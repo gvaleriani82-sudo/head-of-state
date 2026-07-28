@@ -1395,6 +1395,110 @@ const ARCHI_DEF=[
      {l:'Archivi in silenzio', e:'Nessun trionfo: volti pagina', goto:null, fatto:'Lo scandalo del collaboratore si è sgonfiato in silenzio.', epi:'Lasciò che lo scandalo del collaboratore si sgonfiasse, senza clamore.', f:()=>{}},
    ]},
   }},
+
+ /* ============================================ L13-1 · IL FUORI-VERBALE, FASE 1 (DESIGN-RELAZIONI.md §FASE 1).
+    Due archi che danno un volto ai due archetipi rimasti orfani in L11-1 (cronista, lobbista). Stessa macchina
+    ARCHI_DEF: nessun sottosistema nuovo. **La differenza sono le VALUTE**: off-record = non fa notizia ma cambia
+    gli esiti → si muovono le valute INTERNE (correnti, esposizione, visibilità/credibilità d'opposizione) e la
+    stampa solo di striscio. **Zero `gd()`**: se un arco off-record muovesse i gruppi sociali non sarebbe off-record.
+    VALUTE VERIFICATE A TERRA (il paletto): a L3-premier NON esistono `visibilita`/`credibilita` → `visd`/`credd`
+    sono no-op guardati; esistono `S.correnti` (corrented), `S.ind.stampa` (stampad) e l'esposizione (spregiudicata).
+    All'opposizione esistono vis/cred (entraOpposizione) → **`fonte` vale di più lì, senza forzature**: le stesse
+    chiamate rendono dove quelle valute contano. ============================================ */
+ {id:'fonte', era:'universale', famiglia:'Società', dove:'entrambi', prob:0.14, cooldown:24, titolo:'il cronista di lungo corso',
+  cond:()=> (S.mesiAlGoverno||0)>=4 || !!S.opposizione,
+  filo:()=>({nome: nomeGenere('m')+' '+rnd(PAESE.cognomi), ruolo:'il cronista di lungo corso', arc:'cronista'}),
+  nodi:{
+   start:{kick:'Ombre', t:'Qualcuno ha qualcosa su di te', text:'%FILO, %RUOLO, chiede di vederti fuori dagli orari. Non porta un registratore. Dice di avere un documento che riguarda una persona a te vicina, e di non aver ancora deciso cosa farne. Non chiede soldi: chiede di essere il primo a cui parli, la prossima volta che parlerai.', ch:[
+     {l:'Ascolti cosa ha', e:'Sai prima degli altri; adesso gli devi qualcosa', eco:'Dopo quell\'incontro fuori orario, ', goto:'canale', f:()=>{ stampad(2); visd(5); spregiudicata(2); }},
+     {l:'Chiudi la porta: non tratti sulle notizie', e:'La linea netta ti costa l\'informazione', eco:'Dopo la porta chiusa, ', goto:'freddo', f:()=>{ credd(3); stampad(-2); }},
+   ]},
+   canale:{kick:'Ombre', t:'Il primo favore', text:'%ECO il documento è vero e ti riguarda meno di quanto temessi. Passano settimane. Poi %FILO chiama per riscuotere: vuole l\'anticipo su una nomina che non è ancora stata firmata. Nulla di segreto, solo qualche ora di vantaggio sui colleghi.', ch:[
+     {l:'Gliela dai', e:'Il canale resta aperto; qualcuno nel partito nota la fuga', goto:null, fatto:'Il canale con %FILO tenuto aperto.', epi:'Tenne aperto un canale col cronista di lungo corso, e ne pagò il prezzo in silenzio.', f:()=>{ stampad(3); visd(3); corrented('fedelissimi',-3); spregiudicata(3); }},
+     {l:'Ti tiri indietro: il patto era un altro', e:'Tieni il punto; il canale si chiude male', eco:'Dopo il passo indietro, ', goto:'rotto', f:()=>{ credd(2); }},
+   ]},
+   freddo:{kick:'Ombre', t:'Esce lo stesso', text:'%ECO il pezzo esce senza di te, e senza il tuo lato della storia. Nessuno ti accusa di niente. Semplicemente, quando la prossima cosa si muoverà, lo saprai dai giornali come tutti gli altri.', ch:[
+     {l:'Te ne fai una ragione', e:'Resti pulito, e fuori dal giro', goto:null, fatto:'Il rifiuto a %FILO, e il prezzo di restarne fuori.', epi:'Rifiutò il canale col cronista, e restò fuori dalle stanze dove le cose si sanno prima.', f:()=>{ stampad(-1); visd(-3); }},
+   ]},
+   rotto:{kick:'Ombre', t:'Il conto', text:'%ECO %FILO non alza la voce. Ringrazia, saluta, e da quel giorno le sue domande in conferenza diventano più precise.', ch:[
+     {l:'Incassi le domande precise', e:'Un rapporto chiuso male, e si sente', goto:null, fatto:'Il canale con %FILO chiuso male.', epi:'Aprì un canale col cronista e lo chiuse male: le domande, da allora, furono più precise.', f:()=>{ stampad(-4); credd(1); }},
+   ]},
+  }},
+
+ {id:'ascolto', era:'universale', famiglia:'Economia', dove:'governo', prob:0.14, cooldown:24, titolo:'la rappresentante del settore',
+  cond:()=> (S.mesiAlGoverno||0)>=6,
+  filo:()=>({nome: nomeGenere('f')+' '+rnd(PAESE.cognomi), ruolo:'la rappresentante del settore', arc:'lobbista'}),
+  nodi:{
+   start:{kick:'Palazzo', t:'Chiede solo di essere ascoltata', text:'%FILO, %RUOLO, chiede un incontro. Non porta richieste: porta uno studio. Duecento pagine di dati su un dossier che il tuo ufficio sta istruendo da mesi con metà delle risorse. È materiale buono, e lo sai. È anche materiale scritto da chi ha un interesse.', ch:[
+     {l:'La ricevi: i dati servono', e:'Guadagni mesi di lavoro istruttorio; l\'agenda gliela apri', eco:'Dopo aver aperto la porta allo studio, ', goto:'studio', f:()=>{ corrented('pontieri',3); corrented('militanti',-2); }},
+     {l:'Declini: l\'istruttoria la fa lo Stato', e:'Resti terzo; il dossier procede al buio', eco:'Dopo il no all\'incontro, ', goto:'chiuso', f:()=>{ corrented('militanti',3); corrented('pontieri',-2); }},
+   ]},
+   studio:{kick:'Palazzo', t:'La richiesta arriva dopo', text:'%ECO lo studio regge, e il provvedimento ne esce migliore davvero. Poi, a tre giorni dal voto, %FILO segnala «un\'imprecisione tecnica» in un comma. Correggerla non cambia l\'impianto. Cambia molto per chi la paga.', ch:[
+     {l:'Correggi il comma', e:'Un dettaglio tecnico; e un debito che non è scritto da nessuna parte', goto:null, fatto:'L\'emendamento tecnico suggerito da %FILO, approvato.', epi:'Lasciò che un comma suggerito dal settore entrasse in un suo provvedimento.', f:()=>{ spregiudicata(4); corrented('pontieri',2); stampad(-1); }},
+     {l:'Lasci il testo com\'è', e:'Il testo resta tuo; l\'accesso si chiude', eco:'Dopo il comma lasciato com\'era, ', goto:'freddo2', f:()=>{ corrented('militanti',2); }},
+   ]},
+   chiuso:{kick:'Palazzo', t:'Il buio costa', text:'%ECO il dossier va avanti con i dati che hai. Esce con sei mesi di ritardo e due errori che qualcuno noterà.', ch:[
+     {l:'Te ne assumi il ritardo', e:'Istruttoria tutta in casa, e si vede', goto:null, fatto:'Il no a %FILO, e l\'istruttoria fatta in casa.', epi:'Rifiutò i dati del settore e istruì da solo, pagando in tempo ed errori.', f:()=>{ stampad(-2); corrented('militanti',2); }},
+   ]},
+   freddo2:{kick:'Palazzo', t:'Cordiale fino alla fine', text:'%ECO %FILO ringrazia per il tempo dedicato. La settimana dopo lo stesso studio è sul tavolo di qualcun altro.', ch:[
+     {l:'Prendi atto', e:'Hai tenuto il testo; il canale è andato altrove', goto:null, fatto:'Il testo tenuto fermo davanti a %FILO.', epi:'Tenne fermo il testo davanti alla rappresentante del settore, e la vide bussare altrove.', f:()=>{ corrented('pontieri',-2); credd(1); }},
+   ]},
+  }},
+];
+
+/* ============================================================ L14-1 · IL TESSUTO DEL FUORI-VERBALE (DESIGN-RELAZIONI.md
+   §FASE 1-bis). Dieci BEAT: carta singola, due scelte, **nessun `goto`** — il retroscena che *c'è*, non quello che
+   *decide* (quello sono gli archi `fonte`/`ascolto`). POOL DEDICATO, non dentro EVENTI_PERSONALI: quello è la vita
+   privata, questi sono le stanze del potere. Entrano in agenda come `kind:'event'` (stessa strada dei beat leggeri):
+   il ramo-event di `resolveItem` esegue `choice.f()`, zero impianto nuovo.
+   SCENA GRATIS: i kick `Ombre` e `Palazzo` sono già mappati su `retro` in SCENA_DI_KICK → le **8 stanze retro-\***
+   ruotano da sole per-carta (hash sull'id). Nessun asset da generare.
+   VALUTE (lette nel codice, non suggerite): solo INTERNE — `corrented`, `spregiudicata` (esposizione), `credd`/`visd`
+   (rendono all'opposizione, no-op a L3), `stampad` di striscio, `relIntMuovi`. **MAI `gd()`**: se muove i gruppi
+   sociali non è off-record. **Ordine di grandezza 1-3, sotto gli archi (2-5): un beat è un tocco.**
+   ENTRAMBE LE STRADE LEGITTIME: chi apre compra qualcosa e paga in indipendenza, chi chiude resta pulito e cieco.
+   ============================================================ */
+const RETRO_BEAT = [
+  {id:'rb_avvertimento', kick:'Palazzo', t:'L\'avvertimento', text:'Un uomo che nel partito conta più di quanto appaia ti ferma in corridoio. Non ti chiede nulla. Ti dice soltanto che «su quella nomina, al piano di sopra, si sono fatti un\'idea diversa». Poi cambia argomento e parla del tempo.', ch:[
+    {l:'Prendi nota e rallenti', e:'Eviti l\'attrito; qualcuno impara che ti si può frenare così', f:()=>{ corrented('fedelissimi',2); corrented('militanti',-1); }},
+    {l:'Tiri dritto', e:'Fai la tua nomina; il piano di sopra registra', f:()=>{ corrented('fedelissimi',-2); credd(1); }},
+  ]},
+  {id:'rb_complimento', kick:'Palazzo', t:'Il complimento che è una misura', text:'A un ricevimento un imprenditore che non ti ha mai cercato ti fa i complimenti per un discorso di tre mesi fa. Ne cita una frase esatta. Nessuno ricorda i discorsi di tre mesi fa: è un modo per dirti che tu sei sul suo tavolo.', ch:[
+    {l:'Ricambi la cortesia e resti sul generico', e:'La porta resta socchiusa, senza impegni', f:()=>{ corrented('pontieri',2); }},
+    {l:'Chiudi con una battuta e cambi tavolo', e:'Nessun equivoco; nessun canale', f:()=>{ corrented('pontieri',-1); credd(1); }},
+  ]},
+  {id:'rb_telefonata', kick:'Ombre', t:'La telefonata che non chiede niente', text:'Ti chiama un numero che non hai in rubrica. È cordiale, informato, e non chiede assolutamente nulla. Ti aggiorna su una cosa che sapevi già, ti augura buon lavoro, riattacca. Resti col telefono in mano a chiederti perché.', ch:[
+    {l:'Richiami tu, la settimana dopo', e:'Apri un filo che non sai dove porta', f:()=>{ spregiudicata(2); visd(2); }},
+    {l:'Non richiami', e:'Il numero non si farà più vivo. Forse', f:()=>{ credd(1); }},
+  ]},
+  {id:'rb_compagno', kick:'Palazzo', t:'Il vecchio compagno', text:'Uno che c\'era quando non c\'era niente ti aspetta fuori dalla sezione. Non è venuto a chiedere un posto. È venuto a dirti che «quelli come noi, adesso, non ti riconoscono più».', ch:[
+    {l:'Gli dai ragione, e ti fai vedere di più alla base', e:'Costa tempo; i tuoi si sentono meno soli', f:()=>{ corrented('militanti',3); corrented('pontieri',-1); }},
+    {l:'Gli spieghi che governare è un\'altra cosa', e:'Ha capito. Ma è l\'ultima volta che viene a dirtelo', f:()=>{ corrented('militanti',-2); corrented('pontieri',1); }},
+  ]},
+  {id:'rb_fuorimicrofono', kick:'Ombre', t:'La domanda fuori microfono', text:'A conferenza finita, mentre riavvolge il cavo, un giornalista ti chiede una cosa che nessuno ha chiesto dentro. Non sta scrivendo. Vuole solo sapere se è vero.', ch:[
+    {l:'Rispondi sinceramente, fuori dai denti', e:'Ti fidi di uno che non ha ancora tradito', f:()=>{ stampad(2); spregiudicata(1); }},
+    {l:'«Su questo non posso dire niente»', e:'Non ti esponi; e lui capisce che c\'è qualcosa', f:()=>{ stampad(-1); credd(1); }},
+  ]},
+  {id:'rb_cena', kick:'Ombre', t:'L\'invito che non si rifiuta', text:'Una controparte straniera propone una cena privata, senza delegazioni e senza verbale. Il protocollo non lo vieta. Il tuo ministero lo sconsiglia.', cond:()=>!S.opposizione, ch:[
+    {l:'Ci vai', e:'Un canale che nessun cablogramma registra', f:()=>{ spregiudicata(2); relIntMuovi('consesso',2); }},
+    {l:'Mandi un funzionario', e:'Corretto, prudente, e freddo', f:()=>{ relIntMuovi('consesso',-1); credd(1); }},
+  ]},
+  {id:'rb_fascicolo', kick:'Ombre', t:'Il fascicolo sul tavolo', text:'Una toga che non hai mai frequentato ti fa sapere, per vie traverse, che un fascicolo che riguarda il tuo ambiente «non è aperto e non lo sarà». Non è una promessa. È un\'informazione.', ch:[
+    {l:'Ringrazi e archivi la cosa', e:'Sai una cosa che non dovresti sapere', f:()=>{ spregiudicata(3); }},
+    {l:'Fai sapere che non vuoi saperne', e:'Resti pulito, e cieco', f:()=>{ credd(2); }},
+  ]},
+  {id:'rb_emendamento', kick:'Palazzo', t:'L\'emendamento di qualcun altro', text:'Un comma spuntato in commissione non l\'ha scritto nessuno dei tuoi. È scritto bene. Chiedendo in giro, tutti dicono di non saperne niente — e lo dicono con la faccia di chi sa.', cond:()=>!S.opposizione, ch:[
+    {l:'Lo lasci passare', e:'Non è tuo, non è tuo problema', f:()=>{ spregiudicata(2); corrented('pontieri',1); }},
+    {l:'Lo fai togliere', e:'Qualcuno perde soldi, e saprà chi', f:()=>{ corrented('pontieri',-2); corrented('militanti',2); }},
+  ]},
+  {id:'rb_collaboratore', kick:'Ombre', t:'Il collaboratore che ha parlato', text:'Un dettaglio uscito sui giornali lo sapevano in quattro. Uno dei quattro lavora con te da anni. Non hai prove, e non ne avrai.', ch:[
+    {l:'Non dici niente e lo tieni', e:'Chi resta impara che non controlli le fughe', f:()=>{ stampad(-2); corrented('fedelissimi',-1); }},
+    {l:'Lo allontani senza accuse', e:'Chiudi la falla; perdi un uomo che valeva', f:()=>{ corrented('fedelissimi',-2); credd(1); }},
+  ]},
+  {id:'rb_favore', kick:'Ombre', t:'Il conto di un vecchio favore', text:'Anni fa qualcuno ti ha risolto un problema piccolo, in un momento in cui non avevi nessuno. Non ti ha mai chiesto niente. Adesso ti chiede un colloquio per suo nipote — un colloquio, non un posto.', ch:[
+    {l:'Fai fare il colloquio', e:'È davvero solo un colloquio. Ed è davvero un favore', f:()=>{ spregiudicata(2); }},
+    {l:'Spieghi che non puoi', e:'Tieni la riga; il debito resta, non pagato', f:()=>{ credd(1); corrented('fedelissimi',-1); }},
+  ]},
 ];
 
 /* ===== EVENTI PERSONALI singoli (lotto 5 + lotto VITA PERSONALE) — leggeri, NON occupano slot-arco: entrano
@@ -5611,7 +5715,21 @@ function rnd(a){return a[Math.floor(Math.random()*a.length)];}
 /* L9-2 — genere PRIMA del nome (da PAESE.nomiM/nomiF, che esistono per ogni paese; fallback a PAESE.nomi che resta
    dov'è). `g` salvato sul candidato (dato puro, serializza). Il RITRATTO non si salva: lo ricalcola `ritrattoDi(m)`
    dal nome al render (stessa faccia tutta la partita e dopo round-trip). Il profilo NON entra nella scelta del volto. */
-function mkCand(){ var g=Math.random()<0.5?'m':'f'; var lista=(g==='f'?PAESE.nomiF:PAESE.nomiM)||PAESE.nomi;
+/* L15-1 — QUOTA FEMMINILE fra i personaggi GENERATI DI GOVERNO (ministri e candidati a ministro). Nel presente
+   50/50; nella linea storica italiana molto bassa ma NON nulla. VERIFICATO (non a memoria): fra il 1948 e il 1976
+   in Italia **nessuna donna fu ministra** — la prima è Tina Anselmi (29 lug 1976); l'eccezione del '51 è Angela
+   Maria Guidi Cingolani, **sottosegretaria** all'Industria (26 lug 1951), non ministra. La quota 4% NON riproduce
+   quindi i ministri (che sarebbero 0) ma la presenza femminile nella vita politica dell'epoca — ancorata al dato
+   reale delle **21 costituenti su 556 = 3,8%** — perché il gioco non dichiari un'impossibilità (scelta di Giacomo).
+   NOTA MECCANICA: `S.era` resta 'italia1950' per TUTTO l'arco 1950-1970 (il decennio cambia per ANNO dentro
+   LINEE_STORICHE) → la quota copre anche gli anni '60, il che combacia col record storico (nessuna ministra fino
+   al '76): non è servito inventare un numero per il '60. Vale SOLO qui: il GIOCATORE resta libero (premessa
+   controfattuale) e i `filo` non governativi (cronista, movimento, magistratura) restano a genere libero. */
+function quotaFemminileGoverno(){
+  var era=(typeof S!=='undefined' && S && S.era) || 'contemporanea';
+  return (era==='italia1950') ? 0.04 : 0.5;
+}
+function mkCand(){ var g=Math.random()<quotaFemminileGoverno()?'f':'m'; var lista=(g==='f'?PAESE.nomiF:PAESE.nomiM)||PAESE.nomi;
   return {nm:rnd(lista)+' '+rnd(PAESE.cognomi), g:g, profile:rnd(PROFS), comp:1+Math.floor(Math.random()*3)}; }
 
 /* PRESSIONI SULLE POLITICHE (loop attivo — Lotto 3): eventi che ti fanno TORNARE a rivedere una politica lasciata a un estremo,

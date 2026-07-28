@@ -168,6 +168,7 @@ function initStatoBase(){
   S.apertura=null; S.aperturaEsito=null; S.enel=null;   // AVANZAMENTO Lotto 4 — snodi '60 (gemelli di leggeTruffa): apertura a sinistra + dilemma-Enel (dati puri, round-trip)
   S.richiamoCorrUltimo=null;   // CURA Lotto P3 — cooldown della carta-richiamo correnti (dato puro, round-trip)
   S.leggeroUltimo=null;        // G4 — cooldown del beat leggero (dato puro, round-trip)
+  S.retroUltimo=null;          // L14-1 — cooldown del beat-retroscena (dato puro, round-trip)
   S.telUltimo=null;            // F1 — cooldown della telefonata (dato puro, round-trip); il TIMER vive in TEL, mai in S
   S.telPendente=null;          // F1 — id della telefonata senza risposta: al reload il telefono richiama
   S.scandaloUltimo=null;       // G3 — cooldown-famiglia degli archi-scandalo (~36m; stampato dal filo() alla nascita)
@@ -309,6 +310,9 @@ const DICASTERO_IND={ economia:['fiducia',1], lavoro:['unemp',-1], salute:['sani
 function capd(n){ if(S&&S.capitale!=null) S.capitale=clamp(S.capitale+n,0,100); }
 function leald(n){ if(S&&S.premier&&S.premier.lealta!=null) S.premier.lealta=clamp(S.premier.lealta+n,0,100); }
 function visd(n){ if(S&&S.visibilita!=null) S.visibilita=clamp(S.visibilita+n,0,100); }
+/* L13-1 — gemella guardata di visd: muove la CREDIBILITÀ solo dove esiste (opposizione/ministro/locale). A L3-premier
+   `S.credibilita` è undefined → no-op sicuro, e soprattutto NON crea il campo (un `(S.credibilita||0)+n` lo creerebbe). */
+function credd(n){ if(S&&S.credibilita!=null) S.credibilita=clamp(S.credibilita+n,0,100); }
 function dicNome(){ const n=(typeof dicNm==='function')&&dicNm(S.dicastero); return (n&&T(n))||T('il tuo dicastero'); }
 /* D4-coda (da D3) — preposizioni ARTICOLATE per-dicastero, per-era: «all'Alto Commissariato», «al Tesoro», «della Salute».
    In EN non si articola (la preposizione sta nel template) → si sostituisce il nome nudo. Copre i template grane con %DICA/%DICDI. */
@@ -964,6 +968,26 @@ function leggeroDovuto(){
   var mese=S.year*12+S.month;
   if(S.leggeroUltimo!=null && mese-S.leggeroUltimo<2) return false;   // ~1 ogni 2 mesi
   return !graveInCorso();
+}
+/* L14-1 — IL TESSUTO DEL FUORI-VERBALE: innesco dei beat-retroscena. Gemello di `leggeroDovuto`, con tre differenze:
+   (1) solo dove le stanze del potere esistono — **livello 3 o opposizione** (i testi parlano di nomine, commissioni,
+   controparti: da attivista/sindaco non avrebbero senso); (2) cadenza **4 mesi** — frequente ma sotto i beat leggeri
+   (2), perché il retroscena è tessuto; (3) **NIENTE gate `graveInCorso`** — qui mi ero sbagliato per analogia: il
+   cedimento-G4 esiste perché la LEGGEREZZA stona nei mesi neri, ma il fuori-verbale non è leggero, è cupo di suo
+   (un sussurro in corridoio durante una crisi è esattamente il suo posto). MISURATO: col gate, `graveInCorso`
+   bloccava il **76% dei mesi** e i beat uscivano 1 ogni 20 — più rari degli archi, l'opposto dell'obiettivo.
+   Gli ARCHI restano gli snodi (prob 0.14 / cooldown 24); i beat sono il tessuto. */
+function retroDovuto(){
+  if(typeof S==='undefined' || !S || typeof RETRO_BEAT==='undefined') return false;
+  if(!(S.livello===3 || S.opposizione)) return false;
+  var mese=S.year*12+S.month;
+  if(S.retroUltimo!=null && mese-S.retroUltimo<4) return false;
+  return true;
+}
+function pescaRetro(){
+  var pool=RETRO_BEAT.filter(function(b){ try{ return (!b.cond||b.cond()); }catch(e){ return false; } });
+  if(!pool.length) return null;
+  return (typeof pescaBag==='function') ? pescaBag('retro', pool) : pool[0];
 }
 function pescaLeggero(){
   var pool=BEAT_LEGGERI.filter(function(b){ return (typeof eraViva!=='function'||eraViva(b)) && (!b.cond||b.cond()); });
@@ -2474,6 +2498,13 @@ function genAgenda(first){
     var _bl=pescaLeggero();
     if(_bl){ S.leggeroUltimo=S.year*12+S.month; S.agenda.push({kind:'event', data:_bl, resolved:false}); }
   }
+  /* L14-1 — il beat-retroscena: stessa posizione in fondo (l'agenda del mese è completa → `graveInCorso` vede le
+     carte gravi appena pescate) e MAI nello stesso mese di un beat leggero: sono due registri diversi, insieme
+     stonerebbero. */
+  if(!first && typeof retroDovuto==='function' && retroDovuto() && S.leggeroUltimo!==(S.year*12+S.month)){
+    var _br=pescaRetro();
+    if(_br){ S.retroUltimo=S.year*12+S.month; S.agenda.push({kind:'event', data:_br, resolved:false}); }
+  }
 }
 function agendaPending(){return S.agenda.some(a=>!a.resolved);}
 
@@ -3883,6 +3914,7 @@ function applySnap(snap){
   if(S.richiamoCorrUltimo===undefined) S.richiamoCorrUltimo=null;   // CURA Lotto P3 — migrazione cooldown richiamo correnti
   if(S.sondStorico===undefined) S.sondStorico=[];   // F3 — migrazione: i salvataggi pre-lotto ricevono la serie-sondaggi vuota
   if(S.leggeroUltimo===undefined) S.leggeroUltimo=null;   // G4 — migrazione: cooldown del beat leggero
+  if(S.retroUltimo===undefined) S.retroUltimo=null;       // L14-1 — migrazione: cooldown del beat-retroscena
   if(S.telUltimo===undefined) S.telUltimo=null;           // F1 — migrazione: cooldown della telefonata
   if(S.telPendente===undefined) S.telPendente=null;       // F1 — migrazione: nessuna chiamata in sospeso nei vecchi salvataggi
   if(S.scandaloUltimo===undefined) S.scandaloUltimo=null; // G3 — migrazione: cooldown-famiglia archi-scandalo
