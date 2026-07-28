@@ -1,0 +1,4 @@
+# I file arrivano dal progetto con fine-riga LF: niente conversione automatica,
+# altrimenti ogni sincronizzazione segnala come «modificati» file identici.
+* text=auto eol=lf
+*.webp binary

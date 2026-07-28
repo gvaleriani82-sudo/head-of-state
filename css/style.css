@@ -168,6 +168,13 @@
   /* ministers */
   .min{padding:12px 14px; border-top:1px solid var(--line);} .min:first-of-type{border-top:none;}
   .min .mtop{display:flex; justify-content:space-between; align-items:flex-start; gap:10px;}
+  /* L12-1 — il volto nella scheda Governo: tondo a sinistra di ruolo+nome. 34px in lista (come la nomina),
+     56px nella pagina del singolo ministero (.min.solo). Il testo tronca invece di spingere fuori i pallini. */
+  .min .mleft{display:flex; align-items:flex-start; gap:10px; min-width:0;}
+  .min .mwho{min-width:0;}
+  .min .mleft .avatar{width:34px; height:34px; font-size:16px; flex-shrink:0;}
+  .min.solo .mleft .avatar{width:56px; height:56px; font-size:25px;}
+  .min .who{overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
   .min .role{font-size:10.5px; color:var(--mut); text-transform:uppercase; letter-spacing:.05em;}
   .min .who{font-weight:600; font-size:14px; margin-top:1px;}
   .chip{display:inline-block; font-size:11px; font-weight:600; padding:2px 8px; border-radius:20px; margin-top:4px;}

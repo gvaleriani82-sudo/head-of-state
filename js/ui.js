@@ -797,9 +797,13 @@ function renderMinistroCard(m, mode){
   let footer='';
   if(mode==='lista') footer=`<button class="mini-btn" style="background:var(--acc-bg);border-color:var(--acc);color:var(--acc-ink);font-weight:600" onclick="apriMinistero('${m.min}')">${T('Apri il ministero →')}</button>`;
   else if(mode==='pagina') footer=`<button class="mini-btn" onclick="askReplace('${m.min}')">Sostituisci ministro</button>`;
-  return `<div class="min"><div class="mtop"><div>
+  /* L12-1 — il VOLTO nella scheda Governo (playtest: «i volti si vedono solo al momento della scelta»). Tondo a
+     sinistra di ruolo+nome: 34px in lista (come la nomina), 56px nella pagina del singolo ministero — è l'unico
+     punto in cui hai una persona sola davanti. Il caso «Dicastero vacante» esce prima e resta intatto. */
+  const face=(typeof avatar==='function')?avatar(m):'';
+  return `<div class="min${mode==='pagina'?' solo':''}"><div class="mtop"><div class="mleft">${face}<div class="mwho">
     <div class="role">${role}</div><div class="who">${m.nm}</div>
-    <span class="chip" style="background:${PROFCOL[m.profile]}22;color:${PROFCOL[m.profile]}">${T(PROF[m.profile])}</span></div>
+    <span class="chip" style="background:${PROFCOL[m.profile]}22;color:${PROFCOL[m.profile]}">${T(PROF[m.profile])}</span></div></div>
     <div style="text-align:right;"><div class="role">${T('Competenza')}</div>${dotsHTML(m.comp)}</div></div>
     <div class="msum">${ministerSummary(m)}</div>
     <div class="loy"><div class="ll"><span>${T('Lealtà · efficacia')} ${effPct(m)}%</span><span class="mono">${fmt(m.loyalty,0)}</span></div>
