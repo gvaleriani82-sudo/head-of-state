@@ -1,0 +1,5778 @@
+"use strict";
+/* ============================================================
+   DATA — i CONTENUTI del gioco (niente logica qui).
+   Per aggiungere/cambiare un dossier, un evento, un ministero
+   o una politica, modifica SOLO questo file.
+   Le funzioni dentro i dossier/eventi (f:()=>{...}) usano S, gd,
+   allG: vengono eseguite solo quando si risolve la scelta, quindi
+   a quel punto model.js è già caricato.
+   ============================================================ */
+
+/* PAESI — tutto ciò che varia per nazione, un set per paese (come DIFFICOLTA). `PAESE` è il paese ATTIVO,
+   scambiato a inizio partita da setCountry(). I knob mandatoMesi/sistema/sfiducia/coalizione/comeSiVince/
+   cadutaGoverno sono PREDISPOSTI: non ancora usati nella logica (al passo 1). I partiti (nome, orientamento,
+   base, forza) sono stilizzazioni di gioco — niente loghi/simboli. Le basi usano le chiavi REALI di GROUPS
+   (imprese→imprenditori, ceto medio→cetomedio, mondo cattolico→cattolici); pesi indicativi (somma ~1).
+   mandatoMesi resta 60 per tutti finché la logica elezioni non lo legge (durata per-paese: passo successivo). */
+const PAESI = {
+  italia: {
+    economia:{pil:2150, debito:139, deficit:-3.4},   // cifre 2024 riconciliate (CIFRE-ECONOMICHE.md); PIL € mld
+    nome: 'Italia',
+    colori: { bandiera: ['#1e8a5a', '#e9ecf2', '#c8324a'], accento: '#a9791a' },
+    flag: '<svg viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg"><rect width="30" height="20" fill="#fff"/><rect width="10" height="20" fill="#1e8a5a"/><rect x="20" width="10" height="20" fill="#c8324a"/></svg>',
+    nomeArt: "l'Italia",
+    titoloRuolo: 'Presidente del Consiglio',
+    mandatoMesi: 60, sistema: 'parlamentare', sfiducia: true,
+    coalizione: true, comeSiVince: 'parlamentare', cadutaGoverno: true, ue: true, distorsione: 1.1,
+    intermedie: [{tipo:'Elezioni europee', mese:28, ue:true, tocca:'tutti'}, {tipo:'Elezioni regionali', mese:44, tocca:'regione'}],
+    /* VINCOLO: i primi 4 (aree-simbolo) restano PRIMI e in quest'ordine — S.territori è parallelo per indice
+       e la migrazione dei salvataggi vecchi (4 aree) estende l'array conservando le posizioni. */
+    territori: [
+      {nome:'Roma', nomeEn:'Rome', tipo:'città', carica:'Sindaco', lean:-1, simbolo:true}, {nome:'Milano', nomeEn:'Milan', tipo:'città', carica:'Sindaco', lean:0, simbolo:true}, {nome:'la Lombardia', nomeEn:'Lombardy', tipo:'regione', carica:'Presidente di regione', lean:2, simbolo:true}, {nome:'la Campania', tipo:'regione', carica:'Presidente di regione', lean:-2, simbolo:true},
+      {nome:'il Piemonte', nomeEn:'Piedmont', tipo:'regione', carica:'Presidente di regione', lean:1}, {nome:'il Veneto', tipo:'regione', carica:'Presidente di regione', lean:2}, {nome:"l'Emilia-Romagna", tipo:'regione', carica:'Presidente di regione', lean:-2}, {nome:'la Toscana', nomeEn:'Tuscany', tipo:'regione', carica:'Presidente di regione', lean:-2},
+      {nome:'il Lazio', tipo:'regione', carica:'Presidente di regione', lean:0}, {nome:'la Puglia', tipo:'regione', carica:'Presidente di regione', lean:-1}, {nome:'la Sicilia', nomeEn:'Sicily', tipo:'regione', carica:'Presidente di regione', lean:1}, {nome:'la Sardegna', nomeEn:'Sardinia', tipo:'regione', carica:'Presidente di regione', lean:0},
+      {nome:'Napoli', nomeEn:'Naples', tipo:'città', carica:'Sindaco', lean:-1}, {nome:'Torino', nomeEn:'Turin', tipo:'città', carica:'Sindaco', lean:-1}, {nome:'Palermo', tipo:'città', carica:'Sindaco', lean:-1}, {nome:'Genova', nomeEn:'Genoa', tipo:'città', carica:'Sindaco', lean:-1}, {nome:'Bologna', tipo:'città', carica:'Sindaco', lean:-2}, {nome:'Firenze', nomeEn:'Florence', tipo:'città', carica:'Sindaco', lean:-1}
+    ],
+    /* Mappa con CONTORNI GEOGRAFICI REALI — fonte: Natural Earth admin-1 1:10m (PUBBLICO DOMINIO),
+       generata da .claude/genera-mappe.js (province fuse in regioni con dissoluzione topologica,
+       semplificazione Douglas-Peucker, città su coordinate reali). NON disegnare path a mano.
+       'aree' è PARALLELO a territori: {d} = poligono regione, {cx,cy,r} = città (cerchietto sopra la regione). */
+    mappa: { viewBox:'0 0 100 129',
+      sfondo:'M4.9,14.1 L6.0,14.6 L9.1,13.4 L11.6,14.1 L13.8,11.9 L13.6,10.3 L16.1,8.4 L16.4,10.7 L19.5,12.3 L19.1,13.4 L21.0,15.2 L21.0,12.8 L22.8,10.8 L23.3,7.9 L24.6,7.9 L25.4,10.0 L28.5,9.2 L29.8,10.9 L30.3,8.9 L29.4,7.5 L30.7,6.5 L32.8,7.4 L32.2,6.0 L32.9,3.9 L37.3,4.9 L38.7,2.8 L43.3,2.7 L46.9,1.5 L46.5,3.4 L48.7,5.8 L59.3,7.6 L56.6,10.1 L56.9,11.0 L58.8,11.3 L57.3,13.2 L58.5,13.4 L58.2,15.1 L59.9,16.0 L60.5,17.8 L59.4,17.7 L60.2,17.4 L58.3,15.5 L56.9,16.8 L54.6,15.7 L54.3,17.1 L48.8,19.4 L50.2,18.1 L48.7,18.2 L46.7,20.7 L47.3,21.9 L47.9,21.6 L48.4,24.0 L48.4,23.4 L49.8,24.4 L48.8,26.2 L47.6,26.0 L48.4,32.2 L51.1,35.0 L58.6,39.7 L62.3,50.1 L67.8,55.7 L71.2,57.4 L79.1,57.5 L79.5,59.0 L77.2,60.8 L77.7,62.5 L94.3,71.2 L98.5,76.8 L97.3,80.4 L94.9,79.2 L93.2,75.2 L87.9,73.9 L88.8,72.9 L86.0,72.9 L82.9,77.4 L82.0,80.7 L82.4,81.9 L87.4,84.7 L87.5,89.5 L82.8,91.3 L82.6,95.3 L79.4,98.4 L78.6,100.6 L75.4,100.4 L75.0,97.5 L76.5,96.7 L77.3,94.3 L76.7,92.9 L79.2,92.0 L79.8,90.7 L74.9,77.4 L73.2,78.3 L72.0,77.9 L69.1,75.6 L69.8,74.0 L68.1,71.0 L64.5,72.1 L65.6,70.4 L64.1,69.2 L62.1,69.7 L59.5,64.7 L58.0,65.2 L55.9,64.2 L53.9,65.0 L52.7,63.1 L50.6,62.6 L47.4,59.5 L45.6,56.7 L44.0,56.2 L42.7,53.6 L40.4,52.2 L38.2,52.4 L38.6,50.5 L35.1,47.9 L35.4,46.6 L33.2,46.4 L33.5,43.1 L29.9,34.7 L27.9,33.7 L27.8,34.5 L22.9,31.1 L19.1,30.2 L16.7,31.6 L13.4,36.0 L8.8,37.2 L10.4,34.2 L10.1,33.0 L7.5,33.6 L4.5,32.2 L3.4,29.1 L5.2,27.5 L4.8,26.0 L2.7,25.1 L1.5,23.0 L5.6,21.3 L6.0,19.6 L3.0,15.7 ZM32.8,47.4 L32.5,48.9 L30.0,48.4 ZM52.7,104.6 L50.8,104.6 L48.9,102.1 L49.5,99.7 L51.4,97.8 L52.8,99.6 L54.4,97.9 L56.2,97.5 L56.8,98.8 L60.0,100.2 L65.9,99.5 L69.1,97.9 L70.6,98.5 L71.8,97.1 L72.2,97.7 L75.2,97.0 L70.7,105.4 L72.6,110.6 L71.2,111.6 L70.8,114.5 L65.7,113.0 L63.4,109.9 L60.9,109.7 ZM17.8,89.6 L15.9,86.7 L16.5,80.9 L17.5,81.5 L17.4,79.9 L16.1,79.2 L15.9,77.9 L16.9,77.1 L16.0,73.2 L15.2,71.8 L14.1,71.8 L14.4,68.0 L17.1,69.3 L22.9,64.6 L24.6,66.4 L25.6,66.1 L25.2,67.3 L26.4,67.4 L25.1,68.2 L26.9,69.1 L26.4,69.6 L27.7,72.5 L26.1,75.4 L27.0,77.4 L26.2,85.9 L25.2,88.0 L21.1,86.2 L21.2,89.2 L19.8,90.4 L18.7,89.8 L18.1,90.6 Z',
+      aree:[ {cx:49.5,cy:57.6,r:4}, {cx:22.6,cy:19.1,r:4}, {d:'M18.8,12.1 L19.7,12.5 L19.1,13.4 L20.0,13.8 L20.2,15.1 L21.0,15.2 L21.5,14.4 L21.0,12.8 L22.8,10.8 L23.3,7.9 L24.6,7.9 L25.4,10.0 L28.5,9.2 L29.8,10.9 L30.5,10.4 L29.9,9.7 L30.2,8.8 L29.4,8.4 L29.9,6.7 L30.9,6.5 L31.6,7.3 L32.8,7.3 L34.4,8.8 L33.5,9.5 L34.0,10.7 L32.9,13.4 L33.4,15.0 L33.9,15.5 L36.0,15.1 L34.4,17.5 L34.8,20.6 L37.9,23.0 L39.0,22.9 L40.7,24.6 L36.4,25.0 L34.8,24.2 L33.4,25.0 L29.7,23.7 L29.0,22.7 L28.2,22.6 L27.8,23.4 L25.5,22.6 L25.4,23.2 L24.5,23.0 L23.5,25.0 L23.6,27.3 L22.7,27.5 L20.0,23.5 L18.1,23.6 L16.9,20.9 L17.4,20.1 L18.6,20.8 L19.6,19.7 L17.5,15.4 Z'}, {d:'M75.1,77.8 L74.2,77.4 L72.8,78.3 L69.1,75.6 L69.8,74.0 L68.1,71.0 L64.5,72.1 L65.5,70.2 L64.1,69.2 L62.1,69.7 L61.9,68.3 L59.6,64.9 L60.6,64.2 L60.6,62.8 L61.4,62.3 L62.6,63.2 L62.7,62.1 L66.5,63.4 L69.8,62.2 L70.6,62.8 L70.5,63.9 L72.0,64.8 L71.5,65.8 L74.6,67.1 L72.7,69.4 L74.2,73.0 L76.3,75.4 Z'}, {d:'M11.7,13.9 L13.8,11.9 L13.6,10.3 L16.4,8.4 L16.4,10.7 L18.8,12.1 L17.5,15.4 L19.6,19.7 L18.6,20.8 L17.3,20.1 L16.9,21.0 L18.1,23.6 L20.0,23.5 L22.3,26.2 L22.6,28.4 L20.6,27.5 L20.2,28.8 L19.2,29.5 L18.0,28.5 L15.8,29.7 L14.8,29.2 L12.9,33.7 L10.9,33.4 L10.3,33.9 L9.8,33.0 L7.5,33.6 L4.6,32.3 L3.7,31.0 L4.1,30.2 L3.4,29.1 L4.4,27.5 L5.2,27.5 L4.8,26.0 L2.7,25.1 L1.5,23.0 L5.2,21.7 L6.0,19.8 L5.3,19.0 L5.8,18.6 L11.9,17.6 Z'}, {d:'M49.3,5.9 L51.5,6.3 L51.6,7.4 L50.7,7.8 L50.9,8.3 L49.7,8.4 L48.2,10.3 L49.5,11.7 L49.1,13.7 L50.9,15.4 L51.9,14.8 L53.5,15.1 L54.4,17.0 L48.9,19.3 L50.2,18.1 L47.7,19.1 L46.7,20.9 L47.2,20.9 L47.5,22.0 L47.9,21.6 L48.4,24.0 L48.4,23.4 L49.8,24.4 L49.1,26.0 L48.8,25.3 L48.7,26.3 L47.8,24.8 L46.2,24.4 L43.8,24.3 L42.4,25.2 L40.8,24.8 L39.0,22.9 L37.9,23.0 L34.8,20.6 L34.4,17.5 L36.0,15.1 L36.7,16.7 L38.4,16.5 L40.5,13.5 L42.9,13.4 L43.1,12.2 L45.2,11.2 L43.8,9.4 L44.6,8.3 L44.1,7.8 L45.6,7.4 L46.2,6.0 L47.1,6.8 Z'}, {d:'M49.4,35.3 L48.7,35.5 L48.9,36.2 L47.8,37.4 L46.0,37.6 L43.1,36.2 L42.6,34.8 L43.4,33.5 L42.1,33.6 L40.7,32.4 L38.9,33.2 L39.3,33.8 L37.6,33.9 L37.2,33.4 L36.6,34.2 L34.9,33.2 L33.8,33.6 L28.3,29.7 L26.6,31.1 L25.9,30.3 L24.6,30.5 L25.0,28.9 L22.7,28.3 L22.7,27.5 L23.6,27.3 L23.5,24.9 L24.5,23.0 L25.4,23.2 L25.5,22.6 L27.8,23.4 L28.4,22.6 L33.4,25.0 L34.8,24.2 L36.4,25.0 L39.8,24.5 L42.4,25.2 L44.4,24.3 L47.8,24.8 L48.6,26.3 L47.6,26.0 L48.1,31.1 L49.3,33.4 L51.6,35.2 L51.5,36.0 L50.5,36.6 Z'}, {d:'M41.0,52.5 L38.2,52.4 L38.8,51.4 L38.6,50.5 L36.8,48.5 L35.1,47.9 L35.4,46.6 L33.2,46.4 L33.5,43.1 L31.7,40.4 L30.9,35.8 L26.6,31.0 L27.8,29.8 L33.0,32.5 L33.8,33.6 L34.9,33.2 L36.6,34.2 L37.2,33.4 L37.6,33.9 L39.3,33.8 L38.9,33.2 L40.7,32.4 L42.1,33.6 L43.4,33.5 L42.6,35.0 L43.9,36.8 L48.4,37.9 L47.0,38.7 L45.8,41.2 L47.2,42.6 L45.7,43.1 L44.8,44.3 L45.0,47.0 L43.4,47.8 L43.7,49.5 L42.1,50.5 L42.2,51.7 ZM32.8,47.4 L32.5,48.9 L31.9,48.3 L30.0,48.4 L30.2,47.8 Z'}, {d:'M59.6,64.9 L58.0,65.2 L55.9,64.2 L53.9,65.0 L52.7,63.1 L50.6,62.6 L47.4,59.5 L45.6,56.7 L44.0,56.2 L42.7,53.6 L41.0,52.5 L42.2,51.7 L42.1,50.5 L43.7,49.5 L43.5,47.7 L44.5,47.4 L45.6,49.6 L47.4,49.6 L47.9,51.3 L49.8,52.6 L52.8,50.0 L56.1,48.7 L56.6,50.2 L55.1,50.2 L54.6,51.9 L56.6,54.6 L55.5,55.2 L54.3,54.7 L53.7,56.0 L56.5,57.5 L56.5,58.5 L58.0,59.1 L59.4,58.8 L61.5,60.2 L61.8,61.7 Z'}, {d:'M71.0,57.3 L79.1,57.5 L79.6,58.9 L77.2,60.8 L77.5,62.2 L86.6,66.5 L90.0,69.3 L94.3,71.2 L98.5,76.8 L97.3,80.4 L94.9,79.2 L93.2,75.2 L90.3,75.0 L87.9,73.9 L88.8,72.9 L86.5,72.6 L85.0,74.0 L84.0,73.1 L83.7,70.3 L82.2,70.0 L81.3,70.6 L79.6,68.4 L77.9,67.9 L78.3,67.2 L76.9,65.9 L74.7,66.2 L74.4,66.8 L71.5,65.8 L72.0,64.7 L70.5,63.9 L70.7,62.8 L69.3,61.7 L69.4,60.6 L71.1,59.8 Z'}, {d:'M45.4,112.5 L45.7,113.6 L44.8,112.8 ZM52.7,104.6 L50.8,104.6 L48.9,102.1 L49.5,99.7 L51.2,98.7 L51.4,97.8 L52.8,99.6 L54.1,99.0 L54.4,97.9 L56.2,97.5 L56.8,98.8 L57.8,98.7 L60.0,100.2 L61.9,99.4 L65.9,99.5 L69.1,97.9 L70.6,98.5 L71.8,97.1 L72.2,97.7 L74.2,96.7 L75.2,97.0 L71.6,102.5 L70.7,105.4 L70.7,107.0 L71.9,108.0 L71.4,108.5 L72.6,110.6 L71.2,111.6 L70.8,114.5 L65.7,113.0 L63.4,109.9 L60.9,109.7 Z'}, {d:'M16.6,88.3 L16.2,89.5 L15.7,88.0 ZM17.8,89.6 L15.9,86.7 L16.5,80.9 L17.5,81.5 L17.0,81.3 L17.4,79.9 L16.1,79.2 L15.9,77.9 L16.9,77.1 L16.0,73.2 L15.2,71.8 L14.1,71.8 L14.4,68.0 L15.4,69.0 L17.1,69.3 L19.6,68.0 L22.9,64.6 L23.3,65.3 L24.5,65.5 L24.6,66.4 L24.8,65.8 L25.6,66.1 L25.2,67.3 L26.4,67.4 L25.1,68.2 L26.2,68.3 L26.9,69.1 L26.4,69.6 L27.7,72.5 L26.1,75.4 L27.0,77.4 L26.2,85.9 L25.2,88.0 L23.4,86.7 L22.4,87.1 L21.1,86.2 L21.7,86.7 L21.2,89.2 L19.8,90.4 L18.7,89.8 L18.1,90.6 Z'} ] },
+    nomi: ['Marco','Elena','Giulia','Paolo','Andrea','Chiara','Luca','Francesca','Roberto','Silvia','Davide','Marta','Stefano','Laura','Giorgio','Anna','Federico','Valentina','Alessandro','Sara'],
+    nomiM: ['Marco','Paolo','Andrea','Luca','Roberto','Davide','Stefano','Giorgio','Federico','Alessandro'],
+    nomiF: ['Elena','Giulia','Chiara','Francesca','Silvia','Marta','Laura','Anna','Valentina','Sara'],
+    cognomi: ['Marchetti','Ferri','Lombardi','Greco','Bianchini','Costanzo','Ranieri','Vitale','Sartori','De Santis','Moretti','Fabbri','Rinaldi','Serra','Caputo','Pagano','Donati','Bellini','Riva','Esposito'],
+    partiti: [
+      { id:'it_fdi',    nome:"Fratelli d'Italia", orientamento:'destra',           base:{ cetomedio:0.5, cattolici:0.3, pensionati:0.2 },    forza:28, asse:2,  gruppoUE:'conservatori' },
+      { id:'it_pd',     nome:'PD',                 orientamento:'centrosinistra',   base:{ lavoratori:0.5, giovani:0.3, cetomedio:0.2 },      forza:22, asse:-1, gruppoUE:'socialisti' },
+      { id:'it_m5s',    nome:'M5S',                orientamento:'populista',        base:{ giovani:0.6, lavoratori:0.4 },                     forza:15, asse:-1, gruppoUE:'noniscritti' },
+      { id:'it_fi',     nome:'Forza Italia',       orientamento:'centrodestra',     base:{ imprenditori:0.6, cetomedio:0.4 },                 forza:12, asse:1,  gruppoUE:'popolari' },
+      { id:'it_lega',   nome:'Lega',               orientamento:'destra/populista', base:{ cetomedio:0.5, imprenditori:0.3, pensionati:0.2 }, forza:12, asse:2,  gruppoUE:'destra' },
+      { id:'it_azione', nome:'Azione/IV',          orientamento:'centro',           base:{ cetomedio:0.6, imprenditori:0.4 },                 forza:11, asse:0,  gruppoUE:'liberali' },
+    ],
+  },
+  francia: {
+    economia:{pil:2890, debito:112, deficit:-5.8},   // cifre 2024 riconciliate (CIFRE-ECONOMICHE.md); PIL € mld
+    nome: 'Francia',
+    colori: { bandiera: ['#0055a4', '#ffffff', '#ef4135'], accento: '#a9791a' },
+    flag: '<svg viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg"><rect width="30" height="20" fill="#fff"/><rect width="10" height="20" fill="#0055a4"/><rect x="20" width="10" height="20" fill="#ef4135"/></svg>',
+    nomeArt: 'la Francia',
+    titoloRuolo: 'Presidente della Repubblica',
+    mandatoMesi: 60, sistema: 'semipresidenziale', sfiducia: true,
+    coalizione: true, comeSiVince: 'candidato', cadutaGoverno: true, ue: true, distorsione: 1.1,
+    intermedie: [{tipo:'Elezioni europee', mese:28, ue:true, tocca:'tutti'}, {tipo:'Elezioni municipali', mese:44, tocca:'città'}],
+    territori: [
+      {nome:'Parigi', nomeEn:'Paris', tipo:'città', carica:'Sindaco', lean:-1, simbolo:true}, {nome:'Marsiglia', nomeEn:'Marseille', tipo:'città', carica:'Sindaco', lean:0, simbolo:true}, {nome:"l'Île-de-France", tipo:'regione', carica:'Presidente di regione', lean:0, simbolo:true}, {nome:'la Provenza', nomeEn:'Provence', tipo:'regione', carica:'Presidente di regione', lean:2, simbolo:true},
+      {nome:'i Hauts-de-France', tipo:'regione', carica:'Presidente di regione', lean:2}, {nome:'il Grand Est', tipo:'regione', carica:'Presidente di regione', lean:1}, {nome:'la Normandia', nomeEn:'Normandy', tipo:'regione', carica:'Presidente di regione', lean:0}, {nome:'la Bretagna', nomeEn:'Brittany', tipo:'regione', carica:'Presidente di regione', lean:-1},
+      {nome:'la Nuova Aquitania', nomeEn:'Nouvelle-Aquitaine', tipo:'regione', carica:'Presidente di regione', lean:-1}, {nome:"l'Occitania", nomeEn:'Occitanie', tipo:'regione', carica:'Presidente di regione', lean:-1}, {nome:"l'Alvernia-Rodano-Alpi", nomeEn:'Auvergne-Rhône-Alpes', tipo:'regione', carica:'Presidente di regione', lean:1}, {nome:'i Paesi della Loira', nomeEn:'Pays de la Loire', tipo:'regione', carica:'Presidente di regione', lean:0},
+      {nome:'Lione', nomeEn:'Lyon', tipo:'città', carica:'Sindaco', lean:0}, {nome:'Tolosa', nomeEn:'Toulouse', tipo:'città', carica:'Sindaco', lean:-1}, {nome:'Nizza', nomeEn:'Nice', tipo:'città', carica:'Sindaco', lean:2}, {nome:'Nantes', tipo:'città', carica:'Sindaco', lean:-1}, {nome:'Strasburgo', nomeEn:'Strasbourg', tipo:'città', carica:'Sindaco', lean:0}
+    ],
+    /* Contorni REALI (Natural Earth admin-1 10m, pubblico dominio, via .claude/genera-mappe.js: 96 dipartimenti
+       metropolitani fusi nelle 13 regioni; oltremare escluso). NON disegnare path a mano. */
+    mappa: { viewBox:'0 0 100 96',
+      sfondo:'M52.0,1.5 L52.5,3.8 L53.8,5.0 L56.0,4.4 L57.0,6.8 L59.2,7.3 L59.8,9.0 L61.8,8.6 L63.1,9.4 L62.7,12.1 L66.1,12.0 L67.2,10.3 L67.4,13.8 L70.1,14.8 L71.4,16.7 L77.7,17.0 L79.7,19.9 L81.0,19.4 L83.4,20.4 L84.3,19.8 L85.8,21.1 L89.5,21.8 L87.0,25.1 L85.5,29.7 L85.5,34.9 L84.1,36.4 L81.4,35.8 L80.7,37.1 L81.8,37.4 L77.9,41.0 L77.8,42.8 L75.8,44.5 L75.6,47.6 L74.7,48.1 L74.7,48.8 L75.9,48.6 L76.8,46.5 L78.2,45.8 L80.2,46.1 L80.1,48.6 L81.7,50.8 L80.3,51.7 L80.3,52.7 L82.7,55.8 L82.0,57.6 L79.0,58.6 L79.9,60.5 L81.6,61.2 L82.0,62.6 L80.5,64.0 L81.4,66.8 L83.9,68.0 L85.9,67.5 L84.9,71.1 L79.8,74.8 L78.9,76.1 L79.6,76.1 L79.4,76.9 L76.0,78.4 L70.7,76.6 L70.3,75.3 L68.6,75.5 L69.9,74.1 L68.6,73.4 L68.7,74.6 L67.5,74.7 L67.4,75.4 L66.4,73.2 L67.2,75.4 L61.5,73.5 L55.9,77.7 L55.5,82.2 L56.4,84.1 L54.8,83.7 L52.0,85.1 L50.4,84.1 L48.6,84.9 L46.7,83.5 L46.8,82.4 L44.8,82.5 L44.3,81.5 L40.8,80.3 L39.7,80.2 L39.6,81.7 L35.1,81.7 L33.3,80.2 L31.6,80.9 L30.4,79.2 L26.9,77.6 L25.6,78.1 L26.1,76.4 L24.7,76.3 L23.5,75.1 L25.6,73.1 L27.1,63.8 L28.5,62.7 L27.6,61.7 L27.1,63.2 L28.2,54.2 L30.3,56.5 L31.9,60.6 L31.5,59.4 L32.1,59.6 L31.1,58.6 L30.1,55.0 L27.2,52.8 L27.7,51.9 L28.9,52.7 L27.8,51.3 L28.1,47.2 L23.5,45.3 L21.4,42.2 L22.2,40.2 L20.6,39.1 L21.1,37.9 L24.0,38.5 L22.1,37.5 L20.3,38.2 L18.6,37.6 L19.3,37.6 L18.5,36.9 L19.6,36.5 L18.9,35.8 L19.8,35.7 L16.2,35.2 L17.3,35.2 L17.5,34.4 L16.1,34.8 L15.7,34.2 L16.0,35.2 L14.8,34.8 L14.7,35.9 L14.8,33.5 L13.2,33.9 L13.7,33.0 L12.6,33.8 L8.1,31.7 L7.8,32.7 L6.5,32.8 L6.1,31.2 L4.2,30.6 L7.1,29.9 L6.5,28.7 L5.3,29.3 L5.4,27.7 L7.7,28.0 L6.0,27.8 L7.1,26.8 L4.0,27.7 L3.8,26.8 L5.3,25.0 L9.2,24.0 L10.0,25.0 L10.2,24.0 L11.7,24.4 L12.2,22.9 L14.1,22.6 L14.1,23.4 L15.0,22.7 L14.8,23.7 L15.5,23.1 L17.7,26.1 L20.1,24.3 L20.8,25.4 L21.8,24.8 L22.3,26.1 L22.5,24.3 L23.5,25.1 L26.4,24.8 L25.1,23.8 L25.2,19.3 L23.4,17.8 L22.6,14.5 L27.0,14.8 L26.8,16.1 L28.0,18.1 L33.9,18.7 L38.1,17.1 L38.6,16.7 L35.9,16.5 L36.6,14.7 L43.4,12.1 L45.4,9.8 L46.4,10.0 L45.6,9.2 L45.8,3.6 ZM27.3,50.6 L27.4,51.8 L26.1,49.5 ZM92.0,84.6 L92.9,82.7 L95.6,81.2 L96.7,81.8 L97.1,78.6 L97.9,78.8 L98.5,86.8 L96.2,94.3 L93.4,92.4 L94.3,91.1 L92.5,90.6 L93.5,89.1 L92.2,89.0 L93.1,87.7 L91.9,86.8 L92.8,85.5 Z',
+      aree:[ {cx:50.9,cy:22.8,r:4}, {cx:70.8,cy:75.9,r:4}, {d:'M46.1,20.6 L46.6,19.2 L53.5,20.8 L56.1,20.5 L58.3,22.9 L57.8,23.8 L58.7,25.1 L57.5,27.4 L55.4,27.5 L54.7,29.5 L51.7,29.8 L52.0,29.0 L51.2,28.0 L48.4,28.3 L48.1,26.7 L45.8,24.4 L44.9,21.1 Z'}, {d:'M86.1,68.3 L84.7,71.4 L82.6,72.4 L82.5,73.4 L81.4,73.5 L80.9,74.6 L79.8,74.8 L78.9,76.1 L79.6,76.1 L79.5,76.8 L77.5,77.8 L76.3,77.6 L76.2,78.3 L74.6,77.4 L74.1,78.3 L72.8,77.0 L70.7,76.6 L70.3,75.3 L68.6,75.5 L68.6,74.8 L69.9,74.1 L68.6,73.4 L68.7,74.6 L67.5,74.7 L67.4,75.4 L66.4,73.2 L67.2,75.4 L65.7,75.2 L65.2,74.3 L63.2,74.3 L64.8,73.0 L64.9,72.1 L65.8,72.0 L66.0,70.4 L67.4,69.1 L66.1,66.0 L67.3,66.9 L69.5,66.2 L69.6,66.9 L71.5,67.9 L72.8,67.7 L72.5,66.0 L71.2,65.1 L72.7,64.4 L72.7,63.0 L73.7,62.9 L75.0,61.3 L77.4,61.0 L77.1,59.6 L76.5,59.4 L76.8,58.4 L78.0,59.1 L79.2,58.4 L79.9,60.5 L81.6,61.2 L82.0,62.6 L80.5,64.0 L81.5,66.8 L83.9,68.0 L85.9,67.5 ZM68.2,65.0 L68.7,65.6 L67.7,66.2 Z'}, {d:'M52.0,1.5 L52.5,3.8 L53.8,5.0 L56.0,4.4 L57.0,6.8 L59.2,7.3 L59.8,9.0 L61.8,8.6 L63.1,9.5 L62.6,11.8 L63.4,13.0 L63.3,14.4 L62.1,15.5 L62.1,17.8 L59.5,18.5 L60.1,19.8 L59.3,20.1 L59.1,21.0 L59.6,21.3 L58.3,22.9 L56.1,20.5 L53.5,20.8 L46.6,19.2 L47.2,19.0 L46.5,15.3 L47.0,14.0 L44.5,11.3 L45.4,9.8 L46.4,10.0 L45.6,9.2 L45.8,3.6 L48.1,2.4 Z'}, {d:'M67.2,10.3 L67.4,13.8 L70.1,14.8 L71.4,16.7 L73.3,16.2 L74.7,17.2 L77.7,17.0 L79.7,19.9 L81.0,19.4 L81.9,20.4 L83.4,20.4 L84.3,19.8 L85.8,21.1 L89.5,21.8 L87.0,25.1 L85.4,30.1 L85.7,31.2 L85.0,33.8 L85.5,34.8 L84.3,36.3 L82.7,36.3 L81.8,34.7 L81.9,33.7 L79.1,31.5 L74.7,31.2 L73.0,32.9 L73.0,34.0 L71.3,34.1 L70.3,34.9 L69.6,34.1 L68.2,33.9 L68.3,32.7 L67.0,31.0 L61.3,31.6 L60.0,29.5 L59.0,29.2 L59.2,28.4 L57.8,26.9 L58.7,25.1 L57.8,23.7 L59.6,21.3 L59.1,21.0 L59.3,20.1 L60.1,19.8 L59.5,18.5 L62.1,17.9 L62.1,15.5 L63.3,14.4 L63.2,12.3 L66.1,12.0 Z'}, {d:'M24.9,24.8 L26.4,24.8 L25.1,23.8 L25.2,19.3 L23.4,17.8 L22.6,14.5 L24.8,15.2 L27.0,14.8 L26.8,16.1 L27.6,18.0 L29.2,17.7 L33.9,18.7 L38.5,16.9 L35.9,16.3 L36.6,14.7 L39.3,13.2 L43.1,12.3 L44.5,11.3 L46.6,13.1 L47.2,19.0 L46.6,19.0 L46.1,20.6 L44.9,21.0 L45.2,22.0 L44.2,23.5 L40.8,24.6 L41.9,26.8 L40.6,27.8 L40.7,29.2 L38.0,27.9 L37.4,26.5 L35.0,27.3 L33.8,25.6 L30.4,26.8 L27.1,25.8 L25.9,26.5 Z'}, {d:'M19.1,36.2 L19.8,35.7 L18.0,35.5 L18.4,35.2 L16.7,35.7 L16.2,35.2 L17.3,35.2 L17.7,34.6 L16.1,34.8 L15.8,34.2 L16.0,35.2 L14.8,34.8 L14.7,35.9 L14.3,34.4 L14.8,33.5 L14.3,33.4 L14.1,34.2 L13.2,33.9 L13.7,33.9 L13.2,33.7 L13.7,33.0 L12.6,33.8 L8.1,31.7 L7.8,32.7 L6.5,32.8 L6.1,31.2 L4.2,30.6 L7.1,29.9 L6.5,28.7 L5.3,29.3 L4.8,28.2 L5.4,27.7 L5.6,28.1 L7.7,28.0 L6.8,27.9 L7.2,27.5 L6.0,27.8 L7.1,26.8 L3.9,27.7 L4.1,25.7 L9.2,24.0 L10.0,25.0 L10.2,24.0 L11.8,24.4 L12.2,22.9 L14.2,22.7 L14.1,23.4 L14.9,22.6 L14.8,23.7 L15.5,23.1 L17.7,26.1 L20.1,24.3 L20.8,25.4 L21.8,24.8 L22.3,26.1 L22.0,24.7 L23.2,24.2 L23.3,25.0 L24.9,24.8 L25.8,26.5 L27.0,25.9 L28.3,26.2 L28.5,31.0 L27.7,31.3 L27.1,33.1 L25.7,32.7 L22.0,34.1 L21.0,35.9 Z'}, {d:'M23.9,75.9 L23.5,75.0 L24.4,74.9 L25.6,73.1 L27.1,63.8 L27.6,62.8 L28.5,62.7 L27.6,61.7 L27.1,63.2 L28.2,54.2 L30.3,56.5 L31.9,60.6 L31.5,59.4 L32.1,59.6 L31.1,58.6 L30.1,55.0 L27.2,52.8 L27.7,51.9 L28.9,52.7 L27.8,51.3 L28.5,49.7 L27.4,48.5 L28.1,46.9 L30.4,47.2 L31.7,46.5 L30.7,42.4 L29.2,40.4 L31.2,40.6 L31.8,39.8 L33.6,39.6 L34.6,40.0 L35.8,39.0 L37.4,40.1 L37.5,41.1 L39.8,40.8 L43.3,46.4 L44.7,46.7 L47.1,45.7 L50.3,46.0 L52.0,47.9 L52.5,49.9 L51.2,51.8 L52.1,52.9 L51.8,55.8 L50.9,55.7 L49.4,59.7 L47.3,60.2 L45.5,59.2 L44.8,59.6 L44.1,62.1 L42.0,64.0 L42.4,65.5 L41.4,65.6 L41.3,67.8 L39.9,68.8 L38.5,68.6 L36.0,69.4 L35.8,70.0 L35.2,69.4 L34.0,70.0 L33.6,72.7 L35.0,73.6 L35.5,75.4 L33.5,78.7 L33.4,80.3 L31.6,80.9 L30.4,79.2 L27.8,78.6 L26.9,77.6 L25.9,78.3 L26.1,76.4 ZM27.3,50.6 L27.4,51.8 L26.1,49.5 Z'}, {d:'M40.5,80.3 L39.7,80.2 L39.7,81.7 L37.2,81.8 L36.5,81.3 L35.1,81.7 L33.4,80.3 L33.5,78.7 L35.5,75.4 L35.0,73.6 L33.6,72.7 L33.9,70.1 L35.2,69.4 L35.8,70.0 L36.8,69.0 L39.9,68.8 L41.3,67.8 L41.4,65.6 L42.4,65.5 L42.0,64.0 L44.0,62.2 L45.4,59.2 L47.1,60.2 L49.0,59.8 L49.9,63.2 L51.7,62.8 L53.4,60.2 L55.1,63.0 L55.9,60.7 L57.7,60.0 L58.4,61.3 L59.4,60.8 L61.0,62.0 L62.1,66.0 L65.4,66.0 L67.4,69.0 L66.0,70.4 L65.8,72.0 L64.9,72.1 L64.8,73.0 L63.3,74.2 L62.5,73.4 L61.5,73.5 L55.9,77.7 L55.5,82.2 L56.4,84.1 L54.8,83.7 L52.0,85.1 L50.4,84.1 L48.6,84.9 L46.7,83.5 L46.8,82.4 L45.6,82.0 L44.8,82.5 L44.3,81.5 Z'}, {d:'M82.1,55.1 L82.7,55.7 L82.0,57.6 L78.1,59.1 L76.8,58.4 L76.5,59.4 L77.1,59.6 L77.4,61.0 L75.1,61.2 L73.7,62.9 L72.7,63.0 L72.7,64.4 L71.5,64.5 L71.4,65.6 L72.9,66.7 L72.8,67.7 L71.7,68.0 L69.6,66.9 L69.5,66.2 L67.3,66.9 L66.7,66.0 L62.1,66.0 L61.0,62.0 L59.4,60.8 L58.4,61.3 L57.7,60.0 L55.9,60.7 L55.1,63.0 L53.4,60.2 L51.7,62.8 L49.9,63.2 L49.0,59.8 L50.9,55.7 L51.8,55.8 L52.1,52.9 L51.2,51.8 L52.5,50.3 L52.0,47.9 L50.3,46.0 L52.7,44.8 L52.7,43.5 L55.0,42.5 L58.3,43.8 L59.3,43.0 L60.1,44.8 L61.6,45.6 L61.8,46.9 L61.0,47.4 L61.7,48.4 L63.8,48.4 L64.5,47.3 L66.0,47.2 L67.1,48.4 L68.1,45.2 L70.5,45.7 L71.8,47.6 L72.7,46.8 L74.2,47.5 L75.4,46.1 L75.9,46.6 L74.7,48.8 L76.9,47.8 L76.4,47.0 L77.0,46.3 L80.0,46.0 L80.1,48.6 L81.7,50.8 L80.3,51.7 L80.3,52.7 Z'}, {d:'M28.0,47.1 L27.2,47.3 L23.5,45.3 L22.8,43.4 L21.4,42.2 L22.2,40.2 L20.6,39.1 L21.1,37.9 L22.1,37.6 L24.0,38.5 L22.1,37.5 L19.2,38.0 L18.5,36.9 L20.3,35.7 L21.0,35.9 L22.0,34.1 L25.7,32.7 L27.1,33.1 L27.7,31.3 L28.5,31.0 L28.3,26.2 L30.4,26.8 L33.8,25.6 L35.0,27.3 L37.7,26.6 L38.0,27.9 L41.4,29.6 L40.7,30.4 L40.3,33.0 L37.9,35.0 L37.0,34.8 L35.8,39.0 L34.6,40.0 L33.6,39.6 L31.8,39.8 L31.2,40.6 L29.2,40.4 L30.7,42.4 L31.7,46.5 L30.4,47.2 L29.0,46.6 Z'} ] },
+    nomi: ['Julien','Camille','Antoine','Sophie','Romain','Claire','Mathieu','Émilie','Laurent','Céline','Vincent','Aurélie','Guillaume','Hélène','Thomas','Léa','Étienne','Manon','Olivier','Margaux'],
+    nomiM: ['Julien','Antoine','Romain','Mathieu','Laurent','Vincent','Guillaume','Thomas','Étienne','Olivier'],
+    nomiF: ['Camille','Sophie','Claire','Émilie','Céline','Aurélie','Hélène','Léa','Manon','Margaux'],
+    cognomi: ['Lefèvre','Moreau','Girard','Lambert','Bonnet','Mercier','Dubois','Fontaine','Chevalier','Renaud','Brunet','Marchand','Lemoine','Perrin','Gauthier','Noël','Garnier','Lacroix','Colin','Aubert'],
+    partiti: [
+      { id:'fr_rn',  nome:'Rassemblement National', orientamento:'destra populista', base:{ lavoratori:0.5, cetomedio:0.3, pensionati:0.2 }, forza:32, asse:2,  gruppoUE:'destra' },
+      { id:'fr_sx',  nome:'Sinistra (LFI/PS)',      orientamento:'sinistra',         base:{ lavoratori:0.6, giovani:0.4 },                   forza:26, asse:-2, gruppoUE:'sinistra' },
+      { id:'fr_ren', nome:'Renaissance',            orientamento:'centro',           base:{ cetomedio:0.6, imprenditori:0.4 },               forza:22, asse:0,  gruppoUE:'liberali' },
+      { id:'fr_lr',  nome:'Les Républicains',       orientamento:'centrodestra',     base:{ cetomedio:0.5, cattolici:0.3, pensionati:0.2 },  forza:12, asse:1,  gruppoUE:'popolari' },
+      { id:'fr_eco', nome:'Écologistes',            orientamento:'ecologista',       base:{ giovani:1.0 },                                   forza:8, asse:-2,  gruppoUE:'verdi' },
+    ],
+  },
+  usa: {
+    economia:{pil:26600, debito:123, deficit:-6.5},   // cifre 2024 riconciliate (CIFRE-ECONOMICHE.md); PIL € mld
+    nome: 'Stati Uniti',
+    colori: { bandiera: ['#3c3b6e', '#ffffff', '#b22234'], accento: '#a9791a' },
+    flag: '<svg viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg"><rect width="30" height="20" fill="#b22234"/><g fill="#fff"><rect y="1.54" width="30" height="1.54"/><rect y="4.62" width="30" height="1.54"/><rect y="7.69" width="30" height="1.54"/><rect y="10.77" width="30" height="1.54"/><rect y="13.85" width="30" height="1.54"/><rect y="16.92" width="30" height="1.54"/></g><rect width="12" height="10.77" fill="#3c3b6e"/><g fill="#fff"><circle cx="2" cy="1.8" r=".6"/><circle cx="4.5" cy="1.8" r=".6"/><circle cx="7" cy="1.8" r=".6"/><circle cx="9.5" cy="1.8" r=".6"/><circle cx="3.25" cy="3.6" r=".6"/><circle cx="5.75" cy="3.6" r=".6"/><circle cx="8.25" cy="3.6" r=".6"/><circle cx="2" cy="5.4" r=".6"/><circle cx="4.5" cy="5.4" r=".6"/><circle cx="7" cy="5.4" r=".6"/><circle cx="9.5" cy="5.4" r=".6"/><circle cx="3.25" cy="7.2" r=".6"/><circle cx="5.75" cy="7.2" r=".6"/><circle cx="8.25" cy="7.2" r=".6"/><circle cx="2" cy="9" r=".6"/><circle cx="4.5" cy="9" r=".6"/><circle cx="7" cy="9" r=".6"/><circle cx="9.5" cy="9" r=".6"/></g></svg>',
+    nomeArt: 'gli Stati Uniti',
+    titoloRuolo: 'Presidente', terminoLocale: 'Stato',
+    mandatoMesi: 48, sistema: 'presidenziale', sfiducia: false,
+    coalizione: false, comeSiVince: 'candidato', cadutaGoverno: false, ue: false, distorsione: 1.0,
+    intermedie: [{tipo:'Elezioni di metà mandato', mese:24, tocca:'tutti'}],
+    territori: [
+      {nome:'New York', tipo:'città', carica:'Sindaco', lean:-2, simbolo:true}, {nome:'la California', tipo:'regione', carica:'Governatore', lean:-2, simbolo:true}, {nome:'il Texas', tipo:'regione', carica:'Governatore', lean:2, simbolo:true}, {nome:'la Pennsylvania', tipo:'regione', carica:'Governatore', lean:0, simbolo:true},
+      {nome:'la Florida', tipo:'regione', carica:'Governatore', lean:1}, {nome:"l'Ohio", tipo:'regione', carica:'Governatore', lean:1}, {nome:'il Michigan', tipo:'regione', carica:'Governatore', lean:0}, {nome:'la Georgia', tipo:'regione', carica:'Governatore', lean:0},
+      {nome:"l'Illinois", tipo:'regione', carica:'Governatore', lean:-2}, {nome:'lo stato di Washington', nomeEn:'Washington State', tipo:'regione', carica:'Governatore', lean:-2}, {nome:"l'Arizona", tipo:'regione', carica:'Governatore', lean:1}, {nome:"l'Alabama", tipo:'regione', carica:'Governatore', lean:2},
+      {nome:'Los Angeles', tipo:'città', carica:'Sindaco', lean:-2}, {nome:'Chicago', tipo:'città', carica:'Sindaco', lean:-2}, {nome:'Houston', tipo:'città', carica:'Sindaco', lean:1}, {nome:'Phoenix', tipo:'città', carica:'Sindaco', lean:1}, {nome:'Filadelfia', nomeEn:'Philadelphia', tipo:'città', carica:'Sindaco', lean:-1}, {nome:'San Francisco', tipo:'città', carica:'Sindaco', lean:-2}
+    ],
+    /* Contorni REALI (Natural Earth admin-1 10m, pubblico dominio, via .claude/genera-mappe.js).
+       Solo gli stati continentali (niente Alaska/Hawaii sulla silhouette). NON disegnare path a mano. */
+    mappa: { viewBox:'0 0 160 87',
+      sfondo:'M6.9,2.8 L81.8,2.8 L81.9,1.5 L83.4,3.7 L91.6,6.0 L100.3,5.1 L111.9,11.2 L113.2,13.7 L116.2,15.2 L117.3,21.2 L114.5,26.4 L115.9,27.7 L125.8,23.8 L125.3,21.6 L126.5,21.1 L131.7,21.0 L137.0,16.3 L147.9,15.6 L152.4,8.0 L156.2,9.3 L156.2,13.9 L158.5,17.0 L154.2,19.0 L153.5,17.9 L152.5,19.9 L149.5,21.0 L147.4,25.5 L150.4,27.7 L147.1,28.4 L146.5,27.2 L146.2,28.7 L139.7,30.6 L139.5,29.0 L138.3,35.6 L136.8,37.0 L135.2,34.7 L136.6,33.3 L135.1,34.6 L136.6,38.7 L134.1,43.2 L135.0,40.3 L133.0,37.3 L134.4,34.8 L132.3,35.9 L133.1,40.0 L130.6,38.8 L131.1,37.1 L130.3,39.0 L133.3,40.5 L132.6,41.3 L130.9,39.6 L133.2,41.6 L132.6,42.7 L131.8,41.9 L133.2,43.5 L130.5,42.5 L134.0,43.8 L135.3,47.7 L134.1,44.5 L134.6,46.7 L132.0,45.9 L132.0,47.2 L134.7,47.6 L133.6,49.2 L131.1,48.6 L132.7,49.5 L131.4,50.4 L133.0,50.8 L130.1,51.2 L128.7,54.0 L126.5,54.5 L121.6,59.6 L120.8,58.8 L119.0,62.7 L123.0,78.2 L122.0,83.8 L120.1,84.0 L118.4,81.3 L118.3,78.6 L117.6,79.2 L115.7,75.8 L116.5,74.5 L115.4,74.8 L115.9,71.2 L113.1,67.7 L108.6,68.5 L107.9,66.3 L103.5,66.2 L104.0,65.3 L101.3,66.6 L101.3,64.9 L101.0,66.3 L94.8,66.6 L97.6,67.2 L96.6,68.6 L98.6,70.2 L97.5,71.0 L96.4,69.2 L93.5,70.3 L90.9,68.0 L89.6,69.0 L85.4,67.4 L83.0,69.5 L83.7,68.9 L82.2,68.2 L81.9,70.6 L79.0,72.5 L77.8,71.7 L78.5,72.7 L75.5,74.6 L75.8,76.5 L74.8,76.0 L75.9,81.5 L71.2,79.6 L64.9,68.1 L62.4,67.7 L59.5,70.7 L51.4,61.4 L38.7,62.9 L28.7,58.2 L22.2,58.8 L18.4,53.7 L12.6,51.9 L7.5,41.8 L7.8,40.8 L8.8,42.0 L7.9,40.1 L10.4,40.2 L6.1,40.2 L2.4,31.9 L3.4,12.2 L5.7,12.4 L3.3,12.0 L4.0,9.7 L3.0,9.8 L1.5,4.8 L6.8,5.7 L5.8,8.3 L7.5,6.5 L7.4,8.7 L6.0,9.1 L7.0,9.3 L8.4,6.1 Z',
+      aree:[ {cx:139.4,cy:30.9,r:5}, {d:'M28.7,58.2 L22.2,58.8 L21.1,56.0 L18.4,53.7 L12.6,51.9 L12.6,49.9 L9.2,45.9 L9.5,44.1 L7.5,41.8 L7.8,40.8 L8.8,42.0 L7.9,40.1 L10.4,40.2 L6.1,40.2 L4.2,37.1 L3.9,33.9 L2.4,31.9 L3.3,30.5 L2.9,26.6 L14.4,26.6 L14.4,36.8 L29.0,50.4 L30.4,52.8 L29.3,53.9 Z'}, {d:'M51.1,61.4 L50.6,60.6 L60.4,60.6 L60.5,45.3 L68.7,45.3 L68.7,51.8 L69.6,52.4 L76.5,54.7 L81.7,53.9 L84.9,55.3 L84.9,60.6 L86.4,63.8 L85.4,68.5 L83.0,69.5 L83.7,68.9 L82.2,68.2 L82.8,69.5 L81.9,70.6 L79.0,72.5 L79.6,72.0 L77.8,71.7 L78.5,72.7 L75.5,74.6 L75.8,76.5 L74.8,76.6 L75.7,76.7 L75.9,81.5 L71.2,79.6 L70.1,75.6 L64.9,68.1 L62.4,67.7 L59.5,70.7 L56.7,68.8 L55.3,65.3 Z'}, {d:'M121.7,25.5 L123.7,24.7 L123.7,26.6 L135.8,26.6 L137.5,28.7 L136.2,31.0 L137.4,32.8 L134.6,34.3 L121.7,34.3 Z'}, {d:'M102.9,66.3 L102.5,64.0 L109.5,64.0 L109.8,64.9 L117.2,66.1 L117.8,64.6 L119.2,65.0 L123.0,78.2 L122.0,83.8 L120.1,84.0 L118.4,81.3 L118.3,78.6 L117.6,79.2 L117.7,77.6 L116.8,78.1 L115.7,75.8 L116.5,74.5 L115.4,74.8 L115.9,71.2 L113.1,67.7 L111.7,67.0 L108.6,68.5 L107.9,66.3 L103.5,66.2 L104.0,65.3 Z'}, {d:'M114.6,26.8 L116.4,27.7 L121.7,25.5 L120.7,34.6 L116.3,38.8 L115.2,37.6 L113.0,38.0 L110.0,36.4 L110.0,27.6 Z'}, {d:'M97.3,6.2 L100.4,5.1 L109.8,9.9 L110.7,11.4 L111.9,11.2 L112.3,12.7 L113.7,12.9 L113.2,13.7 L116.2,15.2 L117.3,21.2 L113.8,27.5 L103.5,27.4 L103.9,19.9 L106.1,15.6 L103.8,14.9 L102.3,16.0 L101.0,13.2 L94.8,11.1 Z'}, {d:'M120.7,60.5 L119.0,62.7 L119.0,65.0 L117.8,64.6 L117.5,66.1 L109.8,64.9 L107.9,50.4 L114.6,50.4 L114.0,51.4 Z'}, {d:'M94.3,37.2 L91.8,32.8 L93.1,28.6 L95.4,27.1 L94.2,24.8 L104.0,24.9 L103.5,27.4 L102.7,27.4 L102.7,37.6 L100.0,43.3 L97.6,43.4 L97.2,41.3 L94.9,39.4 L95.5,37.3 Z'}, {d:'M6.9,2.8 L22.4,2.8 L22.9,13.0 L8.2,14.4 L6.3,12.5 L3.3,12.0 L4.1,10.7 L3.2,9.9 L4.0,9.7 L3.0,9.8 L1.5,4.8 L6.8,5.7 L7.2,6.6 L5.8,8.3 L7.5,6.5 L7.4,8.7 L6.0,9.1 L7.0,9.3 L8.4,6.1 Z'}, {d:'M38.8,62.9 L28.4,58.9 L30.4,52.8 L29.0,50.8 L28.7,46.9 L30.3,46.8 L30.6,43.6 L44.1,43.6 L44.1,62.9 Z'}, {d:'M102.9,65.8 L101.3,66.6 L102.0,66.4 L101.3,64.9 L101.0,66.3 L100.3,66.1 L100.9,50.3 L107.9,50.4 L109.8,59.7 L109.5,64.0 L102.5,64.0 Z'} ] },
+    nomi: ['James','Emily','Michael','Sarah','David','Jessica','Robert','Ashley','Daniel','Megan','Christopher','Laura','Matthew','Rachel','Andrew','Hannah','Brian','Nicole','Kevin','Samantha'],
+    nomiM: ['James','Michael','David','Robert','Daniel','Christopher','Matthew','Andrew','Brian','Kevin'],
+    nomiF: ['Emily','Sarah','Jessica','Ashley','Megan','Laura','Rachel','Hannah','Nicole','Samantha'],
+    cognomi: ['Brooks','Hale','Coleman','Porter','Bishop','Bryant','Foster','Russell','Hartman','Lawson','Crawford','Caldwell','Donovan','Easton','Pratt','Sutton','Greer','Lockhart','Mercer','Hughes'],
+    partiti: [
+      { id:'us_dem', nome:'Democratici',  orientamento:'centrosinistra', base:{ giovani:0.4, lavoratori:0.35, cetomedio:0.25 },                  forza:50, asse:-1 },
+      { id:'us_rep', nome:'Repubblicani', orientamento:'centrodestra',   base:{ imprenditori:0.4, cetomedio:0.25, cattolici:0.2, pensionati:0.15 }, forza:50, asse:1 },
+    ],
+  },
+  regnounito: {
+    economia:{pil:3230, debito:104, deficit:-4.8},   // cifre 2024 riconciliate (CIFRE-ECONOMICHE.md); PIL € mld
+    nome: 'Regno Unito',
+    colori: { bandiera: ['#012169', '#ffffff', '#c8102e'], accento: '#a9791a' },
+    flag: '<svg viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg"><rect width="30" height="20" fill="#012169"/><path d="M0,0 30,20 M30,0 0,20" stroke="#fff" stroke-width="4"/><path d="M0,0 30,20 M30,0 0,20" stroke="#c8102e" stroke-width="1.7"/><path d="M15,0 V20 M0,10 H30" stroke="#fff" stroke-width="6"/><path d="M15,0 V20 M0,10 H30" stroke="#c8102e" stroke-width="3.4"/></svg>',
+    nomeArt: 'il Regno Unito',
+    titoloRuolo: 'Primo Ministro',
+    mandatoMesi: 60, sistema: 'parlamentare', sfiducia: true,
+    coalizione: false, comeSiVince: 'parlamentare', cadutaGoverno: true, ue: false, distorsione: 1.9,
+    intermedie: [{tipo:'Elezioni amministrative', mese:30, tocca:'tutti'}],
+    territori: [
+      {nome:'Londra', nomeEn:'London', tipo:'città', carica:'Sindaco', lean:-1, simbolo:true}, {nome:'Manchester', tipo:'città', carica:'Sindaco', lean:-2, simbolo:true}, {nome:'la Scozia', nomeEn:'Scotland', tipo:'regione', carica:'Primo ministro', lean:-1, simbolo:true}, {nome:'le West Midlands', tipo:'città', carica:'Sindaco', lean:1, simbolo:true},
+      {nome:'il Galles', nomeEn:'Wales', tipo:'regione', carica:'Primo ministro', lean:-1}, {nome:"l'Irlanda del Nord", nomeEn:'Northern Ireland', tipo:'regione', carica:'Primo ministro', lean:0}, {nome:'il Nord-Est', nomeEn:'North East England', tipo:'regione', carica:'Sindaco metropolitano', lean:-2}, {nome:'lo Yorkshire', tipo:'regione', carica:'Sindaco metropolitano', lean:-1},
+      {nome:'il Sud-Est', nomeEn:'South East England', tipo:'regione', carica:'Presidenza regionale', lean:2}, {nome:'il Sud-Ovest', nomeEn:'South West England', tipo:'regione', carica:'Presidenza regionale', lean:1}, {nome:"l'Est dell'Inghilterra", nomeEn:'East of England', tipo:'regione', carica:'Presidenza regionale', lean:2}, {nome:'le Midlands Orientali', nomeEn:'East Midlands', tipo:'regione', carica:'Sindaco metropolitano', lean:1},
+      {nome:'Leeds', tipo:'città', carica:'Sindaco', lean:-1}, {nome:'Glasgow', tipo:'città', carica:'Sindaco', lean:-1}, {nome:'Liverpool', tipo:'città', carica:'Sindaco', lean:-2}, {nome:'Bristol', tipo:'città', carica:'Sindaco', lean:-1}, {nome:'Sheffield', tipo:'città', carica:'Sindaco', lean:-1}
+    ],
+    /* Contorni REALI (Natural Earth admin-1 10m, pubblico dominio, via .claude/genera-mappe.js: 232 unità fuse —
+       Scozia/Galles/Irlanda del Nord per nazione, le 9 regioni inglesi per `region`; Shetland fuori dal riquadro,
+       scelta da inserto cartografico). Londra/Manchester/West Midlands = cerchietti su aree metropolitane non giocabili
+       (Greater London / North West / West Midlands restano sfondo). NON disegnare path a mano. */
+    mappa: { viewBox:'0 0 90 145',
+      sfondo:'M8.1,68.3 L8.7,66.8 L11.3,66.7 L12.1,64.5 L13.9,64.8 L16.4,63.7 L19.6,64.2 L20.6,67.7 L23.2,70.6 L21.3,73.4 L22.7,72.3 L24.3,72.3 L25.5,75.2 L25.1,77.2 L24.2,76.5 L24.2,74.6 L23.1,73.8 L23.8,75.9 L23.1,77.3 L24.2,76.8 L24.4,78.1 L23.5,79.1 L21.7,79.1 L21.4,81.0 L20.2,82.0 L17.4,80.9 L17.2,81.6 L15.0,81.9 L14.9,80.0 L13.6,79.5 L11.6,76.3 L10.1,77.5 L10.4,79.2 L9.1,80.8 L4.4,79.5 L1.5,75.6 L5.6,73.4 L3.6,72.0 L7.0,71.4 ZM43.6,92.4 L46.0,94.2 L45.4,91.5 L46.5,91.1 L47.8,93.3 L49.4,92.4 L47.4,92.4 L45.9,89.3 L47.6,86.6 L46.3,86.1 L46.3,84.0 L48.0,83.1 L48.2,82.3 L47.5,82.1 L48.5,80.7 L48.5,78.8 L47.3,80.2 L46.3,79.2 L45.5,81.6 L44.7,80.9 L44.9,78.6 L44.1,79.7 L41.2,74.8 L43.4,69.2 L46.6,67.8 L41.8,67.5 L41.7,69.2 L39.6,69.2 L39.6,70.1 L37.9,71.0 L37.5,70.0 L36.9,70.9 L36.3,69.5 L35.6,69.9 L34.5,68.9 L34.7,72.3 L30.5,69.5 L29.7,70.4 L30.5,73.0 L29.8,72.7 L27.9,69.3 L27.8,67.3 L28.3,67.1 L29.2,68.8 L29.2,65.3 L32.6,60.0 L32.0,58.3 L30.0,56.7 L30.3,53.5 L31.0,53.0 L33.8,53.4 L32.1,52.9 L30.7,51.1 L31.2,52.4 L30.6,52.5 L31.4,49.2 L30.6,50.6 L30.0,49.8 L29.5,54.1 L28.2,52.2 L28.5,53.8 L27.7,52.8 L27.5,54.9 L26.7,54.6 L26.3,52.4 L30.0,48.1 L28.8,48.7 L26.0,52.2 L25.4,51.9 L26.5,55.6 L25.0,57.7 L24.2,61.0 L24.7,62.0 L22.5,62.9 L23.3,57.3 L25.3,54.7 L24.0,55.9 L23.5,55.4 L24.3,53.3 L23.2,53.6 L24.3,51.8 L23.1,53.2 L24.6,51.0 L24.8,49.5 L24.0,50.2 L25.0,48.4 L24.1,48.6 L24.3,47.4 L25.3,46.9 L24.6,46.9 L25.3,45.7 L27.4,45.6 L28.7,43.8 L27.5,45.3 L26.0,45.4 L25.7,44.7 L25.3,45.2 L25.5,44.2 L27.1,43.8 L25.6,44.1 L26.5,42.3 L29.3,41.5 L27.2,41.5 L28.2,40.0 L23.4,44.8 L20.4,42.6 L24.5,41.8 L18.5,41.6 L22.6,40.5 L21.8,39.8 L23.5,39.1 L21.2,38.8 L22.0,37.2 L24.7,37.2 L22.4,36.4 L23.0,35.4 L25.8,35.6 L23.3,34.8 L24.2,33.2 L25.7,33.7 L24.9,33.0 L25.4,32.4 L22.9,32.7 L25.3,30.8 L24.3,31.7 L23.8,30.9 L22.2,31.8 L21.9,28.4 L23.7,29.5 L24.8,29.0 L23.5,29.0 L22.2,27.5 L23.4,26.5 L22.2,26.0 L22.2,24.6 L23.2,24.1 L24.0,25.6 L23.9,23.2 L25.0,24.3 L25.6,23.5 L27.3,24.4 L26.1,22.9 L28.6,24.6 L25.4,20.8 L26.6,21.0 L27.1,19.8 L25.8,18.1 L29.8,18.7 L27.7,16.7 L28.0,15.8 L29.1,16.2 L28.3,14.4 L29.4,12.6 L30.7,12.9 L30.9,14.1 L31.2,12.9 L32.2,13.7 L31.4,15.3 L32.9,13.4 L33.9,13.5 L33.7,15.3 L35.0,13.9 L37.8,13.1 L43.6,13.0 L43.5,11.8 L46.6,12.4 L45.6,16.5 L38.0,23.1 L37.3,22.6 L37.9,24.1 L35.4,24.2 L34.6,23.5 L37.7,24.8 L39.9,24.3 L38.1,26.7 L37.3,26.2 L34.4,28.1 L37.9,26.8 L37.1,28.4 L35.7,28.9 L35.8,29.7 L37.7,28.8 L37.3,28.3 L41.6,27.5 L43.2,26.3 L46.5,27.1 L55.5,26.6 L57.0,27.9 L57.6,30.0 L55.7,32.4 L53.9,38.5 L51.8,41.0 L51.0,43.4 L49.1,45.2 L46.2,45.5 L43.9,46.8 L47.8,45.4 L48.5,47.1 L50.5,48.1 L48.7,49.4 L47.1,49.2 L45.3,51.4 L43.8,51.9 L39.4,50.7 L41.0,52.2 L46.1,53.1 L48.3,51.4 L50.0,51.5 L50.4,52.3 L54.3,53.6 L57.1,57.9 L58.7,58.6 L59.7,65.1 L61.8,71.3 L62.8,72.0 L62.5,73.1 L68.1,75.4 L69.8,78.8 L72.3,80.9 L71.1,82.2 L74.2,89.0 L70.7,86.6 L66.7,87.1 L70.6,87.0 L74.9,91.4 L76.1,95.5 L73.1,99.4 L76.4,101.2 L78.0,98.2 L84.2,98.8 L87.6,101.4 L88.5,105.5 L86.8,111.6 L84.8,113.7 L83.1,112.4 L84.1,113.5 L82.4,113.5 L84.2,113.6 L83.5,114.7 L84.2,115.2 L82.3,116.2 L81.6,115.2 L80.6,116.6 L79.1,117.1 L81.1,116.7 L81.1,119.1 L76.4,121.1 L79.1,120.7 L78.0,122.0 L79.4,121.6 L79.7,122.4 L81.6,122.7 L85.7,122.2 L85.1,125.7 L82.3,127.0 L81.6,129.2 L79.7,129.0 L75.4,131.8 L70.6,130.5 L66.4,131.3 L66.1,132.0 L64.8,130.3 L63.5,131.3 L63.7,130.3 L62.8,130.3 L62.9,131.3 L60.2,129.2 L61.5,131.0 L59.3,132.2 L56.0,132.6 L55.2,131.9 L54.8,132.5 L55.9,132.8 L55.8,134.0 L52.0,133.3 L51.5,135.1 L51.3,134.1 L47.9,132.0 L43.5,133.7 L42.7,132.8 L41.9,136.5 L42.5,137.0 L41.0,139.7 L39.9,139.9 L38.4,138.2 L37.5,138.5 L36.3,136.1 L35.5,137.1 L36.3,138.2 L35.1,137.5 L31.9,137.9 L29.2,140.9 L28.8,140.1 L28.2,141.6 L28.8,142.2 L27.6,143.7 L26.6,141.9 L25.1,141.1 L23.4,142.4 L23.3,140.6 L26.5,139.2 L28.8,136.6 L29.3,134.8 L30.6,135.3 L30.0,134.2 L31.1,134.1 L33.0,131.4 L33.4,127.7 L35.1,128.0 L36.2,126.8 L36.0,125.0 L40.0,124.2 L46.6,125.0 L47.0,122.1 L52.1,116.6 L49.3,119.1 L47.0,119.4 L44.2,122.1 L41.9,121.8 L39.3,118.5 L37.8,119.6 L35.5,119.5 L35.5,118.6 L37.4,117.7 L35.3,117.7 L34.8,116.0 L29.8,118.9 L28.2,117.7 L30.6,117.2 L30.8,115.9 L29.4,117.3 L27.7,117.5 L27.1,116.9 L28.3,115.4 L26.5,114.9 L26.7,114.1 L28.7,112.4 L30.7,112.6 L31.7,111.1 L35.3,109.6 L37.1,107.3 L37.5,104.8 L38.5,104.5 L37.5,104.6 L36.9,103.7 L38.1,101.7 L36.7,100.5 L37.3,98.8 L34.5,99.3 L33.5,100.9 L31.5,101.0 L31.6,100.3 L34.9,97.3 L36.5,94.4 L39.5,93.3 L39.1,92.6 L41.5,93.3 ZM81.0,121.7 L81.0,122.4 L79.4,121.7 L79.7,121.2 ZM28.6,59.8 L27.8,60.9 L26.2,60.2 L25.8,57.7 L26.7,56.5 L27.9,57.2 ZM29.0,56.1 L27.5,53.7 L28.6,54.2 ZM20.3,56.4 L20.0,57.5 L18.0,58.7 L18.4,57.5 L17.7,56.6 L18.3,55.7 L16.1,57.1 L16.6,54.6 L17.6,54.0 L17.8,55.1 L19.3,53.2 ZM22.3,50.6 L23.2,50.1 L20.3,55.4 L19.9,53.6 L21.5,52.7 L20.7,52.2 ZM13.4,44.2 L14.1,44.3 L12.8,45.6 L12.1,45.4 L11.9,44.7 ZM23.2,45.8 L22.2,47.5 L21.6,46.9 L18.2,48.3 L17.4,47.7 L20.3,46.6 L18.7,46.6 L20.4,44.7 L19.4,45.2 L17.6,44.0 L18.8,42.6 L20.0,42.6 L20.8,44.4 L22.3,44.5 ZM17.7,36.3 L18.4,37.1 L17.5,38.1 L16.5,37.1 ZM20.0,32.0 L20.4,29.5 L20.6,32.0 ZM15.6,32.0 L14.4,31.7 L13.7,30.3 L14.3,29.4 L15.2,30.5 L14.9,28.0 L17.8,30.2 L16.9,27.4 L17.8,26.6 L19.2,28.3 L19.2,32.6 L21.4,33.5 L23.6,33.2 L23.5,34.0 L20.5,36.8 L20.6,35.4 L21.9,34.4 L20.6,34.6 L20.1,33.7 L19.7,35.3 L19.1,34.2 L17.7,34.8 L18.1,34.2 L17.5,34.4 L16.3,32.5 L17.7,32.5 L15.9,30.9 ZM63.5,132.3 L61.8,134.3 L59.3,133.1 L61.5,131.4 ZM37.2,93.0 L37.2,93.9 L34.5,95.7 L34.6,94.9 L33.7,95.0 L33.0,93.5 L33.0,91.8 L35.2,91.4 L36.2,93.2 ZM8.3,37.1 L7.9,38.0 L6.9,37.9 L7.8,36.3 ZM9.6,32.3 L9.5,33.6 L8.7,33.5 L9.5,34.8 L8.7,35.0 L9.9,35.5 L8.7,35.7 L7.8,33.6 L8.0,31.3 L8.7,31.0 L9.8,32.1 L8.5,31.8 ZM9.5,29.9 L10.0,30.9 L8.2,30.5 ZM10.6,27.3 L10.9,28.0 L9.9,27.6 L10.7,28.6 L9.0,28.9 L10.5,28.9 L10.4,29.5 L7.0,28.2 L9.0,26.8 ZM12.2,26.0 L10.7,24.5 L12.5,24.1 L12.1,23.7 L13.2,23.1 L10.8,22.2 L12.3,21.3 L11.3,21.5 L10.8,19.3 L11.6,19.2 L11.5,18.4 L12.6,18.8 L13.0,20.5 L12.9,19.2 L14.3,19.2 L13.4,17.8 L18.4,14.4 L19.1,16.8 L17.3,18.5 L19.2,18.2 L19.1,18.8 L17.0,18.9 L17.3,19.9 L15.1,20.8 L17.0,20.5 L17.4,21.5 L15.8,21.8 L16.5,22.4 L15.8,23.3 L14.7,23.2 L14.3,22.0 L15.3,21.2 L14.5,21.2 L13.8,22.0 L14.7,23.9 L13.6,23.6 L14.0,24.6 L13.1,24.6 ZM47.2,9.4 L47.8,9.5 L47.3,11.0 L46.5,9.7 ZM44.6,10.1 L45.6,9.9 L44.1,10.3 L43.0,8.9 L43.3,8.2 L45.1,9.2 ZM49.1,7.4 L48.3,8.7 L46.9,7.6 L45.0,8.2 L44.8,6.4 L44.2,7.7 L43.7,7.2 L43.7,5.5 L44.3,4.8 L46.0,5.0 L46.8,6.1 L45.7,7.0 L48.7,7.1 L48.6,8.1 ZM46.7,5.0 L45.9,4.1 L47.2,4.2 ZM51.6,2.5 L49.5,4.1 L50.2,2.5 ZM46.3,2.1 L47.1,1.5 L48.2,3.1 ZM62.9,97.8 L63.3,98.9 L62.8,99.6 L62.3,98.5 ZM63.2,102.9 L63.8,103.4 L63.2,104.3 ZM60.0,98.6 L60.7,99.1 L60.5,100.1 L59.5,99.6 Z',
+      aree:[ {cx:71.9,cy:120.3,r:4}, {cx:53.4,cy:90.4,r:4}, {d:'M55.3,55.3 L52.6,57.8 L53.9,60.7 L50.7,62.7 L49.2,64.9 L47.2,66.8 L46.5,66.7 L46.3,67.7 L41.8,67.5 L41.7,69.2 L39.7,69.6 L39.6,69.2 L39.6,70.1 L37.9,71.0 L37.5,70.0 L36.9,70.9 L36.3,69.5 L35.6,69.9 L34.5,68.9 L35.0,70.6 L34.7,72.3 L30.5,69.5 L29.7,70.4 L30.3,73.0 L27.9,69.3 L27.7,67.6 L28.3,67.0 L28.7,68.5 L29.3,68.7 L28.8,67.0 L29.2,65.3 L32.6,60.0 L32.0,58.3 L30.0,56.7 L30.5,56.0 L30.3,53.5 L31.0,53.0 L33.8,53.4 L32.1,52.9 L30.7,51.1 L31.2,52.4 L30.6,52.5 L30.4,51.3 L31.4,49.2 L30.6,50.6 L30.0,49.8 L30.2,52.5 L29.7,52.4 L30.0,52.9 L29.5,54.1 L28.9,54.1 L28.2,52.2 L28.5,53.8 L27.7,52.8 L27.1,54.0 L27.5,54.9 L26.6,54.4 L26.3,52.4 L30.0,48.1 L28.7,48.9 L26.0,52.2 L25.4,51.9 L25.3,53.0 L26.5,55.6 L25.0,57.7 L25.3,58.5 L24.2,61.0 L24.7,62.0 L23.9,62.8 L22.5,62.9 L23.3,57.3 L25.3,54.7 L24.0,55.9 L23.5,55.4 L24.3,53.3 L23.4,54.0 L23.2,53.6 L24.3,51.8 L23.1,53.2 L24.2,50.9 L24.6,51.0 L24.8,49.5 L24.0,50.2 L25.0,48.4 L24.1,48.6 L24.3,47.4 L25.3,46.9 L24.6,46.9 L25.3,45.7 L27.4,45.6 L28.7,43.8 L27.5,45.3 L26.0,45.4 L25.7,44.7 L25.3,45.2 L25.5,44.2 L26.1,44.5 L27.1,43.8 L25.6,44.1 L26.5,42.3 L29.3,41.5 L27.2,41.5 L28.2,40.0 L23.4,44.8 L22.5,44.2 L22.7,43.7 L21.8,44.0 L20.4,42.6 L21.9,42.9 L21.7,42.3 L22.6,41.7 L24.5,41.8 L19.1,42.1 L18.5,41.3 L20.8,40.5 L21.8,41.0 L21.5,40.5 L22.6,40.5 L21.8,39.8 L23.5,39.1 L21.2,38.8 L21.8,38.7 L22.0,37.2 L22.7,36.8 L23.5,37.5 L24.7,37.1 L23.8,37.3 L22.5,36.1 L23.6,35.2 L25.8,35.6 L23.3,34.8 L24.2,33.2 L25.7,33.7 L24.9,33.0 L25.4,32.4 L24.2,33.0 L22.9,32.7 L25.3,30.8 L24.3,31.7 L23.7,31.6 L23.8,30.9 L22.2,31.8 L21.6,29.7 L21.9,28.4 L23.7,29.5 L24.8,29.0 L23.5,29.0 L22.2,27.5 L22.3,26.7 L23.4,26.5 L22.2,26.0 L22.2,24.6 L23.2,24.1 L24.0,25.6 L23.9,23.2 L25.0,24.3 L25.6,23.5 L27.3,24.4 L25.8,23.3 L26.1,22.9 L28.6,24.6 L27.3,23.3 L27.5,22.7 L25.5,21.6 L25.4,20.8 L26.6,21.0 L27.1,19.8 L25.8,18.1 L28.1,18.0 L29.8,18.7 L29.4,18.3 L29.9,18.1 L28.8,18.2 L27.7,16.7 L28.0,15.8 L29.1,16.2 L28.4,15.8 L28.8,15.2 L29.3,15.5 L28.3,14.4 L29.4,12.6 L30.7,12.9 L30.9,14.1 L31.2,12.9 L32.2,13.7 L31.4,15.3 L32.9,13.4 L33.9,13.5 L34.3,14.1 L33.7,15.3 L35.0,13.9 L36.0,14.1 L37.8,13.1 L38.9,13.5 L41.5,12.6 L43.6,13.0 L43.5,11.8 L46.6,12.4 L45.6,14.3 L46.3,15.0 L45.6,16.5 L38.0,23.1 L37.3,22.6 L38.1,23.5 L37.9,24.1 L35.4,24.2 L34.6,23.5 L35.3,24.3 L37.7,24.8 L38.2,24.5 L38.8,25.0 L39.9,24.3 L38.1,26.7 L37.3,26.2 L35.4,26.9 L34.4,28.1 L34.3,28.5 L36.2,27.0 L37.9,26.8 L37.1,28.4 L35.7,28.9 L36.2,29.1 L35.8,29.7 L37.7,28.8 L37.3,28.3 L41.6,27.5 L41.4,27.1 L43.2,26.3 L46.5,27.1 L47.5,26.6 L51.7,27.1 L55.5,26.6 L57.0,27.9 L57.6,30.0 L55.7,32.4 L53.9,38.5 L51.8,41.0 L51.0,43.4 L49.1,45.2 L46.2,45.5 L43.9,46.8 L44.7,46.9 L47.8,45.4 L48.5,45.9 L48.5,47.1 L50.5,48.1 L48.7,49.4 L47.1,49.2 L45.3,51.4 L43.8,51.9 L40.9,51.6 L39.4,50.6 L40.9,52.1 L46.1,53.1 L47.3,52.8 L48.3,51.4 L50.0,51.5 L50.4,52.3 L54.3,53.6 ZM28.6,59.8 L28.6,60.6 L27.8,60.9 L26.2,60.2 L25.8,57.7 L26.7,56.5 L27.9,57.2 ZM29.0,56.1 L29.1,56.5 L27.5,53.7 L28.6,54.2 ZM20.3,56.4 L20.0,57.5 L18.0,58.7 L17.7,58.0 L18.4,57.5 L17.7,56.6 L18.3,55.7 L17.6,55.6 L16.1,57.1 L16.6,54.6 L17.6,54.0 L17.8,55.1 L19.3,53.2 ZM18.7,50.8 L19.3,50.4 L19.0,51.7 L18.3,51.9 ZM22.3,50.6 L23.2,50.1 L20.8,55.3 L20.3,55.4 L19.9,53.6 L21.5,52.7 L20.7,52.8 L20.7,52.2 ZM13.4,44.2 L14.1,44.3 L12.8,45.6 L12.1,45.4 L11.9,44.7 ZM23.2,45.8 L23.5,46.3 L22.8,46.1 L22.4,46.8 L23.1,46.8 L22.2,47.5 L21.6,46.9 L18.2,48.3 L17.4,47.7 L17.6,47.1 L18.4,47.6 L20.3,46.6 L18.7,46.6 L20.4,44.7 L19.4,45.2 L17.6,44.0 L17.7,43.2 L18.8,42.6 L20.0,42.6 L20.8,44.4 L22.3,44.5 L23.6,45.6 ZM16.5,42.1 L14.5,43.8 L15.3,42.5 ZM17.7,36.3 L18.4,37.1 L17.5,38.1 L16.5,37.1 ZM20.0,32.0 L20.4,29.5 L20.6,32.0 ZM15.6,32.0 L14.4,31.7 L13.7,30.3 L14.2,30.3 L14.3,29.4 L15.2,30.5 L15.0,29.6 L15.6,29.6 L14.8,28.9 L14.9,28.0 L16.8,29.4 L16.6,29.8 L17.0,29.3 L17.8,30.2 L16.9,27.4 L17.8,26.6 L19.2,28.3 L18.9,31.2 L19.4,31.0 L19.6,32.2 L19.2,32.6 L20.1,32.5 L19.8,33.0 L21.4,33.5 L23.6,33.2 L23.5,34.0 L20.5,36.8 L20.6,35.4 L21.9,34.4 L20.6,34.6 L20.1,33.7 L19.7,35.3 L19.1,34.2 L17.7,34.8 L18.1,34.2 L17.5,34.4 L17.5,33.5 L16.3,32.5 L17.7,32.5 L16.5,32.0 L15.9,30.9 ZM8.3,37.1 L7.9,38.0 L6.9,37.9 L7.8,36.3 ZM9.6,32.3 L10.1,32.6 L9.5,33.6 L8.7,33.5 L9.5,34.8 L8.7,35.0 L9.9,35.5 L8.7,35.7 L7.8,33.6 L8.4,32.5 L8.0,31.3 L8.7,31.0 L9.8,32.1 L8.5,31.3 L8.5,31.8 ZM9.5,29.9 L10.0,30.9 L8.2,30.5 L8.5,29.8 ZM10.6,27.3 L11.2,27.6 L10.9,28.0 L9.9,27.6 L10.7,28.6 L9.0,28.9 L10.5,28.9 L10.4,29.5 L9.1,29.5 L9.0,28.9 L7.0,28.2 L7.6,27.2 L8.3,27.6 L9.0,26.8 L9.3,27.4 L10.2,26.8 ZM12.2,26.0 L10.7,24.5 L11.1,24.9 L12.5,24.1 L12.1,23.7 L13.2,23.6 L13.2,23.1 L10.8,22.2 L12.3,21.3 L11.3,21.5 L11.6,20.9 L11.1,21.1 L10.8,20.6 L10.8,19.3 L11.6,19.2 L11.5,18.4 L12.6,18.8 L13.0,20.5 L12.9,19.2 L14.3,19.2 L13.4,17.8 L18.4,14.4 L19.1,16.8 L17.3,18.5 L18.1,18.8 L19.2,18.2 L19.1,18.8 L18.5,19.3 L17.0,18.9 L17.3,19.9 L15.1,20.8 L17.0,20.5 L17.4,21.5 L16.8,22.0 L15.8,21.8 L16.5,22.4 L15.8,23.3 L15.0,22.7 L15.1,23.4 L14.7,23.2 L14.3,22.0 L15.3,21.2 L14.5,21.2 L13.8,22.0 L14.7,23.9 L13.6,23.6 L14.0,24.6 L13.1,24.6 ZM47.2,9.4 L47.8,9.5 L47.3,11.0 L46.6,9.8 L47.0,9.7 L46.5,9.7 ZM44.6,10.1 L45.6,9.9 L44.1,10.3 L43.0,8.9 L43.3,8.2 L45.1,9.2 ZM49.1,7.4 L49.3,8.0 L48.3,8.7 L46.9,7.6 L45.0,8.2 L44.8,6.4 L44.2,7.7 L43.7,7.2 L43.7,5.5 L44.3,4.8 L46.0,5.0 L46.8,6.1 L45.7,7.0 L48.7,7.1 L48.2,7.7 L48.6,8.1 ZM50.8,5.1 L50.8,5.7 L49.5,5.6 L50.1,5.0 L49.7,4.6 ZM46.7,5.0 L46.0,4.8 L45.9,4.1 L47.2,4.2 ZM48.2,4.0 L48.9,3.1 L49.1,4.7 ZM51.6,2.5 L52.0,2.2 L51.1,3.4 L50.2,3.3 L49.5,4.1 L50.2,2.5 L50.9,2.3 L50.6,2.9 ZM46.3,2.1 L47.1,1.5 L46.9,2.1 L48.2,3.1 L47.8,3.5 Z'}, {cx:56.5,cy:105.5,r:4}, {d:'M46.0,93.8 L47.4,94.8 L47.1,95.5 L49.2,98.8 L48.7,99.2 L46.8,98.4 L45.7,99.4 L45.5,100.8 L47.1,101.8 L45.8,104.8 L46.6,104.2 L47.0,104.6 L44.9,106.3 L47.2,107.8 L45.7,111.7 L47.1,114.2 L47.9,113.9 L49.8,115.5 L49.7,118.6 L48.0,119.7 L47.0,119.4 L45.3,121.1 L45.1,121.9 L44.2,122.1 L41.9,121.8 L40.3,120.5 L39.3,118.5 L38.1,118.8 L37.8,119.6 L35.5,119.5 L35.5,118.6 L37.2,118.3 L37.4,117.7 L35.3,117.7 L34.8,116.0 L34.0,116.8 L32.4,116.9 L31.8,118.1 L30.5,118.2 L29.8,118.9 L29.1,118.6 L28.3,117.6 L30.6,117.2 L30.3,116.4 L30.8,115.9 L29.8,116.2 L30.0,117.1 L27.7,117.5 L27.1,116.9 L28.3,116.2 L28.2,115.2 L26.5,114.9 L26.7,114.2 L28.2,113.4 L28.7,112.4 L30.7,112.6 L31.7,111.1 L33.6,110.7 L35.3,109.6 L37.1,107.3 L37.5,104.8 L38.5,104.5 L37.5,104.6 L36.9,103.7 L38.1,101.7 L37.6,101.9 L36.7,100.5 L37.3,98.8 L34.5,99.3 L33.5,100.9 L32.8,100.5 L31.5,101.0 L31.6,100.3 L34.9,97.3 L35.0,96.0 L36.5,94.4 L39.5,93.3 L39.1,92.6 L41.5,93.3 L43.9,92.4 ZM33.0,93.6 L33.0,94.1 L31.9,93.0 L32.5,92.8 ZM37.2,93.0 L37.6,93.1 L37.2,93.9 L34.5,95.7 L34.6,94.9 L33.7,95.0 L33.0,93.5 L33.0,91.8 L35.2,91.4 L36.2,93.2 Z'}, {d:'M8.1,68.3 L8.7,66.8 L11.3,66.7 L12.1,64.5 L13.9,64.8 L16.4,63.7 L19.6,64.2 L20.2,64.9 L20.0,66.3 L20.8,66.8 L20.6,67.7 L22.3,70.2 L23.0,70.7 L22.3,69.8 L22.7,69.6 L23.2,70.6 L22.9,71.6 L21.5,72.4 L21.3,73.4 L22.7,72.3 L24.3,72.3 L25.5,75.2 L25.1,77.2 L24.8,77.5 L24.2,76.5 L24.2,74.6 L23.1,73.8 L23.8,75.9 L23.1,77.3 L24.2,76.8 L24.4,78.1 L23.5,79.1 L21.7,79.1 L21.4,81.0 L20.2,82.0 L17.4,80.9 L17.2,81.6 L15.0,81.9 L14.9,80.0 L13.6,79.5 L12.8,77.4 L11.6,76.3 L10.1,77.5 L10.4,79.2 L9.6,79.6 L9.3,80.7 L8.9,80.2 L9.1,80.8 L4.4,79.5 L4.1,78.2 L1.5,75.6 L5.6,73.4 L3.6,72.0 L7.0,71.4 Z'}, {d:'M49.5,64.6 L50.7,62.7 L53.9,60.7 L52.6,57.8 L55.3,55.3 L57.1,57.9 L58.7,58.6 L59.7,65.1 L61.8,71.3 L62.8,72.0 L62.5,73.1 L63.0,72.8 L66.2,74.1 L65.7,75.2 L62.5,74.9 L61.4,75.6 L60.2,75.0 L60.2,75.9 L58.0,74.5 L56.1,75.7 L54.2,75.7 L54.1,74.6 L52.4,72.1 L52.8,70.7 L52.0,69.8 L51.1,70.4 L50.6,70.1 L50.3,68.0 L51.3,66.3 Z'}, {d:'M66.2,74.1 L68.3,75.6 L69.8,78.8 L72.3,80.9 L71.1,82.2 L74.2,89.0 L73.5,88.0 L72.0,88.1 L70.7,86.6 L67.4,86.6 L66.7,87.1 L70.6,87.0 L73.2,89.8 L72.5,90.0 L72.4,91.0 L71.3,90.5 L71.5,89.2 L70.5,88.5 L70.1,89.3 L68.8,89.6 L69.6,89.9 L68.6,90.7 L67.7,90.9 L67.6,90.1 L66.5,89.9 L66.0,90.9 L65.0,90.3 L62.7,93.3 L58.9,93.1 L59.2,92.7 L55.4,88.3 L55.1,87.4 L54.2,87.2 L55.2,84.9 L54.6,83.9 L52.6,82.7 L52.4,81.9 L51.6,82.0 L50.7,80.3 L51.6,79.1 L52.9,78.8 L52.5,77.3 L53.4,75.8 L55.1,75.3 L56.1,75.7 L58.0,74.5 L60.2,75.9 L60.2,75.0 L61.4,75.6 L62.5,74.9 L65.7,75.2 Z'}, {d:'M76.4,121.1 L77.7,120.5 L79.1,120.7 L79.3,121.2 L78.0,122.0 L79.2,122.1 L79.4,121.6 L79.7,122.4 L81.6,122.7 L85.5,122.0 L85.1,125.7 L82.3,127.0 L81.5,128.2 L81.6,129.2 L79.7,129.0 L78.5,130.1 L76.2,130.7 L75.4,131.8 L70.6,130.5 L66.4,131.3 L66.1,132.0 L65.1,131.4 L65.5,130.9 L64.8,130.3 L64.1,130.3 L63.5,131.3 L63.7,130.3 L62.8,130.3 L62.9,131.3 L60.2,129.2 L61.5,131.0 L59.3,132.2 L57.3,131.2 L57.2,129.0 L56.6,129.1 L55.9,128.1 L56.9,127.8 L58.9,128.6 L58.2,124.4 L59.5,124.2 L60.0,122.9 L59.3,121.7 L59.6,121.1 L58.3,119.3 L58.6,117.7 L58.1,116.2 L58.9,113.9 L58.5,113.1 L59.4,113.3 L60.1,111.5 L61.1,111.4 L61.4,110.4 L62.2,111.4 L61.6,111.7 L62.0,113.2 L64.7,111.7 L65.2,112.5 L65.8,111.9 L65.3,111.1 L67.6,110.2 L68.0,111.4 L67.2,112.2 L67.0,114.3 L68.3,115.6 L66.6,115.4 L67.2,116.5 L68.4,116.8 L68.7,120.7 L70.3,122.0 L70.3,123.0 L70.9,122.3 L71.9,123.6 L72.8,122.9 L73.6,123.7 L75.0,120.8 ZM81.0,121.7 L81.0,122.4 L79.4,121.7 L79.7,121.2 ZM63.5,132.3 L62.8,133.9 L61.8,134.3 L60.0,133.0 L59.3,133.1 L61.5,131.4 Z'}, {d:'M49.7,118.6 L49.6,116.1 L49.9,115.0 L51.7,114.4 L51.5,112.5 L53.3,113.4 L54.1,112.9 L54.1,112.2 L54.5,112.2 L54.4,112.9 L56.0,112.4 L57.0,112.7 L56.7,111.9 L57.6,111.2 L58.9,112.4 L58.1,116.2 L58.6,117.7 L58.3,119.3 L60.0,122.7 L59.5,124.2 L58.2,124.4 L59.0,128.3 L58.5,128.7 L56.9,127.8 L55.9,128.1 L56.6,129.1 L57.2,129.0 L57.4,131.4 L58.4,131.9 L56.0,132.6 L55.2,131.9 L54.8,132.5 L55.2,132.3 L56.1,133.3 L55.7,134.1 L51.7,133.4 L51.5,135.1 L51.3,134.1 L47.9,132.0 L44.5,132.9 L43.5,133.7 L42.7,132.8 L42.5,136.1 L41.9,136.5 L42.5,137.0 L41.2,138.4 L41.0,139.7 L39.9,139.9 L38.4,138.2 L37.5,138.5 L36.3,136.1 L36.0,137.1 L35.5,137.1 L36.3,137.4 L36.3,138.2 L35.1,137.5 L33.7,138.1 L32.1,138.3 L31.9,137.9 L31.0,139.6 L29.2,140.9 L28.8,140.1 L28.2,141.6 L28.8,142.2 L27.6,143.7 L26.6,141.9 L25.1,141.1 L24.3,142.2 L23.1,142.3 L23.3,140.6 L24.8,139.8 L25.4,140.1 L26.5,139.2 L28.8,136.6 L29.1,134.9 L29.7,134.6 L29.8,135.2 L30.6,135.3 L30.0,134.2 L31.1,134.1 L33.0,131.4 L33.4,127.7 L35.1,128.0 L36.2,126.8 L36.0,125.0 L40.0,124.2 L43.4,125.1 L46.5,124.6 L46.6,125.0 L47.0,122.1 L49.4,120.2 L52.0,116.1 Z'}, {d:'M75.4,100.7 L76.4,101.2 L77.3,98.7 L79.0,97.9 L84.2,98.8 L87.6,101.4 L88.5,105.5 L86.8,111.6 L85.9,112.0 L84.8,113.7 L83.1,112.4 L84.1,113.5 L82.4,113.5 L84.2,113.6 L83.5,114.7 L84.3,114.6 L84.2,115.2 L82.3,116.2 L81.6,115.2 L80.6,116.6 L79.1,117.1 L79.7,117.5 L81.1,116.7 L81.1,119.1 L79.8,120.0 L77.0,120.3 L76.1,121.2 L74.9,120.7 L75.9,119.8 L75.2,118.5 L73.7,118.9 L72.9,117.7 L71.7,117.5 L68.7,119.0 L68.4,116.8 L67.2,116.5 L66.6,115.4 L68.3,115.6 L67.0,114.3 L67.2,112.2 L68.0,111.4 L67.4,109.0 L68.4,109.0 L69.0,108.2 L68.8,107.3 L70.1,105.9 L68.7,103.2 L73.3,103.0 L73.5,102.2 L75.4,101.4 Z'}, {d:'M73.2,89.8 L74.9,91.4 L76.1,94.9 L75.9,96.4 L73.1,99.2 L75.4,100.7 L75.4,101.4 L73.5,102.2 L73.3,103.0 L68.7,103.2 L70.1,105.9 L68.8,107.3 L69.0,108.2 L68.3,109.1 L67.4,108.9 L67.3,109.9 L65.3,111.1 L65.8,111.9 L65.2,112.5 L64.7,111.7 L62.0,113.2 L61.6,111.7 L62.2,111.4 L61.4,110.4 L62.4,109.0 L62.1,108.0 L62.8,107.4 L58.1,101.8 L58.9,100.3 L57.0,99.6 L57.7,97.4 L57.2,95.5 L55.7,94.6 L55.3,92.2 L55.8,90.2 L56.4,89.6 L57.1,89.9 L59.2,92.7 L58.9,93.1 L60.8,92.8 L62.1,93.3 L62.7,93.3 L65.0,90.3 L66.0,90.9 L66.5,89.9 L67.6,90.1 L67.7,90.9 L68.6,90.7 L69.6,89.9 L68.8,89.6 L70.1,89.3 L70.5,88.5 L71.5,89.2 L71.3,90.5 L72.0,91.2 L72.5,90.0 ZM62.9,97.8 L63.3,98.9 L62.8,99.6 L62.3,98.5 ZM63.2,102.9 L63.8,103.4 L63.2,104.3 L62.7,103.2 ZM60.0,98.6 L60.7,99.1 L60.5,100.1 L59.5,99.6 Z'} ] },
+    nomi: ['Oliver','Charlotte','Jack','Amelia','Thomas','Grace','Henry','Emily','Samuel','Lucy','Edward','Florence','Daniel','Alice','Joseph','Sophie','Benjamin','Ruby','Nathan','Eleanor'],
+    nomiM: ['Oliver','Jack','Thomas','Henry','Samuel','Edward','Daniel','Joseph','Benjamin','Nathan'],
+    nomiF: ['Charlotte','Amelia','Grace','Emily','Lucy','Florence','Alice','Sophie','Ruby','Eleanor'],
+    cognomi: ['Hartley','Whitfield','Pennington','Pemberton','Hollis','Bramwell','Holloway','Ellison','Fairfax','Goodwin','Harrington','Kingsley','Lockwood','Marsden','Norbury','Radcliffe','Sinclair','Thornton','Westbrook','Yates'],
+    partiti: [
+      { id:'uk_lab',    nome:'Labour',            orientamento:'centrosinistra',   base:{ lavoratori:0.6, giovani:0.4 },                   forza:38, asse:-1 },
+      { id:'uk_con',    nome:'Conservatives',     orientamento:'centrodestra',     base:{ imprenditori:0.5, cetomedio:0.3, pensionati:0.2 }, forza:26, asse:1 },
+      { id:'uk_reform', nome:'Reform UK',         orientamento:'destra populista', base:{ cetomedio:0.6, pensionati:0.4 },                 forza:22, asse:2 },
+      { id:'uk_libdem', nome:'Liberal Democrats', orientamento:'centro',           base:{ cetomedio:0.6, giovani:0.4 },                    forza:14, asse:0 },
+    ],
+  },
+  australia: {
+    economia:{pil:1655, debito:50, deficit:-1.3},   // cifre 2024 riconciliate (CIFRE-ECONOMICHE.md); PIL € mld
+    nome: 'Australia',
+    allineamento: 'occidentale', terminoLocale: 'Stato',
+    colori: { bandiera: ['#00247d', '#ffffff', '#cf142b'], accento: '#a9791a' },
+    flag: '<svg viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg"><rect width="30" height="20" fill="#00247d"/><rect width="13" height="9" fill="#012169"/><path d="M0,0 L13,9 M13,0 L0,9" stroke="#fff" stroke-width="1.6"/><path d="M0,0 L13,9 M13,0 L0,9" stroke="#cf142b" stroke-width="0.8"/><path d="M6.5,0 V9 M0,4.5 H13" stroke="#fff" stroke-width="2.2"/><path d="M6.5,0 V9 M0,4.5 H13" stroke="#cf142b" stroke-width="1.1"/><circle cx="6.5" cy="14.8" r="1.5" fill="#fff"/><circle cx="24" cy="5" r="0.9" fill="#fff"/><circle cx="27.5" cy="9" r="0.9" fill="#fff"/><circle cx="24" cy="13.5" r="0.9" fill="#fff"/><circle cx="20.5" cy="9.5" r="0.9" fill="#fff"/><circle cx="24" cy="9" r="0.55" fill="#fff"/></svg>',
+    nomeArt: "l'Australia",
+    titoloRuolo: 'Primo Ministro',
+    mandatoMesi: 36, sistema: 'parlamentare', sfiducia: true,
+    coalizione: true, comeSiVince: 'parlamentare', cadutaGoverno: true, ue: false, distorsione: 1.1,
+    intermedie: [{tipo:'Elezioni statali', mese:18, tocca:'regione'}],
+    territori: [
+      {nome:'Sydney', tipo:'città', carica:'Sindaco', lean:-1, simbolo:true}, {nome:'Melbourne', tipo:'città', carica:'Sindaco', lean:-1, simbolo:true}, {nome:'Brisbane', tipo:'città', carica:'Sindaco', lean:1, simbolo:true}, {nome:'Perth', tipo:'città', carica:'Sindaco', lean:1, simbolo:true},
+      {nome:'il Nuovo Galles del Sud', nomeEn:'New South Wales', tipo:'regione', carica:'Premier', lean:0}, {nome:'il Victoria', tipo:'regione', carica:'Premier', lean:-1}, {nome:'il Queensland', tipo:'regione', carica:'Premier', lean:1}, {nome:"l'Australia Occidentale", nomeEn:'Western Australia', tipo:'regione', carica:'Premier', lean:1},
+      {nome:"l'Australia Meridionale", nomeEn:'South Australia', tipo:'regione', carica:'Premier', lean:0}, {nome:'la Tasmania', tipo:'regione', carica:'Premier', lean:-1}, {nome:'il Territorio del Nord', nomeEn:'Northern Territory', tipo:'regione', carica:'Premier', lean:0},
+      {nome:'Adelaide', tipo:'città', carica:'Sindaco', lean:0}, {nome:'Canberra', tipo:'città', carica:'Sindaco', lean:-1}, {nome:'Gold Coast', tipo:'città', carica:'Sindaco', lean:1}
+    ],
+    mappa: { viewBox:'0 0 160 183',
+      sfondo:'M56.3,88.6 L40.4,93.7 L37.7,97.7 L25.2,97.8 L18.6,102.4 L14.2,102.2 L9.0,99.4 L8.6,96.0 L11.0,95.0 L11.1,88.9 L8.1,78.1 L2.3,66.2 L4.5,68.0 L3.5,63.6 L4.3,66.4 L4.7,65.4 L6.0,66.9 L3.1,59.2 L5.0,49.2 L5.8,48.6 L6.3,51.4 L7.4,48.8 L14.7,43.5 L17.9,44.0 L29.5,39.4 L33.6,33.8 L33.0,30.3 L35.6,26.9 L37.8,31.6 L39.1,28.5 L37.6,27.8 L37.8,25.9 L42.4,26.8 L40.7,26.5 L41.8,24.4 L40.9,25.2 L40.6,23.3 L41.5,22.2 L43.3,23.2 L42.2,21.7 L44.2,21.7 L43.2,20.1 L44.8,18.0 L45.8,19.7 L46.4,16.7 L47.1,18.0 L49.0,16.1 L50.9,16.9 L53.7,20.0 L53.0,23.2 L54.7,20.1 L58.8,21.9 L59.7,20.0 L57.6,18.4 L60.9,14.5 L60.2,12.8 L62.1,11.9 L61.7,10.6 L62.8,11.6 L64.2,9.2 L67.9,10.6 L69.1,9.6 L68.2,6.9 L65.8,6.2 L66.5,5.5 L77.5,10.2 L79.9,8.1 L79.0,9.8 L80.4,9.3 L80.3,10.9 L82.2,8.6 L83.6,10.4 L81.8,14.0 L79.8,14.4 L80.5,15.7 L78.4,20.9 L91.4,30.6 L95.6,31.8 L98.7,25.4 L99.2,13.0 L100.7,11.9 L99.3,11.2 L102.5,3.7 L106.7,18.7 L109.1,17.8 L112.1,20.9 L112.3,27.0 L114.1,28.7 L115.4,37.1 L123.8,42.3 L126.8,51.4 L128.1,52.0 L128.1,50.0 L130.0,51.9 L130.2,50.9 L130.7,55.5 L134.0,57.6 L138.9,65.3 L138.3,70.4 L140.3,76.3 L138.4,86.1 L136.6,91.6 L132.1,96.0 L130.8,102.3 L128.6,104.9 L127.9,112.0 L120.3,114.0 L117.2,116.8 L115.1,117.0 L115.6,118.7 L112.2,116.2 L112.5,115.0 L109.8,115.4 L111.3,114.7 L110.7,113.5 L105.9,117.5 L102.4,115.6 L98.6,115.7 L93.1,111.1 L92.9,107.5 L90.1,104.3 L92.7,106.9 L90.6,104.4 L91.7,103.5 L87.4,104.5 L88.9,101.1 L87.3,98.4 L86.2,102.5 L83.1,103.0 L85.1,101.6 L86.8,96.4 L86.2,91.9 L84.4,96.5 L80.0,100.1 L80.1,102.0 L77.2,100.3 L78.5,100.4 L77.7,97.9 L72.3,90.3 L67.4,90.0 L63.8,87.7 ZM65.0,6.7 L63.0,8.8 L61.0,5.7 ZM87.5,105.3 L82.0,105.6 L84.8,104.3 ZM121.1,135.2 L118.7,133.4 L117.5,136.7 L114.4,136.5 L115.1,135.6 L111.8,132.7 L111.5,131.0 L112.8,131.6 L110.0,127.9 L109.9,124.8 L116.3,126.9 L121.8,125.6 L122.4,131.1 L121.7,130.0 ZM125.0,102.5 L125.9,103.3 L124.7,105.7 L123.7,103.9 Z',
+      aree:[ {cx:129.6,cy:97.3,r:4}, {cx:110.8,cy:113.3,r:4}, {cx:138.3,cy:71.5,r:4}, {cx:11.5,cy:89.6,r:4}, {d:'M139.9,74.3 L140.2,77.2 L137.9,87.7 L136.6,91.6 L132.1,96.0 L130.8,102.3 L128.6,104.9 L127.8,112.1 L121.5,109.2 L120.8,106.0 L118.2,106.2 L118.1,107.0 L112.6,105.3 L110.0,106.5 L106.1,103.4 L105.2,101.1 L103.4,100.3 L102.5,101.0 L100.8,98.4 L97.2,98.0 L97.2,77.7 L124.4,77.7 L126.2,76.0 L129.0,75.8 L131.5,76.6 L132.6,78.4 L134.8,77.3 L134.6,75.9 L136.4,74.7 Z'}, {d:'M127.8,112.1 L120.3,114.0 L117.2,116.8 L115.1,117.0 L115.6,118.7 L112.2,116.2 L112.5,115.0 L110.7,116.1 L109.8,115.4 L111.3,114.7 L110.7,113.5 L105.9,117.5 L102.4,115.6 L98.6,115.7 L97.1,114.3 L97.1,97.9 L101.5,98.7 L102.6,101.0 L103.4,100.3 L105.2,101.1 L106.1,103.4 L110.0,106.5 L112.6,105.3 L118.1,107.0 L118.2,106.2 L120.8,106.0 L121.5,109.2 Z'}, {d:'M87.0,27.4 L90.5,28.8 L93.8,32.1 L96.7,31.0 L99.5,21.5 L99.2,13.0 L100.7,11.9 L99.3,11.2 L100.8,9.2 L101.2,4.8 L102.5,3.7 L103.6,8.4 L104.9,8.9 L104.3,10.4 L105.9,12.4 L106.7,18.7 L109.1,17.8 L112.1,20.9 L112.3,27.0 L113.5,29.2 L114.1,28.7 L115.2,36.8 L123.8,42.3 L124.3,43.5 L123.4,43.7 L126.2,47.6 L126.8,51.4 L128.1,52.0 L128.1,50.0 L130.0,51.9 L129.9,50.7 L130.5,51.3 L130.7,55.5 L134.0,57.6 L137.9,62.7 L138.9,65.3 L138.3,70.4 L139.9,74.3 L136.4,74.7 L134.6,75.9 L134.8,77.3 L132.6,78.4 L131.5,76.6 L129.0,75.8 L126.2,76.0 L124.4,77.7 L97.2,77.7 L97.2,65.6 L87.0,65.6 ZM139.4,61.5 L138.4,64.8 L139.1,60.3 Z'}, {d:'M56.3,88.6 L50.5,90.9 L46.1,90.9 L40.4,93.7 L37.7,97.7 L25.7,97.6 L18.6,102.4 L11.9,101.3 L8.6,98.9 L8.6,96.0 L9.8,96.4 L11.0,95.0 L11.1,88.9 L8.8,83.9 L8.1,78.1 L2.3,66.2 L2.8,65.6 L3.1,67.1 L3.0,65.6 L4.5,68.0 L3.5,63.6 L4.3,66.4 L4.7,65.4 L5.3,67.2 L6.0,66.9 L6.1,65.0 L3.1,59.2 L5.3,48.8 L6.3,51.4 L7.4,48.8 L14.7,43.5 L17.7,44.1 L22.6,41.2 L24.2,41.6 L28.9,39.9 L33.6,33.8 L33.0,30.3 L35.6,26.9 L37.8,31.6 L37.9,29.2 L39.0,30.1 L39.1,28.5 L37.6,27.8 L37.8,25.9 L38.8,26.9 L39.0,26.1 L42.3,26.9 L40.7,26.5 L41.8,24.4 L40.9,25.2 L40.6,23.3 L41.5,22.2 L43.3,23.2 L42.1,21.8 L42.7,21.0 L44.2,21.7 L43.2,20.1 L44.7,19.3 L44.7,18.1 L44.9,19.7 L45.2,18.7 L45.8,19.7 L46.2,16.8 L47.1,18.0 L48.0,16.9 L48.2,18.0 L49.4,16.0 L53.7,20.0 L53.0,23.2 L54.3,20.3 L56.3,20.6 Z'}, {d:'M74.0,91.8 L72.9,92.0 L72.2,90.2 L67.4,90.0 L63.8,87.7 L56.3,88.6 L56.3,65.6 L97.2,65.6 L97.1,114.3 L95.2,113.8 L93.0,110.8 L92.9,107.5 L90.1,104.3 L92.7,106.9 L90.6,104.4 L91.6,104.7 L91.7,103.5 L87.4,104.5 L88.9,101.1 L87.3,98.4 L86.2,102.5 L83.1,103.0 L83.7,101.6 L85.1,101.6 L85.2,98.5 L86.8,96.4 L86.2,91.9 L86.3,93.8 L84.4,96.5 L80.0,100.1 L80.1,102.0 L77.2,100.3 L78.5,100.4 L75.8,94.6 L73.6,93.6 ZM87.5,105.3 L85.2,106.3 L82.0,105.6 L84.8,104.3 Z'}, {d:'M121.1,135.2 L119.8,134.5 L120.6,133.9 L119.2,134.5 L118.7,133.4 L117.5,136.7 L114.4,136.5 L115.1,135.6 L113.7,135.5 L111.8,132.7 L111.5,131.0 L112.5,132.3 L112.8,131.6 L110.0,127.9 L109.9,124.8 L116.3,126.9 L121.8,125.6 L122.4,131.1 L121.7,130.0 L120.7,132.4 ZM121.2,122.8 L120.3,121.7 L121.0,121.0 L122.2,123.1 Z'}, {d:'M56.3,20.6 L57.1,22.1 L57.1,20.5 L58.6,21.9 L58.5,20.5 L59.7,20.4 L57.6,18.4 L59.4,14.8 L60.9,14.5 L60.2,12.8 L62.1,11.9 L61.7,10.6 L62.8,11.6 L64.2,9.2 L64.7,10.2 L67.4,9.7 L67.9,10.6 L69.1,9.6 L68.2,6.9 L65.8,6.2 L66.5,5.5 L67.2,6.6 L67.1,5.5 L68.9,7.0 L69.7,6.3 L71.8,8.5 L73.1,7.9 L74.0,9.3 L76.0,8.8 L77.5,10.2 L79.8,8.0 L79.3,10.3 L80.4,9.3 L80.3,10.9 L81.1,10.8 L80.8,9.7 L82.1,8.6 L83.6,10.4 L81.8,12.2 L81.8,14.0 L81.3,13.3 L79.9,14.2 L79.9,17.9 L78.0,20.0 L82.6,24.9 L83.6,24.6 L87.0,27.4 L87.0,65.6 L56.3,65.6 ZM83.4,17.8 L81.3,18.0 L82.2,15.8 L83.3,16.2 L82.6,17.6 ZM61.6,7.8 L59.8,8.1 L60.9,6.3 ZM65.0,6.7 L63.0,8.8 L61.0,5.7 L62.1,6.7 L64.1,5.7 Z'} ] },
+    nomi: ['Jack','Charlotte','William','Olivia','Liam','Mia','Thomas','Amelia','James','Chloe','Oliver','Sophie','Lachlan','Ella','Cooper','Grace','Riley','Ruby','Noah','Isla'],
+    nomiM: ['Jack','William','Liam','Thomas','James','Oliver','Lachlan','Cooper','Riley','Noah'],
+    nomiF: ['Charlotte','Olivia','Mia','Amelia','Chloe','Sophie','Ella','Grace','Ruby','Isla'],
+    cognomi: ['Smith','Jones','Williams','Brown','Wilson','Taylor','Nguyen','Walker','Harris','Thompson','Ryan','Murphy','Kelly','Mitchell','Anderson','Robinson','Davies','Evans','Clark','Hughes'],
+    partiti: [
+      { id:'au_alp', nome:'Labor',        orientamento:'centrosinistra',   base:{ lavoratori:0.5, giovani:0.3, cetomedio:0.2 },     forza:33, asse:-1 },
+      { id:'au_lib', nome:'Liberali',     orientamento:'centrodestra',     base:{ imprenditori:0.5, cetomedio:0.3, pensionati:0.2 }, forza:28, asse:1 },
+      { id:'au_ind', nome:'Indipendenti', orientamento:'centro',           base:{ cetomedio:0.6, imprenditori:0.4 },                forza:13, asse:0 },
+      { id:'au_grn', nome:'Verdi',        orientamento:'ecologista',       base:{ giovani:0.7, lavoratori:0.3 },                    forza:12, asse:-2 },
+      { id:'au_nat', nome:'Nazionali',    orientamento:'destra',           base:{ pensionati:0.5, imprenditori:0.5 },               forza:7,  asse:2 },
+      { id:'au_on',  nome:'One Nation',   orientamento:'destra populista', base:{ cetomedio:0.6, pensionati:0.4 },                  forza:7,  asse:2 },
+    ],
+  },
+  india: {
+    economia:{pil:3640, debito:82, deficit:-7.8},   // cifre 2024 riconciliate (CIFRE-ECONOMICHE.md); PIL € mld
+    nome: 'India',
+    allineamento: 'nonallineato', potenzaId: 'india', terminoLocale: 'Stato',
+    colori: { bandiera: ['#ff9933', '#ffffff', '#138808'], accento: '#a9791a' },
+    flag: '<svg viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg"><rect width="30" height="20" fill="#fff"/><rect width="30" height="6.67" fill="#ff9933"/><rect y="13.33" width="30" height="6.67" fill="#138808"/><circle cx="15" cy="10" r="2.6" fill="none" stroke="#1a3a8f" stroke-width="0.5"/><path d="M15,7.4 V12.6 M12.4,10 H17.6 M13.16,8.16 L16.84,11.84 M16.84,8.16 L13.16,11.84" stroke="#1a3a8f" stroke-width="0.3"/><circle cx="15" cy="10" r="0.5" fill="#1a3a8f"/></svg>',
+    nomeArt: "l'India",
+    titoloRuolo: 'Primo Ministro',
+    mandatoMesi: 60, sistema: 'parlamentare', sfiducia: true,
+    coalizione: true, comeSiVince: 'parlamentare', cadutaGoverno: true, ue: false, distorsione: 1.1,
+    intermedie: [{tipo:'Elezioni statali', mese:30, tocca:'regione'}],
+    territori: [
+      {nome:'Delhi', tipo:'città', carica:'Sindaco', lean:-1, simbolo:true}, {nome:'Mumbai', tipo:'città', carica:'Sindaco', lean:0, simbolo:true}, {nome:'Bengaluru', tipo:'città', carica:'Sindaco', lean:-1, simbolo:true}, {nome:'Calcutta', nomeEn:'Kolkata', tipo:'città', carica:'Sindaco', lean:-2, simbolo:true},
+      {nome:"l'Uttar Pradesh", tipo:'regione', carica:'Primo Ministro', caricaEn:'Chief Minister', lean:2}, {nome:'il Maharashtra', tipo:'regione', carica:'Primo Ministro', caricaEn:'Chief Minister', lean:1}, {nome:'il Bengala Occidentale', nomeEn:'West Bengal', tipo:'regione', carica:'Primo Ministro', caricaEn:'Chief Minister', lean:-2}, {nome:'il Tamil Nadu', tipo:'regione', carica:'Primo Ministro', caricaEn:'Chief Minister', lean:-1},
+      {nome:'il Karnataka', tipo:'regione', carica:'Primo Ministro', caricaEn:'Chief Minister', lean:0}, {nome:'il Rajasthan', tipo:'regione', carica:'Primo Ministro', caricaEn:'Chief Minister', lean:1}, {nome:'il Gujarat', tipo:'regione', carica:'Primo Ministro', caricaEn:'Chief Minister', lean:2},
+      {nome:'Chennai', tipo:'città', carica:'Sindaco', lean:-1}, {nome:'Hyderabad', tipo:'città', carica:'Sindaco', lean:0}, {nome:'Ahmedabad', tipo:'città', carica:'Sindaco', lean:2}, {nome:'Pune', tipo:'città', carica:'Sindaco', lean:0}
+    ],
+    mappa: { viewBox:'0 0 120 121',
+      sfondo:'M40.2,1.5 L41.1,1.5 L42.2,5.3 L44.8,6.4 L44.2,10.1 L46.8,11.2 L46.3,12.3 L47.4,13.3 L44.7,15.1 L43.9,13.9 L42.5,14.2 L43.9,16.7 L44.0,19.6 L45.5,19.0 L46.6,20.8 L53.0,24.3 L50.5,26.2 L49.1,30.2 L60.0,36.0 L62.1,36.7 L65.5,35.9 L67.4,36.8 L67.6,38.0 L70.1,39.3 L71.4,38.8 L72.3,40.0 L80.9,40.9 L81.4,34.1 L83.5,33.4 L84.4,34.4 L83.9,37.5 L85.4,38.9 L96.5,39.0 L97.4,36.9 L95.4,35.8 L95.3,34.5 L99.3,34.5 L102.3,31.2 L104.7,30.9 L107.4,28.1 L110.5,29.4 L113.3,27.9 L114.5,28.4 L113.8,29.8 L115.4,30.6 L114.3,32.0 L117.5,32.2 L118.5,33.8 L116.5,35.6 L117.5,37.8 L115.9,36.6 L113.6,37.0 L109.5,39.8 L109.6,42.2 L107.5,45.1 L107.9,46.6 L105.6,51.7 L102.3,50.8 L102.5,54.8 L101.6,55.2 L101.7,58.6 L100.5,59.9 L99.8,59.0 L99.3,59.8 L98.1,52.3 L96.7,52.3 L95.4,55.6 L93.6,52.7 L94.5,50.6 L96.5,50.4 L97.9,47.2 L99.0,47.1 L97.2,46.0 L88.3,45.5 L87.6,41.5 L86.4,42.5 L85.2,40.8 L83.7,41.3 L82.5,39.8 L83.0,40.9 L81.4,43.2 L85.0,45.5 L82.8,45.9 L81.1,48.3 L84.0,49.8 L83.2,52.6 L84.9,54.5 L85.3,61.3 L84.4,60.7 L83.8,61.5 L83.7,58.8 L83.3,61.6 L83.0,59.9 L82.0,61.6 L81.8,59.0 L80.6,57.9 L81.7,59.3 L76.7,62.6 L77.2,65.3 L74.7,68.3 L73.6,67.7 L74.5,68.5 L70.1,69.3 L69.5,70.6 L71.3,69.7 L61.9,78.7 L58.5,80.8 L58.2,83.1 L54.0,84.1 L53.0,86.5 L52.6,85.4 L52.2,86.8 L51.7,86.0 L50.1,86.9 L49.2,93.3 L50.2,96.6 L49.2,95.8 L50.3,97.7 L47.7,105.9 L48.4,110.2 L46.1,110.4 L44.6,113.7 L46.8,115.1 L42.6,115.3 L41.2,118.5 L39.0,119.7 L35.1,116.1 L33.9,110.4 L28.3,99.3 L26.7,92.1 L22.7,85.3 L20.5,75.1 L20.8,71.9 L20.0,72.9 L20.1,71.3 L21.1,71.7 L19.5,69.0 L20.7,65.0 L19.2,62.3 L21.5,60.7 L19.1,61.1 L19.9,59.7 L19.0,59.8 L20.6,58.5 L17.5,58.5 L18.2,59.4 L16.9,60.6 L18.1,61.3 L17.4,63.1 L11.9,65.2 L4.7,58.4 L9.6,57.3 L10.9,54.9 L7.3,56.4 L2.6,53.5 L4.2,51.6 L1.5,52.7 L2.0,51.3 L3.8,51.2 L3.9,49.6 L8.8,50.4 L13.3,49.3 L11.6,43.9 L9.9,43.7 L9.6,40.2 L6.9,39.3 L7.1,37.6 L10.3,33.8 L12.3,35.1 L16.4,34.0 L18.4,30.5 L20.7,29.3 L22.4,25.5 L24.7,24.4 L24.4,23.6 L27.6,20.5 L27.2,17.3 L30.4,15.4 L27.7,14.5 L27.7,13.0 L26.3,13.3 L25.0,11.5 L25.6,10.1 L24.8,9.1 L26.0,8.1 L24.5,7.7 L24.6,5.2 L32.1,5.8 Z',
+      aree:[ {cx:37.8,cy:31.2,r:4}, {cx:20.5,cy:72.3,r:4}, {cx:39.3,cy:98.6,r:4}, {cx:82.5,cy:57.2,r:4}, {d:'M59.7,35.1 L60.0,36.0 L62.1,36.7 L62.5,36.1 L64.6,36.7 L66.6,39.6 L64.7,40.1 L65.7,40.7 L64.9,41.5 L67.4,43.4 L65.6,43.6 L62.4,45.9 L63.1,48.8 L61.9,51.3 L59.9,50.8 L59.8,48.0 L58.2,48.3 L55.1,45.9 L54.0,46.0 L53.4,47.2 L52.0,46.8 L52.3,45.8 L50.2,46.7 L50.7,46.0 L49.8,45.0 L46.4,46.5 L46.2,45.2 L46.1,46.1 L44.5,46.0 L44.5,44.4 L43.0,45.6 L44.9,49.2 L44.2,50.1 L42.9,49.3 L42.5,49.8 L41.6,47.3 L42.4,46.0 L42.0,45.0 L44.0,44.0 L45.2,40.5 L44.7,39.4 L41.6,38.4 L38.5,39.1 L39.8,38.1 L39.0,37.8 L39.6,37.3 L38.1,35.0 L39.1,32.8 L37.2,27.7 L37.8,25.4 L39.6,23.5 L40.8,24.2 L40.0,25.3 L40.3,26.7 L41.6,26.6 L41.8,25.4 L44.7,27.7 L43.8,28.3 L44.6,29.1 L50.9,31.4 L51.2,30.9 L56.4,34.5 Z'}, {d:'M23.8,86.8 L22.2,83.3 L20.7,76.0 L21.2,76.0 L20.4,74.0 L20.8,71.9 L20.0,72.9 L20.1,71.3 L21.1,71.7 L20.0,71.0 L20.5,70.3 L19.5,69.0 L19.8,68.0 L22.5,67.5 L22.7,65.2 L23.7,65.9 L24.5,65.1 L23.2,63.2 L26.2,61.7 L24.2,61.8 L24.2,60.4 L26.6,59.6 L27.4,61.2 L30.2,62.4 L33.3,62.4 L34.1,63.7 L35.5,63.1 L36.2,61.4 L38.3,60.7 L39.2,61.0 L38.9,62.3 L42.4,61.3 L44.2,61.9 L46.0,60.9 L47.2,61.7 L49.7,61.3 L51.7,62.5 L50.7,63.9 L51.5,66.1 L50.6,69.2 L52.6,70.7 L50.6,71.6 L50.1,73.9 L48.6,73.4 L48.8,70.8 L48.2,70.1 L45.8,70.6 L42.3,68.8 L42.2,70.6 L41.6,71.5 L40.4,71.4 L40.0,72.4 L40.6,73.3 L39.2,75.6 L38.0,75.0 L35.7,78.2 L34.2,78.6 L34.3,79.7 L31.4,79.2 L31.5,81.4 L28.8,81.5 L27.6,83.0 L25.9,83.2 L26.9,84.6 L26.2,86.6 L24.9,87.2 Z'}, {d:'M83.9,37.5 L85.4,38.9 L88.5,39.3 L88.6,40.1 L87.1,42.6 L84.8,40.6 L85.1,41.4 L83.7,41.3 L82.6,39.8 L83.0,40.9 L81.3,42.8 L84.9,45.5 L82.8,45.9 L81.1,48.3 L84.0,49.8 L83.2,52.6 L84.1,53.3 L83.8,54.3 L84.9,54.5 L84.4,55.5 L85.3,59.0 L85.3,60.0 L84.6,59.8 L85.4,61.3 L84.4,60.7 L83.8,61.5 L83.7,58.8 L83.3,61.6 L83.0,59.9 L82.8,61.3 L82.1,60.6 L82.0,61.6 L81.8,59.0 L80.6,57.9 L81.7,59.3 L78.9,61.4 L75.8,58.9 L76.4,58.4 L74.6,56.3 L75.0,55.4 L72.6,54.7 L72.3,53.4 L73.2,52.8 L74.1,53.4 L76.5,51.4 L77.7,51.9 L77.9,50.9 L79.7,50.3 L80.6,48.4 L80.0,45.0 L81.3,44.6 L80.2,42.8 L82.2,40.9 L81.4,40.1 L81.0,37.2 Z'}, {d:'M48.4,108.0 L48.4,110.2 L46.2,110.3 L44.7,113.3 L45.1,114.4 L46.8,115.1 L44.9,114.6 L42.6,115.3 L41.2,118.5 L39.2,119.7 L37.4,118.8 L38.6,113.8 L37.7,113.2 L38.1,110.6 L37.7,109.9 L36.3,110.1 L35.8,106.1 L34.8,106.2 L35.1,105.7 L33.9,104.5 L36.2,104.4 L36.6,103.6 L39.7,102.9 L39.9,102.1 L38.8,101.7 L40.2,99.1 L42.7,100.1 L43.9,98.3 L45.6,98.3 L46.8,97.1 L48.1,97.6 L49.2,96.2 L50.4,97.0 L49.6,100.8 L48.4,103.0 L47.7,102.9 Z'}, {d:'M28.4,99.5 L27.9,95.7 L26.7,92.1 L25.3,90.7 L26.2,88.6 L25.3,87.0 L26.8,85.0 L25.9,83.2 L27.6,83.0 L28.8,81.5 L31.5,81.4 L31.4,79.2 L34.4,79.7 L34.2,78.6 L35.7,78.2 L38.2,75.0 L39.3,75.7 L39.5,77.1 L38.6,78.5 L39.7,78.8 L38.5,80.3 L38.8,82.8 L38.0,83.6 L39.2,84.2 L38.8,85.8 L37.1,86.1 L37.5,89.3 L37.1,89.9 L36.0,89.5 L35.9,91.6 L36.6,93.1 L38.8,93.0 L38.5,94.7 L36.5,93.5 L36.8,95.3 L37.5,94.6 L38.9,95.5 L40.7,94.4 L43.2,97.2 L42.8,99.1 L40.2,99.1 L38.8,101.7 L39.9,102.1 L39.7,102.9 L36.6,103.6 L36.2,104.4 L32.3,103.0 L30.0,100.2 Z'}, {d:'M14.8,34.4 L16.4,34.0 L18.4,30.5 L20.7,29.3 L22.4,25.5 L24.7,24.3 L24.5,25.3 L27.0,25.4 L27.4,28.1 L30.5,28.4 L31.3,31.1 L33.3,33.1 L32.9,34.5 L33.8,34.6 L34.2,33.0 L35.2,33.9 L36.4,32.8 L36.5,35.2 L38.1,34.6 L39.6,37.3 L39.0,37.7 L39.8,38.1 L38.6,39.1 L42.0,38.5 L34.9,43.6 L36.0,45.3 L38.4,45.0 L38.5,46.1 L36.4,46.7 L36.1,47.5 L37.2,48.6 L36.2,48.6 L36.4,50.3 L33.7,49.6 L32.9,51.2 L31.3,51.9 L30.9,51.1 L32.2,50.6 L32.2,48.0 L29.7,47.9 L29.7,47.2 L30.6,47.2 L29.9,47.1 L30.2,46.5 L28.2,47.1 L28.9,47.7 L28.1,47.7 L27.8,48.8 L28.7,52.5 L27.0,54.1 L27.8,54.7 L26.2,55.2 L23.5,53.5 L22.4,50.6 L21.4,50.4 L21.3,48.9 L20.5,49.5 L17.1,48.0 L13.2,48.1 L11.6,43.9 L10.0,43.8 L9.3,42.7 L9.6,40.2 L6.8,39.1 L7.2,37.3 L10.3,33.8 L12.0,35.1 Z'}, {d:'M12.9,49.5 L13.2,48.1 L17.1,48.0 L20.5,49.5 L21.3,48.9 L21.4,50.4 L22.4,50.6 L23.5,53.5 L25.3,54.2 L26.8,56.1 L25.1,57.5 L25.9,58.0 L25.2,58.3 L25.5,59.9 L24.2,60.4 L24.0,61.4 L26.2,61.7 L23.2,63.2 L24.6,65.0 L23.7,65.9 L22.4,65.5 L22.5,67.5 L21.2,67.7 L21.2,66.9 L19.8,68.0 L20.7,65.0 L19.2,62.3 L21.5,60.7 L19.1,61.1 L19.9,59.7 L19.0,59.8 L19.2,58.9 L20.6,58.5 L17.5,58.5 L18.2,59.4 L16.9,60.6 L18.1,61.3 L17.4,63.1 L11.9,65.2 L4.7,58.4 L5.2,57.6 L5.8,58.5 L9.6,57.3 L10.9,54.9 L7.3,56.4 L4.4,55.3 L2.6,53.5 L2.6,52.7 L4.2,51.6 L1.5,52.7 L2.0,51.3 L3.8,51.2 L3.9,49.6 L8.0,50.4 L11.0,49.2 L11.4,50.0 Z'} ] },
+    nomi: ['Arjun','Priya','Rahul','Ananya','Vikram','Kavya','Aditya','Neha','Rohan','Pooja','Karan','Divya','Sanjay','Meera','Amit','Anjali','Vivek','Sneha','Ravi','Riya'],
+    nomiM: ['Arjun','Rahul','Vikram','Aditya','Rohan','Karan','Sanjay','Amit','Vivek','Ravi'],
+    nomiF: ['Priya','Ananya','Kavya','Neha','Pooja','Divya','Meera','Anjali','Sneha','Riya'],
+    cognomi: ['Sharma','Patel','Singh','Kumar','Gupta','Reddy','Nair','Iyer','Das','Banerjee','Mehta','Shah','Rao','Joshi','Verma','Chopra','Malhotra','Kapoor','Bose','Pillai'],
+    partiti: [
+      { id:'in_bjp',  nome:'BJP',                orientamento:'destra',         base:{ cattolici:0.4, cetomedio:0.4, imprenditori:0.2 }, forza:38, asse:2 },
+      { id:'in_reg',  nome:'Partiti regionali',  orientamento:'centro',         base:{ lavoratori:0.4, pensionati:0.3, cetomedio:0.3 },  forza:24, asse:0 },
+      { id:'in_inc',  nome:'Congresso',          orientamento:'centrosinistra', base:{ lavoratori:0.4, giovani:0.3, cetomedio:0.3 },     forza:22, asse:-1 },
+      { id:'in_aap',  nome:'AAP',                orientamento:'populista',      base:{ giovani:0.5, cetomedio:0.3, lavoratori:0.2 },     forza:8,  asse:0 },
+      { id:'in_left', nome:'Sinistra',           orientamento:'sinistra',       base:{ lavoratori:0.6, giovani:0.4 },                    forza:8,  asse:-2 },
+    ],
+  },
+  sudafrica: {
+    economia:{pil:340, debito:75, deficit:-6.2},   // cifre 2024 riconciliate (CIFRE-ECONOMICHE.md); PIL € mld
+    nome: 'Sudafrica',
+    allineamento: 'nonallineato', terminoLocale: 'Provincia',
+    colori: { bandiera: ['#007749', '#e03c31', '#001489'], accento: '#a9791a' },
+    flag: '<svg viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg"><rect width="30" height="20" fill="#e03c31"/><rect y="10" width="30" height="10" fill="#001489"/><rect y="7.5" width="30" height="5" fill="#007749"/><rect y="6.7" width="30" height="0.8" fill="#fff"/><rect y="12.5" width="30" height="0.8" fill="#fff"/><path d="M0,0 L13,10 L0,20 Z" fill="#000"/><path d="M0,0 L13,10 L0,20" fill="none" stroke="#ffb915" stroke-width="0.9"/></svg>',
+    nomeArt: 'il Sudafrica',
+    titoloRuolo: 'Presidente',
+    mandatoMesi: 60, sistema: 'parlamentare', sfiducia: true,
+    coalizione: true, comeSiVince: 'parlamentare', cadutaGoverno: true, ue: false, distorsione: 1.0,
+    intermedie: [{tipo:'Elezioni provinciali', mese:30, tocca:'regione'}],
+    territori: [
+      {nome:'Johannesburg', tipo:'città', carica:'Sindaco', lean:-1, simbolo:true}, {nome:'Città del Capo', nomeEn:'Cape Town', tipo:'città', carica:'Sindaco', lean:1, simbolo:true}, {nome:'Durban', tipo:'città', carica:'Sindaco', lean:0, simbolo:true},
+      {nome:'il Gauteng', tipo:'regione', carica:'Premier', lean:-1, simbolo:true}, {nome:'il Capo Occidentale', nomeEn:'Western Cape', tipo:'regione', carica:'Premier', lean:2}, {nome:'il KwaZulu-Natal', tipo:'regione', carica:'Premier', lean:-1}, {nome:'il Capo Orientale', nomeEn:'Eastern Cape', tipo:'regione', carica:'Premier', lean:-2},
+      {nome:'il Limpopo', tipo:'regione', carica:'Premier', lean:-2}, {nome:'il Mpumalanga', tipo:'regione', carica:'Premier', lean:-1}, {nome:'il Nord-Ovest', nomeEn:'North West', tipo:'regione', carica:'Premier', lean:-1}, {nome:'lo Stato Libero', nomeEn:'Free State', tipo:'regione', carica:'Premier', lean:-1},
+      {nome:'Pretoria', tipo:'città', carica:'Sindaco', lean:0}, {nome:'Gqeberha', tipo:'città', carica:'Sindaco', lean:-1}, {nome:'Bloemfontein', tipo:'città', carica:'Sindaco', lean:-1}
+    ],
+    mappa: { viewBox:'0 0 110 97',
+      sfondo:'M5.5,45.2 L7.2,46.7 L7.6,50.3 L12.6,51.7 L16.3,51.3 L18.8,52.1 L21.7,49.0 L24.4,48.2 L24.4,21.0 L28.8,26.3 L30.0,31.2 L28.4,33.9 L29.0,36.8 L35.3,36.6 L41.1,31.7 L44.2,25.0 L47.0,24.9 L50.1,27.5 L54.9,28.9 L60.1,28.1 L62.7,20.9 L66.2,20.1 L69.1,17.4 L70.9,11.9 L75.0,9.6 L78.6,5.0 L82.6,3.9 L83.4,2.2 L87.4,1.5 L91.8,3.1 L97.9,3.3 L99.6,11.4 L102.6,18.5 L102.4,29.9 L98.2,28.4 L94.9,33.2 L94.9,36.2 L97.1,39.1 L99.6,39.9 L102.5,40.0 L102.6,36.2 L108.5,36.5 L105.2,49.1 L98.5,54.9 L89.7,69.4 L76.0,82.4 L66.9,87.7 L61.7,87.8 L61.6,89.8 L57.1,89.3 L55.9,91.0 L48.2,89.4 L46.7,90.3 L41.3,89.5 L38.6,90.1 L36.2,92.3 L27.9,92.9 L24.5,95.6 L19.9,94.1 L20.3,93.2 L18.9,91.7 L16.8,92.3 L16.7,90.2 L14.6,90.3 L14.5,92.1 L13.5,90.7 L14.6,88.3 L10.4,80.8 L13.4,79.2 L13.3,73.9 L6.8,62.4 L3.8,53.2 L1.5,49.6 ZM83.0,51.8 L80.8,49.3 L77.6,50.2 L76.7,51.5 L75.0,51.8 L72.4,56.0 L70.2,57.1 L72.5,62.2 L74.8,64.2 L77.1,64.7 L79.1,60.9 L84.1,59.3 L83.9,58.0 L86.0,55.0 L85.2,53.1 Z',
+      aree:[ {cx:76.9,cy:31.7,r:4}, {cx:15.4,cy:88.4,r:4}, {cx:94.2,cy:58.7,r:4}, {d:'M73.9,35.7 L73.8,35.0 L71.7,35.0 L71.1,34.1 L73.1,29.4 L76.1,29.0 L77.0,26.8 L76.4,25.5 L80.8,24.7 L80.6,24.0 L81.5,23.6 L81.7,24.5 L80.7,25.3 L81.0,27.7 L82.0,27.9 L82.2,26.5 L82.8,27.2 L83.7,26.5 L82.3,30.2 L80.8,30.0 L79.8,31.1 L82.2,33.2 L81.6,34.0 L80.1,34.0 L78.3,36.8 L76.9,36.3 L76.4,35.2 L75.1,36.0 Z'}, {d:'M48.2,89.4 L46.6,89.7 L46.7,90.3 L42.3,89.4 L42.6,89.7 L38.8,90.1 L35.9,92.4 L30.4,92.2 L30.0,93.0 L27.6,93.0 L24.5,95.6 L19.9,94.1 L20.3,93.2 L18.8,92.5 L18.9,91.7 L16.8,92.3 L16.7,90.2 L14.6,90.3 L14.4,92.0 L13.5,90.6 L14.7,88.5 L14.3,87.3 L10.4,80.8 L11.1,79.9 L12.5,80.2 L13.7,78.0 L12.9,72.7 L10.0,68.4 L11.3,65.9 L13.1,65.7 L14.8,63.4 L17.6,65.2 L18.2,73.9 L19.7,73.8 L21.1,75.3 L21.1,79.0 L21.8,79.2 L22.0,78.1 L25.6,76.1 L25.1,78.5 L27.2,81.6 L29.1,81.5 L30.1,79.7 L31.8,79.2 L34.6,76.5 L37.3,76.1 L39.4,71.5 L44.5,74.5 L46.7,72.3 L48.6,72.2 L49.7,73.2 L50.7,72.6 L51.7,74.3 L51.1,75.6 L45.6,77.8 L46.5,80.4 L44.5,80.5 L42.3,84.8 L47.7,85.8 L48.1,86.9 L46.4,87.9 L48.5,88.6 Z'}, {d:'M83.0,51.8 L82.2,50.8 L82.7,49.5 L84.4,49.0 L87.5,46.3 L87.8,41.2 L88.7,40.5 L92.2,39.6 L96.0,40.3 L97.8,39.3 L102.5,40.0 L102.6,36.2 L108.5,36.5 L105.2,49.0 L102.8,51.5 L101.2,51.9 L98.5,54.9 L90.9,67.8 L90.0,66.2 L88.3,65.1 L83.9,64.2 L85.1,62.2 L84.0,61.7 L83.2,59.7 L84.1,59.2 L83.9,58.0 L86.0,55.0 L85.2,53.1 Z'}, {d:'M80.8,60.8 L83.2,59.7 L84.0,61.7 L85.1,62.2 L84.0,64.4 L88.3,65.1 L90.0,66.2 L90.9,67.8 L85.8,72.3 L80.2,78.8 L70.8,86.0 L66.7,87.8 L62.2,87.6 L61.2,88.4 L61.6,89.8 L56.8,89.4 L55.9,91.0 L48.2,89.4 L48.5,88.6 L46.4,87.9 L48.2,86.7 L47.4,85.5 L42.4,85.1 L44.5,80.5 L46.5,80.4 L45.6,78.4 L46.2,77.3 L50.7,76.0 L51.7,74.3 L51.6,72.9 L53.8,72.5 L54.2,70.2 L59.5,68.8 L60.4,66.8 L60.1,64.4 L61.8,64.9 L64.5,63.5 L69.1,64.9 L70.2,63.8 L72.0,63.5 L72.4,62.2 L73.1,62.2 L74.8,64.2 L77.1,64.7 L78.0,61.8 L79.1,60.9 Z'}, {d:'M84.8,1.9 L88.1,1.5 L91.8,3.1 L95.1,2.7 L97.8,3.2 L99.7,9.1 L99.6,11.4 L101.7,15.1 L96.7,16.0 L96.6,17.8 L97.8,18.1 L97.2,18.2 L97.6,19.5 L96.0,19.7 L94.5,18.8 L93.7,21.8 L92.9,22.4 L92.4,21.7 L90.8,21.7 L90.6,23.6 L89.5,23.5 L89.7,25.3 L88.2,25.7 L84.1,25.7 L84.2,25.1 L83.4,24.8 L84.0,23.6 L82.9,23.3 L82.6,22.1 L79.0,24.1 L80.6,24.0 L80.9,24.6 L79.1,25.2 L77.5,24.3 L77.2,23.7 L78.1,23.4 L77.3,22.9 L74.2,22.6 L73.5,23.6 L71.2,22.7 L70.3,20.8 L68.5,21.8 L66.5,21.4 L66.2,20.1 L69.1,17.4 L69.9,13.3 L70.9,11.9 L73.7,10.6 L74.1,9.6 L75.0,9.6 L78.6,5.0 L82.6,3.9 L83.4,2.2 Z'}, {d:'M102.2,17.4 L102.4,29.9 L98.4,28.3 L96.9,29.5 L94.8,33.7 L94.9,36.2 L95.4,35.9 L96.0,37.9 L97.8,39.3 L97.2,40.0 L92.2,39.6 L87.2,41.4 L86.0,39.5 L83.9,38.7 L83.1,37.6 L80.9,37.3 L80.1,38.1 L78.3,36.8 L80.1,34.0 L81.6,34.0 L82.2,33.2 L80.1,31.8 L79.9,30.8 L80.8,30.0 L82.3,30.2 L83.7,26.5 L82.8,27.2 L82.2,26.5 L82.0,27.9 L81.2,27.9 L80.7,25.3 L81.7,24.5 L81.5,23.6 L79.1,24.0 L82.6,22.1 L82.9,23.3 L84.0,23.6 L83.4,24.8 L84.2,25.1 L84.1,25.7 L88.7,25.6 L89.7,25.3 L89.5,23.5 L90.6,23.6 L90.8,21.7 L92.4,21.7 L92.9,22.4 L93.7,21.8 L94.5,18.8 L96.0,19.7 L97.6,19.5 L97.2,18.2 L97.8,18.1 L96.6,17.8 L96.7,16.0 L101.7,15.1 Z'}, {d:'M65.7,20.0 L66.5,21.4 L68.3,21.8 L70.3,20.8 L71.2,22.7 L73.5,23.6 L74.5,22.6 L78.1,23.4 L77.2,23.9 L78.5,25.3 L76.4,25.5 L77.0,26.8 L76.2,28.8 L73.1,29.4 L71.4,33.0 L71.7,35.0 L73.8,35.0 L73.9,35.9 L71.3,37.3 L69.7,36.6 L69.6,37.3 L67.7,37.6 L66.3,38.9 L66.9,40.5 L65.2,40.8 L64.0,42.9 L62.4,41.9 L60.3,42.7 L56.7,45.8 L55.9,44.4 L57.2,42.9 L55.5,42.2 L53.9,45.8 L52.9,44.3 L53.4,42.8 L51.3,43.1 L51.1,40.3 L49.9,39.5 L50.5,37.0 L47.3,35.7 L47.8,34.8 L45.8,33.8 L45.5,30.6 L46.5,30.3 L44.7,30.1 L42.8,33.5 L42.1,33.2 L42.1,31.2 L41.6,31.0 L43.0,26.4 L44.2,25.0 L46.9,24.9 L50.1,27.5 L51.8,27.4 L52.8,28.4 L55.8,28.9 L59.6,28.3 L60.9,27.4 L62.7,20.9 Z'}, {d:'M82.2,50.8 L80.7,49.3 L77.6,50.2 L76.7,51.5 L75.0,51.8 L72.4,56.0 L70.1,57.4 L72.6,60.9 L72.7,62.6 L69.1,64.9 L64.5,63.5 L61.8,64.9 L59.0,63.9 L52.8,57.3 L56.3,49.9 L56.4,47.1 L58.8,43.5 L62.3,41.9 L64.0,42.9 L65.2,40.8 L66.9,40.5 L66.3,38.9 L67.7,37.6 L69.6,37.3 L69.7,36.6 L71.3,37.3 L73.2,36.7 L74.1,35.6 L75.1,36.0 L76.4,35.2 L76.9,36.3 L80.1,38.1 L80.9,37.3 L83.1,37.6 L83.9,38.7 L86.0,39.5 L87.2,41.4 L88.2,41.0 L87.5,46.3 L84.4,49.0 L83.0,49.3 Z'} ] },
+    nomi: ['Thabo','Nomvula','Sipho','Lerato','Johan','Anika','Bongani','Zanele','Daniel','Thandi','Lwazi','Naledi','Tshepo','Amahle','Andile','Palesa','Pieter','Karabo','David','Sarah'],
+    nomiM: ['Thabo','Sipho','Johan','Bongani','Daniel','Lwazi','Tshepo','Andile','Pieter','David'],
+    nomiF: ['Nomvula','Lerato','Anika','Zanele','Thandi','Naledi','Amahle','Palesa','Karabo','Sarah'],
+    cognomi: ['Naidoo','Botha','Nkosi','Van der Merwe','Mokoena','Dlamini','Pillay','Khumalo','Pretorius','Mabaso','Zulu','Smith','Mahlangu','Govender','Ndlovu','Van Wyk','Sithole','Jacobs','Mthembu','Maluleke'],
+    partiti: [
+      { id:'za_anc',  nome:'ANC',                  orientamento:'centrosinistra',   base:{ lavoratori:0.5, pensionati:0.3, cetomedio:0.2 },  forza:40, asse:-1 },
+      { id:'za_da',   nome:'Alleanza Democratica', orientamento:'centrodestra',     base:{ imprenditori:0.5, cetomedio:0.4, cattolici:0.1 }, forza:22, asse:1 },
+      { id:'za_mk',   nome:'MK',                   orientamento:'populista',        base:{ lavoratori:0.5, giovani:0.5 },                    forza:14, asse:-1 },
+      { id:'za_eff',  nome:'EFF',                  orientamento:'sinistra populista', base:{ giovani:0.6, lavoratori:0.4 },                  forza:10, asse:-2 },
+      { id:'za_oth',  nome:'Altri partiti',        orientamento:'centro',           base:{ cetomedio:0.5, imprenditori:0.3, cattolici:0.2 }, forza:8,  asse:0 },
+      { id:'za_ifp',  nome:'IFP',                  orientamento:'centro',           base:{ pensionati:0.5, cattolici:0.5 },                  forza:6,  asse:0 },
+    ],
+  },
+  argentina: {
+    economia:{pil:555, debito:86, deficit:0.3},   // cifre 2024 riconciliate (CIFRE-ECONOMICHE.md); PIL € mld
+    nome: 'Argentina',
+    allineamento: 'nonallineato', terminoLocale: 'Provincia',
+    colori: { bandiera: ['#74acdf', '#ffffff', '#f6b40e'], accento: '#a9791a' },
+    flag: '<svg viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg"><rect width="30" height="20" fill="#fff"/><rect width="30" height="6.67" fill="#74acdf"/><rect y="13.33" width="30" height="6.67" fill="#74acdf"/><circle cx="15" cy="10" r="2.1" fill="#f6b40e"/><circle cx="15" cy="10" r="1.3" fill="#fff" stroke="#e0a800" stroke-width="0.4"/></svg>',
+    nomeArt: "l'Argentina",
+    titoloRuolo: 'Presidente',
+    mandatoMesi: 48, sistema: 'presidenziale', sfiducia: false,
+    coalizione: true, comeSiVince: 'candidato', cadutaGoverno: false, ue: false, distorsione: 1.0,
+    intermedie: [{tipo:'Elezioni di metà mandato', mese:24, tocca:'tutti'}],
+    territori: [
+      {nome:'Buenos Aires', tipo:'città', carica:'Sindaco', lean:0, simbolo:true}, {nome:'Córdoba', tipo:'città', carica:'Sindaco', lean:1, simbolo:true}, {nome:'Rosario', tipo:'città', carica:'Sindaco', lean:-1, simbolo:true}, {nome:'Mendoza', tipo:'città', carica:'Sindaco', lean:1, simbolo:true},
+      {nome:'Buenos Aires', tipo:'regione', carica:'Governatore', lean:-1}, {nome:'Córdoba', tipo:'regione', carica:'Governatore', lean:1}, {nome:'Santa Fe', tipo:'regione', carica:'Governatore', lean:-1}, {nome:'Mendoza', tipo:'regione', carica:'Governatore', lean:1},
+      {nome:'Tucumán', tipo:'regione', carica:'Governatore', lean:-2}, {nome:'Salta', tipo:'regione', carica:'Governatore', lean:-1}, {nome:'il Chubut', tipo:'regione', carica:'Governatore', lean:0},
+      {nome:'La Plata', tipo:'città', carica:'Sindaco', lean:-1}, {nome:'Mar del Plata', tipo:'città', carica:'Sindaco', lean:1}, {nome:'San Miguel de Tucumán', tipo:'città', carica:'Sindaco', lean:-1}
+    ],
+    mappa: { viewBox:'0 0 80 167',
+      sfondo:'M60.9,54.1 L61.2,57.1 L60.1,57.4 L59.6,60.3 L60.3,62.7 L59.5,63.2 L60.5,65.0 L64.8,68.2 L64.2,71.5 L65.8,73.6 L66.6,73.2 L66.8,76.2 L63.7,80.7 L63.4,82.1 L60.4,84.0 L49.6,86.5 L44.8,85.5 L45.0,87.7 L46.2,88.3 L45.2,88.0 L46.1,88.8 L44.4,92.9 L45.0,94.7 L45.6,94.5 L44.9,95.7 L42.2,97.1 L40.0,97.1 L35.0,95.5 L35.4,95.0 L34.1,95.6 L34.6,101.7 L36.7,102.5 L36.2,103.4 L36.8,103.5 L38.1,103.4 L38.3,102.6 L37.2,102.4 L39.4,101.7 L40.0,105.0 L38.1,105.6 L36.8,103.8 L34.9,104.5 L34.7,105.1 L37.4,106.1 L34.9,107.4 L33.4,109.5 L33.8,112.9 L31.8,115.1 L32.6,115.7 L27.2,117.3 L24.7,121.0 L25.3,123.8 L27.7,126.0 L31.8,127.0 L31.4,129.6 L29.3,130.2 L31.2,129.7 L31.7,130.6 L24.8,135.9 L23.7,137.7 L24.6,137.1 L23.5,140.7 L21.7,141.3 L20.2,139.4 L20.8,140.4 L19.1,140.8 L20.8,140.6 L21.7,141.5 L19.7,142.4 L18.7,145.2 L17.6,146.1 L18.5,145.6 L19.3,148.5 L16.8,148.8 L19.3,148.8 L21.6,152.3 L15.5,150.7 L7.7,150.5 L5.8,148.4 L6.6,146.9 L6.0,146.2 L6.4,144.0 L3.0,144.5 L1.5,140.4 L3.5,138.6 L3.1,136.8 L5.2,134.9 L5.4,133.1 L6.4,132.6 L5.5,130.5 L6.2,128.2 L8.0,127.0 L7.8,125.0 L8.8,124.4 L7.9,121.8 L9.1,120.9 L8.5,118.9 L10.2,117.4 L7.2,115.0 L10.3,115.1 L11.0,113.9 L10.6,113.3 L8.1,113.0 L8.9,110.8 L8.3,109.9 L8.7,109.2 L7.8,108.4 L8.6,107.1 L7.1,106.4 L7.0,104.2 L7.4,102.0 L8.6,101.7 L7.8,95.0 L8.8,93.0 L8.3,92.4 L9.1,91.0 L8.7,89.4 L9.5,89.4 L9.9,86.0 L12.1,84.4 L10.7,80.1 L10.7,75.8 L11.3,74.0 L12.5,73.7 L13.8,71.9 L13.7,68.5 L13.1,68.0 L13.8,67.5 L15.1,63.2 L16.0,62.9 L16.1,58.7 L14.9,57.7 L15.3,56.2 L13.1,48.5 L14.3,47.2 L14.6,43.8 L15.5,43.9 L16.0,42.8 L15.4,42.4 L15.2,38.6 L16.1,37.6 L16.7,34.1 L18.4,31.9 L19.9,27.8 L21.8,27.5 L20.7,24.6 L21.5,23.0 L20.7,19.7 L21.6,18.0 L20.8,16.4 L21.1,15.4 L25.5,12.6 L26.9,7.5 L26.2,6.6 L27.9,3.7 L29.6,2.9 L29.9,1.5 L31.8,3.1 L36.2,3.6 L37.3,6.9 L38.7,2.6 L43.1,2.6 L46.4,7.7 L50.1,11.5 L53.9,12.5 L58.6,16.3 L62.2,17.8 L63.4,20.1 L61.1,23.2 L61.0,25.5 L59.2,28.0 L59.4,28.8 L61.6,28.5 L64.9,29.6 L67.3,29.5 L67.9,30.1 L69.0,28.7 L70.4,29.4 L71.7,27.1 L72.8,27.0 L74.1,25.5 L74.9,20.2 L75.5,20.8 L76.7,19.8 L77.6,20.5 L78.5,23.6 L77.9,27.9 L74.1,29.8 L73.2,31.4 L70.3,33.3 L70.6,34.1 L69.8,34.0 L63.1,43.0 L62.1,44.8 L62.5,46.3 L60.9,51.4 ZM20.6,164.4 L20.6,153.8 L22.2,156.1 L21.7,155.6 L20.9,156.7 L22.6,157.3 L24.7,160.0 L28.9,162.8 L34.1,163.7 L33.3,165.1 L29.0,165.7 Z',
+      aree:[ {cx:57.9,cy:66.2,r:4}, {cx:37.8,cy:49.0,r:4}, {cx:51.5,cy:56.6,r:4}, {cx:19.8,cy:56.3,r:4}, {d:'M66.9,75.3 L66.8,76.2 L63.7,80.7 L63.4,82.1 L61.1,83.6 L54.8,85.7 L49.6,86.5 L46.9,86.4 L44.8,85.5 L45.0,87.7 L46.2,88.3 L45.2,88.0 L46.0,88.7 L45.8,90.5 L45.1,90.5 L44.4,92.9 L45.2,94.1 L45.0,94.7 L45.6,94.5 L44.9,95.7 L43.3,96.6 L41.9,95.1 L40.9,94.9 L41.1,63.7 L47.4,63.6 L50.5,59.6 L52.1,59.9 L52.9,58.1 L55.4,60.2 L56.8,60.4 L59.3,62.0 L60.2,61.9 L60.3,62.7 L59.5,63.2 L60.0,63.6 L59.6,65.3 L60.0,65.6 L60.5,65.0 L62.2,65.9 L64.6,67.9 L65.1,68.9 L64.2,70.3 L64.2,71.6 L65.8,73.6 L66.6,73.2 ZM45.7,93.2 L46.1,93.6 L45.8,94.2 L45.3,93.9 Z'}, {d:'M45.9,42.8 L45.7,44.2 L46.8,45.6 L45.3,50.5 L45.4,52.6 L47.3,55.8 L47.1,57.0 L43.0,63.7 L40.9,63.8 L40.9,66.7 L34.3,66.7 L34.1,57.9 L35.1,55.0 L35.0,53.4 L33.9,53.5 L33.5,52.2 L31.7,51.3 L31.7,47.4 L33.1,42.7 L34.9,41.4 L34.8,40.0 L37.5,39.2 L39.3,40.3 L40.6,40.3 L40.9,40.9 L45.1,40.9 Z'}, {d:'M55.5,32.2 L58.4,32.2 L57.5,33.0 L57.1,37.2 L55.6,39.0 L55.3,45.7 L53.4,49.2 L52.4,50.3 L51.5,50.5 L51.2,51.5 L51.0,54.8 L51.9,57.1 L52.9,58.4 L52.1,60.0 L50.5,59.6 L47.4,63.6 L43.0,63.7 L47.2,56.8 L46.6,54.2 L45.4,52.6 L45.3,50.6 L46.8,45.6 L45.7,44.1 L47.4,32.2 Z'}, {d:'M15.3,58.3 L14.9,57.0 L15.3,56.2 L14.3,53.5 L16.6,53.2 L16.8,52.5 L18.5,51.7 L19.5,52.3 L19.6,53.6 L22.8,52.2 L23.7,53.1 L25.4,53.2 L26.2,55.7 L26.3,59.0 L27.9,62.1 L27.6,63.7 L28.7,66.3 L28.8,69.2 L28.4,71.7 L22.0,71.8 L22.1,79.3 L19.2,78.4 L18.6,77.5 L16.5,77.1 L16.1,75.9 L13.9,73.3 L13.7,68.5 L13.1,68.0 L13.8,67.5 L15.1,63.2 L16.0,62.9 L15.6,60.7 L16.1,58.7 L15.8,58.1 Z'}, {d:'M32.1,22.7 L33.4,22.7 L34.9,23.6 L36.6,23.4 L36.6,25.6 L34.4,29.6 L34.7,31.1 L34.3,31.7 L33.3,31.5 L32.5,32.4 L31.4,31.1 L30.9,29.2 L30.0,28.8 L31.4,26.0 L30.2,24.9 L30.4,23.9 L31.9,23.8 Z'}, {d:'M25.8,11.6 L25.9,11.1 L28.8,13.6 L29.4,12.6 L29.3,9.4 L29.8,9.4 L30.8,10.1 L30.8,12.1 L31.7,12.8 L32.4,14.4 L35.0,15.4 L35.3,14.7 L36.1,15.5 L37.8,13.6 L37.8,10.1 L37.1,10.0 L36.8,10.5 L36.0,9.7 L35.2,9.9 L34.5,8.8 L34.6,7.7 L33.8,7.2 L33.3,5.5 L33.9,3.0 L36.2,3.6 L37.3,6.9 L38.8,2.6 L43.1,2.6 L43.8,4.1 L44.9,4.9 L45.0,14.4 L40.8,20.6 L37.8,20.2 L36.6,23.4 L34.9,23.6 L33.4,22.7 L32.1,22.7 L31.9,23.8 L30.0,23.1 L29.2,24.2 L27.6,21.4 L28.9,20.4 L28.6,18.7 L23.8,18.8 L21.1,18.1 L21.6,18.0 L20.8,16.4 L21.1,15.4 L22.1,14.3 L25.5,12.6 Z'}, {d:'M7.9,102.1 L8.6,101.8 L8.5,101.3 L34.2,101.3 L35.2,102.2 L36.7,102.5 L36.2,103.4 L36.8,103.5 L38.1,103.4 L38.3,102.6 L37.2,102.4 L39.4,101.7 L40.1,104.2 L39.8,105.2 L38.1,105.6 L37.0,103.8 L34.9,104.5 L34.7,105.1 L37.4,106.1 L34.9,107.4 L33.4,109.5 L33.8,112.9 L31.8,115.1 L32.6,115.7 L32.0,116.4 L30.0,116.0 L28.5,116.8 L28.8,117.1 L27.2,117.3 L24.7,121.0 L8.9,121.0 L8.5,118.9 L9.6,118.5 L10.2,117.4 L9.2,116.0 L7.3,115.6 L7.2,115.0 L10.3,115.1 L11.0,113.8 L10.6,113.3 L8.1,113.0 L8.1,111.7 L8.9,110.8 L8.3,109.9 L8.7,109.2 L7.8,108.4 L8.6,107.1 L7.0,106.2 L7.4,103.6 L7.1,102.7 L7.5,101.9 Z'} ] },
+    nomi: ['Mateo','Sofía','Santiago','Valentina','Juan','Martina','Diego','Lucía','Martín','Camila','Lucas','Julieta','Tomás','Catalina','Nicolás','Florencia','Facundo','Agustina','Bruno','Paula'],
+    nomiM: ['Mateo','Santiago','Juan','Diego','Martín','Lucas','Tomás','Nicolás','Facundo','Bruno'],
+    nomiF: ['Sofía','Valentina','Martina','Lucía','Camila','Julieta','Catalina','Florencia','Agustina','Paula'],
+    cognomi: ['González','Rodríguez','Fernández','López','Martínez','García','Pérez','Romero','Sosa','Álvarez','Torres','Ruiz','Ramírez','Flores','Acosta','Benítez','Medina','Suárez','Herrera','Gómez'],
+    partiti: [
+      { id:'ar_uxp', nome:'Peronisti',          orientamento:'populista',      base:{ lavoratori:0.5, pensionati:0.3, cetomedio:0.2 }, forza:33, asse:-1 },
+      { id:'ar_lla', nome:'La Libertad Avanza', orientamento:'destra',         base:{ cetomedio:0.4, imprenditori:0.4, giovani:0.2 },  forza:30, asse:2 },
+      { id:'ar_pro', nome:'PRO',                orientamento:'centrodestra',   base:{ imprenditori:0.5, cetomedio:0.5 },               forza:15, asse:1 },
+      { id:'ar_ucr', nome:'Radicali (UCR)',     orientamento:'centro',         base:{ cetomedio:0.6, pensionati:0.4 },                 forza:14, asse:0 },
+      { id:'ar_fit', nome:'Sinistra',           orientamento:'sinistra',       base:{ lavoratori:0.6, giovani:0.4 },                   forza:8,  asse:-2 },
+    ],
+  },
+  /* ===== ROSTER A 16 — 8 paesi nuovi. Dati (partiti reali, territori, nomi, allineamento); il campo `mappa` (Natural
+     Earth) e le mappe-locali (OSM) si generano dopo: senza `mappa` il territorio degrada a lista testuale. ===== */
+  germania: {
+    economia:{pil:4240, debito:64, deficit:-2.8},   // cifre 2024 riconciliate (CIFRE-ECONOMICHE.md); PIL € mld
+    nome: 'Germania',
+    allineamento: 'occidentale', terminoLocale: 'Land',
+    colori: { bandiera: ['#000000', '#dd0000', '#ffce00'], accento: '#a9791a' },
+    flag: '<svg viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg"><rect width="30" height="6.67" fill="#000"/><rect y="6.67" width="30" height="6.67" fill="#dd0000"/><rect y="13.33" width="30" height="6.67" fill="#ffce00"/></svg>',
+    nomeArt: 'la Germania',
+    titoloRuolo: 'Cancelliere',
+    mandatoMesi: 48, sistema: 'parlamentare', sfiducia: true,
+    coalizione: true, comeSiVince: 'parlamentare', cadutaGoverno: true, ue: true, distorsione: 1.0,
+    intermedie: [{tipo:'Elezioni nei Länder', mese:24, tocca:'regione'}],
+    territori: [
+      {nome:'Berlino', nomeEn:'Berlin', tipo:'città', carica:'Sindaco', lean:-1, simbolo:true}, {nome:'Monaco', nomeEn:'Munich', tipo:'città', carica:'Sindaco', lean:1, simbolo:true}, {nome:'Amburgo', nomeEn:'Hamburg', tipo:'città', carica:'Sindaco', lean:-1, simbolo:true},
+      {nome:'la Baviera', nomeEn:'Bavaria', tipo:'regione', carica:'Ministro presidente', lean:2, simbolo:true}, {nome:'la Renania Settentrionale-Vestfalia', nomeEn:'North Rhine-Westphalia', tipo:'regione', carica:'Ministro presidente', lean:0}, {nome:'il Baden-Württemberg', tipo:'regione', carica:'Ministro presidente', lean:1}, {nome:"l'Assia", nomeEn:'Hesse', tipo:'regione', carica:'Ministro presidente', lean:1},
+      {nome:'la Bassa Sassonia', nomeEn:'Lower Saxony', tipo:'regione', carica:'Ministro presidente', lean:-1}, {nome:'la Sassonia', nomeEn:'Saxony', tipo:'regione', carica:'Ministro presidente', lean:2}, {nome:'la Renania-Palatinato', nomeEn:'Rhineland-Palatinate', tipo:'regione', carica:'Ministro presidente', lean:-1}, {nome:'il Brandeburgo', nomeEn:'Brandenburg', tipo:'regione', carica:'Ministro presidente', lean:0},
+      {nome:'Colonia', nomeEn:'Cologne', tipo:'città', carica:'Sindaco', lean:-1}, {nome:'Francoforte', nomeEn:'Frankfurt', tipo:'città', carica:'Sindaco', lean:0}, {nome:'Stoccarda', nomeEn:'Stuttgart', tipo:'città', carica:'Sindaco', lean:1}, {nome:'Düsseldorf', tipo:'città', carica:'Sindaco', lean:0}
+    ],
+    mappa: { viewBox:'0 0 100 134',
+      sfondo:'M91.9,69.9 L90.7,69.5 L90.2,70.4 L91.7,71.4 L91.4,72.1 L87.3,73.4 L85.9,74.7 L83.0,75.0 L81.8,76.9 L81.0,76.4 L78.8,78.6 L77.2,78.6 L76.6,80.1 L75.2,79.5 L71.9,80.4 L69.7,84.2 L69.1,82.6 L67.3,81.6 L69.1,86.2 L72.1,88.6 L70.6,91.3 L73.3,96.6 L74.8,98.2 L77.1,98.9 L79.0,101.8 L80.3,102.2 L82.0,104.8 L83.5,104.7 L85.7,107.8 L84.7,111.9 L81.9,111.0 L81.4,114.3 L74.3,118.8 L77.0,123.3 L76.0,125.4 L77.9,126.4 L77.1,129.7 L74.8,128.2 L74.6,126.3 L71.8,127.0 L71.0,125.9 L69.1,126.1 L69.1,125.2 L68.4,127.4 L62.5,127.6 L58.5,130.9 L58.0,130.3 L55.7,131.0 L54.5,128.6 L50.5,128.6 L49.9,127.8 L49.9,130.9 L47.1,133.0 L47.6,131.3 L46.3,131.5 L44.8,128.4 L43.6,128.5 L43.1,127.6 L41.3,128.8 L36.7,126.3 L33.5,126.5 L30.1,124.1 L28.4,126.3 L30.6,126.5 L30.3,127.6 L26.7,127.1 L24.7,128.1 L20.1,128.0 L20.6,127.5 L19.8,127.7 L19.1,125.6 L20.2,121.2 L19.8,118.8 L21.6,114.9 L22.2,110.3 L26.3,104.5 L23.5,103.2 L20.4,103.2 L18.0,101.0 L16.5,102.1 L14.5,101.4 L14.1,102.0 L12.7,100.3 L10.7,101.2 L8.5,96.7 L6.7,96.1 L8.4,90.4 L6.3,89.7 L4.1,86.1 L4.6,83.3 L7.0,81.6 L6.6,78.8 L4.9,78.2 L5.7,76.6 L3.2,75.0 L2.8,73.8 L3.7,71.6 L1.6,69.8 L4.6,67.5 L3.7,66.5 L5.3,63.5 L5.1,61.5 L2.3,56.5 L4.7,55.9 L4.4,55.0 L6.7,56.2 L10.9,54.8 L11.6,53.6 L10.3,52.2 L13.9,49.3 L13.4,45.6 L10.6,45.4 L10.2,44.1 L10.9,42.5 L13.8,42.7 L15.7,36.4 L15.7,32.2 L16.3,31.0 L17.5,31.2 L13.9,30.0 L14.2,27.7 L15.1,27.3 L14.6,26.4 L16.0,25.1 L24.5,24.4 L26.0,27.0 L25.0,28.4 L26.4,29.4 L27.6,28.3 L26.7,27.5 L27.1,26.0 L30.1,27.2 L29.6,30.3 L30.2,27.1 L29.4,24.5 L30.4,21.7 L33.3,22.3 L37.0,21.6 L41.0,26.4 L43.6,27.2 L41.0,26.0 L39.0,22.3 L33.9,20.5 L33.0,18.9 L34.8,19.0 L35.0,17.8 L32.8,16.4 L34.4,14.1 L31.4,14.9 L30.6,13.8 L31.6,13.4 L31.1,12.6 L33.6,12.4 L34.9,10.9 L31.5,7.1 L31.2,4.4 L33.8,4.3 L37.4,5.9 L40.9,4.9 L43.5,6.7 L44.8,6.3 L45.7,10.0 L43.7,11.5 L46.9,11.2 L47.5,11.7 L46.9,14.0 L48.7,12.0 L53.1,14.2 L57.4,13.0 L56.7,13.4 L56.7,16.4 L53.3,18.6 L54.9,20.1 L57.8,19.2 L58.5,20.4 L60.8,21.1 L63.2,16.9 L67.5,16.2 L67.7,17.8 L67.7,16.4 L72.2,11.2 L76.3,12.2 L71.2,12.9 L70.4,14.2 L70.9,15.2 L72.3,13.2 L74.0,12.5 L73.8,13.2 L75.6,13.4 L77.2,12.1 L78.3,14.7 L82.2,17.9 L84.6,16.5 L85.7,17.7 L85.0,18.9 L86.7,20.4 L85.8,22.0 L88.1,23.6 L90.5,23.7 L89.9,24.4 L92.4,32.1 L91.3,35.5 L89.2,37.0 L89.0,38.9 L94.5,43.5 L93.5,46.8 L95.2,49.2 L94.9,51.2 L95.7,51.9 L93.9,56.5 L95.4,59.0 L95.2,61.1 L97.7,62.5 L98.5,65.5 L95.9,73.2 L94.2,72.7 L94.3,71.4 L93.5,71.6 L93.8,70.5 L92.8,69.5 ZM58.7,11.4 L59.3,12.5 L56.0,11.6 L57.2,10.4 ZM29.5,6.7 L30.5,7.2 L30.2,7.9 L28.4,7.4 ZM28.0,3.5 L28.3,4.4 L31.1,4.4 L27.5,4.9 L27.2,6.9 L28.6,1.5 ZM89.9,20.5 L89.8,21.5 L86.0,22.0 L87.0,21.2 L86.7,19.5 L88.2,20.5 L88.2,19.4 L87.1,18.3 L86.5,19.3 L86.2,18.6 L85.3,19.1 L85.2,16.7 ZM84.5,12.9 L85.2,13.7 L84.8,14.8 L84.0,14.5 L84.6,13.9 L83.6,14.1 L84.1,13.5 L82.2,13.8 L80.9,14.8 L81.4,15.6 L80.7,14.7 L78.7,14.6 L78.7,13.1 L79.9,13.0 L78.8,12.3 L80.0,11.3 L78.6,10.3 L80.3,10.7 L81.0,9.6 L80.8,10.6 L81.1,9.9 L81.7,11.2 L82.6,10.8 L82.6,9.8 L81.0,9.1 L79.8,9.9 L80.2,8.6 L79.6,8.5 L81.5,7.9 L81.6,9.6 L83.9,9.6 L84.3,10.4 L83.2,11.8 ZM29.7,32.5 L34.2,33.6 L34.5,35.5 L31.7,35.5 ZM82.1,42.0 L84.0,44.1 L83.7,45.0 L85.1,45.6 L84.5,47.0 L78.1,46.2 L78.7,43.1 Z',
+      aree:[ {cx:81.4,cy:44.4,r:4}, {cx:62.1,cy:118.3,r:4}, {cx:45.3,cy:27.1,r:4}, {d:'M67.6,81.7 L67.4,82.9 L69.1,86.2 L71.3,87.3 L72.1,88.6 L70.6,91.3 L71.8,92.5 L73.3,96.6 L74.8,98.2 L77.1,98.9 L81.6,104.5 L83.5,104.7 L84.8,106.1 L85.7,107.8 L85.5,110.6 L84.7,111.9 L81.9,111.0 L81.4,114.3 L75.7,117.4 L74.3,118.8 L77.0,123.3 L76.0,125.4 L77.3,125.5 L77.9,126.4 L77.1,129.7 L74.8,128.2 L75.1,127.2 L74.6,126.3 L71.8,127.0 L71.0,125.9 L69.1,126.1 L69.1,125.2 L68.4,125.7 L68.4,127.4 L62.5,127.6 L61.8,128.9 L60.3,129.0 L60.0,130.1 L58.5,130.9 L58.0,130.3 L55.7,131.0 L54.5,128.6 L53.4,128.9 L51.5,128.1 L50.5,128.6 L49.9,127.8 L49.9,130.9 L48.6,132.5 L47.1,133.0 L47.6,131.3 L46.3,131.5 L46.1,130.2 L44.8,128.4 L43.6,128.5 L43.1,127.6 L42.0,128.7 L40.7,128.6 L43.9,126.2 L45.9,126.1 L46.2,126.6 L46.7,126.1 L46.2,124.2 L46.7,123.8 L46.3,121.3 L46.8,119.1 L45.2,114.3 L46.1,112.7 L48.8,111.7 L48.5,108.8 L49.3,109.5 L50.6,108.9 L49.9,107.9 L50.3,105.2 L48.3,103.0 L48.2,101.3 L46.9,100.4 L46.7,95.2 L46.3,94.6 L45.7,95.7 L44.7,95.7 L44.5,94.1 L43.7,94.6 L44.1,93.5 L43.2,91.7 L41.7,92.2 L41.7,90.6 L38.4,90.6 L38.1,91.5 L39.3,91.8 L39.3,92.8 L37.9,93.1 L37.5,94.1 L36.0,94.1 L35.6,93.5 L36.3,90.5 L35.4,89.7 L35.2,86.8 L34.5,86.1 L35.0,85.2 L36.0,84.8 L36.4,85.3 L37.2,84.5 L39.1,85.4 L40.2,85.1 L40.2,83.0 L41.8,83.0 L43.0,80.0 L45.2,79.6 L46.7,77.5 L48.8,78.7 L49.6,80.3 L51.2,80.9 L51.8,83.1 L53.0,83.5 L53.2,82.8 L54.3,82.8 L52.9,81.5 L53.7,80.4 L57.1,80.8 L57.5,81.9 L58.7,82.3 L58.6,79.0 L59.6,78.2 L60.5,78.3 L60.4,79.5 L61.5,80.6 L65.8,79.9 Z'}, {d:'M11.2,51.4 L13.9,49.2 L16.8,48.6 L19.6,46.9 L20.1,45.2 L23.9,47.9 L23.2,49.8 L24.4,50.3 L23.1,51.7 L23.9,52.6 L27.0,51.0 L28.5,51.3 L29.4,50.2 L28.9,47.2 L27.4,45.6 L28.7,45.7 L29.5,44.7 L31.0,44.4 L31.7,46.5 L33.0,46.7 L34.4,46.3 L35.8,44.8 L36.2,46.3 L34.7,47.8 L34.7,48.8 L35.6,49.2 L34.7,50.0 L34.8,51.0 L36.3,51.0 L36.6,53.5 L37.8,53.7 L37.5,54.5 L38.2,54.6 L38.2,55.6 L39.7,55.5 L38.7,59.0 L39.5,59.1 L38.3,59.8 L37.0,62.4 L35.9,62.6 L35.0,61.5 L33.7,62.1 L34.1,63.5 L31.1,64.3 L30.3,65.5 L30.7,66.0 L31.9,65.6 L31.7,68.3 L29.8,68.5 L30.0,69.7 L29.1,71.5 L26.3,73.0 L25.6,73.8 L25.6,75.4 L24.8,75.3 L23.9,72.8 L22.0,71.3 L21.0,73.9 L17.7,75.1 L17.2,76.3 L15.7,76.2 L13.0,77.6 L12.3,79.2 L11.1,79.0 L11.5,80.9 L9.3,80.6 L7.9,81.2 L7.3,80.5 L7.6,81.3 L7.0,81.5 L6.6,78.8 L4.9,78.2 L5.7,76.6 L4.7,76.5 L3.9,74.9 L3.2,75.0 L2.7,73.5 L3.7,71.6 L3.1,70.5 L1.7,70.7 L1.6,69.8 L4.6,67.5 L4.5,67.0 L3.7,67.2 L3.7,66.5 L5.3,63.5 L5.1,61.5 L4.0,60.0 L4.1,59.2 L2.4,57.7 L2.3,56.5 L4.7,55.9 L4.4,55.0 L6.7,56.2 L7.1,55.6 L10.9,54.8 L11.6,53.6 L10.2,52.4 Z'}, {d:'M40.6,128.6 L36.7,126.3 L33.8,126.6 L32.7,125.4 L31.8,125.8 L31.8,124.8 L31.0,124.2 L30.7,124.8 L30.4,124.1 L28.4,125.9 L29.1,126.8 L30.6,126.5 L30.1,127.6 L29.7,127.1 L28.0,127.8 L26.7,127.1 L24.7,128.1 L22.3,127.5 L20.6,128.4 L19.1,125.6 L20.2,121.2 L19.8,118.8 L21.6,114.9 L22.2,110.3 L25.2,107.1 L29.3,98.8 L29.6,96.6 L28.9,96.2 L28.6,94.1 L30.2,94.9 L30.7,94.6 L30.6,93.5 L31.4,93.3 L31.8,94.7 L33.6,95.3 L32.8,96.7 L33.2,97.1 L34.3,95.3 L36.1,95.3 L35.6,94.2 L37.5,94.1 L37.9,93.1 L39.3,92.8 L39.3,91.9 L38.7,92.0 L38.1,90.9 L39.8,90.4 L41.7,90.6 L41.7,92.2 L43.2,91.7 L44.1,93.5 L43.7,94.6 L44.5,94.1 L44.7,95.7 L45.7,95.7 L46.3,94.6 L46.7,95.2 L46.9,100.4 L48.2,101.3 L48.3,103.0 L50.2,104.8 L49.9,107.9 L50.6,108.9 L49.3,109.5 L48.5,108.8 L48.8,111.7 L46.1,112.7 L45.2,114.3 L46.8,119.1 L46.3,121.3 L46.7,123.8 L46.2,124.2 L46.7,126.1 L46.2,126.6 L45.9,126.1 L43.9,126.2 Z'}, {d:'M44.8,63.6 L44.8,65.0 L47.8,67.1 L47.5,68.1 L46.7,67.8 L47.4,70.1 L45.9,70.0 L45.8,71.1 L44.9,71.2 L46.0,72.1 L44.8,73.2 L44.1,76.1 L46.0,75.7 L45.9,78.5 L44.5,80.0 L43.0,80.0 L41.8,83.0 L40.2,83.0 L40.2,85.1 L39.1,85.4 L37.3,84.5 L36.4,85.3 L36.0,84.8 L34.9,85.3 L35.1,88.5 L36.3,90.5 L35.6,93.5 L36.1,95.3 L34.3,95.3 L34.2,96.3 L32.9,97.0 L33.6,95.3 L31.8,94.7 L31.4,93.3 L30.6,93.5 L30.7,94.6 L30.2,94.9 L28.6,94.1 L28.0,92.2 L29.3,90.9 L28.7,90.9 L27.8,87.6 L26.6,86.3 L22.9,87.4 L21.8,86.1 L22.7,85.0 L23.4,85.1 L23.4,83.6 L25.5,82.4 L23.9,80.2 L24.3,78.2 L25.4,78.0 L26.0,77.1 L25.6,73.8 L27.2,72.1 L28.1,72.4 L29.1,71.5 L30.0,69.7 L29.8,68.5 L31.7,68.3 L31.9,65.6 L30.7,66.0 L30.3,65.4 L31.5,64.0 L34.1,63.5 L33.8,62.0 L35.0,61.5 L36.5,62.7 L38.3,60.8 L38.3,59.8 L39.9,59.0 L41.4,59.4 L42.1,60.4 L41.1,61.3 L41.5,63.3 L40.5,64.0 L42.5,65.2 L43.1,64.4 L42.3,64.0 L43.2,63.2 L43.9,63.8 L44.3,63.0 Z'}, {d:'M14.4,39.0 L15.6,36.9 L15.7,32.2 L16.3,31.0 L17.5,31.2 L14.0,30.5 L14.2,27.7 L15.1,27.3 L14.7,26.3 L16.9,24.8 L23.7,24.2 L24.5,24.4 L26.0,27.0 L24.8,27.9 L25.1,28.6 L26.4,29.4 L27.6,28.3 L27.3,27.4 L26.7,27.5 L27.1,26.0 L30.1,27.2 L29.4,28.1 L29.6,30.3 L29.6,28.0 L30.1,27.6 L30.6,28.1 L31.0,27.4 L30.9,26.2 L29.6,25.9 L29.4,24.5 L30.3,21.9 L31.1,21.3 L33.3,22.3 L37.7,21.7 L40.8,26.2 L42.9,27.1 L43.9,29.0 L45.1,29.4 L46.3,28.7 L47.3,29.5 L49.1,29.1 L51.4,30.2 L52.9,30.1 L53.2,31.1 L56.9,33.9 L57.6,33.4 L59.6,35.2 L60.6,34.9 L62.1,35.6 L60.3,37.9 L58.6,38.4 L56.1,37.8 L55.3,38.7 L53.4,39.1 L53.8,41.0 L55.7,42.8 L56.0,44.8 L55.3,45.4 L56.7,46.9 L55.9,47.5 L56.9,49.3 L55.6,52.2 L51.4,53.1 L52.2,53.9 L51.5,56.5 L52.8,59.3 L52.1,59.8 L52.3,60.6 L49.3,60.2 L47.0,62.8 L44.8,63.6 L44.3,63.0 L43.9,63.8 L43.2,63.2 L42.3,64.0 L43.1,64.4 L42.4,65.2 L40.5,63.9 L41.5,63.3 L41.1,61.3 L42.1,60.4 L41.7,59.8 L38.7,59.2 L39.7,55.5 L38.2,55.6 L38.2,54.6 L37.5,54.5 L37.8,53.7 L36.6,53.5 L36.3,51.0 L34.8,51.0 L34.7,50.0 L35.6,49.2 L34.7,48.8 L34.7,47.8 L36.2,46.3 L36.2,45.2 L35.7,44.8 L34.4,46.3 L33.0,46.7 L31.7,46.5 L31.0,44.4 L29.5,44.7 L28.7,45.7 L27.4,45.6 L28.9,47.2 L29.4,50.2 L28.5,51.3 L27.0,51.0 L23.9,52.6 L23.1,51.7 L24.4,50.3 L23.2,49.8 L23.9,47.9 L23.2,46.8 L22.3,47.1 L21.1,46.3 L20.8,45.4 L20.0,45.2 L19.6,46.9 L16.8,48.6 L14.2,49.2 L14.1,47.1 L13.4,45.6 L10.4,45.2 L10.2,44.1 L10.9,43.8 L10.5,42.8 L13.8,42.7 Z'}, {d:'M91.9,69.9 L90.7,69.5 L90.2,70.4 L91.7,71.4 L91.4,72.1 L87.3,73.4 L85.9,74.7 L83.0,75.0 L81.8,76.9 L81.0,76.4 L80.3,77.2 L79.6,77.1 L78.8,78.6 L77.2,78.6 L76.6,80.1 L75.2,79.5 L71.9,80.4 L70.1,82.6 L69.7,84.2 L68.3,81.8 L66.4,81.1 L65.4,79.8 L66.4,77.7 L68.1,77.5 L68.5,76.4 L69.7,76.0 L69.3,73.6 L73.4,71.9 L71.6,69.1 L68.9,68.6 L68.2,67.2 L68.2,62.6 L69.0,60.6 L73.5,59.9 L76.0,58.8 L78.9,60.5 L79.1,63.6 L81.5,63.0 L82.8,63.9 L85.2,64.2 L87.4,64.0 L89.4,61.2 L91.3,61.5 L93.8,60.6 L95.2,61.0 L97.8,62.7 L98.5,66.1 L97.8,69.0 L95.7,73.3 L94.2,72.7 L94.3,71.4 L93.5,71.6 L93.8,70.5 L92.8,69.5 Z'}, {d:'M4.1,85.9 L4.6,83.3 L7.6,81.3 L7.2,80.5 L7.9,81.2 L9.3,80.6 L11.5,81.0 L11.1,79.0 L12.3,79.2 L13.0,77.6 L15.7,76.2 L17.2,76.3 L17.7,75.1 L20.0,74.6 L21.8,72.8 L21.7,71.6 L22.7,71.4 L22.6,72.1 L23.9,72.8 L24.8,75.3 L25.6,75.4 L26.0,77.1 L25.4,78.0 L24.3,78.2 L23.9,80.2 L25.5,82.4 L23.4,83.6 L23.4,85.1 L22.7,85.0 L21.8,86.1 L22.9,87.4 L26.5,86.2 L27.8,87.6 L28.7,90.9 L29.3,90.9 L28.0,92.6 L28.9,96.2 L29.6,96.6 L29.3,98.6 L27.0,104.0 L26.3,104.5 L23.5,103.2 L20.4,103.2 L18.7,101.3 L17.1,100.8 L16.7,99.9 L17.8,97.7 L16.3,96.6 L16.9,95.6 L16.5,94.1 L13.0,93.2 L9.5,94.9 L6.8,95.0 L7.3,92.8 L8.3,91.8 L8.4,90.4 L5.4,88.9 Z'}, {d:'M94.1,43.2 L94.4,44.8 L93.5,46.8 L93.9,48.3 L95.2,49.2 L94.9,51.2 L95.7,51.9 L93.9,56.2 L95.4,59.0 L95.2,61.0 L93.8,60.6 L91.3,61.5 L89.4,61.2 L87.3,64.1 L82.8,63.9 L81.5,63.0 L79.1,63.6 L79.2,61.2 L77.8,59.7 L79.0,58.3 L78.8,56.9 L79.6,55.7 L77.8,55.7 L73.6,53.3 L73.0,53.8 L71.0,53.0 L68.7,50.2 L69.7,44.5 L68.8,44.1 L68.2,44.5 L67.8,43.9 L68.9,41.9 L68.7,38.7 L65.4,38.0 L62.6,35.5 L59.6,35.2 L58.9,34.4 L61.5,34.3 L62.3,32.3 L64.8,32.5 L64.6,32.1 L66.7,31.3 L67.2,30.3 L68.6,30.1 L71.1,31.8 L77.1,33.5 L78.7,32.0 L79.5,32.4 L80.1,31.5 L82.1,31.2 L83.0,29.5 L85.7,28.2 L85.5,27.2 L86.8,29.1 L90.3,29.1 L88.8,31.7 L90.3,32.0 L91.8,30.7 L92.4,32.1 L91.5,35.2 L89.2,37.0 L89.0,38.9 Z'} ] },
+    nomi: ['Lukas','Marie','Leon','Sophie','Paul','Emma','Maximilian','Hannah','Felix','Mia','Jonas','Lena','Tim','Laura','Niklas','Anna','Jan','Lea','Finn','Clara'],
+    nomiM: ['Lukas','Leon','Paul','Maximilian','Felix','Jonas','Tim','Niklas','Jan','Finn'],
+    nomiF: ['Marie','Sophie','Emma','Hannah','Mia','Lena','Laura','Anna','Lea','Clara'],
+    cognomi: ['Müller','Schmidt','Schneider','Fischer','Weber','Meyer','Wagner','Becker','Schulz','Hoffmann','Koch','Bauer','Richter','Klein','Wolf','Neumann','Braun','Krüger','Hofmann','Schäfer'],
+    partiti: [
+      { id:'de_cdu', nome:'CDU/CSU', orientamento:'centrodestra',     base:{ cetomedio:0.4, imprenditori:0.3, pensionati:0.3 }, forza:30, asse:1 },
+      { id:'de_afd', nome:'AfD',     orientamento:'destra populista', base:{ cetomedio:0.5, lavoratori:0.3, pensionati:0.2 },  forza:20, asse:2 },
+      { id:'de_spd', nome:'SPD',     orientamento:'centrosinistra',   base:{ lavoratori:0.5, pensionati:0.3, cetomedio:0.2 }, forza:18, asse:-1 },
+      { id:'de_grn', nome:'Verdi',   orientamento:'ecologista',       base:{ giovani:0.6, cetomedio:0.4 },                    forza:14, asse:-2 },
+      { id:'de_fdp', nome:'FDP',     orientamento:'liberale',         base:{ imprenditori:0.5, cetomedio:0.5 },               forza:9,  asse:1 },
+      { id:'de_lnk', nome:'Linke',   orientamento:'sinistra',         base:{ lavoratori:0.6, giovani:0.4 },                   forza:9,  asse:-2 },
+    ],
+  },
+  giappone: {
+    economia:{pil:3800, debito:255, deficit:-2.5},   // cifre 2024 riconciliate (CIFRE-ECONOMICHE.md); PIL € mld
+    nome: 'Giappone',
+    allineamento: 'occidentale', terminoLocale: 'Prefettura',
+    colori: { bandiera: ['#ffffff', '#bc002d', '#bc002d'], accento: '#a9791a' },
+    flag: '<svg viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg"><rect width="30" height="20" fill="#fff"/><circle cx="15" cy="10" r="6" fill="#bc002d"/></svg>',
+    nomeArt: 'il Giappone',
+    titoloRuolo: 'Primo Ministro',
+    mandatoMesi: 48, sistema: 'parlamentare', sfiducia: true,
+    coalizione: true, comeSiVince: 'parlamentare', cadutaGoverno: true, ue: false, distorsione: 1.1,
+    intermedie: [{tipo:'Elezioni prefetturali', mese:24, tocca:'regione'}],
+    territori: [
+      {nome:'Tokyo', tipo:'città', carica:'Governatore', lean:0, simbolo:true}, {nome:'Osaka', tipo:'città', carica:'Sindaco', lean:1, simbolo:true}, {nome:'Yokohama', tipo:'città', carica:'Sindaco', lean:0, simbolo:true}, {nome:'Nagoya', tipo:'città', carica:'Sindaco', lean:1, simbolo:true},
+      {nome:"l'Hokkaido", tipo:'regione', carica:'Governatore', lean:-1}, {nome:"l'Aichi", tipo:'regione', carica:'Governatore', lean:1}, {nome:"l'Hyogo", tipo:'regione', carica:'Governatore', lean:0}, {nome:'il Fukuoka', tipo:'regione', carica:'Governatore', lean:0},
+      {nome:"l'Hiroshima", tipo:'regione', carica:'Governatore', lean:1}, {nome:'il Kyoto', tipo:'regione', carica:'Governatore', lean:-1}, {nome:'il Chiba', tipo:'regione', carica:'Governatore', lean:1},
+      {nome:'Sapporo', tipo:'città', carica:'Sindaco', lean:-1}, {nome:'Fukuoka', tipo:'città', carica:'Sindaco', lean:0}, {nome:'Kobe', tipo:'città', carica:'Sindaco', lean:0}, {nome:'Kawasaki', tipo:'città', carica:'Sindaco', lean:0}
+    ],
+    mappa: { viewBox:'0 0 130 147',
+      sfondo:'M14.0,141.1 L12.9,142.2 L13.8,143.0 L10.1,145.8 L11.2,142.4 L9.6,140.0 L11.3,139.4 L10.3,138.6 L9.0,141.3 L10.0,144.0 L6.7,143.4 L5.9,141.8 L6.8,142.0 L7.6,139.8 L6.3,138.0 L6.4,135.0 L7.6,134.6 L10.2,129.4 L8.5,129.7 L9.8,128.1 L6.9,124.1 L5.8,127.2 L7.6,127.4 L7.8,129.0 L6.3,130.0 L5.7,128.0 L3.0,130.2 L3.9,128.7 L2.2,126.7 L2.5,125.0 L3.4,127.2 L5.0,127.5 L4.6,125.8 L1.5,123.7 L2.4,122.0 L3.8,123.2 L3.8,120.5 L5.1,121.5 L6.6,119.3 L8.0,119.9 L7.3,119.2 L8.8,117.4 L12.9,116.3 L13.6,119.7 L18.0,119.3 L18.6,121.1 L16.8,123.2 L19.8,123.3 L19.1,124.7 L21.3,126.6 L18.1,130.6 L15.4,142.1 ZM10.3,152.0 L8.8,153.5 L7.9,151.8 L8.9,151.1 ZM-3.8,129.2 L-4.6,130.2 L-5.9,129.8 L-5.5,128.1 L-4.3,127.9 ZM0.7,109.9 L-0.3,113.0 L-0.6,110.3 L0.8,109.0 ZM6.2,130.5 L6.6,132.5 L5.0,134.0 L5.0,130.6 ZM39.7,113.9 L41.3,113.6 L40.9,115.9 L42.1,117.6 L38.7,120.3 L37.6,123.6 L34.2,120.6 L30.7,122.3 L28.4,126.1 L28.6,128.7 L25.5,128.4 L26.1,126.8 L24.5,127.0 L23.6,125.8 L24.4,124.6 L23.7,123.9 L24.9,123.7 L23.6,122.8 L23.9,121.5 L20.7,122.5 L25.9,118.8 L28.0,114.6 L29.6,116.7 L32.6,116.3 L33.5,114.8 L32.8,113.4 L35.7,112.3 L37.3,112.1 ZM18.1,109.3 L25.6,103.1 L25.6,101.7 L29.1,100.1 L31.5,101.6 L40.4,99.4 L43.4,99.7 L45.8,98.4 L45.5,100.6 L46.5,101.6 L47.6,100.1 L48.2,101.2 L50.5,100.8 L52.0,98.5 L52.4,99.5 L51.5,96.1 L57.2,88.9 L57.7,82.6 L62.3,81.0 L61.6,83.1 L59.2,83.9 L58.5,85.4 L60.0,85.2 L59.7,87.8 L62.2,88.5 L63.1,86.8 L71.7,82.4 L74.1,78.0 L78.4,74.9 L83.4,61.3 L83.3,58.1 L80.7,56.8 L82.0,56.5 L83.1,54.0 L81.9,50.3 L85.2,48.3 L86.2,46.2 L85.0,45.2 L85.7,43.8 L88.0,44.5 L88.5,47.9 L90.0,46.3 L91.8,47.7 L92.5,43.8 L89.0,45.0 L90.1,41.1 L93.0,42.9 L94.4,42.2 L94.3,49.7 L97.3,53.9 L99.2,60.8 L98.3,61.7 L99.1,61.7 L98.0,65.3 L95.8,66.5 L96.1,67.8 L94.5,69.7 L94.9,73.6 L93.2,72.2 L91.5,72.7 L90.6,74.6 L90.9,84.9 L87.4,93.3 L89.9,98.9 L86.8,100.4 L85.5,104.8 L84.1,104.8 L82.5,107.0 L81.1,106.5 L82.0,106.1 L81.3,102.9 L83.8,100.4 L82.7,99.4 L81.2,99.6 L81.4,101.0 L80.2,101.6 L80.6,104.7 L79.5,103.0 L76.4,103.7 L76.3,107.4 L73.9,110.1 L73.4,106.3 L74.5,105.8 L73.7,104.9 L71.8,105.1 L69.3,110.1 L63.9,109.3 L59.8,110.3 L62.3,108.8 L59.8,108.2 L59.5,106.8 L59.4,109.1 L58.5,108.7 L58.3,105.3 L55.9,109.2 L59.0,111.7 L58.8,113.4 L57.3,112.7 L54.4,114.2 L49.9,121.6 L44.5,117.2 L45.5,114.5 L44.5,113.4 L46.9,111.2 L47.2,109.1 L44.4,109.8 L40.0,108.2 L35.7,110.2 L36.6,110.2 L35.7,111.5 L32.3,111.1 L30.6,112.8 L30.3,111.8 L29.9,113.2 L29.0,113.4 L29.1,112.1 L25.7,114.0 L23.6,112.4 L21.0,118.2 L21.4,117.3 L18.6,115.4 L14.8,116.8 L13.1,115.5 L12.0,116.8 L12.4,111.8 L16.0,111.8 ZM44.0,110.0 L43.7,113.3 L41.9,114.1 L41.5,112.7 ZM71.0,75.6 L71.9,75.5 L71.3,77.2 L69.2,78.2 L70.1,76.6 L69.3,75.5 L71.4,73.0 ZM128.1,22.7 L126.2,24.9 L123.1,25.3 L122.2,26.7 L116.8,26.5 L113.4,28.1 L109.2,33.3 L108.3,37.2 L97.2,30.5 L94.2,30.9 L90.7,33.5 L88.8,30.9 L86.9,30.7 L85.3,33.9 L92.4,38.5 L90.9,39.4 L88.2,38.2 L86.4,41.2 L84.7,42.4 L83.3,42.0 L84.2,36.7 L81.4,34.0 L81.8,30.3 L84.5,28.4 L85.2,29.0 L87.1,26.6 L85.9,23.3 L92.2,25.2 L94.1,23.4 L93.5,19.5 L95.8,17.2 L97.0,10.7 L95.3,4.6 L96.0,2.2 L98.2,1.5 L106.3,10.8 L112.5,14.7 L112.1,15.5 L115.2,15.3 L115.5,16.4 L116.2,15.4 L117.2,17.0 L120.0,17.5 L124.7,13.2 L122.6,18.9 L125.1,23.5 L124.1,23.3 L126.1,24.3 Z',
+      aree:[ {cx:80.6,cy:99.2,r:4}, {cx:47.9,cy:109.1,r:4}, {cx:80.2,cy:101.7,r:4}, {cx:58.9,cy:104.3,r:4}, {d:'M128.1,22.7 L126.2,24.9 L123.1,25.3 L122.2,26.7 L120.5,26.1 L120.0,27.3 L116.8,26.5 L113.4,28.1 L109.2,33.3 L108.3,37.2 L97.2,30.5 L94.2,30.9 L90.7,33.5 L88.8,30.9 L86.9,30.7 L85.3,33.9 L87.3,35.4 L88.6,35.2 L92.4,38.5 L90.9,39.4 L88.6,39.0 L88.2,38.2 L86.6,39.7 L86.4,41.2 L84.7,42.4 L83.3,42.0 L82.9,40.6 L84.2,36.7 L81.4,34.0 L81.8,30.3 L84.5,28.4 L85.2,29.0 L87.1,26.6 L85.7,24.5 L85.9,23.3 L86.8,22.9 L89.3,24.6 L90.9,24.3 L92.2,25.2 L94.1,23.4 L93.5,19.5 L95.8,17.2 L97.0,10.7 L95.3,4.6 L96.0,2.2 L97.3,2.5 L98.2,1.5 L106.3,10.8 L112.5,14.7 L111.8,14.8 L112.1,15.5 L115.2,15.3 L115.5,16.4 L116.2,15.4 L117.2,17.0 L120.0,17.5 L124.7,13.2 L122.6,18.9 L125.1,23.5 L124.1,23.3 L126.1,24.3 ZM79.5,34.1 L78.8,36.0 L78.5,34.8 ZM93.4,5.0 L92.8,5.7 L91.9,4.6 Z'}, {d:'M63.3,109.3 L59.8,110.3 L62.3,108.8 L61.8,108.0 L59.8,108.2 L59.5,106.8 L59.4,109.1 L58.5,108.7 L58.7,105.2 L57.7,105.8 L57.1,104.7 L57.8,102.6 L59.3,102.2 L60.9,103.7 L65.9,104.1 Z'}, {d:'M39.1,100.1 L43.0,99.5 L43.3,101.0 L44.4,101.1 L43.4,103.1 L47.1,105.1 L47.4,109.0 L44.4,109.8 L41.6,108.3 L38.6,109.0 L38.3,106.1 L40.2,103.4 ZM44.0,110.0 L43.2,112.3 L43.7,113.3 L41.9,114.1 L41.5,112.7 Z'}, {d:'M5.3,121.4 L6.6,119.3 L7.3,120.2 L8.0,119.9 L7.3,119.1 L10.4,116.6 L12.0,117.1 L12.9,116.3 L12.5,117.8 L14.4,119.9 L14.0,121.0 L11.9,121.7 L11.5,125.1 L10.3,124.6 L8.3,126.1 L7.7,124.2 L9.1,121.8 Z'}, {d:'M31.9,111.3 L30.6,112.8 L30.3,111.8 L29.9,113.2 L29.0,113.4 L29.7,112.5 L29.1,112.1 L25.7,114.0 L23.6,112.4 L22.5,114.1 L20.9,111.1 L22.5,108.2 L25.8,107.7 L27.2,105.4 L28.4,105.3 L30.8,106.1 Z'}, {d:'M43.0,99.5 L45.8,98.4 L46.4,99.4 L45.5,100.6 L46.0,100.2 L46.5,101.6 L47.6,100.1 L48.1,102.4 L50.5,103.5 L50.4,106.1 L52.0,109.0 L49.9,108.8 L48.6,106.6 L46.7,105.9 L47.0,105.0 L43.5,103.1 L44.4,101.1 L43.3,101.0 Z'}, {d:'M89.7,98.8 L86.8,100.4 L85.5,104.8 L84.1,104.8 L82.5,107.0 L81.1,106.5 L82.0,106.1 L81.3,102.9 L83.8,100.4 L82.9,99.4 L82.0,99.8 L81.1,95.3 L84.0,97.6 L87.3,97.2 Z'} ] },
+    nomi: ['Haruto','Yui','Sota','Aoi','Yuto','Hina','Ren','Sakura','Yuma','Mei','Kaito','Rin','Riku','Yuna','Hinata','Koharu','Sora','Ichika','Takumi','Akari'],
+    nomiM: ['Haruto','Sota','Yuto','Ren','Yuma','Kaito','Riku','Hinata','Sora','Takumi'],
+    nomiF: ['Yui','Aoi','Hina','Sakura','Mei','Rin','Yuna','Koharu','Ichika','Akari'],
+    cognomi: ['Sato','Suzuki','Takahashi','Tanaka','Watanabe','Ito','Yamamoto','Nakamura','Kobayashi','Kato','Yoshida','Yamada','Sasaki','Yamaguchi','Matsumoto','Inoue','Kimura','Hayashi','Shimizu','Saito'],
+    partiti: [
+      { id:'jp_ldp', nome:'Partito Liberal Democratico', orientamento:'centrodestra',   base:{ imprenditori:0.4, pensionati:0.3, cetomedio:0.3 }, forza:34, asse:1 },
+      { id:'jp_cdp', nome:'Partito Costituzionale Democratico', orientamento:'centrosinistra', base:{ lavoratori:0.4, cetomedio:0.3, giovani:0.3 }, forza:20, asse:-1 },
+      { id:'jp_ish', nome:'Partito dell\'Innovazione', orientamento:'riformista',     base:{ giovani:0.4, imprenditori:0.4, cetomedio:0.2 }, forza:14, asse:2 },
+      { id:'jp_dpp', nome:'Partito Democratico per il Popolo', orientamento:'centro',  base:{ lavoratori:0.5, cetomedio:0.5 },                 forza:12, asse:0 },
+      { id:'jp_kom', nome:'Komeito',         orientamento:'centro',         base:{ pensionati:0.5, cetomedio:0.3, lavoratori:0.2 }, forza:10, asse:0 },
+      { id:'jp_jcp', nome:'Partito Comunista', orientamento:'sinistra',     base:{ lavoratori:0.5, giovani:0.5 },                   forza:10, asse:-2 },
+    ],
+  },
+  canada: {
+    economia:{pil:2070, debito:105, deficit:-1.1},   // cifre 2024 riconciliate (CIFRE-ECONOMICHE.md); PIL € mld
+    nome: 'Canada',
+    allineamento: 'occidentale', terminoLocale: 'Provincia',
+    colori: { bandiera: ['#ff0000', '#ffffff', '#ff0000'], accento: '#a9791a' },
+    flag: '<svg viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg"><rect width="30" height="20" fill="#fff"/><rect width="7.5" height="20" fill="#ff0000"/><rect x="22.5" width="7.5" height="20" fill="#ff0000"/><path d="M15,4.5 L15.9,8 L18.3,7.4 L16.7,9.6 L19.4,10.8 L16.4,11.4 L17,14 L15,12.4 L13,14 L13.6,11.4 L10.6,10.8 L13.3,9.6 L11.7,7.4 L14.1,8 Z" fill="#ff0000"/></svg>',
+    nomeArt: 'il Canada',
+    titoloRuolo: 'Primo Ministro',
+    mandatoMesi: 48, sistema: 'parlamentare', sfiducia: true,
+    coalizione: true, comeSiVince: 'parlamentare', cadutaGoverno: true, ue: false, distorsione: 1.2,
+    intermedie: [{tipo:'Elezioni provinciali', mese:24, tocca:'regione'}],
+    territori: [
+      {nome:'Toronto', tipo:'città', carica:'Sindaco', lean:-1, simbolo:true}, {nome:'Montréal', nomeEn:'Montreal', tipo:'città', carica:'Sindaco', lean:-1, simbolo:true}, {nome:'Vancouver', tipo:'città', carica:'Sindaco', lean:-1, simbolo:true}, {nome:'Calgary', tipo:'città', carica:'Sindaco', lean:2, simbolo:true},
+      {nome:"l'Ontario", tipo:'regione', carica:'Premier', lean:0}, {nome:'il Québec', nomeEn:'Quebec', tipo:'regione', carica:'Premier', lean:-1}, {nome:'la Columbia Britannica', nomeEn:'British Columbia', tipo:'regione', carica:'Premier', lean:-1}, {nome:"l'Alberta", tipo:'regione', carica:'Premier', lean:2},
+      {nome:'il Manitoba', tipo:'regione', carica:'Premier', lean:0}, {nome:'la Saskatchewan', tipo:'regione', carica:'Premier', lean:2}, {nome:'la Nuova Scozia', nomeEn:'Nova Scotia', tipo:'regione', carica:'Premier', lean:-1},
+      {nome:'Ottawa', tipo:'città', carica:'Sindaco', lean:0}, {nome:'Edmonton', tipo:'città', carica:'Sindaco', lean:1}, {nome:'Winnipeg', tipo:'città', carica:'Sindaco', lean:0}
+    ],
+    mappa: { viewBox:'0 0 170 69',
+      sfondo:'M44.0,44.3 L32.4,44.3 L32.2,42.1 L30.5,42.3 L30.9,40.6 L30.0,41.9 L29.0,41.0 L29.9,39.5 L28.5,40.1 L29.0,38.2 L28.3,39.8 L26.2,39.5 L27.4,37.7 L26.9,39.0 L24.0,38.2 L23.3,37.3 L24.6,36.7 L23.3,36.8 L25.6,35.7 L23.4,36.5 L23.1,35.3 L24.5,33.8 L25.4,34.9 L25.3,33.7 L24.7,32.1 L22.1,33.9 L22.8,32.0 L21.0,29.9 L23.1,31.0 L21.7,28.5 L20.4,30.5 L18.8,28.7 L20.0,27.8 L18.1,27.4 L20.0,23.9 L18.8,25.4 L18.9,22.0 L15.5,20.4 L8.4,10.3 L4.5,13.1 L1.5,9.7 L87.0,9.7 L87.9,15.3 L88.2,13.5 L90.2,13.6 L91.6,18.0 L90.7,19.4 L95.1,18.4 L104.6,23.5 L105.1,25.4 L111.2,25.0 L112.0,34.2 L114.4,35.7 L113.6,37.9 L115.3,37.0 L116.9,38.8 L116.2,36.7 L116.9,35.9 L117.8,37.5 L118.7,34.1 L116.1,26.5 L119.9,24.5 L122.3,20.9 L121.5,16.5 L118.4,14.0 L121.0,9.5 L120.4,7.0 L119.1,7.2 L120.5,4.8 L119.2,2.4 L120.5,1.5 L126.1,3.0 L127.8,1.9 L131.9,4.6 L131.9,6.0 L136.1,6.8 L135.3,9.7 L132.9,9.5 L135.8,10.1 L136.0,13.1 L134.4,13.5 L138.1,13.5 L138.1,15.5 L136.1,16.7 L138.8,14.1 L139.3,16.2 L141.9,13.3 L142.5,14.9 L143.5,11.3 L144.6,11.6 L143.6,10.3 L145.6,8.8 L144.9,9.7 L147.7,11.9 L146.4,12.8 L148.7,13.8 L147.3,15.0 L149.3,14.5 L147.8,16.0 L149.5,15.4 L150.6,17.1 L149.3,17.5 L151.6,18.8 L151.0,20.3 L149.2,19.7 L153.6,22.9 L152.9,25.4 L154.7,24.4 L154.4,26.2 L155.9,24.6 L159.4,26.7 L154.0,30.0 L152.5,29.1 L153.4,30.8 L158.0,27.8 L159.7,28.7 L159.3,30.3 L161.0,29.2 L162.5,30.9 L162.4,32.9 L161.0,33.0 L162.6,33.4 L161.6,33.4 L162.1,35.0 L156.9,37.1 L154.3,40.3 L141.8,40.3 L135.5,47.0 L132.9,46.0 L135.4,47.0 L132.5,51.2 L126.5,55.1 L127.3,55.8 L121.8,61.1 L118.0,61.2 L117.5,63.8 L110.9,67.3 L109.5,66.2 L111.5,61.4 L110.7,55.8 L99.4,46.5 L93.2,47.3 L87.4,45.1 L86.3,43.1 L86.3,44.3 ZM14.0,31.0 L13.1,28.0 L14.8,28.5 L14.2,29.9 L15.8,28.0 ZM31.9,45.9 L28.5,45.1 L29.0,43.5 L27.5,44.4 L25.6,43.0 L26.5,42.1 L23.1,40.8 L24.0,39.2 L22.1,38.7 L27.7,40.1 ZM128.4,56.9 L125.8,56.9 L137.2,46.3 L143.5,43.4 L146.1,45.8 L141.0,47.4 L145.0,48.0 L143.9,50.3 L145.4,53.0 L152.4,55.9 L145.9,58.2 L143.2,61.6 L142.6,58.2 L147.7,55.7 L144.7,55.8 L146.0,54.5 L145.1,53.4 L143.1,56.1 L140.0,56.3 L139.1,50.3 L136.4,49.1 L133.2,56.1 ZM168.5,48.9 L166.7,51.8 L166.7,49.9 L165.5,51.1 L165.7,47.8 L163.2,51.0 L162.0,50.7 L164.5,48.5 L161.7,49.1 L162.4,47.6 L160.4,48.9 L155.6,48.6 L157.6,45.8 L155.7,45.7 L158.3,44.4 L159.3,38.9 L162.2,36.0 L160.3,42.6 L161.7,40.6 L163.0,41.3 L161.7,42.9 L163.6,42.6 L163.2,44.1 L164.9,42.6 L166.8,43.4 L165.5,46.2 L167.8,45.7 L166.0,47.9 L166.7,48.9 L167.9,46.9 L167.3,48.8 ZM154.1,54.4 L151.4,54.6 L153.1,50.5 L152.0,54.6 L153.7,52.7 ZM150.4,52.3 L148.9,53.9 L145.7,51.6 L146.5,50.4 L146.6,52.2 Z',
+      aree:[ {cx:116.8,cy:61.1,r:4}, {cx:128.0,cy:55.3,r:4}, {cx:32.3,cy:43.4,r:4}, {cx:49.8,cy:37.8,r:4}, {d:'M97.2,47.4 L93.2,47.3 L87.2,45.0 L86.3,43.1 L86.3,32.3 L98.4,19.5 L100.9,22.2 L105.7,24.3 L105.1,25.4 L105.8,24.5 L111.2,25.0 L111.2,31.8 L112.7,33.9 L112.0,34.2 L114.4,35.7 L113.6,37.9 L114.9,36.9 L116.5,38.2 L116.7,50.3 L118.1,52.6 L122.1,55.1 L125.9,54.8 L126.5,56.2 L121.7,61.2 L118.0,61.2 L117.5,63.8 L110.4,67.4 L109.5,66.2 L111.5,61.4 L110.7,55.8 L108.6,54.4 L107.7,52.1 L99.5,46.5 Z'}, {d:'M128.4,56.9 L125.8,56.9 L130.7,52.1 L133.9,50.5 L138.4,45.4 L143.5,43.4 L146.1,44.6 L146.1,45.9 L144.0,47.4 L138.6,47.4 L137.7,49.2 L136.4,49.2 L133.2,56.1 ZM116.5,38.2 L116.9,38.8 L116.4,36.2 L117.8,37.5 L117.5,35.6 L118.7,34.1 L117.4,28.0 L116.1,26.5 L119.9,24.5 L122.3,21.0 L121.8,17.0 L118.4,13.9 L119.9,10.6 L120.8,11.0 L120.4,7.0 L119.1,7.2 L120.5,4.8 L119.2,2.4 L120.5,1.5 L126.1,3.0 L127.8,1.9 L130.7,3.8 L130.5,4.7 L131.9,4.6 L131.9,6.0 L135.1,7.1 L135.8,6.3 L135.6,9.4 L132.9,9.5 L135.8,10.1 L136.0,13.1 L134.4,13.5 L138.1,13.5 L138.1,15.5 L136.1,16.7 L138.8,14.1 L139.3,16.2 L141.9,13.3 L142.5,14.9 L142.7,13.1 L144.0,12.7 L143.5,11.3 L144.6,11.6 L143.5,10.5 L145.5,8.7 L144.8,10.9 L145.9,12.8 L144.8,13.0 L147.5,13.6 L145.7,15.7 L147.3,16.9 L146.2,20.9 L147.8,24.2 L146.7,26.7 L144.4,25.5 L143.3,26.3 L141.2,24.3 L141.3,26.2 L139.9,25.2 L140.5,26.4 L139.2,28.4 L140.9,30.4 L140.1,32.1 L141.0,32.8 L141.9,31.7 L141.9,34.4 L145.5,36.1 L147.3,32.1 L147.7,32.8 L146.4,33.4 L147.0,34.8 L159.8,34.8 L159.8,36.7 L156.9,37.1 L154.0,40.5 L141.7,40.3 L135.5,47.0 L132.9,46.0 L135.4,47.0 L135.0,48.1 L132.4,51.3 L126.5,55.1 L127.3,55.8 L126.5,56.2 L125.9,54.8 L122.7,55.4 L117.6,52.0 L116.4,49.2 ZM145.9,41.8 L148.2,41.8 L151.0,43.8 L148.3,43.5 Z'}, {d:'M44.0,44.3 L32.4,44.3 L32.2,42.1 L31.5,43.1 L30.5,42.3 L31.5,42.1 L30.9,40.6 L30.0,41.9 L29.0,41.0 L29.9,39.5 L28.5,40.1 L29.0,38.2 L28.3,39.8 L27.8,38.9 L26.2,39.5 L27.4,37.7 L26.9,39.0 L25.7,37.7 L24.0,38.2 L23.3,37.3 L24.6,36.7 L23.3,36.8 L25.6,35.7 L24.1,35.2 L23.4,36.5 L23.1,35.3 L24.5,33.8 L25.4,34.9 L25.3,33.7 L24.4,33.6 L24.7,32.1 L23.6,33.9 L23.1,33.0 L22.1,33.9 L22.8,32.0 L22.0,32.2 L21.0,29.9 L23.1,31.0 L21.3,29.8 L21.7,28.5 L20.4,30.5 L18.8,28.7 L20.0,27.8 L18.1,27.4 L18.2,26.6 L19.1,27.5 L18.3,26.5 L19.2,26.6 L18.7,25.9 L20.0,23.9 L19.3,23.5 L18.8,25.4 L18.9,22.0 L15.5,20.4 L12.4,14.7 L8.4,10.3 L4.5,13.1 L1.5,9.7 L38.3,9.7 L38.5,30.1 L48.0,39.4 L49.8,44.2 ZM16.9,34.3 L14.0,31.2 L15.5,30.9 L15.2,32.1 ZM14.0,31.0 L13.1,28.0 L14.8,28.5 L14.2,29.9 L15.8,28.0 L15.2,30.8 ZM31.9,45.9 L28.5,45.1 L29.0,43.5 L27.5,44.4 L26.9,42.9 L25.6,43.0 L26.5,42.1 L23.1,40.8 L24.0,39.2 L22.8,39.7 L22.1,38.7 L27.7,40.1 Z'}, {d:'M57.6,44.3 L49.8,44.3 L48.0,39.4 L38.5,30.1 L38.3,9.7 L57.6,9.7 Z'}, {d:'M82.3,44.3 L74.3,44.3 L73.1,9.7 L87.0,9.7 L86.6,12.6 L88.2,13.4 L87.9,15.3 L88.2,13.5 L90.2,13.6 L91.6,18.0 L90.7,19.4 L94.3,18.3 L98.3,19.6 L86.3,32.3 L86.3,44.3 Z'}, {d:'M69.1,44.3 L57.6,44.3 L57.6,9.7 L73.1,9.7 L74.3,44.3 Z'}, {d:'M146.4,53.7 L148.9,54.9 L150.5,54.1 L152.4,56.0 L147.2,57.8 L147.2,58.6 L145.9,58.2 L143.2,61.6 L142.6,58.2 L145.6,55.8 L146.2,56.9 L147.7,55.7 L144.7,55.8 ZM154.1,54.4 L151.4,54.6 L153.1,50.5 L153.4,52.8 L152.0,54.6 L153.7,52.7 L154.6,53.2 Z'} ] },
+    nomi: ['Liam','Emma','Noah','Olivia','William','Charlotte','Logan','Sophia','Jacob','Ava','Lucas','Emily','Benjamin','Chloé','Félix','Léa','Nathan','Florence','Thomas','Alice'],
+    nomiM: ['Liam','Noah','William','Logan','Jacob','Lucas','Benjamin','Félix','Nathan','Thomas'],
+    nomiF: ['Emma','Olivia','Charlotte','Sophia','Ava','Emily','Chloé','Léa','Florence','Alice'],
+    cognomi: ['Smith','Brown','Tremblay','Roy','Wilson','MacDonald','Gagnon','Martin','Lee','Taylor','Campbell','Bouchard','Anderson','Côté','Johnson','Gauthier','Morin','Bélanger','White','Singh'],
+    partiti: [
+      { id:'ca_con', nome:'Conservatori',  orientamento:'centrodestra',   base:{ imprenditori:0.4, pensionati:0.3, cetomedio:0.3 }, forza:34, asse:1 },
+      { id:'ca_lib', nome:'Liberali',      orientamento:'centro',         base:{ cetomedio:0.4, giovani:0.3, lavoratori:0.3 },    forza:33, asse:0 },
+      { id:'ca_ndp', nome:'Nuovo Partito Democratico', orientamento:'sinistra', base:{ lavoratori:0.5, giovani:0.5 },           forza:16, asse:-1 },
+      { id:'ca_bq',  nome:'Bloc Québécois', orientamento:'regionalista',  base:{ lavoratori:0.4, cetomedio:0.4, pensionati:0.2 }, forza:9,  asse:0 },
+      { id:'ca_grn', nome:'Verdi',         orientamento:'ecologista',     base:{ giovani:0.7, cetomedio:0.3 },                    forza:8,  asse:-2 },
+    ],
+  },
+  spagna: {
+    economia:{pil:1525, debito:106, deficit:-3.4},   // cifre 2024 riconciliate (CIFRE-ECONOMICHE.md); PIL € mld
+    nome: 'Spagna',
+    allineamento: 'occidentale', terminoLocale: 'Comunità',
+    colori: { bandiera: ['#aa151b', '#f1bf00', '#aa151b'], accento: '#a9791a' },
+    flag: '<svg viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg"><rect width="30" height="20" fill="#f1bf00"/><rect width="30" height="5" fill="#aa151b"/><rect y="15" width="30" height="5" fill="#aa151b"/></svg>',
+    nomeArt: 'la Spagna',
+    titoloRuolo: 'Presidente del Governo',
+    mandatoMesi: 48, sistema: 'parlamentare', sfiducia: true,
+    coalizione: true, comeSiVince: 'parlamentare', cadutaGoverno: true, ue: true, distorsione: 1.1,
+    intermedie: [{tipo:'Elezioni autonomiche', mese:24, tocca:'regione'}],
+    territori: [
+      {nome:'Madrid', tipo:'città', carica:'Sindaco', lean:1, simbolo:true}, {nome:'Barcellona', nomeEn:'Barcelona', tipo:'città', carica:'Sindaco', lean:-1, simbolo:true}, {nome:'Valencia', tipo:'città', carica:'Sindaco', lean:0, simbolo:true}, {nome:'Siviglia', nomeEn:'Seville', tipo:'città', carica:'Sindaco', lean:-1, simbolo:true},
+      {nome:"l'Andalusia", tipo:'regione', carica:'Presidente', lean:-1, simbolo:true}, {nome:'la Catalogna', nomeEn:'Catalonia', tipo:'regione', carica:'Presidente', lean:-1}, {nome:'la Comunità di Madrid', nomeEn:'Community of Madrid', tipo:'regione', carica:'Presidente', lean:1}, {nome:'la Comunità Valenciana', nomeEn:'Valencian Community', tipo:'regione', carica:'Presidente', lean:0},
+      {nome:'la Galizia', nomeEn:'Galicia', tipo:'regione', carica:'Presidente', lean:1}, {nome:'la Castiglia e León', nomeEn:'Castile and León', tipo:'regione', carica:'Presidente', lean:2}, {nome:'i Paesi Baschi', nomeEn:'Basque Country', tipo:'regione', carica:'Presidente', lean:-1},
+      {nome:'Saragozza', nomeEn:'Zaragoza', tipo:'città', carica:'Sindaco', lean:0}, {nome:'Malaga', tipo:'città', carica:'Sindaco', lean:-1}, {nome:'Bilbao', tipo:'città', carica:'Sindaco', lean:-1}
+    ],
+    mappa: { viewBox:'0 0 100 75',
+      sfondo:'M55.2,6.1 L57.6,6.6 L57.3,8.4 L58.5,7.8 L62.2,9.4 L63.6,11.0 L65.3,10.3 L67.4,11.8 L69.6,11.9 L72.3,11.8 L72.3,10.4 L73.4,10.4 L77.2,11.6 L77.9,14.1 L79.8,13.5 L81.9,14.9 L90.3,14.1 L91.2,15.1 L89.8,16.1 L90.6,18.6 L82.8,24.6 L74.9,26.9 L72.7,29.1 L73.7,30.3 L71.6,31.2 L65.3,41.2 L66.5,45.9 L69.3,48.4 L64.0,52.1 L61.5,57.6 L62.5,58.9 L58.2,59.3 L55.7,61.2 L52.5,67.0 L50.8,66.0 L48.3,67.5 L46.8,66.8 L36.3,67.1 L34.5,69.1 L30.7,70.0 L29.6,72.5 L29.0,72.1 L28.9,73.2 L27.7,73.7 L24.7,72.0 L22.7,68.8 L23.7,69.0 L22.1,67.9 L21.8,66.8 L23.5,65.2 L22.2,66.3 L18.6,63.0 L18.9,61.8 L18.3,62.9 L14.9,62.7 L14.0,59.4 L15.9,55.5 L17.6,55.0 L18.2,53.4 L17.1,53.6 L15.3,51.1 L17.9,45.4 L16.1,44.2 L15.6,41.7 L13.8,39.7 L17.7,39.5 L18.7,36.6 L17.5,35.0 L19.3,33.4 L19.1,28.7 L18.2,27.3 L23.5,22.1 L21.1,21.3 L20.6,18.5 L16.8,18.3 L14.7,19.9 L11.4,18.9 L9.4,19.9 L9.1,19.0 L10.0,17.8 L9.1,16.7 L4.4,19.1 L4.3,17.0 L6.3,15.3 L4.5,15.8 L6.0,14.0 L4.0,13.8 L4.8,13.9 L5.5,11.8 L3.5,13.2 L3.4,11.6 L4.4,10.4 L2.9,11.1 L2.6,9.6 L1.5,9.6 L1.6,8.4 L4.7,5.7 L5.8,6.1 L8.3,5.1 L9.2,6.0 L9.4,5.0 L8.5,4.7 L9.5,4.3 L8.3,4.5 L8.5,3.6 L12.9,1.5 L15.9,3.7 L17.5,3.7 L17.5,4.4 L18.2,3.6 L24.4,3.6 L26.0,2.7 L29.1,4.2 L35.7,5.3 L42.2,4.1 L46.2,5.9 L47.9,4.7 L52.5,6.2 L54.7,5.2 ZM79.1,45.1 L77.6,47.5 L76.3,47.0 L77.3,45.2 ZM91.5,38.7 L92.2,39.8 L89.4,43.5 L87.5,42.5 L86.7,40.8 L85.4,41.6 L84.4,40.8 L88.5,37.5 L90.3,37.0 L90.0,38.7 ZM98.3,37.4 L97.9,38.4 L94.7,36.5 L96.8,36.0 ZM48.0,10.7 L49.4,11.1 L49.7,12.1 L47.2,11.3 Z',
+      aree:[ {cx:41.3,cy:32.8,r:4}, {cx:83.1,cy:23.8,r:4}, {cx:64.9,cy:41.6,r:4}, {cx:25.0,cy:60.9,r:4}, {d:'M29.6,72.5 L29.0,72.1 L28.9,73.2 L27.7,73.7 L24.7,72.0 L22.7,68.8 L23.3,69.4 L23.7,69.0 L21.8,67.0 L23.5,65.2 L22.5,65.4 L22.2,66.3 L21.4,64.9 L18.6,63.0 L18.9,61.8 L18.1,62.4 L18.3,62.9 L14.9,62.7 L14.0,59.3 L15.9,55.4 L17.6,55.0 L18.3,53.3 L20.9,55.0 L21.9,54.7 L23.6,55.8 L25.3,55.2 L26.1,53.6 L26.9,53.5 L27.1,54.4 L28.3,53.7 L28.0,51.3 L30.9,48.6 L32.9,48.9 L37.1,52.0 L37.3,51.5 L49.3,50.6 L50.3,52.8 L49.5,54.5 L53.6,56.5 L53.4,58.5 L54.6,60.4 L55.9,61.0 L52.9,66.6 L52.2,67.1 L50.0,66.1 L48.0,67.5 L46.8,66.8 L36.3,67.1 L34.5,69.1 L30.7,70.0 Z'}, {d:'M72.7,10.3 L77.2,11.6 L77.9,14.1 L79.8,13.5 L81.8,14.9 L83.8,14.2 L85.5,15.1 L89.1,13.8 L91.2,15.1 L89.8,16.1 L90.7,18.5 L90.1,19.6 L84.0,23.1 L82.3,24.9 L74.7,27.0 L72.6,29.4 L73.9,29.9 L73.7,30.4 L71.4,31.8 L68.8,29.8 L69.7,27.6 L69.1,26.3 L70.2,25.3 L69.9,23.8 L70.8,22.3 L70.0,21.1 L71.9,19.4 L72.9,15.6 L73.1,12.5 L72.1,11.2 Z'}, {d:'M45.8,35.2 L45.6,36.0 L42.7,36.2 L40.5,37.7 L40.1,37.4 L41.8,35.6 L37.9,34.1 L37.1,34.6 L36.6,33.8 L35.1,34.7 L35.3,33.6 L36.9,32.9 L37.1,30.9 L37.9,30.9 L39.9,27.8 L42.4,25.9 L43.4,27.3 L43.0,30.2 L44.8,31.9 L45.0,34.4 L45.5,34.2 Z'}, {d:'M71.4,31.8 L65.3,41.5 L66.8,46.4 L69.3,48.4 L64.0,52.1 L64.0,53.3 L63.2,53.7 L62.0,56.7 L60.3,54.5 L60.7,52.7 L59.9,51.8 L60.4,49.2 L61.2,48.9 L61.1,47.0 L58.7,45.6 L59.3,43.2 L57.3,42.6 L57.0,40.7 L58.6,39.6 L59.1,37.2 L60.6,36.9 L61.3,38.0 L62.0,37.8 L61.8,36.9 L65.6,33.2 L65.5,31.1 L64.9,30.6 L66.2,29.5 L67.9,30.2 L69.2,29.9 ZM58.4,34.8 L59.9,36.3 L57.8,36.5 L57.3,35.3 Z'}, {d:'M9.3,17.6 L9.1,16.7 L6.2,17.7 L4.4,19.1 L4.3,17.0 L6.3,15.3 L4.5,15.8 L6.0,14.0 L4.7,14.4 L4.0,13.8 L4.8,13.9 L5.5,11.8 L3.5,13.2 L3.4,11.6 L4.4,10.4 L2.9,11.1 L2.6,9.6 L1.5,9.6 L1.6,8.4 L2.8,7.6 L2.1,7.6 L2.4,7.1 L4.1,6.7 L3.7,6.2 L4.7,5.7 L5.8,6.1 L8.3,5.1 L9.2,6.0 L9.4,5.0 L8.5,4.7 L9.5,4.3 L8.3,4.5 L8.5,3.6 L11.3,1.8 L11.7,2.7 L12.9,1.5 L12.9,2.1 L15.2,2.6 L15.9,3.7 L17.6,3.7 L16.6,5.2 L18.1,7.6 L19.0,7.6 L17.9,8.7 L19.0,9.7 L17.5,11.7 L17.3,13.5 L19.1,13.6 L19.7,15.3 L17.6,17.4 L17.9,18.5 L16.7,18.3 L16.3,19.3 L14.7,19.9 L12.7,19.1 L11.4,19.5 L11.4,18.9 L9.4,19.9 L9.1,19.0 L10.0,17.8 Z'}, {d:'M18.7,34.1 L19.3,33.4 L19.1,28.7 L18.3,27.0 L22.6,23.6 L23.5,22.1 L22.3,21.3 L21.1,21.3 L20.8,18.6 L17.9,18.5 L17.6,17.4 L19.7,15.3 L19.1,13.6 L17.3,13.5 L17.5,11.7 L19.0,9.7 L21.4,9.5 L22.3,8.4 L25.0,8.3 L26.4,9.1 L27.0,8.4 L31.2,7.9 L32.8,6.6 L34.0,8.7 L36.1,8.4 L38.2,10.2 L38.0,10.8 L39.1,10.5 L39.4,11.1 L40.5,10.6 L39.8,10.1 L40.2,9.4 L39.3,9.5 L40.4,8.0 L41.7,7.2 L45.2,7.2 L45.1,8.6 L46.1,8.4 L46.4,9.5 L44.7,9.4 L44.3,10.0 L44.7,10.4 L45.5,9.9 L45.3,11.0 L47.4,12.2 L45.8,12.3 L45.5,13.1 L45.9,13.9 L45.4,16.3 L46.1,17.3 L47.2,18.0 L48.2,17.0 L48.1,17.9 L49.3,18.1 L49.8,17.1 L51.3,16.9 L52.5,17.2 L52.7,18.6 L54.4,18.6 L54.9,20.9 L53.5,21.9 L53.8,23.6 L52.7,23.3 L52.2,24.4 L53.0,26.7 L50.4,26.8 L49.2,25.4 L47.0,24.4 L43.3,25.0 L39.9,27.8 L37.9,30.9 L37.1,30.9 L36.9,32.9 L35.3,33.6 L35.1,34.7 L33.5,34.2 L32.4,35.6 L30.7,35.9 L29.7,35.6 L29.5,34.3 L28.2,34.9 L26.3,33.5 L25.5,34.1 L23.3,32.2 L20.8,34.2 ZM48.0,10.7 L49.4,11.1 L49.7,12.1 L47.2,11.3 Z'}, {d:'M54.9,5.3 L55.2,6.1 L54.0,6.8 L53.0,9.0 L51.7,9.5 L51.3,12.0 L49.9,12.5 L50.5,12.7 L50.5,13.5 L48.9,13.4 L45.3,11.0 L45.5,9.9 L44.7,10.4 L44.3,9.8 L46.4,9.5 L46.4,8.7 L45.1,8.6 L45.2,7.2 L43.1,7.1 L45.2,5.5 L46.2,5.9 L46.8,4.8 L52.5,6.2 Z'} ] },
+    nomi: ['Hugo','Lucía','Martín','María','Pablo','Sofía','Daniel','Paula','Álvaro','Carla','Adrián','Valeria','Diego','Daniela','Mario','Alba','Marcos','Noa','Iker','Vega'],
+    nomiM: ['Hugo','Martín','Pablo','Daniel','Álvaro','Adrián','Diego','Mario','Marcos','Iker'],
+    nomiF: ['Lucía','María','Sofía','Paula','Carla','Valeria','Daniela','Alba','Noa','Vega'],
+    cognomi: ['García','Rodríguez','González','Fernández','López','Martínez','Sánchez','Pérez','Gómez','Ruiz','Díaz','Hernández','Jiménez','Moreno','Muñoz','Álvarez','Romero','Alonso','Gutiérrez','Navarro'],
+    partiti: [
+      { id:'es_pp',   nome:'PP',    orientamento:'centrodestra',   base:{ cetomedio:0.4, imprenditori:0.3, pensionati:0.3 }, forza:33, asse:1 },
+      { id:'es_psoe', nome:'PSOE',  orientamento:'centrosinistra', base:{ lavoratori:0.4, pensionati:0.3, cetomedio:0.3 },  forza:31, asse:-1 },
+      { id:'es_vox',  nome:'Vox',   orientamento:'destra',         base:{ cetomedio:0.4, imprenditori:0.3, giovani:0.3 },   forza:15, asse:2 },
+      { id:'es_sum',  nome:'Sumar', orientamento:'sinistra',       base:{ giovani:0.5, lavoratori:0.5 },                    forza:11, asse:-2 },
+      { id:'es_erc',  nome:'ERC',   orientamento:'regionalista',   base:{ giovani:0.4, cetomedio:0.3, lavoratori:0.3 },     forza:5,  asse:0 },
+      { id:'es_pnv',  nome:'PNV',   orientamento:'regionalista',   base:{ cetomedio:0.5, imprenditori:0.3, pensionati:0.2 }, forza:5,  asse:0 },
+    ],
+  },
+  /* ===== BLOCCO 2 — i 4 presidenziali (sistema:'presidenziale', comeSiVince:'candidato', sfiducia/cadutaGoverno:false).
+     Corea del Sud occidentale; Brasile/Messico/Nigeria sedia-swing (allineamento:'nonallineato', come l'India). ===== */
+  coreasud: {
+    economia:{pil:1625, debito:57, deficit:-0.6},   // cifre 2024 riconciliate (CIFRE-ECONOMICHE.md); PIL € mld
+    nome: 'Corea del Sud',
+    allineamento: 'occidentale', terminoLocale: 'Provincia',
+    colori: { bandiera: ['#ffffff', '#cd2e3a', '#0047a0'], accento: '#a9791a' },
+    flag: '<svg viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg"><rect width="30" height="20" fill="#fff"/><path d="M15,6 A4,4 0 0,1 15,14 A2,2 0 0,1 15,10 A2,2 0 0,0 15,6 Z" fill="#cd2e3a"/><path d="M15,6 A4,4 0 0,0 15,14 A2,2 0 0,0 15,10 A2,2 0 0,1 15,6 Z" fill="#0047a0"/></svg>',
+    nomeArt: 'la Corea del Sud',
+    titoloRuolo: 'Presidente',
+    mandatoMesi: 60, sistema: 'presidenziale', sfiducia: false,
+    coalizione: false, comeSiVince: 'candidato', cadutaGoverno: false, ue: false, distorsione: 1.0,
+    intermedie: [{tipo:'Elezioni locali', mese:30, tocca:'regione'}],
+    territori: [
+      {nome:'Seul', nomeEn:'Seoul', tipo:'città', carica:'Sindaco', lean:0, simbolo:true}, {nome:'Busan', tipo:'città', carica:'Sindaco', lean:1, simbolo:true}, {nome:'Incheon', tipo:'città', carica:'Sindaco', lean:0, simbolo:true}, {nome:'Daegu', tipo:'città', carica:'Sindaco', lean:2, simbolo:true},
+      {nome:'il Gyeonggi', tipo:'regione', carica:'Governatore', lean:-1}, {nome:'il Gyeongsang Meridionale', nomeEn:'South Gyeongsang', tipo:'regione', carica:'Governatore', lean:1}, {nome:'il Gyeongsang Settentrionale', nomeEn:'North Gyeongsang', tipo:'regione', carica:'Governatore', lean:2}, {nome:'il Jeolla Meridionale', nomeEn:'South Jeolla', tipo:'regione', carica:'Governatore', lean:-2},
+      {nome:'il Chungcheong Meridionale', nomeEn:'South Chungcheong', tipo:'regione', carica:'Governatore', lean:0}, {nome:'il Gangwon', tipo:'regione', carica:'Governatore', lean:1}, {nome:'il Jeju', tipo:'regione', carica:'Governatore', lean:-1},
+      {nome:'Gwangju', tipo:'città', carica:'Sindaco', lean:-2}, {nome:'Daejeon', tipo:'città', carica:'Sindaco', lean:0}, {nome:'Ulsan', tipo:'città', carica:'Sindaco', lean:1}
+    ],
+    mappa: { viewBox:'0 0 90 95',
+      sfondo:'M47.8,7.0 L51.3,5.3 L52.1,2.2 L53.2,1.5 L57.1,9.9 L62.9,17.6 L66.6,24.4 L68.0,28.1 L68.5,33.8 L67.3,40.7 L67.9,44.5 L67.3,45.5 L68.3,46.3 L69.7,44.8 L70.1,45.9 L68.1,52.4 L68.3,54.5 L67.7,55.2 L67.2,54.2 L67.0,57.2 L65.7,57.8 L64.7,60.6 L63.7,60.7 L63.4,61.7 L62.9,61.2 L62.0,62.4 L61.4,60.9 L60.9,61.8 L60.6,61.2 L60.4,61.8 L57.9,61.6 L56.5,59.6 L57.2,62.2 L54.8,61.5 L53.3,63.0 L54.9,62.4 L55.0,63.3 L54.0,63.5 L54.8,65.1 L54.2,65.9 L52.9,65.4 L52.8,64.1 L52.4,64.8 L51.3,64.3 L51.1,65.1 L49.0,64.4 L49.2,61.8 L48.3,63.4 L47.2,62.9 L46.7,64.1 L44.3,63.4 L43.6,64.8 L42.6,64.1 L42.4,64.7 L43.5,66.4 L45.1,65.8 L44.6,67.9 L43.0,68.4 L43.3,69.7 L42.2,69.0 L41.6,65.1 L39.5,66.2 L40.3,66.6 L39.4,67.3 L41.4,70.2 L39.2,70.3 L40.5,71.0 L39.2,72.7 L37.5,70.9 L36.1,71.0 L37.4,69.4 L37.1,70.5 L37.8,70.3 L38.2,68.2 L38.8,69.2 L39.4,68.4 L37.8,67.2 L37.2,68.5 L34.6,69.8 L33.0,73.1 L31.8,72.6 L31.4,70.3 L30.7,72.9 L29.4,73.5 L28.9,75.1 L27.8,75.2 L27.1,72.2 L28.1,70.7 L26.0,71.2 L24.7,70.2 L24.6,67.5 L25.7,69.9 L27.0,70.3 L26.0,69.4 L25.8,68.1 L28.0,69.6 L29.2,69.5 L27.6,68.0 L25.6,67.5 L27.0,67.0 L28.0,67.6 L28.1,66.7 L29.8,66.5 L28.6,66.3 L28.5,64.9 L27.7,66.9 L25.8,66.8 L26.6,63.5 L25.0,64.3 L25.8,62.9 L24.1,61.1 L25.4,60.6 L26.5,62.9 L26.9,61.5 L25.6,59.1 L24.9,59.3 L25.8,58.9 L26.3,56.9 L26.9,57.3 L26.4,56.5 L27.4,54.3 L29.5,53.5 L30.2,54.1 L29.9,53.2 L27.7,53.4 L27.1,52.3 L29.8,49.7 L31.4,50.3 L30.3,48.8 L32.2,48.0 L29.1,48.1 L27.8,46.7 L30.9,46.4 L32.6,45.1 L30.2,46.2 L28.8,44.0 L27.4,44.0 L28.9,43.3 L28.0,42.5 L28.7,41.2 L27.7,40.7 L28.7,40.2 L27.5,39.0 L29.1,38.1 L27.5,38.6 L27.2,33.5 L26.5,35.9 L25.7,35.5 L25.4,33.6 L24.8,34.3 L25.4,35.8 L24.7,36.3 L24.4,33.9 L23.1,34.7 L23.6,33.8 L22.8,33.2 L22.5,34.2 L22.4,33.2 L22.9,32.3 L23.6,32.9 L23.3,31.1 L24.4,31.3 L24.9,29.7 L24.5,32.5 L25.5,32.8 L25.2,31.8 L26.2,31.6 L26.4,30.5 L25.5,29.2 L26.8,29.1 L27.3,31.9 L27.8,30.1 L28.7,30.9 L27.5,28.2 L29.3,29.2 L29.3,30.7 L30.0,29.3 L31.6,29.9 L32.4,33.4 L32.5,32.1 L33.1,32.2 L32.5,31.4 L35.0,29.5 L33.2,30.4 L32.0,29.1 L33.2,28.9 L32.9,27.5 L32.3,28.5 L31.0,28.3 L31.2,27.2 L32.5,26.1 L30.1,26.9 L30.5,25.5 L29.7,24.8 L31.4,25.4 L32.6,24.6 L30.1,23.5 L30.5,22.6 L29.1,22.7 L28.8,21.1 L29.5,20.6 L28.9,20.5 L27.9,16.3 L29.6,16.1 L29.7,17.7 L31.0,18.3 L30.0,17.5 L29.8,13.2 L31.1,12.5 L34.0,8.4 L37.5,6.8 ZM24.7,15.5 L25.0,16.2 L23.7,16.2 L24.0,15.3 ZM27.6,19.0 L25.7,18.4 L26.4,18.1 L25.7,16.8 L26.2,15.2 L27.7,16.1 ZM3.1,12.5 L2.5,13.5 L1.5,13.1 ZM26.2,38.4 L26.6,39.2 L25.6,39.2 L25.0,36.3 L25.6,35.8 ZM28.4,20.4 L26.7,22.0 L25.7,21.6 L27.5,20.1 ZM36.8,72.0 L37.6,72.1 L37.6,72.9 L36.0,72.8 ZM25.9,71.8 L25.4,73.3 L23.5,74.1 L22.0,73.4 L24.3,71.4 L24.0,70.5 ZM45.2,68.6 L45.3,70.4 L44.6,69.6 L45.3,68.0 ZM20.7,67.0 L19.2,67.9 L19.4,67.0 ZM21.4,64.7 L21.7,65.4 L20.4,65.6 ZM22.1,62.4 L21.4,62.2 L21.6,61.5 L22.9,60.8 ZM31.2,75.0 L29.6,74.6 L29.6,73.5 ZM31.1,73.7 L32.1,72.8 L32.5,73.6 ZM25.3,65.5 L25.3,66.2 L23.8,65.7 L24.7,64.6 ZM49.2,66.4 L49.0,68.4 L47.9,68.3 L47.4,67.2 L46.7,68.1 L45.9,65.5 L46.9,64.2 L47.1,66.0 ZM58.5,65.5 L58.4,66.8 L57.7,66.5 L57.3,67.4 L57.8,67.7 L56.3,68.2 L56.6,66.0 L55.5,66.5 L54.9,65.5 L57.1,65.1 L56.6,64.0 L57.9,62.7 ZM49.2,65.9 L47.7,65.6 L48.5,64.6 ZM88.3,19.9 L88.2,21.3 L87.2,21.1 L87.0,20.3 ZM33.7,89.1 L32.2,92.0 L29.0,93.2 L25.2,93.2 L24.3,93.9 L23.0,92.7 L24.4,89.9 L27.3,88.4 L31.6,87.7 ZM35.2,17.5 L35.9,18.0 L36.0,19.8 L37.1,20.2 L36.1,21.6 L33.3,21.8 L31.6,19.8 ZM33.5,58.9 L34.5,59.9 L34.0,60.7 L32.0,59.2 ZM57.8,46.0 L58.7,48.5 L57.7,49.8 L56.0,50.1 L54.8,48.8 L55.5,46.7 Z',
+      aree:[ {cx:34.1,cy:19.5,r:4}, {cx:63.1,cy:60.2,r:4}, {cx:30.4,cy:21.3,r:4}, {cx:56.5,cy:48.4,r:4}, {d:'M29.8,15.1 L29.8,13.2 L31.1,12.5 L33.9,8.5 L36.9,10.9 L37.2,9.8 L37.6,10.3 L38.7,9.8 L38.5,10.7 L40.6,11.0 L41.0,12.8 L43.1,14.2 L42.8,15.1 L41.8,15.7 L41.9,18.9 L45.9,20.5 L42.7,27.1 L39.7,30.6 L38.0,31.2 L36.2,30.4 L33.9,30.8 L35.0,29.3 L33.2,30.4 L32.0,29.1 L33.2,28.9 L32.9,27.5 L32.3,28.5 L31.0,28.3 L31.2,27.2 L32.6,26.2 L31.7,26.0 L30.1,26.9 L30.4,26.4 L29.8,26.2 L30.5,25.5 L29.7,24.8 L31.2,24.8 L31.4,25.4 L31.9,24.5 L32.6,24.6 L30.1,23.5 L31.6,21.6 L30.3,19.8 L29.0,19.8 L28.4,18.8 L28.0,16.1 L29.8,16.3 L29.7,17.7 L31.0,18.3 L30.0,17.5 L30.3,15.0 ZM24.7,15.5 L25.3,15.7 L25.0,16.2 L23.7,16.2 L24.0,15.3 ZM25.5,17.3 L25.7,18.0 L24.5,17.3 L25.0,16.5 ZM27.6,19.0 L25.7,18.4 L26.4,18.1 L25.7,16.8 L26.2,15.2 L27.7,16.1 L28.1,18.4 ZM3.1,12.5 L2.5,13.5 L1.5,13.1 L1.6,12.5 ZM29.1,24.8 L28.1,25.8 L28.1,24.3 Z'}, {d:'M61.5,61.0 L60.9,61.8 L60.6,61.2 L60.4,61.8 L59.1,61.8 L59.0,61.3 L58.7,61.9 L57.9,61.6 L57.8,60.8 L57.6,61.3 L56.7,60.8 L56.5,59.6 L56.2,60.2 L57.2,62.2 L55.3,61.5 L53.6,62.4 L53.3,63.1 L54.9,62.4 L55.1,63.1 L54.0,63.5 L54.2,65.1 L54.8,65.1 L53.9,66.0 L52.7,65.1 L52.8,64.1 L52.4,64.8 L51.3,64.3 L51.1,65.1 L49.0,64.4 L49.2,61.8 L48.2,62.6 L48.5,63.2 L47.6,63.6 L47.2,62.9 L47.0,63.9 L45.9,64.2 L43.5,60.9 L42.9,58.9 L44.0,56.2 L43.1,54.3 L44.2,50.7 L47.0,48.1 L47.7,49.1 L50.2,50.0 L51.2,51.2 L51.2,52.8 L54.0,53.4 L55.8,52.3 L56.3,53.7 L58.6,54.2 L60.8,53.2 L62.1,53.4 L62.0,55.2 L62.9,55.3 L65.7,57.8 L64.8,60.4 L62.9,58.6 ZM49.2,66.4 L49.0,68.4 L47.9,68.3 L47.4,67.2 L46.7,68.1 L45.9,65.5 L46.9,64.2 L47.4,64.7 L47.1,66.0 ZM58.5,65.5 L58.4,66.8 L57.7,66.5 L57.3,67.4 L57.8,67.7 L56.3,68.2 L56.7,67.9 L55.9,66.9 L56.6,66.0 L55.5,66.5 L54.9,65.5 L56.1,64.8 L57.1,65.1 L56.6,64.0 L57.8,63.5 L57.9,62.7 L58.1,65.3 ZM49.2,65.9 L47.7,65.6 L48.5,64.6 L48.4,65.5 L48.8,65.0 ZM53.5,66.3 L54.3,66.3 L54.0,67.3 L52.8,66.2 Z'}, {d:'M67.8,35.7 L68.1,39.2 L67.4,40.4 L67.3,42.8 L67.9,44.5 L67.3,45.5 L68.3,46.3 L69.7,44.8 L70.1,45.9 L68.3,52.8 L65.7,52.7 L64.4,51.6 L61.7,53.5 L60.8,53.2 L59.1,54.2 L56.7,54.0 L55.8,52.3 L54.0,53.4 L51.2,52.8 L51.2,51.2 L49.9,49.7 L47.1,48.5 L46.5,46.1 L47.4,45.4 L47.7,43.6 L48.7,43.4 L48.2,42.3 L46.0,42.0 L46.7,38.0 L45.3,36.6 L47.5,34.3 L49.0,34.7 L48.6,34.0 L49.0,33.0 L51.0,33.0 L51.5,32.0 L52.9,33.2 L54.1,32.8 L54.0,31.8 L55.2,30.2 L57.2,28.8 L58.6,29.2 L58.7,28.1 L59.7,27.6 L60.4,28.7 L61.2,28.3 L64.5,28.8 L64.3,29.5 L63.4,29.6 L63.4,30.5 L64.3,31.9 L66.0,32.2 L65.8,35.4 ZM88.3,19.9 L88.2,21.3 L87.2,21.1 L87.0,20.3 Z'}, {d:'M45.5,64.0 L44.3,63.4 L43.6,64.8 L42.4,64.4 L43.3,66.4 L45.1,65.8 L44.6,67.9 L43.5,67.8 L43.0,68.4 L43.3,69.7 L42.2,69.0 L42.5,67.5 L41.6,65.1 L41.1,66.0 L39.5,66.2 L40.3,66.6 L39.4,67.3 L41.4,70.2 L39.2,70.3 L39.4,70.8 L40.5,71.0 L38.9,72.2 L39.2,72.7 L37.5,70.9 L36.9,71.5 L36.1,71.0 L37.4,69.4 L37.1,70.5 L37.8,70.3 L38.2,68.2 L38.8,69.2 L39.4,68.4 L37.8,67.2 L37.2,68.5 L34.6,69.8 L33.0,73.1 L31.8,72.6 L31.4,70.3 L30.8,71.5 L31.1,72.1 L29.4,73.5 L28.9,75.1 L27.8,75.2 L27.9,74.4 L27.2,74.3 L27.8,73.2 L27.1,71.8 L28.1,71.5 L28.1,70.7 L26.0,71.2 L24.4,69.3 L24.7,67.4 L25.9,70.0 L27.1,70.0 L26.4,69.1 L26.0,69.4 L25.8,68.1 L26.8,68.2 L28.0,69.6 L27.8,69.2 L29.2,69.5 L27.6,68.0 L25.6,67.5 L27.0,67.0 L28.0,67.6 L28.1,66.7 L29.8,66.5 L28.6,66.3 L28.5,64.9 L27.7,66.9 L27.3,66.4 L25.8,66.8 L26.6,63.5 L25.7,63.8 L25.6,64.5 L25.0,64.3 L24.8,63.7 L25.4,63.7 L25.8,62.9 L25.0,61.8 L24.6,62.3 L24.1,61.1 L25.0,61.3 L25.4,60.6 L25.4,61.6 L26.5,62.9 L26.9,61.5 L25.7,60.3 L25.6,59.1 L24.9,59.3 L25.8,58.9 L26.3,56.9 L26.9,57.3 L26.7,56.9 L28.7,56.6 L28.8,58.2 L31.0,57.4 L31.5,55.9 L32.6,55.4 L34.1,56.7 L35.3,55.9 L36.2,58.4 L40.4,58.3 L41.3,57.6 L42.1,57.9 ZM36.8,72.0 L37.6,72.1 L37.6,72.9 L36.0,72.8 ZM25.9,71.8 L25.4,73.3 L24.9,73.0 L23.5,74.1 L22.6,74.2 L22.7,73.6 L22.0,73.4 L23.7,71.3 L24.3,71.4 L24.0,70.5 L25.4,70.9 ZM45.2,68.6 L45.7,69.8 L45.3,70.4 L44.6,69.6 L45.3,68.0 ZM20.5,68.1 L20.4,69.0 L19.6,68.8 ZM20.7,67.0 L19.2,67.9 L19.4,67.0 ZM21.4,64.7 L21.9,64.7 L21.7,65.4 L20.4,65.6 ZM22.1,62.4 L21.4,62.2 L21.6,61.5 L22.9,60.8 ZM41.8,72.6 L41.2,73.2 L40.7,72.2 ZM22.0,70.1 L22.0,70.7 L21.1,71.2 L21.7,70.4 L21.5,69.7 ZM23.0,67.8 L23.0,68.3 L22.2,68.0 L21.6,67.1 ZM21.7,66.2 L21.6,65.8 L22.7,65.3 L22.2,66.6 ZM28.9,77.4 L27.6,77.9 L28.0,77.2 ZM33.2,76.9 L33.2,77.6 L32.4,77.6 L32.6,76.7 ZM29.1,76.5 L28.7,77.3 L28.2,77.0 L28.3,76.3 ZM32.4,75.0 L31.1,74.5 L32.9,74.4 ZM35.7,74.4 L35.0,74.9 L34.3,74.2 L34.8,73.8 ZM31.2,75.0 L30.7,75.3 L29.6,74.6 L29.6,73.5 L30.4,73.6 ZM31.1,73.7 L32.1,72.8 L32.5,73.6 L31.3,74.2 ZM25.3,65.5 L25.3,66.2 L23.8,65.7 L24.7,64.6 ZM23.9,62.4 L22.9,61.5 L23.9,61.6 L24.2,62.8 Z'}, {d:'M26.2,38.4 L26.6,39.2 L25.6,39.2 L25.0,36.3 L25.6,35.8 ZM31.8,45.4 L30.2,46.2 L28.8,44.0 L27.4,44.0 L28.0,43.2 L28.9,43.3 L28.0,42.5 L28.7,41.2 L27.7,40.7 L28.7,40.2 L27.5,39.0 L29.1,38.1 L27.5,38.6 L27.7,37.2 L26.9,36.1 L27.8,35.5 L27.2,33.5 L26.5,35.9 L25.7,35.5 L25.4,33.6 L24.8,34.3 L25.4,35.8 L24.7,36.3 L24.4,33.9 L23.1,34.7 L22.8,34.2 L23.6,33.8 L22.8,33.2 L22.4,34.1 L22.9,32.3 L23.2,32.9 L23.9,32.3 L23.4,32.2 L23.3,31.1 L23.9,30.8 L23.8,31.3 L24.4,31.3 L24.9,29.7 L24.5,32.5 L25.5,32.8 L25.2,31.8 L26.2,31.6 L25.8,31.3 L26.4,30.5 L25.5,29.9 L25.5,29.2 L26.8,29.1 L27.3,31.9 L27.8,30.1 L28.7,30.9 L27.4,29.2 L28.5,29.5 L27.5,28.2 L29.3,29.2 L29.3,30.7 L30.0,29.3 L31.6,29.9 L31.4,31.0 L32.1,30.7 L32.4,33.4 L32.5,32.1 L33.1,32.2 L32.5,31.4 L33.9,30.8 L36.2,30.4 L38.0,31.2 L38.9,32.4 L38.9,33.9 L37.8,35.2 L35.9,34.4 L35.2,38.4 L37.4,38.4 L38.8,42.2 L40.6,41.2 L41.1,39.8 L41.9,39.6 L40.8,42.2 L40.8,42.7 L42.1,43.0 L43.0,45.7 L42.3,46.3 L40.4,46.4 L38.6,44.1 L36.0,45.2 L35.8,44.0 L35.3,43.9 L32.4,44.6 Z'}, {d:'M47.8,7.0 L49.7,6.6 L51.3,5.3 L52.1,3.9 L52.1,2.2 L53.2,1.5 L57.1,9.9 L62.9,17.6 L63.0,18.7 L66.6,24.4 L68.0,28.1 L68.5,33.8 L67.8,35.7 L65.8,35.4 L66.0,32.2 L64.3,31.9 L63.4,30.5 L63.4,29.6 L64.6,29.2 L64.1,28.6 L61.2,28.3 L60.4,28.7 L60.4,28.1 L59.3,27.6 L58.3,29.2 L55.2,27.9 L54.0,28.1 L53.5,27.2 L52.2,27.5 L51.9,27.2 L52.7,26.2 L50.8,25.7 L48.7,26.6 L48.0,25.4 L47.1,26.0 L46.7,27.2 L45.6,27.2 L45.7,26.3 L42.8,26.9 L45.9,20.5 L41.9,18.9 L41.8,15.7 L42.8,15.1 L43.1,14.2 L41.0,12.8 L40.6,11.0 L38.5,10.7 L38.7,9.8 L37.6,10.3 L37.2,9.8 L36.9,10.9 L33.9,8.5 L36.6,6.9 L44.8,6.6 L45.5,7.1 Z'}, {d:'M33.7,89.1 L32.2,92.0 L29.0,93.2 L25.2,93.2 L24.3,93.9 L23.0,92.7 L23.1,91.5 L24.4,89.9 L27.3,88.4 L31.6,87.7 Z'} ] },
+    nomi: ['Min-jun','Seo-yeon','Seo-jun','Seo-yun','Do-yun','Ji-woo','Ji-ho','Ha-eun','Joon-woo','Soo-ah','Hyun-woo','Da-eun','Ye-jun','Yu-na','Si-woo','Eun-seo','Ji-hoon','Chae-won','Min-seok','Ha-yoon'],
+    nomiM: ['Min-jun','Seo-jun','Do-yun','Ji-ho','Joon-woo','Hyun-woo','Ye-jun','Si-woo','Ji-hoon','Min-seok'],
+    nomiF: ['Seo-yeon','Seo-yun','Ji-woo','Ha-eun','Soo-ah','Da-eun','Yu-na','Eun-seo','Chae-won','Ha-yoon'],
+    cognomi: ['Kim','Lee','Park','Choi','Jung','Kang','Cho','Yoon','Jang','Lim','Han','Oh','Seo','Shin','Kwon','Hwang','Ahn','Song','Yoo','Hong'],
+    partiti: [
+      { id:'kr_dp',  nome:'Partito Democratico',       orientamento:'centrosinistra', base:{ lavoratori:0.4, giovani:0.3, cetomedio:0.3 },    forza:40, asse:-1 },
+      { id:'kr_ppp', nome:'Partito del Potere Popolare', orientamento:'centrodestra',  base:{ pensionati:0.4, imprenditori:0.3, cetomedio:0.3 }, forza:38, asse:1 },
+      { id:'kr_rk',  nome:'Partito della Ricostruzione', orientamento:'centrosinistra', base:{ giovani:0.5, lavoratori:0.3, cetomedio:0.2 },    forza:10, asse:-1 },
+      { id:'kr_rf',  nome:'Partito della Riforma',      orientamento:'centro',         base:{ cetomedio:0.6, imprenditori:0.4 },               forza:6,  asse:0 },
+      { id:'kr_jp',  nome:'Partito della Giustizia',    orientamento:'sinistra',       base:{ lavoratori:0.5, giovani:0.5 },                   forza:6,  asse:-2 },
+    ],
+  },
+  brasile: {
+    economia:{pil:2150, debito:87, deficit:-6.3},   // cifre 2024 riconciliate (CIFRE-ECONOMICHE.md); PIL € mld
+    nome: 'Brasile',
+    allineamento: 'nonallineato', terminoLocale: 'Stato',
+    colori: { bandiera: ['#009c3b', '#ffdf00', '#002776'], accento: '#a9791a' },
+    flag: '<svg viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg"><rect width="30" height="20" fill="#009c3b"/><path d="M15,2.5 L27,10 L15,17.5 L3,10 Z" fill="#ffdf00"/><circle cx="15" cy="10" r="4" fill="#002776"/></svg>',
+    nomeArt: 'il Brasile',
+    titoloRuolo: 'Presidente',
+    mandatoMesi: 48, sistema: 'presidenziale', sfiducia: false,
+    coalizione: true, comeSiVince: 'candidato', cadutaGoverno: false, ue: false, distorsione: 1.0,
+    intermedie: [{tipo:'Elezioni statali', mese:24, tocca:'regione'}],
+    territori: [
+      {nome:'San Paolo', nomeEn:'São Paulo', tipo:'città', carica:'Sindaco', lean:0, simbolo:true}, {nome:'Rio de Janeiro', tipo:'città', carica:'Sindaco', lean:1, simbolo:true}, {nome:'Brasília', tipo:'città', carica:'Sindaco', lean:1, simbolo:true}, {nome:'Salvador', tipo:'città', carica:'Sindaco', lean:-1, simbolo:true},
+      {nome:'il Minas Gerais', tipo:'regione', carica:'Governatore', lean:0}, {nome:'la Bahia', tipo:'regione', carica:'Governatore', lean:-2}, {nome:'il Rio Grande do Sul', tipo:'regione', carica:'Governatore', lean:1}, {nome:'il Paraná', tipo:'regione', carica:'Governatore', lean:1},
+      {nome:'il Pernambuco', tipo:'regione', carica:'Governatore', lean:-1}, {nome:'il Ceará', tipo:'regione', carica:'Governatore', lean:-1}, {nome:"l'Amazonas", tipo:'regione', carica:'Governatore', lean:0},
+      {nome:'Fortaleza', tipo:'città', carica:'Sindaco', lean:-1}, {nome:'Belo Horizonte', tipo:'città', carica:'Sindaco', lean:0}, {nome:'Recife', tipo:'città', carica:'Sindaco', lean:-1}
+    ],
+    mappa: { viewBox:'0 0 120 107',
+      sfondo:'M44.3,96.5 L48.8,91.1 L53.8,88.2 L54.3,85.8 L53.6,84.1 L51.8,84.0 L52.7,79.9 L49.7,79.6 L48.6,75.2 L43.1,74.6 L42.7,68.3 L44.4,64.3 L42.0,61.7 L42.1,59.1 L37.4,59.1 L36.3,56.0 L37.1,55.9 L36.6,52.5 L33.1,51.8 L24.9,47.7 L23.8,41.5 L20.6,42.1 L15.5,45.3 L10.3,45.0 L10.6,40.8 L8.5,42.3 L6.2,42.3 L5.9,41.1 L3.6,40.7 L4.2,39.6 L1.5,35.8 L3.8,32.9 L4.4,29.3 L10.2,26.6 L12.0,27.1 L13.5,18.7 L11.7,16.0 L11.8,14.0 L14.2,13.8 L12.3,12.8 L12.3,11.0 L16.7,11.0 L16.6,10.2 L17.3,10.9 L18.6,9.9 L19.5,12.4 L21.5,13.6 L23.3,13.0 L23.6,13.8 L29.1,9.5 L27.3,9.0 L26.9,6.0 L25.4,4.1 L30.3,6.1 L30.7,4.8 L35.3,3.5 L35.9,1.7 L37.3,1.5 L37.4,3.5 L39.1,5.1 L37.9,7.9 L38.5,10.6 L40.9,12.4 L44.8,10.3 L48.3,10.6 L48.3,8.8 L56.1,9.8 L59.6,4.3 L60.0,5.1 L59.8,3.7 L61.7,10.0 L63.9,11.0 L64.0,12.4 L60.3,15.8 L58.7,19.2 L56.7,19.9 L61.6,18.0 L61.6,20.8 L64.2,21.2 L65.3,20.3 L64.6,22.7 L66.4,19.9 L67.8,20.0 L68.8,17.4 L72.0,17.5 L75.5,19.7 L75.9,19.1 L75.9,20.3 L77.1,19.4 L77.8,20.3 L77.2,21.7 L78.4,21.8 L77.2,24.4 L78.5,22.2 L78.8,23.3 L80.8,21.8 L86.4,23.6 L89.7,23.2 L97.0,28.7 L101.3,29.3 L103.2,34.8 L101.8,40.2 L96.7,45.1 L94.0,50.2 L92.5,49.6 L91.9,62.9 L87.1,74.5 L84.6,75.8 L84.5,77.0 L81.8,77.0 L81.7,76.2 L80.4,77.3 L78.2,76.9 L75.6,79.3 L73.1,79.4 L68.4,83.7 L67.0,83.4 L68.0,84.0 L66.9,85.3 L67.7,88.2 L67.0,91.9 L58.4,101.6 L62.3,97.0 L60.4,95.8 L60.5,97.9 L55.0,105.8 L54.6,104.3 L55.7,103.1 L54.0,101.3 L49.3,98.1 L48.2,98.7 L46.0,96.1 ZM67.7,17.1 L65.8,19.9 L63.4,20.3 L63.1,19.6 L62.7,20.5 L61.7,19.4 L62.8,15.9 L67.8,16.3 Z',
+      aree:[ {cx:72.5,cy:78.6,r:4}, {cx:81.5,cy:76.8,r:4}, {cx:69.1,cy:57.8,r:4}, {cx:93.5,cy:50.3,r:4}, {d:'M72.8,54.9 L74.1,55.3 L73.9,56.4 L79.3,53.8 L79.7,54.9 L82.0,54.8 L85.0,56.0 L86.2,57.7 L89.1,57.9 L90.0,58.7 L88.2,61.4 L89.1,63.7 L87.3,63.6 L87.7,64.1 L86.7,64.5 L87.2,67.7 L86.1,69.6 L84.9,70.0 L83.8,73.6 L73.8,76.8 L72.3,75.3 L72.8,73.0 L71.5,72.8 L70.3,69.0 L66.8,69.5 L66.6,70.2 L65.6,69.0 L62.5,68.5 L61.2,69.3 L61.1,68.4 L63.0,65.6 L66.5,64.6 L69.2,64.9 L70.8,63.9 L70.2,62.2 L71.1,61.0 L70.4,59.5 L72.0,58.0 L71.8,55.9 L72.7,55.8 Z'}, {d:'M96.2,46.4 L94.0,50.2 L93.5,50.4 L93.1,49.2 L92.5,49.6 L93.0,50.0 L91.9,52.3 L92.6,58.0 L91.9,62.9 L90.5,64.6 L88.1,62.1 L90.0,58.7 L89.1,57.9 L86.2,57.7 L85.0,56.0 L79.7,54.9 L79.8,53.9 L78.7,53.7 L73.9,56.3 L74.3,54.0 L73.4,52.7 L74.0,50.2 L73.2,48.6 L73.9,46.6 L72.7,45.8 L74.7,43.2 L76.6,44.7 L79.0,43.9 L80.3,40.6 L82.9,41.2 L86.7,38.9 L88.0,41.0 L91.2,38.4 L93.5,39.2 L95.4,42.6 L95.4,44.1 L94.2,44.7 L94.9,46.0 Z'}, {d:'M44.3,96.5 L48.8,91.1 L53.7,88.1 L58.1,88.5 L62.1,91.5 L64.5,91.9 L63.3,93.9 L64.5,94.0 L62.2,98.2 L58.4,101.6 L58.3,100.7 L60.5,99.7 L62.3,97.0 L62.2,96.3 L61.3,97.0 L60.4,95.8 L60.5,97.9 L58.0,100.5 L58.3,101.6 L56.9,104.2 L55.0,105.8 L54.6,104.3 L55.7,103.1 L54.0,101.3 L49.3,98.1 L48.2,98.7 L46.0,96.1 Z'}, {d:'M52.5,81.7 L52.5,80.1 L54.5,76.8 L58.4,75.8 L63.8,76.8 L65.6,81.5 L67.4,81.6 L67.5,82.6 L68.9,83.0 L67.0,83.4 L68.0,84.0 L66.9,84.8 L67.4,85.1 L64.9,85.7 L62.2,85.1 L60.1,87.0 L54.3,85.8 L53.6,84.1 L51.8,84.0 Z'}, {d:'M102.9,35.8 L102.2,39.4 L100.0,39.4 L98.5,40.4 L95.5,39.3 L94.2,40.5 L93.6,39.2 L91.3,38.4 L88.0,41.0 L87.3,39.2 L86.1,38.9 L88.2,37.3 L88.0,35.4 L90.6,35.3 L92.1,36.6 L93.0,36.0 L94.2,36.6 L96.8,35.0 L97.5,35.6 L96.5,37.0 L97.5,37.7 L101.4,35.5 Z'}, {d:'M86.4,23.6 L89.7,23.2 L96.7,28.3 L93.4,32.3 L93.5,35.2 L92.3,36.6 L90.6,35.3 L88.3,35.3 L88.6,33.8 L87.6,32.9 L85.9,24.8 Z'}, {d:'M18.6,9.9 L19.5,12.4 L21.5,13.6 L23.3,13.0 L23.5,13.8 L24.5,12.6 L26.6,11.9 L27.5,10.3 L29.7,9.8 L30.8,10.4 L31.5,13.4 L31.3,17.7 L33.0,19.3 L33.7,19.4 L34.7,16.9 L35.9,17.9 L37.0,17.4 L37.7,15.0 L40.8,15.0 L42.0,18.4 L47.4,21.6 L41.8,33.5 L42.7,35.2 L41.7,38.9 L32.9,39.3 L30.7,37.1 L28.7,37.0 L27.2,39.5 L25.4,39.6 L24.7,40.8 L24.3,40.3 L22.9,41.2 L21.3,40.7 L20.1,41.9 L11.0,37.4 L2.0,34.6 L3.8,32.9 L4.4,29.3 L10.2,26.6 L12.0,27.1 L13.5,18.7 L11.7,16.0 L11.8,14.0 L14.2,13.8 L13.8,12.8 L12.3,12.8 L12.3,11.0 L16.7,11.0 L16.6,10.2 L17.3,10.9 Z'} ] },
+    nomi: ['Miguel','Helena','Arthur','Alice','Heitor','Laura','Davi','Manuela','Bernardo','Valentina','Théo','Sophia','Gabriel','Isabella','Pedro','Júlia','Lucas','Lívia','Matheus','Maria'],
+    nomiM: ['Miguel','Arthur','Heitor','Davi','Bernardo','Théo','Gabriel','Pedro','Lucas','Matheus'],
+    nomiF: ['Helena','Alice','Laura','Manuela','Valentina','Sophia','Isabella','Júlia','Lívia','Maria'],
+    cognomi: ['Silva','Santos','Oliveira','Souza','Lima','Pereira','Ferreira','Costa','Rodrigues','Almeida','Nascimento','Carvalho','Araújo','Ribeiro','Gomes','Martins','Rocha','Barbosa','Alves','Mendes'],
+    partiti: [
+      { id:'br_pl',  nome:'PL',          orientamento:'destra',         base:{ imprenditori:0.4, cetomedio:0.3, pensionati:0.3 }, forza:25, asse:2 },
+      { id:'br_pt',  nome:'PT',          orientamento:'centrosinistra', base:{ lavoratori:0.5, giovani:0.3, pensionati:0.2 },    forza:23, asse:-1 },
+      { id:'br_uniao', nome:'União Brasil', orientamento:'centrodestra', base:{ cetomedio:0.4, imprenditori:0.4, pensionati:0.2 }, forza:14, asse:1 },
+      { id:'br_psd', nome:'PSD',         orientamento:'centro',         base:{ cetomedio:0.5, lavoratori:0.3, imprenditori:0.2 }, forza:13, asse:0 },
+      { id:'br_mdb', nome:'MDB',         orientamento:'centro',         base:{ pensionati:0.4, cetomedio:0.3, lavoratori:0.3 },  forza:13, asse:0 },
+      { id:'br_psol', nome:'PSOL',       orientamento:'sinistra',       base:{ giovani:0.6, lavoratori:0.4 },                    forza:12, asse:-2 },
+    ],
+  },
+  messico: {
+    economia:{pil:1865, debito:56, deficit:-5.9},   // cifre 2024 riconciliate (CIFRE-ECONOMICHE.md); PIL € mld
+    nome: 'Messico',
+    allineamento: 'nonallineato', terminoLocale: 'Stato',
+    colori: { bandiera: ['#006847', '#ffffff', '#ce1126'], accento: '#a9791a' },
+    flag: '<svg viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg"><rect width="30" height="20" fill="#fff"/><rect width="10" height="20" fill="#006847"/><rect x="20" width="10" height="20" fill="#ce1126"/><circle cx="15" cy="10" r="1.6" fill="none" stroke="#6b4423" stroke-width="0.8"/></svg>',
+    nomeArt: 'il Messico',
+    titoloRuolo: 'Presidente',
+    mandatoMesi: 72, sistema: 'presidenziale', sfiducia: false,
+    coalizione: true, comeSiVince: 'candidato', cadutaGoverno: false, ue: false, distorsione: 1.1,
+    intermedie: [{tipo:'Elezioni intermedie', mese:36, tocca:'regione'}],
+    territori: [
+      {nome:'Città del Messico', nomeEn:'Mexico City', tipo:'città', carica:'Sindaco', lean:-1, simbolo:true}, {nome:'Guadalajara', tipo:'città', carica:'Sindaco', lean:0, simbolo:true}, {nome:'Monterrey', tipo:'città', carica:'Sindaco', lean:1, simbolo:true}, {nome:'Puebla', tipo:'città', carica:'Sindaco', lean:0, simbolo:true},
+      {nome:'lo Stato del Messico', nomeEn:'State of Mexico', tipo:'regione', carica:'Governatore', lean:-1}, {nome:'il Jalisco', tipo:'regione', carica:'Governatore', lean:0}, {nome:'il Nuevo León', tipo:'regione', carica:'Governatore', lean:1}, {nome:'il Veracruz', tipo:'regione', carica:'Governatore', lean:-1},
+      {nome:'la Bassa California', nomeEn:'Baja California', tipo:'regione', carica:'Governatore', lean:-1}, {nome:'il Guanajuato', tipo:'regione', carica:'Governatore', lean:1}, {nome:'lo Yucatán', tipo:'regione', carica:'Governatore', lean:0},
+      {nome:'Tijuana', tipo:'città', carica:'Sindaco', lean:-1}, {nome:'León', tipo:'città', carica:'Sindaco', lean:1}, {nome:'Mérida', tipo:'città', carica:'Sindaco', lean:1}
+    ],
+    mappa: { viewBox:'0 0 140 89',
+      sfondo:'M16.9,2.5 L33.4,8.0 L45.4,8.0 L45.4,5.9 L53.2,6.0 L59.6,11.4 L61.7,16.2 L66.7,19.0 L70.9,14.8 L74.9,15.4 L83.1,25.7 L84.8,31.2 L93.3,33.4 L90.4,43.6 L90.1,49.3 L93.3,58.5 L98.9,67.6 L101.8,67.6 L104.9,70.3 L113.8,67.8 L117.8,68.9 L119.1,67.9 L118.1,67.1 L118.9,66.5 L117.7,67.1 L120.9,64.8 L122.2,61.9 L122.8,56.7 L130.9,54.1 L136.1,54.7 L136.7,53.9 L138.3,56.0 L134.0,63.1 L135.4,63.5 L133.6,70.0 L132.7,66.8 L129.1,71.5 L120.0,71.9 L119.9,74.5 L118.0,74.6 L122.5,78.4 L122.3,80.0 L116.7,80.1 L114.7,83.9 L114.5,87.3 L106.3,79.3 L105.0,79.3 L107.1,80.4 L103.1,78.4 L102.3,79.2 L103.6,79.5 L95.9,82.0 L76.4,74.4 L72.4,71.1 L65.8,69.4 L63.7,66.8 L59.4,64.6 L57.1,61.4 L56.3,59.6 L58.3,58.8 L57.0,57.9 L58.5,54.7 L55.1,48.0 L44.9,37.4 L46.3,37.8 L41.5,35.4 L42.7,34.1 L40.3,34.9 L40.2,33.1 L41.6,31.8 L35.4,27.1 L35.5,24.4 L32.9,24.1 L28.3,19.2 L24.4,11.1 L24.3,8.6 L15.9,5.0 L18.1,14.5 L25.4,21.7 L25.7,24.4 L29.3,28.0 L30.0,30.5 L29.7,29.0 L31.0,29.9 L34.8,40.9 L38.4,42.3 L40.2,45.2 L39.7,46.9 L37.7,47.9 L36.4,44.8 L28.7,39.0 L28.3,33.4 L23.8,29.7 L24.1,28.6 L22.0,29.8 L16.0,25.0 L19.0,24.3 L20.6,25.4 L19.2,24.2 L20.1,21.3 L13.1,15.5 L6.9,2.4 L17.3,1.5 Z',
+      aree:[ {cx:84.7,cy:64.2,r:4}, {cx:66.5,cy:58.4,r:4}, {cx:79.6,cy:34.7,r:4}, {cx:88.8,cy:66.1,r:4}, {d:'M86.8,64.1 L86.5,66.4 L85.4,65.8 L84.8,63.6 L83.1,67.8 L82.4,67.4 L79.8,69.1 L78.3,66.9 L80.3,64.2 L80.4,61.8 L81.6,60.1 L83.6,62.7 L85.1,61.3 L85.5,62.4 L86.6,62.3 Z'}, {d:'M61.1,65.5 L59.3,64.5 L56.3,59.6 L60.3,56.7 L62.4,58.2 L62.7,56.0 L63.9,55.0 L62.8,54.4 L63.2,53.1 L61.9,51.7 L63.9,50.3 L63.7,48.4 L64.6,48.6 L64.3,51.2 L64.8,49.2 L65.1,51.5 L66.4,49.6 L67.8,50.7 L64.8,54.3 L64.8,55.7 L67.7,56.6 L67.8,55.4 L69.5,54.5 L69.0,53.3 L71.3,53.6 L73.0,52.0 L74.4,52.7 L74.2,55.2 L72.1,57.4 L71.9,59.7 L67.7,61.0 L69.3,62.2 L69.5,65.2 L65.9,66.4 L65.2,63.9 L63.4,63.7 Z'}, {d:'M81.8,24.8 L82.5,30.0 L83.6,30.4 L84.7,32.9 L87.2,33.2 L87.7,35.9 L84.7,37.7 L84.6,39.0 L82.1,40.0 L83.3,43.2 L81.7,43.9 L80.7,46.2 L79.5,46.5 L77.4,37.7 L80.1,36.6 L78.0,35.5 L75.7,31.4 L78.3,29.8 L78.5,28.2 L77.4,27.5 L79.0,26.8 L79.4,25.3 Z'}, {d:'M90.6,50.8 L92.6,54.2 L92.1,55.5 L92.3,54.3 L90.6,51.6 L93.3,58.5 L96.3,62.1 L98.9,67.6 L101.8,67.6 L104.6,70.2 L106.3,70.0 L106.6,71.5 L108.6,73.0 L108.5,74.3 L107.5,75.0 L102.9,74.7 L101.7,72.2 L99.3,73.3 L99.0,70.4 L97.6,70.3 L95.4,67.8 L95.1,69.0 L92.6,67.8 L92.8,65.5 L94.0,64.9 L92.2,64.1 L93.4,61.0 L90.6,60.2 L91.5,59.1 L90.6,57.7 L89.6,59.2 L89.3,58.2 L87.6,59.9 L87.2,59.3 L89.1,56.5 L87.5,55.7 L86.8,53.9 L88.1,51.2 L87.0,50.1 L88.8,49.8 Z'}, {d:'M17.3,1.5 L15.9,5.0 L17.0,6.5 L16.6,8.8 L17.5,13.4 L22.0,17.7 L22.5,19.5 L25.4,21.7 L25.7,23.8 L20.1,23.8 L19.6,20.6 L13.1,15.5 L11.5,10.5 L10.3,9.8 L8.5,6.0 L9.1,5.6 L6.9,2.6 Z'}, {d:'M81.9,54.8 L82.2,55.7 L80.8,56.0 L80.5,57.2 L78.8,57.3 L79.7,60.5 L78.7,62.0 L74.9,61.3 L74.6,59.9 L72.8,60.6 L71.9,59.7 L74.4,52.8 Z'}, {d:'M122.6,57.6 L122.8,56.7 L125.2,55.5 L132.3,53.9 L134.9,54.5 L134.3,58.5 L126.8,63.2 L124.1,59.3 L122.6,59.1 Z'} ] },
+    nomi: ['Santiago','Sofía','Mateo','Valentina','Sebastián','Regina','Diego','Ximena','Leonardo','Renata','Emiliano','Victoria','Daniel','Camila','Alexander','Valeria','Gael','Andrea','Maximiliano','Natalia'],
+    nomiM: ['Santiago','Mateo','Sebastián','Diego','Leonardo','Emiliano','Daniel','Alexander','Gael','Maximiliano'],
+    nomiF: ['Sofía','Valentina','Regina','Ximena','Renata','Victoria','Camila','Valeria','Andrea','Natalia'],
+    cognomi: ['Hernández','García','Martínez','López','González','Rodríguez','Pérez','Sánchez','Ramírez','Flores','Gómez','Díaz','Reyes','Morales','Cruz','Ortiz','Gutiérrez','Chávez','Ramos','Vázquez'],
+    partiti: [
+      { id:'mx_morena', nome:'Morena', orientamento:'populista',    base:{ lavoratori:0.5, pensionati:0.3, giovani:0.2 },   forza:42, asse:-1 },
+      { id:'mx_pan',    nome:'PAN',    orientamento:'centrodestra', base:{ cetomedio:0.4, imprenditori:0.4, pensionati:0.2 }, forza:20, asse:1 },
+      { id:'mx_pri',    nome:'PRI',    orientamento:'centro',       base:{ pensionati:0.4, cetomedio:0.3, lavoratori:0.3 },  forza:14, asse:0 },
+      { id:'mx_mc',     nome:'Movimento Cittadino', orientamento:'centro', base:{ giovani:0.5, cetomedio:0.5 },             forza:12, asse:0 },
+      { id:'mx_pvem',   nome:'PVEM',   orientamento:'ecologista',   base:{ giovani:0.5, lavoratori:0.5 },                   forza:7,  asse:-1 },
+      { id:'mx_pt',     nome:'PT',     orientamento:'sinistra',     base:{ lavoratori:0.6, giovani:0.4 },                   forza:5,  asse:-2 },
+    ],
+  },
+  nigeria: {
+    economia:{pil:180, debito:47, deficit:-4.6},   // cifre 2024 riconciliate (CIFRE-ECONOMICHE.md); PIL € mld
+    nome: 'Nigeria',
+    allineamento: 'nonallineato', terminoLocale: 'Stato',
+    colori: { bandiera: ['#008751', '#ffffff', '#008751'], accento: '#a9791a' },
+    flag: '<svg viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg"><rect width="30" height="20" fill="#fff"/><rect width="10" height="20" fill="#008751"/><rect x="20" width="10" height="20" fill="#008751"/></svg>',
+    nomeArt: 'la Nigeria',
+    titoloRuolo: 'Presidente',
+    mandatoMesi: 48, sistema: 'presidenziale', sfiducia: false,
+    coalizione: false, comeSiVince: 'candidato', cadutaGoverno: false, ue: false, distorsione: 1.1,
+    intermedie: [{tipo:'Elezioni statali', mese:24, tocca:'regione'}],
+    territori: [
+      {nome:'Lagos', tipo:'città', carica:'Sindaco', lean:1, simbolo:true}, {nome:'Kano', tipo:'città', carica:'Sindaco', lean:1, simbolo:true}, {nome:'Ibadan', tipo:'città', carica:'Sindaco', lean:0, simbolo:true}, {nome:'Abuja', tipo:'città', carica:'Sindaco', lean:0, simbolo:true},
+      {nome:'il Rivers', tipo:'regione', carica:'Governatore', lean:-1}, {nome:'il Kaduna', tipo:'regione', carica:'Governatore', lean:1}, {nome:"l'Oyo", tipo:'regione', carica:'Governatore', lean:-1}, {nome:'il Borno', tipo:'regione', carica:'Governatore', lean:2},
+      {nome:"l'Anambra", tipo:'regione', carica:'Governatore', lean:-1}, {nome:"l'Enugu", tipo:'regione', carica:'Governatore', lean:-1}, {nome:'il Delta', tipo:'regione', carica:'Governatore', lean:0},
+      {nome:'Port Harcourt', tipo:'città', carica:'Sindaco', lean:-1}, {nome:'Benin City', tipo:'città', carica:'Sindaco', lean:0}, {nome:'Calabar', tipo:'città', carica:'Sindaco', lean:0}
+    ],
+    mappa: { viewBox:'0 0 110 90',
+      sfondo:'M10.6,26.4 L8.6,23.5 L10.4,20.7 L10.2,13.8 L14.1,9.5 L14.5,5.2 L17.9,3.2 L24.3,2.8 L26.9,1.5 L34.5,3.8 L39.5,9.5 L47.5,6.3 L50.0,6.7 L55.1,10.1 L63.2,11.2 L67.9,7.2 L72.9,6.1 L79.7,6.2 L88.9,8.9 L92.2,5.0 L95.6,4.5 L96.6,3.0 L99.0,3.1 L103.1,8.7 L104.2,15.1 L106.9,15.4 L108.5,17.0 L107.4,21.1 L107.9,22.9 L104.0,25.4 L102.4,25.0 L100.3,27.4 L97.5,35.2 L95.7,36.1 L95.4,40.7 L92.3,42.2 L91.6,47.7 L88.0,49.1 L88.3,50.1 L86.7,51.1 L86.4,55.0 L82.3,61.3 L83.6,62.9 L80.8,64.8 L79.1,68.5 L76.8,68.7 L76.1,66.0 L72.0,62.5 L71.3,64.8 L68.7,64.7 L68.1,63.6 L65.0,65.5 L64.1,67.9 L56.7,74.0 L56.1,80.3 L53.7,84.3 L50.6,81.8 L52.2,84.9 L51.6,85.8 L45.1,86.0 L45.0,84.3 L44.6,85.6 L42.6,85.3 L42.6,86.2 L40.7,83.9 L41.7,86.0 L40.5,86.8 L39.8,84.1 L39.8,87.3 L38.9,87.1 L37.6,83.2 L39.0,87.5 L37.6,87.5 L37.7,85.2 L37.3,87.7 L36.1,86.2 L36.3,87.7 L33.6,88.1 L34.2,86.8 L33.5,87.2 L33.3,86.2 L33.2,88.0 L32.2,88.3 L32.0,87.0 L31.7,88.1 L31.1,87.0 L30.2,87.4 L26.5,83.1 L25.7,80.6 L26.7,80.4 L25.5,80.2 L25.3,78.6 L27.4,78.2 L27.0,77.4 L28.0,76.8 L26.1,78.1 L24.0,77.2 L26.8,76.4 L25.2,76.2 L25.3,75.2 L24.8,76.1 L23.4,76.0 L23.2,74.5 L24.9,73.5 L22.7,74.8 L17.0,69.4 L7.9,68.6 L12.0,67.1 L9.0,67.9 L8.7,67.2 L7.9,69.1 L1.8,69.3 L2.4,45.1 L5.1,44.7 L7.3,38.3 L9.8,36.8 L10.4,35.2 L9.5,34.0 L10.2,32.6 L11.3,32.9 L11.9,31.1 Z',
+      aree:[ {cx:7.8,cy:68.0,r:4}, {cx:53.7,cy:18.5,r:4}, {cx:12.5,cy:60.2,r:4}, {cx:44.5,cy:45.0,r:4}, {d:'M44.9,84.4 L44.6,85.6 L42.6,85.3 L42.6,86.2 L40.7,83.9 L41.7,86.0 L40.5,86.8 L40.5,84.9 L39.8,84.1 L40.0,85.2 L39.2,84.7 L40.3,87.2 L39.0,87.2 L38.2,83.3 L37.6,83.2 L39.0,87.5 L37.6,87.5 L37.7,85.2 L34.6,83.3 L35.6,79.9 L36.7,78.7 L35.4,77.7 L36.6,75.2 L37.1,75.4 L36.8,77.4 L37.8,77.7 L37.7,79.0 L38.9,79.9 L42.3,79.9 L41.7,82.8 L43.9,82.9 ZM42.5,86.3 L43.1,86.3 L42.8,87.0 L41.3,87.1 L42.1,85.9 Z'}, {d:'M55.6,31.6 L55.2,32.7 L56.0,33.5 L54.9,35.0 L54.0,39.9 L55.1,43.2 L53.3,45.6 L51.4,44.2 L49.9,45.5 L48.6,42.4 L47.4,43.3 L44.9,42.4 L42.4,42.9 L42.1,41.5 L43.1,40.3 L42.0,38.9 L42.7,38.5 L42.6,36.7 L39.1,35.6 L40.7,33.8 L39.6,33.2 L39.7,32.2 L38.8,31.8 L38.6,30.9 L36.3,31.7 L35.0,31.4 L33.0,33.2 L32.0,32.2 L32.3,29.0 L34.1,27.2 L37.3,26.8 L39.0,24.2 L40.3,24.6 L40.0,25.6 L41.8,26.5 L42.3,25.1 L43.3,25.3 L44.3,24.2 L46.0,25.0 L49.9,23.0 L50.2,24.4 L53.9,26.8 L54.0,29.8 L53.3,30.5 Z'}, {d:'M1.5,55.6 L1.8,50.8 L2.7,49.4 L10.6,45.7 L11.7,44.0 L13.8,45.4 L16.2,45.6 L15.1,48.3 L18.4,54.9 L16.9,56.0 L15.7,55.0 L14.1,56.0 L13.7,58.0 L14.6,59.3 L14.0,62.6 L10.8,63.2 L11.4,62.3 L10.3,59.8 L8.8,60.0 L8.1,59.2 L7.0,60.6 L6.0,60.5 L4.2,58.0 L4.4,56.1 L3.6,56.9 L3.2,55.0 Z'}, {d:'M99.0,3.1 L103.1,8.7 L104.2,15.1 L106.9,15.4 L108.5,16.9 L107.4,21.1 L107.9,22.9 L104.0,25.4 L102.4,25.0 L100.3,28.0 L97.4,28.1 L96.4,32.3 L92.2,31.5 L85.6,36.2 L84.2,36.1 L81.5,33.0 L83.0,28.8 L86.2,27.1 L86.5,24.9 L88.2,22.6 L86.8,21.5 L87.4,14.4 L89.0,12.4 L87.9,10.5 L88.1,8.7 L89.0,8.8 L89.7,7.3 L91.9,6.1 L92.2,5.0 L95.6,4.5 L96.6,3.0 Z'}, {d:'M36.6,75.2 L37.9,71.6 L37.2,67.8 L38.3,67.5 L39.3,65.7 L41.0,66.6 L40.3,68.7 L42.3,72.1 L43.3,72.5 L42.3,73.3 L40.0,73.5 L39.2,74.8 Z'}, {d:'M44.5,63.0 L45.5,64.6 L47.1,64.7 L47.8,65.7 L47.5,67.0 L46.3,67.2 L46.6,71.8 L46.0,73.3 L42.5,72.3 L40.2,68.5 L41.0,66.6 L39.3,66.2 L39.8,65.0 L40.3,65.6 L42.9,63.2 Z'}, {d:'M26.4,80.5 L25.5,80.2 L25.4,78.5 L27.4,78.2 L27.0,77.4 L28.0,76.8 L26.1,78.1 L24.0,77.2 L24.3,76.4 L26.8,76.3 L26.3,75.8 L25.2,76.2 L25.3,75.2 L24.8,76.1 L23.4,76.0 L23.2,74.5 L24.9,73.5 L22.7,74.8 L22.3,74.0 L23.3,71.5 L24.5,73.5 L25.2,72.5 L28.2,72.3 L30.3,73.8 L30.2,75.0 L31.4,74.8 L33.2,72.9 L31.8,69.7 L33.0,70.1 L37.2,67.8 L37.9,71.6 L35.6,78.3 L34.2,78.7 L31.6,80.7 L30.7,80.3 L28.2,81.5 Z'} ] },
+    nomi: ['Chidi','Ngozi','Emeka','Chioma','Tunde','Amara','Ifeanyi','Folake','Segun','Aisha','Musa','Adaeze','Obi','Bola','Kunle','Zainab','Yusuf','Ifeoma','Chukwu','Funke'],
+    nomiM: ['Chidi','Emeka','Tunde','Ifeanyi','Segun','Musa','Obi','Kunle','Yusuf','Chukwu'],
+    nomiF: ['Ngozi','Chioma','Amara','Folake','Aisha','Adaeze','Bola','Zainab','Ifeoma','Funke'],
+    cognomi: ['Okafor','Adeyemi','Okonkwo','Eze','Bello','Abubakar','Okoro','Adebayo','Nwosu','Ibrahim','Olawale','Mohammed','Afolayan','Danjuma','Ogunleye','Uche','Sani','Balogun','Nnamdi','Obi'],
+    partiti: [
+      { id:'ng_apc', nome:'APC',          orientamento:'centrodestra',   base:{ pensionati:0.4, cetomedio:0.3, imprenditori:0.3 }, forza:36, asse:1 },
+      { id:'ng_pdp', nome:'PDP',          orientamento:'centro',         base:{ lavoratori:0.4, pensionati:0.3, cetomedio:0.3 },  forza:29, asse:0 },
+      { id:'ng_lp',  nome:'Labour Party', orientamento:'centrosinistra', base:{ giovani:0.5, lavoratori:0.3, cetomedio:0.2 },    forza:22, asse:-1 },
+      { id:'ng_nnpp', nome:'NNPP',        orientamento:'populista',      base:{ lavoratori:0.5, giovani:0.3, cetomedio:0.2 },    forza:8,  asse:0 },
+      { id:'ng_apga', nome:'APGA',        orientamento:'regionalista',   base:{ cetomedio:0.5, imprenditori:0.3, lavoratori:0.2 }, forza:5,  asse:0 },
+    ],
+  },
+};
+/* paese attivo (scambiato a inizio partita); default Italia */
+let PAESE = PAESI.italia;
+
+/* ============================================================================
+   SCENARI — Build B: preset d'epoca. Uno scenario è CONFIGURAZIONE, non nuovi
+   motori: sovrappone a un PAESE base la lista-partiti dell'epoca, un seed
+   economico e un'era (usata da eraViva() per filtrare i pool di eventi).
+   'presente' = default = nessun override (il gioco resta identico a prima).
+   Applicato da setScenario() (ui.js) che CLONA PAESI[paese] senza mutarlo.
+
+   ⚠ SCOPE-FLAG (lotto 1): solo la corsia ATTIVISTA_EV è era-gated. I pool
+   nazionali (ARCHI/EVENTS/DOSSIERS...) NON sono ancora taggati per epoca →
+   nel '50 possono ancora affiorare contenuti contemporanei. Il tagging
+   completo dei pool nazionali è il LOTTO 2 (non fingere che il '50-nazionale
+   sia già anacronismo-free).
+   ============================================================================ */
+/* ============================================================================
+   P2 — LA VALUTA SEGUE IL PAESE (annotazione #8). Conversione DISPLAY-ONLY sul choke-point euro() (ui.js):
+   i numeri interni del gioco restano in € (economia.pil ecc. sono € mld) — cambia solo la resa a schermo.
+   `sym` = prefisso già pronto (glifo singolo senza spazio, sigle multi-carattere con spazio finale).
+   `cross` = moltiplicatore €→valuta (colonna "Cross da €" di CIFRE-ECONOMICHE.md, tassi medi 2024 IRS).
+   L'EUROZONA NON è in questa mappa: euro() la lascia al ramo € attuale, intatto al byte. Anche il '50 italiano
+   (lira, S.valuta) ha la precedenza: non passa di qui. Fonte: IRS yearly-average 2024 (per-USD), cross = tasso/0,924.
+   ============================================================================ */
+const VALUTE = {
+  regnounito: { sym:'£',    cross:0.847,  nome:'sterline' },
+  usa:        { sym:'$',    cross:1.082,  nome:'dollari' },
+  canada:     { sym:'C$ ',  cross:1.483,  nome:'dollari canadesi' },
+  australia:  { sym:'A$ ',  cross:1.641,  nome:'dollari australiani' },
+  giappone:   { sym:'¥',    cross:163.8,  nome:'yen' },
+  coreasud:   { sym:'₩',    cross:1476,   nome:'won' },
+  brasile:    { sym:'R$ ',  cross:5.835,  nome:'real' },
+  messico:    { sym:'MX$ ', cross:19.84,  nome:'pesos messicani' },
+  india:      { sym:'₹',    cross:90.56,  nome:'rupie' },
+  sudafrica:  { sym:'R ',   cross:19.83,  nome:'rand' },
+  /* Nigeria: la naira NON è nella tabella IRS. Tasso preso dal Treasury Reporting Rate 31/12/2024 = 1.540,0000 ₦/USD
+     (fiscaldata.treasury.gov, riga "Nigeria-Naira") → cross = 1540/0,924 = 1666,7. AVVERTENZA (doc-di-stato): questo è
+     un tasso SPOT 31/12, mentre gli altri 15 sono MEDIE annue IRS — piccola incoerenza di concetto, accettata perché
+     l'IRS non pubblica la naira ed è resa solo cosmetica. Chi rilegge fra sei mesi: ecco il perché. */
+  nigeria:    { sym:'₦',    cross:1666.7, nome:'naira' },
+  /* Argentina: mostrata in DOLLARI USA (prassi reale argentina per le macro-grandezze; e l'unico modo di non stampare
+     numeri già vecchi — il peso è passato da 915 a 1.243/USD in un anno). cross = quello del dollaro (1,082). */
+  argentina:  { sym:'US$ ', cross:1.082,  nome:'dollari' },
+};
+
+const SCENARI = {
+  presente: { id:'presente', era:null, nome:'Presente' },   // default: nessun override
+  italia1950: {
+    id:'italia1950', era:'italia1950', nome:'Italia 1950', anno:1950, paese:'italia',
+    /* Build B 1b — anni di mandato già trascorsi all'avvio: nel 1950 sei a "anno 3/5" del parlamento del '48
+       (turnInMandate=2 → l'elezione naturale del motore cade a gennaio 1953: lo snodo «legge truffa»). */
+    turnMandato: 2,
+    /* Build B (ii) — override sul clone-PAESE: nel '50 non esiste l'UE (niente pesoUE/Bruxelles/PE/enti-UE, tutto
+       cond:PAESE.ue diventa inerte) e il calendario elettorale è d'epoca (niente «Elezioni europee», dirette dal 1979). */
+    ue: false,
+    intermedie: [ {tipo:'Elezioni amministrative', mese:28, tocca:'tutti'}, {tipo:'Elezioni regionali', mese:44, tocca:'regione'} ],
+    /* Mappa politica — baseline elezioni 18 aprile 1948 (forze ≈ % voti '48, somma ~100).
+       base:{gruppo:peso} usa le chiavi di GROUPS; asse -2..+2; gruppoUE cosmetico nel pilot. */
+    partiti: [
+      { id:'i50_dc',    nome:'DC',                orientamento:'centro',         base:{ cattolici:0.4, cetomedio:0.3, imprenditori:0.2, pensionati:0.1 }, forza:48, asse:0,  gruppoUE:'popolari'      },
+      /* AVANZAMENTO Fase 2 — split del Fronte Popolare (la lista-'48) nei due partiti reali: già nel 1953 correvano
+         separati (PCI 22,6% · PSI 12,7%). Entrambi asse −2 → RESTANO FUORI dal blocco-apparentamento del '53
+         (DC+PSDI+PLI+PRI, |Δasse|≤1): la matematica della legge-truffa è preservata (il totale è 100, il blocco
+         centrista invariato). L'APERTURA A SINISTRA (Lotto 4) sarà il PSI che si sposta verso la compatibilità. */
+      { id:'i50_pci',   nome:'PCI',                orientamento:'sinistra',       base:{ lavoratori:0.6, giovani:0.4 },                                    forza:22, asse:-2, gruppoUE:'sinistra'      },
+      { id:'i50_psi',   nome:'PSI',                orientamento:'sinistra',       base:{ lavoratori:0.6, giovani:0.4 },                                    forza:9,  asse:-2, gruppoUE:'socialisti'    },
+      { id:'i50_psdi',  nome:'PSDI',              orientamento:'centrosinistra', base:{ lavoratori:0.5, cetomedio:0.5 },                                  forza:7,  asse:-1, gruppoUE:'socialisti'    },
+      { id:'i50_pnm',   nome:'Monarchici',        orientamento:'destra',         base:{ pensionati:0.5, imprenditori:0.5 },                               forza:5,  asse:2,  gruppoUE:'conservatori'  },
+      { id:'i50_pli',   nome:'PLI',               orientamento:'centrodestra',   base:{ imprenditori:0.6, cetomedio:0.4 },                                forza:4,  asse:1,  gruppoUE:'liberali'      },
+      { id:'i50_pri',   nome:'PRI',               orientamento:'centro',         base:{ cetomedio:0.6, giovani:0.4 },                                     forza:3,  asse:0,  gruppoUE:'liberali'      },
+      { id:'i50_msi',   nome:'MSI',               orientamento:'destra',         base:{ pensionati:0.5, cetomedio:0.5 },                                  forza:2,  asse:2,  gruppoUE:'noniscritti'   },
+    ],
+    /* Seed economico in MAGNITUDINE-LIRE (fix cifre d'epoca): PIL ~14.900 mld di lire (reddito nazionale '51,
+       sourceato), debito 31% del PIL (sale a 38% nel '70), deficit contenuto. Il motore è a RAPPORTI (% di PIL) →
+       unit-agnostico: cambiano numero+label, non le formule. */
+    economia: { pil:14900, debito:31, deficit:-2 },
+    /* Cantiere B — difficoltà d'epoca. debtAncora: l'àncora fiscale RELATIVA al seed (default 135 = presente):
+       fiducia e interessi si muovono rispetto al punto di partenza dell'epoca, non a una soglia assoluta —
+       col debito a 31 la fiducia non è più inchiodata a 100 e l'asse crisi-fiscale rivive.
+       logorioEra: il rate del logorio da incumbency (default presente 0.002) TARATO sul declino storico
+       DC 48,5%('48)→40,1%('53) — valore dalla taratura empirica a 9 celle (vedi walk). */
+    debtAncora: 31,
+    logorioEra: 0.012,
+    /* Valuta d'epoca: la lira, non l'euro. euro() (ui.js) legge S.valuta e ancóra a «mld di lire» (l'unità del '50 —
+       14.900 mld di lire, non l'auto-«tln»). Presente = nessuna valuta = € identico. */
+    valuta: { sym:'L.', mld:'mld lire', mln:'mln lire' },   // unità corta: due cifre-lire convivono nella riga-bilancio a 375px
+    /* Quota di spesa pubblica d'epoca (DISPLAY-only: la «Spesa pubblica» del pannello Stato = PIL×quota; il motore-deficit
+       usa FISCAL/rapporti, mai questo numero). Oggi ~48%; nel '50 lo Stato pesava ~20-25% del PIL → 0,22 ≈ 3.278 mld lire. */
+    quotaSpesa: 0.22,
+    intro: "Italia, primi anni Cinquanta. La ricostruzione è a buon punto e il Piano Marshall irrora l'economia, ma la guerra fredda spacca il paese tra la DC atlantica di De Gasperi e la sinistra del Fronte Popolare.",
+    /* Build B — pelle d'epoca: briefing di contesto mostrato UNA VOLTA all'avvio (in proseguiAvvio, prima del gabinetto).
+       3 paragrafi = 3 chiavi i18n corte. Segue la linea calibrata: De Gasperi = cronaca; l'ombra = «reti che nessuno nomina» (mai «Gladio»). Per-scenario: ogni epoca futura avrà il suo. */
+    contesto: [
+      "Italia, 1950. Il paese si rialza dalle macerie: la produzione ha ritrovato i livelli d'anteguerra e gli aiuti del Piano Marshall nutrono la ricostruzione — ma il Mezzogiorno resta povero, e milioni scelgono la valigia dell'emigrante.",
+      "La Democrazia Cristiana di De Gasperi guida un'Italia atlantica — entrata nella NATO l'anno scorso, schierata a Occidente nella guerra fredda che si accende. Ma il paese è spaccato in due: il mondo cattolico e moderato da un lato, dall'altro il Fronte Popolare di comunisti e socialisti, la più forte sinistra dell'Occidente. La Chiesa pesa su tutto; nel buio, reti che nessuno nomina si preparano al peggio.",
+      "Davanti a te: ricostruire, riformare la terra, sviluppare il Sud, onorare un'alleanza e tenere insieme un paese diviso. È l'alba del tuo decennio.",
+    ],
+  },
+};
+
+/* Build B (b) — la LEGGE TRUFFA come SCELTA di governo. Carta-decisione iniettata da genAgenda nell'anno pre-voto
+   (1952), SOLO per il premier nel '50 (one-shot). Neutra: spiega meccanismo + posta, nessun giudizio; entrambe
+   legittime. Approvare è una scommessa (costo divisivo ora → premio enorme sopra il 50%, ma boomerang se manchi).
+   NON è dentro EVENTS: non viene pescata a caso, la piazza genAgenda deterministicamente. */
+const LEGGE_TRUFFA_EV = {
+  id:'legge_truffa', kick:'Legge elettorale', tono:'grave',
+  t:'Il premio di maggioranza',
+  text:"Il governo può introdurre il premio di maggioranza in vista del voto: se la tua coalizione supera il 50% dei voti, ottiene il 64,4% dei seggi. È una mossa contestata — l'opposizione la bolla come «legge truffa» — e se approvi ma manchi la soglia, ti si ritorce contro.",
+  ch:[
+    { l:'Approva la legge sul premio', e:'La scommessa: sopra il 50% prendi il 64,4% dei seggi · un filo di consenso ora, il contraccolo se manchi',
+      f:function(){ S.leggeTruffa='approvata'; allG(-2); } },   // costo divisivo immediato (storicamente fedele: divisiva già all'approvazione) → la scelta ha una posta
+    { l:'Non approvarla', e:'La via prudente: elezione proporzionale, nessun premio e nessun rischio',
+      f:function(){ S.leggeTruffa='respinta'; } },
+  ],
+};
+
+/* AVANZAMENTO Fase 2 · Lotto 4 — SNODI '60 come SCELTE di governo (pattern legge-truffa): carte-decisione iniettate da
+   genAgenda nel '62-63, solo per il premier nel '50, one-shot. Neutre: due strade legittime, nessun giudizio. Il '63
+   riallineamento legge S.apertura per il ramo (storico vs controfattuale); il boomerang-PLI è recuperabile (forza, non sconfitta). */
+const APERTURA_EV = {
+  id:'apertura_sinistra', kick:'Svolta politica', tono:'grave',
+  t:'L\'apertura a sinistra',
+  text:'La formula centrista si è logorata. Puoi allargare la maggioranza al PSI — l\'apertura a sinistra, la svolta del decennio — o tenere la coalizione di centro collaudata. Due strade legittime, due paesi possibili.',
+  ch:[
+    { l:'Apri la maggioranza al PSI', e:'La svolta organica se hai il consenso per reggerla · se esposto, la reazione moderata premia il PLI (recuperabile)',
+      f:function(){ S.apertura='apri'; var forte=(S.ind.consenso>=48); S.aperturaEsito=forte?'organica':'boomerang'; gd('lavoratori',3); gd('giovani',2);
+        if(forte){ gd('cetomedio',1); S.log.unshift({t:T('Apertura a sinistra'),x:T('Il PSI entra nella maggioranza: nasce il centro-sinistra organico.')}); }
+        else { repd(-2); allG(-1); S.log.unshift({t:T('Apertura a sinistra'),x:T('La svolta divide: la reazione moderata monta, ma la partita resta aperta.')}); } } },
+    { l:'Tieni la formula centrista', e:'Stabilità collaudata · il logorio prosegue, il paese non cambia passo',
+      f:function(){ S.apertura='no'; S.aperturaEsito='centrismo'; gd('cetomedio',2); gd('cattolici',1); S.log.unshift({t:T('Centrismo'),x:T('La formula di centro tiene: niente svolta, niente scossone moderato.')}); } },
+  ],
+};
+const ENEL_EV = {
+  id:'dilemma_enel', kick:'Energia', tono:'grave',
+  t:'L\'energia elettrica allo Stato?',
+  text:'L\'energia elettrica è in mano a pochi grandi gruppi privati. Puoi nazionalizzarla in un ente pubblico — l\'Enel — o lasciarla al mercato. Due visioni dell\'economia, entrambe difendibili.',
+  ch:[
+    { l:'Nazionalizza: nasce l\'Enel', e:'L\'energia come servizio pubblico · consenso a sinistra, i mercati reagiscono (recuperabile)',
+      f:function(){ var forte=(S.ind.consenso>=48); S.enel=forte?'nazionalizzata':'contraccolpo'; gd('lavoratori',4); gd('giovani',2); gd('imprenditori',-4);
+        if(!forte){ if(S.gMod!=null)S.gMod-=0.3; repd(-2); S.log.unshift({t:T('Enel'),x:T('L\'energia passa allo Stato: i mercati reagiscono, ma il colpo è assorbibile.')}); }
+        else { S.log.unshift({t:T('Enel'),x:T('Nasce l\'Enel: l\'energia elettrica diventa un servizio pubblico.')}); } } },
+    { l:'Lascia l\'energia ai privati', e:'Il mercato tiene l\'energia · imprese e capitali contenti, la sinistra scontenta',
+      f:function(){ S.enel='privata'; if(S.gMod!=null)S.gMod+=0.2; gd('imprenditori',4); gd('lavoratori',-3); S.log.unshift({t:T('Energia'),x:T('L\'energia resta ai privati: una scelta di campo diversa, non peggiore.')}); } },
+  ],
+};
+
+/* AVANZAMENTO/CURA · Lotto P3 (#9) — CARTA-RICHIAMO delle correnti. Iniettata da genAgenda quando una corrente
+   scivola sotto la soglia critica-ma-RECUPERABILE (umore<40), PRIMA che monti la sfida avversariale (<35): mai
+   l'imboscata a freddo (il caso-Giacomo, dove a 30 era già tardi). Gentile, non un nag vuoto: porta alla scheda con
+   opzioni VERE (curare o tirare dritto, entrambe legittime). Cooldown 8 mesi (non naggare). */
+const RICHIAMO_CORRENTI_EV = {
+  id:'richiamo_correnti', kick:'Il partito', tono:'grave',
+  t:'I tuoi ti aspettano',
+  text:'Da tempo non ti fai vedere in sezione, e la corrente che ti ha sempre sostenuto comincia a mugugnare: non è ancora una rivolta, ma senza un segno lo diventerà. Un gesto ora vale doppio.',
+  ch:[
+    { l:'Passi a incontrarli, di persona', e:'Il legame si rinsalda · rubi un po\' di tempo al governo',
+      f:function(){ if(S.correnti){ var c=S.correnti.slice().sort(function(a,b){return a.umore-b.umore;})[0]; if(c && typeof corrented==='function') corrented(c.id,12); if(typeof tutteCorrenti==='function') tutteCorrenti(3); } if(S.ind&&S.ind.consenso!=null) S.ind.consenso=clamp(S.ind.consenso-1,0,100); S.log.unshift({t:T('Il partito'),x:T('Hai ricucito coi tuoi: la corrente si placa.')}); } },
+    { l:'Tieni la rotta, li richiamerai dopo', e:'Il governo prima · il malumore resta, e può montare',
+      f:function(){ S.log.unshift({t:T('Il partito'),x:T('Hai rimandato: una scelta legittima, ma il malumore cova.')}); } },
+  ],
+};
+
+/* ===== G2+G4 — IL COLORE D'EPOCA NON-POLITICO (registro LEGGERO). «Il paese parla d'altro»: beat brevi di respiro,
+   iniettati ~1 ogni 2 mesi dallo scheduler (che CEDE davanti a un grave in corso). EFFETTI ZERO per costruzione —
+   nessuna valuta si muove, quindi il farming della leggerezza non esiste. PALETTI DOPPI: nessuna persona reale,
+   nessun titolo di canzone/film, nessun marchio (mai il nome: «il siparietto della pubblicità», «la melodia che
+   tutti canticchiano»); tono da corsivo di giornale, mai demenziale; il leggero NON commenta mai la politica. ===== */
+const BEAT_LEGGERI = [
+  // ---- Anni '50 ----
+  {id:'lg50_schedina', era:'universale', registro:'leggero', kick:'Il paese', t:'La schedina della domenica', text:'Nei bar non si parla d\'altro: pronostici, colonne raddoppiate, e il sogno di fare «13». Per una mattina la politica può aspettare.', ch:[
+    {l:'Giochi anche tu una colonna', e:'Due firme e una speranza', f:function(){}},
+    {l:'Lasci sognare gli altri', e:'Ti diverte guardarli discutere', f:function(){}} ]},
+  {id:'lg50_festival', era:'italia1950', codaFino:1969, registro:'leggero', cond:()=>S.year>=1951, kick:'Il paese', t:'La canzone che tutti canticchiano', text:'Da qualche sera la radio manda sempre la stessa melodia, e ormai la fischietta il paese intero: dal barbiere all\'ufficio.', ch:[
+    {l:'La canticchi anche tu', e:'Entra in testa e non esce più', f:function(){}},
+    {l:'Preferisci il silenzio', e:'Ognuno ha i suoi gusti', f:function(){}} ]},
+  {id:'lg50_giro', era:'italia1950', codaFino:1969, registro:'leggero', kick:'Il paese', t:'La corsa che ferma il paese', text:'La radio è accesa in piazza e la gente si ferma ad ascoltare la tappa: per un\'ora nessuno pensa ad altro.', ch:[
+    {l:'Ti fermi ad ascoltare anche tu', e:'Un\'ora rubata, senza rimpianti', f:function(){}},
+    {l:'Tiri dritto, hai da fare', e:'La corsa andrà avanti lo stesso', f:function(){}} ]},
+  {id:'lg50_cinema', era:'italia1950', codaFino:1969, registro:'leggero', kick:'Il paese', t:'Le sale piene', text:'La domenica si va al cinema: si ride con la commedia, e intanto fuori dai confini premiano i film che raccontano la miseria vera.', ch:[
+    {l:'Vai a vedere la commedia', e:'Due ore di risate', f:function(){}},
+    {l:'Scegli il film che fa pensare', e:'Esci in silenzio', f:function(){}} ]},
+  {id:'lg50_carosello', era:'italia1950', codaFino:1969, registro:'leggero', cond:()=>S.year>=1957, kick:'Il paese', t:'Il siparietto della sera', text:'Prima di andare a letto i bambini aspettano lo spettacolino della pubblicità: due minuti di storielle, e poi tutti a dormire.', ch:[
+    {l:'Lo guardi con loro', e:'Poi a letto, promesso', f:function(){}},
+    {l:'Li lasci ai nonni', e:'Hai carte da leggere', f:function(){}} ]},
+  {id:'lg50_sagra', era:'italia1950', codaFino:1969, registro:'leggero', kick:'Il paese', t:'La sagra del paese', text:'Per un giorno la piazza è bancarelle, luminarie e ballo: si mangia in strada e si balla fino a tardi.', ch:[
+    {l:'Ci fai un giro anche tu', e:'Una sera come tutti', f:function(){}},
+    {l:'Passi a salutare e via', e:'Giusto il tempo di farti vedere', f:function(){}} ]},
+  {id:'lg50_radio', era:'italia1950', codaFino:1962, registro:'leggero', kick:'Il paese', t:'La radio della sera', text:'Dopo cena la famiglia si stringe intorno all\'apparecchio per il programma delle nove: si ascolta in silenzio, come a teatro.', ch:[
+    {l:'Ti siedi ad ascoltare', e:'Mezz\'ora senza pensieri', f:function(){}},
+    {l:'Lavori mentre parlano', e:'La radio come sottofondo', f:function(){}} ]},
+  {id:'lg50_riffa', era:'italia1950', registro:'leggero', kick:'Il paese', t:'La riffa della festa', text:'Alla festa si vendono i biglietti della riffa: il primo premio è un vitello, e tutti fanno finta di non volerlo.', ch:[
+    {l:'Compri un biglietto', e:'Non si sa mai', f:function(){}},
+    {l:'Offri e non partecipi', e:'Il vitello lo vinca un altro', f:function(){}} ]},
+  {id:'lg50_ballo', era:'italia1950', registro:'leggero', kick:'Il paese', t:'Il ballo del sabato', text:'Nella sala da ballo la fisarmonica attacca alle nove: qualche fidanzamento comincia lì, tra un valzer e una mazurca.', ch:[
+    {l:'Fai un ballo anche tu', e:'Le gambe ricordano', f:function(){}},
+    {l:'Resti a guardare dal bordo', e:'Si sta bene anche così', f:function(){}} ]},
+  {id:'lg50_mare', era:'italia1950', codaFino:1969, registro:'leggero', kick:'Il paese', t:'I primi bagni', text:'Col treno della domenica le famiglie scoprono il mare: ombrelloni prestati, panini nella carta, e il ritorno con la sabbia nelle scarpe.', ch:[
+    {l:'Ci porti la famiglia', e:'Una domenica che si ricorda', f:function(){}},
+    {l:'Rimandi a un\'altra volta', e:'Il mare non scappa', f:function(){}} ]},
+  // ---- Anni '60 ----
+  {id:'lg60_festival_tv', era:'italia1960', registro:'leggero', cond:()=>S.year>=1958, kick:'Il paese', t:'Il Festival, ora in televisione', text:'La canzone arriva ovunque nello stesso istante, e il lunedì se ne discute in ogni ufficio: chi doveva vincere, chi è stato scippato.', ch:[
+    {l:'Lo guardi fino in fondo', e:'Anche tu avrai la tua opinione', f:function(){}},
+    {l:'Ti fai raccontare il finale', e:'Basta il riassunto', f:function(){}} ]},
+  {id:'lg60_jukebox', era:'italia1960', registro:'leggero', cond:()=>S.year>=1960, kick:'Il paese', t:'Il jukebox nel bar', text:'Una moneta, un pulsante, e i ragazzi scelgono la musica: i quarantacinque giri girano fino a sera.', ch:[
+    {l:'Metti una moneta anche tu', e:'Scegli la più allegra', f:function(){}},
+    {l:'Bevi il caffè e vai', e:'Il volume è alto', f:function(){}} ]},
+  {id:'lg60_cinema_oro', era:'italia1960', registro:'leggero', cond:()=>S.year>=1958, kick:'Il paese', t:'L\'età d\'oro delle sale', text:'Si fa la fila per lo spettacolo della domenica, e il cinema italiano viene ammirato anche fuori dai confini.', ch:[
+    {l:'Fai la fila come tutti', e:'Vale l\'attesa', f:function(){}},
+    {l:'Aspetti la settimana prossima', e:'Ci sarà meno gente', f:function(){}} ]},
+  {id:'lg60_stadio', era:'italia1960', registro:'leggero', cond:()=>S.year>=1958, kick:'Il paese', t:'Lo stadio pieno', text:'La domenica il paese si divide per novanta minuti — e il lunedì torna amico, con qualche sfottò in più.', ch:[
+    {l:'Ci vai, in mezzo alla gente', e:'Novanta minuti da chiunque altro', f:function(){}},
+    {l:'Segui il finale alla radio', e:'Meglio della folla', f:function(){}} ]},
+  {id:'lg60_varieta', era:'italia1960', registro:'leggero', cond:()=>S.year>=1958, kick:'Il paese', t:'Il varietà del sabato sera', text:'Una sola trasmissione, e le strade si svuotano: chi non ha l\'apparecchio va dal vicino.', ch:[
+    {l:'Ti siedi davanti anche tu', e:'Il sabato è sacro', f:function(){}},
+    {l:'Approfitti del silenzio fuori', e:'Le strade vuote sono un lusso', f:function(){}} ]},
+  {id:'lg60_agosto', era:'italia1960', registro:'leggero', cond:()=>S.year>=1960, kick:'Il paese', t:'L\'agosto che svuota le città', text:'Le fabbriche chiudono, i treni partono carichi, il mare si riempie: per tre settimane il paese è altrove.', ch:[
+    {l:'Parti anche tu, qualche giorno', e:'Il paese può aspettare', f:function(){}},
+    {l:'Resti: la città vuota è tua', e:'Si lavora meglio', f:function(){}} ]},
+  {id:'lg60_gita', era:'italia1960', registro:'leggero', cond:()=>S.year>=1960, kick:'Il paese', t:'La gita della domenica', text:'L\'utilitaria carica fino al tetto, il picnic sul prato, e la fila infinita al ritorno: il rito nuovo delle famiglie.', ch:[
+    {l:'Carichi tutti e parti', e:'La fila fa parte del rito', f:function(){}},
+    {l:'Resti a casa, in pace', e:'Niente coda al ritorno', f:function(){}} ]},
+  {id:'lg60_rotocalchi', era:'italia1960', registro:'leggero', cond:()=>S.year>=1958, kick:'Il paese', t:'I rotocalchi', text:'Nelle sale d\'attesa si sfogliano le riviste illustrate: fotografie a colori, curiosità dal mondo, e l\'oroscopo della settimana.', ch:[
+    {l:'Ne sfogli uno anche tu', e:'Cinque minuti di leggerezza', f:function(){}},
+    {l:'Torni ai tuoi fascicoli', e:'Le curiosità aspettano', f:function(){}} ]},
+  {id:'lg60_sceneggiato', era:'italia1960', registro:'leggero', cond:()=>S.year>=1960, kick:'Il paese', t:'Lo sceneggiato della sera', text:'Dopo cena tutti sulla stessa puntata, e il giorno dopo si commenta come se fosse successo a un vicino di casa.', ch:[
+    {l:'Non ti perdi la puntata', e:'Domani ne parlerai anche tu', f:function(){}},
+    {l:'Te la fai raccontare', e:'Il riassunto basta e avanza', f:function(){}} ]},
+  {id:'lg60_moda', era:'italia1960', registro:'leggero', cond:()=>S.year>=1960, kick:'Il paese', t:'La moda dalle vetrine', text:'Le ragazze copiano i modelli visti in città, le madri scuotono la testa, e alla fine cedono.', ch:[
+    {l:'Ti diverte guardarle discutere', e:'Ogni generazione la sua', f:function(){}},
+    {l:'Non ci fai caso', e:'Hai altri pensieri', f:function(){}} ]},
+  // ---- Presente / universale ----
+  {id:'lg_derby', era:'universale', registro:'leggero', kick:'Il paese', t:'Il derby divide la città', text:'Per una domenica la città si spacca in due colori, e nei bar non si parla d\'altro.', ch:[
+    {l:'Dici la tua sul risultato', e:'Rischi di scontentare metà città', f:function(){}},
+    {l:'Ti tieni fuori, sorridendo', e:'Su questo non si media', f:function(){}} ]},
+  {id:'lg_estate', era:'contemporanea', registro:'leggero', kick:'Il paese', t:'L\'estate che svuota le città', text:'Serrande abbassate, traffico sparito, la città che respira: per qualche settimana tutto rallenta.', ch:[
+    {l:'Ti concedi qualche giorno', e:'Anche il lavoro rallenta', f:function(){}},
+    {l:'Resti, con la città vuota', e:'Si ragiona meglio', f:function(){}} ]},
+  {id:'lg_festival_oggi', era:'contemporanea', registro:'leggero', kick:'Il paese', t:'Il festival di questi giorni', text:'Per una settimana il paese si divide su canzoni e classifiche, e ne parlano tutti — anche chi giura di non guardarlo.', ch:[
+    {l:'Lo guardi, senza dirlo in giro', e:'Come mezzo paese', f:function(){}},
+    {l:'Lo eviti con ostentazione', e:'Ne parlerai lo stesso', f:function(){}} ]},
+  {id:'lg_fenomeno', era:'contemporanea', registro:'leggero', kick:'Il paese', t:'Il fenomeno del momento', text:'Una cosa che nessuno capiva una settimana fa: ora la conoscono tutti, e fra una settimana sarà dimenticata.', ch:[
+    {l:'Ti fai spiegare di cosa si tratta', e:'Meglio capire che fingere', f:function(){}},
+    {l:'Lasci correre', e:'Passerà da solo', f:function(){}} ]},
+  {id:'lg_serie', era:'contemporanea', registro:'leggero', kick:'Il paese', t:'La serie di cui parlano tutti', text:'Per due settimane non si può aprire bocca senza rischiare di rovinare il finale a qualcuno.', ch:[
+    {l:'La guardi anche tu', e:'Almeno saprai di cosa parlano', f:function(){}},
+    {l:'Ti tieni fuori dagli spoiler', e:'Prima o poi ci arriverai', f:function(){}} ]},
+  {id:'lg_ricetta', era:'contemporanea', registro:'leggero', kick:'Il paese', t:'La ricetta che divide', text:'Una variante di un piatto tradizionale finisce in mezzo a una discussione infinita: ognuno ha la versione di sua nonna.', ch:[
+    {l:'Dici come la fai tu', e:'Anche questa è identità', f:function(){}},
+    {l:'Non ti immischi', e:'Su queste cose non si vince', f:function(){}} ]},
+  {id:'lg_caldo', era:'contemporanea', registro:'leggero', kick:'Il paese', t:'Il caldo di cui parlano tutti', text:'Tre giorni sopra la media e non si parla d\'altro: ventilatori esauriti, città deserte al pomeriggio.', ch:[
+    {l:'Ti lamenti come tutti', e:'Un rito nazionale', f:function(){}},
+    {l:'Fai finta di niente', e:'Passerà anche questo', f:function(){}} ]},
+  {id:'lg_rientro', era:'contemporanea', registro:'leggero', kick:'Il paese', t:'Il rientro di settembre', text:'Le città si riempiono di nuovo, i quaderni nuovi, e la sensazione che l\'anno cominci adesso.', ch:[
+    {l:'Ti concedi l\'ottimismo del rientro', e:'Settembre è il vero capodanno', f:function(){}},
+    {l:'Riprendi senza cerimonie', e:'Il lavoro non guarda il calendario', f:function(){}} ]},
+  {id:'lg_giochi', era:'contemporanea', registro:'leggero', kick:'Il paese', t:'I giochi che uniscono per due settimane', text:'Ci si sveglia presto per gare che nessuno seguiva l\'anno prima — e si diventa esperti di tutto.', ch:[
+    {l:'Ti alzi presto anche tu', e:'Due settimane di entusiasmo', f:function(){}},
+    {l:'Leggi i risultati la sera', e:'Il risultato non cambia', f:function(){}} ]},
+  {id:'lg_estiva', era:'contemporanea', registro:'leggero', kick:'Il paese', t:'La canzone dell\'estate', text:'Una melodia che a giugno nessuno conosceva e ad agosto sanno a memoria tutti, senza che nessuno l\'abbia scelta.', ch:[
+    {l:'Ti arrendi e la canticchi', e:'Non c\'è scampo', f:function(){}},
+    {l:'Cambi stazione', e:'La ritroverai altrove', f:function(){}} ]},
+  /* ===== AMPLIAMENTO leggeri (sweep: pool-leggeri per era magro → ripetizione). +10 colore d'epoca, effetti-zero,
+     de-dup fatto vs esistenti (5 candidati coperti tagliati: '60 spiaggia=agosto/autostrada=gita · presente sport-mondiale=giochi/tormentone+virale=fenomeno). Paletti: nessun nome reale, nessun titolo di canzone/film/marca. ===== */
+  // --- '50 (+5 → pool 15) ---
+  {id:'lg50_arena', era:'universale', registro:'leggero', kick:'Il paese', t:'Il cinema sotto le stelle', text:'D\'estate montano lo schermo tra due case: sedie di legno prese in prestito, il lenzuolo teso, e mezzo vicinato col naso all\'insù fino a mezzanotte.', ch:[
+    {l:'Ti porti la sedia da casa', e:'Meglio del salotto', f:function(){}},
+    {l:'Guardi in piedi dall\'ultima fila', e:'Si vede lo stesso', f:function(){}} ]},
+  {id:'lg50_fiera', era:'universale', registro:'leggero', kick:'Il paese', t:'La fiera campionaria', text:'Arriva la fiera: padiglioni pieni di novità mai viste, la folla che spinge per guardare, e per i bambini il gelato come premio della giornata.', ch:[
+    {l:'Ti perdi tra gli stand', e:'Il futuro in vetrina', f:function(){}},
+    {l:'Compri solo il gelato', e:'Il resto costa troppo', f:function(){}} ]},
+  {id:'lg50_stadio', era:'italia1950', codaFino:1969, registro:'leggero', kick:'Il paese', t:'La partita della domenica', text:'Il tram verso il campo è stracolmo di sciarpe; sugli spalti la radiolina all\'orecchio per gli altri risultati, e novanta minuti in cui il paese dimentica tutto.', ch:[
+    {l:'Ci vai col tram delle undici', e:'Meglio arrivare presto', f:function(){}},
+    {l:'Segui tutto dalla radiolina', e:'Il campo è troppo lontano', f:function(){}} ]},
+  {id:'lg50_dicembre', era:'universale', registro:'leggero', kick:'Il paese', t:'Le feste di dicembre', text:'Le luci in strada, i presepi alle finestre, e i parenti che tornano a tavola: per qualche giorno anche i musi lunghi si ammorbidiscono.', ch:[
+    {l:'Apparecchi per tutti', e:'Più siamo meglio è', f:function(){}},
+    {l:'Ti godi la calma prima dei parenti', e:'Durerà poco', f:function(){}} ]},
+  {id:'lg50_fotoromanzo', era:'italia1950', codaFino:1969, registro:'leggero', kick:'Il paese', t:'Il fotoromanzo che gira', text:'Il fascicolo passa di mano in mano: le storie a puntate, i sospiri, e le lettrici che se lo prestano finché non torna tutto sgualcito.', ch:[
+    {l:'Chiedi in prestito la puntata nuova', e:'La coda è lunga', f:function(){}},
+    {l:'Aspetti che finisca il giro', e:'Tanto le sai già', f:function(){}} ]},
+  // --- '60 (+3 → pool 13; spiaggia/autostrada tagliate per de-dup) ---
+  {id:'lg60_transistor', era:'italia1960', registro:'leggero', cond:()=>S.year>=1960, kick:'Il paese', t:'Il transistor', text:'La radio non è più un mobile del salotto: sta in tasca, e la musica segue i ragazzi al parco, in spiaggia, sotto i portici.', ch:[
+    {l:'Te ne fai prestare uno', e:'La musica ovunque', f:function(){}},
+    {l:'Preferisci il grammofono di casa', e:'Ognuno i suoi tempi', f:function(){}} ]},
+  {id:'lg60_quiz', era:'italia1960', registro:'leggero', cond:()=>S.year>=1958, kick:'Il paese', t:'Il quiz della sera', text:'Alla domanda difficile tutta la famiglia risponde a voce alta dal divano, convinta di saperne più del concorrente: si gioca da casa, senza vincere niente.', ch:[
+    {l:'Giochi anche tu dal divano', e:'La sapevi, giuri', f:function(){}},
+    {l:'Guardi e basta', e:'Il bello è vederli sudare', f:function(){}} ]},
+  {id:'lg60_complessi', era:'italia1960', registro:'leggero', cond:()=>S.year>=1962, kick:'Il paese', t:'I complessi dei giovani', text:'Chitarre elettriche in cantina, balli che i grandi trovano scandalosi, e una musica nuova che i ragazzi si sentono finalmente loro.', ch:[
+    {l:'Concedi che il ritmo è contagioso', e:'Anche a te un piede batte', f:function(){}},
+    {l:'Scuoti la testa come i grandi', e:'Ai tuoi tempi era altro', f:function(){}} ]},
+  // --- presente (+2 → pool 11; sport-mondiale/tormentone/virale tagliati per de-dup) ---
+  {id:'lg_concerto', era:'contemporanea', registro:'leggero', kick:'Il paese', t:'Il concerto dell\'estate', text:'Lo stadio pieno all\'inverosimile, e a un certo punto mille schermi accesi insieme fanno un cielo di lucine: per una sera è l\'unico posto dove essere.', ch:[
+    {l:'Alzi lo schermo anche tu', e:'Ci sei anche tu in quel cielo', f:function(){}},
+    {l:'Ti godi il buio senza filmare', e:'Resterà solo a te', f:function(){}} ]},
+  {id:'lg_festa_paese', era:'contemporanea', registro:'leggero', kick:'Il paese', t:'La festa di paese, oggi', text:'La piazza si riempie di banchi di cibo di strada e di un concertino dal vivo: la sagra di una volta, con le luci nuove e la fila per il panino gourmet.', ch:[
+    {l:'Fai il giro di tutti i banchi', e:'Un assaggio a testa', f:function(){}},
+    {l:'Ti siedi e ascolti la musica', e:'La fila può aspettare', f:function(){}} ]},
+];
+
+/* ===== F1 — LA TELEFONATA. Un'interruzione, non una carta: overlay a squillo, due opzioni secche, decisione a
+   caldo (timer ~13s, rimovibile via F1_TIMER). Cadenza rara (~1/4-6 mesi), trasversale ai registri, solo al governo
+   (L3 premier). Effetti PICCOLI e IMMEDIATI su valute che ESISTONO a L3 (groups/stampa/reputazione/fiducia/
+   sicurezza/debt — NON visibilità/credibilità, che a L3 premier sono nulle: verificato a terra). Ogni opzione muove
+   almeno una valuta garantita. `raffredda` = il costo minimo e RECUPERABILE dello squillo perso (mai una sanzione);
+   `squilloTxt` lo racconta. Le due leggere (amico, parente) non hanno lato-sbagliato: effetto zero, squillo indolore. */
+const F1_TIMER = true;        // in prova: se al playtest non piace, false → il telefono aspetta senza scadere (nessuna chirurgia)
+const F1_TIMER_MS = 13000;    // ~13s: unica sorgente per il setTimeout E per la barra CSS (--teldur)
+const F1_TELEFONATE = [
+  { id:'tel_segretario', chiamante:'Il segretario del partito', registro:'lavoro',
+    t:'Il segretario del partito', text:'«Domani sul voto serve compattezza. Posso contare su di te?»',
+    ch:[ { l:'Allinearti alla linea', e:'Partito compatto: la stampa legge coesione (stampa +)', f:function(){ stampad(2); } },
+         { l:'Prendere tempo', e:'Ti tieni le mani libere — ma il segretario mugugna (stampa −, statura +)', f:function(){ stampad(-1); repd(1); } } ],
+    raffredda:function(){ stampad(-1); }, squilloTxt:'Il segretario non ha gradito il silenzio: dovrai ricucire.' },
+
+  { id:'tel_alleato', chiamante:'L\'alleato di coalizione', registro:'grave', cond:function(){ return !!(PAESE&&PAESE.coalizione); },
+    t:'L\'alleato di coalizione', text:'«Se non ci ascoltate, la maggioranza scricchiola. Ne parliamo, adesso?»',
+    ch:[ { l:'Concedere qualcosa', e:'La maggioranza tiene (fiducia +); il ceto medio ti vede cedevole', f:function(){ if(S.ind&&S.ind.fiducia!=null) S.ind.fiducia=clamp(S.ind.fiducia+2,0,100); gd('cetomedio',-1); } },
+         { l:'Tenere il punto', e:'Fermezza premiata dal ceto medio; la maggioranza si tende (fiducia −)', f:function(){ gd('cetomedio',1); if(S.ind&&S.ind.fiducia!=null) S.ind.fiducia=clamp(S.ind.fiducia-2,0,100); } } ],
+    raffredda:function(){ if(S.ind&&S.ind.fiducia!=null) S.ind.fiducia=clamp(S.ind.fiducia-1,0,100); }, squilloTxt:'L\'alleato l\'ha presa come uno sgarbo: la maggioranza resta nervosa.' },
+
+  { id:'tel_direttore', chiamante:'Un direttore di giornale', registro:'lavoro',
+    t:'Un direttore di giornale', text:'«Mi dà una riga per la prima pagina di domani? Solo una battuta.»',
+    ch:[ { l:'Dare la battuta', e:'Il direttore è servito (stampa +); qualcuno la userà contro di te (statura −)', f:function(){ stampad(3); repd(-1); } },
+         { l:'«Nessun commento»', e:'Riservatezza che pesa: serietà notata fuori (statura +), il direttore resta a bocca asciutta (stampa −)', f:function(){ stampad(-2); repd(1); } } ],
+    raffredda:function(){ stampad(-2); }, squilloTxt:'Il direttore ci resta male: la stampa te lo ricorderà.' },
+
+  { id:'tel_ministro', chiamante:'Un ministro in difficoltà', registro:'lavoro', cond:function(){ return !!(S.ministers&&S.ministers.length>0); },
+    t:'Un ministro in difficoltà', text:'«Mi lascia solo, o mi difende in pubblico? Devo saperlo prima di stasera.»',
+    ch:[ { l:'Difenderlo apertamente', e:'Governo compatto (fiducia +); difendi un impresentabile (stampa −)', f:function(){ if(S.ind&&S.ind.fiducia!=null) S.ind.fiducia=clamp(S.ind.fiducia+1,0,100); stampad(-1); } },
+         { l:'Prendere le distanze', e:'Ti smarchi (stampa +); il governo appare meno coeso (fiducia −)', f:function(){ stampad(2); if(S.ind&&S.ind.fiducia!=null) S.ind.fiducia=clamp(S.ind.fiducia-1,0,100); } } ],
+    raffredda:function(){ if(S.ind&&S.ind.fiducia!=null) S.ind.fiducia=clamp(S.ind.fiducia-1,0,100); }, squilloTxt:'Il ministro si è sentito abbandonato al telefono.' },
+
+  { id:'tel_sindaco', chiamante:'Il sindaco di una città in crisi', registro:'lavoro',
+    t:'Il sindaco di una città in crisi', text:'«La mia città non aspetta oltre. Mi dice sì o mi dice no?»',
+    ch:[ { l:'Promettere aiuto', e:'Il territorio respira (lavoratori +); il conto sale un filo (debito +)', f:function(){ gd('lavoratori',2); if(S.ind) S.ind.debt+=0.3; } },
+         { l:'Rimandare', e:'Conti intatti; la città incassa il no (lavoratori −)', f:function(){ gd('lavoratori',-2); } } ],
+    raffredda:function(){ gd('lavoratori',-1); }, squilloTxt:'Il sindaco lo racconterà in giro: nessuna risposta.' },
+
+  { id:'tel_prefetto', chiamante:'Il prefetto', registro:'grave', cond:function(){ return S.paese==='italia' && (S.era&&S.era!=='contemporanea'); },
+    voce:'centralino',
+    t:'Il prefetto', text:'«Il centralino le passa la comunicazione — prefetto in linea. La piazza è tesa: attendo istruzioni.»',
+    ch:[ { l:'Linea di fermezza', e:'Ordine ristabilito (sicurezza +); i giovani mugugnano', f:function(){ if(S.ind) S.ind.sicurezza=clamp((S.ind.sicurezza||50)+1,0,100); gd('giovani',-1); } },
+         { l:'Prudenza, niente forzature', e:'La piazza si calma da sé (giovani +); qualcuno ti dà il molle (sicurezza −)', f:function(){ gd('giovani',1); if(S.ind) S.ind.sicurezza=clamp((S.ind.sicurezza||50)-1,0,100); } } ],
+    raffredda:function(){ stampad(-1); }, squilloTxt:'Il prefetto ha atteso invano: dai territori filtra la tua assenza.' },
+
+  { id:'tel_sindacato', chiamante:'Un leader sindacale', registro:'lavoro',
+    t:'Un leader sindacale', text:'«Domani si ferma tutto, se non ci vediamo stasera. Dipende da lei.»',
+    ch:[ { l:'Aprire un tavolo', e:'Lo sciopero rientra (lavoratori +); gli industriali diffidano', f:function(){ gd('lavoratori',3); gd('imprenditori',-1); } },
+         { l:'Tenere la linea', e:'Non arretri (imprese +); il sindacato ti rinfaccia la chiusura (lavoratori −)', f:function(){ gd('imprenditori',2); gd('lavoratori',-2); } } ],
+    raffredda:function(){ gd('lavoratori',-1); }, squilloTxt:'Il sindacato ha letto il silenzio come una chiusura.' },
+
+  { id:'tel_opposizione', chiamante:'Il capo dell\'opposizione', registro:'grave',
+    t:'Il capo dell\'opposizione', text:'«Le parlo da avversario: ma su questo conviene a entrambi. Resta tra noi?»',
+    ch:[ { l:'Trattare sottotraccia', e:'Sblocchi qualcosa da statista (statura +); qualcosa filtrerà (stampa −): il prezzo è questo', f:function(){ repd(2); stampad(-1); } },
+         { l:'Rifiutare il canale', e:'Niente accordi al buio: lineare (stampa +); l\'occasione sfuma (statura −)', f:function(){ stampad(1); repd(-1); } } ],
+    raffredda:function(){ repd(-1); }, squilloTxt:'L\'avversario non richiamerà due volte.' },
+
+  { id:'tel_amico', chiamante:'Un vecchio amico', registro:'leggero',
+    t:'Un vecchio amico', text:'«Sono in città per due giorni — un caffè lo troviamo, o sei diventato irraggiungibile?»',
+    ch:[ { l:'Trovare il tempo', e:'Un\'ora rubata, senza calcoli', f:function(){} },
+         { l:'Rimandare a presto', e:'Capirà — nessuna colpa', f:function(){} } ],
+    raffredda:null, squilloTxt:'L\'amico capisce e riattacca: ci si rivede.' },
+
+  { id:'tel_parente', chiamante:'Un parente', registro:'leggero',
+    t:'Un parente', text:'«Domani è quel giorno, mi raccomando: non dimenticare. Lo so che hai da fare.»',
+    ch:[ { l:'Esserci', e:'Le cose che contano davvero', f:function(){} },
+         { l:'Scusarti in anticipo', e:'Un fiore e una telefonata, la prossima volta', f:function(){} } ],
+    raffredda:null, squilloTxt:'Lascia detto che non fa niente — ma un po\' ci resta.' },
+];
+
+/* ===== F4 — LA NOTTE ELETTORALE. I LANCI DI STAMPA fra le ondate: voce d'epoca col meccanismo P5-bis (gemella
+   era-taggata preferita, generico come fallback E come presente). `fase` = indice dell'ondata. ===== */
+const NOTTE_LANCI = [
+  // fase 0 — le urne si chiudono (c'è su OGNI ondata: così l'altezza del modale non balla, 375px senza salti)
+  {id:'ln_open',   fase:0, testo:'Le urne si sono chiuse: comincia lo spoglio.'},
+  {id:'ln50_open', fase:0, era:'italia1950', testo:'I seggi hanno chiuso: nelle sezioni si comincia a contare a mano, sotto le lampade.'},
+  {id:'ln60_open', fase:0, era:'italia1960', testo:'Urne chiuse: le prime schede escono dalle cabine, la diretta è cominciata.'},
+  // fase 1 — le prime proiezioni si aggiustano
+  {id:'ln_proj',   fase:1, testo:'Le prime proiezioni correggono l\'exit poll: il quadro si muove.'},
+  {id:'ln50_proj', fase:1, era:'italia1950', testo:'Arrivano i telegrammi dalle prefetture: le prime cifre correggono le voci della sera.'},
+  {id:'ln60_proj', fase:1, era:'italia1960', testo:'Negli studi elettorali in televisione rifanno i conti: la proiezione si sposta.'},
+  // fase 2 — i territori (l'ondata-sapore: la geografia del voto)
+  {id:'ln_terr',   fase:2, testo:'Arrivano i dati dalle grandi città: la geografia del voto prende forma.'},
+  {id:'ln50_terr', fase:2, era:'italia1950', testo:'Le sezioni del Mezzogiorno danno i primi numeri; dal Nord i telegrammi arrivano più fitti.'},
+  {id:'ln60_terr', fase:2, era:'italia1960', testo:'Le città industriali del Nord scrutinano in fretta; il Sud arriverà più tardi.'},
+  // fase 4 — la proclamazione
+  {id:'ln_fin',    fase:4, testo:'Lo spoglio è chiuso: i numeri sono definitivi.'},
+  {id:'ln50_fin',  fase:4, era:'italia1950', testo:'È arrivato l\'ultimo telegramma: il Paese conosce il suo Parlamento.'},
+  {id:'ln60_fin',  fase:4, era:'italia1960', testo:'La diretta si chiude: il risultato è davanti al Paese, in ogni salotto.'},
+];
+/* F4 — LA DICHIARAZIONE A CALDO (penultima ondata). NON tocca i seggi: muove il dopo (stampa, morale delle
+   correnti). Effetti piccoli, tre strade tutte legittime — la cura vale anche nella notte. */
+const DICH_NOTTE = [
+  {id:'prudenza',  l:'«Aspettiamo i dati definitivi»',            e:'Sobrio · la stampa apprezza la misura',
+   stampa:3,  correnti:1, beat:'Hai scelto la prudenza: nessun trionfalismo, e i cronisti lo annotano.'},
+  {id:'rivendica', l:'«Il Paese ci ha dato fiducia»',             e:'La base si accende · qualcuno ti trova precipitoso',
+   stampa:-2, correnti:3, beat:'Hai rivendicato il risultato a caldo: i tuoi esultano, i cronisti meno.'},
+  {id:'affondo',   l:'«Chi ha perso ne tragga le conseguenze»',   e:'Colpo netto · stampa e avversari si irrigidiscono',
+   stampa:-4, correnti:2, beat:'Hai affondato il colpo nella notte: un gesto che gli avversari non dimenticheranno.'},
+];
+
+/* D4 — il PILASTRO datato dell'ingresso ONU (14 dic 1955): one-shot, scatta con l'orologio nell'era '50 (vedi genAgenda).
+   Da qui l'orizzonte ONU si apre (l'apice atlantico/europeo lascia il posto a quello ONU nell'avanzamento). Fatto storico
+   ✓ verificato (ris. 995(X), package deal); nessuna persona reale che parla o agisce. */
+const PILASTRO_ONU_EV = {
+  id:'pilastro_onu', era:'italia1950', tono:'florido', kick:'Nazioni Unite',
+  t:"L'Italia entra alle Nazioni Unite",
+  text:"Il 14 dicembre 1955, dopo anni di veto, l'Italia è ammessa alle Nazioni Unite con un accordo di pacchetto: si apre un orizzonte nuovo per la diplomazia del paese. Come accogli il traguardo?",
+  ch:[
+    { l:'Celebra il ritorno tra le grandi nazioni', e:'Orgoglio nazionale; una porta che si apre',
+      f:function(){ if(S.ind&&S.ind.reputazione!=null) S.ind.reputazione=clamp(S.ind.reputazione+4,0,100); if(S.relInt&&S.relInt.consesso!=null) S.relInt.consesso=clamp(S.relInt.consesso+8,0,100); } },
+    { l:'Un traguardo sobrio, ora il lavoro vero', e:'Nessuna enfasi; la credibilità cresce lo stesso', pleases:'tecnico',
+      f:function(){ if(S.relInt&&S.relInt.consesso!=null) S.relInt.consesso=clamp(S.relInt.consesso+5,0,100); if(S.ind&&S.ind.reputazione!=null) S.ind.reputazione=clamp(S.ind.reputazione+2,0,100); } },
+  ],
+};
+
+/* DIFFICOLTA — moltiplicatori per livello, scelti a inizio partita (vivono in S.diff). Tutto qui, facile da tarare.
+   `normale` è neutro (×1, soglie attuali) => il gioco resta identico a prima. Letti via dif() nei calcoli esistenti. */
+/* capitaleMult = velocità della salita (×crescita capitale); degradoMult = quanto morde l'inazione
+   (×effetti negativi degli appuntamenti stampa/partito e ×decadenza serenità). A difficile si sale più
+   piano e si degrada più in fretta; a facile il contrario. */
+const DIFFICOLTA = {
+  facile:    { interessi:0.5, dragDebito:0.6, costoSpese:0.9,  salitaConsenso:1.3,  discesaConsenso:0.75, sogliaCrisi:18, freqEventi:0.5, freqScandali:0.6, driftLealtaGiu:0.7,
+               sogliaMercati:50, sogliaDeclass:30, sogliaCrisiFid:18, sfiduciaMult:0.7, spreadMult:0.6, mesiInsolvenza:6, rischioSfiducia:0.6, swingGoverno:1, logorioMult:0.7, cicloAmp:0.4, capitaleMult:1.3, degradoMult:0.7 },
+  normale:   { interessi:1,   dragDebito:1,   costoSpese:1,    salitaConsenso:1,    discesaConsenso:1,    sogliaCrisi:24, freqEventi:1,   freqScandali:1,   driftLealtaGiu:1,
+               sogliaMercati:60, sogliaDeclass:40, sogliaCrisiFid:25, sfiduciaMult:1,   spreadMult:1,   mesiInsolvenza:4, rischioSfiducia:1, swingGoverno:1, logorioMult:1, cicloAmp:0.7, capitaleMult:1.0, degradoMult:1.0 },
+  difficile: { interessi:1.7, dragDebito:1.5, costoSpese:1.15, salitaConsenso:0.7,  discesaConsenso:1.35, sogliaCrisi:30, freqEventi:1.7, freqScandali:1.8, driftLealtaGiu:1.5,
+               sogliaMercati:65, sogliaDeclass:45, sogliaCrisiFid:30, sfiduciaMult:1.5, spreadMult:1.5, mesiInsolvenza:3, rischioSfiducia:1.6, swingGoverno:1, logorioMult:1.5, cicloAmp:0.95, capitaleMult:0.7, degradoMult:1.4 },
+};
+
+/* ===== CORRENTI DI PARTITO (lotto primarie) — tre correnti UNIVERSALI, identiche per struttura
+   in ogni partito di ogni paese: la caratterizzazione è RELATIVA al partito (i Militanti di un
+   partito di destra tirano a destra, di uno di sinistra a sinistra, di uno di centro sono i puristi).
+   Scalabilità sui paesi futuri senza dati per-partito. Gli umori vivono in S.correnti (dato puro). ===== */
+const CORRENTI_DEF=[
+  {id:'fedelissimi', nome:'I Fedelissimi', a:'ai Fedelissimi', du:'dei Fedelissimi', desc:'La cerchia del leader: li muove il tuo successo — consenso e vittorie.'},
+  {id:'pontieri',    nome:'I Pontieri',    a:'ai Pontieri',    du:'dei Pontieri',    desc:'L\'ala di governo: li muovono sobrietà, ministri tecnici e mercati tranquilli.'},
+  {id:'militanti',   nome:'I Militanti',   a:'ai Militanti',   du:'dei Militanti',   desc:'L\'ala identitaria: li muovono la base soddisfatta e ministri di linea.'},
+];
+
+/* ===== TRATTI (sistema narrativo, lotto 1) — chi sei diventato. Derivati PURI dai contatori della
+   biografia (tratti() in model.js, nessuno stato salvato): si guadagnano alle soglie e gli eventi
+   futuri li interrogano con haTratto(id). In questo lotto: etichette + 2 assaggi testuali. ===== */
+const TRATTI_DEF=[
+  {id:'riformatore',  nome:'Riformatore',     riga:'Le leggi portano la tua firma.'},
+  {id:'falco',        nome:'Falco dei conti', riga:'I numeri prima del consenso.'},
+  {id:'pugnoduro',    nome:'Pugno duro',      riga:'L\'ordine come linea di governo.'},
+  {id:'progressista', nome:'Progressista',    riga:'Il riformismo sociale come bussola.'},
+  {id:'tribuno',      nome:'Tribuno',         riga:'La voce della pancia del paese.'},
+  {id:'bandiera',     nome:'Bandiera',        riga:'Coerente con l\'anima del partito, sempre.'},
+  {id:'equilibrista', nome:'Equilibrista',    riga:'Mai schierato fino in fondo: il centro del guado.'},
+  {id:'spregiudicato',nome:'Spregiudicato',   riga:'L\'audacia ha un prezzo, e l\'hai pagato volentieri.'},
+  /* asse-vita (lotto VITA PERSONALE) — nomi INVARIABILI (mai flessi per genere, come i titoli istituzionali) */
+  {id:'difamiglia',   nome:'Di famiglia',           riga:'Gli affetti, prima della carriera.'},
+  {id:'sacrificio',   nome:'Gli affetti sacrificati',riga:'Tutto per la carriera, anche i suoi.'},
+];
+
+/* ===== IL PERSONAGGIO (sistema narrativo, lotto 2) — chi sei all'inizio.
+   Background professionale: un credito e una diffidenza sui gruppi (spinta d'esordio che il motore
+   riassorbe coi mesi — convergenza 0,12/mese, non determinismo) + al più UN gancio extra (stampa,
+   reputazione) o un gancio INERTE registrato per i lotti futuri (esposizione, difesa).
+   I numeri sono tarati: nessun background sposta più di ~1 punto di consenso ponderato all'avvio. ===== */
+const BACKGROUNDS=[
+  {id:'sindacalista', nome:'Sindacalista',          groups:{lavoratori:6, imprenditori:-4},
+   desc:'Una vita nelle vertenze: i lavoratori ti conoscono, le imprese diffidano.'},
+  {id:'imprenditore', nome:'Imprenditore',          groups:{imprenditori:6, lavoratori:-4},
+   desc:'Hai fatto impresa: il mondo produttivo ti dà credito, i sindacati ti studiano.'},
+  {id:'magistrato',   nome:'Avvocato / Magistrato', groups:{cetomedio:5, imprenditori:-2},
+   desc:'La legge come mestiere: il ceto medio si fida; negli ambienti d\'affari qualche brivido.'},   // gancio inerte: esposizione giudiziaria più bassa (lotto giudiziario)
+  {id:'docente',      nome:'Docente universitario', groups:{giovani:6, imprenditori:-2},
+   desc:'Dalle aule alla politica: i giovani ti ascoltano; «teorico», mormora chi produce.'},
+  {id:'militare',     nome:'Militare',              groups:{pensionati:5, giovani:-4},
+   desc:'Una carriera in divisa: ordine e patria rassicurano i più anziani, i giovani diffidano.'},   // gancio inerte: voce diversa sui temi di difesa (testi futuri)
+  {id:'medico',       nome:'Medico',                groups:{pensionati:4}, reputazione:3,
+   desc:'Una vita in corsia: fiducia trasversale e credibilità tecnica anche all\'estero.'},
+  {id:'giornalista',  nome:'Giornalista',           groups:{cetomedio:3}, stampa:6,
+   desc:'Vieni dalle redazioni: la stampa ti tratta da collega, almeno all\'inizio.'},
+];
+/* Background familiare: colore + un piccolo gancio. La dinastia non tocca i gruppi: fa partire le
+   correnti interne più benevole (64 invece di 60, in initCorrenti) — i contatti di partito. */
+const FAMIGLIE=[
+  {id:'umili',    nome:'Origini umili',     groups:{lavoratori:3},
+   desc:'Sei partito dal basso: la base popolare ti sente uno di famiglia.'},
+  {id:'borghese', nome:'Famiglia borghese', groups:{cetomedio:2},
+   desc:'Studi, ordine, professioni: il ceto medio si riconosce in te.'},
+  {id:'dinastia', nome:'Dinastia politica',
+   desc:'Un cognome che apre porte: il partito ti accoglie meglio. E ti osserva di più.'},   // gancio inerte: più esposizione futura
+];
+
+/* ===== L'INCHIESTA (sistema narrativo, lotto 3) — l'arco giudiziario a fasi, un mese ciascuna.
+   %PM = il pubblico ministero (archetipo, nome generato a inizio arco). Le difese si accumulano in
+   punti-difesa e pesano sulla sentenza (formula in esitoSentenza, game.js). Registro d'agenzia,
+   mai morboso. Testi ritoccabili a costo zero. ===== */
+const INCHIESTA_FASI=[
+ {fase:1, kick:'Giustizia', t:'Avviso di garanzia',
+  text:'La procura ti iscrive nel registro degli indagati: il fascicolo, coordinato da %PM, parla di favori e di una gestione opaca del potere. Il palazzo trattiene il fiato.',
+  difese:['avvocato','collabora','tempo']},
+ {fase:2, kick:'Giustizia', t:'L\'indagine stringe',
+  text:'Acquisizioni negli uffici, testimoni convocati: il fascicolo di %PM cresce. I giornali contano le carte; i tuoi contano i giorni.',
+  difese:['avvocato','attacca','vittima','tempo']},
+ {fase:3, kick:'Giustizia', t:'Il processo',
+  text:'Rinvio a giudizio: l\'aula è piena e il paese guarda. La linea di difesa va scelta adesso.',
+  difese:['collabora','attacca','patteggia','tempo']},
+ {fase:4, kick:'Giustizia', t:'La sentenza',
+  text:'Il collegio si ritira per la camera di consiglio. Comunque vada, resterà negli archivi.',
+  difese:['sentenza']},
+];
+const DIFESE_INCHIESTA={
+ avvocato: {l:'Il grande avvocato',     e:'Un collegio di grido riduce il rischio; le parcelle d\'oro fanno discutere'},
+ collabora:{l:'Collabora coi giudici',  e:'Consegni le carte e rispondi a tutto: l\'ombra si accorcia, la base storce il naso'},
+ attacca:  {l:'Attacca i giudici',      e:'«Toghe politicizzate»: regge solo se il paese è con te; la stampa giudica'},
+ vittima:  {l:'Fai la vittima',         e:'Il bersaglio di un complotto: funziona solo se i media ti coprono'},
+ patteggia:{l:'Patteggia',              e:'Chiudi subito con una macchia certa: niente sentenza, un prezzo sicuro'},
+ tempo:    {l:'Temporeggia',            e:'Lasci lavorare gli avvocati: nessuna mossa, il calendario decide'},
+ sentenza: {l:'Affronta il verdetto',   e:'In aula, a testa alta: ora decide il collegio'},
+};
+
+/* ===== GLI ARCHI NARRATIVI (sistema narrativo, lotto 4) — storie multi-mese a GRAFO.
+   Ogni arco è un piccolo grafo di `nodi`: la carta presentata dipende solo dal nodo corrente, e la
+   scelta (`goto`) determina il nodo successivo o chiude l'arco (`goto:null` → finale, con `fatto`
+   datato in biografia + `epi` per l'epilogo). Riconvergenze ammesse (più rami tornano sullo stesso
+   nodo). Effetti SOLO dai sistemi esistenti (gd/allG/repd/stampad/espoSale/debt/gMod…), nessun numero
+   nuovo. `cond` = quando il mondo rende sensato l'arco; `prob` = chance mensile quando cond è vera;
+   `cooldown` mesi prima che lo stesso arco possa ripartire. `dove:'governo'` (in questo lotto tutti:
+   sono dilemmi che si giocano con le leve del potere). Testi d'agenzia, ritoccabili a costo zero. ===== */
+const ARCHI_DEF=[
+ /* A — VERTENZA INDUSTRIALE (economico): la fabbrica che chiude, secondo come la gestisci si salva,
+    si cede o esplode in sciopero generale. Riconverge: la tensione può tornare al tavolo. */
+ {id:'vertenza',era:'universale', famiglia:'Economia', dove:'governo', prob:0.13, cooldown:30, titolo:'la vertenza',
+  cond:()=>S.ind.unemp>8,
+  filo:()=>({nome: nomeGenere('m')+' '+rnd(PAESE.cognomi), ruolo:'il leader sindacale', arc:'militante'}),   // L11-1
+  nodi:{
+   start:{kick:'Lavoro', t:'Una grande fabbrica annuncia esuberi', text:'Un grande stabilimento del paese annuncia migliaia di esuberi. %FILO, %RUOLO, monta la protesta e ti sfida: o lo Stato interviene, o il mercato fa il suo corso.', ch:[
+     {l:'Tavolo di crisi: fondi pubblici per i posti', e:'Salvi l\'occupazione, il conto sale', peso:-1, eco:'Dopo che hai aperto ai sindacati, ', goto:'salvataggio', costo:{debito:0.5},f:()=>{S.ind.debt+=0.5; gd('lavoratori',4); gd('imprenditori',-1);}},
+     {l:'Lascia al mercato: punta sulla riconversione', e:'Disciplina di mercato; %FILO chiama alla mobilitazione', peso:1, eco:'Dopo il tuo no ai fondi, ', goto:'tensione', f:()=>{gd('imprenditori',3); gd('lavoratori',-4);}},
+   ]},
+   salvataggio:{kick:'Lavoro', t:'Il salvataggio regge, ma costa', text:'%ECO i soldi pubblici tamponano, però il bilancio scricchiola. %FILO ora vuole garanzie sul futuro dello stabilimento.', ch:[
+     {l:'Controllo pubblico, niente cessioni', e:'Tieni il punto coi lavoratori; il debito pesa', peso:-1, eco:'Dopo l\'impegno sul controllo pubblico, ', goto:'resa', costo:{debito:0.6},f:()=>{S.ind.debt+=0.6; gd('lavoratori',3); gd('cetomedio',-1);}},
+     {l:'Apri a un compratore, con condizioni', e:'Una via di mercato; %FILO diffida', peso:1, eco:'Dopo l\'apertura al compratore, ', goto:'resa', f:()=>{gd('imprenditori',2); gd('lavoratori',-2); repd(2);}},
+   ]},
+   tensione:{kick:'Ordine pubblico', t:'Scioperi a oltranza, la città si blocca', text:'%ECO senza intervento la protesta dilaga: presìdi, blocchi, %FILO in prima fila. La città si ferma.', ch:[
+     {l:'Apri al negoziato adesso', e:'Torni al tavolo: si può ancora ricucire', peso:-1, eco:'Dopo il tuo passo verso il tavolo, ', goto:'resa', f:()=>{gd('lavoratori',2);}},
+     {l:'Sgomberi e linea dura', e:'Ordine ripristinato; %FILO grida al tradimento', peso:1, eco:'Dopo lo sgombero, ', goto:'resa', f:()=>{S.ind.sicurezza+=1; gd('lavoratori',-3); gd('giovani',-2);}},
+   ]},
+   resa:{kick:'Lavoro', t:'%FILO convoca l\'assemblea decisiva', text:'%ECO la vertenza arriva al dunque: %FILO chiama l\'assemblea che deciderà tutto. Tocca a te chiudere la partita.', ch:[
+     {l:'Tieni la linea fino in fondo', e:'Non arretri di un passo', peso:1, eco:'Dopo aver tenuto la linea fino all\'assemblea, ', goto:(a)=>a.peso>=1?'rottura':'accordo', f:()=>{}},
+     {l:'Offri l\'intesa che chiude', e:'Concedi qualcosa per la pace sociale', peso:-1, eco:'Dopo l\'offerta d\'intesa, ', goto:(a)=>a.peso>=1?'rottura':'accordo', costo:{debito:0.2},f:()=>{S.ind.debt+=0.2;}},
+   ]},
+   rottura:{kick:'Ordine pubblico', t:'La rottura con %FILO', text:'%ECO lo strappo è totale: %FILO proclama lo sciopero generale e il paese si spacca attorno alla fabbrica.', ch:[
+     {l:'Governi contro la piazza, fino in fondo', e:'Tieni il punto; il paese si divide', goto:null, fatto:'Lo scontro con %FILO finito in rottura e sciopero generale.', epi:'Hai piegato la vertenza di %FILO con la fermezza, dividendo il paese.', f:()=>{gd('lavoratori',-5); gd('imprenditori',3); stampad(-3);}},
+     {l:'All\'ultimo, una concessione per spegnerlo', e:'Eviti il peggio, ma la frattura resta', goto:null, fatto:'Lo sciopero generale rientrato all\'ultimo, dopo lo strappo con %FILO.', epi:'Hai sfiorato la rottura con %FILO, poi hai ceduto all\'ultimo.', costo:{debito:0.4},f:()=>{S.ind.debt+=0.4; gd('lavoratori',2); gd('imprenditori',-1);}},
+   ]},
+   accordo:{kick:'Lavoro', t:'L\'accordo con %FILO', text:'%ECO all\'assemblea si arriva a un\'intesa: %FILO firma, lo stabilimento ha un futuro, i conti un peso in più.', ch:[
+     {l:'Firmi l\'accordo e lo rivendichi', e:'Pace sociale; te ne assumi il costo', goto:null, fatto:'La vertenza chiusa con l\'accordo firmato con %FILO.', epi:'Hai chiuso la vertenza di %FILO con un accordo, a prezzo dei conti.', costo:{debito:0.5},f:()=>{S.ind.debt+=0.5; gd('lavoratori',5); gd('cetomedio',-1);}},
+     {l:'Firmi, ma scarichi i costi sul compratore', e:'Salvi i conti; %FILO ottiene meno del promesso', goto:null, fatto:'L\'intesa con %FILO chiusa al ribasso.', epi:'Hai chiuso con %FILO un\'intesa al ribasso, salvando i conti.', f:()=>{gd('lavoratori',2); gd('imprenditori',2);}},
+   ]},
+  }},
+ /* B — ONDATA SOCIALE (sociale): un movimento di piazza che monta. Ascolto o repressione. */
+ {id:'ondata',era:'universale', famiglia:'Società', dove:'governo', prob:0.13, cooldown:30, titolo:'l\'ondata',
+  cond:()=>Math.min(S.groups.giovani, S.groups.lavoratori)<38,
+  filo:()=>({nome: nomeGenere('m')+' '+rnd(PAESE.cognomi), ruolo:'la voce del movimento', arc:'militante'}),   // L11-1 (condivide il volto con `vertenza`: nomi diversi, vedi report)
+  nodi:{
+   start:{kick:'Società', t:'Un movimento di piazza monta', text:'Un movimento spontaneo riempie le piazze: giovani, precari, comitati. %FILO, %RUOLO, ne diventa il simbolo, e cresce ogni settimana.', ch:[
+     {l:'Ascolta: apri un tavolo con %FILO', e:'Li riconosci; rischi di legittimarli', peso:-1, eco:'Dopo l\'apertura al dialogo, ', goto:'dialogo', f:()=>{gd('giovani',2);}},
+     {l:'Minimizza: «una minoranza rumorosa»', e:'Niente concessioni; %FILO rilancia', peso:1, eco:'Dopo le tue parole sprezzanti, ', goto:'escalation', f:()=>{gd('giovani',-2);}},
+   ]},
+   dialogo:{kick:'Società', t:'Il tavolo è aperto: ora servono risposte', text:'%ECO %FILO si siede, ma vuole fatti, non foto di rito.', ch:[
+     {l:'Concessioni concrete', e:'Il movimento si placa; qualcosa costa', peso:-1, eco:'Dopo le concessioni, ', goto:'resa', costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; gd('giovani',4); gd('lavoratori',2);}},
+     {l:'Promesse vaghe, prendi tempo', e:'Tamponi oggi; %FILO capisce il bluff', peso:1, eco:'Dopo le promesse a vuoto, ', goto:'escalation', f:()=>{gd('giovani',-3);}},
+   ]},
+   escalation:{kick:'Ordine pubblico', t:'Cortei e occupazioni si moltiplicano', text:'%ECO le piazze si induriscono: occupazioni, scontri, %FILO alza la posta. La scelta non si rinvia più.', ch:[
+     {l:'Apri un canale, anche ora', e:'Tardi, ma tendi una mano a %FILO', peso:-1, eco:'Dopo la mano tesa in extremis, ', goto:'resa', f:()=>{gd('giovani',1);}},
+     {l:'Linea dell\'ordine, senza cedere', e:'Tieni il punto; la frattura si allarga', peso:1, eco:'Dopo la linea dura, ', goto:'resa', f:()=>{S.ind.sicurezza+=1; gd('giovani',-2); gd('cetomedio',1);}},
+   ]},
+   resa:{kick:'Società', t:'%FILO chiama alla mobilitazione finale', text:'%ECO %FILO convoca la manifestazione che dirà se l\'ondata si placa o travolge tutto. Come la affronti?', ch:[
+     {l:'Sgomberi e ristabilisci l\'ordine', e:'La forza, fino in fondo', peso:1, eco:'Dopo la scelta dell\'ordine, ', goto:(a)=>a.peso>=1?'repressione':'apertura', f:()=>{}},
+     {l:'Un\'apertura pubblica a %FILO', e:'Provi a disinnescare riconoscendolo', peso:-1, eco:'Dopo il riconoscimento pubblico, ', goto:(a)=>a.peso>=1?'repressione':'apertura', f:()=>{}},
+   ]},
+   repressione:{kick:'Ordine pubblico', t:'La piazza di %FILO repressa', text:'%ECO le strade vengono sgomberate con la forza: %FILO esce di scena, ma la frattura resta scolpita.', ch:[
+     {l:'Rivendichi l\'ordine ristabilito', e:'Strade libere; il paese resta diviso', goto:null, fatto:'La piazza di %FILO repressa con la forza.', epi:'Hai represso l\'ondata di %FILO: ordine ristabilito, frattura aperta.', f:()=>{S.ind.sicurezza+=2; gd('giovani',-5); gd('cetomedio',2); stampad(-4);}},
+     {l:'Accompagni l\'ordine con un gesto', e:'Sgomberi, ma offri qualcosa: meno strappo', goto:null, fatto:'La piazza di %FILO sgomberata, con un\'apertura tardiva.', epi:'Hai chiuso l\'ondata di %FILO con la forza e un gesto tardivo.', f:()=>{S.ind.sicurezza+=1; gd('giovani',-2);}},
+   ]},
+   apertura:{kick:'Società', t:'L\'intesa con %FILO', text:'%ECO l\'ondata si placa attorno a un\'intesa: %FILO la presenta come una vittoria, tu come responsabilità.', ch:[
+     {l:'Concessioni vere, e te ne prendi il merito', e:'Il movimento rientra; qualcosa costa', goto:null, fatto:'L\'ondata di %FILO assorbita con le concessioni.', epi:'Hai disinnescato l\'ondata di %FILO ascoltandola.', costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; gd('giovani',5); gd('lavoratori',2);}},
+     {l:'Un compromesso di facciata che regge', e:'Spegni l\'incendio al minimo prezzo', goto:null, fatto:'L\'ondata di %FILO spenta con un compromesso misurato.', epi:'Hai spento l\'ondata di %FILO con un compromesso di facciata.', f:()=>{gd('giovani',2);}},
+   ]},
+  }},
+ /* C — CRISI DIPLOMATICA (internazionale): tensione con un partner. Fermezza o mediazione. */
+ {id:'diplomatica',era:'universale', famiglia:'Esteri', dove:'governo', prob:0.12, cooldown:30, titolo:'la crisi diplomatica',
+  cond:()=>S.ind.reputazione!=null && S.ind.reputazione<45,
+  filo:()=>({nome: nomeGenere('f')+' '+rnd(PAESE.cognomi), ruolo:'l\'omologa del paese rivale', arc:'diplomatico'}),   // L11-1: arc-diplomatico è donna → nome+ruolo al femminile
+  nodi:{
+   start:{kick:'Esteri', t:'Tensione con un partner strategico', text:'%FILO, %RUOLO, alza la voce: dazi minacciati, un\'ambasciata richiamata. La crisi è sul tavolo.', ch:[
+     {l:'Linea ferma: difendi l\'interesse nazionale', e:'Mostri i muscoli; %FILO rilancia', peso:1, eco:'Dopo la tua linea dura, ', goto:'escalation', f:()=>{gd('cetomedio',1); repd(-2); relIntMuovi('rivale',-3);}},
+     {l:'Diplomazia: apri un canale con %FILO', e:'Tendi la mano; la pancia mormora «debole»', peso:-1, eco:'Dopo l\'apertura del canale, ', goto:'distensione', f:()=>{repd(2); gd('cetomedio',-1); relIntMuovi('rivale',3);}},
+   ]},
+   distensione:{kick:'Esteri', t:'Il canale è aperto: come tratti con %FILO?', text:'%ECO le cancellerie lavorano sottotraccia. %FILO offre una via d\'uscita, ma chiede qualcosa in cambio.', ch:[
+     {l:'Una concessione per chiudere subito', e:'Crisi rientrata; concedi terreno', peso:-1, eco:'Dopo la concessione, ', goto:'resa', f:()=>{repd(3); gd('cetomedio',-1); relIntMuovi('rivale',3);}},
+     {l:'Tratti duro anche al tavolo', e:'Non regali nulla; %FILO si spazientisce', peso:1, eco:'Dopo il muro al tavolo, ', goto:'escalation', f:()=>{gd('cetomedio',1); repd(-1); relIntMuovi('rivale',-2);}},
+   ]},
+   escalation:{kick:'Esteri', t:'La crisi sale: ritorsioni economiche', text:'%ECO scattano le ritorsioni: dazi, contratti congelati, mercati nervosi. %FILO non arretra, e lo scontro morde l\'economia.', ch:[
+     {l:'Un passo indietro per salvare l\'economia', e:'Salvi i conti; incassi la figura', peso:-1, eco:'Dopo il passo indietro, ', goto:'resa', f:()=>{repd(-1); gd('cetomedio',-1); relIntMuovi('rivale',2);}},
+     {l:'Colpo su colpo con %FILO', e:'Non arretri; l\'economia paga', peso:1, eco:'Dopo lo scontro frontale, ', goto:'resa', f:()=>{repd(-3); S.gMod-=0.2; gd('imprenditori',-2); relIntMuovi('rivale',-4);}},
+   ]},
+   resa:{kick:'Esteri', t:'Il vertice decisivo con %FILO', text:'%ECO si arriva al vertice che chiude o rompe: faccia a faccia con %FILO, davanti a tutti.', ch:[
+     {l:'Tieni il punto fino in fondo', e:'Niente cedimenti davanti a %FILO', peso:1, eco:'Dopo la fermezza al vertice, ', goto:(a)=>a.peso>=1?'rottura':'intesa', f:()=>{}},
+     {l:'Cerchi la stretta di mano', e:'Punti a chiudere con dignità', peso:-1, eco:'Dopo la mano tesa al vertice, ', goto:(a)=>a.peso>=1?'rottura':'intesa', f:()=>{}},
+   ]},
+   rottura:{kick:'Esteri', t:'La rottura con %FILO', text:'%ECO il vertice salta: %FILO lascia il tavolo, la rottura è consumata e i mercati la registrano.', ch:[
+     {l:'Rivendichi la fermezza nazionale', e:'Orgoglio in patria; isolamento fuori', goto:null, fatto:'Lo scontro con %FILO degenerato in rottura.', epi:'Hai rotto con %FILO in nome dell\'interesse nazionale, pagando l\'isolamento.', f:()=>{repd(-5); S.gMod-=0.2; gd('cetomedio',2); relIntMuovi('rivale',-7);}},
+     {l:'Lasci uno spiraglio per il futuro', e:'Rompi, ma non bruci tutti i ponti', goto:null, fatto:'La rottura con %FILO, con uno spiraglio lasciato aperto.', epi:'Hai rotto con %FILO, tenendo un filo per il futuro.', f:()=>{repd(-3); relIntMuovi('rivale',-3);}},
+   ]},
+   intesa:{kick:'Esteri', t:'L\'intesa con %FILO', text:'%ECO al vertice si trova la quadra: %FILO firma, la crisi rientra, la tua reputazione internazionale ne esce rafforzata.', ch:[
+     {l:'Un\'intesa piena e rivendicata', e:'Reputazione su; la pancia ti dà del «cedevole»', goto:null, fatto:'La crisi con %FILO chiusa con un\'intesa piena.', epi:'Hai chiuso la crisi con %FILO da statista, ricucendo i rapporti.', f:()=>{repd(5); gd('cetomedio',-1); relIntMuovi('rivale',6);}},
+     {l:'Un\'intesa minima, salvando la faccia', e:'Chiudi senza esporti troppo', goto:null, fatto:'La crisi con %FILO chiusa con un\'intesa misurata.', epi:'Hai chiuso la crisi con %FILO con un\'intesa prudente.', f:()=>{repd(3); relIntMuovi('rivale',3);}},
+   ]},
+  }},
+ /* AGGRESSIONE (cantiere paesi reali e conflitti, FASE B) — l'arco RARO e GRAVE: una potenza revanscista (la Russia)
+    aggredisce un vicino. Lo Stato aggressore è NOMINATO (fissato nel `filo.pot`; %POTdet/%POTdi risolti da arcoSub→
+    potSub), il paese aggredito GENERICO; la neutralità è sulla TUA risposta, non sull'ambiguità dell'invasione. Il
+    climax è ADATTIVO dal `peso` (linea dura → respinta; via negoziale → tregua; mezzo → logoramento). Riusabile con
+    volti diversi cambiando il `filo`. prob bassa + cooldown lungo = raro («una volta in una carriera lunga»). */
+ {id:'aggressione', famiglia:'Esteri', dove:'governo', prob:0.01, cooldown:120, titolo:'l\'aggressione',
+  filo:()=>{ const p=(typeof potDi==='function'&&potDi('russia'))||{nome:'Russia',id:'russia'}; return {nome:p.nome, ruolo:'una potenza revanscista', pot:p.id||'russia'}; },
+  nodi:{
+   start:{kick:'Esteri', t:'Tamburi di guerra al confine', text:'%POTdet ammassa truppe al confine di un paese vicino. Le cancellerie temono il peggio; gli alleati guardano a te.', ch:[
+     {l:'Fermezza preventiva con gli alleati', e:'Deterrenza compatta; %POTdet ti marca', peso:1, eco:'Dopo la linea dura, ', goto:'invasione', f:()=>{relIntMuovi('alleanza',6); relIntMuovi('rivale',-5); repd(2); gd('cetomedio',1);}},
+     {l:'Tenti la via diplomatica', e:'Cerchi di disinnescare; la pancia teme la debolezza', peso:-1, eco:'Dopo il tentativo diplomatico, ', goto:'invasione', f:()=>{relIntMuovi('rivale',3); relIntMuovi('alleanza',-2); repd(1);}},
+   ]},
+   invasione:{kick:'Esteri', t:'L\'invasione', text:'%ECO%POTdet varca il confine: è guerra aperta. Il paese aggredito chiede aiuto, il mondo si schiera. Come rispondi?', ch:[
+     {l:'Sanzioni dure e armi agli aggrediti', e:'Schieramento netto; %POTdet ti dichiara ostile', peso:2, eco:'Dopo la linea atlantica, ', goto:'guerra', costo:{debito:1.2},f:()=>{relIntMuovi('alleanza',9); relIntMuovi('rivale',-10); relIntMuovi('consesso',4); S.gMod-=0.2; S.ind.debt+=1.2; repd(4); gd('giovani',-2); espoSale(2);}},
+     {l:'Sanzioni misurate, niente armi', e:'Condanni, ma prudente: nessuno del tutto contento', peso:0, eco:'Dopo la linea prudente, ', goto:'guerra', f:()=>{relIntMuovi('alleanza',-2); relIntMuovi('rivale',-3); relIntMuovi('consesso',2); S.gMod-=0.05;}},
+     {l:'Resti fuori: non è guerra tua', e:'Eviti i costi; l\'Occidente ti isola, %POTdet incassa', peso:-2, eco:'Dopo la scelta di restare fuori, ', goto:'guerra', f:()=>{relIntMuovi('alleanza',-9); relIntMuovi('consesso',-5); relIntMuovi('rivale',5); repd(-4); gd('giovani',2);}},
+   ]},
+   guerra:{kick:'Esteri', t:'La guerra si trascina', text:'%ECOi mesi passano: la guerra %POTdi logora i mercati e mette alla prova la tenuta del fronte. La stanchezza cresce.', ch:[
+     {l:'Tieni la linea a oltranza', e:'Sostegno fermo; l\'economia e la pazienza pagano', peso:1, eco:'Dopo la fermezza prolungata, ', goto:(a)=>a.peso>=2?'vittoria':'logoramento', f:()=>{relIntMuovi('alleanza',4); S.gMod-=0.15; gd('lavoratori',-2); repd(2);}},
+     {l:'Spingi per un negoziato', e:'Cerchi l\'uscita; i falchi ti accusano di cedere', peso:-1, eco:'Dopo la spinta al negoziato, ', goto:(a)=>a.peso<=0?'tregua':'logoramento', f:()=>{relIntMuovi('consesso',5); relIntMuovi('rivale',2); gd('cetomedio',1);}},
+   ]},
+   vittoria:{kick:'Esteri', t:'La tenuta paga', text:'%ECOil fronte regge e %POTdet arretra: l\'aggressione è respinta, a un prezzo che il paese ricorderà.', ch:[
+     {l:'Rivendichi la fermezza', e:'Statista del fronte libero; il conto economico resta', goto:null, fatto:'L\'aggressione %POTdi respinta dal fronte tenuto unito.', epi:'Tenne la linea contro l\'aggressione %POTdi, e il fronte resse.', f:()=>{relIntMuovi('alleanza',6); relIntMuovi('consesso',4); relIntMuovi('rivale',-6); repd(6); gd('cetomedio',2);}},
+   ]},
+   tregua:{kick:'Esteri', t:'La tregua', text:'%ECOsi arriva a una tregua negoziata: le armi tacciono, ma il confine resta una ferita aperta e nessuno canta vittoria.', ch:[
+     {l:'Difendi il compromesso', e:'La pace prima di tutto; i falchi mugugnano', goto:null, fatto:'La guerra %POTdi chiusa con una tregua negoziata.', epi:'Portò %POTdet al tavolo: una tregua amara, ma il sangue si fermò.', f:()=>{relIntMuovi('consesso',6); relIntMuovi('rivale',3); repd(3); gd('giovani',2);}},
+   ]},
+   logoramento:{kick:'Esteri', t:'Il logoramento', text:'%ECOla guerra si incancrenisce senza vincitori: i costi si accumulano, il fronte si sfilaccia, e il mondo si abitua all\'orrore.', ch:[
+     {l:'Incassi il logoramento', e:'Nessuna gloria, solo il conto', goto:null, fatto:'La guerra %POTdi trascinata in un logoramento senza esito.', epi:'La guerra %POTdi si trascinò sotto la sua guida, senza vinti né vincitori.', f:()=>{relIntMuovi('alleanza',-2); relIntMuovi('consesso',-2); S.gMod-=0.1; repd(-2);}},
+   ]},
+  }},
+ /* D — SCONTRO ISTITUZIONALE (politico-istituzionale): l'Alta Corte contro la tua riforma bandiera.
+    Istituzione DIVERSA dalla magistratura penale (non si sovrappone all'inchiesta). Lo strappo alza
+    l'esposizione: l'intreccio cross-sistema col lotto 3. */
+ {id:'istituzionale',era:'universale', famiglia:'Istituzioni', dove:'governo', prob:0.12, cooldown:30, titolo:'lo scontro con la Corte',
+  cond:()=>S.ultimaLegge!=null && (S.year*12+S.month)-S.ultimaLegge.mese<=8 && S.ind.fiducia!=null && S.ind.fiducia<62,
+  filo:()=>({nome: nomeGenere('f')+' '+rnd(PAESE.cognomi), ruolo:'la Presidente dell\'Alta Corte', arc:'magistrato'}),   // L11-1: arc-magistrato è donna → nome+ruolo al femminile
+  nodi:{
+   start:{kick:'Istituzioni', t:'L\'Alta Corte mette in dubbio la tua riforma', text:'%FILO, %RUOLO, solleva dubbi di legittimità sulla tua riforma bandiera: potrebbe bocciarla.', ch:[
+     {l:'Rispetta i rilievi, riscrivi la norma', e:'Garantismo; la base s\'aspettava di più', peso:-1, eco:'Dopo l\'apertura ai rilievi, ', goto:'riscrittura', f:()=>{repd(1);}},
+     {l:'Attacca: «giudici non eletti contro il popolo»', e:'Sfidi %FILO; lo scontro infiamma', peso:1, eco:'Dopo l\'attacco a %FILO, ', goto:'escalation', f:()=>{gd('cetomedio',-1); repd(-2);}},
+   ]},
+   riscrittura:{kick:'Istituzioni', t:'Riscrivere la norma: fino a che punto?', text:'%ECO devi riscrivere la riforma per superare i rilievi di %FILO. Quanto cedi alla Corte?', ch:[
+     {l:'Versione equilibrata che regge', e:'Norma solida; la base voleva di più', peso:-1, eco:'Dopo la riscrittura misurata, ', goto:'resa', f:()=>{repd(3); gd('cetomedio',1);}},
+     {l:'Ritocco di facciata, stessa sostanza', e:'Aggiri %FILO; un azzardo che ti espone', peso:1, eco:'Dopo il ritocco di facciata, ', goto:'resa', f:()=>{gd('cetomedio',-1); espoSale(4); repd(-1);}},
+   ]},
+   escalation:{kick:'Istituzioni', t:'Lo scontro istituzionale infiamma il paese', text:'%ECO il braccio di ferro con %FILO diventa scontro tra poteri: editoriali allarmati, piazze contrapposte.', ch:[
+     {l:'Cerchi un compromesso col garante', e:'Un passo indietro che salva le forme', peso:-1, eco:'Dopo l\'apertura al compromesso, ', goto:'resa', f:()=>{repd(2);}},
+     {l:'Forzi la mano: vai avanti comunque', e:'Sfida aperta a %FILO; ti esponi', peso:1, eco:'Dopo la forzatura, ', goto:'resa', f:()=>{repd(-3); espoSale(4); gd('cetomedio',-1);}},
+   ]},
+   resa:{kick:'Istituzioni', t:'Il verdetto di %FILO', text:'%ECO l\'Alta Corte si pronuncia: %FILO sta per leggere la decisione che chiude la partita. Come ti presenti all\'appuntamento?', ch:[
+     {l:'Da sfidante, fino all\'ultimo', e:'Non arretri davanti alla Corte', peso:1, eco:'Dopo la sfida fino all\'ultimo, ', goto:(a)=>a.peso>=1?'strappo':'composizione', f:()=>{}},
+     {l:'Da garante delle istituzioni', e:'Ti mostri rispettoso del verdetto', peso:-1, eco:'Dopo la mano tesa alle istituzioni, ', goto:(a)=>a.peso>=1?'strappo':'composizione', f:()=>{}},
+   ]},
+   strappo:{kick:'Istituzioni', t:'Lo strappo con %FILO', text:'%ECO lo scontro coi giudici diventa strappo istituzionale: %FILO denuncia il rischio per l\'equilibrio dei poteri.', ch:[
+     {l:'Vai avanti comunque, è la volontà popolare', e:'Sfida aperta; un azzardo che ti espone', goto:null, fatto:'Lo strappo istituzionale con %FILO e l\'Alta Corte.', epi:'Hai consumato uno strappo istituzionale sfidando %FILO.', f:()=>{repd(-5); if(S.ind.fiducia!=null) S.ind.fiducia=clamp(S.ind.fiducia-4,0,100); espoSale(8); gd('cetomedio',-1);}},
+     {l:'All\'ultimo, rientri nei binari', e:'Eviti lo strappo definitivo; ci perdi la faccia', goto:null, fatto:'Lo scontro con %FILO rientrato sul filo di lana.', epi:'Hai sfiorato lo strappo con %FILO, poi sei rientrato nei binari.', f:()=>{repd(-1);}},
+   ]},
+   composizione:{kick:'Istituzioni', t:'La composizione con %FILO', text:'%ECO si trova un punto d\'equilibrio: %FILO riconosce la tua disponibilità, la riforma regge nelle forme corrette.', ch:[
+     {l:'Una riforma solida, rispettosa della Corte', e:'Norma che dura; la base voleva di più', goto:null, fatto:'La riforma riscritta a regola d\'arte dopo i rilievi di %FILO.', epi:'Hai riscritto la riforma rispettando %FILO e la Corte.', f:()=>{repd(3); gd('cetomedio',1);}},
+     {l:'Salvi l\'impianto, cedendo sui dettagli', e:'Tieni la sostanza; concedi la forma', goto:null, fatto:'La riforma salvata nell\'impianto, composta con %FILO.', epi:'Hai salvato la tua riforma componendo lo scontro con %FILO.', f:()=>{repd(2); gd('cetomedio',1);}},
+   ]},
+  }},
+ /* ===== ARCHI PERSONALI (lotto 5) — dove:'entrambi' (ti seguono anche da sfidante). Registro SOBRIO,
+    mai morboso. La salute: la mortalità entra solo come esito di scelte (due avvertimenti ignorati). ===== */
+ {id:'salute',era:'universale', famiglia:'Salute', dove:'entrambi', prob:0.10, cooldown:30, titolo:'la salute',
+  cond:()=>etaFase()==='anziano'||etaFase()==='vecchio',
+  nodi:{
+   start:{kick:'Salute', t:'Un malore durante un comizio', text:'Un mancamento in pubblico, poi il ricovero per accertamenti. I medici sono cauti, ma chiari: serve riguardo.', ch:[
+     {l:'Fermati e curati sul serio', e:'Deleghi e rallenti per qualche mese: la scelta saggia', goto:null, cura:6, fatto:'Una malattia affrontata in tempo, e superata.', epi:'Una malattia, affrontata per tempo e superata.', f:()=>{}},
+     {l:'Tira dritto, il paese non aspetta', e:'Niente pause; il problema però non sparisce', eco:'Dopo che hai tirato dritto, ', goto:'peggioramento', f:()=>{}},
+   ]},
+   peggioramento:{kick:'Salute', t:'Gli esami non sono buoni', text:'%ECO i valori peggiorano e i medici insistono: continuare a questo ritmo è un rischio serio. È un secondo avvertimento.', ch:[
+     {l:'Ora ti fermi davvero', e:'Tardi, ma in tempo: ti curi', goto:null, cura:6, fatto:'Una malattia trascurata, poi curata in extremis.', epi:'Una malattia trascurata, e curata appena in tempo.', f:()=>{}},
+     {l:'Ancora avanti, a denti stretti', e:'Ignori anche questo: il corpo presenta il conto', eco:'Dopo aver ignorato anche il secondo allarme, ', goto:'crisi', f:()=>{}},
+   ]},
+   crisi:{kick:'Salute', t:'Un secondo episodio, più grave', text:'%ECO stavolta è serio. Da qui non si torna indietro come prima: la carriera e la salute non possono più convivere.', ch:[
+     {l:'Ti ritiri per ragioni di salute', e:'Lasci con dignità, scegliendo la vita', gameover:'salute', tono:'ritiro', f:()=>{}},
+     {l:'Resisti a ogni costo', e:'Non molli la presa, qualunque sia il prezzo', gameover:'salute', tono:'fatale', f:()=>{}},
+   ]},
+  }},
+ {id:'figlio',era:'universale', famiglia:'Famiglia', dove:'entrambi', prob:0.09, cooldown:36, titolo:'tuo figlio',
+  cond:()=>haFiglioInEta(16,32),
+  nodi:{
+   start:{kick:'Famiglia', t:'Tuo figlio nei guai', text:'%FIGLIO finisce in una vicenda seria: la stampa annusa, e il tuo cognome è sulla bocca di tutti. Da padre, prima ancora che da capo del governo, devi decidere.', ch:[
+     {l:'Muovi le tue conoscenze per proteggerlo', e:'Lo aiuti; ma un favore così si vede, e si paga', goto:null, fatto:'Hai protetto tuo figlio nei guai, esponendoti.', epi:'Quando tuo figlio sbagliò, lo proteggesti — e qualcuno se lo ricordò.', f:()=>{espoSale(8); gd('cattolici',-2);}},
+     {l:'Che risponda da sé, davanti alla legge', e:'Scelta dolorosa; la coerenza, però, si nota', goto:null, fatto:'Hai lasciato che tuo figlio rispondesse da sé.', epi:'Nemmeno per un figlio piegasti la legge.', f:()=>{gd('cattolici',3); gd('cetomedio',2); if(S.integrita!=null) S.integrita=clamp(S.integrita+3,0,100);}},
+     {l:'Stagli vicino, tieni tutto in privato', e:'Un mese di pensieri altrove; nessuna scorciatoia', goto:null, fatto:'Sei stato vicino a tuo figlio, lontano dai riflettori.', epi:'Restasti accanto a tuo figlio, senza clamore.', f:()=>{if(S.ind.consenso!=null) S.ind.consenso=clamp(S.ind.consenso-1,0,100);}},
+   ]},
+  }},
+ /* il genitore che invecchia (lotto VITA PERSONALE): generazionale, SOBRIO. Macchina fase-A col genitore come
+    FILO ricorrente (%RUOLO = tua madre / tuo padre). La perdita è naturale (un genitore anziano), trattata con
+    dignità — l'arco è su quanto sei PRESENTE. La CURA: basta esserci anche una volta per il commiato sereno;
+    solo l'assenza totale porta al rimpianto. */
+ {id:'genitore',era:'universale', famiglia:'Famiglia', dove:'entrambi', prob:0.11, cooldown:48, titolo:'gli ultimi anni',
+  cond:()=>{ var eta=S.eta!=null?S.eta:52; return eta>=50 && eta<=72; },
+  filo:()=>{ var madre=Math.random()<0.5; return {nome: nomeGenere(madre?'f':'m'), ruolo: madre?'tua madre':'tuo padre'}; },
+  nodi:{
+   start:{kick:'Famiglia', t:'%RUOLO ha bisogno di te', text:'%RUOLO non sta più bene: l\'età presenta il conto, e proprio adesso, con la tua agenda piena, c\'è bisogno di te a casa.', ch:[
+     {l:'Riorganizzi tutto, ci sei', e:'Deleghi e rallenti; rinunci a qualche impegno', peso:-1, eco:'Dopo che ti sei reso disponibile, ', goto:'tempo', f:()=>{ if(famigliaPresente()) serenitaMuovi(8); if(S.visibilita!=null) S.visibilita=clamp(S.visibilita-2,0,100); }},
+     {l:'Fai il possibile da lontano', e:'Mandi aiuto, ma il tuo tempo è altrove', peso:1, eco:'Dopo che hai tenuto le distanze, ', goto:'tempo', f:()=>{ if(famigliaPresente()) serenitaMuovi(-4); }},
+   ]},
+   tempo:{kick:'Famiglia', t:'Il tempo con %RUOLO', text:'%ECO i mesi passano e %RUOLO si spegne piano. C\'è ancora del tempo: come lo spendi?', ch:[
+     {l:'Le ore rubate alla politica, per %RUOLO', e:'Presenza vera, finché si può', peso:-1, eco:'Dopo le ore passate insieme, ', goto:(a)=>a.peso<=0?'commiato':'rimpianto', f:()=>{ if(famigliaPresente()) serenitaMuovi(8); if(S.visibilita!=null) S.visibilita=clamp(S.visibilita-1,0,100); }},
+     {l:'Una visita quando l\'agenda lo concede', e:'Presente a sprazzi; il dovere non aspetta', peso:1, eco:'Dopo le visite di corsa, ', goto:(a)=>a.peso<=0?'commiato':'rimpianto', f:()=>{}},
+   ]},
+   commiato:{kick:'Famiglia', t:'Il commiato', text:'%ECO quando %RUOLO se ne va, sei lì. Niente è rimasto in sospeso: c\'eri, e questo conta più di tutto.', ch:[
+     {l:'Un dolore pieno, ma sereno', e:'Hai dato tempo a chi te ne aveva dato', goto:null, fatto:'Hai accompagnato %RUOLO fino alla fine.', epi:'Quando %RUOLO se ne andò, eri accanto: una presenza che ti restò dentro.', f:()=>{ if(famigliaPresente()) serenitaMuovi(6); }},
+   ]},
+   rimpianto:{kick:'Famiglia', t:'Quello che resta', text:'%ECO %RUOLO se ne va mentre sei lontano, in mezzo a un impegno come tanti. Arrivi dopo, e quel «dopo» pesa.', ch:[
+     {l:'Un rimpianto che non si chiude', e:'Il prezzo nascosto degli anni di corsa', goto:null, fatto:'Quando %RUOLO se ne andò, eri altrove.', epi:'Quando %RUOLO se ne andò, eri altrove: un conto che la carriera non salda.', f:()=>{ if(famigliaPresente()) serenitaMuovi(-8); }},
+   ]},
+  }},
+
+ /* ============================================================================
+    G3 — ARCHI-SCANDALO (famiglia 'Scandali'): dal colpo secco alla suspense — sussurro → indiscrezione → resa dei
+    conti, su 3-5 mesi. Effetti SOLO su valute REALI del L3 premier (gd/gruppi · stampad · repd · tutteCorrenti/
+    correnti — MAI credibilità/visibilità, che a L3 sono nulle: lezione-F1). `peso` = accumulatore leggibile, alto =
+    verso il brutto. Nodo3 goto: peso≥2 → 'inchiesta' (il SOLO caso: ignora+spegni, «nascondi due volte» → graft su
+    S.inchiesta, un unico processo) · =1 → 'riesplode' (mediatico) · ≤0 → 'chiuso'. filo() stampa S.scandaloUltimo
+    (cooldown-famiglia 36m). %FUGA = la voce d'epoca della fuga di notizia (arcoSub, def.fuga {p, e50}). Temi fittizi,
+    non-partigiani, tono da cronaca — mai scandali storici reali riconoscibili. ============================================ */
+ {id:'appalto', era:'universale', famiglia:'Scandali', dove:'governo', prob:0.08, cooldown:36, titolo:'lo scandalo dell\'appalto',
+  cond:()=> !S.inchiesta && (S.mesiAlGoverno||0)>=6 && (S.scandaloUltimo==null || (S.year*12+S.month)-S.scandaloUltimo>=36),
+  filo:()=>{ S.scandaloUltimo=S.year*12+S.month; return {nome: nomeGenere('m')+' '+rnd(PAESE.cognomi), ruolo:'l\'imprenditore dell\'appalto', arc:'industriale'}; },   // L11-1
+  fuga:{p:'Un dossier sull\'appalto circola nelle redazioni', e50:'Una lettera anonima al ministero segnala l\'appalto'},
+  nodi:{
+   start:{kick:'Istituzioni', t:'Un sussurro sull\'appalto', text:'In privato ti avvisano: quella gara vinta troppo in fretta da %FILO fa parlare. Per ora è solo un mormorio.', ch:[
+     {l:'Ignorare: non è nulla', e:'Tiri dritto — ma non ti sei coperto', peso:1, eco:'Dopo aver lasciato correre, ', goto:'indiscrezione', f:()=>{}},
+     {l:'Informarti: chiedi il dossier', e:'Arrivi lucido a quel che verrà', peso:0, eco:'Dopo esserti informato, ', goto:'indiscrezione', f:()=>{}},
+     {l:'Mettere le mani avanti', e:'Una nota preventiva: un filo di credito-stampa ora, ma coperto dopo', peso:-1, eco:'Dopo la smentita preventiva, ', goto:'indiscrezione', f:()=>{ stampad(-1); }},
+   ]},
+   indiscrezione:{kick:'Istituzioni', t:'L\'appalto in prima pagina', text:'%ECO%FUGA. Ora la storia è pubblica, e tocca a te.', ch:[
+     {l:'Spegnere: una telefonata, la storia tace', e:'Efficace subito — ma può riesplodere se non ti eri coperto', peso:1, eco:'Dopo aver fatto tacere la storia, ', goto:(a)=>a.peso>=2?'inchiesta':a.peso>=1?'riesplode':'chiuso', f:()=>{}},
+     {l:'Affrontare: conferenza, spieghi tutto', e:'Costoso subito (stampa−, ceto medio−), pulito dopo', peso:-2, eco:'Dopo la conferenza pubblica, ', goto:(a)=>a.peso>=2?'inchiesta':a.peso>=1?'riesplode':'chiuso', f:()=>{ stampad(-2); gd('cetomedio',-2); }},
+     {l:'Scaricare: dai un nome, chiudi in fretta', e:'Rapido — ma cinico: il partito ricorda', peso:-1, eco:'Dopo aver scaricato %FILO, ', goto:(a)=>a.peso>=2?'inchiesta':a.peso>=1?'riesplode':'chiuso', f:()=>{ tutteCorrenti(-3); repd(-1); }},
+   ]},
+   inchiesta:{kick:'Istituzioni', t:'L\'appalto passa in procura', text:'%ECO l\'insabbiamento non ha retto: gli atti finiscono sul tavolo di un magistrato. Ora è un\'altra partita.', ch:[
+     {l:'Non puoi fermarlo', e:'Il fascicolo è aperto: comincia l\'inchiesta', goto:null, fatto:'Lo scandalo dell\'appalto, insabbiato, è sfociato in un\'inchiesta.', epi:'Nascose lo scandalo dell\'appalto fino a quando la procura non bussò.', f:()=>{ if(!S.inchiesta){ S.inchiesta={fase:1, mese:S.year*12+S.month, difesa:0, pm:nomePersona(), scelte:[]}; bioConta('inchieste'); } stampad(-2); }},
+   ]},
+   riesplode:{kick:'Istituzioni', t:'L\'appalto torna in prima pagina', text:'%ECO la storia che credevi sepolta riesplode, più dura: nuovi dettagli, e i giornali ci sguazzano.', ch:[
+     {l:'Incassi il colpo', e:'Tieni, e aspetti che passi', goto:null, fatto:'Lo scandalo dell\'appalto è riesploso: un colpo incassato.', epi:'Provò a spegnere lo scandalo dell\'appalto, e se lo vide tornare addosso.', f:()=>{ stampad(-2); gd('cetomedio',-2); }},
+     {l:'Un\'ultima difesa pubblica', e:'Ti riesponi, a caro prezzo interno', goto:null, fatto:'Lo scandalo dell\'appalto chiuso con un\'ultima, faticosa difesa.', epi:'Domò lo scandalo dell\'appalto all\'ultimo, spendendo credito nel partito.', f:()=>{ stampad(-1); tutteCorrenti(-2); }},
+   ]},
+   chiuso:{kick:'Istituzioni', t:'L\'appalto si sgonfia', text:'%ECO senza nuovi elementi, la storia perde forza e scivola via dalle prime pagine.', ch:[
+     {l:'Rivendichi la trasparenza', e:'Ne esci pulito, e lo dici', goto:null, fatto:'Lo scandalo dell\'appalto attraversato a viso aperto, e chiuso.', epi:'Attraversò lo scandalo dell\'appalto a viso aperto, uscendone pulito.', f:()=>{ stampad(2); repd(1); }},
+     {l:'Archivi in silenzio', e:'Nessun trionfo: volti pagina', goto:null, fatto:'Lo scandalo dell\'appalto si è sgonfiato in silenzio.', epi:'Lasciò che lo scandalo dell\'appalto si sgonfiasse, senza clamore.', f:()=>{}},
+   ]},
+  }},
+
+ {id:'finanziamento', era:'universale', famiglia:'Scandali', dove:'governo', prob:0.08, cooldown:36, titolo:'lo scandalo del finanziamento',
+  cond:()=> !S.inchiesta && (S.mesiAlGoverno||0)>=6 && (S.scandaloUltimo==null || (S.year*12+S.month)-S.scandaloUltimo>=36),
+  filo:()=>{ S.scandaloUltimo=S.year*12+S.month; return {nome: nomeGenere('m')+' '+rnd(PAESE.cognomi), ruolo:'il tesoriere del partito', arc:'faccendiere'}; },   // L11-1
+  fuga:{p:'Un bonifico al partito finisce sui giornali', e50:'Un esposto riservato parla di fondi al partito'},
+  nodi:{
+   start:{kick:'Istituzioni', t:'Un sussurro sui fondi', text:'In privato ti avvisano: un versamento al partito, gestito da %FILO, è arrivato per vie che è meglio guardare. Per ora è solo un mormorio.', ch:[
+     {l:'Ignorare: non è nulla', e:'Tiri dritto — ma non ti sei coperto', peso:1, eco:'Dopo aver lasciato correre, ', goto:'indiscrezione', f:()=>{}},
+     {l:'Informarti: chiedi le carte', e:'Arrivi lucido a quel che verrà', peso:0, eco:'Dopo esserti informato, ', goto:'indiscrezione', f:()=>{}},
+     {l:'Mettere le mani avanti', e:'Una nota preventiva: un filo di credito-stampa ora, ma coperto dopo', peso:-1, eco:'Dopo la smentita preventiva, ', goto:'indiscrezione', f:()=>{ stampad(-1); }},
+   ]},
+   indiscrezione:{kick:'Istituzioni', t:'Il finanziamento in prima pagina', text:'%ECO%FUGA. Ora la storia è pubblica, e tocca a te.', ch:[
+     {l:'Spegnere: una telefonata, la storia tace', e:'Efficace subito — ma può riesplodere se non ti eri coperto', peso:1, eco:'Dopo aver fatto tacere la storia, ', goto:(a)=>a.peso>=2?'inchiesta':a.peso>=1?'riesplode':'chiuso', f:()=>{}},
+     {l:'Affrontare: conferenza, spieghi tutto', e:'Costoso subito (stampa−, ceto medio−), pulito dopo', peso:-2, eco:'Dopo la conferenza pubblica, ', goto:(a)=>a.peso>=2?'inchiesta':a.peso>=1?'riesplode':'chiuso', f:()=>{ stampad(-2); gd('cetomedio',-2); }},
+     {l:'Scaricare: il tesoriere si dimette', e:'Rapido — ma cinico: il partito ricorda', peso:-1, eco:'Dopo le dimissioni di %FILO, ', goto:(a)=>a.peso>=2?'inchiesta':a.peso>=1?'riesplode':'chiuso', f:()=>{ tutteCorrenti(-3); repd(-1); }},
+   ]},
+   inchiesta:{kick:'Istituzioni', t:'I fondi passano in procura', text:'%ECO l\'insabbiamento non ha retto: i movimenti finiscono sul tavolo di un magistrato. Ora è un\'altra partita.', ch:[
+     {l:'Non puoi fermarlo', e:'Il fascicolo è aperto: comincia l\'inchiesta', goto:null, fatto:'Lo scandalo del finanziamento, insabbiato, è sfociato in un\'inchiesta.', epi:'Nascose lo scandalo dei fondi al partito fino a quando la procura non bussò.', f:()=>{ if(!S.inchiesta){ S.inchiesta={fase:1, mese:S.year*12+S.month, difesa:0, pm:nomePersona(), scelte:[]}; bioConta('inchieste'); } stampad(-2); }},
+   ]},
+   riesplode:{kick:'Istituzioni', t:'Il finanziamento torna in prima pagina', text:'%ECO la storia che credevi sepolta riesplode, più dura: nuovi dettagli, e i giornali ci sguazzano.', ch:[
+     {l:'Incassi il colpo', e:'Tieni, e aspetti che passi', goto:null, fatto:'Lo scandalo del finanziamento è riesploso: un colpo incassato.', epi:'Provò a spegnere lo scandalo dei fondi, e se lo vide tornare addosso.', f:()=>{ stampad(-2); gd('cetomedio',-2); }},
+     {l:'Un\'ultima difesa pubblica', e:'Ti riesponi, a caro prezzo interno', goto:null, fatto:'Lo scandalo del finanziamento chiuso con un\'ultima, faticosa difesa.', epi:'Domò lo scandalo dei fondi all\'ultimo, spendendo credito nel partito.', f:()=>{ stampad(-1); tutteCorrenti(-2); }},
+   ]},
+   chiuso:{kick:'Istituzioni', t:'Il finanziamento si sgonfia', text:'%ECO senza nuovi elementi, la storia perde forza e scivola via dalle prime pagine.', ch:[
+     {l:'Rivendichi la trasparenza', e:'Ne esci pulito, e lo dici', goto:null, fatto:'Lo scandalo del finanziamento attraversato a viso aperto, e chiuso.', epi:'Attraversò lo scandalo dei fondi a viso aperto, uscendone pulito.', f:()=>{ stampad(2); repd(1); }},
+     {l:'Archivi in silenzio', e:'Nessun trionfo: volti pagina', goto:null, fatto:'Lo scandalo del finanziamento si è sgonfiato in silenzio.', epi:'Lasciò che lo scandalo dei fondi si sgonfiasse, senza clamore.', f:()=>{}},
+   ]},
+  }},
+
+ {id:'ente', era:'universale', famiglia:'Scandali', dove:'governo', prob:0.08, cooldown:36, titolo:'lo scandalo dell\'ente',
+  cond:()=> !S.inchiesta && (S.mesiAlGoverno||0)>=6 && (S.scandaloUltimo==null || (S.year*12+S.month)-S.scandaloUltimo>=36),
+  filo:()=>{ S.scandaloUltimo=S.year*12+S.month; return {nome: nomeGenere('m')+' '+rnd(PAESE.cognomi), ruolo:'il presidente dell\'ente', arc:'notabile'}; },   // L11-1
+  fuga:{p:'Un\'inchiesta sui conti dell\'ente esce online', e50:'Una relazione della Corte dei conti sull\'ente circola'},
+  nodi:{
+   start:{kick:'Istituzioni', t:'Un sussurro sull\'ente', text:'In privato ti avvisano: quell\'ente pubblico dove hai messo %FILO spende senza freni. Per ora è solo un mormorio.', ch:[
+     {l:'Ignorare: non è nulla', e:'Tiri dritto — ma non ti sei coperto', peso:1, eco:'Dopo aver lasciato correre, ', goto:'indiscrezione', f:()=>{}},
+     {l:'Informarti: chiedi i bilanci', e:'Arrivi lucido a quel che verrà', peso:0, eco:'Dopo esserti informato, ', goto:'indiscrezione', f:()=>{}},
+     {l:'Mettere le mani avanti', e:'Una nota preventiva: un filo di credito-stampa ora, ma coperto dopo', peso:-1, eco:'Dopo la smentita preventiva, ', goto:'indiscrezione', f:()=>{ stampad(-1); }},
+   ]},
+   indiscrezione:{kick:'Istituzioni', t:'L\'ente in prima pagina', text:'%ECO%FUGA. Ora la storia è pubblica, e tocca a te.', ch:[
+     {l:'Spegnere: una telefonata, la storia tace', e:'Efficace subito — ma può riesplodere se non ti eri coperto', peso:1, eco:'Dopo aver fatto tacere la storia, ', goto:(a)=>a.peso>=2?'inchiesta':a.peso>=1?'riesplode':'chiuso', f:()=>{}},
+     {l:'Affrontare: conferenza, spieghi tutto', e:'Costoso subito (stampa−, ceto medio−), pulito dopo', peso:-2, eco:'Dopo la conferenza pubblica, ', goto:(a)=>a.peso>=2?'inchiesta':a.peso>=1?'riesplode':'chiuso', f:()=>{ stampad(-2); gd('cetomedio',-2); }},
+     {l:'Scaricare: il presidente si dimette', e:'Rapido — ma cinico: il partito ricorda', peso:-1, eco:'Dopo le dimissioni di %FILO, ', goto:(a)=>a.peso>=2?'inchiesta':a.peso>=1?'riesplode':'chiuso', f:()=>{ tutteCorrenti(-3); repd(-1); }},
+   ]},
+   inchiesta:{kick:'Istituzioni', t:'I conti dell\'ente passano in procura', text:'%ECO l\'insabbiamento non ha retto: i bilanci finiscono sul tavolo di un magistrato. Ora è un\'altra partita.', ch:[
+     {l:'Non puoi fermarlo', e:'Il fascicolo è aperto: comincia l\'inchiesta', goto:null, fatto:'Lo scandalo dell\'ente, insabbiato, è sfociato in un\'inchiesta.', epi:'Nascose lo scandalo dell\'ente fino a quando la procura non bussò.', f:()=>{ if(!S.inchiesta){ S.inchiesta={fase:1, mese:S.year*12+S.month, difesa:0, pm:nomePersona(), scelte:[]}; bioConta('inchieste'); } stampad(-2); }},
+   ]},
+   riesplode:{kick:'Istituzioni', t:'L\'ente torna in prima pagina', text:'%ECO la storia che credevi sepolta riesplode, più dura: nuovi dettagli, e i giornali ci sguazzano.', ch:[
+     {l:'Incassi il colpo', e:'Tieni, e aspetti che passi', goto:null, fatto:'Lo scandalo dell\'ente è riesploso: un colpo incassato.', epi:'Provò a spegnere lo scandalo dell\'ente, e se lo vide tornare addosso.', f:()=>{ stampad(-2); gd('cetomedio',-2); }},
+     {l:'Un\'ultima difesa pubblica', e:'Ti riesponi, a caro prezzo interno', goto:null, fatto:'Lo scandalo dell\'ente chiuso con un\'ultima, faticosa difesa.', epi:'Domò lo scandalo dell\'ente all\'ultimo, spendendo credito nel partito.', f:()=>{ stampad(-1); tutteCorrenti(-2); }},
+   ]},
+   chiuso:{kick:'Istituzioni', t:'L\'ente si sgonfia', text:'%ECO senza nuovi elementi, la storia perde forza e scivola via dalle prime pagine.', ch:[
+     {l:'Rivendichi la trasparenza', e:'Ne esci pulito, e lo dici', goto:null, fatto:'Lo scandalo dell\'ente attraversato a viso aperto, e chiuso.', epi:'Attraversò lo scandalo dell\'ente a viso aperto, uscendone pulito.', f:()=>{ stampad(2); repd(1); }},
+     {l:'Archivi in silenzio', e:'Nessun trionfo: volti pagina', goto:null, fatto:'Lo scandalo dell\'ente si è sgonfiato in silenzio.', epi:'Lasciò che lo scandalo dell\'ente si sgonfiasse, senza clamore.', f:()=>{}},
+   ]},
+  }},
+
+ {id:'collaboratore', era:'universale', famiglia:'Scandali', dove:'governo', prob:0.08, cooldown:36, titolo:'lo scandalo del collaboratore',
+  cond:()=> !S.inchiesta && (S.mesiAlGoverno||0)>=6 && (S.scandaloUltimo==null || (S.year*12+S.month)-S.scandaloUltimo>=36),
+  filo:()=>{ S.scandaloUltimo=S.year*12+S.month; return {nome: rnd(PAESE.nomi)+' '+rnd(PAESE.cognomi), ruolo:'il tuo stretto collaboratore'}; },
+  fuga:{p:'Un articolo mette in fila gli affari del tuo collaboratore', e50:'Una soffiata negli ambienti parla del tuo collaboratore'},
+  nodi:{
+   start:{kick:'Istituzioni', t:'Un sussurro sul collaboratore', text:'In privato ti avvisano: %FILO ha interessi privati che toccano le tue firme. Per ora è solo un mormorio.', ch:[
+     {l:'Ignorare: non è nulla', e:'Tiri dritto — ma non ti sei coperto', peso:1, eco:'Dopo aver lasciato correre, ', goto:'indiscrezione', f:()=>{}},
+     {l:'Informarti: chiedi conto a %FILO', e:'Arrivi lucido a quel che verrà', peso:0, eco:'Dopo esserti informato, ', goto:'indiscrezione', f:()=>{}},
+     {l:'Mettere le mani avanti', e:'Una nota preventiva: un filo di credito-stampa ora, ma coperto dopo', peso:-1, eco:'Dopo la smentita preventiva, ', goto:'indiscrezione', f:()=>{ stampad(-1); }},
+   ]},
+   indiscrezione:{kick:'Istituzioni', t:'Il collaboratore in prima pagina', text:'%ECO%FUGA. Ora la storia è pubblica, e tocca a te.', ch:[
+     {l:'Spegnere: una telefonata, la storia tace', e:'Efficace subito — ma può riesplodere se non ti eri coperto', peso:1, eco:'Dopo aver fatto tacere la storia, ', goto:(a)=>a.peso>=2?'inchiesta':a.peso>=1?'riesplode':'chiuso', f:()=>{}},
+     {l:'Affrontare: conferenza, spieghi tutto', e:'Costoso subito (stampa−, ceto medio−), pulito dopo', peso:-2, eco:'Dopo la conferenza pubblica, ', goto:(a)=>a.peso>=2?'inchiesta':a.peso>=1?'riesplode':'chiuso', f:()=>{ stampad(-2); gd('cetomedio',-2); }},
+     {l:'Scaricare: allontani il collaboratore', e:'Rapido — ma cinico: il partito ricorda', peso:-1, eco:'Dopo aver allontanato %FILO, ', goto:(a)=>a.peso>=2?'inchiesta':a.peso>=1?'riesplode':'chiuso', f:()=>{ tutteCorrenti(-3); repd(-1); }},
+   ]},
+   inchiesta:{kick:'Istituzioni', t:'Il caso passa in procura', text:'%ECO l\'insabbiamento non ha retto: le carte finiscono sul tavolo di un magistrato. Ora è un\'altra partita.', ch:[
+     {l:'Non puoi fermarlo', e:'Il fascicolo è aperto: comincia l\'inchiesta', goto:null, fatto:'Lo scandalo del collaboratore, insabbiato, è sfociato in un\'inchiesta.', epi:'Coprì il proprio collaboratore fino a quando la procura non bussò.', f:()=>{ if(!S.inchiesta){ S.inchiesta={fase:1, mese:S.year*12+S.month, difesa:0, pm:nomePersona(), scelte:[]}; bioConta('inchieste'); } stampad(-2); }},
+   ]},
+   riesplode:{kick:'Istituzioni', t:'Il collaboratore torna in prima pagina', text:'%ECO la storia che credevi sepolta riesplode, più dura: nuovi dettagli, e i giornali ci sguazzano.', ch:[
+     {l:'Incassi il colpo', e:'Tieni, e aspetti che passi', goto:null, fatto:'Lo scandalo del collaboratore è riesploso: un colpo incassato.', epi:'Provò a coprire il collaboratore, e se lo vide tornare addosso.', f:()=>{ stampad(-2); gd('cetomedio',-2); }},
+     {l:'Un\'ultima difesa pubblica', e:'Ti riesponi, a caro prezzo interno', goto:null, fatto:'Lo scandalo del collaboratore chiuso con un\'ultima, faticosa difesa.', epi:'Domò lo scandalo del collaboratore all\'ultimo, spendendo credito nel partito.', f:()=>{ stampad(-1); tutteCorrenti(-2); }},
+   ]},
+   chiuso:{kick:'Istituzioni', t:'Il collaboratore, storia chiusa', text:'%ECO senza nuovi elementi, la storia perde forza e scivola via dalle prime pagine.', ch:[
+     {l:'Rivendichi la trasparenza', e:'Ne esci pulito, e lo dici', goto:null, fatto:'Lo scandalo del collaboratore attraversato a viso aperto, e chiuso.', epi:'Attraversò lo scandalo del collaboratore a viso aperto, uscendone pulito.', f:()=>{ stampad(2); repd(1); }},
+     {l:'Archivi in silenzio', e:'Nessun trionfo: volti pagina', goto:null, fatto:'Lo scandalo del collaboratore si è sgonfiato in silenzio.', epi:'Lasciò che lo scandalo del collaboratore si sgonfiasse, senza clamore.', f:()=>{}},
+   ]},
+  }},
+];
+
+/* ===== EVENTI PERSONALI singoli (lotto 5 + lotto VITA PERSONALE) — leggeri, NON occupano slot-arco: entrano
+   nel tetto di 2 carte come le conferenze. DATO-GUIDATI: ogni evento ha `cond`/`p`/`tipo` letti da pickPersonale
+   (priorità: crisi>coscienza>affetti/dubbio>lieto; `ripetibile:true` = può tornare). Sacrifici NOMINABILI (il
+   costo politico è piccolo ma concreto: «salti il voto», non «−1»). Registro sobrio. %FIGLIO/%CONIUGE = nomi reali. */
+const EVENTI_PERSONALI=[
+ /* coscienza: solo a integrità bassa e personaggio dissonante — il dilemma linea/coscienza. RIPETIBILE. */
+ {id:'coscienza', tono:'grave', tipo:'coscienza', ripetibile:true, p:0.12,
+  cond:()=>S.integrita!=null && S.integrita<35 && Math.abs(((S.personaggio&&S.personaggio.orientamento)||0)-((part(S.partito)||{}).asse||0))>=2,
+  kick:'Coscienza', t:'La tua linea contro le tue convinzioni',
+  text:'Una scelta del tuo governo va contro ciò in cui credi davvero. Per la prima volta lo senti come un tradimento di te stesso.', ch:[
+   {l:'Segui la tua coscienza', e:'Ti ritrovi; la tua base però non capisce', fatto:'Hai seguito la coscienza contro la linea del partito.', f:()=>{ if(S.integrita!=null) S.integrita=clamp(S.integrita+12,0,100); if(typeof corrented==='function') corrented('militanti',-6); }},
+   {l:'Resta sulla linea del partito', e:'Tieni i tuoi; dentro, qualcosa cede', fatto:'Hai messo a tacere la coscienza per il partito.', f:()=>{ if(S.integrita!=null) S.integrita=clamp(S.integrita-6,0,100); if(typeof corrented==='function') corrented('militanti',2); }},
+  ]},
+ /* crisi familiare: il popup — serenità bassa = hai trascurato troppo. RIPETIBILE. Il sacrificio è NOMINABILE. */
+ {id:'crisi_familiare', tono:'grave', tipo:'crisi', ripetibile:true, p:0.12,
+  cond:()=>famigliaPresente() && S.famiglia.serenita!=null && S.famiglia.serenita<35,
+  kick:'Vita privata', t:'La famiglia ti presenta il conto',
+  text:'Le assenze, le promesse rimandate, le cene saltate: a casa si è arrivati a un punto di rottura. Stavolta non puoi rimandare.', ch:[
+   {l:'Disdici tutto per una settimana', e:'Ricuci lo strappo; salti gli impegni di giorni', fatto:'Ti sei fermato per la famiglia, sacrificando un po\' di slancio.', f:()=>{ serenitaMuovi(35); bioConta('affetti'); if(S.visibilita!=null) S.visibilita=clamp(S.visibilita-3,0,100); if(S.ind.consenso!=null) S.ind.consenso=clamp(S.ind.consenso-1,0,100); }},
+   {l:'Il potere non aspetta', e:'Vai avanti; a casa resta una ferita aperta — e tornerà', fatto:'Hai messo il potere prima della famiglia, di nuovo.', f:()=>{ serenitaMuovi(6); bioConta('affettiSacrificati'); if(S.ind.consenso!=null) S.ind.consenso=clamp(S.ind.consenso-2,0,100); }},
+  ]},
+ /* carriera/affetti: il dilemma base, driver della serenità */
+ {id:'carriera_affetti', tipo:'affetti', p:0.16, cond:()=>famigliaPresente(),
+  kick:'Vita privata', t:'La carriera o gli affetti',
+  text:'Un\'occasione politica importante cade nello stesso giorno di un momento che conta per chi ti ama. Non puoi essere in due posti.', ch:[
+   {l:'L\'occasione politica viene prima', e:'Un passo avanti; un\'assenza che pesa', fatto:'Hai scelto la carriera, sacrificando un momento con i tuoi.', f:()=>{ bioConta('affettiSacrificati'); serenitaMuovi(-16); if(S.visibilita!=null) S.visibilita=clamp(S.visibilita+3,0,100); }},
+   {l:'Stavolta ci sono per loro', e:'Rinunci all\'occasione; gli affetti si rinsaldano', fatto:'Hai scelto gli affetti, lasciando passare un\'occasione.', f:()=>{ bioConta('affetti'); serenitaMuovi(15); if(S.visibilita!=null) S.visibilita=clamp(S.visibilita-2,0,100); }},
+  ]},
+ /* il traguardo di un figlio lo stesso giorno di un voto decisivo */
+ {id:'traguardo_figlio', tono:'florido', tipo:'affetti', p:0.15, cond:()=>haFiglioInEta(10,45),
+  kick:'Vita privata', t:'Il traguardo di %FIGLIO',
+  text:'Un giorno che %FIGLIO aspettava da anni — una laurea, un traguardo — cade nel mezzo di una settimana decisiva in aula.', ch:[
+   {l:'Ci sei, e salti il voto', e:'Un ricordo per sempre; rinunci alla scena', fatto:'Hai scelto di esserci per %FIGLIO nel suo giorno.', f:()=>{ bioConta('affetti'); serenitaMuovi(16); if(S.visibilita!=null) S.visibilita=clamp(S.visibilita-3,0,100); }},
+   {l:'Mandi un messaggio, il dovere chiama', e:'Presente altrove; un\'assenza che non si dimentica', fatto:'Hai mancato il giorno di %FIGLIO per il dovere.', f:()=>{ bioConta('affettiSacrificati'); serenitaMuovi(-15); if(S.visibilita!=null) S.visibilita=clamp(S.visibilita+2,0,100); }},
+  ]},
+ /* il coniuge trascurato: un ultimatum gentile */
+ {id:'coniuge_trascurato', tono:'grave', tipo:'affetti', p:0.15, cond:()=>!!(S.famiglia&&S.famiglia.coniuge),
+  kick:'Vita privata', t:'La solitudine di %CONIUGE',
+  text:'Mesi di sere passate in solitudine, di promesse rimandate. %CONIUGE non fa scenate: dice solo, piano, che così non si può andare avanti.', ch:[
+   {l:'Una settimana solo per voi due', e:'Disdici la trasferta; vi ritrovate', fatto:'Hai scelto di esserci, per il tuo matrimonio.', f:()=>{ bioConta('affetti'); serenitaMuovi(15); if(S.visibilita!=null) S.visibilita=clamp(S.visibilita-2,0,100); }},
+   {l:'«Ora non posso, lo sai»', e:'Tiri dritto; la distanza si allarga', fatto:'Hai chiesto a %CONIUGE di aspettare, ancora.', f:()=>{ bioConta('affettiSacrificati'); serenitaMuovi(-14); }},
+  ]},
+ /* l'anniversario rimandato da troppo */
+ {id:'anniversario',era:'universale', tono:'florido', tipo:'affetti', p:0.13, cond:()=>!!(S.famiglia&&S.famiglia.coniuge),
+  kick:'Vita privata', t:'L\'anniversario',
+  text:'Il vostro anniversario torna, come ogni anno. Come ogni anno, c\'è un impegno che ci si mette di traverso.', ch:[
+   {l:'Stacchi la spina per una sera', e:'Una cena vera; salti la serata mondana', fatto:'Hai festeggiato l\'anniversario, lontano dai riflettori.', f:()=>{ bioConta('affetti'); serenitaMuovi(13); if(S.visibilita!=null) S.visibilita=clamp(S.visibilita-2,0,100); }},
+   {l:'«Recuperiamo il mese prossimo»', e:'L\'ennesimo rinvio; resta un\'amarezza', fatto:'Hai rimandato l\'anniversario, di nuovo.', f:()=>{ bioConta('affettiSacrificati'); serenitaMuovi(-12); }},
+  ]},
+ /* il sogno del coniuge contro la tua esposizione */
+ {id:'coniuge_sogno', tono:'florido', tipo:'affetti', p:0.12, cond:()=>!!(S.famiglia&&S.famiglia.coniuge),
+  kick:'Vita privata', t:'Il sogno di %CONIUGE',
+  text:'A %CONIUGE si apre un\'occasione importante — un lavoro, un progetto di una vita — ma porterebbe attenzione, e la tua immagine pubblica ne risentirebbe.', ch:[
+   {l:'Lo sostieni, costi quel che costi', e:'%CONIUGE rifiorisce; tu incassi qualche critica', fatto:'Hai sostenuto il sogno di %CONIUGE, esponendoti.', f:()=>{ bioConta('affetti'); serenitaMuovi(15); if(S.visibilita!=null) S.visibilita=clamp(S.visibilita-2,0,100); }},
+   {l:'«Non è il momento, per noi»', e:'La tua immagine è salva; un sogno messo in pausa', fatto:'Hai chiesto a %CONIUGE di rinunciare, per te.', f:()=>{ bioConta('affettiSacrificati'); serenitaMuovi(-13); }},
+  ]},
+ /* un figlio che guarda alla politica (o la rifiuta) */
+ {id:'figlio_strada', tipo:'affetti', p:0.12, cond:()=>haFiglioInEta(18,40),
+  kick:'Vita privata', t:'La strada di %FIGLIO',
+  text:'%FIGLIO ti confida una scelta di vita importante: vuole seguirti in politica. Sa cosa significa — l\'ha visto da casa, in tutti questi anni.', ch:[
+   {l:'Lo metti in guardia, con sincerità', e:'Da padre prima che da leader; %FIGLIO ci pensa', fatto:'Hai parlato a cuore aperto con %FIGLIO della politica.', f:()=>{ bioConta('affetti'); serenitaMuovi(10); }},
+   {l:'Gli spiani la strada con le tue reti', e:'Un vantaggio per %FIGLIO; qualcuno mormora «dinastia»', fatto:'Hai aperto a %FIGLIO le porte della politica.', f:()=>{ espoSale(5); }},
+  ]},
+ /* un vecchio amico di prima della politica */
+ {id:'vecchio_amico', tono:'florido', tipo:'affetti', p:0.11, cond:()=>true,
+  kick:'Vita privata', t:'Un vecchio amico',
+  text:'Ti cerca un amico di un tempo, di prima di tutto questo. Vorrebbe rivederti — una cena, come una volta, senza scorta e senza agenda.', ch:[
+   {l:'Lo rivedi, una sera com\'era', e:'Un pezzo di te che torna; salti un impegno', fatto:'Hai ritrovato un vecchio amico, per una sera.', f:()=>{ if(famigliaPresente()) serenitaMuovi(10); if(S.visibilita!=null) S.visibilita=clamp(S.visibilita-1,0,100); }},
+   {l:'«Magari più avanti»', e:'Non hai tempo per il passato; un filo che si spezza', fatto:'Hai lasciato cadere un\'amicizia di un tempo.', f:()=>{ if(famigliaPresente()) serenitaMuovi(-4); }},
+  ]},
+ /* un momento privato di dubbio — ne vale la pena? */
+ {id:'dubbio', tipo:'dubbio', p:0.10, cond:()=>true,
+  kick:'Vita privata', t:'Ne vale la pena?',
+  text:'Una notte insonne, da solo. Il pensiero arriva senza chiedere permesso: tutto questo — le rinunce, le assenze, il logorio — ne vale davvero la pena?',  ch:[
+   {l:'Ti ricordi perché hai cominciato', e:'Ritrovi il senso; riparti con più forza', fatto:'Hai attraversato un dubbio profondo, e l\'hai superato.', f:()=>{ if(S.integrita!=null) S.integrita=clamp(S.integrita+4,0,100); if(famigliaPresente()) serenitaMuovi(6); }},
+   {l:'Lasci che il dubbio ti accompagni', e:'Nessuna risposta; qualcosa si incrina dentro', fatto:'Hai convissuto con un dubbio mai sciolto.', f:()=>{ if(S.integrita!=null) S.integrita=clamp(S.integrita-3,0,100); if(famigliaPresente()) serenitaMuovi(-5); }},
+  ]},
+ /* la salute di una persona cara (SOBRIO, mai il giocatore): esserci o delegare */
+ {id:'salute_caro', tono:'grave', tipo:'affetti', p:0.10, cond:()=>!!(S.famiglia&&(S.famiglia.coniuge||(S.famiglia.figli&&S.famiglia.figli.length))),
+  kick:'Vita privata', t:'Una persona cara non sta bene',
+  text:'Una persona della tua famiglia affronta un problema di salute. Non è il momento di fingere che la politica venga prima.', ch:[
+   {l:'Le stai accanto, riorganizzi tutto', e:'Presenza vera; deleghi e rallenti per un po\'', fatto:'Hai scelto di stare vicino a chi ami nella malattia.', f:()=>{ bioConta('affetti'); serenitaMuovi(14); if(S.visibilita!=null) S.visibilita=clamp(S.visibilita-2,0,100); }},
+   {l:'Fai il possibile, ma il paese chiama', e:'Presente a metà; un peso che resta', fatto:'Hai diviso te stesso tra la malattia di un caro e il dovere.', f:()=>{ bioConta('affettiSacrificati'); serenitaMuovi(-10); }},
+  ]},
+ /* momenti lieti: colore. Aggiornano S.famiglia. */
+ {id:'matrimonio', tono:'florido', tipo:'lieto', p:0.04, cond:()=>{ var eta=S.eta!=null?S.eta:52; return S.famiglia && !S.famiglia.coniuge && eta<60; },
+  kick:'Vita privata', t:'Le nozze',
+  text:'Dopo mesi lontano dai riflettori, una notizia lieve: ti sposi. Il paese, per un giorno, sorride con te.', ch:[
+   {l:'Un giorno per te, e per il paese', e:'Un raro momento di calore pubblico', fatto:'Ti sei sposato durante il mandato.', f:()=>{ if(!S.famiglia) S.famiglia={coniuge:null,figli:[]}; if(!S.famiglia.coniuge){ const gC=(S.personaggio&&S.personaggio.genere==='f')?'m':'f'; S.famiglia.coniuge={nome:nomeGenere(gC), genere:gC}; } if(S.famiglia.serenita!=null) S.famiglia.serenita=clamp(S.famiglia.serenita+10,0,100); if(S.ind.consenso!=null) S.ind.consenso=clamp(S.ind.consenso+2,0,100); stampad(3); }},
+  ]},
+ {id:'nascita', tono:'florido', tipo:'lieto', p:0.04, cond:()=>{ var eta=S.eta!=null?S.eta:52; return S.famiglia && S.famiglia.coniuge && eta<48; },
+  kick:'Vita privata', t:'Una nascita in famiglia',
+  text:'In mezzo agli affanni del potere, una vita nuova: una nascita in famiglia. Per qualche ora, la politica può aspettare.', ch:[
+   {l:'La gioia, anche sotto i riflettori', e:'Il paese partecipa al tuo momento', fatto:'È nato un figlio durante il mandato.', f:()=>{ if(!S.famiglia) S.famiglia={coniuge:null,figli:[]}; S.famiglia.figli.push({nome:rnd(PAESE.nomi), eta:0}); if(S.famiglia.serenita!=null) S.famiglia.serenita=clamp(S.famiglia.serenita+8,0,100); if(S.ind.consenso!=null) S.ind.consenso=clamp(S.ind.consenso+2,0,100); stampad(2); }},
+  ]},
+ /* diventi nonno: un figlio adulto ha un figlio */
+ {id:'nonno', tono:'florido', tipo:'lieto', p:0.05, cond:()=>haFiglioInEta(26,55),
+  kick:'Vita privata', t:'Un nipote in arrivo',
+  text:'%FIGLIO ti dà una notizia che ti spiazza di tenerezza: sta per arrivare un nipote. Il tempo, all\'improvviso, si misura in un altro modo.', ch:[
+   {l:'Un momento di pura gioia', e:'La vita che continua, oltre la politica', fatto:'È arrivato un nipote durante la carriera.', f:()=>{ if(famigliaPresente()) serenitaMuovi(12); if(S.ind.consenso!=null) S.ind.consenso=clamp(S.ind.consenso+1,0,100); }},
+  ]},
+ /* una riconciliazione: un gesto che ricuce, quando le cose non sono al meglio */
+ {id:'riconciliazione', tono:'florido', tipo:'lieto', p:0.10, cond:()=>famigliaPresente() && S.famiglia.serenita!=null && S.famiglia.serenita>=35 && S.famiglia.serenita<58,
+  kick:'Vita privata', t:'Un gesto che ricuce',
+  text:'Senza dirlo, chi ti ama fa un passo verso di te: un biglietto, una cena preparata, una porta lasciata aperta. Tocca a te raccoglierlo.',  ch:[
+   {l:'Lo raccogli, e ti fermi un attimo', e:'Un piccolo ritorno a casa', fatto:'Hai colto un gesto di chi ti ama, e ricucito.', f:()=>{ serenitaMuovi(14); bioConta('affetti'); }},
+   {l:'Lo noti, ma non ora', e:'Un\'occasione di vicinanza lasciata passare', fatto:'Hai lasciato passare un gesto di chi ti ama.', f:()=>{ serenitaMuovi(-3); }},
+  ]},
+];
+
+/* ============================================================================
+   G1 — LA FAMIGLIA VIVA: i GIORNI BUONI e le SCELTE DI TEMPO. Oggi la famiglia appariva solo in crisi/dilemma;
+   qui prende i giorni buoni (serenità+, nessun lato sbagliato — come le leggere-G4) e le piccole scelte di tempo
+   (il lavoro non è mai punito duro: un velo di serenità−, recuperabile — ma la biografia RICORDA via i contatori
+   affetti/affettiSacrificati, che l'epilogo legge come COLORE, non pagella). Effetti SOLO serenità (+ bioConta):
+   MAI gruppi/consenso/visibilità — la famiglia non fa campagna. Kind riusato: 'personale' (stessa risoluzione;
+   %FIGLIO/%CONIUGE risolti da sub() a render). Innesco DEDICATO (famigliaVivaCard in pickPersonale, cadenza propria
+   ~1-2/anno) → niente competizione cieca nel pool. Occasioni DISTINTE dai lieto esistenti (nascita/nonno/matrimonio-
+   tuo restano loro): qui il matrimonio DEL FIGLIO, il compleanno, la domenica, il ritorno a casa. La frase-cura del
+   lotto: non scegli per ottimizzare, scegli che leader vuoi essere ricordato. ============================================ */
+const FAMIGLIA_VIVA=[
+ /* --- i GIORNI BUONI: serenità+, nessun contatore-tratto (anti-cheapening del tratto difamiglia), due vie entrambe positive --- */
+ {id:'fv_matrimonio_figlio', tipo:'buono', once:true, era:'universale', cond:()=>haFiglioInEta(26,34),
+  kick:'Vita privata', t:'Il matrimonio di %FIGLIO',
+  text:'%FIGLIO si sposa. Per un giorno non sei il capo di niente: sei solo un genitore in prima fila, con gli occhi lucidi.', ch:[
+   {l:'Il brindisi, il ballo, tutto', e:'Ci sei per intero, fino a notte', fatto:'Hai ballato al matrimonio di tuo figlio.', f:()=>{ serenitaMuovi(3); }},
+   {l:'Presente per la cerimonia', e:'Un\'ora rubata, ma la più importante', fatto:'Eri alla cerimonia di nozze di tuo figlio.', f:()=>{ serenitaMuovi(1); }},
+  ]},
+ {id:'fv_compleanno', tipo:'buono', era:'contemporanea', cond:()=>famigliaPresente(),
+  kick:'Vita privata', t:'Un compleanno in famiglia',
+  text:'Un compleanno che conta, a casa. Le candeline, la foto di rito, e per una sera gli impegni possono aspettare.', ch:[
+   {l:'La festa in casa, tutti insieme', e:'Una sera che resta', fatto:'Hai festeggiato un compleanno in famiglia.', f:()=>{ serenitaMuovi(2); }},
+   {l:'Una torta di corsa, ma c\'eri', e:'Poco tempo, ma c\'eri', fatto:'Hai fatto in tempo per le candeline.', f:()=>{ serenitaMuovi(1); }},
+  ]},
+ {id:'fv_compleanno50', tipo:'buono', era:'italia1950', cond:()=>famigliaPresente(),
+  kick:'Vita privata', t:'Un compleanno in famiglia',
+  text:'Un compleanno che conta, a casa: il vestito buono, la torta fatta in casa, e i parenti che arrivano in treno per l\'occasione.', ch:[
+   {l:'La tavola grande, tutti insieme', e:'Una festa d\'altri tempi', fatto:'Hai festeggiato un compleanno in famiglia.', f:()=>{ serenitaMuovi(2); }},
+   {l:'Un brindisi veloce prima di ripartire', e:'Poco tempo, ma c\'eri', fatto:'Hai fatto in tempo per il brindisi.', f:()=>{ serenitaMuovi(1); }},
+  ]},
+ {id:'fv_domenica', tipo:'buono', era:'universale', cond:()=>famigliaPresente(),
+  kick:'Vita privata', t:'La domenica in famiglia',
+  text:'Una domenica come tante e come nessuna: la tavola apparecchiata, i tuoi intorno, il tempo che per una volta non corre.', ch:[
+   {l:'Il pranzo lungo, senza orologi', e:'Nessuna fretta, per una volta', fatto:'Ti sei concesso una domenica lenta coi tuoi.', f:()=>{ serenitaMuovi(2); }},
+   {l:'Ci sei per il caffè, poi il dovere', e:'Un\'ora, ma tua', fatto:'Hai preso il caffè della domenica coi tuoi.', f:()=>{ serenitaMuovi(1); }},
+  ]},
+ {id:'fv_ritorno', tipo:'buono', era:'universale', cond:()=>haFiglioInEta(19,55),
+  kick:'Vita privata', t:'%FIGLIO torna a casa',
+  text:'%FIGLIO passa a trovarti, senza un motivo particolare. Vi sedete, si parla del più e del meno: le cose che non si dicono mai in fretta.', ch:[
+   {l:'Una sera come una volta', e:'Il tempo torna indietro, un poco', fatto:'Hai passato una sera con tuo figlio, come una volta.', f:()=>{ serenitaMuovi(2); }},
+   {l:'Un abbraccio veloce sulla porta', e:'Poco, ma vero', fatto:'Hai salutato tuo figlio di sfuggita, ma con affetto.', f:()=>{ serenitaMuovi(1); }},
+  ]},
+ /* --- le SCELTE DI TEMPO: dilemma SOFT. Esserci = serenità+ + affetti · il dovere = serenità− PICCOLA recuperabile
+        + affettiSacrificati. NIENTE gruppi/consenso/visibilità: il lato-lavoro non ha upside meccanico e non è punito
+        duro — resta SCRITTO (la biografia ricorda). --- */
+ {id:'fv_recita', tipo:'scelta', era:'universale', cond:()=>haFiglioInEta(6,14),
+  kick:'Vita privata', t:'La recita di %FIGLIO, o il vertice',
+  text:'La recita di fine anno di %FIGLIO cade nello stesso pomeriggio di un vertice che avevi in agenda da settimane. Non puoi essere in due posti.', ch:[
+   {l:'Ci sei, in prima fila', e:'Un ricordo per sempre; il vertice andrà avanti senza di te', fatto:'Eri in prima fila alla recita di tuo figlio.', f:()=>{ serenitaMuovi(6); bioConta('affetti'); }},
+   {l:'Il vertice non aspetta', e:'Un dovere onorato; un\'assenza che resta', fatto:'Hai mancato la recita di tuo figlio per il vertice.', f:()=>{ serenitaMuovi(-5); bioConta('affettiSacrificati'); }},
+  ]},
+ {id:'fv_weekend', tipo:'scelta', era:'universale', cond:()=>famigliaPresente(),
+  kick:'Vita privata', t:'Il weekend promesso, o la crisi',
+  text:'Avevi promesso un fine settimana lontano da tutto. Poi, il venerdì sera, una gatta da pelare che chiama: puoi delegare, o correre.', ch:[
+   {l:'Il weekend, mantenuto', e:'Una promessa tenuta; deleghi la gatta da pelare', fatto:'Hai mantenuto la promessa del weekend in famiglia.', f:()=>{ serenitaMuovi(6); bioConta('affetti'); }},
+   {l:'Corri: la crisi chiama', e:'Sei sul pezzo; il weekend salta, di nuovo', fatto:'Hai sacrificato il weekend promesso alla crisi del momento.', f:()=>{ serenitaMuovi(-5); bioConta('affettiSacrificati'); }},
+  ]},
+ {id:'fv_cena', tipo:'scelta', era:'universale', cond:()=>famigliaPresente(),
+  kick:'Vita privata', t:'La cena in famiglia, o il telefono',
+  text:'A tavola, tutti insieme, per la prima volta da settimane. Poi il telefono: è il segretario del partito, e non richiama per salutare.', ch:[
+   {l:'Telefono spento, si cena', e:'Un\'ora vostra; il segretario aspetterà domani', fatto:'Hai spento il telefono per cenare coi tuoi.', f:()=>{ serenitaMuovi(5); bioConta('affetti'); }},
+   {l:'Rispondi: due minuti', e:'Il dovere prima; la cena si fredda, e si nota', fatto:'Hai lasciato la cena in famiglia per rispondere al partito.', f:()=>{ serenitaMuovi(-4); bioConta('affettiSacrificati'); }},
+  ]},
+ {id:'fv_vacanze', tipo:'scelta', era:'universale', cond:()=>famigliaPresente(),
+  kick:'Vita privata', t:'Le vacanze insieme, o il bilancio',
+  text:'Le vacanze che rimandi da anni sono a portata di mano. Ma cadono sulla sessione di bilancio: se parti, ci vai con la testa altrove — o non ci vai.', ch:[
+   {l:'Le vacanze, davvero, stavolta', e:'Stacchi sul serio; il bilancio lo segui da lontano', fatto:'Sei partito per le vacanze con la famiglia, davvero.', f:()=>{ serenitaMuovi(6); bioConta('affetti'); }},
+   {l:'Il bilancio prima di tutto', e:'Presente al tuo posto; le vacanze, un\'altra volta', fatto:'Hai rimandato le vacanze in famiglia per la sessione di bilancio.', f:()=>{ serenitaMuovi(-5); bioConta('affettiSacrificati'); }},
+  ]},
+];
+
+/* ============================================================================
+   F2 — LA MAPPA CHE CHIAMA: un territorio pulsa sulla mappa → ci vai tu → mini-scheda con una scelta. Il territorio
+   è il PALCOSCENICO, non una valuta: gli effetti vanno SOLO sulle valute vere (gd/gruppi + l'indicatore nazionale
+   pertinente) — MAI su potereLocale, che è DERIVATO/convergente (quotaTerritori dai titolari; un ± diretto verrebbe
+   risucchiato all'intermedia e sfascerebbe la coerenza «potere = aree»: verificato a terra). %TERR = il nome dell'area
+   (risolto a render). era-split dove arricchisce: nel '50 il Mezzogiorno che chiama è storia radicata. ============ */
+/* Nota di lingua: %TERR porta l'articolo per le regioni («la Campania», «il Piemonte») → mai dopo una preposizione
+   (darebbe «da la Campania») né a inizio-frase (darebbe la minuscola). Sta SEMPRE come soggetto a metà frase; i titoli
+   sono generici (l'area è già nominata nell'intestazione della mini-scheda). */
+const TERRITORIO_PROB=[
+ {id:'tp_fabbrica', era:'universale', kind:'F2',
+  t:'Una fabbrica che chiude', text:'Un grande stabilimento annuncia la chiusura, e %TERR trema: migliaia di posti a rischio, la piazza che monta. La decisione arriva sul tuo tavolo.',
+  ch:[ {l:'Fondi pubblici per salvare i posti', e:'Salvi l\'occupazione; il conto sale', f:()=>{ gd('lavoratori',2); if(S.ind) S.ind.debt+=0.3; }},
+       {l:'Lasci al mercato, punti sulla riconversione', e:'Disciplina di mercato; la piazza freme', f:()=>{ gd('imprenditori',2); gd('lavoratori',-2); }} ]},
+ {id:'tp_servizio', era:'universale', kind:'F2',
+  t:'Un ospedale a rischio', text:'Un ospedale rischia la chiusura, e %TERR si mobilita: a te tocca scegliere tra il servizio e i conti.',
+  ch:[ {l:'Lo tieni aperto, costi quel che costi', e:'Il territorio respira; il bilancio pesa', f:()=>{ gd('pensionati',2); if(S.ind&&S.ind.sanita!=null) S.ind.sanita=clamp(S.ind.sanita+1,0,100); if(S.ind) S.ind.debt+=0.2; }},
+       {l:'Razionalizzi: prima i conti', e:'Salvi la cassa; il territorio incassa il no', f:()=>{ if(S.ind) S.ind.debt-=0.2; gd('pensionati',-2); }} ]},
+ {id:'tp_ordine', era:'universale', kind:'F2',
+  t:'Tensione sul territorio', text:'La tensione sociale sale, e %TERR è nervosa: cortei, qualche scontro, la stampa che incalza. Fermezza o prudenza?',
+  ch:[ {l:'Linea di fermezza, più presidio', e:'Ordine ristabilito; i giovani mugugnano', f:()=>{ if(S.ind&&S.ind.sicurezza!=null) S.ind.sicurezza=clamp(S.ind.sicurezza+1,0,100); gd('giovani',-1); }},
+       {l:'Prudenza: apri un tavolo', e:'La piazza si calma da sé; qualcuno ti dà il molle', f:()=>{ gd('giovani',1); if(S.ind&&S.ind.sicurezza!=null) S.ind.sicurezza=clamp(S.ind.sicurezza-1,0,100); }} ]},
+ /* la periferia che chiede — era-split: '50 il Mezzogiorno (storia radicata), presente le infrastrutture */
+ {id:'tp_periferia', era:'contemporanea', kind:'F2',
+  t:'Un\'area lasciata indietro', text:'C\'è un\'area che chiede attenzione: %TERR domanda infrastrutture e servizi — strade, treni, presidi. Un piano costa, ma cambia il volto del territorio.',
+  ch:[ {l:'Un piano di investimenti per l\'area', e:'Il territorio riparte; il conto sale', f:()=>{ gd('lavoratori',2); if(S.ind) S.ind.debt+=0.3; }},
+       {l:'Le priorità nazionali sono altrove', e:'Tieni i conti; l\'area resta indietro', f:()=>{ gd('cetomedio',1); gd('lavoratori',-1); }} ]},
+ {id:'tp_mezzogiorno', era:'italia1950', kind:'F2',
+  t:'Il Mezzogiorno chiama', text:'Dal Sud sale la questione di sempre — terra, lavoro, l\'emigrazione che svuota i paesi — e %TERR aspetta una risposta dal governo.',
+  ch:[ {l:'Fondi per la terra e il lavoro al Sud', e:'Una promessa al Mezzogiorno; il conto sale', f:()=>{ gd('lavoratori',2); gd('cattolici',1); if(S.ind) S.ind.debt+=0.3; }},
+       {l:'Prima il Nord che produce', e:'Punti sull\'industria; il Sud incassa l\'ennesima attesa', f:()=>{ gd('imprenditori',2); gd('lavoratori',-2); }} ]},
+];
+
+/* ===== PARLAMENTO EUROPEO (solo paesi ue:true) — le famiglie politiche continentali, stilizzate.
+   `base` = riparto-base del PE (somma 100, numeri di gioco — non il PE reale). Ogni partito di un
+   paese UE ha un campo `gruppoUE` che punta qui. Nomi generici di famiglia: niente sigle reali. ===== */
+const GRUPPI_UE=[
+  {id:'popolari',     nome:'Popolari',          base:24},
+  {id:'socialisti',   nome:'Socialisti',        base:19},
+  {id:'liberali',     nome:'Liberali',          base:13},
+  {id:'destra',       nome:'Destra',            base:12},
+  {id:'conservatori', nome:'Conservatori',      base:10},
+  {id:'noniscritti',  nome:'Non iscritti',      base:9},
+  {id:'verdi',        nome:'Verdi',             base:7},
+  {id:'sinistra',     nome:'Sinistra radicale', base:6},
+];
+
+const GROUPS=[
+  {id:'lavoratori', nm:'Lavoratori e sindacati', w:22},
+  {id:'pensionati',  nm:'Pensionati',            w:22},
+  {id:'cetomedio',   nm:'Ceto medio',            w:16},
+  {id:'imprenditori',nm:'Imprese e industria',   w:14},
+  {id:'giovani',     nm:'Giovani e studenti',    w:14},
+  {id:'cattolici',   nm:'Mondo cattolico',       w:12},
+];
+const GSTART={lavoratori:50,pensionati:55,cetomedio:50,imprenditori:48,giovani:45,cattolici:52};
+
+const MINISTRIES=[
+  {id:'economia', nm:'Economia e Finanze', desc:'Conti pubblici, tasse, debito'},
+  {id:'interno',  nm:'Interno',            desc:'Sicurezza e immigrazione'},
+  {id:'giustizia',nm:'Giustizia',          desc:'Tribunali e riforme della giustizia'},
+  {id:'esteri',   nm:'Affari Esteri',      desc:'Diplomazia e relazioni internazionali'},
+  {id:'difesa',   nm:'Difesa',             desc:'Forze armate e sicurezza nazionale'},
+  {id:'lavoro',   nm:'Lavoro e Welfare',   desc:'Occupazione, sussidi, pensioni'},
+  {id:'salute',   nm:'Salute',             desc:'Sanità pubblica'},
+  {id:'istruzione',nm:'Istruzione e Ricerca',desc:'Scuola, università, ricerca'},
+  {id:'sviluppo', nm:'Sviluppo e Ambiente',desc:'Crescita e transizione ecologica'},
+  {id:'infrastrutture',nm:'Infrastrutture',desc:'Opere pubbliche e trasporti'},
+];
+/* D3 asse-3 — OVERLAY nomi dicastero per l'Italia 1950 (strada A, PRESET §5a). Solo VISIVO: `nm` (nome a schermo)
+   e `di` (forma «di/del…» del ruolo). Gli id restano invariati → nessun impatto su pool/gate/S (round-trip salvo:
+   deriva da S.era, che esiste già). L'overlay scatta SOLO con era==='italia1950'; il presente è identico.
+   Salute: nel '50 il Ministero non esiste → «Alto Commissariato per l'igiene e la sanità pubblica», capo = «Alto
+   Commissario» (non «Ministro»). Interno/Esteri/Difesa: invariati (già era-neutri) → non elencati (fallback moderno). */
+/* `art` = articolo determinativo del nome (per le preposizioni articolate «all'Alto Commissariato», «al Tesoro»…, D4-coda). */
+const MINISTRI_50={
+  economia:      {nm:'Tesoro', di:'del Tesoro', art:'il'},
+  lavoro:        {nm:'Lavoro e Previdenza Sociale', di:'del Lavoro e della Previdenza Sociale', art:'il'},
+  istruzione:    {nm:'Pubblica Istruzione', di:'della Pubblica Istruzione', art:'la'},
+  infrastrutture:{nm:'Lavori Pubblici', di:'dei Lavori Pubblici', art:'i'},
+  giustizia:     {nm:'Grazia e Giustizia', di:'di Grazia e Giustizia', art:'la'},
+  salute:        {nm:"Alto Commissariato per l'igiene e la sanità pubblica", di:"per l'igiene e la sanità pubblica", capo:'Alto Commissario', capoF:'Alta Commissaria', art:"l'"},
+  sviluppo:      {nm:'Industria e Commercio', di:"dell'Industria e del Commercio", art:"l'"},
+};
+const MEFFECT={
+  economia:{tecnico:{deficit:-0.5,growth:0.1}, conservatore:{deficit:-0.2,growth:0.1,grp:{imprenditori:3,cetomedio:2}}, progressista:{deficit:0.2,grp:{lavoratori:3}}, populista:{deficit:0.4,growth:-0.05,grp:{lavoratori:2,cetomedio:2}}},
+  interno:{conservatore:{sicurezza:4,grp:{cetomedio:3,cattolici:-1}}, progressista:{sicurezza:-1,grp:{giovani:3,cattolici:2}}, tecnico:{sicurezza:2}, populista:{sicurezza:3,grp:{cetomedio:3,giovani:-1}}},
+  lavoro:{progressista:{unemp:-0.15,grp:{lavoratori:4}}, conservatore:{unemp:-0.1,grp:{imprenditori:3,lavoratori:-2}}, tecnico:{unemp:-0.2}, populista:{deficit:0.2,grp:{lavoratori:3,pensionati:2}}},
+  salute:{progressista:{sanita:4}, tecnico:{sanita:3,deficit:-0.1}, conservatore:{sanita:1,deficit:-0.2}, populista:{sanita:2,grp:{pensionati:3}}},
+  sviluppo:{progressista:{ambiente:4,grp:{giovani:3}}, tecnico:{growth:0.12,ambiente:2}, conservatore:{growth:0.12,ambiente:-1,grp:{imprenditori:2}}, populista:{grp:{cetomedio:2}}},
+  difesa:{conservatore:{sicurezza:1,grp:{}}, tecnico:{deficit:-0.1}, progressista:{grp:{giovani:1}}, populista:{grp:{cetomedio:1}}},
+  giustizia:{tecnico:{sicurezza:1}, conservatore:{sicurezza:2,grp:{cetomedio:2}}, progressista:{grp:{giovani:2,cattolici:1}}, populista:{grp:{cetomedio:2,giovani:-1}}},
+  esteri:{tecnico:{growth:0.05}, conservatore:{grp:{imprenditori:2}}, progressista:{grp:{cattolici:2,giovani:1}}, populista:{grp:{cetomedio:1}}},
+  istruzione:{progressista:{grp:{giovani:4}}, tecnico:{growth:0.08,grp:{giovani:2}}, conservatore:{grp:{cetomedio:1}}, populista:{grp:{giovani:1}}},
+  infrastrutture:{conservatore:{growth:0.1,grp:{imprenditori:2}}, tecnico:{growth:0.1}, progressista:{ambiente:1,grp:{lavoratori:2}}, populista:{grp:{lavoratori:2,cetomedio:1}}},
+};
+
+/* ============================================================
+   LIVELLO 1 — POLITICO LOCALE (lotto ascesa, fase 1). Il gioco locale: indicatori e leve PROPRI,
+   diversi dai nazionali, con accenti città vs regione. Motore in simulateLocale (game.js): ogni
+   indicatore converge verso il target delle leve; il consenso locale = media dei servizi − tasse,
+   bilancio come vincolo. Le scelte locali alimentano gli STESSI contatori dei tratti/esposizione
+   (pleases/rischio): la continuità narrativa parte dalla gavetta. Set FOCALIZZATO (6 città / 5 regione).
+   ============================================================ */
+const LOCALE_IND={
+  città:[
+    {id:'servizi',  nm:'Servizi e rifiuti', desc:'decoro urbano, raccolta'},
+    {id:'mobilita', nm:'Mobilità urbana',   desc:'trasporto pubblico, traffico'},
+    {id:'casa',     nm:'Casa e affitti',    desc:'abitare, sfratti'},
+    {id:'sicurezza',nm:'Sicurezza urbana',  desc:'ordine nei quartieri'},
+    {id:'verde',    nm:'Verde e ambiente',  desc:'parchi, aria'},
+    {id:'bilancio', nm:'Salute dei conti', desc:'i conti del Comune'},
+  ],
+  regione:[
+    {id:'sanita',   nm:'Sanità regionale',  desc:'ospedali, liste'},
+    {id:'mobilita', nm:'Trasporti regionali',desc:'treni, strade'},
+    {id:'sviluppo', nm:'Sviluppo e lavoro', desc:'imprese, occupazione locale'},
+    {id:'ambiente', nm:'Ambiente',          desc:'territorio, rifiuti'},
+    {id:'bilancio', nm:'Salute dei conti', desc:'i conti della Regione'},
+  ],
+};
+/* Leve (basso/medio/alto). `ind` = indicatore di servizio che la leva alza (target = 30/55/80 per livello);
+   `costo` = peso sul bilancio per livello (la spesa erode i conti). La leva `tributi` è speciale: alza il
+   bilancio ma pesa sul consenso (le tasse). `pleases` = profilo che la leva alta soddisfa (tratti dal basso). */
+const LOCALE_LEVE={
+  città:[
+    {id:'raccolta', nm:'Raccolta e decoro',   ind:'servizi',  costo:[0,7,15], levels:['Minima','Standard','Capillare'], pleases:'progressista'},
+    {id:'trasporto',nm:'Trasporto pubblico',  ind:'mobilita', costo:[0,8,16], levels:['Ridotto','Standard','Potenziato'], pleases:'progressista'},
+    {id:'abitare',  nm:'Politiche abitative', ind:'casa',     costo:[0,7,14], levels:['Mercato','Misto','Sociale'], pleases:'progressista'},
+    {id:'vigili',   nm:'Vigili urbani',        ind:'sicurezza',costo:[0,6,13], levels:['Pochi','Standard','Capillari'], pleases:'conservatore'},
+    {id:'parchi',   nm:'Verde pubblico',       ind:'verde',    costo:[0,5,11], levels:['Trascurato','Curato','Ampliato'], pleases:'progressista'},
+    {id:'tributi',  nm:'Tributi locali',       ind:null,       costo:[0,0,0],  levels:['Bassi','Medi','Alti'], pleases:'tecnico'},
+  ],
+  regione:[
+    {id:'sanitaL',  nm:'Spesa sanitaria',      ind:'sanita',   costo:[0,9,18], levels:['Tagli','Standard','Potenziata'], pleases:'progressista'},
+    {id:'mobilitaL',nm:'Trasporti',            ind:'mobilita', costo:[0,8,16], levels:['Ridotti','Standard','Potenziati'], pleases:'progressista'},
+    {id:'sviluppoL',nm:'Incentivi allo sviluppo',ind:'sviluppo',costo:[0,7,15], levels:['Nessuno','Mirati','Ampi'], pleases:'conservatore'},
+    {id:'ambienteL',nm:'Tutela ambientale',    ind:'ambiente', costo:[0,6,12], levels:['Minima','Standard','Forte'], pleases:'progressista'},
+    {id:'tributiL', nm:'Tributi regionali',    ind:null,       costo:[0,0,0],  levels:['Bassi','Medi','Alti'], pleases:'tecnico'},
+  ],
+};
+/* MAPPA QUARTIERI (livello 1, Priorità 5): la geometria vive in `js/mappe-locali.js` (`MAPPE_LOCALI`, confini REALI
+   da OpenStreetMap, generati da `.claude/genera-mappe-locali.js`). Qui non serve nessuna struttura dati. */
+/* Eventi locali tematici: cornice + scelte che muovono gli indicatori locali (locInd) e i gruppi (gd), con
+   `pleases`/`rischio` per i tratti e l'esposizione dal basso. `tipo` filtra città/regione (o entrambi). */
+const LOCALE_EV=[
+  // --- CITTÀ ---
+  {id:'l_rifiuti', tipo:'città', kick:'Emergenza', t:'Rifiuti in strada', text:'I cassonetti traboccano da giorni: la città protesta e i giornali locali incalzano.', ch:[
+    {l:'Appalto d\'urgenza, costi su',e:'Strade pulite in fretta; il bilancio paga',pleases:'progressista',costo:{pct:1.3},f:()=>{locInd('servizi',10); locInd('bilancio',-6); gd('giovani',2);}},
+    {l:'Riorganizzi col personale interno',e:'Più lento, ma sostenibile',pleases:'tecnico',f:()=>{locInd('servizi',5);}},
+    {l:'Affidi a un\'impresa amica, in fretta',e:'Risolvi oggi; qualcuno mormora',rischio:6,f:()=>{locInd('servizi',8); gd('imprenditori',2);}},
+  ]},
+  {id:'l_sfratti', tono:'grave', tipo:'città', kick:'Casa', t:'Ondata di sfratti', text:'Gli affitti corrono e decine di famiglie rischiano lo sfratto. Il quartiere si mobilita.', ch:[
+    {l:'Fondo comunale per la morosità',e:'Tamponi il dramma; conti sotto sforzo',pleases:'progressista',costo:{pct:1.1},f:()=>{locInd('casa',9); locInd('bilancio',-5); gd('lavoratori',3);}},
+    {l:'Tavolo coi proprietari, niente fondi',e:'Mediazione a costo zero, effetto incerto',pleases:'conservatore',f:()=>{locInd('casa',3); gd('imprenditori',2);}},
+  ]},
+  {id:'l_movida', era:'contemporanea', tipo:'città', kick:'Ordine pubblico', t:'Movida fuori controllo', text:'Notti di caos in centro: residenti esasperati, commercianti divisi.', ch:[
+    {l:'Stretta e più vigili',e:'Ordine ripristinato; i giovani protestano',pleases:'conservatore',costo:{pct:0.8},f:()=>{locInd('sicurezza',8); locInd('bilancio',-4); gd('giovani',-3); gd('cetomedio',3);}},
+    {l:'Mediazione coi locali, orari concordati',e:'Equilibrio fragile ma condiviso',pleases:'progressista',f:()=>{locInd('sicurezza',4); gd('giovani',2);}},
+  ]},
+  {id:'l_opera', tipo:'città', kick:'Opera pubblica', t:'Una nuova linea di tram', text:'C\'è l\'occasione di una grande opera di mobilità: trasformativa, ma cantieri e debiti per anni.', ch:[
+    {l:'Vai con l\'opera',e:'Visione di lungo periodo; conti e cantieri pesano',pleases:'progressista',costo:{pct:2.5},f:()=>{locInd('mobilita',14); locInd('bilancio',-12); gd('giovani',3);}},
+    {l:'Soluzione modesta, subito',e:'Meno ambizione, conti salvi',pleases:'tecnico',f:()=>{locInd('mobilita',5);}},
+  ]},
+  {id:'l_evento', tono:'florido', tipo:'città', kick:'Città', t:'Una grande mostra in città', text:'Un evento culturale può portare turismo e prestigio, con un investimento del Comune.', ch:[
+    {l:'Investi, fai le cose in grande',e:'Vetrina e indotto; spesa importante',pleases:'progressista',costo:{pct:1.5},f:()=>{locInd('verde',3); locInd('bilancio',-7); gd('cetomedio',3); gd('imprenditori',2);}},
+    {l:'Versione sobria',e:'Decoroso e prudente',pleases:'tecnico',f:()=>{gd('cetomedio',1);}},
+  ]},
+  {id:'l_tangente', tipo:'città', kick:'Palazzo', t:'Un costruttore ti avvicina', text:'Un imprenditore edile offre sostegno in cambio di una variante urbanistica su misura.', ch:[
+    {l:'Rifiuti e rendi pubblica la cosa',e:'Trasparenza che fa rumore',pleases:'tecnico',trasparenza:5,f:()=>{gd('giovani',2); gd('imprenditori',-2);}},
+    {l:'Concedi la variante, con discrezione',e:'Un favore che pesa, e si ricorda',rischio:8,costo:{pct:-1.1},f:()=>{locInd('bilancio',5); gd('imprenditori',3);}},
+  ]},
+  {id:'l_quartiere', tipo:'città', kick:'Periferie', t:'Un quartiere alla deriva', text:'In una periferia degradata si sommano palazzi fatiscenti, niente servizi e microcriminalità: gli abitanti chiedono presenza.', ch:[
+    {l:'Piano di riqualificazione',e:'Investi sul quartiere; i conti pesano',pleases:'progressista',costo:{pct:1.5},f:()=>{locInd('servizi',8); locInd('bilancio',-7); gd('lavoratori',2);}},
+    {l:'Più controlli e telecamere',e:'Sicurezza visibile; il sociale resta indietro',pleases:'conservatore',costo:{pct:0.8},f:()=>{locInd('sicurezza',7); locInd('bilancio',-4); gd('cetomedio',2); gd('giovani',-1);}},
+    {l:'Affidi tutto a un privato in fretta',e:'Risolvi oggi; qualcuno mormora',rischio:6,f:()=>{locInd('servizi',6); gd('imprenditori',2);}},
+  ]},
+  {id:'l_mercato', era:'contemporanea', tipo:'città', kick:'Commercio', t:'Il mercato storico rischia di chiudere', text:'Lo storico mercato coperto perde banchi e clienti: ambulanti e residenti chiedono di salvarlo.', ch:[
+    {l:'Ristrutturi e rilanci il mercato',e:'Un pezzo di città che resta vivo; spesa importante',pleases:'progressista',costo:{pct:1.3},f:()=>{locInd('servizi',7); locInd('bilancio',-6); gd('cetomedio',2); gd('lavoratori',2);}},
+    {l:'Cedi l\'area a un supermercato',e:'Incassi e modernità; gli ambulanti a casa',pleases:'tecnico',costo:{pct:-1.1},f:()=>{locInd('bilancio',5); gd('imprenditori',3); gd('lavoratori',-2);}},
+  ]},
+  {id:'l_autobus', tono:'grave', tipo:'città', kick:'Trasporti', t:'L\'autobus che non passa mai', text:'Nei quartieri esterni le corse sono rare e affollate: studenti e pendolari restano a piedi.', ch:[
+    {l:'Più corse e nuove linee',e:'Servizio vero; investimento sul bilancio',pleases:'progressista',costo:{pct:1.5},f:()=>{locInd('mobilita',9); locInd('bilancio',-7); gd('giovani',2); gd('lavoratori',2);}},
+    {l:'Ottimizzi le linee esistenti',e:'Fai di più con quel che hai',pleases:'tecnico',f:()=>{locInd('mobilita',4);}},
+    {l:'Tagli le tratte meno usate',e:'Conti più leggeri; chi è isolato resta a piedi',pleases:'conservatore',costo:{pct:-0.8},f:()=>{locInd('mobilita',-2); locInd('bilancio',4); gd('pensionati',-2);}},
+  ]},
+  {id:'l_comitati', tipo:'città', kick:'Territorio', t:'I comitati del no', text:'Un nuovo impianto previsto in città — utile ai servizi, osteggiato dai comitati di quartiere che riempiono le piazze.', ch:[
+    {l:'Tiri dritto, l\'opera serve',e:'Decisione netta; il quartiere si infiamma',pleases:'conservatore',rischio:5,costo:{pct:-0.8},f:()=>{locInd('servizi',6); locInd('bilancio',4); gd('cetomedio',-3);}},
+    {l:'Apri una consultazione pubblica',e:'Tempi lunghi, ma la città partecipa',pleases:'progressista',f:()=>{locInd('servizi',2); gd('giovani',2); gd('cetomedio',2);}},
+    {l:'Ritiri il progetto',e:'Plachi le proteste; l\'opera salta',pleases:'populista',costo:{pct:0.6},f:()=>{gd('cetomedio',3); locInd('bilancio',-3);}},
+  ]},
+  {id:'l_vicino', tipo:'città', kick:'Area vasta', t:'Il sindaco vicino ti sfida', text:'Il sindaco del comune confinante attacca sui giornali e punta a soffiarti servizi e investimenti dell\'area.', ch:[
+    {l:'Proponi una gestione associata dei servizi',e:'Più forza a entrambi; metti da parte l\'orgoglio',pleases:'tecnico',costo:{pct:-0.6},f:()=>{locInd('servizi',6); locInd('bilancio',3); gd('cetomedio',2);}},
+    {l:'Difendi il tuo territorio a muso duro',e:'Rumore e visibilità; rivalità che logora',pleases:'populista',rischio:3,costo:{pct:0.4},f:()=>{gd('cetomedio',3); locInd('bilancio',-2);}},
+  ]},
+  {id:'l_ciclabili', era:'contemporanea', tipo:'città', kick:'Mobilità', t:'Piste ciclabili o parcheggi', text:'Una strada centrale: corsia ciclabile o posti auto? Ambientalisti e commercianti tirano per la giacca.', ch:[
+    {l:'Piste ciclabili e zone 30',e:'Città più vivibile; chi guida protesta',pleases:'progressista',f:()=>{locInd('mobilita',5); locInd('verde',5); gd('giovani',3); gd('cetomedio',-2);}},
+    {l:'Più parcheggi per chi guida',e:'Vieni incontro agli automobilisti; il verde resta indietro',pleases:'conservatore',f:()=>{locInd('mobilita',4); locInd('verde',-2); gd('cetomedio',3); gd('giovani',-2);}},
+  ]},
+  {id:'l_occupato', tipo:'città', kick:'Ordine pubblico', t:'Un palazzo occupato', text:'Un edificio comunale dismesso è occupato da mesi: chi ci abita chiede una casa, il quartiere chiede legalità.', ch:[
+    {l:'Sgombero e messa in sicurezza',e:'Ripristini la legalità; il problema casa resta',pleases:'conservatore',f:()=>{locInd('sicurezza',7); locInd('casa',-2); gd('cetomedio',2); gd('giovani',-2);}},
+    {l:'Regolarizzi e avvii un progetto sociale',e:'Dai una risposta; costa e fa discutere',pleases:'progressista',costo:{pct:0.8},f:()=>{locInd('casa',6); locInd('bilancio',-4); gd('giovani',2); gd('lavoratori',2);}},
+    {l:'Lasci correre, per ora',e:'Eviti lo scontro; il quartiere si sente abbandonato',rischio:4,f:()=>{locInd('sicurezza',-3); gd('cetomedio',-2);}},
+  ]},
+  {id:'l_smog', era:'contemporanea', tipo:'città', kick:'Ambiente', t:'Lo smog soffoca la città', text:'Le centraline sforano i limiti da giorni: cresce la pressione per fermare le auto.', ch:[
+    {l:'Blocco del traffico e domeniche a piedi',e:'Aria più pulita; gli automobilisti brontolano',pleases:'progressista',f:()=>{locInd('verde',7); locInd('mobilita',-2); gd('giovani',2); gd('cetomedio',-2);}},
+    {l:'Incentivi a caldaie e mezzi puliti',e:'Soluzione strutturale; spesa pubblica',pleases:'tecnico',costo:{pct:1.1},f:()=>{locInd('verde',4); locInd('bilancio',-5);}},
+    {l:'Misure minime, non irriti i cittadini',e:'Quieto vivere; l\'aria resta cattiva',pleases:'populista',f:()=>{locInd('verde',-2); gd('cetomedio',2);}},
+  ]},
+  {id:'l_scuola', tipo:'città', kick:'Scuole', t:'Una scuola che cade a pezzi', text:'Intonaco che si stacca e aule fredde: i genitori sono in allarme, gli insegnanti protestano.', ch:[
+    {l:'Cantiere subito, metti in sicurezza',e:'Priorità ai più piccoli; conti sotto sforzo',pleases:'progressista',costo:{pct:1.5},f:()=>{locInd('servizi',8); locInd('bilancio',-7); gd('giovani',3); gd('lavoratori',2);}},
+    {l:'Interventi tampone e classi spostate',e:'Tamponi col poco che hai',pleases:'tecnico',f:()=>{locInd('servizi',3);}},
+  ]},
+  {id:'l_dehors', era:'contemporanea', tipo:'città', kick:'Centro storico', t:'Dehors e decoro in centro', text:'I tavolini dei locali invadono le piazze del centro: i commercianti spingono, i residenti lamentano il decoro.', ch:[
+    {l:'Regolamento dei dehors e più decoro',e:'Ordine e spazi vivibili; i commercianti mugugnano',pleases:'conservatore',f:()=>{locInd('servizi',5); gd('cetomedio',2); gd('imprenditori',-2);}},
+    {l:'Via libera ai tavolini, il centro vive',e:'Locali contenti; i residenti meno',pleases:'populista',f:()=>{locInd('servizi',-1); gd('imprenditori',3); gd('cetomedio',-2);}},
+  ]},
+  {id:'l_capodanno', era:'contemporanea', tipo:'città', kick:'Eventi', t:'Il concerto di Capodanno', cond:()=>[12,1].includes(S.month), text:'La piazza chiede un grande concerto di fine anno: festa e indotto, ma costi e sicurezza da garantire.', ch:[
+    {l:'Grande concerto, sicurezza rinforzata',e:'Una notte di festa; spesa e organizzazione',pleases:'progressista',costo:{pct:1.3},f:()=>{locInd('servizi',3); locInd('sicurezza',-1); locInd('bilancio',-6); gd('giovani',3); gd('imprenditori',2);}},
+    {l:'Festa sobria e diffusa nei quartieri',e:'Misurata e per tutti',pleases:'tecnico',f:()=>{gd('giovani',1); gd('cetomedio',1);}},
+  ]},
+  {id:'l_acqua', era:'contemporanea', tipo:'città', kick:'Servizi', t:'L\'acqua, pubblica o privata', text:'La gestione dell\'acquedotto comunale va rinnovata: tenerla pubblica o affidarla a un gestore privato?', ch:[
+    {l:'Gestione pubblica, investi tu',e:'Controllo diretto; tocca al Comune metterci i soldi',pleases:'progressista',costo:{pct:1.3},f:()=>{locInd('servizi',6); locInd('bilancio',-6); gd('lavoratori',2);}},
+    {l:'Affidi a un gestore privato',e:'Efficienza e canone in cassa; meno mani sul servizio',pleases:'tecnico',costo:{pct:-1.1},f:()=>{locInd('servizi',5); locInd('bilancio',5); gd('imprenditori',2); gd('lavoratori',-2);}},
+  ]},
+  /* --- CITTÀ (espansione lotto 1: qualità+agency, +16 → ~34; temi nuovi, niente reskin) --- */
+  {id:'l_rider', era:'contemporanea', tono:'grave', tipo:'città', kick:'Lavoro', t:'I rider chiedono tutele', text:'I fattorini delle consegne lavorano a cottimo, senza garanzie: chiedono al Comune una carta dei diritti. Le piattaforme minacciano di andarsene.', ch:[
+    {l:'Carta comunale dei diritti dei rider',e:'Tuteli chi lavora; le piattaforme protestano',pleases:'progressista',f:()=>{gd('lavoratori',3); gd('giovani',2); gd('imprenditori',-2);}},
+    {l:'Tavolo volontario con le piattaforme',e:'Mediazione a costo zero, impegni non vincolanti',pleases:'tecnico',f:()=>{gd('lavoratori',1); gd('imprenditori',1);}},
+    {l:'Lasci fare al mercato',e:'Non spaventi gli investitori; chi consegna resta scoperto',pleases:'conservatore',f:()=>{gd('imprenditori',2); gd('lavoratori',-2);}},
+  ]},
+  {id:'l_sciopero', tono:'grave', tipo:'città', kick:'Lavoro', t:'Sciopero dei trasporti', text:'Gli autisti del trasporto pubblico incrociano le braccia per i turni massacranti: la città si ferma, i pendolari sono in mezzo.', ch:[
+    {l:'Accogli le richieste, riorganizzi i turni',e:'Pace sindacale; costa e crea un precedente',pleases:'progressista',costo:{pct:1.1},f:()=>{locInd('mobilita',4); locInd('bilancio',-5); gd('lavoratori',4);}},
+    {l:'Garantisci i servizi minimi e tratti',e:'Tieni la città in piedi mentre negozi',pleases:'tecnico',f:()=>{locInd('mobilita',2); gd('lavoratori',1); gd('cetomedio',2);}},
+    {l:'Ordini i servizi essenziali e tieni il punto',e:'Fermezza; il fronte sindacale si indurisce',pleases:'conservatore',rischio:4,f:()=>{locInd('mobilita',-2); gd('lavoratori',-3); gd('cetomedio',2);}},
+  ]},
+  {id:'l_parco', tipo:'città', kick:'Ambiente', t:'Un\'area dismessa da restituire', text:'Un vecchio scalo ferroviario abbandonato può diventare il grande parco che alla città manca. Serve un investimento, e i costruttori hanno altre idee.', ch:[
+    {l:'Un grande parco urbano',e:'Verde e respiro per anni; il Comune ci mette i soldi',pleases:'progressista',costo:{pct:1.7},f:()=>{locInd('verde',12); locInd('bilancio',-8); gd('giovani',3); gd('cetomedio',2);}},
+    {l:'Progetto misto: verde e servizi',e:'Un equilibrio tra ambiente e cassa',pleases:'tecnico',costo:{pct:0.8},f:()=>{locInd('verde',6); locInd('servizi',4); locInd('bilancio',-4);}},
+    {l:'Cedi l\'area all\'edilizia',e:'Incassi subito; il verde salta',pleases:'conservatore',costo:{pct:-1.7},f:()=>{locInd('bilancio',8); locInd('verde',-2); gd('imprenditori',3);}},
+  ]},
+  {id:'l_differenziata', era:'contemporanea', tipo:'città', kick:'Ambiente', t:'La differenziata non decolla', text:'La raccolta differenziata è ferma da anni a percentuali basse: multe in arrivo e discarica che si riempie.', ch:[
+    {l:'Porta a porta in tutta la città',e:'Salto strutturale; organizzazione e spesa',pleases:'progressista',costo:{pct:1.3},f:()=>{locInd('verde',9); locInd('servizi',3); locInd('bilancio',-6); gd('giovani',2);}},
+    {l:'Premi e tariffe puntuali',e:'Incentivi chi ricicla; effetto graduale',pleases:'tecnico',costo:{pct:0.4},f:()=>{locInd('verde',5); locInd('bilancio',-2);}},
+    {l:'Rinvii, non è il momento',e:'Eviti il fastidio; il problema si aggrava',pleases:'populista',f:()=>{locInd('verde',-2); gd('cetomedio',1);}},
+  ]},
+  {id:'l_festival', tipo:'città', kick:'Cultura', t:'Un festival diffuso delle arti', text:'Artisti e associazioni propongono un festival che accenda le piazze per un\'estate: visibilità e indotto, con un investimento del Comune.', ch:[
+    {l:'Ci credi, in grande',e:'La città diventa un palco; spesa importante',pleases:'progressista',costo:{pct:1.5},f:()=>{locInd('servizi',4); locInd('bilancio',-7); gd('giovani',4); gd('imprenditori',2);}},
+    {l:'Edizione sobria, molto volontariato',e:'Fai molto con poco, insieme alla città',pleases:'tecnico',f:()=>{gd('giovani',2); gd('cetomedio',2);}},
+  ]},
+  {id:'l_integrazione', tipo:'città', kick:'Comunità', t:'Un quartiere che cambia volto', text:'In un quartiere popolare la convivenza tra residenti storici e nuove famiglie arrivate da fuori si fa tesa: piccoli attriti quotidiani, nessuno che li governi.', ch:[
+    {l:'Centro di comunità e mediazione',e:'Investi sul tessuto sociale; risultati lenti',pleases:'progressista',costo:{pct:1.1},f:()=>{locInd('servizi',6); locInd('bilancio',-5); gd('lavoratori',2); gd('giovani',2);}},
+    {l:'Più presidio e regole condivise',e:'Ordine visibile; il sociale resta indietro',pleases:'conservatore',costo:{pct:0.6},f:()=>{locInd('sicurezza',6); locInd('bilancio',-3); gd('cetomedio',3);}},
+    {l:'Feste di strada e associazioni di quartiere',e:'Ricuci dal basso, a costo quasi zero',pleases:'tecnico',f:()=>{locInd('servizi',3); gd('giovani',2); gd('cetomedio',1);}},
+  ]},
+  {id:'l_ztl', era:'contemporanea', tipo:'città', kick:'Mobilità', t:'Chiudere il centro alle auto', text:'C\'è la spinta a pedonalizzare il cuore della città: aria migliore e piazze vive, ma commercianti e automobilisti temono di perderci.', ch:[
+    {l:'Pedonalizzi il centro storico',e:'Città più bella e respirabile; chi guida protesta',pleases:'progressista',f:()=>{locInd('verde',6); locInd('mobilita',3); gd('giovani',3); gd('cetomedio',-2); gd('imprenditori',-1);}},
+    {l:'Zona a traffico limitato con eccezioni',e:'Compromesso: meno auto, non zero',pleases:'tecnico',f:()=>{locInd('verde',3); locInd('mobilita',2); gd('cetomedio',1);}},
+    {l:'Lasci il centro com\'è',e:'Non scontenti nessuno; l\'occasione passa',pleases:'populista',f:()=>{gd('imprenditori',1); gd('cetomedio',1);}},
+  ]},
+  {id:'l_asili', era:'contemporanea', tipo:'città', kick:'Scuole', t:'Nessun posto all\'asilo nido', text:'Le liste d\'attesa per i nidi comunali sono lunghissime: le famiglie giovani non sanno dove lasciare i bambini per tornare a lavorare.', ch:[
+    {l:'Nuovi nidi comunali',e:'Rispondi alle famiglie; investimento sul bilancio',pleases:'progressista',costo:{pct:1.5},f:()=>{locInd('servizi',8); locInd('bilancio',-7); gd('lavoratori',3); gd('giovani',2);}},
+    {l:'Convenzioni e buoni per i nidi privati',e:'Più posti in fretta; meno controllo pubblico',pleases:'conservatore',costo:{pct:0.6},f:()=>{locInd('servizi',5); locInd('bilancio',-3); gd('imprenditori',2);}},
+  ]},
+  {id:'l_assunzioni', tipo:'città', kick:'Palazzo', t:'Le raccomandazioni per il concorso', text:'Si apre un concorso per posti in Comune. Alleati e capicorrente ti mandano nomi di parenti e amici da «sistemare».', ch:[
+    {l:'Concorso trasparente, nessuna eccezione',e:'Merito e fiducia; qualche alleato si offende',pleases:'tecnico',trasparenza:5,f:()=>{locInd('servizi',4); gd('giovani',3); gd('cetomedio',2);}},
+    {l:'Qualche assunzione di riguardo',e:'Tieni buona la maggioranza; una prassi che pesa',rischio:6,f:()=>{gd('cetomedio',2); locInd('servizi',-2);}},
+  ]},
+  {id:'l_civica', tipo:'città', kick:'Palazzo', t:'Una lista civica ti tende la mano', text:'Una lista civica di quartiere, radicata e rumorosa, si offre di entrare in maggioranza: in cambio vuole priorità e assessorati per la sua zona.', ch:[
+    {l:'La imbarchi in maggioranza',e:'Base più larga; impegni da onorare',pleases:'populista',f:()=>{locInd('servizi',3); gd('cetomedio',3); gd('lavoratori',1);}},
+    {l:'Accordi puntuali, senza poltrone',e:'Collabori senza legarti le mani',pleases:'tecnico',f:()=>{locInd('servizi',2); gd('cetomedio',1);}},
+    {l:'Governi da solo',e:'Mani libere; ti fai un\'opposizione in più',pleases:'conservatore',rischio:3,f:()=>{gd('giovani',1);}},
+  ]},
+  {id:'l_startup', era:'contemporanea', tipo:'città', kick:'Sviluppo', t:'Un polo dell\'innovazione', text:'Un gruppo di giovani imprese e un\'università vogliono aprire un incubatore in città: lavoro qualificato e futuro, se il Comune offre spazi e servizi.', ch:[
+    {l:'Offri spazi e sostegno',e:'Scommetti sul futuro; costa e non rende subito',pleases:'progressista',costo:{pct:1.3},f:()=>{locInd('servizi',3); locInd('bilancio',-6); gd('giovani',4); gd('imprenditori',2);}},
+    {l:'Un bando aperto e regole chiare',e:'Attiri chi merita, senza regali',pleases:'tecnico',f:()=>{gd('giovani',3); gd('imprenditori',2);}},
+  ]},
+  {id:'l_dissesto', tipo:'città', kick:'Prevenzione', t:'Il torrente che fa paura', text:'Gli esperti avvertono: il torrente che attraversa la città può esondare, e gli argini sono vecchi. Non è ancora successo nulla — puoi agire prima.', ch:[
+    {l:'Metti in sicurezza gli argini ora',e:'Previeni il disastro; spendi prima che accada',pleases:'tecnico',costo:{pct:1.5},f:()=>{locInd('sicurezza',7); locInd('servizi',3); locInd('bilancio',-7); gd('cetomedio',2);}},
+    {l:'Interventi minimi e monitoraggio',e:'Tamponi e tieni d\'occhio; il rischio resta',pleases:'conservatore',costo:{pct:0.4},f:()=>{locInd('sicurezza',2); locInd('bilancio',-2);}},
+    {l:'Rimandi, i soldi servono altrove',e:'Risparmi oggi; se esonda, pagherà caro',pleases:'populista',rischio:4,costo:{pct:-0.6},f:()=>{locInd('bilancio',3);}},
+  ]},
+  {id:'l_rigenerazione', tipo:'città', kick:'Periferie', t:'La vecchia fabbrica da reinventare', text:'Un enorme capannone industriale dismesso, in una zona popolare, aspetta un destino: può tornare a essere un pezzo di città viva.', ch:[
+    {l:'Rigenerazione: case, verde e servizi',e:'Ridai vita al quartiere; investimento lungo',pleases:'progressista',costo:{pct:1.7},f:()=>{locInd('casa',6); locInd('verde',4); locInd('servizi',3); locInd('bilancio',-8); gd('lavoratori',2); gd('giovani',2);}},
+    {l:'Vendi a un grande sviluppatore',e:'Cassa subito; la città decide poco',pleases:'conservatore',costo:{pct:-1.5},f:()=>{locInd('bilancio',7); locInd('casa',3); gd('imprenditori',3); gd('lavoratori',-1);}},
+  ]},
+  {id:'l_volontariato', tono:'florido', tipo:'città', kick:'Città', t:'Una città che si rimbocca le maniche', text:'Dopo mesi difficili, gruppi di cittadini si organizzano da soli per ripulire i parchi e aiutare i più fragili. Puoi cavalcare quest\'energia.', ch:[
+    {l:'La sostieni con mezzi e spazi',e:'Moltiplichi il bene a poco prezzo',pleases:'progressista',f:()=>{locInd('servizi',5); locInd('verde',3); gd('giovani',3); gd('cetomedio',2);}},
+    {l:'La incanali in regole e convenzioni',e:'Ordine e continuità; un po\' di slancio si perde',pleases:'tecnico',f:()=>{locInd('servizi',3); gd('cetomedio',1);}},
+  ]},
+  {id:'l_digitale', era:'contemporanea', tipo:'città', kick:'Servizi', t:'Il Comune allo sportello, ancora con la carta', text:'Per un certificato i cittadini fanno file di ore. C\'è la possibilità di digitalizzare i servizi, ma serve investire e formare il personale.', ch:[
+    {l:'Sportello digitale unico',e:'Servizi più veloci; costo e formazione',pleases:'tecnico',costo:{pct:1.1},f:()=>{locInd('servizi',8); locInd('bilancio',-5); gd('giovani',2); gd('cetomedio',2);}},
+    {l:'Digitalizzi i servizi più usati',e:'Parti dal concreto, un passo alla volta',pleases:'progressista',costo:{pct:0.4},f:()=>{locInd('servizi',4); locInd('bilancio',-2);}},
+  ]},
+  {id:'l_anziani', era:'contemporanea', tipo:'città', kick:'Servizi', t:'Gli anziani soli della città', text:'Cresce il numero di anziani che vivono soli, senza rete: i servizi sociali non bastano e le segnalazioni si accumulano.', ch:[
+    {l:'Assistenza domiciliare e telesoccorso',e:'Vicinanza vera; spesa che cresce',pleases:'progressista',costo:{pct:1.3},f:()=>{locInd('servizi',8); locInd('bilancio',-6); gd('pensionati',4);}},
+    {l:'Rete di quartiere con il volontariato',e:'Prossimità a basso costo; copre in parte',pleases:'tecnico',f:()=>{locInd('servizi',4); gd('pensionati',2); gd('cetomedio',1);}},
+  ]},
+  // --- REGIONE ---
+  {id:'l_liste', era:'contemporanea', tipo:'regione', tono:'grave', kick:'Sanità', t:'Liste d\'attesa infinite', text:'Mesi di attesa per una visita: la sanità regionale è sotto accusa.', ch:[
+    {l:'Assumi medici e apri ambulatori',e:'Servizio migliore; spesa in salita',pleases:'progressista',costo:{pct:1.7},f:()=>{locInd('sanita',10); locInd('bilancio',-8); gd('pensionati',3);}},
+    {l:'Convenzioni col privato',e:'Più rapido e meno caro; polemiche',pleases:'conservatore',f:()=>{locInd('sanita',6); gd('imprenditori',2); gd('lavoratori',-2);}},
+  ]},
+  {id:'l_treni', tono:'grave', tipo:'regione', kick:'Trasporti', t:'I pendolari sul piede di guerra', text:'Treni in ritardo e soppressi: i pendolari protestano ogni mattina.', ch:[
+    {l:'Nuovi convogli e più corse',e:'Risposta concreta; investimento pesante',pleases:'progressista',costo:{pct:1.9},f:()=>{locInd('mobilita',11); locInd('bilancio',-9); gd('lavoratori',3);}},
+    {l:'Riprogrammi gli orari, senza spesa',e:'Tamponi con quel che hai',pleases:'tecnico',f:()=>{locInd('mobilita',4);}},
+  ]},
+  {id:'l_polo', tipo:'regione', tono:'grave', kick:'Sviluppo', t:'Un polo industriale chiede aiuto', text:'Una grande azienda minaccia di chiudere lo stabilimento regionale: a rischio migliaia di posti.', ch:[
+    {l:'Incentivi e aree attrezzate',e:'Salvi i posti; i conti e l\'ambiente pagano',pleases:'conservatore',costo:{pct:1.7},f:()=>{locInd('sviluppo',12); locInd('bilancio',-8); locInd('ambiente',-4); gd('lavoratori',4); gd('imprenditori',3);}},
+    {l:'Niente soldi pubblici a pioggia',e:'Disciplina; lo stabilimento è a rischio',pleases:'tecnico',f:()=>{gd('imprenditori',-3); gd('lavoratori',-2);}},
+  ]},
+  {id:'l_discarica', tipo:'regione', kick:'Ambiente', t:'Dove mettere la nuova discarica', text:'La regione deve individuare un nuovo sito per i rifiuti: ogni territorio dice «non qui».', ch:[
+    {l:'Impianto moderno di riciclo',e:'Soluzione di prospettiva; costa e divide',pleases:'progressista',costo:{pct:1.5},f:()=>{locInd('ambiente',9); locInd('bilancio',-7); gd('giovani',3);}},
+    {l:'Discarica tradizionale, in fretta',e:'Rapida ed economica; proteste locali',pleases:'populista',costo:{pct:0.4},f:()=>{locInd('ambiente',-3); locInd('bilancio',-2); gd('cetomedio',-2);}},
+  ]},
+  {id:'l_fondi', era:'contemporanea', tipo:'regione', kick:'Palazzo', t:'Fondi europei da assegnare', text:'Arrivano fondi importanti per lo sviluppo: come li distribuisci?', ch:[
+    {l:'Bando trasparente per merito',e:'Equità e fiducia; qualcuno resta a bocca asciutta',pleases:'tecnico',trasparenza:5,f:()=>{locInd('sviluppo',7); gd('giovani',2);}},
+    {l:'Indirizzi i fondi ai tuoi territori',e:'Consenso mirato; un uso disinvolto',rischio:7,f:()=>{locInd('sviluppo',5); gd('cetomedio',2);}},
+  ]},
+  {id:'l_ospedale', tipo:'regione', kick:'Sanità', t:'L\'ospedale di provincia', text:'Un piccolo ospedale di provincia è in perdita e sottoutilizzato: chiuderlo fa risparmiare, il territorio insorge.', ch:[
+    {l:'Lo tieni aperto, è un presidio',e:'Vicinanza ai cittadini; conti in affanno',pleases:'populista',costo:{pct:1.7},f:()=>{locInd('sanita',5); locInd('bilancio',-8); gd('pensionati',4);}},
+    {l:'Lo converti in casa di comunità',e:'Servizi di base più vicini; niente reparti pesanti',pleases:'tecnico',costo:{pct:0.4},f:()=>{locInd('sanita',4); locInd('bilancio',-2); gd('pensionati',1);}},
+    {l:'Razionalizzi e concentri i servizi',e:'Conti più sani; il territorio si sente abbandonato',pleases:'conservatore',costo:{pct:-1.5},f:()=>{locInd('bilancio',7); locInd('sanita',-3); gd('pensionati',-3);}},
+  ]},
+  {id:'l_frana', tipo:'regione', kick:'Dissesto', t:'Un versante che frana', text:'Le piogge hanno aperto una frana che minaccia case e strade: serve mettere in sicurezza il versante.', ch:[
+    {l:'Messa in sicurezza e rimboschimento',e:'Territorio più sicuro; investimento serio',pleases:'progressista',costo:{pct:1.7},f:()=>{locInd('ambiente',8); locInd('bilancio',-8); gd('lavoratori',2);}},
+    {l:'Interventi minimi d\'urgenza',e:'Tamponi il pericolo immediato; il resto resta fragile',pleases:'tecnico',costo:{pct:0.6},f:()=>{locInd('ambiente',3); locInd('bilancio',-3);}},
+  ]},
+  {id:'l_fiera', tipo:'regione', kick:'Turismo', t:'Una grande fiera regionale', text:'Un grande evento fieristico può attirare visitatori e affari in tutta la regione, con un investimento pubblico.', ch:[
+    {l:'Investi e punti in grande',e:'Vetrina e indotto; spesa importante',pleases:'progressista',costo:{pct:1.5},f:()=>{locInd('sviluppo',8); locInd('bilancio',-7); gd('imprenditori',3); gd('cetomedio',2);}},
+    {l:'Edizione misurata, conti prudenti',e:'Sobria e sostenibile',pleases:'tecnico',f:()=>{locInd('sviluppo',3);}},
+  ]},
+  {id:'l_distretto', era:'contemporanea', tipo:'regione', tono:'florido', kick:'Sviluppo', t:'Un distretto da riconvertire', text:'Un vecchio distretto manifatturiero perde colpi: va accompagnato verso produzioni nuove, green o digitali.', ch:[
+    {l:'Fondi alla riconversione verde e digitale',e:'Scommessa sul futuro; spesa e tempo',pleases:'progressista',costo:{pct:1.5},f:()=>{locInd('sviluppo',7); locInd('ambiente',4); locInd('bilancio',-7); gd('giovani',3); gd('lavoratori',2);}},
+    {l:'Lasci fare al mercato',e:'Niente soldi pubblici; chi non regge chiude',pleases:'tecnico',f:()=>{gd('imprenditori',1); gd('lavoratori',-2);}},
+  ]},
+  {id:'l_siccita', tipo:'regione', tono:'grave', kick:'Agricoltura', t:'La siccità mette in ginocchio i campi', text:'Mesi senza pioggia: i raccolti soffrono e gli agricoltori chiedono acqua e invasi.', ch:[
+    {l:'Invasi e reti d\'irrigazione',e:'Risposta strutturale; opere costose',pleases:'tecnico',costo:{pct:1.5},f:()=>{locInd('ambiente',6); locInd('sviluppo',4); locInd('bilancio',-7); gd('lavoratori',3);}},
+    {l:'Razionamento e usi prioritari',e:'Gestisci l\'emergenza con quel che c\'è',pleases:'tecnico',f:()=>{locInd('ambiente',3); gd('cetomedio',-1);}},
+  ]},
+  {id:'l_caccia', tipo:'regione', kick:'Territorio', t:'Caccia e aree protette', text:'Vanno aggiornati il calendario venatorio e i confini dei parchi: cacciatori e ambientalisti su fronti opposti.', ch:[
+    {l:'Amplii le aree protette',e:'Più tutela del territorio; il mondo venatorio protesta',pleases:'progressista',f:()=>{locInd('ambiente',6); gd('giovani',2); gd('pensionati',-2);}},
+    {l:'Vieni incontro al mondo venatorio',e:'Accontenti chi vive di campagna; gli ambientalisti insorgono',pleases:'conservatore',f:()=>{locInd('ambiente',-3); gd('cetomedio',2); gd('pensionati',2);}},
+    {l:'Tavolo tecnico ed equilibrio',e:'Mediazione paziente, senza bandiere',pleases:'tecnico',f:()=>{locInd('ambiente',2);}},
+  ]},
+  {id:'l_aeroporto', era:'contemporanea', tono:'grave', tipo:'regione', kick:'Infrastrutture', t:'L\'aeroporto regionale in bilico', text:'Lo scalo regionale perde voli e passeggeri: rilanciarlo con fondi o lasciarlo al suo destino?', ch:[
+    {l:'Rilanci con nuove rotte e fondi',e:'Connetti la regione; scommessa sui conti',pleases:'conservatore',costo:{pct:1.7},f:()=>{locInd('sviluppo',7); locInd('mobilita',5); locInd('bilancio',-8); gd('imprenditori',3);}},
+    {l:'Stop ai soldi pubblici, ridimensioni',e:'Disciplina di bilancio; territorio meno collegato',pleases:'tecnico',costo:{pct:-1.1},f:()=>{locInd('bilancio',5); gd('imprenditori',-2); gd('lavoratori',-2);}},
+  ]},
+  {id:'l_malasanita', tipo:'regione', tono:'grave', kick:'Sanità', t:'Un caso che fa discutere', text:'Un caso di presunta malasanità finisce sui giornali: l\'opinione pubblica chiede conto alla sanità regionale.', ch:[
+    {l:'Apri una verifica e rafforzi i controlli',e:'Trasparenza e qualità; costa ammettere i problemi',pleases:'tecnico',trasparenza:4,costo:{pct:0.8},f:()=>{locInd('sanita',5); locInd('bilancio',-4); gd('cetomedio',2);}},
+    {l:'Difendi l\'operato, eviti allarmismi',e:'Protezione del sistema; se emerge altro, ti pesa',rischio:4,f:()=>{gd('cetomedio',-1);}},
+  ]},
+  {id:'l_gelo', tipo:'regione', tono:'grave', kick:'Agricoltura', t:'Una gelata sui raccolti', text:'Una gelata fuori stagione ha bruciato i raccolti: gli agricoltori chiedono lo stato di calamità e gli indennizzi.', ch:[
+    {l:'Stato di calamità e indennizzi',e:'Stai vicino a chi lavora la terra; spesa straordinaria',pleases:'progressista',costo:{pct:1.5},f:()=>{locInd('sviluppo',4); locInd('bilancio',-7); gd('lavoratori',3);}},
+    {l:'Sostegno mirato a chi è più colpito',e:'Aiuti selettivi, conti più sostenibili',pleases:'tecnico',costo:{pct:0.6},f:()=>{locInd('sviluppo',2); locInd('bilancio',-3); gd('lavoratori',1);}},
+  ]},
+  {id:'l_alluvione', tipo:'regione', kick:'Emergenza', t:'Dopo l\'alluvione', text:'Un\'alluvione ha colpito alcuni comuni: ora servono soccorsi, conta dei danni e ricostruzione.', ch:[
+    {l:'Protezione civile e fondi per la ricostruzione',e:'Risposta piena al territorio; spesa pesante',pleases:'progressista',costo:{pct:1.9},f:()=>{locInd('ambiente',5); locInd('bilancio',-9); gd('lavoratori',3); gd('cetomedio',2);}},
+    {l:'Gestione essenziale, conti sotto controllo',e:'L\'indispensabile; qualcuno resta scontento',pleases:'tecnico',costo:{pct:0.6},f:()=>{locInd('ambiente',2); locInd('bilancio',-3);}},
+  ]},
+  /* ===== LOTTO 2 — REGIONE (espansione): opportunità/agency oltre il tutto-crisi. Costi DICHIARATI (costo:{pct} sul bilancio
+     regionale ~€32 mld, mostrato+applicato). La cura su ogni carta: attori generici, entrambe le strade legittime, niente sfortuna a
+     freddo. Indicatori regione: sanita/mobilita/sviluppo/ambiente/bilancio. ===== */
+  {id:'l_turismo', era:'contemporanea', tipo:'regione', kick:'Turismo', t:'La regione presa d\'assalto', text:'I turisti arrivano a ondate: economia in festa, ma i residenti sono esasperati — affitti brevi ovunque, servizi al collasso, centri storici svuotati di abitanti.', ch:[
+    {l:'Regoli affitti brevi e tassa di soggiorno',e:'Turismo più sostenibile e casse più piene; parte dell\'indotto brontola',pleases:'tecnico',costo:{pct:-0.8},f:()=>{locInd('bilancio',4); locInd('ambiente',4); locInd('sviluppo',2); gd('cetomedio',3); gd('imprenditori',-2);}},
+    {l:'Cavalchi il boom, più capienza',e:'Indotto al massimo; residenti e territorio pagano il prezzo',pleases:'conservatore',costo:{pct:0.6},f:()=>{locInd('bilancio',-3); locInd('sviluppo',8); locInd('ambiente',-4); gd('imprenditori',4); gd('cetomedio',-3);}},
+    {l:'Promuovi le mete minori, spalmi i flussi',e:'Distribuisci la ricchezza senza scontentare nessuno',pleases:'progressista',costo:{pct:0.8},f:()=>{locInd('bilancio',-4); locInd('sviluppo',5); locInd('ambiente',2); gd('cetomedio',2);}},
+  ]},
+  {id:'l_cervelli', era:'contemporanea', tipo:'regione', tono:'grave', kick:'Sviluppo', t:'La fuga dei cervelli', text:'I giovani laureati se ne vanno: si formano qui e trovano lavoro altrove. Un\'emorragia silenziosa che svuota la regione delle sue energie migliori.', ch:[
+    {l:'Trattieni chi si forma qui: alloggi, borse e primo impiego',e:'Dai una ragione per restare; costa e rende negli anni',pleases:'progressista',costo:{pct:1.5},f:()=>{locInd('bilancio',-7); locInd('sviluppo',7); gd('giovani',5); gd('lavoratori',1);}},
+    {l:'Attrai imprese che assumano qui',e:'Crei la domanda di lavoro qualificato che manca',pleases:'conservatore',costo:{pct:1.0},f:()=>{locInd('bilancio',-5); locInd('sviluppo',6); gd('imprenditori',3); gd('giovani',2);}},
+    {l:'Punti sui settori in cui sei forte',e:'Valorizzi ciò che hai; chi cerca altro continua a partire',pleases:'tecnico',costo:{pct:0.6},f:()=>{locInd('bilancio',-3); locInd('sviluppo',3); gd('lavoratori',2); gd('giovani',-1);}},
+  ]},
+  {id:'l_bandalarga', era:'contemporanea', tipo:'regione', kick:'Infrastrutture', t:'Le aree interne senza rete', text:'I paesi dell\'entroterra sono tagliati fuori dalla banda larga: chi ci vive non può lavorare da remoto né studiare online. Il divario digitale è anche un divario di futuro.', ch:[
+    {l:'Fibra fino all\'ultimo borgo',e:'Colmi il divario e tieni vive le aree interne; opere lunghe',pleases:'progressista',costo:{pct:1.5},f:()=>{locInd('bilancio',-7); locInd('sviluppo',6); gd('giovani',3); gd('cetomedio',2);}},
+    {l:'Parti dai centri, poi il resto',e:'Cominci dove rende di più; l\'entroterra aspetta ancora',pleases:'tecnico',costo:{pct:0.8},f:()=>{locInd('bilancio',-4); locInd('sviluppo',4); gd('imprenditori',2); gd('cetomedio',-1);}},
+    {l:'Voucher agli operatori privati',e:'Copertura più rapida; meno mano pubblica',pleases:'conservatore',costo:{pct:0.6},f:()=>{locInd('bilancio',-3); locInd('sviluppo',4); gd('imprenditori',3);}},
+  ]},
+  {id:'l_borghi', era:'contemporanea', tono:'grave', tipo:'regione', kick:'Territorio', t:'I borghi che si svuotano', text:'Interi paesi perdono abitanti: case vuote, scuole che chiudono. Ma c\'è chi, col lavoro da remoto, cerca proprio una vita più lenta e a misura d\'uomo.', ch:[
+    {l:'Incentivi a chi si trasferisce',e:'Scommetti sul ritorno alla terra; risultati lenti',pleases:'progressista',costo:{pct:1.2},f:()=>{locInd('bilancio',-6); locInd('sviluppo',5); gd('giovani',3); gd('cetomedio',2);}},
+    {l:'Concentri i servizi nei centri più vivi',e:'Realismo dei conti; i borghi più piccoli si rassegnano',pleases:'tecnico',costo:{pct:-0.6},f:()=>{locInd('bilancio',3); locInd('sviluppo',-1); gd('pensionati',-2);}},
+    {l:'Turismo lento e cammini',e:'Valorizzi il territorio con entrate morbide e identità',pleases:'conservatore',costo:{pct:0.6},f:()=>{locInd('bilancio',-3); locInd('sviluppo',4); locInd('ambiente',2); gd('cetomedio',2);}},
+  ]},
+  {id:'l_universita', tipo:'regione', tono:'florido', kick:'Sviluppo', t:'Un nuovo polo universitario', text:'Un\'università vuole aprire un campus in regione: studenti, ricerca, indotto e giovani che restano — se metti a disposizione spazi e servizi.', ch:[
+    {l:'Investi nel campus e negli alloggi',e:'Semini futuro e trattieni i giovani; spesa importante',pleases:'progressista',costo:{pct:1.7},f:()=>{locInd('bilancio',-8); locInd('sviluppo',8); gd('giovani',5); gd('imprenditori',2);}},
+    {l:'Bando e partnership coi privati',e:'Dividi il rischio; meno controllo pubblico',pleases:'conservatore',costo:{pct:0.8},f:()=>{locInd('bilancio',-4); locInd('sviluppo',5); gd('imprenditori',3); gd('giovani',2);}},
+  ]},
+  {id:'l_cinema', tipo:'regione', tono:'florido', kick:'Cultura', t:'Il set a cielo aperto', text:'Grandi produzioni cercano dove girare: una film commission regionale porterebbe troupe, lavoro e una vetrina mondiale ai paesaggi della regione — con qualche incentivo.', ch:[
+    {l:'Fondo e incentivi per le produzioni',e:'Indotto e immagine; soldi anticipati sulla scommessa',pleases:'progressista',costo:{pct:1.0},f:()=>{locInd('bilancio',-5); locInd('sviluppo',6); gd('giovani',3); gd('imprenditori',2);}},
+    {l:'Solo facilitazioni e sportello unico',e:'Attrai senza sborsare; qualche produzione sceglierà altrove',pleases:'tecnico',f:()=>{locInd('sviluppo',3); gd('imprenditori',2); gd('giovani',1);}},
+  ]},
+  {id:'l_agroalimentare', tipo:'regione', tono:'florido', kick:'Agricoltura', t:'Il tesoro nel piatto', text:'I prodotti tipici della regione sono un tesoro poco sfruttato: con una regia comune potrebbero conquistare i mercati esteri, invece di restare una nicchia.', ch:[
+    {l:'Consorzio export e promozione all\'estero',e:'Valorizzi il made-in e i produttori; investi ora',pleases:'conservatore',costo:{pct:1.0},f:()=>{locInd('bilancio',-5); locInd('sviluppo',6); gd('imprenditori',3); gd('lavoratori',2);}},
+    {l:'Marchio di qualità e filiera corta',e:'Identità e piccoli produttori; crescita più lenta',pleases:'progressista',costo:{pct:0.6},f:()=>{locInd('bilancio',-3); locInd('sviluppo',4); locInd('ambiente',2); gd('lavoratori',2);}},
+  ]},
+  {id:'l_pianoclima', era:'contemporanea', tipo:'regione', kick:'Prevenzione', t:'Il piano per il territorio', text:'Gli esperti mettono nero su bianco: frane e alluvioni torneranno, più forti. Non è ancora emergenza — puoi preparare il territorio ORA, prima del prossimo disastro.', ch:[
+    {l:'Piano di prevenzione: argini, boschi, drenaggi',e:'Spendi prima ed eviti danni ben peggiori dopo',pleases:'tecnico',costo:{pct:1.7},f:()=>{locInd('bilancio',-8); locInd('ambiente',8); locInd('sviluppo',2); gd('cetomedio',2); gd('lavoratori',2);}},
+    {l:'Metti in sicurezza solo i punti critici',e:'Parti dai rischi maggiori, coi conti in ordine',pleases:'conservatore',costo:{pct:0.8},f:()=>{locInd('bilancio',-4); locInd('ambiente',4);}},
+    {l:'Rimandi, non è ancora un\'emergenza',e:'Risparmi oggi; se il disastro arriva, il conto sarà più salato',pleases:'populista',rischio:3,costo:{pct:-0.4},f:()=>{locInd('bilancio',2); locInd('ambiente',-2);}},
+  ]},
+  {id:'l_idrica', tono:'grave', tipo:'regione', kick:'Infrastrutture', t:'L\'acqua che si perde', text:'Un terzo dell\'acqua si perde nei tubi vecchi: uno spreco enorme, e d\'estate arrivano i razionamenti. Rifare la rete è un\'opera silenziosa ma decisiva.', ch:[
+    {l:'Rifai la rete idrica, tratto per tratto',e:'Opera invisibile ma sana; anni e milioni',pleases:'tecnico',costo:{pct:1.8},f:()=>{locInd('bilancio',-8); locInd('ambiente',7); locInd('sviluppo',2); gd('cetomedio',2);}},
+    {l:'Intervieni sulle perdite più gravi',e:'Tamponi lo spreco peggiore spendendo meno',pleases:'conservatore',costo:{pct:0.8},f:()=>{locInd('bilancio',-4); locInd('ambiente',3);}},
+  ]},
+  {id:'l_rinnovabili', era:'contemporanea', tipo:'regione', tono:'florido', kick:'Ambiente', t:'L\'energia dal vento e dal sole', text:'Un grande impianto rinnovabile potrebbe rendere la regione autonoma sull\'energia: lavoro e bollette più basse. Ma qualche comitato teme per il paesaggio.', ch:[
+    {l:'Approvi il grande impianto',e:'Energia pulita e lavoro; i comitati protestano',pleases:'progressista',costo:{pct:0.6},f:()=>{locInd('bilancio',-3); locInd('ambiente',6); locInd('sviluppo',5); gd('giovani',3); gd('pensionati',-2);}},
+    {l:'Tanti piccoli impianti e comunità energetiche',e:'Coinvolgi i territori; risultati più diffusi e lenti',pleases:'tecnico',costo:{pct:1.0},f:()=>{locInd('bilancio',-5); locInd('ambiente',5); locInd('sviluppo',3); gd('cetomedio',2);}},
+    {l:'Freni: prima il paesaggio',e:'Tuteli l\'identità dei luoghi; l\'occasione energetica sfuma',pleases:'conservatore',f:()=>{locInd('ambiente',2); locInd('sviluppo',-2); gd('pensionati',2); gd('giovani',-2);}},
+  ]},
+  {id:'l_padigit', era:'contemporanea', tipo:'regione', kick:'Palazzo', t:'La regione digitale', text:'Code, carta, uffici lenti: i servizi regionali sono un labirinto. Digitalizzarli farebbe risparmiare tempo a tutti — e denaro negli anni.', ch:[
+    {l:'Piano di digitalizzazione e personale formato',e:'Efficienza vera; costa e serve tempo',pleases:'tecnico',costo:{pct:1.0},f:()=>{locInd('bilancio',-5); locInd('sviluppo',4); locInd('sanita',2); gd('cetomedio',3); gd('giovani',2);}},
+    {l:'Parti dai servizi più usati',e:'Risultati subito dove pesa di più (sanità, tributi)',pleases:'progressista',costo:{pct:0.6},f:()=>{locInd('bilancio',-3); locInd('sanita',3); gd('cetomedio',2);}},
+  ]},
+  {id:'l_giovani', tipo:'regione', kick:'Sviluppo', t:'Studenti senza casa', text:'Gli studenti fuori sede non trovano alloggio: affitti alle stelle, posti letto pochi. Molti rinunciano o vanno a studiare altrove.', ch:[
+    {l:'Studentati pubblici e borse di studio',e:'Apri le porte a chi merita; investimento sul futuro',pleases:'progressista',costo:{pct:1.3},f:()=>{locInd('bilancio',-6); locInd('sviluppo',4); gd('giovani',5); gd('lavoratori',2);}},
+    {l:'Convenzioni e calmieri coi privati',e:'Più posti in fretta, meno spesa pubblica',pleases:'tecnico',costo:{pct:0.6},f:()=>{locInd('bilancio',-3); gd('giovani',3); gd('imprenditori',1);}},
+  ]},
+  {id:'l_sanitaterritorio', era:'contemporanea', tipo:'regione', tono:'florido', kick:'Sanità', t:'Il pronto soccorso intasato', text:'Troppa gente in pronto soccorso per problemi che il medico di base risolverebbe. Puoi riorganizzare la sanità sul territorio, non solo dentro gli ospedali.', ch:[
+    {l:'Case di comunità e medici di base potenziati',e:'Sanità più vicina alle persone; riorganizzazione lunga',pleases:'progressista',costo:{pct:1.3},f:()=>{locInd('bilancio',-6); locInd('sanita',8); gd('pensionati',4); gd('lavoratori',2);}},
+    {l:'Telemedicina e presidi mobili',e:'Innovi a costi contenuti, soprattutto nelle aree interne',pleases:'tecnico',costo:{pct:0.8},f:()=>{locInd('bilancio',-4); locInd('sanita',5); gd('pensionati',2); gd('giovani',1);}},
+  ]},
+  {id:'l_sport', tipo:'regione', kick:'Turismo', t:'La grande occasione sportiva', text:'La regione può ospitare un grande evento sportivo: stadi pieni, TV di mezzo mondo, indotto per anni — se investe in impianti e organizzazione.', ch:[
+    {l:'Ti candidi e investi negli impianti',e:'Vetrina globale; spesa alta e qualche rischio',pleases:'conservatore',costo:{pct:1.7},f:()=>{locInd('bilancio',-8); locInd('sviluppo',7); locInd('mobilita',3); gd('imprenditori',3); gd('giovani',2);}},
+    {l:'Punti a eventi più piccoli e diffusi',e:'Indotto sobrio, niente cattedrali nel deserto',pleases:'tecnico',costo:{pct:0.6},f:()=>{locInd('bilancio',-3); locInd('sviluppo',3); gd('cetomedio',2);}},
+  ]},
+  {id:'l_montagna', era:'contemporanea', tipo:'regione', kick:'Turismo', t:'La montagna senza neve', text:'Le stagioni sciistiche si accorciano: meno neve, impianti in perdita. Le valli si chiedono che futuro le aspetta.', ch:[
+    {l:'Reinventi la montagna tutto l\'anno',e:'Cammini, terme, sport estivi: visione lunga, conversione costosa',pleases:'progressista',costo:{pct:1.3},f:()=>{locInd('bilancio',-6); locInd('sviluppo',5); locInd('ambiente',3); gd('cetomedio',2); gd('giovani',2);}},
+    {l:'Sostieni ancora gli impianti con neve artificiale',e:'Tieni in vita l\'esistente; costi ed acqua non pochi',pleases:'conservatore',costo:{pct:1.0},f:()=>{locInd('bilancio',-5); locInd('ambiente',-3); locInd('sviluppo',3); gd('lavoratori',2); gd('imprenditori',1);}},
+  ]},
+  {id:'l_porto', tono:'florido', tipo:'regione', kick:'Infrastrutture', t:'Lo scalo da potenziare', text:'Il porto (o lo scalo merci) regionale è sottodimensionato: potenziarlo attirerebbe traffici e lavoro, ma serve un investimento pesante e più mezzi in circolazione.', ch:[
+    {l:'Potenzi lo scalo e la logistica',e:'Traffici e lavoro; ambiente e conti pagano',pleases:'conservatore',costo:{pct:1.7},f:()=>{locInd('bilancio',-8); locInd('sviluppo',8); locInd('mobilita',3); locInd('ambiente',-3); gd('imprenditori',4); gd('lavoratori',2);}},
+    {l:'Investi sull\'intermodale, ferro non solo gomma',e:'Più sostenibile; più lento a rendere',pleases:'progressista',costo:{pct:1.2},f:()=>{locInd('bilancio',-6); locInd('sviluppo',5); locInd('mobilita',3); locInd('ambiente',2); gd('lavoratori',2);}},
+  ]},
+  {id:'l_biotech', era:'contemporanea', tipo:'regione', tono:'florido', kick:'Sanità', t:'Una farmaceutica in cerca di sede', text:'Una grande azienda farmaceutica vuole aprire uno stabilimento in regione: lavoro qualificato e indotto, ma chiede corsie rapide su permessi e sperimentazione.', ch:[
+    {l:'Corsie rapide e un polo sperimentale',e:'Attrai l\'investimento in fretta; qualcuno teme meno controlli',pleases:'conservatore',rischio:2,costo:{pct:1.0},f:()=>{locInd('bilancio',-5); locInd('sviluppo',7); locInd('sanita',2); gd('imprenditori',4); gd('giovani',2);}},
+    {l:'Sì, ma con standard e controlli fermi',e:'Attrai chi accetta le regole; qualche azienda sceglierà altrove',pleases:'tecnico',trasparenza:3,costo:{pct:0.8},f:()=>{locInd('bilancio',-4); locInd('sviluppo',5); locInd('sanita',4); gd('cetomedio',2); gd('giovani',2);}},
+  ]},
+  {id:'l_formazione', tono:'florido', tipo:'regione', kick:'Lavoro', t:'Il lavoro che non trova braccia', text:'Le imprese cercano figure che non trovano — tecnici, infermieri, saldatori — mentre tanti giovani sono senza lavoro. Manca il ponte tra i due mondi.', ch:[
+    {l:'Centri di formazione sui mestieri che mancano',e:'Colmi il divario; investi in aule e docenti',pleases:'progressista',costo:{pct:1.0},f:()=>{locInd('bilancio',-5); locInd('sviluppo',6); gd('lavoratori',3); gd('giovani',3); gd('imprenditori',2);}},
+    {l:'Formazione dentro le imprese, apprendistato',e:'Rapido e concreto; guidato dal privato',pleases:'conservatore',costo:{pct:0.6},f:()=>{locInd('bilancio',-3); locInd('sviluppo',4); gd('imprenditori',3); gd('giovani',2);}},
+  ]},
+  {id:'l_forestazione', tipo:'regione', tono:'florido', kick:'Ambiente', t:'Il verde che arretra', text:'Il cemento avanza e i boschi arretrano. Puoi invertire la rotta — nuovi alberi, meno consumo di suolo — un investimento che si vedrà tra vent\'anni.', ch:[
+    {l:'Piano di forestazione e stop al consumo di suolo',e:'Aria e territorio migliori; freni un po\' di edilizia',pleases:'progressista',costo:{pct:1.0},f:()=>{locInd('bilancio',-5); locInd('ambiente',8); gd('giovani',3); gd('imprenditori',-2);}},
+    {l:'Compensazioni e verde dove serve di più',e:'Equilibrio fra sviluppo e tutela',pleases:'tecnico',costo:{pct:0.6},f:()=>{locInd('bilancio',-3); locInd('ambiente',4); gd('cetomedio',1);}},
+  ]},
+  /* ===== EQUIVALENTI D'EPOCA — Italia 1950 (era:'italia1950'). Sostituiscono i moderni esclusi (movida, piste
+     ciclabili, banda larga, telemedicina, fondi UE…) con la stessa tensione di governo nella veste del '50 —
+     sourceati da PRESET-ITALIA-1950.md §4 + la mappa locale (Giacomo). Neutri, entrambe le strade legittime (la
+     cura). Stesse valute (locInd/gd) del percorso locale. Vary-by-decade dove serve (supermercato ≥1957). ===== */
+  // --- CITTÀ '50 ---
+  {id:'l50_strade', era:'italia1950', tipo:'città', kick:'Mobilità', t:'Strade e tram da rifare', text:'Il centro ha bisogno di mobilità: asfaltare le vie dissestate del dopoguerra, o rilanciare tram e filovie che collegano i quartieri operai?', ch:[
+    {l:'Asfalti le strade e allarghi le vie',e:'La città torna a muoversi; il Comune ci mette i soldi',pleases:'conservatore',costo:{pct:1.3},f:()=>{locInd('mobilita',8); locInd('bilancio',-6); gd('cetomedio',3); gd('imprenditori',2);}},
+    {l:'Potenzi tram e filovie',e:'Trasporto pubblico per chi non ha l\'auto; investimento',pleases:'progressista',costo:{pct:1.3},f:()=>{locInd('mobilita',9); locInd('bilancio',-6); gd('lavoratori',3); gd('giovani',2);}},
+  ]},
+  {id:'l50_osterie', era:'italia1950', tipo:'città', kick:'Eventi', t:'Osterie e festa patronale', text:'La festa del santo patrono riempie le piazze di bancarelle e osterie: allegria e indotto, ma qualcuno lamenta il chiasso e il vino fino a tardi.', ch:[
+    {l:'Grande festa, licenze larghe',e:'Una città che si diverte; l\'ordine pubblico si allenta',pleases:'populista',f:()=>{locInd('servizi',3); locInd('sicurezza',-2); gd('giovani',3); gd('imprenditori',2);}},
+    {l:'Festa sobria e orari misurati',e:'Decoro e quiete; osti e giostrai mugugnano',pleases:'conservatore',f:()=>{locInd('sicurezza',3); gd('cattolici',2); gd('imprenditori',-1);}},
+  ]},
+  {id:'l50_carbone', era:'italia1950', tipo:'città', kick:'Ambiente', tono:'grave', t:'Il fumo del carbone', text:'Le ciminiere delle fabbriche e le stufe a carbone anneriscono l\'aria e i palazzi: la gente tossisce, ma quel fumo è anche lavoro.', ch:[
+    {l:'Limiti gli scarichi delle fabbriche',e:'Aria più respirabile; gli industriali protestano',pleases:'progressista',f:()=>{locInd('verde',6); gd('giovani',2); gd('lavoratori',1); gd('imprenditori',-3);}},
+    {l:'Prima il lavoro, il fumo dopo',e:'Non tocchi le fabbriche; l\'aria resta pesante',pleases:'conservatore',f:()=>{locInd('verde',-2); gd('imprenditori',3); gd('lavoratori',2);}},
+  ]},
+  {id:'l50_botteghe', era:'italia1950', tipo:'città', kick:'Commercio', t:'Le botteghe del rione', text:'Il mercato rionale e le piccole botteghe sono il cuore del quartiere, ma faticano: dai una mano agli esercenti o lasci correre?', ch:[
+    {l:'Sostieni mercato e botteghe',e:'Il rione resta vivo; un piccolo sforzo di bilancio',pleases:'progressista',costo:{pct:0.8},f:()=>{locInd('servizi',5); locInd('bilancio',-4); gd('cetomedio',2); gd('lavoratori',2);}},
+    {l:'Lasci fare al commercio',e:'Nessuna spesa; i più deboli chiudono',pleases:'conservatore',f:()=>{gd('imprenditori',2); gd('cetomedio',-1);}},
+  ]},
+  {id:'l50_supermercato', era:'italia1950', codaFino:1963, tipo:'città', kick:'Commercio', cond:()=>S.year>=1957, t:'Arriva il primo supermercato', text:'Una novità dall\'America: un grande negozio a libero servizio vuole aprire in città. Comodo e moderno — ma i bottegai del rione tremano.', ch:[
+    {l:'Dai il via libera al supermercato',e:'Prezzi e modernità per le famiglie; le botteghe soffrono',pleases:'tecnico',costo:{pct:-0.8},f:()=>{locInd('bilancio',4); locInd('servizi',3); gd('cetomedio',3); gd('imprenditori',-2);}},
+    {l:'Proteggi il piccolo commercio',e:'Salvi le botteghe del rione; freni la novità',pleases:'conservatore',f:()=>{gd('cetomedio',2); gd('lavoratori',2); gd('imprenditori',-1);}},
+  ]},
+  {id:'l50_inacasa', era:'italia1950', tipo:'città', kick:'Casa', t:'Le case popolari dell\'INA-Casa', text:'Il piano nazionale per la casa (INA-Casa) porta fondi per nuovi quartieri operai: un\'occasione enorme per chi non ha un tetto, se il Comune fa la sua parte.', ch:[
+    {l:'Nuovi quartieri di case popolari',e:'Un tetto per gli operai; grande cantiere e spesa',pleases:'progressista',costo:{pct:1.5},f:()=>{locInd('casa',10); locInd('bilancio',-7); gd('lavoratori',5); gd('giovani',2);}},
+    {l:'Interventi mirati, conti prudenti',e:'Fai il possibile senza indebitare il Comune',pleases:'tecnico',costo:{pct:0.6},f:()=>{locInd('casa',4); locInd('bilancio',-3); gd('lavoratori',2);}},
+  ]},
+  {id:'l50_acquedotto', era:'italia1950', tipo:'città', kick:'Servizi', tono:'grave', t:'Acqua e fogne nei quartieri', text:'Interi quartieri popolari sono ancora senza acqua corrente e fognature: le famiglie prendono l\'acqua alla fontanella. Portare le reti costa, ma cambia la vita.', ch:[
+    {l:'Porti acqua e fogne a tutti',e:'Dignità e igiene per il rione; investimento pesante',pleases:'progressista',costo:{pct:1.5},f:()=>{locInd('servizi',9); locInd('bilancio',-7); gd('lavoratori',4); gd('pensionati',2);}},
+    {l:'Estendi le reti per gradi',e:'Parti dove serve di più, coi conti in ordine',pleases:'tecnico',costo:{pct:0.8},f:()=>{locInd('servizi',5); locInd('bilancio',-4); gd('lavoratori',2);}},
+  ]},
+  {id:'l50_scuola', era:'italia1950', tipo:'città', kick:'Scuole', t:'La scuola contro l\'analfabetismo', text:'Molti adulti del quartiere non sanno leggere né scrivere. I corsi serali dell\'UNLA potrebbero cambiare le cose, se il Comune offre aule e maestri.', ch:[
+    {l:'Apri scuole serali per tutti',e:'Riscatto per chi è rimasto indietro; costa e va organizzato',pleases:'progressista',costo:{pct:1.1},f:()=>{locInd('servizi',7); locInd('bilancio',-5); gd('lavoratori',3); gd('giovani',3);}},
+    {l:'Sostieni i corsi dei volontari',e:'Ti appoggi al volontariato e alla parrocchia',pleases:'tecnico',f:()=>{locInd('servizi',4); gd('cattolici',2); gd('giovani',2);}},
+  ]},
+  {id:'l50_vigili', era:'italia1950', tipo:'città', kick:'Sicurezza', t:'Vigili e lampioni', text:'Di sera i quartieri esterni sono al buio e senza presidio: piccoli furti e paura. Più vigili urbani e illuminazione pubblica, o le poche risorse altrove?', ch:[
+    {l:'Più vigili e nuovi lampioni',e:'Strade più sicure e vissute; una spesa da mettere in conto',pleases:'conservatore',costo:{pct:1.1},f:()=>{locInd('sicurezza',8); locInd('bilancio',-5); gd('cetomedio',3); gd('pensionati',2);}},
+    {l:'Presidio leggero e ronde di quartiere',e:'Fai con poco, contando sui cittadini',pleases:'tecnico',f:()=>{locInd('sicurezza',4); gd('cetomedio',2);}},
+  ]},
+  // --- REGIONE '50 ---
+  {id:'l50_condotto', era:'italia1950', tipo:'regione', kick:'Sanità', tono:'grave', t:'Il medico condotto che manca', text:'Nei paesi di campagna il medico condotto è lontano e i malati faticano a curarsi: parti e polmoniti che si potrebbero evitare. Portare le cure nelle campagne costa.', ch:[
+    {l:'Nuove condotte mediche e ambulatori',e:'Cure più vicine alla gente; spesa in salita',pleases:'progressista',costo:{pct:1.7},f:()=>{locInd('sanita',10); locInd('bilancio',-8); gd('lavoratori',3); gd('pensionati',3);}},
+    {l:'Medico itinerante e farmacie rurali',e:'Copri il territorio spendendo meno',pleases:'tecnico',costo:{pct:0.6},f:()=>{locInd('sanita',5); locInd('bilancio',-3); gd('pensionati',2);}},
+  ]},
+  {id:'l50_elettrico', era:'italia1950', tipo:'regione', kick:'Infrastrutture', tono:'grave', t:'I paesi ancora al buio', text:'Molti borghi dell\'entroterra non hanno corrente elettrica né strade decenti: tagliati fuori dal mondo. Portare luce e strade è un\'opera lunga ma decisiva.', ch:[
+    {l:'Elettrifichi e colleghi i borghi',e:'Il futuro arriva nell\'entroterra; grande investimento',pleases:'progressista',costo:{pct:1.7},f:()=>{locInd('sviluppo',8); locInd('mobilita',4); locInd('bilancio',-8); gd('lavoratori',3); gd('cetomedio',2);}},
+    {l:'Cominci dai centri più grandi',e:'Parti dove rende di più; i paesini aspettano',pleases:'tecnico',costo:{pct:0.8},f:()=>{locInd('sviluppo',4); locInd('bilancio',-4); gd('imprenditori',2); gd('pensionati',-1);}},
+  ]},
+  {id:'l50_emigra', era:'italia1950', tipo:'regione', kick:'Territorio', tono:'grave', t:'La valigia di cartone', text:'Ogni mese treni interi di giovani partono per il Nord o per l\'estero in cerca di lavoro: i paesi si svuotano delle loro energie migliori. Puoi dare una ragione per restare?', ch:[
+    {l:'Lavoro e terra per trattenerli',e:'Provi a fermare l\'emorragia; costa e rende negli anni',pleases:'progressista',costo:{pct:1.5},f:()=>{locInd('sviluppo',7); locInd('bilancio',-7); gd('lavoratori',4); gd('giovani',3);}},
+    {l:'Accompagni chi parte',e:'Aiuti gli emigranti e le famiglie rimaste; il paese si spopola',pleases:'tecnico',costo:{pct:0.6},f:()=>{locInd('sviluppo',2); locInd('bilancio',-3); gd('lavoratori',2); gd('giovani',-1);}},
+  ]},
+  {id:'l50_bonifica', era:'italia1950', tipo:'regione', kick:'Agricoltura', t:'Terre da bonificare', text:'Vaste terre paludose e improduttive aspettano la bonifica: acqua da drenare, dighe e centrali idroelettriche da costruire. Un\'occasione per il lavoro e per i campi.', ch:[
+    {l:'Grande piano di bonifica e dighe',e:'Terra fertile e lavoro; opere imponenti e costose',pleases:'progressista',costo:{pct:1.7},f:()=>{locInd('ambiente',8); locInd('sviluppo',6); locInd('bilancio',-8); gd('lavoratori',5);}},
+    {l:'Interventi graduali dove conviene',e:'Bonifichi per gradi, coi conti in ordine',pleases:'tecnico',costo:{pct:0.8},f:()=>{locInd('ambiente',4); locInd('sviluppo',3); locInd('bilancio',-4); gd('lavoratori',2);}},
+  ]},
+  {id:'l50_cassa', era:'italia1950', tipo:'regione', kick:'Palazzo', t:'I fondi della Cassa per il Mezzogiorno', text:'Arrivano i fondi straordinari della Cassa per il Mezzogiorno per lo sviluppo del Sud: come li distribuisci sul territorio?', ch:[
+    {l:'Bando trasparente, opere che servono',e:'Equità e fiducia; qualche notabile resta a bocca asciutta',pleases:'tecnico',trasparenza:5,f:()=>{locInd('sviluppo',7); gd('giovani',2); gd('lavoratori',2);}},
+    {l:'Indirizzi i fondi ai tuoi territori',e:'Consenso mirato dove ti serve; un uso disinvolto',rischio:7,f:()=>{locInd('sviluppo',5); gd('cetomedio',2);}},
+  ]},
+
+  /* ===== AVANZAMENTO Fase 2 · Lotto 3 — VITA LOCALE '60 (era:'italia1960', §4 mappa-aging a livello città/regione):
+     il traffico, i quartieri operai, i consumi, la media unica, lo smog, le periferie del boom. Cura piena, stesse
+     valute locInd/gd del percorso locale. ===== */
+  // --- CITTÀ '60 ---
+  {id:'l60_traffico', era:'italia1960', tipo:'città', kick:'Mobilità', t:'Il traffico soffoca il centro', text:'Le automobili invadono strade pensate per carri e biciclette: ingorghi, clacson, aria pesante. Allargare le vie alle auto o difendere il centro dal traffico?', ch:[
+    {l:'Fai spazio all\'automobile',e:'La città si adatta ai motori; il centro storico soffre',pleases:'conservatore',costo:{pct:1.2},f:()=>{locInd('mobilita',7); locInd('bilancio',-5); gd('cetomedio',3); gd('imprenditori',2);}},
+    {l:'Difendi il centro e i pedoni',e:'Vie più vivibili; gli automobilisti protestano',pleases:'progressista',f:()=>{locInd('ambiente',5); locInd('sicurezza',2); gd('lavoratori',2); gd('cetomedio',-1);}},
+  ]},
+  {id:'l60_case_operaie', era:'italia1960', tipo:'città', kick:'Casa', t:'I nuovi quartieri operai', text:'Gli operai arrivati per le fabbriche cercano casa: puoi sorreggere l\'edilizia popolare o lasciare che i privati costruiscano dove conviene. La città cambia forma o si arricchisce chi ha i terreni.', ch:[
+    {l:'Quartieri popolari con servizi',e:'Un tetto e scuole per gli operai; il Comune investe',pleases:'progressista',costo:{pct:1.5},f:()=>{locInd('servizi',7); locInd('bilancio',-7); gd('lavoratori',5);}},
+    {l:'Lascia costruire ai privati',e:'Cantieri e case in fretta; dormitori senza servizi',pleases:'conservatore',f:()=>{locInd('sviluppo',4); locInd('servizi',-2); gd('imprenditori',4); gd('lavoratori',-2);}},
+  ]},
+  {id:'l60_periferie', era:'italia1960', tipo:'città', kick:'Servizi', tono:'grave', t:'Le periferie senza niente', text:'I nuovi rioni ai margini crescono più in fretta dei servizi: mancano acqua, fogne, illuminazione, trasporti. Portarli costa, ma senza, le periferie diventano ghetti.', ch:[
+    {l:'Porta i servizi nelle periferie',e:'Dignità ai rioni nuovi; grande spesa',pleases:'progressista',costo:{pct:1.4},f:()=>{locInd('servizi',8); locInd('bilancio',-7); gd('lavoratori',4); gd('giovani',1);}},
+    {l:'Concentra le risorse nel centro',e:'Il cuore della città brilla; i margini restano indietro',pleases:'conservatore',f:()=>{locInd('sviluppo',3); locInd('sicurezza',-2); gd('cetomedio',2); gd('lavoratori',-3);}},
+  ]},
+  {id:'l60_consumi_citta', era:'italia1960', tipo:'città', kick:'Commercio', t:'Le vetrine del benessere', text:'Negozi nuovi, elettrodomestici, la prima grande distribuzione: la città scopre i consumi. Assecondare i negozi moderni o proteggere le botteghe del rione?', ch:[
+    {l:'Assecondi il commercio moderno',e:'Vetrine e scelta per le famiglie; le botteghe soffrono',pleases:'conservatore',f:()=>{locInd('sviluppo',5); gd('cetomedio',3); gd('imprenditori',2); gd('pensionati',-1);}},
+    {l:'Proteggi le botteghe del rione',e:'Il tessuto del quartiere tiene; meno modernità',pleases:'populista',f:()=>{locInd('servizi',3); gd('pensionati',3); gd('lavoratori',2); gd('imprenditori',-1);}},
+  ]},
+  {id:'l60_scuola_media', era:'italia1960', tipo:'città', kick:'Scuole', cond:()=>S.year>=1963, t:'La media unica in città', text:'La nuova scuola media unica riempie le aule oltre ogni misura: servono edifici, insegnanti, mense. Investire perché sia davvero per tutti, o cavarsela coi doppi turni?', ch:[
+    {l:'Costruisci scuole e assumi maestri',e:'Istruzione vera per tutti; il bilancio si impegna',pleases:'progressista',costo:{pct:1.3},f:()=>{locInd('servizi',6); locInd('bilancio',-6); gd('giovani',4); gd('lavoratori',2);}},
+    {l:'Doppi turni per contenere i costi',e:'Nessuno resta fuori; la qualità ne risente',pleases:'tecnico',f:()=>{locInd('servizi',2); gd('giovani',1);}},
+  ]},
+  {id:'l60_autobus', era:'italia1960', tipo:'città', kick:'Mobilità', t:'Gli autobus per le fabbriche', text:'Gli operai che vivono in periferia faticano a raggiungere le fabbriche: una rete di autobus li collegherebbe, ma il servizio pubblico costa e non rende.', ch:[
+    {l:'Potenzia il trasporto pubblico',e:'Chi non ha l\'auto arriva al lavoro; investimento',pleases:'progressista',costo:{pct:1.1},f:()=>{locInd('mobilita',8); locInd('bilancio',-5); gd('lavoratori',4);}},
+    {l:'Lascia fare all\'auto privata',e:'Nessun peso sui conti; chi è a piedi resta tagliato fuori',pleases:'conservatore',f:()=>{locInd('bilancio',2); gd('cetomedio',2); gd('lavoratori',-2);}},
+  ]},
+  {id:'l60_smog', era:'italia1960', tipo:'città', kick:'Ambiente', tono:'grave', t:'Il cielo grigio delle fabbriche', text:'Le ciminiere che danno lavoro anneriscono l\'aria e i polmoni: la città industriale respira male. Imporre filtri e limiti tocca le fabbriche che tengono viva l\'economia.', ch:[
+    {l:'Imponi limiti agli scarichi',e:'Aria più pulita; le fabbriche protestano per i costi',pleases:'progressista',f:()=>{locInd('ambiente',7); gd('lavoratori',2); gd('imprenditori',-3);}},
+    {l:'Prima il lavoro, poi l\'aria',e:'Le fabbriche vanno a pieno ritmo; la salute paga',pleases:'conservatore',f:()=>{locInd('sviluppo',4); locInd('ambiente',-4); gd('imprenditori',3); gd('lavoratori',1);}},
+  ]},
+  {id:'l60_impianti', era:'italia1960', tipo:'città', kick:'Eventi', cond:()=>S.year>=1960, tono:'florido', t:'Impianti sportivi per la città', text:'Sull\'onda dei grandi giochi, la città può dotarsi di stadi, piscine, palestre di quartiere: sport per tutti, ma opere che pesano sul bilancio.', ch:[
+    {l:'Grandi impianti e sport di quartiere',e:'Orgoglio e salute; conto salato',pleases:'populista',costo:{pct:1.2},f:()=>{locInd('servizi',6); locInd('bilancio',-5); gd('giovani',4); gd('cetomedio',1);}},
+    {l:'Solo l\'essenziale, coi conti in mano',e:'Prudenza di bilancio; poche palestre',pleases:'tecnico',f:()=>{locInd('bilancio',2); gd('cetomedio',1);}},
+  ]},
+  {id:'l60_mercati', era:'italia1960', tipo:'città', kick:'Commercio', t:'Il mercato coperto', text:'Il vecchio mercato all\'aperto è affollato e insalubre: un mercato coperto moderno lo sostituirebbe, ma sposta gli ambulanti storici e costa.', ch:[
+    {l:'Costruisci il mercato coperto',e:'Igiene e ordine; qualche ambulante si lamenta',pleases:'tecnico',costo:{pct:1},f:()=>{locInd('servizi',5); locInd('bilancio',-4); gd('cetomedio',2);}},
+    {l:'Sistema il mercato all\'aperto',e:'Tradizione salva; l\'igiene resta un problema',pleases:'populista',f:()=>{locInd('servizi',2); gd('lavoratori',2); gd('pensionati',2);}},
+  ]},
+  {id:'l60_asili', era:'italia1960', tipo:'città', kick:'Servizi', t:'Asili per le famiglie operaie', text:'Con tante donne al lavoro in fabbrica, mancano gli asili per i bambini: aprirne di comunali aiuta le famiglie, ma è un servizio nuovo, tutto da finanziare.', ch:[
+    {l:'Apri asili comunali',e:'Un aiuto vero alle famiglie che lavorano; spesa nuova',pleases:'progressista',costo:{pct:1.1},f:()=>{locInd('servizi',6); locInd('bilancio',-5); gd('lavoratori',4); gd('giovani',1);}},
+    {l:'Affida ai patronati e alle parrocchie',e:'Rete esistente a basso costo; copertura disuguale',pleases:'conservatore',f:()=>{locInd('servizi',2); gd('cattolici',3);}},
+  ]},
+  {id:'l60_migranti_citta', era:'italia1960', tipo:'città', kick:'Città', tono:'grave', t:'I nuovi arrivati dal Sud', text:'Le famiglie arrivate dal Mezzogiorno faticano a inserirsi: diffidenze, cartelli «non si affitta ai meridionali», quartieri che si chiudono. L\'integrazione va costruita, o lasciata al tempo.', ch:[
+    {l:'Costruisci l\'integrazione con i fatti',e:'Case, scuole, lavoro per i nuovi cittadini; costa e divide',pleases:'progressista',costo:{pct:1.2},f:()=>{locInd('servizi',6); locInd('bilancio',-5); gd('lavoratori',4); gd('cetomedio',-2);}},
+    {l:'Lascia che il tempo faccia la sua parte',e:'Nessuna forzatura; le diffidenze si incancreniscono',pleases:'conservatore',f:()=>{locInd('sicurezza',-2); gd('cetomedio',2); gd('lavoratori',-2);}},
+  ]},
+  // --- REGIONE '60 ---
+  {id:'l60_zona_ind', era:'italia1960', tipo:'regione', kick:'Sviluppo', t:'La zona industriale', text:'Un\'area attrezzata per le fabbriche porterebbe lavoro e sviluppo, ma consuma campagna e concentra tutto in un punto. Attrarre le industrie o proteggere il territorio agricolo?', ch:[
+    {l:'Crea la grande zona industriale',e:'Fabbriche e posti di lavoro; campagna e ambiente cedono',pleases:'progressista',costo:{pct:1.6},f:()=>{locInd('sviluppo',8); locInd('bilancio',-6); locInd('ambiente',-3); gd('lavoratori',5); gd('imprenditori',3);}},
+    {l:'Sviluppo diffuso e agricoltura',e:'Territorio tutelato; meno grandi fabbriche',pleases:'conservatore',f:()=>{locInd('ambiente',4); locInd('sviluppo',3); gd('lavoratori',2); gd('cetomedio',1);}},
+  ]},
+  {id:'l60_dighe_regione', era:'italia1960', tipo:'regione', kick:'Infrastrutture', t:'Energia e acqua per lo sviluppo', text:'Nuove centrali e acquedotti possono portare energia alle fabbriche e acqua ai paesi che crescono: opere che cambiano una regione, con impatto sul territorio.', ch:[
+    {l:'Grandi opere per la regione',e:'Energia e acqua per lo sviluppo; il territorio cambia',pleases:'progressista',costo:{pct:1.7},f:()=>{locInd('sviluppo',7); locInd('servizi',4); locInd('bilancio',-8); gd('lavoratori',4);}},
+    {l:'Interventi mirati e prudenti',e:'Meno impatto e meno debito; sviluppo più lento',pleases:'tecnico',costo:{pct:0.8},f:()=>{locInd('servizi',3); locInd('bilancio',-4); gd('cetomedio',1);}},
+  ]},
+  {id:'l60_scuole_rurali', era:'italia1960', tipo:'regione', kick:'Scuole', t:'La scuola arriva nei paesi', text:'Nei paesi dell\'entroterra molti ragazzi lasciano la scuola presto: portare la media unica e gli scuolabus fin lassù è un\'opera di giustizia, e di spesa.', ch:[
+    {l:'Scuole e trasporti fino all\'ultimo paese',e:'Istruzione anche nell\'entroterra; impegno lungo',pleases:'progressista',costo:{pct:1.3},f:()=>{locInd('servizi',6); locInd('bilancio',-6); gd('giovani',4); gd('lavoratori',2);}},
+    {l:'Concentra le scuole nei centri maggiori',e:'Meno costi; i paesini restano scoperti',pleases:'tecnico',f:()=>{locInd('servizi',2); gd('cetomedio',1); gd('lavoratori',-1);}},
+  ]},
+];
+
+const POLICIES=[
+  {id:'fisco', nm:'Pressione fiscale', cat:'Conti pubblici', levels:['Bassa','Media','Alta']},
+  {id:'pensioni', nm:'Sistema pensionistico', cat:'Welfare', levels:['Riforma','Invariato','Generoso']},
+  {id:'sanita', nm:'Spesa sanitaria', cat:'Servizi', levels:['Tagli','Standard','Potenziata']},
+  {id:'investimenti', nm:'Investimenti pubblici', cat:'Sviluppo', levels:['Minimi','Moderati','Forti']},
+  {id:'istruzione', nm:'Scuola', cat:'Istruzione', levels:['Tagli','Standard','Investimento']},
+  {id:'lavoro', nm:'Mercato del lavoro', cat:'Economia', levels:['Rigido','Equilibrato','Flessibile']},
+  {id:'welfare', nm:'Welfare e sussidi', cat:'Welfare', levels:['Ridotto','Standard','Esteso']},
+  {id:'imprese', nm:'Incentivi alle imprese', cat:'Economia', levels:['Nessuno','Moderati','Forti']},
+  {id:'sicurezza', nm:'Sicurezza e ordine pubblico', cat:'Stato', levels:['Ridotta','Standard','Rafforzata']},
+  {id:'ambiente', era:'contemporanea', nm:'Transizione ecologica', cat:'Sviluppo', levels:['Minima','Graduale','Ambiziosa']},   // Build B (ii): leva moderna → nascosta nel '50 (resta neutra, 0 FISCAL)
+  {id:'immigrazione', era:'contemporanea', nm:'Politica migratoria', cat:'Stato', levels:['Restrittiva','Equilibrata','Aperta']},   // Build B (ii): nel '50 l'Italia emigra, non accoglie → nascosta
+  {id:'linea_estera', nm:'Linea diplomatica', nmNA:'Allineamento', cat:'Estero e difesa', levels:['Multilaterale','Equilibrata','Assertiva'], levelsNA:['Vicino al blocco rivale','Non allineato','Vicino all\'Occidente']},   // per un non allineato la linea estera è l'asse dell'AUTONOMIA
+  {id:'cooperazione', nm:'Cooperazione internazionale', cat:'Estero e difesa', levels:['Minima','Standard','Generosa']},
+  {id:'commercio', nm:'Apertura commerciale', cat:'Estero e difesa', levels:['Protezionista','Equilibrata','Libero scambio']},
+  {id:'difesa', nm:'Spesa militare', cat:'Estero e difesa', levels:['Minima','Standard','Elevata']},
+  {id:'industria_difesa', nm:'Industria della difesa', cat:'Estero e difesa', levels:['Vietata','Regolata','Promossa']},
+  {id:'territorio', nm:'Sanità territoriale', cat:'Servizi', levels:['Ridotta','Standard','Diffusa']},
+  {id:'personale_san', nm:'Personale sanitario', cat:'Servizi', levels:['Blocco','Turnover','Assunzioni']},
+  {id:'universita', nm:'Università e ricerca', cat:'Istruzione', levels:['Tagli','Standard','Investimento']},
+  {id:'diritto_studio', nm:'Diritto allo studio', cat:'Istruzione', levels:['Minimo','Standard','Esteso']},
+  {id:'trasporti', nm:'Trasporto pubblico', cat:'Sviluppo', levels:['Ridotto','Standard','Potenziato']},
+  {id:'manutenzione', nm:'Manutenzione del territorio', cat:'Sviluppo', levels:['Trascurata','Standard','Programmata']},
+];
+const FISCAL={
+  fisco:[+3,0,-4], pensioni:[-2.0,0,+2.0], sanita:[-1.2,0,+1.5], investimenti:[-1.0,0,+1.5],
+  istruzione:[-0.8,0,+1.0], welfare:[-1.5,0,+1.8], imprese:[-0.6,0,+1.2],
+  sicurezza:[-0.6,0,+0.8], ambiente:[-0.5,0,+1.3], difesa:[-0.5,0,+0.8], lavoro:[0,0,0], immigrazione:[0,0,0],
+  linea_estera:[0,0,0], cooperazione:[-0.3,0,+0.5], commercio:[0,0,0], industria_difesa:[0,0,0],
+  territorio:[-0.3,0,+0.6], personale_san:[-0.4,0,+0.7], universita:[-0.6,0,+1.0], diritto_studio:[-0.3,0,+0.6], trasporti:[-0.3,0,+0.6], manutenzione:[-0.2,0,+0.5],
+};
+
+/* dossiers: leggeri e frequenti. min = dicastero collegato. pleases = profilo che apprezza */
+const DOSSIERS=[
+ {id:'evasione',era:'universale',min:'economia',kick:'Fisco',t:'Piano contro l\'evasione fiscale',text:'Emerge un\'ampia evasione. Come intervieni?',ch:[
+   {l:'Pugno duro e controlli',e:'Più entrate, imprese sul piede di guerra',pleases:'tecnico',costo:{debito:-0.6},f:()=>{S.ind.debt-=0.6; gd('imprenditori',-2);}},
+   {l:'Condono per fare cassa subito',e:'Soldi ora, ma scontenti i corretti',pleases:'populista',rischio:6,costo:{debito:-0.3},f:()=>{S.ind.debt-=0.3; gd('cattolici',-3); gd('cetomedio',2);}},
+ ]},
+ {id:'privat',era:'contemporanea',min:'economia',kick:'Patrimonio pubblico',t:'Pressioni per privatizzare un asset di Stato',text:'Si può vendere una partecipazione pubblica per ridurre il debito.',ch:[
+   {l:'Vendi al mercato',e:'Abbatti il debito, irriti i sindacati',pleases:'conservatore',costo:{debito:-1.2},f:()=>{S.ind.debt-=1.2; gd('lavoratori',-4); gd('imprenditori',3);}},
+   {l:'Mantieni il controllo pubblico',e:'Difendi gli asset strategici',pleases:'progressista',f:()=>{gd('lavoratori',3); gd('imprenditori',-2);}},
+ ]},
+ {id:'salariomin',era:'contemporanea',min:'lavoro',cond:()=>!S.leggi.salario_min,kick:'Lavoro',t:'Proposta di salario minimo legale',text:'Una parte dei legislatori spinge per introdurre un salario minimo.',ch:[
+   {l:'Introducilo',e:'Lavoratori soddisfatti, imprese caute',pleases:'progressista',f:()=>{gd('lavoratori',6); gd('imprenditori',-4); gd('giovani',3);}},
+   {l:'Lascia alla contrattazione',e:'Linea favorevole alle imprese',pleases:'conservatore',f:()=>{gd('imprenditori',4); gd('lavoratori',-3);}},
+ ]},
+ {id:'salariomin_alza',era:'contemporanea',min:'lavoro',cond:()=>!!S.leggi.salario_min,kick:'Lavoro',t:'Pressioni per alzare il salario minimo',text:'Il salario minimo è in vigore, ma i sindacati lo giudicano troppo basso e ne chiedono l\'aumento.',ch:[
+   {l:'Alza l\'importo',e:'Lavoratori soddisfatti, imprese sotto pressione',pleases:'progressista',f:()=>{gd('lavoratori',5); gd('imprenditori',-4);}},
+   {l:'Tienilo fermo',e:'Stabilità per le imprese, sindacati delusi',pleases:'conservatore',f:()=>{gd('imprenditori',3); gd('lavoratori',-3);}},
+ ]},
+ {id:'reddito',era:'contemporanea',min:'lavoro',kick:'Welfare',t:'Revisione del reddito di sostegno',text:'Il sussidio va ricalibrato. In che direzione?',ch:[
+   {l:'Amplia la platea',e:'Più tutela, più spesa',pleases:'populista',costo:{debito:0.4},f:()=>{S.ind.debt+=0.4; gd('lavoratori',3); gd('giovani',4);}},
+   {l:'Restringi ai più fragili',e:'Conti più sani, malumori',pleases:'tecnico',costo:{debito:-0.3},f:()=>{S.ind.debt-=0.3; gd('giovani',-3); gd('cetomedio',2);}},
+ ]},
+ {id:'ordine',era:'universale',min:'interno',kick:'Ordine pubblico',t:'Tensioni nelle periferie urbane',text:'Crescono episodi di disordine in alcune città.',ch:[
+   {l:'Più forze dell\'ordine',e:'Sicurezza percepita su, giovani contrari',pleases:'conservatore',f:()=>{S.ind.sicurezza+=4; gd('cetomedio',3); gd('giovani',-2);}},
+   {l:'Piano sociale per i quartieri',e:'Investi sulle cause, non sui sintomi',pleases:'progressista',costo:{debito:0.4},f:()=>{S.ind.debt+=0.4; gd('giovani',4); S.ind.sicurezza-=1;}},
+ ]},
+ {id:'cittadinanza',min:'interno',cond:()=>!S.leggi.ius_soli,kick:'Diritti',t:'Riforma della cittadinanza',text:'Si discute di chi e come può diventare cittadino.',ch:[
+   {l:'Semplifica i requisiti',e:'Apertura: divide il Paese',pleases:'progressista',f:()=>{gd('giovani',4); gd('cattolici',3); gd('cetomedio',-3);}},
+   {l:'Mantieni i requisiti rigidi',e:'Linea di prudenza',pleases:'conservatore',f:()=>{gd('cetomedio',3); gd('cattolici',-2);}},
+ ]},
+ {id:'liste',era:'contemporanea',min:'salute',cond:()=>S.ind.sanita<58,kick:'Sanità',t:'Liste d\'attesa fuori controllo',text:'I tempi negli ospedali pubblici si allungano.',ch:[
+   {l:'Assumi personale sanitario',e:'Servizio migliore, più spesa',pleases:'progressista',costo:{debito:0.4},f:()=>{S.ind.sanita+=5; S.ind.debt+=0.4;}},
+   {l:'Convenzioni col privato',e:'Soluzione rapida e meno cara',pleases:'conservatore',f:()=>{S.ind.sanita+=2; gd('cetomedio',2); gd('lavoratori',-2);}},
+ ]},
+ {id:'prevenzione',era:'universale',min:'salute',kick:'Sanità',t:'Campagna di prevenzione nazionale',text:'Una campagna potrebbe ridurre i costi futuri.',ch:[
+   {l:'Finanziala bene',e:'Investimento sul lungo periodo',pleases:'tecnico',costo:{debito:0.2},f:()=>{S.ind.sanita+=3; S.ind.debt+=0.2;}},
+   {l:'Versione minima',e:'Risparmi ora, rischi dopo',pleases:'populista',f:()=>{S.ind.sanita-=2;}},
+ ]},
+ {id:'grandeopera',era:'universale',min:'sviluppo',kick:'Infrastrutture',t:'Grande opera infrastrutturale',text:'Un\'opera contestata promette lavoro ma ha impatti ambientali.',ch:[
+   {l:'Approva e accelera',e:'Crescita e cantieri, ambiente sotto pressione',pleases:'conservatore',f:()=>{S.gMod+=0.3; S.ind.ambiente-=3; gd('imprenditori',4); gd('lavoratori',2);}},
+   {l:'Blocca per l\'impatto ambientale',e:'Tuteli il territorio',pleases:'progressista',f:()=>{S.ind.ambiente+=4; gd('giovani',3); gd('imprenditori',-3);}},
+ ]},
+ {id:'green',min:'sviluppo',kick:'Transizione',t:'Incentivi per l\'auto elettrica',text:'Si valuta un piano di incentivi alla mobilità pulita.',ch:[
+   {l:'Incentivi generosi',e:'Spinta ambientale, costo per i conti',pleases:'progressista',costo:{debito:0.4},f:()=>{S.ind.ambiente+=4; S.ind.debt+=0.4; gd('giovani',3);}},
+   {l:'Incentivi minimi',e:'Prudenza di bilancio',pleases:'conservatore',f:()=>{S.ind.ambiente-=1;}},
+ ]},
+ // (i dossier 'nato' e 'missione' sono confluiti nei grandi eventi INTERNAZIONALI — lotto Esteri+Difesa)
+ {id:'spazio',era:'universale',min:'economia',kick:'Bilancio',t:'Un piccolo margine di bilancio disponibile',text:'È emerso spazio fiscale. Come lo usi?',ch:[
+   {l:'Taglio mirato delle tasse',e:'Piace al ceto medio',pleases:'conservatore',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; gd('cetomedio',4);}},
+   {l:'Investimento pubblico extra',e:'Spinta alla crescita',pleases:'progressista',costo:{debito:0.3},f:()=>{S.gMod+=0.2; S.ind.debt+=0.3; gd('lavoratori',2);}},
+   {l:'Riduci il debito',e:'Nessun applauso, conti più solidi',pleases:'tecnico',costo:{debito:-0.6},f:()=>{S.ind.debt-=0.6;}},
+ ]},
+ {id:'stampa',era:'universale',min:'interno',kick:'Comunicazione',t:'La stampa attacca una tua riforma',text:'Editoriali critici mettono in difficoltà il governo.',ch:[
+   {l:'Apri un tavolo di confronto',e:'Toni distesi, recuperi credibilità',pleases:'progressista',f:()=>{gd('cetomedio',2); gd('giovani',2);}},
+   {l:'Tira dritto senza esitazioni',e:'Fermezza che divide',pleases:'populista',f:()=>{gd('cetomedio',-2); gd('imprenditori',2);}},
+ ]},
+ {id:'pioggia',era:'universale',min:'sviluppo',kick:'Maltempo',t:'Forti alluvioni in una regione',text:'Servono interventi rapidi sul territorio.',ch:[
+   {l:'Fondi d\'emergenza pieni',e:'Vicinanza riconosciuta, costo sui conti',pleases:'progressista',costo:{debito:0.6},f:()=>{S.ind.debt+=0.6; allG(2);}},
+   {l:'Intervento essenziale',e:'Conti salvi, qualche critica',pleases:'tecnico',f:()=>{allG(-2);}},
+ ]},
+ {id:'giovani_brain',era:'contemporanea',min:'lavoro',kick:'Giovani',t:'Fuga di giovani talenti all\'estero',text:'Cresce l\'emigrazione di laureati. Come reagisci?',ch:[
+   {l:'Sgravi per chi rientra e assume giovani',e:'Apprezzato dai giovani, costa',pleases:'progressista',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; gd('giovani',5);}},
+   {l:'Nessuna misura specifica',e:'Lasci fare al mercato',pleases:'conservatore',f:()=>{gd('giovani',-3);}},
+ ]},
+ {id:'giustizia_riforma',era:'universale',min:'giustizia',kick:'Giustizia',t:'Riforma della giustizia',text:'Si discute una riforma che ridisegna i rapporti tra politica e magistratura.',ch:[
+   {l:'Spingi la riforma',e:'Apprezzata da una parte, scontro con i giudici',pleases:'conservatore',f:()=>{gd('cetomedio',3); gd('cattolici',-2); S.ind.sicurezza-=1;}},
+   {l:'Lascia tutto com\'è',e:'Eviti lo scontro, deludi i riformisti',pleases:'progressista',f:()=>{gd('giovani',2);}},
+ ]},
+ {id:'carceri',era:'universale',min:'giustizia',kick:'Giustizia',t:'Carceri sovraffollate',text:'Le condizioni nelle carceri peggiorano e crescono le tensioni.',ch:[
+   {l:'Nuove strutture e personale',e:'Costa, ma migliora la situazione',pleases:'tecnico',costo:{debito:0.4},f:()=>{S.ind.debt+=0.4; S.ind.sicurezza+=2;}},
+   {l:'Misure alternative al carcere',e:'Soluzione rapida e divisiva',pleases:'progressista',f:()=>{gd('giovani',2); gd('cetomedio',-3); gd('cattolici',2);}},
+ ]},
+ // (i dossier 'accordo' e 'diplomazia' sono confluiti nei grandi eventi INTERNAZIONALI — lotto Esteri+Difesa)
+ {id:'scuola',era:'universale',min:'istruzione',kick:'Scuola',t:'Riforma della scuola',text:'Una riforma punta su merito e autonomia degli istituti.',ch:[
+   {l:'Più autonomia e merito',e:'Piace a una parte, divide il mondo della scuola',pleases:'conservatore',f:()=>{gd('cetomedio',3); gd('lavoratori',-2);}},
+   {l:'Più risorse e tutele uniformi',e:'Investimento sull\'equità',pleases:'progressista',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; gd('giovani',4); gd('lavoratori',2);}},
+ ]},
+ {id:'ricerca',era:'universale',min:'istruzione',kick:'Ricerca',t:'Fondi per università e ricerca',text:'Atenei e centri di ricerca chiedono più finanziamenti.',ch:[
+   {l:'Aumenta i fondi',e:'Investi sul futuro, costa ora',pleases:'progressista',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; gd('giovani',4); S.gMod+=0.1;}},
+   {l:'Razionalizza la spesa',e:'Prudenza di bilancio',pleases:'tecnico',f:()=>{gd('giovani',-2);}},
+ ]},
+ {id:'av',min:'infrastrutture',kick:'Infrastrutture',t:'Piano per l\'alta velocità ferroviaria',text:'Un grande piano ferroviario collegherebbe meglio le regioni meno servite.',ch:[
+   {l:'Finanzia il piano',e:'Sviluppo e cantieri, debito in salita',pleases:'conservatore',costo:{debito:0.6},f:()=>{S.ind.debt+=0.6; S.gMod+=0.2; gd('lavoratori',3); gd('imprenditori',3);}},
+   {l:'Rinvia per ora',e:'Conti più prudenti',pleases:'tecnico',f:()=>{gd('lavoratori',-2);}},
+ ]},
+ {id:'strade',era:'universale',min:'infrastrutture',kick:'Infrastrutture',t:'Rete stradale in pessimo stato',text:'Crescono gli incidenti per la scarsa manutenzione.',ch:[
+   {l:'Manutenzione straordinaria',e:'Sicurezza su, spesa su',pleases:'progressista',costo:{debito:0.4},f:()=>{S.ind.debt+=0.4; S.ind.sicurezza+=2; gd('cetomedio',2);}},
+   {l:'Solo interventi essenziali',e:'Risparmi, ma resta il problema',pleases:'tecnico',f:()=>{gd('cetomedio',-2);}},
+ ]},
+ {id:'maggioranza',era:'universale',min:'interno',kick:'Politica interna',t:'Tensioni nella maggioranza di governo',text:'Alcuni alleati minacciano di non votare i prossimi provvedimenti.',ch:[
+   {l:'Concedi posti e mediazione',e:'Tieni unita la maggioranza',pleases:'populista',f:()=>{allG(1);}},
+   {l:'Imponi la linea, tira dritto',e:'Mostri i muscoli, rischi rotture',pleases:'conservatore',f:()=>{gd('cetomedio',2); gd('lavoratori',-2);}},
+ ]},
+ /* --- Lotto 3: Salute, Istruzione, Infrastrutture (riequilibrio del pool mensile) --- */
+ {id:'salute_mentale',min:'salute',kick:'Sanità',t:'Emergenza salute mentale tra i giovani',text:'Crescono i casi di disagio psicologico, soprattutto tra i più giovani.',ch:[
+   {l:'Finanzia i servizi sul territorio',e:'Più assistenza, più spesa',pleases:'progressista',costo:{debito:0.3},f:()=>{S.ind.sanita+=3; S.ind.debt+=0.3; gd('giovani',4);}},
+   {l:'Lascia alle strutture esistenti',e:'Conti salvi, bisogni scoperti',pleases:'conservatore',f:()=>{gd('giovani',-3);}},
+ ]},
+ {id:'farmaci',era:'contemporanea',min:'salute',kick:'Sanità',t:'Prezzo dei farmaci alle stelle',text:'Alcune terapie diventano insostenibili per il servizio pubblico.',ch:[
+   {l:'Negozia coi produttori',e:'Risparmi sui conti, trattativa dura',pleases:'tecnico',costo:{debito:-0.3},f:()=>{S.ind.debt-=0.3; gd('imprenditori',-2);}},
+   {l:'Tetto ai prezzi per legge',e:'Protegge i cittadini, irrita l\'industria',pleases:'populista',f:()=>{gd('cetomedio',3); gd('imprenditori',-4);}},
+   {l:'Lascia fare al mercato',e:'Niente scontri, costi sui pazienti',pleases:'conservatore',f:()=>{S.ind.sanita-=2; gd('imprenditori',3); gd('cetomedio',-3);}},
+ ]},
+ {id:'anziani',era:'contemporanea',min:'salute',kick:'Welfare',t:'Non autosufficienza degli anziani',text:'Le famiglie chiedono aiuto per l\'assistenza agli anziani non autosufficienti.',ch:[
+   {l:'Piano nazionale per l\'assistenza',e:'Sollievo alle famiglie, costo sui conti',pleases:'progressista',costo:{debito:0.5},f:()=>{S.ind.debt+=0.5; gd('pensionati',6); gd('lavoratori',2);}},
+   {l:'Lascia il carico alle famiglie',e:'Conti prudenti, malumore diffuso',pleases:'conservatore',f:()=>{gd('pensionati',-5);}},
+ ]},
+ {id:'edilizia_scolastica',era:'universale',min:'istruzione',kick:'Scuola',t:'Scuole fatiscenti',text:'Molti edifici scolastici non sono a norma.',ch:[
+   {l:'Piano nazionale di edilizia scolastica',e:'Sicurezza e cantieri, debito su',pleases:'progressista',costo:{debito:0.5},f:()=>{S.ind.debt+=0.5; gd('giovani',4); gd('lavoratori',3);}},
+   {l:'Solo interventi urgenti',e:'Risparmi, ma il problema resta',pleases:'tecnico',f:()=>{gd('giovani',-2);}},
+ ]},
+ {id:'precari_scuola',era:'contemporanea',min:'istruzione',kick:'Scuola',t:'Precariato nella scuola',text:'Decine di migliaia di insegnanti restano precari da anni.',ch:[
+   {l:'Piano di stabilizzazione',e:'Lavoratori soddisfatti, più spesa',pleases:'progressista',costo:{debito:0.4},f:()=>{S.ind.debt+=0.4; gd('lavoratori',5);}},
+   {l:'Concorsi a merito',e:'Selezione, ma malumori tra i precari',pleases:'conservatore',f:()=>{gd('cetomedio',2); gd('lavoratori',-2);}},
+ ]},
+ {id:'dispersione',era:'universale',min:'istruzione',kick:'Scuola',t:'Dispersione scolastica nelle aree fragili',text:'In alcune zone l\'abbandono scolastico è altissimo.',ch:[
+   {l:'Piano contro l\'abbandono',e:'Investi sui ragazzi, costa',pleases:'progressista',costo:{debito:0.4},f:()=>{S.ind.debt+=0.4; gd('giovani',5); gd('cattolici',2);}},
+   {l:'Nessuna misura specifica',e:'Lasci fare al territorio',pleases:'conservatore',f:()=>{gd('giovani',-3);}},
+ ]},
+ {id:'ponti',era:'universale',min:'infrastrutture',cond:()=>S.ind.sicurezza<60,kick:'Infrastrutture',t:'Allarme sulla sicurezza dei ponti',text:'Diverse perizie segnalano ponti e viadotti a rischio.',ch:[
+   {l:'Messa in sicurezza immediata',e:'Più sicurezza, debito su',pleases:'tecnico',costo:{debito:0.6},f:()=>{S.ind.debt+=0.6; S.ind.sicurezza+=3; gd('cetomedio',3);}},
+   {l:'Solo monitoraggio',e:'Rinvii la spesa, resta il rischio',pleases:'populista',f:()=>{S.ind.sicurezza-=2;}},
+ ]},
+ {id:'pendolari',era:'contemporanea',min:'infrastrutture',kick:'Trasporti',t:'Protesta dei pendolari',text:'Ritardi e treni soppressi esasperano chi viaggia ogni giorno.',ch:[
+   {l:'Potenzia il trasporto pubblico',e:'Pendolari e ambiente, costo sui conti',pleases:'progressista',costo:{debito:0.4},f:()=>{S.ind.debt+=0.4; S.ind.ambiente+=2; gd('lavoratori',3); gd('cetomedio',3);}},
+   {l:'Alza le tariffe per coprire i costi',e:'Conti a posto, utenti furiosi',pleases:'conservatore',costo:{debito:-0.2},f:()=>{S.ind.debt-=0.2; gd('cetomedio',-4); gd('lavoratori',-2);}},
+ ]},
+ {id:'banda_larga',min:'infrastrutture',kick:'Digitale',t:'Divario digitale tra le aree del Paese',text:'Molte zone restano senza connessione veloce.',ch:[
+   {l:'Banda larga ovunque, anche in perdita',e:'Sviluppo diffuso, costo alto',pleases:'progressista',costo:{debito:0.5},f:()=>{S.ind.debt+=0.5; S.gMod+=0.15; gd('giovani',3);}},
+   {l:'Solo dove conviene',e:'Efficiente, ma allarga il divario',pleases:'conservatore',f:()=>{gd('imprenditori',3); gd('cetomedio',-2);}},
+   {l:'Lascia agli operatori privati',e:'Niente spesa pubblica, niente garanzie',pleases:'tecnico',f:()=>{gd('imprenditori',2);}},
+ ]},
+ {id:'porti',era:'universale',min:'infrastrutture',kick:'Logistica',t:'Colli di bottiglia nella logistica',text:'Porti e interporti saturi frenano le merci.',ch:[
+   {l:'Investi su porti e intermodale',e:'Crescita e competitività, debito su',pleases:'conservatore',costo:{debito:0.5},f:()=>{S.ind.debt+=0.5; S.gMod+=0.2; gd('imprenditori',4);}},
+   {l:'Mantieni lo status quo',e:'Nessuna spesa, occasione persa',pleases:'populista',f:()=>{gd('imprenditori',-2);}},
+ ]},
+ {id:'pagamenti_pa',era:'universale',min:'economia',kick:'Pubblica amministrazione',t:'La PA paga in ritardo i fornitori',text:'Imprese e fornitori aspettano mesi i pagamenti dello Stato.',ch:[
+   {l:'Sblocca i pagamenti arretrati',e:'Liquidità alle imprese, debito su',pleases:'tecnico',costo:{debito:0.4},f:()=>{S.ind.debt+=0.4; gd('imprenditori',4); gd('lavoratori',1);}},
+   {l:'Procedi coi tempi ordinari',e:'Conti fermi, imprese esasperate',pleases:'populista',f:()=>{gd('imprenditori',-3);}},
+ ]},
+ {id:'terzo_settore',era:'universale',kick:'Società civile',t:'Il terzo settore chiede sostegno',text:'Associazioni e volontariato reggono servizi essenziali ma sono in difficoltà.',ch:[
+   {l:'Sostieni il volontariato',e:'Welfare di prossimità, piccola spesa',pleases:'progressista',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; gd('cattolici',4); gd('giovani',2);}},
+   {l:'Tagli ai contributi',e:'Risparmi, ma scontenti il mondo associativo',pleases:'conservatore',f:()=>{gd('cattolici',-4);}},
+ ]},
+ /* ===== ESPANSIONE 2026-06-11 (+58, set approvato da Giacomo): pool ~92, finestra recentDoss 22.
+    Temi seri (morti sul lavoro, violenza di genere, aggressioni, detenzione ingiusta): registro
+    d'agenzia, scelte SOLO di policy, mai sulla tragedia. ✋cond = carte di stato/stagionali. ===== */
+ // ----- ECONOMIA (+7) -----
+ {id:'concordato',era:'universale',min:'economia',kick:'Fisco',t:'Maxi-cartella a una grande impresa',text:'Una grande impresa ha un contenzioso fiscale enorme: transare incassando subito o esigere tutto in giudizio?',ch:[
+   {l:'Transazione: incassa subito',e:'Cassa immediata, segnale morbido',pleases:'tecnico',costo:{debito:-0.5},f:()=>{S.ind.debt-=0.5; gd('imprenditori',2); gd('lavoratori',-2);}},
+   {l:'Esigi tutto, fino in fondo',e:'Rigore esemplare, incasso incerto',pleases:'progressista',f:()=>{gd('lavoratori',3); gd('imprenditori',-3);}},
+ ]},
+ {id:'cripto',min:'economia',kick:'Finanza',t:'Febbre delle criptovalute tra i risparmiatori',text:'Piccoli risparmiatori si espongono a prodotti speculativi. Intervenire o lasciar correre?',ch:[
+   {l:'Regole e avvertenze severe',e:'Protezione dei risparmiatori; il settore protesta',pleases:'tecnico',f:()=>{gd('cetomedio',3); gd('giovani',-2);}},
+   {l:'Tassa i guadagni cripto',e:'Gettito nuovo; i giovani investitori insorgono',pleases:'progressista',costo:{debito:-0.3},f:()=>{S.ind.debt-=0.3; gd('giovani',-4);}},
+   {l:'Libertà di investire',e:'Nessun freno: se scoppia, pagherà qualcuno',pleases:'conservatore',f:()=>{gd('giovani',2);}},
+ ]},
+ {id:'banca_crisi',era:'universale',min:'economia',cond:()=>S.ind.fiducia<60,kick:'Credito',t:'Una banca regionale vacilla',text:'Sportelli affollati e voci di dissesto: il sistema regge, ma i correntisti hanno paura.',ch:[
+   {l:'Intervento pubblico a tutela dei conti',e:'Paura rientrata, conti pubblici sotto sforzo',pleases:'progressista',costo:{debito:1},f:()=>{S.ind.debt+=1; gd('pensionati',4); gd('cetomedio',3);}},
+   {l:'Soluzione di mercato: la rilevi un concorrente',e:'Niente soldi pubblici; gli azionisti pagano',pleases:'tecnico',f:()=>{gd('imprenditori',-2); gd('cetomedio',-2); S.ind.fiducia+=2;}},
+ ]},
+ {id:'contanti',min:'economia',kick:'Fisco',t:'Tetto al contante',text:'Si discute di abbassare il tetto ai pagamenti in contanti: tracciabilità contro libertà di spesa.',ch:[
+   {l:'Abbassa il tetto',e:'Anti-evasione; brontolio diffuso',pleases:'tecnico',costo:{debito:-0.2},f:()=>{S.ind.debt-=0.2; gd('pensionati',-3); gd('cetomedio',-1);}},
+   {l:'Alza il tetto',e:'Libertà di spesa; l\'evasione ringrazia',pleases:'conservatore',rischio:3,costo:{debito:0.2},f:()=>{gd('pensionati',3); gd('cetomedio',2); S.ind.debt+=0.2;}},
+ ]},
+ /* le carte del rischio (lotto giudiziario): il favore alla lobby e la nomina dell'amico — la scelta sporca
+    alza l'esposizione (rischio:n), quella pulita la abbassa (trasparenza:n). Archetipi, nessuna persona reale. */
+ {id:'lobby_emend',era:'contemporanea',min:'economia',kick:'Palazzo',t:'L\'emendamento su misura',text:'Un gruppo di pressione chiede un emendamento cucito su misura in manovra. In cambio, sostegno discreto e fondi al territorio.',ch:[
+   {l:'Inserisci l\'emendamento',e:'Un favore che pesa: qualcuno se lo ricorderà',rischio:6,costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; gd('imprenditori',4);}},
+   {l:'Respingi e pubblica la richiesta',e:'Trasparenza che fa rumore; il gruppo non dimentica',pleases:'tecnico',trasparenza:5,f:()=>{gd('imprenditori',-3); gd('giovani',2); stampad(2);}},
+ ]},
+ {id:'nomina_amico',era:'contemporanea',min:'economia',kick:'Palazzo',t:'La poltrona della partecipata',text:'Si libera il vertice di una grande partecipata pubblica. Il cerchio magico spinge un fedelissimo; i tecnici propongono una selezione aperta.',ch:[
+   {l:'Nomina il fedelissimo',e:'Il partito ringrazia; i giornali archiviano il nome',rischio:5,f:()=>{gd('cetomedio',-2); if(typeof tutteCorrenti==='function') tutteCorrenti(2);}},
+   {l:'Selezione pubblica, curricula in chiaro',e:'Merito in vetrina; il cerchio magico mastica amaro',pleases:'tecnico',trasparenza:5,f:()=>{gd('cetomedio',2); gd('giovani',2); if(typeof corrented==='function') corrented('fedelissimi',-2);}},
+ ]},
+ {id:'sommerso',era:'contemporanea',min:'economia',kick:'Lavoro nero',t:'Lavoro nero in un distretto chiave',text:'Un\'inchiesta fotografa un distretto produttivo che vive di sommerso. Blitz o emersione graduale?',ch:[
+   {l:'Blitz e sanzioni',e:'Legalità subito; il distretto trema',pleases:'tecnico',costo:{debito:-0.2},f:()=>{S.ind.debt-=0.2; gd('imprenditori',-4); gd('lavoratori',2);}},
+   {l:'Percorso di emersione agevolata',e:'Regolarizzi senza distruggere',pleases:'conservatore',f:()=>{gd('imprenditori',3); gd('lavoratori',1);}},
+ ]},
+ {id:'lotteria',era:'contemporanea',min:'economia',kick:'Costume',t:'Il jackpot della lotteria fa il record',text:'Mai così alto il montepremi: il paese sogna. E i proventi dello Stato crescono: dove li destini?',ch:[
+   {l:'Un fondo per i piccoli comuni',e:'Gesto popolare e visibile',pleases:'progressista',f:()=>{gd('pensionati',2); gd('cetomedio',2);}},
+   {l:'Riduzione del debito, senza annunci',e:'Sobrietà contabile',pleases:'tecnico',costo:{debito:-0.2},f:()=>{S.ind.debt-=0.2;}},
+ ]},
+ {id:'affitti',era:'contemporanea',min:'economia',kick:'Casa',t:'Caro-affitti nelle grandi città',text:'Studenti e lavoratori non trovano casa a prezzi sostenibili nei grandi centri.',ch:[
+   {l:'Calmiere e canone concordato',e:'Sollievo agli inquilini; i proprietari protestano',pleases:'progressista',f:()=>{gd('giovani',4); gd('lavoratori',2); gd('cetomedio',-3);}},
+   {l:'Incentivi a costruire e affittare',e:'Più offerta domani, debito oggi',pleases:'conservatore',costo:{debito:0.4},f:()=>{S.ind.debt+=0.4; gd('imprenditori',3); gd('giovani',1);}},
+ ]},
+ // ----- LAVORO (+6) -----
+ {id:'rider',min:'lavoro',kick:'Piattaforme',t:'I rider chiedono tutele',text:'I lavoratori delle piattaforme digitali chiedono contratti, contributi e assicurazione.',ch:[
+   {l:'Tutele piene da dipendenti',e:'Diritti estesi; le piattaforme minacciano rincari',pleases:'progressista',f:()=>{gd('lavoratori',4); gd('giovani',3); gd('imprenditori',-4);}},
+   {l:'Statuto leggero ad hoc',e:'Compromesso tecnico',pleases:'tecnico',f:()=>{gd('lavoratori',2); gd('imprenditori',-1);}},
+ ]},
+ {id:'smartwork',min:'lavoro',kick:'Pubblica amministrazione',t:'Smart working nella PA: si torna in presenza?',text:'Metà dei dipendenti pubblici lavora da remoto. Produttività o presidio degli sportelli?',ch:[
+   {l:'Rientro in presenza',e:'Servizi allo sportello; malumore tra i dipendenti',pleases:'conservatore',f:()=>{gd('pensionati',3); gd('lavoratori',-3);}},
+   {l:'Remoto strutturale con obiettivi',e:'Modernità misurabile',pleases:'tecnico',f:()=>{gd('lavoratori',3); gd('giovani',2); gd('pensionati',-2);}},
+ ]},
+ {id:'sicurezza_lavoro',era:'universale',min:'lavoro',kick:'Sicurezza sul lavoro',t:'Infortuni nei cantieri: i numeri non scendono',text:'Le statistiche sugli infortuni gravi restano alte. Servono scelte sul sistema dei controlli.',ch:[
+   {l:'Più ispettori e formazione obbligatoria',e:'Prevenzione strutturale, costo per le imprese',pleases:'progressista',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; gd('lavoratori',5); gd('imprenditori',-3);}},
+   {l:'Patente a punti per le imprese',e:'Premia chi rispetta le regole',pleases:'tecnico',f:()=>{gd('lavoratori',3); gd('imprenditori',-1);}},
+ ]},
+ {id:'quota_giovani',era:'universale',min:'lavoro',cond:()=>S.ind.unemp>8,kick:'Occupazione',t:'Sgravi per assumere under-30',text:'Con la disoccupazione alta, si propone uno sgravio pieno per chi assume giovani.',ch:[
+   {l:'Sgravio pieno, a debito',e:'Spinta vera all\'occupazione giovanile',pleases:'progressista',costo:{debito:0.5},f:()=>{S.ind.debt+=0.5; S.uMod-=0.3; gd('giovani',5); gd('imprenditori',2);}},
+   {l:'Sgravio mirato ai territori fragili',e:'Costa meno, incide dove serve',pleases:'tecnico',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; gd('giovani',2);}},
+ ]},
+ {id:'stagionali',era:'universale',min:'lavoro',kick:'Stagionali',t:'Mancano lavoratori stagionali',text:'Turismo e agricoltura non trovano manodopera per la stagione. Flussi dedicati o salari più alti?',ch:[
+   {l:'Flussi d\'ingresso dedicati',e:'Risposta rapida; il tema immigrazione si riapre',pleases:'tecnico',f:()=>{gd('imprenditori',4); gd('cetomedio',-2);}},
+   {l:'Incentiva salari e alloggi stagionali',e:'Lavoro più dignitoso, costi su',pleases:'progressista',f:()=>{gd('lavoratori',3); gd('imprenditori',-2);}},
+ ]},
+ {id:'quattro_giorni',min:'lavoro',kick:'Tempi di lavoro',t:'La settimana corta entra nel dibattito',text:'Una grande azienda sperimenta la settimana di quattro giorni a parità di salario. Il governo che dice?',ch:[
+   {l:'Incoraggia la sperimentazione',e:'Modernità; gli industriali storcono il naso',pleases:'progressista',f:()=>{gd('giovani',3); gd('lavoratori',2); gd('imprenditori',-2);}},
+   {l:'Questione privata tra le parti',e:'Neutralità prudente',pleases:'conservatore',f:()=>{gd('imprenditori',1);}},
+ ]},
+ // ----- INTERNO (+7) -----
+ {id:'baby_gang',era:'universale',min:'interno',cond:()=>S.ind.sicurezza<55,kick:'Ordine pubblico',t:'Criminalità minorile in crescita',text:'Cresce il numero di reati commessi da minorenni nelle città. Repressione o percorso educativo?',ch:[
+   {l:'Pattugliamento e daspo urbano',e:'Risposta visibile e immediata',pleases:'conservatore',f:()=>{S.ind.sicurezza+=3; gd('pensionati',4); gd('giovani',-3);}},
+   {l:'Educatori di strada e sport nei quartieri',e:'Prevenzione che paga nel tempo',pleases:'progressista',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; gd('giovani',4); gd('pensionati',-2);}},
+ ]},
+ {id:'sgombero',era:'universale',min:'interno',kick:'Ordine pubblico',t:'Maxi-occupazione abusiva da sgomberare',text:'Un grande stabile occupato da anni: il tribunale ordina lo sgombero. Come lo gestisci?',ch:[
+   {l:'Sgombero immediato',e:'Legalità ristabilita; tensioni in piazza',pleases:'conservatore',f:()=>{S.ind.sicurezza+=2; gd('cetomedio',3); gd('giovani',-4);}},
+   {l:'Sgombero graduale con alternative abitative',e:'Meno scontro, più tempo e spesa',pleases:'progressista',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; gd('giovani',2); gd('cetomedio',-2);}},
+ ]},
+ {id:'tifoserie',min:'interno',kick:'Ordine pubblico',t:'Scontri tra tifoserie',text:'Una giornata di scontri attorno allo stadio riapre il tema della violenza nel tifo.',ch:[
+   {l:'Daspo di massa e trasferte vietate',e:'Pugno duro; i club protestano',pleases:'conservatore',f:()=>{S.ind.sicurezza+=2; gd('pensionati',2); gd('giovani',-2);}},
+   {l:'Tavolo coi club e steward formati',e:'Responsabilizzare, non solo punire',pleases:'tecnico',f:()=>{gd('giovani',1);}},
+ ]},
+ {id:'violenza_genere',min:'interno',kick:'Sicurezza',t:'Violenza di genere: il sistema di protezione è sotto esame',text:'I dati sulla violenza contro le donne impongono una risposta. Le risorse attuali non bastano.',ch:[
+   {l:'Centri antiviolenza e codice rosso rafforzati',e:'Protezione e prevenzione, spesa stabile',pleases:'progressista',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; gd('giovani',4); gd('lavoratori',2); gd('cattolici',2);}},
+   {l:'Inasprimento delle pene e braccialetti',e:'Deterrenza al centro',pleases:'conservatore',f:()=>{S.ind.sicurezza+=2; gd('pensionati',3); gd('cattolici',2);}},
+ ]},
+ {id:'intelligence',min:'interno',kick:'Sicurezza nazionale',t:'L\'intelligence chiede più poteri di sorveglianza',text:'I servizi chiedono accesso più ampio alle comunicazioni per prevenire minacce. Sicurezza contro privacy.',ch:[
+   {l:'Concedi con controllo parlamentare',e:'Più strumenti, garanzie scritte',pleases:'tecnico',f:()=>{S.ind.sicurezza+=3; gd('giovani',-3); gd('pensionati',2);}},
+   {l:'Nega: la privacy non si tocca',e:'Diritti prima di tutto',pleases:'progressista',f:()=>{gd('giovani',4); gd('pensionati',-2);}},
+ ]},
+ {id:'periferie_piano',era:'contemporanea',min:'interno',kick:'Città',t:'Un piano per le periferie',text:'Le periferie chiedono attenzione: rigenerazione urbana o più presidio delle forze dell\'ordine?',ch:[
+   {l:'Rigenerazione: scuole, verde, trasporti',e:'Investimento lungo, consenso giovane',pleases:'progressista',costo:{debito:0.4},f:()=>{S.ind.debt+=0.4; gd('giovani',4); gd('lavoratori',2);}},
+   {l:'Presidio fisso e telecamere',e:'Sicurezza percepita subito',pleases:'conservatore',f:()=>{S.ind.sicurezza+=3; gd('pensionati',4); gd('giovani',-2);}},
+ ]},
+ {id:'truffe_anziani',era:'contemporanea',min:'interno',kick:'Sicurezza',t:'Truffe agli anziani in aumento',text:'Falsi tecnici e telefonate ingannevoli: gli anziani sono il bersaglio preferito dei truffatori.',ch:[
+   {l:'Campagna nazionale e numero dedicato',e:'Prevenzione capillare',pleases:'progressista',f:()=>{gd('pensionati',5);}},
+   {l:'Aggravante specifica e pattuglie',e:'Deterrenza giudiziaria',pleases:'conservatore',f:()=>{S.ind.sicurezza+=1; gd('pensionati',3);}},
+ ]},
+ // ----- SALUTE (+5) -----
+ {id:'medici_fuga',era:'contemporanea',min:'salute',cond:()=>S.ind.sanita<60,kick:'Sanità',t:'I medici lasciano il servizio pubblico',text:'Stipendi e turni spingono medici e infermieri verso il privato o l\'estero.',ch:[
+   {l:'Aumenti mirati a chi resta',e:'Trattenere costa, ma il sistema regge',pleases:'progressista',costo:{debito:0.4},f:()=>{S.ind.debt+=0.4; S.ind.sanita+=3; gd('lavoratori',3);}},
+   {l:'Vincolo di permanenza dopo la specializzazione',e:'Costo zero, malumore tra i giovani medici',pleases:'tecnico',f:()=>{S.ind.sanita+=1; gd('giovani',-3);}},
+ ]},
+ {id:'pronto_soccorso',era:'contemporanea',min:'salute',cond:()=>[12,1,2].includes(S.month),kick:'Sanità',t:'Pronto soccorso sotto pressione invernale',text:'Influenza e freddo riempiono i pronto soccorso: barelle nei corridoi e attese lunghissime.',ch:[
+   {l:'Medici a gettone per l\'emergenza',e:'Tampone immediato, costoso',pleases:'tecnico',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; S.ind.sanita+=3;}},
+   {l:'Potenzia la medicina territoriale',e:'Meno accessi impropri, effetto lento',pleases:'progressista',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; S.ind.sanita+=2; gd('pensionati',2);}},
+ ]},
+ {id:'vaccini_stagione',era:'universale',min:'salute',cond:()=>[10,11].includes(S.month),kick:'Prevenzione',t:'Campagna vaccinale d\'autunno fiacca',text:'Le adesioni alla vaccinazione stagionale dei fragili sono sotto le attese.',ch:[
+   {l:'Chiamata attiva di anziani e fragili',e:'Organizzazione capillare',pleases:'tecnico',f:()=>{S.ind.sanita+=2; gd('pensionati',3);}},
+   {l:'Solo informazione, nessuna pressione',e:'Libertà di scelta; i numeri restano bassi',pleases:'conservatore',f:()=>{gd('cetomedio',1); S.ind.sanita-=1;}},
+ ]},
+ {id:'telemedicina',min:'salute',kick:'Innovazione',t:'La telemedicina può alleggerire le visite',text:'Visite a distanza per cronici e zone interne: investire o andare cauti?',ch:[
+   {l:'Piattaforma nazionale e tariffe dedicate',e:'Modernizzazione del servizio',pleases:'tecnico',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; S.ind.sanita+=3; gd('giovani',2);}},
+   {l:'Sperimentazione limitata',e:'Prudenza, piccoli passi',pleases:'conservatore',f:()=>{S.ind.sanita+=1;}},
+ ]},
+ {id:'zuccheri',min:'salute',kick:'Prevenzione',t:'Tassa sulle bibite zuccherate',text:'I medici la chiedono, i produttori la combattono: tassare le bevande zuccherate?',ch:[
+   {l:'Tassa e fondi alla prevenzione',e:'Salute pubblica; un settore protesta',pleases:'progressista',costo:{debito:-0.2},f:()=>{S.ind.debt-=0.2; S.ind.sanita+=1; gd('imprenditori',-3);}},
+   {l:'Niente nuove tasse',e:'I consumi non si toccano',pleases:'conservatore',f:()=>{gd('imprenditori',2); gd('cetomedio',1);}},
+ ]},
+ // ----- ISTRUZIONE (+5) -----
+ {id:'smartphone_scuola',min:'istruzione',kick:'Scuola',t:'Smartphone in classe: vietarli?',text:'Cresce il fronte che chiede il divieto totale degli smartphone a scuola.',ch:[
+   {l:'Divieto totale fino alle superiori',e:'Concentrazione in aula; studenti contrari',pleases:'conservatore',f:()=>{gd('pensionati',3); gd('cattolici',2); gd('giovani',-3);}},
+   {l:'Uso regolato come strumento didattico',e:'Educare, non proibire',pleases:'progressista',f:()=>{gd('giovani',3);}},
+ ]},
+ {id:'condotta',era:'universale',min:'istruzione',kick:'Scuola',t:'Il voto in condotta torna decisivo',text:'Si propone che il comportamento pesi davvero su promozioni e bocciature.',ch:[
+   {l:'Rigore: la condotta boccia',e:'Disciplina ristabilita',pleases:'conservatore',f:()=>{gd('pensionati',3); gd('cetomedio',2); gd('giovani',-2);}},
+   {l:'Percorsi di recupero, non bocciature',e:'Recuperare invece di espellere',pleases:'progressista',f:()=>{gd('giovani',3); gd('pensionati',-2);}},
+ ]},
+ {id:'mense',era:'universale',min:'istruzione',kick:'Scuola',t:'Mense scolastiche gratuite per i redditi bassi',text:'Una platea di famiglie fatica a pagare la mensa dei figli.',ch:[
+   {l:'Gratuità sotto soglia di reddito',e:'Equità concreta, spesa stabile',pleases:'progressista',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; gd('lavoratori',4); gd('giovani',2);}},
+   {l:'Sconti comunali dove possibile',e:'Costo minore, copertura a macchia',pleases:'tecnico',f:()=>{gd('lavoratori',1);}},
+ ]},
+ {id:'orientamento',era:'contemporanea',min:'istruzione',kick:'Università',t:'Lauree senza sbocchi',text:'Migliaia di iscritti scelgono corsi con pochissima domanda di lavoro. Orientare o lasciar scegliere?',ch:[
+   {l:'Orientamento attivo e dati trasparenti',e:'Scelte informate',pleases:'tecnico',f:()=>{gd('giovani',2); gd('imprenditori',2);}},
+   {l:'La libertà di studio non si indirizza',e:'Principio difeso, mercato ignorato',pleases:'progressista',f:()=>{gd('giovani',2); gd('imprenditori',-1);}},
+ ]},
+ {id:'prof_aggrediti',era:'contemporanea',min:'istruzione',kick:'Scuola',t:'Aggressioni al personale scolastico',text:'Si moltiplicano i casi di insegnanti aggrediti. La categoria chiede tutele concrete.',ch:[
+   {l:'Tutela legale e presidi di supporto',e:'Protezione della funzione pubblica',pleases:'progressista',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; gd('lavoratori',4); gd('cetomedio',2);}},
+   {l:'Aggravante penale specifica',e:'Deterrenza',pleases:'conservatore',f:()=>{S.ind.sicurezza+=1; gd('pensionati',2); gd('lavoratori',2);}},
+ ]},
+ // ----- INFRASTRUTTURE (+4) -----
+ {id:'aeroporto',min:'infrastrutture',kick:'Trasporti',t:'Ampliare il grande aeroporto',text:'Il principale scalo del paese è saturo: l\'ampliamento promette traffico e lavoro, il territorio protesta.',ch:[
+   {l:'Ampliamento con compensazioni',e:'Crescita e cantieri; ambiente sotto stress',pleases:'conservatore',f:()=>{S.gMod+=0.2; S.ind.ambiente-=2; gd('imprenditori',4); gd('giovani',-2);}},
+   {l:'Stop: potenzia gli scali minori',e:'Territorio tutelato, rete diffusa',pleases:'progressista',f:()=>{S.ind.ambiente+=2; gd('giovani',3); gd('imprenditori',-3);}},
+ ]},
+ {id:'idrico',era:'universale',min:'infrastrutture',cond:()=>lv('manutenzione')<2,kick:'Acqua',t:'Rete idrica colabrodo',text:'Quasi metà dell\'acqua si perde nei tubi. Cantieri ovunque o ritocchi tariffari?',ch:[
+   {l:'Piano nazionale di rifacimento',e:'Opera seria, conto salato',pleases:'tecnico',costo:{debito:0.6},f:()=>{S.ind.debt+=0.6; S.ind.ambiente+=2; gd('cetomedio',2);}},
+   {l:'Tariffe più alte per finanziare i gestori',e:'Paga chi consuma; malumore',pleases:'conservatore',f:()=>{gd('cetomedio',-3); gd('pensionati',-2);}},
+ ]},
+ {id:'ciclabili',min:'infrastrutture',kick:'Mobilità',t:'Piano nazionale di ciclabili urbane',text:'Le città chiedono fondi per la mobilità dolce. Gli automobilisti temono di perdere corsie.',ch:[
+   {l:'Finanzia le ciclabili',e:'Città più vivibili; clacson contrari',pleases:'progressista',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; S.ind.ambiente+=2; gd('giovani',3); gd('cetomedio',-2);}},
+   {l:'Priorità a strade e parcheggi',e:'L\'auto resta regina',pleases:'conservatore',f:()=>{gd('cetomedio',3); gd('giovani',-2);}},
+ ]},
+ {id:'cantiere_fermo',era:'universale',min:'infrastrutture',kick:'Opere',t:'Un grande cantiere fermo da anni',text:'Un\'opera incompiuta divora fondi e credibilità: commissario coi pieni poteri o revoca definitiva?',ch:[
+   {l:'Commissario e cronoprogramma',e:'Si riparte, con poteri straordinari',pleases:'tecnico',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; S.gMod+=0.1; gd('imprenditori',3);}},
+   {l:'Revoca e bonifica dell\'area',e:'Fine dell\'emorragia, opera persa',pleases:'progressista',f:()=>{S.ind.ambiente+=2; gd('imprenditori',-3); gd('giovani',2);}},
+ ]},
+ // ----- SVILUPPO (+7) -----
+ {id:'ia_lavoro',min:'sviluppo',kick:'Tecnologia',t:'L\'intelligenza artificiale entra nei servizi',text:'Le aziende introducono sistemi automatici al posto di interi reparti. Tutele o via libera?',ch:[
+   {l:'Fondo di transizione e riqualificazione',e:'Accompagni il cambiamento',pleases:'progressista',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; gd('lavoratori',4); gd('giovani',2);}},
+   {l:'Via libera: l\'innovazione non si frena',e:'Competitività; chi perde il posto paga il conto',pleases:'conservatore',f:()=>{S.gMod+=0.2; gd('imprenditori',4); gd('lavoratori',-4);}},
+ ]},
+ {id:'overtourism',min:'sviluppo',cond:()=>[6,7,8].includes(S.month),kick:'Turismo',t:'Overtourism nelle città d\'arte',text:'Folle record nei centri storici: residenti esasperati, commercianti divisi. Ticket d\'ingresso o limiti?',ch:[
+   {l:'Ticket e numero chiuso nei picchi',e:'Vivibilità; il turismo low cost protesta',pleases:'tecnico',f:()=>{gd('cetomedio',3); gd('imprenditori',-2);}},
+   {l:'Nessun limite: il turismo è ricchezza',e:'Cassa piena, residenti in fuga',pleases:'conservatore',f:()=>{S.gMod+=0.1; gd('imprenditori',3); gd('cetomedio',-2);}},
+ ]},
+ {id:'chip',min:'sviluppo',kick:'Industria',t:'Una fabbrica di chip chiede sussidi',text:'Una multinazionale offre di costruire una fabbrica strategica di semiconduttori, ma chiede incentivi pesanti.',ch:[
+   {l:'Accordo: incentivi contro occupazione',e:'Industria strategica nel paese',pleases:'tecnico',costo:{debito:0.6},f:()=>{S.ind.debt+=0.6; S.uMod-=0.2; gd('imprenditori',4); gd('lavoratori',2);}},
+   {l:'No a sussidi su misura',e:'Disciplina di mercato; l\'investimento va altrove',pleases:'conservatore',f:()=>{gd('imprenditori',-3);}},
+ ]},
+ {id:'agricoltori',era:'contemporanea',min:'sviluppo',kick:'Agricoltura',t:'Trattori in piazza',text:'Gli agricoltori protestano contro costi e burocrazia: chiedono gasolio agevolato e meno vincoli.',ch:[
+   {l:'Pacchetto di sostegni',e:'La piazza rientra, conti sotto sforzo',pleases:'conservatore',costo:{debito:0.4},f:()=>{S.ind.debt+=0.4; gd('cetomedio',3); gd('cattolici',2);}},
+   {l:'Dialogo sì, deroghe ambientali no',e:'Fermezza green; protesta che continua',pleases:'progressista',f:()=>{S.ind.ambiente+=2; gd('giovani',2); gd('cetomedio',-3);}},
+ ]},
+ {id:'made_in',era:'contemporanea',min:'sviluppo',kick:'Export',t:'Il made-in nazionale perde commesse',text:'I distretti storici dell\'export soffrono la concorrenza. Sostegno pubblico o riconversione?',ch:[
+   {l:'Piano export e fiere internazionali',e:'Vetrina mondiale, spesa mirata',pleases:'tecnico',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; S.gMod+=0.1; gd('imprenditori',4);}},
+   {l:'Accompagna la riconversione',e:'Realismo industriale; i distretti insorgono',pleases:'progressista',f:()=>{gd('lavoratori',2); gd('imprenditori',-3);}},
+ ]},
+ {id:'startup_fondo',min:'sviluppo',kick:'Innovazione',t:'Un fondo pubblico per le startup',text:'Si propone un fondo sovrano che investa in giovani imprese innovative.',ch:[
+   {l:'Fondo pubblico-privato',e:'Capitale paziente per innovare',pleases:'tecnico',costo:{debito:0.4},f:()=>{S.ind.debt+=0.4; S.gMod+=0.1; gd('giovani',4); gd('imprenditori',2);}},
+   {l:'Il rischio è dei privati',e:'Stato fuori dal venture capital',pleases:'conservatore',f:()=>{gd('imprenditori',1); gd('giovani',-2);}},
+ ]},
+ {id:'trivelle',min:'sviluppo',cond:()=>lv('ambiente')===0,kick:'Energia',t:'Nuove concessioni estrattive',text:'Con la transizione al palo, arrivano richieste di nuove trivellazioni nazionali.',ch:[
+   {l:'Concessioni con royalties alte',e:'Energia e gettito; ambiente in secondo piano',pleases:'conservatore',costo:{debito:-0.2},f:()=>{S.gMod+=0.2; S.ind.debt-=0.2; S.ind.ambiente-=3; gd('giovani',-4); gd('imprenditori',3);}},
+   {l:'Moratoria: si punta sulle rinnovabili',e:'Linea verde; il fabbisogno resta',pleases:'progressista',f:()=>{S.ind.ambiente+=3; gd('giovani',4); gd('imprenditori',-2);}},
+ ]},
+ // ----- GIUSTIZIA (+8) -----
+ {id:'prescrizione',era:'contemporanea',min:'giustizia',kick:'Giustizia',t:'Processi che muoiono di prescrizione',text:'Troppi procedimenti si estinguono per decorrenza dei termini. Dove intervieni?',ch:[
+   {l:'Stop alla prescrizione dopo il primo grado',e:'Nessun processo nel nulla; garantisti contrari',pleases:'progressista',f:()=>{gd('lavoratori',2); gd('cetomedio',-2); S.ind.sicurezza+=1;}},
+   {l:'Tempi certi per ogni grado di giudizio',e:'Riforma di sistema, attuazione lunga',pleases:'tecnico',f:()=>{gd('cetomedio',2);}},
+ ]},
+ {id:'intercettazioni',era:'contemporanea',min:'giustizia',kick:'Giustizia',t:'Stretta sulle intercettazioni pubblicate',text:'Conversazioni private finiscono sui giornali prima dei processi. Garanzie o bavaglio?',ch:[
+   {l:'Divieto di pubblicare prima del giudizio',e:'Garanzie per gli indagati; la stampa insorge',pleases:'conservatore',f:()=>{gd('cetomedio',2); stampad(-6);}},
+   {l:'Nessuna stretta: il pubblico ha diritto di sapere',e:'Trasparenza; i garantisti protestano',pleases:'progressista',f:()=>{stampad(4); gd('cetomedio',-1);}},
+ ]},
+ {id:'toghe_politica',era:'universale',min:'giustizia',kick:'Istituzioni',t:'Un magistrato in politica',text:'Un magistrato noto si candida: si riapre il tema delle porte girevoli tra toghe e politica.',ch:[
+   {l:'Stop al rientro in magistratura dopo la politica',e:'Separazione netta delle carriere',pleases:'tecnico',f:()=>{gd('cetomedio',2);}},
+   {l:'Diritto di candidarsi come tutti',e:'Nessuna norma ad hoc',pleases:'progressista',f:()=>{gd('giovani',1);}},
+ ]},
+ {id:'giustizia_lenta',era:'universale',min:'giustizia',cond:()=>S.ind.growth<1.2,kick:'Giustizia civile',t:'Cause civili decennali',text:'La lentezza della giustizia civile frena investimenti e imprese. Assunzioni o riti più rapidi?',ch:[
+   {l:'Assunzioni straordinarie di personale',e:'Tribunali rinforzati, spesa stabile',pleases:'progressista',costo:{debito:0.4},f:()=>{S.ind.debt+=0.4; S.gMod+=0.1; gd('imprenditori',3);}},
+   {l:'Riti abbreviati e arbitrato diffuso',e:'Deflazione dei processi, dubbi dei giuristi',pleases:'tecnico',f:()=>{S.gMod+=0.1; gd('imprenditori',2); gd('lavoratori',-1);}},
+ ]},
+ {id:'ingiusta_detenzione',era:'universale',min:'giustizia',kick:'Giustizia',t:'Risarcimenti per ingiusta detenzione',text:'I casi di custodia cautelare poi smentita pesano sui conti e sulle vite. Si interviene sulle regole.',ch:[
+   {l:'Criteri più severi per la custodia cautelare',e:'Meno carcere preventivo',pleases:'progressista',f:()=>{gd('giovani',2); gd('cetomedio',2); gd('pensionati',-2);}},
+   {l:'Risarcire in fretta, regole invariate',e:'Riparazione rapida, sistema immutato',pleases:'tecnico',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; gd('cetomedio',1);}},
+ ]},
+ {id:'class_action',min:'giustizia',kick:'Consumatori',t:'Class action contro un colosso',text:'Migliaia di consumatori fanno causa a un grande gruppo per pratiche scorrette.',ch:[
+   {l:'Rafforza gli strumenti dei consumatori',e:'Cittadini più forti; le imprese avvertono',pleases:'progressista',f:()=>{gd('cetomedio',3); gd('lavoratori',2); gd('imprenditori',-3);}},
+   {l:'Il giudizio faccia il suo corso',e:'Neutralità istituzionale',pleases:'tecnico',f:()=>{gd('imprenditori',1);}},
+ ]},
+ {id:'minori_giustizia',era:'universale',min:'giustizia',kick:'Giustizia minorile',t:'Giustizia minorile sotto pressione',text:'Più reati minorili, comunità piene: rafforzare i percorsi educativi o il carcere minorile?',ch:[
+   {l:'Comunità e messa alla prova',e:'Recupero prima della pena',pleases:'progressista',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; gd('giovani',3); gd('pensionati',-2);}},
+   {l:'Più posti nel circuito penale minorile',e:'Certezza della pena anche per i minori',pleases:'conservatore',f:()=>{S.ind.sicurezza+=2; gd('pensionati',3); gd('giovani',-3);}},
+ ]},
+ {id:'ostativo',era:'universale',min:'giustizia',kick:'Giustizia',t:'Benefici ai condannati che non collaborano',text:'La Corte chiede di rivedere l\'automatismo che nega benefici a chi non collabora. Tema tecnico, nervi scoperti.',ch:[
+   {l:'Adeguarsi: valutazione caso per caso',e:'Stato di diritto; polemiche garantite',pleases:'tecnico',f:()=>{gd('giovani',2); gd('pensionati',-3);}},
+   {l:'Difendere il rigore con una nuova legge',e:'Linea dura confermata',pleases:'conservatore',f:()=>{S.ind.sicurezza+=1; gd('pensionati',3); gd('giovani',-2);}},
+ ]},
+ // ----- ESTERI (+4, dossier domestici) -----
+ {id:'expo',era:'universale',min:'esteri',kick:'Diplomazia pubblica',t:'Candidare il paese a un\'esposizione mondiale',text:'Una grande esposizione porterebbe vetrina e turismo, ma la candidatura costa.',ch:[
+   {l:'Candidatura in grande stile',e:'Prestigio e cantieri; conto salato',pleases:'populista',costo:{debito:0.5},f:()=>{S.ind.debt+=0.5; repd(3); gd('imprenditori',3); gd('giovani',2);}},
+   {l:'Rinuncia motivata',e:'Sobrietà; occasione persa',pleases:'tecnico',f:()=>{gd('cetomedio',1); repd(-1);}},
+ ]},
+ {id:'diaspora',era:'universale',min:'esteri',kick:'Connazionali',t:'La diaspora chiede servizi',text:'I connazionali all\'estero lamentano consolati lenti e costi alti. Investire sulla rete estera?',ch:[
+   {l:'Potenzia consolati e servizi digitali',e:'Cittadinanza che non si ferma al confine',pleases:'tecnico',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; repd(2); gd('cetomedio',2);}},
+   {l:'Priorità a chi vive nel paese',e:'Risparmio; la diaspora si sente dimenticata',pleases:'conservatore',f:()=>{gd('pensionati',1); repd(-1);}},
+ ]},
+ {id:'patto_culturale',era:'universale',min:'esteri',kick:'Cultura',t:'Un patto culturale con un paese partner',text:'Un partner propone scambi di studenti, mostre e produzioni comuni.',ch:[
+   {l:'Firma e finanzia gli scambi',e:'Ponte culturale',pleases:'progressista',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; repd(2); gd('giovani',3);}},
+   {l:'Solo protocollo, niente fondi',e:'Cortesia a costo zero',pleases:'tecnico',f:()=>{repd(1);}},
+ ]},
+ {id:'connazionale',era:'universale',min:'esteri',kick:'Caso consolare',t:'Un connazionale detenuto all\'estero',text:'Un cittadino è detenuto all\'estero in condizioni contestate. Il caso è sulle prime pagine.',ch:[
+   {l:'Trattativa riservata',e:'La diplomazia lavora in silenzio',pleases:'tecnico',f:()=>{repd(2); gd('cetomedio',1);}},
+   {l:'Pressione pubblica e richiamo dell\'ambasciatore',e:'Fermezza visibile; il negoziato si complica',pleases:'populista',f:()=>{gd('cetomedio',3); gd('pensionati',2); repd(-2);}},
+ ]},
+ // ----- DIFESA (+4) -----
+ {id:'caserme',era:'universale',min:'difesa',kick:'Patrimonio',t:'Caserme dismesse da riusare',text:'Decine di caserme vuote nei centri urbani: alloggi, spazi pubblici o vendita?',ch:[
+   {l:'Alloggi e servizi pubblici',e:'Patrimonio restituito alle città',pleases:'progressista',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; gd('giovani',3); gd('lavoratori',2);}},
+   {l:'Vendita al miglior offerente',e:'Cassa subito',pleases:'conservatore',costo:{debito:-0.4},f:()=>{S.ind.debt-=0.4; gd('imprenditori',2); gd('giovani',-1);}},
+ ]},
+ {id:'cyber',min:'difesa',kick:'Sicurezza informatica',t:'Attacco informatico a un ministero',text:'Un attacco rivendicato manda in tilt i sistemi di un ministero. La difesa digitale è in ritardo.',ch:[
+   {l:'Comando cyber e assunzione di specialisti',e:'Capacità nuova, spesa nuova',pleases:'tecnico',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; S.ind.sicurezza+=3; gd('giovani',2);}},
+   {l:'Gestione riservata senza clamore',e:'Niente allarmi; la falla resta',pleases:'conservatore',f:()=>{S.ind.sicurezza-=1; stampad(-3);}},
+ ]},
+ {id:'veterani',era:'universale',min:'difesa',kick:'Forze armate',t:'I veterani chiedono riconoscimento',text:'Chi ha servito nelle missioni chiede assistenza sanitaria dedicata e un riconoscimento pubblico.',ch:[
+   {l:'Statuto del veterano e assistenza',e:'Riconoscenza concreta',pleases:'conservatore',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; gd('pensionati',4); gd('cattolici',2);}},
+   {l:'Rientrano nel welfare ordinario',e:'Nessuna corsia speciale',pleases:'tecnico',f:()=>{gd('pensionati',-3);}},
+ ]},
+ {id:'genio_emergenze',era:'universale',min:'difesa',kick:'Protezione civile',t:'Il genio militare per le emergenze',text:'La protezione civile propone un impiego stabile del genio militare per calamità e ricostruzioni.',ch:[
+   {l:'Protocollo stabile e mezzi dedicati',e:'Risposta rapida alle calamità',pleases:'tecnico',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; S.ind.sicurezza+=2; gd('cetomedio',2);}},
+   {l:'Le forze armate restino alla difesa',e:'Missioni separate',pleases:'conservatore',f:()=>{gd('pensionati',1);}},
+ ]},
+ // ----- TRASVERSALE (+1) -----
+ /* D3: kick rimappato (era 'Ricorrenza', orfano di scena) → bucket societacivile */
+ {id:'anniversario',era:'universale',kick:'Società civile',t:'Il grande anniversario nazionale',text:'Una ricorrenza importante della storia nazionale: celebrazione sobria o in grande stile?',ch:[
+   {l:'Celebrazione diffusa nelle scuole e nei comuni',e:'Memoria condivisa, spesa minima',pleases:'progressista',f:()=>{gd('cattolici',2); gd('pensionati',2); gd('giovani',1);}},
+   {l:'Grande evento nella capitale',e:'Vetrina nazionale, qualche polemica sui costi',pleases:'populista',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; repd(2); gd('pensionati',3); gd('giovani',-1);}},
+ ]},
+
+ /* ============================================================================
+    D3 (17 lug 2026) — DOSSIER DI SETTORE PROFONDI. Il percorso ministro (L2) aveva pochissime carte di settore vive
+    (salute '50: 4) e, nel '50, tutte sapevano di presente. Qui: (a) universali SENZA TEMPO (vivono in entrambe le ere,
+    testo era-neutro) dove il pool era magro · (b) dossier d'EPOCA `italia1950` sourceati da PRESET-ITALIA-1950.md §5b
+    (ancore/scadenze dove il fatto lo impone). La cura su ogni carta (due strade legittime); kick su bucket-scena
+    esistenti; `min` sempre impostato → il fallback scena copre (zero orfani). Batch 1 = i 3 dicasteri misurati.
+    ============================================================================ */
+
+ // ----- SALUTE · universali senza tempo (both eras): l'ospedale, l'epidemia, le medicine, madri e bambini, i medici dove mancano -----
+ {id:'du_epidemia',era:'universale',min:'salute',kick:'Sanità',t:'Un\'epidemia mette alla prova gli ospedali',text:'Un\'ondata di contagi riempie le corsie e mette sotto sforzo medici e strutture. La risposta pubblica è alla prova.',ch:[
+   {l:'Mobilita risorse e posti letto',e:'L\'ondata regge; conti sotto sforzo',pleases:'progressista',costo:{debito:0.4},f:()=>{S.ind.debt+=0.4; S.ind.sanita+=4;}},
+   {l:'Risposta essenziale, coi mezzi che ci sono',e:'Conti salvi; il sistema tira la corda',pleases:'tecnico',f:()=>{S.ind.sanita+=1;}},
+ ]},
+ {id:'du_ospedali',era:'universale',min:'salute',kick:'Sanità',t:'Ospedali da costruire',text:'Interi territori restano senza un ospedale vicino: costruirne di nuovi cambia la vita, ma è un impegno di anni e di fondi.',ch:[
+   {l:'Piano di nuovi ospedali',e:'Cure più vicine; debito in salita',pleases:'progressista',costo:{debito:0.5},f:()=>{S.ind.debt+=0.5; S.ind.sanita+=4; gd('lavoratori',2);}},
+   {l:'Potenzia le strutture esistenti',e:'Meno spesa, copertura a macchia',pleases:'tecnico',f:()=>{S.ind.sanita+=2;}},
+ ]},
+ {id:'du_medicine',era:'universale',min:'salute',kick:'Sanità',t:'Il prezzo delle medicine',text:'Le cure costano care e per molte famiglie sono un lusso: calmierare i prezzi aiuta i malati ma scontenta chi le produce.',ch:[
+   {l:'Prezzi calmierati sui farmaci essenziali',e:'Cure accessibili; l\'industria protesta',pleases:'progressista',f:()=>{S.ind.sanita+=2; gd('cetomedio',3); gd('imprenditori',-3);}},
+   {l:'Lascia fare al mercato',e:'Nessuno scontro; i costi restano sulle famiglie',pleases:'conservatore',f:()=>{gd('imprenditori',2); gd('cetomedio',-2);}},
+ ]},
+ {id:'du_maternita',era:'universale',min:'salute',kick:'Sanità',t:'La salute di madri e bambini',text:'Troppi bambini si ammalano nei primi anni e le madri hanno poca assistenza: investire sulla prima infanzia paga nel tempo.',ch:[
+   {l:'Consultori e assistenza alle madri',e:'Meno malattie domani; spesa oggi',pleases:'progressista',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; S.ind.sanita+=3; gd('cattolici',2); gd('lavoratori',2);}},
+   {l:'Solo le misure indispensabili',e:'Prudenza sui conti; bisogni scoperti',pleases:'tecnico',f:()=>{S.ind.sanita+=1;}},
+ ]},
+ {id:'du_medici_dove',era:'universale',min:'salute',kick:'Sanità',t:'Mancano medici dove servono',text:'Le zone interne e i quartieri poveri restano senza medici: incentivarli a lavorare dove nessuno vuole andare costa, ma colma un vuoto.',ch:[
+   {l:'Incentivi per chi va dove manca',e:'Cure più eque; costa',pleases:'progressista',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; S.ind.sanita+=3; gd('lavoratori',2);}},
+   {l:'Nessun obbligo, si fa quel che si può',e:'Libertà; i vuoti restano',pleases:'conservatore',f:()=>{gd('giovani',-1);}},
+ ]},
+
+ // ----- SALUTE · epoca 1950 (Alto Commissariato): malaria/DDT, tubercolosi, mortalità infantile, polio senza vaccino, mutue -----
+ {id:'d50_malaria',era:'italia1950',min:'salute',kick:'Sanità',t:'La lotta alla malaria',text:'La malaria flagella ancora le campagne del Sud e le isole: la disinfestazione col DDT promette di sradicarla, se lo Stato ci mette i fondi.',ch:[
+   {l:'Campagna di disinfestazione capillare',e:'Un flagello che arretra; costa',pleases:'progressista',costo:{debito:0.4},f:()=>{S.ind.debt+=0.4; S.ind.sanita+=5; gd('lavoratori',3);}},
+   {l:'Interventi mirati alle zone peggiori',e:'Fondi risparmiati; la piaga resiste altrove',pleases:'tecnico',f:()=>{S.ind.sanita+=2;}},
+ ]},
+ {id:'d50_tbc',era:'italia1950',min:'salute',kick:'Sanità',t:'La tubercolosi e i sanatori',text:'La tubercolosi riempie i sanatori e colpisce i più poveri: potenziare cure e prevenzione è un dovere sanitario che pesa sui conti.',ch:[
+   {l:'Nuovi sanatori e controlli di massa',e:'Cure per tutti; debito su',pleases:'progressista',costo:{debito:0.4},f:()=>{S.ind.debt+=0.4; S.ind.sanita+=4;}},
+   {l:'Punta sulla prevenzione a basso costo',e:'Poca spesa, effetto lento',pleases:'tecnico',f:()=>{S.ind.sanita+=2;}},
+ ]},
+ {id:'d50_mortinf',era:'italia1950',min:'salute',kick:'Sanità',t:'La mortalità infantile',text:'Troppi bambini muoiono nel primo anno di vita, soprattutto nelle campagne dove il medico condotto è lontano. Portare le cure dove non arrivano cambia i numeri.',ch:[
+   {l:'Rafforza le condotte mediche e l\'ostetricia',e:'Vite salvate; impegno lungo',pleases:'progressista',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; S.ind.sanita+=4; gd('cattolici',2); gd('lavoratori',2);}},
+   {l:'Affida ai comuni ciò che possono',e:'Meno spesa centrale; disparità che restano',pleases:'conservatore',f:()=>{S.ind.sanita+=1;}},
+ ]},
+ {id:'d50_polio',era:'italia1950',min:'salute',kick:'Sanità',t:'L\'ombra della polio',text:'Un\'epidemia di poliomielite colpisce i bambini e non esiste ancora un vaccino: si può solo isolare i casi e assistere i colpiti. Il paese ha paura.',ch:[
+   {l:'Assistenza piena e reparti dedicati',e:'Vicinanza alle famiglie; costa',pleases:'progressista',costo:{debito:0.4},f:()=>{S.ind.debt+=0.4; S.ind.sanita+=3; gd('cattolici',2);}},
+   {l:'Misure di contenimento essenziali',e:'Conti prudenti; l\'angoscia resta',pleases:'tecnico',f:()=>{S.ind.sanita+=1;}},
+ ]},
+ {id:'d50_mutue',era:'italia1950',min:'salute',kick:'Welfare',t:'Le mutue a macchia di leopardo',text:'La copertura sanitaria dipende dalla mutua di categoria: chi ne ha una è protetto, chi no resta scoperto. Estendere la tutela è giusto ma costoso.',ch:[
+   {l:'Allarga la copertura ai non tutelati',e:'Più giustizia sociale; spesa su',pleases:'progressista',costo:{debito:0.4},f:()=>{S.ind.debt+=0.4; gd('lavoratori',4); gd('pensionati',3);}},
+   {l:'Tieni il sistema delle categorie',e:'Nessuno scossone; i vuoti restano',pleases:'conservatore',f:()=>{gd('imprenditori',2); gd('lavoratori',-2);}},
+ ]},
+
+ // ----- ECONOMIA · epoca 1950 (Tesoro): Vanoni, liberalizzazione scambi, i fondi della ricostruzione, la lira, lo Stato-IRI, l'IGE -----
+ {id:'d50_vanoni',era:'italia1950',min:'economia',kick:'Fisco',t:'La riforma tributaria',text:'La dichiarazione unica dei redditi vuole far pagare le tasse a chi non le ha mai pagate: una piccola rivoluzione fiscale, e i ceti abbienti si allarmano.',ch:[
+   {l:'Vara la riforma con decisione',e:'Più equità e gettito; i redditi alti mugugnano',pleases:'progressista',costo:{debito:-0.4},f:()=>{S.ind.debt-=0.4; gd('cetomedio',2); gd('imprenditori',-3);}},
+   {l:'Applicala con gradualità',e:'Prudenza per non spaventare i capitali',pleases:'tecnico',costo:{debito:-0.2},f:()=>{S.ind.debt-=0.2; gd('imprenditori',1);}},
+ ]},
+ {id:'d50_scambi',era:'italia1950',min:'economia',kick:'Export',t:'La liberalizzazione degli scambi',text:'L\'organizzazione europea spinge a smantellare l\'autarchia e aprire le frontiere commerciali: un\'occasione per l\'export, un rischio per le industrie protette.',ch:[
+   {l:'Apri i mercati',e:'L\'export riparte; i settori protetti soffrono',pleases:'conservatore',f:()=>{S.gMod+=0.2; gd('imprenditori',3); gd('lavoratori',-2);}},
+   {l:'Aperture caute e graduali',e:'Proteggi chi non è ancora pronto',pleases:'progressista',f:()=>{gd('lavoratori',2); gd('imprenditori',-1);}},
+ ]},
+ {id:'d50_ricostr',era:'italia1950',min:'economia',kick:'Bilancio',t:'I fondi della ricostruzione',text:'Ricostruzione e Cassa per il Mezzogiorno costano più di quanto le casse reggano: dove trovi le risorse senza affondare la lira?',ch:[
+   {l:'Prestiti e aiuti esteri',e:'Cantieri subito; cresce la dipendenza',pleases:'populista',costo:{debito:0.5},f:()=>{S.ind.debt+=0.5; S.gMod+=0.1; gd('lavoratori',3);}},
+   {l:'Rigore e priorità severe',e:'Conti difesi; qualche opera slitta',pleases:'tecnico',costo:{debito:-0.3},f:()=>{S.ind.debt-=0.3; gd('lavoratori',-2);}},
+ ]},
+ {id:'d50_lira',era:'italia1950',min:'economia',kick:'Credito',t:'La difesa della lira',text:'Dopo anni di inflazione la lira si è stabilizzata: difendere quella conquista frena la spesa, ma è la fiducia su cui poggia tutto.',ch:[
+   {l:'Difendi la stabilità a ogni costo',e:'Fiducia dei mercati su; spesa col freno',pleases:'tecnico',costo:{debito:-0.3},f:()=>{S.ind.debt-=0.3; if(S.ind.fiducia!=null)S.ind.fiducia+=3; gd('pensionati',2); gd('lavoratori',-1);}},
+   {l:'Un po\' di spesa per far ripartire',e:'Ossigeno all\'economia; la lira rischia',pleases:'progressista',costo:{debito:0.4},f:()=>{S.ind.debt+=0.4; S.gMod+=0.1; gd('lavoratori',2);}},
+ ]},
+ {id:'d50_iri',era:'italia1950',min:'economia',kick:'Industria',t:'Lo Stato imprenditore',text:'L\'IRI tiene in piedi siderurgia e banche dalla ricostruzione: allargare la mano pubblica dove il privato non arriva, o cominciare a restituirle al mercato?',ch:[
+   {l:'Espandi il perimetro pubblico',e:'Lo Stato traina; il mercato arretra',pleases:'progressista',f:()=>{gd('lavoratori',4); gd('imprenditori',-3);}},
+   {l:'Restituisci al mercato ciò che puoi',e:'Disciplina di mercato; i sindacati temono',pleases:'conservatore',costo:{debito:-0.4},f:()=>{S.ind.debt-=0.4; gd('imprenditori',3); gd('lavoratori',-3);}},
+ ]},
+ {id:'d50_ige',era:'italia1950',min:'economia',kick:'Fisco',t:'L\'imposta sui consumi',text:'L\'imposta generale sulle entrate grava su ogni passaggio di merce e pesa sui prezzi al minuto: alleggerirla aiuta le famiglie ma svuota le casse.',ch:[
+   {l:'Alleggerisci l\'imposta sui consumi',e:'Sollievo ai prezzi; gettito in calo',pleases:'populista',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; gd('cetomedio',3); gd('lavoratori',2);}},
+   {l:'Tieni ferma l\'imposta',e:'Le casse reggono; il carovita morde',pleases:'tecnico',f:()=>{gd('cetomedio',-2);}},
+ ]},
+
+ // ----- INTERNO · epoca 1950: le terre occupate, le amministrative, prefetti/comuni, il soccorso, reduci e senzatetto -----
+ {id:'d50_terre',era:'italia1950',min:'interno',kick:'Ordine pubblico',t:'Le terre occupate',text:'Nelle campagne del Sud i braccianti occupano i latifondi incolti: una tensione che monta tra chi chiede terra e chi difende la proprietà. Come tieni l\'ordine?',ch:[
+   {l:'Media: apri la strada alla riforma agraria',e:'La tensione cala; i proprietari mugugnano',pleases:'progressista',f:()=>{gd('lavoratori',4); gd('imprenditori',-3);}},
+   {l:'Ripristina l\'ordine e la legalità',e:'Proprietà difesa; le campagne restano in fermento',pleases:'conservatore',f:()=>{S.ind.sicurezza+=2; gd('imprenditori',3); gd('lavoratori',-3);}},
+ ]},
+ {id:'d50_amministrative',era:'italia1950',min:'interno',kick:'Politica interna',t:'La macchina delle amministrative',text:'Si avvicinano le comunali che misureranno il consenso al governo: preparare bene la macchina elettorale conta quanto le idee.',ch:[
+   {l:'Investi sull\'organizzazione sul territorio',e:'Presenza capillare; costa energie',pleases:'populista',f:()=>{gd('cattolici',2); gd('cetomedio',2);}},
+   {l:'Punta sui contenuti, non sull\'apparato',e:'Meno macchina, più messaggio',pleases:'tecnico',f:()=>{gd('giovani',2);}},
+ ]},
+ {id:'d50_prefetti',era:'italia1950',min:'interno',kick:'Città',t:'Prefetti ed enti locali',text:'La ricostruzione passa dai comuni, ma prefetti e amministrazioni locali sono in affanno tra fondi scarsi e macerie. Rafforzare la periferia dello Stato o accentrare?',ch:[
+   {l:'Più fondi e autonomia ai comuni',e:'La ricostruzione accelera dal basso; costa',pleases:'progressista',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; gd('lavoratori',2); gd('cetomedio',2);}},
+   {l:'Coordina tutto dal centro',e:'Ordine e priorità; i comuni scalpitano',pleases:'conservatore',f:()=>{gd('cetomedio',1);}},
+ ]},
+ {id:'d50_calamita',era:'italia1950',min:'interno',kick:'Ordine pubblico',t:'Il soccorso nelle calamità',text:'Il paese è fragile davanti ad alluvioni e frane, e i soccorsi arrivano tardi: costruire una macchina d\'emergenza vera è un investimento sulla prossima catastrofe.',ch:[
+   {l:'Un servizio di soccorso stabile',e:'Pronti alla prossima emergenza; spesa',pleases:'tecnico',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; S.ind.sicurezza+=2; gd('cetomedio',2);}},
+   {l:'Si interviene quando serve',e:'Nessun costo fisso; impreparati domani',pleases:'conservatore',f:()=>{gd('cetomedio',-1);}},
+ ]},
+ {id:'d50_reduci',era:'italia1950',min:'interno',kick:'Città',t:'Reduci e senzatetto del dopoguerra',text:'Reduci, profughi e famiglie senza casa premono sulle città ferite dalla guerra: baracche e occupazioni crescono. Dare un tetto o far rispettare la legge?',ch:[
+   {l:'Alloggi d\'emergenza e nuove case',e:'Un tetto a chi non l\'ha; debito su',pleases:'progressista',costo:{debito:0.4},f:()=>{S.ind.debt+=0.4; gd('lavoratori',4); gd('cattolici',2);}},
+   {l:'Sgomberi e ordine urbano',e:'Legalità ristabilita; il disagio resta',pleases:'conservatore',f:()=>{S.ind.sicurezza+=1; gd('cetomedio',2); gd('lavoratori',-3);}},
+ ]},
+
+ // ----- INTERNO · universali senza tempo (both eras): la manifestazione, il corpo di polizia, la piccola criminalità -----
+ {id:'du_manifestazioni',era:'universale',min:'interno',kick:'Ordine pubblico',t:'Una manifestazione degenera',text:'Un corteo autorizzato degenera in scontri: vetrine rotte, cariche, feriti lievi. L\'ordine pubblico è di nuovo al centro.',ch:[
+   {l:'Linea del dialogo, responsabilità ai promotori',e:'Tensione che scende; qualcuno ti dà del debole',pleases:'progressista',f:()=>{gd('giovani',3); gd('cetomedio',-1);}},
+   {l:'Fermezza e tolleranza zero',e:'Ordine ristabilito; la piazza si indurisce',pleases:'conservatore',f:()=>{S.ind.sicurezza+=2; gd('cetomedio',3); gd('giovani',-3);}},
+ ]},
+ {id:'du_polizia',era:'universale',min:'interno',kick:'Sicurezza',t:'Il corpo di polizia da rafforzare',text:'Le forze dell\'ordine chiedono organici, mezzi e formazione: rafforzarle dà sicurezza ma costa, e il tema divide.',ch:[
+   {l:'Più agenti e mezzi sul territorio',e:'Sicurezza percepita su; debito su',pleases:'conservatore',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; S.ind.sicurezza+=3; gd('cetomedio',3);}},
+   {l:'Prima formazione e legalità interna',e:'Qualità prima dei numeri',pleases:'progressista',f:()=>{gd('giovani',2);}},
+ ]},
+ {id:'du_piccola_crim',era:'universale',min:'interno',kick:'Ordine pubblico',t:'La piccola criminalità nei quartieri',text:'Furti e microcriminalità crescono nei quartieri popolari: la gente ha paura e chiede risposte, tra presidio e prevenzione.',ch:[
+   {l:'Più presidio e pattugliamento',e:'Rassicuri subito; effetto sui sintomi',pleases:'conservatore',f:()=>{S.ind.sicurezza+=2; gd('pensionati',3); gd('giovani',-2);}},
+   {l:'Lavoro e presìdi sociali nei quartieri',e:'Attacchi le cause; risultati lenti',pleases:'progressista',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; gd('giovani',3); gd('lavoratori',2);}},
+ ]},
+
+ // ----- ECONOMIA · epoca 1950: l'annona e il pane, gli stipendi degli statali -----
+ {id:'d50_annona',era:'italia1950',min:'economia',kick:'Fisco',t:'Il prezzo del pane',text:'Il prezzo del pane e dei generi di prima necessità è tenuto sotto controllo dallo Stato: liberalizzarlo, o proteggere le famiglie dal carovita?',ch:[
+   {l:'Liberalizza i prezzi',e:'Mercato libero; le famiglie sentono il colpo',pleases:'conservatore',f:()=>{gd('imprenditori',3); gd('lavoratori',-3);}},
+   {l:'Tieni calmierati i generi di prima necessità',e:'Sollievo al carovita; costa allo Stato',pleases:'populista',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; gd('lavoratori',3); gd('cetomedio',2);}},
+ ]},
+ {id:'d50_statali',era:'italia1950',min:'economia',kick:'Bilancio',t:'Gli stipendi degli statali',text:'I dipendenti pubblici, falcidiati dall\'inflazione degli anni scorsi, chiedono adeguamenti: concederli pesa sul bilancio già magro della ricostruzione.',ch:[
+   {l:'Adegua gli stipendi pubblici',e:'Pace nel pubblico impiego; debito su',pleases:'progressista',costo:{debito:0.4},f:()=>{S.ind.debt+=0.4; gd('lavoratori',3); gd('cetomedio',2);}},
+   {l:'Tieni la linea del rigore',e:'Conti difesi; malumore tra gli statali',pleases:'tecnico',costo:{debito:-0.2},f:()=>{S.ind.debt-=0.2; gd('lavoratori',-2);}},
+ ]},
+
+ /* ============================================================================
+    D3 batch 2 — DOSSIER D'EPOCA `italia1950` per gli altri 7 dicasteri (Lavoro e Previdenza, Pubblica Istruzione,
+    Lavori Pubblici, Esteri, Difesa, Grazia e Giustizia, Industria e Commercio). Temi sourceati da PRESET §5b.
+    Così un '50 giocato su QUALSIASI dicastero è coerente e non anacronistico. La cura; kick su bucket esistenti; min sempre.
+    ============================================================================ */
+
+ // ----- LAVORO e Previdenza · epoca 1950 -----
+ {id:'d50_disocc',era:'italia1950',min:'lavoro',kick:'Occupazione',t:'La disoccupazione di massa',text:'Milioni di braccia cercano lavoro nel paese che si rialza dalle macerie: grandi opere pubbliche per dare un impiego subito, o disciplina di bilancio?',ch:[
+   {l:'Lavoro pubblico su vasta scala',e:'Braccia occupate; il debito sale',pleases:'progressista',costo:{debito:0.5},f:()=>{S.ind.debt+=0.5; if(S.uMod!=null)S.uMod-=0.3; gd('lavoratori',5);}},
+   {l:'Lascia che sia la ripresa a riassorbire',e:'Conti prudenti; l\'attesa è lunga',pleases:'tecnico',f:()=>{gd('lavoratori',-3);}},
+ ]},
+ {id:'d50_cantieri_scuola',era:'italia1950',min:'lavoro',kick:'Occupazione',t:'I cantieri-scuola',text:'Si possono aprire cantieri che danno lavoro ai disoccupati insegnando loro un mestiere: utile ma costoso, e c\'è chi li chiama assistenzialismo.',ch:[
+   {l:'Apri i cantieri-scuola ovunque',e:'Lavoro e formazione insieme; spesa su',pleases:'progressista',costo:{debito:0.4},f:()=>{S.ind.debt+=0.4; gd('lavoratori',4); gd('giovani',2);}},
+   {l:'Solo dove la disoccupazione è peggiore',e:'Fondi mirati; copertura parziale',pleases:'tecnico',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; gd('lavoratori',2);}},
+ ]},
+ {id:'d50_emigrazione',era:'italia1950',min:'lavoro',kick:'Occupazione',t:'L\'emigrazione assistita',text:'Accordi con altri paesi offrono lavoro all\'estero ai disoccupati: alleggerisce la pressione in patria, ma significa mandare via le braccia migliori.',ch:[
+   {l:'Favorisci gli accordi di emigrazione',e:'Meno disoccupati; il paese si svuota',pleases:'conservatore',f:()=>{if(S.uMod!=null)S.uMod-=0.2; gd('lavoratori',2); gd('giovani',-2);}},
+   {l:'Trattieni le braccia, crea lavoro qui',e:'Scommetti sul paese; l\'attesa pesa',pleases:'progressista',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; gd('lavoratori',3);}},
+ ]},
+ {id:'d50_previdenza',era:'italia1950',min:'lavoro',kick:'Welfare',t:'La previdenza frammentata',text:'Pensioni e assicurazioni sociali sono divise tra decine di enti e categorie: chi è coperto e chi no dipende dal mestiere. Riordinare è giusto ma difficile.',ch:[
+   {l:'Verso un sistema più unitario',e:'Più equità; gli enti difendono il loro orto',pleases:'progressista',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; gd('lavoratori',3); gd('pensionati',3);}},
+   {l:'Tieni il sistema delle categorie',e:'Nessuno scossone; le disparità restano',pleases:'conservatore',f:()=>{gd('imprenditori',1);}},
+ ]},
+ {id:'d50_scalamob',era:'italia1950',min:'lavoro',kick:'Lavoro',t:'Salari e carovita',text:'Il costo della vita morde e i sindacati chiedono di legare i salari ai prezzi: proteggere i lavoratori o non alimentare la spirale dei costi?',ch:[
+   {l:'Adeguamento dei salari al carovita',e:'Sollievo ai lavoratori; le imprese frenano',pleases:'progressista',f:()=>{gd('lavoratori',4); gd('imprenditori',-3);}},
+   {l:'Contieni gli automatismi',e:'Prezzi più stabili; i salari arrancano',pleases:'conservatore',f:()=>{gd('imprenditori',3); gd('lavoratori',-3);}},
+ ]},
+
+ // ----- PUBBLICA ISTRUZIONE · epoca 1950 -----
+ {id:'d50_analfab',era:'italia1950',min:'istruzione',kick:'Scuola',t:'La piaga dell\'analfabetismo',text:'Una larga parte del paese non sa leggere né scrivere, soprattutto nel Sud e tra gli adulti. I corsi popolari possono cambiare le cose, se lo Stato li finanzia.',ch:[
+   {l:'Grande piano di scuole popolari',e:'Un paese che impara; costa e dà frutti lenti',pleases:'progressista',costo:{debito:0.4},f:()=>{S.ind.debt+=0.4; gd('lavoratori',3); gd('giovani',3);}},
+   {l:'Priorità alla scuola dei bambini',e:'Investi sul futuro; gli adulti aspettano',pleases:'tecnico',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; gd('giovani',2);}},
+ ]},
+ {id:'d50_maestri',era:'italia1950',min:'istruzione',kick:'Scuola',t:'Le scuole rurali e i maestri che mancano',text:'Nei paesi di montagna e di campagna le aule sono fatiscenti e i maestri non vogliono andarci. Portare la scuola dove non c\'è è un\'opera di anni.',ch:[
+   {l:'Incentivi ai maestri e nuove aule rurali',e:'Scuola per tutti; impegno lungo',pleases:'progressista',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; gd('lavoratori',2); gd('giovani',3);}},
+   {l:'Accorpa le scuole più piccole',e:'Risparmi; i paesi più isolati perdono l\'aula',pleases:'tecnico',f:()=>{gd('giovani',-2);}},
+ ]},
+ {id:'d50_ediliziascol',era:'italia1950',min:'istruzione',kick:'Scuola',t:'Aule tra le macerie',text:'Molte scuole sono distrutte o inagibili dalla guerra e i bambini fanno lezione in locali di fortuna. Ricostruirle è urgente, ma tutto è urgente.',ch:[
+   {l:'Piano di edilizia scolastica',e:'Aule vere e cantieri; debito su',pleases:'progressista',costo:{debito:0.4},f:()=>{S.ind.debt+=0.4; gd('giovani',3); gd('lavoratori',2);}},
+   {l:'Riparazioni essenziali dove serve subito',e:'Meno spesa; molte aule restano di fortuna',pleases:'tecnico',f:()=>{gd('giovani',1);}},
+ ]},
+ {id:'d50_doposcuola',era:'italia1950',min:'istruzione',kick:'Scuola',t:'Doposcuola e patronati',text:'Tanti bambini poveri lasciano la scuola per lavorare: refezione, doposcuola e patronati scolastici possono tenerli sui banchi.',ch:[
+   {l:'Refezione e doposcuola per i più poveri',e:'Meno abbandono; una spesa che paga',pleases:'progressista',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; gd('lavoratori',3); gd('cattolici',2);}},
+   {l:'Affida ai patronati e alle parrocchie',e:'Costo minore; copertura diseguale',pleases:'conservatore',f:()=>{gd('cattolici',3);}},
+ ]},
+
+ // ----- LAVORI PUBBLICI · epoca 1950 -----
+ {id:'d50_inacasa',era:'italia1950',min:'infrastrutture',kick:'Infrastrutture',t:'I cantieri dell\'INA-Casa',text:'Il grande piano nazionale per la casa può dare tetto agli operai e lavoro ai muratori, quartiere dopo quartiere: spingerlo a fondo o dosarlo?',ch:[
+   {l:'Accelera i cantieri ovunque',e:'Case e lavoro subito; il debito sale',pleases:'progressista',costo:{debito:0.5},f:()=>{S.ind.debt+=0.5; if(S.gMod!=null)S.gMod+=0.2; gd('lavoratori',4);}},
+   {l:'Procedi con prudenza di bilancio',e:'Conti difesi; le case arrivano piano',pleases:'tecnico',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; gd('lavoratori',2);}},
+ ]},
+ {id:'d50_acquedotti',era:'italia1950',min:'infrastrutture',kick:'Acqua',t:'Acquedotti e fogne del Sud',text:'Interi paesi del Mezzogiorno sono senza acqua corrente e fognature: portare le reti è un\'opera enorme che cambia la vita e la salute della gente.',ch:[
+   {l:'Grande piano di acquedotti',e:'Acqua e igiene per tutti; costa molto',pleases:'progressista',costo:{debito:0.5},f:()=>{S.ind.debt+=0.5; S.ind.sanita+=2; gd('lavoratori',3);}},
+   {l:'Interventi dove la sete è peggiore',e:'Fondi mirati; molti paesi aspettano',pleases:'tecnico',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; gd('cetomedio',1);}},
+ ]},
+ {id:'d50_stradeponti',era:'italia1950',min:'infrastrutture',kick:'Infrastrutture',t:'Strade e ponti da ricostruire',text:'La guerra ha lasciato ponti crollati e strade interrotte che isolano paesi e mercati: ricostruire la rete è la spina dorsale della ripresa.',ch:[
+   {l:'Ricostruzione rapida della rete',e:'Il paese si ricollega; cantieri e debito',pleases:'conservatore',costo:{debito:0.4},f:()=>{S.ind.debt+=0.4; if(S.gMod!=null)S.gMod+=0.2; gd('imprenditori',3); gd('lavoratori',2);}},
+   {l:'Priorità alle grandi direttrici',e:'Le arterie prima; i rami minori dopo',pleases:'tecnico',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; gd('imprenditori',2);}},
+ ]},
+ {id:'d50_dighe',era:'italia1950',min:'infrastrutture',kick:'Infrastrutture',t:'Dighe e idroelettrico',text:'Le grandi dighe di montagna promettono energia per l\'industria e lavoro per le valli, ma spostano paesi e cambiano il territorio.',ch:[
+   {l:'Via alle grandi dighe',e:'Energia per la crescita; valli trasformate',pleases:'conservatore',costo:{debito:0.4},f:()=>{S.ind.debt+=0.4; if(S.gMod!=null)S.gMod+=0.2; gd('imprenditori',3); gd('lavoratori',2);}},
+   {l:'Opere più piccole e diffuse',e:'Meno impatto; meno potenza',pleases:'progressista',f:()=>{S.ind.ambiente+=2; gd('lavoratori',1);}},
+ ]},
+
+ // ----- AFFARI ESTERI · epoca 1950 -----
+ {id:'d50_ceca',era:'italia1950',min:'esteri',kick:'Alleanza atlantica',t:'Carbone e acciaio: la CECA',text:'Sei paesi europei mettono in comune carbone e acciaio: entrarci lega l\'Italia all\'Europa che nasce, ma cede un pezzo di sovranità industriale.',ch:[
+   {l:'Aderisci con convinzione',e:'L\'Italia tra i fondatori d\'Europa; qualcuno teme',pleases:'progressista',f:()=>{repd(5); gd('imprenditori',2);}},
+   {l:'Aderisci, ma difendi le condizioni',e:'Dentro, con cautela sui nostri interessi',pleases:'tecnico',f:()=>{repd(2); gd('cetomedio',1);}},
+ ]},
+ {id:'d50_trieste',era:'italia1950',min:'esteri',kick:'Alleanza atlantica',t:'La questione di Trieste',text:'Trieste resta contesa e divisa: la diplomazia lavora per riportarla all\'Italia, ma un passo falso può incendiare gli animi e i rapporti col vicino.',ch:[
+   {l:'Trattativa paziente con gli alleati',e:'Via diplomatica; risultati lenti',pleases:'tecnico',f:()=>{repd(4);}},
+   {l:'Rivendicazione ferma e pubblica',e:'Piaci in patria; il tavolo si irrigidisce',pleases:'populista',f:()=>{repd(-2); gd('cetomedio',3); visd(3);}},
+ ]},
+ {id:'d50_ced',era:'italia1950',cond:()=>S.year>=1952&&S.year<=1954,min:'esteri',kick:'Alleanza atlantica',t:'L\'esercito europeo',text:'Si discute una Comunità Europea di Difesa, un esercito comune: un salto d\'integrazione che spacca il paese e le stesse maggioranze.',ch:[
+   {l:'Sostieni il progetto europeo di difesa',e:'Più Europa; l\'opinione è divisa',pleases:'progressista',f:()=>{repd(3); gd('cetomedio',-1);}},
+   {l:'Frena: la difesa resti nazionale',e:'Prudenza sovrana; l\'Europa rallenta',pleases:'conservatore',f:()=>{gd('cetomedio',2); repd(-1);}},
+ ]},
+ {id:'d50_marshall_dip',era:'italia1950',cond:()=>S.year<=1953,min:'esteri',kick:'Piano Marshall',t:'La dipendenza dagli aiuti',text:'Gli aiuti americani hanno rimesso in moto il paese, ma ora chiedono allineamento politico e commerciale. Fin dove seguire l\'alleato?',ch:[
+   {l:'Allineamento pieno con l\'alleato',e:'Aiuti e protezione; la pancia mormora',pleases:'tecnico',f:()=>{repd(4); if(S.gMod!=null)S.gMod+=0.1; gd('cetomedio',-1);}},
+   {l:'Amicizia sì, ma con margini nostri',e:'Autonomia rivendicata; l\'alleato prende nota',pleases:'populista',f:()=>{repd(-2); gd('cetomedio',2);}},
+ ]},
+
+ // ----- DIFESA · epoca 1950 -----
+ {id:'d50_riarmo',era:'italia1950',min:'difesa',kick:'Difesa',t:'Il riarmo atlantico',text:'L\'alleanza chiede all\'Italia di riarmare e ammodernare le forze armate: un impegno che rassicura gli alleati ma pesa su un bilancio da ricostruzione.',ch:[
+   {l:'Rispetta gli impegni di riarmo',e:'Affidabilità atlantica; costo interno',pleases:'conservatore',costo:{debito:0.4},f:()=>{S.ind.debt+=0.4; S.ind.sicurezza+=2; repd(3); gd('giovani',-2);}},
+   {l:'Riarmo misurato, prima la ricostruzione',e:'Fondi alla ripresa; gli alleati insistono',pleases:'progressista',f:()=>{repd(-2); gd('lavoratori',2);}},
+ ]},
+ {id:'d50_leva',era:'italia1950',min:'difesa',kick:'Difesa',t:'La leva e le caserme',text:'Le caserme del dopoguerra sono fatiscenti e la leva obbligatoria strappa braccia ai campi e alle fabbriche. Come tieni in piedi l\'esercito?',ch:[
+   {l:'Ammoderna caserme e addestramento',e:'Forze più solide; spesa su',pleases:'conservatore',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; S.ind.sicurezza+=2;}},
+   {l:'Leva più corta, meno peso sul lavoro',e:'Braccia ai campi; esercito più snello',pleases:'progressista',f:()=>{gd('lavoratori',3); S.ind.sicurezza-=1;}},
+ ]},
+ {id:'d50_ced_mil',era:'italia1950',cond:()=>S.year>=1952&&S.year<=1954,min:'difesa',kick:'Difesa',t:'L\'esercito europeo, visto dai militari',text:'Gli stati maggiori discutono l\'ipotesi di un esercito comune europeo: fondere le forze o custodire l\'autonomia della difesa nazionale?',ch:[
+   {l:'Apri all\'integrazione militare',e:'Più peso in Europa; i tradizionalisti frenano',pleases:'progressista',f:()=>{repd(2);}},
+   {l:'Difendi la catena di comando nazionale',e:'Sovranità militare; l\'Europa rallenta',pleases:'conservatore',f:()=>{gd('cetomedio',2); repd(-1);}},
+ ]},
+
+ // ----- GRAZIA E GIUSTIZIA · epoca 1950 -----
+ {id:'d50_codici',era:'italia1950',min:'giustizia',kick:'Giustizia',t:'I codici del ventennio',text:'Il paese è repubblicano ma i codici sono ancora quelli ereditati dal regime: riformarli per adeguarli alla Costituzione è un cantiere enorme e delicato.',ch:[
+   {l:'Riforma organica dei codici',e:'Diritto nuovo per una repubblica nuova; anni di lavoro',pleases:'progressista',f:()=>{gd('giovani',3); gd('cetomedio',1);}},
+   {l:'Ritocchi mirati, senza stravolgere',e:'Prudenza; molte norme del passato restano',pleases:'conservatore',f:()=>{gd('cetomedio',2);}},
+ ]},
+ {id:'d50_costituzione',era:'italia1950',min:'giustizia',kick:'Giustizia',t:'La Costituzione inattuata',text:'La Carta prevede una Corte costituzionale e un organo di autogoverno dei giudici, ma non esistono ancora: attuarli limita il potere, e non tutti hanno fretta.',ch:[
+   {l:'Attua gli organi di garanzia',e:'La Repubblica prende forma; il potere si autolimita',pleases:'progressista',f:()=>{repd(2); gd('giovani',3); gd('cetomedio',1);}},
+   {l:'Rimanda: prima le urgenze materiali',e:'Ricostruzione prima delle istituzioni; la Carta aspetta',pleases:'conservatore',f:()=>{gd('cetomedio',1);}},
+ ]},
+ {id:'d50_carceri50',era:'italia1950',min:'giustizia',kick:'Giustizia',t:'Le carceri del dopoguerra',text:'Le prigioni sono sovraffollate e fatiscenti, tra detenuti comuni e strascichi della guerra. Investire sulle strutture o sull\'alternativa alla pena?',ch:[
+   {l:'Nuove strutture e personale',e:'Condizioni più umane; costa',pleases:'tecnico',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; S.ind.sicurezza+=1;}},
+   {l:'Amnistie e misure alternative',e:'Sfolli le celle; una scelta che divide',pleases:'progressista',f:()=>{gd('giovani',2); gd('cetomedio',-2);}},
+ ]},
+ {id:'d50_magistratura',era:'italia1950',min:'giustizia',kick:'Giustizia',t:'Concorsi e organici della magistratura',text:'Mancano giudici e cancellieri e i processi si accumulano: assumere e formare costa, ma senza organici la giustizia si ferma.',ch:[
+   {l:'Piano di concorsi e assunzioni',e:'Giustizia più rapida; spesa su',pleases:'progressista',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; gd('giovani',2); gd('cetomedio',2);}},
+   {l:'Razionalizza con gli organici attuali',e:'Nessuna spesa nuova; i tempi restano lunghi',pleases:'tecnico',f:()=>{gd('cetomedio',-1);}},
+ ]},
+
+ // ----- INDUSTRIA E COMMERCIO · epoca 1950 -----
+ {id:'d50_sinigaglia',era:'italia1950',min:'sviluppo',kick:'Industria',t:'Il piano per la siderurgia',text:'Un grande piano rilancia l\'acciaio nazionale con impianti moderni a ciclo integrale: base per l\'industria di domani, ma un investimento pubblico colossale.',ch:[
+   {l:'Punta sull\'acciaio moderno',e:'Fondamenta industriali; debito e Stato in campo',pleases:'progressista',costo:{debito:0.5},f:()=>{S.ind.debt+=0.5; if(S.gMod!=null)S.gMod+=0.2; gd('lavoratori',3); gd('imprenditori',2);}},
+   {l:'Affida di più al capitale privato',e:'Meno spesa pubblica; ritmo incerto',pleases:'conservatore',f:()=>{gd('imprenditori',3); gd('lavoratori',-1);}},
+ ]},
+ {id:'d50_metano',era:'italia1950',min:'sviluppo',kick:'Energia',t:'Il metano della pianura',text:'Nel sottosuolo della pianura si è trovato metano: sfruttarlo con un ente pubblico o aprire ai privati? È l\'energia che può muovere l\'industria.',ch:[
+   {l:'Un ente pubblico per il metano',e:'La ricchezza resta allo Stato; i privati protestano',pleases:'progressista',f:()=>{if(S.gMod!=null)S.gMod+=0.2; gd('lavoratori',3); gd('imprenditori',-2);}},
+   {l:'Concessioni ai privati',e:'Investimenti rapidi; la rendita va ai gruppi',pleases:'conservatore',f:()=>{if(S.gMod!=null)S.gMod+=0.1; gd('imprenditori',4);}},
+ ]},
+ {id:'d50_elettrico',era:'italia1950',min:'sviluppo',kick:'Energia',t:'L\'energia elettrica dei monopoli',text:'La corrente elettrica è in mano a pochi grandi gruppi privati che decidono prezzi e investimenti: lasciarli fare o mettere lo Stato nel gioco dell\'energia?',ch:[
+   {l:'Più controllo pubblico sull\'energia',e:'Prezzi e reti guidati; i gruppi resistono',pleases:'progressista',f:()=>{gd('lavoratori',3); gd('cetomedio',2); gd('imprenditori',-3);}},
+   {l:'Lascia fare ai gruppi privati',e:'Nessuno scontro; la rendita resta concentrata',pleases:'conservatore',f:()=>{gd('imprenditori',3); gd('cetomedio',-1);}},
+ ]},
+ {id:'d50_artigiani',era:'italia1950',min:'sviluppo',kick:'Industria',t:'Artigiani e piccola impresa',text:'Botteghe artigiane e piccole imprese sono l\'ossatura del lavoro ma faticano ad avere credito e materie prime: sostenerle o puntare tutto sulla grande industria?',ch:[
+   {l:'Credito e sostegno agli artigiani',e:'Lavoro diffuso; risorse spalmate',pleases:'progressista',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; gd('cetomedio',3); gd('lavoratori',2);}},
+   {l:'Priorità alla grande industria',e:'Scommetti sulla scala; i piccoli arrancano',pleases:'conservatore',f:()=>{if(S.gMod!=null)S.gMod+=0.1; gd('imprenditori',3); gd('cetomedio',-2);}},
+ ]},
+ {id:'d50_fiere',era:'italia1950',min:'sviluppo',kick:'Export',t:'Le fiere e l\'export che riparte',text:'Le fiere campionarie rilanciano il prodotto nazionale sui mercati esteri: investire per farsi conoscere nel mondo o concentrare tutto sul mercato interno?',ch:[
+   {l:'Spingi l\'export e le fiere internazionali',e:'Il made in Italy riparte; vetrina mondiale',pleases:'tecnico',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; if(S.gMod!=null)S.gMod+=0.1; gd('imprenditori',3);}},
+   {l:'Prima il mercato interno',e:'Consolidi in casa; il mondo aspetta',pleases:'conservatore',f:()=>{gd('cetomedio',2);}},
+ ]},
+
+ /* ===== AVANZAMENTO Fase 2 · Lotto 2 — DOSSIER '60 per-dicastero (era:'italia1960', §5 PRESET-ITALIA-1960.md).
+    Spread del '50 (salute5/economia8/interno5/lavoro5/istruzione4/infra4/esteri4/difesa3/giustizia4/sviluppo5=47).
+    Ancore sciolte nel vaglio: Sabin ≥'64 (obbligo L.51/'66) · CSM insediato '59 (L.195/'58) · GESCAL L.60/'63 ·
+    riforma ospedaliera Mariotti '68 (dibattito ≥'65) · d60_ssn = «il dibattito sulla riforma sanitaria» ≥'66,
+    NIENTE teleologia (il SSN è del '78) · poli-Sud a schermo generico (Taranto/petrolchimici nel doc). Cura piena. ===== */
+ // ----- SALUTE '60: mutue che si espandono, ospedali (Mariotti), vaccino Sabin, coda malaria, il dibattito sulla riforma -----
+ {id:'d60_mutue',era:'italia1960',min:'salute',kick:'Welfare',t:'Le mutue si espandono',text:'Con il boom la copertura mutualistica si allarga a nuove categorie di lavoratori. Estenderla a chi resta scoperto è giusto, ma il sistema a casse separate scricchiola.',ch:[
+   {l:'Allarga la copertura ai non tutelati',e:'Più tutela; la spesa cresce',pleases:'progressista',costo:{debito:0.4},f:()=>{S.ind.debt+=0.4; S.ind.sanita+=3; gd('lavoratori',4); gd('pensionati',2);}},
+   {l:'Consolida il sistema esistente',e:'Conti tenuti; i vuoti restano',pleases:'conservatore',f:()=>{gd('imprenditori',2); gd('lavoratori',-1);}},
+ ]},
+ {id:'d60_ospedali',era:'italia1960',min:'salute',kick:'Sanità',cond:()=>S.year>=1965,t:'La riforma degli ospedali',text:'Gli ospedali sono ancora enti di beneficenza di antica origine: si discute di farne enti pubblici moderni, con reparti e personale veri. Una riforma attesa, e costosa.',ch:[
+   {l:'Sostieni la riforma ospedaliera',e:'Ospedali moderni per tutti; grande spesa',pleases:'progressista',costo:{debito:0.6},f:()=>{S.ind.debt+=0.6; S.ind.sanita+=5; gd('lavoratori',3);}},
+   {l:'Ammoderna senza stravolgere',e:'Passo prudente; il vecchio sistema resiste',pleases:'tecnico',f:()=>{S.ind.sanita+=2;}},
+ ]},
+ {id:'d60_sabin',era:'italia1960',min:'salute',kick:'Sanità',cond:()=>S.year>=1964,t:'Il vaccino contro la polio',text:'Finalmente esiste un vaccino orale contro la poliomielite: una campagna di massa può liberare i bambini dall\'incubo. Renderla obbligatoria accende qualche resistenza.',ch:[
+   {l:'Campagna di massa, verso l\'obbligo',e:'La polio arretra davvero; qualcuno resiste',pleases:'progressista',costo:{debito:0.4},f:()=>{S.ind.debt+=0.4; S.ind.sanita+=6; gd('lavoratori',3); gd('cattolici',1);}},
+   {l:'Vaccinazione volontaria e capillare',e:'Nessuna imposizione; copertura più lenta',pleases:'tecnico',f:()=>{S.ind.sanita+=3;}},
+ ]},
+ {id:'d60_malaria_coda',era:'italia1960',min:'salute',kick:'Sanità',t:'L\'ultima malaria',text:'La malaria che flagellava le campagne è quasi debellata: restano sacche isolate nelle zone più povere. Un ultimo sforzo può chiudere la partita.',ch:[
+   {l:'Chiudi la partita con un ultimo sforzo',e:'Un flagello storico sconfitto; un costo finale',pleases:'progressista',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; S.ind.sanita+=3;}},
+   {l:'Sorveglianza a basso costo',e:'Conti leggeri; le sacche resistono',pleases:'tecnico',f:()=>{S.ind.sanita+=1;}},
+ ]},
+ {id:'d60_ssn',era:'italia1960',min:'salute',kick:'Welfare',cond:()=>S.year>=1966,t:'Il dibattito sulla riforma sanitaria',text:'Cresce il dibattito su come tenere insieme le troppe mutue: c\'è chi immagina un sistema più unitario, chi difende il pluralismo delle casse. Nessuna decisione è matura, ma la discussione è aperta.',ch:[
+   {l:'Apri il confronto sulla riforma',e:'Un dibattito necessario; le categorie si allarmano',pleases:'progressista',f:()=>{gd('lavoratori',3); gd('giovani',1); gd('imprenditori',-2);}},
+   {l:'Difendi il sistema mutualistico',e:'Nessuno scossone; il nodo resta',pleases:'conservatore',f:()=>{gd('cetomedio',2); gd('lavoratori',-1);}},
+ ]},
+
+ // ----- ECONOMIA '60: la stretta '63-64, la programmazione, il costo dello Stato, i prezzi, la lira forte, i consumi, l'export, i poli del Sud -----
+ {id:'d60_stretta',era:'italia1960',min:'economia',kick:'Credito',cond:()=>S.year>=1963&&S.year<=1965,t:'La stretta creditizia',text:'Dopo anni di corsa, i prezzi salgono e la lira è sotto pressione: la banca centrale può stringere il credito per raffreddare l\'economia. Ma le fabbriche rallenterebbero.',ch:[
+   {l:'Stringi per difendere la moneta',e:'Prezzi e lira sotto controllo; l\'occupazione soffre',pleases:'tecnico',f:()=>{if(S.gMod!=null)S.gMod-=0.2; gd('cetomedio',2); gd('imprenditori',1); gd('lavoratori',-3);}},
+   {l:'Allenta per non frenare il lavoro',e:'Fabbriche tutelate; l\'inflazione morde',pleases:'progressista',costo:{debito:0.5},f:()=>{S.ind.debt+=0.5; if(S.gMod!=null)S.gMod+=0.1; gd('lavoratori',4); gd('cetomedio',-2);}},
+ ]},
+ {id:'d60_programmazione',era:'italia1960',min:'economia',kick:'Bilancio',cond:()=>S.year>=1962,t:'La programmazione economica',text:'Si discute un piano pluriennale che indirizzi lo sviluppo del paese: scuole, case, infrastrutture programmate dallo Stato. Un\'idea che entusiasma la sinistra e insospettisce i mercati.',ch:[
+   {l:'Vara un piano di sviluppo',e:'Sviluppo indirizzato; i mercati diffidano',pleases:'progressista',costo:{debito:0.4},f:()=>{S.ind.debt+=0.4; gd('lavoratori',3); gd('giovani',2); gd('imprenditori',-2);}},
+   {l:'Lascia fare al mercato',e:'Fiducia degli operatori; sviluppo diseguale',pleases:'conservatore',f:()=>{if(S.gMod!=null)S.gMod+=0.1; gd('imprenditori',3); gd('lavoratori',-1);}},
+ ]},
+ {id:'d60_costo_stato',era:'italia1960',min:'economia',kick:'Bilancio',t:'Il costo dello Stato che cresce',text:'Il benessere porta domanda di servizi: scuole, pensioni, sanità, strade. La spesa pubblica sale, e il debito — al minimo storico — comincia a risentirne.',ch:[
+   {l:'Contieni la spesa per tenere i conti',e:'Debito sotto controllo; i servizi arrancano',pleases:'tecnico',costo:{debito:-0.4},f:()=>{S.ind.debt-=0.4; gd('cetomedio',2); gd('lavoratori',-2);}},
+   {l:'Investi nei servizi che il paese chiede',e:'Più welfare; il debito risale',pleases:'progressista',costo:{debito:0.6},f:()=>{S.ind.debt+=0.6; gd('lavoratori',4); gd('pensionati',2);}},
+ ]},
+ {id:'d60_inflazione',era:'italia1960',min:'economia',kick:'Prezzi',cond:()=>S.year>=1962&&S.year<=1964,t:'La fiammata dei prezzi',text:'Il costo della vita corre più dei salari: la fiammata dei prezzi erode il potere d\'acquisto delle famiglie. Raffreddare la domanda funziona, ma pesa su chi lavora.',ch:[
+   {l:'Raffredda la domanda',e:'Prezzi frenati; consumi e lavoro rallentano',pleases:'tecnico',f:()=>{if(S.gMod!=null)S.gMod-=0.1; gd('cetomedio',2); gd('lavoratori',-2);}},
+   {l:'Proteggi i salari e le famiglie',e:'Potere d\'acquisto difeso; l\'inflazione resiste',pleases:'progressista',f:()=>{gd('lavoratori',4); gd('pensionati',2); gd('imprenditori',-2);}},
+ ]},
+ {id:'d60_lira_oscar',era:'italia1960',min:'economia',kick:'Credito',cond:()=>S.year>=1959&&S.year<=1962,t:'La lira premiata',text:'La stabilità della lira è celebrata all\'estero come un successo: una moneta forte è un vanto, ma qualcuno vorrebbe usare quel margine di fiducia per investire di più.',ch:[
+   {l:'Difendi la stabilità conquistata',e:'Fiducia dei mercati; sviluppo più prudente',pleases:'tecnico',f:()=>{gd('cetomedio',3); gd('imprenditori',1); gd('lavoratori',-1);}},
+   {l:'Usa il margine per investire',e:'Slancio agli investimenti; un rischio calcolato',pleases:'progressista',costo:{debito:0.4},f:()=>{S.ind.debt+=0.4; if(S.gMod!=null)S.gMod+=0.2; gd('lavoratori',3);}},
+ ]},
+ {id:'d60_consumi',era:'italia1960',min:'economia',kick:'Consumi',t:'L\'Italia dei consumi',text:'Utilitarie, elettrodomestici, televisori: le famiglie comprano come mai prima. Sostenere questo potere d\'acquisto tiene il boom, ma qualcuno lo vorrebbe tassare.',ch:[
+   {l:'Sostieni il potere d\'acquisto',e:'Consumi e crescita in festa; meno gettito',pleases:'progressista',f:()=>{if(S.gMod!=null)S.gMod+=0.2; gd('lavoratori',3); gd('cetomedio',2);}},
+   {l:'Tassa i consumi voluttuari',e:'Casse più piene; le famiglie mugugnano',pleases:'tecnico',costo:{debito:-0.4},f:()=>{S.ind.debt-=0.4; gd('cetomedio',-2); gd('imprenditori',-1);}},
+ ]},
+ {id:'d60_export',era:'italia1960',min:'economia',kick:'Export',t:'L\'export che tira',text:'Il made in Italy conquista i mercati: elettrodomestici, auto, moda vendono ovunque. Puntare tutto sull\'export traina l\'industria, ma espone alle crisi altrui.',ch:[
+   {l:'Spingi l\'export a fondo',e:'L\'industria corre; dipendi dai mercati esteri',pleases:'tecnico',f:()=>{if(S.gMod!=null)S.gMod+=0.2; gd('imprenditori',3); gd('lavoratori',1);}},
+   {l:'Rafforza anche il mercato interno',e:'Base più solida; meno slancio all\'export',pleases:'progressista',f:()=>{gd('lavoratori',3); gd('cetomedio',2);}},
+ ]},
+ {id:'d60_mezzogiorno2',era:'italia1960',min:'economia',kick:'Mezzogiorno',cond:()=>S.year>=1960,t:'I poli industriali del Sud',text:'La seconda fase per il Mezzogiorno punta sui grandi poli industriali: acciaio e chimica per portare le fabbriche dove c\'erano solo campi. Un salto enorme, dal futuro incerto.',ch:[
+   {l:'Punta sui grandi poli industriali',e:'Industria al Sud; scommessa costosa',pleases:'progressista',costo:{debito:0.6},f:()=>{S.ind.debt+=0.6; gd('lavoratori',4); gd('imprenditori',2);}},
+   {l:'Sviluppo diffuso e agricoltura',e:'Meno rischio; niente grande salto',pleases:'conservatore',f:()=>{gd('lavoratori',2); gd('cetomedio',1);}},
+ ]},
+
+ // ----- INTERNO '60: l'ordine pubblico (1960), le città che esplodono, la casa al Nord, le piazze studentesche, le baracche -----
+ {id:'d60_ordine60',era:'italia1960',min:'interno',kick:'Ordine pubblico',cond:()=>S.year>=1960,t:'Tensioni di piazza',text:'La stagione porta manifestazioni che degenerano in scontri: il paese si divide sul modo di rispondere. Ogni scelta sull\'ordine pubblico è una scelta di campo.',ch:[
+   {l:'Linea ferma dell\'ordine',e:'I moderati approvano; la piazza non perdona',pleases:'conservatore',f:()=>{S.ind.sicurezza+=3; gd('cetomedio',3); gd('cattolici',2); gd('lavoratori',-5); gd('giovani',-3);}},
+   {l:'De-escalation e dialogo',e:'Tensione abbassata; chi voleva fermezza si sente scoperto',pleases:'progressista',f:()=>{gd('lavoratori',4); gd('giovani',3); gd('cetomedio',-3); S.ind.sicurezza-=2;}},
+ ]},
+ {id:'d60_migra_interna',era:'italia1960',min:'interno',kick:'Città',t:'Le città che esplodono',text:'Centinaia di migliaia arrivano dal Sud nelle città del Nord: servono case, scuole, servizi, e crescono le tensioni tra vecchi e nuovi residenti. Come governi l\'ondata?',ch:[
+   {l:'Governa l\'accoglienza con servizi',e:'Integrazione più ordinata; costa',pleases:'progressista',costo:{debito:0.5},f:()=>{S.ind.debt+=0.5; gd('lavoratori',4); gd('giovani',1);}},
+   {l:'Lascia che le città si adattino',e:'Conti prudenti; periferie nel disordine',pleases:'conservatore',f:()=>{gd('imprenditori',2); gd('lavoratori',-2); S.ind.sicurezza-=1;}},
+ ]},
+ {id:'d60_case_nord',era:'italia1960',min:'interno',kick:'Casa',t:'L\'emergenza casa',text:'Nelle città industriali le famiglie operaie si ammassano in alloggi di fortuna, mentre i prezzi delle case corrono. Un piano casa pubblico allevia, ma pesa sui conti.',ch:[
+   {l:'Piano casa pubblico',e:'Un tetto per gli operai; grande spesa',pleases:'progressista',costo:{debito:0.6},f:()=>{S.ind.debt+=0.6; gd('lavoratori',5); gd('giovani',1);}},
+   {l:'Affida al mercato edilizio',e:'Nessun peso sui conti; l\'affitto morde',pleases:'conservatore',f:()=>{gd('imprenditori',3); gd('lavoratori',-3);}},
+ ]},
+ {id:'d60_studenti68',era:'italia1960',min:'interno',kick:'Ordine pubblico',cond:()=>S.year>=1968,t:'Gli atenei occupati',text:'Gli studenti occupano le università e sfidano l\'autorità: una contestazione nuova, che non si lascia inquadrare. Il paese si divide tra chi li ascolta e chi chiede ordine.',ch:[
+   {l:'Apri al confronto coi giovani',e:'Ponti verso una generazione; i moderati temono il cedimento',pleases:'progressista',f:()=>{gd('giovani',5); gd('lavoratori',1); gd('cetomedio',-3); gd('pensionati',-2);}},
+   {l:'Ristabilisci l\'ordine negli atenei',e:'Fermezza cara ai moderati; i giovani in rivolta',pleases:'conservatore',f:()=>{S.ind.sicurezza+=3; gd('cetomedio',3); gd('pensionati',2); gd('giovani',-5);}},
+ ]},
+ {id:'d60_baracche',era:'italia1960',min:'interno',kick:'Città',t:'Le baracche ai margini',text:'Ai bordi delle città che crescono spuntano baraccopoli senza acqua né fogne: il rovescio del boom. Risanarle è un dovere che costa, e sposta risorse da altro.',ch:[
+   {l:'Risana le periferie',e:'Dignità e servizi; impegno pesante',pleases:'progressista',costo:{debito:0.5},f:()=>{S.ind.debt+=0.5; gd('lavoratori',4); gd('cattolici',2);}},
+   {l:'Priorità alle opere che rendono',e:'Risorse concentrate; le baracche restano',pleases:'conservatore',f:()=>{gd('imprenditori',2); gd('lavoratori',-2);}},
+ ]},
+
+ // ----- LAVORO '60: le vertenze, le gabbie salariali, l'operaio-massa, i sindacati, la previdenza -----
+ {id:'d60_vertenze',era:'italia1960',min:'lavoro',kick:'Lavoro',cond:()=>S.year>=1962,t:'La stagione delle vertenze',text:'Le fabbriche del Nord si fermano per salari e diritti: i sindacati alzano la posta, gli industriali chiedono di non cedere. Il governo deve dire da che parte sta.',ch:[
+   {l:'Media a favore dei diritti',e:'I lavoratori avanzano; le imprese temono i costi',pleases:'progressista',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; gd('lavoratori',6); gd('imprenditori',-4);}},
+   {l:'Tieni la linea delle imprese',e:'Competitività difesa; la piazza operaia ribolle',pleases:'conservatore',f:()=>{if(S.gMod!=null)S.gMod+=0.1; gd('imprenditori',4); gd('lavoratori',-5);}},
+ ]},
+ {id:'d60_gabbie',era:'italia1960',min:'lavoro',kick:'Salari',t:'Le gabbie salariali',text:'I salari cambiano da zona a zona: nel Sud si paga meno che nel Nord, per legge. Superare queste «gabbie» è una battaglia di giustizia, ma le imprese del Sud temono di perdere il vantaggio.',ch:[
+   {l:'Supera le gabbie: salario uguale',e:'Più giustizia; il Sud teme di perdere competitività',pleases:'progressista',f:()=>{gd('lavoratori',5); gd('giovani',1); gd('imprenditori',-3);}},
+   {l:'Mantieni le differenze territoriali',e:'Il Sud resta attraente per le imprese; l\'ingiustizia pesa',pleases:'conservatore',f:()=>{gd('imprenditori',3); gd('lavoratori',-4);}},
+ ]},
+ {id:'d60_operaio_massa',era:'italia1960',min:'lavoro',kick:'Lavoro',t:'L\'operaio-massa',text:'Le grandi fabbriche del Nord riuniscono migliaia di operai venuti da ogni parte: una forza nuova, concentrata, che chiede rappresentanza. Riconoscerla cambia gli equilibri.',ch:[
+   {l:'Tutele e rappresentanza in fabbrica',e:'Diritti riconosciuti; le imprese si irrigidiscono',pleases:'progressista',f:()=>{gd('lavoratori',5); gd('giovani',2); gd('imprenditori',-3);}},
+   {l:'Flessibilità e disciplina del lavoro',e:'Le imprese respirano; gli operai premono',pleases:'conservatore',f:()=>{if(S.gMod!=null)S.gMod+=0.1; gd('imprenditori',3); gd('lavoratori',-3);}},
+ ]},
+ {id:'d60_sindacati',era:'italia1960',min:'lavoro',kick:'Lavoro',t:'I sindacati più forti',text:'Con il boom i sindacati crescono in iscritti e potere: chiedono un ruolo riconosciuto nella vita del paese. Dargliela rafforza i lavoratori, ma sposta gli equilibri.',ch:[
+   {l:'Riconosci il ruolo sindacale',e:'Concertazione e pace sociale; le imprese diffidano',pleases:'progressista',f:()=>{gd('lavoratori',4); gd('cetomedio',1); gd('imprenditori',-2);}},
+   {l:'Limita il potere dei sindacati',e:'Le imprese rassicurate; lo scontro si inasprisce',pleases:'conservatore',f:()=>{gd('imprenditori',3); gd('lavoratori',-4);}},
+ ]},
+ {id:'d60_previdenza60',era:'italia1960',min:'lavoro',kick:'Welfare',t:'Le pensioni si estendono',text:'Il sistema pensionistico allarga la platea e alza gli assegni: una conquista per milioni di lavoratori, che però impegna i conti per decenni.',ch:[
+   {l:'Estendi e migliora le pensioni',e:'Sicurezza per gli anziani; onere di lungo periodo',pleases:'progressista',costo:{debito:0.5},f:()=>{S.ind.debt+=0.5; gd('pensionati',5); gd('lavoratori',3);}},
+   {l:'Prudenza sulla sostenibilità',e:'Conti protetti; gli anziani attendono',pleases:'tecnico',f:()=>{gd('cetomedio',2); gd('pensionati',-2);}},
+ ]},
+
+ // ----- ISTRUZIONE '60: attuare la media unica, le aule che mancano, l'università affollata, la scuola dell'obbligo -----
+ {id:'d60_mediaunica_att',era:'italia1960',min:'istruzione',kick:'Scuola',cond:()=>S.year>=1963,t:'Attuare la media unica',text:'La scuola media unica è legge, ma renderla vera è un\'altra cosa: servono aule, maestri, trasporti fino agli ultimi paesi. L\'attuazione piena costa, la gradualità lascia indietro qualcuno.',ch:[
+   {l:'Fondi pieni per l\'attuazione',e:'Scuola davvero per tutti; grande spesa',pleases:'progressista',costo:{debito:0.5},f:()=>{S.ind.debt+=0.5; gd('lavoratori',4); gd('giovani',3);}},
+   {l:'Attuazione graduale',e:'Passo sostenibile; le zone povere aspettano',pleases:'tecnico',f:()=>{gd('giovani',1); gd('cetomedio',1);}},
+ ]},
+ {id:'d60_aule',era:'italia1960',min:'istruzione',kick:'Scuola',t:'Le aule che mancano',text:'I figli del boom riempiono le scuole oltre ogni capienza: doppi turni, classi pollaio, edifici fatiscenti. Un piano di edilizia scolastica è urgente, e costoso.',ch:[
+   {l:'Piano di edilizia scolastica',e:'Aule nuove ovunque; debito su',pleases:'progressista',costo:{debito:0.5},f:()=>{S.ind.debt+=0.5; gd('giovani',3); gd('lavoratori',2);}},
+   {l:'Interventi mirati coi fondi che ci sono',e:'Conti tenuti; il sovraffollamento resta',pleases:'tecnico',f:()=>{gd('giovani',1);}},
+ ]},
+ {id:'d60_universita',era:'italia1960',min:'istruzione',kick:'Università',cond:()=>S.year>=1965,t:'L\'università affollata',text:'Sempre più giovani arrivano all\'università, un tempo per pochi: le aule si riempiono e il vecchio sistema scricchiola. Aprirla a tutti o selezionare gli ingressi?',ch:[
+   {l:'Apri e finanzia l\'università di massa',e:'Istruzione per tutti; sistema sotto pressione',pleases:'progressista',costo:{debito:0.5},f:()=>{S.ind.debt+=0.5; gd('giovani',5); gd('lavoratori',2);}},
+   {l:'Selezione e numero programmato',e:'Qualità difesa; i giovani protestano',pleases:'conservatore',f:()=>{gd('cetomedio',2); gd('giovani',-4);}},
+ ]},
+ {id:'d60_obbligo',era:'italia1960',min:'istruzione',kick:'Scuola',t:'La scuola dell\'obbligo',text:'La legge impone la scuola fino a quattordici anni, ma nelle campagne molti ragazzi lavorano ancora nei campi. Far rispettare l\'obbligo strappa braccia alle famiglie povere.',ch:[
+   {l:'Fai rispettare l\'obbligo, con sostegni',e:'Più ragazzi a scuola; le famiglie povere aiutate',pleases:'progressista',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; gd('giovani',3); gd('lavoratori',2);}},
+   {l:'Applicalo con gradualità',e:'Meno strappi; l\'abbandono resiste',pleases:'tecnico',f:()=>{gd('cetomedio',1);}},
+ ]},
+
+ // ----- INFRASTRUTTURE '60: le autostrade, l'edilizia del boom, la motorizzazione, i piani casa (GESCAL) -----
+ {id:'d60_autostrade',era:'italia1960',min:'infrastrutture',kick:'Infrastrutture',cond:()=>S.year>=1962,t:'La rete autostradale',text:'L\'Autostrada del Sole apre la strada a una rete che unirà il paese: un\'opera che fa correre l\'Italia della motorizzazione. Accelerare i cantieri costa, ma il paese lo chiede.',ch:[
+   {l:'Accelera la rete autostradale',e:'Il paese si unisce; grande investimento',pleases:'progressista',costo:{debito:0.6},f:()=>{S.ind.debt+=0.6; if(S.gMod!=null)S.gMod+=0.2; gd('imprenditori',3); gd('lavoratori',3);}},
+   {l:'Procedi coi tempi previsti',e:'Conti in ordine; la rete cresce piano',pleases:'tecnico',f:()=>{gd('cetomedio',2);}},
+ ]},
+ {id:'d60_edilizia_boom',era:'italia1960',min:'infrastrutture',kick:'Città',t:'Il cemento del boom',text:'Le città crescono a dismisura, spesso senza piano: palazzi ovunque, verde che sparisce, speculazione che prospera. Un piano regolatore mette ordine, ma frena gli affari.',ch:[
+   {l:'Piani regolatori e regole',e:'Città più ordinate; gli speculatori frenano',pleases:'progressista',f:()=>{S.ind.ambiente+=3; gd('lavoratori',2); gd('cetomedio',1); gd('imprenditori',-3);}},
+   {l:'Lascia costruire',e:'Cantieri e lavoro; il disordine urbano cresce',pleases:'conservatore',f:()=>{if(S.gMod!=null)S.gMod+=0.1; gd('imprenditori',3); S.ind.ambiente-=3;}},
+ ]},
+ {id:'d60_motorizzazione',era:'italia1960',min:'infrastrutture',kick:'Trasporti',t:'Tutti in automobile',text:'L\'utilitaria entra in ogni famiglia e le strade si riempiono: ingorghi, incidenti, città pensate per i cavalli. Investire in strade e trasporti pubblici o lasciare correre?',ch:[
+   {l:'Investi in strade e trasporti',e:'Mobilità più sicura; costo pubblico',pleases:'progressista',costo:{debito:0.4},f:()=>{S.ind.debt+=0.4; S.ind.sicurezza+=2; gd('cetomedio',2); gd('lavoratori',2);}},
+   {l:'Lascia che l\'auto si diffonda',e:'Libertà e consumi; caos e smog crescono',pleases:'conservatore',f:()=>{if(S.gMod!=null)S.gMod+=0.1; gd('imprenditori',2); S.ind.ambiente-=2;}},
+ ]},
+ {id:'d60_case_popolari60',era:'italia1960',min:'infrastrutture',kick:'Casa',cond:()=>S.year>=1963,t:'Il nuovo piano casa',text:'Un nuovo grande piano per la casa raccoglie l\'eredità dell\'INA-Casa: alloggi per i lavoratori delle città in crescita. Spingere l\'edilizia pubblica o incentivare i privati?',ch:[
+   {l:'Spingi l\'edilizia pubblica',e:'Case per gli operai; grande impegno statale',pleases:'progressista',costo:{debito:0.6},f:()=>{S.ind.debt+=0.6; gd('lavoratori',5); gd('giovani',1);}},
+   {l:'Incentiva i costruttori privati',e:'Cantieri e mercato; meno case popolari',pleases:'conservatore',f:()=>{if(S.gMod!=null)S.gMod+=0.1; gd('imprenditori',3); gd('lavoratori',-1);}},
+ ]},
+
+ // ----- ESTERI '60: la CEE che decolla, la sedia vuota, la distensione, l'Alleanza -----
+ {id:'d60_cee',era:'italia1960',min:'esteri',kick:'Mercato comune',t:'Il Mercato Comune decolla',text:'La Comunità economica europea abbatte le barriere e apre i mercati: un\'occasione enorme per l\'industria italiana, un rischio per i settori protetti. Fin dove spingere l\'integrazione?',ch:[
+   {l:'Più integrazione europea',e:'Mercati aperti all\'export; i settori fragili temono',pleases:'progressista',f:()=>{if(S.gMod!=null)S.gMod+=0.2; gd('imprenditori',3); repd(3); gd('lavoratori',-1);}},
+   {l:'Integrazione con tutele nazionali',e:'Accompagni i settori esposti; meno slancio',pleases:'conservatore',f:()=>{gd('lavoratori',2); gd('cetomedio',1);}},
+ ]},
+ {id:'d60_sedia_vuota',era:'italia1960',min:'esteri',kick:'Mercato comune',cond:()=>S.year>=1965&&S.year<=1966,t:'La crisi della sedia vuota',text:'Un grande paese blocca i lavori della Comunità lasciando vuota la sua sedia: l\'Europa rischia la paralisi sul peso dei voti e della sovranità. Che linea porti?',ch:[
+   {l:'Media per il compromesso europeo',e:'L\'Europa riparte; qualcuno cede sovranità',pleases:'progressista',f:()=>{repd(4); gd('cetomedio',2);}},
+   {l:'Difendi il diritto di veto nazionale',e:'Sovranità tutelata; l\'integrazione rallenta',pleases:'conservatore',f:()=>{gd('cetomedio',2); repd(-2);}},
+ ]},
+ {id:'d60_distensione',era:'italia1960',min:'esteri',kick:'Distensione',cond:()=>S.year>=1963,t:'La distensione dopo Cuba',text:'Passato lo spavento di Cuba, i blocchi cercano il dialogo: linea diretta, messa al bando dei test atomici. Aprirsi all\'Est ha un costo con gli alleati più rigidi.',ch:[
+   {l:'Apri al dialogo Est-Ovest',e:'Costruttore di pace; gli atlantisti diffidano',pleases:'progressista',f:()=>{gd('giovani',3); gd('lavoratori',2); repd(1);}},
+   {l:'Prudenza atlantica',e:'Solido con gli alleati; la distensione aspetta',pleases:'conservatore',f:()=>{repd(2); gd('cetomedio',2); gd('giovani',-1);}},
+ ]},
+ {id:'d60_atlantico60',era:'italia1960',min:'esteri',kick:'Alleanza atlantica',cond:()=>S.year>=1966,t:'L\'Alleanza scossa',text:'La Francia lascia il comando integrato e l\'Alleanza atlantica traballa: c\'è chi vuole più autonomia europea, chi teme di indebolire la difesa comune. Dove ti collochi?',ch:[
+   {l:'Conferma la lealtà atlantica',e:'Difesa comune salda; meno autonomia',pleases:'conservatore',f:()=>{repd(3); gd('cetomedio',2); gd('lavoratori',-1);}},
+   {l:'Più autonomia europea',e:'Un\'Europa più indipendente; gli alleati osservano',pleases:'progressista',f:()=>{repd(-2); gd('giovani',2); gd('cetomedio',-1);}},
+ ]},
+
+ // ----- DIFESA '60: la Francia fuori dalla NATO, distensione e spesa, la leva -----
+ {id:'d60_nato_francia',era:'italia1960',min:'difesa',kick:'Difesa',cond:()=>S.year>=1966,t:'Il buco lasciato dalla Francia',text:'Con Parigi fuori dal comando integrato, l\'Alleanza deve riorganizzare la difesa del continente. All\'Italia si chiede di fare di più: un impegno che pesa sul bilancio.',ch:[
+   {l:'Rafforza l\'impegno nell\'Alleanza',e:'Affidabile agli alleati; costo militare su',pleases:'conservatore',costo:{debito:0.4},f:()=>{S.ind.debt+=0.4; repd(3); gd('cetomedio',2); gd('lavoratori',-1);}},
+   {l:'Tieni un profilo misurato',e:'Bilancio protetto; gli alleati vorrebbero di più',pleases:'progressista',f:()=>{gd('lavoratori',1); repd(-1);}},
+ ]},
+ {id:'d60_distensione_mil',era:'italia1960',min:'difesa',kick:'Difesa',cond:()=>S.year>=1963,t:'La spesa militare nella distensione',text:'Con il disgelo tra i blocchi, c\'è chi propone di alleggerire la spesa militare e dirottare risorse allo sviluppo. Gli stati maggiori chiedono cautela.',ch:[
+   {l:'Riduci la spesa e investi nello sviluppo',e:'Risorse ai civili; i militari protestano',pleases:'progressista',costo:{debito:-0.3},f:()=>{S.ind.debt-=0.3; gd('lavoratori',3); gd('giovani',1);}},
+   {l:'Mantieni le forze armate solide',e:'Difesa garantita; meno per lo sviluppo',pleases:'conservatore',f:()=>{repd(1); gd('cetomedio',1); gd('lavoratori',-1);}},
+ ]},
+ {id:'d60_leva60',era:'italia1960',min:'difesa',kick:'Difesa',t:'La leva e l\'esercito',text:'Il servizio militare obbligatorio strappa i giovani un anno alla vita civile mentre l\'esercito si ammoderna. Investire nelle forze armate o alleggerire il peso sui giovani?',ch:[
+   {l:'Ammoderna le forze armate',e:'Un esercito credibile; costa',pleases:'conservatore',costo:{debito:0.4},f:()=>{S.ind.debt+=0.4; repd(2); gd('cetomedio',1);}},
+   {l:'Alleggerisci il peso della leva',e:'I giovani respirano; l\'esercito arretra',pleases:'progressista',f:()=>{gd('giovani',3); gd('lavoratori',1); repd(-1);}},
+ ]},
+
+ // ----- GIUSTIZIA '60: la Corte costituzionale opera, il CSM insediato, i codici del ventennio, le carceri -----
+ {id:'d60_corte_operativa',era:'italia1960',min:'giustizia',kick:'Giustizia',cond:()=>S.year>=1956,t:'La Corte costituzionale al lavoro',text:'La Corte costituzionale, finalmente operativa, comincia a cancellare le leggi del passato in contrasto con la Carta. Sostenere il controllo di costituzionalità limita il potere di chi governa.',ch:[
+   {l:'Sostieni il controllo di costituzionalità',e:'Lo Stato di diritto si rafforza; le vecchie leggi cadono',pleases:'progressista',f:()=>{gd('giovani',3); gd('cetomedio',2); repd(2);}},
+   {l:'Difendi la stabilità delle leggi',e:'Continuità dell\'ordinamento; la Carta attende attuazione',pleases:'conservatore',f:()=>{gd('cetomedio',2); gd('pensionati',1);}},
+ ]},
+ {id:'d60_csm',era:'italia1960',min:'giustizia',kick:'Giustizia',cond:()=>S.year>=1958,t:'L\'autogoverno dei giudici',text:'Si insedia il Consiglio superiore della magistratura, l\'organo che rende i giudici indipendenti dal governo. Dargli piena autonomia rafforza la giustizia, ma sottrae leve all\'esecutivo.',ch:[
+   {l:'Piena autonomia della magistratura',e:'Giudici indipendenti; l\'esecutivo perde una leva',pleases:'progressista',f:()=>{gd('giovani',2); gd('cetomedio',2); repd(2);}},
+   {l:'Un equilibrio coi poteri dello Stato',e:'Bilanciamento prudente; la magistratura chiede di più',pleases:'conservatore',f:()=>{gd('cetomedio',2); gd('lavoratori',-1);}},
+ ]},
+ {id:'d60_codici_ventennio',era:'italia1960',min:'giustizia',kick:'Giustizia',t:'I codici del ventennio',text:'Molti codici e leggi in vigore vengono ancora dall\'epoca del regime: riformarli per adeguarli alla Repubblica è un cantiere enorme, e non tutti hanno fretta.',ch:[
+   {l:'Riforma i codici in senso repubblicano',e:'Leggi più giuste; un lavoro lungo e conflittuale',pleases:'progressista',f:()=>{gd('giovani',3); gd('lavoratori',2); gd('cetomedio',-1);}},
+   {l:'Procedi con gradualità',e:'Nessuno strappo; le norme vecchie restano',pleases:'conservatore',f:()=>{gd('cetomedio',2); gd('pensionati',1);}},
+ ]},
+ {id:'d60_carceri60',era:'italia1960',min:'giustizia',kick:'Giustizia',t:'Le carceri sovraffollate',text:'Le prigioni restano fatiscenti e affollate, tra pena che punisce e pena che dovrebbe rieducare. Investire sulla riforma penitenziaria o sulla sicurezza e basta?',ch:[
+   {l:'Riforma penitenziaria e rieducazione',e:'La pena guarda avanti; i costi salgono',pleases:'progressista',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; gd('giovani',2); gd('cattolici',1);}},
+   {l:'Prima la sicurezza e la custodia',e:'Ordine garantito; le carceri non cambiano',pleases:'conservatore',f:()=>{S.ind.sicurezza+=2; gd('cetomedio',2); gd('giovani',-1);}},
+ ]},
+
+ // ----- SVILUPPO '60: l'energia per il boom, chimica e acciaio, i poli del Sud, l'export industriale, la piccola impresa -----
+ {id:'d60_energia',era:'italia1960',min:'sviluppo',kick:'Energia',cond:()=>S.year>=1960,t:'L\'energia per il boom',text:'Le fabbriche che corrono divorano energia elettrica come mai prima: reti da potenziare, centrali da costruire. Quanto deve pesare la mano pubblica nel governo dell\'energia?',ch:[
+   {l:'Più Stato nella rete elettrica',e:'Energia come servizio pubblico; i privati arretrano',pleases:'progressista',costo:{debito:0.4},f:()=>{S.ind.debt+=0.4; gd('lavoratori',3); gd('imprenditori',-2);}},
+   {l:'Lascia spazio ai privati',e:'Investimenti di mercato; tariffe e profitti ai gruppi',pleases:'conservatore',f:()=>{if(S.gMod!=null)S.gMod+=0.1; gd('imprenditori',3); gd('lavoratori',-1);}},
+ ]},
+ {id:'d60_chimica_acciaio',era:'italia1960',min:'sviluppo',kick:'Industria',t:'Chimica e acciaio',text:'L\'industria di base — acciaio, chimica, plastica — è il cuore del miracolo e dà lavoro a centinaia di migliaia. Puntare tutto sulla grande industria o diversificare l\'economia?',ch:[
+   {l:'Sostieni la grande industria di base',e:'Il motore del boom accelera; economia sbilanciata',pleases:'progressista',costo:{debito:0.4},f:()=>{S.ind.debt+=0.4; if(S.gMod!=null)S.gMod+=0.2; gd('lavoratori',3); gd('imprenditori',2);}},
+   {l:'Diversifica il tessuto produttivo',e:'Economia più equilibrata; meno slancio immediato',pleases:'tecnico',f:()=>{gd('cetomedio',2); gd('imprenditori',1);}},
+ ]},
+ {id:'d60_poli_sud',era:'italia1960',min:'sviluppo',kick:'Industria',cond:()=>S.year>=1960,t:'I grandi poli del Sud',text:'Enormi stabilimenti industriali sorgono nel Mezzogiorno, cattedrali di acciaio dove c\'erano campi: portano lavoro, ma cambiano il territorio e la vita di intere zone.',ch:[
+   {l:'Spingi i grandi poli industriali',e:'Lavoro e modernità al Sud; impatto pesante sul territorio',pleases:'progressista',costo:{debito:0.5},f:()=>{S.ind.debt+=0.5; gd('lavoratori',4); gd('imprenditori',2); S.ind.ambiente-=2;}},
+   {l:'Sviluppo più misurato',e:'Territorio tutelato; il grande salto rallenta',pleases:'tecnico',f:()=>{S.ind.ambiente+=2; gd('cetomedio',1);}},
+ ]},
+ {id:'d60_export_ind',era:'italia1960',min:'sviluppo',kick:'Export',t:'Il made in Italy nel mondo',text:'Le fabbriche italiane vendono ovunque: elettrodomestici, auto, macchine utensili. Puntare sull\'export industriale traina la crescita, ma lega il paese alla domanda estera.',ch:[
+   {l:'Spingi l\'export manifatturiero',e:'L\'industria conquista i mercati; dipendenza dall\'estero',pleases:'tecnico',f:()=>{if(S.gMod!=null)S.gMod+=0.2; gd('imprenditori',3); gd('lavoratori',1);}},
+   {l:'Bilancia con il mercato interno',e:'Base più solida; export meno aggressivo',pleases:'progressista',f:()=>{gd('lavoratori',3); gd('cetomedio',1);}},
+ ]},
+ {id:'d60_piccola_impresa',era:'italia1960',min:'sviluppo',kick:'Industria',t:'I distretti della piccola impresa',text:'Accanto ai colossi cresce una fitta rete di piccole imprese e botteghe specializzate: flessibili, radicate nei territori. Sostenerle o concentrare tutto sulla grande industria?',ch:[
+   {l:'Sostieni i distretti e le piccole imprese',e:'Lavoro diffuso e radicato; risorse spalmate',pleases:'progressista',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; gd('cetomedio',3); gd('lavoratori',2);}},
+   {l:'Priorità alla grande industria',e:'Scommetti sulla scala; i piccoli arrancano',pleases:'conservatore',f:()=>{if(S.gMod!=null)S.gMod+=0.1; gd('imprenditori',3); gd('cetomedio',-2);}},
+ ]},
+];
+
+/* eventi gravi, rari */
+const EVENTS=[
+ {id:'sisma',era:'universale', kick:'Calamità naturale', t:'Un forte terremoto colpisce il paese', text:'Città colpite: servono soccorsi e ricostruzione.',ch:[
+   {l:'Stato d\'emergenza e fondi pieni',e:'Costa, ma riconoscono la prontezza',costo:{debito:2.5},f:()=>{S.ind.debt+=2.5; S.ind.sanita+=3; allG(4);}},
+   {l:'Risposta minima',e:'Salvi i conti, l\'opinione pubblica non perdona',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; allG(-5); gd('cattolici',-4);}}]},
+ {id:'sciopero',era:'universale', kick:'Conflitto sociale', t:'Sciopero generale dei sindacati', text:'I sindacati bloccano il Paese.',ch:[
+   {l:'Concedi aumenti e tutele',e:'Lavoratori soddisfatti, imprese irritate',costo:{debito:1.5},f:()=>{S.ind.debt+=1.5; gd('lavoratori',10);gd('imprenditori',-6);}},
+   {l:'Tieni il punto',e:'Linea di rigore che divide',f:()=>{gd('lavoratori',-8);gd('imprenditori',6);gd('cetomedio',2);}}]},
+ {id:'corruzione',era:'universale', kick:'Scandalo', t:'Inchiesta per corruzione tocca il governo', text:'Un sottosegretario è indagato.',ch:[
+   {l:'Trasparenza e dimissioni',e:'Colpo d\'immagine ora, credibilità poi',f:()=>{allG(-3); gd('cattolici',5);}},
+   {l:'Minimizza',e:'Eviti lo strappo, resta una ferita',f:()=>{gd('cattolici',-8);gd('giovani',-5);gd('cetomedio',-3);}}]},
+ {id:'migranti', kick:'Frontiere', t:'Ondata di arrivi alle frontiere', text:'Migliaia di arrivi. Il Paese si divide.',ch:[
+   {l:'Accoglienza e gestione concordata',e:'Apprezzata da una parte, contestata dall\'altra',costo:{debito:1},f:()=>{gd('cattolici',8);gd('giovani',4);gd('cetomedio',-6); S.ind.debt+=1; S.ind.sicurezza-=3;}},
+   {l:'Linea dura alle frontiere',e:'Rassicura sulla sicurezza, indigna altri',f:()=>{gd('cattolici',-8);gd('cetomedio',6);gd('imprenditori',2); S.ind.sicurezza+=4;}}]},
+ {id:'pandemia', kick:'Emergenza sanitaria', t:'Nuova emergenza sanitaria', text:'Un focolaio si diffonde rapidamente.',ch:[
+   {l:'Restrizioni e sostegni',e:'Protegge la salute, frena l\'economia',costo:{debito:3},f:()=>{S.gMod-=1.5; S.ind.debt+=3; S.ind.sanita+=5; gd('lavoratori',3);gd('imprenditori',-8);}},
+   {l:'Aperture e responsabilità individuale',e:'Salvi il PIL, rischi sanitari',f:()=>{S.ind.sanita-=8; allG(-3); S.gMod-=0.3;}}]},
+ {id:'energia', kick:'Crisi energetica', t:'Bollette alle stelle', text:'Il prezzo dell\'energia esplode.',ch:[
+   {l:'Sussidi sulle bollette',e:'Sollievo immediato, costo per i conti',costo:{debito:2},f:()=>{S.ind.debt+=2; gd('cetomedio',6);gd('lavoratori',4);}},
+   {l:'Lascia fare al mercato',e:'Conti salvi, malumore diffuso',f:()=>{gd('cetomedio',-7);gd('imprenditori',-3);}}]},
+ /* peso a Bruxelles nei due sensi: marginale (<10) → la soglia-deficit scende a 3,0 (ti tormentano di più);
+    forte (≥18) → terza scelta sbloccata (soglia gemella di need:, vedi renderGov/resolveItem). */
+ {id:'ue', cond:()=>PAESE.ue && (S.ind.deficit>((S.pesoUE!=null&&S.pesoUE<10)?3.0:3.5)||S.ind.debt>136), kick:'Unione Europea', t:'Bruxelles chiede il rientro del deficit', text:'La Commissione avverte sui conti.',ch:[
+   {l:'Rispetta i parametri',e:'Rigore: pesa su crescita e lavoratori',costo:{debito:-1.5},f:()=>{S.ind.debt-=1.5; S.gMod-=0.4; gd('lavoratori',-4);gd('imprenditori',4);}},
+   {l:'Rivendica sovranità di bilancio',e:'Piace all\'orgoglio, spaventa i mercati',costo:{debito:2},f:()=>{gd('cetomedio',4);gd('imprenditori',-4); S.ind.debt+=2;}},
+   {l:'Fai pesare il tuo gruppo a Bruxelles',e:'Il tuo peso compra flessibilità: tempo, senza stangata',pesoUE:18,f:()=>{gd('cetomedio',2); S.gMod+=0.1;}}]},
+ {id:'industria',era:'universale', kick:'Crisi industriale', t:'Un grande gruppo annuncia la chiusura', text:'Migliaia di posti a rischio.',ch:[
+   {l:'Salvataggio pubblico',e:'Salvi i posti, spendi denaro pubblico',costo:{debito:2},f:()=>{S.ind.debt+=2; gd('lavoratori',8); S.uMod-=0.4;}},
+   {l:'Lascia al mercato',e:'Disciplina di bilancio dal costo sociale alto',f:()=>{S.uMod+=0.8; gd('lavoratori',-8);gd('imprenditori',3);}}]},
+ {id:'boom',era:'universale', kick:'Colpo di fortuna', t:'Un\'annata eccezionale', text:'Export e consumi oltre le attese: uno slancio una tantum, sopra l\'andamento di fondo.',ch:[
+   {l:'Sfrutta lo slancio',e:'Crescita e fiducia in aumento',f:()=>{S.gMod+=0.8; gd('imprenditori',6); allG(2);}}]},
+ /* --- Pilastri di sfondo Italia 1950 (era:'italia1950') — «accadono, tu reagisci», FILO MINIMO (non gamificati):
+    danno texture all'epoca senza un sottosistema. Affiorano solo nel '50 (eraViva sul selettore eventi). --- */
+ /* Lotto A (fix playtest) — ANCORE TEMPORALI: i fatti datati hanno una finestra-anni (cond su S.year, i picker la valutano già).
+    Senza, il Giubileo usciva nel 1954 (bug confermato in playtest): eraViva confronta l'epoca, mai l'anno. */
+ {id:'p50_marshall', era:'italia1950', cond:()=>S.year<=1952, kick:'Piano Marshall', t:'Arrivano gli aiuti del Piano Marshall', text:'Le prime navi cariche di materie prime e macchinari attraccano nei porti: la ricostruzione accelera, ma con l\'aiuto americano cresce anche la dipendenza atlantica.',ch:[
+   {l:'Rilancia la ricostruzione',e:'Un soffio di crescita · l\'ombra della dipendenza',f:()=>{S.gMod+=0.3; gd('imprenditori',3); gd('lavoratori',2);}},
+   {l:'Rivendica autonomia sulle scelte',e:'Orgoglio nazionale · meno slancio',f:()=>{gd('cetomedio',3); gd('lavoratori',1);}}]},
+ {id:'p50_corea', era:'italia1950', cond:()=>S.year<=1951, kick:'Guerra di Corea', t:'La guerra di Corea scuote il mondo', text:'Lo scoppio della guerra in Corea gela la guerra fredda e spinge la domanda di produzione industriale: l\'Italia ne sente l\'onda, tra opportunità e paura.',ch:[
+   {l:'Cavalca la domanda industriale',e:'Un soffio alla produzione · i timori restano',f:()=>{S.gMod+=0.3; gd('imprenditori',3);}},
+   {l:'Rassicura il paese sulla pace',e:'Calma le paure · nessuno slancio',f:()=>{gd('lavoratori',2); gd('cattolici',2);}}]},
+ /* ===== Build B 2b-ii — EVENTI '50 NAZIONALI (premier-facing, era:'italia1950', sourceati da PRESET-ITALIA-1950.md).
+    La cura: entrambe le opzioni legittime, filo d'effetto, nessuna morte. Paletti: DC/PCI = FENOMENO (paese
+    polarizzato, non individui reali); Gladio = l'OMBRA (un insider che intravede, non nomi, non caso pubblico). ===== */
+ {id:'i50_cassa', era:'italia1950', cond:()=>S.year<=1951, tono:'florido', kick:'Mezzogiorno', t:'La Cassa per il Mezzogiorno', text:'Nasce il grande piano per lo sviluppo del Sud: strade, dighe, bonifiche, acquedotti. Un\'occasione storica per il Mezzogiorno — ma di quelle che pesano sui conti.',ch:[
+   {l:'Finanzia il grande piano per il Sud',e:'Sviluppo e lavoro nel Mezzogiorno; il debito sale',costo:{debito:1},f:()=>{S.gMod+=0.3; S.ind.debt+=1; gd('lavoratori',4); gd('imprenditori',2);}},
+   {l:'Procedi con gradualità',e:'Conti prudenti; il Sud aspetta ancora',f:()=>{gd('cetomedio',2); gd('lavoratori',-2);}}]},
+ {id:'i50_agraria', era:'italia1950', cond:()=>S.year<=1953, kick:'Terra', t:'La riforma agraria', text:'Le terre dei grandi latifondi possono essere redistribuite ai braccianti. Nelle campagne del Sud la posta è enorme, e i proprietari terrieri sono sul piede di guerra.',ch:[
+   {l:'Espropri e redistribuisci le terre',e:'I braccianti con te; i proprietari terrieri contro',f:()=>{gd('lavoratori',5); gd('imprenditori',-4); gd('cattolici',1);}},
+   {l:'Riforma misurata, con indennizzi',e:'Un passo prudente; nessuno del tutto contento',costo:{debito:0.4},f:()=>{S.ind.debt+=0.4; gd('cetomedio',2); gd('lavoratori',1); gd('imprenditori',1);}}]},
+ {id:'i50_atlantico', era:'italia1950', cond:()=>S.year<=1954, kick:'Alleanza atlantica', t:'Il legame atlantico', text:'L\'Italia è entrata nel Patto Atlantico: gli alleati chiedono un impegno più stretto. La scelta di campo spacca il paese tra chi guarda a Ovest e chi no.',ch:[
+   {l:'Rafforza il legame atlantico',e:'Affidabile agli alleati; la sinistra insorge contro l\'allineamento',f:()=>{repd(3); gd('cetomedio',3); gd('cattolici',2); gd('lavoratori',-3);}},
+   {l:'Tieni un margine di autonomia',e:'Orgoglio nazionale; gli alleati storcono il naso',f:()=>{repd(-2); gd('lavoratori',2); gd('imprenditori',-1);}}]},
+ {id:'i50_spacco', era:'italia1950', kick:'Politica interna', t:'Il paese spaccato', text:'Il paese è diviso in due blocchi che si guardano come nemici: la «conventio ad excludendum» tiene un\'intera area fuori dal governo, e ogni scelta diventa una trincea. Come gestisci la frattura?',ch:[
+   {l:'Irrigidisci la linea, il tuo blocco compatto',e:'La tua area serra i ranghi; il paese si divide di più',f:()=>{gd('cattolici',4); gd('cetomedio',2); gd('lavoratori',-3);}},
+   {l:'Cerca spiragli di dialogo oltre la trincea',e:'Abbassi la tensione; la tua base ti guarda con sospetto',f:()=>{gd('lavoratori',3); gd('giovani',2); gd('cattolici',-2);}}]},
+ {id:'i50_ombra', era:'italia1950', tono:'grave', kick:'Ombre', t:'Un\'ombra nell\'ombra', text:'Un uomo dei servizi ti sfiora una confidenza: esisterebbe una rete clandestina «stay-behind», una contromisura tenuta nel buio in caso d\'invasione. Nessun nome, nessuna prova — solo un sussurro che puoi seguire o lasciar cadere.',ch:[
+   {l:'Lascia che l\'ombra resti tale',e:'Non tocchi nulla; la rete resta nel buio',f:()=>{gd('cetomedio',2);}},
+   {l:'Sonda in silenzio, per sapere',e:'Cerchi di capire cosa c\'è; un filo di rischio',f:()=>{gd('giovani',2); gd('cetomedio',-1);}}]},
+ /* --- SHOCK D'EPOCA (Cantiere B3): i sostituti '50 degli shock moderni esclusi (pandemia/energia/migranti) —
+    il '50 ritrova la sua tensione, autentica. Magnitudini da shock VERO (paragonabili ai moderni). I paletti:
+    Polesine = sfondo rispettoso (mai meccanica sulle vittime, scelte SOLO di policy); piazze = FENOMENO
+    (nessun episodio nominato); entrambe le opzioni sempre legittime. Sourceati: alluvione del Polesine nov 1951 ·
+    scala mobile/vertenze salariali anni '50 · stagione delle tensioni di piazza 1950-53. --- */
+ {id:'i50_polesine', era:'italia1950', cond:()=>S.year>=1951&&S.year<=1952, tono:'grave', kick:'Alluvione', t:'Il Po rompe gli argini', text:'L\'alluvione del Polesine sommerge campagne e paesi: centinaia di migliaia di sfollati, un\'emergenza nazionale. Il paese guarda al governo.',ch:[
+   {l:'Soccorso pieno e ricostruzione',e:'Lo Stato c\'è: vicinanza riconosciuta · il conto è pesante',costo:{debito:2.5},f:()=>{S.ind.debt+=2.5; allG(2); gd('lavoratori',3);}},
+   {l:'Risposta contenuta, conti in ordine',e:'Salvi il bilancio · il paese non dimentica chi resta solo',costo:{debito:0.5},f:()=>{S.ind.debt+=0.5; allG(-5); gd('cattolici',-3);}}]},
+ {id:'i50_scalamobile', era:'italia1950', cond:()=>S.year>=1951, tono:'grave', kick:'Salari', t:'La battaglia della scala mobile', text:'Il carovita morde e l\'adeguamento automatico dei salari è terreno di scontro: i sindacati lo difendono, gli industriali chiedono di frenarlo. Il governo deve dire da che parte sta.',ch:[
+   {l:'Difendi l\'adeguamento dei salari',e:'I lavoratori respirano · le imprese frenano, i conti pagano',costo:{debito:0.5},f:()=>{S.ind.debt+=0.5; gd('lavoratori',6); gd('imprenditori',-6); S.gMod-=0.2;}},
+   {l:'Frena la scala mobile',e:'Le imprese ripartono · i salari restano indietro, la piazza ribolle',f:()=>{gd('imprenditori',5); S.gMod+=0.2; gd('lavoratori',-7); gd('giovani',-2);}}]},
+ {id:'i50_piazze', era:'italia1950', cond:()=>S.year<=1953, tono:'grave', kick:'Ordine pubblico', t:'Il paese in piazza', text:'La stagione delle tensioni: manifestazioni che degenerano, cariche, un paese spaccato che si conta nelle strade. Ogni scelta sull\'ordine pubblico è una scelta di campo.',ch:[
+   {l:'Linea ferma: l\'ordine prima di tutto',e:'Chi chiede fermezza approva · la piazza non perdona',f:()=>{S.ind.sicurezza+=4; gd('cetomedio',3); gd('cattolici',2); gd('lavoratori',-6); gd('giovani',-5); stampad(-3);}},
+   {l:'De-escalation e dialogo coi manifestanti',e:'Abbassi la tensione · chi voleva fermezza si sente scoperto',f:()=>{gd('lavoratori',4); gd('giovani',3); gd('cetomedio',-4); S.ind.sicurezza-=3; gd('pensionati',-2);}}]},
+ /* --- Carte TARDO-DECENNIO (Lotto A): con le ancore, i primi anni si scaricano — queste tengono vivo il '54-'58.
+    Sourceate: RAI gennaio 1954 · Memorandum di Londra ottobre 1954 (Trieste) · rivolta ungherese 1956 · Trattati di Roma marzo 1957.
+    La linea figure-reali: fatti come cronaca, nessun individuo che parla; entrambe le opzioni legittime, filo d'effetto. --- */
+ {id:'i50_tv', era:'italia1950', cond:()=>S.year>=1954, tono:'florido', kick:'Televisione', t:'La televisione accende l\'Italia', text:'Dal gennaio 1954 la RAI trasmette in tutto il paese: nei bar la gente si accalca davanti a uno schermo. Un mezzo nuovo, che cambia anche la politica.',ch:[
+   {l:'Porta il governo sul piccolo schermo',e:'Parli alle famiglie nel salotto · i puristi storcono il naso',f:()=>{gd('cetomedio',3); gd('giovani',2); stampad(3);}},
+   {l:'La politica resta nelle piazze',e:'Fedele al comizio · il mezzo nuovo corre senza di te',f:()=>{gd('lavoratori',2); gd('pensionati',2);}}]},
+ {id:'i50_trieste', era:'italia1950', cond:()=>S.year>=1954&&S.year<=1955, tono:'florido', kick:'Trieste', t:'Trieste torna all\'Italia', text:'Col Memorandum di Londra Trieste torna sotto amministrazione italiana: il tricolore in piazza Unità, il paese col fiato sospeso.',ch:[
+   {l:'Una grande festa nazionale',e:'L\'orgoglio unisce il paese · Belgrado osserva',f:()=>{allG(2); repd(-1);}},
+   {l:'Sobrietà e ponti verso Belgrado',e:'La diplomazia ringrazia · la piazza voleva la festa',f:()=>{repd(3); gd('cetomedio',-1);}}]},
+ {id:'i50_ungheria', era:'italia1950', cond:()=>S.year>=1956&&S.year<=1957, tono:'grave', kick:'Ungheria', t:'I carri su Budapest', text:'La rivolta ungherese è schiacciata dai carri sovietici: profughi ai confini, il paese scosso, la sinistra attraversata da un travaglio profondo.',ch:[
+   {l:'Condanna ferma e accoglienza ai profughi',e:'Scelta di campo netta · costa qualcosa',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; gd('cattolici',4); gd('cetomedio',3); repd(2);}},
+   {l:'Fermezza misurata, senza strappi',e:'Prudenza diplomatica · una parte del paese voleva di più',f:()=>{gd('lavoratori',1); gd('cetomedio',-1); repd(-1);}}]},
+ {id:'i50_cee', era:'italia1950', cond:()=>S.year>=1957, tono:'florido', kick:'Trattati di Roma', t:'I Trattati di Roma', text:'In Campidoglio sei paesi firmano i trattati che fondano il Mercato Comune: l\'Europa economica nasce a Roma, e l\'Italia è tra i fondatori.',ch:[
+   {l:'Protagonismo europeista',e:'Le imprese guardano ai nuovi mercati · i settori fragili temono',f:()=>{S.gMod+=0.2; gd('imprenditori',4); repd(3); gd('lavoratori',-1);}},
+   {l:'Adesione prudente, con tutele interne',e:'Accompagni i settori esposti · meno slancio',f:()=>{gd('lavoratori',2); gd('cetomedio',1);}}]},
+ {id:'i50_annosanto', era:'italia1950', cond:()=>S.year===1950, tono:'florido', kick:'Anno Santo', t:'L\'Anno Santo', text:'Il Giubileo del 1950 richiama milioni di pellegrini nella capitale: la Chiesa è una grande forza politica e culturale del momento. Che rapporto tieni?',ch:[
+   {l:'Abbraccia il momento cattolico',e:'I cattolici con te; la sinistra laica si raffredda',f:()=>{gd('cattolici',5); gd('lavoratori',-2); gd('giovani',-1);}},
+   {l:'Mantieni la distanza laica dello Stato',e:'Laici e giovani apprezzano; i cattolici delusi',f:()=>{gd('giovani',2); gd('cetomedio',1); gd('cattolici',-3);}}]},
+ /* ===== AVANZAMENTO Fase 2 · Lotto 1 — EVENTI '60 NAZIONALI (era:'italia1960', sourceati da PRESET-ITALIA-1960.md).
+    Pilastri §3 ancorati all'anno + equivalenti-aging §4 (boom/migrazione/TV di massa al posto di ricostruzione/
+    emigrazione/comizio). Cura piena: entrambe le opzioni legittime, filo d'effetto, nessuna morte. Paletti:
+    Concilio col massimo rispetto (mai la dottrina, solo il rapporto Stato-Chiesa) · Kennedy sfondo rispettoso, mai
+    gamificato (cordoglio dignitoso, nessun payoff) · il '68 presentato non giudicato (piazza e ordine entrambi
+    legittimi) · niente Vajont/piazza Fontana. L'Enel è il suo SNODO (Lotto 4), non un evento qui. ===== */
+ {id:'i60_sanita58', era:'italia1960', cond:()=>S.year>=1958, tono:'florido', kick:'Sanità', t:'Nasce il Ministero della Sanità', text:'Finisce l\'Alto Commissariato: dal 1958 la sanità ha un ministero vero. Un\'occasione per dare ordine e fondi alla salute pubblica, se il bilancio regge.',ch:[
+   {l:'Dai forza al nuovo ministero',e:'Ospedali e mutue crescono · la spesa sale',costo:{debito:1},f:()=>{S.ind.debt+=1; S.ind.sanita+=4; gd('lavoratori',3); gd('cattolici',1);}},
+   {l:'Parti con prudenza sui conti',e:'Bilancio protetto · la riforma sanitaria aspetta',f:()=>{gd('cetomedio',2); gd('lavoratori',-1);}}]},
+ {id:'i60_olimpiadi', era:'italia1960', cond:()=>S.year>=1960&&S.year<=1961, tono:'florido', kick:'Olimpiadi', t:'Le Olimpiadi di Roma', text:'Il mondo guarda a Roma per i Giochi: una vetrina straordinaria per l\'Italia del boom, con impianti, strade e alberghi da preparare.',ch:[
+   {l:'Investi nella grande vetrina',e:'Prestigio e cantieri · il conto è alto',costo:{debito:1.2},f:()=>{S.ind.debt+=1.2; repd(4); gd('imprenditori',3); gd('giovani',2);}},
+   {l:'Giochi sobri, conti in ordine',e:'Bilancio salvo · qualcuno voleva più grandezza',f:()=>{gd('cetomedio',2); repd(-1);}}]},
+ {id:'i60_gagarin', era:'italia1960', cond:()=>S.year>=1961, tono:'florido', kick:'Corsa allo spazio', t:'L\'uomo nello spazio', text:'Il primo uomo in orbita accende il mondo: la corsa allo spazio è anche una sfida tra i due blocchi. Il paese sogna il progresso.',ch:[
+   {l:'Celebra il progresso e la scienza',e:'I giovani sognano · la ricerca chiede fondi',f:()=>{gd('giovani',4); gd('cetomedio',2);}},
+   {l:'Guarda con distacco alla gara dei blocchi',e:'Prudenza sobria · meno entusiasmo',f:()=>{gd('pensionati',2); gd('cattolici',1);}}]},
+ {id:'i60_muro', era:'italia1960', cond:()=>S.year>=1961, tono:'grave', kick:'Guerra fredda', t:'Il Muro di Berlino', text:'Una città divisa da un muro: la guerra fredda si fa pietra. Il paese guarda a Ovest con inquietudine, e la scelta di campo torna a pesare.',ch:[
+   {l:'Ferma solidarietà atlantica',e:'Affidabile agli alleati · la sinistra dissente',f:()=>{repd(3); gd('cetomedio',3); gd('cattolici',2); gd('lavoratori',-3);}},
+   {l:'Appello alla distensione',e:'Cerchi spiragli · gli alleati vogliono fermezza',f:()=>{repd(-1); gd('lavoratori',2); gd('giovani',2);}}]},
+ {id:'i60_cuba', era:'italia1960', cond:()=>S.year>=1962&&S.year<=1963, tono:'grave', kick:'Crisi di Cuba', t:'Il mondo trattiene il fiato', text:'Le due superpotenze arrivano sull\'orlo dello scontro atomico per Cuba: giorni di paura, poi il passo indietro. La distensione diventa una parola nuova.',ch:[
+   {l:'Solidarietà atlantica ferma',e:'Schierato con gli alleati · la piazza pacifista protesta',f:()=>{repd(3); gd('cetomedio',3); gd('lavoratori',-2);}},
+   {l:'Sostieni la via del dialogo',e:'Con chi cerca la distensione · gli atlantisti storcono il naso',f:()=>{gd('giovani',3); gd('lavoratori',2); repd(-1);}}]},
+ {id:'i60_mediaunica', era:'italia1960', cond:()=>S.year>=1962, tono:'florido', kick:'Scuola', t:'La scuola media unica', text:'Una sola scuola media per tutti, fino a quattordici anni: la fine della vecchia scuola di avviamento che divideva i figli degli operai da quelli dei signori. Una riforma che cambia il paese.',ch:[
+   {l:'Spingi la riforma a fondo',e:'Scuola per tutti · servono aule, maestri e fondi',costo:{debito:1},f:()=>{S.ind.debt+=1; gd('lavoratori',4); gd('giovani',3); gd('cetomedio',-1);}},
+   {l:'Attuazione graduale',e:'Passo prudente · chi aspettava di più mugugna',f:()=>{gd('cetomedio',2); gd('giovani',1);}}]},
+ {id:'i60_concilio', era:'italia1960', cond:()=>S.year>=1962&&S.year<=1965, kick:'Concilio', t:'Il Concilio riunisce i vescovi', text:'Si apre il Concilio Vaticano II: la Chiesa si interroga e si rinnova, e la sua voce pesa nella vita del paese. Che rapporto tieni con una Chiesa che cambia?',ch:[
+   {l:'Dialogo aperto con la Chiesa che si rinnova',e:'Ponti col mondo cattolico · i laici temono l\'ingerenza',f:()=>{gd('cattolici',4); gd('cetomedio',1); gd('giovani',-1);}},
+   {l:'Ferma distinzione laica dello Stato',e:'Autonomia delle istituzioni · una parte cattolica si raffredda',f:()=>{gd('giovani',2); gd('lavoratori',1); gd('cattolici',-2);}}]},
+ {id:'i60_kennedy', era:'italia1960', cond:()=>S.year>=1963&&S.year<=1964, tono:'grave', kick:'Lutto', t:'Un colpo scuote il mondo', text:'L\'assassinio del presidente americano gela il mondo intero: nelle strade la gente si ferma davanti alle radio. Un\'onda di sgomento attraversa anche il paese.',ch:[
+   {l:'Il paese si stringe nel cordoglio',e:'Vicinanza dignitosa all\'alleato · nulla di più',f:()=>{gd('cattolici',2); gd('cetomedio',2); repd(1);}},
+   {l:'Raccoglimento sobrio, poi si continua',e:'Compostezza istituzionale · la vita riprende',f:()=>{gd('pensionati',2); gd('cetomedio',1);}}]},
+ {id:'i60_autostrada', era:'italia1960', cond:()=>S.year>=1962&&S.year<=1964, tono:'florido', kick:'Grandi opere', t:'L\'Autostrada del Sole', text:'Il grande nastro d\'asfalto sta per unire Milano a Napoli: il simbolo del paese che corre e si motorizza. I cantieri avanzano verso il taglio del nastro.',ch:[
+   {l:'Accelera i cantieri',e:'Il paese si unisce · lavoro e debito insieme',costo:{debito:1},f:()=>{S.ind.debt+=1; S.gMod+=0.2; gd('imprenditori',3); gd('lavoratori',3);}},
+   {l:'Procedi coi tempi previsti',e:'Nessuno strappo di bilancio · l\'entusiasmo aspetta',f:()=>{gd('cetomedio',2);}}]},
+ {id:'i60_congiuntura', era:'italia1960', cond:()=>S.year>=1964&&S.year<=1965, tono:'grave', kick:'Congiuntura', t:'La stretta morde', text:'Dopo anni di corsa, l\'economia frena: prezzi in salita, credito più caro, le fabbriche rallentano. Il miracolo conosce la sua prima battuta d\'arresto.',ch:[
+   {l:'Stretta sui conti per fermare i prezzi',e:'La lira difesa · l\'occupazione ne risente',f:()=>{S.gMod-=0.2; gd('cetomedio',2); gd('imprenditori',1); gd('lavoratori',-3);}},
+   {l:'Sostieni l\'occupazione e la domanda',e:'Lavoro protetto · l\'inflazione morde',costo:{debito:1},f:()=>{S.ind.debt+=1; S.gMod+=0.2; gd('lavoratori',4); gd('cetomedio',-2);}}]},
+ {id:'i60_francia_nato', era:'italia1960', cond:()=>S.year>=1966, kick:'Alleanza atlantica', t:'La Francia lascia il comando NATO', text:'Parigi esce dal comando militare integrato dell\'Alleanza: uno strappo che scuote l\'Occidente. L\'Italia deve dire dove sta.',ch:[
+   {l:'Conferma la lealtà atlantica piena',e:'Solida nell\'Alleanza · chi voleva più autonomia mugugna',f:()=>{repd(3); gd('cetomedio',2); gd('lavoratori',-1);}},
+   {l:'Comprensione per le ragioni di Parigi',e:'Un margine di autonomia · gli alleati osservano',f:()=>{repd(-2); gd('giovani',2); gd('cetomedio',-1);}}]},
+ {id:'i60_migrazione', era:'italia1960', cond:()=>S.year>=1958, kick:'Migrazione interna', t:'In viaggio verso Nord', text:'Treni carichi di famiglie lasciano il Sud per le fabbriche del Nord: centinaia di migliaia ogni anno. Le città del triangolo industriale si gonfiano, tra lavoro e disagio.',ch:[
+   {l:'Accompagna la grande migrazione',e:'Case e servizi per i nuovi arrivati · costa',costo:{debito:1},f:()=>{S.ind.debt+=1; gd('lavoratori',4); gd('giovani',2);}},
+   {l:'Lascia che il mercato del lavoro si regoli',e:'Conti prudenti · le periferie crescono nel disordine',f:()=>{gd('imprenditori',2); gd('lavoratori',-2); S.ind.sicurezza-=1;}}]},
+ {id:'i60_boomcosti', era:'italia1960', cond:()=>S.year>=1958, kick:'Il boom', t:'Il boom cambia le città', text:'L\'utilitaria, gli elettrodomestici, la casa di proprietà: il benessere arriva nelle famiglie. Ma le città esplodono senza piano, tra traffico e cemento.',ch:[
+   {l:'Governa la crescita con un piano',e:'Ordine e servizi · gli speculatori frenano',f:()=>{gd('lavoratori',3); gd('cetomedio',2); gd('imprenditori',-2);}},
+   {l:'Lascia correre il benessere',e:'Consumi e imprese felici · il disordine urbano cresce',f:()=>{S.gMod+=0.2; gd('imprenditori',3); gd('cetomedio',2); S.ind.ambiente-=3;}}]},
+ {id:'i60_tv', era:'italia1960', cond:()=>S.year>=1960, tono:'florido', kick:'Televisione', t:'La TV entra nelle case', text:'Non più solo nei bar: la televisione arriva nei salotti, e con la Tribuna la politica entra nelle case di milioni di italiani. Un mezzo che cambia il consenso.',ch:[
+   {l:'Porta la tua voce sul piccolo schermo',e:'Parli a tutto il paese · i tradizionalisti diffidano',f:()=>{gd('cetomedio',3); gd('giovani',2); stampad(3);}},
+   {l:'Resta legato ai comizi e alle sezioni',e:'Fedele alla militanza · il mezzo nuovo corre senza di te',f:()=>{gd('lavoratori',2); gd('pensionati',2);}}]},
+ {id:'i60_sessantotto', era:'italia1960', cond:()=>S.year>=1968, tono:'grave', kick:'Il Sessantotto', t:'Le università in fermento', text:'Gli studenti occupano le facoltà e scendono in piazza: contestano l\'autorità, la scuola, la società intera. Una generazione nuova chiede ascolto, con forza.',ch:[
+   {l:'Apri al dialogo con gli studenti',e:'Ponti verso i giovani · chi vuole ordine ti accusa di cedere',f:()=>{gd('giovani',5); gd('lavoratori',2); gd('cetomedio',-3); gd('pensionati',-2);}},
+   {l:'Tieni la linea dell\'ordine e dell\'autorità',e:'Fermezza cara ai moderati · i giovani ti voltano le spalle',f:()=>{S.ind.sicurezza+=3; gd('cetomedio',3); gd('pensionati',2); gd('giovani',-5);}}]},
+ {id:'i60_autunnocaldo', era:'italia1960', cond:()=>S.year>=1969, tono:'grave', kick:'Vertenze', t:'L\'autunno caldo', text:'Le fabbriche si fermano: la stagione delle grandi vertenze operaie porta in piazza milioni di lavoratori per salari e diritti. Il paese negozia il suo nuovo equilibrio.',ch:[
+   {l:'Favorisci un accordo coi sindacati',e:'Diritti e salari avanzano · le imprese temono i costi',costo:{debito:0.5},f:()=>{S.ind.debt+=0.5; gd('lavoratori',6); gd('giovani',2); gd('imprenditori',-4);}},
+   {l:'Tieni ferma la linea delle imprese',e:'Competitività difesa · la piazza operaia ribolle',f:()=>{gd('imprenditori',4); S.gMod+=0.1; gd('lavoratori',-5); S.ind.sicurezza-=2;}}]},
+ {id:'i60_luna', era:'italia1960', cond:()=>S.year>=1969, tono:'florido', kick:'La conquista della Luna', t:'L\'uomo sulla Luna', text:'Il mondo intero, davanti alla TV, guarda i primi passi sulla Luna: una notte di stupore che unisce tutti. Il progresso sembra non avere più confini.',ch:[
+   {l:'Celebra col paese questa notte',e:'Un momento di unità e meraviglia · nulla da spartire',f:()=>{allG(2); gd('giovani',3);}},
+   {l:'Ricorda che i problemi restano a terra',e:'Concretezza · qualcuno ti trova poco sognatore',f:()=>{gd('lavoratori',2); gd('cetomedio',-1);}}]},
+ {id:'crollo',era:'universale', cond:()=>lv('manutenzione')===0, kick:'Emergenza infrastrutture', t:'Crolla un\'infrastruttura', text:'Cede un\'opera pubblica: anni di manutenzione rinviata presentano il conto. Vittime e disagi, il Paese chiede risposte.',ch:[
+   {l:'Stato d\'emergenza e messa in sicurezza',e:'Ispezioni e cantieri ovunque, costo pesante',costo:{debito:2},f:()=>{S.ind.debt+=2; S.ind.sicurezza+=4; gd('cetomedio',-3); allG(-2);}},
+   {l:'Gestione ordinaria e rassicurazioni',e:'Salvi i conti, ma la fiducia crolla',f:()=>{S.ind.sicurezza-=4; gd('cetomedio',-5); gd('cattolici',-3); allG(-3);}}]},
+];
+
+/* eventi INTERNAZIONALI ricorrenti (lotto Esteri+Difesa): grandi eventi ~ogni 6-9 mesi, taggati min:esteri|difesa.
+   Muovono la REPUTAZIONE (repd() in model.js); alcune scelte da "mediatore" sono a soglia (need = reputazione minima,
+   mostrata onesta nell'UI). Testo NEUTRO: NATO/ONU/G7 come istituzioni, mai persone reali. Spinti da pickInternazionale(). */
+/* ===== RELAZIONI INTERNAZIONALI (lotto internazionale, FASE A) — gli enti come RELAZIONI PERSISTENTI.
+   `S.relInt[id]` = standing 0-100 (i "gruppi" della sfera internazionale; reputazione = lettura aggregata,
+   indipendente, con coppia MORBIDA: la media di relInt spinge la sua àncora). Ogni ente ha un'`ancora()`
+   guidata dalle TUE politiche → ritorno lento mensile (come reputazione). Il TRIANGOLO di tensione vive nelle
+   àncore: una linea estera assertiva/atlantica alza l'Alleanza ma abbassa il Consesso e la potenza Rivale; la
+   distensione fa il contrario. `breve` = etichetta UI. `cond` = enti validi per il paese (Unione solo ue:true). */
+const ENTI_INT=[
+ /* Per un NON ALLINEATO (sedia-swing) la `linea_estera` è l'asse dell'AUTONOMIA (0=vicino al blocco rivale, 1=non
+    allineato, 2=vicino all'Occidente): autonomia → entrambi i poli ~corteggiano e il Consesso è alto MA NON dominante;
+    inclinarsi → quel polo SALE FORTE (un asset concreto), l'altro scende, la leva-swing cala. Il paletto «inclinarsi è
+    tentante» vive negli EVENTI (vantaggi concreti al lean); le àncore danno solo il baseline. */
+ {id:'alleanza', nome:'l\'Alleanza atlantica', breve:'Alleanza', desc:'gli alleati militari',
+  nomeNA:'il blocco occidentale', breveNA:'Occidente', descNA:'uno dei due poli che ti corteggiano',
+  ancora:()=> nonAllineato() ? 50 + [-12,2,14][lv('linea_estera')]
+    : 50 + [-10,0,12][lv('linea_estera')] + [-4,0,8][lv('difesa')] + [0,0,4][lv('industria_difesa')] },
+ {id:'consesso', nome:'le Nazioni Unite', breve:'ONU', desc:'l\'ONU e i grandi fori multilaterali',
+  descNA:'i fori multilaterali: il tuo palco da non allineato',
+  ancora:()=> nonAllineato() ? 50 + [2,8,2][lv('linea_estera')] + [-4,0,8][lv('cooperazione')]
+    : 50 + [10,0,-10][lv('linea_estera')] + [-4,0,8][lv('cooperazione')] + [0,0,4][lv('ambiente')] },
+ {id:'rivale', nome:'la potenza rivale', breve:'Rivale', desc:'Russia, Cina, Iran, Corea del Nord',
+  nomeNA:'il blocco rivale', breveNA:'Polo rivale', descNA:'l\'altro polo che ti corteggia',
+  ancora:()=> nonAllineato() ? 50 + [14,2,-12][lv('linea_estera')]
+    : 50 + [12,0,-14][lv('linea_estera')] + [4,0,-6][lv('difesa')] },
+ {id:'unione', nome:'l\'Unione Europea', breve:'Bruxelles', desc:'le istituzioni europee', cond:()=>!!PAESE.ue,
+  ancora:()=>50 + [6,0,-6][lv('linea_estera')] - Math.max(0,((S.ind&&S.ind.deficit)||3)-3)*3 - Math.max(0,((S.ind&&S.ind.debt)||130)-145)*0.25 },
+ /* le ONG (fase B): NON una potenza geopolitica — il flag `societa` la distingue nel pannello e la ESCLUDE dalla coppia
+    morbida con la reputazione (il favore della società civile non è statura geopolitica). SOLO `ong` porta questo flag
+    (mai gli enti geopolitici, UE inclusa). Àncora dai temi progressisti. NOTA: l'àncora è l'aggregato; la SPACCATURA
+    tematica (verde vs diritti) si sente negli EVENTI, che leggono la policy specifica. */
+ {id:'ong', nome:'le organizzazioni della società civile', breve:'Società civile', desc:'ambiente, diritti, migranti', societa:true,
+  ancora:()=>50 + [-12,0,12][lv('ambiente')] + [-8,0,8][lv('immigrazione')] + [-4,0,6][lv('cooperazione')] },
+];
+
+/* ===== POTENZE REALI (cantiere paesi reali e conflitti, Fetta A) — i VOLTI nominati che popolano gli eventi. Lo
+   STANDING resta sul BLOCCO astratto (`relInt`: rivale/alleanza/consesso/unione); queste sono le facce reali che le
+   Fette B (conflitti da premier) e C (da Segretario) pescheranno per dare un nome al conflitto. PALETTI: stati reali
+   ma i LEADER sempre fittizi (lo Stato agisce — «la Russia», «il governo cinese» — mai un leader reale con parole in
+   bocca); scenari ARCHETIPICI, non scriptati sul conflitto specifico in corso (non si datano, restano non schierati).
+   `blocco`: 'rivale' = il polo antagonista per ogni giocatore occidentale; 'swing' = potenza-pendolo non allineata
+   (l'India), né nemica né alleata — a chi si avvicina conta. `tipi` = i caratteri di conflitto che porta (B/C li usano
+   per pescare lo scenario giusto). `art` = l'articolo determinativo del paese (`la` / `l'`): da esso `potSub` deriva
+   TUTTE le forme con le elisioni giuste — soggetto (`%POTdet`: la Russia, l'Iran), genitivo (`%POTdi`: della Cina,
+   dell'Iran) e preposizioni articolate (`%POTa`: alla/all', `%POTsu`: sulla/sull', `%POTda`: dalla/dall', `%POTin`:
+   nella/nell'); `%POT` = nome nudo, `%POTcar` = carattere. (Tutte le potenze del roster hanno l'articolo; un paese
+   senza — es. Israele — chiederebbe un ramo a parte.) Comparse (Turchia, Golfo) e alleati nominati (Germania, Giappone)
+   restano COLORE per più avanti, non blocchi. ===== */
+const POTENZE=[
+ {id:'russia',     nome:'Russia',         art:'la', nomeEn:'Russia',      artEn:false, blocco:'rivale', carattere:'una potenza revanscista',   carattereEn:'a revanchist power',   tipi:['aggressione','energia','sanzioni']},
+ {id:'cina',       nome:'Cina',           art:'la', nomeEn:'China',       artEn:false, blocco:'rivale', carattere:'un rivale sistemico',       carattereEn:'a systemic rival',       tipi:['stretto','commercio','influenza']},
+ {id:'iran',       nome:'Iran',           art:"l'", nomeEn:'Iran',        artEn:false, blocco:'rivale', carattere:'una potenza regionale',     carattereEn:'a regional power',     tipi:['nucleare','stretto']},
+ {id:'corea_nord', nome:'Corea del Nord', art:'la', nomeEn:'North Korea', artEn:false, blocco:'rivale', carattere:'un regime imprevedibile',   carattereEn:'an unpredictable regime',   tipi:['missili','nucleare']},
+ {id:'urss',       nome:'Unione Sovietica', art:"l'", nomeEn:'Soviet Union', artEn:true, blocco:'rivale', era:'italia1950', codaFino:9999, carattere:'la potenza del blocco orientale', carattereEn:'the power of the Eastern bloc', tipi:['aggressione','influenza']},   // FIX era: il rivale d'epoca del '50 (esclusa dal presente via eraViva). codaFino:∞ (audit C3): rivale di TUTTA la linea storica — non invecchia al '61, resta il rivale anche nei '60
+ {id:'india',      nome:'India',          art:"l'", nomeEn:'India',       artEn:false, blocco:'swing',  carattere:'una potenza non allineata', carattereEn:'a non-aligned power', tipi:['corteggiamento']},
+];
+
+const INTERNAZIONALI=[
+ {id:'nato_vertice',era:'universale', tono:'florido', min:'difesa', kick:'Alleanza atlantica', t:'Vertice dell\'Alleanza', text:'Gli alleati chiedono un impegno di spesa militare più alto. La tua risposta pesa sul rapporto con l\'Alleanza — e su chi la guarda da fuori.',ch:[
+   {l:'Aderisci all\'impegno', e:'Affidabile agli alleati; la potenza rivale si irrigidisce', pleases:'conservatore', costo:{debito:1.2},f:()=>{S.ind.debt+=1.2; relIntMuovi('alleanza',9); relIntMuovi('rivale',-6); repd(3); gd('giovani',-2); gd('imprenditori',2);}},
+   {l:'Rinvia l\'aumento', e:'Risorse al fronte interno; gli alleati storcono il naso', pleases:'populista', f:()=>{relIntMuovi('alleanza',lv('difesa')===0?-9:-6); relIntMuovi('rivale',3); repd(-3); gd('cetomedio',2);}},
+ ]},
+ {id:'missione_int',era:'universale', min:'difesa', kick:'Sicurezza internazionale', t:'Missione internazionale', text:'Si propone la partecipazione a una missione multilaterale: costi e rischi, ma peso sullo scacchiere.',ch:[
+   {l:'Partecipa', e:'Riconosciuto da alleati e Nazioni Unite; costi e rischi', pleases:'tecnico', costo:{debito:0.8},f:()=>{S.ind.debt+=0.8; relIntMuovi('alleanza',5); relIntMuovi('consesso',5); relIntMuovi('rivale',-3); repd(4); gd('giovani',-2); gd('cattolici',2);}},
+   {l:'Declina', e:'Nessun coinvolgimento esterno', pleases:'populista', f:()=>{relIntMuovi('alleanza',-4); relIntMuovi('consesso',-3); repd(-3); gd('giovani',2);}},
+ ]},
+ {id:'basi_coop',era:'universale', tono:'florido', min:'difesa', kick:'Cooperazione militare', t:'Cooperazione militare più stretta', text:'Un alleato propone una cooperazione militare più stretta sul territorio — un passo che la potenza rivale non vedrà di buon occhio.',ch:[
+   {l:'Approfondisci la cooperazione', e:'Peso strategico con l\'Alleanza; il rivale alza la tensione', pleases:'conservatore', f:()=>{relIntMuovi('alleanza',8); relIntMuovi('rivale',-8); repd(3); S.ind.sicurezza+=2; gd('giovani',-3);}},
+   {l:'Mantieni le distanze', e:'Tieni aperto col rivale, deludi gli alleati', pleases:'populista', f:()=>{relIntMuovi('alleanza',-5); relIntMuovi('rivale',4); repd(-2); gd('giovani',2);}},
+ ]},
+ {id:'g7',era:'contemporanea', tono:'florido', min:'esteri', kick:'Foro multilaterale', t:'Summit dei grandi', text:'Il G7 si riunisce. Che ruolo giochi?',ch:[
+   {l:'Protagonista', e:'Alto profilo nel G7, qualche attrito', f:()=>{relIntMuovi('consesso',6); repd(3); gd('cetomedio',2);}},
+   {l:'Defilato', e:'Niente rischi, niente gloria', f:()=>{relIntMuovi('consesso',-3); repd(-2);}},
+   {l:'Tessi la mediazione', e:'Da ponte credibile tra le parti: il G7 ti riconosce', ente:'consesso', enteMin:62, pleases:'tecnico', f:()=>{relIntMuovi('consesso',9); repd(5); gd('imprenditori',2); gd('giovani',2);}},
+ ]},
+ {id:'g7_50',era:'italia1950', tono:'florido', min:'esteri', kick:'Foro multilaterale', t:'La conferenza dei Grandi', text:'Le grandi potenze si riuniscono in conferenza. Che ruolo giochi?',ch:[
+   {l:'Protagonista', e:'Alto profilo tra i Grandi, qualche attrito', f:()=>{relIntMuovi('consesso',6); repd(3); gd('cetomedio',2);}},
+   {l:'Defilato', e:'Niente rischi, niente gloria', f:()=>{relIntMuovi('consesso',-3); repd(-2);}},
+   {l:'Tessi la mediazione', e:'Da ponte credibile tra le parti: i Grandi ti riconoscono', ente:'consesso', enteMin:62, pleases:'tecnico', f:()=>{relIntMuovi('consesso',9); repd(5); gd('imprenditori',2); gd('giovani',2);}},
+ ]},
+ {id:'onu_ris',era:'universale', min:'esteri', kick:'Assemblea internazionale', t:'Risoluzione controversa', text:'In assemblea si vota una risoluzione divisiva, promossa dal fronte occidentale contro la potenza rivale.',ch:[
+   {l:'Allineati al fronte prevalente', e:'In linea con le Nazioni Unite e gli alleati; il rivale se lo lega al dito', f:()=>{relIntMuovi('consesso',5); relIntMuovi('alleanza',3); relIntMuovi('rivale',-6); repd(4); gd('cetomedio',-2);}},
+   {l:'Astieniti', e:'Prudenza: non scontenti, non entusiasmi nessuno', f:()=>{}},
+   {l:'Opponiti in nome della sovranità', e:'Strizzi l\'occhio al rivale; le Nazioni Unite ti isolano', pleases:'populista', f:()=>{relIntMuovi('consesso',-7); relIntMuovi('rivale',6); repd(-5); gd('cetomedio',4);}},
+ ]},
+ {id:'crisi_dipl',era:'universale', tono:'grave', min:'esteri', kick:'Crisi diplomatica', t:'Crisi con la potenza rivale', text:'Le relazioni con la potenza rivale si surriscaldano. Fermezza, distensione, o ti fai mediatore?',ch:[
+   {l:'Linea di fermezza', e:'Compatto con l\'Alleanza; col rivale si gela', pleases:'populista', f:()=>{relIntMuovi('alleanza',5); relIntMuovi('rivale',-8); repd(-2); gd('cetomedio',3); S.gMod-=0.15;}},
+   {l:'Cerca la distensione', e:'Riapri col rivale; gli alleati diffidano', pleases:'tecnico', f:()=>{relIntMuovi('rivale',7); relIntMuovi('alleanza',-4); repd(2); gd('imprenditori',2);}},
+   {l:'Offri una mediazione di terzi', e:'Da mediatore credibile delle Nazioni Unite: tutti ti ascoltano', ente:'consesso', enteMin:64, f:()=>{relIntMuovi('consesso',7); relIntMuovi('rivale',3); repd(8);}},
+ ]},
+ {id:'clima_vertice', min:'esteri', kick:'Vertice sul clima', t:'Impegni sul clima', text:'Le Nazioni Unite chiedono impegni vincolanti sulle emissioni.',ch:[
+   {l:'Sottoscrivi impegni ambiziosi', e:'Ambiente e Nazioni Unite su, industria sotto pressione', pleases:'progressista', f:()=>{S.ind.ambiente+=4; relIntMuovi('consesso',8); repd(5); gd('giovani',4); gd('imprenditori',-4);}},
+   {l:'Impegni di facciata', e:'Non scontenti l\'industria; le Nazioni Unite prendono nota', pleases:'conservatore', f:()=>{relIntMuovi('consesso',-5); repd(-3); gd('imprenditori',2);}},
+ ]},
+ {id:'accordo_comm',era:'universale', min:'esteri', kick:'Negoziato commerciale', t:'Accordo commerciale internazionale', text:'Un trattato col campo occidentale aprirebbe nuovi mercati ma esporrebbe alcuni settori.',ch:[
+   {l:'Firma l\'accordo', e:'Export su; ti leghi al campo occidentale', pleases:'conservatore', f:()=>{S.gMod+=0.25; relIntMuovi('consesso',5); relIntMuovi('alleanza',3); repd(4); gd('imprenditori',5); gd('lavoratori',-3);}},
+   {l:'Proteggi il mercato interno', e:'Tuteli i settori fragili; le Nazioni Unite storcono il naso, il rivale meno', pleases:'populista', f:()=>{relIntMuovi('consesso',-4); relIntMuovi('rivale',3); repd(-3); gd('lavoratori',3); gd('imprenditori',-2);}},
+ ]},
+ {id:'umanitaria',era:'universale', min:'esteri', kick:'Emergenza umanitaria', t:'Emergenza umanitaria', text:'Una crisi umanitaria oltre confine chiede una risposta internazionale.',ch:[
+   {l:'Guida gli aiuti', e:'Generosità riconosciuta dalle Nazioni Unite, costa', pleases:'progressista', costo:{debito:0.6},f:()=>{S.ind.debt+=0.6; relIntMuovi('consesso',8); repd(5); gd('cattolici',4); gd('giovani',2);}},
+   {l:'Contributo simbolico', e:'Conti salvi; le Nazioni Unite notano l\'assenza', pleases:'tecnico', f:()=>{relIntMuovi('consesso',-3); repd(-2);}},
+ ]},
+ /* eventi-PRESSIONE (fase A): cond-gati sul basso standing → la CONSEGUENZA ricorrente di un rapporto trascurato.
+    La cura: arrivano dalle TUE scelte d'allineamento (lo standing è basso perché l'hai reso tale), mai a freddo. */
+ {id:'alleanza_dubbi',era:'universale', tono:'grave', min:'difesa', cond:()=>S.relInt&&S.relInt.alleanza!=null&&S.relInt.alleanza<38, kick:'Alleanza atlantica', t:'Gli alleati dubitano di te', text:'Dopo le tue scelte, l\'Alleanza mette in dubbio la tua affidabilità: girano voci di un tuo isolamento nel blocco.',ch:[
+   {l:'Un gesto di riavvicinamento', e:'Ricuci con gli alleati, a un prezzo', pleases:'conservatore', costo:{debito:0.5},f:()=>{S.ind.debt+=0.5; relIntMuovi('alleanza',8); relIntMuovi('rivale',-3); gd('giovani',-1);}},
+   {l:'Rivendichi l\'autonomia', e:'Tieni il punto; la frattura con l\'Alleanza si allarga', pleases:'populista', f:()=>{relIntMuovi('alleanza',-4); relIntMuovi('rivale',3); gd('cetomedio',2);}},
+ ]},
+ {id:'consesso_isola',era:'universale', tono:'grave', min:'esteri', cond:()=>S.relInt&&S.relInt.consesso!=null&&S.relInt.consesso<35, kick:'Assemblea internazionale', t:'Isolato alle Nazioni Unite', text:'Alle Nazioni Unite sei sempre più solo: le tue posizioni trovano poche sponde, e si vede.',ch:[
+   {l:'Apri un\'iniziativa diplomatica', e:'Provi a rientrare nel gioco; richiede impegno', pleases:'tecnico', costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; relIntMuovi('consesso',8);}},
+   {l:'Vai per la tua strada', e:'Orgoglio sovranista; l\'isolamento si consolida', pleases:'populista', f:()=>{relIntMuovi('consesso',-4); relIntMuovi('rivale',3); gd('cetomedio',3);}},
+ ]},
+];
+
+/* ===== LE ONG (lotto internazionale FASE B) — la società civile come ATTORE con agenda propria (ambiente, diritti,
+   migranti). Lo standing è `S.relInt.ong` (singolo scalare, àncora dai temi). Gli EVENTI leggono la POLICY SPECIFICA
+   (non la media) → la spaccatura verde/diritti si sente: un governo verde+restrittivo ha gli ambientalisti alleati e i
+   gruppi-diritti ostili nello stesso periodo. `consesso:true` sull'evento = ha eco internazionale (muove anche il
+   Consesso); senza, è puramente interno. La CURA: gli eventi ostili sono cond-gati sulla TUA linea (tema restrittivo)
+   o sullo standing basso — conseguenza delle tue scelte, mai a freddo. ONG sempre GENERICHE/FITTIZIE, mai org reali. ===== */
+const ONG_EV=[
+ /* AMBIENTE — transnazionale (clima): tono dalla linea ambientale */
+ {id:'ong_clima', min:'sviluppo', consesso:true, cond:()=>lv('ambiente')<2, kick:'Società civile', t:'Le ambientaliste alzano la voce', text:'Una coalizione di organizzazioni ambientaliste lancia una campagna internazionale: chiede impegni più netti sul clima, e il mondo guarda.',ch:[
+   {l:'Accogli le loro richieste', e:'La società civile e le Nazioni Unite ti premiano; l\'industria frena', pleases:'progressista', f:()=>{relIntMuovi('ong',8); relIntMuovi('consesso',5); gd('giovani',3); gd('imprenditori',-3);}},
+   {l:'Tieni la linea dell\'industria', e:'Rassicuri le imprese; ONG e mondo prendono nota', pleases:'conservatore', f:()=>{relIntMuovi('ong',-6); relIntMuovi('consesso',-3); gd('imprenditori',3); gd('giovani',-2);}},
+ ]},
+ /* AMBIENTE — lode/partnership quando la linea è già verde */
+ {id:'ong_clima_lode', min:'sviluppo', cond:()=>lv('ambiente')===2, kick:'Società civile', t:'Una partnership verde', text:'Le organizzazioni ambientaliste, sponda della tua linea, propongono una partnership su un grande progetto di transizione.',ch:[
+   {l:'Firma la partnership', e:'Alleanza con la società civile; un impegno di spesa', pleases:'progressista', costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; relIntMuovi('ong',6); gd('giovani',2);}},
+   {l:'Ringrazi, ma mantieni le distanze', e:'Non ti leghi; un\'occasione di sponda persa', pleases:'tecnico', f:()=>{relIntMuovi('ong',-3);}},
+ ]},
+ /* DIRITTI/MIGRANTI — transnazionale: tono dalla linea sull'immigrazione (la spaccatura col verde) */
+ {id:'ong_diritti', min:'interno', consesso:true, cond:()=>lv('immigrazione')===0, kick:'Società civile', t:'I gruppi per i diritti accusano', text:'I gruppi per i diritti denunciano la tua linea restrittiva sui migranti, e la denuncia rimbalza sulla stampa internazionale.',ch:[
+   {l:'Apri uno spiraglio umanitario', e:'Allenti la stretta; il mondo apprezza, la pancia mugugna', pleases:'progressista', f:()=>{relIntMuovi('ong',7); relIntMuovi('consesso',4); gd('cattolici',2); gd('cetomedio',-2);}},
+   {l:'Difendi la linea dura', e:'Tieni il punto; ONG e Nazioni Unite ti voltano le spalle', pleases:'populista', f:()=>{relIntMuovi('ong',-7); relIntMuovi('consesso',-3); gd('cetomedio',3); gd('cattolici',-2);}},
+ ]},
+ /* DIRITTI/MIGRANTI — lode quando la linea è aperta */
+ {id:'ong_diritti_lode', min:'interno', cond:()=>lv('immigrazione')===2, kick:'Società civile', t:'La società civile ti tende la mano', text:'I gruppi per i diritti riconoscono la tua linea di apertura e propongono di lavorare insieme all\'accoglienza.',ch:[
+   {l:'Rilanci con loro', e:'Alleanza coi gruppi per i diritti', pleases:'progressista', f:()=>{relIntMuovi('ong',6); gd('cattolici',2); gd('giovani',2);}},
+   {l:'Prudenza, è materia delicata', e:'Non ti esponi; un po\' di freddezza', pleases:'tecnico', f:()=>{relIntMuovi('ong',-2);}},
+ ]},
+ /* MIGRANTI — puramente INTERNO (niente Consesso): l'operato di una ONG sul territorio */
+ {id:'ong_migranti', min:'interno', kick:'Società civile', t:'Una ONG sul territorio', text:'Una organizzazione umanitaria gestisce accoglienza e soccorsi sul territorio: chiede sostegno, mentre una parte dell\'opinione pubblica protesta.',ch:[
+   {l:'Sostieni il loro lavoro', e:'Vicinanza alla società civile; il ceto medio storce il naso', pleases:'progressista', f:()=>{relIntMuovi('ong',6); gd('cattolici',3); gd('cetomedio',-2);}},
+   {l:'Ne ostacoli le attività', e:'Accontenti chi chiede ordine; rottura con le ONG', pleases:'populista', f:()=>{relIntMuovi('ong',-5); gd('cetomedio',2); gd('cattolici',-1);}},
+ ]},
+ /* FINANZIAMENTO — interno: fondi pubblici a un bando per il terzo settore */
+ {id:'ong_fondi', min:'interno', kick:'Società civile', t:'Fondi al terzo settore', text:'Le organizzazioni del terzo settore chiedono di rifinanziare un bando per i loro progetti sociali.',ch:[
+   {l:'Finanzi il bando', e:'Investi nel sociale e nella società civile; costa', pleases:'progressista', costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; relIntMuovi('ong',5); gd('giovani',2);}},
+   {l:'Niente fondi pubblici', e:'Conti salvi; le ONG restano a bocca asciutta', pleases:'tecnico', f:()=>{relIntMuovi('ong',-4);}},
+ ]},
+ /* PRESSIONE — cond-gata sullo standing basso: la campagna ostile è la conseguenza di un rapporto già logorato */
+ {id:'ong_pressione', min:'interno', cond:()=>S.relInt&&S.relInt.ong!=null&&S.relInt.ong<38, kick:'Società civile', t:'La società civile in piazza', text:'Dopo mesi di scelte contrarie ai loro temi, le organizzazioni civili coordinano una grande campagna contro di te.',ch:[
+   {l:'Apri un tavolo di confronto', e:'Provi a ricucire; l\'industria diffida', pleases:'tecnico', f:()=>{relIntMuovi('ong',8); gd('imprenditori',-2);}},
+   {l:'Le accusi di fare politica', e:'Compatti la tua base; la frattura si scava', pleases:'populista', f:()=>{relIntMuovi('ong',-4); gd('cetomedio',3); stampad(-2);}},
+ ]},
+];
+
+/* ===== CONFLITTI INTERNAZIONALI (cantiere paesi reali e conflitti, FASE B) — i flashpoint che vivi DA PREMIER (liv. 3):
+   la presenza RICORRENTE che fa sentire il mondo vivo e teso (l'arco-aggressione, raro e grave, sta in ARCHI_DEF). Ogni
+   carta è un `kind:'event'` (riusa renderer/resolver generici): `pot` FISSA il volto, `potPool` lo pesca; `pickConflittoInt`
+   risolve il templating (`potSub`: %POTdet/%POTdi/%POTa…). Effetti sui sistemi esistenti — relIntMuovi sui BLOCCHI (mai
+   sui paesi: il paese è il VOLTO, lo standing è il blocco), gd/repd/gMod/debt, `rischio`→esposizione, `ente`/`enteMin`→
+   opzione-mediatore a soglia. PALETTI: stati reali / leader fittizi (lo Stato agisce); il giocatore naviga, il gioco non
+   prende posizione (aggressore nominato, vittima generica); scenari archetipici, sobri. ===== */
+const CONFLITTI_INT=[
+ {id:'cv_alleanza', tono:'grave', occ:true, min:'difesa', potPool:['russia','cina'], kick:'Difesa collettiva', t:'Un alleato sotto minaccia', text:'%POTdet minaccia apertamente un paese alleato, e l\'Alleanza invoca la difesa comune. Quanto ti esponi?', ch:[
+   {l:'Un contributo pieno', e:'Affidabile agli alleati; %POTdet ti segna', pleases:'conservatore', costo:{debito:1},f:()=>{relIntMuovi('alleanza',8); relIntMuovi('rivale',-7); repd(3); S.ind.debt+=1; gd('giovani',-2);}},
+   {l:'Solo sostegno politico', e:'Prudenza; gli alleati ti trovano tiepido', pleases:'tecnico', f:()=>{relIntMuovi('alleanza',-3); gd('cetomedio',1);}},
+   {l:'Resti fuori: non è guerra tua', e:'Eviti l\'esposizione; l\'Alleanza prende nota', pleases:'populista', f:()=>{relIntMuovi('alleanza',-7); relIntMuovi('rivale',3); repd(-3); gd('giovani',2);}},
+ ]},
+ {id:'cv_nucleare', tono:'grave', min:'esteri', potPool:['iran','corea_nord'], kick:'Allarme nucleare', t:'%POTdet accelera sul nucleare', text:'%POTdet annuncia un avanzamento del suo programma nucleare. Le Nazioni Unite chiedono una risposta: fermezza e diplomazia tirano in direzioni opposte.', ch:[
+   {l:'Sanzioni e pressione', e:'Fermezza con le Nazioni Unite; %POTdet si arrocca', pleases:'conservatore', f:()=>{relIntMuovi('rivale',-6); relIntMuovi('consesso',5); relIntMuovi('alleanza',3); repd(2);}},
+   {l:'Apri un canale negoziale', e:'Tendi la mano; i falchi storcono il naso', pleases:'progressista', f:()=>{relIntMuovi('rivale',5); relIntMuovi('consesso',2); gd('cetomedio',-2);}},
+   {l:'Lasci la regia ai grandi', e:'Ti chiami fuori; pesi di meno', f:()=>{relIntMuovi('consesso',-3); repd(-2);}},
+ ]},
+ {id:'cv_stretto', occ:true, min:'difesa', pot:'cina', kick:'Rotte contese', t:'Tensione nello stretto', text:'%POTdet rivendica le acque di uno stretto conteso e ne ostacola il traffico: una rotta vitale per il commercio mondiale è a rischio.', ch:[
+   {l:'Ti allinei agli alleati', e:'Compatto con l\'Occidente; il commercio %POTdi si raffredda', pleases:'conservatore', f:()=>{relIntMuovi('alleanza',7); relIntMuovi('rivale',-7); S.gMod-=0.2; gd('imprenditori',-3);}},
+   {l:'Navighi in mezzo', e:'Tieni aperto col mercato; gli alleati diffidano', pleases:'populista', f:()=>{relIntMuovi('alleanza',-5); relIntMuovi('rivale',4); gd('imprenditori',3);}},
+   {l:'Spingi per una mediazione delle Nazioni Unite', e:'Da mediatore credibile, se ne hai il peso', ente:'consesso', enteMin:60, pleases:'tecnico', f:()=>{relIntMuovi('consesso',6); relIntMuovi('rivale',2); repd(4);}},
+ ]},
+ {id:'cv_energia', min:'sviluppo', pot:'russia', kick:'Arma-energia', t:'Il ricatto dell\'energia', text:'%POTdet taglia le forniture di energia per piegare chi ne dipende: i prezzi schizzano, le imprese tremano.', ch:[
+   {l:'Tieni la linea, cerchi alternative', e:'Non cedi al ricatto; l\'inverno sarà caro', pleases:'conservatore', f:()=>{relIntMuovi('alleanza',5); relIntMuovi('rivale',-5); S.gMod-=0.25; gd('lavoratori',-2); repd(3);}},
+   {l:'Apri uno spiraglio %POTa', e:'Allenti la pressione sui prezzi; gli alleati protestano', pleases:'populista', f:()=>{relIntMuovi('alleanza',-5); relIntMuovi('rivale',5); S.gMod+=0.1; gd('imprenditori',2); repd(-3);}},
+ ]},
+ {id:'cv_profughi', min:'interno', kick:'Emergenza umanitaria', t:'Ondata di profughi', text:'Un conflitto oltre confine spinge decine di migliaia di profughi verso le frontiere: l\'accoglienza divide il paese.', ch:[
+   {l:'Apri all\'accoglienza', e:'Generosità riconosciuta; la pancia mugugna', pleases:'progressista', costo:{debito:0.5},f:()=>{relIntMuovi('ong',7); relIntMuovi('consesso',3); gd('cattolici',3); gd('cetomedio',-3); S.ind.debt+=0.5;}},
+   {l:'Chiudi le frontiere', e:'Ordine per chi lo chiede; il mondo prende nota', pleases:'populista', f:()=>{relIntMuovi('ong',-6); relIntMuovi('consesso',-3); gd('cetomedio',3); gd('cattolici',-2);}},
+   {l:'Un piano multilaterale di condivisione', e:'Spartisci il peso, se hai il peso alle Nazioni Unite', ente:'consesso', enteMin:55, pleases:'tecnico', f:()=>{relIntMuovi('consesso',5); relIntMuovi('ong',3); gd('cattolici',1);}},
+ ]},
+ {id:'cv_swing', min:'esteri', pot:'india', occ:true, cond:()=>!nonAllineato(), kick:'Il pendolo', t:'Il corteggiamento %POTdi', text:'%POTdet, la grande potenza non allineata, è corteggiata da entrambi i poli. Si apre una finestra per avvicinarla all\'Occidente — ma ha un prezzo.', ch:[
+   {l:'La corteggi con un grande accordo', e:'Avvicini %POTdet all\'Occidente; costa concessioni', pleases:'tecnico', costo:{debito:0.6},f:()=>{relIntMuovi('rivale',-4); relIntMuovi('alleanza',2); S.gMod+=0.15; S.ind.debt+=0.6; repd(3); gd('imprenditori',2);}},
+   {l:'Un\'apertura prudente', e:'Tieni un piede nella porta, senza esporti', f:()=>{relIntMuovi('rivale',-1);}},
+   {l:'La lasci ai rivali', e:'Niente sforzo; %POTdet guarda altrove', pleases:'populista', f:()=>{relIntMuovi('rivale',5); relIntMuovi('alleanza',-2);}},
+ ]},
+ {id:'cv_missile', min:'difesa', pot:'corea_nord', kick:'Provocazione', t:'Lancio di prova', text:'%POTdet lancia un missile di prova che sorvola acque trafficate: una provocazione in cerca di attenzione.', ch:[
+   {l:'Condanna ferma e coordinata', e:'Compatto cogli alleati; %POTdet incassa l\'isolamento', pleases:'conservatore', f:()=>{relIntMuovi('alleanza',4); relIntMuovi('rivale',-3); relIntMuovi('consesso',2);}},
+   {l:'Minimizzi, per non dare palco', e:'Niente scena %POTa; qualcuno ti dice molle', pleases:'tecnico', f:()=>{gd('cetomedio',-1);}},
+ ]},
+ {id:'cv_sanzioni', occ:true, min:'esteri', potPool:['russia','cina','iran'], kick:'Il voto', t:'Il voto sulle sanzioni', text:'Il fronte occidentale propone nuove sanzioni contro %POTdet. Unirti ha un costo per le tue imprese; sfilarti, un costo con gli alleati.', ch:[
+   {l:'Ti unisci alle sanzioni', e:'Affidabile; le tue imprese pagano il conto', pleases:'conservatore', f:()=>{relIntMuovi('alleanza',5); relIntMuovi('rivale',-5); gd('imprenditori',-3); S.gMod-=0.1; repd(2);}},
+   {l:'Sanzioni annacquate', e:'Cerchi il compromesso; scontenti un po\' tutti', pleases:'tecnico', f:()=>{relIntMuovi('alleanza',-2); relIntMuovi('rivale',1);}},
+   {l:'Ti sfili', e:'Salvi l\'export; gli alleati se lo legano al dito', pleases:'populista', f:()=>{relIntMuovi('alleanza',-6); relIntMuovi('rivale',4); gd('imprenditori',3); repd(-3);}},
+ ]},
+ {id:'cv_incidente', min:'difesa', potPool:['russia','cina'], kick:'Incidente', t:'Incidente al confine', text:'Un incidente militare con %POTdet — uno sconfinamento, un\'unità intercettata — rischia di degenerare. Tutti aspettano la tua reazione.', ch:[
+   {l:'Reazione ferma', e:'Mostri i muscoli; sale la tensione con %POTdet', pleases:'conservatore', rischio:2, f:()=>{relIntMuovi('alleanza',3); relIntMuovi('rivale',-5); gd('cetomedio',2);}},
+   {l:'Gestione diplomatica', e:'Abbassi i toni; eviti l\'escalation', pleases:'tecnico', f:()=>{relIntMuovi('rivale',2); repd(2);}},
+ ]},
+];
+
+/* ===== CONFLITTI dalla SEDIA-SWING (Fetta B) — per i premier NON ALLINEATI (India/Sudafrica/Argentina): NON difendi un
+   polo, sei la media potenza CORTEGGIATA dai due. Il dilemma dell'autonomia: `alleanza`=polo occidentale, `rivale`=polo
+   rivale. PALETTO CARDINE — inclinarsi dev'essere TENTANTE: ogni lean dà un VANTAGGIO CONCRETO (crescita `gMod`, sicurezza,
+   una vittoria regionale) al prezzo dell'altro polo e della leva-swing; l'autonomia è prudente (Consesso/prestigio,
+   flessibilità) ma NON gratis — niente boost economico/sicurezza — così non è strettamente dominante. `cs_palco` è il
+   premio proprio dell'autonomia (il ponte). Rimpiazzano i conflitti `occ:true` (difesa comune, ecc.) per i non allineati. ===== */
+const CONFLITTI_SWING=[
+ {id:'cs_corteggiamento', min:'esteri', kick:'I due poli', t:'Corteggiato dai due poli', text:'Entrambi i poli ti offrono un grande accordo per legarti a sé: l\'Occidente apre i suoi mercati, il blocco rivale promette investimenti senza condizioni. O resti libero.', ch:[
+   {l:'Accetti l\'accordo occidentale', e:'Mercati aperti, ma ti leghi a un polo', pleases:'conservatore', f:()=>{relIntMuovi('alleanza',8); relIntMuovi('rivale',-6); S.gMod+=0.25; gd('imprenditori',3);}},
+   {l:'Resti non allineato', e:'Conservi la leva; nessuno dei due ti possiede', pleases:'tecnico', f:()=>{relIntMuovi('consesso',6); repd(4);}},
+   {l:'Accetti gli investimenti rivali', e:'Capitali freschi, ma l\'Occidente diffida', pleases:'populista', f:()=>{relIntMuovi('rivale',8); relIntMuovi('alleanza',-6); S.gMod+=0.25; gd('lavoratori',3);}},
+ ]},
+ {id:'cs_sicurezza', min:'difesa', kick:'Garanzie di sicurezza', t:'L\'ombrello di un polo', text:'Una minaccia regionale cresce. Entrambi i poli offrono garanzie di sicurezza — in cambio del tuo allineamento. Oppure costruisci la tua difesa, da solo.', ch:[
+   {l:'Sotto l\'ombrello occidentale', e:'Protezione subito; il rivale ti marca', pleases:'conservatore', f:()=>{relIntMuovi('alleanza',8); relIntMuovi('rivale',-5); S.ind.sicurezza+=4;}},
+   {l:'Difesa autonoma', e:'Nessun padrone, ma costa e ci vuole tempo', pleases:'tecnico', costo:{debito:0.8},f:()=>{relIntMuovi('consesso',4); S.ind.debt+=0.8; S.ind.sicurezza+=2; repd(3);}},
+   {l:'Sotto l\'ombrello del blocco rivale', e:'Protezione subito; l\'Occidente diffida', pleases:'populista', f:()=>{relIntMuovi('rivale',8); relIntMuovi('alleanza',-5); S.ind.sicurezza+=4;}},
+ ]},
+ {id:'cs_voto', min:'esteri', kick:'Voto conteso', t:'Il tuo voto alle Nazioni Unite', text:'Un voto divisivo spacca le Nazioni Unite: i due poli premono per averti. Schierarti ti procura un favore; astenerti ti tiene libero ma scontenta entrambi.', ch:[
+   {l:'Voti con l\'Occidente', e:'Un favore dall\'Occidente; il rivale incassa', pleases:'conservatore', f:()=>{relIntMuovi('alleanza',7); relIntMuovi('rivale',-5); repd(2);}},
+   {l:'Ti astieni', e:'Resti libero; nessuno dei due esulta', pleases:'tecnico', f:()=>{relIntMuovi('consesso',5);}},
+   {l:'Voti col blocco rivale', e:'Un favore dal rivale; l\'Occidente incassa', pleases:'populista', f:()=>{relIntMuovi('rivale',7); relIntMuovi('alleanza',-5); repd(2);}},
+ ]},
+ {id:'cs_regionale', min:'difesa', kick:'Rivalità regionale', t:'Tensione con un vicino', text:'Una vecchia rivalità con un paese vicino si riaccende. Un polo si offre di appoggiarti — al prezzo di entrare nella sua orbita. Oppure la gestisci da solo, da non allineato.', ch:[
+   {l:'Accetti l\'appoggio occidentale', e:'Vinci la partita regionale; ti leghi all\'Occidente', pleases:'conservatore', f:()=>{relIntMuovi('alleanza',7); relIntMuovi('rivale',-4); S.ind.sicurezza+=3; gd('cetomedio',2);}},
+   {l:'La gestisci da non allineato', e:'Nessun padrone; la partita resta in bilico', pleases:'tecnico', f:()=>{relIntMuovi('consesso',5); repd(3);}},
+   {l:'Accetti l\'appoggio del blocco rivale', e:'Vinci la partita regionale; ti leghi al rivale', pleases:'populista', f:()=>{relIntMuovi('rivale',7); relIntMuovi('alleanza',-4); S.ind.sicurezza+=3; gd('cetomedio',2);}},
+ ]},
+ {id:'cs_palco', min:'esteri', kick:'Il tuo palco', t:'Guidare i non allineati', text:'Un gruppo di paesi non allineati cerca un portavoce in un foro globale: l\'occasione di pesare come ponte tra i poli — la forza della tua posizione di terzo.', ch:[
+   {l:'Ti fai portavoce dei non allineati', e:'Sali sul palco: le Nazioni Unite ti riconoscono', pleases:'progressista', f:()=>{relIntMuovi('consesso',9); repd(5); gd('giovani',2);}},
+   {l:'Resti defilato', e:'Niente esposizione; un\'occasione persa', f:()=>{relIntMuovi('consesso',-2);}},
+ ]},
+];
+
+/* ===== CRISI DI MEDIAZIONE (lotto internazionale FASI C1a→C1b) — da Segretario Generale del Consesso GIOCHI IL
+   TRIANGOLO DALL'ALTO: medi tra i blocchi (Alleanza/Rivale/Unione) che, da leader nazionale, ti relazionavi. Ogni crisi
+   è un TRILEMMA: pendere da un lato → COESIONE giù (i membri vicini all'altro blocco si sfilano); imporre il COMPROMESSO
+   → coesione+autorevolezza su, MA `gateAut` (serve autorevolezza ≥ soglia — un mediatore debole non ricuce sempre);
+   rinviare → coesione giù lieve. Le scelte alimentano biografia/tratti (`pleases`).
+   C1b — il tabellone VIVO: ogni scelta muove anche gli STANDING dei blocchi esterni (relIntMuovi su alleanza/rivale/
+   unione/ong — MAI 'consesso', che a livello 4 sei TU, già misurato dalla coesione) in modo coerente col triangolo;
+   relAvvicina(a,b,n) de-polarizza (n>0, il compromesso) o allarga (n<0, cavalcare la frattura). Campo `mondo`: la riga
+   d'esito IN PAROLE del riassesto. Alcune crisi sono cond-gate sullo STATO del tabellone (tensione alta, Unione in rotta,
+   Consesso debole) → il mondo che hai plasmato richiama le sue crisi: conseguenza delle TUE scelte, mai a freddo (la
+   cura). NIENTE retroazione numerica sugli indicatori del mandato: il tabellone è colore + gatekeeping + lascito. ===== */
+const CRISI_INT=[
+ /* --- IL TRIANGOLO OCCIDENTE↔RIVALE (le 5 di C1a, testi invariati, ora muovono i blocchi) --- */
+ {id:'ci_scontro', tono:'grave', volto:'rivale', kick:'Crisi tra potenze', t:'%POTDet e l\'Alleanza sull\'orlo dello scontro', text:'L\'Alleanza atlantica e %POTdet arrivano allo scontro su una crisi regionale: i membri delle %ONU ti guardano. Da arbitro, come ti muovi?', ch:[
+   {l:'Dai ragione all\'Alleanza', e:'I membri vicini %POTa si sfilano; sembri di parte', pleases:'conservatore', f:()=>{coesioneMuovi(-6); autorevMuovi(-2); relIntMuovi('alleanza',6); relIntMuovi('rivale',-6);}, mondo:'L\'Occidente si stringe attorno a te; %POTdet si chiude.'},
+   {l:'Dai ragione %POTa', e:'L\'Occidente protesta; la coesione ne soffre', pleases:'populista', f:()=>{coesioneMuovi(-6); autorevMuovi(-2); relIntMuovi('rivale',6); relIntMuovi('alleanza',-6);}, mondo:'%POTDet incassa l\'apertura; gli alleati si sentono scavalcati.'},
+   {l:'Imponi un compromesso', e:'Da arbitro credibile: tieni tutti al tavolo', gateAut:57, pleases:'tecnico', f:()=>{coesioneMuovi(8); autorevMuovi(5); relAvvicina('alleanza','rivale',4);}, mondo:'Tieni tutti al tavolo: la tensione tra i blocchi cala.'},
+   {l:'Prendi tempo, rinvii', e:'L\'inazione logora la fiducia nell\'ente', f:()=>{coesioneMuovi(-3);}, mondo:'Il mondo resta sospeso: l\'attesa logora la fiducia.'},
+ ]},
+ {id:'ci_uscita', kick:'Tenuta dell\'ente', t:'Un membro minaccia di uscire', text:'Un membro influente minaccia di lasciare le %ONU se non otterrà più peso. Cedere crea un precedente; tenere la linea può spaccare il tavolo.', ch:[
+   {l:'Concedi più peso al membro', e:'Lo trattieni; gli altri fiutano il precedente', f:()=>{coesioneMuovi(3); autorevMuovi(-3);}},
+   {l:'Tieni la linea, a costo dell\'addio', e:'Principio salvo; il membro sbatte la porta', pleases:'conservatore', f:()=>{coesioneMuovi(-7); autorevMuovi(1);}},
+   {l:'Una riforma che accontenta tutti', e:'Ricuci con una mediazione di sistema', gateAut:58, pleases:'tecnico', f:()=>{coesioneMuovi(7); autorevMuovi(4);}},
+ ]},
+ {id:'ci_emergenza', tono:'grave', kick:'Emergenza globale', t:'Un\'emergenza chiede una risposta comune', text:'Una crisi umanitaria su scala globale chiede una risposta coordinata delle %ONU. Ma ogni membro guarda al proprio interesse.', ch:[
+   {l:'Spingi per un\'azione comune', e:'Se ti seguono, l\'ente cresce; è un azzardo', pleases:'progressista', f:()=>{coesioneMuovi(5); autorevMuovi(3); relIntMuovi('ong',5);}, mondo:'La società civile applaude la risposta comune.'},
+   {l:'Lascia fare ai singoli stati', e:'Eviti lo scontro; l\'ente sembra inutile', f:()=>{coesioneMuovi(-4); autorevMuovi(-2); relIntMuovi('ong',-3);}, mondo:'Le organizzazioni umanitarie denunciano l\'inazione.'},
+   {l:'Negozia un piano condiviso', e:'Da mediatore: un piano che regge davvero', gateAut:57, pleases:'tecnico', f:()=>{coesioneMuovi(7); autorevMuovi(4); relIntMuovi('ong',4);}, mondo:'Un piano che regge: anche la società civile ti riconosce.'},
+ ]},
+ {id:'ci_riforma', kick:'Riforma dell\'ente', t:'La riforma delle regole', text:'Un fronte di membri chiede di riformare le regole delle %ONU; un altro difende lo status quo. La spaccatura è netta.', ch:[
+   {l:'Stai coi riformatori', e:'I conservatori del tavolo si irrigidiscono', pleases:'progressista', f:()=>{coesioneMuovi(-5); autorevMuovi(-1);}},
+   {l:'Difendi lo status quo', e:'I riformatori ti accusano d\'immobilismo', pleases:'conservatore', f:()=>{coesioneMuovi(-5); autorevMuovi(-1);}},
+   {l:'Una riforma graduale e condivisa', e:'Da statista del multilaterale: tieni il tavolo', gateAut:60, pleases:'tecnico', f:()=>{coesioneMuovi(8); autorevMuovi(6);}},
+ ]},
+ {id:'ci_rivale_test', tono:'grave', volto:'rivale', kick:'Prova di forza', t:'%POTDet sfida l\'ente', text:'%POTDet mette alla prova la tenuta delle %ONU con una mossa provocatoria. Fermezza o dialogo?', ch:[
+   {l:'Fermezza compatta', e:'L\'Occidente si stringe; %POTdet si chiude', pleases:'conservatore', f:()=>{coesioneMuovi(4); autorevMuovi(1); relIntMuovi('alleanza',4); relIntMuovi('rivale',-5);}, mondo:'L\'Occidente si compatta; con %POTdet cala il gelo.'},
+   {l:'Apri un canale di dialogo', e:'De-escalation; i falchi del tavolo mugugnano', pleases:'progressista', f:()=>{coesioneMuovi(-3); autorevMuovi(1); relIntMuovi('rivale',5); relIntMuovi('alleanza',-3);}, mondo:'Spiragli con %POTdet; i falchi alleati mugugnano.'},
+   {l:'Una risposta misurata e unitaria', e:'Tieni dentro falchi e colombe insieme', gateAut:58, pleases:'tecnico', f:()=>{coesioneMuovi(7); autorevMuovi(4); relAvvicina('alleanza','rivale',3);}, mondo:'Falchi e colombe restano insieme: nessuno strappo.'},
+ ]},
+ /* --- IL TRIANGOLO si allarga (C1b): nuove crisi Occidente↔rivale, alcune cond-gate sullo STATO del tabellone --- */
+ {id:'ci_alleanza_spesa', volto:'rivale', kick:'Impegno dell\'Alleanza', t:'L\'Alleanza chiede di più', text:'Gli alleati premono per un impegno militare collettivo più forte sotto l\'egida delle %ONU. %POTDet leggerà ogni passo come una minaccia.', ch:[
+   {l:'Avalli l\'impegno', e:'L\'Alleanza si rafforza; %POTdet si allarma', pleases:'conservatore', f:()=>{coesioneMuovi(-3); autorevMuovi(1); relIntMuovi('alleanza',6); relIntMuovi('rivale',-5);}, mondo:'L\'Alleanza si rafforza; %POTdet legge una minaccia.'},
+   {l:'Freni l\'escalation', e:'Eviti la provocazione; gli alleati ti trovano timido', pleases:'progressista', f:()=>{coesioneMuovi(2); relIntMuovi('alleanza',-4); relIntMuovi('rivale',4);}, mondo:'Eviti l\'escalation; gli alleati ti trovano timido.'},
+   {l:'Un impegno calibrato e condiviso', e:'Da mediatore: fermezza senza provocare', gateAut:58, pleases:'tecnico', f:()=>{coesioneMuovi(6); autorevMuovi(4); relIntMuovi('alleanza',3); relAvvicina('alleanza','rivale',2);}, mondo:'Un impegno misurato: rassicuri gli alleati senza provocare.'},
+ ]},
+ {id:'ci_sanzioni', volto:'rivale', kick:'Pressione %POTsu', t:'Sanzioni contro %POTdet?', text:'Il fronte occidentale chiede sanzioni dure contro %POTdet; %POTdet minaccia ritorsioni. Le %ONU aspettano la tua linea.', ch:[
+   {l:'Imponi le sanzioni', e:'L\'Occidente esulta; con %POTdet è gelo artico', pleases:'conservatore', f:()=>{coesioneMuovi(-4); autorevMuovi(-1); relIntMuovi('alleanza',5); relIntMuovi('rivale',-7);}, mondo:'Punisci %POTdet: l\'Occidente esulta, il gelo si fa artico.'},
+   {l:'Eviti le sanzioni', e:'%POTDet respira; gli alleati protestano', pleases:'populista', f:()=>{coesioneMuovi(-3); autorevMuovi(-1); relIntMuovi('rivale',4); relIntMuovi('alleanza',-4);}, mondo:'Niente sanzioni: %POTdet respira, gli alleati protestano.'},
+   {l:'Sanzioni mirate e reversibili', e:'Da mediatore: fermezza senza rompere ogni ponte', gateAut:60, pleases:'tecnico', f:()=>{coesioneMuovi(7); autorevMuovi(5); relIntMuovi('alleanza',2); relIntMuovi('rivale',-2);}, mondo:'Una stretta misurata: fermezza, ma una porta resta aperta.'},
+ ]},
+ {id:'ci_mediazione_guerra', tono:'grave', volto:'rivale', kick:'Conflitto regionale', t:'Una guerra ai confini del mondo', text:'Un conflitto regionale esplode e divide i blocchi su chi sostenere. Gli occhi del mondo sono sulle %ONU — e su di te.', ch:[
+   {l:'Schieri le %ONU con l\'Occidente', e:'Prendi parte; per %POTdet diventi nemico', pleases:'conservatore', f:()=>{coesioneMuovi(-5); autorevMuovi(-1); relIntMuovi('alleanza',5); relIntMuovi('rivale',-6);}, mondo:'Le %ONU prendono parte: per %POTdet sei nemico.'},
+   {l:'Cerchi l\'equidistanza', e:'Non scontenti nessuno, non convinci nessuno', f:()=>{coesioneMuovi(-2);}, mondo:'Equidistanza: nessuno scontento, nessuno convinto.'},
+   {l:'Promuovi un negoziato di pace', e:'Da statista: porti le parti al tavolo', gateAut:60, pleases:'tecnico', f:()=>{coesioneMuovi(8); autorevMuovi(6); relAvvicina('alleanza','rivale',4); relIntMuovi('ong',4);}, mondo:'Porti le parti al negoziato: il mondo intero tira il fiato.'},
+ ]},
+ {id:'ci_disgelo', tono:'florido', volto:'rivale', kick:'Equilibri tra blocchi', cond:()=>S.relInt&&(S.relInt.rivale||50)>=62, t:'Il disgelo che inquieta gli alleati', text:'Hai riaperto a fondo con %POTdet, e l\'Alleanza teme di essere scavalcata: serpeggia il sospetto che le %ONU pendano troppo da una parte.', ch:[
+   {l:'Rassicura gli alleati', e:'Ricuci con l\'Occidente, a costo di raffreddare %POTdet', pleases:'conservatore', f:()=>{coesioneMuovi(3); autorevMuovi(1); relIntMuovi('alleanza',6); relIntMuovi('rivale',-4);}, mondo:'Ricuci con gli alleati; %POTdet prende le distanze.'},
+   {l:'Tieni la rotta del dialogo', e:'Vai avanti con %POTdet; l\'Occidente diffida', pleases:'populista', f:()=>{coesioneMuovi(-4); relIntMuovi('rivale',4); relIntMuovi('alleanza',-5);}, mondo:'Avanti con %POTdet: la frattura con l\'Occidente si allarga.'},
+   {l:'Un patto di garanzie reciproche', e:'Da mediatore: l\'apertura regge senza rompere il fronte', gateAut:58, pleases:'tecnico', f:()=>{coesioneMuovi(7); autorevMuovi(5); relAvvicina('alleanza','rivale',3);}, mondo:'Garanzie a tutti: il disgelo regge, gli alleati restano.'},
+ ]},
+ {id:'ci_polarizzazione', tono:'grave', kick:'Un mondo diviso', cond:()=>S.relInt&&Math.abs((S.relInt.alleanza||50)-(S.relInt.rivale||50))>=30, t:'Un mondo a due blocchi', text:'La frattura che si è scavata tra i blocchi rischia di sfuggire di mano: ogni incidente può diventare scontro. Da arbitro, che fai?', ch:[
+   {l:'Cavalca la spaccatura', e:'Sfrutti la frattura per pesare di più; il mondo si divide', pleases:'populista', f:()=>{coesioneMuovi(-5); autorevMuovi(-2); relAvvicina('alleanza','rivale',-3);}, mondo:'La frattura si allarga: due mondi sempre più lontani.'},
+   {l:'Prendi tempo', e:'Rimandi; la tensione cova', f:()=>{coesioneMuovi(-3);}, mondo:'Rimandi: la tensione cova sotto la cenere.'},
+   {l:'Riavvicini i due blocchi', e:'Da statista: riapri un canale dove non ce n\'erano', gateAut:60, pleases:'tecnico', f:()=>{coesioneMuovi(8); autorevMuovi(6); relAvvicina('alleanza','rivale',5);}, mondo:'Riapri un canale tra i blocchi: il mondo respira.'},
+ ]},
+ /* --- L'EUROPA (solo se il tabellone ha l'Unione): mediare DENTRO il fronte occidentale --- */
+ {id:'ci_unione_spaccata', tono:'grave', kick:'L\'Europa divisa', cond:()=>S.relInt&&S.relInt.unione!=null, t:'L\'Europa divisa', text:'L\'Unione Europea è spaccata su come rispondere a una crisi: rigoristi contro solidaristi. Da arbitro delle %ONU, spingi una linea?', ch:[
+   {l:'Sostieni il fronte rigorista', e:'Linea dura; l\'Unione si irrigidisce e mugugna', pleases:'conservatore', f:()=>{coesioneMuovi(-4); autorevMuovi(-1); relIntMuovi('unione',-4);}, mondo:'L\'Unione si irrigidisce; cresce il malcontento interno.'},
+   {l:'Spingi una linea solidale', e:'Coesione europea; qualcuno la paga', pleases:'progressista', f:()=>{coesioneMuovi(3); autorevMuovi(1); relIntMuovi('unione',5);}, mondo:'L\'Unione ritrova unità attorno a una linea comune.'},
+   {l:'Una mediazione che tiene insieme l\'Europa', e:'Da ponte credibile: l\'Unione resta unita', gateAut:58, pleases:'tecnico', f:()=>{coesioneMuovi(7); autorevMuovi(4); relIntMuovi('unione',6);}, mondo:'Tieni insieme l\'Europa: Bruxelles ti deve la tenuta.'},
+ ]},
+ {id:'ci_unione_rivale', volto:'rivale', kick:'L\'Europa in bilico', cond:()=>S.relInt&&S.relInt.unione!=null&&S.relInt.unione<42, t:'L\'Europa cerca sponda altrove', text:'Con l\'Unione in rotta con te, alcuni stati membri guardano %POTa per i loro interessi. Il tuo tavolo rischia di svuotarsi.', ch:[
+   {l:'Imponi la linea all\'Europa', e:'Forzi la mano; l\'Unione si sente commissariata', pleases:'populista', f:()=>{coesioneMuovi(-4); autorevMuovi(-2); relIntMuovi('unione',-5);}, mondo:'Imponi la linea: l\'Europa si sente commissariata.'},
+   {l:'Lasci correre', e:'Non intervieni; l\'Europa scivola verso %POTdet', f:()=>{coesioneMuovi(-5); relIntMuovi('unione',-3); relIntMuovi('rivale',3);}, mondo:'L\'Europa scivola verso %POTdet: il tavolo si svuota.'},
+   {l:'Riapri il dialogo con Bruxelles', e:'Da mediatore: ricuci e togli la sponda %POTa', gateAut:57, pleases:'tecnico', f:()=>{coesioneMuovi(6); autorevMuovi(4); relIntMuovi('unione',7); relIntMuovi('rivale',-3);}, mondo:'Ricuci con l\'Europa: %POTdet perde la sponda.'},
+ ]},
+ /* --- LA TENUTA DEL CONSESSO STESSO: cond-gate sulla TUA debolezza (coesione bassa) → leva di recupero, gate basso --- */
+ {id:'ci_consesso_debole', kick:'Rilevanza dell\'ente', cond:()=>S.intl&&S.intl.coesione<42, t:'Le %ONU rischiano l\'irrilevanza', text:'Con i membri divisi, qualcuno propone apertamente di bypassare le %ONU e trattare altrove. L\'ente che guidi rischia di contare niente.', ch:[
+   {l:'Accetti un ruolo minore', e:'Ti fai da parte; l\'autorità delle %ONU si spegne', f:()=>{coesioneMuovi(-4); autorevMuovi(-3);}, mondo:'Le %ONU si fanno da parte: la tua autorità si spegne.'},
+   {l:'Difendi a oltranza il primato', e:'Muso duro; la spaccatura però resta', pleases:'populista', f:()=>{coesioneMuovi(-3); autorevMuovi(1);}, mondo:'Difendi le %ONU a muso duro; la spaccatura resta.'},
+   {l:'Rilanci con una mediazione di peso', e:'Da statista: un colpo d\'ala riporta tutti al tavolo', gateAut:55, pleases:'tecnico', f:()=>{coesioneMuovi(9); autorevMuovi(5); relAvvicina('alleanza','rivale',3);}, mondo:'Un colpo d\'ala: l\'organizzazione torna centrale.'},
+ ]},
+ /* D4 — crisi di mediazione universali senza tempo in più (registro era-neutro: «l'organizzazione», non «le Nazioni Unite»
+    → reggono anche il Segretario d'epoca del '50). Arricchiscono il flusso L4 in entrambe le ere. */
+ {id:'ci_confine', tono:'grave', volto:'rivale', kick:'Crisi tra potenze', t:'Un confine conteso con %POTdet', text:'Due membri si contendono un confine e %POTdet soffia sul fuoco: da arbitro, la tua mossa può spegnere o accendere l\'incendio.', ch:[
+   {l:'Imponi una linea di mediazione', e:'Da arbitro credibile: il fronte si calma', gateAut:56, pleases:'tecnico', f:()=>{coesioneMuovi(7); autorevMuovi(4); relAvvicina('alleanza','rivale',3);}, mondo:'La mediazione regge: il confine si raffredda.'},
+   {l:'Dai ragione al più forte', e:'Chiudi in fretta; l\'altro si sente tradito', pleases:'conservatore', f:()=>{coesioneMuovi(-4); autorevMuovi(-2);}, mondo:'Il più debole incassa il torto: l\'ente perde credito.'},
+   {l:'Prendi tempo', e:'L\'attesa lascia marcire la crisi', f:()=>{coesioneMuovi(-3);}, mondo:'Il confine resta una polveriera.'},
+ ]},
+ {id:'ci_piccoli', kick:'Tenuta dell\'ente', t:'I piccoli membri chiedono voce', text:'I membri più piccoli lamentano di contare poco e minacciano di fare blocco: ascoltarli rafforza l\'ente, ma irrita le grandi potenze.', ch:[
+   {l:'Dai più voce ai piccoli', e:'L\'ente si allarga; le grandi mugugnano', pleases:'progressista', f:()=>{coesioneMuovi(5); autorevMuovi(2); relIntMuovi('alleanza',-2);}},
+   {l:'Tieni il peso alle grandi potenze', e:'Realismo di potenza; i piccoli si sfilano', pleases:'conservatore', f:()=>{coesioneMuovi(-4); relIntMuovi('alleanza',3);}},
+   {l:'Una riforma equilibrata dei pesi', e:'Da mediatore: un compromesso che regge', gateAut:57, pleases:'tecnico', f:()=>{coesioneMuovi(7); autorevMuovi(4);}},
+ ]},
+ {id:'ci_finanze', kick:'Riforma dell\'ente', t:'Le casse dell\'organizzazione', text:'L\'organizzazione è a corto di fondi e i membri litigano su chi paga: tagliare le attività o chiedere contributi più alti?', ch:[
+   {l:'Chiedi contributi più alti', e:'L\'ente resta operativo; qualcuno protesta', pleases:'progressista', f:()=>{coesioneMuovi(4); autorevMuovi(2);}},
+   {l:'Taglia le attività al minimo', e:'Conti a posto; l\'ente conta meno', pleases:'conservatore', f:()=>{coesioneMuovi(-4); autorevMuovi(-2);}},
+   {l:'Un patto di bilancio condiviso', e:'Da mediatore: tutti ci mettono la firma', gateAut:56, pleases:'tecnico', f:()=>{coesioneMuovi(6); autorevMuovi(4);}},
+ ]},
+ {id:'ci_mediatore_conteso', tono:'grave', kick:'Emergenza globale', t:'Due crisi nello stesso momento', text:'Due emergenze scoppiano insieme e non puoi essere ovunque: concentrare le forze su una sola o spalmarle su entrambe?', ch:[
+   {l:'Concentra le forze sulla più grave', e:'Un fronte tenuto; l\'altro si aggrava', pleases:'tecnico', f:()=>{coesioneMuovi(3); autorevMuovi(2);}, mondo:'Una crisi rientra; l\'altra brucia.'},
+   {l:'Spalma le forze su entrambe', e:'Presenza ovunque; nessuna risolta a fondo', pleases:'progressista', f:()=>{coesioneMuovi(2); relIntMuovi('ong',3);}, mondo:'Due fronti tamponati, nessuno spento.'},
+   {l:'Chiama i membri a dividersi i compiti', e:'Da coordinatore: l\'ente agisce come uno', gateAut:58, pleases:'tecnico', f:()=>{coesioneMuovi(8); autorevMuovi(5);}, mondo:'I membri si dividono i compiti: l\'ente funziona.'},
+ ]},
+];
+
+/* ===== MISSIONI DIPLOMATICHE (C2 — percorso diplomatico) — il loop dell'Ambasciatore/Alto rappresentante: missioni e
+   negoziati che costruiscono lo STANDING (`relInt`) e il «credito diplomatico» (`creditoMuovi`). NIENTE governance
+   nazionale (no economia/gruppi/ministri). Riusa `kind:'event'`; `volto:'rivale'` → `potSub` dà un volto reale (negozi
+   con la Russia/Cina…). Si sale per STANDING, non per elezioni: credito alto → Alto rappresentante; relInt.consesso≥75
+   → la chiamata a Segretario. PALETTI: stati reali / leader fittizi; il diplomatico naviga, non prende posizione. ===== */
+const DIPLO_EV=[
+ {id:'dp_mediazione', volto:'rivale', kick:'Mediazione', t:'Un tavolo tra l\'Alleanza e %POTdet', text:'Ti affidano una mediazione delicata: una tensione tra l\'Alleanza e %POTdet rischia di degenerare, e il tuo nome è in gioco.', ch:[
+   {l:'Tessi un compromesso paziente', e:'Da mediatore credibile: il tavolo regge', pleases:'tecnico', f:()=>{creditoMuovi(8); relIntMuovi('consesso',5); relAvvicina('alleanza','rivale',3);}},
+   {l:'Spingi forte da una parte', e:'Risultato rapido, ma ti esponi', pleases:'conservatore', f:()=>{creditoMuovi(-3); relIntMuovi('alleanza',5); relIntMuovi('rivale',-5);}},
+   {l:'Rinvii la questione', e:'Prudenza; nessun passo avanti', f:()=>{creditoMuovi(-2);}},
+ ]},
+ {id:'dp_summit', tono:'florido', kick:'Foro multilaterale', t:'Un summit da preparare', text:'Rappresenti il paese a un grande foro multilaterale: la tua abilità negoziale è sotto esame.', ch:[
+   {l:'Costruisci consenso dietro le quinte', e:'Lavoro paziente: le %ONU ti notano', pleases:'tecnico', f:()=>{creditoMuovi(7); relIntMuovi('consesso',6);}},
+   {l:'Cerchi i riflettori', e:'Visibilità, ma qualche gelosia tra colleghi', pleases:'populista', f:()=>{creditoMuovi(3); relIntMuovi('consesso',2);}},
+ ]},
+ {id:'dp_swing', cond:()=>!nonAllineato(), kick:'Il pendolo', t:'Avvicinare l\'India', text:'L\'India, la grande potenza che tiene il piede fuori dai blocchi, è corteggiata da entrambe le parti. Sta a te tessere la relazione e portarla più vicino all\'Occidente.', ch:[
+   {l:'Un paziente lavoro di tessitura', e:'La avvicini; il rivale perde terreno', pleases:'tecnico', f:()=>{creditoMuovi(6); relIntMuovi('rivale',-4); relIntMuovi('consesso',2);}},
+   {l:'Forzi la mano con un\'offerta secca', e:'Risultato incerto: può irrigidirsi', f:()=>{creditoMuovi(-2); relIntMuovi('rivale',2);}},
+ ]},
+ {id:'dp_crisi', volto:'rivale', kick:'Crisi da disinnescare', t:'Un canale riservato con %POTdet', text:'Una crisi con %POTdet rischia l\'escalation. Ti aprono un canale riservato: disinnescarla sarebbe un colpo da maestro.', ch:[
+   {l:'Lavori il canale con pazienza', e:'De-escalation riuscita: la tua stella sale', pleases:'progressista', f:()=>{creditoMuovi(8); relIntMuovi('rivale',4); relIntMuovi('consesso',3);}},
+   {l:'Tieni una linea dura', e:'Non cedi; il canale si chiude', pleases:'conservatore', f:()=>{creditoMuovi(-2); relIntMuovi('rivale',-4); relIntMuovi('alleanza',3);}},
+ ]},
+ {id:'dp_alleanza', kick:'Rapporti con gli alleati', t:'Cementare un\'alleanza', text:'Un alleato chiede un gesto di vicinanza per rinsaldare i rapporti. Una mossa di routine, ma può pesare.', ch:[
+   {l:'Curi il rapporto di persona', e:'Fiducia rinsaldata; gli alleati ti stimano', pleases:'conservatore', f:()=>{creditoMuovi(5); relIntMuovi('alleanza',6);}},
+   {l:'Deleghi a un sottoposto', e:'Risparmi tempo; un\'occasione di sponda persa', f:()=>{creditoMuovi(-2); relIntMuovi('alleanza',-2);}},
+ ]},
+ {id:'dp_negoziato', kick:'Negoziato', t:'Un trattato da chiudere', text:'Un negoziato multilaterale è arenato sull\'ultimo nodo. Ti chiedono di trovare la quadra.', ch:[
+   {l:'Trovi la formula che accontenta tutti', e:'Trattato firmato: una vittoria diplomatica', pleases:'tecnico', f:()=>{creditoMuovi(7); relIntMuovi('consesso',5);}},
+   {l:'Difendi l\'interesse nazionale a oltranza', e:'Non cedi nulla; il tavolo si irrigidisce', pleases:'populista', f:()=>{creditoMuovi(-3); relIntMuovi('consesso',-3);}},
+ ]},
+ {id:'dp_incidente', volto:'rivale', kick:'Incidente', t:'Una gaffe da recuperare', text:'Una frase mal riportata ti mette in imbarazzo con %POTdet: la stampa ci ricama. Come ne esci?', ch:[
+   {l:'Una smentita misurata e un gesto', e:'Recuperi con eleganza; il credito tiene', pleases:'tecnico', f:()=>{creditoMuovi(3); relIntMuovi('rivale',2);}},
+   {l:'Rilanci con orgoglio', e:'Niente scuse; %POTdet se la lega al dito', pleases:'populista', f:()=>{creditoMuovi(-4); relIntMuovi('rivale',-4);}},
+ ]},
+ /* D4 — missioni universali senza tempo in più (arricchiscono ENTRAMBE le ere: il presente era il più magro) */
+ {id:'dp_conferenza', kick:'Conferenza', t:'Presiedere una conferenza', text:'Ti affidano la presidenza di una conferenza internazionale delicata: guidarla con mano ferma o lasciare che il tavolo trovi da sé la quadra?', ch:[
+   {l:'Guidi con mano ferma', e:'La conferenza produce; qualcuno ti trova invadente', pleases:'conservatore', f:()=>{creditoMuovi(6); relIntMuovi('consesso',4);}},
+   {l:'Lasci maturare il consenso', e:'Tutti si sentono ascoltati; più lento', pleases:'progressista', f:()=>{creditoMuovi(4); relIntMuovi('consesso',3);}},
+ ]},
+ {id:'dp_sanzioni_med', volto:'rivale', kick:'Mediazione', t:'La stretta contro %POTdet', text:'L\'Alleanza spinge per misure dure contro %POTdet; a te chiedono se cavalcare la linea o cercare una via d\'uscita negoziata.', ch:[
+   {l:'Cerca una via d\'uscita negoziata', e:'Da mediatore: eviti l\'escalation', pleases:'tecnico', f:()=>{creditoMuovi(6); relIntMuovi('rivale',3); relIntMuovi('consesso',3);}},
+   {l:'Cavalca la linea dura', e:'Ti allinei; la porta col rivale si chiude', pleases:'conservatore', f:()=>{creditoMuovi(-2); relIntMuovi('alleanza',5); relIntMuovi('rivale',-5);}},
+ ]},
+ {id:'dp_giovane', kick:'Rapporti con gli alleati', t:'Un alleato inaffidabile', text:'Un alleato tentenna e minaccia di sfilarsi da un impegno comune: tenerlo dentro con pazienza o lasciarlo andare per non fare figuracce?', ch:[
+   {l:'Lo tieni dentro con pazienza', e:'L\'unità regge; ci spendi capitale', pleases:'progressista', f:()=>{creditoMuovi(5); relIntMuovi('alleanza',5);}},
+   {l:'Lo lasci alle sue scelte', e:'Non ti esponi; l\'unità s\'incrina', pleases:'tecnico', f:()=>{creditoMuovi(2); relIntMuovi('alleanza',-3);}},
+ ]},
+ {id:'dp_stampa_int', kick:'Ufficio stampa', t:'La stampa internazionale ti cerca', text:'Un grande foro mediatico ti offre la scena per illustrare la tua linea diplomatica: esporti in prima persona o restare nell\'ombra prudente del negoziatore?', ch:[
+   {l:'Esci allo scoperto con la tua linea', e:'Visibilità e statura; ti esponi alle critiche', pleases:'populista', f:()=>{creditoMuovi(4); relIntMuovi('consesso',3);}},
+   {l:'Resti l\'ombra del negoziatore', e:'Lavoro discreto; meno gloria', pleases:'tecnico', f:()=>{creditoMuovi(4);}},
+ ]},
+];
+
+/* ============================================================================
+   D4 (17 lug 2026) — DIPLO_DOSS: la SECONDA superficie-timone del percorso diplomatico (come il ministro ha
+   MINISTRO_CARTE + DOSSIERS). Sono i «fascicoli di scrivania»: i file fermi che colmano i mesi-vuoti (a L5 e L4).
+   Universali senza tempo (eraVivaT default) + d'epoca `italia1950` sourceati da PRESET §6b (ancore/scadenze:
+   CED ≥1952 ≤1954, UEO ≥1954, Memorandum Trieste ≥ott 1954). La cura; effetti sui sistemi della salita
+   (credito/relInt). Nessuna persona reale che parla o agisce.
+   ============================================================================ */
+const DIPLO_DOSS=[
+ // --- universali senza tempo (both eras) ---
+ {id:'dd_ratifica', kick:'Trattato', t:'Un trattato da ratificare', text:'Un trattato firmato aspetta la ratifica: spingerlo in fretta o lasciarlo maturare nelle sedi competenti?', ch:[
+   {l:'Spingi la ratifica rapida', e:'Un impegno onorato; qualcuno grida alla fretta', pleases:'progressista', f:()=>{creditoMuovi(5); relIntMuovi('consesso',4);}},
+   {l:'Lascia che maturi con calma', e:'Prudenza istituzionale; l\'occasione raffredda', pleases:'tecnico', f:()=>{creditoMuovi(2);}},
+ ]},
+ {id:'dd_bilaterale', kick:'Accordo bilaterale', t:'Un accordo bilaterale', text:'Un paese partner propone un accordo di cooperazione: coglierlo apre porte, ma lega le mani su altri tavoli.', ch:[
+   {l:'Firma l\'accordo', e:'Un rapporto in più; meno margine altrove', pleases:'conservatore', f:()=>{creditoMuovi(5); relIntMuovi('alleanza',4);}},
+   {l:'Tieni le mani libere', e:'Flessibilità; un\'occasione lasciata cadere', pleases:'tecnico', f:()=>{creditoMuovi(2);}},
+ ]},
+ {id:'dd_relazione', kick:'Rapporto', t:'La relazione da scrivere', text:'È il momento del rapporto sullo stato della tua missione: schietto sui problemi, o diplomatico per non irritare nessuno?', ch:[
+   {l:'Schietto, anche sui problemi', e:'Onestà apprezzata in alto; qualcuno si offende', pleases:'tecnico', f:()=>{creditoMuovi(5);}},
+   {l:'Misurato e diplomatico', e:'Nessun nemico; nessun scossone', pleases:'conservatore', f:()=>{creditoMuovi(3); relIntMuovi('alleanza',2);}},
+ ]},
+ {id:'dd_protocollo', kick:'Protocollo', t:'Una questione di protocollo', text:'Una disputa sulle precedenze rischia di offendere una delegazione permalosa: cedere il passo o tenere il punto?', ch:[
+   {l:'Cedi il passo con eleganza', e:'Gesto che ingrazia; qualcuno in patria mugugna', pleases:'progressista', f:()=>{creditoMuovi(3); relIntMuovi('consesso',3);}},
+   {l:'Tieni il punto sulla forma', e:'Dignità difesa; un piccolo gelo', pleases:'conservatore', f:()=>{creditoMuovi(1);}},
+ ]},
+ {id:'dd_console', kick:'Affari consolari', t:'I connazionali all\'estero', text:'Un gruppo di tuoi connazionali è in difficoltà in un paese ostile: intervenire pubblicamente o lavorare sottotraccia?', ch:[
+   {l:'Intervento pubblico e fermo', e:'I tuoi ti applaudono; il paese ospite si irrigidisce', pleases:'populista', f:()=>{creditoMuovi(3); relIntMuovi('rivale',-2);}},
+   {l:'Lavoro riservato e paziente', e:'Risultato silenzioso; nessuno se ne accorge', pleases:'tecnico', f:()=>{creditoMuovi(5);}},
+ ]},
+ {id:'dd_delegazione', kick:'Delegazione', t:'Ricevere una delegazione', text:'Arriva una delegazione importante: puntare sulla sostanza dei dossier o sul cerimoniale che fa immagine?', ch:[
+   {l:'Concentrati sulla sostanza', e:'Passi avanti concreti; poca vetrina', pleases:'tecnico', f:()=>{creditoMuovi(5); relIntMuovi('consesso',3);}},
+   {l:'Cura l\'immagine e l\'accoglienza', e:'Buoni rapporti; i dossier restano fermi', pleases:'populista', f:()=>{creditoMuovi(3); relIntMuovi('alleanza',3);}},
+ ]},
+ {id:'dd_commercio', kick:'Dossier commerciale', t:'Il dossier commerciale', text:'Sul tavolo la linea commerciale: spingere l\'export nazionale a testa bassa o difendere le regole multilaterali?', ch:[
+   {l:'Spingi l\'interesse nazionale', e:'I tuoi produttori ringraziano; i partner brontolano', pleases:'populista', f:()=>{creditoMuovi(3); relIntMuovi('alleanza',-2);}},
+   {l:'Difendi le regole comuni', e:'Credibilità multilaterale; qualche mugugno in patria', pleases:'tecnico', f:()=>{creditoMuovi(5); relIntMuovi('consesso',4);}},
+ ]},
+ // --- epoca 1950 (§6b) ---
+ {id:'dd_ced', era:'italia1950', cond:()=>S.year>=1952&&S.year<=1954, kick:'Foro multilaterale', t:'La Comunità Europea di Difesa', text:'Sul tavolo la ratifica del trattato per un esercito europeo comune: un salto d\'integrazione osteggiato da mezza Europa. Che linea porti?', ch:[
+   {l:'Sostieni la ratifica europea', e:'Più Europa; il fronte sovranista frena', pleases:'progressista', f:()=>{creditoMuovi(6); relIntMuovi('consesso',5);}},
+   {l:'Frena: la difesa resti nazionale', e:'Prudenza; l\'integrazione rallenta', pleases:'conservatore', f:()=>{creditoMuovi(3); relIntMuovi('alleanza',3);}},
+ ]},
+ {id:'dd_ueo', era:'italia1950', cond:()=>S.year>=1954, kick:'Foro multilaterale', t:'Dopo la difesa comune, l\'Unione Occidentale', text:'Caduto il progetto dell\'esercito europeo, gli accordi di Parigi propongono una cornice più leggera di cooperazione militare: aderirvi con slancio o con cautela?', ch:[
+   {l:'Aderisci con convinzione', e:'L\'Italia dentro la nuova cornice; passo europeo', pleases:'progressista', f:()=>{creditoMuovi(5); relIntMuovi('consesso',4);}},
+   {l:'Aderisci, ma con cautela', e:'Dentro, senza esporsi troppo', pleases:'tecnico', f:()=>{creditoMuovi(3); relIntMuovi('alleanza',2);}},
+ ]},
+ {id:'dd_trieste', era:'italia1950', cond:()=>S.year>=1954, kick:'Trattato', t:'Il Memorandum su Trieste', text:'Il negoziato per riportare la Zona A di Trieste all\'amministrazione italiana è alla stretta finale: chiudere subito o strappare condizioni migliori?', ch:[
+   {l:'Chiudi l\'accordo adesso', e:'Trieste torna; una pagina si chiude', pleases:'tecnico', f:()=>{creditoMuovi(7); relIntMuovi('alleanza',4); relIntMuovi('consesso',3);}},
+   {l:'Tratta ancora per condizioni migliori', e:'Punti in alto; rischi di far saltare il tavolo', pleases:'populista', f:()=>{creditoMuovi(-2); relIntMuovi('alleanza',-2);}},
+ ]},
+ {id:'dd_ceca', era:'italia1950', kick:'Foro multilaterale', t:'Il mercato comune di carbone e acciaio', text:'L\'Alta Autorità della Comunità del carbone e dell\'acciaio comincia a operare: quanto lasciarle decidere sull\'industria nazionale?', ch:[
+   {l:'Gioca la carta europea a fondo', e:'L\'Italia protagonista; la siderurgia si adatta', pleases:'progressista', f:()=>{creditoMuovi(5); relIntMuovi('consesso',5);}},
+   {l:'Difendi i margini nazionali', e:'Protezione dell\'industria; meno slancio europeo', pleases:'conservatore', f:()=>{creditoMuovi(2); relIntMuovi('alleanza',2);}},
+ ]},
+ {id:'dd_oece', era:'italia1950', kick:'Foro multilaterale', t:'La liberalizzazione degli scambi', text:'Nell\'organizzazione per la cooperazione economica si spinge a liberalizzare gli scambi e a saldare i conti tra i paesi: fin dove aprire?', ch:[
+   {l:'Apri con decisione', e:'Commercio che riparte; i settori protetti soffrono', pleases:'tecnico', f:()=>{creditoMuovi(5); relIntMuovi('consesso',4);}},
+   {l:'Apertura graduale e negoziata', e:'Prudenza; l\'integrazione va piano', pleases:'conservatore', f:()=>{creditoMuovi(3);}},
+ ]},
+ {id:'dd_cedu', era:'italia1950', kick:'Trattato', t:'La Convenzione dei diritti, firmata a Roma', text:'A Roma si firma la Convenzione europea dei diritti dell\'uomo: sostenerla apertamente dà statura, ma vincola lo Stato a un controllo esterno.', ch:[
+   {l:'Sostienila con convinzione', e:'Statura di paese fondatore dei diritti; qualcuno teme i vincoli', pleases:'progressista', f:()=>{creditoMuovi(6); relIntMuovi('consesso',5);}},
+   {l:'Firma, ma con riserve prudenti', e:'Dentro, senza esporsi al controllo', pleases:'conservatore', f:()=>{creditoMuovi(3);}},
+ ]},
+ {id:'dd_pace', era:'italia1950', kick:'Negoziato', t:'Rimuovere i vincoli del dopoguerra', text:'Il trattato di pace del 1947 impone ancora limiti alla sovranità e agli armamenti: lavorare per superarli è una priorità che divide gli alleati.', ch:[
+   {l:'Premi per rimuovere i vincoli', e:'Sovranità piena rivendicata; un negoziato lungo', pleases:'populista', f:()=>{creditoMuovi(4); relIntMuovi('alleanza',3);}},
+   {l:'Muoviti con pazienza diplomatica', e:'Nessuno strappo; i vincoli cadono piano', pleases:'tecnico', f:()=>{creditoMuovi(4); relIntMuovi('consesso',3);}},
+ ]},
+ {id:'dd_onu_cand', era:'italia1950', kick:'Foro multilaterale', t:'La candidatura bloccata', text:'La domanda d\'ingresso dell\'Italia alle Nazioni Unite è ferma da anni, bloccata da un veto: insistere sulla via diretta o cercare un accordo di pacchetto con altri candidati?', ch:[
+   {l:'Insisti sulla via diretta', e:'Principio difeso; il veto non si muove', pleases:'conservatore', f:()=>{creditoMuovi(2);}},
+   {l:'Lavora a un accordo di pacchetto', e:'La via pragmatica: la porta si socchiude', pleases:'tecnico', f:()=>{creditoMuovi(6); relIntMuovi('consesso',5);}},
+ ]},
+ {id:'dd_afis', era:'italia1950', kick:'Amministrazione', t:'L\'amministrazione fiduciaria della Somalia', text:'Alle Nazioni Unite l\'Italia amministra in via fiduciaria la Somalia, con il mandato di portarla all\'indipendenza entro dieci anni: come imposti il compito?', ch:[
+   {l:'Prepara sul serio l\'autogoverno', e:'Istituzioni e scuole per la transizione; costa e impegna', pleases:'progressista', f:()=>{creditoMuovi(5); relIntMuovi('consesso',4);}},
+   {l:'Amministra con prudenza, senza forzare', e:'Gestione ordinata; la transizione va lenta', pleases:'conservatore', f:()=>{creditoMuovi(3);}},
+ ]},
+ {id:'dd_emigra_dip', era:'italia1950', kick:'Accordo bilaterale', t:'Gli accordi per gli emigranti', text:'Diversi paesi offrono lavoro alla manodopera italiana in cambio di accordi: firmare tutele vere per chi parte, o accettare condizioni pur di aprire le porte?', ch:[
+   {l:'Negozia tutele vere per gli emigranti', e:'Dignità difesa; qualche porta si stringe', pleases:'progressista', f:()=>{creditoMuovi(5); relIntMuovi('alleanza',3);}},
+   {l:'Apri le porte, tutele più avanti', e:'Più partenze subito; meno garanzie', pleases:'conservatore', f:()=>{creditoMuovi(3);}},
+ ]},
+ /* D4 — fascicoli universali senza tempo in più (arricchiscono ENTRAMBE le ere) */
+ {id:'dd_cultura', kick:'Accordo bilaterale', t:'Un accordo culturale', text:'Si propone uno scambio culturale e scientifico con un altro paese: coltivare i legami che durano, o dare priorità ai dossier che pesano subito?', ch:[
+   {l:'Investi sui legami di lungo periodo', e:'Semini rapporti che dureranno; frutti lenti', pleases:'progressista', f:()=>{creditoMuovi(4); relIntMuovi('consesso',3);}},
+   {l:'Prima i dossier che pesano', e:'Pragmatismo; un\'occasione rinviata', pleases:'tecnico', f:()=>{creditoMuovi(3);}},
+ ]},
+ {id:'dd_mediazione_terzi', kick:'Rapporto', t:'Una mediazione tra terzi', text:'Due paesi terzi ti chiedono di fare da mediatore in una loro disputa: accettare accresce la statura ma ti espone a scontentare qualcuno.', ch:[
+   {l:'Accetti il ruolo di mediatore', e:'Statura da paese affidabile; un rischio', pleases:'tecnico', f:()=>{creditoMuovi(6); relIntMuovi('consesso',4);}},
+   {l:'Declini con garbo', e:'Nessun nemico; un\'occasione persa', pleases:'conservatore', f:()=>{creditoMuovi(2);}},
+ ]},
+ {id:'dd_organismo', kick:'Foro multilaterale', t:'La quota per l\'organizzazione', text:'L\'organizzazione internazionale chiede ai membri di aumentare i contributi: pagare la propria parte con generosità o negoziare al ribasso?', ch:[
+   {l:'Paga la tua parte con generosità', e:'Peso e riconoscenza; costa al bilancio', pleases:'progressista', f:()=>{creditoMuovi(5); relIntMuovi('consesso',4);}},
+   {l:'Negozia una quota più bassa', e:'Risparmi; un po\' di freddezza al tavolo', pleases:'conservatore', f:()=>{creditoMuovi(2);}},
+ ]},
+ {id:'dd_ambasciata', kick:'Affari consolari', t:'La rete diplomatica da curare', text:'La rete delle ambasciate chiede risorse e nuove sedi dove il paese cresce: investire nella presenza o razionalizzare per far quadrare i conti?', ch:[
+   {l:'Rafforza la presenza dove conta', e:'Più occhi e orecchie nel mondo; costa', pleases:'conservatore', f:()=>{creditoMuovi(4); relIntMuovi('alleanza',3);}},
+   {l:'Razionalizza la rete', e:'Conti a posto; meno presenza', pleases:'tecnico', f:()=>{creditoMuovi(3);}},
+ ]},
+ /* D4 — altri fascicoli universali (diluiscono la scrivania, soprattutto nel presente) */
+ {id:'dd_conferenza_pace', kick:'Negoziato', t:'Una conferenza di pace lontana', text:'Ti chiedono di partecipare a una conferenza per comporre un conflitto lontano: prestarci la tua statura, o tenerla per i dossier di casa?', ch:[
+   {l:'Metti la tua statura al servizio della pace', e:'Riconoscimento internazionale; tempo sottratto ai tuoi', pleases:'progressista', f:()=>{creditoMuovi(6); relIntMuovi('consesso',4);}},
+   {l:'Resta sui dossier che ti competono', e:'Concretezza; un\'occasione di prestigio persa', pleases:'tecnico', f:()=>{creditoMuovi(3);}},
+ ]},
+ {id:'dd_spie', kick:'Rapporto', t:'Un caso di spionaggio imbarazzante', text:'Un caso di spionaggio coinvolge un tuo diplomatico e rischia l\'incidente: gestirlo con fermezza pubblica o con discrezione tra cancellerie?', ch:[
+   {l:'Fermezza pubblica', e:'Dignità difesa; l\'incidente monta', pleases:'populista', f:()=>{creditoMuovi(2); relIntMuovi('rivale',-3);}},
+   {l:'Discrezione tra cancellerie', e:'Il caso rientra nel silenzio', pleases:'tecnico', f:()=>{creditoMuovi(5);}},
+ ]},
+ {id:'dd_neutrale', kick:'Foro multilaterale', t:'Un paese neutrale cerca sponda', text:'Un paese che tiene il piede fuori dai blocchi ti cerca come interlocutore affidabile: coltivarlo o non irritare gli alleati?', ch:[
+   {l:'Coltiva il canale col neutrale', e:'Un ponte in più; gli alleati aggrottano', pleases:'tecnico', f:()=>{creditoMuovi(5); relIntMuovi('consesso',4); relIntMuovi('alleanza',-2);}},
+   {l:'Non irritare gli alleati', e:'Fedeltà al blocco; un ponte lasciato cadere', pleases:'conservatore', f:()=>{creditoMuovi(2); relIntMuovi('alleanza',3);}},
+ ]},
+ {id:'dd_giovani_dip', kick:'Rapporto', t:'La nuova leva di diplomatici', text:'La carriera diplomatica ha bisogno di forze fresche: aprire i concorsi e formare i giovani, o affidarti ai veterani che conoscono i tavoli?', ch:[
+   {l:'Investi sulla nuova leva', e:'Semini il futuro del servizio; frutti lenti', pleases:'progressista', f:()=>{creditoMuovi(4);}},
+   {l:'Affidati ai veterani esperti', e:'Mani sicure ora; il ricambio aspetta', pleases:'conservatore', f:()=>{creditoMuovi(4); relIntMuovi('alleanza',2);}},
+ ]},
+ /* ===== AVANZAMENTO Fase 2 · Lotto 3 — DIPLOMAZIA '60 (era:'italia1960', §6): CEE, sedia vuota, distensione
+    (test-ban, TNP), Francia fuori NATO, seggio ONU pieno, Somalia, decolonizzazione, unione politica. Relazioni
+    esistenti nel '60 (consesso/alleanza/rivale; NIENTE 'unione' — la UE è inerte con ue:false). Cura piena. ===== */
+ {id:'dd60_cee', era:'italia1960', kick:'Mercato comune', t:'L\'Europa dei Sei avanza', text:'La Comunità economica lima dazi e barriere: ogni passo di integrazione apre mercati e cede un pezzo di sovranità. Che spinta imprimi al tavolo europeo?', ch:[
+   {l:'Spingi l\'integrazione più a fondo', e:'Mercati più aperti; qualcuno teme di cedere sovranità', pleases:'progressista', f:()=>{creditoMuovi(5); relIntMuovi('alleanza',5);}},
+   {l:'Procedi con prudenza sui tempi', e:'Nessuno strappo; l\'occasione matura piano', pleases:'tecnico', f:()=>{creditoMuovi(3); relIntMuovi('alleanza',2);}},
+ ]},
+ {id:'dd60_sedia_vuota', era:'italia1960', kick:'Foro multilaterale', cond:()=>S.year>=1965&&S.year<=1966, t:'La crisi della sedia vuota', text:'Un grande partner blocca i lavori comunitari lasciando vuota la sua sedia: l\'Europa rischia la paralisi. Da mediatore, cerchi il compromesso o difendi le regole comuni?', ch:[
+   {l:'Tessi il compromesso che sblocca', e:'L\'Europa riparte; qualche principio si piega', pleases:'progressista', f:()=>{creditoMuovi(6); relIntMuovi('alleanza',4);}},
+   {l:'Difendi le istituzioni comuni', e:'Le regole tengono; lo stallo si prolunga', pleases:'tecnico', f:()=>{creditoMuovi(3); relIntMuovi('alleanza',-1);}},
+ ]},
+ {id:'dd60_testban', era:'italia1960', kick:'Trattato', cond:()=>S.year>=1963, t:'La messa al bando dei test', text:'Dopo lo spavento atomico, si negozia il bando degli esperimenti nucleari nell\'atmosfera: un primo passo di distensione. Sostenerlo con slancio o con cautela atlantica?', ch:[
+   {l:'Sostieni con slancio il disarmo', e:'Costruttore di pace; gli atlantisti rigidi diffidano', pleases:'progressista', f:()=>{creditoMuovi(5); relIntMuovi('consesso',5); relIntMuovi('rivale',3);}},
+   {l:'Appoggialo con cautela', e:'Prudenza che rassicura gli alleati; meno slancio', pleases:'conservatore', f:()=>{creditoMuovi(3); relIntMuovi('alleanza',3);}},
+ ]},
+ {id:'dd60_tnp', era:'italia1960', kick:'Trattato', cond:()=>S.year>=1968, t:'La non proliferazione', text:'Un trattato vuole fermare la diffusione delle armi atomiche: firmarlo dà statura a chi sceglie la responsabilità, ma c\'è chi teme di rinunciare a un\'opzione.', ch:[
+   {l:'Firma con convinzione', e:'Responsabilità riconosciuta nel mondo; rinunci a un\'opzione', pleases:'progressista', f:()=>{creditoMuovi(5); relIntMuovi('consesso',5);}},
+   {l:'Prendi tempo sulle garanzie', e:'Tieni un margine negoziale; qualcuno ti trova tiepido', pleases:'tecnico', f:()=>{creditoMuovi(2);}},
+ ]},
+ {id:'dd60_distensione', era:'italia1960', kick:'Negoziato', cond:()=>S.year>=1963, t:'I ponti verso l\'Est', text:'La distensione apre spiragli di commercio e dialogo coi paesi dell\'Est: coglierli porta affari e respiro, ma irrita gli alleati più intransigenti.', ch:[
+   {l:'Apri canali di dialogo e commercio', e:'Affari e disgelo; gli intransigenti storcono il naso', pleases:'progressista', f:()=>{creditoMuovi(5); relIntMuovi('rivale',4);}},
+   {l:'Muoviti dentro la linea atlantica', e:'Fedeltà al blocco; le occasioni con l\'Est aspettano', pleases:'conservatore', f:()=>{creditoMuovi(3); relIntMuovi('alleanza',4);}},
+ ]},
+ {id:'dd60_nato_francia', era:'italia1960', kick:'Foro multilaterale', cond:()=>S.year>=1966, t:'La sedia vuota atlantica', text:'Con la Francia fuori dal comando integrato, l\'Alleanza si riorganizza in fretta: c\'è chi chiede più impegno agli altri, chi coglie l\'occasione per una difesa più europea.', ch:[
+   {l:'Rafforza la coesione atlantica', e:'L\'Alleanza tiene; meno autonomia', pleases:'conservatore', f:()=>{creditoMuovi(4); relIntMuovi('alleanza',5);}},
+   {l:'Spingi per una difesa più europea', e:'Un\'Europa più autonoma; gli americani osservano', pleases:'progressista', f:()=>{creditoMuovi(4); relIntMuovi('alleanza',-2);}},
+ ]},
+ {id:'dd60_onu_pieno', era:'italia1960', kick:'Foro multilaterale', t:'Il seggio pieno alle Nazioni Unite', text:'Membro dell\'ONU ormai da anni, il paese può giocare un ruolo attivo nei grandi dibattiti: schierarsi sui temi caldi dà peso, ma costa qualche amicizia.', ch:[
+   {l:'Prendi posizioni nette nei dibattiti', e:'Voce che conta; qualche partner si irrita', pleases:'progressista', f:()=>{creditoMuovi(5); relIntMuovi('consesso',4);}},
+   {l:'Tieni un profilo di mediazione', e:'Amico di tutti; nessun ruolo di primo piano', pleases:'tecnico', f:()=>{creditoMuovi(3); relIntMuovi('consesso',2);}},
+ ]},
+ {id:'dd60_somalia', era:'italia1960', kick:'Amministrazione', cond:()=>S.year<=1960, t:'La Somalia verso l\'indipendenza', text:'L\'amministrazione fiduciaria della Somalia arriva alla scadenza: il paese va accompagnato all\'indipendenza. Consegnare pieni poteri o curare fino all\'ultimo le istituzioni?', ch:[
+   {l:'Accompagna con generosità all\'indipendenza', e:'Un congedo che fa onore; rinunci a ogni influenza', pleases:'progressista', f:()=>{creditoMuovi(5); relIntMuovi('consesso',4);}},
+   {l:'Cura le istituzioni fino al passaggio', e:'Una transizione ordinata; qualcuno la dice tutela', pleases:'tecnico', f:()=>{creditoMuovi(3);}},
+ ]},
+ {id:'dd60_cooperazione', era:'italia1960', kick:'Accordo bilaterale', t:'I paesi che nascono', text:'La decolonizzazione fa nascere stati nuovi in cerca di partner: offrire cooperazione e tecnici apre relazioni e mercati, ma impegna risorse lontano da casa.', ch:[
+   {l:'Investi nella cooperazione', e:'Amicizie e mercati nuovi; risorse impegnate lontano', pleases:'progressista', f:()=>{creditoMuovi(5); relIntMuovi('consesso',4);}},
+   {l:'Cauto, prima gli interessi vicini', e:'Conti prudenti; occasioni lasciate ad altri', pleases:'conservatore', f:()=>{creditoMuovi(2); relIntMuovi('alleanza',2);}},
+ ]},
+ {id:'dd60_europa_politica', era:'italia1960', kick:'Negoziato', cond:()=>S.year>=1961&&S.year<=1962, t:'Il sogno dell\'unione politica', text:'Si tenta di dare all\'Europa anche un\'unione politica, non solo economica: un progetto ambizioso che divide chi vuole più integrazione e chi difende le nazioni.', ch:[
+   {l:'Sostieni l\'unione politica', e:'Visione alta; il progetto è fragile e può fallire', pleases:'progressista', f:()=>{creditoMuovi(4); relIntMuovi('alleanza',4);}},
+   {l:'Meglio consolidare l\'economia', e:'Concretezza; il sogno politico resta nel cassetto', pleases:'tecnico', f:()=>{creditoMuovi(3); relIntMuovi('alleanza',1);}},
+ ]},
+];
+
+/* eventi a soglia sulla FIDUCIA DEI MERCATI (linguaggio neutro: mercati / agenzie di rating / creditori).
+   Spinti da pickFiduciaEvent() (game.js), una volta per discesa. Assorbono il vecchio evento 'spread'. */
+/* ===== CONFERENZE STAMPA (lotto comunicazione) — domande reattive allo stato del gioco.
+   Ordinate per SPECIFICITÀ: il motore (pickConferenza, game.js) pesca la PRIMA con cond vera
+   (le generiche senza cond stanno in fondo, da riserva). t/text possono essere funzioni (contenuto
+   dinamico, valutate al pick). Linguaggio NEUTRO: la stampa, i media, gli editorialisti — mai
+   testate o persone reali. Risposte = segnali con trade-off: rassicurare / difendere con forza /
+   evasiva (il silenzio si paga: stampad giù). I testi sono contenuto, ritoccabili a costo zero. ===== */
+const CONFERENZE=[
+ {id:'cf_ministro', cond:()=>!!minFragile(), t:'La posizione del ministro', text:()=>T('Il ministro %M è in difficoltà da settimane, scrivono gli editorialisti. Lo conferma o lo scarica?').replace('%M',minFragile().nm), ch:[
+   {l:'Ha la mia piena fiducia', e:'Il ministro si rinsalda; i media restano scettici', f:()=>{ const m=minFragile(); if(m) m.loyalty=clamp(m.loyalty+14,0,100); stampad(-4); }},
+   {l:'Le valutazioni sono in corso', e:'Lo lasci sulla graticola; i media apprezzano la franchezza', f:()=>{ const m=minFragile(); if(m) m.loyalty=clamp(m.loyalty-10,0,100); stampad(4); }},
+   {l:'Non rispondo su questioni interne', e:'Evasivo: la stampa insisterà', f:()=>{ stampad(-8); }},
+ ]},
+ {id:'cf_conti', cond:()=>S.ind.deficit>4.5, t:'I conti pubblici', text:()=>T(haTratto('falco')?'Da lei, che dei conti ha fatto una bandiera, i creditori si aspettavano altro: il deficit corre. Come lo spiega?':'Gli editorialisti parlano di conti fuori controllo: il deficit corre. Qual è la sua risposta?'), ch:[
+   {l:'Annuncio un percorso di rientro', e:'Rassicura creditori e media; la spesa sociale teme tagli', f:()=>{ gd('imprenditori',3); gd('lavoratori',-2); stampad(6); }},
+   {l:'La spesa serve al paese: la difendo', e:'La base apprezza; gli editorialisti no', f:()=>{ gd('lavoratori',3); gd('pensionati',2); stampad(-5); }},
+   {l:'I numeri si commentano da soli', e:'Evasivo: il tema resterà in prima pagina', f:()=>{ stampad(-8); }},
+ ]},
+ {id:'cf_fiducia', cond:()=>S.ind.fiducia!=null&&S.ind.fiducia<55, t:'La fiducia sui conti', text:'I media rilanciano gli allarmi dei creditori sulla tenuta dei conti. Come risponde?', ch:[
+   {l:'Garantisco la stabilità: nessun rischio', e:'Toni rassicuranti; il mondo produttivo respira', f:()=>{ gd('imprenditori',3); gd('cetomedio',2); stampad(5); }},
+   {l:'I creditori non dettano l\'agenda politica', e:'La base applaude; gli editorialisti attaccano', f:()=>{ gd('lavoratori',3); stampad(-6); }},
+   {l:'Non commento la speculazione', e:'Evasivo: l\'allarme cresce', f:()=>{ stampad(-8); }},
+ ]},
+ {id:'cf_legge', cond:()=>S.ultimaLegge!=null && (S.year*12+S.month)-S.ultimaLegge.mese<=2, t:'La legge contestata', text:()=>{ const L=LEGGI.find(x=>x.id===S.ultimaLegge.id); return T('Gli editorialisti contestano %L. La difende?').replace('%L', L?T('la legge «%N»').replace('%N',L.nome):T('l\'ultima legge varata')); }, ch:[
+   {l:'La rivendico punto per punto', e:'Linea ferma; un segnale al tuo elettorato', f:()=>{ gd('cetomedio',2); stampad(4); }},
+   {l:'Si poteva spiegare meglio', e:'Autocritica misurata: i media apprezzano, la base meno', f:()=>{ stampad(6); gd('cetomedio',-2); }},
+   {l:'Le leggi non si commentano', e:'Evasivo: la polemica continua', f:()=>{ stampad(-7); }},
+ ]},
+ {id:'cf_consenso', cond:()=>S.ind.consenso<40, t:'Un governo in difficoltà?', text:'I sondaggi vi danno in caduta. I media chiedono: il governo è al capolinea?', ch:[
+   {l:'Governiamo fino in fondo: i risultati arriveranno', e:'Fermezza; un po\' di respiro al centro', f:()=>{ gd('cetomedio',2); stampad(4); }},
+   {l:'I sondaggi non governano un paese', e:'La base si compatta; gli editorialisti infieriscono', f:()=>{ gd('pensionati',2); gd('lavoratori',2); stampad(-6); }},
+   {l:'Avanti, prossima domanda', e:'Evasivo: domani titoli peggiori', f:()=>{ stampad(-9); }},
+ ]},
+ {id:'cf_lavoro', cond:()=>S.ind.unemp>9, t:'La disoccupazione', text:'I media aprono sui senza lavoro: i numeri non scendono. Che cosa dice a chi cerca impiego?', ch:[
+   {l:'Presento nuove misure per l\'occupazione', e:'Impegno concreto; i conti ne risentono un poco', costo:{debito:0.2},f:()=>{ gd('lavoratori',3); gd('giovani',2); S.ind.debt+=0.2; stampad(5); }},
+   {l:'È la congiuntura internazionale', e:'Scaricabarile: i media non perdonano', f:()=>{ stampad(-7); }},
+ ]},
+ {id:'cf_recessione', cond:()=>S.ind.growth<0, t:'L\'economia in recessione', text:'Il PIL è in contrazione e i media chiedono una strategia. Qual è la rotta?', ch:[
+   {l:'Un piano di rilancio: investire adesso', e:'Visione; il debito preoccupa gli osservatori', costo:{debito:0.2},f:()=>{ gd('imprenditori',2); gd('lavoratori',2); S.ind.debt+=0.2; stampad(4); }},
+   {l:'Rigore: prima i conti, poi la crescita', e:'Disciplina; chi fatica si sente solo', f:()=>{ gd('imprenditori',3); gd('lavoratori',-2); stampad(3); }},
+   {l:'I cicli economici passano da soli', e:'Fatalista: gli editorialisti si scatenano', f:()=>{ stampad(-8); }},
+ ]},
+ {id:'cf_reputazione', cond:()=>S.ind.reputazione!=null&&S.ind.reputazione<40, t:'L\'immagine internazionale', text:'La stampa estera vi descrive isolati, e quella nazionale rilancia. Come replica?', ch:[
+   {l:'Lavoriamo con tutti i partner', e:'Toni concilianti; piccolo passo di reputazione', f:()=>{ repd(2); stampad(5); }},
+   {l:'Difendiamo l\'interesse nazionale', e:'La base apprezza la schiena dritta', f:()=>{ gd('cetomedio',2); gd('pensionati',2); stampad(-4); }},
+ ]},
+ {id:'cf_minoranza', cond:()=>!!S.minoranza, t:'Un governo senza maggioranza', text:'I media contano i voti che non avete: quanto può durare un governo in minoranza?', ch:[
+   {l:'Cerchiamo convergenze in aula', e:'Responsabilità; il centro respira', f:()=>{ gd('cetomedio',2); stampad(5); }},
+   {l:'Sfido le opposizioni a votarci contro', e:'Azzardo: la base si esalta, gli editorialisti no', f:()=>{ gd('lavoratori',2); gd('pensionati',2); stampad(-6); }},
+ ]},
+ {id:'cf_bilancio', t:'Il bilancio del governo', text:'Domanda di rito: qual è il risultato di cui va più fiero, e dove avete sbagliato?', ch:[
+   {l:'Rivendico i risultati, ammetto i ritardi', e:'Onestà misurata: i media apprezzano', f:()=>{ stampad(6); }},
+   {l:'Solo risultati: gli errori cercateli voi', e:'Trionfalismo: la base gode, i media affilano le penne', f:()=>{ gd('pensionati',2); stampad(-5); }},
+   {l:'Giudicheranno gli elettori', e:'Evasivo: occasione sprecata', f:()=>{ stampad(-6); }},
+ ]},
+ {id:'cf_priorita', t:'Le priorità del governo', text:'I media chiedono: qual è la priorità dei prossimi mesi?', ch:[
+   {l:'Crescita e lavoro', e:'Piace al mondo produttivo', f:()=>{ gd('imprenditori',2); gd('lavoratori',2); stampad(3); }},
+   {l:'Sicurezza e ordine', e:'Piace a chi chiede fermezza; i giovani storcono il naso', f:()=>{ gd('pensionati',2); gd('cattolici',2); gd('giovani',-2); stampad(3); }},
+   {l:'Vedremo strada facendo', e:'Evasivo: senza bussola sui giornali', f:()=>{ stampad(-7); }},
+ ]},
+ /* Lotto A (fix playtest): +3 domande DI RITO — il pool di riserva era di 2 sole → il sacchetto alternava
+    le stesse due per anni (il collo di ripetizione peggiore). Era-neutre come tutta la stampa. */
+ {id:'cf_carovita', t:'Il costo della vita', text:'Domanda di rito: le famiglie sentono i prezzi salire. Il governo che risposta dà?', ch:[
+   {l:'Interverremo su beni e tariffe essenziali', e:'Le famiglie apprezzano; le imprese temono i calmieri', f:()=>{ gd('cetomedio',2); gd('lavoratori',2); gd('imprenditori',-2); stampad(3); }},
+   {l:'La ricetta è far crescere i salari col lavoro', e:'Linea di prospettiva; chi fatica ora resta in attesa', f:()=>{ gd('imprenditori',2); gd('cetomedio',-1); stampad(3); }},
+   {l:'I prezzi non li fa il governo', e:'Evasivo: domani in prima pagina', f:()=>{ stampad(-7); }},
+ ]},
+ {id:'cf_giovani', t:'Il futuro dei giovani', text:'I media incalzano: i giovani faticano a trovare il loro posto. Cosa dice loro?', ch:[
+   {l:'Su di loro investiremo: scuola e lavoro', e:'Un segnale ai giovani; costa credibilità se poi non segue nulla', f:()=>{ gd('giovani',3); stampad(3); }},
+   {l:'Ai giovani serve rigore, non promesse', e:'Piace ai tradizionalisti; i giovani si raffreddano', f:()=>{ gd('pensionati',2); gd('cattolici',1); gd('giovani',-2); stampad(2); }},
+   {l:'I giovani non sono un tema da conferenza', e:'Evasivo: le penne si affilano', f:()=>{ stampad(-6); }},
+ ]},
+ {id:'cf_opposizione', t:'Le accuse dell\'opposizione', text:'Domanda di rito: l\'opposizione la accusa di governare senza ascoltare il paese. Replica?', ch:[
+   {l:'Rispondo coi fatti, non alle polemiche', e:'Aplomb istituzionale: i media apprezzano', f:()=>{ stampad(5); }},
+   {l:'L\'opposizione parla, noi governiamo', e:'Colpo d\'orgoglio: la base gode, i toni salgono', f:()=>{ gd('cetomedio',2); stampad(-4); }},
+   {l:'Non commento gli avversari', e:'Evasivo: sembra una fuga', f:()=>{ stampad(-6); }},
+ ]},
+];
+
+/* ===== SFIDE (D1a — quiz diegetico, spec «Sfide» del PIANO): domande-conoscenza con UNA risposta giusta
+   (sapere vs scegliere), poste DENTRO la finzione — «il giornalista ti incalza» alla conferenza stampa.
+   Esito premia-non-punisce (giusta → reputazione+stampa; sbagliata → gaffe piccola recuperabile) e SEMPRE
+   la risposta giusta + il perché nel log (si impara). Banca SOURCEATA e NON-PARTIGIANA (fonte nei commenti,
+   mai una risposta inventata); bilingue; era-gated (eraViva: le domande d'epoca solo nel loro scenario);
+   rotazione pescaBag('sfide'). Pescate da pickConferenza ~ogni 5+ mesi (≈2/anno). ===== */
+const SFIDE=[
+ // --- di ruolo/contesto (universali: economia, istituzioni, estero) ---
+ {id:'u_debito', era:'universale', diff:'media', q:'Se lo Stato spende ogni anno più di quanto incassa, che cosa succede al debito pubblico?',
+  op:['Cresce: i disavanzi si accumulano nel debito','Diminuisce, perché la spesa stimola le entrate','Resta uguale: sono conti separati'], giusta:0,
+  perche:'Il debito pubblico è la somma dei disavanzi accumulati negli anni.'},   // contabilità pubblica di base
+ {id:'u_parlamento', era:'universale', diff:'media', q:'In un sistema parlamentare, che cosa tiene in carica il governo?',
+  op:['Un mandato fisso che nessun voto può interrompere','La fiducia del parlamento','La nomina a vita del capo dello Stato'], giusta:1,
+  perche:'Senza la fiducia delle camere il governo cade: è il cuore del parlamentarismo.'},   // diritto costituzionale di base
+ {id:'u_inflazione', era:'universale', diff:'facile', q:'Che cos\'è l\'inflazione?',
+  op:['Il calo delle esportazioni','L\'aumento generale e prolungato dei prezzi','L\'aumento della disoccupazione'], giusta:1,
+  perche:'Prezzi che salgono, potere d\'acquisto che scende: questa è l\'inflazione.'},   // definizione standard
+ {id:'u_dazio', era:'universale', diff:'facile', q:'Che cos\'è un dazio?',
+  op:['Un prestito tra stati','Un divieto totale di commercio','Una tassa sulle merci che entrano nel paese'], giusta:2,
+  perche:'Il dazio rincara le importazioni per proteggere i produttori interni.'},   // definizione standard
+ // --- d'epoca italia1950 (sourceate dal PRESET-ITALIA-1950.md; il doppio-uso: varietà + immersione) ---
+ {id:'i50_nato', era:'italia1950', diff:'facile', q:'In che anno l\'Italia ha firmato il Patto Atlantico?',
+  op:['Nel 1949','Nel 1945','Nel 1955'], giusta:0,
+  perche:'Il Trattato è firmato a Washington il 4 aprile 1949, per l\'Italia dal ministro Sforza.'},   // fonte: NATO, dichiarazione 4/4/1949 (cronaca: linea figure-reali ok)
+ {id:'i50_marshall', era:'italia1950', diff:'media', q:'Che cos\'è il Piano Marshall?',
+  op:['Un piano militare per il confine orientale','Il programma americano di aiuti alla ricostruzione europea','La riforma agraria del dopoguerra'], giusta:1,
+  perche:'L\'European Recovery Program (1948-52): l\'Italia è fra i maggiori beneficiari.'},   // fonte: ERP/PRESET
+ {id:'i50_onu', era:'italia1950', diff:'facile', q:'Quale organizzazione nasce nel 1945 per la pace e la sicurezza collettiva?',
+  op:['La Società delle Nazioni','Il Consiglio d\'Europa','L\'ONU'], giusta:2,
+  perche:'Le Nazioni Unite nascono a San Francisco nel 1945; la Società delle Nazioni era del 1919.'},   // storia istituzionale
+ {id:'i50_cassa', era:'italia1950', diff:'media', cond:()=>S.year>=1951, q:'Che cos\'è la Cassa per il Mezzogiorno, istituita nel 1950?',
+  op:['Una banca privata meridionale','Una cassa di previdenza per gli agricoltori','Un ente pubblico per lo sviluppo del Sud: opere, bonifiche, infrastrutture'], giusta:2,
+  perche:'Legge 646 del 1950: l\'intervento straordinario dello Stato nel Mezzogiorno.'},   // fonte: L.646/1950/PRESET
+ /* ===== D1b — banca estesa (24+): tag-era PER-VOCE (no blocco), gate `ruolo`, ancore-anno `cond`, `diff` per la
+    rotazione a fasce. Il `perche` VISIBILE è era-neutro per le universali (niente strumenti post-epoca a schermo:
+    la fonte moderna sta nel commento/doc). Sourceato o fuori · non-partigiano · nomi reali solo come cronaca. ===== */
+ // --- UNIVERSALI (vive dal loro anno in poi, legittime nel '50) ---
+ {id:'u_sciopero', era:'universale', ruolo:'attivista', diff:'facile', q:'Che cos\'è uno sciopero?',
+  op:['L\'astensione collettiva dal lavoro per far valere dei diritti','Una serrata decisa dai datori di lavoro','Una vertenza portata davanti a un giudice'], giusta:0,   // D5: distrattori stessa-famiglia (conflitto di lavoro)
+  perche:'Lo sciopero è l\'astensione collettiva dal lavoro per far valere dei diritti.'},   // perche era-/paese-neutro (la fonte italiana, art. 40 Cost., nel doc)   // fonte: Cost. art. 40
+ {id:'u_referendum', era:'universale', ruolo:'attivista', diff:'media', q:'A cosa serve un referendum abrogativo?',
+  op:['A eleggere il presidente','A chiedere agli elettori di abrogare una legge','A nominare i ministri'], giusta:1,
+  perche:'Il referendum abrogativo permette agli elettori di cancellare una legge già in vigore.'},   // fonte: Cost. art. 75
+ {id:'u_comune', era:'universale', ruolo:'locale', diff:'facile', q:'Di quale servizio si occupa tipicamente il Comune?',
+  op:['La gestione degli ospedali pubblici','La raccolta dei rifiuti urbani','Il rilascio dei passaporti'], giusta:1,   // D5: distrattori stessa-famiglia (servizi confondibili, locale vs sovralocale)
+  perche:'La raccolta dei rifiuti urbani è una competenza del Comune; estero e difesa spettano allo Stato.'},   // fonte (report): TUEL D.lgs 267/2000
+ {id:'u_tassi', era:'universale', ruolo:'ministro', diff:'media', q:'Che cosa fa una banca centrale alzando i tassi d\'interesse?',
+  op:['Rende più caro il credito, per frenare l\'inflazione','Aumenta subito i salari','Cancella il debito pubblico'], giusta:0,
+  perche:'Alzare i tassi rende più caro il credito e raffredda la domanda: è la leva contro l\'inflazione.'},   // politica monetaria
+ {id:'u_decreto', era:'universale', ruolo:'governo', diff:'difficile', q:'Che cos\'è un decreto-legge?',
+  op:['Una legge regionale','Un atto del governo con forza di legge, da convertire entro sessanta giorni','Una sentenza della Corte'], giusta:1,
+  perche:'Il decreto-legge è provvisorio: decade se il Parlamento non lo converte entro sessanta giorni.'},   // fonte: Cost. art. 77
+ {id:'u_quirinale', era:'universale', ruolo:'governo', diff:'media', q:'Chi nomina il capo del governo e può sciogliere le Camere?',
+  op:['Il Presidente della Repubblica','Il presidente del Senato','La Corte costituzionale'], giusta:0,   // D5: distrattore stessa-famiglia (organo dello Stato)
+  perche:'È il Presidente della Repubblica a nominare il capo del governo e a poter sciogliere le Camere.'},   // fonte: Cost. artt. 92 e 88
+ {id:'u_nato5', era:'universale', ruolo:'intl', diff:'media', q:'Cosa prevede l\'articolo 5 del Trattato dell\'Alleanza Atlantica?',
+  op:['Un attacco a un membro è un attacco a tutti','L\'obbligo di ospitare basi di ogni membro','Il divieto di eserciti nazionali'], giusta:0,
+  perche:'L\'articolo 5 sancisce la difesa collettiva: un attacco a un membro è considerato un attacco a tutti.'},   // fonte: Trattato NATO art.5 (1949)
+ {id:'u_veto', era:'universale', ruolo:'intl', diff:'media', q:'Quanti sono i membri permanenti con diritto di veto nel Consiglio di Sicurezza dell\'ONU?',
+  op:['Cinque','Dieci','Uno'], giusta:0,
+  perche:'I membri permanenti del Consiglio di Sicurezza con diritto di veto sono cinque.'},   // fonte: Carta ONU artt.23/27 (1945)
+ // --- CONTEMPORANEE (moderne: escluse dal '50) ---
+ {id:'u_iva', era:'contemporanea', ruolo:'ministro', diff:'facile', q:'Che cos\'è l\'IVA?',
+  op:['Un\'imposta sul reddito d\'impresa','Un\'imposta sui consumi, pagata su beni e servizi','Un contributo previdenziale'], giusta:1,
+  perche:'L\'IVA è l\'imposta sul valore aggiunto: grava sui consumi di beni e servizi.'},   // fonte: DPR 633/1972 (l'IVA è del 1972-73)
+ {id:'u_spread', era:'contemporanea', ruolo:'ministro', diff:'difficile', q:'Cosa misura lo «spread» dei titoli di Stato?',
+  op:['Il divario di rendimento tra i titoli di due paesi (di solito Italia e Germania)','Il cambio euro-dollaro','L\'inflazione annuale'], giusta:0,
+  perche:'Lo spread è il differenziale di rendimento tra i titoli di Stato di due paesi, tipicamente Italia e Germania.'},   // finanza moderna
+ {id:'u_mercato', era:'contemporanea', ruolo:'intl', diff:'difficile', q:'Che cos\'è il mercato unico dell\'Unione Europea?',
+  op:['La libera circolazione di merci, servizi, capitali e persone','Un\'alleanza militare','Una moneta mondiale'], giusta:0,
+  perche:'Il mercato unico garantisce le quattro libertà di circolazione all\'interno dell\'Unione Europea.'},   // fonte: TFUE (mercato unico 1993)
+ {id:'u_regione', era:'contemporanea', ruolo:'locale', diff:'media', q:'Di quale materia si occupano principalmente le Regioni?',
+  op:['La moneta','L\'organizzazione della sanità sul territorio','Le forze armate'], giusta:1,
+  perche:'Le Regioni gestiscono l\'organizzazione della sanità sul territorio.'},   // Cost. Titolo V (regioni ordinarie operative dal 1970; sanità regionale post-1978)
+ // --- ITALIA 1950 (era:'italia1950'; ancore-anno dove il fatto è successivo all'avvio) ---
+ {id:'i50_donne', era:'italia1950', ruolo:'attivista', diff:'media', q:'In che anno le donne italiane votarono per la prima volta a elezioni nazionali?',
+  op:['Nel 1946','Nel 1948','Nel 1919'], giusta:0,
+  perche:'Il voto fu esteso alle donne nel 1945; votarono per la prima volta nel 1946.'},   // fonte: D.Lgs.Lgt. 23/1945
+ {id:'i50_costituzione', era:'italia1950', ruolo:'attivista', diff:'facile', q:'Quando è entrata in vigore la Costituzione della Repubblica?',
+  op:['Nel 1948','Nel 1861','Nel 1953'], giusta:0,
+  perche:'La Costituzione repubblicana è in vigore dal 1° gennaio 1948.'},   // fonte: entrata in vigore 1/1/1948
+ {id:'i50_inacasa', era:'italia1950', ruolo:'locale', diff:'media', q:'Che cos\'era il piano INA-Casa, avviato nel 1949?',
+  op:['Un programma pubblico di case popolari per i lavoratori','Una banca per l\'edilizia di lusso','Un\'imposta sulle abitazioni'], giusta:0,
+  perche:'L\'INA-Casa costruì alloggi popolari per i lavoratori e diede lavoro all\'edilizia.'},   // fonte: L.43/1949 (piano Fanfani)
+ {id:'i50_agraria', era:'italia1950', ruolo:'locale', diff:'difficile', cond:()=>S.year>=1951, q:'Cosa prevedeva la riforma agraria del 1950?',
+  op:['La redistribuzione di terre dei grandi latifondi ai contadini','L\'abolizione dell\'agricoltura','La vendita delle terre all\'estero'], giusta:0,
+  perche:'Le leggi del 1950 espropriarono e redistribuirono ai contadini terre dei grandi latifondi.'},   // fonte: L.230/1950 (Sila) e L.841/1950 (stralcio) → ancora ≥1951
+ {id:'i50_lira', era:'italia1950', ruolo:'ministro', diff:'facile', q:'Qual era la moneta dell\'Italia nei primi anni \'50?',
+  op:['La lira','L\'euro','Lo scudo'], giusta:0,
+  perche:'L\'Italia usava la lira.'},   // storia monetaria (euro dal 2002)
+ {id:'i50_ige', era:'italia1950', ruolo:'ministro', diff:'difficile', q:'Qual era la principale imposta sui consumi in Italia prima dell\'IVA?',
+  op:['L\'IGE, l\'imposta generale sull\'entrata','L\'IRPEF','Il bollo auto'], giusta:0,
+  perche:'Prima dell\'IVA i consumi erano tassati con l\'IGE, l\'imposta generale sull\'entrata.'},   // fonte: R.D.L. 9/1/1940 n.2 (IGE, in vigore fino al 1972) — gemello '50 di u_iva
+ {id:'i50_iri', era:'italia1950', ruolo:'ministro', diff:'difficile', q:'Quale ente pubblico sostenne siderurgia e meccanica nella ricostruzione?',
+  op:['L\'IRI, l\'Istituto per la Ricostruzione Industriale','La Banca Mondiale','La CECA'], giusta:0,
+  perche:'L\'IRI, l\'Istituto per la Ricostruzione Industriale, sostenne siderurgia, meccanica ed energia.'},   // storia dell'IRI (fondato 1933)
+ {id:'i50_boom', era:'italia1960', ruolo:'ministro', diff:'media', cond:()=>S.year>=1960, q:'Come vengono chiamati questi anni di crescita economica straordinaria che l\'Italia sta vivendo?',
+  op:['Il «miracolo economico»','La «grande depressione»','L\'«austerità»'], giusta:0,
+  perche:'Questa fase di rapida industrializzazione e benessere è passata alla storia come il «miracolo economico».'},   // storiografia (~1958-63) → ancora ≥1960, domanda al presente
+ /* ===== AVANZAMENTO Fase 2 · Lotto 4 — BANCA QUIZ '60 (era:'italia1960', §8): sourceati, tag-era per-voce, ruolo, ancore-anno.
+    Cornici ≥6 già garantite dalle universali (misura D5); questi 17 arricchiscono la linea storica. paese esplicito
+    (Italia-istituzionali vs mondo); i nomi reali solo come cronaca nel `perche`, mai nella domanda. ===== */
+ {id:'q60_luna', era:'italia1960', paese:'universale', diff:'facile', cond:()=>S.year>=1969, q:'In che anno l\'uomo mise piede sulla Luna per la prima volta?',
+  op:['Nel 1969','Nel 1961','Nel 1975'], giusta:0, perche:'Il 20 luglio 1969 la missione Apollo 11 portò i primi uomini sulla Luna.'},
+ {id:'q60_muro', era:'italia1960', paese:'universale', diff:'facile', cond:()=>S.year>=1961, q:'Cosa fu eretto a Berlino nel 1961, simbolo della guerra fredda?',
+  op:['Un muro che divise la città','Una nuova stazione','Un grande stadio'], giusta:0, perche:'Nell\'agosto 1961 fu costruito il Muro di Berlino, che divise la città per 28 anni.'},
+ {id:'q60_cuba', era:'italia1960', paese:'universale', diff:'media', cond:()=>S.year>=1962, q:'Cosa portò il mondo sull\'orlo della guerra atomica nell\'ottobre 1962?',
+  op:['La crisi dei missili di Cuba','La guerra di Corea','La caduta del Muro'], giusta:0, perche:'Nell\'ottobre 1962 la crisi dei missili di Cuba fu il culmine della guerra fredda.'},
+ {id:'q60_gagarin', era:'italia1960', paese:'universale', diff:'media', cond:()=>S.year>=1961, q:'Chi fu il primo uomo a volare nello spazio, nel 1961?',
+  op:['Un cosmonauta sovietico','Un astronauta americano','Un aviatore italiano'], giusta:0, perche:'Nell\'aprile 1961 il cosmonauta sovietico Jurij Gagarin fu il primo uomo in orbita.'},
+ {id:'q60_sessantotto', era:'italia1960', paese:'universale', ruolo:'attivista', diff:'media', cond:()=>S.year>=1968, q:'Cosa caratterizzò il «Sessantotto» in gran parte dell\'Occidente?',
+  op:['Le proteste studentesche e sociali','Una riforma della moneta','La nascita della televisione'], giusta:0, perche:'Il 1968 fu segnato da un\'ondata di contestazione studentesca e sociale.'},
+ {id:'q60_autunnocaldo', era:'italia1960', paese:'italia', ruolo:'attivista', diff:'difficile', cond:()=>S.year>=1969, q:'Cos\'è stato l\'«autunno caldo» del 1969 in Italia?',
+  op:['La stagione delle grandi vertenze operaie','Un\'ondata di siccità','Una crisi di governo'], giusta:0, perche:'Nell\'autunno 1969 forti lotte sindacali portarono a conquiste per i lavoratori.'},
+ {id:'q60_mediaunica', era:'italia1960', paese:'italia', ruolo:'locale', diff:'media', cond:()=>S.year>=1962, q:'Cosa introdusse la riforma della scuola media del 1962?',
+  op:['La scuola media unica e obbligatoria per tutti','Il numero chiuso all\'università','La scuola privata di Stato'], giusta:0, perche:'Dal 1962 la scuola media divenne unica e obbligatoria fino ai 14 anni.'},
+ {id:'q60_olimpiadi', era:'italia1960', paese:'italia', ruolo:'locale', diff:'facile', cond:()=>S.year>=1960, q:'Quale città italiana ospitò le Olimpiadi estive del 1960?',
+  op:['Roma','Milano','Torino'], giusta:0, perche:'I Giochi della XVII Olimpiade si tennero a Roma nel 1960.'},
+ {id:'q60_enel', era:'italia1960', paese:'italia', ruolo:'ministro', diff:'media', cond:()=>S.year>=1962, q:'Cosa nacque nel 1962 dalla nazionalizzazione dell\'energia elettrica?',
+  op:['L\'Enel','L\'ENI','L\'IRI'], giusta:0, perche:'Nel 1962 la nazionalizzazione dell\'energia elettrica diede vita all\'Enel.'},
+ {id:'q60_autostrada', era:'italia1960', paese:'italia', ruolo:'ministro', diff:'media', cond:()=>S.year>=1964, q:'Quale grande arteria unì Milano a Napoli, completata nel 1964?',
+  op:['L\'Autostrada del Sole','La Via Emilia','L\'Autostrada Adriatica'], giusta:0, perche:'L\'Autostrada del Sole (A1), completata nel 1964, collegò Milano a Napoli.'},
+ {id:'q60_stretta', era:'italia1960', paese:'italia', ruolo:'ministro', diff:'difficile', cond:()=>S.year>=1964, q:'Cosa frenò la corsa del miracolo economico nel 1963-64?',
+  op:['La stretta creditizia e la congiuntura','Una guerra','Un terremoto'], giusta:0, perche:'Tra il 1963 e il 1964 una stretta sul credito raffreddò l\'economia dopo anni di boom.'},
+ {id:'q60_centrosinistra', era:'italia1960', paese:'italia', ruolo:'governo', diff:'media', cond:()=>S.year>=1963, q:'In che anno nacque il primo governo organico di centro-sinistra in Italia?',
+  op:['Nel 1963','Nel 1953','Nel 1948'], giusta:0, perche:'Nel dicembre 1963 si formò il primo governo organico di centro-sinistra, col PSI nella maggioranza.'},
+ {id:'q60_sediavuota', era:'italia1960', paese:'italia', ruolo:'governo', diff:'difficile', cond:()=>S.year>=1965, q:'Cos\'era la «crisi della sedia vuota» del 1965-66?',
+  op:['Il blocco dei lavori della Comunità europea da parte della Francia','Uno sciopero dei parlamentari','Una crisi delle Nazioni Unite'], giusta:0, perche:'Nel 1965-66 la Francia paralizzò la CEE lasciando vuota la sua sedia nel Consiglio.'},
+ {id:'q60_cee_decollo', era:'italia1960', paese:'universale', ruolo:'intl', diff:'difficile', cond:()=>S.year>=1958, q:'Cosa entrò in funzione nel 1958 dopo i Trattati di Roma?',
+  op:['La Comunità economica europea (Mercato Comune)','Le Nazioni Unite','La NATO'], giusta:0, perche:'La CEE, nata dai Trattati di Roma del 1957, entrò in funzione dal 1958.'},
+ {id:'q60_testban', era:'italia1960', paese:'universale', ruolo:'intl', diff:'difficile', cond:()=>S.year>=1963, q:'Cosa vietava il trattato del 1963 tra le grandi potenze?',
+  op:['Gli esperimenti nucleari nell\'atmosfera','Il commercio delle armi','La navigazione nucleare'], giusta:0, perche:'Il trattato del 1963 mise al bando i test nucleari nell\'atmosfera, nello spazio e sott\'acqua.'},
+ {id:'q60_tnp', era:'italia1960', paese:'universale', ruolo:'intl', diff:'difficile', cond:()=>S.year>=1968, q:'Cosa mirava a fermare il Trattato di non proliferazione del 1968?',
+  op:['La diffusione delle armi nucleari','Il commercio del petrolio','L\'emigrazione'], giusta:0, perche:'Il TNP del 1968 puntava a limitare la diffusione delle armi atomiche nel mondo.'},
+ {id:'q60_concilio', era:'italia1960', paese:'universale', ruolo:'intl', diff:'media', cond:()=>S.year>=1962, q:'Cosa fu il Concilio Vaticano II (1962-1965)?',
+  op:['Una grande assemblea della Chiesa cattolica per rinnovarsi','Un vertice politico europeo','Un trattato commerciale'], giusta:0, perche:'Il Concilio Vaticano II (1962-65) rinnovò profondamente la vita e la liturgia della Chiesa cattolica.'},
+ /* ===== Q-fix PARTE 3 — 4 DIFFICILI italia1960, mirate al triennio-buco '60-'62 (diagnosi Consegna 1: 1 sola difficile viva ≤'62).
+    giusta variata (op non mescolate a schermo). De-dup verificato: #3 vs q60_centrosinistra (l'anno) e #4 vs q60_mediaunica (cosa introdusse) → fatti/risposte-famiglia distinti. ===== */
+ {id:'i60_fouchet', era:'italia1960', paese:'universale', ruolo:'intl', diff:'difficile', cond:()=>S.year>=1961, q:'Cosa propose il piano Fouchet (1961-62)?',
+  op:['Una moneta unica europea','Un\'unione politica confederale tra gli Stati europei','Un esercito comune della NATO'], giusta:1,
+  perche:'La proposta di De Gaulle per un\'Europa delle nazioni, respinta da Olanda e Belgio.'},   // fonte: piani Fouchet 1961-62 → ancora ≥1961
+ {id:'i60_natofrancia', era:'italia1960', paese:'universale', ruolo:'intl', diff:'difficile', cond:()=>S.year>=1966, q:'Quale scelta fece la Francia verso la NATO nel 1966?',
+  op:['Entrò nel Patto di Varsavia','Ne assunse la guida','Uscì dal comando militare integrato'], giusta:2,
+  perche:'La Francia di De Gaulle lasciò il comando integrato, mantenendo l\'alleanza.'},   // fonte: ritiro francese dal comando integrato NATO, 1966 → ancora ≥1966
+ {id:'i60_centrosinistra_psi', era:'italia1960', paese:'italia', ruolo:'governo', diff:'difficile', cond:()=>S.year>=1962, q:'Quale novità segnò il primo governo di centro-sinistra organico?',
+  op:['L\'ingresso del Partito Socialista nella maggioranza','L\'ingresso del Partito Comunista','La fine della Repubblica'], giusta:0,
+  perche:'Il PSI passò dall\'opposizione alla maggioranza di governo.'},   // fonte: apertura a sinistra 1962-63 → ancora ≥1962
+ {id:'i60_mediaunica_avviamento', era:'italia1960', paese:'italia', ruolo:'locale', diff:'difficile', cond:()=>S.year>=1962, q:'Quale doppio canale abolì la scuola media unica del 1962?',
+  op:['Scuola pubblica e privata','La separazione, a 11 anni, tra scuola media e avviamento al lavoro','Scuole del Nord e del Sud'], giusta:1,
+  perche:'La riforma unificò la scuola dell\'obbligo fino a 14 anni.'},   // fonte: L. 1859/1962 scuola media unica → ancora ≥1962
+ {id:'i50_ref46', era:'italia1950', ruolo:'governo', diff:'facile', q:'Col referendum del 2 giugno 1946, fra quali forme di Stato scelsero gli italiani?',
+  op:['Monarchia e Repubblica','Impero e Confederazione','Regno e Ducato'], giusta:0,
+  perche:'Il referendum istituzionale del 2 giugno 1946 scelse fra Monarchia e Repubblica.'},   // fonte: referendum 2/6/1946
+ {id:'i50_legge53', era:'italia1950', ruolo:'governo', diff:'media', cond:()=>S.year>=1953, q:'Cosa introduceva la legge elettorale del 1953?',
+  op:['Un premio di maggioranza per la coalizione oltre il 50% dei voti','Il voto obbligatorio per tutti','L\'abolizione del parlamento'], giusta:0,
+  perche:'La legge del 1953 assegnava un premio di seggi alla coalizione che superasse il 50% dei voti; il premio non scattò.'},   // fonte: L.148/1953 → ancora ≥1953
+ {id:'i50_coe', era:'italia1950', ruolo:'intl', diff:'difficile', q:'Quale organizzazione per i diritti e la cooperazione in Europa, con sede a Strasburgo, nacque nel 1949?',
+  op:['Il Consiglio d\'Europa','L\'Unione Sovietica','La NATO'], giusta:0,
+  perche:'Il Consiglio d\'Europa nacque nel 1949 e ha sede a Strasburgo.'},   // fonte: Statuto del Consiglio d'Europa (firmato a Londra, mag. 1949; sede Strasburgo)
+ {id:'i50_ceca', era:'italia1950', ruolo:'intl', diff:'difficile', cond:()=>S.year>=1951, q:'Cos\'era la CECA, che l\'Italia contribuì a fondare nel 1951?',
+  op:['La Comunità Europea del Carbone e dell\'Acciaio','Un\'alleanza col blocco orientale','Una banca mondiale'], giusta:0,
+  perche:'La CECA mise in comune carbone e acciaio fra sei paesi: il primo passo dell\'integrazione europea.'},   // fonte: Trattato di Parigi 1951 → ancora ≥1951
+ {id:'i50_roma', era:'italia1950', ruolo:'intl', diff:'difficile', cond:()=>S.year>=1957, q:'Cosa firmarono sei paesi europei a Roma nel 1957?',
+  op:['I Trattati che istituirono la Comunità Economica Europea','Un patto di non aggressione con l\'URSS','La fine dell\'Alleanza Atlantica'], giusta:0,
+  perche:'I Trattati di Roma del 1957 istituirono la Comunità Economica Europea e l\'Euratom.'},   // fonte: Trattati di Roma 1957 → ancora ≥1957
+ /* D4 — Sfida-vertice: +5 domande (lista approvata da Giacomo). Portano la banca-vertice a ≥6 vive per era. */
+ {id:'u_haia', era:'universale', ruolo:'intl', diff:'difficile', q:'Dove ha sede la Corte internazionale di giustizia?',
+  op:['All\'Aia, nei Paesi Bassi','A Ginevra','A New York'], giusta:0,
+  perche:'La Corte internazionale di giustizia ha sede all\'Aia; anche la precedente Corte permanente vi risiedeva.'},   // universale (Corte all'Aia dal 1922/1945)
+ {id:'u_strasburgo', era:'universale', ruolo:'intl', diff:'difficile', q:'In quale città ha sede il Consiglio d\'Europa?',
+  op:['Strasburgo','Bruxelles','Vienna'], giusta:0,
+  perche:'Il Consiglio d\'Europa, nato nel 1949, ha sede a Strasburgo.'},   // universale (era-safe dal 1949; nel '50 è cronaca fresca)
+ {id:'u_credenziali', era:'universale', ruolo:'intl', diff:'difficile', q:'A chi presenta le lettere credenziali un ambasciatore appena nominato?',
+  op:['Al capo di Stato del paese ospitante','Al ministro degli Esteri del proprio paese','Al segretario dell\'organizzazione internazionale'], giusta:0,
+  perche:'Per prassi diplomatica consolidata, l\'ambasciatore presenta le lettere credenziali al capo di Stato del paese che lo ospita.'},   // universale (prassi diplomatica)
+ {id:'u_sdg', era:'contemporanea', ruolo:'intl', diff:'facile', q:'Cosa sono gli Obiettivi di Sviluppo Sostenibile dell\'ONU?',
+  op:['I 17 obiettivi dell\'Agenda 2030','Un trattato di libero scambio','Le regole del Consiglio di Sicurezza'], giusta:0,
+  perche:'Sono i 17 obiettivi dell\'Agenda 2030, adottati dall\'ONU nel 2015 per sviluppo e ambiente.'},   // contemporanea (adottati 2015)
+ {id:'i50_schuman', era:'italia1950', ruolo:'intl', diff:'difficile', cond:()=>S.year>=1951, q:'Che cos\'era il Piano Schuman del 1950?',
+  op:['La proposta di mettere in comune carbone e acciaio','Un piano di aiuti militari all\'Italia','Un accordo per stabilizzare la lira'], giusta:0,
+  perche:'La dichiarazione Schuman del 9 maggio 1950 propose di mettere in comune carbone e acciaio: nacque così la CECA.'},   // italia1950, ancora ≥1951 (dichiarazione 9 mag 1950 → evita l'uscita prima del fatto)
+ /* D4b — banca-Sfide attivista/locale sotto soglia: +8 domande UNIVERSALI (lista approvata da Giacomo). Era-safe,
+    non-partigiane, senza duplicati semantici; portano attivista e locale a ≥6 vive per cornice per era. */
+ // --- PIAZZA · attivista (4 universali) ---
+ {id:'u_petizione', era:'universale', ruolo:'attivista', diff:'facile', q:'Che cos\'è una petizione?',
+  op:['Uno strumento con cui i cittadini chiedono qualcosa alle istituzioni raccogliendo firme','Un ricorso presentato a un giudice','Un comunicato ufficiale del governo'], giusta:0,   // D5: distrattori stessa-famiglia (atti verso le istituzioni)
+  perche:'La petizione è una richiesta rivolta alle istituzioni, sostenuta dalle firme dei cittadini.'},   // fonte: art. 50 Cost. (petizione al Parlamento)
+ {id:'u_sindacato', era:'universale', ruolo:'attivista', diff:'media', q:'A che cosa serve un sindacato?',
+  op:['A rappresentare e tutelare i lavoratori','A rappresentare gli interessi delle imprese','A organizzare le elezioni politiche'], giusta:0,   // D5: distrattori stessa-famiglia (rappresentanza)
+  perche:'Il sindacato rappresenta e tutela gli interessi dei lavoratori.'},   // era-safe; distinto da «sciopero» (l'organizzazione, non l'azione)
+ {id:'u_comizio', era:'universale', ruolo:'attivista', diff:'facile', q:'Che cos\'è un comizio elettorale?',
+  op:['Un discorso pubblico per presentare idee e candidati agli elettori','La riunione in cui si contano i voti','Un sondaggio riservato tra gli iscritti'], giusta:0,   // D5: distrattori stessa-famiglia (campagna/voto)
+  perche:'Il comizio è un discorso pubblico con cui candidati e partiti si rivolgono agli elettori.'},   // era-safe, registro-piazza
+ {id:'u_associazione', era:'universale', ruolo:'attivista', diff:'media', q:'Cosa garantisce la libertà di associazione?',
+  op:['Il diritto dei cittadini di associarsi liberamente per fini leciti','Il diritto di riunirsi in un luogo pubblico','Il diritto di esprimere liberamente il proprio voto'], giusta:0,   // D5: distrattori stessa-famiglia (libertà civili)
+  perche:'La libertà di associazione è il diritto dei cittadini di associarsi liberamente per fini non vietati dalla legge.'},   // fonte: art. 18 Cost. (associazioni in generale; i partiti sono l'art. 49, i sindacati l'art. 39 — qui solo l'art. 18)
+ // --- AULA · locale (4 universali) ---
+ {id:'u_sindaco', era:'universale', ruolo:'locale', diff:'facile', q:'Chi guida il governo di un Comune?',
+  op:['Il sindaco','Il prefetto','Il presidente della Repubblica'], giusta:0,
+  perche:'Il sindaco è a capo dell\'amministrazione comunale.'},   // era-safe (il sindaco guida il Comune in ogni era; l'elezione diretta è del 1993, ma la domanda non lo tocca)
+ {id:'u_bilancio_ente', era:'universale', paese:'universale', ruolo:'locale', diff:'difficile', q:'Che cos\'è il bilancio di un ente locale?',
+  op:['Il documento che prevede le entrate e le spese dell\'ente','Il registro dei dipendenti dell\'ente','Il verbale delle sedute del consiglio'], giusta:0,   // D5: distrattori stessa-famiglia (documenti amministrativi)
+  perche:'Il bilancio è il documento che prevede le entrate e le spese dell\'ente per l\'anno.'},   // era-safe (contabilità pubblica)
+ {id:'u_consiglio_com', era:'universale', ruolo:'locale', diff:'facile', q:'A cosa serve il consiglio comunale?',
+  op:['È l\'organo eletto che delibera per il Comune','È un tribunale locale','È l\'ufficio delle tasse'], giusta:0,
+  perche:'Il consiglio comunale è l\'organo eletto che delibera gli atti fondamentali del Comune.'},   // era-safe, registro-aula
+ {id:'u_imposta_locale', era:'universale', paese:'universale', ruolo:'locale', diff:'difficile', q:'Che cos\'è un\'imposta locale?',
+  op:['Un tributo riscosso dall\'ente locale per finanziare i suoi servizi','Un contributo volontario','Una multa stradale'], giusta:0,
+  perche:'L\'imposta locale è un tributo che l\'ente riscuote per finanziare i servizi sul territorio.'},   // era-safe (fiscalità locale)
+
+ /* ============================================================================
+    D5 — SFIDE v2. Nuove UNIVERSALI (+7, alzano il pavimento condiviso di TUTTI i paesi) + BANCA-USA (+12).
+    `paese` esplicito su ogni voce nuova; `perche` a schermo PAESE-NEUTRO (le fonti/citazioni stanno nei commenti,
+    non a schermo — la regola-specchio della regola-era). Difficoltà col mix giusto (~⅓ difficile fra le nuove).
+    ============================================================================ */
+ // ----- UNIVERSALI nuove (economia-governo, partecipazione, aula) -----
+ {id:'u_pil', era:'universale', paese:'universale', ruolo:'governo', diff:'media', q:'Che cos\'è il PIL (prodotto interno lordo)?',
+  op:['Il valore di tutti i beni e servizi prodotti in un anno','Il debito totale dello Stato','Il numero degli occupati'], giusta:0,
+  perche:'Il PIL misura il valore di tutti i beni e servizi prodotti in un paese in un anno.'},
+ {id:'u_bilancio_stato', era:'universale', paese:'universale', ruolo:'governo', diff:'facile', q:'Che cos\'è il bilancio dello Stato?',
+  op:['Il documento che prevede le entrate e le spese pubbliche','La somma di tutti i salari','L\'elenco delle imprese'], giusta:0,
+  perche:'Il bilancio dello Stato prevede, per l\'anno, le entrate e le spese pubbliche.'},
+ {id:'u_recessione', era:'universale', paese:'universale', ruolo:'governo', diff:'difficile', q:'Che cos\'è una recessione?',
+  op:['Una fase prolungata di calo dell\'attività economica','Un aumento generale dei salari','Una riforma del fisco'], giusta:0,
+  perche:'La recessione è una fase prolungata di calo della produzione e dell\'attività economica.'},
+ {id:'u_disoccupazione', era:'universale', paese:'universale', ruolo:'governo', diff:'facile', q:'Cosa misura il tasso di disoccupazione?',
+  op:['La quota di persone in cerca di lavoro sul totale della forza lavoro','Il numero delle imprese','L\'aumento dei prezzi'], giusta:0,
+  perche:'Il tasso di disoccupazione è la quota di chi cerca lavoro sul totale della forza lavoro.'},
+ {id:'u_partito', era:'universale', paese:'universale', ruolo:'attivista', diff:'facile', q:'Che cos\'è un partito politico?',
+  op:['Un\'organizzazione che unisce cittadini attorno a un programma per governare','Un ufficio dello Stato','Un tribunale'], giusta:0,
+  perche:'Un partito è un\'organizzazione che unisce i cittadini attorno a un programma per concorrere a governare.'},
+ {id:'u_piano_urb', era:'universale', paese:'universale', ruolo:'locale', diff:'media', q:'Che cos\'è un piano urbanistico?',
+  op:['Lo strumento che regola l\'uso del territorio e l\'edificazione','Un elenco degli elettori','Una tassa sulle case'], giusta:0,
+  perche:'Il piano urbanistico regola l\'uso del territorio: dove e come si può costruire.'},
+ {id:'u_appalto', era:'universale', paese:'universale', ruolo:'locale', diff:'difficile', q:'Che cos\'è un appalto pubblico?',
+  op:['Un contratto con cui un ente affida a privati un\'opera o un servizio','Un tipo di elezione','Un sussidio alle famiglie'], giusta:0,
+  perche:'Con l\'appalto pubblico un ente affida a un\'impresa la realizzazione di un\'opera o di un servizio.'},
+ // ----- BANCA-USA (istituzioni americane; era:'universale' = valide anche in un futuro USA-1950; SOLO fatti, zero politica) -----
+ {id:'usa_mayor', era:'universale', paese:'usa', ruolo:'locale', diff:'facile', q:'Chi guida il governo di una città americana?',
+  op:['Il sindaco (mayor)','Il governatore dello Stato','Il presidente'], giusta:0,
+  perche:'A capo di una città americana c\'è il sindaco (mayor).'},
+ {id:'usa_council', era:'universale', paese:'usa', ruolo:'locale', diff:'media', q:'Di cosa si occupa il consiglio comunale (city council) americano?',
+  op:['Approva le norme e il bilancio della città','Nomina i giudici federali','Dichiara guerra'], giusta:0,
+  perche:'Il city council approva le ordinanze e il bilancio della città.'},
+ {id:'usa_county', era:'universale', paese:'usa', ruolo:'locale', diff:'media', q:'Che cos\'è una contea (county) negli Stati Uniti?',
+  op:['Una suddivisione amministrativa dello Stato','Un tribunale federale','Un partito'], giusta:0,
+  perche:'La contea è una suddivisione amministrativa interna a uno Stato americano.'},
+ {id:'usa_property', era:'universale', paese:'usa', ruolo:'locale', diff:'difficile', q:'Con quale imposta si finanziano soprattutto le scuole pubbliche locali negli USA?',
+  op:['L\'imposta sulla proprietà immobiliare (property tax)','Un dazio doganale','Un\'imposta federale sulle vendite'], giusta:0,
+  perche:'Le scuole pubbliche locali americane sono finanziate soprattutto dalla property tax, l\'imposta sugli immobili.'},
+ {id:'usa_congresso', era:'universale', paese:'usa', ruolo:'governo', diff:'facile', q:'Da quali due camere è composto il Congresso degli Stati Uniti?',
+  op:['Camera dei Rappresentanti e Senato','Assemblea e Consiglio','Camera e Corte'], giusta:0,
+  perche:'Il Congresso americano è composto dalla Camera dei Rappresentanti e dal Senato.'},
+ {id:'usa_veto', era:'universale', paese:'usa', ruolo:'governo', diff:'difficile', q:'Cosa può fare il presidente con una legge approvata dal Congresso?',
+  op:['Porre il veto e rinviarla al Congresso','Abrogarla per sempre da solo','Riscriverne il testo'], giusta:0,
+  perche:'Il presidente può porre il veto a una legge e rinviarla al Congresso.'},
+ {id:'usa_override', era:'universale', paese:'usa', ruolo:'governo', diff:'difficile', q:'Come può il Congresso superare il veto del presidente?',
+  op:['Riapprovando la legge coi due terzi di entrambe le camere','Con un referendum popolare','Con un ordine della Corte Suprema'], giusta:0,
+  perche:'Il Congresso può superare (override) il veto riapprovando la legge con la maggioranza dei due terzi in entrambe le camere.'},
+ {id:'usa_bill', era:'universale', paese:'usa', ruolo:'governo', diff:'media', q:'Cosa sono i primi dieci emendamenti alla Costituzione americana?',
+  op:['Il Bill of Rights, che elenca i diritti fondamentali','Un trattato commerciale','Il regolamento del Congresso'], giusta:0,
+  perche:'I primi dieci emendamenti formano il Bill of Rights, che elenca i diritti fondamentali.'},
+ {id:'usa_scotus', era:'universale', paese:'usa', ruolo:'ministro', diff:'difficile', q:'Qual è il compito principale della Corte Suprema degli Stati Uniti?',
+  op:['Interpretare la Costituzione e valutare la legittimità delle leggi','Approvare il bilancio federale','Comandare le forze armate'], giusta:0,
+  perche:'La Corte Suprema interpreta la Costituzione e può dichiarare incostituzionali le leggi (judicial review).'},   // fonte-doc: Marbury v. Madison, 1803 (a schermo solo il concetto)
+ {id:'usa_fed', era:'universale', paese:'usa', ruolo:'ministro', diff:'facile', q:'Che cos\'è la Federal Reserve?',
+  op:['La banca centrale degli Stati Uniti','Il ministero del Tesoro','La borsa di New York'], giusta:0,
+  perche:'La Federal Reserve è la banca centrale degli Stati Uniti.'},   // fonte-doc: Federal Reserve Act, 1913
+ {id:'usa_checks', era:'universale', paese:'usa', ruolo:'governo', diff:'difficile', q:'Cosa indica il principio dei «checks and balances»?',
+  op:['I tre poteri si controllano e si bilanciano a vicenda','Il pareggio di bilancio obbligatorio','Il voto obbligatorio'], giusta:0,
+  perche:'«Checks and balances»: i tre poteri (esecutivo, legislativo, giudiziario) si controllano e bilanciano a vicenda.'},
+ {id:'usa_mandati', era:'universale', paese:'usa', ruolo:'governo', diff:'facile', q:'Quanto durano il mandato del presidente e quello di un senatore negli USA?',
+  op:['Quattro anni il presidente, sei anni il senatore','Cinque anni entrambi','Sette e tre anni'], giusta:0,
+  perche:'Il presidente resta in carica quattro anni, il senatore sei.'},
+ {id:'usa_electoral', era:'universale', paese:'usa', ruolo:'governo', diff:'difficile', q:'Come si elegge il presidente degli Stati Uniti?',
+  op:['Attraverso il collegio elettorale (Electoral College)','Con un voto popolare diretto su scala nazionale','Dal Congresso riunito'], giusta:0,
+  perche:'Il presidente è eletto dal collegio elettorale (Electoral College), i cui grandi elettori sono scelti Stato per Stato.'},
+ {id:'usa_impeachment', era:'universale', paese:'usa', ruolo:'governo', diff:'difficile', q:'Come funziona la procedura di impeachment negli Stati Uniti?',
+  op:['La Camera mette in stato d\'accusa, il Senato giudica','Il presidente decade automaticamente','La Corte Suprema lo destituisce'], giusta:0,
+  perche:'Nell\'impeachment la Camera dei Rappresentanti vota l\'accusa e il Senato celebra il processo.'},
+
+ /* ============================================================================
+    D5 Batch 1 — BANCHE-PAESE (griglia-standard 8-10 voci): Regno Unito, Francia, Germania. Solo istituzioni e
+    struttura, MAI titolari attuali (cautela-viventi + non scade). Tag-era esplicito (`contemporanea` dove l'istituto
+    è moderno → utile ai preset storici futuri). Fonti/⚠ nei commenti. Non-partigiane. Vaglio-fonti di Giacomo passato.
+    ============================================================================ */
+ // ----- REGNO UNITO (regnounito) -----
+ {id:'uk_parlamento', era:'universale', paese:'regnounito', ruolo:'governo', diff:'facile', q:'Da quali due camere è composto il Parlamento del Regno Unito?',
+  op:['La Camera dei Comuni e la Camera dei Lord','La Camera e il Senato','L\'Assemblea e il Consiglio'], giusta:0,
+  perche:'Il Parlamento britannico ha la Camera dei Comuni (eletta) e la Camera dei Lord.'},
+ {id:'uk_capo', era:'universale', paese:'regnounito', ruolo:'governo', diff:'media', q:'Nel Regno Unito, chi è il capo dello Stato e chi guida il governo?',
+  op:['Il monarca è capo di Stato, il primo ministro guida il governo','Il primo ministro è anche capo di Stato','Un presidente eletto guida entrambi'], giusta:0,
+  perche:'È una monarchia costituzionale: il monarca regna come capo di Stato, il primo ministro governa.'},
+ {id:'uk_corte', era:'contemporanea', paese:'regnounito', ruolo:'ministro', diff:'difficile', q:'Qual è oggi la più alta corte del Regno Unito?',
+  op:['La Corte Suprema del Regno Unito','La Camera dei Comuni','Il Consiglio della Corona'], giusta:0,
+  perche:'Dal 2009 la più alta corte è la Corte Suprema del Regno Unito; prima la funzione era della Camera dei Lord.'},   // ⚠ era-anchor 2009 → contemporanea
+ {id:'uk_banca', era:'universale', paese:'regnounito', ruolo:'ministro', diff:'facile', q:'Qual è la banca centrale del Regno Unito?',
+  op:['La Banca d\'Inghilterra','La Banca di Londra','Il Tesoro britannico'], giusta:0,
+  perche:'La Banca d\'Inghilterra è la banca centrale del Regno Unito.'},   // fonte: Bank of England, 1694
+ {id:'uk_nazioni', era:'universale', paese:'regnounito', ruolo:'locale', diff:'media', q:'Come si chiamano le quattro nazioni costitutive del Regno Unito?',
+  op:['Inghilterra, Scozia, Galles e Irlanda del Nord','Inghilterra, Irlanda, Galles e Cornovaglia','Gran Bretagna, Scozia e le due Irlande'], giusta:0,
+  perche:'Il Regno Unito riunisce Inghilterra, Scozia, Galles e Irlanda del Nord.'},   // ⚠ Irlanda del Nord dal 1921 (per preset pre-1921 va rivista)
+ {id:'uk_council', era:'universale', paese:'regnounito', ruolo:'locale', diff:'facile', q:'Chi amministra un ente locale (council) britannico?',
+  op:['Il consiglio (council) eletto','Un prefetto nominato dalla Corona','Il parlamento nazionale'], giusta:0,
+  perche:'A livello locale amministra il consiglio (council), eletto dai cittadini.'},
+ {id:'uk_counciltax', era:'contemporanea', paese:'regnounito', ruolo:'locale', diff:'media', q:'Con quale imposta locale si finanziano oggi i servizi comunali nel Regno Unito?',
+  op:['La council tax','Un dazio locale sulle merci','Un contributo volontario'], giusta:0,
+  perche:'La council tax, basata sul valore dell\'abitazione, finanzia i servizi locali.'},   // ⚠ introdotta 1993 (prima rates/poll tax) → contemporanea
+ {id:'uk_fptp', era:'universale', paese:'regnounito', ruolo:'governo', diff:'difficile', q:'Con quale sistema si eleggono i deputati della Camera dei Comuni?',
+  op:['Il maggioritario a turno unico (first-past-the-post)','Il proporzionale puro','Il doppio turno'], giusta:0,
+  perche:'Ogni collegio elegge un deputato col maggioritario a turno unico (first-past-the-post).'},
+ {id:'uk_sovranita', era:'universale', paese:'regnounito', ruolo:'governo', diff:'media', q:'Cosa indica la sovranità del Parlamento nel Regno Unito?',
+  op:['Il Parlamento è l\'autorità legislativa suprema','Il monarca può annullare le leggi','I tribunali possono riscrivere le leggi'], giusta:0,
+  perche:'Per la sovranità parlamentare, il Parlamento è l\'autorità legislativa suprema.'},
+ {id:'uk_costituzione', era:'universale', paese:'regnounito', ruolo:'governo', diff:'facile', q:'Il Regno Unito ha una Costituzione scritta in un unico documento?',
+  op:['No, ha una costituzione non codificata','Sì, dal 1215','Sì, un codice unico moderno'], giusta:0,
+  perche:'Il Regno Unito non ha un unico testo costituzionale: la sua costituzione è non codificata.'},
+ // ----- FRANCIA (francia) -----
+ {id:'fr_parlamento', era:'universale', paese:'francia', ruolo:'governo', diff:'facile', q:'Da quali due camere è composto il Parlamento francese?',
+  op:['L\'Assemblea nazionale e il Senato','La Camera e il Consiglio','La Dieta e il Senato'], giusta:0,
+  perche:'Il Parlamento francese ha l\'Assemblea nazionale e il Senato.'},
+ {id:'fr_capo', era:'contemporanea', paese:'francia', ruolo:'governo', diff:'media', q:'Nella Francia di oggi, chi è il capo dello Stato e chi guida il governo?',
+  op:['Il Presidente della Repubblica; il Primo ministro guida il governo','Il Primo ministro è capo di Stato','Un monarca è capo di Stato'], giusta:0,
+  perche:'Nella V Repubblica il Presidente è capo di Stato e il Primo ministro guida il governo.'},   // ⚠ assetto della V Repubblica, 1958 → contemporanea
+ {id:'fr_conseil', era:'contemporanea', paese:'francia', ruolo:'ministro', diff:'difficile', q:'Quale organo verifica la costituzionalità delle leggi in Francia?',
+  op:['Il Consiglio costituzionale','Il Senato','La Corte dei conti'], giusta:0,
+  perche:'Il Consiglio costituzionale verifica che le leggi rispettino la Costituzione.'},   // ⚠ 1958 → contemporanea
+ {id:'fr_banca', era:'universale', paese:'francia', ruolo:'ministro', diff:'facile', q:'Qual è la banca centrale della Francia?',
+  op:['La Banca di Francia','La Banca di Parigi','Il Tesoro francese'], giusta:0,
+  perche:'La banca centrale emette la moneta e regola il credito.'},   // Q-fix §A — perché era-neutro (tolta la clausola-BCE)
+ {id:'fr_dipartimenti', era:'universale', paese:'francia', ruolo:'locale', diff:'media', q:'Come si chiamano le storiche suddivisioni amministrative della Francia?',
+  op:['I dipartimenti','Le contee','I cantoni federali'], giusta:0,
+  perche:'La Francia è suddivisa in dipartimenti (e, in età moderna, in regioni).'},   // fonte: départements dal 1790
+ {id:'fr_maire', era:'universale', paese:'francia', ruolo:'locale', diff:'facile', q:'Chi guida un comune francese?',
+  op:['Il sindaco (maire), eletto dal consiglio comunale','Un prefetto nominato dallo Stato','Il presidente della regione'], giusta:0,
+  perche:'Il comune è guidato dal sindaco (maire), eletto dal consiglio comunale.'},
+ {id:'fr_foncier', era:'universale', paese:'francia', ruolo:'locale', diff:'difficile', q:'Con quale imposta sugli immobili si finanziano i comuni francesi?',
+  op:['La taxe foncière (imposta fondiaria)','Un dazio comunale','Un\'imposta comunale sul reddito'], giusta:0,
+  perche:'La taxe foncière, l\'imposta sugli immobili, è una risorsa propria dei comuni francesi.'},
+ {id:'fr_presidente', era:'contemporanea', paese:'francia', ruolo:'governo', diff:'difficile', q:'Come si elegge oggi il Presidente della Repubblica francese?',
+  op:['A suffragio universale diretto, con ballottaggio a doppio turno','Dal Parlamento riunito','Da un collegio di notabili'], giusta:0,
+  perche:'Il Presidente è eletto direttamente dai cittadini, con eventuale ballottaggio tra i due più votati.'},   // ⚠ elezione diretta dal 1962 → contemporanea
+ {id:'fr_cohabitation', era:'contemporanea', paese:'francia', ruolo:'governo', diff:'difficile', q:'Che cos\'è la «cohabitation» nella Francia della V Repubblica?',
+  op:['Quando il Presidente e il governo appartengono a schieramenti opposti','L\'unione di due comuni confinanti','Un patto fra le due camere del Parlamento'], giusta:0,
+  perche:'Si ha cohabitation quando il Presidente e la maggioranza di governo sono di parti politiche opposte.'},   // ⚠ fenomeno della V Repubblica → contemporanea
+ {id:'fr_motto', era:'universale', paese:'francia', ruolo:'attivista', diff:'facile', q:'Qual è il motto della Repubblica francese?',
+  op:['«Libertà, Uguaglianza, Fraternità»','«Ordine e Progresso»','«Dio, Patria, Famiglia»'], giusta:0,
+  perche:'Il motto della Repubblica francese è «Libertà, Uguaglianza, Fraternità».'},   // era-safe (dalla Rivoluzione), non-partigiano
+ // ----- GERMANIA (germania) -----
+ {id:'de_parlamento', era:'universale', paese:'germania', ruolo:'governo', diff:'facile', q:'Da quali due organi è composto il livello federale del parlamento tedesco?',
+  op:['Il Bundestag e il Bundesrat','La Camera e il Senato','L\'Assemblea e la Dieta'], giusta:0,
+  perche:'A livello federale operano il Bundestag (eletto) e il Bundesrat (i governi dei Länder).'},   // ⚠ Repubblica Federale, dal 1949
+ {id:'de_capo', era:'universale', paese:'germania', ruolo:'governo', diff:'media', q:'In Germania, chi è il capo dello Stato e chi guida il governo?',
+  op:['Il Presidente federale (ruolo cerimoniale); il Cancelliere guida il governo','Il Cancelliere è capo di Stato','Il Presidente guida il governo'], giusta:0,
+  perche:'Il Presidente federale ha un ruolo cerimoniale; il Cancelliere guida il governo.'},   // ⚠ post-1949
+ {id:'de_corte', era:'contemporanea', paese:'germania', ruolo:'ministro', diff:'media', q:'Quale corte tutela la Legge fondamentale tedesca?',
+  op:['Il Tribunale costituzionale federale','Il Bundestag','La Corte dei conti federale'], giusta:0,
+  perche:'Il Tribunale costituzionale federale, con sede a Karlsruhe, tutela la Legge fondamentale.'},   // ⚠ 1951 → contemporanea
+ {id:'de_banca', era:'contemporanea', paese:'germania', ruolo:'ministro', diff:'facile', q:'Come si chiama la banca centrale tedesca?',
+  op:['La Bundesbank','La Banca di Berlino','Il Tesoro federale'], giusta:0,
+  perche:'La banca centrale emette la moneta e regola il credito.'},   // ⚠ 1957 → contemporanea
+ {id:'de_lander', era:'universale', paese:'germania', ruolo:'locale', diff:'facile', q:'Come si chiamano gli stati federati della Germania?',
+  op:['I Länder','Le province','I cantoni'], giusta:0,
+  perche:'Gli stati federati tedeschi si chiamano Länder.'},
+ {id:'de_burg', era:'universale', paese:'germania', ruolo:'locale', diff:'facile', q:'Chi guida un comune tedesco?',
+  op:['Il sindaco (Bürgermeister)','Un governatore nominato dalla federazione','Il ministro-presidente del Land'], giusta:0,
+  perche:'Il comune è guidato dal sindaco (Bürgermeister).'},
+ {id:'de_gewerbe', era:'universale', paese:'germania', ruolo:'locale', diff:'difficile', q:'Qual è una delle principali imposte proprie dei comuni tedeschi?',
+  op:['L\'imposta sulle attività economiche (Gewerbesteuer)','Un dazio interno','Un\'imposta federale sul reddito'], giusta:0,
+  perche:'La Gewerbesteuer, l\'imposta sulle attività economiche, è una delle principali risorse proprie dei comuni.'},
+ {id:'de_voto', era:'universale', paese:'germania', ruolo:'governo', diff:'difficile', q:'Con quale sistema si elegge il Bundestag?',
+  op:['Un proporzionale personalizzato (collegi uninominali più liste)','Il maggioritario secco','Il voto per acclamazione'], giusta:0,
+  perche:'Il Bundestag si elegge con un proporzionale personalizzato: metà nei collegi, metà con le liste.'},   // ⚠ post-1949
+ {id:'de_federale', era:'universale', paese:'germania', ruolo:'governo', diff:'media', q:'Cosa indica il carattere federale della Germania?',
+  op:['I Länder hanno competenze proprie accanto alla federazione','Tutto è deciso dal governo centrale','I Länder sono solo uffici periferici'], giusta:0,
+  perche:'La Germania è federale: i Länder hanno competenze proprie accanto al livello federale (Bund).'},
+ {id:'de_sfiducia', era:'universale', paese:'germania', ruolo:'governo', diff:'difficile', q:'Cosa prevede la «sfiducia costruttiva» tedesca?',
+  op:['Il cancelliere si può sfiduciare solo eleggendo insieme un successore','Bastano i due terzi del Bundestag','La decisione spetta al Presidente federale'], giusta:0,
+  perche:'Con la sfiducia costruttiva il Bundestag rovescia il cancelliere solo eleggendo contestualmente il successore.'},   // Legge fondamentale, 1949
+
+ /* ============================================================================
+    D5 Batch 2 — banche-paese: Spagna · Canada · Australia · Giappone. Regola-tag (Giacomo): `universale` = istituto
+    già vivo nella finestra giocabile (anni '50); `contemporanea` = posteriore (serve ai preset storici futuri).
+    Solo struttura, mai titolari. Vaglio-fonti passato (fisco IBI/rates/fixed-asset ✓; ritag Canada/Australia/Giappone applicati).
+    ============================================================================ */
+ // ----- SPAGNA (spagna) -----
+ {id:'es_cortes', era:'universale', paese:'spagna', ruolo:'governo', diff:'facile', q:'Da quali due camere sono composte le Cortes Generali spagnole?',
+  op:['Il Congresso dei Deputati e il Senato','La Camera e la Dieta','L\'Assemblea e il Consiglio'], giusta:0,
+  perche:'Le Cortes Generali hanno il Congresso dei Deputati e il Senato.'},
+ {id:'es_capo', era:'contemporanea', paese:'spagna', ruolo:'governo', diff:'media', q:'Nella Spagna di oggi, chi è il capo dello Stato e chi guida il governo?',
+  op:['Il Re è capo di Stato, il Presidente del Governo guida il governo','Il Presidente del Governo è capo di Stato','Un presidente eletto guida entrambi'], giusta:0,
+  perche:'È una monarchia parlamentare: il Re è capo di Stato, il Presidente del Governo guida l\'esecutivo.'},   // ⚠ Costituzione del 1978 → contemporanea
+ {id:'es_tc', era:'contemporanea', paese:'spagna', ruolo:'ministro', diff:'difficile', q:'Quale organo giudica la costituzionalità delle leggi in Spagna?',
+  op:['Il Tribunale costituzionale','Il Senato','La Corte dei conti'], giusta:0,
+  perche:'Il Tribunale costituzionale verifica che le leggi rispettino la Costituzione.'},   // ⚠ 1978 → contemporanea
+ {id:'es_banca', era:'universale', paese:'spagna', ruolo:'ministro', diff:'facile', q:'Qual è la banca centrale della Spagna?',
+  op:['Il Banco de España','La Banca di Madrid','Il Tesoro spagnolo'], giusta:0,
+  perche:'La banca centrale emette la moneta e regola il credito.'},   // Q-fix §A — perché era-neutro (tolta la clausola-BCE)
+ {id:'es_autonomie', era:'contemporanea', paese:'spagna', ruolo:'locale', diff:'media', q:'Come si chiamano le regioni autonome spagnole?',
+  op:['Le comunità autonome','Le contee','I cantoni'], giusta:0,
+  perche:'Le regioni spagnole si chiamano comunità autonome (comunidades autónomas).'},   // ⚠ Stato delle autonomie, 1978 → contemporanea
+ {id:'es_alcalde', era:'universale', paese:'spagna', ruolo:'locale', diff:'facile', q:'Chi guida un comune spagnolo?',
+  op:['Il sindaco (alcalde)','Un prefetto nominato dallo Stato','Il presidente della comunità autonoma'], giusta:0,
+  perche:'Il comune spagnolo è guidato dal sindaco (alcalde).'},
+ {id:'es_ibi', era:'contemporanea', paese:'spagna', ruolo:'locale', diff:'difficile', q:'Con quale imposta sugli immobili si finanziano i comuni spagnoli?',
+  op:['L\'IBI (imposta sui beni immobili)','Un dazio comunale','Un\'imposta comunale sul reddito'], giusta:0,
+  perche:'L\'IBI, l\'imposta sui beni immobili, è una risorsa propria dei comuni spagnoli.'},   // ⚠ contemporanea
+ {id:'es_dhondt', era:'contemporanea', paese:'spagna', ruolo:'governo', diff:'difficile', q:'Con quale sistema si elegge il Congresso dei Deputati spagnolo?',
+  op:['Un proporzionale per circoscrizioni provinciali (metodo D\'Hondt)','Il maggioritario a turno unico','Il voto per acclamazione'], giusta:0,
+  perche:'Il Congresso si elegge con un proporzionale per province, ripartito col metodo D\'Hondt.'},   // ⚠ contemporanea
+ {id:'es_stato', era:'contemporanea', paese:'spagna', ruolo:'governo', diff:'media', q:'Cosa caratterizza lo «Stato delle autonomie» spagnolo?',
+  op:['Un forte decentramento verso le comunità autonome','Un governo interamente centralizzato','L\'assenza di regioni'], giusta:0,
+  perche:'Lo «Stato delle autonomie» decentra ampie competenze alle comunità autonome.'},   // ⚠ contemporanea
+ {id:'es_sfiducia', era:'contemporanea', paese:'spagna', ruolo:'governo', diff:'difficile', q:'Cosa prevede la mozione di sfiducia costruttiva in Spagna?',
+  op:['Si sfiducia il governo solo indicando insieme un candidato successore','Bastano i due terzi del Congresso','La decisione spetta al Re'], giusta:0,
+  perche:'La sfiducia costruttiva rovescia il governo solo indicando contestualmente un successore.'},   // ⚠ 1978 → contemporanea
+ // ----- CANADA (canada) -----
+ {id:'ca_parlamento', era:'universale', paese:'canada', ruolo:'governo', diff:'facile', q:'Da quali due camere è composto il Parlamento del Canada?',
+  op:['La Camera dei Comuni e il Senato','La Camera e l\'Assemblea','Il Bundestag e il Bundesrat'], giusta:0,
+  perche:'Il Parlamento canadese ha la Camera dei Comuni (eletta) e il Senato (nominato).'},
+ {id:'ca_capo', era:'universale', paese:'canada', ruolo:'governo', diff:'media', q:'In Canada, chi è formalmente il capo dello Stato e chi lo rappresenta nel paese?',
+  op:['Il monarca, rappresentato dal Governatore generale; il primo ministro governa','Il primo ministro è capo di Stato','Un presidente eletto è capo di Stato'], giusta:0,
+  perche:'Il capo di Stato è il monarca, rappresentato in Canada dal Governatore generale; il primo ministro guida il governo.'},
+ {id:'ca_corte', era:'universale', paese:'canada', ruolo:'ministro', diff:'media', q:'Qual è la più alta corte del Canada?',
+  op:['La Corte Suprema del Canada','La Camera dei Comuni','Il Consiglio privato'], giusta:0,
+  perche:'La Corte Suprema del Canada è la più alta istanza giudiziaria del paese.'},
+ {id:'ca_banca', era:'universale', paese:'canada', ruolo:'ministro', diff:'facile', q:'Qual è la banca centrale del Canada?',
+  op:['La Banca del Canada','La Banca di Ottawa','Il Tesoro canadese'], giusta:0,
+  perche:'La Banca del Canada è la banca centrale del paese.'},   // fondata 1934 → viva negli anni '50 → universale (ritag)
+ {id:'ca_province', era:'universale', paese:'canada', ruolo:'locale', diff:'facile', q:'In quali unità è diviso il Canada a livello federato?',
+  op:['Province e territori','Länder','Cantoni'], giusta:0,
+  perche:'Il Canada è una federazione di province e territori.'},
+ {id:'ca_mayor', era:'universale', paese:'canada', ruolo:'locale', diff:'facile', q:'Chi guida una città canadese?',
+  op:['Il sindaco (mayor)','Un governatore federale','Il premier della provincia'], giusta:0,
+  perche:'A capo di una città canadese c\'è il sindaco (mayor).'},
+ {id:'ca_property', era:'universale', paese:'canada', ruolo:'locale', diff:'media', q:'Con quale imposta si finanziano soprattutto i comuni canadesi?',
+  op:['L\'imposta sulla proprietà (property tax)','Un dazio interprovinciale','Un\'imposta federale sulle vendite'], giusta:0,
+  perche:'I comuni canadesi si finanziano soprattutto con la property tax, l\'imposta sugli immobili.'},
+ {id:'ca_fptp', era:'universale', paese:'canada', ruolo:'governo', diff:'media', q:'Con quale sistema si eleggono i deputati della Camera dei Comuni canadese?',
+  op:['Il maggioritario a turno unico','Il proporzionale puro','Il doppio turno'], giusta:0,
+  perche:'La Camera dei Comuni si elegge col maggioritario a turno unico.'},
+ {id:'ca_federazione', era:'universale', paese:'canada', ruolo:'governo', diff:'difficile', q:'Che forma di Stato è il Canada?',
+  op:['Una federazione con monarchia costituzionale parlamentare','Una repubblica presidenziale','Uno Stato unitario centralizzato'], giusta:0,
+  perche:'Il Canada è una federazione a monarchia costituzionale di tipo parlamentare.'},
+ {id:'ca_lingue', era:'contemporanea', paese:'canada', ruolo:'governo', diff:'difficile', q:'Quante lingue ufficiali ha il Canada a livello federale?',
+  op:['Due: inglese e francese','Una: l\'inglese','Tre: inglese, francese e spagnolo'], giusta:0,
+  perche:'A livello federale il Canada ha due lingue ufficiali: inglese e francese.'},   // ⚠ Official Languages Act, 1969 → contemporanea
+ // ----- AUSTRALIA (australia) -----
+ {id:'au_parlamento', era:'universale', paese:'australia', ruolo:'governo', diff:'facile', q:'Da quali due camere è composto il Parlamento federale australiano?',
+  op:['La Camera dei Rappresentanti e il Senato','La Camera e la Dieta','L\'Assemblea e il Consiglio'], giusta:0,
+  perche:'Il Parlamento federale australiano ha la Camera dei Rappresentanti e il Senato.'},
+ {id:'au_capo', era:'universale', paese:'australia', ruolo:'governo', diff:'media', q:'In Australia, chi è formalmente il capo dello Stato e chi lo rappresenta?',
+  op:['Il monarca, rappresentato dal Governatore generale; il primo ministro governa','Il primo ministro è capo di Stato','Un presidente eletto è capo di Stato'], giusta:0,
+  perche:'Il capo di Stato è il monarca, rappresentato dal Governatore generale; il primo ministro guida il governo.'},
+ {id:'au_corte', era:'universale', paese:'australia', ruolo:'ministro', diff:'media', q:'Qual è la più alta corte dell\'Australia?',
+  op:['L\'Alta Corte d\'Australia','La Camera dei Rappresentanti','Il Consiglio privato di Londra'], giusta:0,
+  perche:'L\'Alta Corte d\'Australia (High Court) è la più alta istanza del paese.'},
+ {id:'au_banca', era:'contemporanea', paese:'australia', ruolo:'ministro', diff:'difficile', q:'Qual è oggi la banca centrale dell\'Australia?',
+  op:['La Reserve Bank of Australia','La Commonwealth Bank','Il Tesoro australiano'], giusta:0,
+  perche:'La banca centrale è la Reserve Bank of Australia; prima le funzioni erano della Commonwealth Bank.'},   // ⚠ RBA dal 1960 → contemporanea
+ {id:'au_stati', era:'universale', paese:'australia', ruolo:'locale', diff:'facile', q:'In quali unità è divisa la federazione australiana?',
+  op:['Stati e territori','Länder','Province e cantoni'], giusta:0,
+  perche:'L\'Australia è una federazione di stati e territori.'},
+ {id:'au_council', era:'universale', paese:'australia', ruolo:'locale', diff:'facile', q:'Chi amministra un governo locale australiano?',
+  op:['Il consiglio (council), spesso con un sindaco','Un prefetto nominato dallo Stato','Il governatore dello Stato'], giusta:0,
+  perche:'Il governo locale australiano è il consiglio (council), spesso guidato da un sindaco.'},
+ {id:'au_rates', era:'universale', paese:'australia', ruolo:'locale', diff:'media', q:'Con quale prelievo si finanziano i governi locali australiani?',
+  op:['I «rates», tasse sulla proprietà','Un dazio statale','Un\'imposta federale sul reddito'], giusta:0,
+  perche:'I governi locali australiani si finanziano coi «rates», prelievi sulla proprietà.'},
+ {id:'au_voto', era:'universale', paese:'australia', ruolo:'governo', diff:'difficile', q:'Cosa caratterizza il voto in Australia?',
+  op:['È obbligatorio, e alla Camera si usa il voto preferenziale','È facoltativo e a turno unico','Si vota per acclamazione'], giusta:0,
+  perche:'In Australia il voto è obbligatorio e alla Camera si usa il voto preferenziale.'},   // obbligo 1924, preferenziale 1918 → universale (ritag)
+ {id:'au_federazione', era:'universale', paese:'australia', ruolo:'governo', diff:'media', q:'Che forma di Stato è l\'Australia?',
+  op:['Una federazione con monarchia costituzionale parlamentare','Una repubblica presidenziale','Uno Stato unitario'], giusta:0,
+  perche:'L\'Australia è una federazione a monarchia costituzionale parlamentare.'},
+ {id:'au_stv', era:'universale', paese:'australia', ruolo:'governo', diff:'difficile', q:'Con quale sistema si elegge il Senato australiano?',
+  op:['Un proporzionale a voto singolo trasferibile','Il maggioritario secco','La nomina da parte degli Stati'], giusta:0,
+  perche:'Il Senato australiano si elegge con un proporzionale a voto singolo trasferibile.'},   // dal 1948 → universale (ritag)
+ // ----- GIAPPONE (giappone) -----
+ {id:'jp_dieta', era:'universale', paese:'giappone', ruolo:'governo', diff:'facile', q:'Da quali due camere è composta la Dieta giapponese?',
+  op:['La Camera dei Rappresentanti e la Camera dei Consiglieri','La Camera e il Senato imperiale','L\'Assemblea e la Dieta federale'], giusta:0,
+  perche:'La Dieta ha la Camera dei Rappresentanti e la Camera dei Consiglieri.'},
+ {id:'jp_capo', era:'universale', paese:'giappone', ruolo:'governo', diff:'media', q:'In Giappone, qual è il ruolo dell\'Imperatore e chi guida il governo?',
+  op:['L\'Imperatore è simbolo dello Stato; il Primo ministro guida il governo','L\'Imperatore governa direttamente','Il Primo ministro è capo di Stato'], giusta:0,
+  perche:'L\'Imperatore è «simbolo dello Stato»; il potere di governo spetta al Primo ministro.'},   // Costituzione 1947 → universale (ritag, coerente con la Dieta)
+ {id:'jp_corte', era:'universale', paese:'giappone', ruolo:'ministro', diff:'media', q:'Qual è la più alta corte del Giappone?',
+  op:['La Corte Suprema del Giappone','La Dieta','Il Consiglio imperiale'], giusta:0,
+  perche:'La Corte Suprema del Giappone è la più alta istanza giudiziaria.'},
+ {id:'jp_banca', era:'universale', paese:'giappone', ruolo:'ministro', diff:'facile', q:'Qual è la banca centrale del Giappone?',
+  op:['La Banca del Giappone','La Banca di Tokyo','Il Tesoro giapponese'], giusta:0,
+  perche:'La Banca del Giappone è la banca centrale del paese.'},   // 1882 → universale
+ {id:'jp_prefetture', era:'universale', paese:'giappone', ruolo:'locale', diff:'media', q:'In quali unità amministrative è diviso il Giappone?',
+  op:['Le prefetture','I Länder','Le contee'], giusta:0,
+  perche:'Il Giappone è diviso in prefetture.'},
+ {id:'jp_sindaco', era:'universale', paese:'giappone', ruolo:'locale', diff:'facile', q:'Chi guida un comune giapponese?',
+  op:['Il sindaco','Un governatore imperiale','Il ministro dell\'interno'], giusta:0,
+  perche:'Il comune giapponese è guidato dal sindaco.'},
+ {id:'jp_fixedasset', era:'universale', paese:'giappone', ruolo:'locale', diff:'difficile', q:'Con quale imposta si finanziano i comuni giapponesi sugli immobili?',
+  op:['L\'imposta sui beni immobili (fixed asset tax)','Un dazio interno','Un\'imposta imperiale sul reddito'], giusta:0,
+  perche:'I comuni giapponesi si finanziano con l\'imposta sui beni immobili (fixed asset tax).'},   // dal 1950 (riforme Shoup) → universale
+ {id:'jp_mixed', era:'contemporanea', paese:'giappone', ruolo:'governo', diff:'difficile', q:'Con quale sistema si elegge oggi la Camera dei Rappresentanti giapponese?',
+  op:['Un sistema misto (collegi uninominali più proporzionale)','Il solo maggioritario secco','La nomina da parte dell\'Imperatore'], giusta:0,
+  perche:'La Camera dei Rappresentanti si elegge con un sistema misto: collegi uninominali e quota proporzionale.'},   // ⚠ riforma 1994 → contemporanea
+ {id:'jp_art9', era:'universale', paese:'giappone', ruolo:'governo', diff:'difficile', q:'Cosa afferma l\'articolo 9 della Costituzione giapponese?',
+  op:['La rinuncia alla guerra come diritto sovrano della nazione','L\'obbligo del servizio militare universale','La supremazia dell\'esercito sullo Stato'], giusta:0,
+  perche:'L\'articolo 9 della Costituzione del 1947 sancisce la rinuncia alla guerra come diritto sovrano della nazione.'},   // Costituzione 1947 → universale (ritag); formulazione e distrattori STRETTAMENTE descrittivi (zero dibattito riarmo)
+ {id:'jp_monarchia', era:'universale', paese:'giappone', ruolo:'governo', diff:'media', q:'Che forma ha lo Stato giapponese?',
+  op:['Una monarchia costituzionale con l\'Imperatore come simbolo','Una repubblica presidenziale','Un impero assoluto'], giusta:0,
+  perche:'Il Giappone è una monarchia costituzionale in cui l\'Imperatore è simbolo dello Stato.'},   // Costituzione 1947 → universale (ritag)
+
+ /* ============================================================================
+    D5 Batch 3 — banche-paese: Corea del Sud · Brasile · Messico · India. Regola-tag applicata; vaglio-fonti passato
+    (3 correzioni fattuali: BR-elezione-diretta'46→universale; MX non-rielezione'17/sei-anni'28; note-doc su banche/bicameralismi).
+    Fisco locale in via GENERICA (Corea/India). Solo struttura, mai titolari.
+    ============================================================================ */
+ // ----- COREA DEL SUD (coreasud) — assetto attuale in gran parte post-democratizzazione 1987 -----
+ {id:'kr_assemblea', era:'universale', paese:'coreasud', ruolo:'governo', diff:'media', q:'Com\'è composto il parlamento della Corea del Sud?',
+  op:['Da un\'assemblea unicamerale, l\'Assemblea nazionale','Da due camere federali','Da un consiglio di prefetti'], giusta:0,
+  perche:'Il parlamento sudcoreano è l\'Assemblea nazionale, oggi unicamerale.'},   // ⚠ breve fase bicamerale all'inizio degli anni '60 (II Repubblica) — nel doc, non a schermo
+ {id:'kr_capo', era:'contemporanea', paese:'coreasud', ruolo:'governo', diff:'media', q:'Nella Corea del Sud di oggi, chi è il capo dello Stato e del governo?',
+  op:['Il Presidente della Repubblica, eletto direttamente','Un monarca costituzionale','Il presidente dell\'Assemblea nazionale'], giusta:0,
+  perche:'La Corea del Sud è una repubblica presidenziale: il Presidente, eletto direttamente, è capo di Stato e di governo.'},   // ⚠ VI Repubblica, 1987 → contemporanea
+ {id:'kr_corte', era:'contemporanea', paese:'coreasud', ruolo:'ministro', diff:'difficile', q:'Quale corte giudica la costituzionalità delle leggi in Corea del Sud?',
+  op:['La Corte costituzionale','L\'Assemblea nazionale','Il Consiglio di Stato'], giusta:0,
+  perche:'La Corte costituzionale della Corea del Sud giudica la legittimità costituzionale delle leggi.'},   // ⚠ 1988 → contemporanea
+ {id:'kr_banca', era:'universale', paese:'coreasud', ruolo:'ministro', diff:'facile', q:'Qual è la banca centrale della Corea del Sud?',
+  op:['La Banca di Corea','La Banca di Seul','Il Tesoro coreano'], giusta:0,
+  perche:'La Banca di Corea è la banca centrale del paese.'},   // fondata il 12 giugno 1950 → universale (doc: metà 1950, poco prima della guerra)
+ {id:'kr_province', era:'universale', paese:'coreasud', ruolo:'locale', diff:'media', q:'In quali unità è divisa amministrativamente la Corea del Sud?',
+  op:['Province e città metropolitane','Länder','Cantoni'], giusta:0,
+  perche:'La Corea del Sud è divisa in province e città metropolitane.'},
+ {id:'kr_locale', era:'contemporanea', paese:'coreasud', ruolo:'locale', diff:'difficile', q:'Chi guida oggi un\'amministrazione locale in Corea del Sud?',
+  op:['Un sindaco o un governatore eletto','Un prefetto nominato dal centro','L\'autorità militare'], giusta:0,
+  perche:'A livello locale governano sindaci e governatori eletti.'},   // ⚠ autonomie locali ripristinate 1995 → contemporanea
+ {id:'kr_fisco', era:'universale', paese:'coreasud', ruolo:'locale', diff:'difficile', q:'Con quale imposta si finanziano gli enti locali coreani sugli immobili?',
+  op:['L\'imposta sulla proprietà riscossa dagli enti locali','Un dazio interno','Un\'imposta imperiale'], giusta:0,
+  perche:'Gli enti locali riscuotono un\'imposta sulla proprietà immobiliare.'},   // formulazione generica (jaesanse, senza traslitterazione a schermo)
+ {id:'kr_mandato', era:'contemporanea', paese:'coreasud', ruolo:'governo', diff:'difficile', q:'Quanto dura il mandato del Presidente sudcoreano e può essere rinnovato?',
+  op:['Cinque anni, mandato unico non rinnovabile','Quattro anni, rinnovabile una volta','A vita'], giusta:0,
+  perche:'Il Presidente sudcoreano ha un mandato unico di cinque anni, non rinnovabile.'},   // ⚠ 1987 → contemporanea
+ {id:'kr_repubblica', era:'contemporanea', paese:'coreasud', ruolo:'governo', diff:'media', q:'Che forma di Stato è la Corea del Sud?',
+  op:['Una repubblica presidenziale','Una monarchia','Una federazione'], giusta:0,
+  perche:'La Corea del Sud è una repubblica presidenziale.'},
+ {id:'kr_impeachment', era:'contemporanea', paese:'coreasud', ruolo:'governo', diff:'difficile', q:'Come si rimuove il Presidente sudcoreano con la procedura di impeachment?',
+  op:['L\'Assemblea nazionale lo mette in stato d\'accusa, la Corte costituzionale decide','Il primo ministro lo destituisce','Decide l\'autorità militare'], giusta:0,
+  perche:'Nell\'impeachment l\'Assemblea nazionale vota l\'accusa e la Corte costituzionale decide sulla rimozione.'},   // ⚠ VI Repubblica → contemporanea
+ // ----- BRASILE (brasile) -----
+ {id:'br_congresso', era:'universale', paese:'brasile', ruolo:'governo', diff:'facile', q:'Da quali due camere è composto il Congresso Nazionale brasiliano?',
+  op:['La Camera dei Deputati e il Senato Federale','Un\'assemblea unicamerale','La Dieta e il Senato'], giusta:0,
+  perche:'Il Congresso Nazionale brasiliano ha la Camera dei Deputati e il Senato Federale.'},   // bicamerale anche nella Cost. 1946
+ {id:'br_capo', era:'universale', paese:'brasile', ruolo:'governo', diff:'media', q:'In Brasile, chi è il capo dello Stato e del governo?',
+  op:['Il Presidente della Repubblica, eletto direttamente','Un monarca','Il presidente del Congresso'], giusta:0,
+  perche:'Il Brasile è una repubblica presidenziale: il Presidente, eletto direttamente, è capo di Stato e di governo.'},   // elezione diretta già nella Cost. 1946 (Vargas 1950) → universale (ritag)
+ {id:'br_stf', era:'universale', paese:'brasile', ruolo:'ministro', diff:'media', q:'Qual è la più alta corte del Brasile?',
+  op:['Il Supremo Tribunale Federale','Il Congresso Nazionale','Il Consiglio della Corona'], giusta:0,
+  perche:'Il Supremo Tribunale Federale è la più alta corte del Brasile.'},   // dal 1890
+ {id:'br_banca', era:'contemporanea', paese:'brasile', ruolo:'ministro', diff:'difficile', q:'Qual è oggi la banca centrale del Brasile?',
+  op:['Il Banco Central do Brasil','Il Banco do Brasil','Il Tesoro brasiliano'], giusta:0,
+  perche:'La banca centrale è il Banco Central do Brasil; prima le funzioni erano di altri enti (SUMOC, Banco do Brasil).'},   // ⚠ creato 1964, operativo 1965 → contemporanea
+ {id:'br_stati', era:'universale', paese:'brasile', ruolo:'locale', diff:'facile', q:'In quali unità è diviso il Brasile?',
+  op:['Stati e il Distretto Federale','Province e cantoni','Länder'], giusta:0,
+  perche:'Il Brasile è una federazione di stati, più il Distretto Federale.'},
+ {id:'br_prefeito', era:'universale', paese:'brasile', ruolo:'locale', diff:'facile', q:'Chi guida un comune brasiliano?',
+  op:['Il sindaco (prefeito)','Un governatore federale','Il presidente dello stato'], giusta:0,
+  perche:'Il comune brasiliano è guidato dal sindaco (prefeito).'},
+ {id:'br_iptu', era:'universale', paese:'brasile', ruolo:'locale', diff:'difficile', q:'Con quale imposta si finanziano i comuni brasiliani sugli immobili urbani?',
+  op:['L\'IPTU (imposta sulla proprietà urbana)','Un dazio interstatale','Un\'imposta federale sul reddito'], giusta:0,
+  perche:'L\'IPTU, imposta sulla proprietà urbana, è un tributo proprio dei comuni brasiliani.'},
+ {id:'br_voto', era:'universale', paese:'brasile', ruolo:'governo', diff:'media', q:'Cosa caratterizza il voto in Brasile?',
+  op:['È obbligatorio','È facoltativo','Si vota per acclamazione'], giusta:0,
+  perche:'In Brasile il voto è obbligatorio.'},   // dal 1932
+ {id:'br_federazione', era:'universale', paese:'brasile', ruolo:'governo', diff:'difficile', q:'Che forma di Stato è il Brasile?',
+  op:['Una repubblica federale presidenziale','Una monarchia','Uno Stato unitario'], giusta:0,
+  perche:'Il Brasile è una repubblica federale di tipo presidenziale.'},
+ {id:'br_motto', era:'universale', paese:'brasile', ruolo:'attivista', diff:'facile', q:'Cosa recita il motto sulla bandiera del Brasile?',
+  op:['«Ordine e Progresso»','«Libertà e Uguaglianza»','«Dio e Patria»'], giusta:0,
+  perche:'La bandiera brasiliana reca il motto «Ordine e Progresso».'},   // non-partigiano
+ // ----- MESSICO (messico) -----
+ {id:'mx_congresso', era:'universale', paese:'messico', ruolo:'governo', diff:'facile', q:'Da quali due camere è composto il Congresso dell\'Unione messicano?',
+  op:['La Camera dei Deputati e il Senato','Un\'assemblea unicamerale','La Dieta e il Consiglio'], giusta:0,
+  perche:'Il Congresso dell\'Unione ha la Camera dei Deputati e il Senato.'},
+ {id:'mx_capo', era:'universale', paese:'messico', ruolo:'governo', diff:'media', q:'In Messico, chi è il capo dello Stato e del governo?',
+  op:['Il Presidente, eletto direttamente','Un monarca','Il presidente del Congresso'], giusta:0,
+  perche:'Il Messico è una repubblica presidenziale: il Presidente, eletto direttamente, è capo di Stato e di governo.'},
+ {id:'mx_scjn', era:'universale', paese:'messico', ruolo:'ministro', diff:'media', q:'Qual è la più alta corte del Messico?',
+  op:['La Suprema Corte di Giustizia della Nazione','Il Congresso dell\'Unione','Il Consiglio di Stato'], giusta:0,
+  perche:'La Suprema Corte di Giustizia della Nazione è la più alta corte del Messico.'},
+ {id:'mx_banca', era:'universale', paese:'messico', ruolo:'ministro', diff:'facile', q:'Qual è la banca centrale del Messico?',
+  op:['Il Banco de México','Il Banco Nacional','Il Tesoro messicano'], giusta:0,
+  perche:'Il Banco de México è la banca centrale del paese.'},   // 1925
+ {id:'mx_stati', era:'universale', paese:'messico', ruolo:'locale', diff:'facile', q:'In quali unità è diviso il Messico?',
+  op:['Stati e Città del Messico','Province e cantoni','Länder'], giusta:0,
+  perche:'Il Messico è una federazione di stati, più Città del Messico.'},
+ {id:'mx_municipal', era:'universale', paese:'messico', ruolo:'locale', diff:'facile', q:'Chi guida un comune messicano?',
+  op:['Il presidente municipale (sindaco)','Un governatore federale','Il prefetto'], giusta:0,
+  perche:'Il comune messicano è guidato dal presidente municipale (sindaco).'},
+ {id:'mx_predial', era:'universale', paese:'messico', ruolo:'locale', diff:'difficile', q:'Con quale imposta si finanziano i comuni messicani sugli immobili?',
+  op:['L\'imposta sulla proprietà (predial)','Un dazio interstatale','Un\'imposta federale sul reddito'], giusta:0,
+  perche:'L\'imposta predial, sulla proprietà immobiliare, è un tributo proprio dei comuni messicani.'},
+ {id:'mx_sexenio', era:'universale', paese:'messico', ruolo:'governo', diff:'difficile', q:'Cosa caratterizza il mandato presidenziale messicano?',
+  op:['Un mandato unico di sei anni senza rielezione (il «sexenio»)','Un mandato di quattro anni rinnovabile','Un mandato a vita'], giusta:0,
+  perche:'La non-rielezione viene dalla Costituzione del 1917; il mandato di sei anni (il «sexenio») dal 1928.'},   // correzione fattuale del vaglio
+ {id:'mx_misto', era:'contemporanea', paese:'messico', ruolo:'governo', diff:'difficile', q:'Con quale sistema si elegge oggi la Camera dei Deputati messicana?',
+  op:['Un sistema misto (collegi uninominali più proporzionale)','Il solo maggioritario secco','La nomina presidenziale'], giusta:0,
+  perche:'La Camera dei Deputati si elegge con un sistema misto: collegi uninominali e seggi proporzionali.'},   // ⚠ seggi plurinominales dalla riforma 1977 → contemporanea
+ {id:'mx_federazione', era:'universale', paese:'messico', ruolo:'governo', diff:'media', q:'Che forma di Stato è il Messico?',
+  op:['Una repubblica federale presidenziale','Una monarchia','Uno Stato unitario'], giusta:0,
+  perche:'Il Messico è una repubblica federale di tipo presidenziale.'},
+ // ----- INDIA (india) -----
+ {id:'in_parlamento', era:'universale', paese:'india', ruolo:'governo', diff:'media', q:'Da quali due camere è composto il Parlamento indiano?',
+  op:['La Lok Sabha e la Rajya Sabha','Un\'assemblea unicamerale','La Dieta e il Senato'], giusta:0,
+  perche:'Il Parlamento indiano ha la Lok Sabha (camera del popolo) e la Rajya Sabha (consiglio degli stati).'},   // Costituzione in vigore dal 26 gennaio 1950
+ {id:'in_capo', era:'universale', paese:'india', ruolo:'governo', diff:'media', q:'In India, chi è il capo dello Stato e chi guida il governo?',
+  op:['Il Presidente è capo di Stato (cerimoniale); il Primo ministro guida il governo','Il Presidente governa direttamente','Un monarca è capo di Stato'], giusta:0,
+  perche:'L\'India è una repubblica parlamentare: il Presidente è capo di Stato cerimoniale, il Primo ministro guida il governo.'},   // 1950
+ {id:'in_corte', era:'universale', paese:'india', ruolo:'ministro', diff:'media', q:'Qual è la più alta corte dell\'India?',
+  op:['La Corte Suprema dell\'India','Il Parlamento','Il Consiglio privato di Londra'], giusta:0,
+  perche:'La Corte Suprema dell\'India è la più alta istanza giudiziaria del paese.'},   // 1950
+ {id:'in_rbi', era:'universale', paese:'india', ruolo:'ministro', diff:'facile', q:'Qual è la banca centrale dell\'India?',
+  op:['La Reserve Bank of India','La Banca di Delhi','Il Tesoro indiano'], giusta:0,
+  perche:'La Reserve Bank of India è la banca centrale del paese.'},   // 1935
+ {id:'in_stati', era:'universale', paese:'india', ruolo:'locale', diff:'facile', q:'In quali unità è divisa la federazione indiana?',
+  op:['Stati e territori dell\'unione','Province e cantoni','Länder'], giusta:0,
+  perche:'L\'India è un\'unione di stati e territori dell\'unione.'},
+ {id:'in_panchayat', era:'contemporanea', paese:'india', ruolo:'locale', diff:'difficile', q:'Come si chiamano le istituzioni di autogoverno locale rurale in India?',
+  op:['I panchayat','I Länder','Le contee'], giusta:0,
+  perche:'L\'autogoverno locale rurale è affidato ai panchayat.'},   // ⚠ forma costituzionale dal 1992 → contemporanea (tradizione antica)
+ {id:'in_fisco', era:'universale', paese:'india', ruolo:'locale', diff:'media', q:'Con quale imposta si finanziano gli enti locali indiani sugli immobili?',
+  op:['Un\'imposta sulla proprietà riscossa dagli enti locali','Un dazio interstatale','Un\'imposta imperiale'], giusta:0,
+  perche:'Gli enti locali indiani riscuotono un\'imposta sulla proprietà immobiliare.'},   // formulazione generica
+ {id:'in_voto', era:'universale', paese:'india', ruolo:'governo', diff:'difficile', q:'Cosa caratterizza le elezioni politiche in India?',
+  op:['Il suffragio universale e il maggioritario a turno unico','Il voto per censo','La nomina da parte del Presidente'], giusta:0,
+  perche:'L\'India vota a suffragio universale, con sistema maggioritario a turno unico.'},
+ {id:'in_repubblica', era:'universale', paese:'india', ruolo:'governo', diff:'difficile', q:'Che forma di Stato è l\'India?',
+  op:['Una repubblica federale parlamentare (l\'Unione Indiana)','Una monarchia','Uno Stato unitario'], giusta:0,
+  perche:'L\'India è una repubblica federale a governo parlamentare, l\'Unione Indiana.'},
+ {id:'in_diritti', era:'universale', paese:'india', ruolo:'attivista', diff:'media', q:'Cosa garantisce la Costituzione indiana entrata in vigore nel 1950?',
+  op:['I diritti fondamentali dei cittadini','Un\'unica religione di Stato','L\'abolizione del voto'], giusta:0,
+  perche:'La Costituzione del 1950 garantisce ai cittadini i diritti fondamentali.'},   // evito la formula «socialista e laica» (42° emendamento, 1976)
+
+ /* ============================================================================
+    D5 Batch 4 (ultimo) — banche-paese: Nigeria · Argentina · Sudafrica + FILL-ITALIA (audit-griglia). Vaglio passato.
+    Nigeria: Stato indipendente dal 1960 → TUTTO `contemporanea` (note storiche nel doc). Sudafrica: solo struttura
+    post-1994, zero temi divisivi. Argentina: elezione diretta '94; Sáenz Peña 1912 nel perché.
+    ============================================================================ */
+ // ----- NIGERIA (nigeria) — indipendente dal 1960 → tutto contemporanea -----
+ {id:'ng_assemblea', era:'contemporanea', paese:'nigeria', ruolo:'governo', diff:'media', q:'Da quali due camere è composta l\'Assemblea nazionale nigeriana?',
+  op:['Il Senato e la Camera dei Rappresentanti','Un\'assemblea unicamerale','La Dieta e il Senato'], giusta:0,
+  perche:'L\'Assemblea nazionale nigeriana ha il Senato e la Camera dei Rappresentanti.'},
+ {id:'ng_capo', era:'contemporanea', paese:'nigeria', ruolo:'governo', diff:'media', q:'In Nigeria, chi è il capo dello Stato e del governo?',
+  op:['Il Presidente, eletto direttamente','Un monarca','Il presidente del Senato'], giusta:0,
+  perche:'La Nigeria è una repubblica presidenziale: il Presidente, eletto direttamente, è capo di Stato e di governo.'},
+ {id:'ng_corte', era:'contemporanea', paese:'nigeria', ruolo:'ministro', diff:'difficile', q:'Qual è la più alta corte della Nigeria?',
+  op:['La Corte Suprema della Nigeria','Il Consiglio privato di Londra','L\'Assemblea nazionale'], giusta:0,
+  perche:'La Corte Suprema della Nigeria è la più alta istanza del paese.'},   // doc: fino al 1963 l'apice era il Privy Council di Londra
+ {id:'ng_banca', era:'contemporanea', paese:'nigeria', ruolo:'ministro', diff:'facile', q:'Qual è la banca centrale della Nigeria?',
+  op:['La Banca Centrale della Nigeria','La Banca di Lagos','Il Tesoro nigeriano'], giusta:0,
+  perche:'La Banca Centrale della Nigeria è la banca centrale del paese.'},   // doc: fondata 1958, operativa dal luglio 1959
+ {id:'ng_stati', era:'contemporanea', paese:'nigeria', ruolo:'locale', diff:'media', q:'In quali unità è divisa la federazione nigeriana?',
+  op:['In stati e nel Territorio della Capitale Federale','In province e cantoni','In Länder'], giusta:0,
+  perche:'La Nigeria è una federazione di stati, più il Territorio della Capitale Federale.'},
+ {id:'ng_locale', era:'contemporanea', paese:'nigeria', ruolo:'locale', diff:'media', q:'Come si chiama il governo locale in Nigeria?',
+  op:['La «local government area», guidata da un presidente (chairman)','La contea imperiale','Il distretto coloniale'], giusta:0,
+  perche:'Il livello locale è la «local government area», guidata da un chairman.'},
+ {id:'ng_fisco', era:'contemporanea', paese:'nigeria', ruolo:'locale', diff:'difficile', q:'Con quale imposta si finanziano gli enti locali nigeriani sugli immobili?',
+  op:['Un\'imposta locale sulla proprietà','Un dazio interstatale','Un\'imposta imperiale'], giusta:0,
+  perche:'Gli enti locali riscuotono un\'imposta sulla proprietà immobiliare.'},   // generico
+ {id:'ng_voto', era:'contemporanea', paese:'nigeria', ruolo:'governo', diff:'media', q:'Con quale sistema si eleggono i deputati in Nigeria?',
+  op:['Il maggioritario a turno unico','Il proporzionale puro','La nomina federale'], giusta:0,
+  perche:'I deputati nigeriani si eleggono col maggioritario a turno unico.'},
+ {id:'ng_federazione', era:'contemporanea', paese:'nigeria', ruolo:'governo', diff:'difficile', q:'Come è organizzata la federazione nigeriana?',
+  op:['Su tre livelli: federale, statale e locale','Su un unico governo centrale','Come confederazione di regni'], giusta:0,
+  perche:'La Nigeria è una federazione a tre livelli: federale, statale e locale.'},
+ {id:'ng_character', era:'contemporanea', paese:'nigeria', ruolo:'governo', diff:'difficile', q:'Cosa indica il principio del «federal character» in Nigeria?',
+  op:['La rappresentanza equilibrata delle diverse componenti del paese nelle istituzioni','Il pareggio di bilancio obbligatorio','Il voto per acclamazione'], giusta:0,
+  perche:'Il «federal character» impone una rappresentanza equilibrata delle componenti del paese nelle istituzioni.'},   // strutturale, non-partigiano
+ // ----- ARGENTINA (argentina) -----
+ {id:'ar_congresso', era:'universale', paese:'argentina', ruolo:'governo', diff:'facile', q:'Da quali due camere è composto il Congresso argentino?',
+  op:['La Camera dei Deputati e il Senato','Un\'assemblea unicamerale','La Dieta e il Consiglio'], giusta:0,
+  perche:'Il Congresso argentino ha la Camera dei Deputati e il Senato.'},
+ {id:'ar_capo', era:'contemporanea', paese:'argentina', ruolo:'governo', diff:'media', q:'In Argentina, come si sceglie oggi il Presidente?',
+  op:['È eletto direttamente, con ballottaggio (dal 1994)','Da un monarca','Dal Senato, a vita'], giusta:0,
+  perche:'Oggi il Presidente è eletto direttamente con ballottaggio; prima della riforma del 1994 c\'era un collegio elettorale.'},   // ⚠ sciolto: elezione diretta dal 1994 → contemporanea
+ {id:'ar_corte', era:'universale', paese:'argentina', ruolo:'ministro', diff:'media', q:'Qual è la più alta corte dell\'Argentina?',
+  op:['La Corte Suprema di Giustizia','Il Congresso','Il Consiglio di Stato'], giusta:0,
+  perche:'La Corte Suprema di Giustizia è la più alta corte dell\'Argentina.'},
+ {id:'ar_banca', era:'universale', paese:'argentina', ruolo:'ministro', diff:'difficile', q:'Qual è la banca centrale dell\'Argentina?',
+  op:['Il Banco Central de la República Argentina','Il Banco de la Nación','Il Tesoro argentino'], giusta:0,
+  perche:'Il Banco Central de la República Argentina è la banca centrale del paese.'},   // 1935
+ {id:'ar_province', era:'universale', paese:'argentina', ruolo:'locale', diff:'facile', q:'In quali unità è divisa la federazione argentina?',
+  op:['Le province','I Länder','I cantoni'], giusta:0,
+  perche:'L\'Argentina è una federazione di province.'},   // doc: + la Città Autonoma di Buenos Aires (autonomia dal 1994)
+ {id:'ar_intendente', era:'universale', paese:'argentina', ruolo:'locale', diff:'facile', q:'Chi guida un comune argentino?',
+  op:['L\'intendente (sindaco)','Un governatore federale','Il prefetto'], giusta:0,
+  perche:'Il comune argentino è guidato dall\'intendente (sindaco).'},
+ {id:'ar_fisco', era:'universale', paese:'argentina', ruolo:'locale', diff:'difficile', q:'Con quale imposta si finanziano i comuni argentini sugli immobili?',
+  op:['Un\'imposta locale sulla proprietà','Un dazio interprovinciale','Un\'imposta federale sul reddito'], giusta:0,
+  perche:'I comuni argentini riscuotono un\'imposta sulla proprietà immobiliare.'},   // generico
+ {id:'ar_voto', era:'universale', paese:'argentina', ruolo:'governo', diff:'media', q:'Cosa caratterizza il voto in Argentina?',
+  op:['È obbligatorio e segreto','È facoltativo e palese','Si vota per acclamazione'], giusta:0,
+  perche:'In Argentina il voto è obbligatorio e segreto (legge Sáenz Peña, 1912).'},
+ {id:'ar_federazione', era:'universale', paese:'argentina', ruolo:'governo', diff:'media', q:'Che forma di Stato è l\'Argentina?',
+  op:['Una repubblica federale presidenziale','Una monarchia','Uno Stato unitario'], giusta:0,
+  perche:'L\'Argentina è una repubblica federale di tipo presidenziale.'},
+ {id:'ar_ballottaggio', era:'contemporanea', paese:'argentina', ruolo:'governo', diff:'difficile', q:'Come funziona il ballottaggio presidenziale argentino?',
+  op:['Si vince al primo turno con più del 45%, o col 40% e dieci punti di vantaggio','Serve sempre la maggioranza assoluta','Non esiste ballottaggio'], giusta:0,
+  perche:'Si vince al primo turno con oltre il 45%, oppure col 40% e almeno dieci punti sul secondo; altrimenti si va al ballottaggio.'},   // ⚠ regola del 1994 → contemporanea
+ // ----- SUDAFRICA (sudafrica) — solo struttura post-1994, zero temi divisivi -----
+ {id:'za_parlamento', era:'contemporanea', paese:'sudafrica', ruolo:'governo', diff:'media', q:'Da quali due organi è composto il Parlamento sudafricano?',
+  op:['L\'Assemblea nazionale e il Consiglio nazionale delle Province','Un\'assemblea unicamerale','La Dieta e il Senato'], giusta:0,
+  perche:'Il Parlamento sudafricano ha l\'Assemblea nazionale e il Consiglio nazionale delle Province.'},   // ⚠ Costituzione 1996 → contemporanea
+ {id:'za_capo', era:'contemporanea', paese:'sudafrica', ruolo:'governo', diff:'media', q:'In Sudafrica, come si sceglie il Presidente?',
+  op:['È eletto dall\'Assemblea nazionale, ed è capo di Stato e di governo','È eletto direttamente dal popolo','È un monarca'], giusta:0,
+  perche:'Il Presidente sudafricano è eletto dall\'Assemblea nazionale ed è capo di Stato e di governo.'},   // ⚠ 1994 → contemporanea
+ {id:'za_corte', era:'contemporanea', paese:'sudafrica', ruolo:'ministro', diff:'media', q:'Qual è la corte che tutela la Costituzione sudafricana?',
+  op:['La Corte costituzionale','Il Parlamento','Il Consiglio privato'], giusta:0,
+  perche:'La Corte costituzionale tutela la Costituzione del Sudafrica.'},   // ⚠ 1994 → contemporanea
+ {id:'za_banca', era:'universale', paese:'sudafrica', ruolo:'ministro', diff:'facile', q:'Qual è la banca centrale del Sudafrica?',
+  op:['La South African Reserve Bank','La Banca di Pretoria','Il Tesoro sudafricano'], giusta:0,
+  perche:'La South African Reserve Bank è la banca centrale del paese.'},   // 1921 → universale
+ {id:'za_province', era:'contemporanea', paese:'sudafrica', ruolo:'locale', diff:'difficile', q:'In quante province è diviso il Sudafrica?',
+  op:['Nove province','Tre province','Ventisette province'], giusta:0,
+  perche:'Il Sudafrica è diviso in nove province.'},   // ⚠ 1994 → contemporanea
+ {id:'za_comuni', era:'contemporanea', paese:'sudafrica', ruolo:'locale', diff:'media', q:'Chi guida un comune (municipality) sudafricano?',
+  op:['Un sindaco','Un governatore nominato','Un prefetto imperiale'], giusta:0,
+  perche:'Il comune sudafricano è guidato da un sindaco.'},   // ⚠ contemporanea
+ {id:'za_fisco', era:'contemporanea', paese:'sudafrica', ruolo:'locale', diff:'difficile', q:'Con quale imposta si finanziano i comuni sudafricani sugli immobili?',
+  op:['Un\'imposta locale sulla proprietà','Un dazio interprovinciale','Un\'imposta imperiale'], giusta:0,
+  perche:'I comuni sudafricani riscuotono un\'imposta sulla proprietà immobiliare.'},   // generico
+ {id:'za_voto', era:'contemporanea', paese:'sudafrica', ruolo:'governo', diff:'media', q:'Con quale sistema si elegge l\'Assemblea nazionale sudafricana?',
+  op:['La rappresentanza proporzionale','Il maggioritario secco','La nomina presidenziale'], giusta:0,
+  perche:'L\'Assemblea nazionale sudafricana si elegge con la rappresentanza proporzionale.'},   // ⚠ 1994 → contemporanea
+ {id:'za_bill', era:'contemporanea', paese:'sudafrica', ruolo:'governo', diff:'difficile', q:'Cosa contiene la Costituzione sudafricana del 1996 a tutela dei cittadini?',
+  op:['Una Carta dei diritti (Bill of Rights)','Un\'unica religione di Stato','L\'abolizione dei tribunali'], giusta:0,
+  perche:'La Costituzione del 1996 contiene una Carta dei diritti (Bill of Rights).'},   // ⚠ 1996 → contemporanea (strutturale)
+ {id:'za_capitali', era:'universale', paese:'sudafrica', ruolo:'locale', diff:'difficile', q:'Quante capitali ha il Sudafrica?',
+  op:['Tre: Pretoria (esecutiva), Città del Capo (legislativa), Bloemfontein (giudiziaria)','Una: Pretoria','Due: Pretoria e Johannesburg'], giusta:0,
+  perche:'Il Sudafrica ha tre capitali: Pretoria (esecutiva), Città del Capo (legislativa) e Bloemfontein (giudiziaria).'},   // assetto dal 1910 → universale
+ // ----- FILL-ITALIA (audit-griglia): Camera+Senato, Corte cost (≥1956), Banca d'Italia, IMU, legislatura -----
+ {id:'it_parlamento', era:'universale', paese:'italia', ruolo:'governo', diff:'facile', q:'Da quali due camere è composto il Parlamento italiano?',
+  op:['La Camera dei Deputati e il Senato della Repubblica','Un\'assemblea unicamerale','La Dieta e il Consiglio'], giusta:0,
+  perche:'Il Parlamento italiano ha la Camera dei Deputati e il Senato della Repubblica.'},
+ {id:'it_corte', era:'universale', paese:'italia', ruolo:'ministro', diff:'difficile', cond:()=>S.year>=1956, q:'Quale organo giudica la costituzionalità delle leggi in Italia?',
+  op:['La Corte costituzionale','Il Parlamento','Il Consiglio di Stato'], giusta:0,
+  perche:'La Corte costituzionale giudica la legittimità costituzionale delle leggi.'},   // ancora ≥1956 (prima udienza aprile 1956): entra quando la Corte nasce, si sposa col dossier «Costituzione inattuata» del '50
+ {id:'it_banca', era:'universale', paese:'italia', ruolo:'ministro', diff:'facile', q:'Qual è la banca centrale dell\'Italia?',
+  op:['La Banca d\'Italia','La Banca di Roma','Il Tesoro'], giusta:0,
+  perche:'La banca centrale emette la moneta e regola il credito.'},   // Q-fix §A — perché era-neutro (tolta la clausola-BCE: stonava nel '50); 1893 → universale
+ {id:'it_imu', era:'contemporanea', paese:'italia', ruolo:'locale', diff:'media', q:'Con quale imposta si finanziano oggi i comuni italiani sugli immobili?',
+  op:['L\'IMU (imposta municipale sugli immobili)','Un dazio comunale','Un\'imposta federale sul reddito'], giusta:0,
+  perche:'L\'IMU, imposta municipale sugli immobili, è un tributo proprio dei comuni italiani.'},   // ⚠ moderna → contemporanea
+ {id:'it_legislatura', era:'universale', paese:'italia', ruolo:'governo', diff:'media', q:'Quanto dura in via ordinaria una legislatura della Camera dei Deputati italiana?',
+  op:['Cinque anni','Sette anni','Tre anni'], giusta:0,
+  perche:'La Camera dei Deputati dura in via ordinaria cinque anni.'},   // dal 1948 → universale (evito il Senato, che fino al 1963 durava sei anni sulla carta)
+ /* ===== Q-fix PARTE 2 (23 lug 2026) — §B: 9 domande d'epoca DIFFICILI (italia1950, diff:'difficile'), sourceate da
+    SFIDE-BANCA §B. Senza `ruolo` → gancio-conferenza (governo/ministro), dove si misura la difficoltà-partita; paese
+    ='italia' dall'IIFE (era==='italia1950'). `cond` = ancora/finestra-anno (anti-anacronismo, §D walk-campionato). ===== */
+ {id:'i50_ced', era:'italia1950', diff:'difficile', cond:()=>S.year>=1952&&S.year<=1954, q:'Cosa fu la CED, il progetto respinto dall\'Assemblea francese nel 1954?',
+  op:['Un\'unione doganale','Un esercito europeo comune','Un patto con l\'URSS'], giusta:1,
+  perche:'La Comunità Europea di Difesa, firmata nel 1952, fu affossata dall\'Assemblea francese nell\'agosto 1954.'},   // fonte: Trattato CED 1952 → finestra 1952-1954
+ {id:'i50_trieste', era:'italia1950', diff:'difficile', cond:()=>S.year>=1954, q:'Cosa stabilì il Memorandum di Londra del 1954 su Trieste?',
+  op:['L\'indipendenza di Trieste','La cessione alla Jugoslavia','La Zona A, con la città, all\'amministrazione italiana'], giusta:2,
+  perche:'Il Memorandum di Londra del 5 ottobre 1954 assegnò la Zona A, con la città, all\'amministrazione italiana.'},   // fonte: Mem. Londra 5/10/1954 → ancora ≥1954
+ {id:'i50_vanoni', era:'italia1950', diff:'difficile', cond:()=>S.year>=1951, q:'Cosa introdusse la riforma Vanoni del 1951?',
+  op:['La dichiarazione unica e annuale dei redditi','L\'abolizione delle imposte dirette','La patrimoniale'], giusta:0,
+  perche:'La riforma Vanoni (legge 11 gennaio 1951 n. 25) introdusse la dichiarazione unica e annuale dei redditi.'},   // fonte: L. 25/1951 → ancora ≥1951
+ {id:'i50_corte', era:'italia1950', diff:'difficile', cond:()=>S.year<=1955, q:'Quale organo di garanzia previsto dalla Costituzione non era ancora operativo nei primi anni \'50?',
+  op:['Il Senato','La Corte costituzionale','La Corte dei conti'], giusta:1,
+  perche:'La Corte costituzionale fu insediata solo alla fine del 1955: la prima udienza è dell\'aprile 1956.'},   // fonte: insediata dic 1955, 1ª udienza apr 1956 → scadenza ≤1955 (dal 1956 la risposta sarebbe falsa)
+ {id:'i50_cedu', era:'italia1950', diff:'difficile', cond:()=>S.year>=1950, q:'Quale convenzione sui diritti umani fu firmata a Roma nel 1950?',
+  op:['La Carta dell\'ONU','Il Trattato di Roma','La Convenzione europea dei diritti dell\'uomo'], giusta:2,
+  perche:'La Convenzione europea dei diritti dell\'uomo (CEDU) fu firmata a Roma il 4 novembre 1950.'},   // fonte: CEDU, Roma 4/11/1950 → ancora ≥1950
+ {id:'i50_uep', era:'italia1950', diff:'difficile', cond:()=>S.year>=1950, q:'A cosa serviva l\'Unione Europea dei Pagamenti del 1950?',
+  op:['A regolare i pagamenti tra i paesi OECE senza usare dollari','A emettere una moneta unica','A fissare i dazi'], giusta:0,
+  perche:'L\'Unione Europea dei Pagamenti (1950) regolava i pagamenti tra i paesi OECE senza usare dollari.'},   // fonte: UEP 1950, ambito OECE → ancora ≥1950
+ {id:'i50_alta_autorita', era:'italia1950', diff:'difficile', cond:()=>S.year>=1952, q:'Quale organo governava la CECA, la comunità del carbone e dell\'acciaio?',
+  op:['Il Consiglio di Sicurezza','L\'Alta Autorità','La Banca Mondiale'], giusta:1,
+  perche:'La CECA era governata dall\'Alta Autorità, il primo organo sovranazionale europeo, operativo dal 1952.'},   // fonte: Alta Autorità operativa 1952 → ancora ≥1952
+ {id:'i50_sinigaglia', era:'italia1950', diff:'difficile', cond:()=>S.year>=1950, q:'Quale piano guidò la ricostruzione della siderurgia pubblica (IRI/Finsider)?',
+  op:['Il piano Sinigaglia','Il piano Marshall','Il piano Fanfani'], giusta:0,
+  perche:'Il piano Sinigaglia guidò la ricostruzione della siderurgia pubblica (IRI/Finsider) nei primi anni \'50.'},   // fonte: piano Sinigaglia (approvato 1948, in corso nei primi '50) → ancora ≥1950
+ /* ===== Q-fix PARTE 2 — §C: 8 UNIVERSALI DIFFICILI (valide in ogni era, '50 incluso; diff:'difficile'). Senza `ruolo`
+    → gancio-conferenza; paese='universale' dall'IIFE. `perche` ERA-NEUTRO (nessuno strumento/citazione post-'50 a schermo). ===== */
+ {id:'u_bicameralismo', era:'universale', diff:'difficile', q:'Cosa significa «bicameralismo perfetto»?',
+  op:['Una sola camera legifera','Le due camere hanno gli stessi poteri','Il capo di Stato ha due voti'], giusta:1,
+  perche:'Nel bicameralismo perfetto le due camere svolgono le stesse funzioni legislative.'},
+ {id:'u_sfiducia', era:'universale', diff:'difficile', q:'Cosa comporta l\'approvazione di una mozione di sfiducia?',
+  op:['Lo scioglimento della magistratura','L\'aumento delle tasse','Il governo è obbligato a dimettersi'], giusta:2,
+  perche:'Con la sfiducia il governo perde il rapporto di fiducia e deve dimettersi.'},
+ {id:'u_proporzionale', era:'universale', diff:'difficile', q:'Cosa caratterizza un sistema elettorale proporzionale?',
+  op:['I seggi sono ripartiti in proporzione ai voti','Vince chi arriva primo in ogni collegio','Il capo di Stato nomina i deputati'], giusta:0,
+  perche:'Nel sistema proporzionale i seggi sono ripartiti in proporzione ai voti ottenuti.'},
+ {id:'u_pnl_pil', era:'universale', diff:'difficile', q:'Qual è la differenza tra PIL e PNL?',
+  op:['Sono sinonimi','Il PNL include i redditi dei cittadini prodotti all\'estero','Il PIL esclude l\'agricoltura'], giusta:1,
+  perche:'Il PNL somma i redditi dei cittadini ovunque prodotti; il PIL misura la produzione interna al paese.'},
+ {id:'u_svalutazione', era:'universale', diff:'difficile', q:'Cosa comporta la svalutazione di una moneta?',
+  op:['Rende le esportazioni più a buon mercato e le importazioni più care','Azzera il debito pubblico','Aumenta il potere d\'acquisto delle famiglie'], giusta:0,
+  perche:'Una moneta più debole abbassa il prezzo dei beni esportati e alza quello degli importati.'},
+ {id:'u_quorum', era:'universale', diff:'difficile', q:'Cos\'è il quorum in un\'assemblea?',
+  op:['Il numero minimo di presenti perché una votazione sia valida','La maggioranza dei due terzi','Il capo dell\'opposizione'], giusta:0,
+  perche:'Il quorum è il numero minimo di presenti perché una votazione sia valida.'},
+ {id:'u_ref_cost', era:'universale', diff:'difficile', q:'In cosa differisce un referendum costituzionale da uno abrogativo?',
+  op:['Sono identici','Il primo conferma una revisione della Costituzione, il secondo cancella una legge','Il primo elegge il capo di Stato'], giusta:1,
+  perche:'Il referendum costituzionale conferma una revisione della Costituzione; quello abrogativo cancella una legge in vigore.'},
+ {id:'u_pareggio', era:'universale', diff:'difficile', q:'Cosa significa «pareggio di bilancio»?',
+  op:['Il debito è azzerato','Non si riscuotono tasse','Le entrate dello Stato coprono le spese'], giusta:2,
+  perche:'Si ha pareggio di bilancio quando le entrate dello Stato coprono le spese.'},
+];
+/* D5 — DIMENSIONE-PAESE: assegnazione ESPLICITA per-voce (mai un default nel gate — quello era il bug-era di D4b).
+   Le voci nuove portano `paese` nel literal; le 46 vecchie lo ricevono qui da una MAPPA auditabile. 'italia' =
+   istituzioni/fatti italiani; 'universale' = valgono per ogni paese. Le `italia1950` sono Italia per era (nota:
+   riclassificabili quando arriveranno i '50 di altri paesi). Il gate (pescaSfida) legge S.paese. */
+(function(){
+  if(typeof SFIDE==='undefined') return;
+  var IT={u_decreto:1,u_quirinale:1,u_referendum:1,u_regione:1,u_iva:1,u_spread:1,u_sindaco:1,u_comune:1,u_consiglio_com:1};
+  SFIDE.forEach(function(q){
+    if(q.paese!=null) return;                                  // già esplicito (voci D5: universali, USA)
+    q.paese = (q.era==='italia1950' || IT[q.id]) ? 'italia' : 'universale';
+  });
+})();
+
+/* ===== IL PUNTO COL PARTITO (lotto ribilanciamento) — l'appuntamento periodico (capo del governo) in cui i
+   capicorrente ti chiedono conto. Carta INELUDIBILE come la conferenza: gestirla bene tiene le correnti
+   buone, male/evasivamente le inasprisce (e la sfida monta — ma sei stato avvisato, niente sorprese).
+   Gli effetti negativi sono scalati da degradoMult (l'inazione morde di più a difficile). ===== */
+const PUNTO_PARTITO=[
+ {id:'pp_linea', t:'Il partito chiede la linea', text:'I capicorrente ti chiedono conto della direzione: dove sta andando il partito sotto la tua guida?', ch:[
+   {l:'Li ascolto e li coinvolgo nelle scelte', e:'Le correnti si sentono parte; un po\' di autonomia ceduta', f:()=>{ tutteCorrenti(6); }},
+   {l:'La linea la detto io', e:'Fermezza; i fedelissimi gradiscono, gli altri mugugnano', f:()=>{ corrented('fedelissimi',6); corrented('pontieri',-4); corrented('militanti',-4); }},
+   {l:'Non è il momento di discutere', e:'Liquidi la cosa: tutte le correnti si raffreddano', f:()=>{ tutteDegrado(7); }},
+ ]},
+ {id:'pp_nomine', t:'Pressioni sulle nomine', text:'Le correnti spingono per piazzare i loro uomini nei posti che contano. Come gestisci le pretese?', ch:[
+   {l:'Accontento le correnti principali', e:'Pace interna comprata con qualche poltrona', f:()=>{ tutteCorrenti(5); }},
+   {l:'Nomino per merito, non per quota', e:'Scelta nobile; i tecnici apprezzano, i capicorrente no', f:()=>{ corrented('pontieri',6); corrented('fedelissimi',-4); corrented('militanti',-3); }},
+   {l:'Rinvio ogni decisione', e:'Evasivo: il malcontento cova sotto la cenere', f:()=>{ tutteDegrado(6); }},
+ ]},
+ {id:'pp_malumori', t:'Malumori nel partito', text:'Gira voce di scontento tra i tuoi: una corrente si sente esclusa dalle decisioni del governo.', ch:[
+   {l:'Un incontro per ricucire', e:'Gesto d\'ascolto: gli animi si placano', f:()=>{ tutteCorrenti(6); }},
+   {l:'Concedo qualcosa alla corrente più fredda', e:'Mediazione mirata: spegni il focolaio', f:()=>{ const c=(S.correnti||[]).slice().sort((a,b)=>a.umore-b.umore)[0]; if(c) corrented(c.id,12); }},
+   {l:'Chi non è contento può farsi avanti', e:'Sfida aperta: rischi di compattare i critici contro di te', f:()=>{ tutteDegrado(8); }},
+ ]},
+ {id:'pp_congresso', t:'Il partito reclama un congresso', text:'Le correnti chiedono di rimettere in discussione la linea con un congresso. Apri o tieni la barra?', ch:[
+   {l:'Apro al confronto congressuale', e:'Democrazia interna: le correnti si distendono', f:()=>{ tutteCorrenti(5); }},
+   {l:'Tengo la barra, niente resa dei conti', e:'Eviti l\'arena; il rancore resta', f:()=>{ tutteDegrado(5); corrented('fedelissimi',4); }},
+   {l:'Non se ne parla nemmeno', e:'Chiusura netta: le correnti si gelano', f:()=>{ tutteDegrado(9); }},
+ ]},
+ /* --- D2: +5 universali (capienza 4→9) — vita interna senza tempo: nuove leve, territorio, casse, voce, regole. --- */
+ {id:'pp_leve', t:'Le nuove leve bussano', text:'I quadri giovani del partito chiedono spazio e responsabilità: farli crescere ora, o farli aspettare?', ch:[
+   {l:'Apro ai giovani quadri', e:'Energia nuova; i veterani si irrigidiscono', f:()=>{ corrented('militanti',7); corrented('fedelissimi',-3); }},
+   {l:'Prima l\'esperienza, poi il ricambio', e:'I veterani apprezzano; i giovani mordono il freno', f:()=>{ corrented('fedelissimi',6); corrented('militanti',-4); }},
+   {l:'Se ne riparla dopo le prossime urne', e:'Rinvio che raffredda tutti', f:()=>{ tutteDegrado(6); }},
+ ]},
+ {id:'pp_territorio_int', t:'I circoli si sentono lontani', text:'Dalle sezioni sul territorio arriva un mugugno: «Roma decide, noi incolliamo i manifesti».', ch:[
+   {l:'Un giro d\'ascolto nelle sezioni', e:'Presenza vera: il territorio si riscalda', f:()=>{ tutteCorrenti(6); }},
+   {l:'Deleghi un vice a tenere i rapporti', e:'Meglio di niente; il gesto pesa meno', f:()=>{ tutteCorrenti(2); }},
+   {l:'Il territorio aspetti: c\'è da governare', e:'Le sezioni si sentono usate', f:()=>{ tutteDegrado(7); }},
+ ]},
+ {id:'pp_casse', t:'Le casse del partito piangono', text:'Il tesoriere porta conti magri: la macchina del partito costa e le entrate calano.', ch:[
+   {l:'Grande campagna di tesseramento', e:'La base si mobilita e si sente utile', f:()=>{ corrented('militanti',6); corrented('pontieri',2); }},
+   {l:'Tagli alle strutture centrali', e:'Rigore interno; l\'apparato mugugna', f:()=>{ corrented('fedelissimi',-4); corrented('pontieri',4); }},
+   {l:'Rinvii il problema di un anno', e:'I conti non si aggiustano da soli', f:()=>{ tutteDegrado(5); }},
+ ]},
+ {id:'pp_voce', t:'Il partito vuole una voce più forte', text:'Le correnti lamentano che il partito parli solo attraverso di te: serve una voce collettiva?', ch:[
+   {l:'Porto il partito in piazza con me', e:'La base al centro della scena', f:()=>{ corrented('militanti',6); corrented('fedelissimi',2); }},
+   {l:'Affido ai pontieri il dialogo pubblico', e:'Toni misurati, ponti aperti', f:()=>{ corrented('pontieri',6); corrented('militanti',-2); }},
+   {l:'La voce del partito sono io', e:'Chiarezza che accentra; gli altri tacciono', f:()=>{ corrented('fedelissimi',5); corrented('pontieri',-3); corrented('militanti',-3); }},
+ ]},
+ {id:'pp_regole', t:'Regole interne da riscrivere', text:'Lo statuto mostra gli anni: le correnti chiedono regole nuove su iscritti, candidature e congressi.', ch:[
+   {l:'Più peso agli iscritti', e:'La base conta di più; i capicorrente meno', f:()=>{ corrented('militanti',7); corrented('fedelissimi',-4); }},
+   {l:'Regole condivise scritte coi capicorrente', e:'Mediazione paziente: tutti dentro', f:()=>{ tutteCorrenti(4); }},
+   {l:'Lo statuto va bene com\'è', e:'Conservi l\'esistente; la richiesta resta', f:()=>{ tutteDegrado(5); }},
+ ]},
+];
+
+/* ===== LE CARTE DEL MINISTRO (lotto contenuto, fase 1) — il livello 2, prima il più povero, ora ha un pool
+   dedicato e vario. tipo:'interno' = la politica di gabinetto (rapporti col premier, rivalità, manovre per il
+   capitale); tipo:'grane' = le grane del TUO dicastero (testo adattivo con %DIC = nome del ministero; %PREMIER =
+   nome del premier). `dic:'esteri'` = grane internazionali, solo agli Esteri. Effetti coi sistemi della salita:
+   capitale (capd), lealtà del premier (leald), visibilità (visd), correnti (corrented/tutteCorrenti), indicatore
+   di settore (dicMigliora → nutre il capitale via capitaleCresci) + pleases/rischio (continuità biografia/tratti).
+   La binaria asseconda/distinguiti è ora UNA carta tra le altre (mi_asseconda), a cadenza ~4-5 mesi. ===== */
+const MINISTRO_CARTE=[
+ // --- POLITICA INTERNA (gabinetto) ---
+ {id:'mi_asseconda',era:'universale', tipo:'interno', t:'La linea del premier', text:'Sul tavolo una scelta del governo. Sostieni %PREMIER o marchi la tua autonomia?', ch:[
+   {l:'Assecondo il premier', e:'La sua fiducia cresce; ascesa lenta e sicura', f:()=>{ leald(6); capd(1); }},
+   {l:'Mi distinguo dalla linea', e:'Visibilità e capitale su, ma lui ti guarda con sospetto', f:()=>{ capd(2); visd(5); leald(-8); }},
+ ]},
+ {id:'mi_scavalco',era:'universale', tipo:'interno', t:'Il premier ti scavalca', text:'%PREMIER annuncia una misura del TUO dicastero senza nemmeno avvisarti. I tuoi collaboratori sono umiliati.', ch:[
+   {l:'Incasso in silenzio, per la squadra', e:'Lealtà salva; ma dentro qualcosa cede', f:()=>{ leald(4); capd(-1); }},
+   {l:'Rivendico pubblicamente la paternità', e:'Visibilità su; il premier non gradisce', f:()=>{ visd(7); capd(2); leald(-7); }},
+   {l:'Gli chiedo conto a quattr\'occhi', e:'Tieni il punto senza strappi', f:()=>{ leald(-2); capd(1); }},
+ ]},
+ {id:'mi_collega',era:'universale', tipo:'interno', t:'Un collega ti fa le scarpe', text:'Un altro ministro semina veleni sul tuo conto nei retroscena dei giornali, puntando al tuo posto.', ch:[
+   {l:'Rispondo colpo su colpo', e:'Non ti fai mettere i piedi in testa; rumore', f:()=>{ visd(5); espoSale(3); }},
+   {l:'Lavoro e lascio parlare i fatti', e:'Aplomb da statista: i tuoi ti stimano di più', pleases:'tecnico',f:()=>{ capd(2); corrented('pontieri',4); }},
+   {l:'Vado dal premier a lamentarmi', e:'Cerchi protezione; sembri debole', f:()=>{ leald(2); visd(-3); }},
+ ]},
+ {id:'mi_riforma',era:'universale', tipo:'interno', t:'Il premier frena la tua riforma', text:'La riforma di settore a cui tieni viene rallentata da Palazzo Chigi: «non è il momento».', ch:[
+   {l:'Insisto, è la mia battaglia', e:'Capitale e identità; scontro col premier', pleases:'progressista',f:()=>{ capd(3); leald(-6); visd(3); }},
+   {l:'Cedo alla linea del governo', e:'Lealtà; la riforma slitta', f:()=>{ leald(6); capd(-1); }},
+   {l:'Tratto una versione annacquata', e:'Un compromesso che porti a casa', pleases:'tecnico',f:()=>{ capd(1); dicMigliora(2); }},
+ ]},
+ {id:'mi_sacrificio',era:'universale', tipo:'interno', t:'Un sacrificio per la squadra', text:'%PREMIER ti chiede di rinunciare a fondi del tuo dicastero per coprire un buco altrove.', ch:[
+   {l:'Accetto, per il bene del governo', e:'Lealtà alle stelle; il tuo settore soffre', f:()=>{ leald(9); dicMigliora(-3); }},
+   {l:'Difendo il mio bilancio', e:'Tieni i fondi; il premier se lo lega al dito', pleases:'conservatore',f:()=>{ leald(-6); dicMigliora(2); capd(1); }},
+ ]},
+ {id:'mi_ascesa',era:'universale', tipo:'interno', t:'I giornali ti danno in ascesa', text:'Un ritratto lusinghiero ti dipinge come l\'astro nascente del partito. %PREMIER legge, e si insospettisce.', ch:[
+   {l:'Rassicuro il premier sulla mia lealtà', e:'Spegni i sospetti; ascesa più lenta', f:()=>{ leald(7); }},
+   {l:'Cavalco l\'onda mediatica', e:'Visibilità e capitale; la sua fiducia cala', f:()=>{ visd(7); capd(3); leald(-7); }},
+ ]},
+ {id:'mi_rimpasto',era:'universale', tipo:'interno', t:'Aria di rimpasto', text:'Si parla di un rimpasto di governo. È il momento di posizionare la tua corrente.', ch:[
+   {l:'Tesso alleanze tra le correnti', e:'Costruisci consenso interno', pleases:'conservatore',f:()=>{ tutteCorrenti(4); capd(1); }},
+   {l:'Resto fuori dalle manovre', e:'Mani pulite; ma altri si muovono', f:()=>{ leald(2); }},
+   {l:'Premo sul premier per un posto migliore', e:'Ambizione scoperta; rischi', f:()=>{ capd(2); leald(-5); }},
+ ]},
+ {id:'mi_offerta',era:'universale', tipo:'interno', t:'Un dicastero più pesante', text:'%PREMIER ti sonda: saresti disposto a un dicastero di maggior peso? L\'offerta lega le mani.', ch:[
+   {l:'Accetto con gratitudine', e:'Promozione e lealtà; gli devi un favore', f:()=>{ leald(8); capd(2); }},
+   {l:'Declino, sto bene dove sono', e:'Indipendenza; il premier prende nota', f:()=>{ capd(1); leald(-2); }},
+ ]},
+ {id:'mi_gaffe',era:'universale', tipo:'interno', t:'La gaffe del premier', text:'%PREMIER inciampa in una dichiarazione infelice e il governo è nell\'imbarazzo. Da che parte stai?', ch:[
+   {l:'Lo difendo a spada tratta', e:'Lealtà; ti leghi alla sua sorte', f:()=>{ leald(7); }},
+   {l:'Prendo le distanze con garbo', e:'Ti smarchi; visibilità su, fiducia giù', f:()=>{ visd(5); leald(-6); capd(1); }},
+ ]},
+ {id:'mi_spinta',era:'universale', tipo:'interno', t:'I tuoi ti spingono a osare', text:'Un gruppo di parlamentari ti incoraggia a pensare in grande: «il partito ha bisogno di te al vertice».', ch:[
+   {l:'È presto: prima costruisco', e:'Pazienza; capitale solido', pleases:'tecnico',f:()=>{ capd(2); corrented('fedelissimi',4); }},
+   {l:'Alimento l\'ambizione', e:'Le correnti si muovono; il premier teme', f:()=>{ tutteCorrenti(5); leald(-5); capd(1); }},
+ ]},
+ // --- LE GRANE DEL TUO SETTORE (adattive: %DIC = nome del dicastero) ---
+ {id:'mg_tagli',era:'universale', tipo:'grane', t:'Tagli sul tuo dicastero', text:'La manovra prevede tagli %DICA. Difendi i fondi o accetti il sacrificio?', ch:[
+   {l:'Mi batto per il mio bilancio', e:'Salvi il settore; spendi capitale politico', pleases:'progressista',f:()=>{ dicMigliora(3); leald(-4); }},
+   {l:'Accetto i tagli con disciplina', e:'Rigore apprezzato in alto; il settore soffre', pleases:'tecnico',f:()=>{ dicMigliora(-3); leald(4); capd(1); }},
+ ]},
+ {id:'mg_scandalo',era:'universale', tipo:'grane', t:'Scandalo tra i tuoi funzionari', text:'Emergono irregolarità negli uffici %DICDI. La stampa annusa.', ch:[
+   {l:'Pulizia trasparente, teste che saltano', e:'Credibilità; un po\' di caos ora', pleases:'tecnico',trasparenza:4,f:()=>{ visd(3); dicMigliora(1); }},
+   {l:'Gestisco la cosa con discrezione', e:'Eviti lo scandalo; il fango resta sotto', rischio:7,f:()=>{ capd(1); }},
+ ]},
+ {id:'mg_sciopero',era:'universale', tipo:'grane', t:'Sciopero nel tuo settore', text:'I lavoratori %DICDI incrociano le braccia: chiedono più risorse e ascolto.', ch:[
+   {l:'Apro il tavolo e concedo', e:'Pace sociale; il bilancio del settore paga', pleases:'progressista',f:()=>{ dicMigliora(3); gd('lavoratori',3); leald(-2); }},
+   {l:'Tengo la linea della fermezza', e:'Niente cedimenti; tensione che resta', pleases:'conservatore',f:()=>{ gd('lavoratori',-2); leald(3); }},
+ ]},
+ {id:'mg_misura',era:'universale', tipo:'grane', t:'Una misura attesa', text:'Il Parlamento aspetta un provvedimento %DICDI. Lo vari in fretta o lo curi nei dettagli?', ch:[
+   {l:'Lo vario subito, incasso il risultato', e:'Visibilità; qualche sbavatura', f:()=>{ visd(4); dicMigliora(2); capd(1); }},
+   {l:'Lo curo, anche se ci vuole tempo', e:'Lavoro solido che reggerà', pleases:'tecnico',f:()=>{ dicMigliora(4); }},
+ ]},
+ {id:'mg_emergenza',era:'universale', tipo:'grane', t:'Emergenza di settore', text:'Un caso grave nel campo %DICDI apre tutti i telegiornali. Il paese guarda a te.', ch:[
+   {l:'Intervengo in prima persona', e:'Presenza che rassicura; ti esponi', f:()=>{ visd(6); dicMigliora(3); leald(-2); }},
+   {l:'Lascio fare ai tecnici, resto sobrio', e:'Prudenza; meno protagonismo', pleases:'tecnico',f:()=>{ dicMigliora(2); }},
+ ]},
+ {id:'mg_lobby',era:'universale', tipo:'grane', t:'Una lobby ti corteggia', text:'Un gruppo d\'interesse del settore %DICDI offre sostegno in cambio di una norma su misura.', ch:[
+   {l:'Rifiuto e lo dico ai giornali', e:'Trasparenza che fa rumore', pleases:'tecnico',trasparenza:5,f:()=>{ visd(3); }},
+   {l:'Ascolto, con discrezione', e:'Un appoggio che però lascia un debito', rischio:7,f:()=>{ capd(2); }},
+ ]},
+ // --- GRANE INTERNAZIONALI (solo Esteri: la dimensione internazionale comincia a sentirsi dal ministro) ---
+ {id:'mg_vertice',era:'universale', tipo:'grane', dic:'esteri', t:'Un vertice da preparare', text:'Un summit internazionale decisivo si avvicina. Come ti presenti al tavolo?', ch:[
+   {l:'Linea atlantista e multilaterale', e:'Reputazione su; la pancia mormora «allineato»', pleases:'tecnico',f:()=>{ repd(4); dicMigliora(2); gd('cetomedio',-1); }},
+   {l:'Difendo a muso duro l\'interesse nazionale', e:'Piaci in patria; gli alleati si irrigidiscono', pleases:'populista',f:()=>{ repd(-3); gd('cetomedio',2); visd(3); }},
+ ]},
+ {id:'mg_crisi',era:'universale', tipo:'grane', dic:'esteri', t:'Una crisi diplomatica', text:'Un incidente con un paese partner degenera in una crisi improvvisa. La gestione è nelle tue mani.', ch:[
+   {l:'Apro un canale di mediazione', e:'De-escalation; reputazione su', pleases:'progressista',f:()=>{ repd(5); capd(1); }},
+   {l:'Risposta dura e immediata', e:'Fermezza applaudita in casa; rischio escalation', pleases:'conservatore',f:()=>{ repd(-4); gd('cetomedio',2); visd(4); }},
+ ]},
+ {id:'mg_ong', tipo:'grane', dic:'esteri', t:'La pressione di una ONG', text:'Un\'organizzazione internazionale denuncia il paese su diritti e ambiente, con eco mondiale.', ch:[
+   {l:'Accolgo le critiche, apro un dialogo', e:'Immagine internazionale migliore; la base storce il naso', pleases:'progressista',f:()=>{ repd(4); gd('giovani',2); gd('cetomedio',-1); }},
+   {l:'Respingo l\'ingerenza straniera', e:'Sovranità rivendicata; reputazione giù', pleases:'populista',f:()=>{ repd(-3); gd('cetomedio',2); }},
+ ]},
+];
+
+/* ===== TITOLI DEL MESE (lotto comunicazione 2) — la prima pagina che commenta lo stato del gioco.
+   Ordinati per SPECIFICITÀ (generaTitolo, game.js, pesca il PRIMO con cond vera; generici in fondo).
+   Ogni voce ha DUE varianti della stessa notizia: `amico` (rapporto stampa ≥50) / `ostile` (<50).
+   Cornice pura: NON è una carta, niente effetti, niente tetto. Testi ritoccabili a costo zero. ===== */
+const TITOLI=[
+ {id:'ti_inchiesta', pri:1, cond:()=>!!S.inchiesta, amico:'L\'inchiesta al vertice: garantismo, finché parlano le carte', ostile:'Il vertice sotto inchiesta: il palazzo trema'},
+ {id:'ti_voci', cond:()=>(S.esposizione||0)>=40&&!S.inchiesta, amico:'Veleni e fascicoli: il governo denuncia la macchina del fango', ostile:'Sussurri nei palazzi: ombre sul vertice del governo'},
+ {id:'ti_scandalo', pri:1, cond:()=>S.agenda&&S.agenda.some(a=>a.kind==='scandalo'), amico:'Il caso al ministero: garantismo e nervi saldi', ostile:'Scandalo al governo: la credibilità scricchiola'},
+ {id:'ti_crisi_fid', cond:()=>S.ind.fiducia!=null&&S.ind.fiducia<40, amico:'Conti sotto pressione, ma il governo tiene la barra', ostile:'I creditori bussano: il Paese è sull\'orlo'},
+ {id:'ti_recessione', cond:()=>S.ind.growth<0, amico:'Economia in frenata: il governo prepara la risposta', ostile:'Recessione: il Paese arretra e il governo guarda'},
+ {id:'ti_manovra', pri:1, cond:()=>S.month===1, amico:'Manovra, la rotta è tracciata: il governo ci mette la faccia', ostile:'Manovra al buio: conti in bilico e cittadini in attesa'},
+ {id:'ti_disocc', cond:()=>S.ind.unemp>9, amico:'Lavoro, la risalita è lenta ma il piano c\'è', ostile:'Senza lavoro: i numeri inchiodano il governo'},
+ {id:'ti_deficit', cond:()=>S.ind.deficit>4.5, amico:'Il governo stringe i conti con coraggio', ostile:'Stangata in vista, e il Paese paga'},
+ {id:'ti_consenso', cond:()=>S.ind.consenso<40, amico:'Governo in salita: la tenuta c\'è, i risultati verranno', ostile:'Un governo al capolinea: il consenso evapora'},
+ {id:'ti_riformatore', pri:1, cond:()=>haTratto('riformatore')&&S.ultimaLegge!=null&&(S.year*12+S.month)-S.ultimaLegge.mese<=1, amico:'Il Riformatore colpisce ancora: un\'altra legge in porto', ostile:'L\'ennesima legge del «Riformatore»: quantità o qualità?'},
+ {id:'ti_legge', pri:1, cond:()=>S.ultimaLegge!=null&&(S.year*12+S.month)-S.ultimaLegge.mese<=1, amico:'La riforma è legge: il governo incassa', ostile:'La riforma divide: piazza in subbuglio e dubbi in aula'},
+ {id:'ti_voto', pri:1, cond:()=>typeof periodoSondaggi==='function'&&periodoSondaggi(), amico:'Verso le urne: il governo si gioca la conferma a testa alta', ostile:'Verso le urne: il conto alla rovescia spaventa il governo'},
+ {id:'ti_intermedia', pri:1, cond:()=>S.agenda&&S.agenda.some(a=>a.kind==='intermedia'), amico:'Il voto locale come termometro: il governo è pronto', ostile:'Il voto locale incombe: il governo trema'},
+ {id:'ti_reputazione', cond:()=>S.ind.reputazione!=null&&S.ind.reputazione<40, amico:'Il Paese tratta da pari: realismo nelle alleanze', ostile:'Isolati: il Paese conta sempre meno nel mondo'},
+ {id:'ti_bene', cond:()=>S.ind.growth>1&&S.ind.fiducia>70, amico:'Un Paese che riparte: i numeri danno ragione al governo', ostile:'Crescita sì, ma chi ne vede i frutti?'},
+ /* Build B (iii) — la voce-stampa del '50 (era:'italia1950', eraVivaT le esclude nel presente): commenta le
+    circostanze dell'epoca. Fra gli eventi-specifici e gli «ordinario»: un mese quieto del '50 suona d'epoca. */
+ /* conds VARIATE e contestuali (non sempre-eleggibili): al variare degli indicatori nel gioco reale, mesi
+    diversi del '50 fanno affiorare titoli diversi (ricostruzione se cresce, Sud/emigrazione se disoccupa, ecc.). */
+ {id:'ti50_ricostruzione', era:'italia1950', cond:()=>S.ind.growth>1&&S.year<=1954, amico:'Il Paese si rialza: la ricostruzione avanza', ostile:'Macerie e promesse: la ripresa arranca'},
+ {id:'ti50_boom', era:'italia1950', cond:()=>S.year>=1956&&S.ind.growth>1.5, amico:'L\'industria corre: l\'Italia cambia pelle', ostile:'Il paese cresce, ma non per tutti'},
+ {id:'ti50_sud', era:'italia1950', cond:()=>S.ind.unemp>6.5, amico:'Il Mezzogiorno al centro: la Cassa promette rinascita', ostile:'Il Sud aspetta ancora: basterà la Cassa?'},
+ {id:'ti50_emigrazione', era:'italia1950', cond:()=>S.ind.unemp>8, amico:'Braccia che partono: il governo cerca risposte all\'emigrazione', ostile:'Milioni con la valigia: i paesi si svuotano'},
+ {id:'ti50_atlantico', era:'italia1950', cond:()=>S.ind.reputazione!=null&&S.ind.reputazione>=55, amico:'L\'Italia atlantica conferma la sua rotta', ostile:'Troppo allineati? La scelta di campo divide'},
+ {id:'ti50_spacco', era:'italia1950', cond:()=>S.ind.consenso<52, amico:'Due Italie, un governo che tiene la barra', ostile:'La frattura si allarga: due mondi che non si parlano'},
+ /* ===== AVANZAMENTO Fase 2 · Lotto 1 — VOCE-STAMPA '60 (era:'italia1960', §7 PRESET-ITALIA-1960.md): commenta il
+    decennio con conds ad anno+indicatore (boom se cresce, stretta se frena, i pilastri ai loro anni). Taglio era-neutro. ===== */
+ {id:'ti60_boom_citta', era:'italia1960', cond:()=>S.year>=1958&&S.ind.growth>1, amico:'Il boom cambia le città: l\'Italia che corre', ostile:'Cemento e traffico: il boom presenta il conto'},
+ {id:'ti60_migrazione', era:'italia1960', cond:()=>S.year>=1958, amico:'In viaggio verso Nord: il lavoro chiama', ostile:'Treni carichi di braccia: il Sud si svuota'},
+ {id:'ti60_consumi', era:'italia1960', cond:()=>S.year>=1959&&S.ind.growth>1, amico:'L\'Italia del benessere: i consumi in festa', ostile:'Benessere per chi? Il boom lascia indietro qualcuno'},
+ {id:'ti60_utilitaria', era:'italia1960', cond:()=>S.year>=1959, amico:'Un\'utilitaria in ogni cortile', ostile:'Tutti in auto, e le strade restano quelle'},
+ {id:'ti60_tv', era:'italia1960', cond:()=>S.year>=1960, amico:'La TV entra nelle case degli italiani', ostile:'La TV di Stato: chi tiene il telecomando?'},
+ {id:'ti60_olimpiadi', era:'italia1960', cond:()=>S.year>=1960&&S.year<=1961, amico:'Le Olimpiadi accendono Roma', ostile:'Olimpiadi, e il conto per la città?'},
+ {id:'ti60_lira', era:'italia1960', cond:()=>S.year>=1959&&S.year<=1961, amico:'La lira premiata per la sua solidità', ostile:'Lira forte, ma i salari restano fermi'},
+ {id:'ti60_cee', era:'italia1960', cond:()=>S.year>=1958, amico:'Il Mercato Comune decolla', ostile:'Più Europa: chi ci guadagna e chi ci perde'},
+ {id:'ti60_muro', era:'italia1960', cond:()=>S.year>=1961&&S.year<=1963, amico:'Berlino divisa: l\'Occidente serra i ranghi', ostile:'Un muro nel cuore d\'Europa'},
+ {id:'ti60_cuba', era:'italia1960', cond:()=>S.year>=1962&&S.year<=1963, amico:'Il mondo evita il baratro: torna la trattativa', ostile:'Cuba: giorni di paura per tutti'},
+ {id:'ti60_spazio', era:'italia1960', cond:()=>S.year>=1961, amico:'L\'uomo conquista lo spazio', ostile:'Corsa allo spazio: la sfida dei blocchi'},
+ {id:'ti60_autostrada', era:'italia1960', cond:()=>S.year>=1962&&S.year<=1965, amico:'Cantieri sull\'Autostrada del Sole', ostile:'Autostrada del Sole: quanto ci costa?'},
+ {id:'ti60_concilio', era:'italia1960', cond:()=>S.year>=1962&&S.year<=1965, amico:'Il Concilio riunisce i vescovi', ostile:'Il Concilio agita anche la politica'},
+ {id:'ti60_mediaunica', era:'italia1960', cond:()=>S.year>=1963, amico:'La media unica apre le aule a tutti', ostile:'Media unica: aule e maestri non bastano'},
+ {id:'ti60_stretta', era:'italia1960', cond:()=>S.year>=1964&&S.year<=1965, amico:'Il governo difende la lira nella stretta', ostile:'La stretta morde: prezzi su, fabbriche giù'},
+ {id:'ti60_vertenze', era:'italia1960', cond:()=>S.year>=1962&&S.ind.unemp>6, amico:'Il tavolo regge: accordo nelle fabbriche', ostile:'Fabbriche in sciopero: la stagione delle vertenze'},
+ {id:'ti60_sud', era:'italia1960', cond:()=>S.year>=1960&&S.ind.unemp>6, amico:'Il Sud tra industria nuova e partenze', ostile:'I poli industriali del Sud: promesse e attese'},
+ {id:'ti60_studenti', era:'italia1960', cond:()=>S.year>=1968, amico:'Le università in fermento: una generazione parla', ostile:'Atenei occupati: il paese diviso sui giovani'},
+ /* ===== D2 — TITOLI DI STATO (pri 2, universali): il titolo LEGGE il paese (crescita, lavoro, conti, clima
+    politico, stagione) — conds a bande larghe e sovrapposte, così in ogni stato ordinario ≥18 titoli vivi. ===== */
+ {id:'ti_crescita', cond:()=>S.ind.growth>=0.5&&S.ind.growth<=1.5, amico:'L\'economia respira: segnali di fiducia', ostile:'Crescita tiepida: il paese vuole di più'},
+ {id:'ti_stagnazione', cond:()=>S.ind.growth>=0&&S.ind.growth<0.5, amico:'Il motore gira piano, ma gira', ostile:'Un paese in surplace: tutto fermo, tutto uguale'},
+ {id:'ti_lavoro_ok', cond:()=>S.ind.unemp<=6.5, amico:'Le assunzioni tirano: il lavoro c\'è', ostile:'Lavoro sì, ma a quali condizioni?'},
+ {id:'ti_lavoro_chiaroscuro', cond:()=>S.ind.unemp>6.5&&S.ind.unemp<=9, amico:'Lavoro, segnali in chiaroscuro ma la rotta tiene', ostile:'Il lavoro che manca: famiglie col fiato corto'},
+ {id:'ti_conti_ordine', cond:()=>S.ind.deficit<=3, amico:'Conti in ordine: lo Stato tira il fiato', ostile:'Il rigore c\'è: e la crescita?'},
+ {id:'ti_conti_tesi', cond:()=>S.ind.deficit>3&&S.ind.deficit<=4.5, amico:'I conti sotto controllo, assicura il governo', ostile:'La coperta è corta: conti in salita'},
+ {id:'ti_coalizione_tiene', cond:()=>S.coalizione&&S.coalizione.length>1, amico:'La maggioranza marcia compatta', ostile:'Alleati in ordine sparso: quanto regge?'},
+ {id:'ti_consenso_alto', cond:()=>S.ind.consenso>=58, amico:'Il paese si fida: il governo in credito', ostile:'Applausi oggi: e domani?'},
+ {id:'ti_fiducia_solida', cond:()=>S.ind.fiducia!=null&&S.ind.fiducia>=65, amico:'I creditori si fidano: il paese è solido', ostile:'Fiducia sì, ma è fiducia a tempo'},
+ {id:'ti_piazza_fredda', cond:()=>{ var g=S.groups||{}; var m=100; for(var k in g) m=Math.min(m,g[k]); return m<42; }, amico:'Le piazze chiedono, il palazzo ascolta', ostile:'La protesta monta: il palazzo è lontano'},
+ {id:'ti_sanita_tiene', cond:()=>S.ind.sanita!=null&&S.ind.sanita>=55, amico:'Ospedali che reggono: la sanità tiene', ostile:'La sanità tiene: ma quanto ancora?'},
+ {id:'ti_sicurezza_num', cond:()=>S.ind.sicurezza!=null&&S.ind.sicurezza>=50, amico:'Città più sicure, dicono i numeri', ostile:'Sicurezza: i numeri sì, la percezione no'},
+ {id:'ti_debito_macigno', cond:()=>S.ind.debt>=100, amico:'Il debito pesa, ma il paese cammina', ostile:'Il macigno del debito sulle spalle di domani'},
+ {id:'ti_reputazione_media', cond:()=>S.ind.reputazione!=null&&S.ind.reputazione>=45&&S.ind.reputazione<=75, amico:'Il paese ascoltato ai tavoli che contano', ostile:'Nel mondo si contava di più, un tempo'},
+
+ /* ===== AMPLIAMENTO — TITOLI-DI-STATO DEL PRESENTE (sweep-ripetizione: il pool-titoli presente era a ~4 vivi e
+    pendeva su debito/reputazione → ricorreva ogni mese). 14 nuovi, `era:'contemporanea'` (present-only: il '50/'60
+    resta byte-identico, enrichito solo il presente). Struttura D2: leggono lo stato (crescita/lavoro/consenso/
+    coalizione/ordine/reputazione) con conds a bande, voce amica/ostile. De-dup verificato vs il blocco D2 sopra:
+    [NUOVO]=banda scoperta · [2ª voce]=registro distinto su banda coperta (riportato nel vaglio). ===== */
+ {id:'ti_boom', era:'contemporanea', cond:()=>S.ind.growth>1.5, amico:'L\'economia corre, il governo incassa', ostile:'Il PIL corre, ma nelle tasche non si sente'},                                              // [NUOVO] growth>1.5 (sopra ti_crescita; ti_bene chiede fiducia>70)
+ {id:'ti_crescita_ferma', era:'contemporanea', cond:()=>S.ind.growth>=0&&S.ind.growth<0.5, amico:'La crescita rallenta, il governo cerca la spinta', ostile:'La crescita si spegne, e si vede'},                    // [2ª voce] vs ti_stagnazione (registro più netto)
+ {id:'ti_rosso', era:'contemporanea', cond:()=>S.ind.growth<0, amico:'Numeri in rosso: il governo prepara la manovra', ostile:'Numeri in rosso: il paese frena'},                                                 // [2ª voce] vs ti_recessione
+ {id:'ti_lavoro_tira', era:'contemporanea', cond:()=>S.ind.unemp<=6, amico:'Il lavoro tira, calano le tensioni', ostile:'Occupati sì, ma con quali contratti?'},                                                 // [2ª voce] vs ti_lavoro_ok (unemp<=6)
+ {id:'ti_lavoro_piazza', era:'contemporanea', cond:()=>S.ind.unemp>9, amico:'Disoccupazione alta: il governo apre i tavoli', ostile:'Senza lavoro: la piazza rumoreggia'},                                        // [2ª voce] vs ti_disocc (angolo sociale)
+ {id:'ti_vento_favore', era:'contemporanea', cond:()=>S.ind.consenso>=58, amico:'Il vento soffia a favore', ostile:'Consensi oggi, promesse per domani'},                                                        // [2ª voce] vs ti_consenso_alto
+ {id:'ti_sondaggi_calo', era:'contemporanea', cond:()=>S.ind.consenso>=40&&S.ind.consenso<52, amico:'Sondaggi in calo, ma la rotta tiene', ostile:'I sondaggi scivolano, il palazzo trema'},                       // [NUOVO] banda 40-52 (fra ti_consenso<40 e ti_consenso_alto>=58)
+ {id:'ti_maggioranza_tiene', era:'contemporanea', cond:()=>S.coalizione&&S.coalizione.length>1&&S.ind.consenso>=50, amico:'La maggioranza tiene, per ora', ostile:'Maggioranza in fila, ma quanto durerà?'},        // [2ª voce] vs ti_coalizione_tiene (+consenso saldo)
+ {id:'ti_alleati_nervosi', era:'contemporanea', cond:()=>S.coalizione&&S.coalizione.length>1&&S.ind.consenso<45, amico:'Alleati a confronto: la maggioranza cerca la quadra', ostile:'Alleati nervosi: la maggioranza scricchiola'}, // [NUOVO] coalizione debole (nessun titolo la copriva)
+ {id:'ti_cortei', era:'contemporanea', cond:()=>S.ind.sicurezza!=null&&S.ind.sicurezza<45, amico:'Cortei nelle città: il governo osserva e dialoga', ostile:'Cortei nelle città, la tensione sale'},               // [NUOVO] sicurezza<45 (ti_sicurezza_num era solo il positivo)
+ {id:'ti_respira', era:'contemporanea', cond:()=>S.ind.sicurezza!=null&&S.ind.sicurezza>=55, amico:'Un paese che respira', ostile:'Calma apparente: e sotto la superficie?'},                                    // [2ª voce] vs ti_sicurezza_num (banda alta >=55)
+ {id:'ti_reputazione_alta', era:'contemporanea', cond:()=>S.ind.reputazione!=null&&S.ind.reputazione>75, amico:'Ci ascoltano, ai tavoli che contano', ostile:'Prestigio fuori, e dentro i confini?'},              // [NUOVO] reputazione>75 (ostile aggiunto: il render lo esige — vedi report)
+ {id:'ti_ordinaria', era:'contemporanea', pri:3, amico:'Giornata di ordinaria amministrazione', ostile:'Giornata fiacca: il governo in folle'},                                                                  // pri:3 ordinario (fallback mese quieto)
+ {id:'ti_avanti', era:'contemporanea', pri:3, amico:'Il paese va avanti, senza scosse', ostile:'Il paese va avanti, ma verso dove?'},                                                                            // pri:3 ordinario
+
+ /* ===== MICRO-LOTTO MECCANICO — GEMELLE sui trigger SEMPRE-ACCESI (sweep: rep≥3 non crollava perché la carta unica
+    di uno stato ricorreva; ti_debito_macigno era la #1 solitaria). 2 gemelle a testa (stesso `cond`/`pri` dell'originale,
+    testo distinto), `era:'contemporanea'` → il '50/'60 resta byte-identico (l'originale universale lì resta l'unica voce).
+    Così «debito alto»/«sanità tiene»/«reputazione media» ruotano fra 3 titoli. ===== */
+ {id:'ti_debito_2', era:'contemporanea', cond:()=>S.ind.debt>=100, amico:'Debito alto, ma i mercati non scappano', ostile:'Il conto del debito cresce, mese dopo mese'},
+ {id:'ti_debito_3', era:'contemporanea', cond:()=>S.ind.debt>=100, amico:'Sui conti il governo tiene la barra', ostile:'Debito record: l\'ipoteca sul domani'},
+ {id:'ti_sanita_2', era:'contemporanea', cond:()=>S.ind.sanita!=null&&S.ind.sanita>=55, amico:'Corsie che reggono: la sanità pubblica c\'è', ostile:'Sanità in piedi, ma il personale è al limite'},
+ {id:'ti_sanita_3', era:'contemporanea', cond:()=>S.ind.sanita!=null&&S.ind.sanita>=55, amico:'Liste d\'attesa in calo: la sanità respira', ostile:'La sanità tiene, ma i conti degli ospedali no'},
+ {id:'ti_reputazione_2', era:'contemporanea', cond:()=>S.ind.reputazione!=null&&S.ind.reputazione>=45&&S.ind.reputazione<=75, amico:'La diplomazia lavora: il paese si fa rispettare', ostile:'Rispetto formale, peso reale in calo'},
+ {id:'ti_reputazione_3', era:'contemporanea', cond:()=>S.ind.reputazione!=null&&S.ind.reputazione>=45&&S.ind.reputazione<=75, amico:'Alleanze salde: un interlocutore affidabile', ostile:'Affidabili sì, ma sempre in seconda fila'},
+
+ /* ===== P5-bis — LA PRIMA PAGINA D'EPOCA. Gemelle era-taggate dei titoli generici più visti (misura P5: i `pri:1`
+    scattano su fatti-di-gioco e battono i ti50, così la voce del periodo si assottigliava proprio in prima pagina).
+    REGOLA: stesso `cond`, stesso `pri` — cambia SOLO il registro. A parità di pri la gemella d'epoca vince
+    (generaTitolo); dove non esiste, il generico resta il fallback; nel presente sono era-escluse → presente identico.
+    Skin, non meccanica. Lessico d'epoca, mai macchietta. ===== */
+ // --- pri:1 (i fatti del mese) ---
+ {id:'ti50_inchiesta', era:'italia1950', pri:1, cond:()=>!!S.inchiesta, amico:'L\'inchiesta sul vertice: si attende la parola dei giudici', ostile:'Il vertice sotto inchiesta: nel Palazzo si trattiene il fiato'},
+ {id:'ti60_inchiesta', era:'italia1960', pri:1, cond:()=>!!S.inchiesta, amico:'Inchiesta al vertice: il Governo si affida alla magistratura', ostile:'Il vertice sotto inchiesta: il caso corre di bocca in bocca'},
+ {id:'ti50_scandalo', era:'italia1950', pri:1, cond:()=>S.agenda&&S.agenda.some(a=>a.kind==='scandalo'), amico:'Il caso al ministero: si attendono le carte, non le voci', ostile:'Ombre su un ministero: il Palazzo mormora'},
+ {id:'ti60_scandalo', era:'italia1960', pri:1, cond:()=>S.agenda&&S.agenda.some(a=>a.kind==='scandalo'), amico:'Il caso al ministero: il Governo chiede di attendere gli atti', ostile:'Scandalo al ministero: l\'eco arriva dentro le case'},
+ {id:'ti50_manovra', era:'italia1950', pri:1, cond:()=>S.month===1, amico:'Il bilancio dello Stato in aula: il Governo indica la rotta', ostile:'Il bilancio in aula: conti stretti e promesse rinviate'},
+ {id:'ti60_manovra_a', era:'italia1960', pri:1, cond:()=>S.month===1&&S.year<=1961, amico:'Il bilancio dell\'anno: il Governo guida la crescita', ostile:'Il bilancio dell\'anno: la corsa costa, e i conti lo dicono'},
+ {id:'ti60_manovra_b', era:'italia1960', pri:1, cond:()=>S.month===1&&S.year>=1962, amico:'Il bilancio dell\'anno: la programmazione detta la rotta', ostile:'Il bilancio dell\'anno: si programma molto, si attua meno'},   // «programmazione» a fuoco dal '62 (vaglio Giacomo): due voci mutuamente esclusive, zero ambiguità nel picker
+ {id:'ti50_riformatore', era:'italia1950', pri:1, cond:()=>haTratto('riformatore')&&S.ultimaLegge!=null&&(S.year*12+S.month)-S.ultimaLegge.mese<=1, amico:'Un\'altra riforma in porto: il Governo tiene il passo', ostile:'Riforme a raffica: il Paese fa fatica a seguirle'},
+ {id:'ti60_riformatore', era:'italia1960', pri:1, cond:()=>haTratto('riformatore')&&S.ultimaLegge!=null&&(S.year*12+S.month)-S.ultimaLegge.mese<=1, amico:'Ancora una riforma: il disegno riformatore procede', ostile:'Riforme su riforme: si legifera più di quanto si attui'},
+ {id:'ti50_legge', era:'italia1950', pri:1, cond:()=>S.ultimaLegge!=null&&(S.year*12+S.month)-S.ultimaLegge.mese<=1, amico:'La legge è approvata: il Governo porta a casa la riforma', ostile:'La legge passa, ma l\'aula si spacca e la piazza mormora'},
+ {id:'ti60_legge', era:'italia1960', pri:1, cond:()=>S.ultimaLegge!=null&&(S.year*12+S.month)-S.ultimaLegge.mese<=1, amico:'La riforma è legge: una tappa del disegno di governo', ostile:'La riforma passa fra i contrasti: l\'aula si divide'},
+ {id:'ti50_voto', era:'italia1950', pri:1, cond:()=>typeof periodoSondaggi==='function'&&periodoSondaggi(), amico:'Verso le urne: il Governo si presenta al giudizio del Paese', ostile:'Verso le urne: nel Palazzo si contano i giorni con apprensione'},
+ {id:'ti60_voto', era:'italia1960', pri:1, cond:()=>typeof periodoSondaggi==='function'&&periodoSondaggi(), amico:'Verso le urne: la campagna entra nelle case', ostile:'Verso le urne: il Governo alla prova, e stavolta si vede tutto'},
+ {id:'ti50_intermedia', era:'italia1950', pri:1, cond:()=>S.agenda&&S.agenda.some(a=>a.kind==='intermedia'), amico:'Amministrative alle porte: il Governo affronta la prova', ostile:'Amministrative alle porte: la prova che il Governo teme'},
+ {id:'ti60_intermedia', era:'italia1960', pri:1, cond:()=>S.agenda&&S.agenda.some(a=>a.kind==='intermedia'), amico:'Il voto nei comuni: la prova d\'appello per il Governo', ostile:'Il voto nei comuni: un termometro che scotta'},
+ // --- pri:2 (lo stato del paese: i più visti dopo i pri:1, leggono il paese ogni mese) ---
+ {id:'ti50_reput_media', era:'italia1950', cond:()=>S.ind.reputazione!=null&&S.ind.reputazione>=45&&S.ind.reputazione<=75, amico:'L\'Italia ascoltata nei consessi dell\'Occidente', ostile:'Nei consessi che contano, la voce dell\'Italia è sottile'},
+ {id:'ti60_reput_media', era:'italia1960', cond:()=>S.ind.reputazione!=null&&S.ind.reputazione>=45&&S.ind.reputazione<=75, amico:'L\'Italia siede ai tavoli che contano, in Europa e oltre', ostile:'Ai tavoli europei l\'Italia parla piano'},
+ {id:'ti50_crisi_fid', era:'italia1950', cond:()=>S.ind.fiducia!=null&&S.ind.fiducia<40, amico:'Conti sotto pressione: il Governo tiene la barra', ostile:'La lira sotto tiro: il Paese guarda ai conti con timore'},
+ {id:'ti60_crisi_fid', era:'italia1960', cond:()=>S.ind.fiducia!=null&&S.ind.fiducia<40, amico:'Conti sotto pressione, ma la rotta tiene', ostile:'I conti scricchiolano: il boom non copre tutto'},
+ {id:'ti50_recessione', era:'italia1950', cond:()=>S.ind.growth<0, amico:'La produzione rallenta: il Governo prepara la risposta', ostile:'L\'economia arretra: nelle fabbriche si fermano i telai'},
+ {id:'ti60_recessione', era:'italia1960', cond:()=>S.ind.growth<0, amico:'La corsa rallenta: il Governo studia i rimedi', ostile:'Il motore si inceppa: dopo gli anni della corsa, la frenata'},
+ {id:'ti50_disocc', era:'italia1950', cond:()=>S.ind.unemp>9, amico:'Lavoro: il piano c\'è, la strada è lunga', ostile:'Senza lavoro: file agli uffici di collocamento'},
+ {id:'ti60_disocc', era:'italia1960', cond:()=>S.ind.unemp>9, amico:'Occupazione: il piano tiene, i tempi no', ostile:'Fabbriche che assumono meno: il lavoro torna un problema'},
+ {id:'ti50_deficit', era:'italia1950', cond:()=>S.ind.deficit>4.5, amico:'Il Governo stringe i cordoni della borsa', ostile:'Nuove imposte all\'orizzonte, e le famiglie pagano'},
+ {id:'ti60_deficit', era:'italia1960', cond:()=>S.ind.deficit>4.5, amico:'Il Governo mette ordine nei conti', ostile:'Il conto dello Stato cresce: qualcuno dovrà pagarlo'},
+ {id:'ti50_consenso', era:'italia1950', cond:()=>S.ind.consenso<40, amico:'Governo in salita, ma la maggioranza regge', ostile:'Un Governo logorato: nel Paese cresce il malumore'},
+ {id:'ti60_consenso', era:'italia1960', cond:()=>S.ind.consenso<40, amico:'Governo in affanno: la maggioranza tiene ancora', ostile:'Il Governo perde colpi, e il Paese se ne accorge'},
+ {id:'ti50_bene', era:'italia1950', cond:()=>S.ind.growth>1&&S.ind.fiducia>70, amico:'Il Paese si rialza: i numeri danno ragione al Governo', ostile:'La ripresa avanza, ma non per tutti'},
+ {id:'ti60_bene', era:'italia1960', cond:()=>S.ind.growth>1&&S.ind.fiducia>70, amico:'L\'Italia corre: i numeri parlano per il Governo', ostile:'Il benessere cresce, e con esso le distanze'},
+ {id:'ti50_reputazione', era:'italia1950', cond:()=>S.ind.reputazione!=null&&S.ind.reputazione<40, amico:'L\'Italia tratta da pari nei consessi d\'Occidente', ostile:'Isolata nei consessi: l\'Italia conta poco'},
+ {id:'ti60_reputazione', era:'italia1960', cond:()=>S.ind.reputazione!=null&&S.ind.reputazione<40, amico:'Realismo nelle alleanze: il Paese tratta da pari', ostile:'Nei tavoli che contano l\'Italia resta ai margini'},
+ {id:'ti_giovani_finestra', cond:()=>(S.groups&&S.groups.giovani!=null)?S.groups.giovani<=50:false, amico:'I giovani chiedono spazio: il governo apre', ostile:'Una generazione alla finestra'},
+ {id:'ti_estate', cond:()=>S.month>=7&&S.month<=8, amico:'Il paese rallenta, il governo resta al lavoro', ostile:'Ferie per tutti, risposte per nessuno'},
+ {id:'ti_rientro', cond:()=>S.month>=9&&S.month<=10, amico:'Il rientro: l\'agenda d\'autunno del governo', ostile:'L\'autunno dei dossier: il tavolo è pieno'},
+ /* ===== D2 — TITOLI D'EPOCA '50 (pri 2, era italia1950): la scheda-materia-prima §3-bis di PRESET-ITALIA-1950.md,
+    sourceata; ancore-anno e DUE scadenze (Corea ≤'53, TV-sperimentale '52-'54) via cond su S.year. Dedup rispettato:
+    la CECA è angolo-titolo (la carta-evento resta distinta), niente Polesine (solo carta-shock), niente Anno Santo. ===== */
+ {id:'ti50_censimento', era:'italia1950', cond:()=>S.year>=1952, amico:'Il censimento fotografa l\'Italia che cambia', ostile:'Il censimento fotografa un\'Italia a due velocità'},
+ {id:'ti50_ceca', era:'italia1950', cond:()=>S.year>=1951, amico:'Carbone e acciaio: l\'Italia firma a Parigi', ostile:'Carbone e acciaio: cosa cede l\'Italia a Parigi?'},
+ {id:'ti50_corea_prezzi', era:'italia1950', cond:()=>S.year<=1953, amico:'Materie prime care, ma l\'industria regge', ostile:'La guerra in Corea fa salire i prezzi'},
+ {id:'ti50_pianocasa', era:'italia1950', amico:'Primi cantieri del piano casa: si costruisce', ostile:'Piano casa: cantieri aperti, attese lunghe'},
+ {id:'ti50_fondiaria', era:'italia1950', cond:()=>S.year>=1951, amico:'La riforma fondiaria al via: terre assegnate', ostile:'Espropri e proteste: la riforma fondiaria divide'},
+ {id:'ti50_scooter', era:'italia1950', amico:'Scooter e motorette riempiono le strade', ostile:'Strade piene di motorette, e di buche'},
+ {id:'ti50_metano', era:'italia1950', amico:'Il metano della pianura accende l\'industria', ostile:'Il metano c\'è: chi ne raccoglie i frutti?'},
+ {id:'ti50_cinema', era:'italia1950', amico:'Il cinema italiano premiato all\'estero', ostile:'Il cinema racconta un\'Italia che il governo ignora'},
+ {id:'ti50_giro', era:'italia1950', amico:'L\'Italia si ferma per il Giro', ostile:'Il paese pedala, i problemi restano al traguardo'},
+ {id:'ti50_tv_sper', era:'italia1950', cond:()=>S.year>=1952&&S.year<=1954, amico:'Prove di televisione nelle grandi città', ostile:'La televisione arriva: per pochi, per ora'},
+ {id:'ti50_serali', era:'italia1950', amico:'Scuole serali contro l\'analfabetismo', ostile:'Analfabetismo: la strada è ancora lunga'},
+ {id:'ti50_idro', era:'italia1950', amico:'Nuove centrali: l\'idroelettrico tira il paese', ostile:'L\'energia cresce, i divari restano'},
+ /* ===== D2 — ORDINARI DI TONO (pri 3, universali): il fallback non è più una coppia — otto voci variate nel
+    colore, così anche il mese quieto cambia faccia. ===== */
+ {id:'ti_ordinario1', pri:3, amico:'Governo al lavoro: agenda fitta e toni misurati', ostile:'Mesi che passano, risposte che mancano'},
+ {id:'ti_ordinario2', pri:3, amico:'Palazzo, ordinaria amministrazione e qualche ambizione', ostile:'Tra annunci e rinvii, il governo gira a vuoto'},
+ {id:'ti_ord_paese', pri:3, amico:'Il paese va avanti, il governo pure', ostile:'Il paese va avanti, nonostante tutto'},
+ {id:'ti_ord_palazzo', pri:3, amico:'Palazzo operoso: dossier e riunioni', ostile:'Il palazzo parla con sé stesso'},
+ {id:'ti_ord_settimana', pri:3, amico:'Settimane di lavoro ordinato', ostile:'Un\'altra settimana, le stesse promesse'},
+ {id:'ti_ord_province', pri:3, amico:'Dalle province segnali di fiducia', ostile:'La provincia si sente dimenticata'},
+ {id:'ti_ord_attesa', pri:3, amico:'Il governo semina: i frutti verranno', ostile:'Il paese in sala d\'attesa'},
+ {id:'ti_ord_misura', pri:3, amico:'Passi brevi, ma nella direzione giusta', ostile:'Piccolo cabotaggio: dov\'è la visione?'},
+];
+
+/* TITOLI LOCALI (rifinitura livello locale): a LIVELLO 1 la prima pagina parla LOCALE — il consiglio, la giunta,
+   l'opera in città, i conti dell'ente, la cronaca — MAI politica nazionale. `%LUOGO` = nome dell'area (usato solo
+   come SOGGETTO, per evitare i problemi d'articolo: "Milano"/"la Lombardia" reggono entrambi). Campo `tipo`
+   OPZIONALE (default = entrambi) per i pochi temi intrinsecamente città o regione (consiglio comunale vs regionale,
+   quartiere vs aree interne, servizi vs sanità). Variante amica/ostile dal CONSENSO locale. Cornice pura, niente effetti. */
+const TITOLI_LOCALI=[
+ {id:'tl_cons_giu', cond:()=>S.locale&&S.locale.consenso<42, amico:'%LUOGO mugugna, ma la giunta tiene la rotta', ostile:'%LUOGO contro la giunta: il malcontento cresce'},
+ {id:'tl_cons_su', cond:()=>S.locale&&S.locale.consenso>62, amico:'%LUOGO promossa: l\'amministrazione raccoglie i frutti', ostile:'%LUOGO va bene, dicono — c\'è chi pretende di più'},
+ {id:'tl_bilancio', cond:()=>S.locale&&S.locale.ind&&S.locale.ind.bilancio!=null&&S.locale.ind.bilancio<40, amico:'Conti dell\'ente sotto pressione: la giunta stringe la cinghia', ostile:'Conti dell\'ente in affanno: e adesso chi paga?'},
+ {id:'tl_servizi', tipo:'città', cond:()=>S.locale&&S.locale.ind&&S.locale.ind.servizi!=null&&S.locale.ind.servizi<42, amico:'Servizi da rilanciare: il Comune mette mano', ostile:'Servizi al palo: cittadini esasperati'},
+ {id:'tl_sanita', tipo:'regione', cond:()=>S.locale&&S.locale.ind&&S.locale.ind.sanita!=null&&S.locale.ind.sanita<42, amico:'Sanità regionale, la giunta promette il rilancio', ostile:'Liste e ospedali: la sanità regionale sotto accusa'},
+ {id:'tl_opera', amico:'La grande opera avanza: %LUOGO guarda al futuro', ostile:'Cantieri infiniti: la grande opera divide %LUOGO'},
+ {id:'tl_consiglio_c', tipo:'città', amico:'Consiglio comunale acceso, ma la maggioranza regge', ostile:'In consiglio comunale è battaglia: la giunta barcolla'},
+ {id:'tl_consiglio_r', tipo:'regione', amico:'In consiglio regionale la giunta porta a casa il voto', ostile:'Consiglio regionale nel caos: la giunta sotto attacco'},
+ {id:'tl_quartiere', tipo:'città', amico:'%LUOGO riparte dai quartieri: servizi di prossimità', ostile:'Quartieri trascurati: la rabbia monta nelle periferie'},
+ {id:'tl_territorio', tipo:'regione', amico:'La giunta non dimentica le aree interne della regione', ostile:'Aree interne in fuga: la regione le sta perdendo'},
+ {id:'tl_turismo', amico:'Eventi e turismo: %LUOGO si mette in vetrina', ostile:'Occasioni mancate: %LUOGO resta indietro'},
+ {id:'tl_ord1', amico:'%LUOGO al lavoro: giunta operativa, toni misurati', ostile:'%LUOGO aspetta: mesi che passano, risposte che mancano'},
+ {id:'tl_ord2', amico:'Ordinaria amministrazione, e qualche ambizione, per la giunta', ostile:'Tra annunci e rinvii, la giunta gira a vuoto'},
+];
+
+/* ===== DICHIARAZIONI (Ufficio stampa) — i comunicati delle azioni proattive, con TONI a scelta.
+   Ogni tono modula gli effetti: più ti esponi, più incassi — e più la stampa giudica.
+   Template: %G = gruppo, %A = alleato, %P = partito avversario (sostituiti al momento).
+   TARATI PER LA CADENZA MENSILE (una mossa al mese): numeri volutamente più miti del vecchio
+   bimestrale, così la comunicazione non spazza via tenuta/forze/crisi. Contenuto ritoccabile. ===== */
+const DICHIARAZIONI={
+  intervista:[
+    {id:'misurata', l:'Tono misurato', grp:2, stampa:4, testo:'Ho ascoltato %G: nel programma entrano impegni concreti, non slogan.'},
+    {id:'forte', l:'Impegno solenne', grp:4, stampa:1, testo:'%G ha la mia parola: sarà la priorità di questo governo.'},
+  ],
+  annuncio:[
+    {id:'sobrio', l:'Tono sobrio', regge:{cm:2,stampa:3}, gonfiato:{cm:-1,stampa:-4}, testo:'I dati dicono che la rotta è giusta: i primi risultati si vedono.'},
+    {id:'trionfale', l:'Tono trionfale', regge:{cm:4,stampa:2}, gonfiato:{cm:-3,stampa:-8}, testo:'Promesse mantenute: il Paese riparte, e i numeri lo dimostrano.'},
+  ],
+  segnale:[
+    {id:'felpata', l:'Apertura felpata', tenuta:3, stampa:0, testo:'Con %A il dialogo è costante: le sue priorità sono nel programma di governo.'},
+    {id:'endorsement', l:'Endorsement pubblico', tenuta:5, stampa:-1, testo:'%A è un pilastro di questo governo: lo dico chiaramente, oggi e domani.'},
+  ],
+  attacco:[
+    {id:'istituzionale', l:'Tono istituzionale', forzaLui:-0.5, forzaMia:0.25, stampa:-1, testo:'Esprimo rispettoso dissenso dalla linea di %P: i numeri la smentiscono.'},
+    {id:'frontale', l:'Attacco frontale', forzaLui:-0.9, forzaMia:0.45, stampa:-4, testo:'La linea di %P è un pericolo per il Paese: serve dirlo senza giri di parole.'},
+  ],
+};
+
+const FIDUCIA_EV = {
+  warn: { kick:'La fiducia nei conti', t:'I creditori si innervosiscono', text:'I creditori dello Stato guardano con preoccupazione ai conti pubblici: il costo del debito sale.', ch:[
+    {l:'Annuncia prudenza sui conti', e:'Segnale di rigore: un po\' di fiducia recuperata', f:()=>{S.ind.fiducia=clamp(S.ind.fiducia+5,0,100); gd('cetomedio',1);}},
+    {l:'Minimizza il problema', e:'Eviti l\'austerità, ma i creditori restano guardinghi', f:()=>{gd('imprenditori',-2);}},
+  ]},
+  declass: { kick:'La sfiducia cresce', t:'La sfiducia sul debito', text:'Cresce la sfiducia sul debito dello Stato: i creditori chiedono interessi più alti, e rifinanziarlo diventa più caro.', ch:[
+    {l:'Manovra di rientro credibile', e:'Tagli mirati: rassicuri i creditori, ma malumori sociali', costo:{debito:-1},f:()=>{S.ind.fiducia=clamp(S.ind.fiducia+8,0,100); S.ind.debt-=1; S.gMod-=0.3; gd('lavoratori',-5); gd('cetomedio',-3); gd('imprenditori',4);}},
+    {l:'Contesta il giudizio', e:'Orgoglio nazionale, ma i creditori non perdonano', f:()=>{S.ind.fiducia=clamp(S.ind.fiducia-3,0,100); gd('imprenditori',-5); gd('cetomedio',-3);}},
+  ]},
+  crisi: { kick:'Crisi del debito', t:'Crisi del debito', text:'I creditori internazionali temono l\'insolvenza: rifinanziare il debito è sempre più difficile e caro. Se non agisci, il paese rischia il default.', ch:[
+    {l:'Manovra lacrime e sangue', e:'Tagli durissimi: il paese soffre, ma fiducia e debito rientrano (per ora)', costo:{debito:-7},f:()=>{allG(-6); S.ind.fiducia=clamp(S.ind.fiducia+22,0,100); S.ind.debt-=7;}},
+    {l:'Tieni la rotta', e:'Niente austerità: il baratro dell\'insolvenza si avvicina', f:()=>{gd('imprenditori',-3); gd('cetomedio',-2);}},
+  ]},
+};
+
+/* Crisi di coalizione (passo 4): testi per ultimatum e rottura di un alleato. %A = nome del partito alleato.
+   Gli EFFETTI (bonus alla base dell'alleato, costo per te, delta di tenuta) vivono nelle closure costruite in
+   pickAlleato() (game.js), perché dipendono dall'alleato concreto. Qui solo il testo, facile da ritoccare. */
+const ALLEATI_EV = {
+  ultimatum: {
+    kick:'Tensione nella maggioranza',
+    t:'%A minaccia la crisi di governo',
+    text:'%A è insoddisfatto del governo e pronto a staccare la spina se non ottiene ascolto.',
+    concedi:{ l:'Concedi alle sue richieste', e:'Accontenti la sua base; la concessione ha un costo. La sua tenuta risale.' },
+    rifiuta:{ l:'Tieni la linea', e:'Mostri fermezza alla tua base; la sua tenuta crolla e la rottura si avvicina.' },
+  },
+  rottura: {
+    kick:'Rottura nella maggioranza',
+    t:'%A esce dalla coalizione',
+    text:'%A ritira l\'appoggio al governo: i suoi seggi lasciano la maggioranza.',
+    ok:{ l:'Ne prendo atto', e:'I numeri in parlamento cambiano.' },
+  },
+};
+
+/* Profili di governo dell'AVVERSARIO (quando vinci... cioè quando PERDI e vai all'opposizione): all'insediamento
+   imposta S.pol su uno di questi, scelto dall'asse del vincitore. Da lì il motore esistente fa tutto. 12 politiche,
+   livelli 0/1/2. (fisco: 0 = taglio tasse, 2 = aumento.) Deficit impliciti ~ destra 7 / sinistra 6 / centro neutro. */
+const GOVERNI_PROFILI = {
+  destra:   { fisco:0, pensioni:1, sanita:1, investimenti:1, istruzione:1, lavoro:0, welfare:0, imprese:2, sicurezza:2, ambiente:0, immigrazione:0, difesa:2, linea_estera:2, cooperazione:0, commercio:2, industria_difesa:2, territorio:1, personale_san:0, universita:1, diritto_studio:0, trasporti:1, manutenzione:2 },
+  sinistra: { fisco:2, pensioni:2, sanita:2, investimenti:2, istruzione:2, lavoro:2, welfare:2, imprese:1, sicurezza:1, ambiente:2, immigrazione:2, difesa:1, linea_estera:0, cooperazione:2, commercio:1, industria_difesa:0, territorio:2, personale_san:2, universita:2, diritto_studio:2, trasporti:2, manutenzione:1 },
+  centro:   { fisco:1, pensioni:1, sanita:1, investimenti:1, istruzione:1, lavoro:1, welfare:1, imprese:1, sicurezza:1, ambiente:1, immigrazione:1, difesa:1, linea_estera:1, cooperazione:1, commercio:1, industria_difesa:1, territorio:1, personale_san:1, universita:1, diritto_studio:1, trasporti:1, manutenzione:1 },
+};
+
+/* Carte d'opposizione: 6 carte, ognuna con le SUE 3 azioni. Ogni azione è uno spec {l,e, vis,cred,gov,base,centro}:
+   vis/cred = delta diretti alle due variabili; gov = erosione gruppi del governo (× vis × cred); base = tua base (× vis);
+   centro = ceto medio (× vis). pickOpposizione() traduce lo spec in closure. Effetti piccoli: semina, non controllo. */
+const OPPOSIZIONE_EV = [
+  { kick:'Opposizione', t:'Comizio in piazza', text:'Migliaia di persone in piazza ad ascoltarti. Che tono dai?', ch:[
+    { l:'Comizio infuocato', e:'Visibilità su; la base si scalda, ma i toni rischiano', vis:10, cred:-3, gov:-3, pleases:'populista' },
+    { l:'Discorso di unità', e:'Parli da statista: credibilità su', cred:5, base:2, pleases:'tecnico' },
+    { l:'Promessa simbolica', e:'Un applauso facile; piaci al centro', vis:5, centro:3 },
+  ]},
+  { era:'contemporanea', kick:'Opposizione', t:'Intervista in prima serata', text:'Un\'intervista TV molto seguita: come ti presenti?', ch:[
+    { l:'Affondo in diretta', e:'Visibilità su, credibilità giù', vis:10, cred:-4, gov:-2, pleases:'populista' },
+    { l:'Mostra competenza', e:'Dati e proposte: credibilità su', cred:7, vis:3, pleases:'tecnico' },
+    { l:'Tono pacato e rassicurante', e:'Parli al centro con calma', cred:4, centro:3 },
+  ]},
+  { kick:'Opposizione', t:'Tour tra fabbriche e quartieri', text:'Giri il paese per ascoltare e farti vedere. Su cosa punti?', ch:[
+    { l:'Ascolta i lavoratori', e:'Rafforzi la tua base', base:4, cred:3, pleases:'progressista' },
+    { l:'Denuncia il governo sul posto', e:'Visibilità su, colpisci il governo', vis:7, gov:-3, pleases:'populista' },
+    { l:'Foto e strette di mano', e:'Visibilità e simpatia al centro', vis:5, centro:2 },
+  ]},
+  { kick:'Opposizione', t:'Proposta di legge alternativa', text:'Presenti la tua controproposta. Come la imposti?', ch:[
+    { l:'Proposta seria e dettagliata', e:'Credibilità su: sembri pronto a governare', cred:8, vis:3, pleases:'tecnico' },
+    { l:'Proposta-bandiera identitaria', e:'Scalda la base, ma poco credibile', base:5, cred:-3, pleases:'populista' },
+    { l:'Proposta trasversale', e:'Apri al centro con equilibrio', centro:4, cred:4 },
+  ]},
+  { kick:'Opposizione', t:'Un inciampo del governo', text:'Il governo è in difficoltà. Come lo sfrutti?', ch:[
+    { l:'Cavalca senza pietà', e:'Tanto rumore, ma logori la tua immagine', vis:10, gov:-4, cred:-4, pleases:'populista' },
+    { l:'Critica nel merito', e:'Colpo chirurgico: credibilità su', cred:5, gov:-2, pleases:'tecnico' },
+    { l:'Aspetta e osserva', e:'Lasci che si roda; appari responsabile', cred:3, gov:-1 },
+  ]},
+  { kick:'Opposizione', t:'Grande manifestazione', text:'Organizzi una mobilitazione nazionale. La parola d\'ordine?', ch:[
+    { l:'Mobilitazione di piazza', e:'Massima visibilità, base in fermento', vis:12, base:3, cred:-3, pleases:'populista' },
+    { l:'Manifestazione ampia e pacifica', e:'Visibilità e rispetto: anche il centro guarda', vis:6, cred:4, centro:2 },
+    { l:'Corteo simbolico', e:'Ti fai vedere, energizzi i tuoi', vis:7, base:2 },
+  ]},
+  /* --- carte aggiunte (lotto varietà fase 3): COSTRUIRE, non solo attaccare — la tua linea, il partito, le
+     alleanze, la vita interna. Distinte da GOVERNO_EV (reattivo) e da conferenze/titoli. Spec invariato
+     (vis/cred/gov/base/centro) + pleases/rischio/trasparenza per la continuità (biografia/tratti/esposizione).
+     `pleases` è un TONO, non un'etichetta: molte scelte restano senza tag. L'esposizione la muove SOLO o_finanziatore. --- */
+  { kick:'Affondo', t:'Scegli il fronte', text:'Decidi dove concentrare il fuoco contro il governo — i conti, la sanità, la sicurezza — e con che piglio.', ch:[
+    { l:'Dossier dettagliato e numeri', e:'Critica solida: credibilità su', cred:7, vis:2, gov:-2, pleases:'tecnico' },
+    { l:'Slogan che fa breccia', e:'Molto rumore, poca sostanza', vis:9, gov:-3, cred:-3, base:2, pleases:'populista' },
+    { l:'Critica più la tua alternativa', e:'Colpisci e proponi: apri al centro', cred:6, centro:3, gov:-1 },
+  ]},
+  { kick:'Maggioranza', t:'Un transfuga bussa alla porta', cond:()=>S.credibilita>=50, text:'Un parlamentare della maggioranza, deluso, è pronto a passare con te. Un colpo di scena — e un peso.', ch:[
+    { l:'Lo accogli in pompa magna', e:'Visibilità e numeri; sa di mercato', vis:8, base:3, cred:-2, pleases:'populista' },
+    { l:'Lo accogli, con discrezione', e:'Un acquisto sobrio, senza clamore', cred:4, base:2, pleases:'tecnico' },
+    { l:'Rifiuti: non compri voltagabbana', e:'Coerenza che si nota', cred:6, centro:2, pleases:'conservatore' },
+  ]},
+  { kick:'Alleanze', t:'Un patto con un partito minore', cond:()=>S.credibilita>=46, text:'Un piccolo partito ti offre un\'intesa: più peso in vista del voto, ma a un prezzo programmatico.', ch:[
+    { l:'Alleanza piena, anche identitaria', e:'Più forza, meno purezza', base:4, vis:3, cred:-2, pleases:'populista' },
+    { l:'Intesa tecnica su pochi punti', e:'Pragmatica e misurata', cred:5, centro:2, pleases:'tecnico' },
+    { l:'Vai da solo, niente compromessi', e:'Mani libere; rinunci a una sponda', cred:3, base:2 },
+  ]},
+  { kick:'Identità', t:'Che opposizione vuoi essere', text:'I tuoi ti chiedono una rotta: l\'opposizione dura e identitaria, o quella moderata pronta a governare?', ch:[
+    { l:'Linea dura e identitaria', e:'Infiammi i tuoi; spaventi il centro', base:5, vis:4, cred:-3, pleases:'populista' },
+    { l:'Linea moderata, da governo', e:'Ti accrediti come alternativa seria', cred:6, centro:3, base:-2, pleases:'tecnico' },
+    { l:'Tieni il piede in due scarpe', e:'Non scegli; un po\' di rumore, poca chiarezza', vis:3, cred:-1 },
+  ]},
+  { kick:'Partito', t:'Congresso e tesseramento', text:'Si avvicina il congresso: è il momento di dare forma al partito e contare le truppe.', ch:[
+    { l:'Mobiliti la base militante', e:'Partito in fermento, identità marcata', base:5, vis:2, pleases:'populista' },
+    { l:'Apri a moderati e società civile', e:'Allarghi il campo: credibilità su', centro:3, cred:4, pleases:'tecnico' },
+    { l:'Rafforzi la presa sull\'apparato', e:'Più controllo, meno respiro interno', cred:2, base:2, pleases:'conservatore' },
+  ]},
+  { kick:'Aula', t:'Un voto che ti mette alla prova', text:'In aula arriva una misura del governo: non scellerata, ma loro. Come voti?', ch:[
+    { l:'Voti contro a prescindere', e:'Compatto con la base; opposizione dura', base:4, gov:-2, cred:-3, pleases:'populista' },
+    { l:'Ti astieni, con motivazione', e:'Una posizione prudente e spiegata', cred:3 },
+    { l:'Voto responsabile: è una misura giusta', e:'Da statista; la base mugugna', cred:7, centro:3, base:-2, pleases:'tecnico' },
+  ]},
+  { kick:'Piazza', t:'Un movimento che non controlli', text:'Un movimento spontaneo cresce nelle città, con una sua agenda. Non l\'hai creato tu — ma potresti cavalcarlo.', ch:[
+    { l:'Ti ci metti alla testa', e:'Tanta visibilità; sembri opportunista', vis:9, base:3, cred:-3, pleases:'populista' },
+    { l:'Lo appoggi, con misura', e:'Vicinanza senza farti usare', cred:4, base:2, vis:3, pleases:'progressista' },
+    { l:'Prendi le distanze', e:'Non ti leghi a chi non guidi', cred:4, centro:2 },
+  ]},
+  { kick:'Fondi', t:'Un finanziatore ambiguo', text:'Un imprenditore dalle relazioni opache è pronto a finanziare la tua macchina politica. In cambio di che, non è detto.', ch:[
+    { l:'Accetti, i fondi servono', e:'Benzina per la campagna; un debito che pesa', vis:6, base:2, rischio:8 },
+    { l:'Accetti, ma con paletti pubblici', e:'Provi a cautelarti; resta un\'ombra', vis:2, cred:1, rischio:3 },
+    { l:'Rifiuti e lo rendi pubblico', e:'Pulizia che fa notizia', cred:6, centro:2, trasparenza:5, pleases:'tecnico' },
+  ]},
+  { kick:'Partito', t:'Una corrente ti contesta', text:'Una corrente interna mette in discussione la tua leadership: rumori di un nome alternativo.', ch:[
+    { l:'La integri, dai spazio', e:'Unità ricucita; condividi il potere', cred:4, base:3, pleases:'progressista' },
+    { l:'La marginalizzi senza pietà', e:'Comandi tu; qualcuno se ne va', cred:2, base:-2, pleases:'conservatore' },
+    { l:'Apri una mediazione interna', e:'Tieni insieme il partito con pazienza', cred:5, centro:1, pleases:'tecnico' },
+  ]},
+  { era:'contemporanea', kick:'Faccia a faccia', t:'Il duello in TV col premier', text:'Un confronto televisivo diretto con il capo del governo: milioni di spettatori, una sola serata.', ch:[
+    { l:'Lo aggredisci senza tregua', e:'Spettacolo e rumore; rischi la statura', vis:10, gov:-3, cred:-4, pleases:'populista' },
+    { l:'Lo asfissi sui numeri', e:'Lo metti in difficoltà coi fatti', cred:7, gov:-2, vis:3, pleases:'tecnico' },
+    { l:'Ti presenti come alternativa serena', e:'Niente urla; parli al paese', cred:5, centro:3 },
+  ]},
+  { kick:'Sondaggi', t:'Un sondaggio ti dà in volata', cond:()=>{ var f=S.forze&&S.forze[S.partito], b=part(S.partito)&&part(S.partito).forza; return (f!=null&&b!=null&&f>b) || S.credibilita>=55; }, text:'Un sondaggio molto ripreso ti dà in forte crescita. Come reagisci all\'onda?', ch:[
+    { l:'Alzi i toni, vai all\'incasso', e:'Spingi sull\'acceleratore; rischi di strafare', vis:8, base:3, cred:-3, pleases:'populista' },
+    { l:'Ti presenti come premier in pectore', e:'Da leader di governo in attesa', cred:6, centro:3, pleases:'tecnico' },
+    { l:'Prudenza, non montarti la testa', e:'I sondaggi vanno e vengono', cred:3 },
+  ]},
+  { kick:'Inciampo', t:'Una tua gaffe da gestire', text:'Una tua frase infelice rimbalza ovunque e ti mette sulla difensiva. Come la gestisci?', ch:[
+    { l:'Rilanci, fai finta di niente', e:'Tiri dritto; la toppa è peggio del buco', vis:5, cred:-4, pleases:'populista' },
+    { l:'Ammetti e correggi il tiro', e:'Onestà che disinnesca', cred:5, centro:2, pleases:'tecnico' },
+    { l:'Accusi i media di farti le pulci', e:'Compatti i tuoi; sembri permaloso', base:3, vis:3, cred:-2 },
+  ]},
+  /* --- equivalenti d'epoca del duello TV (era: italia1950). Il faccia-a-faccia c'era anche prima della TV:
+     il contraddittorio sui giornali, lo scontro in Parlamento, il comizio. La TV entra solo dal '54 (vary-by-decade). --- */
+  { era:'italia1950', kick:'Faccia a faccia', t:'Il contraddittorio sul giornale', text:'Il grande quotidiano ti offre uno spazio di replica al capo del governo: un botta e risposta che tutti leggeranno.', ch:[
+    { l:'Affondo polemico, riga per riga', e:'Rumore e visibilità; rischi la statura', vis:9, gov:-3, cred:-3, pleases:'populista' },
+    { l:'Replica nel merito, coi numeri', e:'Ti accrediti come alternativa seria', cred:7, gov:-2, vis:2, pleases:'tecnico' },
+    { l:'Ti rivolgi al paese, sopra la lite', e:'Toni alti, da statista', cred:5, centro:3 },
+  ]},
+  { era:'italia1950', kick:'Aula', t:'Lo scontro in Parlamento', text:'In aula arriva la resa dei conti col governo: un intervento che i resoconti riporteranno parola per parola.', ch:[
+    { l:'Requisitoria durissima', e:'Infiammi i tuoi banchi; toni sopra le righe', vis:8, gov:-3, cred:-3, base:3, pleases:'populista' },
+    { l:'Interrogazione puntuale, documentata', e:'Metti il governo con le spalle al muro coi fatti', cred:8, gov:-2, pleases:'tecnico' },
+    { l:'Discorso alto, appello al paese', e:'Parli oltre l\'aula, da alternativa seria', cred:5, centro:3 },
+  ]},
+  { era:'italia1960', kick:'Faccia a faccia', t:'Il confronto in TV', cond:()=>S.year>=1960, text:'La televisione è ormai nelle case, e per la prima volta un confronto politico può andare in onda: parlare al premier davanti alle telecamere raggiunge il paese come mai prima.', ch:[
+    { l:'Cavalchi il mezzo nuovo con foga', e:'Il volto in ogni casa; rischi l\'inesperienza', vis:9, gov:-2, cred:-3, pleases:'populista' },
+    { l:'Sobrio e competente davanti alla camera', e:'Fai bella figura sul mezzo nuovo', cred:6, vis:3, pleases:'tecnico' },
+    { l:'Ti presenti come alternativa serena', e:'Niente urla; parli al paese', cred:4, centro:3 },
+  ]},
+  /* ===== AVANZAMENTO Fase 2 · Lotto 3 — OPPOSIZIONE '60 (era:'italia1960'): la Tribuna, la piazza del '68, l'aula
+     sull'apertura. Campi dichiarativi vis/gov/cred/base/centro (li applica applyOppEffect). Cura piena. ===== */
+  { era:'italia1960', kick:'Tribuna', cond:()=>S.year>=1960, t:'La Tribuna politica', text:'La nuova rubrica televisiva dà spazio anche all\'opposizione: minuti contati, davanti a tutto il paese. È un\'occasione o una trappola, secondo come la giochi.', ch:[
+    { l:'Attacchi il governo senza sconti', e:'Fai rumore; rischi di apparire solo contro', vis:8, gov:-3, cred:-2, pleases:'populista' },
+    { l:'Mostri la tua alternativa di governo', e:'Credibile e pronto; meno clamore', cred:6, centro:3, pleases:'tecnico' },
+    { l:'Parli alla gente comune, con calma', e:'Ti avvicini a chi è indeciso', vis:4, centro:4 },
+  ]},
+  { era:'italia1960', kick:'Piazza', cond:()=>S.year>=1968, t:'La piazza che monta', text:'Studenti e operai riempiono le strade: un\'onda che nessun partito controlla davvero. Dall\'opposizione puoi cavalcarla, accompagnarla o tenertene a distanza.', ch:[
+    { l:'Ti metti alla testa della protesta', e:'La base si accende; i moderati si spaventano', vis:8, base:5, cred:-3, pleases:'populista' },
+    { l:'Accompagni le domande, non gli eccessi', e:'Dai voce senza farti travolgere', cred:5, base:2, centro:1, pleases:'tecnico' },
+    { l:'Prendi le distanze dagli eccessi', e:'Rassicuri i moderati; la piazza ti volta le spalle', cred:3, centro:4, base:-3 },
+  ]},
+  { era:'italia1960', kick:'Aula', cond:()=>S.year>=1962, t:'Lo scontro sull\'apertura', text:'In aula si decide la svolta del decennio: la maggioranza che si allarga a sinistra. Dall\'opposizione, come ti collochi davanti al riassetto?', ch:[
+    { l:'Denunci il patto di potere', e:'Battaglia dura; parli al tuo zoccolo', vis:6, gov:-2, base:3, pleases:'populista' },
+    { l:'Contesti nel merito le scelte', e:'Opposizione seria e competente', cred:6, centro:2, pleases:'tecnico' },
+    { l:'Offri sponde su ciò che condividi', e:'Responsabile; una parte della base non capisce', cred:4, centro:3, base:-2 },
+  ]},
+  /* --- carte-stampa (lotto linea-media): il rapporto coi mezzi del tuo tempo — era-gated dal picker come il resto
+     del pool (universale = entrambe le ere · italia1950 = solo '50 · contemporanea = solo presente). --- */
+  { kick:'Comunicazione', t:'Un giornale ti offre un\'intervista', text:'Un grande quotidiano ti offre una lunga intervista: spazio vero, domande vere.', ch:[
+    { l:'La usi per attaccare il governo', e:'Fai rumore; il merito resta indietro', vis:8, cred:-2, gov:-2, pleases:'populista' },
+    { l:'Parli di proposte, con calma', e:'Sostanza che si nota', cred:6, vis:3, pleases:'tecnico' },
+    { l:'Racconti chi sei, senza polemiche', e:'Ti avvicini al centro', vis:4, cred:2, centro:2 },
+  ]},
+  { era:'italia1950', kick:'Comunicazione', t:'La prima pagina del giornale di partito', text:'Il giornale di partito prepara un numero speciale: la tua voce, dalla prima pagina fino ai circoli e alle sezioni.', ch:[
+    { l:'Un editoriale di battaglia', e:'La base si scalda; i moderati diffidano', vis:6, base:3, cred:-2, pleases:'populista' },
+    { l:'Un programma in dieci punti', e:'Serietà che circola nelle sezioni', cred:6, vis:2, pleases:'tecnico' },
+  ]},
+  { era:'contemporanea', kick:'Comunicazione', t:'Il talk della domenica sera', text:'Il talk più seguito ti invita in studio; i social amplificheranno ogni parola, nel bene e nel male.', ch:[
+    { l:'Cerchi lo scontro in studio', e:'La clip gira ovunque; la sostanza evapora', vis:9, cred:-3, gov:-2, pleases:'populista' },
+    { l:'Dati alla mano, tono fermo', e:'Ti prendi la scena nel merito', cred:6, vis:4, gov:-1, pleases:'tecnico' },
+  ]},
+  /* --- D2: +8 universali (capienza 20→28) — il mestiere d'opposizione senza tempo: quadri, manifesto, province,
+     festa, promesse, confronto, squadra-ombra, alleanze civiche. Kick SOLO su bucket-scena mappati. --- */
+  { kick:'Partito', t:'La scuola dei quadri', text:'Il partito ha bisogno di dirigenti preparati: metti in piedi una scuola di formazione politica?', ch:[
+    { l:'Investi su una scuola seria', e:'Semini classe dirigente; frutti lenti', cred:5, base:3, pleases:'tecnico' },
+    { l:'Corsi rapidi di piazza e propaganda', e:'La base si attiva subito', vis:5, base:4, pleases:'populista' },
+    { l:'I quadri si formano sul campo', e:'Pragmatismo; qualcuno resta indietro', base:2, cred:1 },
+  ]},
+  { kick:'Comunicazione', t:'Il libro-manifesto', text:'Ti propongono di scrivere il libro che raccoglie la tua visione: manifesto o polemica?', ch:[
+    { l:'Un pamphlet di battaglia', e:'Se ne parla ovunque; divide', vis:7, base:3, cred:-2, pleases:'populista' },
+    { l:'Un saggio documentato', e:'Ti prendi sul serio, e si vede', cred:6, vis:2, pleases:'tecnico' },
+  ]},
+  { kick:'Territorio', t:'Il giro delle province', text:'Un mese di viaggio nelle province: dove ti fermi, e con chi parli?', ch:[
+    { l:'Comizi a tappeto nelle piazze', e:'Bagni di folla: visibilità e base', vis:7, base:3, pleases:'populista' },
+    { l:'Incontri con i corpi intermedi', e:'Tessi rapporti che contano', cred:5, centro:2, pleases:'tecnico' },
+    { l:'Solo i territori dove sei debole', e:'Vai dove fa male: coraggio misurato', vis:4, base:2, cred:2 },
+  ]},
+  { kick:'Partito', t:'La festa del partito', text:'La festa annuale: vetrina, cassa e termometro del popolo tuo. Che taglio le dai?', ch:[
+    { l:'Festa popolare, palco e musica', e:'La base si conta e si vede', vis:6, base:4, pleases:'populista' },
+    { l:'Convegno di programma', e:'Meno folla, più sostanza', cred:6, vis:2, pleases:'tecnico' },
+  ]},
+  { kick:'Comunicazione', t:'Il registro delle promesse', text:'Il tuo ufficio studi tiene il conto delle promesse del governo: come lo usi?', ch:[
+    { l:'Pubblichi il registro, voce per voce', e:'Lavoro certosino che fa male al governo', cred:6, gov:-2, pleases:'tecnico' },
+    { l:'Un manifesto sulle promesse tradite', e:'Sintesi brutale, eco immediata', vis:7, gov:-2, cred:-2, pleases:'populista' },
+  ]},
+  { kick:'Società civile', t:'Il confronto pubblico col ministro', text:'Un\'associazione organizza un confronto pubblico tra te e un ministro in carica.', ch:[
+    { l:'Vai per vincere, affondo dopo affondo', e:'Duello rusticano: rumore e rischio', vis:7, gov:-2, cred:-2, pleases:'populista' },
+    { l:'Vai per convincere, nel merito', e:'Chi ascolta ti prende sul serio', cred:6, gov:-1, pleases:'tecnico' },
+  ]},
+  { kick:'Palazzo', t:'La squadra ombra', text:'Presentare una squadra di governo-ombra: responsabilità per tema, come un governo in attesa?', ch:[
+    { l:'Presenti la squadra al completo', e:'Da alternativa organizzata: credibilità su', cred:7, vis:3, pleases:'tecnico' },
+    { l:'Tieni le carte coperte', e:'Nessun bersaglio agli avversari; meno slancio', base:2, cred:2 },
+  ]},
+  { kick:'Società civile', t:'Le liste civiche ti cercano', text:'Una rete di liste civiche locali cerca una sponda nazionale: alleanza o autonomia?', ch:[
+    { l:'Apri un patto con le civiche', e:'Radici locali per la tua sfida', base:3, centro:3, cred:2, pleases:'progressista' },
+    { l:'Collaborazione caso per caso', e:'Libertà reciproca, legami deboli', cred:3, centro:1 },
+    { l:'Il partito basta a sé stesso', e:'Identità netta; un ponte in meno', base:3, cred:-1, pleases:'conservatore' },
+  ]},
+];
+
+/* Eventi del GOVERNO avversario (solo in opposizione): ~0,35/mese. Stesso formato-spec nelle reactions.
+   `scandalo:true` → testo costruito con un ministro avversario fittizio + un testo da SCANDALI. `cond` opzionale. */
+const GOVERNO_EV = [
+  { kick:'Scandalo del governo', scandalo:true, t:'Scandalo travolge %M', reactions:[
+    { l:'Chiedi le dimissioni a gran voce', e:'Molta visibilità, toni alti', vis:10, gov:-4, cred:-3 },
+    { l:'Chiedi chiarezza nelle sedi giuste', e:'Fermo ma istituzionale', cred:6, gov:-2 },
+    { l:'Lascia parlare i fatti', e:'Non infierisci; appari sobrio', cred:2, gov:-1 },
+  ]},
+  { kick:'Maggioranza in crisi', cond:()=>S.coalizione&&S.coalizione.length>1, t:'Lite nella maggioranza di %G', text:'Gli alleati di %G litigano su un provvedimento: la maggioranza scricchiola.', reactions:[
+    { l:'Soffia sul fuoco', e:'Visibilità su, dividi gli avversari', vis:8, gov:-3, cred:-2 },
+    { l:'Offri una sponda responsabile', e:'Ti accrediti come alternativa di governo', cred:7 },
+    { l:'Osserva in silenzio', e:'Lasci che si sbranino', cred:2, gov:-2 },
+  ]},
+  { kick:'Manovra impopolare', t:'%G vara una manovra contestata', text:'La nuova manovra di %G scontenta larghe fasce del paese.', reactions:[
+    { l:'Guida la protesta', e:'Visibilità alta, cavalchi il malcontento', vis:10, gov:-4, cred:-3 },
+    { l:'Proponi un\'alternativa credibile', e:'Critica costruttiva: credibilità su', cred:7, gov:-2 },
+    { l:'Aspetta gli effetti', e:'Lasci che il conto arrivi da solo', cred:2, gov:-1 },
+  ]},
+  { kick:'Conti del governo', cond:()=>S.ind.fiducia<50, t:'I conti di %G peggiorano', text:'Il bilancio dello Stato va alla deriva sotto %G: il debito cresce e la fiducia nei conti pubblici si sgretola.', reactions:[
+    { l:'«Hanno bruciato i conti»', e:'Accusa netta, molta visibilità', vis:10, gov:-4, cred:-2 },
+    { l:'Presenta un piano di rientro', e:'Da statista: credibilità su', cred:8, gov:-2 },
+    { l:'Lascia che i numeri parlino', e:'Niente clamore; appari serio', cred:3, gov:-1 },
+  ]},
+  { kick:'Promessa tradita', t:'%G rimangia una promessa', text:'%G abbandona un impegno preso in campagna elettorale.', reactions:[
+    { l:'Sbattilo in prima pagina', e:'Visibilità su, toni duri', vis:9, gov:-3, cred:-3 },
+    { l:'Ricorda i fatti con precisione', e:'Credibilità su', cred:6, gov:-2 },
+    { l:'Prendi nota, senza strepiti', e:'Sobrietà', cred:2, gov:-1 },
+  ]},
+  { kick:'Piazza contro il governo', t:'Proteste contro %G', text:'Cortei e proteste contro le scelte di %G riempiono le città.', reactions:[
+    { l:'Scendi in piazza con loro', e:'Massima visibilità, base in fermento', vis:11, base:3, gov:-2, cred:-3 },
+    { l:'Dai voce alle ragioni serie', e:'Credibilità e merito', cred:6, gov:-2 },
+    { l:'Resta defilato', e:'Non cavalchi la piazza', cred:2, gov:-1 },
+  ]},
+  { kick:'Gaffe internazionale', t:'Gaffe internazionale di %G', text:'%G inciampa in un imbarazzo sulla scena internazionale.', reactions:[
+    { l:'Ironizza senza pietà', e:'Visibilità su, ma rischi la statura', vis:9, gov:-3, cred:-3 },
+    { l:'Critica con misura', e:'Credibilità da statista', cred:6, gov:-1 },
+    { l:'Glissa', e:'Non infierisci su una gaffe', cred:2 },
+  ]},
+  /* --- D2: +5 universali (capienza 7→12) — reazioni senza tempo: rimpasto, opere, dati, nomine, contestazioni. --- */
+  { kick:'Palazzo', t:'%G rimescola i ministri', text:'Un rimpasto nel governo avversario: poltrone che girano, equilibri che cambiano.', reactions:[
+    { l:'«Un governo allo sbando»', e:'Affondo facile, molta visibilità', vis:8, gov:-3, cred:-2 },
+    { l:'Giudichi i fatti, non le poltrone', e:'Sobrietà che si nota', cred:6, gov:-1 },
+    { l:'Aspetti le prime mosse dei nuovi', e:'Prudenza istituzionale', cred:2 },
+  ]},
+  { kick:'Infrastrutture', t:'L\'opera pubblica di %G è in ritardo', text:'Un grande cantiere del governo accumula ritardi e costi: il territorio protesta.', reactions:[
+    { l:'Cavalchi il disagio dei cittadini', e:'La protesta ha un volto: il tuo', vis:8, gov:-3, cred:-2 },
+    { l:'Proponi come sbloccare il cantiere', e:'Critica che costruisce', cred:6, gov:-2 },
+    { l:'Lasci parlare i ritardi', e:'I fatti lavorano per te', cred:2, gov:-1 },
+  ]},
+  { kick:'Conti del governo', t:'%G rinvia i numeri', text:'Il governo rinvia la pubblicazione di dati attesi: l\'opposizione fiuta l\'imbarazzo.', reactions:[
+    { l:'Denunci l\'insabbiamento', e:'Accusa pesante, eco garantita', vis:9, gov:-3, cred:-3 },
+    { l:'Chiedi i dati con un\'interrogazione', e:'Pressione nelle sedi giuste', cred:6, gov:-2 },
+    { l:'Aspetti i numeri veri', e:'Pazienza che paga al momento giusto', cred:3 },
+  ]},
+  { kick:'Palazzo', t:'Una nomina di %G fa discutere', text:'Il governo piazza un fedelissimo in una poltrona che conta: gridare o incalzare?', reactions:[
+    { l:'Gridi alla lottizzazione', e:'Indignazione rumorosa', vis:8, gov:-3, cred:-2 },
+    { l:'Proponi criteri chiari per le nomine', e:'Alternativa di metodo: credibilità su', cred:6 },
+    { l:'Non è la battaglia giusta', e:'Scegli le tue battaglie', cred:2, gov:-1 },
+  ]},
+  { kick:'Piazza contro il governo', t:'Un ministro di %G contestato in piazza', text:'Un ministro del governo viene contestato duramente a un\'uscita pubblica.', reactions:[
+    { l:'Ti unisci alla contestazione', e:'La piazza ti abbraccia; i moderati meno', vis:9, base:3, gov:-3, cred:-3 },
+    { l:'Critichi il ministro nel merito', e:'Colpo preciso, statura intatta', cred:6, gov:-2 },
+    { l:'Prendi le distanze dai toni', e:'Fermezza sulle idee, garbo sui modi', cred:4, centro:2 },
+  ]},
+];
+
+/* MOSSE DI CHIUSURA della campagna (lotto PAYOFF NARRATIVO fase B): l'ultima mossa prima del voto. È un GESTO DI
+   CARATTERE — alimenta i tratti (pleases) e dà una voce al giocatore — NON una leva che sposta il verdetto: il
+   risultato è già congelato in ATTESA, e l'effetto su un gruppo è +1, ben sotto il rumore della notte (±3). */
+/* ===== CAMPAGNA NAZIONALE (Cantiere C) — l'arco dei 6 mesi prima delle urne: UN beat al mese (pescaBag,
+   era-gated), e ogni scelta MUOVE le forze DAVVERO (gd sui gruppi + applicaSlancio sul blocco) PRIMA del
+   congelamento della vigilia — il vincolo «niente dado alla vigilia» resta intatto: al voto arrivi costruito
+   da 6 mesi di scelte, e i sondaggi mensili lo riflettono. Entrambe le opzioni sempre legittime (la cura).
+   campPiazza()/campPromessa() = contatori/promesse in game.js. ===== */
+const CAMPAGNA_EV=[
+ {id:'cn_apertura', era:'universale', kick:'Campagna elettorale', t:'L\'apertura della campagna', text:'La corsa comincia: dove pianti la prima bandiera?',ch:[
+   {l:'Nella grande piazza, davanti alla tua gente',e:'La base si accende: lavoratori e giovani in marcia',f:()=>{campPiazza(); gd('lavoratori',2); gd('giovani',2); campSlancio(0.6);}},
+   {l:'Nel teatro, coi corpi intermedi e i notabili',e:'Il mondo produttivo e i moderati prendono nota',f:()=>{gd('cetomedio',2); gd('imprenditori',2); stampad(2); campSlancio(0.6);}}]},
+ {id:'cn_economia', era:'universale', kick:'Campagna elettorale', t:'Il tema dei conti', text:'L\'economia è il terreno dove si vincono le elezioni. Che racconto porti nelle piazze?',ch:[
+   {l:'La prosperità che verrà: crescita per tutti',e:'Un messaggio che scalda · gli scettici alzano il sopracciglio',f:()=>{gd('cetomedio',3); gd('giovani',1); campSlancio(0.7);}},
+   {l:'La verità dei numeri: rigore e serietà',e:'Meno applausi, più rispetto: la stampa apprezza',f:()=>{gd('imprenditori',2); stampad(3); campSlancio(0.4);}}]},
+ {id:'cn_promessa', era:'universale', kick:'Campagna elettorale', t:'La promessa', text:'Ogni campagna ha la sua promessa. A chi la fai? Il paese ascolta — e dopo il voto, ricorda.',ch:[
+   {l:'Ai lavoratori: salari e tutele',e:'La promessa pesa: mantienila, o te la rinfacceranno',f:()=>{campPromessa('lavoratori'); gd('lavoratori',4); campSlancio(0.5);}},
+   {l:'Al ceto medio: meno tasse, più respiro',e:'La promessa pesa: mantienila, o te la rinfacceranno',f:()=>{campPromessa('cetomedio'); gd('cetomedio',4); campSlancio(0.5);}},
+   {l:'Ai pensionati: assegni e dignità',e:'La promessa pesa: mantienila, o te la rinfacceranno',f:()=>{campPromessa('pensionati'); gd('pensionati',4); campSlancio(0.5);}}]},
+ {id:'cn_attacco', era:'universale', kick:'Campagna elettorale', t:'Il colpo all\'avversario', text:'Il tuo rivale più forte guadagna terreno. Come lo affronti?',ch:[
+   {l:'Attacco frontale, senza guanti',e:'Gli mordi la rincorsa · i toni si fanno velenosi',f:()=>{campSlancio(0.9); stampad(-3);}},
+   {l:'Contrasto nel merito, toni fermi',e:'Meno sangue, più sostanza: tieni la linea',f:()=>{campSlancio(0.5); stampad(2);}}]},
+ {id:'cn_piazza', era:'universale', kick:'Campagna elettorale', t:'Il grande comizio', text:'La settimana clou: un solo evento, tutte le energie. Dove le metti?',ch:[
+   {l:'Il comizio oceanico nella capitale',e:'Una piazza piena vale mille manifesti',f:()=>{campPiazza(); gd('lavoratori',2); gd('giovani',2); campSlancio(0.7);}},
+   {l:'Il porta a porta nei territori incerti',e:'Meno clamore, voti veri dove si decide',f:()=>{gd('cetomedio',2); gd('pensionati',1); campSlancio(0.5);}}]},
+ {id:'cn_visione', era:'universale', kick:'Campagna elettorale', t:'Il messaggio finale', text:'Gli ultimi manifesti: con quale idea del paese chiudi la corsa?',ch:[
+   {l:'La speranza: il futuro che costruiremo',e:'I giovani ci credono · i prudenti vogliono garanzie',f:()=>{gd('giovani',3); gd('lavoratori',1); campSlancio(0.6);}},
+   {l:'La sicurezza: ordine e continuità',e:'Chi teme il salto nel buio si rassicura',f:()=>{gd('pensionati',2); gd('cattolici',2); campSlancio(0.6);}}]},
+ {id:'cn_treno', era:'italia1950', kick:'Campagna elettorale', t:'Il treno elettorale', text:'L\'Italia si gira in treno: binario dopo binario, piazza dopo piazza, dal Nord al Sud che decide.',ch:[
+   {l:'Il viaggio nelle piazze, fermata per fermata',e:'Il paese ti vede in faccia: la base si muove',f:()=>{campPiazza(); gd('lavoratori',2); gd('cattolici',2); campSlancio(0.7);}},
+   {l:'I comitati civici e la stampa amica',e:'La macchina organizzata lavora casa per casa',f:()=>{gd('cattolici',2); gd('cetomedio',2); stampad(2); campSlancio(0.5);}}]},
+ {id:'cn_tv', era:'contemporanea', kick:'Campagna elettorale', t:'Il confronto in TV', text:'Le emittenti propongono il faccia a faccia col tuo rivale: milioni di spettatori, una sola serata.',ch:[
+   {l:'Accetta il duello',e:'Il palcoscenico più grande: chi lo regge, vola',f:()=>{gd('giovani',2); stampad(3); campSlancio(0.8);}},
+   {l:'Evita: che parlino i fatti',e:'Niente rischi in diretta · i media fiutano la paura',f:()=>{gd('cetomedio',1); stampad(-2); campSlancio(0.2);}}]},
+];
+
+const MOSSE_CHIUSURA=[
+  { l:'Comizio finale di piazza', e:'Chiudi col fuoco, davanti alla tua gente', pleases:'populista', f:()=>{ gd('giovani',1); } },
+  { l:'Chiusura da statista', e:'Toni alti e sobri: parli al paese intero', pleases:'tecnico', f:()=>{ gd('cetomedio',1); } },
+  { l:'Ultimo giro porta a porta', e:'Tra la gente, senza clamore, fino all\'ultimo voto', pleases:'progressista', f:()=>{ gd('lavoratori',1); } },
+  /* Cantiere C — chiusure SBLOCCABILI dalla condotta della campagna (post-congelamento: pesano su tono/gruppi/bio, mai sul verdetto) */
+  { l:'Il bagno di folla', e:'Sei stato nelle piazze per mesi: l\'ultima è un\'onda', pleases:'populista', cond:()=>S.campNaz&&S.campNaz.piazza>=2, f:()=>{ gd('lavoratori',2); gd('giovani',2); } },
+  { l:'L\'uomo di parola', e:'Hai mantenuto la promessa: chiudi ricordandolo', pleases:'tecnico', cond:()=>S.campNaz&&S.campNaz.promMantenuta, f:()=>{ allG(1); stampad(3); } },
+];
+
+/* LEGGI — riforme una tantum on/off (distinte dalle politiche a cursore del bilancio). Ogni legge:
+   asse (−2…+2: chi la ama), costo (RP), unaTantum (scossoni ai gruppi all'approvazione; invertiti in abrogazione),
+   permanenti (modificatori finché in vigore: grp + indicatori), iniziale (in vigore di default, per paese),
+   paesi (solo questi paesi; assente = ovunque). Deficit: SPESA → +, ENTRATA/RISPARMIO → −. Tono sobrio, niente giudizi. */
+const LEGGI = [
+  // ===== Comuni (ovunque) =====
+  { id:'salario_min', nome:'Salario minimo legale', desc:'Fissa per legge una retribuzione oraria minima.', asse:-1, costo:1,
+    iniziale:{usa:1, regnounito:1, francia:1}, unaTantum:{grp:{lavoratori:6, giovani:3, imprenditori:-6}}, permanenti:{grp:{lavoratori:3, imprenditori:-3}} },
+  { id:'matrimonio', era:'contemporanea', nome:'Matrimonio egualitario', desc:'Estende il matrimonio civile alle coppie dello stesso sesso.', asse:-1, costo:1,
+    iniziale:{usa:1, francia:1, regnounito:1}, unaTantum:{grp:{giovani:7, cattolici:-7}}, permanenti:{grp:{giovani:3, cattolici:-3}} },
+  { id:'droghe', era:'contemporanea', nome:'Legalizzazione droghe leggere', desc:'Depenalizza il consumo e la vendita regolata di cannabis.', asse:-1, costo:1,
+    iniziale:{}, unaTantum:{grp:{giovani:6, cattolici:-5, cetomedio:-2}}, permanenti:{grp:{giovani:3, cattolici:-3}} },
+  { id:'pena_morte', nome:'Pena di morte', desc:'Prevede la pena capitale per i reati più gravi.', asse:2, costo:2,
+    iniziale:{usa:1}, unaTantum:{grp:{cattolici:4, pensionati:3, cetomedio:2, giovani:-6}}, permanenti:{grp:{giovani:-2}, sicurezza:1} },
+  { id:'leva', nome:'Leva militare obbligatoria', desc:'Reintroduce il servizio militare obbligatorio.', asse:1, costo:1,
+    iniziale:{}, unaTantum:{grp:{cattolici:3, pensionati:3, giovani:-7}}, permanenti:{grp:{giovani:-3}, sicurezza:1} },
+  { id:'nucleare', era:'contemporanea', nome:'Nucleare civile', desc:'Autorizza la costruzione di nuove centrali nucleari.', asse:1, costo:2,
+    iniziale:{francia:1, usa:1, regnounito:1}, unaTantum:{grp:{imprenditori:5, giovani:-5}}, permanenti:{grp:{giovani:-2}, growth:0.3, ambiente:-4} },
+  { id:'patrimoniale', nome:'Imposta patrimoniale', desc:'Introduce un\'imposta sui grandi patrimoni.', asse:-2, costo:2,
+    iniziale:{}, unaTantum:{grp:{lavoratori:6, imprenditori:-8, cetomedio:-4}}, permanenti:{grp:{imprenditori:-3, cetomedio:-2}, deficit:-0.6} },
+  { id:'liberalizz_lavoro', nome:'Liberalizzazione del lavoro', desc:'Allenta i vincoli su assunzioni e licenziamenti.', asse:2, costo:2,
+    iniziale:{usa:1, regnounito:1}, unaTantum:{grp:{imprenditori:7, lavoratori:-7}}, permanenti:{grp:{imprenditori:3, lavoratori:-3}, growth:0.3, unemp:-0.4} },
+  // ===== USA =====
+  { id:'armi', nome:'Diritto alle armi', desc:'Tutela il diritto dei cittadini a possedere armi da fuoco.', asse:2, costo:2, paesi:['usa'],
+    iniziale:{usa:1}, unaTantum:{grp:{cetomedio:5, cattolici:3, giovani:-5}}, permanenti:{sicurezza:-1} },
+  { id:'sanita_univ', nome:'Sanità pubblica universale', desc:'Istituisce una copertura sanitaria pubblica universale.', asse:-2, costo:2, paesi:['usa'],
+    iniziale:{}, unaTantum:{grp:{lavoratori:7, giovani:5, imprenditori:-6}}, permanenti:{grp:{lavoratori:3, giovani:2}, deficit:0.6} },
+  { id:'pareggio', nome:'Pareggio di bilancio in Costituzione', desc:'Vincola in Costituzione il pareggio di bilancio.', asse:1, costo:2, paesi:['usa'],
+    iniziale:{}, unaTantum:{grp:{imprenditori:4, cetomedio:2, lavoratori:-3}}, permanenti:{deficit:-0.8} },
+  // ===== Francia =====
+  { id:'ore35', nome:'Settimana di 35 ore', desc:'Fissa l\'orario settimanale di lavoro a 35 ore.', asse:-1, costo:2, paesi:['francia'],
+    iniziale:{francia:1}, unaTantum:{grp:{lavoratori:6, imprenditori:-5}}, permanenti:{grp:{lavoratori:3, imprenditori:-2}, growth:-0.3} },
+  { id:'laicita', nome:'Laicità nelle istituzioni', desc:'Limita i simboli religiosi nelle istituzioni pubbliche.', asse:1, costo:1, paesi:['francia'],
+    iniziale:{francia:1}, unaTantum:{grp:{cetomedio:4, cattolici:-6}}, permanenti:{grp:{cattolici:-3}} },
+  { id:'pensioni64', nome:'Età pensionabile a 64 anni', desc:'Innalza l\'età pensionabile a 64 anni.', asse:1, costo:2, paesi:['francia'],
+    iniziale:{}, unaTantum:{grp:{imprenditori:5, pensionati:-8, lavoratori:-5}}, permanenti:{grp:{pensionati:-3}, deficit:-0.6} },
+  // ===== Italia =====
+  { id:'ius_soli', era:'contemporanea', nome:'Ius soli', desc:'Concede la cittadinanza ai nati nel paese.', asse:-1, costo:1, paesi:['italia'],
+    iniziale:{}, unaTantum:{grp:{giovani:5, cattolici:2, cetomedio:-5}}, permanenti:{grp:{cetomedio:-2}} },
+  { id:'reddito_citt', era:'contemporanea', nome:'Reddito di cittadinanza', desc:'Istituisce un reddito minimo garantito.', asse:-1, costo:2, paesi:['italia'],
+    iniziale:{italia:1}, unaTantum:{grp:{lavoratori:6, giovani:4, imprenditori:-3}}, permanenti:{grp:{lavoratori:3}, deficit:0.6} },
+  { id:'autonomia', era:'contemporanea', nome:'Autonomia differenziata', desc:'Trasferisce più poteri e risorse alle regioni.', asse:1, costo:1, paesi:['italia'],
+    iniziale:{}, unaTantum:{grp:{cetomedio:4, imprenditori:3, lavoratori:-3}}, permanenti:{grp:{}} },
+  // ===== Regno Unito =====
+  { id:'monarchia', nome:'Monarchia', desc:'Mantiene la monarchia come forma di Stato.', asse:1, costo:2, paesi:['regnounito'],
+    iniziale:{regnounito:1}, unaTantum:{grp:{pensionati:5, cattolici:3, giovani:-4}}, permanenti:{grp:{pensionati:2}} },
+  { id:'sovranita', nome:'Sovranità sui trattati', desc:'Afferma la prevalenza della legge nazionale sui trattati.', asse:2, costo:2, paesi:['regnounito'],
+    iniziale:{regnounito:1}, unaTantum:{grp:{cetomedio:4, pensionati:4, giovani:-5, imprenditori:-4}}, permanenti:{grp:{imprenditori:-2}, growth:-0.2} },
+  { id:'lord_elettiva', nome:'Camera alta elettiva', desc:'Rende elettiva la camera alta del parlamento.', asse:-1, costo:1, paesi:['regnounito'],
+    iniziale:{}, unaTantum:{grp:{giovani:4, cetomedio:2, pensionati:-3}}, permanenti:{grp:{}} },
+];
+
+/* Mappa POLITICA → MINISTERO (settore di competenza): aggiunge il campo `min` a ogni voce di POLICIES.
+   investimenti→infrastrutture, imprese→sviluppo. (Giustizia ed Esteri non hanno politiche: solo ministro + leggi.) */
+POLICIES.forEach(function(p){ p.min={ fisco:'economia', pensioni:'lavoro', sanita:'salute', investimenti:'infrastrutture', istruzione:'istruzione', lavoro:'lavoro', welfare:'lavoro', imprese:'sviluppo', sicurezza:'interno', ambiente:'sviluppo', immigrazione:'interno', difesa:'difesa', linea_estera:'esteri', cooperazione:'esteri', commercio:'esteri', industria_difesa:'difesa', territorio:'salute', personale_san:'salute', universita:'istruzione', diritto_studio:'istruzione', trasporti:'infrastrutture', manutenzione:'infrastrutture' }[p.id]; });
+
+/* Mappa LEGGE → MINISTERO: aggiunge il campo `min` a ogni voce di LEGGI.
+   Monarchia e camera alta su Giustizia (riforme costituzionali). Bilancio: Giustizia 4, Interno 5. */
+LEGGI.forEach(function(L){ L.min={ salario_min:'lavoro', matrimonio:'giustizia', droghe:'interno', pena_morte:'giustizia', leva:'difesa', nucleare:'sviluppo', patrimoniale:'economia', liberalizz_lavoro:'lavoro', armi:'interno', sanita_univ:'salute', pareggio:'economia', ore35:'lavoro', laicita:'interno', pensioni64:'lavoro', ius_soli:'interno', reddito_citt:'lavoro', autonomia:'interno', monarchia:'giustizia', sovranita:'esteri', lord_elettiva:'giustizia' }[L.id]; });
+
+/* proposte attive dei ministri: legate al PROFILO (e, dove ha senso, al dicastero `min`).
+   profile = chi può proporla; min (opzionale) = solo quel dicastero; f() = effetti se approvata.
+   Il "costo" fiscale è reso come per i dossier: un colpo sul debito (il deficit è calcolato). */
+const PROPOSTE=[
+ // --- Tecnico ---
+ {id:'tec_spending',era:'universale', profile:'tecnico', min:'economia', t:'Spending review dei ministeri',
+   text:'una revisione selettiva della spesa corrente per liberare risorse.',
+   e:'Debito giù; malumore nel pubblico impiego', costo:{debito:-0.8},f:()=>{S.ind.debt-=0.8; gd('lavoratori',-3); gd('cetomedio',1);}},
+ {id:'tec_pa', profile:'tecnico', t:'Piano di digitalizzazione della PA',
+   text:'servizi pubblici online e procedure più snelle.',
+   e:'Lieve spinta alla crescita; costo iniziale', costo:{debito:0.2},f:()=>{S.gMod+=0.15; S.ind.debt+=0.2; gd('giovani',2); gd('imprenditori',1);}},
+ {id:'tec_sanita',era:'universale', profile:'tecnico', min:'salute', t:'Centrali d\'acquisto per la sanità',
+   text:'acquisti centralizzati per ridurre gli sprechi.',
+   e:'Sanità su; conti più ordinati', costo:{debito:-0.3},f:()=>{S.ind.sanita+=2; S.ind.debt-=0.3;}},
+ {id:'tec_merito',era:'universale', profile:'tecnico', t:'Valutazione e merito nella PA',
+   text:'premi legati ai risultati per i dipendenti pubblici.',
+   e:'Efficienza; sindacati freddi', f:()=>{S.gMod+=0.1; gd('lavoratori',-2); gd('cetomedio',2);}},
+ // --- Progressista ---
+ {id:'pro_sussidi',era:'universale', profile:'progressista', min:'lavoro', t:'Ampliamento dei sussidi sociali',
+   text:'più tutele per i redditi bassi e le famiglie fragili.',
+   e:'Lavoratori e giovani contenti; più spesa', costo:{debito:0.5},f:()=>{S.ind.debt+=0.5; gd('lavoratori',4); gd('giovani',3); gd('imprenditori',-2);}},
+ {id:'pro_clima', profile:'progressista', min:'sviluppo', t:'Piano nazionale per il clima',
+   text:'investimenti nella transizione ecologica.',
+   e:'Ambiente su; costo sui conti', costo:{debito:0.4},f:()=>{S.ind.ambiente+=4; S.ind.debt+=0.4; gd('giovani',3);}},
+ {id:'pro_borse',era:'universale', profile:'progressista', t:'Borse di studio per il diritto allo studio',
+   text:'sostegno agli studenti meno abbienti.',
+   e:'Giovani contenti; piccola spesa', costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; gd('giovani',4); gd('lavoratori',1);}},
+ {id:'pro_diritti', profile:'progressista', t:'Estensione dei diritti civili',
+   text:'nuove tutele su diritti e inclusione.',
+   e:'Giovani e parte dei cattolici; divide il ceto medio', f:()=>{gd('giovani',3); gd('cattolici',2); gd('cetomedio',-2);}},
+ // --- Conservatore ---
+ {id:'con_sicurezza',era:'universale', profile:'conservatore', min:'interno', t:'Più forze dell\'ordine sul territorio',
+   text:'agenti e mezzi aggiuntivi nelle città.',
+   e:'Sicurezza su; ceto medio contento; costa', costo:{debito:0.3},f:()=>{S.ind.sicurezza+=4; gd('cetomedio',3); S.ind.debt+=0.3; gd('giovani',-1);}},
+ {id:'con_imprese',era:'universale', profile:'conservatore', min:'economia', t:'Taglio delle tasse alle imprese',
+   text:'meno carico fiscale per chi investe e assume.',
+   e:'Imprese contente; debito su', costo:{debito:0.5},f:()=>{S.ind.debt+=0.5; gd('imprenditori',5); gd('cetomedio',2); S.gMod+=0.1;}},
+ {id:'con_difesa',era:'universale', profile:'conservatore', min:'difesa', t:'Ammodernamento delle forze armate',
+   text:'nuovi mezzi e adeguamento della spesa militare.',
+   e:'Affidabilità; costo interno; giovani freddi', costo:{debito:0.4},f:()=>{S.ind.debt+=0.4; gd('imprenditori',2); gd('giovani',-2);}},
+ {id:'con_famiglia',era:'universale', profile:'conservatore', t:'Incentivi alla natalità e alla famiglia',
+   text:'sostegni economici alle famiglie.',
+   e:'Cattolici e ceto medio; un po\' di spesa', costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; gd('cattolici',4); gd('cetomedio',2);}},
+ // --- Populista ---
+ {id:'pop_bonus',era:'universale', profile:'populista', t:'Bonus una tantum alle famiglie',
+   text:'un trasferimento diretto per dare sollievo subito.',
+   e:'Consenso facile; debito su', costo:{debito:0.7},f:()=>{S.ind.debt+=0.7; gd('cetomedio',4); gd('lavoratori',3); gd('giovani',1);}},
+ {id:'pop_pensioni',era:'universale', profile:'populista', min:'lavoro', t:'Aumento delle pensioni minime',
+   text:'rivalutazione generosa degli assegni più bassi.',
+   e:'Pensionati entusiasti; spesa in salita', costo:{debito:0.6},f:()=>{S.ind.debt+=0.6; gd('pensionati',6); gd('cetomedio',1);}},
+ {id:'pop_immig', profile:'populista', min:'interno', t:'Stretta sull\'immigrazione',
+   text:'controlli più rigidi alle frontiere.',
+   e:'Ceto medio rassicurato; cattolici critici', f:()=>{S.ind.sicurezza+=2; gd('cetomedio',4); gd('cattolici',-3); gd('giovani',-1);}},
+ {id:'pop_condono',era:'universale', profile:'populista', min:'economia', t:'Condono fiscale',
+   text:'una sanatoria per fare cassa rapidamente.',
+   e:'Cassa subito; scontenti i contribuenti corretti', rischio:6, costo:{debito:-0.4},f:()=>{S.ind.debt-=0.4; gd('cetomedio',3); gd('cattolici',-2);}},
+];
+
+/* richieste di budget: legate al DICASTERO (non al profilo). f() = beneficio + costo (debito).
+   I bonus a sanità/sicurezza/ambiente sono TEMPORANEI: il modello li fa rientrare verso il livello
+   fissato dalle politiche. Per un miglioramento duraturo servono le politiche, non i soldi una tantum. */
+const BUDGETS=[
+ {id:'bud_salute', min:'salute', t:'Più personale e posti letto',
+   text:'rafforzare gli organici e le strutture ospedaliere.',
+   e:'Sanità su; debito +0,5', costo:{debito:0.5},f:()=>{S.ind.sanita+=5; S.ind.debt+=0.5; gd('pensionati',2);}},
+ {id:'bud_interno', min:'interno', t:'Più mezzi alle forze dell\'ordine',
+   text:'nuovi mezzi e organici per le forze dell\'ordine.',
+   e:'Sicurezza su; debito +0,4', costo:{debito:0.4},f:()=>{S.ind.sicurezza+=4; S.ind.debt+=0.4; gd('cetomedio',2);}},
+ {id:'bud_sviluppo_amb', min:'sviluppo', t:'Fondi per la transizione ecologica',
+   text:'accelerare la transizione e i progetti ambientali.',
+   e:'Ambiente su; debito +0,5', costo:{debito:0.5},f:()=>{S.ind.ambiente+=5; S.ind.debt+=0.5; gd('giovani',2);}},
+ {id:'bud_sviluppo_cre', min:'sviluppo', t:'Sostegni alla crescita verde',
+   text:'incentivi a imprese e filiere della green economy.',
+   e:'Crescita su; debito +0,4', costo:{debito:0.4},f:()=>{S.gMod+=0.2; S.ind.debt+=0.4; gd('imprenditori',2);}},
+ {id:'bud_difesa', min:'difesa', t:'Ammodernamento dei mezzi',
+   text:'rinnovare equipaggiamenti e capacità delle forze armate.',
+   e:'Sicurezza su; debito +0,5', costo:{debito:0.5},f:()=>{S.ind.sicurezza+=2; S.ind.debt+=0.5; gd('imprenditori',2); gd('giovani',-1);}},
+ {id:'bud_istruzione', min:'istruzione', t:'Più fondi a scuola e ricerca',
+   text:'assunzioni, borse e laboratori per scuola e università.',
+   e:'Giovani contenti; debito +0,5', costo:{debito:0.5},f:()=>{S.ind.debt+=0.5; gd('giovani',4); S.gMod+=0.1;}},
+ {id:'bud_infra', min:'infrastrutture', t:'Cantieri e manutenzioni',
+   text:'nuove opere e messa in sicurezza delle reti.',
+   e:'Crescita e lavoro; debito +0,6', costo:{debito:0.6},f:()=>{S.ind.debt+=0.6; S.gMod+=0.2; gd('lavoratori',3); gd('imprenditori',2);}},
+ {id:'bud_lavoro', min:'lavoro', t:'Politiche attive del lavoro',
+   text:'formazione e incentivi all\'occupazione.',
+   e:'Disoccupazione giù; debito +0,5', costo:{debito:0.5},f:()=>{S.ind.debt+=0.5; S.uMod-=0.3; gd('lavoratori',3);}},
+ {id:'bud_esteri', min:'esteri', t:'Cooperazione ed export',
+   text:'sostegno alle imprese sui mercati esteri e alla cooperazione.',
+   e:'Crescita lieve; debito +0,3', costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; S.gMod+=0.1; gd('imprenditori',2); gd('cattolici',1);}},
+ {id:'bud_giustizia', min:'giustizia', t:'Più fondi ai tribunali',
+   text:'personale e digitalizzazione per ridurre i tempi della giustizia.',
+   e:'Sicurezza su; debito +0,4', costo:{debito:0.4},f:()=>{S.ind.sicurezza+=2; S.ind.debt+=0.4; gd('cetomedio',1);}},
+];
+
+/* scandali dei ministri: `t` titolo, `text` il "fatto" (minuscolo, continua la frase).
+   `min` opzionale = solo quel dicastero (coerenza); senza `min` = generico (chiunque).
+   Gli effetti di Difendi/Dimissioni sono standard (in game.js), così le voci restano leggere e varie. */
+const SCANDALI=[
+ // generici (qualunque ministro)
+ {id:'scn_dichiarazioni', t:'Dichiarazioni imbarazzanti', text:'in un\'intervista fa affermazioni che sollevano polemiche.'},
+ {id:'scn_abuso', t:'Accusa di abuso d\'ufficio', text:'è indagato per presunto abuso d\'ufficio.'},
+ {id:'scn_rimborsi', t:'Rimborsi gonfiati', text:'spunta una nota spese gonfiata a carico dei contribuenti.'},
+ {id:'scn_nepotismo', t:'Nepotismo', text:'avrebbe favorito l\'assunzione di un parente.'},
+ {id:'scn_post', era:'contemporanea', t:'Vecchi post compromettenti', text:'riemergono vecchi post online che lo mettono in imbarazzo.'},   // Build B 2a: cornice moderna (social) nel pool senza-tempo → tolto dall'universale, escluso nel '50
+ {id:'scn_lusso', t:'Soggiorno di lusso pagato da un privato', text:'avrebbe accettato una vacanza offerta da un imprenditore.'},
+ // legati al dicastero
+ {id:'scn_appalti', min:'infrastrutture', t:'Corruzione negli appalti', text:'è coinvolto in un\'inchiesta su presunte tangenti negli appalti.'},
+ {id:'scn_conflitto', min:'economia', t:'Conflitto d\'interessi', text:'avrebbe favorito società a lui collegate.'},
+ {id:'scn_cliniche', min:'salute', t:'Favori a cliniche private', text:'avrebbe garantito corsie preferenziali a strutture private amiche.'},
+ {id:'scn_giudici', min:'giustizia', t:'Pressioni sulla magistratura', text:'avrebbe tentato di influenzare un\'indagine in corso.'},
+ {id:'scn_polizia', min:'interno', t:'Abusi durante un\'operazione', text:'emergono abusi in un\'operazione di polizia da lui ordinata.'},
+ {id:'scn_scuola', min:'istruzione', t:'Fondi della scuola distratti', text:'fondi destinati all\'istruzione sarebbero finiti in spese opache.'},
+ {id:'scn_armi', min:'difesa', t:'Forniture militari sospette', text:'un contratto per forniture militari finisce sotto inchiesta.'},
+ {id:'scn_esteri', min:'esteri', t:'Spese di rappresentanza fuori controllo', text:'spese di rappresentanza spropositate durante le missioni all\'estero.'},
+ /* scandali GIUDIZIARI (lotto 3): pescati SOLO dall'escalation dell'esposizione (mai dal giro normale —
+    pickScandalo li esclude). Difendere qui costa di più: il fango giudiziario schizza su di te. */
+ {id:'giud_appalti', giudiziario:true, t:'Inchiesta sugli appalti del dicastero', text:'la procura indaga su una gara pilotata: il suo nome è nel fascicolo.'},
+ {id:'giud_fondi',   giudiziario:true, t:'Fondi del dicastero sotto inchiesta', text:'consulenze d\'oro e spese opache: l\'avviso di garanzia è arrivato.'},
+ {id:'giud_nomine',  giudiziario:true, t:'Nomine pilotate, indaga la procura', text:'concorsi cuciti su misura per gli amici: i magistrati vogliono vederci chiaro.'},
+];
+
+/* conflitti tra ministri: due lati (profilo + dicastero dove ha senso), tema, posizioni ed effetti.
+   Lo scontro nasce solo se nel governo esistono davvero i due ministri richiesti. f() = effetti della
+   linea che vince (scalda la propria base, raffredda quella avversaria): calibrati in modo simmetrico. */
+const CONFLITTI=[
+ {id:'austerita_spesa', tema:'Austerità o spesa sociale',
+   a:{profile:'tecnico', min:'economia', pos:'tagliare e mettere in ordine i conti.', e:'Conti più solidi; lavoratori e giovani freddi',
+      costo:{debito:-0.4},f:()=>{S.ind.debt-=0.4; gd('imprenditori',3); gd('cetomedio',2); gd('lavoratori',-3); gd('giovani',-2);}},
+   b:{profile:'progressista', min:'lavoro', pos:'spendere di più per tutele e lavoro.', e:'Lavoratori e giovani contenti; debito su',
+      costo:{debito:0.4},f:()=>{S.ind.debt+=0.4; gd('lavoratori',4); gd('giovani',3); gd('imprenditori',-3); gd('cetomedio',-1);}}},
+ {id:'sicurezza_diritti', tema:'Sicurezza o diritti',
+   a:{profile:'conservatore', min:'interno', pos:'linea dura su ordine e sicurezza.', e:'Sicurezza su; giovani contrari',
+      f:()=>{S.ind.sicurezza+=3; gd('cetomedio',3); gd('cattolici',2); gd('giovani',-3);}},
+   b:{profile:'progressista', min:'giustizia', pos:'garanzie e diritti prima di tutto.', e:'Giovani contenti; ceto medio raffreddato',
+      f:()=>{S.ind.sicurezza-=2; gd('giovani',4); gd('cattolici',1); gd('cetomedio',-3);}}},
+ {id:'ambiente_opere', tema:'Ambiente o grandi opere',
+   a:{profile:'progressista', min:'sviluppo', pos:'tutelare l\'ambiente e fermare le opere invasive.', e:'Ambiente su; imprese e lavoratori freddi',
+      f:()=>{S.ind.ambiente+=4; gd('giovani',3); gd('imprenditori',-3); gd('lavoratori',-1);}},
+   b:{profile:'conservatore', min:'infrastrutture', pos:'sbloccare cantieri e grandi opere.', e:'Crescita e lavoro; ambiente giù',
+      f:()=>{S.ind.ambiente-=3; S.gMod+=0.2; gd('imprenditori',4); gd('lavoratori',2); gd('giovani',-2);}}},
+ {id:'tasse_welfare', tema:'Tasse o welfare',
+   a:{profile:'conservatore', min:'economia', pos:'tagliare le tasse a imprese e ceto medio.', e:'Imprese e ceto medio contenti; lavoratori freddi',
+      costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; gd('imprenditori',4); gd('cetomedio',3); gd('lavoratori',-3);}},
+   b:{profile:'progressista', min:'lavoro', pos:'rafforzare il welfare.', e:'Lavoratori e giovani contenti; imprese fredde',
+      costo:{debito:0.4},f:()=>{S.ind.debt+=0.4; gd('lavoratori',4); gd('giovani',2); gd('imprenditori',-3);}}},
+ {id:'rigore_spesafacile', tema:'Rigore o spesa facile',
+   a:{profile:'tecnico', pos:'rigore e prudenza sui conti.', e:'Debito giù; lavoratori freddi',
+      costo:{debito:-0.3},f:()=>{S.ind.debt-=0.3; gd('cetomedio',2); gd('lavoratori',-2);}},
+   b:{profile:'populista', pos:'misure popolari subito.', e:'Ceto medio e lavoratori contenti; imprese fredde',
+      costo:{debito:0.4},f:()=>{S.ind.debt+=0.4; gd('cetomedio',3); gd('lavoratori',2); gd('imprenditori',-2);}}},
+ {id:'apertura_fermezza', tema:'Apertura o fermezza',
+   a:{profile:'progressista', pos:'apertura su diritti e immigrazione.', e:'Giovani e cattolici contenti; ceto medio freddo',
+      f:()=>{gd('giovani',3); gd('cattolici',2); gd('cetomedio',-3);}},
+   b:{profile:'conservatore', pos:'fermezza e prudenza.', e:'Ceto medio contento; giovani freddi',
+      f:()=>{gd('cetomedio',4); gd('giovani',-3); gd('cattolici',-1);}}},
+ /* --- D2: +3 universali (capienza 6→9) — scontri di gabinetto senza tempo: scuola, casa, giustizia. --- */
+ {id:'scuola_merito', tema:'Selezione o inclusione a scuola',
+   a:{profile:'tecnico', min:'istruzione', pos:'rigore e selezione: la scuola premi il merito.', e:'Il ceto medio apprezza; chi resta indietro no',
+      f:()=>{gd('cetomedio',3); gd('imprenditori',2); gd('lavoratori',-2); gd('giovani',-1);}},
+   b:{profile:'progressista', min:'lavoro', pos:'nessuno resti indietro: sostegni e inclusione.', e:'Lavoratori e giovani contenti; i rigoristi storcono il naso',
+      costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; gd('lavoratori',3); gd('giovani',3); gd('cetomedio',-2);}}},
+ {id:'casa_mercato', tema:'Casa: mercato o mano pubblica',
+   a:{profile:'conservatore', min:'economia', pos:'lasciare fare al mercato: meno vincoli su affitti e costruzioni.', e:'Imprese e proprietari contenti; inquilini in ansia',
+      f:()=>{gd('imprenditori',4); gd('cetomedio',1); gd('lavoratori',-3); gd('giovani',-2);}},
+   b:{profile:'progressista', min:'infrastrutture', pos:'intervento pubblico: case popolari e tetti agli affitti.', e:'Lavoratori e giovani contenti; il mattone privato frena',
+      costo:{debito:0.4},f:()=>{S.ind.debt+=0.4; gd('lavoratori',4); gd('giovani',3); gd('imprenditori',-3);}}},
+ {id:'pene_recupero', tema:'Pene severe o recupero',
+   a:{profile:'conservatore', min:'interno', pos:'pene severe e certezza del castigo.', e:'Sicurezza percepita su; i garantisti insorgono',
+      f:()=>{S.ind.sicurezza+=3; gd('cetomedio',3); gd('cattolici',1); gd('giovani',-3);}},
+   b:{profile:'progressista', min:'giustizia', pos:'rieducare e reinserire: la pena guardi avanti.', e:'Giovani e parte dei cattolici; il fronte dell\'ordine mugugna',
+      f:()=>{gd('giovani',3); gd('cattolici',2); gd('cetomedio',-3);}}},
+];
+
+/* nomi di fantasia */
+const PROFS=['tecnico','progressista','conservatore','populista'];
+function rnd(a){return a[Math.floor(Math.random()*a.length)];}
+/* candidato ministro: nome e cognome pescati dal paese attivo (PAESE.nomi/cognomi) */
+/* L9-2 — genere PRIMA del nome (da PAESE.nomiM/nomiF, che esistono per ogni paese; fallback a PAESE.nomi che resta
+   dov'è). `g` salvato sul candidato (dato puro, serializza). Il RITRATTO non si salva: lo ricalcola `ritrattoDi(m)`
+   dal nome al render (stessa faccia tutta la partita e dopo round-trip). Il profilo NON entra nella scelta del volto. */
+function mkCand(){ var g=Math.random()<0.5?'m':'f'; var lista=(g==='f'?PAESE.nomiF:PAESE.nomiM)||PAESE.nomi;
+  return {nm:rnd(lista)+' '+rnd(PAESE.cognomi), g:g, profile:rnd(PROFS), comp:1+Math.floor(Math.random()*3)}; }
+
+/* PRESSIONI SULLE POLITICHE (loop attivo — Lotto 3): eventi che ti fanno TORNARE a rivedere una politica lasciata a un estremo,
+   quando la condizione economica/sociale matura (il costo ricorrente visibile → deficit → una pressione ti richiama: il loop si
+   chiude). LA CURA: la pressione è un'OPPORTUNITÀ, non un castigo — «rivedi» risolve un problema reale, «tieni» è una scelta
+   legittima con un altro trade-off (mercati vs gruppi); entrambe valide, sempre recuperabile. cond = politica all'estremo + stato.
+   Ordinate per urgenza (deficit-critico prima). Passano dal sacchetto anti-ripetizione (pescaBag 'press'). */
+const POL_PRESSIONI=[
+  {id:'pp_pensioni_conti', verso:1, pol:'pensioni', cond:()=>S.pol.pensioni===2 && S.ind.deficit>4.5, kick:'I conti previdenziali', t:'Le pensioni generose non tornano', text:'La spesa previdenziale corre più delle entrate: gli attuari avvertono che, di questo passo, il sistema non regge.', ch:[
+    {l:'Riporti le pensioni a un livello sostenibile',e:'I conti respirano; chi ci contava si sente tradito',pleases:'tecnico',f:()=>{spostaPolitica('pensioni',1); gd('pensionati',-4); gd('cetomedio',2);}},
+    {l:'Tieni la linea generosa',e:'Mantieni la promessa; il conto previdenziale continua a correre',pleases:'populista',f:()=>{gd('pensionati',3); S.ind.debt+=0.6;}},
+  ]},
+  {id:'pp_welfare_mercati', verso:1, pol:'welfare', cond:()=>S.pol.welfare===2 && S.ind.deficit>4.5, kick:'I conti pubblici', t:'Il welfare esteso e i conti che pesano', text:'I creditori guardano al peso crescente dei sussidi sul bilancio: se il deficit non rientra, il costo del debito sale.', ch:[
+    {l:'Ridimensioni il welfare allo standard',e:'Il deficit rientra; chi riceveva perde qualcosa',pleases:'tecnico',f:()=>{spostaPolitica('welfare',1); gd('lavoratori',-3); gd('imprenditori',2);}},
+    {l:'Difendi i sussidi, costi quel che costi',e:'Tieni la protezione sociale; il deficit resta sotto i riflettori',pleases:'progressista',f:()=>{gd('lavoratori',3); S.ind.debt+=0.6;}},
+  ]},
+  {id:'pp_fisco_gettito', verso:1, pol:'fisco', cond:()=>S.pol.fisco===0 && S.ind.deficit>5, kick:'I conti pubblici', t:'Le tasse basse e i conti che non chiudono', text:'Con la pressione fiscale al minimo il gettito non copre la spesa: il deficit si allarga e i creditori se ne accorgono.', ch:[
+    {l:'Alzi la pressione fiscale al livello medio',e:'Più entrate, deficit più sano; malumore diffuso',pleases:'tecnico',f:()=>{spostaPolitica('fisco',1); gd('cetomedio',-3); gd('imprenditori',-2);}},
+    {l:'Non tocchi le tasse',e:'Mantieni la parola sul fisco leggero; il buco resta',pleases:'conservatore',f:()=>{gd('cetomedio',2); gd('imprenditori',2); S.ind.debt+=0.5;}},
+  ]},
+  {id:'pp_ambiente_industria', verso:1, pol:'ambiente', cond:()=>S.pol.ambiente===2 && groupLow('imprenditori',42), kick:'L\'industria', t:'La transizione ambiziosa e il conto dell\'industria', text:'Le imprese lamentano i costi della transizione ecologica spinta: qualcuna minaccia di spostare la produzione altrove.', ch:[
+    {l:'Rallenti la transizione a un passo graduale',e:'Le imprese respirano; i giovani si sentono traditi',pleases:'conservatore',f:()=>{spostaPolitica('ambiente',1); gd('imprenditori',4); gd('giovani',-3);}},
+    {l:'Tieni la rotta verde',e:'Mantieni l\'impegno sul clima; l\'industria protesta',pleases:'progressista',f:()=>{gd('giovani',3); gd('imprenditori',-2);}},
+  ]},
+  {id:'pp_fisco_cetomedio', verso:1, pol:'fisco', cond:()=>S.pol.fisco===2 && groupLow('cetomedio',42), kick:'Il ceto medio', t:'La rivolta fiscale del ceto medio', text:'La pressione fiscale alta pesa soprattutto sui redditi medi: cresce l\'insofferenza, e non solo tra i tuoi avversari.', ch:[
+    {l:'Alleggerisci il fisco al livello medio',e:'Dai ossigeno ai redditi medi; il gettito cala',pleases:'conservatore',f:()=>{spostaPolitica('fisco',1); gd('cetomedio',4); gd('imprenditori',2);}},
+    {l:'Tieni la pressione: servono le entrate',e:'I conti reggono; il ceto medio resta in agitazione',pleases:'progressista',f:()=>{gd('cetomedio',-3); gd('lavoratori',2); S.ind.debt-=0.4;}},
+  ]},
+  {id:'pp_sanita_liste', verso:1, pol:'sanita', cond:()=>S.pol.sanita===0 && S.ind.sanita<52, kick:'Le liste d\'attesa', t:'Le liste d\'attesa fuori controllo', text:'I tagli alla sanità si sentono: mesi per una visita, i pazienti protestano e i medici denunciano il sovraccarico.', ch:[
+    {l:'Rifinanzi la sanità allo standard',e:'Il servizio si riprende; il bilancio paga',pleases:'progressista',f:()=>{spostaPolitica('sanita',1); S.ind.debt+=0.5; gd('pensionati',3); gd('lavoratori',2);}},
+    {l:'Tieni i conti in ordine',e:'Il rigore regge; chi aspetta continua ad aspettare',pleases:'tecnico',f:()=>{gd('pensionati',-3); gd('cetomedio',1); S.ind.debt-=0.4;}},
+  ]},
+  {id:'pp_welfare_piazza', verso:1, pol:'welfare', cond:()=>S.pol.welfare===0 && groupLow('lavoratori',42), kick:'I sindacati', t:'I sindacati in piazza per i sussidi', text:'Con il welfare ridotto al minimo, chi ha perso il lavoro resta scoperto: i sindacati chiamano alla mobilitazione.', ch:[
+    {l:'Ripristini i sussidi allo standard',e:'Rispondi al disagio; il bilancio ne risente',pleases:'progressista',f:()=>{spostaPolitica('welfare',1); S.ind.debt+=0.4; gd('lavoratori',4);}},
+    {l:'Tieni la linea del rigore',e:'Non sfori; la piazza resta in agitazione',pleases:'conservatore',f:()=>{gd('lavoratori',-3); gd('imprenditori',2); S.ind.debt-=0.4;}},
+  ]},
+  {id:'pp_scuola_sciopero', verso:1, pol:'istruzione', cond:()=>S.pol.istruzione===0 && groupLow('giovani',45), kick:'La scuola', t:'La scuola in sciopero', text:'I tagli all\'istruzione lasciano classi affollate e precari senza prospettiva: studenti e insegnanti scendono in piazza.', ch:[
+    {l:'Riporti gli investimenti sulla scuola',e:'Rispondi a una generazione; costa al bilancio',pleases:'progressista',f:()=>{spostaPolitica('istruzione',1); S.ind.debt+=0.4; gd('giovani',4); gd('lavoratori',1);}},
+    {l:'Tieni la spesa sotto controllo',e:'Il bilancio regge; il malcontento cova',pleases:'tecnico',f:()=>{gd('giovani',-3); gd('cetomedio',1); S.ind.debt-=0.4;}},
+  ]},
+];
+
+/* ATTIVISTA — cause del mese (Build A, L2). Ogni mese pescaBag ne estrae una: il `kick` è il TEMA → scenaId lo mappa al
+   bucket tonale esistente (Lavoro→lavoro, Casa→casa, Scuola→scuola, Sanità→sanita, Ambiente→ambiente, Società civile→
+   societacivile), quindi la scena RUOTA da sé mese per mese (anti-wallpaper, rifinitura B) riusando le varianti già fatte.
+   `tono` = variante (grave/florido/assente=base). `grp` = il gruppo che la causa tocca (le mosse lo muovono). Le 3 mosse (fisse)
+   le costruisce pickAttivista(): organizza/tessi = via istituzionale, battaglia = piazza. La cura: entrambe legittime. */
+const ATTIVISTA_CTX = [
+  {id:'ac_fabbrica', kick:'Lavoro',        tono:'grave', grp:'lavoratori',  t:'La fabbrica che chiude', text:'Un\'azienda della zona annuncia i licenziamenti: gli operai cercano chi dia voce alla loro paura.'},
+  {id:'ac_sfratti',  kick:'Casa',          tono:'grave', grp:'lavoratori',  t:'Gli sfratti nel quartiere', text:'Gli affitti salgono e arrivano gli sfratti: le famiglie del quartiere chiedono che qualcuno si faccia sentire.'},
+  {id:'ac_scuola',   kick:'Scuola',        tono:'grave', grp:'giovani',     t:'La scuola che cade a pezzi', text:'L\'istituto è fatiscente e i ragazzi studiano al freddo: studenti e genitori si mobilitano.'},
+  {id:'ac_liste',    kick:'Sanità',        tono:'grave', grp:'pensionati',  t:'Curarsi è un\'impresa', text:'Per gli anziani una visita è un\'odissea — medici lontani, poche strutture, lunghe attese: cresce la rabbia.'},
+  {id:'ac_parco',    kick:'Ambiente',      tono:'florido', grp:'giovani',   t:'Un parco al posto del cemento', text:'Un\'area abbandonata potrebbe diventare un parco: un comitato ci crede, e cerca chi lo guidi.'},
+  {id:'ac_volontari',kick:'Società civile',              grp:'cetomedio',   t:'Una rete di volontari', text:'Gruppi di cittadini si organizzano per i più fragili: un\'energia che aspetta solo di essere incanalata.'},
+  {id:'ac_giovani',  kick:'Welfare',       tono:'grave', grp:'giovani',     t:'Una generazione ferma', text:'Troppi ragazzi sono senza lavoro e senza prospettive: chiedono che qualcuno li ascolti davvero.'},
+  {id:'ac_negozi',   kick:'Territorio',                  grp:'imprenditori',t:'Le saracinesche abbassate', text:'I negozi del corso chiudono uno dopo l\'altro: i piccoli commercianti cercano una sponda.'},
+  {id:'ac_startup',   kick:'Sviluppo',  tono:'florido', grp:'giovani',    t:'Un\'idea che cerca spazio', text:'Un gruppo di giovani vuole avviare un\'impresa nel quartiere ma non trova sostegno: un\'occasione da non perdere.'},
+  {id:'ac_trasporti', kick:'Trasporti', tono:'grave',   grp:'lavoratori', t:'Il quartiere isolato', text:'L\'autobus passa una volta ogni ora e chi non ha l\'auto resta tagliato fuori: i pendolari sono esausti.'},
+  {id:'ac_diritti',   kick:'Diritti',                   grp:'cetomedio',  t:'Uno sportello per i diritti', text:'Molti non conoscono i propri diritti e si arrendono davanti alla burocrazia: serve chi li accompagni.'},
+  {id:'ac_sicurezza', kick:'Sicurezza', tono:'grave',   grp:'cetomedio',  t:'Il quartiere che ha paura', text:'Piccoli furti e degrado alimentano l\'insicurezza: i residenti chiedono presenza e ascolto, non solo repressione.'},
+];
+
+/* CAMPAGNE PLURI-MESE (Build A.5, lotto 2): un impegno stateful che avvii da "Attorno", dura N mesi, le tue mosse lo nutrono NELLA
+   SUA CORSIA (piazza = battaglia · istituzionale = organizza/tessi), e si risolve con un payoff scalato sul progresso + una
+   conseguenza. VINCOLO DI NON-DOMINANZA: ogni resa paga SOLO la valuta della propria corsia (sciopero/occupazione → base+affini,
+   MAI autorev; petizione → autorev+moderati, MAI base) → il gate serve ancora tutte e tre, il weakest-link regge. resa(q): q = progresso/100. */
+const ATTIVISTA_CAMP = [
+  { id:'petizione', tipo:'Petizione', lane:'istituzionale', mesi:4, kick:'Società civile',
+    avvio:'Apri una raccolta firme: la via istituzionale, paziente. La nutri tessendo e organizzando.',
+    esito:'La petizione arriva sui tavoli che contano: cresci in autorevolezza.',
+    resa:function(q){ attA(Math.round(15*q)); gd('cetomedio',Math.round(8*q)); gd('imprenditori',Math.round(6*q)); } },   // SOLO autorev + moderati
+  { id:'sciopero', tipo:'Sciopero', lane:'piazza', mesi:3, kick:'Lavoro',
+    avvio:'Chiami allo sciopero: la piazza, veloce e rischiosa. La nutri con le battaglie pubbliche.',
+    esito:'Lo sciopero riesce: la base ti riconosce come uno dei suoi — ma i poteri forti si raffreddano.',
+    resa:function(q){ attB(Math.round(18*q)); gd('lavoratori',Math.round(10*q)); gd('giovani',Math.round(6*q)); gd('imprenditori',Math.round(-6*q)); gd('cetomedio',Math.round(-5*q)); } },   // SOLO base + affini (−moderati)
+  { id:'occupazione', tipo:'Occupazione', lane:'piazza', mesi:4, kick:'Casa',
+    avvio:'Occupi uno spazio abbandonato: un gesto forte. Lo nutri con le battaglie pubbliche.',
+    esito:'L\'occupazione diventa un simbolo: i giovani ti seguono — ma i moderati si allontanano.',
+    resa:function(q){ attB(Math.round(15*q)); gd('giovani',Math.round(10*q)); gd('lavoratori',Math.round(5*q)); gd('imprenditori',Math.round(-5*q)); gd('cetomedio',Math.round(-4*q)); } },   // SOLO base + affini (−moderati)
+];
+
+/* EVENTI REATTIVI (Build A.5, lotto 3): cose che ti CAPITANO durante la gavetta — sostituiscono la carta-mossa del mese (non ogni
+   mese: freq tarata ~3-5 a gavetta). Ogni scelta è LEGITTIMA (la cura), rischio dichiarato/recuperabile, effetti REALI sulle valute:
+   una scelta di PIAZZA (base+affini, −moderati), una ISTITUZIONALE (autorev+moderati) → la non-dominanza regge (un mono sceglie
+   sempre la stessa corsia → il tallone resta scoperto). Scena via kick→bucket (anti-wallpaper riusato). TAG `era` PREDISPOSTO:
+   oggi 'contemporanea' (sempre viva); è il binario su cui Build B monterà gli eventi storici filtrando per era. */
+const ATTIVISTA_EV = [
+  { id:'ev_retata', era:'universale', kick:'Sicurezza', tono:'grave',
+    t:'La polizia carica il presidio', text:'Un presidio pacifico viene sgomberato con le maniere forti: la piazza ribolle, e i giornali guardano come reagisci.',
+    ch:[ { l:'Tieni la piazza', e:'La base ti segue, i giovani con te · i moderati si raffreddano',
+           f:function(){ attB(5); gd('giovani',4); gd('imprenditori',-2); gd('cetomedio',-2); } },
+         { l:'Disperditi, eviti lo scontro', e:'Prudenza che paga in autorevolezza · la base mugugna',
+           f:function(){ attA(4); gd('cetomedio',2); gd('giovani',-1); } } ] },
+  { id:'ev_rivale', era:'universale', kick:'Società civile',
+    t:'Un rivale ti ruba la piazza', text:'Un altro attivista cavalca la tua battaglia e si prende i riflettori: o lo sfidi, o lo porti dalla tua.',
+    ch:[ { l:'Sfidalo apertamente', e:'Base su, i giovani scelgono te · rischi di dividere',
+           f:function(){ attB(5); gd('giovani',3); gd('cetomedio',-2); } },
+         { l:'Cooptalo, allargate insieme', e:'Autorevolezza su, i moderati apprezzano · più lento',
+           f:function(){ attA(4); gd('cetomedio',3); gd('imprenditori',2); } } ] },
+  { id:'ev_mediatico', era:'contemporanea', kick:'Sviluppo', tono:'florido',
+    t:'Una TV ti offre lo spazio', text:'Un\'emittente ti invita in prima serata: pochi minuti che possono lanciarti — o bruciarti.',
+    ch:[ { l:'Tono acceso, cavalca l\'onda', e:'Base forte, i giovani ti amano · i poteri forti storcono il naso',
+           f:function(){ attB(6); gd('giovani',4); gd('imprenditori',-2); } },
+         { l:'Messaggio misurato e istituzionale', e:'Autorevolezza su, i moderati ti prendono sul serio',
+           f:function(){ attA(5); gd('cetomedio',3); gd('imprenditori',2); } } ] },
+  { id:'ev_cooptazione', era:'universale', kick:'Welfare', cond:function(){ return S.attivista && S.attivista.autorev>=30; },
+    t:'Il partito ti offre una scorciatoia', text:'Un dirigente ti promette una candidatura sicura — a patto che abbassi i toni e rientri nei ranghi. La via facile ha un prezzo.',
+    ch:[ { l:'Accetta la scorciatoia', e:'Autorevolezza su, i moderati ti aprono le porte · perdi base e la piazza si sente tradita',
+           f:function(){ attA(6); attB(-4); gd('cetomedio',3); gd('imprenditori',3); gd('giovani',-3); gd('lavoratori',-2); } },   // magnitudo-mossa (attA 6, non 8) + COSTO base dichiarato (attB −4) → non spammabile per bootstrappare l'autorev
+         { l:'Rifiuta, resti indipendente', e:'La base ti stima di più · rinunci a una spinta comoda',
+           f:function(){ attB(4); gd('giovani',3); gd('lavoratori',2); } } ] },
+  { id:'ev_sgombero', era:'universale', kick:'Casa', tono:'grave',
+    t:'Sgomberano lo spazio occupato', text:'Il Comune manda le ruspe sullo spazio che avevate liberato: davanti alle telecamere, decidi come rispondere.',
+    ch:[ { l:'Resistenza in strada', e:'Base e giovani con te · i moderati si allontanano',
+           f:function(){ attB(5); gd('giovani',4); gd('lavoratori',2); gd('cetomedio',-3); } },
+         { l:'Porta il caso nelle istituzioni', e:'Autorevolezza su, i moderati ascoltano · la piazza si sgonfia',
+           f:function(){ attA(5); gd('cetomedio',3); gd('imprenditori',1); } } ] },
+  { id:'ev_viral', era:'contemporanea', kick:'Territorio', tono:'florido',
+    t:'Il tuo volantino diventa virale', text:'Un tuo appello gira sui telefoni di tutta la città: un\'onda inattesa che ora devi indirizzare.',
+    ch:[ { l:'Chiama tutti in piazza', e:'Base su forte, i giovani in strada · poco per i moderati',
+           f:function(){ attB(6); gd('giovani',5); } },
+         { l:'Trasformala in una proposta seria', e:'Autorevolezza su, i moderati notano · meno adrenalina',
+           f:function(){ attA(5); gd('cetomedio',3); gd('imprenditori',2); } } ] },
+  { id:'ev_assemblea', era:'universale', kick:'Società civile',
+    t:'L\'assemblea si spacca', text:'Alla grande assemblea due anime si scontrano: i duri vogliono alzare la voce, i moderati mediare. Tocca a te dare la linea.',
+    ch:[ { l:'Dai voce ai duri', e:'Base e giovani si accendono · i moderati si defilano',
+           f:function(){ attB(5); gd('giovani',4); gd('cetomedio',-2); } },
+         { l:'Tieni la linea moderata', e:'Autorevolezza e moderati su · la base si raffredda un po\'',
+           f:function(){ attA(5); gd('cetomedio',3); gd('imprenditori',2); gd('giovani',-1); } } ] },
+  /* --- Eventi d'epoca Italia 1950 (era:'italia1950') — vivi SOLO nel preset '50, esclusi dal presente. --- */
+  { id:'ev_i50_cassa', era:'italia1950', cond:()=>S.year<=1951, kick:'Sviluppo', tono:'florido',
+    t:'La Cassa per il Mezzogiorno', text:'Lo Stato lancia il grande piano per lo sviluppo del Sud: strade, dighe, bonifiche. Il tuo movimento può cavalcarne l\'entusiasmo — o vigilare che i fondi non finiscano ai soliti noti.',
+    ch:[ { l:'Porta la gente nei cantieri', e:'Base su, braccianti e giovani con te · i notabili storcono il naso',
+           f:function(){ attB(5); gd('lavoratori',4); gd('giovani',3); gd('imprenditori',-2); } },
+         { l:'Vigila sui fondi dalle istituzioni', e:'Autorevolezza su, i moderati ti prendono sul serio',
+           f:function(){ attA(5); gd('cetomedio',3); gd('imprenditori',2); } } ] },
+  { id:'ev_i50_terra', era:'italia1950', cond:()=>S.year<=1954, kick:'Lavoro', tono:'grave',
+    t:'La riforma agraria', text:'Le terre dei grandi latifondi vengono redistribuite ai braccianti. Nelle campagne del Sud la tensione è altissima: da che parte stai?',
+    ch:[ { l:'In piazza coi braccianti', e:'Base e lavoratori si accendono · i proprietari terrieri contro',
+           f:function(){ attB(6); gd('lavoratori',5); gd('imprenditori',-3); } },
+         { l:'Accompagna la transizione con calma', e:'Autorevolezza su, i moderati ti ascoltano · la piazza freme',
+           f:function(){ attA(5); gd('cetomedio',3); gd('imprenditori',1); } } ] },
+  /* ===== AVANZAMENTO Fase 2 · Lotto 3 — ATTIVISTA '60 (era:'italia1960'). Il '68 vissuto DA DENTRO il movimento:
+     la cura vale doppio — militare è legittimo, e anche il dubbio lo è. Nessuna retorica, né in gloria né in condanna:
+     le due voci sono pari, la scelta è tua. ===== */
+  { id:'a60_sessantotto', era:'italia1960', kick:'Movimento', tono:'grave', cond:function(){ return S.year>=1968; },
+    t:'L\'assemblea occupa la facoltà', text:'Sei dentro il movimento che occupa l\'università: c\'è chi spinge per la lotta a oltranza e chi chiede di fermarsi a capire dove si va. Nessuna delle due voci è più nobile dell\'altra — tocca a te dire la tua.',
+    ch:[ { l:'Stai con chi porta avanti la lotta', e:'La base ti riconosce, i giovani con te · fuori dal movimento in molti si allarmano',
+           f:function(){ attB(5); gd('giovani',4); gd('cetomedio',-3); gd('pensionati',-2); } },
+         { l:'Tieni aperto lo spazio del dubbio', e:'Chi vuole capire prima di agire ti ascolta · qualcuno ti accusa di frenare',
+           f:function(){ attA(5); gd('cetomedio',2); gd('lavoratori',1); gd('giovani',-1); } } ] },
+  { id:'a60_vertenza', era:'italia1960', kick:'Fabbrica', tono:'grave', cond:function(){ return S.year>=1969; },
+    t:'Studenti ai cancelli della fabbrica', text:'Le vertenze operaie e la protesta studentesca si cercano: unire i due mondi può moltiplicare la forza, o disperderla in una babele di parole d\'ordine.',
+    ch:[ { l:'Salda studenti e operai nella stessa lotta', e:'Una forza nuova e larga · più difficile da tenere insieme',
+           f:function(){ attB(5); gd('lavoratori',3); gd('giovani',3); gd('imprenditori',-2); } },
+         { l:'Tieni le due battaglie distinte', e:'Ognuna resta chiara e concreta · rinunci alla saldatura',
+           f:function(){ attA(4); gd('lavoratori',2); gd('cetomedio',2); } } ] },
+  { id:'a60_circolo', era:'italia1960', kick:'Movimento', cond:function(){ return S.year>=1960; },
+    t:'Il circolo nel quartiere nuovo', text:'Nei rioni che il boom fa spuntare dal nulla non c\'è ancora nessuno che organizzi la gente: un circolo può nascere lì, tra chi è appena arrivato dal Sud e cerca casa e diritti.',
+    ch:[ { l:'Radica il circolo tra i nuovi arrivati', e:'Base forte dove nessuno c\'era · un lavoro lungo e oscuro',
+           f:function(){ attB(5); gd('lavoratori',4); gd('giovani',2); } },
+         { l:'Apri il circolo a competenze e dialogo', e:'Autorevolezza e rispetto · cresci più piano',
+           f:function(){ attA(5); gd('cetomedio',3); gd('lavoratori',1); } } ] },
+];

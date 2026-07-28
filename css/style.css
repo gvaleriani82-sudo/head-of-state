@@ -1,0 +1,387 @@
+  /* ============================================================
+     PALETTE — VESTE CHIARA "Avorio" (carta / quotidiano di qualità), 2026-06-07.
+     Decisione di Giacomo: solo chiaro, niente toggle. Blu istituzionale = attivo/cornice,
+     oro = "il tuo". Il TEMA SCURO è archiviato nel commento qui sotto (riattivabile).
+     ============================================================ */
+  :root{
+    --bg:#f3efe6; --bg2:#eae4d6; --panel:#fcfaf4; --panel2:#f1ebdd;
+    --line:#cfc6b2; --line2:#c3baa6;
+    --txt:#23211c; --txt2:#4a463d; --mut:#6f6a5d; --mut2:#767059;
+    --pos:#1a7d44; --neg:#c4392f; --warn:#c8881f; --info:#2f6fbf;
+    --brand:#1f5fa6; --acc:#a9791a; --acc-ink:#8a6411; --warn-ink:#946112;   /* oro/amber VIVIDI per barre e identità; ink SCURI per il testo piccolo (≥4,5:1) */
+    --acc-bg:#f7efda; --pos-bg:#e9f5ec; --neg-bg:#fceeeb; --warn-bg:#fdf6e8; --brand-bg:#dde8f4;
+    --tecnico:#2f6fbf; --progressista:#1a7d44; --conservatore:#6a4fb0; --populista:#946112;
+    --r:14px;
+  }
+  /* TEMA SCURO ARCHIVIATO (per riattivarlo: rimpiazza i valori del blocco :root sopra con questi;
+     ricordati anche PROFCOL in js/core.js → versione scura, e gli accento di PAESI in js/data.js → #cfa14e):
+       --bg:#0d1017; --bg2:#10141d; --panel:#161b26; --panel2:#1b2230;
+       --line:#384358; --line2:#465572;
+       --txt:#e8ebf2; --txt2:#cdd3e0; --mut:#8a93a8; --mut2:#7b859c;
+       --pos:#3fae74; --neg:#e0594f; --warn:#e3b04b; --info:#6f93d6;
+       --brand:#6f93d6; --acc:#cfa14e;
+       --acc-bg:#3a2f17; --pos-bg:#163a28; --neg-bg:#3a1f1c; --brand-bg:#1c2c44;
+       --tecnico:#6f93d6; --progressista:#3fae74; --conservatore:#8f86d8; --populista:#e3b04b;
+  */
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  /* iPhone: tap immediato (niente attesa del doppio-tap) e cursore "mano" su tutto ciò che si tocca. */
+  button, .tab, .opt, .cand, .mini-btn, .seg button, [onclick]{ touch-action:manipulation; cursor:pointer; }
+  html,body{margin:0; background:var(--bg); color:var(--txt);
+    font-family:'IBM Plex Sans',sans-serif; font-size:15px; line-height:1.45; -webkit-font-smoothing:antialiased;}
+  body{padding-bottom:96px;}
+  .mono{font-family:'IBM Plex Mono',monospace; font-feature-settings:"tnum";}
+  .wrap{max-width:560px; margin:0 auto; min-height:100vh; position:relative;}
+  .tri{height:3px; background:var(--acc);}   /* filetto oro decorativo in cima; la bandiera vera vive nell'header */
+  .flag{display:inline-block; overflow:hidden; border-radius:2px; border:1px solid rgba(0,0,0,.22); line-height:0; vertical-align:middle;}
+  .flag svg{display:block; width:100%; height:100%;}
+
+  header{position:sticky; top:0; z-index:30; background:var(--panel); border-bottom:1px solid var(--line); transition:box-shadow .2s ease;}
+  /* le tab vivono dentro l'header sticky: header COMPLETO (bandiera/nome + 4 indicatori + tab) sempre visibile.
+     Allo scroll l'header prende solo un'ombra di separazione mentre il contenuto ci passa sotto. */
+  body.scrolled header{box-shadow:0 5px 16px rgba(0,0,0,.10);}
+  .hbar{padding:11px 16px 12px; display:flex; align-items:flex-end; justify-content:space-between; gap:10px;}
+  .brand .k{font-size:10.5px; letter-spacing:.22em; color:var(--mut); text-transform:uppercase;}
+  .brand h1{font-family:'Fraunces',serif; font-weight:600; font-size:21px; margin:0; line-height:1;}
+  .brand .namerow{display:flex; align-items:center; gap:7px; margin-top:1px;}
+  .hdr-avatar{width:38px; height:38px; flex-shrink:0; border-radius:50%; overflow:hidden; border:1.5px solid var(--line2); background:var(--panel2);}
+  .hdr-avatar img{width:100%; height:100%; object-fit:cover; display:block;}
+  #hdr-flag{width:24px; height:16px; flex-shrink:0;}
+  .clock{text-align:right; line-height:1.18;}
+  .clock .yr{font-family:'Fraunces',serif; font-size:22px; font-weight:600;}
+  .clock .el{font-size:10.5px; color:var(--mut); letter-spacing:.03em;}
+
+  .keys{display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--line); border-bottom:1px solid var(--line);}
+  .key{background:var(--bg2); padding:8px 6px 9px; text-align:center;}
+  .key .lab{font-size:9.5px; color:var(--mut); letter-spacing:.05em; text-transform:uppercase;}
+  .key .val{font-family:'IBM Plex Mono',monospace; font-size:16px; font-weight:600; margin-top:2px;}
+  .key .dlt{font-size:10px; font-family:'IBM Plex Mono',monospace; margin-top:1px; height:13px;}
+
+  nav.tabs{display:flex; gap:5px; padding:11px 14px 4px;}
+  .tab{flex:1; text-align:center; padding:9px 3px; border:1px solid var(--line); border-radius:10px;
+    background:var(--panel); color:var(--mut); font-size:12px; font-weight:600; cursor:pointer; position:relative;}
+  .tab.on{background:var(--brand); color:#fff; border-color:var(--brand); box-shadow:none;}
+  .tab .badge{position:absolute; top:-6px; right:-4px; background:var(--acc); color:#1a1408; font-size:10px;
+    font-weight:700; min-width:17px; height:17px; line-height:17px; border-radius:9px; padding:0 4px;}
+  .tab .badge.dot{min-width:0; width:9px; height:9px; padding:0; line-height:0; border-radius:50%; top:-3px; right:-3px; box-shadow:0 0 0 2px var(--panel);}   /* cruscotto attenzione (loop attivo): pallino "questa scheda ti chiama" */
+
+  main{padding:8px 16px 20px;}
+  .sec{display:none;} .sec.on{display:block;}
+  .card{background:var(--panel); border:1px solid var(--line); border-radius:var(--r); margin-bottom:12px; overflow:hidden;}
+  .card .ct{padding:11px 14px 6px; font-size:11px; letter-spacing:.13em; text-transform:uppercase; color:var(--mut);}
+
+  .ind{display:flex; align-items:center; gap:12px; padding:11px 14px; border-top:1px solid var(--line);}
+  .ind:first-of-type{border-top:none;}
+  .ind .nm{flex:1;} .ind .nm b{font-weight:600; font-size:14px;} .ind .nm small{display:block; color:var(--mut2); font-size:11px;}
+  .ind .num{font-family:'IBM Plex Mono',monospace; font-weight:600; font-size:16px; min-width:62px; text-align:right;}
+  .bar{height:6px; border-radius:4px; background:var(--line); overflow:hidden; margin-top:5px;}
+  .bar i{display:block; height:100%; border-radius:4px;}
+
+  .grp{padding:11px 14px; border-top:1px solid var(--line);} .grp:first-of-type{border-top:none;}
+  .grp .top{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:6px;}
+  .grp .nm{font-weight:600; font-size:14px;} .grp .nm small{color:var(--mut2); font-weight:400; font-size:11px; margin-left:6px;}
+  .grp .pc{font-family:'IBM Plex Mono',monospace; font-weight:600;}
+
+  .pol{padding:12px 14px; border-top:1px solid var(--line);} .pol:first-of-type{border-top:none;}
+  .pol .pn{font-weight:600; font-size:14px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:baseline; gap:8px;}
+  .polcost{font-family:'IBM Plex Mono',monospace; font-weight:600; font-size:11px; color:var(--mut); white-space:nowrap;}   /* cantiere Budget: costo ricorrente per-politica / per-leva */
+  .seg{display:flex; gap:5px;}
+  .seg button{flex:1; padding:9px 4px; border:1px solid var(--line); background:var(--bg2); color:var(--mut);
+    border-radius:9px; font-size:12px; font-weight:500; cursor:pointer; font-family:inherit; line-height:1.15;}
+  .seg button.on{background:var(--brand-bg); color:var(--txt); border-color:var(--brand); box-shadow:inset 0 0 0 1px var(--brand);}
+  /* L9-1 — le due SOGLIE di scenario: miniatura sopra l'etichetta, per far sentire il salto d'epoca */
+  #scenario-seg button{ display:flex; flex-direction:column; align-items:center; gap:6px; padding:7px 5px; }
+  #scenario-seg .soglia-thumb{ width:100%; aspect-ratio:16/9; object-fit:cover; border-radius:7px; display:block; }
+  .seg button:disabled{opacity:.45; cursor:default;}
+  /* selettore paese: bandiera impilata sopra l'etichetta. GRIGLIA responsive (16 paesi) → va a capo su più righe,
+     niente sforo orizzontale a 375px (prima era un flex-row che con 16 bottoni schiacciava/sforava). */
+  #country-seg{display:grid; grid-template-columns:repeat(4,1fr); gap:6px;}
+  #country-seg button{display:flex; flex-direction:column; align-items:center; gap:4px; padding:8px 3px;
+    font-size:10.5px; line-height:1.12; min-width:0; word-break:break-word; text-align:center;}
+  #country-seg .flag{width:26px; height:17px;}
+
+  .budget{background:var(--panel2); border:1px solid var(--line2); border-radius:var(--r); padding:12px 14px; margin-bottom:12px; display:flex; gap:14px; justify-content:space-between;}
+  .budget .b{flex:1;} .budget .b .l{font-size:10px; color:var(--mut); text-transform:uppercase; letter-spacing:.07em;}
+  .budget .b .v{font-family:'IBM Plex Mono',monospace; font-size:18px; font-weight:600; margin-top:2px;}
+
+  .banner{background:var(--acc-bg); border:1px solid var(--acc); border-radius:12px; padding:10px 13px; margin-bottom:12px; font-size:13px; color:var(--txt);}
+
+  /* La prima pagina del mese (lotto comunicazione): striscia-quotidiano in Governo, porta della Sala stampa. */
+  .pressa{background:var(--panel); border:1px solid var(--line2); border-left:3px solid var(--brand); border-radius:12px; padding:9px 13px 8px; margin-bottom:12px; cursor:pointer; position:relative;}
+  .pressa .pk{font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:var(--mut);}
+  .pressa .pt{font-family:'Fraunces',serif; font-style:italic; font-size:15.5px; line-height:1.25; margin-top:3px; color:var(--txt);}
+  .pressa .pl{font-size:11px; color:var(--brand); font-weight:600; margin-top:4px; text-align:right;}
+  .pressa:active{transform:scale(.99);}
+
+  /* Testata sticky (Bilancio + pagine-ministero): la riga RP+saldo resta visibile sotto l'header già sticky.
+     top = altezza REALE dell'header (--hdrH, misurata in JS a ogni render/resize; 211px è il fallback a 375).
+     Lo sfondo --bg copre il contenuto che le scorre sotto; z sotto header (30) e overlay (60). */
+  .sticky-top{position:sticky; top:var(--hdrH,211px); z-index:10; background:var(--bg); padding:8px 0 6px; margin:-8px 0 6px;}
+  .sticky-top .budget{margin-bottom:0; padding:9px 14px;}   /* compatta: a 375 l'etichetta col mese può andare su 2 righe */
+
+  /* Mappa del territorio (drill-down da Partiti): SVG fluido, aree toccabili, legenda compatta. */
+  .mappa-wrap{padding:4px 12px 2px;}
+  .mappa-wrap svg{display:block; width:100%; max-width:420px; height:auto; margin:0 auto;}
+  .mappa-wrap path[onclick], .mappa-wrap circle[onclick]{cursor:pointer; transition:fill .3s ease, fill-opacity .3s ease;}
+  .mappa-leg{display:flex; flex-wrap:wrap; gap:5px 14px; padding:8px 14px 6px; font-size:11px; color:var(--mut);}
+  .mappa-leg i{display:inline-block; width:10px; height:10px; border-radius:3px; margin-right:5px; vertical-align:-1px;}
+
+  /* Bottone "torna su": flottante sopra l'endbar, sobrio (veste avorio), appare oltre ~400px di scroll. */
+  #topbtn{position:fixed; right:14px; bottom:calc(79px + env(safe-area-inset-bottom)); z-index:25;
+    width:40px; height:40px; border-radius:50%; border:1px solid var(--line2); background:var(--panel); color:var(--mut);
+    font-size:17px; font-weight:600; line-height:1; font-family:inherit; cursor:pointer; box-shadow:0 3px 10px rgba(0,0,0,.10);
+    opacity:0; visibility:hidden; transform:translateY(6px); transition:opacity .2s ease, transform .2s ease, visibility .2s;}
+  #topbtn.vis{opacity:1; visibility:visible; transform:none;}
+
+  /* agenda cards */
+  .ag{background:var(--panel); border:1px solid var(--line2); border-radius:var(--r); margin-bottom:12px; overflow:hidden;}
+  .ag.major{border-color:var(--neg); box-shadow:0 0 0 1px var(--neg);}
+  .ag.done{opacity:.78;}
+  .ag .ah{padding:13px 15px 4px;}
+  .ag .kick{font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:var(--brand);}
+  .ag.major .kick{color:var(--neg);}
+  .ag h3{font-family:'Fraunces',serif; font-weight:600; font-size:18px; margin:5px 0 0; line-height:1.15;}
+  .ag .atext{padding:6px 15px 12px; color:var(--txt2); font-size:13.5px;}
+  .ag .opts{padding:0 12px 13px; display:flex; flex-direction:column; gap:7px;}
+  .opt{text-align:left; background:var(--panel2); border:1px solid var(--line2); border-radius:11px; padding:11px 13px; color:var(--txt); cursor:pointer; font-family:inherit; font-size:13.5px; line-height:1.3;}
+  .opt:active{border-color:var(--acc);}
+  .opt .ol{font-weight:600;} .opt .oe{display:block; color:var(--mut); font-size:12px; margin-top:2px;}
+  .opt .ocost{display:inline-block; margin-top:6px; font-size:11.5px; font-weight:600; color:var(--acc-ink); background:var(--bg2); border:1px solid var(--line); border-radius:6px; padding:2px 7px; font-family:'IBM Plex Mono',monospace;}   /* cantiere Budget: targhetta-costo €X · −Y% */
+  .fiscbar{display:flex; flex-wrap:wrap; justify-content:space-between; align-items:baseline; gap:2px 10px; margin:0 2px 10px; padding:7px 12px; background:var(--bg2); border:1px solid var(--line); border-radius:9px; font-size:12px;}   /* cantiere Budget: riga-bilancio persistente sul Governo; wrap-safe a 375px (mai overflow orizzontale) */
+  .fiscbar .fl{color:var(--mut); letter-spacing:.02em;} .fiscbar .fv{font-family:'IBM Plex Mono',monospace; font-weight:600; color:var(--txt); white-space:nowrap;}
+  .ag .outcome{padding:0 15px 13px; color:var(--pos); font-size:13px;}
+  .ag .outcome b{color:var(--txt);}
+  .calm{padding:14px 15px; color:var(--mut); font-size:13.5px;}
+
+  /* icone vettoriali (sistema ICONS): monocromatiche, ereditano currentColor dall'etichetta accanto */
+  .ico{width:1.05em; height:1.05em; display:inline-block; vertical-align:-0.15em; flex-shrink:0; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round;}
+
+  /* ritratto + fumetto (carte in cui parla un ministro) */
+  .avatar{width:40px; height:40px; flex-shrink:0; border-radius:50%; background:var(--panel2); border:1.5px solid; display:flex; align-items:center; justify-content:center; font-family:'Fraunces',serif; font-weight:600; font-size:19px; line-height:1;}
+  .say{display:flex; gap:11px; align-items:flex-start; padding:8px 15px 12px;}
+  .say .body{flex:1; min-width:0;}
+  .say .nm{font-weight:600; font-size:13px;} .say .nm small{font-weight:400; color:var(--mut2);}
+  .say .nm .chip{margin-top:0; vertical-align:middle;}
+  .say .cap{margin-top:5px; color:var(--txt2); font-size:13.5px; line-height:1.35;}
+  .bubble{position:relative; margin-top:7px; background:var(--panel2); border:1px solid var(--line2); border-radius:12px; padding:9px 12px; color:var(--txt2); font-size:13.5px; line-height:1.35;}
+  .bubble:before{content:''; position:absolute; left:14px; top:-6px; width:11px; height:11px; background:var(--panel2); border-top:1px solid var(--line2); border-left:1px solid var(--line2); transform:rotate(45deg);}
+
+  /* ministers */
+  .min{padding:12px 14px; border-top:1px solid var(--line);} .min:first-of-type{border-top:none;}
+  .min .mtop{display:flex; justify-content:space-between; align-items:flex-start; gap:10px;}
+  .min .role{font-size:10.5px; color:var(--mut); text-transform:uppercase; letter-spacing:.05em;}
+  .min .who{font-weight:600; font-size:14px; margin-top:1px;}
+  .chip{display:inline-block; font-size:11px; font-weight:600; padding:2px 8px; border-radius:20px; margin-top:4px;}
+  .dots{display:flex; gap:3px; align-items:center;}
+  .dots i{width:7px; height:7px; border-radius:50%; background:var(--line2);}
+  .dots i.f{background:var(--acc);}
+  .loy{margin-top:8px;}
+  .loy .ll{display:flex; justify-content:space-between; font-size:10.5px; color:var(--mut); margin-bottom:4px;}
+  .msum{font-size:12px; color:var(--mut); margin-top:7px;}
+  .mini-btn{margin-top:9px; background:transparent; border:1px solid var(--line2); color:var(--mut); border-radius:9px; padding:7px 11px; font-size:12px; font-family:inherit; cursor:pointer;}
+  .mini-btn:active{border-color:var(--acc);}
+
+  .endbar{position:fixed; bottom:0; left:0; right:0; z-index:30; background:var(--panel); border-top:1px solid var(--line); padding:11px 16px calc(11px + env(safe-area-inset-bottom));}
+  .endbar .inner{max-width:560px; margin:0 auto; display:flex; align-items:center; gap:12px;}
+  .ctx{flex:1; line-height:1.2; font-size:12.5px; color:var(--mut);}
+  .ctx b{color:var(--txt);}
+  .btn{background:var(--brand); color:#fff; border:none; border-radius:11px; padding:13px 18px; font-family:'IBM Plex Sans',sans-serif; font-weight:700; font-size:14px; cursor:pointer;}
+  .btn:disabled{opacity:.4;}
+  .btn:active{transform:translateY(1px);}
+
+  .log{font-size:12.5px; color:var(--mut);}
+  .log .li{padding:8px 14px; border-top:1px solid var(--line);} .log .li:first-child{border-top:none;}
+  .log .li b{color:var(--txt); font-weight:600;}
+
+  /* screens */
+  .screen{padding:24px 18px 30px;}
+  .screen.center{text-align:center;}
+  .screen .em{font-size:11px; letter-spacing:.22em; text-transform:uppercase; color:var(--acc-ink);}
+  .screen h2{font-family:'Fraunces',serif; font-size:29px; font-weight:600; margin:8px 0 4px; line-height:1.05;}
+  .screen p{color:var(--mut); font-size:14px; max-width:440px; margin:10px auto;}
+  .screen .note{font-size:11.5px; color:var(--mut2); border:1px dashed var(--line2); border-radius:10px; padding:10px 12px; margin:16px auto; max-width:450px; line-height:1.4; text-align:left;}
+  .statgrid{display:grid; grid-template-columns:1fr 1fr; gap:1px; background:var(--line); border:1px solid var(--line); border-radius:12px; overflow:hidden; margin:16px 0;}
+  .statgrid .s{background:var(--bg2); padding:12px;}
+  .statgrid .s .l{font-size:10px; color:var(--mut); text-transform:uppercase; letter-spacing:.05em;}
+  .statgrid .s .v{font-family:'IBM Plex Mono',monospace; font-size:20px; font-weight:600; margin-top:3px;}
+
+  /* appointment */
+  .apt{margin-bottom:12px;} .apt .role{font-size:11px; color:var(--acc-ink); text-transform:uppercase; letter-spacing:.1em;}
+  .apt .desc{font-size:12px; color:var(--mut); margin:2px 0 8px;}
+  .cands{display:flex; flex-direction:column; gap:7px;}
+  .cand{display:flex; justify-content:space-between; align-items:center; gap:10px; text-align:left; background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:11px 13px; color:var(--txt); cursor:pointer; font-family:inherit;}
+  .cand.on{border-color:var(--acc); box-shadow:inset 0 0 0 1px var(--acc); background:var(--panel2);}
+  .cand .cn{font-weight:600; font-size:13.5px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .cand .cmeta{display:flex; align-items:center; gap:8px; flex-shrink:0;}
+  /* L10-2 — il volto del candidato nella nomina: tondo ridotto a 34px (375px), nome che tronca invece di andare a capo */
+  .cand .cleft{display:flex; align-items:center; gap:9px; min-width:0;}
+  .cand .avatar{width:34px; height:34px; font-size:16px; flex-shrink:0;}
+  /* L11-1 — il volto del FILO nella carta-arco: riga sobria (tondo 30px + nome/ruolo), sotto il titolo */
+  .filo-tag{display:flex; align-items:center; gap:8px; margin:7px 0 0; font-size:12px; color:var(--txt2); min-width:0;}
+  .filo-tag img{width:30px; height:30px; border-radius:50%; object-fit:cover; flex-shrink:0; border:1.5px solid var(--line2);}
+  .filo-tag span{overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .cand .chip{margin-top:0;}
+
+  .ov{position:fixed; inset:0; z-index:60; background:rgba(20,22,28,.42); display:none; align-items:flex-end; justify-content:center; padding:14px;}
+  .ov.on{display:flex;}
+  .modal{width:100%; max-width:540px; background:var(--panel); border:1px solid var(--line2); border-radius:18px; overflow:hidden; max-height:90vh; overflow-y:auto; animation:rise .26s cubic-bezier(.2,.7,.3,1);}
+  @keyframes rise{from{transform:translateY(24px); opacity:0;} to{transform:none; opacity:1;}}
+  .modal .mt{padding:16px 18px 6px;} .modal .kicker{font-size:10.5px; letter-spacing:.18em; text-transform:uppercase; color:var(--acc-ink);}
+  .modal h2{font-family:'Fraunces',serif; font-weight:600; font-size:21px; margin:6px 0 0;}
+  .modal .mtext{padding:8px 18px 14px; color:var(--txt2); font-size:14px;}
+  .modal .choices{padding:0 14px 16px; display:flex; flex-direction:column; gap:8px;}
+
+  /* F1 — LA TELEFONATA: veste distinta (cornice accento + squillo d'ingresso) così sembra un'interruzione, non
+     un'altra carta. Lo squillo è alla comparsa (2 scosse poi fermo, mai nagging); la barra timer si consuma da
+     sinistra in F1_TIMER_MS (--teldur). Reduced-motion: la barra RESTA (è funzionale), lo squillo si spegne. */
+  .modal.tel{ border-color:var(--acc); box-shadow:0 0 0 2px var(--acc-bg); }
+  .modal.tel.ring{ animation:rise .26s cubic-bezier(.2,.7,.3,1), telRing 1.05s ease-in-out .06s 1; }
+  .modal.tel .kicker{ color:var(--acc); font-weight:700; }
+  @keyframes telRing{ 0%,100%{transform:none;} 6%,26%{transform:translateX(-3px) rotate(-1.4deg);} 16%,36%{transform:translateX(3px) rotate(1.4deg);} 46%{transform:none;} }
+  .telbar{ height:6px; margin:0 18px 14px; border-radius:4px; background:var(--line); overflow:hidden; }
+  .telbar > i{ display:block; height:100%; border-radius:4px; background:var(--acc); transform-origin:left center; animation:telDrain var(--teldur,13000ms) linear forwards; }
+  @keyframes telDrain{ from{transform:scaleX(1);} to{transform:scaleX(0);} }
+
+  /* ============================================================
+     SLOT IMMAGINE (raster futuro) — DORMIENTI: display:none finché non
+     attivati con .on; vuoti = zero pixel, quindi il mobile <700px resta
+     identico. aspect-ratio riserva lo spazio (niente scatto al caricamento).
+     REGOLA SACRA: il JS non deve MAI aggiungere .on (né iniettare <img>)
+     sotto i 700px — o la scatola 16:9 diventa reale e sposta il mobile.
+     HERO: home, tra emblema e titolo · SCENA: cima della card evento (.ag).
+     ============================================================ */
+  #home-hero{ display:none; width:100%; max-width:440px; margin:12px auto 16px; border-radius:12px; overflow:hidden; aspect-ratio:16/9; background:var(--panel2); }
+  #home-hero.on{ display:block; }
+  #home-hero img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .ag-scene{ display:none; width:100%; margin:0 0 10px; overflow:hidden; aspect-ratio:16/9; max-height:180px; background:var(--panel2); }   /* striscia cinematografica: il cap letterboxa (cover) su card larghe, così non domina lo schermo */
+  .ag-scene.on{ display:block; }
+  .ag-scene img{ width:100%; height:100%; object-fit:cover; display:block; }
+  /* L9-1 — SCENA-MOMENTO in cima al modale (intervista/telefono/finale): banner 16/9, letterboxato dal cap */
+  .mscene{ display:block; width:100%; aspect-ratio:16/9; max-height:172px; object-fit:cover; background:var(--panel2); }
+  /* L9-1 — NOTTE elettorale: la scena come SFONDO (velo scuro sotto il testo, non immagine in cima). Lo sfondo vive su
+     un WRAPPER dentro l'innerHTML (rigenerato a ogni render → nessuna classe che resta appiccicata al #modal riusato).
+     I risultati (barre/righe) restano in un pannello opaco per la leggibilità; a 375px niente full-bleed rotto. */
+  .notte-wrap{ position:relative; }
+  .notte-wrap .mbg-img{ position:absolute; inset:0; background-size:cover; background-position:center; z-index:0; }
+  .notte-wrap .mbg-img::after{ content:''; position:absolute; inset:0; background:linear-gradient(180deg, rgba(10,12,20,.60) 0%, rgba(10,12,20,.80) 42%, rgba(10,12,20,.90) 100%); }
+  .notte-wrap > *:not(.mbg-img){ position:relative; z-index:1; }
+  .notte-wrap .mt .kicker{ color:#cdd6ff; } .notte-wrap .mt h2{ color:#f4f6fb; text-shadow:0 1px 4px rgba(0,0,0,.6); }
+  .notte-wrap .mtext{ color:#eaeef7; text-shadow:0 1px 3px rgba(0,0,0,.55); }                 /* testo sul velo = chiaro */
+  .notte-wrap .notte-panel{ background:var(--panel); border:1px solid var(--line2); border-radius:12px; padding:6px 4px; margin:8px 12px; }
+  .notte-wrap .notte-panel .mtext{ color:var(--txt2); text-shadow:none; }                    /* i risultati nel pannello = colori normali, leggibili */
+  .notte-wrap .choices{ padding:6px 14px 16px; }
+
+  /* ============================================================
+     RESPONSIVO — tablet (≥700px) e desktop (≥1000px).
+     MOBILE-FIRST INTOCCABILE: sotto i 700px nessuna regola qui sotto
+     viene valutata, quindi il telefono resta identico al pixel.
+     Due colonne via MULTICOLONNA (conserva i separatori border-top);
+     break-inside:avoid evita che una riga si spezzi tra le colonne.
+     ============================================================ */
+  @media (min-width:700px){
+    .wrap{ max-width:720px; }
+    .endbar .inner{ max-width:720px; }
+    /* modali centrati (non più "foglio dal basso") e un filo più larghi */
+    .ov{ align-items:center; }
+    .modal{ max-width:600px; }
+    /* liste lunghe a 2 colonne (classe g2: ministri, partiti, leggi, dicasteri di nomina).
+       column-gap coerente coi padding delle card (14px). */
+    .g2{ column-count:2; column-gap:14px; }
+    .g2 > .ct{ column-span:all; }       /* il titolo della card resta a piena larghezza sopra le colonne */
+    .g2 > *{ break-inside:avoid; }       /* OBBLIGATORIO: niente righe spezzate a metà tra le colonne */
+    #home-hero{ max-width:500px; }       /* slot hero dormiente: cresce un filo su tablet */
+    /* misura leggibile (~64 caratteri) a OGNI breakpoint ≥700: il testo che si legge come
+       prosa non si stira a tutta larghezza, allineato a sinistra. Cascata anche a desktop.
+       Non tocca le liste columnizzate (.g2/.duecol). */
+    .ag .atext, .calm, .banner, .sec.on .card:not(.g2):not(.duecol) > .log{ max-width:64ch; }
+  }
+  @media (min-width:1000px){   /* soglia abbassata da 1100: l'iPad landscape (1024px) usa la larghezza piena, non più i 720px stretti */
+    .wrap{ max-width:960px; }
+    .endbar .inner{ max-width:960px; }
+    .modal{ max-width:660px; }
+    #home-hero{ max-width:560px; }
+    /* 2 colonne SOLO sulle liste scansionabili (marcatore .g2, com'è già a tablet) + un
+       opt-in esplicito .duecol. Prima una regola generica (.sec.on .card) columnizzava
+       OGNI card: le card di sola prosa collassavano in una colonna piena e l'altra vuota,
+       e i sottotitoli interni (es. «Società civile») potevano orfanarsi. Con lo scoping,
+       quei casi restano a una colonna unica — leggibili. L'agenda (.agbox>.ag) non è .card,
+       quindi non è mai stata toccata da qui: nessuna eccezione serve. */
+    .sec.on .card.g2, .sec.on .card.duecol{ column-count:2; column-gap:16px; }
+    .sec.on .card.g2 > .ct, .sec.on .card.duecol > .ct{ column-span:all; }
+    .sec.on .card.g2 > *, .sec.on .card.duecol > *{ break-inside:avoid; }   /* niente righe spezzate */
+    /* (il cap di misura ~64ch vive nel blocco @media(700) qui sopra e casca fin qui) */
+    /* l'agenda resta a piena larghezza (è il fulcro): le sue opzioni si affiancano */
+    .ag .opts{ flex-direction:row; flex-wrap:wrap; }
+    .ag .opts > .opt{ flex:1 1 260px; }
+    /* game over: statistiche a 3 colonne */
+    .statgrid{ grid-template-columns:repeat(3,1fr); }
+    /* ritocco lieve di font/respiro */
+    html,body{ font-size:15.5px; }
+    main{ padding:12px 16px 24px; }
+  }
+
+  /* ============================================================
+     FASCIA LEGGERA — transizioni e animazioni sobrie (150-300ms), solo presentazione.
+     INGRESSO: parte alla creazione del nodo (carte, cambio scheda, modali — già con @keyframes rise).
+     VARIAZIONE: guidata da playAnims() (js) con la mappa pre-render UIVALS, perché il render ricrea i nodi.
+     Solo proprietà da compositor (transform/opacity): su iPhone non scalda. Tutto annullato sotto
+     prefers-reduced-motion (blocco in fondo). Regola d'oro: meno è meglio.
+     ============================================================ */
+  /* barre animate: il riempimento è a piena larghezza e SCALA da sinistra (transform, non width → niente layout) */
+  .bar i.fill{ width:100%; transform-origin:left center; transition:transform .26s cubic-bezier(.2,.7,.3,1); }
+  /* carte agenda: entrata fade + lieve slittamento, scaglionata; SOLO quando il set di carte cambia (.agbox.enter) */
+  @keyframes cardIn{ from{ opacity:0; transform:translateY(8px); } to{ opacity:1; transform:none; } }
+  .agbox.enter > .ag{ animation:cardIn .18s cubic-bezier(.2,.7,.3,1) both; }
+  .agbox.enter > .ag:nth-child(2){ animation-delay:.05s; }
+  .agbox.enter > .ag:nth-child(3){ animation-delay:.10s; }
+  .agbox.enter > .ag:nth-child(4){ animation-delay:.15s; }
+  .agbox.enter > .ag:nth-child(n+5){ animation-delay:.20s; }
+  /* cambio scheda: breve dissolvenza del contenuto della sezione (solo al cambio reale, gestito in render) */
+  @keyframes secFade{ from{ opacity:0; } to{ opacity:1; } }
+  .sec.secfade{ animation:secFade .12s ease; }
+  /* bilancio di fine anno: righe in entrata scaglionata; il VERDETTO si rivela DOPO che le barre si riempiono
+     (tensione misurata, come la notte elettorale). Solo opacity/transform → 60fps. */
+  @keyframes bilVerdetto{ from{ opacity:0; transform:translateY(6px); } to{ opacity:1; transform:none; } }
+  .bil-row{ animation:cardIn .26s cubic-bezier(.2,.7,.3,1) both; }
+  .bil-row:nth-child(2){ animation-delay:.06s; } .bil-row:nth-child(3){ animation-delay:.12s; } .bil-row:nth-child(4){ animation-delay:.18s; }
+  .bil-verdetto{ animation:bilVerdetto .42s cubic-bezier(.2,.7,.3,1) .5s both; }
+  /* fioretto promozione: il nuovo titolo entra con un breve scale+fade e un anello-accento che pulsa una volta
+     (highlight). Niente schermata. Solo transform/opacity (e un border via pseudo, opacity-animato) → 60fps. */
+  @keyframes promoFiore{ 0%{ opacity:0; transform:scale(.97); } 55%{ opacity:1; transform:scale(1.015); } 100%{ opacity:1; transform:none; } }
+  @keyframes promoFlash{ 0%{ opacity:0; } 28%{ opacity:.9; } 100%{ opacity:0; } }
+  .promo-fiore{ animation:promoFiore .5s cubic-bezier(.2,.7,.3,1) both; position:relative; }
+  .promo-fiore::after{ content:''; position:absolute; inset:-1px; border-radius:inherit; border:1.5px solid var(--acc); opacity:0; animation:promoFlash .9s ease both; pointer-events:none; }
+  /* emiciclo (lotto 2): i puntini-seggio compaiono a ventaglio sx→dx (ritardo per indice, inline) */
+  @keyframes emiDot{ from{ opacity:0; transform:scale(.2); } to{ opacity:1; transform:scale(1); } }
+  .emi-anim{ animation:emiDot .32s ease-out both; transform-origin:center; transform-box:fill-box; }
+  /* pallino-attenzione (E5): pulse discreto SOLO alla comparsa — 2 battiti poi fermo (mai nagging).
+     La classe .pulse è aggiunta dal render solo quando il pallino appare (lastDots); scale-only → compositor/60fps. */
+  @keyframes dotPulse{ 0%,100%{ transform:scale(1); } 50%{ transform:scale(1.45); } }
+  .tab .badge.dot.pulse{ animation:dotPulse .5s ease 2; transform-origin:center; }
+  /* F2 — l'area-che-chiama sulla mappa: pulse dello stroke SOLO alla comparsa (E5, 2 battiti), poi highlight statico
+     (colore/spessore inline). La classe .pulse è aggiunta dal render solo la prima volta (lastTerrPulse). */
+  @keyframes terrPulse{ 0%,100%{ stroke-opacity:1; } 50%{ stroke-opacity:.3; } }
+  .mappa-chiama.pulse{ animation:terrPulse 1.05s ease-in-out 2; }
+  /* MOVIMENTO — Ken Burns: pan/zoom lento e impercettibile su scene ed hero (il "movimento" che mancava, senza gif/video).
+     L'img è cover al 100% e il contenitore letterboxa (overflow:hidden): un lieve SOVRA-scala (≥1.06) tiene sempre coperto
+     anche col piccolo scorrimento → mai un bordo scoperto. `alternate` = un respiro avanti/indietro senza salti. Solo
+     transform → compositor/60fps, zero asset nuovi. Annullato sotto prefers-reduced-motion (blocco qui sotto). */
+  @keyframes kenBurns{ from{ transform:scale(1.06) translate(0.6%, 0.4%); } to{ transform:scale(1.12) translate(-1.2%, -0.9%); } }
+  #home-hero img{ animation:kenBurns 28s ease-in-out infinite alternate; will-change:transform; }
+  .ag-scene img{ animation:kenBurns 24s ease-in-out infinite alternate; will-change:transform; }
+  /* bottoni: feedback tattile leggero al tocco */
+  .opt:active, .tab:active, .mini-btn:active, .cand:active, .seg button:active, #start-btn:active{ transform:scale(.985); }
+  /* accessibilità non negoziabile: chi chiede meno movimento ha tutto istantaneo */
+  @media (prefers-reduced-motion: reduce){
+    .modal, .agbox.enter > .ag, .sec.secfade{ animation:none !important; }
+    .bar i.fill{ transition:none !important; }
+    .bil-row, .bil-verdetto{ animation:none !important; }
+    .promo-fiore{ animation:none !important; } .promo-fiore::after{ animation:none !important; opacity:0 !important; }
+    .emi-anim{ animation:none !important; }
+    .tab .badge.dot.pulse{ animation:none !important; }
+    .mappa-chiama.pulse{ animation:none !important; }
+    .opt:active, .tab:active, .mini-btn:active, .cand:active, .seg button:active, #start-btn:active{ transform:none !important; }
+    #home-hero img, .ag-scene img{ animation:none !important; }   /* Ken Burns fermo: statico, riempie esatto (scala 1) */
+    .mappa-wrap path, .mappa-wrap circle{ transition:none !important; }
+    header, #topbtn{ transition:none !important; }
+    .opt:active, .tab:active, .mini-btn:active, .cand:active, .seg button:active, #start-btn:active, .btn:active, .pressa:active{ transform:none !important; }
+  }
