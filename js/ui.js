@@ -761,7 +761,18 @@ var RITRATTI_AREA = {
    path inesistente. Derivarlo a runtime dai file richiederebbe fetch/sonde (il gioco usa script classici, niente
    fetch): resta una tabella esplicita, ma **verificata contro il disco** da `node .claude/verifica-ritratti.js`,
    che va rilanciato quando arriva un lotto nuovo. Forma-numero (`occ:5`) ancora accettata per compatibilità. */
-var RITRATTI_POOL = { occ:{m:5,f:5}, lat:{m:5,f:5}, asi:{m:5,f:5}, sud:{m:5,f:5}, afr:{m:5,f:5} };
+var RITRATTI_POOL = { occ:{m:5,f:5}, lat:{m:5,f:5}, asi:{m:5,f:5}, sud:{m:5,f:5}, afr:{m:5,f:5},
+                      occ50:{m:8,f:2} };   // L19-1: volti d'epoca (solo linea storica italiana). 8/2 di proposito: con la quota-genere del '50 il ~94% dei pescaggi è maschile
+/* L19-1 — POOL ERA-AWARE: nello scenario `italia1950` l'occidentale diventa `occ50`. Solo `occ` cambia: lo scenario
+   storico è unicamente italiano, le altre macro-aree restano invariate, e il presente è intatto.
+   SICURO PER COSTRUZIONE: `S.era` è scritta **solo** all'avvio (initStatoBase) e nella migrazione dei salvataggi —
+   mai mossa in partita (verificato) → una carriera non attraversa le due tabelle e nessun ministro cambia faccia a
+   metà strada, nemmeno al confine '58-'61 (lì cambia il DECENNIO dentro LINEE_STORICHE, non `S.era`).
+   L'hash resta quello: cambia la tabella su cui atterra, non il modo di pescare. */
+function ritrattoPoolEra(pref){
+  var era=(typeof S!=='undefined' && S && S.era) || 'contemporanea';
+  return (era==='italia1950' && pref==='occ') ? 'occ50' : pref;
+}
 /* L11-1 — gli 8 ARCHETIPI del fuori-verbale: personaggi FISSI (uno per figura ricorrente), NON pescati per
    area+genere — il nome del file è l'identità. Si agganciano al `filo` degli archi via il campo `arc`. */
 var RITRATTI_ARC = {
@@ -774,6 +785,7 @@ function ritrattoArc(f){ return (f && f.arc && RITRATTI_ARC[f.arc]) ? RITRATTI_A
 function ritrattoDi(m){
   if(!m || !m.nm || typeof hashId!=='function') return null;
   var pref = RITRATTI_AREA[(typeof S!=='undefined'&&S&&S.paese)||'italia'];
+  if(pref) pref = ritrattoPoolEra(pref);                  // L19-1: nel '50 l'occidentale diventa `occ50` (volti d'epoca)
   var conf = pref ? RITRATTI_POOL[pref] : null;
   if(!conf) return null;                                // nessun pool per quest'area → iniziale (degrado pulito)
   var g = (m.g==='f') ? 'f' : 'm';                      // vecchi salvataggi senza g → maschile
