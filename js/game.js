@@ -239,7 +239,7 @@ function startOpposizione(){
   entraOpposizione(w);                   // governo all'avversario col suo profilo; tu sfidante (visibilità/credibilità standard)
   initTerritori(); initPotereLocale();   // territori per lean + potere locale del TUO blocco d'opposizione (bloccoIds = opp)
   S.mandate=0;                           // non hai ancora vinto un mandato: la prima vittoria sarà "Mandato 1"
-  S.log=[{t:'All\'opposizione', x:'Parti da sfidante: al governo c\'è '+w.nome+'. Costruisci consenso e riprenditi il paese alle prossime elezioni.'}];
+  S.log=[{t:T('All\'opposizione'), x:T('Parti da sfidante: al governo c\'è %W. Costruisci consenso e riprenditi il paese alle prossime elezioni.').replace('%W',w.nome)}];
   bioFatto((bgNome()?bgNome()+', e':'E')+'sordisce da sfidante: la scalata comincia dall\'opposizione.');   // "Sindacalista, esordisce da sfidante..."
   document.getElementById('appoint').style.display='none';
   document.getElementById('over').style.display='none';
@@ -294,7 +294,7 @@ function startMinistro(){
   S.minoranza=false; S.tenuta={}; S.tenutaForza0={}; S.tenutaLiv={}; S.tenutaUltimo={}; S.mesiMinoranza=0;
   initTerritori(); initPotereLocale();
   S.ind.consenso=computeConsenso(); S.ind.deficit=computeDeficit(); S.ind.fiducia=targetFiducia();
-  S.log=[{t:'Al governo, da ministro', x:'Entri nel governo di '+S.premier.nome+' come '+ruoloDicastero()+'. Costruisci il tuo capitale: il vertice si conquista.'}];
+  S.log=[{t:T('Al governo, da ministro'), x:T('Entri nel governo di %P come %R. Costruisci il tuo capitale: il vertice si conquista.').replace('%P',S.premier.nome).replace('%R',T(ruoloDicastero()))}];
   bioFatto((bgNome()?bgNome()+', e':'E')+'ntra nel governo come '+ruoloDicastero()+'.');
   document.getElementById('appoint').style.display='none';
   document.getElementById('over').style.display='none';
@@ -436,7 +436,7 @@ function esitoElezioneMinistro(){
     if(PAESE.comeSiVince==='parlamentare'||PAESE.coalizione) S.seggi=calcSeggi();
     S.capitale=clamp(S.capitale+5,0,100); S.premCrisiMesi=0;
     bioFatto('Il governo di '+(S.premier?S.premier.nome:'partito')+' confermato alle urne.');
-    S.log.unshift({t:'Governo confermato',x:(S.premier?S.premier.nome:'Il premier')+' vince le elezioni: resti ministro, il tuo capitale cresce.'});
+    S.log.unshift({t:T('Governo confermato'),x:T('%P vince le elezioni: resti ministro, il tuo capitale cresce.').replace('%P',(S.premier?S.premier.nome:T('Il premier')))});
     genAgenda(false); generaTitolo(); render(); commitSnap(); return;
   }
   S.premier=null;
@@ -523,7 +523,7 @@ function diventaInternazionale(ente){
   S.ministeroAperto=null; S.tab='gov';   // atterra sulla home del Segretario (niente drill-down residui)
   S.diplo=null;   // C2: se sei arrivato dal percorso diplomatico, lo chiude (ora sei Segretario)
   bioFatto('Da '+ruoloPrima+' a '+ruoloIntl()+': oltre il vertice nazionale, al servizio del mondo.');
-  S.log.unshift({t:'Al vertice del mondo', x:'Sei '+ruoloIntl()+'. Non governi un paese: medi tra le potenze.'});
+  S.log.unshift({t:T('Al vertice del mondo'), x:T('Sei %R. Non governi un paese: medi tra le potenze.').replace('%R',T(ruoloIntl()))});
   if(typeof PROMO_FIORE!=='undefined') PROMO_FIORE=true;
   document.getElementById('appoint').style.display='none';
   document.getElementById('over').style.display='none';
@@ -673,7 +673,7 @@ function startLocale(){
   simulateLocale();                                  // consenso locale iniziale
   if(S.biografia) S.biografia.origine='locale';       // l'epilogo ricorderà la gavetta
   const ruolo=ruoloLocale();
-  S.log=[{t:'Eletto '+ruolo, x:'Cominci dal basso: amministra bene '+S.locale.nome+', costruisci la notorietà, e il partito ti chiamerà a Roma.'}];
+  S.log=[{t:'Eletto '+ruolo, x:T('Cominci dal basso: amministra bene %L, costruisci la notorietà, e il partito ti chiamerà a Roma.').replace('%L',S.locale.nome)}];
   bioFatto((bgNome()?bgNome()+', e':'E')+'letto '+ruolo+'.');
   document.getElementById('appoint').style.display='none';
   document.getElementById('over').style.display='none';
@@ -1142,7 +1142,7 @@ function esitoElezioneLocale(){
   if(S.locale.consenso>=40){
     S.mandate++; S.turnInMandate=0; S.locale.mandato++; S.capitale=clamp(S.capitale+5,0,100);
     bioFatto('Rieletto '+ruoloLocale()+': mandato '+S.locale.mandato+'.');
-    S.log.unshift({t:'Rieletto',x:'Le urne locali ti confermano: comincia il mandato '+S.locale.mandato+'.'});
+    S.log.unshift({t:T('Rieletto'),x:T('Le urne locali ti confermano: comincia il mandato %N.').replace('%N',S.locale.mandato)});
     genAgenda(false); generaTitolo(); render(); commitSnap(); return;
   }
   bioFatto(gn('Sconfitto','Sconfitta')+' alle comunali: la carriera si ferma alla guida '+diLuogo(S.locale.nome)+'.');
@@ -1162,7 +1162,7 @@ function diventaMinistro(){
   S.ministers=[]; S.coalizione=[S.partito]; S.seggi=(PAESE.coalizione||PAESE.comeSiVince==='parlamentare')?calcSeggi():null;
   S.ind.consenso=computeConsenso(); S.ind.deficit=computeDeficit(); S.ind.fiducia=targetFiducia();
   bioFatto('Da '+ruoloPrima+' a '+ruoloDicastero()+': la chiamata a Roma.');
-  S.log.unshift({t:'A Roma',x:'Il partito ti porta nel governo come '+ruoloDicastero()+'. La scalata continua.'});
+  S.log.unshift({t:T('A Roma'),x:T('Il partito ti porta nel governo come %R. La scalata continua.').replace('%R',T(ruoloDicastero()))});
   if(typeof PROMO_FIORE!=='undefined') PROMO_FIORE=true;
   S.turnInMandate=0; S.mandate=S.mandate||1;
   document.getElementById('appoint').style.display='none';
@@ -1943,7 +1943,7 @@ function azioneIncarico(id){
   S.correnti.forEach(function(c){ c.umore=clamp(c.umore+(c.id===id?8:-2),0,100); });   // +8/−2 (era +7/−3): la mossa ora si SENTE su umore medio
   if(eraCalda && S.tenuta){ for(var k in S.tenuta) S.tenuta[k]=clamp(S.tenuta[k]+2,0,100); }   // un partito compatto rassicura gli alleati → coalizione più salda
   const D=CORRENTI_DEF.find(function(d){return d.id===id;})||{};
-  S.log.unshift({t:'Incarico di partito', x:'Un incarico di peso '+(D.a||'a una corrente')+': la corrente si rinsalda'+(eraCalda?', e il partito compatto rassicura gli alleati.':', le altre mugugnano.')});
+  S.log.unshift({t:T('Incarico di partito'), x:T(eraCalda?'Un incarico di peso %C: la corrente si rinsalda, e il partito compatto rassicura gli alleati.':'Un incarico di peso %C: la corrente si rinsalda, le altre mugugnano.').replace('%C',T(D.a||'a una corrente'))});
   render();
 }
 function azioneMediazione(){
@@ -2048,9 +2048,17 @@ function esitoIntermedia(ris){
     S.pesoUE=ris.pe.quota;
     repd(ris.win?3:-3);
     const mioNome=(ris.pe.gruppi.find(g=>g.tuo)||{}).nome||'';
-    S.log.unshift({t:'Parlamento europeo', x:'Il tuo gruppo ('+mioNome+'): '+ris.pe.rank+'º per peso · '+ris.pe.quota+'%.'});
+    /* L16-1 — frase intera con segnaposto: l'ordinale «º» vive DENTRO il template italiano (in inglese la forma è
+       un'altra), così la traduzione può risistemarlo senza frammenti appesi. */
+    S.log.unshift({t:T('Parlamento europeo'), x:T('Il tuo gruppo (%G) è %R° per peso, con il %Q%.').replace('%G',mioNome).replace('%R',ris.pe.rank).replace('%Q',ris.pe.quota)});
   }
-  S.log.unshift({t:ris.tipo, x:'Il tuo blocco '+Math.round(ris.quota)+'% (atteso '+Math.round(ris.attesa)+'%): '+(ris.win?'avanzi.':'arretri.')+((ris.aree&&ris.aree.length)?' '+ris.aree.length+' territori cambiano colore.':'')});
+  /* L16-1 — FRASE INTERA con segnaposto, tradotta come unità (mai frammenti: l'ordine delle parti cambia da lingua
+     a lingua). Due frasi separate per avanzata/arretramento; la coda-territori è una frase a sé, con la variante
+     singolare (un «1 territori» sarebbe rotto in entrambe le lingue). */
+  var _qz=Math.round(ris.quota), _az=Math.round(ris.attesa), _nz=(ris.aree&&ris.aree.length)||0;
+  var _xz=T(ris.win?'Il tuo blocco è al %Q% (atteso %A%): avanzi.':'Il tuo blocco è al %Q% (atteso %A%): arretri.').replace('%Q',_qz).replace('%A',_az);
+  if(_nz) _xz+=' '+(_nz===1?T('Un territorio cambia colore.'):T('%N territori cambiano colore.').replace('%N',_nz));
+  S.log.unshift({t:T(ris.tipo), x:_xz});
 }
 
 /* --- Agenda mensile --- */
@@ -2263,12 +2271,12 @@ function pickPersonale(){
   return null;
 }
 
-function genAgenda(first){
+function genAgendaRamo(first){
   S.agenda=[];
   // D4 — il PILASTRO datato: l'Italia entra alle Nazioni Unite (14 dic 1955). One-shot per l'era '50 (qualsiasi livello):
   // da lì l'orizzonte ONU si apre (ruoloIntl/nodo passano all'ONU con l'orologio). S.onuFatto: campo nuovo, migrazione undefined→false.
   if(!first && S.era==='italia1950' && !S.onuFatto && typeof PILASTRO_ONU_EV!=='undefined' && (S.year>1955 || (S.year===1955 && S.month>=12)) && !S.opposizione){
-    S.onuFatto=true; S.agenda.push({kind:'event', data:PILASTRO_ONU_EV, resolved:false}); return;
+    S.onuFatto=true; S.agenda.push({kind:'event', data:PILASTRO_ONU_EV, resolved:false}); agendaSolo(); return;
   }
   if(S.livello===0){ if(S.attivista && !S.attivista.laurea){                     // ATTIVISTA: UNA carta al mese, scelta per priorità (rework L2: campagne come carte di flusso)
       var ac=null;
@@ -2281,7 +2289,7 @@ function genAgenda(first){
       if(!ac) ac=pickAttivista();                                                            // 4) la mossa del mese
       if(ac) S.agenda.push(ac);
     } return; }   // alla laurea (L4) la candidatura
-  if(!first){ const px=intermediaA(meseMandato()+2); if(px) S.log.unshift({t:'In arrivo',x:px.tipo+' tra 2 mesi.'}); }   // avviso prossimo voto
+  if(!first){ const px=intermediaA(meseMandato()+2); if(px) S.log.unshift({t:T('In arrivo'),x:T('%V tra 2 mesi.').replace('%V',T(px.tipo))}); }   // avviso prossimo voto
   if(S.livello===4){   // SEGRETARIO GENERALE (fase C1a): crisi di mediazione + archi personali (ti seguono, dove:'entrambi')
     const inq=aggiornaInchiesta();      // l'esposizione del passato ti segue anche al vertice del mondo
     const inqA=aggiornaArchi(!!inq);
@@ -2295,7 +2303,7 @@ function genAgenda(first){
   }
   if(S.livello===5){   // DIPLOMATICO (C2): la salita > inchiesta/archi personali > missione diplomatica + personale
     const occ=pickOccasione();
-    if(occ){ S.agenda.push(occ); return; }            // la salita (Alto rappresentante / Segretario) è LA carta del mese
+    if(occ){ S.agenda.push(occ); agendaSolo(); return; }            // la salita (Alto rappresentante / Segretario) è LA carta del mese
     const inq=aggiornaInchiesta();
     const inqA=aggiornaArchi(!!inq);
     if(!inq && !inqA){
@@ -2308,7 +2316,7 @@ function genAgenda(first){
   }
   if(S.livello===1){   // POLITICO LOCALE: occasione (salita) > inchiesta/archi personali > evento locale + personale
     const occ=pickOccasione();
-    if(occ){ S.agenda.push(occ); return; }
+    if(occ){ S.agenda.push(occ); agendaSolo(); return; }
     const inq=aggiornaInchiesta();      // l'esposizione ti segue anche da locale (bersaglio sempre tu)
     const inqA=aggiornaArchi(!!inq);    // archi personali (vita/coscienza/salute)
     if(!inq && !inqA){
@@ -2323,7 +2331,7 @@ function genAgenda(first){
   }
   if(S.opposizione){   // all'opposizione: intermedia (se c'è) oppure la tua carta + (a volte) un evento del governo AI
     // Cantiere C: la stagione elettorale vale anche da SFIDANTE (bloccoIds = il tuo blocco d'opposizione)
-    if(typeof pickCampagnaNazionale==='function'){ const cnbO=pickCampagnaNazionale(); if(cnbO){ S.agenda.push(cnbO); return; } }
+    if(typeof pickCampagnaNazionale==='function'){ const cnbO=pickCampagnaNazionale(); if(cnbO){ S.agenda.push(cnbO); agendaSolo(); return; } }
     const inq=aggiornaInchiesta();   // anche da sfidante l'esposizione conta: bersaglio sempre tu (niente ministri qui)
     const inqA=aggiornaArchi(!!inq);   // archi PERSONALI (vita/coscienza/salute) anche da sfidante (dove:'entrambi')
     const inter=pickIntermedia();
@@ -2343,7 +2351,7 @@ function genAgenda(first){
   }
   if(S.livello===2){   // MINISTRO: agenda di SETTORE + politica interna + l'occasione (la salita). Tetto 2 carte.
     const occ=pickOccasione();
-    if(occ){ S.agenda.push(occ); return; }          // l'occasione è LA carta del mese
+    if(occ){ S.agenda.push(occ); agendaSolo(); return; }          // l'occasione è LA carta del mese
     const inq=aggiornaInchiesta();                  // ti bersaglia sempre (a livello 2 non hai ministri da scaricare)
     const inqA=aggiornaArchi(!!inq);                // archi personali (vita/coscienza/salute)
     if(!inq && !inqA){
@@ -2362,16 +2370,16 @@ function genAgenda(first){
     return;
   }
   // Build B (b): lo snodo «legge truffa» come SCELTA di governo — carta prioritaria one-shot nell'anno pre-voto (1952), solo per il premier nel '50
-  if(!first && typeof snodoSceltaDovuta==='function' && snodoSceltaDovuta()){ S.agenda.push({kind:'event', data:LEGGE_TRUFFA_EV, resolved:false}); return; }
+  if(!first && typeof snodoSceltaDovuta==='function' && snodoSceltaDovuta()){ S.agenda.push({kind:'event', data:LEGGE_TRUFFA_EV, resolved:false}); agendaSolo(); return; }
   // AVANZAMENTO Lotto 4: gli snodi '60 come SCELTA (Enel poi apertura) — carte one-shot nel '62-63, solo per il premier nel '50
-  if(!first && typeof snodoEnelDovuta==='function' && snodoEnelDovuta()){ S.agenda.push({kind:'event', data:ENEL_EV, resolved:false}); return; }
-  if(!first && typeof snodoAperturaDovuta==='function' && snodoAperturaDovuta()){ S.agenda.push({kind:'event', data:APERTURA_EV, resolved:false}); return; }
+  if(!first && typeof snodoEnelDovuta==='function' && snodoEnelDovuta()){ S.agenda.push({kind:'event', data:ENEL_EV, resolved:false}); agendaSolo(); return; }
+  if(!first && typeof snodoAperturaDovuta==='function' && snodoAperturaDovuta()){ S.agenda.push({kind:'event', data:APERTURA_EV, resolved:false}); agendaSolo(); return; }
   // CURA Lotto P3 (#9): la CARTA-RICHIAMO delle correnti — chiama alla scheda PRIMA che sia tardi (mai l'imboscata a 30)
-  if(!first && typeof richiamoCorrentiDovuto==='function' && richiamoCorrentiDovuto()){ S.richiamoCorrUltimo=S.year*12+S.month; S.agenda.push({kind:'event', data:RICHIAMO_CORRENTI_EV, resolved:false}); return; }
+  if(!first && typeof richiamoCorrentiDovuto==='function' && richiamoCorrentiDovuto()){ S.richiamoCorrUltimo=S.year*12+S.month; S.agenda.push({kind:'event', data:RICHIAMO_CORRENTI_EV, resolved:false}); agendaSolo(); return; }
   // Cantiere C: la STAGIONE ELETTORALE (ultimi 6 mesi) — il beat-campagna è LA carta del mese (setpiece: la campagna assorbe l'agenda)
-  if(!first && typeof pickCampagnaNazionale==='function'){ const cnb=pickCampagnaNazionale(); if(cnb){ S.agenda.push(cnb); return; } }
+  if(!first && typeof pickCampagnaNazionale==='function'){ const cnb=pickCampagnaNazionale(); if(cnb){ S.agenda.push(cnb); agendaSolo(); return; } }
   // ATTO FINALE (fase C1a): la chiamata a guidare il Consesso (gated su relInt alto) — quando arriva, è LA carta del mese
-  if(!first){ const occI=pickOccasione(); if(occI){ S.agenda.push(occI); return; } }
+  if(!first){ const occI=pickOccasione(); if(occI){ S.agenda.push(occI); agendaSolo(); return; } }
   // rimpasti in sospeso (carte obbligatorie post-scandalo: storicamente esenti dal tetto)
   const hadRimpasto=S.pendingRimpasto.length>0;
   for(const mid of S.pendingRimpasto){
@@ -2491,17 +2499,39 @@ function genAgenda(first){
     S.recentDoss.push(d.id); if(S.recentDoss.length>22) S.recentDoss.shift();   // finestra 22 ≈ 20 mesi senza rivedere la stessa carta (pool ~92)
   }
 
-  /* G4 — il RESPIRO del mese. Additivo (niente `return`): il paese parla d'altro SENZA rubare il posto alla politica.
-     Sta IN FONDO di proposito: solo qui l'agenda del mese è completa, quindi il cedimento (`graveInCorso`) può
-     leggere le carte gravi appena pescate. Messo a metà, il leggero sarebbe entrato prima della crisi che lo vieta. */
-  if(!first && typeof leggeroDovuto==='function' && leggeroDovuto()){
+}
+/* ============================================================ L18-1 · LA CODA COMUNE DELL'AGENDA.
+   Il difetto (diagnosi L17-1): il RESPIRO (beat leggeri G2/G4) e il RETROSCENA (L14-1) stavano in fondo al corpo di
+   genAgenda, ma **ogni ramo-modalità esce con un `return` prima di arrivarci** → al governo funzionavano, in
+   opposizione/ministro/locale/segretario/diplomatico **non uscivano MAI**. Non era il gate né la probabilità: era il
+   punto d'iniezione. (Difetto più vecchio del fuori-verbale: i leggeri lo avevano da G2/G4.)
+
+   LA FORMA, decisa leggendo il codice — wrapper **+ flag esplicito**, non wrapper cieco. Enumerati i `return` di
+   `genAgendaRamo`, sono di DUE specie:
+     · chiudono un RAMO-modalità (attivista/locale/ministro/segretario/diplomatico/opposizione) → **devono** avere la coda;
+     · sono SETPIECE — «è LA carta del mese»: pilastro ONU, snodi d'epoca (truffa/Enel/apertura), richiamo-correnti,
+       beat di campagna elettorale, occasione/salita → **NON devono**: infilare un beat lì dentro diluirebbe il
+       momento che il design vuole solo. Un wrapper cieco l'avrebbe fatto.
+   Perciò `agendaSolo()` marca il mese come esclusivo e la coda si astiene. `AG_SOLO` è TRANSITORIO (come NOTTE/TEL):
+   vive un solo giro di generazione, mai dentro S.
+   L'ORDINE È PRESERVATO: la coda gira DOPO il ramo → l'agenda è completa e `graveInCorso` vede le carte gravi appena
+   pescate, che è il motivo per cui l'iniezione stava in fondo. ============================================ */
+let AG_SOLO=false;
+function agendaSolo(){ AG_SOLO=true; }
+function genAgenda(first){
+  AG_SOLO=false;
+  genAgendaRamo(first);
+  if(first || AG_SOLO) return;      // primo mese e mesi-setpiece: nessuna coda
+  codaAgenda();
+}
+function codaAgenda(){
+  /* G4 — il RESPIRO del mese. Additivo (niente `return`): il paese parla d'altro SENZA rubare il posto alla politica. */
+  if(typeof leggeroDovuto==='function' && leggeroDovuto()){
     var _bl=pescaLeggero();
     if(_bl){ S.leggeroUltimo=S.year*12+S.month; S.agenda.push({kind:'event', data:_bl, resolved:false}); }
   }
-  /* L14-1 — il beat-retroscena: stessa posizione in fondo (l'agenda del mese è completa → `graveInCorso` vede le
-     carte gravi appena pescate) e MAI nello stesso mese di un beat leggero: sono due registri diversi, insieme
-     stonerebbero. */
-  if(!first && typeof retroDovuto==='function' && retroDovuto() && S.leggeroUltimo!==(S.year*12+S.month)){
+  /* L14-1 — il beat-retroscena: MAI nello stesso mese di un beat leggero (due registri diversi, insieme stonerebbero). */
+  if(typeof retroDovuto==='function' && retroDovuto() && S.leggeroUltimo!==(S.year*12+S.month)){
     var _br=pescaRetro();
     if(_br){ S.retroUltimo=S.year*12+S.month; S.agenda.push({kind:'event', data:_br, resolved:false}); }
   }
@@ -2552,12 +2582,12 @@ function resolveItem(idx,ci){
       if(S.premier) S.premier.lealta=clamp(S.premier.lealta+6,0,100);
       S.capitale=clamp((S.capitale||0)+1,0,100);
       it.outcome='Hai sostenuto la linea del premier: la sua fiducia cresce, la tua ascesa è lenta ma sicura.';
-      S.log.unshift({t:'Lealtà al premier',x:'Hai assecondato '+((S.premier||{}).nome||'il premier')+'.'});
+      S.log.unshift({t:T('Lealtà al premier'),x:T('Hai assecondato %P.').replace('%P',((S.premier||{}).nome||T('il premier')))});
     } else {
       S.capitale=clamp((S.capitale||0)+2,0,100); S.visibilita=clamp((S.visibilita||40)+5,0,100);
       if(S.premier) S.premier.lealta=clamp(S.premier.lealta-8,0,100);
       it.outcome='Ti sei smarcato dal premier: visibilità e capitale su, ma lui ti guarda con sospetto.';
-      S.log.unshift({t:'Ambizione',x:'Ti sei distinto dalla linea di '+((S.premier||{}).nome||'partito')+'.'});
+      S.log.unshift({t:T('Ambizione'),x:T('Ti sei distinto dalla linea di %P.').replace('%P',((S.premier||{}).nome||T('partito')))});
     }
     S.premMossaUltimo=S.year*12+S.month;
     it.resolved=true;
@@ -2684,7 +2714,7 @@ function resolveItem(idx,ci){
         bioConta('assoluzioni'); bioFatto(gn('Assolto','Assolta')+' con formula piena: l\'inchiesta si sgonfia.');
         S.log.unshift({t:'Assoluzione',x:'Formula piena: ne esci più forte. Il paese volta pagina con te.'});
         chiudiInchiesta();
-        it.outcome=gn('Assolto','Assolta')+' con formula piena: l\'aula applaude, l\'esposizione crolla. Il rilancio.';
+        it.outcome=T('%A con formula piena: l\'aula applaude, l\'esposizione crolla. Il rilancio.').replace('%A',gn('Assolto','Assolta'));
       } else if(esito==='lieve'){
         bioConta('condanne'); bioFatto(gn('Condannato','Condannata')+' in primo grado: la macchia resta.');
         chiudiInchiesta(); S.esposizione=60;   // segnato: la risalita è possibile ma in salita (−1/mese + raffreddamento 12)
@@ -2729,13 +2759,13 @@ function resolveItem(idx,ci){
       c.a.f();
       if(mA) mA.loyalty=clamp(mA.loyalty+8,0,100);
       if(mB) mB.loyalty=clamp(mB.loyalty-8,0,100);
-      it.outcome='Hai dato ragione a <b>'+(mA?mA.nm:'')+'</b>.';
+      it.outcome=T('Hai dato ragione a <b>%N</b>.').replace('%N',(mA?mA.nm:''));
       S.log.unshift({t:T('Scontro nel governo'),x:(mA?mA.nm:'')+' '+T('(linea sostenuta)')+' · '+T(c.tema)});
     } else { // schierati con B
       c.b.f();
       if(mB) mB.loyalty=clamp(mB.loyalty+8,0,100);
       if(mA) mA.loyalty=clamp(mA.loyalty-8,0,100);
-      it.outcome='Hai dato ragione a <b>'+(mB?mB.nm:'')+'</b>.';
+      it.outcome=T('Hai dato ragione a <b>%N</b>.').replace('%N',(mB?mB.nm:''));
       S.log.unshift({t:T('Scontro nel governo'),x:(mB?mB.nm:'')+' '+T('(linea sostenuta)')+' · '+T(c.tema)});
     }
     S.ind.consenso=computeConsenso();
@@ -2754,7 +2784,7 @@ function resolveItem(idx,ci){
     S.log.unshift({t:T('Il partito'), x:T('Punto con le correnti:')+' '+T(choice.l)});
   } else if(it.kind==='intermedia'){
     esitoIntermedia(it.ris);
-    it.resolved=true; it.outcome=it.ris.win?'Risultato incassato: avanzi nel territorio.':'Risultato incassato: arretri.';
+    it.resolved=true; it.outcome=T(it.ris.win?'Risultato incassato: avanzi nel territorio.':'Risultato incassato: arretri.');   // L16-1: due frasi intere, non un interruttore in mezzo
   } else {
     const d=it.data; const choice=d.ch[ci];
     if(choice.need!=null && (S.ind.reputazione==null || S.ind.reputazione<choice.need)) return;   // opzione a soglia di reputazione: non disponibile
@@ -2923,7 +2953,7 @@ function avanzaMese(){
     if(S.month>12){ S.month=1; S.year++; S.turnInMandate++; }
     if(S.month===1 && S.eta!=null){ S.eta++; if(S.famiglia&&S.famiglia.figli) S.famiglia.figli.forEach(function(f){ f.eta++; });
       if(S.eta>=80) return gameOver('ritiro');       // L5-FIX (MEDIUM): l'orologio biografico vale anche a livello 0 — chi fa coasting non è immortale (il congedo a 80 esiste a ogni altro livello)
-      S.log.unshift({t:'Compleanno',x:'Compi '+S.eta+' anni.'}); }
+      S.log.unshift({t:T('Compleanno'),x:T('Compi %E anni.').replace('%E',S.eta)}); }
     if(famigliaPresente() && S.famiglia.serenita!=null){ const dm=(dif().degradoMult!=null)?dif().degradoMult:1; serenitaMuovi(-0.3*dm); }
     if(S.attivista){ simulateAttivista(); S.attivista.mesi=(S.attivista.mesi||0)+1;      // L3: deriva passiva (verso ciò che hai costruito) + conteggio mesi
       var C2=S.attivista.campagna;
@@ -2955,7 +2985,7 @@ function avanzaMese(){
     if(S.eta>=80) return gameOver('ritiro');
     if(S.eta===77)      S.log.unshift({t:'Compleanno',x:'Compi 77 anni. Nei corridoi si comincia a parlare del tuo ritiro.'});
     else if(S.eta===79) S.log.unshift({t:'Compleanno',x:'Compi 79 anni. L\'ultima stagione: il congedo si avvicina.'});
-    else                S.log.unshift({t:'Compleanno',x:'Compi '+S.eta+' anni.'});
+    else                S.log.unshift({t:T('Compleanno'),x:T('Compi %E anni.').replace('%E',S.eta)});
   }
   /* la serenità familiare cala ogni mese (la carriera che divora) — scalata da degradoMult; vale a ogni livello.
      Curare gli affetti (eventi) la rialza; sotto 35 arriva la crisi familiare (popup in pickPersonale). */
@@ -2999,11 +3029,11 @@ function avanzaMese(){
   if(S.livello===2){   // MINISTRO sotto premier-AI (lotto ascesa): NON perdi tu a crisi/insolvenza — è il governo del premier
     capitaleCresci();
     if(S.premier && S.premier.lealta<20){   // lealtà ai minimi → rischio di essere silurato (isteresi + preavviso, mai a freddo)
-      if(S.silAvviso==null){ S.silAvviso=S.year*12+S.month; S.log.unshift({t:'Tensione col premier',x:S.premier.nome+' non si fida più di te: un altro strappo e sei fuori dal governo.'}); }
+      if(S.silAvviso==null){ S.silAvviso=S.year*12+S.month; S.log.unshift({t:T('Tensione col premier'),x:T('%P non si fida più di te: un altro strappo e sei fuori dal governo.').replace('%P',S.premier.nome)}); }
       else if((S.year*12+S.month)-S.silAvviso>=2){ return gameOver('silurato'); }
     } else { S.silAvviso=null; }
     S.premCrisiMesi = (S.ind.consenso<33) ? (S.premCrisiMesi||0)+1 : 0;   // premier in crisi (consenso nazionale basso a lungo)
-    if(S.premCrisiMesi>=3 && S.capitale<50){ S.premier=generaPremier(); S.premCrisiMesi=0; S.log.unshift({t:'Cambio al vertice',x:'Il partito sostituisce il premier con '+S.premier.nome+'. Tu, ancora acerbo, resti ministro.'}); }   // se non sei pronto, un nuovo premier; se lo sei, scatta l'occasione (pickOccasione)
+    if(S.premCrisiMesi>=3 && S.capitale<50){ S.premier=generaPremier(); S.premCrisiMesi=0; S.log.unshift({t:T('Cambio al vertice'),x:T('Il partito sostituisce il premier con %P. Tu, ancora acerbo, resti ministro.').replace('%P',S.premier.nome)}); }   // se non sei pronto, un nuovo premier; se lo sei, scatta l'occasione (pickOccasione)
     if(S.month===1 && S.turnInMandate>=PAESE.mandatoMesi/12){ return esitoElezioneMinistro(); }
     maturaRP();
     S.snap=Object.assign({},S.pol); S.leggiSnap=Object.assign({},S.leggi);
@@ -3021,11 +3051,11 @@ function avanzaMese(){
   }
   maturaRP();   // PRIMA del reset degli snapshot: rpUsed() è ancora significativo
   S.snap=Object.assign({},S.pol); S.leggiSnap=Object.assign({},S.leggi);
-  if(S.month===1){ S.log.unshift({t:'Nuovo anno',x:'Legge di bilancio: manovra +3 punti riforma'+(((S.potereLocale||0)>50)?' (+1 dal territorio)':'')+' — in cassa ne hai '+curRpMax()+'.'}); }
+  if(S.month===1){ S.log.unshift({t:T('Nuovo anno'),x:T(((S.potereLocale||0)>50)?'Legge di bilancio: manovra +3 punti riforma (+1 dal territorio) — in cassa ne hai %N.':'Legge di bilancio: manovra +3 punti riforma — in cassa ne hai %N.').replace('%N',curRpMax())}); }
   /* il conto della promessa (intervista) si chiude al confine: colpi deliberati ≥3 → ritorno di fiamma; 3 mesi senza → scade in silenzio */
   if(S.promessa){
     if((S.promessa.colpi||0)>=3){ const g=S.promessa.grp; S.promessa=null; gd(g,-4); stampad(-6);
-      S.log.unshift({t:'La stampa ti rinfaccia l\'intervista', x:'Avevi promesso attenzione a '+nomeGruppo(g)+', poi i fatti: i media non perdonano.'}); }
+      S.log.unshift({t:'La stampa ti rinfaccia l\'intervista', x:T('Avevi promesso attenzione a %G, poi i fatti: i media non perdonano.').replace('%G',T(nomeGruppo(g)))}); }
     else if((S.year*12+S.month)-S.promessa.mese>=3){ S.promessa=null; }
   }
   aggiornaSfida();   // la vita interna del partito: la sfida monta, matura o rientra
@@ -3033,7 +3063,7 @@ function avanzaMese(){
   genAgenda(false);
   generaTitolo();   // la prima pagina del mese (dopo genAgenda: può commentare le carte di oggi)
   if(S.ind.consenso<30) S.log.unshift({t:'Allarme',x:'Il consenso è basso: si parla di sfiducia.'});
-  if(S.mesiSottoCrisi>0) S.log.unshift({t:'Allarme debito',x:'Fiducia ai minimi: rischio insolvenza ('+S.mesiSottoCrisi+'/'+dif().mesiInsolvenza+' mesi).'});
+  if(S.mesiSottoCrisi>0) S.log.unshift({t:T('Allarme debito'),x:T('Fiducia ai minimi: rischio insolvenza (%A/%B mesi).').replace('%A',S.mesiSottoCrisi).replace('%B',dif().mesiInsolvenza)});
   forseSondaggio();
   render(); commitSnap();
   if(sfidaMatura()) apriPrimaria('anticipata');   // congresso anticipato: 3 mesi di sfida matura (modale sopra il mese nuovo)
@@ -3693,7 +3723,7 @@ function nextMandate(){
   S.campNaz=null; S.campNazUltimo=null;   // Cantiere C: la stagione si chiude col voto (le promesseCampagna PERSISTONO: resa dei conti alla prossima)
   tutteCorrenti(8);   // la vittoria ricompatta il partito
   bioConta('elezioniVinte'); bioFatto(gn('Rieletto','Rieletta')+': comincia il mandato '+S.mandate+'.');
-  S.log.unshift({t:gn('Rieletto','Rieletta'),x:'Inizia il mandato '+S.mandate+(S.minoranza?' — governo di minoranza.':'.')});
+  S.log.unshift({t:gn('Rieletto','Rieletta'),x:T(S.minoranza?'Inizia il mandato %N — governo di minoranza.':'Inizia il mandato %N.').replace('%N',S.mandate)});
   document.getElementById('ov').classList.remove('on');
   genAgenda(false); generaTitolo(); render(); commitSnap();
 }
@@ -3734,7 +3764,7 @@ function condannaLieve(){
   const w=vincitore();
   entraOpposizione(w);
   S.bloccoAtteso=bloccoQuota();
-  S.log.unshift({t:'All\'opposizione',x:'Dimissioni dopo la condanna: governa '+w.nome+'. La rimonta parte da qui, col marchio addosso.'});
+  S.log.unshift({t:T('All\'opposizione'),x:T('Dimissioni dopo la condanna: governa %W. La rimonta parte da qui, col marchio addosso.').replace('%W',w.nome)});
   document.getElementById('ov').classList.remove('on');
   genAgenda(false); render(); commitSnap();
 }
