@@ -4081,6 +4081,7 @@ const EN = {
   "il favore dei fori multilaterali: la porta del vertice":"the favour of the multilateral forums: the door to the summit",
   "<b>All'opposizione.</b> Governa %P: niente bilancio né ministri. Ogni mese una mossa; segui la tua risalita nella scheda <b>Partiti</b>.":"<b>In opposition.</b> %P is in power: no budget, no ministers. One move each month; follow your climb in the <b>Parties</b> tab.",
   "Visibilità":"Visibility",
+  "Reputazione":"Reputation",
   "quanto i media parlano di te":"how much the media talk about you",
   "Credibilità":"Credibility",
   "quanto sei un'alternativa seria":"how serious an alternative you are",

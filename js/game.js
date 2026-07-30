@@ -1271,6 +1271,12 @@ function premiaSfida(cornice, ok){
   if(cornice==='piazza'){ if(ok){ attA(4); attB(1); d.push(T('Base')+' +4'); d.push(T('Autorevolezza')+' +1'); } else { attA(-1); d.push(T('Base')+' −1'); } }
   else if(cornice==='aula'){ if(S.locale){ S.locale.consenso=clamp((S.locale.consenso||0)+(ok?2:-1),0,100); d.push(T('Consenso locale')+' '+(ok?'+2':'−1')); } }
   else if(cornice==='vertice'){ if(ok){ autorevMuovi(3); creditoMuovi(3); d.push(T('Autorevolezza')+' +3'); d.push(T('Credito diplomatico')+' +3'); } else { autorevMuovi(-1); creditoMuovi(-1); d.push(T('Autorevolezza')+' −1'); d.push(T('Credito diplomatico')+' −1'); } }
+  /* L23-1 — la cornice `stampa` è l'unica servita da DUE ruoli: premier e sfidante. La reputazione internazionale è
+     la valuta di chi rappresenta il paese; lo sfidante che risponde bene guadagna VISIBILITÀ e CREDIBILITÀ. Taratura
+     conservata in grandezza: nessuna mossa supera il +2 dell'originale (`repd`), e `stampad` resta identica in
+     entrambi i rami — il rapporto con la stampa esiste da sfidante quanto da premier.
+     IL MALUS NON SI BIFORCA: la gaffe muove solo `stampad(-3)`, che vale in tutte e due le modalità (verificato). */
+  else if(S.opposizione){ if(ok){ visd(2); credd(1); stampad(3); d.push(T('Visibilità')+' +2'); d.push(T('Credibilità')+' +1'); d.push(T('Rapporto con la stampa')+' +3'); } else { stampad(-3); d.push(T('Rapporto con la stampa')+' −3'); } }
   else { if(ok){ repd(2); stampad(3); d.push(T('Reputazione')+' +2'); d.push(T('Rapporto con la stampa')+' +3'); } else { stampad(-3); d.push(T('Rapporto con la stampa')+' −3'); } }
   return d.join(' · ');
 }
