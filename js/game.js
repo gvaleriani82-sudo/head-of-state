@@ -33,6 +33,9 @@ function goAppoint(){
     const arr=[]; let guard=0;
     while(arr.length<3 && guard++<40){ const c=mkCand(); if(!arr.some(x=>x.profile===c.profile)) arr.push(c); }
     while(arr.length<3) arr.push(mkCand());
+    /* L20-1 — la ROSA: i 3 candidati hanno volti distinti fra loro (è lì che il confronto visivo conta). Il volto
+       mostrato resta `ritRosa`, e alla nomina ha la precedenza se libero: quello che vedi scegliendo è quello che ottieni. */
+    if(typeof assegnaVoltiGruppo==='function'){ assegnaVoltiGruppo(arr); arr.forEach(c=>{ c.ritRosa=c.rit; }); }
     APT.cands[m.id]=arr;
   }
   document.getElementById('start').style.display='none';
@@ -43,7 +46,10 @@ function goAppoint(){
   renderAppoint();
 }
 function confirmCabinet(){
-  const mins=MINISTRIES.map(m=>{const c=APT.cands[m.id][APT.sel[m.id]]; return {min:m.id, nm:c.nm, profile:c.profile, comp:c.comp, loyalty:62};});
+  const mins=MINISTRIES.map(m=>{const c=APT.cands[m.id][APT.sel[m.id]]; return {min:m.id, nm:c.nm, g:c.g, profile:c.profile, comp:c.comp, loyalty:62, rit:c.rit};});
+  /* L20-1 — la formazione è l'unico momento in cui TUTTI sono "nuovi": si assegnano i volti in blocco, ognuno
+     partendo dal suo hash e cedendo il passo a chi l'ha già preso (`rit` congelato). Da qui in poi nessuno cambia. */
+  if(typeof assegnaVoltiGruppo==='function'){ mins.forEach(m=>{ m.rit=null; }); assegnaVoltiGruppo(mins); }
   if(S && S.opposizione) tornaAlGoverno(mins); else startGame(mins);   // rientro dall'opposizione vs nuova partita
 }
 
@@ -454,7 +460,8 @@ function diventaPremier(viaElezione){
   const ruoloPrima=ruoloDicastero();
   S.livello=3; S.premier=null; S.dicastero=null; S.capitale=null; S.prevSettore=null; S.silAvviso=null; S.premCrisiMesi=0; S.occUltima=null; S.mesiAltoCap=0;
   S.opposizione=false; S.governoAvversario=null; S.mesiSottoCrisi=0; S.fidLivello=0; S.fidUltimo={};
-  S.ministers=MINISTRIES.map(function(M){ const c=mkCand(); return { min:M.id, nm:c.nm, profile:c.profile, comp:c.comp, loyalty:62 }; });   // formi un governo (transizione fluida, niente schermata)
+  S.ministers=MINISTRIES.map(function(M){ const c=mkCand(); return { min:M.id, nm:c.nm, g:c.g, profile:c.profile, comp:c.comp, loyalty:62 }; });   // formi un governo (transizione fluida, niente schermata)
+  if(typeof assegnaVoltiGruppo==='function') assegnaVoltiGruppo(S.ministers);   // L20-1: volti distinti nel gabinetto generato alla salita
   S.coalizione=[S.partito];
   S.seggi=(PAESE.coalizione||PAESE.comeSiVince==='parlamentare')?calcSeggi():null;
   S.minoranza = PAESE.coalizione ? seggiCoalizione(S.coalizione,S.seggi)<50 : (PAESE.comeSiVince==='parlamentare'?S.seggi[S.partito]<50:false);
@@ -1373,7 +1380,11 @@ function markSfida(id){ if(!id || typeof S==='undefined' || !S) return; S.recent
 function intervistaCornice(){ return S.livello===2?'commissione':(S.livello>=4?'vertice':'stampa'); }
 function intervistaRuoli(){ return S.livello===2?['governo','ministro']:(S.livello>=4?['intl']:['governo']); }
 function intervistaDovuta(){
-  if(typeof S==='undefined' || !S || S.opposizione) return false;
+  /* L22-1 — TOLTO `|| S.opposizione` (diagnosi L21-1): il gate escludeva l'intervista allo sfidante, cioè il grosso
+     del volume-quiz E la parte dove la difficoltà sale (catene media→difficile→difficile). Misurato: 0/200 contro
+     148/200 al governo. I testi di cornice sono neutri («L'intervista incalzante», «Il cronista va dritto al punto»):
+     un leader d'opposizione incalzato da un cronista è la scena più naturale che ci sia, nessuna biforcazione serve. */
+  if(typeof S==='undefined' || !S) return false;
   if([2,3,4,5].indexOf(S.livello)<0) return false;               // solo i ruoli con una cornice-intervista
   if(typeof SFIDE==='undefined') return false;
   var mese=S.year*12+S.month;
@@ -2543,9 +2554,13 @@ function resolveItem(idx,ci){
   STAMPA_FX=0;   // bandierina dell'amplificatore: pulita prima degli effetti della scelta
   if(it.kind==='rimpasto'){
     const c=it.cands[ci]; const m=getMin(it.min);
-    m.nm=c.nm; m.profile=c.profile; m.comp=c.comp; m.loyalty=58; m.resigning=false;
+    m.nm=c.nm; m.g=c.g; m.profile=c.profile; m.comp=c.comp; m.loyalty=58; m.resigning=false;
+    /* L20-1 — SOLO il nuovo arrivato risolve il suo volto, evitando quelli dei colleghi IN CARICA (escluso il
+       posto che sta prendendo). Nessun altro `rit` viene toccato: un rimpasto non sposta le facce di chi resta. */
+    m.rit=null;
+    if(typeof assegnaVolto==='function') assegnaVolto(m, volteOccupati(it.min), c.ritRosa);   // `ritRosa` = la faccia mostrata nella rosa: se libera si tiene
     it.resolved=true; it.outcome=T('Nuovo ministro: <b>%M</b> (%P).').replace('%M',c.nm).replace('%P',T(PROF[c.profile]));
-    S.log.unshift({t:'Rimpasto',x:c.nm+' guida ora '+MINISTRIES.find(x=>x.id===it.min).nm+'.'});
+    S.log.unshift({t:T('Rimpasto'),x:T('%M guida ora %D.').replace('%M',c.nm).replace('%D',T(MINISTRIES.find(x=>x.id===it.min).nm))});   // L20-1: trovata qui, era concatenata (la guardia non la vedeva: nessuna parola-spia nel frammento)
     if(S.correnti){ const pp=profiloPartito(); corrented(c.profile==='tecnico'?'pontieri':(c.profile===pp?'militanti':'fedelissimi'), 5); }   // una nomina è anche politica interna
   } else if(it.kind==='proposta'){
     const m=getMin(it.min);
@@ -3945,6 +3960,13 @@ function applySnap(snap){
   if(S.sondStorico===undefined) S.sondStorico=[];   // F3 — migrazione: i salvataggi pre-lotto ricevono la serie-sondaggi vuota
   if(S.leggeroUltimo===undefined) S.leggeroUltimo=null;   // G4 — migrazione: cooldown del beat leggero
   if(S.retroUltimo===undefined) S.retroUltimo=null;       // L14-1 — migrazione: cooldown del beat-retroscena
+  /* L20-1 — migrazione dei volti: un gabinetto salvato prima di oggi non ha `rit`. Si assegna UNA volta in blocco
+     (ognuno dal suo hash, cedendo il passo) e da lì è congelato: il giocatore vede il de-dup senza che i volti
+     ballino a ogni caricamento. Chi ha già `rit` non viene toccato. */
+  if(S.ministers && S.ministers.length && typeof assegnaVoltiGruppo==='function' && S.ministers.some(function(m){ return !m.rit; })){
+    var _occ={}; S.ministers.forEach(function(m){ if(m.rit) _occ[m.rit]=1; });
+    assegnaVoltiGruppo(S.ministers.filter(function(m){ return !m.rit; }), _occ);
+  }
   if(S.telUltimo===undefined) S.telUltimo=null;           // F1 — migrazione: cooldown della telefonata
   if(S.telPendente===undefined) S.telPendente=null;       // F1 — migrazione: nessuna chiamata in sospeso nei vecchi salvataggi
   if(S.scandaloUltimo===undefined) S.scandaloUltimo=null; // G3 — migrazione: cooldown-famiglia archi-scandalo

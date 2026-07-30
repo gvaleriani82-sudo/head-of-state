@@ -1495,6 +1495,37 @@ const RETRO_BEAT = [
     {l:'Non dici niente e lo tieni', e:'Chi resta impara che non controlli le fughe', f:()=>{ stampad(-2); corrented('fedelissimi',-1); }},
     {l:'Lo allontani senza accuse', e:'Chiudi la falla; perdi un uomo che valeva', f:()=>{ corrented('fedelissimi',-2); credd(1); }},
   ]},
+  /* ===== L22-2 · SEI BEAT PER L'OPPOSIZIONE (DESIGN-RELAZIONI.md §FASE 1-ter). I dieci sopra sono scritti dalla
+     prospettiva di chi comanda (nomine da concedere, commi da correggere); all'opposizione il fuori-verbale ha una
+     natura sua: **non hai niente da dare, quindi chi ti cerca sta scommettendo su di te.**
+     GATE simmetrico ai due governo-only (`cond:()=>!S.opposizione`) → qui `cond:()=>!!S.opposizione`. Stesso pool
+     `RETRO_BEAT` e stessa rotazione: all'opposizione il sacchetto ha 8+6=14 beat, al governo resta com'era (10).
+     VALUTE: all'opposizione `visd`/`credd` RENDONO (verificato in L13-1: le setta `entraOpposizione`), più
+     `spregiudicata` e `stampad` di striscio, e `corrented` (le correnti sopravvivono alla caduta). Mai `gd()`. ===== */
+  {id:'rb_finanziatore', kick:'Ombre', t:'Il finanziatore discreto', cond:()=>!!S.opposizione, text:'Un uomo che non hai mai visto alle tue iniziative chiede di vederti in privato. Rappresenta «amici che guardano avanti»: gente che oggi finanzia chi governa, e vorrebbe non trovarsi scoperta se il vento gira. Nessuna cifra, nessuna richiesta. Solo sapere se, un domani, ti ricorderesti di chi c\'era.', ch:[
+    {l:'Lasci la porta aperta', e:'Risorse future; sei già in debito prima di vincere', f:()=>{ spregiudicata(2); corrented('fedelissimi',1); }},
+    {l:'Gli dici che il vento non si compra', e:'Bella frase; la ricorderà anche lui', f:()=>{ credd(2); }},
+  ]},
+  {id:'rb_funzionario', kick:'Palazzo', t:'Il funzionario che resta', cond:()=>!!S.opposizione, text:'Un alto funzionario che ha servito quattro governi ti fa arrivare, per canali suoi, un appunto su un dossier che il governo tiene fermo. Non è un documento segreto. È il modo in cui il Palazzo dice a te, sfidante, che certe stanze non cambiano inquilino.', ch:[
+    {l:'Studi l\'appunto e lo usi in aula', e:'Colpisci preparato; adesso il canale esiste', f:()=>{ credd(2); visd(2); spregiudicata(1); }},
+    {l:'Lo ignori: non vuoi debiti col Palazzo', e:'Pulito; e il prossimo appunto va a qualcun altro', f:()=>{ credd(1); }},
+  ]},
+  {id:'rb_coltiva', kick:'Ombre', t:'Il cronista che ti coltiva', cond:()=>!!S.opposizione, text:'Un giornalista ti cerca spesso, ultimamente. Le sue domande sono facili, i suoi pezzi ti trattano bene. Non è simpatia: sta investendo su di te come gli altri investono in borsa — e prima o poi vorrà l\'esclusiva del giorno in cui vincerai. O di quello in cui crollerai.', ch:[
+    {l:'Coltivi il rapporto', e:'Stampa amica nei giorni difficili; sei il suo cavallo', f:()=>{ stampad(3); visd(2); spregiudicata(1); }},
+    {l:'Tieni la distanza professionale', e:'Nessun debito; nessuno sconto', f:()=>{ credd(2); stampad(-1); }},
+  ]},
+  {id:'rb_transfuga', kick:'Ombre', t:'Il transfuga che sonda', cond:()=>!!S.opposizione, text:'Un parlamentare della maggioranza ti fa sapere, per interposta persona, che «diverse persone ragionano». Non offre il passaggio: offre di sapere che ci sta pensando. Se la cosa esce, per lui è la fine — e chi te l\'ha detto lo sa.', ch:[
+    {l:'Fai sapere che la porta esiste', e:'Il fronte avversario ha una crepa; sei complice del silenzio', f:()=>{ spregiudicata(2); corrented('pontieri',2); }},
+    {l:'Non raccogli: chi tradisce una volta…', e:'Linea pulita; la crepa si richiude', f:()=>{ credd(2); corrented('militanti',2); }},
+  ]},
+  {id:'rb_vecchioministro', kick:'Palazzo', t:'Il vecchio ministro', cond:()=>!!S.opposizione, text:'Un ex ministro del campo avversario, fuori dai giochi da anni, ti invita a pranzo. Parla dei suoi errori con una franchezza che ti sorprende. Verso il caffè capisci: non sta facendo pace col passato, sta scegliendo a chi lasciare i suoi contatti.', ch:[
+    {l:'Accetti l\'eredità di rapporti', e:'Rubrica preziosa; con dentro le sue ipoteche', f:()=>{ visd(2); spregiudicata(2); }},
+    {l:'Pranzo cordiale, e nient\'altro', e:'Nessuna ipoteca; la rubrica va altrove', f:()=>{ credd(2); }},
+  ]},
+  {id:'rb_piazza', kick:'Palazzo', t:'La piazza che chiede una parola', cond:()=>!!S.opposizione, text:'Un comitato locale in lotta ti chiede di salire sul loro palco. La causa è giusta, la piazza è arrabbiata, e in mezzo c\'è gente che con la tua idea di opposizione non c\'entra niente. Il governo aspetta solo una tua foto accanto allo striscione sbagliato.', ch:[
+    {l:'Sali sul palco', e:'La base ti sente vicino; la foto la sceglie il governo', f:()=>{ visd(3); corrented('militanti',2); stampad(-2); }},
+    {l:'Mandi una lettera di sostegno', e:'Prudente; la piazza voleva una faccia, non una busta', f:()=>{ credd(1); corrented('militanti',-2); }},
+  ]},
   {id:'rb_favore', kick:'Ombre', t:'Il conto di un vecchio favore', text:'Anni fa qualcuno ti ha risolto un problema piccolo, in un momento in cui non avevi nessuno. Non ti ha mai chiesto niente. Adesso ti chiede un colloquio per suo nipote — un colloquio, non un posto.', ch:[
     {l:'Fai fare il colloquio', e:'È davvero solo un colloquio. Ed è davvero un favore', f:()=>{ spregiudicata(2); }},
     {l:'Spieghi che non puoi', e:'Tieni la riga; il debito resta, non pagato', f:()=>{ credd(1); corrented('fedelissimi',-1); }},

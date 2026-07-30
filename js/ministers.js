@@ -24,6 +24,9 @@ function askReplace(mid){
   const cs=[]; let g=0;
   while(cs.length<3&&g++<40){const c=mkCand(); if(!cs.some(x=>x.profile===c.profile)) cs.push(c);}
   while(cs.length<3) cs.push(mkCand());
+  /* L20-1 — la rosa del rimpasto evita sia i colleghi fra loro sia i ministri IN CARICA (escluso il posto che si
+     libera): così il volto che il giocatore vede scegliendo è già libero e alla nomina non si sposta. */
+  if(typeof assegnaVoltiGruppo==='function'){ assegnaVoltiGruppo(cs, (typeof volteOccupati==='function'?volteOccupati(mid):{})); cs.forEach(c=>{ c.ritRosa=c.rit; }); }
   S.agenda.push({kind:'rimpasto', min:mid, cands:cs, resolved:false});
   S.tab='gov'; render();
 }

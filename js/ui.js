@@ -782,7 +782,55 @@ var RITRATTI_ARC = {
   militante:'assets/ritratti/arc-militante.webp',     magistrato:'assets/ritratti/arc-magistrato.webp',
 };
 function ritrattoArc(f){ return (f && f.arc && RITRATTI_ARC[f.arc]) ? RITRATTI_ARC[f.arc] : null; }
+/* ============================================================ L20-1 · DE-DUPLICA DEI VOLTI NEL GABINETTO.
+   Il problema (misurato in L19-1): con un pool di 8-10 volti, l'hash fa collidere 4 ministri su 10 in media — e
+   nella scheda Governo, dove ora i volti si vedono in fila, si nota. Il rimedio NON è allargare il pool.
+   LA TRAPPOLA EVITATA (la tua): **niente ricalcolo sull'insieme.** Un rimpasto non deve spostare la faccia di
+   ministri che non c'entrano. Quindi il volto risolto si **CONGELA** sul personaggio nel campo `rit` (dato puro,
+   serializza come `g` e sopravvive al round-trip): chi è in carica non si ricalcola MAI, solo il nuovo arrivato
+   evita le facce dei presenti. È coerente con L9-2, non un'eccezione: là si evitava la dipendenza dallo stato,
+   qui la dipendenza dallo stato È il punto (il volto dipende da chi c'era al momento della nomina).
+   L'hash resta la PRIMA scelta: si sposta solo se quella faccia è già occupata (passo +1 deterministico). ====== */
+function volteOccupati(escludi){
+  var out={}; ((typeof S!=='undefined'&&S&&S.ministers)||[]).forEach(function(m){
+    if(escludi && m.min===escludi) return;
+    var v=m&&m.rit; if(v) out[v]=1;
+  }); return out;
+}
+/* Assegna e CONGELA `rit`: parte dall'indice-hash e cammina in avanti (mod n) fino al primo libero. Se il pool è
+   saturo torna la scelta-hash (un duplicato è il tetto del pool, non un errore: 10 uomini su 8 volti fanno 2 doppi). */
+function assegnaVolto(m, occupati, preferito){
+  if(!m || !m.nm || typeof hashId!=='function') return null;
+  var pref = RITRATTI_AREA[(typeof S!=='undefined'&&S&&S.paese)||'italia'];
+  if(pref) pref = ritrattoPoolEra(pref);
+  var conf = pref ? RITRATTI_POOL[pref] : null;
+  if(!conf) return null;
+  var g = (m.g==='f') ? 'f' : 'm';
+  var n = (typeof conf==='number') ? conf : conf[g];
+  if(!n) return null;
+  /* CONTINUITÀ CON LA ROSA: se il candidato aveva già un volto mostrato al giocatore (`preferito`) e quel volto è
+     ancora libero, si tiene — quello che hai visto scegliendo è quello che ottieni. Solo se collide si sposta. */
+  if(preferito && (!occupati || !occupati[preferito])){ m.rit=preferito; if(occupati) occupati[preferito]=1; return preferito; }
+  var base = Math.abs(hashId(m.nm)) % n;
+  var scelto=null;
+  for(var k=0;k<n;k++){
+    var p='assets/ritratti/'+pref+'-'+g+(((base+k)%n)+1)+'.webp';
+    if(!occupati || !occupati[p]){ scelto=p; break; }
+  }
+  if(!scelto) scelto='assets/ritratti/'+pref+'-'+g+(base+1)+'.webp';   // pool saturo: il tetto, non un errore
+  m.rit=scelto;
+  if(occupati) occupati[scelto]=1;
+  return scelto;
+}
+/* Assegna a un GRUPPO (il gabinetto all'atto della formazione, o una rosa di candidati): ognuno parte dal suo
+   hash e cede il passo a chi l'ha già preso, in ordine di lista. */
+function assegnaVoltiGruppo(lista, occupati){
+  occupati = occupati || {};
+  (lista||[]).forEach(function(m){ var pre=m&&m.ritRosa; assegnaVolto(m, occupati, pre); });
+  return occupati;
+}
 function ritrattoDi(m){
+  if(m && m.rit) return m.rit;                            // L20-1: volto CONGELATO alla nomina → non cambia mai più
   if(!m || !m.nm || typeof hashId!=='function') return null;
   var pref = RITRATTI_AREA[(typeof S!=='undefined'&&S&&S.paese)||'italia'];
   if(pref) pref = ritrattoPoolEra(pref);                  // L19-1: nel '50 l'occidentale diventa `occ50` (volti d'epoca)
