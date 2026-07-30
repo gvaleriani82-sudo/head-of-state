@@ -175,6 +175,9 @@ function initStatoBase(){
   S.richiamoCorrUltimo=null;   // CURA Lotto P3 — cooldown della carta-richiamo correnti (dato puro, round-trip)
   S.leggeroUltimo=null;        // G4 — cooldown del beat leggero (dato puro, round-trip)
   S.retroUltimo=null;          // L14-1 — cooldown del beat-retroscena (dato puro, round-trip)
+  S.intese={};                 // L25-1 — il tavolo delle alleanze: {idPartito: 0-100}, dato puro e piatto
+  S.tavoloPid=null;            // L25-1 — il partito con cui è aperto il tavolo (lo scrive filo() dell'arco `tavolo`)
+  S.famOppUltimo=null;         // L25-2/L25-3 — mese dell'ultima carta di famiglia (media O base): il pavimento è UNO per tutte
   S.telUltimo=null;            // F1 — cooldown della telefonata (dato puro, round-trip); il TIMER vive in TEL, mai in S
   S.telPendente=null;          // F1 — id della telefonata senza risposta: al reload il telefono richiama
   S.scandaloUltimo=null;       // G3 — cooldown-famiglia degli archi-scandalo (~36m; stampato dal filo() alla nascita)
@@ -316,9 +319,33 @@ const DICASTERO_IND={ economia:['fiducia',1], lavoro:['unemp',-1], salute:['sani
 function capd(n){ if(S&&S.capitale!=null) S.capitale=clamp(S.capitale+n,0,100); }
 function leald(n){ if(S&&S.premier&&S.premier.lealta!=null) S.premier.lealta=clamp(S.premier.lealta+n,0,100); }
 function visd(n){ if(S&&S.visibilita!=null) S.visibilita=clamp(S.visibilita+n,0,100); }
+/* ===== L26-1 — IL SOFT-CAP DELLA CREDIBILITÀ (rendimenti decrescenti) =====
+   Misurato in L25-2: la condotta «sempre composta» portava la credibilità a 100 e valeva ~4 punti di voto in
+   più di quella aggressiva, in OGNI pool — perché accumularla non costava mai niente e `credBonus()` vale ±5.
+   Decisione di design (Cowork, L26-1): non si tocca `credBonus`, si tocca l'ACCUMULO. Sopra 70 i guadagni
+   valgono metà, sopra 85 un quarto; **le perdite restano piene** (la credibilità si perde intera, come nella
+   realtà). Così arrivare a 70 resta un percorso, ma da lì in su conviene SPENDERLA invece che accumularla.
+
+   L'attenuazione è a SEGMENTI, non decisa dal punto di partenza: un guadagno grosso che parte da 68 paga
+   pieno fino a 70, metà da 70 a 85 e un quarto oltre. Altrimenti un solo colpo grande scavalcherebbe il cap.
+   PUNTO DI PASSAGGIO UNICO: `credd` e `applyOppEffect` passano entrambi di qui — chi muove la credibilità non
+   deve conoscere la regola (stesso schema del tetto-intese di L25-1 e di `euro()`). */
+const CRED_SEGMENTI = [[70,1],[85,0.5],[100,0.25]];   // [tetto del segmento, quanto vale un punto guadagnato dentro]
+function credMuovi(n){
+  if(!(S&&S.credibilita!=null) || !n) return;
+  if(n<0){ S.credibilita=clamp(S.credibilita+n,0,100); return; }   // le PERDITE non si attutiscono mai
+  let cur=S.credibilita, resto=n;
+  for(let i=0;i<CRED_SEGMENTI.length && resto>0;i++){
+    const tetto=CRED_SEGMENTI[i][0], f=CRED_SEGMENTI[i][1];
+    if(cur>=tetto) continue;
+    const costo=(tetto-cur)/f;                                     // punti GREZZI necessari ad attraversare il segmento
+    if(resto>=costo){ cur=tetto; resto-=costo; } else { cur+=resto*f; resto=0; }
+  }
+  S.credibilita=clamp(cur,0,100);
+}
 /* L13-1 — gemella guardata di visd: muove la CREDIBILITÀ solo dove esiste (opposizione/ministro/locale). A L3-premier
    `S.credibilita` è undefined → no-op sicuro, e soprattutto NON crea il campo (un `(S.credibilita||0)+n` lo creerebbe). */
-function credd(n){ if(S&&S.credibilita!=null) S.credibilita=clamp(S.credibilita+n,0,100); }
+function credd(n){ credMuovi(n); }
 function dicNome(){ const n=(typeof dicNm==='function')&&dicNm(S.dicastero); return (n&&T(n))||T('il tuo dicastero'); }
 /* D4-coda (da D3) — preposizioni ARTICOLATE per-dicastero, per-era: «all'Alto Commissariato», «al Tesoro», «della Salute».
    In EN non si articola (la preposizione sta nel template) → si sostituisce il nome nudo. Copre i template grane con %DICA/%DICDI. */
@@ -1001,12 +1028,19 @@ function pescaLeggero(){
   if(!pool.length) return null;
   return (typeof pescaBag==='function') ? pescaBag('leggeri|'+((S&&S.era)||'p'), pool) : pool[0];
 }
+/* L27-1 — il gate vale ora anche all'OPPOSIZIONE (`S.livello` è 3 anche da sfidante, verificato a terra): la
+   sfida alla leadership scatta a 35 e l'avviso a 40, quindi da qualunque parte del campo il guaio bussa prima.
+   `S.sfida` resta nella guardia: a rivolta aperta l'avviso non ha più senso, e garantisce che avviso e sfida
+   non cadano mai nello stesso mese. Chi sceglie la carta la ottiene diversa (RICHIAMO_CORRENTI_OPP_EV). */
 function richiamoCorrentiDovuto(){
-  if(typeof S==='undefined' || !S || S.opposizione || S.livello!==3 || !S.correnti || S.sfida) return false;
+  if(typeof S==='undefined' || !S || S.livello!==3 || !S.correnti || S.sfida) return false;
   var mese=S.year*12+S.month;
   if(S.richiamoCorrUltimo!=null && mese-S.richiamoCorrUltimo<8) return false;
   var c=S.correnti.slice().sort(function(a,b){return a.umore-b.umore;})[0];
   return !!(c && c.umore<40);
+}
+function cartaRichiamoCorrenti(){   // la gemella giusta per il ruolo: al governo si paga in consenso, all'opposizione in visibilità
+  return (S && S.opposizione && typeof RICHIAMO_CORRENTI_OPP_EV!=='undefined') ? RICHIAMO_CORRENTI_OPP_EV : RICHIAMO_CORRENTI_EV;
 }
 /* Tre branche alla risoluzione (concludiNotte), su S.leggeTruffa × voto del blocco:
    approvata+≥50 → 'scatta' (premio) · approvata+<50 → 'boomerang' (niente premio + contraccolo dichiarato,
@@ -1661,12 +1695,17 @@ function quotaTerritori(){ if(!S.territori || !S.territori.length) return null; 
    vere (gd + indicatori nazionali): il territorio è il palcoscenico, non una valuta (potereLocale è derivato).
    ============================================================ */
 function territorioChiamaDovuto(){
-  if(typeof S==='undefined' || !S || S.livello!==3 || S.opposizione) return false;
+  if(typeof S==='undefined' || !S || S.livello!==3) return false;   // L25-1: F2 riaperta allo sfidante (pannello-mappa verificato: mostra titolare/partito/potereLocale, nessuna assunzione di governo)
   if(!PAESE || !PAESE.mappa) return false;                 // serve la mappa nazionale (Italia pilota; gli altri quando l'SVG c'è)
   if(!S.territori || !S.territori.length) return false;
   if(S.territorioChiama) return false;                      // uno alla volta
   if(S.telPendente) return false;                          // mai lo stesso mese della telefonata (i due formati-interruzione non si accavallano)
-  if((S.mesiAlGoverno||0)<4) return false;
+  /* L25-1 — ANZIANITÀ NEUTRA. La soglia serve solo a non far partire F2 nel primissimo mese, ma `mesiAlGoverno`
+     cresce **solo mentre governi** (model.js:183, per il logorio) → da sfidante resta 0 e F2 non sarebbe MAI
+     partita, anche dopo aver tolto il gate-opposizione: la riapertura sarebbe stata finta. All'opposizione si
+     contano quindi i mesi giocati dall'inizio partita. Al governo il comportamento è identico a prima. */
+  var _anz = S.opposizione ? ((S.year*12+S.month)-(((S.annoInizio||S.year)*12)+1)) : (S.mesiAlGoverno||0);
+  if(_anz<4) return false;
   var mese=S.year*12+S.month;
   if(S.territorioUltimo!=null && mese-S.territorioUltimo<4) return false;   // cooldown 4
   return Math.random()<0.4;                                 // eleggibile → ~entro 2-3 mesi → ~1/5-6
@@ -2347,6 +2386,10 @@ function genAgendaRamo(first){
     return;
   }
   if(S.opposizione){   // all'opposizione: intermedia (se c'è) oppure la tua carta + (a volte) un evento del governo AI
+    /* L27-1 — LA CARTA-RICHIAMO DELLE CORRENTI ANCHE QUI. Togliere il gate non bastava: l'iniezione del richiamo
+       sta in fondo a genAgendaRamo, DOPO il `return` di questo ramo (misurato: gate aperto → 0 carte uscite in
+       216 mesi). Stessa precedenza che ha al governo (prima della stagione elettorale), stesso `agendaSolo()`. */
+    if(!first && typeof richiamoCorrentiDovuto==='function' && richiamoCorrentiDovuto()){ S.richiamoCorrUltimo=S.year*12+S.month; S.agenda.push({kind:'event', data:cartaRichiamoCorrenti(), resolved:false}); agendaSolo(); return; }
     // Cantiere C: la stagione elettorale vale anche da SFIDANTE (bloccoIds = il tuo blocco d'opposizione)
     if(typeof pickCampagnaNazionale==='function'){ const cnbO=pickCampagnaNazionale(); if(cnbO){ S.agenda.push(cnbO); agendaSolo(); return; } }
     const inq=aggiornaInchiesta();   // anche da sfidante l'esposizione conta: bersaglio sempre tu (niente ministri qui)
@@ -2359,7 +2402,9 @@ function genAgendaRamo(first){
       var sfO=(typeof pescaSfida==='function')?pescaSfida(['governo'],'stampa'):null;
       if(sfO){ S.agenda.push({kind:'stampa', data:sfO, resolved:false}); }
       else {
-        const op=pickOpposizione(); if(op) S.agenda.push({kind:'dossier', data:op, resolved:false});
+        let op = famigliaOppDovuta() ? pickFamigliaOpp() : null;   // L25-2/L25-3: le famiglie si prendono lo slot della carta d'opposizione, a turno fra loro (stesso kind: la forma del mese non cambia)
+        if(!op) op = pickOpposizione();
+        if(op) S.agenda.push({kind:'dossier', data:op, resolved:false});
         if(S.agenda.length<2){ const pe=pickPersonale(); if(pe) S.agenda.push(pe); }
         else if(Math.random()<0.35){ const gv=pickGovernoEvent(); if(gv) S.agenda.push({kind:'event', data:gv, resolved:false}); }
       }
@@ -2392,7 +2437,7 @@ function genAgendaRamo(first){
   if(!first && typeof snodoEnelDovuta==='function' && snodoEnelDovuta()){ S.agenda.push({kind:'event', data:ENEL_EV, resolved:false}); agendaSolo(); return; }
   if(!first && typeof snodoAperturaDovuta==='function' && snodoAperturaDovuta()){ S.agenda.push({kind:'event', data:APERTURA_EV, resolved:false}); agendaSolo(); return; }
   // CURA Lotto P3 (#9): la CARTA-RICHIAMO delle correnti — chiama alla scheda PRIMA che sia tardi (mai l'imboscata a 30)
-  if(!first && typeof richiamoCorrentiDovuto==='function' && richiamoCorrentiDovuto()){ S.richiamoCorrUltimo=S.year*12+S.month; S.agenda.push({kind:'event', data:RICHIAMO_CORRENTI_EV, resolved:false}); agendaSolo(); return; }
+  if(!first && typeof richiamoCorrentiDovuto==='function' && richiamoCorrentiDovuto()){ S.richiamoCorrUltimo=S.year*12+S.month; S.agenda.push({kind:'event', data:cartaRichiamoCorrenti(), resolved:false}); agendaSolo(); return; }
   // Cantiere C: la STAGIONE ELETTORALE (ultimi 6 mesi) — il beat-campagna è LA carta del mese (setpiece: la campagna assorbe l'agenda)
   if(!first && typeof pickCampagnaNazionale==='function'){ const cnb=pickCampagnaNazionale(); if(cnb){ S.agenda.push(cnb); agendaSolo(); return; } }
   // ATTO FINALE (fase C1a): la chiamata a guidare il Consesso (gated su relInt alto) — quando arriva, è LA carta del mese
@@ -3412,7 +3457,8 @@ function telDef(id){ return (typeof F1_TELEFONATE!=='undefined') ? F1_TELEFONATE
    elettorale. NON soggetta al cedimento-G4: la telefonata è trasversale (grave o leggera). */
 function telefonataDovuta(){
   if(typeof S==='undefined' || !S) return false;
-  if(S.livello!==3 || S.opposizione) return false;   // il capo del governo (a terra: L3 = premier)
+  if(S.livello!==3) return false;                     // L25-1: riaperta allo SFIDANTE (era `|| S.opposizione`) — la telefonata
+                                                      // è la superficie naturale del tavolo-alleanze: un segretario che ti chiama.
   if(S.telPendente) return false;                     // già una chiamata senza risposta
   if(S.campNaz) return false;                         // niente durante la stagione elettorale (il setpiece assorbe il mese)
   var mese=S.year*12+S.month;
@@ -3822,7 +3868,7 @@ function applyOppEffect(spec){
   if(spec.centro) gd('cetomedio', spec.centro*aV);
   const LM=lineaMediaMod();   // la linea modula SOLO la resa vis/cred della mossa (gov/base/centro restano: la linea li tocca nel tempo, via aV/aC)
   if(spec.vis)  S.visibilita=clamp((S.visibilita||0)+spec.vis*(spec.vis>0?LM.vp:LM.vm),0,100);
-  if(spec.cred) S.credibilita=clamp((S.credibilita||0)+spec.cred*(spec.cred>0?LM.cp:LM.cm),0,100);
+  if(spec.cred) credMuovi(spec.cred*(spec.cred>0?LM.cp:LM.cm));   // L26-1: la linea-media modula PRIMA, il soft-cap attenua DOPO (un solo punto di passaggio)
 }
 /* Carta d'opposizione del mese: cornice + le 3 azioni SPECIFICHE della carta (spec→closure). */
 function pickOpposizione(){
@@ -3837,6 +3883,57 @@ function pickOpposizione(){
      biografia/tratti/integrità/esposizione come per gli altri livelli (prima l'opposizione era muta). */
   return { kick:ev.kick, t:ev.t, text:ev.text, ch: ev.ch.map(function(c){ return { l:c.l, e:c.e, pleases:c.pleases, rischio:c.rischio, trasparenza:c.trasparenza, f:function(){ applyOppEffect(c); } }; }) };
 }
+/* ===== L25-2 + L25-3 — LE FAMIGLIE D'OPPOSIZIONE E IL LORO ARBITRO =====
+   Due famiglie (α2 «ai fianchi sui media», α3 «allargare la base») con un innesco DEDICATO: dentro
+   OPPOSIZIONE_EV (35 voci) sarebbero uscite ~3 volte in 36 mesi, cioè una all'anno. Si prendono lo STESSO
+   slot della carta d'opposizione (stesso `kind:'dossier'`, stesso posto in agenda) → la FORMA del mese non
+   cambia di una riga, cambia cosa ci trovi dentro.
+
+   PERCHÉ UN ARBITRO E NON DUE INNESCHI (L25-3): lo slot esiste in ~56 mesi su 100, e due famiglie con
+   cadenza propria ne chiederebbero più di quanti ne esistano — il pool storico resterebbe a secco. Quindi
+   UN solo gate (pavimento + tiro) e poi un sacchetto che ALTERNA le famiglie: la quota complessiva è sotto
+   controllo in un punto solo, e il pool storico conserva la sua fetta. Le cadenze delle singole famiglie
+   sono una CONSEGUENZA di questa divisione, non due manopole indipendenti. */
+const FAM_OPP = [{id:'media'},{id:'base'}];
+function famigliaOppDovuta(){
+  if(!S.opposizione) return false;
+  const mese=S.year*12+S.month;
+  if(S.famOppUltimo!=null && (mese-S.famOppUltimo)<2) return false;   // pavimento: mai due mesi di fila
+  return Math.random()<0.85;                                          // tarato sulla misura (vedi CODA-LAVORI L25-3)
+}
+function pickFamigliaOpp(){
+  const f=pescaBag('oppfam', FAM_OPP); if(!f) return null;
+  const c=(f.id==='base') ? pickBase() : pickMedia();
+  if(c) S.famOppUltimo=S.year*12+S.month;
+  return c;
+}
+/* Applica una scelta di famiglia: lo spec (applyOppEffect) + gli effetti locali (extra) + l'ESITO
+   CONDIZIONATO di α2. `regge` legge la CREDIBILITÀ (pattern-snodo: stato dentro f(), niente caso): sotto la
+   soglia il governo risponde bene e metà del colpo torna indietro — restituito PER LA STESSA STRADA
+   (applyOppEffect), così l'amplificazione vis/cred è la medesima dell'andata e «metà» resta metà davvero.
+   Le carte-base non hanno `regge`: il loro prezzo sono le correnti, e sta tutto in `extra`. */
+function oppFamApplica(c){
+  applyOppEffect(c);
+  if(c.extra) c.extra();
+  if(c.regge){
+    if((S.credibilita||0)>=MEDIA_REGGE){
+      credd(1);
+      S.log.unshift({t:T('L\'attacco regge'), x:T('Il governo prova a smontarlo e non ci riesce: la denuncia resta in piedi.')});
+    } else {
+      applyOppEffect({gov: -(c.gov||0)/2});
+      credd(-c.regge);
+      S.log.unshift({t:T('Il colpo torna indietro'), x:T('Il governo risponde bene e la tua parola non basta a reggerlo: metà del colpo ti torna indietro.')});
+    }
+  }
+}
+function pickFamCarta(pool, chiave){
+  if(!pool) return null;
+  const cand=pool.filter(function(e){ return (!e.cond||e.cond()) && (typeof eraVivaT!=='function'||eraVivaT(e)); });
+  const ev=pescaBag(chiave, cand); if(!ev) return null;
+  return { id:ev.id, kick:ev.kick, t:ev.t, text:ev.text, ch: ev.ch.map(function(c){ return { l:c.l, e:c.e, pleases:c.pleases, rischio:c.rischio, trasparenza:c.trasparenza, f:function(){ oppFamApplica(c); } }; }) };
+}
+function pickMedia(){ return pickFamCarta(typeof OPPOSIZIONE_MEDIA!=='undefined'?OPPOSIZIONE_MEDIA:null, 'oppmedia'); }
+function pickBase(){  return pickFamCarta(typeof OPPOSIZIONE_BASE !=='undefined'?OPPOSIZIONE_BASE :null, 'oppbase'); }
 /* Evento del governo avversario: pesca una variante (rispettando cond e recentGov); scandalo con ministro fittizio. */
 function pickGovernoEvent(){
   S.recentGov=S.recentGov||[];
@@ -3966,6 +4063,12 @@ function applySnap(snap){
   if(S.sondStorico===undefined) S.sondStorico=[];   // F3 — migrazione: i salvataggi pre-lotto ricevono la serie-sondaggi vuota
   if(S.leggeroUltimo===undefined) S.leggeroUltimo=null;   // G4 — migrazione: cooldown del beat leggero
   if(S.retroUltimo===undefined) S.retroUltimo=null;       // L14-1 — migrazione: cooldown del beat-retroscena
+  if(!S.intese || typeof S.intese!=='object') S.intese={};   // L25-1 — migrazione: nessuna intesa nei salvataggi vecchi
+  if(S.tavoloPid===undefined) S.tavoloPid=null;              // L25-1 — migrazione
+  /* L25-3 — migrazione: il cooldown della sola famiglia-media diventa quello CONDIVISO da tutte le famiglie.
+     Un salvataggio L25-2 porta con sé `mediaUltimo`: lo si eredita (non si riparte da zero) e lo si toglie. */
+  if(S.famOppUltimo===undefined) S.famOppUltimo=(S.mediaUltimo!=null?S.mediaUltimo:null);
+  if('mediaUltimo' in S) delete S.mediaUltimo;
   /* L20-1 — migrazione dei volti: un gabinetto salvato prima di oggi non ha `rit`. Si assegna UNA volta in blocco
      (ognuno dal suo hash, cedendo il passo) e da lì è congelato: il giocatore vede il de-dup senza che i volti
      ballino a ogni caricamento. Chi ha già `rit` non viene toccato. */

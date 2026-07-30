@@ -1905,6 +1905,23 @@ function emiciclo(seggi, opts){
   </svg>`;
 }
 
+/* L25-1 — la riga «Intesa» sotto ogni partito NON-tuo, **solo all'opposizione**: il tavolo delle alleanze è un
+   lavoro che si deve vedere accumularsi. Mostra il valore, il tetto-per-distanza (così si capisce perché un partito
+   lontano non arriverà mai) e segnala quando l'intesa ha superato 60, cioè quando quel partito ENTRA nel blocco. */
+function rigaIntesa(p, mine){
+  if(!S || !S.opposizione || mine) return '';
+  if(typeof intesaDi!=='function' || typeof intesaCap!=='function') return '';
+  var v=intesaDi(p.id), cap=intesaCap(p.id);
+  if(cap<=0) return '';
+  var dentro=v>=60;
+  var col=dentro?'var(--pos)':(v>0?'var(--acc)':'var(--mut2)');
+  var nota=dentro?T('nel tuo blocco'):(cap<60?T('troppo lontano')+' · '+T('tetto')+' '+cap:T('serve 60'));
+  return `<div style="display:flex;align-items:center;gap:8px;margin-top:5px">
+    <span style="font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);min-width:46px">${T('Intesa')}</span>
+    <div class="bar" style="flex:1;position:relative">${fillI('intesa:'+p.id, clamp(v,2,100), col)}</div>
+    <span class="mono" style="font-size:11.5px;color:${col};min-width:22px;text-align:right">${Math.round(v)}</span>
+    <small style="font-size:10.5px;color:var(--mut2);white-space:nowrap">${nota}</small></div>`;
+}
 function renderPartiti(){
   if(S.partitoAperto && S.correnti){ document.getElementById('sec-par').innerHTML=renderPartitoPage(); return; }      // drill-down: la vita interna del partito
   if(S.mappaAperta && PAESE.mappa){ document.getElementById('sec-par').innerHTML=renderMappaPage(); return; }   // drill-down: la mappa del territorio
@@ -1977,7 +1994,7 @@ function renderPartiti(){
     h+=`<div class="grp" style="${mine?'box-shadow:inset 0 0 0 1px var(--acc);border-radius:10px;':''}">
       <div class="top"><div class="nm">${T(p.nome)} ${badge}${tenChip}<small>${T(p.orientamento)}</small></div>
       <div class="pc mono" style="color:${gov?'var(--acc)':'var(--txt)'}">${fmt(f,1)}%${seatTxt} <small style="font-weight:400">${arr}</small></div></div>
-      <div class="bar">${fillI('forza:'+p.id, clamp(f,2,100), gov?'var(--acc)':'var(--mut2)')}</div>${segBtn}</div>`;
+      <div class="bar">${fillI('forza:'+p.id, clamp(f,2,100), gov?'var(--acc)':'var(--mut2)')}</div>${segBtn}${rigaIntesa(p, mine)}</div>`;
   }
   const comeVince = P.comeSiVince==='parlamentare'
     ? T('A fine mandato le forze diventano <b>seggi</b> (su 100): per restare al governo la tua coalizione deve raggiungere <b>50 seggi</b>%X.').replace('%X', T(P.coalizione?', formando alleanze coi partiti vicini per asse politico':' da sola'))

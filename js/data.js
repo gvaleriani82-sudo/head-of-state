@@ -707,6 +707,21 @@ const RICHIAMO_CORRENTI_EV = {
       f:function(){ S.log.unshift({t:T('Il partito'),x:T('Hai rimandato: una scelta legittima, ma il malumore cova.')}); } },
   ],
 };
+/* L27-1 — la GEMELLA D'OPPOSIZIONE del richiamo. La cornice (`t`/`text`) e le due etichette sono già neutre e
+   restano IDENTICHE: cambia solo il costo, perché al governo il gesto si paga in consenso e da sfidante il
+   consenso non è tuo — «un mese in sezione è un mese fuori dalle prime pagine», quindi si paga in visibilità
+   (valuta reale dell'opposizione, verificata a terra). Stessa soglia, stesso cooldown, stessa gentilezza. */
+const RICHIAMO_CORRENTI_OPP_EV = {
+  id:'richiamo_correnti_opp', kick:'Il partito', tono:'grave',
+  t:'I tuoi ti aspettano',
+  text:'Da tempo non ti fai vedere in sezione, e la corrente che ti ha sempre sostenuto comincia a mugugnare: non è ancora una rivolta, ma senza un segno lo diventerà. Un gesto ora vale doppio.',
+  ch:[
+    { l:'Passi a incontrarli, di persona', e:'Il legame si rinsalda · un mese in sezione è un mese fuori dalle prime pagine',
+      f:function(){ if(S.correnti){ var c=S.correnti.slice().sort(function(a,b){return a.umore-b.umore;})[0]; if(c && typeof corrented==='function') corrented(c.id,12); if(typeof tutteCorrenti==='function') tutteCorrenti(3); } if(typeof visd==='function') visd(-2); S.log.unshift({t:T('Il partito'),x:T('Hai ricucito coi tuoi: la corrente si placa.')}); } },
+    { l:'Tieni la rotta, li richiamerai dopo', e:'L\'alternativa prima · il malumore resta, e può montare',
+      f:function(){ S.log.unshift({t:T('Il partito'),x:T('Hai rimandato: una scelta legittima, ma il malumore cova.')}); } },
+  ],
+};
 
 /* ===== G2+G4 — IL COLORE D'EPOCA NON-POLITICO (registro LEGGERO). «Il paese parla d'altro»: beat brevi di respiro,
    iniettati ~1 ogni 2 mesi dallo scheduler (che CEDE davanti a un grave in corso). EFFETTI ZERO per costruzione —
@@ -853,13 +868,31 @@ const BEAT_LEGGERI = [
 const F1_TIMER = true;        // in prova: se al playtest non piace, false → il telefono aspetta senza scadere (nessuna chirurgia)
 const F1_TIMER_MS = 13000;    // ~13s: unica sorgente per il setTimeout E per la barra CSS (--teldur)
 const F1_TELEFONATE = [
+  /* L25-1 · α1 — LE TRE TELEFONATE-ALLEANZA (solo sfidante). La telefonata è la superficie naturale del tavolo:
+     un segretario che ti chiama la sera. Bersaglio = un partito a distanza 1-2 scelto al volo (`unTavolo()`);
+     se non ce n'è, la `cond` le tiene fuori. Valute: `intesaMuovi` + credibilità/correnti, mai `gd()`. */
+  { id:'tel_sponda', chiamante:'Il segretario di un partito vicino', registro:'grave', cond:function(){ return !!S.opposizione && !!unTavolo(); },
+    t:'La sponda inattesa', text:'«Domani, se voi vi astenete, noi votiamo contro. Il governo va sotto. Ci sta?»',
+    ch:[ { l:'Accetti la manovra d\'aula', e:'Il governo incassa il colpo; l\'intesa cresce, e ti sei sporcato le mani', f:function(){ intesaMuovi(unTavolo(), 8); spregiudicata(2); } },
+         { l:'Rifiuti il gioco d\'aula', e:'Non fai sgambetti; lui capisce che con te si tratta alla luce', f:function(){ credd(2); } } ],
+    raffredda:function(){ var t=unTavolo(); if(t) intesaMuovi(t,-3); }, squilloTxt:'Il segretario ha atteso invano: domani voterà da solo.' },
+  { id:'tel_smentita', chiamante:'Il segretario di un partito vicino', registro:'grave', cond:function(){ return !!S.opposizione && !!unTavolo() && intesaDi(unTavolo())>=10; },
+    t:'La smentita chiesta', text:'«Un suo dirigente ci ha attaccati in TV. O lo smentisce, o abbiamo un problema.»',
+    ch:[ { l:'Smentisci il tuo dirigente', e:'L\'intesa è salva; nel partito qualcuno non te lo perdona', f:function(){ corrented('militanti',-3); } },
+         { l:'Difendi il tuo: parlava a titolo personale', e:'I tuoi ti sentono leale; il tavolo si raffredda', f:function(){ var t=unTavolo(); if(t) intesaMuovi(t,-15); corrented('militanti',2); } } ],
+    raffredda:function(){ var t=unTavolo(); if(t) intesaMuovi(t,-8); }, squilloTxt:'Nessuna risposta, nessuna smentita: il tavolo si raffredda da sé.' },
+  { id:'tel_congresso', chiamante:'Il segretario di un partito vicino', registro:'lavoro', cond:function(){ return !!S.opposizione && !!unTavolo(); },
+    t:'L\'invito al congresso', text:'«La aspettiamo sul palco del nostro congresso. Un applauso lì vale doppio — ma anche un gelo.»',
+    ch:[ { l:'Ci vai di persona', e:'Ti esponi davanti alla loro base: l\'intesa fa un passo, e ti si vede', f:function(){ var t=unTavolo(); if(t) intesaMuovi(t,10); visd(3); } },
+         { l:'Mandi un messaggio di saluto', e:'Cortese e prudente: nessun rischio, nessuna ovazione', f:function(){ var t=unTavolo(); if(t) intesaMuovi(t,3); } } ],
+    raffredda:function(){ var t=unTavolo(); if(t) intesaMuovi(t,-5); }, squilloTxt:'L\'invito è caduto nel vuoto: al congresso la tua sedia è restata vuota.' },
   { id:'tel_segretario', chiamante:'Il segretario del partito', registro:'lavoro',
     t:'Il segretario del partito', text:'«Domani sul voto serve compattezza. Posso contare su di te?»',
     ch:[ { l:'Allinearti alla linea', e:'Partito compatto: la stampa legge coesione (stampa +)', f:function(){ stampad(2); } },
          { l:'Prendere tempo', e:'Ti tieni le mani libere — ma il segretario mugugna (stampa −, statura +)', f:function(){ stampad(-1); repd(1); } } ],
     raffredda:function(){ stampad(-1); }, squilloTxt:'Il segretario non ha gradito il silenzio: dovrai ricucire.' },
 
-  { id:'tel_alleato', chiamante:'L\'alleato di coalizione', registro:'grave', cond:function(){ return !!(PAESE&&PAESE.coalizione); },
+  { id:'tel_alleato', chiamante:'L\'alleato di coalizione', registro:'grave', cond:function(){ return !S.opposizione && !!(PAESE&&PAESE.coalizione); },   // L25-1: da sfidante non hai una maggioranza che scricchiola
     t:'L\'alleato di coalizione', text:'«Se non ci ascoltate, la maggioranza scricchiola. Ne parliamo, adesso?»',
     ch:[ { l:'Concedere qualcosa', e:'La maggioranza tiene (fiducia +); il ceto medio ti vede cedevole', f:function(){ if(S.ind&&S.ind.fiducia!=null) S.ind.fiducia=clamp(S.ind.fiducia+2,0,100); gd('cetomedio',-1); } },
          { l:'Tenere il punto', e:'Fermezza premiata dal ceto medio; la maggioranza si tende (fiducia −)', f:function(){ gd('cetomedio',1); if(S.ind&&S.ind.fiducia!=null) S.ind.fiducia=clamp(S.ind.fiducia-2,0,100); } } ],
@@ -877,26 +910,26 @@ const F1_TELEFONATE = [
          { l:'Prendere le distanze', e:'Ti smarchi (stampa +); il governo appare meno coeso (fiducia −)', f:function(){ stampad(2); if(S.ind&&S.ind.fiducia!=null) S.ind.fiducia=clamp(S.ind.fiducia-1,0,100); } } ],
     raffredda:function(){ if(S.ind&&S.ind.fiducia!=null) S.ind.fiducia=clamp(S.ind.fiducia-1,0,100); }, squilloTxt:'Il ministro si è sentito abbandonato al telefono.' },
 
-  { id:'tel_sindaco', chiamante:'Il sindaco di una città in crisi', registro:'lavoro',
+  { id:'tel_sindaco', chiamante:'Il sindaco di una città in crisi', registro:'lavoro', cond:function(){ return !S.opposizione; },   // L25-1: chiede un sì/no che solo il governo può dare
     t:'Il sindaco di una città in crisi', text:'«La mia città non aspetta oltre. Mi dice sì o mi dice no?»',
     ch:[ { l:'Promettere aiuto', e:'Il territorio respira (lavoratori +); il conto sale un filo (debito +)', f:function(){ gd('lavoratori',2); if(S.ind) S.ind.debt+=0.3; } },
          { l:'Rimandare', e:'Conti intatti; la città incassa il no (lavoratori −)', f:function(){ gd('lavoratori',-2); } } ],
     raffredda:function(){ gd('lavoratori',-1); }, squilloTxt:'Il sindaco lo racconterà in giro: nessuna risposta.' },
 
-  { id:'tel_prefetto', chiamante:'Il prefetto', registro:'grave', cond:function(){ return S.paese==='italia' && (S.era&&S.era!=='contemporanea'); },
+  { id:'tel_prefetto', chiamante:'Il prefetto', registro:'grave', cond:function(){ return !S.opposizione && S.paese==='italia' && (S.era&&S.era!=='contemporanea'); },   // L25-1: il prefetto attende istruzioni da chi governa
     voce:'centralino',
     t:'Il prefetto', text:'«Il centralino le passa la comunicazione — prefetto in linea. La piazza è tesa: attendo istruzioni.»',
     ch:[ { l:'Linea di fermezza', e:'Ordine ristabilito (sicurezza +); i giovani mugugnano', f:function(){ if(S.ind) S.ind.sicurezza=clamp((S.ind.sicurezza||50)+1,0,100); gd('giovani',-1); } },
          { l:'Prudenza, niente forzature', e:'La piazza si calma da sé (giovani +); qualcuno ti dà il molle (sicurezza −)', f:function(){ gd('giovani',1); if(S.ind) S.ind.sicurezza=clamp((S.ind.sicurezza||50)-1,0,100); } } ],
     raffredda:function(){ stampad(-1); }, squilloTxt:'Il prefetto ha atteso invano: dai territori filtra la tua assenza.' },
 
-  { id:'tel_sindacato', chiamante:'Un leader sindacale', registro:'lavoro',
+  { id:'tel_sindacato', chiamante:'Un leader sindacale', registro:'lavoro', cond:function(){ return !S.opposizione; },   // L25-1: lo sciopero si minaccia a chi governa
     t:'Un leader sindacale', text:'«Domani si ferma tutto, se non ci vediamo stasera. Dipende da lei.»',
     ch:[ { l:'Aprire un tavolo', e:'Lo sciopero rientra (lavoratori +); gli industriali diffidano', f:function(){ gd('lavoratori',3); gd('imprenditori',-1); } },
          { l:'Tenere la linea', e:'Non arretri (imprese +); il sindacato ti rinfaccia la chiusura (lavoratori −)', f:function(){ gd('imprenditori',2); gd('lavoratori',-2); } } ],
     raffredda:function(){ gd('lavoratori',-1); }, squilloTxt:'Il sindacato ha letto il silenzio come una chiusura.' },
 
-  { id:'tel_opposizione', chiamante:'Il capo dell\'opposizione', registro:'grave',
+  { id:'tel_opposizione', chiamante:'Il capo dell\'opposizione', registro:'grave', cond:function(){ return !S.opposizione; },   // L25-1: da sfidante il capo dell'opposizione sei TU
     t:'Il capo dell\'opposizione', text:'«Le parlo da avversario: ma su questo conviene a entrambi. Resta tra noi?»',
     ch:[ { l:'Trattare sottotraccia', e:'Sblocchi qualcosa da statista (statura +); qualcosa filtrerà (stampa −): il prezzo è questo', f:function(){ repd(2); stampad(-1); } },
          { l:'Rifiutare il canale', e:'Niente accordi al buio: lineare (stampa +); l\'occasione sfuma (statura −)', f:function(){ stampad(1); repd(-1); } } ],
@@ -1422,6 +1455,37 @@ const ARCHI_DEF=[
    ]},
    rotto:{kick:'Ombre', t:'Il conto', text:'%ECO %FILO non alza la voce. Ringrazia, saluta, e da quel giorno le sue domande in conferenza diventano più precise.', ch:[
      {l:'Incassi le domande precise', e:'Un rapporto chiuso male, e si sente', goto:null, fatto:'Il canale con %FILO chiuso male.', epi:'Aprì un canale col cronista e lo chiuse male: le domande, da allora, furono più precise.', f:()=>{ stampad(-4); credd(1); }},
+   ]},
+  }},
+
+ /* ============================================================ L25-1 · α1 — L'ARCO `tavolo` (DESIGN-OPPOSIZIONE.md).
+    La trattativa vera con un potenziale alleato. `dove:'opposizione'` — `arcoQui` lo supporta già (verificato).
+    IL PARTITO si sceglie a runtime fra i non-tuoi con 1≤|Δasse|≤2 e si scrive in **`S.tavoloPid`** dentro `filo()`:
+    gli effetti (`choice.f`) NON ricevono l'arco, quindi il bersaglio deve stare in S — stesso schema con cui gli
+    archi-scandalo scrivono `S.scandaloUltimo`. Riusabile per partiti diversi (un arco alla volta per costruzione).
+    VALUTE: `intesaMuovi` (la meccanica nuova), correnti e stampa di striscio. **Niente `gd()`**: il paletto di
+    famiglia dice che le alleanze sono lavoro interno, i media sono l'altra famiglia. ============================ */
+ {id:'tavolo', era:'universale', famiglia:'Istituzioni', dove:'opposizione', prob:0.16, cooldown:20, titolo:'il tavolo delle alleanze',
+  cond:()=> !!(typeof partitiTavolo==='function' && partitiTavolo().length),
+  filo:()=>{ var lista=partitiTavolo(); var P=lista[Math.floor(Math.random()*lista.length)];
+             S.tavoloPid = P ? P.id : null;
+             /* il RUOLO è una frase intera con segnaposto, tradotta e sostituita QUI (il motore applica T() al
+                risultato: su una stringa già risolta è un no-op). Mai `'testo '+nome`: è la classe di L16-1. */
+             return {nome: nomeGenere('m')+' '+rnd(PAESE.cognomi), ruolo: T('il segretario di %P').replace('%P', P?T(P.nome):T('un partito vicino')), arc:'notabile'}; },
+  nodi:{
+   start:{kick:'Palazzo', t:'Il pranzo esplorativo', text:'%FILO, %RUOLO, accetta un pranzo riservato. Niente giornalisti, niente delegazioni: voi due e la domanda che nessuno pronuncia — si può costruire qualcosa, o ci si limita a non farsi la guerra?', ch:[
+     {l:'Metti sul tavolo un programma comune', e:'Fai sul serio; ora sei impegnato', eco:'Dopo il programma messo sul tavolo, ', goto:'programma', f:()=>{ intesaMuovi(S.tavoloPid, 5); }},
+     {l:'Sondi senza scoprirti', e:'Prudente; anche lui lo sarà', eco:'Dopo il pranzo senza impegni, ', goto:'sondaggio', f:()=>{}},
+   ]},
+   programma:{kick:'Palazzo', t:'I punti che dividono', text:'%ECO il documento è sul tavolo e i punti veri sono due. Su uno potete convergere. Sull\'altro %FILO chiede una rinuncia che la tua base sentirà.', ch:[
+     {l:'Cedi sul punto: l\'alternativa vale il prezzo', e:'L\'intesa fa un salto; i tuoi militanti la sentono come una resa', goto:null, fatto:'L\'intesa con %FILO, pagata con un pezzo di programma.', epi:'Comprò l\'alleanza con un pezzo di programma, e i suoi militanti se lo ricordarono.', f:()=>{ intesaMuovi(S.tavoloPid, 30); corrented('militanti',-3); }},
+     {l:'Proponi di congelarlo: se ne riparla al governo', e:'Nessuna resa; l\'intesa cresce meno', eco:'Dopo il punto congelato, ', goto:'congelato', f:()=>{}},
+   ]},
+   sondaggio:{kick:'Palazzo', t:'La misura reciproca', text:'%ECO vi lasciate con una stretta di mano e nessun impegno. Ma il segnale è dato, e nei giorni seguenti i giornali annusano qualcosa.', ch:[
+     {l:'Lasci che i giornali annusino', e:'Un segnale, non un patto', goto:null, fatto:'Il primo sondaggio con %FILO: nessun impegno, un segnale.', epi:'Sondò il terreno con un possibile alleato, senza mai scoprirsi.', f:()=>{ intesaMuovi(S.tavoloPid, 10); stampad(1); }},
+   ]},
+   congelato:{kick:'Palazzo', t:'La fiducia rimandata', text:'%ECO %FILO accetta di congelare il punto, ma lo dice chiaro: «Vuol dire che ci fidiamo a metà». L\'intesa cresce, meno di quanto avrebbe potuto.', ch:[
+     {l:'Ti sta bene così', e:'Metà fiducia, tutto il programma', goto:null, fatto:'L\'intesa con %FILO, col punto più duro congelato.', epi:'Tenne il programma intatto, e l\'alleanza a metà strada.', f:()=>{ intesaMuovi(S.tavoloPid, 18); }},
    ]},
   }},
 
@@ -2399,7 +2463,7 @@ const DOSSIERS=[
    {l:'Razionalizza la spesa',e:'Prudenza di bilancio',pleases:'tecnico',f:()=>{gd('giovani',-2);}},
  ]},
  {id:'av',min:'infrastrutture',kick:'Infrastrutture',t:'Piano per l\'alta velocità ferroviaria',text:'Un grande piano ferroviario collegherebbe meglio le regioni meno servite.',ch:[
-   {l:'Finanzia il piano',e:'Sviluppo e cantieri, debito in salita',pleases:'conservatore',costo:{debito:0.6},f:()=>{S.ind.debt+=0.6; S.gMod+=0.2; gd('lavoratori',3); gd('imprenditori',3);}},
+   {l:'Finanzia il piano',e:'Sviluppo e cantieri, debito in salita',pleases:'conservatore',costo:{debito:0.6},f:()=>{S.ind.debt+=0.6; S.gMod+=0.2; gd('lavoratori',3); gd('imprenditori',3); corrented('fedelissimi',3);}},
    {l:'Rinvia per ora',e:'Conti più prudenti',pleases:'tecnico',f:()=>{gd('lavoratori',-2);}},
  ]},
  {id:'strade',era:'universale',min:'infrastrutture',kick:'Infrastrutture',t:'Rete stradale in pessimo stato',text:'Crescono gli incidenti per la scarsa manutenzione.',ch:[
@@ -5392,6 +5456,113 @@ const OPPOSIZIONE_EV = [
     { l:'Apri un patto con le civiche', e:'Radici locali per la tua sfida', base:3, centro:3, cred:2, pleases:'progressista' },
     { l:'Collaborazione caso per caso', e:'Libertà reciproca, legami deboli', cred:3, centro:1 },
     { l:'Il partito basta a sé stesso', e:'Identità netta; un ponte in meno', base:3, cred:-1, pleases:'conservatore' },
+  ]},
+];
+
+/* ===================== L25-2 · α2 — AI FIANCHI SUI MEDIA (famiglia d'opposizione) =====================
+   Sei carte a DUE strade: la via aggressiva (colpo forte sui gruppi-base del governo, si paga in credibilità
+   o in esposizione) e la via composta (colpo minore, la credibilità cresce). Vivono SOLO all'opposizione per
+   costruzione (le pesca `pickMedia`, chiamata solo dal ramo opposizione di genAgenda) ed era `universale`.
+
+   FORMATO: lo stesso spec delle carte d'opposizione (vis/cred/gov/base/centro + pleases/rischio/trasparenza,
+   li applica applyOppEffect) più due estensioni locali, lette solo da `pickMedia`:
+     · `extra:function(){…}`  — effetti che lo spec non copre (un gruppo singolo, le correnti, la stampa)
+     · `regge:N`              — ESITO CONDIZIONATO (carte 1 e 4); N = la credibilità che costa se va male.
+       Pattern riusato: quello degli SNODI
+       (APERTURA_EV/ENEL_EV), cioè una lettura di STATO dentro f(), niente casualità e niente sottosistemi.
+       Lo stato scelto è **la tua credibilità** (soglia 50, vedi `MEDIA_REGGE`): sopra, la denuncia regge;
+       sotto, il governo risponde bene e METÀ del colpo torna indietro. È il bilanciere della famiglia — e si
+       auto-regola, perché la strada aggressiva consuma credibilità e cammina da sé verso la soglia.
+       (Misurato prima di scegliere: `S.ind.consenso` all'opposizione sta fra 50 e 69 e SALE nel tempo → una
+       soglia sul consenso del governo sarebbe un ramo morto; e i ministri del governo avversario non esistono
+       come oggetti — `S.ministers` è vuoto all'opposizione — quindi «competenza del ministro bersaglio» non
+       era disponibile. La credibilità invece spacca 57/43 sulla distribuzione reale.)
+   ====================================================================================================== */
+const MEDIA_REGGE = 50;   // la soglia di credibilità dell'esito condizionato (mediana misurata all'opposizione)
+const OPPOSIZIONE_MEDIA = [
+  { id:'om_dossier', kick:'Affondo', t:'Il dossier sul ministro',
+    text:'Il tuo ufficio studi ha messo insieme i numeri di un fallimento vero: promesse d\'un ministro contro risultati, nero su bianco. Il materiale regge a qualunque verifica. Resta da scegliere il calibro.', ch:[
+    { l:'La conferenza-denuncia', e:'Colpo forte e visibile · se non hai la credibilità per reggerlo, metà ti torna indietro', vis:5, gov:-5, regge:4 },
+    { l:'L\'interrogazione tecnica', e:'Colpo più piccolo, ma nessuna risposta lo cancella', cred:2, vis:1, gov:-2, pleases:'tecnico' },
+  ]},
+  { id:'om_crepa', kick:'Maggioranza', t:'La crepa nella maggioranza',
+    text:'Due partiti di governo litigano in pubblico su una nomina. Da fuori si vede la crepa; da dentro si vede che nessuno può cedere.', ch:[
+    { l:'Infili il cuneo: un\'aula, un voto, e li costringi a scegliere', e:'La crepa si allarga oggi; ti sei mostrato regista', vis:4, cred:-2, gov:-4, rischio:4 },
+    { l:'Lasci che si logorino da soli', e:'Più lento; nessuna impronta tua sul coltello', cred:2, gov:-2 },
+  ]},
+  { id:'om_cronaca', kick:'Emergenza', t:'Il fatto di cronaca',
+    text:'Un\'emergenza in prima pagina dà ragione a una battaglia che fai da anni. Il paese guarda. La tentazione di dire «l\'avevamo detto» è fortissima — ed è esattamente quello che il governo spera tu faccia.', ch:[
+    { l:'Parli oggi', e:'Massima visibilità; «sciacallo» è a un titolo di distanza', vis:9, gov:-3, pleases:'populista', extra:function(){ stampad(-4); } },
+    { l:'Aspetti tre giorni, poi parli di soluzioni', e:'Metà visibilità; tutta la credibilità', vis:3, cred:3, gov:-2, centro:1 },
+  ]},
+  { id:'om_scivolone', kick:'Comunicazione', t:'Lo scivolone del premier',
+    text:'Il premier ha detto una frase infelice. Estrapolata, è devastante; per intero, è solo goffa. Il video esiste in entrambe le lunghezze.', ch:[
+    { l:'Usi la versione corta', e:'Efficace; chiunque può mostrare quella lunga — e senza credibilità te la mostrerà', vis:6, gov:-5, rischio:5, pleases:'populista', regge:6 },
+    { l:'La commenti per intero', e:'Corretto, metà dell\'effetto; il fair play si nota', cred:3, gov:-2 },
+  ]},
+  { id:'om_controproposta', kick:'Aula', t:'La controproposta',
+    text:'Al provvedimento-bandiera del governo rispondi con un piano tuo: coperture, numeri, firme di tecnici. Nessun titolo strillato — ma chi capisce, capisce.', ch:[
+    { l:'Lo presenti in aula, articolo per articolo', e:'Zero clamore, i competenti prendono nota', cred:4, centro:3, pleases:'tecnico', extra:function(){ gd('imprenditori',2); } },
+    { l:'Lo riassumi in tre slogan per la piazza', e:'Il piano diventa bandiera; i tecnici arricciano il naso', vis:6, base:4, cred:-3, pleases:'populista' },
+  ]},
+  { id:'om_no_che_pesa', kick:'Aula', t:'Il no che pesa',
+    text:'Il governo ti offre un tavolo su una riforma che in privato condividi. Se ti siedi, la riforma migliora e il merito è loro. Se rifiuti, resti puro e la riforma resta peggiore.', ch:[
+    { l:'Ti siedi', e:'Il paese guadagna; la tua base mastica amaro', cred:3, centro:2, gov:1, pleases:'tecnico', extra:function(){ corrented('militanti',-4); } },
+    { l:'Rifiuti: nessuna stampella', e:'La base applaude; il pezzo di paese che aspettava la riforma ricorda', base:3, cred:-2, gov:-1, pleases:'populista', extra:function(){ corrented('militanti',4); } },
+  ]},
+];
+
+/* ===================== L25-3 · α3 — ALLARGARE LA BASE (famiglia d'opposizione) =====================
+   Cinque carte (la 4 ne ha TRE di scelte). Stesso impianto di OPPOSIZIONE_MEDIA: spec + `extra`, pescate
+   dall'arbitro di famiglia, solo all'opposizione, era `universale`.
+
+   LA DIFFERENZA CON α2: là il bersaglio erano i gruppi-base del GOVERNO (attacco), qui sono i TUOI gruppi
+   freddi (costruzione) — e il prezzo non è la credibilità, sono le CORRENTI. Il bersaglio non è mai scritto
+   nel testo: `gruppiFreddi`/`gruppoStorico`/`gruppoNuovo` lo scelgono a runtime, così la carta è giusta per
+   qualunque partito in qualunque era. `gd()` diretto in `extra` (non amplificato da aV/aC): il lavoro sul
+   territorio rende uguale che tu sia visibile o no — è esattamente il punto della famiglia.
+
+   ⚠ VERIFICATO PRIMA DI SCRIVERE (regola L12-2): all'opposizione le correnti NON sono decorative —
+   `aggiornaSfida()` non ha gate-opposizione, e una corrente sotto 35 apre la sfida alla leadership (misurato:
+   `S.sfida` popolata su un cammino d'opposizione). I costi-corrente qui stanno fra −3 e −6: una carta sola
+   non fa mai scattare la sfida, una condotta ripetuta sì. È il prezzo che il design chiede. */
+const OPPOSIZIONE_BASE = [
+  { id:'ob_sezioni', kick:'Partito', t:'Il giro delle sezioni',
+    text:'Un mese fuori dai palazzi: sezioni, circoli, mercati, capannoni. Nessuna telecamera nazionale — solo la gente che decide se sei uno di loro o uno che passa.', ch:[
+    { l:'Lo fai per intero, dove sei più debole', e:'I gruppi freddi si scaldano; la capitale non ti vede per un mese', vis:-4,
+      extra:function(){ gruppiFreddi(2).forEach(function(g){ gd(g,4); }); corrented('militanti',3); } },
+    { l:'Lo concentri nelle roccaforti', e:'Meno strada, base blindata; non allarghi niente', base:2,
+      extra:function(){ corrented('fedelissimi',3); } },
+  ]},
+  { id:'ob_tema', kick:'Identità', t:'Il tema scomodo',
+    text:'C\'è un tema che la tua base storica non vuole sentire — e che invece parla a un pezzo di paese che non ti ha mai votato. Il congresso si avvicina, e il silenzio non è più una posizione.', ch:[
+    { l:'Lo abbracci', e:'Allarghi davvero; i tuoi lo chiamano tradimento', cred:3, pleases:'progressista',
+      extra:function(){ var n=gruppoNuovo(), s=gruppoStorico(); if(n) gd(n,5); if(s) gd(s,-3); corrented('militanti',-4); } },
+    { l:'Riaffermi la linea di sempre', e:'La base respira; il paese nuovo passa oltre', pleases:'conservatore',
+      extra:function(){ var s=gruppoStorico(); if(s) gd(s,2); corrented('militanti',5); } },
+  ]},
+  { id:'ob_volto', kick:'Territorio', t:'Il volto nuovo',
+    text:'In un territorio dove perdi da vent\'anni c\'è una figura civica che vince da sola: sindaco di frontiera, popolare, non tesserato. Vuole correre con te — alle sue condizioni.', ch:[
+    { l:'Lo imbarchi alle sue condizioni', e:'Il territorio si apre; la vecchia guardia locale minaccia lo strappo', vis:2,
+      extra:function(){ var n=gruppoNuovo(); if(n) gd(n,4); corrented('fedelissimi',-4); } },
+    { l:'Proteggi la filiera dei tuoi', e:'Nessuno strappo; il territorio resta degli altri', base:1, pleases:'conservatore',
+      extra:function(){ corrented('fedelissimi',4); } },
+  ]},
+  { id:'ob_festa', kick:'Partito', t:'La festa di partito',
+    text:'La festa nazionale è la vetrina dell\'anno: tre giorni, i giornali guardano. La regia decide chi deve sentirsi a casa — e chi deve sentirsi invitato per la prima volta.', ch:[
+    { l:'La tari sulla base storica', e:'Identità, calore, nessun volto nuovo', base:2, pleases:'conservatore',
+      extra:function(){ corrented('militanti',5); } },
+    { l:'La apri agli elettori nuovi', e:'Facce mai viste nei gazebo; i vecchi si sentono ospiti', vis:4,
+      extra:function(){ var n=gruppoNuovo(); if(n) gd(n,4); corrented('militanti',-3); } },
+    { l:'La dedichi ai corpi intermedi', e:'Sindacati, categorie, associazioni: i moltiplicatori', cred:2, pleases:'tecnico',
+      extra:function(){ gd('lavoratori',3); gd('imprenditori',3); } },
+  ]},
+  { id:'ob_periferia', kick:'Territorio', t:'La periferia che nessuno ascolta',
+    text:'C\'è un\'area che il governo ha dimenticato e i giornali pure. Ci puoi costruire qualcosa — ma i modi sono due, e i tempi anche.', ch:[
+    { l:'Un anno di presenze: sportelli, assemblee, facce', e:'Il margine locale cresce sul serio, lentamente; nessun titolo',
+      extra:function(){ gruppiFreddi(2).forEach(function(g){ gd(g,3); }); corrented('fedelissimi',3); } },
+    { l:'Il blitz: telecamere, denuncia, una settimana', e:'Tutti ne parlano; fra un mese è finita', vis:7, cred:-2, pleases:'populista',
+      extra:function(){ var n=gruppoNuovo(); if(n) gd(n,1); } },
   ]},
 ];
 

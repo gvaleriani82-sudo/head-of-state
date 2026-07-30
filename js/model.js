@@ -129,6 +129,21 @@ function gd(id,n){
   S.groups[id]=clamp(S.groups[id]+n,0,100);
 }
 function allG(n){for(const gr of GROUPS) gd(gr.id,n);}
+/* L25-3 · α3 — BERSAGLI DINAMICI dei gruppi. Le carte-base non nominano mai un gruppo nel testo: dicono
+   «dove sei più debole», «il tuo gruppo storico», «quello che non ti ha mai votato». Qui si traducono a
+   runtime, così la stessa carta è giusta per qualunque partito in qualunque era. */
+function gruppiTuoi(){ const p=(typeof part==='function')?part(S.partito):null; return p&&p.base?Object.keys(p.base):[]; }
+function gruppiFreddi(n, soloNonTuoi){   // gli n gruppi con l'umore più basso (opz. escludendo la tua base)
+  const miei=gruppiTuoi();
+  let ids=Object.keys(S.groups||{});
+  if(soloNonTuoi){ const f=ids.filter(g=>miei.indexOf(g)<0); if(f.length) ids=f; }   // se la tua base è TUTTO, non restare a mani vuote
+  return ids.sort((a,b)=>S.groups[a]-S.groups[b]).slice(0, n||1);
+}
+function gruppoStorico(){   // il tuo zoccolo: il gruppo-base più caldo (se non hai base, il più caldo in assoluto)
+  const miei=gruppiTuoi(), ids=(miei.length?miei:Object.keys(S.groups||{}));
+  return ids.slice().sort((a,b)=>S.groups[b]-S.groups[a])[0]||null;
+}
+function gruppoNuovo(){ return gruppiFreddi(1,true)[0]||null; }   // «quelli che non ti hanno mai votato»
 function repd(n){ if(S.ind && S.ind.reputazione!=null) S.ind.reputazione=clamp(S.ind.reputazione+n,0,100); }   // sposta la REPUTAZIONE internazionale (usata dagli eventi INTERNAZIONALI)
 /* RELAZIONI INTERNAZIONALI (fase A): standing per-ente in S.relInt. relIntMuovi sposta uno standing; relIntMean
    è la media (per la coppia morbida con la reputazione e per l'epilogo); targetEnte legge l'àncora dai dati. */
@@ -366,9 +381,49 @@ function aperturaAmmette(idTuo, idAltro){
       && (idTuo==='i50_dc'||idTuo==='i50_psdi'||idTuo==='i50_pri'||idTuo==='i50_pli');
 }
 /* Partiti compatibili per coalizione: |asse − asse del tuo partito| ≤ 1 (escluso te), ordinati per seggi. */
+/* ============================================================ L25-1 · `S.intese` — IL TAVOLO DELLE ALLEANZE.
+   `S.intese = {idPartito: 0-100}`: il rapporto costruito con ciascun potenziale alleato (dato puro, piatto,
+   migrazione `{}`). È la sola meccanica nuova del cantiere-opposizione.
+   IL TETTO STA NELLA SCRITTURA, non nella lettura (indicazione di design): così nessuna somma di bonus può
+   scavalcarlo, e chi legge non deve conoscere la regola. Distanza d'asse → tetto:
+     |Δasse| ≤1 → 100 (già compatibili: l'intesa è colore che si vede)
+     |Δasse| = 2 → 70  (ce la puoi fare, a fatica: sopra 60 → entra nel blocco)
+     |Δasse| ≥3 → 40  (**non ammette MAI**: niente alleanze fra opposti via simpatia personale)
+   ============================================================ */
+function intesaCap(idAltro){
+  if(typeof S==='undefined' || !S || !S.partito) return 0;
+  var a=part(S.partito), b=part(idAltro); if(!a||!b) return 0;
+  var d=Math.abs(b.asse-a.asse);
+  return d<=1 ? 100 : (d===2 ? 70 : 40);
+}
+function intesaDi(idAltro){ return (typeof S!=='undefined' && S && S.intese && S.intese[idAltro]!=null) ? S.intese[idAltro] : 0; }
+/* I partiti con cui ha senso aprire un tavolo: non il tuo, e a distanza 1-2. Sotto 1 sono già compatibili per
+   asse (l'intesa non aggiunge nulla al blocco), sopra 2 il tetto non ammette mai — trattare sarebbe finto. */
+/* Il bersaglio delle telefonate-alleanza: se un tavolo-arco è aperto usa QUEL partito (coerenza: è lo stesso
+   segretario che ti chiama), altrimenti il più vicino fra i papabili. Null se non ce n'è → la `cond` le esclude. */
+function unTavolo(){
+  var l=partitiTavolo(); if(!l.length) return null;
+  if(typeof S!=='undefined' && S && S.tavoloPid && l.some(function(p){ return p.id===S.tavoloPid; })) return S.tavoloPid;
+  var a=part(S.partito);
+  return l.slice().sort(function(x,y){ return Math.abs(x.asse-a.asse)-Math.abs(y.asse-a.asse); })[0].id;
+}
+function partitiTavolo(){
+  if(typeof S==='undefined' || !S || !S.partito || !PAESE || !PAESE.partiti) return [];
+  var a=part(S.partito); if(!a) return [];
+  return PAESE.partiti.filter(function(p){ var d=Math.abs(p.asse-a.asse); return p.id!==S.partito && d>=1 && d<=2; });
+}
+function intesaMuovi(idAltro, n){
+  if(typeof S==='undefined' || !S || !idAltro) return;
+  S.intese=S.intese||{};
+  S.intese[idAltro]=clamp((S.intese[idAltro]||0)+n, 0, intesaCap(idAltro));
+}
+/* Partiti compatibili per coalizione: |asse − asse del tuo partito| ≤ 1 (escluso te), ordinati per seggi.
+   L25-1 — TERZA VIA: entra anche chi ha un'INTESA ≥60. Si SOMMA agli override storici (`aperturaAmmette`,
+   apparentamento '53), non li sostituisce: l'apertura a sinistra resta uno snodo, l'intesa è il lavorio quotidiano
+   che può prepararla o supplirvi. Col tetto-per-distanza, |Δasse|≥3 non arriva mai a 60 → mai ammesso. */
 function compatibili(idTuo, seggi){
   const a=part(idTuo).asse;
-  const list=PAESE.partiti.filter(p=>p.id!==idTuo && (Math.abs(p.asse-a)<=1 || aperturaAmmette(idTuo,p.id)));
+  const list=PAESE.partiti.filter(p=>p.id!==idTuo && (Math.abs(p.asse-a)<=1 || aperturaAmmette(idTuo,p.id) || (typeof intesaDi==='function' && intesaDi(p.id)>=60)));
   return seggi ? list.sort((x,y)=>(seggi[y.id]||0)-(seggi[x.id]||0)) : list;
 }
 function seggiCoalizione(ids, seggi){ return ids.reduce((s,id)=>s+(seggi[id]||0),0); }
