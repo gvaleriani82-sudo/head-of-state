@@ -141,6 +141,7 @@ function initStatoBase(){
   /* Build B — era: dato PURO (null=presente). Filtra i pool era-gated via eraViva(). Sopravvive allo snapshot come gli altri campi. */
   var _SC=(typeof SCENARI!=='undefined') ? SCENARI[chosenScenario] : null;
   S.era = (_SC && _SC.era) || null;
+  S.scenario = chosenScenario || 'presente';   // L30-1 - dato puro: PIU scenari possono stare sulla stessa linea (il '50 e il '70), quindi l era non basta piu a ritrovarli
   /* Build B — anno d'avvio dallo scenario: l'orologio parte dall'epoca (year + annoInizio), non dal presente.
      Fondamentale quanto i partiti: l'immersione (la data dice il '50) e gli snodi ancorati a un anno reale
      (la legge truffa si ancora al '53 → se l'orologio partisse dal 2026, il '53 non arriverebbe mai). */
@@ -171,6 +172,10 @@ function initStatoBase(){
   S.sfideUltimo = S.year*12 + S.month;   // D1a — sfide (quiz): la prima non prima di ~5 mesi dall'avvio (dato puro, round-trip)
   S.campNaz=null; S.campNazUltimo=null; S.promesseCampagna=[];   // Cantiere C — campagna nazionale (dati puri, round-trip)
   S.riallineamenti={};   // AVANZAMENTO — registro one-shot delle tappe-partiti già scattate (dato puro, round-trip; separato da truffaFatta)
+  S.pilastri70={};             // L28-4 — pilastri-cronaca gia' usciti (one-shot, dato puro)
+  S.rosterDelta={entra:[], esce:[], rinomina:[]};   // L34-1 - il registro delle nascite/morti/rinomine: e LUI la verita, PAESE ne e la proiezione
+  S.divorzioBdi=null; S.scalaMobile=null; S.nucleare=null;   // L33-1 - snodi '80 (dati puri, round-trip)
+  S.austerity=null; S.divorzio=null; S.solidarieta=null;   // L28-3 — snodi '70 (dati puri, round-trip): null = non ancora decisi
   S.apertura=null; S.aperturaEsito=null; S.enel=null;   // AVANZAMENTO Lotto 4 — snodi '60 (gemelli di leggeTruffa): apertura a sinistra + dilemma-Enel (dati puri, round-trip)
   S.richiamoCorrUltimo=null;   // CURA Lotto P3 — cooldown della carta-richiamo correnti (dato puro, round-trip)
   S.leggeroUltimo=null;        // G4 — cooldown del beat leggero (dato puro, round-trip)
@@ -844,10 +849,12 @@ const EV_PROB = 0.70;   // probabilità per mese ELEGGIBILE (tarata perché una 
    Forward-compatible: la futura linea USA userà usa1950/usa1960 senza collisioni (C1).
    PRESENTE e 'universale': nessun decennio, nessuna coda → identici a prima, per costruzione. */
 const LINEE_STORICHE = {
-  italia1950: {
+  [LINEA_IT]: {
     decenni: [
       { tag:'italia1950', da:-Infinity, coda:1961      },   // decade '50: coda-default 1961 (l'invecchiamento §4)
-      { tag:'italia1960', da:1958,      coda:Infinity  }    // decade '60: apre dal '58 (miracolo, Min. Sanità); ultima → aperta (C2)
+      { tag:'italia1960', da:1958,      coda:1971      },   // decade '60: apre dal '58 (miracolo, Min. Sanità); L28-1 CHIUDE la coda al '71
+      { tag:'italia1970', da:1969,      coda:1981      },   // decade '70: apre dal '69 (il confine d'ingresso è dicembre '69); L31-1 CHIUDE la coda all'81
+      { tag:'italia1980', da:1979,      coda:Infinity  }    // decade '80: apre dal '79 (sovrapposizione morbida come '69-'71); ultima → aperta (C2, la chiuderà il '90)
     ]
   }
 };
@@ -883,8 +890,38 @@ function eraVivaT(E){ return eraCartaViva(E, 'universale'); }
    non-dominanza garantita per costruzione (walk: cattivo-nel-miracolo 0,42 < buono-nella-stretta 2,32).
    `cicloBase()`=0 nel presente e prima del '58 → la congiuntura è identica a oggi e il '50 resta sigillato. */
 const DRIFT_ECONOMICO_ERA = {
-  italia1950: [ {da:1958, ciclo:0.6}, {da:1964, ciclo:-0.4}, {da:1966, ciclo:0.4} ]   // miracolo → stretta '64 → ripresa '66 (indice-gioco, §2)
+  /* miracolo → stretta '64 → ripresa '66 (indice-gioco, §2) · L28-1: la STAGFLAZIONE del '70 (scheda §2) — la coda
+     del boom fino al '72, poi lo shock petrolifero del '73 che porta la congiuntura al minimo consentito dalla
+     disciplina di non-dominanza (−0,7, mai oltre), e un decennio che non torna più in positivo. */
+  [LINEA_IT]: [ {da:1958, ciclo:0.6}, {da:1964, ciclo:-0.4}, {da:1966, ciclo:0.4},
+                {da:1970, ciclo:0.2}, {da:1973, ciclo:-0.7}, {da:1976, ciclo:-0.4},
+                {da:1980, ciclo:-0.2}, {da:1983, ciclo:0.2},  {da:1986, ciclo:0.5} ]
 };
+/* ===== L28-4 · IL MODIFICATORE-CLIMA DEGLI ANNI '70 (decisione G3) =====
+   Dal dicembre 1969 a fine decennio il paese vive una stagione piu' cupa. Il clima e' un FENOMENO, mai un evento
+   giocabile: nessuna carta, nessuna interattivita', nessun aggancio a singoli fatti di sangue.
+   Due sole leve, entrambe sobrie e dichiarate:
+     1) ORDINE PUBBLICO — si abbassa il BERSAGLIO di `sicurezza`, non il valore. `S.ind.sicurezza` è convergente
+        (`+= (target − valore) × 0,10`, model.js): un `−=` diretto verrebbe riassorbito in pochi mesi, come per
+        `potereLocale` e le correnti. Il bersaglio invece tiene, ed è la cosa giusta da muovere.
+     2) TONO DEI TITOLI — la prima pagina sceglie la variante amica se `stampa >= 50`; in questo clima la soglia
+        si alza, quindi a parità di rapporto con la stampa il paese legge titoli più cupi.
+   NON tocca l'economia: la disciplina di non-dominanza della stagflazione resta il tetto, e il clima le sta sotto
+   di un ordine di grandezza (il suo effetto sul voto passa solo da `sicurezza`, mai da crescita/deficit).
+   La soglia d'ingresso è 1969,9 e NON 1969,92: dicembre 1969 vale 1969 + 11/12 = 1969,9167, quindi a 1969,92 il
+   clima sarebbe partito a gennaio '70 — un mese dopo il fatto che lo apre. */
+/* L33-1 - il clima NON e solo dei 70: dagli 80 DECADE, perche il terrorismo declina (pentiti 82, dissociazione
+   87). Percettibile fino all 82, residuale dopo: la decade in superficie e luminosa, ed e questo il contrasto. */
+const CLIMA70 = [ {da:1969.9, sicurezza:-4, titoli:4}, {da:1974, sicurezza:-7, titoli:7}, {da:1977, sicurezza:-9, titoli:8},
+                  {da:1981, sicurezza:-6, titoli:6}, {da:1983, sicurezza:-3, titoli:3}, {da:1986, sicurezza:-1, titoli:1} ];
+function clima70(){
+  if(typeof S==='undefined' || !S || S.era!==LINEA_IT) return null;   // solo la linea storica; presente intatto
+  var t=S.year+((S.month||1)-1)/12, out=null;
+  for(var i=0;i<CLIMA70.length;i++){ if(t>=CLIMA70[i].da) out=CLIMA70[i]; }
+  return out;
+}
+function climaSicurezza(){ var c=clima70(); return c?c.sicurezza:0; }   // offset sul BERSAGLIO (model.js)
+function climaTitoli(){    var c=clima70(); return c?c.titoli:0;    }   // alza la soglia amico/ostile della prima pagina
 function cicloBase(){
   if(typeof S==='undefined' || !S) return 0;
   var W = DRIFT_ECONOMICO_ERA[S.era || 'contemporanea'];
@@ -902,14 +939,97 @@ function cicloBase(){
    maggiori entro ~1,1 dallo storico). Il '63 è CONDIZIONALE sull'apertura (S.apertura): ramo storico (apertura avvenuta,
    boomerang-PLI +4) vs controfattuale (centrismo tenuto, niente boomerang, PSI fuori, DC che tiene un filo meglio). */
 const RIALLINEAMENTI_ERA = {
-  italia1950: {
+  [LINEA_IT]: {
     1958: [ {id:'i50_dc',delta:2}, {id:'i50_pci',delta:-5}, {id:'i50_psi',delta:3}, {id:'i50_psdi',delta:-1}, {id:'i50_pnm',delta:-1.5}, {id:'i50_pri',delta:-0.5}, {id:'i50_msi',delta:3} ],   // Σ=0
     1963: {
       apertura:   [ {id:'i50_dc',delta:-2}, {id:'i50_pci',delta:-2.5}, {id:'i50_psi',delta:2}, {id:'i50_psdi',delta:1}, {id:'i50_pnm',delta:-4}, {id:'i50_pli',delta:4}, {id:'i50_pri',delta:-1}, {id:'i50_msi',delta:2.5} ],   // Σ=0 · boomerang-PLI +4 (storico 7,0)
-      centrismo:  [ {id:'i50_dc',delta:1}, {id:'i50_pci',delta:-0.5}, {id:'i50_psi',delta:0.5}, {id:'i50_psdi',delta:0.5}, {id:'i50_pnm',delta:-4}, {id:'i50_pli',delta:1}, {id:'i50_pri',delta:-1}, {id:'i50_msi',delta:2.5} ]     // Σ=0 · controfattuale: niente boomerang, PSI fuori, DC tiene
-    }
+      centrismo:  [ {id:'i50_dc',delta:1}, {id:'i50_pci',delta:-0.5}, {id:'i50_psi',delta:0.5}, {id:'i50_psdi',delta:0.5}, {id:'i50_pnm',delta:-4}, {id:'i50_pli',delta:1}, {id:'i50_pri',delta:-1}, {id:'i50_msi',delta:2.5} ]    // Σ=0 · controfattuale: niente boomerang, PSI fuori, DC tiene
+    },
+    /* L28-1 — LE TRE TAPPE DEGLI ANNI '70 (scheda PRESET-ITALIA-1970 §1). Stessa divisione dei ruoli del '58/'63:
+       il `govF` fa il logorio dell'incumbent, il DELTA fa la REDISTRIBUZIONE storica fra i partiti. I delta non
+       inseguono le percentuali assolute della scheda — inseguirle cancellerebbe il record del giocatore (dopo
+       vent'anni al governo la sua DC è logora quanto se l'è meritato) — ma riproducono CHI guadagna e CHI perde
+       a ogni urna, con la stessa grandezza dei delta esistenti (±1-5) e Σ=0 verificato. */
+    1972: [ {id:'i50_pnm',delta:-4}, {id:'i50_msi',delta:4.5}, {id:'i50_pci',delta:1}, {id:'i50_dc',delta:0.5},
+            {id:'i50_psi',delta:-0.5}, {id:'i50_psdi',delta:-0.5}, {id:'i50_pli',delta:-0.5}, {id:'i50_pri',delta:-0.5} ],   // Σ=0 · la «Destra Nazionale»: i monarchici confluiscono nel MSI, che quasi raddoppia
+    1976: [ {id:'i50_pci',delta:5}, {id:'i50_dc',delta:1.5}, {id:'i50_pli',delta:-2.5}, {id:'i50_msi',delta:-2},
+            {id:'i50_psdi',delta:-1.5}, {id:'i50_pri',delta:-0.5} ],                                                          // Σ=0 · la polarizzazione: DC+PCI al 73%, i laici minori schiacciati (il PLI quasi annientato)
+    1979: [ {id:'i50_pci',delta:-4}, {id:'i50_psi',delta:1}, {id:'i50_psdi',delta:1}, {id:'i50_pri',delta:0.5},
+            {id:'i50_pli',delta:0.5}, {id:'i50_msi',delta:0.5}, {id:'i50_dc',delta:0.5} ],                                    // Σ=0 · il riflusso: il PCI perde per la prima volta dal '48, i piccoli respirano (fisarmonica)
+    /* L31-1 — LE DUE TAPPE DEGLI ANNI '80 (scheda PRESET-ITALIA-1980 §1). Stessa regola di sempre: i delta
+       riproducono CHI guadagna e CHI perde, non le percentuali assolute (inseguirle cancellerebbe il record del
+       giocatore). Σ=0 verificato su entrambe. */
+    1983: [ {id:'i50_dc',delta:-5}, {id:'i50_pri',delta:2}, {id:'i50_psi',delta:1.5},
+            {id:'i50_msi',delta:1}, {id:'i50_pli',delta:0.5} ],                                                               // Σ=0 · il minimo storico della DC (32,9) e l'onda dei laici: il PRI tocca il suo picco, il PSI diventa l'ago della bilancia
+    /* L34-1 — PRIMA TAPPA CON DIRETTIVE: nel 1987 entrano i Verdi (2,5% e 13 deputati, l'onda post-Chernobyl).
+       La Lega Lombarda resta fuori come da consegna: 0,48% è sotto qualunque soglia rappresentabile — entrerà
+       col '90, che è il decennio in cui conta. `forza:2.5` è la sua quota d'esordio; la rinormalizzazione della
+       tappa la riporta in scala col resto del roster. */
+    1987: { entra:[ {id:'i80_verdi', nome:'Verdi', orientamento:'sinistra', base:{giovani:0.6, cetomedio:0.4}, forza:2.5, asse:-1, gruppoUE:'verdi'} ],
+            delta:[ {id:'i50_pci',delta:-3.5}, {id:'i50_psi',delta:3}, {id:'i50_dc',delta:1.5}, {id:'i50_pri',delta:-1.5},
+                    {id:'i50_msi',delta:-0.5}, {id:'i50_psdi',delta:0.5}, {id:'i50_pli',delta:0.5} ] }                        // Σ=0 · il PCI declina, il PSI tocca il massimo dal dopoguerra, la DC recupera, l'onda laica si ritira
   }
 };
+/* ============================================================================================================
+   L34-1 · IL CICLO DI VITA DEI PARTITI — nascite, morti, cambi di nome.
+   Un roster fisso bastava fino al '70; dagli '80 non basta più (i Verdi nell'87) e nel '90 sarebbe una bugia.
+
+   LA FORMA. Le direttive vivono **accanto ai delta, dentro la tappa** — non in `LINEE_STORICHE` come diceva la
+   consegna: le tappe stanno in `RIALLINEAMENTI_ERA` e sono già indicizzate per anno, una struttura parallela
+   sarebbe stata un secondo posto dove cercare la stessa cosa. Una tappa può quindi essere:
+     · un ARRAY di delta (la forma di sempre, invariata)
+     · un oggetto a RAMI (il '63, che sceglie su `S.apertura`)
+     · un oggetto `{delta:[], entra:[], esce:[], rinomina:[]}` — la forma nuova.
+
+   IL VINCOLO CHE DECIDE TUTTO (ricognizione L32-1): **il roster non è in `S`**. `PAESE` viene ricostruito a ogni
+   `applySnap` dallo scenario, quindi una mutazione a runtime si dissolverebbe al primo caricamento. Per questo
+   ogni direttiva applicata si registra in **`S.rosterDelta`** (dato puro), e `applySnap` la RIAPPLICA subito
+   dopo `paeseConScenario`. Il registro è la verità; PAESE è solo la sua proiezione.
+   ============================================================================================================ */
+function applicaRosterDelta(){
+  if(typeof S==='undefined' || !S || !S.rosterDelta || !PAESE || !PAESE.partiti) return;
+  var R=S.rosterDelta;
+  if(!(R.entra||[]).length && !(R.esce||[]).length && !(R.rinomina||[]).length) return;
+  var lista = PAESE.partiti.map(function(p){ return Object.assign({}, p); });   // clone: `paeseConScenario` condivide l'array con SCENARI, mutarlo lo corromperebbe
+  (R.esce||[]).forEach(function(e){ lista = lista.filter(function(p){ return p.id!==e.id; }); });
+  (R.rinomina||[]).forEach(function(r){ var p=lista.find(function(x){ return x.id===r.id; }); if(p) p.nome=r.nome; });
+  (R.entra||[]).forEach(function(n){
+    if(lista.some(function(p){ return p.id===n.id; })) return;
+    lista.push({ id:n.id, nome:n.nome, orientamento:n.orientamento||'centro', base:n.base||{}, forza:n.forza||1, asse:(n.asse!=null?n.asse:0), gruppoUE:n.gruppoUE||'noniscritti' });
+  });
+  PAESE.partiti = lista;
+}
+/* Applica UNA direttiva: aggiorna il registro in S e i dizionari per-id che sarebbero rimasti orfani. */
+function applicaDirettive(d){
+  if(!d) return;
+  S.rosterDelta = S.rosterDelta || {entra:[], esce:[], rinomina:[]};
+  (d.entra||[]).forEach(function(n){
+    S.rosterDelta.entra.push(n);
+    /* correzione #1 della ricognizione: il roster da solo non basta — un partito senza forza non esiste per il
+       motore (evolvePartiti, seggi, blocco). La forza dichiarata la si prende dagli altri, rinormalizzando dopo. */
+    if(S.forze && S.forze[n.id]==null)     S.forze[n.id]=n.forza||1;
+    if(S.forzePrev && S.forzePrev[n.id]==null) S.forzePrev[n.id]=n.forza||1;
+    if(S.seggi && S.seggi[n.id]==null)     S.seggi[n.id]=0;   // i seggi si ricalcolano alla prossima urna
+  });
+  (d.rinomina||[]).forEach(function(r){ S.rosterDelta.rinomina.push(r); });
+  (d.esce||[]).forEach(function(e){
+    /* correzione #3: il partito DEL GIOCATORE non esce mai per direttiva — quello è uno snodo (lo scioglie il
+       lotto successivo). Se capitasse, è un bug di dati: lo si fa emergere, non lo si subisce in silenzio. */
+    if(e.id===S.partito){ if(typeof console!=='undefined' && console.warn) console.warn('[roster] direttiva `esce` sul partito del giocatore ('+e.id+'): ignorata, serve uno snodo.'); return; }
+    S.rosterDelta.esce.push(e);
+    var dest=e.confluisce_in;
+    /* correzione #2: niente id orfani. Forza, intese e territori TRAVASANO nel partito d'arrivo (o si perdono
+       dichiaratamente se la direttiva non ne indica uno). */
+    if(S.forze && S.forze[e.id]!=null){ if(dest && S.forze[dest]!=null) S.forze[dest]+=S.forze[e.id]; delete S.forze[e.id]; }
+    if(S.forzePrev && S.forzePrev[e.id]!=null){ if(dest && S.forzePrev[dest]!=null) S.forzePrev[dest]+=S.forzePrev[e.id]; delete S.forzePrev[e.id]; }
+    if(S.seggi && S.seggi[e.id]!=null){ if(dest && S.seggi[dest]!=null) S.seggi[dest]+=S.seggi[e.id]; delete S.seggi[e.id]; }
+    if(S.intese && S.intese[e.id]!=null){ if(dest) S.intese[dest]=Math.max(S.intese[dest]||0, S.intese[e.id]); delete S.intese[e.id]; }
+    if(Array.isArray(S.coalizione)){ S.coalizione=S.coalizione.filter(function(id){ return id!==e.id; }); if(dest && S.coalizione.indexOf(dest)<0 && S.partito!==dest) S.coalizione.push(dest); }
+    if(Array.isArray(S.territori)) S.territori.forEach(function(t){ if(t && t.partito===e.id) t.partito = dest || S.partito; });
+    if(S.tavoloPid===e.id) S.tavoloPid = dest || null;
+  });
+  applicaRosterDelta();
+}
 function riallineamentoTappa(){
   if(typeof S==='undefined' || !S) return;
   var perAnno = S.era && RIALLINEAMENTI_ERA[S.era];
@@ -918,8 +1038,13 @@ function riallineamentoTappa(){
   if(S.riallineamenti[S.year]) return;              // one-shot per tappa: già applicata
   var entry = perAnno[S.year];
   if(!entry) return;                                // quest'anno non è una tappa della linea
-  var shifts = Array.isArray(entry) ? entry : entry[(S.apertura==='apri') ? 'apertura' : 'centrismo'];   // '63: ramo su S.apertura
-  if(!shifts || !shifts.length) return;
+  var direttive=null, shifts;
+  if(Array.isArray(entry)) shifts=entry;                                              // forma di sempre
+  else if(entry.delta || entry.entra || entry.esce || entry.rinomina){                // forma nuova (L34-1)
+    shifts=entry.delta||[]; direttive=entry;
+  } else shifts=entry[(S.apertura==='apri') ? 'apertura' : 'centrismo'];               // '63: ramo su S.apertura
+  if(direttive) applicaDirettive(direttive);        // PRIMA i nuovi entrano, poi i delta li trovano nel roster
+  if(!shifts || !shifts.length){ if(direttive){ S.riallineamenti[S.year]=true; } return; }
   if(S.forze && PAESE && PAESE.partiti){
     shifts.forEach(function(sh){ if(S.forze[sh.id]!=null) S.forze[sh.id]=Math.max(2, S.forze[sh.id]+sh.delta); });
     var sum=0; PAESE.partiti.forEach(function(p){ sum+=(S.forze[p.id]||0); });
@@ -929,6 +1054,11 @@ function riallineamentoTappa(){
   if(S.log){   // beat visibile della tappa (il quadro politico che si assesta)
     if(S.year===1958) S.log.unshift({t:T('Elezioni 1958'), x:T('Il quadro si assesta: il PSI cresce e si stacca, i monarchici arretrano.')});
     else if(S.year===1963) S.log.unshift({t:T('Elezioni 1963'), x:(S.apertura==='apri') ? T('Con l\'apertura a sinistra il PLI raddoppia: la reazione moderata prende forma.') : T('Il centrismo tiene: nessuna svolta, il logorio prosegue.')});
+    else if(S.year===1972) S.log.unshift({t:T('Elezioni 1972'), x:T('La destra si unisce in un solo cartello e i monarchici vi confluiscono: il quadro si semplifica a destra.')});
+    else if(S.year===1976) S.log.unshift({t:T('Elezioni 1976'), x:T('Il paese si divide in due grandi blocchi: i partiti laici minori vengono schiacciati.')});
+    else if(S.year===1979) S.log.unshift({t:T('Elezioni 1979'), x:T('L\'onda si ritira: la sinistra arretra per la prima volta da trent\'anni e i piccoli tornano a respirare.')});
+    else if(S.year===1983) S.log.unshift({t:T('Elezioni 1983'), x:T('Il partito di maggioranza relativa tocca il suo minimo: i laici crescono e i socialisti diventano l\'ago della bilancia.')});
+    else if(S.year===1987) S.log.unshift({t:T('Elezioni 1987'), x:T('I socialisti toccano il massimo dal dopoguerra, la sinistra storica arretra ancora, l\'onda laica si ritira.')});
   }
   S.riallineamenti[S.year]=true;
 }
@@ -953,7 +1083,7 @@ function paeseConScenario(base, sc){
    nei 3 anni spostano il blocco sopra o sotto la riga.
    ============================================================================ */
 const TRUFFA_SOGLIA=50, TRUFFA_PREMIO=64.4;
-function snodoTruffaAttivo(){ return typeof S!=='undefined' && S && S.era==='italia1950' && !S.truffaFatta && S.year<=1953 && PAESE.comeSiVince==='parlamentare'; }   // Lotto A: la legge è del 1953 — dopo, lo snodo non fira più (il beat dice «del 1953»)
+function snodoTruffaAttivo(){ return typeof S!=='undefined' && S && S.era===LINEA_IT && !S.truffaFatta && S.year<=1953 && PAESE.comeSiVince==='parlamentare'; }   // Lotto A: la legge è del 1953 — dopo, lo snodo non fira più (il beat dice «del 1953»)
 /* voto del blocco = somma forze del blocco / somma forze totali × 100 (i "voti" normalizzati del sistema).
    Cantiere B — il blocco dello snodo è l'APPARENTAMENTO (storico: la L.148/1953 premiava le liste APPARENTATE —
    DC+PSDI+PLI+PRI insieme al 49,8%): coalizione ∪ compatibili per asse (|Δ|≤1 = esattamente l'area centrista;
@@ -975,10 +1105,21 @@ function votoBloccoTruffa(){
    altrimenti lascia l'esito reale. Registra truffaEsito e alza il flag one-shot. Modifica S.seggi in loco. */
 /* Build B (b) — la scelta è dovuta? Solo il PREMIER nel '50, nell'anno pre-voto, se non ha ancora deciso.
    Un non-premier (attivista/sindaco/opposizione) non la vede mai → leggeTruffa resta null → esito 'norma' (degradazione graziosa). */
-function snodoSceltaDovuta(){ return typeof S!=='undefined' && S && S.era==='italia1950' && S.livello===3 && !S.opposizione && S.leggeTruffa==null && S.year<=1952 && S.turnInMandate===(PAESE.mandatoMesi/12 - 1); }   // Lotto A: falla chiusa — un premier arrivato tardi non riceve la carta nel '56+ («legge del 1953» in un anno sbagliato)
+function snodoSceltaDovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_IT && S.livello===3 && !S.opposizione && S.leggeTruffa==null && S.year<=1952 && S.turnInMandate===(PAESE.mandatoMesi/12 - 1); }   // Lotto A: falla chiusa — un premier arrivato tardi non riceve la carta nel '56+ («legge del 1953» in un anno sbagliato)
 /* AVANZAMENTO Lotto 4 — gate degli snodi '60 (gemelli di snodoSceltaDovuta): premier nel '50, '62-63, one-shot per flag. */
-function snodoEnelDovuta(){ return typeof S!=='undefined' && S && S.era==='italia1950' && S.livello===3 && !S.opposizione && S.enel==null && S.year>=1962 && S.year<=1963; }
-function snodoAperturaDovuta(){ return typeof S!=='undefined' && S && S.era==='italia1950' && S.livello===3 && !S.opposizione && S.apertura==null && S.year>=1962 && S.year<=1963; }
+function snodoEnelDovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_IT && S.livello===3 && !S.opposizione && S.enel==null && S.year>=1962 && S.year<=1963; }
+function snodoAperturaDovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_IT && S.livello===3 && !S.opposizione && S.apertura==null && S.year>=1962 && S.year<=1963; }
+/* L28-3 — i tre snodi degli anni '70. Stesso gate degli snodi '60 (linea storica, premier, one-shot, finestra
+   d'anni), finestre disgiunte così non si contendono mai lo stesso mese: austerity '73-'74, divorzio '74-'75,
+   solidarietà '76-'78. L'ordine d'iniezione rispetta la cronologia. */
+function snodoAusterityDovuta(){    return typeof S!=='undefined' && S && S.era===LINEA_IT && S.livello===3 && !S.opposizione && S.austerity==null    && S.year>=1973 && S.year<=1974; }
+function snodoDivorzioDovuta(){     return typeof S!=='undefined' && S && S.era===LINEA_IT && S.livello===3 && !S.opposizione && S.divorzio==null     && S.year>=1974 && S.year<=1975; }
+function snodoSolidarietaDovuta(){  return typeof S!=='undefined' && S && S.era===LINEA_IT && S.livello===3 && !S.opposizione && S.solidarieta==null  && S.year>=1976 && S.year<=1978; }
+/* L33-1 - i tre snodi degli anni 80. Finestre disgiunte come nel 70: divorzio-BdI 81-82, scala mobile 84-85,
+   nucleare 87-88. Nessuna si sovrappone alle finestre del 70 (l ultima chiude nel 78). */
+function snodoDivorzioBdiDovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_IT && S.livello===3 && !S.opposizione && S.divorzioBdi==null && S.year>=1981 && S.year<=1982; }
+function snodoScalaMobileDovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_IT && S.livello===3 && !S.opposizione && S.scalaMobile==null && S.year>=1984 && S.year<=1985; }
+function snodoNucleareDovuta(){    return typeof S!=='undefined' && S && S.era===LINEA_IT && S.livello===3 && !S.opposizione && S.nucleare==null    && S.year>=1987 && S.year<=1988; }
 /* CURA Lotto P3 (#9) — il richiamo delle correnti è dovuto? Premier, una corrente sotto la soglia critica-recuperabile
    (umore<40) PRIMA della sfida (<35), nessuna sfida già in corso, cooldown 8 mesi. Ogni valuta-silenziosa che degrada
    deve chiamare in tempo per rimediare (mai imboscata a freddo). */
@@ -990,7 +1131,13 @@ function graveInCorso(){
   if(S.inchiesta) return true;                                                     // l'inchiesta al vertice
   if(typeof periodoSondaggi==='function' && periodoSondaggi()) return true;        // la settimana elettorale
   if(S.campNaz) return true;                                                       // campagna nazionale in corso
-  if(S.ind && S.ind.fiducia!=null && S.ind.fiducia<40) return true;                // crisi di fiducia
+  /* L29-1 — IL CRITERIO-FIDUCIA È USCITO DA QUI, ed è una regola di design, non una taratura.
+     `fiducia<40` non è un evento: è una CONDIZIONE CRONICA. Misurato in L28-6: la fiducia scende sotto 40 dal
+     1965 e non risale più (76 nel '50 → 38 nel '65 → 29-36 in tutti gli anni '70), quindi il cedimento
+     dichiarava «giorno sbagliato» ogni mese per quindici anni e spegneva la leggerezza per sempre.
+     Il cedimento legge gli STATI ACUTI, non la condizione cronica: un paese in difficoltà ha comunque le sue
+     feste e il suo campionato — l'Italia degli anni di piombo è esattamente il paese della settimana bianca.
+     Stessa logica del fuori-verbale, che questo gate non l'ha mai avuto (L14-1): gli eventi bloccano, gli stati no. */
   if(S.minoranza && (S.mesiMinoranza||0)>0) return true;                           // sfiducia incombente
   if(S.convalescenza && (S.year*12+S.month)<S.convalescenza) return true;          // convalescenza: il lutto/la malattia
   if(S.agenda && S.agenda.some(function(a){ return a && a.data && a.data.tono==='grave'; })) return true;   // un grave già sul tavolo
@@ -1575,16 +1722,21 @@ function generaTitolo(){
        ha già tolto le voci di altre ere, quindi qui basta preferire le era-taggate rimaste. Nel presente non ce ne
        sono → il tier resta identico (prima pagina del presente intatta); dove la gemella non esiste per quel
        trigger, il tier ricade sul generico (fallback). Skin pura: stesso fatto, stesso momento, altra voce. */
-    const tierE=tier0.filter(t=>t.era==='italia1950'||t.era==='italia1960');
+    /* L29-3 — QUESTA RIGA ERA UNA LISTA CABLATA A DUE VOCI (`'italia1950'||'italia1960'`): le gemelle del '70
+       non prendevano la preferenza, e anzi venivano ESCLUSE ogni volta che una gemella-'60 era in tier. Misurato
+       prima del fix: nel decennio '70 la prima pagina parlava al 73% con la voce del '60. Ora la regola è quella
+       che il commento qui sopra già descriveva — si preferisce QUALUNQUE voce d'epoca, perché `eraVivaT` ha già
+       tolto le ere sbagliate. Così ogni decennio futuro entra senza toccare questa riga. */
+    const tierE=tier0.filter(t=>t.era && t.era!=='universale');
     const tier=(tierE.length?tierE:tier0);
     if(tier.length) q=(typeof pescaBag==='function'?pescaBag('titoli',tier):tier[0])||tier[0];
   }
   if(!q) q=cand[0];
-  const amica=(S.ind.stampa!=null?S.ind.stampa:50)>=50;
+  const amica=(S.ind.stampa!=null?S.ind.stampa:50) >= (50 + ((typeof climaTitoli==='function')?climaTitoli():0));   // L28-4: nel clima-'70 la soglia si alza -> a parita' di stampa, titoli piu' cupi
   S.lastTitolo=q.id;
   // micro-lotto meccanico: finestra ERA-AWARE — 8 nel presente (min pool-vivo 17 → 8<<17, mai affamato; i 2 ordinari pri:3 fanno rete),
   // 6 nel '50/'60 così la prima-pagina d'epoca resta BYTE-IDENTICA (recentTit è globale: allargarla toccherebbe anche le ere sigillate).
-  var _wTit=(S.era==='italia1950'||S.era==='italia1960')?6:8;
+  var _wTit=(S.era===LINEA_IT)?6:8;   // L30-1: la seconda condizione (S.era==='italia1960') era MORTA — S.era e la LINEA, non il decennio
   S.recentTit.push(q.id); if(S.recentTit.length>_wTit) S.recentTit.shift();
   S.titoloMese={ id:q.id, testo:T(amica?q.amico:q.ostile), tono:(amica?'amica':'ostile') };   // i18n: tradotto allo store (pattern-log)
 }
@@ -1683,11 +1835,21 @@ function initPotereLocale(){ const share=quotaTerritori(); S.potereLocale=(share
 /* ===== Territori simbolo (FASE B) — eletti persistenti che cambiano col voto (nessuna meccanica sui personaggi). ===== */
 function nomePersona(){ return rnd(PAESE.nomi)+' '+rnd(PAESE.cognomi); }
 function compatibile(partitoId, asse){ const p=part(partitoId); return p ? Math.abs(p.asse-asse)<=1 : false; }
-function asseBlocco(){ const ids=bloccoIds(); let s=0,w=0; for(const id of ids){ const p=part(id); if(!p) continue; const f=(S.forze&&S.forze[id])||0; s+=p.asse*f; w+=f; } return w>0?s/w:(part(S.partito).asse||0); }   // media PESATA e CONTINUA dell'asse del blocco
+/* L34-1 - LE OTTO GUARDIE. Fino a oggi sette punti facevano mioPartito().campo dando per scontato che il
+   partito del giocatore fosse sempre nel roster: con le nascite/morti non e piu vero, e il caso peggiore (il tuo
+   partito che si scioglie) crasherebbe il gioco. Degrado ESPLICITO: si torna un partito-ombra neutro e si urla in
+   console, perche se succede e un bug di dati da correggere, non una condizione da assorbire in silenzio. */
+function mioPartito(){
+  var p=(typeof part==='function') ? part(S.partito) : null;
+  if(p) return p;
+  if(typeof console!=='undefined' && console.warn) console.warn('[roster] il partito del giocatore ('+S.partito+') non e nel roster: nessuno snodo lo ha gestito. Partito-ombra neutro.');
+  return { id:S.partito, nome:'—', asse:0, base:{}, forza:1, orientamento:'centro' };
+}
+function asseBlocco(){ const ids=bloccoIds(); let s=0,w=0; for(const id of ids){ const p=part(id); if(!p) continue; const f=(S.forze&&S.forze[id])||0; s+=p.asse*f; w+=f; } return w>0?s/w:(mioPartito().asse||0); }   // media PESATA e CONTINUA dell'asse del blocco
 function partitoVicinoLean(lean){ let best=PAESE.partiti[0], bd=Infinity; for(const p of PAESE.partiti){ const d=Math.abs(p.asse-lean); if(d<bd){ bd=d; best=p; } } return best.id; }
 function scegliPartito(tuoLato, lean, asseTuo){ const cand=PAESE.partiti.filter(function(p){ return tuoLato ? Math.abs(p.asse-asseTuo)<=1 : Math.abs(p.asse-asseTuo)>1; }); const pool=cand.length?cand:PAESE.partiti; let best=pool[0], bd=Infinity; for(const p of pool){ const d=Math.abs(p.asse-lean); if(d<bd){ bd=d; best=p; } } return best.id; }
 function initTerritori(){ S.territori=(PAESE.territori||[]).map(function(TE){ return { titolare:nomePersona(), partito:partitoVicinoLean(TE.lean) }; }); }
-function quotaTerritori(){ if(!S.territori || !S.territori.length) return null; const a=part(S.partito).asse; return S.territori.filter(function(t){ return compatibile(t.partito,a); }).length / S.territori.length * 100; }
+function quotaTerritori(){ if(!S.territori || !S.territori.length) return null; const a=mioPartito().asse; return S.territori.filter(function(t){ return compatibile(t.partito,a); }).length / S.territori.length * 100; }
 /* ============================================================
    F2 — LA MAPPA CHE CHIAMA. Un territorio pulsa (marcatore S.territorioChiama, dato puro) → il pallino sul tab Partiti
    e il pulse sulla mappa invitano → tap sull'area → mini-scheda con 2 opzioni. Ignorare = zero imboscata: il marcatore
@@ -1713,7 +1875,7 @@ function territorioChiamaDovuto(){
 /* sceglie un'area che CHIAMA: favorisce quelle NON del tuo blocco (la periferia/opposizione che ti invita a guardarla),
    evita la più recente. Ritorna un indice o null. */
 function pickTerritorioChiama(){
-  var a=part(S.partito).asse;
+  var a=mioPartito().asse;
   var idxs=S.territori.map(function(_,i){return i;});
   var avv=idxs.filter(function(i){ return !compatibile(S.territori[i].partito,a) && i!==S.territorioRecente; });
   var pool=avv.length?avv:idxs.filter(function(i){return i!==S.territorioRecente;});
@@ -1759,7 +1921,7 @@ function arcoTerrSub(str, TE){ if(str==null) return str; var nome=(typeof nomeTe
    >50 = controllato dal tuo blocco. Cambio lato → nuovo titolare (partito vincente più vicino al lean). Popola ris.aree + ris.territoriDopo. */
 function decidiTerritori(ris){
   ris.aree=[]; if(!PAESE.territori || !S.territori) return;
-  const asseTuo=part(S.partito).asse, aB=asseBlocco(), wave=ris.margine;
+  const asseTuo=mioPartito().asse, aB=asseBlocco(), wave=ris.margine;
   const dopo=S.territori.map(function(t){ return Object.assign({},t); });
   PAESE.territori.forEach(function(TE,i){
     if(!(ris.tocca==='tutti' || TE.tipo===ris.tocca)) return;
@@ -1918,7 +2080,7 @@ function sfidaAttiva(){ return !!S.sfida; }
 function trovaVolto(){
   let best=null, bs=-1;
   if(S.territori && PAESE.territori && part(S.partito)){
-    const a=part(S.partito).asse;
+    const a=mioPartito().asse;
     PAESE.territori.forEach(function(TE,i){
       const t=S.territori[i]; if(!t || !compatibile(t.partito,a)) return;
       const score=(TE.simbolo?8:4) + ((S.forze[t.partito]||0)*0.2) + (TE.tipo==='regione'?2:0);
@@ -2331,8 +2493,21 @@ function genAgendaRamo(first){
   S.agenda=[];
   // D4 — il PILASTRO datato: l'Italia entra alle Nazioni Unite (14 dic 1955). One-shot per l'era '50 (qualsiasi livello):
   // da lì l'orizzonte ONU si apre (ruoloIntl/nodo passano all'ONU con l'orologio). S.onuFatto: campo nuovo, migrazione undefined→false.
-  if(!first && S.era==='italia1950' && !S.onuFatto && typeof PILASTRO_ONU_EV!=='undefined' && (S.year>1955 || (S.year===1955 && S.month>=12)) && !S.opposizione){
+  if(!first && S.era===LINEA_IT && !S.onuFatto && typeof PILASTRO_ONU_EV!=='undefined' && (S.year>1955 || (S.year===1955 && S.month>=12)) && !S.opposizione){
     S.onuFatto=true; S.agenda.push({kind:'event', data:PILASTRO_ONU_EV, resolved:false}); agendaSolo(); return;
+  }
+  /* L28-4 — i PILASTRI del '70: cronaca all'orologio, one-shot, per QUALUNQUE ruolo (sono fatti del paese).
+     Iniettati qui, prima dei rami: in fondo a genAgendaRamo non li vedrebbe nessuno tranne il premier (lezione L17-1).
+     Ordine cronologico = ordine dell'array; se due sono scaduti insieme escono in due mesi consecutivi. */
+  if(!first && S.era===LINEA_IT && typeof PILASTRI_LINEA!=='undefined'){
+    S.pilastri70=S.pilastri70||{};
+    for(var _pi=0;_pi<PILASTRI_LINEA.length;_pi++){
+      var _P=PILASTRI_LINEA[_pi];
+      if(S.pilastri70[_P.id]) continue;
+      if((S.year*12+S.month) < (_P.anno*12+_P.mese)) continue;
+      S.pilastri70[_P.id]=true;
+      S.agenda.push({kind:'event', data:_P, resolved:false}); agendaSolo(); return;
+    }
   }
   if(S.livello===0){ if(S.attivista && !S.attivista.laurea){                     // ATTIVISTA: UNA carta al mese, scelta per priorità (rework L2: campagne come carte di flusso)
       var ac=null;
@@ -2436,6 +2611,13 @@ function genAgendaRamo(first){
   // AVANZAMENTO Lotto 4: gli snodi '60 come SCELTA (Enel poi apertura) — carte one-shot nel '62-63, solo per il premier nel '50
   if(!first && typeof snodoEnelDovuta==='function' && snodoEnelDovuta()){ S.agenda.push({kind:'event', data:ENEL_EV, resolved:false}); agendaSolo(); return; }
   if(!first && typeof snodoAperturaDovuta==='function' && snodoAperturaDovuta()){ S.agenda.push({kind:'event', data:APERTURA_EV, resolved:false}); agendaSolo(); return; }
+  // L28-3: gli snodi degli anni '70, in ordine di calendario (finestre disgiunte: mai due nello stesso mese)
+  if(!first && typeof snodoAusterityDovuta==='function' && snodoAusterityDovuta()){ S.agenda.push({kind:'event', data:AUSTERITY_EV, resolved:false}); agendaSolo(); return; }
+  if(!first && typeof snodoDivorzioDovuta==='function' && snodoDivorzioDovuta()){ S.agenda.push({kind:'event', data:DIVORZIO_EV, resolved:false}); agendaSolo(); return; }
+  if(!first && typeof snodoSolidarietaDovuta==='function' && snodoSolidarietaDovuta()){ S.agenda.push({kind:'event', data:SOLIDARIETA_EV, resolved:false}); agendaSolo(); return; }
+  if(!first && typeof snodoDivorzioBdiDovuta==='function' && snodoDivorzioBdiDovuta()){ S.agenda.push({kind:'event', data:DIVORZIO_BDI_EV, resolved:false}); agendaSolo(); return; }
+  if(!first && typeof snodoScalaMobileDovuta==='function' && snodoScalaMobileDovuta()){ S.agenda.push({kind:'event', data:SCALAMOBILE_EV, resolved:false}); agendaSolo(); return; }
+  if(!first && typeof snodoNucleareDovuta==='function' && snodoNucleareDovuta()){ S.agenda.push({kind:'event', data:NUCLEARE_EV, resolved:false}); agendaSolo(); return; }
   // CURA Lotto P3 (#9): la CARTA-RICHIAMO delle correnti — chiama alla scheda PRIMA che sia tardi (mai l'imboscata a 30)
   if(!first && typeof richiamoCorrentiDovuto==='function' && richiamoCorrentiDovuto()){ S.richiamoCorrUltimo=S.year*12+S.month; S.agenda.push({kind:'event', data:cartaRichiamoCorrenti(), resolved:false}); agendaSolo(); return; }
   // Cantiere C: la STAGIONE ELETTORALE (ultimi 6 mesi) — il beat-campagna è LA carta del mese (setpiece: la campagna assorbe l'agenda)
@@ -2874,8 +3056,9 @@ function resolveItem(idx,ci){
       bioFatto(T({sisma:'Il terremoto: il paese colpito si rialza.', pandemia:'L\'emergenza sanitaria, attraversata.', energia:'La crisi energetica, gestita.', crollo:'Il crollo: il conto della manutenzione rinviata.'}[d.id]));
     }
     S.ind.consenso=computeConsenso();
-    it.resolved=true; it.outcome=T('Scelta:')+' <b>'+T(choice.l)+'</b>.';
-    S.log.unshift({t:T(d.t),x:T('Decisione:')+' '+T(choice.l)});
+    /* L28-4: una CRONACA non e' una scelta. I pilastri-'70 scrivono il fatto nel registro, non «Decisione: Prosegui». */
+    it.resolved=true; it.outcome = d.cronaca ? '' : T('Scelta:')+' <b>'+T(choice.l)+'</b>.';
+    S.log.unshift({t:T(d.t), x: d.cronaca ? T(d.logx||d.t) : T('Decisione:')+' '+T(choice.l)});
     if(it.kind==='dossier' && d && /^pp_/.test(d.id||'')){ S.pressAck=S.pressAck||{}; S.pressAck[d.pol]=S.year*12+S.month; }   // loop attivo Lotto 3: aver DECISO (rivedi o tieni) mette a tacere il richiamo su quella politica per qualche mese — tenere non resta un problema aperto
   }
   /* visibilità dell'amplificatore: se la stampa ha gonfiato o attutito il colpo, dillo dove il giocatore guarda */
@@ -2961,7 +3144,7 @@ function sondaggioVero(){
    rade e artigianali, banda larga. Dal '58 matura; nel presente il ritmo è serrato. Stessa infrastruttura, tre voci. */
 function sondaggioEra(){
   if(typeof S==='undefined' || !S) return {ogni:1, base:3, floor:2, voce:'Il sondaggio della settimana dà'};
-  if(S.era==='italia1950'){
+  if(S.era===LINEA_IT){
     if(S.year>=1958) return {ogni:1, base:4, floor:2, voce:'L\'istituto demoscopico rileva'};
     return {ogni:2, base:5, floor:3, voce:'Un istituto di ricerche stima'};   // rilevazioni ogni 2 mesi, banda più larga
   }
@@ -3083,7 +3266,7 @@ function avanzaMese(){
     return;
   }
   if(S.opposizione){                                              // all'opposizione: niente crisi/insolvenza/sfiducia tue
-    const f0=part(S.partito).forza;
+    const f0=mioPartito().forza;
     if(S.forze[S.partito] < Math.max(f0*0.5, 5)){ return gameOver('congresso'); }   // forza crollata: il partito ti scarica
     if(S.month===1 && S.turnInMandate>=PAESE.mandatoMesi/12){ if(sfidaAttiva()) return apriPrimaria('vigilia'); return election(); }   // a fine mandato: prima la primaria (se la sfida è viva), poi sfidi
     S.visibilita=clamp((S.visibilita||0)-4,0,100);                                   // il silenzio ti spegne (decadimento mensile)
@@ -3731,7 +3914,7 @@ function pickAlleato(){
     S.tenutaLiv[id]=1; S.tenutaUltimo[id]=mese;
     return { kind:'event', ally:id, data:{ kick:T(AE.kick), t:T(AE.t).replace(/%A/g,nome), text:T(AE.text).replace(/%A/g,nome), ch:[
       { l:T(AE.concedi.l), e:T(AE.concedi.e), f:()=>{ for(const g in base) gd(g,4); S.ind.debt+=0.5; S.tenuta[id]=clamp((S.tenuta[id]||0)+18,0,100); } },
-      { l:T(AE.rifiuta.l), e:T(AE.rifiuta.e), f:()=>{ const mb=part(S.partito).base; for(const g in mb) gd(g,2); S.tenuta[id]=clamp((S.tenuta[id]||0)-18,0,100); } },
+      { l:T(AE.rifiuta.l), e:T(AE.rifiuta.e), f:()=>{ const mb=mioPartito().base; for(const g in mb) gd(g,2); S.tenuta[id]=clamp((S.tenuta[id]||0)-18,0,100); } },
     ] } };
   }
   return null;
@@ -4052,13 +4235,32 @@ function applySnap(snap){
   /* Build B — era: dato puro (migrazione: i vecchi salvataggi non ce l'hanno → presente). Se è attivo uno
      scenario d'epoca, ri-sovrapponi la sua lista-partiti al PAESE base (S.forze è già nello snapshot). */
   if(S.era===undefined) S.era=null;
+  /* L30-1 - MIGRAZIONE DEL NOME DELLA LINEA: prima si chiamava come il suo primo decennio. */
+  if(S.era==='italia1950') S.era=LINEA_IT;
+  /* L30-1 - MIGRAZIONE dello scenario: i salvataggi vecchi non hanno S.scenario. Sulla linea storica lo si
+     inferisce dall ANNO (un salvataggio con anno <1970 e per forza partito dal '50); fuori linea, presente. */
+  if(S.scenario===undefined) S.scenario = S.era ? ((S.year!=null && S.year>=1970) ? 'italia1970' : 'italia1950') : 'presente';
   chosenScenario='presente';
+  /* Si cerca per SCENARIO, non piu per era: due scenari possono condividere la linea, e il primo che combaciava
+     vinceva in silenzio (un salvataggio del '70 tornava su come partita del '50, col roster del 1948). */
   if(S.era && typeof SCENARI!=='undefined'){
-    for(var _sk in SCENARI){ if(SCENARI[_sk].era===S.era){ chosenScenario=_sk; PAESE=paeseConScenario(PAESE, SCENARI[_sk]); break; } }
+    var _sc = SCENARI[S.scenario];
+    if(!_sc || _sc.era!==S.era){ _sc=null; for(var _sk in SCENARI){ if(SCENARI[_sk].era===S.era){ _sc=SCENARI[_sk]; S.scenario=_sk; break; } } }   // ripiego: scenario ignoto o incoerente
+    if(_sc){ chosenScenario=S.scenario; PAESE=paeseConScenario(PAESE, _sc); }
+  }
+  /* L34-1 - IL PUNTO CHE DECIDE TUTTO: PAESE e appena stato ricostruito dallo scenario, quindi senza questa
+     riga ogni nascita/morte/rinomina si dissolverebbe al caricamento. Il registro vive in S, si riapplica qui. */
+  if(!S.rosterDelta || typeof S.rosterDelta!=='object') S.rosterDelta={entra:[], esce:[], rinomina:[]};   // migrazione salvataggi pre-L34-1
+  S.rosterDelta.entra=S.rosterDelta.entra||[]; S.rosterDelta.esce=S.rosterDelta.esce||[]; S.rosterDelta.rinomina=S.rosterDelta.rinomina||[];
+  if(typeof applicaRosterDelta==='function') applicaRosterDelta();
+  if(true){
   }
   if(S.truffaFatta===undefined){ S.truffaFatta=false; S.truffaEsito=null; }   // Build B 1b — snodo one-shot: default per i salvataggi pre-1b
   if(S.riallineamenti===undefined) S.riallineamenti={};   // AVANZAMENTO — migrazione: i salvataggi pre-lotto ricevono il registro-tappe vuoto
   if(S.apertura===undefined){ S.apertura=null; S.aperturaEsito=null; S.enel=null; }   // AVANZAMENTO Lotto 4 — migrazione snodi '60
+  if(S.austerity===undefined){ S.austerity=null; S.divorzio=null; S.solidarieta=null; }   // L28-3 — migrazione snodi '70
+  if(S.divorzioBdi===undefined){ S.divorzioBdi=null; S.scalaMobile=null; S.nucleare=null; }   // L33-1 — migrazione snodi '80
+  if(!S.pilastri70 || typeof S.pilastri70!=='object') S.pilastri70={};   // L28-4 — migrazione pilastri '70
   if(S.richiamoCorrUltimo===undefined) S.richiamoCorrUltimo=null;   // CURA Lotto P3 — migrazione cooldown richiamo correnti
   if(S.sondStorico===undefined) S.sondStorico=[];   // F3 — migrazione: i salvataggi pre-lotto ricevono la serie-sondaggi vuota
   if(S.leggeroUltimo===undefined) S.leggeroUltimo=null;   // G4 — migrazione: cooldown del beat leggero
@@ -4089,7 +4291,7 @@ function applySnap(snap){
   if(S.recentSfide===undefined) S.recentSfide=[];                  // Q-fix #2 — migrazione: finestra viste-di-recente condivisa
   /* AVANZAMENTO Fase 2 — migrazione split Fronte→PCI+PSI: i vecchi salvataggi-'50 hanno `i50_fronte` nel roster.
      Ripartisco la sua forza 22:9 (come il seed) su pci/psi e tolgo l'orfano; idem forzePrev/seggi; partito/coalizione rimappati sul PCI (il maggiore). Senza, la sinistra sparirebbe dal caricato. */
-  if(S.era==='italia1950' && S.forze && S.forze.i50_fronte!=null && S.forze.i50_pci==null){
+  if(S.era===LINEA_IT && S.forze && S.forze.i50_fronte!=null && S.forze.i50_pci==null){
     var _f=S.forze.i50_fronte; S.forze.i50_pci=_f*22/31; S.forze.i50_psi=_f*9/31; delete S.forze.i50_fronte;
     if(S.forzePrev && S.forzePrev.i50_fronte!=null){ var _fp=S.forzePrev.i50_fronte; S.forzePrev.i50_pci=_fp*22/31; S.forzePrev.i50_psi=_fp*9/31; delete S.forzePrev.i50_fronte; }
     if(S.seggi && S.seggi.i50_fronte!=null){ delete S.seggi.i50_fronte; }   // i seggi si ricalcolano alla prossima urna
@@ -4097,8 +4299,8 @@ function applySnap(snap){
     if(Array.isArray(S.coalizione)){ S.coalizione=S.coalizione.map(function(id){return id==='i50_fronte'?'i50_pci':id;}); }
   }
   if(S.leggeTruffa===undefined) S.leggeTruffa=null;                            // Build B (b) — scelta legge truffa: default per i salvataggi pre-(b)
-  if(S.debtAncora===undefined) S.debtAncora=(S.era && SCENARI && (function(){for(var k in SCENARI){if(SCENARI[k].era===S.era&&SCENARI[k].debtAncora!=null)return SCENARI[k].debtAncora;}return null;})())||135;   // Cantiere B — migrazione: vecchi salvataggi → àncora dal loro scenario (o 135)
-  if(S.logorioEra===undefined) S.logorioEra=(S.era && SCENARI && (function(){for(var k in SCENARI){if(SCENARI[k].era===S.era&&SCENARI[k].logorioEra!=null)return SCENARI[k].logorioEra;}return null;})())||null;
+  if(S.debtAncora===undefined) S.debtAncora=((SCENARI && S.scenario && SCENARI[S.scenario] && SCENARI[S.scenario].debtAncora!=null) ? SCENARI[S.scenario].debtAncora : 135);   // L30-1: dallo SCENARIO salvato, non dal primo che combacia con l era   // Cantiere B — migrazione: vecchi salvataggi → àncora dal loro scenario (o 135)
+  if(S.logorioEra===undefined) S.logorioEra=((SCENARI && S.scenario && SCENARI[S.scenario] && SCENARI[S.scenario].logorioEra!=null) ? SCENARI[S.scenario].logorioEra : null);   // L30-1: dallo SCENARIO salvato, non dal primo che combacia con l era
   if(S.sfideUltimo===undefined) S.sfideUltimo=S.year*12+S.month;   // D1a — migrazione: i vecchi salvataggi non ricevono la sfida all'istante
   if(S.campNaz===undefined) S.campNaz=null;                        // Cantiere C — migrazione campagna nazionale
   if(S.campNazUltimo===undefined) S.campNazUltimo=null;

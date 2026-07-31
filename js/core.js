@@ -1,3 +1,12 @@
+/* ============================================================================================================
+   L30-1 — IL NOME DELLA LINEA STORICA. Fino a oggi la linea italiana si chiamava 'italia1950', lo stesso nome
+   del tag-decade delle sue prime carte: due cose diverse con lo stesso nome, per caso. Con lo scenario che parte
+   nel 1970 (e domani l'80, il '90) quel nome sarebbe diventato una bugia permanente — la classe d'errore del
+   commento stale. Da qui: **LINEA_IT e la LINEA** (il binario, che va dal 1950 a oggi), **italia1950/60/70 sono
+   i TAG-DECADE** del contenuto. `S.era` porta la LINEA; il decennio si deriva da `S.year` dentro LINEE_STORICHE.
+   ============================================================================================================ */
+const LINEA_IT = 'italia_repubblica';
+
 "use strict";
 /* ============================================================
    CORE — basi condivise da tutti gli altri file.

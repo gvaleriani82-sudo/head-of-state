@@ -91,6 +91,11 @@
   /* L9-1 — le due SOGLIE di scenario: miniatura sopra l'etichetta, per far sentire il salto d'epoca */
   #scenario-seg button{ display:flex; flex-direction:column; align-items:center; gap:6px; padding:7px 5px; }
   #scenario-seg .soglia-thumb{ width:100%; aspect-ratio:16/9; object-fit:cover; border-radius:7px; display:block; }
+  /* L30-1 - il terzo scenario non ha ancora la sua miniatura: segnaposto con lo STESSO ingombro, cosi i bottoni
+     restano allineati e il degrado e pulito (nessun buco, nessun salto di layout quando l immagine arrivera). */
+  #scenario-seg .soglia-vuota{ background:var(--panel2); border:1px dashed var(--line); }
+  #scenario-seg button{ min-width:0; }
+  #scenario-seg button span[data-i18n]{ font-size:11px; }
   .seg button:disabled{opacity:.45; cursor:default;}
   /* selettore paese: bandiera impilata sopra l'etichetta. GRIGLIA responsive (16 paesi) → va a capo su più righe,
      niente sforo orizzontale a 375px (prima era un flex-row che con 16 bottoni schiacciava/sforava). */

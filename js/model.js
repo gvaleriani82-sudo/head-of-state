@@ -80,7 +80,7 @@ function targetUnemp(){
 function targetService(id){
   const mm=ministerMods(), lm=leggiMods();
   const base={ sanita:[45,60,72][lv('sanita')]+[-4,0,4][lv('territorio')]+[-4,0,4][lv('personale_san')]+mm.sanita,
-    sicurezza:[45,58,70][lv('sicurezza')]+[4,0,-4][lv('immigrazione')]+[-3,0,4][lv('difesa')]+[-3,0,3][lv('manutenzione')]+mm.sicurezza+lm.sicurezza,
+    sicurezza:((typeof climaSicurezza==='function')?climaSicurezza():0)+[45,58,70][lv('sicurezza')]+[4,0,-4][lv('immigrazione')]+[-3,0,4][lv('difesa')]+[-3,0,3][lv('manutenzione')]+mm.sicurezza+lm.sicurezza,
     ambiente:[38,52,70][lv('ambiente')]+[-2,0,4][lv('trasporti')]+mm.ambiente+lm.ambiente };
   return clamp(base[id],0,100);
 }

@@ -1007,7 +1007,7 @@ function renderStampaTab(){
     /* LA LINEA COI MEDIA (lotto stampa-opposizione): il timone al posto del cartello. Era-skin: il canale del
        tuo tempo ('50 = comizi e giornali di partito, TV solo dal '54 · presente = talk e social). */
     const lm=(typeof lineaMedia==='function')?lineaMedia():'documentata';
-    const canale=(S.era==='italia1950')
+    const canale=(S.era===LINEA_IT)
       ? (S.year>=1954 ? T('Nel tuo tempo la linea passa dai comizi, dai giornali di partito e dalla nuova televisione.')
                       : T('Nel tuo tempo la linea passa dai comizi e dai giornali di partito.'))
       : T('Oggi la linea passa dai talk, dai social e dalle interviste.');

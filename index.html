@@ -85,6 +85,9 @@
       <div class="seg" id="scenario-seg" style="max-width:360px;margin:0 auto;">
         <button data-sc="presente" class="on" onclick="setScenario('presente')"><img class="soglia-thumb" src="assets/scenes/soglia-presente.webp" alt=""><span data-i18n>Presente</span></button>
         <button data-sc="italia1950" onclick="setScenario('italia1950')"><img class="soglia-thumb" src="assets/scenes/soglia-1950.webp" alt=""><span data-i18n>Italia 1950</span></button>
+        <!-- L30-1 — la miniatura del '70 non esiste ancora: segnaposto con lo stesso ingombro (16/9), così i tre
+             bottoni restano allineati e il giorno che l'immagine arriva basta sostituire lo span con un <img>. -->
+        <button data-sc="italia1970" onclick="setScenario('italia1970')"><span class="soglia-thumb soglia-vuota" aria-hidden="true"></span><span data-i18n>Italia 1970</span></button>
       </div>
       <div data-i18n style="font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--mut);margin:16px 0 7px;">Il tuo partito</div>
       <div class="cands" id="party-list" style="max-width:360px;margin:0 auto;"></div>
