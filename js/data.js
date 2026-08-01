@@ -2454,6 +2454,23 @@ const LOCALE_LEVE={
 /* Eventi locali tematici: cornice + scelte che muovono gli indicatori locali (locInd) e i gruppi (gd), con
    `pleases`/`rischio` per i tratti e l'esposizione dal basso. `tipo` filtra città/regione (o entrambi). */
 const LOCALE_EV=[
+  /* L45-1 · i cinque locali degli anni 2000 (scheda §CONTENUTO PRONTO-2 C), `era:'italia2000'` — il decennio
+     in cui la politica locale scopre che le cose vere si decidono altrove, e deve esserci lo stesso. */
+  {id:'l00_ztl', era:'italia2000', tipo:'città', kick:'Mobilità', t:'La ZTL', text:'Il centro storico soffoca: la giunta discute di chiudere alle auto. I commercianti insorgono, i residenti applaudono.', ch:[
+    {l:'Vara la ZTL coi varchi elettronici',e:'Aria e proteste',pleases:'progressista',f:()=>{locInd('servizi',8); locInd('bilancio',-4); gd('cetomedio',2); gd('imprenditori',-3);}},
+    {l:'Rinvia: prima i parcheggi',e:'Nessuno strappo; il traffico resta',pleases:'conservatore',f:()=>{locInd('servizi',3); gd('imprenditori',2);}} ]},
+  {id:'l00_centrocomm', era:'italia2000', tipo:'città', kick:'Sviluppo', t:'Il centro commerciale', text:'Fuori città apre un centro commerciale enorme: posti di lavoro nuovi, e il corso che si svuota una saracinesca alla volta.', ch:[
+    {l:'Autorizza: il lavoro prima di tutto',e:'Occupazione oggi; il centro muore piano',pleases:'conservatore',f:()=>{locInd('bilancio',7); gd('lavoratori',3); gd('imprenditori',-2);}},
+    {l:'Blocca e difendi le botteghe',e:'Il corso vive; i posti promessi sfumano',pleases:'progressista',f:()=>{locInd('bilancio',-3); gd('imprenditori',3); gd('lavoratori',-2);}} ]},
+  {id:'l00_antenne', era:'italia2000', tipo:'città', kick:'Tecnologia', t:'Le antenne', text:'I gestori vogliono piantare antenne per i telefonini sui tetti: c\'è chi teme le onde e chi non prende in casa propria.', ch:[
+    {l:'Autorizza con regole e controlli',e:'Il segnale arriva; la paura resta a qualcuno',pleases:'tecnico',f:()=>{locInd('servizi',7); locInd('bilancio',3); gd('giovani',2); gd('cetomedio',-1);}},
+    {l:'Moratoria in attesa di studi',e:'Prudenza; i telefoni tacciono',pleases:'progressista',f:()=>{gd('cetomedio',2); gd('giovani',-2);}} ]},
+  {id:'l00_fabbrica', era:'italia2000', tipo:'provincia', kick:'Crisi', t:'La fabbrica che chiude', cond:()=>S.year>=2008, text:'La crisi arriva in provincia con una lettera: lo stabilimento chiude, trecento famiglie a casa. La politica locale può poco, e deve esserci.', ch:[
+    {l:'Tavolo di crisi e cassa in deroga',e:'Tempo comprato, non salvezza',pleases:'progressista',f:()=>{locInd('bilancio',-6); gd('lavoratori',4); gd('giovani',1);}},
+    {l:'Cerchi un compratore, anche straniero',e:'Una speranza vera; il nome sulla fabbrica cambia',pleases:'tecnico',f:()=>{gd('imprenditori',3); gd('lavoratori',1); locInd('servizi',2);}} ]},
+  {id:'l00_wifi', era:'italia2000', tipo:'città', kick:'Tecnologia', t:'Il wi-fi in piazza', text:'Un\'idea da giornali: la rete gratuita in piazza. Costa poco, si vede molto.', ch:[
+    {l:'Accendi la piazza',e:'Modernità visibile',pleases:'progressista',f:()=>{locInd('servizi',6); locInd('bilancio',-2); gd('giovani',3);}},
+    {l:'Soldi veri ai servizi veri',e:'Prosa amministrativa',pleases:'tecnico',f:()=>{locInd('servizi',3); gd('pensionati',2);}} ]},
   // --- CITTÀ ---
   {id:'l_rifiuti', tipo:'città', kick:'Emergenza', t:'Rifiuti in strada', text:'I cassonetti traboccano da giorni: la città protesta e i giornali locali incalzano.', ch:[
     {l:'Appalto d\'urgenza, costi su',e:'Strade pulite in fretta; il bilancio paga',pleases:'progressista',costo:{pct:1.3},f:()=>{locInd('servizi',10); locInd('bilancio',-6); gd('giovani',2);}},
@@ -3787,6 +3804,68 @@ const DOSSIERS=[
    {l:'Sostieni i distretti e le piccole imprese',e:'Lavoro diffuso e radicato; risorse spalmate',pleases:'progressista',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; gd('cetomedio',3); gd('lavoratori',2);}},
    {l:'Priorità alla grande industria',e:'Scommetti sulla scala; i piccoli arrancano',pleases:'conservatore',f:()=>{if(S.gMod!=null)S.gMod+=0.1; gd('imprenditori',3); gd('cetomedio',-2);}},
  ]},
+ /* ============================================================================================================
+    L45-1 · I DOSSIER DEGLI ANNI 2000 (scheda §CONTENUTO PRONTO-2 A). Vocabolario dei d60_*: `min` per-dicastero,
+    `pleases` per il profilo del ministro, effetti sulle valute vere. Le cifre le ho tarate io sull'equilibrio
+    del decennio — il 2000 è il decennio in cui quasi ogni scelta costa a qualcuno, e si vede.
+    ============================================================================================================ */
+ {id:'d00_liste',era:'italia2000',min:'salute',kick:'Sanità',t:'Il ticket e le liste d\'attesa',text:'Le liste d\'attesa si allungano e il ticket pesa sulle famiglie: la sanità pubblica regge, ma scricchiola dove il cittadino la tocca.',ch:[
+   {l:'Piano straordinario per le liste d\'attesa',e:'Più prestazioni; più spesa',pleases:'progressista',f:()=>{S.ind.debt+=0.4; gd('lavoratori',3); gd('pensionati',3); gd('imprenditori',-1);}},
+   {l:'Rigore sui conti, ticket confermati',e:'I conti tengono; le code restano',pleases:'tecnico',f:()=>{S.ind.debt-=0.2; gd('imprenditori',2); gd('lavoratori',-3); gd('pensionati',-2);}},
+ ]},
+ {id:'d00_aviaria',era:'italia2000',min:'salute',kick:'Sanità',cond:()=>S.year>=2005&&S.year<=2006,t:'L\'influenza dei polli',text:'Dall\'Asia arriva l\'allarme aviaria: casi umani lontani, polli invenduti qui. La paura corre più del virus.',ch:[
+   {l:'Piano pandemico e scorte di antivirali',e:'Prepararsi costa; rassicura',pleases:'tecnico',f:()=>{S.ind.debt+=0.3; gd('cetomedio',3); gd('pensionati',2);}},
+   {l:'Campagna di calma, niente allarmismi',e:'Spesa zero; se arriva, sei scoperto',pleases:'conservatore',f:()=>{gd('cetomedio',2); gd('imprenditori',2); repd(-1);}},
+ ]},
+ {id:'d00_privatizza',era:'italia2000',min:'economia',kick:'Privatizzazioni',t:'L\'ultima privatizzazione',text:'Restano nel perimetro pubblico aziende che il mercato guarda con appetito. Venderle fa cassa oggi; il controllo se ne va per sempre.',ch:[
+   {l:'Vendi e abbatti il debito',e:'Cassa subito; il controllo se ne va',pleases:'tecnico',f:()=>{S.ind.debt-=1.5; gd('imprenditori',4); gd('lavoratori',-3); repd(2);}},
+   {l:'Tieni il controllo pubblico',e:'Nessun incasso; la presa resta',pleases:'progressista',f:()=>{gd('lavoratori',3); gd('imprenditori',-3); S.ind.debt+=0.2;}},
+ ]},
+ {id:'d00_bruxelles',era:'italia2000',min:'economia',kick:'Europa',cond:()=>S.year>=2002,t:'I conti con Bruxelles',text:'La lettera da Bruxelles è cortese e ferma: il disavanzo va ridotto. Ogni manovra correttiva ha un nome che i giornali conoscono: lacrime e sangue.',ch:[
+   {l:'Manovra correttiva vera',e:'L\'Europa apprezza; il paese morde',pleases:'tecnico',f:()=>{S.ind.debt-=1.5; gd('lavoratori',-3); gd('cetomedio',-2); stampad(3); repd(4);}},
+   {l:'Contabilità creativa e rinvio',e:'Il problema slitta; la credibilità pure',pleases:'populista',f:()=>{S.ind.debt+=0.5; stampad(-4); repd(-4); allG(1);}},
+ ]},
+ {id:'d00_sbarchi',era:'italia2000',min:'interno',kick:'Immigrazione',t:'Gli sbarchi',text:'Le carrette del mare arrivano a ondate: l\'accoglienza è al limite, la paura è in prima pagina, e l\'Europa guarda altrove.',ch:[
+   {l:'Accoglienza organizzata e pressing sull\'UE',e:'Gestione umana; i tempi sono lunghi',pleases:'progressista',f:()=>{S.ind.debt+=0.4; gd('giovani',3); gd('cattolici',2); gd('cetomedio',-3); repd(2);}},
+   {l:'Stretta su respingimenti ed espulsioni',e:'Il consenso d\'ordine sale; le immagini feriscono',pleases:'conservatore',f:()=>{gd('cetomedio',3); gd('pensionati',2); gd('giovani',-3); gd('cattolici',-2); repd(-2);}},
+ ]},
+ {id:'d00_telecamere',era:'italia2000',min:'interno',kick:'Sicurezza',t:'Le telecamere in centro',text:'Ogni città chiede telecamere: la sicurezza percepita vale più di quella statistica, e le statistiche non votano.',ch:[
+   {l:'Fondo nazionale per la videosorveglianza',e:'Ordine visibile; costa',pleases:'conservatore',f:()=>{S.ind.debt+=0.3; gd('cetomedio',3); gd('pensionati',2); gd('giovani',-1);}},
+   {l:'Più agenti di quartiere, meno schermi',e:'Presenza vera; effetto lento',pleases:'progressista',f:()=>{S.ind.debt+=0.2; gd('giovani',2); gd('lavoratori',2);}},
+ ]},
+ {id:'d00_riformalavoro',era:'italia2000',min:'lavoro',kick:'Lavoro',cond:()=>S.year>=2003,t:'La riforma del mercato del lavoro',text:'Contratti nuovi per un lavoro che cambia: più facile assumere, più facile restare precari. Il paese si divide su una parola: flessibilità.',ch:[
+   {l:'Vara la riforma piena',e:'Le imprese assumono; la piazza si riempie',pleases:'conservatore',f:()=>{gd('imprenditori',4); gd('lavoratori',-4); gd('giovani',-2); if(S.gMod!=null)S.gMod+=0.1;}},
+   {l:'Solo gli incentivi alla stabilizzazione',e:'Meno slancio, meno strappi',pleases:'progressista',f:()=>{S.ind.debt+=0.3; gd('lavoratori',3); gd('giovani',2); gd('imprenditori',-1);}},
+ ]},
+ {id:'d00_scalone',era:'italia2000',min:'lavoro',kick:'Pensioni',cond:()=>S.year>=2004&&S.year<=2007,t:'Lo scalone',text:'L\'età della pensione deve salire: i conti lo esigono, il corpo del paese lo rifiuta. Il gradino si può fare scalone o scalini.',ch:[
+   {l:'Lo scalone secco',e:'I conti ringraziano; una generazione si sente tradita',pleases:'tecnico',f:()=>{S.ind.debt-=1.5; gd('pensionati',-5); gd('lavoratori',-3); repd(3);}},
+   {l:'Scalini morbidi e finestre',e:'Meno risparmio, meno rabbia',pleases:'progressista',f:()=>{S.ind.debt-=0.4; gd('pensionati',-1); gd('lavoratori',1);}},
+ ]},
+ {id:'d00_treii',era:'italia2000',min:'istruzione',kick:'Scuola',t:'Le tre i',text:'Inglese, impresa, informatica: la scuola deve parlare il linguaggio del nuovo secolo, dicono. I maestri chiedono prima carta, gesso e stipendi.',ch:[
+   {l:'Moduli nuovi e laboratori',e:'La scuola si aggiorna; la spesa sale',pleases:'tecnico',f:()=>{S.ind.debt+=0.4; gd('giovani',4); gd('imprenditori',1);}},
+   {l:'Prima gli organici e gli edifici',e:'Il quotidiano prima del moderno',pleases:'progressista',f:()=>{S.ind.debt+=0.3; gd('lavoratori',3); gd('giovani',1);}},
+ ]},
+ {id:'d00_altavelocita',era:'italia2000',min:'infrastrutture',kick:'Grandi opere',t:'L\'alta velocità',text:'I cantieri dell\'alta velocità divorano miliardi e promettono di cucire il paese. In valle, qualcuno non vuole il treno.',ch:[
+   {l:'Accelera i cantieri',e:'Il paese si avvicina; il conto è enorme',pleases:'tecnico',f:()=>{S.ind.debt+=1.5; gd('imprenditori',4); gd('cetomedio',2); gd('giovani',-3);}},
+   {l:'Rallenta e ridiscuti i tracciati',e:'Meno scontro, meno chilometri',pleases:'progressista',f:()=>{gd('giovani',3); gd('imprenditori',-2);}},
+ ]},
+ {id:'d00_ponte',era:'italia2000',min:'infrastrutture',kick:'Grandi opere',t:'Il Ponte',text:'Il progetto del ponte sullo Stretto torna sul tavolo a ogni legislatura: opera del secolo per qualcuno, monumento allo spreco per altri.',ch:[
+   {l:'Rilancia il progetto',e:'Un sogno d\'acciaio; i tecnici dubitano',pleases:'populista',f:()=>{S.ind.debt+=1; gd('imprenditori',4); gd('cetomedio',-2); stampad(-2);}},
+   {l:'Chiudi il dossier: priorità alle ferrovie vere',e:'Prosa contro poesia',pleases:'tecnico',f:()=>{gd('cetomedio',3); gd('lavoratori',2); gd('imprenditori',-2); stampad(2);}},
+ ]},
+ {id:'d00_naja',era:'italia2000',min:'difesa',kick:'Difesa',cond:()=>S.year>=2004,t:'L\'addio alla naja',text:'La leva obbligatoria ha i mesi contati: l\'esercito diventa di professionisti. Un rito di passaggio nazionale se ne va con lei.',ch:[
+   {l:'Sospendi la leva: solo volontari',e:'Forze armate moderne; il vecchio rito muore',pleases:'tecnico',f:()=>{S.ind.debt+=0.5; gd('giovani',5); gd('pensionati',-3); repd(2);}},
+   {l:'Rinvia: la naja forma i cittadini',e:'La tradizione resiste ancora un po\'',pleases:'conservatore',f:()=>{gd('pensionati',3); gd('giovani',-5);}},
+ ]},
+ {id:'d00_processo',era:'italia2000',min:'giustizia',kick:'Giustizia',t:'Il processo infinito',text:'I processi durano dieci anni e l\'Europa condanna l\'Italia per lentezza. Ogni riforma della giustizia accende il sospetto che serva a qualcuno.',ch:[
+   {l:'Riforma dei tempi: più giudici, più riti rapidi',e:'La macchina accelera; costa',pleases:'tecnico',f:()=>{S.ind.debt+=0.5; gd('cetomedio',3); stampad(3); repd(2);}},
+   {l:'Depenalizza i reati minori',e:'Meno fascicoli; «colpo di spugna» è dietro l\'angolo',pleases:'populista',f:()=>{gd('imprenditori',2); stampad(-4); repd(-2);}},
+ ]},
+ {id:'d00_bandalarga',era:'italia2000',min:'sviluppo',kick:'Tecnologia',t:'La banda larga',text:'L\'ADSL arriva nelle città e salta i paesi: il digitale disegna una nuova questione meridionale, fatta di cavi che non arrivano.',ch:[
+   {l:'Piano nazionale per la rete',e:'Il paese si connette; la spesa è da grande opera',pleases:'tecnico',f:()=>{S.ind.debt+=1; gd('giovani',4); gd('cetomedio',2); if(S.gMod!=null)S.gMod+=0.1;}},
+   {l:'Lascia fare al mercato',e:'Dove conviene, la rete corre; altrove no',pleases:'conservatore',f:()=>{gd('imprenditori',3); gd('giovani',-2); gd('lavoratori',-1);}},
+ ]},
+
 ];
 
 /* eventi gravi, rari */
@@ -4910,6 +4989,33 @@ const SFIDE=[
  {id:'i60_mediaunica_avviamento', era:'italia1960', codaFino:Infinity, paese:'italia', ruolo:'locale', diff:'difficile', cond:()=>S.year>=1962, q:'Quale doppio canale abolì la scuola media unica del 1962?',
   op:['Scuola pubblica e privata','La separazione, a 11 anni, tra scuola media e avviamento al lavoro','Scuole del Nord e del Sud'], giusta:1,
   perche:'La riforma unificò la scuola dell\'obbligo fino a 14 anni.'},   // fonte: L. 1859/1962 scuola media unica → ancora ≥1962
+ /* L45-1 · le SFIDE degli anni 2000 (scheda §CONTENUTO PRONTO-2 B). `codaFino:Infinity` come le altre della
+    banca: una domanda di storia resta valida anche dopo la coda del decennio che racconta. */
+ {id:'i00_cambio', era:'italia2000', codaFino:Infinity, paese:'italia', ruolo:'governo', diff:'facile', cond:()=>S.year>=2002, q:'A quante lire corrisponde un euro al cambio fissato?',
+  op:['1.936,27','1.500','2.000'], giusta:0,
+  perche:'Il cambio irrevocabile fu fissato nel 1998: 1.936,27 lire per un euro.'},
+ {id:'i00_tetto', era:'italia2000', codaFino:Infinity, paese:'universale', ruolo:'governo', diff:'media', q:'Quale tetto al disavanzo chiedono i parametri europei?',
+  op:['Il 10% del PIL','Il 3% del PIL','Il pareggio obbligatorio'], giusta:1,
+  perche:'Il 3% di deficit/PIL è il parametro di Maastricht che vincola le manovre.'},
+ {id:'i00_legge05', era:'italia2000', codaFino:Infinity, paese:'italia', ruolo:'governo', diff:'media', cond:()=>S.year>=2006, q:'Come assegna i seggi la legge elettorale del 2005?',
+  op:['Con collegi uninominali','Con liste bloccate e premio di maggioranza','Con la preferenza singola'], giusta:1,
+  perche:'Proporzionale con liste bloccate e premio alla coalizione vincente: niente più collegi.'},
+ {id:'i00_leva', era:'italia2000', codaFino:Infinity, paese:'italia', ruolo:'governo', diff:'facile', cond:()=>S.year>=2005, q:'Cosa cambia per la leva militare dal 2005?',
+  op:['È sospesa: forze armate di soli volontari','Diventa di sei mesi','Si estende alle donne per obbligo'], giusta:0,
+  perche:'La chiamata obbligatoria è sospesa dal 1° gennaio 2005.'},
+ {id:'i00_allargamento', era:'italia2000', codaFino:Infinity, paese:'universale', ruolo:'intl', diff:'media', cond:()=>S.year>=2004, q:'Quanti paesi conta l\'Unione dopo l\'allargamento del 2004?',
+  op:['Quindici','Venticinque','Trenta'], giusta:1,
+  perche:'Il 1° maggio 2004 entrano dieci paesi, quasi tutti dell\'ex blocco orientale.'},
+ {id:'i00_subprime', era:'italia2000', codaFino:Infinity, paese:'universale', ruolo:'governo', diff:'media', cond:()=>S.year>=2008, q:'Da dove parte la crisi finanziaria del 2008?',
+  op:['Dal petrolio mediorientale','Dal debito pubblico italiano','Dai mutui immobiliari americani'], giusta:2,
+  perche:'I mutui subprime: il crollo parte dalle banche americane e si propaga al mondo.'},
+ {id:'i00_digitale', era:'italia2000', codaFino:Infinity, paese:'italia', ruolo:'governo', diff:'facile', cond:()=>S.year>=2004, q:'Cos\'è il digitale terrestre?',
+  op:['La TV via antenna in formato digitale','La TV via satellite','Internet sul televisore'], giusta:0,
+  perche:'Stessa antenna, segnale digitale: più canali e un decoder in ogni casa.'},
+ {id:'i00_spread', era:'italia2000', codaFino:Infinity, paese:'universale', ruolo:'governo', diff:'difficile', cond:()=>S.year>=2011, q:'Cosa misura lo «spread» di cui parlano tutti?',
+  op:['Il cambio euro-dollaro','La differenza di rendimento fra titoli italiani e tedeschi','Il tasso d\'inflazione'], giusta:1,
+  perche:'Più sale, più caro è per lo Stato farsi prestare i soldi.'},
+
  {id:'i50_ref46', era:'italia1950', ruolo:'governo', diff:'facile', q:'Col referendum del 2 giugno 1946, fra quali forme di Stato scelsero gli italiani?',
   op:['Monarchia e Repubblica','Impero e Confederazione','Regno e Ducato'], giusta:0,
   perche:'Il referendum istituzionale del 2 giugno 1946 scelse fra Monarchia e Repubblica.'},   // fonte: referendum 2/6/1946
@@ -6161,6 +6267,23 @@ const GOVERNI_PROFILI = {
    vis/cred = delta diretti alle due variabili; gov = erosione gruppi del governo (× vis × cred); base = tua base (× vis);
    centro = ceto medio (× vis). pickOpposizione() traduce lo spec in closure. Effetti piccoli: semina, non controllo. */
 const OPPOSIZIONE_EV = [
+  /* L45-1 · le quattro carte-opposizione degli anni 2000 (scheda §CONTENUTO PRONTO-2 D): il decennio in cui
+     l'opposizione si fa in televisione e poi, all'improvviso, in rete. Chiavi dichiarative come le esistenti. */
+  { id:'o00_talk', era:'italia2000', kick:'Opposizione', t:'Il talk della sera', text:'Il duello televisivo del giovedì: il ministro di là, tu di qua, il conduttore in mezzo. Cinque milioni guardano.', ch:[
+    { l:'Aggredisci sui numeri', e:'Lo metti all\'angolo; sembri rabbioso', vis:10, cred:-4, gov:-4, pleases:'populista' },
+    { l:'Smonti con calma una promessa', e:'Meno scintille, più sostanza', cred:6, gov:-2, pleases:'tecnico' },
+    { l:'Parli alla casalinga, non al ministro', e:'Il centro ti ascolta', vis:6, centro:4 } ]},
+  { id:'o00_blog', era:'italia2000', kick:'Opposizione', t:'Il blog', cond:()=>S.year>=2005, text:'Ti propongono un blog: il leader che risponde in rete, senza filtri. I tuoi lo temono più degli avversari.', ch:[
+    { l:'Apri e rispondi tu', e:'La rete premia il coraggio; ogni refuso è per sempre', vis:9, base:4, cred:-3, pleases:'populista' },
+    { l:'Lo cura lo staff, firmi tu', e:'Presidio senza rischi; si sente', vis:4, pleases:'tecnico' },
+    { l:'La politica si fa nelle sezioni', e:'La base vecchia apprezza; i giovani no', base:5, vis:-3 } ]},
+  { id:'o00_piazza', era:'italia2000', kick:'Opposizione', t:'La piazza convocata dalla rete', cond:()=>S.year>=2007, text:'Una manifestazione nata da passaparola e SMS riempie la piazza senza di te: quella gente vota come te, ma non ti ha invitato.', ch:[
+    { l:'Sali sul palco', e:'Ti prendi la piazza; «l\'ha scippata», dirà qualcuno', vis:10, base:5, cred:-4, pleases:'populista' },
+    { l:'In piazza da militante, senza palco', e:'Il gesto giusto; poca ribalta', cred:5, base:4, pleases:'progressista' },
+    { l:'Guardi da casa', e:'Nessun rischio; la distanza si nota', base:-4 } ]},
+  { id:'o00_girotondo', era:'italia2000', kick:'Opposizione', t:'Il girotondo dei professori', text:'Intellettuali e società civile ti accusano di tepore: «l\'opposizione la facciamo noi». Applaudirli o rivendicare?', ch:[
+    { l:'Li abbracci: la società civile è linfa', e:'Base calda; il ceto medio si chiede chi guida', base:6, centro:-4, pleases:'progressista' },
+    { l:'Rivendichi il primato della politica', e:'Parli da leader; la piazza si raffredda', cred:6, base:-4, pleases:'tecnico' } ]},
   { kick:'Opposizione', t:'Comizio in piazza', text:'Migliaia di persone in piazza ad ascoltarti. Che tono dai?', ch:[
     { l:'Comizio infuocato', e:'Visibilità su; la base si scalda, ma i toni rischiano', vis:10, cred:-3, gov:-3, pleases:'populista' },
     { l:'Discorso di unità', e:'Parli da statista: credibilità su', cred:5, base:2, pleases:'tecnico' },
