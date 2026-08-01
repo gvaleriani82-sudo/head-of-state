@@ -34,9 +34,9 @@ const S_ = 'assets/scenes/';   // prefisso unico: se la cartella si sposta, si c
 const SCENES = {
   /* --- i bucket tematici --- */
   economia:       { base:S_+'economia-base.webp', florido:S_+'economia-florido.webp',
-                    italia1960:S_+'economia-anni60.webp' },
+                    italia1960:S_+'economia-anni60.webp', italia1970:S_+'economia-anni70.webp', italia1980:S_+'economia-anni80.webp' },
   lavoro:         { base:S_+'lavoro-base.webp', grave:S_+'lavoro-grave.webp', florido:S_+'lavoro-florido.webp',
-                    italia1950:S_+'lavoro-anni50.webp' },
+                    italia1950:S_+'lavoro-anni50.webp', italia1970:S_+'lavoro-anni70.webp', italia1980:S_+'lavoro-anni80.webp' },
   sanita:         { base:S_+'sanita-base.webp', grave:S_+'sanita-grave.webp', florido:S_+'sanita-florido.webp',
                     italia1950:S_+'sanita-anni50.webp' },   // L9-1: corsia d'epoca, copre le carte neutre/florido nel '50 (base è contemporanea)
   scuola:         { base:S_+'scuola-base.webp', grave:S_+'scuola-grave.webp', florido:S_+'scuola-florido.webp',
@@ -52,7 +52,8 @@ const SCENES = {
   casa:           { base:S_+'casa-base.webp', grave:S_+'casa-grave.webp', florido:S_+'casa-florido.webp' },
   ambiente:       { base:S_+'ambiente-base.webp', grave:S_+'ambiente-grave.webp', florido:S_+'ambiente-florido.webp' },
   societacivile:  { base:S_+'societacivile-base.webp', florido:S_+'societacivile-florido.webp',
-                    italia1950:S_+'societacivile-anni50.webp', italia1960:S_+'societacivile-anni60.webp' },
+                    italia1950:S_+'societacivile-anni50.webp', italia1960:S_+'societacivile-anni60.webp',
+                    italia1970:S_+'societacivile-anni70.webp', italia1980:S_+'societacivile-anni80.webp' },
   esteri:         { base:S_+'esteri-base.webp', florido:S_+'esteri-florido.webp',
                     grave:[S_+'esteri-grave.webp', S_+'esteri-tavolo.webp'] },   // due stanze fredde: ruotano
   crisi:          { base:S_+'crisi-base.webp', grave:S_+'crisi-grave.webp', italia1950:S_+'crisi-anni50.webp' },
@@ -60,13 +61,17 @@ const SCENES = {
      (una carta-calamità neutra deve accendere la scena, non restare vuota). `florido` = i mezzi all'alba. */
   emergenza:      { base:S_+'emergenza-grave.webp', florido:S_+'emergenza-florido.webp' },
   elezioni:       { base:S_+'elezioni-base.webp', grave:S_+'elezioni-grave.webp', florido:S_+'elezioni-florido.webp' },
+  /* L38-1: la `stampa-anni80` della prima passata era da scartare (orologio LED, sigle nei monitor) ed e' in
+     assets/riserva/; questa e' la rigenerata, verificata a vista: monitor bianchi, nessun testo leggibile. */
   stampa:         { base:S_+'stampa-base.webp', grave:S_+'stampa-grave.webp',
-                    italia1950:S_+'stampa-anni50.webp', italia1960:S_+'stampa-anni60.webp' },
+                    italia1950:S_+'stampa-anni50.webp', italia1960:S_+'stampa-anni60.webp',
+                    italia1970:S_+'stampa-anni70.webp', italia1980:S_+'stampa-anni80.webp' },
   vitaprivata:    { base:S_+'vitaprivata-base.webp', florido:S_+'vitaprivata-florido.webp',
-                    italia1950:S_+'vitaprivata-anni50.webp', italia1960:S_+'vitaprivata-anni60.webp' },
+                    italia1950:S_+'vitaprivata-anni50.webp', italia1960:S_+'vitaprivata-anni60.webp',
+                    italia1970:S_+'vitaprivata-anni70.webp', italia1980:S_+'vitaprivata-anni80.webp' },
   partito:        { base:[S_+'partito-base.webp', S_+'partito-riunione.webp'],                     // assemblea / riunione in penombra
                     grave:S_+'partito-grave.webp', florido:S_+'partito-florido.webp',
-                    italia1950:S_+'partito-anni50.webp' },
+                    italia1950:S_+'partito-anni50.webp', italia1970:S_+'partito-anni70.webp', italia1980:S_+'partito-anni80.webp' },
 
   /* --- bucket NUOVI (lotti 4-5): soggetti che prima non esistevano, cablati sotto in SCENA_DI_* --- */
   /* il retroscena: 8 stanze del fuori-verbale in rotazione — l'anti-ripetizione più ricca del set */
@@ -94,7 +99,8 @@ const SCENA_MOMENTO = {
   notte:      { attesa:S_+'notte-attesa.webp', spoglio:S_+'notte-spoglio.webp', vittoria:S_+'notte-vittoria.webp', sconfitta:S_+'notte-sconfitta.webp' },
   telefono:   { oggi:S_+'telefono-oggi.webp', storico:S_+'telefono-anni50.webp', corridoio:S_+'telefono-corridoio.webp' },
   finale:     { trionfo:S_+'finale-trionfo.webp', dignita:S_+'finale-dignita.webp', caduta:S_+'finale-caduta.webp', oblio:S_+'finale-oblio.webp' },
-  soglia:     { contemporanea:S_+'soglia-presente.webp', italia1950:S_+'soglia-1950.webp' },
+  soglia:     { contemporanea:S_+'soglia-presente.webp', italia1950:S_+'soglia-1950.webp',
+                italia1960:S_+'soglia-1960.webp', italia1970:S_+'soglia-1970.webp', italia1980:S_+'soglia-1980.webp' },
 };
 
 /* kicker (stringa-sorgente italiana, com'è nei pool) → id-scena */

@@ -38,7 +38,11 @@
         <div class="em" id="start-ruolo" data-i18n style="margin:0;">La tua carriera politica</div>
         <span style="display:inline-block;width:26px;height:1px;background:var(--line2);"></span>
       </div>
-      <h2 style="margin-top:4px;">Head of State</h2>
+      <!-- L38-1 — il LOGOTIPO al posto dell'h2 testuale. L'h2 resta nel DOM per screen reader e SEO
+           (`.sr-only`, fuori schermo ma leggibile dalle tecnologie assistive): il titolo del gioco non
+           deve sparire dalla pagina solo perché ora è disegnato. -->
+      <h2 class="sr-only">Head of State</h2>
+      <img id="home-titolo" src="assets/ui/titolo-2righe.webp" alt="Head of State" width="900" height="320" decoding="async">
       <!-- pitch GENERICO (statico, bilingue): la intro per-paese/ruolo vive ora nel setup (#setup-intro), dove si sceglie -->
       <p id="start-intro" data-i18n>Dal primo comizio al vertice del paese: scegli dove giocare, dai un volto alla tua carriera politica e guidala mese per mese, tra scelte, alleanze e imprevisti.</p>
       <div class="note" data-i18n><b>Nota.</b> I valori del gioco (debito, crescita, ecc.) sono <b>stilizzati</b> e non sono dati ufficiali. I nomi dei ministri sono di fantasia. È una simulazione di dinamiche politiche, non un modello economico reale.</div>
@@ -85,9 +89,12 @@
       <div class="seg" id="scenario-seg" style="max-width:360px;margin:0 auto;">
         <button data-sc="presente" class="on" onclick="setScenario('presente')"><img class="soglia-thumb" src="assets/scenes/soglia-presente.webp" alt=""><span data-i18n>Presente</span></button>
         <button data-sc="italia1950" onclick="setScenario('italia1950')"><img class="soglia-thumb" src="assets/scenes/soglia-1950.webp" alt=""><span data-i18n>Italia 1950</span></button>
-        <!-- L30-1 — la miniatura del '70 non esiste ancora: segnaposto con lo stesso ingombro (16/9), così i tre
-             bottoni restano allineati e il giorno che l'immagine arriva basta sostituire lo span con un <img>. -->
-        <button data-sc="italia1970" onclick="setScenario('italia1970')"><span class="soglia-thumb soglia-vuota" aria-hidden="true"></span><span data-i18n>Italia 1970</span></button>
+        <!-- L37-1 — le cinque soglie hanno tutte la loro miniatura: i segnaposto tratteggiati sono andati.
+             L35-1 — ordine CRONOLOGICO e cinque porte: a 375px non ci stanno in una riga sola, quindi il
+             contenitore va a capo (due righe, mai scroll orizzontale). Vedi #scenario-seg in style.css. -->
+        <button data-sc="italia1960" onclick="setScenario('italia1960')"><img class="soglia-thumb" src="assets/scenes/soglia-1960.webp" alt=""><span data-i18n>Italia 1960</span></button>
+        <button data-sc="italia1970" onclick="setScenario('italia1970')"><img class="soglia-thumb" src="assets/scenes/soglia-1970.webp" alt=""><span data-i18n>Italia 1970</span></button>
+        <button data-sc="italia1980" onclick="setScenario('italia1980')"><img class="soglia-thumb" src="assets/scenes/soglia-1980.webp" alt=""><span data-i18n>Italia 1980</span></button>
       </div>
       <div data-i18n style="font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--mut);margin:16px 0 7px;">Il tuo partito</div>
       <div class="cands" id="party-list" style="max-width:360px;margin:0 auto;"></div>

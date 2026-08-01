@@ -23,6 +23,24 @@
        --acc-bg:#3a2f17; --pos-bg:#163a28; --neg-bg:#3a1f1c; --brand-bg:#1c2c44;
        --tecnico:#6f93d6; --progressista:#3fae74; --conservatore:#8f86d8; --populista:#e3b04b;
   */
+  /* ============================================================ L38-1 · L'IDENTITA' IN HOME
+     .sr-only — fuori schermo ma leggibile dalle tecnologie assistive: e' dove vive l'<h2> testuale ora
+     che il titolo e' un'immagine. Il ritaglio a 1px (non `display:none`) e' l'unica forma che gli screen
+     reader annunciano davvero. */
+  .sr-only{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden;
+            clip:rect(0 0 0 0); clip-path:inset(50%); white-space:nowrap; border:0; }
+  /* il LOGOTIPO: sorgente 900x320, reso a larghezza-contenitore con un tetto — a 375px viene ~2,7x la
+     larghezza resa, quindi resta nitido anche sugli schermi a densita' alta. */
+  #home-titolo{ display:block; width:100%; max-width:300px; height:auto; margin:2px auto 6px; }
+  /* LA TEXTURE-CARTA: pseudo-elemento fisso SOTTO tutto (z-index -1), cosi' vive solo sul fondo-app e non
+     tocca ne' i modali ne' le card, che hanno il loro fondo opaco. L'opacita' e' volutamente al limite del
+     percepibile: l'effetto giusto e' che si noti solo togliendola. */
+  body::before{ content:''; position:fixed; inset:0; z-index:-1; pointer-events:none;
+    background-image:url('../assets/ui/carta.webp'); background-repeat:repeat; background-size:512px 512px;
+    opacity:.25; mix-blend-mode:multiply; }
+  /* opacita' MISURATA, non a occhio: a .5 la texture scuriva il fondo di 5/9/17 punti su 255 e virava la
+     tinta (avorio freddo -> caldo); a .25 sono ~2/4/8 e la grana resta appena percepibile. Il contrasto del
+     testo scende da 14,01:1 a 13,5:1 circa - sempre molto sopra il minimo AAA di 7:1. */
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
   /* iPhone: tap immediato (niente attesa del doppio-tap) e cursore "mano" su tutto ciò che si tocca. */
   button, .tab, .opt, .cand, .mini-btn, .seg button, [onclick]{ touch-action:manipulation; cursor:pointer; }
@@ -96,6 +114,11 @@
   #scenario-seg .soglia-vuota{ background:var(--panel2); border:1px dashed var(--line); }
   #scenario-seg button{ min-width:0; }
   #scenario-seg button span[data-i18n]{ font-size:11px; }
+  /* L35-1 - con CINQUE porte una riga sola a 375px darebbe bottoni da ~64px: le etichette («Italia 1950») si
+     spezzerebbero male. Stessa medicina del selettore-paese: GRIGLIA che va a capo, tre e due, mai scroll
+     orizzontale. Le colonne sono a frazioni uguali, quindi le due righe restano allineate fra loro. */
+  #scenario-seg{ display:grid; grid-template-columns:repeat(3, 1fr); gap:5px; }
+  @media(min-width:520px){ #scenario-seg{ grid-template-columns:repeat(5, 1fr); } }
   .seg button:disabled{opacity:.45; cursor:default;}
   /* selettore paese: bandiera impilata sopra l'etichetta. GRIGLIA responsive (16 paesi) → va a capo su più righe,
      niente sforo orizzontale a 375px (prima era un flex-row che con 16 bottoni schiacciava/sforava). */

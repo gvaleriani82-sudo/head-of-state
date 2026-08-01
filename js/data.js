@@ -690,6 +690,102 @@ const SCENARI = {
       "Governare qui significa tenere insieme conti che peggiorano e un paese che chiede diritti nuovi. All'opposizione, significa scegliere fra la spallata e la lunga marcia.",
     ],
   },
+  /* ============================================================================================================
+     L35-1 · ITALIA 1960 — la porta mancante. Il '60 finora si attraversava soltanto, partendo dal '50: ora che
+     le porte esistono, l'assenza si vedeva dal menu. Stessa LINEA, stesso roster di 8 (gli id sono quelli su cui
+     girano tappe, blocco, apertura e snodi), anno d'avvio 1960.
+
+     LE FORZE: baseline = **urne del 25 maggio 1958** (DC 42,4 · PCI 22,7 · PSI 14,2 · MSI 4,8 · PSDI 4,6 ·
+     Monarchici 4,8 · PLI 3,5), **rinormalizzate a 100 sugli otto**. Il PRI non è nella scheda: l'1,4% del '58 è
+     un dato storico che aggiungo, perché il roster ha il posto e un partito a zero sarebbe un fantasma nella
+     scheda Partiti. Inferenza dichiarata, come per il '68 del '70 e il '79 dell'80.
+
+     TURNMANDATO 2: parlamento del maggio '58, scadenza naturale 1963 → dal gennaio 1960 restano 3 anni su 5.
+     È la stessa aritmetica del '50 e dell'80, e aggancia la **tappa-1963 già cablata**: si vota con la mappa
+     già mossa (il PLI che raddoppia, il boomerang moderato dell'apertura).
+
+     ⚠ ECONOMIA — LE TRE CIFRE SONO ⚠ NELLA SCHEDA, NON SOURCEATE. La scheda-'60 §2 dà bande, non numeri:
+     PIL 1960 «≈ 21-24.000 mld ⚠ da serie ISTAT», debito «seed ~34-36% ⚠ interpolato», quota spesa «~28-30% ⚠».
+     Qui c'è il **centro di ciascuna banda della scheda** (22.500 · 35 · 0,29) e il deficit −2 dedotto dal fatto
+     che il debito scende fino al minimo storico del 1963 (32,6%): sono valori PROVVISORI, in attesa dei numeri
+     veri. Non sono stime mie inventate: sono le bande che la scheda stessa dichiara.
+     ============================================================================================================ */
+  italia1960: {
+    id:'italia1960', era:LINEA_IT, nome:'Italia 1960', anno:1960, paese:'italia',
+    turnMandato: 2,
+    ue: false,                                  // nel 1960 c'è la CEE, non l'UE: nessuna europea diretta (1979)
+    intermedie: [ {tipo:'Elezioni amministrative', mese:28, tocca:'tutti'}, {tipo:'Elezioni regionali', mese:44, tocca:'regione'} ],
+    partiti: [
+      { id:'i50_dc',    nome:'DC',         orientamento:'centro',         base:{ cattolici:0.4, cetomedio:0.3, imprenditori:0.2, pensionati:0.1 }, forza:43.1, asse:0,  gruppoUE:'popolari'     },
+      { id:'i50_pci',   nome:'PCI',        orientamento:'sinistra',       base:{ lavoratori:0.6, giovani:0.4 },                                    forza:23.1, asse:-2, gruppoUE:'sinistra'     },
+      { id:'i50_psi',   nome:'PSI',        orientamento:'sinistra',       base:{ lavoratori:0.6, giovani:0.4 },                                    forza:14.4, asse:-2, gruppoUE:'socialisti'   },
+      { id:'i50_msi',   nome:'MSI',        orientamento:'destra',         base:{ pensionati:0.5, cetomedio:0.5 },                                  forza:4.9,  asse:2,  gruppoUE:'noniscritti'  },
+      { id:'i50_pnm',   nome:'Monarchici', orientamento:'destra',         base:{ pensionati:0.5, imprenditori:0.5 },                               forza:4.9,  asse:2,  gruppoUE:'conservatori' },
+      { id:'i50_psdi',  nome:'PSDI',       orientamento:'centrosinistra', base:{ lavoratori:0.5, cetomedio:0.5 },                                  forza:4.7,  asse:-1, gruppoUE:'socialisti'   },
+      { id:'i50_pli',   nome:'PLI',        orientamento:'centrodestra',   base:{ imprenditori:0.6, cetomedio:0.4 },                                forza:3.5,  asse:1,  gruppoUE:'liberali'     },
+      { id:'i50_pri',   nome:'PRI',        orientamento:'centro',         base:{ cetomedio:0.6, giovani:0.4 },                                     forza:1.4,  asse:0,  gruppoUE:'liberali'     },
+    ],
+    economia: { pil:22500, debito:35, deficit:-2 },   // ⚠ PIL e debito ancora provvisori: v. la nota sopra
+    debtAncora: 35,                                   // ⚠ provvisorio, segue il debito d'avvio
+    logorioEra: 0.012,                                // stesso rate della linea
+    valuta: { sym:'L.', mld:'mld lire', mln:'mln lire' },
+    quotaSpesa: 0.29,                                 // L36-1: SOURCEATO — «dal 29% del PIL nel 1960 al 53,5% nel 1990» (Osservatorio CPI / lavoce)
+    intro: "Italia, 1960. Il miracolo è in pieno corso: le fabbriche del Nord chiamano, i consumi crescono e il paese cambia pelle più in fretta di quanto sappia raccontarsi.",
+    contesto: [
+      "Italia, 1960. Il miracolo è in pieno corso: le fabbriche del Nord chiamano, i treni dal Sud sono pieni, le utilitarie escono dalle catene a un ritmo che nessuno aveva previsto. Il paese cambia pelle più in fretta di quanto sappia raccontarsi.",
+      "Nelle città cresce tutto: i palazzi, i consumi, le scuole. E con il benessere arrivano domande nuove — la casa, la sanità, la scuola per tutti — che la politica non può più rimandare.",
+      "Governare qui significa cavalcare una crescita che sembra non finire mai, senza farsi travolgere. All'opposizione, significa chiedere per chi resta indietro la parte che il miracolo non distribuisce da solo.",
+    ],
+  },
+  /* ============================================================================================================
+     L34-3 · ITALIA 1980 — la terza porta. Stessa LINEA, stesso roster di 8 (gli id sono quelli su cui girano
+     tappe, blocco e snodi), anno d'avvio 1980.
+     LE FORZE: baseline = **urne del 3-4 giugno 1979** (DC 38,3 · PCI 30,4 · PSI 9,8 · MSI 5,3 · PSDI 3,8 ·
+     PRI 3,0 · PLI 1,9; PR 3,5 e PdUP 1,4 fuori roster), **rinormalizzate a 100 sugli otto**. Ai Monarchici resta
+     una quota residua minima: nel 1979 il PDIUM non correva più, ma il roster è fisso e un partito a zero
+     sarebbe un fantasma nella scheda Partiti. Inferenza dichiarata, come per il '68 del '70.
+     TURNMANDATO 1: parlamento del giugno '79, scadenza naturale 1984 → dal gennaio 1980 restano 4 anni su 5.
+     Come nel '72, **il riallineamento del 1983 arriva prima dell'urna di gioco**: si vota con la mappa già mossa.
+     ============================================================================================================ */
+  italia1980: {
+    id:'italia1980', era:LINEA_IT, nome:'Italia 1980', anno:1980, paese:'italia',
+    turnMandato: 1,
+    ue: false,                                  // le europee dirette esistono dal '79, ma la struttura-UE del gioco è quella di oggi: resta inerte
+    intermedie: [ {tipo:'Elezioni amministrative', mese:28, tocca:'tutti'}, {tipo:'Elezioni regionali', mese:44, tocca:'regione'} ],
+    partiti: [
+      { id:'i50_dc',    nome:'DC',         orientamento:'centro',         base:{ cattolici:0.4, cetomedio:0.3, imprenditori:0.2, pensionati:0.1 }, forza:41.2, asse:0,  gruppoUE:'popolari'     },
+      { id:'i50_pci',   nome:'PCI',        orientamento:'sinistra',       base:{ lavoratori:0.6, giovani:0.4 },                                    forza:32.7, asse:-2, gruppoUE:'sinistra'     },
+      { id:'i50_psi',   nome:'PSI',        orientamento:'sinistra',       base:{ lavoratori:0.6, giovani:0.4 },                                    forza:10.5, asse:-2, gruppoUE:'socialisti'   },
+      { id:'i50_msi',   nome:'MSI',        orientamento:'destra',         base:{ pensionati:0.5, cetomedio:0.5 },                                  forza:5.7,  asse:2,  gruppoUE:'noniscritti'  },
+      { id:'i50_psdi',  nome:'PSDI',       orientamento:'centrosinistra', base:{ lavoratori:0.5, cetomedio:0.5 },                                  forza:4.1,  asse:-1, gruppoUE:'socialisti'   },
+      { id:'i50_pri',   nome:'PRI',        orientamento:'centro',         base:{ cetomedio:0.6, giovani:0.4 },                                     forza:3.2,  asse:0,  gruppoUE:'liberali'     },
+      { id:'i50_pli',   nome:'PLI',        orientamento:'centrodestra',   base:{ imprenditori:0.6, cetomedio:0.4 },                                forza:2.1,  asse:1,  gruppoUE:'liberali'     },
+      { id:'i50_pnm',   nome:'Monarchici', orientamento:'destra',         base:{ pensionati:0.5, imprenditori:0.5 },                               forza:0.5,  asse:2,  gruppoUE:'conservatori' },
+    ],
+    /* Seed dalla scheda §2: PIL ~394.000 mld lire al 1980 · debito **57%** (la serie unica riparte esattamente
+       dove la chiudeva la scheda-'70). Il disavanzo d'avvio la scheda non lo dà: 5 è dedotto dall'ordine del
+       decennio (primari ~3% più gli interessi che cominciano a pesare dopo il divorzio-BdI). Cifra tarabile. */
+    /* L39-1 — SEED DI GIOCO −6, non il −8 storico. Il dato sourceato è −8 (~8% del PIL nel 1980, serie conti
+       pubblici 1980-2025) e in quanto dato vive nella scheda; ma a −8 la condotta spendacciona finisce in
+       insolvenza su 6 cammini su 6 fra l'88 e il '90 — non è una strada rischiosa, è una strada chiusa, e
+       «nessuna strada è chiusa in partenza» è un paletto. C'è anche l'argomento storico: l'Italia degli '80
+       spese davvero così e NON fallì (il conto arrivò nel '92), quindi a −8 il motore punisce più della realtà
+       che vuole rappresentare — sconta il debito più duramente del decennio vero.
+       Vale il principio di L28-1: **la tabella serve ai testi, il seed serve al gioco.** */
+    economia: { pil:394000, debito:57, deficit:-6 },
+    debtAncora: 57,
+    logorioEra: 0.012,
+    valuta: { sym:'L.', mld:'mld lire', mln:'mln lire' },
+    /* L36-1 — SOURCEATO: 46,3% del PIL nel 1980 (serie conti pubblici 1980-2025). Era 0,34, ereditato dal '70:
+       la salita '70→'80 fu ripida (34 → 46) e va con la salita del debito, SSN, pensioni e Regioni. */
+    quotaSpesa: 0.46,
+    intro: "Italia, 1980. L'inflazione corre a due cifre, il debito comincia la sua salita e la televisione si moltiplica. È il decennio che promette denaro e colori, e presenta il conto ai figli.",
+    contesto: [
+      "Italia, 1980. L'inflazione corre a due cifre e il terrorismo non ha ancora deposto le armi, ma qualcosa sta girando: la televisione si moltiplica, i consumi riprendono, il decennio che comincia promette denaro e colori.",
+      "I conti dello Stato, intanto, scivolano: ogni anno si spende più di quanto si incassa, e il debito comincia una salita che nessuno fermerà per vent'anni.",
+      "Governare qui significa scegliere fra la disciplina che raffredda i prezzi e la spesa che compra il consenso. All'opposizione, significa contendersi un paese che ha smesso di credere alle piazze.",
+    ],
+  },
 };
 
 /* Build B (b) — la LEGGE TRUFFA come SCELTA di governo. Carta-decisione iniettata da genAgenda nell'anno pre-voto
@@ -775,6 +871,39 @@ const PILASTRI_LINEA = [
     text:'Nella notte fra il 10 e l\'11 ottobre, sulla pista della base siciliana di Sigonella, militari italiani e statunitensi si fronteggiano attorno all\'aereo che trasporta i sequestratori dell\'Achille Lauro — un dirottamento costato la vita a un passeggero inerme. Nessun colpo parte. Ma l\'alleanza più solida del dopoguerra ha mostrato di avere un punto dove può incrinarsi.',
     logx:'Militari italiani e americani a pochi metri, sulla pista di Sigonella. Nessun colpo parte.',
     ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+
+  /* ========================================================================================================
+     L40-2 · I CINQUE PILASTRI DEL '90. Testi APPROVATI da Giacomo il 1/8 e congelati: byte-identici alla
+     scheda §TESTI PRONTI, riga per riga. Pattern-cronaca invariato (`cronaca:true`, una sola voce, `f()`
+     vuota): il paese subisce il fatto, il giocatore non lo decide e non lo previene — mai gamificare una
+     tragedia (paletto-fondamento). Nessuna meccanica agganciata, nessun contatore.
+     I NOMI CI SONO, per direttiva I1 del 1/8: nominare come cronaca sì, come attori mai.
+     ======================================================================================================== */
+  { id:'p90_manipulite', anno:1992, mese:2, era:'italia1990', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Mani pulite',
+    text:'Il 17 febbraio, a Milano, l\'arresto dell\'ingegner Mario Chiesa per una tangente apre l\'inchiesta del pubblico ministero Antonio Di Pietro. La chiameranno Mani pulite: in due anni il sistema dei finanziamenti illeciti travolge i partiti che hanno governato la Repubblica.',
+    logx:'Un arresto a Milano apre l\'inchiesta che si chiamerà Mani pulite.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'p90_capaci', anno:1992, mese:5, era:'italia1990', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Capaci',
+    text:'Il 23 maggio, sull\'autostrada vicino a Capaci, cinquecento chili di tritolo uccidono il giudice Giovanni Falcone, la moglie Francesca Morvillo e tre agenti della scorta. Il paese scende in piazza con i lenzuoli bianchi.',
+    logx:'Capaci: il paese scende in piazza con i lenzuoli bianchi.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'p90_damelio', anno:1992, mese:7, era:'italia1990', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Via D\'Amelio',
+    text:'Il 19 luglio, in via D\'Amelio a Palermo, un\'autobomba uccide il giudice Paolo Borsellino e cinque agenti della scorta. Cinquantasette giorni dopo Capaci, lo Stato sembra nudo. La risposta sarà la stagione più dura mai opposta alla mafia.',
+    logx:'Cinquantasette giorni dopo Capaci, via D\'Amelio.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'p90_bombe93', anno:1993, mese:7, era:'italia1990', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'La stagione delle bombe',
+    text:'Fra maggio e luglio, autobombe colpiscono Firenze, Milano e Roma: un museo, chiese, strade di notte. L\'attacco arriva al cuore civile del paese. Lo Stato tiene.',
+    logx:'Autobombe a Firenze, Milano e Roma. Lo Stato tiene.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'p90_discesa', anno:1994, mese:1, era:'italia1990', codaFino:Infinity, cronaca:true, kick:'Il paese',
+    t:'La discesa in campo',
+    text:'Il 26 gennaio, con un videomessaggio, Silvio Berlusconi annuncia il suo ingresso in politica. In due mesi Forza Italia diventa il primo partito italiano. La televisione entra nella politica come macchina elettorale.',
+    logx:'Un videomessaggio annuncia un partito nuovo. In due mesi è il primo del paese.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
 ];
 
 /* ============================================================================================================
@@ -796,6 +925,10 @@ const PILASTRI_LINEA = [
 const SNODO_CONSENSO_60 = 57;   // finestra '62-'63 (miracolo): consenso 52,4-61,1 · mediana 56,7 → spacca 43/57
 const SNODO_CONSENSO_70 = 52;   // finestra '73-'78 (stagflazione): consenso 48,1-57,3 · mediana 51,7 → spacca 47/53
 const SNODO_CONSENSO_80 = 54;   // finestra '81-'87 (disinflazione): consenso 48,3-60,7 · mediana 54,3 → spacca 55/45
+/* L40-2 — soglia del '90, MISURATA sulla finestra '91-'98 come le altre (regola L28-5): 463 mesi campionati
+   su 16 cammini, mediana 52,4 → **52**, che spacca 57/43. La serie delle congiunture: '60=57 · '70=52 ·
+   '80=54 · '90=52. Il decennio della frana somiglia agli anni di piombo più che alla Milano da bere. */
+const SNODO_CONSENSO_90 = 52;
 const AUSTERITY_EV = {
   id:'austerity73', kick:'Emergenza', tono:'grave',
   t:'Il paese senza benzina',
@@ -1017,6 +1150,27 @@ const BEAT_LEGGERI = [
   {id:'lg70_distributore', era:'italia1970', registro:'leggero', cond:()=>S.year>=1973&&S.year<=1974, kick:'Il paese', t:'La coda al distributore', text:'Targhe alterne, buoni benzina, domeniche a piedi: l\'automobile, il giocattolo del boom, per la prima volta sta ferma.', ch:[
     {l:'Fai la coda come tutti', e:'Mezz\'ora in fila, e si vede', f:function(){}},
     {l:'Rinunci al viaggio', e:'Un\'abitudine che salta', f:function(){}} ]},
+  /* ---- L34-2 · i sei beat-leggeri degli anni '80. Effetti ZERO come tutti i leggeri. La notte del Mundial è
+     l'unico beat del progetto con **finestra di un anno solo**: fu una notte sola, e fingere che si ripeta ogni
+     estate sarebbe falso — muore col 1982, come le domeniche a piedi muoiono col '74. ---- */
+  {id:'lg80_paninoteca', era:'italia1980', registro:'leggero', cond:()=>S.year>=1983, kick:'Il paese', t:'La paninoteca', text:'I ragazzi coi giubbotti imbottiti colonizzano le paninoteche del centro. I giornali li chiamano paninari; loro non leggono i giornali.', ch:[
+    {l:'Ti fai spiegare il codice di abbigliamento', e:'Ogni generazione la sua divisa', f:function(){}},
+    {l:'Passi oltre senza capire', e:'Non è un tuo problema', f:function(){}} ]},
+  {id:'lg80_walkman', era:'italia1980', registro:'leggero', cond:()=>S.year>=1981, kick:'Il paese', t:'Il walkman', text:'Cuffiette arancioni sull\'autobus: la musica diventa un fatto privato. I nonni non capiscono; i ragazzi non sentono.', ch:[
+    {l:'Ne provi uno, per curiosità', e:'Il mondo con la colonna sonora', f:function(){}},
+    {l:'Preferisci sentire il traffico', e:'Certe abitudini non si cambiano', f:function(){}} ]},
+  {id:'lg80_videoteca', era:'italia1980', registro:'leggero', cond:()=>S.year>=1983, kick:'Il paese', t:'La videoteca', text:'Il videoregistratore entra in salotto e all\'angolo apre la videoteca: il film si sceglie in famiglia, la domenica sera.', ch:[
+    {l:'Scegli tu il film, stavolta', e:'Discussione garantita', f:function(){}},
+    {l:'Lasci scegliere agli altri', e:'Pace domestica', f:function(){}} ]},
+  {id:'lg80_mundial', era:'italia1980', codaFino:1982, registro:'leggero', cond:()=>S.year===1982&&S.month>=7, kick:'Il paese', t:'La notte del Mundial', text:'Una notte di luglio il paese intero è in strada: caroselli, bandiere, sconosciuti che si abbracciano. Per una volta, nessuno parla di politica.', ch:[
+    {l:'Scendi in strada anche tu', e:'Una notte da ricordare', f:function(){}},
+    {l:'Guardi dalla finestra', e:'Il rumore arriva lo stesso', f:function(){}} ]},
+  {id:'lg80_computer', era:'italia1980', registro:'leggero', cond:()=>S.year>=1984, kick:'Il paese', t:'Il computer in casa', text:'Il primo computer entra nelle case: i figli programmano, i padri guardano. A cosa serva, di preciso, non lo sa ancora nessuno.', ch:[
+    {l:'Ti fai insegnare qualcosa', e:'Dieci minuti e una gran confusione', f:function(){}},
+    {l:'Lasci fare a chi ha vent\'anni meno', e:'Ognuno il suo mestiere', f:function(){}} ]},
+  {id:'lg80_motorino', era:'italia1980', registro:'leggero', cond:()=>S.year>=1981, kick:'Il paese', t:'Il motorino', text:'La comitiva si muove in motorino: caschi facoltativi di fatto, genitori in ansia, libertà a due tempi.', ch:[
+    {l:'Ti ricordi com\'era avere quell\'età', e:'La stessa ansia, dall\'altra parte', f:function(){}},
+    {l:'Pensi che qualcuno dovrebbe metterci mano', e:'Un pensiero che torna', f:function(){}} ]},
   // ---- Presente / universale ----
   {id:'lg_derby', era:'universale', registro:'leggero', kick:'Il paese', t:'Il derby divide la città', text:'Per una domenica la città si spacca in due colori, e nei bar non si parla d\'altro.', ch:[
     {l:'Dici la tua sul risultato', e:'Rischi di scontentare metà città', f:function(){}},
@@ -3587,10 +3741,10 @@ const EVENTS=[
  {id:'i60_olimpiadi', era:'italia1960', cond:()=>S.year>=1960&&S.year<=1961, tono:'florido', kick:'Olimpiadi', t:'Le Olimpiadi di Roma', text:'Il mondo guarda a Roma per i Giochi: una vetrina straordinaria per l\'Italia del boom, con impianti, strade e alberghi da preparare.',ch:[
    {l:'Investi nella grande vetrina',e:'Prestigio e cantieri · il conto è alto',costo:{debito:1.2},f:()=>{S.ind.debt+=1.2; repd(4); gd('imprenditori',3); gd('giovani',2);}},
    {l:'Giochi sobri, conti in ordine',e:'Bilancio salvo · qualcuno voleva più grandezza',f:()=>{gd('cetomedio',2); repd(-1);}}]},
- {id:'i60_gagarin', era:'italia1960', cond:()=>S.year>=1961, tono:'florido', kick:'Corsa allo spazio', t:'L\'uomo nello spazio', text:'Il primo uomo in orbita accende il mondo: la corsa allo spazio è anche una sfida tra i due blocchi. Il paese sogna il progresso.',ch:[
+ {id:'i60_gagarin', era:'italia1960', cond:()=>fattoDatato(1961,2,4)/*L39-1: 12 aprile 1961, finestra 2 anni*/, tono:'florido', kick:'Corsa allo spazio', t:'L\'uomo nello spazio', text:'Il primo uomo in orbita accende il mondo: la corsa allo spazio è anche una sfida tra i due blocchi. Il paese sogna il progresso.',ch:[
    {l:'Celebra il progresso e la scienza',e:'I giovani sognano · la ricerca chiede fondi',f:()=>{gd('giovani',4); gd('cetomedio',2);}},
    {l:'Guarda con distacco alla gara dei blocchi',e:'Prudenza sobria · meno entusiasmo',f:()=>{gd('pensionati',2); gd('cattolici',1);}}]},
- {id:'i60_muro', era:'italia1960', cond:()=>S.year>=1961, tono:'grave', kick:'Guerra fredda', t:'Il Muro di Berlino', text:'Una città divisa da un muro: la guerra fredda si fa pietra. Il paese guarda a Ovest con inquietudine, e la scelta di campo torna a pesare.',ch:[
+ {id:'i60_muro', era:'italia1960', cond:()=>fattoDatato(1961,2,8)/*L39-1: 13 agosto 1961, finestra 2 anni*/, tono:'grave', kick:'Guerra fredda', t:'Il Muro di Berlino', text:'Una città divisa da un muro: la guerra fredda si fa pietra. Il paese guarda a Ovest con inquietudine, e la scelta di campo torna a pesare.',ch:[
    {l:'Ferma solidarietà atlantica',e:'Affidabile agli alleati · la sinistra dissente',f:()=>{repd(3); gd('cetomedio',3); gd('cattolici',2); gd('lavoratori',-3);}},
    {l:'Appello alla distensione',e:'Cerchi spiragli · gli alleati vogliono fermezza',f:()=>{repd(-1); gd('lavoratori',2); gd('giovani',2);}}]},
  {id:'i60_cuba', era:'italia1960', cond:()=>S.year>=1962&&S.year<=1963, tono:'grave', kick:'Crisi di Cuba', t:'Il mondo trattiene il fiato', text:'Le due superpotenze arrivano sull\'orlo dello scontro atomico per Cuba: giorni di paura, poi il passo indietro. La distensione diventa una parola nuova.',ch:[
@@ -3611,7 +3765,7 @@ const EVENTS=[
  {id:'i60_congiuntura', era:'italia1960', cond:()=>S.year>=1964&&S.year<=1965, tono:'grave', kick:'Congiuntura', t:'La stretta morde', text:'Dopo anni di corsa, l\'economia frena: prezzi in salita, credito più caro, le fabbriche rallentano. Il miracolo conosce la sua prima battuta d\'arresto.',ch:[
    {l:'Stretta sui conti per fermare i prezzi',e:'La lira difesa · l\'occupazione ne risente',f:()=>{S.gMod-=0.2; gd('cetomedio',2); gd('imprenditori',1); gd('lavoratori',-3);}},
    {l:'Sostieni l\'occupazione e la domanda',e:'Lavoro protetto · l\'inflazione morde',costo:{debito:1},f:()=>{S.ind.debt+=1; S.gMod+=0.2; gd('lavoratori',4); gd('cetomedio',-2);}}]},
- {id:'i60_francia_nato', era:'italia1960', cond:()=>S.year>=1966, kick:'Alleanza atlantica', t:'La Francia lascia il comando NATO', text:'Parigi esce dal comando militare integrato dell\'Alleanza: uno strappo che scuote l\'Occidente. L\'Italia deve dire dove sta.',ch:[
+ {id:'i60_francia_nato', era:'italia1960', cond:()=>fattoDatato(1966,2,3)/*L39-1: marzo 1966, finestra 2 anni*/, kick:'Alleanza atlantica', t:'La Francia lascia il comando NATO', text:'Parigi esce dal comando militare integrato dell\'Alleanza: uno strappo che scuote l\'Occidente. L\'Italia deve dire dove sta.',ch:[
    {l:'Conferma la lealtà atlantica piena',e:'Solida nell\'Alleanza · chi voleva più autonomia mugugna',f:()=>{repd(3); gd('cetomedio',2); gd('lavoratori',-1);}},
    {l:'Comprensione per le ragioni di Parigi',e:'Un margine di autonomia · gli alleati osservano',f:()=>{repd(-2); gd('giovani',2); gd('cetomedio',-1);}}]},
  {id:'i60_migrazione', era:'italia1960', cond:()=>S.year>=1958, kick:'Migrazione interna', t:'In viaggio verso Nord', text:'Treni carichi di famiglie lasciano il Sud per le fabbriche del Nord: centinaia di migliaia ogni anno. Le città del triangolo industriale si gonfiano, tra lavoro e disagio.',ch:[
@@ -3623,13 +3777,13 @@ const EVENTS=[
  {id:'i60_tv', era:'italia1960', cond:()=>S.year>=1960, tono:'florido', kick:'Televisione', t:'La TV entra nelle case', text:'Non più solo nei bar: la televisione arriva nei salotti, e con la Tribuna la politica entra nelle case di milioni di italiani. Un mezzo che cambia il consenso.',ch:[
    {l:'Porta la tua voce sul piccolo schermo',e:'Parli a tutto il paese · i tradizionalisti diffidano',f:()=>{gd('cetomedio',3); gd('giovani',2); stampad(3);}},
    {l:'Resta legato ai comizi e alle sezioni',e:'Fedele alla militanza · il mezzo nuovo corre senza di te',f:()=>{gd('lavoratori',2); gd('pensionati',2);}}]},
- {id:'i60_sessantotto', era:'italia1960', cond:()=>S.year>=1968, tono:'grave', kick:'Il Sessantotto', t:'Le università in fermento', text:'Gli studenti occupano le facoltà e scendono in piazza: contestano l\'autorità, la scuola, la società intera. Una generazione nuova chiede ascolto, con forza.',ch:[
+ {id:'i60_sessantotto', era:'italia1960', cond:()=>fattoDatato(1968)/*L39-1: 1968, finestra 2 anni*/, tono:'grave', kick:'Il Sessantotto', t:'Le università in fermento', text:'Gli studenti occupano le facoltà e scendono in piazza: contestano l\'autorità, la scuola, la società intera. Una generazione nuova chiede ascolto, con forza.',ch:[
    {l:'Apri al dialogo con gli studenti',e:'Ponti verso i giovani · chi vuole ordine ti accusa di cedere',f:()=>{gd('giovani',5); gd('lavoratori',2); gd('cetomedio',-3); gd('pensionati',-2);}},
    {l:'Tieni la linea dell\'ordine e dell\'autorità',e:'Fermezza cara ai moderati · i giovani ti voltano le spalle',f:()=>{S.ind.sicurezza+=3; gd('cetomedio',3); gd('pensionati',2); gd('giovani',-5);}}]},
- {id:'i60_autunnocaldo', era:'italia1960', cond:()=>S.year>=1969, tono:'grave', kick:'Vertenze', t:'L\'autunno caldo', text:'Le fabbriche si fermano: la stagione delle grandi vertenze operaie porta in piazza milioni di lavoratori per salari e diritti. Il paese negozia il suo nuovo equilibrio.',ch:[
+ {id:'i60_autunnocaldo', era:'italia1960', cond:()=>fattoDatato(1969,2,9)/*L39-1: autunno 1969, finestra 2 anni*/, tono:'grave', kick:'Vertenze', t:'L\'autunno caldo', text:'Le fabbriche si fermano: la stagione delle grandi vertenze operaie porta in piazza milioni di lavoratori per salari e diritti. Il paese negozia il suo nuovo equilibrio.',ch:[
    {l:'Favorisci un accordo coi sindacati',e:'Diritti e salari avanzano · le imprese temono i costi',costo:{debito:0.5},f:()=>{S.ind.debt+=0.5; gd('lavoratori',6); gd('giovani',2); gd('imprenditori',-4);}},
    {l:'Tieni ferma la linea delle imprese',e:'Competitività difesa · la piazza operaia ribolle',f:()=>{gd('imprenditori',4); S.gMod+=0.1; gd('lavoratori',-5); S.ind.sicurezza-=2;}}]},
- {id:'i60_luna', era:'italia1960', cond:()=>S.year>=1969, tono:'florido', kick:'La conquista della Luna', t:'L\'uomo sulla Luna', text:'Il mondo intero, davanti alla TV, guarda i primi passi sulla Luna: una notte di stupore che unisce tutti. Il progresso sembra non avere più confini.',ch:[
+ {id:'i60_luna', era:'italia1960', cond:()=>fattoDatato(1969,2,7)/*L39-1: 20 luglio 1969, finestra 2 anni*/, tono:'florido', kick:'La conquista della Luna', t:'L\'uomo sulla Luna', text:'Il mondo intero, davanti alla TV, guarda i primi passi sulla Luna: una notte di stupore che unisce tutti. Il progresso sembra non avere più confini.',ch:[
    {l:'Celebra col paese questa notte',e:'Un momento di unità e meraviglia · nulla da spartire',f:()=>{allG(2); gd('giovani',3);}},
    {l:'Ricorda che i problemi restano a terra',e:'Concretezza · qualcuno ti trova poco sognatore',f:()=>{gd('lavoratori',2); gd('cetomedio',-1);}}]},
  /* ===== L28-6 · GLI EVENTI NAZIONALI DEGLI ANNI '70 (12) — testi da PRESET-ITALIA-1970 §CONTENUTO PRONTO.
@@ -3671,6 +3825,47 @@ const EVENTS=[
  {id:'i70_sequestri', era:'italia1970', cond:()=>S.year>=1973, tono:'grave', kick:'Ordine pubblico', t:'Il rapimento a scopo d\'estorsione', text:'L\'anonima sequestri colpisce ancora: industriali sotto scorta, famiglie che vendono, la provincia ricca che ha paura.',ch:[
    {l:'Blocco dei beni delle famiglie colpite',e:'Si toglie ossigeno al riscatto · le famiglie si sentono sole',f:()=>{S.ind.sicurezza=clamp(S.ind.sicurezza+2,0,100); gd('imprenditori',-3); gd('cetomedio',2);}},
    {l:'Priorità alla vita: si lascia fare, si indaga dopo',e:'Nessuno resta solo · il mercato del riscatto prospera',f:()=>{gd('imprenditori',3); gd('cetomedio',-2); S.ind.sicurezza=clamp(S.ind.sicurezza-2,0,100);}}]},
+ /* ===== L34-2 · GLI EVENTI NAZIONALI DEGLI ANNI '80 (12) — testi da PRESET-ITALIA-1980 §CONTENUTO PRONTO.
+    Paletti onorati: **mai il nome del proprietario delle reti** (H6) · il maxiprocesso si gioca sulla RISPOSTA
+    ISTITUZIONALE, il sangue resta fuori (H2) · la droga è policy, mai spettacolo (H3) · i missili sono il dossier
+    astratto fermezza/autonomia, mai riferito a Sigonella (H5) · la P2 è nominabile come fenomeno, nessun iscritto
+    reale nominato · il Concordato con la fede-colore, entrambe le letture legittime. ===== */
+ {id:'i80_reti', era:'italia1980', cond:()=>S.year>=1981, kick:'Televisione', t:'Le reti private sfidano il monopolio', text:'Le televisioni commerciali crescono ovunque: film, quiz, pubblicità. La RAI protesta, i pretori sequestrano, il Parlamento insegue. Serve una legge che nessuno sa scrivere.',ch:[
+   {l:'Regolamenti subito',e:'Regole certe · chi è cresciuto senza regole protesta',f:()=>{gd('cetomedio',2); gd('imprenditori',-3); gd('giovani',-1); repd(1);}},
+   {l:'Lasci crescere il mercato',e:'Il pubblico sceglie · il pluralismo lo si conterà dopo',f:()=>{gd('imprenditori',4); gd('giovani',2); gd('cattolici',-2); if(S.gMod!=null)S.gMod+=0.1;}}]},
+ {id:'i80_fondi', era:'italia1980', cond:()=>S.year>=1984, kick:'Credito', t:'I fondi comuni e la Borsa', text:'Il risparmio delle famiglie scopre la Borsa: fondi comuni, titoli, pagine economiche lette al bar. C\'è chi parla di democrazia del capitale e chi di roulette.',ch:[
+   {l:'Accompagni il risparmio con regole e vigilanza',e:'Chi entra sa dove mette i soldi · il mercato corre meno',f:()=>{gd('cetomedio',3); gd('pensionati',2); gd('imprenditori',-1);}},
+   {l:'Lasci correre: è il mercato che educa',e:'La piazza si allarga in fretta · la prima scottatura arriverà',f:()=>{gd('imprenditori',3); gd('cetomedio',1); if(S.gMod!=null)S.gMod+=0.1;}}]},
+ {id:'i80_condono', era:'italia1980', cond:()=>S.year>=1985, kick:'Casa', t:'Il condono', text:'Un condono edilizio per fare cassa e «chiudere col passato»: gli uffici tecnici sommersi, i furbi premiati, i conti sollevati. Fino al prossimo.',ch:[
+   {l:'Vai avanti: i conti hanno bisogno di cassa',e:'Entrate subito · chi ha rispettato le regole se lo ricorda',rischio:4,f:()=>{S.ind.debt=Math.max(0,S.ind.debt-1); gd('imprenditori',3); gd('cetomedio',-3); gd('giovani',-2);}},
+   {l:'Nessun condono',e:'La regola vale per tutti · le casse restano vuote',f:()=>{gd('cetomedio',3); gd('giovani',2); gd('imprenditori',-3); S.ind.debt+=0.5;}}]},
+ {id:'i80_droga', era:'italia1980', tono:'grave', kick:'Sanità', t:'La droga nelle città', text:'L\'eroina è nei parchi e nelle cronache. Le famiglie chiedono aiuto, le comunità nascono dal volontariato, la legge insegue.',ch:[
+   {l:'Cura e comunità: si finanzia il recupero',e:'Chi cade trova una rete · i risultati si vedono lentamente',costo:{debito:0.8},f:()=>{S.ind.debt+=0.8; S.ind.sanita=clamp(S.ind.sanita+3,0,100); gd('giovani',3); gd('lavoratori',2);}},
+   {l:'Repressione dello spaccio',e:'Risposta immediata e visibile · chi è già dentro resta solo',f:()=>{S.ind.sicurezza=clamp(S.ind.sicurezza+3,0,100); gd('pensionati',3); gd('cetomedio',2); gd('giovani',-3);}}]},
+ {id:'i80_maxiprocesso', era:'italia1980', tono:'grave', cond:()=>S.year>=1986, kick:'Giustizia', t:'Il maxiprocesso', text:'A Palermo lo Stato processa la mafia come organizzazione: un\'aula-bunker, centinaia di imputati, giudici sotto scorta. Servono risorse, protezione, e nervi.',ch:[
+   {l:'Risorse e protezione, tutte quelle che servono',e:'Lo Stato c\'è, e si vede · il conto è pesante e la scorta lunga',costo:{debito:1},f:()=>{S.ind.debt+=1; S.ind.sicurezza=clamp(S.ind.sicurezza+4,0,100); repd(3); gd('cetomedio',3); gd('giovani',2);}},
+   {l:'Ordinaria amministrazione: è un processo come gli altri',e:'Nessuna eccezione · chi rischia in prima linea se ne accorge',f:()=>{S.ind.sicurezza=clamp(S.ind.sicurezza-3,0,100); repd(-2); gd('cetomedio',-2);}}]},
+ {id:'i80_loggia', era:'italia1980', tono:'grave', cond:()=>S.year>=1981, kick:'Ombre', t:'Le liste della loggia', text:'Una loggia segreta compare nelle carte di un\'inchiesta: nomi che contano, in ogni palazzo. La Repubblica scopre un potere parallelo e deve decidere quanto a fondo guardare.',ch:[
+   {l:'Commissione d\'inchiesta con pieni poteri',e:'Si guarda fino in fondo · molti nei palazzi non te lo perdoneranno',f:()=>{stampad(4); repd(2); gd('cetomedio',3); gd('imprenditori',-3); tutteCorrenti(-4);}},
+   {l:'Lasci lavorare i magistrati, senza clamore',e:'Nessuna caccia alle streghe · il paese sospetta che si copra',f:()=>{tutteCorrenti(3); stampad(-3); gd('giovani',-2); gd('cetomedio',-2);}}]},
+ {id:'i80_pentapartito', era:'italia1980', kick:'Politica interna', t:'Il pentapartito litiga', text:'Cinque partiti, un governo: le verifiche si susseguono, i vertici notturni pure. La governabilità è la parola dell\'epoca — e il suo contrario la pratica.',ch:[
+   {l:'Verifica a fondo: si riscrive il patto',e:'Chiarezza fra alleati · settimane perse a trattare',f:()=>{tutteCorrenti(3); gd('cetomedio',-2); if(S.gMod!=null)S.gMod-=0.1;}},
+   {l:'Tiri dritto: si governa, non si discute',e:'Il lavoro va avanti · i coltelli restano sul tavolo',f:()=>{gd('cetomedio',2); gd('imprenditori',2); tutteCorrenti(-3);}}]},
+ {id:'i80_concordato', era:'italia1980', cond:()=>S.year>=1984, kick:'Diritti', t:'Il nuovo Concordato', text:'Stato e Chiesa riscrivono i patti: l\'ora di religione diventa facoltativa, il finanziamento cambia forma. C\'è chi vede la laicità compiuta e chi un legame che si rinnova.',ch:[
+   {l:'Firmi la revisione',e:'Un rapporto rimesso al passo dei tempi · nessuna delle due parti è del tutto contenta',f:()=>{gd('cetomedio',3); gd('giovani',2); gd('cattolici',-1); repd(1);}},
+   {l:'Rimandi: i patti vecchi hanno retto finora',e:'Nessuno scossone · la questione resta sul tavolo intera',f:()=>{gd('cattolici',3); gd('giovani',-2); gd('cetomedio',-1);}}]},
+ {id:'i80_missili', era:'italia1980', tono:'grave', cond:()=>S.year>=1981&&S.year<=1987, kick:'Alleanza atlantica', t:'I missili e le marce', text:'Nella base siciliana arrivano gli euromissili, e con loro le marce per la pace: centomila in piazza, il dibattito spacca famiglie e partiti. Fermezza atlantica o dissenso?',ch:[
+   {l:'Fermezza: gli impegni con gli alleati si onorano',e:'L\'alleanza tiene · le piazze non si svuotano',f:()=>{repd(4); gd('cetomedio',2); gd('giovani',-4); gd('lavoratori',-2);}},
+   {l:'Ascolti la piazza e chiedi tempo',e:'Il paese si sente rappresentato · gli alleati prendono nota',f:()=>{gd('giovani',4); gd('lavoratori',3); repd(-4); gd('imprenditori',-2);}}]},
+ {id:'i80_attounico', era:'italia1980', cond:()=>S.year>=1986, kick:'Unione Europea', t:'L\'Europa accelera', text:'L\'Atto Unico mette una data al mercato comune: il 1992. Le imprese si preparano, i protetti tremano, e ogni legge nuova deve guardare a Bruxelles.',ch:[
+   {l:'Prepari il paese alla concorrenza',e:'Chi è pronto correrà · chi era protetto lo scoprirà presto',f:()=>{gd('imprenditori',4); gd('cetomedio',2); gd('lavoratori',-3); repd(2); if(S.gMod!=null)S.gMod+=0.1;}},
+   {l:'Chiedi tempo e deroghe',e:'Nessuno resta indietro di colpo · l\'appuntamento però è fissato',f:()=>{gd('lavoratori',3); gd('imprenditori',-2); repd(-2);}}]},
+ {id:'i80_sorpasso_uk', era:'italia1980', tono:'florido', cond:()=>S.year>=1987, kick:'Sviluppo', t:'Il sorpasso sul Regno Unito', text:'I conti ISTAT rivisti dicono che l\'economia italiana ha superato quella britannica: il «sorpasso» riempie le prime pagine. Dura poco, ma il paese ci si specchia.',ch:[
+   {l:'Rivendichi il risultato',e:'Orgoglio nazionale · i conti veri restano quelli di ieri',f:()=>{allG(2); repd(2); stampad(2);}},
+   {l:'Inviti alla prudenza: è una revisione statistica',e:'Serietà riconosciuta · qualcuno ti trova guastafeste',f:()=>{gd('cetomedio',2); gd('imprenditori',1); stampad(-1); repd(1);}}]},
+ {id:'i80_contingenza_dopo', era:'italia1980', cond:()=>S.year>=1985, kick:'Lavoro', t:'La scala mobile del dopo-referendum', text:'Dopo il voto, la contingenza non è più intoccabile: ogni rinnovo contrattuale è una trattativa vera. Le relazioni industriali cambiano pelle.',ch:[
+   {l:'Accompagni la trattativa, contratto per contratto',e:'Relazioni industriali adulte · ci vuole tempo e pazienza',f:()=>{gd('lavoratori',2); gd('imprenditori',2); gd('cetomedio',1);}},
+   {l:'Lasci fare alle parti: lo Stato si fa da parte',e:'Nessuna interferenza · i più deboli trattano da soli',f:()=>{gd('imprenditori',3); gd('lavoratori',-3); if(S.gMod!=null)S.gMod+=0.1;}}]},
  {id:'i70_riflusso', era:'italia1970', cond:()=>S.year>=1977, kick:'Il paese', t:'Il riflusso', text:'Dopo anni di piazze, una parte del paese torna al privato: la casa, il weekend, il corpo. I militanti lo chiamano riflusso, con disprezzo; i sociologi, normalità.',ch:[
    {l:'Il paese ha diritto alla sua tregua',e:'Normalità riconosciuta · chi ha lottato si sente liquidato',f:()=>{gd('cetomedio',3); gd('pensionati',2); tutteCorrenti(-3);}},
    {l:'Chiami alla partecipazione',e:'Tieni desta la militanza · una parte del paese non ti ascolta più',f:()=>{tutteCorrenti(4); gd('giovani',2); gd('cetomedio',-2);}}]},
@@ -5367,26 +5562,69 @@ const TITOLI=[
     il decennio successivo non devono morire con la finestra. Misura prima del lotto: nel '70 la prima pagina
     parlava al 75% con la voce del '60, perché quelle gemelle hanno pri:1 e battono i titoli-evento.
 
-    ⚑ IL PATTO, da onorare quando nasceranno le `ti80_*` (lezione L29-3, costata un lotto): `codaFino:Infinity`
-    qui è un PONTE, non una proprietà. Serve solo perché il decennio dopo non ha ancora le sue gemelle; il lotto
-    che le scrive **deve toglierlo da queste sedici**, altrimenti gli anni '80 leggeranno la prima pagina con la
-    voce del '70 — esattamente ciò che è successo al '70 con la voce del '60. Una riga messa, una riga tolta. ===== */
- {id:'ti70_inchiesta', era:'italia1970', codaFino:Infinity, pri:1, cond:()=>!!S.inchiesta, amico:'Inchiesta al vertice: il Governo lascia lavorare i giudici', ostile:'Il vertice sotto inchiesta: e i giornali non aspettano le carte'},
- {id:'ti70_scandalo', era:'italia1970', codaFino:Infinity, pri:1, cond:()=>S.agenda&&S.agenda.some(a=>a.kind==='scandalo'), amico:'Il caso al ministero: il Governo chiede di attendere gli atti', ostile:'Scandalo al ministero: un altro, dicono in piazza'},
- {id:'ti70_manovra_a', era:'italia1970', codaFino:Infinity, pri:1, cond:()=>S.month===1&&S.year<=1973, amico:'Il bilancio dell\'anno: il Governo indica la rotta', ostile:'Il bilancio dell\'anno: i conti crescono più delle risposte'},
- {id:'ti70_manovra_b', era:'italia1970', codaFino:Infinity, pri:1, cond:()=>S.month===1&&S.year>=1974, amico:'Il bilancio dell\'anno: si governa il caro-vita', ostile:'Il bilancio dell\'anno: l\'inflazione mangia la manovra prima che parta'},   // dopo lo shock del '73 la manovra è un altro mestiere: due voci mutuamente esclusive, come nel '60
- {id:'ti70_riformatore', era:'italia1970', codaFino:Infinity, pri:1, cond:()=>haTratto('riformatore')&&S.ultimaLegge!=null&&(S.year*12+S.month)-S.ultimaLegge.mese<=1, amico:'Un\'altra riforma in porto: la stagione dei diritti continua', ostile:'Leggi su leggi: il paese aspetta i decreti attuativi'},
- {id:'ti70_legge', era:'italia1970', codaFino:Infinity, pri:1, cond:()=>S.ultimaLegge!=null&&(S.year*12+S.month)-S.ultimaLegge.mese<=1, amico:'La riforma è legge: il Parlamento chiude una partita', ostile:'La riforma passa fra i contrasti: l\'aula si spacca'},
- {id:'ti70_voto', era:'italia1970', codaFino:Infinity, pri:1, cond:()=>typeof periodoSondaggi==='function'&&periodoSondaggi(), amico:'Verso le urne: la campagna entra nelle case a colori', ostile:'Verso le urne: il paese arriva al voto con la contingenza in tasca'},
- {id:'ti70_intermedia', era:'italia1970', codaFino:Infinity, pri:1, cond:()=>S.agenda&&S.agenda.some(a=>a.kind==='intermedia'), amico:'Il voto nei comuni e nelle Regioni: la prova d\'appello', ostile:'Il voto locale: il termometro segna febbre'},
- {id:'ti70_reput_media', era:'italia1970', codaFino:Infinity, cond:()=>S.ind.reputazione!=null&&S.ind.reputazione>=45&&S.ind.reputazione<=75, amico:'L\'Italia tiene il suo posto ai tavoli d\'Europa', ostile:'Ai tavoli d\'Europa l\'Italia arriva con la lira debole'},
- {id:'ti70_crisi_fid', era:'italia1970', codaFino:Infinity, cond:()=>S.ind.fiducia!=null&&S.ind.fiducia<40, amico:'Conti sotto pressione: il Governo cerca la stretta giusta', ostile:'I conti non tengono: si guarda ai prestiti internazionali'},
- {id:'ti70_recessione', era:'italia1970', codaFino:Infinity, cond:()=>S.ind.growth<0, amico:'La frenata è mondiale: il Governo studia i rimedi', ostile:'Fabbriche ferme e prezzi che salgono: la parola nuova è stagflazione'},
- {id:'ti70_disocc', era:'italia1970', codaFino:Infinity, cond:()=>S.ind.unemp>9, amico:'Occupazione: la cassa integrazione tampona, il piano tiene', ostile:'Diplomati e laureati senza posto: la generazione istruita aspetta'},
- {id:'ti70_deficit', era:'italia1970', codaFino:Infinity, cond:()=>S.ind.deficit>4.5, amico:'Il Governo mette ordine nei conti dello Stato', ostile:'Lo Stato spende più di quanto incassa, e si vede'},
- {id:'ti70_consenso', era:'italia1970', codaFino:Infinity, cond:()=>S.ind.consenso<40, amico:'Governo in affanno: la maggioranza regge ancora', ostile:'Il Governo perde colpi, e la piazza se ne accorge prima dei palazzi'},
- {id:'ti70_bene', era:'italia1970', codaFino:Infinity, cond:()=>S.ind.growth>1&&S.ind.fiducia>70, amico:'Il paese tiene: i numeri danno ragione al Governo', ostile:'I numeri migliorano, le buste paga meno'},
- {id:'ti70_reputazione', era:'italia1970', codaFino:Infinity, cond:()=>S.ind.reputazione!=null&&S.ind.reputazione<40, amico:'Realismo nelle alleanze: il Paese tratta senza alzare la voce', ostile:'Nei tavoli che contano l\'Italia resta ai margini'},
+    ⚑ IL PATTO È STATO ONORATO (L34-2, 1 ago): il `codaFino:Infinity` che queste sedici avevano era un PONTE
+    verso il decennio successivo, e ora che le `ti80_*` esistono è stato tolto — muoiono con la loro decade, come
+    le ti50 e le ti60 prima di loro. Il ponte vive ora sulle `ti80_*`, e chi scriverà le `ti90_*` dovrà toglierlo
+    da quelle: una riga messa, una riga tolta, ogni decennio. ===== */
+ /* ===== L34-2 · I TITOLI D'EPOCA DEGLI ANNI '80 (22, scheda §7) + LE 16 GEMELLE DI STATO (pattern L29-3).
+    Le coppie amico/ostile le ho costruite io tenendo IL FATTO identico e cambiando solo lo sguardo. Nessun titolo
+    sui fatti di sangue: il clima e i pilastri portano già quel peso. Le gemelle hanno `codaFino:Infinity` — è il
+    PONTE verso il decennio successivo, e chi scriverà le `ti90_*` deve toglierlo (stesso patto delle `ti70_*`). ===== */
+ {id:'ti80_tvprivate', era:'italia1980', cond:()=>S.year>=1981, amico:'La TV commerciale accende il canale nazionale', ostile:'Televisioni ovunque e nessuna regola: il Parlamento insegue'},
+ {id:'ti80_mundial', era:'italia1980', cond:()=>S.year===1982&&S.month>=7, amico:'Campioni del mondo!', ostile:'Campioni del mondo: per una notte il paese dimentica tutto'},
+ {id:'ti80_taglio', era:'italia1980', cond:()=>S.year>=1984&&S.year<=1985, amico:'Il decreto ferma la rincorsa dei prezzi', ostile:'Tre punti in meno in busta: scala mobile tagliata'},
+ {id:'ti80_referendum85', era:'italia1980', cond:()=>S.year>=1985&&S.year<=1986, amico:'Il taglio resta: il referendum dice no', ostile:'Il paese si divide sulla busta paga, e vince di misura'},
+ {id:'ti80_disinflazione', era:'italia1980', cond:()=>S.year>=1985, amico:'I prezzi rallentano: inflazione sotto il dieci per cento', ostile:'I prezzi rallentano, gli stipendi pure'},
+ {id:'ti80_debito', era:'italia1980', cond:()=>S.year>=1983, amico:'Il Governo mette mano alla spesa', ostile:'Il debito pubblico non smette di salire'},
+ {id:'ti80_bot', era:'italia1980', cond:()=>S.year>=1981, amico:'Il risparmio finanzia lo Stato: file agli sportelli', ostile:'Il Tesoro paga di più per farsi prestare i soldi'},
+ {id:'ti80_borsa', era:'italia1980', cond:()=>S.year>=1984, amico:'Tutti in borsa: il piccolo risparmio scopre i fondi', ostile:'Il risparmio di una vita finisce in borsa: e se scende?'},
+ {id:'ti80_borsa_giu', era:'italia1980', cond:()=>S.year>=1986, amico:'La borsa respira dopo la corsa', ostile:'La borsa frena: prima scottatura per i nuovi investitori'},
+ {id:'ti80_concordato', era:'italia1980', cond:()=>S.year>=1984&&S.year<=1985, amico:'Stato e Chiesa firmano il nuovo Concordato', ostile:'Il nuovo Concordato: c\'è chi parla di laicità e chi di rinnovo'},
+ {id:'ti80_ambiente', era:'italia1980', cond:()=>S.year>=1986, amico:'Un ministero per l\'ambiente', ostile:'Nasce il ministero dell\'ambiente: competenze da scrivere'},
+ {id:'ti80_nube', era:'italia1980', cond:()=>S.year>=1986&&S.year<=1987, amico:'Controlli sugli alimenti: il Governo rassicura', ostile:'La nube da est: verdure ritirate e domande senza risposta'},
+ {id:'ti80_nucleare', era:'italia1980', cond:()=>S.year>=1987&&S.year<=1988, amico:'L\'Italia spegne il nucleare: vince il sì', ostile:'Spente le centrali: da domani l\'energia si compra fuori'},
+ {id:'ti80_verdi', era:'italia1980', cond:()=>S.year>=1987&&S.year<=1988, amico:'I Verdi entrano in Parlamento', ostile:'I Verdi in aula: l\'ambiente diventa un partito'},
+ {id:'ti80_lega', era:'italia1980', cond:()=>S.year>=1987, amico:'Una lega dal Nord: pochi voti, molte domande', ostile:'Dal Nord una lista che parla d\'altro: pochi voti, e non è finita'},
+ {id:'ti80_walkman', era:'italia1980', cond:()=>S.year>=1981, amico:'La musica cammina: cuffie in ogni tasca', ostile:'Cuffie in ogni tasca: ognuno per conto suo'},
+ {id:'ti80_paninari', era:'italia1980', cond:()=>S.year>=1983&&S.year<=1987, amico:'Griffe, moto e panini: la nuova tribù dei quindicenni', ostile:'Quindicenni in divisa firmata: chi paga il conto?'},
+ {id:'ti80_milano', era:'italia1980', cond:()=>S.year>=1985, amico:'La città che beve e lavora si racconta in uno spot', ostile:'Lo spot racconta una città che non tutti riconoscono'},
+ {id:'ti80_ozono', era:'italia1980', cond:()=>S.year>=1987, amico:'Buco nell\'ozono: il mondo firma per i cieli', ostile:'Firmato per l\'ozono: adesso vanno cambiate le fabbriche'},
+ {id:'ti80_eroina', era:'italia1980', amico:'Comunità e sportelli: la risposta si organizza', ostile:'L\'eroina svuota le panchine: le famiglie chiedono aiuto'},
+ {id:'ti80_maxiprocesso', era:'italia1980', cond:()=>S.year>=1986&&S.year<=1987, amico:'Il processo alla piovra: l\'aula bunker si apre', ostile:'Il processo alla piovra: un\'aula blindata e una città che guarda'},
+ {id:'ti80_sentenza', era:'italia1980', cond:()=>S.year>=1987&&S.year<=1988, amico:'Trecentosessanta condanne: la sentenza di Palermo', ostile:'La sentenza di Palermo: adesso comincia il difficile'},
+ /* --- le 16 gemelle di stato (stesso `cond` e `pri` delle ti50/60/70, cambia solo il registro) --- */
+ {id:'ti80_st_inchiesta', era:'italia1980', codaFino:Infinity, pri:1, cond:()=>!!S.inchiesta, amico:'Inchiesta al vertice: il Governo attende le carte', ostile:'Il vertice sotto inchiesta: e stavolta c\'è la diretta'},
+ {id:'ti80_st_scandalo', era:'italia1980', codaFino:Infinity, pri:1, cond:()=>S.agenda&&S.agenda.some(a=>a.kind==='scandalo'), amico:'Il caso al ministero: si attendono gli atti', ostile:'Scandalo al ministero: i nomi circolano prima delle carte'},
+ {id:'ti80_st_manovra_a', era:'italia1980', codaFino:Infinity, pri:1, cond:()=>S.month===1&&S.year<=1984, amico:'Il bilancio dell\'anno: si governa la discesa dei prezzi', ostile:'Il bilancio dell\'anno: i prezzi scendono, il debito no'},
+ {id:'ti80_st_manovra_b', era:'italia1980', codaFino:Infinity, pri:1, cond:()=>S.month===1&&S.year>=1985, amico:'Il bilancio dell\'anno: il Governo punta al mercato unico', ostile:'Il bilancio dell\'anno: gli interessi si mangiano la manovra'},
+ {id:'ti80_st_riformatore', era:'italia1980', codaFino:Infinity, pri:1, cond:()=>haTratto('riformatore')&&S.ultimaLegge!=null&&(S.year*12+S.month)-S.ultimaLegge.mese<=1, amico:'Un\'altra riforma in porto: il disegno procede', ostile:'Riforme annunciate in conferenza stampa, attuate chissà quando'},
+ {id:'ti80_st_legge', era:'italia1980', codaFino:Infinity, pri:1, cond:()=>S.ultimaLegge!=null&&(S.year*12+S.month)-S.ultimaLegge.mese<=1, amico:'La riforma è legge: il pentapartito tiene', ostile:'La riforma passa dopo un vertice notturno di troppo'},
+ {id:'ti80_st_voto', era:'italia1980', codaFino:Infinity, pri:1, cond:()=>typeof periodoSondaggi==='function'&&periodoSondaggi(), amico:'Verso le urne: la campagna passa dalla televisione', ostile:'Verso le urne: cinque alleati e cinque campagne diverse'},
+ {id:'ti80_st_intermedia', era:'italia1980', codaFino:Infinity, pri:1, cond:()=>S.agenda&&S.agenda.some(a=>a.kind==='intermedia'), amico:'Il voto locale: la prova d\'appello per la coalizione', ostile:'Il voto locale: i conti fra alleati si fanno nei comuni'},
+ {id:'ti80_st_reput_media', era:'italia1980', codaFino:Infinity, cond:()=>S.ind.reputazione!=null&&S.ind.reputazione>=45&&S.ind.reputazione<=75, amico:'L\'Italia tratta da pari nei vertici occidentali', ostile:'Nei vertici occidentali l\'Italia parla per ultima'},
+ {id:'ti80_st_crisi_fid', era:'italia1980', codaFino:Infinity, cond:()=>S.ind.fiducia!=null&&S.ind.fiducia<40, amico:'Conti sotto pressione: il Governo cerca la rotta', ostile:'I mercati guardano il debito italiano e alzano il prezzo'},
+ {id:'ti80_st_recessione', era:'italia1980', codaFino:Infinity, cond:()=>S.ind.growth<0, amico:'La frenata è internazionale: il Governo studia i rimedi', ostile:'L\'economia si ferma proprio mentre i conti chiedono di più'},
+ {id:'ti80_st_disocc', era:'italia1980', codaFino:Infinity, cond:()=>S.ind.unemp>9, amico:'Occupazione: la cassa integrazione regge l\'urto', ostile:'Disoccupazione a due cifre: il Sud e i giovani per primi'},
+ {id:'ti80_st_deficit', era:'italia1980', codaFino:Infinity, cond:()=>S.ind.deficit>4.5, amico:'Il Governo mette ordine nei conti dello Stato', ostile:'Il disavanzo cresce, e gli interessi con lui'},
+ {id:'ti80_st_consenso', era:'italia1980', codaFino:Infinity, cond:()=>S.ind.consenso<40, amico:'Governo in affanno: la maggioranza a cinque tiene', ostile:'Il Governo perde colpi, e gli alleati contano i giorni'},
+ {id:'ti80_st_bene', era:'italia1980', codaFino:Infinity, cond:()=>S.ind.growth>1&&S.ind.fiducia>70, amico:'Il paese riparte: i numeri danno ragione al Governo', ostile:'I numeri risalgono, ma il conto lo pagheranno i figli'},
+ {id:'ti80_st_reputazione', era:'italia1980', codaFino:Infinity, cond:()=>S.ind.reputazione!=null&&S.ind.reputazione<40, amico:'Realismo nelle alleanze: il Paese tratta senza alzare la voce', ostile:'Nei tavoli che contano l\'Italia resta ai margini'},
+ {id:'ti70_inchiesta', era:'italia1970', pri:1, cond:()=>!!S.inchiesta, amico:'Inchiesta al vertice: il Governo lascia lavorare i giudici', ostile:'Il vertice sotto inchiesta: e i giornali non aspettano le carte'},
+ {id:'ti70_scandalo', era:'italia1970', pri:1, cond:()=>S.agenda&&S.agenda.some(a=>a.kind==='scandalo'), amico:'Il caso al ministero: il Governo chiede di attendere gli atti', ostile:'Scandalo al ministero: un altro, dicono in piazza'},
+ {id:'ti70_manovra_a', era:'italia1970', pri:1, cond:()=>S.month===1&&S.year<=1973, amico:'Il bilancio dell\'anno: il Governo indica la rotta', ostile:'Il bilancio dell\'anno: i conti crescono più delle risposte'},
+ {id:'ti70_manovra_b', era:'italia1970', pri:1, cond:()=>S.month===1&&S.year>=1974, amico:'Il bilancio dell\'anno: si governa il caro-vita', ostile:'Il bilancio dell\'anno: l\'inflazione mangia la manovra prima che parta'},   // dopo lo shock del '73 la manovra è un altro mestiere: due voci mutuamente esclusive, come nel '60
+ {id:'ti70_riformatore', era:'italia1970', pri:1, cond:()=>haTratto('riformatore')&&S.ultimaLegge!=null&&(S.year*12+S.month)-S.ultimaLegge.mese<=1, amico:'Un\'altra riforma in porto: la stagione dei diritti continua', ostile:'Leggi su leggi: il paese aspetta i decreti attuativi'},
+ {id:'ti70_legge', era:'italia1970', pri:1, cond:()=>S.ultimaLegge!=null&&(S.year*12+S.month)-S.ultimaLegge.mese<=1, amico:'La riforma è legge: il Parlamento chiude una partita', ostile:'La riforma passa fra i contrasti: l\'aula si spacca'},
+ {id:'ti70_voto', era:'italia1970', pri:1, cond:()=>typeof periodoSondaggi==='function'&&periodoSondaggi(), amico:'Verso le urne: la campagna entra nelle case a colori', ostile:'Verso le urne: il paese arriva al voto con la contingenza in tasca'},
+ {id:'ti70_intermedia', era:'italia1970', pri:1, cond:()=>S.agenda&&S.agenda.some(a=>a.kind==='intermedia'), amico:'Il voto nei comuni e nelle Regioni: la prova d\'appello', ostile:'Il voto locale: il termometro segna febbre'},
+ {id:'ti70_reput_media', era:'italia1970', cond:()=>S.ind.reputazione!=null&&S.ind.reputazione>=45&&S.ind.reputazione<=75, amico:'L\'Italia tiene il suo posto ai tavoli d\'Europa', ostile:'Ai tavoli d\'Europa l\'Italia arriva con la lira debole'},
+ {id:'ti70_crisi_fid', era:'italia1970', cond:()=>S.ind.fiducia!=null&&S.ind.fiducia<40, amico:'Conti sotto pressione: il Governo cerca la stretta giusta', ostile:'I conti non tengono: si guarda ai prestiti internazionali'},
+ {id:'ti70_recessione', era:'italia1970', cond:()=>S.ind.growth<0, amico:'La frenata è mondiale: il Governo studia i rimedi', ostile:'Fabbriche ferme e prezzi che salgono: la parola nuova è stagflazione'},
+ {id:'ti70_disocc', era:'italia1970', cond:()=>S.ind.unemp>9, amico:'Occupazione: la cassa integrazione tampona, il piano tiene', ostile:'Diplomati e laureati senza posto: la generazione istruita aspetta'},
+ {id:'ti70_deficit', era:'italia1970', cond:()=>S.ind.deficit>4.5, amico:'Il Governo mette ordine nei conti dello Stato', ostile:'Lo Stato spende più di quanto incassa, e si vede'},
+ {id:'ti70_consenso', era:'italia1970', cond:()=>S.ind.consenso<40, amico:'Governo in affanno: la maggioranza regge ancora', ostile:'Il Governo perde colpi, e la piazza se ne accorge prima dei palazzi'},
+ {id:'ti70_bene', era:'italia1970', cond:()=>S.ind.growth>1&&S.ind.fiducia>70, amico:'Il paese tiene: i numeri danno ragione al Governo', ostile:'I numeri migliorano, le buste paga meno'},
+ {id:'ti70_reputazione', era:'italia1970', cond:()=>S.ind.reputazione!=null&&S.ind.reputazione<40, amico:'Realismo nelle alleanze: il Paese tratta senza alzare la voce', ostile:'Nei tavoli che contano l\'Italia resta ai margini'},
  /* ===== D2 — TITOLI DI STATO (pri 2, universali): il titolo LEGGE il paese (crescita, lavoro, conti, clima
     politico, stagione) — conds a bande larghe e sovrapposte, così in ogni stato ordinario ≥18 titoli vivi. ===== */
  {id:'ti_crescita', cond:()=>S.ind.growth>=0.5&&S.ind.growth<=1.5, amico:'L\'economia respira: segnali di fiducia', ostile:'Crescita tiepida: il paese vuole di più'},
@@ -6245,9 +6483,21 @@ function rnd(a){return a[Math.floor(Math.random()*a.length)];}
    LINEE_STORICHE) → la quota copre anche gli anni '60, il che combacia col record storico (nessuna ministra fino
    al '76): non è servito inventare un numero per il '60. Vale SOLO qui: il GIOCATORE resta libero (premessa
    controfattuale) e i `filo` non governativi (cronista, movimento, magistratura) restano a genere libero. */
+/* L37-1 — LA QUOTA-GENERE PER ANNO, non per scenario. Il confronto `era==='italia1950'` è morto il 30 luglio
+   col rinominamento della linea in `italia_repubblica`: da allora **anche il 1950 pescava al 50%**, e nessuna
+   guardia poteva vederlo (stessa regressione silenziosa di `ritrattoPoolEra`, stessa causa).
+   Le soglie: **Tina Anselmi è ministra il 29 luglio 1976** (data verificata in L15-1) — prima di quell'anno una
+   donna al governo è l'eccezione assoluta; dopo restano poche ma non più eccezionali; dalla metà degli '80 la
+   presenza cresce ancora. ⚠ 0,08 e 0,15 sono ORDINI DI GRANDEZZA storici proposti da Cowork, non serie: le
+   schede non danno la percentuale di ministre per anno. Fuori dalla linea (presente) resta 0,5, invariato. */
 function quotaFemminileGoverno(){
-  var era=(typeof S!=='undefined' && S && S.era) || 'contemporanea';
-  return (era==='italia1950') ? 0.04 : 0.5;
+  /* come ritrattoPoolEra: la rosa dei candidati si genera nel setup, prima che `S` esista */
+  var era=(typeof eraGiocata==='function') ? eraGiocata() : ((typeof S!=='undefined'&&S&&S.era)||'contemporanea');
+  if(era!==LINEA_IT) return 0.5;
+  var y=(typeof annoGiocato==='function') ? annoGiocato() : ((typeof S!=='undefined'&&S&&S.year)||0);
+  if(y>=1986) return 0.15;
+  if(y>=1976) return 0.08;
+  return 0.04;
 }
 function mkCand(){ var g=Math.random()<quotaFemminileGoverno()?'f':'m'; var lista=(g==='f'?PAESE.nomiF:PAESE.nomiM)||PAESE.nomi;
   return {nm:rnd(lista)+' '+rnd(PAESE.cognomi), g:g, profile:rnd(PROFS), comp:1+Math.floor(Math.random()*3)}; }
@@ -6414,3 +6664,103 @@ const ATTIVISTA_EV = [
          { l:'Apri il circolo a competenze e dialogo', e:'Autorevolezza e rispetto · cresci più piano',
            f:function(){ attA(5); gd('cetomedio',3); gd('lavoratori',1); } } ] },
 ];
+
+/* ============================================================================================================
+   L40-2 · GLI SNODI DEGLI ANNI '90 (scheda PRESET-ITALIA-1990 §3-bis). Pattern legge-truffa/Enel invariato:
+   carta-decisione one-shot, stato letto dentro `f()`, nessuna casualità, nessun sottosistema nuovo.
+   Due strade legittime ogni volta — e nessuna delle due è quella giusta.
+   ============================================================================================================ */
+
+/* MAASTRICHT · lo snodo economico puro della decade, erede diretto del divorzio-'81. Il dibattito sul rinvio
+   fu reale e documentato: perfino il governo lo sondò nel 1996. L'envelope tiene perché l'euro esisteva
+   comunque e l'Italia poteva mancare la prima ondata — la Grecia entrò nel 2001. */
+const MAASTRICHT_EV = {
+  id:'snodo_maastricht', kick:'Europa', tono:'grave',
+  t:'La corsa o il rinvio',
+  text:'I parametri europei chiedono un deficit sotto il tre per cento e un debito che scenda. Il paese è lontano da entrambi. Puoi correre — manovre, un contributo straordinario, anni di sacrifici — oppure rallentare e prendere il treno dopo. Due strade legittime, due paesi possibili.',
+  ch:[
+    { l:'Corri: dentro alla prima ondata', e:'Conti risanati · il consenso paga il prezzo delle manovre',
+      f:function(){ S.maastricht='corri'; var forte=(S.ind.consenso>=SNODO_CONSENSO_90);
+        S.maastrichtEsito=forte?'dentro':'dentro_logoro';
+        /* LE LEVE VERE, verificate prima di scriverle (regola CLAUDE.md): `fiducia` e `deficit` sono DERIVATI
+           (model.js: la fiducia si ricalcola da debito e disavanzo, il deficit da `computeDeficit()`) — un ±
+           diretto sparirebbe al ricalcolo. Si muove il DEBITO, che è stato vero, e `gMod`, come gli snodi-'80. */
+        S.ind.debt-=3; if(S.gMod!=null) S.gMod-=0.15; stampad(3); repd(3); allG(-2); gd('imprenditori',2);
+        if(forte) S.log.unshift({t:T('La corsa all\'Europa'),x:T('Il paese stringe i denti e ce la fa: i conti rientrano nei parametri.')});
+        else { repd(-3); capd(-6); S.log.unshift({t:T('La corsa all\'Europa'),x:T('I conti rientrano, ma il paese presenta il conto a te: ogni manovra ha lasciato un segno.')}); } } },
+    { l:'Rallenta: il treno dopo', e:'Meno lacrime oggi · la moneta resta esposta e l\'ingresso slitta',
+      f:function(){ S.maastricht='rallenta'; S.maastrichtEsito='slitta';
+        gd('lavoratori',3); gd('pensionati',2); S.ind.debt+=2; if(S.gMod!=null) S.gMod+=0.05; stampad(-2); repd(-4);
+        S.log.unshift({t:T('Il rinvio'),x:T('Nessuna stangata: il paese respira. L\'ingresso nella moneta unica slitta, e la lira resta esposta.')}); } },
+  ],
+};
+
+/* IL MATTARELLUM · la riforma elettorale come snodo. I margini referendari sono schiaccianti (82,7%): la
+   campagna NON può ribaltare il voto, come per il divorzio-'74. Lo snodo si gioca sulla FORMA della legge,
+   dove il Parlamento aveva margine vero. */
+const MATTARELLUM_EV = {
+  id:'snodo_mattarellum', kick:'Riforme', tono:'grave',
+  t:'La legge da scrivere',
+  text:'Il referendum ha travolto il proporzionale con una maggioranza che non si discute. Ora tocca al Parlamento tradurlo in legge, e lì il margine c\'è: un maggioritario secco che consegna il paese a chi vince, o un sistema misto che lascia rappresentanza anche ai piccoli.',
+  ch:[
+    { l:'Maggioritario netto', e:'Chi vince governa · i piccoli spariscono e non te lo perdonano',
+      f:function(){ S.mattarellum='secco'; gd('cetomedio',2); gd('imprenditori',1); stampad(3); allG(-1);
+        S.log.unshift({t:T('La legge elettorale'),x:T('Passa il maggioritario più netto: il paese avrà vincitori chiari e minoranze senza voce.')}); } },
+    { l:'Un sistema misto', e:'Rappresentanza salva · le coalizioni restano fragili e ricattabili',
+      f:function(){ S.mattarellum='misto'; gd('cattolici',1); gd('lavoratori',1); repd(2); stampad(-1);
+        S.log.unshift({t:T('La legge elettorale'),x:T('Passa un sistema misto: nessuno resta fuori, e nessuna maggioranza è mai al sicuro.')}); } },
+  ],
+};
+
+/* TANGENTOPOLI · il DOSSIER a tre strade (scheda §4.2). Non è uno snodo-decennio ma la risposta politica
+   all'inchiesta che ti ha raggiunto: si innesca solo se `S.inchiesta` è aperta nel decennio. Tre strade tutte
+   storicamente percorse, frame riferire-non-giudicare: il paese si divise davvero, e le due Italie erano
+   entrambe vere. Nessuna vicenda giudiziaria individuale, nessun magistrato come personaggio. */
+const QUESTIONE_MORALE_EV = {
+  id:'snodo_questione_morale', kick:'Questione morale', tono:'grave',
+  t:'Il partito davanti ai giudici',
+  text:'Non è più un caso isolato: le procure risalgono la catena degli appalti e il finanziamento dei partiti viene a galla come sistema. Il tuo partito è dentro la tempesta. La strada che scegli adesso la ricorderanno più a lungo dell\'inchiesta.',
+  ch:[
+    { l:'Collabora con i giudici', e:'Credibilità recuperata · il partito si sente tradito da te',
+      /* NIENTE `corrented()` in queste tre voci: l'umore delle correnti è CONVERGENTE (`+= (target−umore)×0,10`)
+         e un ± one-shot verrebbe riassorbito in pochi mesi — sarebbe un no-op silenzioso, la peggior categoria
+         d'errore del progetto (lezione L25-3). Si paga in capitale politico, che è stato vero. */
+      f:function(){ S.questioneMorale='collabora'; stampad(6); repd(3); gd('giovani',2); gd('cetomedio',1); capd(-8);
+        S.log.unshift({t:T('Questione morale'),x:T('Hai scelto di collaborare: fuori il paese ti ascolta, dentro il partito qualcuno non te lo perdonerà.')}); } },
+    { l:'Difendi il partito', e:'I tuoi si compattano · il paese ti guarda come parte del problema',
+      f:function(){ S.questioneMorale='difendi'; stampad(-6); repd(-3); allG(-2); capd(6);
+        S.log.unshift({t:T('Questione morale'),x:T('Hai difeso il partito e denunciato l\'uso politico delle inchieste: i tuoi ti seguono, il paese meno.')}); } },
+    { l:'Rinnova il gruppo dirigente', e:'Una faccia nuova · mesi di caos interno mentre la tempesta è in corso',
+      f:function(){ S.questioneMorale='rinnova'; stampad(3); repd(1); gd('giovani',3); capd(-12);
+        S.log.unshift({t:T('Questione morale'),x:T('Hai cambiato il gruppo dirigente: il partito riparte da facce nuove, e da mesi di confusione.')}); } },
+  ],
+};
+
+/* LA SCISSIONE · LO snodo del decennio per chi gioca il partito comunista, ed è il primo che riscrive il
+   partito del giocatore (L34-1 aveva costruito il travaso proprio per questo). Il giocatore non perde mai
+   niente: cambia casa. Nessun firmatario reale, il segretario mai nominato né virgolettato, le mozioni sono
+   posizioni politiche e non persone (paletto I5). Nessuna delle due strade è quella giusta — la svolta apre
+   il futuro e paga in identità, la rifondazione tiene l'identità e paga in peso. */
+const SCISSIONE_EV = {
+  id:'snodo_scissione', kick:'Il partito', tono:'grave',
+  t:'Il nome e la cosa',
+  text:'Il Muro è caduto, e la domanda non è più rinviabile: può un partito comunista restare comunista? La segreteria propone di cambiare il nome e il simbolo; una parte del partito parla di resa. Il congresso deciderà — ma prima del congresso, devi decidere tu.',
+  ch:[
+    { l:'Sostieni la svolta: nuovo nome, nuova cosa', e:'La storia non si ferma · una parte dei tuoi non ti seguirà',
+      f:function(){ S.scissione='svolta'; } },
+    { l:'Ti opponi: rifondare, non rinnegare', e:'La bandiera resta · il grosso del partito andrà altrove',
+      f:function(){ S.scissione='rifondazione'; } },
+  ],
+};
+const SCISSIONE_CONGRESSO_SVOLTA = {
+  id:'snodo_scissione_svolta', kick:'Il partito', tono:'grave', cronaca:true,
+  t:'Il congresso',
+  text:'Nel salone del congresso la tua mozione passa: il partito cambia nome, il simbolo cambia, una minoranza esce fra i fischi e fonda la sua casa. Ti guardi indietro: c\'è chi piange, e non solo fra chi se ne va.',
+  ch:[ { l:'Prosegui', e:'', f:function(){ if(typeof scissioneApplica==='function') scissioneApplica('svolta'); } } ],
+};
+const SCISSIONE_CONGRESSO_RIFONDAZIONE = {
+  id:'snodo_scissione_rifond', kick:'Il partito', tono:'grave', cronaca:true,
+  t:'Il congresso',
+  text:'La tua mozione perde, come sapevi. Il grosso del partito se ne va col nome nuovo; tu resti con la bandiera, i circoli che resistono e i conti in rosso. Qualcuno vi dà per finiti. Ricominciate da lì.',
+  ch:[ { l:'Prosegui', e:'', f:function(){ if(typeof scissioneApplica==='function') scissioneApplica('rifondazione'); } } ],
+};

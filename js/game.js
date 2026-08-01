@@ -278,6 +278,37 @@ function eraGiocata(){
   if(typeof chosenScenario!=='undefined' && typeof SCENARI!=='undefined' && SCENARI[chosenScenario]) return SCENARI[chosenScenario].era||'contemporanea';
   return 'contemporanea';
 }
+/* L39-1 — I FATTI DATATI. Una carta che racconta un fatto al presente («gli studenti occupano», «il mondo
+   guarda i primi passi sulla Luna») è viva solo finché quel fatto è cronaca. Due condizioni, e servono
+   entrambe — con la sola prima la misura non passa:
+     1. FINESTRA CHIUSA: dall'anno del fatto a `anno+durata` (di regola 2 anni: il Muro nel '62 è vivo, nel
+        '71 è assurdo). Prima le sei carte avevano solo `>=anno` e restavano vive per tutto il decennio.
+     2. MAI PRIMA DELL'INIZIO PARTITA: un fatto già accaduto quando la carriera comincia non è cronaca, è
+        storia. È **lo stesso principio di L34-3** sui pilastri, che L36-2 aveva diagnosticato non coprire
+        questo sistema (quelli sono `PILASTRI_LINEA`, queste sono normali `EVENTS`). Senza questa riga chi
+        apre la porta del 1970 riceve l'autunno caldo nell'agosto 1970 — mentre il suo stesso briefing
+        d'avvio lo dà per avvenuto.
+   NON si applica ai FENOMENI (la migrazione verso Nord, il boom, la TV che entra nelle case): quelli sono
+   processi che durano, e per loro `>=anno` senza tetto è giusto.
+   IL MESE conta: misurando, «L'uomo sulla Luna» usciva nel **gennaio 1969** — sei mesi prima dello sbarco,
+   perché il confronto era solo sull'anno. Chi ha una data precisa la dichiara; chi è una stagione (il '68)
+   lascia il mese a 1. */
+function fattoDatato(anno, durata, mese){
+  if(typeof S==='undefined' || !S) return false;
+  var m0=(mese==null?1:mese), da=anno*12+m0, fino=(anno+(durata==null?2:durata))*12+m0, ora=S.year*12+(S.month||1);
+  if(da < ((S.annoInizio||S.year||anno)*12+1)) return false;     // già successo prima che tu cominciassi
+  return ora>=da && ora<=fino;
+}
+/* L37-1 — ANNO giocato: il gemello di eraGiocata() per tutto ciò che ora si decide sul DECENNIO e non più
+   sullo scenario (pool-ritratti, quota-genere). Serve perché la NOMINA DEL GOVERNO avviene prima che `S`
+   esista: `goAppoint`/`confirmCabinet` girano nel setup, e senza questa funzione il gabinetto d'avvio di
+   una partita del 1980 nasceva con le facce e la quota-genere del presente — e `rit` congelava lo sbaglio
+   per tutta la carriera. Trovato a schermo, non in un walk: headless la nomina non passa da quella strada. */
+function annoGiocato(){
+  if(typeof S!=='undefined' && S && S.year) return S.year;
+  if(typeof chosenScenario!=='undefined' && typeof SCENARI!=='undefined' && SCENARI[chosenScenario]) return SCENARI[chosenScenario].anno||0;
+  return 0;
+}
 /* nome a schermo del dicastero `id`, era-aware (overlay '50 → PRESET §5a; presente → MINISTRIES). Ritorna la
    stringa IT: il chiamante fa T() come già fa con M.nm. */
 function dicNm(id){
@@ -854,7 +885,8 @@ const LINEE_STORICHE = {
       { tag:'italia1950', da:-Infinity, coda:1961      },   // decade '50: coda-default 1961 (l'invecchiamento §4)
       { tag:'italia1960', da:1958,      coda:1971      },   // decade '60: apre dal '58 (miracolo, Min. Sanità); L28-1 CHIUDE la coda al '71
       { tag:'italia1970', da:1969,      coda:1981      },   // decade '70: apre dal '69 (il confine d'ingresso è dicembre '69); L31-1 CHIUDE la coda all'81
-      { tag:'italia1980', da:1979,      coda:Infinity  }    // decade '80: apre dal '79 (sovrapposizione morbida come '69-'71); ultima → aperta (C2, la chiuderà il '90)
+      { tag:'italia1980', da:1979,      coda:1991      },   // decade '80: apre dal '79; L40-1 CHIUDE la coda al '91 (il '90 apre dall'89, stessa sovrapposizione morbida)
+      { tag:'italia1990', da:1989,      coda:Infinity  }    // decade '90: apre dall'89 (la Bolognina è del 12 nov '89); ultima → aperta (C2, la chiuderà il 2000)
     ]
   }
 };
@@ -895,7 +927,12 @@ const DRIFT_ECONOMICO_ERA = {
      disciplina di non-dominanza (−0,7, mai oltre), e un decennio che non torna più in positivo. */
   [LINEA_IT]: [ {da:1958, ciclo:0.6}, {da:1964, ciclo:-0.4}, {da:1966, ciclo:0.4},
                 {da:1970, ciclo:0.2}, {da:1973, ciclo:-0.7}, {da:1976, ciclo:-0.4},
-                {da:1980, ciclo:-0.2}, {da:1983, ciclo:0.2},  {da:1986, ciclo:0.5} ]
+                {da:1980, ciclo:-0.2}, {da:1983, ciclo:0.2},  {da:1986, ciclo:0.5},
+                /* L40-1 — il '90: prima metà durissima, seconda in risalita (scheda §2). Il 1993 è l'unico anno
+                   della linea a toccare il minimo consentito dalla non-dominanza (−0,7) INSIEME al '73: è la
+                   recessione vera, PIL reale negativo. Poi la rincorsa a Maastricht, che cresce ma non esplode. */
+                {da:1990, ciclo:0.1},  {da:1992, ciclo:-0.5}, {da:1993, ciclo:-0.7},
+                {da:1995, ciclo:0.2},  {da:1997, ciclo:0.4},  {da:1999, ciclo:0.3} ]
 };
 /* ===== L28-4 · IL MODIFICATORE-CLIMA DEGLI ANNI '70 (decisione G3) =====
    Dal dicembre 1969 a fine decennio il paese vive una stagione piu' cupa. Il clima e' un FENOMENO, mai un evento
@@ -967,7 +1004,49 @@ const RIALLINEAMENTI_ERA = {
        tappa la riporta in scala col resto del roster. */
     1987: { entra:[ {id:'i80_verdi', nome:'Verdi', orientamento:'sinistra', base:{giovani:0.6, cetomedio:0.4}, forza:2.5, asse:-1, gruppoUE:'verdi'} ],
             delta:[ {id:'i50_pci',delta:-3.5}, {id:'i50_psi',delta:3}, {id:'i50_dc',delta:1.5}, {id:'i50_pri',delta:-1.5},
-                    {id:'i50_msi',delta:-0.5}, {id:'i50_psdi',delta:0.5}, {id:'i50_pli',delta:0.5} ] }                        // Σ=0 · il PCI declina, il PSI tocca il massimo dal dopoguerra, la DC recupera, l'onda laica si ritira
+                    {id:'i50_msi',delta:-0.5}, {id:'i50_psdi',delta:0.5}, {id:'i50_pli',delta:0.5} ] },                       // Σ=0 · il PCI declina, il PSI tocca il massimo dal dopoguerra, la DC recupera, l'onda laica si ritira
+
+    /* ======================================================================================================
+       L40-1 · LA FRANA DEL '90. Quattro tappe in cinque anni: nessun'altra decade del gioco fa morire e
+       nascere partiti — qui è il meccanismo di L34-1 che finalmente serve a quello per cui è nato.
+       Le date sono quelle vere (scheda §1). I `delta` restano SPINTE, non risultati: le forze in partita
+       divergono dalla storia per costruzione (è la premessa del gioco), quindi si spinge nella direzione
+       giusta e si lascia che il motore faccia il resto. Attenzione al floor: `riallineamentoTappa` applica
+       `Math.max(2, ...)`, nessun partito scende sotto 2 per delta — per farne morire uno serve `esce`.
+       ====================================================================================================== */
+
+    /* 1991 · RIMINI — il partito comunista si divide. Storico: XX congresso 31 gen-3 feb 1991, la mozione della
+       svolta passa col 64%, nasce il PDS; una novantina di delegati esce e fonda Rifondazione.
+       `se`: **solo se non è il partito del giocatore.** Se lo è, la stessa storia è lo snodo-scissione (L40-2),
+       dove la scelta è sua — e questa direttiva non deve calpestarla. */
+    1991: { se:function(){ return S.partito!=='i50_pci'; },
+            entra:[ {id:'i90_prc', nome:'Rifondazione', orientamento:'sinistra', base:{lavoratori:0.6, giovani:0.4}, forza:5.5, asse:-2, gruppoUE:'sinistra'} ],
+            rinomina:[ {id:'i50_pci', nome:'PDS'} ],
+            delta:[ {id:'i50_pci',delta:-6}, {id:'i50_psi',delta:1}, {id:'i50_dc',delta:1} ] },                                 // il grosso resta, un terzo esce: insieme pesano meno di prima
+
+    /* 1992 · L'ULTIMA FOTO DEL VECCHIO SISTEMA, già incrinata. DC sotto il 30% per la prima volta (29,7),
+       il PSI al suo massimo storico (13,6) e non lo sa, la Lega dal nulla all'8,65 in cinque anni. */
+    1992: { entra:[ {id:'i90_lega', nome:'Lega Nord', orientamento:'centrodestra', base:{imprenditori:0.5, cetomedio:0.5}, forza:8.5, asse:1, gruppoUE:'noniscritti'} ],
+            delta:[ {id:'i50_dc',delta:-5}, {id:'i50_psi',delta:0.5}, {id:'i50_pci',delta:-1}, {id:'i90_prc',delta:0.5},
+                    {id:'i50_pri',delta:-0.5}, {id:'i50_psdi',delta:-1}, {id:'i50_pli',delta:-1}, {id:'i50_msi',delta:-0.5} ] },
+
+    /* 1994 · LA FRANA. In un solo anno: la DC si scioglie dopo 48 anni (18 gennaio) e diventa PPI, con il CCD
+       in scissione verso destra; lo stesso giorno nasce il partito-azienda, che al debutto è primo partito; il
+       PSI chiude a novembre dopo 102 anni; il MSI si dichiara conservatore a Fiuggi (gennaio '95, portato qui
+       con la tappa). ⚠ IL PSI ESCE SENZA `confluisce_in`: la scheda non indica un erede, e non ce n'è stato uno
+       — i socialisti si dispersero fra i due poli. La forza si redistribuisce alla rinormalizzazione, che è
+       esattamente la dispersione storica. Se un destinatario lo vuoi, basta una parola. */
+    1994: { entra:[ {id:'i90_fi',  nome:'Forza Italia', orientamento:'centrodestra', base:{imprenditori:0.5, cetomedio:0.3, pensionati:0.2}, forza:18, asse:1, gruppoUE:'popolari'},
+                    {id:'i90_ccd', nome:'CCD', orientamento:'centrodestra', base:{cattolici:0.6, pensionati:0.4}, forza:3, asse:1, gruppoUE:'popolari'} ],
+            rinomina:[ {id:'i50_dc', nome:'PPI'}, {id:'i50_msi', nome:'Alleanza Nazionale'} ],
+            esce:[ {id:'i50_psi'} ],
+            delta:[ {id:'i50_dc',delta:-8}, {id:'i50_pci',delta:2}, {id:'i50_msi',delta:4}, {id:'i90_prc',delta:0.5},
+                    {id:'i50_pri',delta:-1}, {id:'i50_psdi',delta:-1}, {id:'i50_pli',delta:-1} ] },
+
+    /* 1996 · IL BIPOLARISMO SI CONSOLIDA. L'erede del PCI è primo partito per la prima volta nella storia
+       repubblicana (21,1); AN tocca il suo massimo; la Lega, in corsa solitaria, il suo (10,1). */
+    1996: { delta:[ {id:'i50_pci',delta:1}, {id:'i50_msi',delta:2}, {id:'i90_lega',delta:1.5}, {id:'i90_prc',delta:2.5},
+                    {id:'i90_fi',delta:-0.5}, {id:'i50_dc',delta:-4}, {id:'i90_ccd',delta:1} ] }
   }
 };
 /* ============================================================================================================
@@ -1011,7 +1090,14 @@ function applicaDirettive(d){
     if(S.forzePrev && S.forzePrev[n.id]==null) S.forzePrev[n.id]=n.forza||1;
     if(S.seggi && S.seggi[n.id]==null)     S.seggi[n.id]=0;   // i seggi si ricalcolano alla prossima urna
   });
-  (d.rinomina||[]).forEach(function(r){ S.rosterDelta.rinomina.push(r); });
+  (d.rinomina||[]).forEach(function(r){
+    /* L40-1 — stessa medicina di `esce` (correzione #3 di L34-1): **il partito del giocatore non cambia nome
+       per direttiva.** Il '91 rinomina il partito comunista, ma se è il TUO quella non è una tappa: è lo
+       snodo-scissione, dove la scelta è tua (L40-2). Senza questa riga il giocatore si sarebbe trovato il
+       partito ribattezzato sotto i piedi, in silenzio. */
+    if(r.id===S.partito){ if(typeof console!=='undefined' && console.warn) console.warn('[roster] direttiva `rinomina` sul partito del giocatore ('+r.id+'): ignorata, serve uno snodo.'); return; }
+    S.rosterDelta.rinomina.push(r);
+  });
   (d.esce||[]).forEach(function(e){
     /* correzione #3: il partito DEL GIOCATORE non esce mai per direttiva — quello è uno snodo (lo scioglie il
        lotto successivo). Se capitasse, è un bug di dati: lo si fa emergere, non lo si subisce in silenzio. */
@@ -1030,6 +1116,49 @@ function applicaDirettive(d){
   });
   applicaRosterDelta();
 }
+/* ============================================================================================================
+   L40-2 · LA SCISSIONE DEL PARTITO DEL GIOCATORE. È il primo snodo che riscrive il partito di chi gioca, e
+   usa il travaso costruito in L34-1 — ma NON può passare da `applicaDirettive`, che per progetto rifiuta
+   `esce` e `rinomina` sul partito del giocatore (sarebbe una tappa che decide al posto suo). Qui la decisione
+   è stata sua: si scrive nel registro direttamente, e `applicaRosterDelta` proietta.
+   IL GIOCATORE NON PERDE MAI NIENTE: tiene il suo id, quindi forze, seggi, intese, coalizione e territori
+   restano attaccati a lui — cambia casa, non ricomincia. Chi se ne va nasce come partito NPC, con la quota
+   che gli spetta sottratta alla sua.
+     svolta       → tieni i ⅔, il nome cambia, esce la minoranza
+     rifondazione → tieni la bandiera e ⅓, il grosso se ne va col nome nuovo
+   ============================================================================================================ */
+function scissioneApplica(ramo){
+  if(typeof S==='undefined' || !S || !S.partito) return;
+  var mio=S.partito, quota=(S.forze&&S.forze[mio]!=null)?S.forze[mio]:20;
+  var svolta=(ramo==='svolta');
+  var mia = svolta ? quota*0.66 : quota*0.30;                      // quello che resta a te
+  var loro = Math.max(2, quota - mia);                             // quello che se ne va
+  S.rosterDelta = S.rosterDelta || {entra:[], esce:[], rinomina:[]};
+  S.rosterDelta.rinomina.push({ id:mio, nome: svolta ? 'PDS' : 'Rifondazione' });
+  var nuovo = svolta
+    ? { id:'i90_prc', nome:'Rifondazione', orientamento:'sinistra',       base:{lavoratori:0.6, giovani:0.4},  forza:loro, asse:-2, gruppoUE:'sinistra' }
+    : { id:'i90_pds', nome:'PDS',          orientamento:'centrosinistra', base:{lavoratori:0.5, cetomedio:0.5}, forza:loro, asse:-1, gruppoUE:'socialisti' };
+  S.rosterDelta.entra.push(nuovo);
+  if(S.forze){ S.forze[mio]=mia; S.forze[nuovo.id]=loro; }
+  if(S.forzePrev){ S.forzePrev[mio]=mia; S.forzePrev[nuovo.id]=loro; }
+  if(S.seggi && S.seggi[nuovo.id]==null) S.seggi[nuovo.id]=0;
+  applicaRosterDelta();
+  /* l'asse del giocatore si sposta col nome: la svolta apre al centro, la rifondazione resta dov'era */
+  if(svolta){ var mp=PAESE.partiti.filter(function(x){return x.id===mio;})[0]; if(mp){ mp.asse=-1; mp.orientamento='centrosinistra'; } }
+  if(svolta){ stampad(3); gd('giovani',2); gd('cetomedio',2); gd('lavoratori',-2);
+    bioFatto('La svolta: il partito ha cambiato nome, e tu c\'eri.'); }
+  else { stampad(-2); gd('lavoratori',3); gd('giovani',1); gd('cetomedio',-3); gd('imprenditori',-2);
+    bioFatto('Hai tenuto la bandiera quando tutti la ammainavano.'); }
+}
+/* L40-2 · IL CLIMA «QUESTIONE MORALE» (scheda §10.5): una campana, non un interruttore — sale dal '92, picco
+   nel '93, scende dal '95. Come il clima-'70 tocca poche leve dichiarate, e **non somma** col resto: la decade
+   ha anche il telefonino e le notti magiche. Qui muove tre soglie di `pescaInchiesta`, che già esistono. */
+const MORALE90 = [ {da:1992, v:0.6}, {da:1993, v:1}, {da:1995, v:0.6}, {da:1997, v:0.3}, {da:1999, v:0} ];
+function climaMorale(){
+  if(typeof S==='undefined' || !S || S.era!==LINEA_IT) return 0;
+  var v=0; for(var i=0;i<MORALE90.length;i++){ if(S.year>=MORALE90[i].da) v=MORALE90[i].v; }
+  return v;
+}
 function riallineamentoTappa(){
   if(typeof S==='undefined' || !S) return;
   var perAnno = S.era && RIALLINEAMENTI_ERA[S.era];
@@ -1041,6 +1170,11 @@ function riallineamentoTappa(){
   var direttive=null, shifts;
   if(Array.isArray(entry)) shifts=entry;                                              // forma di sempre
   else if(entry.delta || entry.entra || entry.esce || entry.rinomina){                // forma nuova (L34-1)
+    /* L40-1 — `se`: una tappa può valere solo a certe condizioni. Serve al '91: la scissione del partito
+       comunista è una direttiva-NPC **solo se non è il partito del giocatore** — nel qual caso la stessa
+       storia si gioca come snodo (L40-2). La tappa resta marcata come fatta: non deve ritentare ogni anno. */
+    if(typeof entry.se==='function'){ var ok=false; try{ ok=entry.se(); }catch(_){ ok=false; }
+      if(!ok){ S.riallineamenti[S.year]=true; return; } }
     shifts=entry.delta||[]; direttive=entry;
   } else shifts=entry[(S.apertura==='apri') ? 'apertura' : 'centrismo'];               // '63: ramo su S.apertura
   if(direttive) applicaDirettive(direttive);        // PRIMA i nuovi entrano, poi i delta li trovano nel roster
@@ -1059,6 +1193,13 @@ function riallineamentoTappa(){
     else if(S.year===1979) S.log.unshift({t:T('Elezioni 1979'), x:T('L\'onda si ritira: la sinistra arretra per la prima volta da trent\'anni e i piccoli tornano a respirare.')});
     else if(S.year===1983) S.log.unshift({t:T('Elezioni 1983'), x:T('Il partito di maggioranza relativa tocca il suo minimo: i laici crescono e i socialisti diventano l\'ago della bilancia.')});
     else if(S.year===1987) S.log.unshift({t:T('Elezioni 1987'), x:T('I socialisti toccano il massimo dal dopoguerra, la sinistra storica arretra ancora, l\'onda laica si ritira.')});
+    /* L40-1 — i beat della frana. Tutte le tappe precedenti ne hanno uno: senza, il giocatore vedrebbe il
+       roster cambiare sotto gli occhi senza una riga che glielo racconti — e qui non cambiano i pesi, cambiano
+       le entità. Registro descrittivo come le altre tappe: cronaca, mai giudizio. */
+    else if(S.year===1991) S.log.unshift({t:T('Il congresso della svolta'), x:T('Il partito comunista cambia nome e simbolo; una minoranza non segue e fonda la sua casa. La sinistra italiana si divide in due.')});
+    else if(S.year===1992) S.log.unshift({t:T('Elezioni 1992'), x:T('Il partito di maggioranza relativa scende sotto una soglia mai toccata, e dal Nord entra in Parlamento una forza nuova. Il quadro non è più quello di sempre.')});
+    else if(S.year===1994) S.log.unshift({t:T('La frana'), x:T('In un anno il partito che ha governato per mezzo secolo si scioglie e i socialisti chiudono; nasce un partito nuovo che al debutto è già primo, e la destra cambia nome. Il sistema dei partiti non esiste più.')});
+    else if(S.year===1996) S.log.unshift({t:T('Elezioni 1996'), x:T('Due coalizioni si contendono il paese: il bipolarismo prende la forma che avrà per vent’anni.')});
   }
   S.riallineamenti[S.year]=true;
 }
@@ -1119,6 +1260,15 @@ function snodoSolidarietaDovuta(){  return typeof S!=='undefined' && S && S.era=
    nucleare 87-88. Nessuna si sovrappone alle finestre del 70 (l ultima chiude nel 78). */
 function snodoDivorzioBdiDovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_IT && S.livello===3 && !S.opposizione && S.divorzioBdi==null && S.year>=1981 && S.year<=1982; }
 function snodoScalaMobileDovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_IT && S.livello===3 && !S.opposizione && S.scalaMobile==null && S.year>=1984 && S.year<=1985; }
+/* L40-2 · i gate del '90. Stessa forma degli snodi '70/'80: premier, one-shot, dentro la finestra storica. */
+function snodoMaastrichtDovuta(){   return typeof S!=='undefined' && S && S.era===LINEA_IT && S.livello===3 && !S.opposizione && S.maastricht==null  && S.year>=1992 && S.year<=1997; }
+function snodoMattarellumDovuta(){  return typeof S!=='undefined' && S && S.era===LINEA_IT && S.livello===3 && !S.opposizione && S.mattarellum==null && S.year>=1993 && S.year<=1994; }
+/* la questione morale non è una scelta di calendario ma la risposta a un'inchiesta che è già addosso */
+function snodoMoraleDovuta(){       return typeof S!=='undefined' && S && S.era===LINEA_IT && S.livello===3 && S.questioneMorale==null && !!S.inchiesta && S.year>=1992 && S.year<=1996; }
+/* LA SCISSIONE: solo per chi gioca il partito comunista, e in due tempi — la scelta a fine '89, il congresso
+   nel febbraio '91, come nella storia. Fra i due c'è un anno di attesa: è il tempo del dibattito. */
+function snodoScissioneDovuta(){    return typeof S!=='undefined' && S && S.era===LINEA_IT && S.partito==='i50_pci' && S.scissione==null && S.year>=1989 && S.year<=1990; }
+function snodoCongressoDovuto(){    return typeof S!=='undefined' && S && S.era===LINEA_IT && S.partito==='i50_pci' && !!S.scissione && !S.scissioneFatta && (S.year>1991 || (S.year===1991 && S.month>=2)); }
 function snodoNucleareDovuta(){    return typeof S!=='undefined' && S && S.era===LINEA_IT && S.livello===3 && !S.opposizione && S.nucleare==null    && S.year>=1987 && S.year<=1988; }
 /* CURA Lotto P3 (#9) — il richiamo delle correnti è dovuto? Premier, una corrente sotto la soglia critica-recuperabile
    (umore<40) PRIMA della sfida (<35), nessuna sfida già in corso, cooldown 8 mesi. Ogni valuta-silenziosa che degrada
@@ -2298,11 +2448,15 @@ function aggiornaInchiesta(){
   /* nuovo avviso? tetto archi (un'inchiesta NON si apre se 2 archi grandi sono già in corso) + cancello
      duro sull'esposizione + raffreddamento + un solo tiro al mese */
   if((S.archi?S.archi.length:0) >= 2) return null;   // slotsArchi pieno di archi: niente nuova inchiesta
-  if((S.esposizione||0)<55) return null;
-  if(S.inchiestaUltima!=null && mese-S.inchiestaUltima<12) return null;
+  /* L40-2 — la «questione morale» degli anni '90 non è una meccanica nuova: è questa che morde di più.
+     Al picco ('93) il cancello sull'esposizione scende di 10, il raffreddamento da 12 mesi passa a 8 e la
+     probabilità sale di metà. Fuori dalla campana i tre numeri sono quelli di sempre, bit per bit. */
+  var _m=(typeof climaMorale==='function')?climaMorale():0;
+  if((S.esposizione||0) < (55-10*_m)) return null;
+  if(S.inchiestaUltima!=null && mese-S.inchiestaUltima < (12-4*_m)) return null;
   if(S.inchiestaRoll===mese) return null;
   S.inchiestaRoll=mese;
-  if(Math.random()>=(S.esposizione-55)/200) return null;
+  if(Math.random()>=(S.esposizione-(55-10*_m))/(200-70*_m)) return null;
   /* bersaglio: al governo 60% tu / 40% un ministro a rischio; all'opposizione sempre tu */
   if(!S.opposizione && Math.random()<0.4 && S.ministers && S.ministers.length){
     const pool=SCANDALI.filter(function(s){return s.giudiziario && eraVivaT(s);});
@@ -2504,6 +2658,11 @@ function genAgendaRamo(first){
     for(var _pi=0;_pi<PILASTRI_LINEA.length;_pi++){
       var _P=PILASTRI_LINEA[_pi];
       if(S.pilastri70[_P.id]) continue;
+      /* L34-3 - UN PILASTRO GIA ACCADUTO PRIMA CHE LA PARTITA COMINCI NON E CRONACA, E STORIA: chi parte nel
+         1980 non deve ricevere piazza Fontana e il caso Moro come se succedessero ora. Trovato grazie allo
+         scenario nuovo: prima dell 80 il caso non poteva darsi (si partiva sempre dal 50). Si marcano come
+         gia visti, cosi non tornano nemmeno dopo. */
+      if((_P.anno*12+_P.mese) < ((S.annoInizio||S.year)*12+1)){ S.pilastri70[_P.id]=true; continue; }
       if((S.year*12+S.month) < (_P.anno*12+_P.mese)) continue;
       S.pilastri70[_P.id]=true;
       S.agenda.push({kind:'event', data:_P, resolved:false}); agendaSolo(); return;
@@ -2618,6 +2777,13 @@ function genAgendaRamo(first){
   if(!first && typeof snodoDivorzioBdiDovuta==='function' && snodoDivorzioBdiDovuta()){ S.agenda.push({kind:'event', data:DIVORZIO_BDI_EV, resolved:false}); agendaSolo(); return; }
   if(!first && typeof snodoScalaMobileDovuta==='function' && snodoScalaMobileDovuta()){ S.agenda.push({kind:'event', data:SCALAMOBILE_EV, resolved:false}); agendaSolo(); return; }
   if(!first && typeof snodoNucleareDovuta==='function' && snodoNucleareDovuta()){ S.agenda.push({kind:'event', data:NUCLEARE_EV, resolved:false}); agendaSolo(); return; }
+  /* L40-2 · gli snodi del '90. La SCISSIONE per prima: è la più identitaria e non può farsi scavalcare. */
+  if(!first && typeof snodoScissioneDovuta==='function' && snodoScissioneDovuta()){ S.agenda.push({kind:'event', data:SCISSIONE_EV, resolved:false}); agendaSolo(); return; }
+  if(!first && typeof snodoCongressoDovuto==='function' && snodoCongressoDovuto()){ S.scissioneFatta=true;
+    S.agenda.push({kind:'event', data:(S.scissione==='svolta'?SCISSIONE_CONGRESSO_SVOLTA:SCISSIONE_CONGRESSO_RIFONDAZIONE), resolved:false}); agendaSolo(); return; }
+  if(!first && typeof snodoMoraleDovuta==='function' && snodoMoraleDovuta()){ S.agenda.push({kind:'event', data:QUESTIONE_MORALE_EV, resolved:false}); agendaSolo(); return; }
+  if(!first && typeof snodoMattarellumDovuta==='function' && snodoMattarellumDovuta()){ S.agenda.push({kind:'event', data:MATTARELLUM_EV, resolved:false}); agendaSolo(); return; }
+  if(!first && typeof snodoMaastrichtDovuta==='function' && snodoMaastrichtDovuta()){ S.agenda.push({kind:'event', data:MAASTRICHT_EV, resolved:false}); agendaSolo(); return; }
   // CURA Lotto P3 (#9): la CARTA-RICHIAMO delle correnti — chiama alla scheda PRIMA che sia tardi (mai l'imboscata a 30)
   if(!first && typeof richiamoCorrentiDovuto==='function' && richiamoCorrentiDovuto()){ S.richiamoCorrUltimo=S.year*12+S.month; S.agenda.push({kind:'event', data:cartaRichiamoCorrenti(), resolved:false}); agendaSolo(); return; }
   // Cantiere C: la STAGIONE ELETTORALE (ultimi 6 mesi) — il beat-campagna è LA carta del mese (setpiece: la campagna assorbe l'agenda)
@@ -4261,6 +4427,13 @@ function applySnap(snap){
   if(S.austerity===undefined){ S.austerity=null; S.divorzio=null; S.solidarieta=null; }   // L28-3 — migrazione snodi '70
   if(S.divorzioBdi===undefined){ S.divorzioBdi=null; S.scalaMobile=null; S.nucleare=null; }   // L33-1 — migrazione snodi '80
   if(!S.pilastri70 || typeof S.pilastri70!=='object') S.pilastri70={};   // L28-4 — migrazione pilastri '70
+  /* L40-2 — i nuovi flag del '90: dato puro, migrazione per i salvataggi anteriori al lotto */
+  if(S.maastricht===undefined) S.maastricht=null;
+  if(S.maastrichtEsito===undefined) S.maastrichtEsito=null;
+  if(S.mattarellum===undefined) S.mattarellum=null;
+  if(S.questioneMorale===undefined) S.questioneMorale=null;
+  if(S.scissione===undefined) S.scissione=null;
+  if(S.scissioneFatta===undefined) S.scissioneFatta=false;
   if(S.richiamoCorrUltimo===undefined) S.richiamoCorrUltimo=null;   // CURA Lotto P3 — migrazione cooldown richiamo correnti
   if(S.sondStorico===undefined) S.sondStorico=[];   // F3 — migrazione: i salvataggi pre-lotto ricevono la serie-sondaggi vuota
   if(S.leggeroUltimo===undefined) S.leggeroUltimo=null;   // G4 — migrazione: cooldown del beat leggero
