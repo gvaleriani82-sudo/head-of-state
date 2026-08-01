@@ -137,7 +137,7 @@ function scenaEraOk(id, key){
    `italia1960`) accanto alle tonali. Le epoche stanno dalla più recente: giocando la linea italiana
    nel 1960 sono vive entrambe (il '50 ha coda 1961, il '60 apre dal '58) e deve vincere la più vicina
    all'anno. Non trovata → null, e il selettore ripiega sul tono/base come prima. */
-var SCENA_ERE = ['italia1980','italia1970','italia1960','italia1950'];   // L37-1: quattro decenni vestiti
+var SCENA_ERE = ['italia1990','italia1980','italia1970','italia1960','italia1950'];   // L42-1: cinque decenni vestiti
 function scenaEraKey(v){
   if(typeof eraCombacia!=='function') return null;
   for(var i=0;i<SCENA_ERE.length;i++){ var t=SCENA_ERE[i]; if(v[t]!=null && eraCombacia(t)) return t; }
@@ -763,13 +763,16 @@ var RITRATTI_AREA = {
    che va rilanciato quando arriva un lotto nuovo. Forma-numero (`occ:5`) ancora accettata per compatibilità. */
 var RITRATTI_POOL = { occ:{m:5,f:5}, lat:{m:5,f:5}, asi:{m:5,f:5}, sud:{m:5,f:5}, afr:{m:5,f:5},
                       occ50:{m:8,f:2},    // L19-1: volti d'epoca. 8/2 di proposito: con la quota-genere del '50 il ~94% dei pescaggi è maschile
-                      occ70:{m:4,f:2}, occ80:{m:3,f:3} };   // L37-1: i due decenni nuovi (conteggi verificati sul disco)
+                      occ70:{m:4,f:2}, occ80:{m:3,f:3},    // L37-1: i due decenni nuovi (conteggi verificati sul disco)
+                      occ90:{m:3,f:3} };   // L43-2: il '90, ora uniforme. LA LEZIONE della collisione: i primi due volti femminili erano
+                                           //   su disco come `f2`/`f3`, il pool costruisce i path da `f1` in su e li ricompattai in `f1`/`f2`;
+                                           //   il volto che arrivò dopo si chiamava `f1` e collise. Da qui in poi gli indici nuovi si AGGIUNGONO IN CODA.
 /* L37-1 — POOL PER DECENNIO. Prima era per SCENARIO (`S.era==='italia1950'`): quel confronto è morto il 30 luglio,
    quando L30-1 ha rinominato l'era in `italia_repubblica` per tutta la linea. Da allora `occ50` **non veniva più
    pescato da nessuno** — regressione silenziosa, nessuna guardia poteva vederla (il path ripiegava su `occ`, che
    esiste). Ora la scelta si fa sull'ANNO dentro la linea, che è anche quello che serviva: un ministro del 1985
    non deve avere la brillantina.
-     ≤1969 → occ50   ·   1970-79 → occ70   ·   ≥1980 → occ80   ·   fuori dalla linea → occ (presente intatto)
+     ≤1969 → occ50 · 1970-79 → occ70 · 1980-89 → occ80 · ≥1990 → occ90 · fuori dalla linea → occ (presente intatto)
    STABILITÀ — scelta (a), il volto si fissa alla nomina: `assegnaVolto` scrive `m.rit` e `ritrattoDi` lo rispetta
    per primo, quindi un ministro nominato nel '68 che serve fino al '74 **tiene la sua faccia**. È la stessa regola
    di L20-1 (niente ricalcolo sull'insieme) e l'unica coerente col mondo: una persona non cambia volto perché è
@@ -782,6 +785,7 @@ function ritrattoPoolEra(pref){
   var era=(typeof eraGiocata==='function') ? eraGiocata() : ((typeof S!=='undefined'&&S&&S.era)||'contemporanea');
   if(era!==LINEA_IT) return pref;                                          // presente o altra linea → invariato
   var y=(typeof annoGiocato==='function') ? annoGiocato() : ((typeof S!=='undefined'&&S&&S.year)||0);
+  if(y>=1990) return 'occ90';
   if(y>=1980) return 'occ80';
   if(y>=1970) return 'occ70';
   return 'occ50';

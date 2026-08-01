@@ -738,6 +738,109 @@ const SCENARI = {
     ],
   },
   /* ============================================================================================================
+     L44-3 · ITALIA 2000 — la settima e ultima porta. Stessa LINEA; il roster è quello uscito dalla frana del '94
+     (PPI, PDS, AN, Rifondazione, Lega, FI, CCD e i laici superstiti), anno d'avvio 2000.
+
+     LE FORZE: baseline = **urne del 21 aprile 1996**, quota proporzionale (PDS 21,1 · FI 20,6 · AN 15,7 ·
+     Lega 10,1 · PRC 8,6 · CCD-CDU 5,8 · lista Dini 4,3; il PPI corre nell'Ulivo e la scheda non ne dà la quota
+     separata), **rinormalizzate sui nove del roster**. Al PPI ho attribuito la quota che nella coalizione gli
+     spettava (~6,8): è un'inferenza dichiarata, come il PRI del '58 e i Monarchici del '79. Ai laici minori
+     resta la quota residua: il roster è fisso e un partito a zero sarebbe un fantasma nella scheda Partiti.
+
+     TURNMANDATO 4: parlamento dell'aprile '96, scadenza naturale 2001 → dal gennaio 2000 resta un anno.
+     **L'urna di gioco cade nell'anno della prima tappa**, come per la porta del '90.
+
+     IL FASCINO DI QUESTA PORTA: si parte **in lire** e si arriva in euro. Il changeover di L44-1 scatta in
+     partita al gennaio 2002 — è l'unico scenario del gioco in cui la valuta cambia mentre giochi.
+     ============================================================================================================ */
+  italia2000: {
+    id:'italia2000', era:LINEA_IT, nome:'Italia 2000', anno:2000, paese:'italia',
+    turnMandato: 4,
+    ue: true,                                   // l'Unione c'è dal 1993: europee e apparato UE vivi (a differenza di tutte le porte precedenti)
+    intermedie: [ {tipo:'Elezioni amministrative', mese:28, tocca:'tutti'}, {tipo:'Elezioni regionali', mese:44, tocca:'regione'} ],
+    partiti: [
+      { id:'i50_pci',   nome:'DS',           orientamento:'centrosinistra', base:{ lavoratori:0.5, cetomedio:0.5 },                 forza:23.1, asse:-1, gruppoUE:'socialisti'   },
+      { id:'i90_fi',    nome:'Forza Italia', orientamento:'centrodestra',   base:{ imprenditori:0.5, cetomedio:0.3, pensionati:0.2 }, forza:22.5, asse:1,  gruppoUE:'popolari'     },
+      { id:'i50_msi',   nome:'Alleanza Nazionale', orientamento:'destra',   base:{ pensionati:0.5, cetomedio:0.5 },                 forza:17.2, asse:1,  gruppoUE:'conservatori' },
+      { id:'i90_lega',  nome:'Lega Nord',    orientamento:'centrodestra',   base:{ imprenditori:0.5, cetomedio:0.5 },              forza:11.1, asse:1,  gruppoUE:'noniscritti'  },
+      { id:'i90_prc',   nome:'Rifondazione', orientamento:'sinistra',       base:{ lavoratori:0.6, giovani:0.4 },                  forza:9.4,  asse:-2, gruppoUE:'sinistra'     },
+      { id:'i50_dc',    nome:'PPI',          orientamento:'centro',         base:{ cattolici:0.6, cetomedio:0.4 },                 forza:7.5,  asse:0,  gruppoUE:'popolari'     },
+      { id:'i90_ccd',   nome:'CCD-CDU',      orientamento:'centrodestra',   base:{ cattolici:0.6, pensionati:0.4 },                forza:6.3,  asse:1,  gruppoUE:'popolari'     },
+      { id:'i80_verdi', nome:'Verdi',        orientamento:'sinistra',       base:{ giovani:0.6, cetomedio:0.4 },                   forza:2,    asse:-1, gruppoUE:'verdi'        },
+      { id:'i50_pri',   nome:'I laici',      orientamento:'centro',         base:{ cetomedio:0.6, giovani:0.4 },                   forza:0.9,  asse:0,  gruppoUE:'liberali'     },
+    ],
+    /* Seed IN LIRE (§1): il PIL 2000 ≈ 2.400.000 mld — la scheda-'90 chiudeva a ~2.270.000 nel 1999, quindi le
+       due porte si agganciano. Debito ~109% (la scheda dà 109,4 al 1999 e la discesa lenta fino al minimo del
+       2007). ⚠ Il disavanzo la scheda lo dà «sotto il 3% a metà decennio»: −2 è il seed di gioco, tarato con la
+       stessa disciplina di L44-1 (col decennio intero misurato, un disavanzo alto su un debito a 109 chiude la
+       partita prima del 2006). Cifra tarabile. */
+    economia: { pil:2400000, debito:109, deficit:-2 },
+    debtAncora: 109,
+    logorioEra: 0.012,
+    valuta: { sym:'L.', mld:'mld lire', mln:'mln lire' },   // si PARTE in lire: il changeover arriva in partita al gennaio 2002
+    quotaSpesa: 0.46,                           // ⚠ la scheda-2000 non la dà: 46% è l'ordine della spesa italiana a inizio decennio, in continuità col dato '80 sourceato. Da confermare.
+    intro: "Italia, 2000. La lira ha i mesi contati e il bipolarismo è maturo: due coalizioni, un ballottaggio permanente. Fra due anni nel portafoglio ci sarà l'euro.",
+    contesto: [
+      "Italia, 2000. La lira ha i mesi contati: fra due anni nel portafoglio ci sarà l'euro, e con lui un'Europa che detta i compiti a casa. Il bipolarismo è maturo — due coalizioni, un ballottaggio permanente.",
+      "Il mondo sembra in pace e in crescita. Non lo resterà: un settembre cambierà l'ordine delle cose, e a fine decennio i mercati presenteranno un conto che nessuna urna può pagare.",
+      "Governare qui significa fare i conti, alla lettera. All'opposizione, significa preparare l'alternanza: in questo decennio, per la prima volta, arriva davvero.",
+    ],
+  },
+  /* ============================================================================================================
+     L41-3 · ITALIA 1990 — la quinta porta, e la prima che si apre su un mondo già cambiato. Stessa LINEA,
+     stesso roster (qui a NOVE: i Verdi sono entrati con la tappa dell'87 e nel 1990 ci sono già), anno 1990.
+
+     LE FORZE: baseline = **urne del 14-15 giugno 1987** (DC 34,3 · PCI 26,6 · PSI 14,3 · MSI 5,9 · PRI 3,7 ·
+     PSDI 3,0 · Verdi 2,5 · PLI 2,1; PR 2,6, DP 1,7 e la Lega Lombarda allo 0,48 restano fuori roster),
+     **rinormalizzate a 100 sui nove**. Ai Monarchici resta la quota residua minima, come nell'80: il roster è
+     fisso e un partito a zero sarebbe un fantasma nella scheda Partiti. Inferenza dichiarata.
+
+     TURNMANDATO 3: parlamento del giugno '87, scadenza naturale 1992 → dal gennaio 1990 restano 2 anni su 5.
+     È l'incastro che serviva: **l'urna di gioco cade nell'anno della tappa-1992**, quella che porta la Lega in
+     Parlamento e la DC sotto il 30 per la prima volta.
+
+     IL MURO È GIÀ CADUTO (decisione I6): non è un pilastro di questo scenario, è la **condizione d'avvio** —
+     sta nel briefing, e chi arriva dagli anni '80 l'ha incontrato come ultimo fatto della vecchia era.
+     ============================================================================================================ */
+  italia1990: {
+    id:'italia1990', era:LINEA_IT, nome:'Italia 1990', anno:1990, paese:'italia',
+    turnMandato: 3,
+    ue: false,                                  // nel 1990 c'è la CEE: l'Unione nasce con Maastricht (in vigore nov 1993)
+    intermedie: [ {tipo:'Elezioni amministrative', mese:28, tocca:'tutti'}, {tipo:'Elezioni regionali', mese:44, tocca:'regione'} ],
+    partiti: [
+      { id:'i50_dc',    nome:'DC',         orientamento:'centro',         base:{ cattolici:0.4, cetomedio:0.3, imprenditori:0.2, pensionati:0.1 }, forza:36.9, asse:0,  gruppoUE:'popolari'     },
+      { id:'i50_pci',   nome:'PCI',        orientamento:'sinistra',       base:{ lavoratori:0.6, giovani:0.4 },                                    forza:28.7, asse:-2, gruppoUE:'sinistra'     },
+      { id:'i50_psi',   nome:'PSI',        orientamento:'sinistra',       base:{ lavoratori:0.6, giovani:0.4 },                                    forza:15.4, asse:-2, gruppoUE:'socialisti'   },
+      { id:'i50_msi',   nome:'MSI',        orientamento:'destra',         base:{ pensionati:0.5, cetomedio:0.5 },                                  forza:6.4,  asse:2,  gruppoUE:'noniscritti'  },
+      { id:'i50_pri',   nome:'PRI',        orientamento:'centro',         base:{ cetomedio:0.6, giovani:0.4 },                                     forza:4,    asse:0,  gruppoUE:'liberali'     },
+      { id:'i50_psdi',  nome:'PSDI',       orientamento:'centrosinistra', base:{ lavoratori:0.5, cetomedio:0.5 },                                  forza:3.2,  asse:-1, gruppoUE:'socialisti'   },
+      { id:'i80_verdi', nome:'Verdi',      orientamento:'sinistra',       base:{ giovani:0.6, cetomedio:0.4 },                                     forza:2.7,  asse:-1, gruppoUE:'verdi'        },
+      { id:'i50_pli',   nome:'PLI',        orientamento:'centrodestra',   base:{ imprenditori:0.6, cetomedio:0.4 },                                forza:2.3,  asse:1,  gruppoUE:'liberali'     },
+      { id:'i50_pnm',   nome:'Monarchici', orientamento:'destra',         base:{ pensionati:0.5, imprenditori:0.5 },                               forza:0.4,  asse:2,  gruppoUE:'conservatori' },
+    ],
+    /* Seed dalla scheda §2: PIL nominale ~1.358.000 mld lire al 1990 — e la scheda-'80 chiudeva esattamente
+       lì, quindi le due porte si agganciano. Debito 95,2% (serie Folliero su dati BdI/ISTAT): il decennio
+       parte già sopra il 95 e andrà al picco di 121,8 nel '94. ⚠ Il DISAVANZO d'avvio la scheda non lo dà:
+       −6 è il seed di gioco, la stessa scelta di L39-1 per l'80 (il motore sconta il debito più duramente
+       della realtà, e a numeri storici pieni il decennio diventerebbe una strada chiusa). Cifra tarabile. */
+    /* L44-1 — deficit CORRETTO da −6 a −3, e il −6 era una MIA inferenza di L41-3, dichiarata tarabile.
+       La misura del decennio 2000 l ha smentita: partendo da un debito gia a 95 (il piu alto delle sei porte),
+       col −6 il debito sfonda a 189 nel 2001 e **sette cammini su otto vanno in insolvenza prima del 2006** —
+       la seconda frana del 2008 la vedeva 1 cammino su 8. Con −3: insolvenze 2/8, frana vista 6/8. */
+    economia: { pil:1358000, debito:95, deficit:-3 },
+    debtAncora: 95,
+    logorioEra: 0.012,
+    valuta: { sym:'L.', mld:'mld lire', mln:'mln lire' },
+    /* SOURCEATA, stessa serie di L36-1: «la spesa pubblica passò dal 29% del PIL del 1960 al 53,5% del 1990». */
+    quotaSpesa: 0.535,
+    intro: "Italia, 1990. Il Muro è caduto da pochi mesi e i partiti che hanno costruito la Repubblica sembrano eterni. Sono alla vigilia della loro stagione più dura.",
+    contesto: [
+      "Italia, 1990. Il Muro di Berlino è caduto da pochi mesi, e con lui l'ordine che ha retto il mondo per quarant'anni. Nelle tasche dei primi italiani squillano telefoni portatili; nei conti dello Stato, il debito si avvicina al valore di un anno intero di prodotto.",
+      "I partiti che hanno costruito la Repubblica sembrano eterni. Sono alla vigilia della loro stagione più dura: i conti, i giudici e un paese stanco presenteranno il conto tutti insieme.",
+      "Governare qui significa reggere l'urto. All'opposizione — o in un partito che sta cambiando nome — significa capire prima degli altri che il vecchio mondo è finito.",
+    ],
+  },
+  /* ============================================================================================================
      L34-3 · ITALIA 1980 — la terza porta. Stessa LINEA, stesso roster di 8 (gli id sono quelli su cui girano
      tappe, blocco e snodi), anno d'avvio 1980.
      LE FORZE: baseline = **urne del 3-4 giugno 1979** (DC 38,3 · PCI 30,4 · PSI 9,8 · MSI 5,3 · PSDI 3,8 ·
@@ -904,6 +1007,33 @@ const PILASTRI_LINEA = [
     text:'Il 26 gennaio, con un videomessaggio, Silvio Berlusconi annuncia il suo ingresso in politica. In due mesi Forza Italia diventa il primo partito italiano. La televisione entra nella politica come macchina elettorale.',
     logx:'Un videomessaggio annuncia un partito nuovo. In due mesi è il primo del paese.',
     ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+
+  /* ========================================================================================================
+     L44-2 · I QUATTRO PILASTRI DEL 2000. Testi approvati da Giacomo l'1/8 e congelati, byte-identici alla
+     scheda §TESTI PRONTI. Pattern-cronaca invariato. L'11 settembre ha il kicker «Il mondo» e non «Il paese»:
+     è il primo pilastro della linea che non accade in Italia, ed è giusto che si annunci come tale.
+     Il governo dei tecnici (nov 2011) è insieme un pilastro e la fine della storia: dopo di lui c'è il presente.
+     ======================================================================================================== */
+  { id:'p00_genova', anno:2001, mese:7, era:'italia2000', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Genova',
+    text:'A luglio il G8 di Genova porta in strada centinaia di migliaia di manifestanti e giorni di scontri durissimi: un ragazzo perde la vita, e le violenze di quei giorni — nelle piazze e nelle caserme — segneranno processi e memoria per vent\'anni. Il rapporto fra i movimenti e lo Stato non sarà più lo stesso.',
+    logx:'Il G8 di Genova: giorni di scontri, e un rapporto col paese che non torna indietro.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'p00_settembre', anno:2001, mese:9, era:'italia2000', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il mondo',
+    t:'L\'11 settembre',
+    text:'L\'11 settembre, due aerei di linea abbattono le Torri Gemelle di New York; altri colpiscono il Pentagono e la Pennsylvania. Migliaia di morti, in diretta televisiva mondiale. Il mondo entra in un\'epoca nuova, e nessuna agenda politica resterà quella di prima.',
+    logx:'Le Torri Gemelle cadono in diretta. Nessuna agenda resta quella di prima.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'p00_nassiriya', anno:2003, mese:11, era:'italia2000', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Nassiriya',
+    text:'Il 12 novembre un camion bomba esplode contro la base italiana di Nassiriya, in Iraq: diciannove morti fra carabinieri, militari e civili. È il giorno più duro per l\'Italia in missione dal dopoguerra. Il paese si ferma per i funerali di Stato.',
+    logx:'Nassiriya: il giorno più duro per l\'Italia in missione dal dopoguerra.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'p00_tecnici', anno:2011, mese:11, era:'italia2000', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Il governo dei tecnici',
+    text:'A novembre, con lo spread oltre i cinquecento punti e i mercati in fuga dai titoli italiani, il governo si dimette: al suo posto un esecutivo tecnico, chiamato a rimettere i conti in sicurezza. Un\'epoca si chiude qui.',
+    logx:'Lo spread oltre i cinquecento: il governo cade, arrivano i tecnici.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
 ];
 
 /* ============================================================================================================
@@ -929,6 +1059,10 @@ const SNODO_CONSENSO_80 = 54;   // finestra '81-'87 (disinflazione): consenso 48
    su 16 cammini, mediana 52,4 → **52**, che spacca 57/43. La serie delle congiunture: '60=57 · '70=52 ·
    '80=54 · '90=52. Il decennio della frana somiglia agli anni di piombo più che alla Milano da bere. */
 const SNODO_CONSENSO_90 = 52;
+/* L44-2 — soglia del 2000, misurata come le altre: 1.413 mesi campionati sulla finestra 2001-2011,
+   mediana 53,4 → **53**, che spacca 55/45. La serie completa della linea: '60=57 · '70=52 · '80=54 ·
+   '90=52 · 2000=53. */
+const SNODO_CONSENSO_00 = 53;
 const AUSTERITY_EV = {
   id:'austerity73', kick:'Emergenza', tono:'grave',
   t:'Il paese senza benzina',
@@ -1171,6 +1305,23 @@ const BEAT_LEGGERI = [
   {id:'lg80_motorino', era:'italia1980', registro:'leggero', cond:()=>S.year>=1981, kick:'Il paese', t:'Il motorino', text:'La comitiva si muove in motorino: caschi facoltativi di fatto, genitori in ansia, libertà a due tempi.', ch:[
     {l:'Ti ricordi com\'era avere quell\'età', e:'La stessa ansia, dall\'altra parte', f:function(){}},
     {l:'Pensi che qualcuno dovrebbe metterci mano', e:'Un pensiero che torna', f:function(){}} ]},
+  /* L41-2 · i 5 beat del '90 (scheda §CONTENUTO PRONTO). Effetto zero, come tutti i beat-leggeri. */
+  {id:'lg90_notti', era:'italia1990', registro:'leggero', cond:()=>S.year===1990, kick:'Il paese', t:'Le notti magiche', text:'I mondiali in casa: bandiere ai balconi, televisori in strada, un\'estate intera col fiato sospeso. Finisce in lacrime, come le cose serie.', ch:[
+    {l:'Guardi la partita con tutti gli altri', e:'Per una sera nessuno parla di politica', f:function(){}},
+    {l:'Resti in ufficio a lavorare', e:'Qualcuno se ne accorgerà', f:function(){}} ]},
+  {id:'lg90_karaoke', era:'italia1990', registro:'leggero', cond:()=>S.year>=1993&&S.year<=1996, kick:'Il paese', t:'Il karaoke', text:'Un microfono, una base, una piazza: il paese scopre di voler cantare in pubblico. I puristi inorridiscono; le piazze si riempiono.', ch:[
+    {l:'Ti fermi ad ascoltare', e:'Anche questo è il paese', f:function(){}},
+    {l:'Tiri dritto', e:'Hai altro da fare', f:function(){}} ]},
+  {id:'lg90_grunge', era:'italia1990', registro:'leggero', cond:()=>S.year>=1992, kick:'Il paese', t:'Il grunge in cameretta', text:'Camicie di flanella, chitarre distorte, malinconia d\'importazione: i figli si vestono da boscaioli e i padri non capiscono, come da copione.', ch:[
+    {l:'Chiedi che musica è', e:'Ti spiegano, con pazienza', f:function(){}},
+    {l:'Alzi il volume della radio in macchina', e:'Ognuno la sua', f:function(){}} ]},
+  {id:'lg90_consolle', era:'italia1990', registro:'leggero', cond:()=>S.year>=1995, kick:'Il paese', t:'La consolle in salotto', text:'I videogiochi escono dalle sale e conquistano il salotto: i figli sfidano, i padri perdono, le madri spengono.', ch:[
+    {l:'Accetti la sfida', e:'Perdi, ma con dignità', f:function(){}},
+    {l:'Dichiari che è ora di cena', e:'Il potere esecutivo, in casa', f:function(){}} ]},
+  {id:'lg90_fantacalcio', era:'italia1990', registro:'leggero', cond:()=>S.year>=1994, kick:'Il paese', t:'Il fantacalcio', text:'Aste notturne fra amici, formazioni schierate sul giornale del lunedì: metà del paese allena una squadra che non esiste.', ch:[
+    {l:'Ti fai spiegare le regole', e:'Sono più complicate di una legge finanziaria', f:function(){}},
+    {l:'Preferisci la squadra vera', e:'Anche quella perde', f:function(){}} ]},
+
   // ---- Presente / universale ----
   {id:'lg_derby', era:'universale', registro:'leggero', kick:'Il paese', t:'Il derby divide la città', text:'Per una domenica la città si spacca in due colori, e nei bar non si parla d\'altro.', ch:[
     {l:'Dici la tua sul risultato', e:'Rischi di scontentare metà città', f:function(){}},
@@ -3866,6 +4017,83 @@ const EVENTS=[
  {id:'i80_contingenza_dopo', era:'italia1980', cond:()=>S.year>=1985, kick:'Lavoro', t:'La scala mobile del dopo-referendum', text:'Dopo il voto, la contingenza non è più intoccabile: ogni rinnovo contrattuale è una trattativa vera. Le relazioni industriali cambiano pelle.',ch:[
    {l:'Accompagni la trattativa, contratto per contratto',e:'Relazioni industriali adulte · ci vuole tempo e pazienza',f:()=>{gd('lavoratori',2); gd('imprenditori',2); gd('cetomedio',1);}},
    {l:'Lasci fare alle parti: lo Stato si fa da parte',e:'Nessuna interferenza · i più deboli trattano da soli',f:()=>{gd('imprenditori',3); gd('lavoratori',-3); if(S.gMod!=null)S.gMod+=0.1;}}]},
+ /* ============================================================================================================
+    L41-2 · IL CONTENUTO DEGLI ANNI '90 (scheda §CONTENUTO PRONTO). Testi della scheda; le leve le ho scelte io
+    aprendo il codice. Sugli SBARCHI il paletto è al massimo: riferire-non-giudicare, entrambe le posizioni
+    legittime, nessuna risposta «semplice» né nel testo né nelle scelte — è il paese che si divide, non il gioco.
+    ============================================================================================================ */
+ {id:'i90_golfo', era:'italia1990', cond:()=>S.year>=1991&&S.year<=1992, tono:'grave', kick:'Guerra', t:'La guerra nel Golfo', text:'L\'Italia partecipa alla coalizione: i Tornado in volo, il paese diviso fra dovere atlantico e ripudio della guerra. L\'articolo 11 è sulla bocca di tutti, in due sensi opposti.',ch:[
+   {l:'Confermi l\'impegno con gli alleati',e:'L\'alleanza tiene · le piazze si riempiono contro di te',f:()=>{repd(4); gd('cetomedio',1); gd('giovani',-3); gd('cattolici',-2);}},
+   {l:'Limiti il contributo al minimo',e:'Il paese respira · gli alleati prendono nota',f:()=>{repd(-4); gd('giovani',3); gd('cattolici',2); gd('imprenditori',-1);}}]},
+ {id:'i90_telefonino', era:'italia1990', cond:()=>S.year>=1993, kick:'Tecnologia', t:'Il telefonino', text:'Il telefono cellulare esce dalle auto blu ed entra nelle tasche: prima i professionisti, poi tutti. Cambia il modo di lavorare, e presto quello di vivere.',ch:[
+   {l:'Apri il mercato a un secondo gestore',e:'Prezzi giù e copertura su · l\'operatore pubblico perde la rendita',f:()=>{gd('imprenditori',3); gd('giovani',2); gd('lavoratori',-1); if(S.gMod!=null)S.gMod+=0.1;}},
+   {l:'Proteggi l\'operatore nazionale',e:'Un campione industriale in casa · il paese aspetta e paga di più',f:()=>{gd('lavoratori',2); gd('cetomedio',-2); gd('giovani',-2);}}]},
+ {id:'i90_internet', era:'italia1990', cond:()=>S.year>=1996, kick:'Tecnologia', t:'La rete delle reti', text:'Internet arriva nelle case: modem che friggono, ore contate a scatti, i primi siti. C\'è chi parla di rivoluzione e chi di moda passeggera.',ch:[
+   {l:'Porti la rete nelle scuole',e:'Una generazione parte avanti · costa, e i risultati si vedranno fra dieci anni',f:()=>{gd('giovani',4); gd('cetomedio',1); S.ind.debt+=0.3;}},
+   {l:'Lasci fare al mercato',e:'Nessuna spesa · chi può si collega, chi non può resta indietro',f:()=>{gd('imprenditori',2); gd('giovani',-1); gd('lavoratori',-1);}}]},
+ {id:'i90_dismissioni', era:'italia1990', cond:()=>S.year>=1993, tono:'grave', kick:'Privatizzazioni', t:'Le dismissioni', text:'Lo Stato vende: banche, telefoni, acciaio, autostrade. Per i conti è ossigeno; per il lavoro, un\'incognita. La parola privatizzazione divide.',ch:[
+   {l:'Vendi e usa il ricavato sul debito',e:'Il debito respira · lo Stato perde le sue leve industriali',f:()=>{S.ind.debt-=2; gd('imprenditori',3); gd('lavoratori',-4); repd(3);}},
+   {l:'Rallenti e tieni le partecipazioni',e:'Le leve restano pubbliche · i conti non migliorano e l\'Europa guarda',f:()=>{gd('lavoratori',3); gd('cetomedio',-1); repd(-3); S.ind.debt+=0.5;}}]},
+ {id:'i90_sindaci', era:'italia1990', cond:()=>S.year>=1993, kick:'Riforme', t:'La stagione dei sindaci', text:'L\'elezione diretta cambia le città: i sindaci diventano i politici più popolari d\'Italia, e i partiti scoprono di contare meno dei volti.',ch:[
+   {l:'Dai più poteri ai sindaci',e:'Le città funzionano meglio · il partito conta meno, e se ne accorge',f:()=>{gd('cetomedio',3); gd('giovani',2); capd(-6); stampad(2);}},
+   {l:'Tieni il centro del gioco nei partiti',e:'La macchina resta tua · il paese guarda altrove',f:()=>{capd(6); gd('cetomedio',-2); gd('giovani',-2); stampad(-2);}}]},
+ {id:'i90_referendum', era:'italia1990', cond:()=>S.year>=1993, kick:'Riforme', t:'I referendum a raffica', text:'Dopo il Mattarellum, i quesiti si moltiplicano: ogni primavera una batteria. La democrazia diretta entusiasma e logora insieme.',ch:[
+   {l:'Cavalchi l\'onda referendaria',e:'Sei dalla parte di chi vuole cambiare · governare diventa più difficile',f:()=>{stampad(4); gd('giovani',2); capd(-5);}},
+   {l:'Difendi il primato del Parlamento',e:'Le istituzioni tengono · ti danno per vecchio',f:()=>{capd(4); stampad(-3); gd('giovani',-2); repd(1);}}]},
+ {id:'i90_eurotassa', era:'italia1990', cond:()=>S.year>=1997&&S.year<=1998, tono:'grave', kick:'Europa', t:'L\'eurotassa', text:'Un contributo straordinario «per l\'Europa»: entrare nell\'euro al primo giro vale un sacrificio? Il paese paga, brontolando — e ci tiene.',ch:[
+   {l:'La chiedi e prometti di restituirla',e:'I conti tornano e la parola è data · dovrai mantenerla',f:()=>{S.ind.debt-=1.5; allG(-2); repd(4); stampad(2);}},
+   {l:'Trovi i soldi altrove, con altri tagli',e:'Nessuna tassa nuova · qualcuno paga lo stesso, in silenzio',f:()=>{S.ind.debt-=1; gd('lavoratori',-3); gd('pensionati',-3); stampad(-1);}}]},
+ {id:'i90_sbarchi', era:'italia1990', cond:()=>S.year>=1991, tono:'grave', kick:'Immigrazione', t:'Gli sbarchi', text:'Navi cariche di persone attraversano l\'Adriatico: l\'Italia scopre di essere terra d\'arrivo. L\'accoglienza e il rimpatrio dividono il paese, e nessuna risposta è semplice.',ch:[
+   {l:'Accogli e organizzi la prima assistenza',e:'Il paese risponde all\'emergenza · l\'opinione pubblica si divide e i costi sono immediati',f:()=>{gd('cattolici',3); gd('giovani',2); gd('pensionati',-3); gd('cetomedio',-2); S.ind.debt+=0.4; repd(2);}},
+   {l:'Rimpatri e chiedi accordi ai paesi d\'origine',e:'Le regole valgono · chi è già arrivato resta in un limbo, e si vede',f:()=>{gd('pensionati',3); gd('cetomedio',2); gd('cattolici',-3); gd('giovani',-2); repd(-2);}}]},
+ {id:'i90_lavoro', era:'italia1990', cond:()=>S.year>=1997, kick:'Lavoro', t:'Il lavoro che cambia', text:'Contratti a termine, interinali, collaborazioni: la flessibilità promette occupazione e minaccia certezze. I giovani la vivono per primi, nel bene e nel male.',ch:[
+   {l:'Apri alla flessibilità con tutele nuove',e:'Più occupazione · le certezze di prima non tornano',f:()=>{gd('giovani',3); gd('imprenditori',3); gd('lavoratori',-3); if(S.gMod!=null)S.gMod+=0.15;}},
+   {l:'Tieni fermo il contratto standard',e:'Chi ha il posto lo tiene · chi lo cerca lo cerca più a lungo',f:()=>{gd('lavoratori',4); gd('giovani',-3); gd('imprenditori',-3); if(S.gMod!=null)S.gMod-=0.1;}}]},
+ {id:'i90_bipolarismo', era:'italia1990', cond:()=>S.year>=1994, kick:'Politica', t:'Il bipolarismo impara a camminare', text:'Due poli, un ballottaggio permanente: il maggioritario doveva semplificare, e intanto le coalizioni si scoprono litigiose quanto i vecchi pentapartiti.',ch:[
+   {l:'Tieni insieme la coalizione a ogni costo',e:'Il governo dura · ogni alleato presenta il conto',f:()=>{capd(-8); gd('cetomedio',1); stampad(-1);}},
+   {l:'Metti la tua linea davanti agli alleati',e:'Sai dove vai · la maggioranza scricchiola',f:()=>{capd(5); stampad(3); gd('cetomedio',-1);}}]},
+ /* ============================================================================================================
+    L44-2 · IL CONTENUTO DEGLI ANNI 2000 (scheda §TESTI PRONTI). Testi della scheda; le leve le ho scelte io
+    aprendo il codice. Il decennio del «declino»: quasi ogni scelta economica costa a qualcuno, e si vede.
+    ============================================================================================================ */
+ {id:'i00_euro', era:'italia2000', cond:()=>S.year>=2002&&S.year<=2003, kick:'Europa', t:'L\'euro nel portafoglio', text:'Il 1° gennaio le lire lasciano il posto all\'euro: file ai bancomat per curiosità, calcoli a mente per mesi, 1.936,27 come numero di casa. Un pezzo d\'identità va in pensione con la banconota da centomila.',ch:[
+   {l:'Campagna di informazione capillare',e:'La gente capisce i prezzi · costa, e qualcuno la trova paternalista',f:()=>{gd('pensionati',3); gd('cetomedio',2); S.ind.debt+=0.2; stampad(2);}},
+   {l:'Lasci che il mercato si assesti',e:'Nessuna spesa · la percezione dei rincari monta senza risposta',f:()=>{gd('imprenditori',2); allG(-1); stampad(-2);}}]},
+ {id:'i00_doppioprezzo', era:'italia2000', cond:()=>S.year>=2002&&S.year<=2004, tono:'grave', kick:'Prezzi', t:'Il doppio prezzo', text:'I cartellini parlano due lingue e la percezione una terza: «è raddoppiato tutto», dice il paese; «l\'inflazione è al 2,5», dice l\'istituto. Hanno ragione entrambi, su cose diverse.',ch:[
+   {l:'Metti i prezzi sotto osservazione',e:'Il paese si sente difeso · i commercianti protestano e i risultati sono lenti',f:()=>{gd('lavoratori',3); gd('pensionati',2); gd('imprenditori',-3); stampad(1);}},
+   {l:'Difendi il dato ufficiale',e:'I numeri sono i numeri · la gente non ci crede e te ne ricorderà',f:()=>{repd(2); allG(-2); stampad(-2);}}]},
+ {id:'i00_missioni', era:'italia2000', cond:()=>S.year>=2002, tono:'grave', kick:'Difesa', t:'Le missioni', text:'Contingenti italiani nei teatri di guerra: chi parla di dovere atlantico, chi di Costituzione tradita. Ogni proroga è un voto sofferto.',ch:[
+   {l:'Confermi e allarghi l\'impegno',e:'Peso internazionale · il paese non ti segue e la maggioranza scricchiola',f:()=>{repd(5); gd('cetomedio',1); gd('giovani',-3); gd('cattolici',-2); capd(-5);}},
+   {l:'Riduci e rimetti tutto al Parlamento',e:'La maggioranza respira · gli alleati prendono nota, di nuovo',f:()=>{repd(-4); gd('giovani',3); gd('cattolici',2); capd(3);}}]},
+ {id:'i00_milleeuro', era:'italia2000', cond:()=>S.year>=2003, tono:'grave', kick:'Lavoro', t:'La generazione mille euro', text:'Contratti a progetto, stage infiniti, il posto fisso come miraggio: i trentenni più istruiti di sempre scoprono di essere anche i più precari.',ch:[
+   {l:'Un piano per stabilizzare',e:'Una generazione respira · le imprese dicono che assumeranno meno',f:()=>{gd('giovani',4); gd('lavoratori',2); gd('imprenditori',-4); S.ind.debt+=0.5;}},
+   {l:'Punti su formazione e incentivi',e:'Meno costo immediato · chi aspetta continua ad aspettare',f:()=>{gd('imprenditori',2); gd('giovani',-1); gd('cetomedio',1);}}]},
+ {id:'i00_scalone', era:'italia2000', cond:()=>S.year>=2004&&S.year<=2008, tono:'grave', kick:'Pensioni', t:'Lo scalone', text:'L\'età della pensione sale a gradini che nessuno vuole salire: ogni governo la ritocca, ogni piazza protesta, il conto demografico resta.',ch:[
+   {l:'Alzi l\'età e tieni la linea',e:'I conti di domani si salvano · le piazze si riempiono oggi',f:()=>{S.ind.debt-=1.5; repd(4); gd('pensionati',-5); gd('lavoratori',-3); capd(-6);}},
+   {l:'Ammorbidisci con uno scalino graduale',e:'Il paese regge · il conto demografico slitta a chi verrà',f:()=>{gd('pensionati',3); gd('lavoratori',2); S.ind.debt+=0.8; repd(-2);}}]},
+ {id:'i00_digitale', era:'italia2000', cond:()=>S.year>=2004, kick:'Televisione', t:'Il digitale terrestre', text:'Decoder, contributi statali, canali che si moltiplicano: la TV cambia di nuovo pelle, e con lei il pubblico.',ch:[
+   {l:'Incentivi ai decoder',e:'La transizione corre · si dirà che hai aiutato chi trasmette, non chi guarda',f:()=>{gd('imprenditori',3); gd('pensionati',1); S.ind.debt+=0.3; stampad(-2);}},
+   {l:'Lasci fare agli operatori',e:'Nessuna spesa pubblica · chi ha il vecchio televisore resta indietro',f:()=>{gd('cetomedio',1); gd('pensionati',-2);}}]},
+ {id:'i00_venticinque', era:'italia2000', cond:()=>S.year>=2004, kick:'Europa', t:'L\'Europa a venticinque', text:'L\'Unione si allarga a est: nuove braccia, nuovi mercati, nuove paure. L\'idraulico polacco diventa un personaggio del dibattito.',ch:[
+   {l:'Apri subito il mercato del lavoro',e:'Imprese contente e mercati nuovi · i salari bassi restano bassi',f:()=>{gd('imprenditori',4); gd('lavoratori',-3); repd(3); if(S.gMod!=null)S.gMod+=0.1;}},
+   {l:'Usi il periodo transitorio',e:'Il lavoro è protetto · in Europa ti guardano storto',f:()=>{gd('lavoratori',3); gd('imprenditori',-2); repd(-3);}}]},
+ {id:'i00_smartphone', era:'italia2000', cond:()=>S.year>=2008, kick:'Tecnologia', t:'Lo smartphone', text:'Il telefono diventa tutto: posta, mappe, musica. I pollici corrono, le conversazioni a tavola muoiono.',ch:[
+   {l:'Digitalizzi i servizi pubblici',e:'Meno code agli sportelli · chi non ha il telefono resta fuori',f:()=>{gd('giovani',3); gd('cetomedio',2); gd('pensionati',-2); S.ind.debt+=0.3;}},
+   {l:'Tieni gli sportelli come sono',e:'Nessuno resta indietro · e nessuno va avanti',f:()=>{gd('pensionati',2); gd('giovani',-2); gd('cetomedio',-1);}}]},
+ {id:'i00_crisi', era:'italia2000', cond:()=>S.year>=2008&&S.year<=2011, tono:'grave', kick:'Crisi', t:'La crisi arriva', text:'Da oltreoceano il crollo si propaga: ordini fermi, cassa integrazione, la parola subprime imparata in fretta. Il decennio del declino chiude col tonfo.',ch:[
+   {l:'Ammortizzatori e sostegno alla domanda',e:'Il colpo si attutisce · il debito prende la rincorsa',f:()=>{gd('lavoratori',4); gd('giovani',2); S.ind.debt+=2.5; if(S.gMod!=null)S.gMod+=0.15; repd(-3);}},
+   {l:'Tieni i conti e aspetti la ripresa',e:'I mercati ti credono · la fabbrica che chiude non riapre',f:()=>{S.ind.debt-=0.5; repd(4); gd('lavoratori',-5); gd('giovani',-3); if(S.gMod!=null)S.gMod-=0.1;}}]},
+ {id:'i00_web', era:'italia2000', cond:()=>S.year>=2008, kick:'Comunicazione', t:'Il popolo del web', text:'Blog, forum, i primi social: la politica scopre che la rete organizza, amplifica, e qualche volta travolge.',ch:[
+   {l:'Ci porti il partito dentro',e:'Parli a chi non ti ascoltava · ti risponde anche chi non volevi sentire',f:()=>{gd('giovani',3); stampad(-2); capd(-3);}},
+   {l:'Resti sui canali di sempre',e:'Il messaggio è controllato · la conversazione avviene senza di te',f:()=>{stampad(2); gd('giovani',-3); capd(2);}}]},
+ {id:'i00_federalismo', era:'italia2000', cond:()=>S.year>=2001, kick:'Riforme', t:'Il federalismo incompiuto', text:'Titolo V riformato, competenze contese, ricorsi a raffica: Stato e Regioni litigano su tutto, la sanità in testa.',ch:[
+   {l:'Porti a termine il disegno federale',e:'Le Regioni rispondono di quel che spendono · lo Stato perde presa',f:()=>{gd('cetomedio',2); gd('imprenditori',1); repd(-1); capd(-4);}},
+   {l:'Riporti le competenze al centro',e:'Una regia sola · le Regioni ricorrono, e qualche volta vincono',f:()=>{capd(4); gd('cetomedio',-2); gd('lavoratori',1);}}]},
+ {id:'i00_spread', era:'italia2000', cond:()=>S.year>=2011, tono:'grave', kick:'Mercati', t:'Lo spread in prima pagina', text:'Una parola tecnica diventa il bollettino del paese: si apre il giornale sul differenziale come sul meteo. E il meteo è brutto.',ch:[
+   {l:'Manovra d\'emergenza, subito',e:'I mercati si calmano · il paese paga in contanti e in consenso',f:()=>{S.ind.debt-=2; repd(5); allG(-4); capd(-8);}},
+   {l:'Prendi tempo e tratti in Europa',e:'Nessuna stangata oggi · ogni giorno costa in interessi',f:()=>{S.ind.debt+=1.5; repd(-4); gd('lavoratori',2); gd('pensionati',2);}}]},
+
+
  {id:'i70_riflusso', era:'italia1970', cond:()=>S.year>=1977, kick:'Il paese', t:'Il riflusso', text:'Dopo anni di piazze, una parte del paese torna al privato: la casa, il weekend, il corpo. I militanti lo chiamano riflusso, con disprezzo; i sociologi, normalità.',ch:[
    {l:'Il paese ha diritto alla sua tregua',e:'Normalità riconosciuta · chi ha lottato si sente liquidato',f:()=>{gd('cetomedio',3); gd('pensionati',2); tutteCorrenti(-3);}},
    {l:'Chiami alla partecipazione',e:'Tieni desta la militanza · una parte del paese non ti ascolta più',f:()=>{tutteCorrenti(4); gd('giovani',2); gd('cetomedio',-2);}}]},
@@ -3892,6 +4120,23 @@ const ENTI_INT=[
   nomeNA:'il blocco occidentale', breveNA:'Occidente', descNA:'uno dei due poli che ti corteggiano',
   ancora:()=> nonAllineato() ? 50 + [-12,2,14][lv('linea_estera')]
     : 50 + [-10,0,12][lv('linea_estera')] + [-4,0,8][lv('difesa')] + [0,0,4][lv('industria_difesa')] },
+  /* L44-2 · i 5 beat del 2000 (scheda §TESTI PRONTI). Effetto zero, come tutti i beat-leggeri. */
+  {id:'lg00_berlino', era:'italia2000', registro:'leggero', cond:()=>S.year===2006, kick:'Il paese', t:'La notte di Berlino', text:'Un\'estate cominciata nei tribunali sportivi finisce a Berlino con la coppa: il paese che due mesi prima si vergognava del suo calcio ora abbraccia sconosciuti per strada.', ch:[
+    {l:'Scendi in strada anche tu', e:'Certe notti non si guardano dalla finestra', f:function(){}},
+    {l:'Guardi i caroselli dalla finestra', e:'Il paese festeggia senza bisogno di te', f:function(){}} ]},
+  {id:'lg00_reality', era:'italia2000', registro:'leggero', cond:()=>S.year>=2001, kick:'Il paese', t:'I reality', text:'Persone comuni chiuse in una casa, il paese che guarda: la TV scopre che la realtà, opportunamente montata, batte la fiction.', ch:[
+    {l:'Provi a guardarne una puntata', e:'Capisci più di quanto vorresti ammettere', f:function(){}},
+    {l:'Cambi canale', e:'Il paese però lo guarda', f:function(){}} ]},
+  {id:'lg00_lowcost', era:'italia2000', registro:'leggero', cond:()=>S.year>=2003, kick:'Il paese', t:'Il volo low-cost', text:'Weekend a venti euro: una generazione scopre l\'Europa a colpi di bagaglio a mano.', ch:[
+    {l:'Ti fai raccontare dove sono stati', e:'Vanno più lontano di quanto andavi tu', f:function(){}},
+    {l:'Pensi ai treni che non funzionano', e:'Anche quello è un problema tuo', f:function(){}} ]},
+  {id:'lg00_navigatore', era:'italia2000', registro:'leggero', cond:()=>S.year>=2005, kick:'Il paese', t:'Il navigatore', text:'La voce che dice «svolta a destra» entra in macchina: le litigate sulle cartine finiscono, ne cominciano altre.', ch:[
+    {l:'Ti affidi alla voce', e:'Ti porta in una strada chiusa', f:function(){}},
+    {l:'Tieni la cartina nel cruscotto', e:'Per ogni evenienza', f:function(){}} ]},
+  {id:'lg00_squillo', era:'italia2000', registro:'leggero', cond:()=>S.year>=2002&&S.year<=2006, kick:'Il paese', t:'Lo squillo', text:'Suonerie polifoniche, SMS a pagamento, lo squillo che vuol dire «pensami»: il telefonino inventa i suoi riti.', ch:[
+    {l:'Impari il codice degli squilli', e:'Un linguaggio nuovo, gratis', f:function(){}},
+    {l:'Richiami e basta', e:'Alla vecchia maniera', f:function(){}} ]},
+
  {id:'consesso', nome:'le Nazioni Unite', breve:'ONU', desc:'l\'ONU e i grandi fori multilaterali',
   descNA:'i fori multilaterali: il tuo palco da non allineato',
   ancora:()=> nonAllineato() ? 50 + [2,8,2][lv('linea_estera')] + [-4,0,8][lv('cooperazione')]
@@ -5593,22 +5838,105 @@ const TITOLI=[
  {id:'ti80_maxiprocesso', era:'italia1980', cond:()=>S.year>=1986&&S.year<=1987, amico:'Il processo alla piovra: l\'aula bunker si apre', ostile:'Il processo alla piovra: un\'aula blindata e una città che guarda'},
  {id:'ti80_sentenza', era:'italia1980', cond:()=>S.year>=1987&&S.year<=1988, amico:'Trecentosessanta condanne: la sentenza di Palermo', ostile:'La sentenza di Palermo: adesso comincia il difficile'},
  /* --- le 16 gemelle di stato (stesso `cond` e `pri` delle ti50/60/70, cambia solo il registro) --- */
- {id:'ti80_st_inchiesta', era:'italia1980', codaFino:Infinity, pri:1, cond:()=>!!S.inchiesta, amico:'Inchiesta al vertice: il Governo attende le carte', ostile:'Il vertice sotto inchiesta: e stavolta c\'è la diretta'},
- {id:'ti80_st_scandalo', era:'italia1980', codaFino:Infinity, pri:1, cond:()=>S.agenda&&S.agenda.some(a=>a.kind==='scandalo'), amico:'Il caso al ministero: si attendono gli atti', ostile:'Scandalo al ministero: i nomi circolano prima delle carte'},
- {id:'ti80_st_manovra_a', era:'italia1980', codaFino:Infinity, pri:1, cond:()=>S.month===1&&S.year<=1984, amico:'Il bilancio dell\'anno: si governa la discesa dei prezzi', ostile:'Il bilancio dell\'anno: i prezzi scendono, il debito no'},
- {id:'ti80_st_manovra_b', era:'italia1980', codaFino:Infinity, pri:1, cond:()=>S.month===1&&S.year>=1985, amico:'Il bilancio dell\'anno: il Governo punta al mercato unico', ostile:'Il bilancio dell\'anno: gli interessi si mangiano la manovra'},
- {id:'ti80_st_riformatore', era:'italia1980', codaFino:Infinity, pri:1, cond:()=>haTratto('riformatore')&&S.ultimaLegge!=null&&(S.year*12+S.month)-S.ultimaLegge.mese<=1, amico:'Un\'altra riforma in porto: il disegno procede', ostile:'Riforme annunciate in conferenza stampa, attuate chissà quando'},
- {id:'ti80_st_legge', era:'italia1980', codaFino:Infinity, pri:1, cond:()=>S.ultimaLegge!=null&&(S.year*12+S.month)-S.ultimaLegge.mese<=1, amico:'La riforma è legge: il pentapartito tiene', ostile:'La riforma passa dopo un vertice notturno di troppo'},
- {id:'ti80_st_voto', era:'italia1980', codaFino:Infinity, pri:1, cond:()=>typeof periodoSondaggi==='function'&&periodoSondaggi(), amico:'Verso le urne: la campagna passa dalla televisione', ostile:'Verso le urne: cinque alleati e cinque campagne diverse'},
- {id:'ti80_st_intermedia', era:'italia1980', codaFino:Infinity, pri:1, cond:()=>S.agenda&&S.agenda.some(a=>a.kind==='intermedia'), amico:'Il voto locale: la prova d\'appello per la coalizione', ostile:'Il voto locale: i conti fra alleati si fanno nei comuni'},
- {id:'ti80_st_reput_media', era:'italia1980', codaFino:Infinity, cond:()=>S.ind.reputazione!=null&&S.ind.reputazione>=45&&S.ind.reputazione<=75, amico:'L\'Italia tratta da pari nei vertici occidentali', ostile:'Nei vertici occidentali l\'Italia parla per ultima'},
- {id:'ti80_st_crisi_fid', era:'italia1980', codaFino:Infinity, cond:()=>S.ind.fiducia!=null&&S.ind.fiducia<40, amico:'Conti sotto pressione: il Governo cerca la rotta', ostile:'I mercati guardano il debito italiano e alzano il prezzo'},
- {id:'ti80_st_recessione', era:'italia1980', codaFino:Infinity, cond:()=>S.ind.growth<0, amico:'La frenata è internazionale: il Governo studia i rimedi', ostile:'L\'economia si ferma proprio mentre i conti chiedono di più'},
- {id:'ti80_st_disocc', era:'italia1980', codaFino:Infinity, cond:()=>S.ind.unemp>9, amico:'Occupazione: la cassa integrazione regge l\'urto', ostile:'Disoccupazione a due cifre: il Sud e i giovani per primi'},
- {id:'ti80_st_deficit', era:'italia1980', codaFino:Infinity, cond:()=>S.ind.deficit>4.5, amico:'Il Governo mette ordine nei conti dello Stato', ostile:'Il disavanzo cresce, e gli interessi con lui'},
- {id:'ti80_st_consenso', era:'italia1980', codaFino:Infinity, cond:()=>S.ind.consenso<40, amico:'Governo in affanno: la maggioranza a cinque tiene', ostile:'Il Governo perde colpi, e gli alleati contano i giorni'},
- {id:'ti80_st_bene', era:'italia1980', codaFino:Infinity, cond:()=>S.ind.growth>1&&S.ind.fiducia>70, amico:'Il paese riparte: i numeri danno ragione al Governo', ostile:'I numeri risalgono, ma il conto lo pagheranno i figli'},
- {id:'ti80_st_reputazione', era:'italia1980', codaFino:Infinity, cond:()=>S.ind.reputazione!=null&&S.ind.reputazione<40, amico:'Realismo nelle alleanze: il Paese tratta senza alzare la voce', ostile:'Nei tavoli che contano l\'Italia resta ai margini'},
+ {id:'ti80_st_inchiesta', era:'italia1980', pri:1, cond:()=>!!S.inchiesta, amico:'Inchiesta al vertice: il Governo attende le carte', ostile:'Il vertice sotto inchiesta: e stavolta c\'è la diretta'},
+ {id:'ti80_st_scandalo', era:'italia1980', pri:1, cond:()=>S.agenda&&S.agenda.some(a=>a.kind==='scandalo'), amico:'Il caso al ministero: si attendono gli atti', ostile:'Scandalo al ministero: i nomi circolano prima delle carte'},
+ {id:'ti80_st_manovra_a', era:'italia1980', pri:1, cond:()=>S.month===1&&S.year<=1984, amico:'Il bilancio dell\'anno: si governa la discesa dei prezzi', ostile:'Il bilancio dell\'anno: i prezzi scendono, il debito no'},
+ {id:'ti80_st_manovra_b', era:'italia1980', pri:1, cond:()=>S.month===1&&S.year>=1985, amico:'Il bilancio dell\'anno: il Governo punta al mercato unico', ostile:'Il bilancio dell\'anno: gli interessi si mangiano la manovra'},
+ {id:'ti80_st_riformatore', era:'italia1980', pri:1, cond:()=>haTratto('riformatore')&&S.ultimaLegge!=null&&(S.year*12+S.month)-S.ultimaLegge.mese<=1, amico:'Un\'altra riforma in porto: il disegno procede', ostile:'Riforme annunciate in conferenza stampa, attuate chissà quando'},
+ {id:'ti80_st_legge', era:'italia1980', pri:1, cond:()=>S.ultimaLegge!=null&&(S.year*12+S.month)-S.ultimaLegge.mese<=1, amico:'La riforma è legge: il pentapartito tiene', ostile:'La riforma passa dopo un vertice notturno di troppo'},
+ {id:'ti80_st_voto', era:'italia1980', pri:1, cond:()=>typeof periodoSondaggi==='function'&&periodoSondaggi(), amico:'Verso le urne: la campagna passa dalla televisione', ostile:'Verso le urne: cinque alleati e cinque campagne diverse'},
+ {id:'ti80_st_intermedia', era:'italia1980', pri:1, cond:()=>S.agenda&&S.agenda.some(a=>a.kind==='intermedia'), amico:'Il voto locale: la prova d\'appello per la coalizione', ostile:'Il voto locale: i conti fra alleati si fanno nei comuni'},
+ {id:'ti80_st_reput_media', era:'italia1980', cond:()=>S.ind.reputazione!=null&&S.ind.reputazione>=45&&S.ind.reputazione<=75, amico:'L\'Italia tratta da pari nei vertici occidentali', ostile:'Nei vertici occidentali l\'Italia parla per ultima'},
+ {id:'ti80_st_crisi_fid', era:'italia1980', cond:()=>S.ind.fiducia!=null&&S.ind.fiducia<40, amico:'Conti sotto pressione: il Governo cerca la rotta', ostile:'I mercati guardano il debito italiano e alzano il prezzo'},
+ {id:'ti80_st_recessione', era:'italia1980', cond:()=>S.ind.growth<0, amico:'La frenata è internazionale: il Governo studia i rimedi', ostile:'L\'economia si ferma proprio mentre i conti chiedono di più'},
+ {id:'ti80_st_disocc', era:'italia1980', cond:()=>S.ind.unemp>9, amico:'Occupazione: la cassa integrazione regge l\'urto', ostile:'Disoccupazione a due cifre: il Sud e i giovani per primi'},
+ {id:'ti80_st_deficit', era:'italia1980', cond:()=>S.ind.deficit>4.5, amico:'Il Governo mette ordine nei conti dello Stato', ostile:'Il disavanzo cresce, e gli interessi con lui'},
+ {id:'ti80_st_consenso', era:'italia1980', cond:()=>S.ind.consenso<40, amico:'Governo in affanno: la maggioranza a cinque tiene', ostile:'Il Governo perde colpi, e gli alleati contano i giorni'},
+ {id:'ti80_st_bene', era:'italia1980', cond:()=>S.ind.growth>1&&S.ind.fiducia>70, amico:'Il paese riparte: i numeri danno ragione al Governo', ostile:'I numeri risalgono, ma il conto lo pagheranno i figli'},
+ {id:'ti80_st_reputazione', era:'italia1980', cond:()=>S.ind.reputazione!=null&&S.ind.reputazione<40, amico:'Realismo nelle alleanze: il Paese tratta senza alzare la voce', ostile:'Nei tavoli che contano l\'Italia resta ai margini'},
+ /* ============================================================================================================
+    L41-2 · I TITOLI DEGLI ANNI '90 (scheda §7). Le ancore secche hanno la finestra chiusa: un referendum o una
+    finale di mondiale non sono notizia due anni dopo.
+    ============================================================================================================ */
+ /* ============================================================================================================
+    L44-2 · I TITOLI DEGLI ANNI 2000 (scheda §5). Ancore secche con la finestra chiusa, come per i decenni prima.
+    ============================================================================================================ */
+ {id:'ti00_euro', era:'italia2000', cond:()=>S.year===2002, amico:'L\'euro nel portafoglio: l\'Italia entra nella moneta di tutti', ostile:'L\'euro nel portafoglio, e il conto della spesa non torna più'},
+ {id:'ti00_doppio', era:'italia2000', cond:()=>S.year>=2002&&S.year<=2004, amico:'Doppio prezzo sui cartellini: la transizione è governata', ostile:'«Tutto a duemila lire» diventa «tutto a un euro»: e il conto sale'},
+ {id:'ti00_noglobal', era:'italia2000', cond:()=>S.year>=2001&&S.year<=2003, amico:'Un altro mondo è possibile: il movimento riempie le piazze', ostile:'Le piazze del movimento e i cordoni: due paesi che non si parlano'},
+ {id:'ti00_missioni', era:'italia2000', cond:()=>S.year>=2003, amico:'I nostri all\'estero: l\'Italia fa la sua parte', ostile:'Un\'altra proroga per le missioni, e un\'altra spaccatura in aula'},
+ {id:'ti00_precari', era:'italia2000', cond:()=>S.year>=2003, amico:'Contratti nuovi: il lavoro si apre ai giovani', ostile:'Mille euro al mese e nessun contratto: la generazione che aspetta'},
+ {id:'ti00_scalone', era:'italia2000', cond:()=>S.year>=2004&&S.year<=2008, amico:'Pensioni, il conto torna: la riforma passa', ostile:'La pensione si allontana di un altro gradino'},
+ {id:'ti00_venticinque', era:'italia2000', cond:()=>S.year>=2004&&S.year<=2006, amico:'L\'Europa a venticinque: il continente si ricompone', ostile:'L\'Europa si allarga a est, e in fabbrica si fanno i conti'},
+ {id:'ti00_calcio', era:'italia2000', cond:()=>S.year===2006&&S.month>=7, amico:'Campioni del mondo a Berlino!', ostile:'Campioni del mondo: e due mesi fa ci vergognavamo del calcio'},
+ {id:'ti00_fotofinish', era:'italia2000', cond:()=>S.year===2006&&S.month<=8, amico:'Il paese sceglie per un soffio: si governa lo stesso', ostile:'Ventiquattromila voti: un paese diviso esattamente a metà'},
+ {id:'ti00_pd', era:'italia2000', cond:()=>S.year>=2007&&S.year<=2008, amico:'Nasce il partito nuovo: la sinistra si unisce', ostile:'Il partito nuovo nasce, e qualcuno resta sull\'uscio'},
+ {id:'ti00_pdl', era:'italia2000', cond:()=>S.year>=2008&&S.year<=2009, amico:'Il centrodestra diventa un partito solo', ostile:'Due sigle in una: e le correnti restano due'},
+ {id:'ti00_smartphone', era:'italia2000', cond:()=>S.year>=2008, amico:'Il telefono diventa tutto: l\'Italia si connette in tasca', ostile:'Tutti col telefono in mano, e nessuno che alza la testa'},
+ {id:'ti00_crisi', era:'italia2000', cond:()=>S.year>=2008&&S.year<=2010, amico:'La crisi mondiale: il paese tiene i conti', ostile:'Ordini fermi e cassa integrazione: la crisi arriva anche qui'},
+ {id:'ti00_web', era:'italia2000', cond:()=>S.year>=2008, amico:'La rete entra in politica: la piazza è anche digitale', ostile:'Il popolo del web decide chi salvare e chi affondare'},
+ {id:'ti00_spread', era:'italia2000', cond:()=>S.year>=2011, amico:'Lo spread rientra: la manovra convince i mercati', ostile:'Lo spread in prima pagina come il meteo. E il meteo è brutto'},
+ {id:'ti00_federalismo', era:'italia2000', cond:()=>S.year>=2002, amico:'Più poteri alle Regioni: le competenze si chiariscono', ostile:'Stato e Regioni davanti alla Consulta, un ricorso via l\'altro'},
+ {id:'ti00_digitale', era:'italia2000', cond:()=>S.year>=2004&&S.year<=2009, amico:'Il digitale moltiplica i canali: più scelta per tutti', ostile:'Decoder e contributi: la TV cambia pelle a spese dello Stato'},
+ {id:'ti00_lowcost', era:'italia2000', cond:()=>S.year>=2003, amico:'Voli a venti euro: l\'Europa a portata di weekend', ostile:'Si vola in Europa a venti euro, e il treno per Reggio ne mette otto'},
+ /* --- le 16 gemelle di stato del 2000. IL PATTO: sono l'ULTIMO decennio, e dopo di loro c'è il PRESENTE —
+    quindi **niente `codaFino:Infinity`**: la coda del 2000 (2013) le spegne, e dal 2012 parlano i titoli
+    contemporanei. Per lo stesso motivo il ponte è stato tolto dalle `ti90_st_*` in questo lotto. --- */
+ {id:'ti00_st_inchiesta', era:'italia2000', pri:1, cond:()=>!!S.inchiesta, amico:'Inchiesta al vertice: il Governo si rimette ai giudici', ostile:'Il vertice sotto inchiesta, e il talk show ne parla da giorni'},
+ {id:'ti00_st_scandalo', era:'italia2000', pri:1, cond:()=>S.agenda&&S.agenda.some(a=>a.kind==='scandalo'), amico:'Il caso al ministero: chiarimenti in Parlamento', ostile:'Scandalo al ministero: le intercettazioni finiscono sui giornali'},
+ {id:'ti00_st_manovra_a', era:'italia2000', pri:1, cond:()=>S.month===1&&S.year<=2007, amico:'La finanziaria dell\'anno: si punta a tenere il patto di stabilità', ostile:'La finanziaria dell\'anno: tagli lineari e nessuna riforma'},
+ {id:'ti00_st_manovra_b', era:'italia2000', pri:1, cond:()=>S.month===1&&S.year>=2008, amico:'La manovra dell\'anno: il Governo difende i conti dalla crisi', ostile:'La manovra dell\'anno: la crisi presenta il conto, e lo paghiamo noi'},
+ {id:'ti00_st_riformatore', era:'italia2000', pri:1, cond:()=>haTratto('riformatore')&&S.ultimaLegge!=null&&(S.year*12+S.month)-S.ultimaLegge.mese<2, amico:'Il Governo riforma: un\'altra legge approvata', ostile:'Riforme annunciate e riforme approvate: il conto non torna'},
+ {id:'ti00_st_legge', era:'italia2000', pri:1, cond:()=>S.ultimaLegge!=null&&(S.year*12+S.month)-S.ultimaLegge.mese<2, amico:'La legge passa: il Parlamento chiude', ostile:'La legge passa col voto di fiducia, e l\'aula mugugna'},
+ {id:'ti00_st_voto', era:'italia2000', pri:1, cond:()=>typeof periodoSondaggi==='function'&&periodoSondaggi(), amico:'Verso il voto: le coalizioni scoprono le carte', ostile:'Verso il voto: due poli, e i sondaggi dicono testa a testa'},
+ {id:'ti00_st_intermedia', era:'italia2000', pri:1, cond:()=>S.agenda&&S.agenda.some(a=>a.kind==='intermedia'), amico:'Si vota nei comuni: il test del territorio', ostile:'Si vota nei comuni, e i sindaci corrono più delle coalizioni'},
+ {id:'ti00_st_reput_media', era:'italia2000', cond:()=>S.ind.reputazione!=null&&S.ind.reputazione>=45&&S.ind.reputazione<=60, amico:'L\'Italia tiene il suo posto nei vertici europei', ostile:'L\'Italia ai vertici europei: presente, e senza peso'},
+ {id:'ti00_st_crisi_fid', era:'italia2000', cond:()=>S.ind.fiducia!=null&&S.ind.fiducia<40, amico:'I mercati attendono un segnale credibile', ostile:'I mercati non si fidano: lo spread sale ancora'},
+ {id:'ti00_st_recessione', era:'italia2000', cond:()=>S.ind.growth<0, amico:'Recessione: il Governo prepara il sostegno', ostile:'Recessione: ordini fermi e cassa integrazione'},
+ {id:'ti00_st_disocc', era:'italia2000', cond:()=>S.ind.unemp>9, amico:'Disoccupazione alta: arriva il piano per il lavoro', ostile:'Disoccupazione alta, e la ripresa non assume'},
+ {id:'ti00_st_deficit', era:'italia2000', cond:()=>S.ind.deficit>4.5, amico:'Il disavanzo sale: la correzione è pronta', ostile:'Il disavanzo sfonda il tetto, e Bruxelles scrive'},
+ {id:'ti00_st_consenso', era:'italia2000', cond:()=>S.ind.consenso<40, amico:'Il Governo cerca il consenso perduto', ostile:'Il Governo ai minimi: la coalizione si interroga'},
+ {id:'ti00_st_bene', era:'italia2000', cond:()=>S.ind.growth>1&&S.ind.fiducia>70, amico:'L\'economia riparte e i conti migliorano', ostile:'L\'economia riparte, ma gli stipendi restano fermi'},
+ {id:'ti00_st_reputazione', era:'italia2000', cond:()=>S.ind.reputazione!=null&&S.ind.reputazione<40, amico:'L\'Italia lavora per riprendersi il suo posto', ostile:'L\'Italia isolata: in Europa decidono senza di noi'},
+ {id:'ti90_muro', era:'italia1990', cond:()=>S.year<=1990, amico:'Il Muro non c\'è più: si apre un mondo nuovo', ostile:'Il Muro non c\'è più, e nessuno sa cosa viene dopo'},
+ {id:'ti90_mondiali', era:'italia1990', cond:()=>S.year===1990&&S.month>=6&&S.month<=9, amico:'Notti magiche: il paese si ferma per il mondiale', ostile:'Notti magiche: il mondiale in casa finisce ai rigori'},
+ {id:'ti90_golfo', era:'italia1990', cond:()=>S.year===1991&&S.month<=6, amico:'Guerra nel Golfo: l\'Italia c\'è', ostile:'Guerra nel Golfo: il paese si divide sull\'articolo 11'},
+ {id:'ti90_preferenza', era:'italia1990', cond:()=>S.year===1991&&S.month>=6, amico:'Una preferenza sola: il paese sceglie di cambiare', ostile:'Una preferenza sola: il referendum travolge i partiti'},
+ {id:'ti90_urss', era:'italia1990', cond:()=>S.year===1991&&S.month>=11||S.year===1992&&S.month<=2, amico:'L\'Unione Sovietica ammaina la bandiera', ostile:'L\'impero si dissolve: il mondo perde una metà'},
+ {id:'ti90_arresto', era:'italia1990', cond:()=>S.year===1992&&S.month>=2&&S.month<=5, amico:'Un arresto a Milano: la giustizia fa il suo corso', ostile:'Un arresto a Milano: e si comincia a parlare di tangenti'},
+ {id:'ti90_prelievo', era:'italia1990', cond:()=>S.year===1992&&S.month>=7&&S.month<=10, amico:'Sei lire ogni mille: la manovra salva i conti', ostile:'Sei lire ogni mille: il prelievo nella notte'},
+ {id:'ti90_sme', era:'italia1990', cond:()=>S.year===1992&&S.month>=9||S.year===1993&&S.month<=1, amico:'La lira lascia lo SME: le esportazioni respirano', ostile:'La lira lascia lo SME: il cambio non lo decidiamo più noi'},
+ {id:'ti90_manovra93', era:'italia1990', cond:()=>S.year===1992&&S.month>=10||S.year===1993&&S.month<=3, amico:'Novantatremila miliardi: il paese mette in sicurezza i conti', ostile:'Novantatremila miliardi: la manovra più pesante di sempre'},
+ {id:'ti90_maggioritario', era:'italia1990', cond:()=>S.year===1993&&S.month>=4, amico:'Il maggioritario stravince: comincia un\'altra Repubblica', ostile:'Il maggioritario stravince: addio proporzionale, e ora?'},
+ {id:'ti90_cellulare', era:'italia1990', cond:()=>S.year>=1992&&S.year<=1996, amico:'Il telefonino esce dall\'auto: ora sta in tasca', ostile:'Il telefonino in tasca: e non si è più irreperibili'},
+ {id:'ti90_dc', era:'italia1990', cond:()=>S.year===1994&&S.month<=6, amico:'Lo scudo crociato ammaina: due eredi per la Balena', ostile:'Lo scudo crociato ammaina: mezzo secolo finisce in una sala'},
+ {id:'ti90_azienda', era:'italia1990', cond:()=>S.year===1994&&S.month<=5, amico:'Un\'azienda scende in campo: la politica cambia linguaggio', ostile:'Un\'azienda scende in campo: la televisione entra in Parlamento'},
+ {id:'ti90_psi', era:'italia1990', cond:()=>S.year===1994&&S.month>=11||S.year===1995&&S.month<=3, amico:'Il garofano appassisce: si chiude una storia lunga cent\'anni', ostile:'Il garofano appassisce: il partito di Turati chiude i conti'},
+ {id:'ti90_fiuggi', era:'italia1990', cond:()=>S.year===1995&&S.month<=6, amico:'La fiamma diventa alleanza: la destra volta pagina', ostile:'La fiamma diventa alleanza: e i nostalgici gridano al tradimento'},
+ {id:'ti90_internet', era:'italia1990', cond:()=>S.year>=1995, amico:'Internet: l\'Italia si collega col modem', ostile:'Internet: il paese si collega, e la bolletta pure'},
+ {id:'ti90_prepagata', era:'italia1990', cond:()=>S.year>=1996, amico:'La scheda si ricarica: il telefonino per tutti', ostile:'La scheda si ricarica: e il telefono diventa un\'abitudine'},
+ {id:'ti90_eurotassa', era:'italia1990', cond:()=>S.year===1997||S.year===1998&&S.month<=3, amico:'Una tassa per l\'Europa: il traguardo si avvicina', ostile:'Una tassa per l\'Europa: si paga adesso, si vedrà poi'},
+ {id:'ti90_euro', era:'italia1990', cond:()=>S.year===1998&&S.month>=5||S.year===1999, amico:'Ce l\'abbiamo fatta: l\'Italia è nell\'euro', ostile:'L\'Italia è nell\'euro: e adesso i conti si fanno in casa d\'altri'},
+ {id:'ti90_sindaci', era:'italia1990', cond:()=>S.year>=1994, amico:'I sindaci eletti dal popolo cambiano le città', ostile:'I sindaci contano più dei partiti, e i partiti se ne accorgono'},
+ /* --- le 16 gemelle di stato del '90 (stesso `cond` e `pri` delle ti50/60/70/80, cambia solo il registro).
+    IL PATTO: il ponte oltre la coda vive sull'ULTIMO decennio scritto — quindi ora su queste, e l'`Infinity`
+    delle `ti80_st_*` è stato tolto in questo stesso lotto. Chi scriverà le `ti00_*` lo toglierà da qui. --- */
+ {id:'ti90_st_inchiesta', era:'italia1990', pri:1, cond:()=>!!S.inchiesta, amico:'Inchiesta al vertice: il Governo aspetta i giudici', ostile:'Il vertice sotto inchiesta: e stavolta il paese guarda'},
+ {id:'ti90_st_scandalo', era:'italia1990', pri:1, cond:()=>S.agenda&&S.agenda.some(a=>a.kind==='scandalo'), amico:'Il caso al ministero: gli atti sono in procura', ostile:'Scandalo al ministero: i nomi escono prima delle carte'},
+ {id:'ti90_st_manovra_a', era:'italia1990', pri:1, cond:()=>S.month===1&&S.year<=1995, amico:'Il bilancio dell\'anno: si punta a rientrare nei parametri', ostile:'Il bilancio dell\'anno: il debito corre più della manovra'},
+ {id:'ti90_st_manovra_b', era:'italia1990', pri:1, cond:()=>S.month===1&&S.year>=1996, amico:'Il bilancio dell\'anno: l\'Europa è a un passo', ostile:'Il bilancio dell\'anno: l\'Europa chiede, il paese paga'},
+ {id:'ti90_st_riformatore', era:'italia1990', pri:1, cond:()=>haTratto('riformatore')&&S.ultimaLegge!=null&&(S.year*12+S.month)-S.ultimaLegge.mese<2, amico:'Il Governo riforma: un\'altra legge in porto', ostile:'Riforme a raffica: il paese fatica a starci dietro'},
+ {id:'ti90_st_legge', era:'italia1990', pri:1, cond:()=>S.ultimaLegge!=null&&(S.year*12+S.month)-S.ultimaLegge.mese<2, amico:'La legge passa: il Parlamento chiude la partita', ostile:'La legge passa fra i mugugni della maggioranza'},
+ {id:'ti90_st_voto', era:'italia1990', pri:1, cond:()=>typeof periodoSondaggi==='function'&&periodoSondaggi(), amico:'Verso il voto: il paese sceglie la coalizione', ostile:'Verso il voto: due poli e nessuna certezza'},
+ {id:'ti90_st_intermedia', era:'italia1990', pri:1, cond:()=>S.agenda&&S.agenda.some(a=>a.kind==='intermedia'), amico:'Si vota nelle città: la prova del territorio', ostile:'Si vota nelle città: e i sindaci pesano più delle segreterie'},
+ {id:'ti90_st_reput_media', era:'italia1990', cond:()=>S.ind.reputazione!=null&&S.ind.reputazione>=45&&S.ind.reputazione<=60, amico:'L\'Italia tiene il suo posto nei tavoli europei', ostile:'L\'Italia ai tavoli europei: presente, e poco ascoltata'},
+ {id:'ti90_st_crisi_fid', era:'italia1990', cond:()=>S.ind.fiducia!=null&&S.ind.fiducia<40, amico:'I mercati aspettano un segnale dal Governo', ostile:'I mercati non si fidano: lo spread sulla lira si allarga'},
+ {id:'ti90_st_recessione', era:'italia1990', cond:()=>S.ind.growth<0, amico:'La recessione morde: il Governo prepara la risposta', ostile:'Recessione: fabbriche ferme e ordini che non arrivano'},
+ {id:'ti90_st_disocc', era:'italia1990', cond:()=>S.ind.unemp>9, amico:'Disoccupazione a due cifre: il piano per il lavoro', ostile:'Disoccupazione a due cifre: e la ripresa non assume'},
+ {id:'ti90_st_deficit', era:'italia1990', cond:()=>S.ind.deficit>4.5, amico:'Il disavanzo resta alto: la correzione è in arrivo', ostile:'Il disavanzo resta alto, e i parametri non aspettano'},
+ {id:'ti90_st_consenso', era:'italia1990', cond:()=>S.ind.consenso<40, amico:'Il Governo cerca il consenso perduto', ostile:'Il Governo ai minimi: il paese guarda altrove'},
+ {id:'ti90_st_bene', era:'italia1990', cond:()=>S.ind.growth>1&&S.ind.fiducia>70, amico:'L\'economia riparte e i conti migliorano', ostile:'L\'economia riparte: i conti migliorano, le buste paga no'},
+ {id:'ti90_st_reputazione', era:'italia1990', cond:()=>S.ind.reputazione!=null&&S.ind.reputazione<40, amico:'L\'Italia lavora per riprendersi il suo posto in Europa', ostile:'L\'Italia isolata: in Europa decidono senza di noi'},
  {id:'ti70_inchiesta', era:'italia1970', pri:1, cond:()=>!!S.inchiesta, amico:'Inchiesta al vertice: il Governo lascia lavorare i giudici', ostile:'Il vertice sotto inchiesta: e i giornali non aspettano le carte'},
  {id:'ti70_scandalo', era:'italia1970', pri:1, cond:()=>S.agenda&&S.agenda.some(a=>a.kind==='scandalo'), amico:'Il caso al ministero: il Governo chiede di attendere gli atti', ostile:'Scandalo al ministero: un altro, dicono in piazza'},
  {id:'ti70_manovra_a', era:'italia1970', pri:1, cond:()=>S.month===1&&S.year<=1973, amico:'Il bilancio dell\'anno: il Governo indica la rotta', ostile:'Il bilancio dell\'anno: i conti crescono più delle risposte'},
@@ -6763,4 +7091,168 @@ const SCISSIONE_CONGRESSO_RIFONDAZIONE = {
   t:'Il congresso',
   text:'La tua mozione perde, come sapevi. Il grosso del partito se ne va col nome nuovo; tu resti con la bandiera, i circoli che resistono e i conti in rosso. Qualcuno vi dà per finiti. Ricominciate da lì.',
   ch:[ { l:'Prosegui', e:'', f:function(){ if(typeof scissioneApplica==='function') scissioneApplica('rifondazione'); } } ],
+};
+
+/* ============================================================================================================
+   L41-1 · I TRE SNODI GEMELLI DELLA FRANA (scheda §SNODI GEMELLI). La storia di chi la frana la SUBISCE:
+   DC, PSI e MSI. Testi della scheda. Nessun dirigente reale nominato: le opzioni sono strade politiche.
+   Valgono solo per chi gioca quel partito — altrimenti la stessa storia la fa la direttiva-NPC della tappa.
+   ============================================================================================================ */
+const DIASPORA_DC_EV = {
+  id:'snodo_diaspora_dc', kick:'Il partito', tono:'grave',
+  t:'La diaspora',
+  text:'Mezzo secolo di governo non basta più: le inchieste hanno svuotato le sezioni, la Lega morde al Nord, il nuovo polo chiama a destra. La direzione propone di tornare al nome delle origini; una parte dei tuoi guarda altrove. Il partito che fu di De Gasperi si divide, e tu devi scegliere dove stare.',
+  ch:[
+    { l:'Guidi il ritorno alle origini: il partito popolare', e:'Tieni la casa madre, ridotta · il centro è tuo, il futuro incerto',
+      f:function(){ S.diaspora='popolare';
+        scissioneDividi('PPI', 0.62, {id:'i90_ccd', nome:'CCD', orientamento:'centrodestra', base:{cattolici:0.6, pensionati:0.4}, asse:1, gruppoUE:'popolari'}, 0);
+        gd('cattolici',2); gd('pensionati',1); gd('imprenditori',-2); stampad(2);
+        S.log.unshift({t:T('La diaspora'),x:T('Il partito torna al nome delle origini: più piccolo, ancora al centro. Una parte dei tuoi ha preso un\'altra strada.')}); } },
+    { l:'Guidi la diaspora: col nuovo polo', e:'Vai dove va il vento · ti chiameranno transfughi',
+      f:function(){ S.diaspora='polo';
+        scissioneDividi('CCD', 0.38, {id:'i90_ppi', nome:'PPI', orientamento:'centro', base:{cattolici:0.6, cetomedio:0.4}, asse:0, gruppoUE:'popolari'}, 1);
+        gd('imprenditori',3); gd('cetomedio',1); gd('cattolici',-2); stampad(-3); espoSale(4);
+        S.log.unshift({t:T('La diaspora'),x:T('Hai portato i tuoi verso il nuovo polo: la casa madre resta in piedi senza di te, e qualcuno non te lo perdona.')}); } },
+  ],
+};
+
+const CROLLO_PSI_EV = {
+  id:'snodo_crollo_psi', kick:'Il partito', tono:'grave',
+  t:'Il crollo',
+  text:'Le inchieste hanno decapitato il partito, le urne lo hanno dimezzato, i debiti lo stanno seppellendo. Non c\'è congresso che possa salvarlo: c\'è solo da decidere come finisce — e cosa ne fai dei tuoi.',
+  ch:[
+    { l:'Tieni acceso il lume', e:'Resti socialista in un partito ridotto all\'osso · la dignità è tua, il peso no',
+      f:function(){ S.crolloPsi='lume';
+        scissioneDisperdi('Socialisti Italiani', 2.5);
+        gd('lavoratori',2); stampad(4); repd(2);
+        S.log.unshift({t:T('Il crollo'),x:T('Il partito resta in piedi ridotto all\'osso: la bandiera è ancora tua, il peso politico no.')}); } },
+    { l:'Porti i tuoi a sinistra', e:'La diaspora verso il centrosinistra · il nome muore, la gente si salva',
+      f:function(){ S.crolloPsi='sinistra';
+        scissioneTrasloca('i50_pci', {id:'i50_pci', nome:'PDS', orientamento:'centrosinistra', base:{lavoratori:0.5, cetomedio:0.5}, forza:20, asse:-1, gruppoUE:'socialisti'});
+        gd('lavoratori',3); gd('giovani',1); stampad(1);
+        S.log.unshift({t:T('Il crollo'),x:T('Il nome si spegne e i tuoi trovano casa a sinistra: hai salvato le persone, non il simbolo.')}); } },
+    { l:'Porti i tuoi nel nuovo polo', e:'La diaspora verso destra · ti diranno che hai venduto la storia',
+      f:function(){ S.crolloPsi='polo';
+        scissioneTrasloca('i90_fi', {id:'i90_fi', nome:'Forza Italia', orientamento:'centrodestra', base:{imprenditori:0.5, cetomedio:0.3, pensionati:0.2}, forza:15, asse:1, gruppoUE:'popolari'});
+        gd('imprenditori',3); gd('cetomedio',1); gd('lavoratori',-4); stampad(-4); espoSale(6);
+        S.log.unshift({t:T('Il crollo'),x:T('Hai portato i tuoi nel nuovo polo: un futuro c\'è, ma la storia da cui vieni non ti seguirà.')}); } },
+  ],
+};
+
+const FIUGGI_EV = {
+  id:'snodo_fiuggi', kick:'Il partito', tono:'grave',
+  t:'Fiuggi',
+  text:'Per la prima volta dal dopoguerra la destra è entrata nell\'area di governo — e proprio adesso la segreteria propone di sciogliere la fiamma in una destra nuova, che non debba più chiedere scusa. I nostalgici parlano di tradimento. Il congresso è convocato: da che parte stai?',
+  ch:[
+    { l:'La svolta: la destra nuova', e:'Il futuro si apre · una parte della fiamma non ti seguirà',
+      f:function(){ S.fiuggi='svolta';
+        scissioneDividi('Alleanza Nazionale', 0.88, {id:'i90_fiamma', nome:'La Fiamma', orientamento:'destra', base:{pensionati:0.5, cetomedio:0.5}, asse:2, gruppoUE:'noniscritti'}, 1);
+        gd('cetomedio',3); gd('imprenditori',2); stampad(5); repd(3);
+        S.log.unshift({t:T('Fiuggi'),x:T('La fiamma si scioglie in una destra nuova: le porte del governo si aprono, e una minoranza esce dalla sala.')}); } },
+    { l:'La fiamma non si tocca', e:'L\'identità è salva · il grosso se ne va senza di te',
+      f:function(){ S.fiuggi='fiamma';
+        scissioneDividi('La Fiamma', 0.14, {id:'i90_an', nome:'Alleanza Nazionale', orientamento:'destra', base:{cetomedio:0.5, pensionati:0.5}, asse:1, gruppoUE:'conservatori'}, 2);
+        gd('pensionati',2); gd('cetomedio',-3); gd('imprenditori',-2); stampad(-3);
+        S.log.unshift({t:T('Fiuggi'),x:T('Hai tenuto la fiamma: il grosso del partito se n\'è andato a fondare la destra nuova, tu sei rimasto con l\'identità.')}); } },
+  ],
+};
+
+/* ============================================================================================================
+   L44-2 · GLI SNODI DEGLI ANNI 2000 (scheda §3). Ultimi tre della linea, pattern invariato.
+   ============================================================================================================ */
+
+/* IL PORCELLUM (2005) · la legge-come-scelta, erede diretta della legge-truffa del '53 e del Mattarellum del
+   '93. È il terzo giro dello stesso tema, e non è un caso: in questo gioco la legge elettorale è il modo in
+   cui la politica decide le proprie regole — e ogni volta chi la scrive lo fa guardando il proprio vantaggio. */
+const PORCELLUM_EV = {
+  id:'snodo_porcellum', kick:'Riforme', tono:'grave',
+  t:'Le regole del gioco, di nuovo',
+  text:'La legislatura si avvia alla fine e la maggioranza ha in mano la penna: si può riscrivere la legge elettorale con un premio che protegga chi arriva primo, oppure lasciare le regole come sono e correre con quelle. Chi la scrive lo sa: la userà anche chi verrà dopo.',
+  ch:[
+    { l:'Riscrivi la legge col premio', e:'Chi vince governa davvero · nessuno te la perdonerà, nemmeno i tuoi',
+      f:function(){ S.porcellum='riscritta'; var forte=(S.ind.consenso>=SNODO_CONSENSO_00);
+        S.porcellumEsito=forte?'blindata':'contestata';
+        capd(8); stampad(-5); gd('cetomedio',-2); gd('giovani',-2);
+        if(forte) S.log.unshift({t:T('La legge elettorale'),x:T('La nuova legge passa: chi vince avrà i numeri per governare, e l\'opposizione dovrà farsene una ragione.')});
+        else { repd(-2); S.log.unshift({t:T('La legge elettorale'),x:T('La nuova legge passa fra le proteste: nasce già con l\'etichetta di legge fatta in casa.')}); } } },
+    { l:'Lasci le regole come sono', e:'Nessuno può accusarti · corri con un sistema che non ti aiuta',
+      f:function(){ S.porcellum='invariata'; stampad(4); repd(2); capd(-4); gd('cetomedio',2);
+        S.log.unshift({t:T('La legge elettorale'),x:T('Le regole restano quelle: si va al voto senza aver cambiato le carte in tavola.')}); } },
+  ],
+};
+
+/* LA CRISI 2008-09 · lo snodo economico della decade, gemello del divorzio-BdI e di Maastricht: silenzioso,
+   senza piazze, con conseguenze che si vedono dieci anni dopo. L'envelope è vero — i vincoli europei
+   esistevano, e l'Italia aveva meno spazio di altri proprio per il debito che si porta dal '90. */
+const CRISI08_EV = {
+  id:'snodo_crisi08', kick:'Crisi', tono:'grave',
+  t:'Il conto della crisi',
+  text:'Il crollo arrivato da oltreoceano ferma gli ordini e riempie la cassa integrazione. Puoi spendere per attutire il colpo — e il debito, già alto, prende la rincorsa — oppure tenere i conti e aspettare che passi, sapendo che qualche fabbrica che chiude non riaprirà.',
+  ch:[
+    { l:'Spendi per attutire il colpo', e:'Il paese regge l\'urto · il debito prende la rincorsa e l\'Europa scrive',
+      f:function(){ S.crisi08='stimolo'; S.ind.debt+=3; if(S.gMod!=null) S.gMod+=0.2;
+        gd('lavoratori',4); gd('giovani',3); gd('imprenditori',1); repd(-4); allG(0);
+        S.log.unshift({t:T('La crisi'),x:T('Il Governo mette i soldi sul tavolo: il colpo si attutisce, e il debito ricomincia a correre.')}); } },
+    { l:'Tieni i conti e aspetti', e:'I mercati ti credono · chi chiude non riapre, e lo ricorderà',
+      f:function(){ S.crisi08='rigore'; S.ind.debt-=0.5; if(S.gMod!=null) S.gMod-=0.15;
+        repd(5); stampad(2); gd('lavoratori',-5); gd('giovani',-4); gd('imprenditori',-2);
+        S.log.unshift({t:T('La crisi'),x:T('Il Governo tiene la barra sui conti: i mercati apprezzano, le fabbriche che chiudono no.')}); } },
+  ],
+};
+
+/* LE FUSIONI DEL 2007-08 per CHI LE GIOCA. Stessa forma dei tre gemelli di L41-1 e stessi tre movimenti:
+   chi guida la fusione trasloca nel partito nuovo, chi resta fuori si divide e tiene un margine. Per la
+   sinistra radicale non c'è fusione: c'è la dispersione, cioè restare fuori dall'aula. */
+const FUSIONE_PD_EV = {
+  id:'snodo_fusione_pd', kick:'Il partito', tono:'grave',
+  t:'Il partito nuovo',
+  text:'Le due anime del centrosinistra hanno deciso di sciogliersi in un soggetto solo: un nome nuovo, un simbolo nuovo, primarie aperte a chiunque voglia parteciparvi. C\'è chi dice che è l\'unico modo per vincere, e chi che è la fine di una storia. Tu devi dire da che parte stai.',
+  ch:[
+    { l:'Guidi la fusione: nasce il partito nuovo', e:'Un solo partito grande · le due storie si annacquano in una',
+      f:function(){ S.fusionePd='dentro';
+        if(typeof scissioneDividi==='function') scissioneDividi('PD', 0.86, {id:'i00_sinistra', nome:'La Sinistra', orientamento:'sinistra', base:{lavoratori:0.6, giovani:0.4}, asse:-2, gruppoUE:'sinistra'}, -1);
+        gd('cetomedio',3); gd('giovani',2); gd('lavoratori',-2); stampad(4); capd(-5);
+        S.log.unshift({t:T('Il partito nuovo'),x:T('Le due storie confluiscono in un partito solo: più grande, e con qualche parola in meno da dire.')}); } },
+    { l:'Resti fuori, con la tua storia', e:'L\'identità è intatta · sarai piccolo, e lo sarai a lungo',
+      f:function(){ S.fusionePd='fuori';
+        if(typeof scissioneDividi==='function') scissioneDividi('La Sinistra', 0.16, {id:'i00_pd', nome:'PD', orientamento:'centrosinistra', base:{cetomedio:0.5, lavoratori:0.5}, asse:-1, gruppoUE:'socialisti'}, -2);
+        gd('lavoratori',4); gd('giovani',1); gd('cetomedio',-4); stampad(-2); capd(4);
+        S.log.unshift({t:T('Il partito nuovo'),x:T('Il partito nuovo nasce senza di te: resti con la tua storia, e con molti meno voti.')}); } },
+  ],
+};
+const FUSIONE_PDL_EV = {
+  id:'snodo_fusione_pdl', kick:'Il partito', tono:'grave',
+  t:'Il partito unico del centrodestra',
+  text:'Il partito-azienda e la destra di governo hanno annunciato la lista unica, e dietro la lista c\'è la fusione. Per una parte dei tuoi è il traguardo di vent\'anni; per un\'altra è consegnare la propria storia a casa d\'altri.',
+  ch:[
+    { l:'Guidi la fusione: il partito unico', e:'Il polo diventa un partito solo · la tua tradizione ci si scioglie dentro',
+      f:function(){ S.fusionePdl='dentro';
+        if(typeof scissioneDividi==='function') scissioneDividi('PdL', 0.88, {id:'i00_destra', nome:'La Destra', orientamento:'destra', base:{pensionati:0.5, cetomedio:0.5}, asse:2, gruppoUE:'noniscritti'}, 1);
+        gd('imprenditori',3); gd('cetomedio',2); gd('pensionati',-2); stampad(3); capd(-4);
+        S.log.unshift({t:T('Il partito unico'),x:T('La fusione si fa: un partito solo a destra, e una tradizione che ci si scioglie dentro.')}); } },
+    { l:'Tieni la tua tradizione fuori', e:'L\'identità resta · fuori dal partito grande si conta poco',
+      f:function(){ S.fusionePdl='fuori';
+        if(typeof scissioneDividi==='function') scissioneDividi('La Destra', 0.12, {id:'i00_pdl', nome:'PdL', orientamento:'centrodestra', base:{imprenditori:0.5, cetomedio:0.3, pensionati:0.2}, asse:1, gruppoUE:'popolari'}, 2);
+        gd('pensionati',3); gd('imprenditori',-3); gd('cetomedio',-2); stampad(-2); capd(3);
+        S.log.unshift({t:T('Il partito unico'),x:T('Il partito unico nasce senza di te: la bandiera è ancora tua, il peso molto meno.')}); } },
+  ],
+};
+const FUORI_AULA_EV = {
+  id:'snodo_fuori_aula', kick:'Il partito', tono:'grave',
+  t:'Sotto la soglia',
+  text:'La legge nuova ha uno sbarramento, e i sondaggi dicono che ci passi sotto. Puoi presentarti in una lista comune con le altre sinistre — un cartello che nessuno ha voluto davvero — oppure correre da solo col tuo simbolo, sapendo come può finire.',
+  ch:[
+    { l:'Il cartello unitario', e:'Una possibilità di restare in aula · il simbolo si annacqua',
+      f:function(){ S.fuoriAula='cartello'; var forte=(S.ind.consenso>=SNODO_CONSENSO_00);
+        S.fuoriAulaEsito=forte?'dentro':'fuori';
+        if(forte){ gd('lavoratori',2); stampad(2); S.log.unshift({t:T('Sotto la soglia'),x:T('Il cartello tiene: si resta in aula, con un simbolo che non è più solo tuo.')}); }
+        else { if(typeof scissioneDisperdi==='function') scissioneDisperdi(null, 2);
+          gd('lavoratori',1); stampad(-2);
+          S.log.unshift({t:T('Sotto la soglia'),x:T('Il cartello non basta: per la prima volta dal dopoguerra, in aula non c\'è nessuno di voi.')}); } } },
+    { l:'Corri col tuo simbolo', e:'La tua storia resta leggibile · quasi certamente resterai fuori',
+      f:function(){ S.fuoriAula='solo'; S.fuoriAulaEsito='fuori';
+        if(typeof scissioneDisperdi==='function') scissioneDisperdi(null, 2);
+        gd('lavoratori',3); gd('giovani',1); stampad(1); capd(3);
+        S.log.unshift({t:T('Sotto la soglia'),x:T('Sei corso col tuo simbolo e sei rimasto fuori: la storia è intatta, l\'aula è vuota.')}); } },
+  ],
 };

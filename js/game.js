@@ -886,7 +886,22 @@ const LINEE_STORICHE = {
       { tag:'italia1960', da:1958,      coda:1971      },   // decade '60: apre dal '58 (miracolo, Min. Sanità); L28-1 CHIUDE la coda al '71
       { tag:'italia1970', da:1969,      coda:1981      },   // decade '70: apre dal '69 (il confine d'ingresso è dicembre '69); L31-1 CHIUDE la coda all'81
       { tag:'italia1980', da:1979,      coda:1991      },   // decade '80: apre dal '79; L40-1 CHIUDE la coda al '91 (il '90 apre dall'89, stessa sovrapposizione morbida)
-      { tag:'italia1990', da:1989,      coda:Infinity  }    // decade '90: apre dall'89 (la Bolognina è del 12 nov '89); ultima → aperta (C2, la chiuderà il 2000)
+      { tag:'italia1990', da:1989,      coda:2001      },   // decade '90: apre dall'89; L44-1 CHIUDE la coda al 2001
+      { tag:'italia2000', da:1999,      coda:2013      },   // decade 2000: apre dal '99; è l'ULTIMO decennio della linea e la sua coda è CHIUSA — v. la saldatura qui sotto
+      /* ====== LA SALDATURA (L44-1) ======================================================================
+         La linea storica italiana finisce qui e **si salda col presente**: dal 2012 la finestra attiva è
+         `contemporanea`, cioè esattamente il tag del contenuto che il gioco ha già per il presente. Non c'è
+         un decennio 2010 e non ci sarà: chi arriva in fondo alla linea **entra nel gioco di oggi**, con lo
+         stesso meccanismo di finestre che ha attraversato sei decenni.
+         Perché funziona senza toccare `eraCartaViva`: quella funzione cerca il tag della carta fra i decenni
+         della linea, e ora `contemporanea` è un decennio come gli altri — prima del 2012 è chiusa (`y < da`),
+         dal 2012 è aperta e senza coda. La sovrapposizione 2012-2013 col decennio 2000 è la solita cerniera
+         morbida: per due anni convivono, come '69-'71 e '89-'91.
+         NIENTE `codaFino:Infinity` nuovo: il ponte oltre l'ultima coda non serve più, perché dopo l'ultima
+         coda c'è il presente. Le 16 gemelle `ti90_st_*` lo tengono ancora — le toglierà il lotto-contenuto
+         del 2000, che scriverà le sue.
+         ==================================================================================================== */
+      { tag:'contemporanea', da:2012,   coda:Infinity  }
     ]
   }
 };
@@ -932,7 +947,13 @@ const DRIFT_ECONOMICO_ERA = {
                    della linea a toccare il minimo consentito dalla non-dominanza (−0,7) INSIEME al '73: è la
                    recessione vera, PIL reale negativo. Poi la rincorsa a Maastricht, che cresce ma non esplode. */
                 {da:1990, ciclo:0.1},  {da:1992, ciclo:-0.5}, {da:1993, ciclo:-0.7},
-                {da:1995, ciclo:0.2},  {da:1997, ciclo:0.4},  {da:1999, ciclo:0.3} ]
+                {da:1995, ciclo:0.2},  {da:1997, ciclo:0.4},  {da:1999, ciclo:0.3},
+                /* L44-1 — il 2000: il decennio del «declino». Crescita anemica per tutto l'arco (mai sopra
+                   +0,1), e **il 2009 tocca −0,7 come il '73 e il '93**: sono i tre fondi della linea, e il
+                   2009 è il più duro dei tre nella realtà (PIL −5,5%). Poi un rimbalzo debole e il 2011. */
+                {da:2001, ciclo:0},    {da:2003, ciclo:-0.2}, {da:2006, ciclo:0.1},
+                {da:2008, ciclo:-0.5}, {da:2009, ciclo:-0.7}, {da:2010, ciclo:-0.1},
+                {da:2011, ciclo:-0.4}, {da:2012, ciclo:0} ]
 };
 /* ===== L28-4 · IL MODIFICATORE-CLIMA DEGLI ANNI '70 (decisione G3) =====
    Dal dicembre 1969 a fine decennio il paese vive una stagione piu' cupa. Il clima e' un FENOMENO, mai un evento
@@ -1046,7 +1067,36 @@ const RIALLINEAMENTI_ERA = {
     /* 1996 · IL BIPOLARISMO SI CONSOLIDA. L'erede del PCI è primo partito per la prima volta nella storia
        repubblicana (21,1); AN tocca il suo massimo; la Lega, in corsa solitaria, il suo (10,1). */
     1996: { delta:[ {id:'i50_pci',delta:1}, {id:'i50_msi',delta:2}, {id:'i90_lega',delta:1.5}, {id:'i90_prc',delta:2.5},
-                    {id:'i90_fi',delta:-0.5}, {id:'i50_dc',delta:-4}, {id:'i90_ccd',delta:1} ] }
+                    {id:'i90_fi',delta:-0.5}, {id:'i50_dc',delta:-4}, {id:'i90_ccd',delta:1} ] },
+
+    /* ======================================================================================================
+       L44-1 · IL DECENNIO 2000 — tre tappe, e la SECONDA FRANA. La prima ('94) aveva fatto morire i partiti
+       fondatori della Repubblica; questa fonde quelli nati dalle sue macerie. Stesso meccanismo di L34-1.
+       ====================================================================================================== */
+
+    /* 2001 · L'ALTERNANZA COMPIUTA. La Casa delle Libertà vince; nel centrosinistra il PPI confluisce nel
+       soggetto nuovo (la Margherita), e la Lega tocca il suo minimo storico (~3,9). */
+    2001: { entra:[ {id:'i00_marg', nome:'La Margherita', orientamento:'centro', base:{cattolici:0.4, cetomedio:0.4, giovani:0.2}, forza:14.5, asse:0, gruppoUE:'liberali'} ],
+            esce:[ {id:'i50_dc', confluisce_in:'i00_marg'} ],
+            delta:[ {id:'i90_fi',delta:6}, {id:'i50_msi',delta:1}, {id:'i90_lega',delta:-5},
+                    {id:'i50_pci',delta:-3}, {id:'i90_prc',delta:-1}, {id:'i90_ccd',delta:-0.5} ] },
+
+    /* 2006 · IL FOTOFINISH: alla Camera decidono ventiquattromila voti. Nel gioco si traduce in una tappa
+       che NON sposta quasi nulla — è il punto in cui il paese è diviso a metà, ed è giusto che si veda. */
+    2006: { delta:[ {id:'i50_pci',delta:1}, {id:'i00_marg',delta:0.5}, {id:'i90_prc',delta:1},
+                    {id:'i90_fi',delta:-1.5}, {id:'i50_msi',delta:-0.5}, {id:'i90_lega',delta:0.5} ] },
+
+    /* 2008 · LA SECONDA FRANA. Le due fusioni: **PD** (l'erede del PCI + la Margherita, il partito nuovo è
+       nato nell'ottobre 2007) e **PdL** (Forza Italia + Alleanza Nazionale, lista unica nel 2008). La Lega
+       risorge dal minimo del 2001. E **la sinistra radicale resta fuori dall'aula** — la prima volta senza
+       comunisti in Parlamento dal 1946: `esce` senza `confluisce_in`, cioè la dispersione, come il PSI nel '94.
+       I minori del vecchio quadro (PSDI, PRI, PLI, Monarchici, CCD) escono anche loro: il bipolarismo del
+       Porcellum non lascia spazio a nessuno sotto la soglia. */
+    2008: { rinomina:[ {id:'i50_pci', nome:'PD'}, {id:'i90_fi', nome:'PdL'} ],
+            esce:[ {id:'i00_marg', confluisce_in:'i50_pci'}, {id:'i50_msi', confluisce_in:'i90_fi'},
+                   {id:'i90_prc'}, {id:'i90_ccd', confluisce_in:'i90_fi'},
+                   {id:'i50_psdi'}, {id:'i50_pri'}, {id:'i50_pli'}, {id:'i50_pnm'} ],
+            delta:[ {id:'i90_lega',delta:4}, {id:'i50_pci',delta:-2}, {id:'i90_fi',delta:-2} ] }
   }
 };
 /* ============================================================================================================
@@ -1150,6 +1200,103 @@ function scissioneApplica(ramo){
   else { stampad(-2); gd('lavoratori',3); gd('giovani',1); gd('cetomedio',-3); gd('imprenditori',-2);
     bioFatto('Hai tenuto la bandiera quando tutti la ammainavano.'); }
 }
+/* ============================================================================================================
+   L41-1 · I TRE SNODI GEMELLI DELLA FRANA (DC, PSI, MSI). Stesso motore della scissione-PCI, generalizzato:
+   quello era cablato su nomi e quote del partito comunista, questi hanno forme diverse. Tre movimenti
+   possibili, e ogni ramo dei tre snodi è uno di questi:
+     A) TI DIVIDI  — resti dove sei con un nome nuovo e una quota, il resto esce come NPC       (`dividi`)
+     B) CROLLI     — resti dove sei, ridotto ai minimi, e il resto si DISPERDE senza erede      (`disperdi`)
+     C) CAMBI CASA — `S.partito` diventa un altro partito, e ti porti dietro tutto              (`trasloca`)
+   Il giocatore non perde mai niente in nessuno dei tre: nel caso C il travaso è quello di L34-1.
+   ============================================================================================================ */
+/* La somma delle forze deve restare 100: la dispersione ne toglie, un partito che nasce ne aggiunge. La
+   tappa rinormalizza gia da se (riallineamentoTappa); questi movimenti no, e senza questa riga il PSI-lume
+   chiudeva a 92 e il PSI-nel-polo a 115. Misurato prima di accorgersene: la somma e la spia. */
+function rinormalizzaForze(){
+  if(typeof S==='undefined' || !S || !S.forze || !PAESE || !PAESE.partiti) return;
+  var sum=0; PAESE.partiti.forEach(function(p){ sum+=(S.forze[p.id]||0); });
+  if(sum>0) PAESE.partiti.forEach(function(p){ S.forze[p.id]=(S.forze[p.id]||0)/sum*100; });
+  S.forzePrev=Object.assign({}, S.forze);
+}
+function _partitoDef(d){ return { id:d.id, nome:d.nome, orientamento:d.orientamento||'centro', base:d.base||{}, forza:d.forza||1, asse:(d.asse!=null?d.asse:0), gruppoUE:d.gruppoUE||'noniscritti' }; }
+
+/* A · TI DIVIDI: tieni `resto` della tua forza col nome nuovo, il resto se ne va come partito NPC. */
+function scissioneDividi(nomeNuovo, quotaMia, npc, asseNuovo){
+  if(typeof S==='undefined' || !S || !S.partito) return;
+  var mio=S.partito, tot=(S.forze&&S.forze[mio]!=null)?S.forze[mio]:20;
+  var mia=Math.max(1, tot*quotaMia), loro=Math.max(1, tot-mia);
+  S.rosterDelta = S.rosterDelta || {entra:[], esce:[], rinomina:[]};
+  if(nomeNuovo) S.rosterDelta.rinomina.push({ id:mio, nome:nomeNuovo });
+  var n=_partitoDef(Object.assign({}, npc, {forza:loro}));
+  S.rosterDelta.entra.push(n);
+  if(S.forze){ S.forze[mio]=mia; S.forze[n.id]=loro; }
+  if(S.forzePrev){ S.forzePrev[mio]=mia; S.forzePrev[n.id]=loro; }
+  if(S.seggi && S.seggi[n.id]==null) S.seggi[n.id]=0;
+  applicaRosterDelta();
+  if(asseNuovo!=null){ var mp=PAESE.partiti.filter(function(x){return x.id===mio;})[0]; if(mp) mp.asse=asseNuovo; }
+  rinormalizzaForze();
+}
+/* B · CROLLI: resti, ma ridotto al minimo. Quello che perdi NON va a nessuno — si redistribuisce alla
+   rinormalizzazione, che è la dispersione vera (la stessa scelta fatta per il PSI della tappa-NPC). */
+function scissioneDisperdi(nomeNuovo, forzaResidua){
+  if(typeof S==='undefined' || !S || !S.partito) return;
+  var mio=S.partito;
+  S.rosterDelta = S.rosterDelta || {entra:[], esce:[], rinomina:[]};
+  if(nomeNuovo) S.rosterDelta.rinomina.push({ id:mio, nome:nomeNuovo });
+  if(S.forze) S.forze[mio]=forzaResidua;
+  if(S.forzePrev) S.forzePrev[mio]=forzaResidua;
+  applicaRosterDelta();
+  rinormalizzaForze();
+}
+/* C · CAMBI CASA: `S.partito` diventa un altro partito. Se non esiste ancora nel roster lo si crea (il caso
+   del PSI che passa al nuovo polo nel '93, quando quel partito non è ancora nato). Il vecchio partito ESCE e
+   tutto quello che aveva — forza, seggi, intese, coalizione, territori — traslocando arriva al nuovo: è il
+   travaso di L34-1, usato qui per la prima volta sul partito di chi gioca. */
+function scissioneTrasloca(destId, destDef){
+  if(typeof S==='undefined' || !S || !S.partito || destId===S.partito) return;
+  var vecchio=S.partito;
+  S.rosterDelta = S.rosterDelta || {entra:[], esce:[], rinomina:[]};
+  var esiste=PAESE.partiti.some(function(x){ return x.id===destId; });
+  if(!esiste && destDef){ S.rosterDelta.entra.push(_partitoDef(destDef));
+    if(S.forze && S.forze[destId]==null) S.forze[destId]=destDef.forza||1;
+    if(S.forzePrev && S.forzePrev[destId]==null) S.forzePrev[destId]=destDef.forza||1;
+    if(S.seggi && S.seggi[destId]==null) S.seggi[destId]=0;
+    applicaRosterDelta();
+  }
+  S.partito=destId;                                        // PRIMA di far uscire il vecchio: così la guardia
+  S.rosterDelta.esce.push({id:vecchio, confluisce_in:destId});   // di `applicaDirettive` non lo scambia per il tuo
+  if(S.forze && S.forze[vecchio]!=null){ if(S.forze[destId]!=null) S.forze[destId]+=S.forze[vecchio]; delete S.forze[vecchio]; }
+  if(S.forzePrev && S.forzePrev[vecchio]!=null){ if(S.forzePrev[destId]!=null) S.forzePrev[destId]+=S.forzePrev[vecchio]; delete S.forzePrev[vecchio]; }
+  if(S.seggi && S.seggi[vecchio]!=null){ if(S.seggi[destId]!=null) S.seggi[destId]+=S.seggi[vecchio]; delete S.seggi[vecchio]; }
+  if(S.intese && S.intese[vecchio]!=null) delete S.intese[vecchio];      // le intese col te stesso di prima non hanno senso
+  if(S.intese && S.intese[destId]!=null) delete S.intese[destId];        // né con la casa in cui ora abiti
+  if(Array.isArray(S.coalizione)) S.coalizione=S.coalizione.filter(function(id){ return id!==vecchio && id!==destId; });
+  if(Array.isArray(S.territori)) S.territori.forEach(function(t){ if(t && t.partito===vecchio) t.partito=destId; });
+  if(S.tavoloPid===vecchio) S.tavoloPid=destId;
+  applicaRosterDelta();
+  rinormalizzaForze();
+}
+/* ============================================================================================================
+   L44-1 · IL CHANGEOVER — l'unico cambio-valuta in corsa di tutta la linea. Il 1° gennaio 2002 la lira esce
+   di scena: `S.valuta` torna a `null`, che nel gioco vuol dire euro (`euro()` in ui.js legge quel campo e col
+   null fa esattamente quello che ha sempre fatto nel presente). Non serve altro: il resto del bilancio è a
+   rapporti, quindi cambia il modo di scrivere i numeri, non i numeri.
+   È idempotente e reload-safe: `S.valuta` sta dentro S, quindi il salvataggio se lo porta dietro, e la
+   funzione non fa nulla se il cambio è già avvenuto. Il beat nel log esce UNA volta sola, al mese giusto. */
+function changeoverEuro(){
+  if(typeof S==='undefined' || !S || S.era!==LINEA_IT) return;
+  if(!S.valuta) return;                                  // già in euro (o presente): niente da fare
+  if(S.year<2002) return;
+  /* LA CIFRA VA CONVERTITA, non solo l etichetta. Senza questa riga il PIL passava da «L. 1.358 mld lire» a
+     «€1,36 tln»: stesso numero, valuta nuova, e il paese sembrava aver raddoppiato la ricchezza in una notte.
+     Il fattore è 1,93627 e non 1936,27 perché cambia anche l unità di lettura del campo (il ramo-lira di euro()
+     stampa  in miliardi, il ramo-euro in milioni). Verificato: 1.358.000 -> 701.349, cioè «€0,70 tln»,
+     che è il PIL italiano vero del 1990 in euro. Tutto il resto del motore è a RAPPORTI e non si tocca: debito
+     e disavanzo restano percentuali, e il bilancio locale (che scala su S.pil) si converte da sé. */
+  if(S.pil) S.pil = Math.round(S.pil / 1.93627);
+  S.valuta = null;
+  if(S.log) S.log.unshift({t:T('L\'euro'), x:T('Da oggi i prezzi si scrivono in euro: milleNovecentoTrentasei lire e ventisette centesimi ne fanno uno. Il portafoglio è lo stesso, i conti sembrano un altro paese.')});
+}
 /* L40-2 · IL CLIMA «QUESTIONE MORALE» (scheda §10.5): una campana, non un interruttore — sale dal '92, picco
    nel '93, scende dal '95. Come il clima-'70 tocca poche leve dichiarate, e **non somma** col resto: la decade
    ha anche il telefonino e le notti magiche. Qui muove tre soglie di `pescaInchiesta`, che già esistono. */
@@ -1161,6 +1308,7 @@ function climaMorale(){
 }
 function riallineamentoTappa(){
   if(typeof S==='undefined' || !S) return;
+  if(typeof changeoverEuro==='function') changeoverEuro();   // L44-1: lo scatto della valuta vive qui, dove il mese comincia
   var perAnno = S.era && RIALLINEAMENTI_ERA[S.era];
   if(!perAnno) return;                              // presente: no-op
   if(!S.riallineamenti) S.riallineamenti={};
@@ -1200,6 +1348,10 @@ function riallineamentoTappa(){
     else if(S.year===1992) S.log.unshift({t:T('Elezioni 1992'), x:T('Il partito di maggioranza relativa scende sotto una soglia mai toccata, e dal Nord entra in Parlamento una forza nuova. Il quadro non è più quello di sempre.')});
     else if(S.year===1994) S.log.unshift({t:T('La frana'), x:T('In un anno il partito che ha governato per mezzo secolo si scioglie e i socialisti chiudono; nasce un partito nuovo che al debutto è già primo, e la destra cambia nome. Il sistema dei partiti non esiste più.')});
     else if(S.year===1996) S.log.unshift({t:T('Elezioni 1996'), x:T('Due coalizioni si contendono il paese: il bipolarismo prende la forma che avrà per vent’anni.')});
+    /* L44-1 — i beat dell'ultimo decennio */
+    else if(S.year===2001) S.log.unshift({t:T('Elezioni 2001'), x:T('L\'alternanza è compiuta: si cambia governo con le urne, e nessuno lo trova più straordinario.')});
+    else if(S.year===2006) S.log.unshift({t:T('Elezioni 2006'), x:T('Il paese si spacca a metà: alla Camera decidono poche migliaia di voti. Governare con quel margine sarà un\'altra cosa.')});
+    else if(S.year===2008) S.log.unshift({t:T('Elezioni 2008'), x:T('Due partiti grandi nati da altrettante fusioni si prendono quasi tutto, e per la prima volta dal dopoguerra la sinistra radicale resta fuori dall\'aula.')});
   }
   S.riallineamenti[S.year]=true;
 }
@@ -1265,6 +1417,23 @@ function snodoMaastrichtDovuta(){   return typeof S!=='undefined' && S && S.era=
 function snodoMattarellumDovuta(){  return typeof S!=='undefined' && S && S.era===LINEA_IT && S.livello===3 && !S.opposizione && S.mattarellum==null && S.year>=1993 && S.year<=1994; }
 /* la questione morale non è una scelta di calendario ma la risposta a un'inchiesta che è già addosso */
 function snodoMoraleDovuta(){       return typeof S!=='undefined' && S && S.era===LINEA_IT && S.livello===3 && S.questioneMorale==null && !!S.inchiesta && S.year>=1992 && S.year<=1996; }
+/* L44-2 · i gate del 2000, gli ultimi della linea. Le due FUSIONI valgono solo per chi gioca quel partito
+   — altrimenti la stessa storia la fa la direttiva-tappa del 2008 (L44-1), e i due non possono scattare
+   insieme perché guardano la stessa condizione su `S.partito`. La finestra sta a cavallo del 2007-08, cioè
+   fra l'annuncio e la lista unica: è lì che la scelta era vera. */
+function snodoPorcellumDovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_IT && S.livello===3 && !S.opposizione && S.porcellum==null && S.year>=2005 && S.year<=2006; }
+function snodoCrisi08Dovuta(){   return typeof S!=='undefined' && S && S.era===LINEA_IT && S.livello===3 && !S.opposizione && S.crisi08==null  && S.year>=2008 && S.year<=2010; }
+function snodoFusionePdDovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_IT && S.partito==='i50_pci' && S.fusionePd==null  && ((S.year===2007 && S.month>=6) || S.year===2008); }
+function snodoFusionePdlDovuta(){return typeof S!=='undefined' && S && S.era===LINEA_IT && S.partito==='i90_fi'  && S.fusionePdl==null && ((S.year===2007 && S.month>=11) || S.year===2008); }
+function snodoFuoriAulaDovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_IT && S.partito==='i90_prc' && S.fuoriAula==null  && S.year>=2007 && S.year<=2008; }
+/* L41-1 · i tre gemelli. Ognuno vale SOLO per chi gioca quel partito: se non è il tuo, la stessa storia la
+   racconta la direttiva-NPC della tappa (L40-1), e i due non possono scattare insieme — il `se` della tappa
+   e questi gate sono mutuamente esclusivi per costruzione, sulla stessa condizione `S.partito`.
+   ⚠ La finestra del PSI la scheda la dà come «'93» nel sottotitolo e «1993-94» nel titolo: l'ho aperta su
+   ENTRAMBI gli anni, perché il ramo «nel nuovo polo» ha bisogno che quel partito esista o possa nascere. */
+function snodoDcDovuta(){    return typeof S!=='undefined' && S && S.era===LINEA_IT && S.partito==='i50_dc'  && S.diaspora==null   && ((S.year===1993 && S.month>=12) || (S.year===1994 && S.month<=2)); }
+function snodoPsiDovuta(){   return typeof S!=='undefined' && S && S.era===LINEA_IT && S.partito==='i50_psi' && S.crolloPsi==null   && S.year>=1993 && S.year<=1994; }
+function snodoMsiDovuta(){   return typeof S!=='undefined' && S && S.era===LINEA_IT && S.partito==='i50_msi' && S.fiuggi==null      && ((S.year===1994 && S.month>=12) || (S.year===1995 && S.month<=2)); }
 /* LA SCISSIONE: solo per chi gioca il partito comunista, e in due tempi — la scelta a fine '89, il congresso
    nel febbraio '91, come nella storia. Fra i due c'è un anno di attesa: è il tempo del dibattito. */
 function snodoScissioneDovuta(){    return typeof S!=='undefined' && S && S.era===LINEA_IT && S.partito==='i50_pci' && S.scissione==null && S.year>=1989 && S.year<=1990; }
@@ -2779,6 +2948,14 @@ function genAgendaRamo(first){
   if(!first && typeof snodoNucleareDovuta==='function' && snodoNucleareDovuta()){ S.agenda.push({kind:'event', data:NUCLEARE_EV, resolved:false}); agendaSolo(); return; }
   /* L40-2 · gli snodi del '90. La SCISSIONE per prima: è la più identitaria e non può farsi scavalcare. */
   if(!first && typeof snodoScissioneDovuta==='function' && snodoScissioneDovuta()){ S.agenda.push({kind:'event', data:SCISSIONE_EV, resolved:false}); agendaSolo(); return; }
+  if(!first && typeof snodoDcDovuta==='function'  && snodoDcDovuta()){  S.agenda.push({kind:'event', data:DIASPORA_DC_EV, resolved:false}); agendaSolo(); return; }
+  if(!first && typeof snodoFusionePdDovuta==='function'  && snodoFusionePdDovuta()){  S.agenda.push({kind:'event', data:FUSIONE_PD_EV,  resolved:false}); agendaSolo(); return; }
+  if(!first && typeof snodoFusionePdlDovuta==='function' && snodoFusionePdlDovuta()){ S.agenda.push({kind:'event', data:FUSIONE_PDL_EV, resolved:false}); agendaSolo(); return; }
+  if(!first && typeof snodoFuoriAulaDovuta==='function'  && snodoFuoriAulaDovuta()){  S.agenda.push({kind:'event', data:FUORI_AULA_EV,  resolved:false}); agendaSolo(); return; }
+  if(!first && typeof snodoCrisi08Dovuta==='function'    && snodoCrisi08Dovuta()){    S.agenda.push({kind:'event', data:CRISI08_EV,     resolved:false}); agendaSolo(); return; }
+  if(!first && typeof snodoPorcellumDovuta==='function'  && snodoPorcellumDovuta()){  S.agenda.push({kind:'event', data:PORCELLUM_EV,   resolved:false}); agendaSolo(); return; }
+  if(!first && typeof snodoPsiDovuta==='function' && snodoPsiDovuta()){ S.agenda.push({kind:'event', data:CROLLO_PSI_EV,  resolved:false}); agendaSolo(); return; }
+  if(!first && typeof snodoMsiDovuta==='function' && snodoMsiDovuta()){ S.agenda.push({kind:'event', data:FIUGGI_EV,      resolved:false}); agendaSolo(); return; }
   if(!first && typeof snodoCongressoDovuto==='function' && snodoCongressoDovuto()){ S.scissioneFatta=true;
     S.agenda.push({kind:'event', data:(S.scissione==='svolta'?SCISSIONE_CONGRESSO_SVOLTA:SCISSIONE_CONGRESSO_RIFONDAZIONE), resolved:false}); agendaSolo(); return; }
   if(!first && typeof snodoMoraleDovuta==='function' && snodoMoraleDovuta()){ S.agenda.push({kind:'event', data:QUESTIONE_MORALE_EV, resolved:false}); agendaSolo(); return; }
@@ -4434,6 +4611,16 @@ function applySnap(snap){
   if(S.questioneMorale===undefined) S.questioneMorale=null;
   if(S.scissione===undefined) S.scissione=null;
   if(S.scissioneFatta===undefined) S.scissioneFatta=false;
+  if(S.diaspora===undefined) S.diaspora=null;       // L41-1 — i tre gemelli della frana
+  if(S.crolloPsi===undefined) S.crolloPsi=null;
+  if(S.fiuggi===undefined) S.fiuggi=null;
+  if(S.porcellum===undefined) S.porcellum=null;         // L44-2 — gli ultimi snodi della linea
+  if(S.porcellumEsito===undefined) S.porcellumEsito=null;
+  if(S.crisi08===undefined) S.crisi08=null;
+  if(S.fusionePd===undefined) S.fusionePd=null;
+  if(S.fusionePdl===undefined) S.fusionePdl=null;
+  if(S.fuoriAula===undefined) S.fuoriAula=null;
+  if(S.fuoriAulaEsito===undefined) S.fuoriAulaEsito=null;
   if(S.richiamoCorrUltimo===undefined) S.richiamoCorrUltimo=null;   // CURA Lotto P3 — migrazione cooldown richiamo correnti
   if(S.sondStorico===undefined) S.sondStorico=[];   // F3 — migrazione: i salvataggi pre-lotto ricevono la serie-sondaggi vuota
   if(S.leggeroUltimo===undefined) S.leggeroUltimo=null;   // G4 — migrazione: cooldown del beat leggero
