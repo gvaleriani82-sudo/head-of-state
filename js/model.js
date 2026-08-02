@@ -364,7 +364,99 @@ function part(id){ return PAESE.partiti.find(p=>p.id===id); }
 
 /* Seggi 0..100 dalle forze correnti: proporzionale ∝ forza^distorsione (premia i grandi), normalizzato.
    Arrotondamento col metodo dei resti più grandi → la somma fa ESATTAMENTE 100 (niente seggi persi/aggiunti). */
+/* ============================================================================================================
+   L47-1 · IL SISTEMA A COLLEGI (first-past-the-post). Affiancato a `calcSeggi`, non al posto suo: chi non
+   dichiara `sistemaSeggi:'collegi'` passa dal ramo proporzionale di sempre, byte per byte.
+
+   PERCHÉ SERVIVA. `calcSeggi` ripartisce una torta con un esponente (`PAESE.distorsione`): amplifica il primo
+   ma **non può invertire**, perché `Math.pow` è monotona — chi ha più voti avrà sempre più seggi. Il 1951
+   britannico (Labour più voti, Conservatives più Camera) era quindi impossibile per costruzione.
+
+   COME FUNZIONA. Non si ripartisce niente: si simulano N **collegi**, e in ognuno vince chi ha la quota locale
+   più alta. La quota locale di un partito in un collegio è la sua forza nazionale più uno **scarto
+   territoriale**, perché i voti non sono spalmati uniformi: la sinistra è concentrata nelle città, la destra
+   diffusa nelle contee. Il collegio ha un carattere `x` (da −1 urbano a +1 rurale) e l'affinità del partito
+   si legge dal suo `asse` — dato che il roster ha già:
+
+       quotaLocale(p, x) = forza[p] + AMPIEZZA · asse[p] · x
+
+   Un partito di sinistra (asse −1) prende il massimo dove x = −1: vince le città con margini enormi, e quei
+   voti in eccesso **sono sprecati** perché il collegio vale uno comunque. È il meccanismo vero dell'inversione.
+
+   I DUE PARAMETRI, e cosa comprano (tarati sulle misure di L47-1, non a occhio):
+     · `ampiezza` — quanto i voti sono concentrati. Alta ⇒ più voti sprecati nelle roccaforti, terzi partiti
+       annientati. È la leva della «crudeltà» del sistema verso chi ha voti diffusi.
+     · `skew` — di quanto la mappa dei collegi pende. Storicamente le contee erano sovrarappresentate: con
+       skew > 0 il collegio mediano è più rurale del paese, e la sinistra deve prendere PIÙ voti per avere
+       gli stessi seggi. È la leva dell'inversione.
+   `S.seggi` resta in percentuale (somma 100) come nel ramo proporzionale: il resto del motore non sa niente.
+   ============================================================================================================ */
+/* L47-2 · COME UN PARTITO SPALMA I SUOI VOTI SUI COLLEGI — e perché non è una somma.
+   Primo tentativo (scartato, e la misura l'ha bocciato subito): affinità ADDITIVA, `forza + A·aff`. Non
+   poteva funzionare: il bonus massimo vale A/2, cioè ~11 punti, e i Liberal del 1950 avevano il 9,1% contro
+   il 46,1% del Labour — **37 punti da colmare**. Nessun valore di A li faceva vincere un solo collegio senza
+   distruggere tutto il resto. Il difetto non era il numero, era la forma.
+   La forma giusta: la forza nazionale **si distribuisce** sui collegi con una densità, invece di essere una
+   base uguale ovunque più un premio.
+
+       peso(p, x) = e^(−½·((x − terreno_p)/σ_p)²) / media   (densità a media 1 sui collegi)
+       quotaLocale(p, x) = forza[p] · peso(p, x)
+
+   Un partito col 9% concentrato in un decimo dei collegi lì ne ha il 90: **vince**, e altrove sparisce. È la
+   specie dei Liberal del '50 e, domani, dei nazionalisti scozzesi — pochi punti nazionali, seggi veri perché
+   tutti in un posto. Un partito diffuso ha peso ≈ 1 ovunque e resta col suo dato nazionale.
+   · **`terreno`** (−1 città ↔ +1 contee) è indipendente dall'asse: il moderato di destra può essere forte
+     nelle contee senza che l'estremo lo scavalchi per costruzione.
+   · **`concentrazione`** stringe la campana; `ampiezza` è il guadagno globale che decide quanto, nel paese,
+     la geografia conta rispetto al dato nazionale.
+   Chi non dichiara `terreno` resta **uniforme** (peso 1 ovunque): il suo risultato è quello nazionale. */
+function pesoCollegio(p, x, A){
+  var t = (p.terreno!=null) ? p.terreno : null;
+  if(t===null) return 1;                                    // partito senza terreno: spalmato uniforme
+  var c = (p.concentrazione!=null) ? p.concentrazione : 0.5;
+  var g = Math.max(0.05, (A||20)/20);                       // `ampiezza` = quanto la geografia conta
+  var sig = 1/(0.5 + Math.max(0, c)*g);
+  var d = (x - t)/sig;
+  return Math.exp(-0.5*d*d);
+}
+/* la densità va normalizzata a media 1 sull'insieme dei collegi, altrimenti un partito concentrato
+   perderebbe voti solo per essere concentrato. Si calcola una volta per elezione, non per collegio. */
+function normalizzaPesi(ps, xs, A){
+  var norm={};
+  ps.forEach(function(p){
+    var s2=0; for(var i=0;i<xs.length;i++) s2+=pesoCollegio(p, xs[i], A);
+    norm[p.id] = s2>0 ? xs.length/s2 : 1;
+  });
+  return norm;
+}
+function calcSeggiCollegi(){
+  var cfg = (PAESE.sistemaSeggi==='collegi' && PAESE.collegi) ? PAESE.collegi : {};
+  var N = cfg.n || 650, A = (cfg.ampiezza!=null?cfg.ampiezza:26), SK = (cfg.skew!=null?cfg.skew:0.22);
+  var ps = PAESE.partiti, vinti = {}, xs = [];
+  ps.forEach(function(p){ vinti[p.id]=0; });
+  for(var i=0;i<N;i++){
+    var u = (N>1) ? (i/(N-1))*2 - 1 : 0;        // il collegio i sull'asse urbano↔rurale
+    xs.push(Math.max(-1, Math.min(1, u + SK)));  // …spostato di `skew`: la mappa pende
+  }
+  var norm = normalizzaPesi(ps, xs, A);
+  for(var i2=0;i2<xs.length;i2++){
+    var x = xs[i2], best=null, bv=-Infinity;
+    for(var k=0;k<ps.length;k++){
+      var p=ps[k], f=(S.forze&&S.forze[p.id])||0;
+      var q = f * pesoCollegio(p, x, A) * (norm[p.id]||1);
+      if(q>bv){ bv=q; best=p.id; }
+    }
+    if(best) vinti[best]++;
+  }
+  /* in percentuale, col metodo dei resti più alti — stessa forma d'uscita di calcSeggi */
+  var q2 = ps.map(function(p){ var e=vinti[p.id]/N*100; return {id:p.id, f:Math.floor(e), r:e-Math.floor(e)}; });
+  var used = q2.reduce(function(s2,x2){ return s2+x2.f; }, 0);
+  q2.slice().sort(function(a,b){ return b.r-a.r; }).forEach(function(x2){ if(used<100){ x2.f++; used++; } });
+  var out={}; q2.forEach(function(x2){ out[x2.id]=x2.f; }); return out;
+}
 function calcSeggi(){
+  /* L47-1 — il bivio: chi dichiara i collegi passa di là, tutti gli altri proseguono nel ramo di sempre. */
+  if(PAESE.sistemaSeggi==='collegi' && typeof calcSeggiCollegi==='function') return calcSeggiCollegi();
   const d=PAESE.distorsione||1, ps=PAESE.partiti;
   const raw=ps.map(p=>({id:p.id, v:Math.pow(Math.max((S.forze&&S.forze[p.id])||0,0), d)}));
   const tot=raw.reduce((s,x)=>s+x.v,0)||1;

@@ -125,6 +125,13 @@ const PAESI = {
     titoloRuolo: 'Primo Ministro',
     mandatoMesi: 60, sistema: 'parlamentare', sfiducia: true,
     coalizione: false, comeSiVince: 'parlamentare', cadutaGoverno: true, ue: false, distorsione: 1.9,
+    /* L47-1 - il Regno Unito vota a COLLEGI: la torta-con-esponente non puo invertire voti e seggi, i collegi si.
+        resta per compatibilita ma non viene piu letta qui. I due parametri sono tarati sulle misure. */
+    sistemaSeggi: 'collegi', collegi: { n:650, ampiezza:26, skew:0.03 },
+    /* i due numeri sono TARATI su una ricerca a griglia (7x7) contro i quattro profili storici del gate L47-1:
+       1951 si inverte (Con 51) - 1950 no, Labour avanti (51) - 1983 Con 67 (vero 61) - 1959 Con 58 (vero 58).
+       Lo skew e PICCOLO di proposito: e la soglia d inversione. Piu alto e il 1950 si invertirebbe anche lui,
+       e l inversione smetterebbe di essere l eccezione che e stata nella storia. */
     intermedie: [{tipo:'Elezioni amministrative', mese:30, tocca:'tutti'}],
     territori: [
       {nome:'Londra', nomeEn:'London', tipo:'città', carica:'Sindaco', lean:-1, simbolo:true}, {nome:'Manchester', tipo:'città', carica:'Sindaco', lean:-2, simbolo:true}, {nome:'la Scozia', nomeEn:'Scotland', tipo:'regione', carica:'Primo ministro', lean:-1, simbolo:true}, {nome:'le West Midlands', tipo:'città', carica:'Sindaco', lean:1, simbolo:true},
@@ -144,10 +151,10 @@ const PAESI = {
     nomiF: ['Charlotte','Amelia','Grace','Emily','Lucy','Florence','Alice','Sophie','Ruby','Eleanor'],
     cognomi: ['Hartley','Whitfield','Pennington','Pemberton','Hollis','Bramwell','Holloway','Ellison','Fairfax','Goodwin','Harrington','Kingsley','Lockwood','Marsden','Norbury','Radcliffe','Sinclair','Thornton','Westbrook','Yates'],
     partiti: [
-      { id:'uk_lab',    nome:'Labour',            orientamento:'centrosinistra',   base:{ lavoratori:0.6, giovani:0.4 },                   forza:38, asse:-1 },
-      { id:'uk_con',    nome:'Conservatives',     orientamento:'centrodestra',     base:{ imprenditori:0.5, cetomedio:0.3, pensionati:0.2 }, forza:26, asse:1 },
-      { id:'uk_reform', nome:'Reform UK',         orientamento:'destra populista', base:{ cetomedio:0.6, pensionati:0.4 },                 forza:22, asse:2 },
-      { id:'uk_libdem', nome:'Liberal Democrats', orientamento:'centro',           base:{ cetomedio:0.6, giovani:0.4 },                    forza:14, asse:0 },
+      { id:'uk_lab',    nome:'Labour',            orientamento:'centrosinistra',   base:{ lavoratori:0.6, giovani:0.4 },                   forza:38, asse:-1, terreno:-0.55, concentrazione:0.75 },
+      { id:'uk_con',    nome:'Conservatives',     orientamento:'centrodestra',     base:{ imprenditori:0.5, cetomedio:0.3, pensionati:0.2 }, forza:26, asse:1, terreno:0.45, concentrazione:0.55 },
+      { id:'uk_reform', nome:'Reform UK',         orientamento:'destra populista', base:{ cetomedio:0.6, pensionati:0.4 },                 forza:22, asse:2, terreno:0.75, concentrazione:1.2 },
+      { id:'uk_libdem', nome:'Liberal Democrats', orientamento:'centro',           base:{ cetomedio:0.6, giovani:0.4 },                    forza:14, asse:0 , terreno:0.15, concentrazione:20 /* L47-2: la specie-Liberal — pochi collegi, ma li vince */},
     ],
   },
   australia: {
