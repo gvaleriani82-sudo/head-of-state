@@ -127,11 +127,21 @@ const PAESI = {
     coalizione: false, comeSiVince: 'parlamentare', cadutaGoverno: true, ue: false, distorsione: 1.9,
     /* L47-1 - il Regno Unito vota a COLLEGI: la torta-con-esponente non puo invertire voti e seggi, i collegi si.
         resta per compatibilita ma non viene piu letta qui. I due parametri sono tarati sulle misure. */
-    sistemaSeggi: 'collegi', collegi: { n:650, ampiezza:26, skew:0.03 },
-    /* i due numeri sono TARATI su una ricerca a griglia (7x7) contro i quattro profili storici del gate L47-1:
-       1951 si inverte (Con 51) - 1950 no, Labour avanti (51) - 1983 Con 67 (vero 61) - 1959 Con 58 (vero 58).
-       Lo skew e PICCOLO di proposito: e la soglia d inversione. Piu alto e il 1950 si invertirebbe anche lui,
-       e l inversione smetterebbe di essere l eccezione che e stata nella storia. */
+    sistemaSeggi: 'collegi', collegi: { n:650, ampiezza:32, skew:0.03 },
+    /* i due numeri sono TARATI su una ricerca a griglia (7x7) contro i quattro profili storici del gate L47-1.
+       ⚠ L50-1 — IL CONSUNTIVO VERO, misurato contro le quattro urne di scheda, perché la riga che stava qui
+       diceva «1950 no, Labour avanti (51)» ed era SBAGLIATA (nessuna guardia poteva vederlo: è un commento).
+       Il modello prende TRE urne su quattro, ed è un buon risultato:
+         1951 ✓ Con avanti, errore 1,2 punti · 1955 ✓ errore 1,0 · 1959 ✓ errore 2,9
+         1950 ✗ dà i seggi ai Conservative (51/46) quando Labour vinse 315 a 298 → errore 4,4
+       E NON ESISTE UNA TARATURA CHE LE PRENDA TUTTE E QUATTRO: sweep su `terreno`, su `concentrazione` e
+       incrociata, il massimo resta 3/4. Fra il 1950 (Labour +2,6 nei voti E vincitore nei seggi) e il 1951
+       (+0,8 e perdente) c'è una finestra di 1,8 punti, e la soglia d'inversione si muove troppo grossolanamente:
+       a `terreno −0,35` ribalta tutti e due insieme. La differenza vera fu REGIONALE, non di voto nazionale.
+       Rimedio adottato: la porta uk1950 **dichiara** i seggi del 1950 (vedi `SCENARI.uk1950.seggi`); dalla
+       prima elezione in poi comanda il modello, dove è 3 su 3.
+       Lo skew resta PICCOLO di proposito: è la soglia d'inversione, e più alto renderebbe l'inversione la regola
+       invece dell'eccezione che è stata nella storia. */
     intermedie: [{tipo:'Elezioni amministrative', mese:30, tocca:'tutti'}],
     territori: [
       {nome:'Londra', nomeEn:'London', tipo:'città', carica:'Sindaco', lean:-1, simbolo:true}, {nome:'Manchester', tipo:'città', carica:'Sindaco', lean:-2, simbolo:true}, {nome:'la Scozia', nomeEn:'Scotland', tipo:'regione', carica:'Primo ministro', lean:-1, simbolo:true}, {nome:'le West Midlands', tipo:'città', carica:'Sindaco', lean:1, simbolo:true},
@@ -153,8 +163,8 @@ const PAESI = {
     partiti: [
       { id:'uk_lab',    nome:'Labour',            orientamento:'centrosinistra',   base:{ lavoratori:0.6, giovani:0.4 },                   forza:38, asse:-1, terreno:-0.55, concentrazione:0.75 },
       { id:'uk_con',    nome:'Conservatives',     orientamento:'centrodestra',     base:{ imprenditori:0.5, cetomedio:0.3, pensionati:0.2 }, forza:26, asse:1, terreno:0.45, concentrazione:0.55 },
-      { id:'uk_reform', nome:'Reform UK',         orientamento:'destra populista', base:{ cetomedio:0.6, pensionati:0.4 },                 forza:22, asse:2, terreno:0.75, concentrazione:1.2 },
-      { id:'uk_libdem', nome:'Liberal Democrats', orientamento:'centro',           base:{ cetomedio:0.6, giovani:0.4 },                    forza:14, asse:0 , terreno:0.15, concentrazione:20 /* L47-2: la specie-Liberal — pochi collegi, ma li vince */},
+      { id:'uk_reform', nome:'Reform UK',         orientamento:'destra populista', base:{ cetomedio:0.6, pensionati:0.4 },                 forza:22, asse:2, terreno:0.85, concentrazione:5 },
+      { id:'uk_libdem', nome:'Liberal Democrats', orientamento:'centro',           base:{ cetomedio:0.6, giovani:0.4 },                    forza:14, asse:0 , terreno:-0.95, concentrazione:24 /* L47-2: la specie-Liberal — pochi collegi, ma li vince */},
     ],
   },
   australia: {
@@ -745,6 +755,91 @@ const SCENARI = {
     ],
   },
   /* ============================================================================================================
+     L48-1 · REGNO UNITO 1950 — la prima porta fuori dall'Italia, e il pilota della fase γ.
+     Linea `LINEA_UK`, paese `regnounito`, **collegi** (γ1): qui i seggi non si ripartiscono, si vincono.
+
+     LE FORZE: urne del **23 febbraio 1950** (Lab 46,1 · Con 43,5 · Lib 9,1), con gli **Ulster Unionist dentro
+     il totale Conservative** come da nota della scheda. Rinormalizzate sui tre del roster-linea: gli «altri»
+     dell'epoca valevano ~1,3 punti e spariscono nella normalizzazione. Il roster è di TRE partiti — il più
+     piccolo del gioco, ed è giusto così: il Regno Unito di quegli anni è un duello con un testimone.
+
+     TURNMANDATO 0: si comincia **appena eletti**, col Parlamento del febbraio '50 che ha cinque anni davanti.
+     Che poi la storia vera lo abbia sciolto dopo venti mesi è **storia, non regola**: nel gioco l'urna cade
+     alla scadenza, e la tappa-1951 arriva comunque per raccontare l'inversione.
+
+     ECONOMIA IN STERLINE, e l'arco è l'opposto del nostro '90: il debito parte **altissimo (195%)** e deve
+     SCENDERE. `debtAncora:195` dice al motore che quella è la normalità del paese in quegli anni — così la
+     fiducia non è già morta al primo mese, e la discesa è un merito del giocatore invece di un regalo.
+     ⚠ Le due cifre economiche sono ⚠ nella scheda (PIL «≈13 mld» e debito «190-200%»): qui c'è il centro
+     della banda, come feci per il '60 italiano. Il disavanzo −4 è seed di gioco, tarabile.
+     ============================================================================================================ */
+  uk1950: {
+    id:'uk1950', era:LINEA_UK, nome:'Regno Unito 1950', anno:1950, paese:'regnounito',
+    turnMandato: 0,
+    ue: false,                                  // niente CEE: il Regno Unito entra nel 1973
+    intermedie: [ {tipo:'Elezioni amministrative', mese:28, tocca:'tutti'} ],
+    partiti: [
+      { id:'uk_lab', nome:'Labour',       orientamento:'centrosinistra', base:{ lavoratori:0.7, giovani:0.3 },                    forza:46.7, asse:-2, gruppoUE:'socialisti',   terreno:-0.55, concentrazione:0.75 },
+      { id:'uk_con', nome:'Conservative', orientamento:'centrodestra',   base:{ imprenditori:0.4, cetomedio:0.4, pensionati:0.2 }, forza:44.1, asse:1,  gruppoUE:'conservatori', terreno:0.45,  concentrazione:0.55 },
+      { id:'uk_lib', nome:'Liberal',      orientamento:'centro',         base:{ cetomedio:0.6, giovani:0.4 },                     forza:9.2,  asse:0,  gruppoUE:'liberali',     terreno:-0.95, concentrazione:24   },
+    ],
+    /* L50-1 · I SEGGI DEL 1950 SONO DICHIARATI, non derivati. Urne vere di scheda §1 (23 feb 1950):
+       Labour 315 su 625 = 50,4% · Conservative 298 = 47,7% · Liberal 9 = 1,4% (i 3 seggi «altri» ridistribuiti
+       al Liberal per chiudere a 100, dato che il roster ne ha tre). **Maggioranza Labour di 5: partenza al filo**,
+       come dice la scheda — non un governo di minoranza.
+       Perché dichiarati: il modello-collegi sbaglia proprio questa urna (darebbe Con 51 / Lab 46, cioè
+       l'inversione un anno prima del vero) e nessuna taratura le prende tutte e quattro — vedi la nota lunga in
+       `game.js`, dove la riga che li applica sta accanto alla spiegazione. Dalle elezioni successive in poi
+       comanda il modello, che sul '51, '55 e '59 è giusto entro 1-2,9 punti. */
+    seggi: { uk_lab:50.4, uk_con:47.7, uk_lib:1.9 },
+    economia: { pil:13000, debito:195, deficit:-4 },
+    debtAncora: 195,
+    logorioEra: 0.012,
+    valuta: { sym:'£', mld:'mld sterline', mln:'mln sterline' },   // il ramo-sterlina di `euro()`, già pronto da L46-1
+    quotaSpesa: 0.36,                           // ⚠ la scheda non la dà: 36% è l'ordine della spesa britannica di quegli anni. Da confermare.
+    intro: "Regno Unito, 1950. La guerra è vinta e il paese è povero: tessere annonarie, debito da primato e un servizio sanitario appena nato da difendere.",
+    contesto: [
+      "Regno Unito, 1950. La guerra è vinta da cinque anni e il paese è ancora in coda per la carne: le tessere annonarie resteranno fino al '54. Il debito pubblico vale quasi due anni di prodotto — il conto di una vittoria pagata a credito.",
+      "Il governo laburista ha costruito il servizio sanitario nazionale e nazionalizzato le miniere; adesso deve difenderli con le casse vuote, mentre la sterlina traballa e Washington tiene i cordoni.",
+      "Qui si governa a collegi: chi prende più voti non è detto che vinca. Ogni seggio è una battaglia a sé, e la mappa conta quanto le urne.",
+    ],
+  },
+  /* ============================================================================================================
+     L55-1 · REGNO UNITO 1960 — la nona porta, seconda della linea britannica. Scheda `PRESET-UK-1960.md`.
+     Si apre nel 1960 con i Conservative al governo da nove anni (vinsero il '59 con cento seggi di margine) e
+     `turnMandato: 4`: la legislatura scade nel '64, che è la tappa dove tredici anni finiscono per un soffio.
+     I SEGGI SONO DICHIARATI, come per uk1950 (L50-1) e per la stessa ragione: il modello-collegi è tarato sulle
+     urne del '50-'59 e la Camera in carica nel 1960 è quella eletta nell'ottobre 1959 — Con 365 su 630 = 58%,
+     Lab 258 = 41%, Lib 6 = 1%. Dalla prima elezione in poi comanda il modello.
+     ⚠ L'SNP NON È NEL ROSTER D'AVVIO: entra alla tappa del 1970 (decisione G7), che è quando prese il suo primo
+     seggio. Vedi la nota sull'asse accanto alla direttiva, in `game.js`.
+     ============================================================================================================ */
+  uk1960: {
+    id:'uk1960', era:LINEA_UK, nome:'Regno Unito 1960', anno:1960, paese:'regnounito',
+    turnMandato: 4,
+    ue: false,                                  // la CEE la si chiede e la si incassa in faccia: lo snodo §B
+    intermedie: [ {tipo:'Elezioni amministrative', mese:28, tocca:'tutti'} ],
+    partiti: [
+      { id:'uk_con', nome:'Conservative', orientamento:'centrodestra',   base:{ imprenditori:0.4, cetomedio:0.4, pensionati:0.2 }, forza:49.4, asse:1,  gruppoUE:'conservatori', terreno:0.45,  concentrazione:0.55 },
+      { id:'uk_lab', nome:'Labour',       orientamento:'centrosinistra', base:{ lavoratori:0.7, giovani:0.3 },                    forza:43.8, asse:-2, gruppoUE:'socialisti',   terreno:-0.55, concentrazione:0.75 },
+      { id:'uk_lib', nome:'Liberal',      orientamento:'centro',         base:{ cetomedio:0.6, giovani:0.4 },                     forza:5.9,  asse:0,  gruppoUE:'liberali',     terreno:-0.95, concentrazione:24   },
+    ],
+    seggi: { uk_con:58, uk_lab:41, uk_lib:1 },
+    /* Scheda §2: PIL nominale ~£26 mld nel 1960 · debito ~110% che scende a ~65-70% nel 1969. Il disavanzo è
+       il seme di gioco: lo stop-go continua, e la sterlina resta la leva di difficoltà (non il debito). */
+    economia: { pil:26000, debito:110, deficit:-3 },
+    debtAncora: 110,
+    logorioEra: 0.012,
+    valuta: { sym:'£', mld:'mld sterline', mln:'mln sterline' },
+    quotaSpesa: 0.38,                           // ⚠ come per il '50 la scheda non la dà: ordine di grandezza, da confermare
+    intro: "Regno Unito, 1960. Nove anni di governo conservatore, i consumi che crescono e una sterlina che ogni due anni fa tremare il Tesoro.",
+    contesto: [
+      "Regno Unito, 1960. I conservatori governano da nove anni e il paese non è mai stato così benestante: automobili, televisori, vacanze pagate. La frase sul non essere mai stati così bene è di tre anni fa, e comincia a suonare diversa.",
+      "Sotto la superficie il conto non torna: si importa più di quanto si esporti, e ogni volta che i mercati se ne accorgono la sterlina traballa. Difendere il cambio è la parola data di ogni governo — finché uno non la rimangia.",
+      "L'impero si scioglie a ritmo di due o tre paesi l'anno, e il Mercato comune cresce dall'altra parte della Manica senza di noi. Bussare a quella porta significa mettersi nelle mani di chi può dire no.",
+    ],
+  },
+  /* ============================================================================================================
      L44-3 · ITALIA 2000 — la settima e ultima porta. Stessa LINEA; il roster è quello uscito dalla frana del '94
      (PPI, PDS, AN, Rifondazione, Lega, FI, CCD e i laici superstiti), anno d'avvio 2000.
 
@@ -776,6 +871,26 @@ const SCENARI = {
       { id:'i80_verdi', nome:'Verdi',        orientamento:'sinistra',       base:{ giovani:0.6, cetomedio:0.4 },                   forza:2,    asse:-1, gruppoUE:'verdi'        },
       { id:'i50_pri',   nome:'I laici',      orientamento:'centro',         base:{ cetomedio:0.6, giovani:0.4 },                   forza:0.9,  asse:0,  gruppoUE:'liberali'     },
     ],
+    /* ==========================================================================================================
+       L51-1 · I SEGGI DEL PARLAMENTO CHE IL GIOCATORE EREDITA DAVVERO — stesso meccanismo di uk1950 (L50-1).
+       IL DIFETTO CHE CURA: la porta si apre nel **2000**, ma i `forza` qui sopra sono i risultati del **2001**
+       (Casa delle Libertà 57 contro Ulivo 43). Derivando i seggi da quelle forze, chi gioca a sinistra si
+       ritrovava un parlamento che nel 2000 non esisteva: **DS 24 seggi, e sommando OGNI partito compatibile
+       si arrivava a 43** — la maggioranza era irraggiungibile comunque si scegliesse, e `confirmCoal` apriva
+       la partita già in minoranza. Da lì: 90% dei mesi in minoranza e ~40 elezioni anticipate per carriera.
+       COSA DICHIARO: la composizione della Camera **eletta nel 1996**, che è quella in carica nel 2000,
+       ripartita sui nove partiti del roster (Ulivo + PRC = 51,5, la maggioranza che il centrosinistra aveva).
+       I `forza` NON si toccano: restano il 2001, così il voto che arriva a fine mandato dà la vittoria al
+       centrodestra come nella storia. La porta dichiara il parlamento di partenza, il modello fa quelli dopo.
+       ========================================================================================================== */
+    seggi: { i50_pci:28.2, i50_dc:11.9, i80_verdi:3.3, i50_pri:2.5, i90_prc:5.6,
+             i90_fi:19.5, i50_msi:14.8, i90_ccd:4.8, i90_lega:9.4 },
+    /* L52-1 · IL PREMIO DEL PORCELLUM. Legge 270/2005: 340 seggi su 630 = **54%** alla coalizione più votata
+       alla Camera, dal voto del 2006 in poi. Il 2001 vota ancora col Mattarellum, che NON è modellato — la
+       ragione (misurata) sta accanto ad `applicaPremio` in `model.js`.
+       `spentoSe` lega il premio allo snodo che già esiste: chi allo snodo sceglie di lasciare le regole com'erano
+       corre senza premio. Fino a oggi quella scelta muoveva solo capitale e stampa; adesso costa davvero. */
+    premio: { da:2006, quota:54, spentoSe:{ campo:'porcellum', valore:'invariata' } },
     /* Seed IN LIRE (§1): il PIL 2000 ≈ 2.400.000 mld — la scheda-'90 chiudeva a ~2.270.000 nel 1999, quindi le
        due porte si agganciano. Debito ~109% (la scheda dà 109,4 al 1999 e la discesa lenta fino al minimo del
        2007). ⚠ Il disavanzo la scheda lo dà «sotto il 3% a metà decennio»: −2 è il seed di gioco, tarato con la
@@ -817,7 +932,16 @@ const SCENARI = {
     partiti: [
       { id:'i50_dc',    nome:'DC',         orientamento:'centro',         base:{ cattolici:0.4, cetomedio:0.3, imprenditori:0.2, pensionati:0.1 }, forza:36.9, asse:0,  gruppoUE:'popolari'     },
       { id:'i50_pci',   nome:'PCI',        orientamento:'sinistra',       base:{ lavoratori:0.6, giovani:0.4 },                                    forza:28.7, asse:-2, gruppoUE:'sinistra'     },
-      { id:'i50_psi',   nome:'PSI',        orientamento:'sinistra',       base:{ lavoratori:0.6, giovani:0.4 },                                    forza:15.4, asse:-2, gruppoUE:'socialisti'   },
+      /* L51-1 · IL PSI DEL 1990 STAVA A `asse:-2`, IDENTICO AL PCI — e da lì nasceva un decennio ingiocabile.
+         `compatibili()` ammette solo |Δasse|≤1: con la DC a 0, il PSI a −2 era fuori, e la DC sommando OGNI
+         partito compatibile arrivava a **49**, un punto sotto la maggioranza. Risultato misurato: minoranza il
+         100% dei mesi e ~25 elezioni anticipate per carriera.
+         Storicamente è il contrario: il **pentapartito** (DC+PSI+PSDI+PLI+PRI) governa fino al 1992, e il PSI
+         di quegli anni è IL partner di governo della DC, non la sinistra d'opposizione. `asse:-1` lo rimette
+         dov'era, e la maggioranza torna raggiungibile (62 col pentapartito intero).
+         ⚠ Lo stesso valore è discutibile anche nel '70 e nell'80 (il centro-sinistra è del 1963), ma **quelle
+         porte passano il gate** e non le tocco: si cambia dove è rotto, non dove sembra migliorabile. */
+      { id:'i50_psi',   nome:'PSI',        orientamento:'centrosinistra', base:{ lavoratori:0.6, giovani:0.4 },                                    forza:15.4, asse:-1, gruppoUE:'socialisti'   },
       { id:'i50_msi',   nome:'MSI',        orientamento:'destra',         base:{ pensionati:0.5, cetomedio:0.5 },                                  forza:6.4,  asse:2,  gruppoUE:'noniscritti'  },
       { id:'i50_pri',   nome:'PRI',        orientamento:'centro',         base:{ cetomedio:0.6, giovani:0.4 },                                     forza:4,    asse:0,  gruppoUE:'liberali'     },
       { id:'i50_psdi',  nome:'PSDI',       orientamento:'centrosinistra', base:{ lavoratori:0.5, cetomedio:0.5 },                                  forza:3.2,  asse:-1, gruppoUE:'socialisti'   },
@@ -1041,6 +1165,79 @@ const PILASTRI_LINEA = [
     text:'A novembre, con lo spread oltre i cinquecento punti e i mercati in fuga dai titoli italiani, il governo si dimette: al suo posto un esecutivo tecnico, chiamato a rimettere i conti in sicurezza. Un\'epoca si chiude qui.',
     logx:'Lo spread oltre i cinquecento: il governo cade, arrivano i tecnici.',
     ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+
+  /* ==========================================================================================================
+     L49-1 · I QUATTRO PILASTRI DEL DECENNIO INGLESE. Testi APPROVATI da Giacomo (1/8) e CONGELATI byte-identici
+     alla scheda §TESTI PRONTI — non si riformulano, non si accorciano, non si «migliorano».
+     `linea:LINEA_UK` è il campo nuovo di questo lotto: prima l'iniezione dei pilastri era cablata su LINEA_IT
+     e una linea nuova non poteva averne. Chi non lo dichiara resta italiano, quindi i venti pilastri esistenti
+     non cambiano di una virgola.
+     SUEZ HA UNA CONDIZIONE IN PIÙ: `cond` lo spegne per chi lo ha GIOCATO come snodo (decisione G1 — al governo
+     si gioca, fuori è cronaca). I due testi non devono mai comparire nella stessa partita.
+     Kicker: «Il paese» per i due interni, «Il mondo» per Suez e per l'indipendenza, come da scheda.
+     ========================================================================================================== */
+  { id:'puk_smog', linea:LINEA_UK, anno:1952, mese:12, era:'uk1950', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Il Grande Smog',
+    text:'Per quattro giorni di dicembre una nebbia gialla di carbone e di freddo si posa su Londra: il traffico si ferma, i teatri chiudono perché dal loggione non si vede il palco, negli ospedali arrivano i malati di petto. I morti si conteranno a migliaia, e per decenni si continuerà a discutere di quanti. Quattro anni dopo il Parlamento vara la prima legge sull\'aria pulita.',
+    logx:'Quattro giorni di nebbia gialla su Londra. I morti si conteranno a migliaia.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'puk_incoronazione', linea:LINEA_UK, anno:1953, mese:6, era:'uk1950', codaFino:Infinity, cronaca:true, kick:'Il paese',
+    t:'L\'Incoronazione',
+    text:'Il 2 giugno la Corona passa a Westminster davanti alle telecamere, e milioni di persone guardano la cerimonia in casa d\'altri, perché il televisore in strada ce l\'ha uno solo. La stessa mattina arriva la notizia dell\'Everest salito da una spedizione britannica. Le tessere annonarie non sono ancora finite, ma il paese decide che si può ricominciare a far festa.',
+    logx:'La Corona a Westminster davanti alle telecamere, e l\'Everest la stessa mattina.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'puk_suez', linea:LINEA_UK, anno:1956, mese:11, era:'uk1950', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il mondo',
+    cond:function(){ return !S.suez; },   /* G1: chi lo ha giocato come snodo NON riceve anche la cronaca */
+    t:'Suez',
+    text:'A fine ottobre le truppe muovono sul Canale di Suez, nazionalizzato dall\'Egitto pochi mesi prima. In due settimane l\'operazione si ferma: non la ferma il nemico, ma la corsa alla sterlina e il rifiuto americano di sostenerla. I soldati rientrano, il premier si dimette in gennaio, e il paese scopre che le sue avventure hanno un limite, e che quel limite è scritto altrove.',
+    logx:'L\'operazione sul Canale si ferma in due settimane: la ferma la sterlina.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  /* ==========================================================================================================
+     L55-1 · I CINQUE PILASTRI DEL DECENNIO '60. Testi APPROVATI da Giacomo (1/8), congelati byte-identici alla
+     scheda §TESTI PRONTI. Belfast entra qui e non nel '70 (decisione G4): è l'inizio, non il seguito.
+
+     ⚑ LA REGOLA G5, che vale su tutto il fronte e di cui Birmingham è il modello: quando un pilastro nomina
+     una persona per un fatto di PAROLA, **si nomina l'autore e la conseguenza politica, mai il contenuto**.
+     Niente citazioni, niente riassunto della tesi, nessuna platea data a ciò che fu detto. Il pilastro racconta
+     che cosa accadde e che conseguenze ebbe — non che cosa disse.
+
+     ⚠ «LA LUNA» (lug 1969) NON C'È, ed è una segnalazione, non una dimenticanza. La scheda la vuole come
+     **pilastro-mondo condiviso**, attingendo a un pool comune. **`PILASTRI_MONDO` non esiste**: cercato in
+     tutto `js/` e in `.claude/`, nessuna occorrenza. La consegna dice di dirlo e non duplicare il testo
+     italiano — quindi qui non c'è, e il pool va creato con un lotto suo. (Il beat-leggero «La Luna in salotto»
+     della scheda §E c'è: è un'altra cosa, il salotto e non il mondo.)
+     ========================================================================================================== */
+  { id:'puk_aberfan', linea:LINEA_UK, anno:1966, mese:10, era:'uk1960', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Aberfan',
+    text:'Il 21 ottobre una collina di scarti di miniera, gonfia di pioggia, scivola sul villaggio di Aberfan e travolge la scuola elementare poco dopo l\'inizio delle lezioni. Muoiono centosedici bambini e ventotto adulti. L\'inchiesta stabilirà che il pericolo era noto e che nessuno vi aveva posto rimedio.',
+    logx:'Una collina di scarti travolge la scuola di Aberfan. Il pericolo era noto.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'puk_wembley', linea:LINEA_UK, anno:1966, mese:7, era:'uk1960', codaFino:Infinity, cronaca:true, kick:'Il paese',
+    t:'Wembley',
+    text:'Il 30 luglio la nazionale vince in casa la Coppa del Mondo, ai supplementari, davanti a centomila persone e a metà del paese incollata al televisore. È l\'unica volta. Per una generazione, quella partita resterà il metro di ogni altra gioia sportiva.',
+    logx:'La Coppa del Mondo vinta in casa, ai supplementari. È l\'unica volta.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'puk_svalutazione', linea:LINEA_UK, anno:1967, mese:11, era:'uk1960', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    cond:function(){ return !S.sterlina60; },   /* chi lo GIOCA come snodo non riceve anche la cronaca (come Suez, G1) */
+    t:'La svalutazione',
+    text:'Il 18 novembre, dopo tre anni passati a difenderla, la sterlina viene svalutata da 2,80 a 2,40 dollari. Il governo spiega che i soldi nel portafoglio degli inglesi non cambiano valore; il paese capisce il contrario, e non lo dimentica.',
+    logx:'La sterlina svalutata da 2,80 a 2,40 dollari, dopo tre anni di difesa.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'puk_birmingham', linea:LINEA_UK, anno:1968, mese:4, era:'uk1960', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Il discorso di Birmingham',
+    text:'Il 20 aprile, a Birmingham, il responsabile della Difesa dell\'opposizione tiene un discorso contro l\'immigrazione dal Commonwealth. Il giorno dopo il suo leader lo caccia dal governo ombra definendo il discorso razzista nei toni. Enoch Powell non tornerà mai in una prima fila, e per vent\'anni il dibattito britannico sull\'immigrazione si misurerà con quella giornata.',
+    logx:'Il discorso di Birmingham costa il governo ombra a chi l\'ha tenuto.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'puk_belfast', linea:LINEA_UK, anno:1969, mese:8, era:'uk1960', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Belfast',
+    text:'In agosto, dopo giorni di scontri e di case bruciate, il governo manda l\'esercito nelle strade dell\'Irlanda del Nord. Arriva per proteggere e resterà per una generazione: comincia qui il conflitto che segnerà i trent\'anni successivi, in Ulster e sull\'isola grande.',
+    logx:'L\'esercito nelle strade dell\'Irlanda del Nord: comincia qui.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'puk_indipendenza', linea:LINEA_UK, anno:1957, mese:3, era:'uk1950', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il mondo',
+    t:'La prima indipendenza',
+    text:'Il 6 marzo la Costa d\'Oro diventa Ghana: è la prima colonia africana dell\'impero a farsi Stato, e altre seguiranno. Negli stessi anni, in Kenya, l\'impero mostra l\'altra faccia: dal 1952 lo stato d\'emergenza risponde alla rivolta Mau Mau con decine di migliaia di internamenti nei campi e con violenze che Londra riconoscerà soltanto mezzo secolo dopo, risarcendo i sopravvissuti. Nello stesso decennio l\'impero si congeda e si difende.',
+    logx:'La Costa d\'Oro diventa Ghana. Nello stesso decennio l\'impero si congeda e si difende.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
 ];
 
 /* ============================================================================================================
@@ -1206,6 +1403,120 @@ const RICHIAMO_CORRENTI_OPP_EV = {
    nessun titolo di canzone/film, nessun marchio (mai il nome: «il siparietto della pubblicità», «la melodia che
    tutti canticchiano»); tono da corsivo di giornale, mai demenziale; il leggero NON commenta mai la politica. ===== */
 const BEAT_LEGGERI = [
+  /* ---- L49-1 · I CINQUE BEAT DEL DECENNIO INGLESE (scheda §D) — effetto ZERO, come tutto il registro leggero.
+     Due sono ANCORATI AL GIORNO e la scheda lo dice: l'Everest **solo 1953**, Wembley **solo nov 1953** (verificato
+     in scheda: 25 nov 1953, Ungheria-Inghilterra 6-3). Monaco è febbraio '58 e ha `tono:'grave'`: è un lutto, non
+     un siparietto — resta nel registro leggero perché non è politica, ma non si scherza sopra. ---- */
+  {id:'lguk_everest', era:'uk1950', registro:'leggero', cond:()=>S.year===1953, kick:'Il paese', t:'L\'Everest è nostro', text:'La cima più alta del mondo salita da una spedizione britannica, e la notizia che arriva la mattina dell\'Incoronazione: il paese decide che è un segno.', ch:[
+    {l:'Ti concedi di crederci anche tu', e:'Certi giorni capitano insieme', f:function(){}},
+    {l:'Segni una nota di congratulazioni', e:'Poche righe, mandate subito', f:function(){}} ]},
+  {id:'lguk_wembley', era:'uk1950', registro:'leggero', cond:()=>S.year===1953&&S.month===11, kick:'Il paese', t:'La lezione di Wembley', text:'Novantamila persone a Wembley vedono una nazionale straniera vincere in casa per la prima volta, e vincere di tre gol. Il calcio inglese, che il calcio l\'ha inventato, esce dal campo con l\'idea di doverlo reimparare.', ch:[
+    {l:'Ammetti che hanno giocato meglio', e:'Si impara anche così', f:function(){}},
+    {l:'Cambi discorso, per stasera', e:'Domani se ne riparla', f:function(){}} ]},
+  {id:'lguk_monaco', era:'uk1950', registro:'leggero', tono:'grave', cond:()=>S.year===1958&&S.month>=2&&S.month<=3, kick:'Il paese', t:'Il lutto di Monaco', text:'Un aereo non riesce a decollare da uno scalo innevato e una squadra intera resta a terra. Il campionato continua, il paese no — per qualche settimana.', ch:[
+    {l:'Un minuto di silenzio, e basta parole', e:'Non c\'è altro da aggiungere', f:function(){}},
+    {l:'Mandi un messaggio alle famiglie', e:'Scritto a mano, non dettato', f:function(){}} ]},
+  {id:'lguk_mini', era:'uk1950', registro:'leggero', cond:()=>S.year>=1959, kick:'Il paese', t:'La Mini', text:'Un\'auto piccolissima che dentro è grande: costa poco, sta ovunque, e la guidano tutti, dal manovale alla contessa. Un oggetto che diventa un\'epoca.', ch:[
+    {l:'Ne provi una, per curiosità', e:'Più spaziosa di quanto sembri', f:function(){}},
+    {l:'Ti fai bastare quella che hai', e:'Le novità possono aspettare', f:function(){}} ]},
+  {id:'lguk_caffe', era:'uk1950', registro:'leggero', cond:()=>S.year>=1954, kick:'Il paese', t:'Il caffè con la macchina', text:'Nei coffee bar arriva la macchina italiana che fa il vapore: i ragazzi ci stanno ore con una tazza sola, e il juke-box fa il resto.', ch:[
+    {l:'Ne bevi uno in piedi al banco', e:'Piccolo, forte, e via', f:function(){}},
+    {l:'Resti al tè, come sempre', e:'Certe cose non si cambiano', f:function(){}} ]},
+  /* ---- L50-2 · SECONDO GIRO (scheda §F, 18-25). Il registro inglese era magro — 5 voci vive contro le 15-22
+     italiane — e il neo l'avevo dichiarato chiudendo L49-1. Effetto ZERO come tutto il leggero.
+     Ancore della scheda, tutte dentro `cond`: rate ≥1954 · rock ≥1956 · colonie ≥1953 · sigarette ≥1954 ·
+     self-service ≥1956 · Natale-TV ≥1957 · scooter ≥1955. La schedina non ha ancora: è tutto il decennio.
+     ⚑ IL MESSAGGIO DI NATALE È CERIMONIA, NON PERSONA (G3): la Corona compare come rito che si guarda, non
+     parla e non decide. Stessa linea dell'Incoronazione. ---- */
+  {id:'lguk_schedina', era:'uk1950', registro:'leggero', kick:'Il paese', t:'La schedina del sabato', text:'Milioni di buste col pronostico partono ogni settimana verso Liverpool: si sogna la vincita mentre alla radio leggono i risultati e in cucina cala il silenzio.', ch:[
+    {l:'Compili anche tu la tua colonna', e:'Otto pronostici e una speranza', f:function(){}},
+    {l:'Ascolti soltanto i risultati', e:'Il silenzio in cucina è lo stesso', f:function(){}} ]},
+  {id:'lguk_rate', era:'uk1950', registro:'leggero', cond:()=>S.year>=1954, kick:'Il paese', t:'Gli elettrodomestici a rate', text:'Lavatrice, frigorifero, aspirapolvere: si comprano pagando ogni mese un po\', e si scopre che la modernità si può rateizzare. Chi ha vissuto la guerra guarda le rate con sospetto.', ch:[
+    {l:'Firmi anche tu per la lavatrice', e:'Un po\' ogni mese, e in casa cambia tutto', f:function(){}},
+    {l:'Aspetti di avere la cifra intera', e:'Come si è sempre fatto', f:function(){}} ]},
+  {id:'lguk_rock', era:'uk1950', registro:'leggero', cond:()=>S.year>=1956, kick:'Il paese', t:'Il rock che arriva', text:'Nei cinema arriva una musica che fa alzare i ragazzi dalle poltrone e ballare nei corridoi. Qualche gestore chiama la polizia, qualcun altro raddoppia gli spettacoli.', ch:[
+    {l:'Ti fai raccontare com\'è, questa musica', e:'Curiosità, per ora', f:function(){}},
+    {l:'Ti sembra baccano e lo dici', e:'Ogni generazione lo ha detto della precedente', f:function(){}} ]},
+  {id:'lguk_colonia', era:'uk1950', registro:'leggero', cond:()=>S.year>=1953, kick:'Il paese', t:'Le vacanze in colonia', text:'Una settimana al mare in un campo vacanze, con l\'altoparlante che sveglia alle otto e la sfida di ballo la sera. Per molte famiglie è la prima vacanza della vita.', ch:[
+    {l:'Ti fai mandare una cartolina dal campo', e:'Otto del mattino, altoparlante compreso', f:function(){}},
+    {l:'Preferisci una settimana in silenzio', e:'Ognuno riposa a modo suo', f:function(){}} ]},
+  {id:'lguk_sigarette', era:'uk1950', registro:'leggero', cond:()=>S.year>=1954, kick:'Il paese', t:'Il medico e le sigarette', text:'Uno studio collega il fumo al cancro ai polmoni, e l\'annuncio finisce sui giornali fra due pubblicità di sigarette. Nei pub, quella sera, se ne parla accendendone un\'altra.', ch:[
+    {l:'Leggi lo studio fino in fondo', e:'C\'è poco da fraintendere', f:function(){}},
+    {l:'Ne parli, e intanto ne accendi una', e:'Lo fanno tutti, per ora', f:function(){}} ]},
+  {id:'lguk_selfservice', era:'uk1950', registro:'leggero', cond:()=>S.year>=1956, kick:'Il paese', t:'Il negozio dove ci si serve da soli', text:'Nel negozio nuovo non c\'è il banco: si prende il cestello, si gira fra gli scaffali, si paga all\'uscita. Le clienti di sempre trovano che manchi la conversazione.', ch:[
+    {l:'Ci entri a vedere com\'è fatto', e:'Cestello, scaffali, cassa all\'uscita', f:function(){}},
+    {l:'Resti alla bottega col banco', e:'Lì almeno ti chiedono come stai', f:function(){}} ]},
+  {id:'lguk_natale', era:'uk1950', registro:'leggero', cond:()=>S.year>=1957, kick:'Il paese', t:'Il messaggio di Natale in TV', text:'Per la prima volta il messaggio di Natale della Corona non si ascolta alla radio: si guarda. Le famiglie restano in salotto anche dopo il pranzo.', ch:[
+    {l:'Lo guardi anche tu, in salotto', e:'Si resta seduti, per una volta', f:function(){}},
+    {l:'Approfitti del silenzio in cucina', e:'Qualcuno deve pur lavare i piatti', f:function(){}} ]},
+  {id:'lguk_scooter', era:'uk1950', registro:'leggero', cond:()=>S.year>=1955, kick:'Il paese', t:'La scooter', text:'Motorette italiane a due tempi riempiono le strade: costano poco, non sporcano il vestito, e i ragazzi ci vanno a ballare in due.', ch:[
+    {l:'Ne guardi una parcheggiata, a lungo', e:'Costa quanto tre mesi di autobus', f:function(){}},
+    {l:'Continui a prendere il tram', e:'Non sporca il vestito nemmeno quello', f:function(){}} ]},
+  /* ---- L51-2 · TERZO GIRO (scheda §G, 26-31) — SENZA ANCORA, e il perché è una misura: in L50-2 il registro
+     inglese del 1950-52 restava a 6-8 voci vive contro le 15-22 italiane, perché sette beat su otto del §F sono
+     fatti datati (il rock è del '56, il self-service del '56, il Natale in TV del '57) e anticiparli sarebbe un
+     anacronismo. Questi sei sono cose che nel Regno Unito si facevano GIÀ nel 1950: nessun `cond` sull'anno,
+     vivi dal primo mese. L'unica eccezione dichiarata è la Festa di Bretagna, che è del 1951. ---- */
+  {id:'lguk_cinema', era:'uk1950', registro:'leggero', kick:'Il paese', t:'Il cinema due volte a settimana', text:'Si va al cinema come si va a cena: due film, il cinegiornale e il gelato nell\'intervallo. Le sale sono piene ogni sera, e ci si innamora in ultima fila.', ch:[
+    {l:'Ci vai anche tu, in seconda serata', e:'Due film e un gelato', f:function(){}},
+    {l:'Ti fai raccontare il finale', e:'Costa meno e dura meno', f:function(){}} ]},
+  {id:'lguk_radio', era:'uk1950', registro:'leggero', kick:'Il paese', t:'La radio dopo cena', text:'La famiglia intorno all\'apparecchio per la commedia del giovedì: battute che il giorno dopo ripetono tutti, in ufficio e in fabbrica.', ch:[
+    {l:'Non ti perdi la puntata', e:'Il giovedì è il giovedì', f:function(){}},
+    {l:'Leggi, mentre gli altri ridono', e:'Ognuno il suo modo di stare in stanza', f:function(){}} ]},
+  {id:'lguk_gradinata', era:'uk1950', registro:'leggero', kick:'Il paese', t:'La gradinata', text:'Sessantamila persone in piedi sotto la pioggia, il berretto in testa e il thermos in tasca. Si entra pagando all\'ingresso, e chi arriva tardi guarda le spalle di chi è arrivato prima.', ch:[
+    {l:'Ci vai presto, per stare davanti', e:'Un\'ora prima, e ne vale la pena', f:function(){}},
+    {l:'Aspetti il risultato alla radio', e:'Asciutto, e con le mani calde', f:function(){}} ]},
+  {id:'lguk_ballo', era:'uk1950', registro:'leggero', kick:'Il paese', t:'La sala da ballo del sabato', text:'Orchestra dal vivo, scarpe lucide, il giro di pista che decide le settimane a venire. Le madri chiedono a che ora si torna, e la risposta è sempre la stessa.', ch:[
+    {l:'Fai lucidare le scarpe', e:'Il sabato è una cosa seria', f:function(){}},
+    {l:'Resti a casa e ti fai raccontare', e:'Ci sarà un altro sabato', f:function(){}} ]},
+  {id:'lguk_orto', era:'uk1950', registro:'leggero', kick:'Il paese', t:'L\'orto di guerra', text:'Il pezzo di terra preso durante la guerra per fare patate è ancora lì, e ci si continua ad andare la domenica mattina. Serve meno di prima, e proprio per questo piace.', ch:[
+    {l:'Ci passi la domenica mattina', e:'Serve meno, e proprio per questo piace', f:function(){}},
+    {l:'Lo lasci a chi ne ha bisogno', e:'C\'è ancora chi conta le patate', f:function(){}} ]},
+  {id:'lguk_bretagna', era:'uk1950', registro:'leggero', cond:()=>S.year>=1951, kick:'Il paese', t:'La Festa di Bretagna', text:'Sulla riva sud del fiume si alza una festa di padiglioni e luci: un paese ammaccato che si guarda allo specchio e si trova, per una stagione, moderno.', ch:[
+    {l:'Ci vai a vedere i padiglioni', e:'Luci sulla riva sud', f:function(){}},
+    {l:'Guardi le fotografie sui giornali', e:'Bastano quelle, per farsi un\'idea', f:function(){}} ]},
+  /* ---- L55-1 · I TREDICI BEAT DEL DECENNIO '60 (scheda §E): sei SENZA ancora, vivi dal 1960 — la lezione di
+     L51-2, che l'apertura di un decennio resta magra se ogni voce è un fatto datato — e sette con ancora.
+     ⚠ La TV a colori resta ≥1967, che è l'estremo prudente della scheda (segnata da verificare). ---- */
+  {id:'lguk60_radio', era:'uk1960', registro:'leggero', kick:'Il paese', t:'La partita alla radio', text:'Il sabato pomeriggio la radio dà i risultati uno per uno, con quella voce che sale o scende prima ancora di dire il punteggio. In cucina si capisce tutto dal tono.', ch:[
+    {l:'Ascolti fino all\'ultimo risultato', e:'Si capisce dal tono, prima del numero', f:function(){}},
+    {l:'Ti fai dire solo il tuo', e:'Il resto può aspettare lunedì', f:function(){}} ]},
+  {id:'lguk60_pub', era:'uk1960', registro:'leggero', kick:'Il paese', t:'Il pub del venerdì', text:'Alle sei si esce dal turno e alle sei e un quarto si è al banco: due pinte, la freccette e la campanella dell\'ultimo giro che nessuno vuole sentire.', ch:[
+    {l:'Ti fermi per la seconda pinta', e:'La campanella arriva sempre presto', f:function(){}},
+    {l:'Torni a casa dopo la prima', e:'Domani è sabato, ma con calma', f:function(){}} ]},
+  {id:'lguk60_fish', era:'uk1960', registro:'leggero', kick:'Il paese', t:'Il fish and chips nel giornale', text:'Si compra all\'angolo, incartato nel giornale di ieri, e si mangia camminando col sale e l\'aceto che pizzicano le dita. Costa poco e riscalda le mani.', ch:[
+    {l:'Lo mangi camminando, come tutti', e:'Sale, aceto, e le dita calde', f:function(){}},
+    {l:'Lo porti a casa nel piatto', e:'Arriva mezzo freddo, ma seduto', f:function(){}} ]},
+  {id:'lguk60_bici', era:'uk1960', registro:'leggero', kick:'Il paese', t:'La bicicletta e l\'autobus', text:'Alle sette del mattino le strade si riempiono di biciclette e di autobus a due piani: chi ha la macchina è ancora una minoranza, e si vede.', ch:[
+    {l:'Prendi l\'autobus e leggi il giornale', e:'Di sopra, davanti, se c\'è posto', f:function(){}},
+    {l:'Vai in bicicletta, con qualunque tempo', e:'Si arriva bagnati e in orario', f:function(){}} ]},
+  {id:'lguk60_ballo', era:'uk1960', registro:'leggero', kick:'Il paese', t:'Il ballo del sabato, ancora', text:'La sala è la stessa di dieci anni fa, l\'orchestra pure, ma la musica che chiedono i ragazzi non è più quella. I gestori fanno finta di niente e cambiano i dischi.', ch:[
+    {l:'Fai cambiare i dischi anche tu', e:'La sala si riempie di nuovo', f:function(){}},
+    {l:'Resti al valzer, per principio', e:'La pista si svuota con dignità', f:function(){}} ]},
+  {id:'lguk60_suoceri', era:'uk1960', registro:'leggero', kick:'Il paese', t:'La domenica dai suoceri', text:'Arrosto all\'una, le stesse domande di sempre, e il pomeriggio che non finisce mai. Si torna a casa con gli avanzi e la sensazione di aver fatto il proprio dovere.', ch:[
+    {l:'Ci vai, e porti il dolce', e:'Il dovere fatto, e gli avanzi', f:function(){}},
+    {l:'Trovi una scusa, per stavolta', e:'Ci sarà un\'altra domenica', f:function(){}} ]},
+  {id:'lguk60_liverpool', era:'uk1960', registro:'leggero', cond:()=>S.year>=1963, kick:'Il paese', t:'I quattro di Liverpool', text:'Quattro ragazzi con la frangia riempiono i teatri di urla: i padri non capiscono, le figlie sì, e i giornali contano i biglietti.', ch:[
+    {l:'Ti fai spiegare perché urlano', e:'Nessuno sa spiegartelo bene', f:function(){}},
+    {l:'Conti i biglietti anche tu', e:'Quello, almeno, è un numero', f:function(){}} ]},
+  {id:'lguk60_minigonna', era:'uk1960', registro:'leggero', cond:()=>S.year>=1965, kick:'Il paese', t:'La minigonna', text:'Sale di dieci centimetri e diventa una notizia da prima pagina: i sarti la copiano, i vescovi la deplorano, le ragazze la portano lo stesso.', ch:[
+    {l:'Non ti pronunci in pubblico', e:'Certe domande non hanno una risposta buona', f:function(){}},
+    {l:'Dici che è una moda come le altre', e:'E come le altre passerà, o no', f:function(){}} ]},
+  {id:'lguk60_colori', era:'uk1960', registro:'leggero', cond:()=>S.year>=1967, kick:'Il paese', t:'La TV a colori', text:'Le prime trasmissioni a colori arrivano su un canale solo, e i negozi mettono un apparecchio in vetrina acceso tutto il giorno. Ci si ferma a guardare l\'erba verde.', ch:[
+    {l:'Ti fermi anche tu davanti alla vetrina', e:'L\'erba è verde, davvero', f:function(){}},
+    {l:'Aspetti che costi la metà', e:'Costerà la metà, prima o poi', f:function(){}} ]},
+  {id:'lguk60_concorde', era:'uk1960', registro:'leggero', cond:()=>S.year>=1969, kick:'Il paese', t:'Il Concorde in prova', text:'Un aereo dal muso storto stacca da terra per la prima volta: farà Londra-New York in metà tempo, dicono, e costerà come un\'ala d\'ospedale.', ch:[
+    {l:'Guardi il decollo alla televisione', e:'Il muso si abbassa, e sembra impossibile', f:function(){}},
+    {l:'Chiedi quanto è costato finora', e:'La risposta arriva in una cartellina', f:function(){}} ]},
+  {id:'lguk60_luna', era:'uk1960', registro:'leggero', cond:()=>S.year===1969&&S.month>=7&&S.month<=8, kick:'Il paese', t:'La Luna in salotto', text:'Ci si alza nel cuore della notte per vedere un uomo camminare su un altro mondo, in bianco e nero e con la voce che gracchia.', ch:[
+    {l:'Svegli anche i bambini', e:'Se lo ricorderanno per sempre', f:function(){}},
+    {l:'Guardi la replica al mattino', e:'La Luna resta lì anche domani', f:function(){}} ]},
+  {id:'lguk60_supermercato', era:'uk1960', registro:'leggero', cond:()=>S.year>=1965, kick:'Il paese', t:'Il supermercato grande', text:'Fuori città apre un negozio con il parcheggio: carrelli grandi come culle, corsie che non finiscono, e la spesa della settimana in una volta sola.', ch:[
+    {l:'Ci vai a vedere il parcheggio', e:'È più grande del negozio di prima', f:function(){}},
+    {l:'Resti alla bottega sotto casa', e:'Lì la spesa te la portano su', f:function(){}} ]},
+  {id:'lguk60_spagna', era:'uk1960', registro:'leggero', cond:()=>S.year>=1966, kick:'Il paese', t:'La vacanza in Spagna', text:'Il volo charter porta al sole a un prezzo che si può fare: si torna scottati e con la bottiglia di liquore giallo.', ch:[
+    {l:'Prenoti anche tu una settimana', e:'Scottati e contenti', f:function(){}},
+    {l:'Resti alla costa di sempre', e:'Piove, ma è vicino', f:function(){}} ]},
   // ---- Anni '50 ----
   {id:'lg50_schedina', era:'universale', registro:'leggero', kick:'Il paese', t:'La schedina della domenica', text:'Nei bar non si parla d\'altro: pronostici, colonne raddoppiate, e il sogno di fare «13». Per una mattina la politica può aspettare.', ch:[
     {l:'Giochi anche tu una colonna', e:'Due firme e una speranza', f:function(){}},
@@ -3934,6 +4245,118 @@ const EVENTS=[
  {id:'i50_ombra', era:'italia1950', tono:'grave', kick:'Ombre', t:'Un\'ombra nell\'ombra', text:'Un uomo dei servizi ti sfiora una confidenza: esisterebbe una rete clandestina «stay-behind», una contromisura tenuta nel buio in caso d\'invasione. Nessun nome, nessuna prova — solo un sussurro che puoi seguire o lasciar cadere.',ch:[
    {l:'Lascia che l\'ombra resti tale',e:'Non tocchi nulla; la rete resta nel buio',f:()=>{gd('cetomedio',2);}},
    {l:'Sonda in silenzio, per sapere',e:'Cerchi di capire cosa c\'è; un filo di rischio',f:()=>{gd('giovani',2); gd('cetomedio',-1);}}]},
+
+ /* ==============================================================================================================
+    L49-1 · I DODICI EVENTI DEL DECENNIO INGLESE (scheda §C). Testi della scheda, resi carte a due voci.
+    IL GATE DI PAESE È IL TAG: `era:'uk1950'` esiste solo fra i decenni di LINEA_UK, quindi `eraCartaViva` le
+    spegne in Italia senza bisogno di un controllo sul paese — è la stessa rete che ha retto in L48-1.
+    GLI ANACRONISMI DELLA SCHEDA SONO CONDIZIONI, NON BUONE INTENZIONI: tessere fino al '54 · ITV dal '55 ·
+    naja fino al '60 · Premium Bonds dal '56 · autostrada dal '58 · bomba H dal '57. Ognuna è nel `cond`.
+    NESSUN NOME DI PERSONA (paletto I1): nessuno di questi dodici ne contiene uno.
+    ============================================================================================================== */
+ {id:'uk_tessere', era:'uk1950', cond:()=>S.year<=1954, kick:'Il paese', t:'Le ultime tessere',
+  text:'Quattordici anni di tessere annonarie finiscono un alimento alla volta: prima lo zucchero, poi il burro, infine la carne. La normalità torna a pezzi, e ogni pezzo è una notizia.',ch:[
+   {l:'Acceleri: via le tessere prima del previsto',e:'Il paese respira · i prezzi si muovono e chi ha meno lo sente',f:()=>{gd('cetomedio',4); gd('giovani',3); gd('lavoratori',-2); if(S.gMod!=null)S.gMod+=0.15;}},
+   {l:'Tieni il razionamento finché i prezzi reggono',e:'Nessuno resta indietro · il paese aspetta un altro po\'',f:()=>{gd('lavoratori',3); gd('pensionati',2); gd('cetomedio',-3);}}]},
+ {id:'uk_case', era:'uk1950', cond:()=>S.year>=1951, kick:'Case', t:'Le trecentomila case',
+  text:'La promessa è un numero tondo: trecentomila case l\'anno. Si può fare con mattoni veri e tempi lunghi, o con prefabbricati e tempi da manifesto.',ch:[
+   {l:'Prefabbricati: il numero si fa, e si vede',e:'La promessa è mantenuta a vista · fra vent\'anni saranno un problema',costo:{debito:1},f:()=>{S.ind.debt+=1; gd('lavoratori',5); gd('giovani',3); gd('cetomedio',-2); stampad(3);}},
+   {l:'Mattoni veri, e il numero arriva più tardi',e:'Case che durano · il manifesto resta scoperto',f:()=>{gd('cetomedio',3); gd('imprenditori',2); gd('lavoratori',-3); stampad(-2);}}]},
+ {id:'uk_acciaio', era:'uk1950', cond:()=>S.year<=1953, kick:'Industria', t:'L\'acciaio avanti e indietro',
+  text:'Nazionalizzato ieri, restituito ai privati oggi: l\'acciaio cambia padrone col colore del governo. Chi ci lavora dentro chiede solo di sapere per chi lavorerà domani.',ch:[
+   {l:'L\'acciaio resta pubblico',e:'I sindacati con te · la City storce la bocca',f:()=>{gd('lavoratori',5); gd('imprenditori',-5); repd(-2);}},
+   {l:'Lo restituisci ai privati',e:'Capitali e mercato tornano · le acciaierie temono il conto',f:()=>{gd('imprenditori',5); gd('lavoratori',-5); repd(2);}}]},
+ {id:'uk_televisore', era:'uk1950', cond:()=>S.year>=1953&&S.year<=1956, kick:'Il paese', t:'Il televisore per l\'Incoronazione',
+  text:'Si comprano televisori come non era mai successo, e chi non l\'ha se lo fa prestare dal vicino. Da quest\'anno il salotto ha una finestra in più.',ch:[
+   {l:'Il canone paga l\'espansione della rete',e:'Il segnale arriva ovunque · qualcuno paga per un\'antenna che non ha',f:()=>{gd('cetomedio',3); gd('giovani',2); gd('pensionati',-2);}},
+   {l:'La rete cresce quando crescono gli abbonati',e:'Nessuno paga per gli altri · le contee lontane aspettano',f:()=>{gd('pensionati',2); gd('giovani',-2);}}]},
+ {id:'uk_itv', era:'uk1950', cond:()=>S.year>=1955, kick:'Il paese', t:'La pubblicità in salotto',
+  text:'Accanto alla BBC nasce la televisione degli sponsor: chi la teme parla di volgarità, chi la fa parla di libertà di scelta. Il pubblico guarda entrambe.',ch:[
+   {l:'Lasci correre il canale commerciale',e:'Il pubblico sceglie · i custodi del buon gusto insorgono',f:()=>{gd('imprenditori',4); gd('giovani',3); gd('cattolici',-4); stampad(2);}},
+   {l:'Metti paletti severi sulla pubblicità',e:'Il servizio pubblico protetto · gli inserzionisti se ne ricorderanno',f:()=>{gd('cattolici',3); gd('pensionati',2); gd('imprenditori',-4);}}]},
+ {id:'uk_naja', era:'uk1950', cond:()=>S.year<=1960, kick:'Difesa', t:'La naja inglese',
+  text:'Due anni di servizio militare per ogni giovane maschio: c\'è chi ci trova un mestiere e chi ci perde due anni. Chiuderla si può, ma l\'esercito chiede in cambio soldati veri, pagati.',ch:[
+   {l:'Verso un esercito di professionisti',e:'I giovani ti ringraziano · la spesa militare cambia di segno',costo:{debito:1},f:()=>{S.ind.debt+=1; gd('giovani',6); gd('cetomedio',-2); repd(-2);}},
+   {l:'La leva resta: è scuola di nazione',e:'Le forze armate tranquille · una generazione conta i mesi',f:()=>{gd('cattolici',3); gd('pensionati',2); gd('giovani',-6);}}]},
+ {id:'uk_smog_carbone', era:'uk1950', cond:()=>S.year>=1952&&S.year<=1956, kick:'Il paese', t:'Lo smog e il carbone',
+  text:'Ogni casa ha il suo camino e la città ha la sua nebbia: convertire il riscaldamento costa a chi ha meno, ma l\'aria è di tutti.',ch:[
+   {l:'Zone senza fumo, con un contributo per convertire',e:'L\'aria migliora · il conto arriva ai bilanci comunali',costo:{debito:0.8},f:()=>{S.ind.debt+=0.8; S.ind.ambiente=Math.min(100,(S.ind.ambiente||50)+6); gd('cetomedio',3); gd('lavoratori',-2);}},
+   {l:'Non ora: il carbone è quello che la gente può permettersi',e:'Nessuna spesa in più · la nebbia torna ogni inverno',f:()=>{S.ind.ambiente=Math.max(0,(S.ind.ambiente||50)-5); gd('lavoratori',3); gd('cetomedio',-3);}}]},
+ {id:'uk_teddy', era:'uk1950', cond:()=>S.year>=1954, kick:'Il paese', t:'I teddy boys',
+  text:'Giacche edoardiane e capelli impomatati: i primi giovani che non vogliono somigliare ai padri. I giornali gridano al teppismo, i negozi contano gli incassi.',ch:[
+   {l:'È moda, non è un problema d\'ordine pubblico',e:'I giovani respirano · i giornali ti danno del permissivo',f:()=>{gd('giovani',5); gd('pensionati',-3); stampad(-3);}},
+   {l:'Più agenti dove si radunano',e:'I quartieri tranquilli · una generazione impara a diffidare',f:()=>{S.ind.sicurezza=Math.min(100,(S.ind.sicurezza||50)+3); gd('pensionati',4); gd('cattolici',2); gd('giovani',-5);}}]},
+ {id:'uk_bomba', era:'uk1950', cond:()=>S.year>=1957, tono:'grave', kick:'Il mondo', t:'La bomba e la coscienza',
+  text:'Il paese ha la sua bomba all\'idrogeno, e la prima marcia contro di essa: quattro giorni a piedi verso il centro atomico, con i cartelli scritti a mano.',ch:[
+   {l:'L\'arma resta: è il posto al tavolo dei grandi',e:'Gli alleati ti trattano da pari · una parte del paese non ti perdona',f:()=>{repd(6); gd('cetomedio',2); gd('giovani',-5); gd('lavoratori',-3);}},
+   {l:'Ricevi i marciatori e apri una discussione',e:'La piazza ti ascolta · il tavolo dei grandi prende nota',f:()=>{repd(-5); gd('giovani',5); gd('lavoratori',3); gd('cetomedio',-2);}}]},
+ {id:'uk_vicino', era:'uk1950', cond:()=>S.year>=1954, tono:'grave', kick:'Il paese', t:'Il vicino nuovo',
+  text:'Arrivano dai Caraibi con un contratto d\'assunzione e un cappotto troppo leggero: guidano gli autobus e reggono le corsie d\'ospedale. Nelle strade dove abitano, l\'accoglienza non è la stessa.',ch:[
+   {l:'Le case popolari si assegnano col bisogno, non con l\'anzianità di quartiere',e:'Una regola giusta · nei quartieri qualcuno grida al favore',f:()=>{gd('lavoratori',3); gd('giovani',3); gd('pensionati',-4); gd('cetomedio',-2);}},
+   {l:'Non tocchi le liste: si fa come si è sempre fatto',e:'Nessuna tensione oggi · chi è arrivato ultimo resta ultimo',f:()=>{gd('pensionati',3); gd('cetomedio',2); gd('lavoratori',-3); gd('giovani',-3);}}]},
+ {id:'uk_bonds', era:'uk1950', cond:()=>S.year>=1956, kick:'Risparmio', t:'I titoli della fortuna',
+  text:'Buoni del Tesoro che invece dell\'interesse danno un\'estrazione: gioco d\'azzardo di Stato per qualcuno, risparmio popolare per altri. La coda in posta è lunga.',ch:[
+   {l:'Li lanci in grande: il Tesoro ha bisogno di quel denaro',e:'Il risparmio popolare entra nelle casse · i pulpiti protestano',f:()=>{S.ind.debt-=0.8; gd('cetomedio',3); gd('lavoratori',2); gd('cattolici',-4);}},
+   {l:'Li tieni piccoli, quasi in sordina',e:'Nessuno scandalo · e nemmeno il denaro',f:()=>{gd('cattolici',3); gd('cetomedio',-1);}}]},
+ /* ==============================================================================================================
+    L55-1 · I DODICI EVENTI DEL DECENNIO '60 (scheda §D). Gate di paese e d'epoca dal tag `era:'uk1960'`, che
+    esiste solo fra i decenni di LINEA_UK. Le ancore della scheda sono dentro `cond`, una per una.
+    ⚠ Due date che la scheda segna da verificare le ho trattate come tali: la TV a colori (beat) resta ≥1967,
+    che è l'estremo prudente, e l'onorificenza ai quattro di Liverpool NON compare in nessun titolo — al suo
+    posto un titolo che dice quello che è certo (i teatri pieni). Chi verifica potrà rimetterla.
+    ============================================================================================================== */
+ {id:'uk60_sterlina', era:'uk1960', cond:()=>S.year<=1966, tono:'grave', kick:'La sterlina', t:'La corsa alla sterlina, di nuovo',
+  text:'Le riserve calano e i telefoni della Banca squillano di notte. Il copione è quello di dieci anni fa, e il paese comincia a chiedersi perché si ripeta.',ch:[
+   {l:'Stretta immediata, come sempre',e:'Il cambio tiene · e chi lavora se ne accorge in busta paga',f:()=>{ if(S.gMod!=null)S.gMod-=0.4; gd('lavoratori',-9); gd('cetomedio',-5); repd(4);}},
+   {l:'Questa volta si prende tempo',e:'Nessun sacrificio adesso · e i mercati tornano prima del previsto',costo:{debito:1},f:()=>{S.ind.debt+=1; stampad(-4); gd('lavoratori',3);}}]},
+ {id:'uk60_piano', era:'uk1960', cond:()=>S.year>=1964, kick:'Economia', t:'Il piano nazionale',
+  text:'Un piano quinquennale all\'inglese: obiettivi di crescita, tavoli con industria e sindacati, un ministero nuovo. Chi ci crede parla di modernità; chi no, di carta.',ch:[
+   {l:'Ci metti la faccia e i soldi',e:'Un\'idea di paese · e un bersaglio grosso se i numeri non arrivano',costo:{debito:1},f:()=>{S.ind.debt+=1; gd('lavoratori',5); gd('imprenditori',3); stampad(-2);}},
+   {l:'Lo annunci e lo lasci ai tecnici',e:'Nessun rischio personale · e nessuno ci crede davvero',f:()=>{gd('cetomedio',2); gd('lavoratori',-3);}}]},
+ {id:'uk60_universita', era:'uk1960', cond:()=>S.year>=1962, tono:'florido', kick:'Istruzione', t:'Le università nuove',
+  text:'Campus nuovi di zecca in città di provincia: per la prima volta i figli degli operai fanno domanda. Chi paga? Lo Stato, e la fila è lunga.',ch:[
+   {l:'Si apre a tutti, con le borse di studio',e:'Una generazione entra dove non era mai entrata · il conto è lungo',costo:{debito:1.2},f:()=>{S.ind.debt+=1.2; gd('giovani',8); gd('lavoratori',4); gd('cetomedio',-3);}},
+   {l:'Si cresce piano, col numero chiuso',e:'Conti in ordine · e la fila resta fuori',f:()=>{gd('cetomedio',3); gd('giovani',-6);}}]},
+ {id:'uk60_bbc2', era:'uk1960', cond:()=>S.year>=1964, kick:'Il paese', t:'Il terzo canale',
+  text:'Nasce il secondo canale della BBC: teatro, documentari, cose che nessun inserzionista pagherebbe. Ne parlano in pochi e ne discutono tutti.',ch:[
+   {l:'Il canone lo finanzia senza discussioni',e:'Il servizio pubblico si allarga · e qualcuno paga per ciò che non guarda',f:()=>{gd('cetomedio',4); gd('giovani',3); gd('pensionati',-3);}},
+   {l:'Deve giustificare ogni sterlina',e:'Nessuno spreco · e una programmazione più timida',f:()=>{gd('pensionati',3); gd('giovani',-3); stampad(-2);}}]},
+ {id:'uk60_congelamento', era:'uk1960', cond:()=>S.year>=1966&&S.year<=1968, tono:'grave', kick:'Economia', t:'Il congelamento',
+  text:'Salari e prezzi bloccati per legge: nessuno può aumentare niente. I sindacati la chiamano tradimento, il Tesoro respiro.',ch:[
+   {l:'Si blocca tutto, e si tiene',e:'L\'inflazione si ferma · e il rapporto coi sindacati anche',f:()=>{ if(S.gMod!=null)S.gMod-=0.3; gd('lavoratori',-13); gd('cetomedio',3); gd('imprenditori',4); repd(3);}},
+   {l:'Solo i prezzi, non i salari',e:'I sindacati restano al tavolo · le imprese gridano',f:()=>{gd('lavoratori',5); gd('imprenditori',-8); gd('cetomedio',-2);}}]},
+ {id:'uk60_pillola', era:'uk1960', cond:()=>S.year>=1961, kick:'Il paese', t:'La pillola e la famiglia',
+  text:'Un farmaco che separa il sesso dalla nascita di un figlio arriva negli ambulatori. Le madri chiedono a chi darlo, i medici a chi negarlo.',ch:[
+   {l:'Nel servizio sanitario, per chi la chiede',e:'Una libertà nuova · e i pulpiti al lavoro',f:()=>{gd('giovani',9); gd('lavoratori',3); gd('cattolici',-10);}},
+   {l:'Si lascia decidere al medico, caso per caso',e:'Nessuno scontro frontale · e una lotteria per codice postale',f:()=>{gd('cattolici',4); gd('giovani',-5);}}]},
+ {id:'uk60_controlli', era:'uk1960', cond:()=>S.year>=1962, tono:'grave', kick:'Il paese', t:'La legge sui controlli d\'ingresso',
+  text:'Chi ha un passaporto del Commonwealth scopre che non basta più. La legge si scrive in fretta, e chi è a metà viaggio resta a metà.',ch:[
+   {l:'Almeno chi è già partito arriva',e:'Una clausola che salva le famiglie in viaggio · i giornali la chiamano scappatoia',f:()=>{gd('giovani',4); gd('lavoratori',2); gd('pensionati',-5); stampad(-4);}},
+   {l:'La legge vale dal giorno della firma',e:'Nessuna eccezione · e navi che arrivano a porto chiuso',f:()=>{gd('pensionati',5); gd('cetomedio',3); gd('giovani',-6); gd('lavoratori',-3); repd(-3);}}]},
+ {id:'uk60_miniere', era:'uk1960', cond:()=>S.year>=1963, tono:'grave', kick:'Industria', t:'Le miniere che chiudono',
+  text:'Pozzo dopo pozzo, il carbone arretra: nei villaggi che vivevano di quello non c\'è un secondo mestiere. La riconversione è una parola che nessuno sa ancora scrivere.',ch:[
+   {l:'Si chiude piano, con la riconversione pagata',e:'I villaggi hanno tempo · il conto lo porta il bilancio',costo:{debito:1.5},f:()=>{S.ind.debt+=1.5; gd('lavoratori',7); gd('imprenditori',-4); gd('cetomedio',-3);}},
+   {l:'Si chiude dove non rende, e basta',e:'I conti tornano · e certi paesi non si riprenderanno',f:()=>{ if(S.gMod!=null)S.gMod+=0.15; gd('imprenditori',5); gd('lavoratori',-12);}}]},
+ {id:'uk60_cittanuova', era:'uk1960', cond:()=>S.year>=1962, kick:'Case', t:'La città nuova',
+  text:'Si costruiscono città intere dove c\'erano campi: torri, rotatorie, negozi in fila. Ci si va volentieri, e dopo dieci anni ci si domanda perché nessuno si conosca.',ch:[
+   {l:'Si costruisce in grande e in fretta',e:'Le case ci sono · e fra vent\'anni saranno una domanda',costo:{debito:1.2},f:()=>{S.ind.debt+=1.2; gd('lavoratori',6); gd('giovani',4); gd('cetomedio',-3);}},
+   {l:'Meno torri, più quartieri bassi',e:'Si vive meglio · e le liste d\'attesa non si accorciano',f:()=>{gd('cetomedio',4); gd('lavoratori',-4);}}]},
+ {id:'uk60_scuola', era:'uk1960', cond:()=>S.year>=1965, kick:'Istruzione', t:'La scuola per tutti',
+  text:'Una scuola media unica al posto della selezione a undici anni: chi ci ha guadagnato dal vecchio esame la difende, chi l\'ha fallito ricorda il giorno esatto.',ch:[
+   {l:'Si unifica: l\'esame a undici anni sparisce',e:'Nessun bambino più bocciato a undici anni · le scuole d\'élite non perdonano',f:()=>{gd('lavoratori',8); gd('giovani',6); gd('cetomedio',-9);}},
+   {l:'Si lascia scegliere alle contee',e:'Nessuno scontro nazionale · e una mappa a macchie di leopardo',f:()=>{gd('cetomedio',4); gd('lavoratori',-4); stampad(-2);}}]},
+ {id:'uk60_decimale', era:'uk1960', cond:()=>S.year>=1966, kick:'Economia', t:'La decimalizzazione annunciata',
+  text:'Si decide che scellini e pence a dodici lasceranno il posto a cento penny per sterlina. Manca ancora qualche anno, e già si litiga sui registratori di cassa.',ch:[
+   {l:'Si annuncia la data e non si torna indietro',e:'I negozi hanno tempo per prepararsi · i più anziani no',costo:{debito:0.5},f:()=>{S.ind.debt+=0.5; gd('imprenditori',4); gd('giovani',3); gd('pensionati',-6);}},
+   {l:'Si rimanda ancora la decisione',e:'Nessuno si arrabbia oggi · e il conto lo paga chi verrà',f:()=>{gd('pensionati',4); gd('imprenditori',-3);}}]},
+ {id:'uk60_carnaby', era:'uk1960', cond:()=>S.year>=1964, tono:'florido', kick:'Il paese', t:'Le luci di Carnaby',
+  text:'Boutique, gonne corte, gruppi che l\'America compra a scatola chiusa: per qualche stagione il paese esporta il suo modo di essere giovane.',ch:[
+   {l:'Il governo ci mette il cappello',e:'Il paese sembra giovane · e qualcuno trova la posa ridicola',f:()=>{gd('giovani',7); gd('imprenditori',3); gd('pensionati',-5); stampad(3);}},
+   {l:'Non è affare del governo',e:'Nessuna posa · e nessun merito',f:()=>{gd('pensionati',3); gd('giovani',-3);}}]},
+ {id:'uk_autostrada', era:'uk1950', cond:()=>S.year>=1958, tono:'florido', kick:'Il paese', t:'La prima autostrada',
+  text:'Il primo tratto di autostrada apre senza limite di velocità e con le auto che si fermano a bordo strada per guardare. Il paese scopre che si può attraversare in un giorno.',ch:[
+   {l:'Un piano decennale: la rete si fa tutta',e:'Il paese si accorcia · il conto è di quelli lunghi',costo:{debito:1.5},f:()=>{S.ind.debt+=1.5; if(S.gMod!=null)S.gMod+=0.2; gd('imprenditori',5); gd('cetomedio',3); gd('lavoratori',2);}},
+   {l:'Un tratto per volta, quando i conti lo permettono',e:'Nessun azzardo · e nessuna rete, per ora',f:()=>{gd('pensionati',2); gd('imprenditori',-3); gd('cetomedio',-2);}}]},
  /* --- SHOCK D'EPOCA (Cantiere B3): i sostituti '50 degli shock moderni esclusi (pandemia/energia/migranti) —
     il '50 ritrova la sua tensione, autentica. Magnitudini da shock VERO (paragonabili ai moderni). I paletti:
     Polesine = sfondo rispettoso (mai meccanica sulle vittime, scelte SOLO di policy); piazze = FENOMENO
@@ -5845,6 +6268,48 @@ const MINISTRO_CARTE=[
    Ogni voce ha DUE varianti della stessa notizia: `amico` (rapporto stampa ≥50) / `ostile` (<50).
    Cornice pura: NON è una carta, niente effetti, niente tetto. Testi ritoccabili a costo zero. ===== */
 const TITOLI=[
+ /* ============================================================================================================
+    L49-1 · I SEDICI TITOLI DEL DECENNIO INGLESE (scheda §E) — pool `ti_uk50`, ognuno con la sua gemella di stato
+    (amico/ostile). Stessa forma dei diciotto `ti50` italiani: è la PRIMA PAGINA d'epoca, e senza di essa il
+    Regno Unito del '50 leggerebbe titoli scritti per il presente (è la lezione di P5-bis).
+    «Mai stati così bene» resta SENZA ATTRIBUZIONE, come frase d'epoca in un titolo e mai in bocca a qualcuno:
+    paletto I1, e la scheda lo ribadisce riga per riga.
+    ============================================================================================================ */
+ /* L55-1 · i sedici titoli del decennio '60 (scheda §F), pool `ti_uk60`, con la gemella di stato.
+    ⚠ Il titolo sull'onorificenza ai quattro di Liverpool NON c'è: la scheda lo segna da verificare e io non
+    posso verificarlo. Al suo posto un titolo che dice solo ciò che è certo — i teatri pieni. */
+ {id:'ti_uk60_tredici', era:'uk1960', pri:1, cond:()=>S.year===1964&&S.month>=10, amico:'Tredici anni finiti per un soffio: il paese volta pagina', ostile:'Tredici anni finiti per un soffio'},
+ {id:'ti_uk60_mandato', era:'uk1960', pri:1, cond:()=>S.year===1966&&S.month>=3&&S.month<=6, amico:'Il mandato ripreso e stravinto', ostile:'Il mandato ripreso: adesso non ci sono più scuse'},
+ {id:'ti_uk60_difesa', era:'uk1960', cond:()=>S.sterlina60==='difesa'||S.sterlina60==='difesa_fino_in_fondo', amico:'La sterlina difesa a ogni costo', ostile:'La sterlina difesa a ogni costo: e il costo lo paga chi lavora'},
+ {id:'ti_uk60_svalutata', era:'uk1960', pri:1, cond:()=>(S.svalutazione||0)>0, amico:'La sterlina svalutata: adesso l\'export respira', ostile:'La sterlina svalutata'},
+ {id:'ti_uk60_parigi', era:'uk1960', pri:1, cond:()=>S.europa60==='insiste'||S.europa60==='ritirata', amico:'Il no da Parigi: si ribusserà', ostile:'Il no da Parigi'},
+ {id:'ti_uk60_aberfan', era:'uk1960', pri:1, cond:()=>S.year===1966&&S.month>=10&&S.month<=11, amico:'Aberfan: il paese si stringe attorno a un villaggio', ostile:'Aberfan'},
+ {id:'ti_uk60_wembley', era:'uk1960', pri:1, cond:()=>S.year===1966&&S.month>=7&&S.month<=9, amico:'La coppa a Wembley', ostile:'La coppa a Wembley, e il resto può aspettare'},
+ {id:'ti_uk60_congelamento', era:'uk1960', cond:()=>S.year>=1966&&S.year<=1968, amico:'Il congelamento di salari e prezzi: la stretta necessaria', ostile:'Il congelamento di salari e prezzi'},
+ {id:'ti_uk60_universita', era:'uk1960', cond:()=>S.year>=1962, amico:'Le università nuove aprono', ostile:'Le università nuove aprono: e la fila resta fuori'},
+ {id:'ti_uk60_pozzo', era:'uk1960', cond:()=>S.year>=1963, amico:'Il pozzo che chiude: la riconversione è cominciata', ostile:'Il pozzo che chiude'},
+ {id:'ti_uk60_scuola', era:'uk1960', cond:()=>S.year>=1965, amico:'La scuola per tutti', ostile:'La scuola per tutti, e le scuole di pochi restano'},
+ {id:'ti_uk60_birmingham', era:'uk1960', pri:1, cond:()=>S.year===1968&&S.month>=4&&S.month<=6, amico:'Il discorso di Birmingham: l\'opposizione caccia il suo uomo', ostile:'Il discorso di Birmingham'},
+ {id:'ti_uk60_belfast', era:'uk1960', pri:1, cond:()=>S.year>=1969&&S.month>=8, amico:'Le truppe a Belfast: mandate per proteggere', ostile:'Le truppe a Belfast'},
+ {id:'ti_uk60_luna', era:'uk1960', pri:1, cond:()=>S.year===1969&&S.month>=7&&S.month<=8, amico:'Un uomo sulla Luna', ostile:'Un uomo sulla Luna, e quaggiù la sterlina'},
+ {id:'ti_uk60_decimale', era:'uk1960', cond:()=>S.year>=1966, amico:'Cento penny per una sterlina', ostile:'Cento penny per una sterlina: e i conti da rifare'},
+ {id:'ti_uk60_liverpool', era:'uk1960', cond:()=>S.year>=1963, amico:'I quattro di Liverpool riempiono i teatri', ostile:'I quattro di Liverpool: i giornali contano i biglietti'},
+ {id:'ti_uk50_tessere', era:'uk1950', cond:()=>S.year<=1954, amico:'Le ultime tessere bruciate: la normalità torna a pezzi', ostile:'Ancora in coda per la carne: la normalità si fa attendere'},
+ {id:'ti_uk50_incoronazione', era:'uk1950', pri:1, cond:()=>S.year===1953&&S.month>=5&&S.month<=7, amico:'L\'Incoronazione in ogni salotto', ostile:'L\'Incoronazione in ogni salotto, il conto in ogni bilancio'},
+ {id:'ti_uk50_everest', era:'uk1950', pri:1, cond:()=>S.year===1953, amico:'L\'Everest è nostro', ostile:'L\'Everest è nostro: e quaggiù?'},
+ {id:'ti_uk50_smog', era:'uk1950', pri:1, cond:()=>S.year===1952&&S.month===12, amico:'Quattro giorni di nebbia gialla: il governo promette una legge', ostile:'Quattro giorni di nebbia gialla, e nessuno sa quanti siano i morti'},
+ {id:'ti_uk50_canale', era:'uk1950', pri:1, cond:()=>S.suez!=null||(S.year===1956&&S.month>=10), amico:'Il Canale e la sterlina: il governo tiene i nervi saldi', ostile:'Il Canale e la sterlina: chi comanda davvero, a Londra?'},
+ {id:'ti_uk50_case', era:'uk1950', cond:()=>S.year>=1951, amico:'Trecentomila case: la promessa si vede dai cantieri', ostile:'Trecentomila case, promesse'},
+ {id:'ti_uk50_itv', era:'uk1950', cond:()=>S.year>=1955, amico:'La televisione degli sponsor: il pubblico sceglie', ostile:'La televisione degli sponsor: il salotto in saldo'},
+ {id:'ti_uk50_marcia', era:'uk1950', cond:()=>S.year>=1957, amico:'Marcia verso il centro atomico: il paese discute, e il governo ascolta', ostile:'Marcia verso il centro atomico: quattro giorni a piedi contro un silenzio'},
+ {id:'ti_uk50_monaco', era:'uk1950', pri:1, cond:()=>S.year===1958&&S.month>=2&&S.month<=3, amico:'Il lutto di Monaco: il paese si stringe', ostile:'Il lutto di Monaco'},
+ {id:'ti_uk50_acciaio', era:'uk1950', cond:()=>S.year<=1953, amico:'L\'acciaio cambia padrone: il governo mette ordine', ostile:'L\'acciaio cambia padrone (di nuovo)'},
+ {id:'ti_uk50_maistati', era:'uk1950', cond:()=>S.year>=1957&&S.ind.growth>1.5, amico:'«Mai stati così bene»', ostile:'«Mai stati così bene»: e chi non c\'era?'},
+ {id:'ti_uk50_ghana', era:'uk1950', pri:1, cond:()=>S.year>=1957&&S.year<=1958, amico:'Il Ghana alza la sua bandiera: un congedo ordinato', ostile:'Il Ghana alza la sua bandiera: l\'impero si conta i pezzi'},
+ {id:'ti_uk50_riserve', era:'uk1950', pri:1, cond:()=>(S.sterlinaCrisi||0)>0||(S.sterlinaRinvii||0)>0, amico:'Le riserve si svuotano: il Tesoro ha un piano', ostile:'Le riserve si svuotano'},
+ {id:'ti_uk50_autostrada', era:'uk1950', cond:()=>S.year>=1958, amico:'Autostrada, nessun limite: il paese si accorcia', ostile:'Autostrada, nessun limite: e nessun bilancio'},
+ {id:'ti_uk50_mini', era:'uk1950', cond:()=>S.year>=1959, amico:'Una macchina piccola per tutti', ostile:'Una macchina piccola per tutti, una casa per pochi'},
+ {id:'ti_uk50_teddy', era:'uk1950', cond:()=>S.year>=1954, amico:'I ragazzi in giacca edoardiana: il paese cambia pelle', ostile:'I ragazzi in giacca edoardiana: i negozi contano, i vicini no'},
  {id:'ti_inchiesta', pri:1, cond:()=>!!S.inchiesta, amico:'L\'inchiesta al vertice: garantismo, finché parlano le carte', ostile:'Il vertice sotto inchiesta: il palazzo trema'},
  {id:'ti_voci', cond:()=>(S.esposizione||0)>=40&&!S.inchiesta, amico:'Veleni e fascicoli: il governo denuncia la macchina del fango', ostile:'Sussurri nei palazzi: ombre sul vertice del governo'},
  {id:'ti_scandalo', pri:1, cond:()=>S.agenda&&S.agenda.some(a=>a.kind==='scandalo'), amico:'Il caso al ministero: garantismo e nervi saldi', ostile:'Scandalo al governo: la credibilità scricchiola'},
@@ -7327,6 +7792,298 @@ const CRISI08_EV = {
       f:function(){ S.crisi08='rigore'; S.ind.debt-=0.5; if(S.gMod!=null) S.gMod-=0.15;
         repd(5); stampad(2); gd('lavoratori',-5); gd('giovani',-4); gd('imprenditori',-2);
         S.log.unshift({t:T('La crisi'),x:T('Il Governo tiene la barra sui conti: i mercati apprezzano, le fabbriche che chiudono no.')}); } },
+  ],
+};
+
+/* ==============================================================================================================
+   L56-2 · `PILASTRI_MONDO` — IL POOL CONDIVISO DEI FATTI-MONDO.
+   (testi in `PILASTRI-MONDO.md`, buco trovato da L55-1)
+
+   A CHE SERVE: i fatti che *ogni* linea vede, scritti da un punto di vista non nazionale, così che quindici
+   paesi non li riscrivano quindici volte.
+
+   ⚑ DUE REGOLE CHE DECIDONO TUTTO:
+   1. **L'ITALIA TIENE I SUOI, E NON SI TOCCA UNA VIRGOLA.** La linea italiana ha già i suoi pilastri approvati
+      e congelati; il pool serve **tutte le linee TRANNE quella italiana**. La misura che conta non è che i sei
+      escano: è che **un giocatore italiano non veda mai due Lune**.
+   2. **OGNI LINEA PUÒ SOVRASCRIVERE** un fatto-mondo con una versione nazionale, se lì è stato vissuto
+      diversamente. Il meccanismo è `sostituitoDa`: un pilastro di linea che dichiara l'id-mondo che rimpiazza.
+      Serve subito — l'11 settembre italiano è già scritto e approvato, e quando il pool arriverà al 2001 dovrà
+      cedergli il posto senza che nessuno riscriva niente.
+
+   PALETTI: pattern-cronaca (una voce, `f()` vuota, il fatto nel log) · nessuna persona come attore · nessuna
+   citazione di discorsi (G5) · kicker **Il mondo**.
+   ============================================================================================================== */
+const PILASTRI_MONDO = [
+  { id:'pm_muro', anno:1961, mese:8, tono:'grave', cronaca:true, kick:'Il mondo',
+    t:'Il Muro',
+    text:'In una notte d\'agosto Berlino si sveglia tagliata in due da filo spinato, poi da cemento. Le famiglie che abitavano ai due lati della stessa strada scoprono di vivere in due mondi. Il confine fra i blocchi smette di essere una linea sulla carta e diventa un muro che si può toccare.',
+    logx:'Berlino tagliata in due: il confine fra i blocchi diventa un muro.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pm_cuba', anno:1962, mese:10, tono:'grave', cronaca:true, kick:'Il mondo',
+    t:'I tredici giorni',
+    text:'Per due settimane d\'ottobre il mondo guarda due flotte avvicinarsi intorno a Cuba e impara a memoria la parola «missili». Poi le navi si fermano e tornano indietro. Non è successo niente, e per questo è la settimana più importante del secolo.',
+    logx:'Due flotte attorno a Cuba, poi le navi tornano indietro.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pm_dallas', anno:1963, mese:11, tono:'grave', cronaca:true, kick:'Il mondo',
+    t:'Dallas',
+    text:'Il 22 novembre il presidente degli Stati Uniti viene ucciso a Dallas, in un corteo di automobili, davanti alle telecamere. Il mondo si ferma davanti alla televisione. Da quel giorno, per una generazione, ognuno ricorderà dov\'era.',
+    logx:'Il presidente americano ucciso a Dallas, davanti alle telecamere.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pm_1968', anno:1968, mese:5, tono:'grave', cronaca:true, kick:'Il mondo',
+    t:'L\'anno',
+    text:'Gli studenti occupano le università da Parigi a Città del Messico, i carri armati entrano a Praga, in America muoiono ammazzati un pastore e un candidato. Nessuno di questi fatti spiega gli altri, e insieme fanno un anno che cambia il modo in cui i giovani parlano al potere — ovunque.',
+    logx:'Università occupate, carri armati a Praga: l\'anno che cambia il tono.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pm_luna', anno:1969, mese:7, cronaca:true, kick:'Il mondo',
+    t:'La Luna',
+    text:'Il 20 luglio due uomini scendono su un altro mondo, e mezzo miliardo di persone li guarda in bianco e nero, di notte, con la voce che gracchia. Per qualche ora la faccenda non è di un paese solo.',
+    logx:'Due uomini sulla Luna, e mezzo miliardo di persone a guardarli.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pm_petrolio', anno:1973, mese:10, tono:'grave', cronaca:true, kick:'Il mondo',
+    t:'Il prezzo del petrolio',
+    text:'In autunno i paesi produttori chiudono i rubinetti e il prezzo del greggio quadruplica in pochi mesi. Le domeniche senza automobili, il riscaldamento abbassato, le fabbriche a orario ridotto: finisce l\'epoca in cui l\'energia costava poco, e con essa il quarto di secolo di crescita facile.',
+    logx:'Il greggio quadruplica: finisce l\'energia che costava poco.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+];
+
+/* ==============================================================================================================
+   L55-1 · I TRE SNODI DEL DECENNIO INGLESE '60 (scheda §A, §B, §C).
+
+   ⚠ VALUTE: come per il '50, la scheda annota in `cred` e `stampa`. **`credibilita` non esiste per il premier
+   di livello 3** (misurato in L49-1): ribasato su `repd` + `stampad` + `gd`, e i «gd tutti» sui sei gruppi,
+   che è anche l'unico modo onesto di muovere il consenso, visto che è derivato.
+   ⚠ E L'ECONOMIA È QUASI CIECA QUI, per la ragione misurata in L49-1: la crescita è clampata a 5 e il drift
+   nominale della linea la tiene al tetto per gran parte del decennio. Quindi «economia +» e «crescita −−»
+   valgono poco da soli: il peso vero lo portano i gruppi e la stampa. La svalutazione fa eccezione perché
+   muove il DEBITO, che il clamp non tocca.
+   ============================================================================================================== */
+const STERLINA60_EV = {
+  id:'snodo_sterlina60', kick:'La sterlina', tono:'grave',
+  t:'Difendere o svalutare',
+  text:'Le riserve si consumano da mesi e i mercati non credono più al cambio. Il Tesoro mette sul tavolo la cosa che nessun governo vuole firmare: svalutare. L\'alternativa è una deflazione che il paese sentirà in busta paga.',
+  ch:[
+    { l:'Si difende: il cambio è la parola data', e:'Si tiene il punto · e il conto lo presenta l\'economia reale',
+      f:function(){ S.sterlina60='difesa'; repd(3); stampad(2); gd('cetomedio',2); gd('lavoratori',-4);
+        if(S.gMod!=null) S.gMod-=0.4;
+        S.log.unshift({t:T('La sterlina'),x:T('Il cambio si difende: tasse su, spesa giù, e i piani tornano nel cassetto.')}); } },
+    { l:'Si svaluta adesso, e si spiega perché', e:'Sollievo per chi esporta, colpo per chi importa · e l\'accusa di aver mentito fino al giorno prima',
+      f:function(){ S.sterlina60='svalutata_subito'; svalutaSterlina();
+        repd(-6); stampad(-6); gd('cetomedio',-8); gd('pensionati',-6); gd('imprenditori',5);
+        S.log.unshift({t:T('La sterlina'),x:T('Svalutata la sterlina, senza aspettare di essere costretti.')}); } },
+  ],
+};
+const STERLINA60_DUE_EV = {
+  id:'snodo_sterlina60_due', kick:'La sterlina', tono:'grave',
+  t:'Il prezzo della parola data',
+  text:'Il cambio regge, ma a caro prezzo: tasse su, spesa giù, e i piani annunciati che tornano nel cassetto. Passano i mesi, e i mercati tornano.',
+  ch:[
+    { l:'Si tiene ancora', e:'Si arriva in fondo · con l\'economia ammaccata e le promesse rimangiate',
+      f:function(){ S.sterlina60='difesa_fino_in_fondo'; repd(5); stampad(3);
+        if(S.gMod!=null) S.gMod-=0.8; if(S.uMod!=null) S.uMod+=0.5;
+        gd('lavoratori',-14); gd('cetomedio',-6); gd('giovani',-5);
+        if(S.promesseCampagna) S.promesseCampagna.forEach(function(q){ q.colpi=(q.colpi||0)+2; });
+        S.log.unshift({t:T('La sterlina'),x:T('Difesa la sterlina fino in fondo, e il paese l\'ha pagata.')}); } },
+    { l:'Si cede: era inevitabile', e:'La svalutazione arriva comunque · ma dopo mesi di sacrifici inutili: il peggio dei due mondi',
+      f:function(){ S.sterlina60='svalutata_tardi'; svalutaSterlina();
+        repd(-10); stampad(-9);
+        gd('lavoratori',-9); gd('pensionati',-9); gd('cetomedio',-11); gd('imprenditori',-4); gd('giovani',-6); gd('cattolici',-5);
+        S.log.unshift({t:T('La sterlina'),x:T('Svalutata la sterlina dopo aver giurato di non farlo.')}); } },
+  ],
+};
+const EUROPA60_EV = {
+  id:'snodo_europa60', kick:'La porta d\'Europa', tono:'grave',
+  t:'La domanda d\'ingresso',
+  text:'Il Mercato comune cresce senza di noi e il Commonwealth non basta più a fare un\'economia. Chiedere di entrare significa mettersi nelle mani di chi può dire no.',
+  ch:[
+    { l:'Si chiede l\'ingresso', e:'Il negoziato parte · e la risposta non la scriviamo noi',
+      f:function(){ S.europa60='chiesto'; gd('imprenditori',4); gd('giovani',3); gd('pensionati',-3);
+        S.log.unshift({t:T('Europa'),x:T('La domanda d\'ingresso è depositata: adesso si aspetta.')}); } },
+    { l:'Si resta fuori: il Commonwealth prima di tutto', e:'Nessuna umiliazione, nessun mercato',
+      f:function(){ S.europa60='fuori'; gd('pensionati',5); gd('cattolici',3); gd('imprenditori',-6); repd(-2);
+        S.log.unshift({t:T('Europa'),x:T('Nessuna domanda: si resta fuori, col Commonwealth e con quello che rende.')}); } },
+  ],
+};
+const EUROPA60_DUE_EV = {
+  id:'snodo_europa60_due', kick:'La porta d\'Europa', tono:'grave',
+  t:'Il no da Parigi',
+  text:'Il negoziato si chiude prima di cominciare davvero: il veto arriva da una sola capitale, e non c\'è appello. Ora la scelta è se rimanere sulla soglia o voltarsi.',
+  ch:[
+    { l:'Si insiste: si riproverà', e:'Ostinazione che un giorno pagherà · oggi è una porta in faccia',
+      f:function(){ S.europa60='insiste'; repd(4); stampad(-4); gd('imprenditori',2); gd('pensionati',-3);
+        S.log.unshift({t:T('Europa'),x:T('Respinti alla porta d\'Europa, e pronti a ribussare.')}); } },
+    { l:'Si ritira la domanda con dignità', e:'Si volta pagina · l\'Europa continua senza di noi',
+      f:function(){ S.europa60='ritirata'; stampad(3); gd('imprenditori',-6); gd('pensionati',3);
+        S.log.unshift({t:T('Europa'),x:T('Ritirata la domanda d\'ingresso in Europa.')}); } },
+  ],
+};
+const COSCIENZA60_EV = {
+  id:'snodo_coscienza60', kick:'Il voto libero', tono:'grave',
+  t:'Il voto libero',
+  text:'Sul banco arrivano leggi che dividono le famiglie prima dei partiti: la pena capitale, l\'aborto, i rapporti fra adulti dello stesso sesso. Il gruppo chiede di lasciare libertà di voto, il paese guarda.',
+  ch:[
+    { l:'Voto libero, e sostieni apertamente le riforme', e:'Il paese cambia · e nelle circoscrizioni tradizionali si paga',
+      f:function(){ S.coscienza60='sostiene'; gd('giovani',12); gd('lavoratori',3); gd('cattolici',-12); gd('pensionati',-7);
+        repd(4); stampad(4);
+        S.log.unshift({t:T('Il voto libero'),x:T('Le leggi passano col voto libero, e tu non ti sei nascosto.')}); } },
+    { l:'Voto libero, e tu ti astieni', e:'Non ti esponi · e non ti crede nessuno dei due',
+      f:function(){ S.coscienza60='astenuto'; stampad(-5); tutteCorrenti(-4); gd('giovani',-3); gd('cattolici',-3);
+        S.log.unshift({t:T('Il voto libero'),x:T('Voto libero, e il capo del governo non vota: se ne accorgono tutti.')}); } },
+    { l:'Si rinvia: non è il momento', e:'Il momento arriverà lo stesso · con un altro governo',
+      f:function(){ S.coscienza60='rinviato'; gd('cattolici',8); gd('pensionati',5); gd('giovani',-12); stampad(-3);
+        S.log.unshift({t:T('Il voto libero'),x:T('Le leggi tornano nel cassetto: il momento arriverà, con qualcun altro.')}); } },
+  ],
+};
+
+/* ==============================================================================================================
+   L53-2 · LE DUE VIE D'USCITA DALLA MINORANZA — il rimpasto e il sostegno esterno.
+   (design in `DESIGN-SOSTEGNO-ESTERNO.md`)
+
+   IL PRINCIPIO: perdere un alleato non è perdere il governo, è l'inizio di una trattativa. Il gioco modellava
+   la caduta e non la trattativa — mancava metà del mestiere.
+   LA STORIA: i governi italiani della non sfiducia (1976-79), monocolori DC che vivevano dell'astensione
+   comunista; il patto Lib-Lab inglese (1977-78), i liberali che tengono in piedi un governo laburista in
+   minoranza senza entrarci. **Chi sostiene da fuori non prende ministeri: prende un prezzo.**
+
+   ⚑ IL REGALO DEL CANTIERE-OPPOSIZIONE: `S.intese` esiste già, nato per costruire l'alternativa da fuori.
+   Qui serve al rovescio — a salvare un governo da dentro: chi ha coltivato i rapporti in tempi buoni ha
+   qualcuno da chiamare in tempi cattivi. È la ricompensa più bella che potessimo dare a quella meccanica.
+
+   ⚠ E UNA NOTA DI ONESTÀ SUL PERCHÉ DI QUESTO LOTTO. Il documento di design nasceva da «5,8-12,4 elezioni
+   anticipate per carriera su tutte le porte». **Quel numero era dello strumento, non del gioco**: riparato il
+   banco perché il perdente vada all'opposizione (L53-1), le elezioni anticipate sono **1 per carriera ovunque**,
+   già dentro il bersaglio. Queste due vie NON servono più a curare quel numero — servono al caso vero che
+   resta: il governo che si sfalda a metà mandato e passa il resto del tempo in minoranza (nel '90 il 43% dei
+   mesi al governo, con carriere che si chiudono al congresso). È il motivo giusto, non quello di partenza.
+   ============================================================================================================== */
+const SOSTEGNO_EV = {
+  id:'ev_sostegno', kick:'La maggioranza che non c\'è', tono:'grave',
+  t:'Un appoggio da fuori',
+  text:'I numeri in aula non ci sono più. Un partito che al governo non vuole entrare fa sapere che potrebbe non farlo cadere: si astiene, e in cambio chiede qualcosa. Non ministeri — quelli non li vuole. Un prezzo.',
+  ch:[
+    { l:'Concedi un impegno programmatico', e:'Una promessa scritta nel loro linguaggio · se la tradisci, l\'accordo salta lo stesso giorno',
+      f:function(){ sostegnoApri('programma'); } },
+    { l:'Dai loro un veto su un ministero', e:'Decidono con te su un dicastero · ogni scelta contro la loro linea incrina l\'intesa',
+      f:function(){ sostegnoApri('veto'); } },
+    { l:'Paghi in opere sul loro territorio', e:'Spesa mirata dove contano i loro voti · costa ogni mese, e la stampa lo chiama col suo nome',
+      f:function(){ sostegnoApri('bottega'); } },
+    { l:'Rifiuti: si governa coi propri voti o non si governa', e:'Nessun debito con nessuno · e nessuna rete sotto il filo',
+      f:function(){ S.sostegno=null;
+        stampad(4); repd(2); tutteCorrenti(4);
+        S.log.unshift({t:T('La maggioranza'),x:T('Nessun accordo: il governo va avanti coi soli voti che ha, e si vedrà quanto dura.')}); } },
+  ],
+};
+const RIMPASTO_EV = {
+  id:'ev_rimpasto', kick:'La maggioranza che non c\'è', tono:'grave',
+  t:'Rifare il governo senza tornare alle urne',
+  text:'Un alleato se n\'è andato e i numeri non tornano. C\'è chi sarebbe disposto a entrare — non da fuori, dentro: vogliono ministeri veri, e li vogliono adesso.',
+  ch:[
+    { l:'Li imbarchi: ministeri in cambio di voti', e:'La maggioranza torna vera · due dicasteri passano di mano e la tua base lo vede',
+      f:function(){ rimpastoEntra(); } },
+    { l:'Non rifai il governo per restare in piedi', e:'Nessun ministero venduto · i numeri restano quelli che sono',
+      f:function(){ S.rimpastoOfferto=(S.mandate||0);
+        tutteCorrenti(5); stampad(2);
+        S.log.unshift({t:T('La maggioranza'),x:T('Nessun rimpasto: il governo resta com\'è, con i numeri che ha.')}); } },
+  ],
+};
+
+/* ==============================================================================================================
+   L49-1 · IL DECENNIO INGLESE — LO SNODO SUEZ (scheda §A) E LA CORSA ALLA STERLINA (scheda §B).
+
+   ⚠ PRIMA DI TUTTO, UNA CORREZIONE DI VALUTE. La scheda annota gli effetti in `cred` e `vis` («cred +», «vis −»,
+   «cred −−»). **Misurato a terra: il premier di livello 3 NON HA né `credibilita` né `visibilita`** — `credd()` e
+   `visd()` esistono come funzioni ma sono no-op silenziosi, e scriverli qui avrebbe prodotto una carta che non
+   fa niente. Le valute vere di questo ruolo sono: consenso e fiducia (DERIVATE, non si toccano a mano),
+   `reputazione`, `stampa`, `debt`, `growth`/`gMod`, `unemp`, e i sei gruppi via `gd()`.
+   Ribasamento adottato: **cred → `repd` + `stampad`** (la credibilità di un capo di governo, qui, è come lo
+   guardano gli alleati e i giornali) · **vis → `stampad`** · **«gd tutti» → `gd()` sui sei gruppi**, che è anche
+   l'unico modo onesto di far scendere il consenso, visto che è derivato.
+
+   ⚠ E UNA NOTA SUL «RISCHIO-CADUTA». Il motore fa cadere il governo per sfiducia solo se sei in MINORANZA
+   (`probSfiducia` cresce coi mesi di minoranza e col consenso basso). Non ho inventato una caduta nuova: la
+   scelta storica picchia sui gruppi, il consenso scende, e **se il gabinetto è già fragile la caduta arriva
+   dal motore che esiste**. Quanto spesso accada è una misura, non una promessa: sta nella consegna archiviata.
+   ============================================================================================================== */
+const SUEZ_EV = {
+  id:'snodo_suez', kick:'Il Canale', tono:'grave',
+  t:'Il Canale',
+  text:'Il Canale è stato nazionalizzato, la flotta è pronta, l\'alleato francese incalza. In gabinetto nessuno dice la parola «impero», ma è di quella che si parla. Il Tesoro fa passare un biglietto: le riserve in dollari non reggono una crisi lunga.',
+  ch:[
+    { l:'Si va: il Canale è una via vitale', e:'La flotta parte · e con lei parte anche il conto in dollari',
+      f:function(){ S.suez='intervento'; gd('imprenditori',3); gd('cetomedio',2); stampad(3); repd(-4);
+        S.log.unshift({t:T('Il Canale'),x:T('La spedizione è decisa: la stampa d\'ordine esulta, gli alleati tacciono.')}); } },
+    { l:'Si tratta: la forza qui costa più di quanto renda', e:'Nessuna avventura, nessuna umiliazione · la stampa d\'ordine grida al tradimento, i conti reggono',
+      f:function(){ S.suez='trattato'; repd(5); stampad(-4); gd('imprenditori',-5); gd('cetomedio',-2); gd('lavoratori',2);
+        S.sterlinaSalva=(S.sterlinaSalva||0)+1;
+        S.log.unshift({t:T('Il Canale'),x:T('Il Canale non è stato ripreso. Nemmeno perduto.')}); } },
+  ],
+};
+const SUEZ_DUE_EV = {
+  id:'snodo_suez_due', kick:'Il Canale', tono:'grave',
+  t:'Due settimane',
+  text:'Le truppe scendono. E mentre scendono, comincia la corsa alla sterlina: le riserve bruciano, e da Washington arriva un no secco a qualunque aiuto finché non ci si ferma.',
+  ch:[
+    /* stesso ribasamento della sterlina, e per la stessa ragione misurata: l'economia è cieca sotto il clamp,
+       quindi la scelta storica la paga POLITICAMENTE — è anche più giusto così, perché il '56 il governo lo
+       perse in Parlamento e sui giornali, non sui conti. */
+    { l:'Ti fermi: la valuta prima della bandiera', e:'L\'operazione si chiude a metà · rientro, umiliazione, il gabinetto in crisi',
+      f:function(){ S.suez='fermato'; repd(-6); stampad(-12);
+        gd('lavoratori',-8); gd('pensionati',-8); gd('cetomedio',-11); gd('imprenditori',-16); gd('giovani',-5); gd('cattolici',-5);
+        S.sterlinaSalva=(S.sterlinaSalva||0)+1;
+        S.log.unshift({t:T('Il Canale'),x:T('Fermati sul Canale, con le riserve quasi finite.')}); } },
+    { l:'Vai avanti: si è arrivati troppo in là per tornare', e:'La sterlina crolla · il paese esce più povero e più solo, e il Canale resta agli altri',
+      f:function(){ S.suez='fondo'; repd(-16); stampad(-8);
+        S.ind.debt+=4; if(S.gMod!=null) S.gMod-=0.5; if(S.uMod!=null) S.uMod+=0.4;
+        gd('lavoratori',-13); gd('pensionati',-12); gd('cetomedio',-16); gd('imprenditori',-10); gd('giovani',-8); gd('cattolici',-8);
+        S.sterlinaCrisi=(S.sterlinaCrisi||0)+1;
+        S.log.unshift({t:T('Il Canale'),x:T('Andato fino in fondo sul Canale, e il conto l\'ha pagato la sterlina.')}); } },
+  ],
+};
+
+/* LA CORSA ALLA STERLINA (§B) — l'evento-morso ricorrente, ancore ~1951, ~1955, ~1957.
+   ⚑ È LA LEVA DI DIFFICOLTÀ DEL DECENNIO INGLESE, e il motivo sta nella misura di L48-2: nel Regno Unito il
+   DEBITO NON MORDE (zero insolvenze su venti cammini, e lo erano anche col debito a 230%). Storicamente la
+   pressione veniva dalla bilancia dei pagamenti: le crisi valutarie del '51, '55 e '56-57 sono ciò che fermava
+   i governi — Suez compreso, dove la ritirata la impone la corsa alla sterlina e non la battaglia.
+   IL RINVIO HA MEMORIA: `S.sterlinaRinvii` conta le volte che hai pagato a rate, e la corsa successiva torna
+   più dura (è la riga «se torna, torna peggio» della scheda, resa vera e non promessa).
+
+   ⚠⚠ IL MORSO È POLITICO, NON ECONOMICO, E LA RAGIONE È UNA MISURA.
+   Prima versione: effetti economici (gMod, unemp, debito) come li annota la scheda. **Misurati, valevano zero.**
+   Il motivo è aritmetico e viene dal lotto precedente: `computeGrowth` fa `g = 0.8 + politiche + gMod + S.ciclo`
+   e poi **clampa a 5**. Il drift nominale che L48-2 ha dovuto installare per far scendere il debito porta
+   `S.ciclo` a 18-21 nelle finestre alte: un `gMod` di −0,45 sposta 19,0 a 18,55, che clampa a 5 identico.
+   Per bucare il clamp servirebbe un gMod attorno a −15, cioè trenta volte qualunque altro valore del gioco.
+   **Quindi la difficoltà del decennio inglese passa dai GRUPPI**, che il clamp non tocca. Quanto pesante:
+   misurato con una sweep contro il rumore di fondo del decennio (consenso-minimo naturale 55,4).
+     colpo ×1 → consenso-min 56,8 (SOPRA il fondo: invisibile) · ×2 → 55,6 (dentro il rumore)
+     colpo ×3 → consenso-min 54,4 (un punto SOTTO il fondo: si sente) · ×4 → 53,0 (comincia a essere un burrone)
+   Adottato **×3**. I numeri sui gruppi sono grandi rispetto al resto del gioco, e sono grandi apposta.
+   ============================================================================================================== */
+const STERLINA_EV = {
+  id:'ev_sterlina', kick:'La sterlina', tono:'grave',
+  t:'La corsa alla sterlina',
+  text:'Le riserve in dollari calano di settimana in settimana e i mercati fiutano la svalutazione. Il Tesoro chiede una decisione: si difende il cambio, o si lascia andare.',
+  ch:[
+    { l:'Difendi il cambio: stretta subito', e:'La sterlina tiene · il paese frena di colpo, e le promesse fatte diventano difficili',
+      f:function(){ var p=1+0.5*(S.sterlinaRinvii||0);   /* chi ha rinviato paga più caro */
+        S.sterlinaSalva=(S.sterlinaSalva||0)+1;
+        if(S.gMod!=null) S.gMod-=0.45*p; if(S.uMod!=null) S.uMod+=0.3*p;
+        gd('lavoratori',Math.round(-14*p)); gd('cetomedio',Math.round(-9*p)); gd('pensionati',-6);
+        repd(5); gd('imprenditori',1);
+        S.log.unshift({t:T('La sterlina'),x:T('Stretta immediata: il cambio tiene, e il paese frena di colpo.')}); } },
+    { l:'Tagli la spesa dove fa meno male, in fretta', e:'Un rinvio pagato a rate · se la corsa torna, torna peggio',
+      f:function(){ S.sterlinaRinvii=(S.sterlinaRinvii||0)+1;
+        S.ind.debt+=1.5; if(S.gMod!=null) S.gMod-=0.15;
+        gd('lavoratori',-6); gd('cetomedio',-4); gd('giovani',-3); stampad(-4);
+        S.log.unshift({t:T('La sterlina'),x:T('Si taglia dove si può e si rimanda il resto: il conto non è pagato, è dilazionato.')}); } },
+    { l:'Lasci correre: la crescita prima di tutto', e:'Il cambio scivola · l\'import costa, l\'export respira, e i prezzi si muovono',
+      f:function(){ var p=1+0.5*(S.sterlinaRinvii||0);
+        S.sterlinaCrisi=(S.sterlinaCrisi||0)+1;
+        if(S.gMod!=null) S.gMod+=0.25; S.ind.debt+=1.2*p;
+        gd('imprenditori',5); gd('lavoratori',Math.round(-9*p)); gd('pensionati',Math.round(-12*p)); gd('cetomedio',-5);
+        repd(-8); stampad(-3);
+        S.log.unshift({t:T('La sterlina'),x:T('Il cambio scivola: l\'export respira, e chi vive di reddito fisso se ne accorge alla spesa.')}); } },
   ],
 };
 

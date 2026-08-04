@@ -97,6 +97,10 @@
         <button data-sc="italia1980" onclick="setScenario('italia1980')"><img class="soglia-thumb" src="assets/scenes/soglia-1980.webp" alt=""><span data-i18n>Italia 1980</span></button>
         <button data-sc="italia1990" onclick="setScenario('italia1990')"><img class="soglia-thumb" src="assets/scenes/soglia-1990.webp" alt=""><span data-i18n>Italia 1990</span></button>
         <button data-sc="italia2000" onclick="setScenario('italia2000')"><img class="soglia-thumb" src="assets/scenes/soglia-2000.webp" alt=""><span data-i18n>Italia 2000</span></button>
+        <!-- L48-1 — la prima porta fuori dall'Italia. Il selettore ora è a DUE LIVELLI: `renderScenariPaese`
+             mostra solo le porte del paese scelto, così la lista non cresce all'infinito e la home resta
+             com'è. La miniatura del '50 britannico non c'è ancora: segnaposto, degrado pulito. -->
+        <button data-sc="uk1950" onclick="setScenario('uk1950')"><span class="soglia-thumb soglia-vuota" aria-hidden="true"></span><span data-i18n>Regno Unito 1950</span></button>
       </div>
       <div data-i18n style="font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--mut);margin:16px 0 7px;">Il tuo partito</div>
       <div class="cands" id="party-list" style="max-width:360px;margin:0 auto;"></div>

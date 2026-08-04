@@ -463,7 +463,68 @@ function calcSeggi(){
   const q=raw.map(x=>{ const e=x.v/tot*100; return {id:x.id, f:Math.floor(e), r:e-Math.floor(e)}; });
   let used=q.reduce((s,x)=>s+x.f,0);
   q.slice().sort((a,b)=>b.r-a.r).forEach(x=>{ if(used<100){ x.f++; used++; } });
-  const out={}; for(const x of q) out[x.id]=x.f; return out;
+  const out={}; for(const x of q) out[x.id]=x.f;
+  return (typeof applicaPremio==='function') ? applicaPremio(out) : out;
+}
+/* ================================================================================================================
+   L52-1 · IL PREMIO DI MAGGIORANZA — parametro per-scenario, sullo schema di `sistemaSeggi`.
+   PERCHÉ SERVE: senza premio, `italia2000` è un decennio in cui la maggioranza è irraggiungibile *per
+   costruzione* — misurato in L51-1. Il Porcellum (legge 270/2005) dava alla coalizione più votata **340 seggi
+   su 630 = 54%** alla Camera, e quello è il meccanismo storico che rendeva governabile quel decennio.
+
+   FORMA: `SCENARI.<porta>.premio = { da:<anno>, quota:<%>, spentoSe:{campo,valore} }`.
+   · `da` — il primo anno in cui la legge vale (2006 per il Porcellum: il voto del 2001 è ancora Mattarellum).
+   · `quota` — la percentuale di seggi garantita al blocco vincente.
+   · `spentoSe` — se il giocatore ha rifiutato la legge allo snodo, il premio non c'è. Così **lo snodo Porcellum,
+     che finora spostava solo capitale e stampa, diventa una scelta con una conseguenza vera**: chi lascia le
+     regole com'erano corre davvero con un sistema che non lo aiuta, come dice il testo della carta.
+
+   CHI VINCE IL PREMIO: si confrontano due blocchi — quello del giocatore (`S.coalizione`) e quello del partito
+   più grande che ne sta fuori, coi suoi compatibili. Chi ha più seggi sale alla quota, gli altri si riducono in
+   proporzione sui seggi che restano. Non è il conteggio dei voti di coalizione (il gioco non lo tiene), ma è la
+   sua approssimazione più vicina con le strutture che ci sono.
+
+   ⚠ IL MATTARELLUM NON È MODELLATO, ED È UNA VALUTAZIONE, NON UNA DIMENTICANZA (la consegna chiedeva di
+   verificare se `distorsione` lo approssima). Misurato sulle urne 2001: a `distorsione 1,3` i totali di
+   coalizione escono **CdL 58 / Ulivo 42** contro i veri 58,4 / 38,4 — quasi esatti. **Ma ci arriva col
+   meccanismo sbagliato**: `distorsione` amplifica i PARTITI uno per uno, quindi sposta seggi dai piccoli ai
+   grandi *dentro la stessa coalizione* — a 1,6 Forza Italia passa da 35 a 47 e la Lega da 4 a 2; a 2,5 la Lega
+   arriva a ZERO. La Lega è parte della CdL: il totale giusto lo si otterrebbe annientando gli alleati piccoli,
+   cioè proprio quelli che rendono possibile una coalizione. **Quindi no**: il Mattarellum va semmai fatto con
+   questa stessa macchina (che è di blocco, non di partito) ma con forma ad amplificazione invece che a soglia
+   — ed è una decisione di design, non una taratura da infilare qui.
+   ================================================================================================================ */
+function applicaPremio(out){
+  if(typeof S==='undefined' || !S) return out;
+  const sc=(typeof SCENARI!=='undefined' && typeof chosenScenario!=='undefined') ? SCENARI[chosenScenario] : null;
+  const pr=sc && sc.premio;
+  if(!pr || !pr.quota) return out;
+  if(pr.da!=null && S.year<pr.da) return out;
+  if(pr.spentoSe && S[pr.spentoSe.campo]===pr.spentoSe.valore) return out;   // il giocatore ha rifiutato la legge
+  const mio=(S.coalizione&&S.coalizione.length)?S.coalizione.slice():[S.partito];
+  const somma=ids=>ids.reduce((s,id)=>s+(out[id]||0),0);
+  /* il blocco rivale: il partito più grosso fuori dalla mia coalizione, coi suoi compatibili (anch'essi fuori) */
+  const fuori=PAESE.partiti.filter(p=>mio.indexOf(p.id)<0);
+  if(!fuori.length) return out;
+  const capo=fuori.slice().sort((a,b)=>(out[b.id]||0)-(out[a.id]||0))[0];
+  const rivale=[capo.id].concat(((typeof compatibili==='function')?compatibili(capo.id,out):[])
+    .filter(p=>mio.indexOf(p.id)<0 && p.id!==capo.id).map(p=>p.id));
+  const vincente = (somma(mio)>=somma(rivale)) ? mio : rivale;
+  const base=somma(vincente);
+  if(base>=pr.quota) return out;                       // ha già più della quota: il premio non toglie niente
+  const resto=100-pr.quota, baseResto=100-base;
+  if(baseResto<=0) return out;
+  const fin={};
+  PAESE.partiti.forEach(p=>{
+    const v=out[p.id]||0;
+    fin[p.id] = (vincente.indexOf(p.id)>=0) ? (base>0 ? v*pr.quota/base : pr.quota/vincente.length)
+                                            : v*resto/baseResto;
+  });
+  /* arrotondamento a interi che somma esattamente 100 (stesso metodo del ramo proporzionale) */
+  const q=PAESE.partiti.map(p=>({id:p.id, f:Math.floor(fin[p.id]), r:fin[p.id]-Math.floor(fin[p.id])}));
+  let used=q.reduce((s,x)=>s+x.f,0);
+  q.slice().sort((a,b)=>b.r-a.r).forEach(x=>{ if(used<100){ x.f++; used++; } });
+  const res={}; for(const x of q) res[x.id]=x.f; return res;
 }
 
 /* AVANZAMENTO (Lotto 4) — l'apertura a sinistra: DOPO lo snodo (S.apertura==='apri') il PSI (asse −2) diventa

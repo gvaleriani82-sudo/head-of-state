@@ -173,9 +173,21 @@ function initStatoBase(){
   S.campNaz=null; S.campNazUltimo=null; S.promesseCampagna=[];   // Cantiere C — campagna nazionale (dati puri, round-trip)
   S.riallineamenti={};   // AVANZAMENTO — registro one-shot delle tappe-partiti già scattate (dato puro, round-trip; separato da truffaFatta)
   S.pilastri70={};             // L28-4 — pilastri-cronaca gia' usciti (one-shot, dato puro)
+  S.pilastriMondo={};          // L56-2 — i fatti-mondo gia usciti (one-shot, dato puro, round-trip)
   S.rosterDelta={entra:[], esce:[], rinomina:[]};   // L34-1 - il registro delle nascite/morti/rinomine: e LUI la verita, PAESE ne e la proiezione
   S.divorzioBdi=null; S.scalaMobile=null; S.nucleare=null;   // L33-1 - snodi '80 (dati puri, round-trip)
   S.austerity=null; S.divorzio=null; S.solidarieta=null;   // L28-3 — snodi '70 (dati puri, round-trip): null = non ancora decisi
+  /* L49-1 — il decennio inglese (dati puri, round-trip). `suez` è insieme l'esito dello snodo E l'interruttore
+     del pilastro-cronaca; `sterlinaRinvii` è la memoria che rende vera la riga «se torna, torna peggio». */
+  S.suez=null; S.sterlinaAncore={}; S.sterlinaRinvii=0; S.sterlinaCrisi=0; S.sterlinaSalva=0;
+  /* L55-1 — il decennio inglese '60 (dati puri, round-trip). `sterlina60` e anche l'interruttore del
+     pilastro-cronaca della svalutazione, come `suez` per il '50. */
+  S.sterlina60=null; S.europa60=null; S.coscienza60=null; S.svalutazione=0;
+  S.scioglimentiChiesti=0; S.scioglimentoScelto=false;   // L56-1 — dati puri, round-trip
+  /* L53-2 — le due vie d'uscita dalla minoranza (dati puri, round-trip). `sostegno` è l'accordo esterno in
+     corso; `sostegnoOfferto` marca il mandato in cui l'occasione è già passata, perché sia un'occasione e non
+     un assillo mensile; `rimpastoOfferto` fa lo stesso per l'altra via. */
+  S.sostegno=null; S.sostegnoOfferto=null; S.rimpastoOfferto=null; S.sostegnoStrappi=0;
   S.apertura=null; S.aperturaEsito=null; S.enel=null;   // AVANZAMENTO Lotto 4 — snodi '60 (gemelli di leggeTruffa): apertura a sinistra + dilemma-Enel (dati puri, round-trip)
   S.richiamoCorrUltimo=null;   // CURA Lotto P3 — cooldown della carta-richiamo correnti (dato puro, round-trip)
   S.leggeroUltimo=null;        // G4 — cooldown del beat leggero (dato puro, round-trip)
@@ -222,6 +234,17 @@ function startGame(mins){
   /* coalizione di governo (passo 3): il tuo partito è sempre incluso; i seggi esistono dove c'è un parlamento */
   S.coalizione=[chosenPartito];
   S.seggi=(PAESE.coalizione||PAESE.comeSiVince==='parlamentare')?calcSeggi():null;
+  /* L50-1 · LA PORTA PUÒ DICHIARARE I SUOI SEGGI D'AVVIO, e uk1950 lo fa. Non è una scorciatoia: i seggi del
+     1950 sono un FATTO della porta, esattamente come il debito al 195% o il PIL — non qualcosa da ri-derivare.
+     Il motivo per cui serve: il modello-collegi è giusto su tre urne su quattro (1951, 1955, 1959: errore 1-2,9
+     punti) ma **sbaglia proprio il 1950**, dando i seggi ai Conservative quando Labour vinse 315 a 298. Ho
+     cercato una taratura che le prendesse tutte e quattro: **non esiste**. Fra il 1950 (Labour avanti di 2,6 nei
+     voti E vincitore nei seggi) e il 1951 (Labour avanti di 0,8 e PERDENTE nei seggi) c'è una finestra di 1,8
+     punti, e la soglia d'inversione del modello si muove troppo grossolanamente — a `terreno −0,35` ribalta
+     tutti e due insieme. La differenza vera fu regionale, non di voto nazionale: il modello non la può vedere.
+     Quindi: la porta dichiara il 1950 storico, il modello governa le elezioni che seguono (dove è 3 su 3). */
+  var _SCseg = (typeof SCENARI!=='undefined' && SCENARI[chosenScenario]) ? SCENARI[chosenScenario].seggi : null;
+  if(S.seggi && _SCseg){ Object.keys(_SCseg).forEach(function(id){ if(S.seggi[id]!=null) S.seggi[id]=_SCseg[id]; }); }
   /* minoranza all'avvio: nei parlamentari SENZA coalizione (UK) riflette i seggi veri del tuo partito (chi parte
      piccolo governa in minoranza); nei paesi a coalizione la decide la trattativa iniziale; negli USA non esiste. */
   S.minoranza=(!PAESE.coalizione && PAESE.comeSiVince==='parlamentare') ? S.seggi[chosenPartito]<50 : false;
@@ -903,6 +926,22 @@ const LINEE_STORICHE = {
          ==================================================================================================== */
       { tag:'contemporanea', da:2012,   coda:Infinity  }
     ]
+  },
+  /* L48-1 · LA SECONDA LINEA. Stessa forma dell'italiana, e non è un caso: `eraCartaViva` cerca il tag della
+     carta fra i decenni della linea corrente, quindi una linea nuova non chiede una riga di motore — solo i
+     suoi decenni. Il contenuto oggi esiste solo per il '50: gli altri tag sono la struttura, pronta e vuota.
+     La saldatura al presente è quella di L44-1, identica: `contemporanea` come ultimo decennio, e niente
+     code infinite, perché dopo l'ultima coda c'è il gioco di oggi. */
+  [LINEA_UK]: {
+    decenni: [
+      { tag:'uk1950', da:-Infinity, coda:1961     },
+      { tag:'uk1960', da:1959,      coda:1971     },
+      { tag:'uk1970', da:1969,      coda:1981     },
+      { tag:'uk1980', da:1979,      coda:1991     },
+      { tag:'uk1990', da:1989,      coda:2001     },
+      { tag:'uk2000', da:1999,      coda:2013     },
+      { tag:'contemporanea', da:2012, coda:Infinity }
+    ]
   }
 };
 /* La carta E è viva? def = default del tag mancante ('contemporanea' per eraViva, 'universale' per eraVivaT).
@@ -953,7 +992,42 @@ const DRIFT_ECONOMICO_ERA = {
                    2009 è il più duro dei tre nella realtà (PIL −5,5%). Poi un rimbalzo debole e il 2011. */
                 {da:2001, ciclo:0},    {da:2003, ciclo:-0.2}, {da:2006, ciclo:0.1},
                 {da:2008, ciclo:-0.5}, {da:2009, ciclo:-0.7}, {da:2010, ciclo:-0.1},
-                {da:2011, ciclo:-0.4}, {da:2012, ciclo:0} ]
+                {da:2011, ciclo:-0.4}, {da:2012, ciclo:0} ],
+  /* ==========================================================================================================
+     L48-2 · IL DRIFT BRITANNICO — e una regola che vale per TUTTA la fase γ.
+     ⚑ **QUANDO UNA SCHEDA CHIEDE UN DEBITO CHE SCENDE, IL DRIFT DEV'ESSERE NOMINALE.** Il rapporto debito/PIL
+     non cala perché il bilancio è virtuoso: cala perché il PIL corre — crescita reale PIÙ inflazione. Il gioco
+     **non ha un indicatore d'inflazione** (limite dichiarato in L28-1), quindi quel pezzo di storia può stare
+     in un posto solo: qui dentro. Vale per la Germania, la Francia e il Giappone del dopoguerra allo stesso
+     modo: chi scrive la prossima scheda lo trovi scritto.
+     Il Regno Unito degli anni '50 fa ~3% reale + ~4% d'inflazione ≈ 7% nominale, e porta 195% a ~117%.
+     LA FORMA — e non è simmetrica, di proposito: PICCHI ALTISSIMI (18-21) e AVVALLAMENTI BASSI (3 e 5,4).
+     I numeri sembrano assurdi finché non si sa che **la crescita a schermo è clampata a 5**: sopra quella
+     soglia il drift non si vede più nell'indicatore, agisce solo sul bersaglio di reversione — cioè sul
+     debito. Quindi i picchi li alzo quanto serve al debito (sono invisibili comunque) e gli avvallamenti
+     li tengo SOTTO il clamp, perché sono loro, e soli loro, a rendere leggibile lo stop-go. Misurato:
+     5 · 3,5 · 3,3 · 5 · 5 · 5 · 4,3 · 4,1 · 5 · 5 — i due incavi cadono dove devono, **1951 (Corea) e
+     1956-57 (Suez: è la corsa alla sterlina che ferma l'avventura, non i carri armati)**.
+     ⚠ LA BANDA È PIÙ STRETTA DELLA DISPERSIONE DEL GIOCO. La scheda chiede il '59 fra 110 e 125 (15 punti),
+     ma su 20 semi il debito finale si sparge su 19 punti (109→128). Tarato sulla MEDIANA (117, il centro
+     esatto della banda): 16 semi su 20 dentro, gli altri quattro sul bordo. Non è taratura da migliorare,
+     è la varianza della partita: chi la volesse più stretta deve stringere il gioco, non il drift.
+     ⚠ LE INSOLVENZE ERANO GIÀ ZERO PRIMA DI QUESTO LOTTO (0/4 col drift vecchio, debito che saliva a 230).
+     Non è il debito che rende difficile il decennio britannico: quella leva, qui, non è mai stata attaccata.
+     ========================================================================================================== */
+  [LINEA_UK]: [ {da:1950, ciclo:18.4}, {da:1951, ciclo:3},  {da:1953, ciclo:20},
+                {da:1955, ciclo:5.4},  {da:1956, ciclo:3},  {da:1958, ciclo:20.8},
+                /* L55-1 · IL DECENNIO '60, stessa forma e stessa ragione: **drift nominale**, perché la scheda
+                   chiede un debito che scende (110 → 65-70) e il gioco non ha un indicatore d'inflazione. La
+                   nota generale sta qui sopra; questa è la sua seconda applicazione, e la prima volta che la
+                   regola scritta in L48-2 viene usata da una scheda successiva senza doverla riscoprire.
+                   Le dentellature sono le crisi di sterlina del decennio (scheda §2): **1961**, **1964** subito
+                   dopo il voto, **1966** col congelamento di salari e prezzi, e il **1967** della svalutazione —
+                   che è l'unica a lasciare un segno che non si riassorbe. Gli avvallamenti restano sotto il
+                   clamp-5 perché siano leggibili; i picchi sono alti e invisibili, e lavorano sul debito. */
+                {da:1960, ciclo:19},   {da:1961, ciclo:1.5}, {da:1962, ciclo:19.5},
+                {da:1964, ciclo:1.3},  {da:1965, ciclo:20},  {da:1966, ciclo:0.9},
+                {da:1968, ciclo:20.5} ]
 };
 /* ===== L28-4 · IL MODIFICATORE-CLIMA DEGLI ANNI '70 (decisione G3) =====
    Dal dicembre 1969 a fine decennio il paese vive una stagione piu' cupa. Il clima e' un FENOMENO, mai un evento
@@ -1097,6 +1171,37 @@ const RIALLINEAMENTI_ERA = {
                    {id:'i90_prc'}, {id:'i90_ccd', confluisce_in:'i90_fi'},
                    {id:'i50_psdi'}, {id:'i50_pri'}, {id:'i50_pli'}, {id:'i50_pnm'} ],
             delta:[ {id:'i90_lega',delta:4}, {id:'i50_pci',delta:-2}, {id:'i90_fi',delta:-2} ] }
+  },
+  /* ==========================================================================================================
+     L48-1 · LE TAPPE BRITANNICHE DEL '50. Dalle urne della scheda §1, con gli **Ulster Unionist sommati ai
+     Conservative** su tutte e quattro (nota della scheda: prendevano il whip Tory, e la coerenza interna viene
+     prima della pedanteria). I delta sono spinte, come in Italia: il 1950 è la baseline della porta, quindi
+     le tappe vere sono tre. La forbice del decennio: Labour da 46,1 a 43,8, Conservative da 43,5 a 49,4.
+     ========================================================================================================== */
+  [LINEA_UK]: {
+    1951: { delta:[ {id:'uk_con',delta:4.5}, {id:'uk_lab',delta:2.7}, {id:'uk_lib',delta:-6.6} ] },   // i Liberal crollano al 2,5: il loro minimo del secolo
+    1955: { delta:[ {id:'uk_con',delta:1.7}, {id:'uk_lab',delta:-2.4}, {id:'uk_lib',delta:0.2} ] },   // l'alternanza non arriva: secondo mandato pieno
+    1959: { delta:[ {id:'uk_con',delta:-0.3}, {id:'uk_lab',delta:-2.6}, {id:'uk_lib',delta:3.2} ] },   // maggioranza 100, e i Liberal respirano appena
+    /* L55-1 · le tre tappe del decennio '60 (urne di scheda §1, Ulster Unionist sommati ai Conservative).
+       1964: Lab 44,1 · Con 43,4 · Lib 11,2 — tredici anni di governo finiscono per un soffio, e i Liberal
+             raddoppiano i voti restando a nove seggi: la crudeltà del sistema, di nuovo.
+       1966: Lab 47,9 · Con 41,9 — la maggioranza di 96.
+       1970: Con 46,4 · Lab 43,0 · Lib 7,5 · SNP 1,1 — la sorpresa vera, e il primo seggio nazionalista. */
+    1964: { delta:[ {id:'uk_con',delta:-6.0}, {id:'uk_lab',delta:0.3}, {id:'uk_lib',delta:5.3} ] },
+    1966: { delta:[ {id:'uk_con',delta:-1.5}, {id:'uk_lab',delta:3.8}, {id:'uk_lib',delta:-2.7} ] },
+    /* ⚠ L'SNP E L'ASSE — valutato e dichiarato, come chiedeva la consegna.
+       L'`asse` di questo gioco è ECONOMICO (−2 sinistra ↔ +2 destra) e serve a `compatibili()` (|Δasse| ≤ 1),
+       a `intesaCap` e ai profili di governo. **Il nazionalismo civico non sta su quella scala**: l'SNP non era
+       isolato nel 1970 per una distanza economica, ma perché chiedeva una cosa che l'asse non rappresenta.
+       Qualunque valore io metta codifica un comportamento di coalizione che non ha la ragione giusta.
+       Scelto **−1**, il più vicino alla sua collocazione socialdemocratica reale e a come si è comportato poi.
+       **L'impatto meccanico è trascurabile** (forza ~1, un seggio), ma il limite vale per tutto il fronte:
+       ogni partito territoriale o identitario che arriverà avrà lo stesso problema, e sarà un limite del
+       modello, non un errore di taratura. `concentrazione: 40` è il caso-limite che γ1-ter ha reso possibile:
+       un partito che esiste solo dove esiste. */
+    1970: { delta:[ {id:'uk_con',delta:4.5}, {id:'uk_lab',delta:-4.9}, {id:'uk_lib',delta:-3.7} ],
+            entra:[ { id:'uk_snp', nome:'SNP', orientamento:'centrosinistra', base:{ lavoratori:0.5, giovani:0.5 },
+                      forza:1.1, asse:-1, gruppoUE:'verdi', terreno:-0.2, concentrazione:40 } ] }
   }
 };
 /* ============================================================================================================
@@ -1115,18 +1220,41 @@ const RIALLINEAMENTI_ERA = {
    ogni direttiva applicata si registra in **`S.rosterDelta`** (dato puro), e `applySnap` la RIAPPLICA subito
    dopo `paeseConScenario`. Il registro è la verità; PAESE è solo la sua proiezione.
    ============================================================================================================ */
-function applicaRosterDelta(){
+/* `ricalcolaSeggi` è VOLONTARIO e vale solo per le chiamate in partita. In `applySnap` il registro si riapplica
+   per ricostruire `PAESE`, ma il roster non sta *cambiando*: sta venendo **ripristinato**, e i seggi salvati sono
+   già quelli giusti. Ricalcolarli lì li sovrascriveva con numeri diversi — i seggi si calcolano alle elezioni,
+   quindi le forze nel frattempo sono derivate e un `calcSeggi()` fresco dà un altro risultato. Lo ha scoperto il
+   round-trip di L54-1: rotto su tre porte sul campo `seggi`, ed era l'interazione fra il ricalcolo di L53-3 e il
+   caricamento. Chi cambia il roster in partita passa `true`; `applySnap` non passa niente. */
+function applicaRosterDelta(ricalcolaSeggi){
   if(typeof S==='undefined' || !S || !S.rosterDelta || !PAESE || !PAESE.partiti) return;
   var R=S.rosterDelta;
   if(!(R.entra||[]).length && !(R.esce||[]).length && !(R.rinomina||[]).length) return;
   var lista = PAESE.partiti.map(function(p){ return Object.assign({}, p); });   // clone: `paeseConScenario` condivide l'array con SCENARI, mutarlo lo corromperebbe
-  (R.esce||[]).forEach(function(e){ lista = lista.filter(function(p){ return p.id!==e.id; }); });
-  (R.rinomina||[]).forEach(function(r){ var p=lista.find(function(x){ return x.id===r.id; }); if(p) p.nome=r.nome; });
+  /* ============================================================================================================
+     L53-3 · L'ORDINE È ENTRA → RINOMINA → ESCE, e prima era il contrario. Il registro è un DIARIO: un partito
+     che nasce e più tardi confluisce compare in `entra` E in `esce`, e lo stato finale dev'essere «sparito».
+     Applicando `esce` per primo, quel partito veniva tolto e poi **rimesso** da `entra`: rinasceva.
+     Il sintomo l'ha trovato la somma dei seggi — La Margherita nel 2000 nasce nel 2002 e confluisce nel PD nel
+     2007, ma tornava nel roster senza una voce in `S.seggi`, e la somma faceva **91 invece di 100** per dodici
+     mesi. È la stessa lezione delle scissioni (L40-2): **la somma è la spia.**
+     ⚠ E NON È UN DIFETTO DEL 2000: sta nel ciclo-partiti, quindi vale per OGNI riallineamento che faccia
+     nascere e poi confluire lo stesso id. Oggi è il solo caso nei dati, ma la correzione è generale.
+     ============================================================================================================ */
   (R.entra||[]).forEach(function(n){
     if(lista.some(function(p){ return p.id===n.id; })) return;
     lista.push({ id:n.id, nome:n.nome, orientamento:n.orientamento||'centro', base:n.base||{}, forza:n.forza||1, asse:(n.asse!=null?n.asse:0), gruppoUE:n.gruppoUE||'noniscritti' });
   });
+  (R.rinomina||[]).forEach(function(r){ var p=lista.find(function(x){ return x.id===r.id; }); if(p) p.nome=r.nome; });
+  (R.esce||[]).forEach(function(e){ lista = lista.filter(function(p){ return p.id!==e.id; }); });
+  var cambiato = (lista.length!==PAESE.partiti.length) ||
+                 lista.some(function(p,i){ return !PAESE.partiti[i] || PAESE.partiti[i].id!==p.id; });
   PAESE.partiti = lista;
+  /* e i SEGGI vanno ricalcolati, se l'insieme dei partiti è cambiato: erano la seconda metà dello stesso
+     difetto — il roster si muoveva e `S.seggi` restava quello di prima, con voci mancanti o orfane. */
+  if(ricalcolaSeggi && cambiato && S.seggi && typeof calcSeggi==='function' && (PAESE.coalizione||PAESE.comeSiVince==='parlamentare')){
+    try{ S.seggi=calcSeggi(); }catch(e){}
+  }
 }
 /* Applica UNA direttiva: aggiorna il registro in S e i dizionari per-id che sarebbero rimasti orfani. */
 function applicaDirettive(d){
@@ -1164,7 +1292,7 @@ function applicaDirettive(d){
     if(Array.isArray(S.territori)) S.territori.forEach(function(t){ if(t && t.partito===e.id) t.partito = dest || S.partito; });
     if(S.tavoloPid===e.id) S.tavoloPid = dest || null;
   });
-  applicaRosterDelta();
+  applicaRosterDelta(true);
 }
 /* ============================================================================================================
    L40-2 · LA SCISSIONE DEL PARTITO DEL GIOCATORE. È il primo snodo che riscrive il partito di chi gioca, e
@@ -1192,7 +1320,7 @@ function scissioneApplica(ramo){
   if(S.forze){ S.forze[mio]=mia; S.forze[nuovo.id]=loro; }
   if(S.forzePrev){ S.forzePrev[mio]=mia; S.forzePrev[nuovo.id]=loro; }
   if(S.seggi && S.seggi[nuovo.id]==null) S.seggi[nuovo.id]=0;
-  applicaRosterDelta();
+  applicaRosterDelta(true);
   /* l'asse del giocatore si sposta col nome: la svolta apre al centro, la rifondazione resta dov'era */
   if(svolta){ var mp=PAESE.partiti.filter(function(x){return x.id===mio;})[0]; if(mp){ mp.asse=-1; mp.orientamento='centrosinistra'; } }
   if(svolta){ stampad(3); gd('giovani',2); gd('cetomedio',2); gd('lavoratori',-2);
@@ -1232,7 +1360,7 @@ function scissioneDividi(nomeNuovo, quotaMia, npc, asseNuovo){
   if(S.forze){ S.forze[mio]=mia; S.forze[n.id]=loro; }
   if(S.forzePrev){ S.forzePrev[mio]=mia; S.forzePrev[n.id]=loro; }
   if(S.seggi && S.seggi[n.id]==null) S.seggi[n.id]=0;
-  applicaRosterDelta();
+  applicaRosterDelta(true);
   if(asseNuovo!=null){ var mp=PAESE.partiti.filter(function(x){return x.id===mio;})[0]; if(mp) mp.asse=asseNuovo; }
   rinormalizzaForze();
 }
@@ -1245,7 +1373,7 @@ function scissioneDisperdi(nomeNuovo, forzaResidua){
   if(nomeNuovo) S.rosterDelta.rinomina.push({ id:mio, nome:nomeNuovo });
   if(S.forze) S.forze[mio]=forzaResidua;
   if(S.forzePrev) S.forzePrev[mio]=forzaResidua;
-  applicaRosterDelta();
+  applicaRosterDelta(true);
   rinormalizzaForze();
 }
 /* C · CAMBI CASA: `S.partito` diventa un altro partito. Se non esiste ancora nel roster lo si crea (il caso
@@ -1261,7 +1389,7 @@ function scissioneTrasloca(destId, destDef){
     if(S.forze && S.forze[destId]==null) S.forze[destId]=destDef.forza||1;
     if(S.forzePrev && S.forzePrev[destId]==null) S.forzePrev[destId]=destDef.forza||1;
     if(S.seggi && S.seggi[destId]==null) S.seggi[destId]=0;
-    applicaRosterDelta();
+    applicaRosterDelta(true);
   }
   S.partito=destId;                                        // PRIMA di far uscire il vecchio: così la guardia
   S.rosterDelta.esce.push({id:vecchio, confluisce_in:destId});   // di `applicaDirettive` non lo scambia per il tuo
@@ -1273,7 +1401,7 @@ function scissioneTrasloca(destId, destDef){
   if(Array.isArray(S.coalizione)) S.coalizione=S.coalizione.filter(function(id){ return id!==vecchio && id!==destId; });
   if(Array.isArray(S.territori)) S.territori.forEach(function(t){ if(t && t.partito===vecchio) t.partito=destId; });
   if(S.tavoloPid===vecchio) S.tavoloPid=destId;
-  applicaRosterDelta();
+  applicaRosterDelta(true);
   rinormalizzaForze();
 }
 /* ============================================================================================================
@@ -1351,6 +1479,9 @@ function riallineamentoTappa(){
     /* L44-1 — i beat dell'ultimo decennio */
     else if(S.year===2001) S.log.unshift({t:T('Elezioni 2001'), x:T('L\'alternanza è compiuta: si cambia governo con le urne, e nessuno lo trova più straordinario.')});
     else if(S.year===2006) S.log.unshift({t:T('Elezioni 2006'), x:T('Il paese si spacca a metà: alla Camera decidono poche migliaia di voti. Governare con quel margine sarà un\'altra cosa.')});
+    else if(S.era===LINEA_UK && S.year===1951) S.log.unshift({t:T('Elezioni 1951'), x:T('Il partito con più voti perde la Camera: i collegi contano le vittorie, non le schede.')});
+    else if(S.era===LINEA_UK && S.year===1955) S.log.unshift({t:T('Elezioni 1955'), x:T('Il governo esce rafforzato: l\'alternanza non arriva, e l\'opposizione si interroga.')});
+    else if(S.era===LINEA_UK && S.year===1959) S.log.unshift({t:T('Elezioni 1959'), x:T('Maggioranza di cento seggi: il decennio si chiude come si era aperto, ma dalla parte opposta.')});
     else if(S.year===2008) S.log.unshift({t:T('Elezioni 2008'), x:T('Due partiti grandi nati da altrettante fusioni si prendono quasi tutto, e per la prima volta dal dopoguerra la sinistra radicale resta fuori dall\'aula.')});
   }
   S.riallineamenti[S.year]=true;
@@ -1412,6 +1543,221 @@ function snodoSolidarietaDovuta(){  return typeof S!=='undefined' && S && S.era=
    nucleare 87-88. Nessuna si sovrappone alle finestre del 70 (l ultima chiude nel 78). */
 function snodoDivorzioBdiDovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_IT && S.livello===3 && !S.opposizione && S.divorzioBdi==null && S.year>=1981 && S.year<=1982; }
 function snodoScalaMobileDovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_IT && S.livello===3 && !S.opposizione && S.scalaMobile==null && S.year>=1984 && S.year<=1985; }
+/* ================================================================================================================
+   L53-2 · LE DUE VIE D'USCITA DALLA MINORANZA. Ordine in partita, come da design §B: **prima il rimpasto**
+   (ministeri per una maggioranza vera), **poi il sostegno esterno** (un prezzo per sopravvivere), **poi la
+   minoranza** e il voto. Nessuna delle due è automatica: sono carte con una voce per rifiutare, e chi rifiuta
+   entrambe resta in minoranza vera — che deve restare mortale.
+   L'OCCASIONE NON È UN ASSILLO: ognuna si offre **una volta per mandato** (`sostegnoOfferto`/`rimpastoOfferto`
+   segnano il numero di mandato), e solo entro i primi due mesi da quando i numeri sono saltati.
+   ================================================================================================================ */
+function bloccoSeggi(){ return (S.seggi && typeof seggiCoalizione==='function') ? seggiCoalizione(S.coalizione||[S.partito], S.seggi) : 100; }
+/* il partner possibile per il SOSTEGNO: fuori dalla coalizione, a distanza d'asse ≤2 **oppure** intesa ≥50.
+   Se non c'è nessuno, l'arco non parte — e il messaggio è quello giusto: non c'è nessuno da chiamare. */
+function partnerSostegno(){
+  if(typeof S==='undefined' || !S || !S.seggi) return null;
+  var mio=part(S.partito); if(!mio) return null;
+  var fuori=PAESE.partiti.filter(function(p){
+    if((S.coalizione||[]).indexOf(p.id)>=0) return false;
+    return Math.abs(p.asse-mio.asse)<=2 || (typeof intesaDi==='function' && intesaDi(p.id)>=50);
+  });
+  if(!fuori.length) return null;
+  fuori.sort(function(a,b){ return (S.seggi[b.id]||0)-(S.seggi[a.id]||0); });
+  /* dev'essere un partner UTILE: coi suoi voti il blocco supera il 50 */
+  for(var i=0;i<fuori.length;i++){ if(bloccoSeggi()+(S.seggi[fuori[i].id]||0)>=50) return fuori[i]; }
+  return null;
+}
+/* il partner per il RIMPASTO: compatibile per asse (entra DENTRO, quindi la regola è quella della coalizione) */
+function partnerRimpasto(){
+  if(typeof S==='undefined' || !S || !S.seggi || typeof compatibili!=='function') return null;
+  var c=compatibili(S.partito, S.seggi)||[];
+  for(var i=0;i<c.length;i++){
+    if((S.coalizione||[]).indexOf(c[i].id)>=0) continue;
+    if(bloccoSeggi()+(S.seggi[c[i].id]||0)>=50) return c[i];
+  }
+  return null;
+}
+function minoranzaFresca(){   // i numeri sono saltati da poco: 1-2 mesi, non un richiamo perenne
+  return !!S.minoranza && (S.mesiMinoranza||0)>=1 && (S.mesiMinoranza||0)<=2;
+}
+function rimpastoDovuto(){
+  return typeof S!=='undefined' && S && S.livello===3 && !S.opposizione && PAESE.coalizione
+      && !S.sostegno && minoranzaFresca() && S.rimpastoOfferto!==(S.mandate||0) && !!partnerRimpasto();
+}
+function sostegnoDovuto(){
+  return typeof S!=='undefined' && S && S.livello===3 && !S.opposizione
+      && !S.sostegno && minoranzaFresca() && S.sostegnoOfferto!==(S.mandate||0)
+      && !partnerRimpasto() && !!partnerSostegno();   // il rimpasto ha la precedenza: si prova prima quello
+}
+/* apre l'accordo col prezzo scelto. `mesi` conta la durata, che finisce comunque col mandato. */
+function sostegnoApri(prezzo){
+  var p=partnerSostegno(); if(!p){ S.sostegno=null; return; }
+  S.sostegno={ pid:p.id, prezzo:prezzo, mesi:0 };
+  S.sostegnoOfferto=(S.mandate||0); S.sostegnoStrappi=0;
+  /* ⚠ L'ACCORDO STESSO STABILISCE IL RAPPORTO, e senza questa riga non funzionava niente: `S.intese` parte a
+     zero per chi non ha mai trattato, quindi la soglia di rottura («intesa sotto 25») scattava al PRIMO mese e
+     l'accordo moriva sempre — offerto 24 volte, zero mesi attivi. La soglia serve a rappresentare un rapporto
+     che si LOGORA, non uno che non è mai esistito: chi firma un patto parte da un rapporto di lavoro. */
+  if(typeof intesaMuovi==='function'){ try{ intesaMuovi(p.id, Math.max(0, 55-(typeof intesaDi==='function'?intesaDi(p.id):0))); }catch(e){} }
+  var nome=T(p.nome);
+  if(prezzo==='programma'){ if(typeof campPromessa==='function' && p.base){ for(var g in p.base){ campPromessa(g); break; } }
+    gd('cetomedio',-2); stampad(-3); }
+  else if(prezzo==='veto'){ stampad(-4); tutteCorrenti(-5); }
+  else { S.ind.debt+=0.6; stampad(-5); if(p.base) for(var g2 in p.base) gd(g2,3); }
+  repd(-2);
+  S.log.unshift({t:T('La maggioranza'),x:T('%P non entra nel governo ma non lo fa cadere: si va avanti con un\'intesa esterna.').replace('%P',nome)});
+}
+/* il rimpasto: l'alleato entra davvero. Costo concreto — due dicasteri passano di mano — e la base lo vede. */
+function rimpastoEntra(){
+  var p=partnerRimpasto(); if(!p) return;
+  S.coalizione=(S.coalizione||[S.partito]).concat([p.id]);
+  S.minoranza=bloccoSeggi()<50;
+  S.rimpastoOfferto=(S.mandate||0);
+  S.tenuta=S.tenuta||{}; S.tenutaForza0=S.tenutaForza0||{};
+  S.tenuta[p.id]=58; S.tenutaForza0[p.id]=S.forze[p.id];   // entra senza luna di miele: è un matrimonio d'interesse
+  var passati=0;
+  (S.ministers||[]).forEach(function(m){ if(passati<2 && m){ m.loyalty=Math.max(20,(m.loyalty||62)-25); passati++; } });
+  tutteCorrenti(-8); stampad(-3);
+  if(p.base) for(var g in p.base) gd(g,2);
+  S.log.unshift({t:T('La maggioranza'),x:T('%P entra nel governo: due ministeri cambiano padrone e i numeri tornano.').replace('%P',T(p.nome))});
+}
+/* IL CONTO DEL SOSTEGNO, ogni mese: il prezzo si paga e si controlla se regge. Chiamata da avanzaMese. */
+function sostegnoTick(){
+  if(!S || !S.sostegno) return;
+  var A=S.sostegno, p=part(A.pid);
+  if(!p || S.opposizione){ S.sostegno=null; return; }
+  A.mesi=(A.mesi||0)+1;
+  if(A.prezzo==='bottega'){ S.ind.debt+=0.05; }                       // costa ogni mese, davvero
+  if(A.prezzo==='programma' && S.promesseCampagna && S.promesseCampagna.some(function(q){ return (q.colpi||0)>=3; })) return sostegnoRompi('promessa');
+  if(A.prezzo==='veto' && (S.sostegnoStrappi||0)>=3) return sostegnoRompi('strappi');
+  if(typeof intesaDi==='function' && intesaDi(A.pid)<25) return sostegnoRompi('intesa');
+  if(A.mesi%6===0 && typeof intesaMuovi==='function'){ try{ intesaMuovi(A.pid,-3); }catch(e){} }   // logora: vivere di stampelle consuma il rapporto
+}
+function sostegnoRompi(perche){
+  if(!S || !S.sostegno) return;
+  var nome=T(part(S.sostegno.pid) ? part(S.sostegno.pid).nome : '');
+  S.sostegno=null; S.minoranza=bloccoSeggi()<50;
+  stampad(-4); repd(-2); gd('cetomedio',-2);
+  S.log.unshift({t:T('La maggioranza'),x:T('%P ritira l\'appoggio esterno: il governo torna senza rete.').replace('%P',nome)});
+}
+/* ================================================================================================================
+   L56-1 · LO SCIOGLIMENTO ANTICIPATO **SCELTO** — la prerogativa che mancava.
+   (design in `DESIGN-SCIOGLIMENTO.md`, buco trovato da L55-1)
+
+   IL BUCO: l'unica strada al voto anticipato era `cadutaGoverno && minoranza && probSfiducia()`. Si andava alle
+   urne **solo per debolezza**. Ma decidere quando si vota è esattamente ciò che fa un capo di governo in forza,
+   e nel sistema britannico è *la* prerogativa: due dei tre voti del decennio '60 sono anticipati.
+   LA STESSA SCOMMESSA VINCE E PERDE, ed è per questo che è buon materiale: 1966 stravince, 1974 e 2017 perdono.
+   Informazione parziale (i sondaggi mentono già, per costruzione), guadagno vero, rischio vero.
+
+   DISPONIBILITÀ — tre condizioni, tutte necessarie:
+     · al governo (all'opposizione non hai niente da sciogliere);
+     · **almeno 18 mesi dal voto precedente**: prima è indecente, e serve anche a impedire il «voto ogni volta
+       che sono in testa» che il design vieta esplicitamente;
+     · **il mandato non è agli sgoccioli**: nell'ultimo anno non è una scelta, è il calendario.
+   `PAESE.scioglimento === false` la spegne dove il calendario è rigido: è **per-scenario**, non universale.
+
+   IL COSTO D'INGRESSO SI PAGA SEMPRE, anche quando va bene — è il paletto del design: la stampa parla di
+   opportunismo, gli alleati che non se l'aspettavano mormorano, e la campagna consuma. Non è una mossa gratis.
+   ================================================================================================================ */
+function scioglimentoAmmesso(){
+  if(typeof S==='undefined' || !S || S.opposizione || S.livello!==3) return false;
+  if(PAESE.scioglimento===false) return false;                      // calendario rigido: la voce non compare
+  if(PAESE.comeSiVince!=='parlamentare' && !PAESE.coalizione) return false;
+  var mesiDalVoto=(S.turnInMandate||0)*12 + ((S.month||1)-1);
+  if(mesiDalVoto<18) return false;                                  // prima è indecente
+  var durata=(PAESE.mandatoMesi||60)/12;
+  if((S.turnInMandate||0) >= durata-1) return false;                // agli sgoccioli non è una scelta
+  return true;
+}
+/* Quel che il giocatore VEDE decidendo: i sondaggi (che mentono col loro margine, come già fanno) e il tempo
+   che resta. Non vede il risultato — quello lo scrive la notte elettorale, con le sue sorprese. */
+function scioglimentoQuadro(){
+  var s=S.ultimoSondaggio, durata=(PAESE.mandatoMesi||60)/12;
+  return { sond:(s?s.val:null), margine:(s?s.margine:null),
+           mesiRestanti: Math.max(0, Math.round((durata-(S.turnInMandate||0))*12 - ((S.month||1)-1))) };
+}
+/* ⚠ LO SCARTO DI CAMPAGNA, e perché senza non c'è gioco. Misurato prima di scriverlo: **l'esito dell'elezione
+   è deterministico dai seggi correnti** (`avviaAttesa` fa `calcSeggi()` sulle forze del momento, e
+   `calcMargineEsito` guarda solo quelli). Quindi chiamare il voto stando sopra il 50 era una **vittoria certa**:
+   10 scioglimenti su 10 vinti in Italia. Il design lo vieta in una riga — «nessuna garanzia» — e la misura
+   chiede espressamente una coda di sconfitte. Senza scarto non è una scommessa, è un regalo.
+   LA FORMA: una campagna corta lascia meno tempo per rimediare, e il paese reagisce a essere chiamato alle urne
+   in anticipo. Due pezzi, entrambi piccoli:
+     · un **malus sistematico** (−1,2 punti): l'opportunismo si paga anche nelle urne, non solo sui giornali;
+     · uno **scarto casuale ±3,5** su chi governa, con la parte opposta che si muove all'inverso.
+   Effetto: chi ha dieci punti di margine vince lo stesso, chi ne ha due sta rischiando davvero. È il 1966
+   contro il 1974 e il 2017, che è esattamente ciò che la scheda voleva rendere giocabile. */
+function scartoCampagna(){
+  var mio=S.partito, avv=null, best=-1;
+  PAESE.partiti.forEach(function(p){ if(p.id!==mio && (S.forze[p.id]||0)>best){ best=S.forze[p.id]||0; avv=p.id; } });
+  var scarto = -1.2 + (Math.random()*7 - 3.5);
+  if(S.forze[mio]!=null) S.forze[mio]=Math.max(2, S.forze[mio]+scarto);
+  if(avv && S.forze[avv]!=null) S.forze[avv]=Math.max(2, S.forze[avv]-scarto);
+  if(typeof rinormalizzaForze==='function'){ try{ rinormalizzaForze(); }catch(e){} }
+  return Math.round(scarto*10)/10;
+}
+function azioneScioglimento(){
+  if(!scioglimentoAmmesso()) return;
+  /* IL COSTO D'INGRESSO, SEMPRE — anche quando va bene. ⚠ Il costo sugli alleati sta su `S.intese` e NON su
+     `S.tenuta`: `nextMandate` chiama `initTenuta()`, che rimette tutti a 65 (luna di miele). Scriverci sarebbe
+     stato un no-op invisibile — la trappola dei valori che vengono ricalcolati, per l'ennesima volta. */
+  stampad(-7);
+  if(S.intese){ (S.coalizione||[]).forEach(function(id){ if(id!==S.partito && typeof intesaMuovi==='function') intesaMuovi(id,-8); }); }
+  if(typeof tutteCorrenti==='function') tutteCorrenti(-4);
+  S.scioglimentiChiesti=(S.scioglimentiChiesti||0)+1;
+  S.elezioniAnticipate=true; S.scioglimentoScelto=true;             // il log ricorda che ci sei andato TU
+  var sc=scartoCampagna();
+  S.log.unshift({t:T('Scioglimento'),x:T('Hai chiesto lo scioglimento: si vota in anticipo, e la scelta è tua.')});
+  if(typeof bioFatto==='function'){ try{ bioFatto(T('Ha sciolto le Camere per andare al voto in anticipo.')); }catch(e){} }
+  election();
+}
+/* ================================================================================================================
+   L55-1 · LA SVALUTAZIONE VERA. La consegna chiede che il decennio «possa finire in svalutazione» con un
+   **effetto misurabile sull'economia**, non con una riga di log. Da 2,80 a 2,40 dollari è un −14% del cambio,
+   e quello che il gioco può rappresentare onestamente è:
+     · il DEBITO estero si rivaluta in sterline — è l'effetto che il clamp della crescita non può nascondere,
+       e per questo è la parte che si vede davvero (scheda §2: la sterlina è la leva, non il debito, ma la
+       svalutazione è l'evento in cui le due cose si toccano);
+     · l'EXPORT respira: un colpo di crescita, che però il clamp assorbe quasi tutto — dichiarato, non nascosto;
+     · l'import costa: la disoccupazione non scende quanto la crescita farebbe pensare.
+   `S.svalutazione` è dato puro (round-trip) e serve anche ai titoli d'epoca. */
+function svalutaSterlina(){
+  if(typeof S==='undefined' || !S) return;
+  S.svalutazione=(S.svalutazione||0)+1;
+  S.ind.debt = Math.round((S.ind.debt*1.06)*10)/10;   // la quota in valuta estera pesa di più, in sterline
+  if(S.gMod!=null) S.gMod+=0.9;                        // l'export respira (il clamp ne assorbe gran parte: dichiarato)
+  if(S.uMod!=null) S.uMod+=0.2;                        // ma l'import costa: la disoccupazione non segue la crescita
+}
+/* I GATE DEL '60. Sterlina: finestra 1966-67, e il secondo nodo è la conseguenza della difesa (come Suez).
+   Europa: 1961-63, e il veto arriva dopo. Coscienza: 1965-67. Finestre disgiunte fra loro dove possibile;
+   dove si toccano, l'ordine d'iniezione decide, e la sterlina ha la precedenza perché è lo snodo del decennio. */
+function snodoSterlina60Dovuta(){    return typeof S!=='undefined' && S && S.era===LINEA_UK && S.livello===3 && !S.opposizione && S.sterlina60==null && S.year>=1966 && S.year<=1967; }
+function snodoSterlina60DueDovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_UK && S.livello===3 && !S.opposizione && S.sterlina60==='difesa'; }
+function snodoEuropa60Dovuta(){      return typeof S!=='undefined' && S && S.era===LINEA_UK && S.livello===3 && !S.opposizione && S.europa60==null && S.year>=1961 && S.year<=1963; }
+function snodoEuropa60DueDovuta(){   return typeof S!=='undefined' && S && S.era===LINEA_UK && S.livello===3 && !S.opposizione && S.europa60==='chiesto'; }
+function snodoCoscienza60Dovuta(){   return typeof S!=='undefined' && S && S.era===LINEA_UK && S.livello===3 && !S.opposizione && S.coscienza60==null && S.year>=1965 && S.year<=1967; }
+/* L49-1 · I GATE DEL DECENNIO INGLESE — la prima famiglia di snodi fuori dalla linea italiana.
+   SUEZ, due nodi in catena: il primo nella finestra ott-dic 1956 (la scheda dice ottobre; do tre mesi di
+   tolleranza perché una finestra di un mese solo si perde se quel mese è già occupato da un pilastro).
+   Il secondo scatta SOLO dopo la scelta d'intervento — è la conseguenza, non un'alternativa.
+   `S.suez!=null` è anche ciò che spegne il pilastro-cronaca (decisione G1). */
+function snodoSuezDovuta(){     return typeof S!=='undefined' && S && S.era===LINEA_UK && S.livello===3 && !S.opposizione && S.suez==null && S.year===1956 && S.month>=10; }
+function snodoSuezDueDovuta(){  return typeof S!=='undefined' && S && S.era===LINEA_UK && S.livello===3 && !S.opposizione && S.suez==='intervento'; }
+/* LA CORSA ALLA STERLINA — tre ancore (~1951, ~1955, ~1957), finestre di due anni perché una carta a finestra
+   stretta si perde se il mese è occupato. `S.sterlinaAncore` marca quali sono state pescate: la stessa ancora
+   non torna, ancore diverse sì — da cui le 2-3 pescate per decennio che chiede la scheda. */
+const STERLINA_ANCORE = [ {id:'a51', da:1951, a:1952}, {id:'a55', da:1955, a:1956}, {id:'a57', da:1957, a:1958} ];
+function sterlinaAncoraDovuta(){
+  if(typeof S==='undefined' || !S || S.era!==LINEA_UK || S.livello!==3 || S.opposizione) return null;
+  if(S.suez==='intervento') return null;                       // la catena di Suez ha la precedenza: mai due morsi valutari insieme
+  var fatte=S.sterlinaAncore||{};
+  for(var i=0;i<STERLINA_ANCORE.length;i++){ var A=STERLINA_ANCORE[i];
+    if(fatte[A.id]) continue;
+    if(S.year>=A.da && S.year<=A.a) return A.id;
+  }
+  return null;
+}
 /* L40-2 · i gate del '90. Stessa forma degli snodi '70/'80: premier, one-shot, dentro la finestra storica. */
 function snodoMaastrichtDovuta(){   return typeof S!=='undefined' && S && S.era===LINEA_IT && S.livello===3 && !S.opposizione && S.maastricht==null  && S.year>=1992 && S.year<=1997; }
 function snodoMattarellumDovuta(){  return typeof S!=='undefined' && S && S.era===LINEA_IT && S.livello===3 && !S.opposizione && S.mattarellum==null && S.year>=1993 && S.year<=1994; }
@@ -2822,10 +3168,39 @@ function genAgendaRamo(first){
   /* L28-4 — i PILASTRI del '70: cronaca all'orologio, one-shot, per QUALUNQUE ruolo (sono fatti del paese).
      Iniettati qui, prima dei rami: in fondo a genAgendaRamo non li vedrebbe nessuno tranne il premier (lezione L17-1).
      Ordine cronologico = ordine dell'array; se due sono scaduti insieme escono in due mesi consecutivi. */
-  if(!first && S.era===LINEA_IT && typeof PILASTRI_LINEA!=='undefined'){
+  /* ================================================================================================================
+     L56-2 · I FATTI-MONDO, iniettati PRIMA dei pilastri di linea e con lo stesso registro one-shot.
+     ⚑ **LA LINEA ITALIANA NON LI RICEVE**: ha già i suoi, approvati e congelati. Il pool serve tutte le altre.
+     È questa riga, e solo questa, a garantire la misura che conta — un giocatore italiano non vede mai due Lune.
+     ⚑ SOVRASCRITTURA NAZIONALE: se un pilastro della linea corrente dichiara `sostituisce:'<id-mondo>'`, il
+     fatto-mondo si marca come visto e si salta — la versione nazionale prende il suo posto senza che nessuno
+     riscriva niente. Serve al 2001: l'11 settembre italiano esiste già ed è approvato.
+     Lo stesso paletto di L34-3 vale qui: un fatto avvenuto PRIMA dell'inizio della carriera è storia, non
+     cronaca — si marca come visto e non torna. */
+  if(!first && typeof PILASTRI_MONDO!=='undefined' && S.era!==LINEA_IT){
+    S.pilastriMondo=S.pilastriMondo||{};
+    var _sost={};
+    if(typeof PILASTRI_LINEA!=='undefined') PILASTRI_LINEA.forEach(function(q){
+      if(q.sostituisce && S.era===(q.linea||LINEA_IT)) _sost[q.sostituisce]=true; });
+    for(var _mi=0;_mi<PILASTRI_MONDO.length;_mi++){
+      var _M=PILASTRI_MONDO[_mi];
+      if(S.pilastriMondo[_M.id]) continue;
+      if((_M.anno*12+_M.mese) < ((S.annoInizio||S.year)*12+1)){ S.pilastriMondo[_M.id]=true; continue; }
+      if((S.year*12+S.month) < (_M.anno*12+_M.mese)) continue;
+      S.pilastriMondo[_M.id]=true;
+      if(_sost[_M.id]) continue;                       // la linea ha la sua versione: cede il posto
+      S.agenda.push({kind:'event', data:_M, resolved:false}); agendaSolo(); return;
+    }
+  }
+  /* L49-1 — l'iniezione era cablata su LINEA_IT e nessuna linea nuova poteva avere pilastri. Ora ogni voce
+     dichiara la SUA linea (`linea`), e chi non la dichiara resta italiano: i venti pilastri esistenti non
+     cambiano comportamento di una virgola. E `cond` opzionale, che serve a Suez: chi lo GIOCA come snodo non
+     deve ricevere anche la cronaca (decisione G1). */
+  if(!first && typeof PILASTRI_LINEA!=='undefined'){
     S.pilastri70=S.pilastri70||{};
     for(var _pi=0;_pi<PILASTRI_LINEA.length;_pi++){
       var _P=PILASTRI_LINEA[_pi];
+      if(S.era!==(_P.linea||LINEA_IT)) continue;
       if(S.pilastri70[_P.id]) continue;
       /* L34-3 - UN PILASTRO GIA ACCADUTO PRIMA CHE LA PARTITA COMINCI NON E CRONACA, E STORIA: chi parte nel
          1980 non deve ricevere piazza Fontana e il caso Moro come se succedessero ora. Trovato grazie allo
@@ -2834,6 +3209,7 @@ function genAgendaRamo(first){
       if((_P.anno*12+_P.mese) < ((S.annoInizio||S.year)*12+1)){ S.pilastri70[_P.id]=true; continue; }
       if((S.year*12+S.month) < (_P.anno*12+_P.mese)) continue;
       S.pilastri70[_P.id]=true;
+      if(_P.cond && !_P.cond()) continue;   /* L49-1: marcato come visto e SALTATO — Suez giocato spegne Suez-cronaca */
       S.agenda.push({kind:'event', data:_P, resolved:false}); agendaSolo(); return;
     }
   }
@@ -2946,6 +3322,24 @@ function genAgendaRamo(first){
   if(!first && typeof snodoDivorzioBdiDovuta==='function' && snodoDivorzioBdiDovuta()){ S.agenda.push({kind:'event', data:DIVORZIO_BDI_EV, resolved:false}); agendaSolo(); return; }
   if(!first && typeof snodoScalaMobileDovuta==='function' && snodoScalaMobileDovuta()){ S.agenda.push({kind:'event', data:SCALAMOBILE_EV, resolved:false}); agendaSolo(); return; }
   if(!first && typeof snodoNucleareDovuta==='function' && snodoNucleareDovuta()){ S.agenda.push({kind:'event', data:NUCLEARE_EV, resolved:false}); agendaSolo(); return; }
+  /* L53-2 · le due vie d'uscita, PRIMA di tutto il resto: quando i numeri saltano, quella è la notizia del
+     mese. Ordine da design: rimpasto (maggioranza vera) → sostegno esterno (un prezzo per sopravvivere). */
+  if(!first && typeof rimpastoDovuto==='function' && rimpastoDovuto()){ S.agenda.push({kind:'event', data:RIMPASTO_EV, resolved:false}); agendaSolo(); return; }
+  if(!first && typeof sostegnoDovuto==='function' && sostegnoDovuto()){ S.agenda.push({kind:'event', data:SOSTEGNO_EV, resolved:false}); agendaSolo(); return; }
+  /* L49-1 · gli snodi inglesi. Suez PRIMA della sterlina: il secondo nodo è la conseguenza diretta di una
+     scelta appena fatta e non può aspettare un mese in cui l'agenda sia libera. */
+  /* L55-1 · gli snodi del '60. La sterlina prima di tutto: è lo snodo del decennio, e il suo secondo nodo è la
+     conseguenza diretta di una scelta già fatta. Poi il veto d'Europa, poi le aperture. */
+  if(!first && typeof snodoSterlina60DueDovuta==='function' && snodoSterlina60DueDovuta()){ S.agenda.push({kind:'event', data:STERLINA60_DUE_EV, resolved:false}); agendaSolo(); return; }
+  if(!first && typeof snodoSterlina60Dovuta==='function' && snodoSterlina60Dovuta()){ S.agenda.push({kind:'event', data:STERLINA60_EV, resolved:false}); agendaSolo(); return; }
+  if(!first && typeof snodoEuropa60DueDovuta==='function' && snodoEuropa60DueDovuta()){ S.agenda.push({kind:'event', data:EUROPA60_DUE_EV, resolved:false}); agendaSolo(); return; }
+  if(!first && typeof snodoEuropa60Dovuta==='function' && snodoEuropa60Dovuta()){ S.agenda.push({kind:'event', data:EUROPA60_EV, resolved:false}); agendaSolo(); return; }
+  if(!first && typeof snodoCoscienza60Dovuta==='function' && snodoCoscienza60Dovuta()){ S.agenda.push({kind:'event', data:COSCIENZA60_EV, resolved:false}); agendaSolo(); return; }
+  if(!first && typeof snodoSuezDueDovuta==='function' && snodoSuezDueDovuta()){ S.agenda.push({kind:'event', data:SUEZ_DUE_EV, resolved:false}); agendaSolo(); return; }
+  if(!first && typeof snodoSuezDovuta==='function' && snodoSuezDovuta()){ S.agenda.push({kind:'event', data:SUEZ_EV, resolved:false}); agendaSolo(); return; }
+  if(!first && typeof sterlinaAncoraDovuta==='function'){ var _sa=sterlinaAncoraDovuta();
+    if(_sa){ S.sterlinaAncore=S.sterlinaAncore||{}; S.sterlinaAncore[_sa]=true;
+      S.agenda.push({kind:'event', data:STERLINA_EV, resolved:false}); agendaSolo(); return; } }
   /* L40-2 · gli snodi del '90. La SCISSIONE per prima: è la più identitaria e non può farsi scavalcare. */
   if(!first && typeof snodoScissioneDovuta==='function' && snodoScissioneDovuta()){ S.agenda.push({kind:'event', data:SCISSIONE_EV, resolved:false}); agendaSolo(); return; }
   if(!first && typeof snodoDcDovuta==='function'  && snodoDcDovuta()){  S.agenda.push({kind:'event', data:DIASPORA_DC_EV, resolved:false}); agendaSolo(); return; }
@@ -3633,6 +4027,7 @@ function avanzaMese(){
     genAgenda(false); generaTitolo(); forseSondaggio(); render(); commitSnap();
     return;
   }
+  if(typeof sostegnoTick==='function') sostegnoTick();   // L53-2 — il prezzo si paga e l'accordo si controlla, prima dei verdetti
   if(S.ind.consenso<dif().sogliaCrisi){ return gameOver('crisi'); }
   if(S.mesiSottoCrisi>=dif().mesiInsolvenza){ return gameOver('insolvenza'); }
   if(S.month===1 && S.turnInMandate>=PAESE.mandatoMesi/12){ if(sfidaAttiva()) return apriPrimaria('vigilia'); return election(); }   // vigilia: prima la primaria, poi le urne
@@ -4217,10 +4612,37 @@ function confirmRinnovo(){
   S.coalizione=COAL.membri.slice(); COAL=null;
   vinciElezione();   // governando → nextMandate; dall'opposizione → goAppoint → tornaAlGoverno
 }
-/* Probabilità mensile di mozione di sfiducia in minoranza: cresce coi mesi in minoranza e col consenso basso. */
+/* ================================================================================================================
+   Probabilità mensile di mozione di sfiducia in minoranza: cresce coi mesi in minoranza e col consenso basso.
+
+   L50-1 · ORA LEGGE ANCHE I SEGGI, e il motivo è una misura. La formula era **una costante proporzionale**: non
+   conteneva la forza parlamentare, cresceva solo coi MESI, e dopo ~14 mesi si inchiodava al tetto del 40% per
+   sempre — con qualunque maggioranza. In Italia non si vedeva perché `S.minoranza` è `false` per costruzione nei
+   paesi a coalizione (game.js:230); nel Regno Unito, dove il blocco è un partito solo, l'effetto era questo:
+   **minoranza il 100% dei mesi e `election()` chiamata 45 volte in 120 mesi**, un'elezione ogni 2,7 mesi.
+   In un sistema a collegi il maggioritario FABBRICA la maggioranza: chi vince i seggi normalmente supera il 50%
+   da solo, e non cade quasi mai. Il parlamento appeso esiste ed è notizia, non condizione permanente.
+
+   La forma nuova: `scarto` = quanto manca alla maggioranza assoluta (in punti di seggi).
+     · sopra il 50% dei seggi → **zero**, in qualunque sistema (chi ha i numeri non è sfiduciabile)
+     · sotto → il vecchio termine mesi×consenso **moltiplicato per quanto sei lontano dalla soglia**: un governo
+       appeso a mezzo punto è quasi stabile, uno al 40% è fragile davvero (`scarto/10`, tetto 1).
+   PERCHÉ L'ITALIA NON SI MUOVE: là `S.minoranza` è false, e la riga chiamante (`S.minoranza && ...`) esce prima —
+   `probSfiducia` non viene proprio invocata. Misurato: 0 chiamate in 120 mesi sulla linea italiana.
+   ================================================================================================================ */
 function probSfiducia(){
   const D=dif(), m=S.mesiMinoranza||0, c=S.ind.consenso;
-  return clamp(0.03*m*(1+Math.max(0,45-c)/45)*D.rischioSfiducia, 0, 0.40);
+  let mio = (S.seggi && S.partito!=null)
+    ? (PAESE.coalizione ? seggiCoalizione(S.coalizione||[S.partito], S.seggi) : (S.seggi[S.partito]||0))
+    : 0;
+  /* L53-2 — L'ACCORDO ESTERNO CONTA COME VOTI, MA NON QUANTO I PROPRI. Chi si astiene ti tiene in piedi in
+     aula: i suoi seggi entrano nel conto, **scontati del 30%**, perché vivere di stampelle non è come avere
+     la maggioranza — e perché il paletto del design dice che nessun automatismo deve salvare il giocatore.
+     Se anche così non si arriva a 50, la sfiducia resta piena: la minoranza vera resta mortale. */
+  if(S.sostegno && S.seggi && S.seggi[S.sostegno.pid]!=null) mio += (S.seggi[S.sostegno.pid]||0)*0.7;
+  if(mio>=50) return 0;                                   // hai i numeri: nessuna mozione ti tocca
+  const scarto = Math.min(1, (50-mio)/10);                // quanto manca alla soglia, saturato a 10 punti
+  return clamp(0.03*m*(1+Math.max(0,45-c)/45)*D.rischioSfiducia*scarto, 0, 0.40);
 }
 /* Carta di crisi di coalizione del mese (ultimatum o rottura), o null. Stesso pattern isteresi+raffreddamento
    degli eventi-fiducia, ma PER alleato. La rottura rimuove subito l'alleato (stato sempre coerente). */
@@ -4313,6 +4735,9 @@ function nextMandate(){
   S.minoranza = PAESE.coalizione ? seggiCoalizione(S.coalizione,S.seggi)<50
               : (PAESE.comeSiVince==='parlamentare' ? S.seggi[S.partito]<50 : false);
   S.mesiMinoranza=0; S.elezioniAnticipate=false; S.mesiAlGoverno=Math.round((S.mesiAlGoverno||0)/2); initTenuta(); S.bloccoAtteso=bloccoQuota(); S.ultimoSondaggio=null; S.sondStorico=[];   // vittoria: logorio dimezzato; aspettativa ri-allineata al nuovo blocco (potere locale persiste)
+  /* L53-2 — l'accordo esterno FINISCE COL MANDATO (design §A): le stampelle valgono per la legislatura che le
+     ha chieste, non per quella dopo. Le due occasioni si riaprono col mandato nuovo. */
+  S.sostegno=null; S.sostegnoStrappi=0;
   S.campNaz=null; S.campNazUltimo=null;   // Cantiere C: la stagione si chiude col voto (le promesseCampagna PERSISTONO: resa dei conti alla prossima)
   tutteCorrenti(8);   // la vittoria ricompatta il partito
   bioConta('elezioniVinte'); bioFatto(gn('Rieletto','Rieletta')+': comincia il mandato '+S.mandate+'.');
@@ -4598,6 +5023,14 @@ function applySnap(snap){
   if(typeof applicaRosterDelta==='function') applicaRosterDelta();
   if(true){
   }
+  /* L49-1 — migrazione del decennio inglese. `S.suez` è anche ciò che spegne il pilastro-cronaca: se restasse
+     undefined dopo un caricamento, chi ha già giocato lo snodo si vedrebbe arrivare anche la cronaca (G1). */
+  if(S.suez===undefined){ S.suez=null; S.sterlinaAncore={}; S.sterlinaRinvii=0; S.sterlinaCrisi=0; S.sterlinaSalva=0; }
+  if(!S.sterlinaAncore || typeof S.sterlinaAncore!=='object') S.sterlinaAncore={};
+  if(S.sostegno===undefined){ S.sostegno=null; S.sostegnoOfferto=null; S.rimpastoOfferto=null; S.sostegnoStrappi=0; }   // L53-2
+  if(S.sterlina60===undefined){ S.sterlina60=null; S.europa60=null; S.coscienza60=null; S.svalutazione=0; }   // L55-1
+  if(S.scioglimentiChiesti===undefined){ S.scioglimentiChiesti=0; S.scioglimentoScelto=false; }   // L56-1
+  if(!S.pilastriMondo || typeof S.pilastriMondo!=='object') S.pilastriMondo={};   // L56-2 — migrazione
   if(S.truffaFatta===undefined){ S.truffaFatta=false; S.truffaEsito=null; }   // Build B 1b — snodo one-shot: default per i salvataggi pre-1b
   if(S.riallineamenti===undefined) S.riallineamenti={};   // AVANZAMENTO — migrazione: i salvataggi pre-lotto ricevono il registro-tappe vuoto
   if(S.apertura===undefined){ S.apertura=null; S.aperturaEsito=null; S.enel=null; }   // AVANZAMENTO Lotto 4 — migrazione snodi '60

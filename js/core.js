@@ -6,6 +6,7 @@
    i TAG-DECADE** del contenuto. `S.era` porta la LINEA; il decennio si deriva da `S.year` dentro LINEE_STORICHE.
    ============================================================================================================ */
 const LINEA_IT = 'italia_repubblica';
+const LINEA_UK = 'uk_postwar';   // L48-1 — la seconda linea storica: il Regno Unito del dopoguerra
 
 "use strict";
 /* ============================================================

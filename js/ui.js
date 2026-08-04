@@ -396,9 +396,10 @@ async function caricaAvatarFile(input){
 /* --- Selettore Paese + Partito (schermata iniziale). Cambiando paese, PAESE diventa attivo, la cornice
    si aggiorna (applyPaese) e il partito di default torna al più forte (primo in elenco) del nuovo paese. --- */
 function setCountry(c){
-  chosenCountry=c; chosenScenario='presente'; PAESE=PAESI[c]; chosenPartito=PAESE.partiti[0].id;   // Build B: cambiare paese riazzera lo scenario (gli scenari sono per-paese)
+  chosenCountry=c; chosenScenario='presente'; PAESE=PAESI[c]; chosenPartito=PAESE.partiti[0].id; if(typeof renderScenariPaese==='function') renderScenariPaese();   // Build B: cambiare paese riazzera lo scenario (gli scenari sono per-paese)
   document.querySelectorAll('#country-seg button').forEach(b=>b.classList.toggle('on', b.dataset.c===c));
   document.querySelectorAll('#scenario-seg button').forEach(b=>b.classList.toggle('on', b.dataset.sc==='presente'));
+  if(typeof renderScenariPaese==='function') renderScenariPaese();
   applyPaese(); renderStartParties();
   if(typeof CREA!=='undefined' && CREA) renderCreazione();   // setup aperto: il punto-di-partenza locale dipende dai territori del paese → rirendi i campi
 }
@@ -415,6 +416,19 @@ function setScenario(id){
   document.querySelectorAll('#country-seg button').forEach(b=>b.classList.toggle('on', b.dataset.c===chosenCountry));
   applyPaese(); renderStartParties();
   if(typeof CREA!=='undefined' && CREA) renderCreazione();
+}
+/* L48-1 · IL SELETTORE A DUE LIVELLI. Con le porte di più paesi la lista crescerebbe senza fine: si mostrano
+   solo quelle del paese scelto (e «Presente», che vale per tutti). Il dato per filtrare c'era già — `SCENARI`
+   ha il campo `paese` da sempre. Se il paese cambia e lo scenario attivo non gli appartiene più, si torna al
+   presente: è la stessa regola che `setCountry` applica già, resa visibile. */
+function renderScenariPaese(){
+  var seg=document.getElementById('scenario-seg'); if(!seg) return;
+  [].slice.call(seg.children).forEach(function(b2){
+    var id=b2.dataset&&b2.dataset.sc; if(!id) return;
+    var sc=(typeof SCENARI!=='undefined')?SCENARI[id]:null;
+    var mio = (id==='presente') || (sc && (!sc.paese || sc.paese===chosenCountry));
+    b2.style.display = mio ? '' : 'none';
+  });
 }
 function renderStartParties(){
   const el=document.getElementById('party-list'); if(!el) return;
@@ -1498,6 +1512,20 @@ function renderGov(){
   if(S.opposizione){
     h+=`<div class="card"><div class="ct">${T('Il Governo')}</div><div class="min"><div class="msum">${T("Governa <b>%P</b>. Non hai ministri: sei all'opposizione. Tornerai a nominare il governo vincendo le elezioni.").replace('%P',T((part(S.governoAvversario)||{}).nome||'—'))}</div></div></div>`;
   } else if(S.livello!==4){   // Fetta 2: il Segretario (liv. 4) non ha ministri nazionali → niente card-ministeri vuota
+  /* L56-1 · LA PREROGATIVA: chiedere lo scioglimento. Compare solo quando è davvero una scelta — al governo,
+     passati 18 mesi dal voto, e col mandato non agli sgoccioli. Mostra quel che il giocatore vedrebbe davvero:
+     il sondaggio col suo margine (che mente già, per costruzione) e i mesi che restano. Non mostra il risultato. */
+  if(typeof scioglimentoAmmesso==='function' && scioglimentoAmmesso()){
+    const q=scioglimentoQuadro();
+    const riga = (q.sond!=null)
+      ? T('Ultimo sondaggio: <b>%V%</b> (± %M)').replace('%V',q.sond).replace('%M',q.margine)
+      : T('Nessun sondaggio recente: andresti al buio.');
+    h+=`<div class="card"><div class="ct">${T('La prerogativa')}</div>
+      <div class="mtext" style="padding-bottom:6px">${riga} · ${T('mancano <b>%N</b> mesi alla scadenza naturale.').replace('%N',q.mesiRestanti)}</div>
+      <button class="opt" onclick="if(confirm('${T('Chiedere lo scioglimento e andare al voto in anticipo?')}')) azioneScioglimento()">
+        <span class="ol">${T('Chiedi lo scioglimento')}</span>
+        <span class="oe">${T('Si vota adesso, e la scelta è tua · la stampa parla di opportunismo e gli alleati mormorano')}</span></button></div>`;
+  }
   h+=`<div class="card g2"><div class="ct">I tuoi ministeri <small style="color:var(--mut2);font-weight:400">· tocca "Apri" per gestirli</small></div>`;
   for(const m of S.ministers) h+=renderMinistroCard(m,'lista');
   h+=`</div>`;
