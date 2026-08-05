@@ -183,6 +183,7 @@ function initStatoBase(){
   /* L55-1 — il decennio inglese '60 (dati puri, round-trip). `sterlina60` e anche l'interruttore del
      pilastro-cronaca della svalutazione, come `suez` per il '50. */
   S.sterlina60=null; S.europa60=null; S.coscienza60=null; S.svalutazione=0;
+  S.minatori=null; S.europa70=null; S.fmi=null;   // L58-1 (dati puri, round-trip)
   S.scioglimentiChiesti=0; S.scioglimentoScelto=false;   // L56-1 — dati puri, round-trip
   /* L53-2 — le due vie d'uscita dalla minoranza (dati puri, round-trip). `sostegno` è l'accordo esterno in
      corso; `sostegnoOfferto` marca il mandato in cui l'occasione è già passata, perché sia un'occasione e non
@@ -1027,7 +1028,31 @@ const DRIFT_ECONOMICO_ERA = {
                    clamp-5 perché siano leggibili; i picchi sono alti e invisibili, e lavorano sul debito. */
                 {da:1960, ciclo:19},   {da:1961, ciclo:1.5}, {da:1962, ciclo:19.5},
                 {da:1964, ciclo:1.3},  {da:1965, ciclo:20},  {da:1966, ciclo:0.9},
-                {da:1968, ciclo:20.5} ]
+                {da:1968, ciclo:20.5},
+                /* ==========================================================================================
+                   L58-1 · IL DECENNIO '70 — **IL DRIFT SI INVERTE**, ed è il primo caso sulla linea.
+                   Per vent'anni il nominale alto ha fatto scendere il debito (195 → 117 → 66). Qui la scheda
+                   chiede il contrario: il debito **smette di scendere e risale**. Quindi il drift scende
+                   sotto la soglia che erode, e nella seconda metà va in negativo.
+                   ⚑ E QUI STA LA RAPPRESENTAZIONE DELL'INFLAZIONE, che il gioco non ha come indicatore
+                   (limite dichiarato in L28-1). L'inflazione al ~24-25% del 1975 non è un numero che si
+                   possa mostrare: **la si rappresenta come una crescita reale che sparisce**. Il drift del
+                   '73-'76 è il più basso mai scritto sulla linea, e i testi delle carte dicono il resto —
+                   «i prezzi salgono più in fretta delle buste paga», «un'imposta che nessuno ha votato».
+                   Chi legge questa tabella deve sapere che quei numeri bassi **non sono recessione: sono
+                   inflazione travestita**, perché è l'unico posto dove il motore la lascia entrare.
+                   La forma: 1970-72 ancora positivo ma modesto · 1973 lo shock petrolifero · 1974-76 il
+                   fondo (tre giorni, FMI) · 1977-79 una risalita debole che non recupera.
+                   ⚠ LA TARATURA È UNA SCELTA FRA DUE BENI, e la dichiaro: più si alza il drift, meno sale il
+                   debito ma più la crescita resta incollata al clamp-5 e il decennio non si SENTE. Misurato:
+                   [13 10 6 4 9] dà debito 75-82 con crescita piatta a 5 · [11 8 4 2 7] dà debito 89-93 **con
+                   un avvallamento visibile a 3,9** proprio negli anni della settimana di tre giorni. Scelta la
+                   seconda: la scheda chiede «il decennio peggiore», e un decennio peggiore che non si vede
+                   nell'indicatore non è il decennio peggiore. Il debito passa da 60 a ~91, cioè sale della
+                   metà: è la «risalita nella seconda metà» della scheda, non una catastrofe.
+                   ========================================================================================== */
+                {da:1970, ciclo:11},  {da:1972, ciclo:8},   {da:1973, ciclo:4},
+                {da:1974, ciclo:2},   {da:1976, ciclo:4},   {da:1978, ciclo:7} ]
 };
 /* ===== L28-4 · IL MODIFICATORE-CLIMA DEGLI ANNI '70 (decisione G3) =====
    Dal dicembre 1969 a fine decennio il paese vive una stagione piu' cupa. Il clima e' un FENOMENO, mai un evento
@@ -1201,7 +1226,27 @@ const RIALLINEAMENTI_ERA = {
        un partito che esiste solo dove esiste. */
     1970: { delta:[ {id:'uk_con',delta:4.5}, {id:'uk_lab',delta:-4.9}, {id:'uk_lib',delta:-3.7} ],
             entra:[ { id:'uk_snp', nome:'SNP', orientamento:'centrosinistra', base:{ lavoratori:0.5, giovani:0.5 },
-                      forza:1.1, asse:-1, gruppoUE:'verdi', terreno:-0.2, concentrazione:40 } ] }
+                      forza:1.1, asse:-1, gruppoUE:'verdi', terreno:-0.2, concentrazione:40 } ] },
+    /* ============================================================================================================
+       L58-1 · LE TAPPE DEL DECENNIO '70 (urne di scheda §1).
+       ⚠ UN LIMITE DEL REGISTRO, DICHIARATO INVECE CHE AGGIRATO: `riallineamentoTappa` è **one-shot per ANNO**
+       (`S.riallineamenti[S.year]`), e il 1974 ebbe **due** elezioni — febbraio e ottobre. Non possono essere
+       due tappe. Scelta: il **febbraio '74 sta al 1974**, perché è quello meccanicamente interessante (il
+       parlamento appeso, il primo dal 1929, e la seconda inversione voti/seggi della linea); l'**ottobre '74
+       sta al 1975**, spostato di un anno. Si perde la doppia consultazione nello stesso anno; si tiene la
+       sostanza, cioè un appeso seguito da una maggioranza risicatissima che poi si consuma.
+       1974 (feb): Lab 37,2 · Con 37,9 · Lib **19,3** — il picco liberale, 14 seggi su 635.
+       1975 (= ott '74): Lab 39,3 · Con 35,8 · Lib 18,3 · SNP 2,9 (11 seggi, il picco storico).
+       1979: Con 43,9 · Lab 36,9 · Lib 13,8 · SNP 1,6 — il cambio d'epoca, e l'SNP che crolla.
+       ============================================================================================================ */
+    1974: { delta:[ {id:'uk_con',delta:-8.5}, {id:'uk_lab',delta:-5.8}, {id:'uk_lib',delta:11.8},
+                    {id:'uk_snp',delta:0.9}, {id:'uk_plaid',delta:-0.1} ],
+            entra:[ { id:'uk_plaid', nome:'Plaid Cymru', orientamento:'centrosinistra', base:{ lavoratori:0.5, giovani:0.5 },
+                      forza:0.5, asse:-1, gruppoUE:'verdi', terreno:-0.3, concentrazione:55 } ] },
+    1975: { delta:[ {id:'uk_con',delta:-2.1}, {id:'uk_lab',delta:2.1}, {id:'uk_lib',delta:-1.0},
+                    {id:'uk_snp',delta:0.9} ] },
+    1979: { delta:[ {id:'uk_con',delta:8.1}, {id:'uk_lab',delta:-2.4}, {id:'uk_lib',delta:-4.5},
+                    {id:'uk_snp',delta:-1.3}, {id:'uk_plaid',delta:-0.1} ] }
   }
 };
 /* ============================================================================================================
@@ -1712,6 +1757,29 @@ function azioneScioglimento(){
   if(typeof bioFatto==='function'){ try{ bioFatto(T('Ha sciolto le Camere per andare al voto in anticipo.')); }catch(e){} }
   election();
 }
+/* ================================================================================================================
+   L58-1 · I GATE DEL DECENNIO '70, e lo scioglimento CHIAMATO DA UNO SNODO.
+   `azioneScioglimentoForzato` è la stessa strada di `azioneScioglimento` **senza il controllo di
+   disponibilità**: qui non è il giocatore che apre il cruscotto, è la storia che lo mette davanti alle urne
+   avendo già scelto di andarci. Costo d'ingresso e **scarto di campagna identici** — quindi, come chiede la
+   consegna, **può perdere davvero**: è il 1974, e chi lo fece perse.
+   ================================================================================================================ */
+function azioneScioglimentoForzato(){
+  if(typeof S==='undefined' || !S || S.opposizione) return;
+  stampad(-7);
+  if(S.intese){ (S.coalizione||[]).forEach(function(id){ if(id!==S.partito && typeof intesaMuovi==='function') intesaMuovi(id,-8); }); }
+  if(typeof tutteCorrenti==='function') tutteCorrenti(-4);
+  S.scioglimentiChiesti=(S.scioglimentiChiesti||0)+1;
+  S.elezioniAnticipate=true; S.scioglimentoScelto=true;
+  if(typeof scartoCampagna==='function') scartoCampagna();
+  if(typeof bioFatto==='function'){ try{ bioFatto(T('Ha sciolto le Camere per andare al voto in anticipo.')); }catch(e){} }
+  election();
+}
+function snodoMinatoriDovuta(){     return typeof S!=='undefined' && S && S.era===LINEA_UK && S.livello===3 && !S.opposizione && S.minatori==null && S.year>=1973 && S.year<=1974; }
+function snodoMinatoriDueDovuta(){  return typeof S!=='undefined' && S && S.era===LINEA_UK && S.livello===3 && !S.opposizione && S.minatori==='resiste'; }
+function snodoEuropa70Dovuta(){     return typeof S!=='undefined' && S && S.era===LINEA_UK && S.livello===3 && !S.opposizione && S.europa70==null && S.year>=1971 && S.year<=1973; }
+function snodoEuropa70DueDovuta(){  return typeof S!=='undefined' && S && S.era===LINEA_UK && S.livello===3 && !S.opposizione && S.europa70==='dentro' && S.year>=1975; }
+function snodoFmiDovuta(){          return typeof S!=='undefined' && S && S.era===LINEA_UK && S.livello===3 && !S.opposizione && S.fmi==null && S.year>=1976 && S.year<=1977; }
 /* ================================================================================================================
    L55-1 · LA SVALUTAZIONE VERA. La consegna chiede che il decennio «possa finire in svalutazione» con un
    **effetto misurabile sull'economia**, non con una riga di log. Da 2,80 a 2,40 dollari è un −14% del cambio,
@@ -3330,6 +3398,12 @@ function genAgendaRamo(first){
      scelta appena fatta e non può aspettare un mese in cui l'agenda sia libera. */
   /* L55-1 · gli snodi del '60. La sterlina prima di tutto: è lo snodo del decennio, e il suo secondo nodo è la
      conseguenza diretta di una scelta già fatta. Poi il veto d'Europa, poi le aperture. */
+  /* L58-1 · gli snodi del '70. I minatori per primi: e il secondo nodo e la conseguenza della resistenza. */
+  if(!first && typeof snodoMinatoriDueDovuta==='function' && snodoMinatoriDueDovuta()){ S.agenda.push({kind:'event', data:MINATORI_DUE_EV, resolved:false}); agendaSolo(); return; }
+  if(!first && typeof snodoMinatoriDovuta==='function' && snodoMinatoriDovuta()){ S.agenda.push({kind:'event', data:MINATORI_EV, resolved:false}); agendaSolo(); return; }
+  if(!first && typeof snodoEuropa70DueDovuta==='function' && snodoEuropa70DueDovuta()){ S.agenda.push({kind:'event', data:EUROPA70_DUE_EV, resolved:false}); agendaSolo(); return; }
+  if(!first && typeof snodoEuropa70Dovuta==='function' && snodoEuropa70Dovuta()){ S.agenda.push({kind:'event', data:EUROPA70_EV, resolved:false}); agendaSolo(); return; }
+  if(!first && typeof snodoFmiDovuta==='function' && snodoFmiDovuta()){ S.agenda.push({kind:'event', data:FMI_EV, resolved:false}); agendaSolo(); return; }
   if(!first && typeof snodoSterlina60DueDovuta==='function' && snodoSterlina60DueDovuta()){ S.agenda.push({kind:'event', data:STERLINA60_DUE_EV, resolved:false}); agendaSolo(); return; }
   if(!first && typeof snodoSterlina60Dovuta==='function' && snodoSterlina60Dovuta()){ S.agenda.push({kind:'event', data:STERLINA60_EV, resolved:false}); agendaSolo(); return; }
   if(!first && typeof snodoEuropa60DueDovuta==='function' && snodoEuropa60DueDovuta()){ S.agenda.push({kind:'event', data:EUROPA60_DUE_EV, resolved:false}); agendaSolo(); return; }
@@ -5029,6 +5103,7 @@ function applySnap(snap){
   if(!S.sterlinaAncore || typeof S.sterlinaAncore!=='object') S.sterlinaAncore={};
   if(S.sostegno===undefined){ S.sostegno=null; S.sostegnoOfferto=null; S.rimpastoOfferto=null; S.sostegnoStrappi=0; }   // L53-2
   if(S.sterlina60===undefined){ S.sterlina60=null; S.europa60=null; S.coscienza60=null; S.svalutazione=0; }   // L55-1
+  if(S.minatori===undefined){ S.minatori=null; S.europa70=null; S.fmi=null; }   // L58-1
   if(S.scioglimentiChiesti===undefined){ S.scioglimentiChiesti=0; S.scioglimentoScelto=false; }   // L56-1
   if(!S.pilastriMondo || typeof S.pilastriMondo!=='object') S.pilastriMondo={};   // L56-2 — migrazione
   if(S.truffaFatta===undefined){ S.truffaFatta=false; S.truffaEsito=null; }   // Build B 1b — snodo one-shot: default per i salvataggi pre-1b
@@ -5216,6 +5291,7 @@ function aggiungiCarriera(reason){ if(!S) return; const p=getProfilo();
 setCountry('italia');
 decorateCountrySelector();   // bandiere nei bottoni del selettore paese
 if(typeof initI18n==='function'){ initI18n(); applyStaticI18n(); }   // i18n: cattura le sorgenti italiane [data-i18n] e applica la lingua corrente (it di default → nessun cambiamento)
+if(typeof renderScenarioSeg==='function'){ try{ renderScenarioSeg(); }catch(e){} }   // L57-1 — la striscia-scenari si genera da SCENARI: va riempita una volta al boot
 try{ const _he=document.getElementById('home-emblema'); if(_he && typeof EMBLEMA_IMG!=='undefined') _he.src=EMBLEMA_IMG; }catch(e){}   // identità home: emblema raster inline (lotto 3)
 renderStartPersistence();    // "Continua la carriera" (se c'è autosave), nome giocatore, "Le tue carriere"
 /* menu schede sempre visibile: le tab stanno nell'header sticky; allo scroll i 4 indicatori .keys si ritirano */

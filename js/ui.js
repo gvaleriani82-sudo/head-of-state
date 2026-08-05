@@ -421,14 +421,107 @@ function setScenario(id){
    solo quelle del paese scelto (e «Presente», che vale per tutti). Il dato per filtrare c'era già — `SCENARI`
    ha il campo `paese` da sempre. Se il paese cambia e lo scenario attivo non gli appartiene più, si torna al
    presente: è la stessa regola che `setCountry` applica già, resa visibile. */
-function renderScenariPaese(){
-  var seg=document.getElementById('scenario-seg'); if(!seg) return;
-  [].slice.call(seg.children).forEach(function(b2){
-    var id=b2.dataset&&b2.dataset.sc; if(!id) return;
-    var sc=(typeof SCENARI!=='undefined')?SCENARI[id]:null;
-    var mio = (id==='presente') || (sc && (!sc.paese || sc.paese===chosenCountry));
-    b2.style.display = mio ? '' : 'none';
+/* ================================================================================================================
+   L57-1 · LA VISTA DEGLI SCENARI — riorganizzata, non reinventata. `SCENARI` ha già `paese`, `setScenario`
+   sposta già il paese: qui cambia solo come si arriva alle porte.
+   ⚑ E LA STRISCIA ORA SI GENERA. Era scritta a mano in `index.html`, e il conto non tornava: `uk1960`,
+   aggiunto in L55-1, **non aveva un bottone** — la nona porta esisteva nei dati ed era irraggiungibile.
+   Nessuna guardia poteva vederlo: il markup non si esegue, e il banco headless non apre la home. Generandola
+   da `SCENARI`, quella classe di difetto sparisce.
+   ================================================================================================================ */
+var SOGLIE={ presente:'assets/scenes/soglia-presente.webp', italia1950:'assets/scenes/soglia-1950.webp',
+             italia1960:'assets/scenes/soglia-1960.webp', italia1970:'assets/scenes/soglia-1970.webp',
+             italia1980:'assets/scenes/soglia-1980.webp', italia1990:'assets/scenes/soglia-1990.webp',
+             italia2000:'assets/scenes/soglia-2000.webp' };
+function sogliaHtml(id){   // degrado pulito: chi non ha la miniatura riceve il segnaposto, non un'immagine rotta
+  return SOGLIE[id] ? '<img class="soglia-thumb" src="'+SOGLIE[id]+'" alt="">'
+                    : '<span class="soglia-thumb soglia-vuota" aria-hidden="true"></span>';
+}
+/* le porte STORICHE di un paese, in ordine cronologico (il presente non è una porta storica) */
+function portePaese(c){
+  if(typeof SCENARI==='undefined') return [];
+  return Object.keys(SCENARI).map(function(k){ return SCENARI[k]; })
+    .filter(function(sc){ return sc.id!=='presente' && sc.paese===c; })
+    .sort(function(a,b){ return (a.anno||0)-(b.anno||0); });
+}
+/* i paesi che HANNO una linea storica: la lista cresce da sola col fronte, e chi non ce l'ha non compare
+   (non compare disabilitato: è il paletto della consegna) */
+function paesiConLinea(){
+  if(typeof SCENARI==='undefined') return [];
+  var visti={}, out=[];
+  Object.keys(SCENARI).forEach(function(k){ var sc=SCENARI[k];
+    if(sc.id==='presente' || !sc.paese || visti[sc.paese]) return;
+    visti[sc.paese]=1; out.push(sc.paese);
   });
+  return out;
+}
+function renderScenarioSeg(){
+  var seg=document.getElementById('scenario-seg'); if(!seg || typeof SCENARI==='undefined') return;
+  var ids=['presente'].concat(portePaese(chosenCountry).map(function(sc){ return sc.id; }));
+  seg.innerHTML=ids.map(function(id){
+    var sc=SCENARI[id]; if(!sc) return '';
+    return '<button data-sc="'+id+'"'+(id===chosenScenario?' class="on"':'')+' onclick="setScenario(\''+id+'\')">'
+      +sogliaHtml(id)+'<span>'+T(sc.nome||id)+'</span></button>';
+  }).join('');
+}
+function renderScenariPaese(){ renderScenarioSeg(); }
+
+/* ---- I DUE MODI DELLA HOME ---- */
+function avviaOggi(){          // il presente, dritto: un tocco in meno (lo scenario non si sceglie più)
+  if(typeof setScenario==='function') setScenario('presente');
+  apriCreazione();
+}
+var STORICI_PAESE=null;        // transitorio della vista: quale paese si sta guardando (mai in S)
+function apriStorici(){
+  STORICI_PAESE=null;
+  document.getElementById('start').style.display='none';
+  document.getElementById('storici').style.display='block';
+  window.scrollTo(0,0); renderStorici();
+}
+function chiudiStorici(){
+  document.getElementById('storici').style.display='none';
+  document.getElementById('start').style.display='block';
+}
+function storiciIndietro(){    // il ritorno dev'essere ovvio: dalla linea del tempo ai paesi, dai paesi alla home
+  if(STORICI_PAESE){ STORICI_PAESE=null; renderStorici(); window.scrollTo(0,0); }
+  else chiudiStorici();
+}
+function storiciPaese(c){ STORICI_PAESE=c; renderStorici(); window.scrollTo(0,0); }
+function storiciPorta(id){     // scelta la porta: si entra nel setup con paese e scenario già impostati
+  document.getElementById('storici').style.display='none';
+  if(typeof setScenario==='function') setScenario(id);
+  apriCreazione();
+}
+function renderStorici(){
+  var b=document.getElementById('storici-body'); if(!b) return;
+  if(!STORICI_PAESE){
+    var cc=paesiConLinea();
+    b.innerHTML='<div class="em" style="margin:0 0 4px">'+T('Scenari storici')+'</div>'
+      +'<p style="font-size:13.5px;color:var(--mut);margin:0 0 16px;line-height:1.5">'
+      +T('Scegli il paese: ogni linea storica ha le sue porte, una per decennio.')+'</p>'
+      +'<div class="cands">'+cc.map(function(c){
+          var p=PAESI[c]||{}, n=portePaese(c).length;
+          return '<button class="cand" onclick="storiciPaese(\''+c+'\')">'
+            +'<span class="cn">'+T(p.nome||c)+'</span>'
+            +'<span class="cmeta"><small style="color:var(--mut2)">'+n+' '+T(n===1?'porta':'porte')+'</small></span></button>';
+        }).join('')+'</div>';
+    return;
+  }
+  var porte=portePaese(STORICI_PAESE), pn=(PAESI[STORICI_PAESE]||{}).nome||STORICI_PAESE;
+  b.innerHTML='<div class="em" style="margin:0 0 4px">'+T(pn)+'</div>'
+    +'<p style="font-size:13.5px;color:var(--mut);margin:0 0 16px;line-height:1.5">'
+    +T('La linea del tempo: scegli da dove cominciare.')+'</p>'
+    +'<div class="seg" id="storici-linea">'+porte.map(function(sc){
+        return '<button onclick="storiciPorta(\''+sc.id+'\')">'+sogliaHtml(sc.id)
+          +'<span>'+T(sc.nome)+'</span></button>';
+      }).join('')+'</div>'
+    +porte.map(function(sc){
+        var riga=(sc.intro||'');
+        return '<div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--line2)">'
+          +'<div style="font-weight:600;font-size:14px">'+T(sc.nome)+'</div>'
+          +(riga?'<div style="font-size:13px;color:var(--mut);line-height:1.5;margin-top:3px">'+T(riga)+'</div>':'')
+          +'</div>';
+      }).join('');
 }
 function renderStartParties(){
   const el=document.getElementById('party-list'); if(!el) return;

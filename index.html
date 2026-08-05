@@ -46,9 +46,26 @@
       <!-- pitch GENERICO (statico, bilingue): la intro per-paese/ruolo vive ora nel setup (#setup-intro), dove si sceglie -->
       <p id="start-intro" data-i18n>Dal primo comizio al vertice del paese: scegli dove giocare, dai un volto alla tua carriera politica e guidala mese per mese, tra scelte, alleanze e imprevisti.</p>
       <div class="note" data-i18n><b>Nota.</b> I valori del gioco (debito, crescita, ecc.) sono <b>stilizzati</b> e non sono dati ufficiali. I nomi dei ministri sono di fantasia. È una simulazione di dinamiche politiche, non un modello economico reale.</div>
-      <button class="btn" data-i18n style="padding:14px 26px;margin-top:4px;" onclick="avviaPartita()">Nuova partita</button>
+      <!-- L57-1 — LA HOME A DUE MODI. Prima c'era un solo «Nuova partita» che portava a una pagina dove il
+           presente e le porte storiche stavano nella stessa striscia, come se fossero la stessa cosa.
+           «Gioca oggi» va dritto al presente (un tocco in meno: non devi più scegliere lo scenario);
+           «Scenari storici» apre la pagina a due passi, paese → linea del tempo. -->
+      <button class="btn" data-i18n style="padding:14px 26px;margin-top:4px;" onclick="avviaOggi()">Gioca oggi</button>
+      <div style="margin-top:10px;"><button class="btn" data-i18n style="padding:12px 22px;background:transparent;color:var(--brand);border:1px solid var(--brand)" onclick="apriStorici()">Scenari storici</button></div>
       <div style="margin-top:14px;"><button data-i18n onclick="showHelp()" style="background:transparent; border:none; color:var(--mut); font-family:inherit; font-size:13px; text-decoration:underline; cursor:pointer;">Come si gioca</button></div>
       <div id="start-profile"></div>
+    </div>
+  </div>
+
+  <!-- L57-1 — SCENARI STORICI, due passi: il paese (solo quelli che hanno una linea storica) e poi la linea
+       del tempo di quel paese. Il contenuto lo scrive `renderStorici()` leggendo SCENARI: nessuna lista
+       ripetuta a mano, quindi una porta nuova compare da sola. -->
+  <div id="storici" style="display:none;">
+    <div class="screen">
+      <div style="max-width:420px;margin:0 auto;padding:18px 14px 40px;">
+        <button id="storici-back" style="background:transparent;border:none;color:var(--mut);font-family:inherit;font-size:13px;cursor:pointer;padding:0 0 12px" onclick="storiciIndietro()">← <span data-i18n>Indietro</span></button>
+        <div id="storici-body"></div>
+      </div>
     </div>
   </div>
 
@@ -86,22 +103,11 @@
       </div>
       <!-- Build B — scenario d'epoca: 'presente' (default) o un preset storico. Cambia partiti/economia/eventi dell'epoca. -->
       <div data-i18n style="font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--mut);margin:16px 0 7px;">Scenario</div>
-      <div class="seg" id="scenario-seg" style="max-width:360px;margin:0 auto;">
-        <button data-sc="presente" class="on" onclick="setScenario('presente')"><img class="soglia-thumb" src="assets/scenes/soglia-presente.webp" alt=""><span data-i18n>Presente</span></button>
-        <button data-sc="italia1950" onclick="setScenario('italia1950')"><img class="soglia-thumb" src="assets/scenes/soglia-1950.webp" alt=""><span data-i18n>Italia 1950</span></button>
-        <!-- L37-1 — le cinque soglie hanno tutte la loro miniatura: i segnaposto tratteggiati sono andati.
-             L35-1 — ordine CRONOLOGICO e cinque porte: a 375px non ci stanno in una riga sola, quindi il
-             contenitore va a capo (due righe, mai scroll orizzontale). Vedi #scenario-seg in style.css. -->
-        <button data-sc="italia1960" onclick="setScenario('italia1960')"><img class="soglia-thumb" src="assets/scenes/soglia-1960.webp" alt=""><span data-i18n>Italia 1960</span></button>
-        <button data-sc="italia1970" onclick="setScenario('italia1970')"><img class="soglia-thumb" src="assets/scenes/soglia-1970.webp" alt=""><span data-i18n>Italia 1970</span></button>
-        <button data-sc="italia1980" onclick="setScenario('italia1980')"><img class="soglia-thumb" src="assets/scenes/soglia-1980.webp" alt=""><span data-i18n>Italia 1980</span></button>
-        <button data-sc="italia1990" onclick="setScenario('italia1990')"><img class="soglia-thumb" src="assets/scenes/soglia-1990.webp" alt=""><span data-i18n>Italia 1990</span></button>
-        <button data-sc="italia2000" onclick="setScenario('italia2000')"><img class="soglia-thumb" src="assets/scenes/soglia-2000.webp" alt=""><span data-i18n>Italia 2000</span></button>
-        <!-- L48-1 — la prima porta fuori dall'Italia. Il selettore ora è a DUE LIVELLI: `renderScenariPaese`
-             mostra solo le porte del paese scelto, così la lista non cresce all'infinito e la home resta
-             com'è. La miniatura del '50 britannico non c'è ancora: segnaposto, degrado pulito. -->
-        <button data-sc="uk1950" onclick="setScenario('uk1950')"><span class="soglia-thumb soglia-vuota" aria-hidden="true"></span><span data-i18n>Regno Unito 1950</span></button>
-      </div>
+      <!-- L57-1 — LA STRISCIA È GENERATA DA `SCENARI` (`renderScenarioSeg`), non più scritta a mano.
+           Il motivo è un difetto vero: `uk1960`, aggiunto in L55-1, esisteva nei dati e **non aveva un
+           bottone qui** — la nona porta era irraggiungibile dall'interfaccia, e nessuna guardia poteva
+           vederlo perché il markup non si esegue. Generandola, una porta nuova compare da sola. -->
+      <div class="seg" id="scenario-seg" style="max-width:360px;margin:0 auto;"></div>
       <div data-i18n style="font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--mut);margin:16px 0 7px;">Il tuo partito</div>
       <div class="cands" id="party-list" style="max-width:360px;margin:0 auto;"></div>
       <div data-i18n style="font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--mut);margin:18px 0 7px;">Difficoltà</div>

@@ -840,6 +840,42 @@ const SCENARI = {
     ],
   },
   /* ============================================================================================================
+     L58-1 · REGNO UNITO 1970 — la decima porta, e **il decennio che dà una storia vera alle due valvole**:
+     il parlamento appeso del febbraio '74 e il patto Lib-Lab del '77 sono il sostegno esterno di L53-2.
+     Si apre nel 1970 coi Conservative appena eletti (giugno 1970): `turnMandato: 0`.
+     I SEGGI DICHIARATI sono quelli del giugno 1970 — Con 330 su 630 = 52,4%, Lab 287 = 45,6%, Lib 6 = 1%,
+     il resto agli altri (qui ridistribuito al Liberal, come per le altre porte a tre partiti).
+     ⚠ IL ROSTER HA CINQUE PARTITI: entrano **SNP e Plaid Cymru**, che nel '74 fanno rispettivamente 7 e 2 seggi.
+     Sono i due casi-`concentrazione` più estremi della linea, e restano piccolissimi in voti.
+     ============================================================================================================ */
+  uk1970: {
+    id:'uk1970', era:LINEA_UK, nome:'Regno Unito 1970', anno:1970, paese:'regnounito',
+    turnMandato: 0,
+    ue: false,                                  // si entra nel 1973: lo snodo §B
+    intermedie: [ {tipo:'Elezioni amministrative', mese:28, tocca:'tutti'} ],
+    partiti: [
+      { id:'uk_con',   nome:'Conservative', orientamento:'centrodestra',   base:{ imprenditori:0.4, cetomedio:0.4, pensionati:0.2 }, forza:46.4, asse:1,  gruppoUE:'conservatori', terreno:0.45,  concentrazione:0.55 },
+      { id:'uk_lab',   nome:'Labour',       orientamento:'centrosinistra', base:{ lavoratori:0.7, giovani:0.3 },                    forza:43.0, asse:-2, gruppoUE:'socialisti',   terreno:-0.55, concentrazione:0.75 },
+      { id:'uk_lib',   nome:'Liberal',      orientamento:'centro',         base:{ cetomedio:0.6, giovani:0.4 },                     forza:7.5,  asse:0,  gruppoUE:'liberali',     terreno:-0.95, concentrazione:24   },
+      { id:'uk_snp',   nome:'SNP',          orientamento:'centrosinistra', base:{ lavoratori:0.5, giovani:0.5 },                    forza:1.1,  asse:-1, gruppoUE:'verdi',        terreno:-0.2,  concentrazione:40   },
+      { id:'uk_plaid', nome:'Plaid Cymru',  orientamento:'centrosinistra', base:{ lavoratori:0.5, giovani:0.5 },                    forza:0.6,  asse:-1, gruppoUE:'verdi',        terreno:-0.3,  concentrazione:55   },
+    ],
+    seggi: { uk_con:52.4, uk_lab:45.6, uk_lib:1.0, uk_snp:0.6, uk_plaid:0.4 },
+    /* Scheda §2: il decennio peggiore. Debito ~60% che **risale** nella seconda metà — primo decennio inglese
+       in cui non scende. Il disavanzo è il seme di gioco. */
+    economia: { pil:52000, debito:60, deficit:-5 },
+    debtAncora: 60,
+    logorioEra: 0.014,                          // il decennio logora di più: scioperi, inflazione, emergenze
+    valuta: { sym:'£', mld:'mld sterline', mln:'mln sterline' },
+    quotaSpesa: 0.44,                           // ⚠ la scheda non la dà: la spesa britannica sale molto in questo decennio. Da confermare.
+    intro: "Regno Unito, 1970. Conservatori appena eletti, i sindacati che contano quanto il governo, e un'inflazione che comincia a correre.",
+    contesto: [
+      "Regno Unito, 1970. I conservatori hanno appena vinto a sorpresa, e il paese entra nel decennio più difficile del dopoguerra: i prezzi corrono, le fabbriche si fermano, e chi può spegnere la luce ha un potere che nessuna urna gli ha dato.",
+      "L'Irlanda del Nord è in guerra aperta e il conflitto sta per attraversare il mare. Il Mercato comune riapre la porta dopo due no. E la sterlina, da quando fluttua, non ha più un cambio da difendere: ha solo un valore che scende.",
+      "È il decennio in cui il maggioritario mostra il rovescio: si può governare senza maggioranza, e si può restare in piedi grazie a chi al governo non vuole entrare.",
+    ],
+  },
+  /* ============================================================================================================
      L44-3 · ITALIA 2000 — la settima e ultima porta. Stessa LINEA; il roster è quello uscito dalla frana del '94
      (PPI, PDS, AN, Rifondazione, Lega, FI, CCD e i laici superstiti), anno d'avvio 2000.
 
@@ -1227,6 +1263,41 @@ const PILASTRI_LINEA = [
     t:'Il discorso di Birmingham',
     text:'Il 20 aprile, a Birmingham, il responsabile della Difesa dell\'opposizione tiene un discorso contro l\'immigrazione dal Commonwealth. Il giorno dopo il suo leader lo caccia dal governo ombra definendo il discorso razzista nei toni. Enoch Powell non tornerà mai in una prima fila, e per vent\'anni il dibattito britannico sull\'immigrazione si misurerà con quella giornata.',
     logx:'Il discorso di Birmingham costa il governo ombra a chi l\'ha tenuto.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  /* ==========================================================================================================
+     L58-1 · I CINQUE PILASTRI DEL DECENNIO '70. Testi APPROVATI da Giacomo (1/8), congelati byte-identici.
+     ⚠ IL DOPPIONE DA EVITARE, verificato: il **pilastro-mondo del petrolio** (ott 1973, `pm_petrolio`) e **La
+     settimana di tre giorni** (gen 1974) raccontano la stessa catena — il secondo è la conseguenza britannica
+     del primo. Non sono un doppione perché dicono cose diverse (il mondo che cambia prezzo · il paese che
+     spegne la luce) e cadono a **tre mesi di distanza**, non nello stesso mese. La misura lo conferma.
+     La regola G5 vale anche qui: la prima donna premier è nominata come **fatto politico**, senza una riga di
+     ciò che disse.
+     ========================================================================================================== */
+  { id:'puk_bloody', linea:LINEA_UK, anno:1972, mese:1, era:'uk1970', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Bloody Sunday',
+    text:'Il 30 gennaio, a Derry, i paracadutisti sparano su una manifestazione per i diritti civili: tredici morti sul posto, un altro settimane dopo. Nessuno viene processato. Trentotto anni più tardi un\'inchiesta pubblica stabilirà che le vittime erano disarmate e innocenti, e il governo britannico chiederà scusa. Fra le due date c\'è tutto il resto del conflitto.',
+    logx:'Tredici morti a Derry. Fra l\'inchiesta e le scuse passeranno trentotto anni.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'puk_tregiorni', linea:LINEA_UK, anno:1974, mese:1, era:'uk1970', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'La settimana di tre giorni',
+    text:'Con il carbone contingentato e i minatori in sciopero, il governo riduce per legge la settimana lavorativa a tre giorni: le fabbriche si fermano il giovedì, la corrente viene razionata, la televisione chiude alle dieci e mezza. Il paese lavora a lume di candela per due mesi, e comincia a chiedersi chi lo governi davvero.',
+    logx:'Settimana di tre giorni: il paese lavora a lume di candela.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'puk_bombe', linea:LINEA_UK, anno:1974, mese:11, era:'uk1970', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Le bombe in Inghilterra',
+    text:'Il conflitto nordirlandese attraversa il mare: in autunno le bombe colpiscono i pub di Birmingham e altre città inglesi, uccidendo decine di persone che bevevano una birra il sabato sera. Seguiranno leggi d\'emergenza, e condanne che molti anni dopo si scopriranno sbagliate.',
+    logx:'Le bombe attraversano il mare: decine di morti nei pub inglesi.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'puk_prestito', linea:LINEA_UK, anno:1976, mese:12, era:'uk1970', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    cond:function(){ return !S.fmi; },   /* chi lo GIOCA come snodo non riceve anche la cronaca (come Suez, G1) */
+    t:'Il prestito',
+    text:'A dicembre il governo chiede un prestito al Fondo Monetario Internazionale e accetta le condizioni che lo accompagnano: tagli alla spesa decisi altrove. È la resa economica del decennio — la quinta potenza industriale del mondo che va allo sportello.',
+    logx:'Allo sportello del Fondo Monetario: le condizioni le scrive lui.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'puk_cambioepoca', linea:LINEA_UK, anno:1979, mese:5, era:'uk1970', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Il cambio d\'epoca',
+    text:'Dopo un inverno di scioperi nei servizi pubblici, con i rifiuti nelle strade e i morti in attesa di sepoltura, il paese vota per la rottura. Entra a Downing Street la prima donna a guidare un governo britannico, e con lei un\'idea di economia che i vent\'anni successivi porteranno ovunque. Il dopoguerra finisce qui.',
+    logx:'Il paese vota per la rottura. Il dopoguerra finisce qui.',
     ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
   { id:'puk_belfast', linea:LINEA_UK, anno:1969, mese:8, era:'uk1960', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
     t:'Belfast',
@@ -7792,6 +7863,101 @@ const CRISI08_EV = {
       f:function(){ S.crisi08='rigore'; S.ind.debt-=0.5; if(S.gMod!=null) S.gMod-=0.15;
         repd(5); stampad(2); gd('lavoratori',-5); gd('giovani',-4); gd('imprenditori',-2);
         S.log.unshift({t:T('La crisi'),x:T('Il Governo tiene la barra sui conti: i mercati apprezzano, le fabbriche che chiudono no.')}); } },
+  ],
+};
+
+/* ==============================================================================================================
+   L58-1 · I TRE SNODI DEL DECENNIO INGLESE '70 (scheda §A, §B, §C).
+   ⚑ LO SNODO-MINATORI SBOCCA NEL VOTO, ed è il caso-1974 di L56-1: il premier in carica chiamò le elezioni
+   durante lo scontro coi minatori chiedendo «chi comanda in questo paese», **e le perse**. La terza voce
+   chiama `azioneScioglimento()`, cioè la stessa meccanica del cruscotto, con lo stesso `scartoCampagna()`:
+   quindi **può perdere davvero**. Non è una carta che decide l'esito — è una carta che apre le urne.
+   ⚠ VALUTE: come sempre, `cred` della scheda non esiste per il premier L3 → `repd`/`stampad`/`gd`.
+   ============================================================================================================== */
+const MINATORI_EV = {
+  id:'snodo_minatori', kick:'Chi comanda', tono:'grave',
+  t:'Il carbone contingentato',
+  text:'I minatori chiedono un aumento che il tetto salariale non consente, e riducono la produzione. Le scorte di carbone calano di settimana in settimana, e con esse la corrente. In gabinetto qualcuno dice la parola che nessuno voleva dire: elezioni.',
+  ch:[
+    { l:'Cedi sull\'aumento: il paese ha bisogno di luce', e:'Le luci restano accese · il tetto salariale è carta straccia, e ogni altra categoria si mette in fila',
+      f:function(){ S.minatori='ceduto'; repd(-5); stampad(-6);
+        if(S.gMod!=null) S.gMod-=0.3; S.ind.debt+=1.5;
+        gd('lavoratori',12); gd('cetomedio',-7); gd('imprenditori',-9);
+        S.log.unshift({t:T('Chi comanda'),x:T('Ceduto ai minatori, e con loro a tutti gli altri.')}); } },
+    { l:'Resisti: tre giorni di lavoro a settimana', e:'Il paese a lume di candela · e la domanda che cresce ogni settimana',
+      f:function(){ S.minatori='resiste'; repd(3); stampad(-3);
+        if(S.gMod!=null) S.gMod-=0.5; if(S.uMod!=null) S.uMod+=0.3;
+        gd('lavoratori',-8); gd('cetomedio',-5); gd('imprenditori',-3);
+        S.log.unshift({t:T('Chi comanda'),x:T('Tre giorni di lavoro a settimana: il paese regge, e brontola.')}); } },
+    { l:'Vai al voto e chiedi chi comanda', e:'La domanda alla nazione · sembra avere una risposta sola, e non è così',
+      f:function(){ S.minatori='alvoto'; gd('cetomedio',-3); gd('lavoratori',-5);
+        S.log.unshift({t:T('Chi comanda'),x:T('Andato al voto chiedendo chi comanda in questo paese.')});
+        if(typeof azioneScioglimentoForzato==='function') azioneScioglimentoForzato(); } },
+  ],
+};
+const MINATORI_DUE_EV = {
+  id:'snodo_minatori_due', kick:'Chi comanda', tono:'grave',
+  t:'A lume di candela',
+  text:'Fabbriche ferme il giovedì e il venerdì, televisione che chiude alle dieci e mezza, compiti fatti a candela. Il paese regge, brontola, e comincia a chiedersi se questo sia governare.',
+  ch:[
+    { l:'Tieni fino a che cedono loro', e:'Cedono, dopo settimane · ma il conto lo hai pagato tu, e il paese ricorda il buio',
+      f:function(){ S.minatori='tenuto'; repd(6); stampad(2);
+        if(S.gMod!=null) S.gMod-=0.4;
+        gd('lavoratori',-14); gd('cetomedio',-8); gd('giovani',-4); gd('imprenditori',3);
+        S.log.unshift({t:T('Chi comanda'),x:T('Tenuto duro fino alla fine, col paese a tre giorni.')}); } },
+    { l:'Ora sì, al voto', e:'La domanda alla nazione, con due mesi di buio alle spalle',
+      f:function(){ S.minatori='alvoto_tardi'; gd('cetomedio',-5); gd('lavoratori',-6); stampad(-3);
+        S.log.unshift({t:T('Chi comanda'),x:T('Andato al voto chiedendo chi comanda in questo paese.')});
+        if(typeof azioneScioglimentoForzato==='function') azioneScioglimentoForzato(); } },
+  ],
+};
+const EUROPA70_EV = {
+  id:'snodo_europa70', kick:'La terza domanda', tono:'grave',
+  t:'La terza domanda',
+  text:'Dopo due no, il Mercato comune riapre la porta. Entrare significa prezzi agricoli più alti, sovranità condivisa, e un mercato di duecento milioni di persone. Il tuo partito è spaccato quanto il paese.',
+  ch:[
+    { l:'Si entra', e:'Il trattato si firma · e il partito si spacca in due',
+      f:function(){ S.europa70='dentro'; repd(6); gd('imprenditori',7); gd('giovani',4); gd('pensionati',-5); gd('lavoratori',-4);
+        if(typeof tutteCorrenti==='function') tutteCorrenti(-6);
+        S.log.unshift({t:T('Europa'),x:T('Si entra nel Mercato comune, e il partito si divide.')}); } },
+    { l:'Si resta fuori, e stavolta per scelta', e:'Nessun trattato, nessuna spaccatura · e un\'economia che guarda i vicini crescere',
+      f:function(){ S.europa70='fuori'; gd('pensionati',6); gd('lavoratori',3); gd('imprenditori',-10); repd(-3);
+        S.log.unshift({t:T('Europa'),x:T('Si resta fuori dal Mercato comune, e stavolta per scelta.')}); } },
+  ],
+};
+const EUROPA70_DUE_EV = {
+  id:'snodo_europa70_due', kick:'La terza domanda', tono:'grave',
+  t:'Il referendum di conferma',
+  text:'Si è entrati, ma metà del paese non l\'ha digerito. Un referendum può chiudere la questione per una generazione — o farti perdere tutto in un pomeriggio.',
+  ch:[
+    { l:'Lo indici: che decida il paese', e:'Vinci due a uno, e la questione si chiude · per un po\'',
+      f:function(){ S.europa70='confermato'; repd(6); stampad(6);
+        gd('imprenditori',4); gd('cetomedio',3); gd('pensionati',-2);
+        S.log.unshift({t:T('Europa'),x:T('Il paese ha confermato l\'Europa, due a uno.')}); } },
+    { l:'Niente referendum: la decisione è del Parlamento', e:'Nessun rischio oggi · la ferita resta aperta e tornerà',
+      f:function(){ S.europa70='senza_referendum'; repd(-3); stampad(-4);
+        if(typeof tutteCorrenti==='function') tutteCorrenti(-7);
+        S.log.unshift({t:T('Europa'),x:T('L\'Europa decisa in Parlamento, senza chiederlo al paese.')}); } },
+  ],
+};
+const FMI_EV = {
+  id:'snodo_fmi', kick:'Lo sportello', tono:'grave',
+  t:'Il prestito',
+  text:'La sterlina precipita e le riserve non bastano. Il Fondo Monetario è disposto a prestare, a condizioni che scriverà lui: tagli alla spesa, decisi altrove e applicati qui.',
+  ch:[
+    { l:'Accetti le condizioni', e:'I conti si stabilizzano · la sinistra del partito parla di resa, e ha le sue ragioni',
+      f:function(){ S.fmi='accettato'; S.ind.debt-=6; if(S.gMod!=null) S.gMod+=0.3;
+        repd(7); stampad(3);
+        gd('lavoratori',-11); gd('giovani',-6); gd('imprenditori',5); gd('cetomedio',3);
+        if(typeof tutteCorrenti==='function') tutteCorrenti(-10);
+        S.log.unshift({t:T('Lo sportello'),x:T('Accettate le condizioni del Fondo Monetario.')}); } },
+    { l:'Rifiuti: la sovranità non si impegna', e:'La sterlina precipita ancora · e i tagli arrivano lo stesso, decisi dalla necessità',
+      f:function(){ S.fmi='rifiutato'; S.ind.debt+=5;
+        if(S.gMod!=null) S.gMod-=0.7; if(S.uMod!=null) S.uMod+=0.5;
+        repd(-9); stampad(-5);
+        gd('lavoratori',-6); gd('pensionati',-7); gd('cetomedio',-8); gd('imprenditori',-9); gd('giovani',-4);
+        if(typeof tutteCorrenti==='function') tutteCorrenti(8);
+        S.log.unshift({t:T('Lo sportello'),x:T('Rifiutate le condizioni del Fondo, e pagato il conto pieno.')}); } },
   ],
 };
 
