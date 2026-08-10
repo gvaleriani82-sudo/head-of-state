@@ -1613,8 +1613,19 @@ function renderGov(){
     const riga = (q.sond!=null)
       ? T('Ultimo sondaggio: <b>%V%</b> (± %M)').replace('%V',q.sond).replace('%M',q.margine)
       : T('Nessun sondaggio recente: andresti al buio.');
+    /* L59-4(a) — la proiezione in SEGGI accanto al sondaggio: il sondaggio è una quota di voti, e nei paesi a
+       collegi non dice da solo come finisce. Mostrata sempre, anche (soprattutto) quando è brutta. */
+    /* ⚠ E la frase cambia dove si ritratta la maggioranza. Misurato: la proiezione azzecca l'esito nel 91%
+       dei casi nel Regno Unito (partito solo) ma solo nel 35% nell'Italia del '70 — perché lì, dopo il voto,
+       la coalizione si RIFORMA: il blocco che conta non è quello di oggi. Promettere «ti basterebbero per
+       governare» sarebbe esattamente l'inganno che questa voce esiste per togliere. Quindi nei paesi a
+       coalizione la carta dice il dato e si ferma lì, e ricorda che la maggioranza andrà ricostruita. */
+    const coalPaese = !!(PAESE && PAESE.coalizione);
+    const rigaSeggi = (q.seggi==null) ? '' : (coalPaese
+      ? `<div class="mtext" style="padding-bottom:6px">${T('Con queste forze la tua maggioranza di oggi avrebbe <b>%S</b> seggi su 100.').replace('%S',q.seggi)} <span style="color:var(--mut2)">${T('Dopo il voto la maggioranza va ricostruita, e i numeri cambiano.')}</span></div>`
+      : `<div class="mtext" style="padding-bottom:6px">${T('Con queste forze i seggi sarebbero <b>%S</b> su 100: %E.').replace('%S',q.seggi).replace('%E',T(q.magg?'ti basterebbero per governare':'non ti basterebbero'))} <span style="color:var(--mut2)">${T('La campagna li muove di qualche punto.')}</span></div>`);
     h+=`<div class="card"><div class="ct">${T('La prerogativa')}</div>
-      <div class="mtext" style="padding-bottom:6px">${riga} · ${T('mancano <b>%N</b> mesi alla scadenza naturale.').replace('%N',q.mesiRestanti)}</div>
+      <div class="mtext" style="padding-bottom:6px">${riga} · ${T('mancano <b>%N</b> mesi alla scadenza naturale.').replace('%N',q.mesiRestanti)}</div>${rigaSeggi}
       <button class="opt" onclick="if(confirm('${T('Chiedere lo scioglimento e andare al voto in anticipo?')}')) azioneScioglimento()">
         <span class="ol">${T('Chiedi lo scioglimento')}</span>
         <span class="oe">${T('Si vota adesso, e la scelta è tua · la stampa parla di opportunismo e gli alleati mormorano')}</span></button></div>`;

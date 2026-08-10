@@ -172,6 +172,8 @@ function initStatoBase(){
   S.sfideUltimo = S.year*12 + S.month;   // D1a — sfide (quiz): la prima non prima di ~5 mesi dall'avvio (dato puro, round-trip)
   S.campNaz=null; S.campNazUltimo=null; S.promesseCampagna=[];   // Cantiere C — campagna nazionale (dati puri, round-trip)
   S.riallineamenti={};   // AVANZAMENTO — registro one-shot delle tappe-partiti già scattate (dato puro, round-trip; separato da truffaFatta)
+  S.tappaSeggiEsito={};  // L61-2 - registro per-tappa dei seggi dichiarati: applicata | saltata (dato puro, round-trip)
+  S.tappaForzaPrec=null;   // L61-4 - forza del partito del giocatore all ultima tappa: e il riferimento della traiettoria (dato puro)
   S.pilastri70={};             // L28-4 — pilastri-cronaca gia' usciti (one-shot, dato puro)
   S.pilastriMondo={};          // L56-2 — i fatti-mondo gia usciti (one-shot, dato puro, round-trip)
   S.rosterDelta={entra:[], esce:[], rinomina:[]};   // L34-1 - il registro delle nascite/morti/rinomine: e LUI la verita, PAESE ne e la proiezione
@@ -248,6 +250,7 @@ function startGame(mins){
   if(S.seggi && _SCseg){ Object.keys(_SCseg).forEach(function(id){ if(S.seggi[id]!=null) S.seggi[id]=_SCseg[id]; }); }
   /* minoranza all'avvio: nei parlamentari SENZA coalizione (UK) riflette i seggi veri del tuo partito (chi parte
      piccolo governa in minoranza); nei paesi a coalizione la decide la trattativa iniziale; negli USA non esiste. */
+  S.tappaForzaPrec=(S.forze && S.forze[chosenPartito]!=null)?S.forze[chosenPartito]:null;   // L61-4 - la porta parte dal dato storico: e il primo riferimento della traiettoria
   S.minoranza=(!PAESE.coalizione && PAESE.comeSiVince==='parlamentare') ? S.seggi[chosenPartito]<50 : false;
   S.tenuta={}; S.tenutaForza0={}; S.tenutaLiv={}; S.tenutaUltimo={}; S.mesiMinoranza=0;
   initTerritori(); initPotereLocale();   // territori (eletti assegnati per lean) + potere locale derivato; per i paesi a coalizione l'aspettativa è ri-fissata in confirmCoal
@@ -551,7 +554,7 @@ function diventaPremier(viaElezione){
   if(typeof assegnaVoltiGruppo==='function') assegnaVoltiGruppo(S.ministers);   // L20-1: volti distinti nel gabinetto generato alla salita
   S.coalizione=[S.partito];
   S.seggi=(PAESE.coalizione||PAESE.comeSiVince==='parlamentare')?calcSeggi():null;
-  S.minoranza = PAESE.coalizione ? seggiCoalizione(S.coalizione,S.seggi)<50 : (PAESE.comeSiVince==='parlamentare'?S.seggi[S.partito]<50:false);
+  S.minoranza = (PAESE.coalizione||PAESE.comeSiVince==='parlamentare') ? bloccoSeggi()<50 : false;   // L61-5 - il blocco, non il solo partito: nell appeso il Regno Unito puo averne uno
   S.tenuta={}; S.tenutaForza0={}; S.tenutaLiv={}; S.tenutaUltimo={}; S.mesiMinoranza=0; initTenuta(); S.bloccoAtteso=bloccoQuota();
   if(viaElezione){ bioConta('elezioniVinte'); S.mandatesWon=(S.mandatesWon||0)+1; }
   S.mandate=S.mandate||1; S.turnInMandate=0; S.elezioniAnticipate=false; S.ultimoSondaggio=null; S.sondStorico=[];
@@ -1095,6 +1098,20 @@ function cicloBase(){
    monarchici che si dissolvono, PLI-boomerang al '63). I delta sommano a ZERO in ogni tappa (verificato sul walk:
    maggiori entro ~1,1 dallo storico). Il '63 è CONDIZIONALE sull'apertura (S.apertura): ramo storico (apertura avvenuta,
    boomerang-PLI +4) vs controfattuale (centrismo tenuto, niente boomerang, PSI fuori, DC che tiene un filo meglio). */
+/* ============================================================================================================
+   L61-4 · LA SOGLIA DEL GUARDIANO — misurata PRIMA, non fissata prima.
+   Il guardiano confronta lo SCARTO DALLA TRAIETTORIA (vedi `riallineamentoTappa`): quanto il giocatore si è
+   allontanato da `forza alla tappa precedente + delta storico`. La dispersione di quello scarto, misurata su
+   **20 carriere da 120 mesi** sulla porta `uk1970` (40 tappe attraversate), prima di scegliere il numero:
+     mediana 18,6 · 75° 19,9 · 90° 20,7 · 95° 21,0 · **massimo 21,3**
+   Quindi 25 sta **comodamente oltre il gioco normale**: nella partita ordinaria il ripiego non scatta mai, e
+   scatta quando la partita è davvero diventata un altro paese (provato forzando la divergenza).
+   ⚠ E UN LIMITE DELLA FORMA, DICHIARATO: **lo scarto cresce con la distanza fra le tappe**, perché è il drift
+   accumulato nell'intervallo — feb '74 (quattro anni dopo l'avvio) ha mediana 19,9, ott '74 (otto mesi dopo)
+   ha mediana 4,2. Una soglia sola tratta i due intervalli allo stesso modo: è permissiva sulle tappe vicine e
+   severa su quelle lontane. Con tappe italiane distanti 3-5 anni il numero andrà rimisurato, non riusato.
+   ============================================================================================================ */
+const TAPPA_SOGLIA_SEGGI = 25;
 const RIALLINEAMENTI_ERA = {
   [LINEA_IT]: {
     1958: [ {id:'i50_dc',delta:2}, {id:'i50_pci',delta:-5}, {id:'i50_psi',delta:3}, {id:'i50_psdi',delta:-1}, {id:'i50_pnm',delta:-1.5}, {id:'i50_pri',delta:-0.5}, {id:'i50_msi',delta:3} ],   // Σ=0
@@ -1228,23 +1245,28 @@ const RIALLINEAMENTI_ERA = {
             entra:[ { id:'uk_snp', nome:'SNP', orientamento:'centrosinistra', base:{ lavoratori:0.5, giovani:0.5 },
                       forza:1.1, asse:-1, gruppoUE:'verdi', terreno:-0.2, concentrazione:40 } ] },
     /* ============================================================================================================
-       L58-1 · LE TAPPE DEL DECENNIO '70 (urne di scheda §1).
-       ⚠ UN LIMITE DEL REGISTRO, DICHIARATO INVECE CHE AGGIRATO: `riallineamentoTappa` è **one-shot per ANNO**
-       (`S.riallineamenti[S.year]`), e il 1974 ebbe **due** elezioni — febbraio e ottobre. Non possono essere
-       due tappe. Scelta: il **febbraio '74 sta al 1974**, perché è quello meccanicamente interessante (il
-       parlamento appeso, il primo dal 1929, e la seconda inversione voti/seggi della linea); l'**ottobre '74
-       sta al 1975**, spostato di un anno. Si perde la doppia consultazione nello stesso anno; si tiene la
-       sostanza, cioè un appeso seguito da una maggioranza risicatissima che poi si consuma.
-       1974 (feb): Lab 37,2 · Con 37,9 · Lib **19,3** — il picco liberale, 14 seggi su 635.
-       1975 (= ott '74): Lab 39,3 · Con 35,8 · Lib 18,3 · SNP 2,9 (11 seggi, il picco storico).
+       L58-1 · LE TAPPE DEL DECENNIO '70 (urne di scheda §1) — **riscritte ai mesi veri da L61-2**.
+       ✅ IL LIMITE DICHIARATO IN L58-1 È TOLTO. Il registro era one-shot per ANNO e il 1974 ebbe DUE elezioni:
+       si era messo il febbraio al 1974 e l'ottobre al 1975, spostato di un anno. Con la chiave 'anno/mese'
+       le due tornano dove sono state — **'1974/2' e '1974/10'** — e con esse i loro PARLAMENTI dichiarati.
+       1974 (feb): Lab 37,2 · Con 37,9 · Lib **19,3** — il picco liberale, 14 seggi su 635, e il primo
+                   parlamento appeso dal 1929: Lab 301 · Con 297 · Lib 14 · SNP 7 · Plaid 2.
+       1974 (ott): Lab 39,3 · Con 35,8 · Lib 18,3 · SNP 2,9 — maggioranza di TRE: Lab 319 su 635.
        1979: Con 43,9 · Lab 36,9 · Lib 13,8 · SNP 1,6 — il cambio d'epoca, e l'SNP che crolla.
+       ⚑ I `seggi` sono in percentuale della Camera e normalizzati sui CINQUE partiti del roster (i seggi
+       nordirlandesi non sono rappresentati): sommano 100, come vuole la forma dell'avvio. Le `urne` servono
+       solo al guardiano di L61-2 — sono il metro da cui si misura quanto la partita ha divergiuto.
        ============================================================================================================ */
-    1974: { delta:[ {id:'uk_con',delta:-8.5}, {id:'uk_lab',delta:-5.8}, {id:'uk_lib',delta:11.8},
+    '1974/2': { delta:[ {id:'uk_con',delta:-8.5}, {id:'uk_lab',delta:-5.8}, {id:'uk_lib',delta:11.8},
                     {id:'uk_snp',delta:0.9}, {id:'uk_plaid',delta:-0.1} ],
             entra:[ { id:'uk_plaid', nome:'Plaid Cymru', orientamento:'centrosinistra', base:{ lavoratori:0.5, giovani:0.5 },
-                      forza:0.5, asse:-1, gruppoUE:'verdi', terreno:-0.3, concentrazione:55 } ] },
-    1975: { delta:[ {id:'uk_con',delta:-2.1}, {id:'uk_lab',delta:2.1}, {id:'uk_lib',delta:-1.0},
-                    {id:'uk_snp',delta:0.9} ] },
+                      forza:0.5, asse:-1, gruppoUE:'verdi', terreno:-0.3, concentrazione:55 } ],
+            urne:  { uk_con:37.9, uk_lab:37.2, uk_lib:19.3, uk_snp:2.0, uk_plaid:0.5 },
+            seggi: { uk_lab:48.47, uk_con:47.83, uk_lib:2.25, uk_snp:1.13, uk_plaid:0.32 } },   // 301/297/14/7/2 su 621 · APPESO
+    '1974/10': { delta:[ {id:'uk_con',delta:-2.1}, {id:'uk_lab',delta:2.1}, {id:'uk_lib',delta:-1.0},
+                    {id:'uk_snp',delta:0.9} ],
+            urne:  { uk_con:35.8, uk_lab:39.3, uk_lib:18.3, uk_snp:2.9, uk_plaid:0.6 },
+            seggi: { uk_lab:51.20, uk_con:44.46, uk_lib:2.09, uk_snp:1.77, uk_plaid:0.48 } },   // 319/277/13/11/3 su 623 · maggioranza di 3
     1979: { delta:[ {id:'uk_con',delta:8.1}, {id:'uk_lab',delta:-2.4}, {id:'uk_lib',delta:-4.5},
                     {id:'uk_snp',delta:-1.3}, {id:'uk_plaid',delta:-0.1} ] }
   }
@@ -1485,9 +1507,16 @@ function riallineamentoTappa(){
   var perAnno = S.era && RIALLINEAMENTI_ERA[S.era];
   if(!perAnno) return;                              // presente: no-op
   if(!S.riallineamenti) S.riallineamenti={};
-  if(S.riallineamenti[S.year]) return;              // one-shot per tappa: già applicata
-  var entry = perAnno[S.year];
-  if(!entry) return;                                // quest'anno non è una tappa della linea
+  /* L61-2 · CHIAVE ANNO/MESE. Il registro era one-shot per ANNO, e il 1974 britannico ebbe DUE elezioni:
+     con i seggi dichiarati (più sotto) quel limite avrebbe spostato un intero PARLAMENTO di un anno.
+     Ora una voce può stare sotto la chiave 'anno/mese' (es. '1974/2') e due tappe convivono nello stesso
+     anno. La chiave-anno di sempre resta e si comporta esattamente come prima: nessuna tappa già scritta
+     cambia comportamento, e il registro salvato continua a leggersi (le chiavi vecchie sono ancora anni). */
+  var chiave = S.year+'/'+S.month;
+  var entry = perAnno[chiave];
+  if(!entry){ chiave = String(S.year); entry = perAnno[chiave]; }
+  if(!entry) return;                                // né questo mese né quest'anno sono una tappa della linea
+  if(S.riallineamenti[chiave]) return;              // one-shot per tappa: già applicata
   var direttive=null, shifts;
   if(Array.isArray(entry)) shifts=entry;                                              // forma di sempre
   else if(entry.delta || entry.entra || entry.esce || entry.rinomina){                // forma nuova (L34-1)
@@ -1495,23 +1524,74 @@ function riallineamentoTappa(){
        comunista è una direttiva-NPC **solo se non è il partito del giocatore** — nel qual caso la stessa
        storia si gioca come snodo (L40-2). La tappa resta marcata come fatta: non deve ritentare ogni anno. */
     if(typeof entry.se==='function'){ var ok=false; try{ ok=entry.se(); }catch(_){ ok=false; }
-      if(!ok){ S.riallineamenti[S.year]=true; return; } }
+      if(!ok){ S.riallineamenti[chiave]=true; return; } }
     shifts=entry.delta||[]; direttive=entry;
   } else shifts=entry[(S.apertura==='apri') ? 'apertura' : 'centrismo'];               // '63: ramo su S.apertura
   if(direttive) applicaDirettive(direttive);        // PRIMA i nuovi entrano, poi i delta li trovano nel roster
-  if(!shifts || !shifts.length){ if(direttive){ S.riallineamenti[S.year]=true; } return; }
+  if(!shifts || !shifts.length){ if(direttive){ S.riallineamenti[chiave]=true; } return; }
   if(S.forze && PAESE && PAESE.partiti){
     shifts.forEach(function(sh){ if(S.forze[sh.id]!=null) S.forze[sh.id]=Math.max(2, S.forze[sh.id]+sh.delta); });
     var sum=0; PAESE.partiti.forEach(function(p){ sum+=(S.forze[p.id]||0); });
     if(sum>0) PAESE.partiti.forEach(function(p){ S.forze[p.id]=(S.forze[p.id]||0)/sum*100; });   // rinormalizza a 100
     S.forzePrev=Object.assign({}, S.forze);
   }
+  /* ============================================================================================================
+     L61-2 · I SEGGI DICHIARATI A UNA TAPPA — forma PIENA (decisione Cowork+Giacomo su L59-1).
+     Il principio: **le urne storiche sono dati, non simulazioni**. Il simulatore serve le elezioni del
+     GIOCATORE, quando la storia è già divergente; dove la tappa porta la sua tabella, il parlamento è quello
+     dei libri e `calcSeggiCollegi` non viene interrogato. Le porte lo facevano già all'avvio (L50-1): una
+     tappa è un'elezione storica esattamente come l'avvio.
+     ⚑ PERCHÉ PIENA E NON MISTA (misurato in L61-1, 3 profili × 5 partiti giocabili): la forma mista —
+     dichiarare gli altri e lasciare calcolato il partito del giocatore, poi rinormalizzare — prende 8 casi
+     su 15, e **con il giocatore laburista sbaglia tutti e tre i profili**. La somma è la spia: va da 92,8 a
+     105,5. La causa è meccanica: il modello sottostima Labour di 10 punti (L59-1), quindi la somma crolla e
+     la rinormalizzazione **gonfia i conservatori dichiarati sopra il loro dato storico**. La mista non
+     attenua il difetto di L59-1: lo moltiplica per la scala.
+     GUARDIANO (soglia decisa da Cowork, non tarata qui): la tabella vale solo se la forza del partito del
+     giocatore è entro TAPPA_SOGLIA_SEGGI punti dal suo valore storico a questa tappa. Oltre, la partita è
+     ormai un altro paese e si torna al modello — e **il fatto va nel log**, perché il giocatore deve poter
+     capire perché quel parlamento non somiglia ai libri. `S.tappaSeggiEsito` tiene il registro (dato puro).
+     ============================================================================================================ */
+  /* ============================================================================================================
+     L61-4 · IL GUARDIANO CONFRONTA LO SPOSTAMENTO, NON IL LIVELLO.
+     ⚑ Perché la prima forma era sbagliata (L61-3): confrontava il **livello** del giocatore col livello
+     storico — ma le tappe sono costruite apposta perché i delta riproducano lo SPOSTAMENTO e non il livello
+     («inseguire le percentuali assolute cancellerebbe il record del giocatore», commento del '70). Un
+     guardiano sul livello misurava quella scelta di design, non la divergenza: scattava sempre.
+     La forma giusta: `atteso = forza alla tappa precedente + delta storico di questa tappa`, e lo scarto è
+     quanto il giocatore si è allontanato da quella traiettoria. Zero = «ha seguito la corrente della storia,
+     col suo livello»; grande = «questa non è più quella storia».
+     ⚠ `entry.urne` NON è più il metro del guardiano: resta come documentazione del voto storico.
+     ============================================================================================================ */
+  var mioDelta = 0;
+  if(shifts && shifts.length) shifts.forEach(function(sh){ if(sh.id===S.partito) mioDelta=(sh.delta||0); });
+  var atteso = (S.tappaForzaPrec!=null) ? (S.tappaForzaPrec + mioDelta) : null;
+  var scarto = (atteso!=null) ? Math.abs((S.forze&&S.forze[S.partito]!=null?S.forze[S.partito]:0) - atteso) : 0;
+  if(entry.seggi && S.seggi){
+    if(!S.tappaSeggiEsito) S.tappaSeggiEsito={};
+    if(atteso!=null && scarto > TAPPA_SOGLIA_SEGGI){
+      S.tappaSeggiEsito[chiave]='saltata';
+      if(S.log) S.log.unshift({t:T('Il nuovo parlamento'), x:T('La composizione non somiglia a quella dei libri di storia: da qui in avanti il paese ha preso un\'altra strada.')});
+    } else {
+      Object.keys(entry.seggi).forEach(function(id){ if(S.seggi[id]!=null) S.seggi[id]=entry.seggi[id]; });
+      S.tappaSeggiEsito[chiave]='applicata';
+      /* i seggi sono cambiati a metà mandato: la minoranza va riletta, come già fanno rimpasto e sostegno.
+         In opposizione non ha senso — lì il numero che conta è quello di chi governa. */
+      if(!S.opposizione && typeof bloccoSeggi==='function') S.minoranza = bloccoSeggi()<50;
+    }
+  }
   if(S.log){   // beat visibile della tappa (il quadro politico che si assesta)
     if(S.year===1958) S.log.unshift({t:T('Elezioni 1958'), x:T('Il quadro si assesta: il PSI cresce e si stacca, i monarchici arretrano.')});
     else if(S.year===1963) S.log.unshift({t:T('Elezioni 1963'), x:(S.apertura==='apri') ? T('Con l\'apertura a sinistra il PLI raddoppia: la reazione moderata prende forma.') : T('Il centrismo tiene: nessuna svolta, il logorio prosegue.')});
     else if(S.year===1972) S.log.unshift({t:T('Elezioni 1972'), x:T('La destra si unisce in un solo cartello e i monarchici vi confluiscono: il quadro si semplifica a destra.')});
     else if(S.year===1976) S.log.unshift({t:T('Elezioni 1976'), x:T('Il paese si divide in due grandi blocchi: i partiti laici minori vengono schiacciati.')});
-    else if(S.year===1979) S.log.unshift({t:T('Elezioni 1979'), x:T('L\'onda si ritira: la sinistra arretra per la prima volta da trent\'anni e i piccoli tornano a respirare.')});
+    /* ⚠ L61-2 — QUESTA RIGA PERDEVA SULLA LINEA BRITANNICA, ed è un difetto trovato lavorando qui dentro.
+       La catena dei beat-tappa non era protetta per linea, e il 1979 è una tappa di ENTRAMBE le linee: un
+       giocatore inglese nel '79 leggeva «la sinistra arretra per la prima volta da trent'anni», che è cronaca
+       italiana. Misurato prima di correggerlo. È l'unico anno in comune fra le due liste di tappe (le italiane
+       sono '58 '63 '72 '76 '79 '83 '87 '91 '92 '94 '96 '01 '06; le britanniche '51 '55 '59 '64 '66 '70 '74 '79),
+       quindi basta il guardiano qui: sulla linea italiana il comportamento non cambia di una virgola. */
+    else if(S.year===1979 && S.era===LINEA_IT) S.log.unshift({t:T('Elezioni 1979'), x:T('L\'onda si ritira: la sinistra arretra per la prima volta da trent\'anni e i piccoli tornano a respirare.')});
     else if(S.year===1983) S.log.unshift({t:T('Elezioni 1983'), x:T('Il partito di maggioranza relativa tocca il suo minimo: i laici crescono e i socialisti diventano l\'ago della bilancia.')});
     else if(S.year===1987) S.log.unshift({t:T('Elezioni 1987'), x:T('I socialisti toccano il massimo dal dopoguerra, la sinistra storica arretra ancora, l\'onda laica si ritira.')});
     /* L40-1 — i beat della frana. Tutte le tappe precedenti ne hanno uno: senza, il giocatore vedrebbe il
@@ -1527,9 +1607,15 @@ function riallineamentoTappa(){
     else if(S.era===LINEA_UK && S.year===1951) S.log.unshift({t:T('Elezioni 1951'), x:T('Il partito con più voti perde la Camera: i collegi contano le vittorie, non le schede.')});
     else if(S.era===LINEA_UK && S.year===1955) S.log.unshift({t:T('Elezioni 1955'), x:T('Il governo esce rafforzato: l\'alternanza non arriva, e l\'opposizione si interroga.')});
     else if(S.era===LINEA_UK && S.year===1959) S.log.unshift({t:T('Elezioni 1959'), x:T('Maggioranza di cento seggi: il decennio si chiude come si era aperto, ma dalla parte opposta.')});
+    /* L61-2 — le due del '74, distinte dal MESE: è la prima volta che due tappe stanno nello stesso anno. */
+    else if(S.era===LINEA_UK && S.year===1974 && S.month<=6) S.log.unshift({t:T('Elezioni di febbraio'), x:T('Nessun partito ha la maggioranza: per la prima volta dal 1929 il paese ha un parlamento appeso, e chi governa dovrà contare i voti ogni sera.')});
+    else if(S.era===LINEA_UK && S.year===1974) S.log.unshift({t:T('Elezioni di ottobre'), x:T('Il secondo voto in otto mesi dà una maggioranza di tre seggi: abbastanza per governare, non abbastanza per dormire.')});
     else if(S.year===2008) S.log.unshift({t:T('Elezioni 2008'), x:T('Due partiti grandi nati da altrettante fusioni si prendono quasi tutto, e per la prima volta dal dopoguerra la sinistra radicale resta fuori dall\'aula.')});
   }
-  S.riallineamenti[S.year]=true;
+  /* L61-4 - il riferimento della traiettoria si aggiorna a OGNI tappa, anche dove non ci sono seggi
+     dichiarati: altrimenti la 'tappa precedente' invecchia e lo scarto misura piu' di un intervallo. */
+  if(S.forze && S.forze[S.partito]!=null) S.tappaForzaPrec=S.forze[S.partito];
+  S.riallineamenti[chiave]=true;
 }
 /* Build B — il clone-PAESE d'epoca: sovrappone a un PAESE base gli override dello scenario (partiti, ue, intermedie…),
    MAI mutando PAESI. Unica fonte di verità, usata da setScenario (avvio) e applySnap (load). */
@@ -1597,6 +1683,24 @@ function snodoScalaMobileDovuta(){ return typeof S!=='undefined' && S && S.era==
    segnano il numero di mandato), e solo entro i primi due mesi da quando i numeri sono saltati.
    ================================================================================================================ */
 function bloccoSeggi(){ return (S.seggi && typeof seggiCoalizione==='function') ? seggiCoalizione(S.coalizione||[S.partito], S.seggi) : 100; }
+/* ================================================================================================================
+   L61-5 · LA COALIZIONE NEL PARLAMENTO APPESO.
+   ⚑ `PAESE.coalizione:false` è vero **finché il sistema fabbrica maggioranze** — non è una legge di natura.
+   È esattamente la costituzione britannica: si governa da soli perché i collegi producono una maggioranza, e
+   **quando non la producono si trattano coalizioni e accordi di sostegno** (il patto Lib-Lab del 1977, il
+   governo di coalizione del 2010). Quindi la costante-paese si legge «di norma», non «sempre».
+   Fuori dall'appeso nulla cambia: il Regno Unito resta monopartitico come prima.
+   ================================================================================================================ */
+function parlamentoAppeso(){
+  if(typeof S==='undefined' || !S || !S.seggi) return false;
+  if(!PAESE || PAESE.comeSiVince!=='parlamentare') return false;
+  var max=0; (PAESE.partiti||[]).forEach(function(p){ var v=S.seggi[p.id]||0; if(v>max) max=v; });
+  return max>0 && max<50;
+}
+function coalizionePossibile(){
+  if(typeof S==='undefined' || !S) return false;
+  return !!(PAESE && PAESE.coalizione) || parlamentoAppeso();
+}
 /* il partner possibile per il SOSTEGNO: fuori dalla coalizione, a distanza d'asse ≤2 **oppure** intesa ≥50.
    Se non c'è nessuno, l'arco non parte — e il messaggio è quello giusto: non c'è nessuno da chiamare. */
 function partnerSostegno(){
@@ -1626,7 +1730,7 @@ function minoranzaFresca(){   // i numeri sono saltati da poco: 1-2 mesi, non un
   return !!S.minoranza && (S.mesiMinoranza||0)>=1 && (S.mesiMinoranza||0)<=2;
 }
 function rimpastoDovuto(){
-  return typeof S!=='undefined' && S && S.livello===3 && !S.opposizione && PAESE.coalizione
+  return typeof S!=='undefined' && S && S.livello===3 && !S.opposizione && coalizionePossibile()
       && !S.sostegno && minoranzaFresca() && S.rimpastoOfferto!==(S.mandate||0) && !!partnerRimpasto();
 }
 function sostegnoDovuto(){
@@ -1719,7 +1823,28 @@ function scioglimentoAmmesso(){
    che resta. Non vede il risultato — quello lo scrive la notte elettorale, con le sue sorprese. */
 function scioglimentoQuadro(){
   var s=S.ultimoSondaggio, durata=(PAESE.mandatoMesi||60)/12;
-  return { sond:(s?s.val:null), margine:(s?s.margine:null),
+  /* ================================================================================================================
+     L59-4(a) · LA PROIEZIONE IN SEGGI, che prima mancava — ed era l'inganno.
+     La carta mostrava il sondaggio, cioè una quota di VOTI. Ma nei paesi a collegi il voto non decide niente da
+     solo: decidono i seggi, e la traduzione è tutt'altro che intuitiva (L59-1: a parità di voti il modello dà
+     dieci punti di scarto). Il giocatore vedeva «43%» e non poteva sapere se erano 52 seggi o 42.
+     ⚑ Il quadro concettuale corretto (Cowork, L59-4): lo scioglimento non è una scommessa, è **tempismo** —
+     la domanda non è «vincerò?» ma «adesso è meglio di dopo?». **Un esito prevedibile e VISIBILE non è un
+     difetto: è informazione. Prevedibile e nascosto sì.** Quindi la voce resta sempre disponibile — anche
+     quando è una mossa disperata — e mostra come stanno le cose.
+     ⚠ Onestà della proiezione: è calcolata sulle forze di OGGI, mentre il voto applica `scartoCampagna`
+     (−1,2 fisso, ±3,5 casuale). Per questo il testo dice che la campagna la muove di qualche punto: la
+     proiezione è una fotografia, non una promessa.
+     ================================================================================================================ */
+  var seggi=null, magg=null;
+  try{
+    if(PAESE && (PAESE.comeSiVince==='parlamentare' || PAESE.coalizione) && typeof calcSeggi==='function'){
+      var proj=calcSeggi();
+      seggi=Math.round(seggiCoalizione(S.coalizione||[S.partito], proj));
+      magg=(seggi>=50);
+    }
+  }catch(e){ seggi=null; magg=null; }
+  return { sond:(s?s.val:null), margine:(s?s.margine:null), seggi:seggi, magg:magg,
            mesiRestanti: Math.max(0, Math.round((durata-(S.turnInMandate||0))*12 - ((S.month||1)-1))) };
 }
 /* ⚠ LO SCARTO DI CAMPAGNA, e perché senza non c'è gioco. Misurato prima di scriverlo: **l'esito dell'elezione
@@ -4677,7 +4802,7 @@ function finalizeVoto(win){   // rielezione parlamentare: porta alla schermata e
 /* Re-inizializza la tenuta degli alleati (luna di miele a 65, forza d'ingresso memorizzata). */
 function initTenuta(){
   S.tenuta={}; S.tenutaForza0={}; S.tenutaLiv={}; S.tenutaUltimo={};
-  if(!PAESE.coalizione) return;
+  if(!coalizionePossibile()) return;   // L61-5
   for(const id of (S.coalizione||[])) if(id!==S.partito){ S.tenuta[id]=65; S.tenutaForza0[id]=S.forze[id]; }
 }
 /* Rinnovo (candidato+coalizione, es. Francia): dopo il ballottaggio vinto si RICOSTRUISCE la maggioranza
@@ -5108,6 +5233,8 @@ function applySnap(snap){
   if(!S.pilastriMondo || typeof S.pilastriMondo!=='object') S.pilastriMondo={};   // L56-2 — migrazione
   if(S.truffaFatta===undefined){ S.truffaFatta=false; S.truffaEsito=null; }   // Build B 1b — snodo one-shot: default per i salvataggi pre-1b
   if(S.riallineamenti===undefined) S.riallineamenti={};   // AVANZAMENTO — migrazione: i salvataggi pre-lotto ricevono il registro-tappe vuoto
+  if(S.tappaSeggiEsito===undefined) S.tappaSeggiEsito={};   // L61-2 - migrazione: i salvataggi precedenti ricevono il registro vuoto
+  if(S.tappaForzaPrec===undefined) S.tappaForzaPrec=null;   // L61-4 - migrazione
   if(S.apertura===undefined){ S.apertura=null; S.aperturaEsito=null; S.enel=null; }   // AVANZAMENTO Lotto 4 — migrazione snodi '60
   if(S.austerity===undefined){ S.austerity=null; S.divorzio=null; S.solidarieta=null; }   // L28-3 — migrazione snodi '70
   if(S.divorzioBdi===undefined){ S.divorzioBdi=null; S.scalaMobile=null; S.nucleare=null; }   // L33-1 — migrazione snodi '80

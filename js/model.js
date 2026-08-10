@@ -227,7 +227,8 @@ function simulateMonth(){
    SODDISFAZIONE della sua base (come evolvePartiti) e dall'ANDAMENTO della sua forza dall'ingresso al governo
    (se si logora, si innervosisce). In discesa riusa driftLealtaGiu (come la lealtà dei ministri). --- */
 function evolveTenuta(){
-  if(!S.tenuta || !PAESE.coalizione) return;
+  if(!S.tenuta) return;
+  if(!(PAESE.coalizione || (typeof coalizionePossibile==='function' && coalizionePossibile()))) return;   // L61-5 - nell appeso gli alleati britannici sono veri alleati
   const D=dif();
   for(const id in S.tenuta){
     const p=part(id); if(!p) continue;

@@ -1143,6 +1143,72 @@ const PILASTRI_LINEA = [
     ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
 
   /* ========================================================================================================
+     L60-1 · GLI UNDICI PILASTRI-TRAGEDIA ITALIANI (8 ago). Nasce da una decisione presa sul Regno Unito
+     («i disastri devono apparire tutti, sono troppo importanti») e applicata all'indietro sulla linea
+     italiana: quando cambia un criterio, si passa su ciò che era chiuso.
+     I testi sono APPROVATI da Giacomo (1/8) e **letti dal file `AUDIT-TRAGEDIE-ITALIA.md` da uno script**,
+     non ricopiati a mano: è l'unico modo di garantire davvero il byte-identico.
+     Pattern-cronaca invariato: `cronaca:true`, una sola voce, `f()` vuota. Il paese subisce il fatto, il
+     giocatore non lo decide e non lo previene — mai gamificare una tragedia (paletto-fondamento).
+     ⚠ I pilastri già congelati NON sono stati toccati: questi si aggiungono.
+     ======================================================================================================== */
+  { id:'p50_marcinelle', anno:1956, mese:8, era:'italia1950', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Marcinelle',
+    text:'L\'8 agosto un incendio nella miniera di carbone di Marcinelle, in Belgio, uccide 262 minatori: 136 sono italiani, partiti con gli accordi che scambiavano braccia contro carbone. Le famiglie aspettano ai cancelli per giorni. Da quel giorno l\'emigrazione smette di essere solo una fortuna da cercare.',
+    logx:'Duecentosessantadue morti in miniera, centotrentasei italiani. L\'emigrazione non è più solo una fortuna da cercare.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'p60_vajont', anno:1963, mese:10, era:'italia1960', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Il Vajont',
+    text:'Alle 22:39 del 9 ottobre una frana di oltre duecento milioni di metri cubi si stacca dal monte Toc e cade nel bacino artificiale sottostante: l\'onda scavalca la diga — che resta in piedi — e in quattro minuti cancella Longarone e i paesi vicini. Le vittime accertate sono millenovecentodiciassette, molte mai identificate. Gli studi che avvertivano del rischio erano stati scritti prima.',
+    logx:'Millenovecentodiciassette morti in quattro minuti. Gli studi che avvertivano erano già stati scritti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'p60_arno', anno:1966, mese:11, era:'italia1960', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'L\'Arno',
+    text:'Il 4 novembre l\'Arno esonda e sommerge Firenze fino a cinque metri d\'altezza: fango e nafta nelle case, nelle chiese, negli archivi e nelle biblioteche. Arrivano da tutto il mondo ragazzi a spalare, e li chiameranno gli angeli del fango. Molte delle opere ferite quel giorno non hanno ancora finito di essere restaurate.',
+    logx:'Firenze sotto cinque metri d\'acqua e di nafta. Arrivano da tutto il mondo ragazzi a spalare.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'p60_belice', anno:1968, mese:1, era:'italia1960', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Il Belice',
+    text:'Fra il 14 e il 15 gennaio una serie di scosse rade al suolo i paesi della valle del Belice, in Sicilia occidentale. I morti sono centinaia, i senzatetto decine di migliaia. Le baracche costruite per l\'emergenza resteranno abitate per più di dieci anni, e la ricostruzione diventerà un caso nazionale su come lo Stato arriva, e quando.',
+    logx:'Paesi rasi al suolo nella Sicilia occidentale. Le baracche resteranno abitate per più di dieci anni.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'p70_brescia', anno:1974, mese:8, era:'italia1970', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Brescia e il treno',
+    text:'Il 28 maggio una bomba esplode in piazza della Loggia a Brescia, durante un comizio sindacale sotto la pioggia: otto morti. Il 4 agosto un\'altra esplode su un treno espresso in galleria, fra Firenze e Bologna: dodici. Sono i mesi in cui la strategia della tensione colpisce chi manifesta e chi viaggia, e i processi dureranno decenni prima di arrivare a una verità.',
+    logx:'Otto morti in piazza a Brescia, dodici su un treno in galleria. I processi dureranno decenni.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'p70_friuli', anno:1976, mese:5, era:'italia1970', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Il Friuli',
+    text:'Il 6 maggio un terremoto colpisce il Friuli: quasi mille morti, decine di migliaia di senzatetto, paesi interi da ricostruire. La ricostruzione che segue — decisa e gestita sul posto, con la formula «prima le fabbriche, poi le case, poi le chiese» — diventerà il modello che il paese citerà per quarant\'anni.',
+    logx:'Quasi mille morti in Friuli. La ricostruzione diventerà il modello che il paese citerà per quarant\'anni.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'p80_ustica', anno:1980, mese:6, era:'italia1980', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Ustica',
+    text:'Il 27 giugno un aereo di linea in volo da Bologna a Palermo precipita nel mar Tirreno: muoiono tutte le ottantuno persone a bordo, sedici delle quali minorenni. Sulle cause si aprirà una delle vicende giudiziarie più lunghe della Repubblica, segnata da documenti spariti e testimoni morti. Una sentenza civile stabilirà anni dopo che quella sera nel cielo c\'era un\'attività militare.',
+    logx:'Ottantuno morti nel Tirreno. Sulle cause si apre una delle vicende giudiziarie più lunghe della Repubblica.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'p80_irpinia', anno:1980, mese:11, era:'italia1980', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'L\'Irpinia',
+    text:'Il 23 novembre novanta secondi di terremoto devastano l\'Appennino fra Campania e Basilicata: oltre duemilacinquecento morti, centinaia di migliaia di senzatetto. I soccorsi arrivano tardi e in disordine, e i giornali titolano «Fate presto». La ricostruzione durerà decenni e diventerà anche una storia di sprechi e di inchieste.',
+    logx:'Oltre duemilacinquecento morti fra Campania e Basilicata. I giornali titolano «Fate presto».',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'p90_mobyprince', anno:1991, mese:4, era:'italia1990', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Il Moby Prince',
+    text:'La sera del 10 aprile un traghetto in uscita da Livorno urta una petroliera alla fonda e prende fuoco: muoiono centoquaranta persone fra passeggeri ed equipaggio, se ne salva una sola. È il più grave disastro della marina civile italiana. Ci vorranno commissioni d\'inchiesta e più di venticinque anni per smontare la versione della nebbia e dell\'errore isolato.',
+    logx:'Centoquaranta morti al largo di Livorno, un solo superstite. Il più grave disastro della marina civile italiana.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'p00_linate', anno:2001, mese:10, era:'italia2000', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Linate',
+    text:'La mattina dell\'8 ottobre, con la nebbia fitta, un aereo di linea in decollo urta un piccolo jet finito per errore sulla pista: centodiciotto morti fra i due velivoli e l\'edificio colpito. È il più grave incidente aereo mai avvenuto in Italia, e l\'inchiesta lo attribuirà a una catena di segnaletiche, radar e procedure che mancavano da anni.',
+    logx:'Centodiciotto morti nella nebbia di Linate. Il più grave incidente aereo mai avvenuto in Italia.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'p00_aquila', anno:2009, mese:4, era:'italia2000', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'L\'Aquila',
+    text:'Alle 3:32 del 6 aprile un terremoto colpisce L\'Aquila e i paesi intorno: trecentonove morti, molti dei quali studenti nelle case del centro, e ottantamila sfollati. Il centro storico resta transennato per anni. Nei mesi precedenti le rassicurazioni ufficiali avevano invitato a non allarmarsi: anche di questo si occuperanno i tribunali.',
+    logx:'Trecentonove morti a L\'Aquila, ottantamila sfollati. Nei mesi prima le rassicurazioni ufficiali invitavano a non allarmarsi.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+
+  /* ========================================================================================================
      L40-2 · I CINQUE PILASTRI DEL '90. Testi APPROVATI da Giacomo il 1/8 e congelati: byte-identici alla
      scheda §TESTI PRONTI, riga per riga. Pattern-cronaca invariato (`cronaca:true`, una sola voce, `f()`
      vuota): il paese subisce il fatto, il giocatore non lo decide e non lo previene — mai gamificare una
@@ -1588,6 +1654,50 @@ const BEAT_LEGGERI = [
   {id:'lguk60_spagna', era:'uk1960', registro:'leggero', cond:()=>S.year>=1966, kick:'Il paese', t:'La vacanza in Spagna', text:'Il volo charter porta al sole a un prezzo che si può fare: si torna scottati e con la bottiglia di liquore giallo.', ch:[
     {l:'Prenoti anche tu una settimana', e:'Scottati e contenti', f:function(){}},
     {l:'Resti alla costa di sempre', e:'Piove, ma è vicino', f:function(){}} ]},
+  // ---- L58-1bis · anni '70 inglesi: 13 beat leggeri (6 senza ancora, 7 con) ----
+  {id:'lguk70_pub', era:'uk1970', registro:'leggero', kick:'Il paese', t:'Il pub, ancora', text:'Il banco è lo stesso di vent\'anni fa, la moquette pure, e la campanella dell\'ultimo giro suona sempre troppo presto. Cambiano i prezzi sulla lavagna, ogni pochi mesi.', ch:[
+    {l:'Ti fermi per la seconda pinta', e:'La lavagna dei prezzi la guardi dopo', f:function(){}},
+    {l:'Paghi e vai, che domani si lavora', e:'Se si lavora', f:function(){}} ]},
+  {id:'lguk70_partita', era:'uk1970', registro:'leggero', kick:'Il paese', t:'La partita del sabato', text:'Si va allo stadio in piedi, sulla gradinata, con la sciarpa e il thermos. Ci si sente parte di qualcosa che il lunedì in fabbrica non c\'è più.', ch:[
+    {l:'Vai in gradinata, come sempre', e:'In piedi, e si canta', f:function(){}},
+    {l:'Aspetti i risultati alla radio', e:'Meno freddo, meno tutto', f:function(){}} ]},
+  {id:'lguk70_posta', era:'uk1970', registro:'leggero', kick:'Il paese', t:'La coda alla posta', text:'Il giovedì mattina la fila esce dalla porta: pensioni, bollette, il libretto da far timbrare. Si sente più politica lì dentro che in mezzo giornale.', ch:[
+    {l:'Fai la fila e ascolti', e:'Si impara più che dai sondaggi', f:function(){}},
+    {l:'Torni nel pomeriggio', e:'C\'è la stessa fila, con altre facce', f:function(){}} ]},
+  {id:'lguk70_te', era:'uk1970', registro:'leggero', kick:'Il paese', t:'Il tè e i biscotti in ufficio', text:'Alle undici passa il carrello e tutto si ferma per dieci minuti: due biscotti, il tè troppo forte, e le uniche cose vere che ci si dice in tutta la giornata.', ch:[
+    {l:'Ti fermi col carrello anche tu', e:'Dieci minuti, e si sa tutto', f:function(){}},
+    {l:'Tieni la porta chiusa', e:'Si finisce prima, e si sa meno', f:function(){}} ]},
+  {id:'lguk70_domenica', era:'uk1970', registro:'leggero', kick:'Il paese', t:'La domenica senza niente aperto', text:'Saracinesche abbassate, strade vuote, e un pomeriggio lunghissimo da riempire. Chi ha dimenticato di comprare il latte il sabato, se ne ricorda fino a lunedì.', ch:[
+    {l:'Ti rassegni e fai una passeggiata', e:'Non c\'è molto altro', f:function(){}},
+    {l:'Cerchi l\'unico negozio aperto', e:'C\'è, e costa il doppio', f:function(){}} ]},
+  {id:'lguk70_radio', era:'uk1970', registro:'leggero', kick:'Il paese', t:'La radio in cucina', text:'Sta accesa dalla mattina, tra una canzone e il notiziario, e nessuno la spegne mai davvero. Le brutte notizie arrivano fra un disco e l\'altro, con la stessa voce.', ch:[
+    {l:'La lasci accesa tutto il giorno', e:'Fa compagnia, anche quando dice cose brutte', f:function(){}},
+    {l:'La spegni dopo il notiziario', e:'Un\'ora di silenzio è già qualcosa', f:function(){}} ]},
+  {id:'lguk70_colore', era:'uk1970', registro:'leggero', cond:()=>S.year>=1970, kick:'Il paese', t:'Il colore in salotto', text:'Il televisore a colori arriva a nolo, perché comprarlo costa un mese di stipendio: la partita e i documentari cambiano faccia, e i vicini passano a trovarti più spesso.', ch:[
+    {l:'Lo prendi a nolo anche tu', e:'E il salotto si riempie di vicini', f:function(){}},
+    {l:'Il bianco e nero funziona ancora', e:'E i vicini restano a casa loro', f:function(){}} ]},
+  {id:'lguk70_pacchetto', era:'uk1970', registro:'leggero', cond:()=>S.year>=1972, kick:'Il paese', t:'La vacanza in pacchetto', text:'Volo, albergo e trasferimento in un prezzo solo, pagato a rate d\'inverno. Si parte da un aeroporto di provincia e si torna con le diapositive da far vedere a tutti.', ch:[
+    {l:'Prenoti, e paghi a rate', e:'Due settimane al sole, decise a gennaio', f:function(){}},
+    {l:'Resti dove si è sempre andati', e:'Piove, ma non ci sono rate', f:function(){}} ]},
+  {id:'lguk70_punk', era:'uk1970', registro:'leggero', cond:()=>S.year>=1976, kick:'Il paese', t:'Il punk', text:'Ragazzi con gli spilli e i capelli dritti dicono che non c\'è futuro, e lo dicono in un modo che i giornali non possono ignorare. I padri si arrabbiano, che è metà del punto.', ch:[
+    {l:'Ti fai spiegare di cosa parlano', e:'Parlano di case che non ci sono e di lavori che non ci sono', f:function(){}},
+    {l:'Lasci perdere: passerà', e:'Passerà · ma non prima di aver detto la sua', f:function(){}} ]},
+  {id:'lguk70_giubileo', era:'uk1970', registro:'leggero', cond:()=>S.year===1977, kick:'Il paese', t:'Il Giubileo', text:'Tavolate in mezzo alla strada, bandierine da un lampione all\'altro e torte fatte in casa: per un fine settimana il paese in crisi festeggia venticinque anni di regno e, soprattutto, se stesso.', ch:[
+    {l:'Ti siedi alla tavolata della tua strada', e:'Per due giorni non si parla di prezzi', f:function(){}},
+    {l:'Guardi dalla finestra', e:'Le bandierine restano su fino a settembre', f:function(){}} ]},
+  {id:'lguk70_video', era:'uk1970', registro:'leggero', cond:()=>S.year>=1978, kick:'Il paese', t:'Il videoregistratore', text:'Una scatola grossa quanto una valigia promette di registrare la partita mentre sei al lavoro. Costa come un\'auto usata, e nessuno riesce a programmarla al primo tentativo.', ch:[
+    {l:'Provi a programmarlo', e:'Registra il telegiornale della settimana prima', f:function(){}},
+    {l:'Chiedi a qualcuno più giovane', e:'Ci mette trenta secondi, e non te lo fa dimenticare', f:function(){}} ]},
+  {id:'lguk70_discoteca', era:'uk1970', registro:'leggero', cond:()=>S.year>=1977, kick:'Il paese', t:'La discoteca', text:'Luci sotto il pavimento, camicie aperte e una musica fatta apposta per non finire mai. Il sabato sera cambia forma, e le sale da ballo di una volta si svuotano.', ch:[
+    {l:'Ci vai a vedere com\'è', e:'Rumorosa, e piena di gente contenta', f:function(){}},
+    {l:'Resti alla sala di sempre', e:'Sempre più vuota, sempre più tua', f:function(){}} ]},
+  /* ⚠ L58-1bis — la scheda segnava questo beat come «dal 1979, verificare prima dell'uso». Verificato:
+     lo sciopero che oscurò la televisione commerciale cominciò il 10 agosto 1979 e durò undici settimane.
+     Il gate è quindi il mese esatto, non l'anno. Il tag `uk1970` arriva alla coda 1981, quindi la voce è
+     raggiungibile — ma solo da chi continua a giocare oltre il cambio d'epoca del maggio '79. */
+  {id:'lguk70_tv', era:'uk1970', registro:'leggero', cond:()=>S.year>=1979&&(S.year>1979||S.month>=8), kick:'Il paese', t:'Lo sciopero della tv', text:'Un canale sparisce dall\'aria per settimane: al suo posto un cartello fisso e un po\' di musica. Si scopre quanta serata riempiva, e si riprende in mano il giornale.', ch:[
+    {l:'Approfitti per leggere', e:'Due libri in undici settimane', f:function(){}},
+    {l:'Guardi l\'altro canale, obtorto collo', e:'Documentari, e tanti', f:function(){}} ]},
   // ---- Anni '50 ----
   {id:'lg50_schedina', era:'universale', registro:'leggero', kick:'Il paese', t:'La schedina della domenica', text:'Nei bar non si parla d\'altro: pronostici, colonne raddoppiate, e il sogno di fare «13». Per una mattina la politica può aspettare.', ch:[
     {l:'Giochi anche tu una colonna', e:'Due firme e una speranza', f:function(){}},
@@ -4424,6 +4534,58 @@ const EVENTS=[
   text:'Boutique, gonne corte, gruppi che l\'America compra a scatola chiusa: per qualche stagione il paese esporta il suo modo di essere giovane.',ch:[
    {l:'Il governo ci mette il cappello',e:'Il paese sembra giovane · e qualcuno trova la posa ridicola',f:()=>{gd('giovani',7); gd('imprenditori',3); gd('pensionati',-5); stampad(3);}},
    {l:'Non è affare del governo',e:'Nessuna posa · e nessun merito',f:()=>{gd('pensionati',3); gd('giovani',-3);}}]},
+ /* ---- L58-1bis · i 12 eventi del decennio inglese '70 (scheda PRESET-UK-1970 §D) ----
+    ⚠ Nota di taratura: nel '70 il drift `S.ciclo` scende a 2-11 (contro i 18-21 dei '50-'60), quindi
+    `computeGrowth` NON è più sempre clampata a 5 e un `gMod` qui si VEDE — al contrario di L49-1.
+    Il morso resta comunque prevalentemente sui gruppi, che il clamp non tocca in nessun decennio. */
+ {id:'uk70_decimale', era:'uk1970', cond:()=>S.year>=1971, kick:'Economia', t:'Cento penny per una sterlina',
+  text:'Scellini e mezze corone vanno in pensione in un giorno solo. I negozi espongono due prezzi, i più anziani rifanno i conti a voce, e qualcuno giura che con la moneta nuova è rincarato tutto.',ch:[
+   {l:'Campagna capillare, e prezzi doppi per un anno',e:'Il cambio si capisce · e costa una piccola fortuna in cartelli',costo:{debito:0.6},f:()=>{S.ind.debt+=0.6; gd('pensionati',6); gd('cetomedio',4); gd('imprenditori',-3);}},
+   {l:'Si cambia e basta: ci si abitua',e:'Nessuna spesa · e mezzo paese convinto di essere stato derubato',f:()=>{gd('pensionati',-8); gd('lavoratori',-4); stampad(-3);}}]},
+ {id:'uk70_prezzi', era:'uk1970', cond:()=>S.year>=1973, tono:'grave', kick:'Economia', t:'Il prezzo che corre',
+  text:'I prezzi salgono più in fretta delle buste paga, ogni mese. Chi ha risparmiato guarda i risparmi assottigliarsi, chi ha debiti scopre che si alleggeriscono. È un\'imposta che nessuno ha votato.',ch:[
+   {l:'Tetto ai salari, per legge',e:'La rincorsa rallenta · e i sindacati la chiamano dichiarazione di guerra',f:()=>{ if(S.gMod!=null)S.gMod+=0.3; gd('lavoratori',-14); gd('pensionati',6); gd('cetomedio',4); repd(3);}},
+   {l:'Si indicizzano le pensioni e si lascia correre',e:'Chi ha meno è protetto · e la spirale gira più veloce',costo:{debito:1.4},f:()=>{S.ind.debt+=1.4; if(S.gMod!=null)S.gMod-=0.3; gd('pensionati',10); gd('lavoratori',5); gd('imprenditori',-7);}}]},
+ {id:'uk70_sterlina', era:'uk1970', cond:()=>S.year>=1972, tono:'grave', kick:'La sterlina', t:'La sterlina che fluttua',
+  text:'Da quando il cambio non è più fisso non c\'è un valore da difendere: c\'è solo un valore che scende. Difenderlo costa riserve, lasciarlo andare costa tutto quello che si compra fuori.',ch:[
+   {l:'Si alzano i tassi e si difende',e:'La caduta si ferma · e chi ha un mutuo se ne accorge il mese stesso',f:()=>{ if(S.gMod!=null)S.gMod-=0.4; gd('cetomedio',-9); gd('imprenditori',-4); gd('pensionati',5); repd(3);}},
+   {l:'Si lascia scendere: aiuta chi esporta',e:'Le fabbriche vendono · e la spesa costa di più ogni settimana',f:()=>{gd('imprenditori',8); gd('lavoratori',3); gd('pensionati',-9); gd('cetomedio',-5);}}]},
+ {id:'uk70_settimana', era:'uk1970', cond:()=>S.year>=1974&&S.year<=1975, tono:'grave', kick:'Il paese', t:'La settimana corta',
+  text:'Corrente razionata, insegne spente, il traffico regolato a mano agli incroci. Chi ha vissuto la guerra dice che si sopravvive; chi non l\'ha vissuta non è d\'accordo.',ch:[
+   {l:'Le fabbriche prima delle case',e:'La produzione tiene · e la sera si cena al buio',f:()=>{gd('imprenditori',7); gd('lavoratori',-4); gd('pensionati',-8); gd('cetomedio',-5);}},
+   {l:'Le case prima delle fabbriche',e:'Le famiglie hanno luce · e i capannoni fermi tre giorni su cinque',f:()=>{ if(S.gMod!=null)S.gMod-=0.5; gd('pensionati',7); gd('cetomedio',5); gd('imprenditori',-11);}}]},
+ {id:'uk70_picchetto', era:'uk1970', tono:'grave', kick:'Industria', t:'Il picchetto',
+  text:'Davanti al cancello ci sono i picchetti e la fila di camion che non entra. Trattare significa cedere qualcosa; non trattare significa un\'altra settimana così.',ch:[
+   {l:'Si tratta, e si firma qualcosa',e:'I cancelli riaprono lunedì · e si mette in fila chi chiederà lo stesso',f:()=>{gd('lavoratori',8); gd('imprenditori',-6); gd('cetomedio',-3); repd(-3);}},
+   {l:'Non si tratta sotto ricatto',e:'Il principio è salvo · e la settimana pure, identica a quella prima',f:()=>{gd('imprenditori',6); gd('cetomedio',3); gd('lavoratori',-10); stampad(-3);}}]},
+ {id:'uk70_mercato', era:'uk1970', cond:()=>S.year>=1973, kick:'Europa', t:'Il mercato comune',
+  text:'Le regole arrivano da Bruxelles, il pesce e i formaggi cambiano nome, e gli agricoltori scoprono un sistema di prezzi che nessuno capisce fino in fondo. Chi esporta ringrazia.',ch:[
+   {l:'Si applica tutto, e in fretta',e:'Nessuna infrazione · e una montagna di moduli nuovi',f:()=>{gd('imprenditori',7); gd('cetomedio',3); gd('lavoratori',-4); gd('pensionati',-5);}},
+   {l:'Si chiedono deroghe su tutto',e:'Il paese difende le sue abitudini · e a Bruxelles se lo segnano',f:()=>{gd('pensionati',6); gd('lavoratori',3); gd('imprenditori',-6); repd(-3);}}]},
+ {id:'uk70_petrolio', era:'uk1970', cond:()=>S.year>=1975, tono:'florido', kick:'Economia', t:'Il petrolio del Mare del Nord',
+  text:'Dalle piattaforme in mezzo al mare comincia ad arrivare il greggio: manna per i conti pubblici, e una domanda nuova — di chi è, di Londra o di Edimburgo?',ch:[
+   {l:'Il gettito va al bilancio nazionale',e:'I conti respirano · e in Scozia contano i barili che partono',f:()=>{S.ind.debt-=2; gd('cetomedio',5); gd('imprenditori',4); gd('lavoratori',3);}},
+   {l:'Una quota resta dov\'è il petrolio',e:'La Scozia si sente vista · e ogni altra regione prepara la sua richiesta',f:()=>{S.ind.debt-=0.8; gd('lavoratori',4); gd('cetomedio',-3); repd(-3);}}]},
+ {id:'uk70_parita', era:'uk1970', cond:()=>S.year>=1970, kick:'Lavoro', t:'La parità in busta paga',
+  text:'La legge dice che a lavoro uguale spetta paga uguale. Le fabbriche scoprono in fretta che i lavori si possono chiamare in modi diversi.',ch:[
+   {l:'Ispezioni vere, e sanzioni',e:'La legge morde · e le imprese parlano di costi insostenibili',f:()=>{gd('lavoratori',9); gd('giovani',6); gd('imprenditori',-9);}},
+   {l:'Si lascia tempo alle aziende',e:'Nessuno scontro · e le mansioni cambiano nome invece che paga',f:()=>{gd('imprenditori',5); gd('lavoratori',-6); gd('giovani',-5); stampad(-3);}}]},
+ {id:'uk70_devoluzione', era:'uk1970', cond:()=>S.year>=1976&&S.year<=1979, kick:'Il paese', t:'La devoluzione',
+  text:'Scozia e Galles chiedono un\'assemblea propria. Concederla vuol dire aprire una porta che non si richiude; negarla vuol dire regalare voti a chi la chiede.',ch:[
+   {l:'Si porta in aula, con un referendum',e:'La domanda torna a chi la fa · e il calendario del governo salta',f:()=>{gd('giovani',6); gd('lavoratori',3); gd('pensionati',-6); repd(-4);}},
+   {l:'Se ne riparla più avanti',e:'Nessuna porta aperta · e i nazionalisti hanno il loro argomento per anni',f:()=>{gd('pensionati',5); gd('cetomedio',3); gd('giovani',-6); stampad(-3);}}]},
+ {id:'uk70_emergenza', era:'uk1970', cond:()=>S.year>=1974, tono:'grave', kick:'Il paese', t:'Le leggi d\'emergenza',
+  text:'Fermi prolungati, poteri speciali, controlli nei porti e nelle stazioni: si difende il paese e si comprime qualcosa. Chi le vota giura che sono temporanee.',ch:[
+   {l:'Si votano, con una scadenza scritta dentro',e:'Il paese si sente protetto · e la scadenza andrà rinnovata',f:()=>{gd('pensionati',7); gd('cetomedio',5); gd('giovani',-7); repd(3);}},
+   {l:'Si fa con gli strumenti che già esistono',e:'Nessun potere nuovo · e il prossimo fatto di cronaca sarà una colpa tua',f:()=>{gd('giovani',5); gd('lavoratori',3); gd('pensionati',-7); gd('cetomedio',-4);}}]},
+ {id:'uk70_fabbrica', era:'uk1970', cond:()=>S.year>=1975, kick:'Industria', t:'La fabbrica di Stato',
+  text:'Salvare l\'azienda che chiude significa comprarla: lo Stato entra nell\'automobile e nell\'acciaio, e scopre quanto costa fare l\'industriale.',ch:[
+   {l:'Si compra, e i cancelli restano aperti',e:'Nessun licenziamento oggi · e un conto che torna ogni anno',costo:{debito:2},f:()=>{S.ind.debt+=2; gd('lavoratori',11); gd('cetomedio',-4); gd('imprenditori',-6);}},
+   {l:'Si lascia decidere al mercato',e:'Conti in ordine · e una città che perde il suo unico mestiere',f:()=>{gd('imprenditori',6); gd('cetomedio',4); gd('lavoratori',-13); stampad(-4);}}]},
+ {id:'uk70_inverno', era:'uk1970', cond:()=>S.year>=1978&&S.year<=1979, tono:'grave', kick:'Il paese', t:'L\'inverno degli scioperi',
+  text:'Netturbini, autisti, becchini: gli scioperi arrivano nei servizi che si notano il primo giorno. Le immagini di quest\'inverno decideranno le elezioni, e lo sanno tutti.',ch:[
+   {l:'Si cede sui salari e si chiude la vertenza',e:'Le strade tornano pulite · e il tetto ai salari è carta straccia',f:()=>{ if(S.gMod!=null)S.gMod-=0.3; gd('lavoratori',9); gd('cetomedio',-7); gd('pensionati',-5); repd(-5);}},
+   {l:'Si tiene la linea fino in fondo',e:'Il principio regge · e le fotografie di quest\'inverno restano',f:()=>{gd('imprenditori',6); gd('lavoratori',-12); gd('cetomedio',-6); gd('pensionati',-6); stampad(-6);}}]},
  {id:'uk_autostrada', era:'uk1950', cond:()=>S.year>=1958, tono:'florido', kick:'Il paese', t:'La prima autostrada',
   text:'Il primo tratto di autostrada apre senza limite di velocità e con le auto che si fermano a bordo strada per guardare. Il paese scopre che si può attraversare in un giorno.',ch:[
    {l:'Un piano decennale: la rete si fa tutta',e:'Il paese si accorcia · il conto è di quelli lunghi',costo:{debito:1.5},f:()=>{S.ind.debt+=1.5; if(S.gMod!=null)S.gMod+=0.2; gd('imprenditori',5); gd('cetomedio',3); gd('lavoratori',2);}},
@@ -6365,6 +6527,26 @@ const TITOLI=[
  {id:'ti_uk60_luna', era:'uk1960', pri:1, cond:()=>S.year===1969&&S.month>=7&&S.month<=8, amico:'Un uomo sulla Luna', ostile:'Un uomo sulla Luna, e quaggiù la sterlina'},
  {id:'ti_uk60_decimale', era:'uk1960', cond:()=>S.year>=1966, amico:'Cento penny per una sterlina', ostile:'Cento penny per una sterlina: e i conti da rifare'},
  {id:'ti_uk60_liverpool', era:'uk1960', cond:()=>S.year>=1963, amico:'I quattro di Liverpool riempiono i teatri', ostile:'I quattro di Liverpool: i giornali contano i biglietti'},
+ /* ---- L58-1bis · i 16 titoli del decennio inglese '70 (scheda PRESET-UK-1970 §F) ---- */
+ {id:'ti_uk70_decimale', era:'uk1970', cond:()=>S.year>=1971, amico:'Cento penny per una sterlina, da lunedì', ostile:'Cento penny per una sterlina: e i conti da rifare a mano'},
+ {id:'ti_uk70_mercato', era:'uk1970', pri:1, cond:()=>S.europa70==='dentro'||S.europa70==='confermato', amico:'Dentro il mercato comune', ostile:'Dentro il mercato comune: e il partito diviso in due'},
+ {id:'ti_uk70_tregiorni', era:'uk1970', pri:1, cond:()=>S.year===1974&&S.month<=6, amico:'Il paese a tre giorni: si tiene botta', ostile:'Il paese a tre giorni'},
+ {id:'ti_uk70_chicomanda', era:'uk1970', pri:1, cond:()=>S.minatori==='alvoto'||S.minatori==='alvoto_tardi', amico:'Chi comanda in questo paese?', ostile:'Chi comanda in questo paese? Bella domanda'},
+ /* ⚠ L59-1: il modello-collegi non sa produrre un parlamento appeso, quindi oggi questo titolo
+    non esce quasi mai. Resta scritto perché la meccanica esiste (`S.minoranza`) e perché il giorno
+    in cui la forma dei seggi cambia, il titolo dev'esserci già. */
+ {id:'ti_uk70_appeso', era:'uk1970', pri:1, cond:()=>S.minoranza===true, amico:'Nessuno ha vinto: parlamento appeso', ostile:'Nessuno ha vinto: e adesso si governa a giorni'},
+ {id:'ti_uk70_referendum', era:'uk1970', pri:1, cond:()=>S.europa70==='confermato', amico:'Il paese conferma l\'Europa', ostile:'Il paese conferma l\'Europa: la questione riaprirà'},
+ {id:'ti_uk70_prezzi', era:'uk1970', cond:()=>S.year>=1973, amico:'I prezzi corrono, le paghe inseguono', ostile:'I prezzi corrono, le paghe no'},
+ {id:'ti_uk70_fmi', era:'uk1970', pri:1, cond:()=>S.fmi!=null||(S.year>=1976&&S.month>=12), amico:'Allo sportello del Fondo Monetario: i conti si rimettono in piedi', ostile:'Allo sportello del Fondo Monetario'},
+ {id:'ti_uk70_greggio', era:'uk1970', cond:()=>S.year>=1975, amico:'Il greggio del Mare del Nord', ostile:'Il greggio del Mare del Nord: e già si litiga su di chi è'},
+ {id:'ti_uk70_accordo', era:'uk1970', pri:1, cond:()=>!!S.sostegno, amico:'L\'accordo che tiene in piedi il governo', ostile:'L\'accordo che tiene in piedi il governo: e a che prezzo'},
+ {id:'ti_uk70_giubileo', era:'uk1970', pri:1, cond:()=>S.year===1977, amico:'Bandierine per il Giubileo', ostile:'Bandierine per il Giubileo, e i conti la settimana dopo'},
+ {id:'ti_uk70_punk', era:'uk1970', cond:()=>S.year>=1976, amico:'Niente futuro, dicono i ragazzi', ostile:'Niente futuro, dicono i ragazzi: e qualcuno dovrà rispondergli'},
+ {id:'ti_uk70_rifiuti', era:'uk1970', pri:1, cond:()=>S.year>=1978&&S.year<=1979, amico:'I rifiuti nelle strade: la vertenza si chiude', ostile:'I rifiuti nelle strade'},
+ {id:'ti_uk70_assemblee', era:'uk1970', cond:()=>S.year>=1976, amico:'Assemblee rimandate: se ne riparla a mente fredda', ostile:'Assemblee rimandate'},
+ {id:'ti_uk70_derry', era:'uk1970', pri:1, cond:()=>S.year===1972&&S.month<=4, amico:'Tredici morti a Derry: il governo promette un\'inchiesta', ostile:'Tredici morti a Derry'},
+ {id:'ti_uk70_donna', era:'uk1970', pri:1, cond:()=>S.year>=1979&&(S.year>1979||S.month>=5), amico:'Downing Street, per la prima volta una donna', ostile:'Downing Street, per la prima volta una donna: e un\'idea nuova di economia'},
  {id:'ti_uk50_tessere', era:'uk1950', cond:()=>S.year<=1954, amico:'Le ultime tessere bruciate: la normalità torna a pezzi', ostile:'Ancora in coda per la carne: la normalità si fa attendere'},
  {id:'ti_uk50_incoronazione', era:'uk1950', pri:1, cond:()=>S.year===1953&&S.month>=5&&S.month<=7, amico:'L\'Incoronazione in ogni salotto', ostile:'L\'Incoronazione in ogni salotto, il conto in ogni bilancio'},
  {id:'ti_uk50_everest', era:'uk1950', pri:1, cond:()=>S.year===1953, amico:'L\'Everest è nostro', ostile:'L\'Everest è nostro: e quaggiù?'},
