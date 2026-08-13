@@ -130,7 +130,7 @@ function initStatoBase(){
     ind:{growth:0.8, debt:135, unemp:7.8, deficit:3.0, sanita:62, sicurezza:58, ambiente:50, consenso:50, fiducia:75, reputazione:60, stampa:55},
     groups:Object.assign({},GSTART),
     pol:{fisco:1,pensioni:1,sanita:1,investimenti:1,istruzione:1,lavoro:1,welfare:1,imprese:1,sicurezza:1,ambiente:1,immigrazione:1,difesa:1,linea_estera:1,cooperazione:1,commercio:1,industria_difesa:1,territorio:1,personale_san:1,universita:1,diritto_studio:1,trasporti:1,manutenzione:1},
-    ministers:[], snap:null, gMod:0, uMod:0, lastEvent:null, recentDoss:[], recentEvent:[], recentInt:[], recentProp:[], recentBudget:[], recentScandalo:[], recentConflitto:[], pendingRimpasto:[], fidLivello:0, fidUltimo:{}, mesiSottoCrisi:0, opposizione:false, governoAvversario:null, recentOpp:[], mesiAlGoverno:0, ciclo:0, ministeroAperto:null, potereLocale:null, bloccoAtteso:null, campagnaMod:0, campagnaFaccia:false, territori:null, confUltimo:null, lastConfQ:null, puntoUltimo:null, recentPunto:[], ultimaLegge:null, titoloMese:null, lastTitolo:null, mossaUltima:null, promessa:null, correnti:null, sfida:null, mossaPartito:null, primariaUltima:null, esposizione:12, inchiesta:null, inchiestaUltima:null, inchiestaRoll:null, archi:[], archiRoll:null, archiUltimoStart:null, recentArchi:[], archiCooldown:{}, famiglia:null, integrita:90, convalescenza:null, recentPers:[], persUltimo:null,
+    ministers:[], snap:null, gMod:0, uMod:0, lastEvent:null, recentDoss:[], recentEvent:[], recentInt:[], recentProp:[], recentBudget:[], recentScandalo:[], recentConflitto:[], pendingRimpasto:[], fidLivello:0, fidUltimo:{}, mesiSottoCrisi:0, opposizione:false, governoAvversario:null, mesiAlGoverno:0, ciclo:0, ministeroAperto:null, potereLocale:null, bloccoAtteso:null, campagnaMod:0, campagnaFaccia:false, territori:null, confUltimo:null, lastConfQ:null, puntoUltimo:null, recentPunto:[], ultimaLegge:null, titoloMese:null, lastTitolo:null, mossaUltima:null, promessa:null, correnti:null, sfida:null, mossaPartito:null, primariaUltima:null, esposizione:12, inchiesta:null, inchiestaUltima:null, inchiestaRoll:null, archi:[], archiRoll:null, archiUltimoStart:null, recentArchi:[], archiCooldown:{}, famiglia:null, integrita:90, convalescenza:null, recentPers:[], persUltimo:null,
     livello:3, premier:null, dicastero:null, capitale:0, premMossaUltimo:null, ministroUltimo:null, recentMinistro:[], silAvviso:null, premCrisiMesi:0, occUltima:null, mesiAltoCap:0,   // livello d'avvio (3=capo del governo, 2=ministro sotto premier-AI)
     relInt:{},   // relazioni internazionali per-ente (lotto internazionale fase A): standing 0-100, seed = reputazione iniziale
     recentTit:[], recentPot:[], recentConflInt:[], diplo:null, recentDiplo:[],   // paesi reali (Fetta A/B) + percorso diplomatico (C2): diplo = stato del diplomatico, recentDiplo = finestra missioni
@@ -170,7 +170,8 @@ function initStatoBase(){
   S.debtAncora = (_SC && _SC.debtAncora!=null) ? _SC.debtAncora : 135;
   S.logorioEra = (_SC && _SC.logorioEra!=null) ? _SC.logorioEra : null;
   S.sfideUltimo = S.year*12 + S.month;   // D1a — sfide (quiz): la prima non prima di ~5 mesi dall'avvio (dato puro, round-trip)
-  S.campNaz=null; S.campNazUltimo=null; S.promesseCampagna=[];   // Cantiere C — campagna nazionale (dati puri, round-trip)
+  S.campNaz=null; S.campNazUltimo=null; S.promesseCampagna=[];
+   // Cantiere C — campagna nazionale (dati puri, round-trip)
   S.riallineamenti={};   // AVANZAMENTO — registro one-shot delle tappe-partiti già scattate (dato puro, round-trip; separato da truffaFatta)
   S.tappaSeggiEsito={};  // L61-2 - registro per-tappa dei seggi dichiarati: applicata | saltata (dato puro, round-trip)
   S.tappaForzaPrec=null;   // L61-4 - forza del partito del giocatore all ultima tappa: e il riferimento della traiettoria (dato puro)
@@ -5019,19 +5020,53 @@ function applyOppEffect(spec){
   const LM=lineaMediaMod();   // la linea modula SOLO la resa vis/cred della mossa (gov/base/centro restano: la linea li tocca nel tempo, via aV/aC)
   if(spec.vis)  S.visibilita=clamp((S.visibilita||0)+spec.vis*(spec.vis>0?LM.vp:LM.vm),0,100);
   if(spec.cred) credMuovi(spec.cred*(spec.cred>0?LM.cp:LM.cm));   // L26-1: la linea-media modula PRIMA, il soft-cap attenua DOPO (un solo punto di passaggio)
+  /* ================================================================================================================
+     L65-1 · QUATTRO CHIAVI IN PIÙ, e la ragione è una correzione a una mia ricognizione sbagliata.
+     In L63-1 avevo risposto «le valute reggono»: avevo verificato che `stampad`, `gd`, `corrented` e
+     `campPromessa` **esistono** e che l'opposizione ne muove alcune — ma quella riga (la Sfida) passa da
+     un'altra strada. **I dossier d'opposizione passano di qui, e qui c'erano solo cinque chiavi**: le 40 carte
+     esistenti usano infatti soltanto `cred/vis/base/centro/gov`. Le carte di L65-1 chiedono stampa, gruppi
+     nominati, una corrente sola e le promesse: senza queste righe sarebbero state **no-op silenziosi**, cioè
+     il difetto peggiore — un effetto scritto che non succede.
+     Le quattro chiavi non inventano niente: **chiamano verbi che esistono già**, dichiarativi come le altre.
+     ⚠ `stampa` NON è amplificata da `aV`/`aC`: il rapporto con la stampa non dipende da quanto sei visibile.
+     ⚠ E `territorio` NON c'è, di proposito: `S.potereLocale` è **derivato e convergente** (si riallinea alla
+     quota dei territori), quindi un `±` diretto sarebbe sovrascritto al ricalcolo — il paletto di sempre. Nelle
+     carte il «territorio» si rende con i gruppi che lo abitano, ed è dichiarato nella scheda del lotto.
+     ================================================================================================================ */
+  if(spec.stampa && typeof stampad==='function') stampad(spec.stampa);
+  if(spec.gruppi) for(const g in spec.gruppi) gd(g, spec.gruppi[g]*aV);
+  if(spec.corrente && typeof corrented==='function') for(const c in spec.corrente) corrented(c, spec.corrente[c]);
+  if(spec.correnti && typeof tutteCorrenti==='function') tutteCorrenti(spec.correnti);
+  /* la promessa: `campPromessa` la registra su `S.promesseCampagna`, che sopravvive all'elezione per progetto.
+     ⚑ E `gd` conta i colpi contro un gruppo promesso **solo fuori dall'opposizione**: una promessa fatta qui
+     resta intatta finché non governi. È esattamente il pezzo che questo lotto accende. */
+  if(spec.promessa && typeof campPromessa==='function') campPromessa(spec.promessa);
 }
 /* Carta d'opposizione del mese: cornice + le 3 azioni SPECIFICHE della carta (spec→closure). */
 function pickOpposizione(){
-  S.recentOpp=S.recentOpp||[];
   const ok=i=>(!OPPOSIZIONE_EV[i].cond || OPPOSIZIONE_EV[i].cond()) && (typeof eraVivaT!=='function'||eraVivaT(OPPOSIZIONE_EV[i]));   // FIX: era-gate anche il percorso opposizione (default eraVivaT: l'opposizione è senza-tempo; i moderni TV → contemporanea). Prima nel '50 usciva «il duello in TV»
-  let pool=OPPOSIZIONE_EV.map((e,i)=>i).filter(i=>ok(i)&&!S.recentOpp.includes(i));
-  if(!pool.length) pool=OPPOSIZIONE_EV.map((e,i)=>i).filter(ok);   // tutte recenti → ignora la finestra (ma rispetta la cond)
-  if(!pool.length) return null;
-  const idx=rnd(pool); S.recentOpp.push(idx); if(S.recentOpp.length>17) S.recentOpp.shift();   // D2: finestra 5→17 (pool 28+): una carta non torna prima di 18 pescate ⇒ max 2× in 36 mesi, garantito
-  const ev=OPPOSIZIONE_EV[idx];
+  /* ================================================================================================================
+     L66-1 · IL SACCHETTO, RIPRISTINATO. Non è una scelta di design: `CLAUDE.md` dice da sempre che **`pescaBag()`
+     è l'unico punto di pescaggio anti-ripetizione**, e questa funzione lo aggirava — `rnd` più una finestra di 17.
+     Il prezzo era misurabile e misurato: **33% di ripetizione all'opposizione contro il 18% del governo**, cioè
+     l'unico numero che separava davvero i due rami e l'unico che corrisponde a «sempre le stesse».
+     `pescaBag` pesca **senza rimpiazzo**: dentro un ciclo una carta non torna, e il hold-back dei suoi ultimi K
+     impedisce la ripetizione a cavallo fra due cicli. Non serve più né la finestra né la rotazione per delega di
+     L65-1b: il sacchetto garantisce da solo che tutte le aree escano, perché esaurisce il mazzo prima di rimescolare.
+     ⚠ E richiede un'IDENTITÀ: `pescaBag` lavora sugli `id`. **Trentacinque carte su 63 non ne avevano uno** — è la
+     stessa mancanza che aveva reso cieca la sonda di L63-1, e adesso ce l'hanno tutte (`opp_*`, esplicite e stabili).
+     ================================================================================================================ */
+  const cand=OPPOSIZIONE_EV.filter((e,i)=>ok(i));
+  if(!cand.length) return null;
+  const ev=pescaBag('opposizione', cand);
+  if(!ev) return null;
   /* porta pleases/rischio/trasparenza attraverso la map → il ramo `dossier` di resolveItem alimenta
      biografia/tratti/integrità/esposizione come per gli altri livelli (prima l'opposizione era muta). */
-  return { kick:ev.kick, t:ev.t, text:ev.text, ch: ev.ch.map(function(c){ return { l:c.l, e:c.e, pleases:c.pleases, rischio:c.rischio, trasparenza:c.trasparenza, f:function(){ applyOppEffect(c); } }; }) };
+  /* L66-1 — **l'`id` viene passato alla carta.** Prima si perdeva qui dentro: la carta arrivava in agenda senza
+     identità, quindi non era tracciabile né misurabile — ed è precisamente ciò che ha reso cieca la sonda di
+     L63-1, che contava per `id` e non vedeva l'intero pool d'opposizione. Una riga, e il ramo torna osservabile. */
+  return { id:ev.id, delega:ev.delega, kick:ev.kick, t:ev.t, text:ev.text, ch: ev.ch.map(function(c){ return { l:c.l, e:c.e, pleases:c.pleases, rischio:c.rischio, trasparenza:c.trasparenza, f:function(){ applyOppEffect(c); } }; }) };
 }
 /* ===== L25-2 + L25-3 — LE FAMIGLIE D'OPPOSIZIONE E IL LORO ARBITRO =====
    Due famiglie (α2 «ai fianchi sui media», α3 «allargare la base») con un innesco DEDICATO: dentro
@@ -5234,7 +5269,8 @@ function applySnap(snap){
   if(S.truffaFatta===undefined){ S.truffaFatta=false; S.truffaEsito=null; }   // Build B 1b — snodo one-shot: default per i salvataggi pre-1b
   if(S.riallineamenti===undefined) S.riallineamenti={};   // AVANZAMENTO — migrazione: i salvataggi pre-lotto ricevono il registro-tappe vuoto
   if(S.tappaSeggiEsito===undefined) S.tappaSeggiEsito={};   // L61-2 - migrazione: i salvataggi precedenti ricevono il registro vuoto
-  if(S.tappaForzaPrec===undefined) S.tappaForzaPrec=null;   // L61-4 - migrazione
+  if(S.tappaForzaPrec===undefined) S.tappaForzaPrec=null;
+   // L61-4 - migrazione
   if(S.apertura===undefined){ S.apertura=null; S.aperturaEsito=null; S.enel=null; }   // AVANZAMENTO Lotto 4 — migrazione snodi '60
   if(S.austerity===undefined){ S.austerity=null; S.divorzio=null; S.solidarieta=null; }   // L28-3 — migrazione snodi '70
   if(S.divorzioBdi===undefined){ S.divorzioBdi=null; S.scalaMobile=null; S.nucleare=null; }   // L33-1 — migrazione snodi '80
@@ -5418,7 +5454,8 @@ function aggiungiCarriera(reason){ if(!S) return; const p=getProfilo();
 setCountry('italia');
 decorateCountrySelector();   // bandiere nei bottoni del selettore paese
 if(typeof initI18n==='function'){ initI18n(); applyStaticI18n(); }   // i18n: cattura le sorgenti italiane [data-i18n] e applica la lingua corrente (it di default → nessun cambiamento)
-if(typeof renderScenarioSeg==='function'){ try{ renderScenarioSeg(); }catch(e){} }   // L57-1 — la striscia-scenari si genera da SCENARI: va riempita una volta al boot
+/* L62-1 — la striscia-scenari non esiste più nel setup (una strada sola per le porte storiche): la chiamata
+   al boot che la riempiva è stata tolta con lei. Le porte si generano ora solo nella pagina storica. */
 try{ const _he=document.getElementById('home-emblema'); if(_he && typeof EMBLEMA_IMG!=='undefined') _he.src=EMBLEMA_IMG; }catch(e){}   // identità home: emblema raster inline (lotto 3)
 renderStartPersistence();    // "Continua la carriera" (se c'è autosave), nome giocatore, "Le tue carriere"
 /* menu schede sempre visibile: le tab stanno nell'header sticky; allo scroll i 4 indicatori .keys si ritirano */

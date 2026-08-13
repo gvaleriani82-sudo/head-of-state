@@ -82,6 +82,10 @@
 
       <!-- SEZIONE 1 — LA PARTITA (paese/partito/difficoltà/ruolo, spostati dalla home; stessi id e onclick) -->
       <div data-i18n style="font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--brand);margin:22px 0 4px;font-weight:600;">La partita</div>
+      <!-- L62-1 — LA PORTA SCELTA, quando si arriva dalla pagina storica: un'ETICHETTA, non un selettore.
+           Riempita da `renderPortaSetup()`; vuota quando si gioca il presente. -->
+      <div id="porta-fissa"></div>
+      <div id="blocco-paese">
       <div data-i18n style="font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--mut);margin:14px 0 7px;">Paese</div>
       <div class="seg" id="country-seg" style="max-width:360px;margin:0 auto;">
         <button data-c="italia" class="on" onclick="setCountry('italia')">Italia</button>
@@ -101,13 +105,14 @@
         <button data-c="messico" onclick="setCountry('messico')">Messico</button>
         <button data-c="nigeria" onclick="setCountry('nigeria')">Nigeria</button>
       </div>
-      <!-- Build B — scenario d'epoca: 'presente' (default) o un preset storico. Cambia partiti/economia/eventi dell'epoca. -->
-      <div data-i18n style="font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--mut);margin:16px 0 7px;">Scenario</div>
-      <!-- L57-1 — LA STRISCIA È GENERATA DA `SCENARI` (`renderScenarioSeg`), non più scritta a mano.
-           Il motivo è un difetto vero: `uk1960`, aggiunto in L55-1, esisteva nei dati e **non aveva un
-           bottone qui** — la nona porta era irraggiungibile dall'interfaccia, e nessuna guardia poteva
-           vederlo perché il markup non si esegue. Generandola, una porta nuova compare da sola. -->
-      <div class="seg" id="scenario-seg" style="max-width:360px;margin:0 auto;"></div>
+      </div><!-- /blocco-paese -->
+      <!-- L62-1 · LA STRISCIA-SCENARIO È STATA TOLTA DA QUI, ed è il punto della voce.
+           Dal playtest di Giacomo: da «Gioca oggi» si sceglieva il paese e ci si ritrovava le porte storiche
+           nella stessa pagina — **due strade per la stessa stanza**. Ora la strada è una sola: «Gioca oggi»
+           porta al presente e basta; le porte storiche si raggiungono SOLO dalla pagina a due passi
+           (paese → linea del tempo), e chi entra da lì trova qui sopra un'ETICHETTA con la porta scelta.
+           ⚠ Il difetto che L57-1 aveva scoperto NON torna: la pagina storica genera le porte da `SCENARI`
+           (`portePaese`), quindi una porta nuova continua a comparire da sola. La misura lo verifica contando. -->
       <div data-i18n style="font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--mut);margin:16px 0 7px;">Il tuo partito</div>
       <div class="cands" id="party-list" style="max-width:360px;margin:0 auto;"></div>
       <div data-i18n style="font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--mut);margin:18px 0 7px;">Difficoltà</div>

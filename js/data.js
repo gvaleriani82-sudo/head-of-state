@@ -5652,6 +5652,128 @@ const SFIDE=[
  {id:'i60_mediaunica_avviamento', era:'italia1960', codaFino:Infinity, paese:'italia', ruolo:'locale', diff:'difficile', cond:()=>S.year>=1962, q:'Quale doppio canale abolì la scuola media unica del 1962?',
   op:['Scuola pubblica e privata','La separazione, a 11 anni, tra scuola media e avviamento al lavoro','Scuole del Nord e del Sud'], giusta:1,
   perche:'La riforma unificò la scuola dell\'obbligo fino a 14 anni.'},   // fonte: L. 1859/1962 scuola media unica → ancora ≥1962
+ /* ============================================================================================================
+    L62-2 · LE 36 DOMANDE D'EPOCA (scheda `SFIDE-NUOVE.md`), dal playtest: «troppo facili e ripetitive».
+    ⚑ LA DIAGNOSI HA CORRETTO LA PREMESSA DELLA CONSEGNA, e vale scritta qui perché spiega le scelte sotto.
+    La consegna temeva che 36 domande nuove si «diluissero fra le 150 generiche». **Le 150 non sono vive**:
+    il gate-paese ne taglia 109, e una porta inglese pescava da **21** domande in tutto, zero d'epoca. Quindi
+    sei domande per decennio non diluiscono niente: portano il pool a 27 e le d'epoca dal **0% al 22%**.
+    ⚠ E «zero per italia1970/'80/'90» era vero solo per l'etichetta: **7 domande taggate `italia1960`
+    sopravvivono nel '70** con la loro coda. Quei decenni erano magri, non vuoti.
+    DUE ACCORTEZZE DI SCRITTURA, non richieste ma necessarie:
+    · **la risposta giusta non sta sempre in prima posizione** (la scheda le elenca in grassetto per prime:
+      copiarle in quell'ordine avrebbe reso ogni domanda indovinabile senza saperne nulla);
+    · **`cond` sull'anno dove la domanda cita una data**: senza, nel 1970 si chiederebbe del referendum del
+      1974. `codaFino:Infinity` come tutta la banca — una domanda di storia resta valida dopo il suo decennio.
+    ============================================================================================================ */
+ {id:'i70_divorzio', era:'italia1970', codaFino:Infinity, paese:'italia', ruolo:'governo', diff:'difficile', cond:()=>S.year>=1974, q:'Che cosa stabiliva la legge sul divorzio del 1970, confermata dal referendum del 1974?',
+  op:['Che il matrimonio religioso perdeva valore civile','Che il vincolo matrimoniale poteva essere sciolto per legge','Che la separazione bastava a sciogliere il matrimonio'], giusta:1,
+  perche:'Il referendum del 1974 chiedeva di abrogarla: vinse il No, e la legge restò.'},
+ {id:'i70_scalamobile', era:'italia1970', codaFino:Infinity, paese:'italia', ruolo:'governo', diff:'difficile', q:'Che cos\'era la «scala mobile»?',
+  op:['Un meccanismo che adeguava i salari all\'aumento dei prezzi','Una tassa progressiva sui redditi alti','Un sistema di avanzamento automatico di carriera'], giusta:0,
+  perche:'Adeguava le retribuzioni all\'inflazione: negli anni \'70 protesse i salari e alimentò la spirale prezzi-salari.'},
+ {id:'i70_domeniche', era:'italia1970', codaFino:Infinity, paese:'italia', ruolo:'governo', diff:'media', cond:()=>S.year>=1974, q:'Che cosa furono le «domeniche a piedi» del 1973-74?',
+  op:['Uno sciopero dei benzinai','Una manifestazione ecologista','Il divieto di circolare in auto per risparmiare carburante'], giusta:2,
+  perche:'Conseguenza dello shock petrolifero: austerità energetica per decreto.'},
+ {id:'i70_statuto', era:'italia1970', codaFino:Infinity, paese:'italia', ruolo:'governo', diff:'difficile', q:'Che cosa introdusse lo Statuto dei lavoratori del 1970?',
+  op:['Il salario minimo nazionale','Tutele sindacali e limiti ai licenziamenti nei luoghi di lavoro','La settimana di 35 ore'], giusta:1,
+  perche:'Legge 300/1970: diritti sindacali in fabbrica e il reintegro in caso di licenziamento illegittimo.'},
+ {id:'i70_tributaria', era:'italia1970', codaFino:Infinity, paese:'italia', ruolo:'governo', diff:'difficile', cond:()=>S.year>=1974, q:'Che cosa cambiò con la riforma tributaria del 1973-74?',
+  op:['Arrivarono l\'IVA e l\'imposta progressiva sul reddito','L\'imposta patrimoniale','L\'abolizione delle imposte locali'], giusta:0,
+  perche:'IRPEF e IVA sostituirono un sistema di imposte frammentato.'},
+ {id:'i70_regioni', era:'italia1970', codaFino:Infinity, paese:'italia', ruolo:'governo', diff:'media', cond:()=>S.year>=1976, q:'Perché nel 1976 le regioni videro crescere i propri poteri?',
+  op:['Furono istituite le regioni','Fu abolita la provincia','Furono trasferite funzioni dallo Stato alle regioni a statuto ordinario'], giusta:2,
+  perche:'Le regioni ordinarie esistevano dal 1970; a metà decennio ricevettero le deleghe vere.'},
+ {id:'i80_divorzio_bi', era:'italia1980', codaFino:Infinity, paese:'italia', ruolo:'governo', diff:'difficile', cond:()=>S.year>=1981, q:'Che cos\'era il «divorzio» fra Tesoro e Banca d\'Italia del 1981?',
+  op:['Il Tesoro perse il controllo del cambio','La banca centrale smise di comprare i titoli invenduti all\'asta','La banca centrale fu privatizzata'], giusta:1,
+  perche:'Da allora il debito pubblico dovette trovare compratori sul mercato: i tassi salirono.'},
+ {id:'i80_sanvalentino', era:'italia1980', codaFino:Infinity, paese:'italia', ruolo:'governo', diff:'difficile', cond:()=>S.year>=1985, q:'Che cosa stabilì l\'accordo di San Valentino del 1984?',
+  op:['Il taglio di alcuni punti di scala mobile','L\'aumento generalizzato dei salari','La settimana corta'], giusta:0,
+  perche:'Fu poi confermato dal referendum del 1985, che respinse l\'abrogazione.'},
+ {id:'i80_sme', era:'italia1980', codaFino:Infinity, paese:'italia', ruolo:'governo', diff:'media', q:'Che cos\'era il Sistema Monetario Europeo, a cui l\'Italia aderì nel 1979?',
+  op:['Una moneta unica anticipata','Un fondo di aiuti ai paesi deboli','Un accordo che teneva i cambi entro bande di oscillazione'], giusta:2,
+  perche:'La lira vi partecipò con una banda più larga delle altre valute.'},
+ {id:'i80_decreto', era:'italia1980', codaFino:Infinity, paese:'italia', ruolo:'governo', diff:'difficile', cond:()=>S.year>=1985, q:'Che cosa fu il «decreto di San Valentino» dal punto di vista costituzionale?',
+  op:['Una legge costituzionale','Un decreto legge poi convertito, impugnato con referendum abrogativo','Un atto amministrativo'], giusta:1,
+  perche:'Il percorso decreto → conversione → referendum è la storia istituzionale di quel taglio.'},
+ {id:'i80_tv', era:'italia1980', codaFino:Infinity, paese:'italia', ruolo:'governo', diff:'media', cond:()=>S.year>=1985, q:'Che cosa cambiò per la televisione italiana negli anni \'80?',
+  op:['Le emittenti private nazionali furono legittimate e regolate','La RAI fu privatizzata','La pubblicità fu vietata sulla RAI'], giusta:0,
+  perche:'Dal vuoto normativo si passò a una disciplina del sistema misto.'},
+ {id:'i80_primario', era:'italia1980', codaFino:Infinity, paese:'universale', ruolo:'governo', diff:'difficile', q:'Che cos\'è il «disavanzo primario»?',
+  op:['Il debito complessivo dello Stato','Il deficit della bilancia commerciale','La differenza fra entrate e spese al netto degli interessi sul debito'], giusta:2,
+  perche:'Distinguere primario e totale è la chiave per capire il debito degli anni \'80.'},
+ {id:'i90_mattarellum', era:'italia1990', codaFino:Infinity, paese:'italia', ruolo:'governo', diff:'difficile', cond:()=>S.year>=1993, q:'Che cosa prevedeva la legge elettorale del 1993, il cosiddetto Mattarellum?',
+  op:['Il proporzionale puro con premio','Tre quarti dei seggi in collegi uninominali, un quarto proporzionale','Il doppio turno di collegio'], giusta:1,
+  perche:'Nacque dal referendum del 1993 e resse le elezioni del 1994, 1996 e 2001.'},
+ {id:'i90_prelievo', era:'italia1990', codaFino:Infinity, paese:'italia', ruolo:'governo', diff:'difficile', cond:()=>S.year>=1992, q:'Che cos\'era il «prelievo» notturno del luglio 1992?',
+  op:['Un\'imposta straordinaria sui conti correnti','Un aumento dell\'IVA','Il blocco dei prelievi bancari'], giusta:0,
+  perche:'Sei per mille sui depositi, deciso in una notte per fermare la crisi della lira.'},
+ {id:'i90_lira92', era:'italia1990', codaFino:Infinity, paese:'italia', ruolo:'governo', diff:'media', cond:()=>S.year>=1992, q:'Che cosa accadde alla lira nel settembre 1992?',
+  op:['Fu agganciata al marco','Fu sostituita dall\'ECU','Uscì dal Sistema Monetario Europeo e si svalutò'], giusta:2,
+  perche:'Il «mercoledì nero»: la difesa del cambio bruciò riserve e fu abbandonata.'},
+ {id:'i90_maastricht', era:'italia1990', codaFino:Infinity, paese:'universale', ruolo:'governo', diff:'difficile', cond:()=>S.year>=1992, q:'Quali parametri fissava il trattato di Maastricht per l\'ingresso nella moneta unica?',
+  op:['Pareggio di bilancio e debito sotto il 100%','Deficit entro il 3% del PIL e debito in tendenziale rientro verso il 60%','Inflazione zero e cambio fisso'], giusta:1,
+  perche:'Più inflazione e tassi allineati ai migliori paesi.'},
+ {id:'i90_eurotassa', era:'italia1990', codaFino:Infinity, paese:'italia', ruolo:'governo', diff:'media', cond:()=>S.year>=1997, q:'Che cos\'era l\'«eurotassa» del 1997?',
+  op:['Una tassa sui cambi valutari','Un\'imposta sulle importazioni','Un contributo straordinario per rientrare nei parametri europei'], giusta:2,
+  perche:'In parte fu poi restituita ai contribuenti.'},
+ {id:'i90_privatizz', era:'italia1990', codaFino:Infinity, paese:'italia', ruolo:'governo', diff:'difficile', cond:()=>S.year>=1993, q:'Che cosa fu il decreto sulle privatizzazioni degli anni \'90?',
+  op:['La trasformazione degli enti pubblici economici in società per azioni','La vendita immediata di tutte le partecipazioni','La nazionalizzazione delle banche'], giusta:0,
+  perche:'Prima si trasformano in SpA, poi si collocano sul mercato.'},
+ {id:'uk50_1951', era:'uk1950', codaFino:Infinity, paese:'regnounito', ruolo:'governo', diff:'difficile', cond:()=>S.year>=1951, q:'Perché nel 1951 il partito con più voti non ottenne il governo?',
+  op:['Perché rinunciò a formare il governo','Perché nei collegi uninominali contano i seggi, non i voti totali','Perché mancò il quorum'], giusta:1,
+  perche:'Il Labour ebbe la percentuale più alta della sua storia e restò all\'opposizione.'},
+ {id:'uk50_razionamento', era:'uk1950', codaFino:Infinity, paese:'regnounito', ruolo:'governo', diff:'media', cond:()=>S.year>=1954, q:'Che cosa fu il razionamento alimentare nel Regno Unito del dopoguerra?',
+  op:['Un sistema di tessere che finì solo nel 1954','Una misura durata pochi mesi dopo la guerra','Un provvedimento mai applicato'], giusta:0,
+  perche:'Durò quattordici anni in tutto: l\'ultimo alimento liberato fu la carne.'},
+ {id:'uk50_suez', era:'uk1950', codaFino:Infinity, paese:'regnounito', ruolo:'governo', diff:'difficile', cond:()=>S.year>=1956, q:'Che cosa fermò davvero l\'operazione anglo-francese a Suez nel 1956?',
+  op:['Una sconfitta militare sul campo','Un voto contrario del Parlamento','La corsa alla sterlina e il rifiuto americano di sostenerla'], giusta:2,
+  perche:'La pressione finanziaria impose il cessate il fuoco.'},
+ {id:'uk50_leva', era:'uk1950', codaFino:Infinity, paese:'regnounito', ruolo:'governo', diff:'media', q:'Che cos\'era il servizio militare obbligatorio britannico degli anni \'50?',
+  op:['Un servizio volontario retribuito','Due anni di leva per i giovani maschi, fino ai primi anni \'60','Un obbligo solo in tempo di guerra'], giusta:1,
+  perche:'Le ultime chiamate furono all\'inizio degli anni \'60.'},
+ {id:'uk50_itv', era:'uk1950', codaFino:Infinity, paese:'regnounito', ruolo:'governo', diff:'difficile', cond:()=>S.year>=1955, q:'Che cosa cambiò nel sistema televisivo britannico nel 1955?',
+  op:['Nacque una rete commerciale accanto al servizio pubblico','La BBC fu privatizzata','La televisione a colori entrò in servizio'], giusta:0,
+  perche:'Fine del monopolio: arrivano gli inserzionisti.'},
+ {id:'uk50_cleanair', era:'uk1950', codaFino:Infinity, paese:'regnounito', ruolo:'governo', diff:'difficile', cond:()=>S.year>=1956, q:'Che cosa fu il Clean Air Act del 1956?',
+  op:['Una legge sulle acque','Un piano di rimboschimento','La legge che limitò i fumi domestici e industriali dopo lo smog di Londra'], giusta:2,
+  perche:'Rispose ai quattro giorni di nebbia letale del dicembre 1952.'},
+ {id:'uk60_svalut67', era:'uk1960', codaFino:Infinity, paese:'regnounito', ruolo:'governo', diff:'difficile', cond:()=>S.year>=1967, q:'Che cosa accadde alla sterlina nel novembre 1967?',
+  op:['Fu lasciata fluttuare liberamente','Fu svalutata da 2,80 a 2,40 dollari','Fu agganciata all\'oro'], giusta:1,
+  perche:'Arrivò dopo tre anni di difesa del cambio.'},
+ {id:'uk60_veto', era:'uk1960', codaFino:Infinity, paese:'regnounito', ruolo:'governo', diff:'difficile', cond:()=>S.year>=1963, q:'Perché la domanda britannica d\'ingresso nella CEE fu respinta negli anni \'60?',
+  op:['Per il veto della Francia','Per un referendum interno contrario','Per l\'opposizione del Commonwealth'], giusta:0,
+  perche:'Accadde due volte, nel 1963 e nel 1967.'},
+ {id:'uk60_congelamento', era:'uk1960', codaFino:Infinity, paese:'regnounito', ruolo:'governo', diff:'media', cond:()=>S.year>=1966, q:'Che cosa fu il «congelamento» del 1966?',
+  op:['Una stretta creditizia','La sospensione delle importazioni','Un blocco per legge di salari e prezzi'], giusta:2,
+  perche:'Misura d\'emergenza durante una crisi della bilancia dei pagamenti.'},
+ {id:'uk60_scuola', era:'uk1960', codaFino:Infinity, paese:'regnounito', ruolo:'governo', diff:'difficile', cond:()=>S.year>=1965, q:'Che cosa cambiò nel sistema scolastico britannico dalla metà degli anni \'60?',
+  op:['Fu introdotto l\'obbligo fino a 18 anni','Si passò gradualmente a una scuola secondaria unica','Furono abolite le scuole private'], giusta:1,
+  perche:'Al posto della selezione a undici anni.'},
+ {id:'uk60_decimale', era:'uk1960', codaFino:Infinity, paese:'regnounito', ruolo:'governo', diff:'difficile', cond:()=>S.year>=1971, q:'Quando fu decisa e quando entrò in vigore la decimalizzazione della sterlina?',
+  op:['Decisa e attuata nel 1966','Attuata nel 1980','Decisa negli anni \'60, in vigore nel 1971'], giusta:2,
+  perche:'Cento penny per sterlina al posto di scellini e pence.'},
+ {id:'uk60_belfast', era:'uk1960', codaFino:Infinity, paese:'regnounito', ruolo:'governo', diff:'media', cond:()=>S.year>=1969, q:'Perché nel 1969 l\'esercito britannico fu schierato in Irlanda del Nord?',
+  op:['Per contenere gli scontri dopo giorni di violenze','Per un\'invasione esterna','Per un\'esercitazione della NATO'], giusta:0,
+  perche:'Arrivò come forza di interposizione e vi rimase per decenni.'},
+ {id:'uk70_feb74', era:'uk1970', codaFino:Infinity, paese:'regnounito', ruolo:'governo', diff:'difficile', cond:()=>S.year>=1974, q:'Che cosa rese eccezionale l\'elezione britannica del febbraio 1974?',
+  op:['Si votò due volte lo stesso giorno','Nessun partito ottenne la maggioranza dei seggi','Vinse un terzo partito'], giusta:1,
+  perche:'Primo parlamento appeso dal 1929.'},
+ {id:'uk70_tregiorni_q', era:'uk1970', codaFino:Infinity, paese:'regnounito', ruolo:'governo', diff:'difficile', cond:()=>S.year>=1974, q:'Che cos\'era la «settimana di tre giorni» del 1974?',
+  op:['Una riduzione volontaria dell\'orario','Uno sciopero generale','Un limite per legge al consumo di elettricità nell\'industria'], giusta:2,
+  perche:'Le fabbriche lavoravano tre giorni per risparmiare carbone.'},
+ {id:'uk70_ref75', era:'uk1970', codaFino:Infinity, paese:'regnounito', ruolo:'governo', diff:'media', cond:()=>S.year>=1975, q:'Che cosa chiese il referendum britannico del 1975?',
+  op:['Se restare nella Comunità europea','Se adottare la moneta unica','Se concedere l\'autonomia alla Scozia'], giusta:0,
+  perche:'Il Sì vinse con circa due terzi dei voti.'},
+ {id:'uk70_fmi_q', era:'uk1970', codaFino:Infinity, paese:'regnounito', ruolo:'governo', diff:'difficile', cond:()=>S.year>=1976, q:'Perché nel 1976 il Regno Unito si rivolse al Fondo Monetario Internazionale?',
+  op:['Per entrare nel sistema monetario europeo','Per ottenere un prestito a fronte di tagli alla spesa','Per ristrutturare il debito estero'], giusta:1,
+  perche:'Le condizioni del prestito furono decise fuori dal paese.'},
+ {id:'uk70_liblab', era:'uk1970', codaFino:Infinity, paese:'regnounito', ruolo:'governo', diff:'difficile', cond:()=>S.year>=1977, q:'Che cos\'era il patto Lib-Lab del 1977?',
+  op:['Un governo di coalizione con ministri liberali','Una fusione fra i due partiti','Un accordo di sostegno esterno senza ministri liberali nel governo'], giusta:2,
+  perche:'Teneva in piedi un governo che aveva perso la maggioranza.'},
+ {id:'uk70_inverno_q', era:'uk1970', codaFino:Infinity, paese:'regnounito', ruolo:'governo', diff:'media', cond:()=>S.year>=1979, q:'Che cosa fu l\'«inverno del malcontento» del 1978-79?',
+  op:['Una stagione di scioperi nei servizi pubblici','Una crisi energetica','Un\'ondata di gelo eccezionale'], giusta:0,
+  perche:'Le immagini di quell\'inverno pesarono sulle elezioni successive.'},
  /* L45-1 · le SFIDE degli anni 2000 (scheda §CONTENUTO PRONTO-2 B). `codaFino:Infinity` come le altre della
     banca: una domanda di storia resta valida anche dopo la coda del decennio che racconta. */
  {id:'i00_cambio', era:'italia2000', codaFino:Infinity, paese:'italia', ruolo:'governo', diff:'facile', cond:()=>S.year>=2002, q:'A quante lire corrisponde un euro al cambio fissato?',
@@ -6992,6 +7114,129 @@ const GOVERNI_PROFILI = {
    vis/cred = delta diretti alle due variabili; gov = erosione gruppi del governo (× vis × cred); base = tua base (× vis);
    centro = ceto medio (× vis). pickOpposizione() traduce lo spec in closure. Effetti piccoli: semina, non controllo. */
 const OPPOSIZIONE_EV = [
+ /* ============================================================================================================
+    L65-1b · I 24 DOSSIER D'OPPOSIZIONE (scheda `DOSSIER-OPPOSIZIONE.md`), indicizzati per **delega**.
+    Il gemello di `DOSSIERS` per chi non governa: non decidi cosa fa lo Stato, decidi **che posizione prende
+    l'alternativa**. Tre per ciascuna delle otto aree del gabinetto — l'indice è il punto, è quello a farne
+    un generatore il giorno che ci sarà un governo ombra (L63-1).
+    ⚑ Girano sulle QUATTRO CHIAVI NUOVE di L65-1a (`stampa`, `gruppi`, `corrente`/`correnti`, `promessa`):
+    prima di quel lotto sarebbero stati **no-op silenziosi**, perché `applyOppEffect` ne conosceva cinque.
+    ⚠ **IL «TERRITORIO» NON È UNA VALUTA E NON L'HO INVENTATA.** `S.potereLocale` è derivato e convergente:
+    un `±` diretto sarebbe sovrascritto al ricalcolo. Dove la scheda dice «territorio ++» qui si muovono
+    **i gruppi che il territorio lo abitano** (pensionati e lavoratori nelle valli e nelle città di fabbrica,
+    giovani dove la posta è il futuro) più la visibilità dove il gesto è pubblico. È una traduzione, dichiarata.
+    ⚠ E le **promesse** puntano a un GRUPPO, perché è quello che `campPromessa` registra e che `gd` poi conta:
+    «rigore» → ceto medio, «spesa» e «atlantismo» → il gruppo a cui la promessa è fatta. Anche questa è una
+    traduzione dichiarata, non una libertà.
+    ⚑ L'ORDINE DELLE OPZIONI NON È QUELLO DI PREFERENZA (lezione L62-2): la scheda elenca per prima la scelta
+    «buona», e copiarla in quell'ordine avrebbe reso ogni carta leggibile senza pensarci.
+    ============================================================================================================ */
+  { id:'o_eco1', era:'universale', delega:'economia', kick:'Opposizione', t:'I conti dell\'alternativa',
+    text:'Il tuo responsabile economico posa sul tavolo due fogli: il programma che vorrebbe la base, e quello che passerebbe l\'esame di chi conta i soldi. Non sono lo stesso foglio, e lo sai da mesi.', ch:[
+      { l:'Si pubblica il programma con le coperture', e:'Ti prendono sul serio quelli che contano; la base lo trova timido', cred:6, stampa:4, corrente:{militanti:-5}, promessa:'cetomedio', pleases:'tecnico' },
+      { l:'Si pubblica quello che la gente aspetta', e:'La piazza si riempie; i giornali economici ti smontano in due giorni', base:6, vis:5, cred:-6, promessa:'lavoratori', pleases:'populista' },
+      { l:'Non si pubblica niente: si aspetta', e:'Nessuno può contestarti; nessuno sa cosa faresti', cred:-3, corrente:{pontieri:4} } ]},
+  { id:'o_eco2', era:'universale', delega:'economia', kick:'Opposizione', t:'Il numero che non torna',
+    text:'Un tuo tecnico ha trovato un errore nei conti del governo: piccolo, ma vero. Usato bene vale una settimana di titoli; usato male ti fa passare per contabile.', ch:[
+      { l:'Conferenza stampa coi numeri', e:'Titoli e credibilità, se regge', vis:6, cred:4, gov:-3, rischio:true },
+      { l:'Lo passi a un giornalista che lo sa scrivere', e:'Esce meglio, ma non porta il tuo nome', stampa:7, vis:-3, gov:-3 },
+      { l:'Lo tieni per il dibattito sul bilancio', e:'Arriva quando conta di più, se nessuno lo trova prima', cred:4, pleases:'tecnico' } ]},
+  { id:'o_eco3', era:'universale', delega:'economia', kick:'Opposizione', t:'La tassa che non piace a nessuno',
+    text:'Nel programma c\'è un\'imposta che serve a far tornare i conti e che nessuna corrente vuole difendere in pubblico.', ch:[
+      { l:'La difendi tu, di persona', e:'Coraggio riconosciuto, voti persi', cred:6, gruppi:{cetomedio:-4}, correnti:3, pleases:'tecnico' },
+      { l:'La togli dal programma', e:'Sollievo generale, un buco nei conti che qualcuno troverà', gruppi:{cetomedio:3}, cred:-4, rischio:true } ]},
+  { id:'o_lav1', era:'universale', delega:'lavoro', kick:'Opposizione', t:'Il sindacato chiede la firma',
+    text:'Ti chiedono di firmare la loro piattaforma così com\'è. Firmare significa un corteo con te sul palco; non firmare significa il palco senza di te.', ch:[
+      { l:'Firmi tutto', e:'Centomila persone e il tuo nome sopra; le imprese chiudono la porta', base:6, gruppi:{lavoratori:5, imprenditori:-5}, promessa:'lavoratori', pleases:'populista' },
+      { l:'Firmi la parte che puoi mantenere', e:'Meno piazza, più credibilità — e i militanti mormorano', cred:5, gruppi:{lavoratori:3}, corrente:{militanti:-5}, pleases:'tecnico' },
+      { l:'Non firmi, e ci vai lo stesso', e:'Presente ma non impegnato: nessuno è contento e nessuno può accusarti', vis:4 } ]},
+  { id:'o_lav2', era:'universale', delega:'lavoro', kick:'Opposizione', t:'La fabbrica che chiude',
+    text:'Trecento posti in una città che ne ha pochi. Il governo tratta e non conclude. Tu puoi andarci — o mandarci qualcuno.', ch:[
+      { l:'Ci vai e ci resti finché serve', e:'La città non lo dimenticherà; l\'agenda nazionale si ferma per una settimana', gruppi:{lavoratori:5, pensionati:3}, vis:6, cred:-3, pleases:'populista' },
+      { l:'Mandi il responsabile e prepari una proposta', e:'Serio, invisibile', cred:5, gruppi:{lavoratori:2}, vis:-3, pleases:'tecnico' } ]},
+  { id:'o_lav3', era:'universale', delega:'lavoro', kick:'Opposizione', t:'Il contratto che divide',
+    text:'Una riforma del lavoro spacca il tuo campo: chi ha il posto la teme, chi non ce l\'ha la spera.', ch:[
+      { l:'Stai con chi il posto ce l\'ha', e:'La base storica ti ringrazia', gruppi:{lavoratori:4, giovani:-3}, corrente:{militanti:5} },
+      { l:'Stai con chi il posto lo cerca', e:'I giovani ti scoprono, il sindacato ti guarda male', gruppi:{giovani:5, lavoratori:-3}, cred:4 } ]},
+  { id:'o_san1', era:'universale', delega:'sanità', kick:'Opposizione', t:'La lista d\'attesa',
+    text:'Il tuo responsabile ha raccolto i tempi d\'attesa reparto per reparto. È un dossier che fa male e non costa niente da dire.', ch:[
+      { l:'Lo usi come manifesto della campagna', e:'Colpisce dove il paese sente, e ti impegna a risolverlo', gruppi:{pensionati:4, lavoratori:3, cetomedio:3}, vis:8, promessa:'pensionati', pleases:'populista' },
+      { l:'Lo usi per proporre un piano coi costi', e:'Meno rumore, più peso', cred:6, gruppi:{lavoratori:3}, pleases:'tecnico' } ]},
+  { id:'o_san2', era:'universale', delega:'sanità', kick:'Opposizione', t:'L\'ospedale che chiude',
+    text:'In una valle chiudono il punto nascita: pochi parti, dice il governo; una comunità che muore, dice la valle.', ch:[
+      { l:'Difendi il presidio', e:'Il territorio è tuo; i tecnici ti danno torto', gruppi:{pensionati:5, lavoratori:3}, vis:4, cred:-4, pleases:'populista' },
+      { l:'Dici la verità: pochi parti sono un rischio', e:'Coraggio impopolare', cred:6, gruppi:{pensionati:-4}, stampa:4, pleases:'tecnico' } ]},
+  { id:'o_san3', era:'universale', delega:'sanità', kick:'Opposizione', t:'Il dubbio nella tua base',
+    text:'Una parte della tua base diffida di una campagna sanitaria pubblica. Sono i tuoi, e hanno torto.', ch:[
+      { l:'Stai con la scienza e lo dici chiaro', e:'Perdi qualcuno, ti guadagni il rispetto di tutti gli altri', cred:6, base:-4, stampa:4, pleases:'tecnico' },
+      { l:'Chiedi solo più informazione', e:'Nessuno si arrabbia, nessuno ti crede', cred:-3 } ]},
+  { id:'o_scu1', era:'universale', delega:'scuola', kick:'Opposizione', t:'Il concorso',
+    text:'Migliaia di precari aspettano una stabilizzazione. Prometterla è facile; dire quanto costa lo è meno.', ch:[
+      { l:'La prometti', e:'Una categoria intera ti guarda', gruppi:{lavoratori:5}, promessa:'lavoratori', cred:-4, pleases:'populista' },
+      { l:'Prometti solo quello che il bilancio regge', e:'Metà applauso, zero sospetti', cred:5, gruppi:{lavoratori:3}, pleases:'tecnico' } ]},
+  { id:'o_scu2', era:'universale', delega:'scuola', kick:'Opposizione', t:'Il preside e il professore',
+    text:'Una riforma dà più poteri ai presidi. I tuoi insegnanti la odiano, i tuoi amministratori la vogliono.', ch:[
+      { l:'Con gli insegnanti', e:'La categoria ti riconosce come suo', gruppi:{lavoratori:4}, corrente:{militanti:5}, cred:-2 },
+      { l:'Con chi deve far funzionare la scuola', e:'Impopolare dentro, credibile fuori', cred:4, gruppi:{lavoratori:-3, cetomedio:3} } ]},
+  { id:'o_scu3', era:'universale', delega:'scuola', kick:'Opposizione', t:'L\'università che costa',
+    text:'Le tasse universitarie salgono. Puoi chiederne l\'abolizione, o un sistema che le leghi al reddito.', ch:[
+      { l:'Abolizione', e:'Semplice, gridabile, costosissimo', gruppi:{giovani:5}, vis:5, cred:-4, promessa:'giovani', pleases:'populista' },
+      { l:'Legarle al reddito', e:'Giusto e difficile da mettere su un cartello', cred:6, gruppi:{giovani:2}, pleases:'tecnico' } ]},
+  { id:'o_giu1', era:'universale', delega:'giustizia', kick:'Opposizione', t:'L\'inchiesta che tocca i tuoi',
+    text:'Un\'inchiesta arriva vicino a un tuo amministratore locale. Non c\'è ancora nulla, ma c\'è già il titolo.', ch:[
+      { l:'Lo sospendi subito', e:'Coerenza pagata cara: la sua corrente non te la perdona', cred:6, stampa:4, correnti:-6, trasparenza:true },
+      { l:'Aspetti i fatti', e:'Garantista e sospetto', correnti:4, stampa:-4, rischio:true },
+      { l:'Lo difendi pubblicamente', e:'La corrente è tua per sempre; se cade, cadi con lui', correnti:7, cred:-5, rischio:true } ]},
+  { id:'o_giu2', era:'universale', delega:'giustizia', kick:'Opposizione', t:'La riforma della giustizia',
+    text:'Il governo propone una riforma. Opporsi in blocco è comodo; distinguere è faticoso.', ch:[
+      { l:'Opposizione totale', e:'Compatti i tuoi', base:5, cred:-3, gov:-4, pleases:'populista' },
+      { l:'Approvi la parte buona e attacchi il resto', e:'Serio, e i tuoi non capiscono', cred:6, base:-4, stampa:4, pleases:'tecnico' } ]},
+  { id:'o_giu3', era:'universale', delega:'giustizia', kick:'Opposizione', t:'Le carceri piene',
+    text:'Le carceri sono piene oltre il consentito. Una misura di clemenza è tecnicamente necessaria e politicamente veleno.', ch:[
+      { l:'La proponi tu', e:'Nessuno lo farebbe; qualcuno lo deve fare', cred:7, gruppi:{cetomedio:-4, pensionati:-3}, pleases:'tecnico' },
+      { l:'Chiedi solo più carceri', e:'Facile, lento, innocuo', gruppi:{cetomedio:3}, cred:-3 } ]},
+  { id:'o_sic1', era:'universale', delega:'sicurezza', kick:'Opposizione', t:'Il fatto di cronaca',
+    text:'Un crimine grave in una città amministrata dai tuoi. L\'avversario ci monta sopra da tre giorni.', ch:[
+      { l:'Rispondi sul loro terreno: più agenti, subito', e:'Togli l\'argomento, e i tuoi ti accusano di inseguire', gruppi:{cetomedio:5}, corrente:{militanti:-8} },
+      { l:'Sposti il discorso sulle cause', e:'Onesto, e in tre giorni hai perso il dibattito', base:4, gruppi:{cetomedio:-4} },
+      { l:'Vai sul posto e ascolti, senza dichiarare', e:'Nessun titolo, qualche rispetto', cred:4, vis:-4, pleases:'tecnico' } ]},
+  { id:'o_sic2', era:'universale', delega:'sicurezza', kick:'Opposizione', t:'I poteri speciali',
+    text:'Il governo chiede misure eccezionali. Votarle ti costa da una parte, non votarle dall\'altra.', ch:[
+      { l:'Le voti', e:'Rassicuri chi ha paura', gruppi:{cetomedio:4}, corrente:{militanti:-8}, cred:3 },
+      { l:'Le voti con emendamenti che ne limitano la durata', e:'La strada difficile', cred:7, base:-2, gruppi:{cetomedio:2}, pleases:'tecnico' },
+      { l:'Le respingi', e:'Coerente e scoperto', base:6, gruppi:{cetomedio:-5}, stampa:-4 } ]},
+  { id:'o_sic3', era:'universale', delega:'sicurezza', kick:'Opposizione', t:'La piazza finita male',
+    text:'In una piazza è finita male. Ci sono due verità e due video.', ch:[
+      { l:'Chiedi un\'inchiesta e taci fino ai risultati', e:'Nessuno applaude, tutti prendono nota', cred:6, base:-4, trasparenza:true },
+      { l:'Stai con la piazza', e:'I tuoi ti riconoscono; il resto del paese meno', base:6, gruppi:{cetomedio:-4}, cred:-3, pleases:'populista' } ]},
+  { id:'o_est1', era:'universale', delega:'esteri', kick:'Opposizione', t:'La missione',
+    text:'Il governo chiede il voto su una missione militare. La tradizione del tuo partito dice una cosa, l\'alleanza ne dice un\'altra.', ch:[
+      { l:'Voti a favore: si sta con gli alleati', e:'Affidabile fuori, contestato dentro', cred:4, gruppi:{cetomedio:3}, corrente:{militanti:-8}, promessa:'cetomedio' },
+      { l:'Voti contro', e:'I tuoi esultano; gli alleati prendono nota', base:6, cred:-4, pleases:'populista' },
+      { l:'Astensione motivata', e:'La strada che non contenta nessuno e non rompe niente', cred:2, corrente:{pontieri:3} } ]},
+  { id:'o_est2', era:'universale', delega:'esteri', kick:'Opposizione', t:'Il viaggio',
+    text:'Ti invitano all\'estero: una capitale amica, o una scomoda. Andare dove è scomodo fa notizia e fa nemici.', ch:[
+      { l:'Capitale amica', e:'Foto rassicuranti', cred:4, vis:2 },
+      { l:'Capitale scomoda', e:'Tutti ne parlano; metà male', vis:8, stampa:-4, rischio:true },
+      { l:'Resti a casa: i problemi sono qui', e:'Nessuna foto, nessun sospetto', base:4, vis:-4 } ]},
+  { id:'o_est3', era:'universale', delega:'esteri', kick:'Opposizione', t:'Il trattato',
+    text:'Un trattato internazionale divide il paese. Il governo lo firma; tu decidi se prometti di disdirlo.', ch:[
+      { l:'Prometti di disdirlo', e:'Applausi oggi, catena domani', base:6, promessa:'lavoratori', cred:-4, pleases:'populista' },
+      { l:'Prometti di rinegoziarlo', e:'La formula che salva capra e cavoli, finché qualcuno non chiede come', cred:2, base:2 },
+      { l:'Lo accetti e lo dici', e:'Coerenza che costa', cred:7, base:-6, pleases:'tecnico' } ]},
+  { id:'o_ter1', era:'universale', delega:'territorio', kick:'Opposizione', t:'La grande opera',
+    text:'Un\'opera enorme divide il paese in due: chi ci lavorerà e chi ci vive accanto. Il tuo partito è spaccato esattamente lì.', ch:[
+      { l:'A favore: il lavoro prima di tutto', e:'I cantieri ti ringraziano, la valle no', gruppi:{lavoratori:4, imprenditori:4, giovani:-4}, correnti:-4 },
+      { l:'Contro: il territorio prima di tutto', e:'La valle è tua; le imprese ti cancellano', gruppi:{giovani:5, pensionati:4, lavoratori:-3, imprenditori:-5} },
+      { l:'Chiedi una revisione del progetto', e:'Nessuno soddisfatto, nessuno perso', cred:4, pleases:'tecnico' } ]},
+  { id:'o_ter2', era:'universale', delega:'territorio', kick:'Opposizione', t:'Il sindaco che vale',
+    text:'In una città importante hai un sindaco bravo e ingombrante. Portarlo a livello nazionale ti rafforza e ti crea un rivale.', ch:[
+      { l:'Lo porti nella squadra nazionale', e:'Un volto forte accanto a te, e un giorno contro di te', cred:5, vis:5, correnti:-4, rischio:true },
+      { l:'Lo lasci dov\'è', e:'Il territorio tiene; l\'occasione passa', gruppi:{pensionati:3, lavoratori:3}, cred:2 } ]},
+  { id:'o_ter3', era:'universale', delega:'territorio', kick:'Opposizione', t:'L\'alluvione',
+    text:'Un territorio è sott\'acqua. Il governo arriva tardi. Tu puoi arrivare prima — o arrivare dopo, con un piano.', ch:[
+      { l:'Ci vai subito, coi volontari del partito', e:'La gente non lo dimentica; qualcuno parlerà di sciacallaggio', gruppi:{lavoratori:4, pensionati:4, giovani:3}, vis:8, rischio:true, pleases:'populista' },
+      { l:'Aspetti e presenti un piano per il dissesto', e:'Serio, e nessuno se ne accorge', cred:7, gruppi:{cetomedio:2}, vis:-3, pleases:'tecnico' } ]},
   /* L45-1 · le quattro carte-opposizione degli anni 2000 (scheda §CONTENUTO PRONTO-2 D): il decennio in cui
      l'opposizione si fa in televisione e poi, all'improvviso, in rete. Chiavi dichiarative come le esistenti. */
   { id:'o00_talk', era:'italia2000', kick:'Opposizione', t:'Il talk della sera', text:'Il duello televisivo del giovedì: il ministro di là, tu di qua, il conduttore in mezzo. Cinque milioni guardano.', ch:[
@@ -7009,32 +7254,32 @@ const OPPOSIZIONE_EV = [
   { id:'o00_girotondo', era:'italia2000', kick:'Opposizione', t:'Il girotondo dei professori', text:'Intellettuali e società civile ti accusano di tepore: «l\'opposizione la facciamo noi». Applaudirli o rivendicare?', ch:[
     { l:'Li abbracci: la società civile è linfa', e:'Base calda; il ceto medio si chiede chi guida', base:6, centro:-4, pleases:'progressista' },
     { l:'Rivendichi il primato della politica', e:'Parli da leader; la piazza si raffredda', cred:6, base:-4, pleases:'tecnico' } ]},
-  { kick:'Opposizione', t:'Comizio in piazza', text:'Migliaia di persone in piazza ad ascoltarti. Che tono dai?', ch:[
+  { id:'opp_comizio_piazza', kick:'Opposizione', t:'Comizio in piazza', text:'Migliaia di persone in piazza ad ascoltarti. Che tono dai?', ch:[
     { l:'Comizio infuocato', e:'Visibilità su; la base si scalda, ma i toni rischiano', vis:10, cred:-3, gov:-3, pleases:'populista' },
     { l:'Discorso di unità', e:'Parli da statista: credibilità su', cred:5, base:2, pleases:'tecnico' },
     { l:'Promessa simbolica', e:'Un applauso facile; piaci al centro', vis:5, centro:3 },
   ]},
-  { era:'contemporanea', kick:'Opposizione', t:'Intervista in prima serata', text:'Un\'intervista TV molto seguita: come ti presenti?', ch:[
+  { id:'opp_intervista_prima_serata', era:'contemporanea', kick:'Opposizione', t:'Intervista in prima serata', text:'Un\'intervista TV molto seguita: come ti presenti?', ch:[
     { l:'Affondo in diretta', e:'Visibilità su, credibilità giù', vis:10, cred:-4, gov:-2, pleases:'populista' },
     { l:'Mostra competenza', e:'Dati e proposte: credibilità su', cred:7, vis:3, pleases:'tecnico' },
     { l:'Tono pacato e rassicurante', e:'Parli al centro con calma', cred:4, centro:3 },
   ]},
-  { kick:'Opposizione', t:'Tour tra fabbriche e quartieri', text:'Giri il paese per ascoltare e farti vedere. Su cosa punti?', ch:[
+  { id:'opp_tour_tra_fabbriche', kick:'Opposizione', t:'Tour tra fabbriche e quartieri', text:'Giri il paese per ascoltare e farti vedere. Su cosa punti?', ch:[
     { l:'Ascolta i lavoratori', e:'Rafforzi la tua base', base:4, cred:3, pleases:'progressista' },
     { l:'Denuncia il governo sul posto', e:'Visibilità su, colpisci il governo', vis:7, gov:-3, pleases:'populista' },
     { l:'Foto e strette di mano', e:'Visibilità e simpatia al centro', vis:5, centro:2 },
   ]},
-  { kick:'Opposizione', t:'Proposta di legge alternativa', text:'Presenti la tua controproposta. Come la imposti?', ch:[
+  { id:'opp_proposta_legge_alternativa', kick:'Opposizione', t:'Proposta di legge alternativa', text:'Presenti la tua controproposta. Come la imposti?', ch:[
     { l:'Proposta seria e dettagliata', e:'Credibilità su: sembri pronto a governare', cred:8, vis:3, pleases:'tecnico' },
     { l:'Proposta-bandiera identitaria', e:'Scalda la base, ma poco credibile', base:5, cred:-3, pleases:'populista' },
     { l:'Proposta trasversale', e:'Apri al centro con equilibrio', centro:4, cred:4 },
   ]},
-  { kick:'Opposizione', t:'Un inciampo del governo', text:'Il governo è in difficoltà. Come lo sfrutti?', ch:[
+  { id:'opp_inciampo_governo', kick:'Opposizione', t:'Un inciampo del governo', text:'Il governo è in difficoltà. Come lo sfrutti?', ch:[
     { l:'Cavalca senza pietà', e:'Tanto rumore, ma logori la tua immagine', vis:10, gov:-4, cred:-4, pleases:'populista' },
     { l:'Critica nel merito', e:'Colpo chirurgico: credibilità su', cred:5, gov:-2, pleases:'tecnico' },
     { l:'Aspetta e osserva', e:'Lasci che si roda; appari responsabile', cred:3, gov:-1 },
   ]},
-  { kick:'Opposizione', t:'Grande manifestazione', text:'Organizzi una mobilitazione nazionale. La parola d\'ordine?', ch:[
+  { id:'opp_grande_manifestazione', kick:'Opposizione', t:'Grande manifestazione', text:'Organizzi una mobilitazione nazionale. La parola d\'ordine?', ch:[
     { l:'Mobilitazione di piazza', e:'Massima visibilità, base in fermento', vis:12, base:3, cred:-3, pleases:'populista' },
     { l:'Manifestazione ampia e pacifica', e:'Visibilità e rispetto: anche il centro guarda', vis:6, cred:4, centro:2 },
     { l:'Corteo simbolico', e:'Ti fai vedere, energizzi i tuoi', vis:7, base:2 },
@@ -7043,148 +7288,148 @@ const OPPOSIZIONE_EV = [
      alleanze, la vita interna. Distinte da GOVERNO_EV (reattivo) e da conferenze/titoli. Spec invariato
      (vis/cred/gov/base/centro) + pleases/rischio/trasparenza per la continuità (biografia/tratti/esposizione).
      `pleases` è un TONO, non un'etichetta: molte scelte restano senza tag. L'esposizione la muove SOLO o_finanziatore. --- */
-  { kick:'Affondo', t:'Scegli il fronte', text:'Decidi dove concentrare il fuoco contro il governo — i conti, la sanità, la sicurezza — e con che piglio.', ch:[
+  { id:'opp_scegli_fronte', kick:'Affondo', t:'Scegli il fronte', text:'Decidi dove concentrare il fuoco contro il governo — i conti, la sanità, la sicurezza — e con che piglio.', ch:[
     { l:'Dossier dettagliato e numeri', e:'Critica solida: credibilità su', cred:7, vis:2, gov:-2, pleases:'tecnico' },
     { l:'Slogan che fa breccia', e:'Molto rumore, poca sostanza', vis:9, gov:-3, cred:-3, base:2, pleases:'populista' },
     { l:'Critica più la tua alternativa', e:'Colpisci e proponi: apri al centro', cred:6, centro:3, gov:-1 },
   ]},
-  { kick:'Maggioranza', t:'Un transfuga bussa alla porta', cond:()=>S.credibilita>=50, text:'Un parlamentare della maggioranza, deluso, è pronto a passare con te. Un colpo di scena — e un peso.', ch:[
+  { id:'opp_transfuga_bussa_porta', kick:'Maggioranza', t:'Un transfuga bussa alla porta', cond:()=>S.credibilita>=50, text:'Un parlamentare della maggioranza, deluso, è pronto a passare con te. Un colpo di scena — e un peso.', ch:[
     { l:'Lo accogli in pompa magna', e:'Visibilità e numeri; sa di mercato', vis:8, base:3, cred:-2, pleases:'populista' },
     { l:'Lo accogli, con discrezione', e:'Un acquisto sobrio, senza clamore', cred:4, base:2, pleases:'tecnico' },
     { l:'Rifiuti: non compri voltagabbana', e:'Coerenza che si nota', cred:6, centro:2, pleases:'conservatore' },
   ]},
-  { kick:'Alleanze', t:'Un patto con un partito minore', cond:()=>S.credibilita>=46, text:'Un piccolo partito ti offre un\'intesa: più peso in vista del voto, ma a un prezzo programmatico.', ch:[
+  { id:'opp_patto_partito_minore', kick:'Alleanze', t:'Un patto con un partito minore', cond:()=>S.credibilita>=46, text:'Un piccolo partito ti offre un\'intesa: più peso in vista del voto, ma a un prezzo programmatico.', ch:[
     { l:'Alleanza piena, anche identitaria', e:'Più forza, meno purezza', base:4, vis:3, cred:-2, pleases:'populista' },
     { l:'Intesa tecnica su pochi punti', e:'Pragmatica e misurata', cred:5, centro:2, pleases:'tecnico' },
     { l:'Vai da solo, niente compromessi', e:'Mani libere; rinunci a una sponda', cred:3, base:2 },
   ]},
-  { kick:'Identità', t:'Che opposizione vuoi essere', text:'I tuoi ti chiedono una rotta: l\'opposizione dura e identitaria, o quella moderata pronta a governare?', ch:[
+  { id:'opp_opposizione_vuoi_essere', kick:'Identità', t:'Che opposizione vuoi essere', text:'I tuoi ti chiedono una rotta: l\'opposizione dura e identitaria, o quella moderata pronta a governare?', ch:[
     { l:'Linea dura e identitaria', e:'Infiammi i tuoi; spaventi il centro', base:5, vis:4, cred:-3, pleases:'populista' },
     { l:'Linea moderata, da governo', e:'Ti accrediti come alternativa seria', cred:6, centro:3, base:-2, pleases:'tecnico' },
     { l:'Tieni il piede in due scarpe', e:'Non scegli; un po\' di rumore, poca chiarezza', vis:3, cred:-1 },
   ]},
-  { kick:'Partito', t:'Congresso e tesseramento', text:'Si avvicina il congresso: è il momento di dare forma al partito e contare le truppe.', ch:[
+  { id:'opp_congresso_tesseramento', kick:'Partito', t:'Congresso e tesseramento', text:'Si avvicina il congresso: è il momento di dare forma al partito e contare le truppe.', ch:[
     { l:'Mobiliti la base militante', e:'Partito in fermento, identità marcata', base:5, vis:2, pleases:'populista' },
     { l:'Apri a moderati e società civile', e:'Allarghi il campo: credibilità su', centro:3, cred:4, pleases:'tecnico' },
     { l:'Rafforzi la presa sull\'apparato', e:'Più controllo, meno respiro interno', cred:2, base:2, pleases:'conservatore' },
   ]},
-  { kick:'Aula', t:'Un voto che ti mette alla prova', text:'In aula arriva una misura del governo: non scellerata, ma loro. Come voti?', ch:[
+  { id:'opp_voto_mette_prova', kick:'Aula', t:'Un voto che ti mette alla prova', text:'In aula arriva una misura del governo: non scellerata, ma loro. Come voti?', ch:[
     { l:'Voti contro a prescindere', e:'Compatto con la base; opposizione dura', base:4, gov:-2, cred:-3, pleases:'populista' },
     { l:'Ti astieni, con motivazione', e:'Una posizione prudente e spiegata', cred:3 },
     { l:'Voto responsabile: è una misura giusta', e:'Da statista; la base mugugna', cred:7, centro:3, base:-2, pleases:'tecnico' },
   ]},
-  { kick:'Piazza', t:'Un movimento che non controlli', text:'Un movimento spontaneo cresce nelle città, con una sua agenda. Non l\'hai creato tu — ma potresti cavalcarlo.', ch:[
+  { id:'opp_movimento_controlli', kick:'Piazza', t:'Un movimento che non controlli', text:'Un movimento spontaneo cresce nelle città, con una sua agenda. Non l\'hai creato tu — ma potresti cavalcarlo.', ch:[
     { l:'Ti ci metti alla testa', e:'Tanta visibilità; sembri opportunista', vis:9, base:3, cred:-3, pleases:'populista' },
     { l:'Lo appoggi, con misura', e:'Vicinanza senza farti usare', cred:4, base:2, vis:3, pleases:'progressista' },
     { l:'Prendi le distanze', e:'Non ti leghi a chi non guidi', cred:4, centro:2 },
   ]},
-  { kick:'Fondi', t:'Un finanziatore ambiguo', text:'Un imprenditore dalle relazioni opache è pronto a finanziare la tua macchina politica. In cambio di che, non è detto.', ch:[
+  { id:'opp_finanziatore_ambiguo', kick:'Fondi', t:'Un finanziatore ambiguo', text:'Un imprenditore dalle relazioni opache è pronto a finanziare la tua macchina politica. In cambio di che, non è detto.', ch:[
     { l:'Accetti, i fondi servono', e:'Benzina per la campagna; un debito che pesa', vis:6, base:2, rischio:8 },
     { l:'Accetti, ma con paletti pubblici', e:'Provi a cautelarti; resta un\'ombra', vis:2, cred:1, rischio:3 },
     { l:'Rifiuti e lo rendi pubblico', e:'Pulizia che fa notizia', cred:6, centro:2, trasparenza:5, pleases:'tecnico' },
   ]},
-  { kick:'Partito', t:'Una corrente ti contesta', text:'Una corrente interna mette in discussione la tua leadership: rumori di un nome alternativo.', ch:[
+  { id:'opp_corrente_contesta', kick:'Partito', t:'Una corrente ti contesta', text:'Una corrente interna mette in discussione la tua leadership: rumori di un nome alternativo.', ch:[
     { l:'La integri, dai spazio', e:'Unità ricucita; condividi il potere', cred:4, base:3, pleases:'progressista' },
     { l:'La marginalizzi senza pietà', e:'Comandi tu; qualcuno se ne va', cred:2, base:-2, pleases:'conservatore' },
     { l:'Apri una mediazione interna', e:'Tieni insieme il partito con pazienza', cred:5, centro:1, pleases:'tecnico' },
   ]},
-  { era:'contemporanea', kick:'Faccia a faccia', t:'Il duello in TV col premier', text:'Un confronto televisivo diretto con il capo del governo: milioni di spettatori, una sola serata.', ch:[
+  { id:'opp_duello_tv_col', era:'contemporanea', kick:'Faccia a faccia', t:'Il duello in TV col premier', text:'Un confronto televisivo diretto con il capo del governo: milioni di spettatori, una sola serata.', ch:[
     { l:'Lo aggredisci senza tregua', e:'Spettacolo e rumore; rischi la statura', vis:10, gov:-3, cred:-4, pleases:'populista' },
     { l:'Lo asfissi sui numeri', e:'Lo metti in difficoltà coi fatti', cred:7, gov:-2, vis:3, pleases:'tecnico' },
     { l:'Ti presenti come alternativa serena', e:'Niente urla; parli al paese', cred:5, centro:3 },
   ]},
-  { kick:'Sondaggi', t:'Un sondaggio ti dà in volata', cond:()=>{ var f=S.forze&&S.forze[S.partito], b=part(S.partito)&&part(S.partito).forza; return (f!=null&&b!=null&&f>b) || S.credibilita>=55; }, text:'Un sondaggio molto ripreso ti dà in forte crescita. Come reagisci all\'onda?', ch:[
+  { id:'opp_sondaggio_volata', kick:'Sondaggi', t:'Un sondaggio ti dà in volata', cond:()=>{ var f=S.forze&&S.forze[S.partito], b=part(S.partito)&&part(S.partito).forza; return (f!=null&&b!=null&&f>b) || S.credibilita>=55; }, text:'Un sondaggio molto ripreso ti dà in forte crescita. Come reagisci all\'onda?', ch:[
     { l:'Alzi i toni, vai all\'incasso', e:'Spingi sull\'acceleratore; rischi di strafare', vis:8, base:3, cred:-3, pleases:'populista' },
     { l:'Ti presenti come premier in pectore', e:'Da leader di governo in attesa', cred:6, centro:3, pleases:'tecnico' },
     { l:'Prudenza, non montarti la testa', e:'I sondaggi vanno e vengono', cred:3 },
   ]},
-  { kick:'Inciampo', t:'Una tua gaffe da gestire', text:'Una tua frase infelice rimbalza ovunque e ti mette sulla difensiva. Come la gestisci?', ch:[
+  { id:'opp_tua_gaffe_gestire', kick:'Inciampo', t:'Una tua gaffe da gestire', text:'Una tua frase infelice rimbalza ovunque e ti mette sulla difensiva. Come la gestisci?', ch:[
     { l:'Rilanci, fai finta di niente', e:'Tiri dritto; la toppa è peggio del buco', vis:5, cred:-4, pleases:'populista' },
     { l:'Ammetti e correggi il tiro', e:'Onestà che disinnesca', cred:5, centro:2, pleases:'tecnico' },
     { l:'Accusi i media di farti le pulci', e:'Compatti i tuoi; sembri permaloso', base:3, vis:3, cred:-2 },
   ]},
   /* --- equivalenti d'epoca del duello TV (era: italia1950). Il faccia-a-faccia c'era anche prima della TV:
      il contraddittorio sui giornali, lo scontro in Parlamento, il comizio. La TV entra solo dal '54 (vary-by-decade). --- */
-  { era:'italia1950', kick:'Faccia a faccia', t:'Il contraddittorio sul giornale', text:'Il grande quotidiano ti offre uno spazio di replica al capo del governo: un botta e risposta che tutti leggeranno.', ch:[
+  { id:'opp_contraddittorio_giornale', era:'italia1950', kick:'Faccia a faccia', t:'Il contraddittorio sul giornale', text:'Il grande quotidiano ti offre uno spazio di replica al capo del governo: un botta e risposta che tutti leggeranno.', ch:[
     { l:'Affondo polemico, riga per riga', e:'Rumore e visibilità; rischi la statura', vis:9, gov:-3, cred:-3, pleases:'populista' },
     { l:'Replica nel merito, coi numeri', e:'Ti accrediti come alternativa seria', cred:7, gov:-2, vis:2, pleases:'tecnico' },
     { l:'Ti rivolgi al paese, sopra la lite', e:'Toni alti, da statista', cred:5, centro:3 },
   ]},
-  { era:'italia1950', kick:'Aula', t:'Lo scontro in Parlamento', text:'In aula arriva la resa dei conti col governo: un intervento che i resoconti riporteranno parola per parola.', ch:[
+  { id:'opp_scontro_parlamento', era:'italia1950', kick:'Aula', t:'Lo scontro in Parlamento', text:'In aula arriva la resa dei conti col governo: un intervento che i resoconti riporteranno parola per parola.', ch:[
     { l:'Requisitoria durissima', e:'Infiammi i tuoi banchi; toni sopra le righe', vis:8, gov:-3, cred:-3, base:3, pleases:'populista' },
     { l:'Interrogazione puntuale, documentata', e:'Metti il governo con le spalle al muro coi fatti', cred:8, gov:-2, pleases:'tecnico' },
     { l:'Discorso alto, appello al paese', e:'Parli oltre l\'aula, da alternativa seria', cred:5, centro:3 },
   ]},
-  { era:'italia1960', kick:'Faccia a faccia', t:'Il confronto in TV', cond:()=>S.year>=1960, text:'La televisione è ormai nelle case, e per la prima volta un confronto politico può andare in onda: parlare al premier davanti alle telecamere raggiunge il paese come mai prima.', ch:[
+  { id:'opp_confronto_tv', era:'italia1960', kick:'Faccia a faccia', t:'Il confronto in TV', cond:()=>S.year>=1960, text:'La televisione è ormai nelle case, e per la prima volta un confronto politico può andare in onda: parlare al premier davanti alle telecamere raggiunge il paese come mai prima.', ch:[
     { l:'Cavalchi il mezzo nuovo con foga', e:'Il volto in ogni casa; rischi l\'inesperienza', vis:9, gov:-2, cred:-3, pleases:'populista' },
     { l:'Sobrio e competente davanti alla camera', e:'Fai bella figura sul mezzo nuovo', cred:6, vis:3, pleases:'tecnico' },
     { l:'Ti presenti come alternativa serena', e:'Niente urla; parli al paese', cred:4, centro:3 },
   ]},
   /* ===== AVANZAMENTO Fase 2 · Lotto 3 — OPPOSIZIONE '60 (era:'italia1960'): la Tribuna, la piazza del '68, l'aula
      sull'apertura. Campi dichiarativi vis/gov/cred/base/centro (li applica applyOppEffect). Cura piena. ===== */
-  { era:'italia1960', kick:'Tribuna', cond:()=>S.year>=1960, t:'La Tribuna politica', text:'La nuova rubrica televisiva dà spazio anche all\'opposizione: minuti contati, davanti a tutto il paese. È un\'occasione o una trappola, secondo come la giochi.', ch:[
+  { id:'opp_tribuna_politica', era:'italia1960', kick:'Tribuna', cond:()=>S.year>=1960, t:'La Tribuna politica', text:'La nuova rubrica televisiva dà spazio anche all\'opposizione: minuti contati, davanti a tutto il paese. È un\'occasione o una trappola, secondo come la giochi.', ch:[
     { l:'Attacchi il governo senza sconti', e:'Fai rumore; rischi di apparire solo contro', vis:8, gov:-3, cred:-2, pleases:'populista' },
     { l:'Mostri la tua alternativa di governo', e:'Credibile e pronto; meno clamore', cred:6, centro:3, pleases:'tecnico' },
     { l:'Parli alla gente comune, con calma', e:'Ti avvicini a chi è indeciso', vis:4, centro:4 },
   ]},
-  { era:'italia1960', kick:'Piazza', cond:()=>S.year>=1968, t:'La piazza che monta', text:'Studenti e operai riempiono le strade: un\'onda che nessun partito controlla davvero. Dall\'opposizione puoi cavalcarla, accompagnarla o tenertene a distanza.', ch:[
+  { id:'opp_piazza_monta', era:'italia1960', kick:'Piazza', cond:()=>S.year>=1968, t:'La piazza che monta', text:'Studenti e operai riempiono le strade: un\'onda che nessun partito controlla davvero. Dall\'opposizione puoi cavalcarla, accompagnarla o tenertene a distanza.', ch:[
     { l:'Ti metti alla testa della protesta', e:'La base si accende; i moderati si spaventano', vis:8, base:5, cred:-3, pleases:'populista' },
     { l:'Accompagni le domande, non gli eccessi', e:'Dai voce senza farti travolgere', cred:5, base:2, centro:1, pleases:'tecnico' },
     { l:'Prendi le distanze dagli eccessi', e:'Rassicuri i moderati; la piazza ti volta le spalle', cred:3, centro:4, base:-3 },
   ]},
-  { era:'italia1960', kick:'Aula', cond:()=>S.year>=1962, t:'Lo scontro sull\'apertura', text:'In aula si decide la svolta del decennio: la maggioranza che si allarga a sinistra. Dall\'opposizione, come ti collochi davanti al riassetto?', ch:[
+  { id:'opp_scontro_apertura', era:'italia1960', kick:'Aula', cond:()=>S.year>=1962, t:'Lo scontro sull\'apertura', text:'In aula si decide la svolta del decennio: la maggioranza che si allarga a sinistra. Dall\'opposizione, come ti collochi davanti al riassetto?', ch:[
     { l:'Denunci il patto di potere', e:'Battaglia dura; parli al tuo zoccolo', vis:6, gov:-2, base:3, pleases:'populista' },
     { l:'Contesti nel merito le scelte', e:'Opposizione seria e competente', cred:6, centro:2, pleases:'tecnico' },
     { l:'Offri sponde su ciò che condividi', e:'Responsabile; una parte della base non capisce', cred:4, centro:3, base:-2 },
   ]},
   /* --- carte-stampa (lotto linea-media): il rapporto coi mezzi del tuo tempo — era-gated dal picker come il resto
      del pool (universale = entrambe le ere · italia1950 = solo '50 · contemporanea = solo presente). --- */
-  { kick:'Comunicazione', t:'Un giornale ti offre un\'intervista', text:'Un grande quotidiano ti offre una lunga intervista: spazio vero, domande vere.', ch:[
+  { id:'opp_giornale_offre_intervista', kick:'Comunicazione', t:'Un giornale ti offre un\'intervista', text:'Un grande quotidiano ti offre una lunga intervista: spazio vero, domande vere.', ch:[
     { l:'La usi per attaccare il governo', e:'Fai rumore; il merito resta indietro', vis:8, cred:-2, gov:-2, pleases:'populista' },
     { l:'Parli di proposte, con calma', e:'Sostanza che si nota', cred:6, vis:3, pleases:'tecnico' },
     { l:'Racconti chi sei, senza polemiche', e:'Ti avvicini al centro', vis:4, cred:2, centro:2 },
   ]},
-  { era:'italia1950', kick:'Comunicazione', t:'La prima pagina del giornale di partito', text:'Il giornale di partito prepara un numero speciale: la tua voce, dalla prima pagina fino ai circoli e alle sezioni.', ch:[
+  { id:'opp_prima_pagina_giornale', era:'italia1950', kick:'Comunicazione', t:'La prima pagina del giornale di partito', text:'Il giornale di partito prepara un numero speciale: la tua voce, dalla prima pagina fino ai circoli e alle sezioni.', ch:[
     { l:'Un editoriale di battaglia', e:'La base si scalda; i moderati diffidano', vis:6, base:3, cred:-2, pleases:'populista' },
     { l:'Un programma in dieci punti', e:'Serietà che circola nelle sezioni', cred:6, vis:2, pleases:'tecnico' },
   ]},
-  { era:'contemporanea', kick:'Comunicazione', t:'Il talk della domenica sera', text:'Il talk più seguito ti invita in studio; i social amplificheranno ogni parola, nel bene e nel male.', ch:[
+  { id:'opp_talk_domenica_sera', era:'contemporanea', kick:'Comunicazione', t:'Il talk della domenica sera', text:'Il talk più seguito ti invita in studio; i social amplificheranno ogni parola, nel bene e nel male.', ch:[
     { l:'Cerchi lo scontro in studio', e:'La clip gira ovunque; la sostanza evapora', vis:9, cred:-3, gov:-2, pleases:'populista' },
     { l:'Dati alla mano, tono fermo', e:'Ti prendi la scena nel merito', cred:6, vis:4, gov:-1, pleases:'tecnico' },
   ]},
   /* --- D2: +8 universali (capienza 20→28) — il mestiere d'opposizione senza tempo: quadri, manifesto, province,
      festa, promesse, confronto, squadra-ombra, alleanze civiche. Kick SOLO su bucket-scena mappati. --- */
-  { kick:'Partito', t:'La scuola dei quadri', text:'Il partito ha bisogno di dirigenti preparati: metti in piedi una scuola di formazione politica?', ch:[
+  { id:'opp_scuola_quadri', kick:'Partito', t:'La scuola dei quadri', text:'Il partito ha bisogno di dirigenti preparati: metti in piedi una scuola di formazione politica?', ch:[
     { l:'Investi su una scuola seria', e:'Semini classe dirigente; frutti lenti', cred:5, base:3, pleases:'tecnico' },
     { l:'Corsi rapidi di piazza e propaganda', e:'La base si attiva subito', vis:5, base:4, pleases:'populista' },
     { l:'I quadri si formano sul campo', e:'Pragmatismo; qualcuno resta indietro', base:2, cred:1 },
   ]},
-  { kick:'Comunicazione', t:'Il libro-manifesto', text:'Ti propongono di scrivere il libro che raccoglie la tua visione: manifesto o polemica?', ch:[
+  { id:'opp_libro_manifesto', kick:'Comunicazione', t:'Il libro-manifesto', text:'Ti propongono di scrivere il libro che raccoglie la tua visione: manifesto o polemica?', ch:[
     { l:'Un pamphlet di battaglia', e:'Se ne parla ovunque; divide', vis:7, base:3, cred:-2, pleases:'populista' },
     { l:'Un saggio documentato', e:'Ti prendi sul serio, e si vede', cred:6, vis:2, pleases:'tecnico' },
   ]},
-  { kick:'Territorio', t:'Il giro delle province', text:'Un mese di viaggio nelle province: dove ti fermi, e con chi parli?', ch:[
+  { id:'opp_giro_province', kick:'Territorio', t:'Il giro delle province', text:'Un mese di viaggio nelle province: dove ti fermi, e con chi parli?', ch:[
     { l:'Comizi a tappeto nelle piazze', e:'Bagni di folla: visibilità e base', vis:7, base:3, pleases:'populista' },
     { l:'Incontri con i corpi intermedi', e:'Tessi rapporti che contano', cred:5, centro:2, pleases:'tecnico' },
     { l:'Solo i territori dove sei debole', e:'Vai dove fa male: coraggio misurato', vis:4, base:2, cred:2 },
   ]},
-  { kick:'Partito', t:'La festa del partito', text:'La festa annuale: vetrina, cassa e termometro del popolo tuo. Che taglio le dai?', ch:[
+  { id:'opp_festa_partito', kick:'Partito', t:'La festa del partito', text:'La festa annuale: vetrina, cassa e termometro del popolo tuo. Che taglio le dai?', ch:[
     { l:'Festa popolare, palco e musica', e:'La base si conta e si vede', vis:6, base:4, pleases:'populista' },
     { l:'Convegno di programma', e:'Meno folla, più sostanza', cred:6, vis:2, pleases:'tecnico' },
   ]},
-  { kick:'Comunicazione', t:'Il registro delle promesse', text:'Il tuo ufficio studi tiene il conto delle promesse del governo: come lo usi?', ch:[
+  { id:'opp_registro_promesse', kick:'Comunicazione', t:'Il registro delle promesse', text:'Il tuo ufficio studi tiene il conto delle promesse del governo: come lo usi?', ch:[
     { l:'Pubblichi il registro, voce per voce', e:'Lavoro certosino che fa male al governo', cred:6, gov:-2, pleases:'tecnico' },
     { l:'Un manifesto sulle promesse tradite', e:'Sintesi brutale, eco immediata', vis:7, gov:-2, cred:-2, pleases:'populista' },
   ]},
-  { kick:'Società civile', t:'Il confronto pubblico col ministro', text:'Un\'associazione organizza un confronto pubblico tra te e un ministro in carica.', ch:[
+  { id:'opp_confronto_pubblico_col', kick:'Società civile', t:'Il confronto pubblico col ministro', text:'Un\'associazione organizza un confronto pubblico tra te e un ministro in carica.', ch:[
     { l:'Vai per vincere, affondo dopo affondo', e:'Duello rusticano: rumore e rischio', vis:7, gov:-2, cred:-2, pleases:'populista' },
     { l:'Vai per convincere, nel merito', e:'Chi ascolta ti prende sul serio', cred:6, gov:-1, pleases:'tecnico' },
   ]},
-  { kick:'Palazzo', t:'La squadra ombra', text:'Presentare una squadra di governo-ombra: responsabilità per tema, come un governo in attesa?', ch:[
+  { id:'opp_squadra_ombra', kick:'Palazzo', t:'La squadra ombra', text:'Presentare una squadra di governo-ombra: responsabilità per tema, come un governo in attesa?', ch:[
     { l:'Presenti la squadra al completo', e:'Da alternativa organizzata: credibilità su', cred:7, vis:3, pleases:'tecnico' },
     { l:'Tieni le carte coperte', e:'Nessun bersaglio agli avversari; meno slancio', base:2, cred:2 },
   ]},
-  { kick:'Società civile', t:'Le liste civiche ti cercano', text:'Una rete di liste civiche locali cerca una sponda nazionale: alleanza o autonomia?', ch:[
+  { id:'opp_liste_civiche_cercano', kick:'Società civile', t:'Le liste civiche ti cercano', text:'Una rete di liste civiche locali cerca una sponda nazionale: alleanza o autonomia?', ch:[
     { l:'Apri un patto con le civiche', e:'Radici locali per la tua sfida', base:3, centro:3, cred:2, pleases:'progressista' },
     { l:'Collaborazione caso per caso', e:'Libertà reciproca, legami deboli', cred:3, centro:1 },
     { l:'Il partito basta a sé stesso', e:'Identità netta; un ponte in meno', base:3, cred:-1, pleases:'conservatore' },

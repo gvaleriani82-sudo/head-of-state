@@ -247,7 +247,12 @@ function apriCreazione(){
   window.scrollTo(0,0);
   renderCreazione();
 }
-function chiudiCreazione(){ CREA=null; document.getElementById('crea').style.display='none'; document.getElementById('start').style.display='block'; }
+/* L62-1 — il «← Indietro» del setup: se ci sei arrivato da una porta storica torna alla LINEA DEL TEMPO,
+   non alla home. Altrimenti il giocatore che vuole cambiare porta deve rifare tutto il giro dall'inizio. */
+function chiudiCreazione(){
+  if(DA_STORICI){ tornaAiStorici(); return; }
+  CREA=null; document.getElementById('crea').style.display='none'; document.getElementById('start').style.display='block';
+}
 /* Build B — pelle d'epoca: negli scenari storici il briefing di contesto è la PRIMA cosa (prima del gabinetto).
    Once-only STRUTTURALE: proseguiAvvio è il collo-di-bottiglia della sola-partita-nuova (il load passa da applySnap,
    mai da qui) → mostrato una volta a partita, mai al reload. Niente flag in S (che pre-gabinetto non esiste ancora). */
@@ -291,6 +296,7 @@ function setCrea(campo,val){ if(!CREA) return; CREA[campo]=val;
   if(campo==='terrIdx' && CREA.livello===1) allineaEtaLocale();        // cambio carica → l'età si riallinea (35→44 a regione, 52→38 a città)
   renderCreazione(); }
 function renderCreazione(){
+  if(typeof renderPortaSetup==='function') renderPortaSetup();   // L62-1 — l'etichetta della porta (o niente, nel presente)
   const C=CREA, el=document.getElementById('crea-campi'); if(!C||!el) return;
   const tit=t=>`<div style="font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--mut);margin:16px 0 7px;">${t}</div>`;
   const seg=(campo,opts,fs)=>`<div class="seg" style="max-width:360px;margin:0 auto;">`+opts.map(o=>`<button class="${C[campo]===o.v?'on':''}" ${fs?`style="font-size:${fs}"`:''} onclick="setCrea('${campo}',${typeof o.v==='string'?`'${o.v}'`:o.v})">${o.l}</button>`).join('')+`</div>`;
@@ -396,10 +402,8 @@ async function caricaAvatarFile(input){
 /* --- Selettore Paese + Partito (schermata iniziale). Cambiando paese, PAESE diventa attivo, la cornice
    si aggiorna (applyPaese) e il partito di default torna al più forte (primo in elenco) del nuovo paese. --- */
 function setCountry(c){
-  chosenCountry=c; chosenScenario='presente'; PAESE=PAESI[c]; chosenPartito=PAESE.partiti[0].id; if(typeof renderScenariPaese==='function') renderScenariPaese();   // Build B: cambiare paese riazzera lo scenario (gli scenari sono per-paese)
+  chosenCountry=c; chosenScenario='presente'; PAESE=PAESI[c]; chosenPartito=PAESE.partiti[0].id;   // Build B: cambiare paese riazzera lo scenario (gli scenari sono per-paese)
   document.querySelectorAll('#country-seg button').forEach(b=>b.classList.toggle('on', b.dataset.c===c));
-  document.querySelectorAll('#scenario-seg button').forEach(b=>b.classList.toggle('on', b.dataset.sc==='presente'));
-  if(typeof renderScenariPaese==='function') renderScenariPaese();
   applyPaese(); renderStartParties();
   if(typeof CREA!=='undefined' && CREA) renderCreazione();   // setup aperto: il punto-di-partenza locale dipende dai territori del paese → rirendi i campi
 }
@@ -412,7 +416,6 @@ function setScenario(id){
   const base=PAESI[chosenCountry];
   PAESE = (typeof paeseConScenario==='function') ? paeseConScenario(base, sc.id==='presente'?null:sc) : base;   // (ii) overlay partiti+ue+intermedie
   chosenPartito=PAESE.partiti[0].id;
-  document.querySelectorAll('#scenario-seg button').forEach(b=>b.classList.toggle('on', b.dataset.sc===sc.id));
   document.querySelectorAll('#country-seg button').forEach(b=>b.classList.toggle('on', b.dataset.c===chosenCountry));
   applyPaese(); renderStartParties();
   if(typeof CREA!=='undefined' && CREA) renderCreazione();
@@ -455,19 +458,57 @@ function paesiConLinea(){
   });
   return out;
 }
-function renderScenarioSeg(){
-  var seg=document.getElementById('scenario-seg'); if(!seg || typeof SCENARI==='undefined') return;
-  var ids=['presente'].concat(portePaese(chosenCountry).map(function(sc){ return sc.id; }));
-  seg.innerHTML=ids.map(function(id){
-    var sc=SCENARI[id]; if(!sc) return '';
-    return '<button data-sc="'+id+'"'+(id===chosenScenario?' class="on"':'')+' onclick="setScenario(\''+id+'\')">'
-      +sogliaHtml(id)+'<span>'+T(sc.nome||id)+'</span></button>';
-  }).join('');
-}
-function renderScenariPaese(){ renderScenarioSeg(); }
+/* L62-1 — `renderScenarioSeg` e `renderScenariPaese` sono state TOLTE insieme alla striscia che riempivano,
+   e con loro le due `querySelectorAll('#scenario-seg button')` di `setCountry` e `setScenario`: codice che
+   punta a un elemento inesistente è della stessa famiglia del commento stale — non fa danni e mente.
+   Le porte storiche continuano a generarsi da `SCENARI` in `portePaese`, che resta e serve la pagina
+   storica: il difetto della porta irraggiungibile trovato in L57-1 non può tornare. */
 
+/* ================================================================================================================
+   L62-1 · UNA STRADA SOLA PER GLI SCENARI STORICI.
+   Il difetto, dal playtest: la pagina «Scenari storici» era nuova (L57-1) ma la striscia-scenario era rimasta
+   nel setup — da «Gioca oggi» si sceglieva il paese e ci si ritrovavano le porte storiche lì dentro. Due strade
+   per la stessa stanza. Ora: «Gioca oggi» → presente e basta; le porte → solo dalla pagina a due passi.
+   `DA_STORICI` è **transitorio di vista**, come `STORICI_PAESE`: la porta da cui si è entrati, per mostrarla
+   come etichetta e per sapere dove tornare. Non entra mai in `S` (non è stato di partita: è come ci sei
+   arrivato) e non sopravvive a un reload — e non deve, perché al reload si riparte dalla home.
+   ================================================================================================================ */
+var DA_STORICI=null;
+function renderPortaSetup(){
+  var box=document.getElementById('porta-fissa'), bp=document.getElementById('blocco-paese');
+  if(!box) return;
+  if(!DA_STORICI || typeof SCENARI==='undefined' || !SCENARI[DA_STORICI]){
+    box.innerHTML=''; if(bp) bp.style.display='';       // presente: il paese si sceglie, come sempre
+    return;
+  }
+  /* dalla porta storica il paese NON si sceglie: lo fissa la porta. Mostrarlo come selettore sarebbe la stessa
+     ambiguità di prima, al contrario — un comando che non comanda. Chi cambia idea torna alla linea del tempo. */
+  if(bp) bp.style.display='none';
+  var sc=SCENARI[DA_STORICI], pn=(PAESI[sc.paese]||{}).nome||sc.paese;
+  box.innerHTML='<div style="max-width:360px;margin:14px auto 0;display:flex;align-items:center;gap:10px;'
+    +'padding:10px 12px;border:1px solid var(--line2);border-radius:10px;text-align:left">'
+    +sogliaHtml(sc.id)
+    +'<div style="flex:1;min-width:0">'
+      +'<div style="font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--mut)">'+T('Scenario')+'</div>'
+      +'<div style="font-weight:600">'+T(pn)+', '+(sc.anno||'')+'</div>'
+    +'</div></div>'
+    +'<div style="max-width:360px;margin:6px auto 0;text-align:left">'
+      +'<button onclick="tornaAiStorici()" style="background:transparent;border:none;color:var(--mut);'
+      +'font-family:inherit;font-size:13px;cursor:pointer;padding:2px 0;text-decoration:underline">'
+      +'← '+T('Cambia porta')+'</button></div>';
+}
+function tornaAiStorici(){     // dal setup si torna alla LINEA DEL TEMPO del paese giusto, non alla lista dei paesi
+  var sc=(typeof SCENARI!=='undefined' && DA_STORICI) ? SCENARI[DA_STORICI] : null;
+  DA_STORICI=null;
+  if(typeof CREA!=='undefined') CREA=null;
+  document.getElementById('crea').style.display='none';
+  STORICI_PAESE=(sc && sc.paese) ? sc.paese : null;
+  document.getElementById('storici').style.display='block';
+  window.scrollTo(0,0); renderStorici();
+}
 /* ---- I DUE MODI DELLA HOME ---- */
 function avviaOggi(){          // il presente, dritto: un tocco in meno (lo scenario non si sceglie più)
+  DA_STORICI=null;
   if(typeof setScenario==='function') setScenario('presente');
   apriCreazione();
 }
@@ -490,6 +531,7 @@ function storiciPaese(c){ STORICI_PAESE=c; renderStorici(); window.scrollTo(0,0)
 function storiciPorta(id){     // scelta la porta: si entra nel setup con paese e scenario già impostati
   document.getElementById('storici').style.display='none';
   if(typeof setScenario==='function') setScenario(id);
+  DA_STORICI=id;               // L62-1 — dopo setScenario: il setup la mostra come etichetta e sa dove tornare
   apriCreazione();
 }
 function renderStorici(){
