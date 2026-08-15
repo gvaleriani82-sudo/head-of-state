@@ -1887,6 +1887,25 @@ const BEAT_LEGGERI = [
   {id:'lg_festa_paese', era:'contemporanea', registro:'leggero', kick:'Il paese', t:'La festa di paese, oggi', text:'La piazza si riempie di banchi di cibo di strada e di un concertino dal vivo: la sagra di una volta, con le luci nuove e la fila per il panino gourmet.', ch:[
     {l:'Fai il giro di tutti i banchi', e:'Un assaggio a testa', f:function(){}},
     {l:'Ti siedi e ascolti la musica', e:'La fila può aspettare', f:function(){}} ]},
+  /* L68-2 — QUESTI CINQUE ERANO DENTRO `ENTI_INT`, non qui. L44-2 li dichiaro' chiusi e non sono
+     mai esistiti: incollati nel contenitore sbagliato, non venivano mai pescati come beat, e in piu'
+     facevano CROLLARE la scheda Paese (`cap(T(E.nome))` su una voce senza `nome` — charAt di undefined).
+     Forma giusta, pool sbagliato: `node --check` verde e nessuna guardia in grado di vederlo. */
+  {id:'lg00_berlino', era:'italia2000', registro:'leggero', cond:()=>S.year===2006, kick:'Il paese', t:'La notte di Berlino', text:'Un\'estate cominciata nei tribunali sportivi finisce a Berlino con la coppa: il paese che due mesi prima si vergognava del suo calcio ora abbraccia sconosciuti per strada.', ch:[
+    {l:'Scendi in strada anche tu', e:'Certe notti non si guardano dalla finestra', f:function(){}},
+    {l:'Guardi i caroselli dalla finestra', e:'Il paese festeggia senza bisogno di te', f:function(){}} ]},
+  {id:'lg00_reality', era:'italia2000', registro:'leggero', cond:()=>S.year>=2001, kick:'Il paese', t:'I reality', text:'Persone comuni chiuse in una casa, il paese che guarda: la TV scopre che la realtà, opportunamente montata, batte la fiction.', ch:[
+    {l:'Provi a guardarne una puntata', e:'Capisci più di quanto vorresti ammettere', f:function(){}},
+    {l:'Cambi canale', e:'Il paese però lo guarda', f:function(){}} ]},
+  {id:'lg00_lowcost', era:'italia2000', registro:'leggero', cond:()=>S.year>=2003, kick:'Il paese', t:'Il volo low-cost', text:'Weekend a venti euro: una generazione scopre l\'Europa a colpi di bagaglio a mano.', ch:[
+    {l:'Ti fai raccontare dove sono stati', e:'Vanno più lontano di quanto andavi tu', f:function(){}},
+    {l:'Pensi ai treni che non funzionano', e:'Anche quello è un problema tuo', f:function(){}} ]},
+  {id:'lg00_navigatore', era:'italia2000', registro:'leggero', cond:()=>S.year>=2005, kick:'Il paese', t:'Il navigatore', text:'La voce che dice «svolta a destra» entra in macchina: le litigate sulle cartine finiscono, ne cominciano altre.', ch:[
+    {l:'Ti affidi alla voce', e:'Ti porta in una strada chiusa', f:function(){}},
+    {l:'Tieni la cartina nel cruscotto', e:'Per ogni evenienza', f:function(){}} ]},
+  {id:'lg00_squillo', era:'italia2000', registro:'leggero', cond:()=>S.year>=2002&&S.year<=2006, kick:'Il paese', t:'Lo squillo', text:'Suonerie polifoniche, SMS a pagamento, lo squillo che vuol dire «pensami»: il telefonino inventa i suoi riti.', ch:[
+    {l:'Impari il codice degli squilli', e:'Un linguaggio nuovo, gratis', f:function(){}},
+    {l:'Richiami e basta', e:'Alla vecchia maniera', f:function(){}} ]}
 ];
 
 /* ===== F1 — LA TELEFONATA. Un'interruzione, non una carta: overlay a squillo, due opzioni secche, decisione a
@@ -4862,23 +4881,6 @@ const ENTI_INT=[
   nomeNA:'il blocco occidentale', breveNA:'Occidente', descNA:'uno dei due poli che ti corteggiano',
   ancora:()=> nonAllineato() ? 50 + [-12,2,14][lv('linea_estera')]
     : 50 + [-10,0,12][lv('linea_estera')] + [-4,0,8][lv('difesa')] + [0,0,4][lv('industria_difesa')] },
-  /* L44-2 · i 5 beat del 2000 (scheda §TESTI PRONTI). Effetto zero, come tutti i beat-leggeri. */
-  {id:'lg00_berlino', era:'italia2000', registro:'leggero', cond:()=>S.year===2006, kick:'Il paese', t:'La notte di Berlino', text:'Un\'estate cominciata nei tribunali sportivi finisce a Berlino con la coppa: il paese che due mesi prima si vergognava del suo calcio ora abbraccia sconosciuti per strada.', ch:[
-    {l:'Scendi in strada anche tu', e:'Certe notti non si guardano dalla finestra', f:function(){}},
-    {l:'Guardi i caroselli dalla finestra', e:'Il paese festeggia senza bisogno di te', f:function(){}} ]},
-  {id:'lg00_reality', era:'italia2000', registro:'leggero', cond:()=>S.year>=2001, kick:'Il paese', t:'I reality', text:'Persone comuni chiuse in una casa, il paese che guarda: la TV scopre che la realtà, opportunamente montata, batte la fiction.', ch:[
-    {l:'Provi a guardarne una puntata', e:'Capisci più di quanto vorresti ammettere', f:function(){}},
-    {l:'Cambi canale', e:'Il paese però lo guarda', f:function(){}} ]},
-  {id:'lg00_lowcost', era:'italia2000', registro:'leggero', cond:()=>S.year>=2003, kick:'Il paese', t:'Il volo low-cost', text:'Weekend a venti euro: una generazione scopre l\'Europa a colpi di bagaglio a mano.', ch:[
-    {l:'Ti fai raccontare dove sono stati', e:'Vanno più lontano di quanto andavi tu', f:function(){}},
-    {l:'Pensi ai treni che non funzionano', e:'Anche quello è un problema tuo', f:function(){}} ]},
-  {id:'lg00_navigatore', era:'italia2000', registro:'leggero', cond:()=>S.year>=2005, kick:'Il paese', t:'Il navigatore', text:'La voce che dice «svolta a destra» entra in macchina: le litigate sulle cartine finiscono, ne cominciano altre.', ch:[
-    {l:'Ti affidi alla voce', e:'Ti porta in una strada chiusa', f:function(){}},
-    {l:'Tieni la cartina nel cruscotto', e:'Per ogni evenienza', f:function(){}} ]},
-  {id:'lg00_squillo', era:'italia2000', registro:'leggero', cond:()=>S.year>=2002&&S.year<=2006, kick:'Il paese', t:'Lo squillo', text:'Suonerie polifoniche, SMS a pagamento, lo squillo che vuol dire «pensami»: il telefonino inventa i suoi riti.', ch:[
-    {l:'Impari il codice degli squilli', e:'Un linguaggio nuovo, gratis', f:function(){}},
-    {l:'Richiami e basta', e:'Alla vecchia maniera', f:function(){}} ]},
-
  {id:'consesso', nome:'le Nazioni Unite', breve:'ONU', desc:'l\'ONU e i grandi fori multilaterali',
   descNA:'i fori multilaterali: il tuo palco da non allineato',
   ancora:()=> nonAllineato() ? 50 + [2,8,2][lv('linea_estera')] + [-4,0,8][lv('cooperazione')]

@@ -492,9 +492,12 @@ function renderPortaSetup(){
       +'<div style="font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--mut)">'+T('Scenario')+'</div>'
       +'<div style="font-weight:600">'+T(pn)+', '+(sc.anno||'')+'</div>'
     +'</div></div>'
-    +'<div style="max-width:360px;margin:6px auto 0;text-align:left">'
-      +'<button onclick="tornaAiStorici()" style="background:transparent;border:none;color:var(--mut);'
-      +'font-family:inherit;font-size:13px;cursor:pointer;padding:2px 0;text-decoration:underline">'
+    /* L68-1 — anche il ritorno è un bersaglio toccabile: era alto 20,6px, il peggiore di tutta la strada
+       storica (ed era mio, di L62-1). min-height 44 e il testo resta a 13px. */
+    +'<div style="max-width:360px;margin:2px auto 0;text-align:left">'
+      +'<button onclick="tornaAiStorici()" style="display:inline-flex;align-items:center;min-height:44px;'
+      +'background:transparent;border:none;color:var(--mut);'
+      +'font-family:inherit;font-size:13px;cursor:pointer;padding:0 8px 0 0;text-decoration:underline">'
       +'← '+T('Cambia porta')+'</button></div>';
 }
 function tornaAiStorici(){     // dal setup si torna alla LINEA DEL TEMPO del paese giusto, non alla lista dei paesi
@@ -550,20 +553,23 @@ function renderStorici(){
     return;
   }
   var porte=portePaese(STORICI_PAESE), pn=(PAESI[STORICI_PAESE]||{}).nome||STORICI_PAESE;
+  /* L68-1 — la linea del tempo è una LISTA VERTICALE, una riga per decennio: miniatura a sinistra, l'anno
+     grande a destra col suo briefing. Sette porte in orizzontale su 375px non ci stanno, e nessuna taratura
+     le fa stare. Il briefing era una lista SEPARATA sotto la striscia (stessi nomi, due volte): adesso sta
+     dentro la riga che apre quella porta, che è il posto dove serve per scegliere.
+     Una forma sola a ogni larghezza, non due: L57-1 insegna che ciò che non si esegue nessuno lo controlla. */
   b.innerHTML='<div class="em" style="margin:0 0 4px">'+T(pn)+'</div>'
     +'<p style="font-size:13.5px;color:var(--mut);margin:0 0 16px;line-height:1.5">'
     +T('La linea del tempo: scegli da dove cominciare.')+'</p>'
-    +'<div class="seg" id="storici-linea">'+porte.map(function(sc){
-        return '<button onclick="storiciPorta(\''+sc.id+'\')">'+sogliaHtml(sc.id)
-          +'<span>'+T(sc.nome)+'</span></button>';
-      }).join('')+'</div>'
-    +porte.map(function(sc){
+    +'<div class="linea-porte" id="storici-linea">'+porte.map(function(sc){
         var riga=(sc.intro||'');
-        return '<div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--line2)">'
-          +'<div style="font-weight:600;font-size:14px">'+T(sc.nome)+'</div>'
-          +(riga?'<div style="font-size:13px;color:var(--mut);line-height:1.5;margin-top:3px">'+T(riga)+'</div>':'')
-          +'</div>';
-      }).join('');
+        return '<button aria-label="'+escAttr(T(sc.nome))+'" onclick="storiciPorta(\''+sc.id+'\')">'
+          +sogliaHtml(sc.id)
+          +'<span class="pt-txt">'
+            +'<span class="pt-anno">'+(sc.anno||T(sc.nome))+'</span>'
+            +(riga?'<span class="pt-brief">'+T(riga)+'</span>':'')
+          +'</span></button>';
+      }).join('')+'</div>';
 }
 function renderStartParties(){
   const el=document.getElementById('party-list'); if(!el) return;
@@ -1816,23 +1822,27 @@ function renderLegge(L){
 /* Riga RP+saldo col mese intessuto, in testata STICKY (resta visibile sotto l'header mentre scorri).
    UN SOLO componente per Bilancio e pagine-ministero: stessa riga, stesso comportamento ovunque si
    cambino politiche/leggi. Sempre aggiornata gratis: setPol/setLegge chiamano render(). */
+/* L68-2 — questa testata e tutta la scheda Bilancio erano scritte CRUDE, senza `T()`: in una partita in
+   inglese comparivano in italiano. La guardia i18n non poteva vederlo (vede gli orfani, non le chiavi
+   mancanti) e lo scan `T(x)===x` l'abbiamo sempre fatto sulle stringhe che il lotto AGGIUNGEVA, mai su
+   quelle che c'erano gia. Le ha trovate il cammino in EN fino al primo mese. */
 function budgetRow(){
   const def=computeDeficit();
-  return `<div class="sticky-top"><div class="budget"><div class="b"><div class="l">Punti riforma · ${T(MONTHS[S.month-1])} — ${S.month===1?'manovra':'decreti'}</div><div class="v">${rpLeft()} / ${curRpMax()}</div></div>
-    <div class="b"><div class="l">Saldo previsto</div><div class="v" style="color:${def<=3?'var(--pos)':def<=4?'var(--warn)':'var(--neg)'}">${def<=0?'Avanzo':'Deficit'} ${fmt(Math.abs(def),1)}%</div></div></div></div>`;
+  return `<div class="sticky-top"><div class="budget"><div class="b"><div class="l">${T('Punti riforma')} · ${T(MONTHS[S.month-1])} — ${T(S.month===1?'manovra':'decreti')}</div><div class="v">${rpLeft()} / ${curRpMax()}</div></div>
+    <div class="b"><div class="l">${T('Saldo previsto')}</div><div class="v" style="color:${def<=3?'var(--pos)':def<=4?'var(--warn)':'var(--neg)'}">${T(def<=0?'Avanzo':'Deficit')} ${fmt(Math.abs(def),1)}%</div></div></div></div>`;
 }
 function renderPol(){
   if(S.opposizione){
     let h=`<div class="banner" style="border-color:var(--neg)">${T("<b>Governa %P.</b> All'opposizione non vari il bilancio: le politiche le decide il governo in carica. Ne vedi gli effetti nella scheda <b>Paese</b>, e la tua risalita in <b>Partiti</b>.").replace('%P',T((part(S.governoAvversario)||{}).nome||'—'))}</div>`;
-    h+=`<div class="card g2"><div class="ct">Leggi in vigore</div>${leggiDelPaese().map(renderLegge).join('')}</div>`;
+    h+=`<div class="card g2"><div class="ct">${T('Leggi in vigore')}</div>${leggiDelPaese().map(renderLegge).join('')}</div>`;
     document.getElementById('sec-pol').innerHTML=h;
     return;
   }
   if(S.livello===1){
     /* da politico locale: il bilancio è quello della tua città/regione (le leve locali) */
-    let h=`<div class="banner"><b>Bilancio ${diLuogo(S.locale.nome)}.</b> Imposta le tue leve: più servizi migliorano gli indicatori ma costano al bilancio; i tributi lo rimpinguano ma pesano sul consenso.</div>`;
+    let h=`<div class="banner">${T('<b>Bilancio %L.</b> Imposta le tue leve: più servizi migliorano gli indicatori ma costano al bilancio; i tributi lo rimpinguano ma pesano sul consenso.').replace('%L',diLuogo(S.locale.nome))}</div>`;
     h+=`<div class="card"><div class="ct">${T('Le tue leve')}</div>${renderLocaleLeve()}</div>`;
-    h+=`<div class="card"><div class="ct">Stato della ${S.locale.tipo==='città'?'città':'regione'}</div>${renderLocaleInd()}</div>`;
+    h+=`<div class="card"><div class="ct">${T(S.locale.tipo==='città'?'Stato della città':'Stato della regione')}</div>${renderLocaleInd()}</div>`;
     document.getElementById('sec-pol').innerHTML=h;
     return;
   }
@@ -1840,18 +1850,20 @@ function renderPol(){
     /* da ministro controlli solo il TUO settore: il resto del bilancio è del premier (in lettura) */
     const Mn=(typeof dicNm==='function'?dicNm(S.dicastero):((MINISTRIES.find(x=>x.id===S.dicastero)||{}).nm||''));   // D3: nome era-aware
     let h=budgetRow();
-    h+=`<div class="banner"><b>Bilancio del tuo dicastero.</b> Governa il paese ${escAttr((S.premier||{}).nome||'il premier')}: il bilancio nazionale è suo. Tu vari le politiche e le leggi di <b>${Mn}</b> (i tuoi punti riforma).</div>`;
+    h+=`<div class="banner">${T('<b>Bilancio del tuo dicastero.</b> Governa il paese %P: il bilancio nazionale è suo. Tu vari le politiche e le leggi di <b>%M</b> (i tuoi punti riforma).').replace('%P',escAttr((S.premier||{}).nome||T('il premier'))).replace('%M',T(Mn))}</div>`;
     const pols=POLICIES.filter(p=>p.min===S.dicastero);
-    if(pols.length) h+=`<div class="card"><div class="ct">Politiche di ${Mn}</div>${pols.map(renderPolicySlider).join('')}</div>`;
+    if(pols.length) h+=`<div class="card"><div class="ct">${T('Politiche di %M').replace('%M',T(Mn))}</div>${pols.map(renderPolicySlider).join('')}</div>`;
     const laws=leggiDelPaese().filter(L=>L.min===S.dicastero);
-    if(laws.length) h+=`<div class="card g2"><div class="ct">Leggi di ${Mn}</div>${laws.map(renderLegge).join('')}</div>`;
+    if(laws.length) h+=`<div class="card g2"><div class="ct">${T('Leggi di %M').replace('%M',T(Mn))}</div>${laws.map(renderLegge).join('')}</div>`;
     document.getElementById('sec-pol').innerHTML=h;
     return;
   }
   let h=budgetRow();
   h+= S.month===1
-    ? `<div class="banner"><b>Gennaio — legge di bilancio.</b> Manovra: <b>+3 punti</b>${(!S.opposizione&&(S.potereLocale||0)>50)?` <b>+1</b> dal territorio`:''} — in cassa ne hai <b>${curRpMax()}</b>. Imposta l'anno.</div>`
-    : `<div class="banner"><b>${T(MONTHS[S.month-1])} — decreti.</b> <b>+1 punto al mese</b>, fino a <b>3 in cassa</b>: risparmiando puoi varare una riforma grossa anche fuori manovra.</div>`;
+    ? `<div class="banner">${T((!S.opposizione&&(S.potereLocale||0)>50)
+        ? '<b>Gennaio — legge di bilancio.</b> Manovra: <b>+3 punti</b> <b>+1</b> dal territorio — in cassa ne hai <b>%N</b>. Imposta l\'anno.'
+        : '<b>Gennaio — legge di bilancio.</b> Manovra: <b>+3 punti</b> — in cassa ne hai <b>%N</b>. Imposta l\'anno.').replace('%N',curRpMax())}</div>`
+    : `<div class="banner">${T('<b>%M — decreti.</b> <b>+1 punto al mese</b>, fino a <b>3 in cassa</b>: risparmiando puoi varare una riforma grossa anche fuori manovra.').replace('%M',T(MONTHS[S.month-1]))}</div>`;
   /* Loop attivo Lotto 3: la scheda dice SUBITO quale politica è sotto pressione e la mossa — così non cerchi tra i cursori */
   const _spP=(typeof politicaSottoPressione==='function')?politicaSottoPressione():null;
   if(_spP){ const P=POLICIES.find(function(x){return x.id===_spP.pol;})||{}; const pnm=(typeof naLabel==='function'&&naLabel()&&P.nmNA)?P.nmNA:P.nm;

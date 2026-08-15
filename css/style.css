@@ -106,25 +106,44 @@
   .seg button{flex:1; padding:9px 4px; border:1px solid var(--line); background:var(--bg2); color:var(--mut);
     border-radius:9px; font-size:12px; font-weight:500; cursor:pointer; font-family:inherit; line-height:1.15;}
   .seg button.on{background:var(--brand-bg); color:var(--txt); border-color:var(--brand); box-shadow:inset 0 0 0 1px var(--brand);}
-  /* L9-1 — le due SOGLIE di scenario: miniatura sopra l'etichetta, per far sentire il salto d'epoca */
-  #scenario-seg button{ display:flex; flex-direction:column; align-items:center; gap:6px; padding:7px 5px; }
-  #scenario-seg .soglia-thumb{ width:100%; aspect-ratio:16/9; object-fit:cover; border-radius:7px; display:block; }
-  /* L30-1 - il terzo scenario non ha ancora la sua miniatura: segnaposto con lo STESSO ingombro, cosi i bottoni
-     restano allineati e il degrado e pulito (nessun buco, nessun salto di layout quando l immagine arrivera). */
-  #scenario-seg .soglia-vuota{ background:var(--panel2); border:1px dashed var(--line); }
-  #scenario-seg button{ min-width:0; }
-  #scenario-seg button span[data-i18n]{ font-size:11px; }
-  /* L35-1 - con CINQUE porte una riga sola a 375px darebbe bottoni da ~64px: le etichette («Italia 1950») si
-     spezzerebbero male. Stessa medicina del selettore-paese: GRIGLIA che va a capo, tre e due, mai scroll
-     orizzontale. Le colonne sono a frazioni uguali, quindi le due righe restano allineate fra loro. */
-  #scenario-seg{ display:grid; grid-template-columns:repeat(3, 1fr); gap:5px; }
-  @media(min-width:520px){ #scenario-seg{ grid-template-columns:repeat(5, 1fr); } }
+  /* ============================================================================================================
+     L68-1 — LA MINIATURA DI SOGLIA HA UNA TAGLIA SUA, non ereditata da un contenitore.
+     ⚑ Il difetto del playtest nasceva qui: tutte le regole di `.soglia-thumb` stavano sotto `#scenario-seg`,
+     la striscia che L62-1 ha TOLTO. Il CSS non si rompe quando il suo selettore sparisce — smette di
+     applicarsi, in silenzio. Da allora l'immagine rendeva alla sua taglia naturale (1600×900) dentro un
+     bottone da 47px: la pagina «Scenari storici» scorreva 9712px su uno schermo da 375 (26 volte), e la
+     stessa cosa succedeva all'etichetta-porta del setup. È la famiglia del commento stale, in CSS.
+     Ora la taglia sta sulla classe, quindi vale ovunque la miniatura compaia.
+     ============================================================================================================ */
+  .soglia-thumb{ width:72px; aspect-ratio:16/9; object-fit:cover; border-radius:7px; display:block; flex:0 0 auto; }
+  /* L30-1 — chi non ha ancora la miniatura riceve un segnaposto con lo STESSO ingombro: nessun buco, nessun
+     salto di layout quando l'immagine arriverà (le porte inglesi sono tutte così, oggi). */
+  .soglia-vuota{ background:var(--panel2); border:1px dashed var(--line); }
   .seg button:disabled{opacity:.45; cursor:default;}
+  /* ============================================================================================================
+     L68-1 — LA LINEA DEL TEMPO, in verticale. Una riga per decennio: miniatura, l'anno grande, il briefing.
+     Il controllo segmentato `.seg` è fatto per bottoni di TESTO affiancati: con sei o sette porte a 375px
+     dà bottoni da ~48px, dove nessuna etichetta può essere leggibile. Bersaglio: riga toccabile ≥44px
+     (qui 64 di minimo) ed etichette ≥12px, misurate — non solo «non sfora».
+     ============================================================================================================ */
+  .linea-porte{ display:flex; flex-direction:column; gap:8px; }
+  .linea-porte button{ display:flex; align-items:center; gap:11px; width:100%; min-height:64px;
+    padding:10px 12px; text-align:left; background:var(--panel); border:1px solid var(--line);
+    border-radius:12px; color:var(--txt); font-family:inherit; cursor:pointer; }
+  .linea-porte .pt-txt{ flex:1; min-width:0; display:block; }
+  .linea-porte .pt-anno{ display:block; font-family:'IBM Plex Mono',monospace; font-size:20px;
+    font-weight:600; line-height:1.1; letter-spacing:.02em; }
+  .linea-porte .pt-brief{ display:block; font-size:12px; color:var(--mut); line-height:1.45; margin-top:4px; }
   /* selettore paese: bandiera impilata sopra l'etichetta. GRIGLIA responsive (16 paesi) → va a capo su più righe,
      niente sforo orizzontale a 375px (prima era un flex-row che con 16 bottoni schiacciava/sforava). */
-  #country-seg{display:grid; grid-template-columns:repeat(4,1fr); gap:6px;}
-  #country-seg button{display:flex; flex-direction:column; align-items:center; gap:4px; padding:8px 3px;
-    font-size:10.5px; line-height:1.12; min-width:0; word-break:break-word; text-align:center;}
+  /* L68-1 — con sedici paesi la griglia a QUATTRO colonne dà 80px di larghezza e costringeva l'etichetta a
+     10,5px: sotto il minimo leggibile. TRE colonne su schermo stretto (≈110px) reggono i 12px, e i nomi
+     lunghi («Regno Unito», «Paesi Bassi») vanno a capo invece di rimpicciolirsi. Da quattro in su appena
+     c'è spazio. Il bersaglio tattile è esplicito, non lasciato al risultato del padding. */
+  #country-seg{display:grid; grid-template-columns:repeat(3,1fr); gap:6px;}
+  @media(min-width:420px){ #country-seg{ grid-template-columns:repeat(4,1fr); } }
+  #country-seg button{display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px;
+    padding:8px 3px; min-height:52px; font-size:12px; line-height:1.15; min-width:0; word-break:break-word; text-align:center;}
   #country-seg .flag{width:26px; height:17px;}
 
   .budget{background:var(--panel2); border:1px solid var(--line2); border-radius:var(--r); padding:12px 14px; margin-bottom:12px; display:flex; gap:14px; justify-content:space-between;}
@@ -244,10 +263,15 @@
   .apt{margin-bottom:12px;} .apt .role{font-size:11px; color:var(--acc-ink); text-transform:uppercase; letter-spacing:.1em;}
   .apt .desc{font-size:12px; color:var(--mut); margin:2px 0 8px;}
   .cands{display:flex; flex-direction:column; gap:7px;}
-  .cand{display:flex; justify-content:space-between; align-items:center; gap:10px; text-align:left; background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:11px 13px; color:var(--txt); cursor:pointer; font-family:inherit;}
+  /* L68-1 — min-height esplicita: il bersaglio tattile non si lascia al risultato del padding (era 40px, sotto
+     i 44 che ci siamo dati). Cresce solo ciò che era sotto la soglia: le schede più alte non si muovono. */
+  .cand{display:flex; justify-content:space-between; align-items:center; gap:10px; min-height:44px; text-align:left; background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:11px 13px; color:var(--txt); cursor:pointer; font-family:inherit;}
   .cand.on{border-color:var(--acc); box-shadow:inset 0 0 0 1px var(--acc); background:var(--panel2);}
   .cand .cn{font-weight:600; font-size:13.5px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
   .cand .cmeta{display:flex; align-items:center; gap:8px; flex-shrink:0;}
+  /* L68-1 — il `small` dentro una scheda non era mai stato stilizzato: prendeva il default del browser
+     (0,83em → 11,1px), sotto il minimo che ci siamo dati. Una regola con un'eccezione è una regola che muore. */
+  .cand small{font-size:12px;}
   /* L10-2 — il volto del candidato nella nomina: tondo ridotto a 34px (375px), nome che tronca invece di andare a capo */
   .cand .cleft{display:flex; align-items:center; gap:9px; min-width:0;}
   .cand .avatar{width:34px; height:34px; font-size:16px; flex-shrink:0;}

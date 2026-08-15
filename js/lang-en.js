@@ -10720,4 +10720,20 @@ const EN = {
   "Italia, 1970. Il miracolo è alle spalle e l'autunno caldo ha appena cambiato le fabbriche: salari su, Statuto in arrivo, le Regioni al debutto. Il paese è più ricco, più istruito e più inquieto di quanto sia mai stato.":"Italy, 1970. The economic miracle is behind us and the \"hot autumn\" has just changed the factories: wages up, the Workers' Statute on its way, the Regions making their debut. The country is richer, better educated and more restless than it has ever been.",
   "Da pochi mesi, a Milano, una bomba ha aperto una stagione che nessuno sa ancora nominare. Le piazze sono piene, le tensioni pure; la lira scricchiola e il petrolio, fra tre anni, presenterà il conto.":"A few months ago, in Milan, a bomb opened a season nobody yet knows how to name. The squares are full, and so are the tensions; the lira is creaking, and oil, three years from now, will present its bill.",
   "Governare qui significa tenere insieme conti che peggiorano e un paese che chiede diritti nuovi. All'opposizione, significa scegliere fra la spallata e la lunga marcia.":"To govern here means holding together worsening accounts and a country demanding new rights. In opposition, it means choosing between the sudden push and the long march.",
+
+  /* L68-2 — la scheda Bilancio: era scritta cruda, senza T(), e in inglese restava in italiano */
+  "Punti riforma":"Reform points",
+  "manovra":"budget bill",
+  "decreti":"decrees",
+  "Saldo previsto":"Projected balance",
+  "Leggi in vigore":"Laws in force",
+  "Stato della città":"State of the city",
+  "Stato della regione":"State of the region",
+  "Politiche di %M":"%M policies",
+  "Leggi di %M":"%M laws",
+  "<b>Bilancio %L.</b> Imposta le tue leve: più servizi migliorano gli indicatori ma costano al bilancio; i tributi lo rimpinguano ma pesano sul consenso.":"<b>Budget %L.</b> Set your levers: more services improve the indicators but cost the budget; taxes top it up but weigh on your support.",
+  "<b>Bilancio del tuo dicastero.</b> Governa il paese %P: il bilancio nazionale è suo. Tu vari le politiche e le leggi di <b>%M</b> (i tuoi punti riforma).":"<b>Your ministry's budget.</b> %P governs the country: the national budget is theirs. You pass the policies and laws of <b>%M</b> (your reform points).",
+  "<b>Gennaio — legge di bilancio.</b> Manovra: <b>+3 punti</b> <b>+1</b> dal territorio — in cassa ne hai <b>%N</b>. Imposta l'anno.":"<b>January — the budget law.</b> The budget bill brings <b>+3 points</b> <b>+1</b> from the territory — you now hold <b>%N</b>. Set the year.",
+  "<b>Gennaio — legge di bilancio.</b> Manovra: <b>+3 punti</b> — in cassa ne hai <b>%N</b>. Imposta l'anno.":"<b>January — the budget law.</b> The budget bill brings <b>+3 points</b> — you now hold <b>%N</b>. Set the year.",
+  "<b>%M — decreti.</b> <b>+1 punto al mese</b>, fino a <b>3 in cassa</b>: risparmiando puoi varare una riforma grossa anche fuori manovra.":"<b>%M — decrees.</b> <b>+1 point a month</b>, up to <b>3 in hand</b>: by saving them you can pass a big reform outside the budget too.",
 };
