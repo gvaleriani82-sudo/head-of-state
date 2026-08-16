@@ -52,7 +52,7 @@
            «Scenari storici» apre la pagina a due passi, paese → linea del tempo. -->
       <button class="btn" data-i18n style="padding:14px 26px;margin-top:4px;" onclick="avviaOggi()">Gioca oggi</button>
       <div style="margin-top:10px;"><button class="btn" data-i18n style="padding:12px 22px;background:transparent;color:var(--brand);border:1px solid var(--brand)" onclick="apriStorici()">Scenari storici</button></div>
-      <div style="margin-top:14px;"><button data-i18n onclick="showHelp()" style="background:transparent; border:none; color:var(--mut); font-family:inherit; font-size:13px; text-decoration:underline; cursor:pointer;">Come si gioca</button></div>
+      <div style="margin-top:6px;"><button class="link-btn" data-i18n onclick="showHelp()">Come si gioca</button></div>
       <div id="start-profile"></div>
     </div>
   </div>
@@ -138,7 +138,7 @@
       <!-- input file nascosto per «Carica la tua foto» (fuori da #crea-campi: persiste ai re-render). -->
       <input type="file" id="crea-foto" accept="image/*" style="display:none" onchange="caricaAvatarFile(this)">
       <button class="btn" id="crea-btn" style="padding:14px 26px;margin-top:20px;" data-i18n onclick="confermaCreazione()">Avanti →</button>
-      <div style="margin-top:14px;"><button data-i18n onclick="saltaCreazione()" style="background:transparent;border:none;color:var(--mut);font-family:inherit;font-size:13px;text-decoration:underline;cursor:pointer;">Salta: personaggio neutro</button></div>
+      <div style="margin-top:6px;"><button class="link-btn" data-i18n onclick="saltaCreazione()">Salta: personaggio neutro</button></div>
     </div>
   </div>
 
@@ -160,8 +160,8 @@
         <div style="display:flex; align-items:flex-end; gap:10px;"><div id="hdr-avatar" class="hdr-avatar" style="display:none;"></div>
         <div class="brand"><span class="k">Head of State</span><div class="namerow"><span class="flag" id="hdr-flag"></span><h1 id="hdr-paese"></h1></div></div></div>
         <div style="display:flex; align-items:center; gap:10px;">
-          <button onclick="showPartita()" aria-label="Salva e carica" style="width:30px; height:30px; flex-shrink:0; border-radius:50%; border:1px solid var(--line2); background:var(--panel2); color:var(--mut); font-size:15px; font-weight:700; line-height:1; cursor:pointer; font-family:inherit;">≡</button>
-          <button onclick="showHelp()" aria-label="Come si gioca" style="width:30px; height:30px; flex-shrink:0; border-radius:50%; border:1px solid var(--line2); background:var(--panel2); color:var(--mut); font-size:15px; font-weight:700; line-height:1; cursor:pointer; font-family:inherit;">?</button>
+          <button onclick="showPartita()" aria-label="Salva e carica" class="tondo-btn">≡</button>
+          <button onclick="showHelp()" aria-label="Come si gioca" class="tondo-btn">?</button>
           <div class="clock"><div class="yr mono" id="yr">2025</div><div class="el" id="el"></div></div>
         </div>
       </div>

@@ -299,7 +299,11 @@ function renderCreazione(){
   if(typeof renderPortaSetup==='function') renderPortaSetup();   // L62-1 — l'etichetta della porta (o niente, nel presente)
   const C=CREA, el=document.getElementById('crea-campi'); if(!C||!el) return;
   const tit=t=>`<div style="font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--mut);margin:16px 0 7px;">${t}</div>`;
-  const seg=(campo,opts,fs)=>`<div class="seg" style="max-width:360px;margin:0 auto;">`+opts.map(o=>`<button class="${C[campo]===o.v?'on':''}" ${fs?`style="font-size:${fs}"`:''} onclick="setCrea('${campo}',${typeof o.v==='string'?`'${o.v}'`:o.v})">${o.l}</button>`).join('')+`</div>`;
+  /* L69-1 — il terzo parametro era la TAGLIA DEL TESTO, e serviva solo a scendere sotto il minimo
+     leggibile (10,5px per «Punto di partenza», 11,5px per «Orientamento»). Tolto il parametro, non solo
+     i due casi: finché il meccanismo esiste, l'eccezione torna. Le etichette lunghe adesso vanno a capo
+     dentro i 44px, che è il comportamento giusto. */
+  const seg=(campo,opts)=>`<div class="seg" style="max-width:360px;margin:0 auto;">`+opts.map(o=>`<button class="${C[campo]===o.v?'on':''}" onclick="setCrea('${campo}',${typeof o.v==='string'?`'${o.v}'`:o.v})">${o.l}</button>`).join('')+`</div>`;
   const nota=t=>`<div style="font-size:12px;color:var(--mut2);margin:8px auto 0;max-width:360px;">${t}</div>`;
   let h='';
   /* IDENTITÀ in cima (campi principali, indipendenti dal livello): nome e GENERE ben visibili.
@@ -314,7 +318,7 @@ function renderCreazione(){
   if(typeof AVATARS!=='undefined' && AVATARS.length){
     h+=tit(T('Volto (facoltativo)'));
     h+=`<div style="display:flex;flex-wrap:wrap;gap:9px;justify-content:center;max-width:360px;margin:0 auto;">`;
-    h+=`<button onclick="setCrea('avatar',null)" title="${T('Nessun volto')}" style="width:72px;height:72px;border-radius:50%;border:2px solid ${C.avatar==null?'var(--brand)':'var(--line2)'};background:var(--panel);color:var(--mut);font-family:inherit;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;">${T('Nessuno')}</button>`;
+    h+=`<button onclick="setCrea('avatar',null)" title="${T('Nessun volto')}" style="width:72px;height:72px;border-radius:50%;border:2px solid ${C.avatar==null?'var(--brand)':'var(--line2)'};background:var(--panel);color:var(--mut);font-family:inherit;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;">${T('Nessuno')}</button>`;   /* L69-1: 11px → 12 */
     h+=AVATARS.map(function(a){ const sel=C.avatar===a.id;
       return `<button onclick="setCrea('avatar','${a.id}')" title="Ritratto" style="width:72px;height:72px;border-radius:50%;border:2px solid ${sel?'var(--brand)':'var(--line2)'};padding:0;cursor:pointer;overflow:hidden;background:none;"><img src="${a.img}" alt="" width="72" height="72" style="display:block;width:100%;height:100%;object-fit:cover;border-radius:50%;"></button>`; }).join('');
     /* terza via: «Carica la tua foto» → input file nascosto (#crea-foto) → canvas 160px WebP → data URL in C.avatarCustom.
@@ -326,20 +330,20 @@ function renderCreazione(){
         +`<button onclick="document.getElementById('crea-foto').click()" title="${T('Cambia foto')}" aria-label="${T('Cambia foto')}" style="position:absolute;right:-3px;bottom:-3px;width:27px;height:27px;border-radius:50%;border:1px solid var(--line2);background:var(--panel);color:var(--mut);font-size:13px;line-height:1;cursor:pointer;font-family:inherit;padding:0;">↻</button>`
         +`</div>`;
     } else {
-      h+=`<button onclick="document.getElementById('crea-foto').click()" title="${T('Carica la tua foto')}" style="width:72px;height:72px;border-radius:50%;border:2px dashed var(--line2);background:var(--panel);color:var(--mut);font-family:inherit;font-size:10.5px;line-height:1.15;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:6px;"><span style="font-size:21px;line-height:1">+</span>${T('La tua foto')}</button>`;
+      h+=`<button onclick="document.getElementById('crea-foto').click()" title="${T('Carica la tua foto')}" style="width:72px;height:72px;border-radius:50%;border:2px dashed var(--line2);background:var(--panel);color:var(--mut);font-family:inherit;font-size:12px;line-height:1.15;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:5px;"><span style="font-size:19px;line-height:1">+</span>${T('La tua foto')}</button>`;   /* L69-1: 10,5px → 12 (il «+» scende a 19 per far stare l'etichetta nei 72px) */
     }
     h+=`</div>`;
     h+=nota(T('Scegli un volto per il tuo personaggio, o lascia l\'iniziale del nome.'));
   }
   /* punto di partenza (lotto ascesa): dal politico locale fino al capo del governo — la stessa carriera, da gradini diversi */
-  h+=tit(T('Punto di partenza'))+seg('livello',[{v:0,l:T('Attivista')},{v:1,l:T('Politico locale')},{v:2,l:T('Ministro')},{v:3,l:T('Capo del governo')},{v:5,l:T('Diplomatico')}],'10.5px');
+  h+=tit(T('Punto di partenza'))+seg('livello',[{v:0,l:T('Attivista')},{v:1,l:T('Politico locale')},{v:2,l:T('Ministro')},{v:3,l:T('Capo del governo')},{v:5,l:T('Diplomatico')}]);
   if(C.livello===0){
     h+=nota(T('Il gradino zero: un attivista di 25 anni, senza carica né bilancio. Costruisci una base militante e la reputazione presso i gruppi, mese dopo mese, fino alla prima candidatura — da cui comincia la scala.'));
   } else if(C.livello===1){
     h+=nota(T('Il gradino più basso e il più giovane: sindaco di una città o presidente di una regione. Amministra bene, costruisci la notorietà, e il partito ti chiamerà a Roma. La stessa carriera, dalla gavetta.'));
     h+=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;max-width:360px;margin:9px auto 0;">`
       +(PAESE.territori||[]).map(function(TE,i){ const sel=C.terrIdx===i; const isC=TE.tipo==='città';   // (param rinominato da T: oscurava la funzione i18n)
-        return `<button onclick="setCrea('terrIdx',${i})" style="padding:8px;border-radius:9px;border:1px solid ${sel?'var(--brand)':'var(--line2)'};background:${sel?'var(--acc-bg)':'var(--panel)'};color:var(--txt);font-family:inherit;font-size:12px;cursor:pointer;text-align:left;"><b>${nomeTerr(TE)}</b><br><span style="font-size:10.5px;color:var(--mut2)">${caricaTerr(TE)} · ${T(isC?'città':'regione')}</span></button>`; }).join('')+`</div>`;
+        return `<button onclick="setCrea('terrIdx',${i})" style="padding:8px;border-radius:9px;border:1px solid ${sel?'var(--brand)':'var(--line2)'};background:${sel?'var(--acc-bg)':'var(--panel)'};color:var(--txt);font-family:inherit;font-size:12px;cursor:pointer;text-align:left;"><b>${nomeTerr(TE)}</b><br><span style="font-size:12px;color:var(--mut2)">${caricaTerr(TE)} · ${T(isC?'città':'regione')}</span></button>`; }).join('')+`</div>`;
   } else if(C.livello===2){
     h+=nota(T('Cominci più in basso: un dicastero sotto il premier del tuo partito. La stessa carriera, dal gradino prima — scala fino al vertice.'));
     h+=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;max-width:360px;margin:9px auto 0;">`
@@ -355,13 +359,15 @@ function renderCreazione(){
   h+=tit(T('Background professionale'));
   h+=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;max-width:360px;margin:0 auto;">`
     +[{id:null,nome:'Funzionario di partito'}].concat(BACKGROUNDS).map(b=>
-      `<button onclick="setCrea('background',${b.id?`'${b.id}'`:'null'})" style="padding:9px 8px;border-radius:9px;border:1px solid ${C.background===b.id?'var(--brand)':'var(--line2)'};background:${C.background===b.id?'var(--acc-bg)':'var(--panel)'};color:var(--txt);font-family:inherit;font-size:12.5px;cursor:pointer;">${T(b.nome)}</button>`).join('')+`</div>`;
+      /* L69-1 — anche questa griglia a norma: era alta 35,1px. Con `min-height` e il centraggio, i nomi
+         lunghi («Avvocato / Magistrato») vanno a capo dentro i 44 invece di allargare la colonna. */
+      `<button onclick="setCrea('background',${b.id?`'${b.id}'`:'null'})" style="display:flex;align-items:center;justify-content:center;text-align:center;min-height:44px;padding:8px;border-radius:9px;border:1px solid ${C.background===b.id?'var(--brand)':'var(--line2)'};background:${C.background===b.id?'var(--acc-bg)':'var(--panel)'};color:var(--txt);font-family:inherit;font-size:12.5px;line-height:1.2;cursor:pointer;">${T(b.nome)}</button>`).join('')+`</div>`;
   const B=BACKGROUNDS.find(b=>b.id===C.background);
   h+=nota(B?T(B.desc):T('La politica è la tua professione: nessun credito particolare, nessuna diffidenza.'));
   h+=tit(T('Famiglia'))+seg('famiglia',[{v:'umili',l:T('Origini umili')},{v:'borghese',l:T('Borghese')},{v:'dinastia',l:T('Dinastia')}]);
   const F=FAMIGLIE.find(f=>f.id===C.famiglia);
   h+=nota(F?T(F.desc):'');
-  h+=tit(T('Orientamento personale'))+seg('orientamento',[{v:-2,l:T('Sinistra')},{v:-1,l:T('Centro-sx')},{v:0,l:T('Centro')},{v:1,l:T('Centro-dx')},{v:2,l:T('Destra')}],'11.5px');
+  h+=tit(T('Orientamento personale'))+seg('orientamento',[{v:-2,l:T('Sinistra')},{v:-1,l:T('Centro-sx')},{v:0,l:T('Centro')},{v:1,l:T('Centro-dx')},{v:2,l:T('Destra')}]);
   h+=tit(T('Religiosità'))+seg('religiosita',[{v:'laico',l:gnCrea('Laico','Laica')},{v:'credente',l:T('Credente')},{v:'devoto',l:gnCrea('Devoto','Devota')}]);
   h+=nota(T('Le tue convinzioni personali, non la linea del partito. Per ora solo registrate: conteranno più avanti.'));
   el.innerHTML=h;
@@ -591,7 +597,7 @@ function renderStartPersistence(){
     const t=lsGet('hos_autosave');
     if(t){ const p=parseSave(t); if(p.save){ const s=p.save.s; const pn=((PAESI[s.paese]||{partiti:[]}).partiti.find(function(x){return x.id===s.partito;})||{}).nome||'';
       html=`<div class="card" style="border-color:var(--brand);max-width:420px;margin:0 auto 16px;text-align:left"><div style="padding:12px 14px">
-        <div style="font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--brand)">${T('Carriera in corso')}</div>
+        <div class="contorno" style="letter-spacing:.16em;text-transform:uppercase;color:var(--brand)">${T('Carriera in corso')}</div>
         <div style="font-weight:600;font-size:15px;margin:3px 0 1px">${(PAESI[s.paese]||{}).nome||''} · ${escAttr(pn)}</div>
         <div style="font-size:12.5px;color:var(--mut)">${T("Anno")} ${s.year} · ${s.opposizione ? (s.mandate>0 ? `${T("Mandato")} ${s.mandate} ${T("· all'opposizione")}` : T("Sfidante all'opposizione")) : `${T("Mandato")} ${s.mandate}`}</div>
         <button class="btn" style="margin-top:10px;width:100%" onclick="continuaCarriera()">${T('Continua la carriera →')}</button></div></div>`;
@@ -628,7 +634,7 @@ function showPartita(){
   h+=`<div class="opt" style="cursor:default"><div class="ol">${ok?T('Esporta / Importa'):T('Salva la carriera in un file')}</div><div class="oe">${T('Sposta la carriera tra PC e telefono.')}</div>
     <textarea id="io-text" readonly style="width:100%;height:60px;margin-top:7px;background:var(--bg2);border:1px solid var(--line2);border-radius:8px;color:var(--mut);font-family:'IBM Plex Mono',monospace;font-size:10px;padding:6px;resize:vertical"></textarea>
     <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px"><button class="mini-btn" onclick="uiExport()">${T('Esporta')}</button><button class="mini-btn" onclick="uiCopy()">${T('Copia')}</button><button class="mini-btn" onclick="uiDownload()">${T('Scarica file')}</button><button class="mini-btn" style="color:var(--brand);border-color:var(--brand)" onclick="uiImportToggle()">${T('Importa…')}</button></div>
-    <div id="io-msg" style="font-size:11.5px;color:var(--mut);margin-top:6px"></div></div>`;
+    <div id="io-msg" style="font-size:12px;color:var(--mut);margin-top:6px"></div></div>`;
   h+=`<button class="opt" onclick="abbandonaPartita()"><span class="ol" style="color:var(--neg)">${T('Torna al menu iniziale')}</span><span class="oe">${T('Abbandona la partita in corso e torna alla schermata iniziale (nuova partita / cambia paese).')}</span></button>`;
   h+=`<button class="opt" onclick="hideMenu()"><span class="ol">${T('Chiudi')}</span></button></div>`;
   document.getElementById('menu-modal').innerHTML=h;
@@ -658,7 +664,7 @@ function showCarriere(){
   const pr=getProfilo();
   let h=`<div class="mt"><div class="kicker">${T('Storico')}</div><h2>${T('Le tue carriere')}</h2></div>`;
   if(!pr.carriere.length) h+=`<div class="mtext">${T('Ancora nessuna carriera conclusa. Le partite finite compariranno qui.')}</div>`;
-  else h+=`<div style="padding:0 18px 8px">`+pr.carriere.map(function(c){ return `<div style="padding:8px 0;border-top:1px solid var(--line)"><div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-weight:600;font-size:13.5px">${escAttr(c.paese)} · ${escAttr(c.partito)}</span><span class="mono" style="font-size:12px;color:var(--mut)">${c.mandati} ${T('mandati')}</span></div><div style="font-size:12px;color:var(--mut)">${c.nome?escAttr(c.nome)+' · ':''}${c.anni} ${T('anni al potere')} · ${escAttr(c.esitoTesto||'')||esitoLabel(c.esito)}</div>${(c.tratti&&c.tratti.length)?`<div style="font-size:11.5px;color:var(--acc-ink);margin-top:2px">${c.tratti.map(escAttr).join(' · ')}</div>`:''}${c.racconto?`<div style="font-size:11.5px;color:var(--mut2);margin-top:3px;font-style:italic">${escAttr(c.racconto)}</div>`:''}</div>`; }).join('')+`</div>`;
+  else h+=`<div style="padding:0 18px 8px">`+pr.carriere.map(function(c){ return `<div style="padding:8px 0;border-top:1px solid var(--line)"><div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-weight:600;font-size:13.5px">${escAttr(c.paese)} · ${escAttr(c.partito)}</span><span class="mono" style="font-size:12px;color:var(--mut)">${c.mandati} ${T('mandati')}</span></div><div style="font-size:12px;color:var(--mut)">${c.nome?escAttr(c.nome)+' · ':''}${c.anni} ${T('anni al potere')} · ${escAttr(c.esitoTesto||'')||esitoLabel(c.esito)}</div>${(c.tratti&&c.tratti.length)?`<div style="font-size:12px;color:var(--acc-ink);margin-top:2px">${c.tratti.map(escAttr).join(' · ')}</div>`:''}${c.racconto?`<div style="font-size:12px;color:var(--mut2);margin-top:3px;font-style:italic">${escAttr(c.racconto)}</div>`:''}</div>`; }).join('')+`</div>`;
   h+=`<div class="choices"><button class="opt" onclick="hideMenu()"><span class="ol">${T('Chiudi')}</span></button></div>`;
   document.getElementById('menu-modal').innerHTML=h;
   document.getElementById('menu').classList.add('on');
@@ -1096,14 +1102,14 @@ function renderLocaleLeve(){
   (LOCALE_LEVE[L.tipo]||[]).forEach(function(lv){ const cur=L.leve[lv.id]||0;
     const tag=lv.ind?`<span class="polcost">${euro(levaEuroAnno(lv.costo[cur]))}/${T('anno')}</span>`:'';
     h+=`<div class="grp"><div class="top"><div class="nm">${adRegL(T(lv.nm))}</div>${tag}</div><div class="seg" style="margin-top:5px">`
-      +lv.levels.map(function(lab,i){ return `<button class="${cur===i?'on':''}" style="font-size:11.5px" onclick="setLocaleLeva('${lv.id}',${i})">${T(lab)}</button>`; }).join('')+`</div></div>`; });
+      +lv.levels.map(function(lab,i){ return `<button class="${cur===i?'on':''}" style="font-size:12px" onclick="setLocaleLeva('${lv.id}',${i})">${T(lab)}</button>`; }).join('')+`</div></div>`; });
   return h;
 }
 function renderLocalePage(){
   const L=S.locale;
   let h=`<button class="mini-btn" style="margin-bottom:10px" onclick="chiudiMinistero()">← ${T('Governo')}</button>`;
   const tR=terminoRegione(); const tRa=(L.tipo==='città'?T('il Comune'):((typeof curLang==='function'&&curLang()==='en')?'the '+enTermine(tR):artTermine(tR)+' '+tR)); const tRA=tRa.charAt(0).toUpperCase()+tRa.slice(1);
-  h+=`<div style="font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--mut);margin:2px 2px 8px;">${escAttr(localeNome())} · ${tRa}</div>`;
+  h+=`<div class="contorno" style="font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--mut);margin:2px 2px 8px;">${escAttr(localeNome())} · ${tRa}</div>`;
   /* il volto del territorio: la mappa REALE (OpenStreetMap), in cima — il colore di ogni zona riflette gli indicatori
      sotto. Compare solo se il paese ha mappe locali generate (altrimenti: solo indicatori+leve, come prima). */
   if(mappaLocale()){
@@ -1111,19 +1117,19 @@ function renderLocalePage(){
     h+=`<div class="card uno"><div class="ct">${tQ}</div><div class="mappa-wrap">${renderQuartieriSVG()}</div>
       <div class="mappa-leg"><span><i style="background:var(--pos)"></i>${T('curato')}</span><span><i style="background:var(--warn)"></i>${T('così così')}</span><span><i style="background:var(--neg)"></i>${T('trascurato')}</span></div>
       ${renderQuartieriInfo()}
-      <div style="font-size:10px;color:var(--mut2);padding:0 14px 10px">${T('Confini reali © OpenStreetMap (ODbL)')}</div></div>`;
+      <div class="contorno" style="font-size:11px;color:var(--mut2);padding:0 14px 10px">${T('Confini reali © OpenStreetMap (ODbL)')}</div></div>`;
   }
   /* BILANCIO LOCALE in € (cantiere Budget): la cassa vera del Comune/Regione, dalla quale le carte con un costo dichiarato attingono. */
   if(L.budget!=null) h+=`<div class="card"><div class="ct">${T(L.tipo==='città'?'Bilancio del Comune':'Bilancio della Regione')}</div>
     <div class="ind" style="border-top:none"><div class="nm"><b style="font-size:17px">${euro(L.budget)}</b><small>${T('la cassa annua che puoi impegnare nelle tue scelte')}</small></div></div></div>`;
   h+=`<div class="card"><div class="ct">${tRA} · ${T('gli indicatori')}</div>${renderLocaleInd()}</div>`;
-  h+=`<div class="card"><div class="ct">${T('Le tue leve')}</div><div style="font-size:11.5px;color:var(--mut2);padding:0 14px 4px">${T("Più servizi costano al bilancio; i tributi lo rimpinguano ma pesano sul consenso. Trova l'equilibrio.")}</div>${renderLocaleLeve()}</div>`;
+  h+=`<div class="card"><div class="ct">${T('Le tue leve')}</div><div style="font-size:12px;color:var(--mut2);padding:0 14px 4px">${T("Più servizi costano al bilancio; i tributi lo rimpinguano ma pesano sul consenso. Trova l'equilibrio.")}</div>${renderLocaleLeve()}</div>`;
   return h;
 }
 function renderMinisteroPage(minId){
   const M=MINISTRIES.find(x=>x.id===minId), m=getMin(minId), _nm=(typeof dicNm==='function'?dicNm(minId):M.nm);   // D3: nome dicastero era-aware (overlay '50)
   let h=`<button class="mini-btn" style="margin-bottom:10px" onclick="chiudiMinistero()">← ${T('Governo')}</button>`;
-  h+=`<div style="font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--mut);margin:2px 2px 8px;">${icon(minId,T(_nm))} ${T(_nm)} · ${T(M.desc)}</div>`;
+  h+=`<div class="contorno" style="font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--mut);margin:2px 2px 8px;">${icon(minId,T(_nm))} ${T(_nm)} · ${T(M.desc)}</div>`;
   h+=budgetRow();   // RP+saldo sticky anche qui: da questa pagina si cambiano politiche e leggi che costano RP
   if(S.livello===2 && minId===S.dicastero){
     h+=`<div class="card"><div class="ct">${T('Il ministro · sei tu')}</div><div style="padding:6px 14px 12px;font-size:12.5px;color:var(--mut2)">${T('Questo è il <b>tuo</b> dicastero. Le leve e le leggi qui sotto sono le uniche che controlli: i risultati costruiscono il tuo capitale politico.')}</div></div>`;
@@ -1161,7 +1167,7 @@ function fasciaEsposizione(){
   else if(ex>=45){ t=T('Si mormora di te nei palazzi: i fascicoli si muovono.'); col='var(--warn-ink)'; }
   else if(ex>=25){ t=T('Qualche dossier circola nelle redazioni.'); }
   if(!t) return '';
-  return `<div style="font-size:11.5px;color:${col};margin-top:7px;padding-top:7px;border-top:1px dashed var(--line)">${t}</div>`;
+  return `<div style="font-size:12px;color:${col};margin-top:7px;padding-top:7px;border-top:1px dashed var(--line)">${t}</div>`;
 }
 /* setLineaMedia (lotto stampa-opposizione): preferenza pura in S, cambiabile sempre, gratis. Persiste al confine
    di mese (commitSnap qui = autosave subito; a metà mese il caricamento riparte dal mese corrente, com'è documentato). */
@@ -1187,7 +1193,7 @@ function renderStampaTab(){
                   documentata:T('Critica documentata: la via bilanciata — colpi nel merito, visibilità e credibilità in equilibrio.'),
                   istituzionale:T('Profilo istituzionale: credibilità su e protetta, metà visibilità.') };
     const lbtn=(id,label)=>`<button class="${lm===id?'on':''}" onclick="setLineaMedia('${id}')">${label}</button>`;
-    el.innerHTML=`<div style="font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--mut);margin:2px 2px 8px;">${T('Ufficio stampa · comunicazione')}</div>`
+    el.innerHTML=`<div class="contorno" style="font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--mut);margin:2px 2px 8px;">${T('Ufficio stampa · comunicazione')}</div>`
       +`<div class="card"><div class="ct">${T('La linea coi media')}</div>
         <div class="seg" style="margin:6px 0 8px">${lbtn('attacco',T('Attacco'))}${lbtn('documentata',T('Documentata'))}${lbtn('istituzionale',T('Istituzionale'))}</div>
         <div style="font-size:12px;color:var(--mut);line-height:1.45">${LDESC[lm]} ${canale}</div></div>`
@@ -1199,11 +1205,11 @@ function renderStampaTab(){
   const fascia=fasciaEsposizione();
   const stCol=st>=60?'var(--pos)':st<=40?'var(--neg)':'var(--txt)';
   const sgn=n=>(n>=0?'+':'')+n;
-  let h=`<div style="font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--mut);margin:2px 2px 8px;">${T('Ufficio stampa · il rapporto coi media')}</div>`;
-  h+=`<div class="card" style="padding:10px 14px;margin-bottom:12px"><div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-size:12.5px;color:var(--mut)">${T('Rapporto con la stampa')}</span><span class="mono" style="font-weight:600;font-size:16px;color:${stCol}">${st}<span style="color:var(--mut2);font-size:11px">/100</span></span></div>
+  let h=`<div class="contorno" style="font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--mut);margin:2px 2px 8px;">${T('Ufficio stampa · il rapporto coi media')}</div>`;
+  h+=`<div class="card" style="padding:10px 14px;margin-bottom:12px"><div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-size:12.5px;color:var(--mut)">${T('Rapporto con la stampa')}</span><span class="mono" style="font-weight:600;font-size:16px;color:${stCol}">${st}<span class="contorno" style="color:var(--mut2);">/100</span></span></div>
     <div class="bar">${fillI('stampa:sala', clamp(st,2,100), st>=60?'var(--pos)':st<=40?'var(--neg)':'var(--brand)')}</div>
-    <div style="font-size:11px;color:var(--mut2);margin-top:5px">${T('Sopra ~64 i colpi politici si attutiscono; sotto ~36 si gonfiano. Nel silenzio torna verso %N%X.').replace('%N',50+etaAutorev()).replace('%X',etaAutorev()?' ('+T('l\'età pesa:')+' '+T(etaAutorev()>0?'l\'autorevolezza aiuta':'devi conquistarti il rispetto')+')':'')}</div>${fascia}</div>`;
-  if(S.titoloMese) h+=`<div class="card" style="padding:11px 14px;margin-bottom:12px"><div style="font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--mut)">${T('La prima pagina')} · ${T(MONTHS[S.month-1])}</div>
+    <div style="font-size:12px;color:var(--mut2);margin-top:5px">${T('Sopra ~64 i colpi politici si attutiscono; sotto ~36 si gonfiano. Nel silenzio torna verso %N%X.').replace('%N',50+etaAutorev()).replace('%X',etaAutorev()?' ('+T('l\'età pesa:')+' '+T(etaAutorev()>0?'l\'autorevolezza aiuta':'devi conquistarti il rispetto')+')':'')}</div>${fascia}</div>`;
+  if(S.titoloMese) h+=`<div class="card" style="padding:11px 14px;margin-bottom:12px"><div class="contorno" style="letter-spacing:.16em;text-transform:uppercase;color:var(--mut)">${T('La prima pagina')} · ${T(MONTHS[S.month-1])}</div>
     <div style="font-family:'Fraunces',serif;font-style:italic;font-size:16.5px;margin-top:4px;line-height:1.3">«${S.titoloMese.testo}»</div></div>`;
   if(S.promessa) h+=`<div class="banner" style="font-size:12.5px">${T('Intervista in piedi: hai promesso attenzione a <b>%G</b>. Colpirlo con le tue scelte nei prossimi mesi sarà rinfacciato.').replace('%G',nomeGruppo(S.promessa.grp))}</div>`;
   const stResto=disp?0:Math.max(1,cdStampa()-((S.year*12+S.month)-S.mossaUltima));   // il contatore legge cdStampa(): col personaggio anziano dice il numero vero
@@ -1259,9 +1265,9 @@ function vitaPersonaleCard(){
   const ink=sv>=60?'var(--pos)':sv>=35?'var(--warn-ink)':'var(--neg)';   // testo piccolo → ink scuri (contrasto ≥4,5:1)
   const barc=sv>=60?'var(--pos)':sv>=35?'var(--warn)':'var(--neg)';       // barra → amber vivido
   const lab=sv>=60?T('Affetti curati'):sv>=35?T('Affetti un po\' trascurati'):T('La famiglia è in crisi');
-  return `<div class="card" style="padding:10px 14px;margin-bottom:10px"><div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-size:12.5px;color:var(--mut)">${T('Vita personale')}</span><span class="mono" style="font-weight:600;font-size:16px;color:${ink}">${sv}<span style="color:var(--mut2);font-size:11px">/100</span></span></div>
+  return `<div class="card" style="padding:10px 14px;margin-bottom:10px"><div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-size:12.5px;color:var(--mut)">${T('Vita personale')}</span><span class="mono" style="font-weight:600;font-size:16px;color:${ink}">${sv}<span class="contorno" style="color:var(--mut2);">/100</span></span></div>
     <div class="bar">${fillI('vita', clamp(sv,2,100), barc)}</div>
-    <div style="font-size:11.5px;color:${ink};font-weight:600;margin-top:7px">${lab}</div></div>`;
+    <div style="font-size:12px;color:${ink};font-weight:600;margin-top:7px">${lab}</div></div>`;
 }
 /* RIGA-BILANCIO persistente (cantiere Budget): le cifre in € del livello corrente, SEMPRE in vista mentre decidi — non più
    sepolte nella scheda Paese. Liv.1 = bilancio del Comune/Regione; liv.3/2 = Bilancio dello Stato + saldo annuo (segno+colore). */
@@ -1299,7 +1305,7 @@ function renderAttivista(){
     h+=`<div class="atext">${T('Hai costruito una base militante, la fiducia dei gruppi e l\'autorevolezza sul campo. Il partito ti offre la prima candidatura: scegli dove correre.')}</div>`;
     h+=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;padding:2px 12px 12px;">`
       +(PAESE.territori||[]).map(function(TE,i){ const isC=TE.tipo==='città';
-        return `<button onclick="diventaLocale(${i})" style="padding:8px;border-radius:9px;border:1px solid var(--line2);background:var(--panel);color:var(--txt);font-family:inherit;font-size:12px;cursor:pointer;text-align:left;"><b>${nomeTerr(TE)}</b><br><span style="font-size:10.5px;color:var(--mut2)">${caricaTerr(TE)} · ${T(isC?'città':'regione')}</span></button>`; }).join('')
+        return `<button onclick="diventaLocale(${i})" style="padding:8px;border-radius:9px;border:1px solid var(--line2);background:var(--panel);color:var(--txt);font-family:inherit;font-size:12px;cursor:pointer;text-align:left;"><b>${nomeTerr(TE)}</b><br><span style="font-size:12px;color:var(--mut2)">${caricaTerr(TE)} · ${T(isC?'città':'regione')}</span></button>`; }).join('')
       +`</div></div>`;
   } else {
     /* la CARTA-MOSSA del mese (Build A, L2): scena (RUOTA per tema, anti-wallpaper) + le 3 scelte. resolveItem le applica
@@ -1399,9 +1405,9 @@ function renderGov(){
     const L=S.locale, cap=Math.round(S.capitale||0), cons=Math.round(L.consenso||0);
     const capCol=cap>=65?'var(--pos)':cap<35?'var(--neg)':'var(--txt)', consCol=cons<40?'var(--neg)':cons<55?'var(--warn)':'var(--pos)';
     h+=`<div class="banner">${T('<b>Sei %R</b>. Amministra %L: i risultati costruiscono la tua notorietà, e il partito ti chiamerà a Roma.').replace('%R',escAttr(ruoloLocale())).replace('%L',escAttr(localeNome()))}</div>`;
-    h+=`<div class="card" style="padding:10px 14px;margin-bottom:10px"><div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-size:12.5px;color:var(--mut)">${T('Notorietà')}</span><span class="mono" style="font-weight:600;font-size:16px;color:${capCol}">${cap}<span style="color:var(--mut2);font-size:11px">/100</span></span></div>
+    h+=`<div class="card" style="padding:10px 14px;margin-bottom:10px"><div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-size:12.5px;color:var(--mut)">${T('Notorietà')}</span><span class="mono" style="font-weight:600;font-size:16px;color:${capCol}">${cap}<span class="contorno" style="color:var(--mut2);">/100</span></span></div>
       <div class="bar">${fillI('cap:loc', clamp(cap,2,100), capCol)}</div>
-      <div style="display:flex;justify-content:space-between;margin-top:7px;font-size:11.5px"><span style="color:var(--mut2)">${T(L.tipo==='città'?'Consenso cittadino':'Consenso regionale')}</span><span style="color:${consCol};font-weight:600">${cons}/100</span></div>
+      <div style="display:flex;justify-content:space-between;margin-top:7px;font-size:12px"><span style="color:var(--mut2)">${T(L.tipo==='città'?'Consenso cittadino':'Consenso regionale')}</span><span style="color:${consCol};font-weight:600">${cons}/100</span></div>
       <div style="font-size:11px;color:var(--mut2);margin-top:5px">${T('Sopra ~65 di notorietà, il partito può offrirti un posto a Roma. Sotto 40 di consenso rischi la mancata rielezione.')}</div></div>`;
     h+=`<div class="card uno" onclick="apriMinistero('__locale__')" style="cursor:pointer;display:flex;justify-content:space-between;align-items:center;padding:12px 14px;margin-bottom:12px"><span><b>${T(entitaLocale()).charAt(0).toUpperCase()+T(entitaLocale()).slice(1)}</b><br><span style="font-size:12px;color:var(--mut)">${T('i tuoi indicatori e le tue leve')}</span></span><span style="color:var(--acc-ink);font-size:13px">${T('Apri →')}</span></div>`;
   }
@@ -1411,9 +1417,9 @@ function renderGov(){
     const Mn=(typeof dicNm==='function'?dicNm(S.dicastero):((MINISTRIES.find(x=>x.id===S.dicastero)||{}).nm||''));   // D3: nome era-aware
     const capCol=cap>=65?'var(--pos)':cap<35?'var(--neg)':'var(--txt)', lealCol=leal<25?'var(--neg)':leal<50?'var(--warn)':'var(--pos)';
     h+=`<div class="banner">${T('<b>Sei %R</b> nel governo di <b>%P</b>. Governa lui il paese; tu costruisci il tuo capitale e punti al vertice.').replace('%R',escAttr(ruoloDicastero())).replace('%P',escAttr(pn))}</div>`;
-    h+=`<div class="card" style="padding:10px 14px;margin-bottom:10px"><div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-size:12.5px;color:var(--mut)">${T('Capitale politico')}</span><span class="mono" style="font-weight:600;font-size:16px;color:${capCol}">${cap}<span style="color:var(--mut2);font-size:11px">/100</span></span></div>
+    h+=`<div class="card" style="padding:10px 14px;margin-bottom:10px"><div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-size:12.5px;color:var(--mut)">${T('Capitale politico')}</span><span class="mono" style="font-weight:600;font-size:16px;color:${capCol}">${cap}<span class="contorno" style="color:var(--mut2);">/100</span></span></div>
       <div class="bar">${fillI('cap:min', clamp(cap,2,100), capCol)}</div>
-      <div style="display:flex;justify-content:space-between;margin-top:7px;font-size:11.5px"><span style="color:var(--mut2)">${T('Fiducia del premier')}</span><span style="color:${lealCol};font-weight:600">${leal}/100${leal<25?T(' · sei in bilico'):''}</span></div>
+      <div style="display:flex;justify-content:space-between;margin-top:7px;font-size:12px"><span style="color:var(--mut2)">${T('Fiducia del premier')}</span><span style="color:${lealCol};font-weight:600">${leal}/100${leal<25?T(' · sei in bilico'):''}</span></div>
       <div style="font-size:11px;color:var(--mut2);margin-top:5px">${T('Sopra ~65 di capitale, un\'occasione per salire può aprirsi. Distinguerti dal premier rende, ma se la sua fiducia crolla rischi il rimpasto.')}</div></div>`;
     h+=`<div class="card uno" onclick="apriMinistero('${S.dicastero}')" style="cursor:pointer;display:flex;justify-content:space-between;align-items:center;padding:12px 14px;margin-bottom:12px"><span><b>${T('Il tuo dicastero')}</b><br><span style="font-size:12px;color:var(--mut)">${Mn} — ${T('le tue leve, leggi e dossier')}</span></span><span style="color:var(--acc-ink);font-size:13px">${T('Apri →')}</span></div>`;
   }
@@ -1427,7 +1433,7 @@ function renderGov(){
   }
   h+=vitaPersonaleCard();   // vita personale: indicatore visibile (valore/100 + barra animata + etichetta umana), prima dell'agenda
   // agenda
-  h+=`<div style="font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--mut);margin:2px 2px 8px;">${T('Agenda di')} ${T(MONTHS[S.month-1])}</div>`;
+  h+=`<div class="contorno" style="font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--mut);margin:2px 2px 8px;">${T('Agenda di')} ${T(MONTHS[S.month-1])}</div>`;
   const _sig=agendaSig(), _enter=(_sig!==lastAgendaSig); lastAgendaSig=_sig;   // entrata scaglionata SOLO quando il set di carte cambia (nuovo mese), non a ogni decisione/cambio scheda
   h+=`<div class="agbox${_enter?' enter':''}">`;
   if(!S.agenda.length){
@@ -1692,7 +1698,7 @@ function renderPaese(){
   const I=S.ind; const def=computeDeficit(); const cic=S.ciclo||0;
   const balText=def<=0?T('Avanzo')+' '+fmt(-def,1)+'%':T('Deficit')+' '+fmt(def,1)+'%';
   if(S.livello===1){   // da politico locale: la scheda "Paese" mostra la TUA città/regione, non la nazione
-    let hl=`<div style="font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--mut);margin:2px 2px 8px;">${escAttr(entitaLocale())}</div>`;
+    let hl=`<div class="contorno" style="font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--mut);margin:2px 2px 8px;">${escAttr(entitaLocale())}</div>`;
     hl+=`<div class="card"><div class="ct">${escAttr(S.locale.nome)} · ${T('i tuoi indicatori')}</div>${renderLocaleInd()}</div>`;
     hl+=`<div class="card"><div class="ct">${T('Come funziona')}</div><div class="log"><div class="li">${T('Sei %RUOLO: queste sono le sorti %DL. Le muovi dalle <b>leve</b> (scheda Bilancio) e dalle decisioni del mese. Buoni indicatori = consenso e <b>notorietà</b>, la credenziale per salire a Roma.').replace('%RUOLO',escAttr(ruoloLocale())).replace('%DL',diLuogo(S.locale.nome))}</div></div></div>`;
     document.getElementById('sec-paese').innerHTML=hl;
@@ -1700,7 +1706,7 @@ function renderPaese(){
   }
   if(S.livello===4||S.livello===5){   // SEGRETARIO (liv 4) e DIPLOMATICO (liv 5, C2): la scheda «Paese» è LO STATO DEL MONDO, non il cruscotto nazionale (muto)
     const ri=S.relInt||{}; const cap=function(s){return s.charAt(0).toUpperCase()+s.slice(1);};
-    let hw=`<div style="font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--mut);margin:2px 2px 8px;">${T('Lo stato del mondo')}</div>`;
+    let hw=`<div class="contorno" style="font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--mut);margin:2px 2px 8px;">${T('Lo stato del mondo')}</div>`;
     hw+=(S.livello===5)
       ? `<div class="banner">${T('<b>I rapporti che costruisci.</b> Da %RUOLO non guidi un paese: tessi le relazioni, missione dopo missione (scheda <b>Governo</b>). Porta il <b>rapporto con %ENTE</b> a 75 e il vertice del mondo ti chiamerà.').replace('%RUOLO', T(typeof ruoloDiplo==='function'?ruoloDiplo():'Ambasciatore')).replace('%ENTE', T(typeof consessoNome==='function'?consessoNome():'le Nazioni Unite'))}</div>`
       : `<div class="banner">${T('<b>Il tabellone che arbitri.</b> Da %RUOLO non guidi un paese: tieni insieme i blocchi. Le tue mediazioni (scheda <b>Governo</b>) plasmano questi rapporti — e lo stato in cui lasci il mondo pesa sul tuo lascito.').replace('%RUOLO', T(typeof ruoloIntl==='function'?ruoloIntl():'Segretario Generale'))}</div>`;
@@ -1720,7 +1726,7 @@ function renderPaese(){
         hw+=indRow(cap(T(_nm)), T(naLabel()&&E.descNA?E.descNA:E.desc), fmt(v,0), v); });
       const soc=ENTI_INT.filter(function(E){return E.societa && ri[E.id]!=null;});
       if(soc.length){
-        hw+=`<div style="font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut2);border-top:1px solid var(--line);margin-top:8px;padding-top:9px">${T('Società civile')}</div>`;
+        hw+=`<div class="contorno" style="letter-spacing:.12em;text-transform:uppercase;color:var(--mut2);border-top:1px solid var(--line);margin-top:8px;padding-top:9px">${T('Società civile')}</div>`;
         soc.forEach(function(E){ const v=ri[E.id]; hw+=indRow(cap(T(E.nome)), E.desc, fmt(v,0), v); });
       }
       hw+=`</div>`;
@@ -1731,7 +1737,7 @@ function renderPaese(){
     document.getElementById('sec-paese').innerHTML=hw;
     return;
   }
-  let h=`<div style="font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--mut);margin:2px 2px 8px;">${T('Stato del paese')}</div>`;
+  let h=`<div class="contorno" style="font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--mut);margin:2px 2px 8px;">${T('Stato del paese')}</div>`;
   if(S.livello===2) h+=`<div class="banner">${T('<b>Governa %PM.</b> Vedi gli indicatori nazionali, ma non li guidi: la politica generale è del premier. Tu incidi dal <b>tuo dicastero</b>.').replace('%PM', escAttr((S.premier||{}).nome||T('il premier')))}</div>`;
   h+=`<div class="budget">
     <div class="b"><div class="l">${T('Saldo di bilancio')}</div><div class="v" style="color:${def<=3?'var(--pos)':def<=4?'var(--warn)':'var(--neg)'}">${balText}</div></div>
@@ -1763,7 +1769,7 @@ function renderPaese(){
     /* la SOCIETÀ CIVILE è un attore di natura diversa (fase B): sotto-titolo + separatore, non «un'altra potenza» */
     const soc=ENTI_INT.filter(function(E){return E.societa && S.relInt[E.id]!=null;});
     if(soc.length){
-      h+=`<div style="font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut2);border-top:1px solid var(--line);margin-top:8px;padding-top:9px">${T('Società civile')}</div>`;
+      h+=`<div class="contorno" style="letter-spacing:.12em;text-transform:uppercase;color:var(--mut2);border-top:1px solid var(--line);margin-top:8px;padding-top:9px">${T('Società civile')}</div>`;
       soc.forEach(function(E){ const v=S.relInt[E.id]; h+=indRow(cap(T(E.nome)), E.desc, fmt(v,0), v); });
     }
     h+=`</div>`;
@@ -1813,7 +1819,7 @@ function renderLegge(L){
   return `<div style="padding:11px 14px;border-top:1px solid var(--line)">
     <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px"><div style="font-weight:600;font-size:14px">${T(L.nome)}</div>${badge}</div>
     <div style="color:var(--mut2);font-size:12.5px;margin:3px 0 5px">${T(L.desc)}</div>
-    <div style="font-size:11.5px;color:var(--mut)${oppo?'':';margin-bottom:7px'}">${meta}</div>
+    <div style="font-size:12px;color:var(--mut)${oppo?'':';margin-bottom:7px'}">${meta}</div>
     ${oppo?'':`<button class="opt" ${troppo?'disabled':''} style="${troppo?'opacity:.5;':''}" onclick="setLegge('${L.id}')"><span class="ol">${T(inVigore?'Abroga':'Approva')}${troppo?T(' — RP insufficienti'):' · '+L.costo+' RP'}</span></button>`}
   </div>`;
 }
@@ -1924,7 +1930,7 @@ function renderMappaInfo(){
   const chiama=(S.territorioChiama && S.territorioChiama.idx===MAPSEL);
   const def=chiama?(typeof defProblemaTerr==='function'?defProblemaTerr(S.territorioChiama.prob):null):null;
   const scheda=(chiama&&def)?`<div class="terr-call" style="margin:2px 14px 10px;padding:10px 12px;border:1px solid var(--acc);border-radius:11px;background:var(--acc-bg)">
-      <div style="font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--acc-ink);font-weight:700">${T('Il territorio ti chiama')}</div>
+      <div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--acc-ink);font-weight:700">${T('Il territorio ti chiama')}</div>
       <div style="font-weight:600;font-size:14px;margin:4px 0 2px">${arcoTerrSub(T(def.t),TE)}</div>
       <div style="font-size:12.5px;color:var(--txt2);margin-bottom:8px">${arcoTerrSub(T(def.text),TE)}</div>
       <div class="choices" style="display:flex;flex-direction:column;gap:7px">`+
@@ -1933,15 +1939,15 @@ function renderMappaInfo(){
   return `<div style="padding:2px 14px 12px">
     <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px"><b style="font-size:14.5px">${cap(nomeTerr(TE))}</b><span class="chip" style="background:${tuo?'var(--acc-bg)':'var(--line2)'};color:${tuo?'var(--acc-ink)':'var(--mut)'}">${T(tuo?'tuo blocco':'avversario')}</span></div>
     <div style="font-size:12.5px;color:var(--mut);margin-top:3px">${caricaTerr(TE)}: <b style="color:var(--txt)">${t.titolare||'—'}</b> · ${pn}</div>
-    <div style="font-size:11.5px;color:var(--mut2);margin-top:2px">${cap(leanLabel(TE.lean))}${TE.simbolo?' · '+T('area simbolo'):''}</div></div>${scheda}`;
+    <div style="font-size:12px;color:var(--mut2);margin-top:2px">${cap(leanLabel(TE.lean))}${TE.simbolo?' · '+T('area simbolo'):''}</div></div>${scheda}`;
 }
 function renderMappaPage(){
   const asseTuo=part(S.partito).asse;
   const pl=(S.potereLocale!=null)?Math.round(S.potereLocale):null;
   const mie=S.territori.filter(t=>compatibile(t.partito,asseTuo)).length;
   let h=`<button class="mini-btn" style="margin-bottom:10px" onclick="chiudiMappa()">← ${T('Partiti')}</button>`;
-  h+=`<div style="font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--mut);margin:2px 2px 8px;">${T('Il territorio · controllo politico')}</div>`;
-  if(pl!=null) h+=`<div class="card" style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;margin-bottom:12px"><span style="font-size:12.5px;color:var(--mut)">${T('Potere locale')}${pl>50?` · <b style="color:var(--acc-ink)">${T('controlli il territorio')}</b>`:''} · <b>${mie}</b>/${S.territori.length} ${T('aree')}</span><span class="mono" style="font-weight:600;font-size:16px;color:${pl>50?'var(--acc-ink)':'var(--txt)'}">${pl}<span style="color:var(--mut2);font-size:11px">/100</span></span></div>`;
+  h+=`<div class="contorno" style="font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--mut);margin:2px 2px 8px;">${T('Il territorio · controllo politico')}</div>`;
+  if(pl!=null) h+=`<div class="card" style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;margin-bottom:12px"><span style="font-size:12.5px;color:var(--mut)">${T('Potere locale')}${pl>50?` · <b style="color:var(--acc-ink)">${T('controlli il territorio')}</b>`:''} · <b>${mie}</b>/${S.territori.length} ${T('aree')}</span><span class="mono" style="font-weight:600;font-size:16px;color:${pl>50?'var(--acc-ink)':'var(--txt)'}">${pl}<span class="contorno" style="color:var(--mut2);">/100</span></span></div>`;
   h+=`<div class="card uno"><div class="ct">${T('La mappa')}</div><div class="mappa-wrap">${renderMappaSVG()}</div>
     <div class="mappa-leg"><span><i style="background:var(--acc)"></i>${T('il tuo blocco')}</span><span><i style="background:var(--mut2)"></i>${T('avversario')}</span><span><i style="background:var(--acc);opacity:.5"></i>${T('tinta chiara = contendibile')}</span><span><i style="border:1.6px solid var(--brand)"></i>${T('area simbolo')}</span></div>
     ${renderMappaInfo()}</div>`;
@@ -1988,7 +1994,7 @@ function renderQuartieriInfo(){
   return `<div style="padding:2px 14px 12px">
     <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px"><b style="font-size:14.5px">${escAttr(a.nm)}</b><span class="pc mono" style="color:${c}">${v}</span></div>
     <div style="font-size:12.5px;color:var(--mut);margin-top:3px">${fonti}</div>
-    <div style="font-size:11.5px;color:var(--mut2);margin-top:3px">${nota}</div></div>`;
+    <div style="font-size:12px;color:var(--mut2);margin-top:3px">${nota}</div></div>`;
 }
 
 /* ===== IL TUO PARTITO — drill-down da Partiti (lotto primarie): le tre correnti, la sfida, le azioni. ===== */
@@ -2000,19 +2006,19 @@ function renderPartitoPage(){
   const dc=correnteDaCurare();   // loop attivo Lotto 2: la corrente da curare ORA (per evidenziarla + consigliare la mossa)
   const mediaU=Math.round(umoreMedio());
   let h=`<button class="mini-btn" style="margin-bottom:10px" onclick="chiudiPartito()">← ${T('Partiti')}</button>`;
-  h+=`<div style="font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--mut);margin:2px 2px 8px;">${T(me.nome||'Il tuo partito')} · ${T('la vita interna')}</div>`;
+  h+=`<div class="contorno" style="font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--mut);margin:2px 2px 8px;">${T(me.nome||'Il tuo partito')} · ${T('la vita interna')}</div>`;
   /* la sfida, col volto specifico (nome + carica + area): è il payoff della mappa */
   if(S.sfida){
     h+=`<div class="banner" style="border-color:var(--neg)"><b>${T('La sfida monta.')}</b> ${S.sfida.volto}${S.sfida.area?`, ${S.sfida.carica} — <b>${S.sfida.area}</b>`:` (${S.sfida.carica})`} ${T('si muove contro la tua leadership')}${(S.sfida.maturazione||0)>0?` · ${T('matura da')} <b>${S.sfida.maturazione}</b> ${T(S.sfida.maturazione===1?'mese':'mesi')} ${T('(a 3 scatta il congresso)')}`:''}. ${T('Ricompatta le correnti sopra 45 per farla rientrare.')}</div>`;
   }
-  h+=`<div class="card" style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;margin-bottom:12px"><span style="font-size:12.5px;color:var(--mut)">${T('Umore medio delle correnti')}</span><span class="mono" style="font-weight:600;font-size:16px;color:${mediaU<45?'var(--neg)':mediaU<55?'var(--warn-ink)':'var(--pos)'}">${mediaU}<span style="color:var(--mut2);font-size:11px">/100</span></span></div>`;
+  h+=`<div class="card" style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;margin-bottom:12px"><span style="font-size:12.5px;color:var(--mut)">${T('Umore medio delle correnti')}</span><span class="mono" style="font-weight:600;font-size:16px;color:${mediaU<45?'var(--neg)':mediaU<55?'var(--warn-ink)':'var(--pos)'}">${mediaU}<span class="contorno" style="color:var(--mut2);">/100</span></span></div>`;
   h+=`<div class="card"><div class="ct">${T('Le correnti')}</div>`;
   (S.correnti||[]).forEach(function(c){
     const D=CORRENTI_DEF.find(function(d){return d.id===c.id;})||{};
     const col=c.umore<35?'var(--neg)':c.umore<50?'var(--warn)':'var(--pos)';
     h+=`<div class="grp"${dc&&dc.corrente===c.id?' style="background:var(--acc-bg);border-radius:8px;padding:4px 6px;margin:0 -6px"':''}><div class="top"><div class="nm">${T(D.nome)}${dc&&dc.corrente===c.id?` <span class="chip" style="background:var(--acc);color:#1a1408">${T('da curare')}</span>`:''}<small>${c.leader}</small></div><div class="pc mono" style="color:${col}">${Math.round(c.umore)}</div></div>
       <div class="bar">${fillI('corr:'+c.id, clamp(c.umore,2,100), col)}</div>
-      <div style="font-size:11.5px;color:var(--mut2);margin-top:4px">${T(D.desc||'')}</div></div>`;
+      <div style="font-size:12px;color:var(--mut2);margin-top:4px">${T(D.desc||'')}</div></div>`;
   });
   h+=`</div>`;
   /* chi sei diventato: i tratti guadagnati + gli ultimi fatti notevoli (sistema narrativo, lotto 1) */
@@ -2120,10 +2126,10 @@ function rigaIntesa(p, mine){
   var col=dentro?'var(--pos)':(v>0?'var(--acc)':'var(--mut2)');
   var nota=dentro?T('nel tuo blocco'):(cap<60?T('troppo lontano')+' · '+T('tetto')+' '+cap:T('serve 60'));
   return `<div style="display:flex;align-items:center;gap:8px;margin-top:5px">
-    <span style="font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);min-width:46px">${T('Intesa')}</span>
+    <span style="font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);min-width:46px">${T('Intesa')}</span>
     <div class="bar" style="flex:1;position:relative">${fillI('intesa:'+p.id, clamp(v,2,100), col)}</div>
-    <span class="mono" style="font-size:11.5px;color:${col};min-width:22px;text-align:right">${Math.round(v)}</span>
-    <small style="font-size:10.5px;color:var(--mut2);white-space:nowrap">${nota}</small></div>`;
+    <span class="mono" style="font-size:12px;color:${col};min-width:22px;text-align:right">${Math.round(v)}</span>
+    <small style="font-size:11px;color:var(--mut2);white-space:nowrap">${nota}</small></div>`;
 }
 function renderPartiti(){
   if(S.partitoAperto && S.correnti){ document.getElementById('sec-par').innerHTML=renderPartitoPage(); return; }      // drill-down: la vita interna del partito
@@ -2133,7 +2139,7 @@ function renderPartiti(){
   const ps=[...P.partiti].sort((a,b)=>fz(b.id)-fz(a.id));
   const coal=S.coalizione||[S.partito], hasSeats=!!S.seggi;
   const pl=(S.potereLocale!=null)?Math.round(S.potereLocale):null;
-  const plBox = pl!=null ? `<div class="card" style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;margin-bottom:12px"><span style="font-size:12.5px;color:var(--mut)">${T('Potere locale')}${pl>50?` · <b style="color:var(--acc-ink)">${T('controlli il territorio')}</b>`:''}</span><span class="mono" style="font-weight:600;font-size:16px;color:${pl>50?'var(--acc-ink)':'var(--txt)'}">${pl}<span style="color:var(--mut2);font-size:11px">/100</span></span></div>` : '';
+  const plBox = pl!=null ? `<div class="card" style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;margin-bottom:12px"><span style="font-size:12.5px;color:var(--mut)">${T('Potere locale')}${pl>50?` · <b style="color:var(--acc-ink)">${T('controlli il territorio')}</b>`:''}</span><span class="mono" style="font-weight:600;font-size:16px;color:${pl>50?'var(--acc-ink)':'var(--txt)'}">${pl}<span class="contorno" style="color:var(--mut2);">/100</span></span></div>` : '';
   const asseTuo=part(S.partito).asse;
   const so=S.ultimoSondaggio;
   /* F3 — IL GRAFICO-TREND: la serie dei sondaggi con la banda d'incertezza, invece dei numeri nudi. Puro render
@@ -2157,7 +2163,7 @@ function renderPartiti(){
       <line x1="${pad}" y1="${y50}" x2="${W-pad}" y2="${y50}" stroke="var(--neg)" stroke-width="1" opacity="0.45" stroke-dasharray="3 3"/>
       <path d="${linea}" fill="none" stroke="var(--brand)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
       ${punti}</svg>
-      <div style="display:flex;justify-content:space-between;font-size:10.5px;color:var(--mut2);margin:-2px 0 4px"><span>${T('%N mesi fa').replace('%N',span)}</span><span>${T('oggi')}</span></div>`;
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--mut2);margin:-2px 0 4px"><span>${T('%N mesi fa').replace('%N',span)}</span><span>${T('oggi')}</span></div>`;
   })();
   const sondBox=(typeof periodoSondaggi==='function' && periodoSondaggi() && so)?`<div class="card" style="margin-bottom:12px;padding:11px 14px">
       <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut);margin-bottom:6px">${T('Ultimo sondaggio')}</div>
@@ -2177,7 +2183,7 @@ function renderPartiti(){
   /* l'aula: emiciclo dai seggi reali (solo dove c'è un parlamento). Affianca le barre, non le sostituisce. */
   const emiBox = hasSeats ? `<div class="card"><div class="ct">${T("L'aula")} · ${Object.values(S.seggi).reduce((a,b)=>a+b,0)} ${T('seggi')}</div>
     <div style="padding:8px 14px 2px">${emiciclo(S.seggi,{key:'par'})}</div>
-    <div style="font-size:11px;color:var(--mut2);padding:0 15px 10px;text-align:center">${T('Il tuo partito pieno, gli alleati in chiaro · la linea tratteggiata segna la maggioranza (50)')}</div></div>` : '';
+    <div class="contorno" style="font-size:11px;color:var(--mut2);padding:0 15px 10px;text-align:center">${T('Il tuo partito pieno, gli alleati in chiaro · la linea tratteggiata segna la maggioranza (50)')}</div></div>` : '';
   let h=sondBox+partitoBox+plBox+emiBox+`<div class="card g2"><div class="ct">${T('Partiti')} · ${T(P.nome)}${hasSeats?' · '+T('seggi'):''}</div>`;
   for(const p of ps){
     const mine=p.id===S.partito, gov=coal.includes(p.id);
