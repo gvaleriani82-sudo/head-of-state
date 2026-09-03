@@ -876,6 +876,41 @@ const SCENARI = {
     ],
   },
   /* ============================================================================================================
+     L60-2 · REGNO UNITO 1980 — la quarta porta inglese (scheda PRESET-UK-1980). Stesso roster di cinque del '70:
+     `uk_lib` NON sparisce, è il vaso che diventa l'Alleanza (1981) e poi i Liberal Democratici (1988), per
+     rinomina + delta (correzione del disegno, 1/8): l'SDP non è un'entità di roster, storicamente confluì subito.
+     LE FORZE: urne del 3 maggio 1979 (Con 43,9 · Lab 36,9 · Lib 13,8 · SNP 1,6 · Plaid 0,4), come il '70 usa il '70.
+     I SEGGI: 339/269/11/2/2 su 623 (senza l'Irlanda del Nord, come le tappe di L61). TURNMANDATO 1: parlamento del
+     maggio '79, scadenza 1984 → dal gennaio 1980 restano 4 anni su 5; la tappa del giugno 1983 arriva prima.
+     ECONOMIA: debito/PIL ~47 (1980) che nella seconda metà SCENDE (drift alto: il boom e le privatizzazioni); la
+     disoccupazione è il numero del decennio e ha una tabella sua (DRIFT_DISOCCUPAZIONE_ERA, game.js).
+     ============================================================================================================ */
+  uk1980: {
+    id:'uk1980', era:LINEA_UK, nome:'Regno Unito 1980', anno:1980, paese:'regnounito',
+    turnMandato: 1,
+    ue: true,                                   // dentro dal 1973 (snodo §B del '70)
+    intermedie: [ {tipo:'Elezioni amministrative', mese:28, tocca:'tutti'} ],
+    partiti: [
+      { id:'uk_con',   nome:'Conservative', orientamento:'centrodestra',   base:{ imprenditori:0.4, cetomedio:0.4, pensionati:0.2 }, forza:43.9, asse:1,  gruppoUE:'conservatori', terreno:0.45,  concentrazione:0.55 },
+      { id:'uk_lab',   nome:'Labour',       orientamento:'centrosinistra', base:{ lavoratori:0.7, giovani:0.3 },                    forza:36.9, asse:-2, gruppoUE:'socialisti',   terreno:-0.55, concentrazione:0.75 },
+      { id:'uk_lib',   nome:'Liberal',      orientamento:'centro',         base:{ cetomedio:0.6, giovani:0.4 },                     forza:13.8, asse:0,  gruppoUE:'liberali',     terreno:-0.95, concentrazione:24   },
+      { id:'uk_snp',   nome:'SNP',          orientamento:'centrosinistra', base:{ lavoratori:0.5, giovani:0.5 },                    forza:1.6,  asse:-1, gruppoUE:'verdi',        terreno:-0.2,  concentrazione:40   },
+      { id:'uk_plaid', nome:'Plaid Cymru',  orientamento:'centrosinistra', base:{ lavoratori:0.5, giovani:0.5 },                    forza:0.4,  asse:-1, gruppoUE:'verdi',        terreno:-0.3,  concentrazione:55   },
+    ],
+    seggi: { uk_con:54.4, uk_lab:43.2, uk_lib:1.8, uk_snp:0.3, uk_plaid:0.3 },
+    economia: { pil:230000, debito:47, deficit:-4 },
+    debtAncora: 40,
+    logorioEra: 0.012,
+    valuta: { sym:'£', mld:'mld sterline', mln:'mln sterline' },
+    quotaSpesa: 0.45,                           // ⚠ la scheda non la dà: ~45% a inizio decennio, scende dopo. Da confermare.
+    intro: 'Regno Unito, 1980. Un governo nuovo che ha promesso la cura, tre milioni di senza lavoro in arrivo, e un partito d\'opposizione che sta per spaccarsi.',
+    contesto: [
+      'Regno Unito, 1980. I conservatori hanno vinto un anno fa promettendo di raddrizzare il paese, e la cura comincia adesso: la stretta sulla moneta chiude le fabbriche prima di piegare i prezzi. Le città del nord imparano una parola nuova, riconversione, e non ne vedono l\'effetto.',
+      'Il partito laburista si divide fra chi vuole l\'Europa e chi vuole uscirne, fra chi tratta e chi occupa: quattro dirigenti stanno per andarsene e fondare qualcosa di nuovo. E a tredicimila chilometri da qui, in un arcipelago di cui nessuno sa il nome, una giunta militare guarda la carta.',
+      'È il decennio in cui il maggioritario mostra il suo caso più crudele: un terzo partito con un quarto dei voti e una manciata di seggi. Chi governa può vincere tre volte di fila; chi si oppone deve prima decidere chi è.',
+    ],
+  },
+  /* ============================================================================================================
      L44-3 · ITALIA 2000 — la settima e ultima porta. Stessa LINEA; il roster è quello uscito dalla frana del '94
      (PPI, PDS, AN, Rifondazione, Lega, FI, CCD e i laici superstiti), anno d'avvio 2000.
 
@@ -1374,6 +1409,61 @@ const PILASTRI_LINEA = [
     t:'La prima indipendenza',
     text:'Il 6 marzo la Costa d\'Oro diventa Ghana: è la prima colonia africana dell\'impero a farsi Stato, e altre seguiranno. Negli stessi anni, in Kenya, l\'impero mostra l\'altra faccia: dal 1952 lo stato d\'emergenza risponde alla rivolta Mau Mau con decine di migliaia di internamenti nei campi e con violenze che Londra riconoscerà soltanto mezzo secolo dopo, risarcendo i sopravvissuti. Nello stesso decennio l\'impero si congeda e si difende.',
     logx:'La Costa d\'Oro diventa Ghana. Nello stesso decennio l\'impero si congeda e si difende.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  /* ==========================================================================================================
+     L60-2 · I NOVE PILASTRI DEL DECENNIO INGLESE '80 (scheda PRESET-UK-1980 §5 e §5-bis, APPROVATI da Giacomo il
+     1/8, byte-identici: li scrive uno script che LEGGE la scheda, non una mano). Decisione G8: i quattro disastri
+     entrano tutti, ciascuno con la sua voce. G9: le Falkland sono snodo + cronaca, mai insieme (`cond`, come Suez).
+     Heysel ha kicker «Il mondo» di proposito: le vittime erano quasi tutte italiane. Sta qui e non in
+     PILASTRI_MONDO perché quel pool NON serve la linea italiana (L56-2): quando l'Italia avrà il suo '80, il testo
+     si riusa byte-identico con `linea:LINEA_IT`. Nove in dieci anni: il più denso della linea, misurato.
+     ========================================================================================================== */
+  { id:'puk80_lefalkland', linea:LINEA_UK, anno:1982, mese:6, era:'uk1980', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    cond:function(){ return !S.falkland; },   /* G9: chi le ha giocate come snodo non riceve anche la cronaca */
+    t:'Le Falkland',
+    text:'In aprile una giunta militare argentina occupa un arcipelago dell\'Atlantico del Sud, e il governo britannico manda una flotta a tredicimila chilometri da casa. La guerra dura settantaquattro giorni e costa quasi mille vite fra le due parti, la maggior parte argentine. Il paese che si credeva in declino scopre di poter ancora vincere qualcosa, e chi governa raccoglie il consenso che ne deriva.',
+    logx:'Le isole riprese, e il paese in piedi ad applaudire.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'puk80_unannodiscio', linea:LINEA_UK, anno:1985, mese:3, era:'uk1980', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    cond:function(){ return S.minatori80!=='trattato'; },   /* chi ha trattato prima che cominciasse non ha avuto l'anno di sciopero */
+    t:'Un anno di sciopero',
+    text:'Per dodici mesi i minatori restano fuori dai cancelli, e il governo — che ha accumulato scorte di carbone in anticipo — non tratta. Le comunità dei pozzi vivono di mense e collette; i picchetti e la polizia si affrontano in scontri che i telegiornali mostrano ogni sera. A marzo si rientra senza aver ottenuto niente. Con quello sciopero finisce il potere di ricatto dei sindacati, e finiscono anche i paesi costruiti attorno a una miniera.',
+    logx:'Dodici mesi fuori, e dentro senza niente: un’epoca finisce ai cancelli dei pozzi.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'puk80_brighton', linea:LINEA_UK, anno:1984, mese:10, era:'uk1980', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Brighton',
+    text:'Alle tre di notte una bomba esplode nell\'albergo che ospita il congresso del partito di governo, in una città di mare. Muoiono cinque persone, altre restano ferite gravemente; il capo del governo, che era l\'obiettivo, non è colpito. Il congresso riapre la mattina dopo all\'ora prevista.',
+    logx:'Una bomba al congresso del partito: cinque morti, e il congresso riapre in orario.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'puk80_hillsborough', linea:LINEA_UK, anno:1989, mese:4, era:'uk1980', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Hillsborough',
+    text:'Il 15 aprile, in uno stadio di Sheffield, la calca in un settore in piedi uccide novantasette tifosi venuti a vedere una semifinale. Per anni la colpa viene attribuita ai tifosi stessi, con l\'avallo di una parte della stampa e della polizia. Ci vorranno ventisette anni perché un\'inchiesta stabilisca la verità e restituisca il nome alle vittime.',
+    logx:'Novantasette morti nella calca di uno stadio. La verità ci metterà ventisette anni.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'puk80_ilbigbang', linea:LINEA_UK, anno:1986, mese:10, era:'uk1980', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Il Big Bang',
+    text:'Il 27 ottobre la Borsa di Londra abolisce in un giorno le regole che la governavano da un secolo: commissioni fisse, ruoli separati, scrivanie ereditarie. Al loro posto arrivano gli schermi, le banche straniere e stipendi che nessun altro mestiere può eguagliare. Da qui in avanti la ricchezza del paese si concentra in un chilometro quadrato della capitale.',
+    logx:'La Borsa riscrive le sue regole in un giorno: la City diventa il motore del paese.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'puk80_heysel', linea:LINEA_UK, anno:1985, mese:5, era:'uk1980', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il mondo',
+    t:'Heysel',
+    text:'Il 29 maggio, allo stadio Heysel di Bruxelles, prima della finale di Coppa dei Campioni un settore cede sotto la carica dei tifosi e trentanove persone muoiono schiacciate, quasi tutte italiane. La partita si gioca lo stesso, per timore di peggio. I club inglesi resteranno esclusi dalle competizioni europee per cinque anni.',
+    logx:'Trentanove morti a Bruxelles prima di una finale che si gioca lo stesso.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'puk80_zeebrugge', linea:LINEA_UK, anno:1987, mese:3, era:'uk1980', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Zeebrugge',
+    text:'Il 6 marzo un traghetto salpa dal porto belga di Zeebrugge con il portellone di prua ancora aperto: si riempie d\'acqua e si rovescia in pochi minuti, a poche centinaia di metri dalla banchina. Muoiono centonovantatré persone. L\'inchiesta parlerà di una catena di negligenze e di una compagnia malata fin nei vertici.',
+    logx:'Un traghetto si rovescia col portellone aperto: centonovantatré morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'puk80_kingscross', linea:LINEA_UK, anno:1987, mese:11, era:'uk1980', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'King\'s Cross',
+    text:'Il 18 novembre un incendio partito da una scala mobile di legno investe l\'atrio della stazione sotterranea più trafficata di Londra: trentuno morti. Si scoprirà che i piccoli incendi sotto le scale mobili erano così frequenti da avere un nome interno, e che nessuno li considerava un pericolo.',
+    logx:'Incendio nella metropolitana: trentuno morti, e un pericolo che tutti chiamavano per nome.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'puk80_lockerbie', linea:LINEA_UK, anno:1988, mese:12, era:'uk1980', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il mondo',
+    t:'Lockerbie',
+    text:'Il 21 dicembre un aereo di linea in volo da Londra esplode sopra il villaggio scozzese di Lockerbie: muoiono duecentosessanta persone a bordo e undici a terra, colpite dai rottami. È il più grave attentato mai avvenuto sul suolo britannico, e il processo che ne seguirà durerà più di dieci anni.',
+    logx:'Un aereo di linea esplode sopra un villaggio scozzese: duecentosettantuno morti.',
     ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
 ];
 
@@ -1905,7 +1995,47 @@ const BEAT_LEGGERI = [
     {l:'Tieni la cartina nel cruscotto', e:'Per ogni evenienza', f:function(){}} ]},
   {id:'lg00_squillo', era:'italia2000', registro:'leggero', cond:()=>S.year>=2002&&S.year<=2006, kick:'Il paese', t:'Lo squillo', text:'Suonerie polifoniche, SMS a pagamento, lo squillo che vuol dire «pensami»: il telefonino inventa i suoi riti.', ch:[
     {l:'Impari il codice degli squilli', e:'Un linguaggio nuovo, gratis', f:function(){}},
-    {l:'Richiami e basta', e:'Alla vecchia maniera', f:function(){}} ]}
+    {l:'Richiami e basta', e:'Alla vecchia maniera', f:function(){}} ]},
+  /* ===== L60-2 · i tredici beat leggeri del decennio inglese '80 (scheda §E: sei senza ancora, sette con) ===== */
+  {id:'lguk80_pub', era:'uk1980', registro:'leggero', kick:'Il paese', t:'Il pub, sempre', text:'La moquette ha cambiato colore e la macchinetta con le luci fa più rumore della gente. Il banco è lo stesso. Il prezzo della pinta no.', ch:[
+    {l:'Una pinta, e si guarda la macchinetta', e:'Le luci girano, i soldi no', f:function(){}},
+    {l:'Una pinta, e si parla col banco', e:'Come vent\'anni fa, con altri prezzi', f:function(){}} ]},
+  {id:'lguk80_botteghino', era:'uk1980', registro:'leggero', kick:'Il paese', t:'La coda al botteghino', text:'Un film americano con le astronavi, la coda che gira l\'angolo e i biglietti che finiscono davanti a te. Domani si riprova.', ch:[
+    {l:'Torni domani, prima', e:'La coda è la metà del film', f:function(){}},
+    {l:'Rinunci: lo vedrai in cassetta', e:'Fra due anni, sul televisore', f:function(){}} ]},
+  {id:'lguk80_genitori', era:'uk1980', registro:'leggero', kick:'Il paese', t:'La domenica dai genitori', text:'Arrosto, patate, la televisione accesa senza volume e la domanda che arriva al dolce: ma tu, con questo governo, come la vedi?', ch:[
+    {l:'Rispondi, e si litiga piano', e:'Alle quattro si è già fatto pace', f:function(){}},
+    {l:'Cambi discorso: il tempo, la partita', e:'Il dolce si mangia in silenzio', f:function(){}} ]},
+  {id:'lguk80_tabloid', era:'uk1980', registro:'leggero', kick:'Il paese', t:'Il tè e il tabloid', text:'Titoli a caratteri di scatola, una ragazza a pagina tre, e in fondo una notizia vera. Si legge tutto, si crede a metà.', ch:[
+    {l:'Lo compri lo stesso', e:'Si leggono i titoli, si saltano gli articoli', f:function(){}},
+    {l:'Passi al giornale grande', e:'Più pagine, meno tè', f:function(){}} ]},
+  {id:'lguk80_radio', era:'uk1980', registro:'leggero', kick:'Il paese', t:'La partita alla radio', text:'Sabato alle tre, la radio in cucina e i risultati che arrivano uno alla volta, letti con la voce che sale o scende prima del numero.', ch:[
+    {l:'Aspetti il tuo risultato in piedi', e:'La voce scende: hai capito prima del numero', f:function(){}},
+    {l:'Spegni al primo gol subito', e:'Lo saprai dal giornale', f:function(){}} ]},
+  {id:'lguk80_spesa', era:'uk1980', registro:'leggero', kick:'Il paese', t:'La spesa del sabato', text:'Il supermercato nuovo fuori città ha il parcheggio grande e i prezzi piccoli. Il negozio all\'angolo ha la campanella, e sempre meno clienti.', ch:[
+    {l:'Il supermercato, con la macchina', e:'Un carrello pieno, e la campanella non la senti più', f:function(){}},
+    {l:'Il negozio all\'angolo, per abitudine', e:'Si paga di più, si parla di più', f:function(){}} ]},
+  {id:'lguk80_computer', era:'uk1980', cond:()=>S.year>=1982, registro:'leggero', kick:'Il paese', t:'Il computer in cameretta', text:'Un calcolatore che si attacca al televisore e carica i giochi da una cassetta, dieci minuti per volta. I ragazzi imparano a programmare per noia.', ch:[
+    {l:'Lo compri: costa meno di una bici', e:'Dieci minuti di caricamento, e poi il gioco', f:function(){}},
+    {l:'Si aspetta: sarà una moda', e:'I vicini ce l\'hanno già', f:function(){}} ]},
+  {id:'lguk80_case', era:'uk1980', cond:()=>S.year>=1986, registro:'leggero', kick:'Il paese', t:'I prezzi delle case', text:'Chi ha comprato dieci anni fa è ricco senza aver fatto niente; chi compra adesso si indebita per trent\'anni.', ch:[
+    {l:'Compri adesso, prima che salgano ancora', e:'Trent\'anni di rate, e la sensazione di essere arrivato in tempo', f:function(){}},
+    {l:'Aspetti che scendano', e:'Scenderanno. Non subito', f:function(){}} ]},
+  {id:'lguk80_tempesta', era:'uk1980', cond:()=>S.year===1987&&S.month>=10, registro:'leggero', kick:'Il paese', t:'La grande tempesta', text:'Una notte di vento abbatte quindici milioni di alberi nel sud del paese, dopo che il meteo aveva rassicurato tutti.', ch:[
+    {l:'Esci a vedere il giardino', e:'L\'albero di sempre non c\'è più', f:function(){}},
+    {l:'Resti dentro: il vento non ha ancora finito', e:'La radio parla di un uomo che aveva detto di non preoccuparsi', f:function(){}} ]},
+  {id:'lguk80_lunedi', era:'uk1980', cond:()=>S.year===1987&&S.month>=10, registro:'leggero', kick:'Il paese', t:'Il lunedì nero', text:'In un giorno la Borsa perde più che in qualunque altro giorno a memoria d\'uomo. Chi aveva comprato le azioni delle aziende di Stato guarda il telegiornale in silenzio.', ch:[
+    {l:'Vendi quello che hai, prima che scenda ancora', e:'Il guadagno di una settimana, perso in un pomeriggio', f:function(){}},
+    {l:'Non guardi: fra un anno sarà passato', e:'Il telegiornale lo guardi lo stesso', f:function(){}} ]},
+  {id:'lguk80_spalline', era:'uk1980', cond:()=>S.year>=1984, registro:'leggero', kick:'Il paese', t:'Le spalline', text:'Giacche squadrate, capelli cotonati, telefoni portatili grandi come una scarpa: il decennio si veste come si sente.', ch:[
+    {l:'Ti adegui: una giacca nuova', e:'Le spalle sembrano più larghe. Il resto no', f:function(){}},
+    {l:'Resti come sei', e:'Fra dieci anni avrai avuto ragione', f:function(){}} ]},
+  {id:'lguk80_walkman', era:'uk1980', cond:()=>S.year>=1980, registro:'leggero', kick:'Il paese', t:'Il walkman', text:'Un registratore grande come una mano, le cuffie arancioni e la musica che cammina con te sull\'autobus. I vicini di posto non sentono niente, e ti guardano lo stesso.', ch:[
+    {l:'Cuffie su, e il mondo fuori', e:'Il tragitto dura la metà', f:function(){}},
+    {l:'Lo trovi maleducato', e:'Fra un anno ce l\'avrai anche tu', f:function(){}} ]},
+  {id:'lguk80_video', era:'uk1980', cond:()=>S.year>=1983, registro:'leggero', kick:'Il paese', t:'La videocassetta a noleggio', text:'Il negozio ha aperto dove c\'era il barbiere: scaffali di scatole colorate, una tessera e un film per una notte. Si riporta domani, riavvolto, o si paga.', ch:[
+    {l:'Un film per stasera', e:'Riavvolto e riportato, per una volta', f:function(){}},
+    {l:'Due, che tanto è sabato', e:'Domani la multa per il secondo', f:function(){}} ]},
 ];
 
 /* ===== F1 — LA TELEFONATA. Un'interruzione, non una carta: overlay a squillo, due opzioni secche, decisione a
@@ -2050,11 +2180,11 @@ const PILASTRO_ONU_EV = {
    piano e si degrada più in fretta; a facile il contrario. */
 const DIFFICOLTA = {
   facile:    { interessi:0.5, dragDebito:0.6, costoSpese:0.9,  salitaConsenso:1.3,  discesaConsenso:0.75, sogliaCrisi:18, freqEventi:0.5, freqScandali:0.6, driftLealtaGiu:0.7,
-               sogliaMercati:50, sogliaDeclass:30, sogliaCrisiFid:18, sfiduciaMult:0.7, spreadMult:0.6, mesiInsolvenza:6, rischioSfiducia:0.6, swingGoverno:1, logorioMult:0.7, cicloAmp:0.4, capitaleMult:1.3, degradoMult:0.7 },
+               sogliaMercati:50, sogliaDeclass:30, sogliaCrisiFid:18, sfiduciaMult:0.7, spreadMult:0.6, mesiInsolvenza:6, mesiRivolta:8, rischioSfiducia:0.6, swingGoverno:1, logorioMult:0.7, cicloAmp:0.4, capitaleMult:1.3, degradoMult:0.7 },
   normale:   { interessi:1,   dragDebito:1,   costoSpese:1,    salitaConsenso:1,    discesaConsenso:1,    sogliaCrisi:24, freqEventi:1,   freqScandali:1,   driftLealtaGiu:1,
-               sogliaMercati:60, sogliaDeclass:40, sogliaCrisiFid:25, sfiduciaMult:1,   spreadMult:1,   mesiInsolvenza:4, rischioSfiducia:1, swingGoverno:1, logorioMult:1, cicloAmp:0.7, capitaleMult:1.0, degradoMult:1.0 },
+               sogliaMercati:60, sogliaDeclass:40, sogliaCrisiFid:25, sfiduciaMult:1,   spreadMult:1,   mesiInsolvenza:4, mesiRivolta:6, rischioSfiducia:1, swingGoverno:1, logorioMult:1, cicloAmp:0.7, capitaleMult:1.0, degradoMult:1.0 },
   difficile: { interessi:1.7, dragDebito:1.5, costoSpese:1.15, salitaConsenso:0.7,  discesaConsenso:1.35, sogliaCrisi:30, freqEventi:1.7, freqScandali:1.8, driftLealtaGiu:1.5,
-               sogliaMercati:65, sogliaDeclass:45, sogliaCrisiFid:30, sfiduciaMult:1.5, spreadMult:1.5, mesiInsolvenza:3, rischioSfiducia:1.6, swingGoverno:1, logorioMult:1.5, cicloAmp:0.95, capitaleMult:0.7, degradoMult:1.4 },
+               sogliaMercati:65, sogliaDeclass:45, sogliaCrisiFid:30, sfiduciaMult:1.5, spreadMult:1.5, mesiInsolvenza:3, mesiRivolta:4, rischioSfiducia:1.6, swingGoverno:1, logorioMult:1.5, cicloAmp:0.95, capitaleMult:0.7, degradoMult:1.4 },
 };
 
 /* ===== CORRENTI DI PARTITO (lotto primarie) — tre correnti UNIVERSALI, identiche per struttura
@@ -4861,6 +4991,56 @@ const EVENTS=[
  {id:'crollo',era:'universale', cond:()=>lv('manutenzione')===0, kick:'Emergenza infrastrutture', t:'Crolla un\'infrastruttura', text:'Cede un\'opera pubblica: anni di manutenzione rinviata presentano il conto. Vittime e disagi, il Paese chiede risposte.',ch:[
    {l:'Stato d\'emergenza e messa in sicurezza',e:'Ispezioni e cantieri ovunque, costo pesante',costo:{debito:2},f:()=>{S.ind.debt+=2; S.ind.sicurezza+=4; gd('cetomedio',-3); allG(-2);}},
    {l:'Gestione ordinaria e rassicurazioni',e:'Salvi i conti, ma la fiducia crolla',f:()=>{S.ind.sicurezza-=4; gd('cetomedio',-5); gd('cattolici',-3); allG(-3);}}]},
+
+ /* ===== L60-2 · i dodici eventi del decennio inglese '80 (scheda §D; il n. 9 è «Il picchetto e la telecamera», come da nota) ===== */
+ {id:'uk80_tremilioni', era:'uk1980', cond:()=>S.year>=1982, kick:'Lavoro', t:'Tre milioni',
+  text:'Il numero dei senza lavoro supera i tre milioni e ci resta per anni. Nelle città industriali intere generazioni escono da scuola e non entrano da nessuna parte.',ch:[
+   {l:'Un programma pubblico per i giovani senza lavoro',e:'Costa, e i numeri restano quelli · ma qualcuno ha qualcosa da fare la mattina',costo:{debito:0.9},f:()=>{S.ind.debt+=0.9; if(S.uMod!=null) S.uMod-=0.3; gd('giovani',6); gd('lavoratori',4); gd('imprenditori',-2);}},
+   {l:'La cura è questa: si tiene la linea',e:'I conti reggono · le città del nord no',f:()=>{repd(2); gd('lavoratori',-7); gd('giovani',-6); gd('imprenditori',3); stampad(-2);}}]},
+ {id:'uk80_casa', era:'uk1980', cond:()=>S.year>=1980, kick:'Il paese', t:'La casa è tua',
+  text:'Gli inquilini delle case popolari possono comprarle a prezzo scontato: per un milione di famiglie è la prima proprietà della vita, e per i comuni è un patrimonio che non torna.',ch:[
+   {l:'Sconto pieno, e si vende',e:'Un milione di proprietari nuovi · e nessuna casa nuova al posto di quelle vendute',f:()=>{S.ind.debt-=0.8; gd('cetomedio',7); gd('lavoratori',4); gd('giovani',-4); gd('pensionati',2); corrented('militanti',-3);}},
+   {l:'Si vende, ma il ricavato ricostruisce',e:'Meno entrate per lo Stato · e il patrimonio non sparisce',f:()=>{gd('cetomedio',4); gd('lavoratori',3); gd('giovani',2); corrented('pontieri',3);}}]},
+ {id:'uk80_azioni', era:'uk1980', cond:()=>S.year>=1984, kick:'Economia', t:'Le azioni per tutti',
+  text:'Le aziende di Stato si vendono in Borsa con campagne televisive che invitano il pubblico a comprare: telefoni, gas, acqua. Chi compra rivende in una settimana col guadagno.',ch:[
+   {l:'Si vende: il ricavato aggiusta i conti',e:'Entrate una tantum · e l\'argenteria non torna',f:()=>{S.ind.debt-=3; if(S.ind.fiducia!=null) S.ind.fiducia=clamp(S.ind.fiducia+6,0,100); gd('imprenditori',8); gd('cetomedio',5); gd('lavoratori',-6); corrented('militanti',-5);}},
+   {l:'Si tengono: sono del paese',e:'Nessun ricavo · e nessuno che ti accusi di vendere il paese',f:()=>{gd('lavoratori',5); gd('imprenditori',-6); corrented('militanti',4); if(S.ind.fiducia!=null) S.ind.fiducia=clamp(S.ind.fiducia-3,0,100);}}]},
+ {id:'uk80_chiude', era:'uk1980', cond:()=>S.year>=1981, kick:'Lavoro', t:'La città che chiude',
+  text:'Acciaierie, cantieri, miniere: dove chiudono non arriva nulla al loro posto. Il nord impara una parola nuova, riconversione, e non ne vede l\'effetto.',ch:[
+   {l:'Zone franche e sgravi per chi investe al nord',e:'Qualche capannone nuovo · e un conto che si paga a Londra',costo:{debito:0.7},f:()=>{S.ind.debt+=0.7; if(S.uMod!=null) S.uMod-=0.2; gd('lavoratori',4); gd('imprenditori',3); gd('cetomedio',-2);}},
+   {l:'Il mercato deciderà dove si lavora',e:'Nessuna spesa · e un nord che vota contro per una generazione',f:()=>{gd('lavoratori',-8); gd('giovani',-4); gd('imprenditori',2); repd(1);}}]},
+ {id:'uk80_brucia', era:'uk1980', cond:()=>S.year===1981||S.year===1985, kick:'Il paese', t:'Il quartiere che brucia',
+  text:'Notti di scontri nelle periferie delle grandi città: disoccupazione, controlli di polizia, rabbia che covava. Le inchieste diranno cose che si sapevano già.',ch:[
+   {l:'Un\'inchiesta pubblica, e la polizia risponde',e:'La verità scritta · e un corpo di polizia che si sente processato',f:()=>{gd('giovani',6); gd('lavoratori',3); gd('pensionati',-4); gd('cetomedio',-2); stampad(3);}},
+   {l:'Ordine prima di tutto: più agenti in strada',e:'Le notti finiscono · le cause restano',costo:{debito:0.4},f:()=>{S.ind.debt+=0.4; gd('pensionati',5); gd('cetomedio',4); gd('giovani',-7); gd('lavoratori',-2);}}]},
+ {id:'uk80_city', era:'uk1980', cond:()=>S.year>=1986, kick:'Economia', t:'La City',
+  text:'Nel quadrato d\'oro si guadagna in un anno quello che altrove si guadagna in dieci. Bretelle rosse, telefoni grandi come mattoni, e un paese che si divide fra chi ci lavora e chi lo guarda.',ch:[
+   {l:'Si lascia correre: è il motore del paese',e:'Entrate fiscali che nessuna fabbrica dava · e un paese sbilanciato verso sud',f:()=>{S.ind.debt-=0.8; if(S.gMod!=null) S.gMod+=0.2; gd('imprenditori',6); gd('cetomedio',3); gd('lavoratori',-5); gd('giovani',-2);}},
+   {l:'Un\'imposta sui guadagni della Borsa',e:'Qualcosa torna al resto del paese · e la City minaccia di andarsene',f:()=>{S.ind.debt-=0.4; if(S.ind.fiducia!=null) S.ind.fiducia=clamp(S.ind.fiducia-4,0,100); gd('lavoratori',5); gd('cetomedio',2); gd('imprenditori',-7);}}]},
+ {id:'uk80_minaccia', era:'uk1980', cond:()=>S.year>=1986, kick:'Il paese', t:'La minaccia nuova',
+  text:'Una campagna d\'informazione entra in ogni casa con toni da guerra: una malattia nuova, che nessuno sa curare, e un paese che deve imparare a parlarne.',ch:[
+   {l:'La campagna parla chiaro, a tutti',e:'Si salvano vite · qualcuno ti accusa di aver messo certe parole in ogni salotto',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; gd('giovani',5); gd('cetomedio',2); gd('cattolici',-4); gd('pensionati',-2); repd(2);}},
+   {l:'Toni prudenti: si informa senza spaventare',e:'Nessuno scandalo · e un messaggio che arriva a metà',f:()=>{gd('cattolici',3); gd('pensionati',2); gd('giovani',-4); stampad(-2);}}]},
+ {id:'uk80_concerto', era:'uk1980', cond:()=>S.year===1985, kick:'Costume', t:'Il concerto',
+  text:'Due stadi, due continenti, sedici ore di musica per la fame in Africa: il paese scopre che si può fare politica senza passare dai partiti.',ch:[
+   {l:'Il governo raddoppia quello che raccoglie il concerto',e:'Un gesto che piace · e un precedente che costa',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; gd('giovani',6); gd('cattolici',4); gd('cetomedio',2); repd(2); if(S.relInt&&S.relInt.ong!=null) S.relInt.ong=clamp(S.relInt.ong+4,0,100);}},
+   {l:'Applausi, e nient\'altro: la beneficenza è dei cittadini',e:'Nessuna spesa · e la sensazione che il paese abbia fatto da solo',f:()=>{gd('giovani',-3); gd('imprenditori',2); corrented('militanti',2);}}]},
+ {id:'uk80_picchetto', era:'uk1980', cond:()=>S.year>=1984, kick:'Lavoro', t:'Il picchetto e la telecamera',
+  text:'Ogni sera il telegiornale mostra le stesse immagini da cancelli diversi. Chi guarda decide da che parte stare in base a quale inquadratura gli hanno mostrato.',ch:[
+   {l:'Si lascia lavorare la televisione',e:'Le immagini della violenza al picchetto ti fanno comodo · finché non arriva la carica sbagliata',f:()=>{gd('cetomedio',4); gd('pensionati',3); gd('lavoratori',-5); stampad(2);}},
+   {l:'Si chiede alla polizia di abbassare i toni',e:'Meno scontri in tv · e un sindacato che legge un segnale di debolezza',f:()=>{gd('lavoratori',3); gd('giovani',2); gd('imprenditori',-3); corrented('fedelissimi',-3);}}]},
+ {id:'uk80_tunnel', era:'uk1980', cond:()=>S.year>=1988, kick:'Economia', t:'Il tunnel',
+  text:'Si comincia a scavare sotto la Manica: fra pochi anni l\'isola non sarà più un\'isola, e non tutti la prendono bene.',ch:[
+   {l:'Capitali privati, e lo Stato garantisce',e:'Nessuna spesa oggi · e una garanzia che un giorno potrebbe costare',f:()=>{gd('imprenditori',5); gd('cetomedio',2); gd('pensionati',-3); if(S.relInt&&S.relInt.ue!=null) S.relInt.ue=clamp(S.relInt.ue+3,0,100);}},
+   {l:'Lo Stato ci mette la sua parte',e:'Un cantiere che si vede · e un debito che si vede meno',costo:{debito:1.2},f:()=>{S.ind.debt+=1.2; if(S.uMod!=null) S.uMod-=0.2; gd('lavoratori',4); gd('imprenditori',3); gd('pensionati',-2);}}]},
+ {id:'uk80_parabola', era:'uk1980', cond:()=>S.year>=1989, kick:'Costume', t:'La parabola',
+  text:'Arrivano i canali via satellite: film, sport a pagamento, notiziari che non chiudono mai. Le antenne spuntano sui tetti delle case popolari.',ch:[
+   {l:'Licenze aperte: chi vuole trasmetta',e:'Più canali, più pubblicità · e la televisione pubblica che si sente sola',f:()=>{gd('imprenditori',4); gd('giovani',3); gd('pensionati',-3); stampad(3);}},
+   {l:'Regole strette su chi possiede cosa',e:'Nessun impero nuovo · e qualche editore che ti ricorderà',f:()=>{gd('cetomedio',2); gd('imprenditori',-4); stampad(-5); repd(2);}}]},
+ {id:'uk80_consiglio', era:'uk1980', cond:()=>S.year===1986, kick:'Il paese', t:'Il consiglio abolito',
+  text:'Il governo scioglie l\'amministrazione della capitale, guidata dall\'opposizione: chi lo fa parla di sprechi, chi lo subisce di un avversario cancellato per legge.',ch:[
+   {l:'Si scioglie: le funzioni passano ai quartieri',e:'Un avversario in meno · e una capitale senza governo',f:()=>{S.ind.debt-=0.3; gd('imprenditori',3); gd('cetomedio',-2); gd('giovani',-5); gd('lavoratori',-3); stampad(-3); corrented('fedelissimi',4);}},
+   {l:'Si lascia in piedi, con i cordoni tirati',e:'Nessuna legge contro un avversario · e un avversario che continua a parlare',f:()=>{gd('giovani',3); gd('lavoratori',2); corrented('fedelissimi',-4); repd(1);}}]},
 ];
 
 /* eventi INTERNAZIONALI ricorrenti (lotto Esteri+Difesa): grandi eventi ~ogni 6-9 mesi, taggati min:esteri|difesa.
@@ -7022,6 +7202,23 @@ const TITOLI=[
  {id:'ti_ord_province', pri:3, amico:'Dalle province segnali di fiducia', ostile:'La provincia si sente dimenticata'},
  {id:'ti_ord_attesa', pri:3, amico:'Il governo semina: i frutti verranno', ostile:'Il paese in sala d\'attesa'},
  {id:'ti_ord_misura', pri:3, amico:'Passi brevi, ma nella direzione giusta', ostile:'Piccolo cabotaggio: dov\'è la visione?'},
+ /* ===== L60-2 · i sedici titoli del decennio inglese '80 (scheda §F) ===== */
+ {id:'ti_uk80_isole', era:'uk1980', cond:()=>S.falkland==='vinta', amico:'Le isole riprese', ostile:'Le isole riprese: e i morti, a chi li conta?'},
+ {id:'ti_uk80_tremilioni', era:'uk1980', cond:()=>S.year>=1982, amico:'Tre milioni senza lavoro, e un governo che tiene la linea', ostile:'Tre milioni senza lavoro'},
+ {id:'ti_uk80_casa', era:'uk1980', cond:()=>S.year>=1980, amico:'La casa è tua', ostile:'La casa è tua: e le case popolari, di chi?'},
+ {id:'ti_uk80_sciopero', era:'uk1980', cond:()=>S.minatori80==='vinto'||S.minatori80==='spiraglio', amico:'Un anno di sciopero, e il governo non ha ceduto', ostile:'Un anno di sciopero'},
+ {id:'ti_uk80_azioni', era:'uk1980', cond:()=>S.year>=1984, amico:'Le azioni vendute allo sportello', ostile:'Le azioni vendute allo sportello: l\'argenteria di famiglia a prezzo di saldo'},
+ {id:'ti_uk80_quadrato', era:'uk1980', cond:()=>S.year>=1986, amico:'Il quadrato d\'oro non dorme mai', ostile:'Il quadrato d\'oro non dorme mai: il resto del paese sì'},
+ {id:'ti_uk80_imposta', era:'uk1980', cond:()=>S.polltax==='varata', amico:'L\'imposta per ogni testa: uguale per tutti', ostile:'L\'imposta per ogni testa'},
+ {id:'ti_uk80_cancelli', era:'uk1980', cond:()=>S.year>=1981, amico:'La città che chiude i cancelli, e riapre altrove', ostile:'La città che chiude i cancelli'},
+ {id:'ti_uk80_consiglio', era:'uk1980', cond:()=>S.year>=1986, amico:'Il consiglio della capitale sciolto per legge: fine degli sprechi', ostile:'Il consiglio della capitale sciolto per legge'},
+ {id:'ti_uk80_alberi', era:'uk1980', cond:()=>S.year>=1987&&(S.year>1987||S.month>=10), amico:'Quindici milioni di alberi a terra', ostile:'Quindici milioni di alberi a terra, e nessuno aveva avvisato'},
+ {id:'ti_uk80_borsa', era:'uk1980', cond:()=>S.year>=1987&&(S.year>1987||S.month>=10), amico:'La Borsa perde tutto in un giorno: e riparte domani', ostile:'La Borsa perde tutto in un giorno'},
+ {id:'ti_uk80_manica', era:'uk1980', cond:()=>S.year>=1988, amico:'Si scava sotto la Manica', ostile:'Si scava sotto la Manica: l\'isola che non vuole smettere di esserlo'},
+ {id:'ti_uk80_antenne', era:'uk1980', cond:()=>S.year>=1989, amico:'Antenne sui tetti', ostile:'Antenne sui tetti, e la televisione di tutti che resta sola'},
+ {id:'ti_uk80_terzo', era:'uk1980', cond:()=>S.year>=1987&&S.mandatesWon>=2, amico:'Terzo mandato di fila', ostile:'Terzo mandato di fila: un paese che non sa più votare altro'},
+ {id:'ti_uk80_alleanza', era:'uk1980', cond:()=>S.year>=1983&&S.partito!=='uk_lib', amico:'L\'Alleanza a un punto e mezzo dal secondo posto', ostile:'L\'Alleanza a un punto e mezzo dal secondo posto, e ventitré seggi'},
+ {id:'ti_uk80_spaccato', era:'uk1980', cond:()=>S.year>=1981&&S.partito!=='uk_lab', amico:'Il partito che si è spaccato in due', ostile:'Il partito che si è spaccato in due, e adesso litiga con entrambe le metà'},
 ];
 
 /* TITOLI LOCALI (rifinitura livello locale): a LIVELLO 1 la prima pagina parla LOCALE — il consiglio, la giunta,
@@ -7436,6 +7633,47 @@ const OPPOSIZIONE_EV = [
     { l:'Collaborazione caso per caso', e:'Libertà reciproca, legami deboli', cred:3, centro:1 },
     { l:'Il partito basta a sé stesso', e:'Identità netta; un ponte in meno', base:3, cred:-1, pleases:'conservatore' },
   ]},
+  /* ===== L60-2 · le otto carte d'opposizione del decennio inglese '80 (scheda §G, taglia nuova era:'uk1980') ===== */
+  { id:'o_uk80_scissione', era:'uk1980', cond:()=>S.year<=1983, delega:'lavoro', kick:'Opposizione', t:'La scissione',
+    text:'Quattro dei tuoi se ne vanno e fondano un partito. Li insegui, li ignori, o li attacchi?', ch:[
+      { l:'Li insegui: si tratta', e:'Qualcuno resta; la base ti accusa di correre dietro ai traditori', cred:3, corrente:{militanti:-5, pontieri:4}, pleases:'tecnico' },
+      { l:'Li ignori: il partito va avanti', e:'Nessun dramma in pubblico; i giornali lo raccontano lo stesso', base:2, stampa:-2, corrente:{pontieri:2} },
+      { l:'Li attacchi: traditori', e:'La base ruggisce; il centro se ne va con loro', base:6, vis:4, cred:-5, corrente:{militanti:7, pontieri:-6}, pleases:'populista' }, ]},
+  { id:'o_uk80_congresso', era:'uk1980', delega:'economia', kick:'Opposizione', t:'Il congresso che ti chiede conto',
+    text:'La sinistra del partito vuole impegni che il paese non voterebbe: nazionalizzazioni, uscita dall\'Europa, disarmo. Il congresso vota domani.', ch:[
+      { l:'Li accetti: il congresso è sovrano', e:'La base esulta; gli elettori di centro leggono il programma e voltano pagina', base:7, cred:-7, corrente:{militanti:8, pontieri:-6}, promessa:'lavoratori', pleases:'populista' },
+      { l:'Li respingi, e dici perché', e:'Ti prendono sul serio quelli che contano; la sala fischia', cred:6, stampa:3, corrente:{militanti:-7, pontieri:5}, pleases:'tecnico' },
+      { l:'Un compromesso scritto di notte', e:'Nessuno è contento, nessuno se ne va', cred:-2, corrente:{pontieri:3, militanti:-2} }, ]},
+  { id:'o_uk80_picchetto', era:'uk1980', cond:()=>S.year>=1984, delega:'lavoro', kick:'Opposizione', t:'Il sindacato in sciopero e tu',
+    text:'I minatori sono fuori da mesi. Stare col picchetto ti costa il centro; non starci ti costa la base. I fotografi aspettano di sapere dove ti metti.', ch:[
+      { l:'Al picchetto, in prima fila', e:'La base ti abbraccia; la foto con la carica della polizia gira per mesi', base:8, vis:6, cred:-6, corrente:{militanti:8, pontieri:-5}, promessa:'lavoratori', pleases:'populista' },
+      { l:'Solidali sì, ma contro la violenza', e:'Una frase che i giornali citano e il picchetto non perdona', cred:4, stampa:2, corrente:{militanti:-5, pontieri:4}, pleases:'tecnico' },
+      { l:'Silenzio: non è la tua battaglia', e:'Nessuna foto; e nessuno che sappia più da che parte stai', cred:-3, base:-4, corrente:{militanti:-6} }, ]},
+  { id:'o_uk80_alleanza', era:'uk1980', cond:()=>S.year>=1981&&S.partito!=='uk_lib', delega:'territorio', kick:'Opposizione', t:'L\'Alleanza che ti ruba i voti',
+    text:'Il terzo polo cresce dove crescevi tu: nei sobborghi, fra chi ha un lavoro e non ama nessuno dei due grandi. Si attacca o si corteggia?', ch:[
+      { l:'Si attacca: un partito senza radici', e:'La base gradisce; i loro elettori si sentono insultati e restano dove sono', base:4, cred:-3, corrente:{militanti:5}, pleases:'populista' },
+      { l:'Si corteggia: un patto sui collegi', e:'Qualche seggio in più, forse; la base ti chiede con chi stai', cred:4, corrente:{pontieri:5, militanti:-6}, pleases:'tecnico' },
+      { l:'Si ignora: gli elettori tornano da soli', e:'Non tornano', cred:-2, vis:-3 }, ]},
+  { id:'o_uk80_isole', era:'uk1980', cond:()=>S.year===1982, delega:'esteri', kick:'Opposizione', t:'Le isole',
+    text:'Il paese è in guerra e sta vincendo. Che fa un\'opposizione patriottica? Ogni parola che dici verrà riletta il giorno della vittoria.', ch:[
+      { l:'Sostieni la flotta senza riserve', e:'Nessuno può accusarti di niente; e nessuno si ricorderà di te', cred:5, vis:-3, corrente:{militanti:-5, pontieri:4} },
+      { l:'Sostieni i soldati, chiedi la pace', e:'Una posizione che la base capisce e i tabloid no', cred:-3, stampa:-5, base:4, corrente:{militanti:5} },
+      { l:'Chiedi conto di chi non ha visto arrivare la giunta', e:'Una domanda giusta, fatta nel giorno sbagliato', vis:5, cred:-5, stampa:-4, pleases:'populista' }, ]},
+  { id:'o_uk80_casa', era:'uk1980', cond:()=>S.year>=1980, delega:'territorio', kick:'Opposizione', t:'La casa venduta',
+    text:'La tua gente compra le case popolari e ti ringrazia. Ti opponi a una misura che piace ai tuoi?', ch:[
+      { l:'Ti opponi: si vende il patrimonio di tutti', e:'Coerente, e a un milione di famiglie nuove proprietarie non piace', cred:3, base:-5, corrente:{militanti:5, pontieri:-4}, pleases:'tecnico' },
+      { l:'Ti adegui: la casa a chi ci vive', e:'Gli elettori capiscono; la sinistra del partito parla di resa', base:4, cred:2, corrente:{militanti:-7, pontieri:5} },
+      { l:'Sì, ma il ricavato ricostruisca', e:'Una posizione che regge; sottile, per un manifesto', cred:4, corrente:{pontieri:3}, promessa:'cetomedio' }, ]},
+  { id:'o_uk80_consiglio', era:'uk1980', cond:()=>S.year>=1985&&S.year<=1986, delega:'territorio', kick:'Opposizione', t:'Il consiglio sciolto',
+    text:'Il governo cancella per legge l\'amministrazione che era tua: si resiste o si va in tribunale?', ch:[
+      { l:'Si resiste: la piazza e i manifesti', e:'La capitale si riempie di manifesti; la legge passa lo stesso', vis:7, base:5, cred:-3, corrente:{militanti:6}, pleases:'populista' },
+      { l:'Si va in tribunale', e:'Un ricorso serio, che perde con dignità', cred:4, vis:-2, corrente:{pontieri:3}, pleases:'tecnico' },
+      { l:'Si accetta, e si riparte dai quartieri', e:'Realismo, dicono i tuoi; resa, dicono gli altri tuoi', cred:2, base:-4, corrente:{militanti:-5, pontieri:4} }, ]},
+  { id:'o_uk80_volto', era:'uk1980', delega:'scuola', kick:'Opposizione', t:'Il volto nuovo',
+    text:'Un giovane dirigente buca lo schermo meglio di te: parla in frasi brevi, non ha nemici dichiarati, e i giornali lo hanno già chiamato il futuro. Lo promuovi o lo tieni lontano?', ch:[
+      { l:'Lo promuovi: il futuro si prende per mano', e:'Il partito sembra nuovo; e qualcuno comincia a contare i tuoi anni', vis:6, cred:3, corrente:{pontieri:5, fedelissimi:-4} },
+      { l:'Lo tieni lontano: un incarico senza telecamere', e:'Nessun rivale in vista; e la sensazione di un partito che invecchia', vis:-4, corrente:{fedelissimi:5, pontieri:-4} },
+      { l:'Lo metti alla prova: un dossier difficile', e:'Se ce la fa, è tuo; se no, lo sapranno tutti', cred:2, corrente:{pontieri:2}, pleases:'tecnico' }, ]},
 ];
 
 /* ===================== L25-2 · α2 — AI FIANCHI SUI MEDIA (famiglia d'opposizione) =====================
@@ -8387,6 +8625,173 @@ const FMI_EV = {
         gd('lavoratori',-6); gd('pensionati',-7); gd('cetomedio',-8); gd('imprenditori',-9); gd('giovani',-4);
         if(typeof tutteCorrenti==='function') tutteCorrenti(8);
         S.log.unshift({t:T('Lo sportello'),x:T('Rifiutate le condizioni del Fondo, e pagato il conto pieno.')}); } },
+  ],
+};
+
+/* ==============================================================================================================
+   L73-2 · SNODI_STORICI — che cosa fece la storia a ogni snodo, e come si racconta la divergenza. Chiave = il flag
+   di stato che lo snodo scrive (S.<flag>); `storico` = i valori con cui hai seguito la storia; `diverge` = una
+   riga per ogni altro valore. I due nodi in catena portano il valore FINALE (falkland: vinta, non flotta).
+   ⚠ Tre scelte dichiarate, non prese dalla tabella di Cowork: questioneMorale → 'difendi' (DC e PSI difesero
+   il partito e denunciarono l'uso politico delle inchieste; nessuno collaborò né si rinnovò in tempo); scalaMobile
+   → 'taglio_confermato' (decreto di San Valentino 1984, referendum 1985 lo confermò); alleanza → 'lasciati' per il
+   Labour (Foot non li inseguì) e 'insieme' per i Liberal. crolloPsi → 'lume' come proposto (il PSI si ridusse ai
+   Socialisti Italiani). Gli *Esito derivati (aperturaEsito, fuoriAulaEsito, maastrichtEsito) non sono snodi.
+   ============================================================================================================== */
+/* ==============================================================================================================
+   L64-4 · LE LISTE (DESIGN-SUPERFICI-VIVE §A). Al PRIMO mese di stagione elettorale (pickCampagnaNazionale) la carta
+   prende il posto del beat di campagna, da sola: N posti sicuri fra correnti · competenti · fedeli. È obbligata (non
+   si salta il mese) e senza ritorno (si decide una volta per stagione). Il dato è piccolo: S.gruppo = {correnti,
+   competenti, fedeli} in quote, e alimenta: l'umore delle correnti al momento e nel target (fedeli → +4 sui target
+   finché dura il gruppo; correnti → +6 alla corrente favorita), la rosa dei ministri (competenti → competenza minima
+   2 e +1 alla prossima formazione, goAppoint) e L'INNESCO DELLO SFIDANTE: chi promuovi (correnti) diventa il seme
+   della prossima sfida (S.sfidaSeme: volto = il leader della corrente favorita, innesco a 40 invece che a 35).
+   ============================================================================================================== */
+const LISTE_EV = {
+  id:'liste', kick:'Il partito', tono:'grave',
+  t:'Le liste',
+  text:'Prima del voto si decidono i posti sicuri: chi entra, chi scala, chi resta fuori. Ne hai un numero, e tre destinazioni che competono. La lista si chiude oggi e non si riapre.',
+  ch:[
+    { l:'Posti alle correnti: si compra la pace', e:'La corrente più arrabbiata si lega a te · le altre lo notano · e chi promuovi, un giorno, ti sfiderà', fatto:'Le liste ai posti sicuri sono andate alle correnti: la pace interna comprata coi seggi.',
+      f:function(){ S.gruppo={correnti:60, competenti:20, fedeli:20, anno:S.year};
+        const arr=(S.correnti||[]).slice().sort(function(a,b){return a.umore-b.umore;})[0];
+        if(arr){ S.correnti.forEach(function(c){ c.umore=clamp(c.umore+(c.id===arr.id?10:-4),0,100); }); S.sfidaSeme={ volto:arr.leader, corrente:arr.id, anno:S.year };
+          S.log.unshift({t:T('Il partito'), x:T('%V, che hai messo in lista, adesso ha un gruppo dietro: se la sua corrente si scalda, sarà lui a sfidarti.').replace('%V',arr.leader)}); } } },
+    { l:'Posti ai competenti: un gruppo che sa fare', e:'I prossimi ministri saranno migliori · le correnti si sentono scavalcate', fatto:'Le liste ai posti sicuri sono andate ai competenti: un gruppo parlamentare che sa fare.',
+      f:function(){ S.gruppo={correnti:20, competenti:60, fedeli:20, anno:S.year}; S.sfidaSeme=null;
+        if(S.correnti) S.correnti.forEach(function(c){ c.umore=clamp(c.umore-3,0,100); }); repd(2); } },
+    { l:'Posti ai fedeli: gente senza dubbi', e:'Umore alto per anni · un gruppo debole, e i migliori altrove', fatto:'Le liste ai posti sicuri sono andate ai fedeli: umore alto, gruppo debole.',
+      f:function(){ S.gruppo={correnti:20, competenti:20, fedeli:60, anno:S.year}; S.sfidaSeme=null;
+        if(S.correnti) S.correnti.forEach(function(c){ c.umore=clamp(c.umore+6,0,100); }); } },
+  ],
+};
+
+const SNODI_STORICI = {
+  apertura: { storico:['apri'], conforme:'sull\'apertura a sinistra', diverge:{ 'no':'L\'apertura a sinistra non c\'è mai stata: la formula centrista ha retto, e il PSI è rimasto fuori.' } },
+  leggeTruffa: { storico:['approvata'], conforme:'sul premio di maggioranza', diverge:{ 'respinta':'La legge sul premio di maggioranza non è mai passata: nessuna «legge truffa» da ricordare.' } },
+  enel: { storico:['nazionalizzata','contraccolpo'], conforme:'sull\'energia allo Stato', diverge:{ 'privata':'L\'Enel non è mai nata: l\'energia è rimasta ai privati.' } },
+  divorzio: { storico:['urne'], conforme:'sul referendum del divorzio', diverge:{ 'evitato':'Il referendum sul divorzio non si è mai tenuto: l\'intesa in Parlamento lo ha evitato.' } },
+  austerity: { storico:['stretta','stretta_contestata'], conforme:'sull\'austerità del \'73', diverge:{ 'morbida':'Il paese senza benzina non ha mai visto le domeniche a piedi: la stretta è stata leggera.' } },
+  solidarieta: { storico:['nonsfiducia'], conforme:'sulla solidarietà nazionale', diverge:{ 'organica':'I comunisti sono entrati nella maggioranza: una solidarietà organica che la storia non ha conosciuto.', 'contestata':'I comunisti sono entrati nella maggioranza, contestati: una solidarietà che la storia non ha conosciuto.' } },
+  divorzioBdi: { storico:['sciolto','sciolto_contestato'], conforme:'sul divorzio fra Tesoro e Banca d\'Italia', diverge:{ 'conservato':'Il vincolo fra Tesoro e Banca d\'Italia non è mai stato sciolto: i titoli li ha continuati a comprare lo Stato.' } },
+  scalaMobile: { storico:['taglio_confermato'], conforme:'sulla scala mobile', diverge:{ 'taglio_respinto':'Il taglio della contingenza è stato cancellato dal referendum: la scala mobile è tornata piena.', 'invariata':'La scala mobile non è mai stata toccata: nessun decreto, nessun referendum.' } },
+  questioneMorale: { storico:['difendi'], conforme:'sulla questione morale', diverge:{ 'collabora':'Davanti ai giudici il tuo partito ha collaborato invece di difendersi: una scelta che nessun partito di allora fece.', 'rinnova':'Davanti ai giudici il tuo partito ha cambiato il gruppo dirigente in piena tempesta: una scelta che nessun partito di allora fece in tempo.' } },
+  nucleare: { storico:['uscita'], conforme:'sul nucleare dopo l\'incidente', diverge:{ 'ridimensionato':'Il nucleare non è stato chiuso dopo l\'incidente: il piano è andato avanti, ridimensionato.', 'ridimensionato_conteso':'Il nucleare non è stato chiuso dopo l\'incidente: il piano è andato avanti, ridimensionato e contestato.' } },
+  scissione: { storico:['svolta'], conforme:'sulla svolta del partito comunista', diverge:{ 'rifondazione':'Il partito comunista non ha cambiato nome: la svolta è stata respinta e la storia ha preso un\'altra strada.' } },
+  maastricht: { storico:['corri'], conforme:'sulla corsa a Maastricht', diverge:{ 'rallenta':'L\'Italia non è entrata nella moneta unica con la prima ondata: ha preso il treno dopo.' } },
+  mattarellum: { storico:['misto'], conforme:'sulla legge elettorale del \'93', diverge:{ 'secco':'La legge elettorale del \'93 è stata un maggioritario netto, non il sistema misto della storia.' } },
+  diaspora: { storico:['popolare'], conforme:'sulla diaspora democristiana', diverge:{ 'polo':'Hai portato i tuoi nel nuovo polo: la casa madre democristiana è rimasta in piedi senza di te.' } },
+  crolloPsi: { storico:['lume'], conforme:'sul crollo socialista', diverge:{ 'sinistra':'Il nome socialista si è spento e i tuoi hanno trovato casa a sinistra.', 'polo':'Il nome socialista si è spento e i tuoi sono andati nel nuovo polo.' } },
+  fiuggi: { storico:['svolta'], conforme:'sulla svolta di Fiuggi', diverge:{ 'fiamma':'A Fiuggi la fiamma non si è toccata: la destra nuova non è nata.' } },
+  porcellum: { storico:['riscritta'], conforme:'sulla legge elettorale del 2005', diverge:{ 'invariata':'La legge elettorale del 2005 non è mai stata scritta: si è votato con le regole del \'93.' } },
+  fusionePd: { storico:['dentro'], conforme:'sulla nascita del partito nuovo', diverge:{ 'fuori':'Il partito nuovo del centrosinistra è nato senza di te: sei rimasto fuori con la tua storia.' } },
+  fusionePdl: { storico:['dentro'], conforme:'sul partito unico del centrodestra', diverge:{ 'fuori':'Il partito unico del centrodestra è nato senza di te: hai tenuto la tua tradizione fuori.' } },
+  fuoriAula: { storico:['cartello'], conforme:'sulla corsa sotto la soglia', diverge:{ 'solo':'Sotto la soglia hai corso col tuo simbolo invece che nel cartello unitario.' } },
+  crisi08: { storico:['rigore'], conforme:'sul conto della crisi del 2008', diverge:{ 'stimolo':'Nella crisi del 2008 hai speso per attutire il colpo, dove la storia tenne i conti.' } },
+  suez: { storico:['fermato'], conforme:'su Suez', diverge:{ 'trattato':'A Suez non si è andati: si è trattato, e la flotta è rimasta in porto.', 'fondo':'A Suez si è andati fino in fondo, contro la valuta e contro gli alleati.', 'intervento':'A Suez la spedizione è partita, e la storia si è fermata lì.' } },
+  sterlina60: { storico:['svalutata_tardi'], conforme:'sulla sterlina', diverge:{ 'svalutata_subito':'La sterlina è stata svalutata subito, senza tre anni di difesa a caro prezzo.', 'difesa_fino_in_fondo':'La sterlina è stata difesa fino in fondo, e il cambio ha tenuto dove la storia cedette.', 'difesa':'La sterlina è stata difesa, e la storia si è fermata lì.' } },
+  europa60: { storico:['insiste'], conforme:'sulla domanda d\'ingresso in Europa', diverge:{ 'fuori':'L\'ingresso in Europa non è mai stato chiesto: il Commonwealth prima di tutto.', 'ritirata':'Dopo il no di Parigi la domanda d\'ingresso in Europa è stata ritirata con dignità, e non ripresentata.', 'chiesto':'L\'ingresso in Europa è stato chiesto, e la storia si è fermata lì.' } },
+  coscienza60: { storico:['sostiene'], conforme:'sulle riforme di coscienza', diverge:{ 'astenuto':'Sulle riforme di coscienza ti sei astenuto: il voto libero c\'è stato, la tua voce no.', 'rinviato':'Le riforme di coscienza sono state rinviate: nessun voto libero in quegli anni.' } },
+  europa70: { storico:['confermato'], conforme:'sull\'Europa', diverge:{ 'fuori':'Il Regno Unito è rimasto fuori dal Mercato comune, e stavolta per scelta.', 'senza_referendum':'L\'ingresso in Europa non è mai stato confermato dal paese: ha deciso il Parlamento.', 'dentro':'Il Regno Unito è entrato nel Mercato comune, e la storia si è fermata lì.' } },
+  minatori: { storico:['alvoto','alvoto_tardi'], conforme:'sui minatori del \'74', diverge:{ 'ceduto':'Ai minatori si è ceduto: le luci sono rimaste accese e il tetto salariale è diventato carta straccia.', 'resiste':'Ai minatori si è resistito, e la storia si è fermata lì.', 'tenuto':'Ai minatori si è tenuto duro fino alla fine, senza andare al voto: il paese ha lavorato tre giorni a settimana e non ha votato.' } },
+  fmi: { storico:['accettato'], conforme:'sul prestito del Fondo monetario', diverge:{ 'rifiutato':'Il prestito del Fondo monetario è stato rifiutato: la sovranità non si è impegnata, e i conti nemmeno.' } },
+  falkland: { storico:['vinta'], conforme:'sulle Falkland', diverge:{ 'trattato':'Le isole non sono state riprese: si è trattato, e non è morto nessuno.', 'meta':'La flotta si è fermata a metà Atlantico, con un compromesso che nessuno voleva.', 'flotta':'La flotta è salpata, e la storia si è fermata lì.' } },
+  minatori80: { storico:['vinto'], conforme:'sullo sciopero dei minatori', diverge:{ 'trattato':'Con i minatori si è trattato prima dello sciopero: l\'anno di sciopero non c\'è mai stato.', 'spiraglio':'Con i minatori si è aperto uno spiraglio e qualche pozzo si è salvato: nessuna vittoria da raccontare.', 'scorte':'Le scorte di carbone sono state accumulate, e la storia si è fermata lì.' } },
+  polltax: { storico:['varata'], conforme:'sull\'imposta per ogni testa', diverge:{ 'annacquata':'L\'imposta per ogni testa è stata annacquata: esenzioni e scaglioni, e nessuna rivolta fiscale.', 'ritirata':'L\'imposta per ogni testa è stata ritirata prima di partire: nessuna rivolta, e una marcia indietro.' } },
+  alleanza: { storico:['lasciati','insieme'], conforme:'sulla scissione dell\'81', diverge:{ 'inseguiti':'I quattro che se ne andavano sono stati inseguiti: qualcuno è rimasto, e la scissione è stata più piccola.', 'attaccati':'I quattro che se ne andavano sono stati chiamati traditori davanti a tutti.', 'soli':'L\'Alleanza non è mai nata: i Liberali sono rimasti quello che erano.' } },
+};
+
+/* ==============================================================================================================
+   L60-2 · I CINQUE SNODI DEL DECENNIO INGLESE '80 (scheda §A, §B, §C + la scissione dell'81 vista dai due partiti).
+   Falkland: snodo + cronaca (G9), il pilastro di giugno '82 ha `cond:!S.falkland`. Minatori: il gemello rovesciato
+   del '74 — stavolta si sta dall'altra parte, e chi accumula le scorte vince. Poll tax: «rischio-caduta grave» =
+   tutti i gruppi giù insieme, il consenso scende di ~9 e da lì la sfiducia e la rivolta (L72-1) fanno il resto.
+   1981: chi gioca il LABOUR subisce la scissione (tre modi di viverla), chi gioca i LIBERAL riceve «I quattro che
+   bussano» e vive il controfattuale; tutti gli altri la vedono come TAPPA (game.js, '1981/3'). ⚠ Per la scissione
+   NON uso `scissioneDividi`: creerebbe un sesto partito (l'SDP) che la correzione del disegno esclude dal roster e
+   che `esce` non saprebbe far confluire — `alleanza81(n)` (game.js) sposta n punti dal Labour a `uk_lib` e lo
+   rinomina, che è la stessa storia col roster a cinque. Dichiarato nella consegna.
+   ⚠ VALUTE: `cred`/`vis` esistono solo all'opposizione → sempre dietro `typeof credd==='function'`.
+   ============================================================================================================== */
+const FALKLAND_EV = {
+  id:'snodo_falkland', kick:'Le isole', tono:'grave',
+  t:'L\'arcipelago',
+  text:'Una giunta militare ha occupato isole britanniche a tredicimila chilometri da qui. Gli abitanti sono duemila. La flotta può salpare in tre giorni, e nessuno può garantire come finisce.',
+  ch:[
+    { l:'Parte la flotta', e:'Tre giorni, e la flotta è in mare · come finisce lo saprai a metà Atlantico',
+      f:function(){ S.falkland='flotta'; stampad(3); S.log.unshift({t:T('Le isole'),x:T('La flotta è salpata verso le isole.')}); } },
+    { l:'Si tratta: nessuna isola vale una guerra', e:'Nessun morto, e un governo che sembra aver ceduto a una giunta militare. La stampa d\'ordine chiede le dimissioni.',
+      f:function(){ S.falkland='trattato'; repd(-8); stampad(-8); gd('cetomedio',-8); gd('pensionati',-5); gd('imprenditori',-3); corrented('fedelissimi',-8); corrented('militanti',-4); if(typeof credd==='function') credd(-6); S.log.unshift({t:T('Le isole'),x:T('Le isole non sono state riprese, e non è morto nessuno.')}); } },
+  ],
+};
+const FALKLAND_DUE_EV = {
+  id:'snodo_falkland_due', kick:'Le isole', tono:'grave',
+  t:'Settantaquattro giorni',
+  text:'La flotta è a metà Atlantico. Arrivano le prime perdite, da entrambe le parti, e arrivano insieme alle prime richieste di mediazione.',
+  ch:[
+    { l:'Si va fino in fondo', e:'Le isole tornano. Quasi mille morti, la maggior parte argentini. Il paese che si credeva in declino scopre di poter ancora vincere, e chi governa raccoglie tutto.', costo:{debito:1.5},
+      f:function(){ S.falkland='vinta'; S.ind.debt+=1.5; repd(10); stampad(8); gd('cetomedio',10); gd('pensionati',10); gd('imprenditori',8); gd('lavoratori',6); gd('giovani',4); gd('cattolici',6); corrented('fedelissimi',8); corrented('pontieri',5); corrented('militanti',5); if(typeof credd==='function') credd(8); if(typeof visd==='function') visd(6); S.log.unshift({t:T('Le isole'),x:T('Le isole riprese, e il paese in piedi ad applaudire.')}); } },
+    { l:'Si accetta la mediazione a metà strada', e:'Un compromesso che nessuno festeggia: le isole restano contese, i morti restano morti.', costo:{debito:0.6},
+      f:function(){ S.falkland='meta'; S.ind.debt+=0.6; repd(-4); stampad(-5); gd('cetomedio',-5); gd('pensionati',-3); corrented('fedelissimi',-4); S.log.unshift({t:T('Le isole'),x:T('Fermati a metà Atlantico, con un compromesso che nessuno voleva.')}); } },
+  ],
+};
+const MINATORI80_EV = {
+  id:'snodo_minatori80', kick:'Il carbone', tono:'grave',
+  t:'Le scorte',
+  text:'Il piano di chiusura dei pozzi porterà allo sciopero, e lo sai. La differenza rispetto a dieci anni fa è che stavolta puoi prepararti: accumulare carbone per un anno, e aspettarli.',
+  ch:[
+    { l:'Accumuli le scorte e vai avanti col piano', e:'Un anno di carbone nei depositi · e un anno di sciopero davanti', costo:{debito:0.8},
+      f:function(){ S.minatori80='scorte'; S.ind.debt+=0.8; gd('lavoratori',-4); gd('imprenditori',3); S.log.unshift({t:T('Il carbone'),x:T('Scorte accumulate per un anno: il braccio di ferro può cominciare.')}); } },
+    { l:'Tratti prima che cominci', e:'Chiusure più lente, nessuno sciopero, e la sensazione che il governo si sia fermato davanti a un sindacato.',
+      f:function(){ S.minatori80='trattato'; if(S.gMod!=null) S.gMod-=0.3; repd(-5); gd('lavoratori',6); gd('imprenditori',-4); corrented('pontieri',-6); S.log.unshift({t:T('Il carbone'),x:T('Trattato prima dello sciopero: i pozzi chiudono più piano, e il governo sembra essersi fermato.')}); } },
+  ],
+};
+const MINATORI80_DUE_EV = {
+  id:'snodo_minatori80_due', kick:'Il carbone', tono:'grave',
+  t:'Dodici mesi',
+  text:'È cominciato. Le comunità dei pozzi vivono di mense e collette, i picchetti e la polizia si affrontano ogni sera in televisione. Il paese guarda, e si divide come non si divideva da una generazione.',
+  ch:[
+    { l:'Non si tratta, fino alla fine', e:'Rientrano dopo un anno senza aver ottenuto nulla. Il potere di ricatto dei sindacati finisce qui — e finiscono anche i paesi costruiti attorno a una miniera.',
+      f:function(){ S.minatori80='vinto'; repd(6); gd('imprenditori',8); gd('cetomedio',2); gd('lavoratori',-14); gd('giovani',-3); corrented('fedelissimi',5); corrented('pontieri',-2); if(S.uMod!=null) S.uMod+=0.6; S.log.unshift({t:T('Il carbone'),x:T('Lo sciopero è finito senza accordo, e con esso un\'epoca.')}); } },
+    { l:'Si apre uno spiraglio: qualche pozzo si salva', e:'Una via d\'uscita per entrambi, che entrambi chiameranno sconfitta.',
+      f:function(){ S.minatori80='spiraglio'; repd(2); gd('lavoratori',-5); gd('imprenditori',1); if(S.gMod!=null) S.gMod-=0.2; S.log.unshift({t:T('Il carbone'),x:T('Qualche pozzo salvato, e un anno perso da tutti.')}); } },
+  ],
+};
+const POLLTAX_EV = {
+  id:'snodo_polltax', kick:'L\'imposta', tono:'grave',
+  t:'Un\'imposta per ogni testa',
+  text:'La tassa sulla casa va sostituita: chi la scrive dice che è giusto che paghi chi usa i servizi, uno per uno. Chi la pagherà nota che il duca e il suo giardiniere pagheranno uguale.',
+  ch:[
+    { l:'Si vara com\'è', e:'Rivolta fiscale, milioni che non pagano, e la fine di un\'epoca politica che sembrava eterna.',
+      f:function(){ S.polltax='varata'; repd(-6); stampad(-6); gd('cetomedio',-10); gd('lavoratori',-10); gd('pensionati',-8); gd('giovani',-8); gd('cattolici',-6); gd('imprenditori',-4); corrented('fedelissimi',-8); corrented('pontieri',-8); corrented('militanti',-6); S.log.unshift({t:T('L\'imposta'),x:T('Varata l\'imposta per ogni testa, e il paese ha smesso di pagare.')}); } },
+    { l:'Si annacqua: esenzioni e scaglioni', e:'Meno ingiusta, meno semplice, e chi l\'ha voluta ti considera un traditore.',
+      f:function(){ S.polltax='annacquata'; repd(3); gd('cetomedio',-4); corrented('fedelissimi',-8); corrented('militanti',-4); S.log.unshift({t:T('L\'imposta'),x:T('Annacquata l\'imposta: esenzioni, scaglioni, e chi la voleva che non ti perdona.')}); } },
+    { l:'Si ritira prima di partire', e:'Nessuna rivolta, e un governo che per la prima volta ha fatto marcia indietro.',
+      f:function(){ S.polltax='ritirata'; repd(-4); gd('cetomedio',3); gd('lavoratori',3); gd('pensionati',3); gd('giovani',3); gd('cattolici',3); gd('imprenditori',3); corrented('fedelissimi',-5); corrented('militanti',-3); S.log.unshift({t:T('L\'imposta'),x:T('Ritirata l\'imposta prima di partire: la prima marcia indietro.')}); } },
+  ],
+};
+const SCISSIONE81_EV = {
+  id:'snodo_scissione81', kick:'Il partito', tono:'grave',
+  t:'Quattro che se ne vanno',
+  text:'Quattro dirigenti del tuo partito hanno firmato una dichiarazione: se ne vanno, fondano un partito nuovo e correranno insieme ai Liberali, un candidato solo per collegio. Con loro se ne va un pezzo di elettorato che non ti ha mai amato, e che adesso ha dove andare.',
+  ch:[
+    { l:'Li insegui: si tratta con chi se ne va', e:'Qualcuno resta, a caro prezzo · la base ti accusa di correre dietro ai traditori',
+      f:function(){ S.alleanza='inseguiti'; alleanza81(4); corrented('militanti',-6); corrented('pontieri',4); stampad(2); if(typeof credd==='function') credd(-2); S.log.unshift({t:T('Il partito'),x:T('Ho trattato con chi se ne andava: qualcuno è rimasto, e la base non me lo perdona.')}); } },
+    { l:'Li lasci andare: il partito resta suo', e:'Nessuna trattativa · la sinistra ti applaude, il centro se ne va con loro',
+      f:function(){ S.alleanza='lasciati'; alleanza81(7); corrented('militanti',6); corrented('pontieri',-6); S.log.unshift({t:T('Il partito'),x:T('Li ho lasciati andare: il partito è rimasto quello che era, più piccolo.')}); } },
+    { l:'Li attacchi: traditori, e si dica', e:'La base ruggisce · i giornali raccontano un partito che si sbrana',
+      f:function(){ S.alleanza='attaccati'; alleanza81(7); corrented('militanti',8); corrented('pontieri',-8); stampad(-4); repd(-3); if(typeof credd==='function') credd(-4); S.log.unshift({t:T('Il partito'),x:T('Li ho chiamati traditori davanti a tutti: la base ha ruggito, i giornali hanno preso nota.')}); } },
+  ],
+};
+const QUATTRO_EV = {
+  id:'snodo_quattro', kick:'Il partito', tono:'grave',
+  t:'I quattro che bussano',
+  text:'Quattro dirigenti laburisti hanno lasciato il loro partito e ne hanno fondato uno nuovo. Adesso sono qui, e non chiedono un\'alleanza qualunque: chiedono di correre insieme, un candidato solo per collegio, un nome solo sulla scheda. Il partito che rappresenti ha centoventi anni di storia e nove seggi.',
+  ch:[
+    { l:'Si corre insieme: un nome, una scheda', e:'In pochi mesi i sondaggi vi danno un quarto del paese. Il secondo posto, che non era mai stato pensabile, adesso lo è.',
+      f:function(){ S.alleanza='insieme'; alleanza81(7, 'Alleanza SDP-Liberali'); gd('cetomedio',4); gd('giovani',3); corrented('militanti',-8); corrented('fedelissimi',4); corrented('pontieri',5); if(typeof visd==='function') visd(8); S.log.unshift({t:T('Il partito'),x:T('Il partito è diventato l\'Alleanza, e per la prima volta punta al secondo posto.')}); } },
+    { l:'Si resta quello che siamo', e:'Nessuna confusione, nessuna crescita. I quattro corrono da soli e vi tolgono l\'aria che avreste avuto.',
+      f:function(){ S.alleanza='soli'; if(S.forze){ S.forze['uk_lab']=Math.max(2,(S.forze['uk_lab']||0)-6); S.forze['uk_lib']=Math.max(2,(S.forze['uk_lib']||0)-3); rinormalizzaForze(); } corrented('militanti',6); corrented('pontieri',-4); if(typeof credd==='function') credd(4); S.log.unshift({t:T('Il partito'),x:T('Rifiutata la fusione coi quattro: il partito è rimasto quello che era.')}); } },
   ],
 };
 

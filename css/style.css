@@ -101,7 +101,12 @@
   .ind:first-of-type{border-top:none;}
   .ind .nm{flex:1;} .ind .nm b{font-weight:600; font-size:14px;} .ind .nm small{display:block; color:var(--mut2); font-size:12px;}
   .ind .num{font-family:'IBM Plex Mono',monospace; font-weight:600; font-size:16px; min-width:62px; text-align:right;}
-  .bar{height:6px; border-radius:4px; background:var(--line); overflow:hidden; margin-top:5px;}
+  .bar{height:6px; border-radius:4px; background:var(--line); overflow:hidden; margin-top:5px; position:relative;}
+  /* L72-1 — il pavimento sulla barra e il conto alla rovescia sotto (testo di decisione: 12px) */
+  .bar .pav{position:absolute; top:0; bottom:0; width:2px; margin-left:-1px; background:var(--neg); opacity:.75;}
+  .grp .rivolta{margin-top:6px; font-size:12px; line-height:1.35; color:var(--neg);}
+  .banner.camp-banner{border-color:var(--brand); background:var(--brand-bg);}   /* L64-2 */
+  .banner.rivolta-banner{border-color:var(--neg); background:color-mix(in srgb, var(--neg) 9%, var(--card));}
   .bar i{display:block; height:100%; border-radius:4px;}
 
   .grp{padding:11px 14px; border-top:1px solid var(--line);} .grp:first-of-type{border-top:none;}
@@ -214,6 +219,23 @@
   .fiscbar .fl{color:var(--mut); letter-spacing:.02em;} .fiscbar .fv{font-family:'IBM Plex Mono',monospace; font-weight:600; color:var(--txt); white-space:normal; overflow-wrap:anywhere;}   /* L44-3: era nowrap. Le cifre-lire del 2000 (le piu grandi della linea: la spesa passa il milione di mld)
       sforavano di 9px a 375px — il contenitore era gia wrap-safe, il VALORE no. Ora va a capo invece di uscire. */
   .ag .outcome{padding:0 15px 13px; color:var(--pos); font-size:13px;}
+  /* L67-3 — il gergo al tocco. La parola resta della sua taglia e del suo colore; l'AREA che si preme è 44px
+     (padding + margine negativo). La definizione si apre sotto, a blocco, e non si sovrappone a niente. */
+  .gergo-wrap{display:inline;}
+  .gergo{display:inline; font:inherit; color:inherit; background:none; border:none; padding:12px 3px; margin:-12px -3px;
+    min-height:44px; cursor:pointer; text-decoration:underline dotted; text-underline-offset:3px; text-decoration-color:var(--mut2);}
+  .gergo[aria-expanded="true"]{text-decoration-style:solid; color:var(--brand);}
+  .gergo-def{display:block; margin:0 14px 12px; padding:7px 10px; border-left:2px solid var(--brand); background:var(--brand-bg);
+    border-radius:0 8px 8px 0; font-size:12px; font-weight:400; line-height:1.4; color:var(--txt2); letter-spacing:0; text-transform:none; white-space:normal; text-align:left;}
+  .sticky-top .gergo-def{margin:0 0 8px;}
+  /* la scheda che ospita la definizione puo essere una RIGA flex (etichetta a sinistra, valore a destra): si porta a capo e la definizione prende tutta la larghezza */
+  .gergo-host{flex-wrap:wrap;}
+  .gergo-host > .gergo-def{flex:1 1 100%; width:100%;}
+  .gergo-def[hidden]{display:none;}
+  /* L67-2 — il riepilogo degli effetti sotto l'esito: righe nome/valore, testo di DECISIONE (12px), contorno a 11 */
+  .ag .esiti{margin:-6px 15px 13px; padding:8px 10px 6px; border:1px dashed var(--line2); border-radius:9px; font-size:12px; color:var(--txt2);}
+  .ag .esiti .esito-riga{display:flex; justify-content:space-between; gap:10px; padding:2px 0;}
+  .ag .esiti .contorno{letter-spacing:.12em; text-transform:uppercase; color:var(--mut); margin-bottom:3px;}
   .ag .outcome b{color:var(--txt);}
   .calm{padding:14px 15px; color:var(--mut); font-size:13.5px;}
 
@@ -284,6 +306,7 @@
   .screen.center{text-align:center;}
   .screen .em{font-size:11px; letter-spacing:.22em; text-transform:uppercase; color:var(--acc-ink);}
   .screen h2{font-family:'Fraunces',serif; font-size:29px; font-weight:600; margin:8px 0 4px; line-height:1.05;}
+  .epitaffio{font-family:'Fraunces',serif; font-style:italic; font-size:20px; line-height:1.25; color:var(--brand); margin:4px auto 10px; max-width:430px;}   /* L73-2: con che nome ti ricorderanno */
   .screen p{color:var(--mut); font-size:14px; max-width:440px; margin:10px auto;}
   .screen .note{font-size:11px; color:var(--mut2); border:1px dashed var(--line2); border-radius:10px; padding:10px 12px; margin:16px auto; max-width:450px; line-height:1.4; text-align:left;}
   .statgrid{display:grid; grid-template-columns:1fr 1fr; gap:1px; background:var(--line); border:1px solid var(--line); border-radius:12px; overflow:hidden; margin:16px 0;}

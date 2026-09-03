@@ -38,6 +38,10 @@ function goAppoint(){
     if(typeof assegnaVoltiGruppo==='function'){ assegnaVoltiGruppo(arr); arr.forEach(c=>{ c.ritRosa=c.rit; }); }
     APT.cands[m.id]=arr;
   }
+  /* L64-4 — le liste ai competenti: la rosa parte da competenza 2 e sale di 1 (tetto 3) — un gruppo che sa fare alimenta le carte future */
+  if(typeof S!=='undefined' && S && S.gruppo && S.gruppo.competenti>=50){ for(const m of MINISTRIES){ (APT.cands[m.id]||[]).forEach(function(c){ c.comp=Math.min(3, Math.max(2, (c.comp||1)+1)); }); } }
+  /* L64-3 — lo sfidante promosso entra nella rosa (primo dicastero), competenza 3: chi ti fa ombra bene diventa il tuo problema */
+  if(typeof S!=='undefined' && S && S.candidatoPromosso && MINISTRIES.length){ /* ⚠ alla prima nomina S non esiste ancora */ const m0=MINISTRIES[0].id, c0=Object.assign(mkCand(), S.candidatoPromosso); APT.cands[m0][0]=c0; S.log.unshift({t:T('Lo sfidante'), x:T('%V, promosso, entra nella rosa dei ministri.').replace('%V',c0.nm)}); S.candidatoPromosso=null; }
   document.getElementById('start').style.display='none';
   document.getElementById('over').style.display='none';
   document.getElementById('game').style.display='none';        // serve al rientro dall'opposizione (innocuo all'avvio)
@@ -187,6 +191,11 @@ function initStatoBase(){
      pilastro-cronaca della svalutazione, come `suez` per il '50. */
   S.sterlina60=null; S.europa60=null; S.coscienza60=null; S.svalutazione=0;
   S.minatori=null; S.europa70=null; S.fmi=null;   // L58-1 (dati puri, round-trip)
+  S.falkland=null; S.minatori80=null; S.polltax=null; S.alleanza=null;   // L60-2 (dati puri, round-trip)
+  S.groups0=null; S.ind0=null; S.promesseEsito=[]; S.leggiStorico=[]; S.governoAvversarioVolto=null;   // L73-2 (dati puri, round-trip)
+  S.decisioniScadenza=0; S.visite={mappa:0, partito:0};   // L64-2: le misure del cantiere (dati puri)
+  S.candidatoPromosso=null;   // L64-3 (dato puro)
+  S.gruppo=null; S.sfidaSeme=null;   // L64-4 (dati puri)
   S.scioglimentiChiesti=0; S.scioglimentoScelto=false;   // L56-1 — dati puri, round-trip
   /* L53-2 — le due vie d'uscita dalla minoranza (dati puri, round-trip). `sostegno` è l'accordo esterno in
      corso; `sostegnoOfferto` marca il mandato in cui l'occasione è già passata, perché sia un'occasione e non
@@ -1056,8 +1065,39 @@ const DRIFT_ECONOMICO_ERA = {
                    metà: è la «risalita nella seconda metà» della scheda, non una catastrofe.
                    ========================================================================================== */
                 {da:1970, ciclo:11},  {da:1972, ciclo:8},   {da:1973, ciclo:4},
-                {da:1974, ciclo:2},   {da:1976, ciclo:4},   {da:1978, ciclo:7} ]
+                {da:1974, ciclo:2},   {da:1976, ciclo:4},   {da:1978, ciclo:7},
+                /* ==========================================================================================
+                   L60-2 · IL DECENNIO '80 — la cura e il suo prezzo (scheda §2). Il drift NOMINALE torna a
+                   salire: 1980-81 la stretta (recessione vera, il fondo), dall'82 la ripresa, dall'86 il boom
+                   della City e le privatizzazioni. Il debito, che nel '70 saliva, qui smette e SCENDE nella
+                   seconda metà — è quello che la scheda chiede. L'inflazione piegata (18% → 4-5%) resta, come
+                   sempre su questa linea, una cosa che i testi dicono e il motore non mostra (L28-1).
+                   La disoccupazione, il numero del decennio, ha una tabella sua: DRIFT_DISOCCUPAZIONE_ERA.
+                   ========================================================================================== */
+                /* ⚑ TARATURA (misurata, stessa scelta fra due beni di L58-1): con [3 6 9 13 15] la crescita stava
+                   inchiodata al clamp +5 dal 1982 al 1989 e la recessione dell'80-81 non si vedeva (3,9). Scelta
+                   la leggibilità: 1980-81 sotto zero (la stretta), poi una salita che tocca il clamp dal 1985.
+                   Misurato (seme 11, scelte 0): crescita −0,2/−0,5 nell'80-81, 2,9-3,0 nell'82-83, 4,8 nell'84, poi 5;
+                   disoccupazione 8,7 → 10,8 (1983) → 4,7 (1989); debito 47 → 77 (1985) → giù nella seconda metà. */
+                {da:1980, ciclo:-1.5}, {da:1982, ciclo:2},  {da:1984, ciclo:4},
+                {da:1986, ciclo:9},    {da:1988, ciclo:11} ]
 };
+/* L60-2 · LA DISOCCUPAZIONE D'EPOCA. Il motore non aveva un posto dove un decennio potesse dire «qui i senza
+   lavoro sono il doppio»: `S.uMod` decade dell'80% al mese e le carte danno solo colpi. Stessa forma di cicloBase():
+   una finestra per anno, additiva su targetUnemp (model.js). Regno Unito '80: da ~1,5 a oltre 3 milioni (scheda §2),
+   cioè da ~6% a ~12% → +5 sul 7,8 di base al culmine (1983-85). Le altre linee non sono in tabella → 0, byte-invariate. */
+const DRIFT_DISOCCUPAZIONE_ERA = {
+  [LINEA_UK]: [ {da:1980, un:1}, {da:1981, un:3}, {da:1982, un:4.5}, {da:1983, un:5}, {da:1986, un:4.5},
+                {da:1987, un:3.5}, {da:1988, un:2}, {da:1989, un:1}, {da:1990, un:0} ]
+};
+function disoccupazioneEra(){
+  if(typeof S==='undefined' || !S) return 0;
+  var W = DRIFT_DISOCCUPAZIONE_ERA[S.era || 'contemporanea'];
+  if(!W || !W.length) return 0;
+  var y=S.year, base=0;
+  for(var i=0;i<W.length;i++){ if(y>=W[i].da) base=W[i].un; }
+  return base;
+}
 /* ===== L28-4 · IL MODIFICATORE-CLIMA DEGLI ANNI '70 (decisione G3) =====
    Dal dicembre 1969 a fine decennio il paese vive una stagione piu' cupa. Il clima e' un FENOMENO, mai un evento
    giocabile: nessuna carta, nessuna interattivita', nessun aggancio a singoli fatti di sangue.
@@ -1269,7 +1309,26 @@ const RIALLINEAMENTI_ERA = {
             urne:  { uk_con:35.8, uk_lab:39.3, uk_lib:18.3, uk_snp:2.9, uk_plaid:0.6 },
             seggi: { uk_lab:51.20, uk_con:44.46, uk_lib:2.09, uk_snp:1.77, uk_plaid:0.48 } },   // 319/277/13/11/3 su 623 · maggioranza di 3
     1979: { delta:[ {id:'uk_con',delta:8.1}, {id:'uk_lab',delta:-2.4}, {id:'uk_lib',delta:-4.5},
-                    {id:'uk_snp',delta:-1.3}, {id:'uk_plaid',delta:-0.1} ] }
+                    {id:'uk_snp',delta:-1.3}, {id:'uk_plaid',delta:-0.1} ] },
+    /* L60-2 · IL DECENNIO '80 (scheda PRESET-UK-1980 §1, ukpolitical.info). Il roster resta a CINQUE: la scissione
+       dell'81 è `rinomina uk_lib → Alleanza SDP-Liberali` + `delta` dal Labour (correzione del disegno, 1/8): l'SDP
+       non è un'entità di roster, confluì subito. `se`: chi gioca Labour o Liberal la vive come SNODO, non come tappa.
+       1983 (giu): Con 42,4 (397) · Lab 27,6 (209) · Alleanza 25,4 (23) — a 1,6 punti dal Labour e 186 seggi in
+             meno: il caso più famoso del maggioritario, dichiarato come dato (L61). I delta partono dal dopo-'81.
+       1987 (giu): Con 42,2 (376) · Lab 30,8 (229) · Alleanza 22,6 (22) — terzo mandato di fila.
+       1988 (mar): l'Alleanza si fonde e diventa Liberal Democratici (rinomina; non per chi gioca uk_lib: L40-1).
+       Seggi su 633 (senza l'Irlanda del Nord, come le tappe del '74). */
+    '1981/3': { se:function(){ return S.partito!=='uk_lab' && S.partito!=='uk_lib'; },
+            rinomina:[ {id:'uk_lib', nome:'Alleanza SDP-Liberali'} ],
+            delta:[ {id:'uk_lab',delta:-7}, {id:'uk_lib',delta:7} ] },
+    '1983/6': { delta:[ {id:'uk_con',delta:-1.5}, {id:'uk_lab',delta:-2.3}, {id:'uk_lib',delta:4.6}, {id:'uk_snp',delta:-0.5} ],
+            urne:  { uk_con:42.4, uk_lab:27.6, uk_lib:25.4, uk_snp:1.1, uk_plaid:0.4 },
+            seggi: { uk_con:62.72, uk_lab:33.02, uk_lib:3.63, uk_snp:0.32, uk_plaid:0.32 } },   // 397/209/23/2/2 su 633 · maggioranza 144
+    '1987/6': { delta:[ {id:'uk_con',delta:-0.2}, {id:'uk_lab',delta:3.2}, {id:'uk_lib',delta:-2.8}, {id:'uk_snp',delta:0.2}, {id:'uk_plaid',delta:-0.1} ],
+            urne:  { uk_con:42.2, uk_lab:30.8, uk_lib:22.6, uk_snp:1.3, uk_plaid:0.3 },
+            seggi: { uk_con:59.40, uk_lab:36.18, uk_lib:3.48, uk_snp:0.47, uk_plaid:0.47 } },   // 376/229/22/3/3 su 633 · maggioranza 102
+    '1988/3': { se:function(){ return S.partito!=='uk_lib'; },
+            rinomina:[ {id:'uk_lib', nome:'Liberal Democratici'} ] }
   }
 };
 /* ============================================================================================================
@@ -1905,6 +1964,30 @@ function snodoMinatoriDovuta(){     return typeof S!=='undefined' && S && S.era=
 function snodoMinatoriDueDovuta(){  return typeof S!=='undefined' && S && S.era===LINEA_UK && S.livello===3 && !S.opposizione && S.minatori==='resiste'; }
 function snodoEuropa70Dovuta(){     return typeof S!=='undefined' && S && S.era===LINEA_UK && S.livello===3 && !S.opposizione && S.europa70==null && S.year>=1971 && S.year<=1973; }
 function snodoEuropa70DueDovuta(){  return typeof S!=='undefined' && S && S.era===LINEA_UK && S.livello===3 && !S.opposizione && S.europa70==='dentro' && S.year>=1975; }
+/* L60-2 · gli snodi del decennio inglese '80. Falkland aprile-maggio '82 (il pilastro-cronaca è giugno, e ha `cond`);
+   il secondo nodo il mese dopo la flotta. Minatori: gennaio-marzo '84, il braccio di ferro da giugno '84 a febbraio '85.
+   Poll tax: da settembre '88 a giugno '89. La scissione dell'81 (Labour) e i quattro che bussano (Liberal): gennaio-marzo
+   '81, ANCHE all'opposizione — è una carta di partito, e nel 1981 quei due partiti sono all'opposizione. */
+function snodoFalklandDovuta(){     return typeof S!=='undefined' && S && S.era===LINEA_UK && S.livello===3 && !S.opposizione && S.falkland==null && S.year===1982 && S.month>=4 && S.month<=5; }
+function snodoFalklandDueDovuta(){  return typeof S!=='undefined' && S && S.era===LINEA_UK && S.livello===3 && !S.opposizione && S.falkland==='flotta'; }
+function snodoMinatori80Dovuta(){   return typeof S!=='undefined' && S && S.era===LINEA_UK && S.livello===3 && !S.opposizione && S.minatori80==null && S.year===1984 && S.month<=3; }
+function snodoMinatori80DueDovuta(){return typeof S!=='undefined' && S && S.era===LINEA_UK && S.livello===3 && !S.opposizione && S.minatori80==='scorte' && ((S.year===1984 && S.month>=6) || (S.year===1985 && S.month<=2)); }
+function snodoPolltaxDovuta(){      return typeof S!=='undefined' && S && S.era===LINEA_UK && S.livello===3 && !S.opposizione && S.polltax==null && ((S.year===1988 && S.month>=9) || (S.year===1989 && S.month<=6)); }
+function snodoAlleanza81Dovuta(){   return typeof S!=='undefined' && S && S.era===LINEA_UK && S.livello===3 && S.alleanza==null && (S.partito==='uk_lab' || S.partito==='uk_lib') && S.year===1981 && S.month<=3; }
+/* L60-2 · la scissione dell'81 col roster a cinque: n punti passano dal Labour a `uk_lib`, che diventa l'Alleanza
+   (rinomina di roster, come la tappa per chi non gioca nessuno dei due). Se `nomeMio` è dato, è il giocatore
+   liberale che accetta i quattro: il suo partito cambia nome per SUA scelta (il paletto L40-1 vale per le direttive). */
+function alleanza81(n, nomeMio){
+  if(typeof S==='undefined' || !S || !S.forze) return;
+  var da='uk_lab', a='uk_lib';
+  var q=Math.min(n, Math.max(0,(S.forze[da]||0)-2));
+  S.forze[da]=(S.forze[da]||0)-q; S.forze[a]=(S.forze[a]||0)+q;
+  if(S.forzePrev){ S.forzePrev[da]=S.forze[da]; S.forzePrev[a]=S.forze[a]; }
+  S.rosterDelta = S.rosterDelta || {entra:[], esce:[], rinomina:[]};
+  if(S.partito!==a || nomeMio) S.rosterDelta.rinomina.push({ id:a, nome:nomeMio||'Alleanza SDP-Liberali' });
+  if(typeof applicaRosterDelta==='function') applicaRosterDelta(true);
+  if(typeof rinormalizzaForze==='function') rinormalizzaForze();
+}
 function snodoFmiDovuta(){          return typeof S!=='undefined' && S && S.era===LINEA_UK && S.livello===3 && !S.opposizione && S.fmi==null && S.year>=1976 && S.year<=1977; }
 /* ================================================================================================================
    L55-1 · LA SVALUTAZIONE VERA. La consegna chiede che il decennio «possa finire in svalutazione» con un
@@ -2784,7 +2867,7 @@ function decidiTerritori(ris){
   const dopo=S.territori.map(function(t){ return Object.assign({},t); });
   PAESE.territori.forEach(function(TE,i){
     if(!(ris.tocca==='tutti' || TE.tipo===ris.tocca)) return;
-    const localShare=50 + wave + (TE.lean*aB*4) + (Math.random()*6-3);
+    const localShare=50 + wave + (TE.lean*aB*4) + ((dopo[i].spinta||0)*0.5) + (Math.random()*6-3);   // L64-2: la spinta della campagna PRIMA dell'onda
     const nuovoTuo=localShare>50, eraTuo=compatibile(dopo[i].partito, asseTuo);
     if(nuovoTuo!==eraTuo){
       const partito=scegliPartito(nuovoTuo, TE.lean, asseTuo), nome=nomePersona();
@@ -2831,16 +2914,105 @@ function bioPleases(p){ const map={tecnico:'rigore',conservatore:'ordine',progre
   if(map[p]) bioConta(map[p]); if(p===profiloPartito()) bioConta('identita'); }
 /* L'epilogo: paragrafi generati dalla biografia. Le due cure di Giacomo: (1) carriera breve coi gruppi
    ancora neutri → niente rimpianti finti; (2) carriera vuota → comunque una storia da leggere. */
+/* ================================================================================================================
+   L73-2 · IL FINALE IN TRE VOCI — cosa hai fatto, cosa ne dice il paese, con che nome ti ricorderanno (DESIGN-FINALI).
+   Tutto viene dallo STATO, mai da un testo fisso per esito: due carriere con dati diversi finiscono diverse.
+   STORIA: le divergenze dalla storia (SNODI_STORICI, solo snodi, max 5) · le promesse (S.promesseEsito) · le leggi
+   con la durata (S.leggiStorico) · la crisi che ti ha segnato (S.biografia.fatti) · e l'inventario di prima.
+   VERDETTO: chi ti ha abbandonato (S.groups0 → S.groups) · chi ti ha succeduto (un nome: S.sfida.volto,
+   S.governoAvversarioVolto, o trovaVolto()) · le correnti · il paese in una riga (S.ind0 → S.ind).
+   TITOLO: l'epitaffio = ciò che hai costruito + ciò che hai pagato, con i dati dentro gli slot (il paletto:
+   tuple-dati diverse → titoli diversi, misurato in .claude/misura-finali.js).
+   ================================================================================================================ */
+function divergenzeStoria(){
+  if(typeof SNODI_STORICI==='undefined') return {div:[], seg:[]};
+  const div=[], seg=[];
+  for(const f in SNODI_STORICI){ const v=S[f]; if(v==null) continue; const D=SNODI_STORICI[f];
+    if(D.storico.indexOf(v)>=0) seg.push(T(D.conforme));
+    else if(D.diverge[v]) div.push(T(D.diverge[v])); }
+  return {div:div, seg:seg};
+}
+function nomeGruppoEp(g){ const gr=GROUPS.find(function(x){return x.id===g;}); return gr?T(gr.nm):g; }
+function gruppoPeggiore(){ let best=null; GROUPS.forEach(function(g){ const v=S.groups&&S.groups[g.id]; if(v==null) return; if(!best || v<best.v) best={id:g.id, v:v, v0:(S.groups0&&S.groups0[g.id]!=null)?S.groups0[g.id]:null}; }); return best; }
+function voltoSuccessore(reason){
+  if((reason==='congresso'||reason==='primaria') && S.sfida && S.sfida.volto) return {v:S.sfida.volto, tipo:'partito'};
+  if(S.opposizione && S.governoAvversarioVolto) return {v:S.governoAvversarioVolto, tipo:'governo', p:(part(S.governoAvversario)||{}).nome||''};
+  if(reason==='voto' && S.governoAvversarioVolto) return {v:S.governoAvversarioVolto, tipo:'governo', p:(part(S.governoAvversario)||{}).nome||''};
+  const tv=(typeof trovaVolto==='function')?trovaVolto():null;
+  if(tv && tv.volto) return {v:tv.volto, tipo:'dopo'};
+  return null;
+}
+function generaFinale(reason){
+  const B=S.biografia||bioVuota(), storia=[], verdetto=[];
+  const anno=S.year;
+  /* A1 · le divergenze */
+  const dz=divergenzeStoria();
+  if(dz.div.length) storia.push(dz.div.slice(0,5).join(' ') + (dz.seg.length?' '+T('Hai fatto quello che fece la storia %L.').replace('%L', dz.seg.slice(0,3).join(', ')):''));
+  else if(dz.seg.length) storia.push(T('Hai attraversato la storia senza cambiarla — che è una scelta anche quella.')+' '+T('Hai fatto quello che fece la storia %L.').replace('%L', dz.seg.slice(0,3).join(', ')));
+  /* A2 · le promesse */
+  const pe=S.promesseEsito||[];
+  if(pe.length){ const ok=pe.filter(function(p){return p.mantenuta;}).length, ko=pe.find(function(p){return !p.mantenuta;});
+    if(pe.length===1) storia.push(T(ok?'Avevi promesso una cosa, a %G, e l\'hai mantenuta.':'Avevi promesso una cosa, a %G, e non l\'hai mantenuta: non l\'hanno dimenticato.').replace('%G',nomeGruppoEp(pe[0].grp)));
+    else if(!ko) storia.push(T('Avevi promesso %M cose, e le hai mantenute tutte.').replace('%M',pe.length));
+    else storia.push(T('Avevi promesso %M cose. Ne hai mantenute %N; la promessa a %G non l\'hanno dimenticata.').replace('%M',pe.length).replace('%N',ok).replace('%G',nomeGruppoEp(ko.grp))); }
+  /* A3 · le leggi, con la durata di quelle abrogate */
+  if(B.leggiFirmate.length) storia.push(T('Portano la tua firma: ')+B.leggiFirmate.slice(0,5).map(function(n){return T(n);}).join(', ')+(B.leggiFirmate.length>5?' '+T('e altre'):'')+'.');
+  (S.leggiStorico||[]).filter(function(l){return l.abrogataAnno!=null;}).slice(0,2).forEach(function(l){ const d=l.abrogataAnno-l.anno; storia.push(d>=1?T('La legge «%L» che avevi voluto è durata %N anni.').replace('%L',T(l.nome)).replace('%N',d):T('La legge «%L» che avevi voluto è durata meno di un anno.').replace('%L',T(l.nome))); });
+  /* A4 · la crisi che ti ha segnato: la prima crisi del debito, o la prima emergenza */
+  const fatti=(B.fatti||[]);
+  const fc=fatti.find(function(f){return /crisi del debito/i.test(f.testo||'');}), fe=fatti.find(function(f){return /emergenza/i.test(f.testo||'');});
+  if(fc) storia.push(T('La crisi del debito del %Y è quella che ti ha segnato.').replace('%Y',fc.anno)); else if(fe) storia.push(T('L\'emergenza del %Y è quella che ti ha segnato.').replace('%Y',fe.anno));
+  /* B1 · chi ti ha abbandonato */
+  const gp=gruppoPeggiore();
+  if(gp && gp.v0!=null){ const nome=nomeGruppoEp(gp.id), a=Math.round(gp.v0), b=Math.round(gp.v);
+    if(b<a-8){ let r=T('%G ti aveva dato il %A: te ne lascia il %B.').replace('%G',nome).replace('%A',a).replace('%B',b); if(reason==='rivolta' && S.rivoltaGruppo===gp.id) r+=' '+T('Sono loro che ti hanno mandato a casa.'); verdetto.push(r); }
+    else verdetto.push(T('%G ti aveva dato il %A e te ne lascia il %B: nessuno ti ha abbandonato davvero.').replace('%G',nome).replace('%A',a).replace('%B',b)); }
+  /* B2 · chi ti ha succeduto */
+  const vs=voltoSuccessore(reason);
+  if(vs){ if(vs.tipo==='partito') verdetto.push(T('Il partito è passato a %V, che aveva aspettato il suo momento.').replace('%V',vs.v)); else if(vs.tipo==='governo') verdetto.push(T('Al governo è andato %V, del %P.').replace('%V',vs.v).replace('%P',T(vs.p||''))); else verdetto.push(T('Dopo di te, il partito ha scelto %V.').replace('%V',vs.v)); }
+  /* B3 · le correnti */
+  if(S.correnti && S.correnti.length>=2){ const cs=S.correnti.slice().sort(function(a,b){return b.umore-a.umore;}); const nm=function(c){ const D=CORRENTI_DEF.find(function(d){return d.id===c.id;})||{}; return T(D.nome||c.id); };
+    if(cs[cs.length-1].umore<45) verdetto.push(T('%A ti hanno seguito fino all\'ultimo; %B ti avevano mollato.').replace('%A',nm(cs[0])).replace('%B',nm(cs[cs.length-1]))); else verdetto.push(T('Le correnti ti hanno seguito fino all\'ultimo, tutte.')); }
+  /* B4 · il paese in una riga */
+  if(S.ind0){ const dd=S.ind.debt-S.ind0.debt, du=S.ind.unemp-S.ind0.unemp;
+    verdetto.push(T('Lasci un paese %D e %L di quello che avevi trovato.').replace('%D',T(dd>3?'più indebitato':dd<-3?'meno indebitato':'col debito dov\'era')).replace('%L',T(du<-0.7?'con più lavoro':du>0.7?'con meno lavoro':'con lo stesso lavoro'))); }
+  /* C · l'epitaffio: costruito + pagato, coi dati negli slot */
+  const nLeggi=B.leggiFirmate.length, nDiv=dz.div.length, promOk=pe.length&&pe.every(function(p){return p.mantenuta;});
+  let costr;
+  if(nDiv>=2) costr=T('Chi cambiò la storia in %N punti').replace('%N',nDiv);
+  else if(nDiv===1) costr=T('Chi cambiò la storia in un punto');
+  else if(nLeggi>=3) costr=T('Il legislatore delle %N leggi').replace('%N',nLeggi);
+  else if(promOk && pe.length>=2) costr=T('Chi mantenne le sue %N promesse').replace('%N',pe.length);
+  else if(S.ind0 && S.ind.debt<=S.ind0.debt-5) costr=T('Il custode dei conti (debito dal %A al %B)').replace('%A',Math.round(S.ind0.debt)).replace('%B',Math.round(S.ind.debt));
+  else if(nLeggi>=1) costr=T('Chi firmò una legge sola');
+  else costr=T('Chi attraversò la storia senza toccarla');
+  const gN=gp?nomeGruppoEp(gp.id):'', gV=gp?Math.round(gp.v):'';
+  let pag;
+  if(reason==='rivolta') pag=T(', caduto nel %Y per la rivolta di %G').replace('%Y',anno).replace('%G',nomeGruppoEp(S.rivoltaGruppo||(gp&&gp.id)));
+  else if(reason==='crisi') pag=T(', sfiduciato nel %Y con %G al %V').replace('%Y',anno).replace('%G',gN).replace('%V',gV);
+  else if(reason==='insolvenza') pag=T(', travolto dai conti nel %Y').replace('%Y',anno);
+  else if(reason==='congresso'||reason==='primaria') pag=T(', che perse il partito nel %Y (%V)').replace('%Y',anno).replace('%V',(vs&&vs.v)||T('lo sfidante'));
+  else if(reason==='voto') pag=T(', battuto alle urne nel %Y da %V').replace('%Y',anno).replace('%V',(vs&&vs.v)||'');
+  else if(reason==='ritiro') pag=T(', ritirato nel %Y con %G ancora al %V').replace('%Y',anno).replace('%G',gN).replace('%V',gV);
+  else if(reason==='condanna') pag=T(', condannato nel %Y').replace('%Y',anno);
+  else if(reason==='salute') pag=T(', fermato dalla salute nel %Y').replace('%Y',anno);
+  else pag=T(', e nel %Y %G era al %V').replace('%Y',anno).replace('%G',gN).replace('%V',gV);
+  return { titolo: costr+pag, storia: storia, verdetto: verdetto, dati:{costr:costr, reason:reason, anno:anno, g:gp?gp.id:null, v:gV, div:nDiv, leggi:nLeggi} };
+}
 function generaEpilogo(reason){
   const B=S.biografia||bioVuota(), c=B.c, anni=Math.max(1,S.year-(S.annoInizio||2025)), par=[];
+  const _F=(typeof generaFinale==='function')?generaFinale(reason):null;   // L73-2: la storia in tre voci viene prima dell'inventario
   par.push(T(anni===1?'Un solo anno sulla scena politica':'%A anni sulla scena politica').replace('%A',anni)+(PAESE.nomeArt?((typeof curLang==='function'&&curLang()==='en')?' of '+T(PAESE.nome):(' del'+(PAESE.nomeArt.slice(0,2)==='l\''?'l\''+PAESE.nomeArt.slice(2):' paese'))):'')+(S.mandatesWon>0?': '+S.mandatesWon+' '+T(S.mandatesWon===1?'mandato vinto':'mandati vinti'):'')+'.'
     +(S.eta!=null?' '+T('Esci di scena a %E anni.').replace('%E',S.eta):''));   // l'orologio biografico chiude l'arco
-  if(B.leggiFirmate.length) par.push(T('Portano la tua firma: ')+B.leggiFirmate.slice(0,5).map(function(n){return T(n);}).join(', ')+(B.leggiFirmate.length>5?' '+T('e altre'):'')+'.');
+  if(_F){ _F.storia.forEach(function(p){ par.push(p); }); }
+  else if(B.leggiFirmate.length) par.push(T('Portano la tua firma: ')+B.leggiFirmate.slice(0,5).map(function(n){return T(n);}).join(', ')+(B.leggiFirmate.length>5?' '+T('e altre'):'')+'.');
   const t2=[];
   if(c.crisi) t2.push(c.crisi===1?T('una crisi del debito affrontata a viso aperto'):c.crisi+' '+T('crisi del debito affrontate'));
   if(c.emergenze) t2.push(c.emergenze===1?T('un\'emergenza nazionale attraversata'):c.emergenze+' '+T('emergenze nazionali attraversate'));
   if(c.scaricati) t2.push(c.scaricati===1?T('un ministro scaricato'):c.scaricati+' '+T('ministri scaricati'));
   if(t2.length) par.push(T('Sul cammino: ')+t2.join(', ')+'.');
+  /* L72-1: la rivolta entra nella storia, fra i primi paragrafi (aggiungiCarriera ne conserva tre) */
+  if(reason==='rivolta'){ const gN=(GROUPS.find(function(g){return g.id===S.rivoltaGruppo;})||{}).nm; if(gN) par.push(T('Cadde perché un pezzo di paese — %G — tenuto per mesi sotto la soglia della pazienza dalla sua stessa politica, scese in piazza.').replace('%G',T(gN))); }
   /* la statura internazionale (lotto internazionale fase A): la media delle relazioni coi grandi enti */
   if(typeof relIntMean==='function' && S.relInt && Object.keys(S.relInt).length){
     const ri=relIntMean();
@@ -2960,24 +3132,62 @@ function aggiornaSfida(){
       S.log.unshift({t:T('La sfida rientra'), x:S.sfida.volto+' '+T('fa un passo indietro: le correnti si placano.')});
       S.sfida=null; return;
     }
-    if(umoreMedio()<45) S.sfida.maturazione=(S.sfida.maturazione||0)+1;
+    /* L64-3 — promosso: per 12 mesi non matura; poi, se l'umore resta basso, torna con +2 (una volta) */
+    if(S.sfida.promossoMese!=null){ if(mese-S.sfida.promossoMese<12) return; if(!S.sfida.rafforzato && umoreMedio()<45){ S.sfida.rafforzato=true; S.sfida.maturazione=(S.sfida.maturazione||0)+2; S.log.unshift({t:T('Lo sfidante'), x:T('%V torna più forte: l\'incarico non è bastato, e adesso ha anche un curriculum.').replace('%V',S.sfida.volto)}); } }
+    if(umoreMedio()<(S.sfida.isolato?40:45)) S.sfida.maturazione=(S.sfida.maturazione||0)+1;   // L64-3: isolato → matura solo sotto 40
     return;
   }
   if(S.primariaUltima!=null && mese-S.primariaUltima<12) return;   // raffreddamento dopo una primaria vinta
-  const arr=S.correnti.find(function(c){return c.umore<35;});
+  /* L64-4 — chi hai messo in lista ti sfida: se la sua corrente scende sotto 40 (non 35), la sfida nasce col SUO volto */
+  const seme=S.sfidaSeme;
+  const arrS=(seme && S.correnti.find(function(c){return c.id===seme.corrente && c.umore<40;}))||null;
+  const arr=arrS||S.correnti.find(function(c){return c.umore<35;});
   if(!arr) return;
-  const v=trovaVolto(); if(!v) return;
+  const v=(arrS && seme.volto)?{ volto:seme.volto, carica:T('capolista'), area:null, fonte:'liste', simbolo:false }:trovaVolto(); if(!v) return;
+  if(arrS) S.sfidaSeme=null;   // il seme si consuma quando germoglia
   const D=CORRENTI_DEF.find(function(d){return d.id===arr.id;})||{};
   S.sfida=Object.assign({ corrente:arr.id, mese:mese, maturazione:0 }, v);
   S.log.unshift({t:'La sfida monta', x:v.volto+(v.area?(', '+v.carica+' — '+v.area):' ('+v.carica+')')+' si muove: '+(D.nome||'una corrente')+' in rivolta.'});
 }
 function sfidaMatura(){ return !!(S.sfida && (S.sfida.maturazione||0)>=3); }
 /* La primaria: punteggio congelato all'apertura (pattern NOTTE), numeri mostrati onestamente. */
-function apriPrimaria(tipo){
+/* ================================================================================================================
+   L64-3 · LO SFIDANTE SI PUÒ GESTIRE (DESIGN-SUPERFICI-VIVE §B). `S.sfida` ha già volto, corrente, maturazione; oggi
+   l'unica risposta era indiretta (alzare l'umore finché «la sfida rientra»). Tre azioni sulla scheda-partito, gemelle
+   di azioneIncarico: PROMUOVI (maturazione a 0, la sua corrente +6, entra nella rosa dei ministri con competenza alta;
+   se fra 12 mesi l'umore medio è ancora sotto 45 torna con +2 di maturazione — «e adesso ha anche un curriculum»),
+   ISOLA (la sua corrente −8, le altre +3, maturazione −1 e da lì matura solo sotto 40), AFFRONTA SUBITO (primaria
+   anticipata con +3 perché scegli tu il momento — e si può perdere). Promuovi e isola sono mosse di partito (stesso
+   raffreddamento di azioneIncarico); ciascuna una volta per sfida. Misurato in .claude/misura-sfida.js.
+   ================================================================================================================ */
+function sfidaPromuovi(){
+  if(!S.sfida || S.sfida.promossoMese!=null || !mossaPartitoDisponibile()) return;
+  const mese=S.year*12+S.month; S.mossaPartito=mese;
+  S.sfida.promossoMese=mese; S.sfida.maturazione=0;
+  S.correnti.forEach(function(c){ c.umore=clamp(c.umore+(c.id===S.sfida.corrente?6:-2),0,100); });
+  const D=CORRENTI_DEF.find(function(d){return d.id===S.sfida.corrente;})||{};
+  S.candidatoPromosso={ nm:S.sfida.volto, profile:(D.id==='pontieri'?'tecnico':D.id==='militanti'?'progressista':'conservatore'), comp:3 };
+  S.log.unshift({t:T('Lo sfidante'), x:T('Hai promosso %V: un incarico di peso, e la sua corrente si placa. Se fra un anno l\'umore è ancora basso, tornerà più forte.').replace('%V',S.sfida.volto)});
+  if(typeof render==='function') render();
+}
+function sfidaIsola(){
+  if(!S.sfida || S.sfida.isolato || !mossaPartitoDisponibile()) return;
+  const mese=S.year*12+S.month; S.mossaPartito=mese;
+  S.sfida.isolato=true; S.sfida.maturazione=Math.max(0,(S.sfida.maturazione||0)-1);
+  S.correnti.forEach(function(c){ c.umore=clamp(c.umore+(c.id===S.sfida.corrente?-8:3),0,100); });
+  S.log.unshift({t:T('Lo sfidante'), x:T('Hai isolato %V: la sua corrente si stringe attorno a lui, le altre respirano. La sfida rallenta, non sparisce.').replace('%V',S.sfida.volto)});
+  if(typeof render==='function') render();
+}
+function sfidaAffronta(){
+  if(!S.sfida) return;
+  S.log.unshift({t:T('Lo sfidante'), x:T('Hai affrontato %V subito, alle tue condizioni: si va ai militanti.').replace('%V',S.sfida.volto)});
+  apriPrimaria('anticipata', 3);
+}
+function apriPrimaria(tipo, bonus){
   const pl=(S.potereLocale!=null)?S.potereLocale:bloccoQuota();
   /* rumore ±3 e bonus-simbolo +2 (tarati col test della cura: governo solido + UNA corrente arrabbiata
      deve sopravvivere con margine; si perde solo deboli su più fronti insieme — mai a sorpresa) */
-  const punteggio=umoreMedio()*0.5 + S.ind.consenso*0.3 + pl*0.2 + (Math.random()*6-3);
+  const punteggio=umoreMedio()*0.5 + S.ind.consenso*0.3 + pl*0.2 + (Math.random()*6-3) + (bonus||0);   // L64-3: +3 se scegli tu il momento
   const soglia=50 + (S.sfida && S.sfida.fonte==='territorio' && S.sfida.simbolo ? 2 : 0);
   PRIM={ tipo:tipo, punteggio:punteggio, soglia:soglia, win:punteggio>=soglia };
   const v=S.sfida||{};
@@ -3463,6 +3673,7 @@ function genAgendaRamo(first){
        sta in fondo a genAgendaRamo, DOPO il `return` di questo ramo (misurato: gate aperto → 0 carte uscite in
        216 mesi). Stessa precedenza che ha al governo (prima della stagione elettorale), stesso `agendaSolo()`. */
     if(!first && typeof richiamoCorrentiDovuto==='function' && richiamoCorrentiDovuto()){ S.richiamoCorrUltimo=S.year*12+S.month; S.agenda.push({kind:'event', data:cartaRichiamoCorrenti(), resolved:false}); agendaSolo(); return; }
+    if(!first && typeof snodoAlleanza81Dovuta==='function' && snodoAlleanza81Dovuta()){ S.agenda.push({kind:'event', data:(S.partito==='uk_lib'?QUATTRO_EV:SCISSIONE81_EV), resolved:false}); agendaSolo(); return; }   // L60-2: la scissione dell'81 arriva anche all'opposizione
     // Cantiere C: la stagione elettorale vale anche da SFIDANTE (bloccoIds = il tuo blocco d'opposizione)
     if(typeof pickCampagnaNazionale==='function'){ const cnbO=pickCampagnaNazionale(); if(cnbO){ S.agenda.push(cnbO); agendaSolo(); return; } }
     const inq=aggiornaInchiesta();   // anche da sfidante l'esposizione conta: bersaglio sempre tu (niente ministri qui)
@@ -3530,6 +3741,13 @@ function genAgendaRamo(first){
   if(!first && typeof snodoEuropa70DueDovuta==='function' && snodoEuropa70DueDovuta()){ S.agenda.push({kind:'event', data:EUROPA70_DUE_EV, resolved:false}); agendaSolo(); return; }
   if(!first && typeof snodoEuropa70Dovuta==='function' && snodoEuropa70Dovuta()){ S.agenda.push({kind:'event', data:EUROPA70_EV, resolved:false}); agendaSolo(); return; }
   if(!first && typeof snodoFmiDovuta==='function' && snodoFmiDovuta()){ S.agenda.push({kind:'event', data:FMI_EV, resolved:false}); agendaSolo(); return; }
+  /* L60-2 · gli snodi dell'80: prima i secondi nodi (conseguenze di scelte già fatte), poi i primi. */
+  if(!first && typeof snodoFalklandDueDovuta==='function' && snodoFalklandDueDovuta()){ S.agenda.push({kind:'event', data:FALKLAND_DUE_EV, resolved:false}); agendaSolo(); return; }
+  if(!first && typeof snodoFalklandDovuta==='function' && snodoFalklandDovuta()){ S.agenda.push({kind:'event', data:FALKLAND_EV, resolved:false}); agendaSolo(); return; }
+  if(!first && typeof snodoMinatori80DueDovuta==='function' && snodoMinatori80DueDovuta()){ S.agenda.push({kind:'event', data:MINATORI80_DUE_EV, resolved:false}); agendaSolo(); return; }
+  if(!first && typeof snodoMinatori80Dovuta==='function' && snodoMinatori80Dovuta()){ S.agenda.push({kind:'event', data:MINATORI80_EV, resolved:false}); agendaSolo(); return; }
+  if(!first && typeof snodoPolltaxDovuta==='function' && snodoPolltaxDovuta()){ S.agenda.push({kind:'event', data:POLLTAX_EV, resolved:false}); agendaSolo(); return; }
+  if(!first && typeof snodoAlleanza81Dovuta==='function' && snodoAlleanza81Dovuta()){ S.agenda.push({kind:'event', data:(S.partito==='uk_lib'?QUATTRO_EV:SCISSIONE81_EV), resolved:false}); agendaSolo(); return; }
   if(!first && typeof snodoSterlina60DueDovuta==='function' && snodoSterlina60DueDovuta()){ S.agenda.push({kind:'event', data:STERLINA60_DUE_EV, resolved:false}); agendaSolo(); return; }
   if(!first && typeof snodoSterlina60Dovuta==='function' && snodoSterlina60Dovuta()){ S.agenda.push({kind:'event', data:STERLINA60_EV, resolved:false}); agendaSolo(); return; }
   if(!first && typeof snodoEuropa60DueDovuta==='function' && snodoEuropa60DueDovuta()){ S.agenda.push({kind:'event', data:EUROPA60_DUE_EV, resolved:false}); agendaSolo(); return; }
@@ -3719,7 +3937,47 @@ function codaAgenda(){
 }
 function agendaPending(){return S.agenda.some(a=>!a.resolved);}
 
+/* ================================================================================================================
+   L67-2 · IL RIEPILOGO DEGLI EFFETTI — «le conseguenze non si vedono».
+   La riga `e:` di una scelta e qualitativa; il numero non compariva mai. Qui, attorno alla risoluzione di una
+   carta, si fotografa CIO CHE IL GIOCATORE HA NEL CRUSCOTTO (gruppi, correnti, indicatori, valute d'opposizione)
+   prima e dopo, e si conserva in `it.esiti` la lista delle variazioni sopra soglia: dato puro, serializzabile.
+   Nessun numero interno (niente uMod, ciclo, target): solo grandezze che una scheda mostra gia.
+   LA SOGLIA E MISURATA (2/9, 3.580 decisioni su 15 carriere): il 63% delle decisioni muove qualcosa, e fra 0,1
+   e 1 punto la quota NON cambia — non c'e un pendio, c'e un gradino. Quindi 1 punto per gruppi/correnti/
+   indicatori; il debito si muove per decimi (mediana 0,4) e ha la sua soglia a 0,2. Media attesa: ~1,6 voci.
+   Massimo 5 voci, le piu grandi prima. Effetti differiti: il motore non ha una coda, quindi nessuna riga al futuro.
+   ================================================================================================================ */
+const ESITI_MAX=5;
+function fotoEsiti(){
+  const f={};
+  if(!S) return f;
+  if(S.ind){ ['consenso','debt','stampa','fiducia','reputazione'].forEach(function(k){ if(S.ind[k]!=null) f['ind:'+k]=S.ind[k]; }); }
+  if(S.groups) GROUPS.forEach(function(g){ if(S.groups[g.id]!=null) f['grp:'+g.id]=S.groups[g.id]; });
+  if(S.correnti) S.correnti.forEach(function(c){ if(c&&c.umore!=null) f['cor:'+c.id]=c.umore; });
+  if(S.opposizione){ if(S.visibilita!=null) f['opp:visibilita']=S.visibilita; if(S.credibilita!=null) f['opp:credibilita']=S.credibilita; }
+  return f;
+}
+function diffEsiti(prima,dopo){
+  const out=[];
+  Object.keys(dopo).forEach(function(k){
+    if(prima[k]==null) return;
+    const d=dopo[k]-prima[k], soglia=(k==='ind:debt')?0.2:1;
+    if(Math.abs(d)+1e-9<soglia) return;
+    out.push({k:k, d:Math.round(d*10)/10});
+  });
+  out.sort(function(a,b){ return Math.abs(b.d)-Math.abs(a.d); });
+  return out.slice(0,ESITI_MAX);
+}
 function resolveItem(idx,ci){
+  const it=S.agenda[idx];
+  const prima=(it&&!it.resolved)?fotoEsiti():null;
+  const r=resolveItemCore(idx,ci);
+  /* la carta puo essere stata rigenerata (occasioni, salti di livello): si annota solo se e ancora la stessa */
+  if(prima && S.agenda && S.agenda[idx]===it && it.resolved) it.esiti=diffEsiti(prima, fotoEsiti());
+  return r;
+}
+function resolveItemCore(idx,ci){
   const it=S.agenda[idx]; if(it.resolved) return;
   STAMPA_FX=0;   // bandierina dell'amplificatore: pulita prima degli effetti della scelta
   if(it.kind==='rimpasto'){
@@ -4050,7 +4308,9 @@ function resaPromesseCampagna(){
   if(!vecchie.length) return;
   vecchie.forEach(function(p){
     var nome=nomeGruppo(p.grp);
-    if((p.colpi||0)>=6){ gd(p.grp,-5); stampad(-4); S.log.unshift({t:T('La promessa tradita'), x:T('In campagna avevi promesso attenzione a %G, poi i fatti: ora te la rinfacciano.').replace('%G',nome)}); }
+    const mantenuta=!((p.colpi||0)>=6);
+    S.promesseEsito=S.promesseEsito||[]; S.promesseEsito.push({grp:p.grp, anno:S.year, mantenuta:mantenuta});   // L73-2: il finale tira le somme
+    if(!mantenuta){ gd(p.grp,-5); stampad(-4); S.log.unshift({t:T('La promessa tradita'), x:T('In campagna avevi promesso attenzione a %G, poi i fatti: ora te la rinfacciano.').replace('%G',nome)}); }
     else { if(S.campNaz) S.campNaz.promMantenuta=true; gd(p.grp,4); S.log.unshift({t:T('La promessa mantenuta'), x:T('%G ricorda la parola data — e mantenuta.').replace('%G',nome)}); }
   });
   S.promesseCampagna=S.promesseCampagna.filter(function(p){return mese-p.mese<=12;});
@@ -4062,7 +4322,10 @@ function pickCampagnaNazionale(){
   var mese=S.year*12+S.month;
   if(S.campNazUltimo!=null && mese-S.campNazUltimo<1) return null;
   if(!S.campNaz) S.campNaz={piazza:0,promMantenuta:false,n:0};
+  campSforzo();   // L64-2: apre lo sforzo della stagione (una volta) e lo annuncia nel log
   if(S.campNaz.n===0) resaPromesseCampagna();          // la resa apre la stagione (le forze si muovono, i sondaggi la prezzano)
+  /* L64-4 — il primo mese di stagione è LE LISTE: obbligata (prende il posto del beat, da sola) e senza ritorno (una per stagione) */
+  if(!S.campNaz.liste && S.correnti && typeof LISTE_EV!=='undefined'){ S.campNaz.liste=true; S.campNazUltimo=mese; S.campNaz.n++; return {kind:'event', data:LISTE_EV, resolved:false}; }
   var pool=CAMPAGNA_EV.filter(function(e){return eraViva(e) && (!e.cond||e.cond());});
   var q=pool.length?pescaBag('campnaz',pool):null; if(!q) return null;
   S.campNazUltimo=mese; S.campNaz.n++;
@@ -4203,6 +4466,7 @@ function avanzaMese(){
     return;
   }
   if(S.opposizione){                                              // all'opposizione: niente crisi/insolvenza/sfiducia tue
+    S.rivolta=null;                                               // L72-1: il conto alla rovescia e' della TUA linea di bilancio; all'opposizione le leve non sono tue
     const f0=mioPartito().forza;
     if(S.forze[S.partito] < Math.max(f0*0.5, 5)){ return gameOver('congresso'); }   // forza crollata: il partito ti scarica
     if(S.month===1 && S.turnInMandate>=PAESE.mandatoMesi/12){ if(sfidaAttiva()) return apriPrimaria('vigilia'); return election(); }   // a fine mandato: prima la primaria (se la sfida è viva), poi sfidi
@@ -4230,6 +4494,7 @@ function avanzaMese(){
   if(typeof sostegnoTick==='function') sostegnoTick();   // L53-2 — il prezzo si paga e l'accordo si controlla, prima dei verdetti
   if(S.ind.consenso<dif().sogliaCrisi){ return gameOver('crisi'); }
   if(S.mesiSottoCrisi>=dif().mesiInsolvenza){ return gameOver('insolvenza'); }
+  { const gR=(typeof rivoltaMatura==='function')?rivoltaMatura():null; if(gR){ S.rivoltaGruppo=gR; return gameOver('rivolta'); } }   // L72-1: un gruppo sotto il pavimento per mesiRivolta mesi
   if(S.month===1 && S.turnInMandate>=PAESE.mandatoMesi/12){ if(sfidaAttiva()) return apriPrimaria('vigilia'); return election(); }   // vigilia: prima la primaria, poi le urne
   if(PAESE.cadutaGoverno && S.minoranza && Math.random()<probSfiducia()){      // elezioni anticipate da sfiducia (passo 4)
     S.elezioniAnticipate=true;
@@ -4346,8 +4611,67 @@ function seedNotteAnim(){
 /* GIORNATA ELETTORALE (fase B): attesa → notte a tappe → esito. Il VERO si congela QUI, nell'attesa, prima
    della mossa di chiusura — così la mossa esprime carattere ma NON sposta il verdetto (vincolo di Giacomo). */
 function election(){ avviaAttesa(); }
+/* ================================================================================================================
+   L64-2 · LA CAMPAGNA SI GIOCA SULLA MAPPA (DESIGN-SUPERFICI-VIVE §C). Nei sei mesi di stagione hai uno SFORZO FINITO
+   (`S.campNaz.sforzo`, dato puro) da distribuire sui territori dal pannello dell'area: ogni punto speso qui è un
+   punto non speso là, e a fine stagione quel che resta SI PERDE — è la decisione a scadenza che le schede non avevano.
+   Il costo dipende dall'area (roccaforte 1, in bilico 1, terreno avversario 2) e il POTERE LOCALE lo abbassa (una rete
+   che esiste rende la campagna più efficace); il ritorno è la SPINTA del territorio (`S.territori[i].spinta`), che il
+   voto legge PRIMA dell'onda nazionale (decidiTerritori) — il verso è finalmente dal basso in alto — e che alla vigilia
+   confluisce nelle forze del blocco (applicaSpintaForze, prima di calcSeggi). Le roccaforti rendono poco (ci voti già),
+   le aree in bilico molto, il terreno avversario costa il doppio e paga in reputazione anche se perdi.
+   Nessun obbligo: chi ignora la campagna gioca lo stesso, peggio. Chiude L59-5 per costruzione.
+   ================================================================================================================ */
+const CAMP_SFORZO_BASE=6;
+function inCampagna(){ if(typeof S==='undefined'||!S||S.livello!==3||!PAESE.territori||!S.territori) return false; const fine=(PAESE.mandatoMesi||60), mm=meseMandato(); return mm>=fine-6 && mm<fine; }
+function mesiAllaFine(){ const fine=(PAESE.mandatoMesi||60); return Math.max(0, fine-meseMandato()); }
+function sforzoIniziale(){ const pl=(S.potereLocale!=null)?S.potereLocale:50; return CAMP_SFORZO_BASE + (pl>=60?1:0); }
+function campSforzo(){ if(!inCampagna()) return 0; if(!S.campNaz) S.campNaz={piazza:0,promMantenuta:false,n:0}; if(S.campNaz.sforzo==null){ S.campNaz.sforzo=sforzoIniziale(); S.campNaz.sforzo0=S.campNaz.sforzo; S.campNaz.speso={}; S.log.unshift({t:T('Campagna sul territorio'), x:T('La campagna è aperta: hai %N punti di sforzo da spendere sulla mappa entro %M mesi. Quelli non spesi si perdono.').replace('%N',S.campNaz.sforzo).replace('%M',mesiAllaFine())}); } return S.campNaz.sforzo; }
+function tipoTerritorio(i){ const TE=PAESE.territori[i], t=S.territori[i]||{}; const tuo=compatibile(t.partito, mioPartito().asse); const L=Math.abs(TE.lean); if(L>=2) return tuo?'roccaforte':'avversario'; return tuo?'bilico':'bilico'; }
+function costoInvestimento(i){ const tipo=tipoTerritorio(i); let c=(tipo==='avversario')?2:1; if(tipo==='avversario' && (S.potereLocale||0)>=60) c=1; return c; }
+function ritornoInvestimento(i){ const tipo=tipoTerritorio(i); const base=(tipo==='roccaforte')?4:(tipo==='bilico'?10:6); return base + ((S.potereLocale||0)>=60?2:0); }
+function investiTerritorio(i){
+  if(!inCampagna()) return; const sf=campSforzo(); const c=costoInvestimento(i); if(sf<c) return;
+  S.campNaz.sforzo=sf-c; S.campNaz.speso[i]=(S.campNaz.speso[i]||0)+c;
+  const t=S.territori[i]; t.spinta=(t.spinta||0)+ritornoInvestimento(i);
+  if(tipoTerritorio(i)==='avversario') repd(1);   // il terreno avversario paga in prestigio anche quando perdi
+  S.decisioniScadenza=(S.decisioniScadenza||0)+1;   // la misura del cantiere: decisioni a scadenza originate da una scheda
+  const TE=PAESE.territori[i];
+  S.log.unshift({t:T('Campagna sul territorio'), x:T('Sforzo di campagna su %T: %C punti spesi, ne restano %R.').replace('%T',nomeTerr(TE)).replace('%C',c).replace('%R',S.campNaz.sforzo)});
+  if(typeof render==='function') render(); if(typeof commitSnap==='function') commitSnap();
+}
+/* Alla vigilia: la spinta confluisce nelle forze del blocco (il punto di giunzione con i seggi: avviaAttesa → calcSeggi).
+   Peso: simbolo ×2, regione ×1,5. Scala: 10 di spinta (un'area in bilico) ≈ 0,5 punti di forza al blocco. */
+function applicaSpintaForze(){
+  if(!S.territori||!PAESE.territori) return 0;
+  let tot=0; PAESE.territori.forEach(function(TE,i){ const sp=(S.territori[i]||{}).spinta||0; if(!sp) return; tot+=sp*(TE.simbolo?2:1)*(TE.tipo==='regione'?1.5:1); });
+  const amount=Math.round(tot/20*10)/10;
+  if(amount>0 && typeof applicaSlancio==='function') applicaSlancio(bloccoElettorale(), amount);
+  return amount;
+}
+/* Il voto nazionale decide i territori DAL BASSO: quota locale = 50 + onda (seggi del blocco − 50, contenuta) + lean×asse×4
+   + spinta×0,5 + rumore. Prima il voto nazionale non toccava i territori (solo le intermedie): la campagna che li ha
+   lavorati deve poterli conquistare. Poi la spinta si consuma: la stagione dopo si ricomincia da zero. */
+function decidiTerritoriNazionale(){
+  if(!S.territori||!PAESE.territori||!S.seggi) return [];
+  const asseTuo=mioPartito().asse, aB=asseBlocco();
+  const wave=clamp((typeof bloccoSeggi==='function'?bloccoSeggi():50)-50, -12, 12);
+  const vinte=[];
+  PAESE.territori.forEach(function(TE,i){ const t=S.territori[i]; if(!t) return;
+    const sp=t.spinta||0; if(!sp) return;   // solo le aree lavorate in campagna si decidono qui (le altre le decidono le intermedie)
+    const localShare=50 + wave + (TE.lean*aB*4) + sp*0.5 + (Math.random()*6-3);
+    const nuovoTuo=localShare>50, eraTuo=compatibile(t.partito, asseTuo);
+    if(nuovoTuo && !eraTuo){ S.territori[i]={ titolare:nomePersona(), partito:scegliPartito(true, TE.lean, asseTuo) }; vinte.push(TE); }
+  });
+  S.territori.forEach(function(t){ if(t) t.spinta=0; });
+  if(vinte.length && typeof initPotereLocale==='function') initPotereLocale();   // solo se qualcosa è cambiato: il gioco senza campagna resta identico
+  if(vinte.length) S.log.unshift({t:T('Campagna sul territorio'), x:T('La campagna sul territorio ha pagato: %N aree sono passate al tuo blocco.').replace('%N',vinte.length)});
+  return vinte;
+}
+function chiudiSforzo(){ if(S.campNaz && S.campNaz.sforzo>0) S.log.unshift({t:T('Campagna sul territorio'), x:T('Fine della campagna: %N punti di sforzo non spesi, persi.').replace('%N',S.campNaz.sforzo)}); }
 function avviaAttesa(){
   let sistema, vero;
+  applicaSpintaForze();   // L64-2: la campagna sul territorio confluisce nelle forze PRIMA che i seggi si calcolino
   if(PAESE.comeSiVince==='parlamentare'){
     S.seggi=calcSeggi();                                       // VERO: seggi, calcolati una volta (qui, prima della chiusura)
     sistema='parlamentare'; vero={ seggi:Object.assign({},S.seggi) };
@@ -4938,6 +5262,7 @@ function nextMandate(){
   /* L53-2 — l'accordo esterno FINISCE COL MANDATO (design §A): le stampelle valgono per la legislatura che le
      ha chieste, non per quella dopo. Le due occasioni si riaprono col mandato nuovo. */
   S.sostegno=null; S.sostegnoStrappi=0;
+  chiudiSforzo(); decidiTerritoriNazionale();   // L64-2: lo sforzo non speso si perde; le aree lavorate si decidono dal basso
   S.campNaz=null; S.campNazUltimo=null;   // Cantiere C: la stagione si chiude col voto (le promesseCampagna PERSISTONO: resa dei conti alla prossima)
   tutteCorrenti(8);   // la vittoria ricompatta il partito
   bioConta('elezioniVinte'); bioFatto(gn('Rieletto','Rieletta')+': comincia il mandato '+S.mandate+'.');
@@ -4955,6 +5280,7 @@ function perdiElezione(){ if(S.opposizione) gameOver('congresso'); else goOpposi
    Condiviso da goOpposizione (sconfitta) e startOpposizione (avvio da sfidante). */
 function entraOpposizione(w){
   S.opposizione=true; S.governoAvversario=w.id; S.ministers=[];
+  S.governoAvversarioVolto=nomePersona();   // L73-2: chi ti ha succeduto ha un nome (generato, mai reale)
   S.coalizione=[w.id].concat(PAESE.coalizione?compatibili(w.id,S.seggi).filter(p=>p.id!==S.partito).map(p=>p.id):[]);
   S.tenuta={}; S.tenutaForza0={}; S.tenutaLiv={}; S.tenutaUltimo={}; S.minoranza=false; S.mesiMinoranza=0;
   S.visibilita=40; S.credibilita=50; S.recentGov=[]; S.mesiAlGoverno=0;   // variabili d'opposizione; la traversata del deserto azzera il logorio
@@ -4968,6 +5294,7 @@ function entraOpposizione(w){
 function goOpposizione(){
   const w=vincitore();
   entraOpposizione(w);
+  chiudiSforzo(); decidiTerritoriNazionale();   // L64-2: anche in sconfitta le aree lavorate possono passare al tuo blocco
   S.campNaz=null; S.campNazUltimo=null;   // Cantiere C: stagione chiusa anche in sconfitta (le promesse restano: da sfidante non le puoi tradire — la resa le premierà)
   S.bloccoAtteso=bloccoQuota();   // aspettativa = quota del tuo blocco d'opposizione (potere locale persiste)
   bioFatto(gn('Sconfitto','Sconfitta')+' alle urne: comincia la traversata del deserto.');
@@ -5148,6 +5475,8 @@ function setLegge(id){
   applicaLegge(L, !cur);
   S.ultimaLegge={id:L.id, mese:S.year*12+S.month};                     // traccia per la conferenza stampa ("la legge contestata")
   /* biografia: le leggi col tuo nome */
+  S.leggiStorico=S.leggiStorico||[];   // L73-2: {id, nome, anno, abrogataAnno} — il finale dice quanto è durata
+  if(!cur) S.leggiStorico.push({id:L.id, nome:L.nome, anno:S.year}); else { const _r=S.leggiStorico.slice().reverse().find(function(x){return x.id===L.id && x.abrogataAnno==null;}); if(_r) _r.abrogataAnno=S.year; }
   if(!cur){ bioConta('leggi'); if(S.biografia && S.biografia.leggiFirmate.indexOf(L.nome)<0) S.biografia.leggiFirmate.push(L.nome);
     bioFatto('Vara la legge: '+L.nome+'.');
     const p=part(S.partito); if(p && p.asse!==0 && L.asse!==0 && (L.asse>0)===(p.asse>0)) bioConta('identita');   // legge coerente con l'anima del partito
@@ -5165,13 +5494,23 @@ function applicaLegge(L, approva){
   S.ind.consenso=computeConsenso();
   S.log.unshift({t:(approva?'Legge approvata':'Legge abrogata'), x:L.nome+'.'});
 }
+/* L72-1 — la rivolta: il testo di chiusura dipende dal gruppo che ti ha voltato le spalle (S.rivoltaGruppo). */
+const RIVOLTA_TESTI={
+  lavoratori:  'Sciopero generale a oltranza: le fabbriche si fermano e i sindacati non trattano più. Il governo cade davanti alla piazza.',
+  pensionati:  'Le piazze si riempiono di anziani, e sono metà del paese: nessun alleato regge. Il governo cade.',
+  cetomedio:   'Il ceto medio smette di pagare e di votare: serrata fiscale, dimissioni in massa nei consigli locali. Il governo cade.',
+  imprenditori:'Serrata delle imprese: capitali in fuga, cantieri fermi, nessun credito. Il governo cade sotto il peso di un\'economia che si ferma.',
+  giovani:     'Università occupate, cortei ogni giorno, scontri: la piazza dei giovani non si svuota più. Il governo cade.',
+  cattolici:   'Parrocchie e associazioni ti tolgono il saluto, e con loro metà della tua maggioranza. Il governo cade.'
+};
 function gameOver(reason){
   try{ aggiungiCarriera(reason); }catch(e){} chiudiAutosave();   // carriera chiusa: aggiorna lo storico e cancella l'autosave (niente "Continua")
   document.getElementById('ov').classList.remove('on');
   const years=S.year-(S.annoInizio||2025);
-  const title= T(reason==='crisi'?'Crisi di governo' : reason==='insolvenza'?'Il paese è insolvente' : reason==='congresso'?'Il partito sceglie un nuovo leader' : reason==='primaria'?'Il partito sceglie lo sfidante' : reason==='ritiro'?'Il congedo' : reason==='condanna'?'La condanna' : reason==='salute'?(S.esitoSalute==='fatale'?'L\'ultimo giorno':'Le ragioni della salute') : reason==='silurato'?'Fuori dal governo' : reason==='sconfittaLocale'?'Sconfitta alle urne locali' : reason==='mandatoInt'?'Fine del mandato internazionale' : 'Fine del percorso');
+  const title= T(reason==='crisi'?'Crisi di governo' : reason==='insolvenza'?'Il paese è insolvente' : reason==='rivolta'?'Un pezzo di paese ti ha voltato le spalle' : reason==='congresso'?'Il partito sceglie un nuovo leader' : reason==='primaria'?'Il partito sceglie lo sfidante' : reason==='ritiro'?'Il congedo' : reason==='condanna'?'La condanna' : reason==='salute'?(S.esitoSalute==='fatale'?'L\'ultimo giorno':'Le ragioni della salute') : reason==='silurato'?'Fuori dal governo' : reason==='sconfittaLocale'?'Sconfitta alle urne locali' : reason==='mandatoInt'?'Fine del mandato internazionale' : 'Fine del percorso');
   const desc= reason==='crisi'?T('Una mozione di sfiducia ha fatto cadere il governo: il consenso era crollato.')
     : reason==='insolvenza'?T('I conti pubblici sono fuori controllo: nessuno finanzia più il debito. Il governo cade travolto dalla crisi finanziaria.')
+    : reason==='rivolta'?T(RIVOLTA_TESTI[S.rivoltaGruppo]||RIVOLTA_TESTI.lavoratori)
     : reason==='congresso'?T('Troppe sconfitte e una forza ridotta all\'osso: il tuo partito ti sostituisce alla guida. La tua carriera politica finisce qui.')
     : reason==='primaria'?T('I militanti scelgono <b>%V</b>%X. Il partito volta pagina: la tua carriera politica finisce qui.').replace('%V',(S.sfida||{}).volto||T('lo sfidante')).replace('%X',(S.sfida&&S.sfida.area)?(', '+S.sfida.carica+' — '+S.sfida.area):'')
     : reason==='ritiro'?T('A %E anni annunci il ritiro a vita privata. Nessuna caduta: un congedo, e la parola passa alla storia.').replace('%E',S.eta)
@@ -5184,12 +5523,14 @@ function gameOver(reason){
     : reason==='mandatoInt'?T('I membri delle Nazioni Unite non ti riconfermano: la coesione si era logorata sotto la tua guida. Il mandato al vertice del mondo finisce qui — ma resta nella storia chi ci è arrivato.')
     : T('Hai perso le elezioni e passi all\'opposizione.');
   const epilogo=generaEpilogo(reason).map(function(p){return '<p style="margin:7px 0">'+p+'</p>';}).join('');
+  const F=(typeof generaFinale==='function')?generaFinale(reason):null;   // L73-2: titolo in alto, verdetto sotto la storia
+  const verdettoHtml=(F&&F.verdetto.length)?'<div style="font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--mut);margin:12px 0 6px">'+T('Il verdetto del paese')+'</div>'+F.verdetto.map(function(p){return '<p style="margin:7px 0">'+p+'</p>';}).join(''):'';
   const scF=(typeof scenaFinale==='function')?scenaFinale(reason):null;   // L9-1: scena d'esito (trionfo/dignità/caduta/oblio) sopra la bandiera
   const scFimg=scF?`<img class="mscene" src="${scF}" alt="" style="max-width:440px;max-height:200px;margin:6px auto 2px;border-radius:14px">`:'';
   document.getElementById('over').innerHTML=`${scFimg}<div style="text-align:center;padding-top:14px"><span class="flag" style="width:54px;height:36px;display:inline-block">${PAESE.flag||''}</span></div>
-   <div class="screen center"><div class="em">${T('Fine partita')}</div><h2>${title}</h2><p>${desc}</p>
+   <div class="screen center"><div class="em">${T('Fine partita')}</div>${F?`<div class="epitaffio">${F.titolo}</div>`:''}<h2>${title}</h2><p>${desc}</p>
    <div style="text-align:left;max-width:430px;margin:12px auto 4px;font-size:13.5px;line-height:1.5;color:var(--txt2);border-top:1px solid var(--line);padding-top:12px">
-     <div style="font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--mut);margin-bottom:6px">${T('La tua storia')}</div>${epilogo}</div>
+     <div style="font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--mut);margin-bottom:6px">${T('La tua storia')}</div>${epilogo}${verdettoHtml}</div>
    <div class="statgrid">
      <div class="s"><div class="l">${T('Anni al governo')}</div><div class="v">${years}</div></div>
      <div class="s"><div class="l">${T('Mandati vinti')}</div><div class="v">${S.mandatesWon}</div></div>
@@ -5264,6 +5605,10 @@ function applySnap(snap){
   if(S.sostegno===undefined){ S.sostegno=null; S.sostegnoOfferto=null; S.rimpastoOfferto=null; S.sostegnoStrappi=0; }   // L53-2
   if(S.sterlina60===undefined){ S.sterlina60=null; S.europa60=null; S.coscienza60=null; S.svalutazione=0; }   // L55-1
   if(S.minatori===undefined){ S.minatori=null; S.europa70=null; S.fmi=null; }   // L58-1
+  if(S.falkland===undefined){ S.falkland=null; S.minatori80=null; S.polltax=null; S.alleanza=null; }   // L60-2
+  if(S.promesseEsito===undefined){ S.groups0=null; S.ind0=null; S.promesseEsito=[]; S.leggiStorico=[]; S.governoAvversarioVolto=null; }   // L73-2
+  if(S.decisioniScadenza===undefined){ S.decisioniScadenza=0; S.visite={mappa:0, partito:0}; }   // L64-2
+  if(S.gruppo===undefined){ S.gruppo=null; S.sfidaSeme=null; S.candidatoPromosso=null; }   // L64-3/4
   if(S.scioglimentiChiesti===undefined){ S.scioglimentiChiesti=0; S.scioglimentoScelto=false; }   // L56-1
   if(!S.pilastriMondo || typeof S.pilastriMondo!=='object') S.pilastriMondo={};   // L56-2 — migrazione
   if(S.truffaFatta===undefined){ S.truffaFatta=false; S.truffaEsito=null; }   // Build B 1b — snodo one-shot: default per i salvataggi pre-1b

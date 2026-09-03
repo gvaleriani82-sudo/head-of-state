@@ -197,7 +197,7 @@ function scenaFinale(reason){ var M=_sm('finale'); if(!M) return null;
   var trionf = ((typeof S!=='undefined'&&S) ? ((S.mandatesWon||0)>=3 || (S.biografia&&S.biografia.trionfi>=2)) : false);
   if(reason==='ritiro' || (reason==='salute'&&(typeof S==='undefined'||!S||S.esitoSalute!=='fatale')) || reason==='mandatoInt')
     return trionf ? M.trionfo : M.dignita;                                     // uscite dignitose; carriera trionfale → trionfo
-  if(reason==='crisi'||reason==='insolvenza'||reason==='condanna'||reason==='silurato'||(reason==='salute'&&typeof S!=='undefined'&&S&&S.esitoSalute==='fatale'))
+  if(reason==='crisi'||reason==='insolvenza'||reason==='rivolta'||reason==='condanna'||reason==='silurato'||(reason==='salute'&&typeof S!=='undefined'&&S&&S.esitoSalute==='fatale'))
     return M.caduta;                                                           // cadute: sfiducia/insolvenza/condanna/silurato/fine-salute
   return M.oblio; }                                                            // congresso/primaria/sconfittaLocale/sconfitta netta
 function agScene(it){ if(!it || typeof SCENA_MAJOR==='undefined' || !SCENA_MAJOR[it.kind]) return '';   // display selettivo (ora incl. le carte locali)
@@ -589,7 +589,7 @@ function setPartito(id){ chosenPartito=id; renderStartParties(); }
 function escAttr(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 /* participi concordati col genere del personaggio IN CORSO (gn, game.js); per le carriere passate
    showCarriere usa l'etichetta CONGELATA alla chiusura (c.esitoTesto) — il genere era di quel personaggio */
-function esitoLabel(r){ return ({crisi:gn('caduto per crisi di governo','caduta per crisi di governo'), insolvenza:gn('travolto dall\'insolvenza','travolta dall\'insolvenza'), congresso:gn('sostituito dal partito','sostituita dal partito'), voto:gn('battuto al voto','battuta al voto'), primaria:gn('sconfitto alle primarie','sconfitta alle primarie'), ritiro:gn('ritirato a vita privata','ritirata a vita privata'), condanna:gn('travolto da una condanna','travolta da una condanna'), salute:T('per ragioni di salute'), silurato:gn('silurato dal premier','silurata dal premier'), sconfittaLocale:gn('sconfitto alle comunali','sconfitta alle comunali')})[r] || (r||T('concluso')); }   // i18n: frasi INTERE dentro gn (in EN convergono)
+function esitoLabel(r){ return ({crisi:gn('caduto per crisi di governo','caduta per crisi di governo'), insolvenza:gn('travolto dall\'insolvenza','travolta dall\'insolvenza'), rivolta:gn('caduto per la rivolta di un gruppo','caduta per la rivolta di un gruppo'), congresso:gn('sostituito dal partito','sostituita dal partito'), voto:gn('battuto al voto','battuta al voto'), primaria:gn('sconfitto alle primarie','sconfitta alle primarie'), ritiro:gn('ritirato a vita privata','ritirata a vita privata'), condanna:gn('travolto da una condanna','travolta da una condanna'), salute:T('per ragioni di salute'), silurato:gn('silurato dal premier','silurata dal premier'), sconfittaLocale:gn('sconfitto alle comunali','sconfitta alle comunali')})[r] || (r||T('concluso')); }   // i18n: frasi INTERE dentro gn (in EN convergono)
 function renderStartPersistence(){
   const cont=document.getElementById('start-continue');
   if(cont){
@@ -708,7 +708,7 @@ function renderAppoint(){
       const on=APT.sel[m.id]===i;
       h+=`<button class="cand ${on?'on':''}" onclick="pickCand('${m.id}',${i})">
         <span class="cleft">${avatar(c)}<span class="cn">${c.nm}</span></span>
-        <span class="cmeta"><span class="chip" style="background:${PROFCOL[c.profile]}22;color:${PROFCOL[c.profile]}">${T(PROF[c.profile])}</span>${dotsHTML(c.comp)}</span>
+        <span class="cmeta"><span class="chip" style="background:${PROFCOL[c.profile]}22;color:${PROFCOL[c.profile]}">${gergo(T(PROF[c.profile]),'profilo')}</span>${dotsHTML(c.comp)}</span>
       </button>`;
     });
     h+=`</div></div>`;
@@ -743,6 +743,53 @@ function fmtMigliaia(n, dec){ var s=fmt(n, dec); var parts=s.split(/[.,]/); var 
   parts[0]=parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, sep); return parts.length>1 ? parts.join(s.indexOf(',')>-1?',':'.') : parts[0]; }
 /* targhetta-costo di una scelta: mostra "€X · −Y% del bilancio" quando la carta DICHIARA un costo (lo rende VISIBILE,
    non più un incremento nascosto). Locale: costo.eur (€ mln) vs il bilancio comunale/regionale in €. */
+/* L67-2 — il riepilogo sotto l'esito: cosa si e mosso davvero, in parole del cruscotto. Solo se c'e qualcosa. */
+function esitiHtml(it){
+  if(!it || !it.esiti || !it.esiti.length) return '';
+  const NOMI={'ind:consenso':'Consenso','ind:debt':'Debito/PIL','ind:stampa':'Stampa','ind:fiducia':'Fiducia','ind:reputazione':'Reputazione','opp:visibilita':'Visibilità','opp:credibilita':'Credibilità'};
+  const righe=it.esiti.map(function(e){
+    const tipo=e.k.slice(0,3), id=e.k.slice(4);
+    let nome;
+    if(tipo==='grp') nome=nomeGruppo(id);
+    else if(tipo==='cor'){ const C=(typeof CORRENTI_DEF!=='undefined')?CORRENTI_DEF.find(function(c){return c.id===id;}):null; nome=C?T(C.nome):id; }
+    else nome=T(NOMI[e.k]||id);
+    const su=e.d>0, dec=(e.k==='ind:debt')?1:0, testo=(su?'+':'−')+fmt(Math.abs(e.d),dec)+(e.k==='ind:debt'?' '+T('pt'):'');
+    return '<span class="esito-riga"><span>'+nome+'</span><span class="mono" style="color:'+(su?'var(--pos)':'var(--neg)')+'">'+testo+'</span></span>';
+  }).join('');
+  return '<div class="esiti"><div class="contorno">'+T('Cosa si è mosso')+'</div>'+righe+'</div>';
+}
+/* ================================================================================================================
+   L67-3 · IL GERGO SPIEGATO AL TOCCO. Sei parole che il gioco usa come fossero note — potere locale, intesa,
+   punti riforma, congiuntura, profilo, tenuta — diventano un termine toccabile con una definizione di UNA riga
+   che si apre sotto, dove il termine compare. Niente hover (sul telefono non esiste): tocco che apre e chiude.
+   Il bersaglio tattile è 44px per costruzione (padding + margine negativo: la parola resta della sua taglia,
+   l'area che si preme no). Le definizioni sono ancorate al codice: le soglie sono quelle del motore.
+   ================================================================================================================ */
+const GERGO_DEF = {
+  potereLocale: 'La quota dei territori che i tuoi eletti controllano: sopra 50 la manovra di gennaio ti dà un punto riforma in più.',
+  intesa:       'Il rapporto con un altro partito, da 0 a 100: sopra 60 quel partito entra nel tuo blocco e conta al voto.',
+  puntiRiforma: 'Il credito con cui cambi politiche e leggi: +1 al mese fino a 3 in cassa, e la manovra di gennaio ne aggiunge 3.',
+  congiuntura:  'Il vento dell\'economia che spinge o frena da solo, a prescindere da quello che fai tu.',
+  profilo:      'L\'orientamento di un ministro o candidato — tecnico, progressista, conservatore, populista — che cambia l\'effetto delle sue politiche.',
+  tenuta:       'Quanto un alleato regge nella coalizione, da 0 a 100: sotto 35 ti dà un ultimatum, sotto 20 rompe.'
+};
+function gergo(termine, chiave){
+  const d=GERGO_DEF[chiave]; if(!d) return termine;
+  return '<span class="gergo-wrap"><button type="button" class="gergo" aria-expanded="false" onclick="toggleGergo(this)">'+termine+'</button>'
+       + '<span class="gergo-def" hidden><b>'+termine+'</b> — '+T(d)+'</span></span>';
+}
+/* La definizione NON resta accanto alla parola: molte delle sei stanno in righe a due colonne (etichetta a
+   sinistra, valore a destra) o dentro un chip, e un blocco aperto li dentro si sovrappone al valore. Al primo
+   tocco la si sposta in CODA alla scheda che la contiene, a tutta larghezza: sotto tutto, sopra niente. */
+function toggleGergo(b){
+  let def=b._gergoDef || b.nextElementSibling; if(!def || !def.classList.contains('gergo-def')) return;
+  const aperto=!def.hidden;
+  document.querySelectorAll('.gergo-def:not([hidden])').forEach(function(x){ x.hidden=true; });
+  document.querySelectorAll('.gergo[aria-expanded="true"]').forEach(function(x){ x.setAttribute('aria-expanded','false'); });
+  if(aperto) return;
+  if(!b._gergoDef){ const host=b.closest('.card, .sticky-top, .ag') || b.parentElement; host.classList.add('gergo-host'); host.appendChild(def); b._gergoDef=def; }
+  def.hidden=false; b.setAttribute('aria-expanded','true');
+}
 function costoChip(c){ if(!c || !c.costo) return '';
   var k=c.costo;
   if(k.pct!=null && S.locale && S.locale.budget){   // LOCALE: % del bilancio comunale/regionale → € (pct>0 spesa, pct<0 entrata)
@@ -1024,7 +1071,7 @@ function avatar(m){ if(!m) return ''; const c=PROFCOL[m.profile]; let img=avatar
   if(!img){ var rp=(typeof ritrattoDi==='function')?ritrattoDi(m):null; if(rp) img=rp; }   // L9-2: ritratto per macro-area+genere (dopo la foto-utente, prima dell'iniziale)
   if(img) return `<div class="avatar" style="border-color:${c};padding:0;overflow:hidden"><img src="${img}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%"></div>`;
   const ini=(m.nm||'?').trim().charAt(0).toUpperCase(); return `<div class="avatar" style="border-color:${c};color:${c}">${ini}</div>`; }
-function chipOf(m){ if(!m) return ''; const c=PROFCOL[m.profile]; return `<span class="chip" style="background:${c}22;color:${c}">${T(PROF[m.profile])}</span>`; }
+function chipOf(m){ if(!m) return ''; const c=PROFCOL[m.profile]; return `<span class="chip" style="background:${c}22;color:${c}">${gergo(T(PROF[m.profile]),'profilo')}</span>`; }
 function cap(s){ return s ? s.charAt(0).toUpperCase()+s.slice(1) : s; }
 
 /* Card di un ministro (RIUSABILE: elenco Governo e pagina-ministero). mode 'lista' → "Apri il ministero →";
@@ -1041,7 +1088,7 @@ function renderMinistroCard(m, mode){
   const face=(typeof avatar==='function')?avatar(m):'';
   return `<div class="min${mode==='pagina'?' solo':''}"><div class="mtop"><div class="mleft">${face}<div class="mwho">
     <div class="role">${role}</div><div class="who">${m.nm}</div>
-    <span class="chip" style="background:${PROFCOL[m.profile]}22;color:${PROFCOL[m.profile]}">${T(PROF[m.profile])}</span></div></div>
+    <span class="chip" style="background:${PROFCOL[m.profile]}22;color:${PROFCOL[m.profile]}">${gergo(T(PROF[m.profile]),'profilo')}</span></div></div>
     <div style="text-align:right;"><div class="role">${T('Competenza')}</div>${dotsHTML(m.comp)}</div></div>
     <div class="msum">${ministerSummary(m)}</div>
     <div class="loy"><div class="ll"><span>${T('Lealtà · efficacia')} ${effPct(m)}%</span><span class="mono">${fmt(m.loyalty,0)}</span></div>
@@ -1282,6 +1329,17 @@ function bilancioRiga(){
   return '';
 }
 /* media della reputazione sui 6 gruppi — una delle valute del gate di laurea (Build A) */
+/* L72-1 — IL PAVIMENTO E LA RIVOLTA, VISIBILI. Sulla barra di ogni gruppo un segno rosso dice dov'e' il pavimento
+   (60% del target a leve neutre, pavimentoGruppo in model.js); quando un gruppo ci sta sotto, sotto la barra compare
+   il conto alla rovescia — mesi sotto, mesi alla crisi — e in testa alla scheda di governo un banner lo ripete.
+   Prevedibile e visibile e' informazione; prevedibile e nascosto sarebbe inganno (L59-4). Testo di decisione: 12px. */
+function pavTick(id){ if(typeof pavimentoGruppo!=='function'||!S.groups||S.opposizione) return ''; const p=pavimentoGruppo(id); return `<b class="pav" style="left:${clamp(p,0,100)}%" title="${T('soglia')} ${fmt(p,0)}"></b>`; }
+function rivoltaHtml(id){ const R=S.rivolta; if(S.opposizione||!R||!R[id]) return ''; const n=Math.max(0,(dif().mesiRivolta||6)-R[id]);
+  return `<div class="rivolta">${T('Sotto la soglia da <b>%M</b> mesi · crisi fra <b>%N</b>').replace('%M',R[id]).replace('%N',n)}</div>`; }
+function rivoltaBanner(){ const R=S.rivolta; if(S.opposizione||!R) return ''; let h='';
+  for(const gr of GROUPS){ if(!R[gr.id]) continue; const n=Math.max(0,(dif().mesiRivolta||6)-R[gr.id]);
+    h+=`<div class="banner rivolta-banner">${T('<b>%G</b> — un pezzo di paese ti ha voltato le spalle: sotto la soglia di %P da %M mesi. Riportalo sopra con le politiche, o fra <b>%N mesi</b> la crisi ti travolge.').replace('%G',T(gr.nm)).replace('%P',fmt(pavimentoGruppo(gr.id),0)).replace('%M',R[gr.id]).replace('%N',n)}</div>`; }
+  return h; }
 function mediaGruppi(){ if(typeof GROUPS==='undefined'||!S.groups) return 0; var s=0,n=0; GROUPS.forEach(function(g){ if(S.groups[g.id]!=null){ s+=S.groups[g.id]; n++; } }); return n?s/n:0; }
 /* Scheda ATTIVISTA (Build A) — L1: cruscotto della militanza. Le 3 valute (base/autorev/reputazione media) con la SOGLIA
    di laurea visibile (gate non invisibile, rifinitura 2a) + i 6 gruppi col template `.grp` esistente. Le mosse arrivano a L2. */
@@ -1313,7 +1371,7 @@ function renderAttivista(){
     (S.agenda||[]).forEach(function(it,idx){ if(it.kind!=='attivista'||!it.data) return; const d=it.data;
       h+=`<div class="ag major ${it.resolved?'done':''}">${agScene(it)}<div class="ah"><div class="kick">${T(d.kick)}</div><h3>${T(d.t)}</h3></div><div class="atext">${T(d.text)}</div>`;
       if(!it.resolved){ h+=`<div class="opts">`+d.ch.map(function(c,ci){ return `<button class="opt" onclick="resolveItem(${idx},${ci})"><span class="ol">${T(c.l)}</span><span class="oe">${T(c.e)}</span></button>`; }).join('')+`</div>`; }
-      else h+=`<div class="outcome">${it.outcome||''}</div>`;
+      else h+=`<div class="outcome">${it.outcome||''}</div>${esitiHtml(it)}`;
       h+=`</div>`;
     });
   }
@@ -1332,7 +1390,7 @@ function renderAttivista(){
   for(const gr of GROUPS){ const v=S.groups[gr.id];
     h+=`<div class="grp"><div class="top"><div class="nm">${icon(gr.id,T(gr.nm))} ${T(gr.nm)}<small>${T('peso')} ${gr.w}%</small></div>
       <div class="pc" style="color:${barColor(v)}">${fmt(v,0)}%</div></div>
-      <div class="bar"><i style="width:${clamp(v,2,100)}%;background:${barColor(v)}"></i></div></div>`; }
+      <div class="bar"><i style="width:${clamp(v,2,100)}%;background:${barColor(v)}"></i>${pavTick(gr.id)}</div>${rivoltaHtml(gr.id)}</div>`; }
   h+=`</div>`;
   /* come funziona — la tensione della cura (le mosse diventano bottoni a L2) */
   h+=`<div class="card"><div class="ct">${T('Come funziona')}</div><div class="log"><div class="li">${T('Ogni mese scegli come muoverti: organizzare un gruppo, una battaglia pubblica, tessere col partito. La via <b>istituzionale</b> è lenta e sicura e piace ai moderati; la <b>piazza</b> è veloce e rischiosa e scalda la base. Entrambe legittime — e il gate chiede il mix.')}</div></div></div>`;
@@ -1424,6 +1482,7 @@ function renderGov(){
     h+=`<div class="card uno" onclick="apriMinistero('${S.dicastero}')" style="cursor:pointer;display:flex;justify-content:space-between;align-items:center;padding:12px 14px;margin-bottom:12px"><span><b>${T('Il tuo dicastero')}</b><br><span style="font-size:12px;color:var(--mut)">${Mn} — ${T('le tue leve, leggi e dossier')}</span></span><span style="color:var(--acc-ink);font-size:13px">${T('Apri →')}</span></div>`;
   }
   else if(S.month===1) h+=`<div class="banner">${T('È <b>gennaio</b>: vai alla scheda <b>Bilancio</b> per varare la manovra dell\'anno (hai %N punti riforma).').replace('%N',rpLeft())}</div>`;
+  h+=rivoltaBanner();   // L72-1: se un gruppo e' sotto il pavimento, il conto alla rovescia sta in testa al Governo
   h+=bilancioRiga();   // il € del livello corrente, persistente in cima al Governo (cantiere Budget): sempre sott'occhio mentre decidi
   /* la prima pagina del mese: presenza fissa della stampa + scorciatoia alla tab Stampa (solo al governo) */
   if(!S.opposizione && S.livello!==4 && S.livello!==5 && S.titoloMese){   // la striscia-stampa nazionale non vale per il Segretario (liv 4) né per il diplomatico (liv 5)
@@ -1445,8 +1504,8 @@ function renderGov(){
         <h3>${T('Nuovo ministro:')} ${T(MINISTRIES.find(x=>x.id===it.min).nm)}</h3></div>
         <div class="atext">${T('Scegli chi guiderà il dicastero.')}</div>`;
       if(!it.resolved){ h+=`<div class="opts">`+it.cands.map((c,i)=>`<button class="opt" onclick="resolveItem(${idx},${i})">
-        <span class="ol">${c.nm}</span><span class="oe"><span class="chip" style="background:${PROFCOL[c.profile]}22;color:${PROFCOL[c.profile]}">${T(PROF[c.profile])}</span> · ${T('competenza')} ${c.comp}/3</span></button>`).join('')+`</div>`; }
-      else h+=`<div class="outcome">${it.outcome}</div>`;
+        <span class="ol">${c.nm}</span><span class="oe"><span class="chip" style="background:${PROFCOL[c.profile]}22;color:${PROFCOL[c.profile]}">${gergo(T(PROF[c.profile]),'profilo')}</span> · ${T('competenza')} ${c.comp}/3</span></button>`).join('')+`</div>`; }
+      else h+=`<div class="outcome">${it.outcome}</div>${esitiHtml(it)}`;
       h+=`</div>`;
     } else if(it.kind==='proposta'){
       const m=getMin(it.min); const p=it.prop;
@@ -1458,7 +1517,7 @@ function renderGov(){
       if(!it.resolved){ h+=`<div class="opts">
         <button class="opt" onclick="resolveItem(${idx},0)"><span class="ol">${T('Approva')}</span><span class="oe">${T(p.e)}</span>${costoChip(p)}</button>
         <button class="opt" onclick="resolveItem(${idx},1)"><span class="ol">${T('Respingi')}</span><span class="oe">${T('Nessun effetto; il ministro la prende male')}</span></button></div>`; }
-      else h+=`<div class="outcome">${it.outcome}</div>`;
+      else h+=`<div class="outcome">${it.outcome}</div>${esitiHtml(it)}`;
       h+=`</div>`;
     } else if(it.kind==='budget'){
       const m=getMin(it.min); const b=it.req;
@@ -1470,7 +1529,7 @@ function renderGov(){
       if(!it.resolved){ h+=`<div class="opts">
         <button class="opt" onclick="resolveItem(${idx},0)"><span class="ol">${T('Concedi')}</span><span class="oe">${T(b.e)}</span>${costoChip(b)}</button>
         <button class="opt" onclick="resolveItem(${idx},1)"><span class="ol">${T('Nega')}</span><span class="oe">${T('Nessun costo, nessun miglioramento')}</span></button></div>`; }
-      else h+=`<div class="outcome">${it.outcome}</div>`;
+      else h+=`<div class="outcome">${it.outcome}</div>${esitiHtml(it)}`;
       h+=`</div>`;
     } else if(it.kind==='arco'){
       /* gli archi narrativi (lotto 4 + payoff fase A): carta maggiore. Il marker discreto = titolo dell'arco +
@@ -1488,7 +1547,7 @@ function renderGov(){
           <div class="atext">${sub(node.text)}</div>`;
         if(!it.resolved){ h+=`<div class="opts">`+node.ch.map((c,i)=>
           `<button class="opt" onclick="resolveItem(${idx},${i})"><span class="ol">${sub(c.l)}</span><span class="oe">${sub(c.e)}</span></button>`).join('')+`</div>`; }
-        else h+=`<div class="outcome">${it.outcome}</div>`;
+        else h+=`<div class="outcome">${it.outcome}</div>${esitiHtml(it)}`;
         h+=`</div>`;
       }
     } else if(it.kind==='personale'){
@@ -1499,7 +1558,7 @@ function renderGov(){
         <div class="atext">${sub(T(d.text))}</div>`;
       if(!it.resolved){ h+=`<div class="opts">`+d.ch.map((c,i)=>
         `<button class="opt" onclick="resolveItem(${idx},${i})"><span class="ol">${sub(T(c.l))}</span><span class="oe">${sub(T(c.e))}</span></button>`).join('')+`</div>`; }
-      else h+=`<div class="outcome">${it.outcome}</div>`;
+      else h+=`<div class="outcome">${it.outcome}</div>${esitiHtml(it)}`;
       h+=`</div>`;
     } else if(it.kind==='locale'){
       /* eventi locali (livello 1): la vita amministrativa di città/regione */
@@ -1508,7 +1567,7 @@ function renderGov(){
         <div class="atext">${T(d.text)}</div>`;
       if(!it.resolved){ h+=`<div class="opts">`+d.ch.map((c,i)=>
         `<button class="opt" onclick="resolveItem(${idx},${i})"><span class="ol">${T(c.l)}</span><span class="oe">${T(c.e)}</span>${costoChip(c)}</button>`).join('')+`</div>`; }
-      else h+=`<div class="outcome">${it.outcome}</div>`;
+      else h+=`<div class="outcome">${it.outcome}</div>${esitiHtml(it)}`;
       h+=`</div>`;
     } else if(it.kind==='premier'){
       /* la mossa interna (lotto ascesa): lealtà vs ambizione */
@@ -1518,7 +1577,7 @@ function renderGov(){
       if(!it.resolved){ h+=`<div class="opts">
         <button class="opt" onclick="resolveItem(${idx},0)"><span class="ol">Assecondare il premier</span><span class="oe">Lealtà +, capitale + (ascesa lenta e sicura)</span></button>
         <button class="opt" onclick="resolveItem(${idx},1)"><span class="ol">Distinguersi</span><span class="oe">Capitale e visibilità +, ma la sua fiducia cala</span></button></div>`; }
-      else h+=`<div class="outcome">${it.outcome}</div>`;
+      else h+=`<div class="outcome">${it.outcome}</div>${esitiHtml(it)}`;
       h+=`</div>`;
     } else if(it.kind==='ministro'){
       /* le carte del ministro (lotto contenuto fase 1): politica interna di gabinetto + grane del tuo settore.
@@ -1529,7 +1588,7 @@ function renderGov(){
         <div class="atext">${subMin(T(d.text))}</div>`;
       if(!it.resolved){ h+=`<div class="opts">`+d.ch.map((c,i)=>
         `<button class="opt" onclick="resolveItem(${idx},${i})"><span class="ol">${subMin(T(c.l))}</span><span class="oe">${subMin(T(c.e))}</span></button>`).join('')+`</div>`; }
-      else h+=`<div class="outcome">${it.outcome}</div>`;
+      else h+=`<div class="outcome">${it.outcome}</div>${esitiHtml(it)}`;
       h+=`</div>`;
     } else if(it.kind==='occasione'){
       /* la salita (lotto ascesa): cogliere il salto o lasciare. internazionale = l'ATTO FINALE 3→4 (fase C1a) */
@@ -1545,7 +1604,7 @@ function renderGov(){
       if(!it.resolved){ h+=`<div class="opts">
         <button class="opt" style="border-color:var(--acc)" onclick="resolveItem(${idx},0)"><span class="ol">${T('Cogli il salto')}</span><span class="oe">${T(intl?'Diventi Segretario generale delle Nazioni Unite — la stessa carriera, oltre il vertice nazionale':it.tipo==='altoRapp'?'Diventi Sottosegretario generale delle Nazioni Unite — un passo dal vertice':it.tipo==='primaria'?'Sfidi: l\'esito dipende dal capitale e dalle correnti':'Diventi capo del governo — la stessa carriera, al vertice')}</span></button>
         <button class="opt" onclick="resolveItem(${idx},1)"><span class="ol">${daDiplo?T('Resti %R').replace('%R',T(typeof ruoloDiplo==='function'?ruoloDiplo():'Ambasciatore')):intl?T('Resti %R').replace('%R',T(PAESE.titoloRuolo)):T('Lascia, resta ministro')}</span><span class="oe">${T('Non è ancora il tuo momento')}</span></button></div>`; }
-      else h+=`<div class="outcome">${it.outcome}</div>`;
+      else h+=`<div class="outcome">${it.outcome}</div>${esitiHtml(it)}`;
       h+=`</div>`;
     } else if(it.kind==='crisiInt'){
       /* crisi di mediazione (fase C1a): trilemma. Il compromesso (gateAut) è mostrato BLOCCATO se l'autorevolezza non basta. */
@@ -1556,7 +1615,7 @@ function renderGov(){
         const locked=c.gateAut!=null && aut<c.gateAut;
         return `<button class="opt" ${locked?'disabled':''} style="${c.gateAut!=null&&!locked?'border-color:var(--acc)':''}" onclick="resolveItem(${idx},${i})"><span class="ol">${T(c.l)}</span><span class="oe">${locked?(T('Serve autorevolezza ≥ %N').replace('%N',c.gateAut)):T(c.e)}</span>${locked?'':costoChip(c)}</button>`;
       }).join('')+`</div>`; }
-      else h+=`<div class="outcome">${it.outcome}</div>`;
+      else h+=`<div class="outcome">${it.outcome}</div>${esitiHtml(it)}`;
       h+=`</div>`;
     } else if(it.kind==='rinnovoInt'){
       /* fine mandato internazionale (fase C1a): rinnovo o ritiro all'apice */
@@ -1566,7 +1625,7 @@ function renderGov(){
       if(!it.resolved){ h+=`<div class="opts">
         <button class="opt" style="border-color:var(--acc)" onclick="resolveItem(${idx},0)"><span class="ol">Accetti un nuovo mandato</span><span class="oe">Continui a guidare le Nazioni Unite</span></button>
         <button class="opt" onclick="resolveItem(${idx},1)"><span class="ol">Ti ritiri all'apice</span><span class="oe">Lasci da protagonista: la parola passa alla storia</span></button></div>`; }
-      else h+=`<div class="outcome">${it.outcome}</div>`;
+      else h+=`<div class="outcome">${it.outcome}</div>${esitiHtml(it)}`;
       h+=`</div>`;
     } else if(it.kind==='inchiesta'){
       /* l'arco giudiziario (lotto 3): carta maggiore, registro d'agenzia, %PM = archetipo a nome generato */
@@ -1577,7 +1636,7 @@ function renderGov(){
         const D=DIFESE_INCHIESTA[id]||{};
         return `<button class="opt" onclick="resolveItem(${idx},${i})"><span class="ol">${T(D.l)||id}</span><span class="oe">${T(D.e)||''}</span></button>`;
       }).join('')+`</div>`; }
-      else h+=`<div class="outcome">${it.outcome}</div>`;
+      else h+=`<div class="outcome">${it.outcome}</div>${esitiHtml(it)}`;
       h+=`</div>`;
     } else if(it.kind==='scandalo'){
       const m=getMin(it.min); const s=it.scn;
@@ -1589,7 +1648,7 @@ function renderGov(){
       if(!it.resolved){ h+=`<div class="opts">
         <button class="opt" onclick="resolveItem(${idx},0)"><span class="ol">${T('Difendi il ministro')}</span><span class="oe">${T('Lo tieni; lealtà su, ma consenso giù')}</span></button>
         <button class="opt" onclick="resolveItem(${idx},1)"><span class="ol">${T('Chiedi le dimissioni')}</span><span class="oe">${T('Lascia; gesto di pulizia, consenso su. Sostituto il mese prossimo')}</span></button></div>`; }
-      else h+=`<div class="outcome">${it.outcome}</div>`;
+      else h+=`<div class="outcome">${it.outcome}</div>${esitiHtml(it)}`;
       h+=`</div>`;
     } else if(it.kind==='conflitto'){
       const c=it.confl; const mA=getMin(it.minA), mB=getMin(it.minB);
@@ -1603,7 +1662,7 @@ function renderGov(){
       if(!it.resolved){ h+=`<div class="opts">
         <button class="opt" onclick="resolveItem(${idx},0)"><span class="ol">${T('Dai ragione a %M').replace('%M',mA?mA.nm:'—')}</span><span class="oe">${T(c.a.e)}</span>${costoChip(c.a)}</button>
         <button class="opt" onclick="resolveItem(${idx},1)"><span class="ol">${T('Dai ragione a %M').replace('%M',mB?mB.nm:'—')}</span><span class="oe">${T(c.b.e)}</span>${costoChip(c.b)}</button></div>`; }
-      else h+=`<div class="outcome">${it.outcome}</div>`;
+      else h+=`<div class="outcome">${it.outcome}</div>${esitiHtml(it)}`;
       h+=`</div>`;
     } else if(it.kind==='stampa'){
       const d=it.data;
@@ -1611,7 +1670,7 @@ function renderGov(){
         <h3>${d.t}</h3></div>
         <div class="atext" style="font-style:italic">«${d.text}»</div>`;
       if(!it.resolved){ h+=`<div class="opts">`+d.ch.map((c,i)=>`<button class="opt" onclick="resolveItem(${idx},${i})"><span class="ol">${T(c.l)}</span><span class="oe">${T(c.e)}</span></button>`).join('')+`</div>`; }
-      else h+=`<div class="outcome">${it.outcome}</div>`;
+      else h+=`<div class="outcome">${it.outcome}</div>${esitiHtml(it)}`;
       h+=`</div>`;
     } else if(it.kind==='puntopartito'){
       /* l'appuntamento con le correnti (lotto ribilanciamento) */
@@ -1620,7 +1679,7 @@ function renderGov(){
         <h3>${T(d.t)}</h3></div>
         <div class="atext">${T(d.text)}</div>`;
       if(!it.resolved){ h+=`<div class="opts">`+d.ch.map((c,i)=>`<button class="opt" onclick="resolveItem(${idx},${i})"><span class="ol">${T(c.l)}</span><span class="oe">${T(c.e)}</span></button>`).join('')+`</div>`; }
-      else h+=`<div class="outcome">${it.outcome}</div>`;
+      else h+=`<div class="outcome">${it.outcome}</div>${esitiHtml(it)}`;
       h+=`</div>`;
     } else if(it.kind==='intermedia'){
       const r=it.ris, col=r.win?'var(--pos)':'var(--neg)';
@@ -1634,7 +1693,7 @@ function renderGov(){
         <div style="padding:0 15px 10px">${r.pe.gruppi.map(g=>`<div style="padding:3px 0"><div style="display:flex;justify-content:space-between;font-size:12px"><span style="font-weight:${g.tuo?700:400}">${T(g.nome)}${g.tuo?' <span class="chip" style="background:var(--acc-bg);color:var(--acc-ink)">'+T('tuo')+'</span>':''}</span><span class="mono">${g.quota}%</span></div><div class="bar" style="height:5px"><i style="width:${clamp(g.quota,2,100)}%;background:${g.tuo?'var(--acc)':'var(--mut2)'}"></i></div></div>`).join('')}
           <div style="font-size:12px;color:var(--mut);margin-top:5px">${T('Il tuo gruppo')} (<b>${T((r.pe.gruppi.find(g=>g.tuo)||{}).nome||'')}</b>): <b>${r.pe.rank}º ${T('per peso')} · ${r.pe.quota}%</b></div></div>`:''}`;
       if(!it.resolved) h+=`<div class="opts"><button class="opt" onclick="resolveItem(${idx},0)"><span class="ol">${T('Avanti →')}</span></button></div>`;
-      else h+=`<div class="outcome">${it.outcome}</div>`;
+      else h+=`<div class="outcome">${it.outcome}</div>${esitiHtml(it)}`;
       h+=`</div>`;
     } else {
       const d=it.data; const major=it.kind==='event';
@@ -1650,7 +1709,7 @@ function renderGov(){
         const locked=lockedRep||lockedUE||lockedEnte;
         return `<button class="opt" ${locked?'disabled':''} onclick="resolveItem(${idx},${i})"><span class="ol">${T(c.l)}</span><span class="oe">${lockedRep?(T('Serve reputazione ≥ %N').replace('%N',c.need)):lockedUE?(T('Serve peso a Bruxelles ≥ %N').replace('%N',c.pesoUE)):lockedEnte?(T('Serve rapporto con %E ≥ %N').replace('%E',((cEnte&&cEnte.breve)||c.ente)).replace('%N',(c.enteMin!=null?c.enteMin:60))):T(c.e)}</span>${locked?'':costoChip(c)}</button>`;
       }).join('')+`</div>`; }
-      else h+=`<div class="outcome">${it.outcome}</div>`;
+      else h+=`<div class="outcome">${it.outcome}</div>${esitiHtml(it)}`;
       h+=`</div>`;
     }
   });
@@ -1752,7 +1811,7 @@ function renderPaese(){
   }
   h+=`<div class="card"><div class="ct">${T('Economia')}</div>
     ${indRow('Crescita del PIL','variazione annua',sign(I.growth,1)+'%',(I.growth+6)/11*100,'crescita')}
-    ${indRow('Congiuntura', cic>0.15?'vento a favore: l\'economia spinge da sola' : cic<-0.15?'vento contrario: l\'economia frena da sola' : 'fase stabile', T(cic>0.15?'Favorevole':cic<-0.15?'Avversa':'Stabile'), (cic+1)/2*100)}
+    ${indRow('Congiuntura', cic>0.15?'vento a favore: l\'economia spinge da sola' : cic<-0.15?'vento contrario: l\'economia frena da sola' : 'fase stabile', T(cic>0.15?'Favorevole':cic<-0.15?'Avversa':'Stabile'), (cic+1)/2*100, null, 'congiuntura')}
     ${indRow('Disoccupazione','tasso',fmt(I.unemp,1)+'%',(20-I.unemp)/17*100)}
     ${indRow('Deficit','% del PIL',fmt(def,1)+'%',(8-Math.max(def,0))/8*100)}
     ${indRow('Fiducia dei mercati','alta = interessi a bada; bassa = spread che morde',fmt(I.fiducia,0),I.fiducia,'mercati')}
@@ -1778,11 +1837,12 @@ function renderPaese(){
     ${indRow('Sanità','qualità del servizio',fmt(I.sanita,0),I.sanita,'sanita')}
     ${indRow('Sicurezza','ordine pubblico',fmt(I.sicurezza,0),I.sicurezza,'sicurezza')}
     ${indRow('Ambiente','transizione ecologica',fmt(I.ambiente,0),I.ambiente,'ambiente')}</div>`;
+  h+=rivoltaBanner();   // L72-1: il conto alla rovescia in testa, se un gruppo e' sotto il pavimento
   h+=`<div class="card"><div class="ct">${T('Consenso complessivo')} · ${fmt(S.ind.consenso,0)}%</div>`;
   for(const gr of GROUPS){const v=S.groups[gr.id];
     h+=`<div class="grp"><div class="top"><div class="nm">${icon(gr.id,T(gr.nm))} ${T(gr.nm)}<small>${T('peso')} ${gr.w}%</small></div>
       <div class="pc" style="color:${barColor(v)}">${fmt(v,0)}%</div></div>
-      <div class="bar"><i style="width:${clamp(v,2,100)}%;background:${barColor(v)}"></i></div></div>`;}
+      <div class="bar"><i style="width:${clamp(v,2,100)}%;background:${barColor(v)}"></i>${pavTick(gr.id)}</div>${rivoltaHtml(gr.id)}</div>`;}
   h+=`</div>`;
   const fioreL = PROMO_FIORE ? ' promo-fiore' : ''; if(PROMO_FIORE) PROMO_FIORE=false;   // premier/ministro (niente banner): il fioretto va sulla prima riga = l'annuncio della promozione
   h+=`<div class="card"><div class="ct">${T('Cronaca di governo')}</div><div class="log">
@@ -1791,8 +1851,8 @@ function renderPaese(){
     <div class="li">${T("Il consenso è la media dei gruppi, pesata per il loro peso elettorale. L'umore dei gruppi muove le <b>forze dei partiti</b>, che al voto decidono le elezioni (seggi o testa a testa, secondo il paese). Sotto il <b>%N%</b> rischi la crisi di governo. I ministri leali rendono più efficaci le tue politiche.").replace('%N',dif().sogliaCrisi)}</div></div></div>`;
   document.getElementById('sec-paese').innerHTML=h;
 }
-function indRow(nm,sub,num,pct,ic){pct=clamp(pct,2,100);
-  return `<div class="ind"><div class="nm"><b>${ic?icon(ic,T(nm))+' ':''}${T(nm)}</b><small>${T(sub)}</small>
+function indRow(nm,sub,num,pct,ic,gk){pct=clamp(pct,2,100);
+  return `<div class="ind"><div class="nm"><b>${ic?icon(ic,T(nm))+' ':''}${gk?gergo(T(nm),gk):T(nm)}</b><small>${T(sub)}</small>
     <div class="bar">${fillI('ind:'+nm, pct, barColor(pct))}</div></div><div class="num">${num}</div></div>`;}
 
 /* (la vecchia scheda Consenso è fusa in renderPaese — 2026-06-11) */
@@ -1834,7 +1894,7 @@ function renderLegge(L){
    quelle che c'erano gia. Le ha trovate il cammino in EN fino al primo mese. */
 function budgetRow(){
   const def=computeDeficit();
-  return `<div class="sticky-top"><div class="budget"><div class="b"><div class="l">${T('Punti riforma')} · ${T(MONTHS[S.month-1])} — ${T(S.month===1?'manovra':'decreti')}</div><div class="v">${rpLeft()} / ${curRpMax()}</div></div>
+  return `<div class="sticky-top"><div class="budget"><div class="b"><div class="l">${gergo(T('Punti riforma'),'puntiRiforma')} · ${T(MONTHS[S.month-1])} — ${T(S.month===1?'manovra':'decreti')}</div><div class="v">${rpLeft()} / ${curRpMax()}</div></div>
     <div class="b"><div class="l">${T('Saldo previsto')}</div><div class="v" style="color:${def<=3?'var(--pos)':def<=4?'var(--warn)':'var(--neg)'}">${T(def<=0?'Avanzo':'Deficit')} ${fmt(Math.abs(def),1)}%</div></div></div></div>`;
 }
 function renderPol(){
@@ -1897,7 +1957,7 @@ function setPol(id,i){
    bordo blu = area simbolo. Le città sono cerchietti SOPRA le regioni. Tocco → pannello info.
    Se PAESE.mappa manca, la scheda Partiti tiene la lista testuale (degrado con grazia). ===== */
 let MAPSEL=null;   // area selezionata (transitoria, mai in S)
-function apriMappa(){ S.mappaAperta=true; MAPSEL=null; render(); }
+function apriMappa(){ S.mappaAperta=true; MAPSEL=null; if(S.visite) S.visite.mappa=(S.visite.mappa||0)+1; render(); }   // L64-2: la visita si conta (misura del cantiere)
 function chiudiMappa(){ S.mappaAperta=null; render(); }
 function selArea(i){ MAPSEL=(MAPSEL===i)?null:i; render(); }
 function leanLabel(l){ return T(l<=-2?'storicamente di sinistra':l===-1?'tende a sinistra':l===0?'contendibile':l===1?'tende a destra':'storicamente di destra'); }
@@ -1912,8 +1972,9 @@ function renderMappaSVG(){
     const t=S.territori[i]||{}, tuo=compatibile(t.partito,asseTuo), L=Math.abs(TE[i].lean);
     const op=L>=2?0.95:L===1?0.72:0.5;
     const sel=MAPSEL===i, chiama=(chiamaIdx===i);   // F2 — l'area che chiama pulsa (E5: alla comparsa, poi ferma)
-    const stroke=chiama?'var(--acc-ink)':((sel||TE[i].simbolo)?'var(--brand)':'var(--panel)');
-    const sw=chiama?2.4:(sel?2:(TE[i].simbolo?1.1:0.6));
+    const lav=!!(t.spinta);   // L64-2: area lavorata in campagna
+    const stroke=chiama?'var(--acc-ink)':((sel||TE[i].simbolo||lav)?'var(--brand)':'var(--panel)');
+    const sw=chiama?2.4:(sel?2:(lav?1.8:(TE[i].simbolo?1.1:0.6)));
     const cls=chiama?` class="mappa-chiama${(typeof lastTerrPulse!=='undefined'&&lastTerrPulse)?'':' pulse'}"`:'';   // pulse SOLO alla comparsa (E5), poi fermo
     const common=`data-anim="fill:area:${i}" data-to="${tuo?1:0}" fill="${tuo?'var(--acc)':'var(--mut2)'}" fill-opacity="${op}" stroke="${stroke}" stroke-width="${sw}"${cls} onclick="selArea(${i})"`;
     h+= A.d ? `<path d="${A.d}" ${common}/>` : `<circle cx="${A.cx}" cy="${A.cy}" r="${A.r}" ${common}/>`;
@@ -1929,6 +1990,13 @@ function renderMappaInfo(){
      Map-native: la decisione vive qui (S.territorioChiama, dato puro), non come carta-agenda. */
   const chiama=(S.territorioChiama && S.territorioChiama.idx===MAPSEL);
   const def=chiama?(typeof defProblemaTerr==='function'?defProblemaTerr(S.territorioChiama.prob):null):null;
+  /* L64-2 — in campagna, il pannello dell'area diventa il posto dove si decide: costo, ritorno, «Investi qui». */
+  const camp=(typeof inCampagna==='function' && inCampagna());
+  const investi=camp?(function(){ const sf=campSforzo(), c=costoInvestimento(MAPSEL), r=ritornoInvestimento(MAPSEL), tipo=tipoTerritorio(MAPSEL), qui=(S.campNaz&&S.campNaz.speso&&S.campNaz.speso[MAPSEL])||0;
+      const nota=T(tipo==='roccaforte'?'roccaforte: rende poco, ci voti già':tipo==='bilico'?'in bilico: rende molto, se arrivi in tempo':'terreno avversario: costa il doppio, paga in prestigio anche se perdi')+(((S.potereLocale||0)>=60)?' · '+T('il potere locale abbassa il costo'):'');
+      return `<div class="camp-area" style="margin:2px 14px 10px;padding:10px 12px;border:1px solid var(--brand);border-radius:11px;background:var(--brand-bg)">
+        <div style="font-size:12px;color:var(--txt2);margin-bottom:6px">${nota}${qui?' · '+T('già investito: %C').replace('%C',qui):''}</div>
+        <button class="opt" ${sf>=c?'':'disabled style="opacity:.5"'} onclick="investiTerritorio(${MAPSEL})"><span class="ol">${T('Investi qui')}</span><span class="oe">${T('costo %C · spinta +%S').replace('%C',c).replace('%S',r)} · ${sf} ${T('punti')}</span></button></div>`; })():'';
   const scheda=(chiama&&def)?`<div class="terr-call" style="margin:2px 14px 10px;padding:10px 12px;border:1px solid var(--acc);border-radius:11px;background:var(--acc-bg)">
       <div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--acc-ink);font-weight:700">${T('Il territorio ti chiama')}</div>
       <div style="font-weight:600;font-size:14px;margin:4px 0 2px">${arcoTerrSub(T(def.t),TE)}</div>
@@ -1939,7 +2007,7 @@ function renderMappaInfo(){
   return `<div style="padding:2px 14px 12px">
     <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px"><b style="font-size:14.5px">${cap(nomeTerr(TE))}</b><span class="chip" style="background:${tuo?'var(--acc-bg)':'var(--line2)'};color:${tuo?'var(--acc-ink)':'var(--mut)'}">${T(tuo?'tuo blocco':'avversario')}</span></div>
     <div style="font-size:12.5px;color:var(--mut);margin-top:3px">${caricaTerr(TE)}: <b style="color:var(--txt)">${t.titolare||'—'}</b> · ${pn}</div>
-    <div style="font-size:12px;color:var(--mut2);margin-top:2px">${cap(leanLabel(TE.lean))}${TE.simbolo?' · '+T('area simbolo'):''}</div></div>${scheda}`;
+    <div style="font-size:12px;color:var(--mut2);margin-top:2px">${cap(leanLabel(TE.lean))}${TE.simbolo?' · '+T('area simbolo'):''}</div></div>${scheda}${investi}`;
 }
 function renderMappaPage(){
   const asseTuo=part(S.partito).asse;
@@ -1947,7 +2015,8 @@ function renderMappaPage(){
   const mie=S.territori.filter(t=>compatibile(t.partito,asseTuo)).length;
   let h=`<button class="mini-btn" style="margin-bottom:10px" onclick="chiudiMappa()">← ${T('Partiti')}</button>`;
   h+=`<div class="contorno" style="font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--mut);margin:2px 2px 8px;">${T('Il territorio · controllo politico')}</div>`;
-  if(pl!=null) h+=`<div class="card" style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;margin-bottom:12px"><span style="font-size:12.5px;color:var(--mut)">${T('Potere locale')}${pl>50?` · <b style="color:var(--acc-ink)">${T('controlli il territorio')}</b>`:''} · <b>${mie}</b>/${S.territori.length} ${T('aree')}</span><span class="mono" style="font-weight:600;font-size:16px;color:${pl>50?'var(--acc-ink)':'var(--txt)'}">${pl}<span class="contorno" style="color:var(--mut2);">/100</span></span></div>`;
+  if(typeof inCampagna==='function' && inCampagna()){ const sf=campSforzo(); h+=`<div class="banner camp-banner">${(sf>0?T('<b>Campagna sul territorio</b>: %N punti di sforzo da spendere, %M mesi al voto. Tocca un\'area e investi: dove vai, sposti; dove non vai, perdi terreno. Quel che resta a fine campagna si perde.').replace('%N',sf):T('<b>Campagna sul territorio</b>: sforzo esaurito, %M mesi al voto. Le aree lavorate sono segnate in blu.')).replace('%M',mesiAllaFine())}</div>`; }   // L64-2
+  if(pl!=null) h+=`<div class="card" style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;margin-bottom:12px"><span style="font-size:12.5px;color:var(--mut)">${gergo(T('Potere locale'),'potereLocale')}${pl>50?` · <b style="color:var(--acc-ink)">${T('controlli il territorio')}</b>`:''} · <b>${mie}</b>/${S.territori.length} ${T('aree')}</span><span class="mono" style="font-weight:600;font-size:16px;color:${pl>50?'var(--acc-ink)':'var(--txt)'}">${pl}<span class="contorno" style="color:var(--mut2);">/100</span></span></div>`;
   h+=`<div class="card uno"><div class="ct">${T('La mappa')}</div><div class="mappa-wrap">${renderMappaSVG()}</div>
     <div class="mappa-leg"><span><i style="background:var(--acc)"></i>${T('il tuo blocco')}</span><span><i style="background:var(--mut2)"></i>${T('avversario')}</span><span><i style="background:var(--acc);opacity:.5"></i>${T('tinta chiara = contendibile')}</span><span><i style="border:1.6px solid var(--brand)"></i>${T('area simbolo')}</span></div>
     ${renderMappaInfo()}</div>`;
@@ -1998,7 +2067,7 @@ function renderQuartieriInfo(){
 }
 
 /* ===== IL TUO PARTITO — drill-down da Partiti (lotto primarie): le tre correnti, la sfida, le azioni. ===== */
-function apriPartito(){ S.partitoAperto=true; render(); }
+function apriPartito(){ S.partitoAperto=true; if(S.visite) S.visite.partito=(S.visite.partito||0)+1; render(); }   // L64-2: la visita si conta
 function chiudiPartito(){ S.partitoAperto=null; render(); }
 function renderPartitoPage(){
   const me=part(S.partito)||{};
@@ -2011,6 +2080,12 @@ function renderPartitoPage(){
   if(S.sfida){
     h+=`<div class="banner" style="border-color:var(--neg)"><b>${T('La sfida monta.')}</b> ${S.sfida.volto}${S.sfida.area?`, ${S.sfida.carica} — <b>${S.sfida.area}</b>`:` (${S.sfida.carica})`} ${T('si muove contro la tua leadership')}${(S.sfida.maturazione||0)>0?` · ${T('matura da')} <b>${S.sfida.maturazione}</b> ${T(S.sfida.maturazione===1?'mese':'mesi')} ${T('(a 3 scatta il congresso)')}`:''}. ${T('Ricompatta le correnti sopra 45 per farla rientrare.')}</div>`;
   }
+  /* L64-3 — la sfida si gestisce: tre azioni sotto il banner (una volta per sfida; promuovi e isola col raffreddamento di partito) */
+  if(S.sfida && !S.opposizione){ const dispS=(typeof mossaPartitoDisponibile==='function')?mossaPartitoDisponibile():true; const fatto='<span class="chip" style="background:var(--line2);color:var(--mut)">'+T('già fatto')+'</span>';
+    h+=`<div class="card"><div class="ct">${T('Lo sfidante: cosa ne fai')}</div><div class="choices" style="display:flex;flex-direction:column;gap:7px;padding:2px 14px 12px">
+      <button class="opt" ${(S.sfida.promossoMese!=null||!dispS)?'disabled style="opacity:.5"':''} onclick="sfidaPromuovi()"><span class="ol">${T('Promuovi: un incarico di peso')} ${S.sfida.promossoMese!=null?fatto:''}</span><span class="oe">${T('Lo neutralizzi per un anno · o gli dai la statura per sfidarti meglio')}</span></button>
+      <button class="opt" ${(S.sfida.isolato||!dispS)?'disabled style="opacity:.5"':''} onclick="sfidaIsola()"><span class="ol">${T('Isola: gli togli l\'area')} ${S.sfida.isolato?fatto:''}</span><span class="oe">${T('La sua corrente si stringe attorno a lui, le altre respirano · la sfida rallenta')}</span></button>
+      <button class="opt" style="border-color:var(--neg)" onclick="sfidaAffronta()"><span class="ol">${T('Affronta subito: primarie alle tue condizioni')}</span><span class="oe">${T('Scegli tu il momento (+3) · ma in primaria si può perdere')}</span></button></div></div>`; }
   h+=`<div class="card" style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;margin-bottom:12px"><span style="font-size:12.5px;color:var(--mut)">${T('Umore medio delle correnti')}</span><span class="mono" style="font-weight:600;font-size:16px;color:${mediaU<45?'var(--neg)':mediaU<55?'var(--warn-ink)':'var(--pos)'}">${mediaU}<span class="contorno" style="color:var(--mut2);">/100</span></span></div>`;
   h+=`<div class="card"><div class="ct">${T('Le correnti')}</div>`;
   (S.correnti||[]).forEach(function(c){
@@ -2126,7 +2201,7 @@ function rigaIntesa(p, mine){
   var col=dentro?'var(--pos)':(v>0?'var(--acc)':'var(--mut2)');
   var nota=dentro?T('nel tuo blocco'):(cap<60?T('troppo lontano')+' · '+T('tetto')+' '+cap:T('serve 60'));
   return `<div style="display:flex;align-items:center;gap:8px;margin-top:5px">
-    <span style="font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);min-width:46px">${T('Intesa')}</span>
+    <span style="font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);min-width:46px">${gergo(T('Intesa'),'intesa')}</span>
     <div class="bar" style="flex:1;position:relative">${fillI('intesa:'+p.id, clamp(v,2,100), col)}</div>
     <span class="mono" style="font-size:12px;color:${col};min-width:22px;text-align:right">${Math.round(v)}</span>
     <small style="font-size:11px;color:var(--mut2);white-space:nowrap">${nota}</small></div>`;
@@ -2139,7 +2214,7 @@ function renderPartiti(){
   const ps=[...P.partiti].sort((a,b)=>fz(b.id)-fz(a.id));
   const coal=S.coalizione||[S.partito], hasSeats=!!S.seggi;
   const pl=(S.potereLocale!=null)?Math.round(S.potereLocale):null;
-  const plBox = pl!=null ? `<div class="card" style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;margin-bottom:12px"><span style="font-size:12.5px;color:var(--mut)">${T('Potere locale')}${pl>50?` · <b style="color:var(--acc-ink)">${T('controlli il territorio')}</b>`:''}</span><span class="mono" style="font-weight:600;font-size:16px;color:${pl>50?'var(--acc-ink)':'var(--txt)'}">${pl}<span class="contorno" style="color:var(--mut2);">/100</span></span></div>` : '';
+  const plBox = pl!=null ? `<div class="card" style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;margin-bottom:12px"><span style="font-size:12.5px;color:var(--mut)">${gergo(T('Potere locale'),'potereLocale')}${pl>50?` · <b style="color:var(--acc-ink)">${T('controlli il territorio')}</b>`:''}</span><span class="mono" style="font-weight:600;font-size:16px;color:${pl>50?'var(--acc-ink)':'var(--txt)'}">${pl}<span class="contorno" style="color:var(--mut2);">/100</span></span></div>` : '';
   const asseTuo=part(S.partito).asse;
   const so=S.ultimoSondaggio;
   /* F3 — IL GRAFICO-TREND: la serie dei sondaggi con la banda d'incertezza, invece dei numeri nudi. Puro render
@@ -2170,9 +2245,10 @@ function renderPartiti(){
       <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px"><span style="font-size:12.5px;color:var(--mut2)">${T(so.tipo==='parlamentare'?'Il tuo blocco':'Testa a testa')} · ${T('margine')} ±${so.margine}</span><span class="mono" style="font-weight:600;font-size:17px">${so.val}%</span></div>
       ${graficoSond || `<div class="bar" style="position:relative"><i style="width:${clamp(so.val,2,100)}%;background:var(--brand)"></i><span style="position:absolute;left:50%;top:-2px;bottom:-2px;width:2px;background:var(--neg);opacity:.55"></span></div>`}
       <div style="font-size:11px;color:var(--mut2);margin-top:6px">${T("La tacca segna il 50%. I sondaggi hanno un margine d'errore: indicano la tendenza, non la certezza.")}</div></div>`:'';
-  const territBox=(S.territori&&S.territori.length)?(PAESE.mappa
+  const campRiga=(typeof inCampagna==='function' && inCampagna() && PAESE.mappa)?`<div class="banner camp-banner" style="margin-bottom:12px">${T('Campagna sul territorio: <b>%N punti</b> da spendere sulla mappa, %M mesi al voto.').replace('%N',campSforzo()).replace('%M',mesiAllaFine())} <a href="#" onclick="apriMappa();return false;" style="font-weight:600">${T('Apri la mappa →')}</a></div>`:'';   // L64-2
+  const territBox=(campRiga)+((S.territori&&S.territori.length)?(PAESE.mappa
     ? `<div class="card" style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 14px;margin-bottom:12px"><span style="font-size:12.5px;color:var(--mut)">${T('Il territorio · <b>%N</b> aree su %M al tuo blocco').replace('%N',S.territori.filter(function(t){return compatibile(t.partito,asseTuo);}).length).replace('%M',S.territori.length)}</span><button class="mini-btn" style="margin-top:0;flex-shrink:0;background:var(--brand-bg);border-color:var(--brand);color:var(--brand);font-weight:600" onclick="apriMappa()">${T('Apri la mappa →')}</button></div>`
-    : `<div class="card"><div class="ct">${T('Il territorio')}</div>`+PAESE.territori.map(function(TE,i){ const t=S.territori[i]||{}; const tuo=compatibile(t.partito,asseTuo); const pn=(part(t.partito)||{}).nome||''; return `<div class="grp"><div class="top"><div class="nm">${nomeTerr(TE)}<small>${caricaTerr(TE)}</small></div><span class="chip" style="background:${tuo?'var(--acc-bg)':'var(--line2)'};color:${tuo?'var(--acc-ink)':'var(--mut)'}">${T(tuo?'tuo':'avversario')}</span></div><div style="font-size:12px;color:var(--mut)">${t.titolare||'—'} · ${pn}</div></div>`; }).join('')+`</div>`):'';
+    : `<div class="card"><div class="ct">${T('Il territorio')}</div>`+PAESE.territori.map(function(TE,i){ const t=S.territori[i]||{}; const tuo=compatibile(t.partito,asseTuo); const pn=(part(t.partito)||{}).nome||''; return `<div class="grp"><div class="top"><div class="nm">${nomeTerr(TE)}<small>${caricaTerr(TE)}</small></div><span class="chip" style="background:${tuo?'var(--acc-bg)':'var(--line2)'};color:${tuo?'var(--acc-ink)':'var(--mut)'}">${T(tuo?'tuo':'avversario')}</span></div><div style="font-size:12px;color:var(--mut)">${t.titolare||'—'} · ${pn}</div></div>`; }).join('')+`</div>`):'');
   const mediaU=S.correnti?Math.round(umoreMedio()):null;
   const dcP=S.correnti?correnteDaCurare():null;   // loop attivo Lotto 2: evidenzia già sulla landing quale corrente curare
   const dcNome=dcP?T((CORRENTI_DEF.find(function(d){return d.id===dcP.corrente;})||{}).nome||''):'';
@@ -2194,7 +2270,7 @@ function renderPartiti(){
     const ten = (S.tenuta && S.tenuta[p.id]!=null) ? S.tenuta[p.id] : null;        // tenuta solo per gli alleati
     const tenCol = ten==null?'' : ten<20?'var(--neg)' : ten<35?'var(--warn-ink)' : 'var(--pos)';
     const tenBg  = ten==null?'' : ten<20?'var(--neg-bg)' : ten<35?'var(--warn-bg)' : 'var(--pos-bg)';
-    const tenChip = ten!=null ? ` <span class="chip" style="background:${tenBg};color:${tenCol}">${T('tenuta')} ${Math.round(ten)}</span>` : '';
+    const tenChip = ten!=null ? ` <span class="chip" style="background:${tenBg};color:${tenCol}">${gergo(T('tenuta'),'tenuta')} ${Math.round(ten)}</span>` : '';
     const seatTxt = hasSeats?` <small style="color:var(--mut2);font-weight:400">· ${S.seggi[p.id]} ${T('seggi')}</small>`:'';
     /* Lotto A (fix playtest): la leva sulla tenuta ORA VIVE ANCHE QUI — un tap dalla riga dell'alleato che scivola
        (prima stava solo in sala Stampa: la tab mostrava il problema senza offrire la mossa). Stesso gate (mossa stampa). */

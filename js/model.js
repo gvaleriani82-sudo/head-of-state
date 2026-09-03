@@ -75,6 +75,7 @@ function computeGrowth(){
 function targetUnemp(){
   let u=8.0; u-=(computeGrowth()-0.8)*0.8;
   u+=[0.4,0,-0.6][lv('lavoro')]+[0,0,-0.3][lv('imprese')]+[0,0,-0.3][lv('investimenti')]+[0.1,0,-0.2][lv('personale_san')];   // assunzioni nella sanità
+  u+=(typeof disoccupazioneEra==='function')?disoccupazioneEra():0;   // L60-2: la disoccupazione d'epoca (tabella per linea, 0 fuori tabella)
   u+=S.uMod+ministerMods().unemp+leggiMods().unemp; return clamp(u,3,20);
 }
 function targetService(id){
@@ -84,29 +85,61 @@ function targetService(id){
     ambiente:[38,52,70][lv('ambiente')]+[-2,0,4][lv('trasporti')]+mm.ambiente+lm.ambiente };
   return clamp(base[id],0,100);
 }
+/* L72-4 (2-3 set 2026) — I MINIMI RAGGIUNGIBILI DEI SEI GRUPPI STANNO IN UNA BANDA COMUNE (15-24, cioe' sotto il 46% del
+   target neutro: il pavimento di L72-1 e' al 60%, e i ministri aggiungono ~5 punti a entrambi, quindi un minimo a 30 non
+   bucherebbe mai il pavimento — la prima banda, 15-30, era troppo alta e la misura di L72-1 l'ha stretta).
+   Prima: con ogni leva contro gli imprenditori scendevano a 4-11 e i cattolici non scendevano sotto 47-50
+   (rispondevano in negativo a due leve sole, -1 ciascuna): «sei cose da non perdere» era falso per costruzione.
+   Cura: si ritoccano SOLO i lati ostili delle leve — l'indice 1 (neutro) resta 0 ovunque, quindi i target a leve
+   neutre e il gioco normale non si muovono di un decimale. Imprenditori: fisco alta -12→-7, lavoro rigido -8→-5,
+   imprese nessuno -5→-4, ambiente -5→-4, welfare esteso -4→-3, protezionismo -2→-1 (il traino della crescita
+   (g-0,8)*4 resta: e' anche il loro lato buono). Cattolici: welfare ridotto -6, sanita' tagli -4, scuola tagli -4,
+   pensioni riforma -4, sicurezza ridotta -2, diritto allo studio minimo -2, cooperazione minima -3, linea assertiva
+   -3 (dottrina sociale, scuola e famiglia, missioni, pace) → minimo 22 (19 nel presente con la migratoria).
+   Lavoratori: flessibile -10→-8 (nel '50 inglese il freno del debito li portava a 13,5). Pensionati: riforma -12→-16,
+   sanita' tagli -7→-9, territoriale -3→-4 (30→23). Giovani: scuola tagli -6→-9, universita' -2→-4, diritto allo
+   studio -2→-3 (26→20). La misura e'
+   .claude/misura-minimi-gruppi.js: ministri e leggi tolti, disoccupazione all'equilibrio, discesa per coordinate. */
 function targetGroup(id){
   const g=computeGrowth(), un=S.ind.unemp; const mm=ministerMods().grp, lm=leggiMods().grp; let t=50;
   const fid=(S.ind.fiducia!=null)?S.ind.fiducia:100; const sfidMalus=Math.min(fid-65,0);   // malus continuo quando la fiducia scende sotto 65
-  if(id==='lavoratori') t=50+[-8,0,8][lv('welfare')]+[-5,0,4][lv('sanita')]+[6,0,-10][lv('lavoro')]+[-4,0,3][lv('pensioni')]+[0,0,4][lv('investimenti')]+(un-8)*-1.5;
-  if(id==='pensionati') t=52+[-12,0,12][lv('pensioni')]+[-7,0,6][lv('sanita')]+[0,0,3][lv('sicurezza')];
+  if(id==='lavoratori') t=50+[-8,0,8][lv('welfare')]+[-5,0,4][lv('sanita')]+[6,0,-8][lv('lavoro')]+[-4,0,3][lv('pensioni')]+[0,0,4][lv('investimenti')]+(un-8)*-1.5;
+  if(id==='pensionati') t=52+[-16,0,12][lv('pensioni')]+[-9,0,6][lv('sanita')]+[0,0,3][lv('sicurezza')];
   if(id==='cetomedio') t=50+[8,0,-10][lv('fisco')]+[-6,0,6][lv('sicurezza')]+[-4,0,3][lv('sanita')]+(g-0.8)*3+sfidMalus*0.07;
-  if(id==='imprenditori') t=48+[-5,0,12][lv('imprese')]+[8,0,-12][lv('fisco')]+[-8,0,10][lv('lavoro')]+[0,0,-5][lv('ambiente')]+[0,0,-4][lv('welfare')]+(g-0.8)*4+sfidMalus*0.15;
-  if(id==='giovani') t=45+[-6,0,8][lv('istruzione')]+[-5,0,8][lv('ambiente')]+[0,0,5][lv('welfare')]+[0,0,3][lv('immigrazione')]+(un-8)*-1.2;
-  if(id==='cattolici') t=52+[-3,0,6][lv('immigrazione')]+[0,0,4][lv('welfare')]+[0,0,3][lv('sicurezza')]+[0,0,2][lv('pensioni')];
+  if(id==='imprenditori') t=48+[-4,0,12][lv('imprese')]+[8,0,-7][lv('fisco')]+[-5,0,10][lv('lavoro')]+[0,0,-4][lv('ambiente')]+[0,0,-3][lv('welfare')]+(g-0.8)*4+sfidMalus*0.15;
+  if(id==='giovani') t=45+[-9,0,8][lv('istruzione')]+[-5,0,8][lv('ambiente')]+[0,0,5][lv('welfare')]+[0,0,3][lv('immigrazione')]+(un-8)*-1.2;
+  if(id==='cattolici') t=52+[-3,0,6][lv('immigrazione')]+[-8,0,4][lv('welfare')]+[-2,0,3][lv('sicurezza')]+[-4,0,2][lv('pensioni')]+[-4,0,0][lv('sanita')]+[-4,0,0][lv('istruzione')];
   // politiche estere/difesa (lotto Esteri+Difesa)
   if(id==='lavoratori')  t+=[3,0,-5][lv('commercio')];
   if(id==='cetomedio')   t+=[-1,0,3][lv('linea_estera')];
-  if(id==='imprenditori')t+=[0,0,3][lv('difesa')]+[-2,0,3][lv('commercio')]+[0,0,3][lv('industria_difesa')];
+  if(id==='imprenditori')t+=[0,0,3][lv('difesa')]+[-1,0,3][lv('commercio')]+[0,0,3][lv('industria_difesa')];
   if(id==='giovani')     t+=[3,0,-2][lv('linea_estera')]+[-2,0,3][lv('cooperazione')]+[0,0,-3][lv('industria_difesa')];
-  if(id==='cattolici')   t+=[2,0,-1][lv('linea_estera')]+[-1,0,3][lv('cooperazione')];
+  if(id==='cattolici')   t+=[2,0,-3][lv('linea_estera')]+[-3,0,3][lv('cooperazione')];
   // servizi alla persona e infrastrutture (lotto Salute+Istruzione+Infrastrutture)
-  if(id==='pensionati')  t+=[-3,0,5][lv('territorio')];
+  if(id==='pensionati')  t+=[-4,0,5][lv('territorio')];
   if(id==='lavoratori')  t+=[-2,0,4][lv('personale_san')]+[-1,0,3][lv('trasporti')]+[0,0,2][lv('diritto_studio')];
-  if(id==='giovani')     t+=[-2,0,4][lv('universita')]+[-2,0,4][lv('diritto_studio')]+[0,0,2][lv('trasporti')];
+  if(id==='giovani')     t+=[-4,0,4][lv('universita')]+[-3,0,4][lv('diritto_studio')]+[0,0,2][lv('trasporti')];
   if(id==='cetomedio')   t+=[-2,0,3][lv('trasporti')]+[-2,0,3][lv('manutenzione')];
+  if(id==='cattolici')   t+=[-2,0,0][lv('diritto_studio')];
   t+=(mm[id]||0)+(lm[id]||0);
   return clamp(t,0,100);
 }
+/* L72-1 (3 set 2026) — IL PAVIMENTO RELATIVO. Un gruppo «ti ha voltato le spalle» quando sta sotto il 60% del target
+   che AVREBBE A LEVE NEUTRE, con l'economia e i ministri di adesso: e' relativo alla tua linea di bilancio, non a un
+   numero fisso, cosi' una recessione o un ministro debole non lo fanno scattare da soli — solo una politica ostile
+   tenuta a lungo (i gruppi hanno una molla del 12%/mese verso il target: le carte sono colpi, le leve sono la linea).
+   Dispersione misurata prima della soglia (.claude/misura-pavimento.js): 50 carriere normali, 0 mesi sotto, rapporto
+   minimo 0,67. Il conto alla rovescia vive in S.rivolta = {gruppo: mesi consecutivi sotto}; alla scadenza
+   (dif().mesiRivolta: 8/6/4) game.js chiude la carriera con gameOver('rivolta'). Si conta solo da premier al governo. */
+const PAVIMENTO_QUOTA=0.6;
+function pavimentoGruppo(id){ const save=S.pol; const neu={}; for(const p of POLICIES) neu[p.id]=1; S.pol=neu; let t; try{ t=targetGroup(id); } finally{ S.pol=save; } return PAVIMENTO_QUOTA*t; }
+function aggiornaRivolta(){
+  if(S.opposizione || (S.livello||3)!==3 || !S.groups){ S.rivolta=null; return; }
+  const R=S.rivolta||{};
+  for(const gr of GROUPS){ if(S.groups[gr.id]<pavimentoGruppo(gr.id)) R[gr.id]=(R[gr.id]||0)+1; else delete R[gr.id]; }
+  S.rivolta=Object.keys(R).length?R:null;
+}
+function rivoltaMatura(){ if(!S.rivolta) return null; const N=dif().mesiRivolta||6; for(const g of GROUPS){ if((S.rivolta[g.id]||0)>=N) return g.id; } return null; }
 function computeConsenso(){let s=0,w=0; for(const gr of GROUPS){s+=S.groups[gr.id]*gr.w; w+=gr.w;} return s/w;}
 
 /* --- Mutazioni dirette sul consenso dei gruppi (usate dai dossier/eventi) --- */
@@ -188,6 +221,8 @@ function minFragile(){ return (S.ministers||[]).find(m=>m && !m.resigning && m.l
 
 /* --- Simulazione di un mese --- */
 function simulateMonth(){
+  if(!S.groups0 && S.groups) S.groups0=Object.assign({},S.groups);   // L73-2: la fotografia iniziale dei gruppi (primo confine di mese, dopo ogni setup)
+  if(!S.ind0) S.ind0={debt:S.ind.debt, unemp:S.ind.unemp, growth:S.ind.growth};   // L73-2: il paese che avevi trovato
   S.prev={growth:S.ind.growth,debt:S.ind.debt,unemp:S.ind.unemp,consenso:S.ind.consenso};
   const ampC=(dif().cicloAmp!=null)?dif().cicloAmp:0.7;
   /* congiuntura: passeggiata aleatoria smorzata. AVANZAMENTO (Lotto 4) — reverte verso cicloBase() (la baseline-decade:
@@ -206,10 +241,15 @@ function simulateMonth(){
   const D=dif();
   for(const gr of GROUPS){ const cur=S.groups[gr.id], t=targetGroup(gr.id); const k=0.12*(t>=cur?D.salitaConsenso:D.discesaConsenso); S.groups[gr.id]=clamp(cur+(t-cur)*k,0,100); }
   S.ind.consenso=computeConsenso();
+  aggiornaRivolta();   // L72-1: il conto alla rovescia della rivolta (dopo la molla, prima della morte in game.js)
   S.gMod*=0.8; S.uMod*=0.8;
   if(S.ind.fiducia!=null){
     S.ind.fiducia += (targetFiducia()-S.ind.fiducia)*0.10;   // convergenza lenta come gli altri indicatori
-    S.mesiSottoCrisi = (S.ind.fiducia < dif().sogliaCrisiFid) ? (S.mesiSottoCrisi||0)+1 : 0;
+    /* L74-1 — il contatore dell'insolvenza corre SOLO da premier al governo (sono i tuoi conti) e si azzera
+       all'opposizione: prima correva ovunque, ma il controllo gameOver('insolvenza') sta solo nel ramo di governo
+       e il rientro lo azzerava — sulle porte italiane storiche 112 mesi sotto soglia senza mai un esito (L72-3). */
+    const alGoverno = !S.opposizione && (S.livello||3)===3;
+    S.mesiSottoCrisi = (alGoverno && S.ind.fiducia < dif().sogliaCrisiFid) ? (S.mesiSottoCrisi||0)+1 : 0;
   }
   /* relazioni internazionali (fase A): ogni ente torna lento verso la sua àncora (guidata dalle tue politiche) —
      stesso ritmo della reputazione. Le tue SCELTE (eventi) le spostano di colpo; nel silenzio derivano alla linea. */
@@ -260,7 +300,10 @@ function etaFase(){ const e=(S&&S.eta!=null)?S.eta:52; return e<=48?'giovane':(e
 function etaAutorev(){ const f=etaFase(); return f==='giovane'?-3:(f==='neutro'?0:3); }
 function etaLogorio(){ return etaFase()==='vecchio'?1.25:1; }
 
-function targetCorrente(id){ return clamp(targetCorrenteBase(id)+etaAutorev(),0,100); }   // l'autorevolezza dell'età sposta il TARGET: convergenza morbida, niente gradini
+/* L64-4 — le liste pesano sul TARGET delle correnti finché dura il gruppo: fedeli → +4 a tutte (stabilità), correnti → +6
+   alla corrente favorita (il seme). Convergente e lieve, come l'età: niente gradini sui valori vivi. */
+function gruppoCorrente(id){ const G=(typeof S!=='undefined'&&S)?S.gruppo:null; if(!G) return 0; let b=0; if(G.fedeli>=50) b+=4; if(G.correnti>=50 && S.sfidaSeme && S.sfidaSeme.corrente===id) b+=6; return b; }
+function targetCorrente(id){ return clamp(targetCorrenteBase(id)+etaAutorev()+gruppoCorrente(id),0,100); }   // l'autorevolezza dell'età sposta il TARGET: convergenza morbida, niente gradini
 function targetCorrenteBase(id){
   /* l'autenticità incrinata (lotto 5): a integrità < 35 l'ala identitaria (i Militanti) sente il tradimento.
      Gentile e convergente — vale solo per i Militanti, non tocca consenso/conti. */
