@@ -2838,12 +2838,12 @@ const FAMIGLIA_VIVA=[
 const TERRITORIO_PROB=[
  {id:'tp_fabbrica', era:'universale', kind:'F2',
   t:'Una fabbrica che chiude', text:'Un grande stabilimento annuncia la chiusura, e %TERR trema: migliaia di posti a rischio, la piazza che monta. La decisione arriva sul tuo tavolo.',
-  ch:[ {l:'Fondi pubblici per salvare i posti', e:'Salvi l\'occupazione; il conto sale', f:()=>{ gd('lavoratori',2); if(S.ind) S.ind.debt+=0.3; }},
+  ch:[ {costo:{debito:0.3}, l:'Fondi pubblici per salvare i posti', e:'Salvi l\'occupazione; il conto sale', f:()=>{ gd('lavoratori',2); if(S.ind) S.ind.debt+=0.3; }},
        {l:'Lasci al mercato, punti sulla riconversione', e:'Disciplina di mercato; la piazza freme', f:()=>{ gd('imprenditori',2); gd('lavoratori',-2); }} ]},
  {id:'tp_servizio', era:'universale', kind:'F2',
   t:'Un ospedale a rischio', text:'Un ospedale rischia la chiusura, e %TERR si mobilita: a te tocca scegliere tra il servizio e i conti.',
-  ch:[ {l:'Lo tieni aperto, costi quel che costi', e:'Il territorio respira; il bilancio pesa', f:()=>{ gd('pensionati',2); if(S.ind&&S.ind.sanita!=null) S.ind.sanita=clamp(S.ind.sanita+1,0,100); if(S.ind) S.ind.debt+=0.2; }},
-       {l:'Razionalizzi: prima i conti', e:'Salvi la cassa; il territorio incassa il no', f:()=>{ if(S.ind) S.ind.debt-=0.2; gd('pensionati',-2); }} ]},
+  ch:[ {costo:{debito:0.2}, l:'Lo tieni aperto, costi quel che costi', e:'Il territorio respira; il bilancio pesa', f:()=>{ gd('pensionati',2); if(S.ind&&S.ind.sanita!=null) S.ind.sanita=clamp(S.ind.sanita+1,0,100); if(S.ind) S.ind.debt+=0.2; }},
+       {costo:{debito:-0.2}, l:'Razionalizzi: prima i conti', e:'Salvi la cassa; il territorio incassa il no', f:()=>{ if(S.ind) S.ind.debt-=0.2; gd('pensionati',-2); }} ]},
  {id:'tp_ordine', era:'universale', kind:'F2',
   t:'Tensione sul territorio', text:'La tensione sociale sale, e %TERR è nervosa: cortei, qualche scontro, la stampa che incalza. Fermezza o prudenza?',
   ch:[ {l:'Linea di fermezza, più presidio', e:'Ordine ristabilito; i giovani mugugnano', f:()=>{ if(S.ind&&S.ind.sicurezza!=null) S.ind.sicurezza=clamp(S.ind.sicurezza+1,0,100); gd('giovani',-1); }},
@@ -2851,11 +2851,11 @@ const TERRITORIO_PROB=[
  /* la periferia che chiede — era-split: '50 il Mezzogiorno (storia radicata), presente le infrastrutture */
  {id:'tp_periferia', era:'contemporanea', kind:'F2',
   t:'Un\'area lasciata indietro', text:'C\'è un\'area che chiede attenzione: %TERR domanda infrastrutture e servizi — strade, treni, presidi. Un piano costa, ma cambia il volto del territorio.',
-  ch:[ {l:'Un piano di investimenti per l\'area', e:'Il territorio riparte; il conto sale', f:()=>{ gd('lavoratori',2); if(S.ind) S.ind.debt+=0.3; }},
+  ch:[ {costo:{debito:0.3}, l:'Un piano di investimenti per l\'area', e:'Il territorio riparte; il conto sale', f:()=>{ gd('lavoratori',2); if(S.ind) S.ind.debt+=0.3; }},
        {l:'Le priorità nazionali sono altrove', e:'Tieni i conti; l\'area resta indietro', f:()=>{ gd('cetomedio',1); gd('lavoratori',-1); }} ]},
  {id:'tp_mezzogiorno', era:'italia1950', kind:'F2',
   t:'Il Mezzogiorno chiama', text:'Dal Sud sale la questione di sempre — terra, lavoro, l\'emigrazione che svuota i paesi — e %TERR aspetta una risposta dal governo.',
-  ch:[ {l:'Fondi per la terra e il lavoro al Sud', e:'Una promessa al Mezzogiorno; il conto sale', f:()=>{ gd('lavoratori',2); gd('cattolici',1); if(S.ind) S.ind.debt+=0.3; }},
+  ch:[ {costo:{debito:0.3}, l:'Fondi per la terra e il lavoro al Sud', e:'Una promessa al Mezzogiorno; il conto sale', f:()=>{ gd('lavoratori',2); gd('cattolici',1); if(S.ind) S.ind.debt+=0.3; }},
        {l:'Prima il Nord che produce', e:'Punti sull\'industria; il Sud incassa l\'ennesima attesa', f:()=>{ gd('imprenditori',2); gd('lavoratori',-2); }} ]},
 ];
 
@@ -4328,59 +4328,59 @@ const DOSSIERS=[
     del decennio — il 2000 è il decennio in cui quasi ogni scelta costa a qualcuno, e si vede.
     ============================================================================================================ */
  {id:'d00_liste',era:'italia2000',min:'salute',kick:'Sanità',t:'Il ticket e le liste d\'attesa',text:'Le liste d\'attesa si allungano e il ticket pesa sulle famiglie: la sanità pubblica regge, ma scricchiola dove il cittadino la tocca.',ch:[
-   {l:'Piano straordinario per le liste d\'attesa',e:'Più prestazioni; più spesa',pleases:'progressista',f:()=>{S.ind.debt+=0.4; gd('lavoratori',3); gd('pensionati',3); gd('imprenditori',-1);}},
-   {l:'Rigore sui conti, ticket confermati',e:'I conti tengono; le code restano',pleases:'tecnico',f:()=>{S.ind.debt-=0.2; gd('imprenditori',2); gd('lavoratori',-3); gd('pensionati',-2);}},
+   {costo:{debito:0.4}, l:'Piano straordinario per le liste d\'attesa',e:'Più prestazioni; più spesa',pleases:'progressista',f:()=>{S.ind.debt+=0.4; gd('lavoratori',3); gd('pensionati',3); gd('imprenditori',-1);}},
+   {costo:{debito:-0.2}, l:'Rigore sui conti, ticket confermati',e:'I conti tengono; le code restano',pleases:'tecnico',f:()=>{S.ind.debt-=0.2; gd('imprenditori',2); gd('lavoratori',-3); gd('pensionati',-2);}},
  ]},
  {id:'d00_aviaria',era:'italia2000',min:'salute',kick:'Sanità',cond:()=>S.year>=2005&&S.year<=2006,t:'L\'influenza dei polli',text:'Dall\'Asia arriva l\'allarme aviaria: casi umani lontani, polli invenduti qui. La paura corre più del virus.',ch:[
-   {l:'Piano pandemico e scorte di antivirali',e:'Prepararsi costa; rassicura',pleases:'tecnico',f:()=>{S.ind.debt+=0.3; gd('cetomedio',3); gd('pensionati',2);}},
+   {costo:{debito:0.3}, l:'Piano pandemico e scorte di antivirali',e:'Prepararsi costa; rassicura',pleases:'tecnico',f:()=>{S.ind.debt+=0.3; gd('cetomedio',3); gd('pensionati',2);}},
    {l:'Campagna di calma, niente allarmismi',e:'Spesa zero; se arriva, sei scoperto',pleases:'conservatore',f:()=>{gd('cetomedio',2); gd('imprenditori',2); repd(-1);}},
  ]},
  {id:'d00_privatizza',era:'italia2000',min:'economia',kick:'Privatizzazioni',t:'L\'ultima privatizzazione',text:'Restano nel perimetro pubblico aziende che il mercato guarda con appetito. Venderle fa cassa oggi; il controllo se ne va per sempre.',ch:[
-   {l:'Vendi e abbatti il debito',e:'Cassa subito; il controllo se ne va',pleases:'tecnico',f:()=>{S.ind.debt-=1.5; gd('imprenditori',4); gd('lavoratori',-3); repd(2);}},
-   {l:'Tieni il controllo pubblico',e:'Nessun incasso; la presa resta',pleases:'progressista',f:()=>{gd('lavoratori',3); gd('imprenditori',-3); S.ind.debt+=0.2;}},
+   {costo:{debito:-1.5}, l:'Vendi e abbatti il debito',e:'Cassa subito; il controllo se ne va',pleases:'tecnico',f:()=>{S.ind.debt-=1.5; gd('imprenditori',4); gd('lavoratori',-3); repd(2);}},
+   {costo:{debito:0.2}, l:'Tieni il controllo pubblico',e:'Nessun incasso; la presa resta',pleases:'progressista',f:()=>{gd('lavoratori',3); gd('imprenditori',-3); S.ind.debt+=0.2;}},
  ]},
  {id:'d00_bruxelles',era:'italia2000',min:'economia',kick:'Europa',cond:()=>S.year>=2002,t:'I conti con Bruxelles',text:'La lettera da Bruxelles è cortese e ferma: il disavanzo va ridotto. Ogni manovra correttiva ha un nome che i giornali conoscono: lacrime e sangue.',ch:[
-   {l:'Manovra correttiva vera',e:'L\'Europa apprezza; il paese morde',pleases:'tecnico',f:()=>{S.ind.debt-=1.5; gd('lavoratori',-3); gd('cetomedio',-2); stampad(3); repd(4);}},
-   {l:'Contabilità creativa e rinvio',e:'Il problema slitta; la credibilità pure',pleases:'populista',f:()=>{S.ind.debt+=0.5; stampad(-4); repd(-4); allG(1);}},
+   {costo:{debito:-1.5}, l:'Manovra correttiva vera',e:'L\'Europa apprezza; il paese morde',pleases:'tecnico',f:()=>{S.ind.debt-=1.5; gd('lavoratori',-3); gd('cetomedio',-2); stampad(3); repd(4);}},
+   {costo:{debito:0.5}, l:'Contabilità creativa e rinvio',e:'Il problema slitta; la credibilità pure',pleases:'populista',f:()=>{S.ind.debt+=0.5; stampad(-4); repd(-4); allG(1);}},
  ]},
  {id:'d00_sbarchi',era:'italia2000',min:'interno',kick:'Immigrazione',t:'Gli sbarchi',text:'Le carrette del mare arrivano a ondate: l\'accoglienza è al limite, la paura è in prima pagina, e l\'Europa guarda altrove.',ch:[
-   {l:'Accoglienza organizzata e pressing sull\'UE',e:'Gestione umana; i tempi sono lunghi',pleases:'progressista',f:()=>{S.ind.debt+=0.4; gd('giovani',3); gd('cattolici',2); gd('cetomedio',-3); repd(2);}},
+   {costo:{debito:0.4}, l:'Accoglienza organizzata e pressing sull\'UE',e:'Gestione umana; i tempi sono lunghi',pleases:'progressista',f:()=>{S.ind.debt+=0.4; gd('giovani',3); gd('cattolici',2); gd('cetomedio',-3); repd(2);}},
    {l:'Stretta su respingimenti ed espulsioni',e:'Il consenso d\'ordine sale; le immagini feriscono',pleases:'conservatore',f:()=>{gd('cetomedio',3); gd('pensionati',2); gd('giovani',-3); gd('cattolici',-2); repd(-2);}},
  ]},
  {id:'d00_telecamere',era:'italia2000',min:'interno',kick:'Sicurezza',t:'Le telecamere in centro',text:'Ogni città chiede telecamere: la sicurezza percepita vale più di quella statistica, e le statistiche non votano.',ch:[
-   {l:'Fondo nazionale per la videosorveglianza',e:'Ordine visibile; costa',pleases:'conservatore',f:()=>{S.ind.debt+=0.3; gd('cetomedio',3); gd('pensionati',2); gd('giovani',-1);}},
-   {l:'Più agenti di quartiere, meno schermi',e:'Presenza vera; effetto lento',pleases:'progressista',f:()=>{S.ind.debt+=0.2; gd('giovani',2); gd('lavoratori',2);}},
+   {costo:{debito:0.3}, l:'Fondo nazionale per la videosorveglianza',e:'Ordine visibile; costa',pleases:'conservatore',f:()=>{S.ind.debt+=0.3; gd('cetomedio',3); gd('pensionati',2); gd('giovani',-1);}},
+   {costo:{debito:0.2}, l:'Più agenti di quartiere, meno schermi',e:'Presenza vera; effetto lento',pleases:'progressista',f:()=>{S.ind.debt+=0.2; gd('giovani',2); gd('lavoratori',2);}},
  ]},
  {id:'d00_riformalavoro',era:'italia2000',min:'lavoro',kick:'Lavoro',cond:()=>S.year>=2003,t:'La riforma del mercato del lavoro',text:'Contratti nuovi per un lavoro che cambia: più facile assumere, più facile restare precari. Il paese si divide su una parola: flessibilità.',ch:[
    {l:'Vara la riforma piena',e:'Le imprese assumono; la piazza si riempie',pleases:'conservatore',f:()=>{gd('imprenditori',4); gd('lavoratori',-4); gd('giovani',-2); if(S.gMod!=null)S.gMod+=0.1;}},
-   {l:'Solo gli incentivi alla stabilizzazione',e:'Meno slancio, meno strappi',pleases:'progressista',f:()=>{S.ind.debt+=0.3; gd('lavoratori',3); gd('giovani',2); gd('imprenditori',-1);}},
+   {costo:{debito:0.3}, l:'Solo gli incentivi alla stabilizzazione',e:'Meno slancio, meno strappi',pleases:'progressista',f:()=>{S.ind.debt+=0.3; gd('lavoratori',3); gd('giovani',2); gd('imprenditori',-1);}},
  ]},
  {id:'d00_scalone',era:'italia2000',min:'lavoro',kick:'Pensioni',cond:()=>S.year>=2004&&S.year<=2007,t:'Lo scalone',text:'L\'età della pensione deve salire: i conti lo esigono, il corpo del paese lo rifiuta. Il gradino si può fare scalone o scalini.',ch:[
-   {l:'Lo scalone secco',e:'I conti ringraziano; una generazione si sente tradita',pleases:'tecnico',f:()=>{S.ind.debt-=1.5; gd('pensionati',-5); gd('lavoratori',-3); repd(3);}},
-   {l:'Scalini morbidi e finestre',e:'Meno risparmio, meno rabbia',pleases:'progressista',f:()=>{S.ind.debt-=0.4; gd('pensionati',-1); gd('lavoratori',1);}},
+   {costo:{debito:-1.5}, l:'Lo scalone secco',e:'I conti ringraziano; una generazione si sente tradita',pleases:'tecnico',f:()=>{S.ind.debt-=1.5; gd('pensionati',-5); gd('lavoratori',-3); repd(3);}},
+   {costo:{debito:-0.4}, l:'Scalini morbidi e finestre',e:'Meno risparmio, meno rabbia',pleases:'progressista',f:()=>{S.ind.debt-=0.4; gd('pensionati',-1); gd('lavoratori',1);}},
  ]},
  {id:'d00_treii',era:'italia2000',min:'istruzione',kick:'Scuola',t:'Le tre i',text:'Inglese, impresa, informatica: la scuola deve parlare il linguaggio del nuovo secolo, dicono. I maestri chiedono prima carta, gesso e stipendi.',ch:[
-   {l:'Moduli nuovi e laboratori',e:'La scuola si aggiorna; la spesa sale',pleases:'tecnico',f:()=>{S.ind.debt+=0.4; gd('giovani',4); gd('imprenditori',1);}},
-   {l:'Prima gli organici e gli edifici',e:'Il quotidiano prima del moderno',pleases:'progressista',f:()=>{S.ind.debt+=0.3; gd('lavoratori',3); gd('giovani',1);}},
+   {costo:{debito:0.4}, l:'Moduli nuovi e laboratori',e:'La scuola si aggiorna; la spesa sale',pleases:'tecnico',f:()=>{S.ind.debt+=0.4; gd('giovani',4); gd('imprenditori',1);}},
+   {costo:{debito:0.3}, l:'Prima gli organici e gli edifici',e:'Il quotidiano prima del moderno',pleases:'progressista',f:()=>{S.ind.debt+=0.3; gd('lavoratori',3); gd('giovani',1);}},
  ]},
  {id:'d00_altavelocita',era:'italia2000',min:'infrastrutture',kick:'Grandi opere',t:'L\'alta velocità',text:'I cantieri dell\'alta velocità divorano miliardi e promettono di cucire il paese. In valle, qualcuno non vuole il treno.',ch:[
-   {l:'Accelera i cantieri',e:'Il paese si avvicina; il conto è enorme',pleases:'tecnico',f:()=>{S.ind.debt+=1.5; gd('imprenditori',4); gd('cetomedio',2); gd('giovani',-3);}},
+   {costo:{debito:1.5}, l:'Accelera i cantieri',e:'Il paese si avvicina; il conto è enorme',pleases:'tecnico',f:()=>{S.ind.debt+=1.5; gd('imprenditori',4); gd('cetomedio',2); gd('giovani',-3);}},
    {l:'Rallenta e ridiscuti i tracciati',e:'Meno scontro, meno chilometri',pleases:'progressista',f:()=>{gd('giovani',3); gd('imprenditori',-2);}},
  ]},
  {id:'d00_ponte',era:'italia2000',min:'infrastrutture',kick:'Grandi opere',t:'Il Ponte',text:'Il progetto del ponte sullo Stretto torna sul tavolo a ogni legislatura: opera del secolo per qualcuno, monumento allo spreco per altri.',ch:[
-   {l:'Rilancia il progetto',e:'Un sogno d\'acciaio; i tecnici dubitano',pleases:'populista',f:()=>{S.ind.debt+=1; gd('imprenditori',4); gd('cetomedio',-2); stampad(-2);}},
+   {costo:{debito:1}, l:'Rilancia il progetto',e:'Un sogno d\'acciaio; i tecnici dubitano',pleases:'populista',f:()=>{S.ind.debt+=1; gd('imprenditori',4); gd('cetomedio',-2); stampad(-2);}},
    {l:'Chiudi il dossier: priorità alle ferrovie vere',e:'Prosa contro poesia',pleases:'tecnico',f:()=>{gd('cetomedio',3); gd('lavoratori',2); gd('imprenditori',-2); stampad(2);}},
  ]},
  {id:'d00_naja',era:'italia2000',min:'difesa',kick:'Difesa',cond:()=>S.year>=2004,t:'L\'addio alla naja',text:'La leva obbligatoria ha i mesi contati: l\'esercito diventa di professionisti. Un rito di passaggio nazionale se ne va con lei.',ch:[
-   {l:'Sospendi la leva: solo volontari',e:'Forze armate moderne; il vecchio rito muore',pleases:'tecnico',f:()=>{S.ind.debt+=0.5; gd('giovani',5); gd('pensionati',-3); repd(2);}},
+   {costo:{debito:0.5}, l:'Sospendi la leva: solo volontari',e:'Forze armate moderne; il vecchio rito muore',pleases:'tecnico',f:()=>{S.ind.debt+=0.5; gd('giovani',5); gd('pensionati',-3); repd(2);}},
    {l:'Rinvia: la naja forma i cittadini',e:'La tradizione resiste ancora un po\'',pleases:'conservatore',f:()=>{gd('pensionati',3); gd('giovani',-5);}},
  ]},
  {id:'d00_processo',era:'italia2000',min:'giustizia',kick:'Giustizia',t:'Il processo infinito',text:'I processi durano dieci anni e l\'Europa condanna l\'Italia per lentezza. Ogni riforma della giustizia accende il sospetto che serva a qualcuno.',ch:[
-   {l:'Riforma dei tempi: più giudici, più riti rapidi',e:'La macchina accelera; costa',pleases:'tecnico',f:()=>{S.ind.debt+=0.5; gd('cetomedio',3); stampad(3); repd(2);}},
+   {costo:{debito:0.5}, l:'Riforma dei tempi: più giudici, più riti rapidi',e:'La macchina accelera; costa',pleases:'tecnico',f:()=>{S.ind.debt+=0.5; gd('cetomedio',3); stampad(3); repd(2);}},
    {l:'Depenalizza i reati minori',e:'Meno fascicoli; «colpo di spugna» è dietro l\'angolo',pleases:'populista',f:()=>{gd('imprenditori',2); stampad(-4); repd(-2);}},
  ]},
  {id:'d00_bandalarga',era:'italia2000',min:'sviluppo',kick:'Tecnologia',t:'La banda larga',text:'L\'ADSL arriva nelle città e salta i paesi: il digitale disegna una nuova questione meridionale, fatta di cavi che non arrivano.',ch:[
-   {l:'Piano nazionale per la rete',e:'Il paese si connette; la spesa è da grande opera',pleases:'tecnico',f:()=>{S.ind.debt+=1; gd('giovani',4); gd('cetomedio',2); if(S.gMod!=null)S.gMod+=0.1;}},
+   {costo:{debito:1}, l:'Piano nazionale per la rete',e:'Il paese si connette; la spesa è da grande opera',pleases:'tecnico',f:()=>{S.ind.debt+=1; gd('giovani',4); gd('cetomedio',2); if(S.gMod!=null)S.gMod+=0.1;}},
    {l:'Lascia fare al mercato',e:'Dove conviene, la rete corre; altrove no',pleases:'conservatore',f:()=>{gd('imprenditori',3); gd('giovani',-2); gd('lavoratori',-1);}},
  ]},
 
@@ -4496,7 +4496,7 @@ const EVENTS=[
    {l:'Non tocchi le liste: si fa come si è sempre fatto',e:'Nessuna tensione oggi · chi è arrivato ultimo resta ultimo',f:()=>{gd('pensionati',3); gd('cetomedio',2); gd('lavoratori',-3); gd('giovani',-3);}}]},
  {id:'uk_bonds', era:'uk1950', cond:()=>S.year>=1956, kick:'Risparmio', t:'I titoli della fortuna',
   text:'Buoni del Tesoro che invece dell\'interesse danno un\'estrazione: gioco d\'azzardo di Stato per qualcuno, risparmio popolare per altri. La coda in posta è lunga.',ch:[
-   {l:'Li lanci in grande: il Tesoro ha bisogno di quel denaro',e:'Il risparmio popolare entra nelle casse · i pulpiti protestano',f:()=>{S.ind.debt-=0.8; gd('cetomedio',3); gd('lavoratori',2); gd('cattolici',-4);}},
+   {costo:{debito:-0.8}, l:'Li lanci in grande: il Tesoro ha bisogno di quel denaro',e:'Il risparmio popolare entra nelle casse · i pulpiti protestano',f:()=>{S.ind.debt-=0.8; gd('cetomedio',3); gd('lavoratori',2); gd('cattolici',-4);}},
    {l:'Li tieni piccoli, quasi in sordina',e:'Nessuno scandalo · e nemmeno il denaro',f:()=>{gd('cattolici',3); gd('cetomedio',-1);}}]},
  /* ==============================================================================================================
     L55-1 · I DODICI EVENTI DEL DECENNIO '60 (scheda §D). Gate di paese e d'epoca dal tag `era:'uk1960'`, che
@@ -4583,8 +4583,8 @@ const EVENTS=[
    {l:'Si chiedono deroghe su tutto',e:'Il paese difende le sue abitudini · e a Bruxelles se lo segnano',f:()=>{gd('pensionati',6); gd('lavoratori',3); gd('imprenditori',-6); repd(-3);}}]},
  {id:'uk70_petrolio', era:'uk1970', cond:()=>S.year>=1975, tono:'florido', kick:'Economia', t:'Il petrolio del Mare del Nord',
   text:'Dalle piattaforme in mezzo al mare comincia ad arrivare il greggio: manna per i conti pubblici, e una domanda nuova — di chi è, di Londra o di Edimburgo?',ch:[
-   {l:'Il gettito va al bilancio nazionale',e:'I conti respirano · e in Scozia contano i barili che partono',f:()=>{S.ind.debt-=2; gd('cetomedio',5); gd('imprenditori',4); gd('lavoratori',3);}},
-   {l:'Una quota resta dov\'è il petrolio',e:'La Scozia si sente vista · e ogni altra regione prepara la sua richiesta',f:()=>{S.ind.debt-=0.8; gd('lavoratori',4); gd('cetomedio',-3); repd(-3);}}]},
+   {costo:{debito:-2}, l:'Il gettito va al bilancio nazionale',e:'I conti respirano · e in Scozia contano i barili che partono',f:()=>{S.ind.debt-=2; gd('cetomedio',5); gd('imprenditori',4); gd('lavoratori',3);}},
+   {costo:{debito:-0.8}, l:'Una quota resta dov\'è il petrolio',e:'La Scozia si sente vista · e ogni altra regione prepara la sua richiesta',f:()=>{S.ind.debt-=0.8; gd('lavoratori',4); gd('cetomedio',-3); repd(-3);}}]},
  {id:'uk70_parita', era:'uk1970', cond:()=>S.year>=1970, kick:'Lavoro', t:'La parità in busta paga',
   text:'La legge dice che a lavoro uguale spetta paga uguale. Le fabbriche scoprono in fretta che i lavori si possono chiamare in modi diversi.',ch:[
    {l:'Ispezioni vere, e sanzioni',e:'La legge morde · e le imprese parlano di costi insostenibili',f:()=>{gd('lavoratori',9); gd('giovani',6); gd('imprenditori',-9);}},
@@ -4708,7 +4708,7 @@ const EVENTS=[
    {l:'La sostieni con convinzione',e:'Il lavoro riconosciuto · le imprese lamentano rigidità',f:()=>{gd('lavoratori',5); gd('giovani',2); gd('imprenditori',-4);}},
    {l:'Segnali il costo per le imprese',e:'Prudenza produttiva · il sindacato ti misura',f:()=>{gd('imprenditori',3); gd('lavoratori',-3); if(S.gMod!=null)S.gMod+=0.1;}}]},
  {id:'i70_regioni', era:'italia1970', cond:()=>S.year>=1970, kick:'Istituzioni', t:'Le Regioni partono', text:'Le Regioni a statuto ordinario eleggono i primi consigli: nasce un livello di governo nuovo, con soldi e competenze da definire.',ch:[
-   {l:'Spingi il decentramento',e:'Governo più vicino · il centro perde presa e qualche conto si moltiplica',f:()=>{gd('cetomedio',3); gd('giovani',2); S.ind.debt+=0.4;}},
+   {costo:{debito:0.4}, l:'Spingi il decentramento',e:'Governo più vicino · il centro perde presa e qualche conto si moltiplica',f:()=>{gd('cetomedio',3); gd('giovani',2); S.ind.debt+=0.4;}},
    {l:'Tieni la presa del centro',e:'Conti sotto controllo · la periferia si sente ospite',f:()=>{gd('imprenditori',2); gd('lavoratori',-2); gd('cetomedio',-1);}}]},
  {id:'i70_tvcolori', era:'italia1970', cond:()=>S.year>=1977, tono:'florido', kick:'Televisione', t:'La TV a colori', text:'Dopo anni di rinvii, la RAI trasmette a colori. Il paese si divide fra chi corre a comprare e chi tiene il bianco e nero per principio o per portafoglio.',ch:[
    {l:'Il paese ha diritto al suo tempo',e:'Modernità riconosciuta · c\'è chi la chiama frivolezza',f:()=>{gd('giovani',3); gd('cetomedio',2); gd('pensionati',-1);}},
@@ -4723,7 +4723,7 @@ const EVENTS=[
    {l:'Applicarla per intero, con i consultori',e:'La legge esiste per essere applicata · una parte del paese non ci si riconosce',f:()=>{gd('giovani',3); gd('lavoratori',2); gd('cattolici',-4);}},
    {l:'Applicarla garantendo l\'obiezione',e:'Si tiene conto delle coscienze · l\'accesso resta diseguale',f:()=>{gd('cattolici',3); gd('giovani',-2); gd('cetomedio',1);}}]},
  {id:'i70_scioperi', era:'italia1970', cond:()=>S.year>=1970, kick:'Conflitto sociale', t:'L\'autunno degli scioperi', text:'Le vertenze si allargano di categoria in categoria: cortei, presidi, trattative notturne. La contingenza copre l\'inflazione, dicono i sindacati; la copre troppo, dicono le imprese.',ch:[
-   {l:'Tavolo aperto, si tratta a oltranza',e:'Pace sociale comprata · qualcosa costa',f:()=>{gd('lavoratori',4); gd('imprenditori',-2); S.ind.debt+=0.5;}},
+   {costo:{debito:0.5}, l:'Tavolo aperto, si tratta a oltranza',e:'Pace sociale comprata · qualcosa costa',f:()=>{gd('lavoratori',4); gd('imprenditori',-2); S.ind.debt+=0.5;}},
    {l:'Fermezza: i conti non reggono tutto',e:'Disciplina di bilancio · l\'autunno si allunga',f:()=>{gd('imprenditori',3); gd('lavoratori',-4); if(S.gMod!=null)S.gMod-=0.1;}}]},
  {id:'i70_fugalira', era:'italia1970', cond:()=>S.year>=1973, tono:'grave', kick:'Credito', t:'La fuga dalla lira', text:'La lira scivola, i capitali espatriano in valigia. Controlli alle frontiere, polemiche sulle banche svizzere.',ch:[
    {l:'Stretta sui movimenti di capitale',e:'Si difende la valuta · chi investe protesta',f:()=>{repd(2); gd('imprenditori',-3); gd('cetomedio',1);}},
@@ -4732,7 +4732,7 @@ const EVENTS=[
    {l:'Sdrammatizzi: contano i voti, non i settimanali',e:'Freddezza istituzionale · i tuoi vorrebbero più grinta',f:()=>{gd('cetomedio',2); tutteCorrenti(-2); stampad(1);}},
    {l:'Alzi il tono: è il momento di scegliere',e:'Mobiliti i tuoi · il paese sente odore di scontro',f:()=>{tutteCorrenti(3); gd('cetomedio',-2); stampad(-1);}}]},
  {id:'i70_scuolamassa', era:'italia1970', cond:()=>S.year>=1972, kick:'Istruzione', t:'La scuola di massa fa i conti', text:'Un\'università affollata e un diploma che non basta più: la generazione più istruita di sempre cerca un posto che non c\'è.',ch:[
-   {l:'Investi sul diritto allo studio',e:'Una porta che resta aperta · il conto cresce',f:()=>{gd('giovani',4); gd('lavoratori',2); S.ind.debt+=0.6;}},
+   {costo:{debito:0.6}, l:'Investi sul diritto allo studio',e:'Una porta che resta aperta · il conto cresce',f:()=>{gd('giovani',4); gd('lavoratori',2); S.ind.debt+=0.6;}},
    {l:'Selezione e sbocchi professionali',e:'Percorsi più stretti e più chiari · chi resta fuori se lo ricorda',f:()=>{gd('imprenditori',3); gd('cetomedio',1); gd('giovani',-3);}}]},
  {id:'i70_sequestri', era:'italia1970', cond:()=>S.year>=1973, tono:'grave', kick:'Ordine pubblico', t:'Il rapimento a scopo d\'estorsione', text:'L\'anonima sequestri colpisce ancora: industriali sotto scorta, famiglie che vendono, la provincia ricca che ha paura.',ch:[
    {l:'Blocco dei beni delle famiglie colpite',e:'Si toglie ossigeno al riscatto · le famiglie si sentono sole',f:()=>{S.ind.sicurezza=clamp(S.ind.sicurezza+2,0,100); gd('imprenditori',-3); gd('cetomedio',2);}},
@@ -4749,8 +4749,8 @@ const EVENTS=[
    {l:'Accompagni il risparmio con regole e vigilanza',e:'Chi entra sa dove mette i soldi · il mercato corre meno',f:()=>{gd('cetomedio',3); gd('pensionati',2); gd('imprenditori',-1);}},
    {l:'Lasci correre: è il mercato che educa',e:'La piazza si allarga in fretta · la prima scottatura arriverà',f:()=>{gd('imprenditori',3); gd('cetomedio',1); if(S.gMod!=null)S.gMod+=0.1;}}]},
  {id:'i80_condono', era:'italia1980', cond:()=>S.year>=1985, kick:'Casa', t:'Il condono', text:'Un condono edilizio per fare cassa e «chiudere col passato»: gli uffici tecnici sommersi, i furbi premiati, i conti sollevati. Fino al prossimo.',ch:[
-   {l:'Vai avanti: i conti hanno bisogno di cassa',e:'Entrate subito · chi ha rispettato le regole se lo ricorda',rischio:4,f:()=>{S.ind.debt=Math.max(0,S.ind.debt-1); gd('imprenditori',3); gd('cetomedio',-3); gd('giovani',-2);}},
-   {l:'Nessun condono',e:'La regola vale per tutti · le casse restano vuote',f:()=>{gd('cetomedio',3); gd('giovani',2); gd('imprenditori',-3); S.ind.debt+=0.5;}}]},
+   {costo:{debito:-1}, l:'Vai avanti: i conti hanno bisogno di cassa',e:'Entrate subito · chi ha rispettato le regole se lo ricorda',rischio:4,f:()=>{S.ind.debt=Math.max(0,S.ind.debt-1); gd('imprenditori',3); gd('cetomedio',-3); gd('giovani',-2);}},
+   {costo:{debito:0.5}, l:'Nessun condono',e:'La regola vale per tutti · le casse restano vuote',f:()=>{gd('cetomedio',3); gd('giovani',2); gd('imprenditori',-3); S.ind.debt+=0.5;}}]},
  {id:'i80_droga', era:'italia1980', tono:'grave', kick:'Sanità', t:'La droga nelle città', text:'L\'eroina è nei parchi e nelle cronache. Le famiglie chiedono aiuto, le comunità nascono dal volontariato, la legge insegue.',ch:[
    {l:'Cura e comunità: si finanzia il recupero',e:'Chi cade trova una rete · i risultati si vedono lentamente',costo:{debito:0.8},f:()=>{S.ind.debt+=0.8; S.ind.sanita=clamp(S.ind.sanita+3,0,100); gd('giovani',3); gd('lavoratori',2);}},
    {l:'Repressione dello spaccio',e:'Risposta immediata e visibile · chi è già dentro resta solo',f:()=>{S.ind.sicurezza=clamp(S.ind.sicurezza+3,0,100); gd('pensionati',3); gd('cetomedio',2); gd('giovani',-3);}}]},
@@ -4790,11 +4790,11 @@ const EVENTS=[
    {l:'Apri il mercato a un secondo gestore',e:'Prezzi giù e copertura su · l\'operatore pubblico perde la rendita',f:()=>{gd('imprenditori',3); gd('giovani',2); gd('lavoratori',-1); if(S.gMod!=null)S.gMod+=0.1;}},
    {l:'Proteggi l\'operatore nazionale',e:'Un campione industriale in casa · il paese aspetta e paga di più',f:()=>{gd('lavoratori',2); gd('cetomedio',-2); gd('giovani',-2);}}]},
  {id:'i90_internet', era:'italia1990', cond:()=>S.year>=1996, kick:'Tecnologia', t:'La rete delle reti', text:'Internet arriva nelle case: modem che friggono, ore contate a scatti, i primi siti. C\'è chi parla di rivoluzione e chi di moda passeggera.',ch:[
-   {l:'Porti la rete nelle scuole',e:'Una generazione parte avanti · costa, e i risultati si vedranno fra dieci anni',f:()=>{gd('giovani',4); gd('cetomedio',1); S.ind.debt+=0.3;}},
+   {costo:{debito:0.3}, l:'Porti la rete nelle scuole',e:'Una generazione parte avanti · costa, e i risultati si vedranno fra dieci anni',f:()=>{gd('giovani',4); gd('cetomedio',1); S.ind.debt+=0.3;}},
    {l:'Lasci fare al mercato',e:'Nessuna spesa · chi può si collega, chi non può resta indietro',f:()=>{gd('imprenditori',2); gd('giovani',-1); gd('lavoratori',-1);}}]},
  {id:'i90_dismissioni', era:'italia1990', cond:()=>S.year>=1993, tono:'grave', kick:'Privatizzazioni', t:'Le dismissioni', text:'Lo Stato vende: banche, telefoni, acciaio, autostrade. Per i conti è ossigeno; per il lavoro, un\'incognita. La parola privatizzazione divide.',ch:[
-   {l:'Vendi e usa il ricavato sul debito',e:'Il debito respira · lo Stato perde le sue leve industriali',f:()=>{S.ind.debt-=2; gd('imprenditori',3); gd('lavoratori',-4); repd(3);}},
-   {l:'Rallenti e tieni le partecipazioni',e:'Le leve restano pubbliche · i conti non migliorano e l\'Europa guarda',f:()=>{gd('lavoratori',3); gd('cetomedio',-1); repd(-3); S.ind.debt+=0.5;}}]},
+   {costo:{debito:-2}, l:'Vendi e usa il ricavato sul debito',e:'Il debito respira · lo Stato perde le sue leve industriali',f:()=>{S.ind.debt-=2; gd('imprenditori',3); gd('lavoratori',-4); repd(3);}},
+   {costo:{debito:0.5}, l:'Rallenti e tieni le partecipazioni',e:'Le leve restano pubbliche · i conti non migliorano e l\'Europa guarda',f:()=>{gd('lavoratori',3); gd('cetomedio',-1); repd(-3); S.ind.debt+=0.5;}}]},
  {id:'i90_sindaci', era:'italia1990', cond:()=>S.year>=1993, kick:'Riforme', t:'La stagione dei sindaci', text:'L\'elezione diretta cambia le città: i sindaci diventano i politici più popolari d\'Italia, e i partiti scoprono di contare meno dei volti.',ch:[
    {l:'Dai più poteri ai sindaci',e:'Le città funzionano meglio · il partito conta meno, e se ne accorge',f:()=>{gd('cetomedio',3); gd('giovani',2); capd(-6); stampad(2);}},
    {l:'Tieni il centro del gioco nei partiti',e:'La macchina resta tua · il paese guarda altrove',f:()=>{capd(6); gd('cetomedio',-2); gd('giovani',-2); stampad(-2);}}]},
@@ -4802,10 +4802,10 @@ const EVENTS=[
    {l:'Cavalchi l\'onda referendaria',e:'Sei dalla parte di chi vuole cambiare · governare diventa più difficile',f:()=>{stampad(4); gd('giovani',2); capd(-5);}},
    {l:'Difendi il primato del Parlamento',e:'Le istituzioni tengono · ti danno per vecchio',f:()=>{capd(4); stampad(-3); gd('giovani',-2); repd(1);}}]},
  {id:'i90_eurotassa', era:'italia1990', cond:()=>S.year>=1997&&S.year<=1998, tono:'grave', kick:'Europa', t:'L\'eurotassa', text:'Un contributo straordinario «per l\'Europa»: entrare nell\'euro al primo giro vale un sacrificio? Il paese paga, brontolando — e ci tiene.',ch:[
-   {l:'La chiedi e prometti di restituirla',e:'I conti tornano e la parola è data · dovrai mantenerla',f:()=>{S.ind.debt-=1.5; allG(-2); repd(4); stampad(2);}},
-   {l:'Trovi i soldi altrove, con altri tagli',e:'Nessuna tassa nuova · qualcuno paga lo stesso, in silenzio',f:()=>{S.ind.debt-=1; gd('lavoratori',-3); gd('pensionati',-3); stampad(-1);}}]},
+   {costo:{debito:-1.5}, l:'La chiedi e prometti di restituirla',e:'I conti tornano e la parola è data · dovrai mantenerla',f:()=>{S.ind.debt-=1.5; allG(-2); repd(4); stampad(2);}},
+   {costo:{debito:-1}, l:'Trovi i soldi altrove, con altri tagli',e:'Nessuna tassa nuova · qualcuno paga lo stesso, in silenzio',f:()=>{S.ind.debt-=1; gd('lavoratori',-3); gd('pensionati',-3); stampad(-1);}}]},
  {id:'i90_sbarchi', era:'italia1990', cond:()=>S.year>=1991, tono:'grave', kick:'Immigrazione', t:'Gli sbarchi', text:'Navi cariche di persone attraversano l\'Adriatico: l\'Italia scopre di essere terra d\'arrivo. L\'accoglienza e il rimpatrio dividono il paese, e nessuna risposta è semplice.',ch:[
-   {l:'Accogli e organizzi la prima assistenza',e:'Il paese risponde all\'emergenza · l\'opinione pubblica si divide e i costi sono immediati',f:()=>{gd('cattolici',3); gd('giovani',2); gd('pensionati',-3); gd('cetomedio',-2); S.ind.debt+=0.4; repd(2);}},
+   {costo:{debito:0.4}, l:'Accogli e organizzi la prima assistenza',e:'Il paese risponde all\'emergenza · l\'opinione pubblica si divide e i costi sono immediati',f:()=>{gd('cattolici',3); gd('giovani',2); gd('pensionati',-3); gd('cetomedio',-2); S.ind.debt+=0.4; repd(2);}},
    {l:'Rimpatri e chiedi accordi ai paesi d\'origine',e:'Le regole valgono · chi è già arrivato resta in un limbo, e si vede',f:()=>{gd('pensionati',3); gd('cetomedio',2); gd('cattolici',-3); gd('giovani',-2); repd(-2);}}]},
  {id:'i90_lavoro', era:'italia1990', cond:()=>S.year>=1997, kick:'Lavoro', t:'Il lavoro che cambia', text:'Contratti a termine, interinali, collaborazioni: la flessibilità promette occupazione e minaccia certezze. I giovani la vivono per primi, nel bene e nel male.',ch:[
    {l:'Apri alla flessibilità con tutele nuove',e:'Più occupazione · le certezze di prima non tornano',f:()=>{gd('giovani',3); gd('imprenditori',3); gd('lavoratori',-3); if(S.gMod!=null)S.gMod+=0.15;}},
@@ -4818,7 +4818,7 @@ const EVENTS=[
     aprendo il codice. Il decennio del «declino»: quasi ogni scelta economica costa a qualcuno, e si vede.
     ============================================================================================================ */
  {id:'i00_euro', era:'italia2000', cond:()=>S.year>=2002&&S.year<=2003, kick:'Europa', t:'L\'euro nel portafoglio', text:'Il 1° gennaio le lire lasciano il posto all\'euro: file ai bancomat per curiosità, calcoli a mente per mesi, 1.936,27 come numero di casa. Un pezzo d\'identità va in pensione con la banconota da centomila.',ch:[
-   {l:'Campagna di informazione capillare',e:'La gente capisce i prezzi · costa, e qualcuno la trova paternalista',f:()=>{gd('pensionati',3); gd('cetomedio',2); S.ind.debt+=0.2; stampad(2);}},
+   {costo:{debito:0.2}, l:'Campagna di informazione capillare',e:'La gente capisce i prezzi · costa, e qualcuno la trova paternalista',f:()=>{gd('pensionati',3); gd('cetomedio',2); S.ind.debt+=0.2; stampad(2);}},
    {l:'Lasci che il mercato si assesti',e:'Nessuna spesa · la percezione dei rincari monta senza risposta',f:()=>{gd('imprenditori',2); allG(-1); stampad(-2);}}]},
  {id:'i00_doppioprezzo', era:'italia2000', cond:()=>S.year>=2002&&S.year<=2004, tono:'grave', kick:'Prezzi', t:'Il doppio prezzo', text:'I cartellini parlano due lingue e la percezione una terza: «è raddoppiato tutto», dice il paese; «l\'inflazione è al 2,5», dice l\'istituto. Hanno ragione entrambi, su cose diverse.',ch:[
    {l:'Metti i prezzi sotto osservazione',e:'Il paese si sente difeso · i commercianti protestano e i risultati sono lenti',f:()=>{gd('lavoratori',3); gd('pensionati',2); gd('imprenditori',-3); stampad(1);}},
@@ -4827,23 +4827,23 @@ const EVENTS=[
    {l:'Confermi e allarghi l\'impegno',e:'Peso internazionale · il paese non ti segue e la maggioranza scricchiola',f:()=>{repd(5); gd('cetomedio',1); gd('giovani',-3); gd('cattolici',-2); capd(-5);}},
    {l:'Riduci e rimetti tutto al Parlamento',e:'La maggioranza respira · gli alleati prendono nota, di nuovo',f:()=>{repd(-4); gd('giovani',3); gd('cattolici',2); capd(3);}}]},
  {id:'i00_milleeuro', era:'italia2000', cond:()=>S.year>=2003, tono:'grave', kick:'Lavoro', t:'La generazione mille euro', text:'Contratti a progetto, stage infiniti, il posto fisso come miraggio: i trentenni più istruiti di sempre scoprono di essere anche i più precari.',ch:[
-   {l:'Un piano per stabilizzare',e:'Una generazione respira · le imprese dicono che assumeranno meno',f:()=>{gd('giovani',4); gd('lavoratori',2); gd('imprenditori',-4); S.ind.debt+=0.5;}},
+   {costo:{debito:0.5}, l:'Un piano per stabilizzare',e:'Una generazione respira · le imprese dicono che assumeranno meno',f:()=>{gd('giovani',4); gd('lavoratori',2); gd('imprenditori',-4); S.ind.debt+=0.5;}},
    {l:'Punti su formazione e incentivi',e:'Meno costo immediato · chi aspetta continua ad aspettare',f:()=>{gd('imprenditori',2); gd('giovani',-1); gd('cetomedio',1);}}]},
  {id:'i00_scalone', era:'italia2000', cond:()=>S.year>=2004&&S.year<=2008, tono:'grave', kick:'Pensioni', t:'Lo scalone', text:'L\'età della pensione sale a gradini che nessuno vuole salire: ogni governo la ritocca, ogni piazza protesta, il conto demografico resta.',ch:[
-   {l:'Alzi l\'età e tieni la linea',e:'I conti di domani si salvano · le piazze si riempiono oggi',f:()=>{S.ind.debt-=1.5; repd(4); gd('pensionati',-5); gd('lavoratori',-3); capd(-6);}},
-   {l:'Ammorbidisci con uno scalino graduale',e:'Il paese regge · il conto demografico slitta a chi verrà',f:()=>{gd('pensionati',3); gd('lavoratori',2); S.ind.debt+=0.8; repd(-2);}}]},
+   {costo:{debito:-1.5}, l:'Alzi l\'età e tieni la linea',e:'I conti di domani si salvano · le piazze si riempiono oggi',f:()=>{S.ind.debt-=1.5; repd(4); gd('pensionati',-5); gd('lavoratori',-3); capd(-6);}},
+   {costo:{debito:0.8}, l:'Ammorbidisci con uno scalino graduale',e:'Il paese regge · il conto demografico slitta a chi verrà',f:()=>{gd('pensionati',3); gd('lavoratori',2); S.ind.debt+=0.8; repd(-2);}}]},
  {id:'i00_digitale', era:'italia2000', cond:()=>S.year>=2004, kick:'Televisione', t:'Il digitale terrestre', text:'Decoder, contributi statali, canali che si moltiplicano: la TV cambia di nuovo pelle, e con lei il pubblico.',ch:[
-   {l:'Incentivi ai decoder',e:'La transizione corre · si dirà che hai aiutato chi trasmette, non chi guarda',f:()=>{gd('imprenditori',3); gd('pensionati',1); S.ind.debt+=0.3; stampad(-2);}},
+   {costo:{debito:0.3}, l:'Incentivi ai decoder',e:'La transizione corre · si dirà che hai aiutato chi trasmette, non chi guarda',f:()=>{gd('imprenditori',3); gd('pensionati',1); S.ind.debt+=0.3; stampad(-2);}},
    {l:'Lasci fare agli operatori',e:'Nessuna spesa pubblica · chi ha il vecchio televisore resta indietro',f:()=>{gd('cetomedio',1); gd('pensionati',-2);}}]},
  {id:'i00_venticinque', era:'italia2000', cond:()=>S.year>=2004, kick:'Europa', t:'L\'Europa a venticinque', text:'L\'Unione si allarga a est: nuove braccia, nuovi mercati, nuove paure. L\'idraulico polacco diventa un personaggio del dibattito.',ch:[
    {l:'Apri subito il mercato del lavoro',e:'Imprese contente e mercati nuovi · i salari bassi restano bassi',f:()=>{gd('imprenditori',4); gd('lavoratori',-3); repd(3); if(S.gMod!=null)S.gMod+=0.1;}},
    {l:'Usi il periodo transitorio',e:'Il lavoro è protetto · in Europa ti guardano storto',f:()=>{gd('lavoratori',3); gd('imprenditori',-2); repd(-3);}}]},
  {id:'i00_smartphone', era:'italia2000', cond:()=>S.year>=2008, kick:'Tecnologia', t:'Lo smartphone', text:'Il telefono diventa tutto: posta, mappe, musica. I pollici corrono, le conversazioni a tavola muoiono.',ch:[
-   {l:'Digitalizzi i servizi pubblici',e:'Meno code agli sportelli · chi non ha il telefono resta fuori',f:()=>{gd('giovani',3); gd('cetomedio',2); gd('pensionati',-2); S.ind.debt+=0.3;}},
+   {costo:{debito:0.3}, l:'Digitalizzi i servizi pubblici',e:'Meno code agli sportelli · chi non ha il telefono resta fuori',f:()=>{gd('giovani',3); gd('cetomedio',2); gd('pensionati',-2); S.ind.debt+=0.3;}},
    {l:'Tieni gli sportelli come sono',e:'Nessuno resta indietro · e nessuno va avanti',f:()=>{gd('pensionati',2); gd('giovani',-2); gd('cetomedio',-1);}}]},
  {id:'i00_crisi', era:'italia2000', cond:()=>S.year>=2008&&S.year<=2011, tono:'grave', kick:'Crisi', t:'La crisi arriva', text:'Da oltreoceano il crollo si propaga: ordini fermi, cassa integrazione, la parola subprime imparata in fretta. Il decennio del declino chiude col tonfo.',ch:[
-   {l:'Ammortizzatori e sostegno alla domanda',e:'Il colpo si attutisce · il debito prende la rincorsa',f:()=>{gd('lavoratori',4); gd('giovani',2); S.ind.debt+=2.5; if(S.gMod!=null)S.gMod+=0.15; repd(-3);}},
-   {l:'Tieni i conti e aspetti la ripresa',e:'I mercati ti credono · la fabbrica che chiude non riapre',f:()=>{S.ind.debt-=0.5; repd(4); gd('lavoratori',-5); gd('giovani',-3); if(S.gMod!=null)S.gMod-=0.1;}}]},
+   {costo:{debito:2.5}, l:'Ammortizzatori e sostegno alla domanda',e:'Il colpo si attutisce · il debito prende la rincorsa',f:()=>{gd('lavoratori',4); gd('giovani',2); S.ind.debt+=2.5; if(S.gMod!=null)S.gMod+=0.15; repd(-3);}},
+   {costo:{debito:-0.5}, l:'Tieni i conti e aspetti la ripresa',e:'I mercati ti credono · la fabbrica che chiude non riapre',f:()=>{S.ind.debt-=0.5; repd(4); gd('lavoratori',-5); gd('giovani',-3); if(S.gMod!=null)S.gMod-=0.1;}}]},
  {id:'i00_web', era:'italia2000', cond:()=>S.year>=2008, kick:'Comunicazione', t:'Il popolo del web', text:'Blog, forum, i primi social: la politica scopre che la rete organizza, amplifica, e qualche volta travolge.',ch:[
    {l:'Ci porti il partito dentro',e:'Parli a chi non ti ascoltava · ti risponde anche chi non volevi sentire',f:()=>{gd('giovani',3); stampad(-2); capd(-3);}},
    {l:'Resti sui canali di sempre',e:'Il messaggio è controllato · la conversazione avviene senza di te',f:()=>{stampad(2); gd('giovani',-3); capd(2);}}]},
@@ -4851,8 +4851,8 @@ const EVENTS=[
    {l:'Porti a termine il disegno federale',e:'Le Regioni rispondono di quel che spendono · lo Stato perde presa',f:()=>{gd('cetomedio',2); gd('imprenditori',1); repd(-1); capd(-4);}},
    {l:'Riporti le competenze al centro',e:'Una regia sola · le Regioni ricorrono, e qualche volta vincono',f:()=>{capd(4); gd('cetomedio',-2); gd('lavoratori',1);}}]},
  {id:'i00_spread', era:'italia2000', cond:()=>S.year>=2011, tono:'grave', kick:'Mercati', t:'Lo spread in prima pagina', text:'Una parola tecnica diventa il bollettino del paese: si apre il giornale sul differenziale come sul meteo. E il meteo è brutto.',ch:[
-   {l:'Manovra d\'emergenza, subito',e:'I mercati si calmano · il paese paga in contanti e in consenso',f:()=>{S.ind.debt-=2; repd(5); allG(-4); capd(-8);}},
-   {l:'Prendi tempo e tratti in Europa',e:'Nessuna stangata oggi · ogni giorno costa in interessi',f:()=>{S.ind.debt+=1.5; repd(-4); gd('lavoratori',2); gd('pensionati',2);}}]},
+   {costo:{debito:-2}, l:'Manovra d\'emergenza, subito',e:'I mercati si calmano · il paese paga in contanti e in consenso',f:()=>{S.ind.debt-=2; repd(5); allG(-4); capd(-8);}},
+   {costo:{debito:1.5}, l:'Prendi tempo e tratti in Europa',e:'Nessuna stangata oggi · ogni giorno costa in interessi',f:()=>{S.ind.debt+=1.5; repd(-4); gd('lavoratori',2); gd('pensionati',2);}}]},
 
 
  {id:'i70_riflusso', era:'italia1970', cond:()=>S.year>=1977, kick:'Il paese', t:'Il riflusso', text:'Dopo anni di piazze, una parte del paese torna al privato: la casa, il weekend, il corpo. I militanti lo chiamano riflusso, con disprezzo; i sociologi, normalità.',ch:[
