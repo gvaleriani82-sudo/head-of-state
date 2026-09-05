@@ -340,7 +340,7 @@ function renderCreazione(){
   if(C.livello===0){
     h+=nota(T('Il gradino zero: un attivista di 25 anni, senza carica né bilancio. Costruisci una base militante e la reputazione presso i gruppi, mese dopo mese, fino alla prima candidatura — da cui comincia la scala.'));
   } else if(C.livello===1){
-    h+=nota(T('Il gradino più basso e il più giovane: sindaco di una città o presidente di una regione. Amministra bene, costruisci la notorietà, e il partito ti chiamerà a Roma. La stessa carriera, dalla gavetta.'));
+    h+=nota(luoghiSub(T('Il gradino più basso e il più giovane: sindaco di una città o presidente di una regione. Amministra bene, costruisci la notorietà, e il partito ti chiamerà %ACAPITALE. La stessa carriera, dalla gavetta.')));
     h+=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;max-width:360px;margin:9px auto 0;">`
       +(PAESE.territori||[]).map(function(TE,i){ const sel=C.terrIdx===i; const isC=TE.tipo==='città';   // (param rinominato da T: oscurava la funzione i18n)
         return `<button onclick="setCrea('terrIdx',${i})" style="padding:8px;border-radius:9px;border:1px solid ${sel?'var(--brand)':'var(--line2)'};background:${sel?'var(--acc-bg)':'var(--panel)'};color:var(--txt);font-family:inherit;font-size:12px;cursor:pointer;text-align:left;"><b>${nomeTerr(TE)}</b><br><span style="font-size:12px;color:var(--mut2)">${caricaTerr(TE)} · ${T(isC?'città':'regione')}</span></button>`; }).join('')+`</div>`;
@@ -725,7 +725,18 @@ function barColor(v){return v>=66?'var(--pos)':v>=40?'var(--warn)':'var(--neg)';
    che suonerebbe posticcio). Default (presente, S.valuta null) = comportamento € IDENTICO. */
 function euro(mln){ if(mln==null||isNaN(mln)) return ''; var a=Math.abs(mln);
   var V=(typeof S!=='undefined' && S && S.valuta) || null;
-  if(V){ var gl=a/1000; return V.sym+' '+fmtMigliaia(gl, gl<10?1:0)+' '+T(V.mld); }   // valuta d'epoca: tutto in mld (con separatore migliaia)
+  /* L75-3 — LA VALUTA D'EPOCA HA DUE GRADINI, non uno. Fino a oggi il ramo d'epoca stampava SEMPRE in miliardi e il
+     campo `mln` di ogni porta (`mln:'mln sterline'`, `mln:'mln lire'`) era dichiarato e non letto da nessuno: un campo
+     morto. Sulla linea inglese, dove le cifre d'epoca sono piccole, il troncamento dava «£ 0,0 mld sterline» per il
+     bilancio di una città del 1950 e per le targhette di costo — e uno zero sembra vero, che è peggio di un errore.
+     ⚑ L'ETICHETTA VIENE DAL CAMPO DELLA PORTA, mai da una stringa fissa: chi dichiara `mln` in una porta nuova sa che
+     viene letto. E la soglia NON sposta l'Italia, misurato prima di scriverla (.claude/misura-valuta.js): su tutte e
+     sei le porte italiane nessuna cifra resa scende sotto i 1.000 mln (la più piccola è 47.680), quindi il ramo-lira
+     è byte-identico per costruzione, non per fiducia. Decimali: la stessa regola del gradino dei miliardi (uno sotto
+     la decina), così «£ 42 mln» e «£ 5,2 mln» si leggono come «£ 4,7 mld» e «£ 228 mld». */
+  if(V){ var gl=a/1000;
+    if(a<1000 && V.mln) return V.sym+' '+fmtMigliaia(a, a<10?1:0)+' '+T(V.mln);
+    return V.sym+' '+fmtMigliaia(gl, gl<10?1:0)+' '+T(V.mld); }   // valuta d'epoca: mld (con separatore migliaia)
   /* P2 — la valuta segue il paese. L'EUROZONA (e ogni paese non mappato) resta al RAMO € ATTUALE, INTATTO al byte.
      Gli altri passano dal ramo convertito: cross PRIMA dei gradini, «tln» sbloccato, separatore migliaia, decimali a scalare. */
   var CUR=(typeof VALUTE!=='undefined' && typeof S!=='undefined' && S) ? VALUTE[S.paese] : null;
@@ -1462,11 +1473,11 @@ function renderGov(){
     /* livello 1 — POLITICO LOCALE: la tua città/regione è tutto il gioco; notorietà = capitale */
     const L=S.locale, cap=Math.round(S.capitale||0), cons=Math.round(L.consenso||0);
     const capCol=cap>=65?'var(--pos)':cap<35?'var(--neg)':'var(--txt)', consCol=cons<40?'var(--neg)':cons<55?'var(--warn)':'var(--pos)';
-    h+=`<div class="banner">${T('<b>Sei %R</b>. Amministra %L: i risultati costruiscono la tua notorietà, e il partito ti chiamerà a Roma.').replace('%R',escAttr(ruoloLocale())).replace('%L',escAttr(localeNome()))}</div>`;
+    h+=`<div class="banner">${luoghiSub(T('<b>Sei %R</b>. Amministra %L: i risultati costruiscono la tua notorietà, e il partito ti chiamerà %ACAPITALE.')).replace('%R',escAttr(ruoloLocale())).replace('%L',escAttr(localeNome()))}</div>`;
     h+=`<div class="card" style="padding:10px 14px;margin-bottom:10px"><div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-size:12.5px;color:var(--mut)">${T('Notorietà')}</span><span class="mono" style="font-weight:600;font-size:16px;color:${capCol}">${cap}<span class="contorno" style="color:var(--mut2);">/100</span></span></div>
       <div class="bar">${fillI('cap:loc', clamp(cap,2,100), capCol)}</div>
       <div style="display:flex;justify-content:space-between;margin-top:7px;font-size:12px"><span style="color:var(--mut2)">${T(L.tipo==='città'?'Consenso cittadino':'Consenso regionale')}</span><span style="color:${consCol};font-weight:600">${cons}/100</span></div>
-      <div style="font-size:11px;color:var(--mut2);margin-top:5px">${T('Sopra ~65 di notorietà, il partito può offrirti un posto a Roma. Sotto 40 di consenso rischi la mancata rielezione.')}</div></div>`;
+      <div style="font-size:11px;color:var(--mut2);margin-top:5px">${luoghiSub(T('Sopra ~65 di notorietà, il partito può offrirti un posto %ACAPITALE. Sotto 40 di consenso rischi la mancata rielezione.'))}</div></div>`;
     h+=`<div class="card uno" onclick="apriMinistero('__locale__')" style="cursor:pointer;display:flex;justify-content:space-between;align-items:center;padding:12px 14px;margin-bottom:12px"><span><b>${T(entitaLocale()).charAt(0).toUpperCase()+T(entitaLocale()).slice(1)}</b><br><span style="font-size:12px;color:var(--mut)">${T('i tuoi indicatori e le tue leve')}</span></span><span style="color:var(--acc-ink);font-size:13px">${T('Apri →')}</span></div>`;
   }
   else if(S.livello===2){
@@ -1969,7 +1980,7 @@ function renderMappaSVG(){
   const chiamaIdx=(S.territorioChiama&&typeof S.territorioChiama.idx==='number')?S.territorioChiama.idx:null;   // F2
   for(const i of idx){
     const A=M.aree[i]; if(!A) continue;
-    const t=S.territori[i]||{}, tuo=compatibile(t.partito,asseTuo), L=Math.abs(TE[i].lean);
+    const t=S.territori[i]||{}, tuo=compatibile(t.partito,asseTuo,S.partito), L=Math.abs(TE[i].lean);
     const op=L>=2?0.95:L===1?0.72:0.5;
     const sel=MAPSEL===i, chiama=(chiamaIdx===i);   // F2 — l'area che chiama pulsa (E5: alla comparsa, poi ferma)
     const lav=!!(t.spinta);   // L64-2: area lavorata in campagna
@@ -1984,7 +1995,7 @@ function renderMappaSVG(){
 }
 function renderMappaInfo(){
   if(MAPSEL==null) return `<div style="padding:4px 14px 12px;font-size:12px;color:var(--mut2)">${T("Tocca un'area per i dettagli.")}</div>`;
-  const TE=PAESE.territori[MAPSEL], t=S.territori[MAPSEL]||{}, tuo=compatibile(t.partito, part(S.partito).asse);
+  const TE=PAESE.territori[MAPSEL], t=S.territori[MAPSEL]||{}, tuo=compatibile(t.partito, part(S.partito).asse, S.partito);
   const pn=(part(t.partito)||{}).nome||'—';
   /* F2 — se l'area selezionata è quella che CHIAMA, la mini-scheda con la scelta prende il posto dell'info piatta.
      Map-native: la decisione vive qui (S.territorioChiama, dato puro), non come carta-agenda. */
@@ -2012,7 +2023,7 @@ function renderMappaInfo(){
 function renderMappaPage(){
   const asseTuo=part(S.partito).asse;
   const pl=(S.potereLocale!=null)?Math.round(S.potereLocale):null;
-  const mie=S.territori.filter(t=>compatibile(t.partito,asseTuo)).length;
+  const mie=S.territori.filter(t=>compatibile(t.partito,asseTuo,S.partito)).length;
   let h=`<button class="mini-btn" style="margin-bottom:10px" onclick="chiudiMappa()">← ${T('Partiti')}</button>`;
   h+=`<div class="contorno" style="font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--mut);margin:2px 2px 8px;">${T('Il territorio · controllo politico')}</div>`;
   if(typeof inCampagna==='function' && inCampagna()){ const sf=campSforzo(); h+=`<div class="banner camp-banner">${(sf>0?T('<b>Campagna sul territorio</b>: %N punti di sforzo da spendere, %M mesi al voto. Tocca un\'area e investi: dove vai, sposti; dove non vai, perdi terreno. Quel che resta a fine campagna si perde.').replace('%N',sf):T('<b>Campagna sul territorio</b>: sforzo esaurito, %M mesi al voto. Le aree lavorate sono segnate in blu.')).replace('%M',mesiAllaFine())}</div>`; }   // L64-2
@@ -2020,7 +2031,7 @@ function renderMappaPage(){
   h+=`<div class="card uno"><div class="ct">${T('La mappa')}</div><div class="mappa-wrap">${renderMappaSVG()}</div>
     <div class="mappa-leg"><span><i style="background:var(--acc)"></i>${T('il tuo blocco')}</span><span><i style="background:var(--mut2)"></i>${T('avversario')}</span><span><i style="background:var(--acc);opacity:.5"></i>${T('tinta chiara = contendibile')}</span><span><i style="border:1.6px solid var(--brand)"></i>${T('area simbolo')}</span></div>
     ${renderMappaInfo()}</div>`;
-  h+=`<div class="card"><div class="ct">${T('Aree simbolo')}</div>`+PAESE.territori.map(function(TE,i){ if(!TE.simbolo) return ''; const t=S.territori[i]||{}; const tuo=compatibile(t.partito,asseTuo); const pn=(part(t.partito)||{}).nome||'';
+  h+=`<div class="card"><div class="ct">${T('Aree simbolo')}</div>`+PAESE.territori.map(function(TE,i){ if(!TE.simbolo) return ''; const t=S.territori[i]||{}; const tuo=compatibile(t.partito,asseTuo,S.partito); const pn=(part(t.partito)||{}).nome||'';
     return `<div class="grp"><div class="top"><div class="nm">${nomeTerr(TE)}<small>${caricaTerr(TE)}</small></div><span class="chip" style="background:${tuo?'var(--acc-bg)':'var(--line2)'};color:${tuo?'var(--acc-ink)':'var(--mut)'}">${T(tuo?'tuo':'avversario')}</span></div><div style="font-size:12px;color:var(--mut)">${t.titolare||'—'} · ${pn}</div></div>`; }).join('')+`</div>`;
   h+=`<div class="card"><div class="ct">${T('Come funziona')}</div><div class="log"><div class="li">${T('Ogni area ha una tendenza storica (tinta piena = roccaforte, chiara = contendibile) e un eletto locale. Alle <b>elezioni intermedie</b> le aree possono cambiare colore: più aree controlla il tuo blocco, più sale il <b>potere locale</b> (sopra 50 → <b>+1 punto riforma</b> a gennaio).')}</div></div></div>`;
   return h;
@@ -2247,8 +2258,8 @@ function renderPartiti(){
       <div style="font-size:11px;color:var(--mut2);margin-top:6px">${T("La tacca segna il 50%. I sondaggi hanno un margine d'errore: indicano la tendenza, non la certezza.")}</div></div>`:'';
   const campRiga=(typeof inCampagna==='function' && inCampagna() && PAESE.mappa)?`<div class="banner camp-banner" style="margin-bottom:12px">${T('Campagna sul territorio: <b>%N punti</b> da spendere sulla mappa, %M mesi al voto.').replace('%N',campSforzo()).replace('%M',mesiAllaFine())} <a href="#" onclick="apriMappa();return false;" style="font-weight:600">${T('Apri la mappa →')}</a></div>`:'';   // L64-2
   const territBox=(campRiga)+((S.territori&&S.territori.length)?(PAESE.mappa
-    ? `<div class="card" style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 14px;margin-bottom:12px"><span style="font-size:12.5px;color:var(--mut)">${T('Il territorio · <b>%N</b> aree su %M al tuo blocco').replace('%N',S.territori.filter(function(t){return compatibile(t.partito,asseTuo);}).length).replace('%M',S.territori.length)}</span><button class="mini-btn" style="margin-top:0;flex-shrink:0;background:var(--brand-bg);border-color:var(--brand);color:var(--brand);font-weight:600" onclick="apriMappa()">${T('Apri la mappa →')}</button></div>`
-    : `<div class="card"><div class="ct">${T('Il territorio')}</div>`+PAESE.territori.map(function(TE,i){ const t=S.territori[i]||{}; const tuo=compatibile(t.partito,asseTuo); const pn=(part(t.partito)||{}).nome||''; return `<div class="grp"><div class="top"><div class="nm">${nomeTerr(TE)}<small>${caricaTerr(TE)}</small></div><span class="chip" style="background:${tuo?'var(--acc-bg)':'var(--line2)'};color:${tuo?'var(--acc-ink)':'var(--mut)'}">${T(tuo?'tuo':'avversario')}</span></div><div style="font-size:12px;color:var(--mut)">${t.titolare||'—'} · ${pn}</div></div>`; }).join('')+`</div>`):'');
+    ? `<div class="card" style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 14px;margin-bottom:12px"><span style="font-size:12.5px;color:var(--mut)">${T('Il territorio · <b>%N</b> aree su %M al tuo blocco').replace('%N',S.territori.filter(function(t){return compatibile(t.partito,asseTuo,S.partito);}).length).replace('%M',S.territori.length)}</span><button class="mini-btn" style="margin-top:0;flex-shrink:0;background:var(--brand-bg);border-color:var(--brand);color:var(--brand);font-weight:600" onclick="apriMappa()">${T('Apri la mappa →')}</button></div>`
+    : `<div class="card"><div class="ct">${T('Il territorio')}</div>`+PAESE.territori.map(function(TE,i){ const t=S.territori[i]||{}; const tuo=compatibile(t.partito,asseTuo,S.partito); const pn=(part(t.partito)||{}).nome||''; return `<div class="grp"><div class="top"><div class="nm">${nomeTerr(TE)}<small>${caricaTerr(TE)}</small></div><span class="chip" style="background:${tuo?'var(--acc-bg)':'var(--line2)'};color:${tuo?'var(--acc-ink)':'var(--mut)'}">${T(tuo?'tuo':'avversario')}</span></div><div style="font-size:12px;color:var(--mut)">${t.titolare||'—'} · ${pn}</div></div>`; }).join('')+`</div>`):'');
   const mediaU=S.correnti?Math.round(umoreMedio()):null;
   const dcP=S.correnti?correnteDaCurare():null;   // loop attivo Lotto 2: evidenzia già sulla landing quale corrente curare
   const dcNome=dcP?T((CORRENTI_DEF.find(function(d){return d.id===dcP.corrente;})||{}).nome||''):'';

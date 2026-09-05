@@ -230,7 +230,8 @@ function simulateMonth(){
      cicloBase()=0 → identico a prima (il '50 sigillato, il presente alla virgola). */
   const cicB=(typeof cicloBase==='function')?cicloBase():0;
   S.ciclo=clamp(cicB + ((S.ciclo||0)-cicB)*0.93 + (Math.random()*2-1)*ampC*0.30, cicB-ampC, cicB+ampC);
-  if(!S.opposizione) S.mesiAlGoverno=(S.mesiAlGoverno||0)+1;                        // logorio del potere (solo mentre governi)
+  if(!S.opposizione){ S.mesiAlGoverno=(S.mesiAlGoverno||0)+1;                        // logorio del potere (solo mentre governi)
+    S.logorioAcc=(S.logorioAcc||0)+rateLogorioMese(); }                              // L77-3: e il logorio del MESE, che dipende dal consenso di quel mese
   S.ind.growth=computeGrowth();
   S.ind.deficit=computeDeficit();
   S.ind.unemp+= (targetUnemp()-S.ind.unemp)*0.12;
@@ -299,6 +300,69 @@ function baseSoddPartito(){ const p=part(S.partito); if(!p||!p.base) return 50;
 function etaFase(){ const e=(S&&S.eta!=null)?S.eta:52; return e<=48?'giovane':(e<64?'neutro':(e<72?'anziano':'vecchio')); }
 function etaAutorev(){ const f=etaFase(); return f==='giovane'?-3:(f==='neutro'?0:3); }
 function etaLogorio(){ return etaFase()==='vecchio'?1.25:1; }
+
+/* ================================================================================================================
+   L77-3 · IL LOGORIO LEGGE IL CONSENSO — e il neutro sta sulla MEDIANA, non su 50.
+
+   PERCHE. Il logorio era il solo tempo passato al governo: `mesiAlGoverno x logorioEra`. Il consenso entrava
+   soltanto dopo, come `bonus` CAPPATO al 70% del logorio — e quel cap ha una conseguenza che nessuno aveva
+   misurato: govF = clamp(1 - logorio + bonus - malus, 0.4, 1.2) tocca il pavimento 0,4 dopo ~50 mesi a consenso
+   50 e ~59 a consenso 60. **Dopo cinque anni di governo il consenso non conta piu nulla**: il premier popolare e
+   quello impopolare perdono il partito alla stessa velocita. E' questo che rendeva irraggiungibile la seconda
+   meta di ogni decennio (L77-2), non il decennio.
+
+   LA CURVA, E PERCHE IL NEUTRO NON E 50. La dispersione del consenso MENTRE SI GOVERNA, misurata su 13 porte x
+   5 semi x 120 mesi (3.776 mesi, `.claude/misura-logorio.js`): min 49,1 · p10 52,4 · p25 54,1 · MEDIANA 56,6 ·
+   p75 59,4 · p90 61,6 · max 66,8. **Il 100% dei mesi sta sopra 50 e lo 0% sotto 40.** Mettere il neutro a 50 —
+   come diceva la prima proposta — avrebbe reso il logorio piu lento SEMPRE (un regalo, non una modulazione), e
+   il ramo «sotto 40 si logora di piu» sarebbe stato un ramo morto: nessuno ci arriva mai. Il neutro va dove
+   sta la meta dei mesi.
+
+       f(consenso) = clamp(1 + (56.6 - consenso) x 0.10,  0.15, 1.8)
+
+   Ai punti della distribuzione: p10 52,4 -> 1,42 (chi arranca si logora molto piu di oggi) · MEDIANA -> 1,00
+   (il giocatore tipico non cambia di un punto: la taratura non regala niente a chi sta in mezzo) · p90 61,6 -> 0,50.
+
+   ⚑ LA PENDENZA E STATA CERCATA, NON SCELTA. La prima proposta era k=0,05, e il confronto appaiato (curva accesa
+   e spenta nello stesso processo, stessi semi, stesso strumento) ha detto che non spostava NULLA: zero differenze
+   su tutte e tredici le porte, col banco e con l'oracolo. La diagnosi che avevo dato era che la forma
+   moltiplicativa non potesse funzionare — il logorio cresce senza limite e satura il pavimento di govF comunque.
+   ERA SBAGLIATA, e a dirlo e' stata la scansione su k: 0,05 non muove niente, **0,10 porta uk2000 da 1 a 3 snodi
+   e i mesi al governo dal 54% al 62%**, 0,20 satura (i clamp mordono e la curva diventa un gradino). La forma era
+   giusta, la pendenza era debole. *Prima di dichiarare che una forma non puo' funzionare, cercare il valore che
+   la farebbe funzionare: se esiste, la diagnosi era sbagliata.*
+
+   ⚑ E IL PAVIMENTO E' LA VERA LEVA, non la pendenza — l'ho scoperto sbagliando. La scansione su k sembrava dire
+   che 0,10 apriva i cancelli, ma in quella prova avevo cambiato DUE cose insieme: la pendenza *e* il pavimento
+   (0,05 invece di 0,35). Col pavimento vero il gate restava chiuso. Rifatta muovendo UNA COSA ALLA VOLTA, a k
+   fisso: il pavimento 0,35 · 0,25 · 0,20 lasciano uk2000 a 1 snodo, **0,15 lo porta a 3 e i mesi al governo dal
+   54% al 62%**, e sotto 0,15 non cambia piu' niente. Quindi 0,15 e' il punto in cui il cancello si apre e non un
+   punto oltre: scendere ancora non regalerebbe altro, regalerebbe soltanto.
+   *Una scansione che muove due parametri insieme non misura nessuno dei due.*
+
+   f = 0,15 corrisponde a consenso 65,1, e il massimo mai osservato al governo e' 66,8: il pavimento morde solo
+   nell'ultima coda, e nel resto della distribuzione la curva e' lineare. Il logorio rallenta fino a un settimo,
+   non si azzera mai: chi e' popolarissimo consuma il partito lentamente, non smette di consumarlo. Il clamp alto
+   (1,8) morde sotto 48,6, fuori dalla distribuzione al governo: e' una rete per gli stati anomali.
+
+   ACCUMULO, NON MOLTIPLICAZIONE DEL TOTALE. Il logorio si somma mese per mese in `S.logorioAcc`: e la somma di
+   quanto hai logorato ogni mese, col consenso che avevi in QUEL mese. Moltiplicare il totale per f(consenso
+   corrente) avrebbe riscritto all'indietro tutta la storia a ogni oscillazione. `S.logorioAcc` e un numero:
+   S resta puro e serializzabile. Segue le due regole di `mesiAlGoverno`: DIMEZZATO alla vittoria, AZZERATO
+   quando si va all'opposizione (la traversata del deserto).
+   ================================================================================================================ */
+function fLogorioConsenso(cons){ return clamp(1 + (56.6 - cons)*0.10, 0.15, 1.8); }
+function rateLogorioMese(){
+  const cons=(S.ind&&S.ind.consenso!=null)?S.ind.consenso:50;
+  const rate=((S.logorioEra!=null)?S.logorioEra:0.002)*(dif().logorioMult!=null?dif().logorioMult:1)*etaLogorio();
+  return rate*fLogorioConsenso(cons);
+}
+/* il totale, con la migrazione: un salvataggio anteriore a L77-3 non ha l'accumulatore e riparte dal
+   comportamento vecchio (mesi x rate), cosi la sua curva non fa un gradino al caricamento. */
+function logorioTotale(){
+  if(S.logorioAcc==null) S.logorioAcc=(S.mesiAlGoverno||0)*((S.logorioEra!=null)?S.logorioEra:0.002)*(dif().logorioMult!=null?dif().logorioMult:1)*etaLogorio();
+  return S.logorioAcc;
+}
 
 /* L64-4 — le liste pesano sul TARGET delle correnti finché dura il gruppo: fedeli → +4 a tutte (stabilità), correnti → +6
    alla corrente favorita (il seme). Convergente e lieve, come l'età: niente gradini sui valori vivi. */
@@ -369,7 +433,7 @@ function evolvePartiti(){
      ACCELERA. Rate per-scenario (S.logorioEra; presente resta 0.002) × difficoltà (logorioMult) × età.
      Nel presente il delta è il solo cap-del-bonus: niente più incumbent che cresce all'infinito (documentato). */
   const cons=(S.ind&&S.ind.consenso!=null)?S.ind.consenso:50;
-  const logorio=(S.mesiAlGoverno||0)*((S.logorioEra!=null)?S.logorioEra:0.002)*(dif().logorioMult!=null?dif().logorioMult:1)*etaLogorio();
+  const logorio=logorioTotale();                                    // L77-3: accumulato mese per mese, col consenso di ogni mese
   const swing=(dif().swingGoverno!=null?dif().swingGoverno:1);
   const bonus=Math.min(Math.max(cons-50,0)/100*swing, logorio*0.7);
   const malus=Math.max(50-cons,0)/100*swing;
@@ -618,9 +682,38 @@ function intesaMuovi(idAltro, n){
    L25-1 — TERZA VIA: entra anche chi ha un'INTESA ≥60. Si SOMMA agli override storici (`aperturaAmmette`,
    apparentamento '53), non li sostituisce: l'apertura a sinistra resta uno snodo, l'intesa è il lavorio quotidiano
    che può prepararla o supplirvi. Col tetto-per-distanza, |Δasse|≥3 non arriva mai a 60 → mai ammesso. */
+/* ================================================================================================================
+   L80-4 · LE ALLEANZE SI DICHIARANO — `alleati:[...]` sul partito, con l'asse come ripiego.
+
+   PERCHE. La compatibilita era una sola regola numerica, |asse tuo - asse suo| <= 1, per sedici sistemi diversi.
+   Misurato in L80-2: dove il giocatore parte con un partito ad asse 2 e gli altri stanno a 0 o sotto, il blocco
+   massimo raggiungibile resta SOTTO la maggioranza per costruzione — India 40 seggi, Brasile 39, Francia 44,
+   contro Italia 53 e Germania 59. E allargare la soglia a 2 per tutti guarisce quei tre ma allea il PP col PSOE
+   in Spagna e l'AfD con l'SPD in Germania: misurato anche quello, e scartato.
+
+   LA REGOLA. Se un partito dichiara `alleati`, quell'elenco DICE con chi puo stare, e l'asse non si guarda piu.
+   Se non lo dichiara, vale |Δasse| <= 1 come sempre: e' ADDITIVO, e un roster che non dichiara nulla si comporta
+   esattamente come prima. L'NDA indiano e il «centrao» brasiliano sono alleanze di convenienza, non di asse; il
+   cordone attorno al RN francese e' il contrario, un partito grande che nessuno vuole — e infatti la Francia non
+   dichiara niente, perche' li' l'asse dice gia' il vero (la cura della Francia e' un'altra, L80-5).
+
+   ⚑ SIMMETRICA PER DICHIARAZIONE, NON A RUNTIME. Se A nomina B, B deve nominare A: lo controlla una guardia
+   (`.claude/verifica-alleanze.js`), non il codice. Renderla simmetrica a runtime nasconderebbe la dimenticanza,
+   ed e' esattamente il tipo di errore che vogliamo vedere.
+
+   ⚑ E LA NOZIONE E' UNA SOLA, letta da tutti e tre i punti che decidevano «sta col mio blocco»: `compatibili()`
+   (le alleanze), `compatibile()` (di chi e' un territorio) e `scegliPartito()` (a chi passa un territorio che
+   cambia mano). La voce ne prevedeva due: il terzo e' saltato fuori cercandoli, e lasciarlo sull'asse avrebbe
+   fatto contare come AVVERSARIA, sulla mappa, un'area governata da un alleato dichiarato.
+   ================================================================================================================ */
+function staColBlocco(idAltro, idTuo){
+  const tuo=part(idTuo), altro=part(idAltro);
+  if(!tuo || !altro || idAltro===idTuo) return false;
+  if(Array.isArray(tuo.alleati)) return tuo.alleati.indexOf(idAltro) >= 0;
+  return Math.abs(altro.asse - tuo.asse) <= 1;
+}
 function compatibili(idTuo, seggi){
-  const a=part(idTuo).asse;
-  const list=PAESE.partiti.filter(p=>p.id!==idTuo && (Math.abs(p.asse-a)<=1 || aperturaAmmette(idTuo,p.id) || (typeof intesaDi==='function' && intesaDi(p.id)>=60)));
+  const list=PAESE.partiti.filter(p=>p.id!==idTuo && (staColBlocco(p.id, idTuo) || aperturaAmmette(idTuo,p.id) || (typeof intesaDi==='function' && intesaDi(p.id)>=60)));
   return seggi ? list.sort((x,y)=>(seggi[y.id]||0)-(seggi[x.id]||0)) : list;
 }
 function seggiCoalizione(ids, seggi){ return ids.reduce((s,id)=>s+(seggi[id]||0),0); }

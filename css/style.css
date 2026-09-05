@@ -195,7 +195,7 @@
 
   /* Bottone "torna su": flottante sopra l'endbar, sobrio (veste avorio), appare oltre ~400px di scroll. */
   #topbtn{position:fixed; right:14px; bottom:calc(79px + env(safe-area-inset-bottom)); z-index:25;
-    width:40px; height:40px; border-radius:50%; border:1px solid var(--line2); background:var(--panel); color:var(--mut);
+    width:44px; height:44px; border-radius:50%; border:1px solid var(--line2); background:var(--panel); color:var(--mut);   /* L77-1: era 40px — la sonda di L68-1 lo ha trovato sotto il bersaglio tattile di 44. Difetto preesistente e globale, non del decennio 2000: e uscito qui perche la sonda gira sulla pagina di gioco, dove il torna-su compare. */
     font-size:17px; font-weight:600; line-height:1; font-family:inherit; cursor:pointer; box-shadow:0 3px 10px rgba(0,0,0,.10);
     opacity:0; visibility:hidden; transform:translateY(6px); transition:opacity .2s ease, transform .2s ease, visibility .2s;}
   #topbtn.vis{opacity:1; visibility:visible; transform:none;}
@@ -327,6 +327,12 @@
   /* L68-1 — il `small` dentro una scheda non era mai stato stilizzato: prendeva il default del browser
      (0,83em → 11,1px), sotto il minimo che ci siamo dati. Una regola con un'eccezione è una regola che muore. */
   .cand small{font-size:12px;}
+  /* L79-2 - terza recidiva della stessa famiglia (L68-1, L70-1): un `small` che nessuno ha stilizzato prende il
+     default del browser, 0,75em = 11,25px, sotto la soglia di 12 del testo-che-serve-a-decidere. Qui era il modal
+     «forma la tua maggioranza», dove i `small` portano l'orientamento del partito e la riga «il tuo partito»: e'
+     esattamente cio' che il giocatore legge per scegliere gli alleati. Il contorno resta a 11 dichiarandosi. */
+  .modal small{font-size:12px;}
+  .modal small.contorno{font-size:11px;}
   /* L10-2 — il volto del candidato nella nomina: tondo ridotto a 34px (375px), nome che tronca invece di andare a capo */
   .cand .cleft{display:flex; align-items:center; gap:9px; min-width:0;}
   .cand .avatar{width:34px; height:34px; font-size:16px; flex-shrink:0;}

@@ -18,6 +18,7 @@ const PAESI = {
   italia: {
     economia:{pil:2150, debito:139, deficit:-3.4},   // cifre 2024 riconciliate (CIFRE-ECONOMICHE.md); PIL € mld
     nome: 'Italia',
+    capitale: 'Roma', sedeGoverno: 'Palazzo Chigi',   /* L76-1: i luoghi sono DATI, non testi (i testi universali li leggono con %CAPITALE/%ACAPITALE/%SEDE) */
     colori: { bandiera: ['#1e8a5a', '#e9ecf2', '#c8324a'], accento: '#a9791a' },
     flag: '<svg viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg"><rect width="30" height="20" fill="#fff"/><rect width="10" height="20" fill="#1e8a5a"/><rect x="20" width="10" height="20" fill="#c8324a"/></svg>',
     nomeArt: "l'Italia",
@@ -56,11 +57,12 @@ const PAESI = {
   francia: {
     economia:{pil:2890, debito:112, deficit:-5.8},   // cifre 2024 riconciliate (CIFRE-ECONOMICHE.md); PIL € mld
     nome: 'Francia',
+    capitale: 'Parigi', sedeGoverno: 'l\'Eliseo',   /* L76-1: i luoghi sono DATI, non testi (i testi universali li leggono con %CAPITALE/%ACAPITALE/%SEDE) */
     colori: { bandiera: ['#0055a4', '#ffffff', '#ef4135'], accento: '#a9791a' },
     flag: '<svg viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg"><rect width="30" height="20" fill="#fff"/><rect width="10" height="20" fill="#0055a4"/><rect x="20" width="10" height="20" fill="#ef4135"/></svg>',
     nomeArt: 'la Francia',
     titoloRuolo: 'Presidente della Repubblica',
-    mandatoMesi: 60, sistema: 'semipresidenziale', sfiducia: true,
+    mandatoMesi: 60, sistema: 'semipresidenziale', sfiducia: true, scioglimentoMesiMin: 12,   /* L80-5: nella V Repubblica il Presidente puo sciogliere l'Assemblea al massimo una volta l'anno; altrove restano i 18 mesi di sempre */
     coalizione: true, comeSiVince: 'candidato', cadutaGoverno: true, ue: true, distorsione: 1.1,
     intermedie: [{tipo:'Elezioni europee', mese:28, ue:true, tocca:'tutti'}, {tipo:'Elezioni municipali', mese:44, tocca:'città'}],
     territori: [
@@ -89,6 +91,7 @@ const PAESI = {
   usa: {
     economia:{pil:26600, debito:123, deficit:-6.5},   // cifre 2024 riconciliate (CIFRE-ECONOMICHE.md); PIL € mld
     nome: 'Stati Uniti',
+    capitale: 'Washington', sedeGoverno: 'la Casa Bianca',   /* L76-1: i luoghi sono DATI, non testi (i testi universali li leggono con %CAPITALE/%ACAPITALE/%SEDE) */
     colori: { bandiera: ['#3c3b6e', '#ffffff', '#b22234'], accento: '#a9791a' },
     flag: '<svg viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg"><rect width="30" height="20" fill="#b22234"/><g fill="#fff"><rect y="1.54" width="30" height="1.54"/><rect y="4.62" width="30" height="1.54"/><rect y="7.69" width="30" height="1.54"/><rect y="10.77" width="30" height="1.54"/><rect y="13.85" width="30" height="1.54"/><rect y="16.92" width="30" height="1.54"/></g><rect width="12" height="10.77" fill="#3c3b6e"/><g fill="#fff"><circle cx="2" cy="1.8" r=".6"/><circle cx="4.5" cy="1.8" r=".6"/><circle cx="7" cy="1.8" r=".6"/><circle cx="9.5" cy="1.8" r=".6"/><circle cx="3.25" cy="3.6" r=".6"/><circle cx="5.75" cy="3.6" r=".6"/><circle cx="8.25" cy="3.6" r=".6"/><circle cx="2" cy="5.4" r=".6"/><circle cx="4.5" cy="5.4" r=".6"/><circle cx="7" cy="5.4" r=".6"/><circle cx="9.5" cy="5.4" r=".6"/><circle cx="3.25" cy="7.2" r=".6"/><circle cx="5.75" cy="7.2" r=".6"/><circle cx="8.25" cy="7.2" r=".6"/><circle cx="2" cy="9" r=".6"/><circle cx="4.5" cy="9" r=".6"/><circle cx="7" cy="9" r=".6"/><circle cx="9.5" cy="9" r=".6"/></g></svg>',
     nomeArt: 'gli Stati Uniti',
@@ -119,6 +122,7 @@ const PAESI = {
   regnounito: {
     economia:{pil:3230, debito:104, deficit:-4.8},   // cifre 2024 riconciliate (CIFRE-ECONOMICHE.md); PIL € mld
     nome: 'Regno Unito',
+    capitale: 'Londra', sedeGoverno: 'Downing Street',   /* L76-1: i luoghi sono DATI, non testi (i testi universali li leggono con %CAPITALE/%ACAPITALE/%SEDE) */
     colori: { bandiera: ['#012169', '#ffffff', '#c8102e'], accento: '#a9791a' },
     flag: '<svg viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg"><rect width="30" height="20" fill="#012169"/><path d="M0,0 30,20 M30,0 0,20" stroke="#fff" stroke-width="4"/><path d="M0,0 30,20 M30,0 0,20" stroke="#c8102e" stroke-width="1.7"/><path d="M15,0 V20 M0,10 H30" stroke="#fff" stroke-width="6"/><path d="M15,0 V20 M0,10 H30" stroke="#c8102e" stroke-width="3.4"/></svg>',
     nomeArt: 'il Regno Unito',
@@ -170,6 +174,7 @@ const PAESI = {
   australia: {
     economia:{pil:1655, debito:50, deficit:-1.3},   // cifre 2024 riconciliate (CIFRE-ECONOMICHE.md); PIL € mld
     nome: 'Australia',
+    capitale: 'Canberra', sedeGoverno: 'la sede del governo',   /* L76-1: i luoghi sono DATI, non testi (i testi universali li leggono con %CAPITALE/%ACAPITALE/%SEDE) */
     allineamento: 'occidentale', terminoLocale: 'Stato',
     colori: { bandiera: ['#00247d', '#ffffff', '#cf142b'], accento: '#a9791a' },
     flag: '<svg viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg"><rect width="30" height="20" fill="#00247d"/><rect width="13" height="9" fill="#012169"/><path d="M0,0 L13,9 M13,0 L0,9" stroke="#fff" stroke-width="1.6"/><path d="M0,0 L13,9 M13,0 L0,9" stroke="#cf142b" stroke-width="0.8"/><path d="M6.5,0 V9 M0,4.5 H13" stroke="#fff" stroke-width="2.2"/><path d="M6.5,0 V9 M0,4.5 H13" stroke="#cf142b" stroke-width="1.1"/><circle cx="6.5" cy="14.8" r="1.5" fill="#fff"/><circle cx="24" cy="5" r="0.9" fill="#fff"/><circle cx="27.5" cy="9" r="0.9" fill="#fff"/><circle cx="24" cy="13.5" r="0.9" fill="#fff"/><circle cx="20.5" cy="9.5" r="0.9" fill="#fff"/><circle cx="24" cy="9" r="0.55" fill="#fff"/></svg>',
@@ -203,6 +208,7 @@ const PAESI = {
   india: {
     economia:{pil:3640, debito:82, deficit:-7.8},   // cifre 2024 riconciliate (CIFRE-ECONOMICHE.md); PIL € mld
     nome: 'India',
+    capitale: 'Nuova Delhi', sedeGoverno: 'la sede del governo',   /* L76-1: i luoghi sono DATI, non testi (i testi universali li leggono con %CAPITALE/%ACAPITALE/%SEDE) */
     allineamento: 'nonallineato', potenzaId: 'india', terminoLocale: 'Stato',
     colori: { bandiera: ['#ff9933', '#ffffff', '#138808'], accento: '#a9791a' },
     flag: '<svg viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg"><rect width="30" height="20" fill="#fff"/><rect width="30" height="6.67" fill="#ff9933"/><rect y="13.33" width="30" height="6.67" fill="#138808"/><circle cx="15" cy="10" r="2.6" fill="none" stroke="#1a3a8f" stroke-width="0.5"/><path d="M15,7.4 V12.6 M12.4,10 H17.6 M13.16,8.16 L16.84,11.84 M16.84,8.16 L13.16,11.84" stroke="#1a3a8f" stroke-width="0.3"/><circle cx="15" cy="10" r="0.5" fill="#1a3a8f"/></svg>',
@@ -225,16 +231,20 @@ const PAESI = {
     nomiF: ['Priya','Ananya','Kavya','Neha','Pooja','Divya','Meera','Anjali','Sneha','Riya'],
     cognomi: ['Sharma','Patel','Singh','Kumar','Gupta','Reddy','Nair','Iyer','Das','Banerjee','Mehta','Shah','Rao','Joshi','Verma','Chopra','Malhotra','Kapoor','Bose','Pillai'],
     partiti: [
-      { id:'in_bjp',  nome:'BJP',                orientamento:'destra',         base:{ cattolici:0.4, cetomedio:0.4, imprenditori:0.2 }, forza:38, asse:2 },
-      { id:'in_reg',  nome:'Partiti regionali',  orientamento:'centro',         base:{ lavoratori:0.4, pensionati:0.3, cetomedio:0.3 },  forza:24, asse:0 },
-      { id:'in_inc',  nome:'Congresso',          orientamento:'centrosinistra', base:{ lavoratori:0.4, giovani:0.3, cetomedio:0.3 },     forza:22, asse:-1 },
-      { id:'in_aap',  nome:'AAP',                orientamento:'populista',      base:{ giovani:0.5, cetomedio:0.3, lavoratori:0.2 },     forza:8,  asse:0 },
-      { id:'in_left', nome:'Sinistra',           orientamento:'sinistra',       base:{ lavoratori:0.6, giovani:0.4 },                    forza:8,  asse:-2 },
+      /* L80-4 - ALLEANZE DICHIARATE. In India si governa con l'NDA e si sfida col fronte INDIA: sono patti di
+         convenienza fra un partito nazionale e i regionali, non vicinanze d'asse. Con la sola regola |asse|<=1
+         il BJP (asse 2) non aveva NESSUN alleato ammesso e restava a 40 seggi: minoranza per costruzione. */
+      { id:'in_bjp',  nome:'BJP',                orientamento:'destra',         base:{ cattolici:0.4, cetomedio:0.4, imprenditori:0.2 }, forza:38, asse:2, alleati:['in_reg'] },
+      { id:'in_reg',  nome:'Partiti regionali',  orientamento:'centro',         base:{ lavoratori:0.4, pensionati:0.3, cetomedio:0.3 },  forza:24, asse:0, alleati:['in_bjp','in_inc','in_aap'] },
+      { id:'in_inc',  nome:'Congresso',          orientamento:'centrosinistra', base:{ lavoratori:0.4, giovani:0.3, cetomedio:0.3 },     forza:22, asse:-1, alleati:['in_reg','in_left','in_aap'] },
+      { id:'in_aap',  nome:'AAP',                orientamento:'populista',      base:{ giovani:0.5, cetomedio:0.3, lavoratori:0.2 },     forza:8,  asse:0, alleati:['in_inc','in_reg'] },
+      { id:'in_left', nome:'Sinistra',           orientamento:'sinistra',       base:{ lavoratori:0.6, giovani:0.4 },                    forza:8,  asse:-2, alleati:['in_inc'] },
     ],
   },
   sudafrica: {
     economia:{pil:340, debito:75, deficit:-6.2},   // cifre 2024 riconciliate (CIFRE-ECONOMICHE.md); PIL € mld
     nome: 'Sudafrica',
+    capitale: 'Pretoria', sedeGoverno: 'la presidenza',   /* L76-1: i luoghi sono DATI, non testi (i testi universali li leggono con %CAPITALE/%ACAPITALE/%SEDE) */
     allineamento: 'nonallineato', terminoLocale: 'Provincia',
     colori: { bandiera: ['#007749', '#e03c31', '#001489'], accento: '#a9791a' },
     flag: '<svg viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg"><rect width="30" height="20" fill="#e03c31"/><rect y="10" width="30" height="10" fill="#001489"/><rect y="7.5" width="30" height="5" fill="#007749"/><rect y="6.7" width="30" height="0.8" fill="#fff"/><rect y="12.5" width="30" height="0.8" fill="#fff"/><path d="M0,0 L13,10 L0,20 Z" fill="#000"/><path d="M0,0 L13,10 L0,20" fill="none" stroke="#ffb915" stroke-width="0.9"/></svg>',
@@ -268,6 +278,7 @@ const PAESI = {
   argentina: {
     economia:{pil:555, debito:86, deficit:0.3},   // cifre 2024 riconciliate (CIFRE-ECONOMICHE.md); PIL € mld
     nome: 'Argentina',
+    capitale: 'Buenos Aires', sedeGoverno: 'la Casa Rosada',   /* L76-1: i luoghi sono DATI, non testi (i testi universali li leggono con %CAPITALE/%ACAPITALE/%SEDE) */
     allineamento: 'nonallineato', terminoLocale: 'Provincia',
     colori: { bandiera: ['#74acdf', '#ffffff', '#f6b40e'], accento: '#a9791a' },
     flag: '<svg viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg"><rect width="30" height="20" fill="#fff"/><rect width="30" height="6.67" fill="#74acdf"/><rect y="13.33" width="30" height="6.67" fill="#74acdf"/><circle cx="15" cy="10" r="2.1" fill="#f6b40e"/><circle cx="15" cy="10" r="1.3" fill="#fff" stroke="#e0a800" stroke-width="0.4"/></svg>',
@@ -302,6 +313,7 @@ const PAESI = {
   germania: {
     economia:{pil:4240, debito:64, deficit:-2.8},   // cifre 2024 riconciliate (CIFRE-ECONOMICHE.md); PIL € mld
     nome: 'Germania',
+    capitale: 'Berlino', sedeGoverno: 'la Cancelleria',   /* L76-1: i luoghi sono DATI, non testi (i testi universali li leggono con %CAPITALE/%ACAPITALE/%SEDE) */
     allineamento: 'occidentale', terminoLocale: 'Land',
     colori: { bandiera: ['#000000', '#dd0000', '#ffce00'], accento: '#a9791a' },
     flag: '<svg viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg"><rect width="30" height="6.67" fill="#000"/><rect y="6.67" width="30" height="6.67" fill="#dd0000"/><rect y="13.33" width="30" height="6.67" fill="#ffce00"/></svg>',
@@ -335,6 +347,7 @@ const PAESI = {
   giappone: {
     economia:{pil:3800, debito:255, deficit:-2.5},   // cifre 2024 riconciliate (CIFRE-ECONOMICHE.md); PIL € mld
     nome: 'Giappone',
+    capitale: 'Tokyo', sedeGoverno: 'la sede del governo',   /* L76-1: i luoghi sono DATI, non testi (i testi universali li leggono con %CAPITALE/%ACAPITALE/%SEDE) */
     allineamento: 'occidentale', terminoLocale: 'Prefettura',
     colori: { bandiera: ['#ffffff', '#bc002d', '#bc002d'], accento: '#a9791a' },
     flag: '<svg viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg"><rect width="30" height="20" fill="#fff"/><circle cx="15" cy="10" r="6" fill="#bc002d"/></svg>',
@@ -368,6 +381,7 @@ const PAESI = {
   canada: {
     economia:{pil:2070, debito:105, deficit:-1.1},   // cifre 2024 riconciliate (CIFRE-ECONOMICHE.md); PIL € mld
     nome: 'Canada',
+    capitale: 'Ottawa', sedeGoverno: 'la sede del governo',   /* L76-1: i luoghi sono DATI, non testi (i testi universali li leggono con %CAPITALE/%ACAPITALE/%SEDE) */
     allineamento: 'occidentale', terminoLocale: 'Provincia',
     colori: { bandiera: ['#ff0000', '#ffffff', '#ff0000'], accento: '#a9791a' },
     flag: '<svg viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg"><rect width="30" height="20" fill="#fff"/><rect width="7.5" height="20" fill="#ff0000"/><rect x="22.5" width="7.5" height="20" fill="#ff0000"/><path d="M15,4.5 L15.9,8 L18.3,7.4 L16.7,9.6 L19.4,10.8 L16.4,11.4 L17,14 L15,12.4 L13,14 L13.6,11.4 L10.6,10.8 L13.3,9.6 L11.7,7.4 L14.1,8 Z" fill="#ff0000"/></svg>',
@@ -400,6 +414,7 @@ const PAESI = {
   spagna: {
     economia:{pil:1525, debito:106, deficit:-3.4},   // cifre 2024 riconciliate (CIFRE-ECONOMICHE.md); PIL € mld
     nome: 'Spagna',
+    capitale: 'Madrid', sedeGoverno: 'la Moncloa',   /* L76-1: i luoghi sono DATI, non testi (i testi universali li leggono con %CAPITALE/%ACAPITALE/%SEDE) */
     allineamento: 'occidentale', terminoLocale: 'Comunità',
     colori: { bandiera: ['#aa151b', '#f1bf00', '#aa151b'], accento: '#a9791a' },
     flag: '<svg viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg"><rect width="30" height="20" fill="#f1bf00"/><rect width="30" height="5" fill="#aa151b"/><rect y="15" width="30" height="5" fill="#aa151b"/></svg>',
@@ -435,6 +450,7 @@ const PAESI = {
   coreasud: {
     economia:{pil:1625, debito:57, deficit:-0.6},   // cifre 2024 riconciliate (CIFRE-ECONOMICHE.md); PIL € mld
     nome: 'Corea del Sud',
+    capitale: 'Seul', sedeGoverno: 'la presidenza',   /* L76-1: i luoghi sono DATI, non testi (i testi universali li leggono con %CAPITALE/%ACAPITALE/%SEDE) */
     allineamento: 'occidentale', terminoLocale: 'Provincia',
     colori: { bandiera: ['#ffffff', '#cd2e3a', '#0047a0'], accento: '#a9791a' },
     flag: '<svg viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg"><rect width="30" height="20" fill="#fff"/><path d="M15,6 A4,4 0 0,1 15,14 A2,2 0 0,1 15,10 A2,2 0 0,0 15,6 Z" fill="#cd2e3a"/><path d="M15,6 A4,4 0 0,0 15,14 A2,2 0 0,0 15,10 A2,2 0 0,1 15,6 Z" fill="#0047a0"/></svg>',
@@ -467,6 +483,7 @@ const PAESI = {
   brasile: {
     economia:{pil:2150, debito:87, deficit:-6.3},   // cifre 2024 riconciliate (CIFRE-ECONOMICHE.md); PIL € mld
     nome: 'Brasile',
+    capitale: 'Brasilia', sedeGoverno: 'il Planalto',   /* L76-1: i luoghi sono DATI, non testi (i testi universali li leggono con %CAPITALE/%ACAPITALE/%SEDE) */
     allineamento: 'nonallineato', terminoLocale: 'Stato',
     colori: { bandiera: ['#009c3b', '#ffdf00', '#002776'], accento: '#a9791a' },
     flag: '<svg viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg"><rect width="30" height="20" fill="#009c3b"/><path d="M15,2.5 L27,10 L15,17.5 L3,10 Z" fill="#ffdf00"/><circle cx="15" cy="10" r="4" fill="#002776"/></svg>',
@@ -489,17 +506,21 @@ const PAESI = {
     nomiF: ['Helena','Alice','Laura','Manuela','Valentina','Sophia','Isabella','Júlia','Lívia','Maria'],
     cognomi: ['Silva','Santos','Oliveira','Souza','Lima','Pereira','Ferreira','Costa','Rodrigues','Almeida','Nascimento','Carvalho','Araújo','Ribeiro','Gomes','Martins','Rocha','Barbosa','Alves','Mendes'],
     partiti: [
-      { id:'br_pl',  nome:'PL',          orientamento:'destra',         base:{ imprenditori:0.4, cetomedio:0.3, pensionati:0.3 }, forza:25, asse:2 },
-      { id:'br_pt',  nome:'PT',          orientamento:'centrosinistra', base:{ lavoratori:0.5, giovani:0.3, pensionati:0.2 },    forza:23, asse:-1 },
-      { id:'br_uniao', nome:'União Brasil', orientamento:'centrodestra', base:{ cetomedio:0.4, imprenditori:0.4, pensionati:0.2 }, forza:14, asse:1 },
-      { id:'br_psd', nome:'PSD',         orientamento:'centro',         base:{ cetomedio:0.5, lavoratori:0.3, imprenditori:0.2 }, forza:13, asse:0 },
-      { id:'br_mdb', nome:'MDB',         orientamento:'centro',         base:{ pensionati:0.4, cetomedio:0.3, lavoratori:0.3 },  forza:13, asse:0 },
-      { id:'br_psol', nome:'PSOL',       orientamento:'sinistra',       base:{ giovani:0.6, lavoratori:0.4 },                    forza:12, asse:-2 },
+      /* L80-4 - ALLEANZE DICHIARATE. Il «centrao» brasiliano sta con chi governa, da qualunque parte venga: e'
+         il presidenzialismo di coalizione, e sull'asse non si vede. Senza dichiarazione il PL (asse 2) arrivava
+         a 39 seggi col solo Uniao. */
+      { id:'br_pl',  nome:'PL',          orientamento:'destra',         base:{ imprenditori:0.4, cetomedio:0.3, pensionati:0.3 }, forza:25, asse:2, alleati:['br_uniao','br_psd','br_mdb'] },
+      { id:'br_pt',  nome:'PT',          orientamento:'centrosinistra', base:{ lavoratori:0.5, giovani:0.3, pensionati:0.2 },    forza:23, asse:-1, alleati:['br_psd','br_mdb','br_psol'] },
+      { id:'br_uniao', nome:'União Brasil', orientamento:'centrodestra', base:{ cetomedio:0.4, imprenditori:0.4, pensionati:0.2 }, forza:14, asse:1, alleati:['br_pl','br_psd','br_mdb'] },
+      { id:'br_psd', nome:'PSD',         orientamento:'centro',         base:{ cetomedio:0.5, lavoratori:0.3, imprenditori:0.2 }, forza:13, asse:0, alleati:['br_pl','br_pt','br_uniao','br_mdb'] },
+      { id:'br_mdb', nome:'MDB',         orientamento:'centro',         base:{ pensionati:0.4, cetomedio:0.3, lavoratori:0.3 },  forza:13, asse:0, alleati:['br_pl','br_pt','br_uniao','br_psd'] },
+      { id:'br_psol', nome:'PSOL',       orientamento:'sinistra',       base:{ giovani:0.6, lavoratori:0.4 },                    forza:12, asse:-2, alleati:['br_pt'] },
     ],
   },
   messico: {
     economia:{pil:1865, debito:56, deficit:-5.9},   // cifre 2024 riconciliate (CIFRE-ECONOMICHE.md); PIL € mld
     nome: 'Messico',
+    capitale: 'Città del Messico', sedeGoverno: 'la presidenza',   /* L76-1: i luoghi sono DATI, non testi (i testi universali li leggono con %CAPITALE/%ACAPITALE/%SEDE) */
     allineamento: 'nonallineato', terminoLocale: 'Stato',
     colori: { bandiera: ['#006847', '#ffffff', '#ce1126'], accento: '#a9791a' },
     flag: '<svg viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg"><rect width="30" height="20" fill="#fff"/><rect width="10" height="20" fill="#006847"/><rect x="20" width="10" height="20" fill="#ce1126"/><circle cx="15" cy="10" r="1.6" fill="none" stroke="#6b4423" stroke-width="0.8"/></svg>',
@@ -533,6 +554,7 @@ const PAESI = {
   nigeria: {
     economia:{pil:180, debito:47, deficit:-4.6},   // cifre 2024 riconciliate (CIFRE-ECONOMICHE.md); PIL € mld
     nome: 'Nigeria',
+    capitale: 'Abuja', sedeGoverno: 'la presidenza',   /* L76-1: i luoghi sono DATI, non testi (i testi universali li leggono con %CAPITALE/%ACAPITALE/%SEDE) */
     allineamento: 'nonallineato', terminoLocale: 'Stato',
     colori: { bandiera: ['#008751', '#ffffff', '#008751'], accento: '#a9791a' },
     flag: '<svg viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg"><rect width="30" height="20" fill="#fff"/><rect width="10" height="20" fill="#008751"/><rect x="20" width="10" height="20" fill="#008751"/></svg>',
@@ -792,7 +814,7 @@ const SCENARI = {
        `game.js`, dove la riga che li applica sta accanto alla spiegazione. Dalle elezioni successive in poi
        comanda il modello, che sul '51, '55 e '59 è giusto entro 1-2,9 punti. */
     seggi: { uk_lab:50.4, uk_con:47.7, uk_lib:1.9 },
-    economia: { pil:13000, debito:195, deficit:-4 },
+    economia: { pil:13, debito:195, deficit:-4 },     // L75-2: PIL in £ MLD, come il presente (era 13000, in milioni: la riga del bilancio moltiplica per mille)
     debtAncora: 195,
     logorioEra: 0.012,
     valuta: { sym:'£', mld:'mld sterline', mln:'mln sterline' },   // il ramo-sterlina di `euro()`, già pronto da L46-1
@@ -827,7 +849,7 @@ const SCENARI = {
     seggi: { uk_con:58, uk_lab:41, uk_lib:1 },
     /* Scheda §2: PIL nominale ~£26 mld nel 1960 · debito ~110% che scende a ~65-70% nel 1969. Il disavanzo è
        il seme di gioco: lo stop-go continua, e la sterlina resta la leva di difficoltà (non il debito). */
-    economia: { pil:26000, debito:110, deficit:-3 },
+    economia: { pil:26, debito:110, deficit:-3 },     // L75-2: £ mld
     debtAncora: 110,
     logorioEra: 0.012,
     valuta: { sym:'£', mld:'mld sterline', mln:'mln sterline' },
@@ -863,7 +885,7 @@ const SCENARI = {
     seggi: { uk_con:52.4, uk_lab:45.6, uk_lib:1.0, uk_snp:0.6, uk_plaid:0.4 },
     /* Scheda §2: il decennio peggiore. Debito ~60% che **risale** nella seconda metà — primo decennio inglese
        in cui non scende. Il disavanzo è il seme di gioco. */
-    economia: { pil:52000, debito:60, deficit:-5 },
+    economia: { pil:52, debito:60, deficit:-5 },     // L75-2: £ mld
     debtAncora: 60,
     logorioEra: 0.014,                          // il decennio logora di più: scioperi, inflazione, emergenze
     valuta: { sym:'£', mld:'mld sterline', mln:'mln sterline' },
@@ -898,7 +920,7 @@ const SCENARI = {
       { id:'uk_plaid', nome:'Plaid Cymru',  orientamento:'centrosinistra', base:{ lavoratori:0.5, giovani:0.5 },                    forza:0.4,  asse:-1, gruppoUE:'verdi',        terreno:-0.3,  concentrazione:55   },
     ],
     seggi: { uk_con:54.4, uk_lab:43.2, uk_lib:1.8, uk_snp:0.3, uk_plaid:0.3 },
-    economia: { pil:230000, debito:47, deficit:-4 },
+    economia: { pil:230, debito:47, deficit:-4 },     // L75-2: £ mld
     debtAncora: 40,
     logorioEra: 0.012,
     valuta: { sym:'£', mld:'mld sterline', mln:'mln sterline' },
@@ -908,6 +930,75 @@ const SCENARI = {
       'Regno Unito, 1980. I conservatori hanno vinto un anno fa promettendo di raddrizzare il paese, e la cura comincia adesso: la stretta sulla moneta chiude le fabbriche prima di piegare i prezzi. Le città del nord imparano una parola nuova, riconversione, e non ne vedono l\'effetto.',
       'Il partito laburista si divide fra chi vuole l\'Europa e chi vuole uscirne, fra chi tratta e chi occupa: quattro dirigenti stanno per andarsene e fondare qualcosa di nuovo. E a tredicimila chilometri da qui, in un arcipelago di cui nessuno sa il nome, una giunta militare guarda la carta.',
       'È il decennio in cui il maggioritario mostra il suo caso più crudele: un terzo partito con un quarto dei voti e una manciata di seggi. Chi governa può vincere tre volte di fila; chi si oppone deve prima decidere chi è.',
+    ],
+  },
+  /* ============================================================================================================
+     L75-1 · REGNO UNITO 1990 — la quinta porta inglese (scheda PRESET-UK-1990). Roster a cinque, `uk_lib` già «Liberal
+     Democratici» (L60-2z). LE FORZE: urne del giugno 1987. I SEGGI: 376/229/22/3/3 su 633. MANDATIVINTI 2 e TURNMANDATO 3:
+     il premier di questa porta ha undici anni alle spalle (parlamento dell'87, tre vittorie): è la premessa della sfida al
+     leader del novembre 1990 (snodo S1, anzianità ≥ 2 mandati). Economia: debito ~35 che sale nella recessione '90-'92 e
+     scende dopo; NIENTE changeover: il Regno Unito resta fuori dall'euro (la porta 2000 nascerà senza cambio-valuta).
+     ============================================================================================================ */
+  uk1990: {
+    id:'uk1990', era:LINEA_UK, nome:'Regno Unito 1990', anno:1990, paese:'regnounito',
+    turnMandato: 3,                            // parlamento dell'87: il voto di gioco cade a gennaio '92, la tappa dichiarata ad aprile (come nel '84/'83)
+    mandatiVinti: 2,
+    ue: true,
+    intermedie: [ {tipo:'Elezioni amministrative', mese:28, tocca:'tutti'} ],
+    partiti: [
+      { id:'uk_con',   nome:'Conservative',          orientamento:'centrodestra',   base:{ imprenditori:0.4, cetomedio:0.4, pensionati:0.2 }, forza:42.2, asse:1,  gruppoUE:'conservatori', terreno:0.45,  concentrazione:0.55 },
+      { id:'uk_lab',   nome:'Labour',                orientamento:'centrosinistra', base:{ lavoratori:0.7, giovani:0.3 },                    forza:30.8, asse:-2, gruppoUE:'socialisti',   terreno:-0.55, concentrazione:0.75 },
+      { id:'uk_lib',   nome:'Liberal Democratici',   orientamento:'centro',         base:{ cetomedio:0.6, giovani:0.4 },                     forza:22.6, asse:0,  gruppoUE:'liberali',     terreno:-0.95, concentrazione:24   },
+      { id:'uk_snp',   nome:'SNP',                   orientamento:'centrosinistra', base:{ lavoratori:0.5, giovani:0.5 },                    forza:1.3,  asse:-1, gruppoUE:'verdi',        terreno:-0.2,  concentrazione:40   },
+      { id:'uk_plaid', nome:'Plaid Cymru',           orientamento:'centrosinistra', base:{ lavoratori:0.5, giovani:0.5 },                    forza:0.3,  asse:-1, gruppoUE:'verdi',        terreno:-0.3,  concentrazione:55   },
+    ],
+    seggi: { uk_con:59.4, uk_lab:36.2, uk_lib:3.5, uk_snp:0.5, uk_plaid:0.4 },
+    economia: { pil:570, debito:35, deficit:-1 },     // L75-2: £ mld
+    debtAncora: 38,
+    logorioEra: 0.013,
+    valuta: { sym:'£', mld:'mld sterline', mln:'mln sterline' },
+    quotaSpesa: 0.40,
+    intro: 'Regno Unito, 1990. Undici anni dello stesso governo, un\'imposta che il paese non paga, e un partito che sta per cacciare la sua leader.',
+    contesto: [
+      'Regno Unito, 1990. La cura degli anni Ottanta ha vinto e ha stancato: la recessione torna, l\'imposta per ogni testa riempie le piazze e il partito di governo comincia a chiedersi se la leader di undici anni sia ancora un vantaggio.',
+      'La sterlina è dentro il Sistema monetario europeo, e i mercati la guardano. L\'opposizione, fuori dal governo da dieci anni, deve decidere se restare quello che è o riscriversi l\'anima per tornare.',
+      'È il decennio in cui il partito caccia il suo leader, i mercati cacciano la sterlina, e chi si riscrive vince di centosettantanove. Chi governa può vincere contro i sondaggi; chi si oppone deve prima decidere chi è.',
+    ],
+  },
+  /* ============================================================================================================
+     L77-1 · REGNO UNITO 2000 — la SESTA e ultima porta inglese (scheda PRESET-UK-2000). Con questa il pilota
+     britannico e' completo: 1950 · 1960 · 1970 · 1980 · 1990 · 2000, e la linea si salda al presente nel 2013.
+     LE FORZE: urne del maggio 1997. I SEGGI: 418/165/46/6/4 su 641. TURNMANDATO 3 e MANDATIVINTI 1: il parlamento
+     del '97 scade nel 2002, e dal gennaio 2000 restano due anni. ECONOMIA: PIL ~1.000 mld di sterline (L75-2: il PIL
+     e' in MILIARDI della valuta della porta), debito 35 che nella crisi supera il 75, e un SURPLUS al seed
+     (economia.deficit positivo → S.deficitBase negativo: nel 2000 i conti erano in avanzo).
+     ⚑ NIENTE CHANGEOVER, ed e' l'unica linea europea che non ne ha: la sterlina resta fino al presente. Il gate di
+     `changeoverEuro` e' gia' su LINEA_IT, quindi qui non scatta per costruzione — misurato, non dedotto.
+     ============================================================================================================ */
+  uk2000: {
+    id:'uk2000', era:LINEA_UK, nome:'Regno Unito 2000', anno:2000, paese:'regnounito',
+    turnMandato: 3,
+    mandatiVinti: 1,
+    ue: true,
+    intermedie: [ {tipo:'Elezioni amministrative', mese:28, tocca:'tutti'} ],
+    partiti: [
+      { id:'uk_lab',   nome:'Labour',              orientamento:'centrosinistra', base:{ lavoratori:0.6, giovani:0.4 },                    forza:43.2, asse:-1, gruppoUE:'socialisti',   terreno:0.1,   concentrazione:1.15 },   // L77-1 · NON e' il Labour del '90 (terreno -0,55): il '97 e' il voto in cui il Labour vince anche nelle CONTEE, e il terreno lo dice. Col -0,55 copiato dalla porta '90 il modello-collegi rendeva 50/45 sulle urne del '97 (veri 65,2/26,1) e la carriera laburista perdeva il primo voto di gioco. Tarato su DUE criteri, non uno: lo scarto sul '97 (4,3 punti) E la stabilita' — a +0,35/1,00 lo scarto era 3,1 ma a dodici punti di svantaggio il Labour finiva a ZERO seggi contro 93. Qui a -9/+9 fa 40/53, a -12/+12 fa 26/67. Vale solo in questa porta: `terreno`/`concentrazione` sono campi DELLA PORTA, non del modello.
+      { id:'uk_con',   nome:'Conservative',        orientamento:'centrodestra',   base:{ imprenditori:0.4, cetomedio:0.4, pensionati:0.2 }, forza:30.7, asse:1,  gruppoUE:'conservatori', terreno:0.45,  concentrazione:0.55 },
+      { id:'uk_lib',   nome:'Liberal Democratici', orientamento:'centro',         base:{ cetomedio:0.6, giovani:0.4 },                     forza:16.8, asse:0,  gruppoUE:'liberali',     terreno:-0.95, concentrazione:24   },
+      { id:'uk_snp',   nome:'SNP',                 orientamento:'centrosinistra', base:{ lavoratori:0.5, giovani:0.5 },                    forza:2.0,  asse:-1, gruppoUE:'verdi',        terreno:-0.2,  concentrazione:40   },
+      { id:'uk_plaid', nome:'Plaid Cymru',         orientamento:'centrosinistra', base:{ lavoratori:0.5, giovani:0.5 },                    forza:0.5,  asse:-1, gruppoUE:'verdi',        terreno:-0.3,  concentrazione:55   },
+    ],
+    seggi: { uk_lab:65.2, uk_con:26.1, uk_lib:7.2, uk_snp:0.9, uk_plaid:0.6 },
+    economia: { pil:1000, debito:35, deficit:1 },
+    debtAncora: 38,
+    logorioEra: 0.012,
+    valuta: { sym:'£', mld:'mld sterline', mln:'mln sterline' },
+    quotaSpesa: 0.37,
+    intro: 'Regno Unito, 2000. Un governo al secondo tempo, i conti in ordine, e una guerra che nessuno ha ancora nominato.',
+    contesto: [
+      'Regno Unito, 2000. Il governo ha vinto tre anni fa con la maggioranza più larga del dopoguerra e i conti sono i migliori da una generazione: crescita lunga, debito basso, disoccupazione che scende. È il momento in cui tutto sembra facile.',
+      'Il paese resta fuori dall\'euro mentre il continente lo adotta, e la sterlina resterà: è l\'unica linea europea che non cambia moneta. Fra tre anni una guerra dividerà il partito di governo e il paese; fra sette, una fila davanti a una banca dirà che l\'età facile è finita.',
+      'È il decennio in cui si può vincere una maggioranza di sessantotto seggi col trentacinque per cento dei voti, e quello in cui nessuno vince affatto: cinque giorni di trattativa, e una coalizione come non se ne vedevano dal dopoguerra.',
     ],
   },
   /* ============================================================================================================
@@ -1464,6 +1555,77 @@ const PILASTRI_LINEA = [
     t:'Lockerbie',
     text:'Il 21 dicembre un aereo di linea in volo da Londra esplode sopra il villaggio scozzese di Lockerbie: muoiono duecentosessanta persone a bordo e undici a terra, colpite dai rottami. È il più grave attentato mai avvenuto sul suolo britannico, e il processo che ne seguirà durerà più di dieci anni.',
     logx:'Un aereo di linea esplode sopra un villaggio scozzese: duecentosettantuno morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  /* ==========================================================================================================
+     L75-1 · I SEI PILASTRI DEL DECENNIO INGLESE '90 (scheda PRESET-UK-1990 §5, APPROVATI da Giacomo il 3/9, byte-identici:
+     li scrive uno script che LEGGE la scheda). G10: «La principessa» è pilastro senza nome. G11: «La caduta» è snodo +
+     cronaca, mai insieme (`cond:!S.caduta90`); lo stesso per il mercoledì nero (`cond:!S.mercoledi`).
+     ========================================================================================================== */
+  { id:'puk90_caduta', linea:LINEA_UK, anno:1990, mese:11, era:'uk1990', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    cond:function(){ return !S.caduta90; },   /* G1/G11: chi la vive come snodo non riceve anche la cronaca */
+    t:'La caduta',
+    text:'A novembre il partito di governo mette in discussione la propria leader dopo undici anni ininterrotti a Downing Street. Non è l\'opposizione a farla cadere: sono i suoi, dopo un\'imposta che il paese non ha voluto pagare e una divisione sull\'Europa che non si è ricucita. Il primo turno della sfida interna non le dà la maggioranza richiesta; si dimette prima del secondo. Chi la sostituisce eredita il partito, non la sua autorità.',
+    logx:'Undici anni, e cadde dai suoi.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'puk90_mercoledi', linea:LINEA_UK, anno:1992, mese:9, era:'uk1990', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    cond:function(){ return !S.mercoledi; },   /* G1: chi lo ha giocato come snodo non riceve anche la cronaca */
+    t:'Il mercoledì nero',
+    text:'Il 16 settembre la sterlina viene attaccata sui mercati e il governo la difende alzando i tassi due volte in un giorno, fino a livelli che nessuna economia può reggere, e bruciando miliardi di riserve. La sera stessa il paese esce dal Sistema monetario europeo. La credibilità economica del governo non si riprenderà più; l\'economia, paradossalmente, sì.',
+    logx:'La sterlina fuori dal Sistema monetario in una sera: la credibilità del governo non si riprende più.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'puk90_dunblane', linea:LINEA_UK, anno:1996, mese:3, era:'uk1990', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Dunblane',
+    text:'Il 13 marzo un uomo entra nella palestra di una scuola elementare scozzese e uccide sedici bambini di cinque e sei anni e la loro maestra, prima di togliersi la vita. Il paese non ha parole. Entro due anni il Parlamento vieta la detenzione privata delle pistole, con una legge che porta il nome di quel villaggio.',
+    logx:'Sedici bambini e la loro maestra: entro due anni le pistole sono vietate.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'puk90_principessa', linea:LINEA_UK, anno:1997, mese:8, era:'uk1990', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'La principessa',
+    text:'Il 31 agosto la principessa del Galles muore in un incidente d\'auto a Parigi, inseguita dai fotografi. Per una settimana il paese si ferma davanti a una montagna di fiori, e il modo in cui la Corona reagisce — tardi, e da lontano — diventa esso stesso una questione politica. Il nuovo governo capisce prima di tutti che cosa il paese vuole sentirsi dire.',
+    logx:'Il paese in fila coi fiori per una settimana, e la Corona che arriva tardi.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'puk90_venerdi', linea:LINEA_UK, anno:1998, mese:4, era:'uk1990', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Il Venerdì Santo',
+    text:'Il 10 aprile, dopo due anni di trattative e trent\'anni di conflitto, i partiti dell\'Irlanda del Nord firmano un accordo: un parlamento condiviso, il disarmo, la liberazione dei prigionieri, e il principio che il futuro dell\'Ulster lo decidano i suoi abitanti. A maggio due referendum lo approvano. Non è la pace: è la decisione di provarci.',
+    logx:'Trent’anni di conflitto, un accordo, due referendum: la decisione di provarci.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'puk90_omagh', linea:LINEA_UK, anno:1998, mese:8, era:'uk1990', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Omagh',
+    text:'Il 15 agosto, quattro mesi dopo l\'accordo, un\'autobomba esplode nel centro di Omagh un sabato pomeriggio di mercato: ventinove morti, la strage più grave di tutto il conflitto. Chi l\'ha messa voleva far saltare la pace. Non ci riesce: è l\'ultima.',
+    logx:'Ventinove morti un sabato di mercato: volevano far saltare la pace, ed è l’ultima.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  /* ==========================================================================================================
+     L77-1 · I CINQUE PILASTRI DEL DECENNIO INGLESE 2000 (scheda PRESET-UK-2000 §5, APPROVATI da Giacomo il 4/9,
+     byte-identici: li scrive uno script che LEGGE la scheda). Tre hanno la `cond` di Suez (G1): chi vive la marcia,
+     la fila alla banca o i cinque giorni come SNODO non riceve anche la cronaca. G13: le Olimpiadi 2012 NON sono
+     un pilastro ma un beat sobrio — la linea inglese chiude con l'austerita', non con una festa.
+     ========================================================================================================== */
+  { id:'puk00_marcia', linea:LINEA_UK, anno:2003, mese:2, era:'uk2000', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    cond:function(){ return !S.iraq; },   /* G1: chi lo ha giocato come snodo non riceve anche la cronaca */
+    t:'La marcia',
+    text:'Il 15 febbraio più di un milione di persone attraversano Londra contro la guerra in Iraq: è la più grande manifestazione mai vista nel paese. Un mese dopo il Parlamento vota comunque a favore dell\'intervento, con la maggioranza del governo spaccata e l\'opposizione che lo sostiene. Le armi che avevano giustificato la guerra non verranno mai trovate, e per il resto del decennio ogni parola del governo peserà meno di prima.',
+    logx:'Un milione in strada contro la guerra, e il Parlamento vota lo stesso.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'puk00_setteluglio', linea:LINEA_UK, anno:2005, mese:7, era:'uk2000', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Il sette luglio',
+    text:'La mattina del 7 luglio quattro attentatori suicidi colpiscono tre convogli della metropolitana e un autobus nel centro di Londra: cinquantadue morti e centinaia di feriti. È il giorno dopo l\'assegnazione delle Olimpiadi alla città, e la festa di ventiquattr\'ore prima rende la mattina ancora più irreale. Gli attentatori erano nati e cresciuti nel paese.',
+    logx:'Cinquantadue morti a Londra, il giorno dopo le Olimpiadi.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'puk00_fila', linea:LINEA_UK, anno:2007, mese:9, era:'uk2000', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    cond:function(){ return !S.rock; },   /* chi la gioca come snodo non riceve anche la cronaca */
+    t:'La fila davanti alla banca',
+    text:'A settembre i clienti di una banca di credito immobiliare si mettono in fila davanti alle filiali per ritirare i propri soldi: non accadeva da oltre un secolo. Il governo garantisce i depositi e la fila si scioglie, ma le immagini restano. È il primo segnale, in Inghilterra, che qualcosa di molto grande si è rotto nel sistema finanziario.',
+    logx:'La prima corsa agli sportelli da oltre un secolo: qualcosa si e rotto.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'puk00_notespese', linea:LINEA_UK, anno:2009, mese:5, era:'uk2000', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Le note spese',
+    text:'A maggio un giornale comincia a pubblicare, giorno dopo giorno, i rimborsi che i parlamentari si erano fatti liquidare: seconde case, mutui già estinti, e una casetta per le anatre. Alcuni finiranno sotto processo, molti non si ricandideranno. Nessun singolo abuso era enorme; insieme hanno fatto più danno alla fiducia nel Parlamento di qualunque scandalo di governo.',
+    logx:'Seconde case, mutui gia estinti e una casetta per le anatre: il Parlamento non si riprende.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'puk00_cinquegiorni', linea:LINEA_UK, anno:2010, mese:5, era:'uk2000', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    cond:function(){ return !S.coalizione2010; },   /* chi la gioca come snodo non riceve anche la cronaca */
+    t:'Cinque giorni',
+    text:'Il voto del 6 maggio non dà la maggioranza a nessuno. Per cinque giorni il paese guarda tre partiti trattare mentre il governo uscente resta in carica, e al termine nasce la prima coalizione dal dopoguerra: due partiti, un programma comune, i ministeri divisi. Il terzo partito, che entra al governo per la prima volta in novant\'anni, pagherà quella scelta per un decennio.',
+    logx:'Nessuno ha vinto: cinque giorni di trattativa e la prima coalizione dal dopoguerra.',
     ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
 ];
 
@@ -2036,6 +2198,143 @@ const BEAT_LEGGERI = [
   {id:'lguk80_video', era:'uk1980', cond:()=>S.year>=1983, registro:'leggero', kick:'Il paese', t:'La videocassetta a noleggio', text:'Il negozio ha aperto dove c\'era il barbiere: scaffali di scatole colorate, una tessera e un film per una notte. Si riporta domani, riavvolto, o si paga.', ch:[
     {l:'Un film per stasera', e:'Riavvolto e riportato, per una volta', f:function(){}},
     {l:'Due, che tanto è sabato', e:'Domani la multa per il secondo', f:function(){}} ]},
+  /* ===== L75-1 · i tredici beat leggeri del decennio inglese '90 (scheda §6: sei senza ancora; la Premier League al posto del Big Brother, come annotato) ===== */
+  {id:'lguk90_pub', era:'uk1990', registro:'leggero', kick:'Il paese', t:'Il pub, di nuovo', text:'Il pub all\'angolo ha cambiato nome tre volte e adesso serve cibo tailandese. La pinta costa il doppio di dieci anni fa. Il banco è quello.', ch:[
+    {l:'Una pinta, e il cibo tailandese', e:'Non è male. Non è il pub', f:function(){}},
+    {l:'Una pinta, e basta', e:'Come sempre, a un prezzo nuovo', f:function(){}} ]},
+  {id:'lguk90_te', era:'uk1990', registro:'leggero', kick:'Il paese', t:'Il tè e il tabloid', text:'Il titolo di oggi è sul principe, o sul ministro, o su una band: si legge, si giudica, si dimentica entro pranzo.', ch:[
+    {l:'Leggi tutto', e:'A pranzo l\'hai già dimenticato', f:function(){}},
+    {l:'Solo i titoli', e:'Che è quello che vogliono', f:function(){}} ]},
+  {id:'lguk90_coda', era:'uk1990', registro:'leggero', kick:'Il paese', t:'La coda', text:'Alla posta, al medico, all\'ufficio del lavoro: si fa la coda in silenzio, con un numero in mano, e si parla del tempo con chi sta dietro.', ch:[
+    {l:'Aspetti il tuo turno', e:'Il tempo passa, il numero pure', f:function(){}},
+    {l:'Torni domani', e:'Domani c\'è la stessa coda', f:function(){}} ]},
+  {id:'lguk90_partita', era:'uk1990', registro:'leggero', kick:'Il paese', t:'La partita', text:'Sabato alle tre, o adesso la domenica alle quattro, o il lunedì sera: la televisione ha spostato gli orari e nessuno sa più quando si gioca.', ch:[
+    {l:'Vai allo stadio, quando è', e:'I posti in piedi non ci sono più', f:function(){}},
+    {l:'La guardi al pub', e:'Il pub ha la parabola', f:function(){}} ]},
+  {id:'lguk90_domenica', era:'uk1990', registro:'leggero', kick:'Il paese', t:'La domenica', text:'I negozi aprono la domenica da poco: c\'è chi va al centro commerciale e chi in chiesa, e i due gruppi non si incontrano più.', ch:[
+    {l:'Al centro commerciale', e:'Parcheggio pieno alle undici', f:function(){}},
+    {l:'A casa, come una volta', e:'La strada è vuota', f:function(){}} ]},
+  {id:'lguk90_tabloid', era:'uk1990', registro:'leggero', kick:'Il paese', t:'Il tabloid e il ministro', text:'Un ministro, una segretaria, una foto: il giornale la tiene due giorni e poi la pubblica. Il ministro si dimette prima di pranzo.', ch:[
+    {l:'Lo compri per vedere la foto', e:'Come tutti', f:function(){}},
+    {l:'Cambi giornale', e:'Ce l\'hanno tutti in prima', f:function(){}} ]},
+  {id:'lguk90_telefonino', era:'uk1990', cond:()=>S.year>=1994, registro:'leggero', kick:'Il paese', t:'Il telefonino nel taschino', text:'Non è più un mattone: sta nel taschino, squilla sul treno e tutti sanno con chi parli. Chi ce l\'ha lo tiene sul tavolo del ristorante.', ch:[
+    {l:'Lo compri', e:'Squilla al momento sbagliato', f:function(){}},
+    {l:'Resisti', e:'Ancora un anno', f:function(){}} ]},
+  {id:'lguk90_lotteria', era:'uk1990', cond:()=>S.year>=1994, registro:'leggero', kick:'Il paese', t:'La lotteria del sabato', text:'Sei numeri, un biglietto, e il sabato sera tutto il paese davanti alla stessa macchina che gira. Qualcuno diventa milionario; tutti gli altri riprovano.', ch:[
+    {l:'Un biglietto, per gioco', e:'Cinque numeri su sei, una volta', f:function(){}},
+    {l:'Mai', e:'I vicini hanno vinto dieci sterline', f:function(){}} ]},
+  {id:'lguk90_cool', era:'uk1990', cond:()=>S.year>=1996&&S.year<=1997, registro:'leggero', kick:'Il paese', t:'Cool Britannia', text:'Le band inglesi sono di nuovo le più famose del mondo, la bandiera sta sulle chitarre e sui vestiti, e i giornali stranieri scrivono che Londra è la città più viva d\'Europa.', ch:[
+    {l:'Compri il disco', e:'Lo comprano tutti', f:function(){}},
+    {l:'Preferisci quelli di prima', e:'Anche loro tornano in classifica', f:function(){}} ]},
+  {id:'lguk90_premier', era:'uk1990', cond:()=>S.year>=1992, registro:'leggero', kick:'Il paese', t:'La partita a pagamento', text:'Il campionato ha cambiato nome e adesso si vede solo con la parabola e un abbonamento. Il pub ce l\'ha; a casa no.', ch:[
+    {l:'Ti abboni', e:'Diciotto sterline al mese, per il calcio', f:function(){}},
+    {l:'La vedi al pub', e:'Con tutti gli altri', f:function(){}} ]},
+  {id:'lguk90_euro96', era:'uk1990', cond:()=>S.year===1996, registro:'leggero', kick:'Il paese', t:'L\'Europeo in casa', text:'Il calcio torna a casa, dice la canzone: tre settimane di bandiere alle finestre e una semifinale persa ai rigori, come sempre.', ch:[
+    {l:'La bandiera alla finestra', e:'Fino ai rigori', f:function(){}},
+    {l:'Niente bandiera', e:'La canzone la sai lo stesso', f:function(){}} ]},
+  {id:'lguk90_internet', era:'uk1990', cond:()=>S.year>=1997, registro:'leggero', kick:'Il paese', t:'Internet in casa', text:'Il modem fischia, la linea del telefono è occupata per un\'ora e la pagina arriva a pezzi. I ragazzi dicono che cambierà tutto.', ch:[
+    {l:'Ti colleghi', e:'Un\'ora, per una pagina', f:function(){}},
+    {l:'Il telefono serve per telefonare', e:'Per ora', f:function(){}} ]},
+  {id:'lguk90_bug', era:'uk1990', cond:()=>S.year===1999, registro:'leggero', kick:'Il paese', t:'Il millennium bug', text:'A mezzanotte del 31 dicembre i computer non sapranno che anno è, dicono: gli aerei, le banche, i semafori. Il governo ha speso miliardi per controllare.', ch:[
+    {l:'Fai scorta di candele', e:'Per sicurezza', f:function(){}},
+    {l:'Non succederà niente', e:'Non succede niente', f:function(){}} ]},
+  /* ===== L77-1 · i tredici beat leggeri del decennio inglese 2000 (scheda §6: sei senza ancora, sette con; le Olimpiadi 2012 sono QUI, non fra i pilastri — G13) ===== */
+  {id:'lguk00_pub', era:'uk2000', registro:'leggero', kick:'Il paese', t:'Il pub, ancora', text:'Ha una lavagna coi vini al bicchiere e un menù che cambia ogni settimana. Il banco è lo stesso di sempre, e c\'è ancora chi ci sta appoggiato alle cinque.', ch:[
+    {l:'Una pinta, al banco', e:'Il posto giusto non cambia', f:function(){}},
+    {l:'Un bicchiere di vino, al tavolo', e:'Anche questo è il pub, adesso', f:function(){}} ]},
+  {id:'lguk00_te', era:'uk2000', registro:'leggero', kick:'Il paese', t:'Il tè e lo schermo', text:'Il notiziario va ventiquattr\'ore su ventiquattro e ripete le stesse tre cose. Il tè si beve lo stesso, e la striscia in basso continua a scorrere.', ch:[
+    {l:'Lo lasci acceso', e:'Rumore di fondo, ormai', f:function(){}},
+    {l:'Lo spegni', e:'Il silenzio è una novità', f:function(){}} ]},
+  {id:'lguk00_coda', era:'uk2000', registro:'leggero', kick:'Il paese', t:'La coda', text:'Adesso c\'è un numero da prendere e uno schermo che lo chiama. Si aspetta uguale, ma si sa quanto manca — e questo, dicono, è progresso.', ch:[
+    {l:'Prendi il numero e aspetti', e:'Quarantadue prima di te', f:function(){}},
+    {l:'Provi a prenotare online', e:'Il sito chiede una password che non hai', f:function(){}} ]},
+  {id:'lguk00_partita', era:'uk2000', registro:'leggero', kick:'Il paese', t:'La partita', text:'Si gioca a mezzogiorno, alle cinque e mezza, il lunedì sera: l\'orario lo decide chi trasmette. Allo stadio si arriva sempre, in qualche modo.', ch:[
+    {l:'Ci vai lo stesso', e:'Il treno delle sette non c\'è più', f:function(){}},
+    {l:'La guardi al pub', e:'Con quelli che ci sarebbero andati', f:function(){}} ]},
+  {id:'lguk00_domenica', era:'uk2000', registro:'leggero', kick:'Il paese', t:'La domenica', text:'Il pranzo è alle due, il telefono resta sul tavolo e qualcuno lo guarda di sottecchi. Fuori piove, come da copione.', ch:[
+    {l:'Lasci il telefono in tasca', e:'Dura mezz\'ora', f:function(){}},
+    {l:'Lo tieni sul tavolo', e:'Come tutti gli altri', f:function(){}} ]},
+  {id:'lguk00_tabloid', era:'uk2000', registro:'leggero', kick:'Il paese', t:'Il tabloid e il segreto', text:'Sa cose che nessuno gli ha detto: messaggi, cartelle, numeri privati. Per ora nessuno chiede come faccia, e la prima pagina è sempre pronta.', ch:[
+    {l:'Lo compri, come sempre', e:'Fra qualche anno si saprà come faceva', f:function(){}},
+    {l:'Passi oltre', e:'Il titolo lo leggi comunque', f:function(){}} ]},
+  {id:'lguk00_ipod', era:'uk2000', cond:()=>S.year>=2003, registro:'leggero', kick:'Il paese', t:'La musica in tasca', text:'Mille canzoni in un oggetto bianco grande come un mazzo di carte, e i negozi di dischi che chiudono uno dopo l\'altro. La cuffia bianca si vede da lontano.', ch:[
+    {l:'Compri quello bianco', e:'Ci metti tre sere a caricarlo', f:function(){}},
+    {l:'Tieni i dischi', e:'Il negozio dove li compravi ha chiuso', f:function(){}} ]},
+  {id:'lguk00_social', era:'uk2000', cond:()=>S.year>=2007, registro:'leggero', kick:'Il paese', t:'Il sito degli amici', text:'Tutti ci scrivono cosa fanno, e tutti leggono cosa fanno gli altri. È una cosa da studenti, dicono, e intanto ci si iscrive anche il capo.', ch:[
+    {l:'Ti iscrivi', e:'Ritrovi gente che avevi perso apposta', f:function(){}},
+    {l:'Non ti iscrivi', e:'Te lo chiedono tutti perché', f:function(){}} ]},
+  {id:'lguk00_wembley', era:'uk2000', cond:()=>S.year>=2007&&S.year<=2009, registro:'leggero', kick:'Il paese', t:'Lo stadio nuovo', text:'Ci hanno messo sette anni e un miliardo, e adesso c\'è un arco che si vede da mezza città. Le torri gemelle che c\'erano prima, quelle, non ci sono più.', ch:[
+    {l:'Ci vai per la prima partita', e:'L\'arco di sera è un\'altra cosa', f:function(){}},
+    {l:'Ti mancano le torri', e:'A tutti quelli della tua età', f:function(){}} ]},
+  {id:'lguk00_bbc', era:'uk2000', cond:()=>S.year>=2005, registro:'leggero', kick:'Il paese', t:'La televisione che si rivede', text:'Adesso i programmi si possono riguardare quando si vuole, dal computer. Chi paga il canone lo scopre per caso e non torna più indietro.', ch:[
+    {l:'Guardi tutto la domenica', e:'Sei puntate di fila', f:function(){}},
+    {l:'Continui all\'ora giusta', e:'È ancora un appuntamento', f:function(){}} ]},
+  {id:'lguk00_olimpiadi', era:'uk2000', cond:()=>S.year===2012, registro:'leggero', kick:'Il paese', t:'Le Olimpiadi in televisione', text:'Per due settimane il paese guarda sport di cui non sapeva le regole e ne impara i nomi. Poi finisce, e si torna al calcio.', ch:[
+    {l:'Le guardi tutte', e:'Anche il ciclismo su pista, alle undici di sera', f:function(){}},
+    {l:'Solo le finali', e:'Bastano quelle', f:function(){}} ]},
+  {id:'lguk00_talent', era:'uk2000', cond:()=>S.year>=2004, registro:'leggero', kick:'Il paese', t:'Il programma del sabato', text:'Gente comune canta davanti a tre giudici e a dodici milioni di persone. Il vincitore avrà il disco di Natale, e l\'anno dopo nessuno si ricorda il nome.', ch:[
+    {l:'Lo guardi e voti', e:'Una sterlina a telefonata', f:function(){}},
+    {l:'Lo trovi crudele', e:'Lo guardi lo stesso', f:function(){}} ]},
+  {id:'lguk00_smartphone', era:'uk2000', cond:()=>S.year>=2008, registro:'leggero', kick:'Il paese', t:'Il telefono che fa tutto', text:'Non ha tasti, sta in tasca e dentro c\'è la posta, le mappe e il giornale. In tre anni nessuno riesce più a immaginare di uscire senza.', ch:[
+    {l:'Lo compri', e:'Non ti perdi più, e non stacchi più', f:function(){}},
+    {l:'Resti al tuo, coi tasti', e:'La batteria dura una settimana', f:function(){}} ]},
+ /* ===== L79-2 · FRANCIA, sei beat leggeri (scheda §C) — effetto zero, come tutto il registro. Tre ancorati al mese. ===== */
+ {id:'fr_p_b_tour', era:'contemporanea', paesi:['francia'], registro:'leggero', cond:()=>S.month===7, kick:'Il paese', t:'La carovana passa', text:'Tre settimane di biciclette, e il paese si guarda dall\'elicottero: i castelli, i campi di girasoli, le salite con i nomi. La politica si ferma al bordo della strada come tutti.', ch:[
+   {l:'Vai a vedere una tappa di montagna', e:'Un giorno in cui nessuno ti chiede niente', f:function(){}},
+   {l:'Guardi l\'arrivo in televisione', e:'Come il resto del paese', f:function(){}}]},
+ {id:'fr_p_b_luglio', era:'contemporanea', paesi:['francia'], registro:'leggero', cond:()=>S.month===7, kick:'Il paese', t:'La sfilata sui Campi', text:'Il quattordici luglio le truppe scendono il viale e gli aerei lasciano tre colori nel cielo. Chi governa è in tribuna, per una mattina senza domande.', ch:[
+   {l:'Resti fino all\'ultimo reparto', e:'La tribuna si svuota dopo di te', f:function(){}},
+   {l:'Ti fermi a parlare con i vigili del fuoco', e:'Sono loro che il paese applaude di più', f:function(){}}]},
+ {id:'fr_p_b_cannes', era:'contemporanea', paesi:['francia'], registro:'leggero', cond:()=>S.month===5, kick:'Il paese', t:'I gradini rossi', text:'Per dodici giorni una città della costa è la capitale del cinema, e il paese si ricorda di essere il posto dove il cinema si prende sul serio. Un film francese vince, o non vince, e se ne discute come di una legge.', ch:[
+   {l:'Sali i gradini, una sera', e:'Le fotografie durano più del film', f:function(){}},
+   {l:'Lasci il cinema al cinema', e:'Qualcuno lo nota, in bene', f:function(){}}]},
+ {id:'fr_p_b_beaujolais', era:'contemporanea', paesi:['francia'], registro:'leggero', cond:()=>S.month===11, kick:'Il paese', t:'Il vino nuovo è arrivato', text:'Il terzo giovedì di novembre i bistrot appendono il cartello e si beve un vino che ha due mesi. Non è il migliore dell\'anno; è il più puntuale.', ch:[
+   {l:'Un bicchiere al bancone, in foto', e:'Il rito vale più del vino', f:function(){}},
+   {l:'Passi: preferisci aspettare l\'annata', e:'Ti citano come un intenditore, o come uno snob', f:function(){}}]},
+ {id:'fr_p_b_baguette', era:'contemporanea', paesi:['francia'], registro:'leggero', kick:'Il paese', t:'Il prezzo del pane', text:'Il panettiere all\'angolo ha ritoccato il prezzo della baguette di qualche centesimo, e il giornale locale ci ha fatto la prima pagina. In questo paese il pane è un indicatore economico e una questione morale.', ch:[
+   {l:'Compri il pane di persona, stamattina', e:'La fila lo racconta per settimane', f:function(){}},
+   {l:'Nessun commento: è il mercato', e:'Il panettiere lo dice in televisione', f:function(){}}]},
+ {id:'fr_p_b_rugby', era:'contemporanea', paesi:['francia'], registro:'leggero', kick:'Il paese', t:'Il Sud-Ovest vince', text:'La nazionale di rugby gioca una finale, e le città del Sud-Ovest — dove il rugby è la religione del sabato — si fermano. Il resto del paese scopre di tifare.', ch:[
+   {l:'Vai allo stadio con una sciarpa', e:'Una foto che gira per un mese', f:function(){}},
+   {l:'Una telefonata allo spogliatoio, e basta', e:'Sobrio, e apprezzato', f:function(){}}]},
+ /* ===== L81-1 · GERMANIA, sei beat leggeri (scheda §C) — effetto zero. Quattro ancorati al mese. ===== */
+ {id:'de_p_b_wiesn', era:'contemporanea', paesi:['germania'], registro:'leggero', cond:()=>S.month===9||S.month===10, kick:'Il paese', t:'Il primo barile', text:'A Monaco il sindaco pianta il rubinetto nel primo barile e per due settimane la città si veste come cento anni fa. Chi governa ci passa un pomeriggio, e viene fotografato con un boccale da un litro.', ch:[
+   {l:'Un litro, in foto, e via', e:'Il rito è compiuto', f:function(){}},
+   {l:'Passi: hai un\'agenda', e:'La Baviera se lo segna', f:function(){}}]},
+ {id:'de_p_b_karneval', era:'contemporanea', paesi:['germania'], registro:'leggero', cond:()=>S.month===2, kick:'Il paese', t:'I carri di Colonia', text:'Nel lunedì delle rose i carri della Renania prendono in giro i potenti, e i potenti fanno finta di ridere. Quest\'anno c\'è un carro anche su di te, con un naso più grande del vero.', ch:[
+   {l:'Ridi, e chiedi una copia della foto', e:'Si vince così, in Renania', f:function(){}},
+   {l:'Nessun commento', e:'Il carro passa comunque', f:function(){}}]},
+ {id:'de_p_b_finale', era:'contemporanea', paesi:['germania'], registro:'leggero', cond:()=>S.month===5, kick:'Il paese', t:'L\'ultima giornata', text:'Il campionato si decide all\'ultima giornata, e per una volta non vince la squadra che vince sempre. Le città si accendono, e per un sabato nessuno parla di politica.', ch:[
+   {l:'Un telegramma alla squadra', e:'Breve, e apprezzato', f:function(){}},
+   {l:'Vai allo stadio, senza annunciarlo', e:'Ti vedono lo stesso', f:function(){}}]},
+ {id:'de_p_b_mercatini', era:'contemporanea', paesi:['germania'], registro:'leggero', cond:()=>S.month===12, kick:'Il paese', t:'Il vino caldo', text:'Le piazze si riempiono di casette di legno e di odore di mandorle tostate. È l\'unico mese in cui il paese si concede di essere sentimentale in pubblico.', ch:[
+   {l:'Un bicchiere in piazza, con i cittadini', e:'Le mani calde e le foto buone', f:function(){}},
+   {l:'Lasci la piazza alla piazza', e:'Sobrio', f:function(){}}]},
+ {id:'de_p_b_doner', era:'contemporanea', paesi:['germania'], registro:'leggero', kick:'Il paese', t:'Il prezzo del döner', text:'Il panino che ha nutrito generazioni di studenti costa il doppio di qualche anno fa, e qualcuno ha proposto un prezzo calmierato. Il paese ne discute più seriamente che di molte leggi.', ch:[
+   {l:'Ne compri uno, in fila come tutti', e:'La fila lo racconta', f:function(){}},
+   {l:'«Non è un tema per il governo»', e:'Un titolo, e non dei migliori', f:function(){}}]},
+ {id:'de_p_b_tatort', era:'contemporanea', paesi:['germania'], registro:'leggero', kick:'Il paese', t:'La domenica sera', text:'Alle otto e un quarto di domenica il paese guarda lo stesso poliziesco da cinquant\'anni, e il lunedì ne parla. Stavolta la puntata era ambientata in un ministero, e il ministro non ne esce bene.', ch:[
+   {l:'Lo guardi, e lo dici', e:'Umano', f:function(){}},
+   {l:'Non guardi la televisione', e:'Nessuno ti crede', f:function(){}}]},
+ /* ===== L82-1 · SPAGNA, sei beat leggeri (scheda §C) — effetto zero. Tre ancorati al mese. ===== */
+ {id:'es_p_b_fallas', era:'contemporanea', paesi:['spagna'], registro:'leggero', cond:()=>S.month===3, kick:'Il paese', t:'La notte in cui si brucia tutto', text:'In una città del Mediterraneo costruiscono per un anno statue di cartapesta che prendono in giro tutti, e poi le bruciano in una notte. Quest\'anno una delle statue eri tu. Adesso sei cenere, e la città applaude.', ch:[
+   {l:'Vai a vederla bruciare', e:'Il modo migliore di prenderla', f:function(){}},
+   {l:'Mandi un ringraziamento agli artisti', e:'Elegante', f:function(){}}]},
+ {id:'es_p_b_sanfermin', era:'contemporanea', paesi:['spagna'], registro:'leggero', cond:()=>S.month===7, kick:'Il paese', t:'I tori per le strade', text:'Per una settimana una città del nord corre davanti ai tori alle otto di mattina, e il mondo intero la guarda. Il dibattito su se sia cultura o crudeltà torna ogni luglio, puntuale come i tori.', ch:[
+   {l:'Guardi la corsa dal balcone', e:'La foto giusta, o sbagliata', f:function(){}},
+   {l:'Nessun commento sui tori', e:'La domanda torna a settembre', f:function(){}}]},
+ {id:'es_p_b_lotteria', era:'contemporanea', paesi:['spagna'], registro:'leggero', cond:()=>S.month===12, kick:'Il paese', t:'I bambini che cantano i numeri', text:'Il ventidue dicembre un coro di bambini canta i numeri della lotteria per ore, e il paese si ferma ad ascoltare. Un paese intero che spera nello stesso biglietto: non c\'è sondaggio che dica altrettanto.', ch:[
+   {l:'Compri un decimo, in foto', e:'Come tutti', f:function(){}},
+   {l:'Non giochi', e:'Ti citano come l\'unico', f:function(){}}]},
+ {id:'es_p_b_siesta', era:'contemporanea', paesi:['spagna'], registro:'leggero', kick:'Il paese', t:'L\'ora sbagliata', text:'Il paese vive su un fuso orario che non è il suo da ottant\'anni: si pranza alle tre, si cena alle dieci, si dorme poco. Ogni tanto qualcuno propone di tornare all\'ora di Londra, e il dibattito è più acceso di una finanziaria.', ch:[
+   {l:'Apri una commissione sugli orari', e:'La risposta a tutto', f:function(){}},
+   {l:'«Ceniamo alle dieci e stiamo bene»', e:'Una frase da manifesto', f:function(){}}]},
+ {id:'es_p_b_clasico', era:'contemporanea', paesi:['spagna'], registro:'leggero', kick:'Il paese', t:'Le due squadre', text:'Due squadre di calcio si giocano il campionato, e il paese si divide come non fa per nessuna elezione. Ti chiedono per chi tifi, e qualunque risposta perde metà del paese.', ch:[
+   {l:'«Tifo per il calcio»', e:'Nessuno ci crede, tutti lo apprezzano', f:function(){}},
+   {l:'Dici la verità', e:'Metà del paese si offende, l\'altra metà ti ama', f:function(){}}]},
+ {id:'es_p_b_cammino', era:'contemporanea', paesi:['spagna'], registro:'leggero', kick:'Il paese', t:'I pellegrini sulla strada', text:'Ogni anno centinaia di migliaia di persone attraversano a piedi il nord del paese verso una cattedrale, con una conchiglia sullo zaino. Non tutti credono; tutti arrivano.', ch:[
+   {l:'Ne fai un tratto, un fine settimana', e:'Le foto girano, e per una volta sono belle', f:function(){}},
+   {l:'Un messaggio ai pellegrini, e basta', e:'Sobrio', f:function(){}}]},
 ];
 
 /* ===== F1 — LA TELEFONATA. Un'interruzione, non una carta: overlay a squillo, due opzioni secche, decisione a
@@ -4514,6 +4813,105 @@ const DOSSIERS=[
    {l:'Lascia fare al mercato',e:'Dove conviene, la rete corre; altrove no',pleases:'conservatore',f:()=>{gd('imprenditori',3); gd('giovani',-2); gd('lavoratori',-1);}},
  ]},
 
+ /* ===== L79-2 · FRANCIA, dossier di dicastero (scheda §B). ===== */
+ {id:'fr_p_d_alta', era:'contemporanea', paesi:['francia'], min:'infrastrutture', kick:'Ferrovie', t:'La linea ad alta velocità che manca', text:'Il paese ha una delle reti più veloci del mondo, ma una grande città resta fuori. La linea costerebbe anni e miliardi; non farla costerebbe una regione.', ch:[
+   {l:'Si fa: la Repubblica arriva ovunque', e:'Un\'opera da inaugurare fra dieci anni', pleases:'progressista', costo:{debito:0.9}, f:()=>{S.ind.debt+=0.9; gd('lavoratori',2); gd('imprenditori',2);}},
+   {l:'Prima si riparano le linee locali', e:'Meno gloria, più treni', pleases:'tecnico', costo:{debito:0.4}, f:()=>{S.ind.debt+=0.4; gd('cetomedio',2); gd('pensionati',1);}},
+   {l:'Rinvia', e:'Si torna a parlarne alla prossima campagna', pleases:'conservatore', f:()=>{gd('imprenditori',-2); gd('lavoratori',-1);}}]},
+ {id:'fr_p_d_ricchezza', era:'contemporanea', paesi:['francia'], min:'economia', kick:'Fisco', t:'L\'imposta sulle grandi fortune', text:'Da quando l\'imposta sul patrimonio è stata ristretta agli immobili, una parte del paese la vuole indietro e un\'altra teme la fuga dei capitali. Il dibattito torna a ogni bilancio.', ch:[
+   {l:'Reintroducila su tutto il patrimonio', e:'Un simbolo, e un gettito incerto', pleases:'progressista', costo:{debito:-0.3}, f:()=>{S.ind.debt-=0.3; S.ind.fiducia-=2; gd('lavoratori',4); gd('giovani',2); gd('imprenditori',-5);}},
+   {l:'Lascia com\'è', e:'Chi investe resta, chi protesta anche', pleases:'conservatore', f:()=>{gd('imprenditori',2); gd('lavoratori',-2);}},
+   {l:'Un contributo temporaneo sui redditi più alti', e:'Né simbolo né fuga', pleases:'tecnico', costo:{debito:-0.2}, f:()=>{S.ind.debt-=0.2; gd('lavoratori',1); gd('imprenditori',-1);}}]},
+ {id:'fr_p_d_bac', era:'contemporanea', paesi:['francia'], min:'istruzione', kick:'Scuola', t:'Il baccalauréat da riscrivere', text:'L\'esame che chiude il liceo è un rito nazionale e un ingorgo. Ogni riforma promette di semplificarlo; ogni riforma aggiunge un modulo.', ch:[
+   {l:'Meno prove, più valutazione continua', e:'I licei tirano il fiato', pleases:'progressista', f:()=>{gd('giovani',3); gd('pensionati',-2);}},
+   {l:'L\'esame resta com\'è: è la Repubblica che valuta', e:'Un rito che regge', pleases:'conservatore', f:()=>{gd('pensionati',2); gd('cattolici',1); gd('giovani',-2);}},
+   {l:'Una commissione con un anno di tempo', e:'Il modo francese di decidere', pleases:'tecnico', costo:{debito:0.05}, f:()=>{S.ind.debt+=0.05;}}]},
+ {id:'fr_p_d_marsiglia', era:'contemporanea', paesi:['francia'], min:'interno', kick:'Sicurezza', t:'I regolamenti di conti nel porto', text:'In una grande città del sud il traffico di droga uccide con regolarità. Il sindaco chiede lo Stato, lo Stato chiede tempo, i quartieri chiedono di dormire.', ch:[
+   {l:'Operazione permanente con forze nazionali', e:'Le sirene tutte le notti', pleases:'conservatore', costo:{debito:0.3}, f:()=>{S.ind.debt+=0.3; gd('pensionati',3); gd('cetomedio',2); gd('giovani',-2);}},
+   {l:'Polizia e servizi sociali insieme, quartiere per quartiere', e:'Lento, e ha funzionato altrove', pleases:'progressista', costo:{debito:0.4}, f:()=>{S.ind.debt+=0.4; gd('giovani',2); gd('cetomedio',1);}},
+   {l:'Colpisci il denaro, non solo la strada', e:'Meno visibile, più profondo', pleases:'tecnico', f:()=>{gd('imprenditori',-1); gd('cetomedio',1);}}]},
+ {id:'fr_p_d_immigrazione', era:'contemporanea', paesi:['francia'], min:'interno', kick:'Frontiere', t:'La legge sull\'immigrazione', text:'Il governo prepara una legge che stringe sui permessi e apre sui mestieri in carenza. Una parte della maggioranza la trova troppo dura, un\'altra troppo morbida, e il Consiglio costituzionale aspetta.', ch:[
+   {l:'Testo duro, per farlo passare', e:'Passa, e una parte viene censurata', pleases:'conservatore', f:()=>{gd('pensionati',3); gd('cetomedio',1); gd('giovani',-3); gd('cattolici',-2);}},
+   {l:'Testo equilibrato, con i mestieri in carenza', e:'Nessuno contento, tutti d\'accordo', pleases:'tecnico', f:()=>{gd('imprenditori',2); gd('cattolici',1); gd('pensionati',-1);}},
+   {l:'Ritira: non è il momento', e:'Il tema resta agli altri', pleases:'progressista', f:()=>{gd('giovani',1); gd('pensionati',-2); gd('cetomedio',-1);}}]},
+ {id:'fr_p_d_casa', era:'contemporanea', paesi:['francia'], min:'casa', kick:'Abitare', t:'Gli affitti della capitale', text:'Nella capitale un lavoratore normale non riesce più ad abitare. Il tetto agli affitti esiste e viene aggirato; costruire è lento; le case vuote sono tante.', ch:[
+   {l:'Tetto agli affitti applicato davvero, con multe', e:'Gli inquilini respirano, i proprietari vendono', pleases:'progressista', f:()=>{gd('giovani',3); gd('lavoratori',2); gd('cetomedio',-2); gd('imprenditori',-2);}},
+   {l:'Costruisci: semplifica i permessi', e:'Le gru fra tre anni', pleases:'tecnico', costo:{debito:0.3}, f:()=>{S.ind.debt+=0.3; gd('imprenditori',2); gd('giovani',1);}},
+   {l:'Tassa le case vuote', e:'Chi non affitta paga', pleases:'progressista', costo:{debito:-0.1}, f:()=>{S.ind.debt-=0.1; gd('cetomedio',-1); gd('giovani',2);}}]},
+ {id:'fr_p_d_difesa', era:'contemporanea', paesi:['francia'], min:'difesa', kick:'Arsenale', t:'La legge di programmazione militare', text:'Il paese ha l\'atomica, una marina oceanica e un\'industria che vende all\'estero. La legge pluriennale deve dire quanto di tutto questo la Repubblica può ancora permettersi.', ch:[
+   {l:'Bilancio in crescita per tutta la legislatura', e:'L\'industria assume, il Tesoro annota', pleases:'conservatore', costo:{debito:0.8}, f:()=>{S.ind.debt+=0.8; gd('imprenditori',3); gd('lavoratori',1); gd('giovani',-2);}},
+   {l:'Mantieni, ma pretendi l\'Europa della difesa', e:'La Francia guida, se gli altri seguono', pleases:'tecnico', costo:{debito:0.3}, f:()=>{S.ind.debt+=0.3; gd('cetomedio',1);}},
+   {l:'Meno navi, più cyber', e:'Il futuro costa meno del passato', pleases:'progressista', costo:{debito:0.1}, f:()=>{S.ind.debt+=0.1; gd('giovani',2); gd('imprenditori',-2);}}]},
+ {id:'fr_p_d_regioni', era:'contemporanea', paesi:['francia'], min:'interno', kick:'Territorio', t:'Tredici regioni, e i dipartimenti', text:'Le regioni sono state accorpate a tredici, ma i dipartimenti sono rimasti, e i comuni sono decine di migliaia. Ogni livello ha un\'assemblea, un bilancio e un motivo per non sparire.', ch:[
+   {l:'Sopprimi un livello: i dipartimenti', e:'Una rivoluzione amministrativa, e una rivolta di notabili', pleases:'tecnico', costo:{debito:-0.3}, f:()=>{S.ind.debt-=0.3; gd('cetomedio',1); gd('pensionati',-3); gd('cattolici',-1);}},
+   {l:'Lascia tutto, ma chiarisci chi fa cosa', e:'La riforma che si fa sempre', pleases:'conservatore', f:()=>{gd('pensionati',1);}},
+   {l:'Fondi i comuni piccoli, con incentivi', e:'Lento, volontario, francese', pleases:'progressista', costo:{debito:0.2}, f:()=>{S.ind.debt+=0.2; gd('cetomedio',1); gd('pensionati',-1);}}]},
+ /* ===== L81-1 · GERMANIA, dossier di dicastero (scheda §B). ===== */
+ {id:'de_p_d_carbone', era:'contemporanea', paesi:['germania'], min:'sviluppo', kick:'Miniere', t:'L\'ultima miniera di lignite', text:'Il paese ha fissato una data per l\'addio al carbone; le regioni minerarie chiedono che quella data non sia solo una chiusura. Anticipare piace al clima; posticipare piace ai villaggi che vivono di scavatrici.', ch:[
+   {l:'Anticipa, e paga la riconversione', e:'Le scavatrici si fermano, i fondi arrivano', pleases:'progressista', costo:{debito:0.7}, f:()=>{S.ind.debt+=0.7; gd('giovani',3); gd('lavoratori',-2);}},
+   {l:'Tieni la data', e:'Un patto è un patto', pleases:'conservatore', f:()=>{gd('lavoratori',1); gd('pensionati',1); gd('giovani',-1);}},
+   {l:'Lega la data alla sicurezza della rete', e:'Si chiude quando la luce resta accesa', pleases:'tecnico', f:()=>{gd('imprenditori',2); gd('giovani',-2);}}]},
+ {id:'de_p_d_affitti', era:'contemporanea', paesi:['germania'], min:'infrastrutture', kick:'Abitare', t:'Gli affitti delle grandi città', text:'Nelle metropoli il freno agli affitti esiste da anni e i canoni salgono lo stesso. Si costruisce meno del necessario, e la proposta di espropriare le grandi società immobiliari ha vinto un referendum cittadino senza che nessuno l\'abbia applicata.', ch:[
+   {l:'Costruire: obiettivi federali e permessi rapidi', e:'Le gru fra tre anni, se il freno al debito lascia', pleases:'tecnico', costo:{debito:0.6}, f:()=>{S.ind.debt+=0.6; gd('imprenditori',2); gd('giovani',2);}},
+   {l:'Freno agli affitti più duro, con controlli', e:'Gli inquilini respirano, i costruttori si fermano', pleases:'progressista', f:()=>{gd('giovani',3); gd('lavoratori',2); gd('imprenditori',-3);}},
+   {l:'Sostieni chi affitta: detrazioni', e:'Il mercato aiutato, non guidato', pleases:'conservatore', costo:{debito:0.3}, f:()=>{S.ind.debt+=0.3; gd('cetomedio',2); gd('giovani',-1);}}]},
+ {id:'de_p_d_scuola', era:'contemporanea', paesi:['germania'], min:'istruzione', kick:'Sedici sistemi', t:'La scuola dei sedici Länder', text:'L\'istruzione è dei Länder: sedici sistemi, sedici calendari, sedici esami. Le prove internazionali dicono che i risultati scendono, e il governo federale non può quasi nulla — salvo pagare.', ch:[
+   {l:'Un patto federale: soldi in cambio di standard comuni', e:'I Länder prendono i soldi e discutono gli standard', pleases:'tecnico', costo:{debito:0.6}, f:()=>{S.ind.debt+=0.6; gd('giovani',2); gd('cetomedio',2);}},
+   {l:'Digitalizzazione delle scuole, subito', e:'Tablet ovunque, insegnanti da nessuna parte', pleases:'progressista', costo:{debito:0.4}, f:()=>{S.ind.debt+=0.4; gd('giovani',2); gd('pensionati',-1);}},
+   {l:'La scuola è dei Länder: non tocca a te', e:'Costituzionalmente esatto', pleases:'conservatore', f:()=>{gd('cetomedio',-1); gd('giovani',-1);}}]},
+ {id:'de_p_d_bundesrat', era:'contemporanea', paesi:['germania'], min:'interno', kick:'Seconda camera', t:'Il Bundesrat blocca', text:'La camera dei Länder ha una maggioranza diversa dalla tua e ferma una legge che ti serve. Per sbloccarla devi trattare con i governi regionali, uno per uno, e ognuno ha una lista.', ch:[
+   {l:'Tratta: qualcosa per ogni Land', e:'La legge passa, con sedici allegati', pleases:'tecnico', costo:{debito:0.4}, f:()=>{S.ind.debt+=0.4; gd('cetomedio',1);}},
+   {l:'Commissione di conciliazione, e pazienza', e:'La procedura prevista, e lunga', pleases:'conservatore', f:()=>{gd('pensionati',1);}},
+   {l:'Riscrivi la legge in modo che il Bundesrat non serva', e:'Legalmente possibile, politicamente ricordato', pleases:'progressista', f:()=>{S.ind.stampa-=2; gd('cetomedio',-1);}}]},
+ {id:'de_p_d_cyber', era:'contemporanea', paesi:['germania'], min:'interno', kick:'Reti', t:'Le antenne del fornitore sbagliato', text:'Le reti mobili del paese usano componenti di un fornitore che gli alleati considerano un rischio. Sostituirli costa miliardi agli operatori; tenerli costa fiducia agli alleati.', ch:[
+   {l:'Fuori i componenti a rischio entro pochi anni', e:'Gli operatori pagano, gli alleati annotano', pleases:'conservatore', costo:{debito:0.3}, f:()=>{S.ind.debt+=0.3; gd('imprenditori',-3); gd('cetomedio',1);}},
+   {l:'Solo dal nucleo della rete, gradualmente', e:'Il compromesso degli ingegneri', pleases:'tecnico', f:()=>{gd('imprenditori',-1);}},
+   {l:'Nessun divieto: la Germania decide da sola', e:'Sovranità, e una lettera da oltreoceano', pleases:'progressista', f:()=>{gd('imprenditori',2); gd('pensionati',-1);}}]},
+ {id:'de_p_d_burocrazia', era:'contemporanea', paesi:['germania'], min:'economia', kick:'Moduli', t:'Il fax negli uffici', text:'Il paese dell\'ingegneria manda ancora i fax fra amministrazioni. Aprire un\'impresa richiede mesi, un permesso edilizio anni. Ogni governo promette di semplificare; ogni governo aggiunge un modulo.', ch:[
+   {l:'Una legge di sfoltimento, con obiettivi misurabili', e:'Meno moduli, se qualcuno li conta', pleases:'tecnico', f:()=>{gd('imprenditori',3); gd('cetomedio',1);}},
+   {l:'Digitalizza tutto, con un\'agenzia federale', e:'Un\'altra agenzia', pleases:'progressista', costo:{debito:0.4}, f:()=>{S.ind.debt+=0.4; gd('giovani',2); gd('imprenditori',1);}},
+   {l:'Sospendi ogni norma nuova per due anni', e:'Semplice, e forse incostituzionale', pleases:'conservatore', f:()=>{gd('imprenditori',2); gd('giovani',-2);}}]},
+ {id:'de_p_d_cannabis', era:'contemporanea', paesi:['germania'], min:'salute', kick:'Droghe', t:'La cannabis regolata', text:'La cannabis è stata parzialmente legalizzata; i Länder conservatori chiedono di tornare indietro, i club di coltivazione chiedono regole chiare, i medici chiedono dati.', ch:[
+   {l:'Mantieni, e aggiungi i negozi autorizzati', e:'Un mercato legale, e una tassa', pleases:'progressista', costo:{debito:-0.1}, f:()=>{S.ind.debt-=0.1; gd('giovani',4); gd('cattolici',-3); gd('pensionati',-2);}},
+   {l:'Torna indietro', e:'I Länder conservatori esultano', pleases:'conservatore', f:()=>{gd('pensionati',3); gd('cattolici',2); gd('giovani',-4);}},
+   {l:'Valuta fra due anni, con i dati', e:'La risposta dei medici', pleases:'tecnico', f:()=>{gd('cetomedio',1);}}]},
+ {id:'de_p_d_estero', era:'contemporanea', paesi:['germania'], min:'esteri', kick:'Commercio', t:'Il cliente più grande', text:'L\'industria vende più di tutto a un grande paese asiatico che gli alleati considerano un rivale sistemico. Ridurre la dipendenza costa mercati; non ridurla costa autonomia, il giorno in cui servisse.', ch:[
+   {l:'Diversifica: accordi con altri mercati, incentivi a spostare', e:'Anni, e meno profitti', pleases:'tecnico', costo:{debito:0.3}, f:()=>{S.ind.debt+=0.3; gd('imprenditori',-2); gd('giovani',1);}},
+   {l:'Gli affari sono affari', e:'L\'industria respira, gli alleati no', pleases:'conservatore', f:()=>{gd('imprenditori',3); gd('cetomedio',-1);}},
+   {l:'Controlli sugli investimenti strategici', e:'Il minimo che gli alleati chiedono', pleases:'progressista', f:()=>{gd('imprenditori',-1); gd('pensionati',1);}}]},
+ /* ===== L82-1 · SPAGNA, dossier di dicastero (scheda §B). ===== */
+ {id:'es_p_d_disoccupazione', era:'contemporanea', paesi:['spagna'], min:'lavoro', kick:'Occupazione', t:'La disoccupazione strutturale', text:'Anche negli anni buoni il paese ha più disoccupati dei vicini, e i giovani del sud più di tutti. Un problema di decenni, che ogni governo dice di aver iniziato a risolvere.', ch:[
+   {l:'Formazione professionale legata alle imprese', e:'Il modello che funziona altrove', pleases:'tecnico', costo:{debito:0.5}, f:()=>{S.ind.debt+=0.5; gd('giovani',3); gd('imprenditori',2);}},
+   {l:'Piano di lavori pubblici nel sud', e:'Cantieri, e un giorno finiscono', pleases:'progressista', costo:{debito:0.8}, f:()=>{S.ind.debt+=0.8; gd('lavoratori',3); gd('giovani',1); gd('imprenditori',-1);}},
+   {l:'Meno contributi per chi assume', e:'Le imprese ringraziano, la cassa pensioni no', pleases:'conservatore', costo:{debito:0.4}, f:()=>{S.ind.debt+=0.4; gd('imprenditori',3); gd('pensionati',-2);}}]},
+ {id:'es_p_d_avestrain', era:'contemporanea', paesi:['spagna'], min:'infrastrutture', kick:'Ferrovie', t:'L\'alta velocità che arriva ovunque', text:'Il paese ha una delle reti ad alta velocità più lunghe del mondo, e treni che spesso viaggiano mezzi vuoti. Ogni capoluogo vuole la sua stazione; i treni regionali, dove viaggia la gente, si fermano per guasti.', ch:[
+   {l:'Basta linee nuove: soldi ai regionali', e:'Meno inaugurazioni, più pendolari', pleases:'tecnico', costo:{debito:0.4}, f:()=>{S.ind.debt+=0.4; gd('lavoratori',2); gd('cetomedio',2); gd('imprenditori',-1);}},
+   {l:'Completa la rete: ogni capoluogo', e:'Un nastro da tagliare per ogni campagna', pleases:'conservatore', costo:{debito:1.0}, f:()=>{S.ind.debt+=1.0; gd('cattolici',2); gd('imprenditori',2); gd('giovani',-1);}},
+   {l:'Apri le linee alla concorrenza', e:'Biglietti più bassi, se il gestore regge', pleases:'progressista', f:()=>{gd('cetomedio',2); gd('lavoratori',-2);}}]},
+ {id:'es_p_d_sanita', era:'contemporanea', paesi:['spagna'], min:'salute', kick:'Sanità', t:'Le liste d\'attesa delle regioni', text:'La sanità è delle regioni, e le liste d\'attesa cambiano da una all\'altra come fossero paesi diversi. I medici emigrano, i pronto soccorso scoppiano, e il ministero nazionale può poco più che contare.', ch:[
+   {l:'Un fondo statale legato a obiettivi di attesa', e:'Le regioni prendono i soldi e discutono gli obiettivi', pleases:'tecnico', costo:{debito:0.6}, f:()=>{S.ind.debt+=0.6; gd('pensionati',3); gd('cetomedio',1);}},
+   {l:'Più posti nelle facoltà di medicina', e:'Fra dieci anni', pleases:'progressista', costo:{debito:0.3}, f:()=>{S.ind.debt+=0.3; gd('giovani',2); gd('pensionati',1);}},
+   {l:'Convenzioni con i privati per smaltire le liste', e:'Veloce, e qualcuno lo chiama privatizzare', pleases:'conservatore', costo:{debito:0.4}, f:()=>{S.ind.debt+=0.4; gd('pensionati',2); gd('imprenditori',2); gd('lavoratori',-3);}}]},
+ {id:'es_p_d_giustizia', era:'contemporanea', paesi:['spagna'], min:'giustizia', kick:'Toghe', t:'Il consiglio dei giudici scaduto', text:'L\'organo che governa i giudici ha il mandato scaduto da anni perché i due grandi partiti non trovano l\'accordo per rinnovarlo. Le nomine sono ferme, l\'Europa lo scrive nei rapporti, e ognuno dà la colpa all\'altro.', ch:[
+   {l:'Accordo con l\'opposizione: metà a testa', e:'Il metodo di sempre, che l\'Europa non ama', pleases:'conservatore', f:()=>{gd('cetomedio',1); gd('giovani',-1);}},
+   {l:'Riforma: siano i giudici a eleggere i giudici', e:'Piace all\'Europa, e a chi ha più giudici', pleases:'tecnico', f:()=>{gd('cetomedio',2); gd('lavoratori',-1);}},
+   {l:'Cambia la legge per rinnovarlo a maggioranza semplice', e:'Si sblocca, e si ricorda', pleases:'progressista', f:()=>{S.ind.stampa-=2; gd('lavoratori',1); gd('pensionati',-2);}}]},
+ {id:'es_p_d_spopolamento', era:'contemporanea', paesi:['spagna'], min:'sviluppo', kick:'Interno', t:'La Spagna vuota', text:'Metà del territorio è quasi vuoto. Paesi che chiudono la scuola, poi il bar, poi tutto. Chi resta chiede un medico, una connessione e una strada; chi se n\'è andato non torna con un sussidio.', ch:[
+   {l:'Sgravi fiscali a chi vive e lavora nei paesi', e:'Qualcuno torna, molti restano dove sono', pleases:'conservatore', costo:{debito:0.4}, f:()=>{S.ind.debt+=0.4; gd('cattolici',3); gd('pensionati',2);}},
+   {l:'Fibra e medico garantiti a ogni comune', e:'Il servizio prima del sussidio', pleases:'tecnico', costo:{debito:0.6}, f:()=>{S.ind.debt+=0.6; gd('pensionati',3); gd('cattolici',2); gd('giovani',1);}},
+   {l:'Accetta: concentra i servizi nei capoluoghi', e:'Onesto, e nessuno lo vota', pleases:'progressista', costo:{debito:-0.2}, f:()=>{S.ind.debt-=0.2; gd('cattolici',-4); gd('pensionati',-3); gd('cetomedio',1);}}]},
+ {id:'es_p_d_rinnovabili', era:'contemporanea', paesi:['spagna'], min:'economia', kick:'Sole', t:'Il sole che avanza', text:'Il paese ha così tanto sole e vento che a mezzogiorno l\'elettricità costa quasi zero e non si sa dove metterla. La rete è vecchia, i collegamenti con il resto d\'Europa sono pochi, e l\'industria che potrebbe venire a usare quell\'energia non arriva.', ch:[
+   {l:'Interconnessioni con la Francia, a ogni costo', e:'Il sole spagnolo vendendosi in Europa', pleases:'tecnico', costo:{debito:0.7}, f:()=>{S.ind.debt+=0.7; gd('imprenditori',3); gd('giovani',1);}},
+   {l:'Attira industria energivora: data center e idrogeno', e:'Le fabbriche seguono il prezzo', pleases:'progressista', costo:{debito:0.4}, f:()=>{S.ind.debt+=0.4; gd('imprenditori',3); gd('lavoratori',2); gd('cattolici',-1);}},
+   {l:'Rallenta: prima la rete, poi i pannelli', e:'Prudente, e i pannelli non aspettano', pleases:'conservatore', f:()=>{gd('cetomedio',1); gd('giovani',-2);}}]},
+ {id:'es_p_d_gibilterra', era:'contemporanea', paesi:['spagna'], min:'esteri', kick:'La Rocca', t:'La frontiera della Rocca', text:'Dall\'altra parte di una recinzione c\'è un territorio britannico che il paese rivendica da tre secoli, e migliaia di spagnoli ci vanno a lavorare ogni mattina. Un accordo sulla frontiera è quasi pronto da anni.', ch:[
+   {l:'Firma: la frontiera aperta prima della sovranità', e:'I lavoratori della zona ringraziano, i nostalgici no', pleases:'tecnico', f:()=>{gd('lavoratori',2); gd('imprenditori',1); gd('pensionati',-2);}},
+   {l:'Nessun accordo senza la parola sovranità', e:'Un principio, e una fila al valico', pleases:'conservatore', f:()=>{gd('pensionati',2); gd('cattolici',1); gd('lavoratori',-2);}},
+   {l:'Lascia fare all\'Europa', e:'Bruxelles tratta, Madrid guarda', pleases:'progressista', f:()=>{gd('cetomedio',1);}}]},
+ {id:'es_p_d_polizia', era:'contemporanea', paesi:['spagna'], min:'interno', kick:'Ordine', t:'La legge sulla piazza', text:'Una legge di sicurezza permette multe pesanti a chi manifesta senza permesso e a chi filma la polizia. Chi l\'ha scritta la chiama ordine; chi l\'ha subita la chiama bavaglio. Riformarla è promesso da tre legislature.', ch:[
+   {l:'Riforma: multe ridotte e filmare è legale', e:'Le piazze ringraziano, i sindacati di polizia no', pleases:'progressista', f:()=>{gd('giovani',3); gd('lavoratori',1); gd('pensionati',-2);}},
+   {l:'Lascia com\'è', e:'La sicurezza prima', pleases:'conservatore', f:()=>{gd('pensionati',2); gd('cetomedio',1); gd('giovani',-3);}},
+   {l:'Un comitato di garanzia e più formazione', e:'La riforma senza la riforma', pleases:'tecnico', costo:{debito:0.1}, f:()=>{S.ind.debt+=0.1; gd('cetomedio',1);}}]},
 ];
 
 /* eventi gravi, rari */
@@ -5041,6 +5439,281 @@ const EVENTS=[
   text:'Il governo scioglie l\'amministrazione della capitale, guidata dall\'opposizione: chi lo fa parla di sprechi, chi lo subisce di un avversario cancellato per legge.',ch:[
    {l:'Si scioglie: le funzioni passano ai quartieri',e:'Un avversario in meno · e una capitale senza governo',f:()=>{S.ind.debt-=0.3; gd('imprenditori',3); gd('cetomedio',-2); gd('giovani',-5); gd('lavoratori',-3); stampad(-3); corrented('fedelissimi',4);}},
    {l:'Si lascia in piedi, con i cordoni tirati',e:'Nessuna legge contro un avversario · e un avversario che continua a parlare',f:()=>{gd('giovani',3); gd('lavoratori',2); corrented('fedelissimi',-4); repd(1);}}]},
+
+ /* ===== L75-1 · i dodici eventi del decennio inglese '90 (scheda §6) e le tre carte-fiducia oltre lo snodo (`fiducia:true`) ===== */
+ {id:'uk90_polltax', era:'uk1990', cond:()=>S.year>=1991&&S.year<=1992, kick:'Il paese', t:'L\'imposta da abolire',
+  text:'L\'imposta per ogni testa ha svuotato le casse dei comuni e riempito le piazze. Sostituirla costa; tenerla costa di più.',ch:[
+   {l:'Si abolisce: torna la tassa sulla casa',e:'Il paese respira · il buco lo copre lo Stato',costo:{debito:1.2},f:()=>{S.ind.debt+=1.2; gd('cetomedio',6); gd('lavoratori',5); gd('pensionati',4); corrented('fedelissimi',-4); repd(2);}},
+   {l:'Si tiene, con sconti per chi non può',e:'I conti reggono · le piazze no',f:()=>{gd('cetomedio',-5); gd('lavoratori',-6); gd('pensionati',-4); corrented('fedelissimi',3); stampad(-4);}}]},
+ {id:'uk90_recessione', era:'uk1990', cond:()=>S.year>=1990&&S.year<=1992, kick:'Economia', t:'I pignoramenti',
+  text:'I tassi alti e la recessione arrivano nelle case comprate dieci anni fa: chi non paga il mutuo perde la casa, e le banche ne hanno più di quante ne vogliano.',ch:[
+   {l:'Un fondo per chi rischia la casa',e:'Meno famiglie in strada · e un conto in più',costo:{debito:0.9},f:()=>{S.ind.debt+=0.9; gd('cetomedio',6); gd('lavoratori',4); gd('imprenditori',-2);}},
+   {l:'Il mercato deve pulirsi da solo',e:'Nessuna spesa · e una generazione che ricorda',f:()=>{gd('cetomedio',-7); gd('lavoratori',-4); gd('imprenditori',2); repd(1);}}]},
+ {id:'uk90_maastricht', era:'uk1990', cond:()=>S.year===1993, kick:'Il paese', t:'La ribellione su Maastricht',
+  text:'Il trattato passa in aula solo se i tuoi lo votano, e una parte dei tuoi non lo voterà. Puoi legare il voto alla fiducia nel governo, o trattare uno per uno.',ch:[
+   {l:'Fiducia sul trattato: chi vota contro fa cadere il governo',e:'Passa · e i ribelli non dimenticano',f:()=>{repd(3); corrented('militanti',-8); corrented('pontieri',4); if(S.relInt&&S.relInt.ue!=null) S.relInt.ue=clamp(S.relInt.ue+5,0,100);}},
+   {l:'Tratti con i ribelli: deroghe e rinvii',e:'Passa a pezzi · e il partito impara che ribellarsi rende',f:()=>{corrented('militanti',4); corrented('pontieri',-4); repd(-2); stampad(-3);}}]},
+ {id:'uk90_mucca', era:'uk1990', cond:()=>S.year===1996, kick:'Il paese', t:'La mucca pazza',
+  text:'Il governo ammette che la malattia dei bovini può passare all\'uomo. L\'Europa blocca la carne britannica, gli allevatori chiedono chi paga.',ch:[
+   {l:'Abbatti le mandrie e paghi gli allevatori',e:'Il blocco si allenta · il conto è enorme',costo:{debito:1.5},f:()=>{S.ind.debt+=1.5; gd('imprenditori',3); gd('cetomedio',2); repd(2); if(S.relInt&&S.relInt.ue!=null) S.relInt.ue=clamp(S.relInt.ue+3,0,100);}},
+   {l:'Contesti il blocco: guerra della carne',e:'La stampa applaude · l\'Europa no, e il blocco resta',f:()=>{stampad(4); gd('pensionati',2); gd('imprenditori',-4); if(S.relInt&&S.relInt.ue!=null) S.relInt.ue=clamp(S.relInt.ue-6,0,100);}}]},
+ {id:'uk90_banca', era:'uk1990', fiducia:true, cond:()=>S.year>=1997, kick:'I mercati', t:'L\'indipendenza della Banca',
+  text:'Il Tesoro ha sempre deciso i tassi. Dare la decisione alla Banca dice ai mercati che nessun governo li userà prima delle elezioni — e ti toglie una leva.',ch:[
+   {l:'La Banca decide da sola',e:'I mercati ti credono · i tuoi si chiedono a che serve governare',f:()=>{if(S.ind.fiducia!=null) S.ind.fiducia=clamp(S.ind.fiducia+10,0,100); repd(4); corrented('militanti',-4); gd('imprenditori',4);}},
+   {l:'I tassi restano al Tesoro',e:'La leva è tua · i mercati lo sanno e prezzano',f:()=>{if(S.ind.fiducia!=null) S.ind.fiducia=clamp(S.ind.fiducia-3,0,100); corrented('militanti',3);}}]},
+ {id:'uk90_salario', era:'uk1990', cond:()=>S.year>=1999, kick:'Lavoro', t:'Il salario minimo',
+  text:'Per la prima volta una paga oraria sotto la quale non si può scendere. Gli imprenditori dicono che chiuderanno; i sindacati che è poco.',ch:[
+   {l:'Si fissa, a un livello che regge',e:'Nessuna chiusura in massa · e una conquista che resta',f:()=>{gd('lavoratori',6); gd('giovani',3); gd('imprenditori',-4); corrented('militanti',4);}},
+   {l:'Si rinvia: prima la crescita',e:'Gli imprenditori respirano · la base no',f:()=>{gd('imprenditori',3); gd('lavoratori',-5); corrented('militanti',-5);}}]},
+ {id:'uk90_lotteria', era:'uk1990', cond:()=>S.year>=1994, kick:'Costume', t:'La lotteria del sabato',
+  text:'Una lotteria nazionale il sabato sera, e metà del ricavato ai «buoni progetti»: sport, arte, musei. Chi decide quali?',ch:[
+   {l:'Ai musei e ai teatri delle grandi città',e:'Le capitali ringraziano · le periferie comprano i biglietti',f:()=>{S.ind.debt-=0.3; gd('cetomedio',3); gd('lavoratori',-2); stampad(2);}},
+   {l:'Ai campi sportivi e alle sale di quartiere',e:'Poco per volta, ovunque · nessun monumento',f:()=>{S.ind.debt-=0.3; gd('lavoratori',3); gd('giovani',3); gd('cetomedio',-1);}}]},
+ {id:'uk90_dome', era:'uk1990', cond:()=>S.year>=1998, kick:'Costume', t:'Il Dome',
+  text:'Una tenda gigantesca sul Tamigi per festeggiare il millennio, che costa più di ogni previsione e che nessuno sa cosa contenga. Finirla o fermarla?',ch:[
+   {l:'Si finisce: il paese merita una festa',e:'Una cupola vuota per un anno · e la lotteria che paga',costo:{debito:0.6},f:()=>{S.ind.debt+=0.6; gd('giovani',2); stampad(-3); repd(-2);}},
+   {l:'Si ferma: i soldi altrove',e:'Un cantiere fermo sul fiume · e un governo che sa dire no',f:()=>{repd(2); gd('cetomedio',2); gd('giovani',-2);}}]},
+ {id:'uk90_britpop', era:'uk1990', cond:()=>S.year>=1996&&S.year<=1997, kick:'Costume', t:'Cool Britannia',
+  text:'Le band, gli stilisti, i registi: il paese è di nuovo di moda, e il partito che vuole vincere si fa fotografare con loro. Ti presti?',ch:[
+   {l:'Ti presti: un ricevimento con le band',e:'I giovani ti guardano · i pensionati cambiano canale',f:()=>{gd('giovani',6); gd('cetomedio',2); gd('pensionati',-3); stampad(3);}},
+   {l:'Non è il tuo mestiere',e:'Nessuna foto imbarazzante · e nessuna foto',f:()=>{gd('pensionati',2); gd('giovani',-3);}}]},
+ {id:'uk90_kosovo', era:'uk1990', cond:()=>S.year>=1999, kick:'Il paese', t:'La guerra umanitaria',
+  text:'Bombardare un paese europeo per fermare una pulizia etnica: senza mandato delle Nazioni Unite, con gli alleati, e con un\'opinione pubblica divisa.',ch:[
+   {l:'Si partecipa, in prima fila',e:'Gli alleati ringraziano · la sinistra del partito no',costo:{debito:0.8},f:()=>{S.ind.debt+=0.8; repd(4); gd('giovani',-4); corrented('militanti',-6); if(S.relInt&&S.relInt.alleanza!=null) S.relInt.alleanza=clamp(S.relInt.alleanza+6,0,100);}},
+   {l:'Si partecipa il minimo',e:'Nessuna spesa vera · e un alleato che prende nota',f:()=>{repd(-2); corrented('militanti',2); if(S.relInt&&S.relInt.alleanza!=null) S.relInt.alleanza=clamp(S.relInt.alleanza-4,0,100);}}]},
+ {id:'uk90_universita', era:'uk1990', cond:()=>S.year>=1998, kick:'Il paese', t:'Le università a pagamento',
+  text:'L\'università era gratuita. Farla pagare agli studenti, con un prestito da restituire, allarga l\'accesso dicono gli uni; lo chiude dicono gli altri.',ch:[
+   {l:'Si paga, con prestito e rate dopo la laurea',e:'Più posti · e una generazione che parte indebitata',f:()=>{S.ind.debt-=0.8; gd('giovani',-7); gd('cetomedio',-2); gd('imprenditori',2); corrented('militanti',-4);}},
+   {l:'Resta gratuita: paga la fiscalità',e:'I giovani respirano · i conti no',costo:{debito:0.8},f:()=>{S.ind.debt+=0.8; gd('giovani',6); gd('cetomedio',1); gd('imprenditori',-2);}}]},
+ {id:'uk90_tabloid', era:'uk1990', cond:()=>S.year>=1992, kick:'Costume', t:'Il tabloid che cambia sponda',
+  text:'Il giornale più venduto del paese ti offre la prima pagina: per averla devi promettere qualcosa al suo editore. Tutti lo fanno; nessuno lo dice.',ch:[
+   {l:'Vai a cena con l\'editore',e:'La prima pagina è tua · e lo sarà finché gli servi',f:()=>{stampad(8); gd('cetomedio',3); corrented('militanti',-4); if(S.esposizione!=null) S.esposizione=clamp(S.esposizione+3,0,100);}},
+   {l:'Non tratti coi giornali',e:'La prima pagina è dell\'avversario · la coscienza è tua',f:()=>{stampad(-5); corrented('militanti',3); repd(1);}}]},
+ {id:'uk90_sme', era:'uk1990', fiducia:true, cond:()=>S.year===1993, kick:'I mercati', t:'Dopo il Sistema monetario',
+  text:'La sterlina fluttua da mesi e il paese, stranamente, cresce. I mercati chiedono se rientrerai nel Sistema monetario o se il cambio resterà libero per sempre.',ch:[
+   {l:'Si fluttua: il cambio lo decide il mercato',e:'I mercati apprezzano la chiarezza · l\'Europa no',f:()=>{if(S.ind.fiducia!=null) S.ind.fiducia=clamp(S.ind.fiducia+4,0,100); if(S.gMod!=null) S.gMod+=0.2; gd('imprenditori',3); if(S.relInt&&S.relInt.ue!=null) S.relInt.ue=clamp(S.relInt.ue-3,0,100);}},
+   {l:'Si rientra, a un cambio più basso',e:'L\'Europa apprezza · i mercati ricordano il mercoledì',f:()=>{if(S.ind.fiducia!=null) S.ind.fiducia=clamp(S.ind.fiducia-6,0,100); if(S.gMod!=null) S.gMod-=0.2; gd('imprenditori',-3); if(S.relInt&&S.relInt.ue!=null) S.relInt.ue=clamp(S.relInt.ue+4,0,100);}}]},
+ {id:'uk90_euro', era:'uk1990', fiducia:true, cond:()=>S.year>=1998, kick:'I mercati', t:'L\'euro: dentro o fuori',
+  text:'Il continente sta per avere una moneta sola. Il paese non decide, e i mercati leggono la non-decisione: dentro, fuori, o un rinvio con cinque condizioni che nessuno verificherà.',ch:[
+   {l:'Dentro: si entra nella prima ondata',e:'I mercati apprezzano · la sterlina finisce, e con lei un pezzo di paese',f:()=>{if(S.ind.fiducia!=null) S.ind.fiducia=clamp(S.ind.fiducia+5,0,100); gd('imprenditori',4); gd('lavoratori',-3); gd('pensionati',-4); corrented('militanti',-6); if(S.relInt&&S.relInt.ue!=null) S.relInt.ue=clamp(S.relInt.ue+8,0,100);}},
+   {l:'Fuori: la sterlina resta',e:'Il paese tira un respiro · i mercati prezzano un\'isola',f:()=>{if(S.ind.fiducia!=null) S.ind.fiducia=clamp(S.ind.fiducia-4,0,100); gd('cetomedio',3); gd('pensionati',3); gd('imprenditori',-2); if(S.relInt&&S.relInt.ue!=null) S.relInt.ue=clamp(S.relInt.ue-4,0,100);}},
+   {l:'Cinque condizioni, e si vedrà',e:'Nessuno è contento · nessuno è contro',f:()=>{if(S.ind.fiducia!=null) S.ind.fiducia=clamp(S.ind.fiducia-1,0,100); corrented('pontieri',2);}}]},
+
+ /* ===== L77-1 · i dodici eventi del decennio inglese 2000 (scheda §6) e le tre carte-fiducia oltre lo snodo (`fiducia:true`) ===== */
+ {id:'uk00_pire', era:'uk2000', cond:()=>S.year===2001, kick:'Il paese', t:'Le pire nei campi',
+  text:'Un\'epidemia negli allevamenti obbliga ad abbattere milioni di capi, e le pire bruciano per settimane nelle campagne. Le immagini fanno il giro del mondo, e il turismo si ferma con loro.',ch:[
+   {l:'Abbattimento totale e indennizzi pieni',e:'L\'epidemia si ferma · e il conto è enorme',costo:{debito:1.2},f:()=>{S.ind.debt+=1.2; gd('imprenditori',3); gd('cetomedio',2); repd(2); if(S.gMod!=null) S.gMod-=0.2;}},
+   {l:'Vaccinazione e abbattimenti mirati',e:'Meno pire · e mesi in più di epidemia',costo:{debito:0.5},f:()=>{S.ind.debt+=0.5; gd('imprenditori',-3); gd('giovani',3); stampad(-2);}}]},
+ {id:'uk00_astensione', era:'uk2000', cond:()=>S.year>=2001, kick:'Il paese', t:'Quelli che non votano',
+  text:'Quattro elettori su dieci sono rimasti a casa: non era mai successo. Non è rabbia, dicono i sondaggi: è che non vedono la differenza.',ch:[
+   {l:'Si va a cercarli dove sono',e:'Mesi di comizi nelle periferie · e qualche punto di affluenza',f:()=>{gd('giovani',4); gd('lavoratori',3); if(typeof visd==='function') visd(4); stampad(2);}},
+   {l:'Chi vuole votare vota',e:'Nessuno sforzo · e un\'aula eletta da poco più di metà del paese',f:()=>{gd('giovani',-4); gd('lavoratori',-2); repd(-2);}}]},
+ {id:'uk00_cinquetest', era:'uk2000', fiducia:true, cond:()=>S.year>=2003&&S.year<=2004, kick:'I mercati', t:'I cinque test sull\'euro',
+  text:'Il Tesoro ha scritto cinque condizioni per entrare nella moneta unica, e la quinta non è mai chiara del tutto. Il continente aspetta una risposta che il paese non vuole dare.',ch:[
+   {l:'I test non sono soddisfatti: si resta fuori',e:'La sterlina resta · e la decisione è rinviata per sempre',f:()=>{if(S.ind.fiducia!=null) S.ind.fiducia=clamp(S.ind.fiducia+3,0,100); gd('pensionati',4); gd('cetomedio',3); if(S.relInt&&S.relInt.ue!=null) S.relInt.ue=clamp(S.relInt.ue-5,0,100);}},
+   {l:'Si apre la strada, con un referendum in fondo',e:'L\'Europa apprezza · il paese si divide su una cosa che non è ancora successa',f:()=>{if(S.ind.fiducia!=null) S.ind.fiducia=clamp(S.ind.fiducia-4,0,100); gd('imprenditori',3); gd('pensionati',-6); stampad(-5); if(S.relInt&&S.relInt.ue!=null) S.relInt.ue=clamp(S.relInt.ue+8,0,100);}}]},
+ {id:'uk00_identita', era:'uk2000', cond:()=>S.year>=2004&&S.year<=2010, kick:'Stato', t:'Le carte d\'identità',
+  text:'Un documento unico con le impronte di tutti, dice il ministero, renderebbe il paese più sicuro. Il paese non ha mai avuto una carta d\'identità obbligatoria, e ci tiene.',ch:[
+   {l:'Si fa: sicurezza prima di tutto',e:'I sondaggi la vogliono · e il conto cresce ogni anno',costo:{debito:1.5},f:()=>{S.ind.debt+=1.5; gd('pensionati',4); gd('cetomedio',2); gd('giovani',-6); corrented('militanti',-5); if(S.ind.sicurezza!=null) S.ind.sicurezza=clamp(S.ind.sicurezza+4,0,100);}},
+   {l:'Si lascia perdere',e:'Nessun archivio delle impronte · e un ministero che ci teneva',f:()=>{gd('giovani',5); gd('cetomedio',2); corrented('militanti',4); repd(1);}}]},
+ {id:'uk00_fumo', era:'uk2000', cond:()=>S.year>=2007, kick:'Costume', t:'Il fumo fuori dai pub',
+  text:'Vietare la sigaretta nei locali chiusi salverebbe vite, dicono i medici. I gestori dicono che salverebbe polmoni e chiuderebbe pub.',ch:[
+   {l:'Divieto pieno, in tutti i locali',e:'L\'aria è pulita · e per due anni il pub è più vuoto',f:()=>{if(S.ind.sanita!=null) S.ind.sanita=clamp(S.ind.sanita+4,0,100); gd('giovani',4); gd('cetomedio',3); gd('imprenditori',-5); gd('lavoratori',-3);}},
+   {l:'Sale separate, e decide il gestore',e:'Nessuno chiude · e il fumo resta dov\'era',f:()=>{gd('imprenditori',3); gd('lavoratori',2); gd('giovani',-2); if(S.ind.sanita!=null) S.ind.sanita=clamp(S.ind.sanita-2,0,100);}}]},
+ {id:'uk00_olimpiadi', era:'uk2000', cond:()=>S.year>=2005&&S.year<=2012, kick:'Il paese', t:'Le Olimpiadi da costruire',
+  text:'La città ha vinto la candidatura e adesso deve costruire: uno stadio, un villaggio, una linea ferroviaria e un quartiere intero al posto di una zona industriale. Il preventivo è già vecchio.',ch:[
+   {l:'Si costruisce bene, e si spende quel che serve',e:'Un quartiere nuovo che resta · e un preventivo triplicato',costo:{debito:2},f:()=>{S.ind.debt+=2; if(S.uMod!=null) S.uMod-=0.3; gd('giovani',5); gd('lavoratori',4); gd('cetomedio',-2); repd(3);}},
+   {l:'Si taglia il progetto all\'essenziale',e:'Il conto regge · e dopo i giochi resta un parcheggio',costo:{debito:0.8},f:()=>{S.ind.debt+=0.8; gd('cetomedio',3); gd('giovani',-3); gd('lavoratori',-2);}}]},
+ {id:'uk00_allargamento', era:'uk2000', cond:()=>S.year>=2004&&S.year<=2008, kick:'Il paese', t:'I lavoratori dell\'Est',
+  text:'Otto paesi entrano nell\'Unione e il tuo apre subito il mercato del lavoro, quando quasi tutti gli altri aspettano sette anni. Arrivano in centinaia di migliaia, e lavorano.',ch:[
+   {l:'Porte aperte: servono braccia',e:'L\'economia cresce · e nelle città piccole si comincia a mormorare',f:()=>{if(S.gMod!=null) S.gMod+=0.3; gd('imprenditori',6); gd('giovani',3); gd('lavoratori',-6); gd('pensionati',-4); if(S.relInt&&S.relInt.ue!=null) S.relInt.ue=clamp(S.relInt.ue+5,0,100);}},
+   {l:'Periodo transitorio, come gli altri',e:'Meno tensione nelle periferie · e i posti restano scoperti',f:()=>{if(S.gMod!=null) S.gMod-=0.2; if(S.uMod!=null) S.uMod+=0.2; gd('lavoratori',5); gd('pensionati',3); gd('imprenditori',-5); if(S.relInt&&S.relInt.ue!=null) S.relInt.ue=clamp(S.relInt.ue-4,0,100);}}]},
+ {id:'uk00_telecamere', era:'uk2000', cond:()=>S.year>=2005, kick:'Stato', t:'Le telecamere',
+  text:'Il paese ha più telecamere di sorveglianza per abitante di quasi ogni altro. Dopo gli attentati la richiesta è di aumentarle ancora, e di tenere i dati più a lungo.',ch:[
+   {l:'Più telecamere e dati conservati a lungo',e:'I reati si risolvono meglio · e qualcuno chiede chi guarda i guardiani',costo:{debito:0.5},f:()=>{S.ind.debt+=0.5; if(S.ind.sicurezza!=null) S.ind.sicurezza=clamp(S.ind.sicurezza+5,0,100); gd('pensionati',4); gd('cetomedio',3); gd('giovani',-5);}},
+   {l:'Un limite: si cancella dopo un mese',e:'La libertà tutelata · e qualche caso che non si chiude',f:()=>{gd('giovani',4); corrented('militanti',3); if(S.ind.sicurezza!=null) S.ind.sicurezza=clamp(S.ind.sicurezza-3,0,100);}}]},
+ {id:'uk00_tasse_uni', era:'uk2000', cond:()=>S.year>=2010, kick:'Il paese', t:'Le tasse universitarie triplicate',
+  text:'Per far quadrare i conti degli atenei la retta triplica, con un prestito che si restituisce quando si guadagna abbastanza. Gli studenti sono in piazza, e uno dei due partiti di governo aveva promesso il contrario.',ch:[
+   {l:'Si tripla, col prestito a rate',e:'Gli atenei respirano · e una promessa scritta in campagna vale zero',f:()=>{S.ind.debt-=1; gd('giovani',-14); gd('lavoratori',-4); gd('imprenditori',3); corrented('pontieri',-6); if(typeof credd==='function') credd(-8); repd(-4);}},
+   {l:'Si tiene la retta, e si taglia altrove',e:'La promessa è mantenuta · e il taglio lo prende qualcun altro',costo:{debito:1},f:()=>{S.ind.debt+=1; gd('giovani',8); gd('lavoratori',2); gd('cetomedio',-3); corrented('militanti',5);}}]},
+ {id:'uk00_disordini', era:'uk2000', cond:()=>S.year===2011, kick:'Il paese', t:'Agosto in fiamme',
+  text:'Quattro notti di saccheggi e incendi in diverse città, cominciati da una sparatoria della polizia e proseguiti per conto loro. Migliaia di arresti, e un paese che si chiede cos\'era.',ch:[
+   {l:'Pene esemplari, subito',e:'I tribunali lavorano di notte · e le ragioni restano tutte lì',f:()=>{if(S.ind.sicurezza!=null) S.ind.sicurezza=clamp(S.ind.sicurezza+5,0,100); gd('pensionati',6); gd('cetomedio',5); gd('giovani',-8); gd('lavoratori',-3); stampad(4);}},
+   {l:'Pene e un piano per quei quartieri',e:'Costa · e forse fra dieci anni si vedrà',costo:{debito:1},f:()=>{S.ind.debt+=1; gd('giovani',3); gd('lavoratori',3); gd('cetomedio',-2); gd('pensionati',-3); repd(2);}}]},
+ {id:'uk00_referendum_voto', era:'uk2000', cond:()=>S.year===2011, kick:'Stato', t:'Il referendum sul voto',
+  text:'Il partner di governo ha ottenuto un referendum per cambiare il sistema elettorale: il voto alternativo al posto del collegio secco. È la sua ragione di stare al governo, e tu non ci credi.',ch:[
+   {l:'Si fa campagna contro, apertamente',e:'Il sistema resta · e il partner scopre quanto vale il suo posto',f:()=>{if(typeof applicaSlancio==='function') applicaSlancio(['uk_lib'], -2); corrented('fedelissimi',5); gd('pensionati',2); if(S.tenuta&&S.tenuta.uk_lib!=null) S.tenuta.uk_lib=clamp(S.tenuta.uk_lib-15,0,100);}},
+   {l:'Si resta neutrali: decida il paese',e:'Il partner respira · e i tuoi non capiscono perché',f:()=>{corrented('fedelissimi',-4); corrented('pontieri',3); if(S.tenuta&&S.tenuta.uk_lib!=null) S.tenuta.uk_lib=clamp(S.tenuta.uk_lib+8,0,100); repd(1);}}]},
+ {id:'uk00_ukip', era:'uk2000', cond:()=>S.year>=2010&&S.year<=2012, kick:'Le urne', t:'Un milione di voti e nessun seggio',
+  text:'Un partito che nel paese prende quasi un milione di voti esce dalle urne senza un solo seggio: i suoi voti sono ovunque e da nessuna parte, spalmati su seicento collegi dove non arriva mai primo. Chiede che il sistema cambi, e i giornali gli danno spazio per la prima volta.',ch:[
+   {l:'Il sistema si difende: chi vince un collegio siede',e:'La regola regge · e un milione di persone impara che il proprio voto non pesa',f:()=>{corrented('fedelissimi',3); gd('pensionati',-3); gd('cetomedio',-2); repd(-1);}},
+   {l:'Si ammette il problema, senza promettere nulla',e:'Nessuno si offende · e nessuno ti crede',f:()=>{corrented('pontieri',2); gd('pensionati',2); if(S.ind.fiducia!=null) S.ind.fiducia=clamp(S.ind.fiducia-2,0,100);}}]},
+ {id:'uk00_comuni', era:'uk2000', cond:()=>S.year>=2010, kick:'I conti', t:'Il taglio ai comuni',
+  text:'Il rientro dei conti passa dai trasferimenti agli enti locali, che è il taglio più facile da fare e il più difficile da vedere: non chiude un ministero, chiude una biblioteca alla volta.',ch:[
+   {l:'Si taglia ai comuni: è dove si può',e:'I conti centrali tornano · e i servizi spariscono uno alla volta',f:()=>{S.ind.debt-=1.5; gd('lavoratori',-6); gd('pensionati',-5); gd('imprenditori',3); if(S.potereLocale!=null) S.potereLocale=clamp(S.potereLocale-4,0,100);}},
+   {l:'Si protegge il locale, si taglia al centro',e:'Le biblioteche restano aperte · e i ministeri urlano',f:()=>{S.ind.debt-=0.8; gd('lavoratori',3); gd('pensionati',3); corrented('pontieri',-5);}}]},
+ {id:'uk00_salvataggi', era:'uk2000', fiducia:true, cond:()=>S.year>=2008&&S.year<=2009, kick:'I mercati', t:'Lo Stato entra nelle banche',
+  text:'Non è più una banca sola: il sistema intero non si fida di sé stesso. Mettere capitale pubblico dentro le grandi banche le salva e ti rende azionista di maggioranza di due di esse.',ch:[
+   {l:'Si ricapitalizza: lo Stato entra',e:'Il sistema regge · e il debito prende in un colpo quello che non prendeva in dieci anni',costo:{debito:12},f:()=>{S.ind.debt+=12; if(S.ind.fiducia!=null) S.ind.fiducia=clamp(S.ind.fiducia+14,0,100); repd(5); gd('cetomedio',3); gd('lavoratori',-3); gd('imprenditori',4); corrented('militanti',-6);}},
+   {l:'Prestiti sì, capitale no',e:'Il debito cresce meno · e il sistema resta appeso a un filo',costo:{debito:4},f:()=>{S.ind.debt+=4; if(S.ind.fiducia!=null) S.ind.fiducia=clamp(S.ind.fiducia-8,0,100); if(S.gMod!=null) S.gMod-=0.4; gd('imprenditori',-4); gd('cetomedio',-4);}}]},
+ {id:'uk00_declassamento', era:'uk2000', fiducia:true, cond:()=>S.year>=2009&&S.year<=2011, kick:'I mercati', t:'Il declassamento minacciato',
+  text:'Un\'agenzia mette il debito del paese «sotto osservazione»: se il piano di rientro non convince, la tripla A se ne va. Non è ancora successo, ed è già una notizia.',ch:[
+   {l:'Si annuncia un piano credibile, subito',e:'La tripla A resta · e il piano vincola chi verrà dopo',f:()=>{if(S.ind.fiducia!=null) S.ind.fiducia=clamp(S.ind.fiducia+9,0,100); repd(3); gd('imprenditori',4); gd('lavoratori',-4); gd('giovani',-3);}},
+   {l:'Non si governa per le agenzie',e:'Applausi in aula · e uno spread che risponde il giorno dopo',costo:{debito:1},f:()=>{if(S.ind.fiducia!=null) S.ind.fiducia=clamp(S.ind.fiducia-11,0,100); corrented('militanti',6); gd('lavoratori',3); gd('imprenditori',-5); S.ind.debt+=1;}}]},
+ {id:'uk00_sterlina', era:'uk2000', fiducia:true, cond:()=>S.year>=2008&&S.year<=2010, kick:'I mercati', t:'La sterlina che scende',
+  text:'In un anno la sterlina ha perso un quarto del suo valore contro le altre monete. Chi esporta ringrazia, chi importa paga, e chi va in vacanza se ne accorge subito.',ch:[
+   {l:'Si lascia scendere: è un ammortizzatore',e:'L\'export respira · e tutto ciò che si compra fuori costa un quarto in più',f:()=>{if(S.ind.fiducia!=null) S.ind.fiducia=clamp(S.ind.fiducia-5,0,100); if(S.gMod!=null) S.gMod+=0.4; gd('imprenditori',5); gd('cetomedio',-4); gd('pensionati',-3);}},
+   {l:'Si difende il cambio',e:'La moneta tiene · e l\'unico ammortizzatore che avevi si spegne',costo:{debito:1.5},f:()=>{if(S.ind.fiducia!=null) S.ind.fiducia=clamp(S.ind.fiducia+4,0,100); if(S.gMod!=null) S.gMod-=0.5; S.ind.debt+=1.5; gd('imprenditori',-5); gd('cetomedio',2);}}]},
+ /* ===== L79-2 · FRANCIA, PRESENTE ARRICCHITO (scheda PRESET-FRANCIA-PRESENTE §A) — dodici questioni che il paese
+    discute oggi. Nessuna data, nessun nome: sono le domande, non i fatti. paesi:['francia'] le tiene in casa. ===== */
+ {id:'fr_p_pensioni', era:'contemporanea', paesi:['francia'], kick:'Piazza', t:'L\'età della pensione torna in piazza', text:'I sindacati chiamano una giornata di mobilitazione contro l\'età pensionabile. I cortei sono lunghi, le stazioni ferme, e chi ha votato la riforma chiede di non cedere.', ch:[
+   {l:'Tieni la linea: la riforma resta', e:'I conti ringraziano, la piazza no', costo:{debito:-0.4}, f:()=>{S.ind.debt-=0.4; S.ind.fiducia+=2; gd('lavoratori',-5); gd('pensionati',-2); gd('imprenditori',3);}},          // ①
+   {l:'Apri un tavolo sulle carriere lunghe', e:'Qualcosa si concede, qualcosa si salva', costo:{debito:0.3}, f:()=>{S.ind.debt+=0.3; gd('lavoratori',2); gd('pensionati',2); gd('imprenditori',-1);}},
+   {l:'Sospendi l\'applicazione per un anno', e:'La piazza si svuota, i mercati alzano un sopracciglio', costo:{debito:0.8}, f:()=>{S.ind.debt+=0.8; S.ind.fiducia-=3; gd('lavoratori',5); gd('pensionati',3); gd('imprenditori',-4);}}]},
+ {id:'fr_p_493', era:'contemporanea', paesi:['francia'], cond:()=>!!S.minoranza,   /* L80-5: l'articolo serve a chi non ha i voti. Con L80-4 il gancio parlamentoAppeso() resta escluso (la Francia e 'candidato'), ma S.minoranza dice la stessa cosa ed e vera dove serve. */ kick:'Assemblea', t:'La legge non ha i voti', text:'Il testo di bilancio non ha una maggioranza certa in Assemblea. La Costituzione ti lascia una strada: farlo passare senza voto, e sfidare l\'aula a sfiduciarti.', ch:[
+   {l:'Usa l\'articolo: passa senza voto', e:'Il testo passa, l\'aula ricorda', f:()=>{S.ind.fiducia+=2; S.ind.stampa-=3; gd('cetomedio',-3); gd('giovani',-2);}},                                                            // ②
+   {l:'Cerca i voti uno a uno, e paga il prezzo', e:'Emendamenti, promesse, tempo', costo:{debito:0.5}, f:()=>{S.ind.debt+=0.5; gd('pensionati',2); gd('cetomedio',1);}},
+   {l:'Ritira il testo e riscrivilo', e:'Nessuno strappo, nessun bilancio', f:()=>{S.ind.fiducia-=2; S.ind.stampa+=1; gd('imprenditori',-3);}}]},
+ {id:'fr_p_nucleare', era:'contemporanea', paesi:['francia'], min:'economia', kick:'Energia', t:'I reattori invecchiano', text:'La maggior parte dell\'elettricità del paese viene dal nucleare, e il parco ha decenni. Prolungare, ricostruire o ridurre: ogni strada costa, e ognuna ha un\'idea di Francia dietro.', ch:[
+   {l:'Nuovi reattori: la Francia resta nucleare', e:'Un debito lungo e un\'indipendenza lunga', costo:{debito:1.2}, f:()=>{S.ind.debt+=1.2; S.ind.fiducia+=1; gd('imprenditori',4); gd('giovani',-3);}},               // ③
+   {l:'Prolunga l\'esistente e investi nelle rinnovabili', e:'La via di mezzo, con i suoi rischi', costo:{debito:0.6}, f:()=>{S.ind.debt+=0.6; gd('giovani',2); gd('imprenditori',1);}},
+   {l:'Chiudi i più vecchi, uno alla volta', e:'La bolletta sale prima che le turbine girino', costo:{debito:0.4}, f:()=>{S.ind.debt+=0.4; gd('giovani',4); gd('imprenditori',-4); gd('cetomedio',-2);}}]},
+ {id:'fr_p_deficit', era:'contemporanea', paesi:['francia'], min:'economia', kick:'Bruxelles', t:'La lettera da Bruxelles', text:'Il deficit è sopra la soglia europea da anni e la Commissione chiede un percorso di rientro. Il paese che ha scritto le regole con gli altri deve dire se le rispetta.', ch:[
+   {l:'Un piano di tagli credibile', e:'I mercati respirano, i ministeri no', costo:{debito:-1.0}, f:()=>{S.ind.debt-=1.0; S.ind.fiducia+=3; allG(-2);}},                                                                  // ④
+   {l:'Rientro lento, crescita prima', e:'Bruxelles aspetta, per ora', costo:{debito:-0.3}, f:()=>{S.ind.debt-=0.3; gd('lavoratori',1);}},
+   {l:'La Francia non è un paese sotto tutela', e:'Applausi in aula, silenzio a Francoforte', f:()=>{S.ind.fiducia-=3; gd('lavoratori',2); gd('pensionati',2); gd('imprenditori',-2);}}]},
+ {id:'fr_p_banlieue', era:'contemporanea', paesi:['francia'], min:'interno', kick:'Periferie', t:'Tre notti nelle banlieue', text:'Un episodio in un quartiere popolare accende tre notti di scontri in più città. Auto bruciate, scuole danneggiate, e una domanda che il paese si fa da quarant\'anni.', ch:[
+   {l:'Coprifuoco e rinforzi', e:'Le notti finiscono, il quartiere resta', f:()=>{gd('pensionati',3); gd('cetomedio',2); gd('giovani',-4);}},
+   {l:'Un piano per le periferie, con soldi veri', e:'Il tempo lungo di una promessa', costo:{debito:0.7}, f:()=>{S.ind.debt+=0.7; gd('giovani',4); gd('lavoratori',1); gd('pensionati',-2);}},
+   {l:'Vai nel quartiere, senza scorta visibile', e:'Un gesto, e il giorno dopo il gesto', f:()=>{S.ind.stampa+=2; gd('giovani',2); gd('cattolici',1); gd('cetomedio',-1);}}]},
+ {id:'fr_p_laicita', era:'contemporanea', paesi:['francia'], min:'istruzione', kick:'Scuola', t:'Il vestito in classe', text:'Una circolare sui simboli religiosi a scuola riapre il dibattito sulla laicità: per alcuni è il fondamento della Repubblica, per altri un modo di guardare sempre le stesse persone.', ch:[
+   {l:'La laicità non si negozia: divieto chiaro', e:'La Repubblica parla, una parte del paese ascolta', f:()=>{gd('pensionati',3); gd('cetomedio',2); gd('giovani',-3); gd('cattolici',1);}},
+   {l:'Lascia decidere ai presidi', e:'Nessuna regola, mille regole', f:()=>{gd('giovani',1); gd('pensionati',-2);}},
+   {l:'Una regola, e un programma di educazione civica', e:'Il divieto con una spiegazione accanto', costo:{debito:0.1}, f:()=>{S.ind.debt+=0.1; gd('cetomedio',1); gd('giovani',-1); gd('cattolici',1);}}]},
+ {id:'fr_p_agricoltori', era:'contemporanea', paesi:['francia'], min:'sviluppo', kick:'Campagne', t:'I trattori sulle tangenziali', text:'Gli agricoltori bloccano gli accessi alle città: prezzi troppo bassi, norme troppe, e l\'Europa che apre ai prodotti di fuori. La Francia rurale chiede di essere vista.', ch:[
+   {l:'Sospendi le norme più contestate e apri un fondo', e:'I blocchi finiscono, il conto arriva', costo:{debito:0.5}, f:()=>{S.ind.debt+=0.5; gd('cattolici',3); gd('lavoratori',2); gd('giovani',-2);}},
+   {l:'Porta la questione a Bruxelles', e:'Il problema cambia indirizzo', f:()=>{gd('cattolici',1); gd('imprenditori',1);}},
+   {l:'Tieni le norme: l\'ambiente non aspetta', e:'I trattori restano un\'altra settimana', f:()=>{gd('giovani',3); gd('cattolici',-4); gd('pensionati',-2);}}]},
+ {id:'fr_p_oltremare', era:'contemporanea', paesi:['francia'], min:'interno', kick:'Oltremare', t:'Un arcipelago a diecimila chilometri', text:'In un territorio d\'oltremare la questione dell\'indipendenza torna a dividere: chi vuole restare, chi vuole andarsene, e chi chiede solo che Parigi ascolti prima di decidere.', ch:[
+   {l:'Riapri il dialogo con tutte le parti', e:'Lento, ma nessuno si alza dal tavolo', f:()=>{gd('giovani',2); gd('cetomedio',1); gd('pensionati',-1);}},
+   {l:'Lo Stato garantisce l\'ordine, poi si parla', e:'La calma prima, la fiducia dopo — forse', f:()=>{gd('pensionati',2); gd('cetomedio',1); gd('giovani',-3);}},
+   {l:'Un pacchetto economico, subito', e:'I soldi arrivano, la domanda resta', costo:{debito:0.4}, f:()=>{S.ind.debt+=0.4; gd('lavoratori',1); gd('giovani',1);}}]},
+ {id:'fr_p_sahel', era:'contemporanea', paesi:['francia'], min:'difesa', kick:'Africa', t:'La base che chiude', text:'Un governo africano chiede il ritiro dei soldati francesi. Il paese che si è pensato per decenni come garante di una regione deve decidere cosa resta di quel ruolo.', ch:[
+   {l:'Ritiro ordinato, e un nuovo patto con chi vuole', e:'Una pagina che si chiude con dignità', costo:{debito:-0.2}, f:()=>{S.ind.debt-=0.2; gd('giovani',2); gd('pensionati',-2);}},
+   {l:'Sposta le forze in un paese vicino', e:'La presenza resta, l\'immagine no', costo:{debito:0.3}, f:()=>{S.ind.debt+=0.3; gd('pensionati',2); gd('cetomedio',1); gd('giovani',-1);}},
+   {l:'Nessun commento: la Francia non risponde agli ultimatum', e:'Si resta finché si resta', f:()=>{S.ind.stampa-=2; gd('pensionati',1); gd('giovani',-2);}}]},
+ {id:'fr_p_corsica', era:'contemporanea', paesi:['francia'], min:'interno', kick:'Isola', t:'L\'autonomia della Corsica', text:'L\'isola chiede uno statuto di autonomia dentro la Repubblica. Per riconoscerlo serve toccare la Costituzione, e nel paese «una e indivisibile» ogni parola pesa.', ch:[
+   {l:'Apri il cantiere costituzionale', e:'Un passo che altri territori guardano', f:()=>{gd('giovani',2); gd('cetomedio',1); gd('pensionati',-2);}},
+   {l:'Più competenze, senza toccare la Costituzione', e:'Molto, ma non la parola', f:()=>{gd('cetomedio',1); gd('cattolici',1);}},
+   {l:'La Repubblica è una: nessuno statuto speciale', e:'Chiaro a Parigi, meno ad Ajaccio', f:()=>{gd('pensionati',2); gd('giovani',-2);}}]},
+ {id:'fr_p_giubbotti', era:'contemporanea', paesi:['francia'], kick:'Rotatorie', t:'Le rotatorie occupate', text:'Non i sindacati, non i partiti: gente dei paesi e delle periferie lontane che occupa le rotatorie ogni sabato. Il carburante, le tasse, la sensazione che Parigi non sappia dove vivono.', ch:[
+   {l:'Un grande dibattito nazionale, comune per comune', e:'Ascoltare costa poco e si vede', costo:{debito:0.2}, f:()=>{S.ind.debt+=0.2; S.ind.stampa+=2; gd('cetomedio',2); gd('lavoratori',1);}},                       // ⑪
+   {l:'Sospendi l\'aumento sul carburante', e:'Il sabato torna tranquillo, il bilancio meno', costo:{debito:0.6}, f:()=>{S.ind.debt+=0.6; gd('cetomedio',3); gd('lavoratori',2); gd('giovani',-2);}},
+   {l:'L\'ordine prima di tutto', e:'I sabati continuano, e peggiorano', f:()=>{gd('pensionati',1); gd('cetomedio',-3); gd('lavoratori',-2);}}]},
+ {id:'fr_p_medici', era:'contemporanea', paesi:['francia'], min:'salute', kick:'Territorio', t:'I deserti medici', text:'In interi cantoni non c\'è più un medico di base che accetti pazienti nuovi. I sindaci scrivono, i cittadini fanno due ore di macchina, e i giovani medici scelgono le città.', ch:[
+   {l:'Obbligo di due anni in zona carente per i neolaureati', e:'I cantoni ringraziano, gli studenti no', f:()=>{gd('pensionati',4); gd('cattolici',2); gd('giovani',-4);}},                                             // ⑫
+   {l:'Incentivi e case della salute', e:'Costa, e funziona a metà', costo:{debito:0.5}, f:()=>{S.ind.debt+=0.5; gd('pensionati',2); gd('cetomedio',1);}},
+   {l:'Telemedicina e infermieri con più competenze', e:'Una risposta moderna a una domanda antica', costo:{debito:0.2}, f:()=>{S.ind.debt+=0.2; gd('giovani',1); gd('pensionati',-1);}}]},
+ /* ===== L81-1 · GERMANIA, PRESENTE ARRICCHITO (scheda PRESET-GERMANIA-PRESENTE §A) — dodici questioni. Il paese è
+    sempre una coalizione: le carte parlano spesso «ai partner». Nessuna data, nessun nome. ===== */
+ {id:'de_p_freno', era:'contemporanea', paesi:['germania'], min:'economia', kick:'Legge fondamentale', t:'Il freno al debito', text:'La Costituzione limita il nuovo debito federale a una frazione minima del prodotto. I ponti cedono, le ferrovie ritardano, l\'esercito chiede: e la regola, scritta per i tempi buoni, vale anche adesso.', ch:[
+   {l:'Il freno resta: si risparmia altrove', e:'I mercati applaudono, i cantieri aspettano', costo:{debito:-0.5}, f:()=>{S.ind.debt-=0.5; S.ind.fiducia+=3; gd('imprenditori',2); gd('lavoratori',-2); gd('giovani',-2);}},                 // ①
+   {l:'Un fondo speciale fuori dal freno, con i due terzi', e:'Serve l\'opposizione, e la si paga', costo:{debito:1.0}, f:()=>{S.ind.debt+=1.0; gd('lavoratori',2); gd('imprenditori',1); gd('pensionati',-1);}},
+   {l:'Dichiara l\'emergenza e sospendilo per un anno', e:'La Corte costituzionale leggerà ogni riga', costo:{debito:1.5}, f:()=>{S.ind.debt+=1.5; S.ind.fiducia-=3; gd('lavoratori',3); gd('giovani',2); gd('imprenditori',-3);}}]},
+ {id:'de_p_energia', era:'contemporanea', paesi:['germania'], min:'economia', kick:'Energia', t:'Dopo l\'ultimo reattore', text:'Il paese ha spento le centrali nucleari e importa gas a prezzi che l\'industria non regge. Le rinnovabili crescono, ma la rete non le porta dove servono: dal nord ventoso al sud delle fabbriche.', ch:[
+   {l:'Elettrodotti nord-sud, contro chiunque protesti', e:'Dieci anni di tralicci e di ricorsi', costo:{debito:0.8}, f:()=>{S.ind.debt+=0.8; S.ind.fiducia+=1; gd('imprenditori',3); gd('cetomedio',-2);}},                              // ②
+   {l:'Un prezzo dell\'energia calmierato per l\'industria', e:'Le fabbriche restano, il Tesoro paga', costo:{debito:0.9}, f:()=>{S.ind.debt+=0.9; gd('imprenditori',4); gd('lavoratori',2); gd('giovani',-2);}},
+   {l:'Riapri la discussione sul nucleare', e:'Una parola che in questo paese divide le famiglie', f:()=>{gd('imprenditori',2); gd('pensionati',1); gd('giovani',-4);}}]},
+ {id:'de_p_esercito', era:'contemporanea', paesi:['germania'], min:'difesa', kick:'Svolta', t:'L\'esercito che non era pronto', text:'Per decenni il paese ha speso poco per le armi e ha chiesto scusa per la storia. Ora gli alleati chiedono di più, e i magazzini sono vuoti. Rimettere in piedi le forze armate costa, e cambia l\'idea che il paese ha di sé.', ch:[
+   {l:'Il due per cento, e oltre, per tutta la legislatura', e:'Gli alleati annotano, i pacifisti anche', costo:{debito:1.2}, f:()=>{S.ind.debt+=1.2; S.ind.fiducia+=1; gd('imprenditori',2); gd('pensionati',1); gd('giovani',-3);}},          // ③
+   {l:'Riarmo graduale, insieme all\'Europa', e:'Più lento, meno solo', costo:{debito:0.6}, f:()=>{S.ind.debt+=0.6; gd('cetomedio',1);}},
+   {l:'Reintroduci un servizio militare volontario', e:'Un anno per chi vuole, e un dibattito per tutti', costo:{debito:0.4}, f:()=>{S.ind.debt+=0.4; gd('pensionati',3); gd('giovani',-4);}}]},
+ {id:'de_p_frontiere', era:'contemporanea', paesi:['germania'], min:'interno', kick:'Confini', t:'I controlli alle frontiere', text:'I Länder non ce la fanno più con gli arrivi, dicono i sindaci di ogni colore. Reintrodurre i controlli ai confini interni dell\'Unione è possibile per legge, e impossibile per l\'idea d\'Europa che il paese ha difeso per settant\'anni.', ch:[
+   {l:'Controlli a tutti i confini, a tempo indeterminato', e:'Le code ai valichi, e il silenzio dei vicini', f:()=>{gd('pensionati',4); gd('cetomedio',2); gd('giovani',-3); gd('imprenditori',-2);}},
+   {l:'Più soldi ai comuni e accordi con i paesi di origine', e:'Il metodo tedesco: lento e finanziato', costo:{debito:0.6}, f:()=>{S.ind.debt+=0.6; gd('cetomedio',1); gd('cattolici',2); gd('pensionati',-1);}},
+   {l:'La soluzione è europea o non è', e:'Giusto, e non basta a un sindaco', f:()=>{gd('giovani',2); gd('pensionati',-3); gd('cetomedio',-1);}}]},
+ {id:'de_p_auto', era:'contemporanea', paesi:['germania'], min:'sviluppo', kick:'Industria', t:'L\'auto che cambia motore', text:'L\'industria che ha fatto il paese vende meno, chiude turni e scopre che l\'elettrico lo fanno altri, più in fretta e a meno. I sindacati chiedono garanzie, i costruttori chiedono aiuti, e tutti chiedono tempo.', ch:[
+   {l:'Incentivi all\'acquisto e alle fabbriche di batterie', e:'Si compra tempo, non il futuro', costo:{debito:0.9}, f:()=>{S.ind.debt+=0.9; S.ind.fiducia-=1; gd('imprenditori',3); gd('lavoratori',3); gd('giovani',-1);}},               // ④
+   {l:'Nessun aiuto: il mercato decide', e:'Il mercato ha già deciso, e non a favore', f:()=>{S.ind.fiducia+=2; gd('imprenditori',-3); gd('lavoratori',-4); gd('cetomedio',1);}},
+   {l:'Riconversione: chi perde il turno va a fare i tralicci', e:'Una promessa che richiede una rete', costo:{debito:0.5}, f:()=>{S.ind.debt+=0.5; gd('lavoratori',2); gd('giovani',2); gd('imprenditori',-1);}}]},
+ {id:'de_p_treni', era:'contemporanea', paesi:['germania'], min:'infrastrutture', kick:'Ferrovie', t:'Il treno che non arriva', text:'La rete ferroviaria, un tempo un vanto, è la barzelletta nazionale: ritardi, cantieri, cancellazioni. Ricostruirla costa decenni; non farlo costa il paese che si sposta in treno più di chiunque.', ch:[
+   {l:'Chiudi le tratte principali, una alla volta, e rifalle', e:'Anni di autobus sostitutivi, poi i treni', costo:{debito:1.0}, f:()=>{S.ind.debt+=1.0; gd('cetomedio',-2); gd('lavoratori',-1); gd('imprenditori',2);}},
+   {l:'Abbonamento nazionale a prezzo fisso', e:'Pieni e in ritardo, ma pieni', costo:{debito:0.5}, f:()=>{S.ind.debt+=0.5; gd('giovani',4); gd('lavoratori',2); gd('cetomedio',1);}},
+   {l:'Apri le linee ai privati', e:'Concorrenza sui binari, se i binari reggono', f:()=>{gd('imprenditori',2); gd('lavoratori',-3);}}]},
+ {id:'de_p_est', era:'contemporanea', paesi:['germania'], kick:'Est', t:'I due paesi nel paese', text:'A trent\'anni dall\'unità, nei Länder dell\'est i salari sono più bassi, i giovani se ne vanno e il voto di protesta cresce. La sensazione di essere «tedeschi di seconda» non è nei numeri, ma è nei risultati elettorali.', ch:[
+   {l:'Un piano decennale per l\'est, con sedi federali e fabbriche', e:'Un investimento lungo e un simbolo', costo:{debito:0.8}, f:()=>{S.ind.debt+=0.8; gd('lavoratori',3); gd('giovani',2); gd('imprenditori',-1);}},
+   {l:'Ascolta: un ciclo di incontri nelle città dell\'est', e:'Il gesto conta, e viene contato', f:()=>{S.ind.stampa+=1; gd('pensionati',2); gd('cetomedio',1);}},
+   {l:'L\'est ha già avuto la sua parte', e:'Una frase che si ricorda alle prossime regionali', f:()=>{gd('imprenditori',1); gd('pensionati',-3); gd('lavoratori',-2);}}]},
+ {id:'de_p_riscaldamento', era:'contemporanea', paesi:['germania'], min:'sviluppo', kick:'Clima', t:'La caldaia in cantina', text:'Una legge vuole che le caldaie nuove usino energia pulita. Tecnicamente giusta, politicamente un disastro: milioni di famiglie hanno capito solo che qualcuno vuole entrare nella loro cantina.', ch:[
+   {l:'Tieni la legge, aggiungi sussidi generosi', e:'Chi cambia caldaia è aiutato, chi ha paura resta', costo:{debito:0.7}, f:()=>{S.ind.debt+=0.7; gd('giovani',3); gd('cetomedio',-1); gd('pensionati',-2);}},
+   {l:'Rinvia di cinque anni e semplifica', e:'La cantina è salva, il clima aspetta', f:()=>{gd('pensionati',3); gd('cetomedio',2); gd('giovani',-4);}},
+   {l:'Ritira: si riparte dai comuni, con piani locali', e:'Meno legge, più mappa', costo:{debito:0.2}, f:()=>{S.ind.debt+=0.2; gd('cetomedio',1); gd('giovani',-2);}}]},
+ {id:'de_p_partner', era:'contemporanea', paesi:['germania'], cond:()=>!!(S.coalizione&&S.coalizione.length>1),   /* L81-1: la carta parla del partner di coalizione, quindi non esce se governi da solo. Misurato: filtra lo 0,5% dei mesi (12 su 2400) — e coerenza narrativa, non meccanica, e va detto invece che spacciarla per un gate. */ kick:'Coalizione', t:'Il partner minore alza la voce', text:'Un partito della tua coalizione minaccia di non votare il bilancio se non ottiene la sua bandiera. È piccolo, ma senza di lui non hai i numeri, e lo sa.', ch:[
+   {l:'Concedi la bandiera: la coalizione prima di tutto', e:'Il bilancio passa, l\'immagine no', costo:{debito:0.4}, f:()=>{S.ind.debt+=0.4; S.ind.stampa-=2; gd('cetomedio',-1);}},
+   {l:'Rifiuta, e sfidalo a uscire', e:'Se esce, si vota; se resta, comandi tu', f:()=>{S.ind.stampa+=2; gd('cetomedio',1); gd('lavoratori',1); gd('imprenditori',-2);}},
+   {l:'Un compromesso scritto, con una commissione di garanzia', e:'Il modo tedesco', f:()=>{gd('pensionati',1);}}]},
+ {id:'de_p_pensioni', era:'contemporanea', paesi:['germania'], min:'lavoro', kick:'Demografia', t:'Il livello delle pensioni', text:'Ci sono sempre meno lavoratori per ogni pensionato, e la pensione pubblica vale ogni anno un po\' meno rispetto al salario. Garantire il livello costa; non garantirlo costa il voto della generazione più numerosa.', ch:[
+   {l:'Garantisci il livello per legge, per dieci anni', e:'Il patto fra generazioni, pagato dai giovani', costo:{debito:0.9}, f:()=>{S.ind.debt+=0.9; gd('pensionati',5); gd('lavoratori',1); gd('giovani',-4);}},
+   {l:'Un fondo pubblico che investe sui mercati', e:'La Germania che compra azioni: una rivoluzione silenziosa', costo:{debito:0.5}, f:()=>{S.ind.debt+=0.5; gd('giovani',2); gd('imprenditori',2); gd('pensionati',-1);}},
+   {l:'Età pensionabile legata all\'aspettativa di vita', e:'Aritmetica, e una piazza', f:()=>{S.ind.fiducia+=1; gd('imprenditori',2); gd('lavoratori',-4); gd('pensionati',-3);}}]},
+ {id:'de_p_manodopera', era:'contemporanea', paesi:['germania'], kick:'Lavoro', t:'I mestieri senza nessuno', text:'Mancano infermieri, autisti, elettricisti, insegnanti. Le imprese chiedono di far entrare chi vuole lavorare; una parte del paese chiede di far entrare meno gente. Le due richieste arrivano lo stesso giorno.', ch:[
+   {l:'Una legge sull\'immigrazione qualificata, con corsie rapide', e:'Le imprese assumono, i comuni alloggiano', f:()=>{gd('imprenditori',4); gd('giovani',1); gd('pensionati',-3);}},                                                // ⑪
+   {l:'Prima i tedeschi: formazione e salari più alti', e:'Giusto e lento', costo:{debito:0.5}, f:()=>{S.ind.debt+=0.5; gd('lavoratori',3); gd('pensionati',1); gd('imprenditori',-2);}},
+   {l:'Automazione: meno braccia, più macchine', e:'Dove si può; e non si può dappertutto', f:()=>{gd('imprenditori',2); gd('lavoratori',-2);}}]},
+ {id:'de_p_limite', era:'contemporanea', paesi:['germania'], kick:'Autostrade', t:'Il limite che non c\'è', text:'È l\'unico paese in cui sull\'autostrada si può andare veloci quanto si vuole, e ogni anno qualcuno propone un limite. Per alcuni è clima e sicurezza; per altri è l\'ultima libertà rimasta, e la difendono come tale.', ch:[
+   {l:'Limite generale, come ovunque', e:'Meno morti, meno emissioni, e una parte del paese che non perdona', f:()=>{gd('giovani',3); gd('cetomedio',-3); gd('imprenditori',-2);}},                                                       // ⑫
+   {l:'Nessun limite: è una questione di libertà', e:'Una frase da manifesto', f:()=>{gd('cetomedio',3); gd('imprenditori',1); gd('giovani',-2);}},
+   {l:'Limite solo dove serve, deciso dai Länder', e:'Il federalismo applicato all\'acceleratore', f:()=>{gd('pensionati',1); gd('cetomedio',1);}}]},
+ /* ===== L82-1 · SPAGNA, PRESENTE ARRICCHITO (scheda PRESET-SPAGNA-PRESENTE §A) — dodici questioni. Le autonomie sono
+    la trama: il governo di Madrid governa trattando con Barcellona e Bilbao. Nessuna data, nessun nome. ===== */
+ {id:'es_p_investidura', era:'contemporanea', paesi:['spagna'], cond:()=>S.coalizione&&S.coalizione.length>1, kick:'Cortes', t:'Il prezzo dell\'investitura', text:'I voti che ti hanno fatto Presidente del Governo vengono da partiti che non stanno a Madrid. Ora presentano il conto: competenze, soldi, e una parola sulla lingua che a Madrid nessuno vuole pronunciare.', ch:[
+   {l:'Paga: più competenze e un fondo per le loro regioni', e:'La legislatura continua, l\'opposizione urla', costo:{debito:0.6}, f:()=>{S.ind.debt+=0.6; S.ind.fiducia-=1; gd('cetomedio',-2); gd('giovani',1);}},                    // ①
+   {l:'Tratta pezzo per pezzo, senza mai dire sì a tutto', e:'Ogni legge un negoziato', costo:{debito:0.3}, f:()=>{S.ind.debt+=0.3; gd('cetomedio',1);}},
+   {l:'Rifiuta: la Spagna non si negozia', e:'Applausi a Madrid, e una maggioranza in meno', f:()=>{S.ind.stampa+=1; gd('pensionati',3); gd('cetomedio',1); gd('giovani',-2);}}]},
+ {id:'es_p_catalogna', era:'contemporanea', paesi:['spagna'], min:'interno', kick:'Catalogna', t:'La ferita e il perdono', text:'A qualche anno dal tentativo di secessione, chi lo guidò chiede di tornare senza processi, e una parte del paese chiede che non torni mai. Una legge di grazia chiuderebbe la ferita per alcuni e la riaprirebbe per altri.', ch:[
+   {l:'Amnistia: si volta pagina', e:'La Catalogna respira, il resto del paese fischia', f:()=>{S.ind.stampa-=3; gd('giovani',2); gd('pensionati',-4); gd('cetomedio',-2);}},
+   {l:'Nessuna grazia: la legge è uguale per tutti', e:'Madrid applaude, Barcellona si chiude', f:()=>{gd('pensionati',3); gd('cetomedio',2); gd('giovani',-2);}},
+   {l:'Un tavolo di dialogo, senza promesse', e:'Il tempo come cura', f:()=>{gd('cetomedio',1); gd('cattolici',1);}}]},
+ {id:'es_p_casa', era:'contemporanea', paesi:['spagna'], min:'infrastrutture', kick:'Abitare', t:'La città che non si può abitare', text:'Nelle grandi città gli affitti sono fuori dalla portata dei salari, gli appartamenti turistici hanno svuotato i centri, e i giovani restano dai genitori fino a trent\'anni. Le piazze si riempiono per la casa come una volta per il lavoro.', ch:[
+   {l:'Limita gli affitti turistici e tassa le case vuote', e:'I centri tornano a chi ci vive; il turismo protesta', costo:{debito:-0.2}, f:()=>{S.ind.debt-=0.2; gd('giovani',4); gd('cetomedio',1); gd('imprenditori',-4);}},
+   {l:'Costruisci case pubbliche, un piano decennale', e:'Le gru arriveranno, gli affitti restano', costo:{debito:0.9}, f:()=>{S.ind.debt+=0.9; gd('giovani',3); gd('lavoratori',2);}},
+   {l:'Aiuti diretti all\'affitto per i giovani', e:'Un assegno che finisce nella tasca del proprietario', costo:{debito:0.5}, f:()=>{S.ind.debt+=0.5; gd('giovani',2); gd('cetomedio',1); gd('imprenditori',1);}}]},
+ {id:'es_p_turismo', era:'contemporanea', paesi:['spagna'], min:'sviluppo', kick:'Costa', t:'Troppi turisti', text:'Il paese vive di turismo e comincia a non sopportarlo: cortei nelle isole, manifesti nei quartieri, un\'acqua che non basta d\'estate. Frenare costa entrate; non frenare costa città.', ch:[
+   {l:'Tassa di soggiorno alta e tetto agli arrivi nelle isole', e:'Meno gente, più spesa a testa — forse', costo:{debito:-0.3}, f:()=>{S.ind.debt-=0.3; S.ind.fiducia-=1; gd('cetomedio',2); gd('giovani',2); gd('imprenditori',-4);}},          // ②
+   {l:'Il turismo è la nostra industria: nessun freno', e:'Le entrate reggono, le piazze no', f:()=>{S.ind.fiducia+=1; gd('imprenditori',4); gd('lavoratori',1); gd('giovani',-3);}},
+   {l:'Sposta i flussi: incentivi all\'interno del paese', e:'Lento, e qualcuno lo vede', costo:{debito:0.3}, f:()=>{S.ind.debt+=0.3; gd('cattolici',1); gd('cetomedio',1);}}]},
+ {id:'es_p_siccita', era:'contemporanea', paesi:['spagna'], min:'sviluppo', kick:'Acqua', t:'L\'anno senza pioggia', text:'I bacini sono ai minimi, i campi del sud chiedono acqua che il nord non vuole cedere, e le città razionano. La guerra dell\'acqua fra regioni è la più antica del paese, e il clima la sta vincendo.', ch:[
+   {l:'Dissalatori e riuso, un piano nazionale', e:'Costoso, e non dipende dalla pioggia', costo:{debito:0.8}, f:()=>{S.ind.debt+=0.8; gd('cattolici',2); gd('imprenditori',2); gd('giovani',1);}},
+   {l:'Trasferimenti d\'acqua fra bacini', e:'Il sud ringrazia, il nord ricorda', costo:{debito:0.4}, f:()=>{S.ind.debt+=0.4; gd('cattolici',3); gd('cetomedio',-2);}},
+   {l:'Riduci le colture che bevono di più', e:'Giusto per il clima, duro per i campi', f:()=>{gd('giovani',3); gd('cattolici',-4); gd('lavoratori',-1);}}]},
+ {id:'es_p_pensioni', era:'contemporanea', paesi:['spagna'], min:'lavoro', kick:'Previdenza', t:'Le pensioni legate ai prezzi', text:'Le pensioni salgono con l\'inflazione per legge, e sono la voce di spesa più grande dello Stato. Bruxelles chiede di dire come si pagano fra vent\'anni; i pensionati chiedono di non toccarle domani.', ch:[
+   {l:'Nessuna revisione: la rivalutazione è un diritto', e:'La piazza dei pensionati è la più fedele', costo:{debito:0.9}, f:()=>{S.ind.debt+=0.9; S.ind.fiducia-=2; gd('pensionati',5); gd('giovani',-3);}},                                         // ③
+   {l:'Contributi più alti sui salari alti', e:'Chi guadagna paga; le imprese contano', costo:{debito:-0.3}, f:()=>{S.ind.debt-=0.3; gd('pensionati',2); gd('imprenditori',-3); gd('cetomedio',-1);}},
+   {l:'Allunga la vita lavorativa con incentivi', e:'Volontario, quindi lento', costo:{debito:-0.1}, f:()=>{S.ind.debt-=0.1; S.ind.fiducia+=1; gd('imprenditori',1); gd('lavoratori',-2);}}]},
+ {id:'es_p_lavoro', era:'contemporanea', paesi:['spagna'], min:'lavoro', kick:'Contratti', t:'Il paese dei contratti brevi', text:'Per decenni metà dei giovani ha lavorato a termine. Una riforma ha reso i contratti stabili la regola; le imprese chiedono flessibilità, i sindacati chiedono che la regola resti, e la disoccupazione — la più alta del continente — non aspetta.', ch:[
+   {l:'Tieni la riforma: i contratti stabili restano la regola', e:'I sindacati applaudono, le imprese si adattano', f:()=>{gd('lavoratori',4); gd('giovani',2); gd('imprenditori',-3);}},
+   {l:'Riapri: più flessibilità in cambio di più assunzioni', e:'Le imprese assumono, a termine', f:()=>{S.ind.fiducia+=1; gd('imprenditori',4); gd('lavoratori',-4);}},
+   {l:'Sgravi a chi assume giovani a tempo indeterminato', e:'Il conto lo paga lo Stato', costo:{debito:0.5}, f:()=>{S.ind.debt+=0.5; gd('giovani',3); gd('imprenditori',1);}}]},
+ {id:'es_p_memoria', era:'contemporanea', paesi:['spagna'], min:'giustizia', kick:'Memoria', t:'Le fosse e i nomi', text:'Migliaia di persone della guerra civile e della dittatura sono ancora in fosse senza nome. Una legge vuole che lo Stato le cerchi e tolga i simboli del regime; una parte del paese dice che riaprire il passato è il modo più sicuro per non chiuderlo.', ch:[
+   {l:'Lo Stato cerca, esuma e nomina', e:'Le famiglie ringraziano, il dibattito si accende', costo:{debito:0.2}, f:()=>{S.ind.debt+=0.2; gd('giovani',2); gd('lavoratori',2); gd('cattolici',-2); gd('pensionati',-1);}},
+   {l:'Le famiglie possono, lo Stato non promuove', e:'Il minimo, e qualcuno lo chiama il massimo', f:()=>{gd('cattolici',1); gd('pensionati',1); gd('giovani',-2);}},
+   {l:'Abroga: il passato al passato', e:'Una parte del paese si sente cancellata due volte', f:()=>{gd('pensionati',2); gd('cattolici',2); gd('giovani',-3); gd('lavoratori',-2);}}]},
+ {id:'es_p_ceuta', era:'contemporanea', paesi:['spagna'], min:'interno', kick:'Frontiera sud', t:'Le barche e le enclavi', text:'Sulle coste del sud e nelle due città sull\'altra sponda arrivano barche ogni notte. Il vicino africano apre e chiude i rubinetti secondo i suoi rapporti con Madrid; l\'Europa guarda, e i sindaci delle isole chiedono aiuto.', ch:[
+   {l:'Accordi con il vicino, e concessioni', e:'Meno barche, e un prezzo che non si dice', costo:{debito:0.3}, f:()=>{S.ind.debt+=0.3; gd('cetomedio',2); gd('pensionati',1); gd('giovani',-1);}},
+   {l:'Redistribuzione obbligatoria fra le regioni', e:'Le isole respirano, le regioni protestano', f:()=>{gd('lavoratori',1); gd('cattolici',2); gd('cetomedio',-2);}},
+   {l:'Chiedi all\'Europa, e aspetta', e:'Bruxelles risponde con una riunione', f:()=>{gd('pensionati',-2); gd('giovani',-1);}}]},
+ {id:'es_p_finanziamento', era:'contemporanea', paesi:['spagna'], min:'economia', kick:'Autonomie', t:'Il sistema di finanziamento regionale', text:'Il modo in cui lo Stato ripartisce i soldi fra le regioni è scaduto da anni e nessuno riesce a riscriverlo: chi dà chiede di dare meno, chi riceve chiede di più, e chi ha un regime speciale non vuole che se ne parli.', ch:[
+   {l:'Un modello nuovo: più soldi a chi ha più abitanti', e:'Le regioni grandi applaudono, le altre no', costo:{debito:0.4}, f:()=>{S.ind.debt+=0.4; gd('cetomedio',2); gd('cattolici',-2);}},
+   {l:'Rinvia: si proroga l\'attuale', e:'Come ogni anno', f:()=>{gd('pensionati',1); gd('giovani',-1);}},
+   {l:'Un regime speciale anche a chi lo chiede', e:'Una breccia che tutti guarderanno', costo:{debito:0.7}, f:()=>{S.ind.debt+=0.7; S.ind.fiducia-=2; gd('cetomedio',-3); gd('imprenditori',-1);}}]},                                                          // ④
+ {id:'es_p_corrida', era:'contemporanea', paesi:['spagna'], kick:'Tradizione', t:'La corrida', text:'Una regione vuole vietarla, un\'altra la dichiara patrimonio, e il premio nazionale che la celebra viene messo in discussione. Non è la questione più grave del paese; è quella su cui tutti hanno un\'opinione.', ch:[
+   {l:'Cultura: nessun divieto nazionale', e:'Le arene applaudono, i giovani no', f:()=>{gd('pensionati',3); gd('cattolici',2); gd('giovani',-3);}},                                                                                         // ⑪
+   {l:'Lascia decidere alle regioni', e:'La risposta spagnola a tutto', f:()=>{gd('cetomedio',1);}},
+   {l:'Togli i fondi pubblici, senza vietare', e:'Chi vuole paga', f:()=>{gd('giovani',3); gd('pensionati',-2); gd('cattolici',-1);}}]},
+ {id:'es_p_lingue', era:'contemporanea', paesi:['spagna'], kick:'Lingue', t:'Le quattro lingue in aula', text:'Una proposta vuole che nelle Cortes si possa parlare in catalano, basco e galiziano, con traduzione. Per alcuni è il paese com\'è; per altri è la fine di una lingua comune in un\'aula sola.', ch:[
+   {l:'Sì: le lingue del paese sono tutte del paese', e:'Cuffie in aula, e titoli', f:()=>{S.ind.stampa+=1; gd('giovani',2); gd('cetomedio',-1); gd('pensionati',-2);}},                                                                     // ⑫
+   {l:'No: in aula si parla la lingua comune', e:'Un principio, e tre regioni che lo ricordano', f:()=>{gd('pensionati',2); gd('cetomedio',1); gd('giovani',-2);}},
+   {l:'Solo in commissione', e:'Il compromesso che scontenta con misura', f:()=>{gd('cetomedio',1);}}]},
 ];
 
 /* eventi INTERNAZIONALI ricorrenti (lotto Esteri+Difesa): grandi eventi ~ogni 6-9 mesi, taggati min:esteri|difesa.
@@ -6151,6 +6824,67 @@ const SFIDE=[
   op:['No, ha una costituzione non codificata','Sì, dal 1215','Sì, un codice unico moderno'], giusta:0,
   perche:'Il Regno Unito non ha un unico testo costituzionale: la sua costituzione è non codificata.'},
  // ----- FRANCIA (francia) -----
+ // ----- FRANCIA, presente arricchito (L79-2, scheda PRESET-FRANCIA-PRESENTE §E) — 10 presente + 10 storia recente -----
+ {id:'fr_p_493q', era:'contemporanea', paese:'francia', ruolo:'governo', diff:'media', q:'Che cosa permette al governo francese l\'articolo 49, comma 3, della Costituzione?',
+  op:['Sciogliere l\'Assemblea nazionale','Far adottare una legge senza voto, salvo mozione di censura','Nominare i senatori'], giusta:1,
+  perche:'Il 49.3 fa passare un testo senza voto: l\'Assemblea può fermarlo solo approvando una mozione di censura.'},
+ {id:'fr_p_senato', era:'contemporanea', paese:'francia', ruolo:'governo', diff:'difficile', q:'Come vengono eletti i senatori francesi?',
+  op:['A suffragio universale diretto','Nominati dal Presidente','Da un collegio di grandi elettori, soprattutto consiglieri comunali'], giusta:2,
+  perche:'Il Senato è eletto indirettamente da un collegio in cui pesano i rappresentanti dei comuni.'},
+ {id:'fr_p_mandato', era:'contemporanea', paese:'francia', ruolo:'governo', diff:'facile', q:'Quanto dura oggi il mandato del Presidente della Repubblica francese?',
+  op:['Cinque anni','Sette anni','Quattro anni'], giusta:0,
+  perche:'Dal 2000 il mandato è di cinque anni (quinquennato), allineato a quello dell\'Assemblea.'},
+ {id:'fr_p_regioni', era:'contemporanea', paese:'francia', ruolo:'locale', diff:'media', q:'Quante regioni ha oggi la Francia metropolitana?',
+  op:['Ventidue','Tredici','Nove'], giusta:1,
+  perche:'Dal 2016 le regioni metropolitane sono tredici, dopo l\'accorpamento delle ventidue precedenti.'},
+ {id:'fr_p_prefetto', era:'universale', paese:'francia', ruolo:'locale', diff:'media', q:'Chi rappresenta lo Stato in un dipartimento francese?',
+  op:['Il presidente del consiglio dipartimentale','Il sindaco del capoluogo','Il prefetto, nominato dal governo'], giusta:2,
+  perche:'Il prefetto è il rappresentante dello Stato nel dipartimento, nominato in Consiglio dei ministri.'},
+ {id:'fr_p_oltremareq', era:'contemporanea', paese:'francia', ruolo:'ministro', diff:'difficile', q:'Quale di questi è un territorio francese d\'oltremare?',
+  op:['La Riunione','Malta','Le Azzorre'], giusta:0,
+  perche:'La Riunione, nell\'oceano Indiano, è un dipartimento e regione d\'oltremare della Francia.'},
+ {id:'fr_p_euro', era:'contemporanea', paese:'francia', ruolo:'ministro', diff:'facile', q:'Qual è la moneta della Francia oggi?',
+  op:['Il franco','L\'euro','La sterlina'], giusta:1,
+  perche:'La Francia ha adottato l\'euro, che ha sostituito il franco.'},
+ {id:'fr_p_nucleareq', era:'contemporanea', paese:'francia', ruolo:'ministro', diff:'media', q:'Da quale fonte viene la maggior parte dell\'elettricità francese?',
+  op:['Dal carbone','Dal gas','Dal nucleare'], giusta:2,
+  perche:'La Francia produce la maggior parte della sua elettricità con le centrali nucleari.'},
+ {id:'fr_p_municipali', era:'contemporanea', paese:'francia', ruolo:'locale', diff:'media', q:'Ogni quanti anni si tengono le elezioni municipali in Francia?',
+  op:['Ogni sei anni','Ogni quattro anni','Ogni cinque anni'], giusta:0,
+  perche:'I consigli comunali francesi durano sei anni.'},
+ {id:'fr_p_europee', era:'contemporanea', paese:'francia', ruolo:'attivista', diff:'facile', q:'Dove ha sede il Parlamento europeo, in Francia?',
+  op:['A Lione','A Strasburgo','A Parigi'], giusta:1,
+  perche:'Il Parlamento europeo tiene le sessioni plenarie a Strasburgo.'},
+ {id:'fr_p_quinta', era:'contemporanea', paese:'francia', ruolo:'governo', diff:'media', q:'In quale anno nasce la Quinta Repubblica francese?',
+  op:['1946','1968','1958'], giusta:2,
+  perche:'La Costituzione della Quinta Repubblica è del 1958, nata dalla crisi algerina.'},
+ {id:'fr_p_algeria', era:'contemporanea', paese:'francia', ruolo:'intl', diff:'media', q:'In quale anno l\'Algeria diventa indipendente dalla Francia?',
+  op:['1962','1954','1975'], giusta:0,
+  perche:'L\'indipendenza algerina arriva nel 1962, dopo otto anni di guerra.'},
+ {id:'fr_p_68', era:'contemporanea', paese:'francia', ruolo:'attivista', diff:'facile', q:'Che cosa ricorda l\'espressione «il maggio francese»?',
+  op:['La vittoria ai Mondiali del 1998','Le proteste studentesche e operaie del 1968','La fine della Quarta Repubblica'], giusta:1,
+  perche:'Il maggio 1968 fu un\'ondata di proteste studentesche e uno sciopero generale.'},
+ {id:'fr_p_81', era:'contemporanea', paese:'francia', ruolo:'governo', diff:'difficile', q:'Che cosa cambia nel 1981 nella politica francese?',
+  op:['Nasce la Quinta Repubblica','La Francia entra nell\'euro','Per la prima volta la sinistra vince la presidenza della Quinta Repubblica'], giusta:2,
+  perche:'Nel 1981 la sinistra conquista per la prima volta l\'Eliseo nella Quinta Repubblica.'},
+ {id:'fr_p_abolizione', era:'contemporanea', paese:'francia', ruolo:'ministro', diff:'media', q:'In quale anno la Francia abolisce la pena di morte?',
+  op:['1981','1958','1999'], giusta:0,
+  perche:'La pena di morte è abolita nel 1981.'},
+ {id:'fr_p_maastricht', era:'contemporanea', paese:'francia', ruolo:'intl', diff:'difficile', q:'Come si è espressa la Francia sul Trattato di Maastricht nel 1992?',
+  op:['Con un voto del solo Parlamento','Con un referendum, approvato di misura','Non lo ha ratificato'], giusta:1,
+  perche:'Il referendum del 1992 approvò Maastricht con una maggioranza molto stretta.'},
+ {id:'fr_p_2005', era:'contemporanea', paese:'francia', ruolo:'intl', diff:'difficile', q:'Che cosa decise il referendum francese del 2005?',
+  op:['L\'ingresso nell\'euro','Il quinquennato presidenziale','Il rifiuto del trattato costituzionale europeo'], giusta:2,
+  perche:'Nel 2005 i francesi respinsero il trattato che istituiva una Costituzione per l\'Europa.'},
+ {id:'fr_p_35ore', era:'contemporanea', paese:'francia', ruolo:'ministro', diff:'media', q:'Quale riforma del lavoro fu introdotta in Francia alla fine degli anni Novanta?',
+  op:['La settimana di 35 ore','Il salario minimo','La pensione a 60 anni'], giusta:0,
+  perche:'Le leggi sulle 35 ore, tra il 1998 e il 2000, ridussero l\'orario legale di lavoro.'},
+ {id:'fr_p_tgv', era:'contemporanea', paese:'francia', ruolo:'locale', diff:'facile', q:'Quale primato ferroviario ha la Francia dagli anni Ottanta?',
+  op:['La prima metropolitana automatica','Una delle prime reti ad alta velocità','Il tunnel più lungo del mondo'], giusta:1,
+  perche:'Il TGV Parigi-Lione, del 1981, fece della Francia uno dei primi paesi con l\'alta velocità.'},
+ {id:'fr_p_manica', era:'contemporanea', paese:'francia', ruolo:'intl', diff:'media', q:'Che cosa collega la Francia al Regno Unito dal 1994?',
+  op:['Un ponte sulla Manica','Un traghetto di Stato','Il tunnel sotto la Manica'], giusta:2,
+  perche:'Il tunnel sotto la Manica è aperto dal 1994.'},
  {id:'fr_parlamento', era:'universale', paese:'francia', ruolo:'governo', diff:'facile', q:'Da quali due camere è composto il Parlamento francese?',
   op:['L\'Assemblea nazionale e il Senato','La Camera e il Consiglio','La Dieta e il Senato'], giusta:0,
   perche:'Il Parlamento francese ha l\'Assemblea nazionale e il Senato.'},
@@ -6182,6 +6916,67 @@ const SFIDE=[
   op:['«Libertà, Uguaglianza, Fraternità»','«Ordine e Progresso»','«Dio, Patria, Famiglia»'], giusta:0,
   perche:'Il motto della Repubblica francese è «Libertà, Uguaglianza, Fraternità».'},   // era-safe (dalla Rivoluzione), non-partigiano
  // ----- GERMANIA (germania) -----
+ // ----- GERMANIA, presente arricchito (L81-1, scheda PRESET-GERMANIA-PRESENTE §E) — 10 presente + 10 storia recente -----
+ {id:'de_p_frenoq', era:'contemporanea', paese:'germania', ruolo:'ministro', diff:'media', q:'Che cosa stabilisce il «freno al debito» nella Legge fondamentale tedesca?',
+  op:['Un limite costituzionale al nuovo indebitamento dello Stato','Il divieto di aumentare le tasse','Un tetto alla spesa per le pensioni'], giusta:0,
+  perche:'Il freno al debito limita per Costituzione il nuovo debito che la Federazione e i Länder possono fare.'},
+ {id:'de_p_landerq', era:'contemporanea', paese:'germania', ruolo:'locale', diff:'facile', q:'Quanti sono i Länder della Germania?',
+  op:['Nove','Sedici','Ventidue'], giusta:1,
+  perche:'La Germania è composta da sedici Länder, compresi i tre città-Stato.'},
+ {id:'de_p_cittastato', era:'contemporanea', paese:'germania', ruolo:'locale', diff:'media', q:'Quale di queste città è anche un Land?',
+  op:['Monaco','Francoforte','Amburgo'], giusta:2,
+  perche:'Amburgo, Brema e Berlino sono città-Stato: comune e Land insieme.'},
+ {id:'de_p_bundesratq', era:'contemporanea', paese:'germania', ruolo:'governo', diff:'difficile', q:'Chi siede nel Bundesrat?',
+  op:['Rappresentanti dei governi dei Länder','Deputati eletti dai cittadini','Giudici della Corte costituzionale'], giusta:0,
+  perche:'Il Bundesrat è composto da membri dei governi regionali, non eletti direttamente.'},
+ {id:'de_p_cancelliereq', era:'contemporanea', paese:'germania', ruolo:'governo', diff:'facile', q:'Chi elegge il Cancelliere federale?',
+  op:['I cittadini, a suffragio diretto','Il Bundestag, su proposta del Presidente federale','Il Bundesrat'], giusta:1,
+  perche:'Il Cancelliere è eletto dal Bundestag su proposta del Presidente federale.'},
+ {id:'de_p_sogliaq', era:'contemporanea', paese:'germania', ruolo:'attivista', diff:'media', q:'Quale soglia deve superare un partito per entrare al Bundestag con le liste?',
+  op:['Il tre per cento','Il dieci per cento','Il cinque per cento'], giusta:2,
+  perche:'La soglia di sbarramento per le liste è del cinque per cento (salvo i mandati diretti).'},
+ {id:'de_p_presidenteq', era:'contemporanea', paese:'germania', ruolo:'governo', diff:'difficile', q:'Come viene eletto il Presidente federale tedesco?',
+  op:['Da un\'Assemblea federale composta dal Bundestag e da delegati dei Länder','A suffragio universale diretto','Dal Bundesrat'], giusta:0,
+  perche:'Il Presidente federale è eletto dall\'Assemblea federale, un organo che si riunisce solo per questo.'},
+ {id:'de_p_karlsruhe', era:'contemporanea', paese:'germania', ruolo:'ministro', diff:'media', q:'In quale città ha sede la Corte costituzionale federale?',
+  op:['Berlino','Karlsruhe','Lipsia'], giusta:1,
+  perche:'La Corte costituzionale federale ha sede a Karlsruhe.'},
+ {id:'de_p_euroq', era:'contemporanea', paese:'germania', ruolo:'ministro', diff:'facile', q:'Dove ha sede la Banca centrale europea?',
+  op:['A Berlino','A Bruxelles','A Francoforte'], giusta:2,
+  perche:'La BCE ha sede a Francoforte sul Meno.'},
+ {id:'de_p_nucleareq', era:'contemporanea', paese:'germania', ruolo:'ministro', diff:'media', q:'Qual è oggi la situazione del nucleare civile in Germania?',
+  op:['Le ultime centrali sono state spente','È in costruzione una nuova generazione di reattori','Produce la maggior parte dell\'elettricità'], giusta:0,
+  perche:'La Germania ha completato l\'uscita dal nucleare spegnendo le ultime centrali.'},
+ {id:'de_p_49', era:'contemporanea', paese:'germania', ruolo:'governo', diff:'media', q:'In quale anno nasce la Repubblica federale tedesca?',
+  op:['1945','1949','1955'], giusta:1,
+  perche:'La Legge fondamentale entra in vigore nel 1949.'},
+ {id:'de_p_muro', era:'contemporanea', paese:'germania', ruolo:'attivista', diff:'facile', q:'In quale anno cade il Muro di Berlino?',
+  op:['1985','1991','1989'], giusta:2,
+  perche:'Il Muro cade nel novembre 1989.'},
+ {id:'de_p_unita', era:'contemporanea', paese:'germania', ruolo:'governo', diff:'media', q:'In quale anno avviene la riunificazione tedesca?',
+  op:['1990','1989','1992'], giusta:0,
+  perche:'La riunificazione è del 3 ottobre 1990, oggi festa nazionale.'},
+ {id:'de_p_bonn', era:'contemporanea', paese:'germania', ruolo:'locale', diff:'media', q:'Quale città era la capitale della Germania Ovest?',
+  op:['Francoforte','Bonn','Amburgo'], giusta:1,
+  perche:'Bonn fu la capitale della Repubblica federale fino al trasferimento a Berlino.'},
+ {id:'de_p_ostpolitik', era:'contemporanea', paese:'germania', ruolo:'intl', diff:'difficile', q:'Che cosa indica l\'espressione «Ostpolitik»?',
+  op:['La politica di ricostruzione dell\'est dopo il 1990','L\'espansione commerciale verso l\'Asia','La distensione verso i paesi del blocco orientale negli anni Settanta'], giusta:2,
+  perche:'L\'Ostpolitik fu la politica di distensione della Germania Ovest verso l\'Est negli anni Settanta.'},
+ {id:'de_p_miracolo', era:'contemporanea', paese:'germania', ruolo:'ministro', diff:'facile', q:'Come si chiama la forte crescita economica tedesca del dopoguerra?',
+  op:['Il miracolo economico (Wirtschaftswunder)','Il grande balzo','La nuova frontiera'], giusta:0,
+  perche:'Il Wirtschaftswunder è il miracolo economico degli anni Cinquanta e Sessanta.'},
+ {id:'de_p_marco', era:'contemporanea', paese:'germania', ruolo:'ministro', diff:'media', q:'Quale moneta aveva la Germania prima dell\'euro?',
+  op:['Il tallero','Il marco tedesco','Il fiorino'], giusta:1,
+  perche:'Il marco tedesco fu sostituito dall\'euro.'},
+ {id:'de_p_grande', era:'contemporanea', paese:'germania', ruolo:'governo', diff:'difficile', q:'Che cos\'è una «grande coalizione» nella politica tedesca?',
+  op:['Un\'alleanza di tutti i partiti in tempo di guerra','Il governo di un solo partito con maggioranza assoluta','Un governo dei due maggiori partiti, storicamente cristiano-democratici e socialdemocratici'], giusta:2,
+  perche:'La grande coalizione unisce i due partiti principali, ed è avvenuta più volte nella storia federale.'},
+ {id:'de_p_verdi', era:'contemporanea', paese:'germania', ruolo:'attivista', diff:'media', q:'Quale particolarità ha la storia dei Verdi tedeschi?',
+  op:['Sono stati fra i primi partiti ecologisti al mondo a entrare in un governo nazionale','Non sono mai entrati in parlamento','Sono nati come partito agrario'], giusta:0,
+  perche:'I Verdi tedeschi sono entrati nel governo federale alla fine degli anni Novanta, fra i primi al mondo.'},
+ {id:'de_p_agenda', era:'contemporanea', paese:'germania', ruolo:'ministro', diff:'difficile', q:'Che cosa furono le riforme del mercato del lavoro dei primi anni Duemila in Germania?',
+  op:['Una riforma delle pensioni','Un insieme di riforme che ridusse i sussidi e flessibilizzò il lavoro','L\'introduzione delle 35 ore'], giusta:1,
+  perche:'Le riforme dei primi anni Duemila ridussero i sussidi di disoccupazione e resero più flessibile il lavoro.'},
  {id:'de_parlamento', era:'universale', paese:'germania', ruolo:'governo', diff:'facile', q:'Da quali due organi è composto il livello federale del parlamento tedesco?',
   op:['Il Bundestag e il Bundesrat','La Camera e il Senato','L\'Assemblea e la Dieta'], giusta:0,
   perche:'A livello federale operano il Bundestag (eletto) e il Bundesrat (i governi dei Länder).'},   // ⚠ Repubblica Federale, dal 1949
@@ -6219,6 +7014,67 @@ const SFIDE=[
     Solo struttura, mai titolari. Vaglio-fonti passato (fisco IBI/rates/fixed-asset ✓; ritag Canada/Australia/Giappone applicati).
     ============================================================================ */
  // ----- SPAGNA (spagna) -----
+ // ----- SPAGNA, presente arricchito (L82-1, scheda PRESET-SPAGNA-PRESENTE §E) — 10 presente + 10 storia recente -----
+ {id:'es_p_investiduraq', era:'contemporanea', paese:'spagna', ruolo:'governo', diff:'media', q:'Come viene scelto il Presidente del Governo spagnolo?',
+  op:['Con un voto di investitura del Congresso dei Deputati, su proposta del Re','A suffragio universale diretto','Dal Senato'], giusta:0,
+  perche:'Il Re propone un candidato e il Congresso lo investe con un voto di fiducia.'},
+ {id:'es_p_comunita', era:'contemporanea', paese:'spagna', ruolo:'locale', diff:'facile', q:'Quante sono le comunità autonome della Spagna?',
+  op:['Dodici','Diciassette','Ventitré'], giusta:1,
+  perche:'La Spagna ha diciassette comunità autonome, più due città autonome.'},
+ {id:'es_p_cittaautonome', era:'contemporanea', paese:'spagna', ruolo:'ministro', diff:'difficile', q:'Quali sono le due città autonome spagnole sulla costa africana?',
+  op:['Cadice e Malaga','Tenerife e Las Palmas','Ceuta e Melilla'], giusta:2,
+  perche:'Ceuta e Melilla sono città autonome spagnole sulla costa del Nordafrica.'},
+ {id:'es_p_lingueq', era:'contemporanea', paese:'spagna', ruolo:'attivista', diff:'media', q:'Oltre al castigliano, quali lingue sono ufficiali in alcune comunità autonome?',
+  op:['Catalano, basco e galiziano','Portoghese e francese','Solo il catalano'], giusta:0,
+  perche:'Catalano, basco e galiziano sono co-ufficiali nelle rispettive comunità.'},
+ {id:'es_p_senatoq', era:'contemporanea', paese:'spagna', ruolo:'governo', diff:'difficile', q:'Che particolarità ha il Senato spagnolo?',
+  op:['È eletto solo dalle comunità autonome','È in parte eletto direttamente e in parte designato dalle comunità autonome','È nominato dal Re'], giusta:1,
+  perche:'Il Senato ha senatori eletti per provincia e senatori designati dai parlamenti autonomici.'},
+ {id:'es_p_monarchia', era:'contemporanea', paese:'spagna', ruolo:'governo', diff:'facile', q:'Che forma di Stato ha la Spagna?',
+  op:['Repubblica presidenziale','Repubblica federale','Monarchia parlamentare'], giusta:2,
+  perche:'La Spagna è una monarchia parlamentare: il Re è capo dello Stato, il governo risponde alle Cortes.'},
+ {id:'es_p_foral', era:'contemporanea', paese:'spagna', ruolo:'ministro', diff:'difficile', q:'Quali comunità hanno un regime fiscale speciale («concerto» o «convenio»)?',
+  op:['Paesi Baschi e Navarra','Catalogna e Valencia','Andalusia e Galizia'], giusta:0,
+  perche:'Paesi Baschi e Navarra raccolgono le proprie imposte e versano una quota allo Stato.'},
+ {id:'es_p_euroq', era:'contemporanea', paese:'spagna', ruolo:'ministro', diff:'facile', q:'Quale moneta aveva la Spagna prima dell\'euro?',
+  op:['Il real','La peseta','L\'escudo'], giusta:1,
+  perche:'La peseta fu sostituita dall\'euro.'},
+ {id:'es_p_autonomiche', era:'contemporanea', paese:'spagna', ruolo:'locale', diff:'media', q:'Chi guida il governo di una comunità autonoma?',
+  op:['Un prefetto nominato da Madrid','Il sindaco del capoluogo','Un presidente eletto dal parlamento autonomico'], giusta:2,
+  perche:'Ogni comunità ha un parlamento che elegge il presidente del governo autonomico.'},
+ {id:'es_p_isole', era:'contemporanea', paese:'spagna', ruolo:'locale', diff:'media', q:'Quale arcipelago spagnolo si trova nell\'Atlantico, davanti alle coste africane?',
+  op:['Le Canarie','Le Baleari','Le Azzorre'], giusta:0,
+  perche:'Le Canarie sono nell\'Atlantico; le Baleari nel Mediterraneo; le Azzorre sono portoghesi.'},
+ {id:'es_p_78', era:'contemporanea', paese:'spagna', ruolo:'governo', diff:'media', q:'In quale anno è approvata l\'attuale Costituzione spagnola?',
+  op:['1975','1978','1982'], giusta:1,
+  perche:'La Costituzione democratica è del 1978, approvata con referendum.'},
+ {id:'es_p_transizione', era:'contemporanea', paese:'spagna', ruolo:'attivista', diff:'facile', q:'Come si chiama il passaggio della Spagna dalla dittatura alla democrazia?',
+  op:['La Reconquista','La Restaurazione','La Transizione'], giusta:2,
+  perche:'La Transizione è il periodo fra la morte del dittatore e il consolidamento democratico.'},
+ {id:'es_p_23f', era:'contemporanea', paese:'spagna', ruolo:'governo', diff:'difficile', q:'Che cosa accadde il 23 febbraio 1981 in Spagna?',
+  op:['Un tentativo di colpo di Stato, con l\'occupazione del Congresso','Le prime elezioni democratiche','L\'ingresso nella NATO'], giusta:0,
+  perche:'Il 23-F fu un tentativo di golpe fallito; il Congresso fu occupato da militari.'},
+ {id:'es_p_ce', era:'contemporanea', paese:'spagna', ruolo:'intl', diff:'media', q:'In quale anno la Spagna entra nella Comunità europea?',
+  op:['1975','1986','1999'], giusta:1,
+  perche:'Spagna e Portogallo aderiscono alla Comunità europea nel 1986.'},
+ {id:'es_p_92', era:'contemporanea', paese:'spagna', ruolo:'locale', diff:'facile', q:'Quale città ospitò i Giochi olimpici del 1992?',
+  op:['Madrid','Siviglia','Barcellona'], giusta:2,
+  perche:'Le Olimpiadi del 1992 si tennero a Barcellona; lo stesso anno Siviglia ospitò l\'Esposizione universale.'},
+ {id:'es_p_eta', era:'contemporanea', paese:'spagna', ruolo:'ministro', diff:'media', q:'Che cosa fu l\'ETA?',
+  op:['Un\'organizzazione terroristica indipendentista basca, sciolta nel 2018','Un partito catalano','Un sindacato agricolo'], giusta:0,
+  perche:'L\'ETA fu un\'organizzazione armata indipendentista basca; ha annunciato lo scioglimento nel 2018.'},
+ {id:'es_p_2004', era:'contemporanea', paese:'spagna', ruolo:'intl', diff:'difficile', q:'Che cosa accadde a Madrid nel marzo 2004?',
+  op:['Un referendum sull\'euro','Attentati terroristici ai treni, tre giorni prima delle elezioni','Un\'alluvione'], giusta:1,
+  perche:'Gli attentati ai treni dell\'11 marzo 2004 colpirono Madrid tre giorni prima del voto.'},
+ {id:'es_p_matrimonio', era:'contemporanea', paese:'spagna', ruolo:'attivista', diff:'media', q:'Quale primato ha la Spagna sul matrimonio fra persone dello stesso sesso?',
+  op:['È l\'unico paese europeo a non riconoscerlo','Lo ha vietato per Costituzione','È stata fra i primi paesi al mondo a legalizzarlo, nel 2005'], giusta:2,
+  perche:'La Spagna ha legalizzato il matrimonio egualitario nel 2005, fra i primi al mondo.'},
+ {id:'es_p_15m', era:'contemporanea', paese:'spagna', ruolo:'attivista', diff:'media', q:'Che cosa fu il movimento del «15-M»?',
+  op:['Le proteste di piazza del 2011 contro la crisi e i partiti tradizionali','Una riforma elettorale','Uno sciopero dei trasporti'], giusta:0,
+  perche:'Il 15 maggio 2011 le piazze si riempirono di «indignados» contro la crisi e il bipartitismo.'},
+ {id:'es_p_2017', era:'contemporanea', paese:'spagna', ruolo:'governo', diff:'difficile', q:'Che cosa accadde in Catalogna nell\'autunno 2017?',
+  op:['Un terremoto','Un referendum di indipendenza non riconosciuto, seguito dalla sospensione dell\'autonomia','L\'ingresso nell\'euro'], giusta:1,
+  perche:'Il referendum del 1° ottobre 2017 e la dichiarazione di indipendenza portarono alla sospensione dell\'autonomia catalana.'},
  {id:'es_cortes', era:'universale', paese:'spagna', ruolo:'governo', diff:'facile', q:'Da quali due camere sono composte le Cortes Generali spagnole?',
   op:['Il Congresso dei Deputati e il Senato','La Camera e la Dieta','L\'Assemblea e il Consiglio'], giusta:0,
   perche:'Le Cortes Generali hanno il Congresso dei Deputati e il Senato.'},
@@ -6730,7 +7586,7 @@ const MINISTRO_CARTE=[
    {l:'Lavoro e lascio parlare i fatti', e:'Aplomb da statista: i tuoi ti stimano di più', pleases:'tecnico',f:()=>{ capd(2); corrented('pontieri',4); }},
    {l:'Vado dal premier a lamentarmi', e:'Cerchi protezione; sembri debole', f:()=>{ leald(2); visd(-3); }},
  ]},
- {id:'mi_riforma',era:'universale', tipo:'interno', t:'Il premier frena la tua riforma', text:'La riforma di settore a cui tieni viene rallentata da Palazzo Chigi: «non è il momento».', ch:[
+ {id:'mi_riforma',era:'universale', tipo:'interno', t:'Il premier frena la tua riforma', text:'La riforma di settore a cui tieni viene rallentata da %SEDE: «non è il momento».', ch:[
    {l:'Insisto, è la mia battaglia', e:'Capitale e identità; scontro col premier', pleases:'progressista',f:()=>{ capd(3); leald(-6); visd(3); }},
    {l:'Cedo alla linea del governo', e:'Lealtà; la riforma slitta', f:()=>{ leald(6); capd(-1); }},
    {l:'Tratto una versione annacquata', e:'Un compromesso che porti a casa', pleases:'tecnico',f:()=>{ capd(1); dicMigliora(2); }},
@@ -7219,6 +8075,55 @@ const TITOLI=[
  {id:'ti_uk80_terzo', era:'uk1980', cond:()=>S.year>=1987&&S.mandatesWon>=2, amico:'Terzo mandato di fila', ostile:'Terzo mandato di fila: un paese che non sa più votare altro'},
  {id:'ti_uk80_alleanza', era:'uk1980', cond:()=>S.year>=1983&&S.partito!=='uk_lib', amico:'L\'Alleanza a un punto e mezzo dal secondo posto', ostile:'L\'Alleanza a un punto e mezzo dal secondo posto, e ventitré seggi'},
  {id:'ti_uk80_spaccato', era:'uk1980', cond:()=>S.year>=1981&&S.partito!=='uk_lab', amico:'Il partito che si è spaccato in due', ostile:'Il partito che si è spaccato in due, e adesso litiga con entrambe le metà'},
+ /* ===== L75-1 · i sedici titoli del decennio inglese '90 (scheda §6) ===== */
+ {id:'ti_uk90_undici', era:'uk1990', cond:()=>S.year>=1990&&(S.year>1990||S.month>=11), amico:'Undici anni, e cadde dai suoi', ostile:'Undici anni, e cadde dai suoi: nessuno pianse a lungo'},
+ {id:'ti_uk90_mercoledi', era:'uk1990', cond:()=>S.mercoledi!=null, amico:'Il mercoledì nero è passato', ostile:'Il mercoledì nero'},
+ {id:'ti_uk90_sondaggi', era:'uk1990', cond:()=>S.year>=1992&&(S.year>1992||S.month>=4), amico:'Contro i sondaggi', ostile:'Contro i sondaggi: i sondaggisti cercano ancora l\'errore'},
+ {id:'ti_uk90_ribellione', era:'uk1990', cond:()=>S.year===1993, amico:'La ribellione su Maastricht, domata', ostile:'La ribellione su Maastricht'},
+ {id:'ti_uk90_dunblane', era:'uk1990', cond:()=>S.year>=1996&&(S.year>1996||S.month>=3), amico:'Dunblane', ostile:'Dunblane: e le pistole ancora in vendita'},
+ {id:'ti_uk90_fiori', era:'uk1990', cond:()=>S.year>=1997&&(S.year>1997||S.month>=9), amico:'Il paese in fila coi fiori', ostile:'Il paese in fila coi fiori, e la Corona in ritardo'},
+ {id:'ti_uk90_179', era:'uk1990', cond:()=>S.year>=1997&&(S.year>1997||S.month>=5), amico:'Centosettantanove', ostile:'Centosettantanove: una maggioranza che non sa cosa farsene'},
+ {id:'ti_uk90_banca', era:'uk1990', cond:()=>S.year>=1997, amico:'La Banca decide da sola', ostile:'La Banca decide da sola: e il governo, cosa fa?'},
+ {id:'ti_uk90_venerdi', era:'uk1990', cond:()=>S.year>=1998&&(S.year>1998||S.month>=4), amico:'Il Venerdì Santo', ostile:'Il Venerdì Santo: un accordo, e le armi ancora nascoste'},
+ {id:'ti_uk90_omagh', era:'uk1990', cond:()=>S.year>=1998&&(S.year>1998||S.month>=8), amico:'Omagh, l\'ultima', ostile:'Omagh'},
+ {id:'ti_uk90_scozia', era:'uk1990', cond:()=>S.devoluzione==='larga'||S.devoluzione==='stretta', amico:'La Scozia ha il suo parlamento', ostile:'La Scozia ha il suo parlamento: e adesso vuole il resto'},
+ {id:'ti_uk90_salario', era:'uk1990', cond:()=>S.year>=1999, amico:'Il salario minimo', ostile:'Il salario minimo: troppo poco per vivere, troppo per le imprese'},
+ {id:'ti_uk90_euro', era:'uk1990', cond:()=>S.year>=1998, amico:'Fuori dallo SME, fuori dall\'euro', ostile:'Fuori dallo SME, fuori dall\'euro: un\'isola che si comporta da isola'},
+ {id:'ti_uk90_lotteria', era:'uk1990', cond:()=>S.year>=1994, amico:'La lotteria del sabato', ostile:'La lotteria del sabato: una tassa sui poveri con i palloncini'},
+ {id:'ti_uk90_dome', era:'uk1990', cond:()=>S.year>=1999, amico:'Il Dome è finito', ostile:'Il Dome vuoto'},
+ {id:'ti_uk90_kosovo', era:'uk1990', cond:()=>S.year>=1999, amico:'Kosovo: la guerra giusta', ostile:'Kosovo'},
+ /* ===== L77-1 · i sedici titoli del decennio inglese 2000 (scheda §6) ===== */
+ {id:'ti_uk00_marcia', era:'uk2000', cond:()=>S.year>=2003, amico:'Un milione in strada, e il Parlamento decide', ostile:'Un milione in strada contro la guerra'},
+ {id:'ti_uk00_armi', era:'uk2000', cond:()=>S.iraq==='guerra'&&S.year>=2004, amico:'Le armi non trovate: la ricerca continua', ostile:'Le armi che non c\'erano'},
+ {id:'ti_uk00_setteluglio', era:'uk2000', cond:()=>S.year>=2005&&(S.year>2005||S.month>=7), amico:'Sette luglio: la città non si ferma', ostile:'Sette luglio'},
+ {id:'ti_uk00_olimpiadi', era:'uk2000', cond:()=>S.year>=2005&&(S.year>2005||S.month>=7), amico:'Le Olimpiadi a Londra', ostile:'Le Olimpiadi a Londra: e chi le paga?'},
+ {id:'ti_uk00_fila', era:'uk2000', cond:()=>S.year>=2007&&(S.year>2007||S.month>=9), amico:'La fila davanti alla banca si è sciolta', ostile:'La fila davanti alla banca'},
+ {id:'ti_uk00_banche', era:'uk2000', cond:()=>S.year>=2008, amico:'Lo Stato entra nelle banche e le salva', ostile:'Lo Stato entra nelle banche'},
+ {id:'ti_uk00_notespese', era:'uk2000', cond:()=>S.year>=2009&&(S.year>2009||S.month>=5), amico:'Le note spese: il Parlamento si ripulisce', ostile:'Le note spese, giorno per giorno'},
+ {id:'ti_uk00_nessuno', era:'uk2000', cond:()=>S.year>=2010&&(S.year>2010||S.month>=5), amico:'Nessuno ha vinto: si tratta', ostile:'Nessuno ha vinto'},
+ {id:'ti_uk00_coalizione', era:'uk2000', cond:()=>S.coalizione2010==='piena', amico:'Cinque giorni e una coalizione', ostile:'Cinque giorni e una coalizione: quanto durerà?'},
+ {id:'ti_uk00_austerita', era:'uk2000', cond:()=>S.austerita2010!=null, amico:'L\'austerità comincia, e i conti rientrano', ostile:'L\'austerità comincia'},
+ {id:'ti_uk00_tasse', era:'uk2000', cond:()=>S.year>=2010, amico:'Le tasse universitarie triplicate: più posti per tutti', ostile:'Le tasse universitarie triplicate'},
+ {id:'ti_uk00_agosto', era:'uk2000', cond:()=>S.year>=2011&&(S.year>2011||S.month>=8), amico:'Agosto in fiamme: l\'ordine è tornato', ostile:'Agosto in fiamme'},
+ {id:'ti_uk00_referendum', era:'uk2000', cond:()=>S.year>=2011, amico:'Il referendum non cambia il voto', ostile:'Il referendum che non cambia il voto'},
+ {id:'ti_uk00_affluenza', era:'uk2000', cond:()=>S.year>=2001, amico:'Sessanta per cento: l\'affluenza più bassa', ostile:'Sessanta per cento: e gli altri quaranta?'},
+ {id:'ti_uk00_trentacinque', era:'uk2000', cond:()=>S.year>=2005&&(S.year>2005||S.month>=5), amico:'Trentacinque per cento e una maggioranza', ostile:'Trentacinque per cento e una maggioranza: il sistema funziona così'},
+ {id:'ti_uk00_euro', era:'uk2000', cond:()=>S.year>=2003, amico:'Fuori dall\'euro, per sempre', ostile:'Fuori dall\'euro: e adesso?'},
+ /* ===== L79-2 · FRANCIA, quattro titoli del presente (scheda §D). Senza cond: sono prime pagine di stagione, non di data. ===== */
+ {id:'fr_p_ti_pensioni', era:'contemporanea', paesi:['francia'], pri:1, amico:'La riforma regge, il paese torna al lavoro', ostile:'Un milione in piazza: la riforma che nessuno voleva'},
+ {id:'fr_p_ti_deficit', era:'contemporanea', paesi:['francia'], pri:1, amico:'Il rientro del deficit è credibile, dice Bruxelles', ostile:'Bruxelles boccia i conti di Parigi'},
+ {id:'fr_p_ti_assemblea', era:'contemporanea', paesi:['francia'], pri:1, amico:'L\'Assemblea trova una maggioranza, contro ogni previsione', ostile:'L\'Assemblea senza maggioranza: si governa a colpi di decreto'},
+ {id:'fr_p_ti_nucleare', era:'contemporanea', paesi:['francia'], pri:1, amico:'La Francia sceglie ancora l\'atomo', ostile:'Reattori vecchi, bollette nuove: il nucleare presenta il conto'},
+ /* ===== L81-1 · GERMANIA, quattro titoli del presente (scheda §D). ===== */
+ {id:'de_p_ti_freno', era:'contemporanea', paesi:['germania'], pri:1, amico:'Il freno al debito regge, i conti tornano', ostile:'Il freno al debito: ponti chiusi e scuole senza tetto'},
+ {id:'de_p_ti_coalizione', era:'contemporanea', paesi:['germania'], pri:1, amico:'La coalizione trova l\'accordo dopo una notte', ostile:'La coalizione litiga in pubblico: si può andare avanti così?'},
+ {id:'de_p_ti_est', era:'contemporanea', paesi:['germania'], pri:1, amico:'L\'est torna a crescere', ostile:'L\'est vota contro: il paese è ancora diviso'},
+ {id:'de_p_ti_auto', era:'contemporanea', paesi:['germania'], pri:1, amico:'L\'auto tedesca riparte con l\'elettrico', ostile:'Un altro stabilimento chiude: l\'auto tedesca in crisi'},
+ /* ===== L82-1 · SPAGNA, quattro titoli del presente (scheda §D). ===== */
+ {id:'es_p_ti_autonomie', era:'contemporanea', paesi:['spagna'], pri:1, amico:'Accordo con le autonomie: la legislatura è salva', ostile:'Ostaggio delle autonomie: la Spagna paga per governare'},
+ {id:'es_p_ti_casa', era:'contemporanea', paesi:['spagna'], pri:1, amico:'Il piano casa parte: prime gru nelle grandi città', ostile:'Affitti alle stelle e piazze piene: la casa è l\'emergenza'},
+ {id:'es_p_ti_lavoro', era:'contemporanea', paesi:['spagna'], pri:1, amico:'Occupazione ai massimi: il paese lavora', ostile:'Ancora i disoccupati più numerosi d\'Europa'},
+ {id:'es_p_ti_acqua', era:'contemporanea', paesi:['spagna'], pri:1, amico:'Piove: i bacini tornano a riempirsi', ostile:'Bacini al minimo: la siccità è politica'},
 ];
 
 /* TITOLI LOCALI (rifinitura livello locale): a LIVELLO 1 la prima pagina parla LOCALE — il consiglio, la giunta,
@@ -7674,6 +8579,88 @@ const OPPOSIZIONE_EV = [
       { l:'Lo promuovi: il futuro si prende per mano', e:'Il partito sembra nuovo; e qualcuno comincia a contare i tuoi anni', vis:6, cred:3, corrente:{pontieri:5, fedelissimi:-4} },
       { l:'Lo tieni lontano: un incarico senza telecamere', e:'Nessun rivale in vista; e la sensazione di un partito che invecchia', vis:-4, corrente:{fedelissimi:5, pontieri:-4} },
       { l:'Lo metti alla prova: un dossier difficile', e:'Se ce la fa, è tuo; se no, lo sapranno tutti', cred:2, corrente:{pontieri:2}, pleases:'tecnico' }, ]},
+  /* ===== L75-1 · le otto carte d'opposizione del decennio inglese '90 (scheda §6, era:'uk1990') ===== */
+  { id:'o_uk90_clausola', era:'uk1990', delega:'economia', kick:'Opposizione', t:'La clausola da riscrivere',
+    text:'Il tuo statuto promette la proprietà comune dei mezzi di produzione. Il paese la legge e non ti vota. Il partito la legge e ti riconosce.', ch:[
+      { l:'Si riscrive', e:'Il centro si volta a guardarti; la sinistra ti dà del traditore', cred:7, vis:4, corrente:{militanti:-8, pontieri:6}, promessa:'cetomedio', pleases:'tecnico' },
+      { l:'Si tiene', e:'La base ti applaude; il paese no', base:5, cred:-5, corrente:{militanti:6, pontieri:-4}, pleases:'populista' },
+      { l:'Si cambia una parola, non la sostanza', e:'Nessuno se ne accorge; è il punto', cred:1, corrente:{pontieri:2} }, ]},
+  { id:'o_uk90_leader', era:'uk1990', cond:()=>S.year===1994, delega:'giustizia', kick:'Opposizione', t:'Il leader che muore',
+    text:'Il leader del tuo partito muore all\'improvviso, a cinquantacinque anni, mentre i sondaggi lo davano al governo. Il partito deve scegliere in fretta, e con dignità.', ch:[
+      { l:'Ti candidi subito', e:'Chi arriva primo prende il partito; qualcuno lo chiama indecenza', vis:8, cred:-4, corrente:{fedelissimi:6, pontieri:-3}, pleases:'populista' },
+      { l:'Un mese di lutto, poi il congresso', e:'La dignità; e gli altri che si organizzano', cred:5, corrente:{pontieri:4}, pleases:'tecnico' },
+      { l:'Sostieni chi era il suo vice', e:'Un gesto che il partito ricorda; e un capo che non sei tu', cred:3, vis:-4, corrente:{pontieri:5, fedelissimi:-4} }, ]},
+  { id:'o_uk90_venti', era:'uk1990', cond:()=>S.year>=1993, delega:'economia', kick:'Opposizione', t:'Il sondaggio che dice venti',
+    text:'Venti punti di vantaggio, dicono i sondaggi. Tre anni fa dicevano cinque, e hai perso. Che fai con un vantaggio che non ti fidi di avere?', ch:[
+      { l:'Prudenza: nessuna promessa costosa', e:'I mercati ti prendono sul serio; la base si annoia', cred:6, base:-3, corrente:{pontieri:5, militanti:-4}, pleases:'tecnico' },
+      { l:'Si spende il vantaggio: un programma largo', e:'La base si accende; i giornali economici contano', base:6, vis:4, cred:-5, promessa:'lavoratori', pleases:'populista' },
+      { l:'Non si crede ai sondaggi: si lavora come se fossi dietro', e:'Nessuna euforia; e nessun errore', cred:3, corrente:{fedelissimi:3} }, ]},
+  { id:'o_uk90_terzavia', era:'uk1990', cond:()=>S.year>=1995, delega:'scuola', kick:'Opposizione', t:'La terza via',
+    text:'Né lo Stato di prima né il mercato di adesso, dice il tuo nuovo consigliere: una terza via. Nessuno sa cosa sia, e per questo funziona.', ch:[
+      { l:'La fai tua: è il tuo marchio', e:'I giornali la ripetono; la base chiede cosa vuol dire', vis:7, cred:4, corrente:{militanti:-5, pontieri:4}, pleases:'tecnico' },
+      { l:'Parole: parli di cose concrete', e:'La base capisce; i giornali si annoiano', base:4, vis:-3, corrente:{militanti:4} },
+      { l:'La lasci dire agli altri', e:'Nessun rischio; nessun marchio', cred:1 }, ]},
+  { id:'o_uk90_donne', era:'uk1990', cond:()=>S.year>=1993, delega:'scuola', kick:'Opposizione', t:'Le donne in lista',
+    text:'In metà dei collegi vincibili la lista sarà solo di donne, propone la direzione. Il gruppo parlamentare raddoppierebbe le donne in un voto; i notabili locali gridano al sopruso.', ch:[
+      { l:'Si fa: liste tutte femminili', e:'Un gruppo diverso in un voto; e un tribunale che le contesta', cred:4, vis:5, corrente:{militanti:5, pontieri:-3}, promessa:'giovani', pleases:'progressista' },
+      { l:'Un obiettivo, senza obbligo', e:'Nessuno grida; niente cambia', cred:1, corrente:{pontieri:2} },
+      { l:'Decidono i collegi', e:'I notabili ringraziano; il gruppo resta com\'è', base:2, cred:-2, corrente:{fedelissimi:3, militanti:-4} }, ]},
+  { id:'o_uk90_tabloid', era:'uk1990', cond:()=>S.year>=1995, delega:'sicurezza', kick:'Opposizione', t:'Il tabloid che cambia sponda',
+    text:'Il giornale che per vent\'anni ti ha chiamato pericolo pubblico ti invita a cena: l\'editore è pronto a cambiare sponda, a un prezzo che non dirà per iscritto.', ch:[
+      { l:'Vai a cena', e:'La prima pagina cambia colore; i tuoi si chiedono cosa hai promesso', vis:8, stampa:8, cred:-3, corrente:{militanti:-6}, pleases:'populista' },
+      { l:'Non tratti con chi ti ha insultato', e:'La coscienza è a posto; la prima pagina no', cred:4, stampa:-4, corrente:{militanti:5} },
+      { l:'Mandi qualcun altro', e:'La cena c\'è, la foto no', stampa:4, cred:1, corrente:{pontieri:2} }, ]},
+  { id:'o_uk90_devoluzione', era:'uk1990', cond:()=>S.year>=1993, delega:'territorio', kick:'Opposizione', t:'La devoluzione promessa',
+    text:'In Scozia ti chiedono un parlamento, e ti chiedono di prometterlo ora. Se lo prometti, i nazionalisti diranno che è poco; se non lo prometti, diranno che è la prova.', ch:[
+      { l:'Lo prometti: un parlamento con poteri veri', e:'La Scozia ti ascolta; l\'Inghilterra chiede chi paga', cred:4, base:4, corrente:{militanti:4}, promessa:'giovani', pleases:'progressista' },
+      { l:'Lo prometti, con un referendum prima', e:'Prudente; e un referendum che potresti perdere', cred:3, corrente:{pontieri:3}, pleases:'tecnico' },
+      { l:'Non prometti niente', e:'I nazionalisti ringraziano', cred:-3, base:-3 }, ]},
+  { id:'o_uk90_sindacato', era:'uk1990', delega:'lavoro', kick:'Opposizione', t:'Il sindacato che non si fida',
+    text:'I sindacati hanno fondato il tuo partito e pagano ancora le bollette. Adesso dici che non avranno privilegi. Ti chiedono se è una linea o un tradimento.', ch:[
+      { l:'Una linea: equità, non favori', e:'Il paese apprezza; il tesoriere conta i versamenti', cred:6, base:-4, corrente:{militanti:-6, pontieri:5}, pleases:'tecnico' },
+      { l:'Un tradimento: e li rassicuri', e:'I versamenti continuano; i giornali ti chiamano il loro uomo', base:6, cred:-5, corrente:{militanti:6}, promessa:'lavoratori', pleases:'populista' },
+      { l:'Né l\'uno né l\'altro: si tratta', e:'Un accordo che nessuno legge', cred:1, corrente:{pontieri:3} }, ]},
+  /* ===== L77-1 · le otto carte d'opposizione del decennio inglese 2000 (scheda §6, era:'uk2000') ===== */
+  { id:'o_uk00_guerra', era:'uk2000', cond:()=>S.year>=2002&&S.year<=2004, delega:'esteri', kick:'Opposizione', t:'Votare la guerra o dividersi',
+    text:'Il governo chiede all\'aula di votare l\'intervento. Il tuo partito è spaccato a metà, e qualunque cosa dici oggi verrà riletta fra due anni, quando si saprà delle armi.', ch:[
+      { l:'La si vota: è una questione di sicurezza', e:'Sembri responsabile; metà dei tuoi non ti parla più', cred:5, base:-7, corrente:{militanti:-10, pontieri:5}, pleases:'tecnico' },
+      { l:'Si vota contro, e si dice perché', e:'La base ti porta in trionfo; i giornali ti chiamano irresponsabile', base:9, vis:6, cred:-4, corrente:{militanti:10, pontieri:-6}, promessa:'giovani', pleases:'populista' },
+      { l:'Libertà di voto ai parlamentari', e:'Nessuno si dimette; e nessuno sa cosa pensi tu', cred:-2, corrente:{pontieri:3} }, ]},
+  { id:'o_uk00_modernizza', era:'uk2000', cond:()=>S.year>=2005, delega:'economia', kick:'Opposizione', t:'Il partito che si «modernizza»',
+    text:'Tre sconfitte di fila dicono che il paese non ti riconosce più. I giovani del partito vogliono cambiare simbolo, linguaggio e priorità; i vecchi dicono che così si perde l\'anima e si perde comunque.', ch:[
+      { l:'Si cambia tutto: simbolo, tono, priorità', e:'Il centro ti riguarda; i tuoi non si riconoscono', cred:7, vis:6, corrente:{militanti:-8, pontieri:6}, promessa:'cetomedio', pleases:'tecnico' },
+      { l:'Si cambia il tono, non la sostanza', e:'Nessuno strappo; e nessuno se ne accorge', cred:2, corrente:{pontieri:2} },
+      { l:'Si resta quello che siamo', e:'La base respira; la quarta sconfitta è già in calendario', base:6, cred:-6, corrente:{militanti:7}, pleases:'populista' }, ]},
+  { id:'o_uk00_leader', era:'uk2000', delega:'scuola', kick:'Opposizione', t:'Il leader che non buca lo schermo',
+    text:'I sondaggi sul partito sono buoni, quelli su di te no: in televisione sembri sempre a disagio, e il paese lo vede. I tuoi ti chiedono di lavorarci con un consulente.', ch:[
+      { l:'Si lavora sull\'immagine, con chi lo fa di mestiere', e:'Migliori davvero; e quando si saprà, sarà una notizia', vis:6, cred:2, stampa:-3, corrente:{pontieri:3} },
+      { l:'Si resta com\'è: la sostanza parlerà', e:'Onesto; e la sostanza in televisione dura undici secondi', cred:4, vis:-5, corrente:{militanti:4}, pleases:'tecnico' },
+      { l:'Meno televisione, più territorio', e:'Le sale si riempiono; lo schermo resta di qualcun altro', base:5, vis:-3, corrente:{militanti:3} }, ]},
+  { id:'o_uk00_dibattito', era:'uk2000', cond:()=>S.year>=2010, delega:'economia', kick:'Opposizione', t:'Il dibattito in televisione',
+    text:'Per la prima volta i leader si confronteranno in diretta, tutti e tre insieme. Non è mai successo, e chi ha meno da perdere è quello che rischia di vincere.', ch:[
+      { l:'Si accetta il confronto a tre', e:'Il paese ti guarda per novanta minuti; anche il terzo', vis:8, cred:3, corrente:{pontieri:3}, pleases:'tecnico' },
+      { l:'Si accetta, ma a due', e:'Il terzo resta fuori; e diventa la vittima simpatica', vis:4, cred:-3, stampa:-3 },
+      { l:'Niente dibattiti: si fa campagna nel paese', e:'Nessun rischio in diretta; e un\'assenza che si nota', base:3, vis:-6, cred:-2 }, ]},
+  { id:'o_uk00_crisi', era:'uk2000', cond:()=>S.year>=2008&&S.year<=2010, delega:'economia', kick:'Opposizione', t:'La crisi come occasione',
+    text:'Le banche sono salve coi soldi di tutti e la disoccupazione sale. È il momento in cui la tua critica di sempre suona giusta — se la fai senza sembrare contento.', ch:[
+      { l:'Si attacca il salvataggio: hanno pagato i soliti', e:'La base ruggisce; i mercati leggono e prezzano', base:8, vis:5, cred:-6, promessa:'lavoratori', pleases:'populista' },
+      { l:'Si sostiene il salvataggio e si chiedono le regole', e:'Responsabile; e indistinguibile da chi governa', cred:7, base:-4, corrente:{pontieri:5}, pleases:'tecnico' },
+      { l:'Si tace: non è il momento', e:'Nessun errore; e un\'occasione che passa', cred:1, vis:-4 }, ]},
+  { id:'o_uk00_notespese', era:'uk2000', cond:()=>S.year>=2009&&S.year<=2010, delega:'giustizia', kick:'Opposizione', t:'Le note spese che colpiscono anche i tuoi',
+    text:'Il giornale pubblica un elenco al giorno, e nell\'elenco ci sono anche i tuoi. Difenderli è impossibile, scaricarli è facile — e chi scarichi oggi domani è un tuo nemico.', ch:[
+      { l:'Si scaricano subito, tutti', e:'Il paese apprezza; il gruppo parlamentare ti odia', cred:8, stampa:5, corrente:{fedelissimi:-8, militanti:-4}, pleases:'tecnico' },
+      { l:'Si restituisce e si chiede scusa, insieme', e:'Dignitoso; e per una settimana ancora in prima pagina', cred:4, stampa:-2, corrente:{pontieri:3} },
+      { l:'Si difende chi è in regola, uno per uno', e:'Giusto; e nessuno ha tempo per i distinguo', cred:-3, base:4, corrente:{fedelissimi:6} }, ]},
+  { id:'o_uk00_coalizione', era:'uk2000', cond:()=>S.year>=2010, delega:'territorio', kick:'Opposizione', t:'La coalizione da offrire o negare',
+    text:'Il parlamento è appeso e il terzo partito ascolta entrambi. Puoi offrirgli tutto pur di tornare al governo, offrire il minimo, o dire che l\'aritmetica non c\'è e mandarli dagli altri.', ch:[
+      { l:'Si offre tutto: ministeri e la riforma del voto', e:'Forse torni al governo; e hai promesso ciò che i tuoi non voteranno', vis:7, cred:-5, corrente:{militanti:-7, pontieri:5} },
+      { l:'Si offre il minimo che regga', e:'Onesto; e probabilmente non basta', cred:5, corrente:{pontieri:3}, pleases:'tecnico' },
+      { l:'Si dice che l\'aritmetica non c\'è', e:'All\'opposizione con le mani pulite; e per cinque anni', cred:6, base:5, vis:-4, corrente:{militanti:6} }, ]},
+  { id:'o_uk00_terzo', era:'uk2000', cond:()=>S.year>=2005&&S.year<=2010, delega:'scuola', kick:'Opposizione', t:'Il terzo partito che ti ruba i giovani',
+    text:'Nelle città universitarie i tuoi voti se ne vanno al terzo partito: si erano opposti alla guerra e promettono di non toccare le rette. Sono i tuoi elettori di domani.', ch:[
+      { l:'Si insegue: rette e ambiente in cima al programma', e:'I giovani tornano a guardarti; e hai promesso una cosa cara', base:5, cred:-3, promessa:'giovani', corrente:{militanti:4} },
+      { l:'Si attacca: prometteranno qualunque cosa', e:'Vero; e detto da te suona come invidia', vis:3, cred:-2, base:-3 },
+      { l:'Si lascia perdere: torneranno da soli', e:'Qualcuno torna; molti no', cred:1, base:-4 }, ]},
 ];
 
 /* ===================== L25-2 · α2 — AI FIANCHI SUI MEDIA (famiglia d'opposizione) =====================
@@ -8699,6 +9686,21 @@ const SNODI_STORICI = {
   minatori80: { storico:['vinto'], conforme:'sullo sciopero dei minatori', diverge:{ 'trattato':'Con i minatori si è trattato prima dello sciopero: l\'anno di sciopero non c\'è mai stato.', 'spiraglio':'Con i minatori si è aperto uno spiraglio e qualche pozzo si è salvato: nessuna vittoria da raccontare.', 'scorte':'Le scorte di carbone sono state accumulate, e la storia si è fermata lì.' } },
   polltax: { storico:['varata'], conforme:'sull\'imposta per ogni testa', diverge:{ 'annacquata':'L\'imposta per ogni testa è stata annacquata: esenzioni e scaglioni, e nessuna rivolta fiscale.', 'ritirata':'L\'imposta per ogni testa è stata ritirata prima di partire: nessuna rivolta, e una marcia indietro.' } },
   alleanza: { storico:['lasciati','insieme'], conforme:'sulla scissione dell\'81', diverge:{ 'inseguiti':'I quattro che se ne andavano sono stati inseguiti: qualcuno è rimasto, e la scissione è stata più piccola.', 'attaccati':'I quattro che se ne andavano sono stati chiamati traditori davanti a tutti.', 'soli':'L\'Alleanza non è mai nata: i Liberali sono rimasti quello che erano.' } },
+  /* L77-3 - GLI OTTO CHE NON C'ERANO. I flag delle porte '90 e 2000 li scrivevano gli snodi e non erano
+     registrati qui: il finale non li raccontava, e la misura "quanti snodi ha giocato" li leggeva come
+     ZERO su uk1990 e uk2000. Preso misurando, non leggendo. L'esito storico di ciascuno e' LETTO dalla
+     riga-effetto della carta (quella marcata «La storia · ...»), non ricordato a memoria. */
+  caduta90: { storico:['dimissioni'], conforme:'sulla caduta della leader di undici anni', diverge:{ 'secondo':'La leader di undici anni non si è dimessa: è andata al secondo turno, e il partito ha dovuto cacciarla in faccia a tutti.' } },
+  mercoledi: { storico:['ceduto'], conforme:'sul mercoledì della sterlina', diverge:{ 'uscito':'La sterlina è uscita dal Sistema monetario senza combattere: le riserve non sono state bruciate, e nessuno ha visto i tassi al quindici per cento.', 'difesa':'Il cambio è stato difeso fino in fondo e ha tenuto: la sterlina non è mai uscita dal Sistema monetario.' } },
+  anima: { storico:['riscritta'], conforme:'sulla clausola dello statuto', diverge:{ 'tenuta':'La clausola non è stata riscritta: il partito ha tenuto la sua promessa di settant’anni, e il centro non gli ha creduto.', 'scissione':'La clausola è stata riscritta e la sinistra se n’è andata: un partito nuovo, e uno più piccolo accanto.' } },
+  devoluzione: { storico:['larga'], conforme:'sui parlamenti di Scozia e Galles', diverge:{ 'stretta':'Edimburgo e Cardiff hanno avuto parlamenti con poteri stretti: la promessa mantenuta a metà.', 'no':'I parlamenti di Scozia e Galles non sono mai nati: la promessa è rimasta sulla carta.' } },
+  iraq: { storico:['guerra'], conforme:'sulla guerra in Iraq', diverge:{ 'mandato':'Il mandato delle Nazioni Unite non è arrivato e il paese si è fermato: nessuna guerra, e un alleato che non ha dimenticato.', 'fuori':'Il paese è rimasto fuori dalla guerra, e lo ha detto prima: nessun milione in piazza, e un’alleanza da ricucire.' } },
+  rock: { storico:['nazionalizzata'], conforme:'sulla banca con la fila davanti', diverge:{ 'garanzia':'La banca non è stata nazionalizzata: garantiti i depositi e lasciata in piedi, con un precedente che tutti hanno capito.', 'fallita':'La banca è stata lasciata fallire: il mercato è rimasto mercato, e la fila è diventata dieci file.' } },
+  coalizione2010: { storico:['piena'], conforme:'sui cinque giorni del parlamento appeso', diverge:{ 'sostegno':'Dal parlamento appeso non è uscita una coalizione ma un sostegno esterno: nessun ministero diviso, e un prezzo da pagare a ogni voto.', 'minoranza':'Dal parlamento appeso è uscito un governo di minoranza: nessun accordo con nessuno, e una conta ogni sera.' } },
+  austerita2010: { storico:['rapida'], conforme:'sull’austerità dopo la crisi', diverge:{ 'graduale':'Il rientro dei conti è stato graduale, su dieci anni: meno dolore subito, e i mercati a chiedere conto ogni trimestre.', 'crescita':'Non c’è stata austerità: si è scommesso sulla crescita, e il debito ha deciso lui quando fermarsi.' } },
+  /* L77-4: i due snodi dall'opposizione entrano nel finale insieme ai loro gemelli, non dopo. */
+  suezOpp: { storico:['combattuta'], conforme:'sull’opposizione a Suez', diverge:{ 'sostegno':'L’opposizione ha sostenuto la spedizione di Suez: nessuno l’ha distinta dal governo, e con lui è affondata.', 'astensione':'Sull’avventura di Suez l’opposizione si è astenuta: né con il governo né contro, e nessuno se l’è ricordato.' } },
+  coal2010Opp: { storico:['tentata'], conforme:'sui cinque giorni visti da chi aveva perso', diverge:{ 'ceduto':'Chi aveva perso ha ceduto il giorno dopo il voto: nessuna trattativa, e un congresso subito.', 'resistito':'Chi aveva perso è rimasto in carica senza maggioranza e si è fatto sfiduciare: al vincitore ha regalato la legittimità che non aveva.' } },
 };
 
 /* ==============================================================================================================
@@ -8792,6 +9794,127 @@ const QUATTRO_EV = {
       f:function(){ S.alleanza='insieme'; alleanza81(7, 'Alleanza SDP-Liberali'); gd('cetomedio',4); gd('giovani',3); corrented('militanti',-8); corrented('fedelissimi',4); corrented('pontieri',5); if(typeof visd==='function') visd(8); S.log.unshift({t:T('Il partito'),x:T('Il partito è diventato l\'Alleanza, e per la prima volta punta al secondo posto.')}); } },
     { l:'Si resta quello che siamo', e:'Nessuna confusione, nessuna crescita. I quattro corrono da soli e vi tolgono l\'aria che avreste avuto.',
       f:function(){ S.alleanza='soli'; if(S.forze){ S.forze['uk_lab']=Math.max(2,(S.forze['uk_lab']||0)-6); S.forze['uk_lib']=Math.max(2,(S.forze['uk_lib']||0)-3); rinormalizzaForze(); } corrented('militanti',6); corrented('pontieri',-4); if(typeof credd==='function') credd(4); S.log.unshift({t:T('Il partito'),x:T('Rifiutata la fusione coi quattro: il partito è rimasto quello che era.')}); } },
+  ],
+};
+
+/* ==============================================================================================================
+   L75-1 · I QUATTRO SNODI DEL DECENNIO INGLESE '90 (scheda §4). S1 la sfida al leader: SOLO con anzianità ≥ 2 mandati
+   (`S.mandatesWon`, che la porta imposta a 2 con `mandatiVinti`), è la meccanica dello sfidante di L64-3 — il secondo
+   turno è `apriPrimaria('anticipata', -3)`, e si può perdere; le dimissioni chiudono la carriera come congresso. Il
+   pilastro «La caduta» ha `cond:!S.caduta90` (G1/G11: mai insieme). S2 il mercoledì nero: la prima carta della taglia-
+   fiducia (L72-3): −15 / −8 / +6 sulla fiducia dei mercati, dichiarati e misurati. S3 l'anima del partito: solo chi
+   gioca il Labour all'opposizione; se la sinistra se ne va, `scissioneDividi` (nome del giocatore invariato, L40-1).
+   S4 la devoluzione: al governo, 1997. ⚠ VALUTE: `cred`/`vis` solo all'opposizione → dietro typeof.
+   ============================================================================================================== */
+const CADUTA90_EV = {
+  id:'snodo_caduta90', kick:'Il partito', tono:'grave',
+  t:'Il primo turno',
+  text:'Undici anni a Downing Street, un\'imposta che il paese non paga, un partito diviso sull\'Europa e un ministro dimissionario che ti ha accoltellato in aula. Il primo turno della sfida interna non ti ha dato la maggioranza richiesta. Il secondo è fra una settimana.',
+  ch:[
+    { l:'Vai al secondo turno', e:'Ti giochi tutto davanti ai tuoi · e stavolta non hai la maggioranza in tasca',
+      f:function(){ S.caduta90='secondo'; if(!S.sfida){ const arr=(S.correnti||[]).slice().sort(function(a,b){return a.umore-b.umore;})[0]; const v=(typeof trovaVolto==='function')?trovaVolto():null; S.sfida=Object.assign({ corrente:arr?arr.id:'militanti', mese:S.year*12+S.month, maturazione:3, fonte:'caduta90' }, v||{ volto:nomePersona(), carica:T('ministro dimissionario') }); } S.log.unshift({t:T('Il partito'),x:T('Al secondo turno, senza la maggioranza in tasca.')}); apriPrimaria('anticipata', -3); } },
+    { l:'Ti dimetti prima del secondo', e:'La storia · chi ti sostituisce eredita il partito, non la tua autorità',
+      f:function(){ S.caduta90='dimissioni'; S.log.unshift({t:T('Il partito'),x:T('Dimissioni prima del secondo turno: undici anni finiti dai tuoi.')}); gameOver('congresso'); } },
+  ],
+};
+const MERCOLEDI_EV = {
+  id:'snodo_mercoledi', kick:'La sterlina', tono:'grave',
+  t:'La sterlina sotto attacco',
+  text:'È mercoledì mattina e i mercati vendono sterline più in fretta di quanto la Banca riesca a comprarne. Il cambio è dentro il Sistema monetario e tu hai promesso di difenderlo. Puoi alzare i tassi fino a dove serve e bruciare le riserve, o uscire.',
+  ch:[
+    { l:'Alzi i tassi fino a dove serve, e la sera cedi', e:'La storia · miliardi bruciati in un giorno, e la credibilità che non torna', costo:{debito:1.5},
+      f:function(){ S.mercoledi='ceduto'; S.ind.debt+=1.5; if(S.ind.fiducia!=null) S.ind.fiducia=clamp(S.ind.fiducia+(-15),0,100); repd(-8); stampad(-8); if(S.gMod!=null) S.gMod-=0.2; gd('cetomedio',-6); gd('imprenditori',-4); corrented('fedelissimi',-6); S.log.unshift({t:T('La sterlina'),x:T('Tassi al 15% e riserve bruciate, poi la resa la sera stessa: fuori dal Sistema monetario.')}); } },
+    { l:'Esci subito, e ti risparmi le riserve', e:'Nessuna umiliazione in diretta · «avete ceduto senza combattere»',
+      f:function(){ S.mercoledi='uscito'; if(S.ind.fiducia!=null) S.ind.fiducia=clamp(S.ind.fiducia+(-8),0,100); repd(-4); stampad(-3); if(S.gMod!=null) S.gMod+=0.1; gd('imprenditori',2); gd('cetomedio',-2); S.log.unshift({t:T('La sterlina'),x:T('Fuori dal Sistema monetario senza combattere: le riserve sono salve, la faccia meno.')}); } },
+    { l:'Combatti e resti dentro, a qualunque prezzo', e:'Il cambio regge · con tassi che strozzano il paese e riserve che non tornano', costo:{debito:3},
+      f:function(){ S.mercoledi='difesa'; S.ind.debt+=3; if(S.ind.fiducia!=null) S.ind.fiducia=clamp(S.ind.fiducia+(6),0,100); repd(2); if(S.gMod!=null) S.gMod-=0.6; if(S.uMod!=null) S.uMod+=0.5; gd('lavoratori',-6); gd('cetomedio',-5); gd('imprenditori',-3); S.log.unshift({t:T('La sterlina'),x:T('La sterlina è rimasta nel Sistema monetario: il cambio regge, il paese paga.')}); } },
+  ],
+};
+const ANIMA_EV = {
+  id:'snodo_anima', kick:'Il partito', tono:'grave',
+  t:'L\'anima del partito',
+  text:'La clausola dello statuto promette da settant\'anni la proprietà comune dei mezzi di produzione. Nessuno la applica, tutti la difendono. Riscriverla dice al paese che sei cambiato; tenerla dice ai tuoi che sei rimasto.',
+  ch:[
+    { l:'Riscrivi la clausola', e:'La storia · il centro ti guarda, la sinistra ti odia e resta',
+      f:function(){ S.anima='riscritta'; if(typeof credd==='function') credd(8); if(typeof visd==='function') visd(6); corrented('militanti',-10); corrented('pontieri',8); gd('cetomedio',5); gd('imprenditori',3); gd('lavoratori',-3); S.log.unshift({t:T('Il partito'),x:T('La clausola riscritta: il partito dice al paese che è cambiato.')}); } },
+    { l:'Riscrivi, e chi non ci sta se ne vada', e:'La sinistra fonda il suo partito · tu resti col grosso, e senza zavorra',
+      f:function(){ S.anima='scissione'; if(typeof credd==='function') credd(10); if(typeof visd==='function') visd(8); corrented('pontieri',10); corrented('militanti',-4); gd('cetomedio',6); gd('lavoratori',-5); if(typeof scissioneDividi==='function') scissioneDividi(null, 0.9, {id:'uk90_sinistra', nome:'Socialist Labour', orientamento:'sinistra', base:{lavoratori:0.7, giovani:0.3}, forza:3, asse:-2, gruppoUE:'sinistra'}, -1); S.log.unshift({t:T('Il partito'),x:T('La clausola riscritta e la sinistra fuori: un partito nuovo, senza zavorra.')}); } },
+    { l:'La clausola resta', e:'I tuoi ti applaudono · il paese continua a non fidarsi',
+      f:function(){ S.anima='tenuta'; if(typeof credd==='function') credd(-5); corrented('militanti',6); corrented('pontieri',-5); gd('lavoratori',3); S.log.unshift({t:T('Il partito'),x:T('La clausola è rimasta: il partito è rimasto quello che era.')}); } },
+  ],
+};
+const DEVOLUZIONE_EV = {
+  id:'snodo_devoluzione', kick:'La devoluzione', tono:'grave',
+  t:'I parlamenti di Scozia e Galles',
+  text:'Hai promesso ai due paesi un parlamento proprio. Ora devi dire quanto conta: un referendum e poteri larghi, con la tassa; poteri stretti; o niente referendum, e la promessa che resta sulla carta.',
+  ch:[
+    { l:'Referendum, e poteri larghi', e:'La storia · la Scozia vota sì largo, il Galles per un soffio',
+      f:function(){ S.devoluzione='larga'; gd('giovani',3); gd('lavoratori',2); repd(3); corrented('militanti',3); if(typeof applicaSlancio==='function') applicaSlancio(['uk_snp','uk_plaid'], -1); S.log.unshift({t:T('La devoluzione'),x:T('Due referendum, due sì: Edimburgo e Cardiff hanno il loro parlamento.')}); } },
+    { l:'Referendum, ma poteri stretti', e:'Un parlamento che parla e non decide · i nazionalisti ringraziano',
+      f:function(){ S.devoluzione='stretta'; gd('cetomedio',2); gd('giovani',-2); if(typeof applicaSlancio==='function') applicaSlancio(['uk_snp','uk_plaid'], 1); S.log.unshift({t:T('La devoluzione'),x:T('Parlamenti con poteri stretti: la promessa mantenuta a metà.')}); } },
+    { l:'Niente referendum: non è il momento', e:'La promessa resta sulla carta · e in Scozia la leggono',
+      f:function(){ S.devoluzione='no'; gd('lavoratori',-4); gd('giovani',-4); repd(-3); if(typeof applicaSlancio==='function') applicaSlancio(['uk_snp','uk_plaid'], 2); S.log.unshift({t:T('La devoluzione'),x:T('Nessun referendum: la promessa dei parlamenti è rimasta sulla carta.')}); } },
+  ],
+};
+
+/* ==============================================================================================================
+   L77-1 · I QUATTRO SNODI DEL DECENNIO INGLESE 2000 (scheda §4). S1 Iraq (2002-03): la scelta piu' costosa della
+   linea, e usa `campPromessa` — le armi che non si troveranno tornano indietro come promessa tradita alla stagione
+   successiva (meccanismo di Cantiere C, non uno nuovo). S2 Northern Rock (2007-08): carta-fiducia, delta +6/-4/-18.
+   S3 la coalizione (mag 2010): e' il collaudo di L61-5 e L53-2 sullo stesso tavolo — coalizione piena (entra uk_lib
+   in S.coalizione), sostegno esterno (S.sostegno, la struttura di L53-2), o minoranza. S4 l'austerita' (2010-11),
+   che chiude la linea. ⚠ VALUTE: `cred`/`vis` solo all'opposizione → sempre dietro typeof.
+   ============================================================================================================== */
+const IRAQ_EV = {
+  id:'snodo_iraq', kick:'La guerra', tono:'grave',
+  t:'La seconda risoluzione',
+  text:'L\'alleato ha deciso e chiede se ci sei. I tuoi servizi dicono che le armi ci sono; gli ispettori non le hanno trovate. Una seconda risoluzione delle Nazioni Unite non arriverà: il tuo paese può andare lo stesso, chiedere il mandato e fermarsi se manca, o restare fuori.',
+  ch:[
+    { l:'Si va, con l\'alleato e senza mandato', e:'La storia · un milione in piazza, il partito spaccato, e una promessa che dovrai mantenere', costo:{debito:1.5},
+      f:function(){ S.iraq='guerra'; S.ind.debt+=1.5; if(typeof campPromessa==='function') campPromessa('giovani'); repd(-6); stampad(-5); gd('giovani',-10); gd('lavoratori',-6); gd('cattolici',-5); gd('imprenditori',2); corrented('militanti',-12); corrented('pontieri',-4); if(S.relInt&&S.relInt.alleanza!=null) S.relInt.alleanza=clamp(S.relInt.alleanza+10,0,100); if(S.relInt&&S.relInt.ong!=null) S.relInt.ong=clamp(S.relInt.ong-10,0,100); S.log.unshift({t:T('La guerra'),x:T('Si va senza una seconda risoluzione: le armi le cercheremo dopo.')}); } },
+    { l:'Si chiede il mandato, e senza mandato ci si ferma', e:'Nessuna guerra e nessuna bugia · un alleato che non dimentica',
+      f:function(){ S.iraq='mandato'; repd(3); gd('giovani',6); gd('cattolici',4); gd('lavoratori',3); corrented('militanti',8); if(S.relInt&&S.relInt.alleanza!=null) S.relInt.alleanza=clamp(S.relInt.alleanza-12,0,100); if(S.relInt&&S.relInt.ong!=null) S.relInt.ong=clamp(S.relInt.ong+8,0,100); S.log.unshift({t:T('La guerra'),x:T('Nessun mandato, nessuna guerra: l\'alleato se l\'è legata al dito.')}); } },
+    { l:'Si resta fuori, e lo si dice prima', e:'Chiaro da subito · e per l\'alleato sei quello che si è sfilato',
+      f:function(){ S.iraq='fuori'; repd(-2); stampad(-4); gd('giovani',8); gd('cattolici',5); gd('imprenditori',-4); corrented('militanti',10); corrented('pontieri',-6); if(S.relInt&&S.relInt.alleanza!=null) S.relInt.alleanza=clamp(S.relInt.alleanza-18,0,100); S.log.unshift({t:T('La guerra'),x:T('Fuori dalla guerra, detto prima e in chiaro.')}); } },
+  ],
+};
+const ROCK_EV = {
+  id:'snodo_rock', kick:'Le banche', tono:'grave',
+  t:'La fila davanti alle filiali',
+  text:'Una banca di credito immobiliare non trova più chi le presti denaro, e i suoi clienti si sono messi in fila davanti alle filiali. Non accadeva da oltre un secolo. Puoi nazionalizzarla, garantire i depositi e lasciarla in piedi, o lasciarla fallire e dire che il mercato è mercato.',
+  ch:[
+    { l:'La si nazionalizza', e:'La fila si scioglie · lo Stato entra in una banca, e non ne uscirà presto', costo:{debito:4},
+      f:function(){ S.rock='nazionalizzata'; S.ind.debt+=4; if(S.ind.fiducia!=null) S.ind.fiducia=clamp(S.ind.fiducia+(6),0,100); repd(3); gd('cetomedio',5); gd('pensionati',4); gd('imprenditori',-4); corrented('militanti',5); S.log.unshift({t:T('Le banche'),x:T('La banca è dello Stato: la fila si è sciolta, il conto resta.')}); } },
+    { l:'Si garantiscono i depositi, e basta', e:'Nessun esborso subito · e un precedente che tutti hanno capito', costo:{debito:1},
+      f:function(){ S.rock='garanzia'; S.ind.debt+=1; if(S.ind.fiducia!=null) S.ind.fiducia=clamp(S.ind.fiducia+(-4),0,100); gd('cetomedio',2); gd('imprenditori',1); S.log.unshift({t:T('Le banche'),x:T('Depositi garantiti e niente altro: si spera che basti.')}); } },
+    { l:'La si lascia fallire', e:'Il mercato è mercato · e la fila diventa due file, poi dieci',
+      f:function(){ S.rock='fallita'; if(S.ind.fiducia!=null) S.ind.fiducia=clamp(S.ind.fiducia+(-18),0,100); if(S.gMod!=null) S.gMod-=0.8; repd(-6); stampad(-6); gd('cetomedio',-10); gd('pensionati',-8); gd('imprenditori',-6); S.log.unshift({t:T('Le banche'),x:T('Lasciata fallire: il panico non si è fermato alla prima banca.')}); } },
+  ],
+};
+const COALIZIONE2010_EV = {
+  id:'snodo_coalizione2010', kick:'Il partito', tono:'grave',
+  t:'Cinque giorni',
+  text:'Il voto non ha dato la maggioranza a nessuno. Il terzo partito ha i numeri che ti mancano e sta parlando anche con gli altri; il governo uscente resta in carica finché non si decide. Hai pochi giorni: una coalizione vera con i ministeri divisi, un accordo di sostegno senza entrare, o un governo di minoranza che conta i voti ogni sera.',
+  ch:[
+    { l:'Coalizione piena: programma comune e ministeri divisi', e:'La storia · governi cinque anni, e il terzo partito lo pagherà per un decennio',
+      f:function(){ S.coalizione2010='piena'; if(S.coalizione && S.coalizione.indexOf('uk_lib')<0) S.coalizione.push('uk_lib'); S.minoranza=false; if(typeof initTenuta==='function') initTenuta(); if(S.ind.fiducia!=null) S.ind.fiducia=clamp(S.ind.fiducia+(8),0,100); repd(4); gd('cetomedio',4); corrented('militanti',-8); corrented('pontieri',6); if(typeof applicaSlancio==='function') applicaSlancio(['uk_lib'], -3); S.log.unshift({t:T('Il partito'),x:T('Coalizione: due partiti, un programma, i ministeri divisi.')}); } },
+    { l:'Sostegno esterno: ci votano, non entrano', e:'Le mani libere · e un prezzo da pagare a ogni voto',
+      f:function(){ S.coalizione2010='sostegno'; if(typeof partnerSostegno==='function'){ var _p=partnerSostegno(); if(_p) S.sostegno={ pid:_p.id, prezzo:2, mesi:0 }; } if(S.ind.fiducia!=null) S.ind.fiducia=clamp(S.ind.fiducia+(2),0,100); corrented('militanti',3); corrented('pontieri',-2); S.log.unshift({t:T('Il partito'),x:T('Sostegno esterno: ci votano da fuori, e ce lo ricorderanno.')}); } },
+    { l:'Minoranza: si governa contando i voti', e:'Nessun compromesso · e ogni sera una conta',
+      f:function(){ S.coalizione2010='minoranza'; S.minoranza=true; if(S.ind.fiducia!=null) S.ind.fiducia=clamp(S.ind.fiducia+(-8),0,100); repd(-3); corrented('militanti',8); corrented('pontieri',-6); S.log.unshift({t:T('Il partito'),x:T('Governo di minoranza: si conta ogni sera.')}); } },
+  ],
+};
+const AUSTERITA_EV = {
+  id:'snodo_austerita', kick:'I conti', tono:'grave',
+  t:'Quanto, e quanto in fretta',
+  text:'Il debito è raddoppiato in tre anni e i mercati guardano. Puoi tagliare in fretta e profondo, spalmare il rientro su un decennio, o scommettere che la crescita chiuda il buco da sola.',
+  ch:[
+    { l:'Taglio rapido e profondo', e:'La storia · i conti rientrano, e il paese lo sente per anni',
+      f:function(){ S.austerita2010='rapida'; S.ind.debt-=4; if(S.ind.fiducia!=null) S.ind.fiducia=clamp(S.ind.fiducia+(10),0,100); if(S.gMod!=null) S.gMod-=0.5; if(S.uMod!=null) S.uMod+=0.8; gd('lavoratori',-10); gd('giovani',-8); gd('pensionati',-5); gd('imprenditori',6); corrented('militanti',-8); S.log.unshift({t:T('I conti'),x:T('Taglio rapido: i conti rientrano, e si sente.')}); } },
+    { l:'Rientro graduale, su dieci anni', e:'Meno dolore subito · e i mercati che chiedono conto ogni trimestre',
+      f:function(){ S.austerita2010='graduale'; S.ind.debt-=1; if(S.ind.fiducia!=null) S.ind.fiducia=clamp(S.ind.fiducia+(2),0,100); if(S.gMod!=null) S.gMod-=0.1; gd('lavoratori',-3); gd('giovani',-2); gd('imprenditori',1); S.log.unshift({t:T('I conti'),x:T('Rientro graduale: il dolore diluito su dieci anni.')}); } },
+    { l:'Si scommette sulla crescita', e:'Nessun taglio · e un debito che decide lui quando fermarsi', costo:{debito:3},
+      f:function(){ S.austerita2010='crescita'; S.ind.debt+=3; if(S.ind.fiducia!=null) S.ind.fiducia=clamp(S.ind.fiducia+(-12),0,100); if(S.gMod!=null) S.gMod+=0.4; gd('lavoratori',6); gd('giovani',5); gd('imprenditori',-3); corrented('militanti',6); S.log.unshift({t:T('I conti'),x:T('Nessun taglio: si scommette che la crescita chiuda il buco.')}); } },
   ],
 };
 
@@ -9004,6 +10127,46 @@ const RIMPASTO_EV = {
    scelta storica picchia sui gruppi, il consenso scende, e **se il gabinetto è già fragile la caduta arriva
    dal motore che esiste**. Quanto spesso accada è una misura, non una promessa: sta nella consegna archiviata.
    ============================================================================================================== */
+/* ================================================================================================================
+   L77-4 - GLI SNODI DALL'OPPOSIZIONE: «chi perde il voto non deve perdere il decennio».
+   I due snodi piu' grossi del pilota avevano un lato-opposizione VERO, e il giocatore che aveva perso li vedeva
+   come cronaca. Suez fu anche la decisione dell'opposizione (che la combatte' in aula, e la storia le diede
+   ragione); i cinque giorni del 2010 furono anche la decisione di chi aveva perso (si tento' la coalizione
+   arcobaleno, e non tenne).
+   ⚑ G1 - MAI INSIEME AL GEMELLO DI GOVERNO: il gate richiede che il flag del gemello sia ancora null, cosi'
+   chi ha giocato lo snodo da premier non riceve anche la versione dall'aula.
+   Testi dalle schede PRESET-UK-1950 §8 e PRESET-UK-2000 §7, non riscritti a memoria.
+   ================================================================================================================ */
+const SUEZ_OPP_EV = {
+  id:'snodo_suez_opp', kick:'Il Canale', tono:'grave',
+  t:'Suez, dall’aula',
+  text:'Il governo ha mandato le truppe sul Canale. Il paese è diviso, l’alleato americano è furioso, e la sterlina trema. Domani si vota in aula: sostenere una guerra in corso, o combatterla mentre i soldati sono sul campo.',
+  ch:[
+    { l:'Sostieni il governo: la bandiera prima di tutto', e:'Nessuno ti accusa di tradimento · e nessuno ti distingue dal governo quando la spedizione fallisce',
+      f:function(){ S.suezOpp='sostegno'; gd('cetomedio',4); gd('lavoratori',-6); gd('giovani',-4); if(typeof credd==='function') credd(-5); stampad(2);
+        S.log.unshift({t:T('Il Canale'),x:T('Sostenuta l’avventura di Suez dall’opposizione.')}); } },
+    { l:'La combatti in aula e in piazza', e:'La storia · disfattista per due settimane, poi la spedizione si ferma e il premier cade',
+      f:function(){ S.suezOpp='combattuta'; gd('lavoratori',7); gd('giovani',6); gd('cetomedio',-4); if(typeof credd==='function') credd(10); if(typeof visd==='function') visd(8); stampad(-4); corrented('militanti',8);
+        S.log.unshift({t:T('Il Canale'),x:T('Combattuta Suez dall’aula, e la storia ti ha dato ragione.')}); } },
+    { l:'Ti astieni: non ora, non coi soldati sul campo', e:'La strada di chi non vuole sbagliare · e non viene ricordato',
+      f:function(){ S.suezOpp='astensione'; gd('lavoratori',-3); gd('giovani',-2); if(typeof credd==='function') credd(-1); corrented('militanti',-5);
+        S.log.unshift({t:T('Il Canale'),x:T('Astenuto su Suez: né con il governo né contro.')}); } }
+  ] };
+const COAL2010_OPP_EV = {
+  id:'snodo_coal2010_opp', kick:'I cinque giorni', tono:'grave',
+  t:'Cinque giorni, dall’altra parte',
+  text:'Il voto non ha dato la maggioranza a nessuno. Hai perso, ma non abbastanza: sei ancora in carica come governo uscente, e i terzi ricevono te e il vincitore nello stesso pomeriggio. Coi nazionalisti e i terzi arriveresti a un soffio dalla maggioranza — un soffio, e un governo di sei partiti.',
+  ch:[
+    { l:'Tenti l’accordo arcobaleno', e:'Tre giorni di trattative · i terzi scelgono l’altro, e il paese ti ha visto aggrapparti',
+      f:function(){ S.coal2010Opp='tentata'; if(typeof credd==='function') credd(-8); stampad(-6); gd('lavoratori',4); gd('cetomedio',-3); corrented('militanti',5); if(typeof applicaSlancio==='function') applicaSlancio(['uk_lib','uk_snp'], -1);
+        S.log.unshift({t:T('I cinque giorni'),x:T('Tentata la coalizione con tutti, e persa.')}); } },
+    { l:'Cedi subito e vai all’opposizione a testa alta', e:'Nessuno ti accusa di aggrapparti · il partito ha un lutto pulito, e un congresso da fare',
+      f:function(){ S.coal2010Opp='ceduto'; if(typeof credd==='function') credd(7); stampad(3); gd('lavoratori',-3); corrented('militanti',-7); corrented('pontieri',5);
+        S.log.unshift({t:T('I cinque giorni'),x:T('Ceduto il governo il giorno dopo il voto.')}); } },
+    { l:'Resti in carica e sfidi la Camera a sfiduciarti', e:'Lecito e suicida · la Camera ti sfiducia entro un mese, e il vincitore governa con la legittimità che gli hai regalato',
+      f:function(){ S.coal2010Opp='resistito'; if(typeof credd==='function') credd(-14); stampad(-10); gd('cetomedio',-6); gd('imprenditori',-4); corrented('fedelissimi',-8);
+        S.log.unshift({t:T('I cinque giorni'),x:T('Restato in carica senza maggioranza, e sfiduciato.')}); } }
+  ] };
 const SUEZ_EV = {
   id:'snodo_suez', kick:'Il Canale', tono:'grave',
   t:'Il Canale',
