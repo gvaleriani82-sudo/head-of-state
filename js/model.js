@@ -64,7 +64,7 @@ function targetReputazione(){
   return clamp(50 + [8,0,-8][lv('linea_estera')] + [0,0,-6][lv('industria_difesa')] + rel, 0, 100);
 }
 function computeGrowth(){
-  let g=0.8;
+  let g=(S.crescitaBase!=null)?S.crescitaBase:0.8;   // L90-1: la crescita di partenza è del PAESE (o della porta); 0,8 era universale
   g+=[-0.3,0,0.45][lv('investimenti')]+[-0.2,0,0.40][lv('imprese')]+[-0.3,0,0.50][lv('lavoro')]
     +[-0.05,0,0.15][lv('istruzione')]+[0.30,0,-0.50][lv('fisco')]+[0,0,-0.15][lv('ambiente')]
     +[-0.10,0,0.20][lv('commercio')]+[0,0,0.15][lv('industria_difesa')]+[-0.05,0,0.20][lv('universita')];   // commercio + export difesa + ricerca universitaria
@@ -73,7 +73,15 @@ function computeGrowth(){
   g+=S.gMod+ministerMods().growth+(S.ciclo||0)+leggiMods().growth; return clamp(g,-6,5);   // + congiuntura + leggi permanenti
 }
 function targetUnemp(){
-  let u=8.0; u-=(computeGrowth()-0.8)*0.8;
+  /* ⚠ L90-1 passo 2 — QUESTO 0,8 ERA LA STESSA COSTANTE della crescita di partenza, e va con lei.
+     La riga dice «la disoccupazione scende quando la crescita supera il NORMALE»: finché il normale era 0,8 per
+     tutti, scriverlo due volte era innocuo. Con la crescita per paese non lo è più — lasciando 0,8 fisso, l'India
+     (6,5) starebbe a −4,6 di disoccupazione per il solo fatto di essere l'India, cioè inchiodata al pavimento.
+     Il neutro è il normale del PAESE. Per un paese o una porta che non dichiara la crescita, `crescitaBase` vale
+     0,8 e la riga è identica a prima. È la classe d'errore di «rinominare una costante»: il confronto col vecchio
+     valore diventa sempre-falso e nessuna guardia lo vede. */
+  const neutro=(S.crescitaBase!=null)?S.crescitaBase:0.8;
+  let u=8.0; u-=(computeGrowth()-neutro)*0.8;
   u+=[0.4,0,-0.6][lv('lavoro')]+[0,0,-0.3][lv('imprese')]+[0,0,-0.3][lv('investimenti')]+[0.1,0,-0.2][lv('personale_san')];   // assunzioni nella sanità
   u+=(typeof disoccupazioneEra==='function')?disoccupazioneEra():0;   // L60-2: la disoccupazione d'epoca (tabella per linea, 0 fuori tabella)
   u+=S.uMod+ministerMods().unemp+leggiMods().unemp; return clamp(u,3,20);
@@ -232,10 +240,21 @@ function simulateMonth(){
   S.ciclo=clamp(cicB + ((S.ciclo||0)-cicB)*0.93 + (Math.random()*2-1)*ampC*0.30, cicB-ampC, cicB+ampC);
   if(!S.opposizione){ S.mesiAlGoverno=(S.mesiAlGoverno||0)+1;                        // logorio del potere (solo mentre governi)
     S.logorioAcc=(S.logorioAcc||0)+rateLogorioMese(); }                              // L77-3: e il logorio del MESE, che dipende dal consenso di quel mese
+  /* L90-2 — E IL GOVERNO AVVERSARIO PAGA LO STESSO PREZZO. Fino a ieri il potere logorava solo il giocatore:
+     misurato in L89-2, all'opposizione `govF` valeva **esattamente 1,000** ogni mese in tutte e sette le porte,
+     perché `logorioAcc` viene azzerato da `entraOpposizione` e nessuno accumulava per l'avversario. Da qui c'è
+     un accumulatore suo, con la stessa forma di L77-3 (`rateLogorioMese`, che all'opposizione legge lo stesso
+     consenso nazionale — quello del governo in carica). Non tocca `S.logorioAcc`: la traversata del deserto
+     resta azzerata per te. Si azzera quando l'avversario cambia (`entraOpposizione`, `tornaAlGoverno`). */
+  else { S.logorioAvv=(S.logorioAvv||0)+rateLogorioMese(); }
   S.ind.growth=computeGrowth();
   S.ind.deficit=computeDeficit();
   S.ind.unemp+= (targetUnemp()-S.ind.unemp)*0.12;
-  S.ind.debt=clamp(S.ind.debt + S.ind.deficit/12 - S.ind.debt*S.ind.growth/100/12, 40,260);
+  /* L90-1 — L'EROSIONE È NOMINALE, NON REALE. Il rapporto debito/PIL scende col PIL NOMINALE (crescita reale +
+     inflazione): il denominatore cresce anche quando i prezzi salgono. Con la sola crescita reale il debito non
+     rientrava mai — `italia1980` faceva 57 → 186 contro un 95 vero, ed era il decennio dell'inflazione a due
+     cifre. `S.inflazione` è il seed della porta o del paese (game.js, `inflazioneSeed`), clamp 0-10. */
+  S.ind.debt=clamp(S.ind.debt + S.ind.deficit/12 - S.ind.debt*(S.ind.growth+(S.inflazione||0))/100/12, 40,260);
   S.ind.sanita+= (targetService('sanita')-S.ind.sanita)*0.10;
   S.ind.sicurezza+= (targetService('sicurezza')-S.ind.sicurezza)*0.10;
   S.ind.ambiente+= (targetService('ambiente')-S.ind.ambiente)*0.10;
@@ -262,6 +281,13 @@ function simulateMonth(){
   evolveTenuta();                                                       // passo 4: tenuta degli alleati di coalizione
   evolveCorrenti();                                                     // primarie: l'umore delle correnti interne (gemello della tenuta)
   S.mesiMinoranza = S.minoranza ? (S.mesiMinoranza||0)+1 : 0;           // conto alla rovescia della minoranza (per la sfiducia)
+  /* L90-2 — il gemello per il governo avversario: quanti mesi di fila sta sotto i 50 seggi. È il numero che
+     `probSfiduciaAvversario` legge, esattamente come `probSfiducia` legge `mesiMinoranza`. Fuori
+     dall'opposizione si azzera: la pazienza dell'Assemblea riparte con ogni governo. */
+  if(S.opposizione){
+    const sottoAvv = (typeof bloccoSeggi==='function') ? (bloccoSeggi()<50) : false;
+    S.mesiMinoranzaAvv = sottoAvv ? (S.mesiMinoranzaAvv||0)+1 : 0;
+  } else S.mesiMinoranzaAvv = 0;
 }
 
 /* --- Tenuta degli alleati (passo 4): ogni alleato di coalizione converge lentamente verso un target dato dalla
@@ -433,7 +459,10 @@ function evolvePartiti(){
      ACCELERA. Rate per-scenario (S.logorioEra; presente resta 0.002) × difficoltà (logorioMult) × età.
      Nel presente il delta è il solo cap-del-bonus: niente più incumbent che cresce all'infinito (documentato). */
   const cons=(S.ind&&S.ind.consenso!=null)?S.ind.consenso:50;
-  const logorio=logorioTotale();                                    // L77-3: accumulato mese per mese, col consenso di ogni mese
+  /* L90-2 — `S.coalizione` è la coalizione DI GOVERNO, e all'opposizione quella di governo è dell'avversario:
+     è a lui che govF si applica, quindi è il SUO accumulatore che deve entrare qui. Prima entrava comunque
+     `logorioTotale()`, che all'opposizione è zero — ed è per questo che il blocco avversario non si logorava. */
+  const logorio=S.opposizione ? (S.logorioAvv||0) : logorioTotale();   // L77-3: accumulato mese per mese, col consenso di ogni mese
   const swing=(dif().swingGoverno!=null?dif().swingGoverno:1);
   const bonus=Math.min(Math.max(cons-50,0)/100*swing, logorio*0.7);
   const malus=Math.max(50-cons,0)/100*swing;

@@ -9,21 +9,21 @@
    ============================================================ */
 
 /* PAESI — tutto ciò che varia per nazione, un set per paese (come DIFFICOLTA). `PAESE` è il paese ATTIVO,
-   scambiato a inizio partita da setCountry(). I knob mandatoMesi/sistema/sfiducia/coalizione/comeSiVince/
+   scambiato a inizio partita da setCountry(). I knob mandatoMesi/mandatiMax/sistema/cadutaGoverno/coalizione/comeSiVince/
    cadutaGoverno sono PREDISPOSTI: non ancora usati nella logica (al passo 1). I partiti (nome, orientamento,
    base, forza) sono stilizzazioni di gioco — niente loghi/simboli. Le basi usano le chiavi REALI di GROUPS
    (imprese→imprenditori, ceto medio→cetomedio, mondo cattolico→cattolici); pesi indicativi (somma ~1).
    mandatoMesi resta 60 per tutti finché la logica elezioni non lo legge (durata per-paese: passo successivo). */
 const PAESI = {
   italia: {
-    economia:{pil:2150, debito:139, deficit:-3.4},   // cifre 2024 riconciliate (CIFRE-ECONOMICHE.md); PIL € mld
+    economia:{pil:2150, debito:139, deficit:-3.4, inflazione:1.0, crescita:0.7},   // cifre 2024 riconciliate (CIFRE-ECONOMICHE.md); PIL € mld
     nome: 'Italia',
     capitale: 'Roma', sedeGoverno: 'Palazzo Chigi',   /* L76-1: i luoghi sono DATI, non testi (i testi universali li leggono con %CAPITALE/%ACAPITALE/%SEDE) */
     colori: { bandiera: ['#1e8a5a', '#e9ecf2', '#c8324a'], accento: '#a9791a' },
     flag: '<svg viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg"><rect width="30" height="20" fill="#fff"/><rect width="10" height="20" fill="#1e8a5a"/><rect x="20" width="10" height="20" fill="#c8324a"/></svg>',
     nomeArt: "l'Italia",
     titoloRuolo: 'Presidente del Consiglio',
-    mandatoMesi: 60, sistema: 'parlamentare', sfiducia: true,
+    mandatoMesi: 60, sistema: 'parlamentare',
     coalizione: true, comeSiVince: 'parlamentare', cadutaGoverno: true, ue: true, distorsione: 1.1,
     intermedie: [{tipo:'Elezioni europee', mese:28, ue:true, tocca:'tutti'}, {tipo:'Elezioni regionali', mese:44, tocca:'regione'}],
     /* VINCOLO: i primi 4 (aree-simbolo) restano PRIMI e in quest'ordine — S.territori è parallelo per indice
@@ -55,14 +55,14 @@ const PAESI = {
     ],
   },
   francia: {
-    economia:{pil:2890, debito:112, deficit:-5.8},   // cifre 2024 riconciliate (CIFRE-ECONOMICHE.md); PIL € mld
+    economia:{pil:2890, debito:112, deficit:-5.8, inflazione:2.0, crescita:1.0},   // cifre 2024 riconciliate (CIFRE-ECONOMICHE.md); PIL € mld
     nome: 'Francia',
     capitale: 'Parigi', sedeGoverno: 'l\'Eliseo',   /* L76-1: i luoghi sono DATI, non testi (i testi universali li leggono con %CAPITALE/%ACAPITALE/%SEDE) */
     colori: { bandiera: ['#0055a4', '#ffffff', '#ef4135'], accento: '#a9791a' },
     flag: '<svg viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg"><rect width="30" height="20" fill="#fff"/><rect width="10" height="20" fill="#0055a4"/><rect x="20" width="10" height="20" fill="#ef4135"/></svg>',
     nomeArt: 'la Francia',
     titoloRuolo: 'Presidente della Repubblica',
-    mandatoMesi: 60, sistema: 'semipresidenziale', sfiducia: true, scioglimentoMesiMin: 12,   /* L80-5: nella V Repubblica il Presidente puo sciogliere l'Assemblea al massimo una volta l'anno; altrove restano i 18 mesi di sempre */
+    mandatoMesi: 60, sistema: 'semipresidenziale', mandatiMax: 2, scioglimentoMesiMin: 12,   /* L80-5: nella V Repubblica il Presidente puo sciogliere l'Assemblea al massimo una volta l'anno; altrove restano i 18 mesi di sempre */
     coalizione: true, comeSiVince: 'candidato', cadutaGoverno: true, ue: true, distorsione: 1.1,
     intermedie: [{tipo:'Elezioni europee', mese:28, ue:true, tocca:'tutti'}, {tipo:'Elezioni municipali', mese:44, tocca:'città'}],
     territori: [
@@ -89,14 +89,14 @@ const PAESI = {
     ],
   },
   usa: {
-    economia:{pil:26600, debito:123, deficit:-6.5},   // cifre 2024 riconciliate (CIFRE-ECONOMICHE.md); PIL € mld
+    economia:{pil:26600, debito:123, deficit:-6.5, inflazione:3.0, crescita:2.5},   // cifre 2024 riconciliate (CIFRE-ECONOMICHE.md); PIL € mld
     nome: 'Stati Uniti',
     capitale: 'Washington', sedeGoverno: 'la Casa Bianca',   /* L76-1: i luoghi sono DATI, non testi (i testi universali li leggono con %CAPITALE/%ACAPITALE/%SEDE) */
     colori: { bandiera: ['#3c3b6e', '#ffffff', '#b22234'], accento: '#a9791a' },
     flag: '<svg viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg"><rect width="30" height="20" fill="#b22234"/><g fill="#fff"><rect y="1.54" width="30" height="1.54"/><rect y="4.62" width="30" height="1.54"/><rect y="7.69" width="30" height="1.54"/><rect y="10.77" width="30" height="1.54"/><rect y="13.85" width="30" height="1.54"/><rect y="16.92" width="30" height="1.54"/></g><rect width="12" height="10.77" fill="#3c3b6e"/><g fill="#fff"><circle cx="2" cy="1.8" r=".6"/><circle cx="4.5" cy="1.8" r=".6"/><circle cx="7" cy="1.8" r=".6"/><circle cx="9.5" cy="1.8" r=".6"/><circle cx="3.25" cy="3.6" r=".6"/><circle cx="5.75" cy="3.6" r=".6"/><circle cx="8.25" cy="3.6" r=".6"/><circle cx="2" cy="5.4" r=".6"/><circle cx="4.5" cy="5.4" r=".6"/><circle cx="7" cy="5.4" r=".6"/><circle cx="9.5" cy="5.4" r=".6"/><circle cx="3.25" cy="7.2" r=".6"/><circle cx="5.75" cy="7.2" r=".6"/><circle cx="8.25" cy="7.2" r=".6"/><circle cx="2" cy="9" r=".6"/><circle cx="4.5" cy="9" r=".6"/><circle cx="7" cy="9" r=".6"/><circle cx="9.5" cy="9" r=".6"/></g></svg>',
     nomeArt: 'gli Stati Uniti',
     titoloRuolo: 'Presidente', terminoLocale: 'Stato',
-    mandatoMesi: 48, sistema: 'presidenziale', sfiducia: false,
+    mandatoMesi: 48, sistema: 'presidenziale', mandatiMax: 2, mandatiConsecutivi: false,
     coalizione: false, comeSiVince: 'candidato', cadutaGoverno: false, ue: false, distorsione: 1.0,
     intermedie: [{tipo:'Elezioni di metà mandato', mese:24, tocca:'tutti'}],
     territori: [
@@ -120,14 +120,14 @@ const PAESI = {
     ],
   },
   regnounito: {
-    economia:{pil:3230, debito:104, deficit:-4.8},   // cifre 2024 riconciliate (CIFRE-ECONOMICHE.md); PIL € mld
+    economia:{pil:3230, debito:104, deficit:-4.8, inflazione:2.5, crescita:1.0},   // cifre 2024 riconciliate (CIFRE-ECONOMICHE.md); PIL € mld
     nome: 'Regno Unito',
     capitale: 'Londra', sedeGoverno: 'Downing Street',   /* L76-1: i luoghi sono DATI, non testi (i testi universali li leggono con %CAPITALE/%ACAPITALE/%SEDE) */
     colori: { bandiera: ['#012169', '#ffffff', '#c8102e'], accento: '#a9791a' },
     flag: '<svg viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg"><rect width="30" height="20" fill="#012169"/><path d="M0,0 30,20 M30,0 0,20" stroke="#fff" stroke-width="4"/><path d="M0,0 30,20 M30,0 0,20" stroke="#c8102e" stroke-width="1.7"/><path d="M15,0 V20 M0,10 H30" stroke="#fff" stroke-width="6"/><path d="M15,0 V20 M0,10 H30" stroke="#c8102e" stroke-width="3.4"/></svg>',
     nomeArt: 'il Regno Unito',
     titoloRuolo: 'Primo Ministro',
-    mandatoMesi: 60, sistema: 'parlamentare', sfiducia: true,
+    mandatoMesi: 60, sistema: 'parlamentare',
     coalizione: false, comeSiVince: 'parlamentare', cadutaGoverno: true, ue: false, distorsione: 1.9,
     /* L47-1 - il Regno Unito vota a COLLEGI: la torta-con-esponente non puo invertire voti e seggi, i collegi si.
         resta per compatibilita ma non viene piu letta qui. I due parametri sono tarati sulle misure. */
@@ -172,7 +172,7 @@ const PAESI = {
     ],
   },
   australia: {
-    economia:{pil:1655, debito:50, deficit:-1.3},   // cifre 2024 riconciliate (CIFRE-ECONOMICHE.md); PIL € mld
+    economia:{pil:1655, debito:50, deficit:-1.3, inflazione:3.2, crescita:1.5},   // cifre 2024 riconciliate (CIFRE-ECONOMICHE.md); PIL € mld
     nome: 'Australia',
     capitale: 'Canberra', sedeGoverno: 'la sede del governo',   /* L76-1: i luoghi sono DATI, non testi (i testi universali li leggono con %CAPITALE/%ACAPITALE/%SEDE) */
     allineamento: 'occidentale', terminoLocale: 'Stato',
@@ -180,7 +180,7 @@ const PAESI = {
     flag: '<svg viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg"><rect width="30" height="20" fill="#00247d"/><rect width="13" height="9" fill="#012169"/><path d="M0,0 L13,9 M13,0 L0,9" stroke="#fff" stroke-width="1.6"/><path d="M0,0 L13,9 M13,0 L0,9" stroke="#cf142b" stroke-width="0.8"/><path d="M6.5,0 V9 M0,4.5 H13" stroke="#fff" stroke-width="2.2"/><path d="M6.5,0 V9 M0,4.5 H13" stroke="#cf142b" stroke-width="1.1"/><circle cx="6.5" cy="14.8" r="1.5" fill="#fff"/><circle cx="24" cy="5" r="0.9" fill="#fff"/><circle cx="27.5" cy="9" r="0.9" fill="#fff"/><circle cx="24" cy="13.5" r="0.9" fill="#fff"/><circle cx="20.5" cy="9.5" r="0.9" fill="#fff"/><circle cx="24" cy="9" r="0.55" fill="#fff"/></svg>',
     nomeArt: "l'Australia",
     titoloRuolo: 'Primo Ministro',
-    mandatoMesi: 36, sistema: 'parlamentare', sfiducia: true,
+    mandatoMesi: 36, sistema: 'parlamentare',
     coalizione: true, comeSiVince: 'parlamentare', cadutaGoverno: true, ue: false, distorsione: 1.1,
     intermedie: [{tipo:'Elezioni statali', mese:18, tocca:'regione'}],
     territori: [
@@ -206,7 +206,7 @@ const PAESI = {
     ],
   },
   india: {
-    economia:{pil:3640, debito:82, deficit:-7.8},   // cifre 2024 riconciliate (CIFRE-ECONOMICHE.md); PIL € mld
+    economia:{pil:3640, debito:82, deficit:-7.8, inflazione:5.0, crescita:6.5},   // cifre 2024 riconciliate (CIFRE-ECONOMICHE.md); PIL € mld
     nome: 'India',
     capitale: 'Nuova Delhi', sedeGoverno: 'la sede del governo',   /* L76-1: i luoghi sono DATI, non testi (i testi universali li leggono con %CAPITALE/%ACAPITALE/%SEDE) */
     allineamento: 'nonallineato', potenzaId: 'india', terminoLocale: 'Stato',
@@ -214,7 +214,7 @@ const PAESI = {
     flag: '<svg viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg"><rect width="30" height="20" fill="#fff"/><rect width="30" height="6.67" fill="#ff9933"/><rect y="13.33" width="30" height="6.67" fill="#138808"/><circle cx="15" cy="10" r="2.6" fill="none" stroke="#1a3a8f" stroke-width="0.5"/><path d="M15,7.4 V12.6 M12.4,10 H17.6 M13.16,8.16 L16.84,11.84 M16.84,8.16 L13.16,11.84" stroke="#1a3a8f" stroke-width="0.3"/><circle cx="15" cy="10" r="0.5" fill="#1a3a8f"/></svg>',
     nomeArt: "l'India",
     titoloRuolo: 'Primo Ministro',
-    mandatoMesi: 60, sistema: 'parlamentare', sfiducia: true,
+    mandatoMesi: 60, sistema: 'parlamentare',
     coalizione: true, comeSiVince: 'parlamentare', cadutaGoverno: true, ue: false, distorsione: 1.1,
     intermedie: [{tipo:'Elezioni statali', mese:30, tocca:'regione'}],
     territori: [
@@ -242,7 +242,7 @@ const PAESI = {
     ],
   },
   sudafrica: {
-    economia:{pil:340, debito:75, deficit:-6.2},   // cifre 2024 riconciliate (CIFRE-ECONOMICHE.md); PIL € mld
+    economia:{pil:340, debito:75, deficit:-6.2, inflazione:4.5, crescita:0.8},   // cifre 2024 riconciliate (CIFRE-ECONOMICHE.md); PIL € mld
     nome: 'Sudafrica',
     capitale: 'Pretoria', sedeGoverno: 'la presidenza',   /* L76-1: i luoghi sono DATI, non testi (i testi universali li leggono con %CAPITALE/%ACAPITALE/%SEDE) */
     allineamento: 'nonallineato', terminoLocale: 'Provincia',
@@ -250,7 +250,7 @@ const PAESI = {
     flag: '<svg viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg"><rect width="30" height="20" fill="#e03c31"/><rect y="10" width="30" height="10" fill="#001489"/><rect y="7.5" width="30" height="5" fill="#007749"/><rect y="6.7" width="30" height="0.8" fill="#fff"/><rect y="12.5" width="30" height="0.8" fill="#fff"/><path d="M0,0 L13,10 L0,20 Z" fill="#000"/><path d="M0,0 L13,10 L0,20" fill="none" stroke="#ffb915" stroke-width="0.9"/></svg>',
     nomeArt: 'il Sudafrica',
     titoloRuolo: 'Presidente',
-    mandatoMesi: 60, sistema: 'parlamentare', sfiducia: true,
+    mandatoMesi: 60, sistema: 'parlamentare', mandatiMax: 2, mandatiConsecutivi: false,   /* L87-1: due mandati per Costituzione. È un limite a VITA come per USA e Nigeria, non ai soli consecutivi — e il contatore sale anche qui, benché il Presidente sia eletto dall'Assemblea: misurato, `mandatesWon` arriva a 2 in vent'anni. */
     coalizione: true, comeSiVince: 'parlamentare', cadutaGoverno: true, ue: false, distorsione: 1.0,
     intermedie: [{tipo:'Elezioni provinciali', mese:30, tocca:'regione'}],
     territori: [
@@ -276,7 +276,7 @@ const PAESI = {
     ],
   },
   argentina: {
-    economia:{pil:555, debito:86, deficit:0.3},   // cifre 2024 riconciliate (CIFRE-ECONOMICHE.md); PIL € mld
+    economia:{pil:555, debito:86, deficit:0.3, inflazione:10, inflazioneTetto:10, crescita:0.5},   // cifre 2024 riconciliate (CIFRE-ECONOMICHE.md); PIL € mld
     nome: 'Argentina',
     capitale: 'Buenos Aires', sedeGoverno: 'la Casa Rosada',   /* L76-1: i luoghi sono DATI, non testi (i testi universali li leggono con %CAPITALE/%ACAPITALE/%SEDE) */
     allineamento: 'nonallineato', terminoLocale: 'Provincia',
@@ -284,7 +284,7 @@ const PAESI = {
     flag: '<svg viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg"><rect width="30" height="20" fill="#fff"/><rect width="30" height="6.67" fill="#74acdf"/><rect y="13.33" width="30" height="6.67" fill="#74acdf"/><circle cx="15" cy="10" r="2.1" fill="#f6b40e"/><circle cx="15" cy="10" r="1.3" fill="#fff" stroke="#e0a800" stroke-width="0.4"/></svg>',
     nomeArt: "l'Argentina",
     titoloRuolo: 'Presidente',
-    mandatoMesi: 48, sistema: 'presidenziale', sfiducia: false,
+    mandatoMesi: 48, sistema: 'presidenziale', mandatiMax: 2,
     coalizione: true, comeSiVince: 'candidato', cadutaGoverno: false, ue: false, distorsione: 1.0,
     intermedie: [{tipo:'Elezioni di metà mandato', mese:24, tocca:'tutti'}],
     territori: [
@@ -311,7 +311,7 @@ const PAESI = {
   /* ===== ROSTER A 16 — 8 paesi nuovi. Dati (partiti reali, territori, nomi, allineamento); il campo `mappa` (Natural
      Earth) e le mappe-locali (OSM) si generano dopo: senza `mappa` il territorio degrada a lista testuale. ===== */
   germania: {
-    economia:{pil:4240, debito:64, deficit:-2.8},   // cifre 2024 riconciliate (CIFRE-ECONOMICHE.md); PIL € mld
+    economia:{pil:4240, debito:64, deficit:-2.8, inflazione:2.3, crescita:0.2},   // cifre 2024 riconciliate (CIFRE-ECONOMICHE.md); PIL € mld
     nome: 'Germania',
     capitale: 'Berlino', sedeGoverno: 'la Cancelleria',   /* L76-1: i luoghi sono DATI, non testi (i testi universali li leggono con %CAPITALE/%ACAPITALE/%SEDE) */
     allineamento: 'occidentale', terminoLocale: 'Land',
@@ -319,7 +319,7 @@ const PAESI = {
     flag: '<svg viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg"><rect width="30" height="6.67" fill="#000"/><rect y="6.67" width="30" height="6.67" fill="#dd0000"/><rect y="13.33" width="30" height="6.67" fill="#ffce00"/></svg>',
     nomeArt: 'la Germania',
     titoloRuolo: 'Cancelliere',
-    mandatoMesi: 48, sistema: 'parlamentare', sfiducia: true,
+    mandatoMesi: 48, sistema: 'parlamentare',
     coalizione: true, comeSiVince: 'parlamentare', cadutaGoverno: true, ue: true, distorsione: 1.0,
     intermedie: [{tipo:'Elezioni nei Länder', mese:24, tocca:'regione'}],
     territori: [
@@ -345,7 +345,7 @@ const PAESI = {
     ],
   },
   giappone: {
-    economia:{pil:3800, debito:255, deficit:-2.5},   // cifre 2024 riconciliate (CIFRE-ECONOMICHE.md); PIL € mld
+    economia:{pil:3800, debito:255, deficit:-2.5, inflazione:2.7, crescita:0.5},   // cifre 2024 riconciliate (CIFRE-ECONOMICHE.md); PIL € mld
     nome: 'Giappone',
     capitale: 'Tokyo', sedeGoverno: 'la sede del governo',   /* L76-1: i luoghi sono DATI, non testi (i testi universali li leggono con %CAPITALE/%ACAPITALE/%SEDE) */
     allineamento: 'occidentale', terminoLocale: 'Prefettura',
@@ -353,7 +353,7 @@ const PAESI = {
     flag: '<svg viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg"><rect width="30" height="20" fill="#fff"/><circle cx="15" cy="10" r="6" fill="#bc002d"/></svg>',
     nomeArt: 'il Giappone',
     titoloRuolo: 'Primo Ministro',
-    mandatoMesi: 48, sistema: 'parlamentare', sfiducia: true,
+    mandatoMesi: 48, sistema: 'parlamentare',
     coalizione: true, comeSiVince: 'parlamentare', cadutaGoverno: true, ue: false, distorsione: 1.1,
     intermedie: [{tipo:'Elezioni prefetturali', mese:24, tocca:'regione'}],
     territori: [
@@ -379,7 +379,7 @@ const PAESI = {
     ],
   },
   canada: {
-    economia:{pil:2070, debito:105, deficit:-1.1},   // cifre 2024 riconciliate (CIFRE-ECONOMICHE.md); PIL € mld
+    economia:{pil:2070, debito:105, deficit:-1.1, inflazione:2.4, crescita:1.2},   // cifre 2024 riconciliate (CIFRE-ECONOMICHE.md); PIL € mld
     nome: 'Canada',
     capitale: 'Ottawa', sedeGoverno: 'la sede del governo',   /* L76-1: i luoghi sono DATI, non testi (i testi universali li leggono con %CAPITALE/%ACAPITALE/%SEDE) */
     allineamento: 'occidentale', terminoLocale: 'Provincia',
@@ -387,7 +387,7 @@ const PAESI = {
     flag: '<svg viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg"><rect width="30" height="20" fill="#fff"/><rect width="7.5" height="20" fill="#ff0000"/><rect x="22.5" width="7.5" height="20" fill="#ff0000"/><path d="M15,4.5 L15.9,8 L18.3,7.4 L16.7,9.6 L19.4,10.8 L16.4,11.4 L17,14 L15,12.4 L13,14 L13.6,11.4 L10.6,10.8 L13.3,9.6 L11.7,7.4 L14.1,8 Z" fill="#ff0000"/></svg>',
     nomeArt: 'il Canada',
     titoloRuolo: 'Primo Ministro',
-    mandatoMesi: 48, sistema: 'parlamentare', sfiducia: true,
+    mandatoMesi: 48, sistema: 'parlamentare',
     coalizione: true, comeSiVince: 'parlamentare', cadutaGoverno: true, ue: false, distorsione: 1.2,
     intermedie: [{tipo:'Elezioni provinciali', mese:24, tocca:'regione'}],
     territori: [
@@ -412,7 +412,7 @@ const PAESI = {
     ],
   },
   spagna: {
-    economia:{pil:1525, debito:106, deficit:-3.4},   // cifre 2024 riconciliate (CIFRE-ECONOMICHE.md); PIL € mld
+    economia:{pil:1525, debito:106, deficit:-3.4, inflazione:2.8, crescita:2.5},   // cifre 2024 riconciliate (CIFRE-ECONOMICHE.md); PIL € mld
     nome: 'Spagna',
     capitale: 'Madrid', sedeGoverno: 'la Moncloa',   /* L76-1: i luoghi sono DATI, non testi (i testi universali li leggono con %CAPITALE/%ACAPITALE/%SEDE) */
     allineamento: 'occidentale', terminoLocale: 'Comunità',
@@ -420,7 +420,7 @@ const PAESI = {
     flag: '<svg viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg"><rect width="30" height="20" fill="#f1bf00"/><rect width="30" height="5" fill="#aa151b"/><rect y="15" width="30" height="5" fill="#aa151b"/></svg>',
     nomeArt: 'la Spagna',
     titoloRuolo: 'Presidente del Governo',
-    mandatoMesi: 48, sistema: 'parlamentare', sfiducia: true,
+    mandatoMesi: 48, sistema: 'parlamentare',
     coalizione: true, comeSiVince: 'parlamentare', cadutaGoverno: true, ue: true, distorsione: 1.1,
     intermedie: [{tipo:'Elezioni autonomiche', mese:24, tocca:'regione'}],
     territori: [
@@ -445,10 +445,10 @@ const PAESI = {
       { id:'es_pnv',  nome:'PNV',   orientamento:'regionalista',   base:{ cetomedio:0.5, imprenditori:0.3, pensionati:0.2 }, forza:5,  asse:0 },
     ],
   },
-  /* ===== BLOCCO 2 — i 4 presidenziali (sistema:'presidenziale', comeSiVince:'candidato', sfiducia/cadutaGoverno:false).
+  /* ===== BLOCCO 2 — i 4 presidenziali (sistema:'presidenziale', comeSiVince:'candidato', cadutaGoverno:false).
      Corea del Sud occidentale; Brasile/Messico/Nigeria sedia-swing (allineamento:'nonallineato', come l'India). ===== */
   coreasud: {
-    economia:{pil:1625, debito:57, deficit:-0.6},   // cifre 2024 riconciliate (CIFRE-ECONOMICHE.md); PIL € mld
+    economia:{pil:1625, debito:57, deficit:-0.6, inflazione:2.3, crescita:2.0},   // cifre 2024 riconciliate (CIFRE-ECONOMICHE.md); PIL € mld
     nome: 'Corea del Sud',
     capitale: 'Seul', sedeGoverno: 'la presidenza',   /* L76-1: i luoghi sono DATI, non testi (i testi universali li leggono con %CAPITALE/%ACAPITALE/%SEDE) */
     allineamento: 'occidentale', terminoLocale: 'Provincia',
@@ -456,7 +456,7 @@ const PAESI = {
     flag: '<svg viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg"><rect width="30" height="20" fill="#fff"/><path d="M15,6 A4,4 0 0,1 15,14 A2,2 0 0,1 15,10 A2,2 0 0,0 15,6 Z" fill="#cd2e3a"/><path d="M15,6 A4,4 0 0,0 15,14 A2,2 0 0,0 15,10 A2,2 0 0,1 15,6 Z" fill="#0047a0"/></svg>',
     nomeArt: 'la Corea del Sud',
     titoloRuolo: 'Presidente',
-    mandatoMesi: 60, sistema: 'presidenziale', sfiducia: false,
+    mandatoMesi: 60, sistema: 'presidenziale', mandatiMax: 1, mandatiConsecutivi: false,
     coalizione: false, comeSiVince: 'candidato', cadutaGoverno: false, ue: false, distorsione: 1.0,
     intermedie: [{tipo:'Elezioni locali', mese:30, tocca:'regione'}],
     territori: [
@@ -481,7 +481,7 @@ const PAESI = {
     ],
   },
   brasile: {
-    economia:{pil:2150, debito:87, deficit:-6.3},   // cifre 2024 riconciliate (CIFRE-ECONOMICHE.md); PIL € mld
+    economia:{pil:2150, debito:87, deficit:-6.3, inflazione:4.4, crescita:2.5},   // cifre 2024 riconciliate (CIFRE-ECONOMICHE.md); PIL € mld
     nome: 'Brasile',
     capitale: 'Brasilia', sedeGoverno: 'il Planalto',   /* L76-1: i luoghi sono DATI, non testi (i testi universali li leggono con %CAPITALE/%ACAPITALE/%SEDE) */
     allineamento: 'nonallineato', terminoLocale: 'Stato',
@@ -489,7 +489,7 @@ const PAESI = {
     flag: '<svg viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg"><rect width="30" height="20" fill="#009c3b"/><path d="M15,2.5 L27,10 L15,17.5 L3,10 Z" fill="#ffdf00"/><circle cx="15" cy="10" r="4" fill="#002776"/></svg>',
     nomeArt: 'il Brasile',
     titoloRuolo: 'Presidente',
-    mandatoMesi: 48, sistema: 'presidenziale', sfiducia: false,
+    mandatoMesi: 48, sistema: 'presidenziale', mandatiMax: 2,
     coalizione: true, comeSiVince: 'candidato', cadutaGoverno: false, ue: false, distorsione: 1.0,
     intermedie: [{tipo:'Elezioni statali', mese:24, tocca:'regione'}],
     territori: [
@@ -518,7 +518,7 @@ const PAESI = {
     ],
   },
   messico: {
-    economia:{pil:1865, debito:56, deficit:-5.9},   // cifre 2024 riconciliate (CIFRE-ECONOMICHE.md); PIL € mld
+    economia:{pil:1865, debito:56, deficit:-5.9, inflazione:4.7, crescita:1.5},   // cifre 2024 riconciliate (CIFRE-ECONOMICHE.md); PIL € mld
     nome: 'Messico',
     capitale: 'Città del Messico', sedeGoverno: 'la presidenza',   /* L76-1: i luoghi sono DATI, non testi (i testi universali li leggono con %CAPITALE/%ACAPITALE/%SEDE) */
     allineamento: 'nonallineato', terminoLocale: 'Stato',
@@ -526,7 +526,7 @@ const PAESI = {
     flag: '<svg viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg"><rect width="30" height="20" fill="#fff"/><rect width="10" height="20" fill="#006847"/><rect x="20" width="10" height="20" fill="#ce1126"/><circle cx="15" cy="10" r="1.6" fill="none" stroke="#6b4423" stroke-width="0.8"/></svg>',
     nomeArt: 'il Messico',
     titoloRuolo: 'Presidente',
-    mandatoMesi: 72, sistema: 'presidenziale', sfiducia: false,
+    mandatoMesi: 72, sistema: 'presidenziale', mandatiMax: 1, mandatiConsecutivi: false,
     coalizione: true, comeSiVince: 'candidato', cadutaGoverno: false, ue: false, distorsione: 1.1,
     intermedie: [{tipo:'Elezioni intermedie', mese:36, tocca:'regione'}],
     territori: [
@@ -552,7 +552,7 @@ const PAESI = {
     ],
   },
   nigeria: {
-    economia:{pil:180, debito:47, deficit:-4.6},   // cifre 2024 riconciliate (CIFRE-ECONOMICHE.md); PIL € mld
+    economia:{pil:180, debito:47, deficit:-4.6, inflazione:10, inflazioneTetto:10, crescita:3.0},   // cifre 2024 riconciliate (CIFRE-ECONOMICHE.md); PIL € mld
     nome: 'Nigeria',
     capitale: 'Abuja', sedeGoverno: 'la presidenza',   /* L76-1: i luoghi sono DATI, non testi (i testi universali li leggono con %CAPITALE/%ACAPITALE/%SEDE) */
     allineamento: 'nonallineato', terminoLocale: 'Stato',
@@ -560,7 +560,7 @@ const PAESI = {
     flag: '<svg viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg"><rect width="30" height="20" fill="#fff"/><rect width="10" height="20" fill="#008751"/><rect x="20" width="10" height="20" fill="#008751"/></svg>',
     nomeArt: 'la Nigeria',
     titoloRuolo: 'Presidente',
-    mandatoMesi: 48, sistema: 'presidenziale', sfiducia: false,
+    mandatoMesi: 48, sistema: 'presidenziale', mandatiMax: 2, mandatiConsecutivi: false,
     coalizione: false, comeSiVince: 'candidato', cadutaGoverno: false, ue: false, distorsione: 1.1,
     intermedie: [{tipo:'Elezioni statali', mese:24, tocca:'regione'}],
     territori: [
@@ -667,6 +667,8 @@ const SCENARI = {
        logorioEra: il rate del logorio da incumbency (default presente 0.002) TARATO sul declino storico
        DC 48,5%('48)→40,1%('53) — valore dalla taratura empirica a 9 celle (vedi walk). */
     debtAncora: 31,
+    inflazione: 3,   // L90-1: inflazione media del decennio (italia1950)
+    crescita: 5.5,   // L90-1: crescita reale media del decennio (italia1950)
     logorioEra: 0.012,
     /* Valuta d'epoca: la lira, non l'euro. euro() (ui.js) legge S.valuta e ancóra a «mld di lire» (l'unità del '50 —
        14.900 mld di lire, non l'auto-«tln»). Presente = nessuna valuta = € identico. */
@@ -719,6 +721,8 @@ const SCENARI = {
        dall'ordine del decennio (deficit primari ~4,2% medi, più alti a metà decade) — cifra tarabile, dichiarata. */
     economia: { pil:68000, debito:37, deficit:-3 },
     debtAncora: 37,
+    inflazione: 13,   // L90-1: inflazione media del decennio (italia1970)
+    crescita: 3.5,   // L90-1: crescita reale media del decennio (italia1970)
     logorioEra: 0.012,                          // stesso rate della linea: nessuna misura suggerisce di cambiarlo qui (v. nota nel report)
     valuta: { sym:'L.', mld:'mld lire', mln:'mln lire' },
     quotaSpesa: 0.34,                           // RGS, Libro verde sulla spesa pubblica: ~34% del PIL alla soglia del decennio
@@ -766,6 +770,8 @@ const SCENARI = {
     ],
     economia: { pil:22500, debito:35, deficit:-2 },   // ⚠ PIL e debito ancora provvisori: v. la nota sopra
     debtAncora: 35,                                   // ⚠ provvisorio, segue il debito d'avvio
+    inflazione: 4,   // L90-1: inflazione media del decennio (italia1960)
+    crescita: 5.5,   // L90-1: crescita reale media del decennio (italia1960)
     logorioEra: 0.012,                                // stesso rate della linea
     valuta: { sym:'L.', mld:'mld lire', mln:'mln lire' },
     quotaSpesa: 0.29,                                 // L36-1: SOURCEATO — «dal 29% del PIL nel 1960 al 53,5% nel 1990» (Osservatorio CPI / lavoce)
@@ -816,6 +822,8 @@ const SCENARI = {
     seggi: { uk_lab:50.4, uk_con:47.7, uk_lib:1.9 },
     economia: { pil:13, debito:195, deficit:-4 },     // L75-2: PIL in £ MLD, come il presente (era 13000, in milioni: la riga del bilancio moltiplica per mille)
     debtAncora: 195,
+    inflazione: 4,   // L90-1: inflazione media del decennio (uk1950)
+    crescita: 2.7,   // L90-1: crescita reale media del decennio (uk1950)
     logorioEra: 0.012,
     valuta: { sym:'£', mld:'mld sterline', mln:'mln sterline' },   // il ramo-sterlina di `euro()`, già pronto da L46-1
     quotaSpesa: 0.36,                           // ⚠ la scheda non la dà: 36% è l'ordine della spesa britannica di quegli anni. Da confermare.
@@ -851,6 +859,8 @@ const SCENARI = {
        il seme di gioco: lo stop-go continua, e la sterlina resta la leva di difficoltà (non il debito). */
     economia: { pil:26, debito:110, deficit:-3 },     // L75-2: £ mld
     debtAncora: 110,
+    inflazione: 3.5,   // L90-1: inflazione media del decennio (uk1960)
+    crescita: 3.0,   // L90-1: crescita reale media del decennio (uk1960)
     logorioEra: 0.012,
     valuta: { sym:'£', mld:'mld sterline', mln:'mln sterline' },
     quotaSpesa: 0.38,                           // ⚠ come per il '50 la scheda non la dà: ordine di grandezza, da confermare
@@ -887,6 +897,8 @@ const SCENARI = {
        in cui non scende. Il disavanzo è il seme di gioco. */
     economia: { pil:52, debito:60, deficit:-5 },     // L75-2: £ mld
     debtAncora: 60,
+    inflazione: 13,   // L90-1: inflazione media del decennio (uk1970)
+    crescita: 2.2,   // L90-1: crescita reale media del decennio (uk1970)
     logorioEra: 0.014,                          // il decennio logora di più: scioperi, inflazione, emergenze
     valuta: { sym:'£', mld:'mld sterline', mln:'mln sterline' },
     quotaSpesa: 0.44,                           // ⚠ la scheda non la dà: la spesa britannica sale molto in questo decennio. Da confermare.
@@ -922,6 +934,8 @@ const SCENARI = {
     seggi: { uk_con:54.4, uk_lab:43.2, uk_lib:1.8, uk_snp:0.3, uk_plaid:0.3 },
     economia: { pil:230, debito:47, deficit:-4 },     // L75-2: £ mld
     debtAncora: 40,
+    inflazione: 6,   // L90-1: inflazione media del decennio (uk1980)
+    crescita: 2.7,   // L90-1: crescita reale media del decennio (uk1980)
     logorioEra: 0.012,
     valuta: { sym:'£', mld:'mld sterline', mln:'mln sterline' },
     quotaSpesa: 0.45,                           // ⚠ la scheda non la dà: ~45% a inizio decennio, scende dopo. Da confermare.
@@ -955,6 +969,8 @@ const SCENARI = {
     seggi: { uk_con:59.4, uk_lab:36.2, uk_lib:3.5, uk_snp:0.5, uk_plaid:0.4 },
     economia: { pil:570, debito:35, deficit:-1 },     // L75-2: £ mld
     debtAncora: 38,
+    inflazione: 3,   // L90-1: inflazione media del decennio (uk1990)
+    crescita: 2.5,   // L90-1: crescita reale media del decennio (uk1990)
     logorioEra: 0.013,
     valuta: { sym:'£', mld:'mld sterline', mln:'mln sterline' },
     quotaSpesa: 0.40,
@@ -991,6 +1007,8 @@ const SCENARI = {
     seggi: { uk_lab:65.2, uk_con:26.1, uk_lib:7.2, uk_snp:0.9, uk_plaid:0.6 },
     economia: { pil:1000, debito:35, deficit:1 },
     debtAncora: 38,
+    inflazione: 2,   // L90-1: inflazione media del decennio (uk2000)
+    crescita: 2.0,   // L90-1: crescita reale media del decennio (uk2000)
     logorioEra: 0.012,
     valuta: { sym:'£', mld:'mld sterline', mln:'mln sterline' },
     quotaSpesa: 0.37,
@@ -1060,6 +1078,8 @@ const SCENARI = {
        partita prima del 2006). Cifra tarabile. */
     economia: { pil:2400000, debito:109, deficit:-2 },
     debtAncora: 109,
+    inflazione: 2.3,   // L90-1: inflazione media del decennio (italia2000)
+    crescita: 1.0,   // L90-1: crescita reale media del decennio (italia2000)
     logorioEra: 0.012,
     valuta: { sym:'L.', mld:'mld lire', mln:'mln lire' },   // si PARTE in lire: il changeover arriva in partita al gennaio 2002
     quotaSpesa: 0.46,                           // ⚠ la scheda-2000 non la dà: 46% è l'ordine della spesa italiana a inizio decennio, in continuità col dato '80 sourceato. Da confermare.
@@ -1120,8 +1140,10 @@ const SCENARI = {
        La misura del decennio 2000 l ha smentita: partendo da un debito gia a 95 (il piu alto delle sei porte),
        col −6 il debito sfonda a 189 nel 2001 e **sette cammini su otto vanno in insolvenza prima del 2006** —
        la seconda frana del 2008 la vedeva 1 cammino su 8. Con −3: insolvenze 2/8, frana vista 6/8. */
-    economia: { pil:1358000, debito:95, deficit:-3 },
+    economia: { pil:1358000, debito:95, deficit:-6 },   // L91-1: era -3, ratificato per giocabilita quando l'erosione era solo reale. Con l'erosione nominale la scansione {3,6,9,11} da 6 come seed piu alto che tiene il decennio (108 contro un 109 reale) restando nelle bande delle altre undici porte.
     debtAncora: 95,
+    inflazione: 4,   // L90-1: inflazione media del decennio (italia1990)
+    crescita: 1.5,   // L90-1: crescita reale media del decennio (italia1990)
     logorioEra: 0.012,
     valuta: { sym:'L.', mld:'mld lire', mln:'mln lire' },
     /* SOURCEATA, stessa serie di L36-1: «la spesa pubblica passò dal 29% del PIL del 1960 al 53,5% del 1990». */
@@ -1170,6 +1192,8 @@ const SCENARI = {
        Vale il principio di L28-1: **la tabella serve ai testi, il seed serve al gioco.** */
     economia: { pil:394000, debito:57, deficit:-6 },
     debtAncora: 57,
+    inflazione: 11,   // L90-1: inflazione media del decennio (italia1980)
+    crescita: 2.4,   // L90-1: crescita reale media del decennio (italia1980)
     logorioEra: 0.012,
     valuta: { sym:'L.', mld:'mld lire', mln:'mln lire' },
     /* L36-1 — SOURCEATO: 46,3% del PIL nel 1980 (serie conti pubblici 1980-2025). Era 0,34, ereditato dal '70:
@@ -2335,6 +2359,215 @@ const BEAT_LEGGERI = [
  {id:'es_p_b_cammino', era:'contemporanea', paesi:['spagna'], registro:'leggero', kick:'Il paese', t:'I pellegrini sulla strada', text:'Ogni anno centinaia di migliaia di persone attraversano a piedi il nord del paese verso una cattedrale, con una conchiglia sullo zaino. Non tutti credono; tutti arrivano.', ch:[
    {l:'Ne fai un tratto, un fine settimana', e:'Le foto girano, e per una volta sono belle', f:function(){}},
    {l:'Un messaggio ai pellegrini, e basta', e:'Sobrio', f:function(){}}]},
+ /* ===== L83-1 · STATI UNITI, sei beat leggeri (scheda §C). ===== */
+ {id:'us_p_b_superbowl', era:'contemporanea', paesi:['usa'], registro:'leggero', cond:()=>S.month===2, kick:'Il paese', t:'La domenica di febbraio', text:'Una domenica sera il paese guarda la stessa partita, le stesse pubblicità e lo stesso concerto all\'intervallo. È il rito più condiviso che l\'America abbia, e il Presidente concede l\'intervista di tradizione.', ch:[
+   {l:'Concedi l\'intervista', e:'Venti minuti visti da cento milioni', f:function(){}},
+   {l:'Guardi la partita e basta', e:'Qualcuno lo nota, in bene', f:function(){}}]},
+ {id:'us_p_b_quattro', era:'contemporanea', paesi:['usa'], registro:'leggero', cond:()=>S.month===7, kick:'Il paese', t:'I fuochi sul fiume', text:'Il quattro luglio: barbecue in ogni cortile, parate in ogni paese, fuochi d\'artificio sul fiume della capitale. Per un giorno tutti sono d\'accordo su qualcosa.', ch:[
+   {l:'Guardi i fuochi dal balcone della residenza', e:'La foto dell\'anno', f:function(){}},
+   {l:'Un barbecue con le famiglie dei militari', e:'Sobrio, e giusto', f:function(){}}]},
+ {id:'us_p_b_halloween', era:'contemporanea', paesi:['usa'], registro:'leggero', cond:()=>S.month===10, kick:'Il paese', t:'I bambini alla porta', text:'La sera del trentuno ottobre i bambini dei dipendenti bussano alla porta della residenza in costume, e la residenza distribuisce caramelle. Le fotografie girano più di qualunque legge.', ch:[
+   {l:'Distribuisci le caramelle di persona', e:'Il travestimento migliore è il tuo', f:function(){}},
+   {l:'Deleghi', e:'I bambini non se ne accorgono', f:function(){}}]},
+ {id:'us_p_b_tacchino', era:'contemporanea', paesi:['usa'], registro:'leggero', cond:()=>S.month===11, kick:'Il paese', t:'Il tacchino graziato', text:'Prima della festa di novembre due tacchini arrivano nel giardino della residenza e il Presidente ne grazia uno, con un discorso pieno di giochi di parole. È la tradizione più assurda dell\'ufficio più potente del mondo, e nessuno la toglierebbe.', ch:[
+   {l:'Grazia il tacchino, con battute', e:'Le battute sono la parte difficile', f:function(){}},
+   {l:'Grazia il tacchino, senza battute', e:'Ti accusano di non avere umorismo', f:function(){}}]},
+ {id:'us_p_b_lancio', era:'contemporanea', paesi:['usa'], registro:'leggero', kick:'Il paese', t:'Il primo lancio', text:'Ti chiedono di lanciare la prima palla della stagione di baseball. Se la tiri bene nessuno lo ricorda; se la tiri male lo ricordano per sempre.', ch:[
+   {l:'Lanci', e:'Il rischio è il gioco', f:function(){}},
+   {l:'Mandi il vicepresidente', e:'Il rischio è suo', f:function(){}}]},
+ {id:'us_p_b_diner', era:'contemporanea', paesi:['usa'], registro:'leggero', kick:'Il paese', t:'Il diner dell\'Iowa', text:'Un diner in un paese di tremila abitanti, torta di mele e caffè, e sei giornalisti per ogni cliente. La politica americana si fa così da un secolo, e la torta è buona davvero.', ch:[
+   {l:'Una fetta di torta, e ascolti', e:'La foto giusta', f:function(){}},
+   {l:'Paghi il conto a tutto il locale', e:'Generoso, e qualcuno lo chiama compravendita', f:function(){}}]},
+ /* ===== L83-1 · CANADA, sei beat leggeri (scheda §C). ===== */
+ {id:'ca_p_b_coppa', era:'contemporanea', paesi:['canada'], registro:'leggero', cond:()=>S.month===6, kick:'Il paese', t:'La coppa che non torna', text:'Il paese ha inventato l\'hockey e la coppa più famosa dello sport non torna a casa da più di trent\'anni: la vincono squadre di città dove non nevica. Una squadra canadese è in finale, e il paese trattiene il fiato.', ch:[
+   {l:'Vai alla partita con la maglia', e:'Se perdono è colpa tua', f:function(){}},
+   {l:'Guardi da casa, come tutti', e:'Come tutti', f:function(){}}]},
+ {id:'ca_p_b_primo', era:'contemporanea', paesi:['canada'], registro:'leggero', cond:()=>S.month===7, kick:'Il paese', t:'La festa sulla collina', text:'Il primo luglio il paese si veste di rosso e bianco e la collina del Parlamento si riempie. Un concerto, i fuochi, e un discorso in due lingue che deve dire qualcosa a un paese che non è d\'accordo su cosa festeggia.', ch:[
+   {l:'Un discorso breve, in due lingue', e:'La brevità è il regalo', f:function(){}},
+   {l:'Ti mescoli alla folla', e:'La scorta suda, le foto sono buone', f:function(){}}]},
+ {id:'ca_p_b_sciroppo', era:'contemporanea', paesi:['canada'], registro:'leggero', cond:()=>S.month===3, kick:'Il paese', t:'La stagione dello sciroppo', text:'A marzo la linfa degli aceri comincia a scorrere e le capanne del Québec riaprono: sciroppo sulla neve, fisarmoniche, e la riserva strategica — esiste davvero — che tiene il prezzo. Un Primo Ministro ci va, e mangia.', ch:[
+   {l:'Vai in una capanna, e mangi', e:'Le foto girano per una settimana', f:function(){}},
+   {l:'Un comunicato sulla stagione', e:'Nessuno legge i comunicati sullo sciroppo', f:function(){}}]},
+ {id:'ca_p_b_caffe', era:'contemporanea', paesi:['canada'], registro:'leggero', kick:'Il paese', t:'Il caffè della catena', text:'La catena di caffè con il nome di un giocatore di hockey è in ogni paese, e ordinare lì è il gesto più canadese che esista. Ti fotografano con il bicchiere in mano, e il paese discute se lo bevi davvero.', ch:[
+   {l:'Lo bevi, e dici come lo prendi', e:'«Doppio doppio», e sei uno di loro', f:function(){}},
+   {l:'Preferisci il caffè di un torrefattore locale', e:'Sofisticato, dicono', f:function(){}}]},
+ {id:'ca_p_b_alce', era:'contemporanea', paesi:['canada'], registro:'leggero', kick:'Il paese', t:'L\'alce sull\'autostrada', text:'Il corteo si ferma su un\'autostrada del Nord perché un alce è in mezzo alla carreggiata e non ha nessuna intenzione di spostarsi. Venti minuti, e la scorta impara chi comanda.', ch:[
+   {l:'Scendi e lo guardi', e:'La foto migliore del mandato', f:function(){}},
+   {l:'Aspetti in macchina', e:'L\'alce vince comunque', f:function(){}}]},
+ {id:'ca_p_b_scuse', era:'contemporanea', paesi:['canada'], registro:'leggero', kick:'Il paese', t:'Scusa', text:'Ti urtano in un corridoio e sei tu a chiedere scusa, per riflesso. La stampa straniera ci fa un articolo: il paese che si scusa anche quando ha ragione. Il paese lo legge e si scusa per l\'articolo.', ch:[
+   {l:'Ridi, e ti scusi per aver riso', e:'Perfetto', f:function(){}},
+   {l:'Nessun commento', e:'Scusa', f:function(){}}]},
+ /* ===== L83-1 · AUSTRALIA, sei beat leggeri (scheda §C). ===== */
+ {id:'au_p_b_cup', era:'contemporanea', paesi:['australia'], registro:'leggero', cond:()=>S.month===11, kick:'Il paese', t:'La corsa che ferma la nazione', text:'Il primo martedì di novembre, alle tre del pomeriggio, il paese si ferma per tre minuti a guardare una corsa di cavalli. Gli uffici organizzano lotterie, si porta il cappello, e per un giorno non si parla di politica — salvo chiedere al Primo Ministro su chi ha puntato.', ch:[
+   {l:'Dici su chi hai puntato', e:'Se vince, sei un genio', f:function(){}},
+   {l:'«Non scommetto»', e:'Il paese ti guarda strano', f:function(){}}]},
+ {id:'au_p_b_finale', era:'contemporanea', paesi:['australia'], registro:'leggero', cond:()=>S.month===9, kick:'Il paese', t:'La finale di settembre', text:'A settembre una città del sud si ferma per la finale del suo football, con regole che il resto del mondo non capisce e novantamila persone che le capiscono benissimo. Il Primo Ministro è in tribuna, e deve sapere per chi tifare.', ch:[
+   {l:'Tifi per la squadra del tuo collegio', e:'Coerente', f:function(){}},
+   {l:'Tifi per chi è sotto', e:'Il paese ama chi è sotto', f:function(){}}]},
+ {id:'au_p_b_fuochi', era:'contemporanea', paesi:['australia'], registro:'leggero', cond:()=>S.month===12, kick:'Il paese', t:'I fuochi sul porto', text:'A mezzanotte del trentuno il porto di Sydney esplode di fuochi e il mondo guarda: è la prima grande città a entrare nell\'anno nuovo. In piena estate, con il ponte illuminato, il paese si sente al centro di qualcosa.', ch:[
+   {l:'Guardi i fuochi dal porto', e:'La foto dell\'anno, per definizione', f:function(){}},
+   {l:'Sei a Canberra, che dorme', e:'La capitale è così', f:function(){}}]},
+ {id:'au_p_b_cricket', era:'contemporanea', paesi:['australia'], registro:'leggero', cond:()=>S.month===1, kick:'Il paese', t:'Cinque giorni di cricket', text:'Una partita che dura cinque giorni, in piena estate, contro la vecchia madrepatria. Il paese la segue alla radio in spiaggia e in ufficio, e chi governa fa finta di capire il regolamento anche se lo capisce davvero.', ch:[
+   {l:'Un pomeriggio in tribuna', e:'Un cappello, una birra, cinque ore', f:function(){}},
+   {l:'Un messaggio alla squadra', e:'Breve, come si deve', f:function(){}}]},
+ {id:'au_p_b_salsiccia', era:'contemporanea', paesi:['australia'], registro:'leggero', kick:'Il paese', t:'La salsiccia della democrazia', text:'Ai seggi elettorali le scuole vendono salsicce alla griglia nel pane per raccogliere fondi, e c\'è una mappa nazionale che dice dove trovarle. Il voto è obbligatorio, la salsiccia no, ma nessuno se la perde.', ch:[
+   {l:'Mangi la salsiccia davanti alle telecamere', e:'Attento a come la mordi: c\'è un precedente', f:function(){}},
+   {l:'La compri e la offri a un elettore', e:'Diplomazia', f:function(){}}]},
+ {id:'au_p_b_gazza', era:'contemporanea', paesi:['australia'], registro:'leggero', kick:'Il paese', t:'La stagione delle gazze', text:'In primavera le gazze australiane difendono il nido buttandosi in picchiata su chiunque passi, e il paese gira con i caschi da bicicletta pieni di fascette di plastica. Una ti ha preso in testa davanti ai fotografi.', ch:[
+   {l:'Ridi, e mostri il graffio', e:'Umano', f:function(){}},
+   {l:'Fai finta di niente', e:'Il video gira lo stesso', f:function(){}}]},
+ /* ===== L85-1 · GIAPPONE, sei beat leggeri (scheda §C). ===== */
+ {id:'jp_p_b_ciliegi', era:'contemporanea', paesi:['giappone'], registro:'leggero', cond:()=>S.month===4, kick:'Il paese', t:'La previsione dei fiori', text:'Il telegiornale annuncia il giorno esatto in cui i ciliegi fioriranno in ogni città, e il paese si organizza per sedersi sotto gli alberi a bere. Una settimana, poi i petali cadono; è il senso della cosa.', ch:[
+   {l:'Un picnic sotto i ciliegi, con lo staff', e:'La foto più bella dell\'anno', f:function(){}},
+   {l:'Li guardi dalla finestra dell\'ufficio', e:'Come metà del paese', f:function(){}}]},
+ {id:'jp_p_b_koshien', era:'contemporanea', paesi:['giappone'], registro:'leggero', cond:()=>S.month===8, kick:'Il paese', t:'I liceali allo stadio', text:'Ad agosto il torneo di baseball dei licei riempie uno stadio e le televisioni: ragazzi di diciassette anni che piangono e raccolgono la terra del campo in un sacchetto. Il paese si commuove più che per i professionisti.', ch:[
+   {l:'Vai alla finale', e:'Il caldo è tremendo, il gesto giusto', f:function(){}},
+   {l:'Un messaggio ai finalisti', e:'Breve, come si deve', f:function(){}}]},
+ {id:'jp_p_b_capodanno', era:'contemporanea', paesi:['giappone'], registro:'leggero', cond:()=>S.month===1, kick:'Il paese', t:'La prima visita', text:'Nei primi giorni dell\'anno il paese va al santuario, compra un biglietto della fortuna e mangia dolci di riso che ogni anno soffocano qualcuno. Il Primo Ministro fa la sua visita, e i giornali guardano a quale santuario.', ch:[
+   {l:'Un santuario di quartiere, senza clamore', e:'Discreto', f:function(){}},
+   {l:'Il grande santuario, con le telecamere', e:'La visita diventa notizia', f:function(){}}]},
+ {id:'jp_p_b_puntuale', era:'contemporanea', paesi:['giappone'], registro:'leggero', kick:'Il paese', t:'Le scuse per venti secondi', text:'Una compagnia ferroviaria si scusa pubblicamente perché un treno è partito venti secondi in anticipo. La stampa straniera ride; i pendolari trovano le scuse insufficienti.', ch:[
+   {l:'Elogi la compagnia per la serietà', e:'Il paese annuisce', f:function(){}},
+   {l:'Ci ridi sopra', e:'La stampa straniera ti cita; quella nazionale no', f:function(){}}]},
+ {id:'jp_p_b_sumo', era:'contemporanea', paesi:['giappone'], registro:'leggero', kick:'Il paese', t:'Il torneo', text:'Quindici giorni di lotta, un rito più antico del Parlamento, e per la prima volta da anni il campione supremo è nato nel paese. Il Primo Ministro consegna il trofeo, che pesa quanto un bambino.', ch:[
+   {l:'Consegni il trofeo di persona', e:'Attento alla schiena', f:function(){}},
+   {l:'Lo consegna un ministro', e:'La tradizione prevede te', f:function(){}}]},
+ {id:'jp_p_b_konbini', era:'contemporanea', paesi:['giappone'], registro:'leggero', kick:'Il paese', t:'Il negozio all\'angolo', text:'Aperto ventiquattr\'ore, vende di tutto, paga le bollette e ritira i pacchi: il minimarket è l\'infrastruttura più affidabile del paese. Ti fotografano mentre compri un onigiri alle undici di sera, e il paese ti trova umano.', ch:[
+   {l:'Compri l\'onigiri e lo mangi lì', e:'Umano', f:function(){}},
+   {l:'Fai comprare all\'autista', e:'Lo notano', f:function(){}}]},
+ /* ===== L85-1 · COREA DEL SUD, sei beat leggeri (scheda §C). ===== */
+ {id:'kr_p_b_esame', era:'contemporanea', paesi:['coreasud'], registro:'leggero', cond:()=>S.month===11, kick:'Il paese', t:'Il giorno dell\'esame', text:'Un giovedì di novembre mezzo milione di ragazzi sostiene l\'esame che decide la loro università. Gli uffici aprono tardi per liberare le strade, la polizia scorta i ritardatari in moto, e gli aerei non decollano durante la prova di ascolto. Il paese trattiene il fiato per un giorno.', ch:[
+   {l:'Un messaggio ai candidati, la sera prima', e:'Tutti lo fanno; conta come lo dici', f:function(){}},
+   {l:'Vai a un cancello, alle sette di mattina', e:'I genitori applaudono, i ragazzi non ti vedono', f:function(){}}]},
+ {id:'kr_p_b_chuseok', era:'contemporanea', paesi:['coreasud'], registro:'leggero', cond:()=>S.month===9||S.month===10, kick:'Il paese', t:'Le autostrade piene', text:'Per la festa del raccolto il paese torna al paese: le autostrade diventano parcheggi, i treni sono esauriti da settimane, e ogni famiglia prepara gli stessi dolci di riso. Il Presidente manda regali ai cittadini meritevoli, e i giornali guardano cosa c\'è nella scatola.', ch:[
+   {l:'Una scatola di prodotti delle province', e:'Le province ringraziano', f:function(){}},
+   {l:'Niente scatola: una donazione', e:'Sobrio, e qualcuno voleva la scatola', f:function(){}}]},
+ {id:'kr_p_b_ciliegi', era:'contemporanea', paesi:['coreasud'], registro:'leggero', cond:()=>S.month===4, kick:'Il paese', t:'I ciliegi del sud', text:'In una città portuale del sud fioriscono trecentomila ciliegi in una settimana, e milioni di persone vanno a vederli. È anche una città di marina, e i ciliegi li piantò chi non si vuole nominare. Il paese ha deciso di guardare i fiori.', ch:[
+   {l:'Vai a vederli', e:'La foto migliore di aprile', f:function(){}},
+   {l:'Un post sui ciliegi', e:'Come tutti', f:function(){}}]},
+ {id:'kr_p_b_kimchi', era:'contemporanea', paesi:['coreasud'], registro:'leggero', kick:'Il paese', t:'Il cavolo che costa', text:'Il prezzo del cavolo è salito, e il paese lo prende come un attentato: senza cavolo non c\'è il piatto che accompagna ogni pasto. Il governo apre le riserve, i giornali titolano, e il Presidente viene fotografato mentre lo prepara con le famiglie.', ch:[
+   {l:'Ti metti i guanti e lo prepari', e:'Le mani rosse, le foto buone', f:function(){}},
+   {l:'Un comunicato sul prezzo del cavolo', e:'Il paese preferiva i guanti', f:function(){}}]},
+ {id:'kr_p_b_concerto', era:'contemporanea', paesi:['coreasud'], registro:'leggero', kick:'Il paese', t:'Il gruppo che riempie gli stadi', text:'Un gruppo del paese riempie stadi in tre continenti e vale più di qualche ministero. Ti chiedono quale sia la tua canzone preferita, e la risposta sbagliata è peggio di una legge sbagliata.', ch:[
+   {l:'Rispondi, con il titolo giusto', e:'I fan controllano', f:function(){}},
+   {l:'«Le ascolto tutte»', e:'Nessuno ci crede', f:function(){}}]},
+ {id:'kr_p_b_baseball', era:'contemporanea', paesi:['coreasud'], registro:'leggero', kick:'Il paese', t:'Il primo lancio', text:'Il campionato di baseball apre e ti chiedono il primo lancio. Qui gli stadi cantano per nove riprese e le mazze si lanciano in aria: se il tuo lancio arriva al ricevitore sei un eroe, se rimbalza sei un video.', ch:[
+   {l:'Lanci', e:'Il rischio è il gioco', f:function(){}},
+   {l:'Lancia il Primo Ministro', e:'Il video è suo', f:function(){}}]},
+ /* ===== L85-1 · INDIA, sei beat leggeri (scheda §C). ===== */
+ {id:'in_p_b_holi', era:'contemporanea', paesi:['india'], registro:'leggero', cond:()=>S.month===3, kick:'Il paese', t:'I colori', text:'Per un giorno il paese si lancia polveri colorate e nessuno è più riconoscibile: ministri, autisti, bambini. Ti fotografano con la faccia rosa e verde, ed è l\'immagine più umana che avrai in tutto il mandato.', ch:[
+   {l:'Ti fai colorare', e:'La faccia verde, le foto perfette', f:function(){}},
+   {l:'Eviti la folla', e:'Ti colorano comunque', f:function(){}}]},
+ {id:'in_p_b_cricket', era:'contemporanea', paesi:['india'], registro:'leggero', cond:()=>S.month===4||S.month===5, kick:'Il paese', t:'La lega delle città', text:'Due mesi di partite serali fra squadre di città, con luci, danzatrici e più spettatori di qualunque campionato al mondo. Il paese si ferma alle otto di sera, e la politica sa che non deve parlare durante la partita.', ch:[
+   {l:'Vai a una partita, nella tua città', e:'Il settore giusto, la sciarpa giusta', f:function(){}},
+   {l:'Guardi da casa', e:'Come un miliardo di persone', f:function(){}}]},
+ {id:'in_p_b_diwali', era:'contemporanea', paesi:['india'], registro:'leggero', cond:()=>S.month===10||S.month===11, kick:'Il paese', t:'Le luci', text:'La festa delle luci accende ogni casa e ogni balcone, e i fuochi d\'artificio rendono l\'aria della capitale irrespirabile per tre giorni. Il governo li vieta ogni anno e ogni anno esplodono. Il dolce è obbligatorio.', ch:[
+   {l:'Accendi le lampade con lo staff, e mangi il dolce', e:'La foto giusta', f:function(){}},
+   {l:'Un messaggio, e nessun fuoco', e:'Coerente, e qualcuno voleva il fuoco', f:function(){}}]},
+ {id:'in_p_b_monsone', era:'contemporanea', paesi:['india'], registro:'leggero', cond:()=>S.month===6, kick:'Il paese', t:'Il monsone arriva', text:'L\'ufficio meteorologico annuncia che il monsone ha toccato la costa sud, e il paese esulta come per una vittoria: dal monsone dipendono i raccolti, i prezzi, e l\'umore di un miliardo di persone. Fra un mese ci si lamenterà della pioggia.', ch:[
+   {l:'Esci sotto la prima pioggia, in foto', e:'Bagnato e amato', f:function(){}},
+   {l:'Un comunicato sui raccolti', e:'Corretto, e asciutto', f:function(){}}]},
+ {id:'in_p_b_chai', era:'contemporanea', paesi:['india'], registro:'leggero', kick:'Il paese', t:'Il tè al banchetto', text:'Ti fermi a un banchetto di strada e bevi un tè al latte in un bicchierino di terracotta, come milioni di persone ogni mattina. Il venditore non ti riconosce; il paese sì, il giorno dopo.', ch:[
+   {l:'Bevi, paghi, e chiacchieri', e:'Il venditore diventa famoso', f:function(){}},
+   {l:'Fai portare il tè in macchina', e:'Lo notano', f:function(){}}]},
+ {id:'in_p_b_film', era:'contemporanea', paesi:['india'], registro:'leggero', kick:'Il paese', t:'Il film del venerdì', text:'Il paese produce più film di chiunque, e il venerdì una città intera va al cinema per tre ore di canzoni, lacrime e un eroe che non perde mai. Il film di questa settimana ha un politico cattivo che somiglia a qualcuno, e i giornali chiedono a chi.', ch:[
+   {l:'Vai a vederlo, e ridi nel punto giusto', e:'Il pubblico ti applaude più dell\'eroe', f:function(){}},
+   {l:'«Non ho tempo per il cinema»', e:'In questo paese è una frase grave', f:function(){}}]},
+ /* ===== L86-3 · BRASILE, sei beat leggeri (scheda §C). ===== */
+ {id:'br_p_b_carnevale', era:'contemporanea', paesi:['brasile'], registro:'leggero', cond:()=>S.month===2||S.month===3, kick:'Il paese', t:'I quattro giorni', text:'Il paese si ferma per quattro giorni e balla: le scuole di samba sfilano tutta la notte, i blocchi di strada riempiono ogni città. Un Presidente in tribuna è tradizione; un Presidente che balla è un video.', ch:[
+   {l:'In tribuna, con un sorriso', e:'Tradizione', f:function(){}},
+   {l:'Balli', e:'Il video dura più del mandato', f:function(){}}]},
+ {id:'br_p_b_giugno', era:'contemporanea', paesi:['brasile'], registro:'leggero', cond:()=>S.month===6, kick:'Il paese', t:'Le feste di giugno', text:'A giugno il Nordest accende i falò, balla in coppia con il cappello di paglia e mangia mais in tutte le forme. È la festa più grande del paese dopo quella di febbraio, e la più contadina. Ti vestono da campagnolo, e non puoi dire di no.', ch:[
+   {l:'Cappello di paglia e balli', e:'Il Nordest ti adotta', f:function(){}},
+   {l:'Solo il mais', e:'Sobrio, per una festa che non lo è', f:function(){}}]},
+ {id:'br_p_b_reveillon', era:'contemporanea', paesi:['brasile'], registro:'leggero', cond:()=>S.month===12, kick:'Il paese', t:'Vestiti di bianco', text:'A capodanno il paese si veste di bianco, va in spiaggia e salta sette onde per la fortuna. Una città sola raduna due milioni di persone sulla sabbia. Un Presidente in bianco sulla spiaggia è la foto che il paese si aspetta.', ch:[
+   {l:'Sette onde, in bianco', e:'La foto', f:function(){}},
+   {l:'Un messaggio dalla capitale', e:'La capitale a capodanno è vuota', f:function(){}}]},
+ {id:'br_p_b_selecao', era:'contemporanea', paesi:['brasile'], registro:'leggero', kick:'Il paese', t:'La maglia gialla', text:'La nazionale gioca, e il paese chiude gli uffici. La maglia gialla è di tutti e da qualche anno anche di una parte: ti chiedono se la indossi, e la risposta è politica qualunque cosa dici.', ch:[
+   {l:'La indossi: è di tutti', e:'Metà del paese annuisce', f:function(){}},
+   {l:'Guardi la partita in giacca', e:'L\'altra metà annuisce', f:function(){}}]},
+ {id:'br_p_b_churrasco', era:'contemporanea', paesi:['brasile'], registro:'leggero', kick:'Il paese', t:'La grigliata della domenica', text:'La domenica il paese griglia carne su ogni terrazza, con la birra ghiacciata e la musica del vicino. Il prezzo della carne è un indicatore politico, e un Presidente che dice che è salito perché la gente mangia di più ha già perso la domenica.', ch:[
+   {l:'Grigli, con i vicini', e:'La domenica giusta', f:function(){}},
+   {l:'Un commento sul prezzo della carne', e:'Attento alle parole', f:function(){}}]},
+ {id:'br_p_b_novela', era:'contemporanea', paesi:['brasile'], registro:'leggero', kick:'Il paese', t:'Le nove di sera', text:'Alle nove il paese guarda la stessa telenovela, da cinquant\'anni. Il cattivo di quest\'anno è un politico che somiglia a qualcuno, e il paese chiede a chi. Il giorno dopo la puntata la politica si adegua alla trama.', ch:[
+   {l:'La guardi, e lo dici', e:'Umano', f:function(){}},
+   {l:'«Non guardo la televisione»', e:'In questo paese è una frase grave', f:function(){}}]},
+ /* ===== L86-3 · ARGENTINA, sei beat leggeri (scheda §C). ===== */
+ {id:'ar_p_b_scuola', era:'contemporanea', paesi:['argentina'], registro:'leggero', cond:()=>S.month===3, kick:'Il paese', t:'Il primo giorno', text:'A marzo, finita l\'estate, i bambini tornano a scuola con il grembiule bianco, uguale per tutti da un secolo. È l\'immagine del paese che voleva essere uguale, e un Presidente in un cortile di scuola con i grembiuli è la foto che il paese si aspetta.', ch:[
+   {l:'Un cortile di scuola, con i grembiuli', e:'La foto', f:function(){}},
+   {l:'Un messaggio agli studenti', e:'Nessuno lo legge, i grembiuli sì', f:function(){}}]},
+ {id:'ar_p_b_inverno', era:'contemporanea', paesi:['argentina'], registro:'leggero', cond:()=>S.month===7, kick:'Il paese', t:'Il nove luglio', text:'La festa dell\'indipendenza cade nel cuore dell\'inverno, e si celebra con una cioccolata calda e frittelle di formaggio. Un Presidente al Nord, nella casa dove fu firmata l\'indipendenza, con una tazza in mano.', ch:[
+   {l:'Cioccolata e frittelle, in foto', e:'Il paese apprezza chi mangia', f:function(){}},
+   {l:'Solo il discorso', e:'Sobrio, e freddo', f:function(){}}]},
+ {id:'ar_p_b_natale', era:'contemporanea', paesi:['argentina'], registro:'leggero', cond:()=>S.month===12, kick:'Il paese', t:'Il Natale a trenta gradi', text:'Il Natale cade in piena estate: si cena in giardino, a mezzanotte partono i fuochi e il panettone si mangia con il gelato. Il paese è fatto di immigrati, e a tavola ci sono cinque cucine.', ch:[
+   {l:'Cena in giardino, con tutte le cucine', e:'Il paese a tavola', f:function(){}},
+   {l:'Un messaggio, e la famiglia', e:'Come si deve', f:function(){}}]},
+ {id:'ar_p_b_mate', era:'contemporanea', paesi:['argentina'], registro:'leggero', kick:'Il paese', t:'Il mate', text:'Ti offrono il mate in una riunione e devi berlo tutto e restituirlo senza dire grazie — grazie vuol dire basta. Il paese guarda come lo tieni, e un Presidente che lo beve male è una notizia.', ch:[
+   {l:'Lo bevi come si deve', e:'Il paese annuisce', f:function(){}},
+   {l:'Dici grazie', e:'Hai detto basta, e lo sanno tutti', f:function(){}}]},
+ {id:'ar_p_b_superclasico', era:'contemporanea', paesi:['argentina'], registro:'leggero', kick:'Il paese', t:'Le due squadre', text:'Le due squadre della capitale si affrontano e il paese si divide come non fa per nessuna elezione. Ti chiedono per chi tifi: qualunque risposta perde metà del paese, e non rispondere perde tutto.', ch:[
+   {l:'Dici la verità', e:'Metà del paese ti ama', f:function(){}},
+   {l:'«Tifo per la nazionale»', e:'Nessuno ci crede, tutti lo apprezzano', f:function(){}}]},
+ {id:'ar_p_b_asado', era:'contemporanea', paesi:['argentina'], registro:'leggero', kick:'Il paese', t:'La domenica alla griglia', text:'La domenica il paese accende la griglia, e chi la governa è chi taglia la carne. Ti invitano a un asado in una provincia e la domanda è una sola: se sei tu a fare il fuoco.', ch:[
+   {l:'Fai il fuoco', e:'La domenica giusta', f:function(){}},
+   {l:'Lasci fare al padrone di casa', e:'Educato, e lo notano', f:function(){}}]},
+ /* ===== L86-3 · MESSICO, sei beat leggeri (scheda §C). ===== */
+ {id:'mx_p_b_grito', era:'contemporanea', paesi:['messico'], registro:'leggero', cond:()=>S.month===9, kick:'Il paese', t:'Il grido', text:'La notte del quindici settembre il Presidente esce sul balcone del palazzo, suona la campana e grida i nomi degli eroi davanti a una piazza piena: «Viva il Messico!». È il momento più teatrale dell\'ufficio, e il paese conta quanti «viva» hai gridato.', ch:[
+   {l:'Gridi, con tutta la voce', e:'La piazza risponde', f:function(){}},
+   {l:'Un grido sobrio', e:'La piazza lo nota', f:function(){}}]},
+ {id:'mx_p_b_morti', era:'contemporanea', paesi:['messico'], registro:'leggero', cond:()=>S.month===11, kick:'Il paese', t:'Gli altari', text:'All\'inizio di novembre le case allestiscono un altare per i morti con fiori arancioni, pane dolce e le foto dei nonni; nella capitale una sfilata di scheletri che il cinema ha inventato e il paese ha adottato. Ti chiedono chi c\'è sul tuo altare.', ch:[
+   {l:'Allestisci l\'altare, con le foto di famiglia', e:'Umano', f:function(){}},
+   {l:'Vai alla sfilata', e:'Le foto girano', f:function(){}}]},
+ {id:'mx_p_b_guadalupe', era:'contemporanea', paesi:['messico'], registro:'leggero', cond:()=>S.month===12, kick:'Il paese', t:'Il dodici dicembre', text:'Milioni di pellegrini arrivano a piedi, in bicicletta e in ginocchio alla basilica della capitale per la festa della patrona. Lo Stato è laico per Costituzione; il paese no. Un Presidente che ci va fa notizia; uno che non ci va anche.', ch:[
+   {l:'Un saluto ai pellegrini, senza entrare', e:'Il compromesso laico', f:function(){}},
+   {l:'Nessun commento', e:'Coerente, e il paese sbuffa', f:function(){}}]},
+ {id:'mx_p_b_tacos', era:'contemporanea', paesi:['messico'], registro:'leggero', kick:'Il paese', t:'Il banchetto dei tacos', text:'Ti fermi a un banchetto di strada e mangi tacos in piedi, come tutti. Un banchetto della capitale ha ricevuto una stella da una guida straniera, e il paese ne è insieme orgoglioso e divertito.', ch:[
+   {l:'Mangi in piedi, con la salsa piccante', e:'Il paese approva', f:function(){}},
+   {l:'Chiedi una forchetta', e:'Un titolo', f:function(){}}]},
+ {id:'mx_p_b_lucha', era:'contemporanea', paesi:['messico'], registro:'leggero', kick:'Il paese', t:'Le maschere', text:'Ti invitano a una serata di lotta libera, con le maschere e i voli dalle corde. Un lottatore in maschera è stato anche deputato, e il paese lo ricorda con affetto. Ti regalano una maschera.', ch:[
+   {l:'La indossi', e:'La foto dell\'anno', f:function(){}},
+   {l:'La tieni in mano', e:'Educato', f:function(){}}]},
+ {id:'mx_p_b_mananera', era:'contemporanea', paesi:['messico'], registro:'leggero', kick:'Il paese', t:'La conferenza delle sette', text:'La tradizione recente vuole che il Presidente parli ogni mattina alle sette, per ore, in diretta, rispondendo a tutto. Il paese si sveglia con te; i giornalisti anche, e non tutti volentieri.', ch:[
+   {l:'Ogni mattina, per due ore', e:'Il paese sa cosa pensi, ogni giorno', f:function(){}},
+   {l:'Una volta a settimana', e:'Il paese dorme un po\' di più', f:function(){}}]},
+ /* ===== L87-3 · SUDAFRICA, sei beat leggeri (scheda §C). ===== */
+ {id:'za_p_b_braai', era:'contemporanea', paesi:['sudafrica'], registro:'leggero', cond:()=>S.month===9, kick:'Il paese', t:'Il giorno della griglia', text:'La festa del patrimonio, a fine settembre, è diventata la festa della griglia: il paese accende il fuoco, di ogni colore e lingua, e per un giorno l\'unica discussione è sulla legna. Un Presidente con le pinze in mano è la foto giusta.', ch:[
+   {l:'Griglia, con i vicini', e:'Le pinze giuste', f:function(){}},
+   {l:'Un discorso sul patrimonio', e:'La griglia era meglio', f:function(){}}]},
+ {id:'za_p_b_maratona', era:'contemporanea', paesi:['sudafrica'], registro:'leggero', cond:()=>S.month===6, kick:'Il paese', t:'I novanta chilometri', text:'A giugno ventimila persone corrono novanta chilometri fra due città, in salita o in discesa secondo l\'anno, e il paese segue in diretta chi arriva a un secondo dal tempo limite. È la corsa più vecchia del paese, e la più commovente.', ch:[
+   {l:'Vai al traguardo, per gli ultimi', e:'Il gesto giusto', f:function(){}},
+   {l:'Un messaggio ai corridori', e:'Breve', f:function(){}}]},
+ {id:'za_p_b_menestrelli', era:'contemporanea', paesi:['sudafrica'], registro:'leggero', cond:()=>S.month===1, kick:'Il paese', t:'Il secondo giorno dell\'anno', text:'Il due gennaio, nella città del Capo, migliaia di menestrelli in raso colorato sfilano con gli ombrellini e le bande: una tradizione nata dagli schiavi liberati che avevano un giorno libero all\'anno. Ti chiedono di sfilare.', ch:[
+   {l:'Sfili, con l\'ombrellino', e:'La foto dell\'anno', f:function(){}},
+   {l:'Guardi dal palco', e:'Educato', f:function(){}}]},
+ {id:'za_p_b_rugby', era:'contemporanea', paesi:['sudafrica'], registro:'leggero', kick:'Il paese', t:'La maglia verde', text:'La nazionale di rugby gioca una finale, e il paese — che una volta si divideva anche su questo — si mette la maglia verde tutto insieme. Un Presidente in maglia verde in tribuna è la foto che il paese ha già visto una volta, e vuole rivedere.', ch:[
+   {l:'La maglia verde, in tribuna', e:'La foto, di nuovo', f:function(){}},
+   {l:'Un messaggio alla squadra', e:'Breve, e la maglia la volevano', f:function(){}}]},
+ {id:'za_p_b_derby', era:'contemporanea', paesi:['sudafrica'], registro:'leggero', kick:'Il paese', t:'Le due squadre della township', text:'Le due grandi squadre della township più famosa si affrontano, e metà del paese tifa per una, l\'altra metà per l\'altra. Ti chiedono per chi tifi, e qualunque risposta perde una township.', ch:[
+   {l:'Dici la verità', e:'Metà della township ti ama', f:function(){}},
+   {l:'«Tifo per il calcio»', e:'Nessuno ci crede', f:function(){}}]},
+ {id:'za_p_b_candele', era:'contemporanea', paesi:['sudafrica'], registro:'leggero', kick:'Il paese', t:'La cena al buio', text:'La corrente salta durante una cena ufficiale, e il paese ride: per una volta il Presidente mangia al lume di candela come tutti. Le foto girano, e sono le più affettuose del mandato.', ch:[
+   {l:'Ridi, e finisci la cena a lume di candela', e:'Umano', f:function(){}},
+   {l:'Accendi il generatore', e:'Il paese nota che ce l\'hai', f:function(){}}]},
+ /* ===== L87-3 · NIGERIA, sei beat leggeri (scheda §C). ===== */
+ {id:'ng_p_b_dicembre', era:'contemporanea', paesi:['nigeria'], registro:'leggero', cond:()=>S.month===12, kick:'Il paese', t:'Il dicembre della diaspora', text:'A dicembre chi è partito torna: la megalopoli si riempie di concerti, feste, matrimoni e traffico, e per un mese il paese è quello che avrebbe potuto essere. Ti invitano a un concerto con centomila persone.', ch:[
+   {l:'Vai al concerto', e:'Il video dura tutto gennaio', f:function(){}},
+   {l:'Un messaggio a chi torna', e:'Breve, e sentito', f:function(){}}]},
+ {id:'ng_p_b_indipendenza', era:'contemporanea', paesi:['nigeria'], registro:'leggero', cond:()=>S.month===10, kick:'Il paese', t:'Il primo ottobre', text:'La festa dell\'indipendenza: bandiere verdi e bianche, una parata, un discorso che il paese ascolta con l\'orecchio di chi ne ha sentiti sessanta. Quello che dici conta meno di quanto dura.', ch:[
+   {l:'Un discorso breve', e:'Il regalo', f:function(){}},
+   {l:'Un discorso lungo, con i numeri', e:'Il paese cambia canale', f:function(){}}]},
+ {id:'ng_p_b_coppa', era:'contemporanea', paesi:['nigeria'], registro:'leggero', cond:()=>S.month===1||S.month===2, kick:'Il paese', t:'Le aquile', text:'La nazionale gioca la coppa del continente e il paese si ferma davanti a ogni televisore, dai bar della megalopoli ai villaggi con il generatore acceso per la partita. Una vittoria vale un mese di pace sociale; una sconfitta, una settimana di lutto.', ch:[
+   {l:'Guardi la partita con i tifosi in piazza', e:'La foto giusta, se vincono', f:function(){}},
+   {l:'Un messaggio alla squadra', e:'Sobrio', f:function(){}}]},
+ {id:'ng_p_b_jollof', era:'contemporanea', paesi:['nigeria'], registro:'leggero', kick:'Il paese', t:'La guerra del riso', text:'Il paese e il vicino a ovest si contendono da anni la paternità del riso speziato che si mangia a ogni festa, e un ministro straniero che ha detto la cosa sbagliata è stato quasi un incidente diplomatico. Ti chiedono quale sia il migliore.', ch:[
+   {l:'«Il nostro, ovviamente»', e:'Il paese applaude, il vicino risponde', f:function(){}},
+   {l:'«Sono entrambi buoni»', e:'Il paese ti guarda come un traditore', f:function(){}}]},
+ {id:'ng_p_b_nollywood', era:'contemporanea', paesi:['nigeria'], registro:'leggero', kick:'Il paese', t:'Il film della settimana', text:'L\'industria del cinema del paese produce più film di quasi chiunque, girati in due settimane e visti in tutto il continente. Il film di questa settimana ha un Presidente cattivo che somiglia a qualcuno, e il paese ride guardandoti.', ch:[
+   {l:'Lo guardi, e ridi', e:'Umano', f:function(){}},
+   {l:'Nessun commento sul cinema', e:'Il cinema commenta te', f:function(){}}]},
+ {id:'ng_p_b_owambe', era:'contemporanea', paesi:['nigeria'], registro:'leggero', kick:'Il paese', t:'La festa con i vestiti uguali', text:'Ti invitano a una grande festa di famiglia, di quelle con centinaia di ospiti vestiti dello stesso tessuto e i musicisti che cantano il nome di chi lascia le banconote. Ti mandano il tessuto in anticipo: è un ordine, non un invito.', ch:[
+   {l:'Indossi il tessuto e balli', e:'La foto migliore del mandato', f:function(){}},
+   {l:'Vai in giacca', e:'Educato, e sbagliato', f:function(){}}]},
 ];
 
 /* ===== F1 — LA TELEFONATA. Un'interruzione, non una carta: overlay a squillo, due opzioni secche, decisione a
@@ -4912,6 +5145,369 @@ const DOSSIERS=[
    {l:'Riforma: multe ridotte e filmare è legale', e:'Le piazze ringraziano, i sindacati di polizia no', pleases:'progressista', f:()=>{gd('giovani',3); gd('lavoratori',1); gd('pensionati',-2);}},
    {l:'Lascia com\'è', e:'La sicurezza prima', pleases:'conservatore', f:()=>{gd('pensionati',2); gd('cetomedio',1); gd('giovani',-3);}},
    {l:'Un comitato di garanzia e più formazione', e:'La riforma senza la riforma', pleases:'tecnico', costo:{debito:0.1}, f:()=>{S.ind.debt+=0.1; gd('cetomedio',1);}}]},
+ /* ===== L83-1 · STATI UNITI, dossier di dicastero (scheda §B). ===== */
+ {id:'us_p_d_oppioidi', era:'contemporanea', paesi:['usa'], min:'salute', kick:'Epidemia', t:'Le overdose', text:'Decine di migliaia di morti l\'anno per oppioidi, in paesi e città che non se ne sono più ripresi. Le aziende che li hanno venduti hanno pagato miliardi; le contee che li spendono non sanno da dove cominciare.', ch:[
+   {l:'Cliniche e antidoto ovunque, con i soldi delle cause', e:'Si salvano vite; il problema resta', pleases:'progressista', costo:{debito:0.3}, f:()=>{S.ind.debt+=0.3; gd('lavoratori',3); gd('cattolici',2); gd('cetomedio',1);}},
+   {l:'Colpisci il traffico: frontiera e pene', e:'La risposta che il paese conosce', pleases:'conservatore', costo:{debito:0.3}, f:()=>{S.ind.debt+=0.3; gd('pensionati',3); gd('cetomedio',1); gd('giovani',-2);}},
+   {l:'Un piano federale con obiettivi per contea', e:'Il metodo, e i dati', pleases:'tecnico', costo:{debito:0.4}, f:()=>{S.ind.debt+=0.4; gd('cetomedio',2); gd('lavoratori',1);}}]},
+ {id:'us_p_d_ponti', era:'contemporanea', paesi:['usa'], min:'infrastrutture', kick:'Cantieri', t:'I ponti degli anni Cinquanta', text:'Il paese ha costruito le sue autostrade e i suoi ponti in una generazione, e non li ha più rifatti. Ogni tanto uno cede. Il piano infrastrutturale è la legge che ogni Presidente promette e che il Congresso approva a metà.', ch:[
+   {l:'Un grande piano decennale, federale', e:'Cantieri ovunque, e un debito lungo', pleases:'progressista', costo:{debito:1.2}, f:()=>{S.ind.debt+=1.2; gd('lavoratori',4); gd('imprenditori',2); gd('giovani',-1);}},
+   {l:'Partenariati con i privati e pedaggi', e:'Meno debito, più caselli', pleases:'conservatore', costo:{debito:0.4}, f:()=>{S.ind.debt+=0.4; gd('imprenditori',3); gd('cetomedio',-2);}},
+   {l:'Prima i ponti a rischio, con una lista pubblica', e:'La manutenzione non fa notizia, finché serve', pleases:'tecnico', costo:{debito:0.6}, f:()=>{S.ind.debt+=0.6; gd('cetomedio',2); gd('lavoratori',1);}}]},
+ {id:'us_p_d_polizia', era:'contemporanea', paesi:['usa'], min:'interno', kick:'Ordine', t:'La polizia e le città', text:'Un altro video, un\'altra città in piazza. Le polizie sono migliaia, ognuna con le sue regole; il governo federale può poco più che finanziare, condizionare e indagare. La riforma è promessa dopo ogni estate.', ch:[
+   {l:'Fondi federali solo a chi adotta standard nazionali', e:'La leva che Washington ha', pleases:'tecnico', f:()=>{gd('giovani',3); gd('lavoratori',1); gd('pensionati',-2);}},
+   {l:'Più fondi alle polizie, senza condizioni', e:'Legge e ordine', pleases:'conservatore', costo:{debito:0.4}, f:()=>{S.ind.debt+=0.4; gd('pensionati',3); gd('cetomedio',1); gd('giovani',-3);}},
+   {l:'Indagini federali sui dipartimenti sotto accusa', e:'Il Dipartimento di Giustizia entra in città', pleases:'progressista', f:()=>{gd('giovani',2); gd('lavoratori',1); gd('pensionati',-2); gd('cattolici',-1);}}]},
+ {id:'us_p_d_fed', era:'contemporanea', paesi:['usa'], min:'economia', kick:'Banca centrale', t:'La banca centrale e il Presidente', text:'La banca centrale alza i tassi e la tua economia rallenta prima delle elezioni. È indipendente per legge e per tradizione; nessun Presidente ha mai smesso di volerla convincere.', ch:[
+   {l:'Nessun commento: l\'indipendenza è sacra', e:'I mercati ringraziano, la tua base no', pleases:'tecnico', f:()=>{S.ind.fiducia+=2; gd('imprenditori',2); gd('lavoratori',-2);}},
+   {l:'Critica pubblica: i tassi sono troppo alti', e:'La base applaude, il dollaro trema', pleases:'populista', f:()=>{S.ind.fiducia-=3; gd('lavoratori',3); gd('cetomedio',1); gd('imprenditori',-2);}},
+   {l:'Una nomina che pensi come te, alla prima occasione', e:'Legale, e ricordato', pleases:'conservatore', f:()=>{S.ind.fiducia-=1; gd('imprenditori',1);}}]},
+ {id:'us_p_d_veterani', era:'contemporanea', paesi:['usa'], min:'difesa', kick:'Veterani', t:'Chi torna dalla guerra', text:'Milioni di veterani dipendono da un sistema sanitario pubblico che è al tempo stesso il più grande del paese e il più criticato: liste d\'attesa, ospedali vecchi, e un tasso di suicidi che il paese non vuole guardare.', ch:[
+   {l:'Più fondi e più personale, subito', e:'Il paese non lo discute', pleases:'conservatore', costo:{debito:0.6}, f:()=>{S.ind.debt+=0.6; gd('pensionati',3); gd('cattolici',2); gd('lavoratori',1);}},
+   {l:'Cure nel privato, pagate dallo Stato', e:'Più veloce, e qualcuno lo chiama smantellare', pleases:'tecnico', costo:{debito:0.5}, f:()=>{S.ind.debt+=0.5; gd('imprenditori',2); gd('pensionati',1); gd('lavoratori',-2);}},
+   {l:'Salute mentale al centro', e:'La priorità che i numeri chiedono', pleases:'progressista', costo:{debito:0.4}, f:()=>{S.ind.debt+=0.4; gd('giovani',2); gd('cattolici',1); gd('pensionati',1);}}]},
+ {id:'us_p_d_cina', era:'contemporanea', paesi:['usa'], min:'esteri', kick:'Pacifico', t:'Il rivale', text:'L\'altra grande potenza costruisce navi più in fretta, compra porti e vende telefoni al mondo intero. Contenere costa alleanze e miliardi; trattare costa la faccia; ignorare non è un\'opzione.', ch:[
+   {l:'Alleanze nel Pacifico e chip made in America', e:'Costoso, e ha un nome: strategia', pleases:'tecnico', costo:{debito:0.8}, f:()=>{S.ind.debt+=0.8; gd('imprenditori',2); gd('lavoratori',2);}},
+   {l:'Confronto duro: sanzioni e navi', e:'La base applaude, Wall Street conta', pleases:'conservatore', costo:{debito:0.5}, f:()=>{S.ind.debt+=0.5; S.ind.fiducia-=1; gd('pensionati',2); gd('cattolici',1); gd('imprenditori',-2);}},
+   {l:'Un canale aperto: competizione senza guerra', e:'Ragionevole, e sembra debole', pleases:'progressista', f:()=>{gd('imprenditori',2); gd('giovani',1); gd('pensionati',-2);}}]},
+ {id:'us_p_d_scuole', era:'contemporanea', paesi:['usa'], min:'istruzione', kick:'Distretti', t:'La scuola dei distretti', text:'La scuola è pagata dalle tasse sulla casa del quartiere: chi vive in un quartiere ricco ha una scuola ricca. Il governo federale mette una frazione dei soldi e vorrebbe contare per intero.', ch:[
+   {l:'Fondi federali ai distretti poveri', e:'Un\'iniezione, non una riforma', pleases:'progressista', costo:{debito:0.6}, f:()=>{S.ind.debt+=0.6; gd('lavoratori',3); gd('giovani',2); gd('cetomedio',-1);}},
+   {l:'Buoni scuola: i soldi seguono lo studente', e:'Le scuole private ringraziano', pleases:'conservatore', costo:{debito:0.3}, f:()=>{S.ind.debt+=0.3; gd('cattolici',4); gd('cetomedio',1); gd('lavoratori',-3);}},
+   {l:'Standard nazionali e test comuni', e:'Gli Stati dicono che non tocca a te', pleases:'tecnico', f:()=>{gd('cetomedio',1); gd('cattolici',-2);}}]},
+ {id:'us_p_d_ordini', era:'contemporanea', paesi:['usa'], min:'giustizia', kick:'Esecutivo', t:'Governare per decreto', text:'Il Congresso non passa nulla, e la penna del Presidente sì: gli ordini esecutivi fanno in un pomeriggio quello che le leggi non fanno in anni — e il successore li cancella in un pomeriggio.', ch:[
+   {l:'Firma: il paese non può aspettare', e:'Fatto, finché dura', pleases:'populista', f:()=>{S.ind.stampa-=1; gd('lavoratori',2); gd('giovani',1); gd('cetomedio',-2);}},
+   {l:'Solo dove la legge lo permette chiaramente', e:'I giuristi approvano, la base sbadiglia', pleases:'tecnico', f:()=>{gd('cetomedio',2); gd('giovani',-1);}},
+   {l:'Rimanda al Congresso, e fallo vedere', e:'La colpa a chi non vota', pleases:'conservatore', f:()=>{S.ind.stampa+=1; gd('pensionati',1); gd('lavoratori',-1);}}]},
+ /* ===== L83-1 · CANADA, dossier di dicastero (scheda §B). ===== */
+ {id:'ca_p_d_oppioidi', era:'contemporanea', paesi:['canada'], min:'salute', kick:'Costa ovest', t:'La droga sotto controllo', text:'Nella provincia del Pacifico le overdose uccidono più degli incidenti, e la provincia ha provato a non punire il possesso di piccole dosi. I risultati sono discussi, le strade delle città lo sono di più.', ch:[
+   {l:'Sostieni la sperimentazione, con più cure', e:'Coraggio, e le strade lo devono vedere', pleases:'progressista', costo:{debito:0.4}, f:()=>{S.ind.debt+=0.4; gd('giovani',3); gd('cetomedio',-2); gd('pensionati',-2);}},
+   {l:'Fine della sperimentazione: si torna alla legge', e:'Le città respirano, i medici no', pleases:'conservatore', f:()=>{gd('pensionati',3); gd('cetomedio',2); gd('giovani',-3);}},
+   {l:'Cure obbligatorie per i casi gravi', e:'Il compromesso che divide i medici', pleases:'tecnico', costo:{debito:0.3}, f:()=>{S.ind.debt+=0.3; gd('cetomedio',1); gd('cattolici',1);}}]},
+ {id:'ca_p_d_immigrazione', era:'contemporanea', paesi:['canada'], min:'interno', kick:'Arrivi', t:'Gli obiettivi di immigrazione', text:'Il paese ha costruito la sua crescita facendo entrare più persone di chiunque, in proporzione. Ora gli studenti stranieri sono un milione, i lavoratori temporanei riempiono i fast food, e per la prima volta la maggioranza dice che sono troppi.', ch:[
+   {l:'Riduci gli obiettivi per tre anni', e:'Le università e le imprese contano le perdite', pleases:'conservatore', f:()=>{gd('cetomedio',3); gd('lavoratori',2); gd('imprenditori',-3); gd('giovani',-1);}},
+   {l:'Mantieni, ma solo lavoratori qualificati', e:'La selezione, come sempre', pleases:'tecnico', f:()=>{gd('imprenditori',2); gd('cetomedio',1);}},
+   {l:'Mantieni: senza arrivi il paese invecchia', e:'Vero, e non piace', pleases:'progressista', f:()=>{gd('imprenditori',3); gd('giovani',1); gd('cetomedio',-3); gd('pensionati',-2);}}]},
+ {id:'ca_p_d_perequazione', era:'contemporanea', paesi:['canada'], min:'economia', kick:'Federazione', t:'La perequazione', text:'Le province ricche versano, le province povere ricevono: è la formula che tiene insieme il paese. L\'Ovest petrolifero dice di pagare per tutti; il Québec dice di ricevere quanto gli spetta. La formula scade, e riscriverla è una guerra.', ch:[
+   {l:'Riscrivi la formula premiando chi produce', e:'L\'Ovest applaude, l\'Est fa i conti', pleases:'conservatore', f:()=>{gd('imprenditori',3); gd('lavoratori',1); gd('cattolici',-3);}},
+   {l:'Proroga la formula attuale', e:'La pace federale costa poco e dura poco', pleases:'tecnico', f:()=>{gd('pensionati',1);}},
+   {l:'Aumenta il fondo per tutti', e:'Nessuno perde, il Tesoro sì', pleases:'progressista', costo:{debito:0.7}, f:()=>{S.ind.debt+=0.7; gd('cattolici',2); gd('lavoratori',2); gd('imprenditori',-1);}}]},
+ {id:'ca_p_d_difesa', era:'contemporanea', paesi:['canada'], min:'difesa', kick:'Alleanza', t:'Il due per cento', text:'Gli alleati chiedono da anni che il paese spenda per la difesa una quota che non ha mai raggiunto. Le forze armate hanno navi vecchie, aerei in arrivo e reclute che mancano. Il paese si è sempre sentito protetto dal vicino, e il vicino ora lo dice.', ch:[
+   {l:'Raggiungi il due per cento entro la legislatura', e:'Gli alleati annotano, il Tesoro anche', pleases:'conservatore', costo:{debito:1.0}, f:()=>{S.ind.debt+=1.0; gd('pensionati',2); gd('imprenditori',2); gd('giovani',-2);}},
+   {l:'Un piano decennale, graduale', e:'Il modo canadese', pleases:'tecnico', costo:{debito:0.5}, f:()=>{S.ind.debt+=0.5; gd('cetomedio',1);}},
+   {l:'La difesa è l\'Artico e le missioni di pace: non le percentuali', e:'Un principio, e una lettera dagli alleati', pleases:'progressista', costo:{debito:0.2}, f:()=>{S.ind.debt+=0.2; gd('giovani',2); gd('pensionati',-2);}}]},
+ {id:'ca_p_d_cbc', era:'contemporanea', paesi:['canada'], min:'istruzione', kick:'Media', t:'La radiotelevisione pubblica', text:'L\'emittente pubblica è l\'unica voce che arriva in ogni villaggio del Nord e in entrambe le lingue, e una parte del paese la considera un megafono a spese sue. Tagliarla è un cavallo di battaglia; difenderla, un altro.', ch:[
+   {l:'Finanziamento pluriennale garantito', e:'L\'emittente respira, l\'opposizione la usa', pleases:'progressista', costo:{debito:0.3}, f:()=>{S.ind.debt+=0.3; gd('giovani',2); gd('cattolici',2); gd('cetomedio',-1);}},
+   {l:'Tagli e fine della pubblicità', e:'Meno soldi, meno voce', pleases:'conservatore', costo:{debito:-0.2}, f:()=>{S.ind.debt-=0.2; gd('cetomedio',2); gd('imprenditori',1); gd('cattolici',-2);}},
+   {l:'Solo servizio pubblico: Nord, francese, notizie', e:'Il nocciolo, senza il resto', pleases:'tecnico', f:()=>{gd('cetomedio',1); gd('cattolici',1);}}]},
+ {id:'ca_p_d_maid', era:'contemporanea', paesi:['canada'], min:'giustizia', kick:'Fine vita', t:'L\'assistenza medica a morire', text:'Il paese ha una delle leggi più aperte al mondo sul fine vita, e discute se estenderla a chi soffre solo di malattie mentali. I medici sono divisi, le famiglie anche, e la scadenza dell\'estensione è già stata rinviata due volte.', ch:[
+   {l:'Rinvia ancora: il paese non è pronto', e:'Prudenza, o paura', pleases:'conservatore', f:()=>{gd('cattolici',3); gd('pensionati',2); gd('giovani',-2);}},
+   {l:'Estendi, con garanzie e valutazioni indipendenti', e:'La legge segue la Corte', pleases:'progressista', f:()=>{gd('giovani',2); gd('cetomedio',1); gd('cattolici',-4);}},
+   {l:'Una commissione di esperti con un anno di tempo', e:'La terza commissione', pleases:'tecnico', f:()=>{gd('cetomedio',1);}}]},
+ {id:'ca_p_d_treni', era:'contemporanea', paesi:['canada'], min:'infrastrutture', kick:'Corridoio', t:'Il treno veloce del corridoio', text:'Fra le due città più grandi e la capitale viaggia metà del paese, e il treno è più lento dell\'auto. Un\'alta velocità è studiata da quarant\'anni; ogni studio costa, e finisce in un cassetto.', ch:[
+   {l:'Si costruisce: la prima alta velocità del paese', e:'Un\'opera da inaugurare fra quindici anni', pleases:'progressista', costo:{debito:1.1}, f:()=>{S.ind.debt+=1.1; gd('lavoratori',3); gd('imprenditori',2); gd('cattolici',-1);}},
+   {l:'Treni più frequenti sulla linea che c\'è', e:'Meno gloria, più treni', pleases:'tecnico', costo:{debito:0.3}, f:()=>{S.ind.debt+=0.3; gd('cetomedio',2);}},
+   {l:'Un altro studio', e:'Il quarantunesimo', pleases:'conservatore', costo:{debito:0.05}, f:()=>{S.ind.debt+=0.05; gd('giovani',-1);}}]},
+ {id:'ca_p_d_banche', era:'contemporanea', paesi:['canada'], min:'economia', kick:'Oligopoli', t:'Le cinque banche e le tre compagnie', text:'Cinque banche, tre compagnie telefoniche, due catene alimentari: il paese paga fra le tariffe più alte del mondo per servizi che altrove costano la metà, e ogni tentativo di aprire il mercato finisce contro la stessa porta.', ch:[
+   {l:'Apri agli operatori stranieri', e:'I prezzi scendono, le banche scrivono', pleases:'progressista', f:()=>{S.ind.fiducia-=1; gd('cetomedio',3); gd('giovani',2); gd('imprenditori',-4);}},
+   {l:'Un\'autorità della concorrenza con i denti', e:'Multe, e anni', pleases:'tecnico', f:()=>{gd('cetomedio',2); gd('imprenditori',-1);}},
+   {l:'La stabilità vale il prezzo', e:'Le banche non falliscono; i clienti pagano', pleases:'conservatore', f:()=>{S.ind.fiducia+=1; gd('imprenditori',3); gd('cetomedio',-2);}}]},
+ /* ===== L83-1 · AUSTRALIA, dossier di dicastero (scheda §B). ===== */
+ {id:'au_p_d_ndis', era:'contemporanea', paesi:['australia'], min:'salute', kick:'Disabilità', t:'Lo schema che cresce', text:'Il programma nazionale per la disabilità è la riforma sociale più grande da una generazione e cresce più di ogni altra spesa. Riformarlo per contenerlo è necessario; ogni riforma sembra un taglio a chi ne dipende.', ch:[
+   {l:'Regole più strette su chi ha diritto', e:'I conti tornano, le famiglie scrivono', pleases:'tecnico', costo:{debito:-0.5}, f:()=>{S.ind.debt-=0.5; gd('imprenditori',1); gd('cattolici',-3); gd('lavoratori',-2);}},
+   {l:'Cresce, e si paga: è un diritto', e:'Il diritto costa, e si vede', pleases:'progressista', costo:{debito:0.9}, f:()=>{S.ind.debt+=0.9; gd('cattolici',3); gd('lavoratori',2); gd('cetomedio',-1);}},
+   {l:'Sposta i casi lievi a Stati e scuole', e:'Il conto cambia indirizzo', pleases:'conservatore', costo:{debito:-0.2}, f:()=>{S.ind.debt-=0.2; gd('cetomedio',1); gd('cattolici',-1);}}]},
+ {id:'au_p_d_universita', era:'contemporanea', paesi:['australia'], min:'istruzione', kick:'Campus', t:'Gli studenti che pagano tutto', text:'Le università vivono delle rette degli studenti stranieri, che sono anche il terzo prodotto d\'esportazione del paese e una parte dell\'emergenza abitativa. Metterci un tetto piace a chi cerca casa; le università chiudono corsi.', ch:[
+   {l:'Tetto agli stranieri per ateneo', e:'Meno affitti contesi, meno ricerca', pleases:'conservatore', f:()=>{gd('cetomedio',2); gd('giovani',1); gd('imprenditori',-2);}},
+   {l:'Nessun tetto, più fondi pubblici alla ricerca', e:'Le università respirano, il Tesoro no', pleases:'progressista', costo:{debito:0.6}, f:()=>{S.ind.debt+=0.6; gd('giovani',2); gd('imprenditori',1);}},
+   {l:'Tetto legato agli alloggi che l\'ateneo costruisce', e:'Chi costruisce ospita', pleases:'tecnico', f:()=>{gd('giovani',2); gd('cetomedio',1);}}]},
+ {id:'au_p_d_nucleare', era:'contemporanea', paesi:['australia'], min:'economia', kick:'Energia', t:'Il nucleare che non c\'è', text:'Il paese ha l\'uranio, i sottomarini nucleari in arrivo e nessuna centrale: sono vietate per legge da decenni. Una parte della politica vuole costruirne sette al posto delle centrali a carbone che chiudono; l\'altra dice che sole e vento costano meno e arrivano prima.', ch:[
+   {l:'Togli il divieto e apri il dossier', e:'Vent\'anni, e un dibattito che ne dura trenta', pleases:'conservatore', costo:{debito:0.3}, f:()=>{S.ind.debt+=0.3; gd('imprenditori',2); gd('pensionati',1); gd('giovani',-3);}},
+   {l:'Rinnovabili e batterie: la strada che c\'è', e:'Più veloce, se la rete regge', pleases:'progressista', costo:{debito:0.6}, f:()=>{S.ind.debt+=0.6; gd('giovani',3); gd('imprenditori',1); gd('lavoratori',-1);}},
+   {l:'Uno studio indipendente sui costi', e:'La risposta è nota, ma la si vuole scritta', pleases:'tecnico', costo:{debito:0.05}, f:()=>{S.ind.debt+=0.05;}}]},
+ {id:'au_p_d_pacifico', era:'contemporanea', paesi:['australia'], min:'esteri', kick:'Vicini', t:'Le isole che affondano', text:'I piccoli Stati del Pacifico sono i vicini del paese e chiedono due cose: che smetta di esportare carbone e che li accolga quando il mare salirà. Il rivale asiatico offre porti e prestiti; il paese offre patti, e deve farli valere.', ch:[
+   {l:'Un patto di mobilità climatica: visti per chi deve lasciare le isole', e:'Il primo del genere, e il rivale lo nota', pleases:'progressista', costo:{debito:0.3}, f:()=>{S.ind.debt+=0.3; gd('giovani',3); gd('cattolici',1); gd('pensionati',-1);}},
+   {l:'Aiuti e basi: la sicurezza prima', e:'Il porto resta nostro', pleases:'conservatore', costo:{debito:0.5}, f:()=>{S.ind.debt+=0.5; gd('pensionati',2); gd('imprenditori',1);}},
+   {l:'Diplomazia e sport: la famiglia del Pacifico', e:'Il rugby come politica estera', pleases:'tecnico', costo:{debito:0.1}, f:()=>{S.ind.debt+=0.1; gd('cetomedio',1);}}]},
+ {id:'au_p_d_stati', era:'contemporanea', paesi:['australia'], min:'interno', kick:'Federazione', t:'Gli Stati e la tassa', text:'Il federale raccoglie l\'imposta sui consumi e la ridistribuisce agli Stati con una formula che ogni Stato considera un furto. Lo Stato minerario dell\'Ovest ha ottenuto un accordo speciale; gli altri chiedono lo stesso, o la fine dell\'accordo.', ch:[
+   {l:'Formula nuova, uguale per tutti', e:'L\'Ovest si ribella', pleases:'tecnico', f:()=>{gd('cetomedio',2); gd('imprenditori',-2);}},
+   {l:'Tieni l\'accordo speciale e compensa gli altri', e:'Tutti contenti, il Tesoro no', pleases:'conservatore', costo:{debito:0.6}, f:()=>{S.ind.debt+=0.6; gd('pensionati',1); gd('cetomedio',1);}},
+   {l:'Rinvia: la formula scade fra due anni', e:'Cioè dopo l\'elezione', pleases:'progressista', f:()=>{gd('giovani',-1);}}]},
+ {id:'au_p_d_media', era:'contemporanea', paesi:['australia'], min:'giustizia', kick:'Piattaforme', t:'Le piattaforme pagano le notizie', text:'Il paese ha obbligato per primo le grandi piattaforme a pagare i giornali per le notizie che mostrano. Ora una piattaforma minaccia di togliere le notizie invece di pagare, e i giornali locali che vivevano di quei soldi chiudono le redazioni.', ch:[
+   {l:'Tassa le piattaforme e finanzia il giornalismo locale', e:'Se non pagano loro, paga la tassa', pleases:'progressista', costo:{debito:-0.1}, f:()=>{S.ind.debt-=0.1; S.ind.stampa+=3; gd('cetomedio',1); gd('imprenditori',-2);}},
+   {l:'Tratta con le piattaforme', e:'Un accordo, finché dura', pleases:'tecnico', f:()=>{S.ind.stampa+=1;}},
+   {l:'Il mercato deciderà', e:'Ha già deciso: chiudono', pleases:'conservatore', f:()=>{S.ind.stampa-=3; gd('imprenditori',1);}}]},
+ {id:'au_p_d_eta', era:'contemporanea', paesi:['australia'], min:'interno', kick:'Social', t:'I sedici anni', text:'Il paese vuole vietare i social ai minori di sedici anni, primo al mondo. I genitori applaudono, le piattaforme dicono che non si può fare, gli adolescenti hanno già trovato il modo.', ch:[
+   {l:'Divieto, con multe alle piattaforme', e:'Il mondo guarda, i ragazzi aggirano', pleases:'conservatore', f:()=>{gd('cattolici',3); gd('pensionati',3); gd('cetomedio',2); gd('giovani',-4);}},
+   {l:'Verifica dell\'età, senza divieto', e:'La tecnica al posto della legge', pleases:'tecnico', f:()=>{gd('cetomedio',1); gd('giovani',-1);}},
+   {l:'Educazione digitale, non divieti', e:'Ragionevole, e i genitori volevano il divieto', pleases:'progressista', costo:{debito:0.2}, f:()=>{S.ind.debt+=0.2; gd('giovani',2); gd('pensionati',-2);}}]},
+ {id:'au_p_d_remoto', era:'contemporanea', paesi:['australia'], min:'salute', kick:'Outback', t:'Il medico volante', text:'Nelle comunità dell\'interno il medico arriva in aereo, la scuola per radio e l\'ospedale a cinque ore. Le comunità aborigene remote hanno un\'aspettativa di vita di anni inferiore. I fondi arrivano, i risultati no.', ch:[
+   {l:'Servizi gestiti dalle comunità, con i fondi', e:'Chi ci vive decide', pleases:'progressista', costo:{debito:0.5}, f:()=>{S.ind.debt+=0.5; gd('giovani',2); gd('cattolici',2);}},
+   {l:'Più aerei, più cliniche mobili', e:'La risposta che il paese conosce', pleases:'tecnico', costo:{debito:0.4}, f:()=>{S.ind.debt+=0.4; gd('pensionati',2); gd('cattolici',1);}},
+   {l:'Incentivi ai medici che vanno nel remoto', e:'Pochi vanno, e restano poco', pleases:'conservatore', costo:{debito:0.3}, f:()=>{S.ind.debt+=0.3; gd('cetomedio',1);}}]},
+ /* ===== L85-1 · GIAPPONE, dossier di dicastero (scheda §B). ===== */
+ {id:'jp_p_d_lavoro', era:'contemporanea', paesi:['giappone'], min:'lavoro', kick:'Straordinari', t:'Le ore che uccidono', text:'La parola per «morte da troppo lavoro» esiste solo in questa lingua. Una legge ha messo un tetto agli straordinari; le imprese lo aggirano, i giovani se ne vanno, e le aziende che chiudono alle sei fanno notizia.', ch:[
+   {l:'Tetto più basso e ispettori', e:'Le imprese protestano, i giovani applaudono', pleases:'progressista', f:()=>{gd('giovani',3); gd('lavoratori',3); gd('imprenditori',-3);}},
+   {l:'Incentivi alle aziende che chiudono alle sei', e:'Volontario, e funziona dove funziona', pleases:'tecnico', costo:{debito:0.2}, f:()=>{S.ind.debt+=0.2; gd('lavoratori',1); gd('imprenditori',1);}},
+   {l:'La competitività prima', e:'Il paese lavora, e lo sa', pleases:'conservatore', f:()=>{gd('imprenditori',3); gd('lavoratori',-3); gd('giovani',-2);}}]},
+ {id:'jp_p_d_anziani', era:'contemporanea', paesi:['giappone'], min:'salute', kick:'Cura', t:'Chi cura chi cura', text:'Un abitante su tre ha più di sessantacinque anni, e chi li assiste è pagato meno di chi serve al ristorante. Le case di riposo hanno liste d\'attesa di anni, e le famiglie — cioè le figlie — smettono di lavorare per occuparsene.', ch:[
+   {l:'Alza i salari del settore con fondi pubblici', e:'Il conto è enorme, e il paese lo sa', pleases:'progressista', costo:{debito:0.9}, f:()=>{S.ind.debt+=0.9; gd('lavoratori',3); gd('pensionati',3); gd('cetomedio',1);}},
+   {l:'Lavoratori stranieri nella cura', e:'Il tabù che le liste d\'attesa stanno rompendo', pleases:'tecnico', costo:{debito:0.2}, f:()=>{S.ind.debt+=0.2; gd('pensionati',2); gd('imprenditori',1); gd('cattolici',-2);}},
+   {l:'Robot e tecnologia nelle case di riposo', e:'Il paese ci crede, gli anziani meno', pleases:'conservatore', costo:{debito:0.5}, f:()=>{S.ind.debt+=0.5; gd('imprenditori',2); gd('pensionati',-1);}}]},
+ {id:'jp_p_d_tokyo', era:'contemporanea', paesi:['giappone'], min:'interno', kick:'Capitale', t:'Tutto a Tokyo', text:'Un abitante su tre vive nell\'area della capitale, e i giovani delle province ci arrivano ogni primavera con una valigia. Decentrare ministeri e imprese è promesso da decenni; l\'unico ministero spostato ha impiegato dieci anni.', ch:[
+   {l:'Sposta tre ministeri in province diverse', e:'Simbolico, e i funzionari resistono', pleases:'progressista', costo:{debito:0.4}, f:()=>{S.ind.debt+=0.4; gd('cattolici',2); gd('cetomedio',1);}},
+   {l:'Incentivi alle imprese che lasciano la capitale', e:'Poche vanno, molte annunciano', pleases:'tecnico', costo:{debito:0.3}, f:()=>{S.ind.debt+=0.3; gd('imprenditori',1); gd('cattolici',1);}},
+   {l:'La capitale è il motore: non si frena', e:'Vero, e le province votano', pleases:'conservatore', f:()=>{gd('imprenditori',2); gd('cattolici',-3);}}]},
+ {id:'jp_p_d_yen', era:'contemporanea', paesi:['giappone'], min:'economia', kick:'Valuta', t:'Lo yen debole', text:'La valuta ha perso un terzo del valore in pochi anni: i turisti arrivano a milioni e trovano il paese a metà prezzo, gli esportatori festeggiano, e le famiglie pagano il cibo importato il doppio. La banca centrale ha alzato i tassi appena, dopo decenni a zero.', ch:[
+   {l:'Sostieni la banca centrale nella stretta', e:'Lo yen si rafforza, il debito costa di più', pleases:'tecnico', f:()=>{S.ind.fiducia+=2; gd('cetomedio',2); gd('imprenditori',-2);}},
+   {l:'Sussidi contro il caro-energia e caro-cibo', e:'Si tampona', pleases:'progressista', costo:{debito:0.6}, f:()=>{S.ind.debt+=0.6; gd('cetomedio',2); gd('lavoratori',2);}},
+   {l:'Lo yen debole è un vantaggio: si esporta', e:'Le fabbriche esultano, il supermercato no', pleases:'conservatore', f:()=>{gd('imprenditori',4); gd('cetomedio',-3);}}]},
+ {id:'jp_p_d_scuola', era:'contemporanea', paesi:['giappone'], min:'istruzione', kick:'Aule', t:'Le scuole che chiudono', text:'Ogni anno centinaia di scuole chiudono per mancanza di bambini, e quelle che restano hanno insegnanti che lavorano dodici ore e non trovano sostituti. Il concorso per insegnare ha sempre meno candidati.', ch:[
+   {l:'Stipendi più alti e meno compiti extra', e:'I candidati tornano, il bilancio no', pleases:'progressista', costo:{debito:0.6}, f:()=>{S.ind.debt+=0.6; gd('giovani',2); gd('lavoratori',2); gd('cetomedio',1);}},
+   {l:'Accorpa le scuole e paga i trasporti', e:'Meno scuole, più autobus', pleases:'tecnico', costo:{debito:0.2}, f:()=>{S.ind.debt+=0.2; gd('cetomedio',1); gd('cattolici',-2);}},
+   {l:'Digitale e lezioni a distanza per i villaggi', e:'Il maestro sullo schermo', pleases:'conservatore', costo:{debito:0.3}, f:()=>{S.ind.debt+=0.3; gd('giovani',1); gd('cattolici',-1);}}]},
+ {id:'jp_p_d_vicini', era:'contemporanea', paesi:['giappone'], min:'esteri', kick:'Vicini', t:'La storia e i vicini', text:'Con il vicino peninsulare i rapporti si guastano a ogni anniversario: il lavoro forzato, le statue, i libri di scuola. Gli alleati chiedono di andare d\'accordo, perché il nemico comune è più grande. Una parola di scuse costa a casa; il silenzio costa fuori.', ch:[
+   {l:'Un gesto verso il vicino, e un accordo sulla sicurezza', e:'Gli alleati applaudono, una parte del partito no', pleases:'progressista', f:()=>{gd('giovani',2); gd('imprenditori',2); gd('cattolici',-3); gd('pensionati',-2);}},
+   {l:'Sicurezza sì, storia no: binari separati', e:'La formula che regge finché non arriva un anniversario', pleases:'tecnico', f:()=>{gd('cetomedio',1);}},
+   {l:'Nessuna scusa in più: il passato è chiuso', e:'La base applaude, il vicino richiama l\'ambasciatore', pleases:'conservatore', f:()=>{gd('cattolici',3); gd('pensionati',2); gd('imprenditori',-2); gd('giovani',-1);}}]},
+ {id:'jp_p_d_terremoto', era:'contemporanea', paesi:['giappone'], min:'interno', kick:'Il grande', t:'Il terremoto che verrà', text:'I sismologi danno una probabilità alta a un grande terremoto sulla costa del Pacifico entro trent\'anni. Il paese è il più preparato del mondo e sa che non basterà. Ogni yen speso prima vale dieci dopo; ogni yen speso prima è uno yen che non si vede.', ch:[
+   {l:'Un piano decennale: dighe, rifugi, edifici', e:'Si vede poco, e si vedrà', pleases:'tecnico', costo:{debito:0.9}, f:()=>{S.ind.debt+=0.9; gd('pensionati',2); gd('cetomedio',2); gd('cattolici',1);}},
+   {l:'Sposta funzioni dello Stato fuori dalla capitale', e:'La ridondanza costa e rassicura', pleases:'progressista', costo:{debito:0.5}, f:()=>{S.ind.debt+=0.5; gd('cattolici',2); gd('cetomedio',1);}},
+   {l:'Esercitazioni e informazione: il paese sa già', e:'Il minimo, e non è poco', pleases:'conservatore', costo:{debito:0.1}, f:()=>{S.ind.debt+=0.1; gd('cetomedio',1);}}]},
+ {id:'jp_p_d_balene', era:'contemporanea', paesi:['giappone'], min:'sviluppo', kick:'Mare', t:'La caccia alla balena', text:'Il paese è uscito dall\'organizzazione internazionale per tornare a cacciare balene nelle sue acque, e quasi nessuno ne mangia più. Costa sussidi, costa immagine, e una parte del paese lo considera una questione di sovranità sul piatto.', ch:[
+   {l:'Fine dei sussidi: chi caccia si paga da solo', e:'La caccia finisce da sola', pleases:'tecnico', costo:{debito:-0.05}, f:()=>{S.ind.debt-=0.05; gd('giovani',2); gd('cattolici',-2);}},
+   {l:'Tradizione: la caccia continua, sussidiata', e:'Il mondo protesta, il piatto resta vuoto', pleases:'conservatore', costo:{debito:0.05}, f:()=>{S.ind.debt+=0.05; gd('cattolici',2); gd('giovani',-2);}},
+   {l:'Rientra nell\'organizzazione', e:'Un gesto verso il mondo, e una perdita di faccia', pleases:'progressista', f:()=>{gd('giovani',2); gd('pensionati',-2);}}]},
+ /* ===== L85-1 · COREA DEL SUD, dossier di dicastero (scheda §B). ===== */
+ {id:'kr_p_d_anziani', era:'contemporanea', paesi:['coreasud'], min:'salute', kick:'Vecchiaia', t:'Gli anziani poveri', text:'Il paese è diventato ricco in una generazione, e quella generazione è invecchiata senza pensione: quasi metà degli anziani vive sotto la soglia di povertà, spinge carrelli di cartone o guida taxi a ottant\'anni. Il sistema pensionistico è giovane e già in rosso.', ch:[
+   {l:'Pensione minima universale più alta', e:'I carrelli si fermano, il conto sale', pleases:'progressista', costo:{debito:1.0}, f:()=>{S.ind.debt+=1.0; gd('pensionati',5); gd('lavoratori',1); gd('giovani',-2);}},
+   {l:'Contributi più alti oggi per pensioni sostenibili domani', e:'I giovani pagano di più, e lo sanno', pleases:'tecnico', costo:{debito:-0.3}, f:()=>{S.ind.debt-=0.3; S.ind.fiducia+=1; gd('pensionati',2); gd('giovani',-3);}},
+   {l:'Lavoro agli anziani: incentivi alle imprese che li assumono', e:'Il taxi a ottant\'anni, con un contributo', pleases:'conservatore', costo:{debito:0.3}, f:()=>{S.ind.debt+=0.3; gd('pensionati',1); gd('imprenditori',1);}}]},
+ {id:'kr_p_d_chip', era:'contemporanea', paesi:['coreasud'], min:'economia', kick:'Semiconduttori', t:'I chip fra due giganti', text:'Il paese produce i chip di memoria di mezzo mondo, con fabbriche in casa e nel grande vicino continentale. L\'alleato oltreoceano chiede di non vendere al vicino le macchine più avanzate; il vicino è il primo cliente. Ogni chip è una scelta di campo.', ch:[
+   {l:'Allineati all\'alleato: controlli sulle esportazioni', e:'La sicurezza prima; il cliente cerca altrove', pleases:'conservatore', f:()=>{S.ind.fiducia+=1; gd('pensionati',2); gd('imprenditori',-3);}},
+   {l:'Sussidi per riportare le fabbriche in patria', e:'Miliardi, e le fabbriche tornano lentamente', pleases:'tecnico', costo:{debito:0.8}, f:()=>{S.ind.debt+=0.8; gd('imprenditori',3); gd('lavoratori',2);}},
+   {l:'Il commercio non sceglie campi', e:'Vende a tutti, finché tutti comprano', pleases:'progressista', f:()=>{gd('imprenditori',3); gd('pensionati',-2);}}]},
+ {id:'kr_p_d_province', era:'contemporanea', paesi:['coreasud'], min:'interno', kick:'Province', t:'Le province che si svuotano', text:'Metà del paese vive nell\'area della capitale, e le province perdono un abitante al minuto: scuole chiuse, ospedali senza ostetrici, città che offrono soldi a chi si trasferisce. Il paese si sta concentrando in un punto.', ch:[
+   {l:'Sposta università e imprese pubbliche nelle province', e:'Il metodo che il paese ha già provato, a metà', pleases:'progressista', costo:{debito:0.6}, f:()=>{S.ind.debt+=0.6; gd('cattolici',3); gd('giovani',1); gd('cetomedio',-1);}},
+   {l:'Città regionali forti: cinque poli, non cento paesi', e:'Concentrare per salvare', pleases:'tecnico', costo:{debito:0.5}, f:()=>{S.ind.debt+=0.5; gd('cattolici',1); gd('cetomedio',1);}},
+   {l:'Il mercato decide dove si vive', e:'Ha già deciso: nella capitale', pleases:'conservatore', f:()=>{gd('imprenditori',2); gd('cattolici',-3);}}]},
+ {id:'kr_p_d_procura', era:'contemporanea', paesi:['coreasud'], min:'giustizia', kick:'Toghe', t:'Il potere della procura', text:'La procura ha il monopolio dell\'azione penale e una storia di inchieste che colpiscono chi ha appena perso il potere. Ogni governo promette di riformarla; ogni governo, arrivato, scopre che gli serve.', ch:[
+   {l:'Togli alla procura i poteri di indagine diretta', e:'Una riforma storica, e un\'istituzione ferita', pleases:'progressista', f:()=>{S.ind.stampa-=1; gd('giovani',2); gd('cetomedio',1); gd('pensionati',-2);}},
+   {l:'Un\'agenzia indipendente per i reati dei potenti', e:'Un contrappeso, se resta indipendente', pleases:'tecnico', f:()=>{gd('cetomedio',2);}},
+   {l:'La procura funziona: nessuna riforma', e:'Funziona per chi governa', pleases:'conservatore', f:()=>{gd('pensionati',1); gd('giovani',-2);}}]},
+ {id:'kr_p_d_stranieri', era:'contemporanea', paesi:['coreasud'], min:'lavoro', kick:'Manodopera', t:'I lavoratori stranieri nei campi', text:'Nelle campagne e nei cantieri lavorano centinaia di migliaia di stranieri con permessi a termine, in un paese che si è sempre pensato di un solo popolo. Le imprese ne chiedono di più; il paese chiede se vuole diventare un altro paese.', ch:[
+   {l:'Quote più alte e percorsi verso la residenza', e:'Le campagne respirano, il dibattito si accende', pleases:'progressista', f:()=>{gd('imprenditori',3); gd('cattolici',1); gd('pensionati',-3);}},
+   {l:'Quote più alte, permessi sempre a termine', e:'Il modo di sempre', pleases:'tecnico', f:()=>{gd('imprenditori',2); gd('pensionati',-1);}},
+   {l:'Automazione e robot nei campi', e:'Il paese ci crede, i campi meno', pleases:'conservatore', costo:{debito:0.4}, f:()=>{S.ind.debt+=0.4; gd('imprenditori',1); gd('cattolici',1);}}]},
+ {id:'kr_p_d_scuola', era:'contemporanea', paesi:['coreasud'], min:'istruzione', kick:'Classi vuote', t:'Le scuole senza bambini', text:'Le scuole elementari chiudono a decine ogni anno, e in alcune un maestro ha un solo alunno. Gli insegnanti in esubero non si possono licenziare; le classi che restano sono le più piene del mondo ricco nelle città e le più vuote nelle province.', ch:[
+   {l:'Ridistribuisci gli insegnanti: classi più piccole in città', e:'Il beneficio del calo, se lo si vuole', pleases:'tecnico', f:()=>{gd('giovani',2); gd('cetomedio',2); gd('lavoratori',-1);}},
+   {l:'Tieni aperte le scuole dei villaggi, a qualunque costo', e:'Un alunno, un maestro, una comunità', pleases:'progressista', costo:{debito:0.4}, f:()=>{S.ind.debt+=0.4; gd('cattolici',3); gd('pensionati',1);}},
+   {l:'Accorpa e riduci il corpo docente', e:'I conti tornano, i sindacati no', pleases:'conservatore', costo:{debito:-0.3}, f:()=>{S.ind.debt-=0.3; gd('lavoratori',-3); gd('cattolici',-2);}}]},
+ {id:'kr_p_d_coste', era:'contemporanea', paesi:['coreasud'], min:'esteri', kick:'Mari', t:'Le navi nel Mar Giallo', text:'Pescherecci del vicino continentale entrano nelle acque del paese a centinaia, e la guardia costiera li insegue con idranti. Il vicino è anche il primo partner commerciale. Ogni sequestro è una nota diplomatica, ogni nota un carico che aspetta in porto.', ch:[
+   {l:'Sequestri e multe, senza eccezioni', e:'I pescatori applaudono, il porto aspetta', pleases:'conservatore', f:()=>{gd('lavoratori',2); gd('cattolici',2); gd('imprenditori',-2);}},
+   {l:'Un accordo di pesca bilaterale', e:'Il tavolo di sempre, con quote nuove', pleases:'tecnico', f:()=>{gd('imprenditori',1); gd('lavoratori',1);}},
+   {l:'Pattugliamenti congiunti con il vicino', e:'Insieme, se il vicino vuole', pleases:'progressista', f:()=>{gd('imprenditori',2); gd('pensionati',-1);}}]},
+ {id:'kr_p_d_ponte', era:'contemporanea', paesi:['coreasud'], min:'infrastrutture', kick:'Trasporti', t:'Il treno che va a nord', text:'La ferrovia si ferma al confine: le rotaie proseguono, i treni no. Un collegamento con il continente attraverso il Nord è il sogno di ogni governo che dialoga e l\'incubo di ogni governo che non lo fa. Intanto si costruiscono treni veloci verso il sud, che è l\'unica direzione.', ch:[
+   {l:'Prepara la linea fino al confine, per quando servirà', e:'Un binario verso il futuro, o verso niente', pleases:'progressista', costo:{debito:0.4}, f:()=>{S.ind.debt+=0.4; gd('giovani',2); gd('pensionati',-1);}},
+   {l:'Alta velocità verso il sud e le province', e:'Il treno che serve oggi', pleases:'tecnico', costo:{debito:0.7}, f:()=>{S.ind.debt+=0.7; gd('cattolici',2); gd('cetomedio',2); gd('lavoratori',1);}},
+   {l:'Nessun binario verso il Nord finché il Nord è il Nord', e:'Realismo', pleases:'conservatore', f:()=>{gd('pensionati',2); gd('giovani',-1);}}]},
+ /* ===== L85-1 · INDIA, dossier di dicastero (scheda §B). ===== */
+ {id:'in_p_d_acqua', era:'contemporanea', paesi:['india'], min:'sviluppo', kick:'Falde', t:'Le falde del granaio', text:'Lo Stato che nutre il paese con il riso lo coltiva con pompe elettriche gratuite che svuotano le falde di un metro l\'anno. Il riso non è nemmeno la coltura di quel clima. Cambiare colture o far pagare l\'elettricità: entrambe le cose sono già state promesse e ritirate.', ch:[
+   {l:'Incentivi a chi passa a colture che bevono meno', e:'Lento, e i contadini ascoltano se pagano', pleases:'tecnico', costo:{debito:0.5}, f:()=>{S.ind.debt+=0.5; gd('cattolici',2); gd('giovani',1);}},
+   {l:'Elettricità a pagamento per le pompe', e:'Le falde respirano, i trattori partono', pleases:'progressista', costo:{debito:-0.3}, f:()=>{S.ind.debt-=0.3; gd('cattolici',-5); gd('cetomedio',1);}},
+   {l:'Nessun cambiamento: i contadini hanno già dato', e:'La falda scende', pleases:'conservatore', f:()=>{gd('cattolici',2); gd('giovani',-2);}}]},
+ {id:'in_p_d_digitale', era:'contemporanea', paesi:['india'], min:'economia', kick:'Identità', t:'Il numero che apre tutto', text:'Oltre un miliardo di persone ha un\'identità digitale con impronte e iride, e con quella riceve sussidi, apre conti, paga con il telefono al banco della frutta. È la spina dorsale del paese e un archivio che fa paura a chi pensa a cosa succederebbe se cambiasse mano.', ch:[
+   {l:'Una legge sulla privacy con un\'autorità indipendente', e:'Il contrappeso che manca', pleases:'progressista', f:()=>{gd('giovani',3); gd('cetomedio',2); gd('imprenditori',-1);}},
+   {l:'Estendi: sanità, voto, tutto sull\'identità', e:'Efficienza, e un archivio che sa tutto', pleases:'tecnico', costo:{debito:0.3}, f:()=>{S.ind.debt+=0.3; gd('imprenditori',3); gd('cetomedio',1); gd('giovani',-2);}},
+   {l:'Rendilo facoltativo per i sussidi', e:'Chi non ha impronte leggibili mangia lo stesso', pleases:'conservatore', costo:{debito:0.2}, f:()=>{S.ind.debt+=0.2; gd('lavoratori',2); gd('cattolici',1);}}]},
+ {id:'in_p_d_donne', era:'contemporanea', paesi:['india'], min:'interno', kick:'Un terzo', t:'I seggi riservati alle donne', text:'Una legge riserva alle donne un terzo dei seggi in Parlamento e nelle assemblee degli Stati — ma entrerà in vigore solo dopo il prossimo ridisegno dei collegi, cioè chissà quando. Nei consigli di villaggio la riserva c\'è da trent\'anni, e ha cambiato i villaggi.', ch:[
+   {l:'Applicala alle prossime elezioni, senza aspettare il ridisegno', e:'Un terzo delle candidate subito, e i partiti cercano nomi', pleases:'progressista', f:()=>{gd('giovani',3); gd('cetomedio',2); gd('cattolici',-1); gd('pensionati',-1);}},
+   {l:'Rispetta il calendario della legge', e:'Cioè chissà quando', pleases:'conservatore', f:()=>{gd('pensionati',1); gd('giovani',-2);}},
+   {l:'Riserve nei partiti, non nei seggi', e:'Il modello che funziona altrove, e non qui', pleases:'tecnico', f:()=>{gd('cetomedio',1);}}]},
+ {id:'in_p_d_fondi', era:'contemporanea', paesi:['india'], min:'giustizia', kick:'Campagne', t:'I soldi delle campagne', text:'La Corte ha cancellato lo strumento che permetteva donazioni anonime ai partiti, e il paese ha scoperto chi dava a chi. Le campagne costano miliardi, i partiti li trovano, e nessuno sa dove. Una legge nuova è dovuta; nessun partito la scrive volentieri.', ch:[
+   {l:'Finanziamento pubblico e tetto alle spese', e:'Trasparente, e i partiti piangono miseria', pleases:'progressista', costo:{debito:0.2}, f:()=>{S.ind.debt+=0.2; gd('giovani',3); gd('cetomedio',2); gd('imprenditori',-2);}},
+   {l:'Donazioni solo tracciate e pubbliche', e:'Chi dà si vede; chi dava di nascosto smette', pleases:'tecnico', f:()=>{S.ind.stampa+=2; gd('cetomedio',2); gd('imprenditori',-2);}},
+   {l:'Nessuna legge: le campagne si finanziano come sempre', e:'Come sempre, e ora tutti lo sanno', pleases:'conservatore', f:()=>{S.ind.stampa-=3; gd('giovani',-2); gd('cetomedio',-1);}}]},
+ {id:'in_p_d_calore', era:'contemporanea', paesi:['india'], min:'salute', kick:'Estate', t:'Cinquanta gradi', text:'Le estati toccano cinquanta gradi nelle pianure, e chi lavora all\'aperto — la maggioranza — muore di caldo con numeri che nessuno conta bene. Le città hanno piani per il calore che nessuno finanzia; i villaggi non hanno l\'acqua.', ch:[
+   {l:'Piani per il calore obbligatori e finanziati in ogni città', e:'Ombra, acqua, orari: le cose semplici che costano', pleases:'tecnico', costo:{debito:0.5}, f:()=>{S.ind.debt+=0.5; gd('lavoratori',3); gd('pensionati',2); gd('cattolici',1);}},
+   {l:'Stop al lavoro all\'aperto nelle ore calde, per legge', e:'Chi non lavora non mangia, dicono i cantieri', pleases:'progressista', f:()=>{gd('lavoratori',2); gd('giovani',1); gd('imprenditori',-3);}},
+   {l:'Aria condizionata nelle scuole e negli ospedali pubblici', e:'La rete elettrica non regge, e si vede', pleases:'conservatore', costo:{debito:0.6}, f:()=>{S.ind.debt+=0.6; gd('cetomedio',2); gd('giovani',1);}}]},
+ {id:'in_p_d_universita', era:'contemporanea', paesi:['india'], min:'istruzione', kick:'Concorsi', t:'Il concorso truccato', text:'Milioni di ragazzi sostengono un unico esame nazionale per entrare in medicina, e i quesiti finiscono in vendita la notte prima. Le piazze si riempiono di diciottenni, la Corte convoca l\'agenzia, e il paese scopre che il suo ascensore sociale ha una porta di servizio.', ch:[
+   {l:'Riforma l\'agenzia degli esami, con esami digitali e più sedi', e:'Il minimo, e ci vorranno due anni', pleases:'tecnico', costo:{debito:0.3}, f:()=>{S.ind.debt+=0.3; gd('giovani',3); gd('cetomedio',2);}},
+   {l:'Restituisci gli esami agli Stati', e:'Trenta esami invece di uno; trenta porte di servizio', pleases:'conservatore', f:()=>{gd('cattolici',1); gd('cetomedio',-1); gd('giovani',-1);}},
+   {l:'Pene severe e un\'inchiesta federale', e:'Qualcuno finisce in prigione; l\'esame resta', pleases:'progressista', f:()=>{S.ind.stampa+=1; gd('giovani',2); gd('lavoratori',1);}}]},
+ {id:'in_p_d_vicino', era:'contemporanea', paesi:['india'], min:'esteri', kick:'Ovest', t:'Il vicino a ovest', text:'Con il vicino a ovest il paese ha combattuto tre guerre e condivide un fiume, una lingua e un confine dove non si passa. Ogni attentato riapre il dibattito; ogni distensione dura un\'estate. Le due bombe si guardano da settant\'anni.', ch:[
+   {l:'Nessun dialogo finché non finisce il terrorismo', e:'La linea che la maggioranza approva', pleases:'conservatore', f:()=>{gd('cattolici',3); gd('pensionati',2); gd('imprenditori',-1);}},
+   {l:'Riapri il commercio e il cricket', e:'La distensione dei piccoli passi', pleases:'progressista', f:()=>{gd('giovani',2); gd('imprenditori',2); gd('cattolici',-3);}},
+   {l:'Canali militari aperti, politica ferma', e:'Il minimo per non sbagliare', pleases:'tecnico', f:()=>{gd('cetomedio',1);}}]},
+ {id:'in_p_d_citta', era:'contemporanea', paesi:['india'], min:'infrastrutture', kick:'Metropoli', t:'La città che allaga', text:'Le metropoli crescono di un quartiere al mese, sopra i laghi e i canali che drenavano il monsone. Ogni luglio una città va sott\'acqua, e ogni luglio si scopre che il piano regolatore esiste e non lo rispetta nessuno.', ch:[
+   {l:'Metropolitane e drenaggi: un fondo federale per le città', e:'Le città non sono dello Stato centrale, ma i soldi sì', pleases:'tecnico', costo:{debito:0.9}, f:()=>{S.ind.debt+=0.9; gd('cetomedio',3); gd('lavoratori',2); gd('imprenditori',1);}},
+   {l:'Demolisci ciò che è costruito sui canali', e:'Giusto per l\'acqua, e le ruspe hanno un costo politico', pleases:'progressista', f:()=>{gd('giovani',2); gd('lavoratori',-3); gd('cetomedio',-1);}},
+   {l:'Sono competenze degli Stati e dei comuni', e:'Vero, e il monsone non lo sa', pleases:'conservatore', f:()=>{gd('cetomedio',-2);}}]},
+ /* ===== L86-3 · BRASILE, dossier di dicastero (scheda §B). ===== */
+ {id:'br_p_d_sus', era:'contemporanea', paesi:['brasile'], min:'salute', kick:'Sanità', t:'Il sistema unico', text:'Il paese ha un sistema sanitario pubblico universale per duecento milioni di persone, con code di mesi e medici che non vanno nell\'interno. Metà della classe media paga un\'assicurazione e usa comunque il pubblico per le cose gravi.', ch:[
+   {l:'Più medici nell\'interno, anche stranieri', e:'Il programma che ha già fatto discutere', pleases:'progressista', costo:{debito:0.5}, f:()=>{S.ind.debt+=0.5; gd('lavoratori',3); gd('cattolici',2); gd('cetomedio',1);}},
+   {l:'Fondi vincolati per Stato, con obiettivi sui tempi', e:'I governatori prendono e discutono', pleases:'tecnico', costo:{debito:0.6}, f:()=>{S.ind.debt+=0.6; gd('pensionati',2); gd('cetomedio',1);}},
+   {l:'Detrazioni per chi si assicura: alleggerisci il pubblico', e:'La classe media ringrazia, la coda resta', pleases:'conservatore', costo:{debito:0.3}, f:()=>{S.ind.debt+=0.3; gd('cetomedio',3); gd('imprenditori',2); gd('lavoratori',-2);}}]},
+ {id:'br_p_d_fisco', era:'contemporanea', paesi:['brasile'], min:'economia', kick:'Tributi', t:'La riforma delle cinque imposte', text:'Il paese ha il sistema fiscale più complicato del mondo: cinque imposte sui consumi, una per livello di governo, e imprese che assumono contabili invece di operai. Unificarle è approvato dopo trent\'anni di tentativi; attuarle è un decennio di transizione.', ch:[
+   {l:'Transizione rapida: cinque anni', e:'Le imprese respirano, gli Stati perdono gettito', pleases:'tecnico', f:()=>{S.ind.fiducia+=2; gd('imprenditori',4); gd('cetomedio',-1);}},
+   {l:'Transizione lunga, con compensazioni agli Stati', e:'Il modo brasiliano', pleases:'conservatore', costo:{debito:0.4}, f:()=>{S.ind.debt+=0.4; gd('imprenditori',1); gd('cetomedio',1);}},
+   {l:'Aliquota ridotta per cibo e medicine, piena per il resto', e:'Giusto per i poveri, complicato per i contabili', pleases:'progressista', f:()=>{gd('lavoratori',3); gd('cattolici',1); gd('imprenditori',-1);}}]},
+ {id:'br_p_d_favela', era:'contemporanea', paesi:['brasile'], min:'infrastrutture', kick:'Città', t:'La casa nella favela', text:'Milioni di persone vivono in quartieri che lo Stato non ha costruito e non riconosce: senza fogne, senza titolo, senza indirizzo. Urbanizzare costa; demolire è impossibile; ignorare è quello che si è fatto.', ch:[
+   {l:'Titoli di proprietà e fogne: riconosci quello che c\'è', e:'I quartieri diventano città', pleases:'progressista', costo:{debito:0.7}, f:()=>{S.ind.debt+=0.7; gd('lavoratori',4); gd('giovani',2); gd('cetomedio',-1);}},
+   {l:'Un programma di case popolari a rate', e:'Il programma che esiste, e non basta', pleases:'tecnico', costo:{debito:0.6}, f:()=>{S.ind.debt+=0.6; gd('lavoratori',3); gd('imprenditori',1);}},
+   {l:'Sicurezza prima: le forze dell\'ordine nei quartieri', e:'L\'ordine, e poi si vede', pleases:'conservatore', costo:{debito:0.3}, f:()=>{S.ind.debt+=0.3; gd('pensionati',2); gd('cetomedio',1); gd('giovani',-2);}}]},
+ {id:'br_p_d_siccita', era:'contemporanea', paesi:['brasile'], min:'sviluppo', kick:'Clima', t:'Il fiume che non arriva', text:'Il grande fiume del Nord tocca i minimi storici e i villaggi restano isolati per settimane; nel Sud le alluvioni cancellano città intere. Il paese che dipende dall\'acqua per l\'elettricità scopre che la pioggia non è più dove era.', ch:[
+   {l:'Un fondo permanente per le emergenze climatiche', e:'Si smette di improvvisare', pleases:'tecnico', costo:{debito:0.6}, f:()=>{S.ind.debt+=0.6; gd('cattolici',2); gd('cetomedio',2); gd('lavoratori',1);}},
+   {l:'Sole e vento: meno dipendenza dalle dighe', e:'Il Nordest ha il sole', pleases:'progressista', costo:{debito:0.5}, f:()=>{S.ind.debt+=0.5; gd('giovani',3); gd('imprenditori',1);}},
+   {l:'Aiuti quando serve, Stato per Stato', e:'Come ogni anno, e ogni anno di più', pleases:'conservatore', costo:{debito:0.3}, f:()=>{S.ind.debt+=0.3; gd('pensionati',1);}}]},
+ {id:'br_p_d_militari', era:'contemporanea', paesi:['brasile'], min:'difesa', kick:'Caserme', t:'I militari e la politica', text:'Le forze armate hanno governato il paese per vent\'anni e non ne hanno mai chiesto scusa; di recente alcuni ufficiali hanno flirtato con l\'idea di tornare. Tenerli fuori dalla politica è la regola; ricordarglielo è il problema.', ch:[
+   {l:'Divieto di cariche politiche per i militari in servizio', e:'Una riga di legge, e un silenzio nelle caserme', pleases:'progressista', f:()=>{gd('giovani',3); gd('cetomedio',1); gd('cattolici',-2); gd('pensionati',-2);}},
+   {l:'Nessuna riforma: il dialogo con i comandi', e:'La prudenza, e il flirt continua', pleases:'conservatore', f:()=>{gd('pensionati',2); gd('cattolici',1); gd('giovani',-2);}},
+   {l:'Più fondi e più professionalità: un esercito occupato', e:'Un esercito che lavora non cospira', pleases:'tecnico', costo:{debito:0.5}, f:()=>{S.ind.debt+=0.5; gd('pensionati',1); gd('imprenditori',1);}}]},
+ {id:'br_p_d_scuola', era:'contemporanea', paesi:['brasile'], min:'istruzione', kick:'Aule', t:'Il tempo pieno', text:'La scuola pubblica dura mezza giornata, e chi può paga il resto. I test internazionali mettono il paese in fondo, e le riforme cambiano nome a ogni ministro. Il tempo pieno è la promessa che tutti fanno e che costa il doppio degli insegnanti.', ch:[
+   {l:'Tempo pieno in tutte le scuole entro il mandato', e:'Il doppio degli insegnanti, e il Nordest per primo', pleases:'progressista', costo:{debito:0.9}, f:()=>{S.ind.debt+=0.9; gd('lavoratori',3); gd('giovani',3); gd('cattolici',1);}},
+   {l:'Prima l\'alfabetizzazione: leggere a sette anni', e:'Il minimo che manca', pleases:'tecnico', costo:{debito:0.3}, f:()=>{S.ind.debt+=0.3; gd('lavoratori',2); gd('cetomedio',1);}},
+   {l:'Scuole tecniche con le imprese', e:'Il lavoro prima del diploma', pleases:'conservatore', costo:{debito:0.4}, f:()=>{S.ind.debt+=0.4; gd('imprenditori',3); gd('giovani',1);}}]},
+ {id:'br_p_d_stato', era:'contemporanea', paesi:['brasile'], min:'interno', kick:'Governatori', t:'Il governatore che sfida', text:'Il governatore dello Stato più ricco governa come un Presidente in attesa: si oppone a ogni legge federale, tiene una polizia propria e parla al paese ogni sera. La federazione gli dà il diritto; la politica gli dà l\'occasione.', ch:[
+   {l:'Tratta con lui: fondi federali per il suo Stato', e:'Il rivale prende i soldi e continua', pleases:'tecnico', costo:{debito:0.4}, f:()=>{S.ind.debt+=0.4; gd('cetomedio',1);}},
+   {l:'Scavalcalo: parla ai sindaci del suo Stato', e:'La federazione ha tre livelli', pleases:'progressista', f:()=>{S.ind.stampa+=1; gd('lavoratori',1); gd('cetomedio',1);}},
+   {l:'Ignoralo: un governatore è un governatore', e:'Sereno, e lui riempie il vuoto', pleases:'conservatore', f:()=>{gd('cetomedio',-2);}}]},
+ {id:'br_p_d_argentina', era:'contemporanea', paesi:['brasile'], min:'esteri', kick:'Vicino', t:'Il vicino che cambia idea', text:'Il vicino del Sud è il partner del mercato comune e ogni pochi anni cambia governo e opinione sul mercato comune. L\'accordo con l\'Europa aspetta da vent\'anni; il vicino ora lo vuole, ora no; e l\'industria del paese vende là un\'auto su tre.', ch:[
+   {l:'Chiudi l\'accordo con l\'Europa, con o senza il vicino', e:'L\'agrobusiness esulta, l\'industria trema', pleases:'progressista', f:()=>{S.ind.fiducia+=1; gd('cattolici',3); gd('imprenditori',-1); gd('lavoratori',-2);}},
+   {l:'Tieni insieme il mercato comune: la pazienza', e:'Il metodo di sempre', pleases:'tecnico', f:()=>{gd('imprenditori',1);}},
+   {l:'Rinegozia il mercato comune: meno vincoli', e:'Ognuno per sé, con una bandiera comune', pleases:'conservatore', f:()=>{gd('imprenditori',2); gd('lavoratori',-1);}}]},
+ /* ===== L86-3 · ARGENTINA, dossier di dicastero (scheda §B). ===== */
+ {id:'ar_p_d_pensioni', era:'contemporanea', paesi:['argentina'], min:'lavoro', kick:'Previdenza', t:'Le moratorie', text:'Metà dei pensionati non ha versato abbastanza contributi e riceve la pensione grazie a leggi speciali che ogni governo rinnova. Chiuderle lascerebbe fuori le donne che hanno lavorato in casa; tenerle costa un punto di prodotto l\'anno.', ch:[
+   {l:'Rinnova la moratoria: nessuno resta fuori', e:'Il conto sale, la piazza no', pleases:'progressista', costo:{debito:0.7}, f:()=>{S.ind.debt+=0.7; gd('pensionati',4); gd('lavoratori',2); gd('imprenditori',-2);}},
+   {l:'Pensione minima universale, più bassa', e:'Tutti dentro, meno soldi a testa', pleases:'tecnico', costo:{debito:0.3}, f:()=>{S.ind.debt+=0.3; gd('pensionati',1); gd('cetomedio',1);}},
+   {l:'Chiudi: chi non ha versato riceve l\'assistenza', e:'I conti tornano, e le donne di casa restano fuori', pleases:'conservatore', costo:{debito:-0.5}, f:()=>{S.ind.debt-=0.5; S.ind.fiducia+=1; gd('pensionati',-4); gd('cattolici',-2); gd('imprenditori',1);}}]},
+ {id:'ar_p_d_treni', era:'contemporanea', paesi:['argentina'], min:'infrastrutture', kick:'Rotaie', t:'La rete che era la più grande', text:'Il paese aveva una delle reti ferroviarie più estese del mondo e ne ha chiusa la maggior parte in una generazione. Le città dell\'interno sono senza treno da trent\'anni, e chi lo promette vince le province.', ch:[
+   {l:'Riapri le linee dell\'interno, con lo Stato', e:'Un treno al giorno, e una provincia che vota', pleases:'progressista', costo:{debito:0.8}, f:()=>{S.ind.debt+=0.8; gd('cattolici',3); gd('lavoratori',2); gd('imprenditori',-1);}},
+   {l:'Concessioni ai privati per le linee merci', e:'Il grano viaggia, la gente no', pleases:'conservatore', f:()=>{gd('imprenditori',3); gd('cattolici',1); gd('lavoratori',-2);}},
+   {l:'Prima i treni della capitale, che portano milioni', e:'Dove viaggia la gente', pleases:'tecnico', costo:{debito:0.5}, f:()=>{S.ind.debt+=0.5; gd('lavoratori',3); gd('cetomedio',2); gd('cattolici',-2);}}]},
+ {id:'ar_p_d_narcos', era:'contemporanea', paesi:['argentina'], min:'interno', kick:'Porto', t:'La città del porto', text:'La città del fiume da cui parte la soia è diventata la porta della cocaina verso l\'Europa, con bande che sparano dalle moto e giudici minacciati. Il governo manda le forze federali; le bande cambiano quartiere.', ch:[
+   {l:'Forze federali permanenti e giudici protetti', e:'La città respira, le bande aspettano', pleases:'conservatore', costo:{debito:0.4}, f:()=>{S.ind.debt+=0.4; gd('pensionati',3); gd('cetomedio',2); gd('giovani',-1);}},
+   {l:'Colpisci il porto e il denaro', e:'Meno sirene, più effetto', pleases:'tecnico', f:()=>{gd('cetomedio',2); gd('imprenditori',-2);}},
+   {l:'Prevenzione nei quartieri, con i sindaci', e:'Una generazione, se dura', pleases:'progressista', costo:{debito:0.5}, f:()=>{S.ind.debt+=0.5; gd('giovani',3); gd('lavoratori',1); gd('pensionati',-1);}}]},
+ {id:'ar_p_d_gas', era:'contemporanea', paesi:['argentina'], min:'sviluppo', kick:'Patagonia', t:'La roccia piena di gas', text:'Nella Patagonia c\'è uno dei giacimenti di gas non convenzionale più grandi del mondo, e il paese importa gas d\'inverno perché non ha i tubi per portarlo alle città. Il gasdotto è l\'opera che ogni governo inaugura a metà.', ch:[
+   {l:'Finisci il gasdotto, a qualunque costo', e:'L\'inverno prossimo il gas è nostro', pleases:'tecnico', costo:{debito:0.9}, f:()=>{S.ind.debt+=0.9; S.ind.fiducia+=1; gd('imprenditori',3); gd('lavoratori',2);}},
+   {l:'Concessioni ai privati per tubi e terminali', e:'Il capitale arriva, se le regole restano', pleases:'conservatore', f:()=>{S.ind.fiducia+=1; gd('imprenditori',4); gd('lavoratori',-1);}},
+   {l:'Il gas resti nel paese: prezzo calmierato per le famiglie', e:'Le bollette basse, gli investimenti no', pleases:'progressista', costo:{debito:0.4}, f:()=>{S.ind.debt+=0.4; gd('cetomedio',2); gd('lavoratori',2); gd('imprenditori',-3);}}]},
+ {id:'ar_p_d_carne', era:'contemporanea', paesi:['argentina'], min:'economia', kick:'Tavola', t:'Il prezzo della carne', text:'Il paese mangia più carne di chiunque e la esporta in tutto il mondo: quando il prezzo interno sale, i governi hanno vietato l\'export per abbassarlo, e la campagna ha smesso di allevare. La bistecca è un indicatore politico più del cambio.', ch:[
+   {l:'Nessun blocco: si esporta e si alleva', e:'Il prezzo sale, la campagna investe', pleases:'conservatore', f:()=>{S.ind.fiducia+=1; gd('cattolici',3); gd('imprenditori',2); gd('cetomedio',-2); gd('lavoratori',-2);}},
+   {l:'Tagli popolari a prezzo concordato', e:'Il compromesso che regge un semestre', pleases:'tecnico', f:()=>{gd('lavoratori',2); gd('cetomedio',1); gd('cattolici',-1);}},
+   {l:'Blocco delle esportazioni finché il prezzo scende', e:'La bistecca cala, il mattatoio chiude', pleases:'progressista', f:()=>{S.ind.fiducia-=2; gd('lavoratori',3); gd('cetomedio',2); gd('cattolici',-5);}}]},
+ {id:'ar_p_d_scuola', era:'contemporanea', paesi:['argentina'], min:'istruzione', kick:'Aule', t:'I giorni di scuola', text:'Fra scioperi, feste e crisi, un anno scolastico perde settimane intere, e le province più povere ne perdono di più. La scuola pubblica è stata la macchina dell\'uguaglianza del paese; oggi chi può paga la privata.', ch:[
+   {l:'Un minimo di giorni garantito per legge, e stipendi indicizzati', e:'I sindacati firmano, il Tesoro paga', pleases:'progressista', costo:{debito:0.6}, f:()=>{S.ind.debt+=0.6; gd('lavoratori',3); gd('giovani',2); gd('cetomedio',1);}},
+   {l:'Buoni scuola: i soldi seguono lo studente', e:'Le private crescono', pleases:'conservatore', costo:{debito:0.3}, f:()=>{S.ind.debt+=0.3; gd('cetomedio',2); gd('cattolici',2); gd('lavoratori',-3);}},
+   {l:'Valutazione nazionale e fondi ai risultati', e:'I dati, e le province che li contestano', pleases:'tecnico', costo:{debito:0.2}, f:()=>{S.ind.debt+=0.2; gd('cetomedio',1);}}]},
+ {id:'ar_p_d_riserve', era:'contemporanea', paesi:['argentina'], min:'economia', kick:'Banca centrale', t:'Le riserve che non ci sono', text:'La banca centrale ha riserve nette vicine allo zero o sotto, e ogni scadenza di debito è un\'emergenza. Chiudere la banca centrale è stato promesso; rifornirla richiede dollari che arrivano solo con la fiducia, e la fiducia con le riserve.', ch:[
+   {l:'Compra riserve con l\'avanzo, mese per mese', e:'Lento, e i mercati contano ogni dollaro', pleases:'tecnico', costo:{debito:-0.3}, f:()=>{S.ind.debt-=0.3; S.ind.fiducia+=2; gd('cetomedio',-1);}},
+   {l:'Un prestito ponte da un paese amico', e:'Dollari oggi, dipendenza domani', pleases:'conservatore', costo:{debito:0.5}, f:()=>{S.ind.debt+=0.5; S.ind.fiducia+=1;}},
+   {l:'Riserve obbligatorie: gli esportatori liquidano in trenta giorni', e:'I dollari arrivano, e la campagna aspetta il prossimo cambio', pleases:'progressista', f:()=>{S.ind.fiducia-=1; gd('cattolici',-3); gd('lavoratori',1);}}]},
+ {id:'ar_p_d_antartide', era:'contemporanea', paesi:['argentina'], min:'difesa', kick:'Sud', t:'La porta dell\'Antartide', text:'La città più a sud del mondo è la porta dell\'Antartide, e il paese rivendica un settore del continente bianco insieme ad altri due. Le basi costano, il turismo cresce, e una potenza lontana costruisce un porto nel paese vicino.', ch:[
+   {l:'Un porto e una base navale nel Sud', e:'La sovranità si vede, e costa', pleases:'conservatore', costo:{debito:0.6}, f:()=>{S.ind.debt+=0.6; gd('pensionati',2); gd('imprenditori',1); gd('giovani',-1);}},
+   {l:'Scienza e turismo: la presenza civile', e:'Meno navi, più ricercatori', pleases:'progressista', costo:{debito:0.3}, f:()=>{S.ind.debt+=0.3; gd('giovani',2); gd('cetomedio',1);}},
+   {l:'Cooperazione con i vicini del Sud', e:'Il trattato lo prevede', pleases:'tecnico', f:()=>{gd('cetomedio',1);}}]},
+ /* ===== L86-3 · MESSICO, dossier di dicastero (scheda §B). ===== */
+ {id:'mx_p_d_scomparsi', era:'contemporanea', paesi:['messico'], min:'giustizia', kick:'Scomparsi', t:'Le madri con la pala', text:'Centomila persone scomparse, e sono le madri, con le pale, a cercare le fosse nei campi perché lo Stato non lo fa. Un istituto forense nazionale è promesso da anni; le fosse sono trovate dalle madri.', ch:[
+   {l:'Un istituto forense nazionale, finanziato, con le madri dentro', e:'Le pale diventano un\'istituzione', pleases:'progressista', costo:{debito:0.4}, f:()=>{S.ind.debt+=0.4; gd('cattolici',3); gd('giovani',3); gd('cetomedio',1);}},
+   {l:'Procure specializzate Stato per Stato', e:'Il metodo, e gli Stati che non lo applicano', pleases:'tecnico', costo:{debito:0.3}, f:()=>{S.ind.debt+=0.3; gd('cetomedio',1); gd('cattolici',1);}},
+   {l:'Rivedi il conteggio: non sono tutti scomparsi', e:'Il numero cala sulla carta, le madri no', pleases:'conservatore', f:()=>{S.ind.stampa-=3; gd('cattolici',-4); gd('giovani',-3);}}]},
+ {id:'mx_p_d_nearshoring', era:'contemporanea', paesi:['messico'], min:'sviluppo', kick:'Fabbriche', t:'Le fabbriche che arrivano', text:'Le imprese del mondo spostano le fabbriche dall\'Asia al Nord del paese, a due ore dal confine: è l\'occasione di una generazione, e manca tutto — elettricità, acqua, strade, ingegneri. Il vicino che le attira è lo stesso che minaccia i dazi.', ch:[
+   {l:'Parchi industriali con energia e acqua garantite', e:'Lo Stato prepara il terreno', pleases:'tecnico', costo:{debito:0.8}, f:()=>{S.ind.debt+=0.8; S.ind.fiducia+=1; gd('imprenditori',4); gd('lavoratori',3);}},
+   {l:'Incentivi fiscali a chi arriva', e:'Arrivano, e pagano poco', pleases:'conservatore', costo:{debito:0.3}, f:()=>{S.ind.debt+=0.3; gd('imprenditori',3); gd('cetomedio',-1);}},
+   {l:'Condizioni: salari e sindacati veri nelle fabbriche nuove', e:'Il vicino le chiede anche lui', pleases:'progressista', f:()=>{gd('lavoratori',4); gd('imprenditori',-2);}}]},
+ {id:'mx_p_d_sanita', era:'contemporanea', paesi:['messico'], min:'salute', kick:'Farmacie', t:'Le medicine che mancano', text:'Metà del paese non ha un\'assicurazione sanitaria e va nelle farmacie con il medico accanto, che visitano per pochi pesos. Il sistema pubblico è stato riformato due volte in sei anni; le medicine mancano negli ospedali e abbondano sui banchi.', ch:[
+   {l:'Un sistema universale con acquisti centralizzati', e:'La terza riforma; forse quella giusta', pleases:'progressista', costo:{debito:0.9}, f:()=>{S.ind.debt+=0.9; gd('lavoratori',3); gd('cattolici',2); gd('pensionati',2);}},
+   {l:'Regolarizza le farmacie con medico: sono il sistema', e:'Onesto, e nessuno lo chiama sanità pubblica', pleases:'tecnico', f:()=>{gd('cetomedio',2); gd('imprenditori',2); gd('lavoratori',-1);}},
+   {l:'Assicurazione privata sussidiata', e:'Il modello del vicino', pleases:'conservatore', costo:{debito:0.5}, f:()=>{S.ind.debt+=0.5; gd('imprenditori',3); gd('cetomedio',1); gd('lavoratori',-2);}}]},
+ {id:'mx_p_d_esercito', era:'contemporanea', paesi:['messico'], min:'difesa', kick:'Caserme', t:'L\'esercito che costruisce', text:'L\'esercito costruisce aeroporti, treni e banche, gestisce porti e dogane, e pattuglia le strade: è l\'istituzione che il paese si fida di più e quella che nessuno controlla. Restituire tutto ai civili è promesso; l\'esercito è più efficiente, e lo sa.', ch:[
+   {l:'Un calendario di restituzione ai civili', e:'L\'esercito annuisce, e tiene i porti', pleases:'progressista', f:()=>{gd('giovani',2); gd('cetomedio',2); gd('pensionati',-2);}},
+   {l:'Controllo parlamentare sulle imprese militari', e:'Il minimo, e già molto', pleases:'tecnico', f:()=>{gd('cetomedio',2); gd('imprenditori',1);}},
+   {l:'Funziona: si lascia com\'è', e:'Efficienza, e un potere che cresce', pleases:'conservatore', f:()=>{gd('pensionati',3); gd('cattolici',1); gd('giovani',-2);}}]},
+ {id:'mx_p_d_mais', era:'contemporanea', paesi:['messico'], min:'sviluppo', kick:'Campi', t:'Il mais e gli altri', text:'Il paese ha inventato il mais e ne importa dal vicino più di quanto ne coltivi. Vietare il mais transgenico per le tortillas è identità e agricoltura contadina; il vicino lo chiama una barriera commerciale e ha vinto l\'arbitrato.', ch:[
+   {l:'Divieto per il consumo umano, importazione libera per il resto', e:'La tortilla è salva, l\'arbitrato resta', pleases:'progressista', f:()=>{gd('cattolici',3); gd('lavoratori',1); gd('imprenditori',-2);}},
+   {l:'Applica l\'arbitrato: nessun divieto', e:'Il vicino ringrazia, le campagne no', pleases:'conservatore', f:()=>{S.ind.fiducia+=1; gd('imprenditori',2); gd('cattolici',-4);}},
+   {l:'Prezzi garantiti ai coltivatori di mais nativo', e:'Il sussidio al posto del divieto', pleases:'tecnico', costo:{debito:0.5}, f:()=>{S.ind.debt+=0.5; gd('cattolici',3); gd('lavoratori',1);}}]},
+ {id:'mx_p_d_pensioni', era:'contemporanea', paesi:['messico'], min:'lavoro', kick:'Previdenza', t:'La pensione al cento per cento', text:'Il sistema a capitalizzazione degli anni Novanta darà pensioni da un terzo dell\'ultimo stipendio, e un fondo pubblico promette di completarle fino all\'intero. Chi paga il fondo non è scritto da nessuna parte; chi lo riceve vota.', ch:[
+   {l:'Fondo pubblico, finanziato con tagli altrove', e:'La promessa costa, e la pagano gli altri programmi', pleases:'progressista', costo:{debito:0.9}, f:()=>{S.ind.debt+=0.9; S.ind.fiducia-=2; gd('pensionati',5); gd('lavoratori',3); gd('giovani',-2);}},
+   {l:'Alza i contributi delle imprese, gradualmente', e:'La riforma che c\'è già, e non basta', pleases:'tecnico', f:()=>{gd('pensionati',2); gd('imprenditori',-2);}},
+   {l:'Nessuna garanzia: il sistema è quello', e:'I conti tornano, i pensionati no', pleases:'conservatore', f:()=>{S.ind.fiducia+=2; gd('imprenditori',2); gd('pensionati',-4); gd('lavoratori',-2);}}]},
+ {id:'mx_p_d_elettorale', era:'contemporanea', paesi:['messico'], min:'interno', kick:'Istituto', t:'L\'arbitro delle elezioni', text:'L\'istituto elettorale indipendente è nato per togliere le urne al partito che le contava da settant\'anni, ed è considerato la conquista della democrazia messicana. Ridurne il bilancio e l\'autonomia è stato proposto; le piazze si sono riempite di rosa.', ch:[
+   {l:'Autonomia e bilancio intatti', e:'La piazza rosa applaude', pleases:'tecnico', f:()=>{gd('cetomedio',3); gd('giovani',2); gd('lavoratori',-1);}},
+   {l:'Riduci i costi, lascia l\'autonomia', e:'Il compromesso che le piazze non credono', pleases:'conservatore', costo:{debito:-0.1}, f:()=>{S.ind.debt-=0.1; gd('cetomedio',-1);}},
+   {l:'Riforma: consiglieri eletti, bilancio dimezzato', e:'La base applaude, l\'arbitro si indebolisce', pleases:'populista', costo:{debito:-0.2}, f:()=>{S.ind.debt-=0.2; S.ind.stampa-=2; gd('lavoratori',2); gd('cetomedio',-4); gd('giovani',-2);}}]},
+ {id:'mx_p_d_turismo', era:'contemporanea', paesi:['messico'], min:'economia', kick:'Caraibi', t:'La costa dei resort', text:'La costa caraibica è la macchina turistica del paese e la si sta consumando: alghe, cemento, acqua che manca, e i cartelli che riscuotono nei bar. Il turismo paga; la costa presenta il conto.', ch:[
+   {l:'Moratoria sul cemento e depuratori', e:'La costa respira, gli investitori no', pleases:'progressista', costo:{debito:0.4}, f:()=>{S.ind.debt+=0.4; gd('giovani',3); gd('imprenditori',-3);}},
+   {l:'Sicurezza federale nelle zone turistiche', e:'I turisti tornano a dormire', pleases:'conservatore', costo:{debito:0.3}, f:()=>{S.ind.debt+=0.3; gd('imprenditori',3); gd('lavoratori',1);}},
+   {l:'Tassa turistica per l\'ambiente', e:'Chi consuma paga', pleases:'tecnico', costo:{debito:-0.2}, f:()=>{S.ind.debt-=0.2; gd('giovani',2); gd('imprenditori',-1);}}]},
+ /* ===== L87-3 · SUDAFRICA, dossier di dicastero (scheda §B). ===== */
+ {id:'za_p_d_cattura', era:'contemporanea', paesi:['sudafrica'], min:'giustizia', kick:'Cattura', t:'Dopo la cattura dello Stato', text:'Una commissione ha documentato in migliaia di pagine come una famiglia di affaristi avesse comprato ministri e imprese pubbliche per un decennio. I responsabili sono noti; i processi sono pochi; e il paese aspetta di vedere qualcuno in prigione.', ch:[
+   {l:'Una procura speciale con fondi e protezione', e:'I processi partono, e i nomi sono nel tuo partito', pleases:'progressista', costo:{debito:0.2}, f:()=>{S.ind.debt+=0.2; S.ind.stampa+=3; gd('cetomedio',3); gd('giovani',2); tutteCorrenti(-4);}},
+   {l:'Recupera i soldi, prima delle persone', e:'I miliardi tornano a metà', pleases:'tecnico', costo:{debito:-0.2}, f:()=>{S.ind.debt-=0.2; gd('cetomedio',1);}},
+   {l:'Il rapporto è pubblico: basta così', e:'Il paese lo legge, e ricorda', pleases:'conservatore', f:()=>{S.ind.stampa-=3; gd('cetomedio',-3); gd('giovani',-2);}}]},
+ {id:'za_p_d_comuni', era:'contemporanea', paesi:['sudafrica'], min:'interno', kick:'Municipi', t:'I comuni che falliscono', text:'La maggior parte dei comuni non riesce a chiudere il bilancio, e molti non pagano l\'elettricità che distribuiscono: strade con buche, discariche a cielo aperto, consigli comunali che cambiano sindaco ogni mese fra coalizioni instabili.', ch:[
+   {l:'Commissariamento dei comuni falliti', e:'Lo Stato entra, i sindaci escono', pleases:'tecnico', costo:{debito:0.3}, f:()=>{S.ind.debt+=0.3; gd('cetomedio',2); gd('lavoratori',-1);}},
+   {l:'Riforma: professionisti al posto dei nominati politici', e:'Il merito, e le correnti che vivono di nomine', pleases:'progressista', f:()=>{gd('cetomedio',2); gd('giovani',1); tutteCorrenti(-3);}},
+   {l:'Più fondi, senza condizioni', e:'I soldi arrivano dove sono spariti', pleases:'conservatore', costo:{debito:0.6}, f:()=>{S.ind.debt+=0.6; gd('lavoratori',2); gd('cetomedio',-1);}}]},
+ {id:'za_p_d_porti', era:'contemporanea', paesi:['sudafrica'], min:'infrastrutture', kick:'Logistica', t:'I porti e i binari', text:'Le navi aspettano settimane davanti ai porti, e il carbone e il ferro non arrivano al mare perché i treni merci sono fermi: cavi rubati, locomotive senza pezzi, una compagnia di Stato che fa tutto e niente. Le miniere pagano camion invece di treni.', ch:[
+   {l:'Apri porti e binari ai privati', e:'I container si muovono, i sindacati no', pleases:'conservatore', f:()=>{S.ind.fiducia+=2; gd('imprenditori',4); gd('lavoratori',-3);}},
+   {l:'Ristruttura la compagnia di Stato con una nuova direzione', e:'La terza direzione in cinque anni', pleases:'tecnico', costo:{debito:0.4}, f:()=>{S.ind.debt+=0.4; gd('cetomedio',1);}},
+   {l:'Investi: locomotive e sicurezza sui binari', e:'Pubblico e lento', pleases:'progressista', costo:{debito:0.8}, f:()=>{S.ind.debt+=0.8; gd('lavoratori',3); gd('imprenditori',1);}}]},
+ {id:'za_p_d_assegni', era:'contemporanea', paesi:['sudafrica'], min:'lavoro', kick:'Assegni', t:'I ventotto milioni', text:'Quasi metà della popolazione riceve un assegno dallo Stato: bambini, anziani, e dalla pandemia un sussidio per chi non ha nulla. È il più grande sistema di protezione del continente, e tiene in piedi le township; i mercati chiedono come si paga.', ch:[
+   {l:'Rendi permanente il sussidio di emergenza', e:'Un diritto nuovo, e un miliardo al mese', pleases:'progressista', costo:{debito:0.9}, f:()=>{S.ind.debt+=0.9; S.ind.fiducia-=2; gd('lavoratori',4); gd('giovani',3);}},
+   {l:'Lega il sussidio a formazione o lavoro pubblico', e:'Il compromesso che le township chiamano condizione', pleases:'tecnico', costo:{debito:0.5}, f:()=>{S.ind.debt+=0.5; gd('cetomedio',2); gd('lavoratori',1);}},
+   {l:'Lascialo scadere', e:'I conti tornano, le file alle mense no', pleases:'conservatore', costo:{debito:-0.6}, f:()=>{S.ind.debt-=0.6; S.ind.fiducia+=2; gd('lavoratori',-5); gd('giovani',-3); gd('imprenditori',2);}}]},
+ {id:'za_p_d_universita', era:'contemporanea', paesi:['sudafrica'], min:'istruzione', kick:'Campus', t:'Le tasse universitarie', text:'Un movimento studentesco ha ottenuto l\'università gratuita per le famiglie povere, e il fondo che la paga non regge: borse in ritardo, studenti sfrattati dalle residenze, campus chiusi per protesta ogni febbraio.', ch:[
+   {l:'Rifinanzia il fondo e allarga la platea', e:'I campus riaprono, il Tesoro chiude', pleases:'progressista', costo:{debito:0.6}, f:()=>{S.ind.debt+=0.6; gd('giovani',4); gd('lavoratori',2); gd('imprenditori',-1);}},
+   {l:'Prestiti a restituzione condizionata al reddito', e:'Il modello che gli studenti hanno già rifiutato', pleases:'tecnico', costo:{debito:0.2}, f:()=>{S.ind.debt+=0.2; gd('cetomedio',1); gd('giovani',-2);}},
+   {l:'Tetto agli iscritti: qualità prima di quantità', e:'Meno studenti, più diplomi', pleases:'conservatore', f:()=>{gd('imprenditori',1); gd('giovani',-4); gd('lavoratori',-1);}}]},
+ {id:'za_p_d_brics', era:'contemporanea', paesi:['sudafrica'], min:'esteri', kick:'Blocchi', t:'Fra i due mondi', text:'Il paese siede nel gruppo delle grandi economie emergenti accanto a chi l\'Occidente considera avversario, e vende i suoi minerali all\'Occidente. Il non allineamento è la sua bandiera; ogni voto all\'ONU è una scelta di campo che qualcuno presenta il conto.', ch:[
+   {l:'Non allineamento dichiarato: nessun blocco', e:'Tutti scontenti allo stesso modo', pleases:'tecnico', f:()=>{gd('cetomedio',1); gd('imprenditori',-1);}},
+   {l:'Il Sud globale prima: il gruppo emergente', e:'La base applaude, gli investitori occidentali contano', pleases:'progressista', f:()=>{S.ind.fiducia-=2; gd('lavoratori',2); gd('giovani',2); gd('imprenditori',-3);}},
+   {l:'Il commercio prima: l\'Occidente compra', e:'I mercati respirano, la base ricorda chi ci aiutò', pleases:'conservatore', f:()=>{S.ind.fiducia+=2; gd('imprenditori',3); gd('lavoratori',-2);}}]},
+ {id:'za_p_d_case', era:'contemporanea', paesi:['sudafrica'], min:'infrastrutture', kick:'Township', t:'Le case promesse', text:'Lo Stato ha costruito milioni di case gratuite dalla fine del regime, e le liste d\'attesa sono ancora di decenni. Le baracche crescono ai bordi delle città, i terreni occupati diventano quartieri, e ogni sgombero è una battaglia.', ch:[
+   {l:'Titoli e servizi ai quartieri informali: riconosci quello che c\'è', e:'Fogne e luce dove c\'erano baracche', pleases:'progressista', costo:{debito:0.7}, f:()=>{S.ind.debt+=0.7; gd('lavoratori',4); gd('giovani',2); gd('cetomedio',-1);}},
+   {l:'Costruisci vicino al lavoro, non ai margini', e:'La città giusta, e la terra costa', pleases:'tecnico', costo:{debito:0.9}, f:()=>{S.ind.debt+=0.9; gd('lavoratori',3); gd('imprenditori',1);}},
+   {l:'Sgomberi e ordine: le occupazioni non si premiano', e:'La legge, e le ruspe', pleases:'conservatore', f:()=>{gd('cetomedio',2); gd('imprenditori',1); gd('lavoratori',-4); gd('giovani',-2);}}]},
+ {id:'za_p_d_polizia', era:'contemporanea', paesi:['sudafrica'], min:'interno', kick:'Divise', t:'La polizia che fa paura', text:'Ogni anno la polizia uccide centinaia di persone e altrettante muoiono in custodia; un\'unità investigativa indipendente esiste e non ha i mezzi. La gente delle township teme la polizia quasi quanto le bande.', ch:[
+   {l:'Rafforza l\'unità indipendente e le telecamere', e:'I numeri si vedono, e calano', pleases:'progressista', costo:{debito:0.3}, f:()=>{S.ind.debt+=0.3; gd('giovani',3); gd('lavoratori',2); gd('pensionati',-1);}},
+   {l:'Formazione e stipendi: una polizia migliore', e:'Lento e giusto', pleases:'tecnico', costo:{debito:0.5}, f:()=>{S.ind.debt+=0.5; gd('cetomedio',2); gd('pensionati',1);}},
+   {l:'La polizia fa il suo lavoro: nessuna riforma', e:'Le divise annuiscono, le township no', pleases:'conservatore', f:()=>{gd('pensionati',2); gd('giovani',-3); gd('lavoratori',-2);}}]},
+ /* ===== L87-3 · NIGERIA, dossier di dicastero (scheda §B). ===== */
+ {id:'ng_p_d_pastori', era:'contemporanea', paesi:['nigeria'], min:'interno', kick:'Pascoli', t:'I pastori e i contadini', text:'Nella fascia centrale i pastori nomadi scendono con le mandrie sui campi dei contadini, e la terra che bastava a tutti non basta più: il deserto avanza, i corridoi del bestiame sono coltivati, e ogni stagione ci sono villaggi bruciati da una parte e dall\'altra.', ch:[
+   {l:'Ranch statali: fine della transumanza', e:'I contadini applaudono, i pastori perdono un modo di vivere', pleases:'tecnico', costo:{debito:0.6}, f:()=>{S.ind.debt+=0.6; gd('cattolici',2); gd('cetomedio',2); gd('lavoratori',-1);}},
+   {l:'Corridoi protetti e tribunali di conciliazione', e:'La tradizione, con lo Stato accanto', pleases:'progressista', costo:{debito:0.3}, f:()=>{S.ind.debt+=0.3; gd('cattolici',2); gd('giovani',1);}},
+   {l:'Sicurezza: pattuglie e armi confiscate', e:'Le pattuglie arrivano dopo', pleases:'conservatore', costo:{debito:0.4}, f:()=>{S.ind.debt+=0.4; gd('pensionati',2); gd('cetomedio',1); gd('giovani',-1);}}]},
+ {id:'ng_p_d_sanita', era:'contemporanea', paesi:['nigeria'], min:'salute', kick:'Ospedali', t:'L\'ospedale che non c\'è', text:'Un paese di duecento milioni con pochi medici per abitante, e i pochi che restano nelle città. I ricchi si curano all\'estero, compresi i ministri; i poveri dal farmacista. L\'assicurazione sanitaria obbligatoria è legge da anni e copre una minoranza.', ch:[
+   {l:'Assicurazione pubblica finanziata dalle tasse, per tutti', e:'Il diritto, e il conto', pleases:'progressista', costo:{debito:0.9}, f:()=>{S.ind.debt+=0.9; gd('lavoratori',4); gd('cattolici',3); gd('cetomedio',1);}},
+   {l:'Cliniche di base in ogni distretto, con infermieri', e:'Il primo livello, che è quello che manca', pleases:'tecnico', costo:{debito:0.6}, f:()=>{S.ind.debt+=0.6; gd('cattolici',3); gd('lavoratori',2); gd('pensionati',1);}},
+   {l:'Divieto di cure all\'estero per i funzionari pubblici', e:'Simbolico, e i ministri protestano', pleases:'populista', f:()=>{S.ind.stampa+=2; gd('lavoratori',2); gd('giovani',2); gd('cetomedio',1);}}]},
+ {id:'ng_p_d_strade', era:'contemporanea', paesi:['nigeria'], min:'infrastrutture', kick:'Asfalto', t:'L\'autostrada costiera', text:'Un\'autostrada di settecento chilometri lungo la costa, dal costo di decine di miliardi, che demolisce resort e villaggi di pescatori: l\'opera simbolo di un governo. Le strade dell\'interno, dove viaggia il paese, hanno buche che inghiottono i camion.', ch:[
+   {l:'Prima le strade dell\'interno: manutenzione ovunque', e:'Non si inaugura, e si viaggia', pleases:'tecnico', costo:{debito:0.6}, f:()=>{S.ind.debt+=0.6; gd('cattolici',3); gd('lavoratori',2); gd('cetomedio',1);}},
+   {l:'Avanti con l\'autostrada: il paese ha bisogno di simboli', e:'Il nastro, fra dieci anni', pleases:'conservatore', costo:{debito:1.0}, f:()=>{S.ind.debt+=1.0; gd('imprenditori',3); gd('cetomedio',-1); gd('lavoratori',-1);}},
+   {l:'Concessioni a pedaggio per le grandi arterie', e:'Chi viaggia paga', pleases:'progressista', costo:{debito:0.3}, f:()=>{S.ind.debt+=0.3; gd('imprenditori',2); gd('cetomedio',-2);}}]},
+ {id:'ng_p_d_debito', era:'contemporanea', paesi:['nigeria'], min:'economia', kick:'Interessi', t:'Gli interessi che mangiano tutto', text:'Lo Stato spende in interessi quasi tutto quello che incassa in tasse, perché quasi nessuno paga le tasse: il paese ha una delle pressioni fiscali più basse del mondo e vive del petrolio. Riscuotere è la riforma di cui tutti parlano e che nessuno fa.', ch:[
+   {l:'Riforma fiscale: allarga la base, digitalizza', e:'Le entrate crescono, lentamente', pleases:'tecnico', costo:{debito:-0.5}, f:()=>{S.ind.debt-=0.5; S.ind.fiducia+=2; gd('imprenditori',-2); gd('cetomedio',-1);}},
+   {l:'Rinegozia il debito con i creditori', e:'Un anno comprato', pleases:'progressista', costo:{debito:0.2}, f:()=>{S.ind.debt+=0.2; gd('lavoratori',1);}},
+   {l:'Tagli alla spesa federale', e:'Il bilancio è piccolo; i tagli si vedono', pleases:'conservatore', costo:{debito:-0.4}, f:()=>{S.ind.debt-=0.4; S.ind.fiducia+=1; gd('lavoratori',-3); gd('cattolici',-1);}}]},
+ {id:'ng_p_d_scuola', era:'contemporanea', paesi:['nigeria'], min:'istruzione', kick:'Banchi', t:'I bambini fuori da scuola', text:'Il paese ha più bambini fuori da scuola di qualunque altro al mondo, soprattutto nel Nord: scuole chiuse per i rapimenti, famiglie che non possono, e un sistema religioso parallelo che insegna altro. Ogni piano promette l\'istruzione universale; i banchi restano vuoti.', ch:[
+   {l:'Pasto gratuito a scuola e trasferimenti alle famiglie', e:'I bambini vengono per il pasto, e restano', pleases:'progressista', costo:{debito:0.8}, f:()=>{S.ind.debt+=0.8; gd('lavoratori',3); gd('cattolici',3); gd('giovani',2);}},
+   {l:'Sicurezza nelle scuole del Nord: recinti e guardie', e:'La condizione prima di tutto', pleases:'conservatore', costo:{debito:0.5}, f:()=>{S.ind.debt+=0.5; gd('cattolici',2); gd('pensionati',2);}},
+   {l:'Integra le scuole tradizionali nel sistema, con i programmi', e:'Il ponte che il Nord accetta', pleases:'tecnico', costo:{debito:0.4}, f:()=>{S.ind.debt+=0.4; gd('cattolici',3); gd('cetomedio',1);}}]},
+ {id:'ng_p_d_vicini', era:'contemporanea', paesi:['nigeria'], min:'esteri', kick:'Sahel', t:'I vicini con i militari', text:'Tre paesi a nord, governati da militari, hanno lasciato la comunità regionale che il paese guida e hanno chiesto aiuto a una potenza lontana. Le frontiere restano aperte al contrabbando e alle bande, chiuse al commercio. Il paese più grande della regione deve decidere se è ancora il suo capo.', ch:[
+   {l:'Dialogo: riportali dentro senza condizioni', e:'La comunità regionale sopravvive, l\'autorità no', pleases:'progressista', f:()=>{gd('imprenditori',2); gd('cattolici',1); gd('pensionati',-2);}},
+   {l:'Sanzioni e frontiere chiuse', e:'La linea dura, e il contrabbando aumenta', pleases:'conservatore', f:()=>{gd('pensionati',2); gd('imprenditori',-3); gd('lavoratori',-1);}},
+   {l:'Cooperazione militare sul confine, politica a parte', e:'Il minimo che serve', pleases:'tecnico', costo:{debito:0.3}, f:()=>{S.ind.debt+=0.3; gd('cetomedio',1); gd('pensionati',1);}}]},
+ {id:'ng_p_d_corruzione', era:'contemporanea', paesi:['nigeria'], min:'giustizia', kick:'Agenzia', t:'L\'agenzia anticorruzione', text:'L\'agenzia anticorruzione arresta ex governatori e banchieri, e i processi durano quindici anni; ogni governo la usa contro il precedente. Il paese è fra i più corrotti nelle classifiche e fra i più stanchi di esserlo.', ch:[
+   {l:'Tribunali speciali con tempi certi', e:'I processi finiscono, e qualcuno va dentro', pleases:'tecnico', costo:{debito:0.2}, f:()=>{S.ind.debt+=0.2; S.ind.stampa+=2; gd('cetomedio',3); gd('giovani',2); tutteCorrenti(-3);}},
+   {l:'Dichiarazione patrimoniale pubblica per tutti gli eletti', e:'Trasparente, e il tuo partito protesta', pleases:'progressista', f:()=>{S.ind.stampa+=2; gd('giovani',3); gd('cetomedio',2); tutteCorrenti(-4);}},
+   {l:'L\'agenzia lavora: nessuna riforma', e:'Lavora contro il governo precedente', pleases:'conservatore', f:()=>{S.ind.stampa-=2; gd('cetomedio',-2);}}]},
+ {id:'ng_p_d_tech', era:'contemporanea', paesi:['nigeria'], min:'sviluppo', kick:'Startup', t:'La città delle startup', text:'La megalopoli ha la scena tecnologica più viva del continente: pagamenti digitali, giovani programmatori, capitali stranieri. Il governo la vede e non sa se regolarla o lasciarla; ha già vietato le criptovalute e poi le ha permesse.', ch:[
+   {l:'Sandbox regolatorio e visti per i talenti', e:'La scena cresce, se non parte', pleases:'progressista', costo:{debito:0.2}, f:()=>{S.ind.debt+=0.2; gd('giovani',4); gd('imprenditori',3);}},
+   {l:'Regole bancarie piene: le startup sono banche', e:'La stabilità, e le startup vanno altrove', pleases:'conservatore', f:()=>{S.ind.fiducia+=1; gd('imprenditori',-2); gd('giovani',-3);}},
+   {l:'Fondo pubblico di investimento', e:'Lo Stato socio, con i suoi tempi', pleases:'tecnico', costo:{debito:0.5}, f:()=>{S.ind.debt+=0.5; gd('giovani',2); gd('imprenditori',1);}}]},
 ];
 
 /* eventi gravi, rari */
@@ -5714,6 +6310,556 @@ const EVENTS=[
    {l:'Sì: le lingue del paese sono tutte del paese', e:'Cuffie in aula, e titoli', f:()=>{S.ind.stampa+=1; gd('giovani',2); gd('cetomedio',-1); gd('pensionati',-2);}},                                                                     // ⑫
    {l:'No: in aula si parla la lingua comune', e:'Un principio, e tre regioni che lo ricordano', f:()=>{gd('pensionati',2); gd('cetomedio',1); gd('giovani',-2);}},
    {l:'Solo in commissione', e:'Il compromesso che scontenta con misura', f:()=>{gd('cetomedio',1);}}]},
+ /* ===== L83-1 · STATI UNITI, PRESENTE ARRICCHITO (scheda PRESET-USA-PRESENTE §A) — dodici questioni. Il Presidente non cade:
+    tratta con un Congresso che non controlla. Nessuna data, nessun nome. ===== */
+ {id:'us_p_tetto', era:'contemporanea', paesi:['usa'], min:'economia', kick:'Congresso', t:'Il tetto del debito', text:'Il Tesoro ha quasi finito i soldi che la legge gli permette di prendere in prestito, e il Congresso usa la scadenza come ostaggio: alzare il tetto in cambio di tagli. Se non si alza, il paese non paga le sue bollette per la prima volta nella storia.', ch:[
+   {l:'Tratta: tagli in cambio del tetto', e:'Si evita il default, si pagano i programmi', costo:{debito:-0.6}, f:()=>{S.ind.debt-=0.6; S.ind.fiducia+=2; gd('lavoratori',-3); gd('pensionati',-2); gd('imprenditori',2);}},                       // ①
+   {l:'Nessun negoziato: si alza e basta', e:'Fermo, e i mercati contano i giorni', f:()=>{S.ind.fiducia-=3; S.ind.stampa+=1; gd('lavoratori',2); gd('cetomedio',-1);}},
+   {l:'Un tetto sospeso per due anni', e:'Il problema torna dopo le prossime elezioni', costo:{debito:0.3}, f:()=>{S.ind.debt+=0.3; gd('cetomedio',1);}}]},
+ {id:'us_p_shutdown', era:'contemporanea', paesi:['usa'], kick:'Bilancio', t:'Il governo chiude', text:'Il Congresso non ha approvato il bilancio e a mezzanotte gli uffici federali chiudono: parchi sbarrati, dipendenti a casa senza stipendio, controllori di volo che lavorano gratis. Ogni giorno che passa qualcuno dà la colpa a qualcun altro.', ch:[
+   {l:'Firma una proroga senza condizioni', e:'Gli uffici riaprono, l\'altra parte esulta', f:()=>{S.ind.stampa-=2; gd('lavoratori',2); gd('cetomedio',1); gd('imprenditori',-1);}},
+   {l:'Resisti: il Congresso deve cedere', e:'Ogni giorno costa, a tutti', f:()=>{S.ind.fiducia-=2; allG(-2); gd('pensionati',1);}},
+   {l:'Un accordo di mezzanotte con qualcosa per tutti', e:'Nessuno ha vinto, tutti lo dicono', costo:{debito:0.4}, f:()=>{S.ind.debt+=0.4; S.ind.stampa+=1; gd('cetomedio',1);}}]},
+ {id:'us_p_corte', era:'contemporanea', paesi:['usa'], min:'giustizia', kick:'Corte Suprema', t:'Un seggio alla Corte', text:'Un giudice della Corte Suprema lascia il seggio, e per la prima volta in anni puoi nominare chi lo occuperà — a vita. Il Senato deve confermarlo, e il Senato non è tuo.', ch:[
+   {l:'Un nome di parte: la base lo chiede', e:'La conferma sarà una guerra', f:()=>{S.ind.stampa-=2; gd('cattolici',4); gd('cetomedio',1); gd('giovani',-3);}},
+   {l:'Un nome che il Senato possa confermare', e:'Passa, e la base ti chiede perché', f:()=>{gd('cetomedio',2); gd('cattolici',-2); gd('giovani',1);}},
+   {l:'Nessuna nomina prima delle elezioni', e:'Il seggio resta vuoto, e diventa il tema', f:()=>{S.ind.stampa+=1; gd('giovani',1); gd('cattolici',-1);}}]},
+ {id:'us_p_frontiera', era:'contemporanea', paesi:['usa'], min:'interno', kick:'Confine sud', t:'Il confine', text:'Gli arrivi al confine meridionale sono ai massimi e i governatori degli Stati di frontiera mandano autobus di migranti alle città del nord per farsi sentire. Il Congresso discute da vent\'anni una riforma che non arriva.', ch:[
+   {l:'Ordine esecutivo: chiudi gli ingressi irregolari', e:'I numeri scendono, i tribunali si riempiono', f:()=>{gd('pensionati',3); gd('cetomedio',2); gd('giovani',-3); gd('lavoratori',-1);}},
+   {l:'Riforma completa: sicurezza e regolarizzazione insieme', e:'Il grande accordo, se il Congresso ci sta', costo:{debito:0.5}, f:()=>{S.ind.debt+=0.5; gd('imprenditori',3); gd('giovani',2); gd('pensionati',-3);}},
+   {l:'Soldi agli Stati di frontiera e alle città', e:'Si gestisce, non si risolve', costo:{debito:0.6}, f:()=>{S.ind.debt+=0.6; gd('cetomedio',1); gd('lavoratori',1);}}]},
+ {id:'us_p_dazi', era:'contemporanea', paesi:['usa'], min:'economia', kick:'Commercio', t:'I dazi', text:'L\'industria del Midwest chiede protezione dalle importazioni; gli agricoltori temono la ritorsione sui loro raccolti; i consumatori pagheranno di più senza saperlo. Il dazio è la tassa che nessuno chiama tassa.', ch:[
+   {l:'Dazi alti sui rivali strategici', e:'Le fabbriche applaudono, i prezzi salgono', f:()=>{S.ind.fiducia-=2; gd('lavoratori',4); gd('imprenditori',1); gd('cetomedio',-2); gd('cattolici',-2);}},                                          // ②
+   {l:'Dazi mirati, con esenzioni per gli alleati', e:'Il compromesso degli economisti', f:()=>{gd('lavoratori',1); gd('imprenditori',1);}},
+   {l:'Libero scambio: i dazi li paga chi compra', e:'Giusto per i manuali, duro in Ohio', f:()=>{S.ind.fiducia+=2; gd('imprenditori',2); gd('cetomedio',1); gd('lavoratori',-4);}}]},
+ {id:'us_p_sanita', era:'contemporanea', paesi:['usa'], min:'salute', kick:'Sanità', t:'Il prezzo dell\'insulina', text:'Un farmaco che costa pochi dollari da produrre ne costa centinaia a chi ne ha bisogno ogni giorno. Il paese spende in sanità più di chiunque e cura peggio di molti; ogni tentativo di cambiarlo è durato una legislatura.', ch:[
+   {l:'Tetto al prezzo dei farmaci essenziali', e:'I pazienti respirano, le aziende ricorrono', f:()=>{gd('pensionati',4); gd('lavoratori',2); gd('imprenditori',-4);}},
+   {l:'Lascia negoziare lo Stato con le aziende', e:'Un passo, e una battaglia in tribunale', costo:{debito:-0.2}, f:()=>{S.ind.debt-=0.2; gd('pensionati',2); gd('imprenditori',-2);}},
+   {l:'Il mercato deciderà: più concorrenza fra generici', e:'Fra qualche anno, forse', f:()=>{gd('imprenditori',2); gd('pensionati',-3);}}]},
+ {id:'us_p_armi', era:'contemporanea', paesi:['usa'], min:'interno', kick:'Armi', t:'Dopo l\'ultima sparatoria', text:'Un\'altra strage in una scuola, un\'altra veglia, un\'altra settimana in cui il paese chiede una legge e poi passa oltre. La Costituzione protegge il diritto alle armi, e la maggioranza degli americani vuole controlli che il Congresso non vota.', ch:[
+   {l:'Controlli sui precedenti per ogni vendita', e:'La maggioranza del paese è d\'accordo; il Senato no', f:()=>{gd('giovani',4); gd('cetomedio',2); gd('cattolici',-3); gd('pensionati',-2);}},
+   {l:'Più sicurezza nelle scuole, nessuna legge sulle armi', e:'La risposta di sempre', costo:{debito:0.3}, f:()=>{S.ind.debt+=0.3; gd('cattolici',2); gd('pensionati',2); gd('giovani',-4);}},
+   {l:'Lascia decidere agli Stati', e:'Cinquanta leggi, un confine', f:()=>{gd('cetomedio',1); gd('giovani',-2);}}]},
+ {id:'us_p_uragani', era:'contemporanea', paesi:['usa'], min:'interno', kick:'Stagione', t:'La stagione degli uragani', text:'Ogni anno, da agosto a ottobre, il Golfo e la costa atlantica aspettano. L\'agenzia federale per le emergenze ha i fondi contati, gli Stati chiedono di più prima che arrivi il primo, e il costo delle assicurazioni sulla costa sta cacciando la gente dalle case.', ch:[
+   {l:'Rifinanzia l\'agenzia prima della stagione', e:'Pronti, e si vede', costo:{debito:0.5}, f:()=>{S.ind.debt+=0.5; gd('cetomedio',2); gd('pensionati',2);}},
+   {l:'Un\'assicurazione federale per le case sulla costa', e:'Lo Stato paga per chi costruisce dove non si dovrebbe', costo:{debito:0.8}, f:()=>{S.ind.debt+=0.8; S.ind.fiducia-=1; gd('cetomedio',3); gd('imprenditori',1); gd('giovani',-2);}},   // ③
+   {l:'Aiuti solo dopo, e caso per caso', e:'Si risparmia, finché non arriva', costo:{debito:-0.1}, f:()=>{S.ind.debt-=0.1; gd('cetomedio',-2);}}]},
+ {id:'us_p_previdenza', era:'contemporanea', paesi:['usa'], min:'lavoro', kick:'Previdenza', t:'Il fondo che si svuota', text:'Il fondo della previdenza pubblica pagherà per intero le pensioni ancora per qualche anno, poi dovrà tagliarle di un quinto se nessuno fa nulla. Tutti lo sanno da decenni; nessuno lo tocca, perché i pensionati votano.', ch:[
+   {l:'Alza il tetto contributivo sui redditi alti', e:'I ricchi pagano di più; il fondo respira', costo:{debito:-0.3}, f:()=>{S.ind.debt-=0.3; S.ind.fiducia+=1; gd('pensionati',3); gd('imprenditori',-3);}},                                     // ④
+   {l:'Alza gradualmente l\'età', e:'Aritmetica, e una generazione che si arrabbia', f:()=>{S.ind.fiducia+=2; gd('lavoratori',-3); gd('pensionati',-3); gd('imprenditori',1);}},
+   {l:'Non è il momento', e:'Non lo è mai stato', f:()=>{gd('pensionati',2); gd('giovani',-2);}}]},
+ {id:'us_p_studenti', era:'contemporanea', paesi:['usa'], min:'istruzione', kick:'Università', t:'Il debito degli studenti', text:'Decine di milioni di americani ripagano per decenni l\'università che li ha fatti entrare nel ceto medio. Cancellare il debito piace a chi lo ha; a chi non è andato all\'università, o lo ha già pagato, sembra un regalo a chi sta meglio.', ch:[
+   {l:'Cancella una parte per i redditi bassi', e:'Milioni di persone liberate, e un ricorso', costo:{debito:0.9}, f:()=>{S.ind.debt+=0.9; gd('giovani',5); gd('cetomedio',-2); gd('lavoratori',-1);}},
+   {l:'Rate legate al reddito, per tutti', e:'Nessun regalo, meno strozzatura', costo:{debito:0.3}, f:()=>{S.ind.debt+=0.3; gd('giovani',2); gd('cetomedio',1);}},
+   {l:'Il debito si paga: abbassa i costi delle università', e:'La causa prima dell\'effetto, fra dieci anni', f:()=>{gd('lavoratori',1); gd('giovani',-3);}}]},
+ {id:'us_p_dc', era:'contemporanea', paesi:['usa'], kick:'Capitale', t:'La città senza Stato', text:'Nella capitale vivono più persone che in due Stati interi, pagano le tasse federali e non hanno un senatore. Farne uno Stato darebbe voce a chi non l\'ha — e due seggi in più al partito che lì vince sempre.', ch:[
+   {l:'Sostieni la statualità della capitale', e:'Un principio, e due senatori', f:()=>{gd('giovani',3); gd('lavoratori',1); gd('pensionati',-2); gd('cattolici',-1);}},                                                                              // ⑪
+   {l:'Un rappresentante con voto, non uno Stato', e:'Il compromesso che non piace a nessuno', f:()=>{gd('cetomedio',1);}},
+   {l:'La capitale è federale e resta federale', e:'Come volevano i padri fondatori, dicono', f:()=>{gd('pensionati',2); gd('cattolici',1); gd('giovani',-2);}}]},
+ {id:'us_p_tech', era:'contemporanea', paesi:['usa'], kick:'Silicon Valley', t:'Le cinque aziende', text:'Un pugno di aziende decide cosa vede mezzo pianeta, quanto costa la pubblicità e quali imprese possono nascere. Spezzarle è nella tradizione americana; sono anche la cosa che il paese esporta meglio.', ch:[
+   {l:'Cause antitrust: si spezzano', e:'La tradizione del paese, e una guerra di avvocati', f:()=>{gd('giovani',2); gd('lavoratori',2); gd('cetomedio',1); gd('imprenditori',-3);}},                                                              // ⑫
+   {l:'Regole sui dati, non sulle dimensioni', e:'L\'Europa lo fa già', f:()=>{gd('cetomedio',2); gd('imprenditori',-1);}},
+   {l:'Lasciale stare: sono l\'America che vince', e:'Gli investitori applaudono, gli utenti scrollano', f:()=>{gd('imprenditori',4); gd('giovani',-2);}}]},
+ /* ===== L83-1 · CANADA, PRESENTE ARRICCHITO (scheda PRESET-CANADA-PRESENTE §A) — dodici questioni. Le province decidono,
+    Ottawa paga; il vicino compra. Nessuna data, nessun nome. ===== */
+ {id:'ca_p_casa', era:'contemporanea', paesi:['canada'], min:'infrastrutture', kick:'Abitare', t:'La casa che nessuno può comprare', text:'Nelle due grandi città una casa costa dieci volte un reddito medio, e un affitto metà dello stipendio. Il paese fa entrare mezzo milione di persone l\'anno e costruisce la metà delle case che servirebbero. Ogni livello di governo dice che tocca a un altro.', ch:[
+   {l:'Fondi federali ai comuni che costruiscono di più', e:'Chi approva permessi prende soldi', costo:{debito:0.8}, f:()=>{S.ind.debt+=0.8; gd('giovani',4); gd('lavoratori',2); gd('cetomedio',-1);}},
+   {l:'Riduci gli arrivi finché non ci sono case', e:'I numeri scendono, le imprese protestano', f:()=>{S.ind.fiducia-=1; gd('cetomedio',3); gd('pensionati',2); gd('imprenditori',-3); gd('giovani',-1);}},                                      // ①
+   {l:'Vieta l\'acquisto agli stranieri e tassa le case vuote', e:'Simbolico, e popolare', costo:{debito:-0.1}, f:()=>{S.ind.debt-=0.1; gd('giovani',2); gd('cetomedio',2); gd('imprenditori',-2);}}]},
+ {id:'ca_p_carbonio', era:'contemporanea', paesi:['canada'], min:'economia', kick:'Clima', t:'Il prezzo del carbonio', text:'Una tassa sulle emissioni che restituisce i soldi alle famiglie: gli economisti la amano, le province petrolifere la odiano, e la gente vede solo il prezzo alla pompa. È la politica climatica più coerente del paese e la meno difendibile in campagna.', ch:[
+   {l:'Tienila e spiegala meglio', e:'La spiegazione arriva dopo la bolletta', f:()=>{S.ind.fiducia+=1; gd('giovani',3); gd('cetomedio',-2); gd('lavoratori',-2);}},                                                                                // ②
+   {l:'Esenta il riscaldamento domestico', e:'Una crepa, e tutti la vedono', f:()=>{gd('cetomedio',2); gd('pensionati',2); gd('giovani',-2);}},
+   {l:'Abolisci: le province facciano da sé', e:'Il petrolio esulta, il clima aspetta', f:()=>{S.ind.fiducia-=1; gd('imprenditori',3); gd('lavoratori',2); gd('giovani',-4);}}]},
+ {id:'ca_p_oleodotto', era:'contemporanea', paesi:['canada'], min:'sviluppo', kick:'Ovest', t:'L\'oleodotto', text:'Il petrolio dell\'Ovest vale più di ogni altra esportazione e non ha abbastanza tubi per uscire. Un oleodotto verso la costa attraversa terre indigene, foreste e una provincia che non lo vuole. Non farlo costa l\'Ovest; farlo costa il resto.', ch:[
+   {l:'Lo Stato lo compra e lo finisce', e:'Miliardi pubblici in un tubo, e il petrolio esce', costo:{debito:1.0}, f:()=>{S.ind.debt+=1.0; gd('imprenditori',4); gd('lavoratori',3); gd('giovani',-4);}},
+   {l:'Approvato, con le condizioni ambientali e indigene', e:'Anni di ricorsi, e forse un tubo', f:()=>{gd('imprenditori',1); gd('lavoratori',1); gd('giovani',-1);}},
+   {l:'Nessun nuovo oleodotto', e:'La costa applaude, l\'Ovest parla di separazione', f:()=>{S.ind.fiducia-=1; gd('giovani',4); gd('imprenditori',-4); gd('lavoratori',-3);}}]},
+ {id:'ca_p_quebec', era:'contemporanea', paesi:['canada'], min:'interno', kick:'Québec', t:'La lingua e la clausola', text:'La provincia francofona approva una legge che restringe l\'inglese negli uffici e nelle scuole, usando la clausola costituzionale che permette di scavalcare i diritti fondamentali. Chi la contesta chiede a Ottawa di intervenire; chi la difende dice che è la provincia a decidere.', ch:[
+   {l:'Impugna la legge davanti alla Corte suprema', e:'Ottawa contro il Québec: un classico che costa', f:()=>{S.ind.stampa+=1; gd('giovani',2); gd('cetomedio',1); gd('cattolici',-3); gd('pensionati',-2);}},
+   {l:'Nessun intervento: sono affari della provincia', e:'La pace federale, e i minoritari da soli', f:()=>{gd('cattolici',2); gd('pensionati',1); gd('giovani',-2);}},
+   {l:'Un accordo bilaterale sull\'immigrazione francofona', e:'Si cambia argomento con un assegno', costo:{debito:0.3}, f:()=>{S.ind.debt+=0.3; gd('cattolici',2); gd('cetomedio',1);}}]},
+ {id:'ca_p_dazi', era:'contemporanea', paesi:['canada'], min:'esteri', kick:'Il vicino', t:'Il vicino alza i dazi', text:'Tre quarti di quello che il paese vende va a sud del confine, e il vicino ha deciso che i dazi sono una leva. Le fabbriche dell\'Ontario contano i giorni; il paese scopre quanto è piccolo quando l\'altro decide.', ch:[
+   {l:'Ritorsione mirata sui prodotti degli Stati che contano', e:'Il paese si compatta; il commercio no', f:()=>{S.ind.fiducia-=2; S.ind.stampa+=2; gd('lavoratori',3); gd('cetomedio',2); gd('imprenditori',-2);}},                                // ③
+   {l:'Tratta: concessioni in cambio dell\'esenzione', e:'Si salva l\'Ontario, si cede altrove', f:()=>{gd('imprenditori',2); gd('lavoratori',1); gd('cattolici',-2);}},
+   {l:'Diversifica: accordi con l\'Europa e l\'Asia', e:'Giusto, e dieci anni di ritardo', costo:{debito:0.3}, f:()=>{S.ind.debt+=0.3; gd('imprenditori',1); gd('giovani',1);}}]},
+ {id:'ca_p_sanita', era:'contemporanea', paesi:['canada'], min:'salute', kick:'Sanità', t:'Le liste d\'attesa', text:'La sanità pubblica è l\'orgoglio del paese e la sua ferita: mesi per uno specialista, pronto soccorso che chiudono di notte, un canadese su cinque senza medico di famiglia. La gestiscono le province, Ottawa manda i trasferimenti — e le condizioni.', ch:[
+   {l:'Più trasferimenti, con obiettivi sui tempi', e:'Le province prendono i soldi e discutono gli obiettivi', costo:{debito:0.9}, f:()=>{S.ind.debt+=0.9; gd('pensionati',3); gd('cetomedio',2); gd('lavoratori',1);}},
+   {l:'Lascia alle province lo spazio per il privato', e:'Più veloce, e qualcuno lo chiama americano', f:()=>{gd('imprenditori',2); gd('cetomedio',1); gd('lavoratori',-3); gd('pensionati',-1);}},
+   {l:'Un piano nazionale per i farmaci', e:'Un pezzo nuovo del sistema, e un conto lungo', costo:{debito:0.7}, f:()=>{S.ind.debt+=0.7; gd('pensionati',3); gd('lavoratori',2); gd('imprenditori',-2);}}]},
+ {id:'ca_p_indigeni', era:'contemporanea', paesi:['canada'], min:'interno', kick:'Riconciliazione', t:'L\'acqua nelle riserve', text:'In decine di comunità indigene l\'acqua del rubinetto non si può bere da anni. Il paese ha chiesto scusa per le scuole residenziali e ha promesso la riconciliazione; la riconciliazione, nelle riserve, comincia da un tubo.', ch:[
+   {l:'Acqua potabile ovunque entro la legislatura, a qualunque costo', e:'Una promessa misurabile, per una volta', costo:{debito:0.6}, f:()=>{S.ind.debt+=0.6; gd('giovani',3); gd('cattolici',2); gd('lavoratori',1);}},
+   {l:'Trasferisci la gestione alle comunità, con i fondi', e:'Autogoverno, e responsabilità', costo:{debito:0.4}, f:()=>{S.ind.debt+=0.4; gd('giovani',2); gd('cetomedio',1);}},
+   {l:'Una commissione', e:'L\'ennesima; le riserve lo sanno', f:()=>{gd('giovani',-3); gd('cattolici',-1);}}]},
+ {id:'ca_p_artico', era:'contemporanea', paesi:['canada'], min:'difesa', kick:'Nord', t:'Il Nord che si scioglie', text:'Il ghiaccio si ritira e il passaggio a nord-ovest diventa navigabile. Altri paesi lo chiamano acque internazionali; il paese lo chiama suo, con tre rompighiaccio e pochissimi soldati per un territorio grande come l\'Europa.', ch:[
+   {l:'Rompighiaccio, basi e radar: la sovranità si vede', e:'Miliardi nel ghiaccio, e gli alleati annuiscono', costo:{debito:0.9}, f:()=>{S.ind.debt+=0.9; gd('pensionati',2); gd('imprenditori',2); gd('giovani',-1);}},
+   {l:'Investi nelle comunità del Nord: la sovranità è chi ci vive', e:'Meno navi, più scuole', costo:{debito:0.5}, f:()=>{S.ind.debt+=0.5; gd('giovani',2); gd('cattolici',1);}},
+   {l:'Diplomazia: il passaggio resta nostro sulla carta', e:'Finché nessuno prova', f:()=>{gd('cetomedio',1); gd('pensionati',-1);}}]},
+ {id:'ca_p_latte', era:'contemporanea', paesi:['canada'], min:'sviluppo', kick:'Campagne', t:'Le quote del latte', text:'Il latte, le uova e il pollame hanno prezzi garantiti e quote di produzione da mezzo secolo. I consumatori pagano di più, i partner commerciali lo pretendono al tavolo, e nessun partito lo ha mai toccato perché le fattorie stanno nei collegi che decidono.', ch:[
+   {l:'Il sistema resta: è la campagna del paese', e:'Le fattorie ringraziano, il negoziato si complica', f:()=>{gd('cattolici',3); gd('lavoratori',1); gd('imprenditori',-1);}},
+   {l:'Apri un po\', con compensazioni', e:'Il modo di sempre, con un assegno', costo:{debito:0.4}, f:()=>{S.ind.debt+=0.4; gd('cattolici',1); gd('imprenditori',1);}},
+   {l:'Smantella: i prezzi scendono', e:'I consumatori esultano, le campagne votano', f:()=>{S.ind.fiducia+=1; gd('cetomedio',3); gd('imprenditori',2); gd('cattolici',-5); gd('lavoratori',-1);}}]},                                              // ④
+ {id:'ca_p_incendi', era:'contemporanea', paesi:['canada'], min:'interno', kick:'Estate', t:'La stagione degli incendi', text:'Ogni estate le foreste bruciano più a lungo e più lontano; il fumo arriva nelle città e oltre il confine. Le province chiedono aerei e soldati, e la domanda è se prepararsi ogni anno o costruire un\'agenzia che ci pensi tutto l\'anno.', ch:[
+   {l:'Un\'agenzia nazionale per gli incendi', e:'Una struttura, non un\'emergenza', costo:{debito:0.5}, f:()=>{S.ind.debt+=0.5; gd('cetomedio',2); gd('giovani',2); gd('pensionati',1);}},
+   {l:'Esercito e fondi, quando serve', e:'Come ogni estate', costo:{debito:0.3}, f:()=>{S.ind.debt+=0.3; gd('pensionati',1);}},
+   {l:'Sono foreste provinciali: tocca a loro', e:'Vero, e il fumo non lo sa', f:()=>{gd('cetomedio',-2); gd('giovani',-2);}}]},
+ {id:'ca_p_senato', era:'contemporanea', paesi:['canada'], kick:'Senato', t:'La camera che nessuno elegge', text:'Il Senato è nominato dal Primo Ministro e resta in carica fino a settantacinque anni. Riformarlo richiede il consenso delle province, che non arriva mai; abolirlo anche. Ogni Primo Ministro promette qualcosa, poi nomina i suoi.', ch:[
+   {l:'Nomine indipendenti, con un comitato', e:'Meglio, e sempre nomine', f:()=>{gd('cetomedio',2); gd('giovani',1);}},                                                                                                                              // ⑪
+   {l:'Chiedi alle province una riforma vera', e:'La risposta arriverà fra dieci anni', f:()=>{gd('cetomedio',1); gd('pensionati',-1);}},
+   {l:'Nomina i tuoi: così fanno tutti', e:'Così fanno tutti, e tutti lo scrivono', f:()=>{S.ind.stampa-=2; gd('giovani',-2);}}]},
+ {id:'ca_p_monarchia', era:'contemporanea', paesi:['canada'], kick:'Corona', t:'Il volto sulle banconote', text:'Il capo dello Stato vive a cinquemila chilometri e cambia per nascita. Una parte del paese, soprattutto francofona, vorrebbe una repubblica; cambiare la Costituzione richiede tutte le province, che non sono mai d\'accordo su niente. Intanto bisogna decidere il volto sulla nuova banconota.', ch:[
+   {l:'Apri il dibattito sulla repubblica', e:'Se ne parla, e non se ne fa niente', f:()=>{gd('giovani',2); gd('cattolici',1); gd('pensionati',-3);}},                                                                                                // ⑫
+   {l:'La monarchia è la nostra storia: nessun dibattito', e:'Sereno, e il Québec sbuffa', f:()=>{gd('pensionati',3); gd('cetomedio',1); gd('giovani',-2); gd('cattolici',-1);}},
+   {l:'Sulla banconota un canadese, e basta', e:'Il compromesso che piace', f:()=>{S.ind.stampa+=1; gd('cetomedio',1); gd('giovani',1);}}]},
+ /* ===== L83-1 · AUSTRALIA, PRESENTE ARRICCHITO (scheda PRESET-AUSTRALIA-PRESENTE §A) — dodici questioni. Mandato di tre anni:
+    ogni scelta ha un'elezione vicina. Nessuna data, nessun nome. ===== */
+ {id:'au_p_casa', era:'contemporanea', paesi:['australia'], min:'infrastrutture', kick:'Abitare', t:'Il sogno della casa', text:'Possedere una casa con il giardino era il patto del paese; oggi nelle grandi città costa dodici redditi, e chi ha già una casa ne compra una seconda con gli sgravi fiscali che lo Stato gli dà. Toccare quegli sgravi ha già fatto perdere un\'elezione.', ch:[
+   {l:'Taglia gli sgravi agli investitori immobiliari', e:'I giovani applaudono; chi ha due case vota', costo:{debito:-0.4}, f:()=>{S.ind.debt-=0.4; gd('giovani',4); gd('lavoratori',2); gd('cetomedio',-3); gd('pensionati',-3);}},
+   {l:'Costruisci: un fondo federale per le case sociali', e:'Le gru fra tre anni — cioè dopo il voto', costo:{debito:0.9}, f:()=>{S.ind.debt+=0.9; gd('giovani',3); gd('lavoratori',2);}},
+   {l:'Aiuti ai primi acquirenti', e:'Più domanda, stessi prezzi', costo:{debito:0.5}, f:()=>{S.ind.debt+=0.5; gd('giovani',2); gd('cetomedio',2); gd('imprenditori',1);}}]},
+ {id:'au_p_carbone', era:'contemporanea', paesi:['australia'], min:'economia', kick:'Miniere', t:'Il carbone che paga tutto', text:'Il paese è fra i primi esportatori di carbone al mondo e fra i più esposti al clima che quel carbone cambia. Le miniere pagano le scuole del Queensland; le alluvioni le allagano. Aprire un\'altra miniera è una scelta che il paese fa e disfa a ogni elezione.', ch:[
+   {l:'Nessuna miniera nuova: si esce, gradualmente', e:'Il mondo applaude, il Queensland no', f:()=>{S.ind.fiducia-=1; gd('giovani',4); gd('imprenditori',-4); gd('lavoratori',-3);}},                                                              // ①
+   {l:'Approvate, con compensazioni climatiche', e:'Il compromesso che nessuno chiama così', costo:{debito:0.2}, f:()=>{S.ind.debt+=0.2; gd('imprenditori',2); gd('lavoratori',2); gd('giovani',-2);}},
+   {l:'Il carbone è l\'Australia: si estrae', e:'Le royalty entrano, e l\'estate arriva', costo:{debito:-0.3}, f:()=>{S.ind.debt-=0.3; S.ind.fiducia+=1; gd('imprenditori',4); gd('lavoratori',2); gd('giovani',-5);}}]},
+ {id:'au_p_cina', era:'contemporanea', paesi:['australia'], min:'esteri', kick:'Pacifico', t:'Il cliente e il rivale', text:'Il paese vende un terzo di ciò che esporta a una potenza di cui teme le navi, e quella potenza ha già chiuso il rubinetto una volta — vino, orzo, aragoste — per punire una parola sbagliata. Ogni frase sulla sicurezza costa un carico.', ch:[
+   {l:'Linea dura con gli alleati, costi quel che costi', e:'Le navi alleate arrivano, le aragoste restano al molo', f:()=>{S.ind.fiducia-=1; gd('pensionati',2); gd('cattolici',1); gd('imprenditori',-4); gd('lavoratori',-1);}},                     // ②
+   {l:'Commercio e sicurezza su binari separati', e:'La frase che ogni governo dice', f:()=>{gd('imprenditori',2); gd('cetomedio',1);}},
+   {l:'Diversifica i mercati: India, Giappone, Sud-est', e:'Giusto, e dieci anni', costo:{debito:0.3}, f:()=>{S.ind.debt+=0.3; gd('imprenditori',1); gd('giovani',1);}}]},
+ {id:'au_p_sottomarini', era:'contemporanea', paesi:['australia'], min:'difesa', kick:'Alleanza', t:'I sottomarini nucleari', text:'Il paese ha firmato per costruire sottomarini a propulsione nucleare con i due alleati anglosassoni: decenni di lavoro, un costo che nessuno scrive per intero, e un paese senza centrali che si ritrova reattori in mare. I cantieri del Sud esultano; i pacifisti contano gli zeri.', ch:[
+   {l:'Avanti tutta: è la difesa del secolo', e:'Il patto regge, il debito con lui', costo:{debito:1.2}, f:()=>{S.ind.debt+=1.2; gd('imprenditori',3); gd('lavoratori',2); gd('pensionati',2); gd('giovani',-3);}},
+   {l:'Avanti, ma con una revisione dei costi ogni due anni', e:'Prudente, e gli alleati lo notano', costo:{debito:0.8}, f:()=>{S.ind.debt+=0.8; gd('cetomedio',1);}},
+   {l:'Rinegozia: meno navi, più droni', e:'Moderno, e sembra un ripensamento', costo:{debito:0.4}, f:()=>{S.ind.debt+=0.4; gd('giovani',2); gd('pensionati',-3); gd('imprenditori',-2);}}]},
+ {id:'au_p_incendi', era:'contemporanea', paesi:['australia'], min:'interno', kick:'Estate', t:'L\'estate nera', text:'Un\'estate in cui il fumo copre le città per settimane e il paese guarda le coste bruciare in televisione. Gli Stati hanno i vigili del fuoco volontari, il federale ha l\'esercito, e la domanda è sempre la stessa: prepararsi o spegnere.', ch:[
+   {l:'Un\'agenzia nazionale e mezzi aerei propri', e:'Si smette di noleggiare aerei dall\'altro emisfero', costo:{debito:0.6}, f:()=>{S.ind.debt+=0.6; gd('cetomedio',2); gd('cattolici',2); gd('giovani',2);}},
+   {l:'Esercito e fondi, quando brucia', e:'Come ogni estate', costo:{debito:0.3}, f:()=>{S.ind.debt+=0.3; gd('pensionati',1);}},
+   {l:'Riduzione delle emissioni: la causa, non l\'effetto', e:'Giusto per il clima, e non spegne un incendio', f:()=>{gd('giovani',3); gd('imprenditori',-2); gd('lavoratori',-1);}}]},
+ {id:'au_p_barriera', era:'contemporanea', paesi:['australia'], min:'sviluppo', kick:'Reef', t:'Il corallo che sbianca', text:'La barriera corallina è la cosa più famosa del paese e sta morendo a estati alterne. L\'ONU vuole dichiararla in pericolo; il governo lo considera un\'offesa, e il turismo del Queensland un disastro. La barriera non ha un\'opinione.', ch:[
+   {l:'Accetta la lista dell\'ONU e un piano da miliardi', e:'Onesto, e il turismo lo paga', costo:{debito:0.7}, f:()=>{S.ind.debt+=0.7; gd('giovani',4); gd('imprenditori',-2); gd('lavoratori',-1);}},
+   {l:'Lobby contro la lista: il reef sta bene', e:'Vinci a Parigi, perdi con i biologi', f:()=>{S.ind.stampa-=2; gd('imprenditori',2); gd('giovani',-3);}},
+   {l:'Fondi alla ricerca sul corallo resistente', e:'Scienza, e tempo che non c\'è', costo:{debito:0.3}, f:()=>{S.ind.debt+=0.3; gd('giovani',1); gd('cetomedio',1);}}]},
+ {id:'au_p_voce', era:'contemporanea', paesi:['australia'], min:'interno', kick:'Prime nazioni', t:'Dopo il referendum', text:'Il paese ha detto no, con un referendum, a un organo consultivo indigeno in Costituzione. I popoli aborigeni sono sulla terra da sessantamila anni e la Costituzione non li nomina. Il no ha chiuso una strada; non ha risposto alla domanda.', ch:[
+   {l:'Riconoscimento per legge ordinaria, senza referendum', e:'Meno di quanto si chiedeva, più di quanto c\'è', f:()=>{gd('giovani',3); gd('cattolici',1); gd('pensionati',-2);}},
+   {l:'Un trattato, Stato per Stato', e:'Lento, e in alcuni Stati già iniziato', f:()=>{gd('giovani',2); gd('cetomedio',-1);}},
+   {l:'Il paese ha parlato: si passa oltre', e:'La maggioranza annuisce, le comunità no', f:()=>{gd('pensionati',2); gd('cetomedio',1); gd('giovani',-4);}}]},
+ {id:'au_p_barche', era:'contemporanea', paesi:['australia'], min:'interno', kick:'Mare', t:'Le barche', text:'Chi arriva via mare senza visto viene mandato su un\'isola di un altro paese, per anni. Il paese lo chiama deterrenza, le Nazioni Unite lo chiamano altrimenti, e il sistema costa più di un ospedale per ogni persona trattenuta. Nessun partito lo smantella, perché le barche sono l\'elezione.', ch:[
+   {l:'Chiudi i centri offshore, esamina le domande in patria', e:'Umano, e l\'opposizione conta le barche', costo:{debito:-0.3}, f:()=>{S.ind.debt-=0.3; gd('giovani',4); gd('cattolici',2); gd('pensionati',-4); gd('cetomedio',-2);}},
+   {l:'Il sistema resta: nessuna barca arriva', e:'Il messaggio funziona, e costa', costo:{debito:0.4}, f:()=>{S.ind.debt+=0.4; gd('pensionati',3); gd('cetomedio',2); gd('giovani',-3);}},
+   {l:'Accordi con paesi terzi per reinsediare chi è trattenuto', e:'Si svuotano le isole senza toccare la regola', costo:{debito:0.2}, f:()=>{S.ind.debt+=0.2; gd('cattolici',1); gd('cetomedio',1);}}]},
+ {id:'au_p_supermercati', era:'contemporanea', paesi:['australia'], min:'economia', kick:'Carrello', t:'I due supermercati', text:'Due catene vendono due terzi della spesa del paese, e i prezzi salgono più dei salari mentre i profitti salgono più dei prezzi. Gli agricoltori dicono di essere pagati una miseria; i clienti dicono di pagare una fortuna; le catene dicono che è l\'inflazione.', ch:[
+   {l:'Un\'autorità della concorrenza con il potere di spezzarle', e:'Le catene assumono avvocati', f:()=>{gd('cetomedio',3); gd('cattolici',2); gd('lavoratori',2); gd('imprenditori',-3);}},
+   {l:'Un codice di condotta obbligatorio con i fornitori', e:'Gli agricoltori respirano, i prezzi no', f:()=>{gd('cattolici',3); gd('cetomedio',1); gd('imprenditori',-1);}},
+   {l:'Il mercato è il mercato', e:'Il carrello resta caro, e votano tutti', f:()=>{S.ind.fiducia+=1; gd('imprenditori',3); gd('cetomedio',-3); gd('lavoratori',-2);}}]},                                                                            // ③
+ {id:'au_p_gioco', era:'contemporanea', paesi:['australia'], kick:'Scommesse', t:'Le macchinette e le scommesse', text:'Il paese perde al gioco più di qualunque altro al mondo per abitante: le macchinette in ogni club di quartiere, le scommesse sportive in ogni pubblicità. Gli Stati vivono delle tasse sul gioco; le famiglie no.', ch:[
+   {l:'Vieta la pubblicità delle scommesse', e:'Le tv perdono, le famiglie no', f:()=>{gd('cattolici',4); gd('cetomedio',2); gd('giovani',1); gd('imprenditori',-3);}},                                                                                    // ⑪
+   {l:'Carta di gioco con limiti di perdita', e:'I club protestano, i dati dicono che funziona', f:()=>{gd('cattolici',2); gd('cetomedio',1); gd('pensionati',-2);}},
+   {l:'È una libertà: nessun intervento', e:'Le entrate reggono', f:()=>{gd('imprenditori',2); gd('pensionati',1); gd('cattolici',-3);}}]},
+ {id:'au_p_repubblica', era:'contemporanea', paesi:['australia'], kick:'Corona', t:'La repubblica, di nuovo', text:'Il capo dello Stato vive dall\'altra parte del mondo, e il paese ha già detto no una volta a una repubblica — non perché volesse il re, ma perché non gli piaceva il modello proposto. Un cambio sul trono riapre la domanda.', ch:[
+   {l:'Un nuovo referendum, con il presidente eletto dal popolo', e:'Il modello che avrebbe vinto l\'altra volta', f:()=>{gd('giovani',3); gd('lavoratori',1); gd('pensionati',-3);}},                                                                   // ⑫
+   {l:'Non è il momento: ci sono le bollette', e:'Vero, e il tema resta lì', f:()=>{gd('pensionati',2); gd('cetomedio',1); gd('giovani',-1);}},
+   {l:'Ministro per la repubblica, senza data', e:'Un segnale, e nient\'altro', f:()=>{gd('giovani',1); gd('pensionati',-1);}}]},
+ {id:'au_p_acqua', era:'contemporanea', paesi:['australia'], min:'sviluppo', kick:'Fiume', t:'Il fiume che finisce prima del mare', text:'Il grande bacino fluviale del sud-est irriga le colture del paese e arriva al mare a stento. Ricomprare l\'acqua dagli agricoltori per il fiume costa miliardi e villaggi; non farlo costa il fiume.', ch:[
+   {l:'Ricompra l\'acqua: il fiume prima', e:'Il delta rivive, le città di campagna si svuotano', costo:{debito:0.8}, f:()=>{S.ind.debt+=0.8; gd('giovani',3); gd('cattolici',-4); gd('lavoratori',-1);}},
+   {l:'Efficienza irrigua, senza riacquisti', e:'Lento, e le campagne restano', costo:{debito:0.5}, f:()=>{S.ind.debt+=0.5; gd('cattolici',2); gd('imprenditori',1);}},
+   {l:'Rinvia gli obiettivi di dieci anni', e:'Gli Stati a monte esultano, quello a valle no', f:()=>{S.ind.fiducia-=1; gd('cattolici',2); gd('giovani',-3); gd('cetomedio',-1);}}]},                                                                     // ④
+ /* ===== L85-1 · GIAPPONE, PRESENTE ARRICCHITO (scheda PRESET-GIAPPONE-PRESENTE §A) — dodici questioni. Nessuna data,
+    nessun nome. La successione imperiale è una regola, non una persona (G3). ===== */
+ {id:'jp_p_culle', era:'contemporanea', paesi:['giappone'], min:'lavoro', kick:'Demografia', t:'Le culle vuote', text:'Nascono meno bambini di quanti ne servano per tenere in piedi il paese, e ogni anno il numero scende sotto il minimo dell\'anno prima. Le scuole chiudono, i villaggi si svuotano, e ogni governo dichiara la natalità «priorità assoluta» — con i risultati che si vedono.', ch:[
+   {l:'Asili gratis e assegni raddoppiati, senza limiti di reddito', e:'Il conto più grande della legislatura', costo:{debito:1.2}, f:()=>{S.ind.debt+=1.2; S.ind.fiducia-=1; gd('giovani',4); gd('lavoratori',2); gd('pensionati',-1);}},          // ①
+   {l:'Orari di lavoro più corti per legge', e:'Le imprese protestano; i padri tornano a casa', f:()=>{gd('giovani',3); gd('lavoratori',3); gd('imprenditori',-4);}},
+   {l:'Accetta il calo: prepara il paese a essere più piccolo', e:'Onesto, e nessuno lo vuole sentire', costo:{debito:-0.3}, f:()=>{S.ind.debt-=0.3; gd('pensionati',-2); gd('giovani',-2); gd('cetomedio',1);}}]},
+ {id:'jp_p_debito', era:'contemporanea', paesi:['giappone'], min:'economia', kick:'Conti', t:'Il debito che nessuno paga', text:'Il debito pubblico è più del doppio del prodotto, il più alto fra i paesi ricchi, e finora non è successo niente: la banca centrale lo compra, i risparmiatori lo tengono. Ma i tassi non sono più a zero, e gli interessi cominciano a mangiare il bilancio.', ch:[
+   {l:'Alza l\'imposta sui consumi di due punti', e:'La misura che ha fatto cadere governi', costo:{debito:-1.0}, f:()=>{S.ind.debt-=1.0; S.ind.fiducia+=3; allG(-3); gd('pensionati',1);}},                                                                   // ②
+   {l:'Tagli graduali alla spesa, pensioni escluse', e:'Il resto del bilancio è piccolo', costo:{debito:-0.4}, f:()=>{S.ind.debt-=0.4; S.ind.fiducia+=1; gd('giovani',-2); gd('lavoratori',-1);}},
+   {l:'Crescita prima: si spende ancora', e:'La strada di sempre, finché i tassi lo permettono', costo:{debito:0.8}, f:()=>{S.ind.debt+=0.8; S.ind.fiducia-=2; gd('imprenditori',2); gd('lavoratori',2);}}]},
+ {id:'jp_p_reattori', era:'contemporanea', paesi:['giappone'], min:'economia', kick:'Energia', t:'I reattori fermi', text:'Dopo il disastro, il paese ha spento tutte le centrali nucleari e ne ha riaccese poche, una alla volta, fra ricorsi e sindaci contrari. Importa gas a caro prezzo, ha promesso emissioni zero, e le montagne non lasciano spazio ai pannelli. Ogni riavvio è un referendum locale.', ch:[
+   {l:'Riavvia i reattori che superano i controlli', e:'La bolletta scende, la paura no', costo:{debito:-0.2}, f:()=>{S.ind.debt-=0.2; S.ind.fiducia+=1; gd('imprenditori',4); gd('cetomedio',-2); gd('giovani',-2);}},
+   {l:'Nuovi reattori di ultima generazione', e:'Vent\'anni, e un dibattito che il paese non ha mai finito', costo:{debito:0.9}, f:()=>{S.ind.debt+=0.9; gd('imprenditori',3); gd('giovani',-4); gd('pensionati',-2);}},
+   {l:'Rinnovabili e eolico offshore: mai più nucleare', e:'Il mare c\'è; la rete e i soldi meno', costo:{debito:0.7}, f:()=>{S.ind.debt+=0.7; gd('giovani',4); gd('imprenditori',-3);}}]},
+ {id:'jp_p_difesa', era:'contemporanea', paesi:['giappone'], min:'difesa', kick:'Articolo 9', t:'Il paese che rinuncia alla guerra', text:'La Costituzione rinuncia alla guerra e alle forze armate, e il paese ha comunque una delle marine più grandi del mondo — chiamandola diversamente. Ora si vuole raddoppiare la spesa, comprare missili che colpiscono lontano, e forse cambiare la parola. I vicini guardano, e la memoria anche.', ch:[
+   {l:'Raddoppia la spesa: due per cento entro cinque anni', e:'Gli alleati applaudono, il Tesoro cerca i soldi', costo:{debito:1.0}, f:()=>{S.ind.debt+=1.0; gd('pensionati',2); gd('imprenditori',2); gd('giovani',-3);}},
+   {l:'Spendi di più, ma senza toccare la Costituzione', e:'La via giapponese: cambiare tutto senza cambiare la parola', costo:{debito:0.6}, f:()=>{S.ind.debt+=0.6; gd('cetomedio',1); gd('pensionati',1);}},
+   {l:'Proponi la revisione dell\'articolo', e:'Il dibattito del secolo, e un referendum incerto', f:()=>{S.ind.stampa+=1; gd('pensionati',2); gd('cattolici',1); gd('giovani',-3); gd('lavoratori',-2);}}]},
+ {id:'jp_p_stranieri', era:'contemporanea', paesi:['giappone'], min:'interno', kick:'Lavoro', t:'I lavoratori che vengono da fuori', text:'Mancano infermieri, operai, contadini. Il paese che non ha mai voluto immigrazione fa entrare centinaia di migliaia di lavoratori con permessi «temporanei» che nessuno chiama tali, e discute se dare loro la possibilità di restare. Le convenienze sono chiare; il paese no.', ch:[
+   {l:'Permessi lunghi e ricongiungimenti: chi lavora resta', e:'Le fabbriche respirano, una parte del paese si irrigidisce', f:()=>{gd('imprenditori',4); gd('giovani',1); gd('pensionati',-3); gd('cattolici',-2);}},
+   {l:'Più permessi, ma sempre temporanei', e:'Il modo di sempre', f:()=>{gd('imprenditori',2); gd('pensionati',1); gd('giovani',-1);}},
+   {l:'Robot e automazione prima delle persone', e:'Il paese ci crede da trent\'anni', costo:{debito:0.5}, f:()=>{S.ind.debt+=0.5; gd('imprenditori',2); gd('cetomedio',1); gd('lavoratori',-1);}}]},
+ {id:'jp_p_cognome', era:'contemporanea', paesi:['giappone'], min:'giustizia', kick:'Famiglia', t:'Il cognome della moglie', text:'Per legge i coniugi devono avere lo stesso cognome, e nella quasi totalità dei casi è quello del marito. Le imprese chiedono di cambiare, le corti rimandano al Parlamento, e il Parlamento rimanda alla «tradizione». Le donne che lavorano hanno due nomi e un solo passaporto.', ch:[
+   {l:'Cognomi separati a scelta', e:'La maggioranza del paese è d\'accordo; la tua base no', f:()=>{gd('giovani',4); gd('cetomedio',2); gd('cattolici',-4); gd('pensionati',-2);}},
+   {l:'Il cognome da nubile come nome d\'uso ufficiale', e:'Il compromesso che non risolve il passaporto', f:()=>{gd('cetomedio',1); gd('giovani',1); gd('cattolici',-1);}},
+   {l:'La famiglia è una: nessun cambiamento', e:'La base applaude, le imprese scrivono', f:()=>{gd('cattolici',3); gd('pensionati',2); gd('giovani',-4); gd('imprenditori',-1);}}]},
+ {id:'jp_p_okinawa', era:'contemporanea', paesi:['giappone'], min:'esteri', kick:'Isole', t:'Le basi sull\'isola', text:'Un\'isola nel sud ospita la maggior parte dei soldati alleati di stanza nel paese, con gli incidenti, il rumore e una popolazione che vota contro da decenni. Spostare una base costa vent\'anni e una baia; non spostarla costa l\'isola.', ch:[
+   {l:'Il trasferimento va avanti: l\'alleanza prima', e:'Tokyo decide, l\'isola protesta', costo:{debito:0.5}, f:()=>{S.ind.debt+=0.5; gd('pensionati',2); gd('imprenditori',1); gd('giovani',-3);}},
+   {l:'Rinegozia con l\'alleato una riduzione', e:'Anni di tavoli, e l\'alleato ha altro da fare', f:()=>{gd('giovani',2); gd('cetomedio',1); gd('pensionati',-1);}},
+   {l:'Compensazioni economiche all\'isola', e:'L\'isola prende i soldi e continua a votare contro', costo:{debito:0.4}, f:()=>{S.ind.debt+=0.4; gd('lavoratori',1); gd('cetomedio',1);}}]},
+ {id:'jp_p_riso', era:'contemporanea', paesi:['giappone'], min:'sviluppo', kick:'Campagne', t:'Il prezzo del riso', text:'Il riso è raddoppiato di prezzo in un anno: raccolti scarsi, scorte tenute strette da chi le ha, e un sistema che protegge i coltivatori con dazi altissimi. Lo Stato ha riserve strategiche e non le ha mai aperte per il prezzo. I supermercati mettono un limite per famiglia.', ch:[
+   {l:'Apri le riserve strategiche', e:'Il prezzo scende, i coltivatori si sentono traditi', f:()=>{gd('cetomedio',4); gd('lavoratori',2); gd('cattolici',-3);}},
+   {l:'Importa, abbassando i dazi per un anno', e:'La misura che le campagne non perdonano', f:()=>{S.ind.fiducia+=1; gd('cetomedio',3); gd('cattolici',-5); gd('pensionati',-1);}},                                                                     // ③
+   {l:'Aspetta il raccolto e sostieni le famiglie', e:'Un assegno per il riso', costo:{debito:0.4}, f:()=>{S.ind.debt+=0.4; gd('cattolici',2); gd('cetomedio',1);}}]},
+ {id:'jp_p_treno', era:'contemporanea', paesi:['giappone'], min:'infrastrutture', kick:'Levitazione', t:'Il treno che levita', text:'Il nuovo treno a levitazione magnetica dovrebbe unire le due grandi città in un\'ora, e una prefettura sulla strada blocca i lavori da anni per un fiume. Il paese che ha inventato l\'alta velocità guarda il cantiere fermo e si chiede se ne ha ancora bisogno.', ch:[
+   {l:'Scavalca la prefettura con una legge nazionale', e:'Il tunnel riparte, il federalismo no', costo:{debito:0.7}, f:()=>{S.ind.debt+=0.7; gd('imprenditori',3); gd('cetomedio',-2);}},
+   {l:'Tratta con la prefettura, anno dopo anno', e:'Il modo giapponese', f:()=>{gd('cetomedio',1);}},
+   {l:'Ridimensiona: il paese si svuota, un treno in più non serve', e:'Realistico, e sembra una resa', f:()=>{S.ind.fiducia-=1; gd('imprenditori',-3); gd('giovani',-1); gd('pensionati',1);}}]},
+ {id:'jp_p_fondi', era:'contemporanea', paesi:['giappone'], kick:'Partito', t:'I fondi non dichiarati', text:'Un\'inchiesta scopre che le correnti del partito di governo raccoglievano fondi alle cene di autofinanziamento e non li dichiaravano. Il sistema delle correnti è il partito stesso; smontarlo è come smontare la casa in cui si vive.', ch:[
+   {l:'Sciogli le correnti e cambia la legge sui fondi', e:'Un terremoto interno, e un titolo che dura', f:()=>{S.ind.stampa+=3; gd('cetomedio',2); gd('giovani',2); tutteCorrenti(-6);}},
+   {l:'Sanzioni ai responsabili, il sistema resta', e:'Il minimo, e il paese lo vede', f:()=>{S.ind.stampa-=2; gd('cetomedio',-2); gd('giovani',-2);}},
+   {l:'Una commissione di terzi', e:'Il tempo passa, il partito spera', f:()=>{S.ind.stampa-=1; gd('cetomedio',-1);}}]},
+ {id:'jp_p_paese', era:'contemporanea', paesi:['giappone'], kick:'Province', t:'Il villaggio che chiude', text:'Un villaggio di montagna ha più case vuote che abitanti, e l\'ultimo negozio ha chiuso. Un programma permette di destinare parte delle tasse al comune che si vuole, in cambio di regali locali: le città finanziano le campagne con la carne e il sakè. Funziona, e sembra una lotteria.', ch:[
+   {l:'Allarga il programma: più tasse ai comuni scelti', e:'I regali migliorano, le città perdono gettito', f:()=>{gd('cattolici',3); gd('cetomedio',1); gd('lavoratori',-1);}},                                                                             // ⑪
+   {l:'Fondi diretti ai comuni sotto i mille abitanti', e:'Meno sakè, più strade', costo:{debito:0.4}, f:()=>{S.ind.debt+=0.4; gd('cattolici',2); gd('pensionati',2);}},
+   {l:'Accompagna la chiusura: servizi nei capoluoghi', e:'Onesto, e nessun sindaco lo vota', costo:{debito:-0.2}, f:()=>{S.ind.debt-=0.2; gd('cattolici',-4); gd('pensionati',-2); gd('cetomedio',1);}}]},
+ {id:'jp_p_successione', era:'contemporanea', paesi:['giappone'], kick:'Cerimonia', t:'La linea maschile', text:'La legge riserva il trono ai maschi, e i maschi in linea sono pochissimi. Il paese discute da vent\'anni se cambiare la regola; la maggioranza dei cittadini è favorevole, una parte del tuo partito no. La famiglia imperiale, per Costituzione, non ha voce.', ch:[
+   {l:'Apri alla successione femminile', e:'La maggioranza del paese è d\'accordo; il dibattito dura anni', f:()=>{gd('giovani',3); gd('cetomedio',2); gd('cattolici',-4);}},                                                                                    // ⑫
+   {l:'Riporta in linea i rami collaterali', e:'La soluzione della tradizione', f:()=>{gd('cattolici',2); gd('pensionati',1); gd('giovani',-2);}},
+   {l:'Rinvia: non è urgente', e:'Lo è da vent\'anni', f:()=>{gd('cetomedio',-1);}}]},
+ /* ===== L85-1 · COREA DEL SUD, PRESENTE ARRICCHITO (scheda PRESET-COREASUD-PRESENTE §A) — dodici questioni. Un mandato
+    solo: nessuna carta parla di rielezione. Nessuna data, nessun nome. ===== */
+ {id:'kr_p_natalita', era:'contemporanea', paesi:['coreasud'], min:'lavoro', kick:'Demografia', t:'Meno di un figlio per donna', text:'Il tasso di natalità è il più basso mai registrato in qualunque paese: meno di un figlio per donna. Il governo ha speso l\'equivalente di decine di miliardi in assegni e non ha spostato la curva. Le giovani coppie dicono il perché: la casa, le ore di lavoro, il costo delle scuole private.', ch:[
+   {l:'Un ministero per la popolazione, con poteri veri', e:'Una struttura, e la curva aspetta', costo:{debito:0.5}, f:()=>{S.ind.debt+=0.5; gd('giovani',2); gd('cetomedio',1);}},
+   {l:'Assegno mensile fino ai diciotto anni, per tutti', e:'Il conto più grande della Repubblica', costo:{debito:1.3}, f:()=>{S.ind.debt+=1.3; S.ind.fiducia-=2; gd('giovani',4); gd('lavoratori',2); gd('pensionati',-2);}},                        // ①
+   {l:'Colpisci le cause: orari, affitti, scuole private', e:'Giusto, lungo, e contro tre lobby', f:()=>{gd('giovani',3); gd('imprenditori',-3); gd('cetomedio',-1);}}]},
+ {id:'kr_p_nord', era:'contemporanea', paesi:['coreasud'], min:'difesa', kick:'Confine', t:'I palloni dal Nord', text:'Il Nord manda palloni carichi di rifiuti oltre la linea, lancia missili nel mare e taglia le strade che lo collegavano al Sud. Il Sud risponde con gli altoparlanti al confine. Sono provocazioni, e ogni tanto una diventa altro.', ch:[
+   {l:'Altoparlanti, esercitazioni, nessun dialogo', e:'Fermo, e il confine resta caldo', f:()=>{gd('pensionati',3); gd('cattolici',2); gd('giovani',-2); gd('imprenditori',-1);}},
+   {l:'Apri un canale, in silenzio', e:'Il Nord non risponde; forse legge', f:()=>{gd('giovani',2); gd('pensionati',-2);}},
+   {l:'Aiuti umanitari senza condizioni', e:'Il gesto che una parte del paese non perdona', f:()=>{gd('giovani',2); gd('cattolici',1); gd('pensionati',-4); gd('cetomedio',-1);}}]},
+ {id:'kr_p_leva', era:'contemporanea', paesi:['coreasud'], min:'difesa', kick:'Servizio', t:'I diciotto mesi', text:'Ogni uomo serve un anno e mezzo sotto le armi, e con meno giovani l\'esercito si restringe. Chi vince medaglie è esentato; chi vende dischi in tutto il mondo no, e il paese discute se un concerto valga una medaglia. Le donne chiedono perché solo gli uomini; gli uomini chiedono perché loro.', ch:[
+   {l:'Esenzione anche per chi porta il paese nel mondo', e:'I fan esultano, i coscritti no', f:()=>{gd('giovani',3); gd('imprenditori',2); gd('pensionati',-3); gd('lavoratori',-1);}},
+   {l:'Nessuna esenzione nuova: la leva è uguale per tutti', e:'Il principio, e un tour rinviato', f:()=>{gd('pensionati',3); gd('lavoratori',2); gd('giovani',-3);}},
+   {l:'Riduci a dodici mesi e professionalizza', e:'Meno soldati, più costosi', costo:{debito:0.6}, f:()=>{S.ind.debt+=0.6; gd('giovani',4); gd('pensionati',-2);}}]},
+ {id:'kr_p_chaebol', era:'contemporanea', paesi:['coreasud'], min:'economia', kick:'Conglomerati', t:'Le famiglie che possiedono il paese', text:'Una manciata di conglomerati familiari produce i telefoni, le navi, le auto e metà del prodotto. Sono l\'orgoglio del paese e il suo problema: soffocano le piccole imprese, si passano il comando di padre in figlio, e ogni tanto un erede finisce in tribunale — e ne esce graziato.', ch:[
+   {l:'Riforma della governance: fine delle partecipazioni incrociate', e:'I mercati applaudono, i conglomerati chiamano', f:()=>{S.ind.fiducia+=2; gd('giovani',3); gd('cetomedio',2); gd('imprenditori',-5);}},                                   // ②
+   {l:'Nessuna grazia agli eredi condannati', e:'Un segnale, e un consiglio di amministrazione nervoso', f:()=>{S.ind.stampa+=2; gd('lavoratori',2); gd('giovani',2); gd('imprenditori',-3);}},
+   {l:'Sono i campioni del paese: si sostengono', e:'Le esportazioni reggono, le piccole imprese chiudono', f:()=>{gd('imprenditori',4); gd('pensionati',1); gd('giovani',-3); gd('lavoratori',-2);}}]},
+ {id:'kr_p_casa', era:'contemporanea', paesi:['coreasud'], min:'infrastrutture', kick:'Abitare', t:'Il deposito che vale una casa', text:'Nella capitale si affitta con un deposito enorme e nessun canone, e chi non ha il deposito non ha casa. I prezzi sono raddoppiati in pochi anni; il governo ha cambiato le regole venti volte, e ogni volta i prezzi hanno letto le regole prima degli inquilini.', ch:[
+   {l:'Costruisci: mezzo milione di case pubbliche', e:'Le gru fra quattro anni', costo:{debito:1.0}, f:()=>{S.ind.debt+=1.0; gd('giovani',4); gd('lavoratori',2);}},
+   {l:'Tasse alte sulle seconde case', e:'I proprietari votano, e sono tanti', costo:{debito:-0.3}, f:()=>{S.ind.debt-=0.3; gd('giovani',3); gd('cetomedio',-3); gd('pensionati',-2);}},
+   {l:'Sposta ministeri e imprese nella città amministrativa', e:'La capitale nuova esiste; la gente no', costo:{debito:0.5}, f:()=>{S.ind.debt+=0.5; gd('cattolici',2); gd('cetomedio',1);}}]},
+ {id:'kr_p_medici', era:'contemporanea', paesi:['coreasud'], min:'salute', kick:'Camici', t:'I medici che si dimettono', text:'Il governo vuole aumentare i posti nelle facoltà di medicina per un paese che invecchia; gli specializzandi si dimettono in massa dagli ospedali, per mesi, dicendo che il problema è dove i medici vanno, non quanti sono. I pronto soccorso funzionano a metà.', ch:[
+   {l:'Tieni l\'aumento: il paese ha bisogno di medici', e:'Fermo, e gli ospedali reggono a stento', f:()=>{gd('pensionati',3); gd('cattolici',1); gd('cetomedio',-2); gd('giovani',-2);}},
+   {l:'Ritira, e tratta sulle condizioni di lavoro', e:'Gli specializzandi tornano, l\'autorità no', f:()=>{S.ind.stampa-=2; gd('giovani',2); gd('pensionati',-2);}},
+   {l:'Aumento più piccolo, e incentivi per le province', e:'Il compromesso che i medici non firmano', costo:{debito:0.4}, f:()=>{S.ind.debt+=0.4; gd('cetomedio',1); gd('cattolici',1);}}]},
+ {id:'kr_p_giappone', era:'contemporanea', paesi:['coreasud'], min:'esteri', kick:'Storia', t:'Il vicino e la memoria', text:'Con il vicino insulare il paese condivide un alleato, un nemico e una storia che non si chiude: il lavoro forzato, le donne, le isole contese. Gli alleati chiedono di andare d\'accordo. Un gesto di distensione costa in patria quanto vale all\'estero.', ch:[
+   {l:'Un fondo coreano per le vittime, senza aspettare il vicino', e:'Pragmatico, e le vittime lo chiamano resa', f:()=>{gd('imprenditori',3); gd('giovani',1); gd('pensionati',-3); gd('cattolici',-2);}},
+   {l:'Nessuna distensione senza scuse formali', e:'Il principio, e un vertice saltato', f:()=>{gd('pensionati',3); gd('cattolici',2); gd('imprenditori',-2);}},
+   {l:'Sicurezza insieme, storia a parte', e:'La formula degli alleati', f:()=>{gd('cetomedio',1); gd('imprenditori',1);}}]},
+ {id:'kr_p_ore', era:'contemporanea', paesi:['coreasud'], min:'lavoro', kick:'Orari', t:'Le sessantanove ore', text:'Il paese lavora fra i più lunghi orari del mondo ricco, e una proposta vuole permettere settimane fino a sessantanove ore, «da recuperare dopo». I giovani rispondono che «dopo» non arriva mai. Le imprese dicono che senza flessibilità chiudono.', ch:[
+   {l:'Ritira: il tetto resta a cinquantadue', e:'I giovani respirano, le imprese scrivono', f:()=>{gd('giovani',4); gd('lavoratori',3); gd('imprenditori',-3);}},
+   {l:'Flessibilità solo con accordo sindacale', e:'Il compromesso europeo', f:()=>{gd('lavoratori',1); gd('imprenditori',1);}},
+   {l:'Avanti: la competitività prima', e:'Le imprese esultano, la piazza si riempie', f:()=>{S.ind.fiducia+=1; gd('imprenditori',4); gd('giovani',-5); gd('lavoratori',-3);}}]},                                                                         // ③
+ {id:'kr_p_nucleare', era:'contemporanea', paesi:['coreasud'], min:'economia', kick:'Energia', t:'Le centrali che si costruiscono', text:'Il paese costruisce centrali nucleari in casa e le vende all\'estero, e ogni governo alterna piani di uscita e piani di espansione. Il vicino insulare ha spento le sue dopo il disastro; qui la scelta divide meno di quanto ci si aspetti, e più di quanto convenga.', ch:[
+   {l:'Espansione: nuove centrali e più export', e:'L\'industria esulta, le coste protestano', costo:{debito:0.7}, f:()=>{S.ind.debt+=0.7; S.ind.fiducia+=1; gd('imprenditori',4); gd('giovani',-2);}},                                                   // ④
+   {l:'Mantieni l\'esistente e spingi le rinnovabili', e:'La via di mezzo', costo:{debito:0.5}, f:()=>{S.ind.debt+=0.5; gd('giovani',2); gd('imprenditori',1);}},
+   {l:'Uscita graduale', e:'Il piano che il governo successivo cancella', f:()=>{gd('giovani',3); gd('imprenditori',-4);}}]},
+ {id:'kr_p_genere', era:'contemporanea', paesi:['coreasud'], min:'interno', kick:'Divario', t:'Il ministero da abolire', text:'Il ministero per l\'uguaglianza di genere è il simbolo di una guerra fra giovani uomini, che lo considerano una discriminazione contro di loro, e giovani donne, che vivono nel paese ricco con il divario salariale più ampio. Abolirlo è stata una promessa elettorale; mantenerlo un\'altra.', ch:[
+   {l:'Abolisci: le competenze a un ministero della famiglia', e:'Una promessa mantenuta, e metà dei giovani in piazza', f:()=>{gd('cattolici',2); gd('pensionati',2); gd('giovani',-3);}},
+   {l:'Mantieni e rafforza', e:'L\'altra metà dei giovani', f:()=>{gd('giovani',2); gd('cetomedio',1); gd('cattolici',-2); gd('pensionati',-1);}},
+   {l:'Rinomina e riorganizza, senza abolire', e:'Il compromesso che nessuno festeggia', f:()=>{gd('cetomedio',1);}}]},
+ {id:'kr_p_esame', era:'contemporanea', paesi:['coreasud'], kick:'Scuola', t:'Le scuole private fino a mezzanotte', text:'I ragazzi escono da scuola e vanno nelle scuole private fino alle dieci di sera, poi studiano. Le famiglie spendono una fortuna, i bambini non dormono, e chiunque proponga di limitarle perde le famiglie che le pagano e non possono smettere finché le pagano gli altri.', ch:[
+   {l:'Coprifuoco alle dieci per le scuole private, ovunque', e:'I ragazzi dormono; le famiglie temono di restare indietro', f:()=>{gd('giovani',4); gd('cetomedio',-2); gd('imprenditori',-2);}},                                                             // ⑪
+   {l:'Riforma l\'esame di ammissione: meno nozioni', e:'L\'esame cambia, le scuole private si adattano in un mese', f:()=>{gd('giovani',2); gd('cetomedio',1);}},
+   {l:'Doposcuola pubblici gratuiti', e:'Concorrenza pubblica alla corsa privata', costo:{debito:0.6}, f:()=>{S.ind.debt+=0.6; gd('lavoratori',3); gd('giovani',2); gd('cetomedio',1);}}]},
+ {id:'kr_p_sejong', era:'contemporanea', paesi:['coreasud'], kick:'Capitale', t:'La capitale a metà', text:'Il paese ha costruito una città amministrativa nuova per spostare il governo fuori dalla capitale, e la Corte ha detto che la capitale non si sposta. Così i ministeri sono in una città e il Parlamento e il Presidente in un\'altra, a due ore di distanza: i funzionari vivono in treno.', ch:[
+   {l:'Sposta anche l\'Assemblea e la presidenza, con una revisione costituzionale', e:'Il completamento, se i due terzi ci stanno', f:()=>{gd('cattolici',2); gd('cetomedio',1); gd('imprenditori',-1);}},                                                    // ⑫
+   {l:'Una sede secondaria dell\'Assemblea nella città nuova', e:'Il compromesso che c\'è già in parte', f:()=>{gd('cetomedio',1);}},
+   {l:'Basta spostamenti: la capitale è una', e:'I funzionari annuiscono dal treno', f:()=>{gd('pensionati',1); gd('cattolici',-2);}}]},
+ /* ===== L85-1 · INDIA, PRESENTE ARRICCHITO (scheda PRESET-INDIA-PRESENTE §A) — dodici questioni. Gli Stati e le lingue
+    sono la trama; la religione entra solo come regola di Stato. Nessuna data, nessun nome. ===== */
+ {id:'in_p_contadini', era:'contemporanea', paesi:['india'], min:'sviluppo', kick:'Campi', t:'I trattori verso la capitale', text:'Metà del paese vive di agricoltura e produce un sesto del prodotto. I contadini chiedono un prezzo minimo garantito per legge su tutti i raccolti e marciano verso la capitale con i trattori; il governo ha già ritirato una riforma davanti a loro una volta.', ch:[
+   {l:'Prezzo minimo per legge su tutti i raccolti', e:'I trattori tornano a casa, il bilancio no', costo:{debito:1.0}, f:()=>{S.ind.debt+=1.0; S.ind.fiducia-=2; gd('cattolici',5); gd('lavoratori',2); gd('imprenditori',-3);}},                       // ①
+   {l:'Prezzo garantito solo per i cereali, come oggi', e:'Il minimo, e i trattori restano al confine', f:()=>{gd('cattolici',-2); gd('imprenditori',1);}},
+   {l:'Trasferimenti diretti alle famiglie contadine', e:'Soldi sul conto, non sul prezzo', costo:{debito:0.6}, f:()=>{S.ind.debt+=0.6; gd('cattolici',3); gd('cetomedio',-1);}}]},
+ {id:'in_p_lavoro', era:'contemporanea', paesi:['india'], min:'lavoro', kick:'Gioventù', t:'Un milione di giovani al mese', text:'Ogni mese un milione di giovani entra nell\'età da lavoro, e i lavori non ci sono: laureati che fanno concorsi per posti da bidello, ingegneri che consegnano cibo. Il paese ha la popolazione più giovane del mondo e il tempo per farne una fortuna sta finendo.', ch:[
+   {l:'Sussidi alle imprese per ogni assunzione formale', e:'Le fabbriche assumono, sulla carta', costo:{debito:0.8}, f:()=>{S.ind.debt+=0.8; gd('giovani',3); gd('imprenditori',3); gd('lavoratori',1);}},
+   {l:'Un grande programma di lavori pubblici', e:'Strade, e stipendi per un anno', costo:{debito:0.9}, f:()=>{S.ind.debt+=0.9; gd('giovani',3); gd('lavoratori',3); gd('cattolici',1);}},
+   {l:'Riforma del lavoro: più facile assumere e licenziare', e:'Le imprese esultano, i sindacati bloccano le città', f:()=>{S.ind.fiducia+=2; gd('imprenditori',4); gd('giovani',1); gd('lavoratori',-5);}}]},                                              // ②
+ {id:'in_p_seggi', era:'contemporanea', paesi:['india'], min:'interno', kick:'Federazione', t:'I seggi e il Sud', text:'I seggi in Parlamento sono assegnati agli Stati con i dati di mezzo secolo fa, congelati per non punire chi ha fatto meno figli. Ridisegnarli darebbe decine di seggi al Nord popoloso e li toglierebbe al Sud, che è più ricco, più istruito e paga più tasse. Il Sud lo chiama una punizione.', ch:[
+   {l:'Ridisegna secondo la popolazione attuale', e:'La democrazia dei numeri, e il Sud parla di secessione', f:()=>{S.ind.stampa-=2; gd('cattolici',3); gd('lavoratori',1); gd('cetomedio',-3); gd('imprenditori',-2);}},
+   {l:'Aumenta i seggi totali così che nessuno ne perda', e:'Un Parlamento più grande, e il peso relativo cambia comunque', costo:{debito:0.1}, f:()=>{S.ind.debt+=0.1; gd('cetomedio',1);}},
+   {l:'Congela ancora per venticinque anni', e:'Il Sud respira, il Nord conta', f:()=>{gd('cetomedio',2); gd('imprenditori',1); gd('cattolici',-2);}}]},
+ {id:'in_p_lingua', era:'contemporanea', paesi:['india'], min:'istruzione', kick:'Lingue', t:'La terza lingua', text:'La politica scolastica nazionale vuole tre lingue in ogni scuola, e gli Stati del Sud leggono «hindi» dove non è scritto. Il paese ha ventidue lingue riconosciute e nessuna che tutti parlino; ogni tentativo di dargliene una è finito in piazza.', ch:[
+   {l:'Tre lingue, ma la terza la sceglie lo Stato', e:'Il Sud accetta, il Nord chiede a cosa serve', f:()=>{gd('cetomedio',2); gd('giovani',1); gd('cattolici',-1);}},
+   {l:'Hindi e inglese ovunque: una lingua comune', e:'Il Sud brucia i manifesti', f:()=>{S.ind.stampa-=2; gd('cattolici',3); gd('lavoratori',1); gd('cetomedio',-3); gd('giovani',-2);}},
+   {l:'Lascia agli Stati ogni scelta linguistica', e:'Il federalismo, e nessuna lingua comune', f:()=>{gd('cetomedio',2); gd('cattolici',-2);}}]},
+ {id:'in_p_aria', era:'contemporanea', paesi:['india'], min:'salute', kick:'Inverno', t:'L\'aria della capitale', text:'Ogni novembre la capitale respira l\'aria più tossica del mondo: i campi degli Stati vicini bruciano le stoppie, il traffico, il freddo che schiaccia tutto a terra. Le scuole chiudono, i cantieri si fermano, e i governi degli Stati si accusano a vicenda.', ch:[
+   {l:'Paga i contadini per non bruciare, e controlla', e:'Il fumo cala, se i soldi arrivano prima di novembre', costo:{debito:0.4}, f:()=>{S.ind.debt+=0.4; gd('cetomedio',3); gd('giovani',2); gd('cattolici',1);}},
+   {l:'Targhe alterne e cantieri fermi per due mesi', e:'Si tampona, come ogni anno', f:()=>{gd('cetomedio',1); gd('imprenditori',-2); gd('lavoratori',-1);}},
+   {l:'Un\'autorità unica per l\'aria della regione, sopra gli Stati', e:'Gli Stati protestano, l\'aria non ha confini', costo:{debito:0.2}, f:()=>{S.ind.debt+=0.2; gd('cetomedio',2); gd('giovani',1);}}]},
+ {id:'in_p_riserve', era:'contemporanea', paesi:['india'], min:'giustizia', kick:'Riserve', t:'Il censimento delle caste', text:'Metà dei posti pubblici e universitari è riservata alle caste e alle tribù storicamente escluse, con un tetto fissato dalla Corte. Un censimento nazionale delle caste direbbe quanti sono davvero, e chiunque governi sa che i numeri riaprirebbero le quote.', ch:[
+   {l:'Fai il censimento delle caste', e:'I numeri arrivano, e con loro le richieste', f:()=>{gd('lavoratori',3); gd('cattolici',2); gd('cetomedio',-3); gd('imprenditori',-1);}},
+   {l:'Nessun censimento: le riserve restano come sono', e:'Chi le ha le tiene, chi non le ha aspetta', f:()=>{gd('cetomedio',2); gd('imprenditori',1); gd('lavoratori',-2);}},
+   {l:'Riserve anche per reddito, non solo per casta', e:'Una porta aperta ai poveri delle caste alte', f:()=>{gd('cetomedio',3); gd('cattolici',1); gd('lavoratori',-1);}}]},
+ {id:'in_p_confine', era:'contemporanea', paesi:['india'], min:'difesa', kick:'Himalaya', t:'La linea in alta quota', text:'Il confine con il grande vicino a nord non è una linea ma una «linea di controllo effettivo» a cinquemila metri, e ogni tanto i soldati si affrontano a bastonate perché nessuno dei due vuole sparare per primo. Il vicino costruisce strade; il paese le costruisce dopo.', ch:[
+   {l:'Strade, ponti e brigate di montagna', e:'Il confine si vede, e costa', costo:{debito:0.9}, f:()=>{S.ind.debt+=0.9; gd('cattolici',3); gd('pensionati',2); gd('giovani',-2);}},
+   {l:'Colloqui militari e distensione', e:'Il vicino parla e costruisce', f:()=>{gd('imprenditori',2); gd('cetomedio',1); gd('cattolici',-2);}},
+   {l:'Vieta le app e gli investimenti del vicino', e:'Il messaggio arriva, e l\'industria cerca fornitori', f:()=>{S.ind.fiducia-=1; gd('cattolici',3); gd('lavoratori',1); gd('imprenditori',-3);}}]},                                                         // ③
+ {id:'in_p_grano', era:'contemporanea', paesi:['india'], min:'economia', kick:'Sussistenza', t:'Il grano gratis', text:'Ottocento milioni di persone ricevono cereali gratis ogni mese dallo Stato, il programma alimentare più grande della storia. Costa una fetta del bilancio, ha tenuto il paese in piedi negli anni difficili, e nessun governo osa toccarlo — anche se il paese esporta grano.', ch:[
+   {l:'Mantieni e rendi permanente', e:'Ottocento milioni di elettori, e un conto lungo', costo:{debito:0.7}, f:()=>{S.ind.debt+=0.7; S.ind.fiducia-=1; gd('lavoratori',4); gd('cattolici',3); gd('imprenditori',-2);}},                                   // ④
+   {l:'Restringi alle famiglie sotto una soglia', e:'I conti tornano, le file alle bilance no', costo:{debito:-0.4}, f:()=>{S.ind.debt-=0.4; S.ind.fiducia+=1; gd('lavoratori',-3); gd('cattolici',-2); gd('cetomedio',1);}},
+   {l:'Trasferimenti in denaro al posto del grano', e:'La scelta al posto del sacco', costo:{debito:0.3}, f:()=>{S.ind.debt+=0.3; gd('cetomedio',2); gd('lavoratori',1); gd('cattolici',-1);}}]},
+ {id:'in_p_kashmir', era:'contemporanea', paesi:['india'], min:'interno', kick:'Nord', t:'Il territorio senza assemblea', text:'La regione himalayana contesa ha perso la sua autonomia speciale e il suo status di Stato: è governata da Delhi. Le elezioni locali sono tornate; lo status di Stato no, e le famiglie chiedono quando. Il vicino a ovest ne fa una questione di ogni discorso.', ch:[
+   {l:'Restituisci lo status di Stato, con un calendario', e:'La regione respira, una parte del partito no', f:()=>{gd('giovani',2); gd('cetomedio',1); gd('cattolici',-3);}},
+   {l:'Prima la sicurezza, poi lo status', e:'La formula di sempre', f:()=>{gd('cattolici',2); gd('pensionati',1); gd('giovani',-1);}},
+   {l:'Investimenti e turismo: la normalità dai fatti', e:'Le funivie arrivano, la domanda resta', costo:{debito:0.5}, f:()=>{S.ind.debt+=0.5; gd('imprenditori',2); gd('lavoratori',1);}}]},
+ {id:'in_p_treni', era:'contemporanea', paesi:['india'], min:'infrastrutture', kick:'Rotaie', t:'La ferrovia che porta il paese', text:'La ferrovia trasporta ogni giorno più persone di quante ne abbia un paese europeo, su binari di un secolo. I treni nuovi sono veloci e fotografati; i vecchi sono pieni e a volte deragliano. La sicurezza non si inaugura.', ch:[
+   {l:'Prima la sicurezza: sistemi anticollisione su tutta la rete', e:'Non si taglia un nastro, si salvano vite', costo:{debito:0.8}, f:()=>{S.ind.debt+=0.8; gd('lavoratori',3); gd('cetomedio',2); gd('pensionati',1);}},
+   {l:'Treni veloci sulle linee principali', e:'Le inaugurazioni, e i pendolari sugli altri treni', costo:{debito:0.9}, f:()=>{S.ind.debt+=0.9; gd('imprenditori',3); gd('cetomedio',1); gd('lavoratori',-1);}},
+   {l:'Privatizza le linee redditizie', e:'Soldi in cassa, e i biglietti salgono', costo:{debito:-0.4}, f:()=>{S.ind.debt-=0.4; gd('imprenditori',3); gd('lavoratori',-4); gd('cattolici',-1);}}]},
+ {id:'in_p_codice', era:'contemporanea', paesi:['india'], kick:'Diritto', t:'Un codice civile per tutti', text:'Matrimonio, divorzio ed eredità seguono leggi diverse a seconda della religione. Un codice unico è nella Costituzione come obiettivo da settant\'anni: chi lo vuole parla di uguaglianza, chi lo teme di una maggioranza che scrive le regole delle minoranze. Uno Stato lo ha appena approvato da solo.', ch:[
+   {l:'Un codice unico nazionale', e:'Uguali davanti alla legge, e una parte del paese in piazza', f:()=>{gd('cattolici',3); gd('cetomedio',2); gd('giovani',-1); gd('lavoratori',-2);}},                                                                      // ⑪
+   {l:'Lascia agli Stati, uno alla volta', e:'Il laboratorio federale', f:()=>{gd('cetomedio',1);}},
+   {l:'Riforma dentro ogni legge personale, con le comunità', e:'Lento, e nessuno si sente scavalcato', f:()=>{gd('giovani',1); gd('lavoratori',1); gd('cattolici',-2);}}]},
+ {id:'in_p_elezioni', era:'contemporanea', paesi:['india'], kick:'Urne', t:'Un\'elezione sola', text:'Il paese vota sempre: ogni anno qualche Stato va alle urne, e il governo nazionale è in campagna permanente. Una proposta vuole allineare tutte le elezioni in una sola tornata ogni cinque anni: meno soldi e meno paralisi, dicono; meno federalismo, rispondono gli Stati.', ch:[
+   {l:'Elezione unica nazionale e statale', e:'Un\'onda sola ogni cinque anni, e gli Stati temono di esserne travolti', f:()=>{gd('cetomedio',2); gd('imprenditori',1); gd('cattolici',-1);}},                                                                   // ⑫
+   {l:'Due tornate: una nazionale, una per tutti gli Stati', e:'Il compromesso delle commissioni', f:()=>{gd('cetomedio',1);}},
+   {l:'Gli Stati votano quando vogliono', e:'Il federalismo, e la campagna permanente', f:()=>{gd('cattolici',1); gd('cetomedio',-1);}}]},
+ /* ===== L86-3 · BRASILE, PRESENTE ARRICCHITO (scheda PRESET-BRASILE-PRESENTE §A) — dodici questioni. Il Presidente vince
+    da solo e governa con il centrão. Nessuna data, nessun nome. ===== */
+ {id:'br_p_emendamenti', era:'contemporanea', paesi:['brasile'], min:'economia', kick:'Congresso', t:'Il bilancio segreto', text:'Il Congresso ha imparato a scrivere da solo una fetta del bilancio: emendamenti che ogni deputato destina al suo Stato, senza dire a cosa. È il prezzo della maggioranza in un Parlamento di trenta partiti, e la Corte suprema ha già detto che così non va.', ch:[
+   {l:'Trasparenza totale: ogni emendamento con nome e destinazione', e:'La Corte applaude, la maggioranza si assottiglia', f:()=>{S.ind.stampa+=3; S.ind.fiducia+=1; gd('cetomedio',2); gd('giovani',2); tutteCorrenti(-4);}},                    // ①
+   {l:'Tratta: meno emendamenti, ma tuoi', e:'Il gioco di sempre, con regole nuove', costo:{debito:0.5}, f:()=>{S.ind.debt+=0.5; gd('cetomedio',-1);}},
+   {l:'Lascia fare: la governabilità ha un prezzo', e:'Il bilancio passa, e nessuno sa dove', costo:{debito:0.9}, f:()=>{S.ind.debt+=0.9; S.ind.fiducia-=2; S.ind.stampa-=3; gd('cetomedio',-3); gd('giovani',-2);}}]},
+ {id:'br_p_amazzonia', era:'contemporanea', paesi:['brasile'], min:'sviluppo', kick:'Foresta', t:'La foresta che brucia', text:'Le immagini della foresta in fiamme fanno il giro del mondo ogni stagione secca. Gli allevatori dicono che la terra è loro; i paesi ricchi offrono fondi e minacciano dazi; le comunità indigene vivono lì da sempre. Il paese non ama che il mondo gli dica cosa fare della sua foresta.', ch:[
+   {l:'Satelliti, multe e polizia ambientale ovunque', e:'La deforestazione cala, gli allevatori votano', costo:{debito:0.5}, f:()=>{S.ind.debt+=0.5; S.ind.fiducia+=2; gd('giovani',4); gd('cattolici',-3); gd('imprenditori',-2);}},                       // ②
+   {l:'Sviluppo sostenibile: chi conserva riceve', e:'Fondi esteri, e la sovranità discussa', costo:{debito:0.2}, f:()=>{S.ind.debt+=0.2; gd('giovani',2); gd('lavoratori',1);}},
+   {l:'La foresta è nostra: strade e miniere', e:'Il Nord esulta, il mondo chiude i rubinetti', f:()=>{S.ind.fiducia-=3; gd('cattolici',3); gd('imprenditori',3); gd('giovani',-5);}}]},
+ {id:'br_p_violenza', era:'contemporanea', paesi:['brasile'], min:'interno', kick:'Sicurezza', t:'Le fazioni', text:'Due grandi organizzazioni criminali nate nelle prigioni controllano quartieri, porti e Stati interi. La polizia uccide più che in qualunque democrazia e le fazioni di più. Ogni Presidente promette di riprendersi le città; le città sanno chi comanda la notte.', ch:[
+   {l:'Esercito nelle città e nelle carceri', e:'I titoli, e i risultati di un anno', costo:{debito:0.5}, f:()=>{S.ind.debt+=0.5; gd('pensionati',4); gd('cetomedio',2); gd('giovani',-3);}},
+   {l:'Colpisci il denaro: porti, banche, avvocati', e:'Lento e invisibile, dove fa male', f:()=>{gd('cetomedio',2); gd('imprenditori',-2); gd('giovani',1);}},
+   {l:'Prevenzione: scuole aperte e lavoro nelle favelas', e:'Una generazione, se i fondi durano', costo:{debito:0.8}, f:()=>{S.ind.debt+=0.8; gd('giovani',4); gd('lavoratori',2); gd('pensionati',-2);}}]},
+ {id:'br_p_bolsa', era:'contemporanea', paesi:['brasile'], min:'lavoro', kick:'Sussidio', t:'L\'assegno alle famiglie', text:'Decine di milioni di famiglie ricevono un assegno mensile con l\'obbligo di mandare i figli a scuola. Ha tirato fuori dalla fame una generazione ed è la misura più copiata del continente; ogni governo la rinomina, e nessuno la toglie.', ch:[
+   {l:'Alzalo e allargalo', e:'Il Nordest ringrazia, il Tesoro no', costo:{debito:0.9}, f:()=>{S.ind.debt+=0.9; S.ind.fiducia-=1; gd('lavoratori',4); gd('cattolici',3); gd('imprenditori',-2);}},
+   {l:'Mantieni, con controlli sulle frequenze scolastiche', e:'Il patto originale', f:()=>{gd('lavoratori',1); gd('cetomedio',1);}},
+   {l:'Riduci: il lavoro prima del sussidio', e:'Le imprese applaudono, le file ai banchi alimentari no', costo:{debito:-0.5}, f:()=>{S.ind.debt-=0.5; S.ind.fiducia+=2; gd('imprenditori',3); gd('lavoratori',-4); gd('cattolici',-3);}}]},                   // ③
+ {id:'br_p_pensioni', era:'contemporanea', paesi:['brasile'], min:'economia', kick:'Previdenza', t:'La riforma che ogni Presidente rifà', text:'Il paese è giovane e spende in pensioni come un paese vecchio, con età di uscita che il resto del mondo invidia. Ogni Presidente presenta una riforma, la negozia articolo per articolo con trenta partiti, e la vede uscire più piccola di come è entrata.', ch:[
+   {l:'Età minima più alta per tutti, militari inclusi', e:'I mercati applaudono, le caserme no', costo:{debito:-0.8}, f:()=>{S.ind.debt-=0.8; S.ind.fiducia+=3; gd('lavoratori',-3); gd('pensionati',-3); gd('imprenditori',2);}},                      // ④
+   {l:'Riforma graduale, con transizione lunga', e:'Meno risparmio, meno piazza', costo:{debito:-0.3}, f:()=>{S.ind.debt-=0.3; gd('pensionati',-1); gd('cetomedio',1);}},
+   {l:'Non è il momento', e:'Non lo è mai stato', f:()=>{S.ind.fiducia-=2; gd('pensionati',2); gd('lavoratori',1);}}]},
+ {id:'br_p_corte', era:'contemporanea', paesi:['brasile'], min:'giustizia', kick:'Toghe', t:'La Corte che governa', text:'La Corte suprema decide su tutto: bilancio, droghe, reti sociali, mandati parlamentari. Una parte del paese la considera l\'ultima diga; un\'altra un potere che nessuno ha eletto. Il Congresso vuole limitare i giudici singoli; i giudici rispondono con una sentenza.', ch:[
+   {l:'Sostieni la Corte: le istituzioni si difendono', e:'Le toghe ringraziano, il Congresso no', f:()=>{gd('cetomedio',2); gd('giovani',2); gd('cattolici',-2); gd('pensionati',-1);}},
+   {l:'Sostieni il Congresso: limiti alle decisioni monocratiche', e:'Una riforma vera, e una Corte che ricorda', f:()=>{S.ind.stampa-=1; gd('cattolici',2); gd('pensionati',2); gd('giovani',-2);}},
+   {l:'Resta fuori: non è il tuo scontro', e:'Prudente, e tutti chiedono da che parte stai', f:()=>{gd('cetomedio',-1);}}]},
+ {id:'br_p_armi', era:'contemporanea', paesi:['brasile'], min:'interno', kick:'Armi', t:'Le armi nelle case', text:'In pochi anni i decreti hanno moltiplicato i permessi: milioni di armi in mano a «cacciatori e tiratori» che non cacciano. Chi le ha dice che lo Stato non protegge; i numeri delle morti dicono cosa succede quando ognuno si protegge da sé.', ch:[
+   {l:'Revoca i decreti e riacquista', e:'Le morti calano, i club di tiro si mobilitano', costo:{debito:0.3}, f:()=>{S.ind.debt+=0.3; gd('giovani',3); gd('cetomedio',1); gd('cattolici',-4); gd('pensionati',-2);}},
+   {l:'Registro nazionale e controlli, senza revoca', e:'Il compromesso che i tiratori accettano a metà', f:()=>{gd('cetomedio',1); gd('cattolici',-1);}},
+   {l:'Il cittadino armato è un cittadino libero', e:'La base esulta, i numeri no', f:()=>{gd('cattolici',4); gd('pensionati',2); gd('giovani',-4); gd('lavoratori',-1);}}]},
+ {id:'br_p_indigeni', era:'contemporanea', paesi:['brasile'], min:'giustizia', kick:'Terre', t:'Il limite temporale', text:'Il Congresso ha stabilito che i popoli indigeni hanno diritto solo alle terre che occupavano alla data della Costituzione; la Corte ha detto il contrario. Gli agricoltori vogliono certezze sui titoli; le comunità vogliono le terre da cui furono cacciate prima di quella data.', ch:[
+   {l:'Nessun limite temporale: la Corte ha ragione', e:'Le demarcazioni ripartono, l\'agrobusiness ricorre', f:()=>{gd('giovani',3); gd('cattolici',-4); gd('imprenditori',-3);}},
+   {l:'Limite sì, con indennizzi per le terre perse', e:'Il compromesso che nessuno chiama giusto', costo:{debito:0.4}, f:()=>{S.ind.debt+=0.4; gd('cattolici',1); gd('imprenditori',1);}},
+   {l:'Il limite resta: certezza per chi coltiva', e:'Il Congresso esulta, i villaggi no', f:()=>{gd('cattolici',3); gd('imprenditori',3); gd('giovani',-3);}}]},
+ {id:'br_p_petrolio', era:'contemporanea', paesi:['brasile'], min:'sviluppo', kick:'Oceano', t:'Il petrolio alla foce', text:'Sotto il mare davanti alla foce del grande fiume c\'è petrolio, forse molto. Estrarlo pagherebbe scuole e strade nel Nord più povero; un incidente arriverebbe alla foresta in un giorno. Il paese che ospita i vertici sul clima deve dire se trivella.', ch:[
+   {l:'Trivella: il Nord ha diritto al suo petrolio', e:'Le royalty arrivano, i vertici sul clima si imbarazzano', costo:{debito:-0.3}, f:()=>{S.ind.debt-=0.3; gd('lavoratori',3); gd('imprenditori',3); gd('giovani',-4);}},
+   {l:'Studi ambientali prima, e vincolanti', e:'Anni, e forse un no', f:()=>{gd('giovani',2); gd('imprenditori',-1);}},
+   {l:'Nessuna trivella: il paese sceglie il clima', e:'Il mondo applaude, il Nord conta le scuole che non avrà', f:()=>{S.ind.fiducia-=1; gd('giovani',4); gd('lavoratori',-2); gd('imprenditori',-3);}}]},
+ {id:'br_p_reti', era:'contemporanea', paesi:['brasile'], kick:'Piattaforme', t:'La piattaforma bloccata', text:'Una piattaforma straniera si rifiuta di obbedire a un giudice, e il giudice la spegne per tutto il paese. Milioni di utenti restano senza, le multe piovono, e il dibattito è se sia censura o sovranità.', ch:[
+   {l:'Sostieni il giudice: la legge vale anche per loro', e:'Sovranità, e milioni di utenti arrabbiati', f:()=>{gd('cetomedio',1); gd('pensionati',2); gd('giovani',-3);}},
+   {l:'Una legge sulle piattaforme, così non decide un giudice solo', e:'Il Congresso la discute da anni', f:()=>{gd('cetomedio',2); gd('giovani',1);}},
+   {l:'Critica il blocco: la rete resta aperta', e:'La piattaforma ringrazia, la Corte annota', f:()=>{S.ind.stampa+=1; gd('giovani',3); gd('cetomedio',-1); gd('pensionati',-2);}}]},
+ {id:'br_p_nordeste', era:'contemporanea', paesi:['brasile'], kick:'Regioni', t:'Il Nordest e il Sud', text:'Il Nordest è povero, vota per chi promette assegni e ha la crescita più alta; il Sud è ricco, vota per chi promette meno tasse e parla di separazione a ogni elezione. Il paese è uno, e ha due mappe.', ch:[
+   {l:'Un fondo di sviluppo per il Nordest, pagato da tutti', e:'Il Nordest ringrazia, il Sud fa i conti', costo:{debito:0.6}, f:()=>{S.ind.debt+=0.6; gd('lavoratori',3); gd('cattolici',2); gd('imprenditori',-2);}},                                     // ⑪
+   {l:'Meno tasse federali, più autonomia agli Stati', e:'Il Sud applaude, il Nordest perde i trasferimenti', costo:{debito:-0.2}, f:()=>{S.ind.debt-=0.2; gd('imprenditori',3); gd('cetomedio',2); gd('lavoratori',-3);}},
+   {l:'Un giro del paese: ascolta entrambe le mappe', e:'Il gesto, e le due mappe restano', f:()=>{S.ind.stampa+=1; gd('cetomedio',1);}}]},
+ {id:'br_p_pacchi', era:'contemporanea', paesi:['brasile'], kick:'Fisco', t:'La tassa sulle piattaforme straniere', text:'I pacchi da pochi dollari arrivano a milioni da negozi online stranieri, senza dazi; i commercianti locali chiudono. Tassarli è giusto per l\'industria e impopolare per chi compra un caricabatterie a due dollari. Il Congresso lo chiama «tassa sulla camicetta».', ch:[
+   {l:'Dazio pieno anche sui pacchi piccoli', e:'L\'industria applaude, i social si riempiono di camicette', f:()=>{S.ind.stampa-=2; gd('imprenditori',3); gd('lavoratori',1); gd('giovani',-3); gd('cetomedio',-2);}},                                  // ⑫
+   {l:'Esenzione sotto una soglia, dazio sopra', e:'Il compromesso che regge', f:()=>{gd('imprenditori',1); gd('cetomedio',1);}},
+   {l:'Nessun dazio: il consumatore prima', e:'I pacchi arrivano, i negozi chiudono', f:()=>{gd('giovani',2); gd('cetomedio',2); gd('imprenditori',-3); gd('lavoratori',-1);}}]},
+ /* ===== L86-3 · ARGENTINA, PRESENTE ARRICCHITO (scheda PRESET-ARGENTINA-PRESENTE §A) — dodici questioni. L'inflazione è
+    la trama e la fiducia dei mercati è la valuta di casa. Nessuna data, nessun nome. ===== */
+ {id:'ar_p_inflazione', era:'contemporanea', paesi:['argentina'], min:'economia', kick:'Prezzi', t:'I prezzi che cambiano ogni settimana', text:'I supermercati cambiano i cartellini ogni lunedì, i salari inseguono i prezzi e non li raggiungono, e il paese ricorda ogni volta che ha già visto tutto questo. Fermare l\'inflazione richiede una recessione che nessun governo è sopravvissuto a imporre; non fermarla richiede un miracolo.', ch:[
+   {l:'Stretta: tagli alla spesa e stampa ferma', e:'I prezzi rallentano, le fabbriche chiudono', costo:{debito:-1.0}, f:()=>{S.ind.debt-=1.0; S.ind.fiducia+=4; allG(-3); gd('imprenditori',2);}},                                                                          // ①
+   {l:'Controllo dei prezzi e accordi con le catene', e:'I cartellini si fermano un mese, gli scaffali si svuotano', f:()=>{S.ind.fiducia-=3; gd('lavoratori',3); gd('cetomedio',2); gd('imprenditori',-4);}},                                                          // ②
+   {l:'Indicizza salari e pensioni', e:'Tutti inseguono, nessuno raggiunge', costo:{debito:0.8}, f:()=>{S.ind.debt+=0.8; S.ind.fiducia-=2; gd('lavoratori',3); gd('pensionati',3); gd('imprenditori',-2);}}]},
+ {id:'ar_p_fmi', era:'contemporanea', paesi:['argentina'], min:'economia', kick:'Creditore', t:'La missione del Fondo', text:'Il paese deve al Fondo monetario più di chiunque altro al mondo, e la missione arriva ogni trimestre a controllare i conti. Ogni accordo promette un avanzo che il Congresso non vota; ogni rinegoziazione compra un anno. La parola «Fondo» perde elezioni da cinquant\'anni.', ch:[
+   {l:'Rispetta l\'accordo: avanzo primario, costi quel che costi', e:'Il Fondo eroga, le province tagliano', costo:{debito:-0.7}, f:()=>{S.ind.debt-=0.7; S.ind.fiducia+=3; gd('lavoratori',-3); gd('pensionati',-2); gd('cetomedio',-1);}},                              // ③
+   {l:'Rinegozia: più tempo, meno avanzo', e:'Un anno comprato', costo:{debito:0.2}, f:()=>{S.ind.debt+=0.2; gd('lavoratori',1);}},
+   {l:'Il paese non si governa da Washington', e:'Applausi in piazza, silenzio dei mercati', f:()=>{S.ind.fiducia-=4; gd('lavoratori',3); gd('giovani',2); gd('imprenditori',-3);}}]},
+ {id:'ar_p_dollaro', era:'contemporanea', paesi:['argentina'], min:'economia', kick:'Cambio', t:'I dieci dollari', text:'Il paese ha un cambio ufficiale e uno vero, con nomi diversi per ogni strada: il «blu», quello della carta, quello del turista. Chi può compra dollari e li mette sotto il materasso; lo Stato vieta, poi permette, poi vieta. Unificare il cambio è una svalutazione con un altro nome.', ch:[
+   {l:'Unifica il cambio: una svalutazione, e poi basta', e:'I prezzi saltano una volta, i mercati respirano', f:()=>{S.ind.fiducia+=3; gd('imprenditori',3); gd('lavoratori',-3); gd('pensionati',-2); gd('cetomedio',-2);}},                                            // ④
+   {l:'Mantieni i controlli e stringi i buchi', e:'Il materasso resta pieno', f:()=>{S.ind.fiducia-=2; gd('cetomedio',1); gd('imprenditori',-2);}},
+   {l:'Dollarizza: la moneta nazionale finisce', e:'Il sogno di metà del paese, e la fine di una parte della sovranità', f:()=>{S.ind.fiducia+=2; S.ind.stampa+=2; gd('cetomedio',3); gd('imprenditori',2); gd('lavoratori',-3); gd('pensionati',-2);}}]},
+ {id:'ar_p_ritenute', era:'contemporanea', paesi:['argentina'], min:'sviluppo', kick:'Campagna', t:'Le ritenute sul grano', text:'Lo Stato trattiene una parte di ogni tonnellata di soia e grano esportata: è la sua entrata più sicura e la guerra più antica con la campagna, che ha già bloccato le strade per mesi una volta. Abbassarle piace ai campi e svuota le casse; alzarle riempie le casse e le strade.', ch:[
+   {l:'Abbassale gradualmente: la campagna investe', e:'I trattori tornano nei campi, il Tesoro cerca altrove', costo:{debito:0.5}, f:()=>{S.ind.debt+=0.5; S.ind.fiducia+=1; gd('cattolici',4); gd('imprenditori',2); gd('lavoratori',-2);}},                          // ⑤
+   {l:'Mantienile: sono le entrate dello Stato', e:'La campagna minaccia lo sciopero', costo:{debito:-0.2}, f:()=>{S.ind.debt-=0.2; gd('cattolici',-3); gd('lavoratori',1);}},
+   {l:'Alzale per finanziare i sussidi', e:'Le strade si bloccano', costo:{debito:-0.6}, f:()=>{S.ind.debt-=0.6; S.ind.fiducia-=2; gd('lavoratori',3); gd('cattolici',-6); gd('imprenditori',-2);}}]},
+ {id:'ar_p_sindacati', era:'contemporanea', paesi:['argentina'], min:'lavoro', kick:'Sciopero', t:'La centrale chiama lo sciopero', text:'La grande centrale sindacale, che è anche partito e sistema sanitario, chiama lo sciopero generale contro la tua riforma del lavoro. Il paese si ferma per un giorno; il Congresso guarda chi ha vinto la giornata.', ch:[
+   {l:'Avanti con la riforma: il paese non può fermarsi', e:'La riforma passa a metà, lo sciopero si ripete', f:()=>{S.ind.fiducia+=2; gd('imprenditori',4); gd('lavoratori',-5); gd('pensionati',-1);}},                                                                     // ⑥
+   {l:'Tratta con la centrale: meno riforma, più pace', e:'Il modo di sempre', f:()=>{gd('lavoratori',2); gd('imprenditori',-2);}},
+   {l:'Ritira', e:'La centrale festeggia, i mercati annotano', f:()=>{S.ind.fiducia-=2; gd('lavoratori',4); gd('imprenditori',-3);}}]},
+ {id:'ar_p_province', era:'contemporanea', paesi:['argentina'], min:'interno', kick:'Federazione', t:'I governatori alla porta', text:'Le province vivono dei trasferimenti federali e i governatori arrivano insieme alla Casa Rosada con la stessa lista: fondi, o niente voti in Senato. Il federalismo argentino è un negoziato mensile fra chi ha i soldi e chi ha i senatori.', ch:[
+   {l:'Paga: i fondi in cambio dei voti', e:'Il Senato vota, la cassa si svuota', costo:{debito:0.7}, f:()=>{S.ind.debt+=0.7; gd('cetomedio',-1); gd('lavoratori',1);}},
+   {l:'Taglia i trasferimenti: le province si arrangino', e:'Le province chiudono le scuole, e lo dicono', costo:{debito:-0.6}, f:()=>{S.ind.debt-=0.6; S.ind.fiducia+=2; gd('lavoratori',-3); gd('cattolici',-2); gd('cetomedio',1);}},
+   {l:'Un patto fiscale nuovo, con regole scritte', e:'Il patto che si firma ogni cinque anni', costo:{debito:0.3}, f:()=>{S.ind.debt+=0.3; gd('cetomedio',1);}}]},
+ {id:'ar_p_litio', era:'contemporanea', paesi:['argentina'], min:'sviluppo', kick:'Nord', t:'Il litio del Nord', text:'Nelle saline del Nord c\'è il metallo che il mondo vuole per le batterie, e le compagnie straniere fanno la fila. Le province dicono che la risorsa è loro; le comunità dicono che l\'acqua è loro; il governo vede la prima esportazione che non dipende dalla pioggia.', ch:[
+   {l:'Regime speciale per gli investimenti: stabilità fiscale trent\'anni', e:'Le compagnie arrivano, le regole restano', f:()=>{S.ind.fiducia+=2; gd('imprenditori',4); gd('lavoratori',1); gd('giovani',-2);}},
+   {l:'Una compagnia di Stato con quote nelle miniere', e:'Il modello del vicino andino', costo:{debito:0.4}, f:()=>{S.ind.debt+=0.4; gd('lavoratori',2); gd('imprenditori',-2);}},
+   {l:'Consenso delle comunità prima di ogni concessione', e:'Lento, e giusto per chi ci vive', f:()=>{gd('giovani',3); gd('imprenditori',-3);}}]},
+ {id:'ar_p_universita', era:'contemporanea', paesi:['argentina'], min:'istruzione', kick:'Atenei', t:'L\'università gratuita', text:'L\'università pubblica è gratuita per tutti, anche per gli stranieri, ed è l\'orgoglio che unisce il paese oltre ogni divisione. Il bilancio non regge l\'inflazione, i professori guadagnano meno dei tassisti, e una marcia riempie le strade quando il governo tocca i fondi.', ch:[
+   {l:'Fondi aggiornati all\'inflazione per legge', e:'La marcia torna a casa, il bilancio no', costo:{debito:0.6}, f:()=>{S.ind.debt+=0.6; gd('giovani',5); gd('cetomedio',2); gd('imprenditori',-1);}},
+   {l:'Audit e poi fondi: prima si vede dove vanno', e:'Ragionevole, e la piazza non aspetta', f:()=>{gd('cetomedio',1); gd('giovani',-3);}},
+   {l:'Tasse per gli stranieri e per i redditi alti', e:'Il tabù si tocca', costo:{debito:-0.2}, f:()=>{S.ind.debt-=0.2; gd('imprenditori',1); gd('giovani',-4); gd('cetomedio',-1);}}]},
+ {id:'ar_p_malvine', era:'contemporanea', paesi:['argentina'], min:'esteri', kick:'Isole', t:'Le isole', text:'Le isole nell\'Atlantico del Sud sono in Costituzione come parte del paese e sono governate da chi ha vinto una guerra quarant\'anni fa. Ogni governo le rivendica; nessuno può fare nulla; e il petrolio attorno alle isole rende la questione meno simbolica ogni anno.', ch:[
+   {l:'Rivendica in ogni sede: la sovranità non si negozia', e:'Il paese annuisce, il mondo ascolta educato', f:()=>{gd('pensionati',3); gd('cattolici',2); gd('giovani',1); gd('imprenditori',-1);}},
+   {l:'Dialogo sui voli e la pesca, sovranità a parte', e:'Piccoli passi, e chi li chiama resa', f:()=>{gd('imprenditori',2); gd('pensionati',-2);}},
+   {l:'Nessuna parola: il paese ha altri problemi', e:'Vero, e la memoria è lunga', f:()=>{gd('cetomedio',1); gd('pensionati',-3);}}]},
+ {id:'ar_p_sussidi', era:'contemporanea', paesi:['argentina'], min:'economia', kick:'Bollette', t:'Le tariffe congelate', text:'Elettricità, gas e trasporti costano una frazione del loro prezzo perché lo Stato paga la differenza da decenni. Le bollette di Buenos Aires sono le più basse del continente e il deficit è il più alto. Toccarle è aritmetica; toccarle prima delle elezioni è suicidio.', ch:[
+   {l:'Tariffe vere, con sussidio solo ai redditi bassi', e:'Le bollette triplicano per la classe media', costo:{debito:-0.9}, f:()=>{S.ind.debt-=0.9; S.ind.fiducia+=3; gd('cetomedio',-4); gd('lavoratori',-2); gd('imprenditori',2);}},
+   {l:'Aumenti graduali, sotto l\'inflazione', e:'Il sussidio cala in teoria', costo:{debito:-0.3}, f:()=>{S.ind.debt-=0.3; gd('cetomedio',-1);}},
+   {l:'Congela: la gente non regge un altro aumento', e:'Le bollette restano basse, il deficit alto', costo:{debito:0.7}, f:()=>{S.ind.debt+=0.7; S.ind.fiducia-=2; gd('cetomedio',3); gd('lavoratori',2);}}]},
+ {id:'ar_p_calcio', era:'contemporanea', paesi:['argentina'], kick:'Club', t:'Le società di calcio', text:'I club di calcio sono associazioni di soci, non aziende, e votano i loro presidenti: sono la scuola politica del paese. Una proposta vuole aprirli ai capitali privati; i tifosi rispondono che il club è dei soci, e nel paese del calcio nessun governo vuole perdere i tifosi.', ch:[
+   {l:'Apri ai capitali: chi vuole si trasforma', e:'I fondi arrivano, le curve marciano', f:()=>{gd('imprenditori',3); gd('cetomedio',1); gd('lavoratori',-3); gd('giovani',-3);}},                                                                                     // ⑪
+   {l:'I club restano dei soci', e:'Le curve applaudono', f:()=>{gd('lavoratori',2); gd('giovani',2); gd('imprenditori',-1);}},
+   {l:'Lascia decidere ai soci di ogni club', e:'La democrazia dei club', f:()=>{gd('cetomedio',1);}}]},
+ {id:'ar_p_memoria', era:'contemporanea', paesi:['argentina'], kick:'Memoria', t:'Il numero', text:'Il paese ha processato i suoi militari per i crimini della dittatura, primo al mondo a farlo con tribunali ordinari. Una parte della politica ora discute il numero degli scomparsi, e le madri con il fazzoletto bianco tornano in piazza ogni giovedì, come da quarant\'anni.', ch:[
+   {l:'Il numero non si discute: memoria, verità, giustizia', e:'La piazza del giovedì annuisce', f:()=>{gd('giovani',3); gd('lavoratori',2); gd('cattolici',-2); gd('pensionati',-1);}},                                                                                // ⑫
+   {l:'La memoria è di tutti, anche delle vittime dell\'altra parte', e:'La frase che divide', f:()=>{gd('cattolici',2); gd('pensionati',2); gd('giovani',-3); gd('lavoratori',-2);}},
+   {l:'Nessun commento: sono i tribunali a parlare', e:'Prudente, e il giovedì torna', f:()=>{gd('cetomedio',-1);}}]},
+ /* ===== L86-3 · MESSICO, PRESENTE ARRICCHITO (scheda PRESET-MESSICO-PRESENTE §A) — dodici questioni. Sei anni e mai più:
+    nessuna carta parla di rielezione. Nessuna data, nessun nome. ===== */
+ {id:'mx_p_cartelli', era:'contemporanea', paesi:['messico'], min:'interno', kick:'Sicurezza', t:'Gli Stati dei cartelli', text:'In interi Stati i cartelli riscuotono tasse, scelgono i sindaci e decidono chi vende l\'avocado. Decine di migliaia di morti l\'anno e centomila scomparsi. La guerra frontale ha riempito i cimiteri; la non-guerra ha riempito le piazze di cartelli. Non c\'è una terza via che qualcuno abbia trovato.', ch:[
+   {l:'Guardia nazionale ovunque, con l\'esercito', e:'La forza si vede, i morti anche', costo:{debito:0.6}, f:()=>{S.ind.debt+=0.6; gd('pensionati',3); gd('cetomedio',2); gd('giovani',-2);}},
+   {l:'Colpisci il denaro e la corruzione locale', e:'Lento, invisibile, e i sindaci tremano', f:()=>{gd('cetomedio',2); gd('imprenditori',-1); gd('giovani',1);}},
+   {l:'Programmi sociali per i giovani dei quartieri', e:'«Abbracci», dicono i critici; una generazione, dicono i fautori', costo:{debito:0.7}, f:()=>{S.ind.debt+=0.7; gd('giovani',4); gd('lavoratori',2); gd('pensionati',-3); gd('cetomedio',-1);}}]},
+ {id:'mx_p_dazi', era:'contemporanea', paesi:['messico'], min:'esteri', kick:'Il vicino', t:'Il vicino minaccia i dazi', text:'Quattro quinti di ciò che il paese esporta va a nord, e il vicino usa i dazi come una leva per tutto: la frontiera, i cartelli, le auto. Le fabbriche del Nord contano i giorni; il paese scopre che l\'accordo commerciale vale finché il vicino vuole.', ch:[
+   {l:'Tratta: concessioni sulla frontiera in cambio dell\'esenzione', e:'Le fabbriche respirano, la sovranità un po\' meno', f:()=>{S.ind.fiducia+=2; gd('imprenditori',3); gd('lavoratori',2); gd('giovani',-2);}},                                        // ①
+   {l:'Ritorsione mirata: i prodotti degli Stati che contano', e:'Il paese si compatta, il peso trema', f:()=>{S.ind.fiducia-=3; S.ind.stampa+=2; gd('lavoratori',2); gd('cetomedio',1); gd('imprenditori',-3);}},
+   {l:'Diversifica: Europa, Asia, il resto del continente', e:'Giusto, e dieci anni', costo:{debito:0.3}, f:()=>{S.ind.debt+=0.3; gd('imprenditori',1);}}]},
+ {id:'mx_p_pemex', era:'contemporanea', paesi:['messico'], min:'economia', kick:'Petrolio', t:'La compagnia più indebitata del mondo', text:'La compagnia petrolifera di Stato è nata da un\'espropriazione che il paese festeggia ancora, ed è la compagnia petrolifera più indebitata del mondo: produce meno ogni anno e raffina in perdita. Salvarla costa il bilancio; lasciarla cadere costa un pezzo dell\'identità.', ch:[
+   {l:'Rifinanzia: lo Stato paga i debiti della compagnia', e:'Il simbolo è salvo, il rating no', costo:{debito:1.2}, f:()=>{S.ind.debt+=1.2; S.ind.fiducia-=3; gd('lavoratori',3); gd('cattolici',2); gd('imprenditori',-2);}},                                     // ②
+   {l:'Apri ai privati per l\'estrazione, lo Stato tiene la bandiera', e:'La riforma che è già stata fatta e disfatta', f:()=>{S.ind.fiducia+=3; gd('imprenditori',4); gd('lavoratori',-3); gd('cattolici',-2);}},
+   {l:'Ridimensiona: meno raffinerie, più rinnovabili', e:'Il futuro, e i sindacati petroliferi', costo:{debito:0.4}, f:()=>{S.ind.debt+=0.4; gd('giovani',3); gd('lavoratori',-3);}}]},
+ {id:'mx_p_rimesse', era:'contemporanea', paesi:['messico'], min:'economia', kick:'Dollari', t:'I dollari da nord', text:'I messicani che lavorano a nord mandano a casa più dollari di quanto valga il petrolio: sono il reddito di interi villaggi. Il vicino vuole tassarle; il paese le difende come un diritto, e sa che ogni dollaro in meno è una famiglia in meno.', ch:[
+   {l:'Negozia l\'esenzione con il vicino, a qualunque prezzo', e:'Le rimesse passano, il prezzo si vede altrove', f:()=>{gd('lavoratori',3); gd('cattolici',3); gd('imprenditori',-1);}},
+   {l:'Compensa: lo Stato rimborsa la tassa', e:'I villaggi ringraziano, il Tesoro paga', costo:{debito:0.6}, f:()=>{S.ind.debt+=0.6; gd('lavoratori',3); gd('cattolici',2);}},
+   {l:'Banche pubbliche con commissioni zero', e:'Il paese trattiene di più senza chiedere nulla', costo:{debito:0.2}, f:()=>{S.ind.debt+=0.2; gd('lavoratori',2); gd('cetomedio',1);}}]},
+ {id:'mx_p_giudici', era:'contemporanea', paesi:['messico'], min:'giustizia', kick:'Toghe', t:'I giudici eletti', text:'Il paese ha deciso di eleggere i giudici, tutti, con il voto popolare: dal giudice di pace alla Corte suprema. Chi lo ha voluto dice che la giustizia era dei ricchi; chi lo teme dice che ora sarà di chi organizza le campagne — e nel paese le campagne le finanzia chi ha i soldi, anche quelli sbagliati.', ch:[
+   {l:'Avanti: la giustizia si vota', e:'I seggi si riempiono, i cartelli fanno le liste', f:()=>{S.ind.fiducia-=2; gd('lavoratori',3); gd('giovani',1); gd('cetomedio',-3); gd('imprenditori',-3);}},                                                              // ③
+   {l:'Elezione solo per la Corte suprema, concorso per gli altri', e:'Il compromesso che nessuno ha chiesto', f:()=>{gd('cetomedio',1); gd('imprenditori',1); gd('lavoratori',-1);}},
+   {l:'Torna indietro: i giudici per concorso', e:'I mercati respirano, la base si sente tradita', f:()=>{S.ind.fiducia+=2; gd('imprenditori',3); gd('cetomedio',2); gd('lavoratori',-3);}}]},
+ {id:'mx_p_frontiera', era:'contemporanea', paesi:['messico'], min:'interno', kick:'Frontiera', t:'La frontiera degli altri', text:'Centinaia di migliaia di persone attraversano il paese da sud per arrivare a nord, e il vicino chiede al paese di fermarle. Le città di frontiera sono piene di accampamenti; il paese che ha mandato milioni di figli a nord deve decidere se fare il muro di qualcun altro.', ch:[
+   {l:'Guardia nazionale sul confine sud: il vicino lo chiede', e:'I dazi si allontanano, gli accampamenti restano', costo:{debito:0.3}, f:()=>{S.ind.debt+=0.3; gd('imprenditori',2); gd('pensionati',1); gd('giovani',-3); gd('cattolici',-2);}},
+   {l:'Permessi umanitari e lavoro: chi passa può restare', e:'Umano, e il vicino alza la voce', costo:{debito:0.4}, f:()=>{S.ind.debt+=0.4; gd('giovani',3); gd('cattolici',2); gd('cetomedio',-2);}},
+   {l:'Accordi con i paesi di origine, e l\'aiuto allo sviluppo', e:'La causa, e il tempo lungo', costo:{debito:0.3}, f:()=>{S.ind.debt+=0.3; gd('cattolici',2); gd('cetomedio',1);}}]},
+ {id:'mx_p_acqua', era:'contemporanea', paesi:['messico'], min:'sviluppo', kick:'Nord', t:'Il giorno zero', text:'Le città del Nord industriale restano senza acqua per settimane, con le fabbriche che la usano e i quartieri che aspettano l\'autobotte. Un trattato obbliga il paese a cederne una parte al vicino, e il vicino la pretende nell\'anno di siccità.', ch:[
+   {l:'Priorità alle case: le fabbriche razionano', e:'I rubinetti tornano, le fabbriche protestano', f:()=>{gd('lavoratori',3); gd('cetomedio',2); gd('imprenditori',-4);}},
+   {l:'Dighe, dissalatori e reti: un piano decennale', e:'Costoso, e non dipende dalla pioggia', costo:{debito:0.9}, f:()=>{S.ind.debt+=0.9; gd('cetomedio',2); gd('imprenditori',1); gd('cattolici',1);}},
+   {l:'Rinegozia il trattato con il vicino', e:'Il vicino risponde con i dazi', f:()=>{S.ind.fiducia-=1; gd('cattolici',3); gd('lavoratori',1); gd('imprenditori',-2);}}]},
+ {id:'mx_p_treno', era:'contemporanea', paesi:['messico'], min:'infrastrutture', kick:'Sud', t:'Il treno nella giungla', text:'Un treno turistico attraversa la penisola del Sud attraverso la giungla e i siti antichi: l\'opera simbolo di un governo, costata il triplo del previsto, costruita dall\'esercito e contestata dagli ambientalisti. I treni viaggiano; i passeggeri, meno.', ch:[
+   {l:'Completa e collega: merci, non solo turisti', e:'Un\'opera che serve, se serve', costo:{debito:0.7}, f:()=>{S.ind.debt+=0.7; gd('lavoratori',2); gd('cattolici',2); gd('giovani',-2);}},
+   {l:'Audit e stop ai tratti più discussi', e:'Onesto, e un\'opera a metà', costo:{debito:-0.2}, f:()=>{S.ind.debt-=0.2; gd('giovani',2); gd('cetomedio',1); gd('lavoratori',-2);}},
+   {l:'Sussidia i biglietti: che i treni si riempiano', e:'Pieni, e in perdita', costo:{debito:0.4}, f:()=>{S.ind.debt+=0.4; gd('cattolici',1); gd('lavoratori',1);}}]},
+ {id:'mx_p_giornalisti', era:'contemporanea', paesi:['messico'], min:'giustizia', kick:'Stampa', t:'Il paese dove muoiono i giornalisti', text:'Nessun paese in pace uccide più giornalisti. Chi scrive di cartelli o di sindaci corrotti negli Stati sa che il meccanismo di protezione federale è un telefono che a volte risponde. Il governo dice che la stampa è contro di lui; la stampa dice che è morta.', ch:[
+   {l:'Meccanismo di protezione con scorte vere e procure federali', e:'I giornalisti vivono, se il meccanismo funziona', costo:{debito:0.3}, f:()=>{S.ind.debt+=0.3; S.ind.stampa+=4; gd('cetomedio',2); gd('giovani',2);}},
+   {l:'Sono i cartelli, non lo Stato: la risposta è la sicurezza', e:'Vero, e non basta', f:()=>{S.ind.stampa-=1; gd('pensionati',1);}},
+   {l:'La stampa esagera: nessuna misura nuova', e:'Il mattino dopo, un altro nome', f:()=>{S.ind.stampa-=5; gd('cetomedio',-2); gd('giovani',-2);}}]},
+ {id:'mx_p_salario', era:'contemporanea', paesi:['messico'], min:'lavoro', kick:'Salari', t:'Il salario minimo che raddoppia', text:'Il salario minimo è stato raddoppiato in pochi anni dopo decenni di gelo, e la povertà è calata senza che l\'inflazione esplodesse. Le imprese dicono che il prossimo aumento le manderà a nord del confine; i lavoratori dicono che il prossimo aumento è dovuto.', ch:[
+   {l:'Un altro aumento: la povertà si combatte così', e:'Le buste paga crescono, le imprese contano', f:()=>{S.ind.fiducia-=1; gd('lavoratori',5); gd('giovani',2); gd('imprenditori',-4);}},                                                                        // ④
+   {l:'Aumento legato alla produttività', e:'La formula degli economisti', f:()=>{S.ind.fiducia+=1; gd('lavoratori',1); gd('imprenditori',1);}},
+   {l:'Pausa: le imprese devono assorbire', e:'Le imprese respirano, i lavoratori ricordano', f:()=>{S.ind.fiducia+=1; gd('imprenditori',3); gd('lavoratori',-4);}}]},
+ {id:'mx_p_capitale', era:'contemporanea', paesi:['messico'], kick:'Metropoli', t:'La città che sprofonda', text:'La capitale è costruita su un lago prosciugato e sprofonda di decine di centimetri l\'anno; l\'acqua arriva da lontano con le pompe e se ne va nelle perdite. Ventidue milioni di persone, e un aeroporto nuovo costruito nel posto sbagliato.', ch:[
+   {l:'Ripara la rete: metà dell\'acqua si perde nei tubi', e:'Non si inaugura, e funziona', costo:{debito:0.6}, f:()=>{S.ind.debt+=0.6; gd('cetomedio',3); gd('lavoratori',2);}},                                                                                 // ⑪
+   {l:'Decentra: incentivi a chi lascia la capitale', e:'Il paese ci prova da cinquant\'anni', costo:{debito:0.3}, f:()=>{S.ind.debt+=0.3; gd('cattolici',2); gd('cetomedio',-1);}},
+   {l:'Nuove fonti: un altro acquedotto da lontano', e:'L\'acqua di un\'altra regione, che protesta', costo:{debito:0.8}, f:()=>{S.ind.debt+=0.8; gd('cetomedio',2); gd('cattolici',-3);}}]},
+ {id:'mx_p_indigeni', era:'contemporanea', paesi:['messico'], kick:'Popoli', t:'Le lingue del paese', text:'Il paese ha sessantotto lingue indigene e milioni di persone che le parlano, nelle regioni più povere. Una riforma riconosce le comunità come soggetti di diritto con bilanci propri; i municipi dicono che è la fine dei municipi.', ch:[
+   {l:'Bilanci diretti alle comunità', e:'Le comunità decidono, i municipi protestano', costo:{debito:0.4}, f:()=>{S.ind.debt+=0.4; gd('giovani',3); gd('cattolici',2); gd('cetomedio',-2);}},                                                                        // ⑫
+   {l:'Riconoscimento senza bilanci', e:'Il simbolo senza il conto', f:()=>{gd('giovani',1); gd('cetomedio',1);}},
+   {l:'Scuole bilingui prima di tutto', e:'La lingua che resta se la si insegna', costo:{debito:0.3}, f:()=>{S.ind.debt+=0.3; gd('giovani',2); gd('cattolici',1);}}]},
+ /* ===== L87-3 · SUDAFRICA, PRESENTE ARRICCHITO (scheda PRESET-SUDAFRICA-PRESENTE §A) — dodici questioni. L'eredità entra
+    nelle regole dello Stato, mai come conflitto fra gruppi. Nessuna data, nessun nome. ===== */
+ {id:'za_p_luce', era:'contemporanea', paesi:['sudafrica'], min:'economia', kick:'Energia', t:'La luce a orari', text:'La compagnia elettrica di Stato spegne la corrente a turni, per ore al giorno, da anni: le centrali a carbone cadono a pezzi, i debiti sono enormi, e ogni famiglia che può compra un generatore o un pannello. Il paese ha imparato a vivere con un calendario dei blackout.', ch:[
+   {l:'Apri il mercato: privati e rinnovabili senza limiti', e:'I pannelli arrivano, la compagnia di Stato si svuota', f:()=>{S.ind.fiducia+=3; gd('imprenditori',4); gd('cetomedio',2); gd('lavoratori',-3);}},                                                       // ①
+   {l:'Salva la compagnia: lo Stato assorbe i debiti', e:'La luce torna a intermittenza, il rating scende', costo:{debito:1.2}, f:()=>{S.ind.debt+=1.2; S.ind.fiducia-=3; gd('lavoratori',3); gd('cetomedio',-1);}},
+   {l:'Spezza la compagnia in tre: rete, produzione, vendita', e:'La riforma che tutti approvano e nessuno finisce', costo:{debito:0.4}, f:()=>{S.ind.debt+=0.4; S.ind.fiducia+=1; gd('cetomedio',1); gd('imprenditori',1);}}]},
+ {id:'za_p_lavoro', era:'contemporanea', paesi:['sudafrica'], min:'lavoro', kick:'Disoccupazione', t:'Un terzo senza lavoro', text:'Un adulto su tre non ha un lavoro, e fra i giovani è uno su due: la disoccupazione più alta fra i paesi che la misurano. Le fabbriche chiudono per la luce, le miniere per i prezzi, e l\'assegno sociale è l\'unico reddito di milioni di case.', ch:[
+   {l:'Un reddito di base permanente per chi non lavora', e:'Le case respirano, il Tesoro cerca un miliardo al mese', costo:{debito:1.0}, f:()=>{S.ind.debt+=1.0; S.ind.fiducia-=2; gd('lavoratori',4); gd('giovani',3); gd('imprenditori',-2);}},                     // ②
+   {l:'Incentivi alle imprese per ogni giovane assunto', e:'Assunzioni, sulla carta e un po\' nei fatti', costo:{debito:0.5}, f:()=>{S.ind.debt+=0.5; gd('imprenditori',3); gd('giovani',2);}},
+   {l:'Lavori pubblici di massa: strade e scuole', e:'Un lavoro per un anno, e una strada', costo:{debito:0.8}, f:()=>{S.ind.debt+=0.8; gd('lavoratori',3); gd('giovani',2); gd('cattolici',1);}}]},
+ {id:'za_p_terra', era:'contemporanea', paesi:['sudafrica'], min:'giustizia', kick:'Terra', t:'La terra che non è tornata', text:'Trent\'anni dopo la fine del regime, la maggior parte della terra coltivabile è ancora nelle mani di chi l\'aveva allora. Una legge permette l\'esproprio senza indennizzo in casi limitati; gli agricoltori dicono che finirà come nel paese vicino, dove i campi sono morti; chi aspetta la terra dice che ha aspettato abbastanza.', ch:[
+   {l:'Applica la legge: espropri mirati, con produttività garantita', e:'La terra si muove, i mercati guardano il vicino', f:()=>{S.ind.fiducia-=2; gd('lavoratori',4); gd('giovani',2); gd('imprenditori',-4); gd('cetomedio',-2);}},                              // ③
+   {l:'Riforma con indennizzo e formazione: lenta e finanziata', e:'La strada lunga, e costosa', costo:{debito:0.8}, f:()=>{S.ind.debt+=0.8; gd('lavoratori',2); gd('cattolici',2); gd('imprenditori',-1);}},
+   {l:'Nessun esproprio: la proprietà è sacra', e:'Gli agricoltori ringraziano, le township no', f:()=>{S.ind.fiducia+=2; gd('imprenditori',4); gd('cetomedio',1); gd('lavoratori',-4); gd('giovani',-3);}}]},
+ {id:'za_p_crimine', era:'contemporanea', paesi:['sudafrica'], min:'interno', kick:'Sicurezza', t:'Le mura e il filo spinato', text:'Il paese ha uno dei tassi di omicidio più alti del mondo, e chi può vive dietro mura elettrificate con una guardia privata: ci sono più guardie private che poliziotti. La polizia è sottopagata e a volte è parte del problema.', ch:[
+   {l:'Polizia: più agenti, più paga, meno corruzione', e:'Anni, e un bilancio', costo:{debito:0.7}, f:()=>{S.ind.debt+=0.7; gd('cetomedio',3); gd('pensionati',2); gd('lavoratori',1);}},
+   {l:'Esercito nelle zone più violente', e:'I titoli, e le township che lo hanno già visto', costo:{debito:0.3}, f:()=>{S.ind.debt+=0.3; gd('pensionati',2); gd('cetomedio',1); gd('giovani',-3);}},
+   {l:'Colpisci le armi e le bande, con procure speciali', e:'Lento, dove fa male', f:()=>{gd('cetomedio',2); gd('giovani',1);}}]},
+ {id:'za_p_coalizione', era:'contemporanea', paesi:['sudafrica'], cond:()=>S.coalizione&&S.coalizione.length>1, kick:'Governo di unità', t:'L\'unità nazionale', text:'Per la prima volta il partito della liberazione governa con gli altri, in un governo di unità nazionale che tiene insieme chi si è combattuto per trent\'anni. Ogni legge è un negoziato, ogni nomina una crisi; e i mercati, per una volta, applaudono.', ch:[
+   {l:'Governa con i partner: ogni legge negoziata', e:'Lento, e i mercati lo amano', f:()=>{S.ind.fiducia+=2; gd('cetomedio',2); gd('imprenditori',2); gd('lavoratori',-2);}},                                                                                      // ④
+   {l:'Decidi da solo dove puoi, tratta dove devi', e:'Il partner minaccia di uscire', f:()=>{S.ind.stampa-=1; gd('lavoratori',1); gd('cetomedio',-1);}},
+   {l:'Rompi: meglio una minoranza che un compromesso', e:'La base applaude, il governo cade', f:()=>{S.ind.fiducia-=3; gd('lavoratori',3); gd('cetomedio',-3); gd('imprenditori',-3);}}]},
+ {id:'za_p_sanita', era:'contemporanea', paesi:['sudafrica'], min:'salute', kick:'Sanità', t:'L\'assicurazione per tutti', text:'Una legge vuole una sanità pubblica unica per tutti, finanziata dalle tasse, che assorba le assicurazioni private di chi le ha. Chi non ha nulla la aspetta; chi ha l\'assicurazione teme di perderla; e nessuno ha detto quanto costa.', ch:[
+   {l:'Avanti: la sanità universale è un diritto', e:'Le assicurazioni ricorrono, il conto non è scritto', costo:{debito:0.9}, f:()=>{S.ind.debt+=0.9; gd('lavoratori',4); gd('giovani',2); gd('cetomedio',-3); gd('imprenditori',-2);}},
+   {l:'Prima ripara gli ospedali pubblici, poi si vede', e:'Il pragmatismo che sembra un rinvio', costo:{debito:0.5}, f:()=>{S.ind.debt+=0.5; gd('pensionati',2); gd('cetomedio',1);}},
+   {l:'Pubblico e privato insieme, senza assorbire nessuno', e:'Il compromesso che la base non chiedeva', f:()=>{gd('cetomedio',2); gd('imprenditori',1); gd('lavoratori',-2);}}]},
+ {id:'za_p_acqua', era:'contemporanea', paesi:['sudafrica'], min:'infrastrutture', kick:'Rubinetti', t:'I rubinetti a secco', text:'Nella città più grande i rubinetti restano a secco per giorni: non manca la pioggia, mancano i tubi, che perdono metà dell\'acqua, e i comuni che dovrebbero ripararli sono falliti. Le autobotti fanno il giro dei quartieri.', ch:[
+   {l:'Commissaria i comuni falliti e ripara la rete', e:'I sindaci protestano, l\'acqua torna', costo:{debito:0.7}, f:()=>{S.ind.debt+=0.7; gd('cetomedio',3); gd('lavoratori',2); gd('cattolici',1);}},
+   {l:'Un\'agenzia nazionale per l\'acqua, sopra i comuni', e:'Centralizzare quello che i comuni non fanno', costo:{debito:0.5}, f:()=>{S.ind.debt+=0.5; gd('cetomedio',2); gd('pensionati',1);}},
+   {l:'È dei comuni: mandagli i soldi', e:'I soldi arrivano dove i tubi perdono', costo:{debito:0.4}, f:()=>{S.ind.debt+=0.4; gd('lavoratori',1); gd('cetomedio',-2);}}]},
+ {id:'za_p_quote', era:'contemporanea', paesi:['sudafrica'], min:'economia', kick:'Imprese', t:'Le quote nelle imprese', text:'Le leggi per riequilibrare la proprietà delle imprese dopo il regime hanno creato una classe di azionisti nuovi e lasciato fuori quasi tutti gli altri. Gli investitori stranieri le chiamano una tassa; chi le difende dice che senza, il paese di trent\'anni fa non è mai finito.', ch:[
+   {l:'Mantieni e rafforza: la trasformazione non è finita', e:'La base annuisce, gli investitori contano', f:()=>{S.ind.fiducia-=1; gd('lavoratori',3); gd('giovani',2); gd('imprenditori',-3);}},
+   {l:'Sposta il criterio dalla proprietà al lavoro e alla formazione', e:'Chi assume e forma conta quanto chi cede quote', f:()=>{gd('imprenditori',2); gd('giovani',2); gd('lavoratori',-1);}},
+   {l:'Esenzioni per chi investe da fuori', e:'Gli investimenti arrivano, la trasformazione aspetta', f:()=>{S.ind.fiducia+=2; gd('imprenditori',4); gd('lavoratori',-3); gd('giovani',-2);}}]},
+ {id:'za_p_miniere', era:'contemporanea', paesi:['sudafrica'], min:'sviluppo', kick:'Sottosuolo', t:'Le miniere abbandonate', text:'Il paese è stato costruito sull\'oro e sul platino, e le miniere chiudono: quelle abbandonate sono occupate da minatori illegali che scavano a mano, e ogni tanto restano sotto. Riaprire le miniere è un sogno; chiudere quelle illegali è una guerra.', ch:[
+   {l:'Sigilla le miniere illegali, con l\'esercito', e:'Le miniere chiudono, i minatori restano dentro', f:()=>{gd('pensionati',2); gd('cetomedio',2); gd('lavoratori',-3); gd('giovani',-2);}},
+   {l:'Regolarizza i piccoli minatori con permessi', e:'Chi scava alla luce del sole paga le tasse', f:()=>{gd('lavoratori',3); gd('giovani',2); gd('imprenditori',-1);}},
+   {l:'Nuove concessioni: minerali per le batterie', e:'Il sottosuolo nuovo, se gli investitori credono nella luce', costo:{debito:0.2}, f:()=>{S.ind.debt+=0.2; gd('imprenditori',3); gd('lavoratori',1);}}]},
+ {id:'za_p_scuola', era:'contemporanea', paesi:['sudafrica'], min:'istruzione', kick:'Aule', t:'I bambini che non leggono', text:'Otto bambini su dieci a dieci anni non capiscono quello che leggono. Le scuole delle township hanno classi da cinquanta, bagni a fossa e insegnanti che non arrivano; le scuole degli ex quartieri bianchi hanno piscine. Trent\'anni di democrazia non hanno unito le due scuole.', ch:[
+   {l:'Un piano nazionale per la lettura, con i fondi nelle township', e:'Il minimo che manca, e il più importante', costo:{debito:0.6}, f:()=>{S.ind.debt+=0.6; gd('lavoratori',3); gd('giovani',3); gd('cattolici',1);}},
+   {l:'Ridistribuisci i fondi dalle scuole ricche alle povere', e:'Le piscine protestano', f:()=>{gd('lavoratori',3); gd('cetomedio',-3); gd('giovani',1);}},
+   {l:'Scuole private a basso costo con fondi pubblici', e:'Il modello che divide, e funziona a metà', costo:{debito:0.4}, f:()=>{S.ind.debt+=0.4; gd('imprenditori',2); gd('cetomedio',1); gd('lavoratori',-2);}}]},
+ {id:'za_p_vicini', era:'contemporanea', paesi:['sudafrica'], kick:'Vicini', t:'Chi viene dal Nord', text:'Milioni di persone dei paesi vicini vivono e lavorano nel paese, nei cantieri e nei negozi delle township, e ogni crisi qualcuno li indica come la causa. Il paese che ha vinto la libertà con l\'aiuto dei vicini deve decidere come li tratta a casa sua.', ch:[
+   {l:'Permessi e regolarizzazione: chi lavora ha diritti', e:'Giusto, e le township chiedono lavoro per i loro', f:()=>{gd('giovani',2); gd('cattolici',2); gd('lavoratori',-3);}},                                                                                         // ⑪
+   {l:'Controlli e rimpatri, con il consenso dei vicini', e:'La linea dura, e il ricordo di chi ci ha aiutato', f:()=>{gd('lavoratori',3); gd('pensionati',1); gd('giovani',-2); gd('cattolici',-2);}},
+   {l:'Un piano regionale: sviluppo nei paesi d\'origine', e:'La causa, e il tempo lungo', costo:{debito:0.3}, f:()=>{S.ind.debt+=0.3; gd('cattolici',1); gd('cetomedio',1);}}]},
+ {id:'za_p_capitali', era:'contemporanea', paesi:['sudafrica'], kick:'Tre capitali', t:'Le tre capitali', text:'Il governo sta in una città, il Parlamento in un\'altra a millecinquecento chilometri, la Corte in una terza. Ogni anno il paese paga voli e case per due governi; ogni anno qualcuno propone di unificare, e la città che perderebbe il Parlamento risponde con i numeri del turismo.', ch:[
+   {l:'Sposta il Parlamento nella capitale amministrativa', e:'Milioni risparmiati, una città offesa', costo:{debito:-0.1}, f:()=>{S.ind.debt-=0.1; gd('cetomedio',2); gd('imprenditori',-1);}},                                                                        // ⑫
+   {l:'Lascia tutto: è il compromesso del 1910', e:'La storia ha un costo', f:()=>{gd('pensionati',1);}},
+   {l:'Parlamento in videoconferenza metà dell\'anno', e:'La soluzione del secolo, e i deputati la odiano', costo:{debito:-0.05}, f:()=>{S.ind.debt-=0.05; gd('giovani',1); gd('cetomedio',1);}}]},
+ /* ===== L87-3 · NIGERIA, PRESENTE ARRICCHITO (scheda PRESET-NIGERIA-PRESENTE §A) — dodici questioni. Nord e Sud sono
+    regioni della federazione, mai comunità in conflitto. Nessuna data, nessun nome. ===== */
+ {id:'ng_p_sussidio', era:'contemporanea', paesi:['nigeria'], min:'economia', kick:'Benzina', t:'Il sussidio alla benzina', text:'Per decenni lo Stato ha pagato la differenza fra il prezzo mondiale e quello alla pompa: la sola cosa che il paese riceveva dal suo petrolio. Toglierlo ha triplicato la benzina in un giorno e liberato un quarto del bilancio; rimetterlo è la promessa di chiunque stia all\'opposizione.', ch:[
+   {l:'Il sussidio resta tolto: i soldi vanno a strade e scuole', e:'I mercati applaudono, i minibus fermi', costo:{debito:-0.8}, f:()=>{S.ind.debt-=0.8; S.ind.fiducia+=3; gd('lavoratori',-4); gd('cetomedio',-3); gd('imprenditori',2);}},                        // ①
+   {l:'Un sussidio mirato: autobus pubblici e trasferimenti ai poveri', e:'Il compromesso, se i trasferimenti arrivano', costo:{debito:0.3}, f:()=>{S.ind.debt+=0.3; gd('lavoratori',2); gd('cattolici',1);}},
+   {l:'Rimetti il sussidio: il paese non regge', e:'Le pompe respirano, il bilancio si svuota', costo:{debito:1.0}, f:()=>{S.ind.debt+=1.0; S.ind.fiducia-=3; gd('lavoratori',4); gd('cetomedio',3); gd('imprenditori',-2);}}]},
+ {id:'ng_p_naira', era:'contemporanea', paesi:['nigeria'], min:'economia', kick:'Cambio', t:'La naira lasciata cadere', text:'La moneta aveva un cambio ufficiale e uno di strada, distanti la metà; unificarli l\'ha fatta crollare, e con lei il prezzo del riso, delle medicine, di tutto ciò che il paese importa — cioè quasi tutto. Gli investitori dicono che ora il prezzo è vero; le famiglie dicono che non possono pagarlo.', ch:[
+   {l:'Tieni il cambio libero: la moneta trova il suo livello', e:'Gli investitori tornano, l\'inflazione morde', f:()=>{S.ind.fiducia+=3; gd('imprenditori',3); gd('lavoratori',-3); gd('cetomedio',-3);}},                                                            // ②
+   {l:'Interventi della banca centrale per frenare la caduta', e:'Le riserve si consumano, la caduta rallenta', costo:{debito:0.4}, f:()=>{S.ind.debt+=0.4; gd('cetomedio',1); gd('lavoratori',1);}},
+   {l:'Torna ai controlli: cambio fisso e permessi', e:'Il mercato di strada riapre il giorno dopo', f:()=>{S.ind.fiducia-=4; gd('lavoratori',2); gd('cetomedio',1); gd('imprenditori',-3);}}]},
+ {id:'ng_p_nord', era:'contemporanea', paesi:['nigeria'], min:'difesa', kick:'Nord', t:'Le strade del Nord', text:'Nel Nord bande armate rapiscono studenti a scuola e viaggiatori sulle strade per chiedere riscatti; nel Nord-est un\'insurrezione dura da quindici anni. L\'esercito è ovunque e non basta; gli Stati chiedono una polizia propria; e la scuola, nei villaggi, chiude per paura.', ch:[
+   {l:'Polizia statale: gli Stati si difendono da soli', e:'Trentasei polizie, e i governatori con un esercito', f:()=>{gd('cattolici',3); gd('cetomedio',2); gd('pensionati',-1); gd('giovani',-1);}},
+   {l:'Più esercito, più droni, più fondi', e:'Le operazioni, e le bande che cambiano foresta', costo:{debito:0.8}, f:()=>{S.ind.debt+=0.8; gd('pensionati',3); gd('cetomedio',1); gd('giovani',-2);}},
+   {l:'Amnistia e reinserimento per chi depone le armi', e:'Il metodo del Delta, con i suoi rischi', costo:{debito:0.4}, f:()=>{S.ind.debt+=0.4; gd('giovani',2); gd('cattolici',-2); gd('pensionati',-3);}}]},
+ {id:'ng_p_japa', era:'contemporanea', paesi:['nigeria'], min:'lavoro', kick:'Partenze', t:'La parola per andarsene', text:'I giovani hanno una parola per il progetto di vita più comune: *japa*, scappare. Medici, infermieri, ingegneri, programmatori: chi ha un titolo ha un biglietto. Gli ospedali restano senza medici; le rimesse restano l\'entrata più stabile del paese.', ch:[
+   {l:'Vincola chi studia con fondi pubblici a restare cinque anni', e:'I medici restano, o non si laureano', f:()=>{gd('pensionati',2); gd('cattolici',1); gd('giovani',-4);}},
+   {l:'Paga di più chi resta: stipendi e alloggi per i medici', e:'Costa, e alcuni restano', costo:{debito:0.6}, f:()=>{S.ind.debt+=0.6; gd('giovani',3); gd('lavoratori',2); gd('cetomedio',1);}},
+   {l:'Lasciali andare: le rimesse valgono', e:'Onesto, e gli ospedali chiudono un reparto', f:()=>{gd('imprenditori',1); gd('giovani',1); gd('pensionati',-3); gd('cattolici',-2);}}]},
+ {id:'ng_p_rete', era:'contemporanea', paesi:['nigeria'], min:'infrastrutture', kick:'Corrente', t:'La rete che crolla', text:'La rete elettrica nazionale crolla intere, più volte l\'anno, e il paese più popoloso del continente produce meno elettricità di una città europea. Ogni negozio ha un generatore; il rumore dei generatori è il suono del paese.', ch:[
+   {l:'Privatizza la distribuzione e libera le tariffe', e:'La corrente arriva a chi paga il prezzo vero', f:()=>{S.ind.fiducia+=2; gd('imprenditori',4); gd('cetomedio',-2); gd('lavoratori',-2);}},                                                                     // ③
+   {l:'Reti locali: solare per villaggi e quartieri', e:'Piccolo, distribuito, e funziona', costo:{debito:0.6}, f:()=>{S.ind.debt+=0.6; gd('cattolici',3); gd('giovani',2); gd('lavoratori',1);}},
+   {l:'Nuove centrali a gas con lo Stato', e:'Il gas c\'è; i tubi e i soldi meno', costo:{debito:0.9}, f:()=>{S.ind.debt+=0.9; gd('imprenditori',2); gd('lavoratori',2);}}]},
+ {id:'ng_p_delta', era:'contemporanea', paesi:['nigeria'], min:'sviluppo', kick:'Delta', t:'Il petrolio rubato', text:'Nel Delta il petrolio esce dai tubi e finisce in raffinerie clandestine nella mangrovia: un barile su dieci sparisce, i fiumi sono neri e le compagnie straniere se ne vanno vendendo i pozzi a compagnie locali. Chi ci vive non ha mai visto una strada pagata dal petrolio.', ch:[
+   {l:'Sorveglianza dei tubi affidata alle comunità', e:'Chi rubava sorveglia, e funziona meglio dell\'esercito', costo:{debito:0.3}, f:()=>{S.ind.debt+=0.3; gd('lavoratori',2); gd('giovani',2); gd('pensionati',-1);}},
+   {l:'Esercito nel Delta e raffinerie clandestine distrutte', e:'I fuochi si spengono, e si riaccendono', costo:{debito:0.4}, f:()=>{S.ind.debt+=0.4; gd('pensionati',2); gd('imprenditori',1); gd('giovani',-2);}},
+   {l:'Una quota fissa del petrolio agli Stati del Delta', e:'La regione respira, gli altri Stati chiedono la loro', costo:{debito:0.5}, f:()=>{S.ind.debt+=0.5; gd('lavoratori',2); gd('cattolici',-2);}}]},
+ {id:'ng_p_raffineria', era:'contemporanea', paesi:['nigeria'], min:'economia', kick:'Raffineria', t:'La raffineria privata', text:'Il paese ha esportato greggio e importato benzina per cinquant\'anni, perché le sue raffinerie di Stato non funzionavano. Ora la più grande raffineria del continente è privata, di un solo uomo d\'affari, e chiede greggio in naira e protezione dalle importazioni: un monopolio nuovo al posto di uno vecchio.', ch:[
+   {l:'Greggio in naira e stop alle importazioni: la raffineria prima', e:'La benzina è nostra, e ha un padrone', f:()=>{S.ind.fiducia-=1; gd('imprenditori',3); gd('lavoratori',2); gd('cetomedio',-1);}},
+   {l:'Nessun privilegio: compete con le importazioni', e:'Il mercato decide, e la raffineria minaccia di chiudere', f:()=>{S.ind.fiducia+=2; gd('cetomedio',2); gd('imprenditori',-2);}},
+   {l:'Ripara anche le raffinerie di Stato', e:'La quarta volta, con lo stesso risultato', costo:{debito:0.7}, f:()=>{S.ind.debt+=0.7; gd('lavoratori',2); gd('cetomedio',-1);}}]},
+ {id:'ng_p_censimento', era:'contemporanea', paesi:['nigeria'], min:'interno', kick:'Conteggio', t:'Il paese che non si conta', text:'L\'ultimo censimento ha vent\'anni e nessuno ci credeva nemmeno allora: i seggi e i fondi si dividono in base alla popolazione, e ogni Stato ha interesse a essere più grande. Farne uno nuovo costa e scatena; non farlo governa un paese di duecento milioni a occhio.', ch:[
+   {l:'Censimento digitale entro il mandato', e:'I numeri arrivano, e ogni Stato li contesta', costo:{debito:0.5}, f:()=>{S.ind.debt+=0.5; gd('cetomedio',2); gd('giovani',1); gd('cattolici',-2);}},
+   {l:'Stime statistiche, senza censimento', e:'Il metodo dei tecnici, che i governatori non accettano', costo:{debito:0.1}, f:()=>{S.ind.debt+=0.1; gd('cetomedio',1);}},
+   {l:'Rinvia: non è il momento', e:'Non lo è dal 2006', f:()=>{gd('cattolici',1); gd('cetomedio',-1);}}]},
+ {id:'ng_p_iva', era:'contemporanea', paesi:['nigeria'], min:'economia', kick:'Federazione', t:'Chi tiene l\'IVA', text:'Una riforma fiscale vuole che l\'imposta sui consumi resti di più dove viene raccolta: gli Stati del Sud, che consumano e producono, ci guadagnano; quelli del Nord, che vivono dei trasferimenti federali, ci perdono. È la questione federale di sempre con un altro nome.', ch:[
+   {l:'Avanti: l\'IVA resta dove si genera', e:'Il Sud esulta, il Nord blocca il Senato', f:()=>{S.ind.fiducia+=1; gd('imprenditori',3); gd('cetomedio',2); gd('cattolici',-4);}},                                                                                     // ④
+   {l:'Formula mista: metà per origine, metà per popolazione', e:'Il compromesso federale', f:()=>{gd('cetomedio',1); gd('cattolici',-1);}},
+   {l:'Ritira: la federazione non regge lo strappo', e:'Il Nord respira, la riforma muore', f:()=>{S.ind.fiducia-=1; gd('cattolici',3); gd('imprenditori',-2); gd('cetomedio',-1);}}]},
+ {id:'ng_p_salario', era:'contemporanea', paesi:['nigeria'], min:'lavoro', kick:'Sindacati', t:'Il salario minimo', text:'Con la benzina triplicata e la naira dimezzata, il salario minimo vale la metà di prima. I sindacati chiedono di moltiplicarlo per dieci e chiamano lo sciopero generale; gli Stati dicono che non possono pagarlo nemmeno com\'è, e alcuni non pagano gli stipendi da mesi.', ch:[
+   {l:'Raddoppia il minimo, e obbliga gli Stati', e:'I sindacati firmano, gli Stati non pagano', costo:{debito:0.7}, f:()=>{S.ind.debt+=0.7; gd('lavoratori',5); gd('cetomedio',1); gd('imprenditori',-2);}},
+   {l:'Un aumento più piccolo, e sussidi ai trasporti', e:'Il compromesso che i sindacati accettano a fatica', costo:{debito:0.4}, f:()=>{S.ind.debt+=0.4; gd('lavoratori',2); gd('cetomedio',1);}},
+   {l:'Nessun aumento: prima l\'inflazione', e:'Lo sciopero, e le città ferme', f:()=>{S.ind.fiducia+=1; gd('imprenditori',2); gd('lavoratori',-5); gd('giovani',-2);}}]},
+ {id:'ng_p_universita', era:'contemporanea', paesi:['nigeria'], kick:'Atenei', t:'Le università chiuse', text:'I professori universitari scioperano per mesi, a volte per un anno intero: gli stipendi non arrivano, le aule cadono, e una laurea di quattro anni ne dura sei. Gli studenti aspettano; chi può, parte.', ch:[
+   {l:'Paga gli arretrati e firma un accordo pluriennale', e:'Le aule riaprono, il Tesoro paga', costo:{debito:0.5}, f:()=>{S.ind.debt+=0.5; gd('giovani',4); gd('lavoratori',2); gd('cetomedio',1);}},                                                                   // ⑪
+   {l:'Prestiti agli studenti e autonomia agli atenei', e:'Le università si finanziano, se gli studenti pagano', costo:{debito:0.2}, f:()=>{S.ind.debt+=0.2; gd('imprenditori',1); gd('giovani',-2);}},
+   {l:'Nessun negoziato durante lo sciopero', e:'Fermo, e un altro semestre perso', f:()=>{gd('pensionati',1); gd('giovani',-4); gd('lavoratori',-2);}}]},
+ {id:'ng_p_lagos', era:'contemporanea', paesi:['nigeria'], kick:'Megalopoli', t:'La città che non si ferma', text:'La città più grande del continente cresce di migliaia di persone al giorno, sopra una laguna, con un traffico che si misura in ore e un mercato che vale più di molti Stati africani. Non è la capitale, e governa più della capitale.', ch:[
+   {l:'Uno statuto speciale e fondi federali per la megalopoli', e:'Gli altri Stati chiedono perché', costo:{debito:0.5}, f:()=>{S.ind.debt+=0.5; gd('imprenditori',3); gd('cetomedio',2); gd('cattolici',-2);}},                                                       // ⑫
+   {l:'Decentra: incentivi alle città di seconda fila', e:'Il paese ha altre città, e lo dimentica', costo:{debito:0.4}, f:()=>{S.ind.debt+=0.4; gd('cattolici',2); gd('cetomedio',1);}},
+   {l:'La città si governa da sola', e:'Lo fa già', f:()=>{gd('imprenditori',1);}}]},
 ];
 
 /* eventi INTERNAZIONALI ricorrenti (lotto Esteri+Difesa): grandi eventi ~ogni 6-9 mesi, taggati min:esteri|difesa.
@@ -6744,6 +7890,67 @@ const SFIDE=[
   op:['Un contratto con cui un ente affida a privati un\'opera o un servizio','Un tipo di elezione','Un sussidio alle famiglie'], giusta:0,
   perche:'Con l\'appalto pubblico un ente affida a un\'impresa la realizzazione di un\'opera o di un servizio.'},
  // ----- BANCA-USA (istituzioni americane; era:'universale' = valide anche in un futuro USA-1950; SOLO fatti, zero politica) -----
+ // ----- STATI UNITI, presente arricchito (L83-1, scheda PRESET-USA-PRESENTE §E) — 10 presente + 10 storia recente -----
+ {id:'us_p_stati', era:'contemporanea', paese:'usa', ruolo:'locale', diff:'facile', q:'Quanti Stati compongono gli Stati Uniti?',
+  op:['Cinquanta','Quarantotto','Cinquantadue'], giusta:0,
+  perche:'Gli Stati sono cinquanta; la bandiera ha cinquanta stelle.'},
+ {id:'us_p_senatori', era:'contemporanea', paese:'usa', ruolo:'governo', diff:'media', q:'Quanti senatori elegge ogni Stato americano?',
+  op:['In proporzione alla popolazione','Due, indipendentemente dalla popolazione','Uno'], giusta:1,
+  perche:'Ogni Stato ha due senatori, dal più popoloso al meno popoloso.'},
+ {id:'us_p_midterm', era:'contemporanea', paese:'usa', ruolo:'governo', diff:'media', q:'Che cosa sono le elezioni di «metà mandato»?',
+  op:['Le primarie presidenziali','Un referendum sul Presidente','Le elezioni del Congresso a metà del mandato presidenziale'], giusta:2,
+  perche:'Due anni dopo le presidenziali si rinnovano tutta la Camera e un terzo del Senato.'},
+ {id:'us_p_filibuster', era:'contemporanea', paese:'usa', ruolo:'governo', diff:'difficile', q:'Che cos\'è il «filibuster» al Senato americano?',
+  op:['Una tattica che richiede sessanta voti per chiudere il dibattito su una legge','Il potere di veto del vicepresidente','Una commissione d\'inchiesta'], giusta:0,
+  perche:'Per superare l\'ostruzionismo servono sessanta voti su cento: una maggioranza semplice spesso non basta.'},
+ {id:'us_p_dcq', era:'contemporanea', paese:'usa', ruolo:'attivista', diff:'media', q:'Che particolarità ha Washington, la capitale, rispetto agli Stati?',
+  op:['È la città più popolosa del paese','Non è uno Stato e non ha senatori','Elegge tre senatori'], giusta:1,
+  perche:'Il Distretto di Columbia non è uno Stato: ha un delegato senza voto alla Camera e nessun senatore.'},
+ {id:'us_p_primarie', era:'contemporanea', paese:'usa', ruolo:'attivista', diff:'facile', q:'Come scelgono i partiti americani il candidato alla presidenza?',
+  op:['Lo nomina il Congresso','Lo sceglie il presidente uscente','Con primarie e caucus Stato per Stato'], giusta:2,
+  perche:'Le primarie e i caucus, da gennaio a giugno, assegnano i delegati alla convention.'},
+ {id:'us_p_governatori', era:'contemporanea', paese:'usa', ruolo:'locale', diff:'facile', q:'Chi guida il governo di uno Stato americano?',
+  op:['Il governatore, eletto dai cittadini dello Stato','Un prefetto nominato dal Presidente','Il senatore più anziano'], giusta:0,
+  perche:'Ogni Stato ha un governatore eletto, con un proprio parlamento e una propria costituzione.'},
+ {id:'us_p_vita', era:'contemporanea', paese:'usa', ruolo:'ministro', diff:'media', q:'Quanto dura il mandato di un giudice della Corte Suprema?',
+  op:['Dodici anni','A vita','Quanto il Presidente che lo ha nominato'], giusta:1,
+  perche:'I giudici federali restano in carica a vita, salvo dimissioni o rimozione.'},
+ {id:'us_p_portorico', era:'contemporanea', paese:'usa', ruolo:'intl', diff:'difficile', q:'Qual è lo status di Porto Rico?',
+  op:['Uno Stato dell\'Unione','Un paese indipendente','Un territorio degli Stati Uniti, i cui abitanti sono cittadini americani ma non votano per il Presidente'], giusta:2,
+  perche:'Porto Rico è un territorio non incorporato: cittadinanza sì, voto presidenziale e senatori no.'},
+ {id:'us_p_gerry', era:'contemporanea', paese:'usa', ruolo:'locale', diff:'difficile', q:'Che cos\'è il «gerrymandering»?',
+  op:['Il disegno dei collegi elettorali a vantaggio di un partito','Il finanziamento privato delle campagne','La conta dei voti per posta'], giusta:0,
+  perche:'I confini dei collegi sono disegnati dai parlamenti statali, spesso a proprio vantaggio.'},
+ {id:'us_p_marshall', era:'contemporanea', paese:'usa', ruolo:'intl', diff:'media', q:'Che cosa fu il Piano Marshall?',
+  op:['Il piano di sbarco in Normandia','Il programma di aiuti americani alla ricostruzione dell\'Europa dopo la guerra','Un trattato con l\'Unione Sovietica'], giusta:1,
+  perche:'Dal 1948 gli Stati Uniti finanziarono la ricostruzione europea.'},
+ {id:'us_p_1964', era:'contemporanea', paese:'usa', ruolo:'attivista', diff:'media', q:'Che cosa stabilì la legge sui diritti civili del 1964?',
+  op:['Il diritto di voto alle donne','L\'abolizione della schiavitù','Il divieto di discriminazione razziale nei luoghi pubblici e sul lavoro'], giusta:2,
+  perche:'Il Civil Rights Act del 1964 vietò la segregazione e la discriminazione.'},
+ {id:'us_p_luna', era:'contemporanea', paese:'usa', ruolo:'ministro', diff:'facile', q:'In quale anno un astronauta americano camminò per la prima volta sulla Luna?',
+  op:['1969','1961','1975'], giusta:0,
+  perche:'Il primo allunaggio è del luglio 1969.'},
+ {id:'us_p_watergate', era:'contemporanea', paese:'usa', ruolo:'governo', diff:'media', q:'Quale fu la conseguenza dello scandalo Watergate?',
+  op:['La sconfitta in Vietnam','Le dimissioni di un Presidente, nel 1974','Una riforma della Corte Suprema'], giusta:1,
+  perche:'Nel 1974, per la prima volta, un Presidente si dimise.'},
+ {id:'us_p_vietnam', era:'contemporanea', paese:'usa', ruolo:'intl', diff:'media', q:'In quale anno finì la guerra del Vietnam per gli Stati Uniti?',
+  op:['1968','1980','1975'], giusta:2,
+  perche:'Le ultime truppe lasciarono il paese nel 1973 e Saigon cadde nel 1975.'},
+ {id:'us_p_golfo', era:'contemporanea', paese:'usa', ruolo:'intl', diff:'difficile', q:'Quale conflitto guidarono gli Stati Uniti nel 1991?',
+  op:['La guerra del Golfo, per liberare il Kuwait','L\'invasione dell\'Afghanistan','La guerra di Corea'], giusta:0,
+  perche:'La prima guerra del Golfo, del 1991, seguì l\'invasione irachena del Kuwait.'},
+ {id:'us_p_2001', era:'contemporanea', paese:'usa', ruolo:'governo', diff:'facile', q:'Che cosa accadde l\'11 settembre 2001?',
+  op:['La caduta del Muro di Berlino','Attentati terroristici a New York e Washington','L\'uragano su New Orleans'], giusta:1,
+  perche:'Gli attentati dell\'11 settembre 2001 colpirono le Torri Gemelle e il Pentagono.'},
+ {id:'us_p_2008', era:'contemporanea', paese:'usa', ruolo:'ministro', diff:'media', q:'Che cosa scatenò la crisi finanziaria del 2008?',
+  op:['Un embargo petrolifero','Il default di uno Stato','Il crollo dei mutui immobiliari ad alto rischio e di grandi banche'], giusta:2,
+  perche:'La crisi dei mutui subprime portò al fallimento di grandi istituti e a una recessione mondiale.'},
+ {id:'us_p_aca', era:'contemporanea', paese:'usa', ruolo:'ministro', diff:'difficile', q:'Che cosa introdusse la riforma sanitaria del 2010?',
+  op:['L\'obbligo di assicurazione sanitaria con sussidi e l\'estensione della copertura','Un sistema sanitario pubblico universale','L\'abolizione delle assicurazioni private'], giusta:0,
+  perche:'La riforma del 2010 estese la copertura assicurativa senza creare un sistema pubblico universale.'},
+ {id:'us_p_brown', era:'contemporanea', paese:'usa', ruolo:'ministro', diff:'difficile', q:'Che cosa decise la Corte Suprema nel 1954 nel caso sulla scuola pubblica?',
+  op:['Il diritto di voto ai diciottenni','Che la segregazione razziale nelle scuole era incostituzionale','La legalità della pena di morte'], giusta:1,
+  perche:'Brown v. Board of Education dichiarò incostituzionale la segregazione scolastica.'},
  {id:'usa_mayor', era:'universale', paese:'usa', ruolo:'locale', diff:'facile', q:'Chi guida il governo di una città americana?',
   op:['Il sindaco (mayor)','Il governatore dello Stato','Il presidente'], giusta:0,
   perche:'A capo di una città americana c\'è il sindaco (mayor).'},
@@ -7106,6 +8313,67 @@ const SFIDE=[
   op:['Si sfiducia il governo solo indicando insieme un candidato successore','Bastano i due terzi del Congresso','La decisione spetta al Re'], giusta:0,
   perche:'La sfiducia costruttiva rovescia il governo solo indicando contestualmente un successore.'},   // ⚠ 1978 → contemporanea
  // ----- CANADA (canada) -----
+ // ----- CANADA, presente arricchito (L83-1, scheda PRESET-CANADA-PRESENTE §E) — 10 presente + 10 storia recente -----
+ {id:'ca_p_provinceq', era:'contemporanea', paese:'canada', ruolo:'locale', diff:'facile', q:'Quante province e quanti territori ha il Canada?',
+  op:['Dieci province e tre territori','Tredici province','Otto province e cinque territori'], giusta:0,
+  perche:'Il Canada ha dieci province e tre territori nel Nord.'},
+ {id:'ca_p_quebecq', era:'contemporanea', paese:'canada', ruolo:'attivista', diff:'facile', q:'Qual è la provincia canadese a maggioranza francofona?',
+  op:['L\'Ontario','Il Québec','Il Manitoba'], giusta:1,
+  perche:'Il Québec è la sola provincia a maggioranza francofona; il francese è la sua unica lingua ufficiale.'},
+ {id:'ca_p_gg', era:'contemporanea', paese:'canada', ruolo:'governo', diff:'media', q:'Chi rappresenta il monarca in Canada a livello federale?',
+  op:['Il Primo Ministro','Il presidente della Camera','Il Governatore generale'], giusta:2,
+  perche:'Il Governatore generale è il rappresentante del monarca e svolge le funzioni di capo dello Stato.'},
+ {id:'ca_p_senatoq', era:'contemporanea', paese:'canada', ruolo:'governo', diff:'media', q:'Come si diventa senatori in Canada?',
+  op:['Per nomina, su proposta del Primo Ministro','Per elezione diretta','Per designazione delle province'], giusta:0,
+  perche:'I senatori sono nominati dal Governatore generale su consiglio del Primo Ministro, fino a 75 anni.'},
+ {id:'ca_p_clausola', era:'contemporanea', paese:'canada', ruolo:'ministro', diff:'difficile', q:'Che cos\'è la «clausola nonostante» (notwithstanding clause) della Costituzione canadese?',
+  op:['Il potere del Senato di bloccare una legge','La possibilità per un parlamento di far valere una legge anche se viola certi diritti della Carta, per cinque anni','Il diritto delle province di uscire dalla federazione'], giusta:1,
+  perche:'L\'articolo 33 della Carta permette di sottrarre temporaneamente una legge ad alcuni diritti fondamentali.'},
+ {id:'ca_p_perequazioneq', era:'contemporanea', paese:'canada', ruolo:'ministro', diff:'difficile', q:'Che cos\'è la «perequazione» fra le province canadesi?',
+  op:['Il sistema di quote per il latte','La ripartizione dei seggi alla Camera','Trasferimenti federali alle province con minore capacità fiscale'], giusta:2,
+  perche:'La perequazione trasferisce fondi federali alle province meno ricche per garantire servizi comparabili.'},
+ {id:'ca_p_carta', era:'contemporanea', paese:'canada', ruolo:'attivista', diff:'media', q:'Che cos\'è la Carta canadese dei diritti e delle libertà?',
+  op:['La parte della Costituzione del 1982 che garantisce i diritti fondamentali','Un trattato con gli Stati Uniti','Lo statuto del Québec'], giusta:0,
+  perche:'La Carta, del 1982, è parte della Costituzione e vincola tutti i livelli di governo.'},
+ {id:'ca_p_nunavut', era:'contemporanea', paese:'canada', ruolo:'locale', diff:'media', q:'Qual è il territorio canadese creato nel 1999 con una maggioranza inuit?',
+  op:['Lo Yukon','Il Nunavut','Il Labrador'], giusta:1,
+  perche:'Il Nunavut, staccato dai Territori del Nord-Ovest nel 1999, ha una popolazione a maggioranza inuit.'},
+ {id:'ca_p_sanitaq', era:'contemporanea', paese:'canada', ruolo:'ministro', diff:'media', q:'Chi gestisce la sanità pubblica in Canada?',
+  op:['Il governo federale direttamente','I comuni','Le province, con trasferimenti federali'], giusta:2,
+  perche:'La sanità è di competenza provinciale; Ottawa contribuisce con trasferimenti a condizioni.'},
+ {id:'ca_p_popolazione', era:'contemporanea', paese:'canada', ruolo:'locale', diff:'facile', q:'Qual è la città più popolosa del Canada?',
+  op:['Toronto','Montréal','Ottawa'], giusta:0,
+  perche:'Toronto è la città più popolosa; Ottawa è la capitale.'},
+ {id:'ca_p_bandiera', era:'contemporanea', paese:'canada', ruolo:'attivista', diff:'facile', q:'In quale anno il Canada adottò la bandiera con la foglia d\'acero?',
+  op:['1945','1965','1982'], giusta:1,
+  perche:'La bandiera con la foglia d\'acero è del 1965; prima si usava un vessillo con la bandiera britannica.'},
+ {id:'ca_p_ottobre', era:'contemporanea', paese:'canada', ruolo:'governo', diff:'difficile', q:'Che cosa fu la «crisi d\'ottobre» del 1970?',
+  op:['Uno sciopero generale','Una crisi finanziaria','Il rapimento di un ministro e di un diplomatico da parte di indipendentisti del Québec, con la legge marziale'], giusta:2,
+  perche:'Nell\'ottobre 1970 il governo federale invocò la legge sulle misure di guerra dopo i rapimenti del FLQ.'},
+ {id:'ca_p_1980', era:'contemporanea', paese:'canada', ruolo:'attivista', diff:'media', q:'Che cosa decisero i referendum del Québec del 1980 e del 1995?',
+  op:['Entrambi respinsero la sovranità del Québec, il secondo per pochissimi voti','Il primo approvò l\'indipendenza','Entrambi approvarono l\'indipendenza'], giusta:0,
+  perche:'Il «no» vinse nel 1980 con ampio margine e nel 1995 con circa un punto.'},
+ {id:'ca_p_1982', era:'contemporanea', paese:'canada', ruolo:'governo', diff:'media', q:'Che cosa accadde alla Costituzione canadese nel 1982?',
+  op:['Fu abolita la monarchia','Fu «rimpatriata» dal Regno Unito, con la Carta dei diritti','Fu introdotto il bilinguismo'], giusta:1,
+  perche:'Nel 1982 il Canada ottenne il potere di emendare la propria Costituzione senza il Parlamento britannico.'},
+ {id:'ca_p_liberoscambio', era:'contemporanea', paese:'canada', ruolo:'intl', diff:'media', q:'Quale accordo entrò in vigore nel 1994 fra Canada, Stati Uniti e Messico?',
+  op:['Il Trattato di Ottawa','La NATO','L\'accordo nordamericano di libero scambio (NAFTA)'], giusta:2,
+  perche:'Il NAFTA del 1994, rinegoziato nel 2020, unisce i tre paesi in un\'area di libero scambio.'},
+ {id:'ca_p_montreal', era:'contemporanea', paese:'canada', ruolo:'locale', diff:'facile', q:'Quale città canadese ospitò i Giochi olimpici estivi del 1976?',
+  op:['Montréal','Toronto','Vancouver'], giusta:0,
+  perche:'Montréal 1976; Vancouver ospitò i Giochi invernali del 2010.'},
+ {id:'ca_p_bilinguismo', era:'contemporanea', paese:'canada', ruolo:'ministro', diff:'difficile', q:'Quando fu adottata la legge federale sulle lingue ufficiali?',
+  op:['1867','1969','1995'], giusta:1,
+  perche:'La legge del 1969 rese inglese e francese lingue ufficiali delle istituzioni federali.'},
+ {id:'ca_p_scuse', era:'contemporanea', paese:'canada', ruolo:'attivista', diff:'media', q:'Per che cosa il governo canadese presentò scuse ufficiali nel 2008?',
+  op:['Per la crisi d\'ottobre','Per il rimpatrio della Costituzione','Per il sistema delle scuole residenziali per bambini indigeni'], giusta:2,
+  perche:'Nel 2008 il Parlamento chiese scusa per le scuole residenziali, che separarono i bambini indigeni dalle famiglie.'},
+ {id:'ca_p_marijuana', era:'contemporanea', paese:'canada', ruolo:'ministro', diff:'media', q:'Quale primato ha il Canada sulla cannabis?',
+  op:['È stato fra i primi paesi del G7 a legalizzarla per uso ricreativo, nel 2018','L\'ha vietata per Costituzione','Non ne regola l\'uso'], giusta:0,
+  perche:'La legalizzazione federale della cannabis ricreativa è del 2018.'},
+ {id:'ca_p_pace', era:'contemporanea', paese:'canada', ruolo:'intl', diff:'difficile', q:'Per quale idea un ministro canadese ricevette il Nobel per la pace nel 1957?',
+  op:['La creazione dell\'ONU','La proposta della prima forza di pace dell\'ONU durante la crisi di Suez','Il disarmo nucleare'], giusta:1,
+  perche:'La proposta dei caschi blu per Suez, nel 1956, valse il Nobel per la pace nel 1957.'},
  {id:'ca_parlamento', era:'universale', paese:'canada', ruolo:'governo', diff:'facile', q:'Da quali due camere è composto il Parlamento del Canada?',
   op:['La Camera dei Comuni e il Senato','La Camera e l\'Assemblea','Il Bundestag e il Bundesrat'], giusta:0,
   perche:'Il Parlamento canadese ha la Camera dei Comuni (eletta) e il Senato (nominato).'},
@@ -7137,6 +8405,67 @@ const SFIDE=[
   op:['Due: inglese e francese','Una: l\'inglese','Tre: inglese, francese e spagnolo'], giusta:0,
   perche:'A livello federale il Canada ha due lingue ufficiali: inglese e francese.'},   // ⚠ Official Languages Act, 1969 → contemporanea
  // ----- AUSTRALIA (australia) -----
+ // ----- AUSTRALIA, presente arricchito (L83-1, scheda PRESET-AUSTRALIA-PRESENTE §E) — 10 presente + 10 storia recente -----
+ {id:'au_p_statiq', era:'contemporanea', paese:'australia', ruolo:'locale', diff:'facile', q:'Quanti Stati ha la federazione australiana?',
+  op:['Sei, più due territori principali','Otto','Dieci'], giusta:0,
+  perche:'Sei Stati e due territori continentali, oltre ai territori esterni.'},
+ {id:'au_p_canberra', era:'contemporanea', paese:'australia', ruolo:'locale', diff:'facile', q:'Perché Canberra è la capitale dell\'Australia?',
+  op:['È la città più antica','Fu costruita apposta come compromesso fra Sydney e Melbourne','È la città più popolosa'], giusta:1,
+  perche:'Canberra fu progettata come capitale per non scegliere fra le due grandi città rivali.'},
+ {id:'au_p_mandatoq', era:'contemporanea', paese:'australia', ruolo:'governo', diff:'media', q:'Quanto dura al massimo una legislatura federale in Australia?',
+  op:['Cinque anni','Quattro anni','Tre anni'], giusta:2,
+  perche:'La Camera dei rappresentanti dura al massimo tre anni: fra le legislature più brevi al mondo.'},
+ {id:'au_p_pm', era:'contemporanea', paese:'australia', ruolo:'governo', diff:'media', q:'Chi sceglie il Primo Ministro australiano?',
+  op:['Il partito o la coalizione di maggioranza alla Camera, che può anche sostituirlo durante la legislatura','I cittadini, con un voto diretto','Il Governatore generale, a sua discrezione'], giusta:0,
+  perche:'Il leader del partito di maggioranza è Primo Ministro; il partito può cambiarlo, ed è successo più volte.'},
+ {id:'au_p_senatoq', era:'contemporanea', paese:'australia', ruolo:'governo', diff:'difficile', q:'Quanti senatori elegge ogni Stato australiano?',
+  op:['In proporzione alla popolazione','Dodici, indipendentemente dalla popolazione','Sei'], giusta:1,
+  perche:'Ogni Stato elegge dodici senatori, i territori due ciascuno.'},
+ {id:'au_p_preferenze', era:'contemporanea', paese:'australia', ruolo:'attivista', diff:'difficile', q:'Come si vota per la Camera dei rappresentanti australiana?',
+  op:['Con una croce su un solo candidato','Con liste bloccate','Numerando i candidati in ordine di preferenza'], giusta:2,
+  perche:'Il voto preferenziale: si numerano i candidati, e le preferenze si trasferiscono finché uno supera il 50%.'},
+ {id:'au_p_prime', era:'contemporanea', paese:'australia', ruolo:'attivista', diff:'media', q:'Chi sono i popoli delle Prime Nazioni australiane?',
+  op:['Gli aborigeni e gli isolani dello Stretto di Torres','I discendenti dei primi coloni britannici','Gli abitanti della Tasmania'], giusta:0,
+  perche:'Aborigeni e isolani dello Stretto di Torres abitano il continente da decine di migliaia di anni.'},
+ {id:'au_p_dollaro', era:'contemporanea', paese:'australia', ruolo:'ministro', diff:'facile', q:'Qual è la moneta dell\'Australia?',
+  op:['La sterlina australiana','Il dollaro australiano','Il dollaro neozelandese'], giusta:1,
+  perche:'Il dollaro australiano ha sostituito la sterlina australiana nel 1966.'},
+ {id:'au_p_ospedali', era:'contemporanea', paese:'australia', ruolo:'ministro', diff:'media', q:'Chi gestisce gli ospedali pubblici in Australia?',
+  op:['Il governo federale','I comuni','Gli Stati, con fondi anche federali'], giusta:2,
+  perche:'Gli ospedali pubblici sono degli Stati; la medicina di base è finanziata dal federale.'},
+ {id:'au_p_gsts', era:'contemporanea', paese:'australia', ruolo:'ministro', diff:'difficile', q:'Come vengono ripartiti fra gli Stati i proventi dell\'imposta sui consumi (GST)?',
+  op:['Con una formula di perequazione decisa da una commissione indipendente','In parti uguali','Restano allo Stato dove sono raccolti'], giusta:0,
+  perche:'La Commonwealth Grants Commission ripartisce la GST secondo i bisogni relativi degli Stati.'},
+ {id:'au_p_1967', era:'contemporanea', paese:'australia', ruolo:'attivista', diff:'media', q:'Che cosa decise il referendum del 1967?',
+  op:['La repubblica','Di contare gli aborigeni nel censimento e di dare al federale il potere di legiferare per loro','Il voto obbligatorio'], giusta:1,
+  perche:'Il referendum del 1967 fu approvato con oltre il 90%: uno dei pochi referendum riusciti.'},
+ {id:'au_p_1975', era:'contemporanea', paese:'australia', ruolo:'governo', diff:'difficile', q:'Che cosa accadde nel novembre 1975, nella crisi costituzionale australiana?',
+  op:['Un colpo di Stato militare','Il Primo Ministro sciolse il Parlamento','Il Governatore generale destituì il Primo Ministro'], giusta:2,
+  perche:'Il Governatore generale rimosse il governo che non riusciva a far passare il bilancio al Senato.'},
+ {id:'au_p_1999', era:'contemporanea', paese:'australia', ruolo:'governo', diff:'media', q:'Che cosa decise il referendum del 1999?',
+  op:['Respinse la trasformazione in repubblica','Approvò la repubblica','Abolì il Senato'], giusta:0,
+  perche:'Il referendum sulla repubblica fallì, in parte per il modello proposto (presidente eletto dal Parlamento).'},
+ {id:'au_p_2000', era:'contemporanea', paese:'australia', ruolo:'locale', diff:'facile', q:'Quale città australiana ospitò i Giochi olimpici del 2000?',
+  op:['Melbourne','Sydney','Brisbane'], giusta:1,
+  perche:'Sydney 2000; Melbourne li aveva ospitati nel 1956, Brisbane li ospiterà nel 2032.'},
+ {id:'au_p_bianca', era:'contemporanea', paese:'australia', ruolo:'intl', diff:'media', q:'Che cosa fu la politica dell\'«Australia bianca»?',
+  op:['Un piano di riforestazione','Una politica sull\'acqua','Un insieme di leggi che limitava l\'immigrazione non europea, smantellato negli anni Sessanta e Settanta'], giusta:2,
+  perche:'La «White Australia policy» restrinse l\'immigrazione non europea dal 1901 fino al suo smantellamento negli anni Settanta.'},
+ {id:'au_p_mabo', era:'contemporanea', paese:'australia', ruolo:'ministro', diff:'difficile', q:'Che cosa stabilì la sentenza «Mabo» del 1992?',
+  op:['Che i popoli indigeni potevano avere titoli sulla terra, superando l\'idea di «terra di nessuno»','Il voto obbligatorio','L\'indipendenza della Papua'], giusta:0,
+  perche:'Mabo riconobbe il «native title» e respinse la dottrina della terra nullius.'},
+ {id:'au_p_armi', era:'contemporanea', paese:'australia', ruolo:'ministro', diff:'media', q:'Che cosa fece l\'Australia nel 1996 dopo una strage con armi da fuoco in Tasmania?',
+  op:['Nulla','Approvò in poche settimane una legge nazionale che vietò le armi semiautomatiche, con un riacquisto di massa','Sospese le elezioni'], giusta:1,
+  perche:'Dopo la strage di Port Arthur il paese vietò le armi semiautomatiche e ne riacquistò centinaia di migliaia.'},
+ {id:'au_p_scuse', era:'contemporanea', paese:'australia', ruolo:'attivista', diff:'media', q:'A chi rivolse le scuse ufficiali il Parlamento australiano nel 2008?',
+  op:['Ai prigionieri di guerra','Agli immigrati europei','Alle «generazioni rubate», i bambini indigeni tolti alle famiglie'], giusta:2,
+  perche:'Le scuse del 2008 riguardavano i bambini aborigeni sottratti alle famiglie fino agli anni Settanta.'},
+ {id:'au_p_2023', era:'contemporanea', paese:'australia', ruolo:'governo', diff:'media', q:'Che cosa decise il referendum del 2023?',
+  op:['Respinse l\'istituzione di una «Voce» indigena in Costituzione','Approvò la repubblica','Approvò un nuovo Stato'], giusta:0,
+  perche:'Il referendum sulla Voce al Parlamento fu respinto in tutti gli Stati.'},
+ {id:'au_p_melbourne', era:'contemporanea', paese:'australia', ruolo:'locale', diff:'facile', q:'Quale città australiana ospitò i Giochi olimpici del 1956?',
+  op:['Sydney','Melbourne','Perth'], giusta:1,
+  perche:'Melbourne 1956: i primi Giochi nell\'emisfero australe.'},
  {id:'au_parlamento', era:'universale', paese:'australia', ruolo:'governo', diff:'facile', q:'Da quali due camere è composto il Parlamento federale australiano?',
   op:['La Camera dei Rappresentanti e il Senato','La Camera e la Dieta','L\'Assemblea e il Consiglio'], giusta:0,
   perche:'Il Parlamento federale australiano ha la Camera dei Rappresentanti e il Senato.'},
@@ -7168,6 +8497,67 @@ const SFIDE=[
   op:['Un proporzionale a voto singolo trasferibile','Il maggioritario secco','La nomina da parte degli Stati'], giusta:0,
   perche:'Il Senato australiano si elegge con un proporzionale a voto singolo trasferibile.'},   // dal 1948 → universale (ritag)
  // ----- GIAPPONE (giappone) -----
+ // ----- GIAPPONE, presente arricchito (L85-1, scheda PRESET-GIAPPONE-PRESENTE §E) — 10 presente + 10 storia recente -----
+ {id:'jp_p_prefettureq', era:'contemporanea', paese:'giappone', ruolo:'locale', diff:'media', q:'Quante prefetture ha il Giappone?',
+  op:['Quarantasette','Trentatré','Sessantaquattro'], giusta:0,
+  perche:'Il Giappone è diviso in 47 prefetture.'},
+ {id:'jp_p_pm', era:'contemporanea', paese:'giappone', ruolo:'governo', diff:'media', q:'Chi sceglie il Primo Ministro giapponese?',
+  op:['I cittadini, con voto diretto','La Dieta, di norma il leader del partito di maggioranza','L\'Imperatore, a sua discrezione'], giusta:1,
+  perche:'La Dieta designa il Primo Ministro; l\'Imperatore lo nomina formalmente.'},
+ {id:'jp_p_isole', era:'contemporanea', paese:'giappone', ruolo:'locale', diff:'facile', q:'Quante sono le isole principali del Giappone?',
+  op:['Due','Sette','Quattro'], giusta:2,
+  perche:'Hokkaido, Honshu, Shikoku e Kyushu, più migliaia di isole minori.'},
+ {id:'jp_p_forze', era:'contemporanea', paese:'giappone', ruolo:'ministro', diff:'media', q:'Come si chiamano le forze armate giapponesi?',
+  op:['Forze di autodifesa','Esercito imperiale','Guardia nazionale'], giusta:0,
+  perche:'La Costituzione rinuncia alla guerra: le forze armate si chiamano Forze di autodifesa.'},
+ {id:'jp_p_iva', era:'contemporanea', paese:'giappone', ruolo:'ministro', diff:'difficile', q:'Qual è l\'aliquota ordinaria dell\'imposta sui consumi in Giappone?',
+  op:['Il venti per cento','Il dieci per cento','Il cinque per cento'], giusta:1,
+  perche:'L\'imposta sui consumi è al 10% dal 2019 (8% sugli alimentari).'},
+ {id:'jp_p_yenq', era:'contemporanea', paese:'giappone', ruolo:'ministro', diff:'facile', q:'Qual è la moneta del Giappone?',
+  op:['Il won','Lo yuan','Lo yen'], giusta:2,
+  perche:'Lo yen è la valuta giapponese.'},
+ {id:'jp_p_basi', era:'contemporanea', paese:'giappone', ruolo:'intl', diff:'media', q:'In quale prefettura si concentra la maggior parte delle basi militari americane in Giappone?',
+  op:['Okinawa','Hokkaido','Osaka'], giusta:0,
+  perche:'Okinawa ospita la maggior parte delle installazioni americane, con tensioni ricorrenti.'},
+ {id:'jp_p_eta', era:'contemporanea', paese:'giappone', ruolo:'attivista', diff:'media', q:'A quale età si vota in Giappone?',
+  op:['Venti anni','Diciotto anni','Sedici anni'], giusta:1,
+  perche:'L\'età di voto è stata abbassata da 20 a 18 anni nel 2016.'},
+ {id:'jp_p_imperatore', era:'contemporanea', paese:'giappone', ruolo:'governo', diff:'facile', q:'Quale ruolo ha l\'Imperatore secondo la Costituzione giapponese?',
+  op:['Capo del governo','Comandante delle forze armate','Simbolo dello Stato e dell\'unità del popolo, senza poteri politici'], giusta:2,
+  perche:'L\'Imperatore è «simbolo dello Stato», senza poteri di governo.'},
+ {id:'jp_p_furusato', era:'contemporanea', paese:'giappone', ruolo:'locale', diff:'difficile', q:'Che cos\'è il sistema della «tassa per la città natale» (furusato nozei)?',
+  op:['La possibilità di destinare parte delle tasse a un comune a scelta, ricevendo prodotti locali in cambio','Un\'imposta sulle seconde case','Una tassa di soggiorno'], giusta:0,
+  perche:'Il furusato nozei permette di donare a un comune a scelta, con detrazione e regali locali.'},
+ {id:'jp_p_1947', era:'contemporanea', paese:'giappone', ruolo:'governo', diff:'media', q:'In quale anno entra in vigore l\'attuale Costituzione giapponese?',
+  op:['1945','1947','1952'], giusta:1,
+  perche:'La Costituzione del dopoguerra entra in vigore nel maggio 1947.'},
+ {id:'jp_p_1964', era:'contemporanea', paese:'giappone', ruolo:'locale', diff:'facile', q:'Che cosa accadde a Tokyo nel 1964?',
+  op:['Un grande terremoto','L\'incoronazione di un imperatore','I Giochi olimpici e l\'inaugurazione del primo treno ad alta velocità'], giusta:2,
+  perche:'Nel 1964 Tokyo ospitò le Olimpiadi e partì il primo shinkansen.'},
+ {id:'jp_p_okinawaq', era:'contemporanea', paese:'giappone', ruolo:'intl', diff:'difficile', q:'In quale anno Okinawa tornò al Giappone dall\'amministrazione americana?',
+  op:['1972','1952','1989'], giusta:0,
+  perche:'Okinawa restò sotto amministrazione americana fino al 1972.'},
+ {id:'jp_p_bolla', era:'contemporanea', paese:'giappone', ruolo:'ministro', diff:'media', q:'Che cosa accadde all\'economia giapponese all\'inizio degli anni Novanta?',
+  op:['Il boom del miracolo','Lo scoppio della bolla immobiliare e finanziaria, seguito da un lungo periodo di stagnazione','L\'adozione dell\'euro'], giusta:1,
+  perche:'Lo scoppio della bolla aprì il «decennio perduto», poi diventati due.'},
+ {id:'jp_p_kobe', era:'contemporanea', paese:'giappone', ruolo:'ministro', diff:'media', q:'Quale città fu colpita da un grave terremoto nel gennaio 1995?',
+  op:['Tokyo','Sendai','Kobe'], giusta:2,
+  perche:'Il terremoto di Kobe del 1995 causò migliaia di vittime e cambiò le norme antisismiche.'},
+ {id:'jp_p_2011', era:'contemporanea', paese:'giappone', ruolo:'governo', diff:'facile', q:'Che cosa accadde nel marzo 2011 nel nord-est del Giappone?',
+  op:['Un terremoto e uno tsunami, con l\'incidente nucleare di Fukushima','Un\'eruzione vulcanica','Un tifone'], giusta:0,
+  perche:'Il terremoto e lo tsunami del 2011 causarono l\'incidente alla centrale di Fukushima.'},
+ {id:'jp_p_1956', era:'contemporanea', paese:'giappone', ruolo:'intl', diff:'difficile', q:'In quale anno il Giappone fu ammesso alle Nazioni Unite?',
+  op:['1945','1956','1972'], giusta:1,
+  perche:'Il Giappone entrò all\'ONU nel dicembre 1956.'},
+ {id:'jp_p_2009', era:'contemporanea', paese:'giappone', ruolo:'governo', diff:'difficile', q:'Che cosa accadde nelle elezioni del 2009 in Giappone?',
+  op:['Fu abolita la Camera alta','Fu introdotto il voto a 18 anni','Per la prima volta l\'opposizione conquistò una maggioranza piena e cambiò il governo'], giusta:2,
+  perche:'Nel 2009 il partito che governava quasi ininterrottamente dal 1955 perse le elezioni.'},
+ {id:'jp_p_ere', era:'contemporanea', paese:'giappone', ruolo:'attivista', diff:'media', q:'Come si chiama l\'era imperiale iniziata nel 2019?',
+  op:['Reiwa','Heisei','Showa'], giusta:0,
+  perche:'L\'era Reiwa è iniziata nel 2019; Heisei è quella precedente (1989-2019).'},
+ {id:'jp_p_expo', era:'contemporanea', paese:'giappone', ruolo:'locale', diff:'media', q:'Quale città giapponese ospitò l\'Esposizione universale del 1970?',
+  op:['Nagoya','Osaka','Kyoto'], giusta:1,
+  perche:'Osaka 1970 fu la prima Expo in Asia; la città l\'ha ospitata di nuovo nel 2025.'},
  {id:'jp_dieta', era:'universale', paese:'giappone', ruolo:'governo', diff:'facile', q:'Da quali due camere è composta la Dieta giapponese?',
   op:['La Camera dei Rappresentanti e la Camera dei Consiglieri','La Camera e il Senato imperiale','L\'Assemblea e la Dieta federale'], giusta:0,
   perche:'La Dieta ha la Camera dei Rappresentanti e la Camera dei Consiglieri.'},
@@ -7205,6 +8595,67 @@ const SFIDE=[
     Fisco locale in via GENERICA (Corea/India). Solo struttura, mai titolari.
     ============================================================================ */
  // ----- COREA DEL SUD (coreasud) — assetto attuale in gran parte post-democratizzazione 1987 -----
+ // ----- COREA DEL SUD, presente arricchito (L85-1, scheda PRESET-COREASUD-PRESENTE §E) — 10 presente + 10 storia recente -----
+ {id:'kr_p_assembleaq', era:'contemporanea', paese:'coreasud', ruolo:'governo', diff:'media', q:'Quanto dura il mandato dell\'Assemblea nazionale sudcoreana?',
+  op:['Quattro anni','Cinque anni, come il Presidente','Tre anni'], giusta:0,
+  perche:'L\'Assemblea dura quattro anni; il Presidente cinque: i due cicli non coincidono.'},
+ {id:'kr_p_sejongq', era:'contemporanea', paese:'coreasud', ruolo:'locale', diff:'difficile', q:'Che cos\'è Sejong?',
+  op:['La seconda città del paese','Una città costruita per ospitare i ministeri fuori dalla capitale','Un\'isola turistica'], giusta:1,
+  perche:'Sejong è la città amministrativa dove sono stati trasferiti molti ministeri; la capitale resta Seul.'},
+ {id:'kr_p_won', era:'contemporanea', paese:'coreasud', ruolo:'ministro', diff:'facile', q:'Qual è la moneta della Corea del Sud?',
+  op:['Lo yen','Lo yuan','Il won'], giusta:2,
+  perche:'Il won è la valuta sudcoreana.'},
+ {id:'kr_p_dmz', era:'contemporanea', paese:'coreasud', ruolo:'intl', diff:'facile', q:'Che cos\'è la zona demilitarizzata coreana?',
+  op:['Una fascia di territorio lungo il confine fra le due Coree, presidiata da entrambe','Un parco nazionale','Il porto franco di Busan'], giusta:0,
+  perche:'La DMZ, larga circa quattro chilometri, separa le due Coree dal 1953.'},
+ {id:'kr_p_levaq', era:'contemporanea', paese:'coreasud', ruolo:'ministro', diff:'media', q:'Chi è tenuto al servizio militare in Corea del Sud?',
+  op:['Nessuno: l\'esercito è professionale','Tutti gli uomini, per circa un anno e mezzo','Uomini e donne'], giusta:1,
+  perche:'Il servizio è obbligatorio per gli uomini, con durata intorno ai diciotto mesi.'},
+ {id:'kr_p_hangul', era:'contemporanea', paese:'coreasud', ruolo:'attivista', diff:'media', q:'Che cos\'è l\'hangul?',
+  op:['Il piatto nazionale','Una danza tradizionale','L\'alfabeto coreano, celebrato con una festa nazionale'], giusta:2,
+  perche:'L\'hangul, creato nel XV secolo, è l\'alfabeto coreano; il 9 ottobre è festa nazionale.'},
+ {id:'kr_p_busan', era:'contemporanea', paese:'coreasud', ruolo:'locale', diff:'facile', q:'Qual è la seconda città della Corea del Sud, grande porto del sud?',
+  op:['Busan','Incheon','Daegu'], giusta:0,
+  perche:'Busan è la seconda città e il principale porto del paese.'},
+ {id:'kr_p_jeju', era:'contemporanea', paese:'coreasud', ruolo:'locale', diff:'media', q:'Quale isola sudcoreana ha uno statuto di provincia autonoma speciale?',
+  op:['Ulleungdo','Jeju','Ganghwa'], giusta:1,
+  perche:'Jeju, l\'isola meridionale, è provincia autonoma speciale dal 2006.'},
+ {id:'kr_p_cortecost', era:'contemporanea', paese:'coreasud', ruolo:'governo', diff:'difficile', q:'Quanti giudici compongono la Corte costituzionale sudcoreana?',
+  op:['Quindici','Sette','Nove'], giusta:2,
+  perche:'Nove giudici, nominati per un terzo ciascuno dal Presidente, dall\'Assemblea e dalla Corte suprema.'},
+ {id:'kr_p_chaebolq', era:'contemporanea', paese:'coreasud', ruolo:'ministro', diff:'media', q:'Che cosa sono i «chaebol»?',
+  op:['Grandi conglomerati industriali a controllo familiare','Le province del paese','I sindacati'], giusta:0,
+  perche:'I chaebol sono i grandi gruppi familiari che dominano l\'economia sudcoreana.'},
+ {id:'kr_p_1948', era:'contemporanea', paese:'coreasud', ruolo:'governo', diff:'media', q:'In quale anno nasce la Repubblica di Corea?',
+  op:['1945','1948','1953'], giusta:1,
+  perche:'La Repubblica di Corea è proclamata nell\'agosto 1948.'},
+ {id:'kr_p_armistizio', era:'contemporanea', paese:'coreasud', ruolo:'intl', diff:'media', q:'Come si è conclusa la guerra di Corea nel 1953?',
+  op:['Con un trattato di pace','Con la riunificazione','Con un armistizio, mai trasformato in trattato di pace'], giusta:2,
+  perche:'L\'armistizio del 1953 è ancora in vigore: formalmente le due Coree non hanno firmato la pace.'},
+ {id:'kr_p_1987', era:'contemporanea', paese:'coreasud', ruolo:'attivista', diff:'media', q:'Che cosa accadde nel 1987 in Corea del Sud?',
+  op:['Le proteste di massa portarono a una nuova Costituzione con l\'elezione diretta del Presidente','Un colpo di Stato militare','L\'ingresso nell\'ONU'], giusta:0,
+  perche:'Il movimento di giugno 1987 ottenne la democratizzazione e le elezioni presidenziali dirette.'},
+ {id:'kr_p_1988', era:'contemporanea', paese:'coreasud', ruolo:'locale', diff:'facile', q:'Quale evento sportivo ospitò Seul nel 1988?',
+  op:['I Mondiali di calcio','I Giochi olimpici','I Giochi asiatici'], giusta:1,
+  perche:'Le Olimpiadi di Seul 1988 furono la vetrina del paese appena democratizzato.'},
+ {id:'kr_p_1997', era:'contemporanea', paese:'coreasud', ruolo:'ministro', diff:'difficile', q:'Che cosa accadde all\'economia sudcoreana nel 1997?',
+  op:['Il boom dei semiconduttori','L\'adozione di una nuova moneta','Una grave crisi finanziaria, con un prestito del Fondo monetario internazionale'], giusta:2,
+  perche:'La crisi asiatica del 1997 costrinse il paese a un salvataggio del FMI; i cittadini donarono oro.'},
+ {id:'kr_p_2000', era:'contemporanea', paese:'coreasud', ruolo:'intl', diff:'media', q:'Che cosa accadde nel giugno 2000 fra le due Coree?',
+  op:['Il primo vertice fra i leader delle due Coree, a Pyongyang','La riapertura del confine','La firma della pace'], giusta:0,
+  perche:'Il vertice del 2000 fu il primo incontro fra i capi di Stato delle due Coree.'},
+ {id:'kr_p_2002', era:'contemporanea', paese:'coreasud', ruolo:'locale', diff:'facile', q:'Quale evento sportivo la Corea del Sud ospitò insieme al Giappone nel 2002?',
+  op:['I Giochi olimpici','I Mondiali di calcio','I Giochi asiatici'], giusta:1,
+  perche:'I Mondiali del 2002, i primi in Asia, furono organizzati insieme dai due paesi.'},
+ {id:'kr_p_gwangju', era:'contemporanea', paese:'coreasud', ruolo:'attivista', diff:'difficile', q:'Che cosa ricorda il 18 maggio in Corea del Sud?',
+  op:['La fine della guerra','L\'ingresso nell\'OCSE','La rivolta democratica di Gwangju del 1980, repressa dall\'esercito'], giusta:2,
+  perche:'Il 18 maggio 1980 iniziò la rivolta di Gwangju contro il regime militare, repressa con centinaia di morti.'},
+ {id:'kr_p_2017', era:'contemporanea', paese:'coreasud', ruolo:'governo', diff:'media', q:'Che cosa accadde per la prima volta nel 2017 nella politica sudcoreana?',
+  op:['Un Presidente fu rimosso dalla carica con la procedura di impeachment confermata dalla Corte costituzionale','Fu abolito il servizio militare','Fu spostata la capitale'], giusta:0,
+  perche:'Nel marzo 2017 la Corte costituzionale confermò per la prima volta la rimozione di un Presidente.'},
+ {id:'kr_p_ocse', era:'contemporanea', paese:'coreasud', ruolo:'ministro', diff:'difficile', q:'In quale anno la Corea del Sud entrò nell\'OCSE, il «club dei paesi ricchi»?',
+  op:['1988','1996','2010'], giusta:1,
+  perche:'L\'ingresso nell\'OCSE nel 1996 segnò il passaggio a paese sviluppato.'},
  {id:'kr_assemblea', era:'universale', paese:'coreasud', ruolo:'governo', diff:'media', q:'Com\'è composto il parlamento della Corea del Sud?',
   op:['Da un\'assemblea unicamerale, l\'Assemblea nazionale','Da due camere federali','Da un consiglio di prefetti'], giusta:0,
   perche:'Il parlamento sudcoreano è l\'Assemblea nazionale, oggi unicamerale.'},   // ⚠ breve fase bicamerale all'inizio degli anni '60 (II Repubblica) — nel doc, non a schermo
@@ -7236,6 +8687,67 @@ const SFIDE=[
   op:['L\'Assemblea nazionale lo mette in stato d\'accusa, la Corte costituzionale decide','Il primo ministro lo destituisce','Decide l\'autorità militare'], giusta:0,
   perche:'Nell\'impeachment l\'Assemblea nazionale vota l\'accusa e la Corte costituzionale decide sulla rimozione.'},   // ⚠ VI Repubblica → contemporanea
  // ----- BRASILE (brasile) -----
+ // ----- BRASILE, presente arricchito (L86-3, scheda PRESET-BRASILE-PRESENTE §E) — 10 presente + 10 storia recente -----
+ {id:'br_p_statiq', era:'contemporanea', paese:'brasile', ruolo:'locale', diff:'media', q:'Quanti Stati ha la federazione brasiliana?',
+  op:['Ventisei, più il Distretto federale','Cinquanta','Tredici'], giusta:0,
+  perche:'Il Brasile ha 26 Stati e il Distretto federale della capitale.'},
+ {id:'br_p_mandato', era:'contemporanea', paese:'brasile', ruolo:'governo', diff:'media', q:'Quanto dura il mandato del Presidente brasiliano e quante volte può essere rieletto di seguito?',
+  op:['Sei anni, mai rieletto','Quattro anni, con una sola rielezione consecutiva','Cinque anni, senza limiti'], giusta:1,
+  perche:'Quattro anni, rinnovabili una volta di seguito; dopo un intervallo ci si può ricandidare.'},
+ {id:'br_p_capitale', era:'contemporanea', paese:'brasile', ruolo:'locale', diff:'facile', q:'Qual è la capitale del Brasile?',
+  op:['Rio de Janeiro','San Paolo','Brasilia'], giusta:2,
+  perche:'Brasilia, costruita apposta nell\'interno e inaugurata nel 1960.'},
+ {id:'br_p_real', era:'contemporanea', paese:'brasile', ruolo:'ministro', diff:'facile', q:'Qual è la moneta del Brasile?',
+  op:['Il real','Il peso','Il cruzeiro'], giusta:0,
+  perche:'Il real, introdotto nel 1994.'},
+ {id:'br_p_coalizione', era:'contemporanea', paese:'brasile', ruolo:'governo', diff:'difficile', q:'Che cosa si intende per «presidenzialismo di coalizione» in Brasile?',
+  op:['L\'elezione del Presidente da parte del Congresso','Un Presidente eletto direttamente che deve costruire una maggioranza in un Congresso molto frammentato distribuendo cariche e fondi','Un governo di tutti i partiti'], giusta:1,
+  perche:'Con decine di partiti in Congresso, il Presidente governa negoziando appoggi partito per partito.'},
+ {id:'br_p_centrao', era:'contemporanea', paese:'brasile', ruolo:'governo', diff:'difficile', q:'Che cos\'è il «centrão»?',
+  op:['La regione centrale del paese','Il partito del Presidente','Un blocco di partiti di centro senza ideologia fissa che sostiene chi governa in cambio di cariche e fondi'], giusta:2,
+  perche:'Il centrão è il gruppo di partiti che garantisce la maggioranza a quasi ogni governo.'},
+ {id:'br_p_sus', era:'contemporanea', paese:'brasile', ruolo:'ministro', diff:'media', q:'Che cos\'è il SUS?',
+  op:['Il sistema sanitario pubblico universale','Il servizio segreto','La società delle autostrade'], giusta:0,
+  perche:'Il Sistema Único de Saúde garantisce cure gratuite a tutti dal 1988.'},
+ {id:'br_p_bolsaq', era:'contemporanea', paese:'brasile', ruolo:'ministro', diff:'media', q:'Che cos\'è il programma di assegni alle famiglie povere brasiliane?',
+  op:['Un prestito agevolato','Un trasferimento mensile condizionato alla frequenza scolastica dei figli','Una pensione anticipata'], giusta:1,
+  perche:'Il programma paga un assegno alle famiglie povere che mandano i figli a scuola e li vaccinano.'},
+ {id:'br_p_amazzoniaq', era:'contemporanea', paese:'brasile', ruolo:'intl', diff:'facile', q:'Quale parte della foresta amazzonica si trova in Brasile?',
+  op:['Meno di un quarto','Circa metà','Circa il sessanta per cento'], giusta:2,
+  perche:'Circa sei decimi dell\'Amazzonia sono in territorio brasiliano.'},
+ {id:'br_p_lingua', era:'contemporanea', paese:'brasile', ruolo:'attivista', diff:'facile', q:'Qual è la lingua ufficiale del Brasile?',
+  op:['Il portoghese','Lo spagnolo','Il brasiliano'], giusta:0,
+  perche:'Il portoghese: il Brasile è l\'unico grande paese lusofono delle Americhe.'},
+ {id:'br_p_1960', era:'contemporanea', paese:'brasile', ruolo:'locale', diff:'media', q:'Che cosa accadde nel 1960 in Brasile?',
+  op:['La fine della monarchia','Fu inaugurata Brasilia, la nuova capitale costruita nell\'interno','La prima Coppa del mondo vinta'], giusta:1,
+  perche:'Brasilia fu inaugurata nel 1960 per spostare il centro del paese verso l\'interno.'},
+ {id:'br_p_1964', era:'contemporanea', paese:'brasile', ruolo:'governo', diff:'media', q:'Che cosa accadde nel 1964 in Brasile?',
+  op:['La prima elezione diretta','L\'indipendenza','Un colpo di Stato militare che aprì ventun anni di dittatura'], giusta:2,
+  perche:'Il regime militare durò dal 1964 al 1985.'},
+ {id:'br_p_1985', era:'contemporanea', paese:'brasile', ruolo:'attivista', diff:'media', q:'Che cosa chiedeva il movimento «Diretas Já» negli anni Ottanta?',
+  op:['Elezioni presidenziali dirette, per porre fine al regime militare','La riforma agraria','L\'abolizione della schiavitù'], giusta:0,
+  perche:'Le manifestazioni per le «Dirette subito» accompagnarono la fine della dittatura nel 1985.'},
+ {id:'br_p_1988', era:'contemporanea', paese:'brasile', ruolo:'governo', diff:'difficile', q:'In quale anno è stata promulgata l\'attuale Costituzione brasiliana?',
+  op:['1946','1988','1994'], giusta:1,
+  perche:'La «Costituzione cittadina» del 1988 chiuse la transizione democratica.'},
+ {id:'br_p_1994', era:'contemporanea', paese:'brasile', ruolo:'ministro', diff:'media', q:'Che cosa fu il Plano Real del 1994?',
+  op:['Un piano di riforma agraria','Un piano di privatizzazioni','Il piano che introdusse una nuova moneta e fermò l\'iperinflazione'], giusta:2,
+  perche:'Il Plano Real pose fine a decenni di inflazione a tre e quattro cifre.'},
+ {id:'br_p_impeachment', era:'contemporanea', paese:'brasile', ruolo:'governo', diff:'difficile', q:'Quante volte un Presidente brasiliano è stato rimosso con l\'impeachment dal 1988?',
+  op:['Due volte, nel 1992 e nel 2016','Mai','Una volta'], giusta:0,
+  perche:'Due Presidenti sono stati rimossi dal Congresso: nel 1992 e nel 2016.'},
+ {id:'br_p_mondiali', era:'contemporanea', paese:'brasile', ruolo:'locale', diff:'facile', q:'Quale grande evento sportivo ospitò il Brasile nel 2014?',
+  op:['I Giochi olimpici','La Coppa del mondo di calcio','I Giochi panamericani'], giusta:1,
+  perche:'I Mondiali del 2014; due anni dopo Rio ospitò le Olimpiadi.'},
+ {id:'br_p_lavajato', era:'contemporanea', paese:'brasile', ruolo:'ministro', diff:'difficile', q:'Che cosa fu l\'inchiesta «Lava Jato»?',
+  op:['Un\'inchiesta sulle miniere','Un\'operazione contro il narcotraffico','Una vasta inchiesta anticorruzione, dal 2014, che coinvolse la compagnia petrolifera di Stato, imprese e politici di tutti i partiti'], giusta:2,
+  perche:'Lava Jato scoprì un sistema di tangenti attorno agli appalti della compagnia petrolifera pubblica.'},
+ {id:'br_p_2023', era:'contemporanea', paese:'brasile', ruolo:'attivista', diff:'media', q:'Che cosa accadde a Brasilia l\'8 gennaio 2023?',
+  op:['Sostenitori del Presidente uscente invasero e devastarono le sedi dei tre poteri','Un terremoto','L\'inaugurazione di un nuovo Congresso'], giusta:0,
+  perche:'L\'assalto alle sedi di Congresso, Corte suprema e Planalto una settimana dopo l\'insediamento del nuovo governo.'},
+ {id:'br_p_mercosul', era:'contemporanea', paese:'brasile', ruolo:'intl', diff:'media', q:'Che cos\'è il Mercosul (Mercosur)?',
+  op:['Un\'alleanza militare','Il mercato comune del Sud America fondato nel 1991 con Argentina, Uruguay e Paraguay','La banca di sviluppo del continente'], giusta:1,
+  perche:'Il Mercosur, del 1991, unisce Brasile, Argentina, Uruguay e Paraguay in un\'unione doganale.'},
  {id:'br_congresso', era:'universale', paese:'brasile', ruolo:'governo', diff:'facile', q:'Da quali due camere è composto il Congresso Nazionale brasiliano?',
   op:['La Camera dei Deputati e il Senato Federale','Un\'assemblea unicamerale','La Dieta e il Senato'], giusta:0,
   perche:'Il Congresso Nazionale brasiliano ha la Camera dei Deputati e il Senato Federale.'},   // bicamerale anche nella Cost. 1946
@@ -7267,6 +8779,67 @@ const SFIDE=[
   op:['«Ordine e Progresso»','«Libertà e Uguaglianza»','«Dio e Patria»'], giusta:0,
   perche:'La bandiera brasiliana reca il motto «Ordine e Progresso».'},   // non-partigiano
  // ----- MESSICO (messico) -----
+ // ----- MESSICO, presente arricchito (L86-3, scheda PRESET-MESSICO-PRESENTE §E) — 10 presente + 10 storia recente -----
+ {id:'mx_p_statiq', era:'contemporanea', paese:'messico', ruolo:'locale', diff:'media', q:'Quanti Stati ha la federazione messicana?',
+  op:['Trentuno, più la Città del Messico','Cinquanta','Ventitré'], giusta:0,
+  perche:'31 Stati e la Città del Messico, che dal 2016 ha uno status equiparato.'},
+ {id:'mx_p_rielezione', era:'contemporanea', paese:'messico', ruolo:'governo', diff:'facile', q:'Può un Presidente messicano essere rieletto?',
+  op:['Sì, una volta','No, mai: il mandato di sei anni non è rinnovabile','Sì, senza limiti'], giusta:1,
+  perche:'La non-rielezione è un principio della Rivoluzione messicana: «suffragio effettivo, non rielezione».'},
+ {id:'mx_p_pesoq', era:'contemporanea', paese:'messico', ruolo:'ministro', diff:'facile', q:'Qual è la moneta del Messico?',
+  op:['Il real','Il dollaro','Il peso'], giusta:2,
+  perche:'Il peso messicano.'},
+ {id:'mx_p_pemexq', era:'contemporanea', paese:'messico', ruolo:'ministro', diff:'media', q:'Che cos\'è Pemex?',
+  op:['La compagnia petrolifera di Stato, nata dall\'espropriazione del 1938','La banca centrale','La compagnia aerea nazionale'], giusta:0,
+  perche:'Petróleos Mexicanos nacque con la nazionalizzazione del petrolio, festeggiata ogni 18 marzo.'},
+ {id:'mx_p_ine', era:'contemporanea', paese:'messico', ruolo:'attivista', diff:'difficile', q:'Che cos\'è l\'INE?',
+  op:['L\'istituto di statistica','L\'istituto elettorale indipendente che organizza le elezioni','Il servizio di intelligence'], giusta:1,
+  perche:'L\'Instituto Nacional Electoral, autonomo, organizza le elezioni dal 1990 (come IFE) e dal 2014 con il nome attuale.'},
+ {id:'mx_p_tmec', era:'contemporanea', paese:'messico', ruolo:'intl', diff:'media', q:'Come si chiama l\'accordo commerciale in vigore con Stati Uniti e Canada dal 2020?',
+  op:['NAFTA','Mercosur','T-MEC (USMCA)'], giusta:2,
+  perche:'Il T-MEC ha sostituito il NAFTA nel 2020.'},
+ {id:'mx_p_rimesseq', era:'contemporanea', paese:'messico', ruolo:'ministro', diff:'media', q:'Che cosa sono le rimesse per l\'economia messicana?',
+  op:['I dollari inviati a casa dai messicani che lavorano all\'estero, una delle prime fonti di valuta del paese','Le tasse sulle esportazioni','I fondi europei'], giusta:0,
+  perche:'Le rimesse superano i proventi del petrolio e del turismo.'},
+ {id:'mx_p_giudiciq', era:'contemporanea', paese:'messico', ruolo:'governo', diff:'difficile', q:'Quale riforma della giustizia ha approvato il Messico nel 2024?',
+  op:['L\'abolizione della Corte suprema','L\'elezione popolare dei giudici, compresi quelli della Corte suprema','La nomina dei giudici da parte dell\'esercito'], giusta:1,
+  perche:'La riforma del 2024 introduce l\'elezione diretta di tutti i giudici federali.'},
+ {id:'mx_p_lingue', era:'contemporanea', paese:'messico', ruolo:'attivista', diff:'media', q:'Quante lingue indigene sono riconosciute in Messico?',
+  op:['Dieci','Una','Sessantotto'], giusta:2,
+  perche:'La legge riconosce 68 lingue indigene come lingue nazionali, accanto allo spagnolo.'},
+ {id:'mx_p_guardia', era:'contemporanea', paese:'messico', ruolo:'ministro', diff:'media', q:'Che cos\'è la Guardia nazionale messicana?',
+  op:['Un corpo di sicurezza creato nel 2019, passato sotto il comando militare','La polizia della capitale','Un corpo di volontari'], giusta:0,
+  perche:'Creata nel 2019 per sostituire la polizia federale, è oggi sotto la Difesa.'},
+ {id:'mx_p_1968', era:'contemporanea', paese:'messico', ruolo:'attivista', diff:'media', q:'Che cosa accadde a Città del Messico nell\'ottobre 1968?',
+  op:['Un terremoto','La repressione nel sangue di una manifestazione studentesca, pochi giorni prima delle Olimpiadi','L\'inaugurazione della metropolitana'], giusta:1,
+  perche:'Il massacro di Tlatelolco del 2 ottobre 1968 precedette di dieci giorni i Giochi olimpici.'},
+ {id:'mx_p_1985', era:'contemporanea', paese:'messico', ruolo:'ministro', diff:'media', q:'Che cosa colpì Città del Messico nel settembre 1985?',
+  op:['Un\'alluvione','Un\'epidemia','Un terremoto devastante, con migliaia di vittime, che rivelò l\'inefficienza dello Stato'], giusta:2,
+  perche:'Il terremoto del 19 settembre 1985; un altro colpì la città nello stesso giorno del 2017.'},
+ {id:'mx_p_2000', era:'contemporanea', paese:'messico', ruolo:'governo', diff:'media', q:'Perché le elezioni del 2000 furono storiche in Messico?',
+  op:['Per la prima volta in settant\'anni vinse un candidato di un partito diverso da quello che aveva sempre governato','Fu introdotto il voto alle donne','Fu la prima elezione diretta'], giusta:0,
+  perche:'Nel 2000 finì l\'egemonia del partito che governava dal 1929.'},
+ {id:'mx_p_1994', era:'contemporanea', paese:'messico', ruolo:'intl', diff:'difficile', q:'Che cosa accadde il 1° gennaio 1994 in Messico?',
+  op:['La svalutazione del peso','L\'entrata in vigore del NAFTA e, lo stesso giorno, l\'insurrezione zapatista nel Chiapas','Le prime elezioni libere'], giusta:1,
+  perche:'Il NAFTA entrò in vigore e nel Chiapas insorse l\'esercito zapatista; a dicembre arrivò la crisi del peso.'},
+ {id:'mx_p_tequila', era:'contemporanea', paese:'messico', ruolo:'ministro', diff:'difficile', q:'Che cosa fu la «crisi del tequila» del 1994-95?',
+  op:['Una crisi agricola','Uno sciopero dei distillatori','Una crisi finanziaria con la svalutazione del peso e un salvataggio internazionale'], giusta:2,
+  perche:'La svalutazione del dicembre 1994 richiese un salvataggio da decine di miliardi di dollari.'},
+ {id:'mx_p_2006', era:'contemporanea', paese:'messico', ruolo:'ministro', diff:'media', q:'Che cosa iniziò nel 2006 in Messico?',
+  op:['La «guerra al narcotraffico», con l\'esercito nelle strade','La riforma elettorale','La costruzione del treno del Sud'], giusta:0,
+  perche:'Dal 2006 l\'esercito è impiegato contro i cartelli; la violenza è aumentata da allora.'},
+ {id:'mx_p_2018', era:'contemporanea', paese:'messico', ruolo:'governo', diff:'media', q:'Che cosa accadde nelle elezioni del 2018?',
+  op:['Fu abolita la presidenza','Vinse per la prima volta un movimento di sinistra, con la maggioranza più ampia dalla transizione democratica','Fu introdotta la rielezione'], giusta:1,
+  perche:'Nel 2018 la sinistra conquistò la presidenza e il Congresso con margini mai visti dal 2000.'},
+ {id:'mx_p_2024', era:'contemporanea', paese:'messico', ruolo:'attivista', diff:'facile', q:'Quale primato ebbero le elezioni presidenziali messicane del 2024?',
+  op:['Il primo ballottaggio','La prima elezione con voto elettronico','Per la prima volta fu eletta una donna alla presidenza'], giusta:2,
+  perche:'Nel 2024 il Messico ha eletto la prima Presidente donna della sua storia.'},
+ {id:'mx_p_1938', era:'contemporanea', paese:'messico', ruolo:'ministro', diff:'media', q:'Che cosa si celebra il 18 marzo in Messico?',
+  op:['L\'espropriazione petrolifera del 1938','L\'indipendenza','La Costituzione'], giusta:0,
+  perche:'Il 18 marzo 1938 il petrolio fu nazionalizzato: nacque Pemex.'},
+ {id:'mx_p_ayotzinapa', era:'contemporanea', paese:'messico', ruolo:'attivista', diff:'difficile', q:'Che cosa accadde nel settembre 2014 nel Guerrero?',
+  op:['Un uragano','La scomparsa di quarantatré studenti di una scuola normale, mai ritrovati','Un\'elezione annullata'], giusta:1,
+  perche:'I 43 di Ayotzinapa, scomparsi dopo un intervento della polizia locale legata ai cartelli: il caso è ancora aperto.'},
  {id:'mx_congresso', era:'universale', paese:'messico', ruolo:'governo', diff:'facile', q:'Da quali due camere è composto il Congresso dell\'Unione messicano?',
   op:['La Camera dei Deputati e il Senato','Un\'assemblea unicamerale','La Dieta e il Consiglio'], giusta:0,
   perche:'Il Congresso dell\'Unione ha la Camera dei Deputati e il Senato.'},
@@ -7298,6 +8871,67 @@ const SFIDE=[
   op:['Una repubblica federale presidenziale','Una monarchia','Uno Stato unitario'], giusta:0,
   perche:'Il Messico è una repubblica federale di tipo presidenziale.'},
  // ----- INDIA (india) -----
+ // ----- INDIA, presente arricchito (L85-1, scheda PRESET-INDIA-PRESENTE §E) — 10 presente + 10 storia recente -----
+ {id:'in_p_statiq', era:'contemporanea', paese:'india', ruolo:'locale', diff:'media', q:'Quanti Stati ha oggi la federazione indiana?',
+  op:['Ventotto, più otto territori dell\'Unione','Cinquanta','Quattordici'], giusta:0,
+  perche:'Dal 2019 l\'India ha 28 Stati e 8 territori dell\'Unione.'},
+ {id:'in_p_loksabha', era:'contemporanea', paese:'india', ruolo:'governo', diff:'media', q:'Come si chiama la camera bassa del Parlamento indiano?',
+  op:['Rajya Sabha','Lok Sabha','Vidhan Sabha'], giusta:1,
+  perche:'La Lok Sabha è la camera del popolo; la Rajya Sabha quella degli Stati.'},
+ {id:'in_p_elettori', era:'contemporanea', paese:'india', ruolo:'attivista', diff:'facile', q:'Quanti elettori ha circa l\'India?',
+  op:['Cento milioni','Trecento milioni','Quasi un miliardo'], giusta:2,
+  perche:'Con quasi un miliardo di elettori, l\'India è la più grande democrazia del mondo.'},
+ {id:'in_p_lingueq', era:'contemporanea', paese:'india', ruolo:'attivista', diff:'media', q:'Quante lingue riconosce la Costituzione indiana nel suo elenco ufficiale?',
+  op:['Ventidue','Due','Cento'], giusta:0,
+  perche:'L\'ottavo allegato della Costituzione elenca 22 lingue; hindi e inglese sono le lingue dell\'Unione.'},
+ {id:'in_p_rupia', era:'contemporanea', paese:'india', ruolo:'ministro', diff:'facile', q:'Qual è la moneta dell\'India?',
+  op:['Il taka','La rupia','Il rial'], giusta:1,
+  perche:'La rupia indiana.'},
+ {id:'in_p_governatore', era:'contemporanea', paese:'india', ruolo:'locale', diff:'difficile', q:'Chi rappresenta l\'Unione in ogni Stato indiano?',
+  op:['Il Chief Minister','Il presidente dell\'assemblea statale','Il Governatore, nominato dal Presidente su indicazione del governo centrale'], giusta:2,
+  perche:'Il Governatore è il capo formale dello Stato, nominato dal centro; il Chief Minister guida il governo eletto.'},
+ {id:'in_p_riserveq', era:'contemporanea', paese:'india', ruolo:'ministro', diff:'media', q:'Che cosa sono le «riserve» nel sistema indiano?',
+  op:['Quote di posti pubblici e universitari riservate a caste e tribù storicamente svantaggiate','Le riserve valutarie della banca centrale','I parchi nazionali'], giusta:0,
+  perche:'Le riserve garantiscono quote a caste e tribù riconosciute e ad altre classi arretrate.'},
+ {id:'in_p_evm', era:'contemporanea', paese:'india', ruolo:'attivista', diff:'media', q:'Come si vota nelle elezioni nazionali indiane?',
+  op:['Per posta','Con macchine elettroniche, in più fasi che durano settimane','Per alzata di mano nei villaggi'], giusta:1,
+  perche:'Il voto è elettronico e le elezioni si svolgono in fasi successive per settimane.'},
+ {id:'in_p_delhi', era:'contemporanea', paese:'india', ruolo:'locale', diff:'difficile', q:'Qual è lo status di Delhi?',
+  op:['Uno Stato come gli altri','Un comune','Un territorio dell\'Unione con un governo eletto ma poteri limitati'], giusta:2,
+  perche:'Delhi è un territorio con assemblea eletta, ma polizia e territorio restano al centro.'},
+ {id:'in_p_presidenteq', era:'contemporanea', paese:'india', ruolo:'governo', diff:'difficile', q:'Come viene eletto il Presidente dell\'India?',
+  op:['Da un collegio elettorale di parlamentari nazionali e statali','A suffragio universale diretto','Dalla Corte suprema'], giusta:0,
+  perche:'Il Presidente, capo dello Stato con ruolo per lo più cerimoniale, è eletto da parlamentari nazionali e statali.'},
+ {id:'in_p_1947', era:'contemporanea', paese:'india', ruolo:'governo', diff:'facile', q:'In quale anno l\'India ottenne l\'indipendenza?',
+  op:['1950','1947','1935'], giusta:1,
+  perche:'L\'indipendenza è del 15 agosto 1947, con la partizione che creò il Pakistan.'},
+ {id:'in_p_1971', era:'contemporanea', paese:'india', ruolo:'intl', diff:'media', q:'Quale Stato nacque nel 1971 dopo una guerra che coinvolse l\'India?',
+  op:['Lo Sri Lanka','Il Nepal','Il Bangladesh'], giusta:2,
+  perche:'La guerra del 1971 portò all\'indipendenza del Bangladesh dal Pakistan.'},
+ {id:'in_p_emergenza', era:'contemporanea', paese:'india', ruolo:'attivista', diff:'difficile', q:'Che cosa fu l\'«Emergenza» del 1975-77?',
+  op:['Un periodo in cui furono sospese le libertà civili e rinviate le elezioni','Una carestia','Una guerra con la Cina'], giusta:0,
+  perche:'Per ventuno mesi il governo governò con poteri d\'emergenza, sospendendo i diritti fondamentali.'},
+ {id:'in_p_1991', era:'contemporanea', paese:'india', ruolo:'ministro', diff:'media', q:'Che cosa accadde all\'economia indiana nel 1991?',
+  op:['La nazionalizzazione delle banche','Le riforme che aprirono l\'economia al mercato e agli investimenti esteri','L\'introduzione della rupia'], giusta:1,
+  perche:'La crisi del 1991 portò alla liberalizzazione che avviò la crescita degli ultimi decenni.'},
+ {id:'in_p_bhopal', era:'contemporanea', paese:'india', ruolo:'ministro', diff:'media', q:'Che cosa accadde a Bhopal nel dicembre 1984?',
+  op:['Un terremoto','Un\'alluvione','Una fuga di gas da una fabbrica chimica, fra i disastri industriali più gravi della storia'], giusta:2,
+  perche:'La fuga di gas di Bhopal causò migliaia di morti e centinaia di migliaia di feriti.'},
+ {id:'in_p_1998', era:'contemporanea', paese:'india', ruolo:'intl', diff:'media', q:'Che cosa fece l\'India nel maggio 1998?',
+  op:['Una serie di test nucleari, seguita da quelli del Pakistan','L\'ingresso nell\'ONU','La firma del trattato di non proliferazione'], giusta:0,
+  perche:'I test del 1998 fecero dell\'India una potenza nucleare dichiarata; il Pakistan rispose in poche settimane.'},
+ {id:'in_p_1962', era:'contemporanea', paese:'india', ruolo:'intl', diff:'difficile', q:'Con quale paese l\'India combatté una breve guerra di confine nel 1962?',
+  op:['Il Pakistan','La Cina','La Birmania'], giusta:1,
+  perche:'La guerra del 1962 sull\'Himalaya finì con una sconfitta indiana e un confine ancora contestato.'},
+ {id:'in_p_verde', era:'contemporanea', paese:'india', ruolo:'ministro', diff:'media', q:'Che cosa fu la «rivoluzione verde» in India?',
+  op:['Un movimento ambientalista','Una riforma agraria che redistribuì le terre','L\'introduzione, dagli anni Sessanta, di sementi ad alto rendimento e irrigazione che resero il paese autosufficiente nei cereali'], giusta:2,
+  perche:'La rivoluzione verde trasformò il Punjab nel granaio del paese e pose fine alle carestie.'},
+ {id:'in_p_2016', era:'contemporanea', paese:'india', ruolo:'ministro', diff:'difficile', q:'Che cosa accadde in India nel novembre 2016?',
+  op:['Le banconote di grosso taglio furono ritirate dalla circolazione da un giorno all\'altro','Fu introdotta una nuova moneta','Fu abolita l\'imposta sul reddito'], giusta:0,
+  perche:'La demonetizzazione ritirò l\'86% del contante in circolazione, con file alle banche per settimane.'},
+ {id:'in_p_2019', era:'contemporanea', paese:'india', ruolo:'governo', diff:'media', q:'Che cosa cambiò nel 2019 per la regione del Jammu e Kashmir?',
+  op:['Divenne indipendente','Perse lo status speciale e quello di Stato, diventando territorio dell\'Unione','Fu unita al Pakistan'], giusta:1,
+  perche:'Nel 2019 fu revocato l\'articolo 370 e la regione fu divisa in due territori dell\'Unione.'},
  {id:'in_parlamento', era:'universale', paese:'india', ruolo:'governo', diff:'media', q:'Da quali due camere è composto il Parlamento indiano?',
   op:['La Lok Sabha e la Rajya Sabha','Un\'assemblea unicamerale','La Dieta e il Senato'], giusta:0,
   perche:'Il Parlamento indiano ha la Lok Sabha (camera del popolo) e la Rajya Sabha (consiglio degli stati).'},   // Costituzione in vigore dal 26 gennaio 1950
@@ -7335,6 +8969,67 @@ const SFIDE=[
     post-1994, zero temi divisivi. Argentina: elezione diretta '94; Sáenz Peña 1912 nel perché.
     ============================================================================ */
  // ----- NIGERIA (nigeria) — indipendente dal 1960 → tutto contemporanea -----
+ // ----- NIGERIA, presente arricchito (L87-3, scheda PRESET-NIGERIA-PRESENTE §E) — 10 presente + 10 storia recente -----
+ {id:'ng_p_statiq', era:'contemporanea', paese:'nigeria', ruolo:'locale', diff:'media', q:'Quanti Stati ha la federazione nigeriana?',
+  op:['Trentasei, più il territorio della capitale','Dodici','Cinquanta'], giusta:0,
+  perche:'36 Stati e il Territorio della capitale federale di Abuja.'},
+ {id:'ng_p_naira', era:'contemporanea', paese:'nigeria', ruolo:'ministro', diff:'facile', q:'Qual è la moneta della Nigeria?',
+  op:['Il cedi','La naira','Lo scellino'], giusta:1,
+  perche:'La naira nigeriana.'},
+ {id:'ng_p_popolazione', era:'contemporanea', paese:'nigeria', ruolo:'attivista', diff:'facile', q:'Quale primato demografico ha la Nigeria?',
+  op:['È il paese più piccolo dell\'Africa','È il paese meno popoloso del continente','È il paese più popoloso dell\'Africa, con oltre duecento milioni di abitanti'], giusta:2,
+  perche:'La Nigeria è il paese più popoloso del continente e fra i primi del mondo.'},
+ {id:'ng_p_lagosq', era:'contemporanea', paese:'nigeria', ruolo:'locale', diff:'facile', q:'Qual è la città più grande della Nigeria?',
+  op:['Lagos','Abuja','Kano'], giusta:0,
+  perche:'Lagos, ex capitale, è la megalopoli del paese; Abuja è la capitale dal 1991.'},
+ {id:'ng_p_mandatiq', era:'contemporanea', paese:'nigeria', ruolo:'governo', diff:'media', q:'Quanti mandati può servire il Presidente nigeriano?',
+  op:['Uno solo','Due mandati di quattro anni','Senza limiti'], giusta:1,
+  perche:'La Costituzione del 1999 fissa un massimo di due mandati.'},
+ {id:'ng_p_25', era:'contemporanea', paese:'nigeria', ruolo:'governo', diff:'difficile', q:'Quale condizione deve soddisfare un candidato per essere eletto Presidente in Nigeria, oltre alla maggioranza dei voti?',
+  op:['Vincere in tutti gli Stati','Essere approvato dal Senato','Ottenere almeno un quarto dei voti in due terzi degli Stati'], giusta:2,
+  perche:'La regola del 25% in due terzi degli Stati garantisce che il Presidente abbia consenso in tutto il paese.'},
+ {id:'ng_p_petrolioq', era:'contemporanea', paese:'nigeria', ruolo:'ministro', diff:'media', q:'Da dove viene la maggior parte dei ricavi in valuta della Nigeria?',
+  op:['Dal petrolio del Delta del Niger','Dal turismo','Dal cacao'], giusta:0,
+  perche:'Il petrolio è la principale fonte di valuta estera, anche se una parte viene rubata.'},
+ {id:'ng_p_sussidioq', era:'contemporanea', paese:'nigeria', ruolo:'ministro', diff:'media', q:'Che cosa accadde al prezzo della benzina in Nigeria nel 2023?',
+  op:['Fu congelato','Triplicò, con la fine del sussidio statale','Scese'], giusta:1,
+  perche:'La rimozione del sussidio nel 2023 fece salire il prezzo alla pompa di tre volte.'},
+ {id:'ng_p_japaq', era:'contemporanea', paese:'nigeria', ruolo:'attivista', diff:'media', q:'Che cosa significa la parola «japa» nel linguaggio dei giovani nigeriani?',
+  op:['Una danza','Un piatto tradizionale','Andarsene all\'estero, «scappare» dal paese'], giusta:2,
+  perche:'Japa, dallo yoruba, è la parola per l\'emigrazione dei giovani qualificati.'},
+ {id:'ng_p_ecowas', era:'contemporanea', paese:'nigeria', ruolo:'intl', diff:'media', q:'Quale organizzazione regionale ha sede ad Abuja ed è guidata di fatto dalla Nigeria?',
+  op:['La Comunità economica degli Stati dell\'Africa occidentale (ECOWAS)','L\'Unione africana','L\'OPEC'], giusta:0,
+  perche:'L\'ECOWAS ha sede ad Abuja; la Nigeria ne è il paese più grande.'},
+ {id:'ng_p_1960', era:'contemporanea', paese:'nigeria', ruolo:'governo', diff:'facile', q:'In quale anno la Nigeria divenne indipendente?',
+  op:['1945','1960','1975'], giusta:1,
+  perche:'Il 1° ottobre 1960, dal Regno Unito.'},
+ {id:'ng_p_biafra', era:'contemporanea', paese:'nigeria', ruolo:'attivista', diff:'media', q:'Che cosa fu la guerra del Biafra?',
+  op:['Una guerra contro un paese vicino','Una guerra coloniale','La guerra civile del 1967-70, dopo la secessione della regione sud-orientale'], giusta:2,
+  perche:'La guerra civile causò oltre un milione di morti, molti per fame; la regione fu reintegrata.'},
+ {id:'ng_p_1999', era:'contemporanea', paese:'nigeria', ruolo:'governo', diff:'media', q:'Che cosa accadde nel 1999 in Nigeria?',
+  op:['Il ritorno alla democrazia dopo sedici anni di governi militari','La scoperta del petrolio','L\'indipendenza'], giusta:0,
+  perche:'Nel 1999 fu adottata l\'attuale Costituzione e tornò un governo civile eletto.'},
+ {id:'ng_p_abuja', era:'contemporanea', paese:'nigeria', ruolo:'locale', diff:'media', q:'Perché la capitale fu spostata da Lagos ad Abuja nel 1991?',
+  op:['Per il clima','Per una posizione centrale e neutrale fra le regioni del paese','Per un terremoto'], giusta:1,
+  perche:'Abuja fu costruita al centro del paese per non appartenere a nessuna delle grandi regioni.'},
+ {id:'ng_p_2015', era:'contemporanea', paese:'nigeria', ruolo:'governo', diff:'media', q:'Perché le elezioni del 2015 furono storiche in Nigeria?',
+  op:['Furono le prime elezioni','Fu eletta una donna','Per la prima volta un Presidente in carica perse le elezioni e cedette il potere pacificamente'], giusta:2,
+  perche:'Nel 2015 avvenne la prima alternanza pacifica fra partiti dalla transizione democratica.'},
+ {id:'ng_p_chibok', era:'contemporanea', paese:'nigeria', ruolo:'attivista', diff:'media', q:'Che cosa accadde a Chibok nell\'aprile 2014?',
+  op:['Il rapimento di oltre duecento studentesse da una scuola da parte di un gruppo armato','Un\'alluvione','Un incidente ferroviario'], giusta:0,
+  perche:'Il rapimento delle studentesse di Chibok portò l\'insurrezione del Nord-est all\'attenzione del mondo.'},
+ {id:'ng_p_endsars', era:'contemporanea', paese:'nigeria', ruolo:'attivista', diff:'difficile', q:'Che cosa chiedevano le proteste dell\'ottobre 2020?',
+  op:['La fine del sussidio alla benzina','Lo scioglimento di un\'unità di polizia accusata di abusi e violenze','Il ritorno della capitale a Lagos'], giusta:1,
+  perche:'Le proteste #EndSARS, guidate dai giovani, chiedevano la fine di un\'unità di polizia; furono represse con violenza.'},
+ {id:'ng_p_opec', era:'contemporanea', paese:'nigeria', ruolo:'intl', diff:'difficile', q:'Di quale organizzazione internazionale la Nigeria fa parte dal 1971?',
+  op:['Il G20','L\'Unione europea','L\'OPEC, il cartello dei paesi esportatori di petrolio'], giusta:2,
+  perche:'La Nigeria è membro dell\'OPEC dal 1971.'},
+ {id:'ng_p_polio', era:'contemporanea', paese:'nigeria', ruolo:'ministro', diff:'difficile', q:'Quale risultato sanitario ha raggiunto la Nigeria nel 2020?',
+  op:['È stata dichiarata libera dalla poliomielite selvaggia, ultimo paese africano','Ha eliminato la malaria','Ha introdotto la sanità gratuita'], giusta:0,
+  perche:'Con la Nigeria libera dalla polio nel 2020, l\'intero continente africano è stato dichiarato libero.'},
+ {id:'ng_p_raffineriaq', era:'contemporanea', paese:'nigeria', ruolo:'ministro', diff:'media', q:'Quale impianto ha iniziato a produrre carburante in Nigeria nel 2024?',
+  op:['Una centrale nucleare','La più grande raffineria privata del continente, vicino a Lagos','Un rigassificatore'], giusta:1,
+  perche:'La raffineria di Lekki, privata, è la più grande dell\'Africa; il paese importava benzina da decenni.'},
  {id:'ng_assemblea', era:'contemporanea', paese:'nigeria', ruolo:'governo', diff:'media', q:'Da quali due camere è composta l\'Assemblea nazionale nigeriana?',
   op:['Il Senato e la Camera dei Rappresentanti','Un\'assemblea unicamerale','La Dieta e il Senato'], giusta:0,
   perche:'L\'Assemblea nazionale nigeriana ha il Senato e la Camera dei Rappresentanti.'},
@@ -7366,6 +9061,67 @@ const SFIDE=[
   op:['La rappresentanza equilibrata delle diverse componenti del paese nelle istituzioni','Il pareggio di bilancio obbligatorio','Il voto per acclamazione'], giusta:0,
   perche:'Il «federal character» impone una rappresentanza equilibrata delle componenti del paese nelle istituzioni.'},   // strutturale, non-partigiano
  // ----- ARGENTINA (argentina) -----
+ // ----- ARGENTINA, presente arricchito (L86-3, scheda PRESET-ARGENTINA-PRESENTE §E) — 10 presente + 10 storia recente -----
+ {id:'ar_p_provinceq', era:'contemporanea', paese:'argentina', ruolo:'locale', diff:'media', q:'Quante province ha l\'Argentina?',
+  op:['Ventitré, più la città autonoma di Buenos Aires','Trentuno','Dodici'], giusta:0,
+  perche:'23 province e la Città autonoma di Buenos Aires.'},
+ {id:'ar_p_mandato', era:'contemporanea', paese:'argentina', ruolo:'governo', diff:'media', q:'Quanto dura il mandato presidenziale argentino?',
+  op:['Sei anni','Quattro anni, con una sola rielezione consecutiva','Cinque anni'], giusta:1,
+  perche:'Quattro anni, rinnovabili una volta di seguito, dalla riforma costituzionale del 1994.'},
+ {id:'ar_p_peso', era:'contemporanea', paese:'argentina', ruolo:'ministro', diff:'facile', q:'Qual è la moneta dell\'Argentina?',
+  op:['Il real','Il bolívar','Il peso'], giusta:2,
+  perche:'Il peso argentino.'},
+ {id:'ar_p_paso', era:'contemporanea', paese:'argentina', ruolo:'attivista', diff:'difficile', q:'Che cosa sono le «PASO» in Argentina?',
+  op:['Primarie aperte, simultanee e obbligatorie, che si tengono prima delle elezioni generali','I permessi di soggiorno','Le zone di frontiera'], giusta:0,
+  perche:'Le PASO sono primarie in cui votano tutti gli elettori, e che fissano anche una soglia per le liste.'},
+ {id:'ar_p_coparticipacion', era:'contemporanea', paese:'argentina', ruolo:'ministro', diff:'difficile', q:'Che cos\'è la «coparticipación» federale?',
+  op:['La partecipazione dei cittadini al bilancio','Il sistema con cui lo Stato nazionale ripartisce le imposte fra le province','Un\'imposta sulle esportazioni'], giusta:1,
+  perche:'La coparticipación è la ripartizione automatica di parte delle imposte nazionali alle province.'},
+ {id:'ar_p_ritenuteq', era:'contemporanea', paese:'argentina', ruolo:'ministro', diff:'media', q:'Che cosa sono le «retenciones» in Argentina?',
+  op:['Trattenute sugli stipendi','Le riserve della banca centrale','Imposte sulle esportazioni agricole, come soia e grano'], giusta:2,
+  perche:'Le retenciones sono dazi all\'esportazione, la principale fonte di attrito con la campagna.'},
+ {id:'ar_p_cgt', era:'contemporanea', paese:'argentina', ruolo:'attivista', diff:'media', q:'Che cos\'è la CGT?',
+  op:['La principale confederazione sindacale del paese','La compagnia dei gas','La corte dei conti'], giusta:0,
+  perche:'La Confederación General del Trabajo è la grande centrale sindacale, storicamente legata al peronismo.'},
+ {id:'ar_p_ushuaia', era:'contemporanea', paese:'argentina', ruolo:'locale', diff:'facile', q:'Qual è la città più australe dell\'Argentina, porta dell\'Antartide?',
+  op:['Bariloche','Ushuaia','Río Gallegos'], giusta:1,
+  perche:'Ushuaia, nella Terra del Fuoco.'},
+ {id:'ar_p_universitaq', era:'contemporanea', paese:'argentina', ruolo:'ministro', diff:'media', q:'Che particolarità ha l\'università pubblica argentina?',
+  op:['È a numero chiuso','Ammette solo cittadini','È gratuita e senza esame di ammissione, anche per gli stranieri'], giusta:2,
+  perche:'L\'università pubblica è gratuita e aperta: un pilastro dell\'identità nazionale.'},
+ {id:'ar_p_senato', era:'contemporanea', paese:'argentina', ruolo:'governo', diff:'difficile', q:'Quanti senatori elegge ogni provincia argentina?',
+  op:['Tre','In proporzione alla popolazione','Uno'], giusta:0,
+  perche:'Tre per provincia: due alla maggioranza e uno alla prima minoranza.'},
+ {id:'ar_p_1983', era:'contemporanea', paese:'argentina', ruolo:'governo', diff:'media', q:'In quale anno l\'Argentina tornò alla democrazia dopo l\'ultima dittatura?',
+  op:['1976','1983','1989'], giusta:1,
+  perche:'Le elezioni dell\'ottobre 1983 chiusero sette anni di dittatura militare.'},
+ {id:'ar_p_1982', era:'contemporanea', paese:'argentina', ruolo:'intl', diff:'facile', q:'Contro quale paese l\'Argentina combatté la guerra del 1982?',
+  op:['Il Cile','Il Brasile','Il Regno Unito'], giusta:2,
+  perche:'La guerra delle Malvine/Falkland, nel 1982, accelerò la fine della dittatura.'},
+ {id:'ar_p_giunte', era:'contemporanea', paese:'argentina', ruolo:'attivista', diff:'difficile', q:'Che cosa fu il «processo alle giunte» del 1985?',
+  op:['Il processo, davanti a un tribunale civile, ai comandanti della dittatura per i crimini commessi','Un referendum','Una riforma costituzionale'], giusta:0,
+  perche:'Nel 1985 i comandanti furono giudicati da un tribunale ordinario: un caso unico al mondo allora.'},
+ {id:'ar_p_madri', era:'contemporanea', paese:'argentina', ruolo:'attivista', diff:'media', q:'Chi sono le «Madri di Plaza de Mayo»?',
+  op:['Un\'associazione di beneficenza','Le madri degli scomparsi della dittatura, che manifestano ogni giovedì dal 1977','Un partito politico'], giusta:1,
+  perche:'Dal 1977 le madri con il fazzoletto bianco chiedono verità sui figli scomparsi.'},
+ {id:'ar_p_2001', era:'contemporanea', paese:'argentina', ruolo:'ministro', diff:'media', q:'Che cosa accadde in Argentina nel dicembre 2001?',
+  op:['La vittoria ai Mondiali','L\'adozione del dollaro','Il crollo economico, con il blocco dei conti bancari, le proteste e il default'], giusta:2,
+  perche:'Il «corralito», le proteste di piazza e le dimissioni del Presidente; il default fu dichiarato in quei giorni.'},
+ {id:'ar_p_convertibilita', era:'contemporanea', paese:'argentina', ruolo:'ministro', diff:'difficile', q:'Che cos\'era la «convertibilità» degli anni Novanta?',
+  op:['Il cambio fisso di un peso per un dollaro, garantito per legge','La libera convertibilità delle pensioni','Un accordo commerciale'], giusta:0,
+  perche:'Dal 1991 al 2001 un peso valeva un dollaro per legge; la fine della parità fu il crollo.'},
+ {id:'ar_p_1994', era:'contemporanea', paese:'argentina', ruolo:'governo', diff:'difficile', q:'Che cosa introdusse la riforma costituzionale del 1994?',
+  op:['Il voto alle donne','Il mandato di quattro anni con rielezione, il ballottaggio e l\'autonomia della città di Buenos Aires','L\'abolizione del Senato'], giusta:1,
+  perche:'La riforma del 1994 ridisegnò la presidenza e diede autonomia alla capitale.'},
+ {id:'ar_p_matrimonio', era:'contemporanea', paese:'argentina', ruolo:'attivista', diff:'media', q:'Quale primato ha l\'Argentina in America latina sul matrimonio fra persone dello stesso sesso?',
+  op:['Lo vieta per Costituzione','Non lo regola','È stato il primo paese del continente a legalizzarlo, nel 2010'], giusta:2,
+  perche:'Nel 2010 l\'Argentina fu il primo paese latinoamericano a legalizzare il matrimonio egualitario.'},
+ {id:'ar_p_mondiali', era:'contemporanea', paese:'argentina', ruolo:'locale', diff:'facile', q:'Quante Coppe del mondo di calcio ha vinto l\'Argentina?',
+  op:['Tre','Una','Cinque'], giusta:0,
+  perche:'1978, 1986 e 2022.'},
+ {id:'ar_p_papa', era:'contemporanea', paese:'argentina', ruolo:'intl', diff:'media', q:'Quale primato ebbe l\'Argentina nel 2013?',
+  op:['Il primo Mondiale ospitato','Per la prima volta un argentino, e un americano, fu eletto Papa','L\'ingresso nel G20'], giusta:1,
+  perche:'Nel 2013 fu eletto il primo Papa proveniente dalle Americhe, argentino.'},
  {id:'ar_congresso', era:'universale', paese:'argentina', ruolo:'governo', diff:'facile', q:'Da quali due camere è composto il Congresso argentino?',
   op:['La Camera dei Deputati e il Senato','Un\'assemblea unicamerale','La Dieta e il Consiglio'], giusta:0,
   perche:'Il Congresso argentino ha la Camera dei Deputati e il Senato.'},
@@ -7397,6 +9153,67 @@ const SFIDE=[
   op:['Si vince al primo turno con più del 45%, o col 40% e dieci punti di vantaggio','Serve sempre la maggioranza assoluta','Non esiste ballottaggio'], giusta:0,
   perche:'Si vince al primo turno con oltre il 45%, oppure col 40% e almeno dieci punti sul secondo; altrimenti si va al ballottaggio.'},   // ⚠ regola del 1994 → contemporanea
  // ----- SUDAFRICA (sudafrica) — solo struttura post-1994, zero temi divisivi -----
+ // ----- SUDAFRICA, presente arricchito (L87-3, scheda PRESET-SUDAFRICA-PRESENTE §E) — 10 presente + 10 storia recente -----
+ {id:'za_p_lingueq', era:'contemporanea', paese:'sudafrica', ruolo:'attivista', diff:'media', q:'Quante lingue ufficiali ha il Sudafrica?',
+  op:['Dodici','Due','Quattro'], giusta:0,
+  perche:'Dodici lingue ufficiali, compresa dal 2023 la lingua dei segni.'},
+ {id:'za_p_rand', era:'contemporanea', paese:'sudafrica', ruolo:'ministro', diff:'facile', q:'Qual è la moneta del Sudafrica?',
+  op:['La sterlina','Il rand','Il dollaro'], giusta:1,
+  perche:'Il rand sudafricano.'},
+ {id:'za_p_eskom', era:'contemporanea', paese:'sudafrica', ruolo:'ministro', diff:'media', q:'Che cos\'è il «load shedding»?',
+  op:['Il razionamento dell\'acqua','Lo sciopero dei minatori','Le interruzioni programmate della corrente per la carenza di produzione elettrica'], giusta:2,
+  perche:'La compagnia elettrica di Stato spegne la corrente a turni quando la produzione non basta.'},
+ {id:'za_p_presidenteq', era:'contemporanea', paese:'sudafrica', ruolo:'governo', diff:'media', q:'Quanti mandati può servire il Presidente sudafricano?',
+  op:['Due mandati di cinque anni','Uno solo','Senza limiti'], giusta:0,
+  perche:'Il Presidente è eletto dall\'Assemblea nazionale per un massimo di due mandati.'},
+ {id:'za_p_provinceq', era:'contemporanea', paese:'sudafrica', ruolo:'locale', diff:'media', q:'Qual è la provincia più popolosa del Sudafrica?',
+  op:['Il Capo Occidentale','Il Gauteng','Il KwaZulu-Natal'], giusta:1,
+  perche:'Il Gauteng, piccolo e urbano, con Johannesburg e Pretoria.'},
+ {id:'za_p_bee', era:'contemporanea', paese:'sudafrica', ruolo:'ministro', diff:'difficile', q:'Che cosa sono le politiche di «Black Economic Empowerment»?',
+  op:['Sussidi alle imprese estere','Un programma di case popolari','Norme che favoriscono la proprietà e l\'impiego della maggioranza storicamente esclusa nelle imprese'], giusta:2,
+  perche:'Le norme di riequilibrio economico condizionano appalti e licenze alla partecipazione della maggioranza nera.'},
+ {id:'za_p_gnu', era:'contemporanea', paese:'sudafrica', ruolo:'governo', diff:'media', q:'Che cosa accadde dopo le elezioni del 2024?',
+  op:['Il partito di governo perse la maggioranza assoluta per la prima volta e formò un governo di unità nazionale','Fu abolito il Senato','Fu eletto un Presidente a suffragio diretto'], giusta:0,
+  perche:'Nel 2024 il partito al governo dal 1994 scese sotto il 50% e governa in coalizione.'},
+ {id:'za_p_township', era:'contemporanea', paese:'sudafrica', ruolo:'locale', diff:'facile', q:'Che cos\'è una «township»?',
+  op:['Una riserva naturale','Un quartiere urbano nato sotto l\'apartheid per la popolazione nera, ai margini delle città','Un comune rurale'], giusta:1,
+  perche:'Le township furono create dalla segregazione e restano i quartieri più poveri delle città.'},
+ {id:'za_p_assegni', era:'contemporanea', paese:'sudafrica', ruolo:'ministro', diff:'media', q:'Quale quota della popolazione sudafricana riceve un assegno sociale dallo Stato?',
+  op:['Meno di un decimo','Circa un quarto','Quasi la metà'], giusta:2,
+  perche:'Fra assegni per i bambini, gli anziani e il sussidio di emergenza, quasi metà della popolazione riceve un trasferimento.'},
+ {id:'za_p_giovani', era:'contemporanea', paese:'sudafrica', ruolo:'attivista', diff:'facile', q:'Quale primato negativo ha il Sudafrica sul lavoro?',
+  op:['Uno dei tassi di disoccupazione più alti del mondo, soprattutto fra i giovani','Il salario minimo più basso','Le ore di lavoro più lunghe'], giusta:0,
+  perche:'La disoccupazione supera il 30%, e fra i giovani è intorno al 50%.'},
+ {id:'za_p_1994', era:'contemporanea', paese:'sudafrica', ruolo:'governo', diff:'facile', q:'In quale anno si tennero le prime elezioni a suffragio universale in Sudafrica?',
+  op:['1990','1994','2000'], giusta:1,
+  perche:'Il 27 aprile 1994, oggi festa della Libertà.'},
+ {id:'za_p_1990', era:'contemporanea', paese:'sudafrica', ruolo:'attivista', diff:'media', q:'Che cosa accadde nel febbraio 1990 in Sudafrica?',
+  op:['Fu approvata la Costituzione','Fu abolita la monarchia','Furono legalizzati i movimenti di liberazione e liberato il loro leader più noto dopo ventisette anni di carcere'], giusta:2,
+  perche:'Il febbraio 1990 aprì la transizione negoziata verso la democrazia.'},
+ {id:'za_p_trc', era:'contemporanea', paese:'sudafrica', ruolo:'ministro', diff:'difficile', q:'Che cosa fu la Commissione per la verità e la riconciliazione?',
+  op:['Un organo che ascoltò vittime e responsabili dell\'apartheid, offrendo amnistia in cambio della piena confessione','Un tribunale militare','Una commissione sul bilancio'], giusta:0,
+  perche:'La Commissione, dal 1996, scelse la verità e l\'amnistia condizionata invece dei processi.'},
+ {id:'za_p_1996', era:'contemporanea', paese:'sudafrica', ruolo:'governo', diff:'media', q:'In quale anno fu adottata l\'attuale Costituzione sudafricana?',
+  op:['1994','1996','2004'], giusta:1,
+  perche:'La Costituzione definitiva è del 1996, fra le più avanzate del mondo per i diritti.'},
+ {id:'za_p_1995', era:'contemporanea', paese:'sudafrica', ruolo:'locale', diff:'facile', q:'Quale evento sportivo del 1995 è ricordato come simbolo della riconciliazione?',
+  op:['Le Olimpiadi','I Mondiali di calcio','La Coppa del mondo di rugby, vinta in casa'], giusta:2,
+  perche:'La vittoria del 1995 con il Presidente in maglia verde è l\'immagine della nazione nuova.'},
+ {id:'za_p_2010', era:'contemporanea', paese:'sudafrica', ruolo:'locale', diff:'facile', q:'Quale evento ospitò il Sudafrica nel 2010, primo paese africano?',
+  op:['La Coppa del mondo di calcio','Le Olimpiadi','L\'Esposizione universale'], giusta:0,
+  perche:'I Mondiali del 2010, con le vuvuzela.'},
+ {id:'za_p_marikana', era:'contemporanea', paese:'sudafrica', ruolo:'ministro', diff:'difficile', q:'Che cosa accadde a Marikana nell\'agosto 2012?',
+  op:['Un crollo in miniera','La polizia sparò su minatori in sciopero, uccidendone trentaquattro','Un incendio'], giusta:1,
+  perche:'Marikana è la strage più grave della democrazia sudafricana, in una miniera di platino.'},
+ {id:'za_p_cattura', era:'contemporanea', paese:'sudafrica', ruolo:'ministro', diff:'media', q:'Che cosa si intende per «cattura dello Stato» in Sudafrica?',
+  op:['Un colpo di Stato','L\'occupazione del Parlamento','Il sistema di corruzione con cui privati influenzarono nomine e appalti pubblici negli anni Dieci'], giusta:2,
+  perche:'Una commissione d\'inchiesta ha documentato la cattura dello Stato in migliaia di pagine.'},
+ {id:'za_p_feesmustfall', era:'contemporanea', paese:'sudafrica', ruolo:'attivista', diff:'media', q:'Che cosa chiedeva il movimento studentesco del 2015-16?',
+  op:['L\'abolizione delle tasse universitarie','Il voto a sedici anni','La fine del servizio militare'], giusta:0,
+  perche:'Il movimento #FeesMustFall ottenne l\'università gratuita per le famiglie a basso reddito.'},
+ {id:'za_p_brics', era:'contemporanea', paese:'sudafrica', ruolo:'intl', diff:'media', q:'A quale gruppo di economie emergenti appartiene il Sudafrica dal 2010?',
+  op:['Il G7','I BRICS','L\'OCSE'], giusta:1,
+  perche:'Brasile, Russia, India, Cina e, dal 2010, Sudafrica.'},
  {id:'za_parlamento', era:'contemporanea', paese:'sudafrica', ruolo:'governo', diff:'media', q:'Da quali due organi è composto il Parlamento sudafricano?',
   op:['L\'Assemblea nazionale e il Consiglio nazionale delle Province','Un\'assemblea unicamerale','La Dieta e il Senato'], giusta:0,
   perche:'Il Parlamento sudafricano ha l\'Assemblea nazionale e il Consiglio nazionale delle Province.'},   // ⚠ Costituzione 1996 → contemporanea
@@ -8124,6 +9941,61 @@ const TITOLI=[
  {id:'es_p_ti_casa', era:'contemporanea', paesi:['spagna'], pri:1, amico:'Il piano casa parte: prime gru nelle grandi città', ostile:'Affitti alle stelle e piazze piene: la casa è l\'emergenza'},
  {id:'es_p_ti_lavoro', era:'contemporanea', paesi:['spagna'], pri:1, amico:'Occupazione ai massimi: il paese lavora', ostile:'Ancora i disoccupati più numerosi d\'Europa'},
  {id:'es_p_ti_acqua', era:'contemporanea', paesi:['spagna'], pri:1, amico:'Piove: i bacini tornano a riempirsi', ostile:'Bacini al minimo: la siccità è politica'},
+ /* ===== L83-1 · STATI UNITI, quattro titoli del presente (scheda §D). ===== */
+ {id:'us_p_ti_congresso', era:'contemporanea', paesi:['usa'], pri:1, amico:'La Casa Bianca e il Congresso trovano l\'accordo', ostile:'Muro contro muro: Washington è bloccata'},
+ {id:'us_p_ti_borsa', era:'contemporanea', paesi:['usa'], pri:1, amico:'Wall Street ai massimi: l\'economia corre', ostile:'Wall Street corre, Main Street no'},
+ {id:'us_p_ti_frontiera', era:'contemporanea', paesi:['usa'], pri:1, amico:'Gli arrivi al confine calano', ostile:'Record al confine: gli Stati di frontiera si ribellano'},
+ {id:'us_p_ti_corte', era:'contemporanea', paesi:['usa'], pri:1, amico:'La Corte Suprema dà ragione alla Casa Bianca', ostile:'La Corte Suprema ferma la Casa Bianca'},
+ /* ===== L83-1 · CANADA, quattro titoli del presente (scheda §D). ===== */
+ {id:'ca_p_ti_casa', era:'contemporanea', paesi:['canada'], pri:1, amico:'Le gru tornano nelle città: il piano casa parte', ostile:'Una casa costa dieci stipendi: la generazione senza casa'},
+ {id:'ca_p_ti_vicino', era:'contemporanea', paesi:['canada'], pri:1, amico:'Il vicino fa marcia indietro sui dazi', ostile:'Il vicino alza i dazi: l\'Ontario trema'},
+ {id:'ca_p_ti_ovest', era:'contemporanea', paesi:['canada'], pri:1, amico:'Ottawa e l\'Ovest trovano l\'accordo sull\'energia', ostile:'L\'Ovest contro Ottawa: si torna a parlare di separazione'},
+ {id:'ca_p_ti_quebec', era:'contemporanea', paesi:['canada'], pri:1, amico:'Il Québec e Ottawa firmano', ostile:'Il Québec sfida Ottawa sulla lingua'},
+ /* ===== L83-1 · AUSTRALIA, quattro titoli del presente (scheda §D). ===== */
+ {id:'au_p_ti_casa', era:'contemporanea', paesi:['australia'], pri:1, amico:'Il piano casa parte: prime chiavi ai giovani', ostile:'Il sogno della casa è finito: una generazione in affitto'},
+ {id:'au_p_ti_cina', era:'contemporanea', paesi:['australia'], pri:1, amico:'Il grande cliente riapre le porte al vino australiano', ostile:'Il grande cliente chiude di nuovo: i porti si fermano'},
+ {id:'au_p_ti_estate', era:'contemporanea', paesi:['australia'], pri:1, amico:'Un\'estate senza grandi incendi', ostile:'Il fumo copre le città: un\'altra estate nera'},
+ {id:'au_p_ti_mandato', era:'contemporanea', paesi:['australia'], pri:1, amico:'Tre anni bastano: il governo consegna', ostile:'Tre anni sono passati e non è cambiato niente'},
+ /* ===== L85-1 · GIAPPONE, quattro titoli del presente (scheda §D). ===== */
+ {id:'jp_p_ti_nascite', era:'contemporanea', paesi:['giappone'], pri:1, amico:'Le nascite si fermano: primo anno senza calo', ostile:'Nuovo minimo storico delle nascite'},
+ {id:'jp_p_ti_yen', era:'contemporanea', paesi:['giappone'], pri:1, amico:'Lo yen si riprende, le famiglie respirano', ostile:'Lo yen ai minimi: il cibo costa il doppio'},
+ {id:'jp_p_ti_reattori', era:'contemporanea', paesi:['giappone'], pri:1, amico:'Un altro reattore riparte senza incidenti', ostile:'Riavvio contestato: la prefettura dice no'},
+ {id:'jp_p_ti_partito', era:'contemporanea', paesi:['giappone'], pri:1, amico:'Il partito si riforma: le correnti sciolte', ostile:'I fondi neri delle correnti: il partito sotto inchiesta'},
+ /* ===== L85-1 · COREA DEL SUD, quattro titoli del presente (scheda §D). ===== */
+ {id:'kr_p_ti_natalita', era:'contemporanea', paesi:['coreasud'], pri:1, amico:'Le nascite risalgono per la prima volta in dieci anni', ostile:'Nuovo minimo mondiale: meno di un figlio per donna'},
+ {id:'kr_p_ti_nord', era:'contemporanea', paesi:['coreasud'], pri:1, amico:'Il confine tace: un mese senza provocazioni', ostile:'Un altro missile nel mare: il Nord alza il tono'},
+ {id:'kr_p_ti_export', era:'contemporanea', paesi:['coreasud'], pri:1, amico:'Esportazioni record: i chip trainano il paese', ostile:'I chip rallentano: il paese scopre di dipendere da un prodotto'},
+ {id:'kr_p_ti_assemblea', era:'contemporanea', paesi:['coreasud'], pri:1, amico:'L\'Assemblea approva: il Presidente incassa', ostile:'L\'Assemblea boccia: il Presidente governa per decreto'},
+ /* ===== L85-1 · INDIA, quattro titoli del presente (scheda §D). ===== */
+ {id:'in_p_ti_crescita', era:'contemporanea', paesi:['india'], pri:1, amico:'L\'economia che cresce più di tutte', ostile:'Cresce il prodotto, non i lavori'},
+ {id:'in_p_ti_contadini', era:'contemporanea', paesi:['india'], pri:1, amico:'I contadini tornano a casa: accordo sul prezzo', ostile:'I trattori al confine della capitale: terzo mese'},
+ {id:'in_p_ti_confine', era:'contemporanea', paesi:['india'], pri:1, amico:'Confine calmo: i soldati si ritirano dai passi', ostile:'Scontri a cinquemila metri: il confine si riscalda'},
+ {id:'in_p_ti_stati', era:'contemporanea', paesi:['india'], pri:1, amico:'Il Sud e il Nord trovano l\'accordo sui seggi', ostile:'Il Sud contro Delhi: «non siamo una colonia»'},
+ /* ===== L86-3 · BRASILE, quattro titoli del presente (scheda §D). ===== */
+ {id:'br_p_ti_congresso', era:'contemporanea', paesi:['brasile'], pri:1, amico:'Il Planalto e il Congresso firmano la pace', ostile:'Il Congresso presenta il conto al Planalto'},
+ {id:'br_p_ti_foresta', era:'contemporanea', paesi:['brasile'], pri:1, amico:'La deforestazione cala per il secondo anno', ostile:'La foresta brucia: record di focolai'},
+ {id:'br_p_ti_real', era:'contemporanea', paesi:['brasile'], pri:1, amico:'Il real si rafforza, i mercati credono al paese', ostile:'Il real ai minimi: i mercati non credono ai conti'},
+ {id:'br_p_ti_violenza', era:'contemporanea', paesi:['brasile'], pri:1, amico:'Omicidi in calo: le città respirano', ostile:'Le fazioni comandano un altro Stato'},
+ /* ===== L86-3 · ARGENTINA, quattro titoli del presente (scheda §D). ===== */
+ {id:'ar_p_ti_inflazione', era:'contemporanea', paesi:['argentina'], pri:1, amico:'L\'inflazione rallenta: il mese più basso da anni', ostile:'I prezzi ripartono: un altro mese a due cifre'},
+ {id:'ar_p_ti_fmi', era:'contemporanea', paesi:['argentina'], pri:1, amico:'Accordo con il Fondo: i dollari arrivano', ostile:'Il Fondo sospende: le riserve non ci sono'},
+ {id:'ar_p_ti_campo', era:'contemporanea', paesi:['argentina'], pri:1, amico:'Raccolto record: la campagna liquida', ostile:'La campagna in sciopero: le strade bloccate'},
+ {id:'ar_p_ti_piazza', era:'contemporanea', paesi:['argentina'], pri:1, amico:'La piazza si svuota: il governo tiene', ostile:'Sciopero generale: il paese si ferma'},
+ /* ===== L86-3 · MESSICO, quattro titoli del presente (scheda §D). ===== */
+ {id:'mx_p_ti_vicino', era:'contemporanea', paesi:['messico'], pri:1, amico:'Il vicino rinvia i dazi: le fabbriche respirano', ostile:'Il vicino annuncia i dazi: il peso crolla'},
+ {id:'mx_p_ti_sicurezza', era:'contemporanea', paesi:['messico'], pri:1, amico:'Omicidi in calo per il terzo mese', ostile:'Un altro sindaco ucciso: lo Stato dei cartelli'},
+ {id:'mx_p_ti_peso', era:'contemporanea', paesi:['messico'], pri:1, amico:'Il super-peso: la moneta più forte dell\'anno', ostile:'Il peso ai minimi: i mercati fuggono'},
+ {id:'mx_p_ti_sexenio', era:'contemporanea', paesi:['messico'], pri:1, amico:'Il sessennio a metà: le promesse tengono', ostile:'Il sessennio a metà: l\'orologio corre'},
+ /* ===== L87-3 · SUDAFRICA, quattro titoli del presente (scheda §D). ===== */
+ {id:'za_p_ti_luce', era:'contemporanea', paesi:['sudafrica'], pri:1, amico:'Cento giorni senza blackout', ostile:'Torna il calendario dei blackout: sei ore al giorno'},
+ {id:'za_p_ti_lavoro', era:'contemporanea', paesi:['sudafrica'], pri:1, amico:'La disoccupazione cala per la prima volta in anni', ostile:'Un giovane su due senza lavoro: il record'},
+ {id:'za_p_ti_unita', era:'contemporanea', paesi:['sudafrica'], pri:1, amico:'Il governo di unità regge: i mercati applaudono', ostile:'Il governo di unità litiga in pubblico'},
+ {id:'za_p_ti_rand', era:'contemporanea', paesi:['sudafrica'], pri:1, amico:'Il rand si rafforza', ostile:'Il rand ai minimi: il rating scende ancora'},
+ /* ===== L87-3 · NIGERIA, quattro titoli del presente (scheda §D). ===== */
+ {id:'ng_p_ti_naira', era:'contemporanea', paesi:['nigeria'], pri:1, amico:'La naira si stabilizza: i prezzi rallentano', ostile:'La naira ai minimi: il riso costa il doppio'},
+ {id:'ng_p_ti_nord', era:'contemporanea', paesi:['nigeria'], pri:1, amico:'Studenti liberati: le scuole del Nord riaprono', ostile:'Un altro rapimento a scuola: il Nord chiede lo Stato'},
+ {id:'ng_p_ti_corrente', era:'contemporanea', paesi:['nigeria'], pri:1, amico:'Un mese senza crolli della rete', ostile:'La rete crolla per la quarta volta quest\'anno'},
+ {id:'ng_p_ti_petrolio', era:'contemporanea', paesi:['nigeria'], pri:1, amico:'La produzione di petrolio torna a salire', ostile:'Un barile su dieci sparisce: il furto record'},
 ];
 
 /* TITOLI LOCALI (rifinitura livello locale): a LIVELLO 1 la prima pagina parla LOCALE — il consiglio, la giunta,

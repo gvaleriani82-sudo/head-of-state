@@ -1754,7 +1754,7 @@ function renderGov(){
         <span class="ol">${T('Chiedi lo scioglimento')}</span>
         <span class="oe">${T('Si vota adesso, e la scelta è tua · la stampa parla di opportunismo e gli alleati mormorano')}</span></button></div>`;
   }
-  h+=`<div class="card g2"><div class="ct">I tuoi ministeri <small style="color:var(--mut2);font-weight:400">· tocca "Apri" per gestirli</small></div>`;
+  h+=`<div class="card g2"><div class="ct">${T('I tuoi ministeri')} <small style="color:var(--mut2);font-weight:400">· ${T('tocca "Apri" per gestirli')}</small></div>`;   // L85-2: erano scritte a mano, e restavano in italiano in una partita inglese
   for(const m of S.ministers) h+=renderMinistroCard(m,'lista');
   h+=`</div>`;
   }

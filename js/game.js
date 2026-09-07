@@ -123,13 +123,71 @@ function convalescente(){ return S.convalescenza!=null && (S.year*12+S.month) < 
 function gn(m,f){ return T((S&&S.personaggio&&S.personaggio.genere==='f')?f:m); }
 function bgNome(){ const p=S&&S.personaggio; if(!p||!p.background) return ''; const B=BACKGROUNDS.find(function(b){return b.id===p.background;}); return B?B.nome:''; }
 
+/* ================================================================================================================
+   L87-1 · L'ÀNCORA FISCALE DELLA FIDUCIA, e perché non può essere una costante.
+
+   `targetFiducia()` fa `78 − (debito − àncora)×0,5 − …`: l'àncora è il debito che per quel paese, in
+   quell'epoca, è la NORMALITÀ. Il Cantiere B l'aveva risolta per le porte storiche — le tredici la dichiarano
+   nello scenario, e nel '50 col debito a 31 senza àncora il target sarebbe stato 156, cioè inchiodato al tetto.
+
+   ⛑ Ma lo scenario `presente` non la dichiara, e il ripiego era **135, il debito italiano**: scritto quando il
+   presente era solo l'Italia, e rimasto lì mentre i paesi diventavano sedici. Il risultato, misurato: sette
+   paesi partivano **inchiodati a 100** (Australia, Sudafrica, Argentina, Germania, Corea, Messico, Nigeria —
+   tutti con meno debito dell'Italia) e il Giappone a **18** (255 di debito). È la stessa famiglia di `%CAPITALE`
+   (L76-1): un dato italiano lasciato dentro un meccanismo universale. Qui è un numero invece di una parola.
+
+   La regola, ora: **lo scenario se la dichiara vince; altrimenti l'àncora è il debito-seed DEL PAESE.** Così
+   ogni paese parte a ~78 meno il suo termine di deficit, e la fiducia si muove rispetto al proprio debito.
+   ⚠ Il 135 sparisce anche per l'Italia, il cui seed è **139**: 135 era una costante invecchiata (le cifre 2024
+   hanno portato il debito italiano a 139 senza che l'àncora seguisse), non una scelta. L'Italia passa da 75,2
+   a 77,2 d'avvio: due punti, ed è la correzione di quello scarto.
+   ================================================================================================================ */
+function ancoraDebito(sc){
+  if(sc && sc.debtAncora!=null) return sc.debtAncora;                       // le dodici porte storiche: la loro
+  if(typeof PAESE!=='undefined' && PAESE && PAESE.economia && PAESE.economia.debito!=null) return PAESE.economia.debito;
+  return 135;                                                               // rete di sicurezza: non ci si arriva
+}
+/* ================================================================================================================
+   L90-1 — L'INFLAZIONE, E PERCHÉ IL DEBITO NON SI ERODEVA.
+   La riga del debito (model.js) toglieva `debt × crescita REALE`; nel mondo il rapporto debito/PIL è eroso dalla
+   crescita **nominale** (reale + inflazione). Misurato in L89-1: l'India raddoppiava in dieci anni un debito che
+   nel mondo tiene fermo, e `italia1980` faceva 57 → 186 contro un 95 reale — perché il decennio con l'inflazione
+   più alta della storia repubblicana era modellato senza inflazione.
+   Stessa forma di `ancoraDebito`: **lo scenario se la dichiara vince, altrimenti è il seed del paese.**
+   ⚠ Il CLAMP 0-10 è una scelta di gioco, non un dato: Argentina e Nigeria nel mondo stanno a tre cifre, ma il
+   loro debito è in dollari e non si erode in pesos o naira. Dieci è il tetto, ed è dichiarato.
+   ================================================================================================================ */
+function inflazioneSeed(sc){
+  var v = null;
+  if(sc && sc.inflazione!=null) v = sc.inflazione;                          // le dodici porte storiche: la loro
+  else if(typeof PAESE!=='undefined' && PAESE && PAESE.economia && PAESE.economia.inflazione!=null) v = PAESE.economia.inflazione;
+  if(v==null) return 0;                                                     // rete di sicurezza: 0 = il gioco di prima
+  /* L91-1 — IL TETTO È DEL PAESE, NON DELLA FORMULA. Nato con L90-1 come `clamp(v,0,10)` globale, era motivato
+     da Argentina e Nigeria — dove il debito è in valuta estera e **non si erode in pesos o naira** — ma tagliava
+     in silenzio i tre decenni a due cifre che i dati dichiarano (italia1970 13, uk1970 13, italia1980 11), cioè
+     proprio gli anni in cui l'inflazione ERA il fatto economico. Ora il tetto lo dichiara chi ce l'ha:
+     `economia.inflazioneTetto`. Chi non lo dichiara usa la sua cifra vera. */
+  var tetto = (typeof PAESE!=='undefined' && PAESE && PAESE.economia && PAESE.economia.inflazioneTetto!=null)
+    ? PAESE.economia.inflazioneTetto : null;
+  return tetto!=null ? clamp(v, 0, tetto) : Math.max(0, v);
+}
+/* L90-1 passo 2 — LA CRESCITA DI PARTENZA È DEL PAESE, non 0,8 per tutti.
+   `computeGrowth()` partiva da 0,8 ovunque: l'India, che nel mondo cresce del 6-7%, cresceva come il Canada — e
+   il freno del debito (sopra 120) la portava anche più in basso, invertendo la classifica (L89-1: India 0,66%,
+   Canada 0,99%). ⚠ La crescita non alimenta solo il debito: da lei passano disoccupazione, consenso e gruppi.
+   Il ripiego resta 0,8, così un paese o una porta che non la dichiara si comporta esattamente come prima. */
+function crescitaSeed(sc){
+  if(sc && sc.crescita!=null) return sc.crescita;                           // le dodici porte storiche: la loro
+  if(typeof PAESE!=='undefined' && PAESE && PAESE.economia && PAESE.economia.crescita!=null) return PAESE.economia.crescita;
+  return 0.8;                                                               // il valore universale di prima
+}
 /* --- Stato base comune ai due avvii (al GOVERNO e all'OPPOSIZIONE) ---
    Costruisce S e i derivati INDIPENDENTI dal ruolo: indicatori iniziali, leggi del paese, forze di partenza.
    Il ruolo (ministri/coalizione/territori) lo aggiunge il chiamante. Condiviso → un solo punto di verità. */
 function initStatoBase(){
   try{ resetUIAnim(); }catch(e){}   // nuova partita: prima apparizione senza animazioni
   S={
-    year:2026, annoInizio:2026, month:1, mandate:1, turnInMandate:0, mandatesWon:0, rp:3, diff:chosenDiff, partito:chosenPartito, lingua:(typeof chosenLang!=='undefined'?chosenLang:'it'),   // lingua = dato puro (it/en); annoInizio = anno d'avvio
+    year:2026, annoInizio:2026, month:1, mandate:1, turnInMandate:0, mandatesWon:0, mandatiConsecutivi:0, avvisoUltimoMandato:false, rp:3, diff:chosenDiff, partito:chosenPartito, lingua:(typeof chosenLang!=='undefined'?chosenLang:'it'),   // lingua = dato puro (it/en); annoInizio = anno d'avvio · L86-1: mandatiConsecutivi si azzera alla sconfitta, mandatesWon no
 
     ind:{growth:0.8, debt:135, unemp:7.8, deficit:3.0, sanita:62, sicurezza:58, ambiente:50, consenso:50, fiducia:75, reputazione:60, stampa:55},
     groups:Object.assign({},GSTART),
@@ -154,7 +212,7 @@ function initStatoBase(){
      l'elezione naturale sull'anno dello snodo. Percorso d'ingresso diverso dal reset turnInMandate=0 di A.5
      (quello è diventaLocale/rielezione; qui è l'avvio-governo → startGame non lo ritocca). */
   if(_SC && _SC.turnMandato!=null){ S.turnInMandate=_SC.turnMandato; }
-  if(_SC && _SC.mandatiVinti!=null){ S.mandatesWon=_SC.mandatiVinti; S.mandate=_SC.mandatiVinti+1; }   // L75-1: la porta parte con l'anzianità (uk1990: undici anni, tre vittorie)
+  if(_SC && _SC.mandatiVinti!=null){ S.mandatesWon=_SC.mandatiVinti; S.mandate=_SC.mandatiVinti+1; S.mandatiConsecutivi=_SC.mandatiVinti; }   // L75-1: la porta parte con l'anzianità (uk1990: undici anni, tre vittorie) · L86-1: l'anzianità è consecutiva per definizione (chi è lì da undici anni non ha perso in mezzo)
   S.leggeTruffa=null;   // Build B (b) — scelta di governo sul premio: null=non decisa · 'approvata' · 'respinta' (dato puro, round-trip)
   /* SEED ECONOMICO per-paese (cantiere Budget): PIL (nuovo stato puro, € mld) + debito/PIL + base-disavanzo dalle cifre
      2024 riconciliate (CIFRE-ECONOMICHE.md); fallback ai valori storici se il paese non ha ancora il blocco (atomicità). */
@@ -169,10 +227,16 @@ function initStatoBase(){
   S.valuta = (_SC && _SC.valuta) || null;              // es. lira nel '50; null = € (presente identico)
   S.quotaSpesa = (_SC && _SC.quotaSpesa!=null) ? _SC.quotaSpesa : 0.48;   // spesa/PIL mostrata (display-only); default oggi 48%
   /* Cantiere B — difficoltà d'epoca (dati PURI, round-trip). debtAncora: l'àncora fiscale di fiducia/interessi,
-     RELATIVA al seed dell'epoca (default 135 = presente identico per costruzione). Va impostata PRIMA della
-     calibrazione del deficit qui sotto (computeDeficit la legge). logorioEra: rate del logorio da incumbency
-     per-scenario (null = default presente 0.002 in evolvePartiti). */
-  S.debtAncora = (_SC && _SC.debtAncora!=null) ? _SC.debtAncora : 135;
+     RELATIVA al seed dell'epoca. Va impostata PRIMA della calibrazione del deficit qui sotto (computeDeficit la
+     legge). logorioEra: rate del logorio da incumbency per-scenario (null = default presente 0.002). */
+  S.debtAncora = ancoraDebito(_SC);
+  S.inflazione = inflazioneSeed(_SC);   // L90-1: erode il debito insieme alla crescita (nominale = reale + inflazione)
+  S.crescitaBase = crescitaSeed(_SC);   // L90-1 passo 2: il punto di partenza di computeGrowth, per paese e per porta
+  /* ⚠ E la crescita MOSTRATA va ricalcolata subito. `S.ind.growth` nasce col letterale 0,8 di `initStatoBase` e
+     nessuno la toccava fino al primo `simulateMonth`: finché 0,8 era la base di tutti nessuno se ne accorgeva,
+     ora il cruscotto mostrerebbe «+0,8%» in India per poi saltare a 6,5 dopo un mese. Stessa logica della
+     calibrazione del deficit qui sotto: al mese 1 si vede la cifra vera del paese. */
+  S.ind.growth = computeGrowth();
   S.logorioEra = (_SC && _SC.logorioEra!=null) ? _SC.logorioEra : null;
   S.sfideUltimo = S.year*12 + S.month;   // D1a — sfide (quiz): la prima non prima di ~5 mesi dall'avvio (dato puro, round-trip)
   S.campNaz=null; S.campNazUltimo=null; S.promesseCampagna=[];
@@ -198,6 +262,8 @@ function initStatoBase(){
   S.suezOpp=null; S.coal2010Opp=null;   // L77-4: gli snodi dall'opposizione, dichiarati al boot come i gemelli
   S.governiCaduti=0;                    // L80-5: quante volte il governo e caduto senza che si andasse a votare
   S.logorioAcc=0;                       // L77-3: il logorio accumulato mese per mese (0 = carriera nuova)
+  S.logorioAvv=0; S.mesiMinoranzaAvv=0;   // L90-2: il logorio del governo AVVERSARIO e i suoi mesi sotto i 50 seggi (dati puri, round-trip)
+  S.mesiGovernoAvv=0; S.sostegnoAvv=null;   // L91-2: l'eta del governo avversario (l'anno di grazia) e la sua stampella esterna
   S.groups0=null; S.ind0=null; S.promesseEsito=[]; S.leggiStorico=[]; S.governoAvversarioVolto=null;   // L73-2 (dati puri, round-trip)
   S.decisioniScadenza=0; S.visite={mappa:0, partito:0};   // L64-2: le misure del cantiere (dati puri)
   S.candidatoPromosso=null;   // L64-3 (dato puro)
@@ -573,7 +639,7 @@ function diventaPremier(viaElezione){
   S.seggi=(PAESE.coalizione||PAESE.comeSiVince==='parlamentare')?calcSeggi():null;
   S.minoranza = (PAESE.coalizione||PAESE.comeSiVince==='parlamentare') ? bloccoSeggi()<50 : false;   // L61-5 - il blocco, non il solo partito: nell appeso il Regno Unito puo averne uno
   S.tenuta={}; S.tenutaForza0={}; S.tenutaLiv={}; S.tenutaUltimo={}; S.mesiMinoranza=0; initTenuta(); S.bloccoAtteso=bloccoQuota();
-  if(viaElezione){ bioConta('elezioniVinte'); S.mandatesWon=(S.mandatesWon||0)+1; }
+  if(viaElezione){ bioConta('elezioniVinte'); S.mandatesWon=(S.mandatesWon||0)+1; S.mandatiConsecutivi=(S.mandatiConsecutivi||0)+1; }   // L86-1: i due contatori salgono insieme; solo il secondo si azzera alla sconfitta
   S.mandate=S.mandate||1; S.turnInMandate=0; S.elezioniAnticipate=false; S.ultimoSondaggio=null; S.sondStorico=[];
   S.snap=Object.assign({},S.pol); S.leggiSnap=Object.assign({},S.leggi);
   bioFatto(T('Da %A a %B: la scalata è compiuta.').replace('%A',ruoloPrima).replace('%B',T(PAESE.titoloRuolo)));
@@ -1891,13 +1957,21 @@ function minoranzaFresca(){   // i numeri sono saltati da poco: 1-2 mesi, non un
 /* L80-7 - QUANTI MESI DI LOGORIO VALE UNA CADUTA. Un anno, e il numero viene da una scansione (0, 3, 6, 9, 12,
    18, 24, 36) col criterio dichiarato PRIMA di guardare la tabella: la differenza fra chi cade poco e chi cade
    molto dev'essere visibile a fine carriera, e chi cade quanto la mediana deve ancora arrivare in fondo.
-   Lo scarto fra i quartili in punti di FORZA: 0,3 a K=0 · 2,9 a K=6 · 3,9 a K=9 · **4,1 a K=12** · poi si
-   comprime (1,8 · 0,9 · 0,4), perche' a K alti affondano tutti e i due quartili tornano uguali. E' una campana:
-   il massimo e' a 12, e li' tutte e quaranta le carriere arrivano ancora in fondo.
+   Lo scarto fra i quartili in punti di FORZA, MISURATO ALLORA: 0,3 a K=0 · 2,9 a K=6 · 3,9 a K=9 · 4,1 a K=12
+   · poi si comprime, perche' a K alti affondano tutti e i due quartili tornano uguali. E' una campana, e il suo
+   massimo allora stava a 12. ⚠ Quei numeri sono di un banco che sovrastimava il logorio: v. L92-1 qui sotto.
    ⛑ La prima scansione guardava il CONSENSO e dava rumore su tutti gli otto valori: il logorio non tocca il
    consenso, agisce su govF dentro evolvePartiti, cioe' sulle FORZE. Misurata la grandezza giusta, la forma
    funzionava gia'. */
-const CADUTA_LOGORIO_K = 12;
+/* ⛑ L92-1 (7 set 2026) — K PASSA DA 12 A 18, e non perché il disegno sia cambiato: perché il banco su cui la
+   campana fu misurata **sovrastimava il logorio del giocatore**. Dimezzava `mesiAlGoverno` alla vittoria ma non
+   `logorioAcc`, che nel gioco vengono dimezzati insieme (5546); corretto in L91-2. Rifatta la scansione con lo
+   stesso criterio dichiarato allora, sulle stesse 40 carriere francesi e sulla stessa grandezza (le FORZE), il
+   massimo della campana si sposta: 3,4 a K=9 · 3,1 a 12 · **5,4 a 18** · 3,1 a 24 · 0,6 a 36. Col difetto
+   rimesso apposta il massimo sta a 9 — quindi lo spostamento è del banco, non del rumore.
+   Il prezzo del cambio, misurato: governi caduti mediani 12 → 13, mesi vissuti 120 → 120 (tutte le carriere
+   arrivano ancora in fondo), carte proprie francesi per carriera 8,0 → 8,0 di mediana. */
+const CADUTA_LOGORIO_K = 18;
 function governoCade(){
   S.governiCaduti=(S.governiCaduti||0)+1;
   var p=(typeof partnerRimpasto==='function')?partnerRimpasto():null;
@@ -2001,6 +2075,42 @@ function sostegnoRompi(perche){
    IL COSTO D'INGRESSO SI PAGA SEMPRE, anche quando va bene — è il paletto del design: la stampa parla di
    opportunismo, gli alleati che non se l'aspettavano mormorano, e la campagna consuma. Non è una mossa gratis.
    ================================================================================================================ */
+/* ================================================================================================================
+   L86-1 · I LIMITI DI MANDATO. `PAESE.mandatiMax` dice quanti mandati da candidato una Costituzione concede;
+   dove il campo non c'è non c'è limite, e nove paesi su sedici stanno così — additivo per costruzione.
+
+   ⚠ QUALE CONTATORE. La consegna scriveva `S.mandate >= mandatiMax`, ma `S.mandate` NON sono «i mandati vinti
+   da candidato»: cresce anche da ministro quando il governo è confermato (esitoElezioneMinistro) e da sindaco
+   (esitoElezioneLocale), e nelle porte con anzianità parte già a `mandatiVinti+1`. Il campo che conta le
+   vittorie alle urne è `S.mandatesWon`, ed è quello che si guarda — come dicono le parole della consegna.
+
+   DUE SEMANTICHE, perché le Costituzioni ne hanno due:
+     · `mandatiConsecutivi:false` → il limite è sui mandati TOTALI: chi c'è stato non ci torna più (Corea,
+       Messico, e qui anche USA e Nigeria — vedi la nota di consegna).
+     · campo assente → CONSECUTIVI: dopo una sconfitta la serie riparte (Brasile, Argentina, Francia).
+   Il motore non distingueva: né `tornaAlGoverno` né `entraOpposizione` azzeravano niente. Il contatore
+   `S.mandatiConsecutivi` è nuovo, sale con `mandatesWon` e si azzera in `entraOpposizione`.
+   ================================================================================================================ */
+/* La soglia fra il congedo «forte» e quello «consumato» nell'epitaffio. È la MEDIANA del consenso d'uscita,
+   misurata su 280 carriere nei sette paesi col limite prima di scriverla: min 47,4 · p25 50,4 · MEDIANA 53,6 ·
+   p75 56,4 · max 63,7. Un 50 tondo avrebbe tagliato il 4% invece della metà. */
+const SOGLIA_USCITA_FORTE = 53.6;
+function mandatiPerIlLimite(){
+  if(typeof PAESE==='undefined' || PAESE.mandatiMax==null) return null;
+  return (PAESE.mandatiConsecutivi===false) ? (S.mandatesWon||0) : (S.mandatiConsecutivi||0);
+}
+/* Il limite è raggiunto: alla prossima vigilia non si corre. Vale solo al vertice e solo al governo — chi è
+   all'opposizione non è in carica, e la sua ricandidatura la decide il partito, non la Costituzione. */
+function limiteMandatiRaggiunto(){
+  if(typeof S==='undefined' || !S || S.opposizione || S.livello!==3) return false;
+  var n=mandatiPerIlLimite();
+  return n!=null && n>=PAESE.mandatiMax;
+}
+/* Quanti mandati restano dopo questo (null = nessun limite). Serve all'avviso, che deve arrivare PRIMA. */
+function mandatiRestanti(){
+  var n=mandatiPerIlLimite();
+  return (n==null) ? null : Math.max(0, PAESE.mandatiMax - n);
+}
 function scioglimentoAmmesso(){
   if(typeof S==='undefined' || !S || S.opposizione || S.livello!==3) return false;
   if(PAESE.scioglimento===false) return false;                      // calendario rigido: la voce non compare
@@ -3146,6 +3256,16 @@ function generaFinale(reason){
   const gc=S.governiCaduti||0;
   if(gc===1) storia.push(T('Una volta l’Assemblea ti ha fatto cadere il governo, e ne hai nominato un altro.'));
   else if(gc>1) storia.push(T('L’Assemblea ti ha fatto cadere il governo %N volte: ogni volta hai nominato un nuovo Primo ministro, e ogni volta è costato.').replace('%N',gc));
+  /* A6 · L86-1 — il mandato compiuto. Slot suo, e porta i DATI (mandati e anni), non un aggettivo: è quello che
+     distingue il congedo di chi ha governato dieci anni da quello di chi ne ha governati cinque. */
+  if(reason==='mandatoCompiuto'){
+    const mw=S.mandatesWon||0, an=Math.max(1,S.year-(S.annoInizio||2026));
+    storia.push(PAESE.mandatiMax===1
+      ? (an===1
+          ? T('Il paese dà un mandato solo, e tu l’hai fatto per intero: un anno, e nessuna seconda occasione — per legge, non per verdetto.')
+          : T('Il paese dà un mandato solo, e tu l’hai fatto per intero: %A anni, e nessuna seconda occasione — per legge, non per verdetto.').replace('%A',an))
+      : T('Hai vinto %M mandati, il massimo che la Costituzione concede, e li hai portati a termine tutti e due: %A anni al vertice, e la porta che si chiude non l’hanno chiusa gli elettori.').replace('%M',mw).replace('%A',an));
+  }
   /* B1 · chi ti ha abbandonato */
   const gp=gruppoPeggiore();
   if(gp && gp.v0!=null){ const nome=nomeGruppoEp(gp.id), a=Math.round(gp.v0), b=Math.round(gp.v);
@@ -3180,6 +3300,16 @@ function generaFinale(reason){
   else if(reason==='ritiro') pag=T(', ritirato nel %Y con %G ancora al %V').replace('%Y',anno).replace('%G',gN).replace('%V',gV);
   else if(reason==='condanna') pag=T(', condannato nel %Y').replace('%Y',anno);
   else if(reason==='salute') pag=T(', fermato dalla salute nel %Y').replace('%Y',anno);
+  /* L86-1 — DUE code, e le separa un DATO, non un aggettivo: il consenso con cui si lascia. La soglia è la
+     MEDIANA misurata sulle 280 carriere che arrivano al limite nei sette paesi (53,6), non un numero tondo:
+     a 50 avrei tagliato il 4% delle carriere invece della metà, e il secondo titolo non sarebbe mai uscito. */
+  else if(reason==='mandatoCompiuto') pag = (S.ind.consenso<SOGLIA_USCITA_FORTE)
+      ? T(', che compì il mandato nel %Y consumandolo fino in fondo: %C per cento di consenso, e %G al %V').replace('%Y',anno).replace('%C',Math.round(S.ind.consenso)).replace('%G',gN).replace('%V',gV)
+      /* tre forme intere e non una concatenata: il singolare e il plurale sono due frasi diverse, e il testo-utente
+         non si compone a pezzi (guardia `verifica-concat`). */
+      : (S.mandatesWon||0)>1
+        ? T(', che compì %M mandati e nel %Y lasciò il paese al %C per cento').replace('%M',S.mandatesWon).replace('%Y',anno).replace('%C',Math.round(S.ind.consenso))
+        : T(', che compì il suo unico mandato nel %Y lasciando il paese al %C per cento').replace('%Y',anno).replace('%C',Math.round(S.ind.consenso));
   else pag=T(', e nel %Y %G era al %V').replace('%Y',anno).replace('%G',gN).replace('%V',gV);
   return { titolo: costr+pag, storia: storia, verdetto: verdetto, dati:{costr:costr, reason:reason, anno:anno, g:gp?gp.id:null, v:gV, div:nDiv, leggi:nLeggi} };
 }
@@ -4666,6 +4796,33 @@ function avanzaMese(){
     const f0=mioPartito().forza;
     if(S.forze[S.partito] < Math.max(f0*0.5, 5)){ return gameOver('congresso'); }   // forza crollata: il partito ti scarica
     if(S.month===1 && S.turnInMandate>=PAESE.mandatoMesi/12){ if(sfidaAttiva()) return apriPrimaria('vigilia'); return election(); }   // a fine mandato: prima la primaria (se la sfida è viva), poi sfidi
+    /* L91-2 — la vita del governo avversario: quanti mesi ha, e la sua stampella. Nell'ordine: prima invecchia
+       (l'anno di grazia si conta da qui), poi il logorio dell'accordo, poi la ricerca di un partner se serve. */
+    S.mesiGovernoAvv=(S.mesiGovernoAvv||0)+1;
+    sostegnoAvvTick();
+    if(!S.sostegnoAvv && bloccoSeggi()<50){
+      var pAvv=partnerSostegnoAvversario();
+      if(pAvv){
+        S.sostegnoAvv={pid:pAvv.id, mesi:0, tenuta:55};
+        S.log.unshift({t:T('Il governo trova una stampella'), x:T('%P non entra nel governo ma promette di non farlo cadere.').replace('%P', T(pAvv.nome))});
+      }
+    }
+    /* L90-2 — LA SECONDA STRADA PER L'URNA, e questa non aspetta la scadenza. Se il governo avversario perde i
+       numeri, la stessa mozione di sfiducia che può cadere sulla tua testa può cadere sulla sua. È il gemello
+       esatto della riga del ramo di governo, quaranta righe più sotto. */
+    if(PAESE.cadutaGoverno && bloccoSeggi()<50 && Math.random()<probSfiduciaAvversario()){
+      if(PAESE.sistema==='semipresidenziale'){
+        /* L80-5, simmetrico: cade il governo, non il Presidente — e il Presidente lì è l'avversario. Nessuna
+           urna, ma il prezzo lo paga lui: la stessa pena di L80-7, sul SUO accumulatore. */
+        S.logorioAvv=(S.logorioAvv||0) + (typeof rateLogorioMese==='function' ? rateLogorioMese()*CADUTA_LOGORIO_K : 0);
+        S.mesiMinoranzaAvv=0; S.mesiGovernoAvv=0; S.sostegnoAvv=null;   // L91-2: il Presidente ne nomina un altro, e il governo nuovo ha il suo anno di grazia
+        S.log.unshift({t:T('Il governo cade'), x:T('Il governo perde la fiducia dell\'Assemblea. Il Presidente ne nomina un altro: alle urne non si va.')});
+      } else {
+        S.elezioniAnticipate=true;
+        S.log.unshift({t:T('Il governo cade'), x:T('Il governo cade: si torna alle urne.')});
+        return election();
+      }
+    }
     S.visibilita=clamp((S.visibilita||0)-4,0,100);                                   // il silenzio ti spegne (decadimento mensile)
     aggiornaSfida();                                                                 // la vita interna del partito non dorme nemmeno da sfidante
     genAgenda(false); forseSondaggio(); render(); commitSnap();
@@ -4688,10 +4845,19 @@ function avanzaMese(){
     return;
   }
   if(typeof sostegnoTick==='function') sostegnoTick();   // L53-2 — il prezzo si paga e l'accordo si controlla, prima dei verdetti
+  /* L86-1 — L'AVVISO ARRIVA PRIMA. Dodici mesi prima della vigilia, chi è all'ultimo mandato che la Costituzione
+     gli concede deve saperlo: una fine che sorprende è un bug di design, non un colpo di scena. Una riga sola,
+     all'inizio dell'ultimo anno, e solo se il limite scatterà davvero. */
+  if(S.month===1 && PAESE.mandatiMax!=null && mandatiRestanti()===0 && (S.turnInMandate||0)===PAESE.mandatoMesi/12-1 && !S.avvisoUltimoMandato){
+    S.avvisoUltimoMandato=true;
+    S.log.unshift({t:T('L\'ultimo anno'), x:T('La Costituzione non ti concede un altro mandato: fra dodici mesi lasci la carica, e non ci saranno urne per te.')});
+  }
   if(S.ind.consenso<dif().sogliaCrisi){ return gameOver('crisi'); }
   if(S.mesiSottoCrisi>=dif().mesiInsolvenza){ return gameOver('insolvenza'); }
   { const gR=(typeof rivoltaMatura==='function')?rivoltaMatura():null; if(gR){ S.rivoltaGruppo=gR; return gameOver('rivolta'); } }   // L72-1: un gruppo sotto il pavimento per mesiRivolta mesi
-  if(S.month===1 && S.turnInMandate>=PAESE.mandatoMesi/12){ if(sfidaAttiva()) return apriPrimaria('vigilia'); return election(); }   // vigilia: prima la primaria, poi le urne
+  if(S.month===1 && S.turnInMandate>=PAESE.mandatoMesi/12){
+    if(limiteMandatiRaggiunto()) return gameOver('mandatoCompiuto');   // L86-1: la Costituzione non ti concede un'altra corsa. Niente urne, e non è una sconfitta.
+    if(sfidaAttiva()) return apriPrimaria('vigilia'); return election(); }   // vigilia: prima la primaria, poi le urne
   if(PAESE.cadutaGoverno && S.minoranza && Math.random()<probSfiducia()){      // elezioni anticipate da sfiducia (passo 4)
     if(PAESE.sistema==='semipresidenziale') return governoCade();              // L80-5: cade il governo, non il Presidente
     S.elezioniAnticipate=true;
@@ -5365,6 +5531,70 @@ function probSfiducia(){
   const scarto = Math.min(1, (50-mio)/10);                // quanto manca alla soglia, saturato a 10 punti
   return clamp(0.03*m*(1+Math.max(0,45-c)/45)*D.rischioSfiducia*scarto, 0, 0.40);
 }
+/* ================================================================================================================
+   L90-2 · LA SFIDUCIA AL GOVERNO AVVERSARIO — l'urna per chi sta all'opposizione.
+
+   ⛑ Il numero da cui nasce: su 280 carriere di dieci anni il giocatore all'opposizione arriva a un voto **sei
+   volte**, e cinque volte su sei lo vince (L88-2). Il collo di bottiglia non è vincere, è ARRIVARCI: la sconfitta
+   cade al mese 109 su 120 e la vigilia successiva è fuori dalla finestra. Questa è la seconda strada per l'urna.
+
+   La formula è **la stessa** di `probSfiducia`, letta dal lato di là: i seggi sono quelli del blocco di governo
+   (che all'opposizione è `S.coalizione`, cioè l'avversario) e il contatore è `S.mesiMinoranzaAvv`. Il consenso
+   che entra è quello nazionale — all'opposizione è il consenso del governo in carica, ed è giusto che sia lui a
+   pesare. Non c'è il ramo del sostegno esterno: quello è un accordo del GIOCATORE, e l'avversario non lo ha.
+   ================================================================================================================ */
+/* L91-2 · IL PARTNER DI STAMPELLA DELL'AVVERSARIO — il gemello di `partnerSostegno()`.
+   ⛑ La simmetria di L90-2 era a metà: il giocatore in minoranza ha due stampelle (il sostegno esterno di L53-2
+   e il rimpasto), l'avversario non ne aveva nessuna — ed è per questo che su italia1950, dove governa sempre
+   sotto i 50, cadeva ogni volta. La regola è la stessa: un partito fuori dalla coalizione, compatibile per asse,
+   i cui seggi portano il blocco sopra 50. Manca il ramo dell'intesa: quella è del GIOCATORE, non sua. */
+function partnerSostegnoAvversario(){
+  if(typeof S==='undefined' || !S || !S.seggi || !S.opposizione) return null;
+  var coal=S.coalizione||[];
+  if(!coal.length) return null;
+  /* il partito-guida dell'avversario: il più grande della sua coalizione (l'asse di riferimento è il suo) */
+  var guida=null, max=-1;
+  coal.forEach(function(id){ var s=S.seggi[id]||0; if(s>max){ max=s; guida=part(id); } });
+  if(!guida) return null;
+  var fuori=PAESE.partiti.filter(function(p){
+    if(coal.indexOf(p.id)>=0) return false;
+    if(p.id===S.partito) return false;                     // tu no: sei l'opposizione, non la stampella
+    return Math.abs(p.asse-guida.asse)<=2;
+  });
+  if(!fuori.length) return null;
+  fuori.sort(function(a,b){ return (S.seggi[b.id]||0)-(S.seggi[a.id]||0); });
+  for(var i=0;i<fuori.length;i++){ if(bloccoSeggi()+(S.seggi[fuori[i].id]||0)*0.7>=50) return fuori[i]; }
+  return null;
+}
+/* Il logorio mensile dell'accordo dell'avversario: la stessa aritmetica di `sostegnoTick` — parte da 55, perde
+   3 ogni sei mesi, si rompe sotto 25. Il giocatore quel numero ce l'ha in `S.intese`; l'avversario non ha una
+   tabella di intese, quindi il numero vive nell'accordo stesso. S resta puro e serializzabile. */
+function sostegnoAvvTick(){
+  if(!S || !S.sostegnoAvv) return;
+  var A=S.sostegnoAvv;
+  if(!S.opposizione || !part(A.pid)){ S.sostegnoAvv=null; return; }
+  A.mesi=(A.mesi||0)+1;
+  if(A.mesi%6===0) A.tenuta=(A.tenuta!=null?A.tenuta:55)-3;
+  if((A.tenuta!=null?A.tenuta:55)<25){
+    S.sostegnoAvv=null;
+    S.log.unshift({t:T('L\'accordo si rompe'), x:T('Chi teneva in piedi il governo si sfila: adesso i numeri non ci sono più.')});
+  }
+}
+function probSfiduciaAvversario(){
+  if(!S.opposizione) return 0;
+  /* L91-2 — L'ANNO DI GRAZIA. Nessuna sfiducia nei primi dodici mesi di un governo: è il gemello del «prima è
+     indecente» dei diciotto mesi dello scioglimento (L64), ed è una costante di disegno dichiarata, non una
+     taratura — *un governo appena insediato non cade il mese dopo.* Dodici e non diciotto perché la sfiducia è
+     dell'aula e lo scioglimento è del premier. */
+  if((S.mesiGovernoAvv||0) < 12) return 0;
+  const D=dif(), m=S.mesiMinoranzaAvv||0, c=S.ind.consenso;
+  let suoi = (typeof bloccoSeggi==='function') ? bloccoSeggi() : 100;
+  /* la stampella conta come per te (L53-2): i seggi di chi si astiene entrano scontati del 30% */
+  if(S.sostegnoAvv && S.seggi && S.seggi[S.sostegnoAvv.pid]!=null) suoi += (S.seggi[S.sostegnoAvv.pid]||0)*0.7;
+  if(suoi>=50) return 0;                                  // ha i numeri: nessuna mozione lo tocca
+  const scarto = Math.min(1, (50-suoi)/10);               // quanto gli manca alla soglia, saturato a 10 punti
+  return clamp(0.03*m*(1+Math.max(0,45-c)/45)*D.rischioSfiducia*scarto, 0, 0.40);
+}
 /* Carta di crisi di coalizione del mese (ultimatum o rottura), o null. Stesso pattern isteresi+raffreddamento
    degli eventi-fiducia, ma PER alleato. La rottura rimuove subito l'alleato (stato sempre coerente). */
 function pickAlleato(){
@@ -5451,7 +5681,7 @@ function esitoCandidato(r){
 }
 function nextMandate(){
   maturaRP();   // qui passa il confine di mese quando si vota: formula del mese in cui cade (gennaio→iniezione, anticipate a metà anno→+1). PRIMA del reset snapshot.
-  S.mandatesWon++; S.mandate++; S.turnInMandate=0; S.snap=Object.assign({},S.pol); S.leggiSnap=Object.assign({},S.leggi);
+  S.mandatesWon++; S.mandate++; S.mandatiConsecutivi=(S.mandatiConsecutivi||0)+1; S.turnInMandate=0; S.snap=Object.assign({},S.pol); S.leggiSnap=Object.assign({},S.leggi);   // L86-1
   if(PAESE.comeSiVince==='parlamentare'||PAESE.coalizione) S.seggi=calcSeggi();
   S.minoranza = PAESE.coalizione ? seggiCoalizione(S.coalizione,S.seggi)<50
               : (PAESE.comeSiVince==='parlamentare' ? S.seggi[S.partito]<50 : false);
@@ -5481,6 +5711,9 @@ function entraOpposizione(w){
   S.coalizione=[w.id].concat(PAESE.coalizione?compatibili(w.id,S.seggi).filter(p=>p.id!==S.partito).map(p=>p.id):[]);
   S.tenuta={}; S.tenutaForza0={}; S.tenutaLiv={}; S.tenutaUltimo={}; S.minoranza=false; S.mesiMinoranza=0;
   S.visibilita=40; S.credibilita=50; S.recentGov=[]; S.mesiAlGoverno=0; S.logorioAcc=0;   // variabili d'opposizione; la traversata del deserto azzera il logorio (L77-3: anche l'accumulatore)
+  S.logorioAvv=0; S.mesiMinoranzaAvv=0;   // L90-2: e l'avversario che si insedia parte pulito — il suo logorio e' il SUO, non l'eredita' del tuo
+  S.mesiGovernoAvv=0; S.sostegnoAvv=null;   // L91-2: governo nuovo, anno di grazia nuovo, nessuna stampella ereditata
+  S.mandatiConsecutivi=0;   // L86-1: la sconfitta interrompe la serie. `mandatesWon` NO: dove il limite è sui mandati totali (Corea, Messico) chi c'è stato non ci torna comunque.
   S.lineaMedia=S.lineaMedia||'documentata';   // la linea coi media (dato puro; i salvataggi senza campo migrano al default)
   if(S.archi) S.archi=S.archi.filter(function(a){ const A=ARCHI_DEF.find(function(d){return d.id===a.id;}); return A && (A.dove||'governo')==='entrambi'; });   // gli archi di GOVERNO non sopravvivono alla caduta; i personali sì (lotto 5)
   const prof = w.asse>=1?'destra' : w.asse<=-1?'sinistra' : 'centro';
@@ -5513,6 +5746,8 @@ function condannaLieve(){
 /* Torna al governo (dopo la nomina dei ministri dall'opposizione): nessuno strascico dall'era avversaria. */
 function tornaAlGoverno(mins){
   S.ministers=mins; S.opposizione=false; S.governoAvversario=null;
+  S.logorioAvv=0; S.mesiMinoranzaAvv=0;   // L90-2: l'avversario non governa piu', il suo accumulatore muore con lui
+  S.mesiGovernoAvv=0; S.sostegnoAvv=null;   // L91-2
   S.mesiSottoCrisi=0; S.fidLivello=0; S.fidUltimo={};        // azzera i contatori del governo precedente
   S.snap=Object.assign({},S.pol);                             // contabilità RP pulita: erediti le politiche e le cambi coi tuoi punti
   bioConta('elezioniVinte'); bioFatto('La rimonta è completa: di nuovo al governo.');
@@ -5704,13 +5939,18 @@ function gameOver(reason){
   try{ aggiungiCarriera(reason); }catch(e){} chiudiAutosave();   // carriera chiusa: aggiorna lo storico e cancella l'autosave (niente "Continua")
   document.getElementById('ov').classList.remove('on');
   const years=S.year-(S.annoInizio||2025);
-  const title= T(reason==='crisi'?'Crisi di governo' : reason==='insolvenza'?'Il paese è insolvente' : reason==='rivolta'?'Un pezzo di paese ti ha voltato le spalle' : reason==='congresso'?'Il partito sceglie un nuovo leader' : reason==='primaria'?'Il partito sceglie lo sfidante' : reason==='ritiro'?'Il congedo' : reason==='condanna'?'La condanna' : reason==='salute'?(S.esitoSalute==='fatale'?'L\'ultimo giorno':'Le ragioni della salute') : reason==='silurato'?'Fuori dal governo' : reason==='sconfittaLocale'?'Sconfitta alle urne locali' : reason==='mandatoInt'?'Fine del mandato internazionale' : 'Fine del percorso');
+  const title= T(reason==='crisi'?'Crisi di governo' : reason==='insolvenza'?'Il paese è insolvente' : reason==='rivolta'?'Un pezzo di paese ti ha voltato le spalle' : reason==='congresso'?'Il partito sceglie un nuovo leader' : reason==='primaria'?'Il partito sceglie lo sfidante' : reason==='ritiro'?'Il congedo' : reason==='condanna'?'La condanna' : reason==='salute'?(S.esitoSalute==='fatale'?'L\'ultimo giorno':'Le ragioni della salute') : reason==='silurato'?'Fuori dal governo' : reason==='sconfittaLocale'?'Sconfitta alle urne locali' : reason==='mandatoInt'?'Fine del mandato internazionale' : reason==='mandatoCompiuto'?'Il mandato compiuto' : 'Fine del percorso');
   const desc= reason==='crisi'?T('Una mozione di sfiducia ha fatto cadere il governo: il consenso era crollato.')
     : reason==='insolvenza'?T('I conti pubblici sono fuori controllo: nessuno finanzia più il debito. Il governo cade travolto dalla crisi finanziaria.')
     : reason==='rivolta'?T(RIVOLTA_TESTI[S.rivoltaGruppo]||RIVOLTA_TESTI.lavoratori)
     : reason==='congresso'?T('Troppe sconfitte e una forza ridotta all\'osso: il tuo partito ti sostituisce alla guida. La tua carriera politica finisce qui.')
     : reason==='primaria'?T('I militanti scelgono <b>%V</b>%X. Il partito volta pagina: la tua carriera politica finisce qui.').replace('%V',(S.sfida||{}).volto||T('lo sfidante')).replace('%X',(S.sfida&&S.sfida.area)?(', '+S.sfida.carica+' — '+S.sfida.area):'')
     : reason==='ritiro'?T('A %E anni annunci il ritiro a vita privata. Nessuna caduta: un congedo, e la parola passa alla storia.').replace('%E',S.eta)
+    /* L86-1 — non è una sconfitta e il testo non deve lasciarlo intendere: è la Costituzione che chiude, e il
+       giocatore lo sapeva da dodici mesi (l'avviso all'inizio dell'ultimo anno). */
+    : reason==='mandatoCompiuto'?(PAESE.mandatiMax===1
+        ? T('La Costituzione dà un mandato solo, e il tuo è finito. Non ci sono urne che ti riguardino: consegni il paese a chi verrà dopo, con il consenso al <b>%C per cento</b>.').replace('%C',Math.round(S.ind.consenso))
+        : T('Hai vinto i <b>%N mandati</b> che la Costituzione concede, e li hai fatti fino in fondo. Nessuna sconfitta: il tempo che ti era dato è finito, e lasci con il consenso al <b>%C per cento</b>.').replace('%N',PAESE.mandatiMax).replace('%C',Math.round(S.ind.consenso)))
     : reason==='condanna'?T('Il collegio legge il dispositivo: condanna. Le scelte che l\'hanno resa possibile portano la tua firma. La carriera politica finisce in tribunale.')
     : reason==='salute'?(S.esitoSalute==='fatale'
         ? T('Avevi ignorato ogni avvertimento. Il corpo ha presentato il conto, e stavolta non c\'è stato ritorno. La corsa finisce qui, a %E anni.').replace('%E',S.eta)
@@ -5721,13 +5961,17 @@ function gameOver(reason){
     : T('Hai perso le elezioni e passi all\'opposizione.');
   const epilogo=generaEpilogo(reason).map(function(p){return '<p style="margin:7px 0">'+p+'</p>';}).join('');
   const F=(typeof generaFinale==='function')?generaFinale(reason):null;   // L73-2: titolo in alto, verdetto sotto la storia
-  const verdettoHtml=(F&&F.verdetto.length)?'<div style="font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--mut);margin:12px 0 6px">'+T('Il verdetto del paese')+'</div>'+F.verdetto.map(function(p){return '<p style="margin:7px 0">'+p+'</p>';}).join(''):'';
+  /* ⛑ L86-1 — DIFETTO PREESISTENTE, trovato passando: questi due occhielli stavano a 10,5px, sotto il pavimento
+     assoluto di 11, e la sonda li leggeva come «testo per decidere» perché non erano marcati. Sono occhielli:
+     `class="contorno"` (L70-1: il contorno si DICHIARA nel markup, non si deduce) e 11px. Vale per ogni finale,
+     non solo per quello nuovo — la schermata era rossa anche su `ritiro`, che con questo lotto non c'entra. */
+  const verdettoHtml=(F&&F.verdetto.length)?'<div class="contorno" style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--mut);margin:12px 0 6px">'+T('Il verdetto del paese')+'</div>'+F.verdetto.map(function(p){return '<p style="margin:7px 0">'+p+'</p>';}).join(''):'';
   const scF=(typeof scenaFinale==='function')?scenaFinale(reason):null;   // L9-1: scena d'esito (trionfo/dignità/caduta/oblio) sopra la bandiera
   const scFimg=scF?`<img class="mscene" src="${scF}" alt="" style="max-width:440px;max-height:200px;margin:6px auto 2px;border-radius:14px">`:'';
   document.getElementById('over').innerHTML=`${scFimg}<div style="text-align:center;padding-top:14px"><span class="flag" style="width:54px;height:36px;display:inline-block">${PAESE.flag||''}</span></div>
    <div class="screen center"><div class="em">${T('Fine partita')}</div>${F?`<div class="epitaffio">${F.titolo}</div>`:''}<h2>${title}</h2><p>${desc}</p>
    <div style="text-align:left;max-width:430px;margin:12px auto 4px;font-size:13.5px;line-height:1.5;color:var(--txt2);border-top:1px solid var(--line);padding-top:12px">
-     <div style="font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--mut);margin-bottom:6px">${T('La tua storia')}</div>${epilogo}${verdettoHtml}</div>
+     <div class="contorno" style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--mut);margin-bottom:6px">${T('La tua storia')}</div>${epilogo}${verdettoHtml}</div>
    <div class="statgrid">
      <div class="s"><div class="l">${T('Anni al governo')}</div><div class="v">${years}</div></div>
      <div class="s"><div class="l">${T('Mandati vinti')}</div><div class="v">${S.mandatesWon}</div></div>
@@ -5837,6 +6081,11 @@ function applySnap(snap){
   if(S.crisi08===undefined) S.crisi08=null;
   if(S.fusionePd===undefined) S.fusionePd=null;
   if(S.fusionePdl===undefined) S.fusionePdl=null;
+  /* L86-1 — migrazione: un salvataggio anteriore non ha il contatore dei mandati consecutivi. Eredita
+     `mandatesWon`, che è il numero giusto per chi non ha mai perso — e chi aveva perso ricomincia la serie
+     da lì al massimo un mandato prima del dovuto, mai dopo: il limite non scatta a sorpresa su un vecchio salvataggio. */
+  if(S.mandatiConsecutivi===undefined) S.mandatiConsecutivi=(S.mandatesWon||0);
+  if(S.avvisoUltimoMandato===undefined) S.avvisoUltimoMandato=false;
   if(S.fuoriAula===undefined) S.fuoriAula=null;
   if(S.fuoriAulaEsito===undefined) S.fuoriAulaEsito=null;
   if(S.richiamoCorrUltimo===undefined) S.richiamoCorrUltimo=null;   // CURA Lotto P3 — migrazione cooldown richiamo correnti
@@ -5877,7 +6126,21 @@ function applySnap(snap){
     if(Array.isArray(S.coalizione)){ S.coalizione=S.coalizione.map(function(id){return id==='i50_fronte'?'i50_pci':id;}); }
   }
   if(S.leggeTruffa===undefined) S.leggeTruffa=null;                            // Build B (b) — scelta legge truffa: default per i salvataggi pre-(b)
-  if(S.debtAncora===undefined) S.debtAncora=((SCENARI && S.scenario && SCENARI[S.scenario] && SCENARI[S.scenario].debtAncora!=null) ? SCENARI[S.scenario].debtAncora : 135);   // L30-1: dallo SCENARIO salvato, non dal primo che combacia con l era   // Cantiere B — migrazione: vecchi salvataggi → àncora dal loro scenario (o 135)
+  /* Cantiere B — migrazione: vecchi salvataggi → àncora dal loro SCENARIO (L30-1: quello salvato, non il primo
+     che combacia con l'era). L87-1: e dove lo scenario non la dichiara, dal debito-seed del paese.
+     ⚠ E si RISCRIVE anche quando c'è già, se vale il vecchio ripiego 135 e il paese ha un'àncora sua: un
+     salvataggio del presente anteriore porta 135 dentro `S`, e senza questa riga si terrebbe il difetto per
+     sempre — la stessa carriera si comporterebbe diversamente da una nuova. Non fa gradino: la fiducia insegue
+     il target al 10% al mese (model.js), quindi scivola verso il valore giusto in una decina di mesi. */
+  var _ancoraSC=(SCENARI && S.scenario && SCENARI[S.scenario]) ? SCENARI[S.scenario] : null;
+  if(S.debtAncora===undefined) S.debtAncora=ancoraDebito(_ancoraSC);
+  else if(S.debtAncora===135 && (!_ancoraSC || _ancoraSC.debtAncora==null)) S.debtAncora=ancoraDebito(_ancoraSC);
+  if(S.inflazione===undefined) S.inflazione=inflazioneSeed(_ancoraSC);   // L90-1: un salvataggio anteriore prende l'inflazione del suo scenario/paese (nessun gradino: l'erosione è mensile)
+  if(S.crescitaBase===undefined) S.crescitaBase=crescitaSeed(_ancoraSC);   // L90-1 passo 2: idem per la crescita di partenza
+  if(S.logorioAvv===undefined) S.logorioAvv=0;              // L90-2: un salvataggio anteriore non ha il logorio dell'avversario: riparte da zero (in favore del giocatore, mai contro)
+  if(S.mesiMinoranzaAvv===undefined) S.mesiMinoranzaAvv=0;
+  if(S.mesiGovernoAvv===undefined) S.mesiGovernoAvv=0;      // L91-2: un salvataggio anteriore da all'avversario un anno di grazia in piu', mai uno in meno
+  if(S.sostegnoAvv===undefined) S.sostegnoAvv=null;
   if(S.logorioEra===undefined) S.logorioEra=((SCENARI && S.scenario && SCENARI[S.scenario] && SCENARI[S.scenario].logorioEra!=null) ? SCENARI[S.scenario].logorioEra : null);   // L30-1: dallo SCENARIO salvato, non dal primo che combacia con l era
   if(S.sfideUltimo===undefined) S.sfideUltimo=S.year*12+S.month;   // D1a — migrazione: i vecchi salvataggi non ricevono la sfida all'istante
   if(S.campNaz===undefined) S.campNaz=null;                        // Cantiere C — migrazione campagna nazionale
