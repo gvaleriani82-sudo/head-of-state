@@ -7,6 +7,11 @@
    ============================================================================================================ */
 const LINEA_IT = 'italia_repubblica';
 const LINEA_UK = 'uk_postwar';   // L48-1 — la seconda linea storica: il Regno Unito del dopoguerra
+/* L93-1 — LA TERZA LINEA: la Francia. Il nome dice la cosa che la rende diversa dalle altre due — la linea
+   attraversa DUE repubbliche. La IV (1946-58) è un parlamentare proporzionale con governi che durano mesi; la V
+   (dal 1958) è il semipresidenziale che il presente ha già. Il cambio non si simula a metà porta: `fr1950` è
+   tutta IV Repubblica e il 1958 è lo snodo che la chiude (decisione D1, `PIANO-LINEA-FRANCIA.md`). */
+const LINEA_FR = 'francia_repubbliche';
 
 "use strict";
 /* ============================================================

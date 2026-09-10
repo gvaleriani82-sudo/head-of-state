@@ -1020,6 +1020,84 @@ const SCENARI = {
     ],
   },
   /* ============================================================================================================
+     L93-1 · FRANCIA 1950 — la quattordicesima porta, PRIMA DELLA TERZA LINEA. Scheda `PRESET-FRANCIA-1950.md`,
+     piano `PIANO-LINEA-FRANCIA.md` (decisioni D1-D6, 7 set 2026).
+
+     ⚑ QUESTA PORTA CAMBIA LE ISTITUZIONI, ed è la prima che lo fa. Il paese `francia` del presente è il
+     semipresidenziale della V Repubblica (Eliseo, due mandati, `comeSiVince:'candidato'`); qui siamo nella IV,
+     un **parlamentare proporzionale** dove il capo del governo è il Presidente del Consiglio a **Matignon** e
+     l'Assemblea lo fa e lo disfa. Il passaggio che lo permette è `SCENARIO_ISTITUZIONI` in game.js.
+     **Il 1958 NON cambia il motore dentro la porta** (D1): `fr1950` è tutta IV Repubblica, il cambio di
+     Repubblica è lo snodo di chiusura e la porta `fr1960` nascerà già semipresidenziale a 84 mesi.
+
+     I SEGGI D'AVVIO SONO DICHIARATI (L50-1), e sono i gruppi dell'Assemblea eletta il 10 nov 1946 (fonte
+     france-politique.fr, scheda §1): PCF 182 · MRP 162 · SFIO 102 · moderati 63 · RGR 42 · gollisti 9 su 560,
+     resi in centesimi. Il proporzionale di lista dipartimentale non è il collegio inglese e non è il premio
+     italiano del '53: qui i seggi seguono i voti da vicino, e la distorsione è quella minima del paese.
+
+     ⚠ IL BLOCCO DELLA TERZA FORZA SUPERA IL 60% E IL DECENNIO CADE LO STESSO: undici governi in sette anni.
+     Non è la minoranza a fare la storia francese degli anni '50 — è la caduta. Il numero da guardare in questa
+     porta è **i governi caduti per carriera**, non i mesi in minoranza.
+     ============================================================================================================ */
+  fr1950: {
+    id:'fr1950', era:LINEA_FR, nome:'Francia 1950', anno:1950, paese:'francia',
+    turnMandato: 3,                             // l'Assemblea del 1946 scade nel 1951: la prima urna è a tre anni e mezzo
+    /* L93-1 · LE ISTITUZIONI DELLA IV REPUBBLICA (D1). Ognuno di questi campi sovrascrive il paese del presente. */
+    sistema: 'parlamentare', comeSiVince: 'parlamentare', coalizione: true, cadutaGoverno: true,
+    mandatoMesi: 60, mandatiMax: null,          // null = nessun limite: il limite dei due mandati è della V Repubblica
+    titoloRuolo: 'Presidente del Consiglio', sedeGoverno: 'Matignon',
+    scioglimentoMesiMin: 18,                    // i 12 mesi sono il potere del Presidente della V: qui vale la regola generale
+    ue: false,                                  // la CECA è del '51 e la CEE del '57: la porta non è UE, l'Europa entra come contenuto
+    intermedie: [ {tipo:'Elezioni cantonali', mese:36, tocca:'tutti'} ],
+    partiti: [
+      /* ⚠ GLI ALLEATI SONO DICHIARATI E LA VERIFICA HA DATO IL RISULTATO CHE LA VOCE TEMEVA: con il solo asse
+         (|Δ| ≤ 1) il RPF a +2 sarebbe compatibile con i moderati a +1, cioè il partito che nel 1951 votava
+         contro il regime entrerebbe nella maggioranza che lo difendeva. Quindi la Terza Forza si dichiara
+         (SFIO ↔ radicali ↔ MRP ↔ moderati, simmetrica), e i tre partiti antisistema dichiarano `alleati: []`:
+         PCF, RPF e più tardi i poujadisti non stanno con nessuno, **in tutte e due le direzioni**. È il fatto
+         del decennio: metà dei voti fuori dall'arco, e una maggioranza obbligata a governare insieme. */
+      { id:'fr_pcf',  nome:'PCF',        orientamento:'sinistra',       base:{ lavoratori:0.7, giovani:0.3 },                     forza:28.3, asse:-2, alleati:[] },
+      { id:'fr_mrp',  nome:'MRP',        orientamento:'centro',         base:{ cattolici:0.5, cetomedio:0.3, pensionati:0.2 },    forza:26.0, asse:1,  alleati:['fr_sfio','fr_rad','fr_mod'] },
+      { id:'fr_sfio', nome:'SFIO',       orientamento:'centrosinistra', base:{ lavoratori:0.5, cetomedio:0.3, giovani:0.2 },      forza:17.9, asse:-1, alleati:['fr_rad','fr_mrp','fr_mod'] },
+      { id:'fr_mod',  nome:'Moderati',   orientamento:'centrodestra',   base:{ imprenditori:0.4, pensionati:0.3, cattolici:0.3 }, forza:12.9, asse:1,  alleati:['fr_sfio','fr_rad','fr_mrp'] },
+      { id:'fr_rad',  nome:'Radicali',   orientamento:'centro',         base:{ cetomedio:0.6, imprenditori:0.4 },                 forza:11.1, asse:0,  alleati:['fr_sfio','fr_mrp','fr_mod'] },
+      /* ⚠⚠ IL RPF A 3,1 NON E' UNA CARRIERA GIOCABILE, ed e' un fatto misurato, non un timore. Il motore chiude
+         la partita con `gameOver('congresso')` quando la forza del partito scende sotto **max(forza d'avvio x 0,5 ; 5)**:
+         il 5 e' un PAVIMENTO ASSOLUTO, quindi un partito che parte a 3,1 e' gia' sotto la soglia al primo mese.
+         Misurato su venti carriere: **venti congressi su venti, mediana sette mesi.**
+         Il 3,1 e' storico (urne del 1946) e la traiettoria verso il 21,8 del '51 e' il senso della porta — quindi
+         il dato NON si tocca. Ma la scelta «gioco il RPF» oggi e' una trappola, e va decisa: o il partito si
+         dichiara non selezionabile, o il pavimento del congresso diventa relativo alla forza d'avvio. E' disegno,
+         e sta in L93-2 con i pilastri. Qui si dichiara, perche' chi lo legge deve saperlo. */
+      { id:'fr_rpf',  nome:'RPF',        orientamento:'destra',         base:{ cetomedio:0.5, pensionati:0.3, lavoratori:0.2 },   forza:3.1,  asse:2,  alleati:[] },
+    ],
+    /* i gruppi dell'Assemblea del 1946, in centesimi (182·162·102·63·42·9 su 560) */
+    seggi: { fr_pcf:32.5, fr_mrp:28.9, fr_sfio:18.2, fr_mod:11.3, fr_rad:7.5, fr_rpf:1.6 },
+    /* ⚠ ECONOMIA IN FRANCHI VECCHI (il nuovo franco è del 1960: 1 NF = 100 F). Le cifre sono l'ordine di
+       grandezza della scheda §2 e stanno in `CIFRE-ECONOMICHE.md` con la data e il ⚠ di chi le ha messe. */
+    economia: { pil:10000, debito:30, deficit:-3.5 },
+    /* ⛑ GLI APPARENTAMENTI SONO IL `premio` CHE ESISTE GIA (L52-1), non un campo nuovo. La voce chiedeva di
+       dichiararli «come `premio` per-scenario»; il campo c'e' dal Porcellum di `italia2000` e ha esattamente la
+       forma che serve. La quota e' storica e si legge dai seggi dichiarati della tappa del '51: la Terza Forza
+       apparentata prese **387 seggi su 626 = 62%** con circa meta' dei voti — e' quello che gli apparentamenti
+       facevano. Vale dal 1951, l'anno della legge (9 maggio 1951); il voto del 1946 e' ancora proporzionale puro.
+       ⚠ Alle DUE TAPPE il premio non si vede, perche' li i seggi sono dichiarati e il motore non viene chiamato
+       (L61-2, forma piena): serve alle elezioni che il giocatore provoca fra una tappa e l'altra. */
+    premio: { da:1951, quota:62 },
+    debtAncora: 30,
+    inflazione: 5,     // L90-1/L91-1: media del decennio, a ondate (Corea 1951-52, poi la calma, poi il '57-58)
+    crescita: 4.5,     // i Trente Glorieuses: cresce come l'Italia del miracolo, un po' meno
+    logorioEra: 0.012,                          // come le porte italiane del '50: il potere consuma in fretta
+    valuta: { sym:'F', mld:'mld franchi', mln:'mln franchi' },
+    quotaSpesa: 0.33,                           // ⚠ la scheda non la dà: 33% è l'ordine della spesa francese di quegli anni. Da confermare.
+    intro: "Francia, 1950. La ricostruzione corre e la Repubblica traballa: si governa in quattro contro chi vuole abbatterla, e i governi durano mesi.",
+    contesto: [
+      "Francia, 1950. Il paese si rialza in fretta — le fabbriche, il Piano, l'auto popolare — e intanto l'Assemblea fa e disfa governi al ritmo delle stagioni.",
+      "Comunisti e gollisti insieme valgono quasi metà dei voti e nessuno dei due può governare: chi sta in mezzo deve tenere insieme socialisti, radicali, democristiani e moderati, che su scuola e colonie non la pensano uguale.",
+      "In Indocina si combatte da quattro anni, e il conto arriva ogni mese sul bilancio.",
+    ],
+  },
+  /* ============================================================================================================
      L44-3 · ITALIA 2000 — la settima e ultima porta. Stessa LINEA; il roster è quello uscito dalla frana del '94
      (PPI, PDS, AN, Rifondazione, Lega, FI, CCD e i laici superstiti), anno d'avvio 2000.
 

@@ -1029,6 +1029,21 @@ const LINEE_STORICHE = {
       { tag:'uk2000', da:1999,      coda:2013     },
       { tag:'contemporanea', da:2012, coda:Infinity }
     ]
+  },
+  /* L93-1 · LA TERZA LINEA, la Francia. Stessa forma delle altre due — e vale la nota di L48-1: una linea nuova
+     non chiede una riga di motore, solo i suoi decenni. Il contenuto oggi esiste solo per il '50 (arriva in
+     L93-2): gli altri tag sono la struttura, pronta e vuota, esattamente come fu per l'inglese.
+     La saldatura al presente è quella di L44-1: `contemporanea` come ultimo decennio, dal 2012. */
+  [LINEA_FR]: {
+    decenni: [
+      { tag:'fr1950', da:-Infinity, coda:1961     },
+      { tag:'fr1960', da:1959,      coda:1971     },
+      { tag:'fr1970', da:1969,      coda:1981     },
+      { tag:'fr1980', da:1979,      coda:1991     },
+      { tag:'fr1990', da:1989,      coda:2001     },
+      { tag:'fr2000', da:1999,      coda:2013     },
+      { tag:'contemporanea', da:2012, coda:Infinity }
+    ]
   }
 };
 /* La carta E è viva? def = default del tag mancante ('contemporanea' per eraViva, 'universale' per eraVivaT).
@@ -1175,7 +1190,19 @@ const DRIFT_ECONOMICO_ERA = {
                    incollata al clamp +5 per otto anni e il decennio non si sentiva. Scelto 3,5: crescita ~3 negli anni
                    buoni, -2,5 nella recessione, e la ripresa lenta che la scheda chiede. */
                 {da:2000, ciclo:3.5}, {da:2008, ciclo:-6},  {da:2010, ciclo:0.5},
-                {da:2012, ciclo:2} ]
+                {da:2012, ciclo:2} ],
+  /* ==============================================================================================================
+     L93-1 · LA FRANCIA DEGLI ANNI '50 — drift ALTERNATO, e per una ragione diversa dalle altre due linee.
+     Sulla linea inglese il drift è nominale perché doveva erodere un debito enorme (L48-2); qui il debito parte
+     basso (30) e ci resta, quindi il drift **non serve a muovere il debito**: serve a far SENTIRE le ondate del
+     decennio, che la scheda §2 descrive come tre stagioni nette — la fiammata di Corea (1951-52), la calma dei
+     prezzi (1953-56), la corsa al franco che chiude il decennio (1957-58).
+     ⚠ E qui c'è una differenza che vale la pena scrivere: da L90-1 l'inflazione è un campo della porta, quindi
+     **non deve più essere travestita da crescita** come sulla linea inglese del '70. Il drift racconta la
+     congiuntura vera (l'attività), l'inflazione la racconta il seed. Sono due cose separate per la prima volta.
+     ============================================================================================================== */
+  [LINEA_FR]: [ {da:1950, ciclo:4},   {da:1951, ciclo:6},   {da:1953, ciclo:2},
+                {da:1957, ciclo:-1},  {da:1959, ciclo:3} ]
 };
 /* L60-2 · LA DISOCCUPAZIONE D'EPOCA. Il motore non aveva un posto dove un decennio potesse dire «qui i senza
    lavoro sono il doppio»: `S.uMod` decade dell'80% al mese e le carte danno solo colpi. Stessa forma di cicloBase():
@@ -1454,6 +1481,45 @@ const RIALLINEAMENTI_ERA = {
             delta:[ {id:'uk_con',delta:3.7}, {id:'uk_lab',delta:-6.2}, {id:'uk_lib',delta:1.0}, {id:'uk_snp',delta:0.2} ],
             urne:  { uk_con:36.1, uk_lab:29.0, uk_lib:23.0, uk_snp:1.7, uk_plaid:0.6, uk_green:1.0 },
             seggi: { uk_con:48.49, uk_lab:40.89, uk_lib:9.03, uk_snp:0.95, uk_plaid:0.48, uk_green:0.16 } }   // 306/258/57/6/3/1 su 631 · APPESO
+  },
+  /* ==============================================================================================================
+     L93-1 · LE DUE TAPPE FRANCESI DEL '50 (scheda §1, france-politique.fr — urne e gruppi dell'Assemblea).
+     Seggi DICHIARATI in centesimi, come le tappe inglesi e per la stessa ragione: **le urne storiche sono dati,
+     non simulazioni** (L61-2). Qui la ragione è ancora più forte, perché il sistema del 1951 non è quello che il
+     motore sa fare — è un proporzionale dipartimentale **con apparentamenti**, un correttivo che regala tutti i
+     seggi di un dipartimento alle liste alleate che insieme superano il 50%. Il risultato è che PCF e RPF, con
+     quasi metà dei voti, prendono un terzo dei seggi. Nessun modello proporzionale lo riproduce: si dichiara.
+
+     ⚑ E QUI VA DETTA UNA COSA CHE LA VOCE DAVA PER FATTA. La voce chiede di dichiarare gli apparentamenti come
+     `premio` per-scenario «così i seggi alle tappe escono dal motore vicini a quelli dichiarati». Ma con la forma
+     PIENA di L61-2 il motore alle tappe **non viene interrogato affatto**: i seggi dichiarati vincono, e un
+     premio non cambierebbe di una virgola ciò che il giocatore vede in quei due mesi. Il premio serve invece
+     alle elezioni CHE IL GIOCATORE PROVOCA fra una tappa e l'altra, ed è lì che è stato messo
+     (`premioApparentamento`, applicato in `calcSeggi`). Lo scarto motore/dichiarato è misurato e riportato.
+
+     1951 · COM 103 · RPF 121 · SOC 107 · MRP 94 · RRRS 74 · RI 53 · CRAPS 43 · UDSR 16 · altri 15 su 626.
+       In gioco, con sei liste: PCF 16,5 · RPF 19,3 · SFIO 17,1 · MRP 15,0 · radicali 14,4 (RRRS+UDSR) ·
+       moderati 17,7 (RI+CRAPS). Il totale dei sei fa 100: i 15 «altri» sono stati ripartiti pro-quota.
+     1956 · COM 150 · IPAS+paysans 95 · SOC 94 · MRP+IOM 83 · RRRS 58 · UFF 52 · RS 22 · UDSR 19 · RGR 14
+       su 594 (i 30 seggi d'Algeria non furono assegnati ✓). In gioco: PCF 25,3 · moderati 16,0 · SFIO 15,8 ·
+       MRP 14,0 · radicali 15,3 (RRRS+UDSR+RGR) · RPF 3,7 (i Repubblicani sociali, quel che resta) · poujadisti 8,8.
+     ============================================================================================================== */
+  [LINEA_FR]: {
+    1951: { delta:[ {id:'fr_rpf',delta:18.7}, {id:'fr_pcf',delta:-2.4}, {id:'fr_sfio',delta:-3.4},
+                    {id:'fr_mrp',delta:-13.5}, {id:'fr_mod',delta:-0.1}, {id:'fr_rad',delta:0.0} ],
+            urne:  { fr_pcf:25.9, fr_rpf:21.8, fr_sfio:14.5, fr_mod:12.8, fr_mrp:12.5, fr_rad:11.1 },
+            seggi: { fr_pcf:16.5, fr_rpf:19.3, fr_sfio:17.1, fr_mod:17.7, fr_mrp:15.0, fr_rad:14.4 } },
+    /* ⚠ IL 1956 PORTA UN PARTITO CHE NASCE E UNO CHE SI SFALDA, nello stesso mese: i poujadisti entrano a 11,5
+       — il primo partito antisistema del dopoguerra, e come gli altri due non sta con nessuno (`alleati: []`) —
+       mentre il RPF si sfalda nei Repubblicani sociali al 4,5. La dispersione dei poujadisti è nel 1958, che è
+       fuori dalle tappe della porta: la porta si chiude nel '59 e il '58 è lo snodo (L93-2). */
+    1956: { entra:[ { id:'fr_pouj', nome:'Poujadisti', orientamento:'destra populista',
+                      base:{ imprenditori:0.6, cetomedio:0.4 }, forza:11.5, asse:2, alleati:[] } ],
+            rinomina:[ {id:'fr_rpf', nome:'Repubblicani sociali'} ],
+            delta:[ {id:'fr_pcf',delta:-0.3}, {id:'fr_sfio',delta:0.4}, {id:'fr_mod',delta:1.7},
+                    {id:'fr_rad',delta:2.4}, {id:'fr_mrp',delta:-1.4}, {id:'fr_rpf',delta:-17.3} ],
+            urne:  { fr_pcf:25.6, fr_sfio:14.9, fr_mod:14.5, fr_rad:13.5, fr_pouj:11.5, fr_mrp:11.1, fr_rpf:4.5 },
+            seggi: { fr_pcf:25.3, fr_mod:16.0, fr_sfio:15.8, fr_rad:15.3, fr_mrp:14.0, fr_pouj:8.8, fr_rpf:3.7 } }
   }
 };
 /* L75-1 · I SONDAGGI CHE SBAGLIANO. La proiezione di L59-4 è onesta per costruzione (legge le forze); il 1992 inglese è
@@ -1824,12 +1890,28 @@ function riallineamentoTappa(){
 }
 /* Build B — il clone-PAESE d'epoca: sovrappone a un PAESE base gli override dello scenario (partiti, ue, intermedie…),
    MAI mutando PAESI. Unica fonte di verità, usata da setScenario (avvio) e applySnap (load). */
+/* ================================================================================================================
+   L93-1 — UNA PORTA PUÒ CAMBIARE LE ISTITUZIONI, non solo i partiti.
+   Fino a oggi uno scenario poteva sovrascrivere `partiti`, `ue` e `intermedie`: bastava, perché Italia e Regno
+   Unito hanno la stessa forma di governo dal 1950 a oggi. **La Francia no**: la porta `fr1950` è la IV Repubblica,
+   un parlamentare proporzionale col Presidente del Consiglio a Matignon, e il paese `francia` del presente è il
+   semipresidenziale della V con l'Eliseo e il limite dei due mandati. Senza questo passaggio la porta d'epoca
+   erediterebbe le istituzioni di oggi, cioè racconterebbe una Francia che nel 1950 non esisteva.
+   È **additivo**: uno scenario che non dichiara un campo si comporta esattamente come prima — verificato sulle
+   dodici porte esistenti, che non ne dichiarano nessuno.
+   ⚠ `mandatiMax` ha bisogno di `null` esplicito, non dell'assenza: la Francia di oggi dichiara 2, e la IV
+   Repubblica non aveva limiti. «Assente» non si può esprimere togliendo un campo a un oggetto che lo eredita.
+   ================================================================================================================ */
+const SCENARIO_ISTITUZIONI = ['sistema','comeSiVince','coalizione','cadutaGoverno','mandatoMesi',
+                              'titoloRuolo','sedeGoverno','scioglimentoMesiMin','distorsione'];
 function paeseConScenario(base, sc){
   if(!sc) return base;
   var ov={};
   if(sc.partiti && sc.partiti.length) ov.partiti=sc.partiti;
   if(sc.ue!==undefined) ov.ue=sc.ue;                 // (ii) es. ue:false → tutta la struttura UE inerte nel '50
   if(sc.intermedie) ov.intermedie=sc.intermedie;     // (ii) calendario elettorale d'epoca (niente europee)
+  SCENARIO_ISTITUZIONI.forEach(function(k){ if(sc[k]!==undefined) ov[k]=sc[k]; });   // L93-1
+  if(sc.mandatiMax!==undefined) ov.mandatiMax = sc.mandatiMax;                        // null = nessun limite (v. la nota)
   return Object.keys(ov).length ? Object.assign({}, base, ov) : base;
 }
 
