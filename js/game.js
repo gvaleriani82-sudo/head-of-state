@@ -507,12 +507,17 @@ function prepDic(prep, id){
 function dicPrepA(){ if(typeof curLang==='function'&&curLang()==='en') return T(dicNm(S.dicastero)); return prepDic('a',S.dicastero); }    // «a %DIC» → all'/al/alla…
 function dicPrepDi(){ if(typeof curLang==='function'&&curLang()==='en') return T(dicNm(S.dicastero)); return prepDic('di',S.dicastero); }  // «di %DIC» → dell'/del/della…
 function dicMigliora(n){ const m=DICASTERO_IND[S.dicastero]; if(!m) return; const k=m[0]; const lo=(k==='growth')?-6:0, hi=(k==='unemp')?30:(k==='growth')?5:100; if(S.ind[k]!=null) S.ind[k]=clamp(S.ind[k]+n*m[1], lo, hi); }
+/* subMin è IL passaggio di sostituzione dei testi-carta: titolo, testo, etichetta e riga-effetto di ogni scelta
+   (ui.js, ramo agenda). Ci stanno tutti i segnaposti che una carta condivisa può usare.
+   ⚠ %G:<gruppo> (L94-1) va risolto PRIMA di qualunque regola su %G nudo — che qui non c'è e non va aggiunta:
+   il %G nudo è dell'intervista e del banner-rivolta, che hanno il gruppo nel contesto e non passano da qui. */
 function subMin(s){ return (s||'')
+  .replace(/%G:([a-zA-Z]+)/g, function(_, id){ return (typeof nomeGruppo==='function') ? nomeGruppo(id) : id; })   /* L94-1: il nome del gruppo è del paese */
   .replace(/%DICDI/g, (typeof dicPrepDi==='function'?dicPrepDi():dicNome()))   // «di %DIC» articolato (D4-coda) — PRIMA di %DIC
   .replace(/%DICA/g, (typeof dicPrepA==='function'?dicPrepA():dicNome()))       // «a %DIC» articolato
   .replace(/%DIC/g, dicNome())
   .replace(/%PREMIER/g, (S.premier||{}).nome||T('il premier'))
-  .replace(/%SEDE/g, (typeof sedeGovernoPaese==='function'?sedeGovernoPaese():'Palazzo Chigi')); }   /* L76-1: la sede del governo e' un dato del paese */
+  .replace(/%SEDE|%CAPITALE|%ACAPITALE/g, function(m){ return (typeof luoghiSub==='function') ? luoghiSub(m) : m; }); }   /* L76-1: i luoghi sono dati del paese — un risolutore solo */
 function capitaleCresci(){
   const cm=(dif().capitaleMult!=null)?dif().capitaleMult:1;   // la salita è più lenta a difficile, più rapida a facile
   if(S.livello===1){   // da locale: la notorietà cresce amministrando bene — LENTA: si sale vincendo, non accumulando
@@ -3058,7 +3063,32 @@ function cdStampa(){ const f=etaFase(); return ((f==='anziano'||f==='vecchio')?2
 function cdPartito(){ const f=etaFase(); return (f==='giovane'?1:(f==='vecchio'?3:2)) + (convalescente()?1:0); }
 function mossaDisponibile(){ const m=S.year*12+S.month; return S.mossaUltima==null || m-S.mossaUltima>=cdStampa(); }
 function spendiMossa(){ S.mossaUltima=S.year*12+S.month; SALA_SUB=null; }
-function nomeGruppo(g){ const gr=GROUPS.find(x=>x.id===g); return gr?T(gr.nm):g; }
+/* ================================================================================================================
+   L94-1 · IL NOME DI UN GRUPPO È DEL PAESE — e il risolutore è UNO.
+   `GROUPS` (data.js) porta il peso e il nome di ripiego; `PAESE.nomiGruppi` può sovrascrivere il nome, gruppo per
+   gruppo. Il peso religioso-tradizionale al 12% ce l'hanno tutti e sedici i paesi; è il NOME che diceva «Mondo
+   cattolico» anche a Tokyo. Il campo è FACOLTATIVO e ADDITIVO: senza, vale `GROUPS[].nm` esattamente come prima.
+   Il valore è una stringa, oppure {nm, plurale} quando il nome nuovo cambia numero grammaticale.
+   ⚠ Si passa per T() UNA volta sola, qui: un nome reso in due modi nello stesso schermo è peggio del nome sbagliato.
+   Tutti i punti che rendevano `gr.nm` a mano (erano otto) chiamano questa, non il campo.
+   ================================================================================================================ */
+function vocePaeseGruppo(g){
+  const NG = (typeof PAESE!=='undefined' && PAESE && PAESE.nomiGruppi) ? PAESE.nomiGruppi[g] : null;
+  return (NG==null) ? null : NG;
+}
+function nomeGruppo(g){
+  const v=vocePaeseGruppo(g);
+  if(v!=null) return T(typeof v==='string' ? v : v.nm);
+  const gr=GROUPS.find(x=>x.id===g); return gr?T(gr.nm):g;
+}
+/* il numero grammaticale del nome: lo usa la frase dell'epitaffio («ti rimpiangono» / «ti rimpiange»).
+   Senza dichiarazione vale il numero di oggi: «Ceto medio» e «Mondo cattolico» singolari, gli altri quattro plurali. */
+const GRUPPI_SING_DEF={cetomedio:1, cattolici:1};
+function gruppoPlurale(g){
+  const v=vocePaeseGruppo(g);
+  if(v!=null && typeof v==='object' && v.plurale!==undefined) return !!v.plurale;
+  return !GRUPPI_SING_DEF[g];
+}
 function dichiara(testo){ S.log.unshift({t:'Dichiarazione', x:'«'+testo+'»'}); }
 /* Intervista: scegli il tema (un gruppo) e il tono. Bonus subito, ma PROMETTI: se entro 3 mesi colpisci
    quel gruppo con le tue scelte (colpi cumulati ≥3 via gd), la stampa te la rinfaccia. La deriva naturale
@@ -3302,7 +3332,7 @@ function divergenzeStoria(){
     else if(D.diverge[v]) div.push(T(D.diverge[v])); }
   return {div:div, seg:seg};
 }
-function nomeGruppoEp(g){ const gr=GROUPS.find(function(x){return x.id===g;}); return gr?T(gr.nm):g; }
+function nomeGruppoEp(g){ return nomeGruppo(g); }   /* L94-1: il risolutore e UNO (era un secondo, identico) */
 function gruppoPeggiore(){ let best=null; GROUPS.forEach(function(g){ const v=S.groups&&S.groups[g.id]; if(v==null) return; if(!best || v<best.v) best={id:g.id, v:v, v0:(S.groups0&&S.groups0[g.id]!=null)?S.groups0[g.id]:null}; }); return best; }
 function voltoSuccessore(reason){
   if((reason==='congresso'||reason==='primaria') && S.sfida && S.sfida.volto) return {v:S.sfida.volto, tipo:'partito'};
@@ -3408,7 +3438,7 @@ function generaEpilogo(reason){
   if(c.scaricati) t2.push(c.scaricati===1?T('un ministro scaricato'):c.scaricati+' '+T('ministri scaricati'));
   if(t2.length) par.push(T('Sul cammino: ')+t2.join(', ')+'.');
   /* L72-1: la rivolta entra nella storia, fra i primi paragrafi (aggiungiCarriera ne conserva tre) */
-  if(reason==='rivolta'){ const gN=(GROUPS.find(function(g){return g.id===S.rivoltaGruppo;})||{}).nm; if(gN) par.push(T('Cadde perché un pezzo di paese — %G — tenuto per mesi sotto la soglia della pazienza dalla sua stessa politica, scese in piazza.').replace('%G',T(gN))); }
+  if(reason==='rivolta'){ const gN=S.rivoltaGruppo?nomeGruppo(S.rivoltaGruppo):null; if(gN) par.push(T('Cadde perché un pezzo di paese — %G — tenuto per mesi sotto la soglia della pazienza dalla sua stessa politica, scese in piazza.').replace('%G',gN)); }
   /* la statura internazionale (lotto internazionale fase A): la media delle relazioni coi grandi enti */
   if(typeof relIntMean==='function' && S.relInt && Object.keys(S.relInt).length){
     const ri=relIntMean();
@@ -3471,16 +3501,16 @@ function generaEpilogo(reason){
   if(tr.length) par.push(T('Ti hanno chiamato ')+tr.map(function(id){return '«'+((TRATTI_DEF.find(function(d){return d.id===id;})||{}).nome||id)+'»';}).join(', ')+'.');
   if(!B.leggiFirmate.length && !t2.length && !tr.length && !(B.archiEpi&&B.archiEpi.length))   // cura 2: anche il vuoto ha la sua storia
     par.push(T(anni<=2?'Un passaggio breve, una promessa non mantenuta.':'Anni di ordinaria amministrazione: la storia volta pagina in fretta.'));
-  const gs=GROUPS.map(function(g){return {id:g.id, nm:g.nm, v:S.groups[g.id]};}).sort(function(a,b){return b.v-a.v;});
+  const gs=GROUPS.map(function(g){return {id:g.id, nm:nomeGruppo(g.id), v:S.groups[g.id]};}).sort(function(a,b){return b.v-a.v;});
   const spread=gs[0].v-gs[gs.length-1].v;
   if(anni<=2 && spread<12) par.push(T('Troppo poco tempo per lasciare un segno nella memoria del paese.'));   // cura 1: niente rimpianti finti
   else if(spread<8) par.push(T('Il paese ti saluta senza amore né rancore.'));
   else {
-    const sing={cetomedio:1,cattolici:1};   // nomi di gruppo grammaticalmente singolari ("Ceto medio"); gli altri sono plurali
+    /* L94-1: il numero grammaticale lo dichiara il paese (gruppoPlurale): «Chiese e campagne» e plurale, «America religiosa» no. */
     const top=gs.filter(function(g){return g.v>=55;}).slice(0,2), bot=gs[gs.length-1];
     let r='';
-    if(top.length) r+=top.map(function(g){return T(g.nm);}).join(' '+T('e')+' ')+' '+T((top.length===1&&sing[top[0].id])?'ti rimpiange':'ti rimpiangono');
-    if(bot.v<45) r+=(r?'; ':'')+T(bot.nm)+' '+T(sing[bot.id]?'non ti perdona':'non ti perdonano');
+    if(top.length) r+=top.map(function(g){return g.nm;}).join(' '+T('e')+' ')+' '+T((top.length===1&&!gruppoPlurale(top[0].id))?'ti rimpiange':'ti rimpiangono');
+    if(bot.v<45) r+=(r?'; ':'')+bot.nm+' '+T(gruppoPlurale(bot.id)?'non ti perdonano':'non ti perdona');
     par.push(r?(r+'.'):T('Il paese ti guarda andare via, diviso.'));
   }
   return par;
@@ -5051,6 +5081,13 @@ function seedNotteAnim(){
   UIVALS['bar:notte:bloc']=0;   // chiave = il data-anim completo: `fillI` antepone 'bar:' (come legge playAnims)
   if(NOTTE.sistema==='parlamentare'){ (PAESE.partiti||[]).forEach(function(p){ UIVALS['bar:notte:seg:'+p.id]=0; }); }
   else { UIVALS['bar:notte:me']=0; UIVALS['bar:notte:opp']=0; }
+  /* L95-2 — anche i NUMERI contano da zero all'exit poll, come le barre; e una notte nuova non eredita lo sfondo
+     né il verdetto già mostrati della notte precedente (altrimenti il primo stadio sfumerebbe dalla vittoria di
+     quattro anni fa). */
+  UIVALS['num:notte:bloc']=0; UIVALS['num:notte:soglia']=0;
+  if(NOTTE.sistema==='parlamentare'){ (PAESE.partiti||[]).forEach(function(p){ UIVALS['num:notte:seg:'+p.id]=0; }); }
+  else { UIVALS['num:notte:me']=0; UIVALS['num:notte:opp']=0; }
+  UIVALS['notte:sfondo']=null; UIVALS['notte:verdetto']=null;
 }
 
 /* GIORNATA ELETTORALE (fase B): attesa → notte a tappe → esito. Il VERO si congela QUI, nell'attesa, prima
@@ -5292,13 +5329,58 @@ function renderNotte(){
   /* 375px senza salti: altezza minima riservata → le ondate non fanno ballare il modale. Sfondo su WRAPPER (no leak di classe). */
   document.getElementById('modal').innerHTML=`<div class="notte-wrap">${mbg}<div class="mt"><div class="kicker">${kicker}</div><h2>${T(LAB_NOTTE[NOTTE.stadio])}</h2></div>
     <div style="min-height:268px">
-      <div class="mtext"${ultima?' style="font-weight:600"':''}>${narr}</div>
+      <div class="mtext${ultima?' notte-verdetto-riga':''}"${ultima?' style="font-weight:600"':''}>${narr}</div>
       ${lancio}
       <div class="notte-panel">${body}</div>
     </div>
     ${azioni}</div>`;
   document.getElementById('ov').classList.add('on');
+  notteMovimento(scN, ultima);    // L95-2: scaglionamento delle barre, sfondo in dissolvenza, verdetto dopo le barre
   try{ playAnims(); }catch(e){}   // vetrina: le barre dello spoglio scorrono tappa dopo tappa
+}
+/* ================================================================================================================
+   L95-2 · LO SPOGLIO CHE SI VEDE CONTARE. Tutto transitorio (UIVALS, nodi del modale): nulla in S, e il VERO
+   congelato in NOTTE non si tocca — questa funzione legge solo quello che renderNotte ha già messo in pagina.
+   Si chiama PRIMA di playAnims(), perché è playAnims che fa partire barre e numeri e deve trovare i ritardi.
+   ================================================================================================================ */
+const NOTTE_PASSO_MS=70, NOTTE_BARRA_MS=260, NOTTE_RESPIRO_MS=200, NOTTE_SICUREZZA_MS=800;
+function notteMovimento(scN, ultima){
+  const modal=document.getElementById('modal'); if(!modal) return;
+  const spento=(typeof motionSpento==='function') && motionSpento();
+  const ridotto=(typeof motionReduced==='function') && motionReduced();
+  /* 1 · LE BARRE SALGONO UNA ALLA VOLTA: 70 ms per posizione, nell'ordine in cui sono rese (il blocco in cima,
+     poi i partiti dal più grande). Il ritardo lo legge playAnims dal nodo (`data-ritardo`). */
+  const barre=modal.querySelectorAll('i.fill[data-anim^="bar:notte:"]');
+  barre.forEach(function(el, i){ el.setAttribute('data-ritardo', String(i*NOTTE_PASSO_MS)); });
+  /* 3 · LO SFONDO IN DISSOLVENZA. Il nodo è nuovo a ogni stadio: la scena di prima resta un istante SOTTO la nuova
+     e se ne va a fine dissolvenza — o allo scadere di un timer di sicurezza, perché un nodo fantasma che resta è
+     peggio di un salto. ⚠ La regola di L95-1: lo sfondo si segna «mostrato» solo quando la dissolvenza è PARTITA;
+     se un render la porta via prima, il render dopo riprova. */
+  const nuovo=modal.querySelector('.notte-wrap .mbg-img');
+  const prima=UIVALS['notte:sfondo'];
+  if(nuovo && scN){
+    if(spento || prima==null || prima===scN){ UIVALS['notte:sfondo']=scN; }
+    else {
+      const g=document.createElement('div'); g.className='mbg-img mbg-prima';
+      g.style.backgroundImage="url('"+prima+"')";
+      nuovo.parentNode.insertBefore(g, nuovo);                    // PRIMA nel DOM = SOTTO la nuova
+      nuovo.classList.add('mbg-entra');
+      const togli=function(){ try{ if(g.parentNode) g.parentNode.removeChild(g); }catch(e){} };
+      nuovo.addEventListener('animationstart', function(){ UIVALS['notte:sfondo']=scN; }, {once:true});
+      nuovo.addEventListener('animationend', togli, {once:true});
+      setTimeout(togli, NOTTE_SICUREZZA_MS);
+    }
+  }
+  /* 4 · LA PROCLAMAZIONE: il verdetto entra DOPO l'ultima barra, più un respiro. Una volta per notte: se lo stesso
+     stadio viene reso di nuovo (cambio lingua) il verdetto non rientra. */
+  if(ultima && !ridotto && UIVALS['notte:verdetto']==null){
+    const riga=modal.querySelector('.notte-verdetto-riga');
+    if(riga){
+      const ritardo=Math.max(0, barre.length-1)*NOTTE_PASSO_MS + NOTTE_BARRA_MS + NOTTE_RESPIRO_MS;
+      riga.classList.add('notte-verdetto'); riga.style.animationDelay=ritardo+'ms';
+      riga.addEventListener('animationstart', function(){ UIVALS['notte:verdetto']=1; }, {once:true});
+    }
+  }
 }
 /* Parlamentare: barre per-partito col rumore, RI-NORMALIZZATE a 100 coi resti (lo spoglio rispetta la somma 100);
    riga grossa "Il tuo blocco: N seggi" con la tacca del 50. Alla proclamazione (sd 0) i seggi sono esatti. */
@@ -5311,15 +5393,15 @@ function notteSeggi(shown, ultima){
   const blocTot=bloc.reduce((s,id)=>s+(shown[id]||0),0), reached=blocTot>=50;
   const sorted=[...ps].sort((a,b)=>shown[b.id]-shown[a.id]);
   const rows=sorted.map(p=>{ const inBloc=bloc.includes(p.id), me=p.id===S.partito;
-    return `<div style="padding:5px 0"><div style="display:flex;justify-content:space-between;font-size:13px"><span style="font-weight:${me?700:500}">${T(p.nome)}${me?(' <span class="chip" style="background:var(--acc-bg);color:var(--acc-ink)">'+T('tu')+'</span>'):''}</span><span class="mono">${shown[p.id]}</span></div>
+    return `<div style="padding:5px 0"><div style="display:flex;justify-content:space-between;font-size:13px"><span style="font-weight:${me?700:500}">${T(p.nome)}${me?(' <span class="chip" style="background:var(--acc-bg);color:var(--acc-ink)">'+T('tu')+'</span>'):''}</span><span class="mono val" data-anim="num:notte:seg:${p.id}" data-to="${shown[p.id]}" data-dec="0" data-unit="">${shown[p.id]}</span></div>
       <div class="bar">${fillI('notte:seg:'+p.id, clamp(shown[p.id],2,100), inBloc?'var(--acc)':'var(--mut2)')}</div></div>`; }).join('');
   /* alla PROCLAMAZIONE: l'aula come emiciclo (grafica lotto 2) — i puntini a ventaglio */
   const emi=(ultima && typeof emiciclo==='function') ? `<div style="padding:6px 18px 0">${emiciclo(shown,{key:'notte',coal:bloc})}</div>` : '';
   /* F4 — LA SOGLIA IN SCENA (il '53 e ogni snodo-soglia futuro): la posta dichiarata ondata per ondata.
      Il VERO non cambia: la soglia resta valutata a valle in applicaSnodoTruffa. Qui si VIVE, non si decide. */
   const soglia=(typeof snodoTruffaAttivo==='function' && snodoTruffaAttivo() && S.leggeTruffa==='approvata')
-    ? `<div class="mtext" style="color:var(--acc-ink);border-left:2px solid var(--acc);padding-left:10px">${T('Il premio di maggioranza: al blocco apparentato serve il 50%.')} <b class="mono">${blocTot}</b> ${T('in questo momento')}.</div>` : '';
-  return `<div class="mtext">${T('Il tuo blocco:')} <b class="mono" style="color:${reached?'var(--pos)':'var(--acc)'};font-size:17px">${blocTot}</b> ${T('seggi su 100')} <small style="color:var(--mut2)">${T('(servono 50)')}</small>.
+    ? `<div class="mtext" style="color:var(--acc-ink);border-left:2px solid var(--acc);padding-left:10px">${T('Il premio di maggioranza: al blocco apparentato serve il 50%.')} <b class="mono val" data-anim="num:notte:soglia" data-to="${blocTot}" data-dec="0" data-unit="">${blocTot}</b> ${T('in questo momento')}.</div>` : '';
+  return `<div class="mtext">${T('Il tuo blocco:')} <b class="mono val" data-anim="num:notte:bloc" data-to="${blocTot}" data-dec="0" data-unit="" style="color:${reached?'var(--pos)':'var(--acc)'};font-size:17px">${blocTot}</b> ${T('seggi su 100')} <small style="color:var(--mut2)">${T('(servono 50)')}</small>.
       <div class="bar" style="position:relative;margin-top:8px">${fillI('notte:bloc', clamp(blocTot,2,100), reached?'var(--pos)':'var(--acc)')}${tacca50()}</div></div>
     ${soglia}
     ${emi}
@@ -5331,9 +5413,9 @@ function notteCandidato(onda){
   const myP=onda.myPct, oppP=clamp(100-myP,0,100);
   return `<div class="mtext">${T('Testa a testa con %O.').replace('%O','<b>'+T(r.opp.nome)+'</b>')}</div>
     <div style="padding:0 18px 6px">
-      <div style="padding:6px 0"><div style="display:flex;justify-content:space-between;font-size:13px"><span style="font-weight:700">${T(me.nome)} <span class="chip" style="background:var(--acc-bg);color:var(--acc-ink)">${T('tu')}</span></span><span class="mono">${fmt(myP,1)}%</span></div>
+      <div style="padding:6px 0"><div style="display:flex;justify-content:space-between;font-size:13px"><span style="font-weight:700">${T(me.nome)} <span class="chip" style="background:var(--acc-bg);color:var(--acc-ink)">${T('tu')}</span></span><span class="mono val" data-anim="num:notte:me" data-to="${myP}" data-dec="1">${fmt(myP,1)}%</span></div>
         <div class="bar" style="position:relative">${fillI('notte:me', clamp(myP,2,100), 'var(--acc)')}${tacca50()}</div></div>
-      <div style="padding:6px 0"><div style="display:flex;justify-content:space-between;font-size:13px"><span style="font-weight:600">${T(r.opp.nome)}</span><span class="mono">${fmt(oppP,1)}%</span></div>
+      <div style="padding:6px 0"><div style="display:flex;justify-content:space-between;font-size:13px"><span style="font-weight:600">${T(r.opp.nome)}</span><span class="mono val" data-anim="num:notte:opp" data-to="${oppP}" data-dec="1">${fmt(oppP,1)}%</span></div>
         <div class="bar">${fillI('notte:opp', clamp(oppP,2,100), 'var(--mut2)')}</div></div></div>`;
 }
 
@@ -5381,7 +5463,23 @@ function voceTel(def){
   if(S && S.era && S.era!=='contemporanea' && PAESE && PAESE.id==='italia') return T('Il centralino ti passa una comunicazione');
   return T('Il telefono squilla');
 }
-function stopTimerTel(){ if(TEL && TEL.timer){ clearTimeout(TEL.timer); TEL.timer=null; } }
+function stopTimerTel(){ if(TEL && TEL.timer){ clearTimeout(TEL.timer); TEL.timer=null; }
+  if(TEL && TEL.tic){ clearInterval(TEL.tic); TEL.tic=null; } }
+/* L95-1 — la barra della telefonata a MOVIMENTO SPENTO. La barra e' solo CSS (`telDrain`): con l'animazione
+   spenta resterebbe piena, e il conto alla rovescia — che e' informazione, non decorazione — sparirebbe. Qui
+   la stessa barra scende a scatti di un secondo, senza transizione. Transitoria come tutto TEL: mai in S. */
+function telTicSpento(){
+  if(!TEL || TEL.missed) return;
+  if(typeof motionSpento!=='function' || !motionSpento()) return;
+  var dur=(typeof F1_TIMER_MS!=='undefined'?F1_TIMER_MS:13000), t0=Date.now();
+  if(TEL.tic) clearInterval(TEL.tic);
+  TEL.tic=setInterval(function(){
+    var el=document.querySelector('.telbar > i');
+    if(!TEL || TEL.missed || !el){ if(TEL&&TEL.tic){ clearInterval(TEL.tic); TEL.tic=null; } return; }
+    var k=Math.max(0, 1-(Date.now()-t0)/dur);
+    el.style.transform='scaleX('+k.toFixed(3)+')';
+  }, 1000);
+}
 function armaTimerTel(){
   if(!TEL) return; stopTimerTel();
   if(typeof F1_TIMER==='undefined' || !F1_TIMER) return;   // timer in prova: spento → la chiamata aspetta, nessuno scadere
@@ -5390,8 +5488,8 @@ function armaTimerTel(){
 }
 function apriTelefonata(){
   var def=telDef(S.telPendente); if(!def){ S.telPendente=null; return; }
-  TEL={ id:def.id, def:def, missed:false, timer:null };
-  renderTelefonata(); armaTimerTel();
+  TEL={ id:def.id, def:def, missed:false, timer:null, tic:null };
+  renderTelefonata(); armaTimerTel(); telTicSpento();
 }
 function renderTelefonata(){
   if(!TEL) return; var def=TEL.def;
@@ -5754,9 +5852,9 @@ function esitoCandidato(r){
   document.getElementById('modal').innerHTML=`<div class="mt"><div class="kicker">${T(S.elezioniAnticipate?'Elezioni anticipate':'Elezioni')} · ${S.year}</div><h2>${titoloEsito(r.win)}</h2></div>
     <div class="mtext">${T('Testa a testa con <b>%O</b>: gli altri partiti si schierano per vicinanza politica.').replace('%O',T(r.opp.nome))}${(S.opposizione&&r.cb)?` ${T('Credibilità:')} <b style="color:${r.cb>=0?'var(--pos)':'var(--neg)'}">${r.cb>=0?'+':''}${Math.round(r.cb*10)/10}</b> ${T('punti')}.`:''}</div>
     <div style="padding:0 18px 6px">
-      <div style="padding:6px 0"><div style="display:flex;justify-content:space-between;font-size:13px"><span style="font-weight:700">${T(me.nome)} <span class="chip" style="background:var(--acc-bg);color:var(--acc-ink)">${T('tu')}</span></span><span class="mono">${fmt(myP,1)}%</span></div>
+      <div style="padding:6px 0"><div style="display:flex;justify-content:space-between;font-size:13px"><span style="font-weight:700">${T(me.nome)} <span class="chip" style="background:var(--acc-bg);color:var(--acc-ink)">${T('tu')}</span></span><span class="mono val" data-anim="num:notte:me" data-to="${myP}" data-dec="1">${fmt(myP,1)}%</span></div>
         <div class="bar"><i style="width:${clamp(myP,2,100)}%;background:var(--acc)"></i></div></div>
-      <div style="padding:6px 0"><div style="display:flex;justify-content:space-between;font-size:13px"><span style="font-weight:600">${T(r.opp.nome)}</span><span class="mono">${fmt(oppP,1)}%</span></div>
+      <div style="padding:6px 0"><div style="display:flex;justify-content:space-between;font-size:13px"><span style="font-weight:600">${T(r.opp.nome)}</span><span class="mono val" data-anim="num:notte:opp" data-to="${oppP}" data-dec="1">${fmt(oppP,1)}%</span></div>
         <div class="bar"><i style="width:${clamp(oppP,2,100)}%;background:var(--mut2)"></i></div></div></div>
     <div class="choices"><button class="opt" style="border-color:${r.win?'var(--acc)':'var(--neg)'}" onclick="${r.win?(PAESE.coalizione?"openTrattativa('rinnovo')":'vinciElezione()'):'perdiElezione()'}"><span class="ol">${T(r.win?(PAESE.coalizione?'Ricostruisci la maggioranza →':(S.opposizione?'Torna al governo →':'Resta in carica →')):(S.opposizione?'Vedi il bilancio finale':'Vai all\'opposizione →'))}</span>${r.win&&!PAESE.coalizione&&!S.opposizione?`<span class="oe">${T('Mandato')} ${S.mandate+1}</span>`:''}</button></div>`;
   document.getElementById('ov').classList.add('on');
@@ -6015,7 +6113,9 @@ const RIVOLTA_TESTI={
   cetomedio:   'Il ceto medio smette di pagare e di votare: serrata fiscale, dimissioni in massa nei consigli locali. Il governo cade.',
   imprenditori:'Serrata delle imprese: capitali in fuga, cantieri fermi, nessun credito. Il governo cade sotto il peso di un\'economia che si ferma.',
   giovani:     'Università occupate, cortei ogni giorno, scontri: la piazza dei giovani non si svuota più. Il governo cade.',
-  cattolici:   'Parrocchie e associazioni ti tolgono il saluto, e con loro metà della tua maggioranza. Il governo cade.'
+  /* L94-1: «parrocchie» era l'Italia in un testo che gira in tutti e sedici i paesi — e questo NON stava in un pool,
+     quindi il censimento non poteva vederlo: l'ho trovato leggendo i punti che nominano il gruppo. */
+  cattolici:   'Luoghi di culto e associazioni ti tolgono il saluto, e con loro metà della tua maggioranza. Il governo cade.'
 };
 function gameOver(reason){
   try{ aggiungiCarriera(reason); }catch(e){} chiudiAutosave();   // carriera chiusa: aggiorna lo storico e cancella l'autosave (niente "Continua")
@@ -6341,6 +6441,12 @@ function aggiungiCarriera(reason){ if(!S) return; const p=getProfilo();
   let esT=''; try{ esT=esitoLabel(reason); }catch(e){}   // etichetta congelata QUI, col genere del personaggio di QUESTA carriera
   p.carriere.unshift({ paese:(PAESE&&PAESE.nome)||S.paese, partito:((part(S.partito)||{}).nome)||S.partito, anni:S.year-(S.annoInizio||2025), mandati:S.mandatesWon||0, esito:reason, esitoTesto:esT, nome:((S.personaggio||{}).nome)||'', tratti:trNomi, racconto:racconto });
   if(p.carriere.length>50) p.carriere.length=50; lsSet('hos_profile', JSON.stringify(p)); }
+
+/* L95-1 — il movimento si applica PRIMA di tutto il resto: la classe sul <html> deve esserci già quando
+   `applyPaese()` mette l'hero in pagina, altrimenti il Ken Burns parte per un istante anche a chi ha scelto
+   «spento». (Gli script stanno in fondo al body, quindi un frame c'è comunque: per quel frame vale il
+   blocco @media del CSS, che copre chi ha «Riduci movimento» di sistema — cioè il caso che conta.) */
+try{ if(typeof applicaMovimento==='function') applicaMovimento(); }catch(e){}
 
 /* inizializza la schermata iniziale: paese di default (Italia), cornice e lista partiti */
 setCountry('italia');

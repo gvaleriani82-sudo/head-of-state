@@ -390,6 +390,12 @@
   .notte-wrap .notte-panel{ background:var(--panel); border:1px solid var(--line2); border-radius:12px; padding:6px 4px; margin:8px 12px; }
   .notte-wrap .notte-panel .mtext{ color:var(--txt2); text-shadow:none; }                    /* i risultati nel pannello = colori normali, leggibili */
   .notte-wrap .choices{ padding:6px 14px 16px; }
+  /* L95-2 — lo sfondo della notte passa in DISSOLVENZA: la scena vecchia (.mbg-prima) resta sotto, la nuova entra
+     sopra in 600 ms. Solo opacity. Tutte e due assolute (ereditano .mbg-img): il modale non balla. */
+  @keyframes mbgEntra{ from{ opacity:0; } to{ opacity:1; } }
+  .notte-wrap .mbg-img.mbg-entra{ animation:mbgEntra .6s ease both; }
+  /* e il verdetto entra dopo le barre: il ritardo lo scrive notteMovimento() sul nodo */
+  .notte-wrap .notte-verdetto{ animation:rise .26s cubic-bezier(.2,.7,.3,1) both; }
 
   /* ============================================================
      RESPONSIVO — tablet (≥700px) e desktop (≥1000px).
@@ -449,13 +455,17 @@
      ============================================================ */
   /* barre animate: il riempimento è a piena larghezza e SCALA da sinistra (transform, non width → niente layout) */
   .bar i.fill{ width:100%; transform-origin:left center; transition:transform .26s cubic-bezier(.2,.7,.3,1); }
-  /* carte agenda: entrata fade + lieve slittamento, scaglionata; SOLO quando il set di carte cambia (.agbox.enter) */
-  @keyframes cardIn{ from{ opacity:0; transform:translateY(8px); } to{ opacity:1; transform:none; } }
-  .agbox.enter > .ag{ animation:cardIn .18s cubic-bezier(.2,.7,.3,1) both; }
-  .agbox.enter > .ag:nth-child(2){ animation-delay:.05s; }
-  .agbox.enter > .ag:nth-child(3){ animation-delay:.10s; }
-  .agbox.enter > .ag:nth-child(4){ animation-delay:.15s; }
-  .agbox.enter > .ag:nth-child(n+5){ animation-delay:.20s; }
+  /* L95-1 — CARTE AGENDA: l'entrata e' della CARTA, non del set. Prima la classe stava sulla scatola
+     (.agbox.enter) e scattava solo quando cambiava la FIRMA dell'agenda: misurato, 8 entrate per 15 carte
+     risolte (L94-2). Ora `.enter` la mette un IntersectionObserver sulla singola carta, al suo primo ingresso
+     NEL VIEWPORT — cosi' un'entrata non parte piu' sotto la piega (erano 18 su 45). Ampiezza 16px in 260 ms
+     (da 8 in 180): sotto quella soglia il movimento c'e' e non si vede. */
+  @keyframes cardIn{ from{ opacity:0; transform:translateY(16px); } to{ opacity:1; transform:none; } }
+  .ag.enter{ animation:cardIn .26s cubic-bezier(.2,.7,.3,1) both; }
+  .ag.enter:nth-child(2){ animation-delay:.05s; }
+  .ag.enter:nth-child(3){ animation-delay:.10s; }
+  .ag.enter:nth-child(4){ animation-delay:.15s; }
+  .ag.enter:nth-child(n+5){ animation-delay:.20s; }
   /* cambio scheda: breve dissolvenza del contenuto della sezione (solo al cambio reale, gestito in render) */
   @keyframes secFade{ from{ opacity:0; } to{ opacity:1; } }
   .sec.secfade{ animation:secFade .12s ease; }
@@ -486,14 +496,35 @@
      L'img è cover al 100% e il contenitore letterboxa (overflow:hidden): un lieve SOVRA-scala (≥1.06) tiene sempre coperto
      anche col piccolo scorrimento → mai un bordo scoperto. `alternate` = un respiro avanti/indietro senza salti. Solo
      transform → compositor/60fps, zero asset nuovi. Annullato sotto prefers-reduced-motion (blocco qui sotto). */
-  @keyframes kenBurns{ from{ transform:scale(1.06) translate(0.6%, 0.4%); } to{ transform:scale(1.12) translate(-1.2%, -0.9%); } }
+  /* L95-1 — e il Ken Burns CONTINUA e si VEDE. `render()` ricrea l'<img>, quindi l'animazione ripartiva da
+     zero: misurato, in dodici mesi arrivava a 367 ms su 24.000, l'1,5% del ciclo (L94-2). Ora `riprendiFase()`
+     (ui.js) rimette la fase con un animation-delay negativo, e la scena scende a 16 s con un'escursione di
+     scala doppia (1,06 -> 1,14 invece di 1,12). Il sovra-scala minimo 1,06 RESTA: e' lui che tiene coperto il
+     bordo mentre l'immagine scorre. L'hero resta a 28 s: e' fermo sotto gli occhi, non ha bisogno di fretta. */
+  @keyframes kenBurns{ from{ transform:scale(1.06) translate(0.6%, 0.4%); } to{ transform:scale(1.14) translate(-1.2%, -0.9%); } }
   #home-hero img{ animation:kenBurns 28s ease-in-out infinite alternate; will-change:transform; }
-  .ag-scene img{ animation:kenBurns 24s ease-in-out infinite alternate; will-change:transform; }
+  .ag-scene img{ animation:kenBurns 16s ease-in-out infinite alternate; will-change:transform; }
+
+  /* L95-1 — IL MESE CHE AVANZA (contachilometri). La data vecchia scorre in alto ed esce, la nuova entra dal
+     basso. Il contenitore ritaglia; le due cifre si muovono solo in transform/opacity. Parte SOLO quando il
+     valore del mese cambia (playAnims legge UIVALS): a cambio di scheda o a decisione, niente. */
+  .mese-roll{ display:inline-block; position:relative; overflow:hidden; vertical-align:bottom; }
+  @keyframes meseEntra{ from{ opacity:0; transform:translateY(100%); } to{ opacity:1; transform:none; } }
+  @keyframes meseEsce{  from{ opacity:1; transform:none; }           to{ opacity:0; transform:translateY(-100%); } }
+  .mese-roll.roll > .mese-ora{ animation:meseEntra .26s cubic-bezier(.2,.7,.3,1) both; display:inline-block; }
+  .mese-roll > .mese-prima{ position:absolute; left:0; top:0; white-space:nowrap; pointer-events:none;
+    animation:meseEsce .26s cubic-bezier(.2,.7,.3,1) both; }
+
+  /* L95-1 — un numero che conta lo dice anche col COLORE, per 600 ms: il segno si vede senza leggere la cifra. */
+  @keyframes segnoSu{  0%{ color:var(--pos); } 70%{ color:var(--pos); } 100%{ color:inherit; } }
+  @keyframes segnoGiu{ 0%{ color:var(--neg); } 70%{ color:var(--neg); } 100%{ color:inherit; } }
+  .val.su{  animation:segnoSu .6s ease both; }
+  .val.giu{ animation:segnoGiu .6s ease both; }
   /* bottoni: feedback tattile leggero al tocco */
   .opt:active, .tab:active, .mini-btn:active, .cand:active, .seg button:active, #start-btn:active{ transform:scale(.985); }
   /* accessibilità non negoziabile: chi chiede meno movimento ha tutto istantaneo */
   @media (prefers-reduced-motion: reduce){
-    .modal, .agbox.enter > .ag, .sec.secfade{ animation:none !important; }
+    .modal, .ag.enter, .sec.secfade{ animation:none !important; }   /* L95-1: la classe e' sulla carta, non sulla scatola */
     .bar i.fill{ transition:none !important; }
     .bil-row, .bil-verdetto{ animation:none !important; }
     .promo-fiore{ animation:none !important; } .promo-fiore::after{ animation:none !important; opacity:0 !important; }
@@ -506,3 +537,35 @@
     header, #topbtn{ transition:none !important; }
     .opt:active, .tab:active, .mini-btn:active, .cand:active, .seg button:active, #start-btn:active, .btn:active, .pressa:active{ transform:none !important; }
   }
+
+  /* ============================================================================================================
+     L95-1 — L'INTERRUTTORE DEL MOVIMENTO (pieno / ridotto / spento), scelto in Impostazioni e salvato in
+     localStorage. La scelta si stampa come classe sul <html> (`.mov-ridotto` / `.mov-spento`) da
+     `applicaMovimento()` (ui.js), che e' anche il punto di verita' di `motionReduced()`.
+
+     ⚑ UN BLOCCO SOLO, E NIENTE COPIE DELLE TREDICI REGOLE DI SOPRA. Invece di ripetere la lista del blocco
+     @media si spegne TUTTO con una regola sola e si RIACCENDE per eccezione quello che «ridotto» conserva.
+     Cosi' una regola di movimento nuova, domani, e' spenta in ridotto/spento senza che nessuno se ne ricordi
+     — che e' il difetto opposto di quello che L94-2 ha trovato (`.telbar > i` era rimasta accesa perche'
+     nessuno l'aveva aggiunta al blocco).
+     ⚠ Il blocco @media qui sopra RESTA e non si tocca: vale prima che il javascript stampi la classe, e per
+     chi ha «Riduci movimento» di sistema senza aver mai aperto Impostazioni.
+     ============================================================================================================ */
+  html.mov-ridotto *, html.mov-ridotto *::before, html.mov-ridotto *::after,
+  html.mov-spento  *, html.mov-spento  *::before, html.mov-spento  *::after{
+    animation:none !important; transition:none !important; }
+  html.mov-ridotto .opt:active, html.mov-ridotto .tab:active, html.mov-ridotto .mini-btn:active,
+  html.mov-spento  .opt:active, html.mov-spento  .tab:active, html.mov-spento  .mini-btn:active{ transform:none !important; }
+  /* RIDOTTO conserva le sole dissolvenze, i fill della mappa e la barra della telefonata — che e' un conto
+     alla rovescia, cioe' INFORMAZIONE (decisione di Cowork su L94-2 §5), non decorazione. */
+  html.mov-ridotto .sec.secfade{ animation:secFade .12s ease !important; }
+  html.mov-ridotto .bil-verdetto{ animation:bilVerdetto .42s cubic-bezier(.2,.7,.3,1) .5s both !important; }
+  html.mov-ridotto .mappa-wrap path[onclick], html.mov-ridotto .mappa-wrap circle[onclick]{
+    transition:fill .3s ease, fill-opacity .3s ease !important; }
+  html.mov-ridotto .telbar > i{ animation:telDrain var(--teldur,13000ms) linear forwards !important; }
+  /* L95-2 — la dissolvenza dello sfondo della notte è una dissolvenza: in «ridotto» resta */
+  html.mov-ridotto .notte-wrap .mbg-img.mbg-entra{ animation:mbgEntra .6s ease both !important; }
+  /* SPENTO: nulla si muove. La barra della telefonata resta VISIBILE e resta un conto alla rovescia, ma a
+     SCATTI DI UN SECONDO: la muove `telTicSpento()` (game.js), scritta apposta in L95-1 perche' la barra era
+     solo CSS e con l'animazione spenta sarebbe rimasta piena — cioe' il conto alla rovescia sarebbe sparito. */
+

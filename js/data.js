@@ -16,6 +16,12 @@
    mandatoMesi resta 60 per tutti finché la logica elezioni non lo legge (durata per-paese: passo successivo). */
 const PAESI = {
   italia: {
+    /* L94-1 · I NOMI DEI GRUPPI SONO DEL PAESE. Il gruppo come PESO ha senso ovunque (un elettorato religioso-
+       tradizionale al 12% ce l'hanno tutti e sedici); e' il NOME che era italiano in tutti e sedici. Il campo
+       dichiara tutti e sei per completezza — cinque uguali a oggi, il sesto suo. `plurale:true` serve alla sola
+       frase dell'epitaffio («ti rimpiangono», non «ti rimpiange»): senza campo vale il numero di oggi. */
+    nomiGruppi:{ lavoratori:'Lavoratori e sindacati', pensionati:'Pensionati', cetomedio:'Ceto medio',
+                 imprenditori:'Imprese e industria', giovani:'Giovani e studenti', cattolici:'Mondo cattolico' },
     economia:{pil:2150, debito:139, deficit:-3.4, inflazione:1.0, crescita:0.7},   // cifre 2024 riconciliate (CIFRE-ECONOMICHE.md); PIL € mld
     nome: 'Italia',
     capitale: 'Roma', sedeGoverno: 'Palazzo Chigi',   /* L76-1: i luoghi sono DATI, non testi (i testi universali li leggono con %CAPITALE/%ACAPITALE/%SEDE) */
@@ -55,6 +61,9 @@ const PAESI = {
     ],
   },
   francia: {
+    /* L94-1 · i nomi dei gruppi, del paese (v. italia) */
+    nomiGruppi:{ lavoratori:'Lavoratori e sindacati', pensionati:'Pensionati', cetomedio:'Ceto medio',
+                 imprenditori:'Imprese e industria', giovani:'Giovani e studenti', cattolici:'Mondo cattolico' },
     economia:{pil:2890, debito:112, deficit:-5.8, inflazione:2.0, crescita:1.0},   // cifre 2024 riconciliate (CIFRE-ECONOMICHE.md); PIL € mld
     nome: 'Francia',
     capitale: 'Parigi', sedeGoverno: 'l\'Eliseo',   /* L76-1: i luoghi sono DATI, non testi (i testi universali li leggono con %CAPITALE/%ACAPITALE/%SEDE) */
@@ -89,6 +98,9 @@ const PAESI = {
     ],
   },
   usa: {
+    /* L94-1 · i nomi dei gruppi, del paese (v. italia) */
+    nomiGruppi:{ lavoratori:'Lavoratori e sindacati', pensionati:'Pensionati', cetomedio:'Ceto medio',
+                 imprenditori:'Imprese e industria', giovani:'Giovani e studenti', cattolici:'America religiosa' },
     economia:{pil:26600, debito:123, deficit:-6.5, inflazione:3.0, crescita:2.5},   // cifre 2024 riconciliate (CIFRE-ECONOMICHE.md); PIL € mld
     nome: 'Stati Uniti',
     capitale: 'Washington', sedeGoverno: 'la Casa Bianca',   /* L76-1: i luoghi sono DATI, non testi (i testi universali li leggono con %CAPITALE/%ACAPITALE/%SEDE) */
@@ -120,6 +132,9 @@ const PAESI = {
     ],
   },
   regnounito: {
+    /* L94-1 · i nomi dei gruppi, del paese (v. italia) */
+    nomiGruppi:{ lavoratori:'Lavoratori e sindacati', pensionati:'Pensionati', cetomedio:'Ceto medio',
+                 imprenditori:'Imprese e industria', giovani:'Giovani e studenti', cattolici:{nm:'Chiese e province', plurale:true} },
     economia:{pil:3230, debito:104, deficit:-4.8, inflazione:2.5, crescita:1.0},   // cifre 2024 riconciliate (CIFRE-ECONOMICHE.md); PIL € mld
     nome: 'Regno Unito',
     capitale: 'Londra', sedeGoverno: 'Downing Street',   /* L76-1: i luoghi sono DATI, non testi (i testi universali li leggono con %CAPITALE/%ACAPITALE/%SEDE) */
@@ -172,6 +187,9 @@ const PAESI = {
     ],
   },
   australia: {
+    /* L94-1 · i nomi dei gruppi, del paese (v. italia) */
+    nomiGruppi:{ lavoratori:'Lavoratori e sindacati', pensionati:'Pensionati', cetomedio:'Ceto medio',
+                 imprenditori:'Imprese e industria', giovani:'Giovani e studenti', cattolici:{nm:'Chiese e comunità rurali', plurale:true} },
     economia:{pil:1655, debito:50, deficit:-1.3, inflazione:3.2, crescita:1.5},   // cifre 2024 riconciliate (CIFRE-ECONOMICHE.md); PIL € mld
     nome: 'Australia',
     capitale: 'Canberra', sedeGoverno: 'la sede del governo',   /* L76-1: i luoghi sono DATI, non testi (i testi universali li leggono con %CAPITALE/%ACAPITALE/%SEDE) */
@@ -206,6 +224,9 @@ const PAESI = {
     ],
   },
   india: {
+    /* L94-1 · i nomi dei gruppi, del paese (v. italia) */
+    nomiGruppi:{ lavoratori:'Lavoratori e sindacati', pensionati:'Pensionati', cetomedio:'Ceto medio',
+                 imprenditori:'Imprese e industria', giovani:'Giovani e studenti', cattolici:{nm:'Comunità religiose', plurale:true} },
     economia:{pil:3640, debito:82, deficit:-7.8, inflazione:5.0, crescita:6.5},   // cifre 2024 riconciliate (CIFRE-ECONOMICHE.md); PIL € mld
     nome: 'India',
     capitale: 'Nuova Delhi', sedeGoverno: 'la sede del governo',   /* L76-1: i luoghi sono DATI, non testi (i testi universali li leggono con %CAPITALE/%ACAPITALE/%SEDE) */
@@ -242,6 +263,9 @@ const PAESI = {
     ],
   },
   sudafrica: {
+    /* L94-1 · i nomi dei gruppi, del paese (v. italia) */
+    nomiGruppi:{ lavoratori:'Lavoratori e sindacati', pensionati:'Pensionati', cetomedio:'Ceto medio',
+                 imprenditori:'Imprese e industria', giovani:'Giovani e studenti', cattolici:{nm:'Comunità religiose', plurale:true} },
     economia:{pil:340, debito:75, deficit:-6.2, inflazione:4.5, crescita:0.8},   // cifre 2024 riconciliate (CIFRE-ECONOMICHE.md); PIL € mld
     nome: 'Sudafrica',
     capitale: 'Pretoria', sedeGoverno: 'la presidenza',   /* L76-1: i luoghi sono DATI, non testi (i testi universali li leggono con %CAPITALE/%ACAPITALE/%SEDE) */
@@ -276,6 +300,9 @@ const PAESI = {
     ],
   },
   argentina: {
+    /* L94-1 · i nomi dei gruppi, del paese (v. italia) */
+    nomiGruppi:{ lavoratori:'Lavoratori e sindacati', pensionati:'Pensionati', cetomedio:'Ceto medio',
+                 imprenditori:'Imprese e industria', giovani:'Giovani e studenti', cattolici:'Mondo cattolico' },
     economia:{pil:555, debito:86, deficit:0.3, inflazione:10, inflazioneTetto:10, crescita:0.5},   // cifre 2024 riconciliate (CIFRE-ECONOMICHE.md); PIL € mld
     nome: 'Argentina',
     capitale: 'Buenos Aires', sedeGoverno: 'la Casa Rosada',   /* L76-1: i luoghi sono DATI, non testi (i testi universali li leggono con %CAPITALE/%ACAPITALE/%SEDE) */
@@ -311,6 +338,9 @@ const PAESI = {
   /* ===== ROSTER A 16 — 8 paesi nuovi. Dati (partiti reali, territori, nomi, allineamento); il campo `mappa` (Natural
      Earth) e le mappe-locali (OSM) si generano dopo: senza `mappa` il territorio degrada a lista testuale. ===== */
   germania: {
+    /* L94-1 · i nomi dei gruppi, del paese (v. italia) */
+    nomiGruppi:{ lavoratori:'Lavoratori e sindacati', pensionati:'Pensionati', cetomedio:'Ceto medio',
+                 imprenditori:'Imprese e industria', giovani:'Giovani e studenti', cattolici:{nm:'Chiese e campagne', plurale:true} },
     economia:{pil:4240, debito:64, deficit:-2.8, inflazione:2.3, crescita:0.2},   // cifre 2024 riconciliate (CIFRE-ECONOMICHE.md); PIL € mld
     nome: 'Germania',
     capitale: 'Berlino', sedeGoverno: 'la Cancelleria',   /* L76-1: i luoghi sono DATI, non testi (i testi universali li leggono con %CAPITALE/%ACAPITALE/%SEDE) */
@@ -345,6 +375,9 @@ const PAESI = {
     ],
   },
   giappone: {
+    /* L94-1 · i nomi dei gruppi, del paese (v. italia) */
+    nomiGruppi:{ lavoratori:'Lavoratori e sindacati', pensionati:'Pensionati', cetomedio:'Ceto medio',
+                 imprenditori:'Imprese e industria', giovani:'Giovani e studenti', cattolici:{nm:'Tradizione e campagne', plurale:true} },
     economia:{pil:3800, debito:255, deficit:-2.5, inflazione:2.7, crescita:0.5},   // cifre 2024 riconciliate (CIFRE-ECONOMICHE.md); PIL € mld
     nome: 'Giappone',
     capitale: 'Tokyo', sedeGoverno: 'la sede del governo',   /* L76-1: i luoghi sono DATI, non testi (i testi universali li leggono con %CAPITALE/%ACAPITALE/%SEDE) */
@@ -379,6 +412,9 @@ const PAESI = {
     ],
   },
   canada: {
+    /* L94-1 · i nomi dei gruppi, del paese (v. italia) */
+    nomiGruppi:{ lavoratori:'Lavoratori e sindacati', pensionati:'Pensionati', cetomedio:'Ceto medio',
+                 imprenditori:'Imprese e industria', giovani:'Giovani e studenti', cattolici:{nm:'Chiese e comunità rurali', plurale:true} },
     economia:{pil:2070, debito:105, deficit:-1.1, inflazione:2.4, crescita:1.2},   // cifre 2024 riconciliate (CIFRE-ECONOMICHE.md); PIL € mld
     nome: 'Canada',
     capitale: 'Ottawa', sedeGoverno: 'la sede del governo',   /* L76-1: i luoghi sono DATI, non testi (i testi universali li leggono con %CAPITALE/%ACAPITALE/%SEDE) */
@@ -412,6 +448,9 @@ const PAESI = {
     ],
   },
   spagna: {
+    /* L94-1 · i nomi dei gruppi, del paese (v. italia) */
+    nomiGruppi:{ lavoratori:'Lavoratori e sindacati', pensionati:'Pensionati', cetomedio:'Ceto medio',
+                 imprenditori:'Imprese e industria', giovani:'Giovani e studenti', cattolici:'Mondo cattolico' },
     economia:{pil:1525, debito:106, deficit:-3.4, inflazione:2.8, crescita:2.5},   // cifre 2024 riconciliate (CIFRE-ECONOMICHE.md); PIL € mld
     nome: 'Spagna',
     capitale: 'Madrid', sedeGoverno: 'la Moncloa',   /* L76-1: i luoghi sono DATI, non testi (i testi universali li leggono con %CAPITALE/%ACAPITALE/%SEDE) */
@@ -448,6 +487,9 @@ const PAESI = {
   /* ===== BLOCCO 2 — i 4 presidenziali (sistema:'presidenziale', comeSiVince:'candidato', cadutaGoverno:false).
      Corea del Sud occidentale; Brasile/Messico/Nigeria sedia-swing (allineamento:'nonallineato', come l'India). ===== */
   coreasud: {
+    /* L94-1 · i nomi dei gruppi, del paese (v. italia) */
+    nomiGruppi:{ lavoratori:'Lavoratori e sindacati', pensionati:'Pensionati', cetomedio:'Ceto medio',
+                 imprenditori:'Imprese e industria', giovani:'Giovani e studenti', cattolici:{nm:'Tradizione e campagne', plurale:true} },
     economia:{pil:1625, debito:57, deficit:-0.6, inflazione:2.3, crescita:2.0},   // cifre 2024 riconciliate (CIFRE-ECONOMICHE.md); PIL € mld
     nome: 'Corea del Sud',
     capitale: 'Seul', sedeGoverno: 'la presidenza',   /* L76-1: i luoghi sono DATI, non testi (i testi universali li leggono con %CAPITALE/%ACAPITALE/%SEDE) */
@@ -481,6 +523,9 @@ const PAESI = {
     ],
   },
   brasile: {
+    /* L94-1 · i nomi dei gruppi, del paese (v. italia) */
+    nomiGruppi:{ lavoratori:'Lavoratori e sindacati', pensionati:'Pensionati', cetomedio:'Ceto medio',
+                 imprenditori:'Imprese e industria', giovani:'Giovani e studenti', cattolici:{nm:'Evangelici e cattolici', plurale:true} },
     economia:{pil:2150, debito:87, deficit:-6.3, inflazione:4.4, crescita:2.5},   // cifre 2024 riconciliate (CIFRE-ECONOMICHE.md); PIL € mld
     nome: 'Brasile',
     capitale: 'Brasilia', sedeGoverno: 'il Planalto',   /* L76-1: i luoghi sono DATI, non testi (i testi universali li leggono con %CAPITALE/%ACAPITALE/%SEDE) */
@@ -518,6 +563,9 @@ const PAESI = {
     ],
   },
   messico: {
+    /* L94-1 · i nomi dei gruppi, del paese (v. italia) */
+    nomiGruppi:{ lavoratori:'Lavoratori e sindacati', pensionati:'Pensionati', cetomedio:'Ceto medio',
+                 imprenditori:'Imprese e industria', giovani:'Giovani e studenti', cattolici:'Mondo cattolico' },
     economia:{pil:1865, debito:56, deficit:-5.9, inflazione:4.7, crescita:1.5},   // cifre 2024 riconciliate (CIFRE-ECONOMICHE.md); PIL € mld
     nome: 'Messico',
     capitale: 'Città del Messico', sedeGoverno: 'la presidenza',   /* L76-1: i luoghi sono DATI, non testi (i testi universali li leggono con %CAPITALE/%ACAPITALE/%SEDE) */
@@ -552,6 +600,9 @@ const PAESI = {
     ],
   },
   nigeria: {
+    /* L94-1 · i nomi dei gruppi, del paese (v. italia) */
+    nomiGruppi:{ lavoratori:'Lavoratori e sindacati', pensionati:'Pensionati', cetomedio:'Ceto medio',
+                 imprenditori:'Imprese e industria', giovani:'Giovani e studenti', cattolici:{nm:'Comunità religiose', plurale:true} },
     economia:{pil:180, debito:47, deficit:-4.6, inflazione:10, inflazioneTetto:10, crescita:3.0},   // cifre 2024 riconciliate (CIFRE-ECONOMICHE.md); PIL € mld
     nome: 'Nigeria',
     capitale: 'Abuja', sedeGoverno: 'la presidenza',   /* L76-1: i luoghi sono DATI, non testi (i testi universali li leggono con %CAPITALE/%ACAPITALE/%SEDE) */
@@ -2053,7 +2104,7 @@ const BEAT_LEGGERI = [
     {l:'Approfitti per leggere', e:'Due libri in undici settimane', f:function(){}},
     {l:'Guardi l\'altro canale, obtorto collo', e:'Documentari, e tanti', f:function(){}} ]},
   // ---- Anni '50 ----
-  {id:'lg50_schedina', era:'universale', registro:'leggero', kick:'Il paese', t:'La schedina della domenica', text:'Nei bar non si parla d\'altro: pronostici, colonne raddoppiate, e il sogno di fare «13». Per una mattina la politica può aspettare.', ch:[
+  {id:'lg50_schedina', paesi:['italia'], era:'universale', registro:'leggero', kick:'Il paese', t:'La schedina della domenica', text:'Nei bar non si parla d\'altro: pronostici, colonne raddoppiate, e il sogno di fare «13». Per una mattina la politica può aspettare.', ch:[
     {l:'Giochi anche tu una colonna', e:'Due firme e una speranza', f:function(){}},
     {l:'Lasci sognare gli altri', e:'Ti diverte guardarli discutere', f:function(){}} ]},
   {id:'lg50_festival', era:'italia1950', codaFino:1969, registro:'leggero', cond:()=>S.year>=1951, kick:'Il paese', t:'La canzone che tutti canticchiano', text:'Da qualche sera la radio manda sempre la stessa melodia, e ormai la fischietta il paese intero: dal barbiere all\'ufficio.', ch:[
@@ -2705,7 +2756,7 @@ const F1_TELEFONATE = [
          { l:'Rimandare', e:'Conti intatti; la città incassa il no (lavoratori −)', f:function(){ gd('lavoratori',-2); } } ],
     raffredda:function(){ gd('lavoratori',-1); }, squilloTxt:'Il sindaco lo racconterà in giro: nessuna risposta.' },
 
-  { id:'tel_prefetto', chiamante:'Il prefetto', registro:'grave', cond:function(){ return !S.opposizione && S.paese==='italia' && (S.era&&S.era!=='contemporanea'); },   // L25-1: il prefetto attende istruzioni da chi governa
+  { id:'tel_prefetto', paesi:['italia'], chiamante:'Il prefetto', registro:'grave', cond:function(){ return !S.opposizione && (S.era&&S.era!=='contemporanea'); },   /* L94-1: il paese si DICHIARA (stava dentro il cond: invisibile a guardie e censimenti) */   // L25-1: il prefetto attende istruzioni da chi governa
     voce:'centralino',
     t:'Il prefetto', text:'«Il centralino le passa la comunicazione — prefetto in linea. La piazza è tesa: attendo istruzioni.»',
     ch:[ { l:'Linea di fermezza', e:'Ordine ristabilito (sicurezza +); i giovani mugugnano', f:function(){ if(S.ind) S.ind.sicurezza=clamp((S.ind.sicurezza||50)+1,0,100); gd('giovani',-1); } },
@@ -9436,7 +9487,7 @@ const PUNTO_PARTITO=[
    {l:'Prima l\'esperienza, poi il ricambio', e:'I veterani apprezzano; i giovani mordono il freno', f:()=>{ corrented('fedelissimi',6); corrented('militanti',-4); }},
    {l:'Se ne riparla dopo le prossime urne', e:'Rinvio che raffredda tutti', f:()=>{ tutteDegrado(6); }},
  ]},
- {id:'pp_territorio_int', t:'I circoli si sentono lontani', text:'Dalle sezioni sul territorio arriva un mugugno: «Roma decide, noi incolliamo i manifesti».', ch:[
+ {id:'pp_territorio_int', t:'I circoli si sentono lontani', text:'Dalle sezioni sul territorio arriva un mugugno: «%CAPITALE decide, noi incolliamo i manifesti».', ch:[
    {l:'Un giro d\'ascolto nelle sezioni', e:'Presenza vera: il territorio si riscalda', f:()=>{ tutteCorrenti(6); }},
    {l:'Deleghi un vice a tenere i rapporti', e:'Meglio di niente; il gesto pesa meno', f:()=>{ tutteCorrenti(2); }},
    {l:'Il territorio aspetti: c\'è da governare', e:'Le sezioni si sentono usate', f:()=>{ tutteDegrado(7); }},
@@ -10920,7 +10971,7 @@ const PROPOSTE=[
    e:'Giovani contenti; piccola spesa', costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; gd('giovani',4); gd('lavoratori',1);}},
  {id:'pro_diritti', profile:'progressista', t:'Estensione dei diritti civili',
    text:'nuove tutele su diritti e inclusione.',
-   e:'Giovani e parte dei cattolici; divide il ceto medio', f:()=>{gd('giovani',3); gd('cattolici',2); gd('cetomedio',-2);}},
+   e:'Giovani con te; consensi anche in %G:cattolici, ma divide il ceto medio', f:()=>{gd('giovani',3); gd('cattolici',2); gd('cetomedio',-2);}},
  // --- Conservatore ---
  {id:'con_sicurezza',era:'universale', profile:'conservatore', min:'interno', t:'Più forze dell\'ordine sul territorio',
    text:'agenti e mezzi aggiuntivi nelle città.',
@@ -10933,7 +10984,7 @@ const PROPOSTE=[
    e:'Affidabilità; costo interno; giovani freddi', costo:{debito:0.4},f:()=>{S.ind.debt+=0.4; gd('imprenditori',2); gd('giovani',-2);}},
  {id:'con_famiglia',era:'universale', profile:'conservatore', t:'Incentivi alla natalità e alla famiglia',
    text:'sostegni economici alle famiglie.',
-   e:'Cattolici e ceto medio; un po\' di spesa', costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; gd('cattolici',4); gd('cetomedio',2);}},
+   e:'Ceto medio contento; consensi in %G:cattolici; un po\' di spesa', costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; gd('cattolici',4); gd('cetomedio',2);}},
  // --- Populista ---
  {id:'pop_bonus',era:'universale', profile:'populista', t:'Bonus una tantum alle famiglie',
    text:'un trasferimento diretto per dare sollievo subito.',
@@ -10943,7 +10994,7 @@ const PROPOSTE=[
    e:'Pensionati entusiasti; spesa in salita', costo:{debito:0.6},f:()=>{S.ind.debt+=0.6; gd('pensionati',6); gd('cetomedio',1);}},
  {id:'pop_immig', profile:'populista', min:'interno', t:'Stretta sull\'immigrazione',
    text:'controlli più rigidi alle frontiere.',
-   e:'Ceto medio rassicurato; cattolici critici', f:()=>{S.ind.sicurezza+=2; gd('cetomedio',4); gd('cattolici',-3); gd('giovani',-1);}},
+   e:'Ceto medio rassicurato; %G:cattolici in dissenso', f:()=>{S.ind.sicurezza+=2; gd('cetomedio',4); gd('cattolici',-3); gd('giovani',-1);}},
  {id:'pop_condono',era:'universale', profile:'populista', min:'economia', t:'Condono fiscale',
    text:'una sanatoria per fare cassa rapidamente.',
    e:'Cassa subito; scontenti i contribuenti corretti', rischio:6, costo:{debito:-0.4},f:()=>{S.ind.debt-=0.4; gd('cetomedio',3); gd('cattolici',-2);}},
@@ -11042,7 +11093,7 @@ const CONFLITTI=[
    b:{profile:'populista', pos:'misure popolari subito.', e:'Ceto medio e lavoratori contenti; imprese fredde',
       costo:{debito:0.4},f:()=>{S.ind.debt+=0.4; gd('cetomedio',3); gd('lavoratori',2); gd('imprenditori',-2);}}},
  {id:'apertura_fermezza', tema:'Apertura o fermezza',
-   a:{profile:'progressista', pos:'apertura su diritti e immigrazione.', e:'Giovani e cattolici contenti; ceto medio freddo',
+   a:{profile:'progressista', pos:'apertura su diritti e immigrazione.', e:'Giovani contenti; consensi anche in %G:cattolici; ceto medio freddo',
       f:()=>{gd('giovani',3); gd('cattolici',2); gd('cetomedio',-3);}},
    b:{profile:'conservatore', pos:'fermezza e prudenza.', e:'Ceto medio contento; giovani freddi',
       f:()=>{gd('cetomedio',4); gd('giovani',-3); gd('cattolici',-1);}}},
@@ -11060,7 +11111,7 @@ const CONFLITTI=[
  {id:'pene_recupero', tema:'Pene severe o recupero',
    a:{profile:'conservatore', min:'interno', pos:'pene severe e certezza del castigo.', e:'Sicurezza percepita su; i garantisti insorgono',
       f:()=>{S.ind.sicurezza+=3; gd('cetomedio',3); gd('cattolici',1); gd('giovani',-3);}},
-   b:{profile:'progressista', min:'giustizia', pos:'rieducare e reinserire: la pena guardi avanti.', e:'Giovani e parte dei cattolici; il fronte dell\'ordine mugugna',
+   b:{profile:'progressista', min:'giustizia', pos:'rieducare e reinserire: la pena guardi avanti.', e:'Giovani e una parte di %G:cattolici; il fronte dell\'ordine mugugna',
       f:()=>{gd('giovani',3); gd('cattolici',2); gd('cetomedio',-3);}}},
 ];
 

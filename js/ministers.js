@@ -14,7 +14,7 @@ function ministerSummary(m){
   if(e.deficit<0) out.push(T('conti in ordine')); if(e.deficit>0) out.push(T('più spesa'));
   if(e.unemp<0) out.push(T('occupazione'));
   if(e.sanita>0) out.push(T('sanità')); if(e.sicurezza>0) out.push(T('sicurezza')); if(e.ambiente>0) out.push(T('ambiente'));
-  if(e.grp) for(const g in e.grp){ if(e.grp[g]>0){const gr=GROUPS.find(x=>x.id===g); if(gr) out.push(T(gr.nm).toLowerCase());} }
+  if(e.grp) for(const g in e.grp){ if(e.grp[g]>0) out.push(nomeGruppo(g).toLowerCase()); }   /* L94-1: il nome del gruppo passa dal risolutore unico */
   return out.length? T('Favorisce: ')+out.slice(0,3).join(', ') : T('Profilo equilibrato');
 }
 function askReplace(mid){

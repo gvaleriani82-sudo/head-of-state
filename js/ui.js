@@ -12,13 +12,141 @@
    Il DOM è SEMPRE reso al valore finale (statico/reduced-motion corretti); playAnims() aggiunge il moto
    vecchio→nuovo leggendo UIVALS (mappa dei valori dell'ultimo render, FUORI da S come COAL/NOTTE: mai
    serializzata, mai tocca la logica). Sotto prefers-reduced-motion è un no-op. UIANIM traccia i rAF in volo. */
-let UIVALS={}, UIANIM={}, lastTab=null, lastAgendaSig=null, lastDots={}, lastTerrPulse=null, PROMO_FIORE=false;   // lastTerrPulse (F2): l'area-che-chiama pulsa SOLO alla comparsa   // lastDots (E5): quali schede avevano il pallino l'ultimo render → il pulse scatta SOLO alla comparsa, mai a ogni re-render   // PROMO_FIORE: fioretto one-shot sul nuovo titolo a una transizione di carriera (consumato dal primo elemento-ruolo reso)
-function motionReduced(){ return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches); }
+let UIVALS={}, UIANIM={}, lastTab=null, lastDots={}, lastTerrPulse=null, PROMO_FIORE=false;   // lastTerrPulse (F2): l'area-che-chiama pulsa SOLO alla comparsa   // lastDots (E5): quali schede avevano il pallino l'ultimo render → il pulse scatta SOLO alla comparsa, mai a ogni re-render   // PROMO_FIORE: fioretto one-shot sul nuovo titolo a una transizione di carriera (consumato dal primo elemento-ruolo reso)
+/* ================================================================================================================
+   L95-1 · L'INTERRUTTORE DEL MOVIMENTO — pieno · ridotto · spento.
+   La scelta vive in localStorage (MAI in S: non è stato di partita, è una preferenza del dispositivo) e si
+   stampa come classe sul <html>, che è quello che il CSS legge. `motionReduced()` diventa IL punto di verità:
+   prima guardava solo la media query, ora guarda la scelta e ripiega sulla media query quando non c'è.
+   ⚠ Il sistema non sovrascrive una scelta esplicita: chi ha detto «pieno» avendo «Riduci movimento» acceso,
+   ha detto pieno. Ma chi non ha mai scelto parte da «ridotto» se il sistema lo chiede.
+   ================================================================================================================ */
+const MOV_CHIAVE='hos_movimento', MOV_MODI=['pieno','ridotto','spento'];
+function motionSistemaReduce(){ try{ return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches); }catch(e){ return false; } }
+function movimentoScelto(){   // la scelta esplicita, o null
+  const v=(typeof lsGet==='function')?lsGet(MOV_CHIAVE):null;
+  return (MOV_MODI.indexOf(v)>=0)?v:null;
+}
+function movimentoModo(){ return movimentoScelto() || (motionSistemaReduce()?'ridotto':'pieno'); }
+function applicaMovimento(){
+  const m=movimentoModo();
+  try{ const r=document.documentElement;
+    r.classList.toggle('mov-ridotto', m==='ridotto');
+    r.classList.toggle('mov-spento',  m==='spento');
+  }catch(e){}
+  return m;
+}
+function setMovimento(m){
+  if(MOV_MODI.indexOf(m)<0) return;
+  if(typeof lsSet==='function') lsSet(MOV_CHIAVE, m);
+  applicaMovimento();
+  if(typeof showPartita==='function' && document.getElementById('menu-modal')) showPartita();   // ridisegna il pannello: il segmento acceso deve seguire la scelta
+}
+function motionReduced(){ const m=movimentoModo(); return m==='ridotto' || m==='spento'; }
+function motionSpento(){ return movimentoModo()==='spento'; }
 function topScroll(){ window.scrollTo({top:0, behavior: motionReduced()?'auto':'smooth'}); }   // torna-su: istantaneo sotto reduced-motion
-function resetUIAnim(){ UIVALS={}; for(const k in UIANIM){ try{ cancelAnimationFrame(UIANIM[k]); }catch(e){} } UIANIM={}; lastTab=null; lastAgendaSig=null; lastDots={}; }   // a nuova partita / caricamento: prima apparizione senza animazione
+
+/* ================================================================================================================
+   L95-1 · IL KEN BURNS CONTINUA DA DOVE ERA.
+   `render()` ricrea i nodi <img>, quindi l'animazione ripartiva da zero: misurato in L94-2, in dodici mesi
+   arrivava a 367 ms su 24.000 — l'1,5% del ciclo, cioè tre millesimi di scala. Invisibile.
+   La cura è un orologio unico del movimento e un `animation-delay` NEGATIVO sul nodo nuovo: il nodo è nuovo,
+   la fase è quella di prima.
+   ⚠ Con `alternate` il ciclo completo è DUE volte la durata dichiarata (andata + ritorno): il modulo si fa sul
+   ciclo intero, altrimenti a ogni render il verso si invertirebbe e il respiro diventerebbe un tremolio.
+   ⚠ La durata si LEGGE dal nodo (getComputedStyle), non si scrive qui: l'hero fa 28 s e la scena 16, e una
+   costante in javascript sarebbe la prima cosa a invecchiare quando il CSS cambia.
+   ================================================================================================================ */
+const MOTION_T0=(typeof performance!=='undefined'&&performance.now)?performance.now():Date.now();
+function oraMovimento(){ return ((typeof performance!=='undefined'&&performance.now)?performance.now():Date.now()) - MOTION_T0; }
+function riprendiFase(img){
+  if(!img || motionReduced()) return;
+  try{
+    const d=getComputedStyle(img).animationDuration;
+    if(!d || d==='0s') return;
+    const ms=/ms$/.test(d)?parseFloat(d):parseFloat(d)*1000;
+    if(!ms || isNaN(ms)) return;
+    img.style.animationDelay = (-(oraMovimento() % (ms*2))) + 'ms';   // ×2: alternate = andata+ritorno
+  }catch(e){}
+}
+function riprendiFaseTutte(){ try{ document.querySelectorAll('#home-hero img, .ag-scene img').forEach(riprendiFase); }catch(e){} }
+
+/* ================================================================================================================
+   L95-1 · OGNI CARTA NUOVA ENTRA, E ENTRA QUANDO SI VEDE.
+   Prima la classe stava sulla SCATOLA e scattava sul cambio di firma dell'agenda: 8 entrate per 15 carte
+   risolte, e 18 animazioni su 45 partivano sotto la piega (L94-2). Ora l'entrata è della carta, e la fa
+   partire un IntersectionObserver al primo ingresso nel viewport.
+   ⚠ L'osservatore si crea UNA volta, non a ogni render: uno per render sarebbe un accumulo silenzioso.
+   ⚠ E non si scrolla mai al posto del giocatore: l'animazione aspetta l'occhio, non lo tira.
+   ⚠ `CARTE_VISTE` è transitorio come UIVALS e si azzera in `resetUIAnim()`, così a nuova partita e a
+   caricamento la prima apparizione resta senza animazione — com'era.
+   ================================================================================================================ */
+let CARTE_VISTE={}, OSS_CARTE=null;
+/* ⚠ LA CHIAVE IDENTIFICA UNA COMPARSA, NON UN TIPO DI CARTA — e la prima versione sbagliava tutte e due le
+   cose. Aveva ereditato la forma di `agendaSig()`, che serviva a distinguere un SET da un altro: per una
+   proposta dava `proposta:lavoro`, cioè il DICASTERO, uguale per proposte diverse dello stesso ministro.
+   Misurato: 18 carte risolte, 7 chiavi distinte, 5 entrate. Ora l'id della carta viene prima del dicastero, e
+   soprattutto la chiave porta il MESE: la stessa carta che ritorna a marzo è una comparsa nuova e deve
+   entrare di nuovo — «già vista» vale per lo schermo di adesso, non per la carriera. */
+function chiaveCarta(it, idx){
+  const m=(typeof S!=='undefined'&&S)?(S.year*12+S.month):0;
+  if(!it) return m+':i'+idx;
+  const id=(it.data&&it.data.id) || (it.prop&&it.prop.id) || (it.req&&it.req.id) || (it.confl&&it.confl.id)
+        || (it.ev&&it.ev.id) || (it.kind==='conflitto'?(it.minA+'/'+it.minB):null) || it.min || ('i'+idx);
+  return m+':'+it.kind+':'+id;
+}
+function ossCarte(){
+  if(OSS_CARTE || typeof IntersectionObserver==='undefined') return OSS_CARTE;
+  OSS_CARTE=new IntersectionObserver(function(voci){
+    voci.forEach(function(v){
+      if(!v.isIntersecting) return;
+      const k=v.target.getAttribute('data-carta');
+      OSS_CARTE.unobserve(v.target);
+      if(!k || CARTE_VISTE[k]) return;
+      /* ⚠ il nodo osservato puo' essere GIA' STATO SOSTITUITO da un render successivo (render gira piu' volte
+         per task): si rilegge quello vivo per chiave, e si segna «entrata» solo se lo si e' trovato. */
+      const el=document.querySelector('.ag[data-carta="'+k+'"]');
+      if(!el) return;
+      if(motionReduced()){ CARTE_VISTE[k]=1; return; }
+      /* ⛑ «entrata» si segna quando l'animazione E' PARTITA, non quando si decide di farla partire. E' la
+         stessa lezione del rullo del mese: fra la decisione e il primo frame ci sta un altro `render()`, che
+         porta via il nodo e con lui l'animazione. Misurato: 12 entrate su 18 carte visibili segnando alla
+         decisione. Se il nodo sparisce prima, la chiave resta libera e il render dopo riprova. */
+      el.classList.add('enter');
+      el.addEventListener('animationstart', function(ev){ if(ev.animationName==='cardIn') CARTE_VISTE[k]=1; }, {once:true});
+    });
+  }, {threshold:0.15});
+  return OSS_CARTE;
+}
+/* La chiave si stampa sui nodi in UN punto solo, per posizione: i rami che rendono una carta sono quindici e
+   toccarli uno per uno vorrebbe dire dimenticarne uno — in silenzio, che è il modo in cui questi difetti
+   costano un lotto (L12-2). Si stampa solo se il conto dei nodi combacia con S.agenda: se non combacia si
+   rinuncia, invece di appiccicare la chiave sbagliata alla carta sbagliata. */
+function osservaCarteNuove(){
+  const O=ossCarte(); if(!O || typeof S==='undefined' || !S) return;
+  try{
+    const nodi=document.querySelectorAll('.agbox > .ag');
+    const ag=S.agenda||[];
+    if(nodi.length!==ag.length) return;        // agenda vuota (il segnaposto) o schermata senza agenda
+    /* la chiave porta il mese: si buttano quelle dei mesi passati, cosi l insieme non cresce per sempre */
+    const mOra=(S.year*12+S.month)+':';
+    for(const k in CARTE_VISTE){ if(k.indexOf(mOra)!==0) delete CARTE_VISTE[k]; }
+    nodi.forEach(function(el, i){
+      const k=chiaveCarta(ag[i], i);
+      el.setAttribute('data-carta', k);
+      if(CARTE_VISTE[k]) return;               // già entrata una volta: non rientra a ogni render
+      O.observe(el);
+    });
+  }catch(e){}
+}
+function resetUIAnim(){ UIVALS={}; for(const k in UIANIM){ try{ cancelAnimationFrame(UIANIM[k]); }catch(e){} } UIANIM={}; lastTab=null; lastDots={}; CARTE_VISTE={}; }   // a nuova partita / caricamento: prima apparizione senza animazione
+/* il mese, marcato per il contachilometri di playAnims (L95-1) */
+function meseSpan(){ return '<span class="mese-roll" data-anim="mese" data-to="'+(S.year*12+S.month)+'"><span class="mese-ora">'+T(MONTHS[S.month-1])+'</span></span>'; }
 /* riempimento barra animabile: a piena larghezza, scala da sinistra. data-to = % (clampata). */
 function fillI(key, pct, color){ return '<i class="fill" data-anim="bar:'+key+'" data-to="'+pct+'" style="transform:scaleX('+(pct/100)+');background:'+color+'"></i>'; }
-function fmtAnim(n, dec, signed){ return (signed&&n>0?'+':'')+n.toFixed(dec)+'%'; }
+/* L95-2 — l'unità si dichiara sul nodo (`data-unit`): i seggi della notte non hanno il «%», e contare «34%» per
+   poi atterrare su «34» sarebbe un numero sbagliato per 400 ms. Senza l'attributo vale «%», come prima. */
+function fmtAnim(n, dec, signed, unit){ return (signed&&n>0?'+':'')+n.toFixed(dec)+(unit==null?'%':unit); }
 function countUp(el, from, to, dec, signed){
   const key=el.getAttribute('data-anim');
   if(UIANIM[key]) cancelAnimationFrame(UIANIM[key]);
@@ -28,7 +156,7 @@ function countUp(el, from, to, dec, signed){
     let k=(t-t0)/dur;
     if(k>=1){ el.textContent=final; delete UIANIM[key]; return; }
     k=1-Math.pow(1-k,3);                                         // easeOutCubic
-    el.textContent=fmtAnim(from+(to-from)*k, dec, signed);
+    el.textContent=fmtAnim(from+(to-from)*k, dec, signed, el.getAttribute('data-unit'));
     UIANIM[key]=requestAnimationFrame(frame);
   }
   UIANIM[key]=requestAnimationFrame(frame);
@@ -42,6 +170,13 @@ function playAnims(){
     UIVALS[key]=to;
     if(reduce || from==null || isNaN(to) || Math.abs(from-to)<0.005) return;
     countUp(el, from, to, parseInt(el.getAttribute('data-dec'),10)||0, el.getAttribute('data-sign')==='1');
+    /* L95-1 - il segno si vede senza leggere la cifra: 600 ms di colore, poi via. La classe si toglie da se'
+       a fine animazione; se il nodo sparisce prima (un render nuovo) sparisce con lui, e va bene cosi'. */
+    /* L95-2 — nella notte il primo stadio conta da uno ZERO SEMINATO (seedNotteAnim), non da un valore vero:
+       colorarlo di verde direbbe «guadagno» a tutti i partiti insieme. Il colore vale dal secondo stadio. */
+    if(from===0 && key.indexOf('num:notte:')===0) return;
+    try{ const cl=(to>from)?'su':'giu'; el.classList.remove('su','giu'); void el.offsetWidth; el.classList.add(cl);
+      el.addEventListener('animationend', function(){ el.classList.remove('su','giu'); }, {once:true}); }catch(e){}
   });
   document.querySelectorAll('i.fill[data-anim^="bar:"]').forEach(function(el){
     const key=el.getAttribute('data-anim'), to=parseFloat(el.getAttribute('data-to')), from=UIVALS[key];
@@ -50,26 +185,68 @@ function playAnims(){
     el.style.transition='none'; el.style.transform='scaleX('+(from/100)+')';   // riparti dal vecchio…
     void el.offsetWidth;                                                       // …forza un reflow…
     el.style.transition=''; el.style.transform='scaleX('+(to/100)+')';         // …e lascia partire la transition CSS verso il nuovo
+    /* L95-2 — lo SCAGLIONAMENTO si legge dal nodo (`data-ritardo`, lo mette solo la notte). Non si puo' mettere
+       inline prima: `transition=''` qui sopra cancella anche il transition-delay; e non dopo il ciclo, perche'
+       il reflow della barra successiva avrebbe gia' fatto partire questa con ritardo zero. */
+    const _rit=el.getAttribute('data-ritardo'); if(_rit) el.style.transitionDelay=_rit+'ms';
   });
   /* aree della mappa: il colore di controllo (0=avversario, 1=tuo) sfuma vecchio→nuovo. Di fatto si vede
      riaprendo la mappa dopo un'intermedia che ha ribaltato aree: l'onda elettorale appare in dissolvenza. */
   document.querySelectorAll('[data-anim^="fill:"]').forEach(function(el){
     const key=el.getAttribute('data-anim'), to=parseInt(el.getAttribute('data-to'),10), from=UIVALS[key];
     UIVALS[key]=to;
-    if(reduce || from==null || from===to) return;
+    /* L95-1 — il fill della mappa è una DISSOLVENZA, e in «ridotto» le dissolvenze restano (DESIGN-MOVIMENTO
+       §4): qui si guarda «spento», non «ridotto». È l'unica riga di playAnims che distingue i due modi. */
+    if(motionSpento() || from==null || from===to) return;
     el.style.transition='none'; el.style.fill=(from===1)?'var(--acc)':'var(--mut2)';
     void el.getBoundingClientRect();                                           // reflow (gli elementi SVG non hanno offsetWidth)
     el.style.transition=''; el.style.fill='';                                  // torna al fill nuovo (attributo) con la transition CSS
   });
+  /* L95-1 - IL MESE CHE AVANZA. Il nodo e' ricreato a ogni render, quindi il valore vecchio non esiste piu':
+     lo tiene UIVALS, come per i numeri. Quando cambia, si aggiunge un fantasma con la data VECCHIA che scorre
+     in alto ed esce, mentre quella nuova entra dal basso. Parte SOLO al cambio di mese: a cambio di scheda o
+     a una decisione, UIVALS['mese'] non e' cambiato e non succede niente. */
+  /* ⛑⛑ E QUI STA LA COSA CHE VALE PER TUTTE E TRE LE CURE DI L95-1. `render()` gira PIU' VOLTE NELLO STESSO
+     TASK (una decisione rende, poi `advanceMonth` rende di nuovo): fra un render e l'altro il browser non
+     compone un frame, quindi un'animazione aggiunta dal render precedente viene buttata col suo nodo PRIMA
+     di partire. Misurato: il rullo del mese veniva DECISO 10 volte su 12 e partiva 3 volte.
+     Quindi la decisione non si consuma subito: si programma su requestAnimationFrame — cioe' quando la raffica
+     di render e' finita — e `UIVALS['mese']` si aggiorna SOLO dopo che il rullo e' davvero partito. Se il nodo
+     nel frattempo e' sparito, il cambio resta da fare e il render dopo riprova. */
+  const _elMese=document.querySelector('.mese-roll[data-anim="mese"]');
+  if(_elMese){
+    const to=parseInt(_elMese.getAttribute('data-to'),10), from=UIVALS['mese'], vecchio=UIVALS['mese:testo'];
+    if(from==null || isNaN(to)){ UIVALS['mese']=to; UIVALS['mese:testo']=_elMese.textContent; }
+    else if(from===to){ UIVALS['mese:testo']=_elMese.textContent; }
+    else if(reduce || !vecchio){ UIVALS['mese']=to; UIVALS['mese:testo']=_elMese.textContent; }
+    else if(!UIANIM['mese:inAttesa']){
+      UIANIM['mese:inAttesa']=1;
+      requestAnimationFrame(function(){
+        UIANIM['mese:inAttesa']=0;
+        const el=document.querySelector('.mese-roll[data-anim="mese"]');
+        if(!el) return;                                         // sparito: il cambio resta da fare, si riprova
+        const ora=parseInt(el.getAttribute('data-to'),10);
+        if(isNaN(ora) || ora===UIVALS['mese']) return;
+        try{
+          const g=document.createElement('span'); g.className='mese-prima'; g.textContent=vecchio;
+          el.appendChild(g); el.classList.add('roll');
+          g.addEventListener('animationend', function(){ try{ g.remove(); el.classList.remove('roll'); }catch(e){} }, {once:true});
+        }catch(e){}
+        UIVALS['mese']=ora; UIVALS['mese:testo']=el.textContent;   // consumato SOLO adesso
+      });
+    }
+  }
+  /* L95-1 - e le immagini appena ricreate riprendono la fase di prima, invece di ricominciare da zero. */
+  riprendiFaseTutte();
+  /* L95-1 - le carte nuove si mettono in coda all'osservatore: entreranno quando entrano nel viewport. */
+  osservaCarteNuove();
 }
-/* Firma del SET di carte in agenda (id, non lo stato risolto): cambia solo quando arrivano carte nuove (nuovo mese),
-   non quando ne risolvi una o cambi scheda → l'entrata scaglionata parte solo quando serve davvero. */
-function agendaSig(){ return (S.agenda||[]).map(function(a){
-  return a.kind+':'+(a.kind==='conflitto'?(a.minA+'/'+a.minB):a.kind==='intermedia'?((a.ev&&a.ev.id)||'i'):a.kind==='rimpasto'?('r'+a.min):(a.min||(a.data&&a.data.id)||''));
-}).join('|'); }
-/* Notte elettorale (vetrina): azzera le barre dello spoglio così l'exit poll SALE da zero e ogni elezione
-   riparte pulita (le chiavi notte:* persistono tra le tappe ma vanno resettate a ogni nuovo voto). */
-function seedNotteAnim(){ ['bar:notte:bloc','bar:notte:me','bar:notte:opp'].forEach(function(k){ UIVALS[k]=0; }); (PAESE.partiti||[]).forEach(function(p){ UIVALS['bar:notte:seg:'+p.id]=0; }); }
+/* L95-1 — `agendaSig()` e `lastAgendaSig` sono state TOLTE: servivano SOLO alla classe d'ingresso sulla
+   scatola, che non c'è più. La forma della firma sopravvive in `chiaveCarta()`, che fa lo stesso lavoro per
+   UNA carta invece che per il set. (Una funzione che non serve più si toglie: un frammento morto è della
+   stessa famiglia del commento stale — non fa danni e mente.) */
+/* L95-2 — qui c'era una SECONDA `seedNotteAnim()`, tolta: game.js ne dichiara un'altra e, caricato per ultimo, vince.
+   Questa non girava mai — e chi l'avesse corretta non avrebbe visto nessun effetto. Quella vera sta in game.js. */
 
 /* --- Cornice-paese: legge tutto da PAESE (data.js) e lo applica all'interfaccia.
    Chiamata una volta al caricamento; richiamabile a mano dopo aver cambiato PAESE. --- */
@@ -87,7 +264,8 @@ function applyPaese(){
      Vuoto → slot spento (nessun .on) → home identica finché non arriva l'arte. */
   const hero=document.getElementById('home-hero');
   if(hero){ const hs=scenaSrc(P.hero)||scenaSrc('hero');
-    if(hs){ hero.innerHTML='<img src="'+hs+'" alt="" decoding="async">'; hero.classList.add('on'); }   // hero = above the fold: decode async ma MAI lazy
+    if(hs){ hero.innerHTML='<img src="'+hs+'" alt="" decoding="async">'; hero.classList.add('on');
+      riprendiFase(hero.firstChild); }   // L95-1: il nodo e' nuovo, la fase e' quella di prima   // hero = above the fold: decode async ma MAI lazy
     else { hero.classList.remove('on'); if(hero.firstChild) hero.innerHTML=''; }
   }
 }
@@ -620,6 +798,15 @@ function showPartita(){
   h+=`<div class="seg" id="lang-seg-menu" style="max-width:200px;margin:0 auto 10px;">
       <button data-l="it" class="${curLang()==='it'?'on':''}" onclick="setLang('it')">Italiano</button>
       <button data-l="en" class="${curLang()==='en'?'on':''}" onclick="setLang('en')">English</button></div>`;
+  /* L95-1 — IL MOVIMENTO, dove sta la lingua. Non e' un'opzione di partita: vive in localStorage e non entra
+     mai in S (il round-trip non lo vede, ed e' giusto cosi': e' del dispositivo, non della carriera). */
+  const _mv=movimentoModo();
+  h+=`<div class="contorno" style="font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--mut);text-align:center;margin:2px 0 4px">${T('Movimento')}</div>`;
+  h+=`<div class="seg" id="mov-seg" style="max-width:280px;margin:0 auto 4px;">
+      <button class="${_mv==='pieno'?'on':''}" onclick="setMovimento('pieno')">${T('Pieno')}</button>
+      <button class="${_mv==='ridotto'?'on':''}" onclick="setMovimento('ridotto')">${T('Ridotto')}</button>
+      <button class="${_mv==='spento'?'on':''}" onclick="setMovimento('spento')">${T('Spento')}</button></div>`;
+  h+=`<div class="contorno" style="font-size:11px;color:var(--mut);text-align:center;margin:0 auto 10px;max-width:300px">${T('Con <b>ridotto</b> restano solo le dissolvenze; con <b>spento</b> nulla si muove. La scelta resta su questo dispositivo.')}${movimentoScelto()?'':(motionSistemaReduce()?(' '+T('(il tuo dispositivo chiede meno movimento: si parte da ridotto)')):'')}</div>`;
   h+=`<div class="mtext">${T(aMetaMese()?"Sei a metà mese: il salvataggio riprenderà <b>dall'inizio del mese corrente</b>.":"Fotografia al confine del mese corrente.")}</div>`;
   h+=`<div class="choices">`;
   if(!ok) h+=`<div class="note" style="border-color:var(--warn);color:var(--warn-ink)">${T('Su questo dispositivo il salvataggio nel browser non è disponibile (stai aprendo il gioco da file locale). Per non perdere la carriera usa <b>Scarica file</b> qui sotto, e riprendila con <b>Importa</b>.')}</div>`;
@@ -899,14 +1086,14 @@ function render(){
   if(liv0){ if(S.tab!=='gov' && S.tab!=='attorno') S.tab='gov'; }   // ATTIVISTA (A.5): due tab — Movimento (gov) + Attorno; coerce solo i tab non validi
   else if(noNaz && S.tab!=='gov' && S.tab!=='paese') S.tab='gov';   // solo Governo + Paese (lo stato del mondo)
   document.getElementById('el').innerHTML = liv0
-    ? `${T(MONTHS[S.month-1])} · ${T('Attivista')}`
+    ? `${meseSpan()} · ${T('Attivista')}`
     : liv4
-    ? `${T(MONTHS[S.month-1])} · ${T('Segretario')} · ${T('mandato')} ${S.intl.mandato} · ${T('mese')} ${(S.intl.mesiInCarica||0)+1}/${S.intl.mandatoMesi}`
+    ? `${meseSpan()} · ${T('Segretario')} · ${T('mandato')} ${S.intl.mandato} · ${T('mese')} ${(S.intl.mesiInCarica||0)+1}/${S.intl.mandatoMesi}`
     : liv5
-    ? `${T(MONTHS[S.month-1])} · ${typeof ruoloDiplo==='function'?ruoloDiplo():T('Ambasciatore')}`
+    ? `${meseSpan()} · ${typeof ruoloDiplo==='function'?ruoloDiplo():T('Ambasciatore')}`
     : S.opposizione
-    ? `${T(MONTHS[S.month-1])} · <span style="color:var(--neg);font-weight:700">${T('OPPOSIZIONE')}</span> · ${T('governa')} ${(part(S.governoAvversario)||{}).nome||'—'} · ${T('anno')} ${S.turnInMandate+1}/${PAESE.mandatoMesi/12} ${T('al voto')}`
-    : `${T(MONTHS[S.month-1])} · ${T('Mandato')} ${S.mandate}, ${T('anno')} ${S.turnInMandate+1}/${PAESE.mandatoMesi/12}`;
+    ? `${meseSpan()} · <span style="color:var(--neg);font-weight:700">${T('OPPOSIZIONE')}</span> · ${T('governa')} ${(part(S.governoAvversario)||{}).nome||'—'} · ${T('anno')} ${S.turnInMandate+1}/${PAESE.mandatoMesi/12} ${T('al voto')}`
+    : `${meseSpan()} · ${T('Mandato')} ${S.mandate}, ${T('anno')} ${S.turnInMandate+1}/${PAESE.mandatoMesi/12}`;
   const I=S.ind,P=S.prev; const riK=S.relInt||{}; const rk=id=>riK[id]!=null?riK[id]:50;
   document.getElementById('keys').innerHTML= liv0
     ? keyCard('Base','base',S.attivista.base,fmt(S.attivista.base,0),0,false,'')+   // ATTIVISTA (Build A): le 3 valute della gavetta, così il gate di laurea è VISIBILE (niente gate invisibile)
@@ -1282,7 +1469,7 @@ function renderStampaTab(){
   // INTERVISTA: tema → tono
   h+=`<button class="opt" ${dis} onclick="salaAz('intervista')"><span class="ol">${T('Intervista')} ${SALA_SUB&&SALA_SUB.az==='intervista'?'▾':''}</span><span class="oe">${T('Scegli un tema e un tono: quel mondo ti ascolta — ma prometti, e i fatti contro di lui ti saranno rinfacciati')}</span></button>`;
   if(disp && SALA_SUB && SALA_SUB.az==='intervista'){
-    if(!SALA_SUB.target) h+=`<div style="display:flex;flex-wrap:wrap;gap:6px;padding:0 2px">`+GROUPS.map(g=>`<button class="mini-btn" style="margin-top:0" onclick="salaTarget('${g.id}')">${T(g.nm)}</button>`).join('')+`</div>`;
+    if(!SALA_SUB.target) h+=`<div style="display:flex;flex-wrap:wrap;gap:6px;padding:0 2px">`+GROUPS.map(g=>`<button class="mini-btn" style="margin-top:0" onclick="salaTarget('${g.id}')">${nomeGruppo(g.id)}</button>`).join('')+`</div>`;
     else h+=toni(DICHIARAZIONI.intervista, nomeGruppo(SALA_SUB.target), id=>`azioneIntervista('${SALA_SUB.target}','${id}')`, d=>`${T('tema')} ${sgn(d.grp)} · ${T('stampa')} ${sgn(d.stampa)} · ${T('promessa attiva')}`);
   }
   // ANNUNCIO: subito i toni
@@ -1349,7 +1536,7 @@ function rivoltaHtml(id){ const R=S.rivolta; if(S.opposizione||!R||!R[id]) retur
   return `<div class="rivolta">${T('Sotto la soglia da <b>%M</b> mesi · crisi fra <b>%N</b>').replace('%M',R[id]).replace('%N',n)}</div>`; }
 function rivoltaBanner(){ const R=S.rivolta; if(S.opposizione||!R) return ''; let h='';
   for(const gr of GROUPS){ if(!R[gr.id]) continue; const n=Math.max(0,(dif().mesiRivolta||6)-R[gr.id]);
-    h+=`<div class="banner rivolta-banner">${T('<b>%G</b> — un pezzo di paese ti ha voltato le spalle: sotto la soglia di %P da %M mesi. Riportalo sopra con le politiche, o fra <b>%N mesi</b> la crisi ti travolge.').replace('%G',T(gr.nm)).replace('%P',fmt(pavimentoGruppo(gr.id),0)).replace('%M',R[gr.id]).replace('%N',n)}</div>`; }
+    h+=`<div class="banner rivolta-banner">${T('<b>%G</b> — un pezzo di paese ti ha voltato le spalle: sotto la soglia di %P da %M mesi. Riportalo sopra con le politiche, o fra <b>%N mesi</b> la crisi ti travolge.').replace('%G',nomeGruppo(gr.id)).replace('%P',fmt(pavimentoGruppo(gr.id),0)).replace('%M',R[gr.id]).replace('%N',n)}</div>`; }
   return h; }
 function mediaGruppi(){ if(typeof GROUPS==='undefined'||!S.groups) return 0; var s=0,n=0; GROUPS.forEach(function(g){ if(S.groups[g.id]!=null){ s+=S.groups[g.id]; n++; } }); return n?s/n:0; }
 /* Scheda ATTIVISTA (Build A) — L1: cruscotto della militanza. Le 3 valute (base/autorev/reputazione media) con la SOGLIA
@@ -1399,7 +1586,7 @@ function renderAttivista(){
   /* i 6 gruppi — stesso template .grp della scheda Paese */
   h+=`<div class="card"><div class="ct">${T('La fiducia dei gruppi')}</div>`;
   for(const gr of GROUPS){ const v=S.groups[gr.id];
-    h+=`<div class="grp"><div class="top"><div class="nm">${icon(gr.id,T(gr.nm))} ${T(gr.nm)}<small>${T('peso')} ${gr.w}%</small></div>
+    h+=`<div class="grp"><div class="top"><div class="nm">${icon(gr.id,nomeGruppo(gr.id))} ${nomeGruppo(gr.id)}<small>${T('peso')} ${gr.w}%</small></div>
       <div class="pc" style="color:${barColor(v)}">${fmt(v,0)}%</div></div>
       <div class="bar"><i style="width:${clamp(v,2,100)}%;background:${barColor(v)}"></i>${pavTick(gr.id)}</div>${rivoltaHtml(gr.id)}</div>`; }
   h+=`</div>`;
@@ -1436,8 +1623,8 @@ function renderAttorno(){
   }
   /* IL CAMPO — contesto VIVO (chi è più con te / chi si raffredda), non un registro morto */
   if(typeof GROUPS!=='undefined' && S.groups){
-    var gs=GROUPS.map(function(g){ return {nm:g.nm, v:S.groups[g.id]}; }).filter(function(x){ return x.v!=null; }).sort(function(a,b){ return b.v-a.v; });
-    if(gs.length>1) h+=`<div class="card"><div class="ct">${T('Il campo')}</div><div class="log"><div class="li">${T('Più con te: <b>%T</b>. Più freddi: <b>%B</b>.').replace('%T',T(gs[0].nm)).replace('%B',T(gs[gs.length-1].nm))}</div></div></div>`;
+    var gs=GROUPS.map(function(g){ return {nm:nomeGruppo(g.id), v:S.groups[g.id]}; }).filter(function(x){ return x.v!=null; }).sort(function(a,b){ return b.v-a.v; });
+    if(gs.length>1) h+=`<div class="card"><div class="ct">${T('Il campo')}</div><div class="log"><div class="li">${T('Più con te: <b>%T</b>. Più freddi: <b>%B</b>.').replace('%T',gs[0].nm).replace('%B',gs[gs.length-1].nm)}</div></div></div>`;
   }
   var el=document.getElementById('sec-attorno'); if(el) el.innerHTML=h;
 }
@@ -1504,8 +1691,10 @@ function renderGov(){
   h+=vitaPersonaleCard();   // vita personale: indicatore visibile (valore/100 + barra animata + etichetta umana), prima dell'agenda
   // agenda
   h+=`<div class="contorno" style="font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--mut);margin:2px 2px 8px;">${T('Agenda di')} ${T(MONTHS[S.month-1])}</div>`;
-  const _sig=agendaSig(), _enter=(_sig!==lastAgendaSig); lastAgendaSig=_sig;   // entrata scaglionata SOLO quando il set di carte cambia (nuovo mese), non a ogni decisione/cambio scheda
-  h+=`<div class="agbox${_enter?' enter':''}">`;
+  /* L95-1 — l'entrata non è più della SCATOLA. La classe stava qui, sulla firma dell'agenda, e scattava una
+     volta per mese qualunque fosse il numero di carte: misurato, 8 entrate per 15 carte risolte (L94-2). Ora
+     ogni carta entra per conto suo, quando entra nel viewport (osservaCarteNuove + ossCarte, sopra). */
+  h+=`<div class="agbox">`;
   if(!S.agenda.length){
     h+=`<div class="ag"><div class="calm">${T('Nessun dossier urgente questo mese. Puoi avanzare al mese successivo.')}</div></div>`;
   }
@@ -1522,11 +1711,11 @@ function renderGov(){
       const m=getMin(it.min); const p=it.prop;
       const role=T(MINISTRIES.find(x=>x.id===it.min).nm);
       h+=`<div class="ag ${it.resolved?'done':''}">${agScene(it)}<div class="ah"><div class="kick">${T('Iniziativa del Ministro')}</div>
-        <h3>${T(p.t)}</h3></div>
+        <h3>${subMin(T(p.t))}</h3></div>
         <div class="say">${avatar(m)}<div class="body"><div class="nm">${m?m.nm:''} ${chipOf(m)}<small> · ${role}</small></div>
-          <div class="bubble">${T('Propongo:')} ${T(p.text)}</div></div></div>`;
+          <div class="bubble">${T('Propongo:')} ${subMin(T(p.text))}</div></div></div>`;
       if(!it.resolved){ h+=`<div class="opts">
-        <button class="opt" onclick="resolveItem(${idx},0)"><span class="ol">${T('Approva')}</span><span class="oe">${T(p.e)}</span>${costoChip(p)}</button>
+        <button class="opt" onclick="resolveItem(${idx},0)"><span class="ol">${T('Approva')}</span><span class="oe">${subMin(T(p.e))}</span>${costoChip(p)}</button>
         <button class="opt" onclick="resolveItem(${idx},1)"><span class="ol">${T('Respingi')}</span><span class="oe">${T('Nessun effetto; il ministro la prende male')}</span></button></div>`; }
       else h+=`<div class="outcome">${it.outcome}</div>${esitiHtml(it)}`;
       h+=`</div>`;
@@ -1665,14 +1854,14 @@ function renderGov(){
       const c=it.confl; const mA=getMin(it.minA), mB=getMin(it.minB);
       const roleA=T(MINISTRIES.find(x=>x.id===it.minA).nm), roleB=T(MINISTRIES.find(x=>x.id===it.minB).nm);
       h+=`<div class="ag ${it.resolved?'done':''}">${agScene(it)}<div class="ah"><div class="kick">${T('Scontro nel governo')}</div>
-        <h3>${T(c.tema)}</h3></div>
+        <h3>${subMin(T(c.tema))}</h3></div>
         <div class="say">${avatar(mA)}<div class="body"><div class="nm">${mA?mA.nm:''} ${chipOf(mA)}<small> · ${roleA}</small></div>
-          <div class="bubble">${cap(T(c.a.pos))}</div></div></div>
+          <div class="bubble">${cap(subMin(T(c.a.pos)))}</div></div></div>
         <div class="say">${avatar(mB)}<div class="body"><div class="nm">${mB?mB.nm:''} ${chipOf(mB)}<small> · ${roleB}</small></div>
-          <div class="bubble">${cap(T(c.b.pos))}</div></div></div>`;
+          <div class="bubble">${cap(subMin(T(c.b.pos)))}</div></div></div>`;
       if(!it.resolved){ h+=`<div class="opts">
-        <button class="opt" onclick="resolveItem(${idx},0)"><span class="ol">${T('Dai ragione a %M').replace('%M',mA?mA.nm:'—')}</span><span class="oe">${T(c.a.e)}</span>${costoChip(c.a)}</button>
-        <button class="opt" onclick="resolveItem(${idx},1)"><span class="ol">${T('Dai ragione a %M').replace('%M',mB?mB.nm:'—')}</span><span class="oe">${T(c.b.e)}</span>${costoChip(c.b)}</button></div>`; }
+        <button class="opt" onclick="resolveItem(${idx},0)"><span class="ol">${T('Dai ragione a %M').replace('%M',mA?mA.nm:'—')}</span><span class="oe">${subMin(T(c.a.e))}</span>${costoChip(c.a)}</button>
+        <button class="opt" onclick="resolveItem(${idx},1)"><span class="ol">${T('Dai ragione a %M').replace('%M',mB?mB.nm:'—')}</span><span class="oe">${subMin(T(c.b.e))}</span>${costoChip(c.b)}</button></div>`; }
       else h+=`<div class="outcome">${it.outcome}</div>${esitiHtml(it)}`;
       h+=`</div>`;
     } else if(it.kind==='stampa'){
@@ -1687,9 +1876,9 @@ function renderGov(){
       /* l'appuntamento con le correnti (lotto ribilanciamento) */
       const d=it.data;
       h+=`<div class="ag ${it.resolved?'done':''}">${agScene(it)}<div class="ah"><div class="kick">${T('Il punto col partito')}</div>
-        <h3>${T(d.t)}</h3></div>
-        <div class="atext">${T(d.text)}</div>`;
-      if(!it.resolved){ h+=`<div class="opts">`+d.ch.map((c,i)=>`<button class="opt" onclick="resolveItem(${idx},${i})"><span class="ol">${T(c.l)}</span><span class="oe">${T(c.e)}</span></button>`).join('')+`</div>`; }
+        <h3>${subMin(T(d.t))}</h3></div>
+        <div class="atext">${subMin(T(d.text))}</div>`;
+      if(!it.resolved){ h+=`<div class="opts">`+d.ch.map((c,i)=>`<button class="opt" onclick="resolveItem(${idx},${i})"><span class="ol">${subMin(T(c.l))}</span><span class="oe">${subMin(T(c.e))}</span></button>`).join('')+`</div>`; }
       else h+=`<div class="outcome">${it.outcome}</div>${esitiHtml(it)}`;
       h+=`</div>`;
     } else if(it.kind==='intermedia'){
@@ -1851,7 +2040,7 @@ function renderPaese(){
   h+=rivoltaBanner();   // L72-1: il conto alla rovescia in testa, se un gruppo e' sotto il pavimento
   h+=`<div class="card"><div class="ct">${T('Consenso complessivo')} · ${fmt(S.ind.consenso,0)}%</div>`;
   for(const gr of GROUPS){const v=S.groups[gr.id];
-    h+=`<div class="grp"><div class="top"><div class="nm">${icon(gr.id,T(gr.nm))} ${T(gr.nm)}<small>${T('peso')} ${gr.w}%</small></div>
+    h+=`<div class="grp"><div class="top"><div class="nm">${icon(gr.id,nomeGruppo(gr.id))} ${nomeGruppo(gr.id)}<small>${T('peso')} ${gr.w}%</small></div>
       <div class="pc" style="color:${barColor(v)}">${fmt(v,0)}%</div></div>
       <div class="bar"><i style="width:${clamp(v,2,100)}%;background:${barColor(v)}"></i>${pavTick(gr.id)}</div>${rivoltaHtml(gr.id)}</div>`;}
   h+=`</div>`;
