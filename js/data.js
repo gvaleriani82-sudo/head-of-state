@@ -1341,8 +1341,12 @@ const SCENARI = {
    (1952), SOLO per il premier nel '50 (one-shot). Neutra: spiega meccanismo + posta, nessun giudizio; entrambe
    legittime. Approvare è una scommessa (costo divisivo ora → premio enorme sopra il 50%, ma boomerang se manchi).
    NON è dentro EVENTS: non viene pescata a caso, la piazza genAgenda deterministicamente. */
+/* L95-3 · `snodo:true` È IL MARCATORE DICHIARATO DI UNO SNODO (decisione di Cowork, 13/9), come `cronaca:true` lo è dei
+   pilastri. Sta sul DATO, non sulla voce d'agenda: i punti d'iniezione sono tanti, l'oggetto è uno. Lo portano tutti i
+   50 oggetti che `verifica-snodi.js` riconosce dall'innesco (`snodoXxxDovuta()` → `data:X_EV`), e la guardia lo pretende.
+   Lo legge il suono `snodo` (ui.js, all'ingresso della carta). Se una carta portasse anche `cronaca:true`, vince cronaca. */
 const LEGGE_TRUFFA_EV = {
-  id:'legge_truffa', kick:'Legge elettorale', tono:'grave',
+  id:'legge_truffa', snodo:true, kick:'Legge elettorale', tono:'grave',
   t:'Il premio di maggioranza',
   text:"Il governo può introdurre il premio di maggioranza in vista del voto: se la tua coalizione supera il 50% dei voti, ottiene il 64,4% dei seggi. È una mossa contestata — l'opposizione la bolla come «legge truffa» — e se approvi ma manchi la soglia, ti si ritorce contro.",
   ch:[
@@ -1357,7 +1361,7 @@ const LEGGE_TRUFFA_EV = {
    genAgenda nel '62-63, solo per il premier nel '50, one-shot. Neutre: due strade legittime, nessun giudizio. Il '63
    riallineamento legge S.apertura per il ramo (storico vs controfattuale); il boomerang-PLI è recuperabile (forza, non sconfitta). */
 const APERTURA_EV = {
-  id:'apertura_sinistra', kick:'Svolta politica', tono:'grave',
+  id:'apertura_sinistra', snodo:true, kick:'Svolta politica', tono:'grave',
   t:'L\'apertura a sinistra',
   text:'La formula centrista si è logorata. Puoi allargare la maggioranza al PSI — l\'apertura a sinistra, la svolta del decennio — o tenere la coalizione di centro collaudata. Due strade legittime, due paesi possibili.',
   ch:[
@@ -1370,7 +1374,7 @@ const APERTURA_EV = {
   ],
 };
 const ENEL_EV = {
-  id:'dilemma_enel', kick:'Energia', tono:'grave',
+  id:'dilemma_enel', snodo:true, kick:'Energia', tono:'grave',
   t:'L\'energia elettrica allo Stato?',
   text:'L\'energia elettrica è in mano a pochi grandi gruppi privati. Puoi nazionalizzarla in un ente pubblico — l\'Enel — o lasciarla al mercato. Due visioni dell\'economia, entrambe difendibili.',
   ch:[
@@ -1810,7 +1814,7 @@ const SNODO_CONSENSO_90 = 52;
    '90=52 · 2000=53. */
 const SNODO_CONSENSO_00 = 53;
 const AUSTERITY_EV = {
-  id:'austerity73', kick:'Emergenza', tono:'grave',
+  id:'austerity73', snodo:true, kick:'Emergenza', tono:'grave',
   t:'Il paese senza benzina',
   text:'Il greggio è quadruplicato in poche settimane e le riserve calano. Puoi fermare il paese nei giorni festivi — automobili in garage, luci pubbliche abbassate, negozi e sale chiusi presto — oppure limitarti a misure leggere e sperare che la tempesta passi. La prima strada la vedranno tutti; la seconda la pagheranno i conti.',
   ch:[
@@ -1825,7 +1829,7 @@ const AUSTERITY_EV = {
   ],
 };
 const DIVORZIO_EV = {
-  id:'divorzio74', kick:'Referendum', tono:'grave',
+  id:'divorzio74', snodo:true, kick:'Referendum', tono:'grave',
   t:'Il referendum sul divorzio',
   text:'Le firme sono state raccolte e il voto si può tenere in primavera. Puoi lasciare che sia il paese a decidere alle urne, oppure cercare in Parlamento un\'intesa che lo eviti. Le due Italie si guardano da anni su questo: qualunque strada scegli, una parte si sentirà tradita.',
   ch:[
@@ -1838,7 +1842,7 @@ const DIVORZIO_EV = {
   ],
 };
 const SOLIDARIETA_EV = {
-  id:'solidarieta76', kick:'Svolta politica', tono:'grave',
+  id:'solidarieta76', snodo:true, kick:'Svolta politica', tono:'grave',
   t:'La maggioranza che non c\'è',
   text:'I numeri non bastano più a governare. Il maggiore partito d\'opposizione si dice pronto a non far cadere il governo — e forse a entrarci. È la scelta che divide da anni tutti e due i campi: un\'intesa larga, che comprerebbe pace sociale e tempo, oppure una maggioranza stretta che tiene le distanze e paga ogni voto uno per uno.',
   ch:[
@@ -1862,7 +1866,7 @@ const SOLIDARIETA_EV = {
    dove si gioca **solo la risposta di politica energetica** — Chernobyl resta cronaca intoccabile (paletto H5).
    ============================================================================================================ */
 const DIVORZIO_BDI_EV = {
-  id:'divorzio_bdi81', kick:'Credito', tono:'grave',
+  id:'divorzio_bdi81', snodo:true, kick:'Credito', tono:'grave',
   t:'La banca centrale e il Tesoro',
   text:'La banca centrale è tenuta a comprare i titoli di Stato che il mercato non assorbe: è la rete che tiene bassi i tassi e alta l\'inflazione. Puoi sciogliere quel vincolo — la moneta si disciplina, ma da domani il debito si paga a prezzo di mercato — oppure conservarlo, e tenere i conti tranquilli oggi al prezzo di una lira fragile.',
   ch:[
@@ -1877,7 +1881,7 @@ const DIVORZIO_BDI_EV = {
   ],
 };
 const SCALAMOBILE_EV = {
-  id:'scalamobile84', kick:'Lavoro', tono:'grave',
+  id:'scalamobile84', snodo:true, kick:'Lavoro', tono:'grave',
   t:'I punti di contingenza',
   text:'L\'indicizzazione dei salari protegge le buste paga e alimenta la rincorsa fra prezzi e retribuzioni. Puoi tagliare per decreto alcuni punti di contingenza — il sindacato si spaccherà, e chi si oppone raccoglierà le firme per il referendum — oppure lasciare l\'accordo dov\'è e cercare la strada lunga della trattativa.',
   ch:[
@@ -1893,7 +1897,7 @@ const SCALAMOBILE_EV = {
   ],
 };
 const NUCLEARE_EV = {
-  id:'nucleare87', kick:'Crisi energetica', tono:'grave',
+  id:'nucleare87', snodo:true, kick:'Crisi energetica', tono:'grave',
   t:'Il piano energetico dopo l\'incidente',
   text:'L\'incidente alla centrale sovietica ha cambiato l\'opinione del paese sull\'atomo. Il piano energetico nazionale prevede nuove centrali; le firme per il referendum ci sono. Puoi chiudere il programma nucleare e puntare su altre fonti — pagandone il costo in bolletta e in importazioni — oppure difenderlo ridimensionato, sapendo che una parte del paese non te lo perdonerà.',
   ch:[
@@ -11324,7 +11328,7 @@ const ATTIVISTA_EV = [
    fu reale e documentato: perfino il governo lo sondò nel 1996. L'envelope tiene perché l'euro esisteva
    comunque e l'Italia poteva mancare la prima ondata — la Grecia entrò nel 2001. */
 const MAASTRICHT_EV = {
-  id:'snodo_maastricht', kick:'Europa', tono:'grave',
+  id:'snodo_maastricht', snodo:true, kick:'Europa', tono:'grave',
   t:'La corsa o il rinvio',
   text:'I parametri europei chiedono un deficit sotto il tre per cento e un debito che scenda. Il paese è lontano da entrambi. Puoi correre — manovre, un contributo straordinario, anni di sacrifici — oppure rallentare e prendere il treno dopo. Due strade legittime, due paesi possibili.',
   ch:[
@@ -11348,7 +11352,7 @@ const MAASTRICHT_EV = {
    campagna NON può ribaltare il voto, come per il divorzio-'74. Lo snodo si gioca sulla FORMA della legge,
    dove il Parlamento aveva margine vero. */
 const MATTARELLUM_EV = {
-  id:'snodo_mattarellum', kick:'Riforme', tono:'grave',
+  id:'snodo_mattarellum', snodo:true, kick:'Riforme', tono:'grave',
   t:'La legge da scrivere',
   text:'Il referendum ha travolto il proporzionale con una maggioranza che non si discute. Ora tocca al Parlamento tradurlo in legge, e lì il margine c\'è: un maggioritario secco che consegna il paese a chi vince, o un sistema misto che lascia rappresentanza anche ai piccoli.',
   ch:[
@@ -11366,7 +11370,7 @@ const MATTARELLUM_EV = {
    storicamente percorse, frame riferire-non-giudicare: il paese si divise davvero, e le due Italie erano
    entrambe vere. Nessuna vicenda giudiziaria individuale, nessun magistrato come personaggio. */
 const QUESTIONE_MORALE_EV = {
-  id:'snodo_questione_morale', kick:'Questione morale', tono:'grave',
+  id:'snodo_questione_morale', snodo:true, kick:'Questione morale', tono:'grave',
   t:'Il partito davanti ai giudici',
   text:'Non è più un caso isolato: le procure risalgono la catena degli appalti e il finanziamento dei partiti viene a galla come sistema. Il tuo partito è dentro la tempesta. La strada che scegli adesso la ricorderanno più a lungo dell\'inchiesta.',
   ch:[
@@ -11391,7 +11395,7 @@ const QUESTIONE_MORALE_EV = {
    posizioni politiche e non persone (paletto I5). Nessuna delle due strade è quella giusta — la svolta apre
    il futuro e paga in identità, la rifondazione tiene l'identità e paga in peso. */
 const SCISSIONE_EV = {
-  id:'snodo_scissione', kick:'Il partito', tono:'grave',
+  id:'snodo_scissione', snodo:true, kick:'Il partito', tono:'grave',
   t:'Il nome e la cosa',
   text:'Il Muro è caduto, e la domanda non è più rinviabile: può un partito comunista restare comunista? La segreteria propone di cambiare il nome e il simbolo; una parte del partito parla di resa. Il congresso deciderà — ma prima del congresso, devi decidere tu.',
   ch:[
@@ -11420,7 +11424,7 @@ const SCISSIONE_CONGRESSO_RIFONDAZIONE = {
    Valgono solo per chi gioca quel partito — altrimenti la stessa storia la fa la direttiva-NPC della tappa.
    ============================================================================================================ */
 const DIASPORA_DC_EV = {
-  id:'snodo_diaspora_dc', kick:'Il partito', tono:'grave',
+  id:'snodo_diaspora_dc', snodo:true, kick:'Il partito', tono:'grave',
   t:'La diaspora',
   text:'Mezzo secolo di governo non basta più: le inchieste hanno svuotato le sezioni, la Lega morde al Nord, il nuovo polo chiama a destra. La direzione propone di tornare al nome delle origini; una parte dei tuoi guarda altrove. Il partito che fu di De Gasperi si divide, e tu devi scegliere dove stare.',
   ch:[
@@ -11438,7 +11442,7 @@ const DIASPORA_DC_EV = {
 };
 
 const CROLLO_PSI_EV = {
-  id:'snodo_crollo_psi', kick:'Il partito', tono:'grave',
+  id:'snodo_crollo_psi', snodo:true, kick:'Il partito', tono:'grave',
   t:'Il crollo',
   text:'Le inchieste hanno decapitato il partito, le urne lo hanno dimezzato, i debiti lo stanno seppellendo. Non c\'è congresso che possa salvarlo: c\'è solo da decidere come finisce — e cosa ne fai dei tuoi.',
   ch:[
@@ -11461,7 +11465,7 @@ const CROLLO_PSI_EV = {
 };
 
 const FIUGGI_EV = {
-  id:'snodo_fiuggi', kick:'Il partito', tono:'grave',
+  id:'snodo_fiuggi', snodo:true, kick:'Il partito', tono:'grave',
   t:'Fiuggi',
   text:'Per la prima volta dal dopoguerra la destra è entrata nell\'area di governo — e proprio adesso la segreteria propone di sciogliere la fiamma in una destra nuova, che non debba più chiedere scusa. I nostalgici parlano di tradimento. Il congresso è convocato: da che parte stai?',
   ch:[
@@ -11486,7 +11490,7 @@ const FIUGGI_EV = {
    '93. È il terzo giro dello stesso tema, e non è un caso: in questo gioco la legge elettorale è il modo in
    cui la politica decide le proprie regole — e ogni volta chi la scrive lo fa guardando il proprio vantaggio. */
 const PORCELLUM_EV = {
-  id:'snodo_porcellum', kick:'Riforme', tono:'grave',
+  id:'snodo_porcellum', snodo:true, kick:'Riforme', tono:'grave',
   t:'Le regole del gioco, di nuovo',
   text:'La legislatura si avvia alla fine e la maggioranza ha in mano la penna: si può riscrivere la legge elettorale con un premio che protegga chi arriva primo, oppure lasciare le regole come sono e correre con quelle. Chi la scrive lo sa: la userà anche chi verrà dopo.',
   ch:[
@@ -11506,7 +11510,7 @@ const PORCELLUM_EV = {
    senza piazze, con conseguenze che si vedono dieci anni dopo. L'envelope è vero — i vincoli europei
    esistevano, e l'Italia aveva meno spazio di altri proprio per il debito che si porta dal '90. */
 const CRISI08_EV = {
-  id:'snodo_crisi08', kick:'Crisi', tono:'grave',
+  id:'snodo_crisi08', snodo:true, kick:'Crisi', tono:'grave',
   t:'Il conto della crisi',
   text:'Il crollo arrivato da oltreoceano ferma gli ordini e riempie la cassa integrazione. Puoi spendere per attutire il colpo — e il debito, già alto, prende la rincorsa — oppure tenere i conti e aspettare che passi, sapendo che qualche fabbrica che chiude non riaprirà.',
   ch:[
@@ -11530,7 +11534,7 @@ const CRISI08_EV = {
    ⚠ VALUTE: come sempre, `cred` della scheda non esiste per il premier L3 → `repd`/`stampad`/`gd`.
    ============================================================================================================== */
 const MINATORI_EV = {
-  id:'snodo_minatori', kick:'Chi comanda', tono:'grave',
+  id:'snodo_minatori', snodo:true, kick:'Chi comanda', tono:'grave',
   t:'Il carbone contingentato',
   text:'I minatori chiedono un aumento che il tetto salariale non consente, e riducono la produzione. Le scorte di carbone calano di settimana in settimana, e con esse la corrente. In gabinetto qualcuno dice la parola che nessuno voleva dire: elezioni.',
   ch:[
@@ -11551,7 +11555,7 @@ const MINATORI_EV = {
   ],
 };
 const MINATORI_DUE_EV = {
-  id:'snodo_minatori_due', kick:'Chi comanda', tono:'grave',
+  id:'snodo_minatori_due', snodo:true, kick:'Chi comanda', tono:'grave',
   t:'A lume di candela',
   text:'Fabbriche ferme il giovedì e il venerdì, televisione che chiude alle dieci e mezza, compiti fatti a candela. Il paese regge, brontola, e comincia a chiedersi se questo sia governare.',
   ch:[
@@ -11567,7 +11571,7 @@ const MINATORI_DUE_EV = {
   ],
 };
 const EUROPA70_EV = {
-  id:'snodo_europa70', kick:'La terza domanda', tono:'grave',
+  id:'snodo_europa70', snodo:true, kick:'La terza domanda', tono:'grave',
   t:'La terza domanda',
   text:'Dopo due no, il Mercato comune riapre la porta. Entrare significa prezzi agricoli più alti, sovranità condivisa, e un mercato di duecento milioni di persone. Il tuo partito è spaccato quanto il paese.',
   ch:[
@@ -11581,7 +11585,7 @@ const EUROPA70_EV = {
   ],
 };
 const EUROPA70_DUE_EV = {
-  id:'snodo_europa70_due', kick:'La terza domanda', tono:'grave',
+  id:'snodo_europa70_due', snodo:true, kick:'La terza domanda', tono:'grave',
   t:'Il referendum di conferma',
   text:'Si è entrati, ma metà del paese non l\'ha digerito. Un referendum può chiudere la questione per una generazione — o farti perdere tutto in un pomeriggio.',
   ch:[
@@ -11596,7 +11600,7 @@ const EUROPA70_DUE_EV = {
   ],
 };
 const FMI_EV = {
-  id:'snodo_fmi', kick:'Lo sportello', tono:'grave',
+  id:'snodo_fmi', snodo:true, kick:'Lo sportello', tono:'grave',
   t:'Il prestito',
   text:'La sterlina precipita e le riserve non bastano. Il Fondo Monetario è disposto a prestare, a condizioni che scriverà lui: tagli alla spesa, decisi altrove e applicati qui.',
   ch:[
@@ -11717,7 +11721,7 @@ const SNODI_STORICI = {
    ⚠ VALUTE: `cred`/`vis` esistono solo all'opposizione → sempre dietro `typeof credd==='function'`.
    ============================================================================================================== */
 const FALKLAND_EV = {
-  id:'snodo_falkland', kick:'Le isole', tono:'grave',
+  id:'snodo_falkland', snodo:true, kick:'Le isole', tono:'grave',
   t:'L\'arcipelago',
   text:'Una giunta militare ha occupato isole britanniche a tredicimila chilometri da qui. Gli abitanti sono duemila. La flotta può salpare in tre giorni, e nessuno può garantire come finisce.',
   ch:[
@@ -11728,7 +11732,7 @@ const FALKLAND_EV = {
   ],
 };
 const FALKLAND_DUE_EV = {
-  id:'snodo_falkland_due', kick:'Le isole', tono:'grave',
+  id:'snodo_falkland_due', snodo:true, kick:'Le isole', tono:'grave',
   t:'Settantaquattro giorni',
   text:'La flotta è a metà Atlantico. Arrivano le prime perdite, da entrambe le parti, e arrivano insieme alle prime richieste di mediazione.',
   ch:[
@@ -11739,7 +11743,7 @@ const FALKLAND_DUE_EV = {
   ],
 };
 const MINATORI80_EV = {
-  id:'snodo_minatori80', kick:'Il carbone', tono:'grave',
+  id:'snodo_minatori80', snodo:true, kick:'Il carbone', tono:'grave',
   t:'Le scorte',
   text:'Il piano di chiusura dei pozzi porterà allo sciopero, e lo sai. La differenza rispetto a dieci anni fa è che stavolta puoi prepararti: accumulare carbone per un anno, e aspettarli.',
   ch:[
@@ -11750,7 +11754,7 @@ const MINATORI80_EV = {
   ],
 };
 const MINATORI80_DUE_EV = {
-  id:'snodo_minatori80_due', kick:'Il carbone', tono:'grave',
+  id:'snodo_minatori80_due', snodo:true, kick:'Il carbone', tono:'grave',
   t:'Dodici mesi',
   text:'È cominciato. Le comunità dei pozzi vivono di mense e collette, i picchetti e la polizia si affrontano ogni sera in televisione. Il paese guarda, e si divide come non si divideva da una generazione.',
   ch:[
@@ -11761,7 +11765,7 @@ const MINATORI80_DUE_EV = {
   ],
 };
 const POLLTAX_EV = {
-  id:'snodo_polltax', kick:'L\'imposta', tono:'grave',
+  id:'snodo_polltax', snodo:true, kick:'L\'imposta', tono:'grave',
   t:'Un\'imposta per ogni testa',
   text:'La tassa sulla casa va sostituita: chi la scrive dice che è giusto che paghi chi usa i servizi, uno per uno. Chi la pagherà nota che il duca e il suo giardiniere pagheranno uguale.',
   ch:[
@@ -11774,7 +11778,7 @@ const POLLTAX_EV = {
   ],
 };
 const SCISSIONE81_EV = {
-  id:'snodo_scissione81', kick:'Il partito', tono:'grave',
+  id:'snodo_scissione81', snodo:true, kick:'Il partito', tono:'grave',
   t:'Quattro che se ne vanno',
   text:'Quattro dirigenti del tuo partito hanno firmato una dichiarazione: se ne vanno, fondano un partito nuovo e correranno insieme ai Liberali, un candidato solo per collegio. Con loro se ne va un pezzo di elettorato che non ti ha mai amato, e che adesso ha dove andare.',
   ch:[
@@ -11787,7 +11791,7 @@ const SCISSIONE81_EV = {
   ],
 };
 const QUATTRO_EV = {
-  id:'snodo_quattro', kick:'Il partito', tono:'grave',
+  id:'snodo_quattro', snodo:true, kick:'Il partito', tono:'grave',
   t:'I quattro che bussano',
   text:'Quattro dirigenti laburisti hanno lasciato il loro partito e ne hanno fondato uno nuovo. Adesso sono qui, e non chiedono un\'alleanza qualunque: chiedono di correre insieme, un candidato solo per collegio, un nome solo sulla scheda. Il partito che rappresenti ha centoventi anni di storia e nove seggi.',
   ch:[
@@ -11808,7 +11812,7 @@ const QUATTRO_EV = {
    S4 la devoluzione: al governo, 1997. ⚠ VALUTE: `cred`/`vis` solo all'opposizione → dietro typeof.
    ============================================================================================================== */
 const CADUTA90_EV = {
-  id:'snodo_caduta90', kick:'Il partito', tono:'grave',
+  id:'snodo_caduta90', snodo:true, kick:'Il partito', tono:'grave',
   t:'Il primo turno',
   text:'Undici anni a Downing Street, un\'imposta che il paese non paga, un partito diviso sull\'Europa e un ministro dimissionario che ti ha accoltellato in aula. Il primo turno della sfida interna non ti ha dato la maggioranza richiesta. Il secondo è fra una settimana.',
   ch:[
@@ -11819,7 +11823,7 @@ const CADUTA90_EV = {
   ],
 };
 const MERCOLEDI_EV = {
-  id:'snodo_mercoledi', kick:'La sterlina', tono:'grave',
+  id:'snodo_mercoledi', snodo:true, kick:'La sterlina', tono:'grave',
   t:'La sterlina sotto attacco',
   text:'È mercoledì mattina e i mercati vendono sterline più in fretta di quanto la Banca riesca a comprarne. Il cambio è dentro il Sistema monetario e tu hai promesso di difenderlo. Puoi alzare i tassi fino a dove serve e bruciare le riserve, o uscire.',
   ch:[
@@ -11832,7 +11836,7 @@ const MERCOLEDI_EV = {
   ],
 };
 const ANIMA_EV = {
-  id:'snodo_anima', kick:'Il partito', tono:'grave',
+  id:'snodo_anima', snodo:true, kick:'Il partito', tono:'grave',
   t:'L\'anima del partito',
   text:'La clausola dello statuto promette da settant\'anni la proprietà comune dei mezzi di produzione. Nessuno la applica, tutti la difendono. Riscriverla dice al paese che sei cambiato; tenerla dice ai tuoi che sei rimasto.',
   ch:[
@@ -11845,7 +11849,7 @@ const ANIMA_EV = {
   ],
 };
 const DEVOLUZIONE_EV = {
-  id:'snodo_devoluzione', kick:'La devoluzione', tono:'grave',
+  id:'snodo_devoluzione', snodo:true, kick:'La devoluzione', tono:'grave',
   t:'I parlamenti di Scozia e Galles',
   text:'Hai promesso ai due paesi un parlamento proprio. Ora devi dire quanto conta: un referendum e poteri larghi, con la tassa; poteri stretti; o niente referendum, e la promessa che resta sulla carta.',
   ch:[
@@ -11867,7 +11871,7 @@ const DEVOLUZIONE_EV = {
    che chiude la linea. ⚠ VALUTE: `cred`/`vis` solo all'opposizione → sempre dietro typeof.
    ============================================================================================================== */
 const IRAQ_EV = {
-  id:'snodo_iraq', kick:'La guerra', tono:'grave',
+  id:'snodo_iraq', snodo:true, kick:'La guerra', tono:'grave',
   t:'La seconda risoluzione',
   text:'L\'alleato ha deciso e chiede se ci sei. I tuoi servizi dicono che le armi ci sono; gli ispettori non le hanno trovate. Una seconda risoluzione delle Nazioni Unite non arriverà: il tuo paese può andare lo stesso, chiedere il mandato e fermarsi se manca, o restare fuori.',
   ch:[
@@ -11880,7 +11884,7 @@ const IRAQ_EV = {
   ],
 };
 const ROCK_EV = {
-  id:'snodo_rock', kick:'Le banche', tono:'grave',
+  id:'snodo_rock', snodo:true, kick:'Le banche', tono:'grave',
   t:'La fila davanti alle filiali',
   text:'Una banca di credito immobiliare non trova più chi le presti denaro, e i suoi clienti si sono messi in fila davanti alle filiali. Non accadeva da oltre un secolo. Puoi nazionalizzarla, garantire i depositi e lasciarla in piedi, o lasciarla fallire e dire che il mercato è mercato.',
   ch:[
@@ -11893,7 +11897,7 @@ const ROCK_EV = {
   ],
 };
 const COALIZIONE2010_EV = {
-  id:'snodo_coalizione2010', kick:'Il partito', tono:'grave',
+  id:'snodo_coalizione2010', snodo:true, kick:'Il partito', tono:'grave',
   t:'Cinque giorni',
   text:'Il voto non ha dato la maggioranza a nessuno. Il terzo partito ha i numeri che ti mancano e sta parlando anche con gli altri; il governo uscente resta in carica finché non si decide. Hai pochi giorni: una coalizione vera con i ministeri divisi, un accordo di sostegno senza entrare, o un governo di minoranza che conta i voti ogni sera.',
   ch:[
@@ -11906,7 +11910,7 @@ const COALIZIONE2010_EV = {
   ],
 };
 const AUSTERITA_EV = {
-  id:'snodo_austerita', kick:'I conti', tono:'grave',
+  id:'snodo_austerita', snodo:true, kick:'I conti', tono:'grave',
   t:'Quanto, e quanto in fretta',
   text:'Il debito è raddoppiato in tre anni e i mercati guardano. Puoi tagliare in fretta e profondo, spalmare il rientro su un decennio, o scommettere che la crescita chiuda il buco da sola.',
   ch:[
@@ -11983,7 +11987,7 @@ const PILASTRI_MONDO = [
    muove il DEBITO, che il clamp non tocca.
    ============================================================================================================== */
 const STERLINA60_EV = {
-  id:'snodo_sterlina60', kick:'La sterlina', tono:'grave',
+  id:'snodo_sterlina60', snodo:true, kick:'La sterlina', tono:'grave',
   t:'Difendere o svalutare',
   text:'Le riserve si consumano da mesi e i mercati non credono più al cambio. Il Tesoro mette sul tavolo la cosa che nessun governo vuole firmare: svalutare. L\'alternativa è una deflazione che il paese sentirà in busta paga.',
   ch:[
@@ -11998,7 +12002,7 @@ const STERLINA60_EV = {
   ],
 };
 const STERLINA60_DUE_EV = {
-  id:'snodo_sterlina60_due', kick:'La sterlina', tono:'grave',
+  id:'snodo_sterlina60_due', snodo:true, kick:'La sterlina', tono:'grave',
   t:'Il prezzo della parola data',
   text:'Il cambio regge, ma a caro prezzo: tasse su, spesa giù, e i piani annunciati che tornano nel cassetto. Passano i mesi, e i mercati tornano.',
   ch:[
@@ -12016,7 +12020,7 @@ const STERLINA60_DUE_EV = {
   ],
 };
 const EUROPA60_EV = {
-  id:'snodo_europa60', kick:'La porta d\'Europa', tono:'grave',
+  id:'snodo_europa60', snodo:true, kick:'La porta d\'Europa', tono:'grave',
   t:'La domanda d\'ingresso',
   text:'Il Mercato comune cresce senza di noi e il Commonwealth non basta più a fare un\'economia. Chiedere di entrare significa mettersi nelle mani di chi può dire no.',
   ch:[
@@ -12029,7 +12033,7 @@ const EUROPA60_EV = {
   ],
 };
 const EUROPA60_DUE_EV = {
-  id:'snodo_europa60_due', kick:'La porta d\'Europa', tono:'grave',
+  id:'snodo_europa60_due', snodo:true, kick:'La porta d\'Europa', tono:'grave',
   t:'Il no da Parigi',
   text:'Il negoziato si chiude prima di cominciare davvero: il veto arriva da una sola capitale, e non c\'è appello. Ora la scelta è se rimanere sulla soglia o voltarsi.',
   ch:[
@@ -12042,7 +12046,7 @@ const EUROPA60_DUE_EV = {
   ],
 };
 const COSCIENZA60_EV = {
-  id:'snodo_coscienza60', kick:'Il voto libero', tono:'grave',
+  id:'snodo_coscienza60', snodo:true, kick:'Il voto libero', tono:'grave',
   t:'Il voto libero',
   text:'Sul banco arrivano leggi che dividono le famiglie prima dei partiti: la pena capitale, l\'aborto, i rapporti fra adulti dello stesso sesso. Il gruppo chiede di lasciare libertà di voto, il paese guarda.',
   ch:[
@@ -12139,7 +12143,7 @@ const RIMPASTO_EV = {
    Testi dalle schede PRESET-UK-1950 §8 e PRESET-UK-2000 §7, non riscritti a memoria.
    ================================================================================================================ */
 const SUEZ_OPP_EV = {
-  id:'snodo_suez_opp', kick:'Il Canale', tono:'grave',
+  id:'snodo_suez_opp', snodo:true, kick:'Il Canale', tono:'grave',
   t:'Suez, dall’aula',
   text:'Il governo ha mandato le truppe sul Canale. Il paese è diviso, l’alleato americano è furioso, e la sterlina trema. Domani si vota in aula: sostenere una guerra in corso, o combatterla mentre i soldati sono sul campo.',
   ch:[
@@ -12154,7 +12158,7 @@ const SUEZ_OPP_EV = {
         S.log.unshift({t:T('Il Canale'),x:T('Astenuto su Suez: né con il governo né contro.')}); } }
   ] };
 const COAL2010_OPP_EV = {
-  id:'snodo_coal2010_opp', kick:'I cinque giorni', tono:'grave',
+  id:'snodo_coal2010_opp', snodo:true, kick:'I cinque giorni', tono:'grave',
   t:'Cinque giorni, dall’altra parte',
   text:'Il voto non ha dato la maggioranza a nessuno. Hai perso, ma non abbastanza: sei ancora in carica come governo uscente, e i terzi ricevono te e il vincitore nello stesso pomeriggio. Coi nazionalisti e i terzi arriveresti a un soffio dalla maggioranza — un soffio, e un governo di sei partiti.',
   ch:[
@@ -12169,7 +12173,7 @@ const COAL2010_OPP_EV = {
         S.log.unshift({t:T('I cinque giorni'),x:T('Restato in carica senza maggioranza, e sfiduciato.')}); } }
   ] };
 const SUEZ_EV = {
-  id:'snodo_suez', kick:'Il Canale', tono:'grave',
+  id:'snodo_suez', snodo:true, kick:'Il Canale', tono:'grave',
   t:'Il Canale',
   text:'Il Canale è stato nazionalizzato, la flotta è pronta, l\'alleato francese incalza. In gabinetto nessuno dice la parola «impero», ma è di quella che si parla. Il Tesoro fa passare un biglietto: le riserve in dollari non reggono una crisi lunga.',
   ch:[
@@ -12183,7 +12187,7 @@ const SUEZ_EV = {
   ],
 };
 const SUEZ_DUE_EV = {
-  id:'snodo_suez_due', kick:'Il Canale', tono:'grave',
+  id:'snodo_suez_due', snodo:true, kick:'Il Canale', tono:'grave',
   t:'Due settimane',
   text:'Le truppe scendono. E mentre scendono, comincia la corsa alla sterlina: le riserve bruciano, e da Washington arriva un no secco a qualunque aiuto finché non ci si ferma.',
   ch:[
@@ -12255,7 +12259,7 @@ const STERLINA_EV = {
    chi guida la fusione trasloca nel partito nuovo, chi resta fuori si divide e tiene un margine. Per la
    sinistra radicale non c'è fusione: c'è la dispersione, cioè restare fuori dall'aula. */
 const FUSIONE_PD_EV = {
-  id:'snodo_fusione_pd', kick:'Il partito', tono:'grave',
+  id:'snodo_fusione_pd', snodo:true, kick:'Il partito', tono:'grave',
   t:'Il partito nuovo',
   text:'Le due anime del centrosinistra hanno deciso di sciogliersi in un soggetto solo: un nome nuovo, un simbolo nuovo, primarie aperte a chiunque voglia parteciparvi. C\'è chi dice che è l\'unico modo per vincere, e chi che è la fine di una storia. Tu devi dire da che parte stai.',
   ch:[
@@ -12272,7 +12276,7 @@ const FUSIONE_PD_EV = {
   ],
 };
 const FUSIONE_PDL_EV = {
-  id:'snodo_fusione_pdl', kick:'Il partito', tono:'grave',
+  id:'snodo_fusione_pdl', snodo:true, kick:'Il partito', tono:'grave',
   t:'Il partito unico del centrodestra',
   text:'Il partito-azienda e la destra di governo hanno annunciato la lista unica, e dietro la lista c\'è la fusione. Per una parte dei tuoi è il traguardo di vent\'anni; per un\'altra è consegnare la propria storia a casa d\'altri.',
   ch:[
@@ -12289,7 +12293,7 @@ const FUSIONE_PDL_EV = {
   ],
 };
 const FUORI_AULA_EV = {
-  id:'snodo_fuori_aula', kick:'Il partito', tono:'grave',
+  id:'snodo_fuori_aula', snodo:true, kick:'Il partito', tono:'grave',
   t:'Sotto la soglia',
   text:'La legge nuova ha uno sbarramento, e i sondaggi dicono che ci passi sotto. Puoi presentarti in una lista comune con le altre sinistre — un cartello che nessuno ha voluto davvero — oppure correre da solo col tuo simbolo, sapendo come può finire.',
   ch:[

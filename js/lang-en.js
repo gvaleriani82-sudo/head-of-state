@@ -2937,6 +2937,9 @@ const EN = {
   "Mondo cattolico":"Catholic community",
   /* L95-1 · l'interruttore del movimento (Impostazioni) */
   "Movimento":"Motion",
+  /* L95-3 · l'interruttore dell'audio */
+  "Audio":"Sound",
+  "Acceso":"On",
   "Pieno":"Full",
   "Ridotto":"Reduced",
   "Spento":"Off",

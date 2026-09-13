@@ -113,7 +113,23 @@ function ossCarte(){
          porta via il nodo e con lui l'animazione. Misurato: 12 entrate su 18 carte visibili segnando alla
          decisione. Se il nodo sparisce prima, la chiave resta libera e il render dopo riprova. */
       el.classList.add('enter');
-      el.addEventListener('animationstart', function(ev){ if(ev.animationName==='cardIn') CARTE_VISTE[k]=1; }, {once:true});
+      /* ⛑⛑ L95-3 — `animationstart` RISALE DAI FIGLI. La carta con una scena contiene un <img> col Ken Burns, e il suo
+         `animationstart` arriva al listener della carta PRIMA di `cardIn`: con `{once:true}` il listener si consumava
+         su un'animazione sbagliata, la carta non veniva mai segnata «entrata» e RIENTRAVA A OGNI RENDER. Misurato
+         mentre si agganciava il suono: 30 entrate di carta in dodici mesi, 1 suono `carta`. Quindi: niente `once`,
+         si guarda che l'evento sia DELLA carta e di `cardIn`, e il listener si toglie a mano solo allora. */
+      const suIngresso=function(ev){ if(ev.target!==el || ev.animationName!=='cardIn') return;
+        el.removeEventListener('animationstart', suIngresso); CARTE_VISTE[k]=1;
+        /* L95-3 — il suono della carta parte quando la carta SI VEDE entrare, non quando è in agenda. ⚠ G8: i
+           pilastri-cronaca non suonano. Il marcatore è il campo DICHIARATO `cronaca:true` (data.js: i 59 pilastri
+           di linea e i 6 fatti-mondo), lo stesso che resolveItem legge per scrivere il fatto nel registro.
+           Uno SNODO (`snodo:true` sull'oggetto, decisione di Cowork 13/9) suona `snodo` AL POSTO di `carta`, non
+           in più. ⚠ Se una carta portasse tutti e due i marcatori VINCE CRONACA: resta muta. */
+        try{ const it=(S.agenda||[]).filter(function(x,i){ return chiaveCarta(x,i)===k; })[0];
+          const d=it && it.data;
+          if(!(d && d.cronaca) && typeof suona==='function') suona(d && d.snodo ? 'snodo' : 'carta'); }catch(e){}
+      };
+      el.addEventListener('animationstart', suIngresso);
     });
   }, {threshold:0.15});
   return OSS_CARTE;
@@ -228,6 +244,7 @@ function playAnims(){
         const ora=parseInt(el.getAttribute('data-to'),10);
         if(isNaN(ora) || ora===UIVALS['mese']) return;
         try{
+          if(typeof suona==='function') suona('mese');   // L95-3: dove il rullo parte davvero (non in advanceMonth)
           const g=document.createElement('span'); g.className='mese-prima'; g.textContent=vecchio;
           el.appendChild(g); el.classList.add('roll');
           g.addEventListener('animationend', function(){ try{ g.remove(); el.classList.remove('roll'); }catch(e){} }, {once:true});
@@ -806,7 +823,14 @@ function showPartita(){
       <button class="${_mv==='pieno'?'on':''}" onclick="setMovimento('pieno')">${T('Pieno')}</button>
       <button class="${_mv==='ridotto'?'on':''}" onclick="setMovimento('ridotto')">${T('Ridotto')}</button>
       <button class="${_mv==='spento'?'on':''}" onclick="setMovimento('spento')">${T('Spento')}</button></div>`;
+  /* L95-3 — l'AUDIO, sotto il movimento, stessa forma. localStorage `hos_audio`, mai in S. */
+  const _au=(typeof audioAcceso==='function' && audioAcceso())?'acceso':'spento';
+  const _auSeg=`<div class="contorno" style="font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--mut);text-align:center;margin:8px 0 4px">${T('Audio')}</div>
+    <div class="seg" id="audio-seg" style="max-width:200px;margin:0 auto 10px;">
+      <button class="${_au==='acceso'?'on':''}" onclick="setAudio('acceso')">${T('Acceso')}</button>
+      <button class="${_au==='spento'?'on':''}" onclick="setAudio('spento')">${T('Spento')}</button></div>`;
   h+=`<div class="contorno" style="font-size:11px;color:var(--mut);text-align:center;margin:0 auto 10px;max-width:300px">${T('Con <b>ridotto</b> restano solo le dissolvenze; con <b>spento</b> nulla si muove. La scelta resta su questo dispositivo.')}${movimentoScelto()?'':(motionSistemaReduce()?(' '+T('(il tuo dispositivo chiede meno movimento: si parte da ridotto)')):'')}</div>`;
+  h+=_auSeg;
   h+=`<div class="mtext">${T(aMetaMese()?"Sei a metà mese: il salvataggio riprenderà <b>dall'inizio del mese corrente</b>.":"Fotografia al confine del mese corrente.")}</div>`;
   h+=`<div class="choices">`;
   if(!ok) h+=`<div class="note" style="border-color:var(--warn);color:var(--warn-ink)">${T('Su questo dispositivo il salvataggio nel browser non è disponibile (stai aprendo il gioco da file locale). Per non perdere la carriera usa <b>Scarica file</b> qui sotto, e riprendila con <b>Importa</b>.')}</div>`;

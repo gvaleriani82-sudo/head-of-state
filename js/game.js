@@ -314,6 +314,7 @@ function initStatoBase(){
 
 /* --- Nuova partita (al GOVERNO) --- */
 function startGame(mins){
+  if(typeof taciTutto==='function') taciTutto();   // L95-3: una partita nuova non eredita i loop della vecchia
   initStatoBase();
   S.ministers=mins;
   /* coalizione di governo (passo 3): il tuo partito è sempre incluso; i seggi esistono dove c'è un parlamento */
@@ -3031,6 +3032,7 @@ function generaTitolo(){
   var _wTit=(S.era===LINEA_IT)?6:8;   // L30-1: la seconda condizione (S.era==='italia1960') era MORTA — S.era e la LINEA, non il decennio
   S.recentTit.push(q.id); if(S.recentTit.length>_wTit) S.recentTit.shift();
   S.titoloMese={ id:q.id, testo:T(amica?q.amico:q.ostile), tono:(amica?'amica':'ostile') };   // i18n: tradotto allo store (pattern-log)
+  if(typeof suona==='function') suona('giornale');   // L95-3: il titolo del mese nasce qui (i titoli non sono carte d'agenda: vedi CODA L95-3)
 }
 /* La prima pagina a LIVELLO 1: pesca da TITOLI_LOCALI (tipo gata città/regione + cond su S.locale), tono dal
    CONSENSO locale, %LUOGO=nome dell'area (soggetto). Stessa anti-ripetizione lastTitolo. Mai temi nazionali. */
@@ -3048,6 +3050,7 @@ function generaTitoloLocale(){
   const luogo=localeNome()||'', ente=(tipo==='regione')?T('Regione'):T('Comune');
   const sub=(s)=>String(s).replace(/%LUOGO/g,luogo).replace(/%ENTE/g,ente);
   S.titoloMese={ id:q.id, testo:sub(T(amica?q.amico:q.ostile)), tono:(amica?'amica':'ostile') };   // i18n: T sul template, PRIMA di sub (%LUOGO/%ENTE intatti)
+  if(typeof suona==='function') suona('giornale');   // L95-3: il titolo locale del mese
 }
 
 /* ============================================================
@@ -3616,6 +3619,7 @@ function apriPrimaria(tipo, bonus){
   const punteggio=umoreMedio()*0.5 + S.ind.consenso*0.3 + pl*0.2 + (Math.random()*6-3) + (bonus||0);   // L64-3: +3 se scegli tu il momento
   const soglia=50 + (S.sfida && S.sfida.fonte==='territorio' && S.sfida.simbolo ? 2 : 0);
   PRIM={ tipo:tipo, punteggio:punteggio, soglia:soglia, win:punteggio>=soglia };
+  if(typeof suona==='function') suona('aula');   // L95-3: il brusio d'aula, in loop fino all'esito
   const v=S.sfida||{};
   document.getElementById('modal').innerHTML=`<div class="mt"><div class="kicker">${T((part(S.partito)||{}).nome)} · ${T(tipo==='vigilia'?'Verso le elezioni':'Congresso anticipato')}</div><h2>${T('Primarie di partito')}</h2></div>
     <div class="mtext">${T('Ti sfida <b>%V</b>%X.').replace('%V',v.volto||'—').replace('%X',v.area?`, ${v.carica} — <b>${v.area}</b>`:(v.carica?` (${v.carica})`:''))} ${T(tipo==='vigilia'?'Prima di guidare il partito alle urne, devi vincere in casa.':'Il malcontento è maturo: il partito vota sulla tua leadership.')}</div>
@@ -3627,6 +3631,7 @@ function apriPrimaria(tipo, bonus){
 }
 function esitoPrimaria(){
   if(!PRIM) return;
+  if(typeof taci==='function') taci('aula');   // L95-3
   if(PRIM.win){
     const marg=Math.round(PRIM.punteggio-PRIM.soglia);
     document.getElementById('modal').innerHTML=`<div class="mt"><div class="kicker">Primarie · esito</div><h2>I militanti ti confermano</h2></div>
@@ -4409,10 +4414,13 @@ function diffEsiti(prima,dopo){
 }
 function resolveItem(idx,ci){
   const it=S.agenda[idx];
+  if(it && !it.resolved){ if(typeof suona==='function') suona('tocco'); }   // L95-3: il tocco sull'opzione — qui, dove la scelta si DECIDE
   const prima=(it&&!it.resolved)?fotoEsiti():null;
   const r=resolveItemCore(idx,ci);
   /* la carta puo essere stata rigenerata (occasioni, salti di livello): si annota solo se e ancora la stessa */
   if(prima && S.agenda && S.agenda[idx]===it && it.resolved) it.esiti=diffEsiti(prima, fotoEsiti());
+  /* L95-3: la riga-effetto con i suoi chip: UN suono per scelta, non uno per chip */
+  if(prima && it && it.esiti && it.esiti.length){ if(typeof suona==='function') suona('chip'); }
   return r;
 }
 function resolveItemCore(idx,ci){
@@ -5114,6 +5122,7 @@ function costoInvestimento(i){ const tipo=tipoTerritorio(i); let c=(tipo==='avve
 function ritornoInvestimento(i){ const tipo=tipoTerritorio(i); const base=(tipo==='roccaforte')?4:(tipo==='bilico'?10:6); return base + ((S.potereLocale||0)>=60?2:0); }
 function investiTerritorio(i){
   if(!inCampagna()) return; const sf=campSforzo(); const c=costoInvestimento(i); if(sf<c) return;
+  if(typeof suona==='function') suona('mappa');   // L95-3: il tocco che investe davvero su un territorio (dopo i controlli: un tocco a vuoto non suona)
   S.campNaz.sforzo=sf-c; S.campNaz.speso[i]=(S.campNaz.speso[i]||0)+c;
   const t=S.territori[i]; t.spinta=(t.spinta||0)+ritornoInvestimento(i);
   if(tipoTerritorio(i)==='avversario') repd(1);   // il terreno avversario paga in prestigio anche quando perdi
@@ -5204,6 +5213,7 @@ function avviaNotte(){
   }
   NOTTE={ sistema:sistema, vero:vero, stadio:0, onde:generaOnde(sistema, vero), dich:null, saltata:false, timer:null };
   try{ seedNotteAnim(); }catch(e){}   // l'exit poll sale da zero; le tappe successive partono dalla precedente
+  if(typeof suona==='function') suona('urne');   // L95-3: il brusio dello spoglio, in loop fino alla proclamazione
   renderNotte(); armaTimerNotte();
 }
 /* Il timer vive SOLO nel transitorio: skip/avanti lo cancellano, il reload lo uccide col resto. */
@@ -5219,14 +5229,27 @@ function avanzaNotte(){
   stopTimerNotte();
   NOTTE.stadio++;
   if(NOTTE.stadio>=SD_NOTTE.length) return concludiNotte();   // oltre la proclamazione → esito a valle
+  if(NOTTE.stadio===SD_NOTTE.length-1) notteSuonaEsito();      // L95-3
   renderNotte(); armaTimerNotte();
 }
 /* «Salta allo spoglio finale»: va all'ULTIMA ondata (i numeri esatti). Chi salta rinuncia al palcoscenico →
    nessuna dichiarazione, nessun effetto (decisione Giacomo: mai un effetto che il giocatore non ha scelto). */
-function saltaNotte(){ if(!NOTTE) return; stopTimerNotte(); NOTTE.saltata=true; NOTTE.stadio=SD_NOTTE.length-1; renderNotte(); }
+function saltaNotte(){ if(!NOTTE) return; stopTimerNotte(); NOTTE.saltata=true; NOTTE.stadio=SD_NOTTE.length-1; notteSuonaEsito(); renderNotte(); }
+/* L95-3 — la proclamazione: il brusio si ferma e parte l'esito, UNA volta per notte (avanti o salto, non tutti e due).
+   Vinta/non vinta è la STESSA lettura dello sfondo di renderNotte (blocco elettorale che tocca 50 sull'ultima ondata,
+   o la mia % oltre 50): scena e suono non possono dire due cose diverse. */
+function notteSuonaEsito(){
+  if(!NOTTE || NOTTE.esitoSuonato) return; NOTTE.esitoSuonato=true;
+  if(typeof taci==='function') taci('urne');
+  var onda=NOTTE.onde[SD_NOTTE.length-1], vinta;
+  if(NOTTE.sistema==='parlamentare'){ var _bl=(typeof bloccoElettorale==='function')?bloccoElettorale():bloccoIds(); vinta=_bl.reduce(function(s,id){return s+(onda[id]||0);},0)>=50; }
+  else vinta=(onda.myPct>50);
+  if(typeof suona==='function') suona(vinta?'esito':'esito_no');
+}
 function dichiaraNotte(i){ if(!NOTTE) return; NOTTE.dich=i; stopTimerNotte(); avanzaNotte(); }
 function concludiNotte(){
   stopTimerNotte();
+  if(typeof taci==='function') taci('urne');   // L95-3: rete di sicurezza, il loop non sopravvive alla notte
   const sistema=NOTTE.sistema, vero=NOTTE.vero, dich=NOTTE.dich; NOTTE=null;   // svuota il transitorio PRIMA del flusso a valle
   const mg=calcMargineEsito(sistema, vero); S.margineEsito=mg; // il MARGINE (fase B): caratterizza l'esito (tono + biografia + epilogo)
   applicaMargineBio(mg);                                       // fatto datato + contatori trionfi/sconfitteNette (solo gli estremi memorabili)
@@ -5489,6 +5512,7 @@ function armaTimerTel(){
 function apriTelefonata(){
   var def=telDef(S.telPendente); if(!def){ S.telPendente=null; return; }
   TEL={ id:def.id, def:def, missed:false, timer:null, tic:null };
+  if(typeof suona==='function') suona('telefono');   // L95-3: dove parte lo squillo (telRing), una volta per chiamata
   renderTelefonata(); armaTimerTel(); telTicSpento();
 }
 function renderTelefonata(){
@@ -6117,7 +6141,13 @@ const RIVOLTA_TESTI={
      quindi il censimento non poteva vederlo: l'ho trovato leggendo i punti che nominano il gruppo. */
   cattolici:   'Luoghi di culto e associazioni ti tolgono il saluto, e con loro metà della tua maggioranza. Il governo cade.'
 };
+/* L95-3 · I FINALI CHE SUONANO (decisione di Cowork, 13/9). «Finale» e «game over» passano dalla stessa gameOver:
+   la distinzione è QUESTA lista, dichiarata una volta. Suonano la fine voluta o compiuta — il mandato compiuto,
+   il ritiro, la fine del mandato internazionale; tutto il resto (crisi, insolvenza, condanna, sconfitta…) è muto. */
+const FINALI_CON_SUONO = ['mandatoCompiuto', 'ritiro', 'mandatoInt'];
 function gameOver(reason){
+  if(typeof taciTutto==='function') taciTutto();   // L95-3: si ferma tutto; poi suona `finale` solo se il finale è nella lista
+  if(FINALI_CON_SUONO.indexOf(reason)>=0 && typeof suona==='function') suona('finale');
   try{ aggiungiCarriera(reason); }catch(e){} chiudiAutosave();   // carriera chiusa: aggiorna lo storico e cancella l'autosave (niente "Continua")
   document.getElementById('ov').classList.remove('on');
   const years=S.year-(S.annoInizio||2025);
@@ -6196,6 +6226,7 @@ function parseSave(text){
   return {ok:true, save:o};
 }
 function applySnap(snap){
+  if(typeof taciTutto==='function') taciTutto();   // L95-3
   S = snap.s;
   chosenCountry=S.paese; PAESE=PAESI[S.paese]; chosenPartito=S.partito; chosenDiff=S.diff||'normale';
   /* Build B — era: dato puro (migrazione: i vecchi salvataggi non ce l'hanno → presente). Se è attivo uno
