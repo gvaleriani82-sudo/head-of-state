@@ -260,6 +260,11 @@ function initStatoBase(){
   S.caduta90=null; S.mercoledi=null; S.anima=null; S.devoluzione=null;   // L75-1 (dati puri, round-trip)
   S.iraq=null; S.rock=null; S.coalizione2010=null; S.austerita2010=null;   // L77-1 (dati puri, round-trip)
   S.suezOpp=null; S.coal2010Opp=null;   // L77-4: gli snodi dall'opposizione, dichiarati al boot come i gemelli
+  /* L93-2 — il decennio francese (dati puri, round-trip). `suez` è condiviso col pilota inglese; `indocinaTrattativa`
+     è l'interruttore della variante di Dien Bien Phu; `francoGrave`/`francoSubito` la corsa che Suez chiama. */
+  S.poteriSpeciali=null; S.poteriSpecialiOpp=null; S.repubblicaCambia=null; S.repubblicaCambiaOpp=null;
+  S.francoAncore={}; S.francoRinvii=0; S.francoCrisi=0; S.francoSubito=false; S.francoGrave=false;
+  S.indocinaTrattativa=false; S.casePrefabbricate=false; S.apparentamenti=null;
   S.governiCaduti=0;                    // L80-5: quante volte il governo e caduto senza che si andasse a votare
   S.logorioAcc=0;                       // L77-3: il logorio accumulato mese per mese (0 = carriera nuova)
   S.logorioAvv=0; S.mesiMinoranzaAvv=0;   // L90-2: il logorio del governo AVVERSARIO e i suoi mesi sotto i 50 seggi (dati puri, round-trip)
@@ -2376,16 +2381,38 @@ function snodoSuezDueDovuta(){  return typeof S!=='undefined' && S && S.era===LI
    stretta si perde se il mese è occupato. `S.sterlinaAncore` marca quali sono state pescate: la stessa ancora
    non torna, ancore diverse sì — da cui le 2-3 pescate per decennio che chiede la scheda. */
 const STERLINA_ANCORE = [ {id:'a51', da:1951, a:1952}, {id:'a55', da:1955, a:1956}, {id:'a57', da:1957, a:1958} ];
-function sterlinaAncoraDovuta(){
-  if(typeof S==='undefined' || !S || S.era!==LINEA_UK || S.livello!==3 || S.opposizione) return null;
-  if(S.suez==='intervento') return null;                       // la catena di Suez ha la precedenza: mai due morsi valutari insieme
-  var fatte=S.sterlinaAncore||{};
-  for(var i=0;i<STERLINA_ANCORE.length;i++){ var A=STERLINA_ANCORE[i];
+/* L93-2 · IL GATE DELLE ANCORE, PARAMETRIZZATO. Era scritto con la linea inglese dentro; la corsa al franco è lo
+   stesso meccanismo su un'altra linea, quindi la funzione prende linea, ancore e registro invece di duplicarsi.
+   La sterlina lo chiama con gli stessi argomenti di prima: comportamento identico (baseline delle tredici porte). */
+function ancoraValutaDovuta(linea, ancore, fatte, bloccata){
+  if(typeof S==='undefined' || !S || S.era!==linea || S.livello!==3 || S.opposizione) return null;
+  if(bloccata) return null;
+  fatte=fatte||{};
+  for(var i=0;i<ancore.length;i++){ var A=ancore[i];
     if(fatte[A.id]) continue;
     if(S.year>=A.da && S.year<=A.a) return A.id;
   }
   return null;
 }
+function sterlinaAncoraDovuta(){
+  if(typeof S==='undefined' || !S) return null;
+  return ancoraValutaDovuta(LINEA_UK, STERLINA_ANCORE, S.sterlinaAncore, S.suez==='intervento');   // la catena di Suez ha la precedenza: mai due morsi valutari insieme
+}
+/* L93-2 · LA CORSA AL FRANCO: le ancore della scheda (1951 · 1955 · 1957), finestre di due anni come la sterlina.
+   Suez «avanti» la chiama SUBITO, fuori ancora: è la corsa che la spedizione solitaria si porta dietro. */
+const FRANCO_ANCORE = [ {id:'a51', da:1951, a:1952}, {id:'a55', da:1955, a:1956}, {id:'a57', da:1957, a:1958} ];
+function francoAncoraDovuta(){
+  if(typeof S==='undefined' || !S || S.era!==LINEA_FR || S.livello!==3 || S.opposizione) return null;
+  if(S.francoSubito) return 'suez';
+  return ancoraValutaDovuta(LINEA_FR, FRANCO_ANCORE, S.francoAncore, false);
+}
+/* L93-2 · I GATE DEL DECENNIO FRANCESE. Finestre di tre mesi dal mese della scheda, per la stessa ragione di Suez
+   inglese (un mese solo si perde se è occupato). G1 nel gate dall'aula: il flag del gemello di governo è null. */
+function snodoPoteriDovuta(){        return typeof S!=='undefined' && S && S.era===LINEA_FR && S.livello===3 && !S.opposizione && S.poteriSpeciali==null && S.year===1956 && S.month>=3 && S.month<=5; }
+function snodoPoteriOppDovuta(){     return typeof S!=='undefined' && S && S.era===LINEA_FR && S.livello===3 && S.opposizione && S.poteriSpecialiOpp==null && S.poteriSpeciali==null && S.year===1956 && S.month>=3 && S.month<=5; }
+function snodoSuezFrDovuta(){        return typeof S!=='undefined' && S && S.era===LINEA_FR && S.livello===3 && !S.opposizione && S.suez==null && S.year===1956 && S.month>=10; }
+function snodoRepubblicaDovuta(){    return typeof S!=='undefined' && S && S.era===LINEA_FR && S.livello===3 && !S.opposizione && S.repubblicaCambia==null && S.year===1958 && S.month>=5 && S.month<=7; }
+function snodoRepubblicaOppDovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_FR && S.livello===3 && S.opposizione && S.repubblicaCambiaOpp==null && S.repubblicaCambia==null && S.year===1958 && S.month>=5 && S.month<=7; }
 /* L40-2 · i gate del '90. Stessa forma degli snodi '70/'80: premier, one-shot, dentro la finestra storica. */
 function snodoMaastrichtDovuta(){   return typeof S!=='undefined' && S && S.era===LINEA_IT && S.livello===3 && !S.opposizione && S.maastricht==null  && S.year>=1992 && S.year<=1997; }
 function snodoMattarellumDovuta(){  return typeof S!=='undefined' && S && S.era===LINEA_IT && S.livello===3 && !S.opposizione && S.mattarellum==null && S.year>=1993 && S.year<=1994; }
@@ -4108,6 +4135,8 @@ function genAgendaRamo(first){
     if(!first && typeof snodoAnimaDovuta==='function' && snodoAnimaDovuta()){ S.agenda.push({kind:'event', data:ANIMA_EV, resolved:false}); agendaSolo(); return; }   // L75-1: l'anima del partito, all'opposizione
     if(!first && typeof snodoSuezOppDovuta==='function' && snodoSuezOppDovuta()){ S.agenda.push({kind:'event', data:SUEZ_OPP_EV, resolved:false}); agendaSolo(); return; }   // L77-4: Suez dall'aula
     if(!first && typeof snodoCoal2010OppDovuta==='function' && snodoCoal2010OppDovuta()){ S.agenda.push({kind:'event', data:COAL2010_OPP_EV, resolved:false}); agendaSolo(); return; }   // L77-4: i cinque giorni, visti da chi ha perso
+    if(!first && typeof snodoPoteriOppDovuta==='function' && snodoPoteriOppDovuta()){ S.agenda.push({kind:'event', data:POTERI_OPP_EV, resolved:false}); agendaSolo(); return; }   // L93-2: i poteri speciali, dall'aula
+    if(!first && typeof snodoRepubblicaOppDovuta==='function' && snodoRepubblicaOppDovuta()){ S.agenda.push({kind:'event', data:REPUBBLICA_OPP_EV, resolved:false}); agendaSolo(); return; }   // L93-2: il primo giugno, dall'aula
     // Cantiere C: la stagione elettorale vale anche da SFIDANTE (bloccoIds = il tuo blocco d'opposizione)
     if(typeof pickCampagnaNazionale==='function'){ const cnbO=pickCampagnaNazionale(); if(cnbO){ S.agenda.push(cnbO); agendaSolo(); return; } }
     const inq=aggiornaInchiesta();   // anche da sfidante l'esposizione conta: bersaglio sempre tu (niente ministri qui)
@@ -4201,6 +4230,14 @@ function genAgendaRamo(first){
   if(!first && typeof sterlinaAncoraDovuta==='function'){ var _sa=sterlinaAncoraDovuta();
     if(_sa){ S.sterlinaAncore=S.sterlinaAncore||{}; S.sterlinaAncore[_sa]=true;
       S.agenda.push({kind:'event', data:STERLINA_EV, resolved:false}); agendaSolo(); return; } }
+  /* L93-2 · gli snodi francesi, in ordine di calendario (finestre disgiunte), poi la corsa al franco: Suez prima
+     del franco, perché la spedizione solitaria è ciò che chiama la corsa. */
+  if(!first && typeof snodoPoteriDovuta==='function' && snodoPoteriDovuta()){ S.agenda.push({kind:'event', data:POTERI_EV, resolved:false}); agendaSolo(); return; }
+  if(!first && typeof snodoSuezFrDovuta==='function' && snodoSuezFrDovuta()){ S.agenda.push({kind:'event', data:SUEZ_FR_EV, resolved:false}); agendaSolo(); return; }
+  if(!first && typeof snodoRepubblicaDovuta==='function' && snodoRepubblicaDovuta()){ S.agenda.push({kind:'event', data:REPUBBLICA_EV, resolved:false}); agendaSolo(); return; }
+  if(!first && typeof francoAncoraDovuta==='function'){ var _fa=francoAncoraDovuta();
+    if(_fa){ if(_fa==='suez'){ S.francoSubito=false; S.francoGrave=true; } else { S.francoAncore=S.francoAncore||{}; S.francoAncore[_fa]=true; }
+      S.agenda.push({kind:'event', data:((S.francoRinvii||0)>=2 ? FRANCO_TERZA_EV : FRANCO_EV), resolved:false}); agendaSolo(); return; } }
   /* L40-2 · gli snodi del '90. La SCISSIONE per prima: è la più identitaria e non può farsi scavalcare. */
   if(!first && typeof snodoScissioneDovuta==='function' && snodoScissioneDovuta()){ S.agenda.push({kind:'event', data:SCISSIONE_EV, resolved:false}); agendaSolo(); return; }
   if(!first && typeof snodoDcDovuta==='function'  && snodoDcDovuta()){  S.agenda.push({kind:'event', data:DIASPORA_DC_EV, resolved:false}); agendaSolo(); return; }
@@ -6263,6 +6300,10 @@ function applySnap(snap){
   if(S.caduta90===undefined){ S.caduta90=null; S.mercoledi=null; S.anima=null; S.devoluzione=null; }   // L75-1
   if(S.iraq===undefined){ S.iraq=null; S.rock=null; S.coalizione2010=null; S.austerita2010=null; }   // L77-1
   if(S.suezOpp===undefined){ S.suezOpp=null; S.coal2010Opp=null; }   // L77-4: gli snodi dall'opposizione
+  if(S.poteriSpeciali===undefined){ S.poteriSpeciali=null; S.poteriSpecialiOpp=null; S.repubblicaCambia=null; S.repubblicaCambiaOpp=null;   // L93-2
+    S.francoAncore={}; S.francoRinvii=0; S.francoCrisi=0; S.francoSubito=false; S.francoGrave=false;
+    S.indocinaTrattativa=false; S.casePrefabbricate=false; S.apparentamenti=null; }
+  if(!S.francoAncore || typeof S.francoAncore!=='object') S.francoAncore={};
   if(S.governiCaduti===undefined) S.governiCaduti=0;   // L80-5
   if(S.logorioAcc===undefined) S.logorioAcc=null;   // L77-3: null = «ricostruiscilo dal comportamento vecchio» (logorioTotale lo fa al primo uso, senza gradino)
   if(S.promesseEsito===undefined){ S.groups0=null; S.ind0=null; S.promesseEsito=[]; S.leggiStorico=[]; S.governoAvversarioVolto=null; }   // L73-2

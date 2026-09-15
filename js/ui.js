@@ -772,13 +772,25 @@ function renderStorici(){
           +'</span></button>';
       }).join('')+'</div>';
 }
+/* L93-2 · `selezionabile:false` su un partito (oggi solo il RPF di fr1950): resta nel roster e nelle urne, ma non è
+   una carriera. È additivo — assente vuol dire selezionabile — e questo è l'unico punto che lo legge: il bottone è
+   spento e sotto c'è la riga `nota` che dice perché. Se la scelta corrente cade su un partito spento (il default è
+   il primo del roster), passa al primo selezionabile. */
+function partitoSelezionabile(p){ return !!p && p.selezionabile!==false; }
 function renderStartParties(){
   const el=document.getElementById('party-list'); if(!el) return;
-  el.innerHTML=PAESE.partiti.map(p=>`<button class="cand ${p.id===chosenPartito?'on':''}" onclick="setPartito('${p.id}')">
+  const cur=PAESE.partiti.filter(p=>p.id===chosenPartito)[0];
+  if(!partitoSelezionabile(cur)){ const primo=PAESE.partiti.filter(partitoSelezionabile)[0]; if(primo) chosenPartito=primo.id; }
+  el.innerHTML=PAESE.partiti.map(p=>partitoSelezionabile(p)
+    ? `<button class="cand ${p.id===chosenPartito?'on':''}" onclick="setPartito('${p.id}')">
     <span class="cn">${T(p.nome)}</span>
-    <span class="cmeta"><small style="color:var(--mut2)">${T(p.orientamento)}</small> <span class="mono" style="color:var(--mut)">${p.forza}%</span></span></button>`).join('');
+    <span class="cmeta"><small style="color:var(--mut2)">${T(p.orientamento)}</small> <span class="mono" style="color:var(--mut)">${p.forza}%</span></span></button>`
+    : `<button class="cand" disabled aria-disabled="true" style="flex-wrap:wrap;opacity:.6;cursor:default">
+    <span class="cn">${T(p.nome)}</span>
+    <span class="cmeta"><small style="color:var(--mut2)">${T(p.orientamento)}</small> <span class="mono" style="color:var(--mut)">${p.forza}%</span></span>
+    ${p.nota?`<small style="flex-basis:100%;font-size:12px;line-height:1.35;color:var(--mut);text-align:left">${T(p.nota)}</small>`:''}</button>`).join('');
 }
-function setPartito(id){ chosenPartito=id; renderStartParties(); }
+function setPartito(id){ const p=PAESE.partiti.filter(x=>x.id===id)[0]; if(!partitoSelezionabile(p)) return; chosenPartito=id; renderStartParties(); }
 
 /* ===== Persistenza — UI (schermata iniziale, modale "Partita", carriere). Il nucleo è in game.js. ===== */
 function escAttr(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
