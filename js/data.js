@@ -1129,7 +1129,7 @@ const SCENARI = {
     seggi: { fr_pcf:32.5, fr_mrp:28.9, fr_sfio:18.2, fr_mod:11.3, fr_rad:7.5, fr_rpf:1.6 },
     /* ⚠ ECONOMIA IN FRANCHI VECCHI (il nuovo franco è del 1960: 1 NF = 100 F). Le cifre sono l'ordine di
        grandezza della scheda §2 e stanno in `CIFRE-ECONOMICHE.md` con la data e il ⚠ di chi le ha messe. */
-    economia: { pil:10000, debito:30, deficit:-3.5 },
+    economia: { pil:10000, debito:30, deficit:-3.5, disoccupazione:1.5 },   // L100-1: il seme della disoccupazione (pieno impiego; il motore la rende al pavimento 3)
     /* ⛑ GLI APPARENTAMENTI SONO IL `premio` CHE ESISTE GIA (L52-1), non un campo nuovo. La voce chiedeva di
        dichiararli «come `premio` per-scenario»; il campo c'e' dal Porcellum di `italia2000` e ha esattamente la
        forma che serve. La quota e' storica e si legge dai seggi dichiarati della tappa del '51: la Terza Forza
@@ -1138,6 +1138,9 @@ const SCENARI = {
        ⚠ Alle DUE TAPPE il premio non si vede, perche' li i seggi sono dichiarati e il motore non viene chiamato
        (L61-2, forma piena): serve alle elezioni che il giocatore provoca fra una tappa e l'altra. */
     premio: { da:1951, quota:62 },
+    /* L93-4 · LA CRISI MINISTERIALE: il governo in minoranza cade al confine del mese e si riforma, alla terza caduta del
+       mandato si vota (game.js, `crisiMinisteriale`). Campo di `SCENARIO_ISTITUZIONI`: le altre porte non lo dichiarano. */
+    crisiMinisteriale: true,
     debtAncora: 30,
     inflazione: 5,     // L90-1/L91-1: media del decennio, a ondate (Corea 1951-52, poi la calma, poi il '57-58)
     crescita: 4.5,     // i Trente Glorieuses: cresce come l'Italia del miracolo, un po' meno
@@ -1149,6 +1152,129 @@ const SCENARI = {
       "Francia, 1950. Il paese si rialza in fretta — le fabbriche, il Piano, l'auto popolare — e intanto l'Assemblea fa e disfa governi al ritmo delle stagioni.",
       "Comunisti e gollisti insieme valgono quasi metà dei voti e nessuno dei due può governare: chi sta in mezzo deve tenere insieme socialisti, radicali, democristiani e moderati, che su scuola e colonie non la pensano uguale.",
       "In Indocina si combatte da quattro anni, e il conto arriva ogni mese sul bilancio.",
+    ],
+  },
+  /* ============================================================================================================
+     L97-1 · FRANCIA 1960 — la quindicesima porta, e la PRIMA SEMIPRESIDENZIALE della linea (scheda
+     PRESET-FRANCIA-1960 §0-§2). La V Repubblica: il settennato, il Presidente che scioglie, e il governo che cade
+     senza urne — il ramo `governoCade` di L80-5, che da L93-6 lascia proseguire il mese.
+
+     ⚠ `turnMandato: 1` E LA PRIMA URNA. Il Presidente in carica è del dicembre 1958: col settennato l'urna vera è
+     il **dicembre 1965** (mese 72 della porta). Ma il motore vota SOLO a gennaio (`S.month===1 && turnInMandate >=
+     mandatoMesi/12`, game.js): il dicembre non è rappresentabile, e il valore che ci arriva più vicino è
+     `turnMandato: 1` → **urna a gennaio 1966**, un mese dopo la storia. `turnMandato: 2` la porterebbe al gennaio
+     1965, undici mesi PRIMA. Dichiarato, non aggirato: spostare il voto fuori gennaio è un lotto di motore.
+
+     ⚠ IL SEED È IN NUOVI FRANCHI (1 NF = 100 F dal 1° gennaio 1960): 300 miliardi, non 30.000. Il cambio di unità
+     è il fatto della soglia e sta nel dato, non in una cerimonia — il changeover del gioco è quello dell'euro e
+     non tocca questa porta (verificato: `euro()` rende «F 300 mld franchi»).
+
+     ⚠ IL ROSTER TIENE GLI ID DI `fr1950` DOVE IL PARTITO È LO STESSO (PCF, SFIO, radicali, MRP, moderati), come la
+     linea inglese: la continuità è la regola. Il RPF non c'è più e l'UNR **non è una sua rinomina**: è un partito
+     nuovo (`fr_unr`), perché nel 1958 il gollismo torna con un'altra forma e un'altra base.
+     ============================================================================================================ */
+  fr1960: {
+    id:'fr1960', era:LINEA_FR, nome:'Francia 1960', anno:1960, paese:'francia',
+    turnMandato: 1,                             // v. la nota: urna presidenziale al gennaio 1966 (la storia è dicembre 1965)
+    sistema: 'semipresidenziale', comeSiVince: 'candidato', coalizione: true, cadutaGoverno: true,
+    mandatoMesi: 84, mandatiMax: null,          // il settennato; il limite dei due mandati è del 2008
+    titoloRuolo: 'Presidente della Repubblica', sedeGoverno: "l'Eliseo",
+    scioglimentoMesiMin: 12,                    // lo scioglimento è un potere del Presidente, come nel presente
+    ue: true,                                   // la Francia è fondatrice della CEE dal '57: l'Europa entra come contenuto (la sedia vuota, i veti a Londra)
+    intermedie: [ {tipo:'Elezioni cantonali', mese:27, tocca:'tutti'}, {tipo:'Elezioni cantonali', mese:63, tocca:'tutti'},
+                  {tipo:'Elezioni municipali', mese:74, tocca:'città'} ],   // ⚠ i mesi sono relativi al mandato (meseMandato): 1961/4, 1964/4, 1965/3
+    partiti: [
+      /* ⚠ 'fr_ri' NON esiste nel roster d'avvio: nasce alla tappa del novembre 1962. Sta qui lo stesso perche'
+         `staColBlocco` legge SOLO la lista del TUO partito: senza questa riga il presidente gollista, sparito il
+         CNIP nel '62, resterebbe col solo MRP — e i Repubblicani indipendenti, che sono i suoi alleati di governo
+         per tutto il decennio, conterebbero come avversari. Un id che non esiste ancora non combacia con nessuno:
+         e additivo, e dal '62 in poi combacia. Simmetrico per dichiarazione (fr_ri nomina fr_unr e fr_mrp). */
+      { id:'fr_unr',  nome:'UNR',        orientamento:'destra',         base:{ cetomedio:0.4, pensionati:0.3, cattolici:0.3 },   forza:17.6, asse:1,  alleati:['fr_mod','fr_mrp','fr_ri'] },
+      { id:'fr_mod',  nome:'Moderati',   orientamento:'centrodestra',   base:{ imprenditori:0.4, pensionati:0.3, cattolici:0.3 }, forza:20.0, asse:1,  alleati:['fr_unr','fr_mrp','fr_rad'] },
+      { id:'fr_mrp',  nome:'MRP',        orientamento:'centro',         base:{ cattolici:0.5, cetomedio:0.3, pensionati:0.2 },    forza:11.1, asse:1,  alleati:['fr_unr','fr_mod','fr_rad','fr_ri'] },
+      { id:'fr_rad',  nome:'Radicali',   orientamento:'centro',         base:{ cetomedio:0.6, imprenditori:0.4 },                 forza:8.0,  asse:0,  alleati:['fr_sfio','fr_mrp','fr_mod'] },
+      { id:'fr_sfio', nome:'SFIO',       orientamento:'centrosinistra', base:{ lavoratori:0.5, cetomedio:0.3, giovani:0.2 },      forza:15.5, asse:-1, alleati:['fr_rad'] },
+      /* il PCF resta fuori dall'arco come nel '50: mezzo elettorato operaio e nessun alleato possibile */
+      { id:'fr_pcf',  nome:'PCF',        orientamento:'sinistra',       base:{ lavoratori:0.7, giovani:0.3 },                     forza:19.0, asse:-2, alleati:[] },
+    ],
+    /* i gruppi dell'Assemblea del 1958 (metropoli, senza i 66 d'Algeria e i non iscritti), in centesimi normalizzati */
+    seggi: { fr_unr:42.6, fr_mod:24.2, fr_mrp:13.2, fr_rad:8.2, fr_sfio:9.7, fr_pcf:2.1 },
+    /* ⚠ IL DEBITO RESTA DOVE LO PORTA IL MOTORE, NON DOVE DICE LA SCHEDA (L97-1/L97-3, misurato il 22/9/2026):
+       il seed è 30 e la scheda §2 vorrebbe una discesa verso ~20 nel 1969, ma la manovra annuale lo porta a ~41
+       nel primo anno e poi lo tiene piatto — la stessa forma di fr1950 (30 → 51) e italia1960 (35 → 40), e la
+       sweep del ciclo economico (4·6·8·10·12) non lo sposta di un punto perché la crescita è già al tetto +5.
+       Dichiarato qui accanto al seed invece che inseguito: la cura sarebbe nel bilancio, non in questa porta. */
+    economia: { pil:300, debito:30, deficit:-1, inflazione:4, inflazioneTetto:10, crescita:5.5, disoccupazione:1.5 },   // L100-1: seme 1,5, reso 3 dal clamp di targetUnemp (dichiarato)
+    debtAncora: 30,
+    inflazione: 4,     // media del decennio: il piano di stabilizzazione del '63 la frena, risale nel '68-69
+    crescita: 5.5,     // i Trente Glorieuses nel loro pieno
+    logorioEra: 0.012,
+    valuta: { sym:'F', mld:'mld franchi', mln:'mln franchi' },
+    quotaSpesa: 0.35,                           // ⚠ la scheda non la dà: 35% è l'ordine della spesa francese degli anni '60. Da confermare.
+    intro: "Francia, 1960. La Repubblica nuova ha un Presidente che dura sette anni, una bomba nel deserto e una guerra da chiudere.",
+    contesto: [
+      "Francia, 1960. Le istituzioni sono cambiate da un anno: il Presidente sta all'Eliseo per sette anni, nomina il governo e può sciogliere l'Assemblea.",
+      "In Algeria si combatte ancora, e una parte dell'esercito non accetta l'idea che quella guerra possa finire.",
+      "Il paese cresce come non ha mai fatto: fabbriche, palazzi nuovi alle porte delle città, e il franco nuovo che vale cento di quelli vecchi.",
+    ],
+  },
+  /* ============================================================================================================
+     L99-1 · FRANCIA 1970 — la sedicesima porta: la V Repubblica DOPO IL GENERALE (scheda PRESET-FRANCIA-1970 §0-§2,
+     decisioni D12-D15 del 23/9). Istituzioni come fr1960: semipresidenziale, settennato, Eliseo.
+
+     ⚠⚠ LA DIVERGENZA PIÙ GRANDE DELLA LINEA (D12a). Il Presidente in carica, eletto nel giugno 1969, nella storia
+     muore il 2 aprile 1974 e si vota a maggio. Il giocatore-Presidente non può morire, e la data dell'urna non può
+     dipendere da chi sei: il settennato arriva in fondo PER TUTTI, **niente morte, niente presidenziale del '74**.
+     `turnMandato: 1` porta l'urna al **gennaio 1976** (il motore vota solo a gennaio, L97-1: la scadenza vera sarebbe
+     il giugno 1976). Il pilastro «Il Presidente è morto» non entra. Dichiarato anche in PIANO-LINEA-FRANCIA.md.
+
+     ⚠ IL ROSTER tiene gli id del '68 (continuità, come la linea inglese): UDR è `fr_unr`, il Centro democratico è
+     `fr_mrp`, la FGDS è `fr_sfio`. I radicali tornano come partito a sé (`fr_rad`): nel '68 votavano dentro la FGDS,
+     quindi la loro forza d'avvio (2) è presa dalla FGDS (16,5 → 14,5) — inferenza dichiarata.
+     ⚠ IL PCF ALLEATO DEL PS DALL'AVVIO, non dal 1972: il programma comune è del giugno '72, ma il motore non sa
+     cambiare `alleati` a una tappa (`rinomina` copia solo il nome, `applicaRosterDelta`). La voce lo prevedeva:
+     dichiarato fin dall'avvio. Per due anni e mezzo il blocco di sinistra è più largo della storia.
+     ============================================================================================================ */
+  fr1970: {
+    id:'fr1970', era:LINEA_FR, nome:'Francia 1970', anno:1970, paese:'francia',
+    turnMandato: 1,                             // v. la nota: urna presidenziale al gennaio 1976 (D12a: niente morte, niente urna del '74)
+    sistema: 'semipresidenziale', comeSiVince: 'candidato', coalizione: true, cadutaGoverno: true,
+    mandatoMesi: 84, mandatiMax: null,
+    titoloRuolo: 'Presidente della Repubblica', sedeGoverno: "l'Eliseo",
+    scioglimentoMesiMin: 12,
+    ue: true,
+    /* ⚠ LE INTERMEDIE SI AGGANCIANO AL MESE DEL MANDATO (`intermediaA` confronta solo `meseMandato()`, senza sapere
+       quale mandato): le municipali del marzo 1977 cadono al mese 14 del SECONDO mandato (dopo l'urna del '76), ma il
+       mese 14 del PRIMO è il marzo 1970, e l'elezione uscirebbe anche lì. **Tolte, dichiarato**: meglio un voto locale
+       in meno che uno inventato. Le cantonali del marzo '76 (mese 2 del secondo) non collidono: il mese 2 del primo
+       è prima dell'avvio. */
+    intermedie: [ {tipo:'Elezioni municipali', mese:26, tocca:'città'}, {tipo:'Elezioni cantonali', mese:56, tocca:'tutti'},
+                  {tipo:'Elezioni cantonali', mese:2, tocca:'tutti'} ],   // 1971/3 · 1973/9 · 1976/3 (secondo mandato)
+    partiti: [
+      { id:'fr_unr',  nome:'UDR',                orientamento:'destra',         base:{ cetomedio:0.4, pensionati:0.3, cattolici:0.3 },    forza:37.0, asse:1,  alleati:['fr_ri','fr_mrp'] },
+      { id:'fr_ri',   nome:'Repubblicani indipendenti', orientamento:'centrodestra', base:{ imprenditori:0.4, cetomedio:0.4, pensionati:0.2 }, forza:6.6, asse:1, alleati:['fr_unr','fr_mrp'] },
+      { id:'fr_mrp',  nome:'Centro democratico', orientamento:'centro',         base:{ cattolici:0.5, cetomedio:0.3, pensionati:0.2 },     forza:10.3, asse:1,  alleati:['fr_unr','fr_ri','fr_rad'] },
+      { id:'fr_rad',  nome:'Radicali',           orientamento:'centro',         base:{ cetomedio:0.6, imprenditori:0.4 },                  forza:2.0,  asse:0,  alleati:['fr_mrp','fr_sfio'] },
+      { id:'fr_sfio', nome:'FGDS',               orientamento:'centrosinistra', base:{ lavoratori:0.5, cetomedio:0.3, giovani:0.2 },       forza:14.5, asse:-1, alleati:['fr_rad','fr_pcf'] },
+      { id:'fr_pcf',  nome:'PCF',                orientamento:'sinistra',       base:{ lavoratori:0.7, giovani:0.3 },                      forza:20.0, asse:-2, alleati:['fr_sfio'] },
+    ],
+    /* l'Assemblea del giugno 1968, già normalizzata a 100 in fr1960 (L97-3); i radicali stavano nella FGDS */
+    seggi: { fr_unr:61.3, fr_ri:12.8, fr_mrp:6.9, fr_rad:0, fr_sfio:11.9, fr_pcf:7.1 },
+    /* ⚠ IL DEBITO RESTA DOVE LO PORTA IL MOTORE (come fr1950 e fr1960, L97-3): il seed è 20 e la manovra annuale lo
+       sposta subito verso ~30-40; la scheda §2 lo vuole «piatto nel decennio», e piatto resta — a un altro livello.
+       Dichiarato il 23/9/2026, con le cifre di CIFRE-ECONOMICHE.md. */
+    economia: { pil:800, debito:20, deficit:-1, inflazione:9, inflazioneTetto:15, crescita:3.5, disoccupazione:2.5 },   // L100-1: il seme (⚠ INSEE ~2,5 nel 1970)
+    debtAncora: 20,
+    inflazione: 9,     // 13,7 nel 1974, 9-10 fino al '79: il decennio dei prezzi
+    crescita: 3.5,     // media di due decenni in uno: 5,5 fino al '73, la recessione del '75, 3 dopo (il ciclo nel drift)
+    logorioEra: 0.012,
+    valuta: { sym:'F', mld:'mld franchi', mln:'mln franchi' },
+    quotaSpesa: 0.38,                           // ⚠ la scheda non la dà: ~38% è l'ordine della spesa francese degli anni '70. Da confermare.
+    intro: "Francia, 1970. Il generale se n'è andato, il suo successore governa con la stessa maggioranza e un'altra voce, e i Trente Glorieuses stanno per finire senza che nessuno lo sappia.",
+    contesto: [
+      "Francia, 1970. Il Presidente è stato eletto nel giugno 1969, dopo il referendum perso dal generale: ha sette anni davanti e un'Assemblea in cui il suo partito ha la maggioranza da solo.",
+      "La sinistra si sta ricomponendo: i socialisti cambiano nome e guida, e cercano un accordo con i comunisti che nessuno ha mai firmato.",
+      "Il paese cresce ancora del cinque per cento, ma il petrolio arriva quasi tutto da fuori, e costa poco solo perché nessuno ha ancora deciso di farlo costare di più.",
     ],
   },
   /* ============================================================================================================
@@ -1849,6 +1975,144 @@ const PILASTRI_LINEA = [
     t:'Malpasset',
     text:'La sera del 2 dicembre la diga sopra Fréjus cede e un\'onda di quaranta metri scende sulla valle e sulla città. I morti sono più di quattrocento. Il paese, che si era appena dato una Repubblica nuova, scopre che il cemento della ricostruzione non era stato tutto controllato, e l\'inchiesta durerà anni.',
     logx:'La diga sopra Fréjus cede: più di quattrocento morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  /* ==========================================================================================================
+     L97-1 · GLI UNDICI PILASTRI DEL DECENNIO FRANCESE '60 (scheda PRESET-FRANCIA-1960 §TESTI PRONTI, D10, e
+     §VERIFICA G8 per i due voli: APPROVATI da Giacomo il 21/9 e congelati BYTE-IDENTICI — la misura li
+     confronta con la scheda, non con la memoria).
+     ⚑ G8 (tutte le tragedie del decennio): oltre a Orly, la verifica ha trovato il volo della Guadalupa
+     (113 morti, diciannove giorni dopo) e quello da Ajaccio (95): sono entrambi qui. Ferrovie e miniere non
+     hanno nulla sopra i cinquanta morti in questo decennio.
+     ⚑ G1 SUI DUE GEMELLI DI SNODO (come Suez e «Il tredici maggio» nel '50): «Il maggio» e «Il 27 aprile»
+     cadono nel mese del loro snodo e i pilastri si iniettano PRIMA degli snodi, quindi il `cond` spegne la
+     cronaca anche per chi lo snodo lo RICEVERÀ (livello 3, al governo). Chi è all'opposizione la vede.
+     ⚠ DUE PILASTRI NELLO STESSO MESE (giugno 1962: Orly il 3, la Guadalupa il 22). L'iniezione ne mette UNO
+     per mese e poi esce: il secondo non viene nemmeno guardato quel mese e arriva il mese dopo. Dichiarato,
+     non aggirato — a luglio si legge «diciannove giorni dopo», che è esattamente il fatto.
+     ========================================================================================================== */
+  { id:'pfr60_bomba', linea:LINEA_FR, anno:1960, mese:2, era:'fr1960', codaFino:Infinity, cronaca:true, kick:'Il mondo',
+    t:'La bomba nel deserto',
+    text:'Il 13 febbraio, all\'alba, nel Sahara algerino, la Francia fa esplodere la sua prima bomba atomica. È la quarta potenza nucleare del mondo, e il Presidente lo dice con una frase sola: da oggi il paese è più forte e più fiero. Le proteste vengono dall\'Africa e da chi vive sottovento; a Parigi, quasi nessuna.',
+    logx:'Una bomba nel Sahara, e il paese è la quarta potenza nucleare del mondo.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pfr60_putsch', linea:LINEA_FR, anno:1961, mese:4, era:'fr1960', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'I quattro giorni',
+    text:'Nella notte del 21 aprile quattro generali prendono Algeri e annunciano che l\'esercito non consegnerà l\'Algeria. Per quattro giorni il paese non sa se i paracadutisti scenderanno su Parigi. La sera del 23 il Presidente parla alla televisione in uniforme, e chiede ai soldati di non obbedire; nelle caserme, i coscritti lo ascoltano alla radio a transistor. Il 25 i generali si arrendono o scappano. L\'esercito ha scelto la Repubblica, ma da quel giorno una parte di esso combatte nell\'ombra.',
+    logx:'Quattro generali prendono Algeri; in quattro giorni l\'esercito sceglie la Repubblica.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pfr60_diciassette', linea:LINEA_FR, anno:1961, mese:10, era:'fr1960', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Il 17 ottobre',
+    text:'La sera del 17 ottobre decine di migliaia di algerini di Parigi e delle periferie manifestano in silenzio contro il coprifuoco imposto solo a loro. La polizia carica, arresta più di diecimila persone, e nelle ore e nei giorni seguenti dei manifestanti vengono uccisi: alcuni annegati nella Senna, altri morti nei centri di raccolta. Il bilancio ufficiale del tempo parla di tre morti; le inchieste degli anni successivi contano decine di vittime, e alcuni storici oltre cento. Il numero esatto non è mai stato stabilito. Per quasi quarant\'anni lo Stato non ne parla.',
+    logx:'Una manifestazione algerina a Parigi finisce nel sangue: quanti siano i morti non si saprà mai.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pfr60_charonne', linea:LINEA_FR, anno:1962, mese:2, era:'fr1960', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Charonne',
+    text:'L\'8 febbraio, a Parigi, una manifestazione contro gli attentati dell\'OAS viene caricata dalla polizia all\'uscita del metrò Charonne: nella calca sulle scale muoiono nove persone, quasi tutte iscritte al sindacato. Ai funerali, cinque giorni dopo, sfilano centinaia di migliaia di persone in silenzio. È l\'ultimo morto della guerra d\'Algeria in metropoli, e il paese lo sa.',
+    logx:'Nove morti all\'uscita del metrò Charonne, e centinaia di migliaia ai funerali.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pfr60_evian', linea:LINEA_FR, anno:1962, mese:3, era:'fr1960', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Evian',
+    text:'Il 18 marzo, a Evian, si firma il cessate il fuoco: dopo sette anni e mezzo la guerra d\'Algeria è finita, e in aprile nove francesi su dieci approvano gli accordi. Poi comincia l\'estate delle navi: in pochi mesi quasi un milione di persone lasciano l\'Algeria con quello che sta in due valigie, e sbarcano a Marsiglia in un paese che non li aspettava. L\'OAS, che ha perso, continua a sparare ancora per mesi.',
+    logx:'A Evian finisce la guerra d\'Algeria, e comincia l\'estate delle navi.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pfr60_orly', linea:LINEA_FR, anno:1962, mese:6, era:'fr1960', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Orly',
+    text:'Il 3 giugno un aereo di linea diretto in America non riesce a staccarsi dalla pista di Orly e prende fuoco in fondo al campo. I morti sono centotrenta, quasi tutti passeggeri stranieri; si salvano due hostess. È il più grave incidente aereo che il paese abbia visto, e per settimane si discute di una pista troppo corta per gli aerei nuovi.',
+    logx:'Un aereo non si stacca dalla pista di Orly: centotrenta morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pfr60_guadalupa', linea:LINEA_FR, anno:1962, mese:6, era:'fr1960', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Diciannove giorni dopo',
+    text:'Il 22 giugno, diciannove giorni dopo Orly, un altro aereo della stessa compagnia si schianta su una collina in avvicinamento a Pointe-à-Pitre, in Guadalupa: centotredici morti, nessun superstite. In un mese la compagnia di bandiera ha perso due aerei e più di duecentoquaranta persone, e le famiglie chiedono se i nuovi jet siano pronti per le piste dell\'epoca.',
+    logx:'Diciannove giorni dopo Orly un altro aereo si schianta in Guadalupa: centotredici morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  /* L97-3 · IL DODICESIMO PILASTRO (scheda §DODICESIMO PILASTRO, approvato il 22/9, byte-identico): il gemello
+     G1 dello snodo NATO, che in L97-2 mancava — la scheda lo citava come cronaca e il testo non c'era.
+     Non è una tragedia: niente `tono:'grave'`. */
+  { id:'pfr60_nato', linea:LINEA_FR, anno:1966, mese:3, era:'fr1960', codaFino:Infinity, cronaca:true, kick:'Il mondo',
+    cond:function(){ return !S.nato && !(S.livello===3 && !S.opposizione); },   /* G1: al governo si gioca, fuori è cronaca */
+    t:'La NATO senza la Francia',
+    text:'Il 7 marzo il Presidente scrive a Washington: la Francia resta nell\'Alleanza, ma esce dal comando militare integrato, e entro un anno le basi e i comandi alleati devono lasciare il territorio. Ventisettemila soldati stranieri fanno le valigie, il quartier generale trasloca in Belgio. Gli alleati protestano; a Parigi la maggioranza applaude, l\'opposizione parla di un\'avventura.',
+    logx:'La Francia esce dal comando integrato: ventisettemila soldati alleati fanno le valigie.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pfr60_feyzin', linea:LINEA_FR, anno:1966, mese:1, era:'fr1960', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Feyzin',
+    text:'Il 4 gennaio, alla raffineria di Feyzin, a sud di Lione, una fuga di gas prende fuoco e i serbatoi esplodono uno dopo l\'altro: diciotto morti, fra cui undici pompieri arrivati per primi. Le regole sugli impianti a rischio vengono riscritte, e per la prima volta si parla di quanto vicine alle case stiano le fabbriche.',
+    logx:'La raffineria di Feyzin esplode: diciotto morti, undici sono pompieri.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  /* L97-2 · SOSTITUISCE IL FATTO-MONDO DEL '68 (sostituisce, L56-2): il maggio francese E' il '68 per questo
+     paese, e due carte sullo stesso mese non ci stanno (una per mese). Cosi il mese di maggio resta al
+     pilastro nazionale per chi lo riceve come cronaca, e a chi lo GIOCA (G1) resta libero per lo snodo. */
+  { id:'pfr60_maggio', linea:LINEA_FR, anno:1968, mese:5, era:'fr1960', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese', sostituisce:'pm_1968',
+    cond:function(){ return !S.maggio && !(S.livello===3 && !S.opposizione); },   /* G1: al governo si gioca, fuori è cronaca */
+    t:'Il maggio',
+    text:'A maggio gli studenti occupano le università, poi le strade: le barricate nel Quartiere latino la notte del 10, e la settimana dopo dieci milioni di lavoratori fermi, la più grande ondata di scioperi della storia del paese. Il governo tratta, il Presidente sparisce per un giorno, poi scioglie l\'Assemblea. A giugno il paese vota la paura: la maggioranza più larga della Repubblica.',
+    logx:'Le barricate, dieci milioni fermi, l\'Assemblea sciolta: a giugno il paese vota la paura.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pfr60_ajaccio', linea:LINEA_FR, anno:1968, mese:9, era:'fr1960', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Il volo da Ajaccio',
+    text:'L\'11 settembre un aereo di linea partito da Ajaccio precipita nel mare davanti a Nizza pochi minuti prima dell\'atterraggio: novantacinque morti, nessun superstite. L\'inchiesta parla di un incendio a bordo, ma non lo spiega, e per decenni le famiglie chiederanno di riaprirla.',
+    logx:'Un aereo partito da Ajaccio cade in mare davanti a Nizza: novantacinque morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pfr60_ventisette', linea:LINEA_FR, anno:1969, mese:4, era:'fr1960', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    cond:function(){ return !S.ref69 && !(S.livello===3 && !S.opposizione); },   /* G1: al governo si gioca, fuori è cronaca */
+    t:'Il 27 aprile',
+    text:'Il Presidente ha legato la sua carica a un referendum su regioni e Senato. Il 27 aprile il no vince di poco, e a mezzanotte un comunicato di due righe annuncia che lascerà le funzioni il giorno dopo a mezzogiorno. Nessun\'altra spiegazione. Dopo undici anni, la V Repubblica cambia mano senza cambiare Costituzione.',
+    logx:'Il no vince di poco, e a mezzanotte due righe annunciano che il Presidente se ne va.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  /* ==========================================================================================================
+     L99-1 · I PILASTRI DEL DECENNIO FRANCESE '70 (scheda PRESET-FRANCIA-1970 §TESTI PRONTI e §VERIFICA G8, approvati
+     per delega il 23/9 e congelati BYTE-IDENTICI: la misura li confronta con la scheda, non con la memoria).
+     ⚑ SETTE, non sei come dice la voce: la voce ne elenca sette per nome (il dancing, Vierzy, sopra Nantes,
+     Ermenonville, la marea nera, il campeggio, l'Europa vota) e sono entrati tutti.
+     ⚑ «Il Presidente è morto» NON entra (D12a): nel gioco il settennato arriva in fondo per tutti.
+     ⚑ G8: Liévin (42 morti) resta fuori per la regola dei cinquanta (D14) — ne resta un titolo. La marea nera non ha
+     morti ed è cronaca senza `tono:'grave'`; l'Europa che vota è la cronaca di chiusura.
+     ⚠ Due pilastri cadono nel mese di una tappa (marzo 1973, marzo 1978): la tappa non è una carta e non occupa
+     l'agenda, quindi non si rubano il mese (misurato in L99-1).
+     ========================================================================================================== */
+  { id:'pfr70_dancing', linea:LINEA_FR, anno:1970, mese:11, era:'fr1970', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Il dancing',
+    text:'La notte del 1° novembre, in un dancing appena aperto in un paese dell\'Isère, un incendio si propaga in pochi minuti fra i rivestimenti di plastica delle pareti; le uscite di sicurezza sono chiuse con i tornelli per non far entrare chi non ha pagato. Muoiono centoquarantasei persone, quasi tutte sotto i venticinque anni. Le regole antincendio dei locali pubblici vengono riscritte, e il paese scopre che la modernità a buon mercato brucia.',
+    logx:'Un incendio in un dancing dell\'Isère: centoquarantasei morti, quasi tutti ragazzi.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pfr70_vierzy', linea:LINEA_FR, anno:1972, mese:6, era:'fr1970', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Vierzy',
+    text:'Il 16 giugno la volta di un tunnel ferroviario dell\'Aisne crolla poco prima del passaggio di un treno, e un secondo treno arriva in senso opposto sul mucchio di pietre: centootto morti. Il tunnel aveva più di cent\'anni e nessuno lo aveva ispezionato da vicino; nei mesi dopo la rete ferroviaria controlla ogni galleria del paese.',
+    logx:'Crolla un tunnel ferroviario dell\'Aisne sotto due treni: centootto morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pfr70_nantes', linea:LINEA_FR, anno:1973, mese:3, era:'fr1970', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Sopra Nantes',
+    text:'Il 5 marzo, mentre i controllori di volo sono in sciopero e i militari li sostituiscono, due aerei di linea stranieri si scontrano in volo sopra la Loira: sessantotto morti in uno, nessuno nell\'altro, che riesce ad atterrare. L\'inchiesta parla di un cielo diviso a metà tra chi sapeva e chi no; lo sciopero finisce la settimana dopo.',
+    logx:'Due aerei si scontrano in volo sopra la Loira durante lo sciopero dei controllori: sessantotto morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pfr70_ermenonville', linea:LINEA_FR, anno:1974, mese:3, era:'fr1970', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Ermenonville',
+    text:'Il 3 marzo un aereo di linea straniero decollato da Orly perde un portellone del vano bagagli e cade nella foresta di Ermenonville: trecentoquarantasei morti, nessun superstite. È il più grave incidente aereo che il mondo abbia visto fino a quel giorno, e il difetto del portellone era noto da due anni.',
+    logx:'Un aereo decollato da Orly cade nella foresta di Ermenonville: trecentoquarantasei morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  /* L99-3 · «Tredici centrali», la cronaca di S2 (scheda §I). Come la NATO del '66: chi governa ad aprile '74 gioca lo
+     snodo e non riceve la cronaca (G1); NON scrive S.nucleare74 — chi non ha giocato S2 non ha scelto, e la seconda
+     corsa del petrolio lo legge a peso 1. */
+  { id:'pfr70_centrali', linea:LINEA_FR, anno:1974, mese:4, era:'fr1970', codaFino:Infinity, cronaca:true, kick:'L\'energia',
+    cond:function(){ return !S.nucleare74 && !(S.livello===3 && !S.opposizione); },   /* G1: al governo si gioca (S2), fuori è cronaca */
+    t:'Tredici centrali',
+    text:'Il governo annuncia tredici reattori nucleari da avviare in due anni: l\'elettricità del paese passerà dal petrolio all\'atomo, e i cantieri aprono entro l\'anno. Nessun voto in aula; i primi comitati nascono sui siti prima ancora delle ruspe.',
+    logx:'Tredici reattori in due anni: il paese sceglie l\'atomo senza un voto in aula.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pfr70_mareanera', linea:LINEA_FR, anno:1978, mese:3, era:'fr1970', codaFino:Infinity, cronaca:true, kick:'Il paese',
+    t:'La marea nera',
+    text:'Il 16 marzo una petroliera in avaria si spezza sugli scogli davanti alla costa bretone e per due settimane riversa in mare tutto il suo carico: trecento chilometri di costa coperti di petrolio, gli uccelli morti a decine di migliaia, i pescatori e gli albergatori davanti alle telecamere. Nessun morto, e il primo grande processo ambientale del paese, che durerà quattordici anni.',
+    logx:'Una petroliera si spezza davanti alla Bretagna: trecento chilometri di costa coperti di petrolio.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pfr70_campeggio', linea:LINEA_FR, anno:1978, mese:7, era:'fr1970', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il mondo',
+    t:'Il campeggio',
+    text:'L\'11 luglio, in Catalogna, un\'autocisterna carica di propilene esce di strada accanto a un campeggio pieno di famiglie francesi e esplode: più di duecento morti, tre su quattro francesi, molti bambini. Il paese segue per settimane i feriti negli ospedali di Barcellona e di Parigi, e la strada dei camion che passava fra le tende diventa il simbolo di un\'Europa delle vacanze senza regole.',
+    logx:'Un\'autocisterna esplode accanto a un campeggio in Catalogna: più di duecento morti, quasi tutti francesi.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pfr70_europa', linea:LINEA_FR, anno:1979, mese:6, era:'fr1970', codaFino:Infinity, cronaca:true, kick:'Il mondo',
+    t:'L\'Europa vota',
+    text:'Il 10 giugno, per la prima volta, i cittadini di nove paesi eleggono direttamente il Parlamento europeo. In Francia va a votare poco più di sei elettori su dieci; vince la lista del Presidente, il partito del Primo ministro dimissionario arriva quarto, e i deputati eletti partono per Strasburgo senza sapere bene cosa potranno decidere.',
+    logx:'Per la prima volta i cittadini di nove paesi eleggono il Parlamento europeo.',
     ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
 ];
 
@@ -2811,6 +3075,65 @@ const BEAT_LEGGERI = [
   {id:'lgfr_nouvellevague', era:'fr1950', registro:'leggero', cond:()=>S.year>=1959, kick:'Il paese', t:'La Nouvelle Vague', text:'Un gruppo di critici prende la macchina da presa e gira per strada, con la luce che c\'è: i film costano un decimo e la critica si divide. I ragazzi fanno la coda.', ch:[
     {l:'Fai la coda con i ragazzi', e:'Un film girato per strada', f:function(){}},
     {l:'Leggi la critica, e aspetti', e:'Divisa a metà, come sempre', f:function(){}} ]},
+  /* ---- L97-2 · I TREDICI BEAT DEL DECENNIO FRANCESE '60 (scheda PRESET-FRANCIA-1960 §D) — effetto ZERO, come
+     tutto il registro leggero. Quattro senza ancora (il transistor, il bistrot, il pane, le vacanze d'agosto);
+     gli altri hanno l'anno dentro il cond, come i beat del '50. ---- */
+  {id:'lgfr60_transistor', era:'fr1960', registro:'leggero', kick:'Il paese', t:'Il transistor', text:'La radio si porta in tasca e si ascolta per strada, sul lavoro, in caserma: le notizie arrivano prima che qualcuno decida se dirle.', ch:[
+   {l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr60_bistrot', era:'fr1960', registro:'leggero', kick:'Il paese', t:'Il bistrot e la terzina', text:'Il sabato si gioca la terzina al bar e la domenica si aspetta l\'arrivo alla radio: una scommessa di Stato che paga le strade.', ch:[
+   {l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr60_pane', era:'fr1960', registro:'leggero', kick:'Il paese', t:'Il prezzo del pane', text:'Il prezzo del pane lo fissa ancora lo Stato, e ogni aumento è una notizia da prima pagina.', ch:[
+   {l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr60_agosto', era:'fr1960', registro:'leggero', kick:'Il paese', t:'Le vacanze di agosto', text:'A Ferragosto Parigi è vuota e la strada del sud è piena: dodici ore di coda per vedere il mare, e dal \'69 la quarta settimana di ferie.', ch:[
+   {l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr60_yeye', era:'fr1960', registro:'leggero', cond:()=>S.year>=1963, kick:'Il paese', t:'La piazza dei ragazzi', text:'Una trasmissione radio per ragazzi raduna centomila persone in una piazza di Parigi per un concerto gratuito: i giornali scoprono che esiste una generazione, e che compra dischi.', ch:[
+   {l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr60_auto', era:'fr1960', registro:'leggero', cond:()=>S.year>=1961, kick:'Il paese', t:'L\'auto con il portellone', text:'L\'auto popolare ha quattro porte e un portellone, e costa quanto sei mesi di stipendio: la Francia va in vacanza in macchina, e le strade non bastano.', ch:[
+   {l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr60_elettrodomestici', era:'fr1960', registro:'leggero', cond:()=>S.year>=1960, kick:'Il paese', t:'Il frigorifero e la lavatrice', text:'Una casa su due ha il frigorifero, una su quattro la lavatrice: le rate le pagano anche le donne che lavorano, sempre di più.', ch:[
+   {l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr60_supermercato', era:'fr1960', registro:'leggero', cond:()=>S.year>=1963, kick:'Il paese', t:'Il supermercato', text:'Alla periferia apre un negozio grande come un capannone con il parcheggio davanti: si compra per una settimana, e il droghiere del quartiere chiude.', ch:[
+   {l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr60_tour', era:'fr1960', registro:'leggero', kick:'Il paese', t:'Il Tour in diretta', text:'A luglio il paese si ferma ai bordi delle strade, e la televisione lo porta in diretta nei salotti per la prima volta.', ch:[
+   {l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr60_mondiale', era:'fr1960', registro:'leggero', cond:()=>S.year===1966, kick:'Il paese', t:'Il Mondiale', text:'La squadra esce al primo turno, e il paese parla di calcio per una settimana come si parla del tempo.', ch:[
+   {l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr60_telefono', era:'fr1960', registro:'leggero', cond:()=>S.year>=1960, kick:'Il paese', t:'Il telefono che manca', text:'Si aspettano due anni per una linea, e la cabina all\'angolo ha la coda: il paese dei Trente Glorieuses senza il telefono in casa.', ch:[
+   {l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr60_cinema', era:'fr1960', registro:'leggero', cond:()=>S.year>=1960, kick:'Il paese', t:'Il cinema d\'autore', text:'Film girati per strada con la luce che c\'è, che costano un decimo e vincono a Cannes: i ragazzi fanno la coda, i padri non capiscono.', ch:[
+   {l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr60_neve', era:'fr1960', registro:'leggero', cond:()=>S.year>=1964, kick:'Il paese', t:'Le classi di neve', text:'Una settimana di scuola in montagna, pagata dal Comune, e bambini che tornano con le guance rosse e un accento nuovo.', ch:[
+   {l:'Prosegui', e:'', f:function(){}}]},
+  /* ---- L99-2 · I TREDICI BEAT DEL DECENNIO FRANCESE '70 (scheda PRESET-FRANCIA-1970 §D) — effetto ZERO, come tutto
+     il registro leggero. Tre senza ancora (il transistor in spiaggia, il Tour, la roulotte); gli altri hanno l'anno
+     nel cond. Titoli senza marchi, come il '60: «Il Concorde» → «Il supersonico in linea», «La Renault 5» →
+     «L'utilitaria tonda», «Il supermercato ipermercato» → «L'ipermercato». ---- */
+  {id:'lgfr70_calcolatrice', era:'fr1970', registro:'leggero', cond:()=>S.year>=1972, kick:'Il paese', t:'La calcolatrice tascabile', text:'Costa quanto un mese di stipendio e sta in tasca: a scuola la vietano, in ufficio la nascondono.', ch:[
+   {l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr70_spiaggia', era:'fr1970', registro:'leggero', kick:'Il paese', t:'Il transistor in spiaggia', text:'Ferragosto in autostrada e la radio che dice i chilometri di coda.', ch:[
+   {l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr70_limiti', era:'fr1970', registro:'leggero', cond:()=>(S.year===1973&&S.month===12)||S.year===1974, kick:'Il paese', t:'I limiti di velocità', text:'Novanta sulle statali, centotrenta in autostrada: per la prima volta il paese rallenta per decreto, e le multe piovono.', ch:[
+   {l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr70_oralegale', era:'fr1970', registro:'leggero', cond:()=>S.year===1976, kick:'Il paese', t:'L\'ora legale', text:'Le lancette avanti di un\'ora per risparmiare petrolio: i contadini protestano, i bambini vanno a scuola al buio.', ch:[
+   {l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr70_supersonico', era:'fr1970', registro:'leggero', cond:()=>S.year===1976, kick:'Il paese', t:'Il supersonico in linea', text:'Parigi-Rio in sei ore, con cento passeggeri e un biglietto da dirigente: l\'orgoglio vola in perdita.', ch:[
+   {l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr70_utilitaria', era:'fr1970', registro:'leggero', cond:()=>S.year>=1972, kick:'Il paese', t:'L\'utilitaria tonda', text:'Piccola, tonda, con il paraurti di plastica: la prima auto che non ha vergogna di essere piccola.', ch:[
+   {l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr70_tour', era:'fr1970', registro:'leggero', kick:'Il paese', t:'Il Tour', text:'A luglio il paese si ferma ai bordi delle strade e in salotto.', ch:[
+   {l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr70_beaubourg', era:'fr1970', registro:'leggero', cond:()=>S.year===1977, kick:'Il paese', t:'Il Beaubourg', text:'Un museo con le tubature fuori e le scale mobili in facciata: i parigini lo odiano per un anno e poi ci fanno la coda.', ch:[
+   {l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr70_ipermercato', era:'fr1970', registro:'leggero', kick:'Il paese', t:'L\'ipermercato', text:'Diecimila metri quadri di scaffali fuori città e un parcheggio grande come un paese: la spesa del sabato è un viaggio.', ch:[
+   {l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr70_colore', era:'fr1970', registro:'leggero', cond:()=>S.year>=1975, kick:'Il paese', t:'La televisione a colori in ogni casa', text:'Sette case su dieci hanno il colore; il telegiornale delle venti è la piazza del paese.', ch:[
+   {l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr70_roulotte', era:'fr1970', registro:'leggero', kick:'Il paese', t:'La roulotte', text:'Ad agosto un milione di roulotte partono per il sud e la costa spagnola: la vacanza si porta dietro la casa.', ch:[
+   {l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr70_pallone', era:'fr1970', registro:'leggero', cond:()=>S.year===1976, kick:'Il paese', t:'Il pallone a Saint-Étienne', text:'Una squadra di provincia arriva in finale di Coppa dei Campioni e la perde sui pali quadrati; il paese si scopre tifoso.', ch:[
+   {l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr70_secca', era:'fr1970', registro:'leggero', cond:()=>S.year===1976, kick:'Il paese', t:'La secca del \'76', text:'Un\'estate senza pioggia: i fiumi in secca, il bestiame senza foraggio, e una tassa una tantum per gli agricoltori che il ceto medio chiama «la tassa della siccità».', ch:[
+   {l:'Prosegui', e:'', f:function(){}}]},
 ];
 
 /* ===== F1 — LA TELEFONATA. Un'interruzione, non una carta: overlay a squillo, due opzioni secche, decisione a
@@ -4969,6 +5292,29 @@ const DOSSIERS=[
    {l:'Solo i minatori',e:'Le miniere lavorano · gli studenti partono',f:()=>{gdFr('lavoratori',2); gdFr('giovani',-2);}},
    {l:'Nessuna',e:'Tutti uguali davanti al servizio · e tutti i ragazzi sui treni',f:()=>{gdFr('giovani',-6); gdFr('cetomedio',-2); repd(1);}},
  ]},
+ /* L97-2 · i due dossier del decennio francese '60 (scheda §F), dai dicasteri che il gioco ha già. I gruppi
+    passano da gdFr60 come negli eventi. */
+ {id:'dfr60_piano',era:'fr1960',cond:()=>S.year>=1965,min:'economia',kick:'Il Piano',t:'Il quinto Piano',
+  text:'Il Commissariato porta il quinto piano alla firma: cifre di produzione, crediti pubblici e un bersaglio di crescita per cinque anni.',ch:[
+   {l:'Firmi',e:'Le imprese hanno cinque anni davanti · e il bilancio pure',costo:{debito:1},f:()=>{S.ind.debt+=1; gdFr60('imprenditori',3); gdFr60('lavoratori',1);}},
+   {l:'Riduci gli impegni',e:'Un piano più corto, un conto più corto',costo:{debito:0.5},f:()=>{S.ind.debt+=0.5;}},
+   {l:'Rinvii',e:'Nessun impegno · le imprese restano ad aspettare',f:()=>{gdFr60('imprenditori',-3);}}]},
+ {id:'dfr60_leva',era:'fr1960',cond:()=>S.year>=1965,min:'difesa',kick:'Difesa',t:'Il servizio militare',
+  text:'Finita l\'Algeria, il servizio militare non ha più bisogno di essere lungo: il ministero propone di portarlo a sedici mesi.',ch:[
+   {l:'Sedici mesi',e:'Quattro mesi di vita restituiti a ogni coscritto',f:()=>{gdFr60('giovani',4); gdFr60('cetomedio',-1);}},
+   {l:'Dodici, con la riserva',e:'Un anno solo, e una riserva da addestrare · costa',costo:{debito:0.5},f:()=>{S.ind.debt+=0.5; gdFr60('giovani',6); gdFr60('imprenditori',-2);}},
+   {l:'Resta a diciotto',e:'L\'esercito non cambia · e i ragazzi contano i mesi',f:()=>{gdFr60('giovani',-5);}}]},
+ /* L99-2 · i due dossier del decennio francese '70 (scheda §F). Il testo della carta la scheda non lo dava: è di Code. */
+ {id:'dfr70_piano',era:'fr1970',cond:()=>S.year>=1976,min:'economia',kick:'Il Piano',t:'Il settimo Piano',
+  text:'Il Commissariato porta il settimo Piano alla firma: meno cifre di produzione che in passato, più lavoro e più energia, per cinque anni che nessuno sa prevedere.',ch:[
+   {l:'Firmi',e:'Cinque anni di impegni · e un bilancio che li deve reggere',costo:{debito:1},f:()=>{S.ind.debt+=1; gdFr70('imprenditori',2);}},
+   {l:'Riduci gli impegni',e:'Un piano più corto, un conto più corto',costo:{debito:0.5},f:()=>{S.ind.debt+=0.5;}},
+   {l:'Rinvii',e:'Nessun impegno · le imprese restano ad aspettare',f:()=>{gdFr70('imprenditori',-2);}}]},
+ {id:'dfr70_centrali',era:'fr1970',cond:()=>S.nucleare74==='tutto',min:'sviluppo',kick:'L\'energia',t:'Le centrali: il calendario',
+  text:'L\'ente elettrico porta il calendario dei cantieri: sei reattori l\'anno, se il governo firma i crediti. Sui siti i comitati sono già pronti.',ch:[
+   {l:'Accelera',e:'Più reattori, prima · e più comitati sui siti',costo:{debito:1},f:()=>{S.ind.debt+=1; gdFr70('imprenditori',2); gdFr70('giovani',-3);}},
+   {l:'Tieni il passo',e:'Il calendario com\'è · nessuna sorpresa',f:()=>{}},
+   {l:'Rallenta',e:'Un reattore in meno l\'anno · e le imprese lo notano',f:()=>{gdFr70('giovani',2); gdFr70('imprenditori',-2);}}]},
  {id:'d50_marshall_dip',era:'italia1950',cond:()=>S.year<=1953,min:'esteri',kick:'Piano Marshall',t:'La dipendenza dagli aiuti',text:'Gli aiuti americani hanno rimesso in moto il paese, ma ora chiedono allineamento politico e commerciale. Fin dove seguire l\'alleato?',ch:[
    {l:'Allineamento pieno con l\'alleato',e:'Aiuti e protezione; la pancia mormora',pleases:'tecnico',f:()=>{repd(4); if(S.gMod!=null)S.gMod+=0.1; gd('cetomedio',-1);}},
    {l:'Amicizia sì, ma con margini nostri',e:'Autonomia rivendicata; l\'alleato prende nota',pleases:'populista',f:()=>{repd(-2); gd('cetomedio',2);}},
@@ -7132,18 +7478,18 @@ const EVENTS=[
  {id:'fr_apparentamenti', era:'fr1950', cond:()=>S.year<=1951&&(S.year<1951||S.month<=5), kick:'La legge elettorale', t:'Gli apparentamenti',
   text:'Una legge nuova permette alle liste di apparentarsi: chi si allea e supera la metà dei voti prende tutti i seggi del dipartimento. È scritta contro i due estremi, e tutti lo sanno. Il tuo partito deve dire con chi sta.',ch:[
    {l:'Con la Terza Forza',e:'I seggi del centro sono al sicuro · la tua ala sinistra parla di legge truffa',f:()=>{S.apparentamenti='terzaForza'; gdFr('cetomedio',3); gdFr('lavoratori',-3);}},
-   {l:'Da soli',e:'Le mani libere · e i seggi del dipartimento agli altri',f:()=>{S.apparentamenti='soli'; gdFr('lavoratori',2); gdFr('cetomedio',-2);}},
+   {l:'Da soli',cade:['fr_mrp','fr_sfio','fr_rad','fr_mod'],e:'Le mani libere · e i seggi del dipartimento agli altri',f:()=>{S.apparentamenti='soli'; gdFr('lavoratori',2); gdFr('cetomedio',-2);}},
    {l:'Contro la legge',e:'I giovani ti applaudono · i moderati ti chiamano irresponsabile, gli alleati se lo segnano',f:()=>{S.apparentamenti='contro'; gdFr('giovani',3); gdFr('cetomedio',-4); repd(-2);}}]},
  {id:'fr_scuole', era:'fr1950', cond:()=>S.year>=1951&&S.year<=1952, tono:'grave', kick:'La scuola', t:'La legge sulle scuole',
   text:'Un sussidio di Stato alle famiglie che mandano i figli alle scuole private, cioè cattoliche. È la questione che divide la coalizione più di ogni altra: i laici parlano di tradimento della Repubblica, i cattolici di giustizia.',ch:[
-   {l:'La voti',e:'Le parrocchie con te · i laici della maggioranza no',f:()=>{gdFr('cattolici',6); gdFr('lavoratori',-4); gdFr('giovani',-3);}},
-   {l:'La affossi',e:'La scuola della Repubblica resta sola · i cattolici non lo dimenticano',f:()=>{gdFr('cattolici',-6); gdFr('lavoratori',4);}},
+   {l:'La voti',cade:['fr_sfio','fr_rad'],e:'Le parrocchie con te · i laici della maggioranza no',f:()=>{gdFr('cattolici',6); gdFr('lavoratori',-4); gdFr('giovani',-3);}},
+   {l:'La affossi',cade:['fr_mrp'],e:'La scuola della Repubblica resta sola · i cattolici non lo dimenticano',f:()=>{gdFr('cattolici',-6); gdFr('lavoratori',4);}},
    {l:'La rinvii in commissione',e:'Nessuno vince · nessuno ti ringrazia, e gli alleati ti trovano debole',f:()=>{gdFr('cattolici',-2); gdFr('lavoratori',-2); repd(-2);}}]},
  {id:'fr_sciopero53', era:'fr1950', cond:()=>S.year===1953&&S.month>=7&&S.month<=9, tono:'grave', kick:'Il lavoro', t:'Lo sciopero d\'agosto',
   text:'Il governo tocca l\'età della pensione nel pubblico impiego e in tre giorni si fermano poste, ferrovie e telefoni: milioni di persone, in pieno agosto, senza un sindacato che l\'abbia deciso. Le vacanze sono bloccate e il paese con loro.',ch:[
-   {l:'Ritiri il decreto',e:'Il paese riparte · e chi voleva il rigore ti chiama arrendevole',f:()=>{gdFr('lavoratori',5); gdFr('pensionati',3); gdFr('imprenditori',-4); repd(-3);}},
+   {l:'Ritiri il decreto',cade:['fr_mod'],e:'Il paese riparte · e chi voleva il rigore ti chiama arrendevole',f:()=>{gdFr('lavoratori',5); gdFr('pensionati',3); gdFr('imprenditori',-4); repd(-3);}},
    {l:'Tratti settore per settore',e:'Un accordo alla volta · costa un po\' a tutti, e nessuno ne esce vincitore',costo:{debito:0.5},f:()=>{S.ind.debt+=0.5; gdFr('lavoratori',1); gdFr('imprenditori',-1);}},
-   {l:'Tieni duro',e:'Il decreto resta · agosto resta fermo, e i giornali contano i treni',f:()=>{gdFr('lavoratori',-8); gdFr('pensionati',-4); gdFr('imprenditori',4); stampad(-3);}}]},
+   {l:'Tieni duro',cade:['fr_sfio'],e:'Il decreto resta · agosto resta fermo, e i giornali contano i treni',f:()=>{gdFr('lavoratori',-8); gdFr('pensionati',-4); gdFr('imprenditori',4); stampad(-3);}}]},
  {id:'fr_case', era:'fr1950', cond:()=>(S.year===1954&&S.month>=3)||(S.year>=1955&&S.year<=1956), kick:'Case', t:'Le case d\'emergenza',
   text:'Dopo l\'inverno, tutti vogliono le case: in fretta, e ovunque. Si può costruire baracche di cemento in sei mesi o quartieri veri in sei anni, e chi dorme per strada non ha sei anni.',ch:[
    {l:'Le città d\'emergenza',e:'Un tetto entro l\'estate · e quartieri che dovevano durare dieci anni',costo:{debito:1},f:()=>{S.ind.debt+=1; S.casePrefabbricate=true; gdFr('lavoratori',4); gdFr('pensionati',2);}},
@@ -7151,9 +7497,9 @@ const EVENTS=[
    {l:'Lasci fare ai Comuni',e:'Nessuna spesa nazionale · e nessuna casa in più',f:()=>{gdFr('lavoratori',-3); gdFr('cattolici',-2);}}]},
  {id:'fr_ced', era:'fr1950', cond:()=>S.year===1954&&S.month>=6&&S.month<=9, kick:'L\'Europa', t:'L\'esercito europeo',
   text:'Il trattato per un esercito europeo comune, con i tedeschi dentro, aspetta da due anni la ratifica. Gli americani lo pretendono, i gollisti e i comunisti lo odiano insieme, e il tuo partito non ha una linea.',ch:[
-   {l:'Lo porti in aula e lo difendi',e:'Gli europeisti con te · l\'aula lo boccia lo stesso, e gli alleati lo vedono',f:()=>{gdFr('cetomedio',2); gdFr('lavoratori',-3); gdFr('cattolici',2); repd(-3);}},
+   {l:'Lo porti in aula e lo difendi',cade:['fr_rad','fr_mod'],e:'Gli europeisti con te · l\'aula lo boccia lo stesso, e gli alleati lo vedono',f:()=>{gdFr('cetomedio',2); gdFr('lavoratori',-3); gdFr('cattolici',2); repd(-3);}},
    {l:'Lo lasci morire senza voto',e:'Nessuno perde in aula · e i giornali scrivono che non hai avuto il coraggio',f:()=>{repd(-1); stampad(-2);}},
-   {l:'Lo ritiri e proponi la NATO',e:'Gli americani si calmano · la sinistra ti rinfaccia il riarmo',f:()=>{gdFr('imprenditori',2); gdFr('cattolici',1); gdFr('lavoratori',-2);}}]},
+   {l:'Lo ritiri e proponi la NATO',cade:['fr_mrp'],e:'Gli americani si calmano · la sinistra ti rinfaccia il riarmo',f:()=>{gdFr('imprenditori',2); gdFr('cattolici',1); gdFr('lavoratori',-2);}}]},
  {id:'fr_contingente', era:'fr1950', cond:()=>(S.year===1956&&S.month>=4)||S.year===1957||S.year===1958, tono:'grave', kick:'Difesa', t:'Il contingente',
   text:'Il servizio militare passa a ventisette mesi e i richiamati partono per l\'Algeria: alle stazioni le madri bloccano i treni, in aula nessuno vuole essere quello che li manda. È il primo decennio in cui la guerra la fanno i figli di tutti.',ch:[
    {l:'Li mandi, e lo dici',e:'Una scelta detta a voce alta · i ragazzi partono, e sanno chi li ha mandati',f:()=>{gdFr('giovani',-8); gdFr('cattolici',1); gdFr('cetomedio',2);}},
@@ -7182,13 +7528,206 @@ const EVENTS=[
  {id:'fr_indocina', era:'fr1950', cond:()=>S.year<1954||(S.year===1954&&S.month<=4), tono:'grave', kick:'Il mondo', t:'Il bilancio dell\'Indocina',
   text:'Otto anni di guerra a dodicimila chilometri da casa, pagata in parte dagli americani e in parte dal bilancio: ogni anno il Parlamento vota i crediti, e ogni anno qualcuno chiede quanti ancora.',ch:[
    {l:'Voti i crediti',e:'La guerra continua · e ogni anno la stessa domanda',costo:{debito:1.5},f:()=>{S.ind.debt+=1.5; gdFr('giovani',-3); gdFr('cattolici',1);}},
-   {l:'Li tagli e chiedi la trattativa',e:'I giovani con te · la destra ti chiama rinunciatario, e la stampa pure',f:()=>{S.indocinaTrattativa=true; gdFr('giovani',3); gdFr('cetomedio',-3); stampad(-2);}},
+   {l:'Li tagli e chiedi la trattativa',cade:['fr_mrp','fr_mod'],e:'I giovani con te · la destra ti chiama rinunciatario, e la stampa pure',f:()=>{S.indocinaTrattativa=true; gdFr('giovani',3); gdFr('cetomedio',-3); stampad(-2);}},
    {l:'Li giri agli americani',e:'Il bilancio respira · e la guerra non è più solo tua',costo:{debito:-0.5},f:()=>{S.ind.debt-=0.5; gdFr('cetomedio',-2); repd(-1);}}]},
  {id:'fr_bottegai', era:'fr1950', cond:()=>S.year>=1955&&S.year<=1956, tono:'grave', kick:'Il fisco', t:'La rivolta dei bottegai',
   text:'Nel sud-ovest i piccoli commercianti cacciano gli ispettori del fisco dai negozi e un movimento di categoria diventa in un anno un partito: contro le tasse, contro Parigi, contro «i ladri». Alle prossime elezioni prenderà due milioni di voti.',ch:[
    {l:'Sospendi i controlli',e:'I negozi si calmano · il Tesoro no, e chi paga le tasse nemmeno',costo:{debito:1},f:()=>{S.ind.debt+=1; gdFr('cetomedio',5); gdFr('imprenditori',2); gdFr('lavoratori',-3);}},
    {l:'Tratti col movimento',e:'Una tregua · e un movimento che adesso sa di contare',f:()=>{gdFr('cetomedio',2); repd(-2);}},
    {l:'Tieni la linea',e:'Lo Stato non si ritira · e i bottegai votano contro di te',f:()=>{gdFr('cetomedio',-6); gdFr('imprenditori',-2); repd(2); stampad(1);}}]},
+ /* ---- L93-2b · la seconda tranche (scheda §C-bis): tre eventi, perché i vivi erano 9 contro la banda inglese 10-13.
+    Stessi meccanismi: ancore nei `cond`, gruppi da `gdFr`. «Tratti l'indipendenza» è l'esito storico e scrive
+    `S.protettorati` (dato puro, round-trip) — un evento non porta il marcatore «La storia», che è degli snodi. ---- */
+ /* ==============================================================================================================
+    L97-2 · I DODICI EVENTI DEL DECENNIO FRANCESE '60 (scheda PRESET-FRANCIA-1960 §C). Testi della scheda, carte a
+    tre voci, gate d'epoca dal tag era:'fr1960'; le ancore della scheda stanno nel cond. I gruppi passano da
+    gdFr60 (× FR60_GRUPPI, la sweep di questa porta); debito, reputazione, stampa e FIDUCIA no.
+    ⚑ LA FIDUCIA SI MUOVE QUI (nota H della scheda: almeno quattro eventi). Sono i cinque dove la congiuntura
+    guarda il governo: la bomba (quanto costa), i minatori (quanto dura), la stabilizzazione (se tiene), la sedia
+    vuota e il veto a Londra (che cosa pensa di noi chi ci compra). Più i quattro snodi.
+    ⚠ NIENTE cade: il Presidente non cade in aula (nota H della scheda). NESSUN NOME DI PERSONA (I1/G5).
+    ============================================================================================================== */
+ {id:'fr60_rimpatriati', era:'fr1960', cond:()=>S.year>=1962&&S.year<=1964, tono:'grave', kick:'Il paese', t:'I rimpatriati',
+  text:'Sbarcano a Marsiglia a decine di migliaia la settimana, con due valigie e un mestiere che laggiù valeva e qui no. Chiedono case, posti e un risarcimento; la città li guarda come un problema.',ch:[
+   {l:'Case e posti riservati',e:'Un tetto e un impiego subito · chi era in lista da anni si sente scavalcato',costo:{debito:1.5},f:()=>{S.ind.debt+=1.5; gdFr60('cattolici',3); gdFr60('cetomedio',-3); gdFr60('lavoratori',-2);}},
+   {l:'Il risarcimento, a rate',e:'Il conto si paga in dieci anni · nessuno è contento, nessuno grida',costo:{debito:1},f:()=>{S.ind.debt+=1; gdFr60('cetomedio',-1);}},
+   {l:'Che si arrangino',e:'Il bilancio non si muove · la stampa fotografa le famiglie che dormono in stazione',f:()=>{gdFr60('cattolici',-4); gdFr60('cetomedio',1); stampad(-3);}}]},
+ {id:'fr60_harkis', era:'fr1960', cond:()=>S.year>=1962&&S.year<=1965, tono:'grave', kick:'Il paese', t:'I campi del sud',
+  text:'Chi ha combattuto con la Francia in Algeria e ha potuto imbarcarsi vive in campi recintati nel sud, con i figli che vanno a scuola dietro un filo. Nessuno ha deciso che restino lì; nessuno decide che escano.',ch:[
+   {l:'Apri i campi e integra',e:'Case, scuole e lavoro fuori dal recinto · costa, e qualcuno dirà che sono stranieri',costo:{debito:0.5},f:()=>{S.ind.debt+=0.5; gdFr60('cattolici',2); gdFr60('giovani',2); gdFr60('cetomedio',-2);}},
+   {l:'I campi restano, con più mezzi',e:'Meglio di ieri, e sempre un recinto',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3;}},
+   {l:'Non è una priorità',e:'Il paese ha altro a cui pensare · e fra dieci anni se ne parlerà ancora',f:()=>{gdFr60('giovani',-3); gdFr60('cattolici',-3); stampad(-2);}}]},
+ {id:'fr60_bomba', era:'fr1960', cond:()=>S.year>=1960&&S.year<=1966, kick:'Difesa', t:'La bomba e il bilancio',
+  text:'La forza di dissuasione costa un quarto del bilancio militare e cresce ogni anno: sottomarini, missili, un poligono nel Pacifico. Chi la vuole dice che è l\'indipendenza; chi non la vuole conta le scuole che non si costruiscono.',ch:[
+   {l:'Tutto il programma',e:'Sottomarini, missili e il poligono · e le scuole aspettano',costo:{debito:2},f:()=>{S.ind.debt+=2; gdFr60('cetomedio',2); gdFr60('imprenditori',2); gdFr60('giovani',-3); fidFr60(-2);}},
+   {l:'Solo i sottomarini',e:'La parte che serve davvero · gli altri programmi rallentano',costo:{debito:1},f:()=>{S.ind.debt+=1; fidFr60(-1);}},
+   {l:'Rallenti',e:'I soldi vanno alle scuole · e una parte del tuo mondo non te lo perdona',f:()=>{gdFr60('cetomedio',-3); gdFr60('giovani',2); baseFr60(-4); fidFr60(1);}}]},
+ {id:'fr60_minatori', era:'fr1960', cond:()=>S.year===1963, tono:'grave', kick:'Il lavoro', t:'I minatori',
+  text:'Il governo ha requisito i minatori in sciopero con un decreto, e i minatori non sono tornati: trentacinque giorni, il paese solidale, le collette nelle parrocchie. Il decreto è carta.',ch:[
+   {l:'Ritiri il decreto e tratti',e:'Il paese riparte · e chi voleva il rigore ti chiama arrendevole',f:()=>{gdFr60('lavoratori',6); gdFr60('cattolici',2); gdFr60('imprenditori',-3); repd(-4); fidFr60(1);}},
+   {l:'Tieni il decreto e aspetti',e:'La legge è la legge · trentacinque giorni di carbone fermo, e le famiglie in coda alle collette',f:()=>{gdFr60('lavoratori',-8); gdFr60('cetomedio',-2); stampad(-4); fidFr60(-3);}},
+   {l:'Un mediatore',e:'Una via d\'uscita che non firma nessuno · e costa',costo:{debito:0.5},f:()=>{S.ind.debt+=0.5; gdFr60('lavoratori',2);}}]},
+ {id:'fr60_stabilizzazione', era:'fr1960', cond:()=>S.year>=1963&&S.year<=1965, kick:'L\'economia', t:'Il piano di stabilizzazione',
+  text:'I prezzi corrono e il ministro propone il blocco: prezzi fermi, credito stretto, bilancio in pareggio. Funziona, e frena.',ch:[
+   {l:'Il blocco intero',e:'I prezzi si fermano · e con loro le assunzioni e gli ordini',f:()=>{gdFr60('imprenditori',-3); gdFr60('lavoratori',-2); gdFr60('pensionati',3); repd(2); fidFr60(4); if(S.gMod!=null) S.gMod-=0.2;}},
+   {l:'Solo il credito',e:'Mezza stretta, mezzo risultato',f:()=>{gdFr60('imprenditori',-1); fidFr60(2);}},
+   {l:'Lasci correre',e:'Nessuno frena niente · i prezzi in vetrina cambiano ogni mese',f:()=>{gdFr60('pensionati',-4); fidFr60(-3); if(S.gMod!=null) S.gMod+=0.15;}}]},
+ {id:'fr60_sediavuota', era:'fr1960', cond:()=>S.year===1965||(S.year===1966&&S.month<=2), kick:'L\'Europa', t:'La sedia vuota',
+  text:'Bruxelles vuole passare al voto a maggioranza e dare più poteri alla Commissione. Si possono ritirare i ministri dal tavolo: la Comunità non decide più niente finché non si torna.',ch:[
+   {l:'La sedia vuota fino al veto',e:'La storia · sei mesi senza decisioni, e alla fine ogni paese tiene il suo veto',f:()=>{S.sediaVuota=true; gdFr60('cetomedio',2); gdFr60('imprenditori',-2); repd(1); fidFr60(-2);}},
+   {l:'Tratti subito',e:'Un compromesso in poche settimane · e il voto a maggioranza resta la regola',f:()=>{gdFr60('imprenditori',2); gdFr60('cetomedio',-1); fidFr60(1);}},
+   {l:'Accetti la maggioranza',e:'L\'Europa va avanti più in fretta · e i tuoi ti chiedono chi comanda a casa nostra',f:()=>{gdFr60('cetomedio',-3); gdFr60('imprenditori',3); baseFr60(-5); fidFr60(2);}}]},
+ {id:'fr60_londra', era:'fr1960', cond:()=>S.year===1963||S.year===1967, kick:'L\'Europa', t:'Il no a Londra',
+  text:'Londra chiede di entrare nel Mercato comune, e cinque paesi su sei vogliono dirle sì. La conferenza stampa è la settimana prossima.',ch:[
+   {l:'Il veto',e:'La storia · Londra resta fuori, e i cinque lo scoprono dalla radio come tutti',f:()=>{S.veto=(S.veto||0)+1; gdFr60('cetomedio',2); gdFr60('imprenditori',-2); repd(1); fidFr60(-1);}},
+   {l:'Un sì con condizioni',e:'Si tratta per anni · nessuno esulta, nessuno si offende',f:()=>{gdFr60('imprenditori',2); fidFr60(1);}},
+   {l:'Il sì',e:'Il Mercato comune diventa a sette · e il tuo mondo dice che hai aperto la porta agli americani',f:()=>{gdFr60('cetomedio',-2); gdFr60('imprenditori',3); baseFr60(-4); fidFr60(2);}}]},
+ {id:'fr60_secondarete', era:'fr1960', cond:()=>S.year>=1964&&S.year<=1967, kick:'Il paese', t:'La seconda rete',
+  text:'La televisione è dello Stato e il telegiornale lo scrive un ministro. Nasce la seconda rete, e nel 1967 arriva il colore: chi decide che cosa si vede?',ch:[
+   {l:'Il ministro decide',e:'Il telegiornale dice quello che deve · e i ragazzi guardano altrove',f:()=>{stampad(3); gdFr60('giovani',-3); repd(-2);}},
+   {l:'Un ufficio autonomo con un consiglio',e:'Una garanzia sulla carta · e un telegiornale che ogni tanto ti contraddice',f:()=>{stampad(-1); gdFr60('giovani',2); gdFr60('cetomedio',1);}},
+   {l:'Il colore prima, le regole dopo',e:'Il paese guarda il colore e non fa domande · le domande arrivano dopo',costo:{debito:0.5},f:()=>{S.ind.debt+=0.5; gdFr60('cetomedio',2);}}]},
+ {id:'fr60_pillola', era:'fr1960', cond:()=>S.year>=1966&&S.year<=1968, kick:'Il paese', t:'La pillola',
+  text:'Un deputato della maggioranza propone di legalizzare la contraccezione, vietata da una legge del 1920. Le chiese sono contrarie, le donne in coda dai medici che la prescrivono di nascosto.',ch:[
+   {l:'Voti la legge',e:'La storia · la legge passa, e i decreti per applicarla arriveranno con calma',f:()=>{S.pillola=true; gdFr60('giovani',5); gdFr60('cetomedio',2); gdFr60('cattolici',-4);}},
+   {l:'Rimandi in commissione',e:'Se ne riparla · e intanto si va all\'estero',f:()=>{gdFr60('giovani',-3); gdFr60('cattolici',1);}},
+   {l:'Contro',e:'La legge del 1920 resta · e nelle sale d\'aspetto non cambia niente, solo il silenzio',f:()=>{gdFr60('cattolici',4); gdFr60('giovani',-6); gdFr60('cetomedio',-2);}}]},
+ {id:'fr60_grandsensembles', era:'fr1960', cond:()=>S.year>=1961&&S.year<=1968, kick:'Il paese', t:'I grandi complessi',
+  text:'Le torri e le stecche crescono attorno alle città a migliaia di alloggi l\'anno: acqua calda e riscaldamento per chi veniva dalle baracche, e nessun negozio, nessun tram, nessun cinema.',ch:[
+   {l:'Costruire più e più in fretta',e:'Le baracche si svuotano · e i quartieri nuovi restano senza niente attorno',costo:{debito:1.5},f:()=>{S.ind.debt+=1.5; gdFr60('lavoratori',4); gdFr60('cattolici',1);}},
+   {l:'Meno alloggi, con i servizi',e:'Negozi, scuole e una linea d\'autobus · e la lista d\'attesa resta lunga',costo:{debito:1},f:()=>{S.ind.debt+=1; gdFr60('cetomedio',2);}},
+   {l:'Ferma i grandi complessi',e:'Nessuna torre nuova · e nessuna casa nuova',f:()=>{gdFr60('lavoratori',-4);}}]},
+ {id:'fr60_universita', era:'fr1960', cond:()=>S.year>=1966&&(S.year<1968||S.month<5), kick:'La scuola', t:'Le università',
+  text:'In dieci anni gli studenti sono triplicati e le facoltà nuove sono capannoni in periferia senza biblioteca. Una riforma vuole la selezione all\'ingresso; gli studenti vogliono i soldi.',ch:[
+   {l:'La selezione',e:'Meno iscritti e più posti a sedere · e le facoltà diventano un problema politico',f:()=>{S.maggioPeso=(S.maggioPeso||0)+1; gdFr60('giovani',-8); gdFr60('cetomedio',3);}},
+   {l:'I soldi senza selezione',e:'Aule, mense e biblioteche · il bilancio se ne accorge',costo:{debito:1.5},f:()=>{S.ind.debt+=1.5; gdFr60('giovani',4);}},
+   {l:'Niente',e:'Si vedrà l\'anno prossimo',f:()=>{gdFr60('giovani',-4);}}]},
+ {id:'fr60_concorde', era:'fr1960', cond:()=>S.year>=1962&&S.year<=1969, kick:'L\'industria', t:'Il supersonico',
+  text:'Un aereo supersonico costruito a metà con Londra costa il triplo del previsto e non ha ancora un cliente. Ritirarsi vuol dire pagare la penale; continuare vuol dire pagare tutto.',ch:[
+   {l:'Continui',e:'La storia · due prototipi e un paese che guarda in alto · e il conto che cresce ogni anno',costo:{debito:1},f:()=>{S.ind.debt+=1; gdFr60('imprenditori',3); gdFr60('cetomedio',1);}},
+   {l:'Rinegozi con Londra',e:'Metà del programma e metà del conto · e un anno perso',costo:{debito:0.5},f:()=>{S.ind.debt+=0.5; gdFr60('imprenditori',1);}},
+   {l:'Ti ritiri',e:'La penale si paga una volta sola · e gli ingegneri vanno a lavorare altrove',f:()=>{gdFr60('imprenditori',-4); gdFr60('cetomedio',-2); baseFr60(-3);}}]},
+ /* ==============================================================================================================
+    L99-2 · I DODICI EVENTI DEL DECENNIO FRANCESE '70 (scheda PRESET-FRANCIA-1970 §C). Testi della scheda, carte a
+    tre voci, gate d'epoca dal tag era:'fr1970'; le ancore nel cond. I gruppi passano da gdFr70 (× FR70_GRUPPI).
+    ⚑ LA FIDUCIA (nota H: 2, 5, 6, 10 + i quattro snodi) si muove qui con fidFr70.
+    ⚑ Le righe-effetto (`e`) la scheda non le dava: sono di Code, da rileggere.
+    ⚠ Quattro ritocchi dichiarati: (1) l'evento dei diciotto anni diceva «il nuovo Presidente» — con D12a nel 1974
+    non c'è un Presidente nuovo, e il Presidente è chi gioca: «il governo propone»; (2) Plogoff e Malville nomina
+    la morte di Malville (luglio 1977): esce da agosto 1977, e non esce per chi ha rinviato il nucleare (non c'è
+    un programma da difendere sui siti); (3) la Lorena nomina Longwy e i fucili da caccia (1979): dal dicembre
+    1978; (4) i rifugiati nominano il comitato di intellettuali (1979): dal 1978. E il TGV è «Il treno veloce»:
+    niente marchi nei titoli, come «Il supersonico» del '60. ⚠ NIENTE cade, NESSUN NOME DI PERSONA (G5).
+    ============================================================================================================== */
+ {id:'fr70_diciotto', era:'fr1970', cond:()=>S.year===1974, kick:'Il paese', t:'Diciotto anni',
+  text:'Il governo propone la maggiore età a diciotto anni: due milioni di elettori in più, e i genitori che perdono la firma sui figli.',ch:[
+   {l:'Sì',e:'La storia · due milioni di ragazzi votano alle prossime elezioni · e qualche padre non la prende bene',f:()=>{gdFr70('giovani',6); gdFr70('cattolici',-2);}},
+   {l:'A ventuno per votare, diciotto per il resto',e:'Mezza riforma · i ragazzi firmano i contratti ma non le schede',f:()=>{gdFr70('giovani',2);}},
+   {l:'No',e:'La maggiore età resta a ventuno · e i ragazzi se lo ricordano',f:()=>{gdFr70('giovani',-5); gdFr70('pensionati',2);}}]},
+ {id:'fr70_ivg', era:'fr1970', cond:()=>(S.year===1974&&S.month>=11)||(S.year===1975&&S.month<=3), kick:'Il paese', t:'L\'IVG',
+  text:'La legge che legalizza l\'aborto arriva in aula: metà della maggioranza voterà contro, e passerà con i voti della sinistra. Un ministro donna la difende per tre giorni davanti a un\'aula ostile.',ch:[
+   {l:'La sostieni con tutto il governo',e:'La storia · la legge passa con i voti della sinistra · metà della tua maggioranza vota contro, e lo ricorderà',f:()=>{gdFr70('giovani',7); gdFr70('cattolici',-7); gdFr70('cetomedio',2); baseFr70(-4); repd(3); fidFr70(1);}},
+   {l:'Libertà di voto, tu ti astieni',e:'La legge passa lo stesso · nessuno ti dà né il merito né la colpa',f:()=>{gdFr70('giovani',2); gdFr70('cattolici',-2);}},
+   {l:'La ritiri',e:'La legge del 1920 resta · e le donne continuano ad andare all\'estero',f:()=>{gdFr70('cattolici',5); gdFr70('giovani',-8); gdFr70('cetomedio',-3); stampad(-3); fidFr70(-1);}}]},
+ {id:'fr70_divorzio', era:'fr1970', cond:()=>S.year===1975, kick:'Il paese', t:'Il divorzio per consenso',
+  text:'Divorziare senza colpa, senza processo, di comune accordo.',ch:[
+   {l:'Sì',e:'Il divorzio senza colpa diventa legge · le chiese protestano, le coppie ringraziano',f:()=>{gdFr70('giovani',3); gdFr70('cetomedio',2); gdFr70('cattolici',-3);}},
+   {l:'Con un anno di riflessione',e:'Un anno di attesa per legge · nessuno è contento, nessuno grida',f:()=>{gdFr70('cattolici',1);}},
+   {l:'No',e:'Il divorzio resta un processo · e i giovani ti leggono come il paese di prima',f:()=>{gdFr70('cattolici',3); gdFr70('giovani',-4);}}]},
+ {id:'fr70_siti', era:'fr1970', cond:()=>(S.year>1977||(S.year===1977&&S.month>=8))&&S.nucleare74!=='rinvio', tono:'grave', kick:'L\'energia', t:'Plogoff e Malville',
+  text:'Sui siti delle centrali i contadini bloccano i camion e a Malville un manifestante muore sotto le cariche. Il programma va avanti o si ferma sul primo cantiere?',ch:[
+   {l:'Avanti, con la gendarmeria',e:'I cantieri ripartono · i ragazzi e i giornali ricordano chi è caduto',f:()=>{gdFr70('imprenditori',3); gdFr70('giovani',-6); gdFr70('lavoratori',-2); stampad(-3);}},
+   {l:'Consulta i comuni, un sito per volta',e:'Un anno in più per ogni centrale · e qualche comune che dice no',costo:{debito:0.5},f:()=>{S.ind.debt+=0.5; gdFr70('giovani',2);}},
+   {l:'Sospendi il sito',e:'Il cantiere si ferma · le imprese contano i soldi già spesi',f:()=>{gdFr70('giovani',4); gdFr70('imprenditori',-4);}}]},
+ {id:'fr70_premier', era:'fr1970', cond:()=>S.year===1976&&S.month>=6&&S.month<=8, kick:'La maggioranza', t:'Il Primo ministro che se ne va',
+  text:'Il Primo ministro si dimette dicendo di non avere i mezzi per governare, e in tre mesi fonda un partito suo. La maggioranza ha due teste.',ch:[
+   {l:'Lo lasci andare e nomini un tecnico',e:'La storia · un professore di economia a capo del governo · e un rivale in più dentro la tua maggioranza',f:()=>{repd(1); gdFr70('cetomedio',1); baseFr70(-3); fidFr70(2);}},
+   {l:'Lo trattieni con più poteri',e:'La maggioranza resta una · e la tua parola vale un po\' meno',f:()=>{baseFr70(2); repd(-3); fidFr70(-1);}},
+   {l:'Sciogli e vai alle urne',e:'Le urne adesso, con la maggioranza divisa · nessuno garantisce come finirà',f:()=>{S.anticipate77=true; fidFr70(-3);
+     S.log.unshift({t:T('La maggioranza'),x:T('Ha sciolto l\'Assemblea quando il Primo ministro se n\'è andato.')});
+     if(typeof azioneScioglimentoForzato==='function') azioneScioglimentoForzato();}}]},
+ {id:'fr70_lorena', era:'fr1970', cond:()=>(S.year===1978&&S.month===12)||S.year===1979, tono:'grave', kick:'Il lavoro', t:'La Lorena chiude',
+  text:'L\'acciaio non regge più: gli altiforni chiudono uno dopo l\'altro e Longwy scende in piazza con i fucili da caccia. Ventimila posti in tre anni.',ch:[
+   {l:'Piano sociale e prepensionamenti',e:'Nessuno resta senza niente · e il conto lo paga il bilancio',costo:{debito:2},f:()=>{S.ind.debt+=2; gdFr70('lavoratori',3); gdFr70('pensionati',2); fidFr70(-2);}},
+   {l:'Riconversione e sussidi alle nuove fabbriche',e:'Fabbriche nuove al posto degli altiforni · fra qualche anno, forse',costo:{debito:1.5},f:()=>{S.ind.debt+=1.5; gdFr70('lavoratori',1); gdFr70('imprenditori',2); fidFr70(-1);}},
+   {l:'Il mercato decide',e:'Gli altiforni chiudono · e la valle scende in piazza',f:()=>{gdFr70('lavoratori',-8); gdFr70('imprenditori',2); stampad(-3); fidFr70(2);}}]},
+ {id:'fr70_radio', era:'fr1970', cond:()=>S.year>=1977&&S.year<=1979, kick:'Il paese', t:'Le radio libere',
+  text:'Nei sottoscala e sui tetti nascono radio senza licenza: la polizia le sequestra, i giudici le rilasciano, e un partito ne apre una sua.',ch:[
+   {l:'Sequestri e multe',e:'Le antenne cadono · e i ragazzi ne montano altre',f:()=>{gdFr70('giovani',-5); gdFr70('cetomedio',-1); stampad(2);}},
+   {l:'Tolleri, e prepari una legge',e:'Le radio restano accese in attesa delle regole',f:()=>{gdFr70('giovani',3);}},
+   {l:'Apri le onde',e:'Cento radio nuove · e la radio di Stato non è più sola',f:()=>{gdFr70('giovani',5); gdFr70('imprenditori',2); stampad(-3);}}]},
+ {id:'fr70_treno', era:'fr1970', cond:()=>S.year>=1976&&S.year<=1979, kick:'L\'industria', t:'Il treno veloce',
+  text:'Un treno a duecentosettanta all\'ora fra Parigi e Lione, una linea nuova su binari nuovi: sei anni di cantiere e un buco nel bilancio delle ferrovie.',ch:[
+   {l:'Costruisci',e:'La storia · sei anni di cantiere · e un treno che il mondo verrà a vedere',costo:{debito:1.5},f:()=>{S.ind.debt+=1.5; gdFr70('imprenditori',2); gdFr70('cetomedio',2);}},
+   {l:'Solo la prima tratta',e:'Metà della linea, metà del conto',costo:{debito:1},f:()=>{S.ind.debt+=1;}},
+   {l:'Rinvia',e:'Il treno resta sulla carta · e le imprese guardano altrove',f:()=>{gdFr70('imprenditori',-2); gdFr70('cetomedio',-2);}}]},
+ {id:'fr70_rifugiati', era:'fr1970', cond:()=>S.year>=1978&&S.year<=1979, kick:'Il mondo', t:'I rifugiati del Sud-est asiatico',
+  text:'Dal Vietnam, dalla Cambogia e dal Laos arrivano decine di migliaia di persone; un comitato di intellettuali di ogni parte chiede di accoglierne di più.',ch:[
+   {l:'Accogli centomila',e:'Case, corsi di lingua e lavoro · le chiese e i ragazzi con te, una parte del ceto medio no',costo:{debito:0.5},f:()=>{S.ind.debt+=0.5; gdFr70('cattolici',3); gdFr70('giovani',2); gdFr70('cetomedio',-2);}},
+   {l:'Le quote europee',e:'Ognuno la sua parte · e nessuno la sua fretta',f:()=>{gdFr70('cattolici',1);}},
+   {l:'Chiudi',e:'Le navi restano in mare · e le fotografie arrivano lo stesso',f:()=>{gdFr70('cattolici',-4); gdFr70('giovani',-2); gdFr70('cetomedio',1);}}]},
+ {id:'fr70_milione', era:'fr1970', cond:()=>S.year===1977, tono:'grave', kick:'Il lavoro', t:'La disoccupazione al milione',
+  text:'Il paese supera per la prima volta il milione di disoccupati. Il governo propone il patto per i giovani: sgravi a chi assume, corsi a chi cerca.',ch:[
+   {l:'Il patto',e:'Sgravi a chi assume, corsi a chi cerca · qualcosa si muove',costo:{debito:1},f:()=>{S.ind.debt+=1; gdFr70('giovani',3); gdFr70('lavoratori',2); gdFr70('imprenditori',2); fidFr70(1);}},
+   {l:'Sussidi più lunghi',e:'Chi perde il lavoro ha un anno in più · e il bilancio pure',costo:{debito:1.5},f:()=>{S.ind.debt+=1.5; gdFr70('lavoratori',3); fidFr70(-2);}},
+   {l:'Niente',e:'Il mercato si aggiusterà da solo · intanto il milione resta',f:()=>{gdFr70('lavoratori',-4); gdFr70('giovani',-4); fidFr70(1);}}]},
+ {id:'fr70_quaranta', era:'fr1970', cond:()=>S.year>=1978&&S.year<=1979, kick:'Il lavoro', t:'La settimana di quaranta ore',
+  text:'I sindacati chiedono le trentacinque ore contro la disoccupazione; il padronato risponde che costerebbe le fabbriche.',ch:[
+   {l:'Trattativa a quaranta',e:'Si tratta settore per settore · nessuna legge, qualche accordo',f:()=>{gdFr70('lavoratori',2); gdFr70('imprenditori',-1);}},
+   {l:'Trentanove per legge',e:'Un\'ora in meno per tutti · e le imprese fanno i conti',f:()=>{gdFr70('lavoratori',5); gdFr70('imprenditori',-5);}},
+   {l:'Niente',e:'Le quaranta ore restano · e i sindacati lo scrivono sui cartelli',f:()=>{gdFr70('lavoratori',-4); gdFr70('imprenditori',3);}}]},
+ {id:'fr70_europee', era:'fr1970', cond:()=>S.year===1979&&S.month<=6, kick:'L\'Europa', t:'Le europee',
+  text:'La prima elezione diretta del Parlamento europeo: il partito del Primo ministro dimissionario fa campagna contro «il partito dell\'estero» e il paese si divide sull\'Europa.',ch:[
+   {l:'Lista del Presidente',e:'La storia · una lista tua, europea e moderata · e il gollismo si presenta diviso',f:()=>{gdFr70('cetomedio',2); gdFr70('imprenditori',2);}},
+   {l:'Lista unica della maggioranza',e:'Un\'unità di facciata · la tua base apprezza, il centro meno',f:()=>{baseFr70(2); gdFr70('cetomedio',-1);}},
+   {l:'Campagna sovranista',e:'Contro «il partito dell\'estero» · le imprese si spaventano, i pensionati applaudono',f:()=>{gdFr70('cetomedio',-3); gdFr70('imprenditori',-4); gdFr70('pensionati',2);}}]},
+ /* ---- L99-3 · LA SECONDA TRANCHE (scheda PRESET-FRANCIA-1970 §I, in forma finale, copiata dalla scheda): sei eventi,
+    tre ancorati al '71-'73 e tre al '72-'78, per il 1971 vuoto e il '75-'77 sottile. Stesse convenzioni della prima. ---- */
+ {id:'fr70_firme', era:'fr1970', cond:()=>S.year===1971&&S.month>=4, kick:'Il paese', t:'Le firme',
+  text:'Trecentoquarantatré donne firmano su un settimanale la dichiarazione di aver abortito e chiedono di essere processate. La legge del 1920 lo prevede; nessun procuratore vuole cominciare.',ch:[
+   {l:'Nessun processo: la legge resta, e non si applica',e:'Nessuno in tribunale · la legge del 1920 resta scritta, e tutti sanno che non vale più',f:()=>{gdFr70('giovani',2); gdFr70('cattolici',-1);}},
+   {l:'Una commissione sulla legge del 1920',e:'Il primo passo · le chiese lo leggono per quello che è',f:()=>{gdFr70('giovani',3); gdFr70('cetomedio',1); gdFr70('cattolici',-3);}},
+   {l:'La legge è la legge: si procede',e:'Trecentoquarantatré processi che nessun procuratore apre · e i giornali ogni giorno',f:()=>{gdFr70('cattolici',3); gdFr70('giovani',-5); gdFr70('cetomedio',-2); stampad(-2);}}]},
+ {id:'fr70_laboratori', era:'fr1970', cond:()=>S.year>=1971&&S.year<=1972, kick:'L\'ordine', t:'I laboratori di Marsiglia',
+  text:'L\'eroina che arriva in America passa dai laboratori clandestini attorno a Marsiglia, e Washington lo dice a voce alta: manda agenti, chiede arresti, minaccia. La polizia del posto conosce i nomi da anni.',ch:[
+   {l:'Operazione congiunta con gli americani',e:'I laboratori chiudono uno dopo l\'altro · l\'alleato ringrazia, il porto no',f:()=>{repd(3); gdFr70('cetomedio',2); gdFr70('lavoratori',-1);}},
+   {l:'Da soli: è affare nostro',e:'Qualche arresto, con calma · Washington prende nota',f:()=>{repd(-2); gdFr70('cetomedio',1);}},
+   {l:'Minimizza: sono voci',e:'I laboratori restano · e i giornali americani scrivono il nome della città',f:()=>{repd(-4); gdFr70('cetomedio',-2); stampad(-2);}}]},
+ {id:'fr70_acciaio', era:'fr1970', cond:()=>S.year>=1971&&S.year<=1973, kick:'L\'industria', t:'L\'acciaio sul mare',
+  text:'Sulla costa davanti a Marsiglia lo Stato costruisce un\'acciaieria sul mare, un porto e una città nuova: il più grande cantiere d\'Europa, dicono, coi soldi di tutti. Le imprese chiedono altri crediti prima di aver colato il primo acciaio.',ch:[
+   {l:'Tutti i crediti',e:'Il cantiere corre · e il conto lo vedrà chi verrà dopo',costo:{debito:1},f:()=>{S.ind.debt+=1; gdFr70('imprenditori',3); gdFr70('lavoratori',2);}},
+   {l:'A tranche, contro risultati',e:'Un altoforno per volta · le imprese brontolano e continuano',costo:{debito:0.5},f:()=>{S.ind.debt+=0.5; gdFr70('imprenditori',1);}},
+   {l:'Fermati al primo altoforno',e:'Il porto resta mezzo · e la città nuova mezza vuota',f:()=>{gdFr70('imprenditori',-3); gdFr70('lavoratori',-2); gdFr70('giovani',1);}}]},
+ {id:'fr70_altopiano', era:'fr1970', cond:()=>S.year>=1972&&S.year<=1978, kick:'La difesa', t:'L\'altopiano',
+  text:'L\'esercito vuole allargare il campo militare sull\'altopiano e comprare le terre di cento fattorie. I contadini non vendono; arrivano gli studenti, poi le marce, e ogni estate l\'altopiano è pieno. Il campo serve davvero, dicono i generali.',ch:[
+   {l:'Espropria: la difesa viene prima',e:'Le ruspe sull\'altopiano · e la foto delle pecore davanti ai gendarmi su tutti i giornali',f:()=>{gdFr70('giovani',-5); gdFr70('lavoratori',-2); stampad(-2);}},
+   {l:'Rinvia di un anno, poi di un altro',e:'Nessuna ruspa, nessuna decisione · e ogni estate la marcia',f:()=>{gdFr70('giovani',1); fidFr70(-1);}},
+   {l:'Rinuncia all\'allargamento',e:'I contadini restano · i generali se lo segnano',f:()=>{gdFr70('giovani',4); gdFr70('cattolici',1); repd(-2);}}]},
+ {id:'fr70_collegio', era:'fr1970', cond:()=>S.year===1975, kick:'La scuola', t:'La scuola unica',
+  text:'Il ministro propone un solo collegio per tutti fino a sedici anni: non più due scuole, una per chi prosegue e una per chi va a lavorare. Gli insegnanti temono il livellamento, le famiglie del ceto medio la classe mista.',ch:[
+   {l:'La scuola unica per tutti',e:'Una scuola sola fino a sedici anni · il ceto medio cerca il privato',f:()=>{gdFr70('giovani',4); gdFr70('lavoratori',2); gdFr70('cetomedio',-3);}},
+   {l:'Unica, ma con le sezioni',e:'Lo stesso edificio, due corridoi · nessuno protesta, nessuno cambia',f:()=>{gdFr70('giovani',1); gdFr70('cetomedio',1);}},
+   {l:'Lascia le due scuole',e:'Tutto come prima · e chi lavora a quattordici anni resta dov\'è',f:()=>{gdFr70('cetomedio',2); gdFr70('giovani',-3); gdFr70('lavoratori',-2);}}]},
+ {id:'fr70_ritorno', era:'fr1970', cond:()=>S.year>=1976&&S.year<=1977, kick:'Il lavoro', t:'Il ritorno pagato',
+  text:'L\'immigrazione di lavoro è sospesa da due anni, e adesso il governo può offrire diecimila franchi a chi riparte. Le imprese hanno ancora bisogno di braccia; i disoccupati sono quasi un milione; e chi è qui da vent\'anni ha i figli a scuola.',ch:[
+   {l:'Diecimila franchi a chi parte',e:'Pochi partono, molti si offendono · e i cantieri restano senza braccia',f:()=>{gdFr70('cetomedio',2); gdFr70('imprenditori',-2); gdFr70('giovani',-2); stampad(-1);}},
+   {l:'Blocca gli ingressi, non le partenze',e:'Le frontiere chiuse com\'erano · nessun incentivo, nessun titolo',f:()=>{gdFr70('cetomedio',1);}},
+   {l:'Nessun incentivo: chi è qui resta',e:'Il ricongiungimento delle famiglie va avanti · il ceto medio conta i posti a scuola',f:()=>{gdFr70('giovani',2); gdFr70('cattolici',1); gdFr70('cetomedio',-2);}}]},
+ {id:'fr_ceca', era:'fr1950', cond:()=>S.year>=1951&&S.year<=1953, kick:'L\'Europa', t:'Il carbone e l\'acciaio con Bonn',
+  text:'Sei paesi mettono in comune carbone e acciaio sotto un\'Alta Autorità che non risponde a nessun governo: per i siderurgici del nord è un mercato, per i minatori una minaccia, per i gollisti una rinuncia. Il tuo partito deve ratificare.',ch:[
+   {l:'Ratifichi',e:'Le acciaierie del nord con te · i minatori temono il mercato comune',f:()=>{gdFr('imprenditori',3); gdFr('cetomedio',2); gdFr('lavoratori',-3); repd(1);}},
+   {l:'Ratifichi con garanzie per le miniere',e:'Tutti un po\' più tranquilli · e le garanzie costano',costo:{debito:0.5},f:()=>{S.ind.debt+=0.5; gdFr('lavoratori',1); gdFr('imprenditori',1);}},
+   {l:'Voti contro',e:'I minatori ti ringraziano · le imprese e i giornali no',f:()=>{gdFr('lavoratori',2); gdFr('cetomedio',-3); gdFr('imprenditori',-4); stampad(-2);}}]},
+ {id:'fr_protettorati', era:'fr1950', cond:()=>S.year>=1955&&S.year<=1956, tono:'grave', kick:'Il mondo', t:'I protettorati',
+  text:'In Tunisia e in Marocco la protesta non si ferma e i coloni chiedono l\'esercito. Si può trattare l\'autonomia, poi l\'indipendenza, e tenere l\'Algeria fuori dal discorso — oppure tenere tutto, e pagare tutto.',ch:[
+   {l:'Tratti l\'indipendenza',cade:['fr_mod'],e:'Due bandiere nuove, senza guerra · i coloni gridano, e l\'Algeria resta fuori dal discorso',f:()=>{S.protettorati='trattati'; gdFr('giovani',3); gdFr('cattolici',-2); gdFr('cetomedio',-3); repd(2);}},
+   {l:'Concedi l\'autonomia e basta',e:'Un passo, e non l\'ultimo · nessuno è contento',f:()=>{S.protettorati='autonomia'; gdFr('cetomedio',-1); gdFr('giovani',-1);}},
+   {l:'Tieni tutto',cade:['fr_sfio','fr_rad'],e:'L\'impero resta intero · i soldati partono, e il conto arriva',costo:{debito:1},f:()=>{S.protettorati='tenuti'; S.ind.debt+=1; gdFr('cetomedio',2); gdFr('giovani',-5); gdFr('imprenditori',-2); stampad(-2);}}]},
+ {id:'fr_latte', era:'fr1950', cond:()=>S.year>=1954&&S.year<=1955, kick:'La scuola', t:'Il latte a scuola',
+  text:'Un bicchiere di latte a ogni scolaro, ogni mattina, pagato dallo Stato: contro la denutrizione dei quartieri poveri e — dicono i maligni — contro il vino a tavola. I viticoltori protestano, i pediatri applaudono.',ch:[
+   {l:'Il latte per tutti',e:'Ogni classe, ogni mattina · i viticoltori ti mandano una cassa di protesta',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; gdFr('cattolici',2); gdFr('lavoratori',2); gdFr('cetomedio',1);}},
+   {l:'Solo nelle scuole povere',e:'Dove serve di più · e dove si vede di meno',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; gdFr('lavoratori',1);}},
+   {l:'Lasci perdere',e:'Nessuna spesa · e le famiglie se ne accorgono',f:()=>{gdFr('cattolici',-2); gdFr('giovani',-1);}}]},
 ];
 
 /* eventi INTERNAZIONALI ricorrenti (lotto Esteri+Difesa): grandi eventi ~ogni 6-9 mesi, taggati min:esteri|difesa.
@@ -8095,6 +8634,57 @@ const SFIDE=[
  {id:'fr50_nuovofranco', era:'fr1950', codaFino:Infinity, paese:'francia', ruolo:'governo', diff:'difficile', cond:()=>S.year>=1959||(S.year===1958&&S.month===12), q:'Che cos\'è il «nuovo franco» annunciato nel dicembre 1958?',
   op:['Una moneta d\'oro','Cento vecchi franchi in uno','Il franco agganciato al dollaro'], giusta:1,
   perche:'Dal 1960 un nuovo franco vale cento vecchi: le cifre si scrivono con due zeri in meno.'},
+ /* L97-2 · le otto sfide del decennio francese '60 (scheda §G): istituzioni e fatti, mai i titolari (regola D5). */
+ {id:'fr60_elezione', era:'fr1960', codaFino:Infinity, paese:'francia', ruolo:'governo', diff:'facile', cond:()=>S.year>=1963||(S.year===1962&&S.month>=11), q:'Chi elegge il Presidente della Repubblica dopo il referendum dell\'ottobre 1962?',
+  op:['Il popolo, a suffragio diretto','L\'Assemblea nazionale','Un collegio di notabili'], giusta:0,
+  perche:'Il referendum del 28 ottobre 1962 introduce l\'elezione diretta: da allora il Presidente lo sceglie il corpo elettorale.'},
+ {id:'fr60_censura', era:'fr1960', codaFino:Infinity, paese:'francia', ruolo:'governo', diff:'difficile', cond:()=>S.year>=1963, q:'Quante mozioni di censura sono state approvate nella V Repubblica fino al 1969?',
+  op:['Nessuna','Una, nell\'ottobre 1962','Tre'], giusta:1,
+  perche:'La sola censura approvata della V Repubblica è quella del 5 ottobre 1962, contro il governo che aveva annunciato il referendum.'},
+ {id:'fr60_nato', era:'fr1960', codaFino:Infinity, paese:'francia', ruolo:'governo', diff:'media', cond:()=>S.year>=1966, q:'Che cosa fa la Francia con la NATO nel 1966?',
+  op:['Esce dall\'Alleanza atlantica','Resta in tutto','Esce dal comando integrato, ma resta nell\'Alleanza'], giusta:2,
+  perche:'Nel 1966 la Francia lascia il comando integrato e fa uscire basi e comandi alleati, ma resta membro dell\'Alleanza.'},
+ {id:'fr60_ballottaggio', era:'fr1960', codaFino:Infinity, paese:'francia', ruolo:'governo', diff:'media', cond:()=>S.year>=1966, q:'Che cosa succede al Presidente al primo turno della presidenziale del dicembre 1965?',
+  op:['Va al ballottaggio','Vince al primo turno','Si ritira'], giusta:0,
+  perche:'Con il 44,6 per cento il Presidente uscente non passa al primo turno: è il primo ballottaggio presidenziale della Repubblica.'},
+ {id:'fr60_settennato', era:'fr1960', codaFino:Infinity, paese:'francia', ruolo:'governo', diff:'facile', q:'Quanto dura il mandato del Presidente della Repubblica negli anni Sessanta?',
+  op:['Cinque anni','Sette anni','Quattro anni'], giusta:1,
+  perche:'Il settennato resta la regola fino al 2000: sette anni, rinnovabili senza limite.'},
+ {id:'fr60_grenelle', era:'fr1960', codaFino:Infinity, paese:'francia', ruolo:'governo', diff:'media', cond:()=>S.year>=1968&&(S.year>1968||S.month>=6), q:'Che cosa sono gli accordi di Grenelle, nel maggio 1968?',
+  op:['Una barricata del Quartiere latino','Un\'università occupata','L\'accordo fra governo, sindacati e imprese'], giusta:2,
+  perche:'A Grenelle si negoziano aumenti salariali e diritti sindacali: la base però rifiuta l\'accordo, e lo sciopero continua.'},
+ {id:'fr60_dimissioni', era:'fr1960', codaFino:Infinity, paese:'francia', ruolo:'governo', diff:'facile', cond:()=>S.year>=1969&&(S.year>1969||S.month>=5), q:'Perché il Presidente lascia la carica nell\'aprile 1969?',
+  op:['Ha perso un referendum a cui aveva legato la carica','Ha perso le elezioni legislative','Per ragioni di età'], giusta:0,
+  perche:'Il 27 aprile 1969 il no vince di poco al referendum su regioni e Senato, e il Presidente lascia le funzioni il giorno dopo.'},
+ {id:'fr60_nuovofranco', era:'fr1960', codaFino:Infinity, paese:'francia', ruolo:'governo', diff:'media', q:'Quanto vale un nuovo franco del 1960?',
+  op:['Dieci vecchi franchi','Cento vecchi franchi','Mille vecchi franchi'], giusta:1,
+  perche:'Dal 1 gennaio 1960 un nuovo franco vale cento franchi vecchi: cambiano le cifre, non il potere d\'acquisto.'},
+ /* L99-2 · le otto sfide del decennio francese '70 (scheda §G): istituzioni e fatti, mai i titolari (regola D5). La
+    sesta non dice «il piano Barre» (G5): dice il piano del nuovo Primo ministro. */
+ {id:'fr70_referendum', era:'fr1970', codaFino:Infinity, paese:'francia', ruolo:'governo', diff:'media', cond:()=>S.year>=1973||(S.year===1972&&S.month>=5), q:'Che cosa sottopone a referendum la Francia nell\'aprile 1972?',
+  op:['L\'ingresso di Londra, Dublino e Copenaghen nel Mercato comune','La moneta unica europea','L\'uscita dalla NATO'], giusta:0,
+  perche:'Il 23 aprile 1972 vince il sì all\'allargamento del Mercato comune, ma quasi quattro elettori su dieci restano a casa.'},
+ {id:'fr70_petrolio', era:'fr1970', codaFino:Infinity, paese:'francia', ruolo:'governo', diff:'facile', cond:()=>S.year>=1974, q:'Che cosa quadruplica di prezzo fra l\'autunno 1973 e l\'inizio del 1974?',
+  op:['Il pane','Il petrolio','Il franco'], giusta:1,
+  perche:'I paesi produttori tagliano l\'offerta e alzano il prezzo: in pochi mesi il barile costa quattro volte tanto.'},
+ {id:'fr70_nucleare', era:'fr1970', codaFino:Infinity, paese:'francia', ruolo:'governo', diff:'facile', cond:()=>S.year>=1975||(S.year===1974&&S.month>=4), q:'Su che cosa punta il piano energetico francese del 1974?',
+  op:['Il carbone','Il gas','Il nucleare'], giusta:2,
+  perche:'Il piano del marzo 1974 lancia la costruzione in serie di centrali nucleari: in dieci anni l\'atomo darà la gran parte della corrente.'},
+ {id:'fr70_diciotto', era:'fr1970', codaFino:Infinity, paese:'francia', ruolo:'governo', diff:'media', cond:()=>S.year>=1975, q:'In che anno la maggiore età in Francia scende a diciotto anni?',
+  op:['1974','1968','1981'], giusta:0,
+  perche:'La legge del luglio 1974 porta la maggiore età, e con lei il voto, da ventuno a diciotto anni.'},
+ {id:'fr70_ivg', era:'fr1970', codaFino:Infinity, paese:'francia', ruolo:'governo', diff:'difficile', cond:()=>S.year>=1976||(S.year===1975&&S.month>=2), q:'Con quali voti passa la legge sull\'aborto del gennaio 1975?',
+  op:['Solo quelli della maggioranza','Quelli della sinistra e di una parte della maggioranza','All\'unanimità'], giusta:1,
+  perche:'La maggioranza si divide: la legge passa perché la sinistra la vota quasi tutta, insieme a meno della metà dei deputati della maggioranza.'},
+ {id:'fr70_rigore', era:'fr1970', codaFino:Infinity, paese:'francia', ruolo:'governo', diff:'media', cond:()=>S.year>=1977||(S.year===1976&&S.month>=10), q:'Che cos\'è il piano presentato dal nuovo Primo ministro nel settembre 1976?',
+  op:['Un piano di rilancio','Un piano nucleare','Un piano di rigore'], giusta:2,
+  perche:'Il piano del settembre 1976 blocca i prezzi per tre mesi, stringe il credito e frena i salari per fermare l\'inflazione.'},
+ {id:'fr70_sinistra', era:'fr1970', codaFino:Infinity, paese:'francia', ruolo:'governo', diff:'media', cond:()=>S.year>=1979||(S.year===1978&&S.month>=4), q:'Perché la sinistra perde le legislative del 1978?',
+  op:['Si è divisa sul programma comune','Non si è presentata','Le ha vinte'], giusta:0,
+  perche:'Nel settembre 1977 socialisti e comunisti rompono sul programma comune: vanno al voto divisi, e la destra vince contro i sondaggi.'},
+ {id:'fr70_europee', era:'fr1970', codaFino:Infinity, paese:'francia', ruolo:'governo', diff:'facile', cond:()=>S.year===1979&&S.month>=7, q:'Che cosa succede il 10 giugno 1979?',
+  op:['Un referendum sull\'Europa','La prima elezione diretta del Parlamento europeo','L\'ingresso della Grecia nel Mercato comune'], giusta:1,
+  perche:'Per la prima volta i cittadini dei nove paesi della Comunità eleggono direttamente il Parlamento europeo.'},
  {id:'uk60_svalut67', era:'uk1960', codaFino:Infinity, paese:'regnounito', ruolo:'governo', diff:'difficile', cond:()=>S.year>=1967, q:'Che cosa accadde alla sterlina nel novembre 1967?',
   op:['Fu lasciata fluttuare liberamente','Fu svalutata da 2,80 a 2,40 dollari','Fu agganciata all\'oro'], giusta:1,
   perche:'Arrivò dopo tre anni di difesa del cambio.'},
@@ -10356,7 +10946,7 @@ const TITOLI=[
     scritta io nella stessa forma dei `ti_uk50` (la stessa notizia, con la coda che punge). I titoli datati hanno
     `pri:1` e la finestra del fatto; quelli che leggono una scelta guardano il flag, così non annunciano ciò che il
     giocatore ha evitato (Suez «fermi con Londra» solo se ci si è fermati con Londra, o se lo snodo non c'è stato). ---- */
- {id:'ti_fr50_investitura', era:'fr1950', pri:1, cond:()=>(S.year===1951||S.year===1954||S.year===1957)&&S.month>=5&&S.month<=7, amico:'Il governo cade sull\'investitura', ostile:'Il governo cade sull\'investitura: il prossimo quanto dura?'},
+ {id:'ti_fr50_investitura', era:'fr1950', pri:1, cond:()=>((S.year===1951||S.year===1954||S.year===1957)&&S.month>=5&&S.month<=7)||(S.ultimaCaduta!=null&&(S.year*12+S.month)-S.ultimaCaduta<=1), amico:'Il governo cade sull\'investitura', ostile:'Il governo cade sull\'investitura: il prossimo quanto dura?'},
  {id:'ti_fr50_apparentamenti', era:'fr1950', pri:1, cond:()=>S.year===1951&&S.month>=4&&S.month<=6, amico:'Gli apparentamenti passano', ostile:'Gli apparentamenti passano: i seggi a chi si allea, i voti a chi resta fuori'},
  {id:'ti_fr50_scuole', era:'fr1950', pri:1, cond:()=>S.year===1951&&S.month>=8, amico:'La legge sulle scuole spacca la maggioranza', ostile:'La legge sulle scuole spacca la maggioranza: e la Repubblica laica?'},
  {id:'ti_fr50_agosto', era:'fr1950', pri:1, cond:()=>S.year===1953&&S.month>=8&&S.month<=9, amico:'Agosto in sciopero', ostile:'Agosto in sciopero: il paese fermo, il governo pure'},
@@ -10372,6 +10962,57 @@ const TITOLI=[
  {id:'ti_fr50_algeri', era:'fr1950', pri:1, cond:()=>S.year===1958&&S.month===5, amico:'Algeri: il comitato', ostile:'Algeri: il comitato, e Parigi non risponde'},
  {id:'ti_fr50_referendum', era:'fr1950', pri:1, cond:()=>S.year===1958&&S.month>=9&&S.month<=10, amico:'Quattro su cinque dicono sì', ostile:'Quattro su cinque dicono sì: una Costituzione scritta in tre mesi'},
  {id:'ti_fr50_nuovofranco', era:'fr1950', pri:1, cond:()=>(S.year===1958&&S.month===12)||(S.year===1959&&S.month<=2), amico:'Il nuovo franco', ostile:'Il nuovo franco: cento vecchi in uno, e i prezzi arrotondati in su'},
+ /* L93-2b · la seconda tranche (scheda §E-bis), con la gemella ostile scritta nella scheda. Senza `pri`: sono titoli di
+    stagione, non di un giorno. Le baracche sono sobrie per scelta della scheda (l'immigrazione algerina, senza nomi). */
+ /* L93-5b · il titolo della maggioranza comprata: il mese della concessione e quello dopo (il titolo nasce al confine). */
+ {id:'ti_fr50_comprato', era:'fr1950', pri:1, cond:()=>S.ultimaConcessione!=null&&(S.year*12+S.month)-S.ultimaConcessione<=1, amico:'La maggioranza ha un prezzo', ostile:'La maggioranza ha un prezzo: e lo pagano i contribuenti'},
+ {id:'ti_fr50_ceca', era:'fr1950', cond:()=>S.year>=1951&&S.year<=1952, amico:'Carbone e acciaio con Bonn', ostile:'Carbone e acciaio con Bonn: e le miniere del nord?'},
+ {id:'ti_fr50_protettorati', era:'fr1950', cond:()=>S.year===1956, amico:'Tunisi e Rabat, due bandiere', ostile:'Tunisi e Rabat, due bandiere: Algeri guarda'},
+ {id:'ti_fr50_sahara', era:'fr1950', cond:()=>S.year>=1956&&S.year<=1958, amico:'Petrolio nel Sahara', ostile:'Petrolio nel Sahara: la ragione in più per restare'},
+ {id:'ti_fr50_latte', era:'fr1950', cond:()=>S.year>=1954&&S.year<=1955, amico:'Un bicchiere di latte in classe', ostile:'Un bicchiere di latte in classe: i viticoltori in piazza'},
+ {id:'ti_fr50_baracche', era:'fr1950', cond:()=>S.year>=1955, amico:'Le baracche alle porte di Parigi', ostile:'Le baracche alle porte di Parigi: chi ci abita lavora per noi'},
+ /* ---- L97-2 · I TITOLI DEL DECENNIO FRANCESE '60 (scheda §E), ciascuno con la gemella ostile. Le ancore stanno
+    nel cond, come per il '50: un titolo senza ancora varrebbe tutto il decennio, e qui sono tutti datati. ---- */
+ {id:'ti_fr60_bomba', era:'fr1960', pri:1, cond:()=>S.year===1960&&S.month>=2, amico:'La bomba nel deserto', ostile:'La bomba nel deserto: e le scuole che non si costruiscono'},
+ {id:'ti_fr60_putsch', era:'fr1960', pri:1, cond:()=>S.year===1961&&S.month>=4&&S.month<=6, amico:'Quattro giorni ad Algeri', ostile:'Quattro giorni ad Algeri: l\'esercito ha scelto tardi'},
+ {id:'ti_fr60_evian', era:'fr1960', pri:1, cond:()=>S.year===1962&&S.month>=3&&S.month<=5, amico:'Evian: la guerra è finita', ostile:'Evian: la guerra è finita, e un milione di persone è senza casa'},
+ {id:'ti_fr60_navi', era:'fr1960', pri:1, cond:()=>S.year===1962&&S.month>=6&&S.month<=9, amico:'Le navi da Algeri', ostile:'Le navi da Algeri: Marsiglia non ha posto'},
+ {id:'ti_fr60_ref62', era:'fr1960', pri:1, cond:()=>S.year===1962&&S.month>=9&&S.month<=11, amico:'Il Presidente sarà eletto dal popolo', ostile:'Il Presidente sarà eletto dal popolo, con un referendum che il Consiglio di Stato dice illegale'},
+ {id:'ti_fr60_censura', era:'fr1960', pri:1, cond:()=>S.year===1962&&S.month>=10, amico:'La censura passa, l\'Assemblea è sciolta', ostile:'La censura passa, l\'Assemblea è sciolta: e il paese vota per paura'},
+ {id:'ti_fr60_bonn', era:'fr1960', pri:1, cond:()=>S.year===1963&&S.month<=4, amico:'Bonn e Parigi, mano nella mano', ostile:'Bonn e Parigi, mano nella mano: e Londra fuori dalla porta'},
+ {id:'ti_fr60_londra', era:'fr1960', pri:1, cond:()=>S.year===1963||S.year===1967, amico:'No a Londra', ostile:'No a Londra: il Mercato comune resta a sei'},
+ {id:'ti_fr60_minatori', era:'fr1960', pri:1, cond:()=>S.year===1963&&S.month>=3&&S.month<=6, amico:'I minatori fermi', ostile:'I minatori fermi: il decreto è carta'},
+ {id:'ti_fr60_sedia', era:'fr1960', pri:1, cond:()=>(S.year===1965&&S.month>=7)||(S.year===1966&&S.month<=1), amico:'La sedia vuota', ostile:'La sedia vuota: l\'Europa aspetta Parigi'},
+ {id:'ti_fr60_ballottaggio', era:'fr1960', pri:1, cond:()=>(S.year===1965&&S.month===12)||(S.year===1966&&S.month<=2), amico:'Il ballottaggio', ostile:'Il ballottaggio: il generale non passa al primo turno'},
+ {id:'ti_fr60_nato', era:'fr1960', pri:1, cond:()=>S.year===1966&&S.month>=3&&S.month<=8, amico:'La NATO senza la Francia', ostile:'La NATO senza la Francia: e gli alleati fanno le valigie'},
+ {id:'ti_fr60_pillola', era:'fr1960', pri:1, cond:()=>S.year===1967||(S.year===1968&&S.month<=3), amico:'La pillola è legale', ostile:'La pillola è legale: le chiese protestano'},
+ {id:'ti_fr60_barricate', era:'fr1960', pri:1, cond:()=>S.year===1968&&S.month>=5&&S.month<=6, amico:'Le barricate', ostile:'Le barricate: il governo non c\'è'},
+ {id:'ti_fr60_dieci', era:'fr1960', pri:1, cond:()=>S.year===1968&&S.month>=5&&S.month<=7, amico:'Dieci milioni fermi', ostile:'Dieci milioni fermi: Grenelle non basta'},
+ {id:'ti_fr60_franco', era:'fr1960', pri:1, cond:()=>S.year===1968&&S.month>=11, amico:'Il franco non si svaluta', ostile:'Il franco non si svaluta: pagano i piccoli'},
+ {id:'ti_fr60_ventisette', era:'fr1960', pri:1, cond:()=>S.year===1969&&S.month>=4, amico:'Il no del 27 aprile', ostile:'Il no del 27 aprile: undici anni finiscono in due righe'},
+ /* ---- L99-2 · I TITOLI DEL DECENNIO FRANCESE '70 (scheda §E), ciascuno con la gemella ostile; tutti datati nel cond.
+    Tre titoli guardano la scelta fatta allo snodo: «Tredici centrali» non esce per chi ha scelto un piano diverso
+    (all'opposizione, dove lo snodo non c'è, è la cronaca che il pilastro non dà), e così «Il piano di rigore» e «Il
+    programma comune è morto». «La destra vince contro i sondaggi» non esce se le legislative sono state anticipate.
+    Senza nomi e senza marchi: «Il piano Barre» → «Il piano di rigore», «Il TGV corre» → «Il treno veloce corre»
+    (e solo nel 1979, quando corre in prova: il servizio è del 1981). ---- */
+ {id:'ti_fr70_petrolio', era:'fr1970', pri:1, cond:()=>S.year===1973&&S.month>=10, amico:'Il petrolio raddoppia', ostile:'Il petrolio raddoppia: e il paese importa tre quarti dell\'energia'},
+ {id:'ti_fr70_limiti', era:'fr1970', pri:1, cond:()=>(S.year===1973&&S.month===12)||(S.year===1974&&S.month<=4), amico:'Novanta sulle statali', ostile:'Novanta sulle statali: e le multe piovono'},
+ {id:'ti_fr70_centrali', era:'fr1970', pri:1, cond:()=>S.year===1974&&S.month>=3&&S.month<=8&&(S.nucleare74==null||S.nucleare74==='tutto'), amico:'Tredici centrali', ostile:'Tredici centrali: e nessuno ha chiesto ai comuni'},
+ {id:'ti_fr70_diciotto', era:'fr1970', pri:1, cond:()=>S.year===1974&&S.month>=7&&S.month<=10, amico:'Diciotto anni per votare', ostile:'Diciotto anni per votare: e i genitori perdono la firma'},
+ {id:'ti_fr70_lievin', era:'fr1970', pri:1, cond:()=>(S.year===1974&&S.month===12)||(S.year===1975&&S.month<=2), amico:'La miniera di Liévin', ostile:'La miniera di Liévin: quarantadue'},
+ {id:'ti_fr70_ivg', era:'fr1970', pri:1, cond:()=>S.year===1975&&S.month<=3, amico:'L\'IVG passa con i voti della sinistra', ostile:'L\'IVG passa con i voti della sinistra: e metà della maggioranza vota contro'},
+ {id:'ti_fr70_serpente', era:'fr1970', pri:1, cond:()=>S.year===1976&&S.month>=3&&S.month<=5, amico:'Il franco esce dal serpente', ostile:'Il franco esce dal serpente, per la seconda volta'},
+ {id:'ti_fr70_premier', era:'fr1970', pri:1, cond:()=>S.year===1976&&S.month>=8&&S.month<=10, amico:'Il Primo ministro se ne va', ostile:'Il Primo ministro se ne va: e in tre mesi ha un partito suo'},
+ {id:'ti_fr70_rigore', era:'fr1970', pri:1, cond:()=>S.year===1976&&S.month>=9&&(S.barre==null||S.barre==='rigore'), amico:'Il piano di rigore', ostile:'Il piano di rigore: e i salari perdono'},
+ {id:'ti_fr70_milione', era:'fr1970', pri:1, cond:()=>S.year===1977&&S.month<=8, amico:'Un milione di disoccupati', ostile:'Un milione di disoccupati: e il governo scopre la parola'},
+ {id:'ti_fr70_programma', era:'fr1970', pri:1, cond:()=>S.year===1977&&S.month>=9&&(S.sinistra77==null||S.sinistra77==='rotta'), amico:'Il programma comune è morto', ostile:'Il programma comune è morto: e la destra ringrazia'},
+ {id:'ti_fr70_sondaggi', era:'fr1970', pri:1, cond:()=>S.year===1978&&S.month>=3&&S.month<=5&&!S.anticipate77, amico:'La destra vince contro i sondaggi', ostile:'La destra vince contro i sondaggi: e la sinistra si guarda'},
+ {id:'ti_fr70_mareanera', era:'fr1970', pri:1, cond:()=>S.year===1978&&S.month>=3&&S.month<=6, amico:'La marea nera', ostile:'La marea nera: e il processo durerà anni'},
+ {id:'ti_fr70_lorena', era:'fr1970', pri:1, cond:()=>S.year===1979&&S.month<=4, amico:'La Lorena in piazza', ostile:'La Lorena in piazza, con i fucili da caccia'},
+ {id:'ti_fr70_shock', era:'fr1970', pri:1, cond:()=>S.year===1979&&S.month>=2&&S.month<=9, amico:'Il secondo shock', ostile:'Il secondo shock: e le centrali non bastano ancora'},
+ {id:'ti_fr70_europa', era:'fr1970', pri:1, cond:()=>S.year===1979&&S.month>=6&&S.month<=8, amico:'L\'Europa vota', ostile:'L\'Europa vota: e sei su dieci restano a casa'},
+ {id:'ti_fr70_treno', era:'fr1970', pri:1, cond:()=>S.year===1979, amico:'Il treno veloce corre', ostile:'Il treno veloce corre, a debito'},
  {id:'ng_p_ti_petrolio', era:'contemporanea', paesi:['nigeria'], pri:1, amico:'La produzione di petrolio torna a salire', ostile:'Un barile su dieci sparisce: il furto record'},
 ];
 
@@ -11957,6 +12598,28 @@ const SNODI_STORICI = {
   poteriSpecialiOpp: { storico:['si'], conforme:'sul voto dei poteri speciali dall’opposizione', diverge:{ 'no':'Dall’opposizione i poteri speciali sono stati votati contro, da soli, quando la stampa aveva già scritto il contrario.', 'astenuto':'Sui poteri speciali l’opposizione si è astenuta e l’ha spiegato: nessuno l’ha seguita, nessuno l’ha attaccata.' } },
   repubblicaCambia: { storico:['chiamato'], conforme:'sul maggio 1958', diverge:{ 'resistito':'Nel maggio 1958 il governo ha resistito con l’Assemblea: la Repubblica è cambiata lo stesso, ma qualcuno ha detto no fino alla fine.', 'dimesso':'Nel maggio 1958 il governo si è dimesso e ha lasciato ad altri la decisione: la Repubblica è cambiata senza di lui.' } },
   repubblicaCambiaOpp: { storico:['investitura'], conforme:'sull’investitura del 1958', diverge:{ 'contro':'Dall’opposizione l’investitura del generale è stata votata contro: un colpo di Stato non si legalizza.', 'liberta':'Sull’investitura del 1958 l’opposizione ha lasciato libertà di voto, e si è divisa in aula.' } },
+  /* L97-2 · i quattro snodi del decennio '60 (più le tre versioni dall'aula). Saldatura a `fr1970`: questi
+     quattro flag sono quello che la porta del '70 dovrà leggere (D11). */
+  ref62:    { storico:['vinto'], conforme:'sul referendum del 1962', diverge:{ 'parlamento':'La riforma del Presidente eletto dal popolo è passata per il Parlamento, e il Senato l’ha fermata: il capo dello Stato resta eletto dai notabili.', 'rinviato':'La riforma del Presidente è stata rinviata con l’Algeria appena chiusa, e non è più tornata.' } },
+  ref62Opp: { storico:['censura'], conforme:'sulla censura dell’ottobre 1962', diverge:{ 'no':'La sola censura che poteva passare in questa Repubblica è passata senza il suo voto.', 'astenuto':'Sulla censura dell’ottobre 1962 si è astenuto, e nessuno gliene ha dato né merito né colpa.' } },
+  nato:     { storico:['fuori'], conforme:'sulla NATO', diverge:{ 'negoziato':'Con la NATO si è negoziato invece di uscire: più bandiere francesi sui comandi, e i comandi al loro posto.', 'dentro':'La Francia è rimasta nel comando integrato della NATO, e la forza di dissuasione è nata dentro l’Alleanza.' } },
+  maggio:   { storico:['sciolto'], conforme:'sul maggio 1968', diverge:{ 'sgombero':'Il maggio 1968 è stato sgomberato con la forza: l’ordine è tornato in una notte, e una generazione non l’ha dimenticato.', 'referendum':'Al maggio 1968 si è risposto con un referendum sulla partecipazione che non si è mai tenuto.' } },
+  maggioOpp:{ storico:['piazza'], conforme:'sulla censura del maggio 1968', diverge:{ 'tavolo':'Nel maggio 1968 ha votato la censura e ha scelto il tavolo invece della piazza.', 'no':'Nel maggio 1968 non ha votato la censura: non con le barricate sotto le finestre.' } },
+  ref69:    { storico:['dimesso'], conforme:'sul referendum del 1969', diverge:{ 'resta':'Il referendum del 1969 è stato perso senza legarci la carica: il Presidente è rimasto, più debole di prima.', 'ritirato':'Il referendum del 1969 è stato ritirato prima del voto, e i giornali hanno scritto che era paura.' } },
+  ref69Opp: { storico:['no'], conforme:'sul referendum del 1969, dall’opposizione', diverge:{ 'si':'Al referendum del 1969 ha fatto campagna per il sì, per le regioni e non per l’uomo.', 'liberta':'Sul referendum del 1969 ha lasciato libertà di voto, e il risultato non è stato di nessuno.' } },
+  /* L99-2 · i quattro snodi del decennio '70 (più le due versioni dall'aula e il Presidente del '77). Saldatura a
+     `fr1980`: sono i flag che la porta dell'80 dovrà leggere (D16). `barreOpp` non ha un esito storico marcato: la
+     scheda non ne indica uno, e ogni scelta è raccontata come divergenza.
+     ⚠ IL FLAG DEL NUCLEARE È nucleare74, NON nucleare come nella scheda: S.nucleare è dello snodo italiano del 1987
+     (L33-1), e una seconda chiave «nucleare» qui avrebbe SOVRASCRITTO la sua riga (chiave doppia: vince l'ultima, e
+     l'epitaffio italiano avrebbe raccontato il piano francese). Lo ha visto verifica-snodi, rossa a ragione. */
+  ref72:     { storico:['referendum'], conforme:'sull’Europa del 1972', diverge:{ 'parlamento':'L’allargamento dell’Europa è passato dal Parlamento in una settimana, senza che il paese se ne accorgesse.', 'rinvio':'L’allargamento dell’Europa è stato rinviato di un anno, e Londra non l’ha dimenticato.' } },
+  ref72Opp:  { storico:['astensione'], conforme:'sul referendum europeo del 1972, dall’opposizione', diverge:{ 'si':'Al referendum europeo del 1972 ha fatto campagna per il sì, accanto al Presidente.', 'no':'Al referendum europeo del 1972 ha fatto campagna per il no.' } },
+  nucleare74:{ storico:['tutto'], conforme:'sul piano nucleare', diverge:{ 'misto':'Il piano energetico del 1974 è stato misto: carbone, gas e qualche reattore, e la bolletta ha seguito il barile.', 'rinvio':'La scelta nucleare è stata rinviata: il paese ha affrontato il secondo shock del petrolio senza centrali.' } },
+  barre:     { storico:['rigore'], conforme:'sul piano di rigore del 1976', diverge:{ 'rilancio':'Alla crisi del 1976 si è risposto con il rilancio della spesa, e l’inflazione è rimasta a due cifre.', 'meta':'Nel 1976 si è scelta una via di mezzo fra rigore e rilancio, e nessuno se n’è accorto.' } },
+  barreOpp:  { storico:[], conforme:'sul piano di rigore, dall’opposizione', diverge:{ 'censura':'Contro il piano di rigore del 1976 ha presentato la censura in aula.', 'tavolo':'Sul piano di rigore del 1976 ha scelto il tavolo e ha trattato.', 'sciopero':'Contro il piano di rigore del 1976 ha chiamato lo sciopero generale.' } },
+  sinistra77:{ storico:['rotta'], conforme:'sul programma comune', diverge:{ 'ceduto':'Sul programma comune ha ceduto ai comunisti: la sinistra è andata unita al voto, e ha perso lo stesso.', 'mediato':'Sul programma comune ha firmato un accordo a metà, e la sinistra è arrivata alle urne né unita né divisa.' } },
+  campagna78:{ storico:['sopra'], conforme:'sulla sinistra divisa del 1977', diverge:{ 'paura':'Con la sinistra divisa, il Presidente è sceso in campo con la campagna della paura.', 'anticipa':'Con la sinistra divisa, il Presidente ha anticipato le legislative al 1977.' } },
 };
 
 /* ==============================================================================================================
@@ -12516,12 +13179,17 @@ const STERLINA_EV = {
    ⚑ IL MOLTIPLICATORE DEI GRUPPI È UNO, E STA QUI. La scheda annota gli effetti sui gruppi al valore «di scrittura»
    e chiede di scriverli ×3 se la sweep di L49-1 regge ancora sul banco di oggi. Le cifre nel codice restano QUELLE
    DELLA SCHEDA (così si confrontano a occhio) e passano tutte da `gdFr`, che le moltiplica per `FR50_GRUPPI`.
-   Il valore l'ha deciso la sweep rifatta su questa porta (consegna di L93-2), non l'eredità inglese.
+   Il valore l'ha deciso la sweep rifatta su questa porta, non l'eredità inglese: ×1 dentro il rumore, **×2 stacca
+   il gruppo peggiore di 3,6 sd** (la distanza che in Inghilterra dava ×3), ×3 fa una crisi su venti. L93-2 scrisse
+   ×3 come chiedeva la consegna; **L93-2b (decisione 13/9) lo porta a ×2**. Il moltiplicatore si prende dalla
+   dispersione della porta, non dal lotto precedente.
    `baseFr(n)` è la «base» delle versioni dall'opposizione: n distribuito sui gruppi-base del TUO partito, coi
    loro pesi dichiarati nel roster — la base del PCF non è quella del MRP.
    ============================================================================================================== */
-let FR50_GRUPPI = 3;   // `let` e non `const`: la sweep di .claude/misura-fr1950-contenuto.js lo varia sul banco
+let FR50_GRUPPI = 2;   // `let` e non `const`: la sweep di .claude/misura-fr1950-contenuto.js lo varia sul banco
 function gdFr(g, n){ gd(g, Math.round(n*FR50_GRUPPI)); }
+/* L93-4 aveva qui i colpi sulla tenuta dei partner (tenutaFr, FR50_COLPO_TENUTA): tolti da L93-5, perché la sweep
+   di L93-4 dava zero cadute con qualunque colpo. Al loro posto, sulle stesse scelte, `cade:[ids]` — il voto di fiducia. */
 function gdFrTutti(n){ ['lavoratori','pensionati','cetomedio','imprenditori','giovani','cattolici'].forEach(function(g){ gdFr(g, n); }); }
 function baseFr(n){
   var P=(PAESE && PAESE.partiti) ? PAESE.partiti.filter(function(x){ return x.id===S.partito; })[0] : null;
@@ -12543,16 +13211,17 @@ const POTERI_EV = {
     { l:'Li chiedi, ma apri un tavolo: la forza per trattare, non per vincere', e:'L\'Assemblea li vota lo stesso · l\'apertura è un segreto che tutti conoscono, i coloni gridano al tradimento, il contingente parte comunque',
       f:function(){ S.poteriSpeciali='trattativa'; gdFr('giovani',-3); gdFr('cattolici',-2); gdFr('cetomedio',-2); gdFr('lavoratori',2); stampad(-2);
         S.log.unshift({t:T('L\'Algeria'),x:T('Poteri speciali con un tavolo aperto, a metà strada.')}); } },
-    { l:'Rifiuti: una Repubblica non si difende con la censura', e:'Il governo cade in aula entro il mese · quello dopo li chiede e li ottiene, e tu resti l\'unico ad averli rifiutati',
+    { l:'Rifiuti: una Repubblica non si difende con la censura', cade:['fr_mrp','fr_mod'], e:'Il governo cade in aula entro il mese · quello dopo li chiede e li ottiene, e tu resti l\'unico ad averli rifiutati',
       f:function(){ S.poteriSpeciali='rifiutati'; repd(-4); gdFr('giovani',5); gdFr('cattolici',-4); gdFr('cetomedio',-5);
         S.log.unshift({t:T('L\'Algeria'),x:T('Ha rifiutato i poteri speciali, e il governo è caduto.')});
-        S.elezioniAnticipate=true;
-        S.log.unshift({t:T('Il governo cade'), x:T('Il governo cade: si torna alle urne.')});
-        if(typeof election==='function') election(); } },
+        if(!PAESE.crisiMinisteriale){   /* L93-5: sotto la crisi ministeriale la caduta la decide `cade`, e il chip la annuncia */
+          S.elezioniAnticipate=true;
+          S.log.unshift({t:T('Il governo cade'), x:T('Il governo cade: si torna alle urne.')});
+          if(typeof election==='function') election(); } } },
   ],
 };
 const POTERI_OPP_EV = {
-  id:'snodo_poteri_opp', snodo:true, kick:'L\'Algeria', tono:'grave',
+  id:'snodo_poteri_opp', snodo:true, era:'fr1950',   /* L93-5b: dichiarata, così il censimento la conta francese in tutti i campi */ kick:'L\'Algeria', tono:'grave',
   t:'I poteri speciali, dall\'aula',
   text:'Il governo chiede i poteri speciali. Il tuo gruppo deve decidere come vota, e la stampa ha già scritto che voterete sì.',
   ch:[
@@ -12634,13 +13303,13 @@ const REPUBBLICA_OPP_EV = {
 function pesoCorsaFranco(){ return Math.max(1+0.5*(S.francoRinvii||0), S.francoGrave?2:1); }
 function corsaFrancoScelta(fn){ return function(){ var p=pesoCorsaFranco(); S.francoGrave=false; fn(p); }; }
 const FRANCO_CH = [
-  { l:'Difendi il cambio: stretta subito', e:'Il franco tiene · il paese frena, e le promesse fatte diventano difficili',
+  { l:'Difendi il cambio: stretta subito', cade:['fr_sfio'], e:'Il franco tiene · il paese frena, e le promesse fatte diventano difficili',
     f:corsaFrancoScelta(function(p){ gd('lavoratori',Math.round(-6*p*FR50_GRUPPI)); gd('cetomedio',Math.round(-4*p*FR50_GRUPPI)); gdFr('imprenditori',2); repd(2);
       S.log.unshift({t:T('Il franco'),x:T('Stretta immediata: il cambio tiene, e il paese frena.')}); }) },
   { l:'Tagli dove fa meno male, in fretta', e:'Un rinvio pagato a rate · se la corsa torna, torna peggio', costo:{debito:1.5},
     f:corsaFrancoScelta(function(p){ S.francoRinvii=(S.francoRinvii||0)+1; S.ind.debt+=1.5;
       S.log.unshift({t:T('Il franco'),x:T('Si taglia dove si può e si rimanda il resto: il conto non è pagato, è dilazionato.')}); }) },
-  { l:'Lasci scivolare: l\'export prima di tutto', e:'L\'import costa, l\'export respira · e chi vive di reddito fisso paga',
+  { l:'Lasci scivolare: l\'export prima di tutto', cade:['fr_mod'], e:'L\'import costa, l\'export respira · e chi vive di reddito fisso paga',
     f:corsaFrancoScelta(function(p){ S.francoCrisi=(S.francoCrisi||0)+1;
       gd('pensionati',Math.round(-7*p*FR50_GRUPPI)); gdFr('imprenditori',4); gd('cetomedio',Math.round(-2*p*FR50_GRUPPI)); stampad(-2);
       S.log.unshift({t:T('Il franco'),x:T('Il cambio scivola: l\'export respira, e chi vive di reddito fisso se ne accorge alla spesa.')}); }) },
@@ -12656,6 +13325,25 @@ const FRANCO_TERZA_EV = {
   t:'La corsa al franco',
   text:'Le riserve calano e i mercati fiutano la svalutazione: è la terza volta, e stavolta i mercati lo sanno. Il Tesoro chiede una decisione entro il mese. Si difende il cambio, o si lascia andare.',
   ch: FRANCO_CH,
+};
+
+/* L93-5 · LA QUESTIONE DI FIDUCIA — i testi della carta ricorrente (la carta la costruisce `cartaQuestioneFiducia`, game.js,
+   che sceglie il partner pesato sui seggi e la variante a rotazione). `%A` è il nome del partito, messo DENTRO la frase
+   dopo la traduzione: si giudica reso (L94-1). `era:'fr1950'` la dichiara francese per i censimenti. */
+const QUESTIONE_FIDUCIA_EV = {
+  id:'ev_questione_fiducia', era:'fr1950', kick:'La maggioranza', t:'La questione di fiducia',
+  testi:{
+    scuole:'Il bilancio arriva in aula e %A mette la sua condizione: il sussidio alle famiglie che mandano i figli alle scuole private, o voterà contro. In aula si contano i seggi prima ancora delle parole.',
+    salari:'Il bilancio arriva in aula e %A mette la sua condizione: l\'aumento del salario minimo, subito, o voterà contro. In aula si contano i seggi prima ancora delle parole.',
+    militari:'Il bilancio arriva in aula e %A mette la sua condizione: i crediti per l\'Algeria, tutti, o voterà contro. In aula si contano i seggi prima ancora delle parole.',
+  },
+  concedi:{ l:'Concedi',
+    e:{ scuole:'%A vota il bilancio · il ceto medio paga il sussidio, e i laici della maggioranza lo annotano',
+        salari:'%A vota il bilancio · le imprese pagano l\'aumento, e non lo dimenticano',
+        militari:'%A vota il bilancio · i crediti passano, e i ragazzi partono' },
+    log:'Concessa la condizione di %A: il bilancio passa, e il conto lo paga qualcuno.' },
+  rifiuta:{ l:'Rifiuti: il governo non si compra', e:'Tieni il punto · e %A decide come votare',
+    log:'Rifiutata la condizione di %A: il governo non si compra.' },
 };
 
 /* LE FUSIONI DEL 2007-08 per CHI LE GIOCA. Stessa forma dei tre gemelli di L41-1 e stessi tre movimenti:
@@ -12713,4 +13401,396 @@ const FUORI_AULA_EV = {
         gd('lavoratori',3); gd('giovani',1); stampad(1); capd(3);
         S.log.unshift({t:T('Sotto la soglia'),x:T('Sei corso col tuo simbolo e sei rimasto fuori: la storia è intatta, l\'aula è vuota.')}); } },
   ],
+};
+
+/* ==============================================================================================================
+   L97-2 · IL DECENNIO FRANCESE '60 — I QUATTRO SNODI (scheda PRESET-FRANCIA-1960 §A) E LA CORSA AL FRANCO (§B).
+
+   ⚠ LE VALUTE, VERIFICATE A TERRA prima di scrivere (banco, fr1960, livello 3, semipresidenziale): il Presidente
+   ha i GRUPPI, reputazione (60), stampa (55), fiducia (78), il debito, le correnti e il potere locale.
+   **Non ha** credibilita né visibilita: credd/visd qui sono no-op silenziosi, e non si usano.
+   ⚠ E NON SI USA cade (nota H della scheda): nel semipresidenziale a cadere è il governo, non il Presidente —
+   crisiMinisteriale non è dichiarata su questa porta, quindi cadeAttivo() non guarderebbe nemmeno.
+
+   ⚑ IL MOLTIPLICATORE DEI GRUPPI È SUO, non ereditato da fr1950: le cifre nel codice restano quelle della
+   scheda (così si confrontano a occhio) e passano tutte da gdFr60. Il valore viene dalla sweep di questa porta
+   (.claude/misura-fr1960-contenuto.js, ×0 fondo · ×1 · ×2 · ×3 · ×4): vedi il commento su FR60_GRUPPI.
+   ============================================================================================================== */
+/* ⚑ L96-4 (23/9) · RIMISURATO SUL BANCO ONESTO (L96-1, mano uniforme): fondo ×0 42,7 (sd 3,1) → ×2 38,1, cioè
+   1,48 sd — appena sotto la banda 1,5-4 (col banco vecchio era 1,72). SI LASCIA ×2, dichiarato: 1,48 è sul bordo, e
+   ritoccare il moltiplicatore per due centesimi di sd sarebbe inseguire il rumore di venti semi. */
+let FR60_GRUPPI = 2;   // let e non const: la sweep di .claude/misura-fr1960-contenuto.js lo varia sul banco
+function gdFr60(g, n){ gd(g, Math.round(n*FR60_GRUPPI)); }
+/* la fiducia dei mercati: la leva che la nota H della scheda chiede negli eventi di congiuntura */
+function fidFr60(n){ if(S.ind && S.ind.fiducia!=null) S.ind.fiducia=clamp(S.ind.fiducia+n, 0, 100); }
+function gdFr60Tutti(n){ ['lavoratori','pensionati','cetomedio','imprenditori','giovani','cattolici'].forEach(function(g){ gdFr60(g, n); }); }
+function baseFr60(n){
+  var P=(PAESE && PAESE.partiti) ? PAESE.partiti.filter(function(x){ return x.id===S.partito; })[0] : null;
+  if(!P || !P.base) return;
+  Object.keys(P.base).forEach(function(g){ gd(g, Math.round(n*P.base[g]*FR60_GRUPPI)); });
+}
+
+/* S1 · IL REFERENDUM DEL PRESIDENTE (ottobre 1962) — lo snodo istituzionale del decennio.
+   ⚠ La prima scelta è la sola della porta che chiama governoCade(): la censura passa e il governo cade, ma
+   **le urne non le chiama la carta** — le porta la tappa dichiarata del novembre 1962 (L61-2). Chiamare anche
+   election() qui produrrebbe DUE urne nello stesso mese e una tappa scavalcata. */
+const REF62_EV = {
+  id:'snodo_ref62', snodo:true, era:'fr1960', kick:'La Repubblica', tono:'grave',
+  t:'Il referendum del Presidente',
+  text:'Il Presidente vuole farsi eleggere dal popolo, e vuole farlo per referendum, saltando il Parlamento: il Consiglio di Stato dice che la via è illegale, l\'Assemblea prepara la censura. Se passa la censura, il governo cade e l\'Assemblea si può sciogliere. È il braccio di ferro che decide chi comanda nella Repubblica nuova.',
+  ch:[
+    { l:'Referendum e scioglimento: che decida il paese', e:'La storia · la censura passa, il governo cade, l\'Assemblea è sciolta · a ottobre il paese vota sì, a novembre ti dà la maggioranza',
+      f:function(){ S.ref62='vinto'; gdFr60('cetomedio',3); gdFr60('cattolici',-2); gdFr60('lavoratori',-2); repd(3);
+        S.log.unshift({t:T('La Repubblica'),x:T('Ha vinto il referendum del 1962 e ha sciolto l\'Assemblea.')});
+        if(typeof governoCade==='function') governoCade(); } },
+    { l:'Passi dal Parlamento', e:'L\'articolo 89 vuole le due Camere · il Senato dice no, la riforma muore, e il Presidente resta eletto dai notabili',
+      f:function(){ S.ref62='parlamento'; gdFr60('cetomedio',-2); gdFr60('cattolici',2); repd(-3);
+        S.log.unshift({t:T('La Repubblica'),x:T('Ha rinunciato al referendum: il Presidente resta eletto dai notabili.')}); } },
+    { l:'Rinunci: non ora, con l\'Algeria appena chiusa', e:'Nessuna crisi, nessuna riforma · i tuoi mormorano che il generale non avrebbe aspettato',
+      f:function(){ S.ref62='rinviato'; gdFr60('cetomedio',-3); repd(-2); baseFr60(-4);
+        S.log.unshift({t:T('La Repubblica'),x:T('Ha rinviato la riforma del Presidente.')}); } },
+  ],
+};
+const REF62_OPP_EV = {
+  id:'snodo_ref62_opp', snodo:true, era:'fr1960', kick:'La Repubblica', tono:'grave',
+  t:'La censura, dall\'aula',
+  text:'Il governo ha annunciato il referendum per far eleggere il Presidente dal popolo, saltando il Parlamento. L\'aula vota la censura: chi la vota sa che l\'Assemblea sarà sciolta, e che il paese, forse, darà ragione al Presidente.',
+  ch:[
+    { l:'Voti la censura: la Costituzione prima del generale', e:'La storia · la sola censura che passerà in questa Repubblica · e il mese dopo si va alle urne',
+      f:function(){ S.ref62Opp='censura'; baseFr60(5); gdFr60('cetomedio',-4);
+        S.log.unshift({t:T('La Repubblica'),x:T('Ha votato la censura dell\'ottobre 1962.')}); } },
+    { l:'Non la voti', e:'Il ceto medio ti legge come responsabile · la tua base come complice',
+      f:function(){ S.ref62Opp='no'; baseFr60(-6); gdFr60('cetomedio',2);
+        S.log.unshift({t:T('La Repubblica'),x:T('Non ha votato la censura del 1962.')}); } },
+    { l:'Ti astieni', e:'Nessuno ti segue, nessuno ti attacca',
+      f:function(){ S.ref62Opp='astenuto'; baseFr60(-3);
+        S.log.unshift({t:T('La Repubblica'),x:T('Astenuto sulla censura del 1962.')}); } },
+  ],
+};
+/* S2 · LA NATO (marzo 1966) — lo snodo di politica estera, come Suez nel '50. Dall'opposizione non c'è versione
+   dall'aula: la scheda la dà come cronaca via pilastro, ma quel pilastro NON è fra gli undici approvati — resta
+   il titolo «La NATO senza la Francia». Dichiarato in L97-2, non inventato. */
+const NATO_EV = {
+  id:'snodo_nato', snodo:true, era:'fr1960', kick:'L\'Alleanza', tono:'grave',
+  t:'La NATO',
+  text:'Il Presidente vuole fuori dal suolo francese le basi e i comandi alleati: la Francia resterebbe nell\'Alleanza ma uscirebbe dal comando integrato. Washington è furiosa, Bonn preoccupata; il paese è diviso fra l\'orgoglio e il conto.',
+  ch:[
+    { l:'Esci dal comando integrato', e:'La storia · ventisettemila soldati alleati lasciano il paese entro un anno · la forza di dissuasione è sola, e voluta',
+      f:function(){ S.nato='fuori'; gdFr60('cetomedio',2); gdFr60('giovani',2); gdFr60('imprenditori',-3); repd(2); S.ind.debt+=0.5; fidFr60(-3);
+        S.log.unshift({t:T('L\'Alleanza'),x:T('Ha portato la Francia fuori dal comando integrato della NATO.')}); } },
+    { l:'Negozi: comandi francesi, basi che restano', e:'Un compromesso che nessuno festeggia · i comandi restano, con più bandiere francesi',
+      f:function(){ S.nato='negoziato'; gdFr60('imprenditori',1); gdFr60('giovani',-1);
+        S.log.unshift({t:T('L\'Alleanza'),x:T('Ha negoziato con la NATO senza uscire.')}); } },
+    { l:'Resti: l\'Alleanza prima dell\'orgoglio', e:'Gli alleati ringraziano senza dirlo · i tuoi gridano al tradimento',
+      f:function(){ S.nato='dentro'; gdFr60('cetomedio',-3); gdFr60('imprenditori',2); baseFr60(-5); fidFr60(2);
+        S.log.unshift({t:T('L\'Alleanza'),x:T('È rimasto nel comando integrato della NATO.')}); } },
+  ],
+};
+/* S3 · MAGGIO (maggio 1968) — lo snodo sociale, e il gemello G1 del pilastro «Il maggio».
+   ⚠ La prima scelta è quella che fa scattare la tappa dichiarata del giugno '68 (se: su S.maggio): qui non
+   si chiama né election() né governoCade() — lo scioglimento È la tappa, il mese dopo. */
+const MAGGIO_EV = {
+  id:'snodo_maggio', snodo:true, era:'fr1960', kick:'Il paese', tono:'grave',
+  t:'Maggio',
+  text:'Le università sono occupate, il Quartiere latino ha le barricate, e da una settimana dieci milioni di lavoratori sono fermi. Il governo tratta con i sindacati, ma la base rifiuta l\'accordo. Bisogna decidere in una notte.',
+  ch:[
+    { l:'Grenelle e scioglimento: il paese alle urne', e:'La storia · aumenti del dieci per cento, il minimo su di un terzo, e l\'Assemblea sciolta · a giugno il paese vota la paura',
+      f:function(){ S.maggio='sciolto'; gdFr60('lavoratori',5); gdFr60('giovani',-3); gdFr60('cetomedio',3); gdFr60('imprenditori',-3); fidFr60(-4);
+        S.log.unshift({t:T('Il paese'),x:T('Ha risposto al maggio con Grenelle e lo scioglimento.')}); } },
+    { l:'La piazza si sgombera', e:'I carri alle porte di Parigi, gli arresti nelle facoltà · la notte passa, l\'ordine torna, e qualcosa nel paese non torna più',
+      f:function(){ S.maggio='sgombero'; gdFr60('giovani',-12); gdFr60('lavoratori',-6); gdFr60('cetomedio',4); gdFr60('cattolici',2); stampad(-5); repd(-4); fidFr60(-2);
+        S.log.unshift({t:T('Il paese'),x:T('Ha sgomberato il maggio con la forza.')}); } },
+    { l:'Il referendum sulla partecipazione', e:'Annunciato alla televisione, non convince nessuno · le tipografie sono in sciopero e non stampano nemmeno le schede',
+      f:function(){ S.maggio='referendum'; gdFr60('giovani',-4); gdFr60('cetomedio',-3); repd(-5); fidFr60(-5);
+        S.log.unshift({t:T('Il paese'),x:T('Ha risposto al maggio con un referendum che non si è tenuto.')}); } },
+  ],
+};
+const MAGGIO_OPP_EV = {
+  id:'snodo_maggio_opp', snodo:true, era:'fr1960', kick:'Il paese', tono:'grave',
+  t:'La censura di maggio',
+  text:'L\'opposizione presenta la censura mentre il paese è fermo: dieci milioni di lavoratori in sciopero, le facoltà occupate, il governo che tratta. In aula mancheranno undici voti.',
+  ch:[
+    { l:'La voti e vai in piazza', e:'La storia · la base e i giovani con te · il ceto medio guarda le barricate e ha paura',
+      f:function(){ S.maggioOpp='piazza'; baseFr60(6); gdFr60('giovani',5); gdFr60('cetomedio',-4);
+        S.log.unshift({t:T('Il paese'),x:T('Ha votato la censura del maggio 1968 ed è sceso in piazza.')}); } },
+    { l:'La voti, ma il tavolo prima della piazza', e:'I sindacati ti riconoscono · i ragazzi delle facoltà molto meno',
+      f:function(){ S.maggioOpp='tavolo'; baseFr60(2); gdFr60('lavoratori',3);
+        S.log.unshift({t:T('Il paese'),x:T('Ha votato la censura del maggio 1968 e ha trattato.')}); } },
+    { l:'Non la voti: non con le barricate', e:'Il ceto medio ti legge come serio · la tua base come assente',
+      f:function(){ S.maggioOpp='no'; baseFr60(-6); gdFr60('cetomedio',3); gdFr60('giovani',-6);
+        S.log.unshift({t:T('Il paese'),x:T('Non ha votato la censura del maggio 1968.')}); } },
+  ],
+};
+/* S4 · IL REFERENDUM PERSO (aprile 1969) — lo snodo di CHIUSURA della porta, gemello G1 del pilastro «Il 27 aprile».
+   ⚠ Chi ha risposto al maggio col referendum mai tenuto paga qui: la reputazione parte cinque punti sotto (la riga
+   della scheda «nel 1969 il referendum perso pesa di più»).
+   ⚠ SALDATURA A fr1970, che non esiste ancora: i quattro flag restano in S e in SNODI_STORICI; la porta del
+   '70 aprirà con la presidenziale del giugno 1969 se S.ref69==='dimesso' o non giocato, altrimenti col Presidente
+   in carica fino al 1972 (D11, da decidere quando si scriverà il '70). */
+/* Il malus di chi al maggio ha risposto col referendum mai tenuto (scheda §A, S3): sta in una funzione e non
+   dentro le scelte perche una condizione su un ALTRO flag, scritta nella scelta marcata «La storia», la guardia
+   verifica-snodi la legge come il valore storico di quel flag — e diventa rossa a ragione (misurato). */
+function malusRef69(){ return (typeof S!=='undefined' && S && S.maggio==='referendum') ? -5 : 0; }
+const REF69_EV = {
+  id:'snodo_ref69', snodo:true, era:'fr1960', kick:'La Repubblica', tono:'grave',
+  t:'Il referendum perso',
+  text:'Il Presidente vuole le regioni e un Senato nuovo, e ha detto che se il paese dice no se ne andrà. I sondaggi dicono no. Il centro, che nel \'58 lo ha portato, stavolta vota contro.',
+  ch:[
+    { l:'Leghi la tua carica al voto', e:'La storia · il no vince di poco, e a mezzanotte due righe annunciano che lasci domani a mezzogiorno',
+      f:function(){ S.ref69='dimesso'; repd(5 + malusRef69()); gdFr60Tutti(-2); fidFr60(-3);
+        S.log.unshift({t:T('La Repubblica'),x:T('Ha legato la carica al referendum del 1969, e l\'ha perso.')}); } },
+    { l:'Il referendum senza la carica', e:'Il no vince lo stesso · resti, indebolito, e la maggioranza comincia a guardare oltre',
+      f:function(){ S.ref69='resta'; repd(-4 + malusRef69()); gdFr60('cetomedio',-3); baseFr60(-4); fidFr60(-2);
+        S.log.unshift({t:T('La Repubblica'),x:T('Ha perso il referendum del 1969 ed è rimasto.')}); } },
+    { l:'Ritiri il referendum', e:'Nessun voto, nessuna riforma · i giornali scrivono che il generale ha avuto paura',
+      f:function(){ S.ref69='ritirato'; repd(-3 + malusRef69()); gdFr60('cetomedio',-2); fidFr60(-1);
+        S.log.unshift({t:T('La Repubblica'),x:T('Ha ritirato il referendum del 1969.')}); } },
+  ],
+};
+const REF69_OPP_EV = {
+  id:'snodo_ref69_opp', snodo:true, era:'fr1960', kick:'La Repubblica', tono:'grave',
+  t:'Il 27 aprile, dall\'aula',
+  text:'Il Presidente ha legato la sua carica a un referendum su regioni e Senato. L\'opposizione deve scegliere se fare campagna per il no, sapendo che il no non riguarda le regioni: riguarda lui.',
+  ch:[
+    { l:'Campagna per il no', e:'La storia, per tutti tranne i suoi · la tua base si ricompatta, e il paese lo manda a casa',
+      f:function(){ S.ref69Opp='no'; baseFr60(4); gdFr60('cetomedio',2);
+        S.log.unshift({t:T('La Repubblica'),x:T('Ha fatto campagna per il no al referendum del 1969.')}); } },
+    { l:'Il sì, per le regioni', e:'La riforma prima dell\'uomo · la tua base non capisce, e lo dice',
+      f:function(){ S.ref69Opp='si'; baseFr60(-5); gdFr60('cetomedio',-2);
+        S.log.unshift({t:T('La Repubblica'),x:T('Ha fatto campagna per il sì al referendum del 1969.')}); } },
+    { l:'Libertà di voto', e:'Il gruppo si divide, e nessuno ti attribuisce il risultato',
+      f:function(){ S.ref69Opp='liberta'; baseFr60(-2);
+        S.log.unshift({t:T('La Repubblica'),x:T('Libertà di voto sul referendum del 1969.')}); } },
+  ],
+};
+/* §B · LA CORSA AL FRANCO DEL '68 (novembre 1968) — UNA VOLTA SOLA, non l'evento-morso ricorrente del '50: qui il
+   maggio ha svuotato le riserve in una stagione, e la decisione è una sera sola. Il conto della NATO torna: chi è
+   uscito dal comando integrato paga di più il prestito che chiede agli stessi alleati. */
+const FRANCO68_EV = {
+  id:'ev_franco68', era:'fr1960', kick:'Il franco', tono:'grave',
+  t:'La corsa al franco',
+  text:'Il maggio è costato le riserve: in sei mesi se n\'è andato un terzo. Bonn rifiuta di rivalutare il marco, i mercati aspettano la svalutazione per il fine settimana. Bisogna parlare al paese sabato sera.',
+  ch:[
+    { l:'Non svaluto', e:'La storia · una frase alla radio, la stretta sui cambi e sul credito · il franco tiene, e l\'anno dopo lo svaluterà un altro',
+      f:function(){ S.franco68='difeso'; gdFr60('imprenditori',-3); gdFr60('cetomedio',2); gdFr60('lavoratori',-2); repd(3); if(S.gMod!=null) S.gMod-=0.15;
+        S.log.unshift({t:T('Il franco'),x:T('Il franco non si svaluta: la stretta sui cambi e sul credito.')}); } },
+    { l:'Svaluti del dieci per cento', e:'L\'export respira, i risparmi no · il maggio lo paga chi ha un libretto',
+      f:function(){ S.franco68='svalutato'; gdFr60('pensionati',-6); gdFr60('imprenditori',4); gdFr60('cetomedio',-2); repd(-2);
+        S.log.unshift({t:T('Il franco'),x:T('Il franco è svalutato del dieci per cento.')}); } },
+    { l:'Chiedi il prestito a Washington e Bonn', e:'I soldi arrivano, con le condizioni · e l\'orgoglio della NATO, tre anni dopo, si paga qui',
+      f:function(){ S.franco68='prestito'; S.ind.debt+=1.5; gdFr60('cetomedio',-2); repd(S.nato==='fuori' ? -5 : -3);
+        S.log.unshift({t:T('Il franco'),x:(S.nato==='fuori')
+          ? T('Il prestito arriva, e chi l\'ha concesso ricorda chi aveva mandato via i suoi comandi.')
+          : T('Il prestito arriva, con le condizioni di chi lo concede.')}); } },
+  ],
+};
+/* ==============================================================================================================
+   L99-2 · IL DECENNIO FRANCESE '70 — I QUATTRO SNODI (scheda PRESET-FRANCIA-1970 §A) E IL PREZZO DEL PETROLIO (§B).
+
+   ⚠ LE VALUTE, VERIFICATE A TERRA prima di scrivere (banco, fr1970, livello 3, semipresidenziale): le stesse del '60
+   — gruppi, reputazione, stampa, fiducia, debito, correnti, potere locale. **Niente** credibilita/visibilita, e
+   **niente cade** (la porta non dichiara crisiMinisteriale: cadeAttivo() non guarderebbe nemmeno).
+
+   ⚑ IL MOLTIPLICATORE DEI GRUPPI È DI QUESTA PORTA (FR70_GRUPPI), preso dalla sweep di .claude/misura-fr1970-contenuto.js
+   come per il '50 e il '60: le cifre nel codice restano quelle della scheda e passano tutte da gdFr70.
+
+   ⚑ QUELLO CHE LA SCHEDA NON POTEVA SAPERE, e che qui è dichiarato (non aggirato):
+     · S2 «Il piano nucleare» è del marzo 1974, e il marzo 1974 è di un pilastro (Ermenonville, che nessun `cond`
+       spegne): la finestra è marzo-maggio e lo snodo esce in APRILE. E dall'aula non c'è una versione: la scheda
+       dà «cronaca (pilastro «Tredici centrali»)», ma quel pilastro NON è fra i sette approvati — resta il titolo
+       «Tredici centrali», come la NATO del '60 (L97-2).
+     · S3 si chiama «Il piano di rigore», non «il piano Barre»: è il nome di una persona (G5, la regola della scheda
+       stessa). Il flag resta `S.barre`, che è un nome di codice e non si legge.
+     · S4 dall'aula è di chi gioca il PS (`fr_sfio`), al governo o no: le scelte sono scritte dal lato socialista
+       («il PS non si fa dettare il programma»). Il Presidente che non è di sinistra riceve la versione sua
+       (`S.campagna78`). Il PCF non riceve S4: nessuna delle due versioni è scritta dal suo lato.
+     · «Anticipa le legislative» (S4) e «Sciogli» (l'evento del Primo ministro che se ne va) chiamano l'urna del
+       motore (azioneScioglimentoForzato, L58-1: costo d'ingresso e scarto di campagna — si può perdere) e scrivono
+       `S.anticipate77`, che spegne la tappa del marzo 1978 (game.js, `se:`).
+   ============================================================================================================== */
+/* ⚑ LA SWEEP (L99-2, 23/9, banco onesto, UDR, 20 semi, 120 mesi): fondo ×0 gruppo peggiore 40,0 (sd 2,5) · ×1 0,25 sd ·
+   ×2 0,75 sd (invisibile: il valore del '60 qui non basta) · **×3 2,40 sd, 0 crisi su 20** (adottato: il primo dentro
+   la banda 1,5-4) · ×4 3,28 sd, 0 crisi. Il '70 ha più carte che si compensano del '60, e ogni carta pesa meno. */
+let FR70_GRUPPI = 3;   // let e non const: la sweep di .claude/misura-fr1970-contenuto.js lo varia sul banco
+function gdFr70(g, n){ gd(g, Math.round(n*FR70_GRUPPI)); }
+function fidFr70(n){ fidFr60(n); }   // la fiducia non ha moltiplicatore: è la stessa leva del '60
+function baseFr70(n){
+  var P=(PAESE && PAESE.partiti) ? PAESE.partiti.filter(function(x){ return x.id===S.partito; })[0] : null;
+  if(!P || !P.base) return;
+  Object.keys(P.base).forEach(function(g){ gd(g, Math.round(n*P.base[g]*FR70_GRUPPI)); });
+}
+
+/* S1 · L'EUROPA AL REFERENDUM (aprile 1972) */
+const REF72_EV = {
+  id:'snodo_ref72', snodo:true, era:'fr1970', kick:'L\'Europa', tono:'grave',
+  t:'L\'Europa al referendum',
+  text:'Londra, Dublino e Copenaghen entrano nel Mercato comune. Il Presidente può far ratificare il trattato dal Parlamento in una settimana, o portarlo davanti al paese: un referendum che vincerà, ma con quanti elettori a casa?',
+  ch:[
+    { l:'Il referendum: che sia il popolo a dire sì', e:'La storia · sì al 68 per cento, ma quattro elettori su dieci restano a casa e la sinistra ha chiamato all\'astensione: il primo referendum che non è un plebiscito',
+      f:function(){ S.ref72='referendum'; gdFr70('cetomedio',2); gdFr70('imprenditori',2); repd(1); stampad(2); fidFr70(1);
+        S.log.unshift({t:T('L\'Europa'),x:T('Ha portato l\'Europa al referendum nel 1972.')}); } },
+    { l:'Il Parlamento basta', e:'Ratifica in una settimana, nessuna campagna · l\'Europa si allarga senza che il paese se ne accorga',
+      f:function(){ S.ref72='parlamento'; gdFr70('imprenditori',2); baseFr70(-2); fidFr70(1);
+        S.log.unshift({t:T('L\'Europa'),x:T('Ha fatto ratificare l\'allargamento dal Parlamento.')}); } },
+    { l:'Rinvii: prima le legislative', e:'L\'allargamento slitta di un anno · Londra si offende, Bonn si spazientisce',
+      f:function(){ S.ref72='rinvio'; gdFr70('imprenditori',-3); gdFr70('cetomedio',-1); repd(-2); fidFr70(-2);
+        S.log.unshift({t:T('L\'Europa'),x:T('Ha rinviato l\'allargamento dell\'Europa.')}); } },
+  ],
+};
+const REF72_OPP_EV = {
+  id:'snodo_ref72_opp', snodo:true, era:'fr1970', kick:'L\'Europa', tono:'grave',
+  t:'L\'Europa al referendum, dall\'aula',
+  text:'Il Presidente porta l\'allargamento del Mercato comune davanti al paese. L\'opposizione deve dire ai suoi elettori che cosa fare di una scheda che nessuno ha chiesto: il sì aiuta lui, il no aiuta chi vuole un\'altra Europa, e restare a casa è una scelta anche quella.',
+  ch:[
+    { l:'Astensione: non è la nostra Europa', e:'La storia · la tua base con te, il ceto medio no · e quattro elettori su dieci restano a casa',
+      f:function(){ S.ref72Opp='astensione'; baseFr70(3); gdFr70('cetomedio',-2);
+        S.log.unshift({t:T('L\'Europa'),x:T('Ha chiamato all\'astensione sul referendum del 1972.')}); } },
+    { l:'Sì', e:'Il sì all\'Europa, accanto al Presidente · la tua base non capisce, e lo dice',
+      f:function(){ S.ref72Opp='si'; baseFr70(-4); gdFr70('imprenditori',2);
+        S.log.unshift({t:T('L\'Europa'),x:T('Ha fatto campagna per il sì all\'allargamento.')}); } },
+    { l:'No', e:'La base si ricompatta · il ceto medio e le imprese ti guardano come un rischio',
+      f:function(){ S.ref72Opp='no'; baseFr70(5); gdFr70('cetomedio',-4); gdFr70('imprenditori',-3);
+        S.log.unshift({t:T('L\'Europa'),x:T('Ha fatto campagna per il no all\'allargamento.')}); } },
+  ],
+};
+/* S2 · IL PIANO NUCLEARE (marzo 1974, esce in aprile: il marzo è di Ermenonville). Legge il petrolio del '79 (§B). */
+const NUCLEARE74_EV = {
+  id:'snodo_nucleare74', snodo:true, era:'fr1970', kick:'L\'energia', tono:'grave',
+  t:'Il piano nucleare',
+  text:'Il petrolio è quadruplicato in sei mesi e il paese importa tre quarti della sua energia. Il governo propone tredici centrali nucleari in due anni, il programma più grande del mondo: indipendenza per chi lo vuole, un azzardo per chi teme le scorie e le rivolte dei siti.',
+  ch:[
+    { l:'Tutto nucleare', e:'La storia · tredici reattori, poi altri: nel decennio dopo l\'ottanta per cento della corrente sarà atomica · e Plogoff e Malville saranno le battaglie della sinistra nuova', costo:{debito:2},
+      f:function(){ S.nucleare74='tutto'; S.ind.debt+=2; gdFr70('imprenditori',4); gdFr70('cetomedio',2); gdFr70('giovani',-5); fidFr70(-1);
+        S.log.unshift({t:T('L\'energia'),x:T('Ha lanciato il programma nucleare del 1974.')}); } },
+    { l:'Carbone e gas, e qualche reattore', e:'Meno soldi, meno rischi · e la bolletta che segue il barile', costo:{debito:1},
+      f:function(){ S.nucleare74='misto'; S.ind.debt+=1; gdFr70('imprenditori',1); gdFr70('giovani',-1);
+        S.log.unshift({t:T('L\'energia'),x:T('Ha scelto un piano energetico misto.')}); } },
+    { l:'Risparmio e rinvio', e:'Ora legale, limiti di velocità, e la decisione rimandata a dopo le elezioni · il barile non aspetta',
+      f:function(){ S.nucleare74='rinvio'; gdFr70('cetomedio',-3); gdFr70('imprenditori',-4); gdFr70('giovani',3); fidFr70(-2);
+        S.log.unshift({t:T('L\'energia'),x:T('Ha rinviato la scelta nucleare.')}); } },
+  ],
+};
+/* S3 · IL PIANO DI RIGORE (settembre 1976). «Inflazione-ombra» della scheda: passa da S.gMod, come la
+   stabilizzazione del '63 (L97-2) — il rigore frena la crescita, il rilancio la spinge. */
+const BARRE_EV = {
+  id:'snodo_barre', snodo:true, era:'fr1970', kick:'L\'economia', tono:'grave',
+  t:'Il piano di rigore',
+  text:'L\'inflazione è a due cifre, il franco è uscito dal serpente per la seconda volta, il Primo ministro se n\'è andato sbattendo la porta. Il nuovo dice una parola sola: rigore.',
+  ch:[
+    { l:'Rigore pieno: prezzi bloccati, franco difeso', e:'La storia · tre mesi di prezzi fermi, il credito stretto, i salari che perdono · il franco tiene, la disoccupazione sale, e la sinistra ringrazia',
+      f:function(){ S.barre='rigore'; gdFr70('lavoratori',-6); gdFr70('pensionati',2); gdFr70('imprenditori',2); gdFr70('cetomedio',-2); repd(2); fidFr70(4); if(S.gMod!=null) S.gMod-=0.2;
+        S.log.unshift({t:T('L\'economia'),x:T('Ha applicato il piano di rigore del 1976.')}); } },
+    { l:'Rilancio: la spesa contro la crisi', e:'Cantieri e assunzioni · l\'inflazione resta a due cifre e il franco scivola ancora', costo:{debito:2},
+      f:function(){ S.barre='rilancio'; S.ind.debt+=2; gdFr70('lavoratori',4); gdFr70('pensionati',-3); repd(-2); fidFr70(-4); if(S.gMod!=null) S.gMod+=0.15;
+        S.log.unshift({t:T('L\'economia'),x:T('Ha risposto alla crisi con il rilancio.')}); } },
+    { l:'A metà: rigore senza dirlo', e:'Un po\' di tutto e niente che si veda · i mercati non credono, la piazza nemmeno', costo:{debito:1},
+      f:function(){ S.barre='meta'; S.ind.debt+=1; gdFr70('lavoratori',-2); repd(-3); fidFr70(-2);
+        S.log.unshift({t:T('L\'economia'),x:T('Ha scelto una via di mezzo nel 1976.')}); } },
+  ],
+};
+const BARRE_OPP_EV = {
+  id:'snodo_barre_opp', snodo:true, era:'fr1970', kick:'L\'economia', tono:'grave',
+  t:'Il piano di rigore, dall\'aula',
+  text:'Il governo ha varato il piano di rigore: prezzi bloccati per tre mesi, credito stretto, salari che rincorrono. L\'opposizione deve decidere dove combatterlo: in aula, al tavolo o in piazza.',
+  ch:[
+    { l:'La censura sul piano', e:'Una mozione che non passerà · la tua base e i lavoratori la leggono come coraggio',
+      f:function(){ S.barreOpp='censura'; baseFr70(4); gdFr70('lavoratori',3);
+        S.log.unshift({t:T('L\'economia'),x:T('Ha presentato la censura sul piano di rigore.')}); } },
+    { l:'Il tavolo: rigore concordato', e:'Qualcosa si ottiene · e la base lo chiama resa',
+      f:function(){ S.barreOpp='tavolo'; baseFr70(-3); gdFr70('lavoratori',1); gdFr70('imprenditori',1);
+        S.log.unshift({t:T('L\'economia'),x:T('Ha trattato il piano di rigore.')}); } },
+    { l:'Lo sciopero generale', e:'Il paese si ferma un giorno · il ceto medio e le imprese non te lo perdonano',
+      f:function(){ S.barreOpp='sciopero'; baseFr70(6); gdFr70('lavoratori',5); gdFr70('cetomedio',-5); gdFr70('imprenditori',-3);
+        S.log.unshift({t:T('L\'economia'),x:T('Ha risposto al piano di rigore con lo sciopero generale.')}); } },
+  ],
+};
+/* S4 · LA SINISTRA DIVISA (settembre 1977) — lo snodo di chiusura. La versione dall'aula è la principale (chi gioca
+   il PS); quella del Presidente è la secondaria. Qualunque esito, la tappa del '78 scatta come dichiarata — salvo
+   «Anticipa le legislative», che porta le urne al '77. */
+const SINISTRA77_EV = {
+  id:'snodo_sinistra77', snodo:true, era:'fr1970', kick:'La sinistra', tono:'grave',
+  t:'La sinistra divisa',
+  text:'Il programma comune va aggiornato prima delle legislative del \'78. I comunisti chiedono più nazionalizzazioni; i socialisti, che ora sono il primo partito della sinistra, non vogliono cedere. Le trattative si rompono in una notte.',
+  ch:[
+    { l:'Rompi: il PS non si fa dettare il programma', e:'La storia · la sinistra va alle elezioni divisa e le perde contro tutti i sondaggi · tre anni dopo, il PS le vincerà da solo',
+      f:function(){ S.sinistra77='rotta'; baseFr70(4); gdFr70('cetomedio',3); gdFr70('lavoratori',-3);
+        S.log.unshift({t:T('La sinistra'),x:T('Ha rotto il programma comune nel 1977.')}); } },
+    { l:'Cedi: l\'unità vale il programma', e:'Il programma passa con le nazionalizzazioni comuniste · la sinistra unita spaventa il centro, e alle legislative il risultato è lo stesso',
+      f:function(){ S.sinistra77='ceduto'; baseFr70(-3); gdFr70('lavoratori',4); gdFr70('cetomedio',-5);
+        S.log.unshift({t:T('La sinistra'),x:T('Ha ceduto ai comunisti sul programma comune.')}); } },
+    { l:'Media: un accordo a metà, fino alle elezioni', e:'Un testo che non dice niente, firmato da tutti · la destra vince lo stesso, di poco',
+      f:function(){ S.sinistra77='mediato'; baseFr70(-1);
+        S.log.unshift({t:T('La sinistra'),x:T('Ha mediato sul programma comune.')}); } },
+  ],
+};
+const CAMPAGNA78_EV = {
+  id:'snodo_campagna78', snodo:true, era:'fr1970', kick:'La maggioranza', tono:'grave',
+  t:'La sinistra si è rotta',
+  text:'La sinistra si è rotta sul programma comune. Il Presidente, che i sondaggi davano per perdente nel \'78, deve decidere come usarlo.',
+  ch:[
+    { l:'Resta sopra le parti', e:'La storia · il Presidente non scende in campo, e lascia che la sinistra si divida da sola',
+      f:function(){ S.campagna78='sopra'; repd(2); gdFr70('cetomedio',2); fidFr70(1);
+        S.log.unshift({t:T('La maggioranza'),x:T('È rimasto sopra le parti nel 1977.')}); } },
+    { l:'La campagna della paura: il collettivismo alle porte', e:'Il ceto medio e le imprese si stringono attorno a te · i lavoratori e i ragazzi no, e i giornali lo scrivono',
+      f:function(){ S.campagna78='paura'; gdFr70('cetomedio',4); gdFr70('imprenditori',3); gdFr70('lavoratori',-4); gdFr70('giovani',-3); stampad(-2);
+        S.log.unshift({t:T('La maggioranza'),x:T('Ha fatto la campagna della paura nel 1978.')}); } },
+    { l:'Anticipa le legislative', e:'Sciogli adesso, con la sinistra divisa · le urne sono tue, e nessuno garantisce come finiranno',
+      f:function(){ S.campagna78='anticipa'; S.anticipate77=true; fidFr70(-2);
+        S.log.unshift({t:T('La maggioranza'),x:T('Ha anticipato le legislative al 1977.')});
+        if(typeof azioneScioglimentoForzato==='function') azioneScioglimentoForzato(); } },
+  ],
+};
+
+/* §B · IL PREZZO DEL PETROLIO — la carta gemella della corsa al franco (L93-2): due ancore (1973/10 e 1979/6) nel gate
+   parametrizzato `ancoraValutaDovuta` (game.js), che da L99-2 accetta anche il MESE d'apertura e di chiusura.
+   ⚠ Tutte e due le ancore cadono in un mese già occupato: l'ottobre 1973 è del fatto-mondo `pm_petrolio`, il giugno
+   1979 del pilastro «L'Europa vota». La carta esce quindi il mese DOPO (novembre 1973, luglio 1979): prima la
+   cronaca del mondo, poi la decisione del paese — l'ordine giusto, ma i due titoli sono uguali (dichiarato).
+   ⚑ LA MEMORIA: la scheda scrive `S.petrolio++` sulle razioni e «`S.petrolio` −1 alla seconda corsa» sul nucleare,
+   senza dire che cosa conti `S.petrolio`. Qui è il REGISTRO delle corse giocate (come `S.francoAncore`), e i pesi
+   della seconda sono quelli dell'ultima riga di §B, che è chiara: nucleare 'tutto' → colpo ridotto di un terzo
+   (e il testo lo dice), 'rinvio' → doppio; e «Lo Stato assorbe» alla prima corsa → doppio alla seconda.
+   Il peso moltiplica solo i COLPI sui gruppi (i numeri negativi), non i guadagni. */
+function pesoPetrolio(quale){
+  if(quale!=='79') return 1;
+  var p=1;
+  if(S.petrolio73==='assorbe') p*=2;
+  if(S.nucleare74==='tutto') p*=2/3; else if(S.nucleare74==='rinvio') p*=2;
+  /* ⚠ TETTO a ×2: la scheda dà i due raddoppi ma non dice come si sommano. Moltiplicati, «assorbe» + «rinvio»
+     facevano ×4 — misurato, ceto medio −47 in un mese solo, una carriera chiusa da una carta.
+     ⚑ Deciso 24/9 (L99-3): i due raddoppi non si sommano, vale il peggiore (§DECISIONI della scheda). */
+  return Math.min(p, 2);
+}
+function gdPetrolio(g, n, p){ gd(g, Math.round((n<0 ? n*p : n)*FR70_GRUPPI)); }
+function petrolioCh(quale){
+  function segna(id){ S['petrolio'+quale]=id; S.petrolio=(S.petrolio||0)+1; }
+  return [
+    { l:'Razioni: limiti, ora legale, domeniche a piedi', e:'Il paese rallenta, la bolletta pure',
+      f:function(){ var p=pesoPetrolio(quale); segna('razioni'); gdPetrolio('cetomedio',-4,p); gdPetrolio('imprenditori',-2,p); gdPetrolio('giovani',1,p); repd(2); fidFr70(1);
+        S.log.unshift({t:T('Il petrolio'),x:T('Razioni e limiti: il paese rallenta, e la bolletta con lui.')}); } },
+    { l:'Prezzi liberi: chi consuma paga', e:'La benzina raddoppia alla pompa · i pendolari pagano, l\'inflazione sale',
+      f:function(){ var p=pesoPetrolio(quale); segna('liberi'); gdPetrolio('cetomedio',-6,p); gdPetrolio('pensionati',-3,p); gdPetrolio('imprenditori',3,p); fidFr70(-1);
+        S.log.unshift({t:T('Il petrolio'),x:T('I prezzi liberi: chi consuma paga, e l\'inflazione sale.')}); } },
+    { l:'Lo Stato assorbe: prezzi calmierati a debito', e:'Nessuno se ne accorge per un anno · poi il conto', costo:{debito:2},
+      f:function(){ var p=pesoPetrolio(quale); segna('assorbe'); S.ind.debt+=2; gdPetrolio('cetomedio',2,p); fidFr70(-2);
+        S.log.unshift({t:T('Il petrolio'),x:T('Lo Stato assorbe il prezzo: nessuno se ne accorge, per ora.')}); } },
+  ];
+}
+const PETROLIO_EV = {
+  id:'ev_petrolio73', era:'fr1970', kick:'Il petrolio', tono:'grave',
+  t:'Il prezzo del petrolio',
+  text:'Il barile raddoppia in una settimana, poi raddoppia ancora. Il paese importa tre quarti dell\'energia: la bolletta dell\'import passa da un giorno all\'altro da sostenibile a insostenibile.',
+  ch: petrolioCh('73'),
+};
+const PETROLIO79_EV = {
+  id:'ev_petrolio79', era:'fr1970', kick:'Il petrolio', tono:'grave',
+  t:'Il secondo shock',
+  text:'La rivoluzione in Iran ha chiuso i pozzi e i produttori alzano il prezzo a ogni riunione: il barile raddoppia di nuovo. Il paese importa ancora tre quarti dell\'energia, e la bolletta torna insostenibile da un giorno all\'altro.',
+  ch: petrolioCh('79'),
+};
+const PETROLIO79_NUC_EV = {
+  id:'ev_petrolio79', era:'fr1970', kick:'Il petrolio', tono:'grave',
+  t:'Il secondo shock',
+  text:'La rivoluzione in Iran ha chiuso i pozzi e i produttori alzano il prezzo a ogni riunione: il barile raddoppia di nuovo. Il paese importa ancora gran parte dell\'energia, ma stavolta le centrali cominciano a contare.',
+  ch: petrolioCh('79'),
 };

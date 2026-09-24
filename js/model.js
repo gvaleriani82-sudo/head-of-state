@@ -110,12 +110,16 @@ function targetService(id){
    .claude/misura-minimi-gruppi.js: ministri e leggi tolti, disoccupazione all'equilibrio, discesa per coordinate. */
 function targetGroup(id){
   const g=computeGrowth(), un=S.ind.unemp; const mm=ministerMods().grp, lm=leggiMods().grp; let t=50;
-  const fid=(S.ind.fiducia!=null)?S.ind.fiducia:100; const sfidMalus=Math.min(fid-65,0);   // malus continuo quando la fiducia scende sotto 65
-  if(id==='lavoratori') t=50+[-8,0,8][lv('welfare')]+[-5,0,4][lv('sanita')]+[6,0,-8][lv('lavoro')]+[-4,0,3][lv('pensioni')]+[0,0,4][lv('investimenti')]+(un-8)*-1.5;
+  const fid=(S.ind.fiducia!=null)?S.ind.fiducia:100; const sfidMalus0=Math.min(fid-65,0);   // malus continuo quando la fiducia scende sotto 65
+  /* L100-2 · sotto coabitazione l'economia è del Primo ministro: il termine economico (disoccupazione, crescita, fiducia)
+     pesa per COABITAZIONE_ECO_K. Fuori dalla coabitazione eK vale 1 e ogni riga è identica a prima (x*1 === x). */
+  const eK=(S.coabitazione && typeof COABITAZIONE_ECO_K!=='undefined') ? COABITAZIONE_ECO_K : 1;
+  const sfidMalus=sfidMalus0*eK, un8=(un-8)*eK, g08=(g-0.8)*eK;
+  if(id==='lavoratori') t=50+[-8,0,8][lv('welfare')]+[-5,0,4][lv('sanita')]+[6,0,-8][lv('lavoro')]+[-4,0,3][lv('pensioni')]+[0,0,4][lv('investimenti')]+un8*-1.5;
   if(id==='pensionati') t=52+[-16,0,12][lv('pensioni')]+[-9,0,6][lv('sanita')]+[0,0,3][lv('sicurezza')];
-  if(id==='cetomedio') t=50+[8,0,-10][lv('fisco')]+[-6,0,6][lv('sicurezza')]+[-4,0,3][lv('sanita')]+(g-0.8)*3+sfidMalus*0.07;
-  if(id==='imprenditori') t=48+[-4,0,12][lv('imprese')]+[8,0,-7][lv('fisco')]+[-5,0,10][lv('lavoro')]+[0,0,-4][lv('ambiente')]+[0,0,-3][lv('welfare')]+(g-0.8)*4+sfidMalus*0.15;
-  if(id==='giovani') t=45+[-9,0,8][lv('istruzione')]+[-5,0,8][lv('ambiente')]+[0,0,5][lv('welfare')]+[0,0,3][lv('immigrazione')]+(un-8)*-1.2;
+  if(id==='cetomedio') t=50+[8,0,-10][lv('fisco')]+[-6,0,6][lv('sicurezza')]+[-4,0,3][lv('sanita')]+g08*3+sfidMalus*0.07;
+  if(id==='imprenditori') t=48+[-4,0,12][lv('imprese')]+[8,0,-7][lv('fisco')]+[-5,0,10][lv('lavoro')]+[0,0,-4][lv('ambiente')]+[0,0,-3][lv('welfare')]+g08*4+sfidMalus*0.15;
+  if(id==='giovani') t=45+[-9,0,8][lv('istruzione')]+[-5,0,8][lv('ambiente')]+[0,0,5][lv('welfare')]+[0,0,3][lv('immigrazione')]+un8*-1.2;
   if(id==='cattolici') t=52+[-3,0,6][lv('immigrazione')]+[-8,0,4][lv('welfare')]+[-2,0,3][lv('sicurezza')]+[-4,0,2][lv('pensioni')]+[-4,0,0][lv('sanita')]+[-4,0,0][lv('istruzione')];
   // politiche estere/difesa (lotto Esteri+Difesa)
   if(id==='lavoratori')  t+=[3,0,-5][lv('commercio')];
@@ -161,7 +165,7 @@ function stampaMul(){ const st=(S.ind&&S.ind.stampa!=null)?S.ind.stampa:50; retu
 let ACT_PACE=1;   // A.5 rework (ritmo): fattore-paceMul attivista applicato ai gd() durante la risoluzione delle carte attiviste (settato/azzerato al confine); 1 = neutro fuori dalla gavetta
 function gd(id,n){
   if(ACT_PACE!==1) n*=ACT_PACE;   // A.5: il ritmo scala i gruppi come i guadagni → ri-scalamento uniforme del tempo (weakest-link intatto: cambia la velocità, non le posizioni)
-  if(n<0 && !S.opposizione){
+  if(n<0 && !S.opposizione && !S.coabitazione){   // L100-2: in coabitazione la stampa non amplifica (come all'opposizione)
     const m=stampaMul(); n*=m;
     if(m>1.08) STAMPA_FX=1; else if(m<0.92) STAMPA_FX=-1;   // percepibile solo oltre ~±8% (stampa sotto ~36 / sopra ~64): mai rumore vicino al neutro
     if(S.promessa && S.promessa.grp===id) S.promessa.colpi=(S.promessa.colpi||0)+(-n);   // intervista: il ritorno di fiamma conta SOLO le tue scelte contro il gruppo promesso (mai la deriva naturale, che non passa da gd)
@@ -381,7 +385,7 @@ function fLogorioConsenso(cons){ return clamp(1 + (56.6 - cons)*0.10, 0.15, 1.8)
 function rateLogorioMese(){
   const cons=(S.ind&&S.ind.consenso!=null)?S.ind.consenso:50;
   const rate=((S.logorioEra!=null)?S.logorioEra:0.002)*(dif().logorioMult!=null?dif().logorioMult:1)*etaLogorio();
-  return rate*fLogorioConsenso(cons);
+  return rate*fLogorioConsenso(cons)*((S.coabitazione && typeof COABITAZIONE_LOGORIO_K!=='undefined') ? COABITAZIONE_LOGORIO_K : 1);   // L100-2
 }
 /* il totale, con la migrazione: un salvataggio anteriore a L77-3 non ha l'accumulatore e riparte dal
    comportamento vecchio (mesi x rate), cosi la sua curva non fa un gradino al caricamento. */

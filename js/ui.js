@@ -1024,6 +1024,13 @@ function toggleGergo(b){
   if(!b._gergoDef){ const host=b.closest('.card, .sticky-top, .ag') || b.parentElement; host.classList.add('gergo-host'); host.appendChild(def); b._gergoDef=def; }
   def.hidden=false; b.setAttribute('aria-expanded','true');
 }
+/* L93-5 · il chip del voto di fiducia: «%A vota contro: il governo cade», col nome del partito DENTRO la frase (si
+   giudica reso, L94-1). Lo stesso calcolo che in resolveItem fa cadere il governo: se il chip non c'è, non cade. */
+/* L93-5b · il chip della maggioranza comprata: la scelta lo dice prima, come il voto contro. */
+function compraChip(c){ if(!c || !c.compra || !PAESE || !PAESE.crisiMinisteriale || !S || S.opposizione) return '';
+  return `<span class="ocost ocade">${T((typeof CONCESSIONE_LOGORIO_K!=='undefined' && CONCESSIONE_LOGORIO_K>0) ? 'Il governo si compra: logorio e debito' : 'Il governo si compra: debito')}</span>`; }   // L93-5b: il chip dice solo ciò che la scelta costa davvero
+function cadeChip(c){ var r=(typeof cadeAttivo==='function')?cadeAttivo(c):null; if(!r) return '';
+  return `<span class="ocost ocade">${T('%A vota contro: il governo cade').replace('%A', r.nomi)}</span>`; }
 function costoChip(c){ if(!c || !c.costo) return '';
   var k=c.costo;
   if(k.pct!=null && S.locale && S.locale.budget){   // LOCALE: % del bilancio comunale/regionale → € (pct>0 spesa, pct<0 entrata)
@@ -1715,7 +1722,7 @@ function renderGov(){
       <div style="font-size:11px;color:var(--mut2);margin-top:5px">${T('Sopra ~65 di capitale, un\'occasione per salire può aprirsi. Distinguerti dal premier rende, ma se la sua fiducia crolla rischi il rimpasto.')}</div></div>`;
     h+=`<div class="card uno" onclick="apriMinistero('${S.dicastero}')" style="cursor:pointer;display:flex;justify-content:space-between;align-items:center;padding:12px 14px;margin-bottom:12px"><span><b>${T('Il tuo dicastero')}</b><br><span style="font-size:12px;color:var(--mut)">${Mn} — ${T('le tue leve, leggi e dossier')}</span></span><span style="color:var(--acc-ink);font-size:13px">${T('Apri →')}</span></div>`;
   }
-  else if(S.month===1) h+=`<div class="banner">${T('È <b>gennaio</b>: vai alla scheda <b>Bilancio</b> per varare la manovra dell\'anno (hai %N punti riforma).').replace('%N',rpLeft())}</div>`;
+  else if(S.month===1 && !S.coabitazione) h+=`<div class="banner">${T('È <b>gennaio</b>: vai alla scheda <b>Bilancio</b> per varare la manovra dell\'anno (hai %N punti riforma).').replace('%N',rpLeft())}</div>`;   // L100-2: in coabitazione la manovra è del Primo ministro
   h+=rivoltaBanner();   // L72-1: se un gruppo e' sotto il pavimento, il conto alla rovescia sta in testa al Governo
   h+=bilancioRiga();   // il € del livello corrente, persistente in cima al Governo (cantiere Budget): sempre sott'occhio mentre decidi
   /* la prima pagina del mese: presenza fissa della stampa + scorciatoia alla tab Stampa (solo al governo) */
@@ -1849,7 +1856,7 @@ function renderGov(){
         <div class="atext">${T(d.text)}</div>`;
       if(!it.resolved){ h+=`<div class="opts">`+d.ch.map((c,i)=>{
         const locked=c.gateAut!=null && aut<c.gateAut;
-        return `<button class="opt" ${locked?'disabled':''} style="${c.gateAut!=null&&!locked?'border-color:var(--acc)':''}" onclick="resolveItem(${idx},${i})"><span class="ol">${T(c.l)}</span><span class="oe">${locked?(T('Serve autorevolezza ≥ %N').replace('%N',c.gateAut)):T(c.e)}</span>${locked?'':costoChip(c)}</button>`;
+        return `<button class="opt" ${locked?'disabled':''} style="${c.gateAut!=null&&!locked?'border-color:var(--acc)':''}" onclick="resolveItem(${idx},${i})"><span class="ol">${T(c.l)}</span><span class="oe">${locked?(T('Serve autorevolezza ≥ %N').replace('%N',c.gateAut)):T(c.e)}</span>${locked?'':costoChip(c)}${locked?'':cadeChip(c)}${locked?'':compraChip(c)}</button>`;
       }).join('')+`</div>`; }
       else h+=`<div class="outcome">${it.outcome}</div>${esitiHtml(it)}`;
       h+=`</div>`;
@@ -1943,7 +1950,7 @@ function renderGov(){
         const cEnte=c.ente!=null?(typeof ENTI_INT!=='undefined'&&ENTI_INT.find(x=>x.id===c.ente)):null;   // soglia di STANDING con un ente (fase A)
         const lockedEnte=c.ente!=null && (!S.relInt || (S.relInt[c.ente]||0) < (c.enteMin!=null?c.enteMin:60));
         const locked=lockedRep||lockedUE||lockedEnte;
-        return `<button class="opt" ${locked?'disabled':''} onclick="resolveItem(${idx},${i})"><span class="ol">${T(c.l)}</span><span class="oe">${lockedRep?(T('Serve reputazione ≥ %N').replace('%N',c.need)):lockedUE?(T('Serve peso a Bruxelles ≥ %N').replace('%N',c.pesoUE)):lockedEnte?(T('Serve rapporto con %E ≥ %N').replace('%E',((cEnte&&cEnte.breve)||c.ente)).replace('%N',(c.enteMin!=null?c.enteMin:60))):T(c.e)}</span>${locked?'':costoChip(c)}</button>`;
+        return `<button class="opt" ${locked?'disabled':''} onclick="resolveItem(${idx},${i})"><span class="ol">${T(c.l)}</span><span class="oe">${lockedRep?(T('Serve reputazione ≥ %N').replace('%N',c.need)):lockedUE?(T('Serve peso a Bruxelles ≥ %N').replace('%N',c.pesoUE)):lockedEnte?(T('Serve rapporto con %E ≥ %N').replace('%E',((cEnte&&cEnte.breve)||c.ente)).replace('%N',(c.enteMin!=null?c.enteMin:60))):T(c.e)}</span>${locked?'':costoChip(c)}${locked?'':cadeChip(c)}${locked?'':compraChip(c)}</button>`;
       }).join('')+`</div>`; }
       else h+=`<div class="outcome">${it.outcome}</div>${esitiHtml(it)}`;
       h+=`</div>`;
@@ -2034,6 +2041,7 @@ function renderPaese(){
   }
   let h=`<div class="contorno" style="font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--mut);margin:2px 2px 8px;">${T('Stato del paese')}</div>`;
   if(S.livello===2) h+=`<div class="banner">${T('<b>Governa %PM.</b> Vedi gli indicatori nazionali, ma non li guidi: la politica generale è del premier. Tu incidi dal <b>tuo dicastero</b>.').replace('%PM', escAttr((S.premier||{}).nome||T('il premier')))}</div>`;
+  if(S.coabitazione) h+=`<div class="banner">${T('<b>Governa %PM.</b> Tieni esteri e difesa; il resto non lo guidi.').replace('%PM', escAttr((S.premier||{}).nome||T('il Primo ministro')))}</div>`;   // L100-2: la coabitazione riusa il banner del livello 2
   h+=`<div class="budget">
     <div class="b"><div class="l">${T('Saldo di bilancio')}</div><div class="v" style="color:${def<=3?'var(--pos)':def<=4?'var(--warn)':'var(--neg)'}">${balText}</div></div>
     <div class="b"><div class="l">${T('Debito / PIL')}</div><div class="v" style="color:${I.debt<130?'var(--pos)':I.debt<150?'var(--warn)':'var(--neg)'}">${fmt(I.debt,0)}%</div></div></div>`;
@@ -2160,6 +2168,16 @@ function renderPol(){
     document.getElementById('sec-pol').innerHTML=h;
     return;
   }
+  if(S.coabitazione){
+    /* L100-2 · LA COABITAZIONE RIUSA IL BILANCIO DEL LIVELLO 2: il bilancio nazionale è del Primo ministro; al Presidente
+       restano le leve di esteri e difesa (COABITAZIONE_MIN). Le leggi sono del governo: nessuna qui (setLegge le rifiuta). */
+    let hc=budgetRow();
+    hc+=`<div class="banner">${T('<b>Bilancio del Primo ministro.</b> Governa il paese %P: il bilancio nazionale è suo. Tu muovi le leve di <b>esteri e difesa</b> (i tuoi punti riforma).').replace('%P',escAttr((S.premier||{}).nome||T('il Primo ministro')))}</div>`;
+    const polsC=POLICIES.filter(p=>COABITAZIONE_MIN.indexOf(p.min)>=0 && (typeof eraVivaT!=='function' || eraVivaT(p)));
+    if(polsC.length) hc+=`<div class="card"><div class="ct">${T('Esteri e difesa')}</div>${polsC.map(renderPolicySlider).join('')}</div>`;
+    document.getElementById('sec-pol').innerHTML=hc;
+    return;
+  }
   let h=budgetRow();
   h+= S.month===1
     ? `<div class="banner">${T((!S.opposizione&&(S.potereLocale||0)>50)
@@ -2183,6 +2201,7 @@ function renderPol(){
 }
 function setPol(id,i){
   if(S.livello===2 && (POLICIES.find(p=>p.id===id)||{}).min!==S.dicastero) return;   // da ministro: solo le leve del TUO dicastero
+  if(S.coabitazione && COABITAZIONE_MIN.indexOf((POLICIES.find(p=>p.id===id)||{}).min)<0) return;   // L100-2: in coabitazione solo esteri e difesa
   const old=S.pol[id]; S.pol[id]=i;
   if(rpUsed()>curRpMax()){S.pol[id]=old; return;}
   S.ind.deficit=computeDeficit(); render();

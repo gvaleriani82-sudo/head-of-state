@@ -215,6 +215,7 @@
   .opt:active{border-color:var(--acc);}
   .opt .ol{font-weight:600;} .opt .oe{display:block; color:var(--mut); font-size:12px; margin-top:2px;}
   .opt .ocost{display:inline-block; margin-top:6px; font-size:12px; font-weight:600; color:var(--acc-ink); background:var(--bg2); border:1px solid var(--line); border-radius:6px; padding:2px 7px; font-family:'IBM Plex Mono',monospace;}   /* cantiere Budget: targhetta-costo €X · −Y% */
+  .opt .ocade{display:block; width:fit-content; color:var(--neg); border-color:var(--neg); font-family:inherit;}   /* L93-5: «%A vota contro: il governo cade» — rosso, su una riga sua */
   .fiscbar{display:flex; flex-wrap:wrap; justify-content:space-between; align-items:baseline; gap:2px 10px; margin:0 2px 10px; padding:7px 12px; background:var(--bg2); border:1px solid var(--line); border-radius:9px; font-size:12px;}   /* cantiere Budget: riga-bilancio persistente sul Governo; wrap-safe a 375px (mai overflow orizzontale) */
   .fiscbar .fl{color:var(--mut); letter-spacing:.02em;} .fiscbar .fv{font-family:'IBM Plex Mono',monospace; font-weight:600; color:var(--txt); white-space:normal; overflow-wrap:anywhere;}   /* L44-3: era nowrap. Le cifre-lire del 2000 (le piu grandi della linea: la spesa passa il milione di mld)
       sforavano di 9px a 375px — il contenitore era gia wrap-safe, il VALORE no. Ora va a capo invece di uscire. */
