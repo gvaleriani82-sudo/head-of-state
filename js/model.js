@@ -44,10 +44,14 @@ function computeDeficit(){
   d+=ministerMods().deficit;
   d-=(S.ciclo||0)*0.7;   // stabilizzatore automatico: recessione (ciclo<0) → meno gettito → deficit su da solo
   d+=leggiMods().deficit;   // leggi di spesa (+) o di entrata/risparmio (−)
+  d+=(typeof deficitEra==='function')?deficitEra():0;   // L102-2: il deficit d'epoca (DRIFT_DEFICIT_ERA, game.js; 0 fuori tabella)
   return d;
 }
 /* fiducia dei mercati: target 0..100 da debito e deficit, ancorato allo stato iniziale (78), scalato da DIFFICOLTA.
    Debito alto e deficit alto la abbassano; debito in rientro la fa risalire. */
+/* L102-1 · il pavimento del debito (clamp in avanzamento mensile, sotto). `let`: lo strumento .claude/misura-pavimento-debito.js
+   lo rimette a 40 nello stesso giro per il confronto prima/dopo. */
+let DEBITO_PAVIMENTO = 5;
 function targetFiducia(){
   const D=dif();
   /* Cantiere B — àncora relativa (S.debtAncora): la fiducia parte ~78 a OGNI epoca e si muove col debito rispetto
@@ -257,8 +261,13 @@ function simulateMonth(){
   /* L90-1 — L'EROSIONE È NOMINALE, NON REALE. Il rapporto debito/PIL scende col PIL NOMINALE (crescita reale +
      inflazione): il denominatore cresce anche quando i prezzi salgono. Con la sola crescita reale il debito non
      rientrava mai — `italia1980` faceva 57 → 186 contro un 95 vero, ed era il decennio dell'inflazione a due
-     cifre. `S.inflazione` è il seed della porta o del paese (game.js, `inflazioneSeed`), clamp 0-10. */
-  S.ind.debt=clamp(S.ind.debt + S.ind.deficit/12 - S.ind.debt*(S.ind.growth+(S.inflazione||0))/100/12, 40,260);
+     cifre. `S.inflazione` è il seed della porta o del paese (game.js, `inflazioneSeed`, col tetto del paese da L91-1);
+     L101-1b: l'inflazione dell'anno la dà `inflazioneAnno()` (DRIFT_INFLAZIONE_ERA, game.js), che senza riga torna il seed. */
+  /* L102-1 · IL PAVIMENTO DEL DEBITO È 5, non più 40. Con 40, nove porte che dichiarano un seme più basso (italia1950 31,
+     italia1960 35, italia1970 37, uk1990 35, uk2000 35, fr1950 30, fr1960 30, fr1970 20, fr1980 21) vedevano il seme
+     diventare 40 al primo mese, e la fiducia pagare (40 − àncora) × 0,5 per un debito che non c'era: era il motivo del
+     «debito fermo a ~40» di tre rapporti. 5 perché uno Stato non ha debito negativo e lo zero non serve. */
+  S.ind.debt=clamp(S.ind.debt + S.ind.deficit/12 - S.ind.debt*(S.ind.growth+(typeof inflazioneAnno==='function' ? inflazioneAnno() : (S.inflazione||0)))/100/12, DEBITO_PAVIMENTO, 260);
   S.ind.sanita+= (targetService('sanita')-S.ind.sanita)*0.10;
   S.ind.sicurezza+= (targetService('sicurezza')-S.ind.sicurezza)*0.10;
   S.ind.ambiente+= (targetService('ambiente')-S.ind.ambiente)*0.10;

@@ -171,6 +171,78 @@ function inflazioneSeed(sc){
     ? PAESE.economia.inflazioneTetto : null;
   return tetto!=null ? clamp(v, 0, tetto) : Math.max(0, v);
 }
+/* ================================================================================================================
+   L101-1b · L'INFLAZIONE D'EPOCA. Il gioco non ha un indicatore d'inflazione (L28-1): `S.inflazione` è il seme della
+   porta, fisso, e il suo solo lettore è l'erosione del debito (model.js, crescita nominale = reale + inflazione).
+   Questa tabella gli dà un anno: **valori ASSOLUTI** (non scostamenti come il ciclo), ⚠ INSEE, ordine di grandezza.
+   `inflazioneAnno()` legge la riga dell'era in vigore per `S.year`; senza riga (prima del 1970, le altre linee, il
+   presente) torna `S.inflazione` com'è sempre stato — additiva: le porte senza riga sono identiche.
+   ⚠ La tabella SCAVALCA il tetto del seme (`economia.inflazioneTetto`, 15 per la Francia '70 e '80), dichiaratamente:
+   il 13,6 del 1980 è vero. Non c'è più un clamp 0-10: da L91-1 il tetto è del paese.
+   ================================================================================================================ */
+const DRIFT_INFLAZIONE_ERA = {
+  [LINEA_FR]: [ {da:1970, inf:5.2}, {da:1973, inf:7.3}, {da:1974, inf:13.7}, {da:1975, inf:11.8}, {da:1976, inf:9.6},
+                {da:1978, inf:9.1}, {da:1979, inf:10.8}, {da:1980, inf:13.6}, {da:1981, inf:13.4}, {da:1982, inf:11.8},
+                {da:1983, inf:9.6}, {da:1984, inf:7.4}, {da:1985, inf:5.8}, {da:1986, inf:2.7}, {da:1987, inf:3.1},
+                {da:1988, inf:2.7}, {da:1989, inf:3.6}, {da:1990, inf:3.4}, {da:1991, inf:3.2},
+                /* L103-1 · gli anni '90 (scheda PRESET-FRANCIA-1990 §2): la disinflazione compiuta, fino allo 0,5 del '99 */
+                {da:1992, inf:2.4}, {da:1993, inf:2.1}, {da:1994, inf:1.7}, {da:1995, inf:1.8}, {da:1996, inf:2.0},
+                {da:1997, inf:1.2}, {da:1998, inf:0.7}, {da:1999, inf:0.5}, {da:2000, inf:1.7}, {da:2001, inf:1.6} ]
+};
+function inflazioneAnno(){
+  if(typeof S==='undefined' || !S) return 0;
+  var W = S.era ? DRIFT_INFLAZIONE_ERA[S.era] : null, v = null;
+  if(W) for(var i=0;i<W.length;i++){ if(S.year>=W[i].da) v=W[i].inf; }
+  return (v!=null) ? v : (S.inflazione||0);
+}
+/* ================================================================================================================
+   L102-2 · IL DEFICIT D'EPOCA. `S.deficitBase` è un seme fisso, il decennio vero no: col pavimento del debito a 5
+   (L102-1) quattro porte scendevano SOTTO la storia (uk2000 33 → 8, uk1990 → 25, italia1970 → 30, uk1970 → 30),
+   perché nulla diceva «qui lo Stato spende di più». Stessa forma della disoccupazione: **scostamenti per anno sul
+   `deficitBase`**, positivi = più disavanzo (la convenzione di `computeDeficit`), letti da `deficitEra()` e SOMMATI
+   alla base in model.js. Assente (le altre linee, gli anni senza riga) = 0: additiva.
+   ⚠ La calibrazione dell'avvio (`deficitTarget`, startGame) assorbe il valore in vigore NEL MESE D'AVVIO: la riga
+   dell'anno d'avvio di una porta non sposta il disavanzo di partenza, solo le successive (per questo ogni decennio
+   comincia da una riga 0). E una riga vale finché non ne arriva un'altra: le righe `{da:1980, def:0}` chiudono il
+   '70 perché non entri nella porta del decennio dopo.
+   ⚑ I valori sono CERCATI con la sweep (.claude/misura-deficit-era.js), non scritti a occhio: il bersaglio è il
+   DEBITO reso, non il deficit. */
+const DRIFT_DEFICIT_ERA = {
+  /* ⚠ LE RIGHE INGLESI SONO GRANDI (fino a +10,5) e non perché il disavanzo inglese lo fosse: sulla linea UK il
+     ciclo è il drift NOMINALE (L48-2, valori 3-11) e lo stabilizzatore di computeDeficit toglie `ciclo × 0,7` dal
+     disavanzo — queste righe restituiscono quello che il drift toglieva. Si leggono sul debito reso, non da sole.
+     Bersagli e resa (luglio, 5 semi, partito della baseline) nel rapporto di L102-2 e nelle schede delle porte. */
+  [LINEA_UK]: [ /* uk1970: 55 nel 1970 → 45 nel 1975 → 45 nel 1979 (la discesa del dopoguerra si ferma sui 45) */
+                {da:1970, def:0},    {da:1971, def:10.5}, {da:1972, def:3.5},  {da:1973, def:5.5},  {da:1974, def:0},
+                {da:1975, def:-5.5}, {da:1976, def:-2.5}, {da:1977, def:-3.5}, {da:1978, def:-1},   {da:1979, def:0},
+                /* uk1990: 35 → 45 nel 1996 → 40 nel 1999 (la recessione dei primi anni e il rientro) */
+                {da:1990, def:0},    {da:1991, def:-1.5}, {da:1992, def:1.5},  {da:1993, def:4.5},  {da:1994, def:6},
+                {da:1995, def:7},    {da:1996, def:3.5},  {da:1997, def:-2},   {da:1998, def:-4},   {da:1999, def:-2.5},
+                /* uk2000: 35 → 40 nel 2007 → 65 nel 2010 → 80 nel 2013 (il salto è del 2008-2010) */
+                {da:2000, def:0},    {da:2001, def:8.5},  {da:2002, def:5.5},  {da:2003, def:6.5},  {da:2004, def:4.5},
+                {da:2005, def:5},    {da:2006, def:5},    {da:2007, def:6.5},  {da:2008, def:1},    {da:2009, def:5},
+                {da:2010, def:5},    {da:2011, def:4.5},  {da:2012, def:8.5},  {da:2013, def:8} ],
+  /* italia1970: 37 nel 1970 → 60 nel 1979, il decennio in cui il debito italiano parte. Chiusa al 1980: la porta
+     dell'80 ha il suo seme e non deve ereditare il '79. */
+  [LINEA_IT]: [ {da:1970, def:0},    {da:1971, def:6.5},  {da:1972, def:8},    {da:1973, def:5},    {da:1974, def:5.5},
+                {da:1975, def:6},    {da:1976, def:4.5},  {da:1977, def:5},    {da:1978, def:0},    {da:1979, def:-1.5},
+                {da:1980, def:0} ],
+  /* L103-1 · fr1990: 35 nel 1990 → 45 nel '93 → 57 nel '96 → 58 nel '99 → 57 nel 2001, il decennio in cui il debito francese
+     decolla. Righe modeste (la crescita e l'inflazione basse fanno già quasi tutto): la discesa per coordinate
+     (.claude/misura-fr1990-struttura.js sweep def, PS, 5 semi) rende 35,6 · 46,4 ('93) · 56,2 ('96) · 57,9 ('99) · 56,9 (2001),
+     scarto massimo 2,0. Nessuna riga prima del 1990: fr1980 (1980-89) non ne è toccata. */
+  [LINEA_FR]: [ {da:1990, def:0},    {da:1991, def:1},    {da:1992, def:1},    {da:1993, def:0},    {da:1994, def:2},
+                {da:1995, def:1},    {da:1996, def:1},    {da:1997, def:-1},   {da:1998, def:0},    {da:1999, def:-0.5},
+                {da:2000, def:-0.5}, {da:2001, def:-1.5} ]
+};
+function deficitEra(){
+  if(typeof S==='undefined' || !S || !S.era) return 0;
+  var W = DRIFT_DEFICIT_ERA[S.era];
+  if(!W || !W.length) return 0;
+  var v=0;
+  for(var i=0;i<W.length;i++){ if(S.year>=W[i].da) v=W[i].def; }
+  return v;
+}
 /* L90-1 passo 2 — LA CRESCITA DI PARTENZA È DEL PAESE, non 0,8 per tutti.
    `computeGrowth()` partiva da 0,8 ovunque: l'India, che nel mondo cresce del 6-7%, cresceva come il Canada — e
    il freno del debito (sopra 120) la portava anche più in basso, invertendo la classifica (L89-1: India 0,66%,
@@ -277,6 +349,9 @@ function initStatoBase(){
   S.ref62Opp=null; S.maggioOpp=null; S.ref69Opp=null; S.franco68=null;   // L97-2: le tre versioni dall'aula e la corsa al franco del '68
   S.ref72=null; S.nucleare74=null; S.barre=null; S.sinistra77=null; S.petrolio=0; S.anticipate77=null;   // L99-1: i flag del decennio francese '70 (dati puri)
   S.ref72Opp=null; S.barreOpp=null; S.campagna78=null; S.petrolio73=null; S.petrolio79=null;   // L99-2: le due versioni dall'aula, il Presidente del '77, le due corse del petrolio
+  S.riforme81=null; S.rigore83=null; S.scuola84=null; S.ordinanze86=null; S.riforme81Opp=null; S.rigore83Opp=null;   // L101-2: i quattro snodi del decennio francese '80 e le due versioni dall'aula
+  S.ref92=null; S.ref92Opp=null; S.sarajevo94=null; S.piano95=null; S.piano95Opp=null; S.quinquennato00=null;   // L103-2: gli snodi del decennio francese '90 (scioglimento97 c'è da L103-1)
+  S.scioglimento97=null;   // L103-1: lo scioglimento del '97 (null = storico; 'no' = «aspetta», tappa 1998/3). Lo scrive S4 in L103-2
   S.coabitazione=false;   // L100-2: il Presidente con l'Assemblea degli altri (derivato dai seggi, dato puro, round-trip)
   S.governiCaduti=0;                    // L80-5: quante volte il governo e caduto senza che si andasse a votare
   S.logorioAcc=0;                       // L77-3: il logorio accumulato mese per mese (0 = carriera nuova)
@@ -287,6 +362,7 @@ function initStatoBase(){
   S.candidatoPromosso=null;   // L64-3 (dato puro)
   S.gruppo=null; S.sfidaSeme=null;   // L64-4 (dati puri)
   S.scioglimentiChiesti=0; S.scioglimentoScelto=false;   // L56-1 — dati puri, round-trip
+  S.legislaturaDa=null;   // L104-2: il mese (anno×12+mese) in cui è nata l'Assemblea in vigore nel semipresidenziale (tappa o scioglimento); null = con la presidenza
   /* L53-2 — le due vie d'uscita dalla minoranza (dati puri, round-trip). `sostegno` è l'accordo esterno in
      corso; `sostegnoOfferto` marca il mandato in cui l'occasione è già passata, perché sia un'occasione e non
      un assillo mensile; `rimpastoOfferto` fa lo stesso per l'altra via. */
@@ -398,6 +474,18 @@ function startOpposizione(){
    S.capitale (la credenziale per il vertice). Quando il capitale è alto e si apre un'occasione →
    la salita → diventaPremier() = transizione FLUIDA al livello 3, ZERO reset del narrativo.
    ============================================================ */
+/* L104-3 · INSTALLARE UN PROFILO DI LEVE NON CAMBIA IL DISAVANZO NEL MESE IN CUI SUCCEDE. `initStatoBase` calibra
+   `S.deficitBase` perché il disavanzo d'avvio sia quello del seme, con le leve di quel momento (neutre). Chi sostituisce
+   `S.pol` per intero dopo — l'avversario che si insedia (entraOpposizione: all'avvio da sfidante e dopo una sconfitta),
+   il premier-AI del ministro, i percorsi «dormienti» a profilo centro — si portava dietro il costo del suo profilo senza
+   che nessuno ricalibrasse: +9,1 punti di disavanzo con un governo di sinistra, +3,3 di destra (L104-1). Qui la base si
+   riallinea perché `computeDeficit()` dia lo stesso numero prima e dopo lo scambio. Le leve mosse DAL GIOCATORE
+   (`setPol`) non passano di qui: quelle devono pesare. È l'UNICO punto che scrive `S.pol` per intero. */
+function installaProfilo(pol){
+  var prima=(S && S.ind && typeof computeDeficit==='function' && S.pol) ? computeDeficit() : null;
+  S.pol=Object.assign({}, pol);
+  if(prima!=null){ var dopo=computeDeficit(); S.deficitBase=(S.deficitBase!=null?S.deficitBase:3.0)+(prima-dopo); }
+}
 function profByAsse(asse){ return asse>=1?'destra':(asse<=-1?'sinistra':'centro'); }
 function generaPremier(){ const p=part(S.partito)||{}; return { nome:nomePersona(), partito:S.partito, asse:(p.asse||0), lealta:60 }; }
 /* D3 asse-3 — era giocata (S se in partita, altrimenti lo scenario scelto nel setup: CREA vive prima di S). */
@@ -458,7 +546,7 @@ function ruoloDicastero(){
 function startMinistro(){
   initStatoBase();                                  // S.livello=2, S.dicastero impostati in applicaPersonaggio
   S.premier=generaPremier();
-  S.pol=Object.assign({}, GOVERNI_PROFILI[profByAsse(S.premier.asse)]);   // la politica nazionale è del premier (tranne il tuo dicastero, che muovi tu)
+  installaProfilo(GOVERNI_PROFILI[profByAsse(S.premier.asse)]);   // la politica nazionale è del premier (tranne il tuo dicastero, che muovi tu) — L104-3: senza salto di disavanzo
   S.snap=Object.assign({},S.pol);
   S.capitale=30; S.visibilita=40; S.credibilita=50;
   S.prevSettore=(DICASTERO_IND[S.dicastero]?S.ind[DICASTERO_IND[S.dicastero][0]]:null);   // baseline per la crescita del capitale
@@ -660,10 +748,10 @@ function diventaPremier(viaElezione){
   S.ministers=MINISTRIES.map(function(M){ const c=mkCand(); return { min:M.id, nm:c.nm, g:c.g, profile:c.profile, comp:c.comp, loyalty:62 }; });   // formi un governo (transizione fluida, niente schermata)
   if(typeof assegnaVoltiGruppo==='function') assegnaVoltiGruppo(S.ministers);   // L20-1: volti distinti nel gabinetto generato alla salita
   S.coalizione=[S.partito];
-  S.seggi=(PAESE.coalizione||PAESE.comeSiVince==='parlamentare')?calcSeggi():null;
+  S.seggi=(sistemaSemipres() && S.seggi) ? S.seggi : ((PAESE.coalizione||PAESE.comeSiVince==='parlamentare')?calcSeggi():null);   // L104-2: nel semipresidenziale la salita eredita l'Assemblea
   S.minoranza = (PAESE.coalizione||PAESE.comeSiVince==='parlamentare') ? bloccoSeggi()<50 : false;   // L61-5 - il blocco, non il solo partito: nell appeso il Regno Unito puo averne uno
   S.tenuta={}; S.tenutaForza0={}; S.tenutaLiv={}; S.tenutaUltimo={}; S.mesiMinoranza=0; initTenuta(); S.bloccoAtteso=bloccoQuota();
-  if(typeof aggiornaCoabitazione==='function') aggiornaCoabitazione();   // L100-2 (dopo il reset di mesiMinoranza)
+  if(typeof aggiornaCoabitazione==='function') aggiornaCoabitazione();   // L100-2/L104-2 (dopo il reset di mesiMinoranza): alla salita si deriva
   if(viaElezione){ bioConta('elezioniVinte'); S.mandatesWon=(S.mandatesWon||0)+1; S.mandatiConsecutivi=(S.mandatiConsecutivi||0)+1; }   // L86-1: i due contatori salgono insieme; solo il secondo si azzera alla sconfitta
   S.mandate=S.mandate||1; S.turnInMandate=0; S.elezioniAnticipate=false; S.ultimoSondaggio=null; S.sondStorico=[];
   S.snap=Object.assign({},S.pol); S.leggiSnap=Object.assign({},S.leggi);
@@ -750,7 +838,7 @@ function ruoloDiplo(){
 function startDiplomatico(){
   initStatoBase();                                   // S.livello=5 impostato in applicaPersonaggio (CREA.livello===5)
   S.diplo={ grado:1, credito:50, mesiAlto:0 };
-  S.pol=Object.assign({}, GOVERNI_PROFILI['centro']); S.snap=Object.assign({},S.pol);   // nazionale neutro/dormiente
+  installaProfilo(GOVERNI_PROFILI['centro']); S.snap=Object.assign({},S.pol);   // nazionale neutro/dormiente (L104-3: dal punto unico)
   S.ministers=[]; S.coalizione=[S.partito]; S.seggi=(PAESE.coalizione||PAESE.comeSiVince==='parlamentare')?calcSeggi():null;
   S.minoranza=false; S.tenuta={};
   if(S.relInt){ for(const id in S.relInt) S.relInt[id]=45; }   // il tabellone parte TIEPIDO: lo costruisci tu, missione dopo missione
@@ -870,7 +958,7 @@ function startLocale(){
   const ind={}; LOCALE_IND[tipo].forEach(function(d){ ind[d.id]=(d.id==='bilancio')?55:50; });
   S.locale={ nome:TE.nome, carica:TE.carica, caricaEn:TE.caricaEn||null, tipo:tipo, terrIdx:terrIdx, ind:ind, leve:leve, consenso:50, mandato:1,
     budget: Math.round((S.pil||2150)*(tipo==='città'?3.2:15)) };   // BILANCIO in € mln (cantiere Budget): calibrato sulle ANCORE reali — Roma ~€6,85 mld (città ~3,2× PIL€mld), Lombardia ~€32 mld (regione ~15×)
-  S.pol=Object.assign({}, GOVERNI_PROFILI['centro']); S.snap=Object.assign({},S.pol);   // nazionale neutro/dormiente
+  installaProfilo(GOVERNI_PROFILI['centro']); S.snap=Object.assign({},S.pol);   // nazionale neutro/dormiente (L104-3: dal punto unico)
   S.capitale=20; S.visibilita=30; S.credibilita=40; S.prevSettore=50;
   S.ministers=[]; S.coalizione=[S.partito]; S.seggi=(PAESE.coalizione||PAESE.comeSiVince==='parlamentare')?calcSeggi():null;
   S.minoranza=false; S.tenuta={}; S.tenutaForza0={}; S.tenutaLiv={}; S.tenutaUltimo={}; S.mesiMinoranza=0;
@@ -1249,7 +1337,21 @@ const DRIFT_ECONOMICO_ERA = {
                    il '79 a 2,0 · C (recessione dura) porta il '75 a −3,1, tre volte la storia, per un '79 più netto (0,9).
                    ⚠ Il secondo shock del '79 si sente poco (2,5 → 2,0): nella storia morde nell'80-81, cioè in fr1980. */
                 {da:1970, ciclo:2},   {da:1973, ciclo:0},   {da:1974, ciclo:-3},
-                {da:1975, ciclo:-5},  {da:1976, ciclo:-1},  {da:1978, ciclo:-1},  {da:1979, ciclo:-2} ]
+                {da:1975, ciclo:-5},  {da:1976, ciclo:-1},  {da:1978, ciclo:-1},  {da:1979, ciclo:-2},
+                /* L101-1 · GLI ANNI '80 (scheda PRESET-FRANCIA-1980 §2), scostamenti sulla crescita-base 2,2. Sweep a tre profili
+                   (.claude/misura-fr1980-struttura.js ciclo, crescita resa a luglio, RPR, 5 semi): A (la scheda) tiene l'83 a 1,7
+                   — la stretta non si sente — e l'88-89 a 3,6/3,9, sotto il 4 chiesto; **B (adottato)** l'83-84 a 0,8, l'88-89
+                   a 4,5/4,6; C alza anche l'86-87 (2,4/2,5) per un guadagno di due decimi sull'88-89. */
+                {da:1980, ciclo:-0.5},{da:1981, ciclo:-1},  {da:1982, ciclo:0},   {da:1983, ciclo:-2},  {da:1984, ciclo:-1},
+                {da:1986, ciclo:0},   {da:1988, ciclo:2.5}, {da:1989, ciclo:2.5},
+                /* L103-1 · GLI ANNI '90 (scheda PRESET-FRANCIA-1990 §2), scostamenti sulla crescita-base 2,0. Le righe 1990-91
+                   dell'80 (+0,5 · −1) sono sostituite: stavano oltre i 120 mesi di fr1980 e non ne toccano le misure.
+                   Discesa per coordinate (.claude/misura-fr1990-struttura.js sweep ciclo, PS, 5 semi, resa a luglio): il profilo
+                   della scheda lasciava il '93 a −0,1 (la recessione non si vedeva) e il '98 a 3,1; adottato: 90 3,0 · 91 0,9 ·
+                   92 1,5 · **93 −0,6** · 94 2,1 · 95 2,1 · 96 1,4 · 97 2,5 · **98 3,4 · 99 3,4 · 2000 4,1** · 01 2,0 (bersaglio ±0,2). */
+                {da:1990, ciclo:1.5}, {da:1991, ciclo:-1.5},{da:1992, ciclo:0},   {da:1993, ciclo:-3},  {da:1994, ciclo:0.5},
+                {da:1995, ciclo:0},   {da:1996, ciclo:-1},  {da:1997, ciclo:1},   {da:1998, ciclo:2},   {da:1999, ciclo:1.5},
+                {da:2000, ciclo:2.5}, {da:2001, ciclo:-0.5} ]
 };
 /* L60-2 · LA DISOCCUPAZIONE D'EPOCA. Il motore non aveva un posto dove un decennio potesse dire «qui i senza
    lavoro sono il doppio»: `S.uMod` decade dell'80% al mese e le carte danno solo colpi. Stessa forma di cicloBase():
@@ -1271,7 +1373,18 @@ const DRIFT_DISOCCUPAZIONE_ERA = {
                    negativa alza già la disoccupazione del motore. Con −6,5/−4/−3: '75 4,2 · '77 5,0 · '79 5,8 (bersaglio
                    4 · 5 · 6 ±0,5). ⚠ Il 1970 rende 5,2: la porta non dichiara la disoccupazione di partenza e scende
                    dal valore del paese — nessuna di queste righe lo tocca. */
-                {da:1970, un:-4}, {da:1974, un:-6.5}, {da:1976, un:-4}, {da:1978, un:-3} ],
+                {da:1970, un:-4}, {da:1974, un:-6.5}, {da:1976, un:-4}, {da:1978, un:-3},
+                /* L101-1 · gli anni '80: la disoccupazione a due cifre (scheda §2: 6,3 nel 1980 → 10 nel '85 → 10,5 nel '87 → 9,5).
+                   CERCATI con la sweep (.claude/misura-fr1980-struttura.js disocc, discesa per coordinate a passi di 0,5, RPR,
+                   5 semi, resa a luglio): 80 6,4 · 83 8,4 · 85 10,1 · 87 10,5 · 89 9,6 — tutti dentro ±0,5. Il 1991 è fuori dai
+                   120 mesi misurati. */
+                {da:1980, un:-1.5}, {da:1982, un:0}, {da:1984, un:1.5}, {da:1986, un:2.5}, {da:1988, un:3.5},
+                /* L103-1 · gli anni '90 (scheda PRESET-FRANCIA-1990 §2: 8,9 nel 1990 → 12,6 nel '94 → 12,3 nel '97 → 9,1 nel 2000).
+                   CERCATE con la sweep (.claude/misura-fr1990-struttura.js sweep un, discesa per coordinate a passi 1 · 0,5 · 0,25,
+                   PS, 5 semi, resa a luglio): 90 9,0 · 94 12,5 · 97 12,2 · 2000 9,2 — tutti dentro ±0,5, scarto massimo 0,1. */
+                {da:1990, un:2},    {da:1991, un:1.5},  {da:1992, un:2.25}, {da:1993, un:3.5},  {da:1994, un:4.5},
+                {da:1995, un:3.5},  {da:1996, un:4},    {da:1997, un:4.75}, {da:1998, un:4.25}, {da:1999, un:3.75},
+                {da:2000, un:2},    {da:2001, un:0.5} ],
   [LINEA_UK]: [ {da:1980, un:1}, {da:1981, un:3}, {da:1982, un:4.5}, {da:1983, un:5}, {da:1986, un:4.5},
                 {da:1987, un:3.5}, {da:1988, un:2}, {da:1989, un:1},
                 /* L75-1 · '90: da ~7% (1990) a ~10,5% (1993) e giù a ~6% (1999) */
@@ -1342,6 +1455,10 @@ function cicloBase(){
    severa su quelle lontane. Con tappe italiane distanti 3-5 anni il numero andrà rimisurato, non riusato.
    ============================================================================================================ */
 const TAPPA_SOGLIA_SEGGI = 25;
+/* L103-1 · i Verdi che entrano alla tappa del 1997/6 o del 1998/3 (una sola scatta): un oggetto solo, così le due tappe
+   gemelle non possono divergere. `selezionabile:false` (D25: sette deputati, una carriera che non si può giocare). */
+const VERDI_1997 = { id:'fr_verts', nome:'Verdi', orientamento:'ecologista', base:{ giovani:0.5, cetomedio:0.5 }, forza:7.9, asse:-1,
+                     alleati:['fr_sfio','fr_pcf'], selezionabile:false, nota:'I Verdi del 1997 hanno sette deputati e governano col PS: non è una carriera che si possa giocare' };
 const RIALLINEAMENTI_ERA = {
   [LINEA_IT]: {
     1958: [ {id:'i50_dc',delta:2}, {id:'i50_pci',delta:-5}, {id:'i50_psi',delta:3}, {id:'i50_psdi',delta:-1}, {id:'i50_pnm',delta:-1.5}, {id:'i50_pri',delta:-0.5}, {id:'i50_msi',delta:3} ],   // Σ=0
@@ -1647,9 +1764,85 @@ const RIALLINEAMENTI_ERA = {
                 esce:[ {id:'fr_mrp', confluisce_in:'fr_ri'} ],
                 delta:[ {id:'fr_unr',delta:-2.8}, {id:'fr_ri',delta:0.0}, {id:'fr_sfio',delta:4.2}, {id:'fr_pcf',delta:-1.4} ],   // Σ=0
                 urne:  { fr_sfio:24.9, fr_unr:22.5, fr_pcf:20.6, fr_ri:19.8 },
-                seggi: { fr_unr:32.2, fr_ri:25.7, fr_sfio:24.1, fr_pcf:18.0 } }
+                seggi: { fr_unr:32.2, fr_ri:25.7, fr_sfio:24.1, fr_pcf:18.0 } },
+    /* ==========================================================================================================
+       L101-1 · LE TRE TAPPE DEGLI ANNI '80 (scheda PRESET-FRANCIA-1980 §1). Seggi a 100 (resti più grandi, i non
+       iscritti ripartiti secondo la tabella destra-sinistra del sito); delta = urne storiche rinormalizzate sul roster
+       meno quelle della tappa prima (il metodo del '70). Σ dei delta = 0, salvo il 1986 dove fa −10,6 = la quota
+       d'ingresso del Front national. Voti del 1° turno: france-politique.fr (legislative 1981/1986/1988, consultate
+       il 24/9/2026); i radicali di sinistra (MRG) contati nel PS, come nel '73.
+       ⚑ D17: il 1981 e il 1988 sono CONDIZIONATI sull'Eliseo di sinistra (`eliseoDiSinistra()`, qui sotto): sono le
+       Assemblee sciolte dal Presidente appena eletto, come il 1968 dal maggio (D9). Il 1986 è incondizionato: ci arriva
+       qualunque Presidente, e per uno di sinistra è la prima coabitazione (L100-2: si entra solo a una tappa).
+       ========================================================================================================== */
+    /* 1981: la sinistra all'Eliseo scioglie l'Assemblea e il PS ha la maggioranza assoluta da solo. */
+    '1981/6': { se:function(){ return typeof eliseoDiSinistra==='function' && eliseoDiSinistra(); },
+                delta:[ {id:'fr_sfio',delta:11.6}, {id:'fr_pcf',delta:-6.2}, {id:'fr_unr',delta:-3.3}, {id:'fr_ri',delta:-2.1} ],   // Σ=0
+                urne:  { fr_sfio:37.4, fr_unr:20.9, fr_ri:19.2, fr_pcf:16.1 },
+                seggi: { fr_sfio:58.9, fr_pcf:9.0, fr_unr:18.9, fr_ri:13.2 } },
+    /* 1986: la proporzionale di una volta sola. Entra il Front national: `alleati:[]` (con nessuno) e
+       `selezionabile:false` (D18: 35 seggi e nessuna alleanza possibile, sarebbe una carriera che non si può giocare).
+       ⚠ Le liste comuni RPR-UDF (21,4) sono divise in proporzione alle liste separate (11,2 : 8,3) — inferenza dichiarata.
+       ⚠ La forza d'ingresso è 10,6: il 9,7 delle urne rinormalizzato sul roster, come ogni altra forza. */
+    '1986/3': { entra:[ { id:'fr_fn', nome:'Front national', orientamento:'destra populista',
+                          base:{ lavoratori:0.4, cetomedio:0.3, pensionati:0.3 }, forza:10.6, asse:2, alleati:[],
+                          selezionabile:false, nota:'Il Front national del 1986 ha trentacinque deputati e nessun alleato: non è una carriera che si possa giocare' } ],
+                delta:[ {id:'fr_sfio',delta:-6.1}, {id:'fr_pcf',delta:-6.5}, {id:'fr_unr',delta:3.4}, {id:'fr_ri',delta:-1.4} ],   // Σ=−10,6 = l'ingresso del FN
+                urne:  { fr_sfio:31.0, fr_unr:23.5, fr_ri:17.4, fr_pcf:9.8, fr_fn:9.7 },
+                seggi: { fr_sfio:37.4, fr_pcf:6.3, fr_unr:27.8, fr_ri:22.4, fr_fn:6.1 } },
+    /* 1988: il Presidente rieletto scioglie, torna il maggioritario, la sinistra ha la maggioranza relativa (e il
+       blocco PS+PCF sopra 50: la coabitazione si spegne qui). Il FN resta con un seggio.
+       ⚠ SEGGI RICALCOLATI: quelli della scheda sommavano 98,4. Col metodo della scheda stessa (UDC dentro l'UDF, i 7 non
+       iscritti di destra pro-quota fra RPR e UDF, i 6 di sinistra fra PS e PCF, il FN a 1) su 575 seggi assegnati. */
+    '1988/6': { se:function(){ return typeof eliseoDiSinistra==='function' && eliseoDiSinistra(); },
+                delta:[ {id:'fr_sfio',delta:4.1}, {id:'fr_pcf',delta:1.2}, {id:'fr_unr',delta:-5.4}, {id:'fr_ri',delta:0.5}, {id:'fr_fn',delta:-0.4} ],   // Σ=0
+                urne:  { fr_sfio:35.9, fr_unr:19.2, fr_ri:18.5, fr_pcf:11.3, fr_fn:9.7 },
+                seggi: { fr_sfio:48.8, fr_pcf:4.4, fr_unr:23.2, fr_ri:23.4, fr_fn:0.2 } },
+    /* ==========================================================================================================
+       L103-1 · LE TRE TAPPE DEGLI ANNI '90 (scheda PRESET-FRANCIA-1990 §1). Seggi a 100 dalla scheda (gruppi AN, RL e NI
+       pro-quota). Delta = urne del 1° turno rinormalizzate sul roster (resti più grandi) meno la tappa prima — per il 1993
+       le forze d'avvio di fr1990 (le urne del 1988). Voti: france-politique.fr (legislative 1993 e 1997, consultate il
+       25/9/2026); i radicali di sinistra contati nel PS, come nel '73 e nell''81; divers e altri fuori roster.
+       ⚑ D24: il 1993 è incondizionato (la legislatura del 1988 scade per chiunque; per un Presidente di sinistra è la
+       seconda coabitazione). Il 1997 e il 1998 sono LA COPPIA di S4 «Sciogliere» (L103-2): stessi seggi, stesso ingresso
+       dei Verdi, condizioni che si escludono — il 1997 è l'Assemblea sciolta dal Presidente di destra, il 1998 la stessa
+       Assemblea un anno dopo, per chi ha aspettato la scadenza o per l'Eliseo di sinistra che non scioglie.
+       `S.scioglimento97`: null = storico (chi non gioca S4, l'opposizione), 'no' = «aspetta». Lo scrive S4 in L103-2.
+       ========================================================================================================== */
+    /* 1993: la disfatta della sinistra. RPR 20,2 · UDF 18,8 · PS+MRG 18,4 · PCF 9,3 · FN 12,5 (Verdi e GE fuori roster). */
+    '1993/3': { delta:[ {id:'fr_unr',delta:5.2}, {id:'fr_ri',delta:4.2}, {id:'fr_sfio',delta:-14.7}, {id:'fr_pcf',delta:-0.2}, {id:'fr_fn',delta:5.5} ],   // Σ=0
+                urne:  { fr_unr:20.2, fr_ri:18.8, fr_sfio:18.4, fr_fn:12.5, fr_pcf:9.3 },
+                seggi: { fr_unr:45.6, fr_ri:38.4, fr_sfio:12.0, fr_pcf:4.0, fr_fn:0 } },
+    /* 1997: il Presidente di destra scioglie con un anno d'anticipo e perde. Entrano i Verdi: forza 7,9 = il 6,8 delle urne
+       rinormalizzato sul roster, come ogni altra forza (⚠ la scheda scriveva «≈ 6,8 rinormalizzata»: 6,8 è il voto,
+       rinormalizzato è 7,9 — stesso metodo del FN nel 1986). `alleati:['fr_sfio','fr_pcf']` dal L104-1 (prima solo il PS, come diceva la scheda): la cricca avversa
+       del '97 torna a tre, PS+PCF+Verdi = 56,6 — il PCF li nomina a sua volta (data.js, roster fr1990).
+       PS+PRS 25,0 · RPR 15,7 · UDF 14,2 · PCF 9,9 · FN 14,9 · Verdi ed ecologisti 6,8 → 28,9 · 18,1 · 16,4 · 11,5 · 17,2 · 7,9. */
+    '1997/6': { se:function(){ return typeof S!=='undefined' && S && typeof eliseoDiSinistra==='function' && !eliseoDiSinistra() && S.scioglimento97!=='no'; },
+                entra:[ VERDI_1997 ],
+                delta:[ {id:'fr_sfio',delta:5.7}, {id:'fr_pcf',delta:-0.2}, {id:'fr_unr',delta:-7.4}, {id:'fr_ri',delta:-7.4}, {id:'fr_fn',delta:1.4} ],   // Σ=−7,9 = l'ingresso dei Verdi
+                urne:  { fr_sfio:25.0, fr_unr:15.7, fr_fn:14.9, fr_ri:14.2, fr_pcf:9.9, fr_verts:6.8 },
+                seggi: { fr_sfio:49.2, fr_pcf:6.2, fr_verts:1.2, fr_unr:24.6, fr_ri:19.8, fr_fn:0.2 } },
+    /* 1998: la gemella. La legislatura del '93 scade a marzo e la sinistra la vince come vinse il 1997: stessi seggi, stesso
+       ingresso (dichiarato: non inventiamo un'altra Assemblea). Per l'Eliseo di sinistra spegne la coabitazione del '93. */
+    '1998/3': { se:function(){ return typeof S!=='undefined' && S && typeof eliseoDiSinistra==='function' && (eliseoDiSinistra() || S.scioglimento97==='no'); },
+                entra:[ VERDI_1997 ],
+                delta:[ {id:'fr_sfio',delta:5.7}, {id:'fr_pcf',delta:-0.2}, {id:'fr_unr',delta:-7.4}, {id:'fr_ri',delta:-7.4}, {id:'fr_fn',delta:1.4} ],   // Σ=−7,9 = l'ingresso dei Verdi
+                urne:  { fr_sfio:25.0, fr_unr:15.7, fr_fn:14.9, fr_ri:14.2, fr_pcf:9.9, fr_verts:6.8 },
+                seggi: { fr_sfio:49.2, fr_pcf:6.2, fr_verts:1.2, fr_unr:24.6, fr_ri:19.8, fr_fn:0.2 } }
   }
 };
+/* L101-1 · D17 · DI CHI È L'ELISEO. Una funzione sola, letta dalle tappe condizionate del 1981 e del 1988: la
+   condizione è di chi ha l'Eliseo, non del giocatore — vale anche per chi gioca all'opposizione. Al governo (e da
+   ministro, dove il premier è del tuo partito, e in coabitazione, dove l'Eliseo resta tuo) è il tuo partito;
+   all'opposizione è `S.governoAvversario`, il partito che ha vinto l'urna contro di te (entraOpposizione, L98-2).
+   «Di sinistra» = asse negativo. */
+function eliseoDiSinistra(){
+  if(typeof S==='undefined' || !S) return false;
+  var pid = S.opposizione ? S.governoAvversario : S.partito;
+  var p = (pid!=null && typeof part==='function') ? part(pid) : null;
+  return !!p && (p.asse||0) < 0;
+}
 /* L75-1 · I SONDAGGI CHE SBAGLIANO. La proiezione di L59-4 è onesta per costruzione (legge le forze); il 1992 inglese è
    il caso in cui i sondaggi sbagliarono davvero. Qui, nei mesi prima di una tappa che lo dichiara, il numero RESO al
    giocatore porta un bias (contro un blocco di destra, a favore di uno di sinistra): la verità delle urne resta quella
@@ -1699,7 +1892,14 @@ function applicaRosterDelta(ricalcolaSeggi){
      ============================================================================================================ */
   (R.entra||[]).forEach(function(n){
     if(lista.some(function(p){ return p.id===n.id; })) return;
-    lista.push({ id:n.id, nome:n.nome, orientamento:n.orientamento||'centro', base:n.base||{}, forza:n.forza||1, asse:(n.asse!=null?n.asse:0), gruppoUE:n.gruppoUE||'noniscritti' });
+    var np={ id:n.id, nome:n.nome, orientamento:n.orientamento||'centro', base:n.base||{}, forza:n.forza||1, asse:(n.asse!=null?n.asse:0), gruppoUE:n.gruppoUE||'noniscritti' };
+    /* L101-1 · i campi dichiarati del partito che nasce NON si perdono più: `alleati` (con la lista vuota = «con nessuno»,
+       il Front national del 1986), `selezionabile` e `nota` (D18). Prima la ricostruzione li scartava in silenzio — anche
+       gli `alleati` dei Poujadisti del 1956 e dei Repubblicani indipendenti del 1962, che dopo la tappa tornavano all'asse. */
+    if(Array.isArray(n.alleati)) np.alleati=n.alleati.slice();
+    if(n.selezionabile===false) np.selezionabile=false;
+    if(n.nota) np.nota=n.nota;
+    lista.push(np);
   });
   (R.rinomina||[]).forEach(function(r){ var p=lista.find(function(x){ return x.id===r.id; }); if(p) p.nome=r.nome; });
   (R.esce||[]).forEach(function(e){ lista = lista.filter(function(p){ return p.id!==e.id; }); });
@@ -1989,7 +2189,8 @@ function riallineamentoTappa(){
       /* i seggi sono cambiati a metà mandato: la minoranza va riletta, come già fanno rimpasto e sostegno.
          In opposizione non ha senso — lì il numero che conta è quello di chi governa. */
       if(!S.opposizione && typeof bloccoSeggi==='function') S.minoranza = bloccoSeggi()<50;
-      if(typeof aggiornaCoabitazione==='function') aggiornaCoabitazione(true);   // L100-2: la tappa è l'UNICO punto da cui si entra in coabitazione (D-b)
+      if(typeof aggiornaCoabitazione==='function') aggiornaCoabitazione();   // L100-2/L104-2: la tappa è una legislativa: la coabitazione si deriva
+      if(typeof sistemaSemipres==='function' && sistemaSemipres()) S.legislaturaDa=S.year*12+S.month;   // L104-2: l'Assemblea nuova nasce qui
     }
   }
   if(S.log){   // beat visibile della tappa (il quadro politico che si assesta)
@@ -2033,6 +2234,12 @@ function riallineamentoTappa(){
     /* L99-1 — le tappe degli anni '70 */
     else if(S.era===LINEA_FR && S.year===1973) S.log.unshift({t:T('Elezioni del marzo 1973'), x:T('La maggioranza tiene, ma perde un quarto dei seggi: la sinistra, con i socialisti che hanno cambiato nome, è tornata a contare.')});
     else if(S.era===LINEA_FR && S.year===1976) S.log.unshift({t:T('Il partito gollista si rifonda'), x:T('Il partito del generale cambia nome e padrone: l\'ex Primo ministro se lo prende in una giornata, davanti a cinquantamila militanti.')});
+    else if(S.era===LINEA_FR && S.year===1981) S.log.unshift({t:T('Elezioni del giugno 1981'), x:T('Il nuovo Presidente scioglie l\'Assemblea e la sinistra vince: il PS, da solo, ha più della metà dei seggi.')});   // L101-1
+    else if(S.era===LINEA_FR && S.year===1986) S.log.unshift({t:T('Elezioni del marzo 1986'), x:T('Con la proporzionale di una volta sola la destra torna maggioranza per pochi seggi, e il Front national entra in aula.')});   // L101-1
+    else if(S.era===LINEA_FR && S.year===1988) S.log.unshift({t:T('Elezioni del giugno 1988'), x:T('Il Presidente rieletto scioglie l\'Assemblea: la sinistra torna la più forte, con la maggioranza relativa.')});   // L101-1
+    else if(S.era===LINEA_FR && S.year===1993) S.log.unshift({t:T('Elezioni del marzo 1993'), x:T('La sinistra perde quattro seggi su cinque: la destra ha la maggioranza più larga che l\'Assemblea abbia mai visto.')});   // L103-1
+    else if(S.era===LINEA_FR && S.year===1997) S.log.unshift({t:T('Elezioni del giugno 1997'), x:T('Il Presidente ha sciolto l\'Assemblea con un anno d\'anticipo, e l\'ha persa: la sinistra torna maggioranza, con i comunisti e, per la prima volta, i Verdi.')});   // L103-1
+    else if(S.era===LINEA_FR && S.year===1998) S.log.unshift({t:T('Elezioni del marzo 1998'), x:T('La legislatura del \'93 arriva a scadenza e la sinistra la vince: torna maggioranza, con i comunisti e, per la prima volta, i Verdi.')});   // L103-1
     else if(S.era===LINEA_FR && S.year===1978) S.log.unshift({t:T('Elezioni del marzo 1978'), x:T('La destra vince contro tutti i sondaggi: la sinistra divisa perde, e i centristi si ritrovano in una confederazione sola.')});
     else if(S.era===LINEA_IT && S.year===2008) S.log.unshift({t:T('Elezioni 2008'), x:T('Due partiti grandi nati da altrettante fusioni si prendono quasi tutto, e per la prima volta dal dopoguerra la sinistra radicale resta fuori dall\'aula.')});
   }
@@ -2152,9 +2359,13 @@ function bloccoSeggi(){ return (S.seggi && typeof seggiCoalizione==='function') 
    ================================================================================================================ */
 const COABITAZIONE_MIN = ['esteri','difesa'];   // i ministeri che restano al Presidente
 /* Chi paga l'economia sotto coabitazione: il termine economico di targetGroup e il logorio si moltiplicano per
-   questi due numeri. NON TARATI: la scheda dell'80 li misurerà sulla porta, con la dispersione della porta. */
-const COABITAZIONE_ECO_K = 0.5;
-const COABITAZIONE_LOGORIO_K = 0.5;
+   questi due numeri. ⚑ TARATI in L101-1 (D19) sulla porta fr1980, con .claude/misura-fr1980-struttura.js d19: consenso a dicembre
+   1987 del Presidente PS in coabitazione contro un Presidente di destra al governo (RPR+UDF, 54,9, 40 carriere), banda
+   «non peggio, non più di 5 punti meglio»: K 0,25 +0,3 · 0,5 +0,2 · 0,75 +0,1 · 1 −0,1. Adottato il primo dentro la banda,
+   **0,25**. ⚠ Il criterio quasi non distingue (4 decimi da un capo all'altro): i due numeri pesano poco sul consenso, perché
+   in coabitazione l'economia della porta è già in ripresa e il logorio è una frazione piccola. */
+let COABITAZIONE_ECO_K = 0.25;       // let: la sweep D19 (L101-1) lo varia sul banco
+let COABITAZIONE_LOGORIO_K = 0.25;   // let: idem
 /* Il blocco avverso più forte, fra i partiti che NON stanno col mio (né nella mia coalizione né nel mio blocco).
    ⚑ D-a (Cowork, 24/9): **UN BLOCCO È UNA CRICCA, NON UNA STELLA** — conta solo insiemi di partiti che stanno TUTTI
    CON TUTTI (ogni coppia compatibile secondo `staColBlocco`, nei due versi). Con la «stella» di un capofila, nel
@@ -2191,15 +2402,18 @@ function coabitazioneDovuta(){
   return typeof S!=='undefined' && !!S && !!PAESE && PAESE.sistema==='semipresidenziale' && S.livello===3 && !S.opposizione
       && !!S.seggi && bloccoSeggi()<50 && bloccoAvversoSeggi()>=50;
 }
-function aggiornaCoabitazione(daTappa){
+/* L104-2 · D-b È RITIRATA: la regola «si entra solo a una tappa» esisteva perché la presidenziale ricalcolava
+   l'Assemblea. Con le urne separate la coabitazione si deriva a OGNI cambio di seggi o di Presidente: tappa,
+   scioglimento, presidenziale, avvio della porta, salita al governo. */
+function aggiornaCoabitazione(){
   if(typeof S==='undefined' || !S) return;
   var era=!!S.coabitazione, ora=coabitazioneDovuta();
-  if(ora && !era && !daTappa){ return; }   // D-b: all'urna, all'avvio e alla salita non si entra (la minoranza resta com'era)
   if(ora){
     S.minoranza=false; S.mesiMinoranza=0;
     if(!era){
       var B=bloccoAvverso(), P=part(B.capofila)||{};
       S.coabitazione=true;
+      S.sostegno=null;   // L101-1: l'appoggio esterno era al governo del Presidente, che non c'è più: rompendosi più tardi rimetteva S.minoranza a vero (misurato: 2 cadute in coabitazione)
       S.premier={ nome:nomePersona(), partito:B.capofila, asse:(P.asse||0), lealta:0 };
       if(S.log) S.log.unshift({t:T('Coabitazione'), x:T('L\'Assemblea è degli altri: il Presidente nomina un Primo ministro di %P.').replace('%P', T(P.nome||''))});
     }
@@ -2433,7 +2647,7 @@ function sostegnoTick(){
 function sostegnoRompi(perche){
   if(!S || !S.sostegno) return;
   var nome=T(part(S.sostegno.pid) ? part(S.sostegno.pid).nome : '');
-  S.sostegno=null; S.minoranza=bloccoSeggi()<50;
+  S.sostegno=null; S.minoranza=!S.coabitazione && bloccoSeggi()<50;   // L101-1: in coabitazione la minoranza resta spenta
   stampad(-4); repd(-2); gd('cetomedio',-2);
   S.log.unshift({t:T('La maggioranza'),x:T('%P ritira l\'appoggio esterno: il governo torna senza rete.').replace('%P',nome)});
 }
@@ -2493,12 +2707,36 @@ function mandatiRestanti(){
   var n=mandatiPerIlLimite();
   return (n==null) ? null : Math.max(0, PAESE.mandatiMax - n);
 }
+/* ================================================================================================================
+   L104-2 · LE URNE DEL SEMIPRESIDENZIALE SI SEPARANO. Fino a qui la presidenziale e lo scioglimento erano la stessa
+   `election()`: la presidenziale ricalcolava l'Assemblea dalle forze, e lo scioglimento rifaceva la presidenza (vinto,
+   passava da `nextMandate` e il settennato ripartiva da capo). La storia non fa così, e il costo era misurato:
+   minoranze «dall'urna» di 14-69 mesi in fr1960-fr1990 (L104-1). Ora, solo con `PAESE.sistema==='semipresidenziale'`:
+     · la PRESIDENZIALE elegge e basta: `S.seggi` non si tocca (avviaAttesa, avviaNotte, nextMandate, la salita), e
+       chi vince da sfidante eredita l'Assemblea in vigore;
+     · lo SCIOGLIMENTO è un'urna di soli seggi (`urnaLegislativa()`): la notte dei seggi, la trattativa, e alla fine
+       `chiudiLegislativa()` — niente `nextMandate`, il mandato presidenziale continua. Ammesso anche in coabitazione;
+       i dodici mesi di `scioglimentoMesiMin` si contano dall'Assemblea in vigore (`S.legislaturaDa`).
+   Parlamentare e presidenziale puro non passano da nessuna di queste righe. */
+function sistemaSemipres(){ return !!PAESE && PAESE.sistema==='semipresidenziale'; }
+function urnaLegislativa(){ return typeof S!=='undefined' && !!S && sistemaSemipres() && !!S.scioglimentoScelto && !S.opposizione; }
+function chiudiLegislativa(){
+  S.scioglimentoScelto=false; S.elezioniAnticipate=false; S.legislaturaDa=S.year*12+S.month;
+  S.minoranza = PAESE.coalizione ? seggiCoalizione(S.coalizione,S.seggi)<50 : false;
+  S.mesiMinoranza=0; S.caduteMandato=0; S.sostegno=null; S.sostegnoStrappi=0;   // Assemblea nuova: conto delle crisi e stampelle ripartono
+  if(typeof aggiornaCoabitazione==='function') aggiornaCoabitazione();          // si entra, si resta o si esce dalla coabitazione
+  initTenuta(); S.bloccoAtteso=bloccoQuota(); S.ultimoSondaggio=null; S.sondStorico=[];
+  if(typeof bioFatto==='function'){ try{ bioFatto(T(S.coabitazione?'Le legislative anticipate danno l\'Assemblea agli altri: comincia una coabitazione.':'Le legislative anticipate si chiudono: il mandato all\'Eliseo continua.')); }catch(e){} }
+  S.log.unshift({t:T('Legislative anticipate'), x:T(S.coabitazione?'L\'Assemblea nuova è degli altri: il mandato all\'Eliseo continua, in coabitazione.':(S.minoranza?'L\'Assemblea nuova non ha una maggioranza tua: il mandato all\'Eliseo continua, in minoranza.':'L\'Assemblea nuova è tua: il mandato all\'Eliseo continua.'))});
+  document.getElementById('ov').classList.remove('on');
+  genAgenda(false); generaTitolo(); render(); commitSnap();
+}
 function scioglimentoAmmesso(){
   if(typeof S==='undefined' || !S || S.opposizione || S.livello!==3) return false;
   if(PAESE.scioglimento===false) return false;                      // calendario rigido: la voce non compare
-  if(S.coabitazione) return false;                                  // L100-2: sotto coabitazione l'urna del motore rifarebbe la presidenza
   if(PAESE.comeSiVince!=='parlamentare' && !PAESE.coalizione) return false;
   var mesiDalVoto=(S.turnInMandate||0)*12 + ((S.month||1)-1);
+  if(sistemaSemipres() && S.legislaturaDa!=null) mesiDalVoto=Math.min(mesiDalVoto, S.year*12+S.month-S.legislaturaDa);   // L104-2: dall'Assemblea in vigore
   var minMesi=(PAESE.scioglimentoMesiMin!=null)?PAESE.scioglimentoMesiMin:18;   // L80-5: la Francia scioglie dopo 12 mesi
   if(mesiDalVoto<minMesi) return false;                            // prima è indecente
   var durata=(PAESE.mandatoMesi||60)/12;
@@ -2764,6 +3002,43 @@ function snodoBarreDovuta(){       return typeof S!=='undefined' && S && S.era==
 function snodoBarreOppDovuta(){    return typeof S!=='undefined' && S && S.era===LINEA_FR && S.livello===3 && S.opposizione && S.barreOpp==null && S.barre==null && S.year===1976 && S.month>=9 && S.month<=11; }
 function snodoSinistra77Dovuta(){  return typeof S!=='undefined' && S && S.era===LINEA_FR && S.livello===3 && S.partito==='fr_sfio' && S.sinistra77==null && S.year===1977 && S.month>=9 && S.month<=11; }
 function snodoCampagna78Dovuta(){  return typeof S!=='undefined' && S && S.era===LINEA_FR && S.livello===3 && !S.opposizione && S.partito!=='fr_sfio' && S.partito!=='fr_pcf' && S.campagna78==null && S.year===1977 && S.month>=9 && S.month<=11; }
+/* L101-2 · GLI SNODI DEL DECENNIO FRANCESE '80. Finestre di tre mesi dal mese della scheda; nessuno dei quattro mesi
+   (settembre 1981, marzo 1983, giugno 1984, luglio 1986) è di un pilastro. Il lato lo decide eliseoDiSinistra() (L101-1):
+   S1 e S2 al governo hanno due versioni sullo stesso id (le sceglie l'agenda); dall'aula esiste solo contro un Eliseo di
+   sinistra, perché il testo parla delle sue nazionalizzazioni. S3 è solo dell'Eliseo di sinistra al governo. S4 ha due
+   versioni sullo stesso id: le ordinanze in coabitazione, le privatizzazioni al governo di destra senza coabitazione;
+   il Presidente di sinistra che nell'86 tiene l'Assemblea non riceve S4 (dichiarato in data.js). */
+function snodoRiforme81Dovuta(){     return typeof S!=='undefined' && S && S.era===LINEA_FR && S.livello===3 && !S.opposizione && S.riforme81==null && S.year===1981 && S.month>=9 && S.month<=11; }
+function snodoRiforme81OppDovuta(){  return typeof S!=='undefined' && S && S.era===LINEA_FR && S.livello===3 && S.opposizione && S.riforme81Opp==null && S.riforme81==null && eliseoDiSinistra() && S.year===1981 && S.month>=9 && S.month<=11; }
+function snodoRigore83Dovuta(){      return typeof S!=='undefined' && S && S.era===LINEA_FR && S.livello===3 && !S.opposizione && S.rigore83==null && S.year===1983 && S.month>=3 && S.month<=5; }
+function snodoRigore83OppDovuta(){   return typeof S!=='undefined' && S && S.era===LINEA_FR && S.livello===3 && S.opposizione && S.rigore83Opp==null && S.rigore83==null && S.year===1983 && S.month>=3 && S.month<=5; }
+function snodoScuola84Dovuta(){      return typeof S!=='undefined' && S && S.era===LINEA_FR && S.livello===3 && !S.opposizione && S.scuola84==null && eliseoDiSinistra() && S.year===1984 && S.month>=6 && S.month<=8; }
+function snodoOrdinanze86Dovuta(){   return typeof S!=='undefined' && S && S.era===LINEA_FR && S.livello===3 && !S.opposizione && S.ordinanze86==null && (!!S.coabitazione || !eliseoDiSinistra()) && S.year===1986 && S.month>=7 && S.month<=9; }
+/* LA CORSA AL FRANCO DELL'81 (§I-B): un'ancora sola, ottobre 1981 → gennaio 1982, nel gate parametrizzato e nello stesso
+   registro del '50 (S.francoAncore): l'id a81 non collide con le ancore del '50. Esce dopo S1 se S1 ha preso il mese. */
+const FRANCO80_ANCORE = [ {id:'a81', da:1981, daMese:10, a:1982, aMese:1} ];
+function franco81AncoraDovuta(){
+  if(typeof S==='undefined' || !S) return null;
+  return ancoraValutaDovuta(LINEA_FR, FRANCO80_ANCORE, S.francoAncore, false);
+}
+/* L103-2 · GLI SNODI DEL DECENNIO FRANCESE '90. Finestre di tre mesi, nessun mese occupato da un pilastro. S1 e S2 sono del
+   Presidente in tutti i rami (anche in coabitazione: il referendum e la difesa restano suoi); S3 e S4 solo col Presidente
+   di destra senza coabitazione. S3 dall'aula è di chi gioca un partito di sinistra all'opposizione di un Presidente di
+   destra. S4 si chiude a maggio: l'urna di soli seggi (L104-2) deve venire prima della tappa del 1997/6. */
+function snodoRef92Dovuta(){        return typeof S!=='undefined' && S && S.era===LINEA_FR && S.livello===3 && !S.opposizione && S.ref92==null && S.year===1992 && S.month>=9 && S.month<=11; }
+function snodoRef92OppDovuta(){     return typeof S!=='undefined' && S && S.era===LINEA_FR && S.livello===3 && S.opposizione && S.ref92Opp==null && S.ref92==null && S.year===1992 && S.month>=9 && S.month<=11; }
+function snodoSarajevo94Dovuta(){   return typeof S!=='undefined' && S && S.era===LINEA_FR && S.livello===3 && !S.opposizione && S.sarajevo94==null && S.year===1994 && S.month>=2 && S.month<=4; }
+function snodoPiano95Dovuta(){      return typeof S!=='undefined' && S && S.era===LINEA_FR && S.livello===3 && !S.opposizione && S.piano95==null && !eliseoDiSinistra() && !S.coabitazione && ((S.year===1995 && S.month>=11) || (S.year===1996 && S.month===1)); }
+function snodoPiano95OppDovuta(){   var p=(typeof part==='function')?part(S&&S.partito):null;
+  return typeof S!=='undefined' && S && S.era===LINEA_FR && S.livello===3 && S.opposizione && S.piano95Opp==null && !eliseoDiSinistra() && !!p && (p.asse||0)<0 && ((S.year===1995 && S.month>=11) || (S.year===1996 && S.month===1)); }
+function snodoScioglimento97Dovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_FR && S.livello===3 && !S.opposizione && S.scioglimento97==null && !eliseoDiSinistra() && !S.coabitazione && S.year===1997 && S.month>=4 && S.month<=5; }
+/* LA CORSA AL FRANCO DEL '92 E DEL '93 (§I-B): due ancore, stesso registro S.francoAncore (a92, a93: nessuna collisione con
+   a51/a55/a57/a81). ⚠ Il gate non guarda la coabitazione: la corsa del '93 arriva anche al Presidente in coabitazione. */
+const FRANCO90_ANCORE = [ {id:'a92', da:1992, daMese:10, a:1993, aMese:1}, {id:'a93', da:1993, daMese:8, a:1993, aMese:12} ];
+function franco90AncoraDovuta(){
+  if(typeof S==='undefined' || !S) return null;
+  return ancoraValutaDovuta(LINEA_FR, FRANCO90_ANCORE, S.francoAncore, false);
+}
 /* IL PREZZO DEL PETROLIO (§B della scheda): due ancore col mese, nel gate parametrizzato. Tutte e due cadono in un mese
    occupato (pm_petrolio a ottobre 1973, «L'Europa vota» a giugno 1979) ed escono il mese dopo. La prima si chiude a
    febbraio 1974, prima del piano nucleare: la scelta energetica viene dopo il primo shock, e legge il secondo. */
@@ -2918,7 +3193,7 @@ function cardAttivistaEvento(id){   // ricostruisce la carta-evento dal pool sta
 function startAttivista(){
   initStatoBase();                                    // S.livello=0 impostato in applicaPersonaggio (CREA.livello===0); S.eta=25 dal form
   S.attivista={ base:10, autorev:15, mesi:0, paceMul:calcPaceMul(S.eta, S.diff||'normale'), campagna:null, campUltimo:0, campOfferta:false, campStoria:[], evUltimo:0, evRecent:[], evCorrente:null };   // valute + paceMul + stato campagna (L2 cooldown/offerta, L3 storico) + eventi
-  S.pol=Object.assign({}, GOVERNI_PROFILI['centro']); S.snap=Object.assign({},S.pol);   // nazionale neutro/dormiente (come startLocale)
+  installaProfilo(GOVERNI_PROFILI['centro']); S.snap=Object.assign({},S.pol);   // nazionale neutro/dormiente (L104-3: dal punto unico) (come startLocale)
   S.capitale=null; S.visibilita=null; S.credibilita=null; S.prevSettore=null;           // niente notorietà amministrativa: la standing è l'autorev di campo
   S.ministers=[]; S.coalizione=[S.partito]; S.seggi=(PAESE.coalizione||PAESE.comeSiVince==='parlamentare')?calcSeggi():null;
   S.minoranza=false; S.tenuta={}; S.tenutaForza0={}; S.tenutaLiv={}; S.tenutaUltimo={}; S.mesiMinoranza=0;
@@ -3023,7 +3298,7 @@ function diventaMinistro(){
   S.livello=2; S.locale=null; S.occUltima=null; S.mesiAltoCap=0;
   S.dicastero=dicasteroDefault(S.personaggio&&S.personaggio.background);
   S.premier=generaPremier();
-  S.pol=Object.assign({}, GOVERNI_PROFILI[profByAsse(S.premier.asse)]); S.snap=Object.assign({},S.pol);
+  installaProfilo(GOVERNI_PROFILI[profByAsse(S.premier.asse)]); S.snap=Object.assign({},S.pol);   // L104-3
   S.capitale=40; S.silAvviso=null; S.premCrisiMesi=0; S.premMossaUltimo=null;
   S.prevSettore=(DICASTERO_IND[S.dicastero]?S.ind[DICASTERO_IND[S.dicastero][0]]:null);
   S.ministers=[]; S.coalizione=[S.partito]; S.seggi=(PAESE.coalizione||PAESE.comeSiVince==='parlamentare')?calcSeggi():null;
@@ -4513,6 +4788,10 @@ function genAgendaRamo(first){
     if(!first && typeof snodoRef72OppDovuta==='function' && snodoRef72OppDovuta()){ S.agenda.push({kind:'event', data:REF72_OPP_EV, resolved:false}); agendaSolo(); return; }   // L99-2: l'Europa al referendum, dall'aula
     if(!first && typeof snodoBarreOppDovuta==='function' && snodoBarreOppDovuta()){ S.agenda.push({kind:'event', data:BARRE_OPP_EV, resolved:false}); agendaSolo(); return; }   // L99-2: il piano di rigore, dall'aula
     if(!first && typeof snodoSinistra77Dovuta==='function' && snodoSinistra77Dovuta()){ S.agenda.push({kind:'event', data:SINISTRA77_EV, resolved:false}); agendaSolo(); return; }   // L99-2: la sinistra divisa (chi gioca il PS)
+    if(!first && typeof snodoRiforme81OppDovuta==='function' && snodoRiforme81OppDovuta()){ S.agenda.push({kind:'event', data:RIFORME81_OPP_EV, resolved:false}); agendaSolo(); return; }   // L101-2: le riforme dell'81, dall'aula
+    if(!first && typeof snodoRigore83OppDovuta==='function' && snodoRigore83OppDovuta()){ S.agenda.push({kind:'event', data:RIGORE83_OPP_EV, resolved:false}); agendaSolo(); return; }   // L101-2: il rigore, dall'aula
+    if(!first && typeof snodoRef92OppDovuta==='function' && snodoRef92OppDovuta()){ S.agenda.push({kind:'event', data:REF92_OPP_EV, resolved:false}); agendaSolo(); return; }   // L103-2: Maastricht, dall'aula
+    if(!first && typeof snodoPiano95OppDovuta==='function' && snodoPiano95OppDovuta()){ S.agenda.push({kind:'event', data:PIANO95_OPP_EV, resolved:false}); agendaSolo(); return; }   // L103-2: il dicembre in piazza
     // Cantiere C: la stagione elettorale vale anche da SFIDANTE (bloccoIds = il tuo blocco d'opposizione)
     if(typeof pickCampagnaNazionale==='function'){ const cnbO=pickCampagnaNazionale(); if(cnbO){ S.agenda.push(cnbO); agendaSolo(); return; } }
     const inq=aggiornaInchiesta();   // anche da sfidante l'esposizione conta: bersaglio sempre tu (niente ministri qui)
@@ -4621,6 +4900,18 @@ function genAgendaRamo(first){
   if(!first && typeof snodoBarreDovuta==='function' && snodoBarreDovuta()){ S.agenda.push({kind:'event', data:BARRE_EV, resolved:false}); agendaSolo(); return; }        // L99-2
   if(!first && typeof snodoSinistra77Dovuta==='function' && snodoSinistra77Dovuta()){ S.agenda.push({kind:'event', data:SINISTRA77_EV, resolved:false}); agendaSolo(); return; }   // L99-2: il PS al governo
   if(!first && typeof snodoCampagna78Dovuta==='function' && snodoCampagna78Dovuta()){ S.agenda.push({kind:'event', data:CAMPAGNA78_EV, resolved:false}); agendaSolo(); return; }   // L99-2: il Presidente
+  if(!first && typeof snodoRiforme81Dovuta==='function' && snodoRiforme81Dovuta()){ S.agenda.push({kind:'event', data:(eliseoDiSinistra() ? RIFORME81_EV : RIFORME81_DX_EV), resolved:false}); agendaSolo(); return; }   // L101-2
+  if(!first && typeof snodoRigore83Dovuta==='function' && snodoRigore83Dovuta()){ S.agenda.push({kind:'event', data:(eliseoDiSinistra() ? RIGORE83_EV : RIGORE83_DX_EV), resolved:false}); agendaSolo(); return; }   // L101-2 (due versioni, residuo)
+  if(!first && typeof snodoScuola84Dovuta==='function' && snodoScuola84Dovuta()){ S.agenda.push({kind:'event', data:SCUOLA84_EV, resolved:false}); agendaSolo(); return; }        // L101-2
+  if(!first && typeof snodoOrdinanze86Dovuta==='function' && snodoOrdinanze86Dovuta()){ S.agenda.push({kind:'event', data:(S.coabitazione ? ORDINANZE86_EV : PRIVATIZZAZIONI86_EV), resolved:false}); agendaSolo(); return; }   // L101-2
+  if(!first && typeof snodoRef92Dovuta==='function' && snodoRef92Dovuta()){ S.agenda.push({kind:'event', data:REF92_EV, resolved:false}); agendaSolo(); return; }        // L103-2
+  if(!first && typeof snodoSarajevo94Dovuta==='function' && snodoSarajevo94Dovuta()){ S.agenda.push({kind:'event', data:SARAJEVO94_EV, resolved:false}); agendaSolo(); return; }   // L103-2
+  if(!first && typeof snodoPiano95Dovuta==='function' && snodoPiano95Dovuta()){ S.agenda.push({kind:'event', data:PIANO95_EV, resolved:false}); agendaSolo(); return; }        // L103-2
+  if(!first && typeof snodoScioglimento97Dovuta==='function' && snodoScioglimento97Dovuta()){ S.agenda.push({kind:'event', data:SCIOGLIMENTO97_EV, resolved:false}); agendaSolo(); return; }   // L103-2
+  if(!first && typeof franco90AncoraDovuta==='function'){ var _f9=franco90AncoraDovuta();   // L103-2: la corsa al franco del '92 e del '93
+    if(_f9){ S.francoAncore=S.francoAncore||{}; S.francoAncore[_f9]=true; if(_f9==='a92' && pesoFranco92()>1) S.francoGrave=true;   // col no a Maastricht pesa doppio
+      S.agenda.push({kind:'event', data:(_f9==='a92' ? FRANCO92_EV : FRANCO93_EV), resolved:false}); agendaSolo(); return; } }
+  if(!first && typeof franco81AncoraDovuta==='function' && franco81AncoraDovuta()){ S.francoAncore=S.francoAncore||{}; S.francoAncore.a81=true; S.agenda.push({kind:'event', data:FRANCO81_EV, resolved:false}); agendaSolo(); return; }   // L101-2: la corsa al franco dell'81
   if(!first && typeof petrolioAncoraDovuta==='function'){ var _pa=petrolioAncoraDovuta();   // L99-2: il prezzo del petrolio, due ancore
     if(_pa){ S.agenda.push({kind:'event', data:(_pa==='73' ? PETROLIO_EV : (S.nucleare74==='tutto' ? PETROLIO79_NUC_EV : PETROLIO79_EV)), resolved:false}); agendaSolo(); return; } }
   if(!first && typeof francoAncoraDovuta==='function'){ var _fa=francoAncoraDovuta();
@@ -5611,11 +5902,11 @@ function chiudiSforzo(){ if(S.campNaz && S.campNaz.sforzo>0) S.log.unshift({t:T(
 function avviaAttesa(){
   let sistema, vero;
   applicaSpintaForze();   // L64-2: la campagna sul territorio confluisce nelle forze PRIMA che i seggi si calcolino
-  if(PAESE.comeSiVince==='parlamentare'){
+  if(PAESE.comeSiVince==='parlamentare' || urnaLegislativa()){   // L104-2: lo scioglimento nel semipresidenziale è un'urna di soli seggi
     S.seggi=calcSeggi();                                       // VERO: seggi, calcolati una volta (qui, prima della chiusura)
     sistema='parlamentare'; vero={ seggi:Object.assign({},S.seggi) };
   } else {
-    if(PAESE.coalizione||PAESE.comeSiVince==='parlamentare') S.seggi=calcSeggi();
+    if((PAESE.coalizione||PAESE.comeSiVince==='parlamentare') && !sistemaSemipres()) S.seggi=calcSeggi();   // L104-2: la presidenziale non rifà l'Assemblea
     sistema='candidato'; vero=testaATesta();                  // VERO: testa a testa, deterministico
   }
   ATTESA={ sistema:sistema, vero:vero };
@@ -5636,7 +5927,7 @@ function renderAttesa(){
   const truffaNota = (snodoTruffaAttivo() && S.leggeTruffa==='approvata')
     ? `<div class="mtext" style="color:var(--acc-ink);border-left:2px solid var(--acc);padding-left:10px">${T('Hai approvato il premio di maggioranza: se il tuo blocco supera il 50% dei voti, ottiene il 64,4% dei seggi — se manchi, la legge ti si ritorce contro.')}</div>`
     : '';
-  document.getElementById('modal').innerHTML=`<div class="mt"><div class="kicker">${T(PAESE.nome)} · ${T(S.elezioniAnticipate?'Elezioni anticipate':'Elezioni')} ${S.year}</div><h2>${T('La chiusura della campagna')}</h2></div>
+  document.getElementById('modal').innerHTML=`<div class="mt"><div class="kicker">${T(PAESE.nome)} · ${T(urnaLegislativa()?'Legislative anticipate':(S.elezioniAnticipate?'Elezioni anticipate':'Elezioni'))} ${S.year}</div><h2>${T('La chiusura della campagna')}</h2></div>
     <div class="mtext">${clima} ${T(stakesPersonali())}</div>
     ${truffaNota}
     <div class="mtext" style="color:var(--mut2)">${T('L\'ultima parola è tua. Domani si vota.')}</div>
@@ -5656,8 +5947,8 @@ function avviaNotte(){
   let sistema, vero;
   if(ATTESA){ sistema=ATTESA.sistema; vero=ATTESA.vero; ATTESA=null; }   // usa il VERO congelato nell'attesa (non ricalcola: la chiusura non lo tocca)
   else {                                                                 // fallback (chiamata diretta): congela ora
-    if(PAESE.comeSiVince==='parlamentare'){ S.seggi=calcSeggi(); sistema='parlamentare'; vero={ seggi:Object.assign({},S.seggi) }; }
-    else { if(PAESE.coalizione||PAESE.comeSiVince==='parlamentare') S.seggi=calcSeggi(); sistema='candidato'; vero=testaATesta(); }
+    if(PAESE.comeSiVince==='parlamentare' || urnaLegislativa()){ S.seggi=calcSeggi(); sistema='parlamentare'; vero={ seggi:Object.assign({},S.seggi) }; }
+    else { if((PAESE.coalizione||PAESE.comeSiVince==='parlamentare') && !sistemaSemipres()) S.seggi=calcSeggi(); sistema='candidato'; vero=testaATesta(); }   // L104-2
   }
   NOTTE={ sistema:sistema, vero:vero, stadio:0, onde:generaOnde(sistema, vero), dich:null, saltata:false, timer:null };
   try{ seedNotteAnim(); }catch(e){}   // l'exit poll sale da zero; le tappe successive partono dalla precedente
@@ -5777,7 +6068,7 @@ function renderNotte(){
   if(!NOTTE) return;
   const ultima=NOTTE.stadio>=SD_NOTTE.length-1;
   const onda=NOTTE.onde[NOTTE.stadio];
-  const kicker=`${T(PAESE.nome)} · ${T(S.elezioniAnticipate?'Elezioni anticipate':'Elezioni')} ${S.year}`;
+  const kicker=`${T(PAESE.nome)} · ${T(urnaLegislativa()?'Legislative anticipate':(S.elezioniAnticipate?'Elezioni anticipate':'Elezioni'))} ${S.year}`;
   const body = NOTTE.sistema==='parlamentare' ? notteSeggi(onda, ultima) : notteCandidato(onda);
   const narr = notteNarr(NOTTE.stadio);   // la riga di narrazione (fase B): tensione/respiro secondo l'andamento
   const lancio = lancioNotte(NOTTE.stadio);
@@ -6116,8 +6407,9 @@ function renderTrattativa(){
   if(reached) action=`<button class="opt" style="border-color:var(--acc);background:var(--acc-bg)" onclick="${confirmFn}"><span class="ol" style="color:var(--acc-ink)">${T(voto?'Conferma la maggioranza':'Forma il governo')} →</span><span class="oe">${total} ${T('seggi')}${cb?` +${cb} ${T('credibilità')} → ${Math.round(eff)}`:' '+T('su 100')}</span></button>`;
   else if(comp.length===0) action= voto
       ? `<button class="opt" style="border-color:var(--neg)" onclick="finalizeVoto(false)"><span class="ol">${T('Nessuna maggioranza possibile')}</span><span class="oe">${T("Vedi l'esito del voto")}</span></button>`
-      : `<button class="opt" style="border-color:var(--acc)" onclick="${confirmFn}"><span class="ol">${T('Governo di minoranza')} →</span><span class="oe">${T('solo %N seggi · sarà fragile').replace('%N',total)}</span></button>`;
-  const kicker = voto?`${T(S.elezioniAnticipate?'Elezioni anticipate':'Elezioni')} ${S.year}` : T(ctx==='rinnovo'?'Nuovo mandato':'Formazione del governo');
+      : (coabitazioneInVista() ? `<button class="opt" style="border-color:var(--acc)" onclick="${confirmFn}"><span class="ol">${T('Coabitazione')} →</span><span class="oe">${T('solo %N seggi · l\'Assemblea è degli altri: il Primo ministro sarà del loro blocco').replace('%N',total)}</span></button>`
+        : `<button class="opt" style="border-color:var(--acc)" onclick="${confirmFn}"><span class="ol">${T('Governo di minoranza')} →</span><span class="oe">${T('solo %N seggi · sarà fragile').replace('%N',total)}</span></button>`);
+  const kicker = voto?`${T(urnaLegislativa()?'Legislative anticipate':(S.elezioniAnticipate?'Elezioni anticipate':'Elezioni'))} ${S.year}` : T(ctx==='rinnovo'?'Nuovo mandato':'Formazione del governo');
   const titolo = T(voto?'Trattativa per il nuovo governo' : ctx==='rinnovo'?'Ricostruisci la maggioranza' : 'Forma la tua maggioranza');
   const mgFrase = (voto && S.margineEsito) ? `<b>${margineFraseTrattativa(S.margineEsito)}</b> ` : '';   // fase B: il verdetto delle urne prima della trattativa
   document.getElementById('modal').innerHTML=`<div class="mt"><div class="kicker">${T(PAESE.nome)} · ${kicker}</div><h2>${titolo}</h2></div>
@@ -6128,9 +6420,15 @@ function renderTrattativa(){
     <div class="choices">${addRows}${action}</div>`;
   document.getElementById('ov').classList.add('on');
 }
+/* L104-2 · con i membri che la trattativa ha in mano, l'Assemblea darebbe una coabitazione? (solo semipresidenziale) */
+function coabitazioneInVista(){
+  if(!sistemaSemipres() || !COAL || S.opposizione) return false;
+  var c0=S.coalizione; S.coalizione=COAL.membri.slice();
+  try{ return coabitazioneDovuta(); } finally { S.coalizione=c0; }
+}
 function confirmCoal(){   // solo avvio: chiude e avvia la partita
   S.coalizione=COAL.membri.slice(); S.minoranza=seggiCoalizione(S.coalizione,S.seggi)<50; COAL=null;
-  if(typeof aggiornaCoabitazione==='function') aggiornaCoabitazione();   // L100-2: anche all'avvio (il presente francese non ci entra: misurato)
+  if(typeof aggiornaCoabitazione==='function') aggiornaCoabitazione();   // L100-2/L104-2: all'avvio la porta parte in coabitazione se i seggi lo dicono (il presente francese no: nessuna cricca a 50)
   initTenuta(); initPotereLocale();   // ora il blocco (coalizione) è noto: fissa potere locale e aspettativa
   document.getElementById('ov').classList.remove('on'); render(); commitSnap();   // primo confine di mese (coalizione formata)
 }
@@ -6262,7 +6560,7 @@ function pickAlleato(){
       S.tenutaLiv[id]=2;
       S.coalizione=S.coalizione.filter(x=>x!==id);
       delete S.tenuta[id]; delete S.tenutaForza0[id]; delete S.tenutaUltimo[id];
-      S.minoranza=seggiCoalizione(S.coalizione,S.seggi)<50;
+      S.minoranza=!S.coabitazione && seggiCoalizione(S.coalizione,S.seggi)<50;   // L101-1: in coabitazione il governo è degli altri — la rottura di un alleato del Presidente non lo mette in minoranza (L100-2 spegne S.minoranza; qui si riaccendeva)
       const nome=part(id).nome, AE=ALLEATI_EV.rottura;   // (rinominata da T: oscurava la funzione i18n T())
       return { kind:'event', ally:id, data:{ kick:T(AE.kick), t:T(AE.t).replace(/%A/g,nome), text:T(AE.text).replace(/%A/g,nome),
         ch:[ {l:T(AE.ok.l), e:T(AE.ok.e), f:()=>{}} ] } };
@@ -6304,6 +6602,7 @@ function margineFraseTrattativa(mg){
   return T((mg&&F[mg.tag])||'');
 }
 function esitoSeggi(win, total){
+  if(urnaLegislativa()) return esitoLegislativa(win, total);   // L104-2
   const seggi=S.seggi, ps=[...PAESE.partiti].sort((a,b)=>seggi[b.id]-seggi[a.id]);
   const rows=ps.map(p=>{ const gov=S.coalizione.includes(p.id);
     return `<div style="padding:6px 0">
@@ -6314,15 +6613,31 @@ function esitoSeggi(win, total){
   const sub= win?T('La tua coalizione ottiene <b>%N seggi</b>%X su 100 e forma il governo.').replace('%N',total).replace('%X',cbTxt)
                :(S.opposizione?T('La tua coalizione si ferma a <b>%N seggi</b>%X: non basta a tornare al governo.').replace('%N',total).replace('%X',cbTxt)
                              :T("La tua coalizione si ferma a <b>%N seggi</b>: senza maggioranza, passi all'opposizione.").replace('%N',total));
-  document.getElementById('modal').innerHTML=`<div class="mt"><div class="kicker">${T(S.elezioniAnticipate?'Elezioni anticipate':'Elezioni')} · ${S.year}</div><h2>${titoloEsito(win)}</h2></div>
+  document.getElementById('modal').innerHTML=`<div class="mt"><div class="kicker">${T(urnaLegislativa()?'Legislative anticipate':(S.elezioniAnticipate?'Elezioni anticipate':'Elezioni'))} · ${S.year}</div><h2>${titoloEsito(win)}</h2></div>
     <div class="mtext">${sub}</div>
     <div style="padding:0 18px 6px">${rows}</div>
     <div class="choices"><button class="opt" style="border-color:${win?'var(--acc)':'var(--neg)'}" onclick="${win?'vinciElezione()':'perdiElezione()'}"><span class="ol">${T(win?(S.opposizione?'Torna al governo →':'Forma il nuovo governo →'):(S.opposizione?'Vedi il bilancio finale':'Vai all\'opposizione →'))}</span>${win&&!S.opposizione?`<span class="oe">${T('Mandato')} ${S.mandate+1}</span>`:''}</button></div>`;
   document.getElementById('ov').classList.add('on');
 }
+/* L104-2 · l'esito delle legislative anticipate nel semipresidenziale: la tabella dei seggi di esitoSeggi, ma nessun
+   mandato nuovo e nessun passaggio all'opposizione — il Presidente resta; cambia solo di chi è l'Assemblea. */
+function esitoLegislativa(win, total){
+  const seggi=S.seggi, ps=[...PAESE.partiti].sort((a,b)=>(seggi[b.id]||0)-(seggi[a.id]||0));
+  const rows=ps.map(p=>{ const gov=S.coalizione.includes(p.id);
+    return `<div style="padding:6px 0">
+      <div style="display:flex;justify-content:space-between;font-size:13px"><span style="font-weight:${gov?700:500}">${T(p.nome)} ${gov?'<span class="chip" style="background:var(--acc-bg);color:var(--acc-ink)">'+T('Governo')+'</span>':''}</span><span class="mono">${seggi[p.id]||0}</span></div>
+      <div class="bar"><i style="width:${clamp(seggi[p.id]||0,2,100)}%;background:${gov?'var(--acc)':'var(--mut2)'}"></i></div></div>`; }).join('');
+  const sub= win ? T('La tua coalizione ottiene <b>%N seggi</b> su 100: l\'Assemblea nuova è tua, e il mandato all\'Eliseo continua.').replace('%N',total)
+                : T('La tua coalizione si ferma a <b>%N seggi</b>: l\'Assemblea nuova non è tua. Il mandato all\'Eliseo continua, con una maggioranza da cercare o in coabitazione.').replace('%N',total);
+  document.getElementById('modal').innerHTML=`<div class="mt"><div class="kicker">${T('Legislative anticipate')} · ${S.year}</div><h2>${titoloEsito(win)}</h2></div>
+    <div class="mtext">${sub}</div>
+    <div style="padding:0 18px 6px">${rows}</div>
+    <div class="choices"><button class="opt" style="border-color:${win?'var(--acc)':'var(--neg)'}" onclick="chiudiLegislativa()"><span class="ol">${T('Torna all\'Eliseo →')}</span></button></div>`;
+  document.getElementById('ov').classList.add('on');
+}
 function esitoCandidato(r){
   const me=part(S.partito), myP=r.myPct, oppP=100-myP;
-  document.getElementById('modal').innerHTML=`<div class="mt"><div class="kicker">${T(S.elezioniAnticipate?'Elezioni anticipate':'Elezioni')} · ${S.year}</div><h2>${titoloEsito(r.win)}</h2></div>
+  document.getElementById('modal').innerHTML=`<div class="mt"><div class="kicker">${T(urnaLegislativa()?'Legislative anticipate':(S.elezioniAnticipate?'Elezioni anticipate':'Elezioni'))} · ${S.year}</div><h2>${titoloEsito(r.win)}</h2></div>
     <div class="mtext">${T('Testa a testa con <b>%O</b>: gli altri partiti si schierano per vicinanza politica.').replace('%O',T(r.opp.nome))}${(S.opposizione&&r.cb)?` ${T('Credibilità:')} <b style="color:${r.cb>=0?'var(--pos)':'var(--neg)'}">${r.cb>=0?'+':''}${Math.round(r.cb*10)/10}</b> ${T('punti')}.`:''}</div>
     <div style="padding:0 18px 6px">
       <div style="padding:6px 0"><div style="display:flex;justify-content:space-between;font-size:13px"><span style="font-weight:700">${T(me.nome)} <span class="chip" style="background:var(--acc-bg);color:var(--acc-ink)">${T('tu')}</span></span><span class="mono val" data-anim="num:notte:me" data-to="${myP}" data-dec="1">${fmt(myP,1)}%</span></div>
@@ -6335,10 +6650,11 @@ function esitoCandidato(r){
 function nextMandate(){
   maturaRP();   // qui passa il confine di mese quando si vota: formula del mese in cui cade (gennaio→iniezione, anticipate a metà anno→+1). PRIMA del reset snapshot.
   S.mandatesWon++; S.mandate++; S.mandatiConsecutivi=(S.mandatiConsecutivi||0)+1; S.turnInMandate=0; S.snap=Object.assign({},S.pol); S.leggiSnap=Object.assign({},S.leggi);   // L86-1
-  if(PAESE.comeSiVince==='parlamentare'||PAESE.coalizione) S.seggi=calcSeggi();
+  if((PAESE.comeSiVince==='parlamentare'||PAESE.coalizione) && !sistemaSemipres()) S.seggi=calcSeggi();   // L104-2: nel semipresidenziale l'Assemblea resta quella in vigore
+  if(sistemaSemipres()) S.scioglimentoScelto=false;   // L104-2
   S.minoranza = PAESE.coalizione ? seggiCoalizione(S.coalizione,S.seggi)<50
               : (PAESE.comeSiVince==='parlamentare' ? S.seggi[S.partito]<50 : false);
-  if(typeof aggiornaCoabitazione==='function') aggiornaCoabitazione();   // L100-2: l'urna vinta coi seggi tornati tuoi spegne la coabitazione
+  if(typeof aggiornaCoabitazione==='function') aggiornaCoabitazione();   // L100-2/L104-2: alla presidenziale la coabitazione si deriva dall'Assemblea in vigore (si entra, si resta, si esce)
   S.caduteMandato=0;   // L93-4: le urne chiudono il conto delle crisi del mandato
   S.mesiMinoranza=0; S.elezioniAnticipate=false; S.mesiAlGoverno=Math.round((S.mesiAlGoverno||0)/2); S.logorioAcc=(S.logorioAcc||0)/2;   /* L77-3: l'accumulatore segue mesiAlGoverno — dimezzato dalla vittoria */ initTenuta(); S.bloccoAtteso=bloccoQuota(); S.ultimoSondaggio=null; S.sondStorico=[];   // vittoria: logorio dimezzato; aspettativa ri-allineata al nuovo blocco (potere locale persiste)
   /* L53-2 — l'accordo esterno FINISCE COL MANDATO (design §A): le stampelle valgono per la legislatura che le
@@ -6374,7 +6690,7 @@ function entraOpposizione(w){
   S.lineaMedia=S.lineaMedia||'documentata';   // la linea coi media (dato puro; i salvataggi senza campo migrano al default)
   if(S.archi) S.archi=S.archi.filter(function(a){ const A=ARCHI_DEF.find(function(d){return d.id===a.id;}); return A && (A.dove||'governo')==='entrambi'; });   // gli archi di GOVERNO non sopravvivono alla caduta; i personali sì (lotto 5)
   const prof = w.asse>=1?'destra' : w.asse<=-1?'sinistra' : 'centro';
-  S.pol=Object.assign({},GOVERNI_PROFILI[prof]); S.snap=Object.assign({},S.pol); S.leggiSnap=Object.assign({},S.leggi);   // eredita le politiche dell'avversario, contabilità RP pulita
+  installaProfilo(GOVERNI_PROFILI[prof]); S.snap=Object.assign({},S.pol); S.leggiSnap=Object.assign({},S.leggi);   // L104-3: senza salto di disavanzo · eredita le politiche dell'avversario, contabilità RP pulita
   S.turnInMandate=0; S.elezioniAnticipate=false; S.ultimoSondaggio=null; S.sondStorico=[];
 }
 /* Vai all'opposizione DOPO una sconfitta: governa il vincitore; il motore fa il resto. */
@@ -6736,6 +7052,9 @@ function applySnap(snap){
   if(S.ref62Opp===undefined){ S.ref62Opp=null; S.maggioOpp=null; S.ref69Opp=null; S.franco68=null; }   // L97-2
   if(S.ref72===undefined){ S.ref72=null; S.nucleare74=null; S.barre=null; S.sinistra77=null; S.petrolio=0; S.anticipate77=null; }   // L99-1
   if(S.ref72Opp===undefined){ S.ref72Opp=null; S.barreOpp=null; S.campagna78=null; S.petrolio73=null; S.petrolio79=null; }   // L99-2
+  if(S.riforme81===undefined){ S.riforme81=null; S.rigore83=null; S.scuola84=null; S.ordinanze86=null; S.riforme81Opp=null; S.rigore83Opp=null; }   // L101-2
+  if(S.ref92===undefined){ S.ref92=null; S.ref92Opp=null; S.sarajevo94=null; S.piano95=null; S.piano95Opp=null; S.quinquennato00=null; }   // L103-2
+  if(S.scioglimento97===undefined) S.scioglimento97=null;   // L103-1
   if(S.coabitazione===undefined) S.coabitazione=false;   // L100-2
   if(S.governiCaduti===undefined) S.governiCaduti=0;   // L80-5
   if(S.logorioAcc===undefined) S.logorioAcc=null;   // L77-3: null = «ricostruiscilo dal comportamento vecchio» (logorioTotale lo fa al primo uso, senza gradino)
@@ -6743,6 +7062,7 @@ function applySnap(snap){
   if(S.decisioniScadenza===undefined){ S.decisioniScadenza=0; S.visite={mappa:0, partito:0}; }   // L64-2
   if(S.gruppo===undefined){ S.gruppo=null; S.sfidaSeme=null; S.candidatoPromosso=null; }   // L64-3/4
   if(S.scioglimentiChiesti===undefined){ S.scioglimentiChiesti=0; S.scioglimentoScelto=false; }   // L56-1
+  if(S.legislaturaDa===undefined) S.legislaturaDa=null;   // L104-2
   if(!S.pilastriMondo || typeof S.pilastriMondo!=='object') S.pilastriMondo={};   // L56-2 — migrazione
   if(S.truffaFatta===undefined){ S.truffaFatta=false; S.truffaEsito=null; }   // Build B 1b — snodo one-shot: default per i salvataggi pre-1b
   if(S.riallineamenti===undefined) S.riallineamenti={};   // AVANZAMENTO — migrazione: i salvataggi pre-lotto ricevono il registro-tappe vuoto

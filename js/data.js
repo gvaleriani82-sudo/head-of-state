@@ -1278,6 +1278,113 @@ const SCENARI = {
     ],
   },
   /* ============================================================================================================
+     L101-1 · FRANCIA 1980 — la quarta porta della linea: L'ALTERNANZA E LA PRIMA COABITAZIONE (scheda PRESET-FRANCIA-1980).
+     Il Presidente in carica è stato eletto nel maggio 1974; il settennato scade nel maggio 1981 → `turnMandato: 6`
+     porta l'urna al **gennaio 1981** (il motore vota solo a gennaio, come `fr1970`), la seconda al **gennaio 1988**.
+     L'Assemblea d'avvio è quella del marzo 1978 (già normalizzata in `fr1970`); le forze d'avvio sono le urne del '78
+     rinormalizzate sui quattro del roster (PS 24,9 · RPR 22,5 · PCF 20,6 · UDF 19,8 → 28,4 · 25,6 · 23,5 · 22,5).
+
+     ⚑ `alleati` DICHIARATI SU TUTTI (RPR↔UDF, PS↔PCF): è la porta in cui il blocco avverso decide la coabitazione
+     (L100-2), e la cricca va dichiarata, non dedotta dall'asse. Il Front national entra alla tappa del marzo 1986
+     (game.js) con `alleati:[]`: **la lista vuota vale «con nessuno»** — verificato in `staColBlocco` (model.js), che
+     con una lista legge `alleati.indexOf(altro)` e non ricade mai sull'asse; e nessun altro partito lo nomina.
+     ⚠ La porta si chiude col 1991 (Maastricht apre `fr1990`): le intermedie sono scelte su quell'orizzonte.
+     ============================================================================================================ */
+  fr1980: {
+    id:'fr1980', era:LINEA_FR, nome:'Francia 1980', anno:1980, paese:'francia',
+    turnMandato: 6,                             // urna presidenziale al gennaio 1981, poi al gennaio 1988 (84 mesi)
+    sistema: 'semipresidenziale', comeSiVince: 'candidato', coalizione: true, cadutaGoverno: true,
+    mandatoMesi: 84, mandatiMax: null,
+    titoloRuolo: 'Presidente della Repubblica', sedeGoverno: "l'Eliseo",
+    scioglimentoMesiMin: 12,
+    ue: true,
+    /* ⚠ LE INTERMEDIE SI AGGANCIANO AL MESE DEL MANDATO (`intermediaA`, L99-1), senza sapere quale mandato. Qui i
+       mandati partono dal gennaio 1981 e dal gennaio 1988, quindi lo stesso mese del mandato cade in due anni:
+         · cantonali marzo 1982 (mese 14) → anche marzo 1989, dove si votano le municipali: TOLTE (e le municipali '89 con loro)
+         · municipali marzo 1983 (mese 26) → anche marzo 1990, dove non si vota: TOLTE
+         · cantonali settembre 1988 (mese 8 del terzo mandato) → anche settembre 1981: TOLTE
+         · cantonali marzo 1985 (mese 50) → l'altra occorrenza è il marzo 1992, fuori dalla porta: **TENUTE**.
+       Dichiarato: meglio un voto locale in meno che uno inventato. */
+    intermedie: [ {tipo:'Elezioni cantonali', mese:50, tocca:'tutti'} ],   // marzo 1985
+    partiti: [
+      { id:'fr_unr',  nome:'RPR',  orientamento:'destra',         base:{ cetomedio:0.4, pensionati:0.3, cattolici:0.3 },       forza:25.6, asse:1,  alleati:['fr_ri'] },
+      { id:'fr_ri',   nome:'UDF',  orientamento:'centrodestra',   base:{ imprenditori:0.4, cetomedio:0.4, pensionati:0.2 },    forza:22.5, asse:1,  alleati:['fr_unr'] },
+      { id:'fr_sfio', nome:'PS',   orientamento:'centrosinistra', base:{ lavoratori:0.5, cetomedio:0.3, giovani:0.2 },         forza:28.4, asse:-1, alleati:['fr_pcf'] },
+      { id:'fr_pcf',  nome:'PCF',  orientamento:'sinistra',       base:{ lavoratori:0.7, giovani:0.3 },                        forza:23.5, asse:-2, alleati:['fr_sfio'] },
+    ],
+    /* l'Assemblea del marzo 1978, già normalizzata a 100 in fr1970 */
+    seggi: { fr_unr:32.2, fr_ri:25.7, fr_sfio:24.1, fr_pcf:18.0 },
+    /* ⚠ tutte le cifre sono INSEE di memoria, ordine di grandezza (scheda §2, CIFRE-ECONOMICHE.md) */
+    economia: { pil:2800, debito:21, deficit:0, inflazione:13, inflazioneTetto:15, crescita:2.2, disoccupazione:6.3 },
+    debtAncora: 21,
+    inflazione: 13,    // 13,6 nel 1980; la disinflazione del decennio è misurata in L101-1 (non curata)
+    crescita: 2.2,     // media del decennio; il ciclo (la stretta dell'83, i due anni buoni dell'88-89) sta nel drift
+    logorioEra: 0.012,
+    valuta: { sym:'F', mld:'mld franchi', mln:'mln franchi' },
+    quotaSpesa: 0.46,                           // ⚠ la scheda non la dà: ~46% è l'ordine della spesa francese degli anni '80. Da confermare.
+    intro: "Francia, 1980. Il Presidente è al sesto anno del settennato, la crisi del petrolio non è finita e la sinistra, divisa nel '78, si prepara di nuovo.",
+    contesto: [
+      "Francia, 1980. Il Presidente è stato eletto nel maggio 1974; il suo settennato scade nella primavera del 1981, e i sondaggi lo danno per favorito.",
+      "L'Assemblea è quella del 1978: la destra governa, ma i due partiti che la compongono non si amano, e il partito gollista ha un sindaco di Parigi che vuole l'Eliseo.",
+      "L'inflazione è a due cifre e la disoccupazione ha superato il milione e mezzo: il secondo shock del petrolio morde adesso.",
+    ],
+  },
+  /* ============================================================================================================
+     L103-1 · FRANCIA 1990 — la quinta porta della linea: LA SECONDA E LA TERZA COABITAZIONE (scheda PRESET-FRANCIA-1990).
+     Il Presidente in carica è stato rieletto nel maggio 1988 (nel gioco gennaio 1988): `turnMandato: 2` porta l'UNICA
+     urna presidenziale della porta al **gennaio 1995** (D23); la successiva, gennaio 2002, è di `fr2000`.
+     L'Assemblea d'avvio è quella del giugno 1988 (la tappa 1988/6 di `fr1980`, già a 100); le forze d'avvio sono le urne
+     del 1° turno del 1988 rinormalizzate sui cinque del roster (PS 35,9 · RPR 19,2 · UDF 18,5 · PCF 11,3 · FN 9,7 →
+     37,9 · 20,3 · 19,6 · 11,9 · 10,3, resti più grandi).
+     ⚑ `alleati` DICHIARATI SU TUTTI (RPR↔UDF, PS↔PCF, PS↔Verdi): il PS nomina i Verdi, che nascono alla tappa del
+     1997/6 o del 1998/3 (game.js) — la guardia delle alleanze legge i partiti che nascono dentro la finestra del decennio
+     (L97-1). Il FN ha `alleati:[]` («con nessuno») e non è una carriera, come i Verdi (D25).
+     ⚠ La porta si chiude col 2001 (il 21 aprile 2002 apre `fr2000`): le intermedie sono scelte su quell'orizzonte.
+     ============================================================================================================ */
+  fr1990: {
+    id:'fr1990', era:LINEA_FR, nome:'Francia 1990', anno:1990, paese:'francia',
+    turnMandato: 2,                             // l'urna presidenziale al gennaio 1995 (D23), la sola della porta
+    sistema: 'semipresidenziale', comeSiVince: 'candidato', coalizione: true, cadutaGoverno: true,
+    mandatoMesi: 84, mandatiMax: null,
+    titoloRuolo: 'Presidente della Repubblica', sedeGoverno: "l'Eliseo",
+    scioglimentoMesiMin: 12,
+    ue: true,
+    /* ⚠ LE INTERMEDIE SI AGGANCIANO AL MESE DEL MANDATO (`intermediaA`, L99-1). I mandati qui partono dal gennaio 1988
+       e dal gennaio 1995, quindi lo stesso mese del mandato cade in due anni:
+         · cantonali e regionali marzo 1992 (mese 50) → anche marzo 1999, dove non si vota: TOLTE
+         · cantonali e regionali marzo 1998 (mese 38 del secondo mandato) → anche marzo 1991, dove non si vota: TOLTE
+         · cantonali marzo 1994 (mese 74) → anche marzo 2001, dove si votano cantonali e municipali: **TENUTE** (vere tutte e due)
+         · municipali giugno 1995 (mese 5 del secondo mandato) → l'altra occorrenza è il giugno 1988, prima della porta: **TENUTE**
+         · municipali marzo 2001: sono il mese 74, già tenuto come cantonali (quel marzo si votano entrambe).
+       Dichiarato: meglio un voto locale in meno che uno inventato. */
+    intermedie: [ {tipo:'Elezioni municipali', mese:5,  tocca:'tutti'},    // giugno 1995
+                  {tipo:'Elezioni cantonali',  mese:74, tocca:'tutti'} ],  // marzo 1994 e marzo 2001
+    partiti: [
+      { id:'fr_unr',  nome:'RPR',  orientamento:'destra',          base:{ cetomedio:0.4, pensionati:0.3, cattolici:0.3 },       forza:20.3, asse:1,  alleati:['fr_ri'] },
+      { id:'fr_ri',   nome:'UDF',  orientamento:'centrodestra',    base:{ imprenditori:0.4, cetomedio:0.4, pensionati:0.2 },    forza:19.6, asse:1,  alleati:['fr_unr'] },
+      { id:'fr_sfio', nome:'PS',   orientamento:'centrosinistra',  base:{ lavoratori:0.5, cetomedio:0.3, giovani:0.2 },         forza:37.9, asse:-1, alleati:['fr_pcf','fr_verts'] },
+      { id:'fr_pcf',  nome:'PCF',  orientamento:'sinistra',        base:{ lavoratori:0.7, giovani:0.3 },                        forza:11.9, asse:-2, alleati:['fr_sfio','fr_verts'] },   // L104-1: i Verdi entrano nel '97/'98, e la sinistra plurale li conta
+      { id:'fr_fn',   nome:'Front national', orientamento:'destra populista', base:{ lavoratori:0.4, cetomedio:0.3, pensionati:0.3 }, forza:10.3, asse:2, alleati:[],
+        selezionabile:false, nota:'Il Front national ha un deputato e nessun alleato: non è una carriera che si possa giocare' },
+    ],
+    /* l'Assemblea del giugno 1988, come la lascia la tappa 1988/6 di fr1980 */
+    seggi: { fr_sfio:48.8, fr_pcf:4.4, fr_unr:23.2, fr_ri:23.4, fr_fn:0.2 },
+    /* ⚠ tutte le cifre sono INSEE di memoria, ordine di grandezza (scheda §2, CIFRE-ECONOMICHE.md) */
+    economia: { pil:6500, debito:35, deficit:-2, inflazione:3.4, inflazioneTetto:5, crescita:2.0, disoccupazione:8.9 },
+    debtAncora: 35,
+    inflazione: 3.4,   // l'anno per anno sta in DRIFT_INFLAZIONE_ERA (1990-2001)
+    crescita: 2.0,     // media del decennio; la recessione del '93 e il triennio 98-2000 stanno nel drift
+    logorioEra: 0.012,
+    valuta: { sym:'F', mld:'mld franchi', mln:'mln franchi' },
+    quotaSpesa: 0.50,                           // ⚠ la scheda non la dà: ~50% è l'ordine della spesa francese degli anni '90. Da confermare.
+    intro: "Francia, 1990. Il Presidente è stato appena rieletto, la sinistra governa con una maggioranza che non ha, e l'Europa sta per chiedere al paese di scegliere.",
+    contesto: [
+      "Francia, 1990. Il Presidente è stato rieletto nel 1988 per altri sette anni; l'Assemblea sciolta subito dopo gli ha dato una maggioranza relativa, non assoluta.",
+      "La destra si prepara alla rivincita: i suoi due partiti hanno perso l'Eliseo due volte e hanno imparato che divisi non vincono.",
+      "La disoccupazione non scende sotto il nove per cento, il muro di Berlino è appena caduto, e l'Europa discute una moneta sola.",
+    ],
+  },
+  /* ============================================================================================================
      L44-3 · ITALIA 2000 — la settima e ultima porta. Stessa LINEA; il roster è quello uscito dalla frana del '94
      (PPI, PDS, AN, Rifondazione, Lega, FI, CCD e i laici superstiti), anno d'avvio 2000.
 
@@ -2113,6 +2220,41 @@ const PILASTRI_LINEA = [
     t:'L\'Europa vota',
     text:'Il 10 giugno, per la prima volta, i cittadini di nove paesi eleggono direttamente il Parlamento europeo. In Francia va a votare poco più di sei elettori su dieci; vince la lista del Presidente, il partito del Primo ministro dimissionario arriva quarto, e i deputati eletti partono per Strasburgo senza sapere bene cosa potranno decidere.',
     logx:'Per la prima volta i cittadini di nove paesi eleggono il Parlamento europeo.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  /* L101-2 · i quattro pilastri di linea del decennio francese '80 (scheda §I-H, testi approvati per delega, byte-identici),
+     in ordine di calendario. Mesi scelti guardando chi occupa il mese: Beaune ad agosto (il fatto è del 31 luglio), la
+     Gare de Lyon a luglio (il giugno 1988 è della tappa), il Bicentenario a luglio e il volo a settembre senza vicini. */
+  { id:'pfr80_beaune', linea:LINEA_FR, anno:1982, mese:8, era:'fr1980', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Beaune',
+    text:'La notte del 31 luglio, sull\'autostrada del sole, un pullman di bambini in gita si scontra con altre auto e prende fuoco: cinquantatré morti, quarantaquattro erano bambini di un quartiere del nord. È la strage della strada più grave della storia del paese. I pullman di ragazzi non viaggeranno più di notte nei fine settimana d\'estate.',
+    logx:'Un pullman di bambini brucia sull\'autostrada: cinquantatré morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pfr80_garedelyon', linea:LINEA_FR, anno:1988, mese:7, era:'fr1980', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'La Gare de Lyon',
+    text:'Il 27 giugno un treno di pendolari senza freni percorre sei chilometri in discesa e entra nella stazione parigina a settanta all\'ora, dentro un altro treno fermo con i passeggeri a bordo: cinquantasei morti. Un freno d\'emergenza tirato da una viaggiatrice, un macchinista che ha chiuso la valvola sbagliata, e una stazione che non si è fatta in tempo a sgomberare.',
+    logx:'Un treno senza freni entra nella Gare de Lyon: cinquantasei morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pfr80_bicentenario', linea:LINEA_FR, anno:1989, mese:7, era:'fr1980', codaFino:Infinity, cronaca:true, kick:'Il paese',
+    t:'Il Bicentenario',
+    text:'Il 14 luglio il paese compie duecento anni dalla presa della Bastiglia: una sfilata di notte sui Campi Elisi con seimila figuranti, un\'opera nuova in una piazza nuova, i capi di Stato del mondo in tribuna e il vertice dei sette grandi il giorno dopo. Per una settimana Parigi è la capitale del mondo, e lo sa.',
+    logx:'Duecento anni dalla Bastiglia: la sfilata di notte, il mondo in tribuna.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pfr80_deserto', linea:LINEA_FR, anno:1989, mese:9, era:'fr1980', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il mondo',
+    t:'Il volo sul deserto',
+    text:'Il 19 settembre un aereo di linea francese decollato dal Ciad esplode in volo sopra il Sahara: centosettanta morti, cinquantaquattro francesi. Una valigia con l\'esplosivo, caricata a Brazzaville; l\'inchiesta porterà a un governo del Nord Africa e a una condanna, dieci anni dopo, in un\'aula vuota.',
+    logx:'Un aereo francese esplode sopra il Sahara: centosettanta morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  /* L103-2 · i due pilastri di linea del decennio francese '90 (scheda §I-H, byte-identici): la tempesta a dicembre 1999,
+     il supersonico a luglio 2000. */
+  { id:'pfr90_tempesta', linea:LINEA_FR, anno:1999, mese:12, era:'fr1990', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'La tempesta',
+    text:'Fra il 26 e il 28 dicembre due tempeste attraversano il paese in tre giorni, con raffiche che nessuno strumento aveva mai registrato: novantadue morti, tre milioni di case senza luce per settimane, le foreste della Lorena e delle Lande a terra, i giardini di Versailles rasi. Il paese passa il Capodanno del millennio al buio, e per la prima volta si chiede se il clima stia cambiando.',
+    logx:'Due tempeste in tre giorni: novantadue morti, tre milioni senza luce.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pfr90_concorde', linea:LINEA_FR, anno:2000, mese:7, era:'fr1990', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Il supersonico cade',
+    text:'Il 25 luglio, un minuto dopo il decollo da Parigi, il supersonico prende fuoco a un\'ala e cade su un albergo alla periferia: centotredici morti, quasi tutti passeggeri tedeschi diretti a una crociera. Una lamina di metallo persa da un altro aereo sulla pista, una gomma esplosa, il serbatoio. L\'aereo più bello del mondo non volerà più a lungo.',
+    logx:'Il supersonico cade dopo il decollo: centotredici morti.',
     ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
 ];
 
@@ -3134,6 +3276,45 @@ const BEAT_LEGGERI = [
    {l:'Prosegui', e:'', f:function(){}}]},
   {id:'lgfr70_secca', era:'fr1970', registro:'leggero', cond:()=>S.year===1976, kick:'Il paese', t:'La secca del \'76', text:'Un\'estate senza pioggia: i fiumi in secca, il bestiame senza foraggio, e una tassa una tantum per gli agricoltori che il ceto medio chiama «la tassa della siccità».', ch:[
    {l:'Prosegui', e:'', f:function(){}}]},
+  /* L101-2 · i beat leggeri del decennio francese '80 (scheda PRESET-FRANCIA-1980 §I-D). Nessun marchio: il terminale
+     in casa, la carta con il chip, la musica in tasca — gli oggetti, non i nomi. */
+  {id:'lgfr80_radio', era:'fr1980', registro:'leggero', cond:()=>S.year>=1982, kick:'Il paese', t:'Le radio libere', text:'Mille radio in un anno, una per quartiere: il monopolio è finito e la musica arriva da ogni tetto.', ch:[
+   {l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr80_terminale', era:'fr1980', registro:'leggero', cond:()=>S.year>=1983, kick:'Il paese', t:'Il terminale in casa', text:'Un piccolo schermo accanto al telefono, gratis con l\'elenco: si consultano gli orari dei treni, si prenota, si chiacchiera di notte.', ch:[
+   {l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr80_quinta', era:'fr1980', registro:'leggero', cond:()=>S.year>=1982&&S.year<=1984, kick:'Il paese', t:'La quinta settimana', text:'Cinque settimane di ferie per legge: agosto resta agosto, e febbraio scopre la neve.', ch:[
+   {l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr80_mense', era:'fr1980', registro:'leggero', cond:()=>(S.year===1985&&S.month>=11)||S.year>=1986, kick:'Il paese', t:'Le mense dell\'inverno', text:'Un comico apre alla radio mense gratuite per chi non ha niente: un inverno, dice. Sono ancora aperte.', ch:[
+   {l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr80_piramide', era:'fr1980', registro:'leggero', cond:()=>S.year===1989, kick:'Il paese', t:'La piramide di vetro', text:'Nel cortile del museo più visitato del mondo si apre una piramide di vetro. Metà del paese la trova bellissima, l\'altra metà l\'ha già detto.', ch:[
+   {l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr80_treno', era:'fr1980', registro:'leggero', cond:()=>S.year>=1989, kick:'Il paese', t:'Il treno veloce verso l\'Atlantico', text:'La seconda linea: Parigi-Nantes in due ore, e il record del mondo di velocità su rotaia.', ch:[
+   {l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr80_musica', era:'fr1980', registro:'leggero', cond:()=>S.year>=1980&&S.year<=1983, kick:'Il paese', t:'La musica in tasca', text:'Le cuffiette per strada, il nastro che gira in tasca: per la prima volta ognuno cammina con la propria colonna sonora.', ch:[
+   {l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr80_siviglia', era:'fr1980', registro:'leggero', cond:()=>S.year===1982&&S.month>=6&&S.month<=8, kick:'Il paese', t:'La semifinale di Siviglia', text:'Una partita di notte, un portiere che travolge un attaccante e resta in campo, i rigori: il paese scopre di poter perdere ingiustamente.', ch:[
+   {l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr80_europei', era:'fr1980', registro:'leggero', cond:()=>S.year===1984&&S.month>=6&&S.month<=8, kick:'Il paese', t:'Campioni d\'Europa', text:'Il primo titolo della nazionale, in casa, con nove gol di un solo giocatore. Il paese si ricorda che sa vincere.', ch:[
+   {l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr80_carta', era:'fr1980', registro:'leggero', cond:()=>S.year>=1986, kick:'Il paese', t:'La carta con il chip', text:'Una carta di plastica con un microcircuito al posto della banda: si paga digitando quattro cifre. Il resto del mondo aspetterà vent\'anni.', ch:[
+   {l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr80_deserto', era:'fr1980', registro:'leggero', cond:()=>S.month===1, kick:'Il paese', t:'La corsa nel deserto', text:'A gennaio, per due settimane, il paese segue moto e camion attraverso il Sahara. Ogni anno qualcuno non torna.', ch:[
+   {l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr80_lunedi', era:'fr1980', registro:'leggero', cond:()=>S.year===1987&&S.month>=10&&S.month<=12, kick:'Il paese', t:'Il lunedì nero', text:'La Borsa di New York perde un quarto in un giorno e quella di Parigi la segue: chi ha comprato le azioni delle privatizzazioni scopre che cosa vuol dire.', ch:[
+   {l:'Prosegui', e:'', f:function(){}}]},
+  /* L103-2 · i beat leggeri del decennio francese '90 (scheda §I-D). */
+  {id:'lgfr90_albertville', era:'fr1990', registro:'leggero', cond:()=>S.year===1992&&S.month>=1&&S.month<=3, kick:'Il paese', t:'I Giochi sulla neve', text:'Sedici giorni di gare fra tredici paesi delle Alpi, la cerimonia d\'apertura come un balletto: la Savoia si scopre al mondo.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr90_parco', era:'fr1990', registro:'leggero', cond:()=>S.year>=1992&&S.year<=1994, kick:'Il paese', t:'Il parco americano', text:'Un parco a tema fuori Parigi, con un castello e i topi con i guanti: gli intellettuali gridano alla colonizzazione culturale, le famiglie fanno la fila.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr90_tunnel', era:'fr1990', registro:'leggero', cond:()=>S.year>=1994&&S.year<=1995, kick:'Il paese', t:'Il treno sotto la Manica', text:'Parigi-Londra in tre ore, senza vedere il mare: l\'isola non è più un\'isola, dicono i giornali; gli inglesi non sono d\'accordo.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr90_mondiale', era:'fr1990', registro:'leggero', cond:()=>S.year===1998&&S.month>=6&&S.month<=9, kick:'Il paese', t:'Campioni del mondo', text:'Il 12 luglio, allo stadio nuovo, tre a zero in finale. Un milione di persone sui Campi Elisi, e per un\'estate il paese si racconta con tre colori che non sono quelli della bandiera: nero, bianco, beur.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr90_euro', era:'fr1990', registro:'leggero', cond:()=>S.year===1999&&S.month<=6, kick:'Il paese', t:'L\'euro virtuale', text:'Dal primo gennaio esiste una moneta che nessuno ha in tasca: sui conti, sulle bollette, nei bilanci. Le banconote fra tre anni. Sei franchi e cinquantasei.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr90_telefonino', era:'fr1990', registro:'leggero', cond:()=>S.year>=1997, kick:'Il paese', t:'Il telefono in tasca', text:'In tre anni da uno su venti a uno su due: si telefona dal treno, dal ristorante, dalla sala d\'attesa. Il vicino di posto sa tutto di te.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr90_rete', era:'fr1990', registro:'leggero', cond:()=>S.year>=1998, kick:'Il paese', t:'La rete', text:'Il modem che canta, la connessione che cade, e un mondo di pagine che nessuno controlla. Il terminale grigio accanto al telefono comincia a sembrare vecchio.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr90_rave', era:'fr1990', registro:'leggero', cond:()=>S.year>=1995, kick:'Il paese', t:'La musica nei capannoni', text:'Feste di una notte in un capannone abbandonato, la musica elettronica, i ragazzi che arrivano in mille da un numero di telefono. La gendarmeria cerca il capannone.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr90_biblioteca', era:'fr1990', registro:'leggero', cond:()=>S.year>=1996&&S.year<=1998, kick:'Il paese', t:'Le quattro torri', text:'La biblioteca nazionale nuova: quattro torri di vetro a forma di libro aperto, sulla riva della Senna. I libri, dicono, soffrono la luce.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr90_tour', era:'fr1990', registro:'leggero', cond:()=>S.year===1998&&S.month>=7&&S.month<=8, kick:'Il paese', t:'Il Tour dei sospetti', text:'Un\'auto della squadra fermata alla frontiera piena di fiale, una squadra intera espulsa, i corridori che scendono di sella per protesta. Il Tour arriva a Parigi lo stesso, e nessuno guarda più allo stesso modo.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr90_millennio', era:'fr1990', registro:'leggero', cond:()=>S.year===2000&&S.month<=2, kick:'Il paese', t:'Il baco', text:'Il primo gennaio 2000 gli aerei non sono caduti e gli ascensori funzionano: i miliardi spesi per il baco del millennio hanno funzionato, o non servivano. La torre ha fatto le scintille lo stesso.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr90_sciopero', era:'fr1990', registro:'leggero', cond:()=>S.year===1995&&S.month===12, kick:'Il paese', t:'Il paese a piedi', text:'Tre settimane senza treni né metrò: si va al lavoro in bicicletta, in autostop, a piedi lungo la Senna. Le famiglie si scoprono vicine di casa.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
 ];
 
 /* ===== F1 — LA TELEFONATA. Un'interruzione, non una carta: overlay a squillo, due opzioni secche, decisione a
@@ -5315,6 +5496,29 @@ const DOSSIERS=[
    {l:'Accelera',e:'Più reattori, prima · e più comitati sui siti',costo:{debito:1},f:()=>{S.ind.debt+=1; gdFr70('imprenditori',2); gdFr70('giovani',-3);}},
    {l:'Tieni il passo',e:'Il calendario com\'è · nessuna sorpresa',f:()=>{}},
    {l:'Rallenta',e:'Un reattore in meno l\'anno · e le imprese lo notano',f:()=>{gdFr70('giovani',2); gdFr70('imprenditori',-2);}}]},
+ /* L101-2 · i due dossier del decennio francese '80 (scheda §I-F): esteri e difesa, quindi entrano anche in coabitazione
+    (sono i ministeri che restano al Presidente, COABITAZIONE_MIN) — voluto. */
+ {id:'dfr80_ciad',era:'fr1980',cond:()=>S.year>=1983&&S.year<=1987,min:'difesa',kick:'La difesa',t:'La linea nel deserto',
+  text:'A sud del Sahara un alleato africano chiede aiuto contro il vicino del nord, che ha armi e ambizioni. Lo stato maggiore propone una linea: sotto, i nostri; sopra, nessuno.',ch:[
+   {l:'Una linea e un contingente',e:'Tremila uomini a tenere un parallelo · l\'alleato resta in piedi, il conto arriva ogni mese',costo:{debito:0.5},f:()=>{S.ind.debt+=0.5; repd(3); gdFr80('giovani',-2);}},
+   {l:'Aerei e istruttori, niente truppe',e:'Presenti dal cielo · a terra decidono gli altri',f:()=>{repd(1);}},
+   {l:'Ritiro: non è la nostra guerra',e:'Nessun soldato · e l\'Africa che parla francese prende nota',f:()=>{repd(-4); gdFr80('giovani',2);}}]},
+ {id:'dfr80_missili',era:'fr1980',cond:()=>S.year>=1983&&S.year<=1985,min:'esteri',kick:'L\'Europa',t:'I missili a est e a ovest',
+  text:'Il vicino tedesco deve decidere se accettare i missili americani contro quelli sovietici puntati sull\'Europa, e chiede a Parigi che cosa ne pensa. La piazza pacifista è piena; la deterrenza francese resta fuori dal conto.',ch:[
+   {l:'Parli al loro Parlamento: i missili servono',e:'La storia · «i missili sono a est, i pacifisti a ovest» · l\'alleato ringrazia, la sinistra pacifista no',f:()=>{repd(4); gdFr80('cetomedio',2); gdFr80('giovani',-3);}},
+   {l:'Neutrale: è affare loro',e:'Nessuna parola · e l\'alleato la legge come una parola',f:()=>{repd(-2);}},
+   {l:'Contro: l\'Europa non è un poligono',e:'La piazza applaude · Washington no',f:()=>{repd(-4); gdFr80('giovani',4); gdFr80('cetomedio',-2);}}]},
+ /* L103-2 · i due dossier del decennio francese '90 (scheda §I-F): difesa ed esteri, entrano anche in coabitazione. */
+ {id:'dfr90_nato',era:'fr1990',cond:()=>S.year>=1995&&S.year<=1997,min:'difesa',kick:'La difesa',t:'Il ritorno nel comando',
+  text:'Trent\'anni dopo l\'uscita, lo stato maggiore propone di tornare nel comando militare integrato dell\'Alleanza, a una condizione: il comando del sud, a Napoli, a un europeo. Washington dice di no alla condizione.',ch:[
+   {l:'Rientri senza condizioni',e:'Dentro il comando · i gollisti della tua maggioranza non ti parlano per un mese',f:()=>{repd(3); baseFr90(-2); gdFr90('pensionati',-2);}},
+   {l:'Rientri solo con il comando del sud',e:'La storia · Washington non cede, tu nemmeno · si resta fuori, con dignità',f:()=>{repd(0); gdFr90('cetomedio',1);}},
+   {l:'Fuori, come il generale',e:'La linea di sempre · gli alleati la conoscono a memoria',f:()=>{repd(-1); gdFr90('pensionati',2); baseFr90(1);}}]},
+ {id:'dfr90_kosovo',era:'fr1990',cond:()=>S.year===1999&&S.month>=3&&S.month<=6,min:'esteri',kick:'L\'Europa',t:'I raid sul Kosovo',
+  text:'L\'Alleanza bombarda un paese europeo senza il mandato dell\'ONU per fermare la pulizia etnica in una provincia. Gli aerei francesi sono i secondi per numero. Il Presidente decide gli obiettivi che la Francia accetta di colpire.',ch:[
+   {l:'Tutti gli obiettivi militari, nessun ponte civile',e:'La storia · settantotto giorni di raid, i ponti restano · gli alleati accettano, e lo dicono',f:()=>{repd(3); gdFr90('giovani',-2); gdFr90('cetomedio',1);}},
+   {l:'Tutto quello che chiede l\'Alleanza',e:'Nessuna riserva · qualche foto che non avresti voluto',f:()=>{repd(2); gdFr90('giovani',-4); stampad(-2);}},
+   {l:'Niente raid senza l\'ONU',e:'Gli aerei restano a terra · l\'Alleanza fa senza di te, e si ricorda',f:()=>{repd(-5); gdFr90('giovani',2); gdFr90('cattolici',1);}}]},
  {id:'d50_marshall_dip',era:'italia1950',cond:()=>S.year<=1953,min:'esteri',kick:'Piano Marshall',t:'La dipendenza dagli aiuti',text:'Gli aiuti americani hanno rimesso in moto il paese, ma ora chiedono allineamento politico e commerciale. Fin dove seguire l\'alleato?',ch:[
    {l:'Allineamento pieno con l\'alleato',e:'Aiuti e protezione; la pancia mormora',pleases:'tecnico',f:()=>{repd(4); if(S.gMod!=null)S.gMod+=0.1; gd('cetomedio',-1);}},
    {l:'Amicizia sì, ma con margini nostri',e:'Autonomia rivendicata; l\'alleato prende nota',pleases:'populista',f:()=>{repd(-2); gd('cetomedio',2);}},
@@ -7713,6 +7917,135 @@ const EVENTS=[
    {l:'Diecimila franchi a chi parte',e:'Pochi partono, molti si offendono · e i cantieri restano senza braccia',f:()=>{gdFr70('cetomedio',2); gdFr70('imprenditori',-2); gdFr70('giovani',-2); stampad(-1);}},
    {l:'Blocca gli ingressi, non le partenze',e:'Le frontiere chiuse com\'erano · nessun incentivo, nessun titolo',f:()=>{gdFr70('cetomedio',1);}},
    {l:'Nessun incentivo: chi è qui resta',e:'Il ricongiungimento delle famiglie va avanti · il ceto medio conta i posti a scuola',f:()=>{gdFr70('giovani',2); gdFr70('cattolici',1); gdFr70('cetomedio',-2);}}]},
+ /* ---- L101-2 · IL DECENNIO FRANCESE '80 (scheda PRESET-FRANCIA-1980 §I-C, forma finale, copiata dalla scheda): dodici
+    eventi, uno o due per anno dal 1981 al 1991. I gruppi passano da gdFr80 (× FR80_GRUPPI). ⚠ fr80_golfo esce anche in
+    coabitazione (gli eventi entrano sotto il flag, L100-2): è la riserva del Presidente, e il testo lo dice. ---- */
+ {id:'fr80_penadimorte', era:'fr1980', cond:()=>S.year===1981&&S.month>=9, kick:'La giustizia', t:'La pena di morte',
+  text:'Il ministro della giustizia porta in aula l\'abolizione della pena di morte. Sei francesi su dieci sono contrari; l\'ultima esecuzione è di quattro anni fa.',ch:[
+   {l:'Abolisci',e:'La storia · la ghigliottina finisce in un museo · sei francesi su dieci non sono d\'accordo, e lo diranno per anni',f:()=>{gdFr80('giovani',5); gdFr80('cattolici',-2); gdFr80('cetomedio',-3); repd(3); stampad(2);}},
+   {l:'Una moratoria: nessuna esecuzione, la legge resta',e:'Nessuno muore, nessuno abolisce · e il dibattito ricomincia a ogni processo',f:()=>{gdFr80('giovani',1); gdFr80('cetomedio',1);}},
+   {l:'Lascia la legge com\'è',e:'La pena resta, e chi ti ha votato per abolirla si ricorda',f:()=>{gdFr80('cetomedio',3); gdFr80('giovani',-5); repd(-2);}}]},
+ {id:'fr80_regioni', era:'fr1980', cond:()=>S.year===1982, kick:'Lo Stato', t:'Le regioni',
+  text:'Il decentramento: il prefetto perde la tutela sui comuni, le regioni diventano enti eletti con un bilancio loro. Duecento anni di Stato centrale si allentano in una legge.',ch:[
+   {l:'Regioni elette, con soldi veri',e:'Le regioni esistono da oggi · e i prefetti scrivono a Parigi',costo:{debito:1},f:()=>{S.ind.debt+=1; gdFr80('cetomedio',3); gdFr80('imprenditori',1); repd(1);}},
+   {l:'Regioni elette, senza bilancio proprio',e:'Un consiglio e nessun soldo · nessuno protesta, nessuno festeggia',f:()=>{gdFr80('cetomedio',1);}},
+   {l:'Lo Stato resta a Parigi',e:'Tutto come prima · la provincia se lo segna',f:()=>{gdFr80('cetomedio',-3); gdFr80('pensionati',1);}}]},
+ {id:'fr80_marcia', era:'fr1980', cond:()=>S.year===1983&&S.month===12, kick:'Il paese', t:'La marcia arriva a Parigi',
+  text:'Partiti in diciassette da Marsiglia, arrivano a Parigi in centomila: i figli dell\'immigrazione chiedono uguaglianza e la fine delle aggressioni. Il Presidente li riceve o no.',ch:[
+   {l:'Li ricevi e prometti la carta di dieci anni',e:'La storia · un permesso di dieci anni per chi è qui · la destra parla di resa, i ragazzi di Parigi ricordano la stretta di mano',f:()=>{gdFr80('giovani',6); gdFr80('lavoratori',2); gdFr80('cetomedio',-3); gdFr80('pensionati',-2); stampad(2);}},
+   {l:'Li ricevi, senza promesse',e:'Una foto e un caffè · nessuno ci crede troppo',f:()=>{gdFr80('giovani',2); gdFr80('cetomedio',-1);}},
+   {l:'Non li ricevi',e:'La marcia finisce davanti a un portone chiuso · e i giornali lo fotografano',f:()=>{gdFr80('cetomedio',2); gdFr80('giovani',-6); stampad(-3); repd(-2);}}]},
+ {id:'fr80_nave', era:'fr1980', cond:()=>S.year===1985&&S.month>=7&&S.month<=10, tono:'grave', kick:'I servizi', t:'La nave affondata',
+  text:'In un porto dall\'altra parte del mondo una nave di ecologisti è stata affondata da due mine e un fotografo è morto. Due agenti dei tuoi servizi sono in cella laggiù, e i giornali sanno già chi ha dato l\'ordine.',ch:[
+   {l:'Il ministro della difesa si dimette, tu no',e:'La storia · una testa cade, la tua resta · l\'alleato laggiù non dimentica',f:()=>{repd(-4); stampad(-2); gdFr80('giovani',-3); fidFr80(-1);}},
+   {l:'Ammetti tutto e chiedi scusa',e:'Il paese sente il Presidente dire «siamo stati noi» · i servizi non te lo perdonano, i giornali sì',f:()=>{repd(-2); stampad(3); gdFr80('giovani',2); gdFr80('cetomedio',-2);}},
+   {l:'Nega: erano altri',e:'Per due mesi regge · poi i giornali pubblicano tutto, e il ministro cade lo stesso',f:()=>{repd(-6); stampad(-6); gdFr80('giovani',-4); gdFr80('cetomedio',-2);}}]},
+ {id:'fr80_attentati', era:'fr1980', cond:()=>S.year===1986&&S.month>=9&&S.month<=12, tono:'grave', kick:'L\'ordine', t:'Rue de Rennes',
+  text:'Un cestino esplode davanti a un grande magazzino a Parigi: sette morti, il quinto attentato del mese. I mandanti sono all\'estero e chiedono la liberazione di un uomo detenuto in Francia.',ch:[
+   {l:'Visti per tutti gli stranieri, gendarmi per le strade',e:'Le frontiere si chiudono, i turisti pure · la città respira',f:()=>{gdFr80('cetomedio',4); gdFr80('pensionati',3); gdFr80('giovani',-2); repd(-1);}},
+   {l:'Tratti in segreto con chi ha armato la mano',e:'Gli attentati si fermano · e nessuno deve sapere perché',f:()=>{gdFr80('cetomedio',2); repd(-3); stampad(-2);}},
+   {l:'Nessuna misura speciale: la legge basta',e:'I giudici lavorano · la città conta i cestini',f:()=>{gdFr80('giovani',2); gdFr80('cetomedio',-4); gdFr80('pensionati',-3);}}]},
+ {id:'fr80_studenti', era:'fr1980', cond:()=>S.year===1986&&S.month===12, tono:'grave', kick:'La scuola', t:'Gli studenti in piazza',
+  text:'La riforma dell\'università porta in piazza mezzo milione di studenti, e una notte un ragazzo muore sotto i colpi di una pattuglia. Il paese si ferma. Il governo può ritirare la legge o tenere.',ch:[
+   {l:'Ritira la legge',e:'La storia · la legge sparisce in un giorno, il ministro se ne va · i ragazzi tornano a casa, il ricordo no',f:()=>{gdFr80('giovani',4); gdFr80('cattolici',-1); baseFr80(-2); stampad(1);}},
+   {l:'Tieni la legge, cambia i ministri',e:'La riforma resta, con altre facce · la piazza non si svuota',f:()=>{gdFr80('giovani',-6); gdFr80('cetomedio',1); stampad(-3);}},
+   {l:'Inchiesta pubblica sulla morte del ragazzo',e:'I responsabili a processo · la legge intanto resta ferma',f:()=>{gdFr80('giovani',2); repd(1); gdFr80('cetomedio',-1);}}]},
+ {id:'fr80_tvprivata', era:'fr1980', cond:()=>S.year===1987, kick:'Il paese', t:'La televisione privata',
+  text:'Il primo canale pubblico, quello che tutti guardano alle otto, va in vendita: un gruppo industriale contro un gruppo editoriale, e un\'audizione pubblica per decidere chi lo merita.',ch:[
+   {l:'Vendi al gruppo industriale',e:'Il canale delle otto è di un costruttore · la Borsa applaude, la cultura si offende',costo:{debito:-0.5},f:()=>{S.ind.debt-=0.5; gdFr80('imprenditori',4); gdFr80('giovani',-2); stampad(-2);}},
+   {l:'Vendi con vincoli di qualità',e:'Un canale privato con un capitolato · nessuno lo leggerà',costo:{debito:-0.3},f:()=>{S.ind.debt-=0.3; gdFr80('imprenditori',2); gdFr80('cetomedio',1);}},
+   {l:'Il primo canale resta pubblico',e:'Lo Stato tiene le otto di sera · e i privati si comprano il secondo',f:()=>{gdFr80('cetomedio',2); gdFr80('imprenditori',-3);}}]},
+ {id:'fr80_caledonia', era:'fr1980', cond:()=>S.year===1988&&S.month>=6&&S.month<=9, tono:'grave', kick:'Oltremare', t:'La Nuova Caledonia',
+  text:'Nell\'isola dall\'altra parte del mondo una grotta è finita in un bagno di sangue: ostaggi, un assalto, diciannove indipendentisti e sei gendarmi morti. I due capi delle due comunità sono a Parigi, allo stesso tavolo, per la prima volta.',ch:[
+   {l:'Un accordo con un referendum fra dieci anni',e:'La storia · la pace per dieci anni, poi si vota · le due comunità firmano, e uno dei due capi lo pagherà',f:()=>{repd(4); gdFr80('giovani',3); gdFr80('cetomedio',1); fidFr80(1);}},
+   {l:'Ordine pubblico e niente referendum',e:'L\'isola resta francese per decreto · e ogni anno un morto in più',f:()=>{gdFr80('pensionati',2); gdFr80('cetomedio',1); gdFr80('giovani',-4); repd(-3);}},
+   {l:'Indipendenza subito',e:'L\'isola se ne va · i coloni tornano, la destra grida al tradimento',f:()=>{gdFr80('giovani',3); gdFr80('cetomedio',-5); gdFr80('pensionati',-4); repd(1);}}]},
+ {id:'fr80_rmi', era:'fr1980', cond:()=>(S.year===1988&&S.month>=11)||(S.year===1989&&S.month<=2), kick:'Il lavoro', t:'Il reddito minimo',
+  text:'Un reddito garantito per chi non ha niente, in cambio di un percorso di inserimento: un milione di persone, dicono i conti. Passa quasi all\'unanimità, se lo proponi.',ch:[
+   {l:'Il reddito minimo per tutti gli adulti',e:'La storia · un milione di assegni · e un tetto in più nel bilancio',costo:{debito:1.5},f:()=>{S.ind.debt+=1.5; gdFr80('lavoratori',4); gdFr80('giovani',3); gdFr80('cattolici',2); gdFr80('imprenditori',-2); fidFr80(-1);}},
+   {l:'Solo con un lavoro d\'utilità sociale in cambio',e:'Un assegno e un cantiere · i comuni cercano i cantieri',costo:{debito:1},f:()=>{S.ind.debt+=1; gdFr80('lavoratori',2); gdFr80('cetomedio',1);}},
+   {l:'Niente reddito, più sussidi esistenti',e:'Tutto com\'è · e le mense dell\'inverno raddoppiano',f:()=>{gdFr80('imprenditori',2); gdFr80('lavoratori',-3); gdFr80('cattolici',-3);}}]},
+ {id:'fr80_velo', era:'fr1980', cond:()=>(S.year===1989&&S.month>=10)||(S.year===1990&&S.month<=2), kick:'La scuola', t:'Il velo a scuola',
+  text:'In un liceo di provincia tre ragazze vengono escluse dalle lezioni perché entrano in classe con il velo. In una settimana è il paese intero a discuterne: la laicità, la scuola, chi decide.',ch:[
+   {l:'Decidano i presidi, caso per caso',e:'La storia · il Consiglio di Stato dà la regola, i presidi la applicano · nessuno è contento, il fuoco si spegne',f:()=>{gdFr80('cetomedio',1); gdFr80('giovani',1);}},
+   {l:'Una legge: niente segni religiosi a scuola',e:'La legge passa · i ragazzi dei quartieri la leggono come contro di loro',f:()=>{gdFr80('cetomedio',4); gdFr80('pensionati',2); gdFr80('giovani',-4); gdFr80('cattolici',-1);}},
+   {l:'Il velo è ammesso: la scuola è per tutti',e:'Le ragazze tornano in classe · la laicità, dicono, è ferita',f:()=>{gdFr80('giovani',3); gdFr80('cetomedio',-5); gdFr80('pensionati',-3);}}]},
+ {id:'fr80_banlieue', era:'fr1980', cond:()=>(S.year===1990&&S.month>=10)||(S.year===1991&&S.month<=3), tono:'grave', kick:'Il paese', t:'Le banlieue',
+  text:'In un quartiere alla periferia di Lione un ragazzo muore su una moto dopo un controllo, e per tre notti il quartiere brucia. Vent\'anni di torri costruite in fretta presentano il conto.',ch:[
+   {l:'Un ministero per le città e un piano per i quartieri',e:'La storia · un ministro, dei fondi, dei cantieri · e il prossimo quartiere che brucia',costo:{debito:1},f:()=>{S.ind.debt+=1; gdFr80('giovani',4); gdFr80('lavoratori',2); gdFr80('cetomedio',-1);}},
+   {l:'Ordine pubblico: più polizia nei quartieri',e:'Le notti si calmano · e i ragazzi imparano a odiare la divisa',f:()=>{gdFr80('cetomedio',3); gdFr80('pensionati',2); gdFr80('giovani',-5);}},
+   {l:'Niente: è un fatto di cronaca',e:'Tre notti, poi silenzio · fino alla prossima',f:()=>{gdFr80('giovani',-3); stampad(-2);}}]},
+ {id:'fr80_golfo', era:'fr1980', cond:()=>S.year===1991&&S.month>=1&&S.month<=3, tono:'grave', kick:'La difesa', t:'Il contingente',
+  text:'La coalizione attacca il paese che ha invaso il suo vicino, e la Francia deve dire quanti uomini manda e sotto quale comando. È il Presidente che decide: è la sua riserva, coabitazione o no.',ch:[
+   {l:'Una divisione, sotto comando alleato',e:'La storia · diecimila uomini nel deserto, con gli altri · il paese conta, e lo sa',costo:{debito:0.5},f:()=>{S.ind.debt+=0.5; repd(5); gdFr80('cetomedio',2); gdFr80('giovani',-3); gdFr80('lavoratori',-1);}},
+   {l:'Solo aerei e navi, comando francese',e:'Presenti ma a modo nostro · gli alleati sorridono a metà',f:()=>{repd(2); gdFr80('giovani',-1);}},
+   {l:'Fuori dalla guerra',e:'Nessun soldato · il ministro della difesa se ne va, e gli alleati non chiamano più',f:()=>{repd(-6); gdFr80('giovani',3); gdFr80('cetomedio',-3); fidFr80(-1);}}]},
+ /* ---- L103-2 · IL DECENNIO FRANCESE '90 (scheda PRESET-FRANCIA-1990 §I-C, copiata dalla scheda): dodici eventi. fr90_35ore e
+    fr90_pacs hanno `&& !S.coabitazione` (sotto coabitazione sono del Primo ministro); quinquennato, Ruanda, test e leva
+    entrano anche in coabitazione (sono del Presidente). ---- */
+ {id:'fr90_sangue', era:'fr1990', cond:()=>S.year>=1992&&S.year<=1993, tono:'grave', kick:'La giustizia', t:'Il sangue',
+  text:'Negli anni Ottanta un centro trasfusionale ha distribuito sangue che sapeva infetto, e centinaia di emofiliaci si sono ammalati. I dirigenti sono a processo; una commissione chiede se debbano andarci anche i ministri di allora.',ch:[
+   {l:'Una corte per i ministri di allora',e:'La storia · una corte nuova, un processo fra sei anni · le famiglie aspettano, i ministri di oggi si guardano',f:()=>{gdFr90('giovani',2); gdFr90('cetomedio',2); repd(1); baseFr90(-2);}},
+   {l:'Risarcimento pieno, subito, senza processo ai ministri',e:'Le famiglie ricevono · e chiedono ancora chi sapeva',costo:{debito:0.5},f:()=>{S.ind.debt+=0.5; gdFr90('cetomedio',1); gdFr90('giovani',-1);}},
+   {l:'Solo i dirigenti: la politica non c\'entra',e:'I dirigenti condannati, i ministri no · i giornali non la chiudono qui',f:()=>{gdFr90('giovani',-4); gdFr90('cetomedio',-3); stampad(-4);}}]},
+ {id:'fr90_ruanda', era:'fr1990', cond:()=>S.year===1994&&S.month>=5&&S.month<=8, tono:'grave', kick:'La difesa', t:'Il Ruanda',
+  text:'In cento giorni, in un paese dove la Francia ha addestrato l\'esercito, è in corso un genocidio. Nessuno interviene. Lo stato maggiore propone un\'operazione umanitaria nel sud-ovest: salverà chi resta, e proteggerà anche chi ha ucciso.',ch:[
+   {l:'L\'operazione umanitaria',e:'La storia · una zona sicura, decine di migliaia di vite · e le domande su chi ci si è rifugiato dentro, per trent\'anni',costo:{debito:0.5},f:()=>{S.ind.debt+=0.5; repd(1); gdFr90('cattolici',2); gdFr90('giovani',-2); stampad(-2);}},
+   {l:'Sotto bandiera ONU, e basta',e:'I caschi blu arrivano dopo · il paese non è né dentro né fuori',f:()=>{repd(-2); gdFr90('giovani',-1);}},
+   {l:'Niente: non tocca a noi',e:'Nessun soldato · e la parola «genocidio» resta nei giornali per sempre accanto a un\'altra',f:()=>{repd(-5); gdFr90('giovani',-4); gdFr90('cattolici',-3); stampad(-3);}}]},
+ {id:'fr90_test', era:'fr1990', cond:()=>S.year===1995&&S.month>=6&&S.month<=10, kick:'La difesa', t:'I test nel Pacifico',
+  text:'Il nuovo Presidente vuole una serie di test nucleari nell\'atollo, l\'ultima prima del bando totale: gli scienziati dicono che servono, il mondo dice di no, e nell\'atollo la gente scende in piazza.',ch:[
+   {l:'Sei test, poi la firma del bando',e:'La storia · sei esplosioni, il boicottaggio del vino e del formaggio, poi la firma · i militari ringraziano, il Pacifico no',f:()=>{gdFr90('pensionati',2); gdFr90('cetomedio',1); gdFr90('giovani',-4); repd(-4);}},
+   {l:'Uno solo, simbolico',e:'Un test, poi basta · nessuno è contento, il boicottaggio dura un mese',f:()=>{repd(-2); gdFr90('giovani',-1);}},
+   {l:'Nessun test: firmi subito',e:'La firma senza esplosioni · i militari dicono che l\'arsenale invecchia, il mondo applaude',f:()=>{repd(3); gdFr90('giovani',3); gdFr90('pensionati',-2);}}]},
+ {id:'fr90_michel', era:'fr1990', cond:()=>S.year===1995&&S.month>=7&&S.month<=11, tono:'grave', kick:'L\'ordine', t:'Saint-Michel',
+  text:'Una bombola di gas esplode in una stazione della metropolitana sotto la cattedrale: otto morti, il primo di una serie. I mandanti sono dall\'altra parte del Mediterraneo, dove la guerra civile dura da tre anni.',ch:[
+   {l:'Piano di vigilanza: militari nelle stazioni, cestini sigillati',e:'La storia · i soldati nel metrò per anni · la città si abitua, e non dimentica',f:()=>{gdFr90('cetomedio',4); gdFr90('pensionati',3); gdFr90('giovani',-2);}},
+   {l:'Chiudi la frontiera sud',e:'I visti sospesi · le famiglie divise, e gli attentati continuano lo stesso',f:()=>{gdFr90('cetomedio',2); gdFr90('giovani',-4); repd(-2);}},
+   {l:'Solo la polizia giudiziaria',e:'Gli arresti arrivano in autunno · intanto altre due bombe',f:()=>{gdFr90('giovani',1); gdFr90('cetomedio',-4); gdFr90('pensionati',-3); stampad(-2);}}]},
+ {id:'fr90_leva', era:'fr1990', cond:()=>S.year===1996&&S.month>=2&&S.month<=6, kick:'La difesa', t:'La fine della leva',
+  text:'Duecento anni dopo la Rivoluzione, il Presidente annuncia che i ragazzi non faranno più il servizio militare: un esercito di professionisti, più piccolo, per le guerre lontane. I generali sono divisi; i ragazzi no.',ch:[
+   {l:'La leva finisce: esercito di mestiere',e:'La storia · l\'ultima classe parte nel 2001 · i ragazzi festeggiano, le caserme di provincia chiudono',costo:{debito:0.5},f:()=>{S.ind.debt+=0.5; gdFr90('giovani',6); gdFr90('cetomedio',1); gdFr90('pensionati',-3); repd(1);}},
+   {l:'Una leva breve e civile',e:'Sei mesi di servizio, anche negli ospedali · nessuno la fa volentieri, nessuno protesta',f:()=>{gdFr90('giovani',2); gdFr90('pensionati',1);}},
+   {l:'La leva resta',e:'Dodici mesi per tutti, come i padri · i ragazzi se lo ricordano al primo voto',f:()=>{gdFr90('pensionati',3); gdFr90('giovani',-6);}}]},
+ {id:'fr90_bernard', era:'fr1990', cond:()=>S.year===1996&&S.month>=8&&S.month<=10, kick:'Il paese', t:'Saint-Bernard',
+  text:'Trecento persone senza documenti occupano una chiesa di Parigi da due mesi, dieci di loro in sciopero della fame, e la parrocchia li protegge. La prefettura chiede di sgomberare.',ch:[
+   {l:'Sgombero, con le asce sulla porta',e:'La storia · la porta abbattuta in diretta, la chiesa vuota in un\'ora · una parte del paese applaude, l\'altra non dimentica le asce',f:()=>{gdFr90('cetomedio',3); gdFr90('pensionati',3); gdFr90('giovani',-6); gdFr90('cattolici',-4); stampad(-3);}},
+   {l:'Esame caso per caso, la chiesa resta occupata',e:'Metà regolarizzati, metà no · la chiesa si svuota da sola in autunno',f:()=>{gdFr90('giovani',2); gdFr90('cattolici',1); gdFr90('cetomedio',-2);}},
+   {l:'Regolarizzazione per tutti i trecento',e:'I documenti a tutti · e la prossima chiesa si riempie il mese dopo',f:()=>{gdFr90('giovani',4); gdFr90('cattolici',2); gdFr90('cetomedio',-5); gdFr90('pensionati',-4);}}]},
+ {id:'fr90_mucca', era:'fr1990', cond:()=>S.year===1996&&S.month>=3&&S.month<=7, kick:'La salute', t:'La mucca pazza',
+  text:'Londra ammette che la malattia delle mucche può passare all\'uomo. Il paese importa carne inglese da anni; i macellai svuotano i banchi, e il ministro deve dire se chiudere la frontiera alla carne dell\'alleato.',ch:[
+   {l:'Embargo totale sulla carne inglese',e:'La storia · la frontiera chiusa per dieci anni · gli allevatori francesi respirano, Londra minaccia',f:()=>{gdFr90('cetomedio',3); gdFr90('cattolici',2); repd(-2);}},
+   {l:'Controlli e etichette, niente embargo',e:'La carne passa, con un bollino · i consumatori non si fidano del bollino',f:()=>{gdFr90('cetomedio',-2); repd(1);}},
+   {l:'Segui Bruxelles',e:'Quello che decide l\'Europa, quando lo decide · e intanto i banchi restano vuoti',f:()=>{gdFr90('cetomedio',-3); gdFr90('cattolici',-2);}}]},
+ {id:'fr90_35ore', era:'fr1990', cond:()=>((S.year===1997&&S.month>=10)||S.year===1998)&&!S.coabitazione, kick:'Il lavoro', t:'Le 35 ore',
+  text:'Il governo propone di portare la settimana a trentacinque ore per legge, a parità di salario: meno ore ciascuno, più posti per tutti, dicono; i padroni dicono che chiudono. Sotto coabitazione la legge è del Primo ministro; qui decidi tu.',ch:[
+   {l:'Trentacinque ore per legge',e:'La storia · la settimana più corta d\'Europa · i disoccupati scendono, le imprese contano, il mondo guarda',costo:{debito:1},f:()=>{S.ind.debt+=1; gdFr90('lavoratori',6); gdFr90('giovani',2); gdFr90('imprenditori',-7); gdFr90('cetomedio',-1);}},
+   {l:'Trentacinque ore contrattate, settore per settore',e:'Dove si firma si fa · nella metà del paese non si firma',f:()=>{gdFr90('lavoratori',2); gdFr90('imprenditori',-2);}},
+   {l:'Niente: le ore restano trentanove',e:'Tutto com\'è · e la promessa della campagna se la ricordano',f:()=>{gdFr90('imprenditori',3); gdFr90('lavoratori',-5); baseFr90(-3);}}]},
+ {id:'fr90_pacs', era:'fr1990', cond:()=>S.year===1999&&S.month>=9&&S.month<=12&&!S.coabitazione, kick:'Il paese', t:'Il patto civile',
+  text:'Un contratto per le coppie che non si sposano, anche dello stesso sesso: diritti fiscali e di successione, senza il matrimonio. In aula la destra parla per ore; fuori, una manifestazione con i cartelli e i bambini.',ch:[
+   {l:'Il patto per tutte le coppie',e:'La storia · un contratto in municipio · in dieci anni lo firmeranno più coppie del matrimonio',f:()=>{gdFr90('giovani',6); gdFr90('cetomedio',1); gdFr90('cattolici',-6); gdFr90('pensionati',-2);}},
+   {l:'Solo per le coppie eterosessuali',e:'Metà patto · nessuno dei due fronti lo voleva così',f:()=>{gdFr90('giovani',-2); gdFr90('cattolici',-1);}},
+   {l:'Ritira il testo',e:'Niente patto · i cartelli tornano a casa, i ragazzi no',f:()=>{gdFr90('cattolici',4); gdFr90('pensionati',2); gdFr90('giovani',-6);}}]},
+ {id:'fr90_erika', era:'fr1990', cond:()=>(S.year===1999&&S.month===12)||(S.year===2000&&S.month<=3), tono:'grave', kick:'Il paese', t:'La marea nera',
+  text:'Una petroliera vecchia di venticinque anni si spezza al largo della Bretagna, nel mezzo della tempesta: quattrocento chilometri di costa coperti di olio pesante, gli uccelli a decine di migliaia, i volontari con le pale a Natale. Il proprietario è una scatola a Malta; il carico è di una compagnia francese.',ch:[
+   {l:'Processo alla compagnia, non solo all\'armatore',e:'La storia · dieci anni di processo, e chi affitta la nave paga · la compagnia lo ricorda',f:()=>{gdFr90('giovani',4); gdFr90('cetomedio',2); gdFr90('imprenditori',-3); repd(2);}},
+   {l:'Lo Stato paga la pulizia e chiede i danni dopo',e:'Le spiagge pulite per l\'estate · il conto a Malta, dove non risponde nessuno',costo:{debito:0.5},f:()=>{S.ind.debt+=0.5; gdFr90('cetomedio',2); gdFr90('giovani',1);}},
+   {l:'Sono cose che capitano in mare',e:'Nessun processo nuovo · e i volontari con le pale ti hanno visto in televisione',f:()=>{gdFr90('giovani',-5); gdFr90('cetomedio',-3); stampad(-3);}}]},
+ {id:'fr90_quinquennato', era:'fr1990', cond:()=>S.year===2000&&S.month>=5&&S.month<=9, kick:'L\'Eliseo', t:'Il quinquennato',
+  text:'Sette anni sono troppi, dice quasi tutta la classe politica, e la coabitazione lo dimostra: un mandato di cinque anni, allineato all\'Assemblea, e le due urne a un mese di distanza. Puoi portarlo a referendum, o lasciarlo dov\'è. È il tuo mandato che accorci.',ch:[
+   {l:'Referendum sul quinquennato',e:'La storia · il sì al 73 per cento, e sette francesi su dieci restano a casa · dal 2002 cinque anni, e la coabitazione diventa quasi impossibile',f:()=>{S.quinquennato00='referendum'; gdFr90('giovani',2); gdFr90('cetomedio',1); fidFr90(1);
+     S.log.unshift({t:T('L\'Eliseo'),x:T('Ha portato il quinquennato a referendum.')});}},
+   {l:'Lo fai passare in Parlamento',e:'Il mandato accorciato senza chiedere a nessuno · nessuno se ne accorge',f:()=>{S.quinquennato00='parlamento'; gdFr90('cetomedio',-1);
+     S.log.unshift({t:T('L\'Eliseo'),x:T('Ha fatto passare il quinquennato dal Parlamento.')});}},
+   {l:'Il settennato resta',e:'Sette anni, come il generale · e la prossima coabitazione è già scritta',f:()=>{S.quinquennato00='no'; gdFr90('pensionati',2); gdFr90('giovani',-3);
+     S.log.unshift({t:T('L\'Eliseo'),x:T('Ha tenuto il settennato.')});}}]},
+ {id:'fr90_tunnel', era:'fr1990', cond:()=>S.year===1999&&S.month>=3&&S.month<=8, tono:'grave', kick:'Le infrastrutture', t:'Il tunnel',
+  text:'Un camion di farina e margarina prende fuoco a metà del tunnel sotto la montagna più alta d\'Europa: trentanove morti, due giorni di incendio, il traforo chiuso per tre anni. Le due società, una francese e una italiana, si rimpallano la colpa.',ch:[
+   {l:'Un\'autorità unica per il tunnel, con l\'Italia',e:'La storia · una sola regia, una sola norma · il traforo riapre nel 2002, più sicuro e più caro',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; repd(2); gdFr90('cetomedio',2); gdFr90('imprenditori',1);}},
+   {l:'Riapertura rapida, poi le norme',e:'Il traforo riapre in un anno · e i camion tornano come prima',f:()=>{gdFr90('imprenditori',3); gdFr90('giovani',-2); repd(-1);}},
+   {l:'Chiusura ai camion, per sempre',e:'Solo auto sotto la montagna · i valligiani respirano, i camionisti bloccano le strade',f:()=>{gdFr90('giovani',3); gdFr90('imprenditori',-4); gdFr90('lavoratori',-2);}}]},
  {id:'fr_ceca', era:'fr1950', cond:()=>S.year>=1951&&S.year<=1953, kick:'L\'Europa', t:'Il carbone e l\'acciaio con Bonn',
   text:'Sei paesi mettono in comune carbone e acciaio sotto un\'Alta Autorità che non risponde a nessun governo: per i siderurgici del nord è un mercato, per i minatori una minaccia, per i gollisti una rinuncia. Il tuo partito deve ratificare.',ch:[
    {l:'Ratifichi',e:'Le acciaierie del nord con te · i minatori temono il mercato comune',f:()=>{gdFr('imprenditori',3); gdFr('cetomedio',2); gdFr('lavoratori',-3); repd(1);}},
@@ -8685,6 +9018,59 @@ const SFIDE=[
  {id:'fr70_europee', era:'fr1970', codaFino:Infinity, paese:'francia', ruolo:'governo', diff:'facile', cond:()=>S.year===1979&&S.month>=7, q:'Che cosa succede il 10 giugno 1979?',
   op:['Un referendum sull\'Europa','La prima elezione diretta del Parlamento europeo','L\'ingresso della Grecia nel Mercato comune'], giusta:1,
   perche:'Per la prima volta i cittadini dei nove paesi della Comunità eleggono direttamente il Parlamento europeo.'},
+ /* L101-2 · le otto sfide del decennio francese '80 (scheda §I-G). ⚠ La scheda le dava tutte con la risposta giusta al
+    primo posto; cartaSfida mostra le opzioni NELL'ORDINE dichiarato (non le rimescola), quindi la posizione della
+    giusta è ruotata qui, come nelle sfide del '70. Il «perché» è di Code. */
+ {id:'fr80_eliseo', era:'fr1980', codaFino:Infinity, paese:'francia', ruolo:'governo', diff:'facile', cond:()=>S.year>=1982, q:'In che anno la sinistra conquista l\'Eliseo?',
+  op:['1981','1974','1988'], giusta:0,
+  perche:'Nel maggio 1981 il candidato socialista vince la presidenziale: è la prima volta per la sinistra nella Quinta Repubblica.'},
+ {id:'fr80_pena', era:'fr1980', codaFino:Infinity, paese:'francia', ruolo:'governo', diff:'facile', cond:()=>S.year>=1982, q:'Che cosa abolisce la Francia nel 1981?',
+  op:['La leva obbligatoria','La pena di morte','Il monopolio televisivo'], giusta:1,
+  perche:'La legge dell\'ottobre 1981 abolisce la pena di morte, contro il parere della maggioranza dei francesi.'},
+ {id:'fr80_rigore', era:'fr1980', codaFino:Infinity, paese:'francia', ruolo:'governo', diff:'media', cond:()=>S.year>=1984, q:'Che cosa sceglie il governo nel marzo 1983?',
+  op:['Uscire dallo SME','Il controllo dei prezzi','Restare nello SME e il rigore'], giusta:2,
+  perche:'Dopo la terza svalutazione il governo sceglie di restare nel sistema monetario europeo e di stringere salari e spesa.'},
+ {id:'fr80_scuola', era:'fr1980', codaFino:Infinity, paese:'francia', ruolo:'governo', diff:'media', cond:()=>S.year>=1985, q:'Che cosa porta un milione di persone a Parigi nel giugno 1984?',
+  op:['Le pensioni','La scuola libera','Il servizio militare'], giusta:1,
+  perche:'La piazza difende le scuole private contro la legge che le vuole in un servizio pubblico unico: la legge viene ritirata.'},
+ {id:'fr80_proporzionale', era:'fr1980', codaFino:Infinity, paese:'francia', ruolo:'governo', diff:'media', cond:()=>S.year>=1987||(S.year===1986&&S.month>=4), q:'Con quale sistema si vota alle legislative del 1986?',
+  op:['Maggioritario a due turni','Maggioritario a un turno','Proporzionale'], giusta:2,
+  perche:'Per le sole legislative del 1986 si vota con la proporzionale: nel 1988 si torna al maggioritario a due turni.'},
+ {id:'fr80_coabitazione', era:'fr1980', codaFino:Infinity, paese:'francia', ruolo:'governo', diff:'media', cond:()=>S.year>=1987||(S.year===1986&&S.month>=4), q:'Come si chiama un Presidente con un Primo ministro del blocco avverso?',
+  op:['Coabitazione','Cogestione','Coalizione'], giusta:0,
+  perche:'Dal marzo 1986 il Presidente convive con un governo dell\'altro blocco: la prima coabitazione della Quinta Repubblica.'},
+ {id:'fr80_reddito', era:'fr1980', codaFino:Infinity, paese:'francia', ruolo:'governo', diff:'facile', cond:()=>S.year>=1989, q:'Che cosa nasce nel dicembre 1988?',
+  op:['La quinta settimana di ferie','Il reddito minimo d\'inserimento','L\'IVA ridotta'], giusta:1,
+  perche:'Il reddito minimo d\'inserimento garantisce un assegno a chi non ha niente, in cambio di un percorso di inserimento.'},
+ {id:'fr80_muro', era:'fr1980', codaFino:Infinity, paese:'francia', ruolo:'governo', diff:'facile', cond:()=>S.year>=1990, q:'Che cosa cade nel novembre 1989?',
+  op:['Il governo','Il franco','Il Muro di Berlino'], giusta:2,
+  perche:'La sera del 9 novembre 1989 i posti di blocco di Berlino si aprono: l\'Europa divisa finisce.'},
+ /* L103-2 · le otto sfide del decennio francese '90 (scheda §I-G), con la risposta giusta nelle posizioni della scheda
+    (0,1,2,1,2,0,1,2: cartaSfida non rimescola). Il «perché» è di Code. */
+ {id:'fr90_q_maastricht', era:'fr1990', codaFino:Infinity, paese:'francia', ruolo:'governo', diff:'facile', cond:()=>S.year>=1993, q:'Con quale percentuale passa il referendum su Maastricht nel 1992?',
+  op:['51','62','48'], giusta:0,
+  perche:'Il sì vince col 51 per cento: il paese si scopre diviso a metà sull\'Europa.'},
+ {id:'fr90_q_coabitazione', era:'fr1990', codaFino:Infinity, paese:'francia', ruolo:'governo', diff:'facile', cond:()=>S.year>=1994||(S.year===1993&&S.month>=4), q:'Che cosa significa «coabitazione»?',
+  op:['Un Presidente e un Primo ministro dello stesso partito','Un Presidente e un Primo ministro di blocchi opposti','Due Primi ministri'], giusta:1,
+  perche:'Quando l\'Assemblea è del blocco avverso, il Presidente nomina un Primo ministro dell\'altra parte e governano insieme.'},
+ {id:'fr90_q_sarajevo', era:'fr1990', codaFino:Infinity, paese:'francia', ruolo:'governo', diff:'media', cond:()=>S.year>=1995||(S.year===1994&&S.month>=3), q:'In quale città una granata sul mercato uccide 68 persone nel febbraio 1994?',
+  op:['Belgrado','Zagabria','Sarajevo'], giusta:2,
+  perche:'La strage del mercato di Sarajevo porta all\'ultimatum degli alleati sulle armi pesanti attorno alla città.'},
+ {id:'fr90_q_dicembre', era:'fr1990', codaFino:Infinity, paese:'francia', ruolo:'governo', diff:'media', cond:()=>S.year>=1996, q:'Che cosa ferma il paese per tre settimane nel dicembre 1995?',
+  op:['Una tempesta','Gli scioperi contro il piano sulla previdenza','Il baco del millennio'], giusta:1,
+  perche:'Ferrovieri e statali scioperano contro il piano sulla previdenza: il governo ritira la parte sulle pensioni.'},
+ {id:'fr90_q_leva', era:'fr1990', codaFino:Infinity, paese:'francia', ruolo:'governo', diff:'media', cond:()=>S.year>=1997||(S.year===1996&&S.month>=3), q:'Che cosa annuncia il Presidente nel febbraio 1996?',
+  op:['La fine dei test nucleari','L\'ingresso nell\'euro','La fine della leva'], giusta:2,
+  perche:'Il servizio militare obbligatorio finisce: l\'esercito diventa di professionisti, e l\'ultima classe parte nel 2001.'},
+ {id:'fr90_q_scioglimento', era:'fr1990', codaFino:Infinity, paese:'francia', ruolo:'governo', diff:'media', cond:()=>S.year>=1998||(S.year===1997&&S.month>=7), q:'Perché nel 1997 si vota un anno prima della scadenza?',
+  op:['Il Presidente ha sciolto l\'Assemblea','Il governo è caduto','Un referendum lo ha chiesto'], giusta:0,
+  perche:'Il Presidente scioglie per avere cinque anni di maggioranza, e la perde: comincia la terza coabitazione.'},
+ {id:'fr90_q_35ore', era:'fr1990', codaFino:Infinity, paese:'francia', ruolo:'governo', diff:'facile', cond:()=>S.year>=1999, q:'Quante ore la settimana per legge dal 1998?',
+  op:['39','35','32'], giusta:1,
+  perche:'La legge porta la settimana legale a trentacinque ore, per creare posti di lavoro.'},
+ {id:'fr90_q_quinquennato', era:'fr1990', codaFino:Infinity, paese:'francia', ruolo:'governo', diff:'facile', cond:()=>S.year>=2001||(S.year===2000&&S.month>=10), q:'Quanto dura il mandato presidenziale dopo il referendum del 2000?',
+  op:['Sette anni','Sei anni','Cinque anni'], giusta:2,
+  perche:'Il referendum del 2000 accorcia il mandato a cinque anni, allineato a quello dell\'Assemblea.'},
  {id:'uk60_svalut67', era:'uk1960', codaFino:Infinity, paese:'regnounito', ruolo:'governo', diff:'difficile', cond:()=>S.year>=1967, q:'Che cosa accadde alla sterlina nel novembre 1967?',
   op:['Fu lasciata fluttuare liberamente','Fu svalutata da 2,80 a 2,40 dollari','Fu agganciata all\'oro'], giusta:1,
   perche:'Arrivò dopo tre anni di difesa del cambio.'},
@@ -11013,6 +11399,46 @@ const TITOLI=[
  {id:'ti_fr70_shock', era:'fr1970', pri:1, cond:()=>S.year===1979&&S.month>=2&&S.month<=9, amico:'Il secondo shock', ostile:'Il secondo shock: e le centrali non bastano ancora'},
  {id:'ti_fr70_europa', era:'fr1970', pri:1, cond:()=>S.year===1979&&S.month>=6&&S.month<=8, amico:'L\'Europa vota', ostile:'L\'Europa vota: e sei su dieci restano a casa'},
  {id:'ti_fr70_treno', era:'fr1970', pri:1, cond:()=>S.year===1979, amico:'Il treno veloce corre', ostile:'Il treno veloce corre, a debito'},
+ /* L101-2 · i titoli del decennio francese '80 (scheda §I-E). I `cond` sugli esiti sono quelli della scheda: chi non ha
+    giocato lo snodo (l'opposizione) non vede il titolo che ne racconta l'esito. */
+ {id:'ti_fr80_eliseo', era:'fr1980', pri:1, cond:()=>S.year===1981&&S.month>=5&&S.month<=7&&eliseoDiSinistra(), amico:'La sinistra all\'Eliseo', ostile:'La sinistra all\'Eliseo: e la Borsa chiude'},
+ {id:'ti_fr80_pena', era:'fr1980', pri:1, cond:()=>S.year===1981&&S.month>=10&&S.month<=11, amico:'La ghigliottina in museo', ostile:'La ghigliottina in museo: sei francesi su dieci contrari'},
+ {id:'ti_fr80_nazionalizza', era:'fr1980', pri:1, cond:()=>S.year===1982&&S.month>=2&&S.month<=4&&S.riforme81==='tutto', amico:'Le banche allo Stato', ostile:'Le banche allo Stato: e i capitali all\'estero'},
+ {id:'ti_fr80_svaluta', era:'fr1980', pri:1, cond:()=>S.year===1982&&S.month>=6&&S.month<=7, amico:'Il franco svalutato, di nuovo', ostile:'Il franco svalutato: la seconda volta in otto mesi'},
+ {id:'ti_fr80_rigore', era:'fr1980', pri:1, cond:()=>S.year===1983&&S.month>=3&&S.month<=6&&S.rigore83==='rigore'&&eliseoDiSinistra(), amico:'Il rigore', ostile:'Il rigore: la parola che la sinistra non voleva dire'},
+ {id:'ti_fr80_scuola', era:'fr1980', pri:1, cond:()=>S.year===1984&&S.month>=6&&S.month<=7, amico:'Un milione per la scuola libera', ostile:'Un milione per la scuola libera: la piazza più grande del dopoguerra'},
+ {id:'ti_fr80_fn', era:'fr1980', pri:1, cond:()=>S.year===1984&&S.month>=6&&S.month<=8, amico:'Il FN all\'undici per cento', ostile:'Il FN all\'undici per cento: e nessuno l\'aveva visto'},
+ {id:'ti_fr80_nave', era:'fr1980', pri:1, cond:()=>S.year===1985&&S.month>=8&&S.month<=10, amico:'La nave affondata', ostile:'La nave affondata: erano i nostri'},
+ {id:'ti_fr80_coabita', era:'fr1980', pri:1, cond:()=>S.year===1986&&S.month>=3&&S.month<=5&&!!S.coabitazione, amico:'La coabitazione', ostile:'La coabitazione: due teste, un Eliseo'},
+ {id:'ti_fr80_rennes', era:'fr1980', pri:1, cond:()=>S.year===1986&&S.month>=9&&S.month<=10, amico:'Rue de Rennes', ostile:'Rue de Rennes: il quinto in un mese'},
+ {id:'ti_fr80_studenti', era:'fr1980', pri:1, cond:()=>S.year===1986&&S.month===12, amico:'Gli studenti in piazza', ostile:'Gli studenti in piazza: un ragazzo è morto'},
+ {id:'ti_fr80_54', era:'fr1980', pri:1, cond:()=>S.year===1988&&S.month<=2&&eliseoDiSinistra(), amico:'Cinquantaquattro per cento', ostile:'Cinquantaquattro per cento: il settennato bis'},
+ {id:'ti_fr80_ouvea', era:'fr1980', pri:1, cond:()=>S.year===1988&&S.month>=5&&S.month<=6, amico:'Ouvéa', ostile:'Ouvéa: la grotta, venticinque morti'},
+ {id:'ti_fr80_rmi', era:'fr1980', pri:1, cond:()=>(S.year===1988&&S.month===12)||(S.year===1989&&S.month===1), amico:'Il reddito minimo', ostile:'Il reddito minimo: un milione di assegni'},
+ {id:'ti_fr80_velo', era:'fr1980', pri:1, cond:()=>S.year===1989&&S.month>=10&&S.month<=12, amico:'Il velo di Creil', ostile:'Il velo di Creil: la laicità in classe'},
+ {id:'ti_fr80_carpentras', era:'fr1980', pri:1, cond:()=>S.year===1990&&S.month>=5&&S.month<=6, amico:'Carpentras', ostile:'Carpentras: le tombe profanate, il paese in piazza'},
+ {id:'ti_fr80_golfo', era:'fr1980', pri:1, cond:()=>S.year===1991&&S.month>=1&&S.month<=3, amico:'Il Golfo', ostile:'Il Golfo: diecimila francesi nel deserto'},
+ {id:'ti_fr80_matignon', era:'fr1980', pri:1, cond:()=>S.year===1991&&S.month>=5&&S.month<=7&&eliseoDiSinistra(), amico:'La prima donna a Matignon', ostile:'La prima donna a Matignon: dieci mesi, dicono i giornali'},
+ /* L103-2 · i titoli del decennio francese '90 (scheda §I-E). Le gemelle «…: X» sono scritte per intero. */
+ {id:'ti_fr90_matignon', era:'fr1990', pri:1, cond:()=>S.year===1991&&S.month>=5&&S.month<=7&&eliseoDiSinistra(), amico:'La prima donna a Matignon', ostile:'La prima donna a Matignon: e la maggioranza mormora'},
+ {id:'ti_fr90_furiani', era:'fr1990', pri:1, cond:()=>S.year===1992&&S.month>=5&&S.month<=6, amico:'Furiani', ostile:'Furiani: la tribuna crolla prima del calcio d\'inizio'},
+ {id:'ti_fr90_ref', era:'fr1990', pri:1, cond:()=>S.year===1992&&S.month>=9&&S.month<=10&&S.ref92==='referendum', amico:'Maastricht: 51 per cento', ostile:'Maastricht, 51 per cento: un paese diviso a metà'},
+ {id:'ti_fr90_franco', era:'fr1990', pri:1, cond:()=>S.year===1992&&S.month>=10&&S.month<=11, amico:'Il franco sotto attacco', ostile:'Il franco sotto attacco: le riserve bruciano'},
+ {id:'ti_fr90_disfatta', era:'fr1990', pri:1, cond:()=>S.year===1993&&S.month>=3&&S.month<=5&&eliseoDiSinistra(), amico:'La disfatta', ostile:'La disfatta: cinquantasette deputati'},
+ {id:'ti_fr90_coab2', era:'fr1990', pri:1, cond:()=>S.year===1993&&S.month>=3&&S.month<=5&&!!S.coabitazione, amico:'La seconda coabitazione', ostile:'La seconda coabitazione: stavolta senza sorprese'},
+ {id:'ti_fr90_sarajevo', era:'fr1990', pri:1, cond:()=>S.year===1994&&S.month>=2&&S.month<=3, amico:'Sarajevo', ostile:'Sarajevo: sessantotto morti al mercato'},
+ {id:'ti_fr90_ruanda', era:'fr1990', pri:1, cond:()=>S.year===1994&&S.month>=6&&S.month<=8, amico:'Il Ruanda', ostile:'Il Ruanda: l\'operazione contestata'},
+ {id:'ti_fr90_52', era:'fr1990', pri:1, cond:()=>S.year===1995&&S.month<=2&&!eliseoDiSinistra(), amico:'Cinquantadue per cento', ostile:'Cinquantadue per cento: l\'Eliseo cambia colore'},
+ {id:'ti_fr90_dicembre', era:'fr1990', pri:1, cond:()=>(S.year===1995&&S.month===12)||(S.year===1996&&S.month===1), amico:'Il dicembre in piazza', ostile:'Il dicembre in piazza: tre settimane a piedi'},
+ {id:'ti_fr90_leva', era:'fr1990', pri:1, cond:()=>S.year===1996&&S.month>=2&&S.month<=4, amico:'La leva finisce', ostile:'La leva finisce: l\'ultima classe nel 2001'},
+ {id:'ti_fr90_scioglimento', era:'fr1990', pri:1, cond:()=>S.year===1997&&S.month>=4&&S.month<=6&&(S.scioglimento97==='sciolto'||S.scioglimento97==='campagna'), amico:'Lo scioglimento', ostile:'Lo scioglimento: i sondaggi dicevano altro'},
+ {id:'ti_fr90_coab3', era:'fr1990', pri:1, cond:()=>S.year===1997&&S.month>=6&&S.month<=8&&!!S.coabitazione, amico:'La terza coabitazione', ostile:'La terza coabitazione: cinque anni, dicono'},
+ {id:'ti_fr90_35ore', era:'fr1990', pri:1, cond:()=>S.year===1998&&S.month>=5&&S.month<=7, amico:'Le 35 ore', ostile:'Le 35 ore: la settimana più corta d\'Europa'},
+ {id:'ti_fr90_mondiale', era:'fr1990', pri:1, cond:()=>S.year===1998&&S.month>=7&&S.month<=8, amico:'Campioni del mondo', ostile:'Campioni del mondo: un milione sui Campi Elisi'},
+ {id:'ti_fr90_tempesta', era:'fr1990', pri:1, cond:()=>(S.year===1999&&S.month===12)||(S.year===2000&&S.month===1), amico:'La tempesta', ostile:'La tempesta: tre milioni senza luce'},
+ {id:'ti_fr90_concorde', era:'fr1990', pri:1, cond:()=>S.year===2000&&S.month>=7&&S.month<=8, amico:'Il Concorde cade', ostile:'Il Concorde cade: centotredici morti'},
+ {id:'ti_fr90_70', era:'fr1990', pri:1, cond:()=>S.year===2000&&S.month>=9&&S.month<=10&&S.quinquennato00==='referendum', amico:'Settanta per cento a casa', ostile:'Settanta per cento a casa: il quinquennato passa lo stesso'},
+ {id:'ti_fr90_torri', era:'fr1990', pri:1, cond:()=>S.year===2001&&S.month>=9&&S.month<=10, amico:'Le torri', ostile:'Le torri: siamo tutti americani'},
  {id:'ng_p_ti_petrolio', era:'contemporanea', paesi:['nigeria'], pri:1, amico:'La produzione di petrolio torna a salire', ostile:'Un barile su dieci sparisce: il furto record'},
 ];
 
@@ -12620,6 +13046,25 @@ const SNODI_STORICI = {
   barreOpp:  { storico:[], conforme:'sul piano di rigore, dall’opposizione', diverge:{ 'censura':'Contro il piano di rigore del 1976 ha presentato la censura in aula.', 'tavolo':'Sul piano di rigore del 1976 ha scelto il tavolo e ha trattato.', 'sciopero':'Contro il piano di rigore del 1976 ha chiamato lo sciopero generale.' } },
   sinistra77:{ storico:['rotta'], conforme:'sul programma comune', diverge:{ 'ceduto':'Sul programma comune ha ceduto ai comunisti: la sinistra è andata unita al voto, e ha perso lo stesso.', 'mediato':'Sul programma comune ha firmato un accordo a metà, e la sinistra è arrivata alle urne né unita né divisa.' } },
   campagna78:{ storico:['sopra'], conforme:'sulla sinistra divisa del 1977', diverge:{ 'paura':'Con la sinistra divisa, il Presidente è sceso in campo con la campagna della paura.', 'anticipa':'Con la sinistra divisa, il Presidente ha anticipato le legislative al 1977.' } },
+  /* L101-2 · i quattro snodi del decennio '80 e le due versioni dall'aula. `ordinanze86` ha due esiti storici: il rifiuto
+     dalla coabitazione e le privatizzazioni per ordinanza dal governo di destra — tutti e due conformi (scheda §I-A).
+     `rigore83Opp` non ha un esito storico marcato, come `barreOpp`. */
+  riforme81:   { storico:['tutto'], conforme:'sulle riforme del 1981', diverge:{ 'sociali':'Nel 1981 sono passate le riforme sociali, ma le banche e i grandi gruppi sono rimasti privati.', 'rinvio':'Il programma del 1981 è stato rinviato per mettere prima a posto i conti, e chi aveva votato il cambiamento non l’ha visto arrivare.', 'apertura':'Nel 1981 la sinistra è rimasta fuori dall’Eliseo, e il Presidente ha aperto al centro con riforme sociali sue.', 'rigore':'Nel 1981 la sinistra è rimasta fuori dall’Eliseo, e il Presidente ha scelto il rigore dal primo anno.', 'referendum':'Nel 1981 la sinistra è rimasta fuori dall’Eliseo, e il Presidente ha portato il paese a votare sulle istituzioni.' } },
+  riforme81Opp:{ storico:['contro'], conforme:'sulle riforme del 1981, dall’opposizione', diverge:{ 'sociali':'Sulle riforme del 1981 ha votato quelle sociali e non le nazionalizzazioni.', 'astensione':'Sulle riforme del 1981 si è astenuto, e sono passate senza la sua firma.' } },
+  rigore83:    { storico:['rigore'], conforme:'sulla svolta del rigore del 1983', diverge:{ 'altra':'Nel 1983 il paese è uscito dal sistema monetario europeo e ha chiuso le frontiere ai capitali.', 'rinvio':'Nel 1983 il franco è stato svalutato per la terza volta, e la scelta fra rigore e altra politica è stata rinviata.' } },
+  rigore83Opp: { storico:[], conforme:'sulla svolta del rigore, dall’opposizione', diverge:{ 'censura':'Contro il rigore del 1983 ha presentato la censura in aula.', 'tavolo':'Sul rigore del 1983 ha scelto il tavolo e ha trattato.', 'sciopero':'Contro il rigore del 1983 ha chiamato lo sciopero generale.' } },
+  scuola84:    { storico:['ritirata'], conforme:'sulla scuola libera del 1984', diverge:{ 'avanti':'La legge sulla scuola libera è passata nel 1984, contro la piazza più grande del dopoguerra.', 'referendum':'La scuola libera è stata portata a referendum nel 1984.' } },
+  ordinanze86: { storico:['rifiuto','tutte'], conforme:'sulle privatizzazioni del 1986', diverge:{ 'firma':'In coabitazione il Presidente ha firmato le ordinanze sulle privatizzazioni del 1986.', 'riserva':'In coabitazione il Presidente ha firmato le ordinanze del 1986, con una riserva pubblica.', 'banche':'Nel 1986 sono tornate private solo le banche, per legge.', 'nessuna':'Nel 1986 lo Stato è rimasto azionista di tutto: nessuna privatizzazione.' } },
+  /* L103-2 · i quattro snodi del decennio '90 e le due versioni dall'aula. `ref92Opp` ha due esiti
+     storici (la destra si spaccò), `scioglimento97` uno solo: «campagna» diverge. */
+  ref92:         { storico:['referendum'], conforme:'su Maastricht', diverge:{ 'parlamento':'Maastricht è passato dal Parlamento in una settimana, senza chiedere niente al paese.', 'no':'Il paese ha detto no a Maastricht, e il franco è rimasto il franco.' } },
+  ref92Opp:      { storico:['si','no'], conforme:'su Maastricht, dall’opposizione', diverge:{ 'astensione':'Su Maastricht ha lasciato liberi i suoi elettori, e il partito si è diviso lo stesso.' } },
+  sarajevo94:    { storico:['ultimatum'], conforme:'su Sarajevo', diverge:{ 'restano':'Nel 1994 i caschi blu sono rimasti a Sarajevo senza ultimatum, e la città è rimasta assediata.', 'ritiro':'Nel 1994 i caschi blu francesi sono tornati a casa dalla Bosnia.' } },
+  piano95:       { storico:['meta'], conforme:'sul piano sulla previdenza del 1995', diverge:{ 'tutto':'Il piano sulla previdenza del 1995 è stato tenuto per intero, contro tre settimane di scioperi.', 'ritirato':'Il piano sulla previdenza del 1995 è stato ritirato tutto.' } },
+  piano95Opp:    { storico:['sciopero'], conforme:'sul piano sulla previdenza, dall’opposizione', diverge:{ 'tavolo':'Sul piano sulla previdenza del 1995 ha scelto il tavolo e ha trattato.', 'censura':'Contro il piano sulla previdenza del 1995 ha presentato la censura in aula.' } },
+  scioglimento97:{ storico:['sciolto'], conforme:'sullo scioglimento del 1997', diverge:{ 'no':'Nel 1997 l’Assemblea non è stata sciolta: la legislatura è arrivata alla scadenza del 1998.', 'campagna':'Nel 1997 il Presidente ha sciolto l’Assemblea e ha fatto campagna in prima persona.' } },
+  /* ⚠ quinquennato00 (scritto dall'evento fr90_quinquennato) NON è qui: verifica-snodi accetta solo righe scritte da carte-snodo
+     e la segnava «riga morta». Residuo L103-2 aperto per Cowork. */
 };
 
 /* ==============================================================================================================
@@ -12886,6 +13331,36 @@ const PILASTRI_MONDO = [
     t:'Il prezzo del petrolio',
     text:'In autunno i paesi produttori chiudono i rubinetti e il prezzo del greggio quadruplica in pochi mesi. Le domeniche senza automobili, il riscaldamento abbassato, le fabbriche a orario ridotto: finisce l\'epoca in cui l\'energia costava poco, e con essa il quarto di secolo di crescita facile.',
     logx:'Il greggio quadruplica: finisce l\'energia che costava poco.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  /* L101-2 · tre fatti-mondo degli anni '80 (scheda PRESET-FRANCIA-1980 §I-H). Entrano in ogni linea tranne l'italiana:
+     oggi la francese (fr1980) e l'inglese (uk1980, e il Golfo anche in uk1990). Chernobyl a maggio: il fatto è del
+     26 aprile, e a maggio la nube era ancora la notizia (il testo dice la data). */
+  { id:'pm_chernobyl', anno:1986, mese:5, tono:'grave', cronaca:true, kick:'Il mondo',
+    t:'La nube',
+    text:'Il 26 aprile un reattore esplode in una centrale dell\'Ucraina sovietica, e per giorni Mosca non dice niente. La nube attraversa l\'Europa da est a ovest; ogni governo dice ai suoi quanto è pericolosa, e ognuno dice una cosa diversa. Le centrali del mondo non saranno più guardate allo stesso modo.',
+    logx:'Un reattore esplode in Ucraina: la nube attraversa l\'Europa.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pm_muro89', anno:1989, mese:11, cronaca:true, kick:'Il mondo',
+    t:'Il Muro cade',
+    text:'La sera del 9 novembre un portavoce legge male un foglio, e in poche ore i berlinesi dell\'est sono ai posti di blocco a chiedere di passare. I soldati aprono. La notte stessa la gente sale sul Muro con i martelli; ventotto anni dopo la notte in cui era stato tirato su, l\'Europa divisa finisce in diretta televisiva.',
+    logx:'I berlinesi passano il Muro: ventotto anni dopo, l\'Europa divisa finisce.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pm_golfo', anno:1991, mese:1, tono:'grave', cronaca:true, kick:'Il mondo',
+    t:'Il Golfo',
+    text:'Nella notte del 17 gennaio una coalizione di trenta paesi comincia a bombardare il paese che cinque mesi prima ha invaso e annesso il suo piccolo vicino. È la prima guerra in diretta televisiva: le luci verdi sul cielo della capitale, i missili sulle città dell\'alleato a ovest, cento ore di guerra di terra. L\'ordine del mondo dopo il Muro si decide qui.',
+    logx:'La coalizione attacca: la prima guerra in diretta televisiva.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  /* L103-2 · due fatti-mondo (scheda PRESET-FRANCIA-1990 §I-H): la fine dell'Unione a dicembre 1991, le torri a settembre 2001.
+     Entrano in ogni linea tranne l'italiana (regola 1 di questo pool). */
+  { id:'pm_urss', anno:1991, mese:12, cronaca:true, kick:'Il mondo',
+    t:'La fine dell\'Unione',
+    text:'Il 25 dicembre la bandiera rossa scende dal Cremlino per l\'ultima volta: il Presidente dell\'Unione si dimette in diretta, e il paese che ha diviso il mondo per settant\'anni non esiste più dal giorno dopo. Quindici Stati al suo posto, un arsenale nucleare in quattro di loro, e nessuno che sappia come si vive senza il nemico.',
+    logx:'La bandiera rossa scende dal Cremlino: l\'Unione Sovietica non esiste più.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pm_11settembre', anno:2001, mese:9, tono:'grave', cronaca:true, kick:'Il mondo',
+    t:'Le torri',
+    text:'La mattina dell\'11 settembre due aerei di linea dirottati entrano nelle torri gemelle di New York, un terzo nel Pentagono, un quarto cade in un campo. Le torri crollano in diretta davanti al mondo: quasi tremila morti. L\'America chiude il cielo, l\'Alleanza invoca per la prima volta la difesa comune, e il decennio che era cominciato con il Muro finisce qui.',
+    logx:'Due aerei nelle torri gemelle: quasi tremila morti, in diretta.',
     ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
 ];
 
@@ -13793,4 +14268,357 @@ const PETROLIO79_NUC_EV = {
   t:'Il secondo shock',
   text:'La rivoluzione in Iran ha chiuso i pozzi e i produttori alzano il prezzo a ogni riunione: il barile raddoppia di nuovo. Il paese importa ancora gran parte dell\'energia, ma stavolta le centrali cominciano a contare.',
   ch: petrolioCh('79'),
+};
+
+/* ==============================================================================================================
+   L101-2 · IL DECENNIO FRANCESE '80 — I QUATTRO SNODI (scheda PRESET-FRANCIA-1980 §I-A) E LA CORSA AL FRANCO (§I-B).
+
+   ⚠ LE VALUTE sono quelle del '60 e del '70 (Presidente, livello 3, semipresidenziale): gruppi, reputazione, stampa,
+   fiducia, debito. **Niente** credibilita/visibilita, e **niente cade** (la porta non dichiara crisiMinisteriale).
+   ⚠ I FLAG NUOVI sono stati cercati in tutto S prima di usarli (lezione L99-2): riforme81, rigore83, scuola84,
+   ordinanze86, riforme81Opp, rigore83Opp — zero occorrenze prima di questo lotto.
+
+   ⚑ CHI RICEVE CHE COSA (i gate sono in game.js, accanto a quelli del '70). Il lato lo decide `eliseoDiSinistra()` (L101-1):
+     · S1 settembre 1981, un id solo `snodo_riforme81`: RIFORME81_EV con l'Eliseo di sinistra, RIFORME81_DX_EV con
+       quello di destra. Dall'aula RIFORME81_OPP_EV — ⚠ solo contro un Eliseo DI SINISTRA (vedi il commento sulla carta).
+     · S2 marzo 1983, un id solo `snodo_rigore83`: RIGORE83_EV con l'Eliseo di sinistra, RIGORE83_DX_EV con quello di
+       destra (deciso da Cowork, L101-2 residuo); dall'aula RIGORE83_OPP_EV.
+     · S3 giugno 1984: SCUOLA84_EV, solo con l'Eliseo di sinistra al governo. Nessuna versione dall'aula.
+     · S4 luglio 1986, un id solo `snodo_ordinanze86`: ORDINANZE86_EV in coabitazione, PRIVATIZZAZIONI86_EV al governo
+       senza coabitazione — ⚠ solo col Presidente DI DESTRA, come dice la scheda fra parentesi: il testo è «il governo
+       propone di venderne sessantacinque», che non è il programma di una sinistra con la maggioranza. Il Presidente
+       di sinistra che nell'86 tiene l'Assemblea non riceve S4 (dichiarato).
+   I mesi non sono occupati da nessun pilastro (settembre '81, marzo '83, giugno '84, luglio '86): finestre di tre
+   mesi come il '70, per chi slitta dietro un'altra carta forzata.
+   ============================================================================================================== */
+/* ⚑ LA SWEEP (L101-2, 25/9, banco onesto, PS al governo, 20 semi, 120 mesi): fondo ×0 gruppo peggiore 39,8 (sd 2,8) ·
+   ×1 0,20 sd · ×2 1,12 sd · **×3 3,54 sd, 0 crisi su 20** (adottato: il primo dentro la banda 1,5-4, come il '70) · ×4 5,31 sd. */
+let FR80_GRUPPI = 3;   // let e non const: la sweep di .claude/misura-fr1980-contenuto.js lo varia sul banco
+function gdFr80(g, n){ gd(g, Math.round(n*FR80_GRUPPI)); }
+function fidFr80(n){ fidFr60(n); }   // la fiducia non ha moltiplicatore: è la stessa leva del '60
+function baseFr80(n){
+  var P=(PAESE && PAESE.partiti) ? PAESE.partiti.filter(function(x){ return x.id===S.partito; })[0] : null;
+  if(!P || !P.base) return;
+  Object.keys(P.base).forEach(function(g){ gd(g, Math.round(n*P.base[g]*FR80_GRUPPI)); });
+}
+
+/* S1 · LE RIFORME DELL'81 (settembre 1981), con l'Eliseo di sinistra */
+const RIFORME81_EV = {
+  id:'snodo_riforme81', snodo:true, era:'fr1980', kick:'Il programma', tono:'grave',
+  t:'Le riforme dell\'81',
+  text:'Il paese ha votato il cambiamento e l\'Assemblea nuova è tua per tre quinti. Sul tavolo c\'è tutto insieme: le banche e i grandi gruppi allo Stato, le trentanove ore, la quinta settimana, la pensione a sessant\'anni. I mercati guardano il franco; la tua base guarda te.',
+  ch:[
+    { l:'Tutto il programma, subito', e:'La storia · le banche e i gruppi allo Stato, le trentanove ore, la pensione a sessanta · il franco paga il conto entro l\'anno', costo:{debito:3},
+      f:function(){ S.riforme81='tutto'; S.ind.debt+=3; gdFr80('lavoratori',6); gdFr80('giovani',3); gdFr80('imprenditori',-7); gdFr80('cetomedio',-2); fidFr80(-3);
+        S.log.unshift({t:T('Il programma'),x:T('Ha varato tutto il programma dell\'81: nazionalizzazioni, trentanove ore, pensione a sessanta.')}); } },
+    { l:'Le riforme sociali, non le nazionalizzazioni', e:'Le ore e la pensione sì, le banche restano private · la base mormora, i mercati respirano', costo:{debito:1.5},
+      f:function(){ S.riforme81='sociali'; S.ind.debt+=1.5; gdFr80('lavoratori',3); gdFr80('imprenditori',-2); baseFr80(-2); fidFr80(-1);
+        S.log.unshift({t:T('Il programma'),x:T('Ha fatto le riforme sociali dell\'81 senza le nazionalizzazioni.')}); } },
+    { l:'Un passo per volta: prima i conti', e:'Il cambiamento aspetta · chi ti ha eletto non capisce, e la destra dice che aveva ragione',
+      f:function(){ S.riforme81='rinvio'; gdFr80('imprenditori',3); gdFr80('lavoratori',-5); gdFr80('giovani',-4); baseFr80(-4); fidFr80(1);
+        S.log.unshift({t:T('Il programma'),x:T('Ha rinviato il programma dell\'81.')}); } },
+  ],
+};
+/* S1 con l'Eliseo di destra: il 1981 divergente. Stesso id di snodo: nessuno vede le due versioni. */
+const RIFORME81_DX_EV = {
+  id:'snodo_riforme81', snodo:true, era:'fr1980', kick:'Il programma', tono:'grave',
+  t:'Il paese che non ha cambiato',
+  text:'Il paese non ha voltato pagina: la sinistra resta fuori dall\'Eliseo dopo ventitré anni di attesa e non lo accetta. Le piazze chiedono le riforme che l\'altro programma prometteva. Puoi prenderne qualcuna, stringere subito, o portare il paese a votare sulle istituzioni.',
+  ch:[
+    { l:'Apri al centro: qualche riforma sociale è anche tua', e:'La quinta settimana e la pensione un po\' prima · la sinistra perde una bandiera, i tuoi perdono la pazienza', costo:{debito:1.5},
+      f:function(){ S.riforme81='apertura'; S.ind.debt+=1.5; gdFr80('lavoratori',3); gdFr80('cetomedio',1); gdFr80('imprenditori',-2); baseFr80(-2);
+        S.log.unshift({t:T('Il programma'),x:T('Ha aperto al centro nel 1981, con riforme sociali sue.')}); } },
+    { l:'Rigore subito: l\'inflazione prima di tutto', e:'Prezzi e salari stretti dal primo anno · i mercati applaudono, le piazze no',
+      f:function(){ S.riforme81='rigore'; gdFr80('imprenditori',4); gdFr80('cetomedio',2); gdFr80('lavoratori',-5); gdFr80('giovani',-3); fidFr80(2);
+        S.log.unshift({t:T('Il programma'),x:T('Ha scelto il rigore dal 1981.')}); } },
+    { l:'Un referendum sulle istituzioni', e:'Il paese vota sul settennato · lo vinci di poco, e hai speso un anno',
+      f:function(){ S.riforme81='referendum'; gdFr80('cetomedio',2); gdFr80('giovani',-2); stampad(2); fidFr80(-1);
+        S.log.unshift({t:T('Il programma'),x:T('Ha chiamato un referendum sulle istituzioni nel 1981.')}); } },
+  ],
+};
+/* S2 · LA SVOLTA DEL RIGORE (marzo 1983), per qualunque Presidente al governo, in due versioni sullo stesso id: questa
+   con l'Eliseo di sinistra, RIGORE83_DX_EV con quello di destra (L101-2 residuo). È anche la terza svalutazione: il
+   mese è suo, la corsa al franco non ci esce (la sua ancora è una sola, nell'81). */
+const RIGORE83_EV = {
+  id:'snodo_rigore83', snodo:true, era:'fr1980', kick:'Il franco', tono:'grave',
+  t:'La svolta del rigore',
+  text:'Il franco è stato svalutato due volte in diciotto mesi e le riserve finiscono a giorni. Due strade sul tavolo: restare nel sistema monetario europeo e stringere — salari, spesa, prezzi — oppure uscirne, chiudere le frontiere ai capitali e proteggere il paese da solo. Qualunque scelta, il cambiamento com\'era finisce oggi.',
+  ch:[
+    { l:'Resti in Europa e stringi', e:'La storia · la terza svalutazione, poi il rigore: salari fermi, spesa tagliata · l\'inflazione scende, la sinistra scopre la parola',
+      f:function(){ S.rigore83='rigore'; gdFr80('imprenditori',4); gdFr80('cetomedio',2); gdFr80('lavoratori',-5); gdFr80('giovani',-3); fidFr80(3); repd(2);
+        S.log.unshift({t:T('Il franco'),x:T('Ha scelto il rigore nel marzo 1983: dentro l\'Europa, e i conti prima.')}); } },
+    { l:'L\'altra politica: fuori dal sistema, frontiere chiuse ai capitali', e:'Il franco fluttua, i capitali non escono per legge · un anno di respiro, poi il conto, e l\'Europa senza di te', costo:{debito:3},
+      f:function(){ S.rigore83='altra'; S.ind.debt+=3; gdFr80('lavoratori',4); gdFr80('imprenditori',-6); gdFr80('cetomedio',-3); fidFr80(-5); repd(-4);
+        S.log.unshift({t:T('Il franco'),x:T('Ha scelto l\'altra politica nel 1983: fuori dal sistema monetario, frontiere chiuse ai capitali.')}); } },
+    { l:'Svaluti e rinvii la scelta', e:'La terza svalutazione senza il rigore · sei mesi, poi si ricomincia', costo:{debito:1.5},
+      f:function(){ S.rigore83='rinvio'; S.ind.debt+=1.5; gdFr80('lavoratori',-1); gdFr80('imprenditori',-3); fidFr80(-2);
+        S.log.unshift({t:T('Il franco'),x:T('Ha svalutato nel 1983 e rinviato la scelta.')}); } },
+  ],
+};
+/* S2 col Presidente di destra (L101-2 residuo, deciso da Cowork il 25/9): stesso id, stessi flag, stessi effetti e
+   stesse etichette salvo una; cambiano il testo e due righe-effetto — la versione di prima diceva «la sinistra scopre
+   la parola» anche a un Presidente di destra. L'agenda sceglie fra le due con eliseoDiSinistra(), come S1. */
+const RIGORE83_DX_EV = {
+  id:'snodo_rigore83', snodo:true, era:'fr1980', kick:'Il franco', tono:'grave',
+  t:'La svolta del rigore',
+  text:'Il franco è stato svalutato due volte in diciotto mesi e le riserve finiscono a giorni. Due strade sul tavolo: restare nel sistema monetario europeo e stringere davvero — salari, spesa, prezzi — oppure uscirne e proteggere il paese da solo, come chiede una parte della tua maggioranza. Qualunque scelta, il decennio comincia oggi.',
+  ch:[
+    { l:'Resti in Europa e stringi', e:'La terza svalutazione, poi il rigore: salari fermi, spesa tagliata · l\'inflazione scende, la tua base lo chiama coerenza, le piazze no',
+      f:function(){ S.rigore83='rigore'; gdFr80('imprenditori',4); gdFr80('cetomedio',2); gdFr80('lavoratori',-5); gdFr80('giovani',-3); fidFr80(3); repd(2);
+        S.log.unshift({t:T('Il franco'),x:T('Ha scelto il rigore nel marzo 1983: dentro l\'Europa, e i conti prima.')}); } },
+    { l:'Fuori dal sistema, frontiere chiuse ai capitali', e:'Il franco fluttua, i capitali non escono per legge · un anno di respiro, poi il conto, e l\'Europa senza di te', costo:{debito:3},
+      f:function(){ S.rigore83='altra'; S.ind.debt+=3; gdFr80('lavoratori',4); gdFr80('imprenditori',-6); gdFr80('cetomedio',-3); fidFr80(-5); repd(-4);
+        S.log.unshift({t:T('Il franco'),x:T('Ha scelto l\'altra politica nel 1983: fuori dal sistema monetario, frontiere chiuse ai capitali.')}); } },
+    { l:'Svaluti e rinvii la scelta', e:'La terza svalutazione senza il rigore · sei mesi, poi si ricomincia', costo:{debito:1.5},
+      f:function(){ S.rigore83='rinvio'; S.ind.debt+=1.5; gdFr80('lavoratori',-1); gdFr80('imprenditori',-3); fidFr80(-2);
+        S.log.unshift({t:T('Il franco'),x:T('Ha svalutato nel 1983 e rinviato la scelta.')}); } },
+  ],
+};
+/* S3 · LA SCUOLA LIBERA (giugno 1984), solo con l'Eliseo di sinistra al governo. Per gli altri resta il titolo. */
+const SCUOLA84_EV = {
+  id:'snodo_scuola84', snodo:true, era:'fr1980', kick:'La scuola', tono:'grave',
+  t:'La scuola libera',
+  text:'La legge che porta le scuole private dentro un servizio pubblico unico è in aula da mesi, e domenica un milione di persone ha sfilato a Parigi contro di essa: famiglie, parrocchie, la destra intera. La piazza più grande dal dopoguerra non è tua.',
+  ch:[
+    { l:'Ritiri la legge', e:'La storia · la legge sparisce, il ministro se ne va, il governo cambia entro l\'estate · la piazza torna a casa, la tua base non capisce',
+      f:function(){ S.scuola84='ritirata'; gdFr80('cattolici',5); gdFr80('cetomedio',2); gdFr80('lavoratori',-3); gdFr80('giovani',-2); baseFr80(-3); stampad(2);
+        S.log.unshift({t:T('La scuola'),x:T('Ha ritirato la legge sulla scuola libera nel 1984.')}); } },
+    { l:'Vai avanti: la legge passa', e:'La legge passa con i tuoi voti · le scuole private in piazza ogni mese, e le chiese si ricordano di te',
+      f:function(){ S.scuola84='avanti'; gdFr80('lavoratori',3); gdFr80('giovani',3); gdFr80('cattolici',-8); gdFr80('cetomedio',-4); stampad(-3);
+        S.log.unshift({t:T('La scuola'),x:T('Ha fatto passare la legge sulla scuola libera contro la piazza.')}); } },
+    { l:'Un referendum sulla scuola', e:'Il paese decide · lo perdi, probabilmente, ma non da solo',
+      f:function(){ S.scuola84='referendum'; gdFr80('cattolici',1); gdFr80('cetomedio',1); gdFr80('giovani',-1); baseFr80(-1); fidFr80(-1);
+        S.log.unshift({t:T('La scuola'),x:T('Ha portato la scuola libera a referendum.')}); } },
+  ],
+};
+/* S4 · LE ORDINANZE (luglio 1986), in coabitazione: lo snodo che si gioca sotto il flag (gli snodi entrano, L100-2). */
+const ORDINANZE86_EV = {
+  id:'snodo_ordinanze86', snodo:true, era:'fr1980', kick:'La coabitazione', tono:'grave',
+  t:'Le ordinanze',
+  text:'Il Primo ministro vuole privatizzare per ordinanza, senza passare dall\'Assemblea: sessantacinque imprese, le banche che tu hai nazionalizzato. Le ordinanze hanno bisogno della tua firma. La Costituzione dice che le firmi; non dice quando.',
+  ch:[
+    { l:'Non firmi', e:'La storia · le ordinanze tornano in Assemblea come leggi, e passano lo stesso · ma il paese ha visto chi ha detto no',
+      f:function(){ S.ordinanze86='rifiuto'; baseFr80(5); gdFr80('lavoratori',3); gdFr80('imprenditori',-3); stampad(2);
+        S.log.unshift({t:T('La coabitazione'),x:T('Ha rifiutato di firmare le ordinanze del 1986.')}); } },
+    { l:'Firmi', e:'Le privatizzazioni partono in un mese · la tua base dice che l\'Eliseo non serve a niente',
+      f:function(){ S.ordinanze86='firma'; baseFr80(-5); gdFr80('imprenditori',3); gdFr80('lavoratori',-3);
+        S.log.unshift({t:T('La coabitazione'),x:T('Ha firmato le ordinanze del 1986.')}); } },
+    { l:'Firmi, con una riserva pubblica', e:'La firma c\'è e anche la lettera · nessuno è contento, nessuno grida',
+      f:function(){ S.ordinanze86='riserva'; baseFr80(-1); gdFr80('cetomedio',1);
+        S.log.unshift({t:T('La coabitazione'),x:T('Ha firmato le ordinanze del 1986 con una riserva pubblica.')}); } },
+  ],
+};
+/* S4 al governo senza coabitazione, col Presidente di destra. Stesso id di snodo. */
+const PRIVATIZZAZIONI86_EV = {
+  id:'snodo_ordinanze86', snodo:true, era:'fr1980', kick:'Lo Stato', tono:'grave',
+  t:'Le privatizzazioni',
+  text:'Lo Stato possiede banche, assicurazioni, televisione, gruppi industriali. Il governo propone di venderne sessantacinque in cinque anni, per ordinanza: i mercati aspettano, i sindacati pure.',
+  ch:[
+    { l:'Tutte, per ordinanza', e:'Sessantacinque imprese sul mercato in cinque anni · la Borsa festeggia, le fabbriche no', costo:{debito:-2},
+      f:function(){ S.ordinanze86='tutte'; S.ind.debt-=2; gdFr80('imprenditori',6); gdFr80('cetomedio',2); gdFr80('lavoratori',-6); gdFr80('giovani',-2);
+        S.log.unshift({t:T('Lo Stato'),x:T('Ha privatizzato per ordinanza nel 1986.')}); } },
+    { l:'Solo le banche, per legge', e:'Le banche tornano private, il resto aspetta · l\'Assemblea ci mette un anno', costo:{debito:-1},
+      f:function(){ S.ordinanze86='banche'; S.ind.debt-=1; gdFr80('imprenditori',3); gdFr80('lavoratori',-2);
+        S.log.unshift({t:T('Lo Stato'),x:T('Ha privatizzato le banche nel 1986.')}); } },
+    { l:'Nessuna: lo Stato resta azionista', e:'Tutto com\'è · i tuoi elettori non capiscono per che cosa ti hanno votato',
+      f:function(){ S.ordinanze86='nessuna'; gdFr80('lavoratori',2); gdFr80('imprenditori',-5); baseFr80(-3);
+        S.log.unshift({t:T('Lo Stato'),x:T('Non ha privatizzato nel 1986.')}); } },
+  ],
+};
+/* S1 dall'aula (scheda §A: testo dato, scelte ed effetti descritti). ⚑ Solo contro un Eliseo DI SINISTRA: il testo parla
+   di nazionalizzazioni, che sono del programma della sinistra — chi è all'opposizione di un Presidente di destra non riceve
+   S1 (dichiarato: la scheda diceva «qualunque lato»). Effetti «base ±3, ceto medio ∓2»: contro +3/−2, sociali −3/+2,
+   astensione −1 alla base. Righe-effetto di Code. */
+const RIFORME81_OPP_EV = {
+  id:'snodo_riforme81_opp', snodo:true, era:'fr1980', kick:'Il programma', tono:'grave',
+  t:'Le riforme dell\'81, dall\'aula',
+  text:'Il governo porta all\'Assemblea le nazionalizzazioni e le riforme sociali insieme. L\'opposizione può votare contro tutto, distinguere, o lasciare che passino senza la sua firma.',
+  ch:[
+    { l:'Voti contro tutto', e:'La storia · la tua base ti riconosce · il ceto medio si chiede se le trentanove ore fossero davvero il nemico',
+      f:function(){ S.riforme81Opp='contro'; baseFr80(3); gdFr80('cetomedio',-2);
+        S.log.unshift({t:T('Il programma'),x:T('Ha votato contro tutto il programma dell\'81.')}); } },
+    { l:'Voti le riforme sociali, non le nazionalizzazioni', e:'Il ceto medio apprezza la distinzione · la tua base no',
+      f:function(){ S.riforme81Opp='sociali'; baseFr80(-3); gdFr80('cetomedio',2);
+        S.log.unshift({t:T('Il programma'),x:T('Ha votato le riforme sociali dell\'81 e non le nazionalizzazioni.')}); } },
+    { l:'Ti astieni: che passino senza la tua firma', e:'Nessuno ti attacca, nessuno ti ringrazia',
+      f:function(){ S.riforme81Opp='astensione'; baseFr80(-1);
+        S.log.unshift({t:T('Il programma'),x:T('Si è astenuto sul programma dell\'81.')}); } },
+  ],
+};
+/* S2 dall'aula (scheda §A): come BARRE_OPP_EV del '76, con le stesse scelte e gli stessi effetti. */
+const RIGORE83_OPP_EV = {
+  id:'snodo_rigore83_opp', snodo:true, era:'fr1980', kick:'Il franco', tono:'grave',
+  t:'Il rigore, dall\'aula',
+  text:'Il governo ha scelto il rigore: salari fermi, spesa tagliata, il franco svalutato per la terza volta. L\'opposizione decide dove combatterlo.',
+  ch:[
+    { l:'La censura sul piano', e:'Una mozione che non passerà · la tua base e i lavoratori la leggono come coraggio',
+      f:function(){ S.rigore83Opp='censura'; baseFr80(4); gdFr80('lavoratori',3);
+        S.log.unshift({t:T('Il franco'),x:T('Ha presentato la censura sul rigore del 1983.')}); } },
+    { l:'Il tavolo: rigore concordato', e:'Qualcosa si ottiene · e la base lo chiama resa',
+      f:function(){ S.rigore83Opp='tavolo'; baseFr80(-3); gdFr80('lavoratori',1); gdFr80('imprenditori',1);
+        S.log.unshift({t:T('Il franco'),x:T('Ha trattato sul rigore del 1983.')}); } },
+    { l:'Lo sciopero generale', e:'Il paese si ferma un giorno · il ceto medio e le imprese non te lo perdonano',
+      f:function(){ S.rigore83Opp='sciopero'; baseFr80(6); gdFr80('lavoratori',5); gdFr80('cetomedio',-5); gdFr80('imprenditori',-3);
+        S.log.unshift({t:T('Il franco'),x:T('Ha risposto al rigore del 1983 con lo sciopero generale.')}); } },
+  ],
+};
+/* §B · LA CORSA AL FRANCO DELL'81: una sola ancora (1981/10), le tre scelte di FRANCO_CH (quelle del '50: i gruppi
+   passano da gdFr, cioè da FR50_GRUPPI — dichiarato; i `cade` lì dentro sono inerti senza crisiMinisteriale), testo
+   nuovo della scheda. Il giugno 1982 è un titolo, il marzo 1983 è S2. */
+const FRANCO81_EV = {
+  id:'ev_franco81', era:'fr1980', kick:'Il franco', tono:'grave',
+  t:'La corsa al franco',
+  text:'Il franco perde ogni giorno dalla vittoria di maggio: i capitali escono, le riserve scendono, e il sistema monetario europeo chiede una risposta entro il fine settimana.',
+  ch: FRANCO_CH,
+};
+/* ==============================================================================================================
+   L103-2 · IL DECENNIO FRANCESE '90 — I QUATTRO SNODI (scheda PRESET-FRANCIA-1990 §I-A) E LA CORSA AL FRANCO (§I-B).
+
+   ⚠ LE VALUTE sono quelle del '60-'80 (Presidente, livello 3, semipresidenziale): gruppi, reputazione, stampa, fiducia,
+   debito. Niente credibilita/visibilita, niente cade. I flag nuovi (ref92, ref92Opp, sarajevo94, piano95, piano95Opp,
+   quinquennato00) sono stati cercati in tutto S prima di usarli: zero occorrenze (⚠ S.maastricht è italiano e non si
+   tocca). S.scioglimento97 esiste da L103-1 e lo legge la tappa del '97.
+
+   ⚑ CHI RICEVE CHE COSA (gate in game.js, accanto a quelli dell'80):
+     · S1 settembre 1992: REF92_EV al Presidente al governo, qualunque colore (anche in coabitazione); dall'aula REF92_OPP_EV.
+     · S2 febbraio 1994: SARAJEVO94_EV al Presidente al governo, ANCHE in coabitazione (domaine réservé). Nessuna aula.
+     · S3 novembre 1995: PIANO95_EV solo al Presidente di destra senza coabitazione; dall'aula PIANO95_OPP_EV, solo per chi
+       gioca un partito di sinistra all'opposizione di un Presidente di destra.
+     · S4 aprile 1997: SCIOGLIMENTO97_EV solo al Presidente di destra senza coabitazione. «Sciogli» chiama
+       azioneScioglimentoForzato(), che dal L104-2 è un'urna di soli seggi; la tappa del 1997/6 (seggi storici) arriva
+       dopo e la sovrascrive. La finestra è aprile-maggio perché l'urna deve precedere la tappa.
+   Nessuno dei quattro mesi (settembre '92, febbraio '94, novembre '95, aprile '97) è di un pilastro.
+   ============================================================================================================== */
+/* ⚑ LA SWEEP (L103-2, 25/9, banco onesto, PS al governo, 20 semi, 144 mesi): fondo ×0 gruppo peggiore 36,2 (sd 3,5) · ×1 −0,09 sd ·
+   ×2 0,01 sd · ×3 0,91 sd (il valore del '70 e dell'80 qui non basta: il '90 ha più carte che si compensano) ·
+   **×4 2,32 sd, 0 crisi su 20** (adottato: il primo dentro la banda 1,5-4). */
+let FR90_GRUPPI = 4;   // let e non const: la sweep di .claude/misura-fr1990-contenuto.js lo varia sul banco
+function gdFr90(g, n){ gd(g, Math.round(n*FR90_GRUPPI)); }
+function fidFr90(n){ fidFr60(n); }   // la fiducia non ha moltiplicatore: è la stessa leva del '60
+function baseFr90(n){
+  var P=(PAESE && PAESE.partiti) ? PAESE.partiti.filter(function(x){ return x.id===S.partito; })[0] : null;
+  if(!P || !P.base) return;
+  Object.keys(P.base).forEach(function(g){ gd(g, Math.round(n*P.base[g]*FR90_GRUPPI)); });
+}
+
+/* S1 · MAASTRICHT AL REFERENDUM (settembre 1992) */
+const REF92_EV = {
+  id:'snodo_ref92', snodo:true, era:'fr1990', kick:'L\'Europa', tono:'grave',
+  t:'Maastricht al referendum',
+  text:'Il trattato che fa la moneta unica è firmato e va ratificato. Puoi farlo passare in Parlamento in una settimana, o portarlo davanti al paese: i sondaggi dicono sì, ma il no cresce ogni giorno, e i danesi hanno appena detto no.',
+  ch:[
+    { l:'Referendum', e:'La storia · il sì al 51 per cento, di notte · l\'Europa passa, e il paese scopre di essere diviso a metà',
+      f:function(){ S.ref92='referendum'; gdFr90('cetomedio',2); gdFr90('imprenditori',3); gdFr90('lavoratori',-3); gdFr90('giovani',1); repd(3); fidFr90(1);
+        S.log.unshift({t:T('L\'Europa'),x:T('Ha portato Maastricht a referendum: sì al 51 per cento.')}); } },
+    { l:'Ratifica in Parlamento', e:'Il trattato passa in una settimana · nessuno ha chiesto niente al paese, e il paese se lo segna',
+      f:function(){ S.ref92='parlamento'; gdFr90('imprenditori',2); gdFr90('cetomedio',-2); gdFr90('lavoratori',-2); repd(2);
+        S.log.unshift({t:T('L\'Europa'),x:T('Ha fatto ratificare Maastricht dal Parlamento.')}); } },
+    { l:'No al trattato: la moneta resta francese', e:'Il franco resta il franco · i mercati lo attaccano il giorno dopo, gli alleati non chiamano più', costo:{debito:1},
+      f:function(){ S.ref92='no'; S.ind.debt+=1; gdFr90('lavoratori',3); gdFr90('pensionati',2); gdFr90('imprenditori',-6); gdFr90('cetomedio',-2); repd(-6); fidFr90(-4);
+        S.log.unshift({t:T('L\'Europa'),x:T('Ha detto no a Maastricht.')}); } },
+  ],
+};
+/* S1 dall'aula (scheda: sì / no / astensione, effetti come REF72_OPP_EV). Il testo è di Code. ⚠ Lo storico è doppio
+   (la destra si spaccò: `storico:['si','no']`), quindi nessuna scelta porta il marcatore «La storia» — dichiarato. */
+const REF92_OPP_EV = {
+  id:'snodo_ref92_opp', snodo:true, era:'fr1990', kick:'L\'Europa', tono:'grave',
+  t:'Maastricht, dall\'aula',
+  text:'Il Presidente porta il trattato della moneta unica davanti al paese. L\'opposizione deve dire ai suoi elettori che cosa votare: il sì aiuta lui, il no mette insieme chi non si sopporta, e restare a casa è una scelta anche quella.',
+  ch:[
+    { l:'Sì: l\'Europa prima del Presidente', e:'Il sì accanto a chi governa · la tua base non capisce, le imprese sì',
+      f:function(){ S.ref92Opp='si'; baseFr90(-4); gdFr90('imprenditori',2);
+        S.log.unshift({t:T('L\'Europa'),x:T('Ha fatto campagna per il sì a Maastricht.')}); } },
+    { l:'No: non è questa l\'Europa', e:'La base si ricompatta · il ceto medio e le imprese ti guardano come un rischio',
+      f:function(){ S.ref92Opp='no'; baseFr90(5); gdFr90('cetomedio',-4); gdFr90('imprenditori',-3);
+        S.log.unshift({t:T('L\'Europa'),x:T('Ha fatto campagna per il no a Maastricht.')}); } },
+    { l:'Astensione: decidano gli elettori', e:'La tua base con te, il ceto medio no · e il partito si divide lo stesso',
+      f:function(){ S.ref92Opp='astensione'; baseFr90(3); gdFr90('cetomedio',-2);
+        S.log.unshift({t:T('L\'Europa'),x:T('Ha lasciato liberi i suoi elettori su Maastricht.')}); } },
+  ],
+};
+/* S2 · SARAJEVO (febbraio 1994), al Presidente anche in coabitazione */
+const SARAJEVO94_EV = {
+  id:'snodo_sarajevo94', snodo:true, era:'fr1990', kick:'La difesa', tono:'grave',
+  t:'Sarajevo',
+  text:'Una granata sul mercato di Sarajevo, sessantotto morti in diretta televisiva, e i caschi blu francesi — i più numerosi — che guardano. Gli alleati propongono un ultimatum a chi assedia la città: le armi pesanti via dalle colline, o i raid.',
+  ch:[
+    { l:'L\'ultimatum, con gli alleati', e:'La storia · le armi pesanti si ritirano dalle colline, per un po\' · il paese si sente utile, i caschi blu contano i giorni',
+      f:function(){ S.sarajevo94='ultimatum'; repd(4); gdFr90('giovani',2); gdFr90('cetomedio',1);
+        S.log.unshift({t:T('La difesa'),x:T('Ha sostenuto l\'ultimatum su Sarajevo nel 1994.')}); } },
+    { l:'I caschi blu restano, e basta', e:'Nessun raid, nessun ritiro · la città resta assediata, e le foto continuano',
+      f:function(){ S.sarajevo94='restano'; repd(-2); gdFr90('giovani',-3); stampad(-2);
+        S.log.unshift({t:T('La difesa'),x:T('Ha tenuto i caschi blu a Sarajevo senza ultimatum.')}); } },
+    { l:'Ritiro: non è la nostra guerra', e:'I francesi tornano a casa · gli alleati restano, e il paese non è più al tavolo',
+      f:function(){ S.sarajevo94='ritiro'; repd(-6); gdFr90('pensionati',2); gdFr90('giovani',-4); gdFr90('cetomedio',-2);
+        S.log.unshift({t:T('La difesa'),x:T('Ha ritirato i caschi blu dalla Bosnia.')}); } },
+  ],
+};
+/* S3 · IL PIANO SULLA PREVIDENZA (novembre 1995), solo col Presidente di destra senza coabitazione */
+const PIANO95_EV = {
+  id:'snodo_piano95', snodo:true, era:'fr1990', kick:'La previdenza', tono:'grave',
+  t:'Il piano sulla previdenza',
+  text:'Il Primo ministro presenta il piano: la previdenza sotto il controllo del Parlamento, i conti della sanità in pareggio, e i regimi speciali dei ferrovieri e degli statali allineati agli altri. Il giorno dopo i treni si fermano; tre settimane dopo si fermano ancora, e il paese cammina.',
+  ch:[
+    { l:'Tieni tutto', e:'Tre settimane senza treni, poi quattro · il paese cammina e ti dà la colpa; i conti, forse, tornano',
+      f:function(){ S.piano95='tutto'; gdFr90('imprenditori',4); gdFr90('lavoratori',-8); gdFr90('cetomedio',-4); gdFr90('pensionati',-3); fidFr90(3); stampad(-3);
+        S.log.unshift({t:T('La previdenza'),x:T('Ha tenuto tutto il piano del 1995 contro gli scioperi.')}); } },
+    { l:'Ritiri la parte sulle pensioni, tieni il resto', e:'La storia · i regimi speciali restano, la sanità no · i treni ripartono a Natale, e il governo ha perso la faccia',
+      f:function(){ S.piano95='meta'; gdFr90('lavoratori',-2); gdFr90('imprenditori',1); baseFr90(-3); fidFr90(1); stampad(-1);
+        S.log.unshift({t:T('La previdenza'),x:T('Ha ritirato la parte pensionistica del piano del 1995.')}); } },
+    { l:'Ritiri tutto', e:'I treni ripartono domani · e i conti restano quelli di ieri',
+      f:function(){ S.piano95='ritirato'; gdFr90('lavoratori',3); gdFr90('imprenditori',-4); baseFr90(-5); fidFr90(-3);
+        S.log.unshift({t:T('La previdenza'),x:T('Ha ritirato tutto il piano del 1995.')}); } },
+  ],
+};
+/* S3 dall'aula (scheda: piazza (storico) / tavolo / censura, effetti come BARRE_OPP_EV). */
+const PIANO95_OPP_EV = {
+  id:'snodo_piano95_opp', snodo:true, era:'fr1990', kick:'La previdenza', tono:'grave',
+  t:'Il dicembre in piazza',
+  text:'Il governo ha presentato il piano sulla previdenza e il paese si è fermato: tre settimane di scioperi, le stazioni vuote, le strade piene. L\'opposizione decide dove stare.',
+  ch:[
+    { l:'In piazza, con gli scioperanti', e:'La storia · la tua base e i lavoratori con te · il ceto medio che cammina per andare al lavoro no',
+      f:function(){ S.piano95Opp='sciopero'; baseFr90(6); gdFr90('lavoratori',5); gdFr90('cetomedio',-5); gdFr90('imprenditori',-3);
+        S.log.unshift({t:T('La previdenza'),x:T('È sceso in piazza contro il piano del 1995.')}); } },
+    { l:'Il tavolo: una riforma concordata', e:'Qualcosa si ottiene · e la base lo chiama resa',
+      f:function(){ S.piano95Opp='tavolo'; baseFr90(-3); gdFr90('lavoratori',1); gdFr90('imprenditori',1);
+        S.log.unshift({t:T('La previdenza'),x:T('Ha trattato sul piano del 1995.')}); } },
+    { l:'La censura in aula', e:'Una mozione che non passerà · la tua base e i lavoratori la leggono come coraggio',
+      f:function(){ S.piano95Opp='censura'; baseFr90(4); gdFr90('lavoratori',3);
+        S.log.unshift({t:T('La previdenza'),x:T('Ha presentato la censura sul piano del 1995.')}); } },
+  ],
+};
+/* S4 · SCIOGLIERE (aprile 1997), solo col Presidente di destra senza coabitazione */
+const SCIOGLIMENTO97_EV = {
+  id:'snodo_scioglimento97', snodo:true, era:'fr1990', kick:'L\'Eliseo', tono:'grave',
+  t:'Sciogliere',
+  text:'Hai una maggioranza dell\'ottanta per cento e un anno di legislatura davanti. I consiglieri dicono: sciogli adesso, prima che il rigore per l\'euro morda, e avrai cinque anni di maggioranza. I sondaggi dicono che vinci. I sondaggi dicevano anche altre cose.',
+  ch:[
+    { l:'Sciogli adesso', e:'La storia · le urne a maggio · nessuno garantisce come finirà, e la storia lo sa',
+      f:function(){ S.scioglimento97='sciolto'; fidFr90(-1);
+        S.log.unshift({t:T('L\'Eliseo'),x:T('Ha sciolto l\'Assemblea nell\'aprile 1997.')});
+        if(typeof azioneScioglimentoForzato==='function') azioneScioglimentoForzato(); } },
+    { l:'Aspetti la scadenza del \'98', e:'La legislatura arriva in fondo · un anno di rigore in più con la tua maggioranza, e poi si vede',
+      f:function(){ S.scioglimento97='no'; gdFr90('cetomedio',1);
+        S.log.unshift({t:T('L\'Eliseo'),x:T('Non ha sciolto l\'Assemblea nel 1997.')}); } },
+    { l:'Sciogli e fai campagna tu', e:'Le urne a maggio, con l\'Eliseo in prima fila · se perdi, perdi due volte',
+      f:function(){ S.scioglimento97='campagna'; baseFr90(2); fidFr90(-1); stampad(-1);
+        S.log.unshift({t:T('L\'Eliseo'),x:T('Ha sciolto l\'Assemblea nel 1997 e ha fatto campagna in prima persona.')});
+        if(typeof azioneScioglimentoForzato==='function') azioneScioglimentoForzato(); } },
+  ],
+};
+/* §I-B · LA CORSA AL FRANCO DEL '92 E DEL '93: due ancore (game.js, FRANCO90_ANCORE), testi nuovi, le tre scelte di
+   FRANCO_CH (i pesi dei gruppi del '50, come nell'80 — dichiarato). Col no a Maastricht la corsa del '92 pesa doppio:
+   pesoFranco92() accende S.francoGrave, e pesoCorsaFranco() ha già il tetto a ×2. */
+function pesoFranco92(){ return (typeof S!=='undefined' && S && S.ref92==='no') ? 2 : 1; }
+const FRANCO92_EV = {
+  id:'ev_franco92', era:'fr1990', kick:'Il franco', tono:'grave',
+  t:'La corsa al franco',
+  text:'Il giorno dopo il referendum i mercati vendono franchi: la lira e la sterlina sono già uscite dal sistema, e la Banca di Francia brucia le riserve per tenere il cambio con il marco.',
+  ch: FRANCO_CH,
+};
+const FRANCO93_EV = {
+  id:'ev_franco93', era:'fr1990', kick:'Il franco', tono:'grave',
+  t:'La corsa al franco',
+  text:'Luglio: i mercati riprovano. Stavolta la Bundesbank non taglia i tassi, e in un fine settimana i ministri europei allargano le bande al quindici per cento: il sistema c\'è ancora, di nome.',
+  ch: FRANCO_CH,
 };

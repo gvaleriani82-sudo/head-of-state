@@ -1984,7 +1984,7 @@ function renderGov(){
       <div class="mtext" style="padding-bottom:6px">${riga} · ${T('mancano <b>%N</b> mesi alla scadenza naturale.').replace('%N',q.mesiRestanti)}</div>${rigaSeggi}
       <button class="opt" onclick="if(confirm('${T('Chiedere lo scioglimento e andare al voto in anticipo?')}')) azioneScioglimento()">
         <span class="ol">${T('Chiedi lo scioglimento')}</span>
-        <span class="oe">${T('Si vota adesso, e la scelta è tua · la stampa parla di opportunismo e gli alleati mormorano')}</span></button></div>`;
+        <span class="oe">${T((typeof sistemaSemipres==='function' && sistemaSemipres()) ? 'Si vota solo per l\'Assemblea: il tuo mandato all\'Eliseo continua · la stampa parla di opportunismo, e se perdi governa l\'altro blocco' : 'Si vota adesso, e la scelta è tua · la stampa parla di opportunismo e gli alleati mormorano')}</span></button></div>`;   /* L104-2 */
   }
   h+=`<div class="card g2"><div class="ct">${T('I tuoi ministeri')} <small style="color:var(--mut2);font-weight:400">· ${T('tocca "Apri" per gestirli')}</small></div>`;   // L85-2: erano scritte a mano, e restavano in italiano in una partita inglese
   for(const m of S.ministers) h+=renderMinistroCard(m,'lista');
