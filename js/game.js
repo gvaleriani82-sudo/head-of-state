@@ -1864,7 +1864,8 @@ const RIALLINEAMENTI_ERA = {
        SRC 204 · GDR 24 (Verdi 4) → 59,8 · 0,7 · 35,3 · 3,5 · 0,7; 2012 SRC 295+RRDP 16 · Verdi 18 · GDR 15 · UMP 196+UDI
        29+4 · MoDem 1 · FN 3 → 53,9 · 3,1 · 2,6 · 39,7 · 0,2 · 0,5.
        ⚠ LE DUE RINOMINE (RPR → UMP nel 2002, UDF → MoDem nel 2007) sul partito DEL GIOCATORE sono ignorate dal motore
-       (serve uno snodo, come DC → PPI): chi gioca l'RPR resta «RPR». Dichiarato. */
+       (serve uno snodo, come DC → PPI). L105-4: l'RPR diventa «UMP» dallo snodo del 21 aprile (rinominaPartitoMio,
+       solo con la scelta storica). L106-2: **chi gioca l'UDF resta «UDF» dopo il 2007/6 — accettato**, nessuno snodo. */
     '2002/6': { se:function(){ return typeof S!=='undefined' && S && typeof eliseoDiSinistra==='function' && !eliseoDiSinistra(); },
                 rinomina:[ {id:'fr_unr', nome:'UMP'} ],
                 delta:[ {id:'fr_unr',delta:22.0}, {id:'fr_ri',delta:-10.7}, {id:'fr_sfio',delta:1.1}, {id:'fr_pcf',delta:-5.7}, {id:'fr_verts',delta:-2.6}, {id:'fr_fn',delta:-4.1} ],   // Σ=0
@@ -1977,8 +1978,11 @@ function applicaDirettive(d){
     /* L40-1 — stessa medicina di `esce` (correzione #3 di L34-1): **il partito del giocatore non cambia nome
        per direttiva.** Il '91 rinomina il partito comunista, ma se è il TUO quella non è una tappa: è lo
        snodo-scissione, dove la scelta è tua (L40-2). Senza questa riga il giocatore si sarebbe trovato il
-       partito ribattezzato sotto i piedi, in silenzio. */
-    if(r.id===S.partito){ if(typeof console!=='undefined' && console.warn) console.warn('[roster] direttiva `rinomina` sul partito del giocatore ('+r.id+'): ignorata, serve uno snodo.'); return; }
+       partito ribattezzato sotto i piedi, in silenzio.
+       L106-2 — niente più console.warn qui: la tappa lo produceva APPOSTA in una partita normale (RPR 2002, UDF
+       2007) e sporcava la console di chi gioca. Il controllo è statico: verifica-alleanze.js elenca le rinomine di
+       tappa sui partiti selezionabili. Per cambiare nome al TUO partito c'è rinominaPartitoMio, da uno snodo. */
+    if(r.id===S.partito) return;
     S.rosterDelta.rinomina.push(r);
   });
   (d.esce||[]).forEach(function(e){

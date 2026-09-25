@@ -5945,7 +5945,7 @@ const DOSSIERS=[
    {l:'Si fa: la Repubblica arriva ovunque', e:'Un\'opera da inaugurare fra dieci anni', pleases:'progressista', costo:{debito:0.9}, f:()=>{S.ind.debt+=0.9; gd('lavoratori',2); gd('imprenditori',2);}},
    {l:'Prima si riparano le linee locali', e:'Meno gloria, più treni', pleases:'tecnico', costo:{debito:0.4}, f:()=>{S.ind.debt+=0.4; gd('cetomedio',2); gd('pensionati',1);}},
    {l:'Rinvia', e:'Si torna a parlarne alla prossima campagna', pleases:'conservatore', f:()=>{gd('imprenditori',-2); gd('lavoratori',-1);}}]},
- {id:'fr_p_d_ricchezza', era:'contemporanea', paesi:['francia'], min:'economia', kick:'Fisco', t:'L\'imposta sulle grandi fortune', text:'Da quando l\'imposta sul patrimonio è stata ristretta agli immobili, una parte del paese la vuole indietro e un\'altra teme la fuga dei capitali. Il dibattito torna a ogni bilancio.', ch:[
+ {id:'fr_p_d_ricchezza', era:'contemporanea', paesi:['francia'], cond:()=>S.year>=2018, min:'economia', kick:'Fisco', t:'L\'imposta sulle grandi fortune', text:'Da quando l\'imposta sul patrimonio è stata ristretta agli immobili, una parte del paese la vuole indietro e un\'altra teme la fuga dei capitali. Il dibattito torna a ogni bilancio.', ch:[
    {l:'Reintroducila su tutto il patrimonio', e:'Un simbolo, e un gettito incerto', pleases:'progressista', costo:{debito:-0.3}, f:()=>{S.ind.debt-=0.3; S.ind.fiducia-=2; gd('lavoratori',4); gd('giovani',2); gd('imprenditori',-5);}},
    {l:'Lascia com\'è', e:'Chi investe resta, chi protesta anche', pleases:'conservatore', f:()=>{gd('imprenditori',2); gd('lavoratori',-2);}},
    {l:'Un contributo temporaneo sui redditi più alti', e:'Né simbolo né fuga', pleases:'tecnico', costo:{debito:-0.2}, f:()=>{S.ind.debt-=0.2; gd('lavoratori',1); gd('imprenditori',-1);}}]},
@@ -7088,7 +7088,7 @@ const EVENTS=[
    {l:'Riapri il dialogo con tutte le parti', e:'Lento, ma nessuno si alza dal tavolo', f:()=>{gd('giovani',2); gd('cetomedio',1); gd('pensionati',-1);}},
    {l:'Lo Stato garantisce l\'ordine, poi si parla', e:'La calma prima, la fiducia dopo — forse', f:()=>{gd('pensionati',2); gd('cetomedio',1); gd('giovani',-3);}},
    {l:'Un pacchetto economico, subito', e:'I soldi arrivano, la domanda resta', costo:{debito:0.4}, f:()=>{S.ind.debt+=0.4; gd('lavoratori',1); gd('giovani',1);}}]},
- {id:'fr_p_sahel', era:'contemporanea', paesi:['francia'], min:'difesa', kick:'Africa', t:'La base che chiude', text:'Un governo africano chiede il ritiro dei soldati francesi. Il paese che si è pensato per decenni come garante di una regione deve decidere cosa resta di quel ruolo.', ch:[
+ {id:'fr_p_sahel', era:'contemporanea', paesi:['francia'], cond:()=>S.year>=2022, min:'difesa', kick:'Africa', t:'La base che chiude', text:'Un governo africano chiede il ritiro dei soldati francesi. Il paese che si è pensato per decenni come garante di una regione deve decidere cosa resta di quel ruolo.', ch:[
    {l:'Ritiro ordinato, e un nuovo patto con chi vuole', e:'Una pagina che si chiude con dignità', costo:{debito:-0.2}, f:()=>{S.ind.debt-=0.2; gd('giovani',2); gd('pensionati',-2);}},
    {l:'Sposta le forze in un paese vicino', e:'La presenza resta, l\'immagine no', costo:{debito:0.3}, f:()=>{S.ind.debt+=0.3; gd('pensionati',2); gd('cetomedio',1); gd('giovani',-1);}},
    {l:'Nessun commento: la Francia non risponde agli ultimatum', e:'Si resta finché si resta', f:()=>{S.ind.stampa-=2; gd('pensionati',1); gd('giovani',-2);}}]},
@@ -7096,7 +7096,7 @@ const EVENTS=[
    {l:'Apri il cantiere costituzionale', e:'Un passo che altri territori guardano', f:()=>{gd('giovani',2); gd('cetomedio',1); gd('pensionati',-2);}},
    {l:'Più competenze, senza toccare la Costituzione', e:'Molto, ma non la parola', f:()=>{gd('cetomedio',1); gd('cattolici',1);}},
    {l:'La Repubblica è una: nessuno statuto speciale', e:'Chiaro a Parigi, meno ad Ajaccio', f:()=>{gd('pensionati',2); gd('giovani',-2);}}]},
- {id:'fr_p_giubbotti', era:'contemporanea', paesi:['francia'], kick:'Rotatorie', t:'Le rotatorie occupate', text:'Non i sindacati, non i partiti: gente dei paesi e delle periferie lontane che occupa le rotatorie ogni sabato. Il carburante, le tasse, la sensazione che Parigi non sappia dove vivono.', ch:[
+ {id:'fr_p_giubbotti', era:'contemporanea', paesi:['francia'], cond:()=>S.year>=2018, kick:'Rotatorie', t:'Le rotatorie occupate', text:'Non i sindacati, non i partiti: gente dei paesi e delle periferie lontane che occupa le rotatorie ogni sabato. Il carburante, le tasse, la sensazione che Parigi non sappia dove vivono.', ch:[
    {l:'Un grande dibattito nazionale, comune per comune', e:'Ascoltare costa poco e si vede', costo:{debito:0.2}, f:()=>{S.ind.debt+=0.2; S.ind.stampa+=2; gd('cetomedio',2); gd('lavoratori',1);}},                       // ⑪
    {l:'Sospendi l\'aumento sul carburante', e:'Il sabato torna tranquillo, il bilancio meno', costo:{debito:0.6}, f:()=>{S.ind.debt+=0.6; gd('cetomedio',3); gd('lavoratori',2); gd('giovani',-2);}},
    {l:'L\'ordine prima di tutto', e:'I sabati continuano, e peggiorano', f:()=>{gd('pensionati',1); gd('cetomedio',-3); gd('lavoratori',-2);}}]},
