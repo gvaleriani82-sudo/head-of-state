@@ -331,6 +331,9 @@ function initStatoBase(){
   S.riallineamenti={};   // AVANZAMENTO — registro one-shot delle tappe-partiti già scattate (dato puro, round-trip; separato da truffaFatta)
   S.tappaSeggiEsito={};  // L61-2 - registro per-tappa dei seggi dichiarati: applicata | saltata (dato puro, round-trip)
   S.tappaForzaPrec=null;   // L61-4 - forza del partito del giocatore all ultima tappa: e il riferimento della traiettoria (dato puro)
+  S.ancoraTappa={};        // L106-3 - somma dei delta di tappa MARCATI (ancora:true) per partito: spostano l'àncora della molla (dato puro)
+  S.territoriDelta={entra:[]};   // L107-3 - i territori entrati a una tappa (registro, riapplicato in applySnap come S.rosterDelta)
+  S.capitaleSede=null;           // L107-3 - la capitale cambiata a una tappa (Bonn → Berlino). ⚠ S.capitale è il capitale POLITICO del livello 2
   S.pilastri70={};             // L28-4 — pilastri-cronaca gia' usciti (one-shot, dato puro)
   S.pilastriMondo={};          // L56-2 — i fatti-mondo gia usciti (one-shot, dato puro, round-trip)
   S.rosterDelta={entra:[], esce:[], rinomina:[]};   // L34-1 - il registro delle nascite/morti/rinomine: e LUI la verita, PAESE ne e la proiezione
@@ -1611,7 +1614,8 @@ const RIALLINEAMENTI_ERA = {
        ogni partito territoriale o identitario che arriverà avrà lo stesso problema, e sarà un limite del
        modello, non un errore di taratura. `concentrazione: 40` è il caso-limite che γ1-ter ha reso possibile:
        un partito che esiste solo dove esiste. */
-    1970: { delta:[ {id:'uk_con',delta:4.5}, {id:'uk_lab',delta:-4.9}, {id:'uk_lib',delta:-3.7} ],
+    1970: { delta:[ {id:'uk_con',delta:4.5}, {id:'uk_lab',delta:-4.9}, {id:'uk_lib',delta:-3.7} ],   // L106-3: uk1970 parte già da queste urne
+            saltaDeltaPer:['uk1970'],
             entra:[ { id:'uk_snp', nome:'SNP', orientamento:'centrosinistra', base:{ lavoratori:0.5, giovani:0.5 },
                       forza:1.1, asse:-1, gruppoUE:'verdi', terreno:-0.2, concentrazione:40 } ] },
     /* ============================================================================================================
@@ -1868,7 +1872,7 @@ const RIALLINEAMENTI_ERA = {
        solo con la scelta storica). L106-2: **chi gioca l'UDF resta «UDF» dopo il 2007/6 — accettato**, nessuno snodo. */
     '2002/6': { se:function(){ return typeof S!=='undefined' && S && typeof eliseoDiSinistra==='function' && !eliseoDiSinistra(); },
                 rinomina:[ {id:'fr_unr', nome:'UMP'} ],
-                delta:[ {id:'fr_unr',delta:22.0}, {id:'fr_ri',delta:-10.7}, {id:'fr_sfio',delta:1.1}, {id:'fr_pcf',delta:-5.7}, {id:'fr_verts',delta:-2.6}, {id:'fr_fn',delta:-4.1} ],   // Σ=0
+                delta:[ {id:'fr_unr',delta:22.0,ancora:true}, {id:'fr_ri',delta:-10.7}, {id:'fr_sfio',delta:1.1}, {id:'fr_pcf',delta:-5.7}, {id:'fr_verts',delta:-2.6}, {id:'fr_fn',delta:-4.1} ],   // Σ=0
                 urne:  { fr_unr:33.8, fr_sfio:25.3, fr_fn:11.1, fr_pcf:4.9, fr_ri:4.8, fr_verts:4.4 },
                 seggi: { fr_unr:64.0, fr_ri:5.0, fr_sfio:26.4, fr_pcf:4.1, fr_verts:0.5, fr_fn:0 } },
     '2007/6': { se:function(){ return typeof S!=='undefined' && S && typeof eliseoDiSinistra==='function' && !eliseoDiSinistra(); },
@@ -1962,9 +1966,36 @@ function applicaRosterDelta(ricalcolaSeggi){
     try{ S.seggi=calcSeggi(); }catch(e){}
   }
 }
+/* L107-3 · riapplica il registro dei territori entrati a una tappa su un PAESE appena ricostruito: cloni (PAESE.territori e
+   PAESE.mappa sono condivisi con SCENARI/PAESI), in coda, una volta sola per nome. Idempotente. */
+function applicaTerritoriDelta(){
+  if(typeof S==='undefined' || !S || !S.territoriDelta || !(S.territoriDelta.entra||[]).length || !PAESE || !PAESE.territori) return;
+  var lista=PAESE.territori.slice(), mappa=PAESE.mappa ? Object.assign({}, PAESE.mappa, {aree:(PAESE.mappa.aree||[]).slice()}) : null;
+  S.territoriDelta.entra.forEach(function(te){
+    if(lista.some(function(x){ return x.nome===te.nome; })) return;
+    var t2=Object.assign({}, te); delete t2.area;
+    lista.push(t2);
+    /* ⚠ le aree possono essere MENO dei territori (le città senza cerchio: il presente tedesco ne ha 15 e 11): si allinea
+       con dei vuoti prima di aggiungere, altrimenti l'area nuova finirebbe sotto l'indice di un'altra città. */
+    if(mappa){ while(mappa.aree.length < lista.length-1) mappa.aree.push(null); mappa.aree.push(te.area || null); }
+  });
+  PAESE=Object.assign({}, PAESE, {territori:lista}, mappa?{mappa:mappa}:{});
+}
 /* Applica UNA direttiva: aggiorna il registro in S e i dizionari per-id che sarebbero rimasti orfani. */
 function applicaDirettive(d){
   if(!d) return;
+  /* L107-3 · TERRITORI E CAPITALE A UNA TAPPA. I territori nuovi entrano IN CODA (gli indici di S.territori sono paralleli a
+     PAESE.territori e a PAESE.mappa.aree: in mezzo sposterebbero gli eletti di tutti gli altri), ciascuno con la sua area di
+     mappa (`area`). Il fatto va nel registro S.territoriDelta, riapplicato in applySnap: PAESE si ricostruisce dallo scenario
+     al caricamento (la lezione di L34-1). Di chi è un territorio nuovo lo dice il suo `lean`, come all'avvio (initTerritori). */
+  if(d.territori && d.territori.entra && d.territori.entra.length){
+    S.territoriDelta = S.territoriDelta || {entra:[]};
+    d.territori.entra.forEach(function(te){ S.territoriDelta.entra.push(te); });
+    applicaTerritoriDelta();
+    if(S.territori && PAESE.territori) for(var it=S.territori.length; it<PAESE.territori.length; it++)
+      S.territori.push({ titolare:nomePersona(), partito:partitoVicinoLean(PAESE.territori[it].lean) });
+  }
+  if(d.capitale) S.capitaleSede=d.capitale;
   S.rosterDelta = S.rosterDelta || {entra:[], esce:[], rinomina:[]};
   (d.entra||[]).forEach(function(n){
     S.rosterDelta.entra.push(n);
@@ -2160,6 +2191,7 @@ function rinominaPartitoMio(nome){
    «verificato» con un calcolo fatto sull'unità sbagliata, non guardando la schermata (lezione 194). */
 const CHANGEOVER = {
   [LINEA_IT]: { anno:2002, fattore:1936.27, testo:'Da oggi i prezzi si scrivono in euro: milleNovecentoTrentasei lire e ventisette centesimi ne fanno uno. Il portafoglio è lo stesso, i conti sembrano un altro paese.' },
+  [LINEA_DE]: { anno:2002, fattore:1.95583, testo:'Da oggi i prezzi si scrivono in euro: un marco e novantasei pfennig ne fanno uno. Il portafoglio è lo stesso, i conti sembrano un altro paese.' },   // L107-3
   [LINEA_FR]: { anno:2002, fattore:6.55957, testo:'Da oggi i prezzi si scrivono in euro: sei franchi e cinquantasei centesimi ne fanno uno. Il portafoglio è lo stesso, i conti sembrano un altro paese.' },
 };
 function changeoverEuro(){
@@ -2200,18 +2232,31 @@ function riallineamentoTappa(){
   if(S.riallineamenti[chiave]) return;              // one-shot per tappa: già applicata
   var direttive=null, shifts;
   if(Array.isArray(entry)) shifts=entry;                                              // forma di sempre
-  else if(entry.delta || entry.entra || entry.esce || entry.rinomina){                // forma nuova (L34-1)
+  else if(entry.delta || entry.entra || entry.esce || entry.rinomina || entry.territori || entry.capitale){   // forma nuova (L34-1; territori e capitale L107-3)
     /* L40-1 — `se`: una tappa può valere solo a certe condizioni. Serve al '91: la scissione del partito
        comunista è una direttiva-NPC **solo se non è il partito del giocatore** — nel qual caso la stessa
        storia si gioca come snodo (L40-2). La tappa resta marcata come fatta: non deve ritentare ogni anno. */
     if(typeof entry.se==='function'){ var ok=false; try{ ok=entry.se(); }catch(_){ ok=false; }
       if(!ok){ S.riallineamenti[chiave]=true; return; } }
     shifts=entry.delta||[]; direttive=entry;
+    /* L106-3 · `saltaDeltaPer`: le porte che PARTONO già con i voti di questa tappa nel roster. `uk1970` ha le urne del
+       1970 come forze d'avvio e la tappa del 1970 le rispostava al secondo mese (Liberali 7,5 → 3,9): il 1970 contato due
+       volte, nascosto dalla molla che lo riassorbiva in un anno. Per quelle porte i delta si saltano; le direttive
+       (entra/esce/rinomina) restano, e per chi arriva da `uk1960` la tappa è quella di sempre. */
+    if(Array.isArray(entry.saltaDeltaPer) && entry.saltaDeltaPer.indexOf(S.scenario)>=0) shifts=[];
   } else shifts=entry[(S.apertura==='apri') ? 'apertura' : 'centrismo'];               // '63: ramo su S.apertura
   if(direttive) applicaDirettive(direttive);        // PRIMA i nuovi entrano, poi i delta li trovano nel roster
   if(!shifts || !shifts.length){ if(direttive){ S.riallineamenti[chiave]=true; } return; }
   if(S.forze && PAESE && PAESE.partiti){
     shifts.forEach(function(sh){ if(S.forze[sh.id]!=null) S.forze[sh.id]=Math.max(2, S.forze[sh.id]+sh.delta); });
+    /* L106-3 · L'ÀNCORA SI SPOSTA SOLO ALLE TAPPE MARCATE. La molla di evolvePartiti riporta ogni partito verso la forza
+       d'inizio porta (`p.forza`): riassorbe gli scossoni e tiene in vita le carriere che la storia punisce, ed è giusto
+       (L106-1: con l'àncora mobile per tutti, `italia1980` finiva al congresso 20 volte su 20). Ma cancellava anche i
+       cambiamenti di NATURA di un partito: l'RPR fuso nell'UMP (+22 nel 2002) tornava a 12 nel 2007 e la tappa del
+       2007 saltava 18 volte su 20. Un delta marcato `ancora:true` sposta anche l'àncora (`S.ancoraTappa`, letto da
+       evolvePartiti). ⚑ CRITERIO per chi marcherà: si marca una fusione, una scissione o una rifondazione che cambia
+       CHI STA nel partito; non si marca una frana o una vittoria elettorale. */
+    shifts.forEach(function(sh){ if(sh.ancora && S.forze[sh.id]!=null){ if(!S.ancoraTappa) S.ancoraTappa={}; S.ancoraTappa[sh.id]=(S.ancoraTappa[sh.id]||0)+sh.delta; } });
     var sum=0; PAESE.partiti.forEach(function(p){ sum+=(S.forze[p.id]||0); });
     if(sum>0) PAESE.partiti.forEach(function(p){ S.forze[p.id]=(S.forze[p.id]||0)/sum*100; });   // rinormalizza a 100
     S.forzePrev=Object.assign({}, S.forze);
@@ -2343,13 +2388,19 @@ function riallineamentoTappa(){
    ================================================================================================================ */
 const SCENARIO_ISTITUZIONI = ['sistema','comeSiVince','coalizione','cadutaGoverno','mandatoMesi',
                               'titoloRuolo','sedeGoverno','scioglimentoMesiMin','distorsione',
-                              'crisiMinisteriale'];   // L93-4: la IV Repubblica cade senza urne (assente = come prima)
+                              'crisiMinisteriale',   // L93-4: la IV Repubblica cade senza urne (assente = come prima)
+                              'sbarramento', 'sfiduciaCostruttiva'];   // L107-2: la soglia dei seggi e l'art. 67 (assenti = come prima)
 function paeseConScenario(base, sc){
   if(!sc) return base;
   var ov={};
   if(sc.partiti && sc.partiti.length) ov.partiti=sc.partiti;
   if(sc.ue!==undefined) ov.ue=sc.ue;                 // (ii) es. ue:false → tutta la struttura UE inerte nel '50
   if(sc.intermedie) ov.intermedie=sc.intermedie;     // (ii) calendario elettorale d'epoca (niente europee)
+  /* L107-3 · una porta può dichiarare i SUOI territori, la sua mappa e la sua capitale (la Germania di Bonn: l'Ovest, con
+     l'Est in coda che entra a una tappa). Additivo: il presente non si tocca (i salvataggi ricostruiscono per indice). */
+  if(sc.territori) ov.territori=sc.territori;
+  if(sc.mappa) ov.mappa=sc.mappa;
+  if(sc.capitale) ov.capitale=sc.capitale;
   SCENARIO_ISTITUZIONI.forEach(function(k){ if(sc[k]!==undefined) ov[k]=sc[k]; });   // L93-1
   if(sc.mandatiMax!==undefined) ov.mandatiMax = sc.mandatiMax;                        // null = nessun limite (v. la nota)
   return Object.keys(ov).length ? Object.assign({}, base, ov) : base;
@@ -2413,12 +2464,10 @@ function bloccoSeggi(){ return (S.seggi && typeof seggiCoalizione==='function') 
 /* ================================================================================================================
    L100-2 · LA COABITAZIONE — un Presidente con l'Assemblea degli altri.
    ⚑ È DERIVATA DAI SEGGI, non dichiarata: sistema semipresidenziale, livello 3, al governo, il mio blocco sotto 50
-   **e** un blocco avverso a 50 o più. ⚑ D-b (Cowork, 24/9): **SI ENTRA SOLO A UNA TAPPA** (`riallineamentoTappa`),
-   mai a un'urna: nel gioco la presidenziale ricalcola l'Assemblea dalle forze — un'urna sola per le due — e un
-   Presidente appena eletto che si ritrova in coabitazione non è mai successo (1981 e 1988 sono l'opposto: eletto,
-   scioglie, vince). Agli altri punti in cui si scrive `S.minoranza` (l'avvio in `confirmCoal`, l'urna in
-   `nextMandate`, la salita in `diventaPremier`, e il banco che ricalca quelle cerimonie) il flag può solo
-   **restare o spegnersi**. Senza, `fr1970` entrava in coabitazione nel gennaio '76 in 17 carriere su 20 (L100-2).
+   **e** un blocco avverso a 50 o più (una CRICCA, vedi bloccoAvverso). ⚑ Si deriva a OGNI cambio di seggi o di Presidente
+   — tappa, scioglimento, presidenziale, avvio della porta, salita al governo — con `aggiornaCoabitazione()` (L104-2).
+   ⚠ STORIA: fino a L104-2 valeva D-b («si entra SOLO a una tappa»), nata perché la presidenziale ricalcolava l'Assemblea;
+   con le urne separate D-b è ritirata (e una porta può partire in coabitazione dai suoi seggi: il PS del 1980).
    Quando entra **spegne `S.minoranza`**: il governo c'è, è degli altri — così
    sfiducia, contatore, rimpasto/sostegno, sondaggi mensili, beat spenti, nota rossa e le due carte si spengono
    insieme, senza toccarli uno per uno (ricognizione L100-1, punto 2a).
@@ -2427,8 +2476,9 @@ function bloccoSeggi(){ return (S.seggi && typeof seggiCoalizione==='function') 
    filtrano per ministero come al livello 2 — qui `esteri` e `difesa`, il «domaine réservé».
    ⚠ In v1 si rende SOLO dal lato del Presidente: chi gioca all'opposizione non entra in coabitazione (per lui è già
    il governo avversario), e la vive come cronaca nella scheda della porta.
-   ⚠ L'uscita è SOLO la presidenziale: sotto coabitazione `scioglimentoAmmesso()` è falso, perché l'urna del motore
-   nel semipresidenziale rifà la presidenza (ricognizione L100-1, punto 2e).
+   ⚑ Le uscite sono due (L104-2): la presidenziale, e lo SCIOGLIMENTO, ammesso anche in coabitazione — è un'urna di
+   soli seggi (`urnaLegislativa`) e il mandato presidenziale continua. (Fino a L104-2 `scioglimentoAmmesso()` era falso
+   sotto coabitazione, perché l'urna del motore rifaceva la presidenza: riscritto in L107-2, era rimasto stale.)
    ================================================================================================================ */
 const COABITAZIONE_MIN = ['esteri','difesa'];   // i ministeri che restano al Presidente
 /* Chi paga l'economia sotto coabitazione: il termine economico di targetGroup e il logorio si moltiplicano per
@@ -2452,7 +2502,11 @@ function coppiaCompatibile(a, b){ return staColBlocco(a, b) && staColBlocco(b, a
 function bloccoAvverso(){
   if(typeof S==='undefined' || !S || !S.seggi || !PAESE || !PAESE.partiti) return {seggi:0, capofila:null, membri:[]};
   var mio=S.partito, coal=S.coalizione||[mio];
-  var avv=PAESE.partiti.filter(function(p){ return p.id!==mio && coal.indexOf(p.id)<0 && !staColBlocco(p.id, mio) && (S.seggi[p.id]||0)>0; }).map(function(p){ return p.id; });
+  /* L107-2 · sotto la sfiducia costruttiva IL PARTNER CHE HA ROTTO CONTA COME AVVERSO, anche se `alleati` lo dichiara «col mio
+     blocco»: è il 1982, la FDP che lascia l'SPD ed elegge un altro Cancelliere con la CDU. Il registro è quello di sempre,
+     `S.tenutaLiv[id]===2` scritto da pickAlleato alla rottura. Senza il campo la regola è quella di prima, byte per byte. */
+  var haRotto=function(id){ return !!(PAESE.sfiduciaCostruttiva && S.tenutaLiv && S.tenutaLiv[id]===2); };
+  var avv=PAESE.partiti.filter(function(p){ return p.id!==mio && coal.indexOf(p.id)<0 && (!staColBlocco(p.id, mio) || haRotto(p.id)) && (S.seggi[p.id]||0)>0; }).map(function(p){ return p.id; });
   var best={seggi:0, capofila:null, membri:[]}, n=avv.length;
   for(var m=1; m<(1<<n); m++){
     var membri=[]; for(var k=0;k<n;k++) if(m&(1<<k)) membri.push(avv[k]);
@@ -2629,6 +2683,24 @@ function governoCade(){
   } else {
     S.log.unshift({t:T('Sfiducia'), x:T('Il governo è caduto: il Presidente nomina un nuovo Primo ministro.')});
   }
+}
+/* L107-2 · la sfiducia costruttiva: se la cricca avversa ha i numeri, il governo passa a lei senza elezioni. Riusa
+   `entraOpposizione` (che installa anche il profilo dell'avversario, L104-3) con due correzioni: (a) il governo avversario è
+   la CRICCA, non i compatibili del capofila; (b) la legislatura continua — `turnInMandate` non si azzera: si vota alla
+   scadenza, o prima se il nuovo Cancelliere scioglie. Ritorna true se il governo è caduto (il mese si chiude qui, come
+   dopo una sconfitta: il resto di advanceMonth è del governo). */
+function sfiduciaCostruttiva(){
+  var b=bloccoAvverso();
+  if(!b || b.seggi<50 || !b.capofila) return false;
+  var w=part(b.capofila), turno=S.turnInMandate;
+  entraOpposizione(w);
+  S.coalizione=b.membri.slice();
+  S.turnInMandate=turno;
+  S.bloccoAtteso=bloccoQuota();
+  S.log.unshift({t:T('Sfiducia costruttiva'), x:T('%P elegge un nuovo Cancelliere: il governo cambia senza elezioni.').replace('%P', T(w.nome))});
+  var ov=(typeof document!=='undefined') && document.getElementById && document.getElementById('ov'); if(ov && ov.classList) ov.classList.remove('on');
+  genAgenda(false); render(); commitSnap();
+  return true;
 }
 /* L93-4 · la crisi ministeriale della IV Repubblica. Chiamata SOLO sotto `PAESE.crisiMinisteriale`, al confine del
    mese, quando il governo del giocatore è in minoranza. Le prime due cadute del mandato riformano il governo
@@ -2875,7 +2947,8 @@ function azioneScioglimento(){
   S.scioglimentiChiesti=(S.scioglimentiChiesti||0)+1;
   S.elezioniAnticipate=true; S.scioglimentoScelto=true;             // il log ricorda che ci sei andato TU
   var sc=scartoCampagna();
-  S.log.unshift({t:T('Scioglimento'),x:T('Hai chiesto lo scioglimento: si vota in anticipo, e la scelta è tua.')});
+  if(PAESE.sfiduciaCostruttiva) S.log.unshift({t:T('La questione di fiducia'),x:T('Hai posto la questione di fiducia e l\'hai persa apposta: si vota in anticipo, e la scelta è tua.')});   // L107-2
+  else S.log.unshift({t:T('Scioglimento'),x:T('Hai chiesto lo scioglimento: si vota in anticipo, e la scelta è tua.')});
   if(typeof bioFatto==='function'){ try{ bioFatto(T('Ha sciolto le Camere per andare al voto in anticipo.')); }catch(e){} }
   election();
 }
@@ -3997,7 +4070,7 @@ function resolveTerritorio(ci){
    ⚠ Il segnaposto sta nel testo ITALIANO, che e' la chiave del dizionario: l'inglese lo eredita senza doppioni — e in
    quasi tutti questi casi l'inglese era GIA' neutro («in the capital»), segno che il difetto era della sola sorgente.
    ================================================================================================================ */
-function capitalePaese(){ return (typeof PAESE!=='undefined' && PAESE && PAESE.capitale) || 'Roma'; }
+function capitalePaese(){ return (typeof S!=='undefined' && S && S.capitaleSede) || (typeof PAESE!=='undefined' && PAESE && PAESE.capitale) || 'Roma'; }   // L107-3: prima la capitale cambiata a una tappa
 function sedeGovernoPaese(){ return (typeof PAESE!=='undefined' && PAESE && PAESE.sedeGoverno) || 'Palazzo Chigi'; }
 function aCapitale(){ var c=capitalePaese(); return (/^[Aa]/.test(c) ? 'ad ' : 'a ') + c; }
 function luoghiSub(str){
@@ -5801,6 +5874,12 @@ function avanzaMese(){
   if(PAESE.crisiMinisteriale && PAESE.cadutaGoverno && S.minoranza){
     if(crisiMinisteriale()==='urne') return;
   }
+  /* L107-2 · LA SFIDUCIA COSTRUTTIVA (art. 67, `PAESE.sfiduciaCostruttiva`): il ramo gemello di `crisiMinisteriale`. Un
+     governo in minoranza cade SOLO se un'altra maggioranza c'è davvero — una cricca avversa ≥ 50, la stessa
+     `bloccoAvverso()` della coabitazione — e cade SENZA URNE; senza cricca resta, e `probSfiducia` non si tira. */
+  else if(PAESE.sfiduciaCostruttiva && PAESE.cadutaGoverno && S.minoranza){
+    if(sfiduciaCostruttiva()) return;
+  }
   else if(PAESE.cadutaGoverno && S.minoranza && Math.random()<probSfiducia()){      // elezioni anticipate da sfiducia (passo 4)
     /* L80-5: cade il governo, non il Presidente. ⚑ L93-6: SENZA return — prima `return governoCade()` usciva da advanceMonth e
        saltava genAgenda/generaTitolo/render/commitSnap: il mese della caduta restava con l'agenda del mese prima, già risolta,
@@ -7116,6 +7195,9 @@ function applySnap(snap){
   if(!S.rosterDelta || typeof S.rosterDelta!=='object') S.rosterDelta={entra:[], esce:[], rinomina:[]};   // migrazione salvataggi pre-L34-1
   S.rosterDelta.entra=S.rosterDelta.entra||[]; S.rosterDelta.esce=S.rosterDelta.esce||[]; S.rosterDelta.rinomina=S.rosterDelta.rinomina||[];
   if(typeof applicaRosterDelta==='function') applicaRosterDelta();
+  if(S.territoriDelta===undefined) S.territoriDelta={entra:[]};   // L107-3
+  if(S.capitaleSede===undefined) S.capitaleSede=null;             // L107-3
+  if(typeof applicaTerritoriDelta==='function') applicaTerritoriDelta();   // L107-3: prima del controllo sulla lunghezza di S.territori qui sotto
   if(true){
   }
   /* L49-1 — migrazione del decennio inglese. `S.suez` è anche ciò che spegne il pilastro-cronaca: se restasse
@@ -7158,6 +7240,7 @@ function applySnap(snap){
   if(S.riallineamenti===undefined) S.riallineamenti={};   // AVANZAMENTO — migrazione: i salvataggi pre-lotto ricevono il registro-tappe vuoto
   if(S.tappaSeggiEsito===undefined) S.tappaSeggiEsito={};   // L61-2 - migrazione: i salvataggi precedenti ricevono il registro vuoto
   if(S.tappaForzaPrec===undefined) S.tappaForzaPrec=null;
+  if(S.ancoraTappa===undefined) S.ancoraTappa={};   // L106-3: i salvataggi di prima non hanno tappe marcate applicate (salvo fr2000 dopo il 2002: vedi l'archivio)
    // L61-4 - migrazione
   if(S.apertura===undefined){ S.apertura=null; S.aperturaEsito=null; S.enel=null; }   // AVANZAMENTO Lotto 4 — migrazione snodi '60
   if(S.austerity===undefined){ S.austerity=null; S.divorzio=null; S.solidarieta=null; }   // L28-3 — migrazione snodi '70

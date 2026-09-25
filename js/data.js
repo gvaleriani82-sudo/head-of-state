@@ -14850,7 +14850,10 @@ const FRANCO93_EV = {
    ============================================================================================================== */
 /* ⚑ LA SWEEP (L105-4, 25/9, banco onesto, RPR al governo, 20 semi, 168 mesi): fondo ×0 gruppo peggiore 34,3 (sd 4,0) · ×1 0,27 sd ·
    ×2 0,19 sd · ×3 0,69 sd · ×4 1,24 sd (1 crisi) · **×5 2,50 sd, 2 crisi o rivolte su 20** (adottato: il primo dentro la banda
-   1,5-4) · ×6 4,04 sd, 5 su 20. ⚠ È la prima porta in cui il valore adottato non è a zero crisi: segnalato a Cowork. */
+   1,5-4) · ×6 4,04 sd, 5 su 20. ⚠ È la prima porta in cui il valore adottato non è a zero crisi: segnalato a Cowork.
+   ⚑ RIFATTA IN L106-3 (l'àncora dell'RPR segue la fusione del 2002): ×0 34,7 (sd 3,5) · ×3 0,96 sd, 0 crisi · ×4 1,49 sd, 1 crisi ·
+   ×4,1 1,54 sd, 1 · ×4,25 1,87 sd, 1 · ×4,5 2,54 sd, 1 · ×5 3,14 sd, 2. **Nessun valore è dentro la banda con zero crisi**, che era il
+   bersaglio della voce: il valore resta ×5 finché non decide Cowork (le due candidate: ×4,1 con una crisi, ×3 sotto la banda). */
 let FR00_GRUPPI = 5;   // let e non const: la sweep di .claude/misura-fr2000-contenuto.js lo varia sul banco
 function gdFr00(g, n){ gd(g, Math.round(n*FR00_GRUPPI)); }
 function fidFr00(n){ fidFr60(n); }   // la fiducia non ha moltiplicatore: è la stessa leva del '60

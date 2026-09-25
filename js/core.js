@@ -12,6 +12,10 @@ const LINEA_UK = 'uk_postwar';   // L48-1 — la seconda linea storica: il Regno
    (dal 1958) è il semipresidenziale che il presente ha già. Il cambio non si simula a metà porta: `fr1950` è
    tutta IV Repubblica e il 1958 è lo snodo che la chiude (decisione D1, `PIANO-LINEA-FRANCIA.md`). */
 const LINEA_FR = 'francia_repubbliche';
+/* L107-3 — la quarta linea storica, la Germania del dopoguerra (PIANO-LINEA-GERMANIA.md). Nasce qui con il suo cambio
+   all'euro; le porte arriveranno con le schede. */
+const LINEA_DE = 'germania_repubbliche';
+const VALUTA_MARCO = { sym:'DM', mld:'mld marchi', mln:'mln marchi' };   // L107-3: la valuta delle porte tedesche fino al 2001 (valuta: VALUTA_MARCO)
 
 "use strict";
 /* ============================================================

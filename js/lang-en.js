@@ -18423,4 +18423,12 @@ const EN = {
   "Contro il piano per la crisi del 2008 ha presentato la censura in aula.":"Against the plan for the 2008 crisis it tabled a censure motion in the Assembly.",
   "Sul piano per la crisi del 2008 ha scelto il tavolo e ha trattato.":"On the plan for the 2008 crisis it chose the table and negotiated.",
   "Contro il piano per la crisi del 2008 è sceso in piazza.":"Against the plan for the 2008 crisis it took to the streets.",
+  /* L107-2 · la sfiducia costruttiva e la questione di fiducia */
+  "Sfiducia costruttiva":"Constructive vote of no confidence",
+  "%P elegge un nuovo Cancelliere: il governo cambia senza elezioni.":"%P elects a new Chancellor: the government changes without an election.",
+  "Hai posto la questione di fiducia e l'hai persa apposta: si vota in anticipo, e la scelta è tua.":"You called a confidence vote and lost it on purpose: the election comes early, and the choice was yours.",
+  /* L107-3 · la linea tedesca: il marco e il cambio all'euro */
+  "mld marchi":"bn marks",
+  "mln marchi":"m marks",
+  "Da oggi i prezzi si scrivono in euro: un marco e novantasei pfennig ne fanno uno. Il portafoglio è lo stesso, i conti sembrano un altro paese.":"From today prices are written in euros: one mark and ninety-six pfennigs make one. The wallet is the same, the accounts look like another country.",
 };

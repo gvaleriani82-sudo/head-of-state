@@ -461,7 +461,7 @@ function tratti(){
 function haTratto(id){ return tratti().indexOf(id)>-1; }
 
 /* --- Forze dei partiti: ogni mese seguono l'umore della loro base (gruppi), restando ancorate alla
-   forza INIZIALE (p.forza da PAESI, mai mutato). Somma ≈100, pavimento ~2. Scrive solo S.forze/S.forzePrev,
+   forza INIZIALE (p.forza da PAESI, mai mutato) — più i delta di tappa MARCATI `ancora:true` (L106-3, S.ancoraTappa). Somma ≈100, pavimento ~2. Scrive solo S.forze/S.forzePrev,
    non tocca economia/consenso/elezioni. La guardia protegge i test che non impostano S.forze. --- */
 function evolvePartiti(){
   if(!S.forze || !PAESE.partiti) return;
@@ -483,7 +483,8 @@ function evolvePartiti(){
   for(const p of parts){
     let s=0,w=0; for(const g in p.base){ s+=S.groups[g]*p.base[g]; w+=p.base[g]; }
     const sodd=w>0?s/w:50;                 // soddisfazione della base 0..100
-    let sc=p.forza*(0.5+sodd/100);
+    const anc=Math.max(1, p.forza+((S.ancoraTappa&&S.ancoraTappa[p.id])||0));   // L106-3: l'àncora segue le tappe MARCATE (riallineamentoTappa)
+    let sc=anc*(0.5+sodd/100);
     if(S.coalizione && S.coalizione.includes(p.id)) sc*=govF;   // governare bene cresce, male cede voti all'opposizione
     score[p.id]=sc; tot+=sc;
   }
@@ -608,7 +609,11 @@ function calcSeggi(){
   /* L47-1 — il bivio: chi dichiara i collegi passa di là, tutti gli altri proseguono nel ramo di sempre. */
   if(PAESE.sistemaSeggi==='collegi' && typeof calcSeggiCollegi==='function') return calcSeggiCollegi();
   const d=PAESE.distorsione||1, ps=PAESE.partiti;
-  const raw=ps.map(p=>({id:p.id, v:Math.pow(Math.max((S.forze&&S.forze[p.id])||0,0), d)}));
+  /* L107-2 · LO SBARRAMENTO (`PAESE.sbarramento`, percentuale; dichiarabile da una porta via SCENARIO_ISTITUZIONI). Un
+     partito con forza sotto la soglia pesa zero nella torta: i suoi voti si ripartiscono fra gli altri da soli, nella
+     normalizzazione. Il ramo `collegi` qui sopra non lo legge (i collegi fanno già da soglia). Senza il campo: com'era. */
+  const sb=PAESE.sbarramento||0;
+  const raw=ps.map(p=>{ const f=(S.forze&&S.forze[p.id])||0; return {id:p.id, v:(sb && f<sb) ? 0 : Math.pow(Math.max(f,0), d)}; });
   const tot=raw.reduce((s,x)=>s+x.v,0)||1;
   const q=raw.map(x=>{ const e=x.v/tot*100; return {id:x.id, f:Math.floor(e), r:e-Math.floor(e)}; });
   let used=q.reduce((s,x)=>s+x.f,0);
@@ -755,7 +760,11 @@ function staColBlocco(idAltro, idTuo){
   return Math.abs(altro.asse - tuo.asse) <= 1;
 }
 function compatibili(idTuo, seggi){
-  const list=PAESE.partiti.filter(p=>p.id!==idTuo && (staColBlocco(p.id, idTuo) || aperturaAmmette(idTuo,p.id) || (typeof intesaDi==='function' && intesaDi(p.id)>=60)));
+  /* L107-2 · con lo sbarramento dichiarato chi non è in aula non si imbarca: il banco, la trattativa e il governo avversario
+     leggono tutti da qui. Senza il campo il filtro non c'è, e la lista è quella di sempre. */
+  const sg=seggi || (typeof S!=='undefined' && S && S.seggi);
+  const fuori=(PAESE.sbarramento && sg) ? function(p){ return sg[p.id]===0; } : function(){ return false; };
+  const list=PAESE.partiti.filter(p=>p.id!==idTuo && !fuori(p) && (staColBlocco(p.id, idTuo) || aperturaAmmette(idTuo,p.id) || (typeof intesaDi==='function' && intesaDi(p.id)>=60)));
   return seggi ? list.sort((x,y)=>(seggi[y.id]||0)-(seggi[x.id]||0)) : list;
 }
 function seggiCoalizione(ids, seggi){ return ids.reduce((s,id)=>s+(seggi[id]||0),0); }
