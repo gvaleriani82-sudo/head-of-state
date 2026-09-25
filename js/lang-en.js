@@ -18430,5 +18430,23 @@ const EN = {
   /* L107-3 · la linea tedesca: il marco e il cambio all'euro */
   "mld marchi":"bn marks",
   "mln marchi":"m marks",
+  "Il governo torna suo senza elezioni, con la sfiducia costruttiva.":"Back in government without an election, through a constructive vote of no confidence.",
+  "Il Parlamento ti elegge: torni a guidare il paese senza passare dalle urne.":"Parliament elects you: you lead the country again without going to the polls.",
   "Da oggi i prezzi si scrivono in euro: un marco e novantasei pfennig ne fanno uno. Il portafoglio è lo stesso, i conti sembrano un altro paese.":"From today prices are written in euros: one mark and ninety-six pfennigs make one. The wallet is the same, the accounts look like another country.",
+  /* L108-2 · la porta de1950 */
+  "Germania 1950":"Germany 1950",
+  "Germania, 1950. La Repubblica ha un anno, la capitale è una città universitaria sul Reno, e il Cancelliere governa con un voto di scarto.":"Germany, 1950. The Republic is a year old, the capital is a university town on the Rhine, and the Chancellor governs with a majority of one vote.",
+  "Germania, 1950. Le città sono ancora macerie, ma il marco nuovo ha riempito le vetrine in una notte: la ricostruzione corre più in fretta di chiunque avesse previsto.":"Germany, 1950. The cities are still rubble, but the new mark filled the shop windows overnight: reconstruction is running faster than anyone had predicted.",
+  "Dieci milioni di profughi dall'Est cercano casa e lavoro. Un disoccupato su dieci, e la metà del paese dall'altra parte di un confine che nessuno riconosce.":"Ten million refugees from the East are looking for a home and a job. One in ten out of work, and half the country on the other side of a border nobody recognises.",
+  "Il Cancelliere governa con i liberali e con un piccolo partito nazionale; l'opposizione socialdemocratica vuole l'unità prima dell'Occidente.":"The Chancellor governs with the liberals and a small national party; the Social Democratic opposition wants unity before the West.",
+  "Il KPD esce dal Bundestag nel 1953 e viene sciolto nel 1956: non è una carriera che si possa giocare":"The KPD leaves the Bundestag in 1953 and is banned in 1956: it is not a career you can play",
+  "Il Partito bavarese vive in un Land solo ed esce dal Bundestag nel 1953: non è una carriera che si possa giocare":"The Bavaria Party lives in a single state and leaves the Bundestag in 1953: it is not a career you can play",
+  "Elezioni del settembre 1953":"The September 1953 election",
+  "Il partito del Cancelliere sfiora la metà dei seggi. Entra in aula il partito dei profughi dall'Est, e con la soglia del cinque per cento comunisti e bavaresi restano fuori.":"The Chancellor's party comes close to half the seats. The party of the refugees from the East enters parliament, and with the five per cent threshold the communists and the Bavarians stay out.",
+  "Il partito comunista è sciolto":"The communist party is banned",
+  "La Corte costituzionale scioglie il partito comunista: i suoi voti restano senza casa.":"The Constitutional Court bans the communist party: its voters are left without a home.",
+  "La Saar torna":"The Saar returns",
+  "Dopo il referendum, la Saar entra nella Repubblica federale: un Land in più.":"After the referendum, the Saar joins the Federal Republic: one more state.",
+  "Elezioni del settembre 1957":"The September 1957 election",
+  "Per la prima volta un partito solo ha la maggioranza assoluta dei voti e dei seggi.":"For the first time a single party has an absolute majority of the votes and the seats.",
 };

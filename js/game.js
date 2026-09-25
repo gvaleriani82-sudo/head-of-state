@@ -192,7 +192,9 @@ const DRIFT_INFLAZIONE_ERA = {
                 {da:2002, inf:1.9}, {da:2003, inf:2.1}, {da:2004, inf:2.1}, {da:2005, inf:1.7}, {da:2006, inf:1.7},
                 {da:2007, inf:1.5}, {da:2008, inf:2.8}, {da:2009, inf:0.1}, {da:2010, inf:1.5}, {da:2011, inf:2.1},
                 {da:2012, inf:2.0}, {da:2013, inf:0.9},
-                {da:2014, inf:null} ]   // L105-3: chiusura — nel presente inflazioneAnno() torna a S.inflazione (il seme), come ciclo, disoccupazione e deficit
+                {da:2014, inf:null} ],   // L105-3: chiusura — nel presente inflazioneAnno() torna a S.inflazione (il seme), come ciclo, disoccupazione e deficit
+  /* L108-2 · la Germania del '50 (scheda PRESET-GERMANIA-1950 §2, ⚠ Destatis): prezzi fermi, salvo la fiammata della Corea nel 1951 */
+  [LINEA_DE]: [ {da:1950, inf:2}, {da:1951, inf:8}, {da:1952, inf:2} ]
 };
 function inflazioneAnno(){
   if(typeof S==='undefined' || !S) return 0;
@@ -331,6 +333,7 @@ function initStatoBase(){
   S.riallineamenti={};   // AVANZAMENTO — registro one-shot delle tappe-partiti già scattate (dato puro, round-trip; separato da truffaFatta)
   S.tappaSeggiEsito={};  // L61-2 - registro per-tappa dei seggi dichiarati: applicata | saltata (dato puro, round-trip)
   S.tappaForzaPrec=null;   // L61-4 - forza del partito del giocatore all ultima tappa: e il riferimento della traiettoria (dato puro)
+  S.rientroCostruttivo=null;     // L108-1 - {membri, turno}: dalla sfiducia costruttiva alla nomina dei ministri (vive un solo passaggio)
   S.ancoraTappa={};        // L106-3 - somma dei delta di tappa MARCATI (ancora:true) per partito: spostano l'àncora della molla (dato puro)
   S.territoriDelta={entra:[]};   // L107-3 - i territori entrati a una tappa (registro, riapplicato in applySnap come S.rosterDelta)
   S.capitaleSede=null;           // L107-3 - la capitale cambiata a una tappa (Bonn → Berlino). ⚠ S.capitale è il capitale POLITICO del livello 2
@@ -1172,6 +1175,19 @@ const LINEE_STORICHE = {
       { tag:'fr2000', da:1999,      coda:2013     },
       { tag:'contemporanea', da:2012, coda:Infinity }
     ]
+  },
+  /* L108-2 · LA QUARTA LINEA, la Germania. Stessa forma delle altre: una linea nuova non chiede una riga di motore, solo i
+     suoi decenni. Oggi c'è la porta del '50 senza contenuto (arriva con la scheda); gli altri tag sono la struttura. */
+  [LINEA_DE]: {
+    decenni: [
+      { tag:'de1950', da:-Infinity, coda:1961     },
+      { tag:'de1960', da:1959,      coda:1971     },
+      { tag:'de1970', da:1969,      coda:1981     },
+      { tag:'de1980', da:1979,      coda:1991     },
+      { tag:'de1990', da:1989,      coda:2001     },
+      { tag:'de2000', da:1999,      coda:2013     },
+      { tag:'contemporanea', da:2012, coda:Infinity }
+    ]
   }
 };
 /* La carta E è viva? def = default del tag mancante ('contemporanea' per eraViva, 'universale' per eraVivaT).
@@ -1372,7 +1388,12 @@ const DRIFT_ECONOMICO_ERA = {
                    11 2,2 · 12 0,1 · 13 0,4 (bersaglio ±0,33). Il 2000 (3,5 contro 3,9) è la riga di fr1990 e non si tocca. */
                 {da:2002, ciclo:-0.9}, {da:2003, ciclo:-1.7}, {da:2004, ciclo:1.8}, {da:2005, ciclo:-0.3}, {da:2006, ciclo:1.4},
                 {da:2007, ciclo:0.9}, {da:2008, ciclo:-1.7}, {da:2009, ciclo:-4.9}, {da:2010, ciclo:0.9}, {da:2011, ciclo:0.7},
-                {da:2012, ciclo:-1.7}, {da:2013, ciclo:-0.4}, {da:2014, ciclo:0} ]   // 2014 = chiusura: nel presente il ciclo della linea non vale più
+                {da:2012, ciclo:-1.7}, {da:2013, ciclo:-0.4}, {da:2014, ciclo:0} ],   // 2014 = chiusura: nel presente il ciclo della linea non vale più
+  /* L108-2 · la Germania del miracolo (scheda PRESET-GERMANIA-1950 §2: 1950 ~10, 1955 ~12, 1958 ~4, media 8). ⚠ IL TETTO DEL MOTORE:
+     computeGrowth taglia la crescita a 5 (clamp(g,-6,5), per tutti i paesi), e col seme 8 la crescita di fondo è ~9,5: il miracolo
+     si rende come 5 fisso e la sweep (misura-de1950-struttura.js sweep ciclo) non trova niente da muovere. L'unico bersaglio
+     sotto il tetto è la frenata del 1958: −5,5 la porta a ~4. Alzare il tetto è una decisione di motore (Cowork). */
+  [LINEA_DE]: [ {da:1950, ciclo:0}, {da:1958, ciclo:-5.5}, {da:1959, ciclo:0} ]
 };
 /* L60-2 · LA DISOCCUPAZIONE D'EPOCA. Il motore non aveva un posto dove un decennio potesse dire «qui i senza
    lavoro sono il doppio»: `S.uMod` decade dell'80% al mese e le carte danno solo colpi. Stessa forma di cicloBase():
@@ -1416,7 +1437,12 @@ const DRIFT_DISOCCUPAZIONE_ERA = {
                 /* L75-1 · '90: da ~7% (1990) a ~10,5% (1993) e giù a ~6% (1999) */
                 {da:1990, un:0}, {da:1991, un:2}, {da:1992, un:3.5}, {da:1994, un:2.5}, {da:1995, un:1.5}, {da:1997, un:0.5},
                 /* L77-1 · 2000: disoccupazione bassa e stabile fino al 2008 (~5%), poi la crisi la porta verso l'8% */
-                {da:1999, un:0}, {da:2008, un:0.5}, {da:2009, un:1}, {da:2012, un:0.5} ]
+                {da:1999, un:0}, {da:2008, un:0.5}, {da:2009, un:1}, {da:2012, un:0.5} ],
+  /* L108-2 · la Germania del '50 (scheda §2: 11 → 8 → 4 → 2,5 → 1,3), CERCATA con la sweep (misura-de1950-struttura.js sweep un, CDU, 5 semi,
+     luglio): resa 50 10,7 · 53 7,9 · 56 4,0 · 58 3,1 · 59-61 3,0. ⚠ Il pavimento 3 di computeUnemp taglia gli ultimi anni (bersaglio 2,5 e 1,3):
+     dichiarato, come la Francia del '60. */
+  [LINEA_DE]: [ {da:1950, un:0.25}, {da:1951, un:0}, {da:1952, un:-2.25}, {da:1953, un:-2.75}, {da:1954, un:-4.5}, {da:1955, un:-5.5},
+                {da:1956, un:-7.25}, {da:1957, un:-6}, {da:1958, un:-6.5} ]
 };
 function disoccupazioneEra(){
   if(typeof S==='undefined' || !S) return 0;
@@ -1884,6 +1910,38 @@ const RIALLINEAMENTI_ERA = {
                 delta:[ {id:'fr_sfio',delta:4.7}, {id:'fr_unr',delta:-13.3}, {id:'fr_ri',delta:-6.7}, {id:'fr_pcf',delta:2.8}, {id:'fr_verts',delta:2.3}, {id:'fr_fn',delta:10.2} ],   // Σ=0
                 urne:  { fr_unr:31.2, fr_sfio:31.0, fr_fn:13.6, fr_pcf:6.9, fr_verts:5.5, fr_ri:1.8 },
                 seggi: { fr_sfio:53.9, fr_verts:3.1, fr_pcf:2.6, fr_unr:39.7, fr_ri:0.2, fr_fn:0.5 } }
+  },
+  /* ============================================================================================================
+     L108-2 · LE TAPPE DELLA LINEA TEDESCA, il decennio '50 (scheda PRESET-GERMANIA-1950 §1). Voti e seggi **confermati sul
+     sito della Commissione elettorale federale** (bundeswahlleiterin.de, 25/9/2026); seggi senza i delegati di Berlino Ovest.
+     Delta = voti della tappa rinormalizzati sul roster di quel momento, meno quelli della tappa prima (Σ 0 con chi entra).
+     · 1953/9: CDU 36,4 + CSU 8,8 · SPD 28,8 · FDP 9,5 · GB/BHE 5,9 · DP 3,3 · KPD 2,2 · BP 1,7 → sui sette 46,8 · 29,8 · 9,8 ·
+       6,1 · 3,4 · 2,3 · 1,8. Entra il BHE (i profughi dall'Est). Seggi 487: CDU/CSU 243 + Zentrum 3 (per affinità, D della
+       scheda) · SPD 151 · FDP 48 · BHE 27 · DP 15. Con lo sbarramento KPD e BP restano fuori.
+     · 1956/8: la Corte costituzionale scioglie il KPD. `esce` SENZA `confluisce_in`: è ammessa (la forza si perde e il
+       motore la ridistribuisce al mese dopo). ⚠ Due effetti da sapere, entrambi del motore e non di questa tappa: i
+       territori del partito uscito passano al partito del GIOCATORE (`t.partito = dest || S.partito`), e un roster che
+       cambia fa ricalcolare TUTTI i seggi dalle forze (applicaRosterDelta). Per questo la tappa dichiara di nuovo i seggi
+       del 1953 (il Bundestag non cambia), con un delta a zero: senza delta la tappa esce prima di leggere i seggi.
+     · 1957/1: la Saar entra (1° gennaio 1957, dopo il referendum del 1955) — il primo uso vero di `territori:{entra}` (L107-3).
+     · 1957/9: CDU 39,7 + CSU 10,5 · SPD 31,8 · FDP 7,7 · BHE 4,6 · DP 3,4 · BP 0,9 (nella Föderalistische Union) → sui sei
+       50,9 · 32,2 · 7,8 · 4,7 · 3,4 · 0,9. Seggi 497: CDU/CSU 270 · SPD 169 · FDP 41 · DP 17 — l'unica maggioranza assoluta.
+     ============================================================================================================ */
+  [LINEA_DE]: {
+    '1953/9': { entra:[ { id:'de_bhe', nome:'BHE', orientamento:'destra', base:{ pensionati:0.5, lavoratori:0.3, cetomedio:0.2 },
+                          forza:6.1, asse:1, alleati:['de_cdu','de_fdp','de_dp','de_bp'] } ],
+                delta:[ {id:'de_cdu',delta:10.7}, {id:'de_spd',delta:-4.1}, {id:'de_fdp',delta:-4.0}, {id:'de_kpd',delta:-4.4},
+                        {id:'de_bp',delta:-3.1}, {id:'de_dp',delta:-1.2} ],   // Σ −6,1 = la forza del BHE che entra
+                urne:  { de_cdu:45.2, de_spd:28.8, de_fdp:9.5, de_bhe:5.9, de_dp:3.3, de_kpd:2.2, de_bp:1.7 },
+                seggi: { de_cdu:50.5, de_spd:31.0, de_fdp:9.9, de_bhe:5.5, de_dp:3.1, de_kpd:0, de_bp:0 } },
+    '1956/8': { esce:[ { id:'de_kpd' } ],
+                delta:[ {id:'de_cdu',delta:0} ],   // a zero apposta: vedi sopra
+                seggi: { de_cdu:50.5, de_spd:31.0, de_fdp:9.9, de_bhe:5.5, de_dp:3.1, de_bp:0 } },
+    '1957/1': { territori:{ entra:[ { nome:'la Saar', nomeEn:'Saarland', tipo:'regione', carica:'Ministro presidente', lean:1, area:MAPPA_DE_LAND.aree.saar } ] } },
+    '1957/9': { delta:[ {id:'de_cdu',delta:3.0}, {id:'de_spd',delta:1.7}, {id:'de_fdp',delta:-2.2}, {id:'de_bhe',delta:-1.6},
+                        {id:'de_dp',delta:0}, {id:'de_bp',delta:-0.9} ],   // Σ 0
+                urne:  { de_cdu:50.2, de_spd:31.8, de_fdp:7.7, de_bhe:4.6, de_dp:3.4, de_bp:0.9 },
+                seggi: { de_cdu:54.3, de_spd:34.0, de_fdp:8.3, de_dp:3.4, de_bhe:0, de_bp:0 } }
   }
 };
 /* L101-1 · D17 · DI CHI È L'ELISEO. Una funzione sola, letta dalle tappe condizionate del 1981 e del 1988: la
@@ -2359,6 +2417,11 @@ function riallineamentoTappa(){
     else if(S.era===LINEA_FR && S.year===2007) S.log.unshift({t:T('Elezioni del giugno 2007'), x:T('Il Presidente appena eletto ha la sua maggioranza; il centro che non si è schierato resta con quattro deputati.')});   // L105-2
     else if(S.era===LINEA_FR && S.year===2012) S.log.unshift({t:T('Elezioni del giugno 2012'), x:T('Dopo l\'Eliseo la sinistra prende anche l\'Assemblea, e da sola: i socialisti hanno la maggioranza assoluta.')});   // L105-2
     else if(S.era===LINEA_FR && S.year===1978) S.log.unshift({t:T('Elezioni del marzo 1978'), x:T('La destra vince contro tutti i sondaggi: la sinistra divisa perde, e i centristi si ritrovano in una confederazione sola.')});
+    /* L108-2 · le tappe tedesche del '50, filtrate per linea come vuole L77-1 (due nel 1957: il mese le distingue) */
+    else if(S.era===LINEA_DE && S.year===1953) S.log.unshift({t:T('Elezioni del settembre 1953'), x:T('Il partito del Cancelliere sfiora la metà dei seggi. Entra in aula il partito dei profughi dall\'Est, e con la soglia del cinque per cento comunisti e bavaresi restano fuori.')});
+    else if(S.era===LINEA_DE && S.year===1956) S.log.unshift({t:T('Il partito comunista è sciolto'), x:T('La Corte costituzionale scioglie il partito comunista: i suoi voti restano senza casa.')});
+    else if(S.era===LINEA_DE && S.year===1957 && S.month<=6) S.log.unshift({t:T('La Saar torna'), x:T('Dopo il referendum, la Saar entra nella Repubblica federale: un Land in più.')});
+    else if(S.era===LINEA_DE && S.year===1957) S.log.unshift({t:T('Elezioni del settembre 1957'), x:T('Per la prima volta un partito solo ha la maggioranza assoluta dei voti e dei seggi.')});
     else if(S.era===LINEA_IT && S.year===2008) S.log.unshift({t:T('Elezioni 2008'), x:T('Due partiti grandi nati da altrettante fusioni si prendono quasi tutto, e per la prima volta dal dopoguerra la sinistra radicale resta fuori dall\'aula.')});
   }
   /* ⚑ L77-1 — OGNI NOTA-TAPPA E' FILTRATA PER LINEA. Tredici note italiane erano scritte if(S.year===N) senza dire
@@ -2499,6 +2562,22 @@ let COABITAZIONE_LOGORIO_K = 0.25;   // let: idem
    medio del blocco) — non del partito che lo ha raccolto: prima, sulla tappa rovesciata del '78, usciva il PCF.
    Ritorna {seggi, capofila, membri}. */
 function coppiaCompatibile(a, b){ return staColBlocco(a, b) && staColBlocco(b, a); }
+/* L108-1 · la cricca che contiene il MIO partito, fra chi non sta nel governo avversario (dall'opposizione S.coalizione è la
+   sua). Stessa regola di bloccoAvverso: tutti compatibili con tutti, seggi > 0, i sottoinsiemi provati tutti. */
+function criccaMia(){
+  if(typeof S==='undefined' || !S || !S.seggi || !PAESE || !PAESE.partiti) return {seggi:0, membri:[]};
+  var mio=S.partito, gov=S.coalizione||[];
+  var fuori=PAESE.partiti.filter(function(p){ return p.id!==mio && gov.indexOf(p.id)<0 && (S.seggi[p.id]||0)>0 && coppiaCompatibile(p.id, mio); }).map(function(p){ return p.id; });
+  var best={seggi:S.seggi[mio]||0, membri:[mio]}, n=fuori.length;
+  for(var m=1; m<(1<<n); m++){
+    var membri=[mio]; for(var k=0;k<n;k++) if(m&(1<<k)) membri.push(fuori[k]);
+    var ok=true; for(var x=1;x<membri.length && ok;x++) for(var y=x+1;y<membri.length;y++){ if(!coppiaCompatibile(membri[x], membri[y])){ ok=false; break; } }
+    if(!ok) continue;
+    var tot=membri.reduce(function(s,id){ return s+(S.seggi[id]||0); },0);
+    if(tot>best.seggi) best={seggi:tot, membri:membri};
+  }
+  return best;
+}
 function bloccoAvverso(){
   if(typeof S==='undefined' || !S || !S.seggi || !PAESE || !PAESE.partiti) return {seggi:0, capofila:null, membri:[]};
   var mio=S.partito, coal=S.coalizione||[mio];
@@ -5819,7 +5898,19 @@ function avanzaMese(){
     /* L90-2 — LA SECONDA STRADA PER L'URNA, e questa non aspetta la scadenza. Se il governo avversario perde i
        numeri, la stessa mozione di sfiducia che può cadere sulla tua testa può cadere sulla sua. È il gemello
        esatto della riga del ramo di governo, quaranta righe più sotto. */
-    if(PAESE.cadutaGoverno && bloccoSeggi()<50 && Math.random()<probSfiduciaAvversario()){
+    /* L108-1 · LA SFIDUCIA COSTRUTTIVA VISTA DALL'OPPOSIZIONE (il 1982 dalla parte della CDU). Sotto il campo il governo
+       avversario non cade a sorte: cade SOLO se esiste una cricca ≥ 50 che contiene il TUO partito (criccaMia, la stessa
+       bloccoAvverso vista dall'altra parte), e allora entri al governo SENZA URNE con quella cricca — la nomina dei
+       ministri, poi tornaAlGoverno senza nextMandate: la legislatura continua. Senza cricca, nessuna caduta. */
+    if(PAESE.sfiduciaCostruttiva && PAESE.cadutaGoverno){
+      if(bloccoSeggi()<50){ var cm=criccaMia();
+        if(cm.seggi>=50){
+          S.rientroCostruttivo={ membri:cm.membri.slice(), turno:S.turnInMandate };
+          S.log.unshift({t:T('Sfiducia costruttiva'), x:T('%P elegge un nuovo Cancelliere: il governo cambia senza elezioni.').replace('%P', T((part(S.partito)||{}).nome||''))});
+          goAppoint(); return;
+        } }
+    }
+    else if(PAESE.cadutaGoverno && bloccoSeggi()<50 && Math.random()<probSfiduciaAvversario()){
       if(PAESE.sistema==='semipresidenziale' || PAESE.crisiMinisteriale){   // L93-4: nella IV Repubblica anche il governo avversario cade senza urne
         /* L80-5, simmetrico: cade il governo, non il Presidente — e il Presidente lì è l'avversario. Nessuna
            urna, ma il prezzo lo paga lui: la stessa pena di L80-7, sul SUO accumulatore. */
@@ -6887,6 +6978,22 @@ function condannaLieve(){
 /* Torna al governo (dopo la nomina dei ministri dall'opposizione): nessuno strascico dall'era avversaria. */
 function tornaAlGoverno(mins){
   S.ministers=mins; S.opposizione=false; S.governoAvversario=null;
+  /* L108-1 · il rientro della sfiducia costruttiva: niente urne, niente mandato nuovo. Il governo è la cricca che ha eletto
+     il Cancelliere, e la legislatura è quella dell'avversario caduto (turnInMandate conservato). */
+  if(S.rientroCostruttivo){
+    var RC=S.rientroCostruttivo; S.rientroCostruttivo=null;
+    S.coalizione=RC.membri.slice(); S.turnInMandate=RC.turno;
+    S.caduteMandato=0; S.logorioAvv=0; S.mesiMinoranzaAvv=0; S.mesiGovernoAvv=0; S.sostegnoAvv=null;
+    S.mesiSottoCrisi=0; S.fidLivello=0; S.fidUltimo={}; S.snap=Object.assign({},S.pol); S.leggiSnap=Object.assign({},S.leggi);
+    S.minoranza = PAESE.coalizione ? seggiCoalizione(S.coalizione,S.seggi)<50 : false; S.mesiMinoranza=0; S.elezioniAnticipate=false;
+    initTenuta(); S.bloccoAtteso=bloccoQuota();
+    bioFatto(T('Il governo torna suo senza elezioni, con la sfiducia costruttiva.'));
+    S.log.unshift({t:T('Al governo'), x:T('Il Parlamento ti elegge: torni a guidare il paese senza passare dalle urne.')});
+    document.getElementById('appoint').style.display='none';
+    document.getElementById('game').style.display='block';
+    genAgenda(false); generaTitolo(); render(); commitSnap();
+    return;
+  }
   /* L96-3 · LA COALIZIONE TORNA TUA. `entraOpposizione` scrive in `S.coalizione` quella di chi governa; nei paesi
      CON coalizione la riscrive la trattativa del rinnovo, e nel parlamentare senza coalizione (Regno Unito) la rimette
      `concludiNotte` al momento dell'esito. Ma nei paesi a CANDIDATO senza coalizione (USA, Corea, Nigeria) la rimonta
@@ -7240,6 +7347,7 @@ function applySnap(snap){
   if(S.riallineamenti===undefined) S.riallineamenti={};   // AVANZAMENTO — migrazione: i salvataggi pre-lotto ricevono il registro-tappe vuoto
   if(S.tappaSeggiEsito===undefined) S.tappaSeggiEsito={};   // L61-2 - migrazione: i salvataggi precedenti ricevono il registro vuoto
   if(S.tappaForzaPrec===undefined) S.tappaForzaPrec=null;
+  if(S.rientroCostruttivo===undefined) S.rientroCostruttivo=null;   // L108-1
   if(S.ancoraTappa===undefined) S.ancoraTappa={};   // L106-3: i salvataggi di prima non hanno tappe marcate applicate (salvo fr2000 dopo il 2002: vedi l'archivio)
    // L61-4 - migrazione
   if(S.apertura===undefined){ S.apertura=null; S.aperturaEsito=null; S.enel=null; }   // AVANZAMENTO Lotto 4 — migrazione snodi '60
