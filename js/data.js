@@ -1385,6 +1385,59 @@ const SCENARI = {
     ],
   },
   /* ============================================================================================================
+     L105-2 · FRANCIA 2000 — la sesta e ultima porta della linea francese (scheda PRESET-FRANCIA-2000 §0-§2).
+     Semipresidenziale come fr1990, ma col QUINQUENNATO: `mandatoMesi:60`. ⚑ D29 · `turnMandato:3` è un ESPEDIENTE
+     DI CONTEGGIO, non una storia: il mandato in corso nel 2000 è il settennato del 1995, ma sul mandato a 60 mesi
+     tre anni già passati mettono l'urna del motore al gennaio 2002 (poi 2007 e 2012), che è quel che serve.
+     L'Assemblea d'avvio è quella del 1997 (come la lascia fr1990) e il Presidente della baseline è di destra (RPR):
+     la porta PARTE IN COABITAZIONE, derivata all'avvio (L104-2), e la tappa del giugno 2002 la spegne.
+     Le forze sono le urne del 1997 rinormalizzate sul roster (PS+PRS 25,0 · RPR 15,7 · UDF 14,2 · PCF 9,9 · FN 14,9 ·
+     Verdi 6,8 → 28,9 · 18,1 · 16,4 · 11,5 · 17,2 · 7,9), le stesse della tappa 1997/6.
+     ⚠ LE INTERMEDIE SONO VUOTE, dichiarato. `intermediaA` si aggancia al mese del mandato e i mandati qui partono dal
+     gennaio 1997, 2002, 2007 e 2012: ogni mese candidato della scheda §H.4 cade anche in un anno in cui non si vota —
+     marzo del 2° anno (2008 sì, 2003 e 2013 no), del 3° (2004 e 2014 sì, 2009 no), del 4° (2010 e 2015 sì, 2000 e 2005
+     no), del 5° (2001 e 2011 sì, 2006 no). La regola di fr1990: meglio un voto locale in meno che uno inventato.
+     ⚠ La porta chiude col 2013 e si SALDA COL PRESENTE (`contemporanea` dal 2012, LINEE_STORICHE): chi arriva in fondo
+     entra nel gioco di oggi col roster della porta com'è (D32).
+     ============================================================================================================ */
+  fr2000: {
+    id:'fr2000', era:LINEA_FR, nome:'Francia 2000', anno:2000, paese:'francia',
+    turnMandato: 3,                             // D29: sul mandato a 60 mesi l'urna del motore cade al gennaio 2002 (poi 2007, 2012)
+    sistema: 'semipresidenziale', comeSiVince: 'candidato', coalizione: true, cadutaGoverno: true,
+    mandatoMesi: 60, mandatiMax: null,
+    titoloRuolo: 'Presidente della Repubblica', sedeGoverno: "l'Eliseo",
+    scioglimentoMesiMin: 12,
+    ue: true,
+    intermedie: [],
+    partiti: [
+      { id:'fr_unr',   nome:'RPR',  orientamento:'destra',          base:{ cetomedio:0.4, pensionati:0.3, cattolici:0.3 },       forza:18.1, asse:1,  alleati:['fr_ri'] },
+      { id:'fr_ri',    nome:'UDF',  orientamento:'centrodestra',    base:{ imprenditori:0.4, cetomedio:0.4, pensionati:0.2 },    forza:16.4, asse:1,  alleati:['fr_unr'] },
+      { id:'fr_sfio',  nome:'PS',   orientamento:'centrosinistra',  base:{ lavoratori:0.5, cetomedio:0.3, giovani:0.2 },         forza:28.9, asse:-1, alleati:['fr_pcf','fr_verts'] },
+      { id:'fr_pcf',   nome:'PCF',  orientamento:'sinistra',        base:{ lavoratori:0.7, giovani:0.3 },                        forza:11.5, asse:-2, alleati:['fr_sfio','fr_verts'] },
+      { id:'fr_verts', nome:'Verdi', orientamento:'ecologista',     base:{ giovani:0.5, cetomedio:0.5 },                         forza:7.9,  asse:-1, alleati:['fr_sfio','fr_pcf'],
+        selezionabile:false, nota:'I Verdi hanno sette deputati e governano col PS: non è una carriera che si possa giocare' },
+      { id:'fr_fn',    nome:'Front national', orientamento:'destra populista', base:{ lavoratori:0.4, cetomedio:0.3, pensionati:0.3 }, forza:17.2, asse:2, alleati:[],
+        selezionabile:false, nota:'Il Front national ha un deputato e nessun alleato: non è una carriera che si possa giocare' },
+    ],
+    /* l'Assemblea del giugno 1997, come la lascia la tappa 1997/6 di fr1990 */
+    seggi: { fr_sfio:49.2, fr_pcf:6.2, fr_verts:1.2, fr_unr:24.6, fr_ri:19.8, fr_fn:0.2 },
+    /* ⚠ cifre INSEE/Eurostat di memoria, ordine di grandezza (scheda §2, CIFRE-ECONOMICHE.md). In franchi fino al 2001:
+       il changeover del gennaio 2002 (CHANGEOVER, game.js) converte il PIL e passa all'euro. */
+    economia: { pil:9450, debito:58, deficit:-1.5, inflazione:1.7, inflazioneTetto:5, crescita:1.5, disoccupazione:9 },
+    debtAncora: 58,
+    inflazione: 1.7,   // l'anno per anno sta in DRIFT_INFLAZIONE_ERA (2002-2013)
+    crescita: 1.5,     // la media del decennio; il 2000, il 2009 e la ripresa stanno nel drift
+    logorioEra: 0.012,
+    valuta: { sym:'F', mld:'mld franchi', mln:'mln franchi' },
+    quotaSpesa: 0.52,                           // ⚠ la scheda non la dà: ~52% è l'ordine della spesa francese degli anni 2000. Da confermare.
+    intro: "Francia, 2000. Il Presidente è di destra, il governo è di sinistra, e fra due anni si voteranno tutti e due: la coabitazione ha i giorni contati.",
+    contesto: [
+      "Francia, 2000. Da tre anni il Presidente convive con un Primo ministro dell'altro blocco: l'Assemblea sciolta nel 1997 gli ha dato torto.",
+      "Il franco ha ancora due anni di vita: dal gennaio 2002 nelle tasche ci sarà l'euro. La disoccupazione scende, le trentacinque ore arrivano nelle fabbriche.",
+      "Il mandato presidenziale è appena stato accorciato a cinque anni: dal 2002 le due urne, quella dell'Eliseo e quella dell'Assemblea, cadranno a un mese di distanza.",
+    ],
+  },
+  /* ============================================================================================================
      L44-3 · ITALIA 2000 — la settima e ultima porta. Stessa LINEA; il roster è quello uscito dalla frana del '94
      (PPI, PDS, AN, Rifondazione, Lega, FI, CCD e i laici superstiti), anno d'avvio 2000.
 
@@ -2255,6 +2308,17 @@ const PILASTRI_LINEA = [
     t:'Il supersonico cade',
     text:'Il 25 luglio, un minuto dopo il decollo da Parigi, il supersonico prende fuoco a un\'ala e cade su un albergo alla periferia: centotredici morti, quasi tutti passeggeri tedeschi diretti a una crociera. Una lamina di metallo persa da un altro aereo sulla pista, una gomma esplosa, il serbatoio. L\'aereo più bello del mondo non volerà più a lungo.',
     logx:'Il supersonico cade dopo il decollo: centotredici morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  /* L105-4 · i due pilastri di linea del 2000 (scheda §I-H, byte-identici): la canicola dell'agosto 2003 e il volo del giugno 2009. */
+  { id:'pfr00_canicola', linea:LINEA_FR, anno:2003, mese:8, era:'fr2000', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'La canicola',
+    text:'Due settimane d\'agosto sopra i quaranta gradi, le notti che non rinfrescano, le città di pietra che trattengono il caldo. Muoiono quasi quindicimila persone, quasi tutte anziane, molte sole negli appartamenti di città svuotate dalle vacanze; le camere mortuarie non bastano, e a Parigi si usano i magazzini frigoriferi dei mercati generali. Il governo torna dalle ferie quando il conto è già fatto.',
+    logx:'Due settimane di caldo: quasi quindicimila morti, quasi tutti anziani e soli.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pfr00_atlantico', linea:LINEA_FR, anno:2009, mese:6, era:'fr2000', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Il volo nell\'Atlantico',
+    text:'Nella notte del primo giugno l\'aereo di linea partito da Rio per Parigi scompare dai radar in mezzo all\'oceano, dentro una tempesta. Duecentoventotto persone a bordo, nessun superstite. Le scatole nere verranno ritrovate due anni dopo, a quattromila metri di profondità: i sensori della velocità ghiacciati, e un equipaggio che non ha capito che cosa stava succedendo.',
+    logx:'Il volo Rio-Parigi scompare nell\'Atlantico: duecentoventotto morti.',
     ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
 ];
 
@@ -3310,11 +3374,24 @@ const BEAT_LEGGERI = [
   {id:'lgfr90_euro', era:'fr1990', registro:'leggero', cond:()=>S.year===1999&&S.month<=6, kick:'Il paese', t:'L\'euro virtuale', text:'Dal primo gennaio esiste una moneta che nessuno ha in tasca: sui conti, sulle bollette, nei bilanci. Le banconote fra tre anni. Sei franchi e cinquantasei.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
   {id:'lgfr90_telefonino', era:'fr1990', registro:'leggero', cond:()=>S.year>=1997, kick:'Il paese', t:'Il telefono in tasca', text:'In tre anni da uno su venti a uno su due: si telefona dal treno, dal ristorante, dalla sala d\'attesa. Il vicino di posto sa tutto di te.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
   {id:'lgfr90_rete', era:'fr1990', registro:'leggero', cond:()=>S.year>=1998, kick:'Il paese', t:'La rete', text:'Il modem che canta, la connessione che cade, e un mondo di pagine che nessuno controlla. Il terminale grigio accanto al telefono comincia a sembrare vecchio.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
-  {id:'lgfr90_rave', era:'fr1990', registro:'leggero', cond:()=>S.year>=1995, kick:'Il paese', t:'La musica nei capannoni', text:'Feste di una notte in un capannone abbandonato, la musica elettronica, i ragazzi che arrivano in mille da un numero di telefono. La gendarmeria cerca il capannone.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr90_rave', era:'fr1990', registro:'leggero', cond:()=>S.year>=1995&&S.year<=1999, kick:'Il paese', t:'La musica nei capannoni', text:'Feste di una notte in un capannone abbandonato, la musica elettronica, i ragazzi che arrivano in mille da un numero di telefono. La gendarmeria cerca il capannone.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
   {id:'lgfr90_biblioteca', era:'fr1990', registro:'leggero', cond:()=>S.year>=1996&&S.year<=1998, kick:'Il paese', t:'Le quattro torri', text:'La biblioteca nazionale nuova: quattro torri di vetro a forma di libro aperto, sulla riva della Senna. I libri, dicono, soffrono la luce.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
   {id:'lgfr90_tour', era:'fr1990', registro:'leggero', cond:()=>S.year===1998&&S.month>=7&&S.month<=8, kick:'Il paese', t:'Il Tour dei sospetti', text:'Un\'auto della squadra fermata alla frontiera piena di fiale, una squadra intera espulsa, i corridori che scendono di sella per protesta. Il Tour arriva a Parigi lo stesso, e nessuno guarda più allo stesso modo.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
   {id:'lgfr90_millennio', era:'fr1990', registro:'leggero', cond:()=>S.year===2000&&S.month<=2, kick:'Il paese', t:'Il baco', text:'Il primo gennaio 2000 gli aerei non sono caduti e gli ascensori funzionano: i miliardi spesi per il baco del millennio hanno funzionato, o non servivano. La torre ha fatto le scintille lo stesso.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
   {id:'lgfr90_sciopero', era:'fr1990', registro:'leggero', cond:()=>S.year===1995&&S.month===12, kick:'Il paese', t:'Il paese a piedi', text:'Tre settimane senza treni né metrò: si va al lavoro in bicicletta, in autostop, a piedi lungo la Senna. Le famiglie si scoprono vicine di casa.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  /* L105-4 · i beat leggeri del decennio francese 2000 (scheda §I-D): id e testi senza marchi. */
+  {id:'lgfr00_euro', era:'fr2000', registro:'leggero', cond:()=>S.year===2002&&S.month<=3, kick:'Il paese', t:'Le monete nuove', text:'Le cassiere con due cassetti, i prezzi scritti due volte, le calcolatrici tascabili sulla cassa. In tre settimane i franchi spariscono; il conto del caffè no.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr00_primomaggio', era:'fr2000', registro:'leggero', cond:()=>S.year===2002&&S.month>=4&&S.month<=5, kick:'Il paese', t:'Un milione il primo maggio', text:'Studenti, pensionati, famiglie intere dietro lo stesso striscione: mai visto un primo maggio così, e mai uno contro qualcuno invece che per qualcosa.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr00_reality', era:'fr2000', registro:'leggero', cond:()=>S.year>=2001&&S.year<=2004, kick:'Il paese', t:'La casa con le telecamere', text:'Undici ragazzi chiusi in un appartamento, ripresi giorno e notte, e mezzo paese che guarda la piscina. I sociologi scrivono libri, la rete fa ascolti record.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr00_radar', era:'fr2000', registro:'leggero', cond:()=>S.year>=2003, kick:'Il paese', t:'I radar sulle strade', text:'Scatole grigie sui cavalcavia, la foto e la multa a casa. In due anni i morti sulle strade calano di un terzo; gli automobilisti non ringraziano.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr00_testata', era:'fr2000', registro:'leggero', cond:()=>S.year===2006&&S.month>=7&&S.month<=8, kick:'Il paese', t:'La testata', text:'La finale del mondiale a Berlino, il capitano che esce per una testata a un difensore italiano, i rigori persi. Il paese discute per un\'estate di che cosa gli sia stato detto.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr00_bici', era:'fr2000', registro:'leggero', cond:()=>S.year>=2007, kick:'Il paese', t:'Le biciclette in comune', text:'Ventimila biciclette grigie in centinaia di stazioni a Parigi: si prende qui, si lascia là. In un anno ne rubano un terzo; gli altri due terzi cambiano la città.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr00_smartphone', era:'fr2000', registro:'leggero', cond:()=>S.year>=2009, kick:'Il paese', t:'Il telefono che sa tutto', text:'Uno schermo senza tasti che fa da mappa, da giornale, da televisione. Nel metrò nessuno guarda più nessuno.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr00_fumo', era:'fr2000', registro:'leggero', cond:()=>S.year===2008&&S.month<=3, kick:'Il paese', t:'Il bar senza fumo', text:'Dal primo gennaio non si fuma più nei bar e nei ristoranti. I titolari prevedono la fine del caffè francese; i clienti escono sul marciapiede e ci restano.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr00_giro', era:'fr2000', registro:'leggero', cond:()=>S.year>=2004&&S.year<=2008, kick:'Il paese', t:'Il campione del giro', text:'Sette maglie gialle di fila allo stesso americano: il Tour arriva a Parigi e il paese applaude, e si chiede come faccia. La risposta arriverà dopo.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr00_nuvola', era:'fr2000', registro:'leggero', cond:()=>S.year===2010&&S.month>=4&&S.month<=5, kick:'Il paese', t:'Il cielo chiuso', text:'Un vulcano islandese dal nome impronunciabile sputa cenere su mezza Europa: per sei giorni non vola nessun aereo. Le stazioni si riempiono come nel dopoguerra.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr00_londra', era:'fr2000', registro:'leggero', cond:()=>S.year===2005&&S.month>=6&&S.month<=8, kick:'Il paese', t:'I Giochi a Londra', text:'Il comitato olimpico sceglie Londra per quattro voti. Parigi aveva già preparato la festa sotto la torre; la festa è a Trafalgar Square.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr00_rete', era:'fr2000', registro:'leggero', cond:()=>S.year>=2008&&S.year<=2012, kick:'Il paese', t:'Gli amici in rete', text:'Tutti hanno una pagina, anche i nonni: le foto delle vacanze, i compleanni, i compagni di scuola ritrovati. I giornalisti la chiamano la piazza nuova.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
 ];
 
 /* ===== F1 — LA TELEFONATA. Un'interruzione, non una carta: overlay a squillo, due opzioni secche, decisione a
@@ -5519,6 +5596,17 @@ const DOSSIERS=[
    {l:'Tutti gli obiettivi militari, nessun ponte civile',e:'La storia · settantotto giorni di raid, i ponti restano · gli alleati accettano, e lo dicono',f:()=>{repd(3); gdFr90('giovani',-2); gdFr90('cetomedio',1);}},
    {l:'Tutto quello che chiede l\'Alleanza',e:'Nessuna riserva · qualche foto che non avresti voluto',f:()=>{repd(2); gdFr90('giovani',-4); stampad(-2);}},
    {l:'Niente raid senza l\'ONU',e:'Gli aerei restano a terra · l\'Alleanza fa senza di te, e si ricorda',f:()=>{repd(-5); gdFr90('giovani',2); gdFr90('cattolici',1);}}]},
+ /* L105-4 · i due dossier del decennio francese 2000 (scheda §I-F): difesa ed esteri, entrano anche in coabitazione. */
+ {id:'dfr00_afghanistan',era:'fr2000',cond:()=>S.year>=2002&&S.year<=2012,min:'difesa',kick:'La difesa',t:'L\'Afghanistan',
+  text:'I soldati francesi sono in Afghanistan dal 2001 con l\'Alleanza. Lo stato maggiore chiede rinforzi per la valle più difficile del paese; i sondaggi dicono che sei francesi su dieci vogliono il ritiro.',ch:[
+   {l:'I rinforzi',e:'Mille uomini in più · gli alleati ringraziano, e i caduti tornano con la bandiera',costo:{debito:0.5},f:()=>{S.ind.debt+=0.5; repd(3); gdFr00('giovani',-3); gdFr00('pensionati',-1);}},
+   {l:'Tieni il contingente com\'è',e:'Né un passo avanti né uno indietro · la valle resta agli altri',f:()=>{repd(0);}},
+   {l:'Il ritiro, anticipato',e:'I soldati a casa prima degli alleati · il paese applaude, l\'Alleanza prende nota',f:()=>{repd(-3); gdFr00('giovani',3);}}]},
+ {id:'dfr00_iraq',era:'fr2000',cond:()=>(S.year===2002&&S.month>=9)||(S.year===2003&&S.month<=3),min:'esteri',kick:'Il mondo',t:'L\'Iraq',
+  text:'Washington vuole una guerra contro l\'Iraq e chiede al Consiglio di sicurezza di autorizzarla. La Francia ha il veto. Il ministro degli esteri può parlare contro in aula davanti al mondo, o tacere.',ch:[
+   {l:'Il discorso contro la guerra, e la minaccia del veto',e:'La storia · l\'aula applaude, cosa che non fa mai · Washington non lo dimenticherà per anni',f:()=>{repd(2); gdFr00('giovani',4); gdFr00('cetomedio',2); gdFr00('imprenditori',-1);}},
+   {l:'Astensione',e:'La guerra si fa lo stesso, senza la tua voce · nessuno ti ricorda',f:()=>{repd(-1); gdFr00('giovani',-1);}},
+   {l:'Con Washington',e:'I soldati francesi a Baghdad · il paese non capisce perché',f:()=>{repd(3); gdFr00('giovani',-6); gdFr00('cetomedio',-3); stampad(-3);}}]},
  {id:'d50_marshall_dip',era:'italia1950',cond:()=>S.year<=1953,min:'esteri',kick:'Piano Marshall',t:'La dipendenza dagli aiuti',text:'Gli aiuti americani hanno rimesso in moto il paese, ma ora chiedono allineamento politico e commerciale. Fin dove seguire l\'alleato?',ch:[
    {l:'Allineamento pieno con l\'alleato',e:'Aiuti e protezione; la pancia mormora',pleases:'tecnico',f:()=>{repd(4); if(S.gMod!=null)S.gMod+=0.1; gd('cetomedio',-1);}},
    {l:'Amicizia sì, ma con margini nostri',e:'Autonomia rivendicata; l\'alleato prende nota',pleases:'populista',f:()=>{repd(-2); gd('cetomedio',2);}},
@@ -8046,6 +8134,69 @@ const EVENTS=[
    {l:'Un\'autorità unica per il tunnel, con l\'Italia',e:'La storia · una sola regia, una sola norma · il traforo riapre nel 2002, più sicuro e più caro',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; repd(2); gdFr90('cetomedio',2); gdFr90('imprenditori',1);}},
    {l:'Riapertura rapida, poi le norme',e:'Il traforo riapre in un anno · e i camion tornano come prima',f:()=>{gdFr90('imprenditori',3); gdFr90('giovani',-2); repd(-1);}},
    {l:'Chiusura ai camion, per sempre',e:'Solo auto sotto la montagna · i valligiani respirano, i camionisti bloccano le strade',f:()=>{gdFr90('giovani',3); gdFr90('imprenditori',-4); gdFr90('lavoratori',-2);}}]},
+ /* ---- L105-4 · IL DECENNIO FRANCESE 2000 (scheda PRESET-FRANCIA-2000 §I-C, copiata dalla scheda): dodici eventi. Le leggi del
+    governo (pensioni, contratto per i giovani, pacchetto, 62 anni, 75 per cento, matrimonio) hanno `&& !S.coabitazione`;
+    `fr00_apertura` è della destra, `fr00_75` della sinistra; il cond del matrimonio ha le parentesi giuste. ---- */
+ {id:'fr00_pensioni', era:'fr2000', cond:()=>S.year===2003&&S.month>=4&&S.month<=7&&!S.coabitazione, kick:'La previdenza', t:'Quarant\'anni per tutti',
+  text:'Il governo porta a quarant\'anni i contributi per tutti, statali compresi. Scioperi a maggio e giugno, gli insegnanti in piazza per settimane; questa volta i ferrovieri restano fuori.',ch:[
+   {l:'Tieni la riforma',e:'La storia · la riforma passa, le piazze si svuotano a luglio · gli insegnanti non votano più per te',f:()=>{gdFr00('imprenditori',3); gdFr00('lavoratori',-4); gdFr00('cetomedio',-2); fidFr00(3);}},
+   {l:'Esenti gli statali',e:'Le piazze si calmano · e i conti restano a metà',f:()=>{gdFr00('lavoratori',-1); fidFr00(1);}},
+   {l:'La ritiri',e:'Nessuno sciopero · e la previdenza aspetta un altro governo',f:()=>{gdFr00('lavoratori',3); gdFr00('imprenditori',-3); fidFr00(-3);}}]},
+ {id:'fr00_velo', era:'fr2000', cond:()=>S.year===2004&&S.month<=4, kick:'La scuola', t:'Il velo vietato per legge',
+  text:'Quindici anni dopo il liceo di Creil, una commissione propone la legge: niente segni religiosi vistosi a scuola. La proposta piace a sette francesi su dieci; nei quartieri la leggono come contro di loro.',ch:[
+   {l:'La legge',e:'La storia · la legge passa quasi all\'unanimità · il fuoco di Creil si spegne, un altro si accende',f:()=>{gdFr00('cetomedio',4); gdFr00('pensionati',2); gdFr00('giovani',-4); gdFr00('cattolici',-1);}},
+   {l:'Una circolare ai presidi',e:'Caso per caso, come prima · nessuno è contento, nessuno grida',f:()=>{gdFr00('cetomedio',-1); gdFr00('giovani',1);}},
+   {l:'Nessuna legge: la scuola è per tutti',e:'Le ragazze restano in classe · la laicità, dicono, è ferita',f:()=>{gdFr00('giovani',3); gdFr00('cetomedio',-5); gdFr00('pensionati',-3);}}]},
+ {id:'fr00_cpe', era:'fr2000', cond:()=>S.year===2006&&S.month>=2&&S.month<=5&&!S.coabitazione, kick:'Il lavoro', t:'Il contratto per i giovani',
+  text:'Un contratto per chi ha meno di ventisei anni, licenziabile senza motivo nei primi due anni: per dare lavoro, dice il governo. Un milione di studenti e sindacati in piazza, le università occupate, la Sorbona sgomberata.',ch:[
+   {l:'Lo ritiri',e:'La storia · la legge promulgata e ritirata nello stesso mese · i ragazzi hanno vinto, il governo ha perso la faccia',f:()=>{gdFr00('giovani',4); gdFr00('imprenditori',-2); baseFr00(-3); stampad(-2);}},
+   {l:'Tieni il contratto',e:'La legge resta · e la piazza non si svuota fino all\'estate',f:()=>{gdFr00('imprenditori',3); gdFr00('giovani',-8); gdFr00('lavoratori',-3); stampad(-3);}},
+   {l:'Lo riscrivi con i sindacati',e:'Un contratto diverso, sei mesi dopo · nessuno se lo ricorda',f:()=>{gdFr00('giovani',1); gdFr00('lavoratori',1);}}]},
+ {id:'fr00_apertura', era:'fr2000', cond:()=>S.year===2007&&S.month>=5&&S.month<=8&&!eliseoDiSinistra(), kick:'Il governo', t:'L\'apertura',
+  text:'Hai vinto, e puoi fare un governo solo dei tuoi. Oppure puoi chiamare qualche nome dell\'altro campo — un ex ministro degli esteri della sinistra, un fondatore di un\'associazione umanitaria — e far vedere che il paese è più largo della tua maggioranza.',ch:[
+   {l:'Chiami l\'altro campo',e:'La storia · quattro ministri di sinistra nel tuo governo · la sinistra li chiama traditori, i tuoi li guardano storto',f:()=>{gdFr00('cetomedio',2); gdFr00('giovani',2); baseFr00(-2); stampad(3);}},
+   {l:'Un governo dei tuoi',e:'Tutti fedeli · e tutti uguali',f:()=>{baseFr00(3); gdFr00('giovani',-1);}},
+   {l:'Tecnici al posto dei politici',e:'Competenti e sconosciuti · la stampa non sa di chi parlare',f:()=>{fidFr00(2); baseFr00(-1);}}]},
+ {id:'fr00_pacchetto', era:'fr2000', cond:()=>S.year===2007&&S.month>=6&&S.month<=10&&!S.coabitazione, kick:'L\'economia', t:'Lavorare di più per guadagnare di più',
+  text:'Le ore di straordinario senza tasse, il tetto alle imposte sui patrimoni, gli interessi dei mutui deducibili: il pacchetto della campagna. Quindici miliardi l\'anno, dicono i conti; lo shock di fiducia, dice il governo.',ch:[
+   {l:'Tutto il pacchetto',e:'La storia · gli straordinari detassati e lo scudo sui patrimoni · chi guadagna molto lo sa, chi guadagna poco lo sa anche lui',costo:{debito:1.5},f:()=>{S.ind.debt+=1.5; gdFr00('imprenditori',4); gdFr00('cetomedio',2); gdFr00('lavoratori',-2); gdFr00('giovani',-2);}},
+   {l:'Solo gli straordinari',e:'Il pezzo che piace a tutti · il resto aspetta',costo:{debito:0.5},f:()=>{S.ind.debt+=0.5; gdFr00('lavoratori',2); gdFr00('cetomedio',1);}},
+   {l:'Niente: prima i conti',e:'Il debito ringrazia · gli elettori della campagna no',f:()=>{fidFr00(2); baseFr00(-3); gdFr00('imprenditori',-2);}}]},
+ {id:'fr00_nato', era:'fr2000', cond:()=>S.year===2009&&S.month<=6, kick:'La difesa', t:'Il ritorno nel comando',
+  text:'Quarantatré anni dopo l\'uscita del generale, lo stato maggiore dice che il paese partecipa già a tutto tranne che alle decisioni. Rientrare nel comando integrato costa un simbolo e porta due comandi alleati.',ch:[
+   {l:'Rientri',e:'La storia · due comandi alleati a ufficiali francesi · i gollisti di tutti i campi protestano per una settimana',f:()=>{repd(4); gdFr00('pensionati',-2); baseFr00(-1);}},
+   {l:'Resti fuori, come il generale',e:'La linea di sempre · gli alleati alzano le spalle',f:()=>{repd(-1); gdFr00('pensionati',2);}},
+   {l:'Rientri a metà: solo i comitati tecnici',e:'Un passo, non due · nessuno se ne accorge',f:()=>{repd(1);}}]},
+ {id:'fr00_62', era:'fr2000', cond:()=>S.year===2010&&S.month>=6&&S.month<=11&&!S.coabitazione, kick:'La previdenza', t:'Sessantadue anni',
+  text:'L\'età della pensione da sessanta a sessantadue: il governo dice che senza non si pagano più le pensioni del 2020. Otto giornate di sciopero in autunno, le raffinerie bloccate, i distributori a secco.',ch:[
+   {l:'Tieni i sessantadue',e:'La storia · la legge passa a novembre · le piazze si svuotano, i sondaggi no',f:()=>{gdFr00('imprenditori',3); gdFr00('lavoratori',-5); gdFr00('pensionati',-3); fidFr00(3);}},
+   {l:'Sessantuno, e i lavori usuranti fuori',e:'Mezzo passo · i sindacati trattano, i mercati sbuffano',f:()=>{gdFr00('lavoratori',-1); fidFr00(1);}},
+   {l:'Resta a sessanta',e:'Nessuno sciopero · e il conto per chi viene dopo',f:()=>{gdFr00('lavoratori',3); gdFr00('pensionati',2); fidFr00(-4);}}]},
+ {id:'fr00_libia', era:'fr2000', cond:()=>S.year===2011&&S.month>=2&&S.month<=5, tono:'grave', kick:'La difesa', t:'La Libia',
+  text:'Il colonnello promette di stanare i ribelli di Bengasi casa per casa. L\'ONU autorizza una zona d\'interdizione al volo; la Francia può essere la prima a far decollare gli aerei, o aspettare gli alleati.',ch:[
+   {l:'I primi aerei sono i nostri',e:'La storia · la colonna di carri fermata alle porte di Bengasi · il paese conta, e poi dovrà occuparsi di quello che viene dopo',costo:{debito:0.5},f:()=>{S.ind.debt+=0.5; repd(5); gdFr00('cetomedio',2); gdFr00('giovani',-2);}},
+   {l:'Con gli alleati, sotto l\'Alleanza',e:'Presenti ma secondi · nessuno ti ringrazia, nessuno ti accusa',f:()=>{repd(2);}},
+   {l:'Niente guerra',e:'Bengasi aspetta da sola · e i giornali contano i giorni',f:()=>{repd(-5); gdFr00('giovani',2); stampad(-2);}}]},
+ {id:'fr00_75', era:'fr2000', cond:()=>S.year===2012&&S.month>=6&&S.month<=12&&eliseoDiSinistra()&&!S.coabitazione, kick:'L\'economia', t:'Il 75 per cento',
+  text:'La promessa della campagna: un\'aliquota al settantacinque per cento sopra il milione di euro l\'anno. Rende poco, dicono i conti; dice molto, dicono i tuoi. Un grande attore prende la cittadinanza di un altro paese.',ch:[
+   {l:'Il 75 per cento, per due anni',e:'La storia · poche centinaia di contribuenti, un simbolo, e il Consiglio costituzionale che lo riscrive · chi è partito non torna',f:()=>{gdFr00('lavoratori',3); gdFr00('imprenditori',-6); baseFr00(3); fidFr00(-1);}},
+   {l:'Una fascia al 45, più larga',e:'Rende di più, fa meno notizia · la base voleva la notizia',f:()=>{gdFr00('imprenditori',-2); baseFr00(-2); fidFr00(1);}},
+   {l:'La lasci cadere',e:'Nessun esilio fiscale · e la prima promessa tradita',f:()=>{gdFr00('imprenditori',2); baseFr00(-5);}}]},
+ {id:'fr00_matrimonio', era:'fr2000', cond:()=>((S.year===2012&&S.month>=11)||(S.year===2013&&S.month<=5))&&!S.coabitazione, kick:'Il paese', t:'Il matrimonio per tutti',
+  text:'Il matrimonio e l\'adozione per le coppie dello stesso sesso. In aula centotrentasei ore di dibattito; fuori, le manifestazioni più grandi dai tempi della scuola libera, con le famiglie e i passeggini.',ch:[
+   {l:'Il matrimonio per tutti',e:'La storia · la legge passa a maggio · le piazze del no si svuotano, e dieci anni dopo nessuno la toglie',f:()=>{gdFr00('giovani',6); gdFr00('cetomedio',1); gdFr00('cattolici',-7); gdFr00('pensionati',-2);}},
+   {l:'Un patto rafforzato, senza adozione',e:'Mezzo passo · nessuno dei due fronti lo voleva così',f:()=>{gdFr00('giovani',-2); gdFr00('cattolici',-1);}},
+   {l:'Ritiri il testo',e:'Niente legge · le piazze tornano a casa, i ragazzi no',f:()=>{gdFr00('cattolici',4); gdFr00('giovani',-6);}}]},
+ {id:'fr00_mali', era:'fr2000', cond:()=>S.year===2013&&S.month<=4, tono:'grave', kick:'La difesa', t:'Il Mali',
+  text:'Le colonne jihadiste scendono verso la capitale del Mali, e il governo di Bamako chiede aiuto a Parigi. Gli elicotteri possono partire domani; nessuno sa quando torneranno.',ch:[
+   {l:'Intervieni subito',e:'La storia · le colonne fermate in una settimana · e dieci anni di presenza nel Sahel che nessuno aveva previsto',costo:{debito:0.5},f:()=>{S.ind.debt+=0.5; repd(4); gdFr00('cetomedio',2); gdFr00('giovani',-2);}},
+   {l:'Solo aerei e istruttori',e:'Presenti dal cielo · a terra decidono gli altri',f:()=>{repd(1);}},
+   {l:'Aspetti l\'Africa e l\'ONU',e:'Bamako aspetta · e forse non c\'è più quando arrivano',f:()=>{repd(-5); stampad(-2);}}]},
+ {id:'fr00_conto', era:'fr2000', cond:()=>S.year===2013&&S.month>=3&&S.month<=7, kick:'La giustizia', t:'Il ministro e il conto',
+  text:'Il ministro del bilancio, quello che doveva combattere la frode fiscale, ha un conto non dichiarato in Svizzera: ha negato per quattro mesi davanti all\'Assemblea, e ora confessa.',ch:[
+   {l:'Una legge sulla trasparenza: tutti i patrimoni pubblici',e:'La storia · i ministri e i deputati dichiarano tutto, e un\'autorità controlla · i tuoi borbottano',f:()=>{stampad(4); gdFr00('cetomedio',2); baseFr00(-2);}},
+   {l:'Il ministro fuori, e basta',e:'Una testa cade · la domanda «chi sapeva» resta',f:()=>{stampad(-2); gdFr00('cetomedio',-2);}},
+   {l:'Una commissione d\'inchiesta',e:'Sei mesi di audizioni in diretta · e il governo ci passa l\'estate',f:()=>{stampad(1); baseFr00(-1); fidFr00(-1);}}]},
  {id:'fr_ceca', era:'fr1950', cond:()=>S.year>=1951&&S.year<=1953, kick:'L\'Europa', t:'Il carbone e l\'acciaio con Bonn',
   text:'Sei paesi mettono in comune carbone e acciaio sotto un\'Alta Autorità che non risponde a nessun governo: per i siderurgici del nord è un mercato, per i minatori una minaccia, per i gollisti una rinuncia. Il tuo partito deve ratificare.',ch:[
    {l:'Ratifichi',e:'Le acciaierie del nord con te · i minatori temono il mercato comune',f:()=>{gdFr('imprenditori',3); gdFr('cetomedio',2); gdFr('lavoratori',-3); repd(1);}},
@@ -9071,6 +9222,31 @@ const SFIDE=[
  {id:'fr90_q_quinquennato', era:'fr1990', codaFino:Infinity, paese:'francia', ruolo:'governo', diff:'facile', cond:()=>S.year>=2001||(S.year===2000&&S.month>=10), q:'Quanto dura il mandato presidenziale dopo il referendum del 2000?',
   op:['Sette anni','Sei anni','Cinque anni'], giusta:2,
   perche:'Il referendum del 2000 accorcia il mandato a cinque anni, allineato a quello dell\'Assemblea.'},
+ /* L105-4 · le otto sfide del decennio francese 2000 (scheda §I-G), la giusta nelle posizioni della scheda (0,1,2,1,2,0,1,2). Il «perché» è di Code. */
+ {id:'fr00_q_euro', era:'fr2000', codaFino:Infinity, paese:'francia', ruolo:'governo', diff:'facile', cond:()=>S.year>=2003||(S.year===2002&&S.month>=2), q:'Quanti franchi valeva un euro?',
+  op:['6,56','1936,27','10'], giusta:0,
+  perche:'Il tasso fisso era 6,55957 franchi per un euro: 1936,27 era quello della lira.'},
+ {id:'fr00_q_ballottaggio', era:'fr2000', codaFino:Infinity, paese:'francia', ruolo:'governo', diff:'facile', cond:()=>S.year>=2003||(S.year===2002&&S.month>=6), q:'Chi arriva al ballottaggio del 2002 contro il Presidente uscente?',
+  op:['Il Primo ministro socialista','Il leader dell\'estrema destra','Il candidato centrista'], giusta:1,
+  perche:'Il 21 aprile 2002 il leader dell\'estrema destra supera il Primo ministro socialista al primo turno.'},
+ {id:'fr00_q_mandato', era:'fr2000', codaFino:Infinity, paese:'francia', ruolo:'governo', diff:'facile', cond:()=>S.year>=2003||(S.year===2002&&S.month>=6), q:'Quanto dura il mandato presidenziale dal 2002?',
+  op:['Sette anni','Sei anni','Cinque anni'], giusta:2,
+  perche:'Il referendum del 2000 ha portato il mandato a cinque anni, allineato a quello dell\'Assemblea.'},
+ {id:'fr00_q_trattato', era:'fr2000', codaFino:Infinity, paese:'francia', ruolo:'governo', diff:'media', cond:()=>S.year>=2006||(S.year===2005&&S.month>=7), q:'Che cosa decide il referendum del maggio 2005?',
+  op:['Il quinquennato','Il no al trattato costituzionale europeo','La fine della leva'], giusta:1,
+  perche:'Il 29 maggio 2005 il no al trattato che dava una costituzione all\'Europa vince col 55 per cento.'},
+ {id:'fr00_q_scuola', era:'fr2000', codaFino:Infinity, paese:'francia', ruolo:'governo', diff:'media', cond:()=>S.year>=2005||(S.year===2004&&S.month>=5), q:'Che cosa vieta la legge del 2004 nelle scuole?',
+  op:['Il fumo','Il telefono','I segni religiosi vistosi'], giusta:2,
+  perche:'La legge del marzo 2004 vieta nelle scuole pubbliche i segni religiosi vistosi, velo compreso.'},
+ {id:'fr00_q_pensione', era:'fr2000', codaFino:Infinity, paese:'francia', ruolo:'governo', diff:'media', cond:()=>S.year>=2011, q:'A quanti anni passa l\'età minima della pensione nel 2010?',
+  op:['62','60','65'], giusta:0,
+  perche:'La riforma del 2010 porta l\'età minima della pensione da sessanta a sessantadue anni, dopo otto giornate di sciopero.'},
+ {id:'fr00_q_mali', era:'fr2000', codaFino:Infinity, paese:'francia', ruolo:'governo', diff:'facile', cond:()=>S.year>=2014||(S.year===2013&&S.month>=3), q:'Quale paese africano chiede l\'intervento francese nel gennaio 2013?',
+  op:['Il Ciad','Il Mali','La Costa d\'Avorio'], giusta:1,
+  perche:'Il governo del Mali chiede aiuto contro le colonne jihadiste che scendono verso la capitale.'},
+ {id:'fr00_q_matrimonio', era:'fr2000', codaFino:Infinity, paese:'francia', ruolo:'governo', diff:'facile', cond:()=>S.year>=2014||(S.year===2013&&S.month>=6), q:'Che cosa introduce la legge del maggio 2013?',
+  op:['Il patto civile','La parità nelle liste','Il matrimonio per le coppie dello stesso sesso'], giusta:2,
+  perche:'La legge del maggio 2013 apre il matrimonio e l\'adozione alle coppie dello stesso sesso.'},
  {id:'uk60_svalut67', era:'uk1960', codaFino:Infinity, paese:'regnounito', ruolo:'governo', diff:'difficile', cond:()=>S.year>=1967, q:'Che cosa accadde alla sterlina nel novembre 1967?',
   op:['Fu lasciata fluttuare liberamente','Fu svalutata da 2,80 a 2,40 dollari','Fu agganciata all\'oro'], giusta:1,
   perche:'Arrivò dopo tre anni di difesa del cambio.'},
@@ -11439,6 +11615,25 @@ const TITOLI=[
  {id:'ti_fr90_concorde', era:'fr1990', pri:1, cond:()=>S.year===2000&&S.month>=7&&S.month<=8, amico:'Il Concorde cade', ostile:'Il Concorde cade: centotredici morti'},
  {id:'ti_fr90_70', era:'fr1990', pri:1, cond:()=>S.year===2000&&S.month>=9&&S.month<=10&&S.quinquennato00==='referendum', amico:'Settanta per cento a casa', ostile:'Settanta per cento a casa: il quinquennato passa lo stesso'},
  {id:'ti_fr90_torri', era:'fr1990', pri:1, cond:()=>S.year===2001&&S.month>=9&&S.month<=10, amico:'Le torri', ostile:'Le torri: siamo tutti americani'},
+ /* L105-4 · i titoli del decennio francese 2000 (scheda §I-E). */
+ {id:'ti_fr00_euro', era:'fr2000', pri:1, cond:()=>S.year===2002&&S.month<=2, amico:'Sei franchi e cinquantasei', ostile:'Sei franchi e cinquantasei: i prezzi arrotondati all\'insù'},
+ {id:'ti_fr00_aprile', era:'fr2000', pri:1, cond:()=>S.year===2002&&S.month<=3, amico:'Il 21 aprile', ostile:'Il 21 aprile: l\'estrema destra al ballottaggio'},
+ {id:'ti_fr00_82', era:'fr2000', pri:1, cond:()=>S.year===2002&&S.month>=2&&S.month<=4&&!eliseoDiSinistra(), amico:'L\'82 per cento', ostile:'L\'82 per cento: anche i voti dell\'altro campo'},
+ {id:'ti_fr00_canicola', era:'fr2000', pri:1, cond:()=>S.year===2003&&S.month>=8&&S.month<=9, amico:'La canicola', ostile:'La canicola: e il governo era in vacanza'},
+ {id:'ti_fr00_pensioni', era:'fr2000', pri:1, cond:()=>S.year===2003&&S.month>=6&&S.month<=7, amico:'Quarant\'anni per tutti', ostile:'Quarant\'anni per tutti: gli insegnanti in piazza'},
+ {id:'ti_fr00_velo', era:'fr2000', pri:1, cond:()=>S.year===2004&&S.month>=3&&S.month<=4, amico:'Il velo vietato', ostile:'Il velo vietato: la legge passa'},
+ {id:'ti_fr00_no', era:'fr2000', pri:1, cond:()=>S.year===2005&&S.month>=5&&S.month<=7&&S.tce05==='referendum', amico:'Il no all\'Europa', ostile:'Il no all\'Europa: cinquantacinque per cento'},
+ {id:'ti_fr00_banlieue', era:'fr2000', pri:1, cond:()=>S.year===2005&&S.month>=11, amico:'Le banlieue bruciano', ostile:'Le banlieue bruciano: il coprifuoco'},
+ {id:'ti_fr00_cpe', era:'fr2000', pri:1, cond:()=>S.year===2006&&S.month>=3&&S.month<=4, amico:'Il contratto ritirato', ostile:'Il contratto ritirato: i ragazzi hanno vinto'},
+ {id:'ti_fr00_rottura', era:'fr2000', pri:1, cond:()=>S.year===2007&&S.month>=5&&S.month<=7&&!eliseoDiSinistra(), amico:'La rottura', ostile:'La rottura: un Presidente iperattivo'},
+ {id:'ti_fr00_crollo', era:'fr2000', pri:1, cond:()=>S.year===2008&&S.month>=9&&S.month<=10, amico:'Il crollo', ostile:'Il crollo: le banche non si prestano più'},
+ {id:'ti_fr00_rilancio', era:'fr2000', pri:1, cond:()=>((S.year===2008&&S.month===12)||(S.year===2009&&S.month<=2))&&S.crisi08fr==='rilancio', amico:'Il piano di rilancio', ostile:'Il piano di rilancio: ventisei miliardi'},
+ {id:'ti_fr00_volo', era:'fr2000', pri:1, cond:()=>S.year===2009&&S.month>=6&&S.month<=7, amico:'Il volo nell\'Atlantico', ostile:'Il volo nell\'Atlantico: nessun superstite'},
+ {id:'ti_fr00_62', era:'fr2000', pri:1, cond:()=>S.year===2010&&S.month>=10&&S.month<=11, amico:'Sessantadue anni', ostile:'Sessantadue anni: le raffinerie bloccate'},
+ {id:'ti_fr00_libia', era:'fr2000', pri:1, cond:()=>S.year===2011&&S.month>=3&&S.month<=4, amico:'La Libia', ostile:'La Libia: i primi aerei sono francesi'},
+ {id:'ti_fr00_alternanza', era:'fr2000', pri:1, cond:()=>S.year===2012&&S.month<=3&&eliseoDiSinistra(), amico:'La sinistra torna', ostile:'La sinistra torna all\'Eliseo'},
+ {id:'ti_fr00_matrimonio', era:'fr2000', pri:1, cond:()=>S.year===2013&&S.month>=4&&S.month<=6, amico:'Il matrimonio per tutti', ostile:'Il matrimonio per tutti: centotrentasei ore in aula'},
+ {id:'ti_fr00_mali', era:'fr2000', pri:1, cond:()=>S.year===2013&&S.month<=2, amico:'Il Mali', ostile:'Il Mali: le colonne fermate'},
  {id:'ng_p_ti_petrolio', era:'contemporanea', paesi:['nigeria'], pri:1, amico:'La produzione di petrolio torna a salire', ostile:'Un barile su dieci sparisce: il furto record'},
 ];
 
@@ -13064,7 +13259,14 @@ const SNODI_STORICI = {
   piano95Opp:    { storico:['sciopero'], conforme:'sul piano sulla previdenza, dall’opposizione', diverge:{ 'tavolo':'Sul piano sulla previdenza del 1995 ha scelto il tavolo e ha trattato.', 'censura':'Contro il piano sulla previdenza del 1995 ha presentato la censura in aula.' } },
   scioglimento97:{ storico:['sciolto'], conforme:'sullo scioglimento del 1997', diverge:{ 'no':'Nel 1997 l’Assemblea non è stata sciolta: la legislatura è arrivata alla scadenza del 1998.', 'campagna':'Nel 1997 il Presidente ha sciolto l’Assemblea e ha fatto campagna in prima persona.' } },
   /* ⚠ quinquennato00 (scritto dall'evento fr90_quinquennato) NON è qui: verifica-snodi accetta solo righe scritte da carte-snodo
-     e la segnava «riga morta». Residuo L103-2 aperto per Cowork. */
+     e la segnava «riga morta». Deciso da Cowork (25/9 sera): resta fuori, il flag vive nei titoli. */
+  /* L105-4 · i quattro snodi del decennio 2000 e le due versioni dall'aula. `crisi08frOpp` non ha un esito storico marcato. */
+  aprile02:    { storico:['partito'], conforme:'sul 21 aprile', diverge:{ 'apertura':'Dopo il 21 aprile il Presidente ha aperto il governo all’altro campo.', 'proporzionale':'Dopo il 21 aprile il Presidente ha proposto la proporzionale, e nessuno ha più avuto la maggioranza da solo.' } },
+  aprile02Opp: { storico:['unita'], conforme:'sul 21 aprile, dall’opposizione', diverge:{ 'centro':'Dopo il 21 aprile ha cercato il centro, senza i comunisti.', 'quartieri':'Dopo il 21 aprile è tornato nei quartieri, ad ascoltare chi aveva votato gli estremi.' } },
+  tce05:       { storico:['referendum'], conforme:'sul trattato europeo del 2005', diverge:{ 'parlamento':'Il trattato europeo del 2005 è passato dal Parlamento, senza referendum.', 'rinvio':'Il trattato europeo del 2005 è stato rinviato, e gli altri paesi lo hanno ratificato senza la Francia.' } },
+  banlieue05:  { storico:['emergenza'], conforme:'sulle banlieue del 2005', diverge:{ 'piano':'Alle banlieue del 2005 ha risposto con un piano per i quartieri, senza stato d’emergenza.', 'entrambi':'Alle banlieue del 2005 ha risposto col coprifuoco e con un piano per i quartieri insieme.' } },
+  crisi08fr:   { storico:['rilancio'], conforme:'sulla crisi del 2008', diverge:{ 'rigore':'Alla crisi del 2008 ha risposto col rigore, e la disoccupazione è salita per tre anni.', 'banche':'Nella crisi del 2008 ha salvato le banche, e basta.' } },
+  crisi08frOpp:{ storico:[], conforme:'sulla crisi del 2008, dall’opposizione', diverge:{ 'censura':'Contro il piano per la crisi del 2008 ha presentato la censura in aula.', 'tavolo':'Sul piano per la crisi del 2008 ha scelto il tavolo e ha trattato.', 'sciopero':'Contro il piano per la crisi del 2008 è sceso in piazza.' } },
 };
 
 /* ==============================================================================================================
@@ -13361,6 +13563,18 @@ const PILASTRI_MONDO = [
     t:'Le torri',
     text:'La mattina dell\'11 settembre due aerei di linea dirottati entrano nelle torri gemelle di New York, un terzo nel Pentagono, un quarto cade in un campo. Le torri crollano in diretta davanti al mondo: quasi tremila morti. L\'America chiude il cielo, l\'Alleanza invoca per la prima volta la difesa comune, e il decennio che era cominciato con il Muro finisce qui.',
     logx:'Due aerei nelle torri gemelle: quasi tremila morti, in diretta.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  /* L105-4 · due fatti-mondo (scheda PRESET-FRANCIA-2000 §I-H): l'onda (gennaio 2005) e il crollo (settembre 2008).
+     Entrano in ogni linea tranne l'italiana: oggi fr2000 e uk2000. */
+  { id:'pm_tsunami', anno:2005, mese:1, tono:'grave', cronaca:true, kick:'Il mondo',
+    t:'L\'onda',
+    text:'Il giorno dopo Natale un terremoto sotto l\'oceano Indiano solleva un\'onda che in poche ore colpisce le coste di dodici paesi, dall\'Indonesia alla Somalia. Più di duecentomila morti; fra loro migliaia di turisti europei nelle spiagge della Thailandia. Le immagini arrivano dai telefoni dei sopravvissuti, prima che dalle televisioni.',
+    logx:'Un\'onda nell\'oceano Indiano: più di duecentomila morti in dodici paesi.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pm_crollo', anno:2008, mese:9, tono:'grave', cronaca:true, kick:'Il mondo',
+    t:'Il crollo',
+    text:'Il 15 settembre una delle grandi banche d\'affari di Wall Street fallisce, e nessuno la salva. In una settimana le banche del mondo smettono di prestarsi denaro, i governi nazionalizzano quello che fino al giorno prima era il cuore del capitalismo, e le Borse perdono un terzo. La crisi dei mutui americani è diventata la crisi di tutti.',
+    logx:'Una grande banca americana fallisce: il credito si ferma in tutto il mondo.',
     ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
 ];
 
@@ -14621,4 +14835,125 @@ const FRANCO93_EV = {
   t:'La corsa al franco',
   text:'Luglio: i mercati riprovano. Stavolta la Bundesbank non taglia i tassi, e in un fine settimana i ministri europei allargano le bande al quindici per cento: il sistema c\'è ancora, di nome.',
   ch: FRANCO_CH,
+};
+/* ==============================================================================================================
+   L105-4 · IL DECENNIO FRANCESE 2000 — I QUATTRO SNODI (scheda PRESET-FRANCIA-2000 §I-A). L'ultima porta della linea.
+   Valute come '60-'90 (Presidente, livello 3, semipresidenziale). Flag nuovi cercati in tutto S prima di usarli: aprile02,
+   aprile02Opp, tce05, banlieue05, crisi08fr, crisi08frOpp — zero occorrenze (⚠ S.crisi08 è inglese e non si tocca).
+   ⚑ CHI RICEVE CHE COSA (gate in game.js):
+     · S1 febbraio 2002 (il mese dopo l'urna del motore): APRILE02_EV al Presidente di destra al governo, ANCHE in
+       coabitazione (quella d'avvio è accesa fino alla tappa di giugno). La scelta storica, per chi gioca l'RPR, rinomina il
+       partito in «UMP» con rinominaPartitoMio (game.js). Dall'aula APRILE02_OPP_EV per chi gioca il PS o il PCF.
+     · S2 maggio 2005: TCE05_EV al Presidente al governo, anche in coabitazione.
+     · S3 novembre 2005 e S4 ottobre 2008: al governo senza coabitazione; dall'aula di S4 CRISI08FR_OPP_EV.
+   Nessuno dei mesi è di un pilastro (il crollo del 2008 è a settembre: prima la cronaca, poi la decisione).
+   ============================================================================================================== */
+/* ⚑ LA SWEEP (L105-4, 25/9, banco onesto, RPR al governo, 20 semi, 168 mesi): fondo ×0 gruppo peggiore 34,3 (sd 4,0) · ×1 0,27 sd ·
+   ×2 0,19 sd · ×3 0,69 sd · ×4 1,24 sd (1 crisi) · **×5 2,50 sd, 2 crisi o rivolte su 20** (adottato: il primo dentro la banda
+   1,5-4) · ×6 4,04 sd, 5 su 20. ⚠ È la prima porta in cui il valore adottato non è a zero crisi: segnalato a Cowork. */
+let FR00_GRUPPI = 5;   // let e non const: la sweep di .claude/misura-fr2000-contenuto.js lo varia sul banco
+function gdFr00(g, n){ gd(g, Math.round(n*FR00_GRUPPI)); }
+function fidFr00(n){ fidFr60(n); }   // la fiducia non ha moltiplicatore: è la stessa leva del '60
+function baseFr00(n){
+  var P=(PAESE && PAESE.partiti) ? PAESE.partiti.filter(function(x){ return x.id===S.partito; })[0] : null;
+  if(!P || !P.base) return;
+  Object.keys(P.base).forEach(function(g){ gd(g, Math.round(n*P.base[g]*FR00_GRUPPI)); });
+}
+const APRILE02_EV = {
+  id:'snodo_aprile02', snodo:true, era:'fr2000', kick:'L\'Eliseo', tono:'grave',
+  t:'Il 21 aprile',
+  text:'Al primo turno l\'estrema destra è arrivata seconda, davanti al Primo ministro; al ballottaggio hai preso l\'ottantadue per cento, anche i voti di chi ti combatte da vent\'anni e si è turato il naso. Un milione di persone in piazza il primo maggio. Ora le legislative: che cosa fai di una vittoria che non è solo tua?',
+  ch:[
+    { l:'Il partito unico: la maggioranza dei tuoi', e:'La storia · la destra e il centro in un partito solo, e cinque anni di maggioranza · chi ti ha votato per sbarrare la strada se lo ricorderà',
+      f:function(){ S.aprile02='partito'; gdFr00('cetomedio',2); gdFr00('imprenditori',3); gdFr00('giovani',-3); gdFr00('lavoratori',-2); baseFr00(3);
+        if(S.partito==='fr_unr' && typeof rinominaPartitoMio==='function') rinominaPartitoMio('UMP');
+        S.log.unshift({t:T('L\'Eliseo'),x:T('Dopo il 21 aprile ha fatto il partito unico della destra e del centro.')}); } },
+    { l:'Il governo di tutti: ministri dell\'altro campo', e:'Un governo largo per un voto largo · i tuoi non capiscono, gli altri non si fidano',
+      f:function(){ S.aprile02='apertura'; gdFr00('giovani',2); gdFr00('lavoratori',2); baseFr00(-4); stampad(3); fidFr00(1);
+        S.log.unshift({t:T('L\'Eliseo'),x:T('Dopo il 21 aprile ha aperto il governo all\'altro campo.')}); } },
+    { l:'La proporzionale: nessuno vincerà più così', e:'La riforma del voto · l\'estrema destra entra in Assemblea, e nessuno ha più la maggioranza da solo',
+      f:function(){ S.aprile02='proporzionale'; gdFr00('giovani',1); baseFr00(-2); stampad(1); repd(1);
+        S.log.unshift({t:T('L\'Eliseo'),x:T('Dopo il 21 aprile ha proposto la proporzionale.')}); } },
+  ],
+};
+const APRILE02_OPP_EV = {
+  id:'snodo_aprile02_opp', snodo:true, era:'fr2000', kick:'La sinistra', tono:'grave',
+  t:'Il 21 aprile, dall\'aula',
+  text:'Il tuo campo non è arrivato al ballottaggio: l\'estrema destra sì. Hai chiamato a votare l\'avversario di sempre per sbarrarle la strada, e ha preso l\'ottantadue per cento anche con i tuoi voti. Ora le legislative, e la domanda che nessuno vuole fare: perché?',
+  ch:[
+    { l:'Tutta la sinistra in una lista sola', e:'La storia, a metà · una candidatura per collegio, e il campo che si conta · qualcuno resta fuori e lo dice',
+      f:function(){ S.aprile02Opp='unita'; baseFr00(3); gdFr00('lavoratori',2); gdFr00('cetomedio',-1);
+        S.log.unshift({t:T('La sinistra'),x:T('Dopo il 21 aprile ha unito tutta la sinistra.')}); } },
+    { l:'Ricominciare dal centro', e:'Una sinistra di governo, senza i comunisti · il centro ascolta, la tua base si divide',
+      f:function(){ S.aprile02Opp='centro'; baseFr00(-4); gdFr00('cetomedio',3); gdFr00('lavoratori',-2);
+        S.log.unshift({t:T('La sinistra'),x:T('Dopo il 21 aprile ha cercato il centro.')}); } },
+    { l:'Tornare nei quartieri: ascoltare chi ha votato gli estremi', e:'Cinque anni di porta a porta · nessun risultato subito, ma qualcuno torna',
+      f:function(){ S.aprile02Opp='quartieri'; gdFr00('lavoratori',3); gdFr00('giovani',1); stampad(-1);
+        S.log.unshift({t:T('La sinistra'),x:T('Dopo il 21 aprile è tornata nei quartieri.')}); } },
+  ],
+};
+const TCE05_EV = {
+  id:'snodo_tce05', snodo:true, era:'fr2000', kick:'L\'Europa', tono:'grave',
+  t:'Il no all\'Europa',
+  text:'Il trattato che dà all\'Europa una costituzione va ratificato. Il Parlamento lo voterebbe in un pomeriggio; un referendum lo porterebbe in ogni cucina, con l\'idraulico polacco, la Turchia e la disoccupazione dentro la stessa scheda. I sondaggi del sì scendono ogni settimana.',
+  ch:[
+    { l:'Referendum', e:'La storia · il no al cinquantacinque per cento · l\'Europa si ferma, e il paese ha parlato contro di te',
+      f:function(){ S.tce05='referendum'; gdFr00('lavoratori',2); gdFr00('imprenditori',-2); baseFr00(-3); repd(-4); fidFr00(-1); stampad(-2);
+        S.log.unshift({t:T('L\'Europa'),x:T('Ha portato il trattato europeo a referendum, e il no ha vinto.')}); } },
+    { l:'Ratifica in Parlamento', e:'Il trattato passa · e il paese dice che non gliel\'hanno chiesto',
+      f:function(){ S.tce05='parlamento'; gdFr00('imprenditori',2); gdFr00('lavoratori',-3); gdFr00('giovani',-2); repd(3);
+        S.log.unshift({t:T('L\'Europa'),x:T('Ha fatto ratificare il trattato europeo dal Parlamento.')}); } },
+    { l:'Rinvii: non è il momento', e:'Nessuna scheda, nessun voto · gli altri ratificano, tu no',
+      f:function(){ S.tce05='rinvio'; repd(-2); gdFr00('cetomedio',1);
+        S.log.unshift({t:T('L\'Europa'),x:T('Ha rinviato il trattato europeo.')}); } },
+  ],
+};
+const BANLIEUE05_EV = {
+  id:'snodo_banlieue05', snodo:true, era:'fr2000', kick:'L\'ordine', tono:'grave',
+  t:'Le banlieue in fiamme',
+  text:'Due ragazzi inseguiti dalla polizia muoiono in una cabina elettrica a nord di Parigi, e da quella notte le periferie bruciano: diecimila auto in tre settimane, trecento comuni, le scuole e le palestre dei quartieri. Il ministro dell\'interno parla di feccia; i sindaci chiedono soldi.',
+  ch:[
+    { l:'Lo stato d\'emergenza', e:'La storia · il coprifuoco nei quartieri, per la prima volta dall\'Algeria · le notti si calmano, e nessuno dimentica la legge che l\'ha permesso',
+      f:function(){ S.banlieue05='emergenza'; gdFr00('cetomedio',4); gdFr00('pensionati',4); gdFr00('giovani',-7); stampad(-2); repd(-2);
+        S.log.unshift({t:T('L\'ordine'),x:T('Ha dichiarato lo stato d\'emergenza nelle banlieue.')}); } },
+    { l:'Un piano per i quartieri: scuole, lavoro, trasporti', e:'I cantieri partono, le notti continuano per un\'altra settimana · e il conto è di tutti', costo:{debito:1.5},
+      f:function(){ S.banlieue05='piano'; S.ind.debt+=1.5; gdFr00('giovani',4); gdFr00('lavoratori',2); gdFr00('cetomedio',-4); gdFr00('pensionati',-3);
+        S.log.unshift({t:T('L\'ordine'),x:T('Ha risposto alle banlieue con un piano per i quartieri.')}); } },
+    { l:'Tutte e due: il coprifuoco e il piano', e:'Ordine e cantieri insieme · il conto doppio, e nessuno ti dà ragione del tutto', costo:{debito:1},
+      f:function(){ S.banlieue05='entrambi'; S.ind.debt+=1; gdFr00('cetomedio',2); gdFr00('pensionati',1); gdFr00('giovani',-2); fidFr00(-1);
+        S.log.unshift({t:T('L\'ordine'),x:T('Ha messo insieme il coprifuoco e il piano per i quartieri.')}); } },
+  ],
+};
+const CRISI08FR_EV = {
+  id:'snodo_crisi08fr', snodo:true, era:'fr2000', kick:'L\'economia', tono:'grave',
+  t:'La crisi',
+  text:'Una banca americana è fallita a settembre e da allora nessuna banca presta a un\'altra. Le imprese non trovano credito, le fabbriche d\'auto si fermano, le Borse perdono in un mese quello che avevano guadagnato in cinque anni. Il debito del paese è già sopra il sessanta.',
+  ch:[
+    { l:'Un piano di rilancio, a debito', e:'La storia · ventisei miliardi di cantieri, prestiti alle banche e alle fabbriche · la recessione è più corta, il debito sale di venti punti', costo:{debito:3},
+      f:function(){ S.crisi08fr='rilancio'; S.ind.debt+=3; gdFr00('lavoratori',3); gdFr00('imprenditori',3); fidFr00(-2);
+        S.log.unshift({t:T('L\'economia'),x:T('Ha risposto alla crisi del 2008 con un piano di rilancio.')}); } },
+    { l:'Il rigore subito', e:'I conti tengono · la disoccupazione no, e il paese lo sente per tre anni',
+      f:function(){ S.crisi08fr='rigore'; gdFr00('lavoratori',-6); gdFr00('giovani',-4); gdFr00('imprenditori',-2); fidFr00(3);
+        S.log.unshift({t:T('L\'economia'),x:T('Ha risposto alla crisi del 2008 col rigore.')}); } },
+    { l:'Salvare le banche, e basta', e:'Il credito riparte · e il paese vede chi è stato salvato per primo', costo:{debito:2},
+      f:function(){ S.crisi08fr='banche'; S.ind.debt+=2; gdFr00('imprenditori',4); gdFr00('lavoratori',-4); gdFr00('cetomedio',-2); stampad(-3);
+        S.log.unshift({t:T('L\'economia'),x:T('Ha salvato le banche nel 2008, e basta.')}); } },
+  ],
+};
+/* S4 dall'aula (scheda: censura / tavolo / piazza, come BARRE_OPP_EV; storico vuoto, nessun marcatore «La storia»). */
+const CRISI08FR_OPP_EV = {
+  id:'snodo_crisi08fr_opp', snodo:true, era:'fr2000', kick:'L\'economia', tono:'grave',
+  t:'La crisi, dall\'aula',
+  text:'Il governo ha presentato il suo piano contro la crisi. L\'opposizione decide dove combatterlo: in aula, al tavolo o in piazza.',
+  ch:[
+    { l:'La censura sul piano', e:'Una mozione che non passerà · la tua base e i lavoratori la leggono come coraggio',
+      f:function(){ S.crisi08frOpp='censura'; baseFr00(4); gdFr00('lavoratori',3);
+        S.log.unshift({t:T('L\'economia'),x:T('Ha presentato la censura sul piano contro la crisi del 2008.')}); } },
+    { l:'Il tavolo: un piano concordato', e:'Qualcosa si ottiene · e la base lo chiama resa',
+      f:function(){ S.crisi08frOpp='tavolo'; baseFr00(-3); gdFr00('lavoratori',1); gdFr00('imprenditori',1);
+        S.log.unshift({t:T('L\'economia'),x:T('Ha trattato sul piano contro la crisi del 2008.')}); } },
+    { l:'In piazza', e:'Il paese si ferma un giorno · il ceto medio e le imprese non te lo perdonano',
+      f:function(){ S.crisi08frOpp='sciopero'; baseFr00(6); gdFr00('lavoratori',5); gdFr00('cetomedio',-5); gdFr00('imprenditori',-3);
+        S.log.unshift({t:T('L\'economia'),x:T('È sceso in piazza contro il piano per la crisi del 2008.')}); } },
+  ],
 };

@@ -187,7 +187,12 @@ const DRIFT_INFLAZIONE_ERA = {
                 {da:1988, inf:2.7}, {da:1989, inf:3.6}, {da:1990, inf:3.4}, {da:1991, inf:3.2},
                 /* L103-1 · gli anni '90 (scheda PRESET-FRANCIA-1990 §2): la disinflazione compiuta, fino allo 0,5 del '99 */
                 {da:1992, inf:2.4}, {da:1993, inf:2.1}, {da:1994, inf:1.7}, {da:1995, inf:1.8}, {da:1996, inf:2.0},
-                {da:1997, inf:1.2}, {da:1998, inf:0.7}, {da:1999, inf:0.5}, {da:2000, inf:1.7}, {da:2001, inf:1.6} ]
+                {da:1997, inf:1.2}, {da:1998, inf:0.7}, {da:1999, inf:0.5}, {da:2000, inf:1.7}, {da:2001, inf:1.6},
+                /* L105-2 · il 2000 (scheda §2, ⚠ INSEE): l'euro non cambia i prezzi, il 2008 sì e il 2009 li ferma */
+                {da:2002, inf:1.9}, {da:2003, inf:2.1}, {da:2004, inf:2.1}, {da:2005, inf:1.7}, {da:2006, inf:1.7},
+                {da:2007, inf:1.5}, {da:2008, inf:2.8}, {da:2009, inf:0.1}, {da:2010, inf:1.5}, {da:2011, inf:2.1},
+                {da:2012, inf:2.0}, {da:2013, inf:0.9},
+                {da:2014, inf:null} ]   // L105-3: chiusura — nel presente inflazioneAnno() torna a S.inflazione (il seme), come ciclo, disoccupazione e deficit
 };
 function inflazioneAnno(){
   if(typeof S==='undefined' || !S) return 0;
@@ -233,7 +238,13 @@ const DRIFT_DEFICIT_ERA = {
      scarto massimo 2,0. Nessuna riga prima del 1990: fr1980 (1980-89) non ne è toccata. */
   [LINEA_FR]: [ {da:1990, def:0},    {da:1991, def:1},    {da:1992, def:1},    {da:1993, def:0},    {da:1994, def:2},
                 {da:1995, def:1},    {da:1996, def:1},    {da:1997, def:-1},   {da:1998, def:0},    {da:1999, def:-0.5},
-                {da:2000, def:-0.5}, {da:2001, def:-1.5} ]
+                {da:2000, def:-0.5}, {da:2001, def:-1.5},
+                /* L105-2 · il 2000, CERCATO con la sweep (misura-fr2000-struttura.js sweep def, RPR, 5 semi, luglio): debito reso 02 57 ·
+                   04 65 · 07 67 · 09 76 · 11 85 · 13 90 (bersaglio 61 · 65 · 64 · 79 · 85 · 90, ±5 ovunque; il peggiore il 2002, −4,8,
+                   perché 2000-2001 sono righe di fr1990). 2014 = chiusura. */
+                {da:2002, def:0},   {da:2003, def:3},   {da:2004, def:1},   {da:2005, def:0},   {da:2006, def:1},
+                {da:2007, def:0},   {da:2008, def:2},   {da:2009, def:2},   {da:2010, def:1},   {da:2011, def:3},
+                {da:2012, def:1},   {da:2013, def:2.5}, {da:2014, def:0} ]
 };
 function deficitEra(){
   if(typeof S==='undefined' || !S || !S.era) return 0;
@@ -351,6 +362,7 @@ function initStatoBase(){
   S.ref72Opp=null; S.barreOpp=null; S.campagna78=null; S.petrolio73=null; S.petrolio79=null;   // L99-2: le due versioni dall'aula, il Presidente del '77, le due corse del petrolio
   S.riforme81=null; S.rigore83=null; S.scuola84=null; S.ordinanze86=null; S.riforme81Opp=null; S.rigore83Opp=null;   // L101-2: i quattro snodi del decennio francese '80 e le due versioni dall'aula
   S.ref92=null; S.ref92Opp=null; S.sarajevo94=null; S.piano95=null; S.piano95Opp=null; S.quinquennato00=null;   // L103-2: gli snodi del decennio francese '90 (scioglimento97 c'è da L103-1)
+  S.aprile02=null; S.aprile02Opp=null; S.tce05=null; S.banlieue05=null; S.crisi08fr=null; S.crisi08frOpp=null;   // L105-4: gli snodi del decennio francese 2000 (⚠ S.crisi08 è inglese)
   S.scioglimento97=null;   // L103-1: lo scioglimento del '97 (null = storico; 'no' = «aspetta», tappa 1998/3). Lo scrive S4 in L103-2
   S.coabitazione=false;   // L100-2: il Presidente con l'Assemblea degli altri (derivato dai seggi, dato puro, round-trip)
   S.governiCaduti=0;                    // L80-5: quante volte il governo e caduto senza che si andasse a votare
@@ -1351,7 +1363,13 @@ const DRIFT_ECONOMICO_ERA = {
                    92 1,5 · **93 −0,6** · 94 2,1 · 95 2,1 · 96 1,4 · 97 2,5 · **98 3,4 · 99 3,4 · 2000 4,1** · 01 2,0 (bersaglio ±0,2). */
                 {da:1990, ciclo:1.5}, {da:1991, ciclo:-1.5},{da:1992, ciclo:0},   {da:1993, ciclo:-3},  {da:1994, ciclo:0.5},
                 {da:1995, ciclo:0},   {da:1996, ciclo:-1},  {da:1997, ciclo:1},   {da:1998, ciclo:2},   {da:1999, ciclo:1.5},
-                {da:2000, ciclo:2.5}, {da:2001, ciclo:-0.5} ]
+                {da:2000, ciclo:2.5}, {da:2001, ciclo:-0.5},
+                /* L105-2 · il 2000 (scheda PRESET-FRANCIA-2000 §2), CERCATO con la sweep (.claude/misura-fr2000-struttura.js sweep ciclo,
+                   RPR, 5 semi, luglio): crescita resa 02 1,1 · 03 0,5 · 04 2,9 · 05 1,9 · 06 2,4 · 07 2,5 · 08 0,2 · **09 −2,9** · 10 2,1 ·
+                   11 2,2 · 12 0,1 · 13 0,4 (bersaglio ±0,33). Il 2000 (3,5 contro 3,9) è la riga di fr1990 e non si tocca. */
+                {da:2002, ciclo:-0.9}, {da:2003, ciclo:-1.7}, {da:2004, ciclo:1.8}, {da:2005, ciclo:-0.3}, {da:2006, ciclo:1.4},
+                {da:2007, ciclo:0.9}, {da:2008, ciclo:-1.7}, {da:2009, ciclo:-4.9}, {da:2010, ciclo:0.9}, {da:2011, ciclo:0.7},
+                {da:2012, ciclo:-1.7}, {da:2013, ciclo:-0.4}, {da:2014, ciclo:0} ]   // 2014 = chiusura: nel presente il ciclo della linea non vale più
 };
 /* L60-2 · LA DISOCCUPAZIONE D'EPOCA. Il motore non aveva un posto dove un decennio potesse dire «qui i senza
    lavoro sono il doppio»: `S.uMod` decade dell'80% al mese e le carte danno solo colpi. Stessa forma di cicloBase():
@@ -1384,7 +1402,12 @@ const DRIFT_DISOCCUPAZIONE_ERA = {
                    PS, 5 semi, resa a luglio): 90 9,0 · 94 12,5 · 97 12,2 · 2000 9,2 — tutti dentro ±0,5, scarto massimo 0,1. */
                 {da:1990, un:2},    {da:1991, un:1.5},  {da:1992, un:2.25}, {da:1993, un:3.5},  {da:1994, un:4.5},
                 {da:1995, un:3.5},  {da:1996, un:4},    {da:1997, un:4.75}, {da:1998, un:4.25}, {da:1999, un:3.75},
-                {da:2000, un:2},    {da:2001, un:0.5} ],
+                {da:2000, un:2},    {da:2001, un:0.5},
+                /* L105-2 · il 2000, CERCATO con la sweep (misura-fr2000-struttura.js sweep un, RPR, 5 semi, luglio): resa 02 8,3 · 03 9,0 ·
+                   05 8,9 · 07 8,0 · **08 7,4** · 09 9,2 · 10 9,3 · 13 9,9 (bersaglio ±0,2). 2014 = chiusura: nel presente non vale più. */
+                {da:2002, un:0.25}, {da:2003, un:0.75}, {da:2004, un:1.75}, {da:2005, un:1.5},  {da:2006, un:0.75}, {da:2007, un:0.75},
+                {da:2008, un:-2},   {da:2009, un:-0.5}, {da:2010, un:1},    {da:2011, un:2.5},  {da:2012, un:0.75}, {da:2013, un:1.25},
+                {da:2014, un:0} ],
   [LINEA_UK]: [ {da:1980, un:1}, {da:1981, un:3}, {da:1982, un:4.5}, {da:1983, un:5}, {da:1986, un:4.5},
                 {da:1987, un:3.5}, {da:1988, un:2}, {da:1989, un:1},
                 /* L75-1 · '90: da ~7% (1990) a ~10,5% (1993) e giù a ~6% (1999) */
@@ -1829,7 +1852,33 @@ const RIALLINEAMENTI_ERA = {
                 entra:[ VERDI_1997 ],
                 delta:[ {id:'fr_sfio',delta:5.7}, {id:'fr_pcf',delta:-0.2}, {id:'fr_unr',delta:-7.4}, {id:'fr_ri',delta:-7.4}, {id:'fr_fn',delta:1.4} ],   // Σ=−7,9 = l'ingresso dei Verdi
                 urne:  { fr_sfio:25.0, fr_unr:15.7, fr_fn:14.9, fr_ri:14.2, fr_pcf:9.9, fr_verts:6.8 },
-                seggi: { fr_sfio:49.2, fr_pcf:6.2, fr_verts:1.2, fr_unr:24.6, fr_ri:19.8, fr_fn:0.2 } }
+                seggi: { fr_sfio:49.2, fr_pcf:6.2, fr_verts:1.2, fr_unr:24.6, fr_ri:19.8, fr_fn:0.2 } },
+    /* L105-2 · IL 2000 (scheda PRESET-FRANCIA-2000 §1). Tre legislative, tutte CONDIZIONATE SULL'ELISEO come l'80 (D31):
+       seguono la presidenziale del mese di gennaio, e nel ramo divergente l'Assemblea in vigore resta fino alla tappa dopo.
+       Voti del 1° turno da france-politique.fr (consultato il 25/9/2026, dati del ministero), radicali nel PS, DL e poi
+       Nuovo Centro e UDI nell'UMP (come la scheda), rinormalizzati sui sei del roster; il delta è la differenza con le urne
+       della tappa storica precedente (1997, 2002, 2007), Σ 0 salvo arrotondamento.
+       ⚠ I SEGGI SONO RICALCOLATI dalla composizione dell'Assemblea (577, resti più grandi a una cifra), perché quelli
+       della scheda non sommavano a 100 (2002: 98,5; 2012: 100,4): 2002 UMP 365+4 NI · UDF 29 · SOC 141 · COM 22 · NI di
+       sinistra 16 (Verdi 3, il resto pro-quota PS/PCF) → 64,0 · 5,0 · 26,4 · 4,1 · 0,5; 2007 UMP 320+NC 22+3 · MoDem 4 ·
+       SRC 204 · GDR 24 (Verdi 4) → 59,8 · 0,7 · 35,3 · 3,5 · 0,7; 2012 SRC 295+RRDP 16 · Verdi 18 · GDR 15 · UMP 196+UDI
+       29+4 · MoDem 1 · FN 3 → 53,9 · 3,1 · 2,6 · 39,7 · 0,2 · 0,5.
+       ⚠ LE DUE RINOMINE (RPR → UMP nel 2002, UDF → MoDem nel 2007) sul partito DEL GIOCATORE sono ignorate dal motore
+       (serve uno snodo, come DC → PPI): chi gioca l'RPR resta «RPR». Dichiarato. */
+    '2002/6': { se:function(){ return typeof S!=='undefined' && S && typeof eliseoDiSinistra==='function' && !eliseoDiSinistra(); },
+                rinomina:[ {id:'fr_unr', nome:'UMP'} ],
+                delta:[ {id:'fr_unr',delta:22.0}, {id:'fr_ri',delta:-10.7}, {id:'fr_sfio',delta:1.1}, {id:'fr_pcf',delta:-5.7}, {id:'fr_verts',delta:-2.6}, {id:'fr_fn',delta:-4.1} ],   // Σ=0
+                urne:  { fr_unr:33.8, fr_sfio:25.3, fr_fn:11.1, fr_pcf:4.9, fr_ri:4.8, fr_verts:4.4 },
+                seggi: { fr_unr:64.0, fr_ri:5.0, fr_sfio:26.4, fr_pcf:4.1, fr_verts:0.5, fr_fn:0 } },
+    '2007/6': { se:function(){ return typeof S!=='undefined' && S && typeof eliseoDiSinistra==='function' && !eliseoDiSinistra(); },
+                rinomina:[ {id:'fr_ri', nome:'MoDem'} ],
+                delta:[ {id:'fr_unr',delta:7.9}, {id:'fr_ri',delta:3.0}, {id:'fr_sfio',delta:-0.2}, {id:'fr_pcf',delta:-0.9}, {id:'fr_verts',delta:-1.5}, {id:'fr_fn',delta:-8.3} ],   // Σ=0
+                urne:  { fr_unr:41.9, fr_sfio:26.1, fr_ri:7.6, fr_pcf:4.3, fr_fn:4.3, fr_verts:3.3 },
+                seggi: { fr_unr:59.8, fr_ri:0.7, fr_sfio:35.3, fr_pcf:3.5, fr_verts:0.7, fr_fn:0 } },
+    '2012/6': { se:function(){ return typeof S!=='undefined' && S && typeof eliseoDiSinistra==='function' && eliseoDiSinistra(); },
+                delta:[ {id:'fr_sfio',delta:4.7}, {id:'fr_unr',delta:-13.3}, {id:'fr_ri',delta:-6.7}, {id:'fr_pcf',delta:2.8}, {id:'fr_verts',delta:2.3}, {id:'fr_fn',delta:10.2} ],   // Σ=0
+                urne:  { fr_unr:31.2, fr_sfio:31.0, fr_fn:13.6, fr_pcf:6.9, fr_verts:5.5, fr_ri:1.8 },
+                seggi: { fr_sfio:53.9, fr_verts:3.1, fr_pcf:2.6, fr_unr:39.7, fr_ri:0.2, fr_fn:0.5 } }
   }
 };
 /* L101-1 · D17 · DI CHI È L'ELISEO. Una funzione sola, letta dalle tappe condizionate del 1981 e del 1988: la
@@ -2082,6 +2131,16 @@ function scissioneTrasloca(destId, destDef){
   applicaRosterDelta(true);
   rinormalizzaForze();
 }
+/* L105-4 · RINOMINARE IL PARTITO DI CHI GIOCA, senza scissione. La tappa non può (applicaDirettive ignora la `rinomina` sul
+   partito del giocatore: serve uno snodo); lo snodo usa questa. È il pezzo di scissioneDisperdi che rinomina, senza toccare
+   la forza: bastava anche scissioneDisperdi(nome, forza attuale), ma una funzione col suo nome dice che cosa fa. Il registro
+   è quello di sempre (S.rosterDelta.rinomina), quindi il salvataggio se lo porta dietro. */
+function rinominaPartitoMio(nome){
+  if(typeof S==='undefined' || !S || !S.partito || !nome) return;
+  S.rosterDelta = S.rosterDelta || {entra:[], esce:[], rinomina:[]};
+  S.rosterDelta.rinomina.push({ id:S.partito, nome:nome });
+  applicaRosterDelta(true);
+}
 /* ============================================================================================================
    L44-1 · IL CHANGEOVER — l'unico cambio-valuta in corsa di tutta la linea. Il 1° gennaio 2002 la lira esce
    di scena: `S.valuta` torna a `null`, che nel gioco vuol dire euro (`euro()` in ui.js legge quel campo e col
@@ -2089,19 +2148,26 @@ function scissioneTrasloca(destId, destDef){
    rapporti, quindi cambia il modo di scrivere i numeri, non i numeri.
    È idempotente e reload-safe: `S.valuta` sta dentro S, quindi il salvataggio se lo porta dietro, e la
    funzione non fa nulla se il cambio è già avvenuto. Il beat nel log esce UNA volta sola, al mese giusto. */
+/* L105-2 · D30 · IL CHANGEOVER È DI OGNI LINEA CHE LO HA. Una riga per linea: l'anno, il fattore ufficiale e il testo del
+   beat. ⚑ L105-3 · LA CIFRA SI DIVIDE PER IL FATTORE INTERO (1936,27 per la lira, 6,55957 per il franco). `S.pil` è in
+   MILIARDI della valuta della porta, e dopo il cambio si legge in miliardi di euro come nel presente (l'Italia di oggi ha
+   2150): 2 400 000 mld di lire → 1 239 mld di euro, 9 450 mld di franchi → 1 441. Fino al L105-3 si divideva per
+   fattore/1000, e il Bilancio dello Stato si leggeva «€570 tln» invece di «€570 mld» — il commento di L44-1 lo dava per
+   «verificato» con un calcolo fatto sull'unità sbagliata, non guardando la schermata (lezione 194). */
+const CHANGEOVER = {
+  [LINEA_IT]: { anno:2002, fattore:1936.27, testo:'Da oggi i prezzi si scrivono in euro: milleNovecentoTrentasei lire e ventisette centesimi ne fanno uno. Il portafoglio è lo stesso, i conti sembrano un altro paese.' },
+  [LINEA_FR]: { anno:2002, fattore:6.55957, testo:'Da oggi i prezzi si scrivono in euro: sei franchi e cinquantasei centesimi ne fanno uno. Il portafoglio è lo stesso, i conti sembrano un altro paese.' },
+};
 function changeoverEuro(){
-  if(typeof S==='undefined' || !S || S.era!==LINEA_IT) return;
+  if(typeof S==='undefined' || !S) return;
+  var C = CHANGEOVER[S.era]; if(!C) return;              // una linea senza changeover (il Regno Unito) non passa di qui
   if(!S.valuta) return;                                  // già in euro (o presente): niente da fare
-  if(S.year<2002) return;
-  /* LA CIFRA VA CONVERTITA, non solo l etichetta. Senza questa riga il PIL passava da «L. 1.358 mld lire» a
-     «€1,36 tln»: stesso numero, valuta nuova, e il paese sembrava aver raddoppiato la ricchezza in una notte.
-     Il fattore è 1,93627 e non 1936,27 perché cambia anche l unità di lettura del campo (il ramo-lira di euro()
-     stampa  in miliardi, il ramo-euro in milioni). Verificato: 1.358.000 -> 701.349, cioè «€0,70 tln»,
-     che è il PIL italiano vero del 1990 in euro. Tutto il resto del motore è a RAPPORTI e non si tocca: debito
-     e disavanzo restano percentuali, e il bilancio locale (che scala su S.pil) si converte da sé. */
-  if(S.pil) S.pil = Math.round(S.pil / 1.93627);
+  if(S.year<C.anno) return;
+  /* LA CIFRA VA CONVERTITA, non solo l etichetta (L44-1). Il PIL è una RESA: nessuna meccanica lo legge (grep del L105-3:
+     cruscotto e bilancio in ui.js, costi delle scelte, bilancio locale alla nascita di una carriera locale). */
+  if(S.pil) S.pil = Math.round(S.pil / C.fattore);
   S.valuta = null;
-  if(S.log) S.log.unshift({t:T('L\'euro'), x:T('Da oggi i prezzi si scrivono in euro: milleNovecentoTrentasei lire e ventisette centesimi ne fanno uno. Il portafoglio è lo stesso, i conti sembrano un altro paese.')});
+  if(S.log) S.log.unshift({t:T('L\'euro'), x:T(C.testo)});
 }
 /* L40-2 · IL CLIMA «QUESTIONE MORALE» (scheda §10.5): una campana, non un interruttore — sale dal '92, picco
    nel '93, scende dal '95. Come il clima-'70 tocca poche leve dichiarate, e **non somma** col resto: la decade
@@ -2240,6 +2306,9 @@ function riallineamentoTappa(){
     else if(S.era===LINEA_FR && S.year===1993) S.log.unshift({t:T('Elezioni del marzo 1993'), x:T('La sinistra perde quattro seggi su cinque: la destra ha la maggioranza più larga che l\'Assemblea abbia mai visto.')});   // L103-1
     else if(S.era===LINEA_FR && S.year===1997) S.log.unshift({t:T('Elezioni del giugno 1997'), x:T('Il Presidente ha sciolto l\'Assemblea con un anno d\'anticipo, e l\'ha persa: la sinistra torna maggioranza, con i comunisti e, per la prima volta, i Verdi.')});   // L103-1
     else if(S.era===LINEA_FR && S.year===1998) S.log.unshift({t:T('Elezioni del marzo 1998'), x:T('La legislatura del \'93 arriva a scadenza e la sinistra la vince: torna maggioranza, con i comunisti e, per la prima volta, i Verdi.')});   // L103-1
+    else if(S.era===LINEA_FR && S.year===2002) S.log.unshift({t:T('Elezioni del giugno 2002'), x:T('Un mese dopo la presidenziale la destra vince anche l\'Assemblea, unita in un partito solo: la coabitazione è finita.')});   // L105-2
+    else if(S.era===LINEA_FR && S.year===2007) S.log.unshift({t:T('Elezioni del giugno 2007'), x:T('Il Presidente appena eletto ha la sua maggioranza; il centro che non si è schierato resta con quattro deputati.')});   // L105-2
+    else if(S.era===LINEA_FR && S.year===2012) S.log.unshift({t:T('Elezioni del giugno 2012'), x:T('Dopo l\'Eliseo la sinistra prende anche l\'Assemblea, e da sola: i socialisti hanno la maggioranza assoluta.')});   // L105-2
     else if(S.era===LINEA_FR && S.year===1978) S.log.unshift({t:T('Elezioni del marzo 1978'), x:T('La destra vince contro tutti i sondaggi: la sinistra divisa perde, e i centristi si ritrovano in una confederazione sola.')});
     else if(S.era===LINEA_IT && S.year===2008) S.log.unshift({t:T('Elezioni 2008'), x:T('Due partiti grandi nati da altrettante fusioni si prendono quasi tutto, e per la prima volta dal dopoguerra la sinistra radicale resta fuori dall\'aula.')});
   }
@@ -2914,6 +2983,7 @@ const STERLINA_ANCORE = [ {id:'a51', da:1951, a:1952}, {id:'a55', da:1955, a:195
    La sterlina lo chiama con gli stessi argomenti di prima: comportamento identico (baseline delle tredici porte). */
 function ancoraValutaDovuta(linea, ancore, fatte, bloccata){
   if(typeof S==='undefined' || !S || S.era!==linea || S.livello!==3 || S.opposizione) return null;
+  if(S.coabitazione) return null;   // L105-1: la difesa del cambio (e il prezzo del petrolio, che passa di qui) è del governo, non del Presidente in coabitazione
   if(bloccata) return null;
   fatte=fatte||{};
   for(var i=0;i<ancore.length;i++){ var A=ancore[i];
@@ -3039,6 +3109,15 @@ function franco90AncoraDovuta(){
   if(typeof S==='undefined' || !S) return null;
   return ancoraValutaDovuta(LINEA_FR, FRANCO90_ANCORE, S.francoAncore, false);
 }
+/* L105-4 · GLI SNODI DEL DECENNIO FRANCESE 2000. Finestre di tre mesi, nessun mese occupato da un pilastro. S1 e S2 sono del
+   Presidente anche in coabitazione (S1: la coabitazione d'avvio dura fino alla tappa del giugno 2002); S3 e S4 del governo
+   senza coabitazione. S1 dall'aula è di chi gioca il PS o il PCF; S4 dall'aula di chiunque sia all'opposizione. */
+function snodoAprile02Dovuta(){      return typeof S!=='undefined' && S && S.era===LINEA_FR && S.livello===3 && !S.opposizione && S.aprile02==null && !eliseoDiSinistra() && S.year===2002 && S.month>=2 && S.month<=4; }
+function snodoAprile02OppDovuta(){   return typeof S!=='undefined' && S && S.era===LINEA_FR && S.livello===3 && S.opposizione && S.aprile02Opp==null && S.aprile02==null && (S.partito==='fr_sfio' || S.partito==='fr_pcf') && !eliseoDiSinistra() && S.year===2002 && S.month>=2 && S.month<=4; }
+function snodoTce05Dovuta(){         return typeof S!=='undefined' && S && S.era===LINEA_FR && S.livello===3 && !S.opposizione && S.tce05==null && S.year===2005 && S.month>=5 && S.month<=7; }
+function snodoBanlieue05Dovuta(){    return typeof S!=='undefined' && S && S.era===LINEA_FR && S.livello===3 && !S.opposizione && !S.coabitazione && S.banlieue05==null && ((S.year===2005 && S.month>=11) || (S.year===2006 && S.month===1)); }
+function snodoCrisi08frDovuta(){     return typeof S!=='undefined' && S && S.era===LINEA_FR && S.livello===3 && !S.opposizione && !S.coabitazione && S.crisi08fr==null && S.year===2008 && S.month>=10 && S.month<=12; }
+function snodoCrisi08frOppDovuta(){  return typeof S!=='undefined' && S && S.era===LINEA_FR && S.livello===3 && S.opposizione && S.crisi08frOpp==null && S.crisi08fr==null && S.year===2008 && S.month>=10 && S.month<=12; }
 /* IL PREZZO DEL PETROLIO (§B della scheda): due ancore col mese, nel gate parametrizzato. Tutte e due cadono in un mese
    occupato (pm_petrolio a ottobre 1973, «L'Europa vota» a giugno 1979) ed escono il mese dopo. La prima si chiude a
    febbraio 1974, prima del piano nucleare: la scelta energetica viene dopo il primo shock, e legge il secondo. */
@@ -4792,6 +4871,8 @@ function genAgendaRamo(first){
     if(!first && typeof snodoRigore83OppDovuta==='function' && snodoRigore83OppDovuta()){ S.agenda.push({kind:'event', data:RIGORE83_OPP_EV, resolved:false}); agendaSolo(); return; }   // L101-2: il rigore, dall'aula
     if(!first && typeof snodoRef92OppDovuta==='function' && snodoRef92OppDovuta()){ S.agenda.push({kind:'event', data:REF92_OPP_EV, resolved:false}); agendaSolo(); return; }   // L103-2: Maastricht, dall'aula
     if(!first && typeof snodoPiano95OppDovuta==='function' && snodoPiano95OppDovuta()){ S.agenda.push({kind:'event', data:PIANO95_OPP_EV, resolved:false}); agendaSolo(); return; }   // L103-2: il dicembre in piazza
+    if(!first && typeof snodoAprile02OppDovuta==='function' && snodoAprile02OppDovuta()){ S.agenda.push({kind:'event', data:APRILE02_OPP_EV, resolved:false}); agendaSolo(); return; }   // L105-4: il 21 aprile, dall'aula
+    if(!first && typeof snodoCrisi08frOppDovuta==='function' && snodoCrisi08frOppDovuta()){ S.agenda.push({kind:'event', data:CRISI08FR_OPP_EV, resolved:false}); agendaSolo(); return; }   // L105-4: la crisi, dall'aula
     // Cantiere C: la stagione elettorale vale anche da SFIDANTE (bloccoIds = il tuo blocco d'opposizione)
     if(typeof pickCampagnaNazionale==='function'){ const cnbO=pickCampagnaNazionale(); if(cnbO){ S.agenda.push(cnbO); agendaSolo(); return; } }
     const inq=aggiornaInchiesta();   // anche da sfidante l'esposizione conta: bersaglio sempre tu (niente ministri qui)
@@ -4908,6 +4989,10 @@ function genAgendaRamo(first){
   if(!first && typeof snodoSarajevo94Dovuta==='function' && snodoSarajevo94Dovuta()){ S.agenda.push({kind:'event', data:SARAJEVO94_EV, resolved:false}); agendaSolo(); return; }   // L103-2
   if(!first && typeof snodoPiano95Dovuta==='function' && snodoPiano95Dovuta()){ S.agenda.push({kind:'event', data:PIANO95_EV, resolved:false}); agendaSolo(); return; }        // L103-2
   if(!first && typeof snodoScioglimento97Dovuta==='function' && snodoScioglimento97Dovuta()){ S.agenda.push({kind:'event', data:SCIOGLIMENTO97_EV, resolved:false}); agendaSolo(); return; }   // L103-2
+  if(!first && typeof snodoAprile02Dovuta==='function' && snodoAprile02Dovuta()){ S.agenda.push({kind:'event', data:APRILE02_EV, resolved:false}); agendaSolo(); return; }        // L105-4
+  if(!first && typeof snodoTce05Dovuta==='function' && snodoTce05Dovuta()){ S.agenda.push({kind:'event', data:TCE05_EV, resolved:false}); agendaSolo(); return; }                // L105-4
+  if(!first && typeof snodoBanlieue05Dovuta==='function' && snodoBanlieue05Dovuta()){ S.agenda.push({kind:'event', data:BANLIEUE05_EV, resolved:false}); agendaSolo(); return; }  // L105-4
+  if(!first && typeof snodoCrisi08frDovuta==='function' && snodoCrisi08frDovuta()){ S.agenda.push({kind:'event', data:CRISI08FR_EV, resolved:false}); agendaSolo(); return; }    // L105-4
   if(!first && typeof franco90AncoraDovuta==='function'){ var _f9=franco90AncoraDovuta();   // L103-2: la corsa al franco del '92 e del '93
     if(_f9){ S.francoAncore=S.francoAncore||{}; S.francoAncore[_f9]=true; if(_f9==='a92' && pesoFranco92()>1) S.francoGrave=true;   // col no a Maastricht pesa doppio
       S.agenda.push({kind:'event', data:(_f9==='a92' ? FRANCO92_EV : FRANCO93_EV), resolved:false}); agendaSolo(); return; } }
@@ -7054,6 +7139,7 @@ function applySnap(snap){
   if(S.ref72Opp===undefined){ S.ref72Opp=null; S.barreOpp=null; S.campagna78=null; S.petrolio73=null; S.petrolio79=null; }   // L99-2
   if(S.riforme81===undefined){ S.riforme81=null; S.rigore83=null; S.scuola84=null; S.ordinanze86=null; S.riforme81Opp=null; S.rigore83Opp=null; }   // L101-2
   if(S.ref92===undefined){ S.ref92=null; S.ref92Opp=null; S.sarajevo94=null; S.piano95=null; S.piano95Opp=null; S.quinquennato00=null; }   // L103-2
+  if(S.aprile02===undefined){ S.aprile02=null; S.aprile02Opp=null; S.tce05=null; S.banlieue05=null; S.crisi08fr=null; S.crisi08frOpp=null; }   // L105-4
   if(S.scioglimento97===undefined) S.scioglimento97=null;   // L103-1
   if(S.coabitazione===undefined) S.coabitazione=false;   // L100-2
   if(S.governiCaduti===undefined) S.governiCaduti=0;   // L80-5
