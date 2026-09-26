@@ -96,6 +96,13 @@ const SCENES = {
   hero: S_+'hero.webp',
 };
 
+/* ===== L95-4 — LE CLIP IN MOVIMENTO (`assets/video/`). Una clip ha lo STESSO NOME del .webp della scena che
+   anima (l'hero fa eccezione: `home-hero`), perché il suo primo fotogramma è quell'immagine e il passaggio non
+   deve vedersi. La lista è una promessa sulla cartella, come AUDIO_PRESENTI: il gioco chiede SOLO questi file
+   (zero 404), e `.claude/verifica-asset.js` tiene allineate lista e cartella e pretende che ogni nome abbia la
+   sua scena. Contratto e condizioni (movimento «pieno», niente risparmio dati) in DESIGN-MOVIMENTO.md e ui.js. */
+const VIDEO_PRESENTI = ['home-hero'];
+
 /* ===== L9-1 — SCENE DEI MOMENTI (NON card): fondi/illustrazioni per i modali di solo testo.
    Cablate direttamente nei render (intervista/notte/telefonata/finale) e nel selettore-scenario,
    MAI nel selettore-carta generico. Gli helper era-aware stanno in ui.js (dove vive eraCombacia). ===== */

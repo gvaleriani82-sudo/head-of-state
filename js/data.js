@@ -1555,6 +1555,64 @@ const SCENARI = {
     ],
   },
   /* ============================================================================================================
+     L112-1 · GERMANIA 1970 — la terza porta della linea tedesca (scheda PRESET-GERMANIA-1970.md). Si apre col Bundestag del
+     1969 e il primo governo socialdemocratico-liberale, e chiude col 1981: la Ostpolitik, le prime anticipate (1972), il
+     petrolio, la spia, la recessione del 1975, l'autunno tedesco, i Verdi.
+     LE ISTITUZIONI come de1960 (sfiducia costruttiva, sbarramento 5, Bonn, marco). `ue:false`: le porte del '70 degli altri
+     paesi non sono coerenti fra loro (italia1970 e uk1970 false, fr1970 true) — si segue la maggioranza e le due porte tedesche
+     precedenti (dichiarato).
+     IL ROSTER: CDU/CSU, SPD, FDP, NPD (non selezionabile, crolla dopo il 1969 senza un `esce`); i Verdi entrano alla tappa del
+     1980/1 (non selezionabili: la carriera verde è di de1980, D46) con l'id del presente, `de_grn` (la scheda diceva `de_verdi`:
+     lo stesso id del roster di oggi salda la linea al presente). `alleati`: SPD↔FDP e CDU↔FDP ordinari (D47), CDU↔SPD di
+     RISERVA come in de1960.
+     FORZE: urne del 1969 sui quattro (46,1 · 42,7 · 5,8 · 4,3, somma 98,9) → 46,6 · 43,2 · 5,9 · 4,3. SEGGI: il Bundestag del 1969
+     senza Berlino, come lo lascia la tappa del 1969/9 di de1960 (48,8 · 45,2 · 6,0).
+     `forzaAncora` (L111-1, la media del decennio): urne 1972 · 1976 · 1980 → CDU/CSU 46,01 · SPD 43,76 · FDP 8,97 · NPD 0,35
+     (somma 99,09), rinormalizzate → **CDU 46,4 · SPD 44,2 · FDP 9,0** (conto di Code: 46,44 · 44,16 · 9,05, uguale alla scheda al
+     decimale). La NPD non la dichiara (scheda): la sua àncora resta la forza d'avvio. Nessun `esce` con `ancora:true`: niente
+     da sottrarre.
+     L'URNA DEL MOTORE: `turnMandato:2` sul Bundestag del settembre 1969 → urne **1972/1 · 1976/1 · 1980/1** (la proposta della
+     scheda, §H i): l'urna anticipata del novembre 1972 cade dieci mesi dopo quella del motore, come il settembre di ogni tappa
+     dopo il gennaio del motore (la convenzione delle porte parlamentari, de1950 e de1960). Nessun campo nuovo: la regola c'è già.
+     LA CRESCITA DI PARTENZA 4,5 come de1960 (la media del decennio è ~3): le righe di ciclo e di disoccupazione della linea sono
+     scostamenti da questa base, e le righe del 1970-71 le leggono tutte e due le porte (la coda di de1960 arriva al 1971) —
+     con due basi diverse la stessa riga darebbe due anni diversi.
+     ============================================================================================================ */
+  de1970: {
+    id:'de1970', era:LINEA_DE, nome:'Germania 1970', anno:1970, paese:'germania',
+    turnMandato: 2,
+    sistema: 'parlamentare', comeSiVince: 'parlamentare', coalizione: true, cadutaGoverno: true,
+    sfiduciaCostruttiva: true, sbarramento: 5,
+    mandatoMesi: 48, mandatiMax: null,
+    titoloRuolo: 'Cancelliere', sedeGoverno: 'Palazzo Schaumburg',
+    capitale: 'Bonn',
+    ue: false,
+    intermedie: [ {tipo:'Elezioni nei Länder', mese:24, tocca:'regione'} ],
+    partiti: [
+      { id:'de_cdu', nome:'CDU/CSU', orientamento:'centrodestra',   base:{ cattolici:0.35, cetomedio:0.35, imprenditori:0.3 }, forza:46.6, forzaAncora:46.4, asse:1,  alleati:['de_fdp'], alleatiRiserva:['de_spd'] },
+      { id:'de_spd', nome:'SPD',     orientamento:'centrosinistra', base:{ lavoratori:0.6, pensionati:0.2, giovani:0.2 },    forza:43.2, forzaAncora:44.2, asse:-1, alleati:['de_fdp'], alleatiRiserva:['de_cdu'] },
+      { id:'de_fdp', nome:'FDP',     orientamento:'liberale',       base:{ imprenditori:0.5, cetomedio:0.5 },                forza:5.9,  forzaAncora:9.0,  asse:1,  alleati:['de_cdu','de_spd'] },
+      { id:'de_npd', nome:'NPD',     orientamento:'destra',         base:{ pensionati:0.4, cetomedio:0.3, lavoratori:0.3 },  forza:4.3,  asse:2,  alleati:[],
+        selezionabile:false, nota:'La NPD non entra mai nel Bundestag: sta sotto la soglia del cinque per cento' },
+    ],
+    /* il Bundestag del 1969 senza Berlino (496), come lo lascia de1960 */
+    seggi: { de_cdu:48.8, de_spd:45.2, de_fdp:6.0, de_npd:0 },
+    /* ⚠ cifre della scheda §2, ordine di grandezza (Destatis/Bundesbank da confermare): in miliardi di marchi. */
+    economia: { pil:675, debito:18.5, deficit:0, inflazione:3.4, inflazioneTetto:8, crescita:4.5, disoccupazione:0.7, disoccupazionePavimento:0.5 },
+    debtAncora: 18.5,
+    inflazione: 3.4,
+    crescita: 4.5,
+    logorioEra: 0.012,
+    valuta: VALUTA_MARCO,
+    quotaSpesa: 0.30,                           // ⚠ come de1950 e de1960: da confermare
+    intro: "Germania, 1970. Per la prima volta in vent'anni il Cancelliere è socialdemocratico, e governa con i liberali con dodici seggi di margine.",
+    contesto: [
+      "Germania, 1970. Il paese è ricco e inquieto: le università sono ancora in fermento, e la disoccupazione non arriva all'uno per cento.",
+      "Il nuovo governo vuole parlare con l'Est: con Mosca, con Varsavia, perfino con l'altra Germania. L'opposizione la chiama una svendita.",
+      "L'Unione cristiana resta il primo partito e siede all'opposizione per la prima volta; nella sua ala destra c'è chi aspetta che i liberali cambino campo.",
+    ],
+  },
+  /* ============================================================================================================
      L44-3 · ITALIA 2000 — la settima e ultima porta. Stessa LINEA; il roster è quello uscito dalla frana del '94
      (PPI, PDS, AN, Rifondazione, Lega, FI, CCD e i laici superstiti), anno d'avvio 2000.
 
@@ -2473,6 +2531,21 @@ const PILASTRI_LINEA = [
     t:'L\'aereo di linea in Franconia',
     text:'Un aereo di linea cecoslovacco partito da Praga si schianta nella campagna della Franconia, vicino a Igensdorf: cinquantadue morti, nessun superstite. Le cause non saranno mai chiarite del tutto; il relitto è sul lato occidentale di un confine che i due paesi non riconoscono.',
     logx:'Un aereo di linea cecoslovacco cade in Franconia: cinquantadue morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  /* L111-2 · i due pilastri della linea tedesca del '60 (testi di Cowork, byte per byte). Cifre verificate da Code sulla fonte
+     (en.wikipedia, 26/9): alluvione del 16-17 febbraio 1962, 315 morti ad Amburgo, un sesto della città sotto l'acqua, il senatore
+     di polizia chiama l'esercito oltre i suoi poteri (⚠ la fonte dice «circa 50 falle» prima dell'allarme, il testo «sessanta punti»:
+     non toccato, segnalato) · Luisenthal 7 febbraio 1962, 299 morti, oltre 600 metri, grisou e polvere di carbone, «la sciagura
+     mineraria più grave della Repubblica federale». Un pilastro per mese: Amburgo a febbraio, Luisenthal a marzo (il testo lo dice). */
+  { id:'pde60_amburgo', linea:LINEA_DE, anno:1962, mese:2, era:'de1960', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Amburgo sott\'acqua',
+    text:'Nella notte fra il 16 e il 17 febbraio una tempesta spinge il mare del Nord su per l\'Elba e le dighe cedono in sessanta punti. Un sesto di Amburgo finisce sott\'acqua mentre la gente dorme, soprattutto nei quartieri di baracche e casette dove vivevano ancora gli sfollati della guerra: più di trecento morti. Il senatore dell\'interno chiama l\'esercito e gli alleati senza aspettare nessuno, e la città se lo ricorderà.',
+    logx:'Il mare rompe le dighe dell\'Elba: Amburgo sott\'acqua, più di trecento morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pde60_luisenthal', linea:LINEA_DE, anno:1962, mese:3, era:'de1960', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Luisenthal',
+    text:'Il 7 febbraio un\'esplosione di grisou e polvere di carbone attraversa le gallerie della miniera di Luisenthal, nella Saar, a seicento metri di profondità: duecentonovantanove minatori morti. È la sciagura mineraria più grave del dopoguerra tedesco. Dieci giorni dopo arriverà l\'alluvione di Amburgo, e il paese avrà due lutti nello stesso inverno.',
+    logx:'Esplosione nella miniera di Luisenthal: duecentonovantanove minatori morti.',
     ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
 ];
 
@@ -3557,6 +3630,17 @@ const BEAT_LEGGERI = [
   {id:'lgde50_ricostruzione', era:'de1950', registro:'leggero', cond:()=>S.year<=1954, kick:'Il paese', t:'Le donne delle macerie', text:'Nelle città ancora a metà, file di donne passano i mattoni di mano in mano e li puliscono uno a uno. Con quelli si rifanno le case.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
   {id:'lgde50_carnevale', era:'de1950', registro:'leggero', cond:()=>S.month===2, kick:'Il paese', t:'Il carnevale del Reno', text:'A Colonia e a Magonza i carri tornano in strada: i potenti in cartapesta, le bande, i discorsi in dialetto. Quest\'anno sul carro più grande c\'è Bonn.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
   {id:'lgde50_frigo', era:'de1950', registro:'leggero', cond:()=>S.year>=1957, kick:'Il paese', t:'Il frigorifero', text:'Uno su dieci ce l\'ha: la pubblicità lo mostra accanto a una casalinga sorridente e a un pollo intero. La banca presta i soldi a rate; le rate si pagano col miracolo.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  /* L111-2 · i dieci beat leggeri del decennio tedesco '60 (scheda PRESET-GERMANIA-1960 §I-D). */
+  {id:'lgde60_lengede', era:'de1960', registro:'leggero', cond:()=>S.year===1963&&S.month>=11, kick:'Il paese', t:'Il miracolo di Lengede', text:'Quattordici giorni dopo il crollo della miniera, una sonda trova undici minatori vivi in una sacca d\'aria. Il paese li guarda uscire uno per uno alla televisione, alle tre di notte.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde60_beat', era:'de1960', registro:'leggero', cond:()=>S.year>=1965, kick:'Il paese', t:'I capelloni', text:'Ad Amburgo i ragazzi con i capelli lunghi fanno la fila per i gruppi inglesi che hanno imparato il mestiere proprio lì, nei locali del porto. I padri parlano di decadenza; i figli comprano chitarre.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde60_colore', era:'de1960', registro:'leggero', cond:()=>S.year===1967&&S.month>=8, kick:'Il paese', t:'La televisione a colori', text:'Alla fiera di Berlino un politico preme un pulsante rosso e le trasmissioni diventano a colori — un secondo prima del pulsante, dicono i tecnici. Costa quanto un\'utilitaria.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde60_maiorca', era:'de1960', registro:'leggero', cond:()=>S.year>=1962, kick:'Il paese', t:'Le vacanze in aereo', text:'Per la prima volta le famiglie volano al mare: due settimane nelle Baleari, tutto compreso, meno di un mese di stipendio. Le spiagge spagnole imparano le parole tedesche della colazione.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde60_pillola', era:'de1960', registro:'leggero', cond:()=>S.year>=1961&&S.year<=1966, kick:'Il paese', t:'La pillola', text:'In farmacia arriva la pillola, ma i medici la prescrivono solo alle donne sposate e «per disturbi mestruali». Nelle università nessuno ci crede.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde60_wembley', era:'de1960', registro:'leggero', cond:()=>S.year===1966&&S.month>=7&&S.month<=8, kick:'Il paese', t:'Il gol di Londra', text:'La finale del Mondiale, i supplementari, un tiro che colpisce la traversa e rimbalza forse dentro, forse no. L\'arbitro dice dentro. Il paese discuterà di quel metro di erba per cinquant\'anni.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde60_comune', era:'de1960', registro:'leggero', cond:()=>S.year>=1967&&S.year<=1969, kick:'Il paese', t:'La comune', text:'A Berlino un gruppo di studenti vive in un appartamento senza porte chiuse e fotografa la propria vita per i giornali. I giornali la pubblicano, e i lettori si scandalizzano ogni settimana.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde60_autostrada', era:'de1960', registro:'leggero', cond:()=>S.year>=1963, kick:'Il paese', t:'La domenica in autostrada', text:'Il sabato pomeriggio libero, la macchina nuova, e l\'autostrada senza limiti di velocità: la domenica il paese va a trovare i parenti a centoquaranta all\'ora.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde60_krimi', era:'de1960', registro:'leggero', cond:()=>S.year>=1962&&S.year<=1966, kick:'Il paese', t:'Le strade vuote', text:'Quando la televisione trasmette il giallo a puntate, le strade si svuotano e la polizia registra un calo dei furti: i ladri, dicono, sono davanti al televisore anche loro.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde60_luna', era:'de1960', registro:'leggero', cond:()=>S.year===1969&&S.month>=7&&S.month<=8, kick:'Il paese', t:'La notte della Luna', text:'Alle quattro del mattino mezzo paese è sveglio davanti al televisore. Il giorno dopo, negli uffici, nessuno lavora e tutti parlano della stessa cosa.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
 ];
 
 /* ===== F1 — LA TELEFONATA. Un'interruzione, non una carta: overlay a squillo, due opzioni secche, decisione a
@@ -5783,6 +5867,17 @@ const DOSSIERS=[
    {l:'Dodici mesi',e:'La storia · la prima classe entra in caserma nel 1957 · i genitori mugugnano, i generali pure',f:()=>{repd(2); gdDe50('giovani',-3);}},
    {l:'Diciotto mesi',e:'Gli alleati applaudono · i ragazzi no',f:()=>{repd(3); gdDe50('giovani',-6); gdDe50('pensionati',-1);}},
    {l:'Solo volontari',e:'Un esercito piccolo · l\'Alleanza chiede quando arriverà il resto',f:()=>{repd(-4); gdDe50('giovani',3);}}]},
+ /* L111-2 · i due dossier del decennio tedesco '60 (scheda §I-F). */
+ {id:'dde60_atomica',era:'de1960',cond:()=>S.year>=1966&&S.year<=1969,min:'esteri',kick:'La difesa',t:'Il trattato contro l\'atomica',
+  text:'Washington e Mosca preparano un trattato che vieta a chi non ha l\'atomica di averla. Il paese non la vuole, ma non vuole nemmeno firmare una rinuncia per sempre mentre l\'altra Germania esiste e la divisione pure.',ch:[
+   {l:'Firmare, con una dichiarazione sull\'Europa',e:'La storia che verrà · la firma arriva nel 1969 · la destra la chiama una seconda Versailles',f:()=>{repd(4); baseDe60(-2); gdDe60('giovani',2);}},
+   {l:'Aspettare garanzie',e:'Il trattato si fa senza di te · per ora',f:()=>{repd(-2);}},
+   {l:'Non firmare',e:'Nessuna rinuncia · e tutti si chiedono perché',f:()=>{repd(-6); baseDe60(2);}}]},
+ {id:'dde60_carri',era:'de1960',cond:()=>S.year>=1962&&S.year<=1965,min:'difesa',kick:'La difesa',t:'L\'aereo che cade',
+  text:'I nuovi caccia americani dell\'aviazione cadono uno dopo l\'altro: decine di piloti morti in pochi anni. I giornali li chiamano «bare volanti»; lo stato maggiore dice che l\'aereo è buono e i piloti giovani. Le vedove chiedono chi ha scelto quell\'aereo.',ch:[
+   {l:'Tenerli a terra finché non si capisce',e:'L\'aviazione resta senza caccia per mesi · l\'Alleanza chiede spiegazioni',f:()=>{repd(-2); gdDe60('cetomedio',2); stampad(2);}},
+   {l:'Addestramento più lungo, gli aerei restano',e:'La storia, a metà · gli incidenti calano, lentamente',f:()=>{stampad(-1);}},
+   {l:'Un\'inchiesta sul contratto d\'acquisto',e:'Il ministero trema · e l\'aereo resta in volo',f:()=>{stampad(3); baseDe60(-2);}}]},
  {id:'d50_marshall_dip',era:'italia1950',cond:()=>S.year<=1953,min:'esteri',kick:'Piano Marshall',t:'La dipendenza dagli aiuti',text:'Gli aiuti americani hanno rimesso in moto il paese, ma ora chiedono allineamento politico e commerciale. Fin dove seguire l\'alleato?',ch:[
    {l:'Allineamento pieno con l\'alleato',e:'Aiuti e protezione; la pancia mormora',pleases:'tecnico',f:()=>{repd(4); if(S.gMod!=null)S.gMod+=0.1; gd('cetomedio',-1);}},
    {l:'Amicizia sì, ma con margini nostri',e:'Autonomia rivendicata; l\'alleato prende nota',pleases:'populista',f:()=>{repd(-2); gd('cetomedio',2);}},
@@ -8425,6 +8520,57 @@ const EVENTS=[
    {l:'Nessun passo indietro: gli alleati restano',e:'La storia · l\'ultimatum scade senza che succeda niente · la città resta un\'isola, e la gente continua a passare',f:()=>{repd(3); gdDe50('cetomedio',2); gdDe50('pensionati',1);}},
    {l:'Proponi una conferenza a quattro',e:'I ministri si incontrano a Ginevra · Berlino aspetta',f:()=>{repd(1);}},
    {l:'Tratta con Mosca sulla città',e:'Un\'apertura che gli alleati non volevano · e i berlinesi si sentono venduti',f:()=>{repd(-5); gdDe50('pensionati',-2); gdDe50('cetomedio',-3);}}]},
+ /* L111-2 · i dieci eventi del decennio tedesco '60 (scheda PRESET-GERMANIA-1960 §I-C). */
+ {id:'de60_auschwitz', era:'de1960', cond:()=>S.year>=1963&&S.year<=1965, tono:'grave', kick:'La giustizia', t:'Il processo di Francoforte',
+  text:'Il procuratore dell\'Assia porta in aula ventidue uomini che lavoravano nel campo di Auschwitz. Per venti mesi i testimoni raccontano in tribunale quello che il paese non voleva sentire. Il governo può tacere, o dire qualcosa.',ch:[
+   {l:'Il Cancelliere parla al paese',e:'Un discorso che nessuno si aspettava · i giovani ascoltano, una parte dei tuoi elettori no',f:()=>{gdDe60('giovani',5); repd(4); gdDe60('pensionati',-3); baseDe60(-2);}},
+   {l:'Il processo è della giustizia: nessun commento',e:'La storia · il governo tace · il processo parla per tutti',f:()=>{repd(1);}},
+   {l:'Basta processi: è ora di chiudere il passato',e:'Una parte del paese annuisce · il mondo prende nota, e i giovani anche',f:()=>{gdDe60('pensionati',3); gdDe60('giovani',-6); repd(-6); stampad(-4);}}]},
+ {id:'de60_prescrizione', era:'de1960', cond:()=>S.year===1965&&S.month<=5, tono:'grave', kick:'La giustizia', t:'La prescrizione',
+  text:'Tra poche settimane i crimini di omicidio del regime vanno in prescrizione: vent\'anni dalla fine della guerra. Chi non è stato ancora processato non lo sarà mai. Il Bundestag può spostare la data.',ch:[
+   {l:'Spostare la data di quattro anni',e:'La storia · il dibattito più alto della legislatura · e la domanda torna nel 1969',f:()=>{repd(3); gdDe60('giovani',3); gdDe60('pensionati',-1);}},
+   {l:'Abolire la prescrizione per l\'omicidio',e:'Una volta per tutte · la destra del tuo partito vota contro',f:()=>{repd(5); gdDe60('giovani',4); baseDe60(-3);}},
+   {l:'Lasciarla scadere',e:'Chi è sfuggito resta libero · il mondo non lo dimentica',f:()=>{repd(-8); gdDe60('pensionati',2); gdDe60('giovani',-5); stampad(-4);}}]},
+ {id:'de60_ospiti', era:'de1960', cond:()=>S.year>=1964&&S.year<=1965, kick:'Il lavoro', t:'Il milionesimo',
+  text:'Alla stazione di Colonia arriva un operaio portoghese: è il milionesimo lavoratore straniero, e il sindacato dei datori di lavoro gli regala un motorino davanti ai fotografi. Turchi, italiani, spagnoli, greci: ospiti, dicono. Il contratto dice due anni.',ch:[
+   {l:'Rotazione: due anni e si torna a casa',e:'Le fabbriche protestano, devono formare ogni volta gente nuova · e molti restano lo stesso',f:()=>{gdDe60('imprenditori',-2); gdDe60('cetomedio',1);}},
+   {l:'Chi lavora bene può restare, e portare la famiglia',e:'La storia che verrà · le fabbriche ringraziano, e fra vent\'anni le scuole se ne accorgono',f:()=>{gdDe60('imprenditori',4); gdDe60('cattolici',1); gdDe60('cetomedio',-2);}},
+   {l:'Basta arrivi: prima i tedeschi',e:'I cantieri si fermano · la destra ti applaude',f:()=>{gdDe60('imprenditori',-5); gdDe60('pensionati',2); repd(-2);}}]},
+ {id:'de60_eliseo', era:'de1960', cond:()=>S.year===1963&&S.month<=5, kick:'L\'Europa', t:'Il trattato con Parigi',
+  text:'Il generale e il Cancelliere firmano all\'Eliseo un trattato d\'amicizia: consultazioni ogni sei mesi, scambi di giovani, una politica estera comune. Washington è furiosa; nel Bundestag i filoamericani vogliono aggiungere un preambolo sull\'Alleanza atlantica.',ch:[
+   {l:'Ratifica, col preambolo atlantico',e:'La storia · Parigi si offende per il preambolo · ma i ragazzi francesi e tedeschi cominciano a scambiarsi le case',f:()=>{repd(3); gdDe60('giovani',2);}},
+   {l:'Ratifica così com\'è',e:'Parigi è contenta · Washington no, e lo dice',f:()=>{repd(-1); gdDe60('giovani',2); gdDe60('imprenditori',-1);}},
+   {l:'Rinvia la ratifica',e:'Il trattato resta nel cassetto · il generale si ricorda',f:()=>{repd(-3);}}]},
+ {id:'de60_presidente', era:'de1960', cond:()=>S.year===1963&&S.month>=6&&S.month<=7, kick:'Berlino', t:'Il Presidente a Berlino',
+  text:'Il Presidente americano parla a Berlino Ovest davanti a mezzo milione di persone e dice una frase in tedesco che la folla non dimenticherà. Il Cancelliere è sul palco accanto a lui, o no.',ch:[
+   {l:'Accanto a lui sul palco',e:'La foto che fa il giro del mondo · e il sindaco di Berlino ci è anche lui',f:()=>{repd(3); gdDe60('cetomedio',2); stampad(2);}},
+   {l:'A Bonn: la visita è di Stato, non di piazza',e:'Il protocollo è salvo · la piazza è del sindaco',f:()=>{baseDe60(-2);}},
+   {l:'Chiedi che parli anche dell\'unità',e:'Il discorso cambia di una riga · Washington non gradisce la correzione',f:()=>{repd(-1); gdDe60('pensionati',2);}}]},
+ {id:'de60_miniere', era:'de1960', cond:()=>S.year>=1966&&S.year<=1968, tono:'grave', kick:'Il lavoro', t:'La Ruhr senza carbone',
+  text:'Il petrolio costa meno del carbone e le miniere della Ruhr chiudono una dopo l\'altra: centomila posti in dieci anni. I minatori marciano su Bonn con le lampade accese. Le imprese chiedono di chiudere più in fretta; i sindacati, di non chiudere.',ch:[
+   {l:'Un\'unica società per tutte le miniere, che chiude piano',e:'La storia che verrà · le miniere diventano pubbliche per morire lentamente · nessun minatore resta senza niente',costo:{debito:1},f:()=>{S.ind.debt+=1; gdDe60('lavoratori',5); gdDe60('imprenditori',-2); fidDe60(-1);}},
+   {l:'Chiusure veloci e riqualificazione',e:'La Ruhr cambia in fretta · e le piazze sono piene',f:()=>{gdDe60('lavoratori',-6); gdDe60('imprenditori',3); fidDe60(1);}},
+   {l:'Sussidi al carbone, le miniere restano aperte',e:'I minatori restano · il conto pure, ogni anno',costo:{debito:2},f:()=>{S.ind.debt+=2; gdDe60('lavoratori',4); fidDe60(-2);}}]},
+ {id:'de60_2giugno', era:'de1960', cond:()=>S.year===1967&&S.month>=6&&S.month<=8, tono:'grave', kick:'L\'ordine', t:'Il 2 giugno',
+  text:'Durante la visita di un sovrano straniero a Berlino, davanti all\'Opera, un poliziotto uccide con un colpo alla testa uno studente disarmato che assisteva alla manifestazione. Il poliziotto dice legittima difesa; i testimoni no. Le università esplodono.',ch:[
+   {l:'Un\'inchiesta indipendente sulla polizia di Berlino',e:'Gli studenti la chiedono, la polizia no · il paese scopre che la domanda non è più solo degli studenti',f:()=>{gdDe60('giovani',4); stampad(2); gdDe60('pensionati',-2);}},
+   {l:'Solidarietà alla polizia, ordine nelle università',e:'La storia, all\'inizio · e da quel giorno una parte dei ragazzi smette di credere allo Stato',f:()=>{gdDe60('giovani',-8); gdDe60('pensionati',3); gdDe60('cetomedio',2); stampad(-3);}},
+   {l:'Il silenzio: è una questione di Berlino',e:'Bonn non dice niente · Berlino brucia da sola',f:()=>{gdDe60('giovani',-4); stampad(-2);}}]},
+ {id:'de60_attentato', era:'de1960', cond:()=>S.year===1968&&S.month>=4&&S.month<=5, tono:'grave', kick:'L\'ordine', t:'Gli spari a Berlino',
+  text:'Un giovane di estrema destra spara in testa al capo degli studenti di Berlino, per strada. Sopravviverà a stento. Quella sera gli studenti assaltano le sedi del gruppo editoriale che da mesi li chiama teppisti; per Pasqua le strade di tutto il paese sono piene.',ch:[
+   {l:'Una commissione sulla concentrazione della stampa',e:'Gli studenti la chiedevano · l\'editore la chiama censura',f:()=>{gdDe60('giovani',4); stampad(-4); gdDe60('cetomedio',-1);}},
+   {l:'Ordine pubblico e processi per gli assalti',e:'Le strade si svuotano dopo Pasqua · il conflitto no',f:()=>{gdDe60('giovani',-6); gdDe60('pensionati',3); gdDe60('cetomedio',2);}},
+   {l:'Il Cancelliere incontra gli studenti',e:'Un pomeriggio di discussione in televisione · nessuno convince nessuno, ma tutti guardano',f:()=>{gdDe60('giovani',3); stampad(2); baseDe60(-2);}}]},
+ {id:'de60_marco', era:'de1960', cond:()=>(S.year===1968&&S.month>=10)||(S.year===1969&&S.month<=9), kick:'L\'economia', t:'Il marco troppo forte',
+  text:'I capitali di mezzo mondo comprano marchi aspettando che valga di più; la Banca federale chiede di rivalutare, gli esportatori dicono che li rovinerebbe. La Francia sta svalutando. A Bonn si litiga in pubblico.',ch:[
+   {l:'Rivaluta, subito',e:'Gli speculatori perdono · gli esportatori anche, per un po\'',f:()=>{fidDe60(3); gdDe60('imprenditori',-4); gdDe60('cetomedio',1); repd(1);}},
+   {l:'No: una tassa sulle esportazioni al suo posto',e:'La storia, per ora · e la questione passa al governo che verrà',f:()=>{fidDe60(-1); gdDe60('imprenditori',2);}},
+   {l:'Lascia fluttuare il marco',e:'Il mercato decide · e gli altri europei ti guardano storto',f:()=>{fidDe60(1); repd(-2); gdDe60('imprenditori',-2);}}]},
+ {id:'de60_npd', era:'de1960', cond:()=>S.year>=1966&&S.year<=1968, kick:'L\'ordine', t:'L\'estrema destra nei Landtag',
+  text:'Un partito di estrema destra entra in sette parlamenti regionali su undici, col sette, l\'otto, il nove per cento. All\'estero i giornali scrivono che il paese ricomincia. Si può chiederne lo scioglimento alla Corte, come col partito comunista.',ch:[
+   {l:'Chiedi lo scioglimento',e:'Anni di processo · e intanto il partito fa la vittima',f:()=>{repd(2); gdDe60('pensionati',-1); gdDe60('giovani',1);}},
+   {l:'Combatterlo nelle urne, non in tribunale',e:'La storia · nel 1969 resta sotto il cinque per cento · per un soffio',f:()=>{repd(1);}},
+   {l:'Riprendersi i suoi elettori a destra',e:'I voti tornano · e con loro qualche parola che non si diceva',f:()=>{baseDe60(3); repd(-4); gdDe60('giovani',-3); stampad(-2);}}]},
  {id:'fr_ceca', era:'fr1950', cond:()=>S.year>=1951&&S.year<=1953, kick:'L\'Europa', t:'Il carbone e l\'acciaio con Bonn',
   text:'Sei paesi mettono in comune carbone e acciaio sotto un\'Alta Autorità che non risponde a nessun governo: per i siderurgici del nord è un mercato, per i minatori una minaccia, per i gollisti una rinuncia. Il tuo partito deve ratificare.',ch:[
    {l:'Ratifichi',e:'Le acciaierie del nord con te · i minatori temono il mercato comune',f:()=>{gdFr('imprenditori',3); gdFr('cetomedio',2); gdFr('lavoratori',-3); repd(1);}},
@@ -9500,6 +9646,31 @@ const SFIDE=[
  {id:'de50_q_cinquanta', era:'de1950', codaFino:Infinity, paese:'germania', ruolo:'governo', diff:'facile', cond:()=>S.year>=1958||(S.year===1957&&S.month>=10), q:'Quale partito ottiene la maggioranza assoluta nel 1957?',
   op:['L\'SPD','La FDP','La CDU/CSU'], giusta:2,
   perche:'Nel settembre 1957 la CDU/CSU prende il 50,2 per cento dei voti: l\'unica maggioranza assoluta della storia tedesca.'},
+ /* L111-2 · le otto sfide del decennio tedesco '60 (scheda §I-G), la giusta nelle posizioni della scheda (0,1,2,1,2,0,1,2). Il «perché» è di Code. */
+ {id:'de60_q_muro', era:'de1960', codaFino:Infinity, paese:'germania', ruolo:'governo', diff:'facile', cond:()=>S.year>=1962||(S.year===1961&&S.month>=9), q:'In che anno viene costruito il Muro di Berlino?',
+  op:['1961','1953','1949'], giusta:0,
+  perche:'Nella notte del 13 agosto 1961 Berlino viene divisa col filo spinato; nei giorni dopo arrivano i mattoni.'},
+ {id:'de60_q_spiegel', era:'de1960', codaFino:Infinity, paese:'germania', ruolo:'governo', diff:'media', cond:()=>S.year>=1963||(S.year===1962&&S.month>=12), q:'Quale settimanale viene perquisito nell\'ottobre 1962?',
+  op:['Die Zeit','Der Spiegel','Stern'], giusta:1,
+  perche:'La polizia occupa la redazione dello Spiegel dopo un articolo sulla debolezza dell\'esercito; il ministro della difesa deve lasciare.'},
+ {id:'de60_q_eliseo', era:'de1960', codaFino:Infinity, paese:'germania', ruolo:'governo', diff:'facile', cond:()=>S.year>=1964||(S.year===1963&&S.month>=2), q:'Con quale paese viene firmato il trattato dell\'Eliseo nel 1963?',
+  op:['Il Regno Unito','L\'Italia','La Francia'], giusta:2,
+  perche:'Nel gennaio 1963, a Parigi, i due paesi nemici di tre guerre firmano un trattato d\'amicizia.'},
+ {id:'de60_q_francoforte', era:'de1960', codaFino:Infinity, paese:'germania', ruolo:'governo', diff:'media', cond:()=>S.year>=1964, q:'Che cosa si processa a Francoforte dal 1963?',
+  op:['La banda della Ruhr','Il personale del campo di Auschwitz','I responsabili del Muro'], giusta:1,
+  perche:'Dal dicembre 1963 all\'agosto 1965 il tribunale di Francoforte giudica ventidue uomini del campo di Auschwitz.'},
+ {id:'de60_q_grandecoal', era:'de1960', codaFino:Infinity, paese:'germania', ruolo:'governo', diff:'facile', cond:()=>S.year>=1967, q:'Quali partiti formano la grande coalizione del 1966?',
+  op:['CDU/CSU e FDP','SPD e FDP','CDU/CSU e SPD'], giusta:2,
+  perche:'Nel dicembre 1966 i due partiti più grandi governano insieme: in aula resta all\'opposizione la sola FDP.'},
+ {id:'de60_q_recessione', era:'de1960', codaFino:Infinity, paese:'germania', ruolo:'governo', diff:'media', cond:()=>S.year>=1968, q:'Che cosa succede all\'economia nel 1967?',
+  op:['La prima recessione del dopoguerra','L\'iperinflazione','Il crollo del marco'], giusta:0,
+  perche:'Nel 1967 il prodotto cala per la prima volta dalla guerra, e la disoccupazione supera il due per cento.'},
+ {id:'de60_q_emergenza', era:'de1960', codaFino:Infinity, paese:'germania', ruolo:'governo', diff:'difficile', cond:()=>S.year>=1969||(S.year===1968&&S.month>=6), q:'Che cosa vuole restituire la riforma d\'emergenza del 1968?',
+  op:['Le colonie','I diritti d\'emergenza degli alleati','La Saar'], giusta:1,
+  perche:'Fino al 1968 in caso d\'emergenza decidevano le potenze occupanti; la riforma della Costituzione riporta quei poteri al paese.'},
+ {id:'de60_q_alternanza', era:'de1960', codaFino:Infinity, paese:'germania', ruolo:'governo', diff:'facile', cond:()=>S.year>=1970||(S.year===1969&&S.month>=11), q:'Chi governa dopo le elezioni del 1969?',
+  op:['CDU/CSU da sola','La grande coalizione','SPD e FDP'], giusta:2,
+  perche:'La CDU/CSU resta il primo partito, ma socialdemocratici e liberali insieme hanno la maggioranza e scelgono il Cancelliere.'},
  {id:'uk60_svalut67', era:'uk1960', codaFino:Infinity, paese:'regnounito', ruolo:'governo', diff:'difficile', cond:()=>S.year>=1967, q:'Che cosa accadde alla sterlina nel novembre 1967?',
   op:['Fu lasciata fluttuare liberamente','Fu svalutata da 2,80 a 2,40 dollari','Fu agganciata all\'oro'], giusta:1,
   perche:'Arrivò dopo tre anni di difesa del cambio.'},
@@ -11905,6 +12076,27 @@ const TITOLI=[
  {id:'ti_de50_cinquanta', era:'de1950', pri:1, cond:()=>S.year===1957&&S.month>=9&&S.month<=10&&S.partito==='de_cdu'&&!S.opposizione, amico:'Cinquanta per cento', ostile:'Cinquanta per cento: nessuno l\'aveva mai fatto'},
  {id:'ti_de50_sputnik', era:'de1950', pri:1, cond:()=>S.year===1957&&S.month>=10&&S.month<=11, amico:'Il satellite', ostile:'Il satellite: e l\'America ha paura'},
  {id:'ti_de50_atomica', era:'de1950', pri:1, cond:()=>S.year===1958&&S.month>=3&&S.month<=5, amico:'La morte atomica', ostile:'La morte atomica: le piazze contro il voto'},
+ /* L111-2 · i titoli del decennio tedesco '60 (scheda §I-E). Tre condizioni (voce L111-2, correzione 6): «La prima recessione: i
+    liberali escono» solo se i liberali sono usciti nel 1966 (S3 «tasse», o la FDP rotta e fuori dal governo senza che sia stato lo
+    Spiegel — approssimazione dichiarata: una rottura spontanea del 1963-66 conta come «del 1966»), altrimenti la sola prima riga
+    (`ti_de60_recessione1`, le due righe uguali); la grande coalizione e l'alternanza leggono chi è in `S.coalizione`. */
+ {id:'ti_de60_muro', era:'de1960', pri:1, cond:()=>S.year===1961&&S.month>=8&&S.month<=9, amico:'Il Muro', ostile:'Il Muro: Berlino tagliata in due'},
+ {id:'ti_de60_voto61', era:'de1960', pri:1, cond:()=>S.year===1961&&S.month>=9&&S.month<=10, amico:'Niente più maggioranza assoluta', ostile:'Niente più maggioranza assoluta: i liberali decidono'},
+ {id:'ti_de60_amburgo', era:'de1960', pri:1, cond:()=>S.year===1962&&S.month>=2&&S.month<=3, amico:'Amburgo sott\'acqua', ostile:'Amburgo sott\'acqua: trecento morti'},
+ {id:'ti_de60_spiegel', era:'de1960', pri:1, cond:()=>S.year===1962&&S.month>=10&&S.month<=11, amico:'Lo Spiegel', ostile:'Lo Spiegel: la redazione occupata di notte'},
+ {id:'ti_de60_eliseo', era:'de1960', pri:1, cond:()=>S.year===1963&&S.month>=1&&S.month<=2, amico:'L\'amicizia con Parigi', ostile:'L\'amicizia con Parigi: e Washington si arrabbia'},
+ {id:'ti_de60_berlino63', era:'de1960', pri:1, cond:()=>S.year===1963&&S.month>=6&&S.month<=7, amico:'Il Presidente a Berlino', ostile:'Il Presidente a Berlino: mezzo milione davanti al municipio'},
+ {id:'ti_de60_francoforte', era:'de1960', pri:1, cond:()=>(S.year===1963&&S.month===12)||(S.year===1964&&S.month<=2), amico:'Il processo di Francoforte', ostile:'Il processo di Francoforte: i testimoni in aula'},
+ {id:'ti_de60_milione', era:'de1960', pri:1, cond:()=>S.year===1964&&S.month>=9&&S.month<=10, amico:'Il milionesimo ospite', ostile:'Il milionesimo ospite: un motorino in regalo'},
+ {id:'ti_de60_recessione', era:'de1960', pri:1, cond:()=>((S.year===1966&&S.month>=11)||(S.year===1967&&S.month<=2))&&liberaliUsciti66(), amico:'La prima recessione', ostile:'La prima recessione: i liberali escono'},
+ {id:'ti_de60_recessione1', era:'de1960', pri:1, cond:()=>((S.year===1966&&S.month>=11)||(S.year===1967&&S.month<=2))&&!liberaliUsciti66(), amico:'La prima recessione', ostile:'La prima recessione'},
+ {id:'ti_de60_grandecoal', era:'de1960', pri:1, cond:()=>((S.year===1966&&S.month===12)||(S.year===1967&&S.month===1))&&S.coalizione.includes('de_cdu')&&S.coalizione.includes('de_spd'), amico:'La grande coalizione', ostile:'La grande coalizione: nessuna opposizione in aula'},
+ {id:'ti_de60_2giugno', era:'de1960', pri:1, cond:()=>S.year===1967&&S.month===6, amico:'Il 2 giugno', ostile:'Il 2 giugno: uno studente ucciso a Berlino'},
+ {id:'ti_de60_colore', era:'de1960', pri:1, cond:()=>S.year===1967&&S.month>=8&&S.month<=9, amico:'A colori', ostile:'A colori: un pulsante rosso a Berlino'},
+ {id:'ti_de60_pasqua', era:'de1960', pri:1, cond:()=>S.year===1968&&S.month===4, amico:'Pasqua di fuoco', ostile:'Pasqua di fuoco: gli studenti contro l\'editore'},
+ {id:'ti_de60_emergenza', era:'de1960', pri:1, cond:()=>S.year===1968&&S.month>=6&&S.month<=7, amico:'Le leggi d\'emergenza', ostile:'Le leggi d\'emergenza: sessantamila su Bonn'},
+ {id:'ti_de60_praga', era:'de1960', pri:1, cond:()=>S.year===1968&&S.month>=8&&S.month<=9, amico:'Praga', ostile:'Praga: i carri nella primavera'},
+ {id:'ti_de60_alternanza', era:'de1960', pri:1, cond:()=>S.year===1969&&S.month>=10&&S.month<=11&&S.coalizione.includes('de_spd')&&S.coalizione.includes('de_fdp')&&!S.coalizione.includes('de_cdu'), amico:'Il primo Cancelliere socialdemocratico', ostile:'Il primo Cancelliere socialdemocratico: con i liberali, dopo vent\'anni'},
  {id:'ng_p_ti_petrolio', era:'contemporanea', paesi:['nigeria'], pri:1, amico:'La produzione di petrolio torna a salire', ostile:'Un barile su dieci sparisce: il furto record'},
 ];
 
@@ -13545,6 +13737,13 @@ const SNODI_STORICI = {
   pensioni57:   { storico:['dinamiche'], conforme:'sulle pensioni del 1957', diverge:{ 'aumento':'Nel 1957 ha aumentato le pensioni una volta sola, senza legarle ai salari.', 'fondo':'Nel 1957 ha scelto un fondo a capitalizzazione per le pensioni.' } },
   atomica58:    { storico:['si'], conforme:'sulle armi nucleari del 1958', diverge:{ 'no':'Nel 1958 ha rifiutato le armi nucleari per l’esercito.', 'rinvio':'Nel 1958 ha rinviato la questione delle armi nucleari.' } },
   atomica58Opp: { storico:['piazza'], conforme:'sulle armi nucleari del 1958, dall’opposizione', diverge:{ 'referendum':'Nel 1958 ha chiesto un referendum nei Länder sulle armi nucleari.', 'silenzio':'Nel 1958 ha taciuto sulle armi nucleari.' } },
+  /* L111-2 · i quattro snodi del decennio tedesco '60 e le due versioni dall'aula (frasi di Code). */
+  muro61:       { storico:['prudenza'], conforme:'sul Muro del 1961', diverge:{ 'berlino':'Nel 1961 ha raggiunto subito Berlino davanti al Muro.', 'abbattere':'Nel 1961 ha chiesto agli alleati di abbattere il Muro.' } },
+  muro61Opp:    { storico:['citta'], conforme:'sul Muro del 1961, dall’opposizione', diverge:{ 'unita':'Nel 1961 ha scelto l’unità nazionale davanti al Muro.', 'attacco':'Nel 1961 ha attaccato il Cancelliere assente da Berlino.' } },
+  spiegel62:    { storico:['ministro'], conforme:'sull’affare dello Spiegel', diverge:{ 'difeso':'Nel 1962 ha difeso il ministro della difesa, e i liberali sono usciti.', 'inchiesta':'Nel 1962 ha affidato l’affare dello Spiegel a un’inchiesta indipendente.' } },
+  grandeCoal66: { storico:['tasse'], conforme:'sulla recessione del 1966', diverge:{ 'tagli':'Nel 1966 ha tagliato la spesa come chiedevano i liberali.', 'investimenti':'Nel 1966 ha risposto alla recessione con un piano di investimenti.' } },
+  emergenza68:  { storico:['votata'], conforme:'sulle leggi d’emergenza del 1968', diverge:{ 'ammorbidita':'Nel 1968 ha fatto votare le leggi d’emergenza con più garanzie.', 'rinviata':'Nel 1968 ha rinviato le leggi d’emergenza.' } },
+  emergenza68Opp:{ storico:['contro'], conforme:'sulle leggi d’emergenza del 1968, dall’opposizione', diverge:{ 'piazza':'Nel 1968 ha manifestato in piazza con gli studenti.', 'favore':'Nel 1968 ha votato le leggi d’emergenza dall’opposizione.' } },
 };
 
 /* ==============================================================================================================
@@ -15424,6 +15623,134 @@ const ATOMICA58_OPP_EV = {
   ],
 };
 
+/* ==============================================================================================================
+   L111-2 · IL DECENNIO TEDESCO '60 — I QUATTRO SNODI (scheda PRESET-GERMANIA-1960 §I-A, con le sei correzioni della voce L111-2).
+   Valute del livello 3 (Cancelliere, parlamentare). Flag nuovi cercati in tutto S e in SNODI_STORICI prima di usarli: muro61,
+   muro61Opp, spiegel62, grandeCoal66, emergenza68, emergenza68Opp — zero occorrenze al 26/9.
+   ⚑ CHI RICEVE CHE COSA (gate in game.js): S1 settembre 1961 (agosto è di `pm_muro`), S2 novembre 1962, S3 novembre 1966, S4 GIUGNO
+   1968 (maggio è di `pm_1968`) — finestre di tre mesi, al governo. Dall'aula MURO61_OPP_EV ed EMERGENZA68_OPP_EV a chi è
+   all'opposizione. ⚑ S2 e S3 HANNO UN LATO (lezione di L101-2): «i ministri liberali minacciano di andarsene» non si dice a chi
+   governa senza liberali, né ai liberali stessi — le condizioni stanno in `spiegel62Lato()`/`recessione66Lato()` (game.js), FUORI
+   dalla carta, perché la guardia degli snodi legge le condizioni dentro le scelte come valori storici (L97-2).
+   ⚑ S2 «Lo difendi» e S3 «Le tasse e i tagli» fanno ROMPERE la FDP con `rompiPartner('de_fdp')` (game.js, L111-2): il governo va in
+   minoranza e la carta «La grande coalizione» di L111-1 (o la caduta verso una cricca) fa il resto. Lo snodo non la duplica.
+   ============================================================================================================== */
+/* Il moltiplicatore dei gruppi è di questa porta. ⚑ LA SWEEP (L111-2, 26/9, banco onesto, CDU al governo, ampia, 20 semi, 144 mesi,
+   gruppo peggiore): fondo ×0 43,1 (sd 2,3) · ×1 −0,07 sd · ×2 −0,27 · ×3 0,19 · ×4 0,91 · **×5 3,63 sd, zero crisi** (adottato: il più
+   alto dentro la banda 1,5-4 con zero crisi) · ×6 5,14 e una crisi · ×7 7,65 e quattro · ×8 9,25 e sei. Il salto fra ×4 e ×5 è vero
+   (il gruppo peggiore passa da 41,0 a 34,8): sotto ×5 le carte non scalfiscono il fondo della porta. */
+let DE60_GRUPPI = 5;   // let e non const: la sweep di .claude/misura-de1960-contenuto.js lo varia sul banco
+function gdDe60(g, n){ gd(g, Math.round(n*DE60_GRUPPI)); }
+function fidDe60(n){ fidFr60(n); }   // la fiducia non ha moltiplicatore: la stessa leva del '50 tedesco e del '60 francese
+function baseDe60(n){
+  var P=(PAESE && PAESE.partiti) ? PAESE.partiti.filter(function(x){ return x.id===S.partito; })[0] : null;
+  if(!P || !P.base) return;
+  Object.keys(P.base).forEach(function(g){ gd(g, Math.round(n*P.base[g]*DE60_GRUPPI)); });
+}
+const MURO61_EV = {
+  id:'snodo_muro61', snodo:true, era:'de1960', kick:'Berlino', tono:'grave',
+  t:'Il Muro',
+  text:'Da tre settimane Berlino è tagliata in due, e il muro di mattoni sta prendendo il posto del filo spinato. Il sindaco di Berlino Ovest chiede che il Cancelliere venga in città; gli alleati dicono di non provocare Mosca; il paese sta per votare.',
+  ch:[
+    { l:'Protesta formale, e resti a Bonn ancora qualche giorno', e:'La storia · arrivi a Berlino dopo nove giorni · i berlinesi non lo dimenticano, e il sindaco sale nei sondaggi',
+      f:function(){ S.muro61='prudenza'; repd(2); gdDe60('pensionati',-2); gdDe60('cetomedio',-2); baseDe60(-2);
+        S.log.unshift({t:T('Berlino'),x:T('Davanti al Muro ha scelto la prudenza.')}); } },
+    { l:'Subito a Berlino, davanti alla porta di Brandeburgo', e:'La città ti applaude · Mosca e gli alleati ti guardano allo stesso modo, con preoccupazione',
+      f:function(){ S.muro61='berlino'; repd(-1); gdDe60('pensionati',3); gdDe60('cetomedio',3); baseDe60(2); stampad(3);
+        S.log.unshift({t:T('Berlino'),x:T('È andato subito a Berlino davanti al Muro.')}); } },
+    { l:'Chiedi agli alleati di abbatterlo', e:'Nessun alleato lo farà · e ora tutti sanno che l\'hai chiesto',
+      f:function(){ S.muro61='abbattere'; repd(-6); gdDe60('pensionati',2); gdDe60('giovani',-2); fidDe60(-2);
+        S.log.unshift({t:T('Berlino'),x:T('Ha chiesto agli alleati di abbattere il Muro.')}); } },
+  ],
+};
+/* S1 dall'aula (scheda: il sindaco resta nella sua città e ne fa la campagna, storico · l'unità nazionale · l'attacco al Cancelliere
+   assente). Testo della scheda; etichette, righe-effetto, effetti e registro di Code, sul modello delle aule di de1950 (base ±3,
+   ceto medio ∓2; l'attacco: base +1, ceto medio −1, stampa +1). */
+const MURO61_OPP_EV = {
+  id:'snodo_muro61_opp', snodo:true, era:'de1960', kick:'Berlino', tono:'grave',
+  t:'Il Muro, dall\'aula',
+  text:'Il Muro divide Berlino da tre settimane e il Cancelliere non è ancora venuto. L\'opposizione può fare della città la sua campagna, stringersi al governo, o dire ad alta voce che il governo non c\'era.',
+  ch:[
+    { l:'La città è la campagna: il sindaco resta a Berlino', e:'La storia · il sindaco fa campagna lungo il filo spinato · la tua base con te, il ceto medio no',
+      f:function(){ S.muro61Opp='citta'; baseDe60(3); gdDe60('cetomedio',-2);
+        S.log.unshift({t:T('Berlino'),x:T('Dall\'opposizione ha fatto di Berlino la sua campagna.')}); } },
+    { l:'Unità nazionale: niente campagna sul Muro', e:'Il paese apprezza · la tua base si chiede dove sei',
+      f:function(){ S.muro61Opp='unita'; baseDe60(-3); gdDe60('cetomedio',2);
+        S.log.unshift({t:T('Berlino'),x:T('Davanti al Muro ha scelto l\'unità nazionale col governo.')}); } },
+    { l:'Il Cancelliere non c\'era: dillo in aula', e:'I giornali riprendono la frase · qualcuno la trova ingenerosa',
+      f:function(){ S.muro61Opp='attacco'; baseDe60(1); gdDe60('cetomedio',-1); stampad(1);
+        S.log.unshift({t:T('Berlino'),x:T('Ha attaccato in aula il Cancelliere assente da Berlino.')}); } },
+  ],
+};
+const SPIEGEL62_EV = {
+  id:'snodo_spiegel62', snodo:true, era:'de1960', kick:'La stampa', tono:'grave',
+  t:'Lo Spiegel',
+  text:'Di notte la polizia occupa la redazione del più importante settimanale del paese e arresta i direttori per tradimento: hanno scritto che l\'esercito non reggerebbe un attacco. Il ministro della difesa ha fatto arrestare un giornalista in vacanza in Spagna, e in aula ha mentito. I ministri liberali minacciano di andarsene.',
+  ch:[
+    { l:'Sacrifichi il ministro della difesa', e:'La storia · il ministro esce dal governo, i liberali restano · la stampa ha vinto, e lo sa',
+      f:function(){ S.spiegel62='ministro'; stampad(6); gdDe60('giovani',3); gdDe60('cetomedio',1); baseDe60(-2);
+        S.log.unshift({t:T('La stampa'),x:T('Ha fatto uscire il ministro della difesa dopo l\'affare dello Spiegel.')}); } },
+    { l:'Lo difendi: la sicurezza prima di tutto', e:'I liberali escono dal governo · la stampa ti ha contro per anni',
+      f:function(){ S.spiegel62='difeso'; stampad(-8); gdDe60('giovani',-4); baseDe60(3);
+        rompiPartner('de_fdp');
+        S.log.unshift({t:T('La stampa'),x:T('Ha difeso il ministro della difesa, e i liberali sono usciti dal governo.')}); } },
+    { l:'Un\'inchiesta indipendente, e intanto la redazione riapre', e:'Il ministro resta fino all\'inchiesta · i liberali restano a guardare',
+      f:function(){ S.spiegel62='inchiesta'; stampad(2); gdDe60('cetomedio',1);
+        S.log.unshift({t:T('La stampa'),x:T('Ha affidato l\'affare dello Spiegel a un\'inchiesta indipendente.')}); } },
+  ],
+};
+const RECESSIONE66_EV = {
+  id:'snodo_recessione66', snodo:true, era:'de1960', kick:'L\'economia', tono:'grave',
+  t:'La recessione',
+  text:'Per la prima volta dal dopoguerra l\'economia si ferma e il bilancio non torna: mancano quattro miliardi. I liberali vogliono tagliare la spesa e non alzare le tasse; i socialdemocratici propongono un piano di investimenti e una legge per governare la congiuntura. Nelle regioni del carbone chiudono le miniere.',
+  ch:[
+    { l:'Le tasse e i tagli insieme', e:'La storia · il bilancio si chiude · i ministri liberali escono dal governo il giorno dopo',
+      f:function(){ S.grandeCoal66='tasse'; gdDe60('imprenditori',-2); gdDe60('cetomedio',-2); fidDe60(2);
+        rompiPartner('de_fdp');
+        S.log.unshift({t:T('L\'economia'),x:T('Nella recessione del 1966 ha alzato le tasse, e i liberali sono usciti.')}); } },
+    { l:'Solo tagli, come chiedono i liberali', e:'La coalizione regge · la recessione morde più a fondo, e le miniere chiudono prima',
+      f:function(){ S.grandeCoal66='tagli'; gdDe60('lavoratori',-5); gdDe60('pensionati',-2); fidDe60(1);
+        S.log.unshift({t:T('L\'economia'),x:T('Nella recessione del 1966 ha tagliato la spesa.')}); } },
+    { l:'Un piano di investimenti, a debito', e:'La recessione è più corta · il debito sale, e i liberali lo fanno notare ogni giorno', costo:{debito:1.5},
+      f:function(){ S.grandeCoal66='investimenti'; S.ind.debt+=1.5; gdDe60('lavoratori',4); gdDe60('imprenditori',2); fidDe60(-2); baseDe60(-1);
+        S.log.unshift({t:T('L\'economia'),x:T('Nella recessione del 1966 ha lanciato un piano di investimenti.')}); } },
+  ],
+};
+/* S4 a GIUGNO 1968 (L111-2, correzione 3): il testo al passato e la riga-effetto senza «i due terzi» (veri solo in grande coalizione). */
+const EMERGENZA68_EV = {
+  id:'snodo_emergenza68', snodo:true, era:'de1960', kick:'La Costituzione', tono:'grave',
+  t:'Le leggi d\'emergenza',
+  text:'Gli alleati tengono ancora i diritti d\'emergenza del 1949: finché la Costituzione non dice che cosa succede in guerra o in rivolta, decidono loro. La riforma che li restituisce al paese limita la posta, il telefono e la libertà di movimento quando lo stato d\'emergenza è dichiarato. Il mese scorso sessantamila studenti hanno marciato su Bonn; ora manca l\'ultima firma.',
+  ch:[
+    { l:'Voti la riforma', e:'La storia · la riforma passa · gli alleati restituiscono i diritti, e gli studenti non ti perdonano',
+      f:function(){ S.emergenza68='votata'; repd(3); gdDe60('cetomedio',2); gdDe60('pensionati',2); gdDe60('giovani',-7); stampad(-2);
+        S.log.unshift({t:T('La Costituzione'),x:T('Ha fatto votare le leggi d\'emergenza nel 1968.')}); } },
+    { l:'La voti ammorbidita: il Parlamento decide sempre', e:'Più garanzie, stesso risultato · gli studenti restano in piazza lo stesso',
+      f:function(){ S.emergenza68='ammorbidita'; repd(2); gdDe60('giovani',-3); gdDe60('cetomedio',1);
+        S.log.unshift({t:T('La Costituzione'),x:T('Ha fatto votare le leggi d\'emergenza con più garanzie.')}); } },
+    { l:'La rinvii', e:'I diritti restano agli alleati · la piazza si calma, Washington chiede fino a quando',
+      f:function(){ S.emergenza68='rinviata'; repd(-3); gdDe60('giovani',3); fidDe60(-1);
+        S.log.unshift({t:T('La Costituzione'),x:T('Ha rinviato le leggi d\'emergenza.')}); } },
+  ],
+};
+/* S4 dall'aula (scheda: il voto contro, storico per la FDP · la piazza con gli studenti · il voto a favore); effetti come S1 dall'aula.
+   Testo, etichette e registro di Code, al passato come S4. */
+const EMERGENZA68_OPP_EV = {
+  id:'snodo_emergenza68_opp', snodo:true, era:'de1960', kick:'La Costituzione', tono:'grave',
+  t:'Le leggi d\'emergenza, dall\'aula',
+  text:'Il governo porta al voto finale le leggi d\'emergenza; il mese scorso sessantamila studenti hanno marciato su Bonn. L\'opposizione può votare contro in aula, scendere in piazza con gli studenti, o votarle perché gli alleati restituiscano i loro diritti.',
+  ch:[
+    { l:'Contro, in aula', e:'La storia · la legge passa lo stesso · la tua base con te, il ceto medio no',
+      f:function(){ S.emergenza68Opp='contro'; baseDe60(3); gdDe60('cetomedio',-2);
+        S.log.unshift({t:T('La Costituzione'),x:T('Ha votato contro le leggi d\'emergenza.')}); } },
+    { l:'In piazza con gli studenti', e:'I ragazzi ti applaudono · il ceto medio ti guarda come un estraneo',
+      f:function(){ S.emergenza68Opp='piazza'; baseDe60(1); gdDe60('giovani',3); gdDe60('cetomedio',-3);
+        S.log.unshift({t:T('La Costituzione'),x:T('Ha manifestato in piazza con gli studenti contro le leggi d\'emergenza.')}); } },
+    { l:'A favore: i diritti tornano al paese', e:'Il paese riprende i suoi poteri · la tua base non capisce, il ceto medio sì',
+      f:function(){ S.emergenza68Opp='favore'; baseDe60(-3); gdDe60('cetomedio',2);
+        S.log.unshift({t:T('La Costituzione'),x:T('Ha votato a favore delle leggi d\'emergenza dall\'opposizione.')}); } },
+  ],
+};
 /* L110-2 · I TERRITORI E LA MAPPA DI de1960: quelli di de1950 più la Saar in coda (è entrata alla tappa del 1957/1), con lo stesso
    sfondo dell'Ovest. Lo stesso ordine di de1950, così gli indici delle due porte si corrispondono. */
 (function(){
@@ -15431,3 +15758,6 @@ const ATOMICA58_OPP_EV = {
   SCENARI.de1960.territori = s.territori.concat([ { nome:'la Saar', nomeEn:'Saarland', tipo:'regione', carica:'Ministro presidente', lean:1 } ]);
   SCENARI.de1960.mappa = { viewBox:s.mappa.viewBox, sfondo:s.mappa.sfondo, aree:s.mappa.aree.concat([ MAPPA_DE_LAND.aree.saar ]) };
 })();
+/* L112-1 · de1970 RIUSA territori e mappa di de1960 (dieci Länder con la Saar, Berlino Ovest): lo stesso oggetto, non una copia. */
+SCENARI.de1970.territori = SCENARI.de1960.territori;
+SCENARI.de1970.mappa = SCENARI.de1960.mappa;

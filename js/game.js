@@ -199,7 +199,12 @@ const DRIFT_INFLAZIONE_ERA = {
   /* L108-2 · la Germania del '50 (scheda PRESET-GERMANIA-1950 §2, ⚠ Destatis): prezzi fermi, salvo la fiammata della Corea nel 1951 */
   [LINEA_DE]: [ {da:1950, inf:2}, {da:1951, inf:8}, {da:1952, inf:2},
                 /* L110-2 · il '60 (scheda PRESET-GERMANIA-1960 §2, ⚠ ordine di grandezza): ~2,5, la fiammata del 1966 */
-                {da:1960, inf:2.5}, {da:1966, inf:3.5}, {da:1967, inf:2.5} ]
+                {da:1960, inf:2.5}, {da:1966, inf:3.5}, {da:1967, inf:2.5},
+                /* L112-1 · il '70 (scheda PRESET-GERMANIA-1970 §2, ⚠ ordine di grandezza): il 7 del 1973-74, poi la disinflazione e la
+                   seconda fiammata del 1980. Il 1981 (6,3) è di Code (la scheda si ferma al 1980). ⚠ Le righe del 1970-71 le legge anche
+                   la coda di de1960 (prima 2,5): dichiarato. */
+                {da:1970, inf:3.4}, {da:1971, inf:5.3}, {da:1972, inf:5.5}, {da:1973, inf:7.0}, {da:1975, inf:6.0}, {da:1976, inf:4.3},
+                {da:1977, inf:3.7}, {da:1978, inf:2.7}, {da:1979, inf:4.1}, {da:1980, inf:5.4}, {da:1981, inf:6.3} ]
 };
 function inflazioneAnno(){
   if(typeof S==='undefined' || !S) return 0;
@@ -234,6 +239,14 @@ const DRIFT_DEFICIT_ERA = {
                 {da:2000, def:0},    {da:2001, def:8.5},  {da:2002, def:5.5},  {da:2003, def:6.5},  {da:2004, def:4.5},
                 {da:2005, def:5},    {da:2006, def:5},    {da:2007, def:6.5},  {da:2008, def:1},    {da:2009, def:5},
                 {da:2010, def:5},    {da:2011, def:4.5},  {da:2012, def:8.5},  {da:2013, def:8} ],
+  /* L112-1 · de1970: 18,5 nel 1970 → ~25 nel 1975 → 31 nel 1980 (la scheda dà gli estremi; il 1975 e il 1981 a 33 sono di Code). Righe
+     modeste: la recessione del 1975 e l'inflazione fanno già quasi tutto. CERCATE con la sweep (misura-de1970-struttura.js sweep def
+     de_spd, SPD al governo, 5 semi, luglio): debito reso 18,1 · 19,6 · 21,1 · 22,4 · 22,5 · 25,1 · 26,8 · 27,7 · 29,1 · 29,8 · 30,6 · 33,0,
+     scarto massimo 1,2 (il 1974). ⚠ Il disavanzo reso del 1975 non arriva al −5,5 della scheda: si è inseguito il debito. Nessuna riga
+     prima del 1970 (de1950 e de1960 fino al 1969 non ne sono toccate; la coda di de1960 nel 1970-71 sì). 1982 = chiusura. */
+  [LINEA_DE]: [ {da:1970, def:-1},   {da:1971, def:0.5},  {da:1972, def:1},    {da:1973, def:-2},   {da:1974, def:-1},
+                {da:1975, def:-1},   {da:1976, def:1.5},  {da:1977, def:0},    {da:1978, def:0},    {da:1979, def:0.5},
+                {da:1980, def:-1},   {da:1981, def:1.5},  {da:1982, def:0} ],
   /* italia1970: 37 nel 1970 → 60 nel 1979, il decennio in cui il debito italiano parte. Chiusa al 1980: la porta
      dell'80 ha il suo seme e non deve ereditare il '79. */
   [LINEA_IT]: [ {da:1970, def:0},    {da:1971, def:6.5},  {da:1972, def:8},    {da:1973, def:5},    {da:1974, def:5.5},
@@ -375,6 +388,7 @@ function initStatoBase(){
   S.ref92=null; S.ref92Opp=null; S.sarajevo94=null; S.piano95=null; S.piano95Opp=null; S.quinquennato00=null;   // L103-2: gli snodi del decennio francese '90 (scioglimento97 c'è da L103-1)
   S.aprile02=null; S.aprile02Opp=null; S.tce05=null; S.banlieue05=null; S.crisi08fr=null; S.crisi08frOpp=null;   // L105-4: gli snodi del decennio francese 2000 (⚠ S.crisi08 è inglese)
   S.notaStalin52=null; S.riarmo55=null; S.riarmo55Opp=null; S.pensioni57=null; S.atomica58=null; S.atomica58Opp=null; S.riparazioni52=null;   // L109-2: il decennio tedesco '50
+  S.muro61=null; S.muro61Opp=null; S.spiegel62=null; S.grandeCoal66=null; S.emergenza68=null; S.emergenza68Opp=null;   // L111-2: il decennio tedesco '60
   S.scioglimento97=null;   // L103-1: lo scioglimento del '97 (null = storico; 'no' = «aspetta», tappa 1998/3). Lo scrive S4 in L103-2
   S.coabitazione=false;   // L100-2: il Presidente con l'Assemblea degli altri (derivato dai seggi, dato puro, round-trip)
   S.governiCaduti=0;                    // L80-5: quante volte il governo e caduto senza che si andasse a votare
@@ -1406,7 +1420,15 @@ const DRIFT_ECONOMICO_ERA = {
                    8,5 · 4,4 · 4,6 · 2,7 · 6,6 · 5,2 · 2,9 · **−0,3 (la recessione del 1967)** · 5,4 · 7,3 · 5,1 · 4,9, scarto massimo 0,2. Le righe del
                    1960-61 di de1950 (0 e −0,5) sono sostituite da queste: la coda di de1950 le eredita (dichiarato). */
                 {da:1960, ciclo:4}, {da:1961, ciclo:-1}, {da:1962, ciclo:0}, {da:1963, ciclo:-2.5}, {da:1964, ciclo:2}, {da:1965, ciclo:0},
-                {da:1966, ciclo:-2.5}, {da:1967, ciclo:-5.5}, {da:1968, ciclo:1}, {da:1969, ciclo:3}, {da:1970, ciclo:0}, {da:1971, ciclo:0} ]
+                {da:1966, ciclo:-2.5}, {da:1967, ciclo:-5.5}, {da:1968, ciclo:1}, {da:1969, ciclo:3},
+                /* L112-1 · il '70 (de1970, crescita di partenza 4,5 come de1960, tetto 5 del motore), CERCATO con la sweep (misura-de1970-struttura.js
+                   sweep ciclo de_spd, SPD al governo, 5 semi, luglio): resa 5,0 · 2,8 · 4,4 · 4,8 · 0,9 · **−0,8 (la recessione del 1975)** · 4,8 · 3,1 ·
+                   3,0 · 4,2 · 1,5 · 0,7 contro la scheda 5,0 · 3,1 · 4,3 · 4,8 · 0,9 · −0,9 · 4,9 · 3,3 · 3,0 · 4,2 · 1,4 (1981 0,5 di Code), scarto massimo
+                   0,31. ⚠ Sostituiscono le righe 1970-71 di de1960 (0 e 0, bersaglio «~5» di Code): la coda di de1960 le eredita (dichiarato).
+                   Il 1970 resta a 0 (la sweep dava +1): col tetto 9 di de1960 il +1 portava la sua coda a 6,7; a 0 de1960 rende ~5 e de1970 4,8
+                   (il suo tetto è il 5 del motore) — uno scarto di 0,2 invece di 1,7. */
+                {da:1970, ciclo:0}, {da:1971, ciclo:-2.5}, {da:1972, ciclo:0}, {da:1973, ciclo:0}, {da:1974, ciclo:-4.5}, {da:1975, ciclo:-6},
+                {da:1976, ciclo:0}, {da:1977, ciclo:-2.5}, {da:1978, ciclo:-2}, {da:1979, ciclo:-0.5}, {da:1980, ciclo:-4.5}, {da:1981, ciclo:-5} ]
 };
 /* L60-2 · LA DISOCCUPAZIONE D'EPOCA. Il motore non aveva un posto dove un decennio potesse dire «qui i senza
    lavoro sono il doppio»: `S.uMod` decade dell'80% al mese e le carte danno solo colpi. Stessa forma di cicloBase():
@@ -1460,7 +1482,13 @@ const DRIFT_DISOCCUPAZIONE_ERA = {
                    del decennio (una prima sweep in parallelo col ciclo dava 4,4 nel 1967): resa 0,7 · 1,0 · 0,9 · 0,7 · 0,8 · 0,6 · 0,6 · **2,1 (1967)** · 1,6 ·
                    0,7 · 0,8 · 0,9, scarto massimo 0,3. */
                 {da:1960, un:-6.5}, {da:1961, un:-6.5}, {da:1962, un:-7.5}, {da:1963, un:-8.5}, {da:1964, un:-5.5}, {da:1965, un:-8.5},
-                {da:1966, un:-8.5}, {da:1967, un:-8.25}, {da:1968, un:-7.25}, {da:1969, un:-7}, {da:1970, un:-6.25}, {da:1971, un:-7} ]
+                {da:1966, un:-8.5}, {da:1967, un:-8.25}, {da:1968, un:-7.25}, {da:1969, un:-7},
+                /* L112-1 · il '70 (de1970, pavimento 0,5), CERCATO con la sweep (sweep un de_spd, SPD al governo, 5 semi, luglio) SOPRA le righe del ciclo:
+                   resa 0,7 · 0,8 · 1,1 · 1,1 · 2,6 · **4,8 (il milione del 1975)** · 4,5 · 4,5 · 4,3 · 3,7 · 3,8 · 5,4 contro la scheda 0,7 · 0,8 · 1,1 · 1,2 ·
+                   2,6 · 4,7 · 4,6 · 4,5 · 4,3 · 3,8 · 3,8 (1981 5,5 di Code), scarto massimo 0,09. ⚠ Sostituiscono le righe 1970-71 di de1960 (−6,25 e −7):
+                   la coda di de1960 le eredita (dichiarato). */
+                {da:1970, un:-6.75}, {da:1971, un:-8.25}, {da:1972, un:-6.75}, {da:1973, un:-6.5}, {da:1974, un:-7}, {da:1975, un:-6},
+                {da:1976, un:-4.25}, {da:1977, un:-4.25}, {da:1978, un:-5.5}, {da:1979, un:-5}, {da:1980, un:-6.5}, {da:1981, un:-4.5} ]
 };
 function disoccupazioneEra(){
   if(typeof S==='undefined' || !S) return 0;
@@ -1982,7 +2010,26 @@ const RIALLINEAMENTI_ERA = {
                 seggi: { de_cdu:49.4, de_spd:40.7, de_fdp:9.9, de_npd:0 } },
     '1969/9': { delta:[ {id:'de_cdu',delta:-1.8}, {id:'de_spd',delta:3.2}, {id:'de_fdp',delta:-3.8}, {id:'de_npd',delta:2.4} ],   // Σ 0
                 urne:  { de_cdu:46.1, de_spd:42.7, de_fdp:5.8, de_npd:4.3 },
-                seggi: { de_cdu:48.8, de_spd:45.2, de_fdp:6.0, de_npd:0 } }
+                seggi: { de_cdu:48.8, de_spd:45.2, de_fdp:6.0, de_npd:0 } },
+    /* L112-1 · il decennio '70 (scheda PRESET-GERMANIA-1970 §1). Voti e seggi **confermati sul sito della Commissione elettorale
+       federale** (26/9): 1972 CDU 35,2 + CSU 9,7 · SPD 45,8 · FDP 8,4 · NPD 0,6; seggi con Berlino 242 · 186+48 · 42 = 518, senza
+       230 · 225 · 41 = 496 ✓ · 1976 CDU 38,0 + CSU 10,6 · SPD 42,6 · FDP 7,9 · NPD 0,3; con Berlino 224 · 201+53 · 40, senza 214 ·
+       243 · 39 ✓ · 1980 CDU 34,2 + CSU 10,3 · SPD 42,9 · FDP 10,6 · Verdi 1,5 · NPD 0,2; con Berlino 228 · 185+52 · 54, senza 218 ·
+       226 · 53 = 497 ✓ (la scheda, al centesimo, dal Bundeswahlleiter). Delta = voti rinormalizzati sul roster del momento, meno
+       quelli della tappa prima (Σ 0; il 1980/10 Σ −1,5 = i Verdi entrati a gennaio). Seggi a resti maggiori sul decimale.
+       · 1972/11: le prime anticipate (la questione di fiducia persa apposta). L'urna del motore è del 1972/1 (`turnMandato:2`).
+       · 1976/10: seggi del 1976. · 1980/1: entrano i Verdi (1,5, non selezionabili, D46). · 1980/10: seggi del 1980. */
+    '1972/11': { delta:[ {id:'de_cdu',delta:-1.6}, {id:'de_spd',delta:2.9}, {id:'de_fdp',delta:2.5}, {id:'de_npd',delta:-3.8} ],   // Σ 0
+                 urne:  { de_cdu:44.9, de_spd:45.8, de_fdp:8.4, de_npd:0.6 },
+                 seggi: { de_cdu:45.3, de_spd:46.4, de_fdp:8.3, de_npd:0 } },
+    '1976/10': { delta:[ {id:'de_cdu',delta:3.9}, {id:'de_spd',delta:-3.2}, {id:'de_fdp',delta:-0.4}, {id:'de_npd',delta:-0.3} ],   // Σ 0
+                 urne:  { de_cdu:48.6, de_spd:42.6, de_fdp:7.9, de_npd:0.3 },
+                 seggi: { de_cdu:49.0, de_spd:43.1, de_fdp:7.9, de_npd:0 } },
+    '1980/1':  { entra:[ { id:'de_grn', nome:'Verdi', orientamento:'ecologista', base:{ giovani:0.6, cetomedio:0.4 }, forza:1.5, asse:-2, alleati:[],
+                           selezionabile:false, nota:'I Verdi nascono nel 1980 e restano fuori dal Bundestag fino al 1983: la loro carriera comincia nel decennio dopo' } ] },
+    '1980/10': { delta:[ {id:'de_cdu',delta:-4.2}, {id:'de_spd',delta:0.2}, {id:'de_fdp',delta:2.7}, {id:'de_npd',delta:-0.2} ],   // Σ −1,5 = i Verdi entrati a gennaio
+                 urne:  { de_cdu:44.5, de_spd:42.9, de_fdp:10.6, de_grn:1.5, de_npd:0.2 },
+                 seggi: { de_cdu:45.5, de_spd:43.8, de_fdp:10.7, de_grn:0, de_npd:0 } }
   }
 };
 /* L101-1 · D17 · DI CHI È L'ELISEO. Una funzione sola, letta dalle tappe condizionate del 1981 e del 1988: la
@@ -2474,6 +2521,12 @@ function riallineamentoTappa(){
     else if(S.era===LINEA_DE && S.year===1964) S.log.unshift({t:T('Un partito nuovo all\'estrema destra'), x:T('Nasce un partito nazionaldemocratico che raccoglie i nostalgici e gli scontenti: nelle regioni cresce, al Bundestag resta sotto la soglia.')});
     else if(S.era===LINEA_DE && S.year===1965) S.log.unshift({t:T('Elezioni del settembre 1965'), x:T('Il partito del Cancelliere sfiora di nuovo la maggioranza; i socialdemocratici crescono, i liberali perdono un seggio su quattro.')});
     else if(S.era===LINEA_DE && S.year===1969) S.log.unshift({t:T('Elezioni del settembre 1969'), x:T('Il partito del Cancelliere resta il primo, ma socialdemocratici e liberali insieme hanno la maggioranza: per la prima volta il Cancelliere può essere un altro.')});
+    /* L112-1 · le tappe tedesche del '70 (due nel 1980: il mese le distingue). Nessun «partito del Cancelliere»: nel '70 il Cancelliere
+       della storia e quello del giocatore possono essere di partiti diversi. */
+    else if(S.era===LINEA_DE && S.year===1972) S.log.unshift({t:T('Elezioni del novembre 1972'), x:T('Le prime elezioni anticipate della Repubblica: i socialdemocratici diventano per la prima volta il primo partito, e con i liberali hanno una maggioranza vera.')});
+    else if(S.era===LINEA_DE && S.year===1976) S.log.unshift({t:T('Elezioni dell\'ottobre 1976'), x:T('L\'Unione cristiana torna il primo partito e sfiora la maggioranza assoluta, ma socialdemocratici e liberali tengono per dieci seggi.')});
+    else if(S.era===LINEA_DE && S.year===1980 && S.month<=6) S.log.unshift({t:T('Nascono i Verdi'), x:T('A Karlsruhe ambientalisti, pacifisti e reduci del Sessantotto fondano un partito: per ora raccoglie poco, ma nei comuni e nei Länder comincia a contare.')});
+    else if(S.era===LINEA_DE && S.year===1980) S.log.unshift({t:T('Elezioni dell\'ottobre 1980'), x:T('I liberali crescono e l\'Unione cristiana perde quattro punti: socialdemocratici e liberali hanno quarantacinque seggi di margine. I Verdi restano sotto la soglia.')});
     else if(S.era===LINEA_IT && S.year===2008) S.log.unshift({t:T('Elezioni 2008'), x:T('Due partiti grandi nati da altrettante fusioni si prendono quasi tutto, e per la prima volta dal dopoguerra la sinistra radicale resta fuori dall\'aula.')});
   }
   /* ⚑ L77-1 — OGNI NOTA-TAPPA E' FILTRATA PER LINEA. Tredici note italiane erano scritte if(S.year===N) senza dire
@@ -3371,6 +3424,23 @@ function snodoRiarmo55OppDovuta(){  return typeof S!=='undefined' && S && S.era=
 function snodoPensioni57Dovuta(){   return typeof S!=='undefined' && S && S.era===LINEA_DE && S.livello===3 && !S.opposizione && S.pensioni57==null && S.year===1957 && S.month>=1 && S.month<=3; }
 function snodoAtomica58Dovuta(){    return typeof S!=='undefined' && S && S.era===LINEA_DE && S.livello===3 && !S.opposizione && S.atomica58==null && S.year===1958 && S.month>=3 && S.month<=5; }
 function snodoAtomica58OppDovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_DE && S.livello===3 && S.opposizione && S.atomica58Opp==null && S.atomica58==null && S.year===1958 && S.month>=3 && S.month<=5; }
+/* L111-2 · il decennio tedesco '60. S1 settembre 1961 (agosto è di pm_muro), S4 GIUGNO 1968 (maggio è di pm_1968). S2 e S3 HANNO UN
+   LATO (L101-2), e il lato sta qui, fuori dalla carta: S2 a chi governa con i liberali senza essere i liberali; S3 alla sola CDU con i
+   liberali in coalizione (il testo nomina «i socialdemocratici» dall'esterno). */
+function spiegel62Lato(){    return Array.isArray(S.coalizione) && S.coalizione.includes('de_fdp') && S.partito!=='de_fdp'; }
+function recessione66Lato(){ return Array.isArray(S.coalizione) && S.coalizione.includes('de_fdp') && S.partito==='de_cdu'; }
+function snodoMuro61Dovuta(){       return typeof S!=='undefined' && S && S.era===LINEA_DE && S.livello===3 && !S.opposizione && S.muro61==null && S.year===1961 && S.month>=9 && S.month<=11; }
+function snodoMuro61OppDovuta(){    return typeof S!=='undefined' && S && S.era===LINEA_DE && S.livello===3 && S.opposizione && S.muro61Opp==null && S.muro61==null && S.year===1961 && S.month>=9 && S.month<=11; }
+function snodoSpiegel62Dovuta(){    return typeof S!=='undefined' && S && S.era===LINEA_DE && S.livello===3 && !S.opposizione && S.spiegel62==null && ((S.year===1962 && S.month>=11) || (S.year===1963 && S.month===1)) && spiegel62Lato(); }
+function snodoRecessione66Dovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_DE && S.livello===3 && !S.opposizione && S.grandeCoal66==null && ((S.year===1966 && S.month>=11) || (S.year===1967 && S.month===1)) && recessione66Lato(); }
+function snodoEmergenza68Dovuta(){  return typeof S!=='undefined' && S && S.era===LINEA_DE && S.livello===3 && !S.opposizione && S.emergenza68==null && S.year===1968 && S.month>=6 && S.month<=8; }
+function snodoEmergenza68OppDovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_DE && S.livello===3 && S.opposizione && S.emergenza68Opp==null && S.emergenza68==null && S.year===1968 && S.month>=6 && S.month<=8; }
+/* L111-2 · il titolo «La prima recessione: i liberali escono» — vero se i liberali sono usciti nel 1966: S3 «tasse», o la FDP rotta e
+   fuori dal governo senza che sia stato lo Spiegel (approssimazione dichiarata: una rottura spontanea del 1963-66 conta come «del 1966»). */
+function liberaliUsciti66(){
+  if(S.grandeCoal66==='tasse') return true;
+  return !!(S.tenutaLiv && S.tenutaLiv.de_fdp===2 && Array.isArray(S.coalizione) && !S.coalizione.includes('de_fdp') && S.spiegel62!=='difeso');
+}
 /* IL PREZZO DEL PETROLIO (§B della scheda): due ancore col mese, nel gate parametrizzato. Tutte e due cadono in un mese
    occupato (pm_petrolio a ottobre 1973, «L'Europa vota» a giugno 1979) ed escono il mese dopo. La prima si chiude a
    febbraio 1974, prima del piano nucleare: la scelta energetica viene dopo il primo shock, e legge il secondo. */
@@ -5128,6 +5198,8 @@ function genAgendaRamo(first){
     if(!first && typeof snodoCrisi08frOppDovuta==='function' && snodoCrisi08frOppDovuta()){ S.agenda.push({kind:'event', data:CRISI08FR_OPP_EV, resolved:false}); agendaSolo(); return; }   // L105-4: la crisi, dall'aula
     if(!first && typeof snodoRiarmo55OppDovuta==='function' && snodoRiarmo55OppDovuta()){ S.agenda.push({kind:'event', data:RIARMO55_OPP_EV, resolved:false}); agendaSolo(); return; }   // L109-2: il riarmo, dall'aula
     if(!first && typeof snodoAtomica58OppDovuta==='function' && snodoAtomica58OppDovuta()){ S.agenda.push({kind:'event', data:ATOMICA58_OPP_EV, resolved:false}); agendaSolo(); return; }   // L109-2: la morte atomica, dall'aula
+    if(!first && typeof snodoMuro61OppDovuta==='function' && snodoMuro61OppDovuta()){ S.agenda.push({kind:'event', data:MURO61_OPP_EV, resolved:false}); agendaSolo(); return; }   // L111-2: il Muro, dall'aula
+    if(!first && typeof snodoEmergenza68OppDovuta==='function' && snodoEmergenza68OppDovuta()){ S.agenda.push({kind:'event', data:EMERGENZA68_OPP_EV, resolved:false}); agendaSolo(); return; }   // L111-2: le leggi d'emergenza, dall'aula
     // Cantiere C: la stagione elettorale vale anche da SFIDANTE (bloccoIds = il tuo blocco d'opposizione)
     if(typeof pickCampagnaNazionale==='function'){ const cnbO=pickCampagnaNazionale(); if(cnbO){ S.agenda.push(cnbO); agendaSolo(); return; } }
     const inq=aggiornaInchiesta();   // anche da sfidante l'esposizione conta: bersaglio sempre tu (niente ministri qui)
@@ -5252,6 +5324,10 @@ function genAgendaRamo(first){
   if(!first && typeof snodoRiarmo55Dovuta==='function' && snodoRiarmo55Dovuta()){ S.agenda.push({kind:'event', data:RIARMO55_EV, resolved:false}); agendaSolo(); return; }            // L109-2
   if(!first && typeof snodoPensioni57Dovuta==='function' && snodoPensioni57Dovuta()){ S.agenda.push({kind:'event', data:PENSIONI57_EV, resolved:false}); agendaSolo(); return; }      // L109-2
   if(!first && typeof snodoAtomica58Dovuta==='function' && snodoAtomica58Dovuta()){ S.agenda.push({kind:'event', data:ATOMICA58_EV, resolved:false}); agendaSolo(); return; }        // L109-2
+  if(!first && typeof snodoMuro61Dovuta==='function' && snodoMuro61Dovuta()){ S.agenda.push({kind:'event', data:MURO61_EV, resolved:false}); agendaSolo(); return; }              // L111-2
+  if(!first && typeof snodoSpiegel62Dovuta==='function' && snodoSpiegel62Dovuta()){ S.agenda.push({kind:'event', data:SPIEGEL62_EV, resolved:false}); agendaSolo(); return; }        // L111-2
+  if(!first && typeof snodoRecessione66Dovuta==='function' && snodoRecessione66Dovuta()){ S.agenda.push({kind:'event', data:RECESSIONE66_EV, resolved:false}); agendaSolo(); return; }  // L111-2
+  if(!first && typeof snodoEmergenza68Dovuta==='function' && snodoEmergenza68Dovuta()){ S.agenda.push({kind:'event', data:EMERGENZA68_EV, resolved:false}); agendaSolo(); return; }  // L111-2
   if(!first && typeof franco90AncoraDovuta==='function'){ var _f9=franco90AncoraDovuta();   // L103-2: la corsa al franco del '92 e del '93
     if(_f9){ S.francoAncore=S.francoAncore||{}; S.francoAncore[_f9]=true; if(_f9==='a92' && pesoFranco92()>1) S.francoGrave=true;   // col no a Maastricht pesa doppio
       S.agenda.push({kind:'event', data:(_f9==='a92' ? FRANCO92_EV : FRANCO93_EV), resolved:false}); agendaSolo(); return; } }
@@ -6315,6 +6391,7 @@ function avviaNotte(){
   NOTTE={ sistema:sistema, vero:vero, stadio:0, onde:generaOnde(sistema, vero), dich:null, saltata:false, timer:null };
   try{ seedNotteAnim(); }catch(e){}   // l'exit poll sale da zero; le tappe successive partono dalla precedente
   if(typeof suona==='function') suona('urne');   // L95-3: il brusio dello spoglio, in loop fino alla proclamazione
+  if(typeof musica==='function') musica();       // L114-1: la musica della notte (NOTTE è appena nato)
   renderNotte(); armaTimerNotte();
 }
 /* Il timer vive SOLO nel transitorio: skip/avanti lo cancellano, il reload lo uccide col resto. */
@@ -6352,6 +6429,7 @@ function concludiNotte(){
   stopTimerNotte();
   if(typeof taci==='function') taci('urne');   // L95-3: rete di sicurezza, il loop non sopravvive alla notte
   const sistema=NOTTE.sistema, vero=NOTTE.vero, dich=NOTTE.dich; NOTTE=null;   // svuota il transitorio PRIMA del flusso a valle
+  if(typeof musica==='function') musica();       // L114-1: finita la notte, la musica torna all'epoca (o alla crisi)
   const mg=calcMargineEsito(sistema, vero); S.margineEsito=mg; // il MARGINE (fase B): caratterizza l'esito (tono + biografia + epilogo)
   applicaMargineBio(mg);                                       // fatto datato + contatori trionfi/sconfitteNette (solo gli estremi memorabili)
   /* F4 — LA DICHIARAZIONE A CALDO, applicata QUI: dopo il risultato, mai prima. I seggi sono già congelati nel VERO
@@ -6910,6 +6988,21 @@ function probSfiduciaAvversario(){
 }
 /* Carta di crisi di coalizione del mese (ultimatum o rottura), o null. Stesso pattern isteresi+raffreddamento
    degli eventi-fiducia, ma PER alleato. La rottura rimuove subito l'alleato (stato sempre coerente). */
+/* L111-2 · UN ALLEATO HA ROTTO — il punto unico. Estratto dal ramo «1) rottura» di pickAlleato, che ora lo chiama, e chiamato
+   direttamente dagli snodi che fanno uscire un partner (S2 e S3 di de1960: `rompiPartner('de_fdp')`). Non mostra carte (chi lo
+   chiama ha già raccontato) ed è un no-op se `id` non è in coalizione. Dopo la rottura `tenutaLiv[id]===2`: sotto la sfiducia
+   costruttiva il partner conta come avverso (bloccoAvverso) e non si ricompra col rimpasto (L111-1). */
+function rompiPartner(id){
+  if(!S || !Array.isArray(S.coalizione) || !S.coalizione.includes(id) || id===S.partito) return false;
+  S.tenutaLiv=S.tenutaLiv||{};
+  S.tenutaLiv[id]=2;
+  S.coalizione=S.coalizione.filter(x=>x!==id);
+  if(S.tenuta) delete S.tenuta[id];
+  if(S.tenutaForza0) delete S.tenutaForza0[id];
+  if(S.tenutaUltimo) delete S.tenutaUltimo[id];
+  S.minoranza=!S.coabitazione && seggiCoalizione(S.coalizione,S.seggi)<50;   // L101-1: in coabitazione il governo è degli altri — la rottura di un alleato del Presidente non lo mette in minoranza (L100-2 spegne S.minoranza; qui si riaccendeva)
+  return true;
+}
 function pickAlleato(){
   if(S.opposizione || !PAESE.coalizione || !S.tenuta) return null;
   const allies=S.coalizione.filter(id=>id!==S.partito);
@@ -6919,10 +7012,7 @@ function pickAlleato(){
   // 1) rottura: un alleato sotto la soglia, non ancora annunciata
   for(const id of allies){
     if((S.tenuta[id]||0)<sRot && (S.tenutaLiv[id]||0)<2){
-      S.tenutaLiv[id]=2;
-      S.coalizione=S.coalizione.filter(x=>x!==id);
-      delete S.tenuta[id]; delete S.tenutaForza0[id]; delete S.tenutaUltimo[id];
-      S.minoranza=!S.coabitazione && seggiCoalizione(S.coalizione,S.seggi)<50;   // L101-1: in coabitazione il governo è degli altri — la rottura di un alleato del Presidente non lo mette in minoranza (L100-2 spegne S.minoranza; qui si riaccendeva)
+      rompiPartner(id);   // L111-2: un punto solo di verità per «un alleato ha rotto»
       const nome=part(id).nome, AE=ALLEATI_EV.rottura;   // (rinominata da T: oscurava la funzione i18n T())
       return { kind:'event', ally:id, data:{ kick:T(AE.kick), t:T(AE.t).replace(/%A/g,nome), text:T(AE.text).replace(/%A/g,nome),
         ch:[ {l:T(AE.ok.l), e:T(AE.ok.e), f:()=>{}} ] } };
@@ -7303,6 +7393,7 @@ const FINALI_CON_SUONO = ['mandatoCompiuto', 'ritiro', 'mandatoInt'];
 function gameOver(reason){
   if(typeof taciTutto==='function') taciTutto();   // L95-3: si ferma tutto; poi suona `finale` solo se il finale è nella lista
   if(FINALI_CON_SUONO.indexOf(reason)>=0 && typeof suona==='function') suona('finale');
+  if(FINALI_CON_SUONO.indexOf(reason)>=0 && typeof musica==='function') musica('finale');   // L114-1: il brano del finale, sugli stessi motivi
   try{ aggiungiCarriera(reason); }catch(e){} chiudiAutosave();   // carriera chiusa: aggiorna lo storico e cancella l'autosave (niente "Continua")
   document.getElementById('ov').classList.remove('on');
   const years=S.year-(S.annoInizio||2025);
@@ -7438,6 +7529,7 @@ function applySnap(snap){
   if(S.ref92===undefined){ S.ref92=null; S.ref92Opp=null; S.sarajevo94=null; S.piano95=null; S.piano95Opp=null; S.quinquennato00=null; }   // L103-2
   if(S.aprile02===undefined){ S.aprile02=null; S.aprile02Opp=null; S.tce05=null; S.banlieue05=null; S.crisi08fr=null; S.crisi08frOpp=null; }   // L105-4
   if(S.notaStalin52===undefined){ S.notaStalin52=null; S.riarmo55=null; S.riarmo55Opp=null; S.pensioni57=null; S.atomica58=null; S.atomica58Opp=null; S.riparazioni52=null; }   // L109-2
+  if(S.muro61===undefined){ S.muro61=null; S.muro61Opp=null; S.spiegel62=null; S.grandeCoal66=null; S.emergenza68=null; S.emergenza68Opp=null; }   // L111-2
   if(S.scioglimento97===undefined) S.scioglimento97=null;   // L103-1
   if(S.coabitazione===undefined) S.coabitazione=false;   // L100-2
   if(S.governiCaduti===undefined) S.governiCaduti=0;   // L80-5

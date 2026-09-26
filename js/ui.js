@@ -40,6 +40,7 @@ function setMovimento(m){
   if(MOV_MODI.indexOf(m)<0) return;
   if(typeof lsSet==='function') lsSet(MOV_CHIAVE, m);
   applicaMovimento();
+  try{ document.querySelectorAll('video.scena-video').forEach(function(v){ if(m==='pieno'){ const p=v.play(); if(p&&p.catch) p.catch(function(){}); } else v.pause(); }); }catch(e){}   // L95-4: il CSS le nasconde, qui smettono di decodificare
   if(typeof showPartita==='function' && document.getElementById('menu-modal')) showPartita();   // ridisegna il pannello: il segmento acceso deve seguire la scelta
 }
 function motionReduced(){ const m=movimentoModo(); return m==='ridotto' || m==='spento'; }
@@ -70,6 +71,46 @@ function riprendiFase(img){
   }catch(e){}
 }
 function riprendiFaseTutte(){ try{ document.querySelectorAll('#home-hero img, .ag-scene img').forEach(riprendiFase); }catch(e){} }
+
+/* ================================================================================================================
+   L95-4 · LE CLIP SULLE SCENE. Dove una scena ha la sua clip (VIDEO_PRESENTI, scenes.js) un <video> muto in loop
+   sta SOPRA l'<img>, trasparente finché non suona il primo fotogramma, poi si dissolve (.vivo). Il contenitore
+   porta `.con-video` e l'immagine sotto sta FERMA a scala 1: la clip nasce da quell'immagine a scala 1, e un
+   Ken Burns sotto la dissolvenza si vedrebbe come uno scatto di zoom.
+   Condizioni: movimento «pieno» (motionReduced falso) e nessun segno di rete da risparmiare (`saveData`, 2G,
+   rete cellulare quando il browser lo dice — `connection.type` c'è quasi solo su Android). Altrimenti niente
+   <video> e l'immagine fa il suo Ken Burns come prima.
+   ⚑ La regola del movimento lungo vale anche qui: render() ricrea il nodo, e una clip ricreata RIPRENDE, non
+   riparte. La prima volta che una clip si vede parte da zero (il fotogramma coincide con l'immagine: passaggio
+   invisibile) e se ne segna l'ora; le volte dopo `currentTime` è l'ora trascorsa modulo la durata LETTA dal file.
+   ================================================================================================================ */
+const VIDEO_DIR='assets/video/', VIDEO_T0={};
+function videoConsentito(){
+  if(motionReduced()) return false;
+  try{ const c=navigator.connection;
+    if(c && (c.saveData || /2g/.test(c.effectiveType||'') || c.type==='cellular')) return false; }catch(e){}
+  return true;
+}
+/* nome della clip per un'immagine di scena (il basename del .webp), o '' se la clip non c'è / non si può */
+function clipPer(nome){
+  if(!nome || typeof VIDEO_PRESENTI==='undefined' || VIDEO_PRESENTI.indexOf(nome)<0) return '';
+  return videoConsentito()?nome:'';
+}
+function clipDaSrc(src){ const m=/([^\/]+)\.webp$/.exec(String(src||'')); return m?clipPer(m[1]):''; }
+function videoHtml(nome){ return '<video class="scena-video" src="'+VIDEO_DIR+nome+'.mp4" data-clip="'+nome+'" muted autoplay loop playsinline preload="auto" disablepictureinpicture aria-hidden="true" tabindex="-1"></video>'; }
+function agganciaVideo(v){
+  if(!v || v.dataset.agganciato) return;
+  v.dataset.agganciato='1';
+  try{ v.muted=true; }catch(e){}   // la proprietà, non solo l'attributo: senza, l'autoplay può essere negato
+  const nome=v.dataset.clip;
+  v.addEventListener('loadedmetadata', function(){
+    try{ if(VIDEO_T0[nome]==null){ VIDEO_T0[nome]=oraMovimento(); return; }
+      const d=v.duration; if(d && isFinite(d)) v.currentTime=((oraMovimento()-VIDEO_T0[nome])/1000)%d; }catch(e){}
+  });
+  v.addEventListener('playing', function(){ v.classList.add('vivo'); }, {once:true});   // gli eventi media non risalgono: il target è lui
+  try{ const p=v.play(); if(p && p.catch) p.catch(function(){}); }catch(e){}   // autoplay negato = resta l'immagine, nessun errore
+}
+function agganciaVideoTutti(){ try{ document.querySelectorAll('video.scena-video').forEach(agganciaVideo); }catch(e){} }
 
 /* ================================================================================================================
    L95-1 · OGNI CARTA NUOVA ENTRA, E ENTRA QUANDO SI VEDE.
@@ -255,6 +296,7 @@ function playAnims(){
   }
   /* L95-1 - e le immagini appena ricreate riprendono la fase di prima, invece di ricominciare da zero. */
   riprendiFaseTutte();
+  agganciaVideoTutti();   // L95-4: le clip appena ricreate riprendono dal punto dell'ora, non da zero
   /* L95-1 - le carte nuove si mettono in coda all'osservatore: entreranno quando entrano nel viewport. */
   osservaCarteNuove();
 }
@@ -281,9 +323,15 @@ function applyPaese(){
      Vuoto → slot spento (nessun .on) → home identica finché non arriva l'arte. */
   const hero=document.getElementById('home-hero');
   if(hero){ const hs=scenaSrc(P.hero)||scenaSrc('hero');
-    if(hs){ hero.innerHTML='<img src="'+hs+'" alt="" decoding="async">'; hero.classList.add('on');
-      riprendiFase(hero.firstChild); }   // L95-1: il nodo e' nuovo, la fase e' quella di prima   // hero = above the fold: decode async ma MAI lazy
-    else { hero.classList.remove('on'); if(hero.firstChild) hero.innerHTML=''; }
+    if(hs){ const clip=(hs===scenaSrc('hero'))?clipPer('home-hero'):'';   // L95-4: la clip e' della hero CONDIVISA; un P.hero di paese non la eredita
+      const firma=hs+'|'+clip;
+      if(hero.dataset.firma!==firma){   // stessa immagine e stessa clip: il nodo resta, e con lui Ken Burns e clip senza riprese
+        hero.dataset.firma=firma;
+        hero.innerHTML='<img src="'+hs+'" alt="" decoding="async">'+(clip?videoHtml(clip):'');
+        hero.classList.toggle('con-video', !!clip);
+        riprendiFase(hero.firstChild); agganciaVideoTutti(); }   // L95-1: il nodo e' nuovo, la fase e' quella di prima   // hero = above the fold: decode async ma MAI lazy
+      hero.classList.add('on'); }
+    else { hero.classList.remove('on','con-video'); delete hero.dataset.firma; if(hero.firstChild) hero.innerHTML=''; }
   }
 }
 
@@ -402,7 +450,9 @@ function agScene(it){ if(!it || typeof SCENA_MAJOR==='undefined' || !SCENA_MAJOR
   /* loading=lazy + decoding=async: con le scene su file (assets/) le carte fuori schermo non pagano la rete
      e la decodifica non blocca il render. Nessun salto di layout: .ag-scene ha aspect-ratio 16/9 + fondo panel2,
      quindi lo slot occupa il suo posto anche prima che l'immagine arrivi. Inerte sui base64 (già in memoria). */
-  return src?`<div class="ag-scene on"><img src="${src}" alt="" loading="lazy" decoding="async"></div>`:''; }
+  if(!src) return '';
+  const clip=clipDaSrc(src);   // L95-4: la clip con lo stesso nome del .webp, se c'e' (oggi nessuna scena-carta ne ha una)
+  return `<div class="ag-scene on${clip?' con-video':''}"><img src="${src}" alt="" loading="lazy" decoding="async">${clip?videoHtml(clip):''}</div>`; }
 /* Bandiere nei bottoni del selettore paese (schermata iniziale): iniettate da PAESI[c].flag. Una volta, al boot. */
 function decorateCountrySelector(){
   document.querySelectorAll('#country-seg button').forEach(function(b){ const P=PAESI[b.dataset.c]; if(P) b.innerHTML=`<span class="flag">${P.flag||''}</span><span>${T(P.nome)}</span>`; });
@@ -840,7 +890,12 @@ function showPartita(){
   const _auSeg=`<div class="contorno" style="font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--mut);text-align:center;margin:8px 0 4px">${T('Audio')}</div>
     <div class="seg" id="audio-seg" style="max-width:200px;margin:0 auto 10px;">
       <button class="${_au==='acceso'?'on':''}" onclick="setAudio('acceso')">${T('Acceso')}</button>
-      <button class="${_au==='spento'?'on':''}" onclick="setAudio('spento')">${T('Spento')}</button></div>`;
+      <button class="${_au==='spento'?'on':''}" onclick="setAudio('spento')">${T('Spento')}</button></div>`
+    /* L114-1 — la MUSICA, accanto all'audio e separata: localStorage `hos_musica`, mai in S; con l'audio spento tace comunque */
+    +`<div class="contorno" style="font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--mut);text-align:center;margin:8px 0 4px">${T('Musica')}</div>
+    <div class="seg" id="musica-seg" style="max-width:200px;margin:0 auto 10px;">
+      <button class="${(typeof musicaAccesa==='function'&&musicaAccesa())?'on':''}" onclick="setMusica('accesa')">${T('Accesa')}</button>
+      <button class="${(typeof musicaAccesa==='function'&&musicaAccesa())?'':'on'}" onclick="setMusica('spenta')">${T('Spenta')}</button></div>`;
   h+=`<div class="contorno" style="font-size:11px;color:var(--mut);text-align:center;margin:0 auto 10px;max-width:300px">${T('Con <b>ridotto</b> restano solo le dissolvenze; con <b>spento</b> nulla si muove. La scelta resta su questo dispositivo.')}${movimentoScelto()?'':(motionSistemaReduce()?(' '+T('(il tuo dispositivo chiede meno movimento: si parte da ridotto)')):'')}</div>`;
   h+=_auSeg;
   h+=`<div class="mtext">${T(aMetaMese()?"Sei a metà mese: il salvataggio riprenderà <b>dall'inizio del mese corrente</b>.":"Fotografia al confine del mese corrente.")}</div>`;
@@ -1188,6 +1243,7 @@ function render(){
     : `${T('Pronto. Prossimo:')} <b>${next}</b>`;
   document.getElementById('advbtn').textContent = T(pend>0?'Decidi prima →':'Avanza →');
   playAnims();   // moto vecchio→nuovo sui numeri/barre appena resi (no-op sotto reduced-motion)
+  if(typeof musica==='function') musica();   // L114-1: il brano segue lo stato (idempotente: agisce solo sul cambio)
 }
 function keyCard(l,k,num,v,dec,signed,d){return `<div class="key"><div class="lab">${T(l)}</div><div class="val" data-anim="num:${k}" data-to="${num}" data-dec="${dec}" data-sign="${signed?1:0}">${v}</div><div class="dlt">${d}</div></div>`;}
 

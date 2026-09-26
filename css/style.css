@@ -493,7 +493,7 @@
      (colore/spessore inline). La classe .pulse è aggiunta dal render solo la prima volta (lastTerrPulse). */
   @keyframes terrPulse{ 0%,100%{ stroke-opacity:1; } 50%{ stroke-opacity:.3; } }
   .mappa-chiama.pulse{ animation:terrPulse 1.05s ease-in-out 2; }
-  /* MOVIMENTO — Ken Burns: pan/zoom lento e impercettibile su scene ed hero (il "movimento" che mancava, senza gif/video).
+  /* MOVIMENTO — Ken Burns: pan/zoom lento e impercettibile su scene ed hero (il "movimento" che mancava; dove c'e' una clip, L95-4, sotto la clip l'immagine sta ferma).
      L'img è cover al 100% e il contenitore letterboxa (overflow:hidden): un lieve SOVRA-scala (≥1.06) tiene sempre coperto
      anche col piccolo scorrimento → mai un bordo scoperto. `alternate` = un respiro avanti/indietro senza salti. Solo
      transform → compositor/60fps, zero asset nuovi. Annullato sotto prefers-reduced-motion (blocco qui sotto). */
@@ -505,6 +505,15 @@
   @keyframes kenBurns{ from{ transform:scale(1.06) translate(0.6%, 0.4%); } to{ transform:scale(1.14) translate(-1.2%, -0.9%); } }
   #home-hero img{ animation:kenBurns 28s ease-in-out infinite alternate; will-change:transform; }
   .ag-scene img{ animation:kenBurns 16s ease-in-out infinite alternate; will-change:transform; }
+  /* L95-4 — LA CLIP SOPRA L'IMMAGINE. Il <video> copre l'<img> ed e' trasparente finche' non suona il primo
+     fotogramma (.vivo, messo da agganciaVideo in ui.js): la dissolvenza passa dall'immagine alla clip che ne nasce.
+     Sotto la clip l'immagine sta ferma a scala 1 (la clip e' girata a scala 1: un Ken Burns sotto si vedrebbe come
+     uno scatto). Con movimento ridotto o spento il gioco non mette la clip; se lo si cambia a clip gia' messa, sparisce. */
+  #home-hero.con-video, .ag-scene.con-video{ position:relative; }
+  #home-hero.con-video img, .ag-scene.con-video img{ animation:none; transform:none; }
+  .scena-video{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block; opacity:0; transition:opacity .6s ease; pointer-events:none; }
+  .scena-video.vivo{ opacity:1; }
+  .mov-ridotto .scena-video, .mov-spento .scena-video{ display:none; }
 
   /* L95-1 — IL MESE CHE AVANZA (contachilometri). La data vecchia scorre in alto ed esce, la nuova entra dal
      basso. Il contenitore ritaglia; le due cifre si muovono solo in transform/opacity. Parte SOLO quando il
