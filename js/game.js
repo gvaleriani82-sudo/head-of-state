@@ -166,9 +166,12 @@ function inflazioneSeed(sc){
      da Argentina e Nigeria — dove il debito è in valuta estera e **non si erode in pesos o naira** — ma tagliava
      in silenzio i tre decenni a due cifre che i dati dichiarano (italia1970 13, uk1970 13, italia1980 11), cioè
      proprio gli anni in cui l'inflazione ERA il fatto economico. Ora il tetto lo dichiara chi ce l'ha:
-     `economia.inflazioneTetto`. Chi non lo dichiara usa la sua cifra vera. */
-  var tetto = (typeof PAESE!=='undefined' && PAESE && PAESE.economia && PAESE.economia.inflazioneTetto!=null)
-    ? PAESE.economia.inflazioneTetto : null;
+     `economia.inflazioneTetto`. Chi non lo dichiara usa la sua cifra vera.
+     ⚠ L110-1: fino al 26/9 si leggeva SOLO `PAESE.economia`, che per una porta è quella del paese di OGGI (paeseConScenario non
+     sovrascrive `economia`): il tetto dichiarato nello scenario da sei porte non era mai letto. Ora lo scenario vince sul paese
+     (lo stesso ordine di economiaPorta, model.js); `sc` è quello passato, perché all'avvio S.scenario può non esserci ancora. */
+  var tetto = (sc && sc.economia && sc.economia.inflazioneTetto!=null) ? sc.economia.inflazioneTetto
+    : ((typeof PAESE!=='undefined' && PAESE && PAESE.economia && PAESE.economia.inflazioneTetto!=null) ? PAESE.economia.inflazioneTetto : null);
   return tetto!=null ? clamp(v, 0, tetto) : Math.max(0, v);
 }
 /* ================================================================================================================
@@ -194,7 +197,9 @@ const DRIFT_INFLAZIONE_ERA = {
                 {da:2012, inf:2.0}, {da:2013, inf:0.9},
                 {da:2014, inf:null} ],   // L105-3: chiusura — nel presente inflazioneAnno() torna a S.inflazione (il seme), come ciclo, disoccupazione e deficit
   /* L108-2 · la Germania del '50 (scheda PRESET-GERMANIA-1950 §2, ⚠ Destatis): prezzi fermi, salvo la fiammata della Corea nel 1951 */
-  [LINEA_DE]: [ {da:1950, inf:2}, {da:1951, inf:8}, {da:1952, inf:2} ]
+  [LINEA_DE]: [ {da:1950, inf:2}, {da:1951, inf:8}, {da:1952, inf:2},
+                /* L110-2 · il '60 (scheda PRESET-GERMANIA-1960 §2, ⚠ ordine di grandezza): ~2,5, la fiammata del 1966 */
+                {da:1960, inf:2.5}, {da:1966, inf:3.5}, {da:1967, inf:2.5} ]
 };
 function inflazioneAnno(){
   if(typeof S==='undefined' || !S) return 0;
@@ -369,6 +374,7 @@ function initStatoBase(){
   S.riforme81=null; S.rigore83=null; S.scuola84=null; S.ordinanze86=null; S.riforme81Opp=null; S.rigore83Opp=null;   // L101-2: i quattro snodi del decennio francese '80 e le due versioni dall'aula
   S.ref92=null; S.ref92Opp=null; S.sarajevo94=null; S.piano95=null; S.piano95Opp=null; S.quinquennato00=null;   // L103-2: gli snodi del decennio francese '90 (scioglimento97 c'è da L103-1)
   S.aprile02=null; S.aprile02Opp=null; S.tce05=null; S.banlieue05=null; S.crisi08fr=null; S.crisi08frOpp=null;   // L105-4: gli snodi del decennio francese 2000 (⚠ S.crisi08 è inglese)
+  S.notaStalin52=null; S.riarmo55=null; S.riarmo55Opp=null; S.pensioni57=null; S.atomica58=null; S.atomica58Opp=null; S.riparazioni52=null;   // L109-2: il decennio tedesco '50
   S.scioglimento97=null;   // L103-1: lo scioglimento del '97 (null = storico; 'no' = «aspetta», tappa 1998/3). Lo scrive S4 in L103-2
   S.coabitazione=false;   // L100-2: il Presidente con l'Assemblea degli altri (derivato dai seggi, dato puro, round-trip)
   S.governiCaduti=0;                    // L80-5: quante volte il governo e caduto senza che si andasse a votare
@@ -385,6 +391,7 @@ function initStatoBase(){
      corso; `sostegnoOfferto` marca il mandato in cui l'occasione è già passata, perché sia un'occasione e non
      un assillo mensile; `rimpastoOfferto` fa lo stesso per l'altra via. */
   S.sostegno=null; S.sostegnoOfferto=null; S.rimpastoOfferto=null; S.sostegnoStrappi=0;
+  S.rimpastoOffertoMese=null;   // L111-1: il mese (anno×12+mese) in cui la carta del rimpasto è uscita — sotto la sfiducia costruttiva il segno è per EPISODIO di minoranza
   S.apertura=null; S.aperturaEsito=null; S.enel=null;   // AVANZAMENTO Lotto 4 — snodi '60 (gemelli di leggeTruffa): apertura a sinistra + dilemma-Enel (dati puri, round-trip)
   S.richiamoCorrUltimo=null;   // CURA Lotto P3 — cooldown della carta-richiamo correnti (dato puro, round-trip)
   S.leggeroUltimo=null;        // G4 — cooldown del beat leggero (dato puro, round-trip)
@@ -1389,11 +1396,17 @@ const DRIFT_ECONOMICO_ERA = {
                 {da:2002, ciclo:-0.9}, {da:2003, ciclo:-1.7}, {da:2004, ciclo:1.8}, {da:2005, ciclo:-0.3}, {da:2006, ciclo:1.4},
                 {da:2007, ciclo:0.9}, {da:2008, ciclo:-1.7}, {da:2009, ciclo:-4.9}, {da:2010, ciclo:0.9}, {da:2011, ciclo:0.7},
                 {da:2012, ciclo:-1.7}, {da:2013, ciclo:-0.4}, {da:2014, ciclo:0} ],   // 2014 = chiusura: nel presente il ciclo della linea non vale più
-  /* L108-2 · la Germania del miracolo (scheda PRESET-GERMANIA-1950 §2: 1950 ~10, 1955 ~12, 1958 ~4, media 8). ⚠ IL TETTO DEL MOTORE:
-     computeGrowth taglia la crescita a 5 (clamp(g,-6,5), per tutti i paesi), e col seme 8 la crescita di fondo è ~9,5: il miracolo
-     si rende come 5 fisso e la sweep (misura-de1950-struttura.js sweep ciclo) non trova niente da muovere. L'unico bersaglio
-     sotto il tetto è la frenata del 1958: −5,5 la porta a ~4. Alzare il tetto è una decisione di motore (Cowork). */
-  [LINEA_DE]: [ {da:1950, ciclo:0}, {da:1958, ciclo:-5.5}, {da:1959, ciclo:0} ]
+  /* L108-2 · la Germania del miracolo (scheda PRESET-GERMANIA-1950 §2). L109-1: col tetto della porta a 10 (crescitaTetto, model.js) la sweep
+     (misura-de1950-struttura.js sweep ciclo, CDU, 5 semi, luglio) sui bersagli decisi da Cowork (1950 10 · 1951 9 · 1953 8 · 1955 11 · 1957 6 ·
+     1958 4 · 1959 7 · 1960 8, ±1) rende 10,0 · 8,9 · 8,4 · 8,0 · 9,7 · 10,0 · 8,7 · 6,0 · 4,1 · 7,2 · 8,0 · 8,0: tutto dentro ±1 (il 1955 sul bordo:
+     il tetto è 10). Col tetto a 5 (L108-2) il decennio rendeva 5 fisso e l'unica riga era la frenata del 1958. */
+  [LINEA_DE]: [ {da:1950, ciclo:2.5}, {da:1951, ciclo:0}, {da:1952, ciclo:-0.5}, {da:1953, ciclo:0}, {da:1954, ciclo:2}, {da:1955, ciclo:2.5},
+                {da:1956, ciclo:0}, {da:1957, ciclo:-2.5}, {da:1958, ciclo:-4.5}, {da:1959, ciclo:-0.5},
+                /* L110-2 · il '60 (de1960, crescitaTetto 9), CERCATO con la sweep (misura-de1960-struttura.js sweep ciclo, CDU, 5 semi, luglio): resa
+                   8,5 · 4,4 · 4,6 · 2,7 · 6,6 · 5,2 · 2,9 · **−0,3 (la recessione del 1967)** · 5,4 · 7,3 · 5,1 · 4,9, scarto massimo 0,2. Le righe del
+                   1960-61 di de1950 (0 e −0,5) sono sostituite da queste: la coda di de1950 le eredita (dichiarato). */
+                {da:1960, ciclo:4}, {da:1961, ciclo:-1}, {da:1962, ciclo:0}, {da:1963, ciclo:-2.5}, {da:1964, ciclo:2}, {da:1965, ciclo:0},
+                {da:1966, ciclo:-2.5}, {da:1967, ciclo:-5.5}, {da:1968, ciclo:1}, {da:1969, ciclo:3}, {da:1970, ciclo:0}, {da:1971, ciclo:0} ]
 };
 /* L60-2 · LA DISOCCUPAZIONE D'EPOCA. Il motore non aveva un posto dove un decennio potesse dire «qui i senza
    lavoro sono il doppio»: `S.uMod` decade dell'80% al mese e le carte danno solo colpi. Stessa forma di cicloBase():
@@ -1438,11 +1451,16 @@ const DRIFT_DISOCCUPAZIONE_ERA = {
                 {da:1990, un:0}, {da:1991, un:2}, {da:1992, un:3.5}, {da:1994, un:2.5}, {da:1995, un:1.5}, {da:1997, un:0.5},
                 /* L77-1 · 2000: disoccupazione bassa e stabile fino al 2008 (~5%), poi la crisi la porta verso l'8% */
                 {da:1999, un:0}, {da:2008, un:0.5}, {da:2009, un:1}, {da:2012, un:0.5} ],
-  /* L108-2 · la Germania del '50 (scheda §2: 11 → 8 → 4 → 2,5 → 1,3), CERCATA con la sweep (misura-de1950-struttura.js sweep un, CDU, 5 semi,
-     luglio): resa 50 10,7 · 53 7,9 · 56 4,0 · 58 3,1 · 59-61 3,0. ⚠ Il pavimento 3 di computeUnemp taglia gli ultimi anni (bersaglio 2,5 e 1,3):
-     dichiarato, come la Francia del '60. */
-  [LINEA_DE]: [ {da:1950, un:0.25}, {da:1951, un:0}, {da:1952, un:-2.25}, {da:1953, un:-2.75}, {da:1954, un:-4.5}, {da:1955, un:-5.5},
-                {da:1956, un:-7.25}, {da:1957, un:-6}, {da:1958, un:-6.5} ]
+  /* L108-2 · la Germania del '50 (scheda §2: 11 → 8 → 4 → 2,5 → 1,3). RIFATTA in L109-1 dopo il tetto della crescita a 10 (col miracolo
+     la disoccupazione scendeva a 8,6 già nel 1950): sweep un (CDU, 5 semi, luglio) → resa 50 10,9 · 51 10,2 · 52 8,9 · 53 7,8 · 54 7,0 · 55 4,8 ·
+     56 3,4 · 57 3,2 · 58 3,1 · 59-61 3,0. ⚠ Il pavimento 3 di computeUnemp taglia gli ultimi anni (bersaglio 2,5 e 1,3): dichiarato. */
+  [LINEA_DE]: [ {da:1950, un:4.5}, {da:1951, un:2.5}, {da:1952, un:0.5}, {da:1953, un:-0.5}, {da:1954, un:0.25}, {da:1955, un:-5.5},
+                {da:1956, un:-7.25}, {da:1957, un:-6}, {da:1958, un:-9.5}, {da:1959, un:-6},
+                /* L110-2 · il '60 (de1960, disoccupazionePavimento 0,5), CERCATO con la sweep (sweep un, CDU, 5 semi, luglio) SOPRA le righe del ciclo
+                   del decennio (una prima sweep in parallelo col ciclo dava 4,4 nel 1967): resa 0,7 · 1,0 · 0,9 · 0,7 · 0,8 · 0,6 · 0,6 · **2,1 (1967)** · 1,6 ·
+                   0,7 · 0,8 · 0,9, scarto massimo 0,3. */
+                {da:1960, un:-6.5}, {da:1961, un:-6.5}, {da:1962, un:-7.5}, {da:1963, un:-8.5}, {da:1964, un:-5.5}, {da:1965, un:-8.5},
+                {da:1966, un:-8.5}, {da:1967, un:-8.25}, {da:1968, un:-7.25}, {da:1969, un:-7}, {da:1970, un:-6.25}, {da:1971, un:-7} ]
 };
 function disoccupazioneEra(){
   if(typeof S==='undefined' || !S) return 0;
@@ -1930,8 +1948,11 @@ const RIALLINEAMENTI_ERA = {
   [LINEA_DE]: {
     '1953/9': { entra:[ { id:'de_bhe', nome:'BHE', orientamento:'destra', base:{ pensionati:0.5, lavoratori:0.3, cetomedio:0.2 },
                           forza:6.1, asse:1, alleati:['de_cdu','de_fdp','de_dp','de_bp'] } ],
-                delta:[ {id:'de_cdu',delta:10.7}, {id:'de_spd',delta:-4.1}, {id:'de_fdp',delta:-4.0}, {id:'de_kpd',delta:-4.4},
-                        {id:'de_bp',delta:-3.1}, {id:'de_dp',delta:-1.2} ],   // Σ −6,1 = la forza del BHE che entra
+                /* L109-1 · la CONCENTRAZIONE del 1953 è marcata `ancora:true` (il criterio di L106-3 esteso: una concentrazione del
+                   sistema dei partiti che assorbe i minori — la CDU/CSU prende i voti di Zentrum, Partito bavarese e piccoli borghesi).
+                   Marcati CDU, KPD e BP; SPD e FDP no (è voto, non natura). */
+                delta:[ {id:'de_cdu',delta:10.7,ancora:true}, {id:'de_spd',delta:-4.1}, {id:'de_fdp',delta:-4.0}, {id:'de_kpd',delta:-4.4,ancora:true},
+                        {id:'de_bp',delta:-3.1,ancora:true}, {id:'de_dp',delta:-1.2} ],   // Σ −6,1 = la forza del BHE che entra
                 urne:  { de_cdu:45.2, de_spd:28.8, de_fdp:9.5, de_bhe:5.9, de_dp:3.3, de_kpd:2.2, de_bp:1.7 },
                 seggi: { de_cdu:50.5, de_spd:31.0, de_fdp:9.9, de_bhe:5.5, de_dp:3.1, de_kpd:0, de_bp:0 } },
     '1956/8': { esce:[ { id:'de_kpd' } ],
@@ -1941,7 +1962,27 @@ const RIALLINEAMENTI_ERA = {
     '1957/9': { delta:[ {id:'de_cdu',delta:3.0}, {id:'de_spd',delta:1.7}, {id:'de_fdp',delta:-2.2}, {id:'de_bhe',delta:-1.6},
                         {id:'de_dp',delta:0}, {id:'de_bp',delta:-0.9} ],   // Σ 0
                 urne:  { de_cdu:50.2, de_spd:31.8, de_fdp:7.7, de_bhe:4.6, de_dp:3.4, de_bp:0.9 },
-                seggi: { de_cdu:54.3, de_spd:34.0, de_fdp:8.3, de_dp:3.4, de_bhe:0, de_bp:0 } }
+                seggi: { de_cdu:54.3, de_spd:34.0, de_fdp:8.3, de_dp:3.4, de_bhe:0, de_bp:0 } },
+    /* L110-2 · il decennio '60 (scheda PRESET-GERMANIA-1960 §1). Voti e seggi **confermati sul sito della Commissione elettorale
+       federale** (26/9): 1961 CDU 35,8 + CSU 9,6 = **45,4** (la scheda diceva 45,3) · SPD 36,2 · FDP 12,8 · GDP 2,8 · DFU 1,9; seggi
+       senza Berlino 242 · 190 · 67 = 499 (con Berlino 251 · 203 · 67) · 1965 CDU/CSU 47,6 · SPD 39,3 · FDP 9,5 · NPD 2,0; seggi 245 ·
+       202 · 49 = 496 (con Berlino 251 · 217 · 50) ✓ · 1969 CDU/CSU 46,1 · SPD 42,7 · FDP 5,8 · NPD 4,3; seggi 242 · 224 · 30 = 496 (con
+       Berlino 250 · 237 · 31) ✓. Delta = voti rinormalizzati sul roster del momento, meno quelli della tappa prima.
+       · 1961/9: la DP confluisce nella CDU (`esce` con `confluisce_in` e **`ancora:true`**: la forza e l'àncora della DP passano alla
+         CDU, D42); poi il voto: sui tre 48,1 · 38,3 · 13,6 contro 57,5 (CDU+DP) · 34,2 · 8,3 del 1957.
+       · 1964/11: entra la NPD (2,0; `alleati:[]`, non selezionabile). · 1965/9 e 1969/9: seggi e delta. */
+    '1961/9': { esce:[ { id:'de_dp', confluisce_in:'de_cdu', ancora:true } ],
+                delta:[ {id:'de_cdu',delta:-9.4}, {id:'de_spd',delta:4.1}, {id:'de_fdp',delta:5.3} ],   // Σ 0
+                urne:  { de_cdu:45.4, de_spd:36.2, de_fdp:12.8 },
+                seggi: { de_cdu:48.5, de_spd:38.1, de_fdp:13.4 } },
+    '1964/11': { entra:[ { id:'de_npd', nome:'NPD', orientamento:'destra', base:{ pensionati:0.4, cetomedio:0.3, lavoratori:0.3 }, forza:2.0, asse:2, alleati:[],
+                           selezionabile:false, nota:'La NPD non entra mai nel Bundestag: sta sotto la soglia del cinque per cento' } ] },
+    '1965/9': { delta:[ {id:'de_cdu',delta:0.3}, {id:'de_spd',delta:1.6}, {id:'de_fdp',delta:-3.9} ],   // Σ −2,0 = la NPD entrata nel 1964
+                urne:  { de_cdu:47.6, de_spd:39.3, de_fdp:9.5, de_npd:2.0 },
+                seggi: { de_cdu:49.4, de_spd:40.7, de_fdp:9.9, de_npd:0 } },
+    '1969/9': { delta:[ {id:'de_cdu',delta:-1.8}, {id:'de_spd',delta:3.2}, {id:'de_fdp',delta:-3.8}, {id:'de_npd',delta:2.4} ],   // Σ 0
+                urne:  { de_cdu:46.1, de_spd:42.7, de_fdp:5.8, de_npd:4.3 },
+                seggi: { de_cdu:48.8, de_spd:45.2, de_fdp:6.0, de_npd:0 } }
   }
 };
 /* L101-1 · D17 · DI CHI È L'ELISEO. Una funzione sola, letta dalle tappe condizionate del 1981 e del 1988: la
@@ -2082,6 +2123,11 @@ function applicaDirettive(d){
     var dest=e.confluisce_in;
     /* correzione #2: niente id orfani. Forza, intese e territori TRAVASANO nel partito d'arrivo (o si perdono
        dichiaratamente se la direttiva non ne indica uno). */
+    /* L110-2 · `ancora:true` su un `esce` con `confluisce_in`: è una CONCENTRAZIONE (il criterio di L109-1), quindi insieme alla forza
+       passa anche l'ÀNCORA del partito che esce (la sua forza di porta più le tappe marcate) al partito d'arrivo. Senza, la molla
+       riporterebbe il partito d'arrivo alla forza che aveva prima di assorbire l'altro. Oggi: la DP nella CDU, 1961/9 (de1960). */
+    if(e.ancora && dest){ var pEsce=PAESE.partiti.filter(function(p){ return p.id===e.id; })[0];
+      if(pEsce){ S.ancoraTappa=S.ancoraTappa||{}; S.ancoraTappa[dest]=(S.ancoraTappa[dest]||0)+(pEsce.forzaAncora!=null?pEsce.forzaAncora:pEsce.forza)+(S.ancoraTappa[e.id]||0);   /* L111-1: l'àncora di chi esce è la sua forzaAncora, se la dichiara */ delete S.ancoraTappa[e.id]; } }
     if(S.forze && S.forze[e.id]!=null){ if(dest && S.forze[dest]!=null) S.forze[dest]+=S.forze[e.id]; delete S.forze[e.id]; }
     if(S.forzePrev && S.forzePrev[e.id]!=null){ if(dest && S.forzePrev[dest]!=null) S.forzePrev[dest]+=S.forzePrev[e.id]; delete S.forzePrev[e.id]; }
     if(S.seggi && S.seggi[e.id]!=null){ if(dest && S.seggi[dest]!=null) S.seggi[dest]+=S.seggi[e.id]; delete S.seggi[e.id]; }
@@ -2313,7 +2359,8 @@ function riallineamentoTappa(){
        cambiamenti di NATURA di un partito: l'RPR fuso nell'UMP (+22 nel 2002) tornava a 12 nel 2007 e la tappa del
        2007 saltava 18 volte su 20. Un delta marcato `ancora:true` sposta anche l'àncora (`S.ancoraTappa`, letto da
        evolvePartiti). ⚑ CRITERIO per chi marcherà: si marca una fusione, una scissione o una rifondazione che cambia
-       CHI STA nel partito; non si marca una frana o una vittoria elettorale. */
+       CHI STA nel partito; non si marca una frana o una vittoria elettorale. ⚑ ESTESO in L109-1: si marca anche una
+       CONCENTRAZIONE del sistema dei partiti che assorbe i minori (la CDU/CSU del 1953, e chi ne perde gli elettori). */
     shifts.forEach(function(sh){ if(sh.ancora && S.forze[sh.id]!=null){ if(!S.ancoraTappa) S.ancoraTappa={}; S.ancoraTappa[sh.id]=(S.ancoraTappa[sh.id]||0)+sh.delta; } });
     var sum=0; PAESE.partiti.forEach(function(p){ sum+=(S.forze[p.id]||0); });
     if(sum>0) PAESE.partiti.forEach(function(p){ S.forze[p.id]=(S.forze[p.id]||0)/sum*100; });   // rinormalizza a 100
@@ -2422,6 +2469,11 @@ function riallineamentoTappa(){
     else if(S.era===LINEA_DE && S.year===1956) S.log.unshift({t:T('Il partito comunista è sciolto'), x:T('La Corte costituzionale scioglie il partito comunista: i suoi voti restano senza casa.')});
     else if(S.era===LINEA_DE && S.year===1957 && S.month<=6) S.log.unshift({t:T('La Saar torna'), x:T('Dopo il referendum, la Saar entra nella Repubblica federale: un Land in più.')});
     else if(S.era===LINEA_DE && S.year===1957) S.log.unshift({t:T('Elezioni del settembre 1957'), x:T('Per la prima volta un partito solo ha la maggioranza assoluta dei voti e dei seggi.')});
+    /* L110-2 · le tappe tedesche del '60 */
+    else if(S.era===LINEA_DE && S.year===1961) S.log.unshift({t:T('Elezioni del settembre 1961'), x:T('Un mese dopo il Muro il partito del Cancelliere perde la maggioranza assoluta: dovrà governare di nuovo con i liberali. Il piccolo partito nazionale non c\'è più: i suoi sono entrati nella CDU.')});
+    else if(S.era===LINEA_DE && S.year===1964) S.log.unshift({t:T('Un partito nuovo all\'estrema destra'), x:T('Nasce un partito nazionaldemocratico che raccoglie i nostalgici e gli scontenti: nelle regioni cresce, al Bundestag resta sotto la soglia.')});
+    else if(S.era===LINEA_DE && S.year===1965) S.log.unshift({t:T('Elezioni del settembre 1965'), x:T('Il partito del Cancelliere sfiora di nuovo la maggioranza; i socialdemocratici crescono, i liberali perdono un seggio su quattro.')});
+    else if(S.era===LINEA_DE && S.year===1969) S.log.unshift({t:T('Elezioni del settembre 1969'), x:T('Il partito del Cancelliere resta il primo, ma socialdemocratici e liberali insieme hanno la maggioranza: per la prima volta il Cancelliere può essere un altro.')});
     else if(S.era===LINEA_IT && S.year===2008) S.log.unshift({t:T('Elezioni 2008'), x:T('Due partiti grandi nati da altrettante fusioni si prendono quasi tutto, e per la prima volta dal dopoguerra la sinistra radicale resta fuori dall\'aula.')});
   }
   /* ⚑ L77-1 — OGNI NOTA-TAPPA E' FILTRATA PER LINEA. Tredici note italiane erano scritte if(S.year===N) senza dire
@@ -2668,14 +2720,51 @@ function partnerSostegno(){
   return null;
 }
 /* il partner per il RIMPASTO: compatibile per asse (entra DENTRO, quindi la regola è quella della coalizione) */
+/* L111-1 · IL RIMPASTO È LA CERIMONIA DELL'EMERGENZA: considera SEMPRE gli alleati di riserva (`alleatiRiserva`), ma DOPO quelli
+   ordinari — la grande coalizione si offre solo se nessun partner ordinario porta i numeri. E sotto la sfiducia costruttiva il
+   partner che ha appena rotto (`tenutaLiv===2`) non si ricompra col rimpasto: è la stessa regola di `bloccoAvverso`, che lo conta
+   come avverso (senza, la FDP del 1966 tornava al governo alla prima carta e la grande coalizione non usciva mai).
+   Senza i due campi la lista e l'ordine sono quelli di sempre. */
 function partnerRimpasto(){
   if(typeof S==='undefined' || !S || !S.seggi || typeof compatibili!=='function') return null;
-  var c=compatibili(S.partito, S.seggi)||[];
+  var c=(compatibili(S.partito, S.seggi)||[]).slice();
+  var haRotto=function(id){ return !!(PAESE.sfiduciaCostruttiva && S.tenutaLiv && S.tenutaLiv[id]===2); };
+  var mio=part(S.partito);
+  if(mio && Array.isArray(mio.alleatiRiserva)){
+    c=c.filter(function(p){ return !alleatoRiserva(p.id, S.partito); });   // le riserve che compatibili ha già messo vanno in coda
+    var ris=PAESE.partiti.filter(function(p){ return alleatoRiserva(p.id, S.partito) && !(PAESE.sbarramento && S.seggi[p.id]===0); })
+                        .sort(function(x,y){ return (S.seggi[y.id]||0)-(S.seggi[x.id]||0); });
+    c=c.concat(ris);
+  }
   for(var i=0;i<c.length;i++){
     if((S.coalizione||[]).indexOf(c[i].id)>=0) continue;
+    if(haRotto(c[i].id)) continue;
     if(bloccoSeggi()+(S.seggi[c[i].id]||0)>=50) return c[i];
   }
   return null;
+}
+/* L111-1 · la carta del rimpasto si chiama «La grande coalizione» sotto la sfiducia costruttiva quando il partner è di riserva */
+function rimpastoGrandeCoalizione(){
+  var p=partnerRimpasto();
+  return !!(p && PAESE.sfiduciaCostruttiva && alleatoRiserva(p.id, S.partito));
+}
+/* L111-1 · L'ORDINE NEL MESE sotto la sfiducia costruttiva: PRIMA l'offerta del rimpasto, POI la cricca. La caduta al confine del
+   mese aspetta finché una carta del rimpasto può ancora uscire in questo episodio di minoranza (le stesse condizioni di
+   `rimpastoDovuto`, con la finestra dei primi due mesi): accettata, la minoranza finisce; rifiutata (`rimpastoOfferto` = il mandato),
+   o senza partner, o passata la finestra, la cricca avversa fa il suo corso. ⚠ Se nei due mesi l'agenda è presa da carte che
+   vengono prima (gli snodi), l'offerta può saltare: la finestra è quella di sempre e non si allunga. */
+function rimpastoInAttesa(){
+  return !!S.minoranza && (S.mesiMinoranza||0)<=2 && !S.sostegno && !rimpastoGiaOfferto() && !!partnerRimpasto();
+}
+/* L111-1 · QUANDO LA CARTA DEL RIMPASTO È «GIÀ PASSATA». Di norma una volta per MANDATO (L53-2, `rimpastoOfferto`). Sotto la sfiducia
+   costruttiva una volta per EPISODIO di minoranza: l'episodio comincia `mesiMinoranza` mesi fa, e la carta uscita da allora
+   (`rimpastoOffertoMese`) lo chiude. Perché: la FDP del 1965 si imbarca con un rimpasto dopo la tappa, e la sua rottura del 1966 cade
+   nello STESSO mandato — col segno per mandato la grande coalizione non si offriva mai (misurato: la CDU cadeva verso SPD+FDP senza
+   carta). Senza il campo il segno è quello di sempre. */
+function rimpastoGiaOfferto(){
+  if(!PAESE.sfiduciaCostruttiva) return S.rimpastoOfferto===(S.mandate||0);
+  var ora=S.year*12+S.month;
+  return S.rimpastoOffertoMese!=null && S.rimpastoOffertoMese>=ora-(S.mesiMinoranza||0);
 }
 function minoranzaFresca(){   // i numeri sono saltati da poco: 1-2 mesi, non un richiamo perenne
   return !!S.minoranza && (S.mesiMinoranza||0)>=1 && (S.mesiMinoranza||0)<=2;
@@ -2817,7 +2906,7 @@ function crisiMinisteriale(){
    dentro governoCade. Altrimenti la crisi si risolverebbe sempre prima di diventare crisi (L93-3). */
 function rimpastoDovuto(){
   return typeof S!=='undefined' && S && S.livello===3 && !S.opposizione && !PAESE.crisiMinisteriale && coalizionePossibile()
-      && !S.sostegno && minoranzaFresca() && S.rimpastoOfferto!==(S.mandate||0) && !!partnerRimpasto();
+      && !S.sostegno && minoranzaFresca() && !rimpastoGiaOfferto() && !!partnerRimpasto();   // L111-1: per episodio sotto la sfiducia costruttiva
 }
 function sostegnoDovuto(){
   return typeof S!=='undefined' && S && S.livello===3 && !S.opposizione && !PAESE.crisiMinisteriale
@@ -3274,6 +3363,14 @@ function snodoTce05Dovuta(){         return typeof S!=='undefined' && S && S.era
 function snodoBanlieue05Dovuta(){    return typeof S!=='undefined' && S && S.era===LINEA_FR && S.livello===3 && !S.opposizione && !S.coabitazione && S.banlieue05==null && ((S.year===2005 && S.month>=11) || (S.year===2006 && S.month===1)); }
 function snodoCrisi08frDovuta(){     return typeof S!=='undefined' && S && S.era===LINEA_FR && S.livello===3 && !S.opposizione && !S.coabitazione && S.crisi08fr==null && S.year===2008 && S.month>=10 && S.month<=12; }
 function snodoCrisi08frOppDovuta(){  return typeof S!=='undefined' && S && S.era===LINEA_FR && S.livello===3 && S.opposizione && S.crisi08frOpp==null && S.crisi08fr==null && S.year===2008 && S.month>=10 && S.month<=12; }
+/* L109-2 · GLI SNODI DEL DECENNIO TEDESCO '50. Finestre di tre mesi al governo (Cancelliere, livello 3); le due versioni dall'aula
+   (S2 e S4) a chi è all'opposizione, e mai insieme a quella di governo (G1). Nessun mese è di un pilastro della linea. */
+function snodoNotaStalin52Dovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_DE && S.livello===3 && !S.opposizione && S.notaStalin52==null && S.year===1952 && S.month>=3 && S.month<=5; }
+function snodoRiarmo55Dovuta(){     return typeof S!=='undefined' && S && S.era===LINEA_DE && S.livello===3 && !S.opposizione && S.riarmo55==null && S.year===1955 && S.month>=2 && S.month<=4; }
+function snodoRiarmo55OppDovuta(){  return typeof S!=='undefined' && S && S.era===LINEA_DE && S.livello===3 && S.opposizione && S.riarmo55Opp==null && S.riarmo55==null && S.year===1955 && S.month>=2 && S.month<=4; }
+function snodoPensioni57Dovuta(){   return typeof S!=='undefined' && S && S.era===LINEA_DE && S.livello===3 && !S.opposizione && S.pensioni57==null && S.year===1957 && S.month>=1 && S.month<=3; }
+function snodoAtomica58Dovuta(){    return typeof S!=='undefined' && S && S.era===LINEA_DE && S.livello===3 && !S.opposizione && S.atomica58==null && S.year===1958 && S.month>=3 && S.month<=5; }
+function snodoAtomica58OppDovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_DE && S.livello===3 && S.opposizione && S.atomica58Opp==null && S.atomica58==null && S.year===1958 && S.month>=3 && S.month<=5; }
 /* IL PREZZO DEL PETROLIO (§B della scheda): due ancore col mese, nel gate parametrizzato. Tutte e due cadono in un mese
    occupato (pm_petrolio a ottobre 1973, «L'Europa vota» a giugno 1979) ed escono il mese dopo. La prima si chiude a
    febbraio 1974, prima del piano nucleare: la scelta energetica viene dopo il primo shock, e legge il secondo. */
@@ -5029,6 +5126,8 @@ function genAgendaRamo(first){
     if(!first && typeof snodoPiano95OppDovuta==='function' && snodoPiano95OppDovuta()){ S.agenda.push({kind:'event', data:PIANO95_OPP_EV, resolved:false}); agendaSolo(); return; }   // L103-2: il dicembre in piazza
     if(!first && typeof snodoAprile02OppDovuta==='function' && snodoAprile02OppDovuta()){ S.agenda.push({kind:'event', data:APRILE02_OPP_EV, resolved:false}); agendaSolo(); return; }   // L105-4: il 21 aprile, dall'aula
     if(!first && typeof snodoCrisi08frOppDovuta==='function' && snodoCrisi08frOppDovuta()){ S.agenda.push({kind:'event', data:CRISI08FR_OPP_EV, resolved:false}); agendaSolo(); return; }   // L105-4: la crisi, dall'aula
+    if(!first && typeof snodoRiarmo55OppDovuta==='function' && snodoRiarmo55OppDovuta()){ S.agenda.push({kind:'event', data:RIARMO55_OPP_EV, resolved:false}); agendaSolo(); return; }   // L109-2: il riarmo, dall'aula
+    if(!first && typeof snodoAtomica58OppDovuta==='function' && snodoAtomica58OppDovuta()){ S.agenda.push({kind:'event', data:ATOMICA58_OPP_EV, resolved:false}); agendaSolo(); return; }   // L109-2: la morte atomica, dall'aula
     // Cantiere C: la stagione elettorale vale anche da SFIDANTE (bloccoIds = il tuo blocco d'opposizione)
     if(typeof pickCampagnaNazionale==='function'){ const cnbO=pickCampagnaNazionale(); if(cnbO){ S.agenda.push(cnbO); agendaSolo(); return; } }
     const inq=aggiornaInchiesta();   // anche da sfidante l'esposizione conta: bersaglio sempre tu (niente ministri qui)
@@ -5084,7 +5183,7 @@ function genAgendaRamo(first){
   if(!first && typeof snodoNucleareDovuta==='function' && snodoNucleareDovuta()){ S.agenda.push({kind:'event', data:NUCLEARE_EV, resolved:false}); agendaSolo(); return; }
   /* L53-2 · le due vie d'uscita, PRIMA di tutto il resto: quando i numeri saltano, quella è la notizia del
      mese. Ordine da design: rimpasto (maggioranza vera) → sostegno esterno (un prezzo per sopravvivere). */
-  if(!first && typeof rimpastoDovuto==='function' && rimpastoDovuto()){ S.agenda.push({kind:'event', data:RIMPASTO_EV, resolved:false}); agendaSolo(); return; }
+  if(!first && typeof rimpastoDovuto==='function' && rimpastoDovuto()){ S.agenda.push({kind:'event', data:(rimpastoGrandeCoalizione() ? GRANDE_COALIZIONE_EV : RIMPASTO_EV), resolved:false}); S.rimpastoOffertoMese=S.year*12+S.month; agendaSolo(); return; }   // L111-1
   if(!first && typeof sostegnoDovuto==='function' && sostegnoDovuto()){ S.agenda.push({kind:'event', data:SOSTEGNO_EV, resolved:false}); agendaSolo(); return; }
   /* L49-1 · gli snodi inglesi. Suez PRIMA della sterlina: il secondo nodo è la conseguenza diretta di una
      scelta appena fatta e non può aspettare un mese in cui l'agenda sia libera. */
@@ -5149,6 +5248,10 @@ function genAgendaRamo(first){
   if(!first && typeof snodoTce05Dovuta==='function' && snodoTce05Dovuta()){ S.agenda.push({kind:'event', data:TCE05_EV, resolved:false}); agendaSolo(); return; }                // L105-4
   if(!first && typeof snodoBanlieue05Dovuta==='function' && snodoBanlieue05Dovuta()){ S.agenda.push({kind:'event', data:BANLIEUE05_EV, resolved:false}); agendaSolo(); return; }  // L105-4
   if(!first && typeof snodoCrisi08frDovuta==='function' && snodoCrisi08frDovuta()){ S.agenda.push({kind:'event', data:CRISI08FR_EV, resolved:false}); agendaSolo(); return; }    // L105-4
+  if(!first && typeof snodoNotaStalin52Dovuta==='function' && snodoNotaStalin52Dovuta()){ S.agenda.push({kind:'event', data:NOTASTALIN52_EV, resolved:false}); agendaSolo(); return; }   // L109-2
+  if(!first && typeof snodoRiarmo55Dovuta==='function' && snodoRiarmo55Dovuta()){ S.agenda.push({kind:'event', data:RIARMO55_EV, resolved:false}); agendaSolo(); return; }            // L109-2
+  if(!first && typeof snodoPensioni57Dovuta==='function' && snodoPensioni57Dovuta()){ S.agenda.push({kind:'event', data:PENSIONI57_EV, resolved:false}); agendaSolo(); return; }      // L109-2
+  if(!first && typeof snodoAtomica58Dovuta==='function' && snodoAtomica58Dovuta()){ S.agenda.push({kind:'event', data:ATOMICA58_EV, resolved:false}); agendaSolo(); return; }        // L109-2
   if(!first && typeof franco90AncoraDovuta==='function'){ var _f9=franco90AncoraDovuta();   // L103-2: la corsa al franco del '92 e del '93
     if(_f9){ S.francoAncore=S.francoAncore||{}; S.francoAncore[_f9]=true; if(_f9==='a92' && pesoFranco92()>1) S.francoGrave=true;   // col no a Maastricht pesa doppio
       S.agenda.push({kind:'event', data:(_f9==='a92' ? FRANCO92_EV : FRANCO93_EV), resolved:false}); agendaSolo(); return; } }
@@ -5969,7 +6072,7 @@ function avanzaMese(){
      governo in minoranza cade SOLO se un'altra maggioranza c'è davvero — una cricca avversa ≥ 50, la stessa
      `bloccoAvverso()` della coabitazione — e cade SENZA URNE; senza cricca resta, e `probSfiducia` non si tira. */
   else if(PAESE.sfiduciaCostruttiva && PAESE.cadutaGoverno && S.minoranza){
-    if(sfiduciaCostruttiva()) return;
+    if(!rimpastoInAttesa() && sfiduciaCostruttiva()) return;   // L111-1: prima l'offerta del rimpasto, poi la cricca
   }
   else if(PAESE.cadutaGoverno && S.minoranza && Math.random()<probSfiducia()){      // elezioni anticipate da sfiducia (passo 4)
     /* L80-5: cade il governo, non il Presidente. ⚑ L93-6: SENZA return — prima `return governoCade()` usciva da advanceMonth e
@@ -7312,6 +7415,7 @@ function applySnap(snap){
   if(S.suez===undefined){ S.suez=null; S.sterlinaAncore={}; S.sterlinaRinvii=0; S.sterlinaCrisi=0; S.sterlinaSalva=0; }
   if(!S.sterlinaAncore || typeof S.sterlinaAncore!=='object') S.sterlinaAncore={};
   if(S.sostegno===undefined){ S.sostegno=null; S.sostegnoOfferto=null; S.rimpastoOfferto=null; S.sostegnoStrappi=0; }   // L53-2
+  if(S.rimpastoOffertoMese===undefined) S.rimpastoOffertoMese=null;   // L111-1
   if(S.sterlina60===undefined){ S.sterlina60=null; S.europa60=null; S.coscienza60=null; S.svalutazione=0; }   // L55-1
   if(S.minatori===undefined){ S.minatori=null; S.europa70=null; S.fmi=null; }   // L58-1
   if(S.falkland===undefined){ S.falkland=null; S.minatori80=null; S.polltax=null; S.alleanza=null; }   // L60-2
@@ -7333,6 +7437,7 @@ function applySnap(snap){
   if(S.riforme81===undefined){ S.riforme81=null; S.rigore83=null; S.scuola84=null; S.ordinanze86=null; S.riforme81Opp=null; S.rigore83Opp=null; }   // L101-2
   if(S.ref92===undefined){ S.ref92=null; S.ref92Opp=null; S.sarajevo94=null; S.piano95=null; S.piano95Opp=null; S.quinquennato00=null; }   // L103-2
   if(S.aprile02===undefined){ S.aprile02=null; S.aprile02Opp=null; S.tce05=null; S.banlieue05=null; S.crisi08fr=null; S.crisi08frOpp=null; }   // L105-4
+  if(S.notaStalin52===undefined){ S.notaStalin52=null; S.riarmo55=null; S.riarmo55Opp=null; S.pensioni57=null; S.atomica58=null; S.atomica58Opp=null; S.riparazioni52=null; }   // L109-2
   if(S.scioglimento97===undefined) S.scioglimento97=null;   // L103-1
   if(S.coabitazione===undefined) S.coabitazione=false;   // L100-2
   if(S.governiCaduti===undefined) S.governiCaduti=0;   // L80-5

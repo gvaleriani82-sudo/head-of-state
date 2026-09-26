@@ -67,6 +67,24 @@ function targetReputazione(){
   const rel=(typeof relIntMean==='function' && S.relInt)?(relIntMean()-50)*0.3:0;
   return clamp(50 + [8,0,-8][lv('linea_estera')] + [0,0,-6][lv('industria_difesa')] + rel, 0, 100);
 }
+/* L109-1 · IL TETTO DELLA CRESCITA È DELLA PORTA, non del motore. Era 5 per tutti (`clamp(g,-6,5)`), e il miracolo tedesco — la
+   crescita di fondo di de1950 è ~9,5 — si rendeva 5 fisso. `economia.crescitaTetto` si dichiara nello SCENARIO o nel PAESE
+   (lo scenario vince), additivo come `inflazioneTetto`: assente = 5, quindi chi non lo dichiara è identico al decimale.
+   ⚠ Lo scenario si legge da SCENARI[S.scenario], non da PAESE.economia: paeseConScenario NON sovrascrive `economia`, e
+   PAESE.economia di una porta è quella del paese di OGGI (è per questo che l'`inflazioneTetto` degli scenari francesi non
+   è mai stato letto: L109-1). */
+/* L110-1 · IL RISOLUTORE UNICO dei campi di `economia` che una porta può dichiarare: lo scenario (SCENARI[S.scenario]) vince sul
+   paese, e senza nessuno dei due vale il ripiego. Lo leggono crescitaTetto, disoccupazionePavimento e il tetto dell'inflazione. */
+function economiaPorta(campo, ripiego){
+  var sc=(typeof SCENARI!=='undefined' && typeof S!=='undefined' && S && S.scenario && SCENARI[S.scenario]) || null;
+  if(sc && sc.economia && sc.economia[campo]!=null) return sc.economia[campo];
+  if(typeof PAESE!=='undefined' && PAESE && PAESE.economia && PAESE.economia[campo]!=null) return PAESE.economia[campo];
+  return ripiego;
+}
+function crescitaTetto(){ return economiaPorta('crescitaTetto', 5); }
+/* L110-1 · IL PAVIMENTO DELLA DISOCCUPAZIONE è della porta: `economia.disoccupazionePavimento`, assente = 3 come sempre (il
+   pieno impiego della Germania degli anni '60 sta sotto l'1). */
+function disoccupazionePavimento(){ return economiaPorta('disoccupazionePavimento', 3); }
 function computeGrowth(){
   let g=(S.crescitaBase!=null)?S.crescitaBase:0.8;   // L90-1: la crescita di partenza è del PAESE (o della porta); 0,8 era universale
   g+=[-0.3,0,0.45][lv('investimenti')]+[-0.2,0,0.40][lv('imprese')]+[-0.3,0,0.50][lv('lavoro')]
@@ -74,7 +92,7 @@ function computeGrowth(){
     +[-0.10,0,0.20][lv('commercio')]+[0,0,0.15][lv('industria_difesa')]+[-0.05,0,0.20][lv('universita')];   // commercio + export difesa + ricerca universitaria
   if(S.ind.debt>120) g-=(S.ind.debt-120)*0.02*dif().dragDebito;
   g+=((S.ind.reputazione!=null?S.ind.reputazione:50)-50)/50*0.2;   // commercio: reputazione alta = piccolo traino, bassa = freno
-  g+=S.gMod+ministerMods().growth+(S.ciclo||0)+leggiMods().growth; return clamp(g,-6,5);   // + congiuntura + leggi permanenti
+  g+=S.gMod+ministerMods().growth+(S.ciclo||0)+leggiMods().growth; return clamp(g,-6,crescitaTetto());   // + congiuntura + leggi permanenti · L109-1: il tetto è della porta
 }
 function targetUnemp(){
   /* ⚠ L90-1 passo 2 — QUESTO 0,8 ERA LA STESSA COSTANTE della crescita di partenza, e va con lei.
@@ -88,7 +106,7 @@ function targetUnemp(){
   let u=8.0; u-=(computeGrowth()-neutro)*0.8;
   u+=[0.4,0,-0.6][lv('lavoro')]+[0,0,-0.3][lv('imprese')]+[0,0,-0.3][lv('investimenti')]+[0.1,0,-0.2][lv('personale_san')];   // assunzioni nella sanità
   u+=(typeof disoccupazioneEra==='function')?disoccupazioneEra():0;   // L60-2: la disoccupazione d'epoca (tabella per linea, 0 fuori tabella)
-  u+=S.uMod+ministerMods().unemp+leggiMods().unemp; return clamp(u,3,20);
+  u+=S.uMod+ministerMods().unemp+leggiMods().unemp; return clamp(u,disoccupazionePavimento(),20);   // L110-1: il pavimento è della porta (assente = 3)
 }
 function targetService(id){
   const mm=ministerMods(), lm=leggiMods();
@@ -461,7 +479,7 @@ function tratti(){
 function haTratto(id){ return tratti().indexOf(id)>-1; }
 
 /* --- Forze dei partiti: ogni mese seguono l'umore della loro base (gruppi), restando ancorate alla
-   forza INIZIALE (p.forza da PAESI, mai mutato) — più i delta di tappa MARCATI `ancora:true` (L106-3, S.ancoraTappa). Somma ≈100, pavimento ~2. Scrive solo S.forze/S.forzePrev,
+   forza INIZIALE (p.forza da PAESI, mai mutato; o `p.forzaAncora` se la porta la dichiara, L111-1) — più i delta di tappa MARCATI `ancora:true` (L106-3, S.ancoraTappa). Somma ≈100, pavimento ~2. Scrive solo S.forze/S.forzePrev,
    non tocca economia/consenso/elezioni. La guardia protegge i test che non impostano S.forze. --- */
 function evolvePartiti(){
   if(!S.forze || !PAESE.partiti) return;
@@ -483,7 +501,9 @@ function evolvePartiti(){
   for(const p of parts){
     let s=0,w=0; for(const g in p.base){ s+=S.groups[g]*p.base[g]; w+=p.base[g]; }
     const sodd=w>0?s/w:50;                 // soddisfazione della base 0..100
-    const anc=Math.max(1, p.forza+((S.ancoraTappa&&S.ancoraTappa[p.id])||0));   // L106-3: l'àncora segue le tappe MARCATE (riallineamentoTappa)
+    /* L111-1 · L'ÀNCORA DEL DECENNIO: un partito può dichiarare `forzaAncora`, l'equilibrio verso cui lo tira la molla, diverso dalla
+       forza d'avvio (`forza` resta le urne d'apertura). Assente = `forza`, come sempre. Le tappe marcate si sommano come prima. */
+    const anc=Math.max(1, (p.forzaAncora!=null ? p.forzaAncora : p.forza)+((S.ancoraTappa&&S.ancoraTappa[p.id])||0));   // L106-3: l'àncora segue le tappe MARCATE (riallineamentoTappa)
     let sc=anc*(0.5+sodd/100);
     if(S.coalizione && S.coalizione.includes(p.id)) sc*=govF;   // governare bene cresce, male cede voti all'opposizione
     score[p.id]=sc; tot+=sc;
@@ -765,7 +785,22 @@ function compatibili(idTuo, seggi){
   const sg=seggi || (typeof S!=='undefined' && S && S.seggi);
   const fuori=(PAESE.sbarramento && sg) ? function(p){ return sg[p.id]===0; } : function(){ return false; };
   const list=PAESE.partiti.filter(p=>p.id!==idTuo && !fuori(p) && (staColBlocco(p.id, idTuo) || aperturaAmmette(idTuo,p.id) || (typeof intesaDi==='function' && intesaDi(p.id)>=60)));
+  /* L111-1 · GLI ALLEATI DI RISERVA (`alleatiRiserva`, la grande coalizione): entrano nella lista SOLO se il blocco ordinario —
+     il partito più la lista qui sopra, coi seggi in vigore — non arriva a 50. Così il banco «ampio» e la trattativa non fanno la
+     grande coalizione quando la maggioranza ordinaria c'è, e la fanno quando non c'è. Senza seggi non si giudica: niente riserve.
+     ⚠ NON passano da `staColBlocco`: per la sfiducia costruttiva un partner di riserva resta avverso finché non è in coalizione
+     (bloccoAvverso e criccaMia lo trattano come gli altri). Senza il campo la lista è quella di sempre, byte per byte. */
+  const tuo=part(idTuo);
+  if(tuo && Array.isArray(tuo.alleatiRiserva) && tuo.alleatiRiserva.length && sg){
+    const ord=list.reduce((s,p)=>s+(sg[p.id]||0), sg[idTuo]||0);
+    if(ord<50) PAESE.partiti.forEach(p=>{ if(tuo.alleatiRiserva.indexOf(p.id)>=0 && !fuori(p) && list.indexOf(p)<0) list.push(p); });
+  }
   return seggi ? list.sort((x,y)=>(seggi[y.id]||0)-(seggi[x.id]||0)) : list;
+}
+/* L111-1 · il partito `idAltro` è un alleato di RISERVA di `idTuo` (letto dalla lista del TUO partito, come `alleati`) */
+function alleatoRiserva(idAltro, idTuo){
+  const tuo=part(idTuo);
+  return !!(tuo && Array.isArray(tuo.alleatiRiserva) && tuo.alleatiRiserva.indexOf(idAltro)>=0);
 }
 function seggiCoalizione(ids, seggi){ return ids.reduce((s,id)=>s+(seggi[id]||0),0); }
 

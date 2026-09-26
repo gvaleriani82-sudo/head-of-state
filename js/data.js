@@ -1437,63 +1437,123 @@ const SCENARI = {
       "Il mandato presidenziale è appena stato accorciato a cinque anni: dal 2002 le due urne, quella dell'Eliseo e quella dell'Assemblea, cadranno a un mese di distanza.",
     ],
   },
-  /* ============================================================================================================
-     L108-2 · GERMANIA 1950 — la prima porta della linea tedesca (scheda PRESET-GERMANIA-1950.md). La Repubblica di Bonn
-     appena nata: il primo Cancelliere, la coalizione borghese, il miracolo economico. Chiude col 1961 (il Muro apre de1960).
-     LE ISTITUZIONI: parlamentare a coalizioni, con i due campi della linea (L107-2) — `sfiduciaCostruttiva` (art. 67: il
-     governo cade solo se un'altra maggioranza elegge un altro Cancelliere) e `sbarramento` al 5 (federale dal 1953; nel 1949
-     valeva per Land, e i seggi d'avvio sono dichiarati). Bonn capitale e il marco (L107-3). ⚠ `ue:false`: la scheda chiedeva
-     `ue:true` «come nell'Italia del '50», ma l'Italia del '50 (e la Francia) hanno `ue:false` — la CECA e la CEE entrano come
-     contenuto, non come apparato del presente.
-     IL ROSTER A SETTE (D36; il settimo, il BHE, nasce alla tappa del 1953): voti del 14 agosto 1949 **confermati sul sito
-     della Commissione elettorale federale** (bundeswahlleiterin.de, consultato il 25/9/2026: CDU 25,2 + CSU 5,8 · SPD 29,2 ·
-     FDP 11,9 · KPD 5,7 · BP 4,2 · DP 4,0; Zentrum, WAV, DRP, SSW e indipendenti fuori dal roster), rinormalizzati sui sei.
-     SEGGI: i 402 del Bundestag senza i delegati di Berlino Ovest, che non votavano (con, 410: SPD 136 · CDU/CSU 141 · FDP 53),
-     rinormalizzati sui sei (371): la coalizione CDU/CSU + FDP + DP ha 56,1 su 100 (208 su 402 nella storia, 51,7).
-     ⚠ Con lo sbarramento DP (4,7) e BP (4,9) sono sotto il 5 fin dall'avvio: all'urna del motore del 1953 vanno a zero seggi.
-     Nella storia la DP rientrò nel 1953 coi mandati diretti (15 seggi al 3,3%), che il gioco non modella: la tappa del
-     1953/9 le rende i suoi seggi, l'urna di gioco no.
-     L'URNA DEL MOTORE: `turnMandato:1` sul Bundestag dell'agosto 1949 → urne 1953/1 e 1957/1, otto mesi prima di quelle
-     vere (settembre): è la convenzione delle porte parlamentari (il motore vota solo a gennaio), e le tappe di settembre
-     riportano il Bundestag dei libri.
-     ============================================================================================================ */
-  de1950: {
-    id:'de1950', era:LINEA_DE, nome:'Germania 1950', anno:1950, paese:'germania',
-    turnMandato: 1,
-    sistema: 'parlamentare', comeSiVince: 'parlamentare', coalizione: true, cadutaGoverno: true,
-    sfiduciaCostruttiva: true, sbarramento: 5,
-    mandatoMesi: 48, mandatiMax: null,
-    titoloRuolo: 'Cancelliere', sedeGoverno: 'Palazzo Schaumburg',
-    capitale: 'Bonn',
-    ue: false,
-    intermedie: [ {tipo:'Elezioni nei Länder', mese:24, tocca:'regione'} ],
-    partiti: [
-      { id:'de_cdu', nome:'CDU/CSU', orientamento:'centrodestra',   base:{ cattolici:0.35, cetomedio:0.35, imprenditori:0.3 }, forza:36.0, asse:1,  alleati:['de_fdp','de_dp','de_bhe'] },
-      { id:'de_spd', nome:'SPD',     orientamento:'centrosinistra', base:{ lavoratori:0.6, pensionati:0.2, giovani:0.2 },    forza:34.0, asse:-1, alleati:['de_fdp','de_bp'] },
-      { id:'de_fdp', nome:'FDP',     orientamento:'liberale',       base:{ imprenditori:0.5, cetomedio:0.5 },                forza:13.8, asse:1,  alleati:['de_cdu','de_dp','de_bhe','de_spd','de_bp'] },
-      { id:'de_dp',  nome:'DP',      orientamento:'destra',         base:{ cetomedio:0.5, pensionati:0.5 },                  forza:4.7,  asse:2,  alleati:['de_cdu','de_fdp','de_bhe'] },
-      { id:'de_kpd', nome:'KPD',     orientamento:'sinistra',       base:{ lavoratori:0.7, giovani:0.3 },                    forza:6.6,  asse:-2, alleati:[],
-        selezionabile:false, nota:'Il KPD esce dal Bundestag nel 1953 e viene sciolto nel 1956: non è una carriera che si possa giocare' },
-      { id:'de_bp',  nome:'BP',      orientamento:'regionalista',   base:{ cattolici:0.5, cetomedio:0.5 },                   forza:4.9,  asse:1,  alleati:['de_spd','de_fdp','de_bhe'],
-        selezionabile:false, nota:'Il Partito bavarese vive in un Land solo ed esce dal Bundestag nel 1953: non è una carriera che si possa giocare' },
-    ],
-    /* il Bundestag del 1949 senza i delegati di Berlino (402), rinormalizzato sui sei del roster (371) */
-    seggi: { de_cdu:37.5, de_spd:35.3, de_fdp:14.0, de_dp:4.6, de_kpd:4.0, de_bp:4.6 },
-    /* ⚠ cifre della scheda §2, ordine di grandezza (Destatis/Bundesbank da confermare): in miliardi di marchi. */
-    economia: { pil:98, debito:20, deficit:0, inflazione:2, inflazioneTetto:8, crescita:8, disoccupazione:11 },
-    debtAncora: 20,
-    inflazione: 2,     // l'anno per anno sta in DRIFT_INFLAZIONE_ERA (la Corea del 1951)
-    crescita: 8,       // il miracolo: la media del decennio; il 1955 e la frenata del 1958 stanno nel drift
-    logorioEra: 0.012,                          // come le altre porte del '50
-    valuta: VALUTA_MARCO,
-    quotaSpesa: 0.30,                           // ⚠ la scheda non la dà: ~30% è l'ordine della spesa federale e dei Länder di quegli anni. Da confermare.
-    intro: "Germania, 1950. La Repubblica ha un anno, la capitale è una città universitaria sul Reno, e il Cancelliere governa con un voto di scarto.",
-    contesto: [
-      "Germania, 1950. Le città sono ancora macerie, ma il marco nuovo ha riempito le vetrine in una notte: la ricostruzione corre più in fretta di chiunque avesse previsto.",
-      "Dieci milioni di profughi dall'Est cercano casa e lavoro. Un disoccupato su dieci, e la metà del paese dall'altra parte di un confine che nessuno riconosce.",
-      "Il Cancelliere governa con i liberali e con un piccolo partito nazionale; l'opposizione socialdemocratica vuole l'unità prima dell'Occidente.",
-    ],
-  },
+  /* ============================================================================================================
+     L108-2 · GERMANIA 1950 — la prima porta della linea tedesca (scheda PRESET-GERMANIA-1950.md). La Repubblica di Bonn
+     appena nata: il primo Cancelliere, la coalizione borghese, il miracolo economico. Chiude col 1961 (il Muro apre de1960).
+     LE ISTITUZIONI: parlamentare a coalizioni, con i due campi della linea (L107-2) — `sfiduciaCostruttiva` (art. 67: il
+     governo cade solo se un'altra maggioranza elegge un altro Cancelliere) e `sbarramento` al 5 (federale dal 1953; nel 1949
+     valeva per Land, e i seggi d'avvio sono dichiarati). Bonn capitale e il marco (L107-3). ⚠ `ue:false`: la scheda chiedeva
+     `ue:true` «come nell'Italia del '50», ma l'Italia del '50 (e la Francia) hanno `ue:false` — la CECA e la CEE entrano come
+     contenuto, non come apparato del presente.
+     IL ROSTER A SETTE (D36; il settimo, il BHE, nasce alla tappa del 1953): voti del 14 agosto 1949 **confermati sul sito
+     della Commissione elettorale federale** (bundeswahlleiterin.de, consultato il 25/9/2026: CDU 25,2 + CSU 5,8 · SPD 29,2 ·
+     FDP 11,9 · KPD 5,7 · BP 4,2 · DP 4,0; Zentrum, WAV, DRP, SSW e indipendenti fuori dal roster), rinormalizzati sui sei.
+     SEGGI: i 402 del Bundestag senza i delegati di Berlino Ovest, che non votavano (con, 410: SPD 136 · CDU/CSU 141 · FDP 53),
+     rinormalizzati sui sei (371): la coalizione CDU/CSU + FDP + DP ha 56,1 su 100 (208 su 402 nella storia, 51,7).
+     ⚠ Con lo sbarramento DP (4,7) e BP (4,9) sono sotto il 5 fin dall'avvio: all'urna del motore del 1953 vanno a zero seggi.
+     Nella storia la DP rientrò nel 1953 coi mandati diretti (15 seggi al 3,3%), che il gioco non modella: la tappa del
+     1953/9 le rende i suoi seggi, l'urna di gioco no.
+     L'URNA DEL MOTORE: `turnMandato:1` sul Bundestag dell'agosto 1949 → urne 1953/1 e 1957/1, otto mesi prima di quelle
+     vere (settembre): è la convenzione delle porte parlamentari (il motore vota solo a gennaio), e le tappe di settembre
+     riportano il Bundestag dei libri.
+     ============================================================================================================ */
+  de1950: {
+    id:'de1950', era:LINEA_DE, nome:'Germania 1950', anno:1950, paese:'germania',
+    turnMandato: 1,
+    sistema: 'parlamentare', comeSiVince: 'parlamentare', coalizione: true, cadutaGoverno: true,
+    sfiduciaCostruttiva: true, sbarramento: 5,
+    mandatoMesi: 48, mandatiMax: null,
+    titoloRuolo: 'Cancelliere', sedeGoverno: 'Palazzo Schaumburg',
+    capitale: 'Bonn',
+    ue: false,
+    intermedie: [ {tipo:'Elezioni nei Länder', mese:24, tocca:'regione'} ],
+    partiti: [
+      { id:'de_cdu', nome:'CDU/CSU', orientamento:'centrodestra',   base:{ cattolici:0.35, cetomedio:0.35, imprenditori:0.3 }, forza:36.0, asse:1,  alleati:['de_fdp','de_dp','de_bhe'] },
+      { id:'de_spd', nome:'SPD',     orientamento:'centrosinistra', base:{ lavoratori:0.6, pensionati:0.2, giovani:0.2 },    forza:34.0, asse:-1, alleati:['de_fdp','de_bp'] },
+      { id:'de_fdp', nome:'FDP',     orientamento:'liberale',       base:{ imprenditori:0.5, cetomedio:0.5 },                forza:13.8, asse:1,  alleati:['de_cdu','de_dp','de_bhe','de_spd','de_bp'] },
+      { id:'de_dp',  nome:'DP',      orientamento:'destra',         base:{ cetomedio:0.5, pensionati:0.5 },                  forza:4.7,  asse:2,  alleati:['de_cdu','de_fdp','de_bhe'],
+        selezionabile:false, nota:'Il Partito tedesco governa solo accanto alla CDU: fuori dalla coalizione non supera la soglia' },   // L109-1: 15/20 al congresso in L108-2 era la sua storia
+      { id:'de_kpd', nome:'KPD',     orientamento:'sinistra',       base:{ lavoratori:0.7, giovani:0.3 },                    forza:6.6,  asse:-2, alleati:[],
+        selezionabile:false, nota:'Il KPD esce dal Bundestag nel 1953 e viene sciolto nel 1956: non è una carriera che si possa giocare' },
+      { id:'de_bp',  nome:'BP',      orientamento:'regionalista',   base:{ cattolici:0.5, cetomedio:0.5 },                   forza:4.9,  asse:1,  alleati:['de_spd','de_fdp','de_bhe'],
+        selezionabile:false, nota:'Il Partito bavarese vive in un Land solo ed esce dal Bundestag nel 1953: non è una carriera che si possa giocare' },
+    ],
+    /* il Bundestag del 1949 senza i delegati di Berlino (402), rinormalizzato sui sei del roster (371) */
+    seggi: { de_cdu:37.5, de_spd:35.3, de_fdp:14.0, de_dp:4.6, de_kpd:4.0, de_bp:4.6 },
+    /* ⚠ cifre della scheda §2, ordine di grandezza (Destatis/Bundesbank da confermare): in miliardi di marchi. */
+    economia: { pil:98, debito:20, deficit:0, inflazione:2, inflazioneTetto:8, crescitaTetto:10, crescita:8, disoccupazione:11 },   // L109-1: il miracolo passa il tetto di 5 (⚠ inflazioneTetto di scenario non è letto: vedi crescitaTetto in model.js)
+    debtAncora: 20,
+    inflazione: 2,     // l'anno per anno sta in DRIFT_INFLAZIONE_ERA (la Corea del 1951)
+    crescita: 8,       // il miracolo: la media del decennio; il 1955 e la frenata del 1958 stanno nel drift
+    logorioEra: 0.012,                          // come le altre porte del '50
+    valuta: VALUTA_MARCO,
+    quotaSpesa: 0.30,                           // ⚠ la scheda non la dà: ~30% è l'ordine della spesa federale e dei Länder di quegli anni. Da confermare.
+    intro: "Germania, 1950. La Repubblica ha un anno, la capitale è una città universitaria sul Reno, e il Cancelliere governa con un voto di scarto.",
+    contesto: [
+      "Germania, 1950. Le città sono ancora macerie, ma il marco nuovo ha riempito le vetrine in una notte: la ricostruzione corre più in fretta di chiunque avesse previsto.",
+      "Dieci milioni di profughi dall'Est cercano casa e lavoro. Un disoccupato su dieci, e la metà del paese dall'altra parte di un confine che nessuno riconosce.",
+      "Il Cancelliere governa con i liberali e con un piccolo partito nazionale; l'opposizione socialdemocratica vuole l'unità prima dell'Occidente.",
+    ],
+  },
+  /* ============================================================================================================
+     L110-2 · GERMANIA 1960 — la seconda porta della linea tedesca (scheda PRESET-GERMANIA-1960.md). Si apre col Bundestag
+     della maggioranza assoluta del 1957 e chiude col 1971: il Muro, lo Spiegel, la prima recessione, la grande coalizione,
+     l'alternanza del 1969.
+     LE ISTITUZIONI come de1950 (sfiducia costruttiva, sbarramento 5, Bonn, marco). ⚠ `ue:false` come la scheda e come de1950;
+     le porte del '60 degli altri paesi non sono coerenti fra loro (italia1960 e uk1960 false, fr1960 true): dichiarato.
+     IL ROSTER: CDU/CSU, SPD, FDP, DP (confluisce nella CDU alla tappa del 1961, con l'àncora: D42), NPD che entra nel 1964
+     (non selezionabile). Il BHE del 1957 (4,6) non è nel roster: voti rinormalizzati sui quattro. **CDU↔SPD si dichiara qui**,
+     come alleanza di RISERVA (D41 corretta in L111-1: la grande coalizione del 1966, vedi sotto i seggi). La DP `selezionabile:false` come in de1950 (esce nel 1961: una carriera che finisce).
+     FORZE: urne del 1957 sui quattro (CDU/CSU 50,2 · SPD 31,8 · FDP 7,7 · DP 3,4 → 53,9 · 34,2 · 8,3 · 3,6). SEGGI: il Bundestag del
+     1957 senza Berlino, come lo lascia la tappa del 1957/9 di de1950 (54,3 · 34,0 · 8,3 · 3,4).
+     L'URNA DEL MOTORE: `turnMandato:3` sul Bundestag del settembre 1957 → urne 1961/1, 1965/1, 1969/1 (otto mesi prima di
+     quelle vere, la convenzione delle porte parlamentari).
+     ============================================================================================================ */
+  de1960: {
+    id:'de1960', era:LINEA_DE, nome:'Germania 1960', anno:1960, paese:'germania',
+    turnMandato: 3,
+    sistema: 'parlamentare', comeSiVince: 'parlamentare', coalizione: true, cadutaGoverno: true,
+    sfiduciaCostruttiva: true, sbarramento: 5,
+    mandatoMesi: 48, mandatiMax: null,
+    titoloRuolo: 'Cancelliere', sedeGoverno: 'Palazzo Schaumburg',
+    capitale: 'Bonn',
+    ue: false,
+    intermedie: [ {tipo:'Elezioni nei Länder', mese:24, tocca:'regione'} ],
+    partiti: [
+      { id:'de_cdu', nome:'CDU/CSU', orientamento:'centrodestra',   base:{ cattolici:0.35, cetomedio:0.35, imprenditori:0.3 }, forza:53.9, forzaAncora:44.1, asse:1,  alleati:['de_fdp','de_dp'], alleatiRiserva:['de_spd'] },
+      { id:'de_spd', nome:'SPD',     orientamento:'centrosinistra', base:{ lavoratori:0.6, pensionati:0.2, giovani:0.2 },    forza:34.2, forzaAncora:40.5, asse:-1, alleati:['de_fdp'], alleatiRiserva:['de_cdu'] },
+      { id:'de_fdp', nome:'FDP',     orientamento:'liberale',       base:{ imprenditori:0.5, cetomedio:0.5 },                forza:8.3,  forzaAncora:9.6,  asse:1,  alleati:['de_cdu','de_spd','de_dp'] },
+      { id:'de_dp',  nome:'DP',      orientamento:'destra',         base:{ cetomedio:0.5, pensionati:0.5 },                  forza:3.6,  asse:2,  alleati:['de_cdu','de_fdp'],
+        selezionabile:false, nota:'Il Partito tedesco governa solo accanto alla CDU: fuori dalla coalizione non supera la soglia' },
+    ],
+    /* il Bundestag del 1957 senza Berlino (497), come lo lascia de1950 */
+    seggi: { de_cdu:54.3, de_spd:34.0, de_fdp:8.3, de_dp:3.4 },
+    /* L111-1 · LA GRANDE COALIZIONE E L'ÀNCORA DEL DECENNIO.
+       (a) CDU↔SPD passa da `alleati` ad **`alleatiRiserva`** (D41 corretta): la grande coalizione si fa solo quando non c'è un'altra
+       maggioranza — il banco «ampio» e la trattativa la formano se il blocco ordinario è sotto 50, e il rimpasto la offre sempre,
+       dopo i partner ordinari («La grande coalizione», il 1966). Per la sfiducia costruttiva la SPD resta avversa finché non è in
+       coalizione: rifiutata la grande coalizione, SPD+FDP (50,6 nel 1966) può eleggere un altro Cancelliere.
+       (b) `forzaAncora`: la molla tira verso il decennio, non verso la maggioranza assoluta del 1957 (`forza` resta l'avvio).
+       Media delle tre urne del decennio (1961 · 1965 · 1969; la NPD a 0 nel 1961): CDU/CSU 46,37 · SPD 39,40 · FDP 9,37 · NPD 2,10,
+       rinormalizzata sul roster del decennio dopo la tappa del 1961 (CDU, SPD, FDP, NPD: somma 97,23) → **CDU 47,7 · SPD 40,5 ·
+       FDP 9,6** (NPD 2,2: non dichiarata, la sua àncora è la forza d'ingresso 2,0). ⚠ Alla CDU si toglie il 3,6 della DP: alla tappa
+       del 1961/9 la DP confluisce con `ancora:true` e le passa la sua àncora (L110-2), quindi 47,7 − 3,6 = **44,1** — prima del 1961 i
+       due partiti fanno insieme il 47,7, dopo la CDU da sola. */
+    /* ⚠ cifre della scheda §2, ordine di grandezza (Destatis/Bundesbank da confermare): in miliardi di marchi. */
+    economia: { pil:300, debito:17, deficit:0, inflazione:2.5, inflazioneTetto:8, crescitaTetto:9, crescita:4.5, disoccupazione:1, disoccupazionePavimento:0.5 },
+    debtAncora: 17,
+    inflazione: 2.5,
+    crescita: 4.5,
+    logorioEra: 0.012,
+    valuta: VALUTA_MARCO,
+    quotaSpesa: 0.30,                           // ⚠ come de1950: da confermare
+    intro: "Germania, 1960. Il Cancelliere ha la maggioranza assoluta e ottantaquattro anni; il paese ha il pieno impiego e cerca braccia fuori dai suoi confini.",
+    contesto: [
+      "Germania, 1960. Il miracolo è diventato abitudine: un'automobile, un frigorifero, le vacanze al Sud. La disoccupazione non esiste quasi più.",
+      "A Berlino il confine è ancora aperto, e ogni giorno migliaia di persone passano da Est a Ovest per restare.",
+      "Il Cancelliere governa da solo con i voti del 1957; il suo ministro dell'economia aspetta il suo turno, e l'opposizione socialdemocratica ha appena rinunciato al marxismo.",
+    ],
+  },
   /* ============================================================================================================
      L44-3 · ITALIA 2000 — la settima e ultima porta. Stessa LINEA; il roster è quello uscito dalla frana del '94
      (PPI, PDS, AN, Rifondazione, Lega, FI, CCD e i laici superstiti), anno d'avvio 2000.
@@ -2376,6 +2436,43 @@ const PILASTRI_LINEA = [
     t:'Il volo nell\'Atlantico',
     text:'Nella notte del primo giugno l\'aereo di linea partito da Rio per Parigi scompare dai radar in mezzo all\'oceano, dentro una tempesta. Duecentoventotto persone a bordo, nessun superstite. Le scatole nere verranno ritrovate due anni dopo, a quattromila metri di profondità: i sensori della velocità ghiacciati, e un equipaggio che non ha capito che cosa stava succedendo.',
     logx:'Il volo Rio-Parigi scompare nell\'Atlantico: duecentoventotto morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  /* L109-2 · i tre pilastri della linea tedesca del '50 (scheda §I-H, byte-identici). Budapest e lo Sputnik sono pilastri
+     DI LINEA (kick «Il mondo»), non del pool mondiale: nel pool entrerebbero nel novembre 1956 della Francia, che è di Suez. */
+  { id:'pde50_17giugno', linea:LINEA_DE, anno:1953, mese:6, era:'de1950', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Il 17 giugno',
+    text:'A Berlino Est gli operai dei cantieri del grande viale incrociano le braccia contro l\'aumento dei ritmi, e in un giorno lo sciopero diventa una rivolta in tutta la Germania dell\'Est: un milione di persone in piazza, le sedi del partito assaltate. A mezzogiorno arrivano i carri sovietici. Decine di morti, migliaia di arresti. A Ovest il 17 giugno diventa festa nazionale; a Est non se ne parlerà più.',
+    logx:'Rivolta a Berlino Est: i carri sovietici, decine di morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pde50_budapest', linea:LINEA_DE, anno:1956, mese:11, era:'de1950', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il mondo',
+    t:'Budapest',
+    text:'Il 4 novembre i carri sovietici entrano a Budapest e schiacciano la rivolta ungherese in una settimana: migliaia di morti, duecentomila profughi che passano il confine con l\'Austria. La radio dei ribelli chiede aiuto all\'Occidente fino all\'ultimo; l\'Occidente, impegnato a Suez, non arriva.',
+    logx:'I carri sovietici a Budapest: la rivolta ungherese schiacciata.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pde50_sputnik', linea:LINEA_DE, anno:1957, mese:10, era:'de1950', codaFino:Infinity, cronaca:true, kick:'Il mondo',
+    t:'Il satellite',
+    text:'Il 4 ottobre una sfera di metallo lanciata dall\'Unione sovietica gira intorno alla Terra ogni novantasei minuti e trasmette un segnale che chiunque può ascoltare alla radio. L\'America scopre di essere stata superata; l\'Europa scopre che i missili che portano un satellite possono portare anche altro.',
+    logx:'Un satellite sovietico gira intorno alla Terra: l\'Occidente scopre di essere indietro.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  /* L110-1 · i tre pilastri G8 della linea tedesca del '50 (testi di Cowork, byte per byte). Date e cifre verificate da Code sulle
+     pagine della lista delle catastrofi in Germania (en.wikipedia, 26/9): Altensteig 11 agosto 1955, due C-119 dell'aviazione
+     americana in addestramento, 66 morti · Monaco 17 dicembre 1960, un Convair dell'aviazione americana sul tram, 52 (32 a terra) ·
+     Igensdorf 28 marzo 1961, un Il-18 della ČSA da Praga, 52, cause contese. L111-1: il testo di Monaco riscritto da Cowork sulla fonte
+     (il motore perso, il sabato prima di Natale; via la città che chiede, che nella fonte non c'era). */
+  { id:'pde50_altensteig', linea:LINEA_DE, anno:1955, mese:8, era:'de1950', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Sopra la Foresta Nera',
+    text:'Due aerei militari da trasporto si scontrano in volo sopra la Foresta Nera, vicino ad Altensteig, durante un\'esercitazione: sessantasei morti, nessun superstite. È la sciagura aerea più grave vista fino ad allora nel paese, e nessuno dei morti è tedesco: sono i soldati degli alleati che il paese ospita da dieci anni.',
+    logx:'Due aerei militari si scontrano sopra la Foresta Nera: sessantasei morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pde50_monaco', linea:LINEA_DE, anno:1960, mese:12, era:'de1950', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'L\'aereo sul tram',
+    text:'Pochi minuti dopo il decollo un aereo militare alleato perde un motore e cade nel centro di Monaco, su un tram affollato: è il sabato prima di Natale. Cinquantadue morti, fra chi era a bordo e chi era per strada.',
+    logx:'Un aereo militare cade su un tram nel centro di Monaco: cinquantadue morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pde50_igensdorf', linea:LINEA_DE, anno:1961, mese:3, era:'de1950', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'L\'aereo di linea in Franconia',
+    text:'Un aereo di linea cecoslovacco partito da Praga si schianta nella campagna della Franconia, vicino a Igensdorf: cinquantadue morti, nessun superstite. Le cause non saranno mai chiarite del tutto; il relitto è sul lato occidentale di un confine che i due paesi non riconoscono.',
+    logx:'Un aereo di linea cecoslovacco cade in Franconia: cinquantadue morti.',
     ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
 ];
 
@@ -3449,6 +3546,17 @@ const BEAT_LEGGERI = [
   {id:'lgfr00_nuvola', era:'fr2000', registro:'leggero', cond:()=>S.year===2010&&S.month>=4&&S.month<=5, kick:'Il paese', t:'Il cielo chiuso', text:'Un vulcano islandese dal nome impronunciabile sputa cenere su mezza Europa: per sei giorni non vola nessun aereo. Le stazioni si riempiono come nel dopoguerra.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
   {id:'lgfr00_londra', era:'fr2000', registro:'leggero', cond:()=>S.year===2005&&S.month>=6&&S.month<=8, kick:'Il paese', t:'I Giochi a Londra', text:'Il comitato olimpico sceglie Londra per quattro voti. Parigi aveva già preparato la festa sotto la torre; la festa è a Trafalgar Square.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
   {id:'lgfr00_rete', era:'fr2000', registro:'leggero', cond:()=>S.year>=2008&&S.year<=2012, kick:'Il paese', t:'Gli amici in rete', text:'Tutti hanno una pagina, anche i nonni: le foto delle vacanze, i compleanni, i compagni di scuola ritrovati. I giornalisti la chiamano la piazza nuova.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  /* L109-2 · i dieci beat leggeri del decennio tedesco '50 (scheda PRESET-GERMANIA-1950 §I-D). */
+  {id:'lgde50_berna', era:'de1950', registro:'leggero', cond:()=>S.year===1954&&S.month>=7&&S.month<=8, kick:'Il paese', t:'Il miracolo di Berna', text:'Sotto la pioggia di Berna la nazionale batte la squadra imbattibile dell\'Ungheria, tre a due. Alla radio il telecronista grida per un minuto intero, e il paese per la prima volta dal 1945 si permette di essere contento di sé.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde50_maggiolino', era:'de1950', registro:'leggero', cond:()=>S.year>=1953, kick:'Il paese', t:'L\'automobile tonda', text:'Quella che era la macchina del popolo promessa da un altro regime esce dalla fabbrica di Wolfsburg a centinaia al giorno: la compra l\'operaio, la compra il medico, la esportano in America.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde50_ondata', era:'de1950', registro:'leggero', cond:()=>S.year>=1952&&S.year<=1956, kick:'Il paese', t:'Le ondate', text:'Prima l\'ondata del mangiare, poi quella dei vestiti, poi quella dei mobili, poi quella dei viaggi: il paese recupera dieci anni di fame un\'ondata alla volta.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde50_rimini', era:'de1950', registro:'leggero', cond:()=>S.year>=1955&&S.month>=7&&S.month<=8, kick:'Il paese', t:'Le vacanze al Sud', text:'Le prime famiglie passano il Brennero in macchina, con la tenda sul portapacchi: l\'Adriatico, il vino, le canzoni. Per molti è il primo viaggio all\'estero senza un\'uniforme.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde50_televisione', era:'de1950', registro:'leggero', cond:()=>S.year>=1953, kick:'Il paese', t:'Il primo canale', text:'Una trasmissione la sera, un annunciatore in giacca, e la gente davanti alle vetrine dei negozi di elettrodomestici. Chi ha un televisore a casa invita i vicini.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde50_rocknroll', era:'de1950', registro:'leggero', cond:()=>S.year>=1956, kick:'Il paese', t:'I teppisti del rock', text:'Ai concerti americani i ragazzi con la brillantina spaccano le sedie; i giornali li chiamano teppisti, i genitori non capiscono la musica, i ragazzi non capiscono i genitori.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde50_film', era:'de1950', registro:'leggero', cond:()=>S.year>=1951&&S.year<=1958, kick:'Il paese', t:'I film della patria', text:'Boschi, montagne, cacciatori e fanciulle in costume: al cinema il paese guarda una Germania che non è mai esistita e che non ha fatto niente di male.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde50_ricostruzione', era:'de1950', registro:'leggero', cond:()=>S.year<=1954, kick:'Il paese', t:'Le donne delle macerie', text:'Nelle città ancora a metà, file di donne passano i mattoni di mano in mano e li puliscono uno a uno. Con quelli si rifanno le case.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde50_carnevale', era:'de1950', registro:'leggero', cond:()=>S.month===2, kick:'Il paese', t:'Il carnevale del Reno', text:'A Colonia e a Magonza i carri tornano in strada: i potenti in cartapesta, le bande, i discorsi in dialetto. Quest\'anno sul carro più grande c\'è Bonn.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde50_frigo', era:'de1950', registro:'leggero', cond:()=>S.year>=1957, kick:'Il paese', t:'Il frigorifero', text:'Uno su dieci ce l\'ha: la pubblicità lo mostra accanto a una casalinga sorridente e a un pollo intero. La banca presta i soldi a rate; le rate si pagano col miracolo.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
 ];
 
 /* ===== F1 — LA TELEFONATA. Un'interruzione, non una carta: overlay a squillo, due opzioni secche, decisione a
@@ -5664,6 +5772,17 @@ const DOSSIERS=[
    {l:'Il discorso contro la guerra, e la minaccia del veto',e:'La storia · l\'aula applaude, cosa che non fa mai · Washington non lo dimenticherà per anni',f:()=>{repd(2); gdFr00('giovani',4); gdFr00('cetomedio',2); gdFr00('imprenditori',-1);}},
    {l:'Astensione',e:'La guerra si fa lo stesso, senza la tua voce · nessuno ti ricorda',f:()=>{repd(-1); gdFr00('giovani',-1);}},
    {l:'Con Washington',e:'I soldati francesi a Baghdad · il paese non capisce perché',f:()=>{repd(3); gdFr00('giovani',-6); gdFr00('cetomedio',-3); stampad(-3);}}]},
+ /* L109-2 · i due dossier del decennio tedesco '50 (scheda §I-F). */
+ {id:'dde50_dottrina',era:'de1950',cond:()=>S.year>=1956,min:'esteri',kick:'La Germania',t:'Chi riconosce l\'Est',
+  text:'La Jugoslavia sta per riconoscere l\'altra Germania. La regola del ministero è chiara: chi lo fa, perde l\'ambasciata di Bonn. Ma la regola costa amici, e il mondo fuori dall\'Europa comincia a contare.',ch:[
+   {l:'Applica la regola: rompi con Belgrado',e:'La storia · l\'ambasciata chiude · e la regola tiene, per ora',f:()=>{repd(-1); baseDe50(2);}},
+   {l:'Un avvertimento, non la rottura',e:'La regola si piega · e gli altri se ne accorgono',f:()=>{repd(1); baseDe50(-1);}},
+   {l:'Abolisci la regola',e:'Relazioni con tutti · a destra ti accusano di aver riconosciuto la divisione',f:()=>{repd(3); baseDe50(-4); gdDe50('pensionati',-2);}}]},
+ {id:'dde50_leva',era:'de1950',cond:()=>S.year>=1956&&S.year<=1958,min:'difesa',kick:'La difesa',t:'La leva',
+  text:'L\'esercito ha i volontari ma non i numeri: lo stato maggiore chiede la leva obbligatoria, diciotto mesi. Il ministro della difesa propone dodici. I ragazzi del 1937 aspettano la lettera.',ch:[
+   {l:'Dodici mesi',e:'La storia · la prima classe entra in caserma nel 1957 · i genitori mugugnano, i generali pure',f:()=>{repd(2); gdDe50('giovani',-3);}},
+   {l:'Diciotto mesi',e:'Gli alleati applaudono · i ragazzi no',f:()=>{repd(3); gdDe50('giovani',-6); gdDe50('pensionati',-1);}},
+   {l:'Solo volontari',e:'Un esercito piccolo · l\'Alleanza chiede quando arriverà il resto',f:()=>{repd(-4); gdDe50('giovani',3);}}]},
  {id:'d50_marshall_dip',era:'italia1950',cond:()=>S.year<=1953,min:'esteri',kick:'Piano Marshall',t:'La dipendenza dagli aiuti',text:'Gli aiuti americani hanno rimesso in moto il paese, ma ora chiedono allineamento politico e commerciale. Fin dove seguire l\'alleato?',ch:[
    {l:'Allineamento pieno con l\'alleato',e:'Aiuti e protezione; la pancia mormora',pleases:'tecnico',f:()=>{repd(4); if(S.gMod!=null)S.gMod+=0.1; gd('cetomedio',-1);}},
    {l:'Amicizia sì, ma con margini nostri',e:'Autonomia rivendicata; l\'alleato prende nota',pleases:'populista',f:()=>{repd(-2); gd('cetomedio',2);}},
@@ -8254,6 +8373,58 @@ const EVENTS=[
    {l:'Una legge sulla trasparenza: tutti i patrimoni pubblici',e:'La storia · i ministri e i deputati dichiarano tutto, e un\'autorità controlla · i tuoi borbottano',f:()=>{stampad(4); gdFr00('cetomedio',2); baseFr00(-2);}},
    {l:'Il ministro fuori, e basta',e:'Una testa cade · la domanda «chi sapeva» resta',f:()=>{stampad(-2); gdFr00('cetomedio',-2);}},
    {l:'Una commissione d\'inchiesta',e:'Sei mesi di audizioni in diretta · e il governo ci passa l\'estate',f:()=>{stampad(1); baseFr00(-1); fidFr00(-1);}}]},
+ /* L109-2 · i dieci eventi del decennio tedesco '50 (scheda PRESET-GERMANIA-1950 §I-C). Unica aggiunta di Code: il flag
+    S.riparazioni52 sulle tre scelte delle riparazioni, perché il titolo del 1952 vuole «se l'accordo è fatto». */
+ {id:'de50_perequazione', era:'de1950', cond:()=>S.year>=1951&&S.year<=1952, kick:'Il paese', t:'Gli espulsi',
+  text:'Dieci milioni di tedeschi cacciati dall\'Est vivono in baracche e soffitte, e chi ha ancora una casa dovrebbe pagare per loro: metà del patrimonio del 1948, in trent\'anni. È la legge più grande della Repubblica, e nessuno la vota volentieri.',ch:[
+   {l:'La legge: chi ha, paga per chi ha perso',e:'La storia · trent\'anni di rate sulle case e sulle fabbriche · gli espulsi diventano cittadini, e votano',costo:{debito:0.5},f:()=>{S.ind.debt+=0.5; gdDe50('pensionati',3); gdDe50('lavoratori',2); gdDe50('imprenditori',-3); gdDe50('cetomedio',-1);}},
+   {l:'Un fondo pubblico, senza toccare i patrimoni',e:'Lo Stato paga · e il debito lo ricorda',costo:{debito:2},f:()=>{S.ind.debt+=2; gdDe50('pensionati',2); gdDe50('imprenditori',1); fidDe50(-2);}},
+   {l:'Case e lavoro, niente indennizzi',e:'I cantieri arrivano, i conti no · gli espulsi fondano un partito loro',f:()=>{gdDe50('pensionati',-3); gdDe50('lavoratori',-1); gdDe50('imprenditori',2);}}]},
+ {id:'de50_cogestione', era:'de1950', cond:()=>S.year===1951&&S.month<=6, kick:'Il lavoro', t:'I sindacati nei consigli',
+  text:'Nelle miniere e nelle acciaierie i sindacati minacciano lo sciopero generale se non avranno metà dei posti nei consigli di sorveglianza. Gli industriali dicono che è la fine dell\'impresa.',ch:[
+   {l:'Metà dei posti ai lavoratori, nel carbone e nell\'acciaio',e:'La storia · la cogestione nasce nella Ruhr · e diventa un modello che il mondo verrà a studiare',f:()=>{gdDe50('lavoratori',6); gdDe50('imprenditori',-4); stampad(1);}},
+   {l:'Un terzo dei posti, in tutte le imprese',e:'Meno forza, più largo · i sindacati accettano a denti stretti',f:()=>{gdDe50('lavoratori',2); gdDe50('imprenditori',-1);}},
+   {l:'Nessuna legge: decidano i contratti',e:'Lo sciopero parte · e il miracolo si ferma per un mese',f:()=>{gdDe50('lavoratori',-6); gdDe50('imprenditori',3); fidDe50(-1);}}]},
+ {id:'de50_riparazioni', era:'de1950', cond:()=>S.year===1952&&S.month>=6, tono:'grave', kick:'Il mondo', t:'Le riparazioni',
+  text:'Lo Stato d\'Israele e le organizzazioni ebraiche chiedono un risarcimento per i beni dei sei milioni di uccisi. La somma è enorme; nel governo c\'è chi dice che il paese non può pagarla, e i sondaggi dicono che il paese non vuole.',ch:[
+   {l:'L\'accordo: tre miliardi di marchi in merci, in dodici anni',e:'La storia · la ratifica passa con i voti dell\'opposizione, non dei tuoi · il mondo prende nota',costo:{debito:1},f:()=>{S.riparazioni52='accordo'; S.ind.debt+=1; repd(6); baseDe50(-3); gdDe50('cetomedio',-1);}},
+   {l:'Una somma più piccola',e:'Un accordo al ribasso · il mondo lo legge come quello che è',costo:{debito:0.5},f:()=>{S.riparazioni52='ridotto'; S.ind.debt+=0.5; repd(1);}},
+   {l:'Prima i debiti di guerra con gli alleati',e:'Nessun accordo per ora · e il nome del paese resta quello che era',f:()=>{S.riparazioni52='no'; repd(-7); baseDe50(2); stampad(-3);}}]},
+ {id:'de50_prigionieri', era:'de1950', cond:()=>S.year===1955&&S.month>=8&&S.month<=10, kick:'Il mondo', t:'I prigionieri',
+  text:'Mosca invita il Cancelliere. Nei campi sovietici restano diecimila soldati tedeschi, dieci anni dopo la guerra. Il prezzo: allacciare relazioni diplomatiche con l\'Unione sovietica, che riconosce l\'altra Germania.',ch:[
+   {l:'Le relazioni in cambio dei prigionieri',e:'La storia · diecimila uomini tornano a casa entro Natale · le madri alla stazione di Friedland, e il paese piange con loro',f:()=>{gdDe50('pensionati',6); gdDe50('cattolici',3); gdDe50('cetomedio',2); repd(-1);}},
+   {l:'Niente relazioni con chi riconosce l\'Est',e:'La dottrina resta pulita · i prigionieri restano dove sono',f:()=>{gdDe50('pensionati',-6); repd(2); stampad(-3);}},
+   {l:'Chiedi di più: anche i civili deportati',e:'Mosca alza le spalle · la trattativa dura un anno di più',f:()=>{gdDe50('pensionati',1); repd(-2);}}]},
+ {id:'de50_italiani', era:'de1950', cond:()=>S.year>=1955&&S.year<=1956, kick:'Il lavoro', t:'I lavoratori dal Sud',
+  text:'Le fabbriche non trovano più braccia: la disoccupazione è quasi sparita. Roma propone un accordo: lavoratori italiani per l\'industria e l\'agricoltura, con contratto e ritorno. Nel paese si parla già di «ospiti».',ch:[
+   {l:'L\'accordo con l\'Italia',e:'La storia · i primi treni da Verona e da Napoli · sono ospiti, dicono; molti resteranno',f:()=>{gdDe50('imprenditori',4); gdDe50('lavoratori',-2); gdDe50('cetomedio',-1);}},
+   {l:'Solo lavoro stagionale, senza famiglie',e:'Braccia per l\'estate · e la fabbrica aspetta l\'autunno',f:()=>{gdDe50('imprenditori',2);}},
+   {l:'Prima i tedeschi dell\'Est',e:'Si aspetta chi scappa dall\'altra parte · le fabbriche aspettano con loro',f:()=>{gdDe50('imprenditori',-3); gdDe50('lavoratori',2); gdDe50('pensionati',1);}}]},
+ {id:'de50_saar', era:'de1950', cond:()=>S.year===1955&&S.month>=9&&S.month<=11, kick:'L\'Europa', t:'La Saar al voto',
+  text:'Parigi e Bonn hanno firmato uno statuto europeo per la Saar: un territorio né francese né tedesco, sotto un commissario europeo. Ora vota la Saar. Il Cancelliere ha firmato lo statuto; i partiti della Saar fanno campagna per il no.',ch:[
+   {l:'Sostieni lo statuto che hai firmato',e:'Il no vince col due terzi · la Saar torna alla Germania lo stesso, e Parigi si ricorda che l\'avevi difeso',f:()=>{repd(3); baseDe50(-2);}},
+   {l:'Resta neutrale: decidano loro',e:'La storia, più o meno · il no vince, la Saar torna, e nessuno ti accusa di niente',f:()=>{repd(1); gdDe50('cetomedio',1);}},
+   {l:'Fai campagna per il no',e:'La Saar torna con la tua bandiera · Parigi non ti perdona l\'ambiguità',f:()=>{repd(-4); baseDe50(3); gdDe50('pensionati',2);}}]},
+ {id:'de50_kpd', era:'de1950', cond:()=>S.year===1956&&S.month>=6&&S.month<=9, kick:'La giustizia', t:'Il partito comunista',
+  text:'Il governo ha chiesto cinque anni fa alla Corte costituzionale di sciogliere il partito comunista, e la sentenza arriva adesso: è contrario all\'ordine democratico. I suoi deputati non ci sono più da tre anni; i suoi militanti sì.',ch:[
+   {l:'Esegui la sentenza: sede chiusa, beni confiscati',e:'La storia · il partito sparisce · i suoi militanti no, e alcuni finiscono in carcere',f:()=>{gdDe50('cetomedio',2); gdDe50('pensionati',1); gdDe50('giovani',-2); repd(-1);}},
+   {l:'Esegui, ma nessun processo ai militanti',e:'Il partito chiude, le persone restano libere · la destra dice che sei morbido',f:()=>{gdDe50('giovani',1); baseDe50(-1);}},
+   {l:'Chiedi di ritirare la domanda',e:'Il partito resta legale e senza seggi · Washington chiede perché',f:()=>{repd(-3); gdDe50('giovani',2); gdDe50('cetomedio',-2);}}]},
+ {id:'de50_roma', era:'de1950', cond:()=>S.year===1957&&S.month<=4, kick:'L\'Europa', t:'I trattati di Roma',
+  text:'Sei paesi firmano a Roma un mercato comune: niente dazi fra loro in dodici anni, una politica agricola comune, un\'agenzia per l\'atomo. Il ministro dell\'economia teme che la Francia faccia pagare ai tedeschi i suoi contadini.',ch:[
+   {l:'Firma: il mercato è la pace',e:'La storia · la ratifica passa larga · i contadini francesi e i tuoi industriali ringraziano, per motivi diversi',f:()=>{repd(4); gdDe50('imprenditori',3); gdDe50('cattolici',-1);}},
+   {l:'Firma, ma con una zona di libero scambio più larga',e:'Si tratta con Londra · e Parigi si irrigidisce',f:()=>{repd(1); gdDe50('imprenditori',2);}},
+   {l:'Non firmare: prima il commercio con tutti',e:'I sei restano cinque · l\'Europa si fa senza il paese più grande',f:()=>{repd(-6); gdDe50('imprenditori',-2); gdDe50('cattolici',1);}}]},
+ {id:'de50_parita', era:'de1950', cond:()=>S.year>=1957&&S.year<=1958, kick:'Il paese', t:'Le mogli e il lavoro',
+  text:'La Costituzione dice che uomini e donne sono uguali; il codice civile dice ancora che il marito decide se la moglie può lavorare e amministra i suoi soldi. La Corte ha dato una scadenza al Parlamento.',ch:[
+   {l:'La legge sulla parità: la moglie decide da sola',e:'La storia, a metà · il marito perde il veto sul lavoro · ma l\'ultima parola sui figli resta a lui, per ora',f:()=>{gdDe50('giovani',3); gdDe50('cetomedio',1); gdDe50('cattolici',-3);}},
+   {l:'La parità piena, anche sui figli',e:'Dieci anni prima della Corte · le chiese protestano',f:()=>{gdDe50('giovani',5); gdDe50('cattolici',-6); gdDe50('pensionati',-2);}},
+   {l:'Rinviare: la famiglia non si tocca',e:'Il codice resta · e la Corte decide al posto tuo',f:()=>{gdDe50('cattolici',3); gdDe50('giovani',-4); stampad(-2);}}]},
+ {id:'de50_berlino', era:'de1950', cond:()=>(S.year===1958&&S.month===12)||(S.year===1959&&S.month<=5), tono:'grave', kick:'Il mondo', t:'L\'ultimatum su Berlino',
+  text:'Mosca dà sei mesi agli alleati: Berlino Ovest deve diventare una «città libera», smilitarizzata, o i sovietici consegneranno le vie d\'accesso all\'altra Germania. Due milioni di berlinesi guardano Bonn.',ch:[
+   {l:'Nessun passo indietro: gli alleati restano',e:'La storia · l\'ultimatum scade senza che succeda niente · la città resta un\'isola, e la gente continua a passare',f:()=>{repd(3); gdDe50('cetomedio',2); gdDe50('pensionati',1);}},
+   {l:'Proponi una conferenza a quattro',e:'I ministri si incontrano a Ginevra · Berlino aspetta',f:()=>{repd(1);}},
+   {l:'Tratta con Mosca sulla città',e:'Un\'apertura che gli alleati non volevano · e i berlinesi si sentono venduti',f:()=>{repd(-5); gdDe50('pensionati',-2); gdDe50('cetomedio',-3);}}]},
  {id:'fr_ceca', era:'fr1950', cond:()=>S.year>=1951&&S.year<=1953, kick:'L\'Europa', t:'Il carbone e l\'acciaio con Bonn',
   text:'Sei paesi mettono in comune carbone e acciaio sotto un\'Alta Autorità che non risponde a nessun governo: per i siderurgici del nord è un mercato, per i minatori una minaccia, per i gollisti una rinuncia. Il tuo partito deve ratificare.',ch:[
    {l:'Ratifichi',e:'Le acciaierie del nord con te · i minatori temono il mercato comune',f:()=>{gdFr('imprenditori',3); gdFr('cetomedio',2); gdFr('lavoratori',-3); repd(1);}},
@@ -9304,6 +9475,31 @@ const SFIDE=[
  {id:'fr00_q_matrimonio', era:'fr2000', codaFino:Infinity, paese:'francia', ruolo:'governo', diff:'facile', cond:()=>S.year>=2014||(S.year===2013&&S.month>=6), q:'Che cosa introduce la legge del maggio 2013?',
   op:['Il patto civile','La parità nelle liste','Il matrimonio per le coppie dello stesso sesso'], giusta:2,
   perche:'La legge del maggio 2013 apre il matrimonio e l\'adozione alle coppie dello stesso sesso.'},
+ /* L109-2 · le otto sfide del decennio tedesco '50 (scheda §I-G), la giusta nelle posizioni della scheda (0,1,2,1,2,0,1,2). Il «perché» è di Code. */
+ {id:'de50_q_bonn', era:'de1950', codaFino:Infinity, paese:'germania', ruolo:'governo', diff:'facile', cond:()=>S.year>=1950, q:'Quale città fu la capitale provvisoria della Repubblica federale?',
+  op:['Bonn','Francoforte','Colonia'], giusta:0,
+  perche:'Nel 1949 la capitale provvisoria fu una città universitaria sul Reno: Bonn, preferita a Francoforte.'},
+ {id:'de50_q_nota', era:'de1950', codaFino:Infinity, paese:'germania', ruolo:'governo', diff:'media', cond:()=>S.year>=1953||(S.year===1952&&S.month>=4), q:'Che cosa offriva la Nota di Mosca del 1952?',
+  op:['Il ritiro dalla Polonia','L\'unità in cambio della neutralità','Il ritorno della Prussia orientale'], giusta:1,
+  perche:'Mosca offriva una Germania unita, con un suo esercito e libere elezioni, a patto che non entrasse in nessuna alleanza.'},
+ {id:'de50_q_nato', era:'de1950', codaFino:Infinity, paese:'germania', ruolo:'governo', diff:'media', cond:()=>S.year>=1956||(S.year===1955&&S.month>=6), q:'Quando entra la Repubblica federale nell\'Alleanza atlantica?',
+  op:['1949','1952','1955'], giusta:2,
+  perche:'Nel maggio 1955, lo stesso mese in cui il paese riottiene la piena sovranità.'},
+ {id:'de50_q_17giugno', era:'de1950', codaFino:Infinity, paese:'germania', ruolo:'governo', diff:'facile', cond:()=>S.year>=1954||(S.year===1953&&S.month>=7), q:'Che cosa succede a Berlino Est il 17 giugno 1953?',
+  op:['Un\'elezione libera','Una rivolta operaia repressa dai carri sovietici','L\'apertura delle frontiere'], giusta:1,
+  perche:'Uno sciopero degli operai edili diventa una rivolta in tutta la Germania dell\'Est, e i carri sovietici la schiacciano.'},
+ {id:'de50_q_berna', era:'de1950', codaFino:Infinity, paese:'germania', ruolo:'governo', diff:'facile', cond:()=>S.year>=1955||(S.year===1954&&S.month>=8), q:'Chi vince il Mondiale di calcio del 1954?',
+  op:['L\'Ungheria','Il Brasile','La Germania Ovest'], giusta:2,
+  perche:'A Berna la Germania Ovest batte in finale l\'Ungheria, la squadra che nessuno batteva, tre a due.'},
+ {id:'de50_q_saar', era:'de1950', codaFino:Infinity, paese:'germania', ruolo:'governo', diff:'facile', cond:()=>S.year>=1958||(S.year===1957&&S.month>=2), q:'Quale territorio torna alla Germania il 1° gennaio 1957?',
+  op:['La Saar','L\'Alsazia','Il Tirolo'], giusta:0,
+  perche:'Dopo il no allo statuto europeo nel referendum del 1955, la Saar entra nella Repubblica federale come Land.'},
+ {id:'de50_q_pensioni', era:'de1950', codaFino:Infinity, paese:'germania', ruolo:'governo', diff:'media', cond:()=>S.year>=1958||(S.year===1957&&S.month>=3), q:'Che cosa ottengono le pensioni con la riforma del 1957?',
+  op:['Un fondo privato','L\'adeguamento ai salari','L\'età a 60 anni'], giusta:1,
+  perche:'La riforma del gennaio 1957 lega ogni anno le pensioni alla crescita dei salari.'},
+ {id:'de50_q_cinquanta', era:'de1950', codaFino:Infinity, paese:'germania', ruolo:'governo', diff:'facile', cond:()=>S.year>=1958||(S.year===1957&&S.month>=10), q:'Quale partito ottiene la maggioranza assoluta nel 1957?',
+  op:['L\'SPD','La FDP','La CDU/CSU'], giusta:2,
+  perche:'Nel settembre 1957 la CDU/CSU prende il 50,2 per cento dei voti: l\'unica maggioranza assoluta della storia tedesca.'},
  {id:'uk60_svalut67', era:'uk1960', codaFino:Infinity, paese:'regnounito', ruolo:'governo', diff:'difficile', cond:()=>S.year>=1967, q:'Che cosa accadde alla sterlina nel novembre 1967?',
   op:['Fu lasciata fluttuare liberamente','Fu svalutata da 2,80 a 2,40 dollari','Fu agganciata all\'oro'], giusta:1,
   perche:'Arrivò dopo tre anni di difesa del cambio.'},
@@ -11691,6 +11887,24 @@ const TITOLI=[
  {id:'ti_fr00_alternanza', era:'fr2000', pri:1, cond:()=>S.year===2012&&S.month<=3&&eliseoDiSinistra(), amico:'La sinistra torna', ostile:'La sinistra torna all\'Eliseo'},
  {id:'ti_fr00_matrimonio', era:'fr2000', pri:1, cond:()=>S.year===2013&&S.month>=4&&S.month<=6, amico:'Il matrimonio per tutti', ostile:'Il matrimonio per tutti: centotrentasei ore in aula'},
  {id:'ti_fr00_mali', era:'fr2000', pri:1, cond:()=>S.year===2013&&S.month<=2, amico:'Il Mali', ostile:'Il Mali: le colonne fermate'},
+ /* L109-2 · i titoli del decennio tedesco '50 (scheda §I-E). «Se al governo CDU» = il giocatore è della CDU/CSU e governa:
+    il titolo parla del Cancelliere, e con un Cancelliere di un altro partito sarebbe falso. */
+ {id:'ti_de50_bonn', era:'de1950', pri:1, cond:()=>S.year===1950&&S.month<=3, amico:'Il governo a Bonn', ostile:'Il governo a Bonn: capitale provvisoria'},
+ {id:'ti_de50_corea', era:'de1950', pri:1, cond:()=>S.year===1950&&S.month>=7&&S.month<=10, amico:'La Corea', ostile:'La Corea: e il riarmo torna in discussione'},
+ {id:'ti_de50_ceca', era:'de1950', pri:1, cond:()=>S.year===1951&&S.month>=4&&S.month<=6, amico:'Il carbone e l\'acciaio in comune', ostile:'Il carbone e l\'acciaio in comune: sei paesi, una sola Alta autorità'},
+ {id:'ti_de50_nota', era:'de1950', pri:1, cond:()=>S.year===1952&&S.month>=3&&S.month<=5, amico:'La Nota di Mosca', ostile:'La Nota di Mosca: unità in cambio di neutralità'},
+ {id:'ti_de50_riparazioni', era:'de1950', pri:1, cond:()=>S.year===1952&&S.month>=9&&S.month<=10&&S.riparazioni52==='accordo', amico:'Le riparazioni', ostile:'Le riparazioni: la ratifica coi voti dell\'opposizione'},
+ {id:'ti_de50_17giugno', era:'de1950', pri:1, cond:()=>S.year===1953&&S.month>=6&&S.month<=7, amico:'Il 17 giugno', ostile:'Il 17 giugno: i carri a Berlino Est'},
+ {id:'ti_de50_voto53', era:'de1950', pri:1, cond:()=>S.year===1953&&S.month>=9&&S.month<=10&&S.partito==='de_cdu'&&!S.opposizione, amico:'Il Cancelliere stravince', ostile:'Il Cancelliere stravince: quarantacinque per cento'},
+ {id:'ti_de50_berna', era:'de1950', pri:1, cond:()=>S.year===1954&&S.month===7, amico:'Campioni del mondo', ostile:'Campioni del mondo: il miracolo di Berna'},
+ {id:'ti_de50_sovranita', era:'de1950', pri:1, cond:()=>S.year===1955&&S.month>=5&&S.month<=6&&S.riarmo55==='nato', amico:'Sovrani', ostile:'Sovrani: e nell\'Alleanza'},
+ {id:'ti_de50_prigionieri', era:'de1950', pri:1, cond:()=>S.year===1955&&S.month>=10&&S.month<=11, amico:'Tornano a casa', ostile:'Tornano a casa: diecimila da Mosca'},
+ {id:'ti_de50_bundeswehr', era:'de1950', pri:1, cond:()=>S.year===1955&&S.month>=11, amico:'I primi soldati', ostile:'I primi soldati: in uniforme dieci anni dopo'},
+ {id:'ti_de50_budapest', era:'de1950', pri:1, cond:()=>S.year===1956&&S.month===11, amico:'Budapest', ostile:'Budapest: i carri e il silenzio dell\'Occidente'},
+ {id:'ti_de50_saar', era:'de1950', pri:1, cond:()=>S.year===1957&&S.month===1, amico:'La Saar torna', ostile:'La Saar torna: dieci Länder'},
+ {id:'ti_de50_cinquanta', era:'de1950', pri:1, cond:()=>S.year===1957&&S.month>=9&&S.month<=10&&S.partito==='de_cdu'&&!S.opposizione, amico:'Cinquanta per cento', ostile:'Cinquanta per cento: nessuno l\'aveva mai fatto'},
+ {id:'ti_de50_sputnik', era:'de1950', pri:1, cond:()=>S.year===1957&&S.month>=10&&S.month<=11, amico:'Il satellite', ostile:'Il satellite: e l\'America ha paura'},
+ {id:'ti_de50_atomica', era:'de1950', pri:1, cond:()=>S.year===1958&&S.month>=3&&S.month<=5, amico:'La morte atomica', ostile:'La morte atomica: le piazze contro il voto'},
  {id:'ng_p_ti_petrolio', era:'contemporanea', paesi:['nigeria'], pri:1, amico:'La produzione di petrolio torna a salire', ostile:'Un barile su dieci sparisce: il furto record'},
 ];
 
@@ -13324,6 +13538,13 @@ const SNODI_STORICI = {
   banlieue05:  { storico:['emergenza'], conforme:'sulle banlieue del 2005', diverge:{ 'piano':'Alle banlieue del 2005 ha risposto con un piano per i quartieri, senza stato d’emergenza.', 'entrambi':'Alle banlieue del 2005 ha risposto col coprifuoco e con un piano per i quartieri insieme.' } },
   crisi08fr:   { storico:['rilancio'], conforme:'sulla crisi del 2008', diverge:{ 'rigore':'Alla crisi del 2008 ha risposto col rigore, e la disoccupazione è salita per tre anni.', 'banche':'Nella crisi del 2008 ha salvato le banche, e basta.' } },
   crisi08frOpp:{ storico:[], conforme:'sulla crisi del 2008, dall’opposizione', diverge:{ 'censura':'Contro il piano per la crisi del 2008 ha presentato la censura in aula.', 'tavolo':'Sul piano per la crisi del 2008 ha scelto il tavolo e ha trattato.', 'sciopero':'Contro il piano per la crisi del 2008 è sceso in piazza.' } },
+  /* L109-2 · i quattro snodi del decennio tedesco '50 e le due versioni dall'aula (frasi di Code, sul modello francese). */
+  notaStalin52: { storico:['occidente'], conforme:'sulla Nota di Mosca del 1952', diverge:{ 'elezioni':'Alla Nota di Mosca del 1952 ha risposto chiedendo elezioni libere sotto controllo internazionale.', 'trattativa':'Sulla Nota di Mosca del 1952 ha trattato davvero: l’unità in cambio della neutralità.' } },
+  riarmo55:     { storico:['nato'], conforme:'sul riarmo del 1955', diverge:{ 'europeo':'Nel 1955 ha voluto solo un esercito europeo, e ha aspettato Parigi.', 'neutrale':'Nel 1955 ha proposto la neutralità armata, fuori dall’Alleanza.' } },
+  riarmo55Opp:  { storico:['piazza'], conforme:'sul riarmo del 1955, dall’opposizione', diverge:{ 'controllo':'Nel 1955 ha votato il riarmo in cambio del controllo del Parlamento sull’esercito.', 'astensione':'Nel 1955 ha scelto l’astensione sul riarmo.' } },
+  pensioni57:   { storico:['dinamiche'], conforme:'sulle pensioni del 1957', diverge:{ 'aumento':'Nel 1957 ha aumentato le pensioni una volta sola, senza legarle ai salari.', 'fondo':'Nel 1957 ha scelto un fondo a capitalizzazione per le pensioni.' } },
+  atomica58:    { storico:['si'], conforme:'sulle armi nucleari del 1958', diverge:{ 'no':'Nel 1958 ha rifiutato le armi nucleari per l’esercito.', 'rinvio':'Nel 1958 ha rinviato la questione delle armi nucleari.' } },
+  atomica58Opp: { storico:['piazza'], conforme:'sulle armi nucleari del 1958, dall’opposizione', diverge:{ 'referendum':'Nel 1958 ha chiesto un referendum nei Länder sulle armi nucleari.', 'silenzio':'Nel 1958 ha taciuto sulle armi nucleari.' } },
 };
 
 /* ==============================================================================================================
@@ -13774,6 +13995,9 @@ const RIMPASTO_EV = {
         S.log.unshift({t:T('La maggioranza'),x:T('Nessun rimpasto: il governo resta com\'è, con i numeri che ha.')}); } },
   ],
 };
+/* L111-1 · la stessa cerimonia quando il partner è un alleato di RISERVA sotto la sfiducia costruttiva (il 1966 tedesco): cambia
+   solo il titolo, il resto è il rimpasto com'è. La sceglie genAgenda con `rimpastoGrandeCoalizione()`. */
+const GRANDE_COALIZIONE_EV = Object.assign({}, RIMPASTO_EV, { t:'La grande coalizione' });
 
 /* ==============================================================================================================
    L49-1 · IL DECENNIO INGLESE — LO SNODO SUEZ (scheda §A) E LA CORSA ALLA STERLINA (scheda §B).
@@ -15077,4 +15301,133 @@ const SFONDO_DE_OVEST = 'M67.6,81.7 L67.4,82.9 L69.1,86.2 L72.1,88.6 L70.6,91.3 
   ];
   SCENARI.de1950.territori = T.map(function(x){ return x[0]; });
   SCENARI.de1950.mappa = { viewBox:MAPPA_DE_LAND.viewBox, sfondo:SFONDO_DE_OVEST, aree:T.map(function(x){ return x[1]; }) };
+})();
+
+/* ==============================================================================================================
+   L109-2 · IL DECENNIO TEDESCO '50 — I QUATTRO SNODI (scheda PRESET-GERMANIA-1950 §I-A). La prima porta della linea tedesca.
+   Valute del livello 3 (Cancelliere, parlamentare). Flag nuovi cercati in tutto S prima di usarli: notaStalin52, riarmo55,
+   riarmo55Opp, pensioni57, atomica58, atomica58Opp, riparazioni52 — zero occorrenze al 26/9.
+   ⚑ CHI RICEVE CHE COSA (gate in game.js): S1 marzo 1952, S2 febbraio 1955, S3 gennaio 1957, S4 marzo 1958 — finestre di tre
+   mesi, al governo. Dall'aula RIARMO55_OPP_EV e ATOMICA58_OPP_EV a chi è all'opposizione (la scheda dice «SPD all'opposizione»:
+   il gate è di chiunque sia all'opposizione, perché il testo parla dell'opposizione e non di un partito — dichiarato).
+   Nessuno dei mesi è di un pilastro (17 giugno 1953, Budapest novembre 1956, lo Sputnik ottobre 1957).
+   ============================================================================================================== */
+/* Il moltiplicatore dei gruppi è di questa porta. ⚑ LA SWEEP (L109-2, 26/9, banco onesto, CDU al governo, 20 semi, 144 mesi, gruppo peggiore):
+   fondo ×0 41,0 (sd 3,8) · ×1 0,05 sd · ×2 0,20 sd · ×3 0,57 sd · **×4 1,67 sd, zero crisi** (adottato: il primo dentro la banda 1,5-4 con
+   zero crisi). Col miracolo (crescitaTetto 10) la porta è benevola: il fondo è alto, e serve ×4 per farsi sentire. */
+let DE50_GRUPPI = 4;   // let e non const: la sweep di .claude/misura-de1950-contenuto.js lo varia sul banco
+function gdDe50(g, n){ gd(g, Math.round(n*DE50_GRUPPI)); }
+function fidDe50(n){ fidFr60(n); }   // la fiducia non ha moltiplicatore: è la stessa leva del '60 francese
+function baseDe50(n){
+  var P=(PAESE && PAESE.partiti) ? PAESE.partiti.filter(function(x){ return x.id===S.partito; })[0] : null;
+  if(!P || !P.base) return;
+  Object.keys(P.base).forEach(function(g){ gd(g, Math.round(n*P.base[g]*DE50_GRUPPI)); });
+}
+const NOTASTALIN52_EV = {
+  id:'snodo_notastalin52', snodo:true, era:'de1950', kick:'La Germania', tono:'grave',
+  t:'La Nota di Mosca',
+  text:'Mosca scrive alle tre potenze occidentali: una Germania unita, con un suo esercito, libere elezioni in tutto il paese e truppe straniere fuori — a una condizione, che non entri in nessuna alleanza. Gli americani la chiamano una trappola. A Est vivono diciotto milioni di tedeschi.',
+  ch:[
+    { l:'Nessuna trattativa: prima l\'Occidente', e:'La storia · la Nota resta senza risposta vera · l\'Ovest si lega all\'Ovest, e l\'unità diventa una promessa per un\'altra generazione',
+      f:function(){ S.notaStalin52='occidente'; repd(4); gdDe50('imprenditori',2); gdDe50('cetomedio',1); gdDe50('lavoratori',-2); gdDe50('pensionati',-1);
+        S.log.unshift({t:T('La Germania'),x:T('Ha respinto la Nota di Mosca: prima l\'Occidente.')}); } },
+    { l:'Prima elezioni libere controllate dall\'ONU, poi si vede', e:'La risposta che mette alla prova Mosca · Mosca non risponde, e tu non hai chiuso la porta',
+      f:function(){ S.notaStalin52='elezioni'; repd(1); gdDe50('pensionati',2); gdDe50('lavoratori',1);
+        S.log.unshift({t:T('La Germania'),x:T('Ha risposto alla Nota di Mosca chiedendo elezioni libere sotto controllo internazionale.')}); } },
+    { l:'Trattare davvero: l\'unità val bene la neutralità', e:'Washington si raffredda, Parigi si allarma · e a Est qualcuno ricomincia a sperare',
+      f:function(){ S.notaStalin52='trattativa'; repd(-6); gdDe50('lavoratori',3); gdDe50('pensionati',3); gdDe50('imprenditori',-4); baseDe50(-3); fidDe50(-2);
+        S.log.unshift({t:T('La Germania'),x:T('Ha trattato con Mosca sull\'unità in cambio della neutralità.')}); } },
+  ],
+};
+const RIARMO55_EV = {
+  id:'snodo_riarmo55', snodo:true, era:'de1950', kick:'La difesa', tono:'grave',
+  t:'Il riarmo',
+  text:'Dieci anni dopo la guerra, gli alleati chiedono al paese un esercito: dodici divisioni, dentro l\'Alleanza atlantica, in cambio della piena sovranità. Parigi ha appena bocciato l\'esercito europeo. Nelle piazze il movimento «Senza di me»; in aula, i due terzi servono per cambiare la Costituzione.',
+  ch:[
+    { l:'Nell\'Alleanza, con un esercito proprio', e:'La storia · la sovranità a maggio, i primi soldati a novembre · e mezzo paese che non voleva più vedere un\'uniforme',
+      f:function(){ S.riarmo55='nato'; repd(5); gdDe50('imprenditori',2); gdDe50('cetomedio',1); gdDe50('giovani',-5); gdDe50('pensionati',-2);
+        S.log.unshift({t:T('La difesa'),x:T('Ha portato il paese nell\'Alleanza atlantica con un esercito proprio.')}); } },
+    { l:'Solo un esercito europeo, o niente', e:'Si aspetta Parigi · la sovranità aspetta con lei',
+      f:function(){ S.riarmo55='europeo'; repd(-2); gdDe50('giovani',2); fidDe50(-1);
+        S.log.unshift({t:T('La difesa'),x:T('Ha chiesto un esercito solo europeo, e ha aspettato.')}); } },
+    { l:'Neutralità armata: un esercito, nessuna alleanza', e:'Una via di mezzo che nessuno ti ha chiesto · Washington non la firma',
+      f:function(){ S.riarmo55='neutrale'; repd(-6); gdDe50('giovani',1); gdDe50('pensionati',2); gdDe50('imprenditori',-3);
+        S.log.unshift({t:T('La difesa'),x:T('Ha proposto la neutralità armata.')}); } },
+  ],
+};
+/* S2 dall'aula (scheda: il voto contro e la piazza, storico · il voto in cambio del controllo del Parlamento · l'astensione);
+   effetti sul modello di REF72_OPP_EV (base ±3, ceto medio ∓2). Etichette e registro di Code. */
+const RIARMO55_OPP_EV = {
+  id:'snodo_riarmo55_opp', snodo:true, era:'de1950', kick:'La difesa', tono:'grave',
+  t:'Il riarmo, dall\'aula',
+  text:'Il governo porta in aula l\'esercito e l\'ingresso nell\'Alleanza. L\'opposizione può combatterlo in piazza, votarlo in cambio di un controllo del Parlamento sulle forze armate, o lasciarlo passare senza la sua firma.',
+  ch:[
+    { l:'Contro, in aula e in piazza', e:'La storia · la tua base con te, il ceto medio no · il riarmo passa lo stesso',
+      f:function(){ S.riarmo55Opp='piazza'; baseDe50(3); gdDe50('cetomedio',-2);
+        S.log.unshift({t:T('La difesa'),x:T('Ha combattuto il riarmo in aula e in piazza.')}); } },
+    { l:'Sì, in cambio del controllo del Parlamento', e:'Un commissario del Parlamento sulle forze armate · la tua base non capisce, il ceto medio sì',
+      f:function(){ S.riarmo55Opp='controllo'; baseDe50(-3); gdDe50('cetomedio',2);
+        S.log.unshift({t:T('La difesa'),x:T('Ha votato il riarmo in cambio del controllo del Parlamento sull\'esercito.')}); } },
+    { l:'Astensione: che passi senza la nostra firma', e:'Né contro né con · e nessuno ti ringrazia',
+      f:function(){ S.riarmo55Opp='astensione'; baseDe50(-1); gdDe50('cetomedio',1);
+        S.log.unshift({t:T('La difesa'),x:T('Ha scelto l\'astensione sul riarmo.')}); } },
+  ],
+};
+const PENSIONI57_EV = {
+  id:'snodo_pensioni57', snodo:true, era:'de1950', kick:'La previdenza', tono:'grave',
+  t:'Le pensioni che crescono',
+  text:'I salari sono raddoppiati in otto anni e le pensioni no: un vecchio vive con un terzo di quello che guadagnava. La riforma le lega ai salari, ogni anno, per sempre. Il ministro delle finanze dice che la pagheranno i nipoti; le elezioni sono fra otto mesi.',
+  ch:[
+    { l:'Pensioni legate ai salari', e:'La storia · le pensioni crescono del sessanta per cento in un giorno · i pensionati non lo dimenticheranno alle urne', costo:{debito:1},
+      f:function(){ S.pensioni57='dinamiche'; S.ind.debt+=1; gdDe50('pensionati',8); gdDe50('lavoratori',2); gdDe50('imprenditori',-2); fidDe50(-1);
+        S.log.unshift({t:T('La previdenza'),x:T('Ha legato le pensioni ai salari nel 1957.')}); } },
+    { l:'Un aumento una volta sola', e:'Più soldi subito, nessun automatismo · e fra cinque anni si ricomincia',
+      f:function(){ S.pensioni57='aumento'; gdDe50('pensionati',3); fidDe50(1);
+        S.log.unshift({t:T('La previdenza'),x:T('Ha aumentato le pensioni una volta sola.')}); } },
+    { l:'Un fondo a capitalizzazione', e:'I conti tengono per sempre · i vecchi di oggi aspettano quelli di domani',
+      f:function(){ S.pensioni57='fondo'; gdDe50('pensionati',-5); gdDe50('imprenditori',3); fidDe50(2);
+        S.log.unshift({t:T('La previdenza'),x:T('Ha scelto un fondo a capitalizzazione per le pensioni.')}); } },
+  ],
+};
+const ATOMICA58_EV = {
+  id:'snodo_atomica58', snodo:true, era:'de1950', kick:'La difesa', tono:'grave',
+  t:'L\'atomica per l\'esercito',
+  text:'Gli alleati offrono all\'esercito armi nucleari tattiche, con la chiave in mano americana. Diciotto fisici hanno firmato un appello contro; le piazze si riempiono sotto lo slogan «Lotta contro la morte atomica». In aula il voto è a marzo.',
+  ch:[
+    { l:'Sì, sotto controllo alleato', e:'La storia · l\'aula vota sì dopo quattro giorni di dibattito · le piazze non si svuotano per un anno',
+      f:function(){ S.atomica58='si'; repd(3); gdDe50('cetomedio',1); gdDe50('giovani',-5); gdDe50('cattolici',-2); stampad(-2);
+        S.log.unshift({t:T('La difesa'),x:T('Ha accettato le armi nucleari tattiche per l\'esercito.')}); } },
+    { l:'No: e lo si dice agli alleati', e:'Nessuna testata · gli alleati si domandano che alleato sei',
+      f:function(){ S.atomica58='no'; repd(-5); gdDe50('giovani',4); gdDe50('cattolici',2); baseDe50(-2);
+        S.log.unshift({t:T('La difesa'),x:T('Ha rifiutato le armi nucleari per l\'esercito.')}); } },
+    { l:'Rinviare: se ne riparla fra due anni', e:'Nessun voto · e il tema resta nelle piazze',
+      f:function(){ S.atomica58='rinvio'; repd(-1); fidDe50(-1);
+        S.log.unshift({t:T('La difesa'),x:T('Ha rinviato la questione delle armi nucleari.')}); } },
+  ],
+};
+/* S4 dall'aula (scheda: la campagna nelle piazze, storico · un referendum nei Länder, che la Corte vietò nel 1958 · il silenzio);
+   effetti come l'aula di S2. Testo, etichette e registro di Code. */
+const ATOMICA58_OPP_EV = {
+  id:'snodo_atomica58_opp', snodo:true, era:'de1950', kick:'La difesa', tono:'grave',
+  t:'La morte atomica, dall\'aula',
+  text:'Il governo porta in aula le armi nucleari per l\'esercito. Fuori, sindacati, chiese e professori riempiono le piazze. L\'opposizione può guidare la campagna, chiedere che decidano gli elettori con un referendum nei Länder, o lasciare che il voto passi in silenzio.',
+  ch:[
+    { l:'La campagna nelle piazze', e:'La storia · «Lotta contro la morte atomica» · la tua base con te, il ceto medio no',
+      f:function(){ S.atomica58Opp='piazza'; baseDe50(3); gdDe50('cetomedio',-2);
+        S.log.unshift({t:T('La difesa'),x:T('Ha guidato la campagna contro le armi nucleari.')}); } },
+    { l:'Un referendum nei Länder', e:'Lo chiedi ai Länder che governi · la Corte costituzionale lo vieta, e hai perso un anno',
+      f:function(){ S.atomica58Opp='referendum'; baseDe50(-3); gdDe50('cetomedio',2);
+        S.log.unshift({t:T('La difesa'),x:T('Ha chiesto un referendum nei Länder sulle armi nucleari.')}); } },
+    { l:'Il silenzio', e:'Il voto passa · e la piazza si cerca un altro partito',
+      f:function(){ S.atomica58Opp='silenzio'; baseDe50(-1); gdDe50('cetomedio',1);
+        S.log.unshift({t:T('La difesa'),x:T('Ha taciuto sulle armi nucleari per l\'esercito.')}); } },
+  ],
+};
+
+/* L110-2 · I TERRITORI E LA MAPPA DI de1960: quelli di de1950 più la Saar in coda (è entrata alla tappa del 1957/1), con lo stesso
+   sfondo dell'Ovest. Lo stesso ordine di de1950, così gli indici delle due porte si corrispondono. */
+(function(){
+  var s=SCENARI.de1950;
+  SCENARI.de1960.territori = s.territori.concat([ { nome:'la Saar', nomeEn:'Saarland', tipo:'regione', carica:'Ministro presidente', lean:1 } ]);
+  SCENARI.de1960.mappa = { viewBox:s.mappa.viewBox, sfondo:s.mappa.sfondo, aree:s.mappa.aree.concat([ MAPPA_DE_LAND.aree.saar ]) };
 })();
