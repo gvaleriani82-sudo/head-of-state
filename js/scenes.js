@@ -100,8 +100,11 @@ const SCENES = {
    anima (l'hero fa eccezione: `home-hero`), perché il suo primo fotogramma è quell'immagine e il passaggio non
    deve vedersi. La lista è una promessa sulla cartella, come AUDIO_PRESENTI: il gioco chiede SOLO questi file
    (zero 404), e `.claude/verifica-asset.js` tiene allineate lista e cartella e pretende che ogni nome abbia la
-   sua scena. Contratto e condizioni (movimento «pieno», niente risparmio dati) in DESIGN-MOVIMENTO.md e ui.js. */
-const VIDEO_PRESENTI = ['home-hero'];
+   sua scena. Contratto e condizioni (movimento «pieno», niente risparmio dati) in DESIGN-MOVIMENTO.md e ui.js.
+   ⚑ L119-1 (27/9): le clip arrivano da Gemini, ripulite da Cowork in `arte-sorgente/video-gemini/pronte/` (960×540, 10 s, muto);
+   da questo lotto OGNI TURNO di Code porta quelle nuove qui e in cartella. `home-hero` è ora quella di Gemini (al posto di
+   quella di ElevenLabs, decisione di Giacomo). */
+const VIDEO_PRESENTI = ['home-hero', 'partito-base'];
 
 /* ===== L113-2 — LE PEDINE DEL TAVOLO (`assets/tavolo/<nome>.webp`, 256 × 256 con trasparenza, ≤ 60 KB, appoggiate in
    basso al centro). Terza lista-promessa, stesso contratto di AUDIO_PRESENTI e VIDEO_PRESENTI: il tavolo disegna SOLO

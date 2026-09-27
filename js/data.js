@@ -3657,7 +3657,7 @@ const F1_TELEFONATE = [
      se non ce n'è, la `cond` le tiene fuori. Valute: `intesaMuovi` + credibilità/correnti, mai `gd()`. */
   { id:'tel_sponda', chiamante:'Il segretario di un partito vicino', registro:'grave', cond:function(){ return !!S.opposizione && !!unTavolo(); },
     t:'La sponda inattesa', text:'«Domani, se voi vi astenete, noi votiamo contro. Il governo va sotto. Ci sta?»',
-    ch:[ { l:'Accetti la manovra d\'aula', e:'Il governo incassa il colpo; l\'intesa cresce, e ti sei sporcato le mani', f:function(){ intesaMuovi(unTavolo(), 8); spregiudicata(2); } },
+    ch:[ { l:'Accetti la manovra d\'aula', e:'Il governo incassa il colpo; l\'intesa cresce, e le tue mani non sono più pulite', f:function(){ intesaMuovi(unTavolo(), 8); spregiudicata(2); } },
          { l:'Rifiuti il gioco d\'aula', e:'Non fai sgambetti; lui capisce che con te si tratta alla luce', f:function(){ credd(2); } } ],
     raffredda:function(){ var t=unTavolo(); if(t) intesaMuovi(t,-3); }, squilloTxt:'Il segretario ha atteso invano: domani voterà da solo.' },
   { id:'tel_smentita', chiamante:'Il segretario di un partito vicino', registro:'grave', cond:function(){ return !!S.opposizione && !!unTavolo() && intesaDi(unTavolo())>=10; },
@@ -3720,7 +3720,7 @@ const F1_TELEFONATE = [
     raffredda:function(){ repd(-1); }, squilloTxt:'L\'avversario non richiamerà due volte.' },
 
   { id:'tel_amico', chiamante:'Un vecchio amico', registro:'leggero',
-    t:'Un vecchio amico', text:'«Sono in città per due giorni — un caffè lo troviamo, o sei diventato irraggiungibile?»',
+    t:'Un vecchio amico', text:'«Sono in città per due giorni — un caffè lo troviamo, o ormai sei irraggiungibile?»',
     ch:[ { l:'Trovare il tempo', e:'Un\'ora rubata, senza calcoli', f:function(){} },
          { l:'Rimandare a presto', e:'Capirà — nessuna colpa', f:function(){} } ],
     raffredda:null, squilloTxt:'L\'amico capisce e riattacca: ci si rivede.' },
@@ -4035,7 +4035,7 @@ const ARCHI_DEF=[
    ]},
    strappo:{kick:'Istituzioni', t:'Lo strappo con %FILO', text:'%ECO lo scontro coi giudici diventa strappo istituzionale: %FILO denuncia il rischio per l\'equilibrio dei poteri.', ch:[
      {l:'Vai avanti comunque, è la volontà popolare', e:'Sfida aperta; un azzardo che ti espone', goto:null, fatto:'Lo strappo istituzionale con %FILO e l\'Alta Corte.', epi:'Hai consumato uno strappo istituzionale sfidando %FILO.', f:()=>{repd(-5); if(S.ind.fiducia!=null) S.ind.fiducia=clamp(S.ind.fiducia-4,0,100); espoSale(8); gd('cetomedio',-1);}},
-     {l:'All\'ultimo, rientri nei binari', e:'Eviti lo strappo definitivo; ci perdi la faccia', goto:null, fatto:'Lo scontro con %FILO rientrato sul filo di lana.', epi:'Hai sfiorato lo strappo con %FILO, poi sei rientrato nei binari.', f:()=>{repd(-1);}},
+     {l:'All\'ultimo, rientri nei binari', e:'Eviti lo strappo definitivo; ci perdi la faccia', goto:null, fatto:'Lo scontro con %FILO rientrato sul filo di lana.', epi:'Hai sfiorato lo strappo con %FILO, poi hai ripreso i binari.', f:()=>{repd(-1);}},
    ]},
    composizione:{kick:'Istituzioni', t:'La composizione con %FILO', text:'%ECO si trova un punto d\'equilibrio: %FILO riconosce la tua disponibilità, la riforma regge nelle forme corrette.', ch:[
      {l:'Una riforma solida, rispettosa della Corte', e:'Norma che dura; la base voleva di più', goto:null, fatto:'La riforma riscritta a regola d\'arte dopo i rilievi di %FILO.', epi:'Hai riscritto la riforma rispettando %FILO e la Corte.', f:()=>{repd(3); gd('cetomedio',1);}},
@@ -4066,7 +4066,7 @@ const ARCHI_DEF=[
    start:{kick:'Famiglia', t:'Tuo figlio nei guai', text:'%FIGLIO finisce in una vicenda seria: la stampa annusa, e il tuo cognome è sulla bocca di tutti. Da padre, prima ancora che da capo del governo, devi decidere.', ch:[
      {l:'Muovi le tue conoscenze per proteggerlo', e:'Lo aiuti; ma un favore così si vede, e si paga', goto:null, fatto:'Hai protetto tuo figlio nei guai, esponendoti.', epi:'Quando tuo figlio sbagliò, lo proteggesti — e qualcuno se lo ricordò.', f:()=>{espoSale(8); gd('cattolici',-2);}},
      {l:'Che risponda da sé, davanti alla legge', e:'Scelta dolorosa; la coerenza, però, si nota', goto:null, fatto:'Hai lasciato che tuo figlio rispondesse da sé.', epi:'Nemmeno per un figlio piegasti la legge.', f:()=>{gd('cattolici',3); gd('cetomedio',2); if(S.integrita!=null) S.integrita=clamp(S.integrita+3,0,100);}},
-     {l:'Stagli vicino, tieni tutto in privato', e:'Un mese di pensieri altrove; nessuna scorciatoia', goto:null, fatto:'Sei stato vicino a tuo figlio, lontano dai riflettori.', epi:'Restasti accanto a tuo figlio, senza clamore.', f:()=>{if(S.ind.consenso!=null) S.ind.consenso=clamp(S.ind.consenso-1,0,100);}},
+     {l:'Stagli vicino, tieni tutto in privato', e:'Un mese di pensieri altrove; nessuna scorciatoia', goto:null, fatto:'Accanto a tuo figlio, lontano dai riflettori.', epi:'Restasti accanto a tuo figlio, senza clamore.', f:()=>{if(S.ind.consenso!=null) S.ind.consenso=clamp(S.ind.consenso-1,0,100);}},
    ]},
   }},
  /* il genitore che invecchia (lotto VITA PERSONALE): generazionale, SOBRIO. Macchina fase-A col genitore come
@@ -4398,7 +4398,7 @@ const EVENTI_PERSONALI=[
   cond:()=>famigliaPresente() && S.famiglia.serenita!=null && S.famiglia.serenita<35,
   kick:'Vita privata', t:'La famiglia ti presenta il conto',
   text:'Le assenze, le promesse rimandate, le cene saltate: a casa si è arrivati a un punto di rottura. Stavolta non puoi rimandare.', ch:[
-   {l:'Disdici tutto per una settimana', e:'Ricuci lo strappo; salti gli impegni di giorni', fatto:'Ti sei fermato per la famiglia, sacrificando un po\' di slancio.', f:()=>{ serenitaMuovi(35); bioConta('affetti'); if(S.visibilita!=null) S.visibilita=clamp(S.visibilita-3,0,100); if(S.ind.consenso!=null) S.ind.consenso=clamp(S.ind.consenso-1,0,100); }},
+   {l:'Disdici tutto per una settimana', e:'Ricuci lo strappo; salti gli impegni di giorni', fatto:'Una settimana ferma per la famiglia, a costo di un po\' di slancio.', f:()=>{ serenitaMuovi(35); bioConta('affetti'); if(S.visibilita!=null) S.visibilita=clamp(S.visibilita-3,0,100); if(S.ind.consenso!=null) S.ind.consenso=clamp(S.ind.consenso-1,0,100); }},
    {l:'Il potere non aspetta', e:'Vai avanti; a casa resta una ferita aperta — e tornerà', fatto:'Hai messo il potere prima della famiglia, di nuovo.', f:()=>{ serenitaMuovi(6); bioConta('affettiSacrificati'); if(S.ind.consenso!=null) S.ind.consenso=clamp(S.ind.consenso-2,0,100); }},
   ]},
  /* carriera/affetti: il dilemma base, driver della serenità */
@@ -4468,7 +4468,7 @@ const EVENTI_PERSONALI=[
  {id:'matrimonio', tono:'florido', tipo:'lieto', p:0.04, cond:()=>{ var eta=S.eta!=null?S.eta:52; return S.famiglia && !S.famiglia.coniuge && eta<60; },
   kick:'Vita privata', t:'Le nozze',
   text:'Dopo mesi lontano dai riflettori, una notizia lieve: ti sposi. Il paese, per un giorno, sorride con te.', ch:[
-   {l:'Un giorno per te, e per il paese', e:'Un raro momento di calore pubblico', fatto:'Ti sei sposato durante il mandato.', f:()=>{ if(!S.famiglia) S.famiglia={coniuge:null,figli:[]}; if(!S.famiglia.coniuge){ const gC=(S.personaggio&&S.personaggio.genere==='f')?'m':'f'; S.famiglia.coniuge={nome:nomeGenere(gC), genere:gC}; } if(S.famiglia.serenita!=null) S.famiglia.serenita=clamp(S.famiglia.serenita+10,0,100); if(S.ind.consenso!=null) S.ind.consenso=clamp(S.ind.consenso+2,0,100); stampad(3); }},
+   {l:'Un giorno per te, e per il paese', e:'Un raro momento di calore pubblico', fatto:'Il matrimonio, durante il mandato.', f:()=>{ if(!S.famiglia) S.famiglia={coniuge:null,figli:[]}; if(!S.famiglia.coniuge){ const gC=(S.personaggio&&S.personaggio.genere==='f')?'m':'f'; S.famiglia.coniuge={nome:nomeGenere(gC), genere:gC}; } if(S.famiglia.serenita!=null) S.famiglia.serenita=clamp(S.famiglia.serenita+10,0,100); if(S.ind.consenso!=null) S.ind.consenso=clamp(S.ind.consenso+2,0,100); stampad(3); }},
   ]},
  {id:'nascita', tono:'florido', tipo:'lieto', p:0.04, cond:()=>{ var eta=S.eta!=null?S.eta:52; return S.famiglia && S.famiglia.coniuge && eta<48; },
   kick:'Vita privata', t:'Una nascita in famiglia',
@@ -4523,7 +4523,7 @@ const FAMIGLIA_VIVA=[
  {id:'fv_domenica', tipo:'buono', era:'universale', cond:()=>famigliaPresente(),
   kick:'Vita privata', t:'La domenica in famiglia',
   text:'Una domenica come tante e come nessuna: la tavola apparecchiata, i tuoi intorno, il tempo che per una volta non corre.', ch:[
-   {l:'Il pranzo lungo, senza orologi', e:'Nessuna fretta, per una volta', fatto:'Ti sei concesso una domenica lenta coi tuoi.', f:()=>{ serenitaMuovi(2); }},
+   {l:'Il pranzo lungo, senza orologi', e:'Nessuna fretta, per una volta', fatto:'Una domenica lenta coi tuoi, per una volta.', f:()=>{ serenitaMuovi(2); }},
    {l:'Ci sei per il caffè, poi il dovere', e:'Un\'ora, ma tua', fatto:'Hai preso il caffè della domenica coi tuoi.', f:()=>{ serenitaMuovi(1); }},
   ]},
  {id:'fv_ritorno', tipo:'buono', era:'universale', cond:()=>haFiglioInEta(19,55),
@@ -12665,7 +12665,7 @@ const OPPOSIZIONE_MEDIA = [
   ]},
   { id:'om_crepa', kick:'Maggioranza', t:'La crepa nella maggioranza',
     text:'Due partiti di governo litigano in pubblico su una nomina. Da fuori si vede la crepa; da dentro si vede che nessuno può cedere.', ch:[
-    { l:'Infili il cuneo: un\'aula, un voto, e li costringi a scegliere', e:'La crepa si allarga oggi; ti sei mostrato regista', vis:4, cred:-2, gov:-4, rischio:4 },
+    { l:'Infili il cuneo: un\'aula, un voto, e li costringi a scegliere', e:'La crepa si allarga oggi; la regia si vede, ed è tua', vis:4, cred:-2, gov:-4, rischio:4 },
     { l:'Lasci che si logorino da soli', e:'Più lento; nessuna impronta tua sul coltello', cred:2, gov:-2 },
   ]},
   { id:'om_cronaca', kick:'Emergenza', t:'Il fatto di cronaca',
@@ -12851,7 +12851,7 @@ const MOSSE_CHIUSURA=[
   { l:'Chiusura da statista', e:'Toni alti e sobri: parli al paese intero', pleases:'tecnico', f:()=>{ gd('cetomedio',1); } },
   { l:'Ultimo giro porta a porta', e:'Tra la gente, senza clamore, fino all\'ultimo voto', pleases:'progressista', f:()=>{ gd('lavoratori',1); } },
   /* Cantiere C — chiusure SBLOCCABILI dalla condotta della campagna (post-congelamento: pesano su tono/gruppi/bio, mai sul verdetto) */
-  { l:'Il bagno di folla', e:'Sei stato nelle piazze per mesi: l\'ultima è un\'onda', pleases:'populista', cond:()=>S.campNaz&&S.campNaz.piazza>=2, f:()=>{ gd('lavoratori',2); gd('giovani',2); } },
+  { l:'Il bagno di folla', e:'Mesi di piazze: l\'ultima è un\'onda', pleases:'populista', cond:()=>S.campNaz&&S.campNaz.piazza>=2, f:()=>{ gd('lavoratori',2); gd('giovani',2); } },
   { l:'L\'uomo di parola', e:'Hai mantenuto la promessa: chiudi ricordandolo', pleases:'tecnico', cond:()=>S.campNaz&&S.campNaz.promMantenuta, f:()=>{ allG(1); stampad(3); } },
 ];
 
@@ -13447,7 +13447,7 @@ const FIUGGI_EV = {
       f:function(){ S.fiuggi='fiamma';
         scissioneDividi('La Fiamma', 0.14, {id:'i90_an', nome:'Alleanza Nazionale', orientamento:'destra', base:{cetomedio:0.5, pensionati:0.5}, asse:1, gruppoUE:'conservatori'}, 2);
         gd('pensionati',2); gd('cetomedio',-3); gd('imprenditori',-2); stampad(-3);
-        S.log.unshift({t:T('Fiuggi'),x:T('Hai tenuto la fiamma: il grosso del partito se n\'è andato a fondare la destra nuova, tu sei rimasto con l\'identità.')}); } },
+        S.log.unshift({t:T('Fiuggi'),x:T('Hai tenuto la fiamma: il grosso del partito se n\'è andato a fondare la destra nuova, a te è rimasta l\'identità.')}); } },
   ],
 };
 
@@ -13519,7 +13519,7 @@ const MINATORI_EV = {
         S.log.unshift({t:T('Chi comanda'),x:T('Tre giorni di lavoro a settimana: il paese regge, e brontola.')}); } },
     { l:'Vai al voto e chiedi chi comanda', e:'La domanda alla nazione · sembra avere una risposta sola, e non è così',
       f:function(){ S.minatori='alvoto'; gd('cetomedio',-3); gd('lavoratori',-5);
-        S.log.unshift({t:T('Chi comanda'),x:T('Andato al voto chiedendo chi comanda in questo paese.')});
+        S.log.unshift({t:T('Chi comanda'),x:T('Ha chiamato il paese al voto chiedendo chi comanda.')});
         if(typeof azioneScioglimentoForzato==='function') azioneScioglimentoForzato(); } },
   ],
 };
@@ -13535,7 +13535,7 @@ const MINATORI_DUE_EV = {
         S.log.unshift({t:T('Chi comanda'),x:T('Tenuto duro fino alla fine, col paese a tre giorni.')}); } },
     { l:'Ora sì, al voto', e:'La domanda alla nazione, con due mesi di buio alle spalle',
       f:function(){ S.minatori='alvoto_tardi'; gd('cetomedio',-5); gd('lavoratori',-6); stampad(-3);
-        S.log.unshift({t:T('Chi comanda'),x:T('Andato al voto chiedendo chi comanda in questo paese.')});
+        S.log.unshift({t:T('Chi comanda'),x:T('Ha chiamato il paese al voto chiedendo chi comanda.')});
         if(typeof azioneScioglimentoForzato==='function') azioneScioglimentoForzato(); } },
   ],
 };
@@ -13645,7 +13645,7 @@ const SNODI_STORICI = {
   crolloPsi: { storico:['lume'], conforme:'sul crollo socialista', diverge:{ 'sinistra':'Il nome socialista si è spento e i tuoi hanno trovato casa a sinistra.', 'polo':'Il nome socialista si è spento e i tuoi sono andati nel nuovo polo.' } },
   fiuggi: { storico:['svolta'], conforme:'sulla svolta di Fiuggi', diverge:{ 'fiamma':'A Fiuggi la fiamma non si è toccata: la destra nuova non è nata.' } },
   porcellum: { storico:['riscritta'], conforme:'sulla legge elettorale del 2005', diverge:{ 'invariata':'La legge elettorale del 2005 non è mai stata scritta: si è votato con le regole del \'93.' } },
-  fusionePd: { storico:['dentro'], conforme:'sulla nascita del partito nuovo', diverge:{ 'fuori':'Il partito nuovo del centrosinistra è nato senza di te: sei rimasto fuori con la tua storia.' } },
+  fusionePd: { storico:['dentro'], conforme:'sulla nascita del partito nuovo', diverge:{ 'fuori':'Il partito nuovo del centrosinistra è nato senza di te: fuori, con la tua storia.' } },
   fusionePdl: { storico:['dentro'], conforme:'sul partito unico del centrodestra', diverge:{ 'fuori':'Il partito unico del centrodestra è nato senza di te: hai tenuto la tua tradizione fuori.' } },
   fuoriAula: { storico:['cartello'], conforme:'sulla corsa sotto la soglia', diverge:{ 'solo':'Sotto la soglia hai corso col tuo simbolo invece che nel cartello unitario.' } },
   crisi08: { storico:['rigore'], conforme:'sul conto della crisi del 2008', diverge:{ 'stimolo':'Nella crisi del 2008 hai speso per attutire il colpo, dove la storia tenne i conti.' } },
@@ -13653,7 +13653,7 @@ const SNODI_STORICI = {
   suez: { storico:['fermato'], conforme:'su Suez', diverge:{ 'trattato':'A Suez non si è andati: si è trattato, e la flotta è rimasta in porto.', 'fondo':'A Suez si è andati fino in fondo, contro la valuta e contro gli alleati.', 'intervento':'A Suez la spedizione è partita, e la storia si è fermata lì.', 'avanti':'A Suez si è andati avanti da soli quando Londra si è fermata, e il conto l\'ha pagato il franco.' } },
   sterlina60: { storico:['svalutata_tardi'], conforme:'sulla sterlina', diverge:{ 'svalutata_subito':'La sterlina è stata svalutata subito, senza tre anni di difesa a caro prezzo.', 'difesa_fino_in_fondo':'La sterlina è stata difesa fino in fondo, e il cambio ha tenuto dove la storia cedette.', 'difesa':'La sterlina è stata difesa, e la storia si è fermata lì.' } },
   europa60: { storico:['insiste'], conforme:'sulla domanda d\'ingresso in Europa', diverge:{ 'fuori':'L\'ingresso in Europa non è mai stato chiesto: il Commonwealth prima di tutto.', 'ritirata':'Dopo il no di Parigi la domanda d\'ingresso in Europa è stata ritirata con dignità, e non ripresentata.', 'chiesto':'L\'ingresso in Europa è stato chiesto, e la storia si è fermata lì.' } },
-  coscienza60: { storico:['sostiene'], conforme:'sulle riforme di coscienza', diverge:{ 'astenuto':'Sulle riforme di coscienza ti sei astenuto: il voto libero c\'è stato, la tua voce no.', 'rinviato':'Le riforme di coscienza sono state rinviate: nessun voto libero in quegli anni.' } },
+  coscienza60: { storico:['sostiene'], conforme:'sulle riforme di coscienza', diverge:{ 'astenuto':'Sulle riforme di coscienza hai scelto l\'astensione: il voto libero c\'è stato, la tua voce no.', 'rinviato':'Le riforme di coscienza sono state rinviate: nessun voto libero in quegli anni.' } },
   europa70: { storico:['confermato'], conforme:'sull\'Europa', diverge:{ 'fuori':'Il Regno Unito è rimasto fuori dal Mercato comune, e stavolta per scelta.', 'senza_referendum':'L\'ingresso in Europa non è mai stato confermato dal paese: ha deciso il Parlamento.', 'dentro':'Il Regno Unito è entrato nel Mercato comune, e la storia si è fermata lì.' } },
   minatori: { storico:['alvoto','alvoto_tardi'], conforme:'sui minatori del \'74', diverge:{ 'ceduto':'Ai minatori si è ceduto: le luci sono rimaste accese e il tetto salariale è diventato carta straccia.', 'resiste':'Ai minatori si è resistito, e la storia si è fermata lì.', 'tenuto':'Ai minatori si è tenuto duro fino alla fine, senza andare al voto: il paese ha lavorato tre giorni a settimana e non ha votato.' } },
   fmi: { storico:['accettato'], conforme:'sul prestito del Fondo monetario', diverge:{ 'rifiutato':'Il prestito del Fondo monetario è stato rifiutato: la sovranità non si è impegnata, e i conti nemmeno.' } },
@@ -13876,7 +13876,7 @@ const MERCOLEDI_EV = {
 const ANIMA_EV = {
   id:'snodo_anima', snodo:true, kick:'Il partito', tono:'grave',
   t:'L\'anima del partito',
-  text:'La clausola dello statuto promette da settant\'anni la proprietà comune dei mezzi di produzione. Nessuno la applica, tutti la difendono. Riscriverla dice al paese che sei cambiato; tenerla dice ai tuoi che sei rimasto.',
+  text:'La clausola dello statuto promette da settant\'anni la proprietà comune dei mezzi di produzione. Nessuno la applica, tutti la difendono. Riscriverla dice al paese che hai cambiato strada; tenerla dice ai tuoi che non l\'hai lasciata.',
   ch:[
     { l:'Riscrivi la clausola', e:'La storia · il centro ti guarda, la sinistra ti odia e resta',
       f:function(){ S.anima='riscritta'; if(typeof credd==='function') credd(8); if(typeof visd==='function') visd(6); corrented('militanti',-10); corrented('pontieri',8); gd('cetomedio',5); gd('imprenditori',3); gd('lavoratori',-3); S.log.unshift({t:T('Il partito'),x:T('La clausola riscritta: il partito dice al paese che è cambiato.')}); } },
@@ -14133,7 +14133,7 @@ const COSCIENZA60_EV = {
     { l:'Voto libero, e sostieni apertamente le riforme', e:'Il paese cambia · e nelle circoscrizioni tradizionali si paga',
       f:function(){ S.coscienza60='sostiene'; gd('giovani',12); gd('lavoratori',3); gd('cattolici',-12); gd('pensionati',-7);
         repd(4); stampad(4);
-        S.log.unshift({t:T('Il voto libero'),x:T('Le leggi passano col voto libero, e tu non ti sei nascosto.')}); } },
+        S.log.unshift({t:T('Il voto libero'),x:T('Le leggi passano col voto libero, e tu ci hai messo la faccia.')}); } },
     { l:'Voto libero, e tu ti astieni', e:'Non ti esponi · e non ti crede nessuno dei due',
       f:function(){ S.coscienza60='astenuto'; stampad(-5); tutteCorrenti(-4); gd('giovani',-3); gd('cattolici',-3);
         S.log.unshift({t:T('Il voto libero'),x:T('Voto libero, e il capo del governo non vota: se ne accorgono tutti.')}); } },
@@ -14238,7 +14238,7 @@ const SUEZ_OPP_EV = {
         S.log.unshift({t:T('Il Canale'),x:T('Combattuta Suez dall’aula, e la storia ti ha dato ragione.')}); } },
     { l:'Ti astieni: non ora, non coi soldati sul campo', e:'La strada di chi non vuole sbagliare · e non viene ricordato',
       f:function(){ S.suezOpp='astensione'; gd('lavoratori',-3); gd('giovani',-2); if(typeof credd==='function') credd(-1); corrented('militanti',-5);
-        S.log.unshift({t:T('Il Canale'),x:T('Astenuto su Suez: né con il governo né contro.')}); } }
+        S.log.unshift({t:T('Il Canale'),x:T('Astensione su Suez: né con il governo né contro.')}); } }
   ] };
 const COAL2010_OPP_EV = {
   id:'snodo_coal2010_opp', snodo:true, kick:'I cinque giorni', tono:'grave',
@@ -14253,7 +14253,7 @@ const COAL2010_OPP_EV = {
         S.log.unshift({t:T('I cinque giorni'),x:T('Ceduto il governo il giorno dopo il voto.')}); } },
     { l:'Resti in carica e sfidi la Camera a sfiduciarti', e:'Lecito e suicida · la Camera ti sfiducia entro un mese, e il vincitore governa con la legittimità che gli hai regalato',
       f:function(){ S.coal2010Opp='resistito'; if(typeof credd==='function') credd(-14); stampad(-10); gd('cetomedio',-6); gd('imprenditori',-4); corrented('fedelissimi',-8);
-        S.log.unshift({t:T('I cinque giorni'),x:T('Restato in carica senza maggioranza, e sfiduciato.')}); } }
+        S.log.unshift({t:T('I cinque giorni'),x:T('Ha tenuto la carica senza maggioranza, fino alla sfiducia.')}); } }
   ] };
 const SUEZ_EV = {
   id:'snodo_suez', snodo:true, kick:'Il Canale', tono:'grave',
@@ -14287,7 +14287,7 @@ const SUEZ_DUE_EV = {
         S.ind.debt+=4; if(S.gMod!=null) S.gMod-=0.5; if(S.uMod!=null) S.uMod+=0.4;
         gd('lavoratori',-13); gd('pensionati',-12); gd('cetomedio',-16); gd('imprenditori',-10); gd('giovani',-8); gd('cattolici',-8);
         S.sterlinaCrisi=(S.sterlinaCrisi||0)+1;
-        S.log.unshift({t:T('Il Canale'),x:T('Andato fino in fondo sul Canale, e il conto l\'ha pagato la sterlina.')}); } },
+        S.log.unshift({t:T('Il Canale'),x:T('Ha tirato dritto sul Canale, e il conto l\'ha pagato la sterlina.')}); } },
   ],
 };
 
@@ -14568,7 +14568,7 @@ const FUORI_AULA_EV = {
       f:function(){ S.fuoriAula='solo'; S.fuoriAulaEsito='fuori';
         if(typeof scissioneDisperdi==='function') scissioneDisperdi(null, 2);
         gd('lavoratori',3); gd('giovani',1); stampad(1); capd(3);
-        S.log.unshift({t:T('Sotto la soglia'),x:T('Sei corso col tuo simbolo e sei rimasto fuori: la storia è intatta, l\'aula è vuota.')}); } },
+        S.log.unshift({t:T('Sotto la soglia'),x:T('Hai corso col tuo simbolo e la soglia ti ha lasciato fuori: la storia è intatta, l\'aula è vuota.')}); } },
   ],
 };
 
@@ -15499,7 +15499,10 @@ const SFONDO_DE_OVEST = 'M67.6,81.7 L67.4,82.9 L69.1,86.2 L72.1,88.6 L70.6,91.3 
     [{nome:'Düsseldorf', nomeEn:'Düsseldorf', tipo:'città', carica:'Sindaco', lean:0}, null],
   ];
   SCENARI.de1950.territori = T.map(function(x){ return x[0]; });
-  SCENARI.de1950.mappa = { viewBox:MAPPA_DE_LAND.viewBox, sfondo:SFONDO_DE_OVEST, aree:T.map(function(x){ return x[1]; }) };
+  /* L117-1 · `oltre`: la terra oltre il confine (la RDT), disegnata dal tavolo sotto l'Ovest, più scura e spenta. NON è un'area
+     (niente tocco, niente dati) e NON è terra libera per i punti di luogoCarta, che leggono solo `sfondo`. È lo sfondo della
+     Germania intera, stessa proiezione: la parte che l'Ovest non copre è l'Est, e Berlino Ovest ci sta dentro invece che nel mare. */
+  SCENARI.de1950.mappa = { viewBox:MAPPA_DE_LAND.viewBox, sfondo:SFONDO_DE_OVEST, oltre:MAPPA_DE_LAND.sfondo, aree:T.map(function(x){ return x[1]; }) };
 })();
 
 /* ==============================================================================================================
@@ -15756,7 +15759,7 @@ const EMERGENZA68_OPP_EV = {
 (function(){
   var s=SCENARI.de1950;
   SCENARI.de1960.territori = s.territori.concat([ { nome:'la Saar', nomeEn:'Saarland', tipo:'regione', carica:'Ministro presidente', lean:1 } ]);
-  SCENARI.de1960.mappa = { viewBox:s.mappa.viewBox, sfondo:s.mappa.sfondo, aree:s.mappa.aree.concat([ MAPPA_DE_LAND.aree.saar ]) };
+  SCENARI.de1960.mappa = { viewBox:s.mappa.viewBox, sfondo:s.mappa.sfondo, oltre:s.mappa.oltre, aree:s.mappa.aree.concat([ MAPPA_DE_LAND.aree.saar ]) };   // L117-1: anche la terra oltre il confine
 })();
 /* L112-1 · de1970 RIUSA territori e mappa di de1960 (dieci Länder con la Saar, Berlino Ovest): lo stesso oggetto, non una copia. */
 SCENARI.de1970.territori = SCENARI.de1960.territori;

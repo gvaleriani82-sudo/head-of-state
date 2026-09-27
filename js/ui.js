@@ -101,9 +101,72 @@ function clipPer(nome){
   return videoConsentito()?nome:'';
 }
 function clipDaSrc(src){ const m=/([^\/]+)\.webp$/.exec(String(src||'')); return m?clipPer(m[1]):''; }
-function videoHtml(nome){ return '<video class="scena-video" src="'+VIDEO_DIR+nome+'.mp4" data-clip="'+nome+'" muted autoplay loop playsinline preload="auto" disablepictureinpicture aria-hidden="true" tabindex="-1"></video>'; }
+/* ================================================================================================================
+   L119-1 · LA CLIP DI UNA CARTA NON SI RIDISSOLVE A OGNI RENDER, E NON SI SCARICA PRIMA DI ESSERE VISTA.
+   · `render()` riscrive l'agenda e con lei il <video>: il nodo nuovo nasceva trasparente e si ridissolveva (il ⚠ di L95-4). Ora
+     la clip di una carta porta una CHIAVE (`data-vkey`: mese + carta + clip) e `agganciaVideo` tiene il primo nodo di ogni chiave
+     in `VIDEO_VIVI`: al render dopo, il nodo nuovo viene SOSTITUITO da quello vivo (trapianto nello stesso task, prima che il
+     browser lo metta in pausa per averlo visto uscire dal documento), che è già `.vivo` e sta suonando dal suo punto. Una
+     dissolvenza per carta, non una per render. Un nodo vivo che dopo un render non è più nel documento si dimentica.
+   · La clip di una carta nasce SENZA `src` (`data-src`): la sorgente si mette quando la carta entra nel viewport
+     (IntersectionObserver, `OSS_VIDEO`) — dal L120-1 solo quando diventa il TESTIMONE, la più visibile (sotto). Una carta nel cassetto chiuso o sotto la piega non scarica niente; una clip che esce
+     dalla vista va in pausa e al ritorno riprende dall'ora. L'hero no: sta sulla home, sopra la piega, e parte subito come prima.
+   · Con `reteLeggera()` o movimento non pieno non c'è nessun <video> (`clipPer`), quindi nessuna richiesta.
+   ================================================================================================================ */
+let VIDEO_VIVI={}, OSS_VIDEO=null;
+/* ================================================================================================================
+   L120-1 · UNA CLIP PER VOLTA. Con due carte con clip nello stesso cassetto Chrome senza finestra faceva 31 fps, e le clip
+   saranno decine: al più UNA clip di carta suona, il «testimone» — la clip con la quota visibile più alta (a pari quota la più
+   in alto). Le altre in vista restano in pausa sul loro fotogramma (o sull'immagine, se non sono mai partite: la sorgente la
+   riceve solo il testimone) e ripartono DALL'ORA (VIDEO_T0) quando tocca a loro. La quota la dà l'osservatore (soglie fitte,
+   così lo scorrimento la aggiorna); tutto transitorio, niente in S. La hero della home non è una carta e non è osservata.
+   ================================================================================================================ */
+const VIDEO_QUOTA=new Map();
+function videoRiprendiOra(el){ try{ const nome=el.dataset.clip, d=el.duration; if(VIDEO_T0[nome]!=null && d && isFinite(d)) el.currentTime=((oraMovimento()-VIDEO_T0[nome])/1000)%d; }catch(e){} }
+function videoTestimone(){
+  let best=null, bq=0, btop=Infinity;
+  VIDEO_QUOTA.forEach(function(q, el){
+    if(!el.isConnected || !(q>0)) return;
+    const top=el.getBoundingClientRect().top;
+    if(q>bq+1e-3 || (Math.abs(q-bq)<=1e-3 && top<btop)){ best=el; bq=q; btop=top; }
+  });
+  return best;
+}
+function videoAggiornaTestimone(){
+  const t=videoTestimone();
+  VIDEO_QUOTA.forEach(function(q, el){ if(el!==t && !el.paused){ try{ el.pause(); }catch(e){} } });
+  if(!t) return;
+  if(!t.getAttribute('src') && t.dataset.src) t.src=t.dataset.src;
+  else if(t.paused) videoRiprendiOra(t);
+  if(t.paused){ try{ const p=t.play(); if(p && p.catch) p.catch(function(){}); }catch(e){} }
+}
+function videoHtml(nome, vkey){
+  const sorg=VIDEO_DIR+nome+'.mp4';
+  return '<video class="scena-video" '+(vkey?('data-src="'+sorg+'" data-vkey="'+escAttr(vkey)+'" preload="none"'):('src="'+sorg+'" preload="auto"'))
+    +' data-clip="'+nome+'" muted'+(vkey?'':' autoplay')+' loop playsinline disablepictureinpicture aria-hidden="true" tabindex="-1"></video>'; }   // L120-1: la clip di una carta non parte da sola (la fa partire il testimone)
+function ossVideo(){
+  if(OSS_VIDEO || typeof IntersectionObserver==='undefined') return OSS_VIDEO;
+  /* L'osservatore resta attaccato: una clip che esce dalla vista (cassetto chiuso, carta scorsa via) va IN PAUSA e smette di
+     decodificare; quando torna riprende dall'ora (VIDEO_T0), non da dove si era fermata — la regola del movimento lungo. */
+  OSS_VIDEO=new IntersectionObserver(function(voci){
+    voci.forEach(function(v){ const el=v.target;
+      if(!v.isIntersecting || !(v.intersectionRatio>0)){ VIDEO_QUOTA.delete(el); if(el.getAttribute('src') && !el.paused){ try{ el.pause(); }catch(e){} } return; }
+      VIDEO_QUOTA.set(el, v.intersectionRatio); });
+    videoAggiornaTestimone();   // L120-1: suona solo il testimone
+  }, {threshold:[0.01,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1]});
+  return OSS_VIDEO;
+}
+function videoCaricaQuandoVisto(v){
+  const O=ossVideo();
+  if(O) O.observe(v);
+  else if(!v.getAttribute('src')) v.src=v.dataset.src;   // senza IntersectionObserver: come prima
+}
 function agganciaVideo(v){
   if(!v || v.dataset.agganciato) return;
+  const k=v.dataset.vkey;
+  if(k){ const vivo=VIDEO_VIVI[k];
+    if(vivo && vivo!==v){ try{ v.replaceWith(vivo); }catch(e){} return; }   // play e pausa li decide l'osservatore (la vista), non il render
+    VIDEO_VIVI[k]=v; }
   v.dataset.agganciato='1';
   try{ v.muted=true; }catch(e){}   // la proprietà, non solo l'attributo: senza, l'autoplay può essere negato
   const nome=v.dataset.clip;
@@ -112,9 +175,13 @@ function agganciaVideo(v){
       const d=v.duration; if(d && isFinite(d)) v.currentTime=((oraMovimento()-VIDEO_T0[nome])/1000)%d; }catch(e){}
   });
   v.addEventListener('playing', function(){ v.classList.add('vivo'); }, {once:true});   // gli eventi media non risalgono: il target è lui
+  if(k){ videoCaricaQuandoVisto(v); return; }   // L119-1: la clip di una carta parte quando la carta si vede
   try{ const p=v.play(); if(p && p.catch) p.catch(function(){}); }catch(e){}   // autoplay negato = resta l'immagine, nessun errore
 }
-function agganciaVideoTutti(){ try{ document.querySelectorAll('video.scena-video').forEach(agganciaVideo); }catch(e){} }
+function agganciaVideoTutti(){ try{ document.querySelectorAll('video.scena-video').forEach(agganciaVideo);
+  let tolte=0; VIDEO_QUOTA.forEach(function(q, el){ if(!el.isConnected){ VIDEO_QUOTA.delete(el); tolte++; } }); if(tolte) videoAggiornaTestimone();   // L120-1: se è uscito il testimone, il testimone passa
+  for(const k in VIDEO_VIVI){ const v=VIDEO_VIVI[k]; if(!v.isConnected){ if(OSS_VIDEO) OSS_VIDEO.unobserve(v); delete VIDEO_VIVI[k]; } }   // L119-1: fuori dal documento, dimenticata
+}catch(e){} }
 
 /* ================================================================================================================
    L95-1 · OGNI CARTA NUOVA ENTRA, E ENTRA QUANDO SI VEDE.
@@ -202,7 +269,7 @@ function osservaCarteNuove(){
     });
   }catch(e){}
 }
-function resetUIAnim(){ UIVALS={}; for(const k in UIANIM){ try{ cancelAnimationFrame(UIANIM[k]); }catch(e){} } UIANIM={}; lastTab=null; lastDots={}; CARTE_VISTE={}; }   // a nuova partita / caricamento: prima apparizione senza animazione
+function resetUIAnim(){ UIVALS={}; for(const k in UIANIM){ try{ cancelAnimationFrame(UIANIM[k]); }catch(e){} } UIANIM={}; lastTab=null; lastDots={}; CARTE_VISTE={}; SEG_VISTI={}; }   // a nuova partita / caricamento: prima apparizione senza animazione
 /* il mese, marcato per il contachilometri di playAnims (L95-1) */
 function meseSpan(){ return '<span class="mese-roll" data-anim="mese" data-to="'+(S.year*12+S.month)+'"><span class="mese-ora">'+T(MONTHS[S.month-1])+'</span></span>'; }
 /* riempimento barra animabile: a piena larghezza, scala da sinistra. data-to = % (clampata). */
@@ -457,8 +524,12 @@ function agScene(it){ if(!it || typeof SCENA_MAJOR==='undefined' || !SCENA_MAJOR
      e la decodifica non blocca il render. Nessun salto di layout: .ag-scene ha aspect-ratio 16/9 + fondo panel2,
      quindi lo slot occupa il suo posto anche prima che l'immagine arrivi. Inerte sui base64 (già in memoria). */
   if(!src) return '';
-  const clip=clipDaSrc(src);   // L95-4: la clip con lo stesso nome del .webp, se c'e' (oggi nessuna scena-carta ne ha una)
-  return `<div class="ag-scene on${clip?' con-video':''}"><img src="${src}" alt="" loading="lazy" decoding="async">${clip?videoHtml(clip):''}</div>`; }
+  /* L119-1 · G8: un pilastro-cronaca o una tragedia non si anima — niente clip e niente Ken Burns (`.ferma`), l'immagine sta ferma.
+     Si decide sulla CARTA, non sulla scena: la stessa scena può servire una carta qualunque e un pilastro. */
+  const d=it.data||{}, ferma=(d.cronaca===true || d.tono==='grave' || scenaTono(it)==='grave');
+  const clip=ferma ? '' : clipDaSrc(src);   // L95-4: la clip con lo stesso nome del .webp, se c'e'
+  const vkey=clip ? ((S?(S.year*12+S.month):0)+':'+seed+':'+clip) : '';   // L119-1: la chiave del nodo vivo (mese + carta + clip)
+  return `<div class="ag-scene on${clip?' con-video':''}${ferma?' ferma':''}"><img src="${src}" alt="" loading="lazy" decoding="async">${clip?videoHtml(clip, vkey):''}</div>`; }
 /* Bandiere nei bottoni del selettore paese (schermata iniziale): iniettate da PAESI[c].flag. Una volta, al boot. */
 function decorateCountrySelector(){
   document.querySelectorAll('#country-seg button').forEach(function(b){ const P=PAESI[b.dataset.c]; if(P) b.innerHTML=`<span class="flag">${P.flag||''}</span><span>${T(P.nome)}</span>`; });
@@ -876,8 +947,58 @@ function renderStartPersistence(){
 function hideMenu(){ const m=document.getElementById('menu'); if(m) m.classList.remove('on'); }
 /* E4c — audio rimosso per scelta (verdetto playtest): il gioco è muto. Nei save vecchi può esistere
    S.audio: campo ignoto e innocuo — nessuno lo legge, il round-trip lo trasporta senza effetti. */
+/* L120-1 · I CONTROLLI DEL SUONO, un pezzo solo: li usano il menu Partita (showPartita) e il pannello «Suono» della home
+   (showSuonoHome). Stessi interruttori, stessi cursori, stessi valori in localStorage; niente in S. */
+function audioControlliHtml(){
+  const _au=(typeof audioAcceso==='function' && audioAcceso())?'acceso':'spento';
+  /* L118-1 — i menu mostrano la SCELTA di ciascuno strato (`musicaPreferita`, `ambientePreferito`), non lo stato vivo: con «Silenzia
+     tutto» le scelte restano quelle di prima, sospese. Sotto ogni interruttore il suo cursore (0-100 %, localStorage, mai in S). */
+  const _mu=(typeof audioMuto==='function' && audioMuto());
+  const _vol=(k, et)=>{ const v=(typeof audioVolume==='function')?audioVolume(k):100;
+    return `<div class="vol-riga"><input type="range" id="vol-${k}" min="0" max="100" step="5" value="${v}" aria-label="${escAttr(et)}"
+      oninput="setVolume('${k}',this.value)" onchange="setVolume('${k}',this.value,true)"><span class="vol-v" id="vol-${k}-v">${v}%</span></div>`; };
+  const _auSeg=`<button class="vol-muto${_mu?' on':''}" id="vol-muto" onclick="setMuto(${_mu?'false':'true'})">${T(_mu?'Riattiva i suoni':'Silenzia tutto')}</button>`
+    +`<div class="contorno" style="font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--mut);text-align:center;margin:8px 0 4px">${T('Audio')}</div>
+    <div class="seg" id="audio-seg" style="max-width:200px;margin:0 auto 10px;">
+      <button class="${_au==='acceso'?'on':''}" onclick="setAudio('acceso')">${T('Acceso')}</button>
+      <button class="${_au==='spento'?'on':''}" onclick="setAudio('spento')">${T('Spento')}</button></div>`
+    +_vol('effetti', T('Volume degli effetti'))
+    /* L114-1 — la MUSICA, accanto all'audio e separata: localStorage `hos_musica`, mai in S; con l'audio spento tace comunque */
+    +`<div class="contorno" style="font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--mut);text-align:center;margin:8px 0 4px">${T('Musica')}</div>
+    <div class="seg" id="musica-seg" style="max-width:200px;margin:0 auto 10px;">
+      <button class="${(_au==='acceso'&&typeof musicaPreferita==='function'&&musicaPreferita())?'on':''}" onclick="setMusica('accesa')">${T('Accesa')}</button>
+      <button class="${(_au==='acceso'&&typeof musicaPreferita==='function'&&musicaPreferita())?'':'on'}" onclick="setMusica('spenta')">${T('Spenta')}</button></div>`
+    +_vol('musica', T('Volume della musica'))
+    /* L116-2 — l'AMBIENTE, sotto la musica e separato: localStorage `hos_ambiente`, mai in S; con l'audio spento tace comunque */
+    +`<div class="contorno" style="font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--mut);text-align:center;margin:8px 0 4px">${T('Ambiente sonoro')}</div>
+    <div class="seg" id="ambiente-seg" style="max-width:200px;margin:0 auto 10px;">
+      <button class="${(_au==='acceso'&&typeof ambientePreferito==='function'&&ambientePreferito())?'on':''}" onclick="setAmbiente('acceso')">${T('Acceso')}</button>
+      <button class="${(_au==='acceso'&&typeof ambientePreferito==='function'&&ambientePreferito())?'':'on'}" onclick="setAmbiente('spento')">${T('Spento')}</button></div>`
+    +_vol('ambiente', T('Volume dell’ambiente sonoro'));
+  return _auSeg;
+}
+/* L120-1 · il pannello «Suono» fuori partita (home, creazione, storici): lo stesso modale del menu (#menu, si chiude toccando
+   fuori), con la ✕ e i controlli di audioControlliHtml(). Il tocco che lo apre è già il gesto che fa nascere il contesto
+   (audioSblocca in cattura sul pointerdown) e quindi il tema: qui non si inventa altro. */
+function showSuonoHome(){
+  const mm=document.getElementById('menu-modal'); if(!mm) return;
+  mm.dataset.vista='suono';
+  mm.innerHTML=`<div class="mt" style="position:relative"><div class="kicker">${T('Suono')}</div><h2>${T('Audio, musica, ambiente')}</h2>`
+    +`<button class="suono-x" onclick="hideMenu()" aria-label="${escAttr(T('Chiudi'))}">✕</button></div>`
+    +audioControlliHtml()
+    +`<div class="contorno" style="font-size:11px;color:var(--mut);text-align:center;margin:4px auto 2px;max-width:300px">${T('Le stesse scelte del menu Partita. Restano su questo dispositivo.')}</div>`;
+  document.getElementById('menu').classList.add('on');
+}
+/* L120-1 · dopo un cambio (audio.js), ridisegna il pannello APERTO, quale che sia: prima ridisegnava sempre il menu Partita,
+   che fuori partita con una S rimasta (dopo «Gioca di nuovo») avrebbe aperto il menu della carriera finita. */
+function ridisegnaAudio(){
+  const m=document.getElementById('menu'), mm=document.getElementById('menu-modal');
+  if(!m || !mm || !m.classList.contains('on')) return;
+  if(mm.dataset.vista==='suono') showSuonoHome(); else if(typeof S!=='undefined' && S) showPartita();
+}
 function showPartita(){
   if(!S) return;
+  { const mm=document.getElementById('menu-modal'); if(mm) mm.dataset.vista='partita'; }
   const ok=storageOK();   // localStorage disponibile? (file:// su iOS lo blocca → degrada su export/import file)
   let h=`<div class="mt"><div class="kicker">${T('Partita')}</div><h2>${T('Salva e carica')}</h2></div>`;
   h+=`<div class="seg" id="lang-seg-menu" style="max-width:200px;margin:0 auto 10px;">
@@ -892,21 +1013,7 @@ function showPartita(){
       <button class="${_mv==='ridotto'?'on':''}" onclick="setMovimento('ridotto')">${T('Ridotto')}</button>
       <button class="${_mv==='spento'?'on':''}" onclick="setMovimento('spento')">${T('Spento')}</button></div>`;
   /* L95-3 — l'AUDIO, sotto il movimento, stessa forma. localStorage `hos_audio`, mai in S. */
-  const _au=(typeof audioAcceso==='function' && audioAcceso())?'acceso':'spento';
-  const _auSeg=`<div class="contorno" style="font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--mut);text-align:center;margin:8px 0 4px">${T('Audio')}</div>
-    <div class="seg" id="audio-seg" style="max-width:200px;margin:0 auto 10px;">
-      <button class="${_au==='acceso'?'on':''}" onclick="setAudio('acceso')">${T('Acceso')}</button>
-      <button class="${_au==='spento'?'on':''}" onclick="setAudio('spento')">${T('Spento')}</button></div>`
-    /* L114-1 — la MUSICA, accanto all'audio e separata: localStorage `hos_musica`, mai in S; con l'audio spento tace comunque */
-    +`<div class="contorno" style="font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--mut);text-align:center;margin:8px 0 4px">${T('Musica')}</div>
-    <div class="seg" id="musica-seg" style="max-width:200px;margin:0 auto 10px;">
-      <button class="${(typeof musicaAccesa==='function'&&musicaAccesa())?'on':''}" onclick="setMusica('accesa')">${T('Accesa')}</button>
-      <button class="${(typeof musicaAccesa==='function'&&musicaAccesa())?'':'on'}" onclick="setMusica('spenta')">${T('Spenta')}</button></div>`
-    /* L116-2 — l'AMBIENTE, sotto la musica e separato: localStorage `hos_ambiente`, mai in S; con l'audio spento tace comunque */
-    +`<div class="contorno" style="font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--mut);text-align:center;margin:8px 0 4px">${T('Ambiente sonoro')}</div>
-    <div class="seg" id="ambiente-seg" style="max-width:200px;margin:0 auto 10px;">
-      <button class="${(typeof ambienteAcceso==='function'&&ambienteAcceso())?'on':''}" onclick="setAmbiente('acceso')">${T('Acceso')}</button>
-      <button class="${(typeof ambienteAcceso==='function'&&ambienteAcceso())?'':'on'}" onclick="setAmbiente('spento')">${T('Spento')}</button></div>`;
+  const _auSeg=audioControlliHtml();
   h+=`<div class="contorno" style="font-size:11px;color:var(--mut);text-align:center;margin:0 auto 10px;max-width:300px">${T('Con <b>ridotto</b> restano solo le dissolvenze; con <b>spento</b> nulla si muove. La scelta resta su questo dispositivo.')}${movimentoScelto()?'':(motionSistemaReduce()?(' '+T('(il tuo dispositivo chiede meno movimento: si parte da ridotto)')):'')}</div>`;
   h+=_auSeg;
   h+=`<div class="mtext">${T(aMetaMese()?"Sei a metà mese: il salvataggio riprenderà <b>dall'inizio del mese corrente</b>.":"Fotografia al confine del mese corrente.")}</div>`;
@@ -939,6 +1046,7 @@ function abbandonaPartita(){
   const st=document.getElementById('start'); if(st) st.style.display='block';
   try{ resetUIAnim(); }catch(e){}
   try{ if(typeof renderStartPersistence==='function') renderStartPersistence(); }catch(e){}   // aggiorna «Continua la carriera» sulla home
+  try{ if(typeof musica==='function') musica(); if(typeof ambiente==='function') ambiente(); }catch(e){}   // L118-1: sulla home il tema, e l'ambiente tace
   window.scrollTo(0,0);
 }
 function uiSlotSave(i){ const cur=(slotInfo(i)||{}).nome || (S&&S.personaggio&&S.personaggio.nome) || T('Carriera'); const nome=prompt(T('Nome dello slot %N:').replace('%N',i+1), cur); if(nome===null) return; if(!salvaSlot(i,nome)) alert(T('Salvataggio non riuscito (storage non disponibile).')); showPartita(); }
@@ -1111,9 +1219,9 @@ function dlt(now,then,d=1,inv=false){
   const good=inv?diff<0:diff>0; return `<span style="color:${good?'var(--pos)':'var(--neg)'}">${sign(diff,d)}</span>`;
 }
 function setTab(t){ if(S.tab===t && t!=='tavolo' && tavoloAttivo()) t='tavolo';   // L113-2: toccare la scheda aperta richiude il cassetto
-  if(S.tab!==t && t!=='tavolo' && typeof suona==='function') suona('scheda');   // L116-1: il cassetto che si apre
+  if(S.tab!==t && t!=='tavolo' && typeof suona==='function') suona('pagina');   // L118-1: il cassetto che si apre — `scheda` è uscito (non piaceva), `pagina` suona quando arriva il file
   S.tab=t; S.ministeroAperto=null; S.mappaAperta=null; S.partitoAperto=null; SALA_SUB=null; render();}   // cambiare tab chiude pagina-ministero, mappa, pagina-partito e composizione-dichiarazione (niente pagine fantasma)
-function apriMinistero(id){ if(S.ministeroAperto!==id && typeof suona==='function') suona('bussare');   // L116-1: la porta del ministero
+function apriMinistero(id){ if(S.ministeroAperto!==id && typeof suona==='function') suona(suonoPreferito('passi','bussare'));   // L116-1: la porta del ministero · L118-1: i passi nel corridoio, quando arriva il file
   S.ministeroAperto=id; render(); }
 function chiudiMinistero(){ S.ministeroAperto=null; QSEL=null; render(); }   // QSEL: azzera la zona selezionata della mappa-quartieri uscendo
 
@@ -1258,6 +1366,7 @@ function render(){
   if(S.tab==='pol') renderPol();
   if(S.tab==='par') renderPartiti();
   if(S.tab==='stampa') renderStampaTab();
+  if(tv) vaiACartaDalTavolo();   // L113-3: la carta aperta da un segnalino, scorsa e segnata nel cassetto
   // endbar
   document.getElementById('advbtn').disabled = pend>0 && !(tv && S.tab!=='gov');   // L113-2: dal tavolo il bottone apre le decisioni
   const next = S.month<12?T(MONTHS[S.month]):T(MONTHS[0])+' '+(S.year+1);
@@ -1692,7 +1801,7 @@ function renderAttivista(){
     (S.agenda||[]).forEach(function(it,idx){ if(it.kind!=='attivista'||!it.data) return; const d=it.data;
       h+=`<div class="ag major ${it.resolved?'done':''}">${agScene(it)}<div class="ah"><div class="kick">${T(d.kick)}</div><h3>${T(d.t)}</h3></div><div class="atext">${T(d.text)}</div>`;
       if(!it.resolved){ h+=`<div class="opts">`+d.ch.map(function(c,ci){ return `<button class="opt" onclick="resolveItem(${idx},${ci})"><span class="ol">${T(c.l)}</span><span class="oe">${T(c.e)}</span></button>`; }).join('')+`</div>`; }
-      else h+=`<div class="outcome">${it.outcome||''}</div>${esitiHtml(it)}`;
+      else h+=`<div class="outcome">${it.outcome||''}</div>${esitiHtml(it)}${tornaTavoloHtml(it)}`;
       h+=`</div>`;
     });
   }
@@ -1828,7 +1937,7 @@ function renderGov(){
         <div class="atext">${T('Scegli chi guiderà il dicastero.')}</div>`;
       if(!it.resolved){ h+=`<div class="opts">`+it.cands.map((c,i)=>`<button class="opt" onclick="resolveItem(${idx},${i})">
         <span class="ol">${c.nm}</span><span class="oe"><span class="chip" style="background:${PROFCOL[c.profile]}22;color:${PROFCOL[c.profile]}">${gergo(T(PROF[c.profile]),'profilo')}</span> · ${T('competenza')} ${c.comp}/3</span></button>`).join('')+`</div>`; }
-      else h+=`<div class="outcome">${it.outcome}</div>${esitiHtml(it)}`;
+      else h+=`<div class="outcome">${it.outcome}</div>${esitiHtml(it)}${tornaTavoloHtml(it)}`;
       h+=`</div>`;
     } else if(it.kind==='proposta'){
       const m=getMin(it.min); const p=it.prop;
@@ -1840,7 +1949,7 @@ function renderGov(){
       if(!it.resolved){ h+=`<div class="opts">
         <button class="opt" onclick="resolveItem(${idx},0)"><span class="ol">${T('Approva')}</span><span class="oe">${subMin(T(p.e))}</span>${costoChip(p)}</button>
         <button class="opt" onclick="resolveItem(${idx},1)"><span class="ol">${T('Respingi')}</span><span class="oe">${T('Nessun effetto; il ministro la prende male')}</span></button></div>`; }
-      else h+=`<div class="outcome">${it.outcome}</div>${esitiHtml(it)}`;
+      else h+=`<div class="outcome">${it.outcome}</div>${esitiHtml(it)}${tornaTavoloHtml(it)}`;
       h+=`</div>`;
     } else if(it.kind==='budget'){
       const m=getMin(it.min); const b=it.req;
@@ -1852,7 +1961,7 @@ function renderGov(){
       if(!it.resolved){ h+=`<div class="opts">
         <button class="opt" onclick="resolveItem(${idx},0)"><span class="ol">${T('Concedi')}</span><span class="oe">${T(b.e)}</span>${costoChip(b)}</button>
         <button class="opt" onclick="resolveItem(${idx},1)"><span class="ol">${T('Nega')}</span><span class="oe">${T('Nessun costo, nessun miglioramento')}</span></button></div>`; }
-      else h+=`<div class="outcome">${it.outcome}</div>${esitiHtml(it)}`;
+      else h+=`<div class="outcome">${it.outcome}</div>${esitiHtml(it)}${tornaTavoloHtml(it)}`;
       h+=`</div>`;
     } else if(it.kind==='arco'){
       /* gli archi narrativi (lotto 4 + payoff fase A): carta maggiore. Il marker discreto = titolo dell'arco +
@@ -1870,7 +1979,7 @@ function renderGov(){
           <div class="atext">${sub(node.text)}</div>`;
         if(!it.resolved){ h+=`<div class="opts">`+node.ch.map((c,i)=>
           `<button class="opt" onclick="resolveItem(${idx},${i})"><span class="ol">${sub(c.l)}</span><span class="oe">${sub(c.e)}</span></button>`).join('')+`</div>`; }
-        else h+=`<div class="outcome">${it.outcome}</div>${esitiHtml(it)}`;
+        else h+=`<div class="outcome">${it.outcome}</div>${esitiHtml(it)}${tornaTavoloHtml(it)}`;
         h+=`</div>`;
       }
     } else if(it.kind==='personale'){
@@ -1881,7 +1990,7 @@ function renderGov(){
         <div class="atext">${sub(T(d.text))}</div>`;
       if(!it.resolved){ h+=`<div class="opts">`+d.ch.map((c,i)=>
         `<button class="opt" onclick="resolveItem(${idx},${i})"><span class="ol">${sub(T(c.l))}</span><span class="oe">${sub(T(c.e))}</span></button>`).join('')+`</div>`; }
-      else h+=`<div class="outcome">${it.outcome}</div>${esitiHtml(it)}`;
+      else h+=`<div class="outcome">${it.outcome}</div>${esitiHtml(it)}${tornaTavoloHtml(it)}`;
       h+=`</div>`;
     } else if(it.kind==='locale'){
       /* eventi locali (livello 1): la vita amministrativa di città/regione */
@@ -1890,7 +1999,7 @@ function renderGov(){
         <div class="atext">${T(d.text)}</div>`;
       if(!it.resolved){ h+=`<div class="opts">`+d.ch.map((c,i)=>
         `<button class="opt" onclick="resolveItem(${idx},${i})"><span class="ol">${T(c.l)}</span><span class="oe">${T(c.e)}</span>${costoChip(c)}</button>`).join('')+`</div>`; }
-      else h+=`<div class="outcome">${it.outcome}</div>${esitiHtml(it)}`;
+      else h+=`<div class="outcome">${it.outcome}</div>${esitiHtml(it)}${tornaTavoloHtml(it)}`;
       h+=`</div>`;
     } else if(it.kind==='premier'){
       /* la mossa interna (lotto ascesa): lealtà vs ambizione */
@@ -1900,7 +2009,7 @@ function renderGov(){
       if(!it.resolved){ h+=`<div class="opts">
         <button class="opt" onclick="resolveItem(${idx},0)"><span class="ol">Assecondare il premier</span><span class="oe">Lealtà +, capitale + (ascesa lenta e sicura)</span></button>
         <button class="opt" onclick="resolveItem(${idx},1)"><span class="ol">Distinguersi</span><span class="oe">Capitale e visibilità +, ma la sua fiducia cala</span></button></div>`; }
-      else h+=`<div class="outcome">${it.outcome}</div>${esitiHtml(it)}`;
+      else h+=`<div class="outcome">${it.outcome}</div>${esitiHtml(it)}${tornaTavoloHtml(it)}`;
       h+=`</div>`;
     } else if(it.kind==='ministro'){
       /* le carte del ministro (lotto contenuto fase 1): politica interna di gabinetto + grane del tuo settore.
@@ -1911,7 +2020,7 @@ function renderGov(){
         <div class="atext">${subMin(T(d.text))}</div>`;
       if(!it.resolved){ h+=`<div class="opts">`+d.ch.map((c,i)=>
         `<button class="opt" onclick="resolveItem(${idx},${i})"><span class="ol">${subMin(T(c.l))}</span><span class="oe">${subMin(T(c.e))}</span></button>`).join('')+`</div>`; }
-      else h+=`<div class="outcome">${it.outcome}</div>${esitiHtml(it)}`;
+      else h+=`<div class="outcome">${it.outcome}</div>${esitiHtml(it)}${tornaTavoloHtml(it)}`;
       h+=`</div>`;
     } else if(it.kind==='occasione'){
       /* la salita (lotto ascesa): cogliere il salto o lasciare. internazionale = l'ATTO FINALE 3→4 (fase C1a) */
@@ -1927,7 +2036,7 @@ function renderGov(){
       if(!it.resolved){ h+=`<div class="opts">
         <button class="opt" style="border-color:var(--acc)" onclick="resolveItem(${idx},0)"><span class="ol">${T('Cogli il salto')}</span><span class="oe">${T(intl?'Diventi Segretario generale delle Nazioni Unite — la stessa carriera, oltre il vertice nazionale':it.tipo==='altoRapp'?'Diventi Sottosegretario generale delle Nazioni Unite — un passo dal vertice':it.tipo==='primaria'?'Sfidi: l\'esito dipende dal capitale e dalle correnti':'Diventi capo del governo — la stessa carriera, al vertice')}</span></button>
         <button class="opt" onclick="resolveItem(${idx},1)"><span class="ol">${daDiplo?T('Resti %R').replace('%R',T(typeof ruoloDiplo==='function'?ruoloDiplo():'Ambasciatore')):intl?T('Resti %R').replace('%R',T(PAESE.titoloRuolo)):T('Lascia, resta ministro')}</span><span class="oe">${T('Non è ancora il tuo momento')}</span></button></div>`; }
-      else h+=`<div class="outcome">${it.outcome}</div>${esitiHtml(it)}`;
+      else h+=`<div class="outcome">${it.outcome}</div>${esitiHtml(it)}${tornaTavoloHtml(it)}`;
       h+=`</div>`;
     } else if(it.kind==='crisiInt'){
       /* crisi di mediazione (fase C1a): trilemma. Il compromesso (gateAut) è mostrato BLOCCATO se l'autorevolezza non basta. */
@@ -1938,7 +2047,7 @@ function renderGov(){
         const locked=c.gateAut!=null && aut<c.gateAut;
         return `<button class="opt" ${locked?'disabled':''} style="${c.gateAut!=null&&!locked?'border-color:var(--acc)':''}" onclick="resolveItem(${idx},${i})"><span class="ol">${T(c.l)}</span><span class="oe">${locked?(T('Serve autorevolezza ≥ %N').replace('%N',c.gateAut)):T(c.e)}</span>${locked?'':costoChip(c)}${locked?'':cadeChip(c)}${locked?'':compraChip(c)}</button>`;
       }).join('')+`</div>`; }
-      else h+=`<div class="outcome">${it.outcome}</div>${esitiHtml(it)}`;
+      else h+=`<div class="outcome">${it.outcome}</div>${esitiHtml(it)}${tornaTavoloHtml(it)}`;
       h+=`</div>`;
     } else if(it.kind==='rinnovoInt'){
       /* fine mandato internazionale (fase C1a): rinnovo o ritiro all'apice */
@@ -1948,7 +2057,7 @@ function renderGov(){
       if(!it.resolved){ h+=`<div class="opts">
         <button class="opt" style="border-color:var(--acc)" onclick="resolveItem(${idx},0)"><span class="ol">Accetti un nuovo mandato</span><span class="oe">Continui a guidare le Nazioni Unite</span></button>
         <button class="opt" onclick="resolveItem(${idx},1)"><span class="ol">Ti ritiri all'apice</span><span class="oe">Lasci da protagonista: la parola passa alla storia</span></button></div>`; }
-      else h+=`<div class="outcome">${it.outcome}</div>${esitiHtml(it)}`;
+      else h+=`<div class="outcome">${it.outcome}</div>${esitiHtml(it)}${tornaTavoloHtml(it)}`;
       h+=`</div>`;
     } else if(it.kind==='inchiesta'){
       /* l'arco giudiziario (lotto 3): carta maggiore, registro d'agenzia, %PM = archetipo a nome generato */
@@ -1959,7 +2068,7 @@ function renderGov(){
         const D=DIFESE_INCHIESTA[id]||{};
         return `<button class="opt" onclick="resolveItem(${idx},${i})"><span class="ol">${T(D.l)||id}</span><span class="oe">${T(D.e)||''}</span></button>`;
       }).join('')+`</div>`; }
-      else h+=`<div class="outcome">${it.outcome}</div>${esitiHtml(it)}`;
+      else h+=`<div class="outcome">${it.outcome}</div>${esitiHtml(it)}${tornaTavoloHtml(it)}`;
       h+=`</div>`;
     } else if(it.kind==='scandalo'){
       const m=getMin(it.min); const s=it.scn;
@@ -1971,7 +2080,7 @@ function renderGov(){
       if(!it.resolved){ h+=`<div class="opts">
         <button class="opt" onclick="resolveItem(${idx},0)"><span class="ol">${T('Difendi il ministro')}</span><span class="oe">${T('Lo tieni; lealtà su, ma consenso giù')}</span></button>
         <button class="opt" onclick="resolveItem(${idx},1)"><span class="ol">${T('Chiedi le dimissioni')}</span><span class="oe">${T('Lascia; gesto di pulizia, consenso su. Sostituto il mese prossimo')}</span></button></div>`; }
-      else h+=`<div class="outcome">${it.outcome}</div>${esitiHtml(it)}`;
+      else h+=`<div class="outcome">${it.outcome}</div>${esitiHtml(it)}${tornaTavoloHtml(it)}`;
       h+=`</div>`;
     } else if(it.kind==='conflitto'){
       const c=it.confl; const mA=getMin(it.minA), mB=getMin(it.minB);
@@ -1985,7 +2094,7 @@ function renderGov(){
       if(!it.resolved){ h+=`<div class="opts">
         <button class="opt" onclick="resolveItem(${idx},0)"><span class="ol">${T('Dai ragione a %M').replace('%M',mA?mA.nm:'—')}</span><span class="oe">${subMin(T(c.a.e))}</span>${costoChip(c.a)}</button>
         <button class="opt" onclick="resolveItem(${idx},1)"><span class="ol">${T('Dai ragione a %M').replace('%M',mB?mB.nm:'—')}</span><span class="oe">${subMin(T(c.b.e))}</span>${costoChip(c.b)}</button></div>`; }
-      else h+=`<div class="outcome">${it.outcome}</div>${esitiHtml(it)}`;
+      else h+=`<div class="outcome">${it.outcome}</div>${esitiHtml(it)}${tornaTavoloHtml(it)}`;
       h+=`</div>`;
     } else if(it.kind==='stampa'){
       const d=it.data;
@@ -1993,7 +2102,7 @@ function renderGov(){
         <h3>${d.t}</h3></div>
         <div class="atext" style="font-style:italic">«${d.text}»</div>`;
       if(!it.resolved){ h+=`<div class="opts">`+d.ch.map((c,i)=>`<button class="opt" onclick="resolveItem(${idx},${i})"><span class="ol">${T(c.l)}</span><span class="oe">${T(c.e)}</span></button>`).join('')+`</div>`; }
-      else h+=`<div class="outcome">${it.outcome}</div>${esitiHtml(it)}`;
+      else h+=`<div class="outcome">${it.outcome}</div>${esitiHtml(it)}${tornaTavoloHtml(it)}`;
       h+=`</div>`;
     } else if(it.kind==='puntopartito'){
       /* l'appuntamento con le correnti (lotto ribilanciamento) */
@@ -2002,7 +2111,7 @@ function renderGov(){
         <h3>${subMin(T(d.t))}</h3></div>
         <div class="atext">${subMin(T(d.text))}</div>`;
       if(!it.resolved){ h+=`<div class="opts">`+d.ch.map((c,i)=>`<button class="opt" onclick="resolveItem(${idx},${i})"><span class="ol">${subMin(T(c.l))}</span><span class="oe">${subMin(T(c.e))}</span></button>`).join('')+`</div>`; }
-      else h+=`<div class="outcome">${it.outcome}</div>${esitiHtml(it)}`;
+      else h+=`<div class="outcome">${it.outcome}</div>${esitiHtml(it)}${tornaTavoloHtml(it)}`;
       h+=`</div>`;
     } else if(it.kind==='intermedia'){
       const r=it.ris, col=r.win?'var(--pos)':'var(--neg)';
@@ -2016,7 +2125,7 @@ function renderGov(){
         <div style="padding:0 15px 10px">${r.pe.gruppi.map(g=>`<div style="padding:3px 0"><div style="display:flex;justify-content:space-between;font-size:12px"><span style="font-weight:${g.tuo?700:400}">${T(g.nome)}${g.tuo?' <span class="chip" style="background:var(--acc-bg);color:var(--acc-ink)">'+T('tuo')+'</span>':''}</span><span class="mono">${g.quota}%</span></div><div class="bar" style="height:5px"><i style="width:${clamp(g.quota,2,100)}%;background:${g.tuo?'var(--acc)':'var(--mut2)'}"></i></div></div>`).join('')}
           <div style="font-size:12px;color:var(--mut);margin-top:5px">${T('Il tuo gruppo')} (<b>${T((r.pe.gruppi.find(g=>g.tuo)||{}).nome||'')}</b>): <b>${r.pe.rank}º ${T('per peso')} · ${r.pe.quota}%</b></div></div>`:''}`;
       if(!it.resolved) h+=`<div class="opts"><button class="opt" onclick="resolveItem(${idx},0)"><span class="ol">${T('Avanti →')}</span></button></div>`;
-      else h+=`<div class="outcome">${it.outcome}</div>${esitiHtml(it)}`;
+      else h+=`<div class="outcome">${it.outcome}</div>${esitiHtml(it)}${tornaTavoloHtml(it)}`;
       h+=`</div>`;
     } else {
       const d=it.data; const major=it.kind==='event';
@@ -2032,7 +2141,7 @@ function renderGov(){
         const locked=lockedRep||lockedUE||lockedEnte;
         return `<button class="opt" ${locked?'disabled':''} onclick="resolveItem(${idx},${i})"><span class="ol">${T(c.l)}</span><span class="oe">${lockedRep?(T('Serve reputazione ≥ %N').replace('%N',c.need)):lockedUE?(T('Serve peso a Bruxelles ≥ %N').replace('%N',c.pesoUE)):lockedEnte?(T('Serve rapporto con %E ≥ %N').replace('%E',((cEnte&&cEnte.breve)||c.ente)).replace('%N',(c.enteMin!=null?c.enteMin:60))):T(c.e)}</span>${locked?'':costoChip(c)}${locked?'':cadeChip(c)}${locked?'':compraChip(c)}</button>`;
       }).join('')+`</div>`; }
-      else h+=`<div class="outcome">${it.outcome}</div>${esitiHtml(it)}`;
+      else h+=`<div class="outcome">${it.outcome}</div>${esitiHtml(it)}${tornaTavoloHtml(it)}`;
       h+=`</div>`;
     }
   });
@@ -2313,8 +2422,9 @@ const LUOGO_KIND_CASA=['personale','arco'];
 const LUOGO_RE={
   /* R1 · il palazzo: le cerimonie di governo e di partito e i kicker del potere centrale (+ «Ombre», le carte di corridoio) */
   palazzo:/palazzo|bilancio|governo|costituzion|stampa|partit|parlament|aula|giustizia|corte|elezion|campagna elettorale|consenso|sondagg|congresso|istituz|capitale|quirinale|eliseo|cancell|premier|ministr|riform|coalizion|ombre/i,
-  /* R2 · il bordo: esteri e difesa, i kicker del mondo (+ la diplomazia: foro multilaterale, accordo bilaterale, affari consolari) */
-  esteri:/mondo|europa|difesa|nazioni|ester|alleanza|washington|mosca|diplomaz|guerra|atlantic|onu|nato|immigraz|frontier|multilateral|bilateral|consolar/i,
+  /* R2 · il bordo: esteri e difesa, i kicker del mondo (+ la diplomazia: foro multilaterale, accordo bilaterale, affari consolari).
+     L117-1: `europ[ae]` al posto di `europa` — prende anche «Unione Europea», europeo/i/e, europeismo */
+  esteri:/mondo|europ[ae]|difesa|nazioni|ester|alleanza|washington|mosca|diplomaz|guerra|atlantic|onu|nato|immigraz|frontier|multilateral|bilateral|consolar/i,
   /* R3 · la pedina di carattere: il kicker parla dell'economia reale, del lavoro, dei servizi */
   carattere:/lavoro|industri|economia|fabbric|campagn|agricolt|contadin|scuol|universit|sanit|ospedal|ambient|energia|porto|miniera|trasport|infrastru|casa|edilizia|pension|welfare|tasse|fisco|prezzi|inflaz|moneta|valuta|banca|sciopero|sindacat/i,
   /* R4 · la casa del giocatore */
@@ -2439,7 +2549,7 @@ function luogoCarta(item){
     if(LUOGO_RE.sede.test(src)) return { tipo:'palazzo', via:'segnaposto della sede' };
     /* 2 · LE REGOLE DI L113-1 (R4, R2, R1, R3) */
     if(LUOGO_KIND_CASA.indexOf(kind)>=0 || LUOGO_RE.casa.test(kick)) return { tipo:'casa', via:'R4 casa' };
-    if(min==='esteri' || min==='difesa' || fam==='ci' || LUOGO_RE.esteri.test(kick)) return { tipo:'bordo', via:'R2 bordo' };   // L113-1c: le crisi internazionali (`ci`) al bordo
+    if(min==='esteri' || min==='difesa' || fam==='ci' || fam==='dd' || LUOGO_RE.esteri.test(kick)) return { tipo:'bordo', via:'R2 bordo' };   // L113-1c: le crisi internazionali (`ci`) al bordo · L117-1: la diplomazia (`dd`) tutta al bordo
     if(LUOGO_KIND_PALAZZO.indexOf(kind)>=0 || LUOGO_RE.palazzo.test(kick)) return { tipo:'palazzo', via:'R1 palazzo' };
     if(LUOGO_RE.carattere.test(kick) || LUOGO_MIN_CARATTERE.test(min)) return { tipo:'pedina', id:luogoCarattere(kick+' · '+txt)||'città', via:'R3 carattere' };
     /* 3 · LE FAMIGLIE (Cowork, 26/9 sera), in quest'ordine */
@@ -2465,10 +2575,24 @@ function luogoCarta(item){
   }catch(e){ return { tipo:'ripiego', via:'errore: '+e.message }; }
 }
 function leanLabel(l){ return T(l<=-2?'storicamente di sinistra':l===-1?'tende a sinistra':l===0?'contendibile':l===1?'tende a destra':'storicamente di destra'); }
+/* L117-1 / L120-1 · la terra OLTRE IL CONFINE (`mappa.oltre`, oggi la RDT nelle porte tedesche prima dell'unità), UNA resa sola
+   per il tavolo e per la mappa della scheda (che resta ai livelli senza tavolo: attivista, Segretario, diplomatico): la texture
+   della terra più scura e spenta, sotto la terra, niente tocco. L'id del pattern è di chi lo chiama (i due svg convivono nel DOM). */
+function oltrePattern(id, u){
+  return `<pattern id="${id}" patternUnits="userSpaceOnUse" width="${u}" height="${u}">`+
+     `<rect width="${u}" height="${u}" fill="#56574d"/>`+
+     `<circle cx="${u*.22}" cy="${u*.3}" r="${u*.26}" fill="#5c5d52" opacity=".7"/>`+
+     `<circle cx="${u*.74}" cy="${u*.68}" r="${u*.3}" fill="#505147" opacity=".7"/>`+
+     `<circle cx="${u*.62}" cy="${u*.18}" r="${u*.1}" fill="#4a4b42" opacity=".6"/>`+
+     `<circle cx="${u*.2}" cy="${u*.82}" r="${u*.08}" fill="#616257" opacity=".6"/>`+
+     `</pattern>`;
+}
+function oltrePath(id, d, larghezza){ return `<path class="tv-oltre" d="${d}" fill="url(#${id})" stroke="#3a3b33" stroke-width="${(larghezza/200).toFixed(2)}" stroke-linejoin="round" pointer-events="none"/>`; }
 function renderMappaSVG(){
   const M=PAESE.mappa, TE=PAESE.territori, asseTuo=part(S.partito).asse;
   let h=`<svg viewBox="${M.viewBox}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${T('Mappa del controllo politico')}">`;
-  h+=`<path d="${M.sfondo}" fill="var(--bg2)" stroke="var(--line2)" stroke-width="0.7"/>`;
+  if(M.oltre){ const vb=tavoloVB(); h+=`<defs>${oltrePattern('mp-oltre', vb[2]/24)}</defs>`+oltrePath('mp-oltre', M.oltre, vb[2]); }   // L120-1: la RDT anche qui, sotto la terra
+  h+=`<path d="${M.sfondo}" fill="var(--bg2)" stroke="${M.oltre?'#2e2d20':'var(--line2)'}" stroke-width="${M.oltre?1.1:0.7}"/>`;
   const idx=TE.map((_,i)=>i).sort((a,b)=>((M.aree[a]&&M.aree[a].d?0:1)-(M.aree[b]&&M.aree[b].d?0:1))||(a-b));   // prima le regioni, poi le città sopra
   const chiamaIdx=(S.territorioChiama&&typeof S.territorioChiama.idx==='number')?S.territorioChiama.idx:null;   // F2
   for(const i of idx){
@@ -2560,8 +2684,13 @@ function costruisciTavolo(box){
      `<circle cx="${u*.74}" cy="${u*.68}" r="${u*.3}" fill="#737049" opacity=".7"/>`+
      `<circle cx="${u*.62}" cy="${u*.18}" r="${u*.1}" fill="#6a6843" opacity=".6"/>`+
      `<circle cx="${u*.2}" cy="${u*.82}" r="${u*.08}" fill="#8b875e" opacity=".6"/>`+
-     `</pattern></defs>`;
-  h+=`<path class="tv-terra" d="${M.sfondo}" fill="url(#tv-terra)" stroke="#4d4b33" stroke-width="${(vb[2]/160).toFixed(2)}" stroke-linejoin="round"/>`;
+     `</pattern>`+
+     /* L117-1 · la terra OLTRE IL CONFINE (`mappa.oltre`, oggi la RDT nelle porte tedesche prima dell'unità): la stessa texture,
+        più scura e spenta. Non è un'area: niente tocco, niente velatura, niente dati; i punti di luogoCarta leggono solo `sfondo`. */
+     (M.oltre ? oltrePattern('tv-oltre', u) : '')+`</defs>`;
+  if(M.oltre) h+=oltrePath('tv-oltre', M.oltre, vb[2]);
+  /* con la terra oltre il confine, il contorno della terra è anche il CONFINE: una linea netta, più marcata */
+  h+=`<path class="tv-terra" d="${M.sfondo}" fill="url(#tv-terra)" stroke="${M.oltre?'#2e2d20':'#4d4b33'}" stroke-width="${(vb[2]/(M.oltre?110:160)).toFixed(2)}" stroke-linejoin="round"/>`;
   const regioni=[], citta=[];
   TE.forEach(function(_, i){ const A=M.aree[i]; if(!A) return; (A.d?regioni:citta).push(i); });
   regioni.forEach(function(i){ h+=`<path class="tv-area" data-i="${i}" d="${M.aree[i].d}" onclick="selArea(${i})"/>`; });
@@ -2571,9 +2700,15 @@ function costruisciTavolo(box){
   /* i bersagli di tocco: un cerchio trasparente sopra ogni città e ogni regione piccola; il raggio lo fissa aggiornaTavolo
      dalla scala reale (≥ 22 px, cioè un bersaglio di 44) */
   citta.concat(regioni).forEach(function(i){ const c=tavoloCentro(i); if(c) h+=`<circle class="tv-tocco" data-i="${i}" cx="${c[0].toFixed(2)}" cy="${c[1].toFixed(2)}" r="0" onclick="selArea(${i})"/>`; });
+  /* L113-4 §3 · la luce del mese: un rettangolo sfumato ritagliato sulla terra, fermo e invisibile finché non scorre */
+  h+=`<defs><linearGradient id="tv-luce-g" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#ffd79a" stop-opacity="0"/><stop offset=".5" stop-color="#ffd79a" stop-opacity=".42"/><stop offset="1" stop-color="#ffd79a" stop-opacity="0"/></linearGradient>`+
+     `<clipPath id="tv-luce-c"><path d="${M.sfondo}"/></clipPath></defs>`+
+     `<g clip-path="url(#tv-luce-c)" pointer-events="none"><rect class="tv-luce" x="${vb[0]}" y="${vb[1]}" width="${vb[2]*0.6}" height="${vb[3]}" fill="url(#tv-luce-g)"/></g>`;
+  h+=`<g class="tv-segnalini"></g>`;   // L113-3: i segnalini delle carte, sopra tutto (il segnalino vince sull'area)
   h+=`</svg>`;
   box.innerHTML=`<div class="tv-nota" aria-live="polite"></div>${h}<div class="tv-info"></div>`;
-  TAVOLO_CHIAMA=null;
+  TAVOLO_CHIAMA=null; TAVOLO_SEG={};   // L113-3: l'svg nuovo non ha segnalini (ripartono, senza rientrare se già entrati)
+  TAVOLO_CODA={ mese:null, voci:[] }; SEG_PRONTO=null; LUCE_MESE=null;   // L113-4: un tavolo nuovo (paese, caricamento) non eredita code né luci
 }
 function aggiornaTavolo(){
   const box=document.getElementById('tavolo'); if(!box || !tavoloAttivo()) return;
@@ -2614,7 +2749,9 @@ function aggiornaTavolo(){
       /* un'area piccola si tocca SOLO dal suo bersaglio (il disegno sotto è più piccolo di 44 px); una grande dal disegno */
       const vis=svg.querySelector('path.tv-area[data-i="'+i+'"]');
       if(vis){ if(serve>0){ vis.removeAttribute('onclick'); vis.setAttribute('pointer-events','none'); } else { vis.setAttribute('onclick','selArea('+i+')'); vis.removeAttribute('pointer-events'); } }
-      if(serve<=0) el.removeAttribute('onclick'); else el.setAttribute('onclick','selArea('+i+')'); }); }
+      if(serve<=0) el.removeAttribute('onclick'); else el.setAttribute('onclick','selArea('+i+')'); });
+    aggiornaSegnalini(svg, k); }   // L113-3
+  tavoloLuce();   // L113-4 §3: la luce del mese (una per mese, solo a tavolo scoperto): i segnalini, a tavolo misurato (la scala serve al disegno e al raggruppamento)
   /* la nota in alto: la campagna sul territorio o il territorio che chiama; il pannello dell'area in basso */
   const camp=(typeof inCampagna==='function' && inCampagna());
   const nota=box.querySelector('.tv-nota'), info=box.querySelector('.tv-info');
@@ -2623,6 +2760,308 @@ function aggiornaTavolo(){
   nota.style.display=nota.innerHTML?'':'none';
   if(MAPSEL!=null && S.tab==='tavolo'){ info.innerHTML=`<button class="tv-chiudi" onclick="selArea(${MAPSEL})" aria-label="${escAttr(T('Chiudi'))}">✕</button>`+renderMappaInfo(); info.style.display=''; }
   else { info.innerHTML=''; info.style.display='none'; }
+}
+/* ================================================================================================================
+   L113-3 · LE CARTE SUL TAVOLO: I SEGNALINI. Ogni decisione del mese non ancora presa ha un segnalino nel luogo che le dà
+   `luogoCarta(item)`; toccato, apre la carta nel cassetto Governo; decisa, il segnalino esce e, se il luogo è un territorio
+   con un'area, l'area fa un'onda. Il tavolo è una SECONDA porta: il cassetto resta com'era.
+   ⚠ TUTTO TRANSITORIO: il segnalino è una vista di `S.agenda`, niente entra in S (i registri qui sotto sono come CARTE_VISTE).
+   ⚠ IL NODO NON SI RIFÀ (paletto L113-2): i segnalini stanno nel gruppo `.tv-segnalini` dell'`<svg>` del tavolo, e
+   `aggiornaSegnalini()` li AGGIUNGE e li TOGLIE per chiave, senza toccare gli altri. La chiave di un segnalino è il mese più il
+   suo LUOGO (più carte nello stesso luogo sono un segnalino solo, col numero); le carte dentro si riconoscono con `chiaveCarta`.
+   ⚠ L'ENTRATA (due battiti, E5) si segna «avvenuta» SOLO su `animationstart` dell'elemento animato e di `segIn` (paletti
+   L95-1 e L95-3: l'evento risale dai figli), e il listener si toglie a mano: un segnalino entrato non rientra al render dopo.
+   I TRE STATI: pieno = entra a due battiti, esce in dissolvenza, l'area fa l'onda · ridotto = fermo e visibile, esce in
+   dissolvenza (l'eccezione nel CSS), niente onda (resta la transizione del fill) · spento = compare ed esce di colpo.
+   Nessun suono: la carta suona quando entra nel cassetto, come prima (tetto dei due per gesto, L116-1).
+   ================================================================================================================ */
+let TAVOLO_SEG={};            // chiave del segnalino → { el, carte:[chiaveCarta…], terr, tipo } — transitorio
+let SEG_VISTI={};             // segnalini già entrati (chiave) — transitorio, come CARTE_VISTE
+let SEG_ENTRATE=0;            // entrate contate (per la misura: ognuna una volta)
+let SEG_LUOGO={}, SEG_LUOGO_MESE=null;   // il luogo di una carta, calcolato una volta per mese (luogoCarta è pura: stesso esito)
+let TAVOLO_VAI=null;          // la carta da mostrare nel cassetto dopo il tocco di un segnalino (indice nell'agenda)
+/* L113-4 · UN EFFETTO DEL TAVOLO NON SI CONSUMA FINCHÉ IL TAVOLO NON SI VEDE (la regola di L95-1 portata al cassetto). Una carta
+   decisa col cassetto aperto non fa uscire il suo segnalino, non fa l'onda e non manda cifre: la sua voce aspetta in
+   TAVOLO_CODA (transitoria, mai in S) e parte, una volta, al primo render a cassetto chiuso — da qualunque via si chiuda.
+   Se nel frattempo il mese è cambiato, la coda si svuota senza animare. */
+let TAVOLO_CODA={ mese:null, voci:[] }, TAVOLO_CODA_ARMATA=false;
+let SEG_USCITE=0, SEG_ONDE=0, CIFRE_PARTITE=0;   // contati su animationstart (per la misura)
+const DA_TAVOLO=(typeof WeakSet!=='undefined')?new WeakSet():{ add:function(){}, has:function(){ return false; } };   // le carte aperte da un segnalino (per «Torna al tavolo»)
+let SEG_PRONTO=null, SEG_RINVIO=null;   // L113-4 §4: il mese i cui segnalini sono costruiti; il rinvio al fotogramma dopo
+let LUCE_MESE=null, LUCE_ARMATA=false, LUCE_ASCOLTO=null, LUCE_PARTITE=0;   // L113-4 §3: la luce del mese
+const SEG_R=13, SEG_TOCCO=22; // il disegno (26 px di diametro) e il bersaglio (44 px), in pixel reali
+
+/* il titolo della carta per l'aria-label (già tradotto): il campo `t` della carta, per qualunque specie */
+function titoloSegnalino(it){
+  if(!it) return T('Una decisione');
+  if(it.kind==='rimpasto') return T('Rimpasto di governo');
+  const o=it.data||it.prop||it.node||it.confl||it.ev||{};
+  const t=o.t||o.tema;
+  return t ? subMin(T(t)) : T('Una decisione');
+}
+/* un punto appena FUORI dalla terra, sulla sagoma, deterministico dall'id della carta (come luogoPunto): un vertice dell'anello
+   più grande dello sfondo, spinto verso l'esterno lungo la direzione dal baricentro; nessun dato del paese straniero */
+function segnalinoBordo(chiave){
+  const G=luogoGeo(); if(!G || !G.sfondo.length) return null;
+  let P=G.sfondo[0], ba=0;
+  G.sfondo.forEach(function(R){ let a=0; for(let k=0, j=R.length-1; k<R.length; j=k++) a+=R[j][0]*R[k][1]-R[k][0]*R[j][1]; if(Math.abs(a)>ba){ ba=Math.abs(a); P=R; } });
+  let cx=0, cy=0; P.forEach(function(p){ cx+=p[0]; cy+=p[1]; }); cx/=P.length; cy/=P.length;
+  const v=P[luogoHash('bordo:'+chiave)%P.length], dx=v[0]-cx, dy=v[1]-cy, n=Math.hypot(dx,dy)||1, vb=G.vb, passo=vb[2]*0.035;
+  let x=v[0], y=v[1];
+  for(let k=1; k<=6; k++){ x=v[0]+dx/n*passo*k; y=v[1]+dy/n*passo*k; if(!luogoDentro(G.sfondo, x, y)) break; }
+  x=Math.min(vb[0]+vb[2]*0.97, Math.max(vb[0]+vb[2]*0.03, x)); y=Math.min(vb[1]+vb[3]*0.97, Math.max(vb[1]+vb[3]*0.03, y));
+  return [x, y];
+}
+/* il territorio di una pedina: quello che dichiara quel `carattere` più vicino al centro; altrimenti (oggi sempre) la prima
+   città del roster con un'area, «la città più grande» come in luogoCitta */
+function segnalinoPedina(car){
+  const TE=PAESE.territori||[], vb=tavoloVB(), cx=vb[0]+vb[2]/2, cy=vb[1]+vb[3]/2;
+  let best=-1, bd=1e9;
+  TE.forEach(function(t, i){ if(t.carattere===car && luogoHaArea(i)){ const c=tavoloCentro(i), d=Math.hypot(c[0]-cx, c[1]-cy); if(d<bd){ bd=d; best=i; } } });
+  if(best<0) best=TE.findIndex(function(t, i){ return t.tipo==='città' && luogoHaArea(i); });
+  return best;
+}
+/* ⚑ IL LUOGO SUL TAVOLO di una carta: { key, tipo (palazzo · casa · bordo · territorio · punto), x, y, terr } in unità del disegno */
+function segnalinoLuogo(it, idx){
+  const L=luogoCarta(it)||{ tipo:'ripiego' }, vb=tavoloVB(), lato=vb[2]*0.13, M=PAESE.mappa;
+  const cap=tavoloCapitale()||[vb[0]+vb[2]/2, vb[1]+vb[3]/2];
+  const terr=function(i){ const A=M.aree[i], c=tavoloCentro(i); if(!c) return null;
+    return (A && A.cx!=null) ? { key:'t'+i, tipo:'territorio', x:c[0]+(+A.r)+vb[2]*0.035, y:c[1], terr:i }   // la città: ACCANTO al cerchio, non sopra
+                             : { key:'t'+i, tipo:'territorio', x:c[0], y:c[1], terr:i }; };
+  let out=null;
+  if(L.tipo==='territorio' && L.area) out=terr(L.id);
+  else if(L.tipo==='territorio'){ const p=luogoPunto('segnalino:'+chiaveCarta(it, idx), 'territorio senza area'); if(p) out={ key:'p'+p.x+','+p.y, tipo:'punto', x:p.x, y:p.y }; }
+  else if(L.tipo==='pedina'){ const i=segnalinoPedina(L.id); if(i>=0) out=terr(i); }
+  else if(L.tipo==='punto') out={ key:'p'+L.x+','+L.y, tipo:'punto', x:L.x, y:L.y };
+  else if(L.tipo==='bordo'){ const b=segnalinoBordo(chiaveCarta(it, idx).replace(/^\d+:/,'')); if(b) out={ key:'b'+b[0].toFixed(1)+','+b[1].toFixed(1), tipo:'bordo', x:b[0], y:b[1] }; }
+  else if(L.tipo==='casa') out={ key:'casa', tipo:'casa', x:cap[0]-lato*0.55, y:cap[1]-lato*0.3 };   // la sede: nella capitale, dall'altra parte del palazzo
+  if(!out) out={ key:'pal', tipo:'palazzo', x:cap[0]+lato*0.55, y:cap[1]-lato*0.3 };   // palazzo e ripiego: accanto al palazzo
+  out.via=L.tipo;
+  return out;
+}
+/* i segni per famiglia di luogo, disegnati in pixel attorno allo zero (il disco ha raggio 13) */
+const SEG_SEGNO={
+  palazzo:'M-7,-3 L0,-8 L7,-3 Z M-6,-2 h2.2 v7 h-2.2 Z M-1.1,-2 h2.2 v7 h-2.2 Z M3.8,-2 h2.2 v7 h-2.2 Z M-7.5,5.6 h15 v1.8 h-15 Z',
+  casa:'M-7.5,0.5 L0,-7 L7.5,0.5 L5.5,0.5 L5.5,7 L1.6,7 L1.6,2.6 L-1.6,2.6 L-1.6,7 L-5.5,7 L-5.5,0.5 Z',
+  bordo:'M-5,-7.5 h1.8 v15 h-1.8 Z M-3.2,-7.5 L6.5,-4.4 L-3.2,-1.3 Z',
+  territorio:'M0,7.5 C-1.8,3.8 -5.5,0.8 -5.5,-2.5 A5.5,5.5 0 1 1 5.5,-2.5 C5.5,0.8 1.8,3.8 0,7.5 Z M0,-4.6 a2.1,2.1 0 1 0 0.01,0 Z'
+};
+SEG_SEGNO.punto=SEG_SEGNO.territorio;
+function segnalinoNodo(key, S1){
+  const g=document.createElementNS('http://www.w3.org/2000/svg', 'g');
+  g.setAttribute('class', 'tv-seg'); g.setAttribute('data-k', key); g.setAttribute('role', 'button'); g.setAttribute('tabindex', '0');
+  g.setAttribute('onclick', 'apriSegnalino(this.getAttribute("data-k"))');
+  g.setAttribute('onkeydown', 'if(event.key==="Enter"||event.key===" "){ event.preventDefault(); apriSegnalino(this.getAttribute("data-k")); }');
+  g.innerHTML=`<g class="tv-seg-s"><circle class="tv-seg-toc" r="${SEG_TOCCO}"/><g class="tv-seg-anim">`+
+    `<circle class="tv-seg-anello" r="${SEG_R+3.5}"/><circle class="tv-seg-disco" r="${SEG_R}"/>`+
+    `<path class="tv-seg-segno" d="${SEG_SEGNO[S1.tipo]||SEG_SEGNO.punto}"/>`+
+    `<g class="tv-seg-num"><circle cx="11" cy="-11" r="8.5"/><text x="11" y="-7" text-anchor="middle"></text></g></g></g>`;
+  return g;
+}
+/* ⚑ l'aggiornamento: chiamato da aggiornaTavolo a tavolo misurato (k = pixel per unità del disegno) */
+function aggiornaSegnalini(svg, k){
+  const box=svg.querySelector('.tv-segnalini'); if(!box || !(k>0)) return;
+  const mese=S.year*12+S.month;
+  if(SEG_LUOGO_MESE!==mese){ SEG_LUOGO={}; SEG_LUOGO_MESE=mese; for(const v in SEG_VISTI){ if(v.indexOf(mese+':')!==0) delete SEG_VISTI[v]; } }
+  /* L113-4 §4 · IL MESE NUOVO FUORI DAL SUO TASK. I luoghi delle carte nuove (luogoPunto, fino a 400 tentativi) si calcolavano
+     nel task del cambio di mese e ne allungavano il fotogramma. Ora, a mese nuovo, i segnalini del mese vecchio escono subito
+     e quelli nuovi si costruiscono DOPO il fotogramma (requestAnimationFrame e poi un task a parte): entrano comunque con la
+     loro animazione, un fotogramma più tardi. luogoCarta non cambia (è pura: stesso esito, solo un altro momento). */
+  if(SEG_PRONTO!==mese){
+    Object.keys(TAVOLO_SEG).forEach(function(key){ const R=TAVOLO_SEG[key]; delete TAVOLO_SEG[key]; if(S.tab==='tavolo') segnalinoEsce(R.el); else R.el.remove(); });   // sotto un cassetto: via senza animare (nessuno la vedrebbe)
+    tavoloCodaSvuota();
+    if(!SEG_RINVIO) SEG_RINVIO=requestAnimationFrame(function(){ setTimeout(function(){ SEG_RINVIO=null;
+      try{ if(typeof S!=='undefined' && S && tavoloAttivo()){ SEG_PRONTO=S.year*12+S.month; const sv=document.querySelector('#tavolo svg'), w=sv?sv.getBoundingClientRect().width:0, vb=tavoloVB();
+        if(w>0) aggiornaSegnalini(sv, Math.min(w/vb[2], sv.getBoundingClientRect().height/vb[3])); } }catch(e){} }, 0); });   // solo i segnalini, non tutto il tavolo
+    return;
+  }
+  /* 1 · i luoghi delle carte aperte, nell'ordine dell'agenda */
+  const luoghi={}, ordine=[];
+  (S.agenda||[]).forEach(function(it, idx){
+    if(!it || it.resolved) return;
+    const ck=chiaveCarta(it, idx);
+    const Lo=SEG_LUOGO[ck] || (SEG_LUOGO[ck]=segnalinoLuogo(it, idx));
+    if(!luoghi[Lo.key]){ luoghi[Lo.key]={ L:Lo, carte:[], idx:[], urgente:false }; ordine.push(Lo.key); }
+    const g=luoghi[Lo.key]; g.carte.push(ck); g.idx.push(idx); if(it.data && it.data.snodo) g.urgente=true;
+  });
+  /* 2 · LA REGOLA DEL RAGGRUPPAMENTO: due luoghi i cui bersagli (44 px) si toccherebbero diventano un segnalino solo, con la
+     chiave del primo in quest'ordine — palazzo, casa, territori nell'ordine del roster, poi gli altri per chiave */
+  const prio=function(key){ return key==='pal'?0 : key==='casa'?1 : key.charAt(0)==='t'?2+(+key.slice(1))/1000 : 3; };
+  ordine.sort(function(a, b){ return prio(a)-prio(b) || (a<b?-1:a>b?1:0); });
+  const gruppi=[];
+  ordine.forEach(function(key){ const g=luoghi[key];
+    const vicino=gruppi.find(function(h){ return Math.hypot(h.L.x-g.L.x, h.L.y-g.L.y)*k < SEG_TOCCO*2; });
+    if(vicino){ vicino.carte=vicino.carte.concat(g.carte); vicino.idx=vicino.idx.concat(g.idx); vicino.urgente=vicino.urgente||g.urgente; }
+    else gruppi.push({ key:mese+':'+key, L:g.L, carte:g.carte.slice(), idx:g.idx.slice(), urgente:g.urgente }); });
+  /* 3 · aggiungi e aggiorna per chiave */
+  const vivi={};
+  gruppi.forEach(function(g){
+    vivi[g.key]=1;
+    let R=TAVOLO_SEG[g.key];
+    if(!R){
+      const el=segnalinoNodo(g.key, g.L);
+      R=TAVOLO_SEG[g.key]={ el:el, terr:(g.L.terr!=null?g.L.terr:null) };
+      box.appendChild(el);
+      if(SEG_VISTI[g.key] || motionReduced()) SEG_VISTI[g.key]=1;
+      else {
+        const an=el.querySelector('.tv-seg-anim');
+        const suEntrata=function(ev){ if(ev.target!==an || ev.animationName!=='segIn') return;
+          an.removeEventListener('animationstart', suEntrata); SEG_VISTI[g.key]=1; SEG_ENTRATE++; };
+        const suFine=function(ev){ if(ev.target!==an || ev.animationName!=='segIn') return;
+          an.removeEventListener('animationend', suFine); el.classList.remove('entra'); };
+        an.addEventListener('animationstart', suEntrata); an.addEventListener('animationend', suFine);
+        el.classList.add('entra');
+      }
+    }
+    R.carte=g.carte; R.idx=g.idx;
+    const el=R.el, n=g.carte.length, s=1/k;
+    el.setAttribute('transform', 'translate('+g.L.x.toFixed(2)+' '+g.L.y.toFixed(2)+')');
+    el.querySelector('.tv-seg-s').setAttribute('transform', 'scale('+s.toFixed(4)+')');
+    el.classList.toggle('urgente', g.urgente);
+    el.classList.toggle('gruppo', n>1);
+    el.querySelector('.tv-seg-num text').textContent=n>1 ? String(n) : '';
+    const tit=titoloSegnalino(S.agenda[g.idx[0]]);
+    el.setAttribute('aria-label', n>1 ? T('%N decisioni qui · %T').replace('%N', n).replace('%T', tit) : tit);
+  });
+  /* 4 · togli per chiave: il segnalino esce; se una sua carta è stata DECISA (è ancora in agenda, risolta) e il luogo è un
+     territorio con area, l'area fa l'onda. Una carta sparita senza essere decisa (mese nuovo, caricamento) non fa onde. */
+  Object.keys(TAVOLO_SEG).forEach(function(key){
+    if(vivi[key]) return;
+    const R=TAVOLO_SEG[key]; delete TAVOLO_SEG[key];
+    const decisa=(S.agenda||[]).some(function(it, idx){ return it && it.resolved && R.carte.indexOf(chiaveCarta(it, idx))>=0; });
+    const voce={ el:R.el, terr:R.terr, decisa:decisa, cifre:decisa?tavoloCifre():[] };
+    if(decisa && S.tab!=='tavolo'){   // L113-4: col cassetto aperto l'effetto aspetta (il segnalino resta, sotto, e non si tocca più)
+      R.el.removeAttribute('onclick'); R.el.style.pointerEvents='none';
+      if(TAVOLO_CODA.mese!==mese) TAVOLO_CODA={ mese:mese, voci:[] };
+      TAVOLO_CODA.voci.push(voce);
+    } else tavoloEffetto(svg, voce);
+  });
+  /* L113-4 · a cassetto chiuso la coda parte, una volta, al fotogramma dopo la raffica di render */
+  if(TAVOLO_CODA.voci.length){
+    if(TAVOLO_CODA.mese!==mese) tavoloCodaSvuota();
+    else if(S.tab==='tavolo' && !TAVOLO_CODA_ARMATA){ TAVOLO_CODA_ARMATA=true;
+      requestAnimationFrame(function(){ TAVOLO_CODA_ARMATA=false;
+        if(typeof S==='undefined' || !S || S.tab!=='tavolo') return;                 // riaperto nel frattempo: resta in coda
+        if(TAVOLO_CODA.mese!==S.year*12+S.month){ tavoloCodaSvuota(); return; }
+        const sv=document.querySelector('#tavolo svg'), v=TAVOLO_CODA.voci; TAVOLO_CODA.voci=[];
+        v.forEach(function(x){ tavoloEffetto(sv, x); }); }); }
+  }
+}
+function tavoloCodaSvuota(){ TAVOLO_CODA.voci.forEach(function(v){ if(v.el && v.el.isConnected) v.el.remove(); }); TAVOLO_CODA.voci=[]; }
+/* l'effetto di una carta decisa sul tavolo: l'onda dell'area, le cifre che volano, l'uscita del segnalino */
+function tavoloEffetto(svg, v){
+  if(v.decisa && v.terr!=null && svg && !motionReduced()) segnalinoOnda(svg, v.terr);
+  if(v.decisa && v.cifre && v.cifre.length && !motionReduced()) tavoloCifreVolo(v.el, v.cifre);
+  segnalinoEsce(v.el);
+}
+/* L113-4 §2 · LE CIFRE CHE VOLANO. Al più due, le variazioni più grandi in valore assoluto fra prima e dopo la carta, lette dai
+   valori che la barra già conosce: dentro il render della decisione #keys porta già il valore nuovo (data-to) e UIVALS
+   ancora quello di prima (playAnims li allinea alla fine del render). Il colore è per il GIOCATORE: debito e disoccupazione
+   che salgono sono rossi. Solo in «pieno»; in ridotto e spento la barra cambia il numero come sempre. */
+const CIFRE_VERSO={ growth:1, debt:-1, unemp:-1, consenso:1 };
+function tavoloCifre(){
+  const out=[];
+  document.querySelectorAll('#keys .val[data-anim^="num:"]').forEach(function(el){
+    const k=el.getAttribute('data-anim').slice(4); if(!CIFRE_VERSO[k]) return;
+    const to=parseFloat(el.getAttribute('data-to')), from=UIVALS['num:'+k], dec=parseInt(el.getAttribute('data-dec'),10)||0;
+    if(from==null || isNaN(to)) return;
+    const d=+(to-from).toFixed(dec); if(!d) return;
+    out.push({ k:k, d:d, dec:dec, buona:d*CIFRE_VERSO[k]>0 });
+  });
+  out.sort(function(a, b){ return Math.abs(b.d)-Math.abs(a.d); });
+  return out.slice(0, 2);
+}
+function tavoloCifreVolo(el, cifre){
+  const src=el && el.isConnected && el.querySelector('.tv-seg-disco'); if(!src) return;
+  const a=src.getBoundingClientRect(), x0=a.left+a.width/2, y0=a.top+a.height/2;
+  cifre.forEach(function(c, n){
+    const cella=document.querySelector('#keys .val[data-anim="num:'+c.k+'"]'); if(!cella) return;
+    const b=cella.getBoundingClientRect();
+    const f=document.createElement('div');
+    f.className='cifra-volo '+(c.buona?'buona':'cattiva'); f.setAttribute('aria-hidden', 'true');
+    f.textContent=(c.d>0?'+':'−')+fmt(Math.abs(c.d), c.dec);
+    f.style.left=x0+'px'; f.style.top=y0+'px';
+    f.style.setProperty('--dx', (b.left+b.width/2-x0).toFixed(1)+'px'); f.style.setProperty('--dy', (b.top+b.height/2-y0).toFixed(1)+'px');
+    f.style.animationDelay=(n*90)+'ms';
+    const via=function(){ if(f.isConnected) f.remove(); };
+    f.addEventListener('animationstart', function su(ev){ if(ev.target!==f || ev.animationName!=='cifraVolo') return; f.removeEventListener('animationstart', su); CIFRE_PARTITE++; });
+    f.addEventListener('animationend', function fine(ev){ if(ev.target!==f || ev.animationName!=='cifraVolo') return; f.removeEventListener('animationend', fine); via();
+      const k2=document.querySelector('#keys .val[data-anim="num:'+c.k+'"]'), key=k2 && k2.closest('.key');   // la cella di ADESSO (un render l'ha rifatta)
+      if(key){ key.classList.remove('battito'); void key.offsetWidth; key.classList.add('battito');
+        key.addEventListener('animationend', function b(ev2){ if(ev2.target!==key || ev2.animationName!=='cellaBattito') return; key.removeEventListener('animationend', b); key.classList.remove('battito'); }); } });
+    let box=document.getElementById('cifre-volo'); if(!box){ box=document.createElement('div'); box.id='cifre-volo'; box.setAttribute('aria-hidden','true'); document.body.appendChild(box); }   // un contenitore fisso che ritaglia: una cifra al bordo non allarga la pagina
+    box.appendChild(f);
+    setTimeout(via, 1500);   // se l'animazione non parte, la cifra se ne va lo stesso
+  });
+}
+/* L113-4 §1 · «Torna al tavolo ↑»: nella carta decisa che era stata aperta da un segnalino (DA_TAVOLO, transitorio) */
+function tornaTavoloHtml(it){
+  if(!it || !it.resolved || !DA_TAVOLO.has(it) || typeof tavoloAttivo!=='function' || !tavoloAttivo()) return '';
+  return '<button class="torna-tavolo" onclick="setTab(\'tavolo\')">'+T('Torna al tavolo ↑')+'</button>';
+}
+/* L113-4 §3 · LA LUCE DEL MESE: al cambio di mese una velatura calda scorre da est a ovest, una volta, su un nodo che c'è già
+   (.tv-luce, nato con il tavolo). Programmata su requestAnimationFrame e segnata avvenuta solo su animationstart del suo
+   nodo e del suo nome (paletti L95-1 e L95-3): una per mese, non una per render. Se al cambio di mese il tavolo è coperto
+   da un cassetto, o il movimento non è pieno, il mese si segna senza luce: è decorazione, non si mette in coda. */
+function tavoloLuce(){
+  const mese=S.year*12+S.month;
+  if(LUCE_MESE==null){ LUCE_MESE=mese; return; }       // il primo mese visto (avvio, caricamento): niente luce
+  if(LUCE_MESE===mese || LUCE_ARMATA) return;
+  if(motionReduced() || S.tab!=='tavolo'){ LUCE_MESE=mese; return; }
+  LUCE_ARMATA=true;
+  requestAnimationFrame(function(){ LUCE_ARMATA=false;
+    if(typeof S==='undefined' || !S) return;
+    const m=S.year*12+S.month, r=document.querySelector('#tavolo .tv-luce');
+    if(LUCE_MESE===m || !r) return;
+    if(S.tab!=='tavolo' || motionReduced()){ LUCE_MESE=m; return; }
+    if(LUCE_ASCOLTO){ LUCE_ASCOLTO.r.removeEventListener('animationstart', LUCE_ASCOLTO.su); LUCE_ASCOLTO.r.removeEventListener('animationend', LUCE_ASCOLTO.fine); }
+    const su=function(ev){ if(ev.target!==r || ev.animationName!=='tvLuce') return; r.removeEventListener('animationstart', su); LUCE_MESE=m; LUCE_PARTITE++; };
+    const fine=function(ev){ if(ev.target!==r || ev.animationName!=='tvLuce') return; r.removeEventListener('animationend', fine); r.classList.remove('va'); LUCE_ASCOLTO=null; };
+    LUCE_ASCOLTO={ r:r, su:su, fine:fine };
+    r.addEventListener('animationstart', su); r.addEventListener('animationend', fine);
+    r.classList.remove('va'); void r.getBoundingClientRect(); r.classList.add('va');
+  });
+}
+function segnalinoEsce(el){
+  if(motionSpento() || !el.isConnected){ el.remove(); return; }
+  el.removeAttribute('onclick'); el.removeAttribute('role'); el.setAttribute('aria-hidden', 'true'); el.style.pointerEvents='none';
+  const an=el.querySelector('.tv-seg-anim');
+  const via=function(){ if(el.isConnected) el.remove(); };
+  an.addEventListener('animationstart', function su(ev){ if(ev.target!==an || ev.animationName!=='segOut') return; an.removeEventListener('animationstart', su); SEG_USCITE++; });   // L113-4: per la misura
+  an.addEventListener('animationend', function fine(ev){ if(ev.target!==an || ev.animationName!=='segOut') return; an.removeEventListener('animationend', fine); via(); });
+  el.classList.remove('entra'); el.classList.add('esce');
+  setTimeout(via, 900);   // se l'animazione non parte (riquadro nascosto, movimento di sistema), il nodo se ne va lo stesso
+}
+function segnalinoOnda(svg, i){
+  const A=PAESE.mappa.aree[i]; if(!A) return;
+  const ns='http://www.w3.org/2000/svg', o=document.createElementNS(ns, A.d?'path':'circle');
+  if(A.d) o.setAttribute('d', A.d); else { o.setAttribute('cx', A.cx); o.setAttribute('cy', A.cy); o.setAttribute('r', A.r); }
+  o.setAttribute('class', 'tv-onda'); o.setAttribute('pointer-events', 'none');
+  o.setAttribute('stroke-width', (tavoloVB()[2]/90).toFixed(2));
+  const box=svg.querySelector('.tv-segnalini'); svg.insertBefore(o, box);
+  const via=function(){ if(o.isConnected) o.remove(); };
+  o.addEventListener('animationstart', function su(ev){ if(ev.target!==o || ev.animationName!=='tvOnda') return; o.removeEventListener('animationstart', su); SEG_ONDE++; });   // L113-4: per la misura
+  o.addEventListener('animationend', function fine(ev){ if(ev.target!==o || ev.animationName!=='tvOnda') return; o.removeEventListener('animationend', fine); via(); });
+  setTimeout(via, 1600);
+}
+/* ⚑ il tocco: apre la PRIMA carta non decisa del segnalino nel cassetto Governo, scorsa e segnata (TAVOLO_VAI, sotto render) */
+function apriSegnalino(key){
+  const R=TAVOLO_SEG[key]; if(!R || !R.idx || !R.idx.length) return;
+  const idx=R.idx.find(function(i){ return S.agenda[i] && !S.agenda[i].resolved; });
+  if(idx==null) return;
+  TAVOLO_VAI=idx; DA_TAVOLO.add(S.agenda[idx]);   // L113-4: decisa, mostrerà «Torna al tavolo»
+  if(S.tab==='gov') render(); else setTab('gov');   // setTab('gov') a cassetto Governo aperto lo chiuderebbe (L113-2)
+}
+/* il mezzo più piccolo per «andare a quella carta»: a cassetto reso, la si scorre in cima al cassetto e la si segna per un
+   momento (classe `da-tavolo`, un contorno che sfuma; niente movimento in spento). Si consuma una volta. */
+function vaiACartaDalTavolo(){
+  if(TAVOLO_VAI==null) return;
+  const idx=TAVOLO_VAI; TAVOLO_VAI=null;
+  if(S.tab!=='gov') return;
+  const el=document.querySelectorAll('.agbox > .ag')[idx], mn=document.querySelector('#game > main');
+  if(!el || !mn) return;
+  mn.scrollTop += el.getBoundingClientRect().top - mn.getBoundingClientRect().top - 52;   // sotto la maniglia (44) del cassetto
+  el.classList.remove('da-tavolo'); void el.offsetWidth; el.classList.add('da-tavolo');
 }
 window.addEventListener('resize', function(){ try{ if(S && tavoloAttivo()) aggiornaTavolo(); }catch(e){} });
 /* il bottone in fondo: con decisioni aperte e il tavolo in vista, apre il cassetto Governo (prima era spento) */
@@ -2746,7 +3185,7 @@ function renderPartitoPage(){
   h+=`</div>`;
   /* chi sei diventato: i tratti guadagnati + gli ultimi fatti notevoli (sistema narrativo, lotto 1) */
   const tr=tratti();
-  h+=`<div class="card"><div class="ct">${T('Chi sei diventato')}</div><div style="padding:2px 14px 12px">`;
+  h+=`<div class="card"><div class="ct">${gn('Chi sei diventato','Chi sei diventata')}</div><div style="padding:2px 14px 12px">`;
   /* l'identità in testa (lotto 2): nome, età che avanza, background — l'orologio biografico fa parte del racconto */
   const pers=S.personaggio||{};
   const bgP=pers.background?T((BACKGROUNDS.find(function(b){return b.id===pers.background;})||{}).nome||''):'';

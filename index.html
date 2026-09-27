@@ -25,9 +25,13 @@
   <div id="start">
     <div class="screen center">
       <div id="start-continue"></div>
-      <div class="seg" id="lang-seg" style="max-width:200px;margin:0 auto 4px;">
-        <button data-l="it" class="on" onclick="setLang('it')">Italiano</button>
-        <button data-l="en" onclick="setLang('en')">English</button>
+      <!-- L120-1 — accanto alla lingua, il bottone «Suono»: apre gli stessi controlli del menu Partita (showSuonoHome, ui.js) -->
+      <div class="lang-riga">
+        <div class="seg" id="lang-seg">
+          <button data-l="it" class="on" onclick="setLang('it')">Italiano</button>
+          <button data-l="en" onclick="setLang('en')">English</button>
+        </div>
+        <button class="suono-btn" id="suono-home" onclick="showSuonoHome()"><span aria-hidden="true">♪</span> <span data-i18n>Suono</span></button>
       </div>
       <!-- lockup identità (lotto 3): emblema raster (base64 da js/emblema.js, src al boot) + occhiello coi filetti + titolo -->
       <img id="home-emblema" alt="" aria-hidden="true" width="130" height="130" decoding="async" style="display:block;width:130px;height:auto;margin:2px auto 8px;">
@@ -67,6 +71,7 @@
       <div style="max-width:420px;margin:0 auto;padding:18px 14px 40px;">
         <!-- L68-1 — il ritorno è un bersaglio toccabile come gli altri: min-height 44px e testo 13px.
              Era alto 28,6px, e l'ha trovato la sonda generale (non quella mirata alle porte). -->
+        <button class="suono-btn" style="float:right" onclick="showSuonoHome()"><span aria-hidden="true">♪</span> <span data-i18n>Suono</span></button>
         <button id="storici-back" style="display:inline-flex;align-items:center;min-height:44px;background:transparent;border:none;color:var(--mut);font-family:inherit;font-size:13px;cursor:pointer;padding:0 8px 0 0;margin-left:-2px" onclick="storiciIndietro()">← <span data-i18n>Indietro</span></button>
         <div id="storici-body"></div>
       </div>
@@ -79,6 +84,7 @@
   <div id="crea" style="display:none;">
     <div class="screen center">
       <button class="mini-btn" style="float:left" data-i18n onclick="chiudiCreazione()">← Indietro</button>
+      <button class="suono-btn" style="float:right" onclick="showSuonoHome()"><span aria-hidden="true">♪</span> <span data-i18n>Suono</span></button>
       <div class="em" style="clear:both" data-i18n>La tua carriera politica</div>
       <h2 data-i18n>Nuova partita</h2>
       <!-- intro per-paese/ruolo (dinamica, spostata dalla home): applyPaese la ri-tesse quando cambi paese/ruolo qui -->

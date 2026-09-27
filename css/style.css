@@ -511,6 +511,8 @@
      uno scatto). Con movimento ridotto o spento il gioco non mette la clip; se lo si cambia a clip gia' messa, sparisce. */
   #home-hero.con-video, .ag-scene.con-video{ position:relative; }
   #home-hero.con-video img, .ag-scene.con-video img{ animation:none; transform:none; }
+  /* L119-1 — G8: la scena di un pilastro-cronaca o di una tragedia sta FERMA (niente Ken Burns, niente clip: lo decide agScene) */
+  .ag-scene.ferma img{ animation:none; transform:none; }
   .scena-video{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block; opacity:0; transition:opacity .6s ease; pointer-events:none; }
   .scena-video.vivo{ opacity:1; }
   .mov-ridotto .scena-video, .mov-spento .scena-video{ display:none; }
@@ -621,3 +623,60 @@
      che sale diventa una dissolvenza. SPENTO: tutto di colpo (la regola unica di sopra). */
   html.mov-ridotto .tv-area{ transition:fill .6s ease, fill-opacity .6s ease !important; }
   html.mov-ridotto #game.con-tavolo main.sale{ animation:secFade .12s ease !important; }
+  /* L113-3 · I SEGNALINI delle carte (ui.js, aggiornaSegnalini): un disco carta/oro coi colori del mondo, uguali nei due temi.
+     Il gruppo `.tv-seg-s` è scalato a pixel reali dal javascript: qui le misure sono in pixel (disco 26, bersaglio 44). */
+  .tv-seg{ cursor:pointer; outline:none; }
+  .tv-seg-toc{ fill:transparent; }
+  .tv-seg-disco{ fill:var(--tv-segno); stroke:var(--tv-tuo); stroke-width:2; filter:drop-shadow(0 1.5px 1.5px rgba(20,16,8,.55)); }
+  .tv-seg-segno{ fill:var(--tv-bordo); fill-rule:evenodd; }
+  .tv-seg-anello{ fill:none; stroke:var(--tv-segno); stroke-width:2; opacity:0; }
+  .tv-seg.urgente .tv-seg-anello{ opacity:.95; }
+  .tv-seg:not(.gruppo) .tv-seg-num{ display:none; }
+  .tv-seg-num circle{ fill:var(--tv-bordo); stroke:var(--tv-segno); stroke-width:1.2; }
+  .tv-seg-num text{ fill:#fff8e6; font-size:12px; font-weight:700; font-family:inherit; }
+  .tv-seg:focus-visible .tv-seg-disco{ stroke:#fff; stroke-width:3; }
+  .tv-seg-anim{ transform-box:fill-box; transform-origin:center; }
+  @keyframes segIn{ 0%{ transform:scale(.4); opacity:0; } 22%{ transform:scale(1.18); opacity:1; } 44%{ transform:scale(1); } 66%{ transform:scale(1.12); } 100%{ transform:scale(1); opacity:1; } }
+  @keyframes segOut{ from{ opacity:1; } to{ opacity:0; transform:scale(.7); } }
+  @keyframes tvOnda{ from{ transform:scale(1); stroke-opacity:.95; } to{ transform:scale(1.14); stroke-opacity:0; } }
+  .tv-seg.entra .tv-seg-anim{ animation:segIn .9s cubic-bezier(.2,.7,.3,1) both; }   /* due battiti (E5), una volta */
+  .tv-seg.esce .tv-seg-anim{ animation:segOut .32s ease forwards; }
+  .tv-onda{ fill:none; stroke:var(--tv-segno); transform-box:fill-box; transform-origin:center; animation:tvOnda .9s ease-out forwards; }
+  .agbox > .ag.da-tavolo{ animation:daTavolo 1.6s ease-out; }
+  @keyframes daTavolo{ from{ box-shadow:0 0 0 3px var(--tv-tuo); } to{ box-shadow:0 0 0 3px rgba(196,144,42,0); } }
+  @media (prefers-reduced-motion: reduce){ .tv-seg.entra .tv-seg-anim, .tv-onda{ animation:none !important; } }
+  /* RIDOTTO: il segnalino nuovo sta fermo e visibile, niente onda (resta la transizione del fill); l'uscita dissolve.
+     SPENTO: il javascript lo toglie di colpo (la regola unica spegne tutto, qui niente da aggiungere). */
+  html.mov-ridotto .tv-seg.esce .tv-seg-anim{ animation:segOut .32s ease forwards !important; }
+  /* L113-4 — il ritorno al tavolo da una carta decisa (44px, 13px), le cifre che volano alla barra (13px: si leggono) col battito
+     della cella d'arrivo, e la luce del mese. Cifre e luce le mette il javascript solo in «pieno»; la regola unica le spegne comunque. */
+  .torna-tavolo{ display:block; width:100%; min-height:44px; margin:10px 0 0; padding:8px 14px; border:1px solid var(--brand); border-radius:9px;
+    background:var(--brand-bg); color:var(--brand); font-family:inherit; font-size:13px; font-weight:600; cursor:pointer; }
+  #cifre-volo{ position:fixed; inset:0; overflow:hidden; pointer-events:none; z-index:60; }
+  .cifra-volo{ position:absolute; pointer-events:none; transform:translate(-50%,-50%); padding:2px 7px; border-radius:8px;
+    font-family:'IBM Plex Mono',monospace; font-size:13px; font-weight:700; line-height:1.2; white-space:nowrap; background:var(--panel);
+    box-shadow:0 2px 8px rgba(0,0,0,.25); animation:cifraVolo .6s cubic-bezier(.45,.05,.25,1) both; }
+  .cifra-volo.buona{ color:var(--pos); border:1px solid var(--pos); }
+  .cifra-volo.cattiva{ color:var(--neg); border:1px solid var(--neg); }
+  @keyframes cifraVolo{ 0%{ transform:translate(-50%,-50%) scale(.6); opacity:0; } 15%{ transform:translate(-50%,-50%) scale(1.1); opacity:1; }
+    85%{ opacity:1; } 100%{ transform:translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(.9); opacity:.2; } }
+  .key.battito{ animation:cellaBattito .36s ease; }
+  @keyframes cellaBattito{ 0%{ box-shadow:inset 0 0 0 0 transparent; } 40%{ box-shadow:inset 0 0 0 2px var(--brand); background-color:var(--brand-bg); } 100%{ box-shadow:inset 0 0 0 0 transparent; } }   /* niente scala: la cella al bordo allargherebbe la pagina */
+  .tv-luce{ opacity:0; transform-box:fill-box; }
+  .tv-luce.va{ animation:tvLuce 1.2s ease-in-out 1; }
+  @keyframes tvLuce{ 0%{ opacity:0; transform:translateX(170%); } 18%{ opacity:1; } 82%{ opacity:1; } 100%{ opacity:0; transform:translateX(-100%); } }
+  /* L118-1 — i CURSORI DEL VOLUME nel menu Partita, uno per strato sotto il suo interruttore. Bersaglio 44px (l'input intero è alto
+     44: il pollice si prende ovunque sulla riga), valore a 12px (è un valore che si legge per scegliere). */
+  .vol-riga{display:flex; align-items:center; gap:10px; max-width:280px; margin:-4px auto 10px;}
+  .vol-riga input[type=range]{flex:1; min-width:0; height:44px; margin:0; accent-color:var(--brand); cursor:pointer; background:transparent;}
+  .vol-riga .vol-v{font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--mut); min-width:40px; text-align:right;}
+  .vol-muto{display:block; width:100%; max-width:280px; min-height:44px; margin:8px auto 6px; padding:8px 12px; border-radius:9px;
+    border:1px solid var(--line); background:var(--bg2); color:var(--txt); font-family:inherit; font-size:13px; font-weight:600; cursor:pointer;}
+  .vol-muto.on{border-color:var(--neg); color:var(--neg); box-shadow:inset 0 0 0 1px var(--neg);}
+  /* L120-1 — il «Suono» fuori partita: accanto alla lingua sulla home, in alto a destra su creazione e storici (bersaglio 44px, 12px) */
+  .lang-riga{display:flex; align-items:center; justify-content:center; gap:6px; max-width:300px; margin:0 auto 4px;}
+  .lang-riga #lang-seg{flex:1 1 200px; max-width:200px;}
+  .suono-btn{min-height:44px; min-width:44px; padding:7px 12px; border:1px solid var(--line); background:var(--bg2); color:var(--mut);
+    border-radius:9px; font-size:12px; font-weight:500; cursor:pointer; font-family:inherit; line-height:1.15; white-space:nowrap;}
+  .suono-x{position:absolute; top:-6px; right:-6px; width:44px; height:44px; border:none; background:transparent; color:var(--mut);
+    font-size:18px; cursor:pointer; font-family:inherit;}

@@ -4095,7 +4095,7 @@ function generaTitolo(){
   var _wTit=(S.era===LINEA_IT)?6:8;   // L30-1: la seconda condizione (S.era==='italia1960') era MORTA — S.era e la LINEA, non il decennio
   S.recentTit.push(q.id); if(S.recentTit.length>_wTit) S.recentTit.shift();
   S.titoloMese={ id:q.id, testo:T(amica?q.amico:q.ostile), tono:(amica?'amica':'ostile') };   // i18n: tradotto allo store (pattern-log)
-  if(typeof suona==='function') suona('giornale');   // L95-3: il titolo del mese nasce qui (i titoli non sono carte d'agenda: vedi CODA L95-3)
+  if(typeof suona==='function') suona(suonoGiornale());   // L95-3: il titolo del mese nasce qui (i titoli non sono carte d'agenda: vedi CODA L95-3) · L118-1: dal 2000 `notifica`
 }
 /* La prima pagina a LIVELLO 1: pesca da TITOLI_LOCALI (tipo gata città/regione + cond su S.locale), tono dal
    CONSENSO locale, %LUOGO=nome dell'area (soggetto). Stessa anti-ripetizione lastTitolo. Mai temi nazionali. */
@@ -4113,7 +4113,7 @@ function generaTitoloLocale(){
   const luogo=localeNome()||'', ente=(tipo==='regione')?T('Regione'):T('Comune');
   const sub=(s)=>String(s).replace(/%LUOGO/g,luogo).replace(/%ENTE/g,ente);
   S.titoloMese={ id:q.id, testo:sub(T(amica?q.amico:q.ostile)), tono:(amica?'amica':'ostile') };   // i18n: T sul template, PRIMA di sub (%LUOGO/%ENTE intatti)
-  if(typeof suona==='function') suona('giornale');   // L95-3: il titolo locale del mese
+  if(typeof suona==='function') suona(suonoGiornale());   // L95-3: il titolo locale del mese · L118-1: dal 2000 `notifica`
 }
 
 /* ============================================================
@@ -5613,13 +5613,13 @@ function resolveItemCore(idx,ci){
     if(ci===0){
       if(S.premier) S.premier.lealta=clamp(S.premier.lealta+6,0,100);
       S.capitale=clamp((S.capitale||0)+1,0,100);
-      it.outcome='Hai sostenuto la linea del premier: la sua fiducia cresce, la tua ascesa è lenta ma sicura.';
+      it.outcome=T('Hai sostenuto la linea del premier: la sua fiducia cresce, la tua ascesa è lenta ma sicura.');
       S.log.unshift({t:T('Lealtà al premier'),x:T('Hai assecondato %P.').replace('%P',((S.premier||{}).nome||T('il premier')))});
     } else {
       S.capitale=clamp((S.capitale||0)+2,0,100); S.visibilita=clamp((S.visibilita||40)+5,0,100);
       if(S.premier) S.premier.lealta=clamp(S.premier.lealta-8,0,100);
-      it.outcome='Ti sei smarcato dal premier: visibilità e capitale su, ma lui ti guarda con sospetto.';
-      S.log.unshift({t:T('Ambizione'),x:T('Ti sei distinto dalla linea di %P.').replace('%P',((S.premier||{}).nome||T('partito')))});
+      it.outcome=T('Prendi le distanze dal premier: visibilità e capitale su, ma ora ti guarda con sospetto.');
+      S.log.unshift({t:T('Ambizione'),x:T('Hai preso le distanze dalla linea di %P.').replace('%P',((S.premier||{}).nome||T('partito')))});
     }
     S.premMossaUltimo=S.year*12+S.month;
     it.resolved=true;
@@ -6430,9 +6430,10 @@ function notteSuonaEsito(){
   if(!NOTTE || NOTTE.esitoSuonato) return; NOTTE.esitoSuonato=true;
   if(typeof taci==='function') taci('urne');
   var onda=NOTTE.onde[SD_NOTTE.length-1], vinta;
-  if(NOTTE.sistema==='parlamentare'){ var _bl=(typeof bloccoElettorale==='function')?bloccoElettorale():bloccoIds(); vinta=_bl.reduce(function(s,id){return s+(onda[id]||0);},0)>=50; }
-  else vinta=(onda.myPct>50);
-  if(typeof suona==='function'){ suona(vinta?'esito':'esito_no'); suona(vinta?'folla':'fischi'); }   // L116-1: la piazza, sotto l'esito
+  var quota;   // L118-1: la stessa lettura, in numero — oltre 55 la vittoria è LARGA e la piazza suona le campane
+  if(NOTTE.sistema==='parlamentare'){ var _bl=(typeof bloccoElettorale==='function')?bloccoElettorale():bloccoIds(); quota=_bl.reduce(function(s,id){return s+(onda[id]||0);},0); vinta=quota>=50; }
+  else { quota=onda.myPct; vinta=(onda.myPct>50); }
+  if(typeof suona==='function'){ suona(vinta?'esito':'esito_no'); suona(vinta?(quota>=55?suonoPreferito('campane','folla'):'folla'):'fischi'); }   // L116-1: la piazza, sotto l'esito
 }
 function dichiaraNotte(i){ if(!NOTTE) return; NOTTE.dich=i; stopTimerNotte(); avanzaNotte(); }
 function concludiNotte(){
@@ -6702,7 +6703,7 @@ function armaTimerTel(){
 function apriTelefonata(){
   var def=telDef(S.telPendente); if(!def){ S.telPendente=null; return; }
   TEL={ id:def.id, def:def, missed:false, timer:null, tic:null };
-  if(typeof suona==='function') suona('telefono');   // L95-3: dove parte lo squillo (telRing), una volta per chiamata
+  if(typeof suona==='function') suona(suonoTelefono());   // L95-3: dove parte lo squillo (telRing), una volta per chiamata · L118-1: dal 2000 `vibrazione`
   renderTelefonata(); armaTimerTel(); telTicSpento();
 }
 function renderTelefonata(){
@@ -6879,7 +6880,7 @@ function coabitazioneInVista(){
 }
 function confirmCoal(){   // solo avvio: chiude e avvia la partita
   if(typeof suona==='function'){ suona('firma');                      // L116-1: il governo nominato
-    if(S.scenario && S.scenario!=='presente') suona('soglia'); }       // L116-1: il primo mese di una porta è un passaggio d'epoca
+    suona((S.scenario && S.scenario!=='presente') ? 'soglia' : 'fanfara'); }   // L116-1: il primo mese di una porta è un passaggio d'epoca · L118-1: nel presente l'insediamento (la fanfara, quando arriva il file)
   S.coalizione=COAL.membri.slice(); S.minoranza=seggiCoalizione(S.coalizione,S.seggi)<50; COAL=null;
   if(typeof aggiornaCoabitazione==='function') aggiornaCoabitazione();   // L100-2/L104-2: all'avvio la porta parte in coabitazione se i seggi lo dicono (il presente francese no: nessuna cricca a 50)
   initTenuta(); initPotereLocale();   // ora il blocco (coalizione) è noto: fissa potere locale e aspettativa
@@ -6901,7 +6902,7 @@ function initTenuta(){
 /* Rinnovo (candidato+coalizione, es. Francia): dopo il ballottaggio vinto si RICOSTRUISCE la maggioranza
    parlamentare sui seggi correnti. Qui non si perde: al peggio si riparte in minoranza nel nuovo mandato. */
 function confirmRinnovo(){
-  if(typeof suona==='function') suona('firma');                      // L116-1: la maggioranza ricostruita
+  if(typeof suona==='function'){ suona('stretta'); suona('firma'); }   // L116-1: la maggioranza ricostruita · L118-1: la stretta di mano del nuovo accordo, prima della firma
   S.coalizione=COAL.membri.slice(); COAL=null;
   vinciElezione();   // governando → nextMandate; dall'opposizione → goAppoint → tornaAlGoverno
 }
@@ -7368,7 +7369,7 @@ function setLegge(id){
   const cur=!!S.leggi[id];
   S.leggi[id]=!cur; const over=rpUsed()>curRpMax(); S.leggi[id]=cur;   // prova il costo RP del toggle
   if(over) return;                                                     // punti riforma insufficienti
-  if(!cur && typeof suona==='function') suona('firma');               // L116-1: la legge firmata, dopo i controlli (un tocco a vuoto non suona)
+  if(!cur && typeof suona==='function'){ suona('martelletto'); suona('firma'); }   // L116-1: la legge firmata, dopo i controlli (un tocco a vuoto non suona) · L118-1: prima il martelletto dell'aula
   applicaLegge(L, !cur);
   S.ultimaLegge={id:L.id, mese:S.year*12+S.month};                     // traccia per la conferenza stampa ("la legge contestata")
   /* biografia: le leggi col tuo nome */
@@ -7430,7 +7431,7 @@ function gameOver(reason){
     : reason==='salute'?(S.esitoSalute==='fatale'
         ? T('Avevi ignorato ogni avvertimento. Il corpo ha presentato il conto, e stavolta non c\'è stato ritorno. La corsa finisce qui, a %E anni.').replace('%E',S.eta)
         : T('A %E anni scegli la vita prima della carica: ti ritiri per ragioni di salute. Nessuna sconfitta — una resa serena a ciò che conta davvero.').replace('%E',S.eta))
-    : reason==='silurato'?T('Ti sei distinto una volta di troppo: il premier ti estromette dal governo in un rimpasto. L\'ambizione, senza la pazienza, ti è costata il posto. La carriera finisce qui.')
+    : reason==='silurato'?T('Hai preso le distanze una volta di troppo: il premier ti estromette dal governo in un rimpasto. L\'ambizione, senza la pazienza, ti è costata il posto. La carriera finisce qui.')
     : reason==='sconfittaLocale'?T('Gli elettori %DL non ti riconfermano: un mandato amministrato male si paga alle urne. La carriera politica si ferma sul primo gradino.').replace('%DL',S.locale?diLuogo(S.locale.nome):T('locali'))
     : reason==='mandatoInt'?T('I membri delle Nazioni Unite non ti riconfermano: la coesione si era logorata sotto la tua guida. Il mandato al vertice del mondo finisce qui — ma resta nella storia chi ci è arrivato.')
     : T('Hai perso le elezioni e passi all\'opposizione.');
@@ -7463,6 +7464,7 @@ function gameOver(reason){
 function resetAll(){
   document.getElementById('over').style.display='none';
   document.getElementById('start').style.display='block';
+  try{ if(typeof musica==='function') musica(); if(typeof ambiente==='function') ambiente(); }catch(e){}   // L118-1: sulla home il tema del gioco
 }
 
 /* ============================================================
