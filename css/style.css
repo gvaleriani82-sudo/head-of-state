@@ -759,3 +759,17 @@
     border-radius:9px; font-size:12px; font-weight:500; cursor:pointer; font-family:inherit; line-height:1.15; white-space:nowrap;}
   .suono-x{position:absolute; top:-6px; right:-6px; width:44px; height:44px; border:none; background:transparent; color:var(--mut);
     font-size:18px; cursor:pointer; font-family:inherit;}
+
+  /* L124-1 — IL VIDEO INTRODUTTIVO (apriIntro, ui.js): a tutto schermo su fondo nero, `contain` (niente tagli né a 375 px né
+     sull'iPad orizzontale), «Salta» sempre visibile in alto a destra (bersaglio 44 px, 13 px). I sottotitoli: sobri, in basso,
+     mai sotto 13 px resi. Con movimento spento la dissolvenza la spegne la regola di sempre. */
+  #intro{position:fixed; inset:0; z-index:10000; background:#000; opacity:0; transition:opacity .35s ease; display:flex; align-items:center; justify-content:center;}
+  #intro.on{opacity:1;}
+  #intro video{width:100%; height:100%; object-fit:contain; background:#000; display:block;}
+  #intro video::cue{font-family:'IBM Plex Sans',system-ui,sans-serif; font-size:clamp(13px, 2.6vmin, 22px); line-height:1.35; color:#f3efe6; background:rgba(0,0,0,.55);}
+  #intro-salta{position:absolute; top:max(12px, env(safe-area-inset-top)); right:max(12px, env(safe-area-inset-right)); min-height:44px; min-width:44px;
+    padding:8px 16px; border:1px solid rgba(255,255,255,.35); border-radius:22px; background:rgba(0,0,0,.45); color:#f3efe6;
+    font-family:inherit; font-size:13px; font-weight:500; letter-spacing:.04em; cursor:pointer;}
+  #intro-salta:focus-visible{outline:2px solid #f3efe6; outline-offset:2px;}
+  .intro-rivedi{display:block; margin:10px auto 2px; min-height:44px; padding:8px 14px; border:1px solid var(--line); background:var(--bg2); color:inherit;
+    border-radius:9px; font-size:12px; font-family:inherit; cursor:pointer;}

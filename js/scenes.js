@@ -116,6 +116,12 @@ const VIDEO_PRESENTI = ['home-hero', 'partito-base', 'vitaprivata-base', 'retro-
   'telefono-anni50', 'telefono-corridoio', 'telefono-oggi',
   'vitaprivata-anni60', 'vitaprivata-anni90', 'vitaprivata-florido'];
 
+/* ===== L124-1 — IL VIDEO INTRODUTTIVO (`assets/video/intro.*`). Non è una scena: sta FUORI da VIDEO_PRESENTI (non ha una
+   carta né un .webp in assets/scenes) ma sotto la stessa guardia (`.claude/verifica-asset.js`): i file dichiarati qui devono
+   esserci, un `intro.*` in cartella dev’essere dichiarato qui, e la clip non supera 10 MB. Lo apre `apriIntro()` (ui.js) al
+   primo tocco sulla home, una volta per dispositivo. Montaggio di Cowork: `arte-sorgente/intro/monta.sh`. */
+const INTRO_VIDEO = { clip:'intro.mp4', poster:'intro.webp', sottotitoli:{ it:'intro.it.vtt', en:'intro.en.vtt' } };
+
 /* ===== L127-3 — LE SCENE DEL PAESE (`assets/scenes/<scena>-<paese>.webp`, <paese> = un id di PAESI). Decisione di Giacomo
    del 27/9: le bandiere nazionali sono ammesse SOLO in un'immagine legata a un paese; una scena che il gioco mostra ovunque
    non ne ha. Quinta lista-promessa, stesso contratto delle altre: `scenaSrc` (ui.js) preferisce `<file scelto>-<S.paese>`

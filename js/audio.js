@@ -458,6 +458,7 @@ function musicaGiroVariante(tema){ const V=musicaVarianti(tema); return V[(MUSIC
 function musicaTema(brano){ const M=MUSICA_MANIFEST[brano]; return (M && M.variante) || brano; }
 /* ⚑ IL PUNTO DI VERITÀ del brano: puro, legge lo stato e non tocca niente (lo usa anche la misura nel banco) */
 function musicaScelta(){
+  if(typeof INTRO_APERTA!=='undefined' && INTRO_APERTA) return null;   // L124-1: sotto il video introduttivo la musica tace (è nel video)
   if(fuoriPartita()) return 'mus-tema';                          // L118-1: fuori partita, il tema del gioco (dentro non vale mai)
   if(MUSICA_FORZATA && MUSICA_FORZATA_S===S) return MUSICA_FORZATA;
   if(typeof NOTTE!=='undefined' && NOTTE) return 'mus-notte';

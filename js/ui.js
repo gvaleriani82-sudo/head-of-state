@@ -193,6 +193,84 @@ function agganciaVideoTutti(){ try{ document.querySelectorAll('video.scena-video
 }catch(e){} }
 
 /* ================================================================================================================
+   L124-1 · IL VIDEO INTRODUTTIVO: dopo il primo tocco, prima della home. Chiesto da Giacomo il 27/9.
+   · QUANDO. Al PRIMO TOCCO sulla home (il gesto che sblocca l'audio: senza gesto il browser non fa partire un video col
+     sonoro) si apre il video a tutto schermo (`#intro`, nato qui e tolto alla fine); alla fine, o su «Salta», si torna alla home
+     e il tema (`mus-tema`) entra in dissolvenza. Il listener sta su `window` in CATTURA, quindi scatta PRIMA di `audioSblocca`
+     (document, cattura): quando la musica chiede il suo brano `INTRO_APERTA` è già vero e `musicaScelta()` risponde null.
+   · UNA VOLTA PER DISPOSITIVO: `hos_intro_visto` in localStorage, mai in S (si segna quando parte). «Rivedi l'introduzione»
+     sta nel pannello Suono della home (`showSuonoHome`) e la fa partire comunque, anche con rete leggera o movimento spento.
+   · QUANDO NO. Con `reteLeggera()` o movimento «spento» al primo tocco non si scarica e non parte (e non si segna vista).
+   · IL FILE SI CHIEDE SOLO AL TOCCO: il <video> nasce qui, con `src` e poster; prima nella pagina non c'è niente che lo nomini.
+   · IL SONORO segue l'audio del gioco (`audioVivo()`): spento o silenziato = video muto. Se il browser nega il play col sonoro
+     sul pointerdown (Safari conta l'attivazione al touchend) parte muto, e il touchend/pointerup dello stesso tocco lo riaccende.
+   · Sottotitoli: un <track> solo, nella lingua del gioco (`INTRO_VIDEO.sottotitoli`, scenes.js); la voce è inglese.
+   · Transitorio: INTRO_APERTA e il nodo non toccano S.
+   ================================================================================================================ */
+const INTRO_CHIAVE='hos_intro_visto';
+let INTRO_APERTA=false, INTRO_HERO_FERME=[];
+function introDisponibile(){ return typeof INTRO_VIDEO!=='undefined' && !!(INTRO_VIDEO && INTRO_VIDEO.clip); }
+function introVista(){ return (typeof lsGet==='function') && lsGet(INTRO_CHIAVE)==='1'; }
+function introSullaHome(){ const e=document.getElementById('start'); return !!(e && getComputedStyle(e).display!=='none'); }
+function introPrimoTocco(ev){
+  try{ window.removeEventListener('pointerdown', introPrimoTocco, true); window.removeEventListener('touchend', introPrimoTocco, true); }catch(e){}
+  if(!introDisponibile() || introVista() || INTRO_APERTA || !introSullaHome()) return;
+  if(reteLeggera() || motionSpento()) return;            // niente video: dritti alla home (e «Rivedi» resta)
+  /* il tocco che apre il video non deve arrivare al bottone che stava sotto (Nuova partita, Continua…) */
+  const inghiotti=function(e){ e.stopPropagation(); e.preventDefault(); };
+  window.addEventListener('click', inghiotti, true);
+  setTimeout(function(){ window.removeEventListener('click', inghiotti, true); }, 700);
+  apriIntro();
+}
+function apriIntro(){
+  if(!introDisponibile() || INTRO_APERTA) return;
+  INTRO_APERTA=true;
+  if(typeof lsSet==='function') lsSet(INTRO_CHIAVE, '1');
+  try{ if(typeof hideMenu==='function') hideMenu(); }catch(e){}
+  /* la hero della home sta sotto: si ferma finché c'è il video (due decodifiche su un telefono sono troppe) */
+  INTRO_HERO_FERME=[]; try{ document.querySelectorAll('#home-hero video').forEach(function(v){ if(!v.paused){ v.pause(); INTRO_HERO_FERME.push(v); } }); }catch(e){}
+  const D=VIDEO_DIR, lin=(typeof curLang==='function' && curLang()==='en')?'en':'it', st=(INTRO_VIDEO.sottotitoli||{})[lin];
+  const el=document.createElement('div');
+  el.id='intro'; el.setAttribute('role','dialog'); el.setAttribute('aria-label', T('Introduzione'));
+  el.innerHTML='<video id="intro-video" src="'+D+INTRO_VIDEO.clip+'"'+(INTRO_VIDEO.poster?' poster="'+D+INTRO_VIDEO.poster+'"':'')
+    +' playsinline preload="auto" disablepictureinpicture>'
+    +(st?'<track kind="subtitles" srclang="'+lin+'" label="'+(lin==='en'?'English':'Italiano')+'" src="'+D+st+'" default>':'')+'</video>'
+    +'<button id="intro-salta" type="button" onclick="chiudiIntro()">'+T('Salta')+'</button>';
+  document.body.appendChild(el);
+  const v=document.getElementById('intro-video');
+  try{ v.muted=!(typeof audioVivo==='function' && audioVivo()); }catch(e){}
+  v.addEventListener('ended', chiudiIntro, {once:true});
+  v.addEventListener('error', chiudiIntro, {once:true});   // un file che non arriva non lascia lo schermo nero
+  try{ if(v.textTracks && v.textTracks[0]) v.textTracks[0].mode='showing'; }catch(e){}
+  const voluto=!v.muted;
+  try{ const p=v.play(); if(p && p.catch) p.catch(function(){ try{ v.muted=true; const q=v.play(); if(q && q.catch) q.catch(function(){}); }catch(e){} }); }catch(e){}
+  if(voluto){ const riaccendi=function(){ window.removeEventListener('pointerup', riaccendi, true); window.removeEventListener('touchend', riaccendi, true);
+      try{ if(INTRO_APERTA && v.muted){ v.muted=false; if(v.paused){ const p=v.play(); if(p && p.catch) p.catch(function(){}); } } }catch(e){} };
+    window.addEventListener('pointerup', riaccendi, true); window.addEventListener('touchend', riaccendi, true); }
+  document.addEventListener('keydown', introTasto, true);
+  try{ if(typeof musica==='function') musica(); }catch(e){}   // il tema, se suonava già (Rivedi), sfuma sotto il video
+  requestAnimationFrame(function(){ el.classList.add('on'); });
+  setTimeout(function(){ try{ document.getElementById('intro-salta').focus({preventScroll:true}); }catch(e){} }, 50);
+}
+function introTasto(e){ if(e.key==='Escape'){ e.preventDefault(); chiudiIntro(); } }
+function chiudiIntro(){
+  if(!INTRO_APERTA) return;
+  INTRO_APERTA=false;
+  document.removeEventListener('keydown', introTasto, true);
+  const el=document.getElementById('intro');
+  if(el){ const v=el.querySelector('video');
+    try{ if(v){ v.pause(); v.removeAttribute('src'); v.load(); } }catch(e){}   // smette di scaricare
+    el.classList.remove('on'); setTimeout(function(){ try{ el.remove(); }catch(e){} }, 400); }
+  INTRO_HERO_FERME.forEach(function(v){ try{ if(v.isConnected){ const p=v.play(); if(p && p.catch) p.catch(function(){}); } }catch(e){} }); INTRO_HERO_FERME=[];
+  try{ if(typeof musica==='function') musica(); }catch(e){}   // il tema entra in dissolvenza
+}
+function rivediIntro(){ apriIntro(); }
+try{
+  window.addEventListener('pointerdown', introPrimoTocco, {capture:true, passive:true});
+  window.addEventListener('touchend',    introPrimoTocco, {capture:true, passive:true});
+}catch(e){}
+
+/* ================================================================================================================
    L95-1 · OGNI CARTA NUOVA ENTRA, E ENTRA QUANDO SI VEDE.
    Prima la classe stava sulla SCATOLA e scattava sul cambio di firma dell'agenda: 8 entrate per 15 carte
    risolte, e 18 animazioni su 45 partivano sotto la piega (L94-2). Ora l'entrata è della carta, e la fa
@@ -1032,7 +1110,9 @@ function showSuonoHome(){
   mm.innerHTML=`<div class="mt" style="position:relative"><div class="kicker">${T('Suono')}</div><h2>${T('Audio, musica, ambiente')}</h2>`
     +`<button class="suono-x" onclick="hideMenu()" aria-label="${escAttr(T('Chiudi'))}">✕</button></div>`
     +audioControlliHtml()
-    +`<div class="contorno" style="font-size:11px;color:var(--mut);text-align:center;margin:4px auto 2px;max-width:300px">${T('Le stesse scelte del menu Partita. Restano su questo dispositivo.')}</div>`;
+    +`<div class="contorno" style="font-size:11px;color:var(--mut);text-align:center;margin:4px auto 2px;max-width:300px">${T('Le stesse scelte del menu Partita. Restano su questo dispositivo.')}</div>`
+    /* L124-1 · il video introduttivo, di nuovo: parte comunque (anche con rete leggera o movimento spento, è una scelta) */
+    +(typeof introDisponibile==='function' && introDisponibile() ? `<button class="intro-rivedi" onclick="rivediIntro()">${T('Rivedi l’introduzione')}</button>` : '');
   document.getElementById('menu').classList.add('on');
 }
 /* L120-1 · dopo un cambio (audio.js), ridisegna il pannello APERTO, quale che sia: prima ridisegnava sempre il menu Partita,
@@ -2727,12 +2807,17 @@ function tavoloCentro(i){
 function tavoloCapitale(){
   const cap=capitalePaese(), capN=senzaAccenti(cap), TE=PAESE.territori||[];
   for(let i=0;i<TE.length;i++){ if(senzaAccenti(TE[i].nome)===capN && luogoHaArea(i)){ const A=PAESE.mappa.aree[i], c=tavoloCentro(i);
-    return (A && A.cx!=null) ? [c[0], c[1]-(+A.r)*0.8] : c; } }   // la capitale-cerchio: il palazzo poggia sul bordo alto del cerchio, che gli sta davanti senza coprirlo
+    /* la capitale-cerchio: il palazzo poggia sul bordo alto del cerchio, che gli sta davanti senza coprirlo; la capitale-poligono
+       sul baricentro. L131-1: anche questo punto CEDE al bersaglio di un'altra città (Tokyo su Yokohama, Città del Messico su
+       Puebla, Buenos Aires su Rosario, Seul su Incheon); il nome del TERRITORIO fa da `stessa` (confronto esatto: col nome della
+       capitale il Brasile, «Brasilia» contro «Brasília», cederebbe dal proprio cerchio), così dal proprio cerchio non cede. */
+    return tavoloPalazzoCede((A && A.cx!=null) ? [c[0], c[1]-(+A.r)*0.8] : c, TE[i].nome); } }
   const tab=(S.scenario && TAVOLO_CAPITALI[S.scenario]) || TAVOLO_CAPITALI[S.paese] || {}, v=tab[cap];
   if(!v) return null;
   return Array.isArray(v) ? tavoloPalazzoCede(v, null) : tavoloPalazzoCede(v.xy, v.stessa);
 }
-/* L129-2 · il palazzo DALLA TABELLA cede al bersaglio del cerchio di un'altra città. Il disegno del palazzo è il riquadro opaco
+/* L129-2 · il palazzo cede al bersaglio del cerchio di un'altra città — dal L131-1 OGNI palazzo, dalla tabella e dall'area (la
+   capitale-area fa da `stessa` a sé: dal proprio cerchio non cede). Il disegno del palazzo è il riquadro opaco
    della pedina (lato 13% del viewBox, ancorata al punto con y−0,86·lato: l'opaco va da −0,63 a +0,12 del lato in verticale, per
    tutta la larghezza); il bersaglio della città è il più grande fra il suo cerchio e il cerchio di tocco (22 px nella scala reale,
    `TAVOLO_MIS`; senza misura, il cerchio). Se il palazzo tocca il bersaglio di un'altra città, si cerca il posto libero PIÙ
