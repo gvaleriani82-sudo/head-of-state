@@ -103,6 +103,15 @@ const SCENES = {
    sua scena. Contratto e condizioni (movimento «pieno», niente risparmio dati) in DESIGN-MOVIMENTO.md e ui.js. */
 const VIDEO_PRESENTI = ['home-hero'];
 
+/* ===== L113-2 — LE PEDINE DEL TAVOLO (`assets/tavolo/<nome>.webp`, 256 × 256 con trasparenza, ≤ 60 KB, appoggiate in
+   basso al centro). Terza lista-promessa, stesso contratto di AUDIO_PRESENTI e VIDEO_PRESENTI: il tavolo disegna SOLO
+   le pedine di questa lista (zero 404, e niente segnaposto inventati finché il file non c'è), e `.claude/verifica-asset.js`
+   tiene allineate lista e cartella. I nomi possibili sono i sette di PEDINE_NOMI (lo stile C di PROMPT-TAVOLO-CAMPIONI.md):
+   un nome fuori da lì è rosso. Le sorgenti stanno in `arte-sorgente/tavolo/` e si convertono con
+   `node .claude/tavolo-prova/converti-pedine.js`. Dove va ogni pedina lo decide `pedinaDi()` in ui.js. */
+const PEDINE_NOMI = ['palazzo','citta','industria','campagna','porto','universita','montagna','sede'];
+const PEDINE_PRESENTI = ['palazzo'];
+
 /* ===== L9-1 — SCENE DEI MOMENTI (NON card): fondi/illustrazioni per i modali di solo testo.
    Cablate direttamente nei render (intervista/notte/telefonata/finale) e nel selettore-scenario,
    MAI nel selettore-carta generico. Gli helper era-aware stanno in ui.js (dove vive eraCombacia). ===== */

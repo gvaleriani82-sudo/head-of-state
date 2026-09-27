@@ -177,7 +177,10 @@
         <div class="tab" data-t="stampa" data-i18n onclick="setTab('stampa')">Stampa</div>
       </nav>
     </header>
+    <!-- L113-2 · IL TAVOLO: un nodo solo, persistente; lo costruisce e lo aggiorna aggiornaTavolo() (ui.js) -->
+    <div id="tavolo" class="tavolo"></div>
     <main>
+      <div class="cassetto-testa"><span class="maniglia" onclick="setTab('tavolo')"></span><button class="cassetto-chiudi" onclick="setTab('tavolo')" aria-label="Chiudi">✕</button></div>
       <section class="sec on" id="sec-gov"></section>
       <section class="sec" id="sec-attorno"></section>
       <section class="sec" id="sec-paese"></section>
@@ -187,7 +190,7 @@
     </main>
     <div class="endbar"><div class="inner">
       <div class="ctx" id="ctx"></div>
-      <button class="btn" id="advbtn" data-i18n onclick="advanceMonth()">Avanza →</button>
+      <button class="btn" id="advbtn" data-i18n onclick="premiAvanza()">Avanza →</button>
     </div></div>
   </div>
 

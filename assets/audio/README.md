@@ -1,3 +1,4 @@
-# Suoni del gioco — cartella dei file (L95-3)
-I quattordici file sono quelli di AUDIO_MANIFEST in js/audio.js, generati da .claude/genera-audio.js: WAV mono 22,05 kHz, picco -3 dBFS. Un campione CC0 li può sostituire (.wav o .mp3).
-Un file che manca è silenzio, non un errore: dopo aver cambiato un file aggiorna AUDIO_MANIFEST e AUDIO_PRESENTI, e lancia node .claude/verifica-asset.js.
+# Suoni e musica del gioco — cartella dei file (L95-3, L114-1/2)
+Effetti: i quattordici nomi di AUDIO_MANIFEST in js/audio.js. Dal L114-2 tredici sono MP3 di ElevenLabs; `tocco.wav` resta il sintetico di .claude/genera-audio.js.
+Musica: gli undici brani di MUSICA_MANIFEST (mus-*.mp3, 192 kbps), stessa cartella.
+Un file che manca è silenzio, non un errore: dopo aver cambiato un file aggiorna il manifesto e AUDIO_PRESENTI / MUSICA_PRESENTI, e lancia node .claude/verifica-asset.js.

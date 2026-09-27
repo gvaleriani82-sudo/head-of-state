@@ -579,3 +579,45 @@
      SCATTI DI UN SECONDO: la muove `telTicSpento()` (game.js), scritta apposta in L95-1 perche' la barra era
      solo CSS e con l'animazione spenta sarebbe rimasta piena — cioe' il conto alla rovescia sarebbe sparito. */
 
+  /* ============================================================================================================
+     L113-2 — IL TAVOLO E I CASSETTI (DESIGN-TAVOLO.md). `#tavolo` è un nodo persistente fra header e main
+     (aggiornaTavolo, ui.js); con `#game.con-tavolo` il main diventa il CASSETTO che sale dal basso sopra il tavolo
+     (85% dell'altezza del tavolo, con la maniglia e la ✕), e senza `.cassetto-aperto` non c'è. La barra dei numeri,
+     le schede e «Avanza» restano dove sono. I colori del tavolo sono del MONDO, non dell'interfaccia: uguali nei
+     due temi (la terra non cambia col tema del telefono).
+     ============================================================================================================ */
+  :root{ --tv-tuo:#c4902a; --tv-avv:#4f6178; --tv-segno:#f2e3b8; --tv-bordo:#3f3d2a; --tv-mare:#3f5058; --endH:72px; }
+  .tavolo{ display:none; }
+  body.con-tavolo{ padding-bottom:0; }
+  #game.con-tavolo .tavolo{ display:block; position:relative; overflow:hidden;
+    height:calc(100vh - var(--hdrH,211px) - var(--endH,72px)); height:calc(100dvh - var(--hdrH,211px) - var(--endH,72px)); min-height:240px;
+    background:radial-gradient(ellipse 90% 70% at 30% 18%, rgba(255,226,170,.16), rgba(255,226,170,0) 60%), radial-gradient(ellipse at 50% 50%, #4a5c64 0%, var(--tv-mare) 70%, #2c3a40 100%); }
+  /* la luce calda e laterale del tavolo, sopra tutto e trasparente al tocco (in linea con le scene) */
+  #game.con-tavolo .tavolo::after{ content:''; position:absolute; inset:0; pointer-events:none;
+    background:radial-gradient(ellipse 75% 60% at 28% 22%, rgba(255,214,150,.18), rgba(255,214,150,0) 65%), radial-gradient(ellipse at 50% 55%, rgba(0,0,0,0) 55%, rgba(0,0,0,.28) 100%); }
+  .tv-svg{ display:block; width:100%; height:100%; overflow:visible; }   /* overflow: le isole oltre il riquadro (il Giappone) si vedono se c'è spazio attorno */
+  .tv-area{ cursor:pointer; transition:fill .6s ease, fill-opacity .6s ease; }
+  .tv-tocco{ fill:transparent; cursor:pointer; }
+  .tv-pedina{ filter:drop-shadow(0 1.5px 1.5px rgba(20,16,8,.55)); }
+  .tv-nota{ position:absolute; top:10px; left:12px; right:12px; z-index:2; padding:8px 12px; border-radius:10px;
+    background:rgba(28,26,20,.72); color:#f3ecd8; font-size:12.5px; line-height:1.35; }
+  .tv-nota b{ color:#f2d58a; }
+  .tv-info{ position:absolute; left:8px; right:8px; bottom:8px; z-index:3; max-height:55%; overflow:auto; overscroll-behavior:contain;
+    background:var(--panel); color:var(--txt); border:1px solid var(--line); border-radius:14px; padding-top:10px; box-shadow:0 -6px 20px rgba(0,0,0,.25); max-width:560px; margin:0 auto; }
+  .tv-chiudi{ float:right; width:44px; height:44px; margin:-8px 2px 0 6px; border:0; background:transparent; color:var(--mut); font-size:18px; cursor:pointer; }
+  .cassetto-testa{ display:none; }
+  #game.con-tavolo main{ position:fixed; left:0; right:0; bottom:var(--endH,72px); z-index:25; max-width:960px; margin:0 auto;
+    max-height:calc((100vh - var(--hdrH,211px) - var(--endH,72px)) * .85); max-height:calc((100dvh - var(--hdrH,211px) - var(--endH,72px)) * .85);
+    overflow:auto; overscroll-behavior:contain; background:var(--bg); border-radius:16px 16px 0 0; box-shadow:0 -10px 28px rgba(0,0,0,.28); padding-top:0; }
+  #game.con-tavolo:not(.cassetto-aperto) main{ display:none; }
+  #game.con-tavolo .cassetto-testa{ display:flex; align-items:center; justify-content:center; position:sticky; top:0; z-index:12; height:44px; margin:0 -16px 4px; background:var(--bg); }
+  .cassetto-testa .maniglia{ display:block; width:64px; height:44px; cursor:pointer; background:linear-gradient(var(--line2),var(--line2)) center/40px 5px no-repeat; }
+  .cassetto-testa .cassetto-chiudi{ position:absolute; right:6px; top:0; width:44px; height:44px; border:0; background:transparent; color:var(--mut); font-size:18px; cursor:pointer; }
+  #game.con-tavolo .sticky-top{ top:44px; }   /* dentro il cassetto la testata appiccicosa sta sotto la maniglia, non sotto l'header */
+  @keyframes cassettoSale{ from{ transform:translateY(40%); opacity:0; } to{ transform:none; opacity:1; } }
+  #game.con-tavolo main.sale{ animation:cassettoSale .26s cubic-bezier(.2,.7,.3,1); }
+  @media (prefers-reduced-motion: reduce){ .tv-area{ transition:none !important; } #game.con-tavolo main.sale{ animation:none !important; } }
+  /* RIDOTTO (L113-1 §5): il cambio di mano delle aree è informazione e resta come transizione di fill; il cassetto
+     che sale diventa una dissolvenza. SPENTO: tutto di colpo (la regola unica di sopra). */
+  html.mov-ridotto .tv-area{ transition:fill .6s ease, fill-opacity .6s ease !important; }
+  html.mov-ridotto #game.con-tavolo main.sale{ animation:secFade .12s ease !important; }

@@ -85,11 +85,15 @@ function riprendiFaseTutte(){ try{ document.querySelectorAll('#home-hero img, .a
    invisibile) e se ne segna l'ora; le volte dopo `currentTime` è l'ora trascorsa modulo la durata LETTA dal file.
    ================================================================================================================ */
 const VIDEO_DIR='assets/video/', VIDEO_T0={};
+/* la condizione di rete, una sola: risparmio dati, 2G, rete cellulare. La leggono le clip (sotto) e la musica (L114-2, audio.js) */
+function reteLeggera(){
+  try{ const c=navigator.connection;
+    if(c && (c.saveData || /2g/.test(c.effectiveType||'') || c.type==='cellular')) return true; }catch(e){}
+  return false;
+}
 function videoConsentito(){
   if(motionReduced()) return false;
-  try{ const c=navigator.connection;
-    if(c && (c.saveData || /2g/.test(c.effectiveType||'') || c.type==='cellular')) return false; }catch(e){}
-  return true;
+  return !reteLeggera();
 }
 /* nome della clip per un'immagine di scena (il basename del .webp), o '' se la clip non c'è / non si può */
 function clipPer(nome){
@@ -168,7 +172,9 @@ function ossCarte(){
            in più. ⚠ Se una carta portasse tutti e due i marcatori VINCE CRONACA: resta muta. */
         try{ const it=(S.agenda||[]).filter(function(x,i){ return chiaveCarta(x,i)===k; })[0];
           const d=it && it.data;
-          if(!(d && d.cronaca) && typeof suona==='function') suona(d && d.snodo ? 'snodo' : 'carta'); }catch(e){}
+          if(!(d && d.cronaca) && typeof suona==='function') suona(d && d.snodo ? 'snodo' : 'carta');
+          /* L116-1 · il secondo suono del gesto, dalla specie o dal kicker (suonoCarta, audio.js: mai cronaca, mai tragedia) */
+          const _sc=(typeof suonoCarta==='function') ? suonoCarta(it) : null; if(_sc && typeof suona==='function') suona(_sc); }catch(e){}
       };
       el.addEventListener('animationstart', suIngresso);
     });
@@ -895,7 +901,12 @@ function showPartita(){
     +`<div class="contorno" style="font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--mut);text-align:center;margin:8px 0 4px">${T('Musica')}</div>
     <div class="seg" id="musica-seg" style="max-width:200px;margin:0 auto 10px;">
       <button class="${(typeof musicaAccesa==='function'&&musicaAccesa())?'on':''}" onclick="setMusica('accesa')">${T('Accesa')}</button>
-      <button class="${(typeof musicaAccesa==='function'&&musicaAccesa())?'':'on'}" onclick="setMusica('spenta')">${T('Spenta')}</button></div>`;
+      <button class="${(typeof musicaAccesa==='function'&&musicaAccesa())?'':'on'}" onclick="setMusica('spenta')">${T('Spenta')}</button></div>`
+    /* L116-2 — l'AMBIENTE, sotto la musica e separato: localStorage `hos_ambiente`, mai in S; con l'audio spento tace comunque */
+    +`<div class="contorno" style="font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--mut);text-align:center;margin:8px 0 4px">${T('Ambiente sonoro')}</div>
+    <div class="seg" id="ambiente-seg" style="max-width:200px;margin:0 auto 10px;">
+      <button class="${(typeof ambienteAcceso==='function'&&ambienteAcceso())?'on':''}" onclick="setAmbiente('acceso')">${T('Acceso')}</button>
+      <button class="${(typeof ambienteAcceso==='function'&&ambienteAcceso())?'':'on'}" onclick="setAmbiente('spento')">${T('Spento')}</button></div>`;
   h+=`<div class="contorno" style="font-size:11px;color:var(--mut);text-align:center;margin:0 auto 10px;max-width:300px">${T('Con <b>ridotto</b> restano solo le dissolvenze; con <b>spento</b> nulla si muove. La scelta resta su questo dispositivo.')}${movimentoScelto()?'':(motionSistemaReduce()?(' '+T('(il tuo dispositivo chiede meno movimento: si parte da ridotto)')):'')}</div>`;
   h+=_auSeg;
   h+=`<div class="mtext">${T(aMetaMese()?"Sei a metà mese: il salvataggio riprenderà <b>dall'inizio del mese corrente</b>.":"Fotografia al confine del mese corrente.")}</div>`;
@@ -1099,8 +1110,11 @@ function dlt(now,then,d=1,inv=false){
   const diff=now-then; if(Math.abs(diff)<0.05) return `<span style="color:var(--mut2)">–</span>`;
   const good=inv?diff<0:diff>0; return `<span style="color:${good?'var(--pos)':'var(--neg)'}">${sign(diff,d)}</span>`;
 }
-function setTab(t){S.tab=t; S.ministeroAperto=null; S.mappaAperta=null; S.partitoAperto=null; SALA_SUB=null; render();}   // cambiare tab chiude pagina-ministero, mappa, pagina-partito e composizione-dichiarazione (niente pagine fantasma)
-function apriMinistero(id){ S.ministeroAperto=id; render(); }
+function setTab(t){ if(S.tab===t && t!=='tavolo' && tavoloAttivo()) t='tavolo';   // L113-2: toccare la scheda aperta richiude il cassetto
+  if(S.tab!==t && t!=='tavolo' && typeof suona==='function') suona('scheda');   // L116-1: il cassetto che si apre
+  S.tab=t; S.ministeroAperto=null; S.mappaAperta=null; S.partitoAperto=null; SALA_SUB=null; render();}   // cambiare tab chiude pagina-ministero, mappa, pagina-partito e composizione-dichiarazione (niente pagine fantasma)
+function apriMinistero(id){ if(S.ministeroAperto!==id && typeof suona==='function') suona('bussare');   // L116-1: la porta del ministero
+  S.ministeroAperto=id; render(); }
 function chiudiMinistero(){ S.ministeroAperto=null; QSEL=null; render(); }   // QSEL: azzera la zona selezionata della mappa-quartieri uscendo
 
 /* --- Render principale --- */
@@ -1172,7 +1186,7 @@ function render(){
   if(S.lingua===undefined) S.lingua='it';   // migrazione APT: i salvataggi pre-i18n partono in italiano
   if(S.tab==='ind'||S.tab==='con') S.tab='paese';   // guardia per stati pre-fusione: PRIMA del toggle delle sezioni (sec-ind/sec-con non esistono più)
   applyPaese();   // rete di sicurezza: la striscia-bandiera segue sempre PAESE, qualunque percorso porti qui (idempotente)
-  try{ document.documentElement.style.setProperty('--hdrH', document.querySelector('header').offsetHeight+'px'); }catch(e){}   // la testata sticky (.sticky-top) si appoggia all'altezza REALE dell'header
+  try{ const hh=document.querySelector('header').offsetHeight; if(hh>0) document.documentElement.style.setProperty('--hdrH', hh+'px'); }catch(e){}   // L113-2: a #game nascosto è 0 (il tavolo ne prende l'altezza): resta l'ultima buona   // la testata sticky (.sticky-top) si appoggia all'altezza REALE dell'header
   document.getElementById('yr').textContent=S.year;
   /* Volto in-game: ritrattino del giocatore nell'header (statico, immagine già inline). Si nasconde se non scelto. */
   const hav=document.getElementById('hdr-avatar'); if(hav){ const pim=avatarImg(S.personaggio&&S.personaggio.avatar);
@@ -1226,9 +1240,18 @@ function render(){
       : (noNaz && t!=='gov' && t!=='paese') ? 'none' : '';                       // Segretario/diplomatico: Governo+Paese
   });
   lastDots={}; att.forEach(function(a){ lastDots[a.tab]=1; });   // E5: fotografa i pallini di questo render → il pulse scatta solo alla PROSSIMA comparsa
+  /* L113-2 · il tavolo è la casa: S.tab 'tavolo' = nessun cassetto aperto. Dove il tavolo non c'è (attivista, Segretario,
+     diplomatico, un paese senza mappa) 'tavolo' torna 'gov' e le schede restano pagine come prima. */
+  const tv=tavoloAttivo(); if(S.tab==='tavolo' && !tv) S.tab='gov';
+  const cch=document.querySelector('.cassetto-chiudi'); if(cch) cch.setAttribute('aria-label', T('Chiudi'));
+  const gm=document.getElementById('game'); gm.classList.toggle('con-tavolo', tv); gm.classList.toggle('cassetto-aperto', tv && S.tab!=='tavolo'); document.body.classList.toggle('con-tavolo', tv);
+  try{ const eh=document.querySelector('.endbar').offsetHeight; if(eh>0) document.documentElement.style.setProperty('--endH', eh+'px'); }catch(e){}   // a #game ancora nascosto l'altezza è 0: resta l'ultima buona (o i 72 del CSS)
   document.querySelectorAll('.sec').forEach(el=>el.classList.remove('on'));
-  const secEl=document.getElementById('sec-'+S.tab); secEl.classList.add('on');
-  if(lastTab!==S.tab){ secEl.classList.remove('secfade'); void secEl.offsetWidth; secEl.classList.add('secfade'); lastTab=S.tab; }   // dissolvenza solo al cambio reale di scheda
+  const secEl=document.getElementById('sec-'+S.tab); if(secEl) secEl.classList.add('on');
+  if(secEl && lastTab!==S.tab){ secEl.classList.remove('secfade'); void secEl.offsetWidth; secEl.classList.add('secfade');
+    if(tv && (lastTab==null || lastTab==='tavolo')){ const mn=document.querySelector('#game > main'); mn.classList.remove('sale'); void mn.offsetWidth; mn.classList.add('sale'); mn.scrollTop=0; } }   // il cassetto sale solo quando si apre, non fra una scheda e l'altra
+  lastTab=S.tab;
+  if(tv) aggiornaTavolo();   // dissolvenza solo al cambio reale di scheda
   if(S.tab==='gov') renderGov();
   if(S.tab==='attorno') renderAttorno();
   if(S.tab==='paese') renderPaese();
@@ -1236,7 +1259,7 @@ function render(){
   if(S.tab==='par') renderPartiti();
   if(S.tab==='stampa') renderStampaTab();
   // endbar
-  document.getElementById('advbtn').disabled = pend>0;
+  document.getElementById('advbtn').disabled = pend>0 && !(tv && S.tab!=='gov');   // L113-2: dal tavolo il bottone apre le decisioni
   const next = S.month<12?T(MONTHS[S.month]):T(MONTHS[0])+' '+(S.year+1);
   document.getElementById('ctx').innerHTML = pend>0
     ? `<b>${pend}</b> ${T(pend>1?'decisioni in agenda':'decisione in agenda')}`
@@ -1244,6 +1267,7 @@ function render(){
   document.getElementById('advbtn').textContent = T(pend>0?'Decidi prima →':'Avanza →');
   playAnims();   // moto vecchio→nuovo sui numeri/barre appena resi (no-op sotto reduced-motion)
   if(typeof musica==='function') musica();   // L114-1: il brano segue lo stato (idempotente: agisce solo sul cambio)
+  if(typeof ambiente==='function') ambiente();   // L116-2: l'ambiente segue il luogo (idempotente, come la musica)
 }
 function keyCard(l,k,num,v,dec,signed,d){return `<div class="key"><div class="lab">${T(l)}</div><div class="val" data-anim="num:${k}" data-to="${num}" data-dec="${dec}" data-sign="${signed?1:0}">${v}</div><div class="dlt">${d}</div></div>`;}
 
@@ -2268,9 +2292,178 @@ function setPol(id,i){
    bordo blu = area simbolo. Le città sono cerchietti SOPRA le regioni. Tocco → pannello info.
    Se PAESE.mappa manca, la scheda Partiti tiene la lista testuale (degrado con grazia). ===== */
 let MAPSEL=null;   // area selezionata (transitoria, mai in S)
-function apriMappa(){ S.mappaAperta=true; MAPSEL=null; if(S.visite) S.visite.mappa=(S.visite.mappa||0)+1; render(); }   // L64-2: la visita si conta (misura del cantiere)
+function apriMappa(){ if(tavoloAttivo()){ MAPSEL=null; if(S.visite) S.visite.mappa=(S.visite.mappa||0)+1; setTab('tavolo'); return; }   // L113-2: la mappa È il tavolo — «Apri la mappa» chiude i cassetti
+  S.mappaAperta=true; MAPSEL=null; if(S.visite) S.visite.mappa=(S.visite.mappa||0)+1; render(); }   // L64-2: la visita si conta (misura del cantiere)
 function chiudiMappa(){ S.mappaAperta=null; render(); }
-function selArea(i){ MAPSEL=(MAPSEL===i)?null:i; render(); }
+function selArea(i){ MAPSEL=(MAPSEL===i)?null:i; if(tavoloAttivo() && S.tab!=='tavolo'){ MAPSEL=i; setTab('tavolo'); return; } render(); }   // L113-2: toccare il tavolo con un cassetto aperto lo richiude e seleziona
+/* ===== L113-1b · IL LUOGO DI UNA CARTA — funzione PURA, per il tavolo (L113-3 la userà; oggi non la chiama nessuna resa).
+   luogoCarta(item) → {tipo, id, via}: `tipo` ∈ territorio (id = indice in PAESE.territori/S.territori, `area` dice se ha un
+   poligono o un cerchio) · palazzo · bordo · casa · pedina (id = il carattere: città, industria, campagna, porto, università,
+   montagna) · punto (x, y nel viewBox dello sfondo, terra SENZA area, deterministico dall'id della carta) · ripiego (il palazzo,
+   marcato). `via` dice quale regola ha deciso (per le misure).
+   L'ORDINE (DESIGN-TAVOLO § «Il luogo delle famiglie senza luogo»): esplicito → R4 casa → R2 bordo → R1 palazzo → R3 pedina
+   (l'ordine delle regole di L113-1) → le righe per famiglia di Cowork → ripiego.
+   ⚠ PURA: non scrive in S, non chiama Math.random né il seme del gioco (il punto nasce da un hash dell'id della carta), legge il
+   testo SORGENTE (italiano, prima di T e delle sostituzioni: così il luogo non cambia con la lingua).
+   ⚠ LE ESPRESSIONI stanno QUI e solo qui: `.claude/misura-tavolo-luoghi.js` chiama questa funzione e le prova con la sua riga
+   SANE (ogni parola-chiave sulla sua stringa di prova). Scritte a mano (lezione del 4/9); le R1-R4 leggono i KICKER e restano senza
+   confini, il LESSICO delle pedine legge il testo e dal L113-1c ha il confine d'inizio scritto nella classe, non col confine di parola delle espressioni. ===== */
+const LUOGO_KIND_PALAZZO=['budget','proposta','conflitto','rimpasto','ministro','premier','puntopartito','scandalo','inchiesta','stampa','occasione','attivista'];
+const LUOGO_KIND_CASA=['personale','arco'];
+const LUOGO_RE={
+  /* R1 · il palazzo: le cerimonie di governo e di partito e i kicker del potere centrale (+ «Ombre», le carte di corridoio) */
+  palazzo:/palazzo|bilancio|governo|costituzion|stampa|partit|parlament|aula|giustizia|corte|elezion|campagna elettorale|consenso|sondagg|congresso|istituz|capitale|quirinale|eliseo|cancell|premier|ministr|riform|coalizion|ombre/i,
+  /* R2 · il bordo: esteri e difesa, i kicker del mondo (+ la diplomazia: foro multilaterale, accordo bilaterale, affari consolari) */
+  esteri:/mondo|europa|difesa|nazioni|ester|alleanza|washington|mosca|diplomaz|guerra|atlantic|onu|nato|immigraz|frontier|multilateral|bilateral|consolar/i,
+  /* R3 · la pedina di carattere: il kicker parla dell'economia reale, del lavoro, dei servizi */
+  carattere:/lavoro|industri|economia|fabbric|campagn|agricolt|contadin|scuol|universit|sanit|ospedal|ambient|energia|porto|miniera|trasport|infrastru|casa|edilizia|pension|welfare|tasse|fisco|prezzi|inflaz|moneta|valuta|banca|sciopero|sindacat/i,
+  /* R4 · la casa del giocatore */
+  casa:/vita privata|famiglia|salute|figli|coscienza|matrimon|personale/i,
+  /* i segnaposto del sorgente che nominano il palazzo */
+  sede:/%CAPITALE|%ACAPITALE|%SEDE/
+};
+const LUOGO_MIN_CARATTERE=/economia|lavoro|welfare|sanita|istruzione|infrastrutture|ambiente|agricoltura/;
+/* il carattere di una pedina dal lessico (kicker e testo): il primo che risponde, in quest'ordine; nessuno → città.
+   L113-1c · CONFINE D'INIZIO su ogni radice (il carattere prima non è una lettera, come in luogoNominato): «rapporto»,
+   «trasporto», «supporto» non sono più porti. Alcune radici hanno anche il confine di FINE (porto, mare, nave, tram, negozi…):
+   «portoghese», «maresciallo», «tramite», «negoziato» restano fuori. Tolte `costa` (quasi sempre il verbo: ci sono «coste» e
+   «costier»), `lavoro` (il mercato del lavoro, il ministero), `rifugi` (i rifugiati), `raccolt` (la raccolta firme),
+   `centrale` da sola (la banca centrale: resta la centrale nucleare, elettrica, a carbone). Scritte a mano (lezione del 4/9):
+   la prova è la riga SANE di `.claude/misura-tavolo-luoghi.js`, una frase per radice, e la riga NON-PROVA dei falsi amici. */
+const LUOGO_LESSICO=[
+  ['porto',      /(?:^|[^a-zà-öø-ÿ])(?:mare(?![a-zà-öø-ÿ])|spiagg|porto(?![a-zà-öø-ÿ])|portual|nave(?![a-zà-öø-ÿ])|navi(?![a-zà-öø-ÿ])|naval|pesca(?![a-zà-öø-ÿ])|pescator|pescherecc|coste(?![a-zà-öø-ÿ])|costier|balnear|traghett|marina(?![a-zà-öø-ÿ])|marittim)/i],
+  ['montagna',   /(?:^|[^a-zà-öø-ÿ])(?:montagn|neve(?![a-zà-öø-ÿ])|nevicat|alpin|alpi(?![a-zà-öø-ÿ])|valang|ghiacciai|vette(?![a-zà-öø-ÿ])|baita|baite|sciistic|funivi)/i],
+  ['industria',  /(?:^|[^a-zà-öø-ÿ])(?:fabbric|industri|operai|acciai|siderurg|altoforn|miniera|miniere|minator|cantier|stabiliment|sciopero|scioperi|sindacat|energia|centrale nucleare|centrali nucleari|centrale elettrica|centrale a carbone)/i],
+  ['campagna',   /(?:^|[^a-zà-öø-ÿ])(?:campagn|contadin|vendemmi|agricol|agrari|grano(?![a-zà-öø-ÿ])|vigne|stalla|stalle|trattor|allevator|allevament|siccit|mietitur|braccianti|ambient)/i],
+  ['università', /(?:^|[^a-zà-öø-ÿ])(?:scuol|universit|ateneo|atenei|student|maestra(?![a-zà-öø-ÿ])|maestre(?![a-zà-öø-ÿ])|maestri(?![a-zà-öø-ÿ])|maestro(?![a-zà-öø-ÿ])|esami|laurea|laureat|istruzion|liceo|licei)/i],
+  ['città',      /(?:^|[^a-zà-öø-ÿ])(?:stadio|stadi(?![a-zà-öø-ÿ])|cinema|teatr|piazza|piazze|tram(?![a-zà-öø-ÿ])|metropolitan|quartier|traffico|negozio|negozi(?![a-zà-öø-ÿ])|festival|concerto|concerti|museo|musei|ospedal|sanit|periferi)/i]
+];
+/* le espressioni che contengono una radice del lessico ma non dicono un luogo: si tolgono dal testo PRIMA del lessico */
+const LUOGO_ESCLUSI=/campagna elettorale|campagne elettorali|banca centrale|banche centrali|raccolta firme|raccolta di firme|raccolta delle firme|quartier generale/gi;
+/* L113-1c · titolo, testo, registro ed ETICHETTE delle scelte; NON le righe-effetto (`c.e`): sono scritte in gergo di effetti
+   («il ceto medio non te lo perdona», «gli industriali prendono nota») e non dicono dove si sta — misurato in L113-1c. */
+function luogoTesto(it){
+  const d=(it&&it.data)||{}, parti=[d.t, d.text, d.logx];
+  (d.ch||[]).forEach(function(c){ parti.push(c.l); });
+  return parti.filter(function(x){ return typeof x==='string'; }).join(' · ');
+}
+function luogoFamiglia(it){ const id=String(((it&&it.data)||{}).id||''); const m=/^[a-z]+[0-9]*/i.exec(id); return m?m[0]:''; }
+function luogoHaArea(i){ const A=PAESE.mappa && PAESE.mappa.aree && PAESE.mappa.aree[i]; return !!(A && (A.d || A.cx!=null)); }
+function luogoTerr(i, via){ return { tipo:'territorio', id:i, area:luogoHaArea(i), via:via }; }
+/* un nome della mappa nel testo, a parola intera (i caratteri accanto non sono lettere): «Roma» non si trova in «Romagna» */
+function luogoNominato(txt){
+  const TE=PAESE.territori||[], lettera=/[A-Za-zÀ-ÖØ-öø-ÿ]/;
+  let migliore=-1;
+  TE.forEach(function(te, i){
+    const n=String(te.nome||'').replace(/^(il|lo|la|l'|i|gli|le)\s*/i,'').trim(); if(n.length<4) return;
+    let k=txt.indexOf(n);
+    while(k>=0){ const pr=txt.charAt(k-1), dp=txt.charAt(k+n.length);
+      if(!(pr && lettera.test(pr)) && !(dp && lettera.test(dp))){ if(migliore<0 || (luogoHaArea(i) && !luogoHaArea(migliore))) migliore=i; return; }
+      k=txt.indexOf(n, k+1); }
+  });
+  return migliore;
+}
+function luogoCarattere(txt){ const t=String(txt||'').replace(LUOGO_ESCLUSI,' · '); for(let i=0;i<LUOGO_LESSICO.length;i++){ if(LUOGO_LESSICO[i][1].test(t)) return LUOGO_LESSICO[i][0]; } return null; }
+/* la città più grande: nei dati non c'è un peso, quindi la prima città con un'area nell'ordine del roster (le aree-simbolo stanno
+   prima, e la prima è di norma la capitale); senza, il palazzo */
+function luogoCitta(via){
+  const TE=PAESE.territori||[];
+  for(let i=0;i<TE.length;i++){ if(TE[i].tipo==='città' && luogoHaArea(i)) return luogoTerr(i, via); }
+  return { tipo:'palazzo', via:via };
+}
+/* `ob` «Territorio»: il territorio con un'area dove il mio partito è più debole — la quota locale del modello di decidiTerritori
+   (50 + lean × asse del blocco × 4 + spinta × 0,5) SENZA l'onda e senza il caso; a parità il primo per indice. Non salvato. */
+function luogoDebole(via){
+  const TE=PAESE.territori||[]; let aB=0; try{ aB=asseBlocco(); }catch(e){ aB=0; }
+  let best=-1, bv=Infinity;
+  for(let i=0;i<TE.length;i++){ if(!luogoHaArea(i)) continue;
+    const t=(S.territori&&S.territori[i])||{}, v=50 + (TE[i].lean||0)*aB*4 + (t.spinta||0)*0.5;
+    if(v<bv){ bv=v; best=i; } }
+  return best>=0 ? luogoTerr(best, via) : { tipo:'palazzo', via:via };
+}
+/* ── il punto nella terra senza area: lo sfondo e le aree sono path M/L/Z assoluti (Natural Earth, genera-mappe.js) ── */
+let LUOGO_GEO=null, LUOGO_GEO_DI=null;          // cache transitoria della geometria, per mappa (mai in S)
+function luogoAnelli(d){
+  const anelli=[]; let cur=null; const re=/([MLZ])\s*(-?[0-9.]+)?[ ,]?(-?[0-9.]+)?/gi; let m;
+  while((m=re.exec(String(d||'')))){ const c=m[1].toUpperCase();
+    if(c==='M'){ cur=[[+m[2],+m[3]]]; anelli.push(cur); } else if(c==='L' && cur){ cur.push([+m[2],+m[3]]); } else if(c==='Z'){ cur=null; } }
+  return anelli;
+}
+function luogoDentro(anelli, x, y){        // pari-dispari su tutti gli anelli: i buchi restano fuori
+  let dentro=false;
+  anelli.forEach(function(P){ for(let i=0, j=P.length-1; i<P.length; j=i++){
+    if(((P[i][1]>y)!==(P[j][1]>y)) && (x < (P[j][0]-P[i][0])*(y-P[i][1])/(P[j][1]-P[i][1]) + P[i][0])) dentro=!dentro; } });
+  return dentro;
+}
+function luogoGeo(){
+  const M=PAESE.mappa; if(!M || !M.sfondo) return null;
+  if(LUOGO_GEO_DI===M) return LUOGO_GEO;
+  const vb=String(M.viewBox||'0 0 100 100').split(/[ ,]+/).map(Number);
+  const aree=(M.aree||[]).map(function(A){ return !A ? null : A.d ? { anelli:luogoAnelli(A.d) } : (A.cx!=null ? { cx:+A.cx, cy:+A.cy, r:+A.r } : null); });
+  LUOGO_GEO={ vb:vb, sfondo:luogoAnelli(M.sfondo), aree:aree }; LUOGO_GEO_DI=M;
+  return LUOGO_GEO;
+}
+function luogoHash(s){ let h=2166136261; s=String(s); for(let i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h, 16777619); } return h>>>0; }
+function luogoPunto(chiave, via){
+  const G=luogoGeo(); if(!G) return null;
+  let h=luogoHash(chiave)||1;
+  const passo=function(){ h^=h<<13; h>>>=0; h^=h>>>17; h^=h<<5; h>>>=0; return h/4294967296; };   // xorshift sul hash: niente Math.random
+  let soloTerra=null;
+  for(let k=0;k<400;k++){
+    const x=G.vb[0]+passo()*G.vb[2], y=G.vb[1]+passo()*G.vb[3];
+    if(!luogoDentro(G.sfondo, x, y)) continue;
+    if(!soloTerra) soloTerra=[x,y];
+    const inArea=G.aree.some(function(A){ return A && (A.anelli ? luogoDentro(A.anelli, x, y) : ((x-A.cx)*(x-A.cx)+(y-A.cy)*(y-A.cy) <= A.r*A.r)); });
+    if(!inArea) return { tipo:'punto', x:Math.round(x*10)/10, y:Math.round(y*10)/10, via:via };
+  }
+  return soloTerra ? { tipo:'punto', x:Math.round(soloTerra[0]*10)/10, y:Math.round(soloTerra[1]*10)/10, via:via+' (dentro un\'area)' } : null;
+}
+function luogoCarta(item){
+  try{
+    if(!item || typeof PAESE==='undefined' || !PAESE) return { tipo:'ripiego', via:'nessun paese' };
+    const d=item.data||{}, kind=item.kind, fam=luogoFamiglia(item), kick=String(d.kick||''), min=String(d.min||item.min||'');
+    const txt=luogoTesto(item);
+    /* 1 · ESPLICITO */
+    if(kind==='intermedia'){
+      const TE=PAESE.territori||[], ris=item.ris||{}, tocca=ris.tocca||(item.ev&&item.ev.tocca)||'tutti';
+      const cambiate=(ris.aree||[]).map(function(a){ return TE.findIndex(function(te){ return te.nome===a.nome; }); }).filter(function(i){ return i>=0 && luogoHaArea(i); });
+      if(cambiate.length) return luogoTerr(cambiate[0], 'intermedia');
+      for(let i=0;i<TE.length;i++){ if((tocca==='tutti' || TE[i].tipo===tocca) && luogoHaArea(i)) return luogoTerr(i, 'intermedia'); }
+      return { tipo:'palazzo', via:'intermedia' };
+    }
+    if(kind==='locale' && S.locale && typeof S.locale.terrIdx==='number') return luogoTerr(S.locale.terrIdx, 'locale');
+    let src=txt; (d.ch||[]).forEach(function(c){ if(typeof c.f==='function') src+=' '+c.f.toString(); });
+    if(/territorioChiama/.test(src) && S.territorioChiama && typeof S.territorioChiama.idx==='number') return luogoTerr(S.territorioChiama.idx, 'territorio che chiama');
+    const nom=luogoNominato(txt);
+    if(nom>=0) return luogoTerr(nom, 'nomina un territorio');
+    if(LUOGO_RE.sede.test(src)) return { tipo:'palazzo', via:'segnaposto della sede' };
+    /* 2 · LE REGOLE DI L113-1 (R4, R2, R1, R3) */
+    if(LUOGO_KIND_CASA.indexOf(kind)>=0 || LUOGO_RE.casa.test(kick)) return { tipo:'casa', via:'R4 casa' };
+    if(min==='esteri' || min==='difesa' || fam==='ci' || LUOGO_RE.esteri.test(kick)) return { tipo:'bordo', via:'R2 bordo' };   // L113-1c: le crisi internazionali (`ci`) al bordo
+    if(LUOGO_KIND_PALAZZO.indexOf(kind)>=0 || LUOGO_RE.palazzo.test(kick)) return { tipo:'palazzo', via:'R1 palazzo' };
+    if(LUOGO_RE.carattere.test(kick) || LUOGO_MIN_CARATTERE.test(min)) return { tipo:'pedina', id:luogoCarattere(kick+' · '+txt)||'città', via:'R3 carattere' };
+    /* 3 · LE FAMIGLIE (Cowork, 26/9 sera), in quest'ordine */
+    /* i beat (`lg`) e, dal L113-1c, i pilastri-cronaca dal MARCATORE dichiarato (`cronaca:true`, lo stesso dell'audio), non da una
+       lista di prefissi: pedina dal testo, altrimenti un punto sulla terra. Una tragedia (tono grave) non arriva mai a «casa». */
+    if(/^lg/.test(fam) || d.cronaca===true){
+      const chi=(d.cronaca===true && !/^lg/.test(fam)) ? 'cronaca' : 'beat';
+      const car=luogoCarattere(txt); if(car) return { tipo:'pedina', id:car, via:chi+': pedina dal testo' };
+      const p=luogoPunto(d.id||d.t||'', chi+': punto'); if(p) return p;
+    }
+    if(fam==='o' || fam==='om' || fam==='opp'){
+      if(/territorio/i.test(kick)) return luogoDebole('opposizione: territorio');
+      if(/società civile/i.test(kick)) return luogoCitta('opposizione: società civile');
+      return { tipo:'palazzo', via:'opposizione: l\'aula' };
+    }
+    if(fam==='ob'){
+      if(/territorio/i.test(kick)) return luogoDebole('ob: territorio');
+      if(/identit/i.test(kick)) return { tipo:'casa', via:'ob: identità' };
+    }
+    if(fam==='du' || fam==='ong') return luogoCitta(fam+': la città più grande');
+    /* 4 · RIPIEGO: il palazzo, marcato */
+    return { tipo:'ripiego', via:'ripiego' };
+  }catch(e){ return { tipo:'ripiego', via:'errore: '+e.message }; }
+}
 function leanLabel(l){ return T(l<=-2?'storicamente di sinistra':l===-1?'tende a sinistra':l===0?'contendibile':l===1?'tende a destra':'storicamente di destra'); }
 function renderMappaSVG(){
   const M=PAESE.mappa, TE=PAESE.territori, asseTuo=part(S.partito).asse;
@@ -2292,6 +2485,150 @@ function renderMappaSVG(){
   }
   if(chiamaIdx!=null) lastTerrPulse=1; else lastTerrPulse=null;   // E5: fotografa il pulse mostrato → alla prossima resa è fermo; reset quando l'invito finisce (il prossimo pulserà)
   return h+`</svg>`;
+}
+/* ===== L113-2 · IL TAVOLO — il paese come schermata di casa (DESIGN-TAVOLO.md § L113-1 §4 e § «L113-2 · quello che c'è»).
+   ⚑ UN NODO SOLO CHE NON SI RIFÀ. `#tavolo` sta in index.html fra l'header e il main; il suo `<svg>` si costruisce UNA volta per
+   mappa (`costruisciTavolo`, chiave: l'oggetto `PAESE.mappa`, il numero dei territori e il paese — quindi si rifà da solo al
+   cambio di paese, alla ricostruzione dei territori di una tappa e dopo un `applySnap`) e a ogni `render()` `aggiornaTavolo()`
+   ne cambia solo gli ATTRIBUTI. È la risposta al paletto dei due render nello stesso task (L95-1): l'elemento resta lo stesso,
+   quindi la transizione del `fill` di un'area che cambia mano parte dal colore vecchio e non muore al render successivo.
+   I due figli testuali (`.tv-nota`, `.tv-info`) si riscrivono: sono testo, non movimento.
+   ⚑ GLI STRATI, dal basso: la terra (lo sfondo del paese riempito dal `<pattern>` della texture) → le aree-regione con la
+   velatura del blocco → le pedine → le aree-città (cerchi) → i bersagli di tocco trasparenti. Le città stanno SOPRA le pedine:
+   il palazzo non copre mai il cerchio della capitale.
+   ⚑ LA TEXTURE: finché le texture dipinte non ci sono (`C-terra`, `C-mare`), un fondo PROCEDURALE sobrio nel tono (terra
+   olivastra spenta a chiazze, mare ardesia nel CSS del contenitore) — nessun asset inventato. Arrivata la texture, cambia il
+   contenuto del `<pattern id="tv-terra">` e basta.
+   ⚑ LE PEDINE: solo quelle di `PEDINE_PRESENTI` (scenes.js, guardata da verifica-asset.js) — oggi il palazzo. Dove va ogni
+   pedina lo dice `pedinaDi(i)`; la regola delle sovrapposizioni è `tavoloPedine()`.
+   ⚑ DOVE C'È: ai livelli con la scheda Partiti e la mappa del paese (1, 2 e 3: `tavoloAttivo()`); l'attivista, il Segretario e
+   il diplomatico tengono le loro superfici come prima, e un paese senza mappa torna alle schede (S.tab 'tavolo' → 'gov'). ===== */
+let TAVOLO_DI=null;          // la chiave della mappa costruita (transitoria, mai in S)
+let TAVOLO_CHIAMA=null, TAVOLO_RIPROVA=null;      // l'area che pulsava all'ultimo aggiornamento (il pulse parte quando la classe arriva, una volta)
+/* le capitali che non sono un'area della mappa: le coordinate nel viewBox, ricavate dalla proiezione di genera-mappe.js
+   (x e y sono lineari in lon e lat: adattate sulle città-cerchio note, errore ≤ 0,06 unità; gli Stati Uniti, con una città
+   sola, dai parametri della proiezione). Chiave: lo scenario per le porte con una mappa sua, altrimenti il paese. */
+const TAVOLO_CAPITALI={
+  usa:{ 'Washington':[131.1,37.0] }, australia:{ 'Canberra':[125,103.1] }, india:{ 'Nuova Delhi':[37.8,31.2] },
+  sudafrica:{ 'Pretoria':[77.8,28.3] }, canada:{ 'Ottawa':[123.9,55.5] }, brasile:{ 'Brasilia':[69.1,57.8] }, nigeria:{ 'Abuja':[44.5,45] },
+  argentina:{ 'Buenos Aires':[60.3,64.8] }, germania:{ 'Berlino':[81.4,44.4], 'Bonn':[14.7,74.5] },
+  de1950:{ 'Bonn':[14.7,74.4], 'Berlino':[81.5,44.4] }, de1960:{ 'Bonn':[14.7,74.4], 'Berlino':[81.5,44.4] }, de1970:{ 'Bonn':[14.7,74.4], 'Berlino':[81.5,44.4] }
+};
+function tavoloAttivo(){ return !!(S && PAESE && PAESE.mappa && PAESE.mappa.aree && [1,2,3].indexOf(S.livello)>=0); }
+function tavoloVB(){ return String(PAESE.mappa.viewBox||'0 0 100 100').split(/[ ,]+/).map(Number); }
+/* il punto di un'area: il centro del cerchio, o il baricentro dell'anello più grande del poligono */
+function tavoloCentro(i){
+  const A=PAESE.mappa.aree[i]; if(!A) return null;
+  if(A.cx!=null) return [+A.cx, +A.cy];
+  let best=null, ba=0;
+  luogoAnelli(A.d).forEach(function(P){ let a=0, cx=0, cy=0;
+    for(let k=0, j=P.length-1; k<P.length; j=k++){ const f=P[j][0]*P[k][1]-P[k][0]*P[j][1]; a+=f; cx+=(P[j][0]+P[k][0])*f; cy+=(P[j][1]+P[k][1])*f; }
+    if(Math.abs(a)>ba){ ba=Math.abs(a); best=a?[cx/(3*a), cy/(3*a)]:P[0]; } });
+  return best;
+}
+/* il palazzo sta sulla capitale (`capitalePaese()`: segue anche la capitale cambiata a una tappa): prima un territorio con
+   quel nome e un'area, poi la tabella delle capitali, altrimenti niente palazzo (dichiarato, nessun punto inventato) */
+function tavoloCapitale(){
+  const cap=capitalePaese(), TE=PAESE.territori||[];
+  for(let i=0;i<TE.length;i++){ if(TE[i].nome===cap && luogoHaArea(i)){ const A=PAESE.mappa.aree[i], c=tavoloCentro(i);
+    return (A && A.cx!=null) ? [c[0], c[1]-(+A.r)*0.8] : c; } }   // la capitale-cerchio: il palazzo poggia sul bordo alto del cerchio, che gli sta davanti senza coprirlo
+  const tab=(S.scenario && TAVOLO_CAPITALI[S.scenario]) || TAVOLO_CAPITALI[S.paese] || {};
+  return tab[cap] || null;
+}
+/* la pedina di un territorio: il carattere dichiarato (`carattere`, campo facoltativo che nessun paese ha ancora) o, per le
+   città, la pedina città; le regioni senza carattere non hanno pedina. Solo se il file è in PEDINE_PRESENTI. */
+function pedinaDi(i){
+  const TE=(PAESE.territori||[])[i]; if(!TE || !luogoHaArea(i)) return null;
+  const n=TE.carattere || (TE.tipo==='città' ? 'citta' : null);
+  return (n && typeof PEDINE_PRESENTI!=='undefined' && PEDINE_PRESENTI.indexOf(n)>=0) ? n : null;
+}
+/* le pedine da disegnare, con la REGOLA DELLE SOVRAPPOSIZIONI: il palazzo per primo, poi i territori nell'ordine del roster;
+   una pedina il cui punto cade a meno di mezza pedina da una già messa NON si disegna (vince chi viene prima). */
+function tavoloPedine(lato){
+  const out=[], vicina=function(p){ return out.some(function(q){ return Math.hypot(q.x-p[0], q.y-p[1]) < lato*0.5; }); };
+  if(typeof PEDINE_PRESENTI!=='undefined' && PEDINE_PRESENTI.indexOf('palazzo')>=0){ const c=tavoloCapitale(); if(c) out.push({ nome:'palazzo', x:c[0], y:c[1], id:'cap' }); }
+  (PAESE.territori||[]).forEach(function(_, i){ const n=pedinaDi(i); if(!n) return; const c=tavoloCentro(i); if(c && !vicina(c)) out.push({ nome:n, x:c[0], y:c[1], id:'t'+i }); });
+  return out;
+}
+function costruisciTavolo(box){
+  const M=PAESE.mappa, TE=PAESE.territori, vb=tavoloVB(), u=vb[2]/24, lato=vb[2]*0.13;
+  let h=`<svg class="tv-svg" viewBox="${M.viewBox}" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${escAttr(T('Mappa del controllo politico'))}">`;
+  /* la terra procedurale: un fondo olivastro spento con chiazze più chiare e più scure, un modulo di 1/24 della larghezza */
+  h+=`<defs><pattern id="tv-terra" patternUnits="userSpaceOnUse" width="${u}" height="${u}">`+
+     `<rect width="${u}" height="${u}" fill="#7b7852"/>`+
+     `<circle cx="${u*.22}" cy="${u*.3}" r="${u*.26}" fill="#848158" opacity=".7"/>`+
+     `<circle cx="${u*.74}" cy="${u*.68}" r="${u*.3}" fill="#737049" opacity=".7"/>`+
+     `<circle cx="${u*.62}" cy="${u*.18}" r="${u*.1}" fill="#6a6843" opacity=".6"/>`+
+     `<circle cx="${u*.2}" cy="${u*.82}" r="${u*.08}" fill="#8b875e" opacity=".6"/>`+
+     `</pattern></defs>`;
+  h+=`<path class="tv-terra" d="${M.sfondo}" fill="url(#tv-terra)" stroke="#4d4b33" stroke-width="${(vb[2]/160).toFixed(2)}" stroke-linejoin="round"/>`;
+  const regioni=[], citta=[];
+  TE.forEach(function(_, i){ const A=M.aree[i]; if(!A) return; (A.d?regioni:citta).push(i); });
+  regioni.forEach(function(i){ h+=`<path class="tv-area" data-i="${i}" d="${M.aree[i].d}" onclick="selArea(${i})"/>`; });
+  h+=`<g class="tv-pedine">`+tavoloPedine(lato).map(function(p){
+      return `<image class="tv-pedina" data-p="${p.id}" href="assets/tavolo/${p.nome}.webp" width="${lato.toFixed(2)}" height="${lato.toFixed(2)}" x="${(p.x-lato/2).toFixed(2)}" y="${(p.y-lato*0.86).toFixed(2)}" pointer-events="none"/>`; }).join('')+`</g>`;
+  citta.forEach(function(i){ const A=M.aree[i]; h+=`<circle class="tv-area tv-citta" data-i="${i}" cx="${A.cx}" cy="${A.cy}" r="${A.r}" pointer-events="none"/>`; });
+  /* i bersagli di tocco: un cerchio trasparente sopra ogni città e ogni regione piccola; il raggio lo fissa aggiornaTavolo
+     dalla scala reale (≥ 22 px, cioè un bersaglio di 44) */
+  citta.concat(regioni).forEach(function(i){ const c=tavoloCentro(i); if(c) h+=`<circle class="tv-tocco" data-i="${i}" cx="${c[0].toFixed(2)}" cy="${c[1].toFixed(2)}" r="0" onclick="selArea(${i})"/>`; });
+  h+=`</svg>`;
+  box.innerHTML=`<div class="tv-nota" aria-live="polite"></div>${h}<div class="tv-info"></div>`;
+  TAVOLO_CHIAMA=null;
+}
+function aggiornaTavolo(){
+  const box=document.getElementById('tavolo'); if(!box || !tavoloAttivo()) return;
+  /* l'altezza del tavolo = lo schermo meno header e barra: si rimisurano QUI, a header già riempito (render() la prende
+     all'inizio, prima dei numeri e delle schede: al primo mese era 30 px più bassa del vero) */
+  try{ const hh=document.querySelector('header').offsetHeight, eh=document.querySelector('.endbar').offsetHeight;
+    if(hh>0) document.documentElement.style.setProperty('--hdrH', hh+'px'); if(eh>0) document.documentElement.style.setProperty('--endH', eh+'px'); }catch(e){}
+  const chiave=[PAESE.mappa, (PAESE.territori||[]).length, S.paese, S.scenario||''];
+  if(!TAVOLO_DI || TAVOLO_DI.some(function(v, k){ return v!==chiave[k]; }) || !box.querySelector('svg')){ costruisciTavolo(box); TAVOLO_DI=chiave; }
+  const TE=PAESE.territori, asseTuo=part(S.partito).asse, svg=box.querySelector('svg');
+  const chiamaIdx=(S.territorioChiama && typeof S.territorioChiama.idx==='number') ? S.territorioChiama.idx : null;
+  svg.querySelectorAll('.tv-area').forEach(function(el){
+    const i=+el.getAttribute('data-i'), t=S.territori[i]||{}, tuo=compatibile(t.partito, asseTuo, S.partito), L=Math.abs(TE[i].lean||0);
+    const sel=(MAPSEL===i), chiama=(chiamaIdx===i), lav=!!t.spinta, citta=!!el.getAttribute('r');
+    /* la VELATURA del blocco: oro il tuo, ardesia l'avversario; la trasparenza dice il radicamento (lean) */
+    el.setAttribute('fill', tuo ? 'var(--tv-tuo)' : 'var(--tv-avv)');
+    el.setAttribute('fill-opacity', citta ? (L>=2?0.95:L===1?0.85:0.75) : (L>=2?0.55:L===1?0.42:0.3));
+    el.setAttribute('stroke', chiama ? 'var(--acc-ink)' : ((sel||TE[i].simbolo||lav) ? 'var(--tv-segno)' : 'var(--tv-bordo)'));
+    el.setAttribute('stroke-width', (chiama?2.2:(sel?1.8:(lav?1.5:(TE[i].simbolo?0.9:0.45))))*tavoloVB()[2]/100);
+    el.classList.toggle('mappa-chiama', chiama);
+    if(chiama && TAVOLO_CHIAMA!==i) el.classList.add('pulse');   // il pulse parte all'arrivo della classe, una volta (E5)
+    if(!chiama) el.classList.remove('pulse');
+  });
+  TAVOLO_CHIAMA=chiamaIdx;
+  /* il palazzo segue la capitale (una tappa può cambiarla: Bonn → Berlino) */
+  const pal=svg.querySelector('[data-p="cap"]');
+  if(pal){ const c=tavoloCapitale(), lato=+pal.getAttribute('width');
+    if(c){ pal.setAttribute('x', (c[0]-lato/2).toFixed(2)); pal.setAttribute('y', (c[1]-lato*0.86).toFixed(2)); pal.style.display=''; } else pal.style.display='none'; }
+  /* i bersagli di tocco: ≥ 22 px di raggio nella scala REALE (dopo il layout; a tavolo nascosto non si misura) */
+  const w=svg.getBoundingClientRect().width, vb=tavoloVB();
+  if(w===0 && !TAVOLO_RIPROVA){ TAVOLO_RIPROVA=requestAnimationFrame(function(){ TAVOLO_RIPROVA=null; try{ if(tavoloAttivo()){ const hh=document.querySelector('header').offsetHeight, eh=document.querySelector('.endbar').offsetHeight; if(hh>0) document.documentElement.style.setProperty('--hdrH', hh+'px'); if(eh>0) document.documentElement.style.setProperty('--endH', eh+'px'); aggiornaTavolo(); } }catch(e){} }); }   // il gioco si mostra dopo il render: si rimisura al fotogramma dopo
+  if(w>0){ const k=Math.min(w/vb[2], svg.getBoundingClientRect().height/vb[3]), rMin=22/k;
+    svg.querySelectorAll('.tv-tocco').forEach(function(el){ const i=+el.getAttribute('data-i'), A=PAESE.mappa.aree[i];
+      let serve=rMin;
+      if(A && A.d){ const G=luogoAnelli(A.d); let a=1e9,b=1e9,z=-1e9,y2=-1e9; G.forEach(function(P){ P.forEach(function(p){ if(p[0]<a)a=p[0]; if(p[0]>z)z=p[0]; if(p[1]<b)b=p[1]; if(p[1]>y2)y2=p[1]; }); });
+        if(Math.min(z-a, y2-b)*k >= 44) serve=0; }             // la regione è già un bersaglio grande: niente cerchio
+      el.setAttribute('r', serve>0 ? serve.toFixed(2) : 0);
+      /* un'area piccola si tocca SOLO dal suo bersaglio (il disegno sotto è più piccolo di 44 px); una grande dal disegno */
+      const vis=svg.querySelector('path.tv-area[data-i="'+i+'"]');
+      if(vis){ if(serve>0){ vis.removeAttribute('onclick'); vis.setAttribute('pointer-events','none'); } else { vis.setAttribute('onclick','selArea('+i+')'); vis.removeAttribute('pointer-events'); } }
+      if(serve<=0) el.removeAttribute('onclick'); else el.setAttribute('onclick','selArea('+i+')'); }); }
+  /* la nota in alto: la campagna sul territorio o il territorio che chiama; il pannello dell'area in basso */
+  const camp=(typeof inCampagna==='function' && inCampagna());
+  const nota=box.querySelector('.tv-nota'), info=box.querySelector('.tv-info');
+  nota.innerHTML = camp ? T('Campagna sul territorio: <b>%N punti</b> da spendere sulla mappa, %M mesi al voto.').replace('%N',campSforzo()).replace('%M',mesiAllaFine())
+    : (chiamaIdx!=null && MAPSEL!==chiamaIdx) ? `<b>${T('Il territorio ti chiama')}</b> · ${cap(nomeTerr(TE[chiamaIdx]))}` : '';
+  nota.style.display=nota.innerHTML?'':'none';
+  if(MAPSEL!=null && S.tab==='tavolo'){ info.innerHTML=`<button class="tv-chiudi" onclick="selArea(${MAPSEL})" aria-label="${escAttr(T('Chiudi'))}">✕</button>`+renderMappaInfo(); info.style.display=''; }
+  else { info.innerHTML=''; info.style.display='none'; }
+}
+window.addEventListener('resize', function(){ try{ if(S && tavoloAttivo()) aggiornaTavolo(); }catch(e){} });
+/* il bottone in fondo: con decisioni aperte e il tavolo in vista, apre il cassetto Governo (prima era spento) */
+function premiAvanza(){
+  if(S && S.agenda && S.agenda.some(function(a){ return !a.resolved; })){ if(S.tab!=='gov') setTab('gov'); return; }
+  advanceMonth();
 }
 function renderMappaInfo(){
   if(MAPSEL==null) return `<div style="padding:4px 14px 12px;font-size:12px;color:var(--mut2)">${T("Tocca un'area per i dettagli.")}</div>`;

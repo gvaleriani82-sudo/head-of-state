@@ -2534,12 +2534,12 @@ const PILASTRI_LINEA = [
     ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
   /* L111-2 · i due pilastri della linea tedesca del '60 (testi di Cowork, byte per byte). Cifre verificate da Code sulla fonte
      (en.wikipedia, 26/9): alluvione del 16-17 febbraio 1962, 315 morti ad Amburgo, un sesto della città sotto l'acqua, il senatore
-     di polizia chiama l'esercito oltre i suoi poteri (⚠ la fonte dice «circa 50 falle» prima dell'allarme, il testo «sessanta punti»:
-     non toccato, segnalato) · Luisenthal 7 febbraio 1962, 299 morti, oltre 600 metri, grisou e polvere di carbone, «la sciagura
+     di polizia chiama l'esercito oltre i suoi poteri (la cifra delle falle è stata TOLTA in L115-1: la fonte dice «circa 50 falle»,
+     il testo diceva «sessanta punti», ora «decine di punti» — decisione di Cowork: una precisione di fonte, non una riscrittura) · Luisenthal 7 febbraio 1962, 299 morti, oltre 600 metri, grisou e polvere di carbone, «la sciagura
      mineraria più grave della Repubblica federale». Un pilastro per mese: Amburgo a febbraio, Luisenthal a marzo (il testo lo dice). */
   { id:'pde60_amburgo', linea:LINEA_DE, anno:1962, mese:2, era:'de1960', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
     t:'Amburgo sott\'acqua',
-    text:'Nella notte fra il 16 e il 17 febbraio una tempesta spinge il mare del Nord su per l\'Elba e le dighe cedono in sessanta punti. Un sesto di Amburgo finisce sott\'acqua mentre la gente dorme, soprattutto nei quartieri di baracche e casette dove vivevano ancora gli sfollati della guerra: più di trecento morti. Il senatore dell\'interno chiama l\'esercito e gli alleati senza aspettare nessuno, e la città se lo ricorderà.',
+    text:'Nella notte fra il 16 e il 17 febbraio una tempesta spinge il mare del Nord su per l\'Elba e le dighe cedono in decine di punti. Un sesto di Amburgo finisce sott\'acqua mentre la gente dorme, soprattutto nei quartieri di baracche e casette dove vivevano ancora gli sfollati della guerra: più di trecento morti. Il senatore dell\'interno chiama l\'esercito e gli alleati senza aspettare nessuno, e la città se lo ricorderà.',
     logx:'Il mare rompe le dighe dell\'Elba: Amburgo sott\'acqua, più di trecento morti.',
     ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
   { id:'pde60_luisenthal', linea:LINEA_DE, anno:1962, mese:3, era:'de1960', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
@@ -13685,7 +13685,7 @@ const SNODI_STORICI = {
   /* L97-2 · i quattro snodi del decennio '60 (più le tre versioni dall'aula). Saldatura a `fr1970`: questi
      quattro flag sono quello che la porta del '70 dovrà leggere (D11). */
   ref62:    { storico:['vinto'], conforme:'sul referendum del 1962', diverge:{ 'parlamento':'La riforma del Presidente eletto dal popolo è passata per il Parlamento, e il Senato l’ha fermata: il capo dello Stato resta eletto dai notabili.', 'rinviato':'La riforma del Presidente è stata rinviata con l’Algeria appena chiusa, e non è più tornata.' } },
-  ref62Opp: { storico:['censura'], conforme:'sulla censura dell’ottobre 1962', diverge:{ 'no':'La sola censura che poteva passare in questa Repubblica è passata senza il suo voto.', 'astenuto':'Sulla censura dell’ottobre 1962 si è astenuto, e nessuno gliene ha dato né merito né colpa.' } },
+  ref62Opp: { storico:['censura'], conforme:'sulla censura dell’ottobre 1962', diverge:{ 'no':'La sola censura che poteva passare in questa Repubblica è passata senza il suo voto.', 'astenuto':'Sulla censura dell’ottobre 1962 ha scelto l’astensione, e nessuno gliene ha dato né merito né colpa.' } },
   nato:     { storico:['fuori'], conforme:'sulla NATO', diverge:{ 'negoziato':'Con la NATO si è negoziato invece di uscire: più bandiere francesi sui comandi, e i comandi al loro posto.', 'dentro':'La Francia è rimasta nel comando integrato della NATO, e la forza di dissuasione è nata dentro l’Alleanza.' } },
   maggio:   { storico:['sciolto'], conforme:'sul maggio 1968', diverge:{ 'sgombero':'Il maggio 1968 è stato sgomberato con la forza: l’ordine è tornato in una notte, e una generazione non l’ha dimenticato.', 'referendum':'Al maggio 1968 si è risposto con un referendum sulla partecipazione che non si è mai tenuto.' } },
   maggioOpp:{ storico:['piazza'], conforme:'sulla censura del maggio 1968', diverge:{ 'tavolo':'Nel maggio 1968 ha votato la censura e ha scelto il tavolo invece della piazza.', 'no':'Nel maggio 1968 non ha votato la censura: non con le barricate sotto le finestre.' } },
@@ -13708,7 +13708,7 @@ const SNODI_STORICI = {
      dalla coabitazione e le privatizzazioni per ordinanza dal governo di destra — tutti e due conformi (scheda §I-A).
      `rigore83Opp` non ha un esito storico marcato, come `barreOpp`. */
   riforme81:   { storico:['tutto'], conforme:'sulle riforme del 1981', diverge:{ 'sociali':'Nel 1981 sono passate le riforme sociali, ma le banche e i grandi gruppi sono rimasti privati.', 'rinvio':'Il programma del 1981 è stato rinviato per mettere prima a posto i conti, e chi aveva votato il cambiamento non l’ha visto arrivare.', 'apertura':'Nel 1981 la sinistra è rimasta fuori dall’Eliseo, e il Presidente ha aperto al centro con riforme sociali sue.', 'rigore':'Nel 1981 la sinistra è rimasta fuori dall’Eliseo, e il Presidente ha scelto il rigore dal primo anno.', 'referendum':'Nel 1981 la sinistra è rimasta fuori dall’Eliseo, e il Presidente ha portato il paese a votare sulle istituzioni.' } },
-  riforme81Opp:{ storico:['contro'], conforme:'sulle riforme del 1981, dall’opposizione', diverge:{ 'sociali':'Sulle riforme del 1981 ha votato quelle sociali e non le nazionalizzazioni.', 'astensione':'Sulle riforme del 1981 si è astenuto, e sono passate senza la sua firma.' } },
+  riforme81Opp:{ storico:['contro'], conforme:'sulle riforme del 1981, dall’opposizione', diverge:{ 'sociali':'Sulle riforme del 1981 ha votato quelle sociali e non le nazionalizzazioni.', 'astensione':'Sulle riforme del 1981 ha scelto l’astensione, e sono passate senza la sua firma.' } },
   rigore83:    { storico:['rigore'], conforme:'sulla svolta del rigore del 1983', diverge:{ 'altra':'Nel 1983 il paese è uscito dal sistema monetario europeo e ha chiuso le frontiere ai capitali.', 'rinvio':'Nel 1983 il franco è stato svalutato per la terza volta, e la scelta fra rigore e altra politica è stata rinviata.' } },
   rigore83Opp: { storico:[], conforme:'sulla svolta del rigore, dall’opposizione', diverge:{ 'censura':'Contro il rigore del 1983 ha presentato la censura in aula.', 'tavolo':'Sul rigore del 1983 ha scelto il tavolo e ha trattato.', 'sciopero':'Contro il rigore del 1983 ha chiamato lo sciopero generale.' } },
   scuola84:    { storico:['ritirata'], conforme:'sulla scuola libera del 1984', diverge:{ 'avanti':'La legge sulla scuola libera è passata nel 1984, contro la piazza più grande del dopoguerra.', 'referendum':'La scuola libera è stata portata a referendum nel 1984.' } },
@@ -13725,11 +13725,11 @@ const SNODI_STORICI = {
      e la segnava «riga morta». Deciso da Cowork (25/9 sera): resta fuori, il flag vive nei titoli. */
   /* L105-4 · i quattro snodi del decennio 2000 e le due versioni dall'aula. `crisi08frOpp` non ha un esito storico marcato. */
   aprile02:    { storico:['partito'], conforme:'sul 21 aprile', diverge:{ 'apertura':'Dopo il 21 aprile il Presidente ha aperto il governo all’altro campo.', 'proporzionale':'Dopo il 21 aprile il Presidente ha proposto la proporzionale, e nessuno ha più avuto la maggioranza da solo.' } },
-  aprile02Opp: { storico:['unita'], conforme:'sul 21 aprile, dall’opposizione', diverge:{ 'centro':'Dopo il 21 aprile ha cercato il centro, senza i comunisti.', 'quartieri':'Dopo il 21 aprile è tornato nei quartieri, ad ascoltare chi aveva votato gli estremi.' } },
+  aprile02Opp: { storico:['unita'], conforme:'sul 21 aprile, dall’opposizione', diverge:{ 'centro':'Dopo il 21 aprile ha cercato il centro, senza i comunisti.', 'quartieri':'Dopo il 21 aprile ha riportato il partito nei quartieri, ad ascoltare chi aveva votato gli estremi.' } },
   tce05:       { storico:['referendum'], conforme:'sul trattato europeo del 2005', diverge:{ 'parlamento':'Il trattato europeo del 2005 è passato dal Parlamento, senza referendum.', 'rinvio':'Il trattato europeo del 2005 è stato rinviato, e gli altri paesi lo hanno ratificato senza la Francia.' } },
   banlieue05:  { storico:['emergenza'], conforme:'sulle banlieue del 2005', diverge:{ 'piano':'Alle banlieue del 2005 ha risposto con un piano per i quartieri, senza stato d’emergenza.', 'entrambi':'Alle banlieue del 2005 ha risposto col coprifuoco e con un piano per i quartieri insieme.' } },
   crisi08fr:   { storico:['rilancio'], conforme:'sulla crisi del 2008', diverge:{ 'rigore':'Alla crisi del 2008 ha risposto col rigore, e la disoccupazione è salita per tre anni.', 'banche':'Nella crisi del 2008 ha salvato le banche, e basta.' } },
-  crisi08frOpp:{ storico:[], conforme:'sulla crisi del 2008, dall’opposizione', diverge:{ 'censura':'Contro il piano per la crisi del 2008 ha presentato la censura in aula.', 'tavolo':'Sul piano per la crisi del 2008 ha scelto il tavolo e ha trattato.', 'sciopero':'Contro il piano per la crisi del 2008 è sceso in piazza.' } },
+  crisi08frOpp:{ storico:[], conforme:'sulla crisi del 2008, dall’opposizione', diverge:{ 'censura':'Contro il piano per la crisi del 2008 ha presentato la censura in aula.', 'tavolo':'Sul piano per la crisi del 2008 ha scelto il tavolo e ha trattato.', 'sciopero':'Contro il piano per la crisi del 2008 ha portato il partito in piazza.' } },
   /* L109-2 · i quattro snodi del decennio tedesco '50 e le due versioni dall'aula (frasi di Code, sul modello francese). */
   notaStalin52: { storico:['occidente'], conforme:'sulla Nota di Mosca del 1952', diverge:{ 'elezioni':'Alla Nota di Mosca del 1952 ha risposto chiedendo elezioni libere sotto controllo internazionale.', 'trattativa':'Sulla Nota di Mosca del 1952 ha trattato davvero: l’unità in cambio della neutralità.' } },
   riarmo55:     { storico:['nato'], conforme:'sul riarmo del 1955', diverge:{ 'europeo':'Nel 1955 ha voluto solo un esercito europeo, e ha aspettato Parigi.', 'neutrale':'Nel 1955 ha proposto la neutralità armata, fuori dall’Alleanza.' } },
@@ -14402,7 +14402,7 @@ const POTERI_OPP_EV = {
         S.log.unshift({t:T('L\'Algeria'),x:T('Ha votato no ai poteri speciali.')}); } },
     { l:'Ti astieni e lo spieghi', e:'Nessuno ti segue, nessuno ti attacca',
       f:function(){ S.poteriSpecialiOpp='astenuto'; baseFr(-2);
-        S.log.unshift({t:T('L\'Algeria'),x:T('Astenuto sui poteri speciali.')}); } },
+        S.log.unshift({t:T('L\'Algeria'),x:T('Astensione sui poteri speciali.')}); } },
   ],
 };
 /* S2 · SUEZ, DA PARIGI (novembre 1956). Stesso flag `S.suez` e stessa riga di `SNODI_STORICI` del pilota inglese:
@@ -14416,14 +14416,14 @@ const SUEZ_FR_EV = {
   ch:[
     { l:'Vai con Londra, e ti fermi quando si ferma Londra', e:'La storia · l\'operazione dura una settimana, il Canale resta agli altri, e il paese scopre di non contare da solo',
       f:function(){ S.suez='fermato'; gdFr('cetomedio',-3); gdFr('imprenditori',-2); stampad(-3);
-        S.log.unshift({t:T('Il Canale'),x:T('Fermato a Suez quando Londra si è fermata.')}); } },
+        S.log.unshift({t:T('Il Canale'),x:T('Ha fermato la spedizione a Suez quando Londra si è fermata.')}); } },
     { l:'Tratti prima di sparare', e:'Nessuna spedizione · la destra grida alla viltà, i coloni d\'Algeria prendono nota, i conti reggono',
       f:function(){ S.suez='trattato'; gdFr('cetomedio',-4); gdFr('cattolici',-2); gdFr('lavoratori',2);
         S.log.unshift({t:T('Il Canale'),x:T('Ha trattato su Suez, senza sparare.')}); } },
     { l:'Vai avanti da solo', e:'Londra si ritira, tu no · il franco crolla in dieci giorni, il paese resta senza alleati, e il Canale resta comunque agli altri',
       f:function(){ S.suez='avanti'; S.francoSubito=true;
         ['lavoratori','pensionati','cetomedio','giovani','cattolici'].forEach(function(g){ gdFr(g,-3); }); gdFr('imprenditori',-5);
-        S.log.unshift({t:T('Il Canale'),x:T('Andato avanti a Suez da solo, e il conto l\'ha pagato il franco.')}); } },
+        S.log.unshift({t:T('Il Canale'),x:T('Ha tirato dritto a Suez senza Londra, e il conto l\'ha pagato il franco.')}); } },
   ],
 };
 /* S3 · LA REPUBBLICA CAMBIA (maggio 1958) — lo snodo di chiusura (D1). Qualunque scelta, il motore non cambia: la
@@ -14441,7 +14441,7 @@ const REPUBBLICA_EV = {
         S.log.unshift({t:T('La Repubblica'),x:T('Ha resistito al maggio 1958, fino alla fine.')}); } },
     { l:'Ti dimetti: che decida un altro', e:'Il governo dopo di te lo chiama · la Repubblica cambia lo stesso, e tu non ci sei',
       f:function(){ S.repubblicaCambia='dimesso'; gdFrTutti(-2); repd(-5);
-        S.log.unshift({t:T('La Repubblica'),x:T('Si è dimesso nel maggio 1958.')}); } },
+        S.log.unshift({t:T('La Repubblica'),x:T('Ha rassegnato le dimissioni nel maggio 1958.')}); } },
   ],
 };
 const REPUBBLICA_OPP_EV = {
@@ -14633,7 +14633,7 @@ const REF62_OPP_EV = {
         S.log.unshift({t:T('La Repubblica'),x:T('Non ha votato la censura del 1962.')}); } },
     { l:'Ti astieni', e:'Nessuno ti segue, nessuno ti attacca',
       f:function(){ S.ref62Opp='astenuto'; baseFr60(-3);
-        S.log.unshift({t:T('La Repubblica'),x:T('Astenuto sulla censura del 1962.')}); } },
+        S.log.unshift({t:T('La Repubblica'),x:T('Astensione sulla censura del 1962.')}); } },
   ],
 };
 /* S2 · LA NATO (marzo 1966) — lo snodo di politica estera, come Suez nel '50. Dall'opposizione non c'è versione
@@ -14652,7 +14652,7 @@ const NATO_EV = {
         S.log.unshift({t:T('L\'Alleanza'),x:T('Ha negoziato con la NATO senza uscire.')}); } },
     { l:'Resti: l\'Alleanza prima dell\'orgoglio', e:'Gli alleati ringraziano senza dirlo · i tuoi gridano al tradimento',
       f:function(){ S.nato='dentro'; gdFr60('cetomedio',-3); gdFr60('imprenditori',2); baseFr60(-5); fidFr60(2);
-        S.log.unshift({t:T('L\'Alleanza'),x:T('È rimasto nel comando integrato della NATO.')}); } },
+        S.log.unshift({t:T('L\'Alleanza'),x:T('Ha tenuto la Francia nel comando integrato della NATO.')}); } },
   ],
 };
 /* S3 · MAGGIO (maggio 1968) — lo snodo sociale, e il gemello G1 del pilastro «Il maggio».
@@ -14681,7 +14681,7 @@ const MAGGIO_OPP_EV = {
   ch:[
     { l:'La voti e vai in piazza', e:'La storia · la base e i giovani con te · il ceto medio guarda le barricate e ha paura',
       f:function(){ S.maggioOpp='piazza'; baseFr60(6); gdFr60('giovani',5); gdFr60('cetomedio',-4);
-        S.log.unshift({t:T('Il paese'),x:T('Ha votato la censura del maggio 1968 ed è sceso in piazza.')}); } },
+        S.log.unshift({t:T('Il paese'),x:T('Ha votato la censura del maggio 1968 e ha portato il partito in piazza.')}); } },
     { l:'La voti, ma il tavolo prima della piazza', e:'I sindacati ti riconoscono · i ragazzi delle facoltà molto meno',
       f:function(){ S.maggioOpp='tavolo'; baseFr60(2); gdFr60('lavoratori',3);
         S.log.unshift({t:T('Il paese'),x:T('Ha votato la censura del maggio 1968 e ha trattato.')}); } },
@@ -14710,7 +14710,7 @@ const REF69_EV = {
         S.log.unshift({t:T('La Repubblica'),x:T('Ha legato la carica al referendum del 1969, e l\'ha perso.')}); } },
     { l:'Il referendum senza la carica', e:'Il no vince lo stesso · resti, indebolito, e la maggioranza comincia a guardare oltre',
       f:function(){ S.ref69='resta'; repd(-4 + malusRef69()); gdFr60('cetomedio',-3); baseFr60(-4); fidFr60(-2);
-        S.log.unshift({t:T('La Repubblica'),x:T('Ha perso il referendum del 1969 ed è rimasto.')}); } },
+        S.log.unshift({t:T('La Repubblica'),x:T('Ha perso il referendum del 1969 e non ha lasciato la carica.')}); } },
     { l:'Ritiri il referendum', e:'Nessun voto, nessuna riforma · i giornali scrivono che il generale ha avuto paura',
       f:function(){ S.ref69='ritirato'; repd(-3 + malusRef69()); gdFr60('cetomedio',-2); fidFr60(-1);
         S.log.unshift({t:T('La Repubblica'),x:T('Ha ritirato il referendum del 1969.')}); } },
@@ -14899,7 +14899,7 @@ const CAMPAGNA78_EV = {
   ch:[
     { l:'Resta sopra le parti', e:'La storia · il Presidente non scende in campo, e lascia che la sinistra si divida da sola',
       f:function(){ S.campagna78='sopra'; repd(2); gdFr70('cetomedio',2); fidFr70(1);
-        S.log.unshift({t:T('La maggioranza'),x:T('È rimasto sopra le parti nel 1977.')}); } },
+        S.log.unshift({t:T('La maggioranza'),x:T('Ha tenuto la presidenza sopra le parti nel 1977.')}); } },
     { l:'La campagna della paura: il collettivismo alle porte', e:'Il ceto medio e le imprese si stringono attorno a te · i lavoratori e i ragazzi no, e i giornali lo scrivono',
       f:function(){ S.campagna78='paura'; gdFr70('cetomedio',4); gdFr70('imprenditori',3); gdFr70('lavoratori',-4); gdFr70('giovani',-3); stampad(-2);
         S.log.unshift({t:T('La maggioranza'),x:T('Ha fatto la campagna della paura nel 1978.')}); } },
@@ -15136,7 +15136,7 @@ const RIFORME81_OPP_EV = {
         S.log.unshift({t:T('Il programma'),x:T('Ha votato le riforme sociali dell\'81 e non le nazionalizzazioni.')}); } },
     { l:'Ti astieni: che passino senza la tua firma', e:'Nessuno ti attacca, nessuno ti ringrazia',
       f:function(){ S.riforme81Opp='astensione'; baseFr80(-1);
-        S.log.unshift({t:T('Il programma'),x:T('Si è astenuto sul programma dell\'81.')}); } },
+        S.log.unshift({t:T('Il programma'),x:T('Ha scelto l\'astensione sul programma dell\'81.')}); } },
   ],
 };
 /* S2 dall'aula (scheda §A): come BARRE_OPP_EV del '76, con le stesse scelte e gli stessi effetti. */
@@ -15272,7 +15272,7 @@ const PIANO95_OPP_EV = {
   ch:[
     { l:'In piazza, con gli scioperanti', e:'La storia · la tua base e i lavoratori con te · il ceto medio che cammina per andare al lavoro no',
       f:function(){ S.piano95Opp='sciopero'; baseFr90(6); gdFr90('lavoratori',5); gdFr90('cetomedio',-5); gdFr90('imprenditori',-3);
-        S.log.unshift({t:T('La previdenza'),x:T('È sceso in piazza contro il piano del 1995.')}); } },
+        S.log.unshift({t:T('La previdenza'),x:T('Ha portato il partito in piazza contro il piano del 1995.')}); } },
     { l:'Il tavolo: una riforma concordata', e:'Qualcosa si ottiene · e la base lo chiama resa',
       f:function(){ S.piano95Opp='tavolo'; baseFr90(-3); gdFr90('lavoratori',1); gdFr90('imprenditori',1);
         S.log.unshift({t:T('La previdenza'),x:T('Ha trattato sul piano del 1995.')}); } },
@@ -15438,7 +15438,7 @@ const CRISI08FR_OPP_EV = {
         S.log.unshift({t:T('L\'economia'),x:T('Ha trattato sul piano contro la crisi del 2008.')}); } },
     { l:'In piazza', e:'Il paese si ferma un giorno · il ceto medio e le imprese non te lo perdonano',
       f:function(){ S.crisi08frOpp='sciopero'; baseFr00(6); gdFr00('lavoratori',5); gdFr00('cetomedio',-5); gdFr00('imprenditori',-3);
-        S.log.unshift({t:T('L\'economia'),x:T('È sceso in piazza contro il piano per la crisi del 2008.')}); } },
+        S.log.unshift({t:T('L\'economia'),x:T('Ha portato il partito in piazza contro il piano per la crisi del 2008.')}); } },
   ],
 };
 
@@ -15657,7 +15657,7 @@ const MURO61_EV = {
         S.log.unshift({t:T('Berlino'),x:T('Davanti al Muro ha scelto la prudenza.')}); } },
     { l:'Subito a Berlino, davanti alla porta di Brandeburgo', e:'La città ti applaude · Mosca e gli alleati ti guardano allo stesso modo, con preoccupazione',
       f:function(){ S.muro61='berlino'; repd(-1); gdDe60('pensionati',3); gdDe60('cetomedio',3); baseDe60(2); stampad(3);
-        S.log.unshift({t:T('Berlino'),x:T('È andato subito a Berlino davanti al Muro.')}); } },
+        S.log.unshift({t:T('Berlino'),x:T('Subito a Berlino, davanti al Muro.')}); } },
     { l:'Chiedi agli alleati di abbatterlo', e:'Nessun alleato lo farà · e ora tutti sanno che l\'hai chiesto',
       f:function(){ S.muro61='abbattere'; repd(-6); gdDe60('pensionati',2); gdDe60('giovani',-2); fidDe60(-2);
         S.log.unshift({t:T('Berlino'),x:T('Ha chiesto agli alleati di abbattere il Muro.')}); } },

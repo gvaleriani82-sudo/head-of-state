@@ -299,7 +299,7 @@ function initStatoBase(){
     livello:3, premier:null, dicastero:null, capitale:0, premMossaUltimo:null, ministroUltimo:null, recentMinistro:[], silAvviso:null, premCrisiMesi:0, occUltima:null, mesiAltoCap:0,   // livello d'avvio (3=capo del governo, 2=ministro sotto premier-AI)
     relInt:{},   // relazioni internazionali per-ente (lotto internazionale fase A): standing 0-100, seed = reputazione iniziale
     recentTit:[], recentPot:[], recentConflInt:[], diplo:null, recentDiplo:[],   // paesi reali (Fetta A/B) + percorso diplomatico (C2): diplo = stato del diplomatico, recentDiplo = finestra missioni
-    log:[], prev:null, tab:'gov', agenda:[],
+    log:[], prev:null, tab:'tavolo', agenda:[],   // L113-2: le partite nuove aprono sul tavolo (render lo riporta a 'gov' dove il tavolo non c'è)
   };
   S.snap=Object.assign({},S.pol);
   S.paese=chosenCountry;   // chiave del paese (per leggi: filtro per paese + stato iniziale)
@@ -4704,6 +4704,7 @@ function esitoPrimaria(){
   if(!PRIM) return;
   if(typeof taci==='function') taci('aula');   // L95-3
   if(PRIM.win){
+    if(typeof suona==='function') suona('applauso');   // L116-1: i militanti ti confermano
     const marg=Math.round(PRIM.punteggio-PRIM.soglia);
     document.getElementById('modal').innerHTML=`<div class="mt"><div class="kicker">Primarie · esito</div><h2>I militanti ti confermano</h2></div>
       <div class="mtext">La sfida di <b>${(S.sfida||{}).volto||'—'}</b> rientra: il partito si ricompatta attorno alla tua leadership${marg>=8?' con un margine netto':marg<=2?', per un soffio':''}.</div>
@@ -5558,8 +5559,11 @@ function resolveItem(idx,ci){
   const r=resolveItemCore(idx,ci);
   /* la carta puo essere stata rigenerata (occasioni, salti di livello): si annota solo se e ancora la stessa */
   if(prima && S.agenda && S.agenda[idx]===it && it.resolved) it.esiti=diffEsiti(prima, fotoEsiti());
-  /* L95-3: la riga-effetto con i suoi chip: UN suono per scelta, non uno per chip */
-  if(prima && it && it.esiti && it.esiti.length){ if(typeof suona==='function') suona('chip'); }
+  /* L95-3: la riga-effetto con i suoi chip: UN suono per scelta, non uno per chip.
+     L116-1: quel suono lo sceglie suonoEsito (audio.js) — firma (bilancio) · positivo/negativo (esiti tutti dallo stesso verso)
+     · monete (esiti misti col debito) · chip (misti) — sempre UNO, al posto di chip e mai in più */
+  if(prima && it && it.resolved && typeof suonoEsito==='function' && typeof suona==='function'){ const _se=suonoEsito(it); if(_se) suona(_se); }
+  if(typeof suonoCarta==='function' && typeof taci==='function' && !(S.agenda||[]).some(function(a){ return a && !a.resolved && suonoCarta(a)==='protesta'; })) taci('protesta');
   return r;
 }
 function resolveItemCore(idx,ci){
@@ -5981,8 +5985,13 @@ function maturaRP(){
    (così se avanzaMese ha aperto un modale/gameOver, forseBilancio lo salta). Lo snapshot baseline si crea alla prima
    chiamata (così il primo gennaio ha già un confronto). advanceMonth resta il nome pubblico (onclick, ecc.). */
 function advanceMonth(){
+  if(typeof taci==='function') taci('protesta');   // L116-1: il loop della piazza non attraversa il mese
   if(S && S.snapAnnuale===undefined && S.month!=null){ try{ S.snapAnnuale=snapAnnuale(); }catch(e){} }   // baseline (dato puro, migrato)
+  const _anno0=S.year;
   avanzaMese();
+  /* L116-1 · la soglia: il decennio che cambia in una linea storica (gennaio di un anno che finisce per zero, fino al 2013: dopo
+     è il presente); il primo mese di una porta suona in confirmCoal */
+  if(S && S.year!==_anno0 && S.month===1 && S.year%10===0 && S.scenario && S.scenario!=='presente' && S.year<2014 && typeof suona==='function') suona('soglia');
   try{ forseBilancio(); }catch(e){}
   try{ forseTelefonata(); }catch(e){}   // F1 — la telefonata DOPO il bilancio: se il bilancio (o un altro modale) è aperto, lo squillo salta e ritenta il mese dopo (cooldown non consumato)
   try{ scadiTerritorio(); forseTerritorio(); }catch(e){}   // F2 — la mappa che chiama: scade il vecchio invito, poi ne prova uno nuovo (mai lo stesso mese della telefonata: la gate controlla !S.telPendente)
@@ -6392,6 +6401,7 @@ function avviaNotte(){
   try{ seedNotteAnim(); }catch(e){}   // l'exit poll sale da zero; le tappe successive partono dalla precedente
   if(typeof suona==='function') suona('urne');   // L95-3: il brusio dello spoglio, in loop fino alla proclamazione
   if(typeof musica==='function') musica();       // L114-1: la musica della notte (NOTTE è appena nato)
+  if(typeof ambiente==='function') ambiente();   // L116-2: sotto la notte l'ambiente tace
   renderNotte(); armaTimerNotte();
 }
 /* Il timer vive SOLO nel transitorio: skip/avanti lo cancellano, il reload lo uccide col resto. */
@@ -6422,7 +6432,7 @@ function notteSuonaEsito(){
   var onda=NOTTE.onde[SD_NOTTE.length-1], vinta;
   if(NOTTE.sistema==='parlamentare'){ var _bl=(typeof bloccoElettorale==='function')?bloccoElettorale():bloccoIds(); vinta=_bl.reduce(function(s,id){return s+(onda[id]||0);},0)>=50; }
   else vinta=(onda.myPct>50);
-  if(typeof suona==='function') suona(vinta?'esito':'esito_no');
+  if(typeof suona==='function'){ suona(vinta?'esito':'esito_no'); suona(vinta?'folla':'fischi'); }   // L116-1: la piazza, sotto l'esito
 }
 function dichiaraNotte(i){ if(!NOTTE) return; NOTTE.dich=i; stopTimerNotte(); avanzaNotte(); }
 function concludiNotte(){
@@ -6430,6 +6440,7 @@ function concludiNotte(){
   if(typeof taci==='function') taci('urne');   // L95-3: rete di sicurezza, il loop non sopravvive alla notte
   const sistema=NOTTE.sistema, vero=NOTTE.vero, dich=NOTTE.dich; NOTTE=null;   // svuota il transitorio PRIMA del flusso a valle
   if(typeof musica==='function') musica();       // L114-1: finita la notte, la musica torna all'epoca (o alla crisi)
+  if(typeof ambiente==='function') ambiente();   // L116-2: finita la notte, l'ambiente torna
   const mg=calcMargineEsito(sistema, vero); S.margineEsito=mg; // il MARGINE (fase B): caratterizza l'esito (tono + biografia + epilogo)
   applicaMargineBio(mg);                                       // fatto datato + contatori trionfi/sconfitteNette (solo gli estremi memorabili)
   /* F4 — LA DICHIARAZIONE A CALDO, applicata QUI: dopo il risultato, mai prima. I seggi sono già congelati nel VERO
@@ -6867,12 +6878,15 @@ function coabitazioneInVista(){
   try{ return coabitazioneDovuta(); } finally { S.coalizione=c0; }
 }
 function confirmCoal(){   // solo avvio: chiude e avvia la partita
+  if(typeof suona==='function'){ suona('firma');                      // L116-1: il governo nominato
+    if(S.scenario && S.scenario!=='presente') suona('soglia'); }       // L116-1: il primo mese di una porta è un passaggio d'epoca
   S.coalizione=COAL.membri.slice(); S.minoranza=seggiCoalizione(S.coalizione,S.seggi)<50; COAL=null;
   if(typeof aggiornaCoabitazione==='function') aggiornaCoabitazione();   // L100-2/L104-2: all'avvio la porta parte in coabitazione se i seggi lo dicono (il presente francese no: nessuna cricca a 50)
   initTenuta(); initPotereLocale();   // ora il blocco (coalizione) è noto: fissa potere locale e aspettativa
   document.getElementById('ov').classList.remove('on'); render(); commitSnap();   // primo confine di mese (coalizione formata)
 }
 function finalizeVoto(win){   // rielezione parlamentare: porta alla schermata esito
+  if(win && typeof suona==='function') suona('firma');               // L116-1: la maggioranza confermata
   S.coalizione=COAL.membri.slice(); S.minoranza=false; const total=seggiCoalizione(S.coalizione,S.seggi); COAL=null;
   esitoSeggi(win, total);
 }
@@ -6887,6 +6901,7 @@ function initTenuta(){
 /* Rinnovo (candidato+coalizione, es. Francia): dopo il ballottaggio vinto si RICOSTRUISCE la maggioranza
    parlamentare sui seggi correnti. Qui non si perde: al peggio si riparte in minoranza nel nuovo mandato. */
 function confirmRinnovo(){
+  if(typeof suona==='function') suona('firma');                      // L116-1: la maggioranza ricostruita
   S.coalizione=COAL.membri.slice(); COAL=null;
   vinciElezione();   // governando → nextMandate; dall'opposizione → goAppoint → tornaAlGoverno
 }
@@ -7353,6 +7368,7 @@ function setLegge(id){
   const cur=!!S.leggi[id];
   S.leggi[id]=!cur; const over=rpUsed()>curRpMax(); S.leggi[id]=cur;   // prova il costo RP del toggle
   if(over) return;                                                     // punti riforma insufficienti
+  if(!cur && typeof suona==='function') suona('firma');               // L116-1: la legge firmata, dopo i controlli (un tocco a vuoto non suona)
   applicaLegge(L, !cur);
   S.ultimaLegge={id:L.id, mese:S.year*12+S.month};                     // traccia per la conferenza stampa ("la legge contestata")
   /* biografia: le leggi col tuo nome */
@@ -7394,6 +7410,7 @@ function gameOver(reason){
   if(typeof taciTutto==='function') taciTutto();   // L95-3: si ferma tutto; poi suona `finale` solo se il finale è nella lista
   if(FINALI_CON_SUONO.indexOf(reason)>=0 && typeof suona==='function') suona('finale');
   if(FINALI_CON_SUONO.indexOf(reason)>=0 && typeof musica==='function') musica('finale');   // L114-1: il brano del finale, sugli stessi motivi
+  if(typeof ambiente==='function') ambiente('fine');   // L116-2: finale e game over, l'ambiente tace (tutti i motivi)
   try{ aggiungiCarriera(reason); }catch(e){} chiudiAutosave();   // carriera chiusa: aggiorna lo storico e cancella l'autosave (niente "Continua")
   document.getElementById('ov').classList.remove('on');
   const years=S.year-(S.annoInizio||2025);
