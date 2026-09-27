@@ -308,6 +308,9 @@ function playAnims(){
     try{ const cl=(to>from)?'su':'giu'; el.classList.remove('su','giu'); void el.offsetWidth; el.classList.add(cl);
       el.addEventListener('animationend', function(){ el.classList.remove('su','giu'); }, {once:true}); }catch(e){}
   });
+  /* ⚑ IL «SALTO VECCHIO» È VOLUTO (L123-1, deciso da Cowork in L126-2): a cassetto chiuso le schede non sono nel DOM e UIVALS
+     resta al valore dell'ultima volta che le hai viste; aprendo un cassetto dopo mesi di tavolo la barra corre da lì a oggi.
+     Dice che cosa è cambiato mentre guardavi il tavolo: è un'informazione, non un difetto da riparare. */
   document.querySelectorAll('i.fill[data-anim^="bar:"]').forEach(function(el){
     const key=el.getAttribute('data-anim'), to=parseFloat(el.getAttribute('data-to')), from=UIVALS[key];
     UIVALS[key]=to;
@@ -2727,10 +2730,11 @@ function costruisciTavolo(box){
   h+=`<defs><linearGradient id="tv-luce-g" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#ffd79a" stop-opacity="0"/><stop offset=".5" stop-color="#ffd79a" stop-opacity=".42"/><stop offset="1" stop-color="#ffd79a" stop-opacity="0"/></linearGradient>`+
      `<clipPath id="tv-luce-c"><path d="${M.sfondo}"/></clipPath></defs>`+
      `<g clip-path="url(#tv-luce-c)" pointer-events="none"><rect class="tv-luce" x="${vb[0]}" y="${vb[1]}" width="${vb[2]*0.6}" height="${vb[3]}" fill="url(#tv-luce-g)"/></g>`;
+  h+=`<g class="tv-fissi"></g>`;       // L126-1: i segni di ciò che resta aperto, SOTTO le carte del mese (le carte restano sopra al tocco)
   h+=`<g class="tv-segnalini"></g>`;   // L113-3: i segnalini delle carte, sopra tutto (il segnalino vince sull'area)
   h+=`</svg>`;
-  box.innerHTML=`<div class="tv-nota" aria-live="polite"></div>${h}<div class="tv-info"></div>`;
-  TAVOLO_CHIAMA=null; TAVOLO_SEG={};   // L113-3: l'svg nuovo non ha segnalini (ripartono, senza rientrare se già entrati)
+  box.innerHTML=`<div class="tv-nota" aria-live="polite"></div>${h}<div class="tv-foglio" style="display:none"></div><div class="tv-info"></div>`;
+  TAVOLO_CHIAMA=null; TAVOLO_SEG={}; TAVOLO_FISSI={}; FISSO_APERTO=null;   // L113-3 · L126-1: l'svg nuovo non ha segnalini (ripartono, senza rientrare se già entrati)
   TAVOLO_CODA={ mese:null, voci:[] }; SEG_PRONTO=null; LUCE_MESE=null;   // L113-4: un tavolo nuovo (paese, caricamento) non eredita code né luci
 }
 /* l'altezza del tavolo = lo schermo meno header e barra. L123-1: si scrive SOLO se cambia (confronto con lo stile inline, che non
@@ -2780,7 +2784,7 @@ function aggiornaTavolo(){
       const vis=svg.querySelector('path.tv-area[data-i="'+i+'"]');
       if(vis){ if(serve>0){ vis.removeAttribute('onclick'); vis.setAttribute('pointer-events','none'); } else { vis.setAttribute('onclick','selArea('+i+')'); vis.removeAttribute('pointer-events'); } }
       if(serve<=0) el.removeAttribute('onclick'); else el.setAttribute('onclick','selArea('+i+')'); });
-    aggiornaSegnalini(svg, k); }   // L113-3
+    aggiornaSegnalini(svg, k); aggiornaFissi(svg, k, [w, RQ.height]); }   // L113-3 · L126-1 (L128-1: le misure dell'svg, già lette)
   tavoloLuce();   // L113-4 §3: la luce del mese (una per mese, solo a tavolo scoperto): i segnalini, a tavolo misurato (la scala serve al disegno e al raggruppamento)
   /* la nota in alto: la campagna sul territorio o il territorio che chiama; il pannello dell'area in basso */
   const camp=(typeof inCampagna==='function' && inCampagna());
@@ -2971,7 +2975,7 @@ function aggiornaSegnalini(svg, k){
     tavoloCodaSvuota();
     if(!SEG_RINVIO) SEG_RINVIO=requestAnimationFrame(function(){ setTimeout(function(){ SEG_RINVIO=null;
       try{ if(typeof S!=='undefined' && S && tavoloAttivo()){ SEG_PRONTO=S.year*12+S.month; const sv=document.querySelector('#tavolo svg'), w=sv?sv.getBoundingClientRect().width:0, vb=tavoloVB();
-        if(w>0) aggiornaSegnalini(sv, Math.min(w/vb[2], sv.getBoundingClientRect().height/vb[3])); } }catch(e){} }, 0); });   // solo i segnalini, non tutto il tavolo
+        if(w>0){ const h2=sv.getBoundingClientRect().height, k2=Math.min(w/vb[2], h2/vb[3]); aggiornaSegnalini(sv, k2); aggiornaFissi(sv, k2, [w, h2]); } } }catch(e){} }, 0); });   // solo i segnalini (e i fissi, che si scansano dalle carte nuove), non tutto il tavolo
     return;
   }
   /* 1 · i luoghi delle carte aperte, nell'ordine dell'agenda */
@@ -3012,7 +3016,7 @@ function aggiornaSegnalini(svg, k){
         el.classList.add('entra');
       }
     }
-    R.carte=g.carte; R.idx=g.idx;
+    R.carte=g.carte; R.idx=g.idx; R.x=g.L.x; R.y=g.L.y;   // L126-1: il punto, per i segni fissi che si scansano
     const el=R.el, n=g.carte.length, s=1/k;
     el.setAttribute('transform', 'translate('+g.L.x.toFixed(2)+' '+g.L.y.toFixed(2)+')');
     el.querySelector('.tv-seg-s').setAttribute('transform', 'scale('+s.toFixed(4)+')');
@@ -3046,9 +3050,13 @@ function aggiornaSegnalini(svg, k){
         v.forEach(function(x){ tavoloEffetto(sv, x); }); }); }
   }
 }
-function tavoloCodaSvuota(){ TAVOLO_CODA.voci.forEach(function(v){ if(v.el && v.el.isConnected) v.el.remove(); }); TAVOLO_CODA.voci=[]; }
+function tavoloCodaSvuota(){ TAVOLO_CODA.voci.forEach(function(v){
+    if(v.fisso==='in'){ if(v.el) v.el.classList.remove('attende'); const R=TAVOLO_FISSI[v.key]; if(R && R.cont) R.cont.classList.remove('attende'); FISSI_VISTI[v.key]=1; return; }   // L126-1: a mese cambiato il segno fisso compare senza entrata (lo stato resta aperto)
+    if(v.el && v.el.isConnected) v.el.remove(); if(v.cont && v.cont.isConnected) v.cont.remove(); }); TAVOLO_CODA.voci=[]; }
 /* l'effetto di una carta decisa sul tavolo: l'onda dell'area, le cifre che volano, l'uscita del segnalino */
 function tavoloEffetto(svg, v){
+  if(v.fisso==='in'){ fissoEntra(v.el, v.key); return; }   // L126-1
+  if(v.fisso==='out'){ fissoEsce(v.el, v.cont); return; }
   if(v.decisa && v.terr!=null && svg && !motionReduced()) segnalinoOnda(svg, v.terr);
   if(v.decisa && v.cifre && v.cifre.length && !motionReduced()) tavoloCifreVolo(v.el, v.cifre);
   segnalinoEsce(v.el);
@@ -3162,6 +3170,222 @@ function vaiACartaDalTavolo(){
   mn.scrollTop += el.getBoundingClientRect().top - mn.getBoundingClientRect().top - 52;   // sotto la maniglia (44) del cassetto
   el.classList.remove('da-tavolo'); void el.offsetWidth; el.classList.add('da-tavolo');
 }
+/* ================================================================================================================
+   L126-1 · I SEGNI DI CIÒ CHE RESTA APERTO. Un segnalino di carta dice «da decidere adesso» e vive un mese; un segno fisso
+   dice «resta aperto» e vive finché lo stato si chiude: la sfida nel partito, il fronte giudiziario (archi e inchiesta, al più
+   tre), il gruppo in rivolta. Forma diversa (uno SCUDO col bordo rame, non il disco oro), gruppo suo `.tv-fissi` SOTTO le
+   carte del mese; il raggruppamento delle carte non li fonde, e dove un fisso cadrebbe su un segnalino di carta (o su un altro
+   fisso) è il fisso a spostarsi lungo un anello attorno al suo luogo, mai la carta.
+   ⚠ NIENTE IN S: `fissiAperti()` DERIVA i segni da S a ogni aggiornaTavolo (pura: si chiama anche dal banco per contarli).
+   ⚠ IL NODO NON SI RIFÀ (paletto dei segnalini, L113-3): la CHIAVE è lo STATO — `sfida`, `fronte`, `rivolta:<gruppo>` — non
+   il mese: il segno nato a marzo è lo stesso nodo a settembre, e a ogni render cambiano solo attributi (tacche, numero,
+   aria-label, posto). Entrata una volta (animationstart con ev.target e animationName, listener tolto a mano); uscita in
+   dissolvenza quando lo stato si chiude. A CASSETTO APERTO entrata e uscita vanno in TAVOLO_CODA (L113-4): il segno nasce
+   `attende` (invisibile) ed entra alla chiusura; a mese cambiato la coda si svuota senza animare (il segno compare e basta).
+   I TRE STATI: pieno = entra a due battiti, esce in dissolvenza · ridotto = compare fermo, esce in dissolvenza · spento = di colpo.
+   L128-1 · LE PROMESSE DI CAMPAGNA sono il quarto segno, uno per gruppo (`promessa:<grp>`, alla casa, sopra). I `colpi` della
+   promessa sono PUNTI di consenso persi dal gruppo per le tue scelte (model.js, gd; i guadagni si leggono come zero) e la
+   promessa è tradita a 6 alla resa dei conti della campagna dopo (resaPromesseCampagna): tre tacche su 6, una ogni 2 punti;
+   tre piene = già tradita. (Il «3» di sostegnoTick è un'altra cosa: la stampella «programma» del governo avversario.)
+   I BERSAGLI DELLE CITTÀ sono ostacoli come i segnalini (L128-1): un fisso non copre il cerchio-bersaglio di una città, gira
+   sull'anello; il cerchio della città non si sposta mai.
+   Il tocco apre un FOGLIETTO (`.tv-foglio`) sopra il tavolo, sotto la nota; si chiude col secondo tocco o toccando fuori.
+   ================================================================================================================ */
+let TAVOLO_FISSI={};          // chiave dello stato → { el, cont, terr, F } — transitorio
+let FISSI_VISTI={};           // segni già entrati (chiave) — transitorio: un segno entrato non rientra (tavolo rifatto, caricamento)
+let FISSI_ENTRATE=0, FISSI_USCITE=0;   // contati su animationstart (per la misura)
+let FISSO_APERTO=null;        // la chiave del segno col foglietto aperto — transitorio
+/* il territorio dello sfidante: `S.sfida.area` è il NOME reso (nomeTerr, nella lingua del momento in cui la sfida è nata);
+   si cerca fra i territori con un'area del tavolo sotto tutti e due i nomi. Senza (sfida di corrente o di lista), il palazzo. */
+function sfidaTerritorio(){
+  const a=S.sfida && S.sfida.area; if(!a) return null;
+  const TE=PAESE.territori||[];
+  for(let i=0;i<TE.length;i++){ const t=TE[i]; if((t.nome===a || nomeNudo(t.nome)===a || t.nomeEn===a || nomeTerr(t)===a) && luogoHaArea(i)) return i; }
+  return null;
+}
+/* ⚑ PURA: i segni fissi aperti adesso, nell'ordine in cui si piazzano (fronte, rivolte nell'ordine di GROUPS, sfida, promesse
+   nell'ordine di GROUPS). Due promesse allo stesso gruppo sono un segno solo: conta la più vicina al tradimento. */
+function fissiAperti(){
+  const out=[];
+  const n=(typeof slotsArchi==='function') ? slotsArchi() : 0;
+  if(n>0) out.push({ key:'fronte', tipo:'fronte', n:n, inchiesta:!!S.inchiesta });
+  if(S.rivolta && !S.opposizione){ const N=dif().mesiRivolta||6;
+    GROUPS.forEach(function(g){ const m=S.rivolta[g.id]||0; if(m>0) out.push({ key:'rivolta:'+g.id, tipo:'rivolta', grp:g.id, n:Math.max(1, N-m) }); }); }
+  if(S.sfida) out.push({ key:'sfida', tipo:'sfida', tacche:Math.min(3, Math.max(0, S.sfida.maturazione||0)), terr:sfidaTerritorio() });
+  if(S.promesseCampagna && S.promesseCampagna.length){ const per={};
+    S.promesseCampagna.forEach(function(p){ const c=Math.max(0, p.colpi||0); per[p.grp]=(p.grp in per) ? Math.max(per[p.grp], c) : c; });
+    GROUPS.forEach(function(g){ if(g.id in per) out.push({ key:'promessa:'+g.id, tipo:'promessa', grp:g.id,
+      punti:Math.min(6, Math.floor(per[g.id])), tacche:Math.min(3, Math.floor(per[g.id]/2)) }); }); }
+  return out;
+}
+/* il luogo di base, in unità del disegno: il fronte SOPRA il palazzo, la rivolta in basso a sinistra (col suo anello), la sfida
+   sul suo territorio o, senza, nello stesso posto della rivolta (e l'anello la scansa) */
+function fissoBase(F){
+  const vb=tavoloVB(), lato=vb[2]*0.13, cap=tavoloCapitale()||[vb[0]+vb[2]/2, vb[1]+vb[3]/2];
+  if(F.tipo==='sfida' && F.terr!=null){ const c=tavoloCentro(F.terr); if(c) return c; }
+  if(F.tipo==='fronte') return [cap[0], cap[1]-lato*1.05];
+  if(F.tipo==='promessa') return [cap[0]-lato*0.95, cap[1]-lato*1.2];   // la casa, SOPRA: il segnalino-casa sta a sinistra del palazzo (−0,55; −0,3), il fronte sopra il palazzo
+  return [cap[0]-lato*0.62, cap[1]+lato*0.42];   // in basso a SINISTRA del palazzo: sotto, dritto, c'è il cerchio della capitale-città (Roma) e il suo bersaglio
+}
+/* il posto libero: dal luogo di base, se il bersaglio (44 px) toccherebbe un segnalino di carta, un fisso già messo o il bersaglio
+   di una città (L128-1: [x, y, distanza minima]), si gira su un anello di 44 px (otto posti, dall'alto in senso orario), poi su
+   uno di 88; deterministico. Un posto il cui bersaglio esce dal riquadro visibile del tavolo (`lim`) non è libero; se nessuno
+   lo è, resta il luogo di base (come prima) */
+function fissoPosto(base, presi, k, lim){
+  const d=SEG_TOCCO*2/k, libero=function(p){ return (!lim || (p[0]>=lim[0] && p[0]<=lim[2] && p[1]>=lim[1] && p[1]<=lim[3])) && presi.every(function(q){ return Math.hypot(q[0]-p[0], q[1]-p[1]) >= (q.length>2 ? q[2] : d)-1e-6; }); };
+  if(libero(base)) return base;
+  for(let giro=1; giro<=2; giro++) for(let a=0; a<8; a++){ const t=-Math.PI/2+a*Math.PI/4, p=[base[0]+Math.cos(t)*d*giro, base[1]+Math.sin(t)*d*giro]; if(libero(p)) return p; }
+  return base;
+}
+/* i pittogrammi (a mano, in pixel attorno allo zero; lo scudo è alto 24,5 e largo 21): bilancia, bandierina spezzata, pugno,
+   stretta di mano (due polsini e le due mani che si chiudono, le dita a tre tagli) */
+const FISSO_SEGNO={
+  promessa:'M-8,-2.4 L-5,-5.4 L-2.6,-3 L-5.6,0 Z M8,-2.4 L5,-5.4 L2.6,-3 L5.6,0 Z M-4.6,0.9 L-1.4,-2.3 L1.4,-2.3 L4.6,0.9 L1.2,4.8 C0.4,5.7 -0.4,5.7 -1.2,4.8 Z M-2.6,0.4 L0.2,3.2 L0.9,2.5 L-1.9,-0.3 Z M-1.2,-0.8 L1.6,2 L2.3,1.3 L-0.5,-1.5 Z M0.2,-2 L3,0.8 L3.6,0.1 L0.9,-2.3 Z',
+  fronte:'M-0.7,-6.2 h1.4 v9.8 h-1.4 Z M-6.2,-4.9 h12.4 v1.3 h-12.4 Z M-3.4,3.6 h6.8 v1.5 h-6.8 Z M-4.6,-3.6 L-7.3,1.2 L-1.9,1.2 Z M4.6,-3.6 L1.9,1.2 L7.3,1.2 Z',
+  sfida:'M-4.4,-7 h1.5 v5.8 h-1.5 Z M-3.7,0.4 h1.5 v6.4 h-1.5 Z M-2.9,-7 L5.8,-4.7 L-2.9,-2.4 Z',
+  rivolta:'M-5.2,-4.4 h9.6 a1.6,1.6 0 0 1 1.6,1.6 v4.4 a3.2,3.2 0 0 1 -3.2,3.2 h-5.6 a2.4,2.4 0 0 1 -2.4,-2.4 v-5.2 a1.6,1.6 0 0 1 0,-1.6 Z M-2.6,-4.4 h0.8 v3 h-0.8 Z M0.4,-4.4 h0.8 v3 h-0.8 Z M3.3,-4.4 h0.8 v3 h-0.8 Z M-3.1,4.8 h6.2 v2.8 h-6.2 Z'
+};
+const FISSO_SCUDO='M0,-12 L10.5,-8.5 L10.5,1 C10.5,7 5.5,10.5 0,12.5 C-5.5,10.5 -10.5,7 -10.5,1 L-10.5,-8.5 Z';
+/* il bersaglio ha mezzo pixel oltre i 22 di raggio: sull'iPad il riquadro reso usciva 43,99 e la sonda lo dava sotto soglia */
+function fissoNodo(F){
+  const g=document.createElementNS('http://www.w3.org/2000/svg', 'g');
+  g.setAttribute('class', 'tv-fisso tv-fisso-'+F.tipo); g.setAttribute('data-f', F.key); g.setAttribute('role', 'button'); g.setAttribute('tabindex', '0');
+  g.setAttribute('onclick', 'toccaFisso(this.getAttribute("data-f"))');
+  g.setAttribute('onkeydown', 'if(event.key==="Enter"||event.key===" "){ event.preventDefault(); toccaFisso(this.getAttribute("data-f")); }');
+  g.innerHTML=`<g class="tv-seg-s"><circle class="tv-seg-toc" r="${SEG_TOCCO+0.5}"/><g class="tv-fisso-anim">`+
+    `<circle class="tv-fisso-anello" r="16.5"/><path class="tv-fisso-scudo" d="${FISSO_SCUDO}"/><path class="tv-fisso-segno" d="${FISSO_SEGNO[F.tipo]}"/>`+
+    `<g class="tv-fisso-tacche"><circle cx="-6" cy="17.5" r="2.4"/><circle cx="0" cy="17.5" r="2.4"/><circle cx="6" cy="17.5" r="2.4"/></g>`+
+    `<g class="tv-fisso-num"><circle cx="10.5" cy="-11" r="8.5"/><text x="10.5" y="-7" text-anchor="middle"></text></g></g></g>`;
+  return g;
+}
+/* il contorno TRATTEGGIATO del territorio dello sfidante (il territorio che chiama ha il contorno pieno: sono due cose) */
+function fissoContorno(i){
+  const A=PAESE.mappa.aree[i], ns='http://www.w3.org/2000/svg', o=document.createElementNS(ns, A.d?'path':'circle');
+  if(A.d) o.setAttribute('d', A.d); else { o.setAttribute('cx', A.cx); o.setAttribute('cy', A.cy); o.setAttribute('r', A.r); }
+  const w=tavoloVB()[2]/110;
+  o.setAttribute('class', 'tv-fisso-contorno'); o.setAttribute('pointer-events', 'none'); o.setAttribute('data-i', i);
+  o.setAttribute('stroke-width', w.toFixed(2)); o.setAttribute('stroke-dasharray', (w*2.6).toFixed(2)+' '+(w*1.8).toFixed(2));
+  return o;
+}
+/* il titolo del segno (già tradotto e reso): è anche l'aria-label */
+function fissoTitolo(F){
+  if(F.tipo==='sfida') return T('La sfida nel partito');
+  if(F.tipo==='fronte') return T('Il fronte giudiziario');
+  if(F.tipo==='promessa') return T('Promessa: %G').replace('%G', nomeGruppo(F.grp));   // il gruppo dopo i due punti: «Promessa a Lavoratori» non reggeva
+  return T('%G in rivolta').replace('%G', nomeGruppo(F.grp));
+}
+/* ⚑ l'aggiornamento: dopo aggiornaSegnalini (i posti delle carte ci sono già), a tavolo misurato */
+function aggiornaFissi(svg, k, wh){
+  const box=svg.querySelector('.tv-fissi'); if(!box || !(k>0)) return;
+  const L=fissiAperti(), vivi={}, presi=[];
+  Object.keys(TAVOLO_SEG).forEach(function(key){ const R=TAVOLO_SEG[key]; if(R.x!=null) presi.push([R.x, R.y]); });
+  /* L128-1 · i bersagli delle città (raggio scritto da aggiornaTavolo in questo stesso passaggio: attributi, niente layout) */
+  const AR=PAESE.mappa.aree, dT=(SEG_TOCCO+0.5)/k;
+  /* L128-1 · il riquadro VISIBILE dell'svg (xMidYMid meet: il disegno è centrato), ristretto del bersaglio: un posto il cui bersaglio
+     uscirebbe dal tavolo non è libero (Bonn sta sul bordo ovest: la promessa usciva di 9 px) */
+  const vb=tavoloVB(), lim=(wh && wh[0]>0) ? (function(){ const ex=(wh[0]/k-vb[2])/2, ey=(wh[1]/k-vb[3])/2; return [vb[0]-ex+dT, vb[1]-ey+dT, vb[0]+vb[2]+ex-dT, vb[1]+vb[3]+ey-dT]; })() : null;
+  svg.querySelectorAll('.tv-tocco').forEach(function(c){ const A=AR[+c.getAttribute('data-i')]; if(!A || A.d) return;
+    presi.push([+c.getAttribute('cx'), +c.getAttribute('cy'), dT+Math.max(+c.getAttribute('r')||0, +A.r||0)]); });
+  L.forEach(function(F){
+    vivi[F.key]=1;
+    let R=TAVOLO_FISSI[F.key];
+    if(!R){
+      const el=fissoNodo(F);
+      R=TAVOLO_FISSI[F.key]={ el:el, cont:null, terr:null, F:F };
+      box.appendChild(el);
+      if(FISSI_VISTI[F.key] || motionReduced()) FISSI_VISTI[F.key]=1;
+      else if(S.tab!=='tavolo'){ el.classList.add('attende'); tavoloCodaMetti({ fisso:'in', el:el, key:F.key }); }   // sotto un cassetto: entra alla chiusura
+      else fissoEntra(el, F.key);
+    }
+    /* il contorno tratteggiato segue il territorio (una sfida di corrente sta al palazzo: niente contorno) */
+    const terr=(F.tipo==='sfida') ? F.terr : null;
+    if(R.terr!==terr){ if(R.cont) R.cont.remove(); R.cont=null; R.terr=terr;
+      if(terr!=null){ R.cont=fissoContorno(terr); box.insertBefore(R.cont, box.firstChild); if(R.el.classList.contains('attende')) R.cont.classList.add('attende'); } }
+    const p=fissoPosto(fissoBase(F), presi, k, lim); presi.push(p);
+    const el=R.el;
+    el.setAttribute('transform', 'translate('+p[0].toFixed(2)+' '+p[1].toFixed(2)+')');
+    el.querySelector('.tv-seg-s').setAttribute('transform', 'scale('+(1/k).toFixed(4)+')');
+    el.classList.toggle('urgente', F.tipo==='rivolta');
+    const num=(F.tipo==='rivolta') ? F.n : (F.tipo==='fronte' && F.n>1) ? F.n : 0;
+    el.classList.toggle('con-num', !!num);
+    el.querySelector('.tv-fisso-num text').textContent=num ? String(num) : '';
+    const tacche=(F.tipo==='sfida' || F.tipo==='promessa');
+    el.classList.toggle('con-tacche', tacche);
+    el.querySelectorAll('.tv-fisso-tacche circle').forEach(function(c, j){ c.classList.toggle('piena', tacche && j<F.tacche); });
+    el.setAttribute('aria-label', fissoTitolo(F));
+    R.F=F;
+  });
+  Object.keys(TAVOLO_FISSI).forEach(function(key){
+    if(vivi[key]) return;
+    const R=TAVOLO_FISSI[key]; delete TAVOLO_FISSI[key]; delete FISSI_VISTI[key];   // uno stato che si riapre è un segno nuovo: rientra
+    if(R.el.classList.contains('attende')){   // mai visto (nato e chiuso sotto il cassetto): via, e via dalla coda
+      TAVOLO_CODA.voci=TAVOLO_CODA.voci.filter(function(v){ return v.el!==R.el; }); R.el.remove(); if(R.cont) R.cont.remove(); return; }
+    R.el.removeAttribute('onclick'); R.el.style.pointerEvents='none';
+    if(S.tab!=='tavolo') tavoloCodaMetti({ fisso:'out', el:R.el, cont:R.cont, key:key });
+    else fissoEsce(R.el, R.cont);
+  });
+  if(FISSO_APERTO && !TAVOLO_FISSI[FISSO_APERTO]) FISSO_APERTO=null;
+  fissoFoglio();
+}
+/* una voce nella coda del tavolo, nel mese di oggi (una coda di un altro mese si svuota prima, senza animare) */
+function tavoloCodaMetti(v){
+  const mese=S.year*12+S.month;
+  if(TAVOLO_CODA.mese!==mese){ tavoloCodaSvuota(); TAVOLO_CODA.mese=mese; }
+  TAVOLO_CODA.voci.push(v);
+}
+function fissoEntra(el, key){
+  el.classList.remove('attende'); const R=TAVOLO_FISSI[key]; if(R && R.cont) R.cont.classList.remove('attende');
+  if(motionReduced()){ FISSI_VISTI[key]=1; return; }
+  const an=el.querySelector('.tv-fisso-anim');
+  const su=function(ev){ if(ev.target!==an || ev.animationName!=='segIn') return; an.removeEventListener('animationstart', su); FISSI_VISTI[key]=1; FISSI_ENTRATE++; };
+  const fine=function(ev){ if(ev.target!==an || ev.animationName!=='segIn') return; an.removeEventListener('animationend', fine); el.classList.remove('entra'); };
+  an.addEventListener('animationstart', su); an.addEventListener('animationend', fine);
+  el.classList.add('entra');
+}
+function fissoEsce(el, cont){
+  if(motionSpento() || !el.isConnected){ el.remove(); if(cont) cont.remove(); return; }
+  el.removeAttribute('role'); el.setAttribute('aria-hidden', 'true');
+  const an=el.querySelector('.tv-fisso-anim'), via=function(){ if(el.isConnected) el.remove(); if(cont && cont.isConnected) cont.remove(); };
+  an.addEventListener('animationstart', function su(ev){ if(ev.target!==an || ev.animationName!=='segOut') return; an.removeEventListener('animationstart', su); FISSI_USCITE++; });
+  an.addEventListener('animationend', function fine(ev){ if(ev.target!==an || ev.animationName!=='segOut') return; an.removeEventListener('animationend', fine); via(); });
+  el.classList.remove('entra'); el.classList.add('esce'); if(cont) cont.classList.add('esce');
+  setTimeout(via, 900);   // se l'animazione non parte, il nodo se ne va lo stesso
+}
+/* ⚑ il tocco: apre il foglietto del segno; lo stesso segno (o null) lo chiude. Nessun cassetto si apre. */
+function toccaFisso(key){
+  FISSO_APERTO=(key && FISSO_APERTO!==key && TAVOLO_FISSI[key]) ? key : null;
+  fissoFoglio();
+}
+function fissoFoglio(){
+  const f=document.querySelector('#tavolo .tv-foglio'); if(!f) return;
+  const R=FISSO_APERTO && TAVOLO_FISSI[FISSO_APERTO];
+  if(!R || !R.F){ if(f.style.display!=='none'){ f.innerHTML=''; f.style.display='none'; } return; }
+  const F=R.F, righe=[]; let tacche='';
+  if(F.tipo==='sfida'){ righe.push(T('%V ti contende la guida del partito.').replace('%V', (S.sfida&&S.sfida.volto)||T('lo sfidante')));
+    tacche=T('Maturazione %N su 3').replace('%N', F.tacche); }
+  else if(F.tipo==='fronte'){ righe.push(F.n>1 ? T('%N fronti aperti').replace('%N', F.n) : T('Uno scandalo aperto'));
+    if(F.inchiesta) righe.push(T('La magistratura sta indagando.')); }
+  else if(F.tipo==='promessa'){ righe.push(F.tacche>=3 ? T('Ormai è tradita: alla prossima campagna te la rinfacceranno.') : T('Alla prossima campagna chiederanno conto.'));
+    tacche=T('Consenso perso: %N punti su 6').replace('%N', F.punti); }
+  else righe.push(F.n===1 ? T('Un altro mese sotto il limite e la carriera finisce.') : T('Ancora %N mesi sotto il limite e la carriera finisce.').replace('%N', F.n));
+  const h=`<button class="tv-chiudi" onclick="toccaFisso(null)" aria-label="${escAttr(T('Chiudi'))}">✕</button>`+
+    `<div class="tv-foglio-t">${fissoTitolo(F)}</div>`+righe.map(function(r){ return `<div class="tv-foglio-r">${r}</div>`; }).join('')+
+    (tacche ? `<div class="tv-foglio-tacche contorno">${tacche}</div>` : '');
+  if(f.innerHTML!==h) f.innerHTML=h;
+  f.setAttribute('aria-label', fissoTitolo(F));
+  /* sotto la nota, se c'è (la nota resta del territorio e della campagna): una lettura di layout, solo a foglietto aperto */
+  const nota=document.querySelector('#tavolo .tv-nota'), top=(nota && nota.style.display!=='none' && nota.innerHTML) ? (nota.offsetTop+nota.offsetHeight+6) : 10;
+  f.style.top=top+'px'; f.style.bottom=''; f.style.display='';
+  /* se il foglietto copre il SUO segno (una sfida al nord, sotto la nota), scende in basso: il secondo tocco deve trovare il segno */
+  const sg=R.el.getBoundingClientRect(), fr=f.getBoundingClientRect();
+  if(sg.bottom>fr.top && sg.top<fr.bottom){ f.style.top='auto'; f.style.bottom='10px'; }
+}
+/* il tocco fuori chiude il foglietto (il tocco sul segno lo gestisce il segno) */
+document.addEventListener('click', function(ev){
+  if(!FISSO_APERTO) return;
+  const t=ev.target; if(t && t.closest && t.closest('.tv-foglio, .tv-fisso')) return;
+  FISSO_APERTO=null; fissoFoglio();
+}, true);
 window.addEventListener('resize', function(){ try{ if(S && tavoloAttivo()) aggiornaTavolo(); }catch(e){} });
 /* il bottone in fondo: con decisioni aperte e il tavolo in vista, apre il cassetto Governo (prima era spento) */
 function premiAvanza(){

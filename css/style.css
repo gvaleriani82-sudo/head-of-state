@@ -34,6 +34,15 @@
   /* L125-1: il logo quadrato, col titolo dentro. 240 px sul telefono: a 280 «Gioca oggi» scendeva sotto la piega a 375×812 */
   #home-emblema{ display:block; width:min(240px, 64vw); height:auto; aspect-ratio:1; margin:2px auto 12px; border-radius:14px; box-shadow:0 6px 20px rgba(0,0,0,.22); }
   @media (min-width:700px){ #home-emblema{ width:280px; } }
+  /* L126-2 · la VETRINA della home: sul telefono e sull'iPad verticale il contenitore non conta (uno sotto l'altro, come prima);
+     da 900 px in ORIZZONTALE logo e comizio sulla stessa riga, alla stessa altezza — il logo quadrato a sinistra, il 16:9 a destra
+     (--vetrina-h: 240 px → 240 + 427 + 16 di spazio = 683 px, dentro la colonna). */
+  .home-vetrina{ display:contents; }
+  @media (min-width:900px) and (orientation:landscape){
+    .home-vetrina{ --vetrina-h:240px; display:flex; justify-content:center; align-items:center; gap:16px; margin:2px auto 14px; }
+    .home-vetrina #home-emblema{ width:var(--vetrina-h); height:var(--vetrina-h); margin:0; flex:none; }
+    .home-vetrina #home-hero.on{ width:calc(var(--vetrina-h) * 16 / 9); max-width:none; height:var(--vetrina-h); margin:0; flex:none; }
+  }
   /* LA TEXTURE-CARTA: pseudo-elemento fisso SOTTO tutto (z-index -1), cosi' vive solo sul fondo-app e non
      tocca ne' i modali ne' le card, che hanno il loro fondo opaco. L'opacita' e' volutamente al limite del
      percepibile: l'effetto giusto e' che si noti solo togliendola. */
@@ -366,12 +375,15 @@
   @keyframes telDrain{ from{transform:scaleX(1);} to{transform:scaleX(0);} }
 
   /* ============================================================
-     SLOT IMMAGINE (raster futuro) — DORMIENTI: display:none finché non
-     attivati con .on; vuoti = zero pixel, quindi il mobile <700px resta
-     identico. aspect-ratio riserva lo spazio (niente scatto al caricamento).
-     REGOLA SACRA: il JS non deve MAI aggiungere .on (né iniettare <img>)
-     sotto i 700px — o la scatola 16:9 diventa reale e sposta il mobile.
-     HERO: home, tra emblema e titolo · SCENA: cima della card evento (.ag).
+     SLOT IMMAGINE — display:none finché non attivati con .on; vuoti = zero
+     pixel. aspect-ratio riserva lo spazio (niente scatto al caricamento).
+     La REGOLA DI OGGI (L126-2): il JS accende .on A OGNI LARGHEZZA, telefono
+     compreso, quando lo slot ha un'immagine — la hero in applyPaese (PAESE.hero
+     o la condivisa SCENES.hero), la scena in agScene. Dal «Finale» raster del
+     3 luglio le immagini ci sono anche sul telefono (voluto, confermato da
+     Giacomo): la vecchia «regola sacra» dei 700px valeva per gli slot vuoti.
+     HERO: home, sotto il logo (da 900px in orizzontale accanto: .home-vetrina)
+     · SCENA: cima della card evento (.ag).
      ============================================================ */
   #home-hero{ display:none; width:100%; max-width:440px; margin:12px auto 16px; border-radius:12px; overflow:hidden; aspect-ratio:16/9; background:var(--panel2); }
   #home-hero.on{ display:block; }
@@ -675,6 +687,37 @@
   /* RIDOTTO: il segnalino nuovo sta fermo e visibile, niente onda (resta la transizione del fill); l'uscita dissolve.
      SPENTO: il javascript lo toglie di colpo (la regola unica spegne tutto, qui niente da aggiungere). */
   html.mov-ridotto .tv-seg.esce .tv-seg-anim{ animation:segOut .32s ease forwards !important; }
+  /* L126-1 · I SEGNI FISSI (ui.js, aggiornaFissi): ciò che resta aperto. Uno SCUDO carta col bordo rame (il disco oro è «da
+     decidere adesso»), in pixel come i segnalini (scudo 21×24,5, bersaglio 44). Stesse entrate e uscite dei segnalini. */
+  :root{ --tv-rame:#b4643a; }
+  .tv-fisso{ cursor:pointer; outline:none; }
+  .tv-fisso-scudo{ fill:var(--tv-segno); stroke:var(--tv-rame); stroke-width:2.2; stroke-linejoin:round; filter:drop-shadow(0 1.5px 1.5px rgba(20,16,8,.55)); }
+  .tv-fisso-segno{ fill:#5b3520; fill-rule:evenodd; }
+  .tv-fisso-anello{ fill:none; stroke:var(--tv-segno); stroke-width:2; opacity:0; }
+  .tv-fisso.urgente .tv-fisso-anello{ opacity:.95; }
+  .tv-fisso:not(.con-num) .tv-fisso-num, .tv-fisso:not(.con-tacche) .tv-fisso-tacche{ display:none; }
+  .tv-fisso-num circle{ fill:var(--tv-rame); stroke:var(--tv-segno); stroke-width:1.2; }
+  .tv-fisso-num text{ fill:#fff8e6; font-size:12px; font-weight:700; font-family:inherit; }
+  .tv-fisso-tacche circle{ fill:rgba(28,26,20,.55); stroke:var(--tv-segno); stroke-width:1; }
+  .tv-fisso-tacche circle.piena{ fill:var(--tv-rame); }
+  .tv-fisso:focus-visible .tv-fisso-scudo{ stroke:#fff; stroke-width:3; }
+  .tv-fisso-anim{ transform-box:fill-box; transform-origin:center; }
+  .tv-fisso-contorno{ fill:none; stroke:var(--tv-rame); stroke-linejoin:round; transition:opacity .32s ease; }
+  .tv-fisso.attende, .tv-fisso-contorno.attende{ opacity:0; pointer-events:none; }   /* nato sotto un cassetto: entra alla chiusura (TAVOLO_CODA) */
+  .tv-fisso-contorno.esce{ opacity:0; }
+  .tv-fisso.entra .tv-fisso-anim{ animation:segIn .9s cubic-bezier(.2,.7,.3,1) both; }
+  .tv-fisso.esce .tv-fisso-anim{ animation:segOut .32s ease forwards; }
+  @media (prefers-reduced-motion: reduce){ .tv-fisso.entra .tv-fisso-anim{ animation:none !important; } }
+  html.mov-ridotto .tv-fisso.esce .tv-fisso-anim{ animation:segOut .32s ease forwards !important; }
+  html.mov-ridotto .tv-fisso-contorno{ transition:opacity .32s ease !important; }
+  /* il foglietto del segno: sopra il tavolo, sotto la nota (la posizione verticale la mette il javascript) */
+  .tv-foglio{ position:absolute; top:10px; left:12px; right:12px; z-index:3; max-width:420px; margin:0 auto; padding:10px 12px 10px 14px;
+    background:var(--panel); color:var(--txt); border:1px solid var(--tv-rame); border-left-width:4px; border-radius:12px; box-shadow:0 6px 20px rgba(0,0,0,.3); }
+  .tv-foglio .tv-chiudi{ margin:-10px -8px 0 6px; }
+  .tv-foglio-t{ font-weight:700; font-size:14px; line-height:1.3; margin-bottom:3px; }
+  .tv-foglio-r{ font-size:12.5px; line-height:1.4; color:var(--txt2); }
+  .tv-foglio-tacche{ font-size:11.5px; color:var(--mut); margin-top:4px; letter-spacing:.02em; }
+  body.notte-sul-tavolo #tavolo .tv-fissi, body.notte-sul-tavolo #tavolo .tv-foglio{ display:none; }
   /* L113-4 — il ritorno al tavolo da una carta decisa (44px, 13px), le cifre che volano alla barra (13px: si leggono) col battito
      della cella d'arrivo, e la luce del mese. Cifre e luce le mette il javascript solo in «pieno»; la regola unica le spegne comunque. */
   .torna-tavolo{ display:block; width:100%; min-height:44px; margin:10px 0 0; padding:8px 14px; border:1px solid var(--brand); border-radius:9px;

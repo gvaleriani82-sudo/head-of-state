@@ -36,11 +36,17 @@
       <!-- L125-1 — il LOGO (lo statista di spalle davanti alla mappa, col titolo HEAD OF STATE dentro l'immagine, uguale in IT ed EN)
            al posto dell'emblema con la colonna e del logotipo che stava sotto: il titolo ora è nel logo, due sarebbero doppi.
            L'src lo mette il boot da EMBLEMA_IMG (js/emblema.js); le misure le dà il CSS (#home-emblema). -->
+      <!-- L126-2 — la VETRINA: logo e comizio. Sul telefono e sull'iPad verticale il contenitore non esiste per il layout
+           (display:contents: uno sotto l'altro come prima); da 900 px in orizzontale stanno sulla stessa riga, alla stessa altezza. -->
+      <div class="home-vetrina">
       <img id="home-emblema" alt="" aria-hidden="true" width="640" height="640" decoding="async">
-      <!-- slot HERO (raster futuro): DORMIENTE (display:none via CSS finché non riceve <img> + .on).
-           Hook per-paese previsto in applyPaese (PAESE.hero); si parte con UNA hero condivisa.
-           REGOLA SACRA: non attivare mai .on sotto i 700px. -->
+      <!-- la HERO (il comizio in piazza, 16:9): la accende applyPaese (ui.js) con `.on` A OGNI LARGHEZZA, telefono compreso,
+           quando c'è un'immagine (PAESE.hero del paese, altrimenti la hero condivisa SCENES.hero); senza immagine resta spenta
+           (display:none, zero pixel). È così dal «Finale» raster del 3 luglio (PIANO-CHIUSURA.md: «le scene compaiono anche su
+           mobile», confermato da Giacomo), che ha superato la vecchia regola «mai .on sotto i 700px» degli slot dormienti.
+           Sopra l'immagine la clip `home-hero` (L95-4/L119-1). La scatola: aspect-ratio 16/9, larghezza piena fino a 440/500/560 px. -->
       <div id="home-hero" aria-hidden="true"></div>
+      </div>
       <div style="display:flex;align-items:center;justify-content:center;gap:10px;">
         <span style="display:inline-block;width:26px;height:1px;background:var(--line2);"></span>
         <div class="em" id="start-ruolo" data-i18n style="margin:0;">La tua carriera politica</div>

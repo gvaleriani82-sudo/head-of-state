@@ -104,7 +104,7 @@ const SCENES = {
    ⚑ L119-1 (27/9): le clip arrivano da Gemini, ripulite da Cowork in `arte-sorgente/video-gemini/pronte/` (960×540, 10 s, muto);
    da questo lotto OGNI TURNO di Code porta quelle nuove qui e in cartella. `home-hero` è ora quella di Gemini (al posto di
    quella di ElevenLabs, decisione di Giacomo). */
-const VIDEO_PRESENTI = ['home-hero', 'partito-base', 'vitaprivata-base'];
+const VIDEO_PRESENTI = ['home-hero', 'partito-base', 'vitaprivata-base', 'retro-sezione'];
 
 /* ===== L113-2 — LE PEDINE DEL TAVOLO (`assets/tavolo/<nome>.webp`, 256 × 256 con trasparenza, ≤ 60 KB, appoggiate in
    basso al centro). Terza lista-promessa, stesso contratto di AUDIO_PRESENTI e VIDEO_PRESENTI: il tavolo disegna SOLO
