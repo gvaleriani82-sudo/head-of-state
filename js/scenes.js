@@ -104,7 +104,26 @@ const SCENES = {
    ⚑ L119-1 (27/9): le clip arrivano da Gemini, ripulite da Cowork in `arte-sorgente/video-gemini/pronte/` (960×540, 10 s, muto);
    da questo lotto OGNI TURNO di Code porta quelle nuove qui e in cartella. `home-hero` è ora quella di Gemini (al posto di
    quella di ElevenLabs, decisione di Giacomo). */
-const VIDEO_PRESENTI = ['home-hero', 'partito-base', 'vitaprivata-base', 'retro-sezione'];
+const VIDEO_PRESENTI = ['home-hero', 'partito-base', 'vitaprivata-base', 'retro-sezione',
+  /* 27/9 sera (L127-1): 31 clip di Kling. I momenti (elezioni-*, notte-*, telefono-*, intervista-*, finale-*) passano da
+     `scenaMomentoHtml` (ui.js); le altre sono carte come sempre. */
+  'elezioni-base', 'elezioni-florido', 'elezioni-scrutinio', 'esteri-base', 'esteri-florido',
+  'finale-caduta', 'finale-dignita', 'finale-oblio', 'finale-trionfo',
+  'intervista-aula', 'intervista-studio', 'intervista-studio-anni50', 'intervista-studio-anni60', 'intervista-vertice',
+  'notte-attesa', 'notte-sconfitta', 'notte-spoglio', 'notte-vittoria',
+  'partito-notte', 'partito-riunione',
+  'retro-accordo', 'retro-anticamera', 'retro-canale', 'retro-cronista', 'retro-stanza',
+  'telefono-anni50', 'telefono-corridoio', 'telefono-oggi',
+  'vitaprivata-anni60', 'vitaprivata-anni90', 'vitaprivata-florido'];
+
+/* ===== L127-3 — LE SCENE DEL PAESE (`assets/scenes/<scena>-<paese>.webp`, <paese> = un id di PAESI). Decisione di Giacomo
+   del 27/9: le bandiere nazionali sono ammesse SOLO in un'immagine legata a un paese; una scena che il gioco mostra ovunque
+   non ne ha. Quinta lista-promessa, stesso contratto delle altre: `scenaSrc` (ui.js) preferisce `<file scelto>-<S.paese>`
+   solo se il nome è qui, e `.claude/verifica-asset.js` tiene allineate lista e cartella ed è rossa su un suffisso che non è
+   un id di PAESI. Additivo: una scena senza variante di paese si vede come prima. Le sorgenti stanno in
+   `arte-sorgente/video-gemini/immagini/` e si convertono con `node .claude/converti-scene.js`. */
+const SCENE_PAESE = ['elezioni-florido-italia', 'elezioni-grave-italia',
+                     'elezioni-florido-francia', 'elezioni-florido-regnounito', 'elezioni-florido-germania'];
 
 /* ===== L113-2 — LE PEDINE DEL TAVOLO (`assets/tavolo/<nome>.webp`, 256 × 256 con trasparenza, ≤ 60 KB, appoggiate in
    basso al centro). Terza lista-promessa, stesso contratto di AUDIO_PRESENTI e VIDEO_PRESENTI: il tavolo disegna SOLO

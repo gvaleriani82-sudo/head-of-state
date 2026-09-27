@@ -4692,6 +4692,7 @@ const EN = {
   "La magistratura sta indagando.":"Investigators are at work.",
   "%G in rivolta":"%G in revolt",
   "Promessa: %G":"Promise: %G",
+  "Quale?":"Which one?",
   "Alla prossima campagna chiederanno conto.":"At the next campaign they will hold you to it.",
   "Ormai è tradita: alla prossima campagna te la rinfacceranno.":"It's broken now: at the next campaign they'll throw it back at you.",
   "Consenso perso: %N punti su 6":"Support lost: %N points of 6",

@@ -3978,7 +3978,7 @@ function renderIntervista(){
   var CORN={ commissione:{kick:'Question time', t:'Il question time'}, stampa:{kick:'Intervista', t:'L\'intervista incalzante'}, vertice:{kick:'Foro multilaterale', t:'Il confronto al vertice'} };
   var C=CORN[I.cornice]||CORN.stampa;
   var scI=(typeof scenaIntervista==='function')?scenaIntervista(I.cornice):null;   // L9-1: scena per cornice (aula univ. / studio era-aware / vertice)
-  var scImg=scI?`<img class="mscene" src="${scI}" alt="">`:'';
+  var scImg=scenaMomentoHtml(scI);   // L127-1: immagine + clip, le regole delle carte
   var m=document.getElementById('modal');
   if(I.esito){
     m.innerHTML=`${scImg}<div class="mt"><div class="kicker">${T(C.kick)}</div><h2>${T(C.t)}</h2></div>
@@ -3994,6 +3994,7 @@ function renderIntervista(){
       <div class="choices">${opts}</div>`;
   }
   document.getElementById('ov').classList.add('on');
+  agganciaVideoTutti();   // L127-1: la clip del momento (trapianto del nodo vivo nello stesso task)
 }
 function rispondiIntervista(ci){
   if(!INTERVISTA || INTERVISTA.esito) return;
@@ -6558,7 +6559,7 @@ function renderNotte(){
   var vinta=false;
   if(ultima){ if(NOTTE.sistema==='parlamentare'){ var _bl=(typeof bloccoElettorale==='function')?bloccoElettorale():bloccoIds(); vinta=_bl.reduce(function(s,id){return s+(onda[id]||0);},0)>=50; } else { vinta=(onda.myPct>50); } }
   var scN=(typeof scenaNotte==='function')?scenaNotte(NOTTE.stadio, ultima, vinta):null;
-  var mbg=scN?`<div class="mbg-img" style="background-image:url('${scN}')"></div>`:'';
+  var mbg=scenaMomentoHtml(scN, {sfondo:true});   // L127-1: lo sfondo con la clip sotto il velo (la scelta e il perché in DESIGN-MOVIMENTO § L127-1)
   /* 375px senza salti: altezza minima riservata → le ondate non fanno ballare il modale. Sfondo su WRAPPER (no leak di classe). */
   /* L113-5 · la legenda delle due lingue del tavolo: le righe sono il voto dell'area, il colore pieno chi la governa */
   const legenda = sulTavolo ? `<div class="notte-legenda contorno"><span class="nl-righe" aria-hidden="true"></span>${T('a righe: come ha votato')} · <span class="nl-pieno" aria-hidden="true"></span>${T("colore: chi governa l'area")}</div>` : '';
@@ -6571,6 +6572,7 @@ function renderNotte(){
     </div>
     ${azioni}</div>`;
   document.getElementById('ov').classList.add('on');
+  agganciaVideoTutti();   // L127-1: la clip dello stadio (lo stesso nodo attraversa gli stadi con la stessa scena)
   if(typeof notteTavolo==='function') notteTavolo();   // L113-5: le righe dello stadio sul tavolo (scaglionate), il foglio in basso
   notteMovimento(scN, ultima);    // L95-2: scaglionamento delle barre, sfondo in dissolvenza, verdetto dopo le barre
   try{ playAnims(); }catch(e){}   // vetrina: le barre dello spoglio scorrono tappa dopo tappa
@@ -6741,7 +6743,7 @@ function renderTelefonata(){
   var barra=(typeof F1_TIMER!=='undefined' && F1_TIMER)
     ? `<div class="telbar" aria-hidden="true"><i style="--teldur:${dur}ms"></i></div>` : '';
   var scT=(typeof scenaTelefono==='function')?scenaTelefono(TEL.missed):null;   // L9-1: oggi (presente) / storico ('50-'60) / corridoio (chiamata chiusa)
-  var scImgT=scT?`<img class="mscene" src="${scT}" alt="">`:'';
+  var scImgT=scenaMomentoHtml(scT);   // L127-1: immagine + clip, le regole delle carte
   if(TEL.missed){
     document.getElementById('modal').innerHTML=`${scImgT}<div class="mt"><div class="kicker">${T('Squillo perso')}</div><h2>${T('Hai lasciato squillare')}</h2></div>
       <div class="mtext">${T(def.squilloTxt||'La chiamata è caduta: richiamerà un\'altra volta.')}</div>
@@ -6755,6 +6757,7 @@ function renderTelefonata(){
   }
   var m=document.getElementById('modal'); if(m){ m.classList.add('tel'); m.classList.toggle('ring', !TEL.missed); }   // lo squillo (shake) solo mentre squilla, non sulla schermata «hai lasciato squillare»
   document.getElementById('ov').classList.add('on');
+  agganciaVideoTutti();   // L127-1: la clip del momento
 }
 function rispondiTel(ci){
   if(!TEL) return; stopTimerTel();
@@ -7473,7 +7476,8 @@ function gameOver(reason){
      non solo per quello nuovo — la schermata era rossa anche su `ritiro`, che con questo lotto non c'entra. */
   const verdettoHtml=(F&&F.verdetto.length)?'<div class="contorno" style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--mut);margin:12px 0 6px">'+T('Il verdetto del paese')+'</div>'+F.verdetto.map(function(p){return '<p style="margin:7px 0">'+p+'</p>';}).join(''):'';
   const scF=(typeof scenaFinale==='function')?scenaFinale(reason):null;   // L9-1: scena d'esito (trionfo/dignità/caduta/oblio) sopra la bandiera
-  const scFimg=scF?`<img class="mscene" src="${scF}" alt="" style="max-width:440px;max-height:200px;margin:6px auto 2px;border-radius:14px">`:'';
+  /* L127-1: immagine + clip; G8 — la morte in carica non si anima (la caduta resta ferma) */
+  const scFimg=scenaMomentoHtml(scF, {fin:true, ferma:(reason==='salute' && S.esitoSalute==='fatale')});
   document.getElementById('over').innerHTML=`${scFimg}<div style="text-align:center;padding-top:14px"><span class="flag" style="width:54px;height:36px;display:inline-block">${PAESE.flag||''}</span></div>
    <div class="screen center"><div class="em">${T('Fine partita')}</div>${F?`<div class="epitaffio">${F.titolo}</div>`:''}<h2>${title}</h2><p>${desc}</p>
    <div style="text-align:left;max-width:430px;margin:12px auto 4px;font-size:13.5px;line-height:1.5;color:var(--txt2);border-top:1px solid var(--line);padding-top:12px">
@@ -7490,6 +7494,7 @@ function gameOver(reason){
    <button class="btn" onclick="resetAll()">${T('Gioca di nuovo')}</button></div>`;
   document.getElementById('game').style.display='none';
   document.getElementById('over').style.display='block';
+  agganciaVideoTutti();   // L127-1: la clip del finale (visibile solo ora che #over si vede)
 }
 function resetAll(){
   document.getElementById('over').style.display='none';

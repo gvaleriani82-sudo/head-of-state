@@ -393,6 +393,11 @@
   .ag-scene img{ width:100%; height:100%; object-fit:cover; display:block; }
   /* L9-1 — SCENA-MOMENTO in cima al modale (intervista/telefono/finale): banner 16/9, letterboxato dal cap */
   .mscene{ display:block; width:100%; aspect-ratio:16/9; max-height:172px; object-fit:cover; background:var(--panel2); }
+  /* L127-1 — la scena-momento sta in una scatola, così la clip (`.scena-video`, assoluta) le si posa sopra esatta; `.fin` = il finale
+     (era lo stile in linea dell'<img>). Con la clip l'immagine sotto sta ferma, come sulle carte. */
+  .mscene-box{ position:relative; overflow:hidden; }
+  .mscene-box.fin{ max-width:440px; margin:6px auto 2px; border-radius:14px; }
+  .mscene-box.fin .mscene{ max-height:200px; }
   /* L9-1 — NOTTE elettorale: la scena come SFONDO (velo scuro sotto il testo, non immagine in cima). Lo sfondo vive su
      un WRAPPER dentro l'innerHTML (rigenerato a ogni render → nessuna classe che resta appiccicata al #modal riusato).
      I risultati (barre/righe) restano in un pannello opaco per la leggibilità; a 375px niente full-bleed rotto. */
@@ -717,6 +722,10 @@
   .tv-foglio-t{ font-weight:700; font-size:14px; line-height:1.3; margin-bottom:3px; }
   .tv-foglio-r{ font-size:12.5px; line-height:1.4; color:var(--txt2); }
   .tv-foglio-tacche{ font-size:11.5px; color:var(--mut); margin-top:4px; letter-spacing:.02em; }
+  /* L129-1 · «Quale?»: una riga per area, ciascuna un bottone di 44 px (il tocco ambiguo fra due bersagli sovrapposti) */
+  .tv-quale{ display:block; width:100%; min-height:44px; margin-top:6px; padding:8px 12px; text-align:left; font:inherit; font-size:14px; font-weight:600;
+    color:var(--txt); background:transparent; border:1px solid var(--tv-rame); border-radius:10px; cursor:pointer; }
+  .tv-quale:hover, .tv-quale:focus-visible{ background:rgba(0,0,0,.06); }
   body.notte-sul-tavolo #tavolo .tv-fissi, body.notte-sul-tavolo #tavolo .tv-foglio{ display:none; }
   /* L113-4 — il ritorno al tavolo da una carta decisa (44px, 13px), le cifre che volano alla barra (13px: si leggono) col battito
      della cella d'arrivo, e la luce del mese. Cifre e luce le mette il javascript solo in «pieno»; la regola unica le spegne comunque. */

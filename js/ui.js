@@ -110,7 +110,7 @@ function clipDaSrc(src){ const m=/([^\/]+)\.webp$/.exec(String(src||'')); return
      dissolvenza per carta, non una per render. Un nodo vivo che dopo un render non è più nel documento si dimentica.
    · La clip di una carta nasce SENZA `src` (`data-src`): la sorgente si mette quando la carta entra nel viewport
      (IntersectionObserver, `OSS_VIDEO`) — dal L120-1 solo quando diventa il TESTIMONE, la più visibile (sotto). Una carta nel cassetto chiuso o sotto la piega non scarica niente; una clip che esce
-     dalla vista va in pausa e al ritorno riprende dall'ora. L'hero no: sta sulla home, sopra la piega, e parte subito come prima.
+     dalla vista va in pausa e al ritorno riprende dall'ora. L'hero no: sta sulla home, sopra la piega, e parte subito (ha la sua sorgente); dal L127-1 è osservata anche lei, per la pausa fuori vista.
    · Con `reteLeggera()` o movimento non pieno non c'è nessun <video> (`clipPer`), quindi nessuna richiesta.
    ================================================================================================================ */
 let VIDEO_VIVI={}, OSS_VIDEO=null;
@@ -119,16 +119,21 @@ let VIDEO_VIVI={}, OSS_VIDEO=null;
    saranno decine: al più UNA clip di carta suona, il «testimone» — la clip con la quota visibile più alta (a pari quota la più
    in alto). Le altre in vista restano in pausa sul loro fotogramma (o sull'immagine, se non sono mai partite: la sorgente la
    riceve solo il testimone) e ripartono DALL'ORA (VIDEO_T0) quando tocca a loro. La quota la dà l'osservatore (soglie fitte,
-   così lo scorrimento la aggiorna); tutto transitorio, niente in S. La hero della home non è una carta e non è osservata.
+   così lo scorrimento la aggiorna); tutto transitorio, niente in S. La hero della home parte da sé ma dal L127-1 è osservata (fuori vista in pausa, sulla home è il testimone); la clip di un MOMENTO vince su tutte.
    ================================================================================================================ */
 const VIDEO_QUOTA=new Map();
 function videoRiprendiOra(el){ try{ const nome=el.dataset.clip, d=el.duration; if(VIDEO_T0[nome]!=null && d && isFinite(d)) el.currentTime=((oraMovimento()-VIDEO_T0[nome])/1000)%d; }catch(e){} }
+/* L127-1 · la clip di un MOMENTO (modale o finale, `.momento`) vince su ogni carta: l'osservatore non vede l'occlusione, quindi
+   le carte sotto il modale restano «in vista» e senza la precedenza la carta più alta rubava il posto. Quando il modale si chiude
+   (`.ov` torna display:none) la clip del momento esce dalla vista, perde la quota e il testimone torna quello di prima. */
 function videoTestimone(){
-  let best=null, bq=0, btop=Infinity;
+  let best=null, bq=0, btop=Infinity, bm=0;
   VIDEO_QUOTA.forEach(function(q, el){
     if(!el.isConnected || !(q>0)) return;
+    const m=el.classList.contains('momento')?1:0;
+    if(m<bm) return;
     const top=el.getBoundingClientRect().top;
-    if(q>bq+1e-3 || (Math.abs(q-bq)<=1e-3 && top<btop)){ best=el; bq=q; btop=top; }
+    if(m>bm || q>bq+1e-3 || (Math.abs(q-bq)<=1e-3 && top<btop)){ best=el; bq=q; btop=top; bm=m; }
   });
   return best;
 }
@@ -140,9 +145,9 @@ function videoAggiornaTestimone(){
   else if(t.paused) videoRiprendiOra(t);
   if(t.paused){ try{ const p=t.play(); if(p && p.catch) p.catch(function(){}); }catch(e){} }
 }
-function videoHtml(nome, vkey){
+function videoHtml(nome, vkey, momento){
   const sorg=VIDEO_DIR+nome+'.mp4';
-  return '<video class="scena-video" '+(vkey?('data-src="'+sorg+'" data-vkey="'+escAttr(vkey)+'" preload="none"'):('src="'+sorg+'" preload="auto"'))
+  return '<video class="scena-video'+(momento?' momento':'')+'" '+(vkey?('data-src="'+sorg+'" data-vkey="'+escAttr(vkey)+'" preload="none"'):('src="'+sorg+'" preload="auto"'))
     +' data-clip="'+nome+'" muted'+(vkey?'':' autoplay')+' loop playsinline disablepictureinpicture aria-hidden="true" tabindex="-1"></video>'; }   // L120-1: la clip di una carta non parte da sola (la fa partire il testimone)
 function ossVideo(){
   if(OSS_VIDEO || typeof IntersectionObserver==='undefined') return OSS_VIDEO;
@@ -177,6 +182,10 @@ function agganciaVideo(v){
   v.addEventListener('playing', function(){ v.classList.add('vivo'); }, {once:true});   // gli eventi media non risalgono: il target è lui
   if(k){ videoCaricaQuandoVisto(v); return; }   // L119-1: la clip di una carta parte quando la carta si vede
   try{ const p=v.play(); if(p && p.catch) p.catch(function(){}); }catch(e){}   // autoplay negato = resta l'immagine, nessun errore
+  /* L127-1 · anche la hero sta sotto l'osservatore: prima continuava a suonare nascosta sotto la partita (#start a display:none),
+     e le misure dei momenti contavano sempre due <video> che suonano. Fuori vista va in pausa; tornata la home è il testimone
+     (lì non ci sono carte) e riprende dall'ora. */
+  const O=ossVideo(); if(O) O.observe(v);
 }
 function agganciaVideoTutti(){ try{ document.querySelectorAll('video.scena-video').forEach(agganciaVideo);
   let tolte=0; VIDEO_QUOTA.forEach(function(q, el){ if(!el.isConnected){ VIDEO_QUOTA.delete(el); tolte++; } }); if(tolte) videoAggiornaTestimone();   // L120-1: se è uscito il testimone, il testimone passa
@@ -468,7 +477,21 @@ function scenaEraKey(v){
      3. scena d'epoca del bucket                      — copre il caso neutro E i `base` mancanti nel '50
      4. base se era-viva
      5. NESSUNA scena → graceful (il CSS regge lo slot vuoto) */
-function scenaSrc(id, tono, seed){
+/* L127-3 · LA VARIANTE DI PAESE. Il file che le regole qui sopra hanno scelto (tono › epoca › base) si «veste» col paese:
+   se `<basename>-<S.paese>` è in SCENE_PAESE (scenes.js) si usa quello. L'ordine deciso è quindi tono › epoca › base,
+   POI paese: il tono decide quale piazza (una piazza «grave» resta grave anche in Francia) e il paese la veste. L'epoca
+   viene prima del paese perché le varianti d'epoca sono già di un paese (i tag `italia1950`… vivono solo nella linea
+   italiana): un'immagine del '50 italiano è più specifica di una `-italia` senza data. Una scena senza variante di paese
+   torna intatta. La clip segue da sé: `clipDaSrc` legge il basename, quindi la clip di `elezioni-florido` è della neutra
+   e quella di `elezioni-florido-italia` solo dell'Italia. */
+function scenaPaese(p){
+  if(typeof p!=='string' || typeof SCENE_PAESE==='undefined' || typeof S==='undefined' || !S || !S.paese) return p;
+  var m=/^(.*\/)?([^\/]+)\.webp$/.exec(p); if(!m) return p;
+  var n=m[2]+'-'+S.paese;
+  return SCENE_PAESE.indexOf(n)>=0 ? (m[1]||'')+n+'.webp' : p;
+}
+function scenaSrc(id, tono, seed){ return scenaPaese(scenaSrcComune(id, tono, seed)); }
+function scenaSrcComune(id, tono, seed){
   if(!id) return null;
   var diretta=scenaSrcDiretta(id); if(diretta) return diretta;                 // src diretta (es. P.hero custom): data-URL o path d'asset
   if(typeof SCENES==='undefined' || !SCENES) return null;
@@ -519,6 +542,26 @@ function scenaFinale(reason){ var M=_sm('finale'); if(!M) return null;
   if(reason==='crisi'||reason==='insolvenza'||reason==='rivolta'||reason==='condanna'||reason==='silurato'||(reason==='salute'&&typeof S!=='undefined'&&S&&S.esitoSalute==='fatale'))
     return M.caduta;                                                           // cadute: sfiducia/insolvenza/condanna/silurato/fine-salute
   return M.oblio; }                                                            // congresso/primaria/sconfittaLocale/sconfitta netta
+/* ================================================================================================================
+   L127-1 · LE CLIP DEI MOMENTI. Intervista, telefonata, notte e finale rendevano la loro scena a mano (`<img class="mscene">`)
+   e non passavano da `clipDaSrc`: una clip `notte-spoglio.mp4` in VIDEO_PRESENTI non si sarebbe vista. Ora passano tutti da
+   qui, con le STESSE regole delle carte — `clipDaSrc` (movimento «pieno», niente `reteLeggera()`), il nodo che sopravvive ai
+   render (`data-vkey`: il modale si riscrive a ogni battuta, a ogni stadio della notte), sorgente solo al testimone, pausa fuori
+   vista — e la clip del momento è il testimone finché il modale è aperto (`.momento`, videoTestimone).
+   G8: niente clip sotto un pilastro-tragedia non risolto (la regola della musica, `musicaTragedia`), né quando il chiamante
+   dichiara il momento fermo (il finale per morte: `ferma`). Due forme: una striscia in cima (`.mscene-box`, intervista,
+   telefonata, finale con `fin`) e lo sfondo sotto il velo della notte (`sfondo`, `.mbg-img`).
+   ⚠ Chi scrive l'HTML nel modale chiama `agganciaVideoTutti()` subito dopo, nello stesso task: il trapianto del nodo vivo va
+   fatto prima che il browser metta in pausa quello uscito dal documento (L119-1).
+   ================================================================================================================ */
+function scenaMomentoHtml(src, opt){
+  opt=opt||{}; if(!src) return '';
+  const trag=(typeof musicaTragedia==='function') && musicaTragedia();
+  const clip=(opt.ferma || trag) ? '' : clipDaSrc(src);
+  const vid=clip ? videoHtml(clip, 'm:'+((typeof S!=='undefined'&&S)?(S.year*12+S.month):0)+':'+clip, true) : '';
+  if(opt.sfondo) return `<div class="mbg-img${clip?' con-video':''}" style="background-image:url('${src}')">${vid}</div>`;
+  return `<div class="mscene-box${opt.fin?' fin':''}${clip?' con-video':''}"><img class="mscene" src="${src}" alt="">${vid}</div>`;
+}
 function agScene(it){ if(!it || typeof SCENA_MAJOR==='undefined' || !SCENA_MAJOR[it.kind]) return '';   // display selettivo (ora incl. le carte locali)
   const bucket=scenaId(it); if(!bucket) return '';
   const seed=(it.data&&it.data.id) || it.kind || bucket;   // hash stabile: id-carta → stessa variante per quella carta
@@ -2649,13 +2692,24 @@ let TAVOLO_DI=null;          // la chiave della mappa costruita (transitoria, ma
 let TAVOLO_CHIAMA=null, TAVOLO_RIPROVA=null;      // l'area che pulsava all'ultimo aggiornamento (il pulse parte quando la classe arriva, una volta)
 /* le capitali che non sono un'area della mappa: le coordinate nel viewBox, ricavate dalla proiezione di genera-mappe.js
    (x e y sono lineari in lon e lat: adattate sulle città-cerchio note, errore ≤ 0,06 unità; gli Stati Uniti, con una città
-   sola, dai parametri della proiezione). Chiave: lo scenario per le porte con una mappa sua, altrimenti il paese. */
+   sola, dai parametri della proiezione). Chiave: lo scenario per le porte con una mappa sua, altrimenti il paese.
+   ⚠ Le coordinate sono la proiezione VERA e non si falsano per il disegno (L129-2): se il palazzo così messo coprirebbe il
+   bersaglio del cerchio di un'ALTRA città, cede lui (tavoloPalazzoCede: si sposta del minimo, nella direzione vera, dal centro
+   di quel cerchio verso la capitale — Pretoria a nord di Johannesburg, Washington a sud-ovest di New York); il cerchio della
+   città non si sposta mai. Quando la capitale È quella città la voce lo DICHIARA: `{ xy:[x, y], stessa:'<nome del territorio>' }`
+   invece della coppia nuda — da quella città il palazzo non cede (Nuova Delhi sul cerchio di Delhi è giusto così); niente
+   regole dedotte dai nomi. Il Brasile non c'è più: «Brasilia» (la grafia italiana di PAESI.brasile.capitale, che i testi
+   leggono con %CAPITALE) trova il cerchio «Brasília» col confronto senza accenti, e il palazzo viene dall'area. */
 const TAVOLO_CAPITALI={
-  usa:{ 'Washington':[131.1,37.0] }, australia:{ 'Canberra':[125,103.1] }, india:{ 'Nuova Delhi':[37.8,31.2] },
-  sudafrica:{ 'Pretoria':[77.8,28.3] }, canada:{ 'Ottawa':[123.9,55.5] }, brasile:{ 'Brasilia':[69.1,57.8] }, nigeria:{ 'Abuja':[44.5,45] },
+  usa:{ 'Washington':[131.1,37.0] }, australia:{ 'Canberra':[125,103.1] }, india:{ 'Nuova Delhi':{ xy:[37.8,31.2], stessa:'Delhi' } },
+  sudafrica:{ 'Pretoria':[77.8,28.3] }, canada:{ 'Ottawa':[123.9,55.5] }, nigeria:{ 'Abuja':[44.5,45] },
   argentina:{ 'Buenos Aires':[60.3,64.8] }, germania:{ 'Berlino':[81.4,44.4], 'Bonn':[14.7,74.5] },
-  de1950:{ 'Bonn':[14.7,74.4], 'Berlino':[81.5,44.4] }, de1960:{ 'Bonn':[14.7,74.4], 'Berlino':[81.5,44.4] }, de1970:{ 'Bonn':[14.7,74.4], 'Berlino':[81.5,44.4] }
+  /* nelle porte tedesche la capitale Berlino (se una tappa ce la portasse) È la città del cerchio «Berlino Ovest» */
+  de1950:{ 'Bonn':[14.7,74.4], 'Berlino':{ xy:[81.5,44.4], stessa:'Berlino Ovest' } }, de1960:{ 'Bonn':[14.7,74.4], 'Berlino':{ xy:[81.5,44.4], stessa:'Berlino Ovest' } }, de1970:{ 'Bonn':[14.7,74.4], 'Berlino':{ xy:[81.5,44.4], stessa:'Berlino Ovest' } }
 };
+let TAVOLO_MIS=null;         // L129-2: l'ultima scala del tavolo { k, wh } (transitoria, la scrive aggiornaTavolo a tavolo misurato)
+/* un nome senza segni diacritici, per confrontare grafie («Brasilia» e «Brasília») */
+function senzaAccenti(s){ return String(s==null?'':s).normalize('NFD').replace(/[̀-ͯ]/g, ''); }
 function tavoloAttivo(){ return !!(S && PAESE && PAESE.mappa && PAESE.mappa.aree && [1,2,3].indexOf(S.livello)>=0); }
 function tavoloVB(){ return String(PAESE.mappa.viewBox||'0 0 100 100').split(/[ ,]+/).map(Number); }
 /* il punto di un'area: il centro del cerchio, o il baricentro dell'anello più grande del poligono */
@@ -2671,11 +2725,44 @@ function tavoloCentro(i){
 /* il palazzo sta sulla capitale (`capitalePaese()`: segue anche la capitale cambiata a una tappa): prima un territorio con
    quel nome e un'area, poi la tabella delle capitali, altrimenti niente palazzo (dichiarato, nessun punto inventato) */
 function tavoloCapitale(){
-  const cap=capitalePaese(), TE=PAESE.territori||[];
-  for(let i=0;i<TE.length;i++){ if(TE[i].nome===cap && luogoHaArea(i)){ const A=PAESE.mappa.aree[i], c=tavoloCentro(i);
+  const cap=capitalePaese(), capN=senzaAccenti(cap), TE=PAESE.territori||[];
+  for(let i=0;i<TE.length;i++){ if(senzaAccenti(TE[i].nome)===capN && luogoHaArea(i)){ const A=PAESE.mappa.aree[i], c=tavoloCentro(i);
     return (A && A.cx!=null) ? [c[0], c[1]-(+A.r)*0.8] : c; } }   // la capitale-cerchio: il palazzo poggia sul bordo alto del cerchio, che gli sta davanti senza coprirlo
-  const tab=(S.scenario && TAVOLO_CAPITALI[S.scenario]) || TAVOLO_CAPITALI[S.paese] || {};
-  return tab[cap] || null;
+  const tab=(S.scenario && TAVOLO_CAPITALI[S.scenario]) || TAVOLO_CAPITALI[S.paese] || {}, v=tab[cap];
+  if(!v) return null;
+  return Array.isArray(v) ? tavoloPalazzoCede(v, null) : tavoloPalazzoCede(v.xy, v.stessa);
+}
+/* L129-2 · il palazzo DALLA TABELLA cede al bersaglio del cerchio di un'altra città. Il disegno del palazzo è il riquadro opaco
+   della pedina (lato 13% del viewBox, ancorata al punto con y−0,86·lato: l'opaco va da −0,63 a +0,12 del lato in verticale, per
+   tutta la larghezza); il bersaglio della città è il più grande fra il suo cerchio e il cerchio di tocco (22 px nella scala reale,
+   `TAVOLO_MIS`; senza misura, il cerchio). Se il palazzo tocca il bersaglio di un'altra città, si cerca il posto libero PIÙ
+   VICINO: la direzione vera (dal centro della città toccata più vicina verso il punto della capitale) per prima, e solo se un'altra
+   città sbarra la strada si devia, a passi di 15° fino a 90° per parte; a parità di distanza vince la deviazione minore. Un posto
+   è libero se non tocca il bersaglio di nessun'altra città e il disegno sta nel riquadro visibile. Nessun posto libero entro il
+   triplo del lato: resta il punto vero (dichiarato, come prima). Deterministico, puro sulla scala. */
+let PAL_CEDE=null;           // la memoria dell'ultimo calcolo (chiave: punto, stessa, paese, scenario, scala) — transitoria
+function tavoloPalazzoCede(p, stessa){
+  const k=TAVOLO_MIS && TAVOLO_MIS.k, chiave=[p[0], p[1], stessa, S.paese, S.scenario, k, TAVOLO_MIS && TAVOLO_MIS.wh.join('x')].join('|');
+  if(PAL_CEDE && PAL_CEDE.chiave===chiave) return PAL_CEDE.q.slice();
+  const q=palazzoCedeCalcola(p, stessa, k); PAL_CEDE={ chiave:chiave, q:q }; return q.slice();
+}
+function palazzoCedeCalcola(p, stessa, k){
+  const M=PAESE.mappa, TE=PAESE.territori||[], vb=tavoloVB(), lato=vb[2]*0.13;
+  const C=[]; TE.forEach(function(T1, i){ const A=M.aree[i]; if(!A || A.d || A.cx==null || (stessa && T1.nome===stessa)) return;
+    C.push({ x:+A.cx, y:+A.cy, R:Math.max(+A.r||0, k ? 22/k : 0) }); });
+  const tocca=function(q, c){ const x0=q[0]-lato/2, x1=q[0]+lato/2, y0=q[1]-lato*0.63, y1=q[1]+lato*0.12;
+    return Math.hypot(Math.max(x0, Math.min(c.x, x1))-c.x, Math.max(y0, Math.min(c.y, y1))-c.y) < c.R; };
+  const q0=[+p[0], +p[1]], sotto=C.filter(function(c){ return tocca(q0, c); });
+  if(!sotto.length) return q0;
+  const lim=TAVOLO_MIS ? tavoloLim(TAVOLO_MIS.k, TAVOLO_MIS.wh, 0) : null;
+  const libero=function(q){ return (!lim || (q[0]-lato/2>=lim[0] && q[0]+lato/2<=lim[2] && q[1]-lato*0.63>=lim[1] && q[1]+lato*0.12<=lim[3]))
+    && C.every(function(c){ return !tocca(q, c); }); };
+  const c0=sotto.reduce(function(a, c){ return Math.hypot(c.x-q0[0], c.y-q0[1])<Math.hypot(a.x-q0[0], a.y-q0[1]) ? c : a; });
+  const a0=Math.hypot(q0[0]-c0.x, q0[1]-c0.y)<1e-6 ? -Math.PI/2 : Math.atan2(q0[1]-c0.y, q0[0]-c0.x);
+  const passo=lato/80, dev=[0]; for(let g=15; g<=90; g+=15) dev.push(g, -g);
+  for(let t=passo; t<=lato*3; t+=passo) for(let j=0; j<dev.length; j++){ const a=a0+dev[j]*Math.PI/180, q=[q0[0]+Math.cos(a)*t, q0[1]+Math.sin(a)*t];
+    if(libero(q)) return q; }
+  return q0;
 }
 /* la pedina di un territorio: il carattere dichiarato (`carattere`, campo facoltativo che nessun paese ha ancora) o, per le
    città, la pedina città; le regioni senza carattere non hanno pedina. Solo se il file è in PEDINE_PRESENTI. */
@@ -2724,8 +2811,9 @@ function costruisciTavolo(box){
      sopra il palazzo — che poggia sul bordo alto del cerchio della capitale e ne tocca appena la corona (dichiarato nel rapporto). */
   h+=`<g class="tv-righe tv-righe-citta" pointer-events="none">`+citta.map(function(i){ const A=M.aree[i]; return `<circle class="tv-riga" data-i="${i}" cx="${A.cx}" cy="${A.cy}" r="${A.r}" fill="url(#tv-righe-tuo)" opacity="0"/>`; }).join('')+`</g>`;
   /* i bersagli di tocco: un cerchio trasparente sopra ogni città e ogni regione piccola; il raggio lo fissa aggiornaTavolo
-     dalla scala reale (≥ 22 px, cioè un bersaglio di 44) */
-  citta.concat(regioni).forEach(function(i){ const c=tavoloCentro(i); if(c) h+=`<circle class="tv-tocco" data-i="${i}" cx="${c[0].toFixed(2)}" cy="${c[1].toFixed(2)}" r="0" onclick="selArea(${i})"/>`; });
+     dalla scala reale (≥ 22 px, cioè un bersaglio di 44). L129-1: il tocco passa da toccaBersaglio, che chiede «Quale?» dove due
+     bersagli si sovrappongono */
+  citta.concat(regioni).forEach(function(i){ const c=tavoloCentro(i); if(c) h+=`<circle class="tv-tocco" data-i="${i}" cx="${c[0].toFixed(2)}" cy="${c[1].toFixed(2)}" r="0" onclick="toccaBersaglio(event,${i})"/>`; });
   /* L113-4 §3 · la luce del mese: un rettangolo sfumato ritagliato sulla terra, fermo e invisibile finché non scorre */
   h+=`<defs><linearGradient id="tv-luce-g" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#ffd79a" stop-opacity="0"/><stop offset=".5" stop-color="#ffd79a" stop-opacity=".42"/><stop offset="1" stop-color="#ffd79a" stop-opacity="0"/></linearGradient>`+
      `<clipPath id="tv-luce-c"><path d="${M.sfondo}"/></clipPath></defs>`+
@@ -2734,7 +2822,7 @@ function costruisciTavolo(box){
   h+=`<g class="tv-segnalini"></g>`;   // L113-3: i segnalini delle carte, sopra tutto (il segnalino vince sull'area)
   h+=`</svg>`;
   box.innerHTML=`<div class="tv-nota" aria-live="polite"></div>${h}<div class="tv-foglio" style="display:none"></div><div class="tv-info"></div>`;
-  TAVOLO_CHIAMA=null; TAVOLO_SEG={}; TAVOLO_FISSI={}; FISSO_APERTO=null;   // L113-3 · L126-1: l'svg nuovo non ha segnalini (ripartono, senza rientrare se già entrati)
+  TAVOLO_CHIAMA=null; TAVOLO_SEG={}; TAVOLO_FISSI={}; FISSO_APERTO=null; QUALE_APERTO=null; TAVOLO_MIS=null;   // L113-3 · L126-1: l'svg nuovo non ha segnalini (ripartono, senza rientrare se già entrati)
   TAVOLO_CODA={ mese:null, voci:[] }; SEG_PRONTO=null; LUCE_MESE=null;   // L113-4: un tavolo nuovo (paese, caricamento) non eredita code né luci
 }
 /* l'altezza del tavolo = lo schermo meno header e barra. L123-1: si scrive SOLO se cambia (confronto con lo stile inline, che non
@@ -2755,6 +2843,7 @@ function aggiornaTavolo(){
   /* L123-1 · la scala REALE si legge UNA volta, qui, prima di ogni scrittura di questo passaggio (una lettura dopo un setAttribute
      è un layout forzato); a tavolo nascosto è 0 e si riprova al fotogramma dopo */
   const RQ=svg.getBoundingClientRect(), w=RQ.width, vb=tavoloVB();
+  if(w>0) TAVOLO_MIS={ k:Math.min(w/vb[2], RQ.height/vb[3]), wh:[w, RQ.height] };   // L129-2: la scala per il palazzo che cede (tavoloPalazzoCede)
   const chiamaIdx=(S.territorioChiama && typeof S.territorioChiama.idx==='number') ? S.territorioChiama.idx : null;
   svg.querySelectorAll('.tv-area').forEach(function(el){
     const i=+el.getAttribute('data-i'), t=S.territori[i]||{}, tuo=compatibile(t.partito, asseTuo, S.partito), L=Math.abs(TE[i].lean||0);
@@ -2783,8 +2872,8 @@ function aggiornaTavolo(){
       /* un'area piccola si tocca SOLO dal suo bersaglio (il disegno sotto è più piccolo di 44 px); una grande dal disegno */
       const vis=svg.querySelector('path.tv-area[data-i="'+i+'"]');
       if(vis){ if(serve>0){ vis.removeAttribute('onclick'); vis.setAttribute('pointer-events','none'); } else { vis.setAttribute('onclick','selArea('+i+')'); vis.removeAttribute('pointer-events'); } }
-      if(serve<=0) el.removeAttribute('onclick'); else el.setAttribute('onclick','selArea('+i+')'); });
-    aggiornaSegnalini(svg, k); aggiornaFissi(svg, k, [w, RQ.height]); }   // L113-3 · L126-1 (L128-1: le misure dell'svg, già lette)
+      if(serve<=0) el.removeAttribute('onclick'); else el.setAttribute('onclick','toccaBersaglio(event,'+i+')'); });
+    aggiornaSegnalini(svg, k, [w, RQ.height]); aggiornaFissi(svg, k, [w, RQ.height]); }   // L113-3 · L126-1 (L128-1: le misure dell'svg, già lette)
   tavoloLuce();   // L113-4 §3: la luce del mese (una per mese, solo a tavolo scoperto): i segnalini, a tavolo misurato (la scala serve al disegno e al raggruppamento)
   /* la nota in alto: la campagna sul territorio o il territorio che chiama; il pannello dell'area in basso */
   const camp=(typeof inCampagna==='function' && inCampagna());
@@ -2962,7 +3051,7 @@ function segnalinoNodo(key, S1){
   return g;
 }
 /* ⚑ l'aggiornamento: chiamato da aggiornaTavolo a tavolo misurato (k = pixel per unità del disegno) */
-function aggiornaSegnalini(svg, k){
+function aggiornaSegnalini(svg, k, wh){
   const box=svg.querySelector('.tv-segnalini'); if(!box || !(k>0)) return;
   const mese=S.year*12+S.month;
   if(SEG_LUOGO_MESE!==mese){ SEG_LUOGO={}; SEG_LUOGO_MESE=mese; for(const v in SEG_VISTI){ if(v.indexOf(mese+':')!==0) delete SEG_VISTI[v]; } }
@@ -2975,15 +3064,18 @@ function aggiornaSegnalini(svg, k){
     tavoloCodaSvuota();
     if(!SEG_RINVIO) SEG_RINVIO=requestAnimationFrame(function(){ setTimeout(function(){ SEG_RINVIO=null;
       try{ if(typeof S!=='undefined' && S && tavoloAttivo()){ SEG_PRONTO=S.year*12+S.month; const sv=document.querySelector('#tavolo svg'), w=sv?sv.getBoundingClientRect().width:0, vb=tavoloVB();
-        if(w>0){ const h2=sv.getBoundingClientRect().height, k2=Math.min(w/vb[2], h2/vb[3]); aggiornaSegnalini(sv, k2); aggiornaFissi(sv, k2, [w, h2]); } } }catch(e){} }, 0); });   // solo i segnalini (e i fissi, che si scansano dalle carte nuove), non tutto il tavolo
+        if(w>0){ const h2=sv.getBoundingClientRect().height, k2=Math.min(w/vb[2], h2/vb[3]); aggiornaSegnalini(sv, k2, [w, h2]); aggiornaFissi(sv, k2, [w, h2]); } } }catch(e){} }, 0); });   // solo i segnalini (e i fissi, che si scansano dalle carte nuove), non tutto il tavolo
     return;
   }
-  /* 1 · i luoghi delle carte aperte, nell'ordine dell'agenda */
+  /* 1 · i luoghi delle carte aperte, nell'ordine dell'agenda. L129-1: un luogo il cui bersaglio (44 px) uscirebbe dal riquadro
+     VISIBILE del tavolo (`wh`, già letto dal chiamante) rientra lungo la retta verso il centro del disegno, del minimo necessario —
+     qui e non in luogoCarta, che è pura e non conosce lo schermo; il luogo in cache resta quello vero (una rotazione lo ricalcola) */
+  const lim=tavoloLim(k, wh, SEG_TOCCO/k), vbS=tavoloVB(), centro=[vbS[0]+vbS[2]/2, vbS[1]+vbS[3]/2];
   const luoghi={}, ordine=[];
   (S.agenda||[]).forEach(function(it, idx){
     if(!it || it.resolved) return;
     const ck=chiaveCarta(it, idx);
-    const Lo=SEG_LUOGO[ck] || (SEG_LUOGO[ck]=segnalinoLuogo(it, idx));
+    const Lo=tavoloDentro(SEG_LUOGO[ck] || (SEG_LUOGO[ck]=segnalinoLuogo(it, idx)), lim, centro);
     if(!luoghi[Lo.key]){ luoghi[Lo.key]={ L:Lo, carte:[], idx:[], urgente:false }; ordine.push(Lo.key); }
     const g=luoghi[Lo.key]; g.carte.push(ck); g.idx.push(idx); if(it.data && it.data.snodo) g.urgente=true;
   });
@@ -3231,6 +3323,24 @@ function fissoBase(F){
    di una città (L128-1: [x, y, distanza minima]), si gira su un anello di 44 px (otto posti, dall'alto in senso orario), poi su
    uno di 88; deterministico. Un posto il cui bersaglio esce dal riquadro visibile del tavolo (`lim`) non è libero; se nessuno
    lo è, resta il luogo di base (come prima) */
+/* il riquadro VISIBILE dell'svg in unità del disegno (xMidYMid meet: il disegno è centrato e ai lati c'è tavolo in più),
+   ristretto di `d` (il raggio del bersaglio, in unità). `wh` sono le misure dell'svg già lette dal chiamante: niente layout qui.
+   Senza misure, null (nessun vincolo). Lo usano i fissi (L128-1) e i segnalini (L129-1). */
+function tavoloLim(k, wh, d){
+  if(!(wh && wh[0]>0 && k>0)) return null;
+  const vb=tavoloVB(), ex=(wh[0]/k-vb[2])/2, ey=(wh[1]/k-vb[3])/2;
+  return [vb[0]-ex+d, vb[1]-ey+d, vb[0]+vb[2]+ex-d, vb[1]+vb[3]+ey-d];
+}
+/* un luogo {x, y, …} dentro `lim`: se ne esce, si sposta lungo la retta verso `c` del minimo che lo fa rientrare (una copia;
+   il luogo dato non si tocca). Dentro, lo stesso oggetto. */
+function tavoloDentro(L, lim, c){
+  if(!lim || !L || (L.x>=lim[0] && L.x<=lim[2] && L.y>=lim[1] && L.y<=lim[3])) return L;
+  let t=0;
+  const asse=function(p, q, a, b){ if(p<a && q>p) t=Math.max(t, (a-p)/(q-p)); else if(p>b && q<p) t=Math.max(t, (p-b)/(p-q)); };
+  asse(L.x, c[0], lim[0], lim[2]); asse(L.y, c[1], lim[1], lim[3]);
+  t=Math.min(1, t);
+  return Object.assign({}, L, { x:L.x+(c[0]-L.x)*t, y:L.y+(c[1]-L.y)*t });
+}
 function fissoPosto(base, presi, k, lim){
   const d=SEG_TOCCO*2/k, libero=function(p){ return (!lim || (p[0]>=lim[0] && p[0]<=lim[2] && p[1]>=lim[1] && p[1]<=lim[3])) && presi.every(function(q){ return Math.hypot(q[0]-p[0], q[1]-p[1]) >= (q.length>2 ? q[2] : d)-1e-6; }); };
   if(libero(base)) return base;
@@ -3283,7 +3393,7 @@ function aggiornaFissi(svg, k, wh){
   const AR=PAESE.mappa.aree, dT=(SEG_TOCCO+0.5)/k;
   /* L128-1 · il riquadro VISIBILE dell'svg (xMidYMid meet: il disegno è centrato), ristretto del bersaglio: un posto il cui bersaglio
      uscirebbe dal tavolo non è libero (Bonn sta sul bordo ovest: la promessa usciva di 9 px) */
-  const vb=tavoloVB(), lim=(wh && wh[0]>0) ? (function(){ const ex=(wh[0]/k-vb[2])/2, ey=(wh[1]/k-vb[3])/2; return [vb[0]-ex+dT, vb[1]-ey+dT, vb[0]+vb[2]+ex-dT, vb[1]+vb[3]+ey-dT]; })() : null;
+  const lim=tavoloLim(k, wh, dT);
   svg.querySelectorAll('.tv-tocco').forEach(function(c){ const A=AR[+c.getAttribute('data-i')]; if(!A || A.d) return;
     presi.push([+c.getAttribute('cx'), +c.getAttribute('cy'), dT+Math.max(+c.getAttribute('r')||0, +A.r||0)]); });
   L.forEach(function(F){
@@ -3353,12 +3463,13 @@ function fissoEsce(el, cont){
 }
 /* ⚑ il tocco: apre il foglietto del segno; lo stesso segno (o null) lo chiude. Nessun cassetto si apre. */
 function toccaFisso(key){
-  FISSO_APERTO=(key && FISSO_APERTO!==key && TAVOLO_FISSI[key]) ? key : null;
+  FISSO_APERTO=(key && FISSO_APERTO!==key && TAVOLO_FISSI[key]) ? key : null; QUALE_APERTO=null;
   fissoFoglio();
 }
 function fissoFoglio(){
   const f=document.querySelector('#tavolo .tv-foglio'); if(!f) return;
   const R=FISSO_APERTO && TAVOLO_FISSI[FISSO_APERTO];
+  if((!R || !R.F) && QUALE_APERTO){ qualeFoglio(f); return; }   // L129-1: lo stesso foglietto, per il tocco ambiguo
   if(!R || !R.F){ if(f.style.display!=='none'){ f.innerHTML=''; f.style.display='none'; } return; }
   const F=R.F, righe=[]; let tacche='';
   if(F.tipo==='sfida'){ righe.push(T('%V ti contende la guida del partito.').replace('%V', (S.sfida&&S.sfida.volto)||T('lo sfidante')));
@@ -3382,10 +3493,44 @@ function fissoFoglio(){
 }
 /* il tocco fuori chiude il foglietto (il tocco sul segno lo gestisce il segno) */
 document.addEventListener('click', function(ev){
-  if(!FISSO_APERTO) return;
+  if(!FISSO_APERTO && !QUALE_APERTO) return;
   const t=ev.target; if(t && t.closest && t.closest('.tv-foglio, .tv-fisso')) return;
-  FISSO_APERTO=null; fissoFoglio();
+  FISSO_APERTO=null; QUALE_APERTO=null; fissoFoglio();
 }, true);
+/* ================================================================================================================
+   L129-1 · IL TOCCO AMBIGUO. Nei paesi densi (Giappone, Messico, Canada…) due bersagli piccoli (44 px) si sovrappongono: prima
+   il tocco nella zona comune andava a chi era disegnato sopra. Il bersaglio non si sposta e non si rimpicciolisce (paletto dei
+   44 px): al tocco si contano i bersagli PICCOLI (r>0) che contengono il punto, nel sistema del viewBox — uno solo → selArea
+   come prima; due o più → il foglietto del tavolo con «Quale?» e una riga per area, la più vicina al tocco per prima. Le aree
+   grandi (r=0, si toccano dal disegno) non entrano nel conto. Il calcolo sta QUI, nel gestore: nessuna lettura in più a ogni
+   mese. Transitorio, mai in S.
+   ================================================================================================================ */
+let QUALE_APERTO=null;        // { aree:[indici], y:clientY del tocco } — transitorio
+function toccaBersaglio(ev, i){
+  const svg=document.querySelector('#tavolo svg'), M=svg && svg.getScreenCTM && svg.getScreenCTM();
+  if(!ev || !M || !(ev.clientX || ev.clientY)){ QUALE_APERTO=null; selArea(i); return; }
+  const p=new DOMPoint(ev.clientX, ev.clientY).matrixTransform(M.inverse()), dentro=[];
+  svg.querySelectorAll('.tv-tocco').forEach(function(c){ const r=+c.getAttribute('r'); if(!(r>0)) return;
+    const d=Math.hypot(+c.getAttribute('cx')-p.x, +c.getAttribute('cy')-p.y); if(d<=r) dentro.push({ i:+c.getAttribute('data-i'), d:d }); });
+  if(dentro.length<2){ QUALE_APERTO=null; fissoFoglio(); selArea(i); return; }
+  dentro.sort(function(a, b){ return a.d-b.d; });
+  FISSO_APERTO=null; QUALE_APERTO={ aree:dentro.map(function(x){ return x.i; }), y:ev.clientY };
+  fissoFoglio();
+}
+function sceglieQuale(i){ QUALE_APERTO=null; fissoFoglio(); selArea(i); }
+function qualeFoglio(f){
+  const TE=PAESE.territori||[];
+  const h=`<button class="tv-chiudi" onclick="QUALE_APERTO=null;fissoFoglio()" aria-label="${escAttr(T('Chiudi'))}">✕</button>`+
+    `<div class="tv-foglio-t">${T('Quale?')}</div>`+
+    QUALE_APERTO.aree.map(function(i){ return `<button class="tv-quale" data-i="${i}" onclick="sceglieQuale(${i})">${cap(nomeTerr(TE[i]))}</button>`; }).join('');
+  if(f.innerHTML!==h) f.innerHTML=h;
+  f.setAttribute('aria-label', T('Quale?'));
+  const nota=document.querySelector('#tavolo .tv-nota'), top=(nota && nota.style.display!=='none' && nota.innerHTML) ? (nota.offsetTop+nota.offsetHeight+6) : 10;
+  f.style.top=top+'px'; f.style.bottom=''; f.style.display='';
+  /* il foglietto non copre il punto toccato: se ci sta sopra, scende in basso */
+  const fr=f.getBoundingClientRect();
+  if(QUALE_APERTO.y>=fr.top-8 && QUALE_APERTO.y<=fr.bottom+8){ f.style.top='auto'; f.style.bottom='10px'; }
+}
 window.addEventListener('resize', function(){ try{ if(S && tavoloAttivo()) aggiornaTavolo(); }catch(e){} });
 /* il bottone in fondo: con decisioni aperte e il tavolo in vista, apre il cassetto Governo (prima era spento) */
 function premiAvanza(){

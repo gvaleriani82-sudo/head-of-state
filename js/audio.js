@@ -63,16 +63,17 @@ const AUDIO_MANIFEST = {
   bussare:  { file:'bussare.mp3',  loop:false, gain:0.50 },   // RMS −17,4
   macchina: { file:'macchina.mp3', loop:false, gain:1.24 },   // RMS −29, tetto del picco
   allarme:  { file:'allarme.mp3',  loop:false, gain:5.54 },   // RMS −38,3 ⚠ basso
-  /* ⚑ L118-1 (27/9) · IL TERZO GIRO, venti nomi (PROMPT-AUDIO-ELEVENLABS § «Terzo giro»). I file NON ci sono ancora: è una lista-promessa,
+  /* ⚑ L118-1 (27/9) · IL TERZO GIRO, venti nomi (PROMPT-AUDIO-ELEVENLABS § «Terzo giro»). Col file, dal 27/9: `pagina`, `martelletto`, `passi` (L130-1); campanella, bicchieri,
+     stretta, porta scartati da Cowork (restano senza file). Gli altri NON ci sono ancora: è una lista-promessa,
      come la musica di L114-1. Gli agganci sono già al loro posto (nel punto dove si decide, `suonoCarta` per le carte che entrano), e
      finché un file manca il nome è silenzio SENZA consumare un posto del gesto (vedi `suona`). ⚠ Il gain qui è il valore base 0,6:
      quando arriva il file si rifà con la regola di sopra (0,6 × 10^((−19 − RMS)/20), tetto del picco a −1 dBFS) e si aggiunge ad AUDIO_PRESENTI. */
   pagina:      { file:'pagina.mp3',      loop:false, gain:0.26 },  // il cassetto che si apre (al posto di `scheda`) · ARRIVATO il 27/9 08:19 (Gemini, «taglio 1», 0,6 s): RMS −17,7, picco 0 → regola di sopra × 0,5 (6 dB sotto: gesto frequente, come era `scheda`)
-  martelletto: { file:'martelletto.mp3', loop:false, gain:0.6 },   // la legge approvata
+  martelletto: { file:'martelletto.mp3', loop:false, gain:1.01 },  // la legge approvata · ARRIVATO il 27/9 (L130-1, ritaglio Lyria di Cowork, 2,2 s): RMS −23,5, picco −1,4 → regola di sopra (a 0,6 rendeva −27,9, 4,5 dB sotto i vicini)
   campanella:  { file:'campanella.mp3',  loop:false, gain:0.6 },   // si apre una seduta, un dibattito
   stretta:     { file:'stretta.mp3',     loop:false, gain:0.6 },   // un accordo, una maggioranza ricostruita
   bicchieri:   { file:'bicchieri.mp3',   loop:false, gain:0.6 },   // un accordo festeggiato
-  passi:       { file:'passi.mp3',       loop:false, gain:0.6 },   // un ministero che si apre, una visita
+  passi:       { file:'passi.mp3',       loop:false, gain:0.66 },  // un ministero che si apre, una visita · ARRIVATO il 27/9 (L130-1, 2,9 s): RMS −19,8, picco 0 → regola di sopra, rende −23,4 come `bussare`, che sostituisce
   porta:       { file:'porta.mp3',       loop:false, gain:0.6 },   // il retroscena (i beat `rb_`)
   sussurro:    { file:'sussurro.mp3',    loop:false, gain:0.6 },   // fuori verbale, indiscrezioni
   radio:       { file:'radio.mp3',       loop:false, gain:0.6 },   // l'estero e le crisi internazionali, FINO AL 1989
@@ -96,6 +97,7 @@ const AUDIO_MANIFEST = {
 const AUDIO_PRESENTI = ['tocco.wav','carta.mp3','chip.mp3','mese.mp3','giornale.mp3','mappa.mp3','urne.mp3',
                         'esito.mp3','esito_no.mp3','snodo.mp3','soglia.mp3','finale.mp3','telefono.mp3','aula.mp3',   // L114-2
                         'pagina.mp3',   // L118-1: il primo del terzo giro (27/9 08:19)
+                        'martelletto.mp3','passi.mp3',   // L130-1 (27/9 sera): gli altri quattro dell'infornata (campanella, bicchieri, stretta, porta) scartati da Cowork
                         'positivo.mp3','negativo.mp3','firma.mp3','monete.mp3','applauso.mp3','folla.mp3',
                         'protesta.mp3','fischi.mp3','flash.mp3','bussare.mp3','macchina.mp3','allarme.mp3'];         // L116-1
 
