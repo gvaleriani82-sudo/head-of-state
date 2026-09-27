@@ -33,8 +33,10 @@
         </div>
         <button class="suono-btn" id="suono-home" onclick="showSuonoHome()"><span aria-hidden="true">♪</span> <span data-i18n>Suono</span></button>
       </div>
-      <!-- lockup identità (lotto 3): emblema raster (base64 da js/emblema.js, src al boot) + occhiello coi filetti + titolo -->
-      <img id="home-emblema" alt="" aria-hidden="true" width="130" height="130" decoding="async" style="display:block;width:130px;height:auto;margin:2px auto 8px;">
+      <!-- L125-1 — il LOGO (lo statista di spalle davanti alla mappa, col titolo HEAD OF STATE dentro l'immagine, uguale in IT ed EN)
+           al posto dell'emblema con la colonna e del logotipo che stava sotto: il titolo ora è nel logo, due sarebbero doppi.
+           L'src lo mette il boot da EMBLEMA_IMG (js/emblema.js); le misure le dà il CSS (#home-emblema). -->
+      <img id="home-emblema" alt="" aria-hidden="true" width="640" height="640" decoding="async">
       <!-- slot HERO (raster futuro): DORMIENTE (display:none via CSS finché non riceve <img> + .on).
            Hook per-paese previsto in applyPaese (PAESE.hero); si parte con UNA hero condivisa.
            REGOLA SACRA: non attivare mai .on sotto i 700px. -->
@@ -44,11 +46,9 @@
         <div class="em" id="start-ruolo" data-i18n style="margin:0;">La tua carriera politica</div>
         <span style="display:inline-block;width:26px;height:1px;background:var(--line2);"></span>
       </div>
-      <!-- L38-1 — il LOGOTIPO al posto dell'h2 testuale. L'h2 resta nel DOM per screen reader e SEO
-           (`.sr-only`, fuori schermo ma leggibile dalle tecnologie assistive): il titolo del gioco non
-           deve sparire dalla pagina solo perché ora è disegnato. -->
+      <!-- L38-1 — l'h2 testuale resta nel DOM per screen reader e SEO (`.sr-only`, fuori schermo ma leggibile dalle
+           tecnologie assistive): il titolo del gioco non deve sparire dalla pagina solo perché ora è disegnato (nel logo, L125-1). -->
       <h2 class="sr-only">Head of State</h2>
-      <img id="home-titolo" src="assets/ui/titolo-2righe.webp" alt="Head of State" width="900" height="320" decoding="async">
       <!-- pitch GENERICO (statico, bilingue): la intro per-paese/ruolo vive ora nel setup (#setup-intro), dove si sceglie -->
       <p id="start-intro" data-i18n>Dal primo comizio al vertice del paese: scegli dove giocare, dai un volto alla tua carriera politica e guidala mese per mese, tra scelte, alleanze e imprevisti.</p>
       <div class="note" data-i18n><b>Nota.</b> I valori del gioco (debito, crescita, ecc.) sono <b>stilizzati</b> e non sono dati ufficiali. I nomi dei ministri sono di fantasia. È una simulazione di dinamiche politiche, non un modello economico reale.</div>

@@ -31,7 +31,9 @@
             clip:rect(0 0 0 0); clip-path:inset(50%); white-space:nowrap; border:0; }
   /* il LOGOTIPO: sorgente 900x320, reso a larghezza-contenitore con un tetto — a 375px viene ~2,7x la
      larghezza resa, quindi resta nitido anche sugli schermi a densita' alta. */
-  #home-titolo{ display:block; width:100%; max-width:300px; height:auto; margin:2px auto 6px; }
+  /* L125-1: il logo quadrato, col titolo dentro. 240 px sul telefono: a 280 «Gioca oggi» scendeva sotto la piega a 375×812 */
+  #home-emblema{ display:block; width:min(240px, 64vw); height:auto; aspect-ratio:1; margin:2px auto 12px; border-radius:14px; box-shadow:0 6px 20px rgba(0,0,0,.22); }
+  @media (min-width:700px){ #home-emblema{ width:280px; } }
   /* LA TEXTURE-CARTA: pseudo-elemento fisso SOTTO tutto (z-index -1), cosi' vive solo sul fondo-app e non
      tocca ne' i modali ne' le card, che hanno il loro fondo opaco. L'opacita' e' volutamente al limite del
      percepibile: l'effetto giusto e' che si noti solo togliendola. */
@@ -622,6 +624,31 @@
   /* RIDOTTO (L113-1 §5): il cambio di mano delle aree è informazione e resta come transizione di fill; il cassetto
      che sale diventa una dissolvenza. SPENTO: tutto di colpo (la regola unica di sopra). */
   html.mov-ridotto .tv-area{ transition:fill .6s ease, fill-opacity .6s ease !important; }
+  /* L113-5 · LA NOTTE SUL TAVOLO (ui.js, notteTavolo). Il tavolo — lo stesso nodo — sale in alto e prende il 42% dello schermo,
+     il contenuto della notte sta in un foglio in basso (58%); lo sfondo-scena resta dentro il foglio. Sopra il tavolo le RIGHE
+     (il voto dell'area); il colore pieno sotto resta il controllo. Durante la notte il tavolo non si tocca e i segnalini, la
+     nota e la luce del mese si nascondono (tornano dopo). */
+  .tv-riga{ transition:opacity .45s ease; }
+  .tv-riga.onda{ animation:rigaOnda .55s ease-out; }
+  @keyframes rigaOnda{ 0%{ filter:brightness(1.9); } 100%{ filter:none; } }
+  html.mov-ridotto .tv-riga{ transition:opacity .45s ease !important; }   /* ridotto: lo scaglionamento resta, senza onde */
+  body.notte-sul-tavolo #game.con-tavolo .tavolo{ position:fixed; top:0; left:0; right:0; z-index:55; height:42vh; height:42dvh; min-height:0; pointer-events:none; }
+  body.notte-sul-tavolo #tavolo .tv-segnalini, body.notte-sul-tavolo #tavolo .tv-nota, body.notte-sul-tavolo #tavolo .tv-info, body.notte-sul-tavolo #tavolo .tv-luce{ display:none; }
+  .ov.notte-tavolo{ padding:0; align-items:flex-end; pointer-events:none; background:linear-gradient(rgba(20,22,28,0) 42dvh, rgba(20,22,28,.55) 42dvh); }
+  .ov.notte-tavolo .modal{ pointer-events:auto; height:58vh; height:58dvh; max-height:58dvh; border-radius:18px 18px 0 0; border-bottom:0; animation:none; }
+  .ov.notte-tavolo .notte-wrap{ min-height:100%; }
+  .notte-wrap.sul-tavolo .mt{ padding:10px 18px 0; } .notte-wrap.sul-tavolo .mt h2{ font-size:19px; margin-top:2px; }
+  .notte-wrap.sul-tavolo .mtext{ padding:3px 18px 4px; }
+  .notte-wrap.sul-tavolo .notte-panel{ margin:4px 12px; padding:4px; }
+  .notte-wrap.sul-tavolo .notte-panel .mtext{ padding:4px 12px; }
+  .notte-wrap.sul-tavolo .choices{ padding:4px 14px 10px; gap:6px; }
+  .notte-wrap.sul-tavolo .notte-bottoni{ flex-direction:row; }
+  .notte-wrap.sul-tavolo .notte-bottoni .opt{ flex:1 1 0; min-height:44px; justify-content:center; }
+  .notte-legenda{ display:flex; flex-wrap:wrap; align-items:center; gap:4px 6px; padding:0 18px 2px; font-size:11px; color:#dfe4ee; text-shadow:0 1px 2px rgba(0,0,0,.6); }
+  .notte-legenda .nl-righe, .notte-legenda .nl-pieno{ display:inline-block; width:14px; height:10px; border-radius:2px; vertical-align:middle; }
+  .notte-legenda .nl-righe{ background:repeating-linear-gradient(45deg, var(--tv-tuo) 0 2px, transparent 2px 5px); box-shadow:inset 0 0 0 1px rgba(255,255,255,.35); }
+  .notte-legenda .nl-pieno{ background:var(--tv-tuo); opacity:.75; margin-left:4px; }
+  .notte-tutti summary{ min-height:44px; display:flex; align-items:center; cursor:pointer; font-size:12px; color:var(--mut); }
   html.mov-ridotto #game.con-tavolo main.sale{ animation:secFade .12s ease !important; }
   /* L113-3 · I SEGNALINI delle carte (ui.js, aggiornaSegnalini): un disco carta/oro coi colori del mondo, uguali nei due temi.
      Il gruppo `.tv-seg-s` è scalato a pixel reali dal javascript: qui le misure sono in pixel (disco 26, bersaglio 44). */

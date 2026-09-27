@@ -1291,6 +1291,7 @@ function attenzioni(){
   return out.slice(0,2);   // cap: max 2 pallini, i più urgenti — la selettività tiene il richiamo significativo
 }
 function render(){
+  if(typeof MESE_IN_CORSO!=='undefined' && MESE_IN_CORSO){ MESE_RENDER=true; return; }   // L123-1: dentro advanceMonth si rende una volta, alla fine
   if(S.lingua===undefined) S.lingua='it';   // migrazione APT: i salvataggi pre-i18n partono in italiano
   if(S.tab==='ind'||S.tab==='con') S.tab='paese';   // guardia per stati pre-fusione: PRIMA del toggle delle sezioni (sec-ind/sec-con non esistono più)
   applyPaese();   // rete di sicurezza: la striscia-bandiera segue sempre PAESE, qualunque percorso porti qui (idempotente)
@@ -2513,6 +2514,18 @@ function luogoGeo(){
   LUOGO_GEO={ vb:vb, sfondo:luogoAnelli(M.sfondo), aree:aree }; LUOGO_GEO_DI=M;
   return LUOGO_GEO;
 }
+/* L123-1 · i RIQUADRI delle aree-regione (min/max degli anelli), per mappa: prima aggiornaTavolo rifaceva luogoAnelli su ogni area a
+   ogni render. Stessa chiave di LUOGO_GEO (la mappa), cache sua perché luogoGeo pretende lo sfondo. Transitoria, mai in S. */
+let LUOGO_RIQ=null, LUOGO_RIQ_DI=null;
+function luogoRiquadri(){
+  const M=PAESE.mappa; if(!M) return [];
+  if(LUOGO_RIQ_DI===M) return LUOGO_RIQ;
+  LUOGO_RIQ=(M.aree||[]).map(function(A){ if(!A || !A.d) return null;
+    let a=1e9,b=1e9,z=-1e9,y2=-1e9; luogoAnelli(A.d).forEach(function(P){ P.forEach(function(p){ if(p[0]<a)a=p[0]; if(p[0]>z)z=p[0]; if(p[1]<b)b=p[1]; if(p[1]>y2)y2=p[1]; }); });
+    return [a,b,z,y2]; });
+  LUOGO_RIQ_DI=M;
+  return LUOGO_RIQ;
+}
 function luogoHash(s){ let h=2166136261; s=String(s); for(let i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h, 16777619); } return h>>>0; }
 function luogoPunto(chiave, via){
   const G=luogoGeo(); if(!G) return null;
@@ -2587,6 +2600,8 @@ function oltrePattern(id, u){
      `<circle cx="${u*.2}" cy="${u*.82}" r="${u*.08}" fill="#616257" opacity=".6"/>`+
      `</pattern>`;
 }
+/* L113-5 · una trama a righe diagonali (45°): righe piene del colore, larghe poco meno di metà del periodo, e vuoto fra l'una e l'altra */
+function righePattern(id, colore, p){ return `<pattern id="${id}" patternUnits="userSpaceOnUse" width="${p.toFixed(3)}" height="${p.toFixed(3)}" patternTransform="rotate(45)"><rect width="${(p*0.45).toFixed(3)}" height="${p.toFixed(3)}" fill="${colore}"/></pattern>`; }
 function oltrePath(id, d, larghezza){ return `<path class="tv-oltre" d="${d}" fill="url(#${id})" stroke="#3a3b33" stroke-width="${(larghezza/200).toFixed(2)}" stroke-linejoin="round" pointer-events="none"/>`; }
 function renderMappaSVG(){
   const M=PAESE.mappa, TE=PAESE.territori, asseTuo=part(S.partito).asse;
@@ -2687,16 +2702,24 @@ function costruisciTavolo(box){
      `</pattern>`+
      /* L117-1 · la terra OLTRE IL CONFINE (`mappa.oltre`, oggi la RDT nelle porte tedesche prima dell'unità): la stessa texture,
         più scura e spenta. Non è un'area: niente tocco, niente velatura, niente dati; i punti di luogoCarta leggono solo `sfondo`. */
-     (M.oltre ? oltrePattern('tv-oltre', u) : '')+`</defs>`;
+     (M.oltre ? oltrePattern('tv-oltre', u) : '')+
+     /* L113-5 · le RIGHE della notte (come ha votato l'area): due trame a righe diagonali, oro e ardesia, un periodo di 1/60 della
+        larghezza del disegno. Nascono qui, col tavolo; la notte cambia solo quale delle due e l'opacità (notteTavolo). */
+     righePattern('tv-righe-tuo', 'var(--tv-tuo)', vb[2]/60)+righePattern('tv-righe-avv', 'var(--tv-avv)', vb[2]/60)+`</defs>`;
   if(M.oltre) h+=oltrePath('tv-oltre', M.oltre, vb[2]);
   /* con la terra oltre il confine, il contorno della terra è anche il CONFINE: una linea netta, più marcata */
   h+=`<path class="tv-terra" d="${M.sfondo}" fill="url(#tv-terra)" stroke="${M.oltre?'#2e2d20':'#4d4b33'}" stroke-width="${(vb[2]/(M.oltre?110:160)).toFixed(2)}" stroke-linejoin="round"/>`;
   const regioni=[], citta=[];
   TE.forEach(function(_, i){ const A=M.aree[i]; if(!A) return; (A.d?regioni:citta).push(i); });
   regioni.forEach(function(i){ h+=`<path class="tv-area" data-i="${i}" d="${M.aree[i].d}" onclick="selArea(${i})"/>`; });
+  /* L113-5 · lo strato delle righe: sopra le aree-regione, sotto le pedine (per le città, il loro strato sta sopra i cerchi: più giù) */
+  h+=`<g class="tv-righe" pointer-events="none">`+regioni.map(function(i){ return `<path class="tv-riga" data-i="${i}" d="${M.aree[i].d}" fill="url(#tv-righe-tuo)" opacity="0"/>`; }).join('')+`</g>`;
   h+=`<g class="tv-pedine">`+tavoloPedine(lato).map(function(p){
       return `<image class="tv-pedina" data-p="${p.id}" href="assets/tavolo/${p.nome}.webp" width="${lato.toFixed(2)}" height="${lato.toFixed(2)}" x="${(p.x-lato/2).toFixed(2)}" y="${(p.y-lato*0.86).toFixed(2)}" pointer-events="none"/>`; }).join('')+`</g>`;
   citta.forEach(function(i){ const A=M.aree[i]; h+=`<circle class="tv-area tv-citta" data-i="${i}" cx="${A.cx}" cy="${A.cy}" r="${A.r}" pointer-events="none"/>`; });
+  /* L113-5 · le righe delle città: sopra il cerchio. Le città stanno già sopra le pedine (L113-2), quindi qui le righe stanno anche
+     sopra il palazzo — che poggia sul bordo alto del cerchio della capitale e ne tocca appena la corona (dichiarato nel rapporto). */
+  h+=`<g class="tv-righe tv-righe-citta" pointer-events="none">`+citta.map(function(i){ const A=M.aree[i]; return `<circle class="tv-riga" data-i="${i}" cx="${A.cx}" cy="${A.cy}" r="${A.r}" fill="url(#tv-righe-tuo)" opacity="0"/>`; }).join('')+`</g>`;
   /* i bersagli di tocco: un cerchio trasparente sopra ogni città e ogni regione piccola; il raggio lo fissa aggiornaTavolo
      dalla scala reale (≥ 22 px, cioè un bersaglio di 44) */
   citta.concat(regioni).forEach(function(i){ const c=tavoloCentro(i); if(c) h+=`<circle class="tv-tocco" data-i="${i}" cx="${c[0].toFixed(2)}" cy="${c[1].toFixed(2)}" r="0" onclick="selArea(${i})"/>`; });
@@ -2710,15 +2733,24 @@ function costruisciTavolo(box){
   TAVOLO_CHIAMA=null; TAVOLO_SEG={};   // L113-3: l'svg nuovo non ha segnalini (ripartono, senza rientrare se già entrati)
   TAVOLO_CODA={ mese:null, voci:[] }; SEG_PRONTO=null; LUCE_MESE=null;   // L113-4: un tavolo nuovo (paese, caricamento) non eredita code né luci
 }
+/* l'altezza del tavolo = lo schermo meno header e barra. L123-1: si scrive SOLO se cambia (confronto con lo stile inline, che non
+   è una lettura di layout): una scrittura uguale sporcava lo stile e la lettura del riquadro dell'svg rifaceva il layout. */
+function tavoloAltezze(){
+  const rs=document.documentElement.style, hh=document.querySelector('header').offsetHeight, eh=document.querySelector('.endbar').offsetHeight;
+  if(hh>0 && rs.getPropertyValue('--hdrH')!==hh+'px') rs.setProperty('--hdrH', hh+'px');
+  if(eh>0 && rs.getPropertyValue('--endH')!==eh+'px') rs.setProperty('--endH', eh+'px');
+}
 function aggiornaTavolo(){
   const box=document.getElementById('tavolo'); if(!box || !tavoloAttivo()) return;
-  /* l'altezza del tavolo = lo schermo meno header e barra: si rimisurano QUI, a header già riempito (render() la prende
-     all'inizio, prima dei numeri e delle schede: al primo mese era 30 px più bassa del vero) */
-  try{ const hh=document.querySelector('header').offsetHeight, eh=document.querySelector('.endbar').offsetHeight;
-    if(hh>0) document.documentElement.style.setProperty('--hdrH', hh+'px'); if(eh>0) document.documentElement.style.setProperty('--endH', eh+'px'); }catch(e){}
+  /* si rimisurano QUI, a header già riempito (render() la prende all'inizio, prima dei numeri e delle schede: al primo mese era
+     30 px più bassa del vero) */
+  try{ tavoloAltezze(); }catch(e){}
   const chiave=[PAESE.mappa, (PAESE.territori||[]).length, S.paese, S.scenario||''];
   if(!TAVOLO_DI || TAVOLO_DI.some(function(v, k){ return v!==chiave[k]; }) || !box.querySelector('svg')){ costruisciTavolo(box); TAVOLO_DI=chiave; }
   const TE=PAESE.territori, asseTuo=part(S.partito).asse, svg=box.querySelector('svg');
+  /* L123-1 · la scala REALE si legge UNA volta, qui, prima di ogni scrittura di questo passaggio (una lettura dopo un setAttribute
+     è un layout forzato); a tavolo nascosto è 0 e si riprova al fotogramma dopo */
+  const RQ=svg.getBoundingClientRect(), w=RQ.width, vb=tavoloVB();
   const chiamaIdx=(S.territorioChiama && typeof S.territorioChiama.idx==='number') ? S.territorioChiama.idx : null;
   svg.querySelectorAll('.tv-area').forEach(function(el){
     const i=+el.getAttribute('data-i'), t=S.territori[i]||{}, tuo=compatibile(t.partito, asseTuo, S.partito), L=Math.abs(TE[i].lean||0);
@@ -2727,7 +2759,7 @@ function aggiornaTavolo(){
     el.setAttribute('fill', tuo ? 'var(--tv-tuo)' : 'var(--tv-avv)');
     el.setAttribute('fill-opacity', citta ? (L>=2?0.95:L===1?0.85:0.75) : (L>=2?0.55:L===1?0.42:0.3));
     el.setAttribute('stroke', chiama ? 'var(--acc-ink)' : ((sel||TE[i].simbolo||lav) ? 'var(--tv-segno)' : 'var(--tv-bordo)'));
-    el.setAttribute('stroke-width', (chiama?2.2:(sel?1.8:(lav?1.5:(TE[i].simbolo?0.9:0.45))))*tavoloVB()[2]/100);
+    el.setAttribute('stroke-width', (chiama?2.2:(sel?1.8:(lav?1.5:(TE[i].simbolo?0.9:0.45))))*vb[2]/100);
     el.classList.toggle('mappa-chiama', chiama);
     if(chiama && TAVOLO_CHIAMA!==i) el.classList.add('pulse');   // il pulse parte all'arrivo della classe, una volta (E5)
     if(!chiama) el.classList.remove('pulse');
@@ -2738,13 +2770,11 @@ function aggiornaTavolo(){
   if(pal){ const c=tavoloCapitale(), lato=+pal.getAttribute('width');
     if(c){ pal.setAttribute('x', (c[0]-lato/2).toFixed(2)); pal.setAttribute('y', (c[1]-lato*0.86).toFixed(2)); pal.style.display=''; } else pal.style.display='none'; }
   /* i bersagli di tocco: ≥ 22 px di raggio nella scala REALE (dopo il layout; a tavolo nascosto non si misura) */
-  const w=svg.getBoundingClientRect().width, vb=tavoloVB();
-  if(w===0 && !TAVOLO_RIPROVA){ TAVOLO_RIPROVA=requestAnimationFrame(function(){ TAVOLO_RIPROVA=null; try{ if(tavoloAttivo()){ const hh=document.querySelector('header').offsetHeight, eh=document.querySelector('.endbar').offsetHeight; if(hh>0) document.documentElement.style.setProperty('--hdrH', hh+'px'); if(eh>0) document.documentElement.style.setProperty('--endH', eh+'px'); aggiornaTavolo(); } }catch(e){} }); }   // il gioco si mostra dopo il render: si rimisura al fotogramma dopo
-  if(w>0){ const k=Math.min(w/vb[2], svg.getBoundingClientRect().height/vb[3]), rMin=22/k;
-    svg.querySelectorAll('.tv-tocco').forEach(function(el){ const i=+el.getAttribute('data-i'), A=PAESE.mappa.aree[i];
+  if(w===0 && !TAVOLO_RIPROVA){ TAVOLO_RIPROVA=requestAnimationFrame(function(){ TAVOLO_RIPROVA=null; try{ if(tavoloAttivo()){ tavoloAltezze(); aggiornaTavolo(); } }catch(e){} }); }   // il gioco si mostra dopo il render: si rimisura al fotogramma dopo
+  if(w>0){ const k=Math.min(w/vb[2], RQ.height/vb[3]), rMin=22/k, RIQ=luogoRiquadri();
+    svg.querySelectorAll('.tv-tocco').forEach(function(el){ const i=+el.getAttribute('data-i'), R=RIQ[i];
       let serve=rMin;
-      if(A && A.d){ const G=luogoAnelli(A.d); let a=1e9,b=1e9,z=-1e9,y2=-1e9; G.forEach(function(P){ P.forEach(function(p){ if(p[0]<a)a=p[0]; if(p[0]>z)z=p[0]; if(p[1]<b)b=p[1]; if(p[1]>y2)y2=p[1]; }); });
-        if(Math.min(z-a, y2-b)*k >= 44) serve=0; }             // la regione è già un bersaglio grande: niente cerchio
+      if(R && Math.min(R[2]-R[0], R[3]-R[1])*k >= 44) serve=0;             // la regione è già un bersaglio grande: niente cerchio
       el.setAttribute('r', serve>0 ? serve.toFixed(2) : 0);
       /* un'area piccola si tocca SOLO dal suo bersaglio (il disegno sotto è più piccolo di 44 px); una grande dal disegno */
       const vis=svg.querySelector('path.tv-area[data-i="'+i+'"]');
@@ -2760,6 +2790,75 @@ function aggiornaTavolo(){
   nota.style.display=nota.innerHTML?'':'none';
   if(MAPSEL!=null && S.tab==='tavolo'){ info.innerHTML=`<button class="tv-chiudi" onclick="selArea(${MAPSEL})" aria-label="${escAttr(T('Chiudi'))}">✕</button>`+renderMappaInfo(); info.style.display=''; }
   else { info.innerHTML=''; info.style.display='none'; }
+}
+/* ================================================================================================================
+   L113-5 · LA NOTTE SUL TAVOLO. Dove c'è il tavolo, lo spoglio si vive sopra il paese: il tavolo sale in alto (42% dello
+   schermo, lo STESSO nodo spostato dal CSS con `body.notte-sul-tavolo`, mai rifatto) e il contenuto della notte sta in un
+   foglio in basso (`#ov.notte-tavolo`). Due lingue diverse, due grandezze diverse:
+   · il COLORE PIENO delle aree resta il CONTROLLO (chi governa l'area) per tutta la notte — aggiornaTavolo non si tocca;
+   · le RIGHE dicono COME HA VOTATO l'area, una lettura di sola visualizzazione dal VERO senza dadi:
+     50 + onda + lean × asse del blocco × 4, con l'onda = seggi del blocco dell'ondata mostrata − 50 (o la mia % − 50 per il
+     candidato), contenuta a ±12 — la formula di decidiTerritoriNazionale senza rumore e senza spinta. Sopra 50 righe oro,
+     sotto ardesia; l'opacità dalla distanza da 50, fra 0,35 (in bilico) e 0,85 (15 punti o più).
+   Un'area può votarti e restare governata dall'avversario: righe e pieno che non coincidono sono un FATTO, non un errore (il
+   voto nazionale non decide il controllo: lo decidono le intermedie e la campagna; misura di L113-5 §0).
+   ⚠ Nessun numero casuale, niente in S: legge NOTTE.onde (già generate) e le funzioni pure del blocco.
+   I tre stati: pieno = scaglionato (60 ms per area, dalla capitale verso fuori) con l'onda (un lampo di luce sulla riga) ·
+   ridotto = scaglionato, senza onde (la dissolvenza dell'opacità resta: è l'eccezione nel CSS) · spento = tutto lo stadio di colpo.
+   ================================================================================================================ */
+const NOTTE_RIGA_MS=60;
+let NOTTE_RIGHE={ stadio:null, timer:[] };
+let ONDE_RIGHE=0;                            // onde partite (per la misura)   // lo stadio già disegnato e i timer dello scaglionamento (transitori)
+function notteLettura(onda){
+  const TE=PAESE.territori||[], M=PAESE.mappa, out=[];
+  let wave;
+  if(NOTTE.sistema==='parlamentare'){ const bl=(typeof bloccoElettorale==='function')?bloccoElettorale():bloccoIds(); wave=bl.reduce(function(s,id){ return s+(onda[id]||0); },0)-50; }
+  else wave=(onda.myPct||0)-50;
+  wave=clamp(wave, -12, 12);
+  const aB=asseBlocco();
+  TE.forEach(function(T1, i){ if(!M.aree[i]) return;
+    const q=50+wave+(T1.lean||0)*aB*4, d=Math.abs(q-50);
+    out.push({ i:i, mio:q>50, op:+(0.35+Math.min(d,15)/15*0.5).toFixed(2) }); });
+  return out;
+}
+/* l'ordine dello spoglio: dalla capitale verso fuori (senza capitale sul tavolo, l'ordine del roster) */
+function notteOrdine(L){
+  const c=tavoloCapitale(); if(!c) return L;
+  return L.map(function(x){ const p=tavoloCentro(x.i)||c; return { x:x, d:Math.hypot(p[0]-c[0], p[1]-c[1]) }; })
+    .sort(function(a, b){ return a.d-b.d || a.x.i-b.x.i; }).map(function(y){ return y.x; });
+}
+function notteRigheFerma(){ NOTTE_RIGHE.timer.forEach(clearTimeout); NOTTE_RIGHE.timer=[]; }
+/* chiamata da renderNotte: sposta la notte sul tavolo e disegna le righe dello stadio. Ritorna vero se la notte è sul tavolo. */
+function notteSuTavolo(){
+  const box=document.getElementById('tavolo'), gm=document.getElementById('game');
+  return !!(typeof NOTTE!=='undefined' && NOTTE && tavoloAttivo() && box && box.querySelector('svg') && gm && gm.classList.contains('con-tavolo'));
+}
+function notteTavolo(){
+  const ov=document.getElementById('ov'), svg=document.querySelector('#tavolo svg');
+  const su=notteSuTavolo();
+  if(ov) ov.classList.toggle('notte-tavolo', su);
+  document.body.classList.toggle('notte-sul-tavolo', su);
+  if(!su) return false;
+  if(NOTTE_RIGHE.stadio===NOTTE.stadio) return true;   // lo stesso stadio reso di nuovo (lingua, dichiarazione): le righe sono già lì
+  NOTTE_RIGHE.stadio=NOTTE.stadio;
+  notteRigheFerma();
+  const spento=(typeof motionSpento==='function') && motionSpento(), pieno=!((typeof motionReduced==='function') && motionReduced());
+  const lett=notteOrdine(notteLettura(NOTTE.onde[NOTTE.stadio]));
+  const metti=function(x){ svg.querySelectorAll('.tv-riga[data-i="'+x.i+'"]').forEach(function(el){
+    const f='url(#tv-righe-'+(x.mio?'tuo':'avv')+')';
+    el.setAttribute('fill', f); el.setAttribute('opacity', String(x.op));
+    if(pieno){ el.classList.remove('onda'); void el.getBoundingClientRect(); el.classList.add('onda'); ONDE_RIGHE++; } }); };   // l'onda: ogni area «contata» lampeggia, anche se il colore non cambia
+  if(spento){ lett.forEach(metti); return true; }
+  lett.forEach(function(x, k){ NOTTE_RIGHE.timer.push(setTimeout(function(){ if(NOTTE) metti(x); }, k*NOTTE_RIGA_MS)); });
+  return true;
+}
+/* fine della notte (concludiNotte, e il reset di un caricamento): le righe svaniscono (0,6 s; in spento di colpo) e il tavolo torna
+   al suo posto. Il `fill` delle aree che la campagna conquista cambia al render dopo, con la transizione di sempre. */
+function notteTavoloFine(){
+  notteRigheFerma(); NOTTE_RIGHE.stadio=null;
+  const ov=document.getElementById('ov'); if(ov) ov.classList.remove('notte-tavolo');
+  document.body.classList.remove('notte-sul-tavolo');
+  document.querySelectorAll('#tavolo .tv-riga').forEach(function(el){ el.classList.remove('onda'); el.setAttribute('opacity', '0'); });
 }
 /* ================================================================================================================
    L113-3 · LE CARTE SUL TAVOLO: I SEGNALINI. Ogni decisione del mese non ancora presa ha un segnalino nel luogo che le dà

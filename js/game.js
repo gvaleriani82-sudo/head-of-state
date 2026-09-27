@@ -4287,7 +4287,7 @@ function forseTerritorio(){
   var mese=S.year*12+S.month;
   S.territorioChiama={idx:idx, prob:prob, nato:mese};
   S.territorioUltimo=mese; S.territorioRecente=idx;
-  try{ render(); commitSnap(); }catch(e){}   // il pallino sul tab Partiti + il pulse appaiono ora
+  try{ render(); commitSnap(); }catch(e){}   // il pallino sul tab Partiti + il pulse (dentro advanceMonth: nel render unico di fine mese, L123-1)
 }
 /* la mappa invita, non ricatta: dopo 3 mesi senza risposta il marcatore scade da sé, il pulse muore, nessuna penalità. */
 function scadiTerritorio(){
@@ -5981,10 +5981,27 @@ function maturaRP(){
 }
 
 /* --- Avanzamento del mese --- */
-/* avanzamento mese: il CORE è avanzaMese(); il wrapper advanceMonth() aggiunge il BILANCIO di fine anno DOPO il render
-   (così se avanzaMese ha aperto un modale/gameOver, forseBilancio lo salta). Lo snapshot baseline si crea alla prima
+/* avanzamento mese: il CORE è avanzaMese(); il wrapper advanceMonth() (corpo in corpoMese) aggiunge il BILANCIO di fine anno
+   DOPO avanzaMese (così se avanzaMese ha aperto un modale/gameOver, forseBilancio lo salta). Lo snapshot baseline si crea alla prima
    chiamata (così il primo gennaio ha già un confronto). advanceMonth resta il nome pubblico (onclick, ecc.). */
+/* L123-1 · UN RENDER E UN SALVATAGGIO PER MESE. Dentro advanceMonth render() e commitSnap() non disegnano e non salvano:
+   segnano «dovuto» e tornano; all'uscita (anche anticipata, anche su eccezione) UN render() e UN commitSnap(), in quest'ordine.
+   Prima il mese rendeva due volte quando il territorio chiamava o scadeva (avanzaMese, poi forseTerritorio/scadiTerritorio) e
+   salvava fino a quattro. Nessuno dentro il mese legge il DOM di #game appena reso: bilancio, telefonata, intervista, primaria e
+   la vigilia delle urne scrivono nel modale (#ov/#modal), che non passa da render(). Se il mese finisce con gameOver
+   (MESE_FINITO) non si rende e non si salva: la carriera è chiusa e l'autosave cancellato (prima un scadiTerritorio dopo la fine
+   poteva riscriverlo). Transitorio, mai in S. */
+let MESE_IN_CORSO=false, MESE_RENDER=false, MESE_SNAP=false, MESE_FINITO=false;
 function advanceMonth(){
+  if(MESE_IN_CORSO) return corpoMese();
+  MESE_IN_CORSO=true; MESE_RENDER=false; MESE_SNAP=false; MESE_FINITO=false;
+  try{ corpoMese(); }
+  finally{
+    MESE_IN_CORSO=false;
+    if(!MESE_FINITO){ if(MESE_RENDER) render(); if(MESE_SNAP) commitSnap(); }
+  }
+}
+function corpoMese(){
   if(typeof taci==='function') taci('protesta');   // L116-1: il loop della piazza non attraversa il mese
   if(S && S.snapAnnuale===undefined && S.month!=null){ try{ S.snapAnnuale=snapAnnuale(); }catch(e){} }   // baseline (dato puro, migrato)
   const _anno0=S.year;
@@ -6440,6 +6457,7 @@ function concludiNotte(){
   stopTimerNotte();
   if(typeof taci==='function') taci('urne');   // L95-3: rete di sicurezza, il loop non sopravvive alla notte
   const sistema=NOTTE.sistema, vero=NOTTE.vero, dich=NOTTE.dich; NOTTE=null;   // svuota il transitorio PRIMA del flusso a valle
+  if(typeof notteTavoloFine==='function') notteTavoloFine();   // L113-5: le righe svaniscono, il tavolo torna al suo posto
   if(typeof musica==='function') musica();       // L114-1: finita la notte, la musica torna all'epoca (o alla crisi)
   if(typeof ambiente==='function') ambiente();   // L116-2: finita la notte, l'ambiente torna
   const mg=calcMargineEsito(sistema, vero); S.margineEsito=mg; // il MARGINE (fase B): caratterizza l'esito (tono + biografia + epilogo)
@@ -6521,7 +6539,8 @@ function renderNotte(){
   const ultima=NOTTE.stadio>=SD_NOTTE.length-1;
   const onda=NOTTE.onde[NOTTE.stadio];
   const kicker=`${T(PAESE.nome)} · ${T(urnaLegislativa()?'Legislative anticipate':(S.elezioniAnticipate?'Elezioni anticipate':'Elezioni'))} ${S.year}`;
-  const body = NOTTE.sistema==='parlamentare' ? notteSeggi(onda, ultima) : notteCandidato(onda);
+  const sulTavolo=(typeof notteSuTavolo==='function') && notteSuTavolo();   // L113-5: dove c'è il tavolo la notte sta in un foglio in basso, sopra si vede il paese
+  const body = NOTTE.sistema==='parlamentare' ? notteSeggi(onda, ultima, sulTavolo) : notteCandidato(onda);
   const narr = notteNarr(NOTTE.stadio);   // la riga di narrazione (fase B): tensione/respiro secondo l'andamento
   const lancio = lancioNotte(NOTTE.stadio);
   /* la DICHIARAZIONE A CALDO (penultima ondata): 2-3 opzioni. NON tocca i seggi — muove il dopo (concludiNotte). */
@@ -6531,7 +6550,7 @@ function renderNotte(){
       DICH_NOTTE.map(function(d,i){ return `<button class="opt" onclick="dichiaraNotte(${i})"><span class="ol">${T(d.l)}</span><span class="oe">${T(d.e)}</span></button>`; }).join('')+`</div>`;
   } else {
     const btnTxt = T(ultima ? 'Risultato ufficiale →' : 'Avanti →');
-    azioni = `<div class="choices"><button class="opt" style="border-color:${ultima?'var(--acc)':'var(--brand)'}" onclick="avanzaNotte()"><span class="ol"${ultima?' style="color:var(--acc-ink)"':''}>${btnTxt}</span></button>`+
+    azioni = `<div class="choices notte-bottoni"><button class="opt" style="border-color:${ultima?'var(--acc)':'var(--brand)'}" onclick="avanzaNotte()"><span class="ol"${ultima?' style="color:var(--acc-ink)"':''}>${btnTxt}</span></button>`+
       (ultima?'':`<button class="opt" style="border-color:var(--mut2)" onclick="saltaNotte()"><span class="ol" style="color:var(--mut)">${T('Salta allo spoglio finale')}</span></button>`)+`</div>`;
   }
   /* L9-1 — lo SFONDO della notte: attesa (stadio 0) / spoglio (in corso) / vittoria|sconfitta (proclamazione). Vinta =
@@ -6541,14 +6560,18 @@ function renderNotte(){
   var scN=(typeof scenaNotte==='function')?scenaNotte(NOTTE.stadio, ultima, vinta):null;
   var mbg=scN?`<div class="mbg-img" style="background-image:url('${scN}')"></div>`:'';
   /* 375px senza salti: altezza minima riservata → le ondate non fanno ballare il modale. Sfondo su WRAPPER (no leak di classe). */
-  document.getElementById('modal').innerHTML=`<div class="notte-wrap">${mbg}<div class="mt"><div class="kicker">${kicker}</div><h2>${T(LAB_NOTTE[NOTTE.stadio])}</h2></div>
-    <div style="min-height:268px">
+  /* L113-5 · la legenda delle due lingue del tavolo: le righe sono il voto dell'area, il colore pieno chi la governa */
+  const legenda = sulTavolo ? `<div class="notte-legenda contorno"><span class="nl-righe" aria-hidden="true"></span>${T('a righe: come ha votato')} · <span class="nl-pieno" aria-hidden="true"></span>${T("colore: chi governa l'area")}</div>` : '';
+  document.getElementById('modal').innerHTML=`<div class="notte-wrap${sulTavolo?' sul-tavolo':''}">${mbg}<div class="mt"><div class="kicker">${kicker}</div><h2>${T(LAB_NOTTE[NOTTE.stadio])}</h2></div>
+    <div${sulTavolo?'':' style="min-height:268px"'}>
       <div class="mtext${ultima?' notte-verdetto-riga':''}"${ultima?' style="font-weight:600"':''}>${narr}</div>
-      ${lancio}
+      ${sulTavolo?'':lancio}
+      ${legenda}
       <div class="notte-panel">${body}</div>
     </div>
     ${azioni}</div>`;
   document.getElementById('ov').classList.add('on');
+  if(typeof notteTavolo==='function') notteTavolo();   // L113-5: le righe dello stadio sul tavolo (scaglionate), il foglio in basso
   notteMovimento(scN, ultima);    // L95-2: scaglionamento delle barre, sfondo in dissolvenza, verdetto dopo le barre
   try{ playAnims(); }catch(e){}   // vetrina: le barre dello spoglio scorrono tappa dopo tappa
 }
@@ -6598,7 +6621,7 @@ function notteMovimento(scN, ultima){
 }
 /* Parlamentare: barre per-partito col rumore, RI-NORMALIZZATE a 100 coi resti (lo spoglio rispetta la somma 100);
    riga grossa "Il tuo blocco: N seggi" con la tacca del 50. Alla proclamazione (sd 0) i seggi sono esatti. */
-function notteSeggi(shown, ultima){
+function notteSeggi(shown, ultima, compatto){
   const ps=PAESE.partiti;
   const sd=ultima?0:1;   // solo per l'emiciclo finale (compat: la vecchia firma usava sd)
   /* F4 — il blocco mostrato è quello che DECIDE: nel '53 con la legge approvata è l'APPARENTAMENTO (bloccoElettorale),
@@ -6606,9 +6629,15 @@ function notteSeggi(shown, ultima){
   const bloc=(typeof bloccoElettorale==='function')?bloccoElettorale():bloccoIds();
   const blocTot=bloc.reduce((s,id)=>s+(shown[id]||0),0), reached=blocTot>=50;
   const sorted=[...ps].sort((a,b)=>shown[b.id]-shown[a.id]);
-  const rows=sorted.map(p=>{ const inBloc=bloc.includes(p.id), me=p.id===S.partito;
-    return `<div style="padding:5px 0"><div style="display:flex;justify-content:space-between;font-size:13px"><span style="font-weight:${me?700:500}">${T(p.nome)}${me?(' <span class="chip" style="background:var(--acc-bg);color:var(--acc-ink)">'+T('tu')+'</span>'):''}</span><span class="mono val" data-anim="num:notte:seg:${p.id}" data-to="${shown[p.id]}" data-dec="0" data-unit="">${shown[p.id]}</span></div>
-      <div class="bar">${fillI('notte:seg:'+p.id, clamp(shown[p.id],2,100), inBloc?'var(--acc)':'var(--mut2)')}</div></div>`; }).join('');
+  /* L113-5 · sul tavolo il foglio è più basso: si vedono i primi quattro partiti (e il tuo), gli altri dietro «Tutti i partiti».
+     Lo stato aperto/chiuso vive nel transitorio NOTTE, non in S. */
+  const riga=p=>{ const inBloc=bloc.includes(p.id), me=p.id===S.partito;
+    return `<div style="padding:${compatto?3:5}px 0"><div style="display:flex;justify-content:space-between;font-size:13px"><span style="font-weight:${me?700:500}">${T(p.nome)}${me?(' <span class="chip" style="background:var(--acc-bg);color:var(--acc-ink)">'+T('tu')+'</span>'):''}</span><span class="mono val" data-anim="num:notte:seg:${p.id}" data-to="${shown[p.id]}" data-dec="0" data-unit="">${shown[p.id]}</span></div>
+      <div class="bar">${fillI('notte:seg:'+p.id, clamp(shown[p.id],2,100), inBloc?'var(--acc)':'var(--mut2)')}</div></div>`; };
+  /* alla dichiarazione (le tre risposte) e alla proclamazione (l'emiciclo) il foglio è pieno: lì tutti i partiti stanno dietro «Tutti i partiti» */
+  const nessuno=compatto && (ultima || NOTTE.stadio===NOTTE_DICH);
+  const primi=compatto ? (nessuno ? [] : sorted.filter((p,k)=>k<4 || p.id===S.partito)) : sorted, altri=compatto ? sorted.filter(p=>primi.indexOf(p)<0) : [];
+  const rows=primi.map(riga).join('')+(altri.length ? `<details class="notte-tutti"${NOTTE.tutti?' open':''} ontoggle="if(NOTTE) NOTTE.tutti=this.open"><summary>${T('Tutti i partiti')} (${altri.length})</summary>${altri.map(riga).join('')}</details>` : '');
   /* alla PROCLAMAZIONE: l'aula come emiciclo (grafica lotto 2) — i puntini a ventaglio */
   const emi=(ultima && typeof emiciclo==='function') ? `<div style="padding:6px 18px 0">${emiciclo(shown,{key:'notte',coal:bloc})}</div>` : '';
   /* F4 — LA SOGLIA IN SCENA (il '53 e ogni snodo-soglia futuro): la posta dichiarata ondata per ondata.
@@ -6659,7 +6688,7 @@ function pescaTelefonata(){
   if(!pool.length) return null;
   return (typeof pescaBag==='function') ? pescaBag('tel|'+((S&&S.era)||'p'), pool) : pool[0];
 }
-/* forseTelefonata: al confine di mese (fine di avanzaMese, ramo premier), dopo che il mese è già reso sotto.
+/* forseTelefonata: al confine di mese (fine di avanzaMese, ramo premier); il mese si rende sotto alla fine del task (L123-1).
    ~35% oltre il pavimento → cadenza attesa ~1/4-6 mesi. Non squilla se un modale è già aperto (primaria/bilancio…). */
 function forseTelefonata(){
   if(!telefonataDovuta()) return;
@@ -6803,7 +6832,7 @@ function verdettoBilancio(prev, dims){
   if(avgDelta<=-3 || avgLev<38 || nDown>nUp+1) return {t:T('Un anno difficile'), c:'var(--neg)'};
   return {t:T('Luci e ombre'), c:'var(--warn-ink)'};
 }
-/* hook di gennaio (chiamato dal wrapper advanceMonth DOPO il render del mese). Idempotente per anno. */
+/* hook di gennaio (chiamato dal wrapper advanceMonth dopo avanzaMese; il mese si rende sotto alla fine del task, L123-1). Idempotente per anno. */
 function forseBilancio(){
   if(!S || S.month!==1) return;
   const over=document.getElementById('over'), ov=document.getElementById('ov');
@@ -6832,7 +6861,7 @@ function mostraBilancio(prev, cur){
   document.getElementById('ov').classList.add('on');
   try{ playAnims(); }catch(e){}   // vetrina: le barre salgono da 0 al valore (transform scaleX, 60fps)
 }
-function chiudiBilancio(){ document.getElementById('ov').classList.remove('on'); }   // presentazione: il mese è già reso sotto
+function chiudiBilancio(){ document.getElementById('ov').classList.remove('on'); }   // presentazione: il mese è già reso sotto (il render unico di fine mese, L123-1)
 
 /* --- Trattativa di coalizione (avvio e rielezione). Riusa l'overlay #ov/#modal. --- */
 function openTrattativa(ctx){
@@ -7408,6 +7437,7 @@ const RIVOLTA_TESTI={
    il ritiro, la fine del mandato internazionale; tutto il resto (crisi, insolvenza, condanna, sconfitta…) è muto. */
 const FINALI_CON_SUONO = ['mandatoCompiuto', 'ritiro', 'mandatoInt'];
 function gameOver(reason){
+  if(MESE_IN_CORSO) MESE_FINITO=true;   // L123-1: il render e il salvataggio rinviati del mese non si fanno più
   if(typeof taciTutto==='function') taciTutto();   // L95-3: si ferma tutto; poi suona `finale` solo se il finale è nella lista
   if(FINALI_CON_SUONO.indexOf(reason)>=0 && typeof suona==='function') suona('finale');
   if(FINALI_CON_SUONO.indexOf(reason)>=0 && typeof musica==='function') musica('finale');   // L114-1: il brano del finale, sugli stessi motivi
@@ -7479,8 +7509,12 @@ function storageOK(){ try{ localStorage.setItem('__hos_t','1'); localStorage.rem
 function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
 function lsSet(k,v){ try{ localStorage.setItem(k,v); return true; }catch(e){ return false; } }
 function lsDel(k){ try{ localStorage.removeItem(k); }catch(e){} }
-function snapshot(){ const c=Object.assign({},S); c.agenda=[]; c.ministeroAperto=null; c.mappaAperta=null; c.partitoAperto=null; return JSON.parse(JSON.stringify({v:SAVE_VERSION, s:c})); }   // deep, indipendente, senza funzioni
-function commitSnap(){ if(!S) return; lastSnap=snapshot(); lsSet('hos_autosave', JSON.stringify(lastSnap)); }   // confine di mese: aggiorna fotografia + autosave
+function snapshotStr(){ const c=Object.assign({},S); c.agenda=[]; c.ministeroAperto=null; c.mappaAperta=null; c.partitoAperto=null; return JSON.stringify({v:SAVE_VERSION, s:c}); }
+function snapshot(){ return JSON.parse(snapshotStr()); }   // deep, indipendente, senza funzioni
+/* confine di mese: aggiorna fotografia + autosave. L123-1 · due passaggi invece di tre: la stringa si fa UNA volta, lastSnap è il
+   suo parse e il salvataggio scrive quella stessa stringa (identica byte per byte a JSON.stringify(lastSnap): dati puri).
+   Dentro advanceMonth il salvataggio si rinvia alla fine del mese (MESE_IN_CORSO): uno per mese, dopo l'ultimo cambio di S. */
+function commitSnap(){ if(!S) return; if(MESE_IN_CORSO){ MESE_SNAP=true; return; } const str=snapshotStr(); lastSnap=JSON.parse(str); lsSet('hos_autosave', str); }
 function aMetaMese(){ return !!(S && S.agenda && S.agenda.some(function(a){return a.resolved;})); }   // ci sono carte già risolte questo mese?
 function parseSave(text){
   let o; try{ o=JSON.parse(text); }catch(e){ return {err:'Testo non leggibile (JSON non valido).'}; }
@@ -7730,7 +7764,7 @@ function applySnap(snap){
   if(S.puntoUltimo===undefined) S.puntoUltimo=null;
   if(!S.recentPunto) S.recentPunto=[];
   S.partitoAperto=null;
-  COAL=null; try{ stopTimerNotte(); }catch(e){} NOTTE=null; ATTESA=null; PRIM=null; try{ stopTimerTel(); }catch(e){} TEL=null; INTERVISTA=null;   // F4: il timer della notte muore col transitorio; F1/F5: telefonata e intervista sono transitorie → il reload le abbandona (S intatto), la telefonata richiama da S.telPendente try{ resetUIAnim(); }catch(e){} try{ document.getElementById('ov').classList.remove('on'); }catch(e){}   // nessun residuo di trattativa/attesa/notte/primaria/animazioni dopo un caricamento
+  COAL=null; try{ stopTimerNotte(); }catch(e){} NOTTE=null; try{ notteTavoloFine(); }catch(e){} ATTESA=null; PRIM=null; try{ stopTimerTel(); }catch(e){} TEL=null; INTERVISTA=null;   // F4: il timer della notte muore col transitorio; F1/F5: telefonata e intervista sono transitorie → il reload le abbandona (S intatto), la telefonata richiama da S.telPendente try{ resetUIAnim(); }catch(e){} try{ document.getElementById('ov').classList.remove('on'); }catch(e){}   // nessun residuo di trattativa/attesa/notte/primaria/animazioni dopo un caricamento
   document.getElementById('start').style.display='none';
   document.getElementById('over').style.display='none';
   document.getElementById('appoint').style.display='none';

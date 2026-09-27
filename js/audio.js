@@ -378,9 +378,19 @@ const MUSICA_MANIFEST = {
      metà). `musicaScelta()` resta il punto unico e, quando la variante ha il file, ALTERNA A e B a ogni giro del brano (il brano
      non è più in loop: al giro successivo passa all'altro con la dissolvenza di sempre, mai lo stesso due volte di fila). */
   'mus-1970-b':   { file:'mus-1970-b.mp3',   loop:true,  gain:0.30, variante:'mus-1970' },   // −14,7 · Gemini, 2:57, 128 kbps (ricodificato da Cowork)
+  /* ⚑ L122-1 (27/9) · le altre otto varianti (Gemini/Lyria, ~3 min, 128 kbps ricodificati da Cowork), tutte a −14,7 dB RMS misurati →
+     gain 0,30 come `mus-1970-b`. Anche crisi e campagna alternano: musicaScelta passa da musicaGiroVariante anche per loro. */
+  'mus-1950-b':     { file:'mus-1950-b.mp3',     loop:true, gain:0.30, variante:'mus-1950' },       // −14,7 · 3:01
+  'mus-1960-b':     { file:'mus-1960-b.mp3',     loop:true, gain:0.30, variante:'mus-1960' },       // −14,7 · 2:59
+  'mus-1980-b':     { file:'mus-1980-b.mp3',     loop:true, gain:0.30, variante:'mus-1980' },       // −14,7 · 2:59
+  'mus-1990-b':     { file:'mus-1990-b.mp3',     loop:true, gain:0.30, variante:'mus-1990' },       // −14,7 · 2:57
+  'mus-2000-b':     { file:'mus-2000-b.mp3',     loop:true, gain:0.30, variante:'mus-2000' },       // −14,7 · 3:02
+  'mus-presente-b': { file:'mus-presente-b.mp3', loop:true, gain:0.30, variante:'mus-presente' },   // −14,7 · 3:02
+  'mus-crisi-b':    { file:'mus-crisi-b.mp3',    loop:true, gain:0.30, variante:'mus-crisi' },      // −14,7 · 3:02
+  'mus-campagna-b': { file:'mus-campagna-b.mp3', loop:true, gain:0.30, variante:'mus-campagna' },   // −14,7 · 2:59
   /* ⚑ L118-1 · IL TEMA DEL GIOCO, fuori partita (home, scelta del paese e del partito, scenari storici). Lista-promessa: il file
-     arriva da Gemini (`arte-sorgente/audio-elevenlabs/mus-tema.mp3`); finché manca è silenzio. Gain base, da rifare sul file. */
-  'mus-tema':     { file:'mus-tema.mp3',     loop:true,  gain:0.35 }
+     arriva da Gemini (`arte-sorgente/audio-elevenlabs/mus-tema.mp3`); L122-1: arrivato, −14,7 dB RMS misurati, 3:00. */
+  'mus-tema':     { file:'mus-tema.mp3',     loop:true,  gain:0.30 }
 };
 /* ⚠ I BRANI CHE ESISTONO DAVVERO in assets/audio/: solo questi si chiedono alla rete. Si aggiorna a mano quando un file arriva;
    se lista e cartella divergono `.claude/verifica-asset.js` diventa rossa. L114-2 (26/9): TUTTI E UNDICI, a 192 kbps così come
@@ -388,7 +398,9 @@ const MUSICA_MANIFEST = {
    volta e a richiesta; la ricodifica a 128 kbps è un'ottimizzazione facoltativa per quando ci sarà ffmpeg). */
 const MUSICA_PRESENTI = ['mus-1950.mp3','mus-1960.mp3','mus-1970.mp3','mus-1980.mp3','mus-1990.mp3','mus-2000.mp3',
                          'mus-presente.mp3','mus-crisi.mp3','mus-campagna.mp3','mus-notte.mp3','mus-finale.mp3',
-                         'mus-1970-b.mp3'];   // L118-1: la prima variante (Gemini); `mus-tema` entra quando arriva il file
+                         'mus-1970-b.mp3',    // L118-1: la prima variante (Gemini)
+                         'mus-tema.mp3','mus-1950-b.mp3','mus-1960-b.mp3','mus-1980-b.mp3','mus-1990-b.mp3','mus-2000-b.mp3',
+                         'mus-presente-b.mp3','mus-crisi-b.mp3','mus-campagna-b.mp3'];   // L122-1: il tema e le altre otto varianti
 const MUSICA_CHIAVE = 'hos_musica', MUSICA_GAIN = 0.35, MUSICA_XFADE_S = 2.5, MUSICA_DUCK_S = 0.8;
 let MUSICA_DIR = 'assets/audio/';     // `let`: la pagina di prova di L114-1 la punta ai segnaposto di .claude/musica-prova/
 let MUSICA_BUF = {}, MUSICA_CARICO = {}, MUSICA_ORA = null, MUSICA_VOCE = null, MUSICA_ZITTA = false;
@@ -447,8 +459,8 @@ function musicaScelta(){
   if(fuoriPartita()) return 'mus-tema';                          // L118-1: fuori partita, il tema del gioco (dentro non vale mai)
   if(MUSICA_FORZATA && MUSICA_FORZATA_S===S) return MUSICA_FORZATA;
   if(typeof NOTTE!=='undefined' && NOTTE) return 'mus-notte';
-  if(musicaCrisi()) return 'mus-crisi';
-  if(typeof inCampagna==='function' && inCampagna()) return 'mus-campagna';
+  if(musicaCrisi()) return musicaGiroVariante('mus-crisi');                                          // L122-1: anche crisi e campagna
+  if(typeof inCampagna==='function' && inCampagna()) return musicaGiroVariante('mus-campagna');      // hanno la loro variante
   const ep=musicaEpoca();
   return ep ? musicaGiroVariante(ep) : ep;                       // L118-1: la variante di questo giro, se il tema ne ha una
 }
