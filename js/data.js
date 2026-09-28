@@ -1563,8 +1563,12 @@ const SCENARI = {
      precedenti (dichiarato).
      IL ROSTER: CDU/CSU, SPD, FDP, NPD (non selezionabile, crolla dopo il 1969 senza un `esce`); i Verdi entrano alla tappa del
      1980/1 (non selezionabili: la carriera verde è di de1980, D46) con l'id del presente, `de_grn` (la scheda diceva `de_verdi`:
-     lo stesso id del roster di oggi salda la linea al presente). `alleati`: SPD↔FDP e CDU↔FDP ordinari (D47), CDU↔SPD di
-     RISERVA come in de1960.
+     lo stesso id del roster di oggi salda la linea al presente). `alleati`: ⚑ **L135-3 (D50, rivede D47): la FDP sta con la
+     SPD e basta** (`de_fdp:['de_spd']`, `de_cdu:[]`), e **niente riserva CDU↔SPD**. Misurato (CDU partita all'opposizione, 20
+     carriere × 144 mesi, banco di L135-1): con CDU↔FDP ordinaria la CDU vinceva il 1972 20/20 (L133-3); con la sola riserva
+     CDU↔SPD entrava al governo nel 1972 20/20 per grande coalizione (una CDU sola al 46 è sempre sotto 50, e la riserva entra in
+     `compatibili()` proprio allora); senza riserva **0/20** prima del 1982 (bersaglio ≤ 3; storia: mai). Il cambio di campo della
+     FDP è del 1982, cioè di de1980.
      FORZE: urne del 1969 sui quattro (46,1 · 42,7 · 5,8 · 4,3, somma 98,9) → 46,6 · 43,2 · 5,9 · 4,3. SEGGI: il Bundestag del 1969
      senza Berlino, come lo lascia la tappa del 1969/9 di de1960 (48,8 · 45,2 · 6,0).
      `forzaAncora` (L111-1, la media del decennio): urne 1972 · 1976 · 1980 → CDU/CSU 46,01 · SPD 43,76 · FDP 8,97 · NPD 0,35
@@ -1589,9 +1593,9 @@ const SCENARI = {
     ue: false,
     intermedie: [ {tipo:'Elezioni nei Länder', mese:24, tocca:'regione'} ],
     partiti: [
-      { id:'de_cdu', nome:'CDU/CSU', orientamento:'centrodestra',   base:{ cattolici:0.35, cetomedio:0.35, imprenditori:0.3 }, forza:46.6, forzaAncora:46.4, asse:1,  alleati:['de_fdp'], alleatiRiserva:['de_spd'] },
-      { id:'de_spd', nome:'SPD',     orientamento:'centrosinistra', base:{ lavoratori:0.6, pensionati:0.2, giovani:0.2 },    forza:43.2, forzaAncora:44.2, asse:-1, alleati:['de_fdp'], alleatiRiserva:['de_cdu'] },
-      { id:'de_fdp', nome:'FDP',     orientamento:'liberale',       base:{ imprenditori:0.5, cetomedio:0.5 },                forza:5.9,  forzaAncora:9.0,  asse:1,  alleati:['de_cdu','de_spd'] },
+      { id:'de_cdu', nome:'CDU/CSU', orientamento:'centrodestra',   base:{ cattolici:0.35, cetomedio:0.35, imprenditori:0.3 }, forza:46.6, forzaAncora:46.4, asse:1,  alleati:[] },
+      { id:'de_spd', nome:'SPD',     orientamento:'centrosinistra', base:{ lavoratori:0.6, pensionati:0.2, giovani:0.2 },    forza:43.2, forzaAncora:44.2, asse:-1, alleati:['de_fdp'] },
+      { id:'de_fdp', nome:'FDP',     orientamento:'liberale',       base:{ imprenditori:0.5, cetomedio:0.5 },                forza:5.9,  forzaAncora:9.0,  asse:1,  alleati:['de_spd'] },
       { id:'de_npd', nome:'NPD',     orientamento:'destra',         base:{ pensionati:0.4, cetomedio:0.3, lavoratori:0.3 },  forza:4.3,  asse:2,  alleati:[],
         selezionabile:false, nota:'La NPD non entra mai nel Bundestag: sta sotto la soglia del cinque per cento' },
     ],
@@ -2546,6 +2550,22 @@ const PILASTRI_LINEA = [
     t:'Luisenthal',
     text:'Il 7 febbraio un\'esplosione di grisou e polvere di carbone attraversa le gallerie della miniera di Luisenthal, nella Saar, a seicento metri di profondità: duecentonovantanove minatori morti. È la sciagura mineraria più grave del dopoguerra tedesco. Dieci giorni dopo arriverà l\'alluvione di Amburgo, e il paese avrà due lutti nello stesso inverno.',
     logx:'Esplosione nella miniera di Luisenthal: duecentonovantanove minatori morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  /* L135-3 · i due pilastri del decennio tedesco '70 (scheda §I-H, D48 e D49: pilastri sobri anche fuori confine e sotto la
+     soglia). Verifiche: Monaco — undici atleti israeliani (due nel villaggio, nove a Fürstenfeldbruck) e un poliziotto. Zagabria —
+     10 settembre 1976, 176 morti, il DC-9 da Spalato a Colonia con 108 passeggeri «mostly German holiday-makers» (en.wikipedia,
+     «1976 Zagreb mid-air collision»); TOLTA la frase «In molte città del paese, quella settimana, ci sono funerali nello stesso
+     giorno»: un'immagine che la fonte non regge. G8: nessuna sciagura sopra i 50 sul territorio della Repubblica federale fra il
+     1970 e il 1981 (en.wikipedia «List of disasters in Germany by death toll»: la più grave è Dahlerau/Radevormwald, 46). */
+  { id:'pde70_monaco', linea:LINEA_DE, anno:1972, mese:9, era:'de1970', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Monaco',
+    text:'All\'alba del 5 settembre un commando palestinese entra nel villaggio olimpico e prende in ostaggio la squadra israeliana: due atleti sono uccisi subito. La notte dopo, all\'aeroporto militare di Fürstenfeldbruck, il tentativo di liberarli fallisce: muoiono tutti gli ostaggi, undici in tutto con i primi due, e un poliziotto tedesco. Il paese aveva voluto dei Giochi sereni, con i poliziotti senza armi. Il giorno dopo, nello stadio, la cerimonia funebre; poi i Giochi continuano.',
+    logx:'Monaco: il commando nel villaggio olimpico, undici atleti israeliani e un poliziotto uccisi.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pde70_zagabria', linea:LINEA_DE, anno:1976, mese:9, era:'de1970', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Il cielo di Zagabria',
+    text:'Il 10 settembre, sopra la Croazia, un aereo di linea diretto a Colonia si scontra in volo con un aereo inglese. Nessuno sopravvive: centosettantasei morti. Sull\'aereo per Colonia tornavano dalle vacanze sulla costa soprattutto turisti tedeschi.',
+    logx:'Collisione in volo sopra Zagabria: centosettantasei morti, in gran parte turisti tedeschi di ritorno dalle vacanze.',
     ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
 ];
 
@@ -3641,6 +3661,17 @@ const BEAT_LEGGERI = [
   {id:'lgde60_autostrada', era:'de1960', registro:'leggero', cond:()=>S.year>=1963, kick:'Il paese', t:'La domenica in autostrada', text:'Il sabato pomeriggio libero, la macchina nuova, e l\'autostrada senza limiti di velocità: la domenica il paese va a trovare i parenti a centoquaranta all\'ora.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
   {id:'lgde60_krimi', era:'de1960', registro:'leggero', cond:()=>S.year>=1962&&S.year<=1966, kick:'Il paese', t:'Le strade vuote', text:'Quando la televisione trasmette il giallo a puntate, le strade si svuotano e la polizia registra un calo dei furti: i ladri, dicono, sono davanti al televisore anche loro.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
   {id:'lgde60_luna', era:'de1960', registro:'leggero', cond:()=>S.year===1969&&S.month>=7&&S.month<=8, kick:'Il paese', t:'La notte della Luna', text:'Alle quattro del mattino mezzo paese è sveglio davanti al televisore. Il giorno dopo, negli uffici, nessuno lavora e tutti parlano della stessa cosa.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  /* L135-3 · i dieci beat leggeri del decennio tedesco '70 (scheda §I-D). */
+  {id:'lgde70_giallo', era:'de1970', registro:'leggero', cond:()=>S.year>=1970&&S.year<=1973, kick:'Il paese', t:'Il giallo della domenica', text:'La domenica sera il giallo della televisione cambia città ogni settimana: un commissario ad Amburgo, uno a Monaco, uno a Duisburg. Il lunedì in ufficio si discute di chi era l\'assassino.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde70_percorsi', era:'de1970', registro:'leggero', cond:()=>S.year>=1970&&S.year<=1974, kick:'Il paese', t:'I percorsi vita', text:'Nei boschi di ogni città spuntano i percorsi con le stazioni di ginnastica: flessioni al cartello tre, sbarra al cartello sette. La campagna nazionale ha una mascotte che alza il pollice, e la domenica gli impiegati corrono.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde70_adriatico', era:'de1970', registro:'leggero', cond:()=>S.year>=1970, kick:'Il paese', t:'L\'Adriatico', text:'A luglio la strada del Brennero è una fila unica di automobili con la tenda sul tetto. Sulla riviera italiana i menu sono in tedesco e i bagnini imparano a dire «ombrellone» in due lingue.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde70_giochi', era:'de1970', registro:'leggero', cond:()=>S.year===1972&&S.month>=7&&S.month<=8, kick:'Il paese', t:'I Giochi sereni', text:'Monaco ha costruito uno stadio col tetto trasparente che sembra una tenda, e i poliziotti del villaggio olimpico hanno divise azzurre e niente armi. Il paese vuole mostrare al mondo che è un altro paese.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde70_pedonale', era:'de1970', registro:'leggero', cond:()=>S.year>=1972&&S.year<=1975, kick:'Il paese', t:'La zona pedonale', text:'Nel centro delle città le automobili spariscono dalle vie dei negozi: panchine, fioriere, fontane di cemento. I commercianti erano contrari; il primo sabato hanno esaurito la merce.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde70_mondiale', era:'de1970', registro:'leggero', cond:()=>S.year===1974&&S.month>=7&&S.month<=8, kick:'Il paese', t:'Campioni in casa', text:'La finale si gioca a Monaco, e il paese vince il Mondiale davanti alla sua gente. Qualche settimana prima, ad Amburgo, aveva perso la partita contro l\'altra Germania: se ne parla quasi più che della finale.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde70_130', era:'de1970', registro:'leggero', cond:()=>S.year>=1974&&S.year<=1977, kick:'Il paese', t:'Centotrenta, consigliati', text:'Finita la crisi del petrolio il limite in autostrada torna un consiglio: centotrenta, se volete. Il cartello blu col numero bianco è ovunque; la corsia di sinistra non l\'ha mai visto.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde70_panino', era:'de1970', registro:'leggero', cond:()=>S.year>=1974, kick:'Il paese', t:'Il panino di Kreuzberg', text:'A Berlino, vicino alla stazione, un cuoco turco mette la carne dello spiedo dentro il pane con l\'insalata e la salsa. Costa poco, si mangia camminando, e gli operai del turno di notte fanno la fila.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde70_sintetizzatori', era:'de1970', registro:'leggero', cond:()=>S.year>=1975&&S.year<=1979, kick:'Il paese', t:'Le macchine che suonano', text:'A Düsseldorf quattro musicisti in giacca e cravatta suonano soltanto macchine elettroniche e cantano di autostrade e di treni. In patria li prendono in giro; in Inghilterra e in America li copiano.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde70_discoteca', era:'de1970', registro:'leggero', cond:()=>S.year>=1977, kick:'Il paese', t:'Il sabato in discoteca', text:'Le sale da ballo dei paesi diventano discoteche con le luci colorate sotto il pavimento. I genitori aspettano in macchina nel parcheggio fino alle due; i figli escono sudati e dicono che è stata una serata normale.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
 ];
 
 /* ===== F1 — LA TELEFONATA. Un'interruzione, non una carta: overlay a squillo, due opzioni secche, decisione a
@@ -5561,6 +5592,71 @@ const DOSSIERS=[
    {l:'Trattativa riservata',e:'La diplomazia lavora in silenzio',pleases:'tecnico',f:()=>{repd(2); gd('cetomedio',1);}},
    {l:'Pressione pubblica e richiamo dell\'ambasciatore',e:'Fermezza visibile; il negoziato si complica',pleases:'populista',f:()=>{gd('cetomedio',3); gd('pensionati',2); repd(-2);}},
  ]},
+ // L133-2 · varietà del ministro (28/9): sedici dossier del presente per il ministro degli Esteri — era 'contemporanea', senza paesi.
+ {id:'ms_es_vertice',era:'contemporanea',min:'esteri',kick:'Diplomazia',t:'Ospitare un vertice internazionale',text:'I capi di governo cercano una sede per il prossimo vertice. Prestigio assicurato, città blindata per una settimana.',ch:[
+   {l:'Candida la capitale',e:'Vetrina mondiale, cantieri e proteste',pleases:'tecnico',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; repd(3); gd('imprenditori',2); gd('giovani',-1);}},
+   {l:'Lascia l\'onore ad altri',e:'Niente spese, niente vetrina',pleases:'conservatore',f:()=>{repd(-1); gd('cetomedio',1);}},
+ ]},
+ {id:'ms_es_visti',era:'contemporanea',min:'esteri',kick:'Mobilità',t:'Visti per studenti e ricercatori',text:'Le università lamentano mesi di attesa per i visti di studenti e ricercatori stranieri. Altri paesi li accolgono in due settimane.',ch:[
+   {l:'Corsia rapida per chi studia e ricerca',e:'Cervelli in arrivo, qualche malumore',pleases:'progressista',f:()=>{repd(2); gd('giovani',3); gd('pensionati',-1);}},
+   {l:'Controlli come prima',e:'Prudenza; le università perdono candidati',pleases:'conservatore',f:()=>{S.ind.sicurezza+=1; gd('pensionati',2); gd('giovani',-2);}},
+ ]},
+ {id:'ms_es_rimpatrio',era:'contemporanea',min:'esteri',kick:'Crisi consolare',t:'Connazionali bloccati da una crisi',text:'Una rivolta ha chiuso l\'aeroporto di un paese lontano: centinaia di connazionali chiedono di tornare a casa.',ch:[
+   {l:'Voli di rimpatrio a carico dello Stato',e:'Tutti a casa; il conto lo paga il bilancio',pleases:'populista',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; gd('cetomedio',3); repd(1);}},
+   {l:'Assistenza consolare ordinaria',e:'Risparmio; i racconti delle famiglie in prima pagina',pleases:'tecnico',f:()=>{gd('cetomedio',-2); stampad(-2);}},
+ ]},
+ {id:'ms_es_sanzioni',era:'contemporanea',min:'esteri',kick:'Sanzioni',t:'Sanzioni contro un regime',text:'Gli alleati propongono sanzioni contro un governo che ha represso le proteste. Le nostre imprese hanno contratti aperti laggiù.',ch:[
+   {l:'Aderisci senza eccezioni',e:'Coerenza con gli alleati; commesse perse',pleases:'progressista',f:()=>{repd(3); gd('imprenditori',-3); gd('giovani',1);}},
+   {l:'Chiedi esenzioni per le nostre imprese',e:'Fatturato salvo; gli alleati prendono nota',pleases:'conservatore',f:()=>{gd('imprenditori',3); repd(-2);}},
+ ]},
+ {id:'ms_es_aiuti',era:'contemporanea',min:'esteri',kick:'Cooperazione',t:'Il bilancio della cooperazione',text:'Il fondo per la cooperazione allo sviluppo è fermo da anni. Le organizzazioni umanitarie chiedono di raddoppiarlo, il Tesoro di tagliarlo.',ch:[
+   {l:'Aumenta il fondo',e:'Solidarietà che costa',pleases:'progressista',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; repd(3); gd('cattolici',2);}},
+   {l:'Taglia e concentra',e:'Risparmio; la rete umanitaria protesta',pleases:'conservatore',costo:{debito:-0.2},f:()=>{S.ind.debt-=0.2; repd(-2); gd('pensionati',1);}},
+ ]},
+ {id:'ms_es_rete',era:'contemporanea',min:'esteri',kick:'Rete diplomatica',t:'Chiudere le ambasciate minori',text:'La revisione della spesa propone di accorpare una dozzina di sedi diplomatiche in paesi piccoli.',ch:[
+   {l:'Accorpa le sedi',e:'Risparmio; presenza più sottile nel mondo',pleases:'tecnico',costo:{debito:-0.2},f:()=>{S.ind.debt-=0.2; repd(-2);}},
+   {l:'Difendi la rete',e:'Presenza ovunque, e il suo costo',pleases:'conservatore',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; repd(1); gd('imprenditori',1);}},
+ ]},
+ {id:'ms_es_giornalista',era:'contemporanea',min:'esteri',kick:'Libertà di stampa',t:'Un giornalista espulso da un paese partner',text:'Un nostro corrispondente è stato espulso per i suoi articoli. Le redazioni chiedono una risposta, il partner è un cliente importante.',ch:[
+   {l:'Protesta formale e pubblica',e:'La stampa applaude; il partner si irrigidisce',pleases:'progressista',f:()=>{stampad(3); repd(-1);}},
+   {l:'Diplomazia silenziosa',e:'Rapporti salvi; le redazioni deluse',pleases:'tecnico',f:()=>{repd(1); stampad(-2);}},
+ ]},
+ {id:'ms_es_armi',era:'contemporanea',min:'esteri',kick:'Esportazioni',t:'Una commessa di armi verso un\'area di guerra',text:'Un\'azienda nazionale chiede la licenza per vendere mezzi militari a un governo coinvolto in un conflitto regionale.',ch:[
+   {l:'Autorizza la licenza',e:'Posti di lavoro salvi; le chiese protestano',pleases:'conservatore',f:()=>{gd('imprenditori',3); gd('lavoratori',1); gd('cattolici',-3); repd(-1);}},
+   {l:'Blocca la vendita',e:'Coerenza; l\'azienda minaccia tagli',pleases:'progressista',f:()=>{gd('imprenditori',-2); gd('cattolici',2); repd(1);}},
+ ]},
+ {id:'ms_es_seggio',era:'contemporanea',min:'esteri',kick:'Organismi internazionali',t:'Un seggio in un consesso internazionale',text:'Si libera un seggio a rotazione in un importante consesso internazionale. Candidarsi vuol dire due anni di campagna diplomatica.',ch:[
+   {l:'Candida il paese',e:'Due anni di voti da cercare, uno per uno',pleases:'tecnico',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; repd(4);}},
+   {l:'Sostieni la candidatura di un alleato',e:'Un favore da riscuotere più avanti',pleases:'conservatore',f:()=>{repd(1); gd('cetomedio',1);}},
+ ]},
+ {id:'ms_es_mare',era:'contemporanea',min:'esteri',kick:'Frontiere',t:'Una disputa su un confine marittimo',text:'I pescherecci di un paese vicino lavorano in acque che consideriamo nostre. I pescatori chiedono pattuglie.',ch:[
+   {l:'Ricorri a un arbitrato internazionale',e:'Anni di carte bollate; i pescatori aspettano',pleases:'tecnico',f:()=>{repd(2); gd('lavoratori',-1);}},
+   {l:'Pattuglie e fermezza',e:'Il porto applaude; il vicino convoca l\'ambasciatore',pleases:'populista',f:()=>{gd('pensionati',2); gd('lavoratori',1); repd(-2);}},
+ ]},
+ {id:'ms_es_cultura',era:'contemporanea',min:'esteri',kick:'Cultura all\'estero',t:'Gli istituti di cultura all\'estero',text:'Gli istituti che insegnano la nostra lingua nel mondo hanno liste d\'attesa e sedi cadenti. Aprirne di nuovi o affidarli a fondazioni private?',ch:[
+   {l:'Apri nuove sedi',e:'La lingua viaggia',pleases:'progressista',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; repd(2); gd('giovani',1);}},
+   {l:'Affidale alle fondazioni',e:'Costo zero; qualche sede chiude',pleases:'conservatore',costo:{debito:-0.1},f:()=>{S.ind.debt-=0.1; gd('imprenditori',1); repd(-1);}},
+ ]},
+ {id:'ms_es_avviso',era:'contemporanea',min:'esteri',kick:'Immagine del paese',t:'Un avviso di viaggio contro il paese',text:'Un grande paese partner sconsiglia ai suoi cittadini i viaggi da noi per una serie di proteste. Gli albergatori temono l\'estate.',ch:[
+   {l:'Campagna di rassicurazione',e:'Spot e fiere; i turisti forse tornano',pleases:'tecnico',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; gd('imprenditori',2); repd(1);}},
+   {l:'Protesta per l\'avviso',e:'Orgoglio nazionale; il partner non ritira nulla',pleases:'populista',f:()=>{repd(-2); gd('pensionati',1); gd('cetomedio',1);}},
+ ]},
+ {id:'ms_es_commercio',era:'contemporanea',min:'esteri',kick:'Commercio',t:'Un accordo commerciale da ratificare',text:'Dopo sei anni di negoziati l\'accordo di libero scambio con un grande mercato è pronto. I sindacati temono per le fabbriche.',ch:[
+   {l:'Ratifica così com\'è',e:'Mercati aperti; fabbriche in allarme',pleases:'tecnico',f:()=>{gd('imprenditori',3); gd('lavoratori',-2); repd(2);}},
+   {l:'Chiedi clausole sociali',e:'Tutele in più; il partner rinvia',pleases:'progressista',f:()=>{gd('lavoratori',2); gd('imprenditori',-1); repd(-1);}},
+ ]},
+ {id:'ms_es_clima',era:'contemporanea',min:'esteri',kick:'Clima',t:'La conferenza sul clima',text:'Alla conferenza annuale sul clima ogni paese deve presentare i suoi impegni. Le industrie pesanti chiedono prudenza, i giovani in piazza il contrario.',ch:[
+   {l:'Impegni ambiziosi',e:'Applausi in sala; le industrie preoccupate',pleases:'progressista',f:()=>{repd(3); gd('giovani',3); gd('imprenditori',-2);}},
+   {l:'Impegni minimi',e:'Industria tranquilla; piazze deluse',pleases:'conservatore',f:()=>{gd('imprenditori',2); gd('giovani',-2); repd(-1);}},
+ ]},
+ {id:'ms_es_estradizione',era:'contemporanea',min:'esteri',kick:'Giustizia internazionale',t:'Una richiesta di estradizione scomoda',text:'Un paese alleato chiede di estradare un uomo d\'affari accusato di corruzione. Da noi ha amici, e avvocati molto bravi.',ch:[
+   {l:'Concedi l\'estradizione',e:'Fiducia fra alleati; qualche telefonata irritata',pleases:'tecnico',f:()=>{repd(2); gd('imprenditori',-1);}},
+   {l:'Negala per vizi di forma',e:'Amici tranquilli; l\'alleato non dimentica',pleases:'conservatore',f:()=>{repd(-2); gd('imprenditori',1); stampad(-1);}},
+ ]},
+ {id:'ms_es_spia',era:'contemporanea',min:'esteri',kick:'Controspionaggio',t:'Un diplomatico straniero sorpreso a spiare',text:'I servizi hanno le prove: un addetto di un\'ambasciata straniera comprava documenti riservati. Espellerlo pubblicamente o in silenzio?',ch:[
+   {l:'Espulsione pubblica',e:'Fermezza mostrata; ritorsione probabile',pleases:'populista',f:()=>{gd('pensionati',2); S.ind.sicurezza+=1; repd(-2);}},
+   {l:'Allontanamento discreto',e:'Nessuna crisi; la stampa lo scopre dopo',pleases:'tecnico',f:()=>{repd(1); stampad(-1);}},
+ ]},
  // ----- DIFESA (+4) -----
  {id:'caserme',era:'universale',min:'difesa',kick:'Patrimonio',t:'Caserme dismesse da riusare',text:'Decine di caserme vuote nei centri urbani: alloggi, spazi pubblici o vendita?',ch:[
    {l:'Alloggi e servizi pubblici',e:'Patrimonio restituito alle città',pleases:'progressista',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; gd('giovani',3); gd('lavoratori',2);}},
@@ -5577,6 +5673,71 @@ const DOSSIERS=[
  {id:'genio_emergenze',era:'universale',min:'difesa',kick:'Protezione civile',t:'Il genio militare per le emergenze',text:'La protezione civile propone un impiego stabile del genio militare per calamità e ricostruzioni.',ch:[
    {l:'Protocollo stabile e mezzi dedicati',e:'Risposta rapida alle calamità',pleases:'tecnico',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; S.ind.sicurezza+=2; gd('cetomedio',2);}},
    {l:'Le forze armate restino alla difesa',e:'Missioni separate',pleases:'conservatore',f:()=>{gd('pensionati',1);}},
+ ]},
+ // L133-2 · varietà del ministro (28/9): sedici dossier del presente per il ministro della Difesa — era 'contemporanea', senza paesi.
+ {id:'ms_df_servizio',era:'contemporanea',min:'difesa',kick:'Giovani e Stato',t:'Tornare a un servizio obbligatorio?',text:'Un rapporto propone di reintrodurre un periodo di servizio per i diciottenni, civile o militare. I sondaggi sono divisi per età.',ch:[
+   {l:'Servizio civile volontario, con incentivi',e:'Nessun obbligo, qualche adesione',pleases:'progressista',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; gd('giovani',3);}},
+   {l:'Leva breve obbligatoria',e:'Gli anziani approvano, i ragazzi no',pleases:'conservatore',f:()=>{S.ind.sicurezza+=1; gd('pensionati',3); gd('giovani',-4);}},
+ ]},
+ {id:'ms_df_aerei',era:'contemporanea',min:'difesa',kick:'Appalti',t:'Il grande appalto dei caccia',text:'L\'aeronautica deve sostituire la flotta. Comprare dall\'alleato è più rapido; un programma nazionale dà lavoro ma costa di più.',ch:[
+   {l:'Compra dall\'alleato',e:'Consegne rapide; l\'industria nazionale resta a guardare',pleases:'tecnico',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; repd(2); gd('imprenditori',-1);}},
+   {l:'Programma nazionale',e:'Fabbriche piene, conto più alto',pleases:'populista',costo:{debito:0.5},f:()=>{S.ind.debt+=0.5; gd('imprenditori',3); gd('lavoratori',2); repd(-1);}},
+ ]},
+ {id:'ms_df_pace',era:'contemporanea',min:'difesa',kick:'Missioni',t:'Una missione di pace all\'estero',text:'Le organizzazioni internazionali chiedono un contingente per separare due fazioni dopo una tregua.',ch:[
+   {l:'Invia il contingente',e:'Peso internazionale; rischio per i soldati',pleases:'tecnico',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; repd(3); gd('cattolici',1);}},
+   {l:'Solo supporto logistico',e:'Prudenza; gli alleati notano l\'assenza',pleases:'conservatore',f:()=>{repd(-1); gd('pensionati',1);}},
+ ]},
+ {id:'ms_df_poligono',era:'contemporanea',min:'difesa',kick:'Territorio',t:'Un poligono di tiro contestato',text:'I comuni vicini a un poligono chiedono di ridurre le esercitazioni: rumore, incendi estivi, terreni vincolati.',ch:[
+   {l:'Riduci le esercitazioni',e:'Pace coi comuni; addestramento più scarso',pleases:'progressista',f:()=>{gd('cetomedio',2); S.ind.sicurezza-=1;}},
+   {l:'Le esercitazioni restano',e:'Prontezza intatta; i comuni ricorrono',pleases:'conservatore',f:()=>{S.ind.sicurezza+=1; gd('cetomedio',-2);}},
+ ]},
+ {id:'ms_df_alloggi',era:'contemporanea',min:'difesa',kick:'Personale',t:'Case per le famiglie dei militari',text:'I trasferimenti continui costringono i militari a pagare affitti in città care. I sindacati di categoria chiedono alloggi.',ch:[
+   {l:'Piano alloggi',e:'Famiglie sistemate; cantieri da finanziare',pleases:'progressista',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; gd('lavoratori',2); gd('pensionati',1);}},
+   {l:'Un\'indennità d\'affitto',e:'Più rapido, meno risolutivo',pleases:'tecnico',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; gd('cetomedio',1);}},
+ ]},
+ {id:'ms_df_reclute',era:'contemporanea',min:'difesa',kick:'Reclutamento',t:'Più donne nelle forze armate',text:'Le donne sono una piccola minoranza fra i militari. Uno studio propone obiettivi di reclutamento e carriere più flessibili.',ch:[
+   {l:'Obiettivi di reclutamento',e:'Forze più moderne; qualche resistenza interna',pleases:'progressista',f:()=>{gd('giovani',2); gd('cattolici',-1);}},
+   {l:'Nessun obiettivo',e:'Tutto come prima',pleases:'conservatore',f:()=>{gd('pensionati',1); gd('giovani',-1);}},
+ ]},
+ {id:'ms_df_munizioni',era:'contemporanea',min:'difesa',kick:'Scorte',t:'Le scorte di munizioni sono basse',text:'Un\'ispezione rivela che le scorte basterebbero per poche settimane di impiego. Ricostituirle costa, e le fabbriche hanno liste d\'attesa.',ch:[
+   {l:'Ricostituisci le scorte',e:'Sicurezza ritrovata, bilancio più pesante',pleases:'conservatore',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; S.ind.sicurezza+=2; repd(1);}},
+   {l:'Rinvia al prossimo bilancio',e:'Conti in ordine, magazzini vuoti',pleases:'tecnico',f:()=>{S.ind.sicurezza-=2; repd(-1);}},
+ ]},
+ {id:'ms_df_satelliti',era:'contemporanea',min:'difesa',kick:'Spazio',t:'Satelliti militari nazionali?',text:'Le forze armate dipendono dai satelliti degli alleati per le comunicazioni. Un programma nazionale darebbe autonomia.',ch:[
+   {l:'Programma nazionale',e:'Autonomia e industria spaziale',pleases:'tecnico',costo:{debito:0.4},f:()=>{S.ind.debt+=0.4; S.ind.sicurezza+=2; gd('imprenditori',2);}},
+   {l:'Una quota del programma alleato',e:'Meno spesa, meno controllo',pleases:'conservatore',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; repd(2);}},
+ ]},
+ {id:'ms_df_addestramento',era:'contemporanea',min:'difesa',kick:'Sicurezza del personale',t:'Un\'esercitazione finita male',text:'Durante un\'esercitazione notturna alcune reclute sono rimaste ferite. Le famiglie chiedono chi ha dato l\'ordine.',ch:[
+   {l:'Commissione indipendente',e:'Trasparenza; i vertici si irrigidiscono',pleases:'progressista',f:()=>{stampad(2); gd('cetomedio',1);}},
+   {l:'Inchiesta interna',e:'Discrezione; le famiglie non si fidano',pleases:'conservatore',f:()=>{stampad(-2); gd('pensionati',1);}},
+ ]},
+ {id:'ms_df_abusi',era:'contemporanea',min:'difesa',kick:'Disciplina',t:'Denunce di abusi in una caserma',text:'Alcune reclute denunciano umiliazioni sistematiche da parte dei commilitoni anziani. Il video gira sui telefoni.',ch:[
+   {l:'Un ispettore esterno',e:'Pulizia vera; malumore nei reparti',pleases:'progressista',f:()=>{gd('giovani',2); stampad(2);}},
+   {l:'Procedura disciplinare interna',e:'Casi chiusi in fretta; i dubbi restano',pleases:'conservatore',f:()=>{stampad(-2); gd('pensionati',1);}},
+ ]},
+ {id:'ms_df_riserva',era:'contemporanea',min:'difesa',kick:'Riserva',t:'Una riserva di volontari',text:'Lo stato maggiore propone una riserva di cittadini addestrati nei fine settimana, pronti per le emergenze.',ch:[
+   {l:'Crea la riserva',e:'Più mani nelle emergenze',pleases:'tecnico',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; S.ind.sicurezza+=1; gd('giovani',1);}},
+   {l:'Basta la protezione civile',e:'Nessuna struttura nuova',pleases:'conservatore',f:()=>{gd('cetomedio',1);}},
+ ]},
+ {id:'ms_df_droni',era:'contemporanea',min:'difesa',kick:'Armamenti',t:'Droni armati: sì o no?',text:'Le forze armate chiedono di armare i droni che oggi usano solo per osservare. Le chiese e una parte del parlamento sono contrarie.',ch:[
+   {l:'Armali',e:'Capacità nuova; coscienze divise',pleases:'conservatore',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; S.ind.sicurezza+=2; gd('cattolici',-2);}},
+   {l:'Restino da osservazione',e:'Linea prudente',pleases:'progressista',f:()=>{gd('cattolici',1); gd('giovani',1);}},
+ ]},
+ {id:'ms_df_industria',era:'contemporanea',min:'difesa',kick:'Industria della difesa',t:'L\'industria della difesa chiede di esportare di più',text:'I costruttori nazionali chiedono licenze d\'esportazione più rapide: senza clienti esteri le linee di produzione chiudono.',ch:[
+   {l:'Licenze più rapide',e:'Commesse e posti di lavoro',pleases:'conservatore',f:()=>{gd('imprenditori',3); gd('lavoratori',1); gd('cattolici',-2);}},
+   {l:'Controlli severi come prima',e:'Coerenza; l\'industria si lamenta',pleases:'progressista',f:()=>{gd('cattolici',2); gd('imprenditori',-2);}},
+ ]},
+ {id:'ms_df_spesa',era:'contemporanea',min:'difesa',kick:'Alleanze',t:'Gli alleati chiedono più spesa militare',text:'Al vertice dell\'alleanza il nostro paese è fra gli ultimi per spesa militare. Gli alleati chiedono un calendario per salire.',ch:[
+   {l:'Un calendario per salire',e:'Alleati soddisfatti; il bilancio si stringe',pleases:'conservatore',costo:{debito:0.5},f:()=>{S.ind.debt+=0.5; repd(3); gd('pensionati',1);}},
+   {l:'Restiamo dove siamo',e:'Soldi per altro; gli alleati freddi',pleases:'progressista',f:()=>{repd(-3); gd('lavoratori',1);}},
+ ]},
+ {id:'ms_df_base',era:'contemporanea',min:'difesa',kick:'Basi',t:'Una base alleata da rinnovare',text:'Scade l\'accordo che ospita una base di un paese alleato. Il comune vicino chiede di rinegoziare, l\'alleato di rinnovare così com\'è.',ch:[
+   {l:'Rinnova così com\'è',e:'Alleato soddisfatto; il comune protesta',pleases:'conservatore',f:()=>{repd(2); gd('giovani',-2);}},
+   {l:'Chiedi una revisione',e:'Più voce al territorio; l\'alleato si irrigidisce',pleases:'progressista',f:()=>{repd(-2); gd('giovani',1); gd('cetomedio',1);}},
+ ]},
+ {id:'ms_df_ospedali',era:'contemporanea',min:'difesa',kick:'Sanità militare',t:'Aprire gli ospedali militari ai civili',text:'Gli ospedali militari hanno letti vuoti mentre quelli civili sono pieni. Il ministero della salute propone di aprirli a tutti.',ch:[
+   {l:'Aprili ai civili',e:'Letti in più per tutti',pleases:'progressista',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; gd('pensionati',2); gd('cetomedio',1);}},
+   {l:'Restino militari',e:'Prontezza per le emergenze',pleases:'conservatore',f:()=>{S.ind.sicurezza+=1;}},
  ]},
  // ----- TRASVERSALE (+1) -----
  /* D3: kick rimappato (era 'Ricorrenza', orfano di scena) → bucket societacivile */
@@ -5878,6 +6039,18 @@ const DOSSIERS=[
    {l:'Tenerli a terra finché non si capisce',e:'L\'aviazione resta senza caccia per mesi · l\'Alleanza chiede spiegazioni',f:()=>{repd(-2); gdDe60('cetomedio',2); stampad(2);}},
    {l:'Addestramento più lungo, gli aerei restano',e:'La storia, a metà · gli incidenti calano, lentamente',f:()=>{stampad(-1);}},
    {l:'Un\'inchiesta sul contratto d\'acquisto',e:'Il ministero trema · e l\'aereo resta in volo',f:()=>{stampad(3); baseDe60(-2);}}]},
+ /* L135-3 · i due dossier del decennio tedesco '70 (scheda §I-F; «triplicano» → «si moltiplicano»: 41 000 domande nel 1976,
+    66 700 nel 1977, fonte de.wikipedia «Kriegsdienstverweigerung in Deutschland»). */
+ {id:'dde70_helsinki',era:'de1970',cond:()=>S.year>=1974&&S.year<=1975,min:'esteri',kick:'L\'Est',t:'La conferenza di Helsinki',
+  text:'Trentacinque paesi preparano un atto finale sulla sicurezza in Europa: Mosca vuole i confini riconosciuti per sempre, l\'Occidente vuole scriverci i diritti umani e la libertà di movimento. La delegazione chiede una linea: una riga sul cambiamento pacifico dei confini lascerebbe aperta l\'unità.',ch:[
+   {l:'Firmare, con la riga sul cambiamento pacifico',e:'La storia · i confini sono fermi ma non per sempre · e all\'Est i dissidenti cominciano a citare l\'atto finale',f:()=>{repd(4); gdDe70('pensionati',1);}},
+   {l:'Firmare così com\'è',e:'Mosca è soddisfatta · a casa i profughi no',f:()=>{repd(1); gdDe70('pensionati',-3);}},
+   {l:'Non firmare senza garanzie per Berlino',e:'La conferenza si ferma per due settimane · gli alleati ti chiedono di non esagerare',f:()=>{repd(-3); baseDe70(1);}}]},
+ {id:'dde70_obiettori',era:'de1970',cond:()=>S.year>=1977&&S.year<=1978,min:'difesa',kick:'La difesa',t:'L\'obiezione per cartolina',
+  text:'La legge nuova permette ai ragazzi di rifiutare il servizio militare con una cartolina, senza più l\'esame di coscienza davanti a una commissione. In pochi mesi le domande si moltiplicano, e le caserme restano mezze vuote. La Corte costituzionale sta per pronunciarsi.',ch:[
+   {l:'Difendere la cartolina',e:'Se la Corte la boccia, l\'hai difesa tu · i ragazzi lo ricordano',f:()=>{gdDe70('giovani',4); repd(-2);}},
+   {l:'Un servizio civile più lungo di quello militare',e:'La storia che verrà · chi rifiuta le armi paga con qualche mese in più · le domande calano',f:()=>{gdDe70('giovani',-1); repd(1);}},
+   {l:'Tornare alle commissioni',e:'Le caserme si riempiono · i ragazzi tornano a raccontare la loro coscienza a un funzionario',f:()=>{gdDe70('giovani',-5); gdDe70('pensionati',2); repd(1);}}]},
  {id:'d50_marshall_dip',era:'italia1950',cond:()=>S.year<=1953,min:'esteri',kick:'Piano Marshall',t:'La dipendenza dagli aiuti',text:'Gli aiuti americani hanno rimesso in moto il paese, ma ora chiedono allineamento politico e commerciale. Fin dove seguire l\'alleato?',ch:[
    {l:'Allineamento pieno con l\'alleato',e:'Aiuti e protezione; la pancia mormora',pleases:'tecnico',f:()=>{repd(4); if(S.gMod!=null)S.gMod+=0.1; gd('cetomedio',-1);}},
    {l:'Amicizia sì, ma con margini nostri',e:'Autonomia rivendicata; l\'alleato prende nota',pleases:'populista',f:()=>{repd(-2); gd('cetomedio',2);}},
@@ -8571,6 +8744,57 @@ const EVENTS=[
    {l:'Chiedi lo scioglimento',e:'Anni di processo · e intanto il partito fa la vittima',f:()=>{repd(2); gdDe60('pensionati',-1); gdDe60('giovani',1);}},
    {l:'Combatterlo nelle urne, non in tribunale',e:'La storia · nel 1969 resta sotto il cinque per cento · per un soffio',f:()=>{repd(1);}},
    {l:'Riprendersi i suoi elettori a destra',e:'I voti tornano · e con loro qualche parola che non si diceva',f:()=>{baseDe60(3); repd(-4); gdDe60('giovani',-3); stampad(-2);}}]},
+ /* L135-3 · i dieci eventi del decennio tedesco '70 (scheda PRESET-GERMANIA-1970 §I-C). */
+ {id:'de70_varsavia', era:'de1970', cond:()=>S.year===1970&&S.month===12&&!S.opposizione, tono:'grave', kick:'L\'Est', t:'Il monumento del ghetto',
+  text:'A Varsavia, prima di firmare il trattato, il programma prevede una corona al monumento degli insorti del ghetto. Le telecamere sono lì. Nessuno ti ha detto che cosa fare dopo aver posato la corona.',ch:[
+   {l:'Ti inginocchi, in silenzio',e:'La storia · l\'immagine fa il giro del mondo · a casa metà del paese dice che era troppo',f:()=>{repd(6); gdDe70('giovani',4); gdDe70('pensionati',-4); baseDe70(-1);}},
+   {l:'Resti in piedi, a capo chino',e:'Il protocollo è rispettato · nessuno se ne ricorderà',f:()=>{repd(1);}},
+   {l:'Un discorso alla stampa, davanti al monumento',e:'Parole giuste · ma sono parole',f:()=>{repd(2); stampad(1);}}]},
+ {id:'de70_radicali', era:'de1970', cond:()=>S.year===1972&&S.month<=3, kick:'Lo Stato', t:'Il decreto sui radicali',
+  text:'I presidenti delle regioni vogliono escludere dal pubblico impiego chi appartiene a un\'organizzazione «ostile alla Costituzione». Maestri, postini, macchinisti: un\'indagine per ognuno. Dall\'estero lo chiamano divieto di professione.',ch:[
+   {l:'Firmalo: lo Stato si difende',e:'La storia · centinaia di migliaia di controlli negli anni · pochissimi esclusi, moltissimi spaventati',f:()=>{gdDe70('pensionati',2); gdDe70('cetomedio',1); gdDe70('giovani',-5); stampad(-2);}},
+   {l:'Solo per chi commette un reato',e:'Le regioni conservatrici protestano · i giovani insegnanti respirano',f:()=>{gdDe70('giovani',3); gdDe70('pensionati',-2); baseDe70(-1);}},
+   {l:'Lascialo alle regioni',e:'Ogni regione fa da sé · e un maestro è radicale in Baviera e non in Assia',f:()=>{repd(-1);}}]},
+ {id:'de70_transfughi', era:'de1970', cond:()=>S.year===1972&&S.month>=2&&S.month<=4&&!S.opposizione, kick:'Il Bundestag', t:'I transfughi',
+  text:'Un deputato dopo l\'altro lascia la maggioranza per protesta contro i trattati con l\'Est. Ogni settimana qualcuno rifà i conti, e il pareggio è vicino. L\'opposizione annusa la sfiducia.',ch:[
+   {l:'Tirare dritto sui trattati, e contarsi',e:'La maggioranza si assottiglia ma non si piega · la stampa conta con te, ogni giorno',f:()=>{repd(2); stampad(2); baseDe70(1); gdDe70('pensionati',-2);}},
+   {l:'Parlare con i dubbiosi uno per uno',e:'Qualcuno resta · e i giornali scrivono di favori e di promesse',f:()=>{stampad(-3); gdDe70('cetomedio',-1);}},
+   {l:'Chiedere all\'opposizione un patto sui trattati',e:'Il tempo si allunga · i tuoi ti accusano di cedere prima ancora di trattare',f:()=>{baseDe70(-2); gdDe70('pensionati',2); repd(-1);}}]},
+ {id:'de70_reclutamento', era:'de1970', cond:()=>(S.year===1973&&S.month>=11)||(S.year===1974&&S.month<=3), kick:'Il lavoro', t:'Lo stop agli ospiti',
+  text:'Con il petrolio alle stelle le fabbriche frenano, e il ministero del lavoro propone di chiudere il reclutamento di lavoratori stranieri: nessun contratto nuovo fuori dalla Comunità europea. Due milioni e mezzo sono già qui. Resteranno?',ch:[
+   {l:'Stop al reclutamento, chi c\'è può restare',e:'La storia · gli arrivi si fermano · e chi c\'è fa venire la famiglia, perché uscire vorrebbe dire non tornare',f:()=>{gdDe70('lavoratori',2); gdDe70('imprenditori',-2); gdDe70('cattolici',1);}},
+   {l:'Stop, e un premio a chi torna a casa',e:'Pochi accettano · il premio costa più di quanto rende',costo:{debito:0.5},f:()=>{S.ind.debt+=0.5; gdDe70('lavoratori',1); gdDe70('cetomedio',1); repd(-1);}},
+   {l:'Nessuno stop: le fabbriche ripartiranno',e:'Gli imprenditori ringraziano · i sindacati no, con un milione di disoccupati in arrivo',f:()=>{gdDe70('imprenditori',3); gdDe70('lavoratori',-4);}}]},
+ {id:'de70_218', era:'de1970', cond:()=>S.year>=1974&&S.year<=1976, tono:'grave', kick:'La giustizia', t:'La riforma sull\'aborto',
+  text:'Il Bundestag ha votato che l\'aborto nei primi tre mesi non è più reato. Le regioni cattoliche e l\'opposizione ricorrono alla Corte costituzionale; le donne raccolgono firme a centinaia di migliaia. La Corte può decidere contro.',ch:[
+   {l:'Difendi la legge dei tre mesi',e:'Se la Corte la annulla, sei tu ad aver perso · le donne lo ricordano',f:()=>{gdDe70('giovani',4); gdDe70('cattolici',-5); stampad(1);}},
+   {l:'Prepara già una legge delle indicazioni',e:'La storia che verrà · l\'aborto resta reato, ma non punito in certi casi · nessuno è contento, tutti la accettano',f:()=>{gdDe70('cattolici',-1); gdDe70('giovani',-1); repd(1);}},
+   {l:'Ritira la riforma prima della sentenza',e:'Le regioni cattoliche ringraziano · le piazze no',f:()=>{gdDe70('cattolici',4); gdDe70('giovani',-6); baseDe70(-2);}}]},
+ {id:'de70_milione', era:'de1970', cond:()=>S.year===1975, tono:'grave', kick:'L\'economia', t:'Un milione di disoccupati',
+  text:'Per la prima volta da vent\'anni i disoccupati superano il milione. Le acciaierie tagliano i turni, i cantieri navali chiudono, e i giornali contano ogni mese le file agli uffici del lavoro. La Banca federale non vuole sentir parlare di debito.',ch:[
+   {l:'Un programma di investimenti, a debito',e:'I cantieri ripartono · la Banca federale alza i tassi per protesta',costo:{debito:1.5},f:()=>{S.ind.debt+=1.5; gdDe70('lavoratori',5); gdDe70('imprenditori',1); fidDe70(-2);}},
+   {l:'Tagli e pazienza: l\'inflazione prima di tutto',e:'La storia, a metà · il marco tiene · le file agli uffici del lavoro pure',f:()=>{gdDe70('lavoratori',-5); gdDe70('pensionati',-1); fidDe70(2);}},
+   {l:'Lavoro ridotto pagato dallo Stato',e:'Nessuno perde il posto, tutti perdono un po\' di stipendio · e il conto arriva',costo:{debito:1},f:()=>{S.ind.debt+=1; gdDe70('lavoratori',3); gdDe70('cetomedio',-1); fidDe70(-1);}}]},
+ {id:'de70_wyhl', era:'de1970', cond:()=>S.year>=1975&&S.year<=1977, kick:'L\'energia', t:'Il cantiere occupato',
+  text:'In un villaggio di viticoltori sul Reno contadini, studenti e parroci occupano il cantiere di una centrale nucleare e non se ne vanno. Da lì il movimento si allarga ad altri cantieri: i cortei diventano di decine di migliaia, e la polizia arriva con gli idranti.',ch:[
+   {l:'Sgomberare e costruire',e:'Il cantiere riapre · le immagini degli idranti sui contadini fanno il giro del paese',f:()=>{gdDe70('imprenditori',3); gdDe70('giovani',-6); gdDe70('cattolici',-2); stampad(-2);}},
+   {l:'Fermare i lavori finché decide un tribunale',e:'La storia, qui · il cantiere non riaprirà mai · e il movimento ha capito che si può vincere',f:()=>{gdDe70('giovani',4); gdDe70('imprenditori',-3); fidDe70(-1);}},
+   {l:'Un dibattito pubblico sul nucleare, regione per regione',e:'Mesi di assemblee · nessuno cambia idea, ma nessuno può dire di non essere stato ascoltato',f:()=>{gdDe70('giovani',1); stampad(1); repd(1);}}]},
+ {id:'de70_cogestione', era:'de1970', cond:()=>S.year>=1975&&S.year<=1976, kick:'Il lavoro', t:'I lavoratori nei consigli',
+  text:'La legge sulla cogestione è pronta: nelle imprese con più di duemila dipendenti metà del consiglio di sorveglianza la eleggono i lavoratori. Gli imprenditori dicono che è la fine della proprietà; i sindacati che la metà non è la metà, se in caso di pareggio decide il presidente.',ch:[
+   {l:'Metà e metà, col voto decisivo al presidente',e:'La storia · la legge passa con quasi tutta l\'aula · gli imprenditori ricorrono lo stesso alla Corte',f:()=>{gdDe70('lavoratori',3); gdDe70('imprenditori',-2); repd(1);}},
+   {l:'Parità piena, come vogliono i sindacati',e:'I sindacati festeggiano · i liberali minacciano di andarsene',f:()=>{gdDe70('lavoratori',5); gdDe70('imprenditori',-5); gdDe70('cetomedio',-2);}},
+   {l:'Rinviare: non con la crisi in corso',e:'Le imprese respirano · il sindacato se ne ricorda al prossimo voto',f:()=>{gdDe70('imprenditori',3); gdDe70('lavoratori',-4);}}]},
+ {id:'de70_binario', era:'de1970', cond:()=>(S.year===1979&&S.month>=10)||(S.year===1980&&S.month<=3), tono:'grave', kick:'La difesa', t:'Il doppio binario',
+  text:'Mosca ha puntato sull\'Europa missili nuovi a medio raggio. L\'Alleanza propone di installarne di propri fra quattro anni, se nel frattempo Mosca non accetta di trattare. I missili verrebbero anche qui. Nel tuo partito c\'è chi non lo accetterà mai.',ch:[
+   {l:'Sì al doppio binario',e:'La storia · l\'Alleanza è compatta · e nelle piazze nasce il movimento per la pace più grande del paese',f:()=>{repd(4); gdDe70('giovani',-5); baseDe70(-2); gdDe70('cetomedio',1);}},
+   {l:'Sì alla trattativa, no ai missili',e:'Mosca apprezza · Washington chiede da che parte stai',f:()=>{repd(-4); gdDe70('giovani',3);}},
+   {l:'Rinviare la decisione di un anno',e:'L\'Alleanza decide senza di te · e i missili arriverebbero comunque',f:()=>{repd(-2); baseDe70(-1);}}]},
+ {id:'de70_mosca80', era:'de1970', cond:()=>S.year===1980&&S.month>=2&&S.month<=5, kick:'Il mondo', t:'Le Olimpiadi di Mosca',
+  text:'I carri sovietici sono in Afghanistan, e il Presidente americano chiede agli alleati di non mandare gli atleti ai Giochi di Mosca. Il comitato olimpico decide da sé, ma aspetta che cosa dice il governo. Gli atleti si allenano da quattro anni.',ch:[
+   {l:'Boicottaggio, con Washington',e:'La storia · gli atleti restano a casa, alcuni in lacrime davanti alle telecamere',f:()=>{repd(3); gdDe70('giovani',-2);}},
+   {l:'Lasciar decidere il comitato olimpico',e:'Lo sport è libero · e Washington prende nota',f:()=>{repd(-2); gdDe70('giovani',1);}},
+   {l:'Andare, e dirlo a Mosca in faccia',e:'Gli atleti partono · l\'Alleanza no, e se ne ricorderà',f:()=>{repd(-4); gdDe70('giovani',2); stampad(1);}}]},
  {id:'fr_ceca', era:'fr1950', cond:()=>S.year>=1951&&S.year<=1953, kick:'L\'Europa', t:'Il carbone e l\'acciaio con Bonn',
   text:'Sei paesi mettono in comune carbone e acciaio sotto un\'Alta Autorità che non risponde a nessun governo: per i siderurgici del nord è un mercato, per i minatori una minaccia, per i gollisti una rinuncia. Il tuo partito deve ratificare.',ch:[
    {l:'Ratifichi',e:'Le acciaierie del nord con te · i minatori temono il mercato comune',f:()=>{gdFr('imprenditori',3); gdFr('cetomedio',2); gdFr('lavoratori',-3); repd(1);}},
@@ -9671,6 +9895,31 @@ const SFIDE=[
  {id:'de60_q_alternanza', era:'de1960', codaFino:Infinity, paese:'germania', ruolo:'governo', diff:'facile', cond:()=>S.year>=1970||(S.year===1969&&S.month>=11), q:'Chi governa dopo le elezioni del 1969?',
   op:['CDU/CSU da sola','La grande coalizione','SPD e FDP'], giusta:2,
   perche:'La CDU/CSU resta il primo partito, ma socialdemocratici e liberali insieme hanno la maggioranza e scelgono il Cancelliere.'},
+ /* L135-3 · le otto sfide del decennio tedesco '70 (scheda §I-G), la giusta nelle posizioni della scheda (0,1,2,1,2,0,1,2). Il «perché» è di Code. */
+ {id:'de70_q_varsavia', era:'de1970', codaFino:Infinity, paese:'germania', ruolo:'governo', diff:'facile', cond:()=>S.year>=1971, q:'In che anno il Cancelliere si inginocchia a Varsavia?',
+  op:['1970','1968','1974'], giusta:0,
+  perche:'Il 7 dicembre 1970, davanti al monumento agli insorti del ghetto, prima della firma del trattato con la Polonia.'},
+ {id:'de70_q_duevoti', era:'de1970', codaFino:Infinity, paese:'germania', ruolo:'governo', diff:'media', cond:()=>S.year>=1973||(S.year===1972&&S.month>=5), q:'Come finisce la sfiducia costruttiva dell\'aprile 1972?',
+  op:['Passa con un voto','Fallisce per due voti','Non si vota'], giusta:1,
+  perche:'Il 27 aprile 1972 l\'opposizione raccoglie 247 voti: ne servivano 249.'},
+ {id:'de70_q_fondamentale', era:'de1970', codaFino:Infinity, paese:'germania', ruolo:'governo', diff:'media', cond:()=>S.year>=1973, q:'Che cosa regola il trattato del dicembre 1972?',
+  op:['I confini con la Polonia','Il prezzo del petrolio','I rapporti con l\'altra Germania'], giusta:2,
+  perche:'Il trattato fondamentale del 21 dicembre 1972 regola i rapporti fra le due Germanie; l\'anno dopo entrano insieme all\'ONU.'},
+ {id:'de70_q_domeniche', era:'de1970', codaFino:Infinity, paese:'germania', ruolo:'governo', diff:'facile', cond:()=>S.year>=1974, q:'Che cosa è vietato in quattro domeniche del 1973?',
+  op:['Aprire i negozi','Guidare l\'automobile','Vendere alcolici'], giusta:1,
+  perche:'Fra novembre e dicembre 1973, per la crisi del petrolio, quattro domeniche senza automobili e un limite di velocità provvisorio.'},
+ {id:'de70_q_spia', era:'de1970', codaFino:Infinity, paese:'germania', ruolo:'governo', diff:'facile', cond:()=>S.year>=1975||(S.year===1974&&S.month>=6), q:'Chi viene scoperto nel 1974 nell\'ufficio del Cancelliere?',
+  op:['Un giornalista','Un ex ministro','Una spia dell\'Est'], giusta:2,
+  perche:'Un collaboratore stretto del Cancelliere era un ufficiale dei servizi dell\'Est: arrestato nell\'aprile 1974, il Cancelliere si dimette a maggio.'},
+ {id:'de70_q_milione', era:'de1970', codaFino:Infinity, paese:'germania', ruolo:'governo', diff:'media', cond:()=>S.year>=1976||(S.year===1975&&S.month>=6), q:'Quanti disoccupati conta il paese nel 1975?',
+  op:['Un milione','Centomila','Tre milioni'], giusta:0,
+  perche:'Nel 1975 i disoccupati superano il milione per la prima volta dal 1955.'},
+ {id:'de70_q_mogadiscio', era:'de1970', codaFino:Infinity, paese:'germania', ruolo:'governo', diff:'media', cond:()=>S.year>=1978||(S.year===1977&&S.month>=11), q:'Dove viene liberato l\'aereo dirottato nell\'ottobre 1977?',
+  op:['Entebbe','Mogadiscio','Algeri'], giusta:1,
+  perche:'Nella notte del 18 ottobre 1977 le teste di cuoio della polizia di frontiera liberano gli ostaggi sulla pista di Mogadiscio.'},
+ {id:'de70_q_verdi', era:'de1970', codaFino:Infinity, paese:'germania', ruolo:'governo', diff:'facile', cond:()=>S.year>=1981||(S.year===1980&&S.month>=2), q:'Quale partito nasce nel gennaio 1980?',
+  op:['La NPD','Il partito liberale','I Verdi'], giusta:2,
+  perche:'I Verdi si fondano come partito federale a Karlsruhe nel gennaio 1980.'},
  {id:'uk60_svalut67', era:'uk1960', codaFino:Infinity, paese:'regnounito', ruolo:'governo', diff:'difficile', cond:()=>S.year>=1967, q:'Che cosa accadde alla sterlina nel novembre 1967?',
   op:['Fu lasciata fluttuare liberamente','Fu svalutata da 2,80 a 2,40 dollari','Fu agganciata all\'oro'], giusta:1,
   perche:'Arrivò dopo tre anni di difesa del cambio.'},
@@ -11477,7 +11726,11 @@ const TITOLI=[
  {id:'ti_scandalo', pri:1, cond:()=>S.agenda&&S.agenda.some(a=>a.kind==='scandalo'), amico:'Il caso al ministero: garantismo e nervi saldi', ostile:'Scandalo al governo: la credibilità scricchiola'},
  {id:'ti_crisi_fid', cond:()=>S.ind.fiducia!=null&&S.ind.fiducia<40, amico:'Conti sotto pressione, ma il governo tiene la barra', ostile:'I creditori bussano: il Paese è sull\'orlo'},
  {id:'ti_recessione', cond:()=>S.ind.growth<0, amico:'Economia in frenata: il governo prepara la risposta', ostile:'Recessione: il Paese arretra e il governo guarda'},
- {id:'ti_manovra', pri:1, cond:()=>S.month===1, amico:'Manovra, la rotta è tracciata: il governo ci mette la faccia', ostile:'Manovra al buio: conti in bilico e cittadini in attesa'},
+ {id:'ti_manovra', pri:1, serie:'manovra', cond:()=>S.month===1, amico:'Manovra, la rotta è tracciata: il governo ci mette la faccia', ostile:'Manovra al buio: conti in bilico e cittadini in attesa'},   // L135-2: la serie «manovra» — cinque voci, una per gennaio, pescate col loro sacchetto (generaTitolo)
+ {id:'ti_manovra_2', pri:1, serie:'manovra', cond:()=>S.month===1, amico:'Legge di bilancio: i conti tengono, le promesse pure', ostile:'Legge di bilancio: tagli in arrivo, e nessuno lo dice'},
+ {id:'ti_manovra_3', pri:1, serie:'manovra', cond:()=>S.month===1, amico:'Il bilancio arriva in aula: il governo tira dritto', ostile:'Il bilancio arriva in aula, e la maggioranza mugugna'},
+ {id:'ti_manovra_4', pri:1, serie:'manovra', cond:()=>S.month===1, amico:'I conti dell\'anno nuovo: più investimenti, meno sprechi', ostile:'I conti dell\'anno nuovo: la coperta è corta'},
+ {id:'ti_manovra_5', pri:1, serie:'manovra', cond:()=>S.month===1, amico:'Il governo presenta il bilancio: "Un anno per crescere"', ostile:'Il bilancio del governo: tasse giù sulla carta, su nella realtà'},
  {id:'ti_disocc', cond:()=>S.ind.unemp>9, amico:'Lavoro, la risalita è lenta ma il piano c\'è', ostile:'Senza lavoro: i numeri inchiodano il governo'},
  {id:'ti_deficit', cond:()=>S.ind.deficit>4.5, amico:'Il governo stringe i conti con coraggio', ostile:'Stangata in vista, e il Paese paga'},
  {id:'ti_consenso', cond:()=>S.ind.consenso<40, amico:'Governo in salita: la tenuta c\'è, i risultati verranno', ostile:'Un governo al capolinea: il consenso evapora'},
@@ -11740,6 +11993,64 @@ const TITOLI=[
  {id:'ti_sanita_3', era:'contemporanea', cond:()=>S.ind.sanita!=null&&S.ind.sanita>=55, amico:'Liste d\'attesa in calo: la sanità respira', ostile:'La sanità tiene, ma i conti degli ospedali no'},
  {id:'ti_reputazione_2', era:'contemporanea', cond:()=>S.ind.reputazione!=null&&S.ind.reputazione>=45&&S.ind.reputazione<=75, amico:'La diplomazia lavora: il paese si fa rispettare', ostile:'Rispetto formale, peso reale in calo'},
  {id:'ti_reputazione_3', era:'contemporanea', cond:()=>S.ind.reputazione!=null&&S.ind.reputazione>=45&&S.ind.reputazione<=75, amico:'Alleanze salde: un interlocutore affidabile', ostile:'Affidabili sì, ma sempre in seconda fila'},
+ // L134-2 · varietà della prima pagina — 42 titoli di stato del presente (gradino 2, nessun `paesi`), testi di Cowork in LOTTO-L134-2-TITOLI.md
+// L135-2 · LE SOGLIE DALLA DISPERSIONE (la regola di Giacomo: la dispersione PRIMA). Misura .claude/misura-l135-soglie.js: 16 presenti ×
+// governo/opposizione × 3 semi × 120 mesi, livelli 2-3, 10 466 mesi. Un titolo di «male» (sotto una soglia) al p15, uno di «bene» (sopra) al p50,
+// una banda fra p30 e p70, ti_v_agenda al p85 (raro per natura); arrotondato all'intero. I percentili usati:
+//   grandezza          p15    p30    p50    p70    p85
+//   ind.sanita         59.0   61.6   62.7   64.6   67.2   → pronto_soccorso <59 · medici <59 · cure >=63 · visite 62-65
+//   ind.sicurezza      58.0   59.7   61.7   64.2   80.9   → quartieri <58 · reati_calo >=62 · truffe 60-64
+//   ind.consenso       52.1   53.7   55.1   56.8   59.1   → corridoi <52
+//   ind.stampa         42.1   44.7   47.3   50.2   53.1   → agenda >=53 (p85)
+//   ind.ambiente       39.4   50.2   52.2   55.2   58.3   → rinnovabili >=52
+//   ind.growth          0.6    1.2    1.9    2.7    3.3   → export >=2 · carrello >2 · turismo >=2 · affitti >=2 (⚠ all'intero le quattro coincidono)
+//   ind.unemp           7.0    7.4    7.7    7.9    8.2   → precari 7-8
+//   gr.pensionati      52.7   54.2   55.7   57.5   61.0   → anziani_piazza <=53
+//   gr.cetomedio       50.9   54.9   58.9   64.6   73.9   → ceto_ko <=51
+//   gr.imprenditori    47.7   52.1   58.1   65.5   74.5   → imprese_ko <=48
+// ti_v_minoranza non ha soglia (S.minoranza) e resta com'è. ti_v_monocolore: solo dove PAESE.coalizione (falso in USA, Regno Unito, Corea, Nigeria).
+ {id:'ti_v_aria_pulita', era:'contemporanea', cond:()=>S.ind.ambiente!=null&&S.ind.ambiente>=58, amico:'Aria più pulita nelle città: il piano verde funziona', ostile:'Aria più pulita, bollette più care'},
+ {id:'ti_v_clima_mezzo', era:'contemporanea', cond:()=>S.ind.ambiente!=null&&S.ind.ambiente>=45&&S.ind.ambiente<58, amico:'Ambiente, passi avanti senza strappi', ostile:'Sul clima il governo prende tempo'},
+ {id:'ti_v_smog', era:'contemporanea', cond:()=>S.ind.ambiente!=null&&S.ind.ambiente<45, amico:'Smog in città: il governo annuncia misure', ostile:'Smog, fiumi, discariche: l\'ambiente presenta il conto'},
+ {id:'ti_v_fiumi', era:'contemporanea', cond:()=>S.ind.ambiente!=null&&S.ind.ambiente<50, amico:'Fiumi e coste, un piano di bonifica sul tavolo', ostile:'Il fiume che nessuno pulisce'},
+ {id:'ti_v_rinnovabili', era:'contemporanea', cond:()=>S.ind.ambiente!=null&&S.ind.ambiente>=52, amico:'Pannelli e pale: l\'energia cambia volto', ostile:'L\'energia verde avanza, i costi pure'},
+ {id:'ti_v_pronto_soccorso', era:'contemporanea', cond:()=>S.ind.sanita!=null&&S.ind.sanita<59, amico:'Pronto soccorso in affanno: arrivano i rinforzi', ostile:'Ore in barella: il pronto soccorso scoppia'},
+ {id:'ti_v_medici', era:'contemporanea', cond:()=>S.ind.sanita!=null&&S.ind.sanita<59, amico:'Medici e infermieri, il governo apre le assunzioni', ostile:'Mancano medici, e si vede'},
+ {id:'ti_v_cure', era:'contemporanea', cond:()=>S.ind.sanita!=null&&S.ind.sanita>=63, amico:'Farmaci e cure, il sistema regge l\'urto', ostile:'La sanità tiene grazie a chi ci lavora'},
+ {id:'ti_v_visite', era:'contemporanea', cond:()=>S.ind.sanita!=null&&S.ind.sanita>=62&&S.ind.sanita<65, amico:'Liste d\'attesa: il piano entra nel vivo', ostile:'Sei mesi per una visita'},
+ {id:'ti_v_quartieri', era:'contemporanea', cond:()=>S.ind.sicurezza!=null&&S.ind.sicurezza<58, amico:'Più pattuglie nei quartieri difficili', ostile:'Quartieri lasciati soli'},
+ {id:'ti_v_reati_calo', era:'contemporanea', cond:()=>S.ind.sicurezza!=null&&S.ind.sicurezza>=62, amico:'Reati in calo per il terzo trimestre', ostile:'Reati in calo: ma chi li denuncia più?'},
+ {id:'ti_v_truffe', era:'contemporanea', cond:()=>S.ind.sicurezza!=null&&S.ind.sicurezza>=60&&S.ind.sicurezza<64, amico:'Truffe in rete, la polizia alza la guardia', ostile:'Truffe in rete: gli anziani le prime vittime'},
+ {id:'ti_v_debito_basso', era:'contemporanea', cond:()=>S.ind.debt<60, amico:'Debito sotto controllo: un margine che altri invidiano', ostile:'Conti in ordine, servizi al lumicino'},
+ {id:'ti_v_debito_medio', era:'contemporanea', cond:()=>S.ind.debt>=60&&S.ind.debt<100, amico:'Il debito si stabilizza', ostile:'Il debito sale piano, ma sale'},
+ {id:'ti_v_mercati', era:'contemporanea', cond:()=>S.ind.fiducia!=null&&S.ind.fiducia>=40&&S.ind.fiducia<65, amico:'Mercati tranquilli: il paese si finanzia senza scosse', ostile:'I mercati osservano, e il costo del debito sale'},
+ {id:'ti_v_fisco', era:'contemporanea', cond:()=>S.ind.deficit<=3, amico:'Dichiarazione dei redditi: il fisco promette semplicità', ostile:'Tasse, moduli, code: il fisco semplice resta una promessa'},
+ {id:'ti_v_evasione', era:'contemporanea', cond:()=>S.ind.deficit>3, amico:'Caccia all\'evasione: il governo recupera miliardi', ostile:'Evasione: i soliti annunci, i soliti ignoti'},
+ {id:'ti_v_fabbrica', era:'contemporanea', cond:()=>S.ind.growth<0.5, amico:'Crisi aziendale: il governo convoca il tavolo', ostile:'Un\'altra fabbrica chiude i cancelli'},
+ {id:'ti_v_export', era:'contemporanea', cond:()=>S.ind.growth>=2, amico:'L\'export tira: le imprese assumono', ostile:'Export record, salari fermi'},
+ {id:'ti_v_carrello', era:'contemporanea', cond:()=>S.ind.growth>2, amico:'Prezzi in salita: il governo vigila', ostile:'Il carrello della spesa pesa di più'},
+ {id:'ti_v_precari', era:'contemporanea', cond:()=>S.ind.unemp>7&&S.ind.unemp<=8, amico:'Contratti stabili in crescita, lentamente', ostile:'Una generazione a tempo determinato'},
+ {id:'ti_v_turismo', era:'contemporanea', cond:()=>S.ind.growth>=2, amico:'Anno da record per il turismo', ostile:'Turisti in arrivo, stagionali sottopagati'},
+ {id:'ti_v_affitti', era:'contemporanea', cond:()=>S.ind.growth>=2, amico:'Affitti alle stelle: il governo prepara un piano casa', ostile:'Una casa è diventata un lusso'},
+ {id:'ti_v_sindacati_ok', era:'contemporanea', cond:()=>(S.groups&&S.groups.lavoratori!=null)?S.groups.lavoratori>=60:false, amico:'Sindacati e governo, un clima nuovo', ostile:'Pace sociale, a che prezzo?'},
+ {id:'ti_v_sciopero', era:'contemporanea', cond:()=>(S.groups&&S.groups.lavoratori!=null)?S.groups.lavoratori<=42:false, amico:'Sciopero generale: il governo tiene aperto il dialogo', ostile:'Sciopero generale: il paese si ferma'},
+ {id:'ti_v_pensioni_ok', era:'contemporanea', cond:()=>(S.groups&&S.groups.pensionati!=null)?S.groups.pensionati>=60:false, amico:'Pensioni al sicuro, promette il governo', ostile:'Pensioni al sicuro: e il conto per i figli?'},
+ {id:'ti_v_anziani_piazza', era:'contemporanea', cond:()=>(S.groups&&S.groups.pensionati!=null)?S.groups.pensionati<=53:false, amico:'Anziani in piazza: il governo li riceve', ostile:'Anziani in piazza: "Ci avete dimenticati"'},
+ {id:'ti_v_ceto_ok', era:'contemporanea', cond:()=>(S.groups&&S.groups.cetomedio!=null)?S.groups.cetomedio>=60:false, amico:'Il ceto medio ritrova fiducia', ostile:'Il ceto medio respira, per ora'},
+ {id:'ti_v_ceto_ko', era:'contemporanea', cond:()=>(S.groups&&S.groups.cetomedio!=null)?S.groups.cetomedio<=51:false, amico:'Ceto medio in affanno: allo studio un taglio delle tasse', ostile:'Il ceto medio scivola'},
+ {id:'ti_v_imprese_ok', era:'contemporanea', cond:()=>(S.groups&&S.groups.imprenditori!=null)?S.groups.imprenditori>=60:false, amico:'Gli industriali promuovono il governo', ostile:'Gli industriali applaudono: e i lavoratori?'},
+ {id:'ti_v_imprese_ko', era:'contemporanea', cond:()=>(S.groups&&S.groups.imprenditori!=null)?S.groups.imprenditori<=48:false, amico:'Imprese preoccupate: il governo le ascolta', ostile:'Le imprese minacciano di andarsene'},
+ {id:'ti_v_giovani_ok', era:'contemporanea', cond:()=>(S.groups&&S.groups.giovani!=null)?S.groups.giovani>=60:false, amico:'I giovani tornano a credere nella politica', ostile:'I giovani applaudono, gli altri aspettano'},
+ {id:'ti_v_talenti', era:'contemporanea', cond:()=>(S.groups&&S.groups.giovani!=null)?S.groups.giovani<=45:false, amico:'Fuga dei talenti: il governo lancia un piano per il rientro', ostile:'Laureati con la valigia in mano'},
+ {id:'ti_v_agenda', era:'contemporanea', cond:()=>S.ind.stampa!=null&&S.ind.stampa>=53, amico:'Il governo detta l\'agenda', ostile:'Una stampa troppo gentile?'},
+ {id:'ti_v_editoriali', era:'contemporanea', cond:()=>S.ind.stampa!=null&&S.ind.stampa<45, amico:'Il governo risponde punto per punto alle critiche', ostile:'Editoriali al veleno: il governo sotto tiro'},
+ {id:'ti_v_minoranza', era:'contemporanea', cond:()=>S.minoranza===true, amico:'Governo di minoranza: si tratta legge per legge', ostile:'Un governo senza numeri'},
+ {id:'ti_v_monocolore', era:'contemporanea', cond:()=>!!PAESE.coalizione&&S.coalizione&&S.coalizione.length===1&&!S.minoranza, amico:'Un partito solo al comando: decisioni rapide', ostile:'Un partito solo al comando, e nessuno che frena'},
+ {id:'ti_v_sondaggi_fermi', era:'contemporanea', cond:()=>S.ind.consenso>=52&&S.ind.consenso<58, amico:'Il governo tiene nei sondaggi', ostile:'Sondaggi fermi: il paese non si scalda'},
+ {id:'ti_v_corridoi', era:'contemporanea', cond:()=>S.ind.consenso<52, amico:'Il governo serra le file', ostile:'Voci di rimpasto nei corridoi'},
+ {id:'ti_v_bollette', era:'contemporanea', cond:()=>S.ind.growth<1, amico:'Bollette: il governo prepara un aiuto alle famiglie', ostile:'Bollette alle stelle: famiglie al buio'},
+ {id:'ti_v_cantieri', era:'contemporanea', cond:()=>S.ind.deficit<=4.5, amico:'Cantieri aperti: le opere ripartono', ostile:'Cantieri annunciati, cantieri fermi'},
+ {id:'ti_v_scuola', era:'contemporanea', cond:()=>(S.groups&&S.groups.giovani!=null)?S.groups.giovani>45&&S.groups.giovani<60:false, amico:'Scuola: più insegnanti in cattedra', ostile:'Scuole: mancano gli insegnanti'},
 
  /* ===== P5-bis — LA PRIMA PAGINA D'EPOCA. Gemelle era-taggate dei titoli generici più visti (misura P5: i `pri:1`
     scattano su fatti-di-gioco e battono i ti50, così la voce del periodo si assottigliava proprio in prima pagina).
@@ -11858,75 +12169,79 @@ const TITOLI=[
  {id:'ti_uk00_affluenza', era:'uk2000', cond:()=>S.year>=2001, amico:'Sessanta per cento: l\'affluenza più bassa', ostile:'Sessanta per cento: e gli altri quaranta?'},
  {id:'ti_uk00_trentacinque', era:'uk2000', cond:()=>S.year>=2005&&(S.year>2005||S.month>=5), amico:'Trentacinque per cento e una maggioranza', ostile:'Trentacinque per cento e una maggioranza: il sistema funziona così'},
  {id:'ti_uk00_euro', era:'uk2000', cond:()=>S.year>=2003, amico:'Fuori dall\'euro, per sempre', ostile:'Fuori dall\'euro: e adesso?'},
+ /* ===== L133-1 (28/9) · I TITOLI-PAESE STANNO AL GRADINO 2, «STATO del paese» (il default di generaTitolo). Fino al 28/9 i 56 titoli
+    `*_p_ti_*` qui sotto (e `ng_p_ti_petrolio` in fondo all elenco) portavano pri:1, il gradino «EVENTO del mese»: senza cond, lo tenevano sempre pieno e quattro titoli
+    coprivano quasi metà delle prime pagine (81-86% di ripetizioni, L132-1). Sono lo stato permanente del paese: a pri 2 si
+    mescolano coi titoli di stato universali. Tutti gli altri pri:1 dei TITOLI (220) hanno una cond, come il gradino vuole. ===== */
  /* ===== L79-2 · FRANCIA, quattro titoli del presente (scheda §D). Senza cond: sono prime pagine di stagione, non di data. ===== */
- {id:'fr_p_ti_pensioni', era:'contemporanea', paesi:['francia'], pri:1, amico:'La riforma regge, il paese torna al lavoro', ostile:'Un milione in piazza: la riforma che nessuno voleva'},
- {id:'fr_p_ti_deficit', era:'contemporanea', paesi:['francia'], pri:1, amico:'Il rientro del deficit è credibile, dice Bruxelles', ostile:'Bruxelles boccia i conti di Parigi'},
- {id:'fr_p_ti_assemblea', era:'contemporanea', paesi:['francia'], pri:1, amico:'L\'Assemblea trova una maggioranza, contro ogni previsione', ostile:'L\'Assemblea senza maggioranza: si governa a colpi di decreto'},
- {id:'fr_p_ti_nucleare', era:'contemporanea', paesi:['francia'], pri:1, amico:'La Francia sceglie ancora l\'atomo', ostile:'Reattori vecchi, bollette nuove: il nucleare presenta il conto'},
+ {id:'fr_p_ti_pensioni', era:'contemporanea', paesi:['francia'], amico:'La riforma regge, il paese torna al lavoro', ostile:'Un milione in piazza: la riforma che nessuno voleva'},
+ {id:'fr_p_ti_deficit', era:'contemporanea', paesi:['francia'], amico:'Il rientro del deficit è credibile, dice Bruxelles', ostile:'Bruxelles boccia i conti di Parigi'},
+ {id:'fr_p_ti_assemblea', era:'contemporanea', paesi:['francia'], amico:'L\'Assemblea trova una maggioranza, contro ogni previsione', ostile:'L\'Assemblea senza maggioranza: si governa a colpi di decreto'},
+ {id:'fr_p_ti_nucleare', era:'contemporanea', paesi:['francia'], amico:'La Francia sceglie ancora l\'atomo', ostile:'Reattori vecchi, bollette nuove: il nucleare presenta il conto'},
  /* ===== L81-1 · GERMANIA, quattro titoli del presente (scheda §D). ===== */
- {id:'de_p_ti_freno', era:'contemporanea', paesi:['germania'], pri:1, amico:'Il freno al debito regge, i conti tornano', ostile:'Il freno al debito: ponti chiusi e scuole senza tetto'},
- {id:'de_p_ti_coalizione', era:'contemporanea', paesi:['germania'], pri:1, amico:'La coalizione trova l\'accordo dopo una notte', ostile:'La coalizione litiga in pubblico: si può andare avanti così?'},
- {id:'de_p_ti_est', era:'contemporanea', paesi:['germania'], pri:1, amico:'L\'est torna a crescere', ostile:'L\'est vota contro: il paese è ancora diviso'},
- {id:'de_p_ti_auto', era:'contemporanea', paesi:['germania'], pri:1, amico:'L\'auto tedesca riparte con l\'elettrico', ostile:'Un altro stabilimento chiude: l\'auto tedesca in crisi'},
+ {id:'de_p_ti_freno', era:'contemporanea', paesi:['germania'], amico:'Il freno al debito regge, i conti tornano', ostile:'Il freno al debito: ponti chiusi e scuole senza tetto'},
+ {id:'de_p_ti_coalizione', era:'contemporanea', paesi:['germania'], amico:'La coalizione trova l\'accordo dopo una notte', ostile:'La coalizione litiga in pubblico: si può andare avanti così?'},
+ {id:'de_p_ti_est', era:'contemporanea', paesi:['germania'], amico:'L\'est torna a crescere', ostile:'L\'est vota contro: il paese è ancora diviso'},
+ {id:'de_p_ti_auto', era:'contemporanea', paesi:['germania'], amico:'L\'auto tedesca riparte con l\'elettrico', ostile:'Un altro stabilimento chiude: l\'auto tedesca in crisi'},
  /* ===== L82-1 · SPAGNA, quattro titoli del presente (scheda §D). ===== */
- {id:'es_p_ti_autonomie', era:'contemporanea', paesi:['spagna'], pri:1, amico:'Accordo con le autonomie: la legislatura è salva', ostile:'Ostaggio delle autonomie: la Spagna paga per governare'},
- {id:'es_p_ti_casa', era:'contemporanea', paesi:['spagna'], pri:1, amico:'Il piano casa parte: prime gru nelle grandi città', ostile:'Affitti alle stelle e piazze piene: la casa è l\'emergenza'},
- {id:'es_p_ti_lavoro', era:'contemporanea', paesi:['spagna'], pri:1, amico:'Occupazione ai massimi: il paese lavora', ostile:'Ancora i disoccupati più numerosi d\'Europa'},
- {id:'es_p_ti_acqua', era:'contemporanea', paesi:['spagna'], pri:1, amico:'Piove: i bacini tornano a riempirsi', ostile:'Bacini al minimo: la siccità è politica'},
+ {id:'es_p_ti_autonomie', era:'contemporanea', paesi:['spagna'], amico:'Accordo con le autonomie: la legislatura è salva', ostile:'Ostaggio delle autonomie: la Spagna paga per governare'},
+ {id:'es_p_ti_casa', era:'contemporanea', paesi:['spagna'], amico:'Il piano casa parte: prime gru nelle grandi città', ostile:'Affitti alle stelle e piazze piene: la casa è l\'emergenza'},
+ {id:'es_p_ti_lavoro', era:'contemporanea', paesi:['spagna'], amico:'Occupazione ai massimi: il paese lavora', ostile:'Ancora i disoccupati più numerosi d\'Europa'},
+ {id:'es_p_ti_acqua', era:'contemporanea', paesi:['spagna'], amico:'Piove: i bacini tornano a riempirsi', ostile:'Bacini al minimo: la siccità è politica'},
  /* ===== L83-1 · STATI UNITI, quattro titoli del presente (scheda §D). ===== */
- {id:'us_p_ti_congresso', era:'contemporanea', paesi:['usa'], pri:1, amico:'La Casa Bianca e il Congresso trovano l\'accordo', ostile:'Muro contro muro: Washington è bloccata'},
- {id:'us_p_ti_borsa', era:'contemporanea', paesi:['usa'], pri:1, amico:'Wall Street ai massimi: l\'economia corre', ostile:'Wall Street corre, Main Street no'},
- {id:'us_p_ti_frontiera', era:'contemporanea', paesi:['usa'], pri:1, amico:'Gli arrivi al confine calano', ostile:'Record al confine: gli Stati di frontiera si ribellano'},
- {id:'us_p_ti_corte', era:'contemporanea', paesi:['usa'], pri:1, amico:'La Corte Suprema dà ragione alla Casa Bianca', ostile:'La Corte Suprema ferma la Casa Bianca'},
+ {id:'us_p_ti_congresso', era:'contemporanea', paesi:['usa'], amico:'La Casa Bianca e il Congresso trovano l\'accordo', ostile:'Muro contro muro: Washington è bloccata'},
+ {id:'us_p_ti_borsa', era:'contemporanea', paesi:['usa'], amico:'Wall Street ai massimi: l\'economia corre', ostile:'Wall Street corre, Main Street no'},
+ {id:'us_p_ti_frontiera', era:'contemporanea', paesi:['usa'], amico:'Gli arrivi al confine calano', ostile:'Record al confine: gli Stati di frontiera si ribellano'},
+ {id:'us_p_ti_corte', era:'contemporanea', paesi:['usa'], amico:'La Corte Suprema dà ragione alla Casa Bianca', ostile:'La Corte Suprema ferma la Casa Bianca'},
  /* ===== L83-1 · CANADA, quattro titoli del presente (scheda §D). ===== */
- {id:'ca_p_ti_casa', era:'contemporanea', paesi:['canada'], pri:1, amico:'Le gru tornano nelle città: il piano casa parte', ostile:'Una casa costa dieci stipendi: la generazione senza casa'},
- {id:'ca_p_ti_vicino', era:'contemporanea', paesi:['canada'], pri:1, amico:'Il vicino fa marcia indietro sui dazi', ostile:'Il vicino alza i dazi: l\'Ontario trema'},
- {id:'ca_p_ti_ovest', era:'contemporanea', paesi:['canada'], pri:1, amico:'Ottawa e l\'Ovest trovano l\'accordo sull\'energia', ostile:'L\'Ovest contro Ottawa: si torna a parlare di separazione'},
- {id:'ca_p_ti_quebec', era:'contemporanea', paesi:['canada'], pri:1, amico:'Il Québec e Ottawa firmano', ostile:'Il Québec sfida Ottawa sulla lingua'},
+ {id:'ca_p_ti_casa', era:'contemporanea', paesi:['canada'], amico:'Le gru tornano nelle città: il piano casa parte', ostile:'Una casa costa dieci stipendi: la generazione senza casa'},
+ {id:'ca_p_ti_vicino', era:'contemporanea', paesi:['canada'], amico:'Il vicino fa marcia indietro sui dazi', ostile:'Il vicino alza i dazi: l\'Ontario trema'},
+ {id:'ca_p_ti_ovest', era:'contemporanea', paesi:['canada'], amico:'Ottawa e l\'Ovest trovano l\'accordo sull\'energia', ostile:'L\'Ovest contro Ottawa: si torna a parlare di separazione'},
+ {id:'ca_p_ti_quebec', era:'contemporanea', paesi:['canada'], amico:'Il Québec e Ottawa firmano', ostile:'Il Québec sfida Ottawa sulla lingua'},
  /* ===== L83-1 · AUSTRALIA, quattro titoli del presente (scheda §D). ===== */
- {id:'au_p_ti_casa', era:'contemporanea', paesi:['australia'], pri:1, amico:'Il piano casa parte: prime chiavi ai giovani', ostile:'Il sogno della casa è finito: una generazione in affitto'},
- {id:'au_p_ti_cina', era:'contemporanea', paesi:['australia'], pri:1, amico:'Il grande cliente riapre le porte al vino australiano', ostile:'Il grande cliente chiude di nuovo: i porti si fermano'},
- {id:'au_p_ti_estate', era:'contemporanea', paesi:['australia'], pri:1, amico:'Un\'estate senza grandi incendi', ostile:'Il fumo copre le città: un\'altra estate nera'},
- {id:'au_p_ti_mandato', era:'contemporanea', paesi:['australia'], pri:1, amico:'Tre anni bastano: il governo consegna', ostile:'Tre anni sono passati e non è cambiato niente'},
+ {id:'au_p_ti_casa', era:'contemporanea', paesi:['australia'], amico:'Il piano casa parte: prime chiavi ai giovani', ostile:'Il sogno della casa è finito: una generazione in affitto'},
+ {id:'au_p_ti_cina', era:'contemporanea', paesi:['australia'], amico:'Il grande cliente riapre le porte al vino australiano', ostile:'Il grande cliente chiude di nuovo: i porti si fermano'},
+ {id:'au_p_ti_estate', era:'contemporanea', paesi:['australia'], amico:'Un\'estate senza grandi incendi', ostile:'Il fumo copre le città: un\'altra estate nera'},
+ {id:'au_p_ti_mandato', era:'contemporanea', paesi:['australia'], amico:'Tre anni bastano: il governo consegna', ostile:'Tre anni sono passati e non è cambiato niente'},
  /* ===== L85-1 · GIAPPONE, quattro titoli del presente (scheda §D). ===== */
- {id:'jp_p_ti_nascite', era:'contemporanea', paesi:['giappone'], pri:1, amico:'Le nascite si fermano: primo anno senza calo', ostile:'Nuovo minimo storico delle nascite'},
- {id:'jp_p_ti_yen', era:'contemporanea', paesi:['giappone'], pri:1, amico:'Lo yen si riprende, le famiglie respirano', ostile:'Lo yen ai minimi: il cibo costa il doppio'},
- {id:'jp_p_ti_reattori', era:'contemporanea', paesi:['giappone'], pri:1, amico:'Un altro reattore riparte senza incidenti', ostile:'Riavvio contestato: la prefettura dice no'},
- {id:'jp_p_ti_partito', era:'contemporanea', paesi:['giappone'], pri:1, amico:'Il partito si riforma: le correnti sciolte', ostile:'I fondi neri delle correnti: il partito sotto inchiesta'},
+ {id:'jp_p_ti_nascite', era:'contemporanea', paesi:['giappone'], amico:'Le nascite si fermano: primo anno senza calo', ostile:'Nuovo minimo storico delle nascite'},
+ {id:'jp_p_ti_yen', era:'contemporanea', paesi:['giappone'], amico:'Lo yen si riprende, le famiglie respirano', ostile:'Lo yen ai minimi: il cibo costa il doppio'},
+ {id:'jp_p_ti_reattori', era:'contemporanea', paesi:['giappone'], amico:'Un altro reattore riparte senza incidenti', ostile:'Riavvio contestato: la prefettura dice no'},
+ {id:'jp_p_ti_partito', era:'contemporanea', paesi:['giappone'], amico:'Il partito si riforma: le correnti sciolte', ostile:'I fondi neri delle correnti: il partito sotto inchiesta'},
  /* ===== L85-1 · COREA DEL SUD, quattro titoli del presente (scheda §D). ===== */
- {id:'kr_p_ti_natalita', era:'contemporanea', paesi:['coreasud'], pri:1, amico:'Le nascite risalgono per la prima volta in dieci anni', ostile:'Nuovo minimo mondiale: meno di un figlio per donna'},
- {id:'kr_p_ti_nord', era:'contemporanea', paesi:['coreasud'], pri:1, amico:'Il confine tace: un mese senza provocazioni', ostile:'Un altro missile nel mare: il Nord alza il tono'},
- {id:'kr_p_ti_export', era:'contemporanea', paesi:['coreasud'], pri:1, amico:'Esportazioni record: i chip trainano il paese', ostile:'I chip rallentano: il paese scopre di dipendere da un prodotto'},
- {id:'kr_p_ti_assemblea', era:'contemporanea', paesi:['coreasud'], pri:1, amico:'L\'Assemblea approva: il Presidente incassa', ostile:'L\'Assemblea boccia: il Presidente governa per decreto'},
+ {id:'kr_p_ti_natalita', era:'contemporanea', paesi:['coreasud'], amico:'Le nascite risalgono per la prima volta in dieci anni', ostile:'Nuovo minimo mondiale: meno di un figlio per donna'},
+ {id:'kr_p_ti_nord', era:'contemporanea', paesi:['coreasud'], amico:'Il confine tace: un mese senza provocazioni', ostile:'Un altro missile nel mare: il Nord alza il tono'},
+ {id:'kr_p_ti_export', era:'contemporanea', paesi:['coreasud'], amico:'Esportazioni record: i chip trainano il paese', ostile:'I chip rallentano: il paese scopre di dipendere da un prodotto'},
+ {id:'kr_p_ti_assemblea', era:'contemporanea', paesi:['coreasud'], amico:'L\'Assemblea approva: il Presidente incassa', ostile:'L\'Assemblea boccia: il Presidente governa per decreto'},
  /* ===== L85-1 · INDIA, quattro titoli del presente (scheda §D). ===== */
- {id:'in_p_ti_crescita', era:'contemporanea', paesi:['india'], pri:1, amico:'L\'economia che cresce più di tutte', ostile:'Cresce il prodotto, non i lavori'},
- {id:'in_p_ti_contadini', era:'contemporanea', paesi:['india'], pri:1, amico:'I contadini tornano a casa: accordo sul prezzo', ostile:'I trattori al confine della capitale: terzo mese'},
- {id:'in_p_ti_confine', era:'contemporanea', paesi:['india'], pri:1, amico:'Confine calmo: i soldati si ritirano dai passi', ostile:'Scontri a cinquemila metri: il confine si riscalda'},
- {id:'in_p_ti_stati', era:'contemporanea', paesi:['india'], pri:1, amico:'Il Sud e il Nord trovano l\'accordo sui seggi', ostile:'Il Sud contro Delhi: «non siamo una colonia»'},
+ {id:'in_p_ti_crescita', era:'contemporanea', paesi:['india'], amico:'L\'economia che cresce più di tutte', ostile:'Cresce il prodotto, non i lavori'},
+ {id:'in_p_ti_contadini', era:'contemporanea', paesi:['india'], amico:'I contadini tornano a casa: accordo sul prezzo', ostile:'I trattori al confine della capitale: terzo mese'},
+ {id:'in_p_ti_confine', era:'contemporanea', paesi:['india'], amico:'Confine calmo: i soldati si ritirano dai passi', ostile:'Scontri a cinquemila metri: il confine si riscalda'},
+ {id:'in_p_ti_stati', era:'contemporanea', paesi:['india'], amico:'Il Sud e il Nord trovano l\'accordo sui seggi', ostile:'Il Sud contro Delhi: «non siamo una colonia»'},
  /* ===== L86-3 · BRASILE, quattro titoli del presente (scheda §D). ===== */
- {id:'br_p_ti_congresso', era:'contemporanea', paesi:['brasile'], pri:1, amico:'Il Planalto e il Congresso firmano la pace', ostile:'Il Congresso presenta il conto al Planalto'},
- {id:'br_p_ti_foresta', era:'contemporanea', paesi:['brasile'], pri:1, amico:'La deforestazione cala per il secondo anno', ostile:'La foresta brucia: record di focolai'},
- {id:'br_p_ti_real', era:'contemporanea', paesi:['brasile'], pri:1, amico:'Il real si rafforza, i mercati credono al paese', ostile:'Il real ai minimi: i mercati non credono ai conti'},
- {id:'br_p_ti_violenza', era:'contemporanea', paesi:['brasile'], pri:1, amico:'Omicidi in calo: le città respirano', ostile:'Le fazioni comandano un altro Stato'},
+ {id:'br_p_ti_congresso', era:'contemporanea', paesi:['brasile'], amico:'Il Planalto e il Congresso firmano la pace', ostile:'Il Congresso presenta il conto al Planalto'},
+ {id:'br_p_ti_foresta', era:'contemporanea', paesi:['brasile'], amico:'La deforestazione cala per il secondo anno', ostile:'La foresta brucia: record di focolai'},
+ {id:'br_p_ti_real', era:'contemporanea', paesi:['brasile'], amico:'Il real si rafforza, i mercati credono al paese', ostile:'Il real ai minimi: i mercati non credono ai conti'},
+ {id:'br_p_ti_violenza', era:'contemporanea', paesi:['brasile'], amico:'Omicidi in calo: le città respirano', ostile:'Le fazioni comandano un altro Stato'},
  /* ===== L86-3 · ARGENTINA, quattro titoli del presente (scheda §D). ===== */
- {id:'ar_p_ti_inflazione', era:'contemporanea', paesi:['argentina'], pri:1, amico:'L\'inflazione rallenta: il mese più basso da anni', ostile:'I prezzi ripartono: un altro mese a due cifre'},
- {id:'ar_p_ti_fmi', era:'contemporanea', paesi:['argentina'], pri:1, amico:'Accordo con il Fondo: i dollari arrivano', ostile:'Il Fondo sospende: le riserve non ci sono'},
- {id:'ar_p_ti_campo', era:'contemporanea', paesi:['argentina'], pri:1, amico:'Raccolto record: la campagna liquida', ostile:'La campagna in sciopero: le strade bloccate'},
- {id:'ar_p_ti_piazza', era:'contemporanea', paesi:['argentina'], pri:1, amico:'La piazza si svuota: il governo tiene', ostile:'Sciopero generale: il paese si ferma'},
+ {id:'ar_p_ti_inflazione', era:'contemporanea', paesi:['argentina'], amico:'L\'inflazione rallenta: il mese più basso da anni', ostile:'I prezzi ripartono: un altro mese a due cifre'},
+ {id:'ar_p_ti_fmi', era:'contemporanea', paesi:['argentina'], amico:'Accordo con il Fondo: i dollari arrivano', ostile:'Il Fondo sospende: le riserve non ci sono'},
+ {id:'ar_p_ti_campo', era:'contemporanea', paesi:['argentina'], amico:'Raccolto record: la campagna liquida', ostile:'La campagna in sciopero: le strade bloccate'},
+ {id:'ar_p_ti_piazza', era:'contemporanea', paesi:['argentina'], amico:'La piazza si svuota: il governo tiene', ostile:'Sciopero generale: il paese si ferma'},
  /* ===== L86-3 · MESSICO, quattro titoli del presente (scheda §D). ===== */
- {id:'mx_p_ti_vicino', era:'contemporanea', paesi:['messico'], pri:1, amico:'Il vicino rinvia i dazi: le fabbriche respirano', ostile:'Il vicino annuncia i dazi: il peso crolla'},
- {id:'mx_p_ti_sicurezza', era:'contemporanea', paesi:['messico'], pri:1, amico:'Omicidi in calo per il terzo mese', ostile:'Un altro sindaco ucciso: lo Stato dei cartelli'},
- {id:'mx_p_ti_peso', era:'contemporanea', paesi:['messico'], pri:1, amico:'Il super-peso: la moneta più forte dell\'anno', ostile:'Il peso ai minimi: i mercati fuggono'},
- {id:'mx_p_ti_sexenio', era:'contemporanea', paesi:['messico'], pri:1, amico:'Il sessennio a metà: le promesse tengono', ostile:'Il sessennio a metà: l\'orologio corre'},
+ {id:'mx_p_ti_vicino', era:'contemporanea', paesi:['messico'], amico:'Il vicino rinvia i dazi: le fabbriche respirano', ostile:'Il vicino annuncia i dazi: il peso crolla'},
+ {id:'mx_p_ti_sicurezza', era:'contemporanea', paesi:['messico'], amico:'Omicidi in calo per il terzo mese', ostile:'Un altro sindaco ucciso: lo Stato dei cartelli'},
+ {id:'mx_p_ti_peso', era:'contemporanea', paesi:['messico'], amico:'Il super-peso: la moneta più forte dell\'anno', ostile:'Il peso ai minimi: i mercati fuggono'},
+ {id:'mx_p_ti_sexenio', era:'contemporanea', paesi:['messico'], amico:'Il sessennio a metà: le promesse tengono', ostile:'Il sessennio a metà: l\'orologio corre'},
  /* ===== L87-3 · SUDAFRICA, quattro titoli del presente (scheda §D). ===== */
- {id:'za_p_ti_luce', era:'contemporanea', paesi:['sudafrica'], pri:1, amico:'Cento giorni senza blackout', ostile:'Torna il calendario dei blackout: sei ore al giorno'},
- {id:'za_p_ti_lavoro', era:'contemporanea', paesi:['sudafrica'], pri:1, amico:'La disoccupazione cala per la prima volta in anni', ostile:'Un giovane su due senza lavoro: il record'},
- {id:'za_p_ti_unita', era:'contemporanea', paesi:['sudafrica'], pri:1, amico:'Il governo di unità regge: i mercati applaudono', ostile:'Il governo di unità litiga in pubblico'},
- {id:'za_p_ti_rand', era:'contemporanea', paesi:['sudafrica'], pri:1, amico:'Il rand si rafforza', ostile:'Il rand ai minimi: il rating scende ancora'},
+ {id:'za_p_ti_luce', era:'contemporanea', paesi:['sudafrica'], amico:'Cento giorni senza blackout', ostile:'Torna il calendario dei blackout: sei ore al giorno'},
+ {id:'za_p_ti_lavoro', era:'contemporanea', paesi:['sudafrica'], amico:'La disoccupazione cala per la prima volta in anni', ostile:'Un giovane su due senza lavoro: il record'},
+ {id:'za_p_ti_unita', era:'contemporanea', paesi:['sudafrica'], amico:'Il governo di unità regge: i mercati applaudono', ostile:'Il governo di unità litiga in pubblico'},
+ {id:'za_p_ti_rand', era:'contemporanea', paesi:['sudafrica'], amico:'Il rand si rafforza', ostile:'Il rand ai minimi: il rating scende ancora'},
  /* ===== L87-3 · NIGERIA, quattro titoli del presente (scheda §D). ===== */
- {id:'ng_p_ti_naira', era:'contemporanea', paesi:['nigeria'], pri:1, amico:'La naira si stabilizza: i prezzi rallentano', ostile:'La naira ai minimi: il riso costa il doppio'},
- {id:'ng_p_ti_nord', era:'contemporanea', paesi:['nigeria'], pri:1, amico:'Studenti liberati: le scuole del Nord riaprono', ostile:'Un altro rapimento a scuola: il Nord chiede lo Stato'},
- {id:'ng_p_ti_corrente', era:'contemporanea', paesi:['nigeria'], pri:1, amico:'Un mese senza crolli della rete', ostile:'La rete crolla per la quarta volta quest\'anno'},
+ {id:'ng_p_ti_naira', era:'contemporanea', paesi:['nigeria'], amico:'La naira si stabilizza: i prezzi rallentano', ostile:'La naira ai minimi: il riso costa il doppio'},
+ {id:'ng_p_ti_nord', era:'contemporanea', paesi:['nigeria'], amico:'Studenti liberati: le scuole del Nord riaprono', ostile:'Un altro rapimento a scuola: il Nord chiede lo Stato'},
+ {id:'ng_p_ti_corrente', era:'contemporanea', paesi:['nigeria'], amico:'Un mese senza crolli della rete', ostile:'La rete crolla per la quarta volta quest\'anno'},
  /* ---- L93-2 · i 16 titoli del decennio francese (scheda PRESET-FRANCIA-1950 §E), pool `ti_fr50`. ⚠ La scheda dà UNA
     riga per titolo, non le due gemelle: la riga della scheda è la voce della stampa AMICA, e la gemella ostile l'ho
     scritta io nella stessa forma dei `ti_uk50` (la stessa notizia, con la coda che punge). I titoli datati hanno
@@ -12097,7 +12412,32 @@ const TITOLI=[
  {id:'ti_de60_emergenza', era:'de1960', pri:1, cond:()=>S.year===1968&&S.month>=6&&S.month<=7, amico:'Le leggi d\'emergenza', ostile:'Le leggi d\'emergenza: sessantamila su Bonn'},
  {id:'ti_de60_praga', era:'de1960', pri:1, cond:()=>S.year===1968&&S.month>=8&&S.month<=9, amico:'Praga', ostile:'Praga: i carri nella primavera'},
  {id:'ti_de60_alternanza', era:'de1960', pri:1, cond:()=>S.year===1969&&S.month>=10&&S.month<=11&&S.coalizione.includes('de_spd')&&S.coalizione.includes('de_fdp')&&!S.coalizione.includes('de_cdu'), amico:'Il primo Cancelliere socialdemocratico', ostile:'Il primo Cancelliere socialdemocratico: con i liberali, dopo vent\'anni'},
- {id:'ng_p_ti_petrolio', era:'contemporanea', paesi:['nigeria'], pri:1, amico:'La produzione di petrolio torna a salire', ostile:'Un barile su dieci sparisce: il furto record'},
+ /* L135-3 · i titoli del decennio tedesco '70 (scheda §I-E). Tre condizioni leggono chi governa (SPD e liberali senza la CDU, la
+    forma di ti_de60_alternanza): Varsavia, il Nobel, i due voti; la spia vuole la SPD in coalizione; Mogadiscio esce se non c'è
+    stato lo scambio, la domenica a piedi se non si è scelto altro. I titoli non portano `tono` (come i ti_de60_*): la gravità sta
+    nel testo. Cifre verificate: Radevormwald 46 (Dahlerau, 27 maggio 1971); il milione di disoccupati «per la prima volta dal 1955». */
+ {id:'ti_de70_varsavia', era:'de1970', pri:1, cond:()=>((S.year===1970&&S.month===12)||(S.year===1971&&S.month===1))&&S.coalizione.includes('de_spd')&&S.coalizione.includes('de_fdp')&&!S.coalizione.includes('de_cdu'), amico:'In ginocchio a Varsavia', ostile:'In ginocchio a Varsavia: metà del paese non approva'},
+ {id:'ti_de70_radevormwald', era:'de1970', pri:1, cond:()=>S.year===1971&&S.month>=5&&S.month<=6, amico:'Lo scontro di Radevormwald', ostile:'Radevormwald: una classe in gita, quarantasei morti'},
+ {id:'ti_de70_nobel', era:'de1970', pri:1, cond:()=>S.year===1971&&S.month>=10&&S.month<=11&&S.coalizione.includes('de_spd')&&S.coalizione.includes('de_fdp')&&!S.coalizione.includes('de_cdu'), amico:'Il Nobel per la pace a Bonn', ostile:'Il Nobel per la pace: l\'opposizione non applaude'},
+ {id:'ti_de70_radicali', era:'de1970', pri:1, cond:()=>S.year===1972&&S.month>=2&&S.month<=3, amico:'Il decreto sui radicali', ostile:'Il decreto sui radicali: un esame di fedeltà per i maestri'},
+ {id:'ti_de70_duevoti', era:'de1970', pri:1, cond:()=>S.year===1972&&S.month>=4&&S.month<=5&&S.coalizione.includes('de_spd')&&S.coalizione.includes('de_fdp')&&!S.coalizione.includes('de_cdu'), amico:'Due voti', ostile:'Due voti: la sfiducia fallisce'},
+ {id:'ti_de70_monaco', era:'de1970', pri:1, cond:()=>S.year===1972&&S.month>=9&&S.month<=10, amico:'Monaco', ostile:'Monaco: i Giochi continuano'},
+ {id:'ti_de70_voto72', era:'de1970', pri:1, cond:()=>S.year===1972&&S.month>=11&&S.seggi&&S.seggi.de_spd>S.seggi.de_cdu, amico:'I socialdemocratici primo partito', ostile:'Per la prima volta i socialdemocratici davanti a tutti'},
+ {id:'ti_de70_fondamentale', era:'de1970', pri:1, cond:()=>(S.year===1972&&S.month===12)||(S.year===1973&&S.month===1), amico:'Le due Germanie si riconoscono', ostile:'Le due Germanie si riconoscono: la Baviera ricorre alla Corte'},
+ {id:'ti_de70_onu', era:'de1970', pri:1, cond:()=>S.year===1973&&S.month>=9&&S.month<=10, amico:'Due Germanie all\'ONU', ostile:'Due bandiere all\'ONU, un popolo solo'},
+ {id:'ti_de70_domenica', era:'de1970', pri:1, cond:()=>S.year===1973&&S.month>=11&&S.month<=12&&(S.dePetrolio73==null||S.dePetrolio73==='domeniche'), amico:'La domenica a piedi', ostile:'La domenica a piedi: autostrade vuote'},
+ {id:'ti_de70_stop', era:'de1970', pri:1, cond:()=>(S.year===1973&&S.month>=11)||(S.year===1974&&S.month===1), amico:'Stop al reclutamento', ostile:'Stop agli ospiti: e arrivano le famiglie'},
+ {id:'ti_de70_spia', era:'de1970', pri:1, cond:()=>S.year===1974&&S.month>=5&&S.month<=6&&S.coalizione.includes('de_spd'), amico:'La spia', ostile:'La spia nell\'ufficio del Cancelliere'},
+ {id:'ti_de70_mondiale', era:'de1970', pri:1, cond:()=>S.year===1974&&S.month===7, amico:'Campioni del mondo', ostile:'Campioni del mondo, in casa'},
+ {id:'ti_de70_milione', era:'de1970', pri:1, cond:()=>S.year===1975&&S.month>=1&&S.month<=3, amico:'Un milione di disoccupati', ostile:'Un milione di disoccupati: non succedeva da vent\'anni'},
+ {id:'ti_de70_corte218', era:'de1970', pri:1, cond:()=>S.year===1975&&S.month>=2&&S.month<=3, amico:'La Corte ferma la riforma sull\'aborto', ostile:'Aborto: la Corte annulla la legge dei tre mesi'},
+ {id:'ti_de70_cogestione', era:'de1970', pri:1, cond:()=>S.year===1976&&S.month>=3&&S.month<=5, amico:'I lavoratori nei consigli', ostile:'Cogestione: le imprese ricorrono alla Corte'},
+ {id:'ti_de70_mogadiscio', era:'de1970', pri:1, cond:()=>S.year===1977&&S.month>=10&&S.month<=11&&S.deAutunno77!=='scambio', amico:'Mogadiscio', ostile:'Mogadiscio: gli ostaggi liberi, tre morti in cella'},
+ {id:'ti_de70_prescrizione', era:'de1970', pri:1, cond:()=>S.year===1979&&S.month>=7&&S.month<=8, amico:'Nessuna prescrizione per l\'omicidio', ostile:'L\'omicidio non si prescrive più: il Bundestag chiude la questione'},
+ {id:'ti_de70_binario', era:'de1970', pri:1, cond:()=>(S.year===1979&&S.month===12)||(S.year===1980&&S.month===1), amico:'Il doppio binario', ostile:'Il doppio binario: missili, se Mosca non tratta'},
+ {id:'ti_de70_verdi', era:'de1970', pri:1, cond:()=>S.year===1980&&S.month>=1&&S.month<=2, amico:'Nascono i Verdi', ostile:'Nascono i Verdi: girasoli a Karlsruhe'},
+ {id:'ti_de70_oktoberfest', era:'de1970', pri:1, cond:()=>S.year===1980&&S.month>=9&&S.month<=10, amico:'La bomba all\'Oktoberfest', ostile:'La bomba all\'Oktoberfest: tredici morti'},
+ {id:'ng_p_ti_petrolio', era:'contemporanea', paesi:['nigeria'], amico:'La produzione di petrolio torna a salire', ostile:'Un barile su dieci sparisce: il furto record'},
 ];
 
 /* TITOLI LOCALI (rifinitura livello locale): a LIVELLO 1 la prima pagina parla LOCALE — il consiglio, la giunta,
@@ -13744,6 +14084,13 @@ const SNODI_STORICI = {
   grandeCoal66: { storico:['tasse'], conforme:'sulla recessione del 1966', diverge:{ 'tagli':'Nel 1966 ha tagliato la spesa come chiedevano i liberali.', 'investimenti':'Nel 1966 ha risposto alla recessione con un piano di investimenti.' } },
   emergenza68:  { storico:['votata'], conforme:'sulle leggi d’emergenza del 1968', diverge:{ 'ammorbidita':'Nel 1968 ha fatto votare le leggi d’emergenza con più garanzie.', 'rinviata':'Nel 1968 ha rinviato le leggi d’emergenza.' } },
   emergenza68Opp:{ storico:['contro'], conforme:'sulle leggi d’emergenza del 1968, dall’opposizione', diverge:{ 'piazza':'Nel 1968 ha manifestato in piazza con gli studenti.', 'favore':'Nel 1968 ha votato le leggi d’emergenza dall’opposizione.' } },
+  /* L135-3 · i quattro snodi del decennio tedesco '70 e le due versioni dall'aula (frasi di Code). */
+  deTrattati72:    { storico:['comune'], conforme:'sui trattati con l’Est del 1972', diverge:{ 'maggioranza':'Nel 1972 ha fatto ratificare i trattati con l’Est a maggioranza, contro l’opposizione.', 'rinvio':'Nel 1972 ha rinviato i trattati con l’Est per rinegoziarli.' } },
+  deTrattati72Opp: { storico:['astensione'], conforme:'sui trattati con l’Est del 1972, dall’opposizione', diverge:{ 'contro':'Nel 1972 ha votato contro i trattati con l’Est.', 'favore':'Nel 1972 ha votato i trattati con l’Est dall’opposizione.' } },
+  dePetrolio73:    { storico:['domeniche'], conforme:'sulla crisi del petrolio del 1973', diverge:{ 'prezzi':'Nella crisi del petrolio del 1973 ha lasciato decidere i prezzi.', 'nucleare':'Nella crisi del petrolio del 1973 ha accelerato le centrali nucleari.' } },
+  deSpia74:        { storico:['responsabilita'], conforme:'sulla spia del 1974', diverge:{ 'servizi':'Nel 1974 ha fatto cadere il capo dei servizi e il ministro dell’interno per la spia nel suo ufficio.', 'minimizza':'Nel 1974 ha minimizzato la spia nel suo ufficio.' } },
+  deAutunno77:     { storico:['fermezza'], conforme:'sull’autunno del 1977', diverge:{ 'scambio':'Nell’autunno del 1977 ha scambiato gli ostaggi con i capi del gruppo armato.', 'tempo':'Nell’autunno del 1977 ha trattato per guadagnare tempo.' } },
+  deAutunno77Opp:  { storico:['crisi'], conforme:'sull’autunno del 1977, dall’opposizione', diverge:{ 'trattare':'Nell’autunno del 1977 ha chiesto di trattare coi rapitori.', 'attacco':'Nell’autunno del 1977 è rimasto fuori dal gabinetto di crisi.' } },
 };
 
 /* ==============================================================================================================
@@ -15752,6 +16099,136 @@ const EMERGENZA68_OPP_EV = {
     { l:'A favore: i diritti tornano al paese', e:'Il paese riprende i suoi poteri · la tua base non capisce, il ceto medio sì',
       f:function(){ S.emergenza68Opp='favore'; baseDe60(-3); gdDe60('cetomedio',2);
         S.log.unshift({t:T('La Costituzione'),x:T('Ha votato a favore delle leggi d\'emergenza dall\'opposizione.')}); } },
+  ],
+};
+
+/* ==============================================================================================================
+   L135-3 · IL DECENNIO TEDESCO '70 — I QUATTRO SNODI E LE DUE AULE (scheda PRESET-GERMANIA-1970 §I-A, testi di Cowork approvati).
+   Valute del livello 3 (Cancelliere, parlamentare). Flag nuovi cercati in tutto S e in SNODI_STORICI prima di usarli (L99-2):
+   deTrattati72, deTrattati72Opp, dePetrolio73, deSpia74, deAutunno77, deAutunno77Opp — zero occorrenze al 28/9 (⚠ S.petrolio73
+   ESISTE ed è francese: per questo il prefisso `de`).
+   ⚑ CHI RICEVE CHE COSA (gate in game.js): S1 maggio 1972, S2 NOVEMBRE 1973 (ottobre è di `pm_petrolio`, l'unico fatto-mondo della
+   finestra 1970-1981), S3 maggio 1974, S4 ottobre 1977 — finestre di tre mesi, al governo. Dall'aula TRATTATI72_OPP_EV e
+   AUTUNNO77_OPP_EV a chi è all'opposizione. ⚑ S3 HA UN LATO (L101-2): la spia era nell'ufficio del Cancelliere socialdemocratico, e
+   la seconda scelta dice «i liberali non gradiscono: il ministro era loro» — la condizione sta in `spia74Lato()` (game.js, fuori
+   dalla carta): la SPD al governo con la FDP in coalizione.
+   ⚑ LE VERIFICHE (L135-3 §3): in S2 è tolto «e il prezzo del greggio è quadruplicato» — nel novembre 1973 il prezzo ufficiale era
+   salito del 70% (16 ottobre), il quadruplo arriva il 1° gennaio 1974.
+   ============================================================================================================== */
+/* Il moltiplicatore dei gruppi è di questa porta. ⚑ LA SWEEP (L135-3, 28/9, banco di L135-1, ampia, 20 semi, 144 mesi, gruppo peggiore,
+   .claude/misura-de1970-contenuto.js sweep): SPD al governo — fondo ×0 33,0 (sd 4,6) e già 1 rivolta su 20 · ×3 0,61 sd, 3 rivolte ·
+   ×4 1,40 sd, 5 · ×5 1,17 sd, 5 · ×6 2,10 sd, 9 · ×7 3,20 sd, 12. FDP al governo — ×0 30,5 (sd 3,5), 1 rivolta · ×3 0,08 sd, 5 · ×5 0,63 sd,
+   2 · ×6 1,89 sd, 7 · ×7 3,50 sd, 10. La CDU dall'opposizione non si muove con nessun valore (finisce al congresso nel 1972).
+   ⚠ NESSUN VALORE soddisfa la regola «il più alto dentro 1,5-4 sd con zero crisi»: già la porta senza contenuto ha una rivolta su 20
+   (giovani e cattolici, 1977-82), e la banda si raggiunge solo a ×6 con sette-nove rivolte. Tenuto ×5 (il valore di de1960, 1,17 e
+   0,63 sd, 5 e 2 rivolte su 20) e riportato: la scelta non è tarata qui. */
+let DE70_GRUPPI = 5;   // let e non const: la sweep lo varia sul banco
+function gdDe70(g, n){ gd(g, Math.round(n*DE70_GRUPPI)); }
+function fidDe70(n){ fidFr60(n); }   // la fiducia non ha moltiplicatore: la stessa leva del '50 e del '60 tedeschi
+function baseDe70(n){
+  var P=(PAESE && PAESE.partiti) ? PAESE.partiti.filter(function(x){ return x.id===S.partito; })[0] : null;
+  if(!P || !P.base) return;
+  Object.keys(P.base).forEach(function(g){ gd(g, Math.round(n*P.base[g]*DE70_GRUPPI)); });
+}
+const TRATTATI72_EV = {
+  id:'snodo_trattati72', snodo:true, era:'de1970', kick:'L\'Est', tono:'grave',
+  t:'I trattati con l\'Est',
+  text:'I trattati con Mosca e con Varsavia aspettano la ratifica: riconoscono i confini usciti dalla guerra, compresi quelli a est dell\'Oder. Per milioni di profughi vuol dire rinunciare per sempre alla casa dei nonni; per il governo vuol dire poter finalmente parlare con l\'Est. La maggioranza in aula si conta sulle dita.',
+  ch:[
+    { l:'Una risoluzione comune, e l\'opposizione si astiene', e:'La storia · i trattati passano senza voti contrari decisivi · i profughi si sentono traditi lo stesso',
+      f:function(){ S.deTrattati72='comune'; repd(4); gdDe70('giovani',2); gdDe70('pensionati',-2); stampad(2);
+        S.log.unshift({t:T('L\'Est'),x:T('Ha fatto ratificare i trattati con l\'Est con una risoluzione comune.')}); } },
+    { l:'A maggioranza, contro l\'opposizione', e:'I trattati passano per pochi voti · il paese resta diviso in due come l\'aula',
+      f:function(){ S.deTrattati72='maggioranza'; repd(3); baseDe70(2); gdDe70('pensionati',-4); gdDe70('cetomedio',-2);
+        S.log.unshift({t:T('L\'Est'),x:T('Ha fatto ratificare i trattati con l\'Est a maggioranza.')}); } },
+    { l:'Rinviare e rinegoziare', e:'Mosca e Varsavia aspettano, poi smettono di aspettare · gli alleati occidentali chiedono che cosa vuoi',
+      f:function(){ S.deTrattati72='rinvio'; repd(-5); gdDe70('pensionati',2); gdDe70('giovani',-3); baseDe70(-2);
+        S.log.unshift({t:T('L\'Est'),x:T('Ha rinviato la ratifica dei trattati con l\'Est.')}); } },
+  ],
+};
+const PETROLIO73DE_EV = {
+  id:'snodo_petrolio73de', snodo:true, era:'de1970', kick:'L\'energia', tono:'grave',
+  t:'Il petrolio',
+  text:'Da un mese i paesi arabi chiudono i rubinetti. Il paese brucia petrolio per le fabbriche, le case e le automobili, e le scorte bastano per poche settimane. I ministri vogliono una risposta prima dell\'inverno.',
+  ch:[
+    { l:'Quattro domeniche senza automobili e un limite di velocità', e:'La storia · le autostrade vuote la domenica, i bambini in bicicletta sulle corsie · il segnale arriva a tutti',
+      f:function(){ S.dePetrolio73='domeniche'; fidDe70(1); repd(1); gdDe70('cetomedio',-1); gdDe70('imprenditori',-1);
+        S.log.unshift({t:T('L\'energia'),x:T('Nella crisi del petrolio ha fermato le automobili la domenica.')}); } },
+    { l:'Lasciar salire i prezzi: il mercato razionerà da sé', e:'Nessun divieto · la benzina e il riscaldamento costano il doppio, e chi guadagna meno se ne accorge per primo',
+      f:function(){ S.dePetrolio73='prezzi'; fidDe70(2); gdDe70('lavoratori',-3); gdDe70('pensionati',-3); gdDe70('imprenditori',1);
+        S.log.unshift({t:T('L\'energia'),x:T('Nella crisi del petrolio ha lasciato decidere i prezzi.')}); } },
+    { l:'Accelerare le centrali nucleari', e:'Un programma per non dipendere più dal petrolio · e un cantiere in ogni regione che qualcuno non vorrà', costo:{debito:1.5},
+      f:function(){ S.dePetrolio73='nucleare'; S.ind.debt+=1.5; gdDe70('imprenditori',3); gdDe70('lavoratori',1); gdDe70('giovani',-3); fidDe70(-1);
+        S.log.unshift({t:T('L\'energia'),x:T('Nella crisi del petrolio ha accelerato le centrali nucleari.')}); } },
+  ],
+};
+const SPIA74_EV = {
+  id:'snodo_spia74', snodo:true, era:'de1970', kick:'Il governo', tono:'grave',
+  t:'La spia',
+  text:'Uno dei tuoi collaboratori più vicini, l\'uomo che per due anni ha letto i tuoi documenti e viaggiato con te, era un ufficiale dei servizi dell\'Est. I servizi lo sospettavano da un anno e ti avevano chiesto di lasciarlo al suo posto per coglierlo sul fatto. Ora è arrestato, e il paese vuole sapere chi sapeva.',
+  ch:[
+    { l:'Ti assumi tutta la responsabilità, davanti al paese', e:'La storia chiudeva qui una carriera · tu resti, ma il prezzo lo paghi nel partito e fuori',
+      f:function(){ S.deSpia74='responsabilita'; repd(3); stampad(3); baseDe70(-4);
+        S.log.unshift({t:T('Il governo'),x:T('Dopo la spia nel suo ufficio si è assunto tutta la responsabilità.')}); } },
+    { l:'Fai cadere il capo dei servizi e il ministro dell\'interno', e:'Due teste al posto della tua · i liberali non gradiscono: il ministro era loro',
+      f:function(){ S.deSpia74='servizi'; stampad(-2); repd(-1); gdDe70('cetomedio',-2); baseDe70(-1);
+        S.log.unshift({t:T('Il governo'),x:T('Dopo la spia ha fatto cadere il capo dei servizi e il ministro dell\'interno.')}); } },
+    { l:'Minimizzi: un impiegato, niente di più', e:'Per una settimana regge · poi i giornali pubblicano che cosa leggeva',
+      f:function(){ S.deSpia74='minimizza'; stampad(-6); repd(-3); gdDe70('cetomedio',-2); gdDe70('pensionati',-1);
+        S.log.unshift({t:T('Il governo'),x:T('Ha minimizzato la spia nel suo ufficio.')}); } },
+  ],
+};
+const AUTUNNO77_EV = {
+  id:'snodo_autunno77', snodo:true, era:'de1970', kick:'L\'ordine', tono:'grave',
+  t:'L\'autunno tedesco',
+  text:'Da sei settimane il presidente degli industriali è prigioniero di un gruppo armato, e ora un commando alleato ha dirottato un aereo di linea con novanta persone a bordo. Chiedono la liberazione dei loro capi, detenuti in un carcere del paese. L\'aereo è fermo su una pista africana; le teste di cuoio della polizia di frontiera sono pronte a partire.',
+  ch:[
+    { l:'Nessuna trattativa: l\'assalto all\'aereo', e:'La storia · gli ostaggi dell\'aereo tornano a casa · la stessa notte tre detenuti muoiono in cella, e il presidente degli industriali viene ucciso',
+      f:function(){ S.deAutunno77='fermezza'; repd(3); gdDe70('pensionati',3); gdDe70('cetomedio',2); gdDe70('giovani',-3);
+        S.log.unshift({t:T('L\'ordine'),x:T('Nell\'autunno del 1977 non ha trattato, e ha ordinato l\'assalto all\'aereo.')}); } },
+    { l:'Lo scambio dei prigionieri', e:'Gli ostaggi sono liberi · i capi del gruppo armato anche, e il paese sa che la prossima volta funzionerà ancora',
+      f:function(){ S.deAutunno77='scambio'; repd(-6); gdDe70('pensionati',-4); gdDe70('cetomedio',-3); stampad(-3);
+        S.log.unshift({t:T('L\'ordine'),x:T('Nell\'autunno del 1977 ha scambiato gli ostaggi con i prigionieri.')}); } },
+    { l:'Trattare per guadagnare tempo', e:'Giorni di telefonate e di ultimatum · alla fine bisogna decidere lo stesso',
+      f:function(){ S.deAutunno77='tempo'; repd(-1); stampad(-1); gdDe70('cetomedio',-1);
+        S.log.unshift({t:T('L\'ordine'),x:T('Nell\'autunno del 1977 ha trattato per guadagnare tempo.')}); } },
+  ],
+};
+/* S1 dall'aula (scheda: astenersi, storico · votare contro · votare a favore). Testo della scheda; etichette, righe-effetto,
+   effetti e registro di Code, sul modello delle aule del '60 (base ±3, pensionati e giovani in senso contrario, ±2-3). Nessuna
+   valuta del governo (repd, stampad, fiducia): dall'opposizione sarebbero no-op silenziosi (L12-2). */
+const TRATTATI72_OPP_EV = {
+  id:'snodo_trattati72_opp', snodo:true, era:'de1970', kick:'L\'Est', tono:'grave',
+  t:'I trattati con l\'Est, dall\'aula',
+  text:'I trattati con Mosca e Varsavia arrivano al voto, e la maggioranza si conta sulle dita. L\'opposizione può astenersi e lasciarli passare, votare contro, o votare a favore e dividersi.',
+  ch:[
+    { l:'Astenersi, con una risoluzione comune', e:'La storia · i trattati passano · i profughi del tuo elettorato non te lo perdonano',
+      f:function(){ S.deTrattati72Opp='astensione'; baseDe70(-2); gdDe70('pensionati',-2); gdDe70('giovani',2);
+        S.log.unshift({t:T('L\'Est'),x:T('Dall\'opposizione si è astenuto sui trattati con l\'Est.')}); } },
+    { l:'Votare contro', e:'La tua base con te · i giovani vedono un partito fermo al passato',
+      f:function(){ S.deTrattati72Opp='contro'; baseDe70(3); gdDe70('pensionati',2); gdDe70('giovani',-3);
+        S.log.unshift({t:T('L\'Est'),x:T('Ha votato contro i trattati con l\'Est.')}); } },
+    { l:'Votare a favore, e dividersi', e:'Il paese apprezza · il partito si spacca in aula',
+      f:function(){ S.deTrattati72Opp='favore'; baseDe70(-3); gdDe70('giovani',3); gdDe70('pensionati',-2);
+        S.log.unshift({t:T('L\'Est'),x:T('Dall\'opposizione ha votato a favore dei trattati con l\'Est.')}); } },
+  ],
+};
+/* S4 dall'aula (scheda: il gabinetto di crisi con l'opposizione dentro, storico · chiedere di trattare · l'attacco alla gestione);
+   effetti come S1 dall'aula. */
+const AUTUNNO77_OPP_EV = {
+  id:'snodo_autunno77_opp', snodo:true, era:'de1970', kick:'L\'ordine', tono:'grave',
+  t:'L\'autunno tedesco, dall\'aula',
+  text:'Il governo ha chiamato i capi dell\'opposizione nel gabinetto di crisi: si decide insieme, e insieme si porta la responsabilità. Si può entrare, chiedere di trattare, o restarne fuori e giudicare dopo.',
+  ch:[
+    { l:'Entrare nel gabinetto di crisi', e:'La storia · una decisione sola, e la porti anche tu · la tua base ti vuole più duro',
+      f:function(){ S.deAutunno77Opp='crisi'; baseDe70(-1); gdDe70('pensionati',2); gdDe70('cetomedio',1);
+        S.log.unshift({t:T('L\'ordine'),x:T('Nell\'autunno del 1977 è entrato nel gabinetto di crisi col governo.')}); } },
+    { l:'Chiedere di trattare', e:'Qualche famiglia ti ringrazia · il paese ti trova debole',
+      f:function(){ S.deAutunno77Opp='trattare'; baseDe70(-3); gdDe70('pensionati',-2); gdDe70('giovani',2);
+        S.log.unshift({t:T('L\'ordine'),x:T('Nell\'autunno del 1977 ha chiesto di trattare coi rapitori.')}); } },
+    { l:'Restarne fuori, e giudicare dopo', e:'Le mani libere · e il sospetto di aspettare che il governo sbagli',
+      f:function(){ S.deAutunno77Opp='attacco'; baseDe70(2); gdDe70('cetomedio',-2);
+        S.log.unshift({t:T('L\'ordine'),x:T('Nell\'autunno del 1977 è rimasto fuori dal gabinetto di crisi.')}); } },
   ],
 };
 /* L110-2 · I TERRITORI E LA MAPPA DI de1960: quelli di de1950 più la Saar in coda (è entrata alla tappa del 1957/1), con lo stesso

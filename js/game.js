@@ -389,6 +389,7 @@ function initStatoBase(){
   S.aprile02=null; S.aprile02Opp=null; S.tce05=null; S.banlieue05=null; S.crisi08fr=null; S.crisi08frOpp=null;   // L105-4: gli snodi del decennio francese 2000 (⚠ S.crisi08 è inglese)
   S.notaStalin52=null; S.riarmo55=null; S.riarmo55Opp=null; S.pensioni57=null; S.atomica58=null; S.atomica58Opp=null; S.riparazioni52=null;   // L109-2: il decennio tedesco '50
   S.muro61=null; S.muro61Opp=null; S.spiegel62=null; S.grandeCoal66=null; S.emergenza68=null; S.emergenza68Opp=null;   // L111-2: il decennio tedesco '60
+  S.deTrattati72=null; S.deTrattati72Opp=null; S.dePetrolio73=null; S.deSpia74=null; S.deAutunno77=null; S.deAutunno77Opp=null;   // L135-3: il decennio tedesco '70 (⚠ S.petrolio73 è francese)
   S.scioglimento97=null;   // L103-1: lo scioglimento del '97 (null = storico; 'no' = «aspetta», tappa 1998/3). Lo scrive S4 in L103-2
   S.coabitazione=false;   // L100-2: il Presidente con l'Assemblea degli altri (derivato dai seggi, dato puro, round-trip)
   S.governiCaduti=0;                    // L80-5: quante volte il governo e caduto senza che si andasse a votare
@@ -494,6 +495,13 @@ function startOpposizione(){
   S.seggi=(PAESE.coalizione||PAESE.comeSiVince==='parlamentare')?calcSeggi():null;   // serve a entraOpposizione e alla scheda Partiti
   const w=vincitore();                   // partito più forte ≠ tuo, dalle forze iniziali
   entraOpposizione(w);                   // governo all'avversario col suo profilo; tu sfidante (visibilità/credibilità standard)
+  /* L133-3 (28/9) · CHI PARTE ALL'OPPOSIZIONE VOTA QUANDO VOTA LA PORTA. entraOpposizione azzera l'orologio del mandato
+     (S.turnInMandate), che initStatoBase aveva messo a `turnMandato` dello scenario: così lo sfidante di una porta votava
+     a un mandato pieno dall'avvio (la CDU di de1970 nel 1975 invece che nel 1972, e al governo 20 volte su 20). Qui, SOLO
+     all'avvio, l'orologio riprende quello della porta; a partita in corso l'uscita dal governo (goOpposizione) apre una
+     legislatura nuova come prima. Senza `turnMandato` (il presente) non cambia niente. */
+  var _SCo=(typeof SCENARI!=='undefined' && S.scenario) ? SCENARI[S.scenario] : null;
+  if(_SCo && _SCo.turnMandato!=null) S.turnInMandate=_SCo.turnMandato;
   initTerritori(); initPotereLocale();   // territori per lean + potere locale del TUO blocco d'opposizione (bloccoIds = opp)
   S.mandate=0;                           // non hai ancora vinto un mandato: la prima vittoria sarà "Mandato 1"
   S.log=[{t:T('All\'opposizione'), x:T('Parti da sfidante: al governo c\'è %W. Costruisci consenso e riprenditi il paese alle prossime elezioni.').replace('%W',w.nome)}];
@@ -3435,6 +3443,16 @@ function snodoSpiegel62Dovuta(){    return typeof S!=='undefined' && S && S.era=
 function snodoRecessione66Dovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_DE && S.livello===3 && !S.opposizione && S.grandeCoal66==null && ((S.year===1966 && S.month>=11) || (S.year===1967 && S.month===1)) && recessione66Lato(); }
 function snodoEmergenza68Dovuta(){  return typeof S!=='undefined' && S && S.era===LINEA_DE && S.livello===3 && !S.opposizione && S.emergenza68==null && S.year===1968 && S.month>=6 && S.month<=8; }
 function snodoEmergenza68OppDovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_DE && S.livello===3 && S.opposizione && S.emergenza68Opp==null && S.emergenza68==null && S.year===1968 && S.month>=6 && S.month<=8; }
+/* L135-3 · il decennio tedesco '70. S1 maggio 1972, S2 NOVEMBRE 1973 (ottobre è di pm_petrolio), S3 maggio 1974, S4 ottobre 1977;
+   finestre di tre mesi. S3 HA UN LATO (L101-2): la SPD al governo con i liberali (la spia era nell'ufficio del Cancelliere
+   socialdemocratico, e il ministro dell'interno era liberale). */
+function spia74Lato(){ return Array.isArray(S.coalizione) && S.coalizione.includes('de_fdp') && S.partito==='de_spd'; }
+function snodoTrattati72Dovuta(){    return typeof S!=='undefined' && S && S.era===LINEA_DE && S.livello===3 && !S.opposizione && S.deTrattati72==null && S.year===1972 && S.month>=5 && S.month<=7; }
+function snodoTrattati72OppDovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_DE && S.livello===3 && S.opposizione && S.deTrattati72Opp==null && S.deTrattati72==null && S.year===1972 && S.month>=5 && S.month<=7; }
+function snodoPetrolio73deDovuta(){  return typeof S!=='undefined' && S && S.era===LINEA_DE && S.livello===3 && !S.opposizione && S.dePetrolio73==null && ((S.year===1973 && S.month>=11) || (S.year===1974 && S.month===1)); }
+function snodoSpia74Dovuta(){        return typeof S!=='undefined' && S && S.era===LINEA_DE && S.livello===3 && !S.opposizione && S.deSpia74==null && S.year===1974 && S.month>=5 && S.month<=7 && spia74Lato(); }
+function snodoAutunno77Dovuta(){     return typeof S!=='undefined' && S && S.era===LINEA_DE && S.livello===3 && !S.opposizione && S.deAutunno77==null && S.year===1977 && S.month>=10 && S.month<=12; }
+function snodoAutunno77OppDovuta(){  return typeof S!=='undefined' && S && S.era===LINEA_DE && S.livello===3 && S.opposizione && S.deAutunno77Opp==null && S.deAutunno77==null && S.year===1977 && S.month>=10 && S.month<=12; }
 /* L111-2 · il titolo «La prima recessione: i liberali escono» — vero se i liberali sono usciti nel 1966: S3 «tasse», o la FDP rotta e
    fuori dal governo senza che sia stato lo Spiegel (approssimazione dichiarata: una rottura spontanea del 1963-66 conta come «del 1966»). */
 function liberaliUsciti66(){
@@ -4068,7 +4086,9 @@ function generaTitolo(){
      MASSIMO 4 titoli anche con un pool grande (il primo-fresco in ordine di lista cicla su sé stesso). Ora: TIER
      di priorità — pri 1 = EVENTO del mese (inchiesta, legge, manovra, voto: la specificità resta sovrana) ·
      pri 2 = STATO del paese (default) · pri 3 = ordinario (fallback). Vince il tier più alto con candidati
-     freschi; DENTRO il tier si pesca col sacchetto (rotazione piena). Finestra-recenti 3→6 (il pool è cresciuto). */
+     freschi; DENTRO il tier si pesca col sacchetto (rotazione piena). Finestra-recenti 3→6 (il pool è cresciuto).
+     L133-1 (28/9): lo stato del paese sta a pri 2 — anche i titoli-paese `*_p_ti_*`, che senza cond a pri 1 tenevano il
+     gradino dell'evento sempre pieno (81-86% di ripetizioni). Un pri 1 vuole una cond: è un evento, non uno stato. */
   S.recentTit=S.recentTit||[];
   const freschi=pool.filter(t=>S.recentTit.indexOf(t.id)<0);
   const cand=(freschi.length?freschi:pool);
@@ -4085,8 +4105,15 @@ function generaTitolo(){
        che il commento qui sopra già descriveva — si preferisce QUALUNQUE voce d'epoca, perché `eraVivaT` ha già
        tolto le ere sbagliate. Così ogni decennio futuro entra senza toccare questa riga. */
     const tierE=tier0.filter(t=>t.era && t.era!=='universale');
-    const tier=(tierE.length?tierE:tier0);
+    let tier=(tierE.length?tierE:tier0);
+    /* L135-2 — LE SERIE. Voci con lo stesso `serie` (oggi le cinque «manovra» di gennaio) sono UN titolo con più versioni:
+       nel gradino concorrono con un rappresentante solo (il primo della serie), e se esce la versione la sceglie il
+       sacchetto della serie, 'titoli:<serie>'. Il sacchetto comune 'titoli' non può farlo: tra due gennai passa per
+       undici mesi di altri gradini, e la ripetizione fra due gennai di fila tornerebbe al caso. Senza `serie`, come prima. */
+    const serie={};
+    tier=tier.filter(t=>{ if(!t.serie) return true; const nuova=!serie[t.serie]; (serie[t.serie]=serie[t.serie]||[]).push(t); return nuova; });
     if(tier.length) q=(typeof pescaBag==='function'?pescaBag('titoli',tier):tier[0])||tier[0];
+    if(q && q.serie && serie[q.serie] && typeof pescaBag==='function') q=pescaBag('titoli:'+q.serie, serie[q.serie])||q;
   }
   if(!q) q=cand[0];
   const amica=(S.ind.stampa!=null?S.ind.stampa:50) >= (50 + ((typeof climaTitoli==='function')?climaTitoli():0));   // L28-4: nel clima-'70 la soglia si alza -> a parita' di stampa, titoli piu' cupi
@@ -5202,6 +5229,8 @@ function genAgendaRamo(first){
     if(!first && typeof snodoAtomica58OppDovuta==='function' && snodoAtomica58OppDovuta()){ S.agenda.push({kind:'event', data:ATOMICA58_OPP_EV, resolved:false}); agendaSolo(); return; }   // L109-2: la morte atomica, dall'aula
     if(!first && typeof snodoMuro61OppDovuta==='function' && snodoMuro61OppDovuta()){ S.agenda.push({kind:'event', data:MURO61_OPP_EV, resolved:false}); agendaSolo(); return; }   // L111-2: il Muro, dall'aula
     if(!first && typeof snodoEmergenza68OppDovuta==='function' && snodoEmergenza68OppDovuta()){ S.agenda.push({kind:'event', data:EMERGENZA68_OPP_EV, resolved:false}); agendaSolo(); return; }   // L111-2: le leggi d'emergenza, dall'aula
+    if(!first && typeof snodoTrattati72OppDovuta==='function' && snodoTrattati72OppDovuta()){ S.agenda.push({kind:'event', data:TRATTATI72_OPP_EV, resolved:false}); agendaSolo(); return; }   // L135-3: i trattati, dall'aula
+    if(!first && typeof snodoAutunno77OppDovuta==='function' && snodoAutunno77OppDovuta()){ S.agenda.push({kind:'event', data:AUTUNNO77_OPP_EV, resolved:false}); agendaSolo(); return; }   // L135-3: l'autunno tedesco, dall'aula
     // Cantiere C: la stagione elettorale vale anche da SFIDANTE (bloccoIds = il tuo blocco d'opposizione)
     if(typeof pickCampagnaNazionale==='function'){ const cnbO=pickCampagnaNazionale(); if(cnbO){ S.agenda.push(cnbO); agendaSolo(); return; } }
     const inq=aggiornaInchiesta();   // anche da sfidante l'esposizione conta: bersaglio sempre tu (niente ministri qui)
@@ -5330,6 +5359,10 @@ function genAgendaRamo(first){
   if(!first && typeof snodoSpiegel62Dovuta==='function' && snodoSpiegel62Dovuta()){ S.agenda.push({kind:'event', data:SPIEGEL62_EV, resolved:false}); agendaSolo(); return; }        // L111-2
   if(!first && typeof snodoRecessione66Dovuta==='function' && snodoRecessione66Dovuta()){ S.agenda.push({kind:'event', data:RECESSIONE66_EV, resolved:false}); agendaSolo(); return; }  // L111-2
   if(!first && typeof snodoEmergenza68Dovuta==='function' && snodoEmergenza68Dovuta()){ S.agenda.push({kind:'event', data:EMERGENZA68_EV, resolved:false}); agendaSolo(); return; }  // L111-2
+  if(!first && typeof snodoTrattati72Dovuta==='function' && snodoTrattati72Dovuta()){ S.agenda.push({kind:'event', data:TRATTATI72_EV, resolved:false}); agendaSolo(); return; }    // L135-3
+  if(!first && typeof snodoPetrolio73deDovuta==='function' && snodoPetrolio73deDovuta()){ S.agenda.push({kind:'event', data:PETROLIO73DE_EV, resolved:false}); agendaSolo(); return; }  // L135-3
+  if(!first && typeof snodoSpia74Dovuta==='function' && snodoSpia74Dovuta()){ S.agenda.push({kind:'event', data:SPIA74_EV, resolved:false}); agendaSolo(); return; }              // L135-3
+  if(!first && typeof snodoAutunno77Dovuta==='function' && snodoAutunno77Dovuta()){ S.agenda.push({kind:'event', data:AUTUNNO77_EV, resolved:false}); agendaSolo(); return; }      // L135-3
   if(!first && typeof franco90AncoraDovuta==='function'){ var _f9=franco90AncoraDovuta();   // L103-2: la corsa al franco del '92 e del '93
     if(_f9){ S.francoAncore=S.francoAncore||{}; S.francoAncore[_f9]=true; if(_f9==='a92' && pesoFranco92()>1) S.francoGrave=true;   // col no a Maastricht pesa doppio
       S.agenda.push({kind:'event', data:(_f9==='a92' ? FRANCO92_EV : FRANCO93_EV), resolved:false}); agendaSolo(); return; } }
@@ -7588,6 +7621,7 @@ function applySnap(snap){
   if(S.aprile02===undefined){ S.aprile02=null; S.aprile02Opp=null; S.tce05=null; S.banlieue05=null; S.crisi08fr=null; S.crisi08frOpp=null; }   // L105-4
   if(S.notaStalin52===undefined){ S.notaStalin52=null; S.riarmo55=null; S.riarmo55Opp=null; S.pensioni57=null; S.atomica58=null; S.atomica58Opp=null; S.riparazioni52=null; }   // L109-2
   if(S.muro61===undefined){ S.muro61=null; S.muro61Opp=null; S.spiegel62=null; S.grandeCoal66=null; S.emergenza68=null; S.emergenza68Opp=null; }   // L111-2
+  if(S.deTrattati72===undefined){ S.deTrattati72=null; S.deTrattati72Opp=null; S.dePetrolio73=null; S.deSpia74=null; S.deAutunno77=null; S.deAutunno77Opp=null; }   // L135-3
   if(S.scioglimento97===undefined) S.scioglimento97=null;   // L103-1
   if(S.coabitazione===undefined) S.coabitazione=false;   // L100-2
   if(S.governiCaduti===undefined) S.governiCaduti=0;   // L80-5
