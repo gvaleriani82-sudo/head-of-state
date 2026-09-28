@@ -4077,6 +4077,11 @@ function pickPuntoPartito(){
    Generato al confine di mese DOPO genAgenda (può reagire alle carte di oggi, es. lo scandalo).
    Pesca il PRIMO di TITOLI con cond vera (anti-ripetizione), variante amica/ostile dal rapporto stampa.
    Cornice pura: niente effetti, niente tetto. Vive in S.titoloMese (dato puro → si salva). --- */
+var TITOLI_PER_ID=null;   // L138-1b: indice id→titolo, costruito alla prima richiesta (TITOLI non cambia a partita in corso)
+function titoloPerId(id){
+  if(!TITOLI_PER_ID){ TITOLI_PER_ID={}; TITOLI.forEach(t=>{ TITOLI_PER_ID[t.id]=t; }); }
+  return TITOLI_PER_ID[id];
+}
 function generaTitolo(){
   if(typeof TITOLI==='undefined' || !S || S.opposizione) return;
   if(S.livello===1){ generaTitoloLocale(); return; }   // rifinitura locale: a livello 1 la prima pagina parla LOCALE
@@ -4090,7 +4095,14 @@ function generaTitolo(){
      L133-1 (28/9): lo stato del paese sta a pri 2 — anche i titoli-paese `*_p_ti_*`, che senza cond a pri 1 tenevano il
      gradino dell'evento sempre pieno (81-86% di ripetizioni). Un pri 1 vuole una cond: è un evento, non uno stato. */
   S.recentTit=S.recentTit||[];
-  const freschi=pool.filter(t=>S.recentTit.indexOf(t.id)<0);
+  /* L138-1b — UNA SERIE È FRESCA SOLO SE NESSUNA SUA VERSIONE È FRA I RECENTI. La finestra scartava per id, e la serie sceglie
+     il rappresentante DOPO il filtro: uscita una versione, le altre erano ancora «fresche» e la serie tornava il mese dopo.
+     Con la manovra (cond vera un mese l'anno) non si vedeva; con la serie «voto» (periodoSondaggi(), vera per mesi di fila) la
+     famiglia usciva ×4,8 (1264 → 6070, misurato in L138-1). Vale per ogni serie, anche quelle future. L'indice id→titolo si
+     costruisce una volta (TITOLI è fisso): niente TITOLI.find dentro il ciclo. */
+  const recS={};
+  S.recentTit.forEach(id=>{ const x=titoloPerId(id); if(x&&x.serie) recS[x.serie]=1; });
+  const freschi=pool.filter(t=>S.recentTit.indexOf(t.id)<0 && !(t.serie&&recS[t.serie]));
   const cand=(freschi.length?freschi:pool);
   let q=null;
   for(let p=1;p<=3 && !q;p++){
@@ -6943,16 +6955,27 @@ function coabitazioneInVista(){
   var c0=S.coalizione; S.coalizione=COAL.membri.slice();
   try{ return coabitazioneDovuta(); } finally { S.coalizione=c0; }
 }
+/* L140-1 · I BICCHIERI ALLA COALIZIONE. Il gesto che forma un governo di coalizione (la conferma della trattativa: avvio,
+   rielezione, rinnovo) brinda — solo se i partiti sono almeno due (un monocolore non brinda), non in coabitazione (il governo
+   è degli altri) e mai sotto un pilastro-tragedia in agenda. Il tetto è di due effetti per gesto: `bicchieri` prende il posto
+   del SECONDO suono del gesto (all'avvio `soglia`/`fanfara`, al rinnovo `stretta`; alla rielezione il secondo posto era
+   libero). Senza file ripiega sul suono di prima (suonoPreferito). */
+function suonoFormazione(ripiego){
+  const brinda = COAL && COAL.membri && COAL.membri.length>=2 && !coabitazioneInVista()
+    && !(typeof musicaTragedia==='function' && musicaTragedia());
+  return (brinda && typeof suonoPreferito==='function') ? suonoPreferito('bicchieri', ripiego) : ripiego;
+}
 function confirmCoal(){   // solo avvio: chiude e avvia la partita
   if(typeof suona==='function'){ suona('firma');                      // L116-1: il governo nominato
-    suona((S.scenario && S.scenario!=='presente') ? 'soglia' : 'fanfara'); }   // L116-1: il primo mese di una porta è un passaggio d'epoca · L118-1: nel presente l'insediamento (la fanfara, quando arriva il file)
+    suona(suonoFormazione((S.scenario && S.scenario!=='presente') ? 'soglia' : 'fanfara')); }   // L116-1: il primo mese di una porta è un passaggio d'epoca · L118-1: nel presente l'insediamento · L140-1: una coalizione brinda al posto loro
   S.coalizione=COAL.membri.slice(); S.minoranza=seggiCoalizione(S.coalizione,S.seggi)<50; COAL=null;
   if(typeof aggiornaCoabitazione==='function') aggiornaCoabitazione();   // L100-2/L104-2: all'avvio la porta parte in coabitazione se i seggi lo dicono (il presente francese no: nessuna cricca a 50)
   initTenuta(); initPotereLocale();   // ora il blocco (coalizione) è noto: fissa potere locale e aspettativa
   document.getElementById('ov').classList.remove('on'); render(); commitSnap();   // primo confine di mese (coalizione formata)
 }
 function finalizeVoto(win){   // rielezione parlamentare: porta alla schermata esito
-  if(win && typeof suona==='function') suona('firma');               // L116-1: la maggioranza confermata
+  if(win && typeof suona==='function'){ suona('firma');               // L116-1: la maggioranza confermata
+    const b=suonoFormazione(null); if(b) suona(b); }                    // L140-1: il secondo posto era libero — una coalizione brinda
   S.coalizione=COAL.membri.slice(); S.minoranza=false; const total=seggiCoalizione(S.coalizione,S.seggi); COAL=null;
   esitoSeggi(win, total);
 }
@@ -6967,7 +6990,9 @@ function initTenuta(){
 /* Rinnovo (candidato+coalizione, es. Francia): dopo il ballottaggio vinto si RICOSTRUISCE la maggioranza
    parlamentare sui seggi correnti. Qui non si perde: al peggio si riparte in minoranza nel nuovo mandato. */
 function confirmRinnovo(){
-  if(typeof suona==='function'){ suona('stretta'); suona('firma'); }   // L116-1: la maggioranza ricostruita · L118-1: la stretta di mano del nuovo accordo, prima della firma
+  if(typeof suona==='function'){ const b=suonoFormazione('stretta');   // L140-1: una coalizione brinda al posto della stretta
+    if(b==='stretta'){ suona('stretta'); suona('firma'); }             // L116-1: la maggioranza ricostruita · L118-1: la stretta di mano del nuovo accordo, prima della firma
+    else { suona('firma'); suona(b); } }                                 // la firma, poi il brindisi
   S.coalizione=COAL.membri.slice(); COAL=null;
   vinciElezione();   // governando → nextMandate; dall'opposizione → goAppoint → tornaAlGoverno
 }
@@ -7524,7 +7549,7 @@ function gameOver(reason){
      <div class="s"><div class="l">${T('Disoccupazione')}</div><div class="v">${fmt(S.ind.unemp,1)}%</div></div>
      <div class="s"><div class="l">${T('Fiducia mercati')}</div><div class="v">${fmt(S.ind.fiducia,0)}</div></div>
    </div>
-   <button class="btn" onclick="resetAll()">${T('Gioca di nuovo')}</button></div>`;
+   <div class="barra-avanti"><button class="btn" onclick="resetAll()">${T('Gioca di nuovo')}</button></div></div>`;   // L140-2: nella barra in fondo (sticky, figlia diretta della pagina del finale)
   document.getElementById('game').style.display='none';
   document.getElementById('over').style.display='block';
   agganciaVideoTutti();   // L127-1: la clip del finale (visibile solo ora che #over si vede)

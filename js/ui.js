@@ -721,12 +721,65 @@ function proseguiAvvio(){ document.getElementById('crea').style.display='none';
   else avviaRuolo();                                                                        // presente: dritto al ruolo (nessun contesto)
 }
 function avviaRuolo(){
+  const partenza=partenzaDelRuolo();                     // L127-2: letto PRIMA dello start (initStatoBase consuma CREA)
   if(CREA && CREA.livello===0) startAttivista();         // Build A: la gavetta da attivista (nessuna carica, nessun bilancio)
   else if(CREA && CREA.livello===1) startLocale();       // da politico locale: sindaco/governatore di un'area
   else if(CREA && CREA.livello===2) startMinistro();     // da ministro: si salta la nomina del gabinetto (sei TU un ministro)
   else if(CREA && CREA.livello===5) startDiplomatico();  // C2: percorso diplomatico (Ambasciatore → … → Segretario)
   else if(chosenMode==='opposizione') startOpposizione();
-  else goAppoint(); }
+  else goAppoint();
+  apriPartenza(partenza); }
+/* ================================================================================================================
+   L127-2 · LA CLIP DEL PUNTO DI PARTENZA. Decisione di Giacomo (28/9): a OGNI nuova partita (non una volta per dispositivo come
+   l'intro), si salta, non parte alla ripresa di un salvataggio.
+   · QUANDO. All'ingresso in carriera: `avviaRuolo` (dopo «Avanti»/«Salta» della creazione e, nelle porte, dopo il briefing)
+     fa partire la carriera COME PRIMA e poi mette la clip del livello scelto sopra la prima schermata, a tutto schermo, muta.
+     Sotto c'è già la partita: la musica d'epoca parte in quel momento (musica() sceglie dall'anno, la creazione non si vede più),
+     e alla fine della clip — o su «Salta», o con un tocco ovunque, o Esc — il velo se ne va e si è nella partita come oggi.
+   · QUANDO NO. Movimento «ridotto»/«spento» o `reteLeggera()`: niente clip. Un salvataggio caricato non passa da `avviaRuolo`.
+   · IL FILE SI CHIEDE SOLO QUI: il <video> nasce con `src` in questo momento; prima nessun nodo nomina `partenza-*`.
+   · Le altre clip (la carta testimone) si fermano finché c'è il velo e ripartono dopo. Transitorio: niente in S.
+   · La clip: `partenza-<livello>` in VIDEO_PRESENTI (scenes.js, sotto la guardia degli asset); dall'opposizione è il capo.
+   ================================================================================================================ */
+const PARTENZA_NOMI={0:'attivista', 1:'locale', 2:'ministro', 3:'capo', 5:'diplomatico'};
+let PARTENZA_APERTA=false, PARTENZA_FERME=[];
+function partenzaDelRuolo(){
+  const n=PARTENZA_NOMI[(CREA && CREA.livello!=null) ? CREA.livello : 3];
+  const nome=n ? 'partenza-'+n : null;
+  return (nome && typeof VIDEO_PRESENTI!=='undefined' && VIDEO_PRESENTI.indexOf(nome)>=0) ? nome : null;
+}
+function apriPartenza(nome){
+  if(!nome || PARTENZA_APERTA || typeof document==='undefined' || !document.body) return;
+  if(motionReduced() || reteLeggera()) return;
+  PARTENZA_APERTA=true;
+  PARTENZA_FERME=[]; try{ document.querySelectorAll('video').forEach(function(v){ if(!v.paused){ v.pause(); PARTENZA_FERME.push(v); } }); }catch(e){}
+  const el=document.createElement('div');
+  el.id='partenza'; el.setAttribute('role','dialog'); el.setAttribute('aria-label', T('Inizio della carriera'));
+  el.innerHTML='<video id="partenza-video" src="'+VIDEO_DIR+nome+'.mp4" poster="assets/scenes/'+nome+'.webp" muted playsinline preload="auto" disablepictureinpicture></video>'
+    +'<button id="partenza-salta" type="button">'+T('Salta')+'</button>';
+  el.addEventListener('click', chiudiPartenza);            // un tocco ovunque salta (anche su «Salta»)
+  document.body.appendChild(el);
+  const v=document.getElementById('partenza-video');
+  v.muted=true;
+  v.addEventListener('ended', chiudiPartenza, {once:true});
+  v.addEventListener('error', chiudiPartenza, {once:true});   // un file che non arriva non lascia lo schermo nero
+  try{ const p=v.play(); if(p && p.catch) p.catch(function(){}); }catch(e){}
+  document.addEventListener('keydown', partenzaTasto, true);
+  try{ if(typeof musica==='function') musica(); if(typeof ambiente==='function') ambiente(); }catch(e){}   // la musica d'epoca parte ora, sotto la clip
+  void el.offsetWidth; el.classList.add('on');   // la dissolvenza d'entrata col reflow forzato, non con rAF: senza frame (scheda nascosta) il velo resterebbe trasparente
+  setTimeout(function(){ try{ document.getElementById('partenza-salta').focus({preventScroll:true}); }catch(e){} }, 50);
+}
+function partenzaTasto(e){ if(e.key==='Escape'){ e.preventDefault(); chiudiPartenza(); } }
+function chiudiPartenza(){
+  if(!PARTENZA_APERTA) return;
+  PARTENZA_APERTA=false;
+  document.removeEventListener('keydown', partenzaTasto, true);
+  const el=document.getElementById('partenza');
+  if(el){ el.id='partenza-uscente'; const v=el.querySelector('video');
+    try{ if(v){ v.pause(); v.removeAttribute('src'); v.load(); } }catch(e){}   // smette di scaricare
+    el.classList.remove('on'); setTimeout(function(){ try{ el.remove(); }catch(e){} }, 400); }
+  PARTENZA_FERME.forEach(function(v){ try{ if(v.isConnected){ const p=v.play(); if(p && p.catch) p.catch(function(){}); } }catch(e){} }); PARTENZA_FERME=[];
+}
 function confermaCreazione(){ proseguiAvvio(); }                  // CREA resta: initStatoBase la consuma
 function saltaCreazione(){ CREA=null; proseguiAvvio(); }          // neutro: nessun credito, età 52
 /* le età credibili per la carica locale: sindaco di una grande città 35-48 (def 38), presidente di regione
@@ -1160,7 +1213,7 @@ function showPartita(){
     <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px"><button class="mini-btn" onclick="uiExport()">${T('Esporta')}</button><button class="mini-btn" onclick="uiCopy()">${T('Copia')}</button><button class="mini-btn" onclick="uiDownload()">${T('Scarica file')}</button><button class="mini-btn" style="color:var(--brand);border-color:var(--brand)" onclick="uiImportToggle()">${T('Importa…')}</button></div>
     <div id="io-msg" style="font-size:12px;color:var(--mut);margin-top:6px"></div></div>`;
   h+=`<button class="opt" onclick="abbandonaPartita()"><span class="ol" style="color:var(--neg)">${T('Torna al menu iniziale')}</span><span class="oe">${T('Abbandona la partita in corso e torna alla schermata iniziale (nuova partita / cambia paese).')}</span></button>`;
-  h+=`<button class="opt" onclick="hideMenu()"><span class="ol">${T('Chiudi')}</span></button></div>`;
+  h+=`</div><div class="barra-avanti"><button class="opt" onclick="hideMenu()"><span class="ol">${T('Chiudi')}</span></button></div>`;   // L140-2: «Chiudi» nella barra in fondo al modale (figlia diretta del .modal che scorre)
   document.getElementById('menu-modal').innerHTML=h;
   document.getElementById('menu').classList.add('on');
 }
@@ -1233,13 +1286,19 @@ function renderAppoint(){
       const on=APT.sel[m.id]===i;
       h+=`<button class="cand ${on?'on':''}" onclick="pickCand('${m.id}',${i})">
         <span class="cleft">${avatar(c)}<span class="cn">${c.nm}</span></span>
-        <span class="cmeta"><span class="chip" style="background:${PROFCOL[c.profile]}22;color:${PROFCOL[c.profile]}">${gergo(T(PROF[c.profile]),'profilo')}</span>${dotsHTML(c.comp)}</span>
+        <span class="cmeta"><span class="chip" style="background:${PROFCOL[c.profile]}22;color:${PROFCOL[c.profile]}">${T(PROF[c.profile])}</span>${dotsHTML(c.comp)}</span>
       </button>`;
+      /* L140-1: nel candidato il profilo è testo, NON `gergo()` — come nel chip del rimpasto (L138-1): il gergo è un <button>, e un
+         <button> dentro il <button> del candidato è HTML non valido (il parser chiudeva il candidato lì). Il glossario del profilo
+         in questa schermata si perde: si impara dalla scheda Governo e dalle carte. */
     });
     h+=`</div></div>`;
   }
   document.getElementById('aptlist').innerHTML=h;
   document.getElementById('aptbtn').disabled = Object.keys(APT.sel).length<MINISTRIES.length;
+  /* L140-2: quanti ministeri mancano, accanto al bottone nella barra in fondo; a lista completa sparisce */
+  const manca=MINISTRIES.length-Object.keys(APT.sel).length, mn=document.getElementById('apt-mancano');
+  if(mn) mn.textContent = manca>0 ? T('%N da nominare').replace('%N',manca) : '';
 }
 function pickCand(mid,i){APT.sel[mid]=i; renderAppoint();}
 
@@ -2065,7 +2124,10 @@ function renderGov(){
         <h3>${T('Nuovo ministro:')} ${T(MINISTRIES.find(x=>x.id===it.min).nm)}</h3></div>
         <div class="atext">${T('Scegli chi guiderà il dicastero.')}</div>`;
       if(!it.resolved){ h+=`<div class="opts">`+it.cands.map((c,i)=>`<button class="opt" onclick="resolveItem(${idx},${i})">
-        <span class="ol">${c.nm}</span><span class="oe"><span class="chip" style="background:${PROFCOL[c.profile]}22;color:${PROFCOL[c.profile]}">${gergo(T(PROF[c.profile]),'profilo')}</span> · ${T('competenza')} ${c.comp}/3</span></button>`).join('')+`</div>`; }
+        <span class="ol">${c.nm}</span><span class="oe"><span class="chip" style="background:${PROFCOL[c.profile]}22;color:${PROFCOL[c.profile]}">${T(PROF[c.profile])}</span> · ${T('competenza')} ${c.comp}/3</span></button>`).join('')+`</div>`; }
+      /* L138-1: nel chip il profilo è testo, NON `gergo()` — il gergo è un <button>, e un <button> dentro il <button> della scelta
+         è HTML non valido: il parser chiudeva la scelta lì e chip e competenza finivano FUORI dal bottone (la barretta vuota era
+         il chip rimasto dentro, senza testo). E dentro una scelta un tocco deve scegliere, non aprire una definizione. */
       else h+=`<div class="outcome">${it.outcome}</div>${esitiHtml(it)}${tornaTavoloHtml(it)}`;
       h+=`</div>`;
     } else if(it.kind==='proposta'){
@@ -2955,7 +3017,7 @@ function aggiornaTavolo(){
     svg.querySelectorAll('.tv-tocco').forEach(function(el){ const i=+el.getAttribute('data-i'), R=RIQ[i];
       let serve=rMin;
       if(R && Math.min(R[2]-R[0], R[3]-R[1])*k >= 44) serve=0;             // la regione è già un bersaglio grande: niente cerchio
-      el.setAttribute('r', serve>0 ? serve.toFixed(2) : 0);
+      el.setAttribute('r', serve>0 ? (Math.ceil(serve*100)/100).toFixed(2) : 0);   // L138-1: per ECCESSO — toFixed arrotondava al più vicino e il Messico misurava 43,98 px
       /* un'area piccola si tocca SOLO dal suo bersaglio (il disegno sotto è più piccolo di 44 px); una grande dal disegno */
       const vis=svg.querySelector('path.tv-area[data-i="'+i+'"]');
       if(vis){ if(serve>0){ vis.removeAttribute('onclick'); vis.setAttribute('pointer-events','none'); } else { vis.setAttribute('onclick','selArea('+i+')'); vis.removeAttribute('pointer-events'); } }
@@ -3198,7 +3260,7 @@ function aggiornaSegnalini(svg, k, wh){
     R.carte=g.carte; R.idx=g.idx; R.x=g.L.x; R.y=g.L.y;   // L126-1: il punto, per i segni fissi che si scansano
     const el=R.el, n=g.carte.length, s=1/k;
     el.setAttribute('transform', 'translate('+g.L.x.toFixed(2)+' '+g.L.y.toFixed(2)+')');
-    el.querySelector('.tv-seg-s').setAttribute('transform', 'scale('+s.toFixed(4)+')');
+    el.querySelector('.tv-seg-s').setAttribute('transform', 'scale('+(Math.ceil(s*1e4)/1e4).toFixed(4)+')');   // L138-1: per eccesso (al più vicino un segnalino misurava 43,997 px)
     el.classList.toggle('urgente', g.urgente);
     el.classList.toggle('gruppo', n>1);
     el.querySelector('.tv-seg-num text').textContent=n>1 ? String(n) : '';
@@ -3501,7 +3563,7 @@ function aggiornaFissi(svg, k, wh){
     const p=fissoPosto(fissoBase(F), presi, k, lim); presi.push(p);
     const el=R.el;
     el.setAttribute('transform', 'translate('+p[0].toFixed(2)+' '+p[1].toFixed(2)+')');
-    el.querySelector('.tv-seg-s').setAttribute('transform', 'scale('+(1/k).toFixed(4)+')');
+    el.querySelector('.tv-seg-s').setAttribute('transform', 'scale('+(Math.ceil(1e4/k)/1e4).toFixed(4)+')');   // L138-1: per eccesso, come i segnalini di carta
     el.classList.toggle('urgente', F.tipo==='rivolta');
     const num=(F.tipo==='rivolta') ? F.n : (F.tipo==='fronte' && F.n>1) ? F.n : 0;
     el.classList.toggle('con-num', !!num);

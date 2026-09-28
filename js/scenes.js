@@ -120,7 +120,10 @@ const VIDEO_PRESENTI = ['home-hero', 'partito-base', 'vitaprivata-base', 'retro-
   'telefono-anni50', 'telefono-corridoio', 'telefono-oggi',
   'vitaprivata-anni60', 'vitaprivata-anni90', 'vitaprivata-florido',
   /* 28/9 (L127-1b): il ministro che se ne va, sulla carta del rimpasto e nella fine `silurato` */
-  'ministro-cacciato', 'ministro-dimissioni'];
+  'ministro-cacciato', 'ministro-dimissioni',
+  /* 28/9 sera (L127-2): le cinque clip del PUNTO DI PARTENZA — non sono carte: le apre `apriPartenza()` (ui.js) all'ingresso
+     in carriera; il .webp sta in assets/scenes/ come per ogni clip (fa da poster), nessuna carta lo nomina. */
+  'partenza-attivista', 'partenza-locale', 'partenza-ministro', 'partenza-capo', 'partenza-diplomatico'];
 
 /* ===== L124-1 — IL VIDEO INTRODUTTIVO (`assets/video/intro.*`). Non è una scena: sta FUORI da VIDEO_PRESENTI (non ha una
    carta né un .webp in assets/scenes) ma sotto la stessa guardia (`.claude/verifica-asset.js`): i file dichiarati qui devono

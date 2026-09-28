@@ -63,31 +63,31 @@ const AUDIO_MANIFEST = {
   bussare:  { file:'bussare.mp3',  loop:false, gain:0.50 },   // RMS −17,4
   macchina: { file:'macchina.mp3', loop:false, gain:1.24 },   // RMS −29, tetto del picco
   allarme:  { file:'allarme.mp3',  loop:false, gain:5.54 },   // RMS −38,3 ⚠ basso
-  /* ⚑ L118-1 (27/9) · IL TERZO GIRO, venti nomi (PROMPT-AUDIO-ELEVENLABS § «Terzo giro»). Col file, dal 27/9: `pagina`, `martelletto`, `passi` (L130-1); campanella, bicchieri,
-     stretta, porta scartati da Cowork (restano senza file). Gli altri NON ci sono ancora: è una lista-promessa,
+  /* ⚑ L118-1 (27/9) · IL TERZO GIRO, venti nomi (PROMPT-AUDIO-ELEVENLABS § «Terzo giro»). Col file, dal 27/9: `pagina`, `martelletto`, `passi` (L130-1); dal 28/9 (L137-1)
+     campanella, porta, bicchieri, stretta, sussurro, radio, telex (le prime versioni di Lyria erano state scartate da Cowork: questi sono ElevenLabs e due ritagli). Gli altri NON ci sono ancora: è una lista-promessa,
      come la musica di L114-1. Gli agganci sono già al loro posto (nel punto dove si decide, `suonoCarta` per le carte che entrano), e
      finché un file manca il nome è silenzio SENZA consumare un posto del gesto (vedi `suona`). ⚠ Il gain qui è il valore base 0,6:
      quando arriva il file si rifà con la regola di sopra (0,6 × 10^((−19 − RMS)/20), tetto del picco a −1 dBFS) e si aggiunge ad AUDIO_PRESENTI. */
   pagina:      { file:'pagina.mp3',      loop:false, gain:0.26 },  // il cassetto che si apre (al posto di `scheda`) · ARRIVATO il 27/9 08:19 (Gemini, «taglio 1», 0,6 s): RMS −17,7, picco 0 → regola di sopra × 0,5 (6 dB sotto: gesto frequente, come era `scheda`)
   martelletto: { file:'martelletto.mp3', loop:false, gain:1.01 },  // la legge approvata · ARRIVATO il 27/9 (L130-1, ritaglio Lyria di Cowork, 2,2 s): RMS −23,5, picco −1,4 → regola di sopra (a 0,6 rendeva −27,9, 4,5 dB sotto i vicini)
-  campanella:  { file:'campanella.mp3',  loop:false, gain:0.6 },   // si apre una seduta, un dibattito
-  stretta:     { file:'stretta.mp3',     loop:false, gain:0.6 },   // un accordo, una maggioranza ricostruita
-  bicchieri:   { file:'bicchieri.mp3',   loop:false, gain:0.6 },   // un accordo festeggiato
+  campanella:  { file:'campanella.mp3',  loop:false, gain:0.90 },  // si apre una seduta, un dibattito · ARRIVATO il 28/9 (L137-1, ElevenLabs, 3 s): RMS −22,5, picco −2,2 → regola di sopra
+  stretta:     { file:'stretta.mp3',     loop:false, gain:1.06 },  // un accordo, una maggioranza ricostruita · L137-1 (0,9 s): RMS −26,5, picco −1,5 → tetto del picco (la regola dava 1,42)
+  bicchieri:   { file:'bicchieri.mp3',   loop:false, gain:0.94 },  // un accordo festeggiato · L137-1 (1,1 s): RMS −22,9, picco −1,9 → regola di sopra
   passi:       { file:'passi.mp3',       loop:false, gain:0.66 },  // un ministero che si apre, una visita · ARRIVATO il 27/9 (L130-1, 2,9 s): RMS −19,8, picco 0 → regola di sopra, rende −23,4 come `bussare`, che sostituisce
-  porta:       { file:'porta.mp3',       loop:false, gain:0.6 },   // il retroscena (i beat `rb_`)
-  sussurro:    { file:'sussurro.mp3',    loop:false, gain:0.6 },   // fuori verbale, indiscrezioni
-  radio:       { file:'radio.mp3',       loop:false, gain:0.6 },   // l'estero e le crisi internazionali, FINO AL 1989
-  telex:       { file:'telex.mp3',       loop:false, gain:0.6 },   // dispacci e diplomazia, FINO AL 1989
+  porta:       { file:'porta.mp3',       loop:false, gain:1.00 },  // il retroscena (i beat `rb_`) · L137-1 (1,2 s): RMS −23,4, picco −1,5 → regola di sopra
+  sussurro:    { file:'sussurro.mp3',    loop:false, gain:1.08 },  // fuori verbale, indiscrezioni · L137-1 (1,9 s): RMS −26,2, picco −1,7 → tetto del picco (la regola dava 1,37)
+  radio:       { file:'radio.mp3',       loop:false, gain:0.92 },  // l'estero e le crisi internazionali, FINO AL 1989 · L137-1 (ritaglio Lyria, 2,5 s): RMS −22,7, picco −1,4 → regola di sopra
+  telex:       { file:'telex.mp3',       loop:false, gain:0.40 },  // dispacci e diplomazia, FINO AL 1989 · L137-1 (ritaglio Lyria, 2,4 s): RMS −15,4, picco 0 → regola di sopra
   notifica:    { file:'notifica.mp3',    loop:false, gain:0.6 },   // DAL 2000: al posto di `giornale`
   vibrazione:  { file:'vibrazione.mp3',  loop:false, gain:0.6 },   // DAL 2000: al posto di `telefono`
-  borsa:       { file:'borsa.mp3',       loop:false, gain:0.6 },   // mercati, spread
+  borsa:       { file:'borsa.mp3',       loop:false, gain:0.64 },  // mercati, spread · L141-1 (28/9, ritaglio Lyria di Cowork, 3,0 s): RMS −19,6, picco −1,4 → regola di sopra
   sirena:      { file:'sirena.mp3',      loop:false, gain:0.6 },   // ordine pubblico (mai una tragedia)
-  ambulanza:   { file:'ambulanza.mp3',   loop:false, gain:0.6 },   // sanità (mai una tragedia)
+  ambulanza:   { file:'ambulanza.mp3',   loop:false, gain:0.35 },  // sanità (mai una tragedia) · L141-1 (4,0 s): RMS −14,4, picco −1,4 → regola di sopra
   cantiere:    { file:'cantiere.mp3',    loop:false, gain:0.6 },   // infrastrutture, grandi opere
   treno:       { file:'treno.mp3',       loop:false, gain:0.6 },   // trasporti
-  orologio:    { file:'orologio.mp3',    loop:false, gain:0.6 },   // scadenza, ultimatum, la fiducia che si vota
-  fanfara:     { file:'fanfara.mp3',     loop:false, gain:0.6 },   // l'insediamento, la vittoria larga
-  campane:     { file:'campane.mp3',     loop:false, gain:0.6 }    // la festa nazionale
+  orologio:    { file:'orologio.mp3',    loop:false, gain:0.84 },  // scadenza, ultimatum, la fiducia che si vota · L141-1 (3,2 s, quattro colpi): RMS −21,9, picco −0,2 → regola di sopra (il tetto del picco è 0,91)
+  fanfara:     { file:'fanfara.mp3',     loop:false, gain:0.33 },  // l'insediamento, la vittoria larga · L141-1 (4,0 s): RMS −13,9, picco −1,2 → regola di sopra
+  campane:     { file:'campane.mp3',     loop:false, gain:0.41 }   // la festa nazionale · L141-1 (4,0 s): RMS −15,6, picco −1,5 → regola di sopra
 };
 /* ⚠ I FILE CHE ESISTONO DAVVERO in assets/audio/. Il motore carica SOLO questi: un nome del manifesto che non è
    qui non genera nessuna richiesta di rete. Si aggiorna a mano quando un file cambia, e se la lista e la cartella
@@ -97,7 +97,9 @@ const AUDIO_MANIFEST = {
 const AUDIO_PRESENTI = ['tocco.wav','carta.mp3','chip.mp3','mese.mp3','giornale.mp3','mappa.mp3','urne.mp3',
                         'esito.mp3','esito_no.mp3','snodo.mp3','soglia.mp3','finale.mp3','telefono.mp3','aula.mp3',   // L114-2
                         'pagina.mp3',   // L118-1: il primo del terzo giro (27/9 08:19)
-                        'martelletto.mp3','passi.mp3',   // L130-1 (27/9 sera): gli altri quattro dell'infornata (campanella, bicchieri, stretta, porta) scartati da Cowork
+                        'martelletto.mp3','passi.mp3',   // L130-1 (27/9 sera)
+                        'campanella.mp3','porta.mp3','bicchieri.mp3','stretta.mp3','sussurro.mp3','radio.mp3','telex.mp3',   // L137-1 (28/9)
+                        'borsa.mp3','ambulanza.mp3','orologio.mp3','fanfara.mp3','campane.mp3',   // L141-1 (28/9 sera)
                         'positivo.mp3','negativo.mp3','firma.mp3','monete.mp3','applauso.mp3','folla.mp3',
                         'protesta.mp3','fischi.mp3','flash.mp3','bussare.mp3','macchina.mp3','allarme.mp3'];         // L116-1
 
@@ -307,9 +309,9 @@ const SUONO_CARTA = [
   ['telex',    [],                            /dispacc|diplomaz|ambasciat|vertice|trattat|cancellerie/i, { prima:1990 }],
   ['notifica', ['stampa'],                    /social(?![a-z])|online|virale|sul web/i, { dal:2000 }],   // «social» col confine: senza, prendeva «Conflitto sociale» (L118-1, lezione 202)
   ['flash',    ['stampa','scandalo'],         /stampa|comunicazione|televisione|scandalo|intervista|giornal|conferenza/i],
+  ['campanella',[],                           /question time|dibattito|seduta|interpellanz|in aula|mozione/i],   // L140-1: PRIMA di `macchina` — un dossier che parla di un dibattito in aula suona la campanella (dopo `macchina` non usciva mai)
   ['macchina', ['dossier','inchiesta'],       /dossier|rapporto|inchiesta|indagine|toghe|giustizia|procura|conti pubblici/i],
   ['allarme',  ['crisiInt'],                  /crisi|emergenz|allarme|calamit|attentat|terror|i mercati|default/i],
-  ['campanella',[],                           /question time|dibattito|seduta|interpellanz|in aula|mozione/i],
   ['passi',    [],                            /visita|sopralluogo/i],   // senza «corridoi»: prendeva il kicker «Corridoio» (il treno veloce)
   ['bussare',  ['ministro','rimpasto','premier'], /udienza|visita|colloquio|palazzo|istituzioni|quirinale|eliseo/i],
   ['stretta',  [],                            /accordo|intesa|patto|alleanz/i],
