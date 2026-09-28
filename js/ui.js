@@ -590,6 +590,7 @@ function scenaTono(it){ if(!it) return null;
   return null;
 }
 function scenaId(it){ if(!it) return null;
+  if(it.kind==='rimpasto') return it.uscita==='cacciato' ? 'ministroCacciato' : 'ministroDimissioni';   // L127-1b: senza campo (carte d'un salvataggio vecchio) = dimissioni, la neutra
   if(it.kind && typeof SCENA_DI_KIND!=='undefined' && SCENA_DI_KIND[it.kind]) return SCENA_DI_KIND[it.kind];
   const k=(it.data&&it.data.kick)||null;
   if(k && typeof SCENA_DI_KICK!=='undefined' && SCENA_DI_KICK[k]) return SCENA_DI_KICK[k];
@@ -617,6 +618,7 @@ function scenaFinale(reason){ var M=_sm('finale'); if(!M) return null;
   var trionf = ((typeof S!=='undefined'&&S) ? ((S.mandatesWon||0)>=3 || (S.biografia&&S.biografia.trionfi>=2)) : false);
   if(reason==='ritiro' || (reason==='salute'&&(typeof S==='undefined'||!S||S.esitoSalute!=='fatale')) || reason==='mandatoInt')
     return trionf ? M.trionfo : M.dignita;                                     // uscite dignitose; carriera trionfale → trionfo
+  if(reason==='silurato' && M.silurato) return M.silurato;                     // L127-1b: il premier ti toglie la scrivania
   if(reason==='crisi'||reason==='insolvenza'||reason==='rivolta'||reason==='condanna'||reason==='silurato'||(reason==='salute'&&typeof S!=='undefined'&&S&&S.esitoSalute==='fatale'))
     return M.caduta;                                                           // cadute: sfiducia/insolvenza/condanna/silurato/fine-salute
   return M.oblio; }                                                            // congresso/primaria/sconfittaLocale/sconfitta netta
@@ -642,7 +644,7 @@ function scenaMomentoHtml(src, opt){
 }
 function agScene(it){ if(!it || typeof SCENA_MAJOR==='undefined' || !SCENA_MAJOR[it.kind]) return '';   // display selettivo (ora incl. le carte locali)
   const bucket=scenaId(it); if(!bucket) return '';
-  const seed=(it.data&&it.data.id) || it.kind || bucket;   // hash stabile: id-carta → stessa variante per quella carta
+  const seed=(it.data&&it.data.id) || (it.kind==='rimpasto'&&it.min ? 'rimpasto:'+it.min : null) || it.kind || bucket;   // hash stabile: id-carta → stessa variante per quella carta (L127-1b: due rimpasti nello stesso mese sono due chiavi della clip, non un nodo conteso)
   const src=scenaSrc(bucket, scenaTono(it), seed);
   /* loading=lazy + decoding=async: con le scene su file (assets/) le carte fuori schermo non pagano la rete
      e la decodifica non blocca il render. Nessun salto di layout: .ag-scene ha aspect-ratio 16/9 + fondo panel2,

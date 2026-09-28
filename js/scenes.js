@@ -91,6 +91,10 @@ const SCENES = {
   cultura:        { base:S_+'societacivile-base.webp',  italia1950:S_+'cinema-anni50.webp' },
   festa:          { base:S_+'societacivile-base.webp',  italia1950:S_+'festa-anni50.webp' },
   mare:           { base:S_+'societacivile-base.webp',  italia1960:S_+'mare-anni60.webp' },
+  /* L127-1b: il ministro che se ne va. La carta del rimpasto sceglie fra le due da `it.uscita` (scenaId, ui.js):
+     «Sostituisci» → la scrivania svuotata; lealtà sotto 18 o dimissioni chieste dopo uno scandalo → la scalinata coi cronisti. */
+  ministroCacciato:   S_+'ministro-cacciato.webp',
+  ministroDimissioni: S_+'ministro-dimissioni.webp',
 
   /* --- home --- */
   hero: S_+'hero.webp',
@@ -114,7 +118,9 @@ const VIDEO_PRESENTI = ['home-hero', 'partito-base', 'vitaprivata-base', 'retro-
   'partito-notte', 'partito-riunione',
   'retro-accordo', 'retro-anticamera', 'retro-canale', 'retro-cronista', 'retro-stanza',
   'telefono-anni50', 'telefono-corridoio', 'telefono-oggi',
-  'vitaprivata-anni60', 'vitaprivata-anni90', 'vitaprivata-florido'];
+  'vitaprivata-anni60', 'vitaprivata-anni90', 'vitaprivata-florido',
+  /* 28/9 (L127-1b): il ministro che se ne va, sulla carta del rimpasto e nella fine `silurato` */
+  'ministro-cacciato', 'ministro-dimissioni'];
 
 /* ===== L124-1 — IL VIDEO INTRODUTTIVO (`assets/video/intro.*`). Non è una scena: sta FUORI da VIDEO_PRESENTI (non ha una
    carta né un .webp in assets/scenes) ma sotto la stessa guardia (`.claude/verifica-asset.js`): i file dichiarati qui devono
@@ -148,7 +154,8 @@ const SCENA_MOMENTO = {
                 studio_italia1950:S_+'intervista-studio-anni50.webp', studio_italia1960:S_+'intervista-studio-anni60.webp' },
   notte:      { attesa:S_+'notte-attesa.webp', spoglio:S_+'notte-spoglio.webp', vittoria:S_+'notte-vittoria.webp', sconfitta:S_+'notte-sconfitta.webp' },
   telefono:   { oggi:S_+'telefono-oggi.webp', storico:S_+'telefono-anni50.webp', corridoio:S_+'telefono-corridoio.webp' },
-  finale:     { trionfo:S_+'finale-trionfo.webp', dignita:S_+'finale-dignita.webp', caduta:S_+'finale-caduta.webp', oblio:S_+'finale-oblio.webp' },
+  finale:     { trionfo:S_+'finale-trionfo.webp', dignita:S_+'finale-dignita.webp', caduta:S_+'finale-caduta.webp', oblio:S_+'finale-oblio.webp',
+                silurato:S_+'ministro-cacciato.webp' },   // L127-1b: la fine `silurato` è la scrivania svuotata
   soglia:     { contemporanea:S_+'soglia-presente.webp', italia1950:S_+'soglia-1950.webp',
                 italia1960:S_+'soglia-1960.webp', italia1970:S_+'soglia-1970.webp', italia1980:S_+'soglia-1980.webp',
                 italia1990:S_+'soglia-1990.webp' },
@@ -226,7 +233,7 @@ const SCENA_DI_MIN = {
 
 /* DISPLAY SELETTIVO: la scena compare SOLO sulle carte MAGGIORI/narrative — marca i momenti che
    contano, così non stanca e non allunga lo scroll delle carte di routine. Le carte NON elencate
-   (dossier, proposta, budget, ministro, rimpasto, premier, stampa) restano senza scena.
+   (dossier, proposta, budget, ministro, premier, stampa) restano senza scena (il rimpasto no dal L127-1b).
    [puntopartito e conflitto SONO major — accendono la scena-partito, vedi sotto]. */
 const SCENA_MAJOR = {
   event:1,        // eventi gravi one-off
@@ -238,6 +245,7 @@ const SCENA_MAJOR = {
   personale:1,    // eventi di vita privata
   locale:1,       // VARIANTI-SCENA (pilota 2026-07-04): le carte città/regione accendono la scena via scenaId (kick→bucket)
   puntopartito:1, conflitto:1,   // VARIANTI-SCENA batch 3: unità/trionfo (puntopartito) e spaccatura interna (conflitto) accendono la scena-partito
+  rimpasto:1,    // L127-1b (28/9): la carta del rimpasto porta il ministro che esce (cacciato/dimissioni, da `it.uscita`)
   attivista:1,   // BUILD A (L2): la carta-mossa del mese. NON in SCENA_DI_KIND → scenaId cade sul `kick` (tema) → bucket tonale che ruota (anti-wallpaper, rifinitura B)
 };
 /* TONO PER KIND (valenza uniforme): le carte GENERATE senza campo `tono` proprio (partito/estero) prendono la valenza

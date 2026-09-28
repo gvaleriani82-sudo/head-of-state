@@ -1569,6 +1569,12 @@ const SCENARI = {
      CDU↔SPD entrava al governo nel 1972 20/20 per grande coalizione (una CDU sola al 46 è sempre sotto 50, e la riserva entra in
      `compatibili()` proprio allora); senza riserva **0/20** prima del 1982 (bersaglio ≤ 3; storia: mai). Il cambio di campo della
      FDP è del 1982, cioè di de1980.
+     ⚑ **L136-2 (D52): la CDU/CSU è `selezionabile:false`.** Con D50 la carriera CDU parte all'opposizione, perde l'urna del
+     1972 (sola al 46 contro SPD+FDP) e `perdiElezione` all'opposizione la chiude al congresso: 20/20 in 26 mesi (L135-3) —
+     come nella storia, che le fa perdere 1972, 1976 e 1980. Una carriera che finisce sempre non è una carriera: quella della
+     CDU nel decennio si gioca da de1960 (che arriva al 1971) e riparte con de1980. La CDU resta nel roster, nei seggi, nelle
+     urne e come governo avversario; `selezionabile` lo legge solo il selettore, quindi un salvataggio CDU già iniziato si
+     carica e prosegue.
      FORZE: urne del 1969 sui quattro (46,1 · 42,7 · 5,8 · 4,3, somma 98,9) → 46,6 · 43,2 · 5,9 · 4,3. SEGGI: il Bundestag del 1969
      senza Berlino, come lo lascia la tappa del 1969/9 di de1960 (48,8 · 45,2 · 6,0).
      `forzaAncora` (L111-1, la media del decennio): urne 1972 · 1976 · 1980 → CDU/CSU 46,01 · SPD 43,76 · FDP 8,97 · NPD 0,35
@@ -1593,7 +1599,8 @@ const SCENARI = {
     ue: false,
     intermedie: [ {tipo:'Elezioni nei Länder', mese:24, tocca:'regione'} ],
     partiti: [
-      { id:'de_cdu', nome:'CDU/CSU', orientamento:'centrodestra',   base:{ cattolici:0.35, cetomedio:0.35, imprenditori:0.3 }, forza:46.6, forzaAncora:46.4, asse:1,  alleati:[] },
+      { id:'de_cdu', nome:'CDU/CSU', orientamento:'centrodestra',   base:{ cattolici:0.35, cetomedio:0.35, imprenditori:0.3 }, forza:46.6, forzaAncora:46.4, asse:1,  alleati:[],
+        selezionabile:false, nota:'La CDU/CSU passa tutto il decennio all\'opposizione: la sua carriera riprende con gli anni Ottanta' },   // L136-2, D52
       { id:'de_spd', nome:'SPD',     orientamento:'centrosinistra', base:{ lavoratori:0.6, pensionati:0.2, giovani:0.2 },    forza:43.2, forzaAncora:44.2, asse:-1, alleati:['de_fdp'] },
       { id:'de_fdp', nome:'FDP',     orientamento:'liberale',       base:{ imprenditori:0.5, cetomedio:0.5 },                forza:5.9,  forzaAncora:9.0,  asse:1,  alleati:['de_spd'] },
       { id:'de_npd', nome:'NPD',     orientamento:'destra',         base:{ pensionati:0.4, cetomedio:0.3, lavoratori:0.3 },  forza:4.3,  asse:2,  alleati:[],
@@ -12008,7 +12015,10 @@ const TITOLI=[
 //   gr.pensionati      52.7   54.2   55.7   57.5   61.0   → anziani_piazza <=53
 //   gr.cetomedio       50.9   54.9   58.9   64.6   73.9   → ceto_ko <=51
 //   gr.imprenditori    47.7   52.1   58.1   65.5   74.5   → imprese_ko <=48
-// ti_v_minoranza non ha soglia (S.minoranza) e resta com'è. ti_v_monocolore: solo dove PAESE.coalizione (falso in USA, Regno Unito, Corea, Nigeria).
+//   ind.deficit         0.7    2.2    3.5    5.7    6.8   → evasione >=7 (p85) — L136-1, stesso campione rimisurato il 28/9 (10 861 mesi): il deficit
+//                                                           cresce col male, quindi il titolo di «male» sta in coda come agenda (prima >3, viva il 58,9%)
+// ti_v_minoranza non ha soglia (S.minoranza) e resta com'è. ti_v_monocolore: solo dove PAESE.coalizione (falso in USA, Regno Unito, Corea, Nigeria)
+// e (L136-1) solo al capo del governo: al livello 2 S.coalizione è [S.partito] per costruzione (l'avvio da ministro) e il titolo era un falso monocolore.
  {id:'ti_v_aria_pulita', era:'contemporanea', cond:()=>S.ind.ambiente!=null&&S.ind.ambiente>=58, amico:'Aria più pulita nelle città: il piano verde funziona', ostile:'Aria più pulita, bollette più care'},
  {id:'ti_v_clima_mezzo', era:'contemporanea', cond:()=>S.ind.ambiente!=null&&S.ind.ambiente>=45&&S.ind.ambiente<58, amico:'Ambiente, passi avanti senza strappi', ostile:'Sul clima il governo prende tempo'},
  {id:'ti_v_smog', era:'contemporanea', cond:()=>S.ind.ambiente!=null&&S.ind.ambiente<45, amico:'Smog in città: il governo annuncia misure', ostile:'Smog, fiumi, discariche: l\'ambiente presenta il conto'},
@@ -12025,7 +12035,7 @@ const TITOLI=[
  {id:'ti_v_debito_medio', era:'contemporanea', cond:()=>S.ind.debt>=60&&S.ind.debt<100, amico:'Il debito si stabilizza', ostile:'Il debito sale piano, ma sale'},
  {id:'ti_v_mercati', era:'contemporanea', cond:()=>S.ind.fiducia!=null&&S.ind.fiducia>=40&&S.ind.fiducia<65, amico:'Mercati tranquilli: il paese si finanzia senza scosse', ostile:'I mercati osservano, e il costo del debito sale'},
  {id:'ti_v_fisco', era:'contemporanea', cond:()=>S.ind.deficit<=3, amico:'Dichiarazione dei redditi: il fisco promette semplicità', ostile:'Tasse, moduli, code: il fisco semplice resta una promessa'},
- {id:'ti_v_evasione', era:'contemporanea', cond:()=>S.ind.deficit>3, amico:'Caccia all\'evasione: il governo recupera miliardi', ostile:'Evasione: i soliti annunci, i soliti ignoti'},
+ {id:'ti_v_evasione', era:'contemporanea', cond:()=>S.ind.deficit>=7, amico:'Caccia all\'evasione: il governo recupera miliardi', ostile:'Evasione: i soliti annunci, i soliti ignoti'},
  {id:'ti_v_fabbrica', era:'contemporanea', cond:()=>S.ind.growth<0.5, amico:'Crisi aziendale: il governo convoca il tavolo', ostile:'Un\'altra fabbrica chiude i cancelli'},
  {id:'ti_v_export', era:'contemporanea', cond:()=>S.ind.growth>=2, amico:'L\'export tira: le imprese assumono', ostile:'Export record, salari fermi'},
  {id:'ti_v_carrello', era:'contemporanea', cond:()=>S.ind.growth>2, amico:'Prezzi in salita: il governo vigila', ostile:'Il carrello della spesa pesa di più'},
@@ -12045,7 +12055,7 @@ const TITOLI=[
  {id:'ti_v_agenda', era:'contemporanea', cond:()=>S.ind.stampa!=null&&S.ind.stampa>=53, amico:'Il governo detta l\'agenda', ostile:'Una stampa troppo gentile?'},
  {id:'ti_v_editoriali', era:'contemporanea', cond:()=>S.ind.stampa!=null&&S.ind.stampa<45, amico:'Il governo risponde punto per punto alle critiche', ostile:'Editoriali al veleno: il governo sotto tiro'},
  {id:'ti_v_minoranza', era:'contemporanea', cond:()=>S.minoranza===true, amico:'Governo di minoranza: si tratta legge per legge', ostile:'Un governo senza numeri'},
- {id:'ti_v_monocolore', era:'contemporanea', cond:()=>!!PAESE.coalizione&&S.coalizione&&S.coalizione.length===1&&!S.minoranza, amico:'Un partito solo al comando: decisioni rapide', ostile:'Un partito solo al comando, e nessuno che frena'},
+ {id:'ti_v_monocolore', era:'contemporanea', cond:()=>S.livello===3&&!!PAESE.coalizione&&S.coalizione&&S.coalizione.length===1&&!S.minoranza, amico:'Un partito solo al comando: decisioni rapide', ostile:'Un partito solo al comando, e nessuno che frena'},
  {id:'ti_v_sondaggi_fermi', era:'contemporanea', cond:()=>S.ind.consenso>=52&&S.ind.consenso<58, amico:'Il governo tiene nei sondaggi', ostile:'Sondaggi fermi: il paese non si scalda'},
  {id:'ti_v_corridoi', era:'contemporanea', cond:()=>S.ind.consenso<52, amico:'Il governo serra le file', ostile:'Voci di rimpasto nei corridoi'},
  {id:'ti_v_bollette', era:'contemporanea', cond:()=>S.ind.growth<1, amico:'Bollette: il governo prepara un aiuto alle famiglie', ostile:'Bollette alle stelle: famiglie al buio'},
@@ -12178,70 +12188,130 @@ const TITOLI=[
  {id:'fr_p_ti_deficit', era:'contemporanea', paesi:['francia'], amico:'Il rientro del deficit è credibile, dice Bruxelles', ostile:'Bruxelles boccia i conti di Parigi'},
  {id:'fr_p_ti_assemblea', era:'contemporanea', paesi:['francia'], amico:'L\'Assemblea trova una maggioranza, contro ogni previsione', ostile:'L\'Assemblea senza maggioranza: si governa a colpi di decreto'},
  {id:'fr_p_ti_nucleare', era:'contemporanea', paesi:['francia'], amico:'La Francia sceglie ancora l\'atomo', ostile:'Reattori vecchi, bollette nuove: il nucleare presenta il conto'},
+ // L136-3 (28/9) · due titoli-paese in più (testi di Cowork)
+ {id:'fr_p_ti_periferie', era:'contemporanea', paesi:['francia'], amico:'Le periferie ritrovano la calma', ostile:'Notti di fuoco nelle periferie'},
+ {id:'fr_p_ti_trattori', era:'contemporanea', paesi:['francia'], amico:'Accordo con gli agricoltori: i trattori lasciano Parigi', ostile:'I trattori assediano Parigi'},
  /* ===== L81-1 · GERMANIA, quattro titoli del presente (scheda §D). ===== */
  {id:'de_p_ti_freno', era:'contemporanea', paesi:['germania'], amico:'Il freno al debito regge, i conti tornano', ostile:'Il freno al debito: ponti chiusi e scuole senza tetto'},
  {id:'de_p_ti_coalizione', era:'contemporanea', paesi:['germania'], amico:'La coalizione trova l\'accordo dopo una notte', ostile:'La coalizione litiga in pubblico: si può andare avanti così?'},
  {id:'de_p_ti_est', era:'contemporanea', paesi:['germania'], amico:'L\'est torna a crescere', ostile:'L\'est vota contro: il paese è ancora diviso'},
  {id:'de_p_ti_auto', era:'contemporanea', paesi:['germania'], amico:'L\'auto tedesca riparte con l\'elettrico', ostile:'Un altro stabilimento chiude: l\'auto tedesca in crisi'},
+ // L136-3 (28/9) · due titoli-paese in più (testi di Cowork)
+ {id:'de_p_ti_ferrovie', era:'contemporanea', paesi:['germania'], amico:'I treni tornano puntuali', ostile:'Un treno su tre in ritardo: la ferrovia al collasso'},
+ {id:'de_p_ti_energia', era:'contemporanea', paesi:['germania'], amico:'Il gas scende: l\'industria riaccende i forni', ostile:'Energia cara: le fabbriche guardano all\'estero'},
  /* ===== L82-1 · SPAGNA, quattro titoli del presente (scheda §D). ===== */
  {id:'es_p_ti_autonomie', era:'contemporanea', paesi:['spagna'], amico:'Accordo con le autonomie: la legislatura è salva', ostile:'Ostaggio delle autonomie: la Spagna paga per governare'},
  {id:'es_p_ti_casa', era:'contemporanea', paesi:['spagna'], amico:'Il piano casa parte: prime gru nelle grandi città', ostile:'Affitti alle stelle e piazze piene: la casa è l\'emergenza'},
  {id:'es_p_ti_lavoro', era:'contemporanea', paesi:['spagna'], amico:'Occupazione ai massimi: il paese lavora', ostile:'Ancora i disoccupati più numerosi d\'Europa'},
  {id:'es_p_ti_acqua', era:'contemporanea', paesi:['spagna'], amico:'Piove: i bacini tornano a riempirsi', ostile:'Bacini al minimo: la siccità è politica'},
+ // L136-3 (28/9) · due titoli-paese in più (testi di Cowork)
+ {id:'es_p_ti_turismo', era:'contemporanea', paesi:['spagna'], amico:'Estate record: il turismo traina il paese', ostile:'Residenti contro turisti: le città in piazza'},
+ {id:'es_p_ti_catalogna', era:'contemporanea', paesi:['spagna'], amico:'Barcellona e Madrid tornano a parlarsi', ostile:'La Catalogna rilancia: "Votiamo"'},
  /* ===== L83-1 · STATI UNITI, quattro titoli del presente (scheda §D). ===== */
  {id:'us_p_ti_congresso', era:'contemporanea', paesi:['usa'], amico:'La Casa Bianca e il Congresso trovano l\'accordo', ostile:'Muro contro muro: Washington è bloccata'},
  {id:'us_p_ti_borsa', era:'contemporanea', paesi:['usa'], amico:'Wall Street ai massimi: l\'economia corre', ostile:'Wall Street corre, Main Street no'},
  {id:'us_p_ti_frontiera', era:'contemporanea', paesi:['usa'], amico:'Gli arrivi al confine calano', ostile:'Record al confine: gli Stati di frontiera si ribellano'},
  {id:'us_p_ti_corte', era:'contemporanea', paesi:['usa'], amico:'La Corte Suprema dà ragione alla Casa Bianca', ostile:'La Corte Suprema ferma la Casa Bianca'},
+ // L136-3 (28/9) · due titoli-paese in più (testi di Cowork)
+ {id:'us_p_ti_debito', era:'contemporanea', paesi:['usa'], amico:'Accordo sul tetto del debito: niente insolvenza', ostile:'Tetto del debito: lo Stato federale verso la chiusura'},
+ {id:'us_p_ti_prezzi', era:'contemporanea', paesi:['usa'], amico:'La benzina scende sotto i tre dollari', ostile:'Uova, affitti, benzina: tutto costa di più'},
  /* ===== L83-1 · CANADA, quattro titoli del presente (scheda §D). ===== */
  {id:'ca_p_ti_casa', era:'contemporanea', paesi:['canada'], amico:'Le gru tornano nelle città: il piano casa parte', ostile:'Una casa costa dieci stipendi: la generazione senza casa'},
  {id:'ca_p_ti_vicino', era:'contemporanea', paesi:['canada'], amico:'Il vicino fa marcia indietro sui dazi', ostile:'Il vicino alza i dazi: l\'Ontario trema'},
  {id:'ca_p_ti_ovest', era:'contemporanea', paesi:['canada'], amico:'Ottawa e l\'Ovest trovano l\'accordo sull\'energia', ostile:'L\'Ovest contro Ottawa: si torna a parlare di separazione'},
  {id:'ca_p_ti_quebec', era:'contemporanea', paesi:['canada'], amico:'Il Québec e Ottawa firmano', ostile:'Il Québec sfida Ottawa sulla lingua'},
+ // L136-3 (28/9) · due titoli-paese in più (testi di Cowork)
+ {id:'ca_p_ti_medici', era:'contemporanea', paesi:['canada'], amico:'Più medici di famiglia: le attese si accorciano', ostile:'Senza medico di famiglia: le code al pronto soccorso'},
+ {id:'ca_p_ti_fumo', era:'contemporanea', paesi:['canada'], amico:'Le foreste bruciano meno quest\'estate', ostile:'Il fumo degli incendi arriva fino alle città'},
  /* ===== L83-1 · AUSTRALIA, quattro titoli del presente (scheda §D). ===== */
  {id:'au_p_ti_casa', era:'contemporanea', paesi:['australia'], amico:'Il piano casa parte: prime chiavi ai giovani', ostile:'Il sogno della casa è finito: una generazione in affitto'},
  {id:'au_p_ti_cina', era:'contemporanea', paesi:['australia'], amico:'Il grande cliente riapre le porte al vino australiano', ostile:'Il grande cliente chiude di nuovo: i porti si fermano'},
  {id:'au_p_ti_estate', era:'contemporanea', paesi:['australia'], amico:'Un\'estate senza grandi incendi', ostile:'Il fumo copre le città: un\'altra estate nera'},
  {id:'au_p_ti_mandato', era:'contemporanea', paesi:['australia'], amico:'Tre anni bastano: il governo consegna', ostile:'Tre anni sono passati e non è cambiato niente'},
+ // L136-3 (28/9) · due titoli-paese in più (testi di Cowork)
+ {id:'au_p_ti_barriera', era:'contemporanea', paesi:['australia'], amico:'La barriera corallina si riprende', ostile:'La barriera corallina sbianca di nuovo'},
+ {id:'au_p_ti_miniere', era:'contemporanea', paesi:['australia'], amico:'Miniere a pieno ritmo: entrate record', ostile:'Il prezzo del ferro crolla: il bilancio trema'},
  /* ===== L85-1 · GIAPPONE, quattro titoli del presente (scheda §D). ===== */
  {id:'jp_p_ti_nascite', era:'contemporanea', paesi:['giappone'], amico:'Le nascite si fermano: primo anno senza calo', ostile:'Nuovo minimo storico delle nascite'},
  {id:'jp_p_ti_yen', era:'contemporanea', paesi:['giappone'], amico:'Lo yen si riprende, le famiglie respirano', ostile:'Lo yen ai minimi: il cibo costa il doppio'},
  {id:'jp_p_ti_reattori', era:'contemporanea', paesi:['giappone'], amico:'Un altro reattore riparte senza incidenti', ostile:'Riavvio contestato: la prefettura dice no'},
  {id:'jp_p_ti_partito', era:'contemporanea', paesi:['giappone'], amico:'Il partito si riforma: le correnti sciolte', ostile:'I fondi neri delle correnti: il partito sotto inchiesta'},
+ // L136-3 (28/9) · due titoli-paese in più (testi di Cowork)
+ {id:'jp_p_ti_turisti', era:'contemporanea', paesi:['giappone'], amico:'Turisti record: le città d\'arte si riempiono', ostile:'Troppi turisti: i templi chiudono le porte'},
+ {id:'jp_p_ti_villaggi', era:'contemporanea', paesi:['giappone'], amico:'I giovani tornano nei villaggi', ostile:'Villaggi vuoti: chiudono le scuole di campagna'},
  /* ===== L85-1 · COREA DEL SUD, quattro titoli del presente (scheda §D). ===== */
  {id:'kr_p_ti_natalita', era:'contemporanea', paesi:['coreasud'], amico:'Le nascite risalgono per la prima volta in dieci anni', ostile:'Nuovo minimo mondiale: meno di un figlio per donna'},
  {id:'kr_p_ti_nord', era:'contemporanea', paesi:['coreasud'], amico:'Il confine tace: un mese senza provocazioni', ostile:'Un altro missile nel mare: il Nord alza il tono'},
  {id:'kr_p_ti_export', era:'contemporanea', paesi:['coreasud'], amico:'Esportazioni record: i chip trainano il paese', ostile:'I chip rallentano: il paese scopre di dipendere da un prodotto'},
  {id:'kr_p_ti_assemblea', era:'contemporanea', paesi:['coreasud'], amico:'L\'Assemblea approva: il Presidente incassa', ostile:'L\'Assemblea boccia: il Presidente governa per decreto'},
+ // L136-3 (28/9) · due titoli-paese in più (testi di Cowork)
+ {id:'kr_p_ti_casa', era:'contemporanea', paesi:['coreasud'], amico:'I prezzi delle case si fermano a Seul', ostile:'Seul, una casa costa una vita'},
+ {id:'kr_p_ti_medici', era:'contemporanea', paesi:['coreasud'], amico:'Medici e governo firmano: gli ospedali riaprono i reparti', ostile:'Medici in sciopero: gli ospedali rimandano gli interventi'},
  /* ===== L85-1 · INDIA, quattro titoli del presente (scheda §D). ===== */
  {id:'in_p_ti_crescita', era:'contemporanea', paesi:['india'], amico:'L\'economia che cresce più di tutte', ostile:'Cresce il prodotto, non i lavori'},
  {id:'in_p_ti_contadini', era:'contemporanea', paesi:['india'], amico:'I contadini tornano a casa: accordo sul prezzo', ostile:'I trattori al confine della capitale: terzo mese'},
  {id:'in_p_ti_confine', era:'contemporanea', paesi:['india'], amico:'Confine calmo: i soldati si ritirano dai passi', ostile:'Scontri a cinquemila metri: il confine si riscalda'},
  {id:'in_p_ti_stati', era:'contemporanea', paesi:['india'], amico:'Il Sud e il Nord trovano l\'accordo sui seggi', ostile:'Il Sud contro Delhi: «non siamo una colonia»'},
+ // L136-3 (28/9) · due titoli-paese in più (testi di Cowork)
+ {id:'in_p_ti_aria', era:'contemporanea', paesi:['india'], amico:'La capitale respira: l\'aria migliora', ostile:'Nebbia tossica sulla capitale: scuole chiuse'},
+ {id:'in_p_ti_monsone', era:'contemporanea', paesi:['india'], amico:'Un buon monsone: i raccolti sono salvi', ostile:'Il monsone manca: le campagne a secco'},
  /* ===== L86-3 · BRASILE, quattro titoli del presente (scheda §D). ===== */
  {id:'br_p_ti_congresso', era:'contemporanea', paesi:['brasile'], amico:'Il Planalto e il Congresso firmano la pace', ostile:'Il Congresso presenta il conto al Planalto'},
  {id:'br_p_ti_foresta', era:'contemporanea', paesi:['brasile'], amico:'La deforestazione cala per il secondo anno', ostile:'La foresta brucia: record di focolai'},
  {id:'br_p_ti_real', era:'contemporanea', paesi:['brasile'], amico:'Il real si rafforza, i mercati credono al paese', ostile:'Il real ai minimi: i mercati non credono ai conti'},
  {id:'br_p_ti_violenza', era:'contemporanea', paesi:['brasile'], amico:'Omicidi in calo: le città respirano', ostile:'Le fazioni comandano un altro Stato'},
+ // L136-3 (28/9) · due titoli-paese in più (testi di Cowork)
+ {id:'br_p_ti_fame', era:'contemporanea', paesi:['brasile'], amico:'Il paese esce dalla mappa della fame', ostile:'La fame torna nelle periferie'},
+ {id:'br_p_ti_raccolto', era:'contemporanea', paesi:['brasile'], amico:'Esportazioni record: soia e carne trainano', ostile:'Il raccolto crolla: la siccità nel granaio del paese'},
  /* ===== L86-3 · ARGENTINA, quattro titoli del presente (scheda §D). ===== */
  {id:'ar_p_ti_inflazione', era:'contemporanea', paesi:['argentina'], amico:'L\'inflazione rallenta: il mese più basso da anni', ostile:'I prezzi ripartono: un altro mese a due cifre'},
  {id:'ar_p_ti_fmi', era:'contemporanea', paesi:['argentina'], amico:'Accordo con il Fondo: i dollari arrivano', ostile:'Il Fondo sospende: le riserve non ci sono'},
  {id:'ar_p_ti_campo', era:'contemporanea', paesi:['argentina'], amico:'Raccolto record: la campagna liquida', ostile:'La campagna in sciopero: le strade bloccate'},
  {id:'ar_p_ti_piazza', era:'contemporanea', paesi:['argentina'], amico:'La piazza si svuota: il governo tiene', ostile:'Sciopero generale: il paese si ferma'},
+ // L136-3 (28/9) · due titoli-paese in più (testi di Cowork)
+ {id:'ar_p_ti_cambio', era:'contemporanea', paesi:['argentina'], amico:'Il dollaro parallelo si ferma', ostile:'Il dollaro parallelo vola: i risparmi sotto il materasso'},
+ {id:'ar_p_ti_province', era:'contemporanea', paesi:['argentina'], amico:'Le province firmano il patto fiscale', ostile:'I governatori contro la Casa Rosada'},
  /* ===== L86-3 · MESSICO, quattro titoli del presente (scheda §D). ===== */
  {id:'mx_p_ti_vicino', era:'contemporanea', paesi:['messico'], amico:'Il vicino rinvia i dazi: le fabbriche respirano', ostile:'Il vicino annuncia i dazi: il peso crolla'},
  {id:'mx_p_ti_sicurezza', era:'contemporanea', paesi:['messico'], amico:'Omicidi in calo per il terzo mese', ostile:'Un altro sindaco ucciso: lo Stato dei cartelli'},
  {id:'mx_p_ti_peso', era:'contemporanea', paesi:['messico'], amico:'Il super-peso: la moneta più forte dell\'anno', ostile:'Il peso ai minimi: i mercati fuggono'},
  {id:'mx_p_ti_sexenio', era:'contemporanea', paesi:['messico'], amico:'Il sessennio a metà: le promesse tengono', ostile:'Il sessennio a metà: l\'orologio corre'},
+ // L136-3 (28/9) · due titoli-paese in più (testi di Cowork)
+ {id:'mx_p_ti_rimesse', era:'contemporanea', paesi:['messico'], amico:'Rimesse record: i soldi dei migranti tengono a galla i paesi', ostile:'Le rimesse calano: i paesi senza entrate'},
+ {id:'mx_p_ti_acqua', era:'contemporanea', paesi:['messico'], amico:'La capitale ritrova l\'acqua: finiti i turni', ostile:'Acqua a giorni alterni nella capitale'},
  /* ===== L87-3 · SUDAFRICA, quattro titoli del presente (scheda §D). ===== */
  {id:'za_p_ti_luce', era:'contemporanea', paesi:['sudafrica'], amico:'Cento giorni senza blackout', ostile:'Torna il calendario dei blackout: sei ore al giorno'},
  {id:'za_p_ti_lavoro', era:'contemporanea', paesi:['sudafrica'], amico:'La disoccupazione cala per la prima volta in anni', ostile:'Un giovane su due senza lavoro: il record'},
  {id:'za_p_ti_unita', era:'contemporanea', paesi:['sudafrica'], amico:'Il governo di unità regge: i mercati applaudono', ostile:'Il governo di unità litiga in pubblico'},
  {id:'za_p_ti_rand', era:'contemporanea', paesi:['sudafrica'], amico:'Il rand si rafforza', ostile:'Il rand ai minimi: il rating scende ancora'},
+ // L136-3 (28/9) · due titoli-paese in più (testi di Cowork)
+ {id:'za_p_ti_rapine', era:'contemporanea', paesi:['sudafrica'], amico:'Rapine in calo nelle città', ostile:'Un\'altra settimana di rapine: le città si blindano'},
+ {id:'za_p_ti_porti', era:'contemporanea', paesi:['sudafrica'], amico:'I porti tornano a lavorare: le navi non aspettano più', ostile:'Navi in rada per settimane: i porti bloccati'},
  /* ===== L87-3 · NIGERIA, quattro titoli del presente (scheda §D). ===== */
  {id:'ng_p_ti_naira', era:'contemporanea', paesi:['nigeria'], amico:'La naira si stabilizza: i prezzi rallentano', ostile:'La naira ai minimi: il riso costa il doppio'},
  {id:'ng_p_ti_nord', era:'contemporanea', paesi:['nigeria'], amico:'Studenti liberati: le scuole del Nord riaprono', ostile:'Un altro rapimento a scuola: il Nord chiede lo Stato'},
  {id:'ng_p_ti_corrente', era:'contemporanea', paesi:['nigeria'], amico:'Un mese senza crolli della rete', ostile:'La rete crolla per la quarta volta quest\'anno'},
+ // L136-3 (28/9) · due titoli-paese in più (testi di Cowork)
+ {id:'ng_p_ti_benzina', era:'contemporanea', paesi:['nigeria'], amico:'Finite le code ai distributori', ostile:'Benzina introvabile: un giorno di coda ai distributori'},
+ {id:'ng_p_ti_lagos', era:'contemporanea', paesi:['nigeria'], amico:'Lagos apre la nuova linea: la città si muove', ostile:'Lagos sott\'acqua: le piogge bloccano la città'},
+ /* ===== L136-3 (28/9) · ITALIA, otto titoli-paese del presente (testi di Cowork in CODA-LAVORI.md). Gradino 2 come i L133-1: niente pri, niente cond. ===== */
+ {id:'it_p_ti_fondi', era:'contemporanea', paesi:['italia'], amico:'I fondi europei arrivano: cantieri aperti in tutto il paese', ostile:'I fondi europei a rischio: i progetti restano sulla carta'},
+ {id:'it_p_ti_sud', era:'contemporanea', paesi:['italia'], amico:'Il Sud cresce più del Nord, per una volta', ostile:'Il Sud si svuota: i giovani partono con la valigia'},
+ {id:'it_p_ti_spread', era:'contemporanea', paesi:['italia'], amico:'Lo spread scende: i mercati tornano a fidarsi', ostile:'Lo spread sale: il paese sotto esame'},
+ {id:'it_p_ti_giustizia', era:'contemporanea', paesi:['italia'], amico:'Processi più brevi: i tribunali smaltiscono l\'arretrato', ostile:'Dieci anni per una sentenza: la giustizia che non arriva'},
+ {id:'it_p_ti_sbarchi', era:'contemporanea', paesi:['italia'], amico:'Gli sbarchi calano: l\'accordo con l\'altra sponda regge', ostile:'Sbarchi record: l\'isola chiede aiuto all\'Europa'},
+ {id:'it_p_ti_culle', era:'contemporanea', paesi:['italia'], amico:'Asili nido gratis: le famiglie ci credono', ostile:'Culle vuote: il paese più vecchio d\'Europa'},
+ {id:'it_p_ti_autonomia', era:'contemporanea', paesi:['italia'], amico:'Autonomia alle regioni: c\'è l\'accordo', ostile:'Autonomia: il paese a due velocità'},
+ {id:'it_p_ti_cervelli', era:'contemporanea', paesi:['italia'], amico:'I giovani tornano: rientri in crescita dall\'estero', ostile:'Laureati in fuga: il paese li forma, l\'estero li assume'},
+ /* ===== L136-3 (28/9) · REGNO UNITO, otto titoli-paese del presente (testi di Cowork in CODA-LAVORI.md). Gradino 2 come i L133-1: niente pri, niente cond. ===== */
+ {id:'uk_p_ti_attese', era:'contemporanea', paesi:['regnounito'], amico:'Liste d\'attesa in calo per il terzo mese', ostile:'Liste d\'attesa record: il servizio sanitario allo stremo'},
+ {id:'uk_p_ti_europa', era:'contemporanea', paesi:['regnounito'], amico:'Londra e Bruxelles firmano: meno file alla frontiera', ostile:'Camion fermi a Dover: il prezzo dell\'uscita'},
+ {id:'uk_p_ti_scozia', era:'contemporanea', paesi:['regnounito'], amico:'La Scozia resta: il referendum si allontana', ostile:'Edimburgo chiede un nuovo referendum'},
+ {id:'uk_p_ti_bollette', era:'contemporanea', paesi:['regnounito'], amico:'Le bollette scendono: l\'inverno fa meno paura', ostile:'Scaldarsi o mangiare: le bollette dell\'inverno'},
+ {id:'uk_p_ti_scioperi', era:'contemporanea', paesi:['regnounito'], amico:'Accordo sui salari: i treni tornano a correre', ostile:'Treni fermi, ospedali in sciopero: l\'inverno del malcontento'},
+ {id:'uk_p_ti_canale', era:'contemporanea', paesi:['regnounito'], amico:'Meno traversate nella Manica', ostile:'Barchini nella Manica: un altro giorno record'},
+ {id:'uk_p_ti_fiumi', era:'contemporanea', paesi:['regnounito'], amico:'Le società dell\'acqua multate: fiumi più puliti', ostile:'Scarichi nei fiumi: le spiagge chiuse d\'estate'},
+ {id:'uk_p_ti_tassi', era:'contemporanea', paesi:['regnounito'], amico:'La banca centrale taglia i tassi: i mutui respirano', ostile:'Tassi su ancora: le rate dei mutui raddoppiano'},
  /* ---- L93-2 · i 16 titoli del decennio francese (scheda PRESET-FRANCIA-1950 §E), pool `ti_fr50`. ⚠ La scheda dà UNA
     riga per titolo, non le due gemelle: la riga della scheda è la voce della stampa AMICA, e la gemella ostile l'ho
     scritta io nella stessa forma dei `ti_uk50` (la stessa notizia, con la coda che punge). I titoli datati hanno

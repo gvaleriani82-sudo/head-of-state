@@ -27,7 +27,7 @@ function askReplace(mid){
   /* L20-1 — la rosa del rimpasto evita sia i colleghi fra loro sia i ministri IN CARICA (escluso il posto che si
      libera): così il volto che il giocatore vede scegliendo è già libero e alla nomina non si sposta. */
   if(typeof assegnaVoltiGruppo==='function'){ assegnaVoltiGruppo(cs, (typeof volteOccupati==='function'?volteOccupati(mid):{})); cs.forEach(c=>{ c.ritRosa=c.rit; }); }
-  S.agenda.push({kind:'rimpasto', min:mid, cands:cs, resolved:false});
+  S.agenda.push({kind:'rimpasto', min:mid, uscita:'cacciato', cands:cs, resolved:false});   // L127-1b: l'hai deciso tu
   S.tab='gov'; render();
 }
 function ministerMods(){
@@ -51,7 +51,7 @@ function ministerAlignment(m){
 function monthlyMinisters(){
   for(const m of S.ministers){ let d=ministerAlignment(m)*0.6; if(d<0) d*=dif().driftLealtaGiu; m.loyalty=clamp(m.loyalty+d,0,100); }
   for(const m of S.ministers){
-    if(!m.resigning && m.loyalty<18){ S.pendingRimpasto.push(m.min);
+    if(!m.resigning && m.loyalty<18){ S.pendingRimpasto.push({id:m.min, uscita:'dimissioni'});   // L127-1b: coppie {id, uscita}
       S.log.unshift({t:T('Dimissioni'),x:T('Il Ministro %M (%D) si è dimesso.').replace('%M',m.nm).replace('%D',T(MINISTRIES.find(x=>x.id===m.min).nm))});
       m.loyalty=40; m.resigning=true;
     }

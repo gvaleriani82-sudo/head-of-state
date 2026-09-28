@@ -5398,11 +5398,11 @@ function genAgendaRamo(first){
   if(!first){ const occI=pickOccasione(); if(occI){ S.agenda.push(occI); agendaSolo(); return; } }
   // rimpasti in sospeso (carte obbligatorie post-scandalo: storicamente esenti dal tetto)
   const hadRimpasto=S.pendingRimpasto.length>0;
-  for(const mid of S.pendingRimpasto){
+  for(const pr of S.pendingRimpasto){   // L127-1b: coppie {id, uscita} (un id nudo di un salvataggio vecchio lo migra applySnap)
     const cs=[]; let g=0;
     while(cs.length<3 && g++<40){ const c=mkCand(); if(!cs.some(x=>x.profile===c.profile)) cs.push(c); }
     while(cs.length<3) cs.push(mkCand());
-    S.agenda.push({kind:'rimpasto', min:mid, cands:cs, resolved:false});
+    S.agenda.push({kind:'rimpasto', min:pr.id, uscita:pr.uscita||'dimissioni', cands:cs, resolved:false});
   }
   S.pendingRimpasto=[];
   if(first){
@@ -5811,7 +5811,7 @@ function resolveItemCore(idx,ci){
       S.log.unshift({t:T('Scandalo'),x:T('Difeso')+' '+(m?m.nm:'')+': '+T(it.scn.t)});
       bioConta('difesi'); spregiudicata(it.scn.giudiziario?8:6);   // difendere l'indifendibile si paga; se l'inchiesta è giudiziaria il fango ti schizza (+8)
     } else { // Chiedi le dimissioni
-      if(m && !m.resigning){ m.resigning=true; S.pendingRimpasto.push(it.min);
+      if(m && !m.resigning){ m.resigning=true; S.pendingRimpasto.push({id:it.min, uscita:'dimissioni'});   // L127-1b: la scalinata coi cronisti
         S.log.unshift({t:T('Dimissioni'),x:T('Il Ministro %M (%D) si è dimesso dopo lo scandalo.').replace('%M',m.nm).replace('%D',T(role))}); }
       gd('cattolici',3); gd('giovani',2); gd('cetomedio',2);
       it.outcome=T('Dimissioni accolte: <b>%M</b> lascia. Sostituto il mese prossimo.').replace('%M',m?m.nm:T('il ministro'));
@@ -7598,6 +7598,10 @@ function applySnap(snap){
   if(!S.sterlinaAncore || typeof S.sterlinaAncore!=='object') S.sterlinaAncore={};
   if(S.sostegno===undefined){ S.sostegno=null; S.sostegnoOfferto=null; S.rimpastoOfferto=null; S.sostegnoStrappi=0; }   // L53-2
   if(S.rimpastoOffertoMese===undefined) S.rimpastoOffertoMese=null;   // L111-1
+  /* L127-1b: `pendingRimpasto` era una lista di id; ora coppie {id, uscita}. Un id nudo è un'uscita di cui non si sa la via:
+     vale `dimissioni`, la scena neutra. Le carte `rimpasto` già in agenda senza `uscita` le rende scenaId allo stesso modo. */
+  if(!Array.isArray(S.pendingRimpasto)) S.pendingRimpasto=[];
+  S.pendingRimpasto=S.pendingRimpasto.map(x=>typeof x==='string' ? {id:x, uscita:'dimissioni'} : x);
   if(S.sterlina60===undefined){ S.sterlina60=null; S.europa60=null; S.coscienza60=null; S.svalutazione=0; }   // L55-1
   if(S.minatori===undefined){ S.minatori=null; S.europa70=null; S.fmi=null; }   // L58-1
   if(S.falkland===undefined){ S.falkland=null; S.minatori80=null; S.polltax=null; S.alleanza=null; }   // L60-2
