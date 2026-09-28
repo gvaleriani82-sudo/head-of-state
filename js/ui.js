@@ -249,7 +249,7 @@ function apriIntro(){
     window.addEventListener('pointerup', riaccendi, true); window.addEventListener('touchend', riaccendi, true); }
   document.addEventListener('keydown', introTasto, true);
   try{ if(typeof musica==='function') musica(); }catch(e){}   // il tema, se suonava già (Rivedi), sfuma sotto il video
-  requestAnimationFrame(function(){ el.classList.add('on'); });
+  void el.offsetWidth; el.classList.add('on');   // L142-1: la dissolvenza d'entrata col reflow forzato, non con rAF (come apriPartenza, L127-2): senza frame il velo resterebbe trasparente
   setTimeout(function(){ try{ document.getElementById('intro-salta').focus({preventScroll:true}); }catch(e){} }, 50);
 }
 function introTasto(e){ if(e.key==='Escape'){ e.preventDefault(); chiudiIntro(); } }
@@ -799,7 +799,7 @@ function setCrea(campo,val){ if(!CREA) return; CREA[campo]=val;
 function renderCreazione(){
   if(typeof renderPortaSetup==='function') renderPortaSetup();   // L62-1 — l'etichetta della porta (o niente, nel presente)
   const C=CREA, el=document.getElementById('crea-campi'); if(!C||!el) return;
-  const tit=t=>`<div style="font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--mut);margin:16px 0 7px;">${t}</div>`;
+  const tit=t=>`<div class="crea-etich">${t}</div>`;   // L142-1: 12 px dalla regola CSS (dice che cosa scegliere, non dove si è)
   /* L69-1 — il terzo parametro era la TAGLIA DEL TESTO, e serviva solo a scendere sotto il minimo
      leggibile (10,5px per «Punto di partenza», 11,5px per «Orientamento»). Tolto il parametro, non solo
      i due casi: finché il meccanismo esiste, l'eccezione torna. Le etichette lunghe adesso vanno a capo

@@ -5098,9 +5098,14 @@ function pickPersonale(){
     if(e.cond && !e.cond()) return false;
     if(!e.ripetibile && recent.indexOf(e.id)>-1) return false;   // i non-ripetibili (affetti/lieti) non tornano a breve; crisi/coscienza sì
     return eraVivaT(e);   // vita privata = senza-tempo (default universale): sopravvive nel '50; i pochi a cornice moderna si taggano 'contemporanea'
-  }).sort(function(a,b){ return (ord[a.tipo]==null?2:ord[a.tipo])-(ord[b.tipo]==null?2:ord[b.tipo]); });   // i drammatici hanno la precedenza
+  });
+  /* L142-2 · A PARI TIPO L'ORDINE È CASUALE. Il tiro `Math.random() < p` scorre i candidati nell'ordine: con il solo ordine per
+     tipo, a pari tipo vinceva chi stava prima nell'array, e le carte messe in coda uscivano di rado. Una chiave casuale per
+     candidato, assegnata una volta per chiamata, fa da secondo criterio; la precedenza dei drammatici resta com'è. */
+  const chiave=new Map(); cands.forEach(function(e){ chiave.set(e, Math.random()); });
+  cands.sort(function(a,b){ return ((ord[a.tipo]==null?2:ord[a.tipo])-(ord[b.tipo]==null?2:ord[b.tipo])) || (chiave.get(a)-chiave.get(b)); });   // i drammatici hanno la precedenza
   for(const e of cands){
-    if(Math.random() < (e.p!=null?e.p:0.12)){
+    if(Math.random() < (e.p!=null?e.p:0.12)*(typeof PERSONALI_K!=='undefined'?PERSONALI_K:1)){   // L142-2: il fattore unico della vita privata (data.js)
       S.persUltimo=mese; S.recentPers=recent; S.recentPers.push(e.id); if(S.recentPers.length>4) S.recentPers.shift();
       return {kind:'personale', data:e, resolved:false};
     }

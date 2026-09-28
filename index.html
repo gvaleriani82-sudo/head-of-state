@@ -102,7 +102,7 @@
            Riempita da `renderPortaSetup()`; vuota quando si gioca il presente. -->
       <div id="porta-fissa"></div>
       <div id="blocco-paese">
-      <div data-i18n style="font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--mut);margin:14px 0 7px;">Paese</div>
+      <div data-i18n class="crea-etich" style="margin-top:14px;">Paese</div>
       <div class="seg" id="country-seg" style="max-width:360px;margin:0 auto;">
         <button data-c="italia" class="on" onclick="setCountry('italia')">Italia</button>
         <button data-c="francia" onclick="setCountry('francia')">Francia</button>
@@ -129,16 +129,16 @@
            (paese → linea del tempo), e chi entra da lì trova qui sopra un'ETICHETTA con la porta scelta.
            ⚠ Il difetto che L57-1 aveva scoperto NON torna: la pagina storica genera le porte da `SCENARI`
            (`portePaese`), quindi una porta nuova continua a comparire da sola. La misura lo verifica contando. -->
-      <div data-i18n style="font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--mut);margin:16px 0 7px;">Il tuo partito</div>
+      <div data-i18n class="crea-etich" style="margin-top:16px;">Il tuo partito</div>
       <div class="cands" id="party-list" style="max-width:360px;margin:0 auto;"></div>
-      <div data-i18n style="font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--mut);margin:18px 0 7px;">Difficoltà</div>
+      <div data-i18n class="crea-etich" style="margin-top:18px;">Difficoltà</div>
       <div class="seg" id="diff-seg" style="max-width:360px;margin:0 auto;">
         <button data-i18n onclick="setDiff('facile',this)">Facile</button>
         <button class="on" data-i18n onclick="setDiff('normale',this)">Normale</button>
         <button data-i18n onclick="setDiff('difficile',this)">Difficile</button>
       </div>
       <div id="diff-desc" data-i18n style="font-size:12px;color:var(--mut2);margin:8px auto 16px;max-width:360px;">Bilanciamento standard.</div>
-      <div data-i18n style="font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--mut);margin:16px 0 7px;">Ruolo</div>
+      <div data-i18n class="crea-etich" style="margin-top:16px;">Ruolo</div>
       <div class="seg" id="mode-seg" style="max-width:360px;margin:0 auto;">
         <button class="on" data-i18n onclick="setMode('governo',this)">Al governo</button>
         <button data-i18n onclick="setMode('opposizione',this)">All'opposizione</button>

@@ -289,7 +289,8 @@ function suonoGiornale(){ return audioAnno()>=2000 ? suonoPreferito('notifica','
    KICKER E TITOLO, con la tabella qui sotto, la prima riga che risponde. MAI su un pilastro-cronaca (`cronaca:true`, che è muto
    del tutto) e MAI su una tragedia (`tono:'grave'`). Le parole sono radici scritte a mano, lette sul testo SORGENTE (italiano).
    ⚑ L118-1 · il terzo giro: righe nuove, con un quarto campo facoltativo — `id` (una regola sull'id della carta: i beat del
-   retroscena sono `rb_…`), `prima` (l'anno sotto cui la riga vale: `radio`, `telex`), `dal` (l'anno da cui vale: `notifica`).
+   retroscena sono `rb_…`), `prima` (l'anno sotto cui la riga vale: `radio`, `telex`), `dal` (l'anno da cui vale: `notifica`) e, dal L142-1, `noKind` (i tipi di carta
+   che la riga salta: `campane` non suona per la vita privata, `personale`).
    Una riga il cui nome NON HA FILE si salta (`audioHaFile`): la carta suona come prima finché il file non arriva. Le righe nuove
    stanno PRIMA di quelle vecchie che coprono lo stesso tema (`borsa` prima di `allarme` sui mercati), così quando il file arriva
    il suono specifico vince sul generico — e prima delle righe per SPECIE (`macchina` prende tutti i dossier: `cantiere` e `treno`
@@ -316,7 +317,7 @@ const SUONO_CARTA = [
   ['bussare',  ['ministro','rimpasto','premier'], /udienza|visita|colloquio|palazzo|istituzioni|quirinale|eliseo/i],
   ['stretta',  [],                            /accordo|intesa|patto|alleanz/i],
   ['bicchieri',[],                            /brindisi|festegg|celebra/i],
-  ['campane',  [],                            /festa nazionale|anniversari|liberazione|giubileo|14 luglio|bastiglia/i],
+  ['campane',  [],                            /festa nazionale|anniversari|liberazione|giubileo|14 luglio|bastiglia/i, { noKind:['personale'] }],   // L142-1: le campane sono della piazza, non di casa — «L'anniversario» della vita privata non le suona (la radice `anniversari` resta: serve alle feste nazionali)
   ['folla',    [],                            /campagna elettorale|comizio/i]
 ];
 function suonoCarta(item){
@@ -328,6 +329,7 @@ function suonoCarta(item){
     if(!audioHaFile(R[0])) continue;                                   // L118-1: niente file, niente riga
     if(O.prima && anno>=O.prima) continue;
     if(O.dal && anno<O.dal) continue;
+    if(O.noKind && O.noKind.indexOf(item.kind)>=0) continue;          // L142-1: una riga può escludere un tipo di carta (campane: non la vita privata)
     if(R[1].indexOf(item.kind)>=0 || R[2].test(testo) || (O.id && O.id.test(String(d.id||'')))) return R[0]; }
   return null;
 }
