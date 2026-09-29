@@ -410,6 +410,13 @@ const MUSICA_PRESENTI = ['mus-1950.mp3','mus-1960.mp3','mus-1970.mp3','mus-1980.
 const MUSICA_CHIAVE = 'hos_musica', MUSICA_GAIN = 0.35, MUSICA_XFADE_S = 2.5, MUSICA_DUCK_S = 0.8;
 let MUSICA_DIR = 'assets/audio/';     // `let`: la pagina di prova di L114-1 la punta ai segnaposto di .claude/musica-prova/
 let MUSICA_BUF = {}, MUSICA_CARICO = {}, MUSICA_ORA = null, MUSICA_VOCE = null, MUSICA_ZITTA = false;
+/* L146-1 · SOTTO LA VOCE: mentre parla la voce di una clip di partenza la musica scende a ×0,3 (≈ −10 dB) e poi torna piena.
+   Non è un secondo meccanismo: il livello del brano lo decide UN punto solo, `musica()`, fra tre gradini — zero sotto un
+   pilastro-tragedia (vince sempre), sotto-voce, pieno — e `musicaParti` parte al gradino in vigore. `MUSICA_SOTTOVOCE` lo
+   accende e lo spegne `musicaSottovoce()` (la chiama ui.js, `apriPartenza`/`chiudiPartenza`). Transitorio, mai in S. */
+const MUSICA_SOTTOVOCE_K = 0.3;
+let MUSICA_SOTTOVOCE = false, MUSICA_LIVELLO = 1;
+function musicaSottovoce(on){ on=!!on; if(on===MUSICA_SOTTOVOCE) return; MUSICA_SOTTOVOCE=on; musica(); }
 let MUSICA_FORZATA = null, MUSICA_FORZATA_S = null;
 let MUSICA_GIRO = {};                 // L118-1: {tema: n} — quanti giri ha fatto il tema; il resto sceglie A o B. Transitorio
 let MUSICA_REGISTRO = [];             // {brano, t, esito} — la sequenza dei cambi, per le misure; transitorio
@@ -494,7 +501,7 @@ function musicaParti(brano){
   const tema=musicaTema(brano), alterna=musicaVarianti(tema).length>1;
   src.buffer=buf; src.loop=!!M.loop && !alterna; g.gain.setValueAtTime(0, t);
   const pieno=(M.gain!=null)?M.gain:MUSICA_GAIN;       // L114-2: il gain del brano, sul volume misurato
-  g.gain.linearRampToValueAtTime(MUSICA_ZITTA?0:pieno, t+MUSICA_XFADE_S);
+  g.gain.linearRampToValueAtTime(pieno*MUSICA_LIVELLO, t+MUSICA_XFADE_S);   // L146-1: al gradino in vigore (zero, sotto-voce, pieno)
   src.connect(g); g.connect(AUDIO_BUS.musica||AUDIO_MASTER_GAIN); src.start();   // L118-1: sul bus della musica (il cursore)
   const V={ brano:brano, src:src, g:g, pieno:pieno, t0:t, dur:buf.duration };
   MUSICA_VOCE=V;
@@ -531,12 +538,12 @@ function musica(stato){
     if(!musicaAccesa()){ if(MUSICA_VOCE) musicaFerma(); return; }
     if(!AUDIO_CTX) return;                             // prima del primo gesto: niente (la prossima resa riprova)
     const brano=musicaScelta();
-    /* il volume: a zero per la durata di un pilastro-tragedia, poi torna */
-    const zitta=musicaTragedia();
-    if(zitta!==MUSICA_ZITTA){ MUSICA_ZITTA=zitta;
+    /* il volume: a zero per la durata di un pilastro-tragedia, poi torna; sotto una voce di partenza a ×0,3 (L146-1). La tragedia vince. */
+    const zitta=musicaTragedia(), liv=zitta?0:(MUSICA_SOTTOVOCE?MUSICA_SOTTOVOCE_K:1);
+    if(liv!==MUSICA_LIVELLO){ MUSICA_ZITTA=zitta; MUSICA_LIVELLO=liv;
       if(MUSICA_VOCE){ const t=AUDIO_CTX.currentTime, g=MUSICA_VOCE.g.gain;
-        try{ g.cancelScheduledValues(t); g.setValueAtTime(g.value, t); g.linearRampToValueAtTime(zitta?0:(MUSICA_VOCE.pieno||MUSICA_GAIN), t+MUSICA_DUCK_S); }catch(e){} }
-      musicaSegna(brano, zitta?'a zero (tragedia)':'torna'); }
+        try{ g.cancelScheduledValues(t); g.setValueAtTime(g.value, t); g.linearRampToValueAtTime((MUSICA_VOCE.pieno||MUSICA_GAIN)*liv, t+MUSICA_DUCK_S); }catch(e){} }
+      musicaSegna(brano, zitta?'a zero (tragedia)':(liv<1?'sotto la voce':'torna')); }
     /* il successivo probabile: il brano della campagna due mesi prima che cominci */
     try{ if(typeof meseMandato==='function' && S && S.livello===3){ const fine=(PAESE.mandatoMesi||60), mm=meseMandato(); if(mm>=fine-8 && mm<fine-6) musicaCarica('mus-campagna'); } }catch(e){}
     if(brano===MUSICA_ORA) return;

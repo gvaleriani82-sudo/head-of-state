@@ -753,9 +753,31 @@ function avviaRuolo(){
    · IL FILE SI CHIEDE SOLO QUI: il <video> nasce con `src` in questo momento; prima nessun nodo nomina `partenza-*`.
    · Le altre clip (la carta testimone) si fermano finché c'è il velo e ripartono dopo. Transitorio: niente in S.
    · La clip: `partenza-<livello>` in VIDEO_PRESENTI (scenes.js, sotto la guardia degli asset); dall'opposizione è il capo.
+   · L146-1 (29/9) · LA VOCE E I SOTTOTITOLI. La clip resta muta; la voce è un file a parte (`PARTENZA_VOCE`, scenes.js), in un
+     <audio> nato qui e tolto alla chiusura (il file si chiede solo qui, come la clip). Parte al PRIMO `playing` del video (un
+     video che bufferizza non la lascia avanti). Il sonoro segue `audioVivo()` come l'intro: spento o silenziato = voce MUTA, che
+     scorre lo stesso e tiene a tempo i sottotitoli; se il browser nega il play col sonoro, ripiego muto. La chiusura automatica
+     aspetta la fine di ENTRAMBE: la clip che finisce prima resta sull'ultimo fotogramma (decisione di Giacomo, niente tagli);
+     «Salta», tocco ed Esc chiudono subito e fermano la voce. Una voce che non arriva (`error`) = la clip come prima.
+     I sottotitoli seguono la VOCE, non il video: la traccia sta sull'<audio> in modalità `hidden` e i cue attivi si scrivono
+     in `#partenza-sott`, sempre visibili, nella lingua del gioco. Mentre la voce suona (non muta) la musica scende a ×0,3
+     (`musicaSottovoce`, audio.js: lo stesso punto che la porta a zero sotto una tragedia). Dall'opposizione niente voce né
+     sottotitoli: la clip è quella del capo del governo e la voce dice «Govern.» (letto da `S.opposizione` dopo l'avvio).
    ================================================================================================================ */
 const PARTENZA_NOMI={0:'attivista', 1:'locale', 2:'ministro', 3:'capo', 5:'diplomatico'};
-let PARTENZA_APERTA=false, PARTENZA_FERME=[];
+let PARTENZA_APERTA=false, PARTENZA_FERME=[], PARTENZA_FINE={clip:false, voce:true};
+function partenzaVoce(nome){       // L146-1: la voce della clip, o null (dall'opposizione, o senza dichiarazione)
+  const k=String(nome||'').replace(/^partenza-/, '');
+  const PV=(typeof PARTENZA_VOCE!=='undefined' && PARTENZA_VOCE) ? PARTENZA_VOCE[k] : null;
+  if(!PV || !PV.voce) return null;
+  if(k==='capo' && typeof S!=='undefined' && S && S.opposizione) return null;
+  return PV;
+}
+function partenzaFinita(chi){      // L146-1: si chiude da sola solo quando clip e voce sono finite tutte e due
+  PARTENZA_FINE[chi]=true;
+  if(chi==='voce'){ try{ if(typeof musicaSottovoce==='function') musicaSottovoce(false); }catch(e){} }
+  if(PARTENZA_FINE.clip && PARTENZA_FINE.voce) chiudiPartenza();
+}
 function partenzaDelRuolo(){
   const n=PARTENZA_NOMI[(CREA && CREA.livello!=null) ? CREA.livello : 3];
   const nome=n ? 'partenza-'+n : null;
@@ -768,14 +790,32 @@ function apriPartenza(nome){
   PARTENZA_FERME=[]; try{ document.querySelectorAll('video').forEach(function(v){ if(!v.paused){ v.pause(); PARTENZA_FERME.push(v); } }); }catch(e){}
   const el=document.createElement('div');
   el.id='partenza'; el.setAttribute('role','dialog'); el.setAttribute('aria-label', T('Inizio della carriera'));
+  const PV=partenzaVoce(nome), lin=(typeof curLang==='function' && curLang()==='en')?'en':'it', st=PV ? (PV.sottotitoli||{})[lin] : null;
+  PARTENZA_FINE={clip:false, voce:!PV};
   el.innerHTML='<video id="partenza-video" src="'+VIDEO_DIR+nome+'.mp4" poster="assets/scenes/'+nome+'.webp" muted playsinline preload="auto" disablepictureinpicture></video>'
+    +(PV ? '<audio id="partenza-voce" src="'+VIDEO_DIR+PV.voce+'" preload="auto">'
+        +(st ? '<track kind="subtitles" srclang="'+lin+'" label="'+(lin==='en'?'English':'Italiano')+'" src="'+VIDEO_DIR+st+'">' : '')+'</audio>'
+        +'<div id="partenza-sott" aria-live="polite"><span></span></div>' : '')
     +'<button id="partenza-salta" type="button">'+T('Salta')+'</button>';
   el.addEventListener('click', chiudiPartenza);            // un tocco ovunque salta (anche su «Salta»)
   document.body.appendChild(el);
   const v=document.getElementById('partenza-video');
   v.muted=true;
-  v.addEventListener('ended', chiudiPartenza, {once:true});
+  v.addEventListener('ended', function(){ partenzaFinita('clip'); }, {once:true});   // L146-1: finita la clip, aspetta la voce (ultimo fotogramma)
   v.addEventListener('error', chiudiPartenza, {once:true});   // un file che non arriva non lascia lo schermo nero
+  if(PV){ const a=document.getElementById('partenza-voce'), sott=document.querySelector('#partenza-sott span');
+    try{ a.muted=!(typeof audioVivo==='function' && audioVivo()); }catch(e){ a.muted=true; }
+    try{ const tt=a.textTracks && a.textTracks[0];
+      if(tt){ tt.mode='hidden';
+        tt.addEventListener('cuechange', function(){ try{ const c=tt.activeCues, r=[]; for(let i=0;c && i<c.length;i++) r.push(c[i].text);
+          sott.textContent=r.join('\n'); sott.parentNode.classList.toggle('on', r.length>0); }catch(e){} }); } }catch(e){}
+    a.addEventListener('playing', function(){ if(!a.muted && PARTENZA_APERTA){ try{ if(typeof musicaSottovoce==='function') musicaSottovoce(true); }catch(e){} } }, {once:true});
+    a.addEventListener('ended', function(){ partenzaFinita('voce'); }, {once:true});
+    a.addEventListener('error', function(){ try{ sott.textContent=''; sott.parentNode.classList.remove('on'); }catch(e){} partenzaFinita('voce'); }, {once:true});
+    /* parte col primo `playing` del video; se il browser nega il sonoro, muta (i sottotitoli restano a tempo) */
+    v.addEventListener('playing', function(){ if(!PARTENZA_APERTA) return;
+      try{ const p=a.play(); if(p && p.catch) p.catch(function(){ try{ if(!PARTENZA_APERTA) return; a.muted=true; const q=a.play(); if(q && q.catch) q.catch(function(){}); }catch(e){} }); }catch(e){} }, {once:true});
+  }
   try{ const p=v.play(); if(p && p.catch) p.catch(function(){}); }catch(e){}
   document.addEventListener('keydown', partenzaTasto, true);
   try{ if(typeof musica==='function') musica(); if(typeof ambiente==='function') ambiente(); }catch(e){}   // la musica d'epoca parte ora, sotto la clip
@@ -788,9 +828,11 @@ function chiudiPartenza(){
   PARTENZA_APERTA=false;
   document.removeEventListener('keydown', partenzaTasto, true);
   const el=document.getElementById('partenza');
-  if(el){ el.id='partenza-uscente'; const v=el.querySelector('video');
+  if(el){ el.id='partenza-uscente'; const v=el.querySelector('video'), a=el.querySelector('audio');
     try{ if(v){ v.pause(); v.removeAttribute('src'); v.load(); } }catch(e){}   // smette di scaricare
+    try{ if(a){ a.pause(); a.removeAttribute('src'); a.load(); } }catch(e){}   // L146-1: e la voce tace subito
     el.classList.remove('on'); setTimeout(function(){ try{ el.remove(); }catch(e){} }, 400); }
+  try{ if(typeof musicaSottovoce==='function') musicaSottovoce(false); }catch(e){}   // L146-1: la musica torna piena
   PARTENZA_FERME.forEach(function(v){ try{ if(v.isConnected){ const p=v.play(); if(p && p.catch) p.catch(function(){}); } }catch(e){} }); PARTENZA_FERME=[];
 }
 function confermaCreazione(){ proseguiAvvio(); }                  // CREA resta: initStatoBase la consuma

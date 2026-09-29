@@ -445,6 +445,23 @@
       .modal:has(> .mscene-box:first-child) > .mscene-box .mscene{ max-height:none; }
     }
   }
+  /* L146-2 (29/9) · IL FINALE A DUE COLONNE, sopra i 1000 px in orizzontale: la scena (la scatola di `scenaMomentoHtml`, primo
+     figlio di #over) a sinistra, 16:9 con le proporzioni del file e ferma in alto (sticky) mentre la colonna destra scorre;
+     bandiera, titolo, storia, verdetto, statistiche e la barra «Gioca di nuovo» (sticky in fondo, come oggi) a destra. Il segno
+     è la scena stessa — `#over:has(> .mscene-box:first-child)` — senza classi messe da javascript; un finale senza scena, o
+     un browser senza :has(), resta a una colonna. ⚠ Non una griglia: `gameOver` mette `display:block` IN LINEA su #over (e `none`
+     gli altri), che vincerebbe su qualunque `display` qui; quindi la scena FLOTTA a sinistra (sticky) e il resto le sta accanto
+     col margine. La scatola non si sposta nel DOM: la clip (VIDEO_VIVI) non se ne accorge, e il
+     finale per morte resta `ferma` come prima. Misura del bersaglio, calcolata PRIMA sulle altezze vere (non 960×540: la scena
+     del finale era già 440×200, `.mscene-box.fin`): a 1024 mandato compiuto 1,62 → 1,35 schermate, sconfitta 1,41 → 1,14. */
+  @media (min-width:1000px) and (orientation:landscape){
+    @supports selector(:has(> a)){
+      #over:has(> .mscene-box:first-child) > .mscene-box{ float:left; position:sticky; top:14px; width:calc(50% - 10px); max-width:none; margin:14px 0 0; }
+      #over:has(> .mscene-box:first-child) > .mscene-box .mscene{ max-height:none; }
+      #over:has(> .mscene-box:first-child) > :not(.mscene-box){ margin-left:calc(50% + 10px); }
+      #over:has(> .mscene-box:first-child)::after{ content:''; display:block; clear:both; }
+    }
+  }
   /* L9-1 — NOTTE elettorale: la scena come SFONDO (velo scuro sotto il testo, non immagine in cima). Lo sfondo vive su
      un WRAPPER dentro l'innerHTML (rigenerato a ogni render → nessuna classe che resta appiccicata al #modal riusato).
      I risultati (barre/righe) restano in un pannello opaco per la leggibilità; a 375px niente full-bleed rotto. */
@@ -766,6 +783,17 @@
     #game.con-tavolo main.sale{ animation:cassettoLato .26s cubic-bezier(.2,.7,.3,1); }
     body:not(.notte-sul-tavolo) #game.con-tavolo.cassetto-aperto .tavolo{ margin-right:var(--cassetto-lato); }   /* la notte (L113-5) sposta lo stesso nodo a tutta larghezza: non si tocca */
   }
+  /* L146-2 (29/9) · LA NOTTE A DUE COLONNE, sopra i 1000 px in orizzontale: in orizzontale l'altezza è poca, e la notte di L113-5
+     la divideva (tavolo 42% sopra, foglio 58% sotto: il foglio scorreva di 2-29 px a 1024). Qui il tavolo — lo stesso nodo, che
+     `notteTavolo()` sposta come sempre — sta a sinistra a tutta altezza, e il foglio a destra in una colonna larga come il
+     cassetto (460) e alta quanto la finestra; il velo diventa laterale. Solo CSS: il viewBox col «meet» adatta il disegno al
+     riquadro, righe e pieno come prima. `--notte-lato` è propria (la sonda la usa per togliere il blocco e misurare il prima). */
+  @media (min-width:1000px) and (orientation:landscape){
+    :root{ --notte-lato:460px; }
+    body.notte-sul-tavolo #game.con-tavolo .tavolo{ right:var(--notte-lato); height:100vh; height:100dvh; }
+    .ov.notte-tavolo{ align-items:stretch; justify-content:flex-end; background:linear-gradient(90deg, rgba(20,22,28,0) calc(100% - var(--notte-lato)), rgba(20,22,28,.55) calc(100% - var(--notte-lato))); }
+    .ov.notte-tavolo .modal{ width:var(--notte-lato); max-width:var(--notte-lato); height:100vh; height:100dvh; max-height:100dvh; margin:0; border-radius:18px 0 0 18px; border-bottom:1px solid var(--line2); border-right:0; }
+  }
   /* L113-3 · I SEGNALINI delle carte (ui.js, aggiornaSegnalini): un disco carta/oro coi colori del mondo, uguali nei due temi.
      Il gruppo `.tv-seg-s` è scalato a pixel reali dal javascript: qui le misure sono in pixel (disco 26, bersaglio 44). */
   .tv-seg{ cursor:pointer; outline:none; }
@@ -878,5 +906,13 @@
     padding:8px 16px; border:1px solid rgba(255,255,255,.35); border-radius:22px; background:rgba(0,0,0,.45); color:#f3efe6;
     font-family:inherit; font-size:13px; font-weight:500; letter-spacing:.04em; cursor:pointer;}
   #partenza-salta:focus-visible{outline:2px solid #f3efe6; outline-offset:2px;}
+  /* L146-1: i sottotitoli della voce di partenza — seguono la VOCE (un <audio> con la traccia `hidden`), scritti qui da ui.js */
+  #partenza-sott{position:absolute; left:max(16px, env(safe-area-inset-left)); right:max(16px, env(safe-area-inset-right)); bottom:max(28px, calc(env(safe-area-inset-bottom) + 16px));
+    text-align:center; pointer-events:none; opacity:0; transition:opacity .2s ease;}
+  #partenza-sott.on{opacity:1;}
+  #partenza-sott span{display:inline-block; max-width:44em; padding:4px 10px; border-radius:4px; background:rgba(0,0,0,.62); color:#f3efe6; white-space:pre-line;
+    font-family:'IBM Plex Sans',system-ui,sans-serif; font-size:clamp(16px, 2.8vmin, 24px); line-height:1.35;}
+  /* in verticale la clip (16:9, a tutta larghezza) è una fascia in mezzo: i sottotitoli le stanno subito sotto, non in fondo allo schermo */
+  @media (orientation:portrait){ #partenza-sott{top:calc(50% + 28.125vw + 14px); bottom:auto;} }
   .intro-rivedi{display:block; margin:10px auto 2px; min-height:44px; padding:8px 14px; border:1px solid var(--line); background:var(--bg2); color:inherit;
     border-radius:9px; font-size:12px; font-family:inherit; cursor:pointer;}

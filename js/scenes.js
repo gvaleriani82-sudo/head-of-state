@@ -131,6 +131,18 @@ const VIDEO_PRESENTI = ['home-hero', 'partito-base', 'vitaprivata-base', 'retro-
    primo tocco sulla home, una volta per dispositivo. Montaggio di Cowork: `arte-sorgente/intro/monta.sh`. */
 const INTRO_VIDEO = { clip:'intro.mp4', poster:'intro.webp', sottotitoli:{ it:'intro.it.vtt', en:'intro.en.vtt' } };
 
+/* ===== L146-1 — LA VOCE DELLE CLIP DEL PUNTO DI PARTENZA (`assets/video/partenza-<nome>.voce.mp3` e `.it/.en.vtt`). La voce
+   (ElevenLabs, voce «Statista» come l'intro) NON è dentro l'mp4: è un file a parte, perché la clip deve poter restare ferma
+   sull'ultimo fotogramma mentre la voce finisce. La chiave è il nome di `PARTENZA_NOMI` (ui.js). Stessa guardia delle altre
+   liste (`.claude/verifica-asset.js`): dichiarato = in cartella, in cartella = dichiarato, una voce ≤ 300 KB. I tempi dei cue
+   sono MISURATI sulla voce (`.claude/partenza-voce/pause-cdp.js` → `cue.js`), non stimati. */
+const PARTENZA_VOCE = {
+  attivista:   { voce:'partenza-attivista.voce.mp3',   sottotitoli:{ it:'partenza-attivista.it.vtt',   en:'partenza-attivista.en.vtt' } },
+  locale:      { voce:'partenza-locale.voce.mp3',      sottotitoli:{ it:'partenza-locale.it.vtt',      en:'partenza-locale.en.vtt' } },
+  ministro:    { voce:'partenza-ministro.voce.mp3',    sottotitoli:{ it:'partenza-ministro.it.vtt',    en:'partenza-ministro.en.vtt' } },
+  capo:        { voce:'partenza-capo.voce.mp3',        sottotitoli:{ it:'partenza-capo.it.vtt',        en:'partenza-capo.en.vtt' } },
+  diplomatico: { voce:'partenza-diplomatico.voce.mp3', sottotitoli:{ it:'partenza-diplomatico.it.vtt', en:'partenza-diplomatico.en.vtt' } } };
+
 /* ===== L127-3 — LE SCENE DEL PAESE (`assets/scenes/<scena>-<paese>.webp`, <paese> = un id di PAESI). Decisione di Giacomo
    del 27/9: le bandiere nazionali sono ammesse SOLO in un'immagine legata a un paese; una scena che il gioco mostra ovunque
    non ne ha. Quinta lista-promessa, stesso contratto delle altre: `scenaSrc` (ui.js) preferisce `<file scelto>-<S.paese>`
