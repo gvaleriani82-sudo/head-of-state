@@ -820,17 +820,20 @@ function renderCreazione(){
   const seg=(campo,opts)=>`<div class="seg" style="max-width:360px;margin:0 auto;">`+opts.map(o=>`<button class="${C[campo]===o.v?'on':''}" onclick="setCrea('${campo}',${typeof o.v==='string'?`'${o.v}'`:o.v})">${o.l}</button>`).join('')+`</div>`;
   const nota=t=>`<div style="font-size:12px;color:var(--mut2);margin:8px auto 0;max-width:360px;">${t}</div>`;
   let h='';
+  /* L145-1 · ogni campo in un contenitore (.crea-campo): sotto i 1000 px è display:contents (nessuna differenza), sopra è un
+     pezzo delle due colonne bilanciate di #crea-campi, che non si spezza fra le due (style.css). */
+  const campo=()=>'<div class="crea-campo">', fine='</div>';
   /* IDENTITÀ in cima (campi principali, indipendenti dal livello): nome e GENERE ben visibili.
      nome: oninput aggiorna CREA senza re-render (il re-render farebbe perdere il focus a ogni tasto) */
-  h+=tit(T('Nome'));
-  h+=`<input id="crea-nome" value="${escAttr(C.nome)}" oninput="if(CREA)CREA.nome=this.value" placeholder="${T('Il tuo nome (facoltativo)')}" maxlength="24" style="width:100%;max-width:360px;text-align:center;background:var(--panel);border:1px solid var(--line2);border-radius:9px;padding:8px 10px;color:var(--txt);font-family:inherit;font-size:14px">`;
-  h+=tit(T('Genere'))+seg('genere',[{v:'m',l:T('Uomo')},{v:'f',l:T('Donna')}]);
-  h+=nota(T('Solo narrativo: cambia qualche testo, mai i numeri. I titoli istituzionali restano invariabili.'));
+  h+=campo()+tit(T('Nome'));
+  h+=`<input id="crea-nome" value="${escAttr(C.nome)}" oninput="if(CREA)CREA.nome=this.value" placeholder="${T('Il tuo nome (facoltativo)')}" maxlength="24" style="width:100%;max-width:360px;text-align:center;background:var(--panel);border:1px solid var(--line2);border-radius:9px;padding:8px 10px;color:var(--txt);font-family:inherit;font-size:14px">`+fine;
+  h+=campo()+tit(T('Genere'))+seg('genere',[{v:'m',l:T('Uomo')},{v:'f',l:T('Donna')}]);
+  h+=nota(T('Solo narrativo: cambia qualche testo, mai i numeri. I titoli istituzionali restano invariabili.'))+fine;
   /* Volto: badge ~72px dai 10 AVATARS illustrati (L11-2) + opzione «Nessuno» (iniziale) + la tua foto.
      Tondo 88→72px con 10 volti: 4 per riga a 375px (3 righe invece di 4, blocco ~250px anziché 379).
      Solo estetico: non tocca i numeri. Se AVATARS non è caricato, la sezione si omette. */
   if(typeof AVATARS!=='undefined' && AVATARS.length){
-    h+=tit(T('Volto (facoltativo)'));
+    h+=campo()+tit(T('Volto (facoltativo)'));
     h+=`<div style="display:flex;flex-wrap:wrap;gap:9px;justify-content:center;max-width:360px;margin:0 auto;">`;
     h+=`<button onclick="setCrea('avatar',null)" title="${T('Nessun volto')}" style="width:72px;height:72px;border-radius:50%;border:2px solid ${C.avatar==null?'var(--brand)':'var(--line2)'};background:var(--panel);color:var(--mut);font-family:inherit;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;">${T('Nessuno')}</button>`;   /* L69-1: 11px → 12 */
     h+=AVATARS.map(function(a){ const sel=C.avatar===a.id;
@@ -847,10 +850,10 @@ function renderCreazione(){
       h+=`<button onclick="document.getElementById('crea-foto').click()" title="${T('Carica la tua foto')}" style="width:72px;height:72px;border-radius:50%;border:2px dashed var(--line2);background:var(--panel);color:var(--mut);font-family:inherit;font-size:12px;line-height:1.15;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:5px;"><span style="font-size:19px;line-height:1">+</span>${T('La tua foto')}</button>`;   /* L69-1: 10,5px → 12 (il «+» scende a 19 per far stare l'etichetta nei 72px) */
     }
     h+=`</div>`;
-    h+=nota(T('Scegli un volto per il tuo personaggio, o lascia l\'iniziale del nome.'));
+    h+=nota(T('Scegli un volto per il tuo personaggio, o lascia l\'iniziale del nome.'))+fine;
   }
   /* punto di partenza (lotto ascesa): dal politico locale fino al capo del governo — la stessa carriera, da gradini diversi */
-  h+=tit(T('Punto di partenza'))+seg('livello',[{v:0,l:T('Attivista')},{v:1,l:T('Politico locale')},{v:2,l:T('Ministro')},{v:3,l:T('Capo del governo')},{v:5,l:T('Diplomatico')}]);
+  h+=campo()+tit(T('Punto di partenza'))+seg('livello',[{v:0,l:T('Attivista')},{v:1,l:T('Politico locale')},{v:2,l:T('Ministro')},{v:3,l:T('Capo del governo')},{v:5,l:T('Diplomatico')}]);
   if(C.livello===0){
     h+=nota(T('Il gradino zero: un attivista di 25 anni, senza carica né bilancio. Costruisci una base militante e la reputazione presso i gruppi, mese dopo mese, fino alla prima candidatura — da cui comincia la scala.'));
   } else if(C.livello===1){
@@ -865,25 +868,27 @@ function renderCreazione(){
   } else if(C.livello===5){
     h+=nota(T('Il percorso alternativo: cominci dalla diplomazia, come Ambasciatore. Non governi mai un paese — sali costruendo rapporti e credito, missione dopo missione, fino alla chiamata a Segretario generale delle Nazioni Unite.'));
   } else h+=nota(T('Il gioco pieno, dall\'insediamento: nomini il governo e guidi il paese.'));
+  h+=fine;
   const etaOpts=(C.livello===0?[25,30,35]:C.livello===1?etaOptLocale(C.terrIdx):C.livello===2?[40,45,50]:C.livello===5?[40,45,50]:[45,50,55,60]);   // A.5 rework: età a scatti di 5
-  h+=tit(T('Età'))+seg('eta',etaOpts.map(n=>({v:n,l:String(n)})));
+  h+=campo()+tit(T('Età'))+seg('eta',etaOpts.map(n=>({v:n,l:String(n)})));
   if(C.livello===1){ const reg=((PAESE.territori||[])[C.terrIdx]||{}).tipo==='regione';
     h+=nota(T(reg?'Presidente di regione: una carica di peso, <b>40-52 anni</b>.':'Sindaco di una grande città: <b>35-48 anni</b>. Col ritmo della scalata, da ~38 si arriva al vertice intorno ai 50.')); }
   else h+=nota(T('Più giovane: più carriera davanti e più energia, meno autorevolezza · Più anziano: più rispetto, meno tempo.'));
-  h+=tit(T('Background professionale'));
+  h+=fine;
+  h+=campo()+tit(T('Background professionale'));
   h+=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;max-width:360px;margin:0 auto;">`
     +[{id:null,nome:'Funzionario di partito'}].concat(BACKGROUNDS).map(b=>
       /* L69-1 — anche questa griglia a norma: era alta 35,1px. Con `min-height` e il centraggio, i nomi
          lunghi («Avvocato / Magistrato») vanno a capo dentro i 44 invece di allargare la colonna. */
       `<button onclick="setCrea('background',${b.id?`'${b.id}'`:'null'})" style="display:flex;align-items:center;justify-content:center;text-align:center;min-height:44px;padding:8px;border-radius:9px;border:1px solid ${C.background===b.id?'var(--brand)':'var(--line2)'};background:${C.background===b.id?'var(--acc-bg)':'var(--panel)'};color:var(--txt);font-family:inherit;font-size:12.5px;line-height:1.2;cursor:pointer;">${T(b.nome)}</button>`).join('')+`</div>`;
   const B=BACKGROUNDS.find(b=>b.id===C.background);
-  h+=nota(B?T(B.desc):T('La politica è la tua professione: nessun credito particolare, nessuna diffidenza.'));
-  h+=tit(T('Famiglia'))+seg('famiglia',[{v:'umili',l:T('Origini umili')},{v:'borghese',l:T('Borghese')},{v:'dinastia',l:T('Dinastia')}]);
+  h+=nota(B?T(B.desc):T('La politica è la tua professione: nessun credito particolare, nessuna diffidenza.'))+fine;
+  h+=campo()+tit(T('Famiglia'))+seg('famiglia',[{v:'umili',l:T('Origini umili')},{v:'borghese',l:T('Borghese')},{v:'dinastia',l:T('Dinastia')}]);
   const F=FAMIGLIE.find(f=>f.id===C.famiglia);
-  h+=nota(F?T(F.desc):'');
-  h+=tit(T('Orientamento personale'))+seg('orientamento',[{v:-2,l:T('Sinistra')},{v:-1,l:T('Centro-sx')},{v:0,l:T('Centro')},{v:1,l:T('Centro-dx')},{v:2,l:T('Destra')}]);
+  h+=nota(F?T(F.desc):'')+fine;
+  h+=campo()+tit(T('Orientamento personale'))+seg('orientamento',[{v:-2,l:T('Sinistra')},{v:-1,l:T('Centro-sx')},{v:0,l:T('Centro')},{v:1,l:T('Centro-dx')},{v:2,l:T('Destra')}]);
   h+=tit(T('Religiosità'))+seg('religiosita',[{v:'laico',l:gnCrea('Laico','Laica')},{v:'credente',l:T('Credente')},{v:'devoto',l:gnCrea('Devoto','Devota')}]);
-  h+=nota(T('Le tue convinzioni personali, non la linea del partito. Per ora solo registrate: conteranno più avanti.'));
+  h+=nota(T('Le tue convinzioni personali, non la linea del partito. Per ora solo registrate: conteranno più avanti.'))+fine;
   el.innerHTML=h;
 }
 /* il participio nella schermata di creazione (S non esiste ancora: legge CREA, non S.personaggio) */

@@ -150,12 +150,14 @@
         <button data-i18n onclick="setMode('opposizione',this)">All'opposizione</button>
       </div>
       <div id="mode-desc" data-i18n style="font-size:12px;color:var(--mut2);margin:8px auto 16px;max-width:360px;">Nomini il tuo governo e guidi il paese (modalità classica).</div>
+      </div></div><!-- /crea-come /crea-2col — L145-1: «Chi sei» sta SOTTO le due colonne, a tutta larghezza (.crea-chi) -->
 
       <!-- SEZIONE 2 — CHI SEI (personaggio, sistema narrativo): campi costruiti da renderCreazione() nel transitorio CREA -->
+      <div class="crea-chi">
       <div data-i18n style="font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--brand);margin:26px 0 4px;font-weight:600;">Chi sei</div>
       <p data-i18n>Dai un volto alla carriera. Ogni scelta è colore e una <b>spinta d'esordio</b> che i mesi riassorbono: poi conta solo come governi.</p>
       <div id="crea-campi"></div>
-      </div></div><!-- /crea-come /crea-2col -->
+      </div><!-- /crea-chi -->
       <!-- input file nascosto per «Carica la tua foto» (fuori da #crea-campi: persiste ai re-render). -->
       <input type="file" id="crea-foto" accept="image/*" style="display:none" onchange="caricaAvatarFile(this)">
       <!-- L140-2: «Avanti» nella barra in fondo (sticky, figlia diretta della pagina), con «Salta» accanto -->

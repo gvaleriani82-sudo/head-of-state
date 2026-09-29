@@ -57,7 +57,10 @@
   button, .tab, .opt, .cand, .mini-btn, .seg button, [onclick]{ touch-action:manipulation; cursor:pointer; }
   html,body{margin:0; background:var(--bg); color:var(--txt);
     font-family:'IBM Plex Sans',sans-serif; font-size:15px; line-height:1.45; -webkit-font-smoothing:antialiased;}
-  body{padding-bottom:96px;}
+  /* L145-1 (29/9): i 96 px per la .endbar fissa di «Avanza» li porta #game, non il body: la barra esiste solo lì (è sua figlia),
+     quindi home, creazione, storici, formazione e finale non li hanno più. Nessuna classe da mettere e togliere: #game nascosto
+     = niente spazio. Con il tavolo (#game.con-tavolo, sotto) lo spazio è zero come prima. */
+  #game{padding-bottom:96px;}
   .mono{font-family:'IBM Plex Mono',monospace; font-feature-settings:"tnum";}
   .wrap{max-width:560px; margin:0 auto; min-height:100vh; position:relative;}
   .tri{height:3px; background:var(--acc);}   /* filetto oro decorativo in cima; la bandiera vera vive nell'header */
@@ -302,7 +305,7 @@
   .endbar .inner{max-width:560px; margin:0 auto; display:flex; align-items:center; gap:12px;}
   /* L140-2 · LA BARRA IN FONDO delle pagine lunghe: il bottone che fa andare avanti sempre in vista. Stessa veste della barra di
      «Avanza» (fondo panel, filo in alto, 11 px sopra e sotto più l'area sicura), ma `sticky` e non `fixed`: la barra di «Avanza» è
-     UNA per la pagina di gioco, fissata alla finestra, e il corpo le lascia 96 px (`body{padding-bottom}`); qui la barra sta nel
+     UNA per la pagina di gioco, fissata alla finestra, e `#game` le lascia 96 px (`padding-bottom`, dal L145-1: prima era il body, su ogni schermata); qui la barra sta nel
      flusso del suo contenitore — la pagina (creazione, formazione, finale) o il `.modal` che scorre (menu Partita) — quindi in fondo
      si ferma DOPO l'ultimo blocco e non lo copre mai. Deve essere figlia diretta del contenitore lungo (una sticky non esce dal
      suo genitore). La usano SOLO quattro punti: #crea-btn, #aptbtn, «Gioca di nuovo» del finale, «Chiudi» del menu Partita. */
@@ -427,6 +430,21 @@
   .mscene-box{ position:relative; overflow:hidden; }
   .mscene-box.fin{ max-width:440px; margin:6px auto 2px; border-radius:14px; }
   .mscene-box.fin .mscene{ max-height:200px; }
+  /* L145-2 (29/9) · I MODALI CON LA SCENA A DUE COLONNE, sopra i 1000 px in orizzontale: la scena a sinistra (16:9, le proporzioni
+     del file, centrata in verticale), kicker, titolo, testo, barra del tempo e scelte a destra. Oggi sono l'esito dell'intervista e
+     la telefonata (squillo e perso): i modali che scrivono una scena-momento IN TESTA a #modal (`scenaMomentoHtml`, non di sfondo;
+     la notte porta .mbg-img dentro .notte-wrap e non è toccata, il finale è una schermata). Il segno «ho una scena» è il primo
+     figlio stesso — `:has(> .mscene-box:first-child)` — così non c'è una classe da mettere e togliere sul #modal che tutti i
+     modali riusano; dove :has() non c'è (@supports), resta il modale di oggi a una colonna. La scatola della scena non si
+     sposta nel DOM: la clip (VIDEO_VIVI, .momento) non se ne accorge. */
+  @media (min-width:1000px) and (orientation:landscape){
+    @supports selector(:has(> a)){
+      .modal:has(> .mscene-box:first-child){ max-width:min(940px, 92vw); display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); grid-template-rows:auto auto auto 1fr; align-items:start; }
+      .modal:has(> .mscene-box:first-child) > *{ grid-column:2; min-width:0; }
+      .modal:has(> .mscene-box:first-child) > .mscene-box{ grid-column:1; grid-row:1 / span 4; align-self:center; margin:14px 0 14px 14px; border-radius:12px; }
+      .modal:has(> .mscene-box:first-child) > .mscene-box .mscene{ max-height:none; }
+    }
+  }
   /* L9-1 — NOTTE elettorale: la scena come SFONDO (velo scuro sotto il testo, non immagine in cima). Lo sfondo vive su
      un WRAPPER dentro l'innerHTML (rigenerato a ogni render → nessuna classe che resta appiccicata al #modal riusato).
      I risultati (barre/righe) restano in un pannello opaco per la leggibilità; a 375px niente full-bleed rotto. */
@@ -498,13 +516,23 @@
   /* L144-2 (29/9) · IPAD IN ORIZZONTALE: CREAZIONE, HOME E STORICI A DUE COLONNE SOPRA I 1000 PX. Solo CSS e contenitori nel
      markup, nessun nodo spostato da javascript, stessi id e onclick. Sotto i 1000 px i contenitori nuovi non esistono per il
      layout (display:contents, come .home-vetrina di L126-2) e .storici-col è la vecchia colonna da 420: tutto come prima. */
-  .crea-2col, .crea-dove, .crea-come{ display:contents; }
+  .crea-2col, .crea-dove, .crea-come, .crea-chi, .crea-campo{ display:contents; }
   .storici-col{ max-width:420px; margin:0 auto; padding:18px 14px 40px; }
   @media (min-width:1000px){
     /* CREAZIONE: a sinistra «La partita — dove» (paese, partito), a destra «come e chi» (difficoltà, ruolo, Chi sei);
        la barra «Avanti» resta a tutta larghezza, sticky, fuori dalla griglia */
     .crea-2col{ display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); column-gap:36px; align-items:start; }
     .crea-dove, .crea-come{ display:block; min-width:0; }
+    /* L145-1: «Chi sei» esce dalle due colonne e sta sotto, a tutta larghezza; i suoi campi (un .crea-campo per campo,
+       renderCreazione) in DUE COLONNE BILANCIATE (columns, non una griglia a coppie): ogni controllo porta già max-width 360
+       nel suo stile, quindi nessun campo è largo per natura, e le coppie a righe lasciavano buchi (età 127 accanto al
+       background 280: misurato, la griglia a coppie faceva 1029 px e la creazione a 1024 saliva a 2,77 schermate). Le colonne
+       leggono dall'alto in basso — nome, genere, volto, punto di partenza | età, background, famiglia, convinzioni — e un
+       campo non si spezza fra le due (break-inside). */
+    .crea-chi{ display:block; }
+    #crea-campi{ columns:2; column-gap:36px; }
+    .crea-campo{ display:block; break-inside:avoid; -webkit-column-break-inside:avoid; page-break-inside:avoid; }
+    .crea-campo > .crea-etich:first-child{ margin-top:0; padding-top:16px; }
     /* HOME: la griglia prende il posto della vetrina di L126-2 (fra 900 e 999 in orizzontale resta quella). A sinistra la
        scena 16:9 larga quanto la colonna; a destra il logo (più piccolo), l'occhiello, il testo, la nota, i bottoni; lingua e
        Suono in alto a tutta larghezza. La vetrina diventa display:contents: il nodo della hero non si sposta nel DOM
@@ -664,7 +692,7 @@
      ============================================================================================================ */
   :root{ --tv-tuo:#c4902a; --tv-avv:#4f6178; --tv-segno:#f2e3b8; --tv-bordo:#3f3d2a; --tv-mare:#3f5058; --endH:72px; }
   .tavolo{ display:none; }
-  body.con-tavolo{ padding-bottom:0; }
+  #game.con-tavolo{ padding-bottom:0; }
   #game.con-tavolo .tavolo{ display:block; position:relative; overflow:hidden;
     height:calc(100vh - var(--hdrH,211px) - var(--endH,72px)); height:calc(100dvh - var(--hdrH,211px) - var(--endH,72px)); min-height:240px;
     background:radial-gradient(ellipse 90% 70% at 30% 18%, rgba(255,226,170,.16), rgba(255,226,170,0) 60%), radial-gradient(ellipse at 50% 50%, #4a5c64 0%, var(--tv-mare) 70%, #2c3a40 100%); }
@@ -722,6 +750,22 @@
   .notte-legenda .nl-pieno{ background:var(--tv-tuo); opacity:.75; margin-left:4px; }
   .notte-tutti summary{ min-height:44px; display:flex; align-items:center; cursor:pointer; font-size:12px; color:var(--mut); }
   html.mov-ridotto #game.con-tavolo main.sale{ animation:secFade .12s ease !important; }
+  /* L145-3 (29/9) · IL CASSETTO A LATO DEL TAVOLO, sopra i 1000 px in orizzontale: il cassetto aperto è una colonna a destra,
+     larga --cassetto-lato (460), dalla testata alla barra di «Avanza», allineata al bordo destro della colonna del gioco (.wrap,
+     960), ed entra DA DESTRA (cassettoLato). Il tavolo, a cassetto aperto, lascia a destra lo spazio della colonna
+     (margin-right): solo CSS, l'<svg> non si riscrive (L113-2) — col viewBox e il «meet» di sempre il disegno si adatta alla
+     larghezza che resta, e aggiornaTavolo, che nello stesso render legge il riquadro dopo il cambio di classe, rifà scala,
+     segnalini, fissi e bersagli sul riquadro nuovo. Il tavolo non si anima (la scala si legge una volta per render).
+     Movimento: la regola unica spegne cassettoLato in ridotto/spento; «ridotto» riaccende la dissolvenza qui sopra, che vince
+     (!important). Sotto i 1000 px e in verticale il cassetto dal basso di sempre. */
+  @keyframes cassettoLato{ from{ transform:translateX(40%); opacity:0; } to{ transform:none; opacity:1; } }
+  @media (min-width:1000px) and (orientation:landscape){
+    #game.con-tavolo{ --cassetto-lato:460px; }
+    #game.con-tavolo main{ top:var(--hdrH,211px); bottom:var(--endH,72px); left:auto; right:max(0px, calc((100vw - 960px) / 2)); width:var(--cassetto-lato); max-width:none; margin:0;
+      max-height:none; border-radius:16px 0 0 16px; box-shadow:-10px 0 28px rgba(0,0,0,.28); }
+    #game.con-tavolo main.sale{ animation:cassettoLato .26s cubic-bezier(.2,.7,.3,1); }
+    body:not(.notte-sul-tavolo) #game.con-tavolo.cassetto-aperto .tavolo{ margin-right:var(--cassetto-lato); }   /* la notte (L113-5) sposta lo stesso nodo a tutta larghezza: non si tocca */
+  }
   /* L113-3 · I SEGNALINI delle carte (ui.js, aggiornaSegnalini): un disco carta/oro coi colori del mondo, uguali nei due temi.
      Il gruppo `.tv-seg-s` è scalato a pixel reali dal javascript: qui le misure sono in pixel (disco 26, bersaglio 44). */
   .tv-seg{ cursor:pointer; outline:none; }
