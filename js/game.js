@@ -208,7 +208,12 @@ const DRIFT_INFLAZIONE_ERA = {
                    seconda fiammata del 1980. Il 1981 (6,3) è di Code (la scheda si ferma al 1980). ⚠ Le righe del 1970-71 le legge anche
                    la coda di de1960 (prima 2,5): dichiarato. */
                 {da:1970, inf:3.4}, {da:1971, inf:5.3}, {da:1972, inf:5.5}, {da:1973, inf:7.0}, {da:1975, inf:6.0}, {da:1976, inf:4.3},
-                {da:1977, inf:3.7}, {da:1978, inf:2.7}, {da:1979, inf:4.1}, {da:1980, inf:5.4}, {da:1981, inf:6.3} ]
+                {da:1977, inf:3.7}, {da:1978, inf:2.7}, {da:1979, inf:4.1}, {da:1980, inf:5.4}, {da:1981, inf:6.3},
+                /* L147-1 · l'80 (scheda PRESET-GERMANIA-1980 §2, ⚠ ordine di grandezza): la disinflazione, il −0,1 del 1986 (il petrolio che
+                   crolla) e il 3,6 dell'unità. Il motore regge l'inflazione negativa: inflazioneAnno() la rende com'è, e il debito la legge
+                   senza pavimenti (model.js, il termine growth+inflazione). */
+                {da:1982, inf:5.3}, {da:1983, inf:3.3}, {da:1984, inf:2.4}, {da:1985, inf:2.1}, {da:1986, inf:-0.1}, {da:1987, inf:0.2},
+                {da:1988, inf:1.3}, {da:1989, inf:2.8}, {da:1990, inf:2.7}, {da:1991, inf:3.6} ]
 };
 function inflazioneAnno(){
   if(typeof S==='undefined' || !S) return 0;
@@ -250,7 +255,16 @@ const DRIFT_DEFICIT_ERA = {
      prima del 1970 (de1950 e de1960 fino al 1969 non ne sono toccate; la coda di de1960 nel 1970-71 sì). 1982 = chiusura. */
   [LINEA_DE]: [ {da:1970, def:-1},   {da:1971, def:0.5},  {da:1972, def:1},    {da:1973, def:-2},   {da:1974, def:-1},
                 {da:1975, def:-1},   {da:1976, def:1.5},  {da:1977, def:0},    {da:1978, def:0},    {da:1979, def:0.5},
-                {da:1980, def:-1},   {da:1981, def:1.5},  {da:1982, def:0} ],
+                {da:1980, def:-1},   {da:1981, def:1.5},
+                /* L147-1 · l'80 (de1980): 30,9 nel 1980 → ~38 (1982) → ~41 (1985-89) → ~42 (1990). La sweep (misura-de1980-struttura.js sweep def
+                   de_cdu) trovava righe erratiche (−8 nel 1984-85: avanzi che la storia non ha) e restava a 8,9 punti di scarto nel 1983, perché le
+                   righe 1980-81 di de1970 (non toccate: il 1981 è dentro la sua finestra) portano già il debito a 37,7 nel 1981. Scelte righe
+                   MODERATE, misurate con misura-de1980-struttura.js economia (CDU dal 1982, 5 semi, luglio): disavanzo reso 4,9 · 2,5 · 1,5 · 1,6 ·
+                   2,0 · 3,4 · 2,3 · 1,7 · 2,7 · 3,4 (1982-91; scheda 3,3 · 2,6 · 1,9 · 1,1 · 1,1 · 1,8 · 2,1 · −0,1 · 2,0 · 2,9), debito 42,3 (1982) →
+                   47,8 (1985) → 53,1 (1989) → 51,5 (1991) contro ~38 → 41 → 41 → 42. ⚠ Il residuo (~+10) nasce nel 1980-81: disavanzo reso 5,8 e 8,9
+                   contro 2,9 e 3,7 della scheda, dalle righe condivise con de1970 — dichiarato, decide Cowork se separarle. */
+                {da:1982, def:-3.5}, {da:1983, def:-4},   {da:1984, def:-4.5}, {da:1985, def:-4.5}, {da:1986, def:-4},
+                {da:1987, def:-3.5}, {da:1988, def:-3.5}, {da:1989, def:-4},   {da:1990, def:-1.5}, {da:1991, def:-0.5} ],
   /* italia1970: 37 nel 1970 → 60 nel 1979, il decennio in cui il debito italiano parte. Chiusa al 1980: la porta
      dell'80 ha il suo seme e non deve ereditare il '79. */
   [LINEA_IT]: [ {da:1970, def:0},    {da:1971, def:6.5},  {da:1972, def:8},    {da:1973, def:5},    {da:1974, def:5.5},
@@ -394,6 +408,7 @@ function initStatoBase(){
   S.notaStalin52=null; S.riarmo55=null; S.riarmo55Opp=null; S.pensioni57=null; S.atomica58=null; S.atomica58Opp=null; S.riparazioni52=null;   // L109-2: il decennio tedesco '50
   S.muro61=null; S.muro61Opp=null; S.spiegel62=null; S.grandeCoal66=null; S.emergenza68=null; S.emergenza68Opp=null;   // L111-2: il decennio tedesco '60
   S.deTrattati72=null; S.deTrattati72Opp=null; S.dePetrolio73=null; S.deSpia74=null; S.deAutunno77=null; S.deAutunno77Opp=null;   // L135-3: il decennio tedesco '70 (⚠ S.petrolio73 è francese)
+  S.deSvolta82=null; S.deSvolta82Opp=null; S.deMissili83=null; S.deMissili83Opp=null; S.deUnita90=null; S.deUnita90Opp=null; S.deMarco90=null; S.deMarco90Opp=null; S.deCapitale91=null;   // L148-2: il decennio tedesco '80 (S.deSvolta82 lo legge la tappa del 1982/10)
   S.scioglimento97=null;   // L103-1: lo scioglimento del '97 (null = storico; 'no' = «aspetta», tappa 1998/3). Lo scrive S4 in L103-2
   S.coabitazione=false;   // L100-2: il Presidente con l'Assemblea degli altri (derivato dai seggi, dato puro, round-trip)
   S.governiCaduti=0;                    // L80-5: quante volte il governo e caduto senza che si andasse a votare
@@ -1440,7 +1455,14 @@ const DRIFT_ECONOMICO_ERA = {
                    Il 1970 resta a 0 (la sweep dava +1): col tetto 9 di de1960 il +1 portava la sua coda a 6,7; a 0 de1960 rende ~5 e de1970 4,8
                    (il suo tetto è il 5 del motore) — uno scarto di 0,2 invece di 1,7. */
                 {da:1970, ciclo:0}, {da:1971, ciclo:-2.5}, {da:1972, ciclo:0}, {da:1973, ciclo:0}, {da:1974, ciclo:-4.5}, {da:1975, ciclo:-6},
-                {da:1976, ciclo:0}, {da:1977, ciclo:-2.5}, {da:1978, ciclo:-2}, {da:1979, ciclo:-0.5}, {da:1980, ciclo:-4.5}, {da:1981, ciclo:-5} ]
+                {da:1976, ciclo:0}, {da:1977, ciclo:-2.5}, {da:1978, ciclo:-2}, {da:1979, ciclo:-0.5}, {da:1980, ciclo:-4.5}, {da:1981, ciclo:-5},
+                /* L147-1 · l'80 (de1980, crescita di partenza 4,5, tetto 5 del motore), CERCATO con la sweep (misura-de1980-struttura.js sweep ciclo
+                   de_cdu, CDU partita all'opposizione e al governo dal 1982/10, 5 semi, luglio): resa 1,1 · 0,5 · **−0,7 (la recessione del 1982)** · 1,9 ·
+                   2,6 · 2,4 · 2,4 · 1,7 · 3,5 · 3,9 · 5,0 · 5,0 contro la scheda 1,4 · 0,5 · −0,4 · 1,6 · 2,8 · 2,2 · 2,4 · 1,5 · 3,7 · 3,9 · 5,3 · 5,1, scarto
+                   massimo 0,32. Il 1990-91 sta sul tetto del 5 (la scheda dice 5,3 e 5,1): tre decimi, `crescitaTetto` non serve (dichiarato). Le righe
+                   1980-81 sono quelle di de1970 (la sua coda) e non si toccano. Prima di queste righe il −5 del 1981 valeva per sempre. */
+                {da:1982, ciclo:-6.5}, {da:1983, ciclo:-3}, {da:1984, ciclo:-2.5}, {da:1985, ciclo:-3.5}, {da:1986, ciclo:-2.5}, {da:1987, ciclo:-4},
+                {da:1988, ciclo:-1.5}, {da:1989, ciclo:-1.5}, {da:1990, ciclo:0.5}, {da:1991, ciclo:0.5} ]
 };
 /* L60-2 · LA DISOCCUPAZIONE D'EPOCA. Il motore non aveva un posto dove un decennio potesse dire «qui i senza
    lavoro sono il doppio»: `S.uMod` decade dell'80% al mese e le carte danno solo colpi. Stessa forma di cicloBase():
@@ -1500,7 +1522,14 @@ const DRIFT_DISOCCUPAZIONE_ERA = {
                    2,6 · 4,7 · 4,6 · 4,5 · 4,3 · 3,8 · 3,8 (1981 5,5 di Code), scarto massimo 0,09. ⚠ Sostituiscono le righe 1970-71 di de1960 (−6,25 e −7):
                    la coda di de1960 le eredita (dichiarato). */
                 {da:1970, un:-6.75}, {da:1971, un:-8.25}, {da:1972, un:-6.75}, {da:1973, un:-6.5}, {da:1974, un:-7}, {da:1975, un:-6},
-                {da:1976, un:-4.25}, {da:1977, un:-4.25}, {da:1978, un:-5.5}, {da:1979, un:-5}, {da:1980, un:-6.5}, {da:1981, un:-4.5} ]
+                {da:1976, un:-4.25}, {da:1977, un:-4.25}, {da:1978, un:-5.5}, {da:1979, un:-5}, {da:1980, un:-6.5}, {da:1981, un:-4.5},
+                /* L147-1 · l'80 (de1980, pavimento 0,5), CERCATO con la sweep (misura-de1980-struttura.js sweep un de_cdu, CDU partita all'opposizione,
+                   5 semi, luglio) SOPRA le righe del ciclo: resa 3,4 · 4,4 · 7,6 · **8,9 (i due milioni del 1983)** · 9,1 · 9,4 · 9,0 · 8,9 · 8,8 · 7,9 · 7,2 ·
+                   7,3 contro la scheda 3,8 · 5,5 · 7,5 · 9,1 · 9,1 · 9,3 · 9,0 · 8,9 · 8,7 · 7,9 · 7,2 · 7,3, scarto massimo 0,24 dal 1982. ⚠ Il 1980-81 sono
+                   le righe di de1970 (che lì rendono 3,8 e 5,4): in de1980, che parte nel 1980, rendono 3,4 e 4,4 — non si toccano per non spostare la
+                   coda di de1970 (dichiarato). Il 1991 è la riga unita della scheda (7,3). Prima di queste righe il −4,5 del 1981 valeva per sempre. */
+                {da:1982, un:-1.25}, {da:1983, un:0}, {da:1984, un:1}, {da:1985, un:1}, {da:1986, un:0}, {da:1987, un:0.25},
+                {da:1988, un:0.75}, {da:1989, un:-0.25}, {da:1990, un:0.5}, {da:1991, un:1} ]
 };
 function disoccupazioneEra(){
   if(typeof S==='undefined' || !S) return 0;
@@ -2016,7 +2045,8 @@ const RIALLINEAMENTI_ERA = {
                 urne:  { de_cdu:45.4, de_spd:36.2, de_fdp:12.8 },
                 seggi: { de_cdu:48.5, de_spd:38.1, de_fdp:13.4 } },
     '1964/11': { entra:[ { id:'de_npd', nome:'NPD', orientamento:'destra', base:{ pensionati:0.4, cetomedio:0.3, lavoratori:0.3 }, forza:2.0, asse:2, alleati:[],
-                           selezionabile:false, nota:'La NPD non entra mai nel Bundestag: sta sotto la soglia del cinque per cento' } ] },
+                           selezionabile:false, nota:'La NPD non entra mai nel Bundestag: sta sotto la soglia del cinque per cento' } ],
+                 seggiInvariati:true },   // L148-1 (D64): il Bundestag del 1961 resta in carica, la NPD entra con 0 seggi (misura-l148-1.js tappe: carriere identiche)
     '1965/9': { delta:[ {id:'de_cdu',delta:0.3}, {id:'de_spd',delta:1.6}, {id:'de_fdp',delta:-3.9} ],   // Σ −2,0 = la NPD entrata nel 1964
                 urne:  { de_cdu:47.6, de_spd:39.3, de_fdp:9.5, de_npd:2.0 },
                 seggi: { de_cdu:49.4, de_spd:40.7, de_fdp:9.9, de_npd:0 } },
@@ -2038,10 +2068,51 @@ const RIALLINEAMENTI_ERA = {
                  urne:  { de_cdu:48.6, de_spd:42.6, de_fdp:7.9, de_npd:0.3 },
                  seggi: { de_cdu:49.0, de_spd:43.1, de_fdp:7.9, de_npd:0 } },
     '1980/1':  { entra:[ { id:'de_grn', nome:'Verdi', orientamento:'ecologista', base:{ giovani:0.6, cetomedio:0.4 }, forza:1.5, asse:-2, alleati:[],
-                           selezionabile:false, nota:'I Verdi nascono nel 1980 e restano fuori dal Bundestag fino al 1983: la loro carriera comincia nel decennio dopo' } ] },
+                           selezionabile:false, nota:'I Verdi nascono nel 1980 e restano fuori dal Bundestag fino al 1983: la loro carriera comincia nel decennio dopo' } ],
+                 seggiInvariati:true },   // L148-1 (D64): i Verdi entrano con 0 seggi; in de1970 l'urna del motore dello stesso mese gira DOPO la tappa e rifà comunque i seggi
     '1980/10': { delta:[ {id:'de_cdu',delta:-4.2}, {id:'de_spd',delta:0.2}, {id:'de_fdp',delta:2.7}, {id:'de_npd',delta:-0.2} ],   // Σ −1,5 = i Verdi entrati a gennaio
+                 saltaDeltaPer:['de1980'],   // L147-1: de1980 parte con le urne del 1980 come forze; i seggi del 1980 restano (precedente uk1970, L106-3)
                  urne:  { de_cdu:44.5, de_spd:42.9, de_fdp:10.6, de_grn:1.5, de_npd:0.2 },
-                 seggi: { de_cdu:45.5, de_spd:43.8, de_fdp:10.7, de_grn:0, de_npd:0 } }
+                 seggi: { de_cdu:45.5, de_spd:43.8, de_fdp:10.7, de_grn:0, de_npd:0 } },
+    /* L147-1 · il decennio '80 (scheda PRESET-GERMANIA-1980 §1; urne verificate da Cowork su Wikipedia che cita il Bundeswahlleiter: 1983
+       CDU 38,15 + CSU 10,63 = 48,78 · SPD 38,18 · FDP 6,95 · Verdi 5,57 · NPD 0,23 · 1987 CDU 34,45 + CSU 9,81 = 44,26 · SPD 37,04 · FDP 9,09 ·
+       Verdi 8,26 · NPD 0,60 — ⚠ la conferma sul sito del Bundeswahlleiter non si è fatta da un turno automatico: dichiarato).
+       · 1982/10: IL CAMBIO DI CAMPO (D54). La direttiva `alleati` riscrive le liste ordinarie — FDP con la CDU, SPD con i Verdi (D57);
+         CDU↔SPD resta di riserva — e il partner che non sta più col capo del governo esce nel mese (applicaDirettive). Sotto la sfiducia
+         costruttiva: la CDU all'opposizione entra al governo senza urne con la FDP (criccaMia, L108-1); la SPD al governo cade verso
+         CDU+FDP se non ricompra i numeri (il rimpasto offre la grande coalizione). `se`: spenta se lo snodo S1 (contenuto) ha trattenuto
+         i liberali, `S.deSvolta82==='trattenuta'` (il flag è nuovo: cercato in tutto S, L99-2). Nessun delta, nessun seggio.
+       · 1982/12 e 1986/12: il voto del 1983 e del 1987 come DELTA prima dell'urna del motore di gennaio (niente seggi: li fa l'urna).
+         1982/12 Σ +0,1 · 1986/12 Σ −0,8 (NPD e altri fuori roster). In de1970 (roster con la NPD) valgono uguali: la NPD non è nominata. */
+    '1982/10': { se:function(){ return typeof S!=='undefined' && S && S.deSvolta82!=='trattenuta'; },
+                 alleati:{ de_fdp:['de_cdu'], de_cdu:['de_fdp'], de_spd:['de_grn'], de_grn:['de_spd'] } },
+    '1982/12': { delta:[ {id:'de_cdu',delta:4.3}, {id:'de_spd',delta:-4.7}, {id:'de_fdp',delta:-3.6}, {id:'de_grn',delta:4.1} ],   // Σ +0,1
+                 urne:  { de_cdu:48.8, de_spd:38.2, de_fdp:7.0, de_grn:5.6, de_npd:0.2 } },
+    '1986/12': { delta:[ {id:'de_cdu',delta:-4.5}, {id:'de_spd',delta:-1.1}, {id:'de_fdp',delta:2.1}, {id:'de_grn',delta:2.7} ],   // Σ −0,8
+                 urne:  { de_cdu:44.3, de_spd:37.0, de_fdp:9.1, de_grn:8.3, de_npd:0.6 } },
+    /* L147-2 · L'UNITÀ (scheda PRESET-GERMANIA-1980 §1, D58-D61). Vale per chiunque attraversi l'ottobre 1990 nella linea.
+       · 1990/10: i cinque Länder dell'Est entrano IN CODA (le aree erano pronte in MAPPA_DE_LAND dal L108-1); Berlino Ovest diventa
+         Berlino (stesso indice, stesso cerchio: `territori.rinomina`); la terra diventa la Germania intera e la RDT oltre il confine
+         sparisce (`mappa`); entra la PDS (l'id della Linke del presente: la linea si salda); il delta dell'elettorato dell'Est è
+         MARCATO `ancora:true` (cambia chi sta nel paese: il criterio di L106-3/L109-1 esteso a una concentrazione dell'elettorato).
+         Conto: il pantedesco meno l'Ovest dello stesso 2 dicembre 1990 — Σ −2,1 = la PDS che entra. Seggi invariati (i 144 della
+         Volkskammer cooptati non si modellano). La capitale resta Bonn (D61: il palazzo sul tavolo è il governo).
+       · 1990/12: il voto dell'Ovest come delta (Σ −3,0: i Repubblicani e gli altri fuori roster), niente seggi: l'urna del motore del
+         1991/1 È la pantedesca (D59). La soglia separata del 1990 non si modella (dichiarato). */
+    '1990/10': { territori:{ entra:[
+                   { nome:'il Meclemburgo-Pomerania Anteriore', nomeEn:'Mecklenburg-Western Pomerania', tipo:'regione', carica:'Ministro presidente', lean:1, area:MAPPA_DE_LAND.aree.meclemburgo },
+                   { nome:'il Brandeburgo', nomeEn:'Brandenburg', tipo:'regione', carica:'Ministro presidente', lean:-1, area:MAPPA_DE_LAND.aree.brandeburgo },
+                   { nome:'la Sassonia-Anhalt', nomeEn:'Saxony-Anhalt', tipo:'regione', carica:'Ministro presidente', lean:1, area:MAPPA_DE_LAND.aree.sassoniaanhalt },
+                   { nome:'la Turingia', nomeEn:'Thuringia', tipo:'regione', carica:'Ministro presidente', lean:1, area:MAPPA_DE_LAND.aree.turingia },
+                   { nome:'la Sassonia', nomeEn:'Saxony', tipo:'regione', carica:'Ministro presidente', lean:2, area:MAPPA_DE_LAND.aree.sassonia } ],
+                             rinomina:[ { nome:'Berlino Ovest', in:'Berlino', nomeEn:'Berlin' } ] },
+                 mappa:{ sfondo:MAPPA_DE_LAND.sfondo, oltre:null },
+                 seggiInvariati:true,   // il Bundestag resta quello in carica: la PDS entra con 0 seggi (applicaDirettive)
+                 entra:[ { id:'de_lnk', nome:'PDS', orientamento:'sinistra', base:{ lavoratori:0.6, giovani:0.4 }, forza:2.1, asse:-2, alleati:[],
+                           selezionabile:false, nota:'Il PDS è l\'erede del partito che governava l\'Est: nel decennio non governa, e la sua carriera comincia nel decennio dopo' } ],
+                 delta:[ {id:'de_cdu',delta:-0.5,ancora:true}, {id:'de_spd',delta:-2.2,ancora:true}, {id:'de_fdp',delta:0.4,ancora:true}, {id:'de_grn',delta:0.2,ancora:true} ] },   // Σ −2,1 = la PDS che entra
+    '1990/12': { delta:[ {id:'de_cdu',delta:0}, {id:'de_spd',delta:-1.3}, {id:'de_fdp',delta:1.5}, {id:'de_grn',delta:-3.5}, {id:'de_lnk',delta:0.3} ],   // Σ −3,0
+                 urne:  { de_cdu:43.8, de_spd:33.5, de_fdp:11.0, de_grn:5.0, de_lnk:2.4 } }
   }
 };
 /* L101-1 · D17 · DI CHI È L'ELISEO. Una funzione sola, letta dalle tappe condizionate del 1981 e del 1988: la
@@ -2090,7 +2161,7 @@ function biasSondaggio(){
 function applicaRosterDelta(ricalcolaSeggi){
   if(typeof S==='undefined' || !S || !S.rosterDelta || !PAESE || !PAESE.partiti) return;
   var R=S.rosterDelta;
-  if(!(R.entra||[]).length && !(R.esce||[]).length && !(R.rinomina||[]).length) return;
+  if(!(R.entra||[]).length && !(R.esce||[]).length && !(R.rinomina||[]).length && !(R.alleati && Object.keys(R.alleati).length)) return;
   var lista = PAESE.partiti.map(function(p){ return Object.assign({}, p); });   // clone: `paeseConScenario` condivide l'array con SCENARI, mutarlo lo corromperebbe
   /* ============================================================================================================
      L53-3 · L'ORDINE È ENTRA → RINOMINA → ESCE, e prima era il contrario. Il registro è un DIARIO: un partito
@@ -2114,6 +2185,10 @@ function applicaRosterDelta(ricalcolaSeggi){
     lista.push(np);
   });
   (R.rinomina||[]).forEach(function(r){ var p=lista.find(function(x){ return x.id===r.id; }); if(p) p.nome=r.nome; });
+  /* L147-1 · LE LISTE `alleati` RISCRITTE A UNA TAPPA (il cambio di campo dei liberali, 1982/10). Il registro è una mappa
+     id → lista, l'ultima scrittura vince; si proietta sul clone come i nomi. Un id che non è nel roster si ignora (la NPD in
+     de1980). `alleatiRiserva` non si tocca: la direttiva riscrive solo le alleanze ordinarie. */
+  if(R.alleati) Object.keys(R.alleati).forEach(function(id){ var p=lista.find(function(x){ return x.id===id; }); if(p) p.alleati=R.alleati[id].slice(); });
   (R.esce||[]).forEach(function(e){ lista = lista.filter(function(p){ return p.id!==e.id; }); });
   var cambiato = (lista.length!==PAESE.partiti.length) ||
                  lista.some(function(p,i){ return !PAESE.partiti[i] || PAESE.partiti[i].id!==p.id; });
@@ -2127,9 +2202,23 @@ function applicaRosterDelta(ricalcolaSeggi){
 /* L107-3 · riapplica il registro dei territori entrati a una tappa su un PAESE appena ricostruito: cloni (PAESE.territori e
    PAESE.mappa sono condivisi con SCENARI/PAESI), in coda, una volta sola per nome. Idempotente. */
 function applicaTerritoriDelta(){
-  if(typeof S==='undefined' || !S || !S.territoriDelta || !(S.territoriDelta.entra||[]).length || !PAESE || !PAESE.territori) return;
+  if(typeof S==='undefined' || !S || !S.territoriDelta || !PAESE || !PAESE.territori) return;
+  var R=S.territoriDelta;
+  if(!(R.entra||[]).length && !(R.rinomina||[]).length && !R.mappa) return;
   var lista=PAESE.territori.slice(), mappa=PAESE.mappa ? Object.assign({}, PAESE.mappa, {aree:(PAESE.mappa.aree||[]).slice()}) : null;
-  S.territoriDelta.entra.forEach(function(te){
+  /* L147-2 · LA RINOMINA DI UN TERRITORIO (Berlino Ovest → Berlino, 1990/10): stesso indice, stessa area, cambia il nome (e l'esonimo).
+     Idempotente: un nome già rinominato non si trova più. Prima di `entra`, così un territorio che entra non incontra il nome vecchio. */
+  (R.rinomina||[]).forEach(function(r){
+    var i=lista.findIndex(function(x){ return x.nome===r.nome; }); if(i<0) return;
+    lista[i]=Object.assign({}, lista[i], {nome:r.in}); if(r.nomeEn) lista[i].nomeEn=r.nomeEn; else delete lista[i].nomeEn;
+  });
+  /* L147-2 · LO SFONDO A UNA TAPPA (l'unità: la terra diventa la Germania intera e `oltre` sparisce). `mappa` del registro porta
+     `sfondo` e/o `oltre` (null = toglilo); le aree non si toccano qui (entrano con `entra`). */
+  if(mappa && R.mappa){
+    if(R.mappa.sfondo) mappa.sfondo=R.mappa.sfondo;
+    if('oltre' in R.mappa){ if(R.mappa.oltre) mappa.oltre=R.mappa.oltre; else delete mappa.oltre; }
+  }
+  (R.entra||[]).forEach(function(te){
     if(lista.some(function(x){ return x.nome===te.nome; })) return;
     var t2=Object.assign({}, te); delete t2.area;
     lista.push(t2);
@@ -2146,15 +2235,40 @@ function applicaDirettive(d){
      PAESE.territori e a PAESE.mappa.aree: in mezzo sposterebbero gli eletti di tutti gli altri), ciascuno con la sua area di
      mappa (`area`). Il fatto va nel registro S.territoriDelta, riapplicato in applySnap: PAESE si ricostruisce dallo scenario
      al caricamento (la lezione di L34-1). Di chi è un territorio nuovo lo dice il suo `lean`, come all'avvio (initTerritori). */
-  if(d.territori && d.territori.entra && d.territori.entra.length){
+  /* L147-2 · `territori:{rinomina:[{nome, in, nomeEn}]}` e `mappa:{sfondo, oltre}` (l'unità del 1990/10) vanno nello STESSO registro,
+     riapplicato in applySnap. La rinomina porta con sé anche la carriera locale che governava quel territorio (S.locale.nome: il
+     sindaco di Berlino Ovest diventa sindaco di Berlino). */
+  var terrTocca = d.territori && ((d.territori.entra||[]).length || (d.territori.rinomina||[]).length);
+  if(terrTocca || d.mappa){
     S.territoriDelta = S.territoriDelta || {entra:[]};
+    if(!S.territoriDelta.entra) S.territoriDelta.entra=[];
+    ((d.territori&&d.territori.rinomina)||[]).forEach(function(r){
+      S.territoriDelta.rinomina = S.territoriDelta.rinomina || []; S.territoriDelta.rinomina.push(r);
+      if(S.locale && S.locale.nome===r.nome) S.locale.nome=r.in;
+    });
+    if(d.mappa) S.territoriDelta.mappa = Object.assign({}, S.territoriDelta.mappa||{}, d.mappa);
+  }
+  if(d.territori && d.territori.entra && d.territori.entra.length){
     d.territori.entra.forEach(function(te){ S.territoriDelta.entra.push(te); });
+  }
+  if(terrTocca || d.mappa){
     applicaTerritoriDelta();
     if(S.territori && PAESE.territori) for(var it=S.territori.length; it<PAESE.territori.length; it++)
       S.territori.push({ titolare:nomePersona(), partito:partitoVicinoLean(PAESE.territori[it].lean) });
   }
   if(d.capitale) S.capitaleSede=d.capitale;
   S.rosterDelta = S.rosterDelta || {entra:[], esce:[], rinomina:[]};
+  /* L147-1 · LA DIRETTIVA `alleati` (il cambio di campo, D54): riscrive le liste ordinarie dei partiti nominati. Va nel registro
+     (S.rosterDelta.alleati, riapplicato in applySnap con il resto del roster: un salvataggio preso dopo la tappa si ricarica con
+     le liste nuove) e si proietta alla fine, con applicaRosterDelta. Prima si annota chi, nel governo, stava col capo del governo:
+     dopo la riscrittura chi non ci sta più ESCE (sotto). */
+  var coppiePrima=null;
+  if(d.alleati){
+    S.rosterDelta.alleati = S.rosterDelta.alleati || {};
+    Object.keys(d.alleati).forEach(function(id){ S.rosterDelta.alleati[id]=d.alleati[id].slice(); });
+    var capo0 = S.opposizione ? S.governoAvversario : S.partito;
+    coppiePrima = (Array.isArray(S.coalizione) && capo0) ? S.coalizione.filter(function(id){ return id!==capo0 && coppiaCompatibile(id, capo0); }) : [];
+  }
   (d.entra||[]).forEach(function(n){
     S.rosterDelta.entra.push(n);
     /* correzione #1 della ricognizione: il roster da solo non basta — un partito senza forza non esiste per il
@@ -2217,7 +2331,27 @@ function applicaDirettive(d){
       }
     }
   });
-  applicaRosterDelta(true);
+  /* L147-2 · `seggiInvariati:true`: un partito che entra a metà legislatura NON ricalcola il parlamento (prende 0 seggi, già scritti
+     sopra). Senza, il roster cambiato rifà S.seggi dalle forze del mese: all'unità del 1990/10 il Bundestag di ogni carriera veniva
+     riscritto e la CDU all'opposizione entrava al governo per sfiducia costruttiva prima della pantedesca, 20 carriere su 20 (misura-l147-2.js
+     urne). Additivo: una tappa che non lo dichiara ricalcola come prima. L148-1 (D64): lo dichiarano anche la NPD del 1964/11 e i Verdi
+     del 1980/1 — A/B su de1960 e de1970, 20 semi per partito e posizione: carriere identiche una per una. */
+  applicaRosterDelta(!d.seggiInvariati);
+  /* L147-1 · DOPO IL CAMBIO DI CAMPO, IL GOVERNO NON TIENE CHI NON STA PIÙ COL SUO CAPO. Un partner che era compatibile col capo
+     del governo e dopo la riscrittura non lo è più lascia la coalizione nel mese della tappa — è la storia: i ministri liberali si
+     dimettono il 17 settembre 1982, e il 1° ottobre votano il Cancelliere nuovo. Al governo passa da rompiPartner (tenutaLiv 2:
+     sotto la sfiducia costruttiva conta come avverso, e il governo cade verso la cricca nuova se ha i numeri); all'opposizione esce
+     dalla coalizione di chi governa, e criccaMia() porta il giocatore al governo senza urne (L108-1). Uno snodo che l'ha già fatto
+     uscire (S1 a) rende il passo un no-op; uno che l'ha trattenuto (S1 c) spegne la tappa col suo `se`. I partner di riserva (la
+     grande coalizione) non si toccano: non passano da staColBlocco. */
+  if(coppiePrima && coppiePrima.length){
+    var capo = S.opposizione ? S.governoAvversario : S.partito;
+    coppiePrima.forEach(function(id){
+      if(coppiaCompatibile(id, capo) || alleatoRiserva(id, capo)) return;
+      if(S.opposizione){ S.coalizione=S.coalizione.filter(function(x){ return x!==id; }); if(S.sostegnoAvv && S.sostegnoAvv.pid===id) S.sostegnoAvv=null; }
+      else if(typeof rompiPartner==='function') rompiPartner(id);
+    });
+  }
 }
 /* ============================================================================================================
    L40-2 · LA SCISSIONE DEL PARTITO DEL GIOCATORE. È il primo snodo che riscrive il partito di chi gioca, e
@@ -2395,7 +2529,7 @@ function riallineamentoTappa(){
   if(S.riallineamenti[chiave]) return;              // one-shot per tappa: già applicata
   var direttive=null, shifts;
   if(Array.isArray(entry)) shifts=entry;                                              // forma di sempre
-  else if(entry.delta || entry.entra || entry.esce || entry.rinomina || entry.territori || entry.capitale){   // forma nuova (L34-1; territori e capitale L107-3)
+  else if(entry.delta || entry.entra || entry.esce || entry.rinomina || entry.territori || entry.capitale || entry.alleati || entry.mappa){   // forma nuova (L34-1; territori e capitale L107-3; alleati L147-1; mappa L147-2)
     /* L40-1 — `se`: una tappa può valere solo a certe condizioni. Serve al '91: la scissione del partito
        comunista è una direttiva-NPC **solo se non è il partito del giocatore** — nel qual caso la stessa
        storia si gioca come snodo (L40-2). La tappa resta marcata come fatta: non deve ritentare ogni anno. */
@@ -2409,8 +2543,12 @@ function riallineamentoTappa(){
     if(Array.isArray(entry.saltaDeltaPer) && entry.saltaDeltaPer.indexOf(S.scenario)>=0) shifts=[];
   } else shifts=entry[(S.apertura==='apri') ? 'apertura' : 'centrismo'];               // '63: ramo su S.apertura
   if(direttive) applicaDirettive(direttive);        // PRIMA i nuovi entrano, poi i delta li trovano nel roster
-  if(!shifts || !shifts.length){ if(direttive){ S.riallineamenti[chiave]=true; } return; }
-  if(S.forze && PAESE && PAESE.partiti){
+  /* L147-1 · una tappa SENZA delta ma CON i seggi (oggi il 1980/10 per de1980: `saltaDeltaPer` le toglie i delta) non esce qui: i seggi
+     dichiarati vanno letti. Prima usciva, e il Bundestag del 1980 non arrivava mai (la stessa trappola del 1956/8, curata là con un delta
+     a zero). Le forze non si toccano. Le tappe senza delta e senza seggi escono come prima. */
+  var senzaDelta = (!shifts || !shifts.length);
+  if(senzaDelta && !(entry && !Array.isArray(entry) && entry.seggi)){ if(direttive){ S.riallineamenti[chiave]=true; } return; }
+  if(!senzaDelta && S.forze && PAESE && PAESE.partiti){
     shifts.forEach(function(sh){ if(S.forze[sh.id]!=null) S.forze[sh.id]=Math.max(2, S.forze[sh.id]+sh.delta); });
     /* L106-3 · L'ÀNCORA SI SPOSTA SOLO ALLE TAPPE MARCATE. La molla di evolvePartiti riporta ogni partito verso la forza
        d'inizio porta (`p.forza`): riassorbe gli scossoni e tiene in vita le carriere che la storia punisce, ed è giusto
@@ -2539,6 +2677,12 @@ function riallineamentoTappa(){
     else if(S.era===LINEA_DE && S.year===1976) S.log.unshift({t:T('Elezioni dell\'ottobre 1976'), x:T('L\'Unione cristiana torna il primo partito e sfiora la maggioranza assoluta, ma socialdemocratici e liberali tengono per dieci seggi.')});
     else if(S.era===LINEA_DE && S.year===1980 && S.month<=6) S.log.unshift({t:T('Nascono i Verdi'), x:T('A Karlsruhe ambientalisti, pacifisti e reduci del Sessantotto fondano un partito: per ora raccoglie poco, ma nei comuni e nei Länder comincia a contare.')});
     else if(S.era===LINEA_DE && S.year===1980) S.log.unshift({t:T('Elezioni dell\'ottobre 1980'), x:T('I liberali crescono e l\'Unione cristiana perde quattro punti: socialdemocratici e liberali hanno quarantacinque seggi di margine. I Verdi restano sotto la soglia.')});
+    /* L147-1 · le tappe tedesche dell'80: il cambio di campo, e i due inverni prima dell'urna del motore (nessun «risultato»: le urne le fa il gioco) */
+    else if(S.era===LINEA_DE && S.year===1982 && S.month===10) S.log.unshift({t:T('I liberali cambiano campo'), x:T('Dopo tredici anni i liberali lasciano i socialdemocratici: da oggi la loro maggioranza si fa con l\'Unione cristiana. I socialdemocratici guardano ai Verdi.')});
+    else if(S.era===LINEA_DE && S.year===1982) S.log.unshift({t:T('Verso le urne'), x:T('Il paese va al voto con due milioni di disoccupati. I Verdi, per la prima volta, sono dati sopra la soglia; i liberali rischiano di restarne sotto.')});
+    else if(S.era===LINEA_DE && S.year===1986) S.log.unshift({t:T('Verso le urne'), x:T('A un mese dal voto i due partiti grandi perdono terreno tutti e due: i liberali risalgono, e i Verdi crescono ancora dopo Chernobyl.')});
+    else if(S.era===LINEA_DE && S.year===1990 && S.month===10) S.log.unshift({t:T('L\'unità'), x:T('Il 3 ottobre la Repubblica democratica entra nella Repubblica federale: cinque Länder nuovi, e Berlino torna una città sola. Gli eredi del partito che governava l\'Est si presentano col nome nuovo di PDS.')});
+    else if(S.era===LINEA_DE && S.year===1990) S.log.unshift({t:T('Il primo voto del paese unito'), x:T('A dicembre si vota liberamente in tutta la Germania per la prima volta dagli anni di Weimar. All\'Ovest l\'Unione cristiana tiene, i socialdemocratici perdono terreno e i Verdi scendono verso la soglia.')});
     else if(S.era===LINEA_IT && S.year===2008) S.log.unshift({t:T('Elezioni 2008'), x:T('Due partiti grandi nati da altrettante fusioni si prendono quasi tutto, e per la prima volta dal dopoguerra la sinistra radicale resta fuori dall\'aula.')});
   }
   /* ⚑ L77-1 — OGNI NOTA-TAPPA E' FILTRATA PER LINEA. Tredici note italiane erano scritte if(S.year===N) senza dire
@@ -3457,6 +3601,36 @@ function snodoPetrolio73deDovuta(){  return typeof S!=='undefined' && S && S.era
 function snodoSpia74Dovuta(){        return typeof S!=='undefined' && S && S.era===LINEA_DE && S.livello===3 && !S.opposizione && S.deSpia74==null && S.year===1974 && S.month>=5 && S.month<=7 && spia74Lato(); }
 function snodoAutunno77Dovuta(){     return typeof S!=='undefined' && S && S.era===LINEA_DE && S.livello===3 && !S.opposizione && S.deAutunno77==null && S.year===1977 && S.month>=10 && S.month<=12; }
 function snodoAutunno77OppDovuta(){  return typeof S!=='undefined' && S && S.era===LINEA_DE && S.livello===3 && S.opposizione && S.deAutunno77Opp==null && S.deAutunno77==null && S.year===1977 && S.month>=10 && S.month<=12; }
+/* L148-2 · gli snodi del decennio tedesco '80 (scheda PRESET-GERMANIA-1980 §I-A). S1 nel solo settembre 1982 (la tappa del cambio di campo
+   è di ottobre, e lo snodo deve deciderla prima): la SPD al governo con la FDP in coalizione, la FDP al governo con la SPD, la CDU
+   all'opposizione con la FDP nella coalizione di chi governa. S2 novembre-dicembre 1983, S3 febbraio-marzo 1990, S4 maggio-giugno 1990,
+   la capitale giugno-luglio 1991 a tutti al livello 3. Nessun fatto-mondo né pilastro in quei mesi (pm_chernobyl 1986/5, pde80_* 1988/6,
+   1988/8, 1989/11, pm_golfo 1991/1, pm_urss 1991/12). */
+function deCoal(id){ return Array.isArray(S.coalizione) && S.coalizione.includes(id); }
+function snodoSvolta82Dovuta(){    return typeof S!=='undefined' && S && S.era===LINEA_DE && S.livello===3 && !S.opposizione && S.deSvolta82==null && S.year===1982 && S.month===9 && ((S.partito==='de_spd' && deCoal('de_fdp')) || (S.partito==='de_fdp' && deCoal('de_spd'))); }
+function snodoSvolta82OppDovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_DE && S.livello===3 && S.opposizione && S.deSvolta82Opp==null && S.partito==='de_cdu' && S.year===1982 && S.month===9 && deCoal('de_fdp'); }
+function snodoMissili83Dovuta(){    return typeof S!=='undefined' && S && S.era===LINEA_DE && S.livello===3 && !S.opposizione && S.deMissili83==null && S.year===1983 && S.month>=11; }
+function snodoMissili83OppDovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_DE && S.livello===3 && S.opposizione && S.deMissili83Opp==null && S.deMissili83==null && S.year===1983 && S.month>=11; }
+function snodoUnita90Dovuta(){      return typeof S!=='undefined' && S && S.era===LINEA_DE && S.livello===3 && !S.opposizione && S.deUnita90==null && S.year===1990 && S.month>=2 && S.month<=3; }
+function snodoUnita90OppDovuta(){   return typeof S!=='undefined' && S && S.era===LINEA_DE && S.livello===3 && S.opposizione && S.deUnita90Opp==null && S.deUnita90==null && S.year===1990 && S.month>=2 && S.month<=3; }
+function snodoMarco90Dovuta(){      return typeof S!=='undefined' && S && S.era===LINEA_DE && S.livello===3 && !S.opposizione && S.deMarco90==null && S.year===1990 && S.month>=5 && S.month<=6; }
+function snodoMarco90OppDovuta(){   return typeof S!=='undefined' && S && S.era===LINEA_DE && S.livello===3 && S.opposizione && S.deMarco90Opp==null && S.deMarco90==null && S.year===1990 && S.month>=5 && S.month<=6; }
+function snodoCapitale91Dovuta(){   return typeof S!=='undefined' && S && S.era===LINEA_DE && S.livello===3 && S.deCapitale91==null && S.year===1991 && S.month>=6 && S.month<=7; }
+/* L148-2 · APPLICA ORA LA DIRETTIVA DI UNA TAPPA (S1 b e FDP c, «le urne subito»: le liste del cambio di campo valgono PRIMA dello
+   scioglimento, altrimenti la FDP rotta torna ordinaria all'urna e la SPD rifà la coalizione di prima). La stessa voce di
+   RIALLINEAMENTI_ERA, col suo `se`, segnata come fatta: quando il mese della tappa arriva, riallineamentoTappa la salta (idempotente).
+   Solo per le tappe di sole direttive (niente delta né seggi: quelli hanno il loro mese, e anticiparli sposterebbe le urne). */
+function applicaTappaOra(chiave){
+  if(typeof S==='undefined' || !S) return false;
+  var perAnno=S.era && RIALLINEAMENTI_ERA[S.era], entry=perAnno && perAnno[chiave];
+  if(!entry || Array.isArray(entry) || (entry.delta && entry.delta.length) || entry.seggi) return false;
+  if(!S.riallineamenti) S.riallineamenti={};
+  if(S.riallineamenti[chiave]) return false;
+  if(typeof entry.se==='function'){ var ok=false; try{ ok=entry.se(); }catch(_){ ok=false; } if(!ok) return false; }
+  applicaDirettive(entry);
+  S.riallineamenti[chiave]=true;
+  return true;
+}
 /* L111-2 · il titolo «La prima recessione: i liberali escono» — vero se i liberali sono usciti nel 1966: S3 «tasse», o la FDP rotta e
    fuori dal governo senza che sia stato lo Spiegel (approssimazione dichiarata: una rottura spontanea del 1963-66 conta come «del 1966»). */
 function liberaliUsciti66(){
@@ -5252,6 +5426,11 @@ function genAgendaRamo(first){
     if(!first && typeof snodoEmergenza68OppDovuta==='function' && snodoEmergenza68OppDovuta()){ S.agenda.push({kind:'event', data:EMERGENZA68_OPP_EV, resolved:false}); agendaSolo(); return; }   // L111-2: le leggi d'emergenza, dall'aula
     if(!first && typeof snodoTrattati72OppDovuta==='function' && snodoTrattati72OppDovuta()){ S.agenda.push({kind:'event', data:TRATTATI72_OPP_EV, resolved:false}); agendaSolo(); return; }   // L135-3: i trattati, dall'aula
     if(!first && typeof snodoAutunno77OppDovuta==='function' && snodoAutunno77OppDovuta()){ S.agenda.push({kind:'event', data:AUTUNNO77_OPP_EV, resolved:false}); agendaSolo(); return; }   // L135-3: l'autunno tedesco, dall'aula
+    if(!first && typeof snodoSvolta82OppDovuta==='function' && snodoSvolta82OppDovuta()){ S.agenda.push({kind:'event', data:SVOLTA82_OPP_EV, resolved:false}); agendaSolo(); return; }   // L148-2: il cambio di campo, dall'aula
+    if(!first && typeof snodoMissili83OppDovuta==='function' && snodoMissili83OppDovuta()){ S.agenda.push({kind:'event', data:(S.partito==='de_spd' ? MISSILI83_OPP_EV : MISSILI83_OPP_ALTRO_EV), resolved:false}); agendaSolo(); return; }   // L148-2: i missili, dall'aula
+    if(!first && typeof snodoUnita90OppDovuta==='function' && snodoUnita90OppDovuta()){ S.agenda.push({kind:'event', data:UNITA90_OPP_EV, resolved:false}); agendaSolo(); return; }   // L148-2: l'unità, dall'aula
+    if(!first && typeof snodoMarco90OppDovuta==='function' && snodoMarco90OppDovuta()){ S.agenda.push({kind:'event', data:(S.partito==='de_spd' ? MARCO90_OPP_EV : MARCO90_OPP_ALTRO_EV), resolved:false}); agendaSolo(); return; }   // L148-2: il marco, dall'aula
+    if(!first && typeof snodoCapitale91Dovuta==='function' && snodoCapitale91Dovuta()){ S.agenda.push({kind:'event', data:CAPITALE91_EV, resolved:false}); agendaSolo(); return; }   // L148-2: la capitale, dall'aula
     // Cantiere C: la stagione elettorale vale anche da SFIDANTE (bloccoIds = il tuo blocco d'opposizione)
     if(typeof pickCampagnaNazionale==='function'){ const cnbO=pickCampagnaNazionale(); if(cnbO){ S.agenda.push(cnbO); agendaSolo(); return; } }
     const inq=aggiornaInchiesta();   // anche da sfidante l'esposizione conta: bersaglio sempre tu (niente ministri qui)
@@ -5384,6 +5563,11 @@ function genAgendaRamo(first){
   if(!first && typeof snodoPetrolio73deDovuta==='function' && snodoPetrolio73deDovuta()){ S.agenda.push({kind:'event', data:PETROLIO73DE_EV, resolved:false}); agendaSolo(); return; }  // L135-3
   if(!first && typeof snodoSpia74Dovuta==='function' && snodoSpia74Dovuta()){ S.agenda.push({kind:'event', data:SPIA74_EV, resolved:false}); agendaSolo(); return; }              // L135-3
   if(!first && typeof snodoAutunno77Dovuta==='function' && snodoAutunno77Dovuta()){ S.agenda.push({kind:'event', data:AUTUNNO77_EV, resolved:false}); agendaSolo(); return; }      // L135-3
+  if(!first && typeof snodoSvolta82Dovuta==='function' && snodoSvolta82Dovuta()){ S.agenda.push({kind:'event', data:(S.partito==='de_fdp' ? SVOLTA82FDP_EV : SVOLTA82_EV), resolved:false}); agendaSolo(); return; }   // L148-2
+  if(!first && typeof snodoMissili83Dovuta==='function' && snodoMissili83Dovuta()){ S.agenda.push({kind:'event', data:MISSILI83_EV, resolved:false}); agendaSolo(); return; }      // L148-2
+  if(!first && typeof snodoUnita90Dovuta==='function' && snodoUnita90Dovuta()){ S.agenda.push({kind:'event', data:UNITA90_EV, resolved:false}); agendaSolo(); return; }            // L148-2
+  if(!first && typeof snodoMarco90Dovuta==='function' && snodoMarco90Dovuta()){ S.agenda.push({kind:'event', data:MARCO90_EV, resolved:false}); agendaSolo(); return; }            // L148-2
+  if(!first && typeof snodoCapitale91Dovuta==='function' && snodoCapitale91Dovuta()){ S.agenda.push({kind:'event', data:CAPITALE91_EV, resolved:false}); agendaSolo(); return; }   // L148-2
   if(!first && typeof franco90AncoraDovuta==='function'){ var _f9=franco90AncoraDovuta();   // L103-2: la corsa al franco del '92 e del '93
     if(_f9){ S.francoAncore=S.francoAncore||{}; S.francoAncore[_f9]=true; if(_f9==='a92' && pesoFranco92()>1) S.francoGrave=true;   // col no a Maastricht pesa doppio
       S.agenda.push({kind:'event', data:(_f9==='a92' ? FRANCO92_EV : FRANCO93_EV), resolved:false}); agendaSolo(); return; } }
@@ -7660,6 +7844,7 @@ function applySnap(snap){
   if(S.notaStalin52===undefined){ S.notaStalin52=null; S.riarmo55=null; S.riarmo55Opp=null; S.pensioni57=null; S.atomica58=null; S.atomica58Opp=null; S.riparazioni52=null; }   // L109-2
   if(S.muro61===undefined){ S.muro61=null; S.muro61Opp=null; S.spiegel62=null; S.grandeCoal66=null; S.emergenza68=null; S.emergenza68Opp=null; }   // L111-2
   if(S.deTrattati72===undefined){ S.deTrattati72=null; S.deTrattati72Opp=null; S.dePetrolio73=null; S.deSpia74=null; S.deAutunno77=null; S.deAutunno77Opp=null; }   // L135-3
+  ['deSvolta82','deSvolta82Opp','deMissili83','deMissili83Opp','deUnita90','deUnita90Opp','deMarco90','deMarco90Opp','deCapitale91'].forEach(function(k){ if(S[k]===undefined) S[k]=null; });   // L148-2: uno per uno, mai azzerare un flag già scritto (L99-2)
   if(S.scioglimento97===undefined) S.scioglimento97=null;   // L103-1
   if(S.coabitazione===undefined) S.coabitazione=false;   // L100-2
   if(S.governiCaduti===undefined) S.governiCaduti=0;   // L80-5

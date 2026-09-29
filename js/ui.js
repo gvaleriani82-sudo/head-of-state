@@ -2953,7 +2953,8 @@ const TAVOLO_CAPITALI={
   sudafrica:{ 'Pretoria':[77.8,28.3] }, canada:{ 'Ottawa':[123.9,55.5] }, nigeria:{ 'Abuja':[44.5,45] },
   argentina:{ 'Buenos Aires':[60.3,64.8] }, germania:{ 'Berlino':[81.4,44.4], 'Bonn':[14.7,74.5] },
   /* nelle porte tedesche la capitale Berlino (se una tappa ce la portasse) È la città del cerchio «Berlino Ovest» */
-  de1950:{ 'Bonn':[14.7,74.4], 'Berlino':{ xy:[81.5,44.4], stessa:'Berlino Ovest' } }, de1960:{ 'Bonn':[14.7,74.4], 'Berlino':{ xy:[81.5,44.4], stessa:'Berlino Ovest' } }, de1970:{ 'Bonn':[14.7,74.4], 'Berlino':{ xy:[81.5,44.4], stessa:'Berlino Ovest' } }
+  de1950:{ 'Bonn':[14.7,74.4], 'Berlino':{ xy:[81.5,44.4], stessa:'Berlino Ovest' } }, de1960:{ 'Bonn':[14.7,74.4], 'Berlino':{ xy:[81.5,44.4], stessa:'Berlino Ovest' } }, de1970:{ 'Bonn':[14.7,74.4], 'Berlino':{ xy:[81.5,44.4], stessa:'Berlino Ovest' } },
+  de1980:{ 'Bonn':[14.7,74.4], 'Berlino':{ xy:[81.5,44.4], stessa:'Berlino Ovest' } }   // L147-1
 };
 let TAVOLO_MIS=null;         // L129-2: l'ultima scala del tavolo { k, wh } (transitoria, la scrive aggiornaTavolo a tavolo misurato)
 /* un nome senza segni diacritici, per confrontare grafie («Brasilia» e «Brasília») */

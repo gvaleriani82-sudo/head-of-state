@@ -1624,6 +1624,62 @@ const SCENARI = {
     ],
   },
   /* ============================================================================================================
+     L147-1 · GERMANIA 1980 — la quarta porta della linea tedesca (scheda PRESET-GERMANIA-1980.md). Si apre con l'ultimo
+     biennio del governo socialdemocratico-liberale e arriva al dicembre 1991: la recessione, gli euromissili, il cambio di campo
+     dei liberali (1982, senza urne), i Verdi nel Bundestag, e — con L147-2 — l'unità e la prima elezione pantedesca.
+     LE ISTITUZIONI come de1970 (sfiducia costruttiva, sbarramento 5, Bonn, marco, `ue:false` come le tre porte tedesche prima; le
+     porte del '80 delle altre linee sono discordi: italia1980 false, fr1980 true — dichiarato). ⚑ D53: `sedeGoverno` è **«la
+     Cancelleria»** (la nuova sede di Bonn è in uso dal 1976): il campo lo leggono i testi universali con %SEDE, ed è anche il
+     valore del presente tedesco.
+     IL ROSTER (D55, D56): CDU/CSU, SPD, FDP, Verdi — **niente NPD** (sotto l'1% per tutto il decennio: nel roster peserebbe il
+     pavimento di 2 punti dei delta di tappa). I Verdi `selezionabile:false`. `alleati` d'avvio: SPD↔FDP soltanto (come D50), CDU e
+     Verdi `[]`, CDU↔SPD di riserva (la grande coalizione, come de1960). Dal 1982/10 la tappa riscrive le liste (il cambio di campo,
+     D54: FDP↔CDU, SPD↔Verdi), vedi RIALLINEAMENTI_ERA.
+     FORZE: le urne del 1980 sui quattro (44,5 · 42,9 · 10,6 · 1,5, somma 99,5) → 44,7 · 43,1 · 10,7 · 1,5. SEGGI: il Bundestag del
+     1976 senza Berlino, in carica nel gennaio 1980 (49,0 · 43,1 · 7,9): la tappa del 1980/10 porta i seggi del 1980 e salta i delta
+     (`saltaDeltaPer`, le forze sono già quelle). `forzaAncora` (L111-1): la media dell'Ovest 1980-83-87 (CDU 45,85 — la scheda dice
+     45,87 — · SPD 39,37 · FDP 8,88 · Verdi 5,11), rinormalizzata a resti maggiori → 46,2 · 39,7 · 8,9 · 5,2 (uguale alla scheda).
+     L'URNA DEL MOTORE: `turnMandato:1` sul Bundestag del 1980 → urne **1983/1 · 1987/1 · 1991/1** (la storia: 1983/3, 1987/1,
+     1990/12). La crescita di partenza 4,5 come de1960 e de1970: le righe di linea sono scostamenti da questa base, e le righe del
+     1980-81 le leggono tutte e due le porte.
+     ============================================================================================================ */
+  de1980: {
+    id:'de1980', era:LINEA_DE, nome:'Germania 1980', anno:1980, paese:'germania',
+    turnMandato: 1,
+    sistema: 'parlamentare', comeSiVince: 'parlamentare', coalizione: true, cadutaGoverno: true,
+    sfiduciaCostruttiva: true, sbarramento: 5,
+    mandatoMesi: 48, mandatiMax: null,
+    titoloRuolo: 'Cancelliere', sedeGoverno: 'la Cancelleria',
+    capitale: 'Bonn',
+    ue: false,
+    intermedie: [ {tipo:'Elezioni nei Länder', mese:24, tocca:'regione'} ],
+    partiti: [
+      { id:'de_cdu', nome:'CDU/CSU', orientamento:'centrodestra',   base:{ cattolici:0.35, cetomedio:0.35, imprenditori:0.3 }, forza:44.7, forzaAncora:46.2, asse:1,  alleati:[], alleatiRiserva:['de_spd'] },
+      { id:'de_spd', nome:'SPD',     orientamento:'centrosinistra', base:{ lavoratori:0.6, pensionati:0.2, giovani:0.2 },    forza:43.1, forzaAncora:39.7, asse:-1, alleati:['de_fdp'], alleatiRiserva:['de_cdu'] },
+      { id:'de_fdp', nome:'FDP',     orientamento:'liberale',       base:{ imprenditori:0.5, cetomedio:0.5 },                forza:10.7, forzaAncora:8.9,  asse:1,  alleati:['de_spd'] },
+      { id:'de_grn', nome:'Verdi',   orientamento:'ecologista',     base:{ giovani:0.6, cetomedio:0.4 },                     forza:1.5,  forzaAncora:5.2,  asse:-2, alleati:[],
+        selezionabile:false, nota:'I Verdi entrano nel Bundestag nel 1983 e non governano nel decennio: all\'opposizione la prima sconfitta chiuderebbe la carriera' },   // D56
+    ],
+    /* il Bundestag del 1976 senza Berlino (496), in carica all'avvio, come lo lascia de1970 */
+    seggi: { de_cdu:49.0, de_spd:43.1, de_fdp:7.9, de_grn:0 },
+    /* ⚠ cifre della scheda §2, ordine di grandezza (Destatis/Bundesbank da confermare): in miliardi di marchi. Il PIL è la cifra della
+       scheda, 1.470: la consegna chiedeva di agganciarlo a quello che de1970 rende al 1980, ma il motore NON fa crescere S.pil (resta il
+       seme della porta: de1970 rende 675 in ogni mese, misura-de1980-struttura.js pil70) — l'aggancio sarebbe stato 675, cioè il 1970. */
+    economia: { pil:1470, debito:30.9, deficit:-2.9, inflazione:5.4, inflazioneTetto:8, crescita:4.5, disoccupazione:3.8, disoccupazionePavimento:0.5 },
+    debtAncora: 30.9,
+    inflazione: 5.4,
+    crescita: 4.5,
+    logorioEra: 0.008,                          // come de1970 dopo D51 (scheda §0): da misurare
+    valuta: VALUTA_MARCO,
+    quotaSpesa: 0.30,                           // ⚠ come le porte tedesche prima: da confermare
+    intro: "Germania, 1980. Il Cancelliere socialdemocratico va verso le urne d'autunno da favorito, ma i liberali che lo tengono al governo guardano già dall'altra parte.",
+    contesto: [
+      "Germania, 1980. Il secondo shock del petrolio morde: la crescita si ferma, e i disoccupati tornano verso il milione.",
+      "Nelle piazze il movimento per la pace si oppone ai missili che la NATO vuole installare; nei comuni i Verdi raccolgono i primi seggi.",
+      "Socialdemocratici e liberali governano da più di dieci anni. L'Unione cristiana è il primo partito e aspetta: basta che i liberali cambino campo.",
+    ],
+  },
+  /* ============================================================================================================
      L44-3 · ITALIA 2000 — la settima e ultima porta. Stessa LINEA; il roster è quello uscito dalla frana del '94
      (PPI, PDS, AN, Rifondazione, Lega, FI, CCD e i laici superstiti), anno d'avvio 2000.
 
@@ -2573,6 +2629,29 @@ const PILASTRI_LINEA = [
     t:'Il cielo di Zagabria',
     text:'Il 10 settembre, sopra la Croazia, un aereo di linea diretto a Colonia si scontra in volo con un aereo inglese. Nessuno sopravvive: centosettantasei morti. Sull\'aereo per Colonia tornavano dalle vacanze sulla costa soprattutto turisti tedeschi.',
     logx:'Collisione in volo sopra Zagabria: centosettantasei morti, in gran parte turisti tedeschi di ritorno dalle vacanze.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  /* L148-2 · i tre pilastri del decennio tedesco '80 (scheda PRESET-GERMANIA-1980 §I-H, byte-identici). Verifiche: Borken — de.wikipedia
+     «Grubenunglück von Stolzenbach»: 1° giugno 1988, 57 sotto terra, 51 morti, 6 salvati raggiunti alle 4:20 del 4 giugno (l'esplosione
+     alle 12:30 del 1°: circa 64 ore, «quasi tre giorni» ✓). Ramstein — en/de.wikipedia: 70 morti (67 + 3 piloti) ✓; i feriti, circa 450
+     ricoverati, distribuiti la prima notte in 46 cliniche di tutto il paese ✓ («gli ospedali della regione non bastano»); la folla fra
+     30.000 (en) e oltre 300.000 (de): «decine di migliaia» è la forma prudente. G8: nessun'altra sciagura sopra i 50 sul territorio della
+     Repubblica federale fra il 1980 e il 1991 (en.wikipedia «List of disasters in Germany by death toll»: sopra i 50 c'è solo l'Aeroflot
+     892 del 1986, 72 morti, a Schönefeld — territorio dell'Est, non della Repubblica federale; la lista non riporta Borken). Il Muro
+     sostituisce il fatto-mondo del mese (sostituisce, L56-2: il precedente è il maggio francese, L97-2); non è grave. */
+  { id:'pde80_borken', linea:LINEA_DE, anno:1988, mese:6, era:'de1980', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Borken',
+    text:'Il 1° giugno un\'esplosione scuote la miniera di lignite di Stolzenbach, vicino a Borken, in Assia. Sotto terra lavorano cinquantasette minatori. Le squadre di soccorso scavano per giorni senza più speranza; dopo quasi tre giorni ne trovano sei vivi, chiusi in una galleria dove l\'aria era rimasta. Gli altri cinquantuno sono morti.',
+    logx:'Borken: un\'esplosione nella miniera di Stolzenbach, cinquantuno minatori morti, sei salvati dopo quasi tre giorni.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pde80_ramstein', linea:LINEA_DE, anno:1988, mese:8, era:'de1980', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Ramstein',
+    text:'Il 28 agosto, alla giornata aperta della base aerea di Ramstein, davanti a una folla di decine di migliaia di persone, tre aerei di una pattuglia acrobatica si scontrano in volo. Uno precipita in fiamme sugli spettatori. Muoiono settanta persone, sessantasette spettatori e i tre piloti; i feriti sono centinaia. Gli ospedali della regione non bastano.',
+    logx:'Ramstein: tre aerei acrobatici si scontrano, uno cade sulla folla. Settanta morti, centinaia di feriti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pde80_muro', linea:LINEA_DE, anno:1989, mese:11, era:'de1980', codaFino:Infinity, cronaca:true, kick:'Il paese', sostituisce:'pm_muro89',
+    t:'La notte del Muro',
+    text:'Da settembre l\'Est si svuota: l\'Ungheria ha aperto la frontiera, a Praga il giardino dell\'ambasciata si è riempito di tende, a Lipsia ogni lunedì la piazza è più grande e nessuno spara. La sera del 9 novembre un portavoce dell\'Est legge male un foglio in conferenza stampa, e in poche ore i berlinesi dell\'est sono ai posti di blocco. I soldati aprono. A Bonn i deputati si alzano in piedi e cantano l\'inno. Stanotte, al centro di Berlino, il paese non ha più un confine.',
+    logx:'La notte del Muro: i berlinesi dell\'est passano i posti di blocco, e il paese si ritrova a Berlino.',
     ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
 ];
 
@@ -3679,6 +3758,17 @@ const BEAT_LEGGERI = [
   {id:'lgde70_panino', era:'de1970', registro:'leggero', cond:()=>S.year>=1974, kick:'Il paese', t:'Il panino di Kreuzberg', text:'A Berlino, vicino alla stazione, un cuoco turco mette la carne dello spiedo dentro il pane con l\'insalata e la salsa. Costa poco, si mangia camminando, e gli operai del turno di notte fanno la fila.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
   {id:'lgde70_sintetizzatori', era:'de1970', registro:'leggero', cond:()=>S.year>=1975&&S.year<=1979, kick:'Il paese', t:'Le macchine che suonano', text:'A Düsseldorf quattro musicisti in giacca e cravatta suonano soltanto macchine elettroniche e cantano di autostrade e di treni. In patria li prendono in giro; in Inghilterra e in America li copiano.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
   {id:'lgde70_discoteca', era:'de1970', registro:'leggero', cond:()=>S.year>=1977, kick:'Il paese', t:'Il sabato in discoteca', text:'Le sale da ballo dei paesi diventano discoteche con le luci colorate sotto il pavimento. I genitori aspettano in macchina nel parcheggio fino alle due; i figli escono sudati e dicono che è stata una serata normale.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  /* L148-2 · i dieci beat leggeri del decennio tedesco '80 (scheda §I-D). La canzone dei palloncini si descrive e non si nomina (G5). */
+  {id:'lgde80_onda', era:'de1980', registro:'leggero', cond:()=>S.year>=1981&&S.year<=1984, kick:'Il paese', t:'La nuova onda', text:'Le radio passano canzoni in tedesco con i sintetizzatori: testi strani, ritornelli da cantare in macchina. Una canzone su novantanove palloncini che fanno scoppiare una guerra arriva nelle classifiche americane, e là nessuno capisce le parole.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde80_computer', era:'de1980', registro:'leggero', cond:()=>S.year>=1983&&S.year<=1988, kick:'Il paese', t:'Il computer in cameretta', text:'Sotto l\'albero di Natale c\'è un computer che si collega al televisore. I ragazzi passano la notte a ricopiare programmi dalle riviste riga per riga, e il lunedì a scuola si scambiano le cassette.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde80_videoteca', era:'de1980', registro:'leggero', cond:()=>S.year>=1982, kick:'Il paese', t:'La videoteca', text:'In ogni quartiere apre un negozio di cassette da noleggiare: i film d\'azione davanti, gli altri dietro una tenda. Il venerdì sera la fila è più lunga che al cinema.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde80_erba', era:'de1980', registro:'leggero', cond:()=>S.year===1985&&S.month>=7&&S.month<=9, kick:'Il paese', t:'Il ragazzo sull\'erba', text:'Un ragazzo di diciassette anni di un paese vicino a Heidelberg vince il torneo di tennis più famoso del mondo, sull\'erba di Londra, tuffandosi su ogni palla. Il giorno dopo i campi da tennis comunali sono prenotati fino a ottobre.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde80_strada', era:'de1980', registro:'leggero', cond:()=>S.year>=1986, kick:'Il paese', t:'La strada della domenica', text:'La domenica sera la televisione racconta gli inquilini di una strada di Monaco: il medico, la vedova, la famiglia greca del ristorante. Ogni settimana una lite e un problema del paese vero. Si guarda in famiglia e si litiga dopo.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde80_aerobica', era:'de1980', registro:'leggero', cond:()=>S.year>=1983&&S.year<=1987, kick:'Il paese', t:'La ginnastica in tuta', text:'Tute lucide, fasce sulla fronte, scaldamuscoli colorati: la ginnastica con la musica si fa davanti al televisore alle sette del mattino. Le palestre cambiano nome e diventano centri di benessere.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde80_benvenuto', era:'de1980', registro:'leggero', cond:()=>(S.year===1989&&S.month>=11)||(S.year===1990&&S.month<=2), kick:'Il paese', t:'I soldi di benvenuto', text:'Chi arriva dall\'Est riceve cento marchi di benvenuto allo sportello di una banca. Davanti ai supermercati di confine le piccole automobili dell\'Est fanno la coda col motore a due tempi acceso, e dentro si comprano banane.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde80_picchi', era:'de1980', registro:'leggero', cond:()=>(S.year===1989&&S.month===12)||(S.year===1990&&S.month<=6), kick:'Il paese', t:'I picchi del Muro', text:'A Berlino la gente arriva con martello e scalpello e si porta via un pezzo di Muro. I ragazzi li vendono ai turisti in sacchetti di plastica; quelli con la vernice colorata costano di più.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde80_roma', era:'de1980', registro:'leggero', cond:()=>S.year===1990&&S.month>=7&&S.month<=8, kick:'Il paese', t:'Campioni a Roma', text:'La finale dei Mondiali si gioca a Roma, e il paese vince il suo terzo titolo con un rigore a pochi minuti dalla fine. È l\'ultima volta di una squadra dell\'Ovest da sola: dalla prossima, giocheranno anche quelli dell\'Est.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde80_sacco', era:'de1980', registro:'leggero', cond:()=>S.year===1991, kick:'Il paese', t:'Il sacco giallo', text:'Sugli imballaggi compare un bollino, e in ogni casa arriva un sacco giallo: la plastica e le lattine da una parte, la carta dall\'altra, il vetro per colore. Le famiglie discutono di dove va il tappo dello yogurt.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
 ];
 
 /* ===== F1 — LA TELEFONATA. Un'interruzione, non una carta: overlay a squillo, due opzioni secche, decisione a
@@ -6252,6 +6342,18 @@ const DOSSIERS=[
    {l:'Difendere la cartolina',e:'Se la Corte la boccia, l\'hai difesa tu · i ragazzi lo ricordano',f:()=>{gdDe70('giovani',4); repd(-2);}},
    {l:'Un servizio civile più lungo di quello militare',e:'La storia che verrà · chi rifiuta le armi paga con qualche mese in più · le domande calano',f:()=>{gdDe70('giovani',-1); repd(1);}},
    {l:'Tornare alle commissioni',e:'Le caserme si riempiono · i ragazzi tornano a raccontare la loro coscienza a un funzionario',f:()=>{gdDe70('giovani',-5); gdDe70('pensionati',2); repd(1);}}]},
+ /* L148-2 · i due dossier del decennio tedesco '80 (scheda §I-F). La «passeggiata nel bosco» è del luglio 1982; la leva a diciotto mesi
+    votata nel 1986 e ritirata nel 1989 prima di entrare in vigore. */
+ {id:'dde80_ginevra',era:'de1980',cond:()=>S.year>=1982&&S.year<=1983,min:'esteri',kick:'La difesa',t:'Il negoziato di Ginevra',
+  text:'A Ginevra i due negoziatori, l\'americano e il sovietico, hanno trovato da soli un compromesso durante una passeggiata nel bosco: meno missili da tutte e due le parti. Le due capitali lo hanno sconfessato. La delegazione chiede che cosa dire agli alleati.',ch:[
+   {l:'Tenere la linea dell\'Alleanza: zero missili sovietici o i nostri',e:'La storia · la trattativa resta ferma · i missili arriveranno a novembre',f:()=>{repd(3); gdDe80('giovani',-2);}},
+   {l:'Sostenere il compromesso del bosco',e:'Washington ti chiede da che parte stai · il movimento per la pace ti cita per la prima volta con rispetto',f:()=>{repd(-2); gdDe80('giovani',3);}},
+   {l:'Chiedere una moratoria di un anno da tutte e due le parti',e:'Mosca la vorrebbe solo per sé · l\'Alleanza non la vuole per niente',f:()=>{repd(-3); gdDe80('giovani',1);}}]},
+ {id:'dde80_leva',era:'de1980',cond:()=>S.year>=1985&&S.year<=1988,min:'difesa',kick:'La difesa',t:'Diciotto mesi',
+  text:'Nascono meno bambini da vent\'anni, e fra qualche anno non ci saranno abbastanza ragazzi per riempire le caserme. Lo stato maggiore chiede di portare la leva da quindici a diciotto mesi. I ragazzi di diciott\'anni fanno i conti.',ch:[
+   {l:'Diciotto mesi, dal 1989',e:'La storia · la legge passa · e alla vigilia sarà ritirata, perché il mondo è cambiato',f:()=>{repd(1); gdDe80('giovani',-4); gdDe80('pensionati',1);}},
+   {l:'Una parte di soldati di mestiere',e:'Caserme piene · bilancio della difesa più pesante',costo:{debito:0.5},f:()=>{S.ind.debt+=0.5; gdDe80('giovani',2); repd(1);}},
+   {l:'Quindici mesi, e meno reparti',e:'I ragazzi ringraziano · l\'Alleanza chiede come pensi di difendere la frontiera più esposta d\'Europa',f:()=>{repd(-3); gdDe80('giovani',3);}}]},
  {id:'d50_marshall_dip',era:'italia1950',cond:()=>S.year<=1953,min:'esteri',kick:'Piano Marshall',t:'La dipendenza dagli aiuti',text:'Gli aiuti americani hanno rimesso in moto il paese, ma ora chiedono allineamento politico e commerciale. Fin dove seguire l\'alleato?',ch:[
    {l:'Allineamento pieno con l\'alleato',e:'Aiuti e protezione; la pancia mormora',pleases:'tecnico',f:()=>{repd(4); if(S.gMod!=null)S.gMod+=0.1; gd('cetomedio',-1);}},
    {l:'Amicizia sì, ma con margini nostri',e:'Autonomia rivendicata; l\'alleato prende nota',pleases:'populista',f:()=>{repd(-2); gd('cetomedio',2);}},
@@ -8996,6 +9098,60 @@ const EVENTS=[
    {l:'Boicottaggio, con Washington',e:'La storia · gli atleti restano a casa, alcuni in lacrime davanti alle telecamere',f:()=>{repd(3); gdDe70('giovani',-2);}},
    {l:'Lasciar decidere il comitato olimpico',e:'Lo sport è libero · e Washington prende nota',f:()=>{repd(-2); gdDe70('giovani',1);}},
    {l:'Andare, e dirlo a Mosca in faccia',e:'Gli atleti partono · l\'Alleanza no, e se ne ricorderà',f:()=>{repd(-4); gdDe70('giovani',2); stampad(1);}}]},
+ /* L148-2 · i dieci eventi del decennio tedesco '80 (scheda PRESET-GERMANIA-1980 §I-C). Verifiche ⚠ della scheda (a memoria, niente
+    fonte aperta da un turno automatico): il credito del 1983 di un miliardo di marchi garantito dallo Stato ✓ e lo smontaggio degli
+    ordigni automatici sulla frontiera nel 1984 ✓; il sussidio negato a chi era fermo per la serrata del 1984 fu una disposizione
+    dell'ufficio federale del lavoro (poi la legge del 1986): l'etichetta resta com'è; il ministero dell'ambiente nasce il 6 giugno 1986. */
+ {id:'de80_pace', era:'de1980', cond:()=>S.year===1981&&S.month>=9&&S.month<=11, kick:'La pace', t:'Trecentomila nel parco',
+  text:'Nel parco davanti all\'università di Bonn si sono radunate trecentomila persone contro i missili: pastori protestanti, sindacalisti, studenti, qualche deputato del tuo stesso campo. Chiedono di essere ricevuti.',ch:[
+   {l:'Ricevere i promotori',e:'Un\'ora di colloquio e una foto · gli alleati chiedono che cosa ci sia da discutere',f:()=>{gdDe80('giovani',3); repd(-2);}},
+   {l:'Nessun incontro: la sicurezza non si decide in piazza',e:'La storia, a Bonn · il movimento cresce lo stesso',f:()=>{gdDe80('giovani',-3); gdDe80('pensionati',1); repd(1);}},
+   {l:'Lasciare che i tuoi deputati ci vadano',e:'Il partito respira · i giornali contano quanti erano sul palco',f:()=>{gdDe80('giovani',2); baseDe80(-1); stampad(-1);}}]},
+ {id:'de80_duemilioni', era:'de1980', cond:()=>(S.year===1982&&S.month>=11)||S.year===1983, tono:'grave', kick:'Il lavoro', t:'Due milioni di disoccupati',
+  text:'I disoccupati hanno passato i due milioni, il doppio di cinque anni fa. Le acciaierie della Ruhr e i cantieri del nord chiudono reparti interi. Il governo ha promesso una svolta; il paese vuole sapere quale.',ch:[
+   {l:'Tagliare la spesa sociale e alleggerire le imprese',e:'La svolta promessa · gli imprenditori investono, i sindacati scendono in piazza',f:()=>{gdDe80('imprenditori',4); gdDe80('lavoratori',-5); fidDe80(2);}},
+   {l:'La pensione anticipata a cinquantotto anni, per far posto ai giovani',e:'I reparti si svuotano dall\'alto · il conto lo pagano le casse della previdenza',costo:{debito:1},f:()=>{S.ind.debt+=1; gdDe80('lavoratori',2); gdDe80('giovani',2); gdDe80('pensionati',1); fidDe80(-1);}},
+   {l:'Un programma di case popolari, a debito',e:'I cantieri ripartono · la banca centrale ricorda a tutti che cosa è successo nel \'75',costo:{debito:1.5},f:()=>{S.ind.debt+=1.5; gdDe80('lavoratori',4); fidDe80(-2);}}]},
+ {id:'de80_credito', era:'de1980', cond:()=>S.year===1983&&S.month>=6&&S.month<=8&&!S.opposizione, kick:'L\'Est', t:'Il credito all\'altra Germania',
+  text:'L\'Est è al verde e chiede un credito di un miliardo di marchi alle banche dell\'Ovest, con la garanzia dello Stato. Proprio chi per anni ha tuonato contro l\'Est si offre di trattarlo. In cambio, forse, qualcosa alla frontiera.',ch:[
+   {l:'Garantirlo, e chiedere in cambio le mine della frontiera',e:'La storia · il credito passa · l\'anno dopo l\'Est smonta gli ordigni automatici lungo il confine',f:()=>{repd(3); gdDe80('pensionati',1); baseDe80(-1);}},
+   {l:'Garantirlo senza condizioni',e:'L\'Est respira · e ne prende nota: la prossima volta chiederà di più',f:()=>{repd(1); gdDe80('cetomedio',-2);}},
+   {l:'Rifiutare: niente soldi a chi spara sul confine',e:'La linea dura · a Est nessuno smonta niente',f:()=>{repd(-2); gdDe80('pensionati',2); baseDe80(1);}}]},
+ {id:'de80_35ore', era:'de1980', cond:()=>S.year===1984&&S.month>=4&&S.month<=6, kick:'Il lavoro', t:'Le trentacinque ore',
+  text:'Il sindacato dei metalmeccanici sciopera per la settimana di trentacinque ore a parità di salario, e le imprese rispondono con la serrata. Le fabbriche di automobili si fermano anche dove non si sciopera, perché mancano i pezzi. Settimane di fermo.',ch:[
+   {l:'Un mediatore, e un compromesso a trentotto ore e mezza',e:'La storia · sette settimane di sciopero · l\'orario scende, e la strada è aperta',f:()=>{gdDe80('lavoratori',2); gdDe80('imprenditori',-1); repd(1);}},
+   {l:'Niente sussidi a chi è fermo per la serrata',e:'Le imprese ringraziano · il sindacato giura che non finirà qui',f:()=>{gdDe80('imprenditori',3); gdDe80('lavoratori',-5); stampad(-1);}},
+   {l:'Sostenere le trentacinque ore',e:'Il sindacato ti deve un favore · gli imprenditori ti chiedono chi ha scritto il tuo programma',f:()=>{gdDe80('lavoratori',5); gdDe80('imprenditori',-5); fidDe80(-1);}}]},
+ {id:'de80_fondi', era:'de1980', cond:()=>S.year===1984&&S.month>=6, tono:'grave', kick:'La giustizia', t:'I fondi dei partiti',
+  text:'I giudici hanno scoperto come un grande gruppo industriale finanziava i partiti attraverso associazioni di comodo, esentasse. Il ministro dell\'economia si è dimesso; il presidente del Bundestag potrebbe essere il prossimo. In aula si parla di un\'amnistia per i donatori.',ch:[
+   {l:'L\'amnistia: una pagina da chiudere',e:'Per due giorni sembra fatta · poi la stampa e la base la fanno saltare, e resta solo il tentativo',f:()=>{stampad(-5); baseDe80(-3); gdDe80('imprenditori',2);}},
+   {l:'Lasciar lavorare i tribunali',e:'Mesi di udienze e di titoli · ma nessuno potrà dire che hai coperto qualcuno',f:()=>{stampad(2); gdDe80('cetomedio',1); gdDe80('imprenditori',-1);}},
+   {l:'Una legge nuova: il finanziamento pubblico, e le donazioni alla luce del sole',e:'La cura che servirà · i tesorieri dei partiti la odiano',costo:{debito:0.5},f:()=>{S.ind.debt+=0.5; stampad(3); baseDe80(-1);}}]},
+ {id:'de80_cimitero', era:'de1980', cond:()=>S.year===1985&&S.month>=4&&S.month<=5&&!S.opposizione, tono:'grave', kick:'La memoria', t:'Il cimitero militare',
+  text:'Per i quarant\'anni dalla fine della guerra il Presidente americano visiterà con te un cimitero militare: fra le tombe, si è scoperto, ci sono anche quelle di alcune SS. In America i veterani protestano, qui le comunità ebraiche. Il programma è stampato.',ch:[
+   {l:'Confermare, e aggiungere la visita a un campo di concentramento',e:'La storia · le due immagini nello stesso giorno · nessuno ne esce contento, ma la visita si fa',f:()=>{repd(1); gdDe80('pensionati',1); stampad(-1);}},
+   {l:'Togliere il cimitero dal programma',e:'Le proteste si fermano · e a destra qualcuno parla di umiliazione',f:()=>{repd(2); gdDe80('pensionati',-2); baseDe80(S.partito==='de_cdu'?-2:0);}},
+   {l:'Confermare così com\'è',e:'Il protocollo è rispettato · il resto del mondo ne parla per settimane',f:()=>{repd(-5); stampad(-3); gdDe80('pensionati',2);}}]},
+ {id:'de80_nube', era:'de1980', cond:()=>S.year===1986&&S.month>=6&&S.month<=8, kick:'L\'ambiente', t:'Dopo la nube',
+  text:'La nube di Chernobyl è passata, ma in Baviera l\'insalata e il latte si buttano ancora, e i bambini non giocano nei prati. Il paese ha scoperto che nessuno era responsabile di dire che cosa fosse sicuro. Un Land dice una cosa, il vicino un\'altra.',ch:[
+   {l:'Un ministero dell\'ambiente, subito',e:'La storia · nasce in giugno · un ministro solo che risponde di tutto',f:()=>{gdDe80('giovani',2); gdDe80('cetomedio',1); repd(1);}},
+   {l:'Uscire dal nucleare in dieci anni',e:'I Verdi e i giovani esultano · le imprese elettriche fanno i conti, e li mandano a te',f:()=>{gdDe80('giovani',5); gdDe80('imprenditori',-4); fidDe80(-1);}},
+   {l:'Rassicurare: le nostre centrali sono diverse',e:'Tecnicamente è vero · nessuno ci crede',f:()=>{gdDe80('imprenditori',2); gdDe80('giovani',-4); stampad(-2);}}]},
+ {id:'de80_censimento', era:'de1980', cond:()=>S.year===1987&&S.month>=3&&S.month<=5, kick:'Lo Stato', t:'Il censimento',
+  text:'Quattro anni fa la Corte costituzionale ha fermato il censimento in nome del diritto di ciascuno a decidere dei propri dati. Ora si riparte, con la legge riscritta. Nelle città i comitati invitano a non rispondere, o a strappare il numero dal questionario.',ch:[
+   {l:'Si risponde: multe per chi boicotta',e:'La storia · quasi tutti rispondono · qualche migliaio paga, e ne fa un vanto',f:()=>{gdDe80('pensionati',1); gdDe80('giovani',-3); fidDe80(1);}},
+   {l:'Tolleranza: niente multe',e:'Il censimento si fa lo stesso, un po\' peggio · lo Stato ha mostrato di non volerne fare una guerra',f:()=>{gdDe80('giovani',2); gdDe80('pensionati',-1);}},
+   {l:'Rinviare e rifare il questionario, anonimo',e:'Un anno perso e qualche milione · i comitati non hanno più niente da strappare',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; gdDe80('giovani',2); stampad(1);}}]},
+ {id:'de80_visita', era:'de1980', cond:()=>S.year===1987&&S.month>=7&&S.month<=9&&!S.opposizione, kick:'L\'Est', t:'Il capo dell\'Est a Bonn',
+  text:'Il capo dell\'altra Germania arriva a Bonn in visita ufficiale, la prima in quarant\'anni. Il protocollo chiede di decidere tutto: gli inni, le bandiere, il tappeto rosso. Per l\'Est è il riconoscimento; per molti qui è l\'uomo che fa sparare sul confine.',ch:[
+   {l:'Tutti gli onori: inni e bandiere',e:'La storia · le immagini sono quelle di due Stati · e nel brindisi dici che il Muro è ancora lì',f:()=>{repd(3); gdDe80('pensionati',-2);}},
+   {l:'Una visita di lavoro, senza protocollo',e:'Niente inni, niente tappeto · l\'Est se ne offende, e la visita dura un giorno',f:()=>{repd(-1); gdDe80('pensionati',1);}},
+   {l:'Chiedere prima la fine degli spari sul confine',e:'L\'Est rimanda la visita · a casa ti applaudono, i diplomatici no',f:()=>{repd(-3); gdDe80('pensionati',2); baseDe80(1);}}]},
+ {id:'de80_praga', era:'de1980', cond:()=>S.year===1989&&S.month>=8&&S.month<=9&&!S.opposizione, tono:'grave', kick:'L\'Est', t:'Il giardino dell\'ambasciata',
+  text:'Nel giardino della nostra ambasciata a Praga dormono in tenda migliaia di persone arrivate dall\'Est: bambini, famiglie, i loro vecchi. Non tornano indietro. Le fogne sono al limite e piove. L\'Est accetta di lasciarli partire, ma vuole che i treni attraversino il suo territorio.',ch:[
+   {l:'Accettare: i treni passano dall\'Est',e:'La storia · il ministro degli esteri lo annuncia dal balcone · alle stazioni dell\'Est la folla prova a salire',f:()=>{repd(4); gdDe80('pensionati',2); gdDe80('cetomedio',1);}},
+   {l:'Chiedere che vengano direttamente a ovest',e:'Giorni di trattativa in più nel fango · alla fine i treni passano lo stesso',f:()=>{repd(-1); stampad(-2);}},
+   {l:'Chiudere l\'ambasciata ai nuovi arrivi',e:'Il giardino non si riempie più · il paese ti guarda come chi ha chiuso la porta',f:()=>{repd(-4); gdDe80('pensionati',-3); baseDe80(-2);}}]},
  {id:'fr_ceca', era:'fr1950', cond:()=>S.year>=1951&&S.year<=1953, kick:'L\'Europa', t:'Il carbone e l\'acciaio con Bonn',
   text:'Sei paesi mettono in comune carbone e acciaio sotto un\'Alta Autorità che non risponde a nessun governo: per i siderurgici del nord è un mercato, per i minatori una minaccia, per i gollisti una rinuncia. Il tuo partito deve ratificare.',ch:[
    {l:'Ratifichi',e:'Le acciaierie del nord con te · i minatori temono il mercato comune',f:()=>{gdFr('imprenditori',3); gdFr('cetomedio',2); gdFr('lavoratori',-3); repd(1);}},
@@ -10121,6 +10277,31 @@ const SFIDE=[
  {id:'de70_q_verdi', era:'de1970', codaFino:Infinity, paese:'germania', ruolo:'governo', diff:'facile', cond:()=>S.year>=1981||(S.year===1980&&S.month>=2), q:'Quale partito nasce nel gennaio 1980?',
   op:['La NPD','Il partito liberale','I Verdi'], giusta:2,
   perche:'I Verdi si fondano come partito federale a Karlsruhe nel gennaio 1980.'},
+ /* L148-2 · le otto sfide del decennio tedesco '80 (scheda §I-G), la giusta nelle posizioni della scheda (0,1,2,1,2,0,1,2). Il «perché» è di Code. */
+ {id:'de80_q_svolta', era:'de1980', codaFino:Infinity, paese:'germania', ruolo:'governo', diff:'media', cond:()=>S.year>=1983||(S.year===1982&&S.month>=11), q:'Come cambia il governo nell\'ottobre 1982?',
+  op:['Con una sfiducia costruttiva','Con elezioni anticipate','Con le dimissioni del Cancelliere'], giusta:0,
+  perche:'I liberali cambiano campo e il Bundestag elegge un Cancelliere nuovo votando la sfiducia a quello in carica: il governo cambia senza urne.'},
+ {id:'de80_q_verdi', era:'de1980', codaFino:Infinity, paese:'germania', ruolo:'governo', diff:'facile', cond:()=>S.year>=1984||(S.year===1983&&S.month>=4), q:'Quale partito entra per la prima volta nel Bundestag nel 1983?',
+  op:['La NPD','I Verdi','La PDS'], giusta:1,
+  perche:'Alle anticipate del marzo 1983 i Verdi passano il cinque per cento ed entrano in aula con ventisette deputati.'},
+ {id:'de80_q_35ore', era:'de1980', codaFino:Infinity, paese:'germania', ruolo:'governo', diff:'facile', cond:()=>S.year>=1985||(S.year===1984&&S.month>=7), q:'Che cosa chiedono i metalmeccanici con lo sciopero del 1984?',
+  op:['Più ferie','Un aumento del 10%','La settimana di 35 ore'], giusta:2,
+  perche:'Sette settimane di sciopero per le trentacinque ore a parità di salario: il compromesso porta la settimana a trentotto ore e mezza.'},
+ {id:'de80_q_chernobyl', era:'de1980', codaFino:Infinity, paese:'germania', ruolo:'governo', diff:'facile', cond:()=>S.year>=1987||(S.year===1986&&S.month>=6), q:'Dove si trova la centrale la cui nube arriva in Baviera nel 1986?',
+  op:['Harrisburg','Chernobyl','Sellafield'], giusta:1,
+  perche:'Il reattore di Chernobyl, in Ucraina, esplode il 26 aprile 1986; la nube arriva fino alla Germania del sud.'},
+ {id:'de80_q_muro', era:'de1980', codaFino:Infinity, paese:'germania', ruolo:'governo', diff:'facile', cond:()=>S.year>=1990||(S.year===1989&&S.month>=12), q:'In che anno cade il Muro di Berlino?',
+  op:['1990','1987','1989'], giusta:2,
+  perche:'La sera del 9 novembre 1989 i posti di blocco di Berlino si aprono.'},
+ {id:'de80_q_dueppiuquattro', era:'de1980', codaFino:Infinity, paese:'germania', ruolo:'governo', diff:'media', cond:()=>S.year>=1991||(S.year===1990&&S.month>=10), q:'In quale città si firma il trattato «due più quattro»?',
+  op:['Mosca','Washington','Bonn'], giusta:0,
+  perche:'Il 12 settembre 1990 le due Germanie e le quattro potenze vincitrici firmano a Mosca il trattato che rende sovrano il paese unito.'},
+ {id:'de80_q_unita', era:'de1980', codaFino:Infinity, paese:'germania', ruolo:'governo', diff:'media', cond:()=>S.year>=1991||(S.year===1990&&S.month>=11), q:'In che giorno il paese si riunisce?',
+  op:['Il 9 novembre','Il 3 ottobre','Il 1° luglio'], giusta:1,
+  perche:'Il 3 ottobre 1990 i Länder dell\'Est aderiscono alla Repubblica federale; il 1° luglio era arrivato il marco, il 9 novembre era caduto il Muro.'},
+ {id:'de80_q_berlino', era:'de1980', codaFino:Infinity, paese:'germania', ruolo:'governo', diff:'difficile', cond:()=>S.year>=1992||(S.year===1991&&S.month>=7), q:'Con quale voto il Bundestag sceglie Berlino capitale nel 1991?',
+  op:['All\'unanimità','400 a 250','338 a 320'], giusta:2,
+  perche:'Il 20 giugno 1991, dopo un giorno intero di dibattito, Berlino vince per diciotto voti.'},
  {id:'uk60_svalut67', era:'uk1960', codaFino:Infinity, paese:'regnounito', ruolo:'governo', diff:'difficile', cond:()=>S.year>=1967, q:'Che cosa accadde alla sterlina nel novembre 1967?',
   op:['Fu lasciata fluttuare liberamente','Fu svalutata da 2,80 a 2,40 dollari','Fu agganciata all\'oro'], giusta:1,
   perche:'Arrivò dopo tre anni di difesa del cambio.'},
@@ -12820,6 +13001,41 @@ const TITOLI=[
  {id:'ti_de70_binario', era:'de1970', pri:1, cond:()=>(S.year===1979&&S.month===12)||(S.year===1980&&S.month===1), amico:'Il doppio binario', ostile:'Il doppio binario: missili, se Mosca non tratta'},
  {id:'ti_de70_verdi', era:'de1970', pri:1, cond:()=>S.year===1980&&S.month>=1&&S.month<=2, amico:'Nascono i Verdi', ostile:'Nascono i Verdi: girasoli a Karlsruhe'},
  {id:'ti_de70_oktoberfest', era:'de1970', pri:1, cond:()=>S.year===1980&&S.month>=9&&S.month<=10, amico:'La bomba all\'Oktoberfest', ostile:'La bomba all\'Oktoberfest: tredici morti'},
+ /* L148-2 · i titoli del decennio tedesco '80 (scheda §I-E). Niente `tono` (come i ti_de60_* e i ti_de70_*: la gravità sta nel testo).
+    Le gemelle: il piano in dieci punti ha la sua versione per chi È il Cancelliere (la forma di ti_de60_alternanza, chi governa); il
+    marco all'Est la sua per il cambio di due a uno. ⚑ `ti_de80_documento` esce SOLO a settembre: il documento dei liberali è del 9
+    settembre 1982, e in agosto il titolo sarebbe un anacronismo (la scheda diceva 8-9). */
+ {id:'ti_de80_pace', era:'de1980', pri:1, cond:()=>S.year===1981&&S.month>=10&&S.month<=11, amico:'Trecentomila a Bonn', ostile:'Trecentomila a Bonn contro i missili'},
+ {id:'ti_de80_documento', era:'de1980', pri:1, cond:()=>S.year===1982&&S.month===9&&S.deSvolta82==null, amico:'Il documento dei liberali', ostile:'Il documento dei liberali: la coalizione trema'},
+ {id:'ti_de80_svolta', era:'de1980', pri:1, cond:()=>S.year===1982&&S.month>=10&&S.month<=11&&S.deSvolta82!=='trattenuta'&&S.deSvolta82!=='urne', amico:'Il cambio di campo', ostile:'I liberali cambiano campo: un Cancelliere nuovo senza urne'},
+ {id:'ti_de80_verdi', era:'de1980', pri:1, cond:()=>S.year===1983&&S.month>=3&&S.month<=4&&(S.seggi&&S.seggi.de_grn)>0, amico:'I Verdi in Parlamento', ostile:'I Verdi in aula: maglioni e vasi di fiori'},
+ {id:'ti_de80_diari', era:'de1980', pri:1, cond:()=>S.year===1983&&S.month===5, amico:'I diari falsi', ostile:'I diari del dittatore erano falsi: un settimanale chiede scusa'},
+ {id:'ti_de80_catena', era:'de1980', pri:1, cond:()=>S.year===1983&&S.month>=10&&S.month<=11, amico:'La catena umana', ostile:'Da Stoccarda a Neu-Ulm, una catena umana contro i missili'},
+ {id:'ti_de80_missili', era:'de1980', pri:1, cond:()=>S.year===1983&&S.month>=11&&S.month<=12&&(S.deMissili83==null||S.deMissili83==='installati'), amico:'Il Bundestag vota i missili', ostile:'I missili arrivano: il Bundestag dice sì'},
+ {id:'ti_de80_generale', era:'de1980', pri:1, cond:()=>S.year===1984&&S.month>=1&&S.month<=2, amico:'Il generale congedato', ostile:'Il generale congedato per una calunnia: il ministro resta'},
+ {id:'ti_de80_ministro', era:'de1980', pri:1, cond:()=>S.year===1984&&S.month>=6&&S.month<=7, amico:'Si dimette il ministro dell\'economia', ostile:'Fondi ai partiti: si dimette il ministro dell\'economia'},
+ {id:'ti_de80_orario', era:'de1980', pri:1, cond:()=>S.year===1984&&S.month>=6&&S.month<=7, amico:'Trentotto ore e mezza', ostile:'Sette settimane di sciopero: trentotto ore e mezza'},
+ {id:'ti_de80_presidente', era:'de1980', pri:1, cond:()=>S.year===1984&&S.month>=10&&S.month<=11, amico:'Si dimette il presidente del Bundestag', ostile:'Fondi ai partiti: si dimette anche il presidente del Bundestag'},
+ {id:'ti_de80_ottomaggio', era:'de1980', pri:1, cond:()=>S.year===1985&&S.month>=5&&S.month<=6, amico:'Il discorso dell\'8 maggio', ostile:'Il Presidente della Repubblica: l\'8 maggio fu un giorno di liberazione'},
+ {id:'ti_de80_ambiente', era:'de1980', pri:1, cond:()=>S.year===1986&&S.month>=6&&S.month<=7, amico:'Nasce il ministero dell\'ambiente', ostile:'Dopo la nube, un ministero dell\'ambiente'},
+ {id:'ti_de80_storici', era:'de1980', pri:1, cond:()=>S.year===1986&&S.month>=8&&S.month<=9, amico:'La disputa degli storici', ostile:'Gli storici si dividono: il passato che non passa'},
+ {id:'ti_de80_reno', era:'de1980', pri:1, cond:()=>S.year===1986&&S.month>=11&&S.month<=12, amico:'Il Reno rosso', ostile:'Un incendio a Basilea: il Reno avvelenato fino all\'Olanda'},
+ {id:'ti_de80_capoest', era:'de1980', pri:1, cond:()=>S.year===1987&&S.month===9, amico:'Il capo dell\'Est a Bonn', ostile:'Il capo dell\'Est a Bonn: gli inni, le bandiere'},
+ {id:'ti_de80_kiel', era:'de1980', pri:1, cond:()=>S.year===1987&&S.month>=10&&S.month<=11, amico:'Lo scandalo di Kiel', ostile:'Kiel: si dimette il presidente della regione, poi viene trovato morto'},
+ {id:'ti_de80_ramstein', era:'de1980', pri:1, cond:()=>S.year===1988&&S.month>=9&&S.month<=10, amico:'Dopo Ramstein', ostile:'Dopo Ramstein: basta esibizioni aeree sulle folle'},
+ {id:'ti_de80_estrema', era:'de1980', pri:1, cond:()=>S.year===1989&&S.month===2, amico:'L\'estrema destra al 7,5 a Berlino', ostile:'Berlino: un partito dell\'estrema destra entra nel Parlamento cittadino'},
+ {id:'ti_de80_ungheria', era:'de1980', pri:1, cond:()=>S.year===1989&&S.month===9, amico:'L\'Ungheria apre la frontiera', ostile:'L\'Ungheria apre la frontiera: migliaia passano a ovest'},
+ {id:'ti_de80_lipsia', era:'de1980', pri:1, cond:()=>S.year===1989&&S.month===10, amico:'Lipsia', ostile:'Lipsia: settantamila in piazza, nessuno spara'},
+ {id:'ti_de80_diecipunti', era:'de1980', pri:1, cond:()=>S.year===1989&&S.month===12&&S.opposizione, amico:'Il piano in dieci punti', ostile:'Il Cancelliere presenta il piano in dieci punti'},
+ {id:'ti_de80_diecipunti_gov', era:'de1980', pri:1, cond:()=>S.year===1989&&S.month===12&&!S.opposizione, amico:'Il piano in dieci punti', ostile:'Il piano in dieci punti del governo'},
+ {id:'ti_de80_estvota', era:'de1980', pri:1, cond:()=>S.year===1990&&S.month>=3&&S.month<=4, amico:'L\'Est vota libero', ostile:'Prime elezioni libere all\'Est'},
+ {id:'ti_de80_marco', era:'de1980', pri:1, cond:()=>S.year===1990&&S.month===7&&S.deMarco90!=='dueauno', amico:'Il marco arriva all\'Est', ostile:'Il marco all\'Est: le banche aperte la domenica'},
+ {id:'ti_de80_marco_dueauno', era:'de1980', pri:1, cond:()=>S.year===1990&&S.month===7&&S.deMarco90==='dueauno', amico:'Il marco arriva all\'Est', ostile:'Il marco all\'Est, a due a uno'},
+ {id:'ti_de80_dueppiuquattro', era:'de1980', pri:1, cond:()=>S.year===1990&&S.month===9, amico:'Due più quattro', ostile:'Firmato a Mosca: il paese unito torna sovrano'},
+ {id:'ti_de80_privatizzazioni', era:'de1980', pri:1, cond:()=>S.year===1991&&S.month===4, amico:'Ucciso il capo dell\'agenzia delle privatizzazioni', ostile:'Ucciso nella sua casa il capo dell\'agenzia che vende le fabbriche dell\'Est'},
+ {id:'ti_de80_berlino', era:'de1980', pri:1, cond:()=>S.year===1991&&S.month>=6&&S.month<=7, amico:'Berlino capitale', ostile:'Berlino capitale: trecentotrentotto a trecentoventi'},
+ {id:'ti_de80_solidarieta', era:'de1980', pri:1, cond:()=>S.year===1991&&S.month>=7&&S.month<=8, amico:'Il contributo di solidarietà', ostile:'Il contributo di solidarietà: le tasse salgono per l\'Est'},
+ {id:'ti_de80_hoyerswerda', era:'de1980', pri:1, cond:()=>S.year===1991&&S.month>=9&&S.month<=10, amico:'Hoyerswerda', ostile:'Hoyerswerda: gli alloggi dei profughi assediati, la polizia li porta via'},
  {id:'ng_p_ti_petrolio', era:'contemporanea', paesi:['nigeria'], amico:'La produzione di petrolio torna a salire', ostile:'Un barile su dieci sparisce: il furto record'},
 ];
 
@@ -14474,6 +14690,16 @@ const SNODI_STORICI = {
   deSpia74:        { storico:['responsabilita'], conforme:'sulla spia del 1974', diverge:{ 'servizi':'Nel 1974 ha fatto cadere il capo dei servizi e il ministro dell’interno per la spia nel suo ufficio.', 'minimizza':'Nel 1974 ha minimizzato la spia nel suo ufficio.' } },
   deAutunno77:     { storico:['fermezza'], conforme:'sull’autunno del 1977', diverge:{ 'scambio':'Nell’autunno del 1977 ha scambiato gli ostaggi con i capi del gruppo armato.', 'tempo':'Nell’autunno del 1977 ha trattato per guadagnare tempo.' } },
   deAutunno77Opp:  { storico:['crisi'], conforme:'sull’autunno del 1977, dall’opposizione', diverge:{ 'trattare':'Nell’autunno del 1977 ha chiesto di trattare coi rapitori.', 'attacco':'Nell’autunno del 1977 è rimasto fuori dal gabinetto di crisi.' } },
+  /* L148-2 · i quattro snodi del decennio tedesco '80, le aule e la capitale (frasi di Code). */
+  deSvolta82:      { storico:['lasciata','cambio'], conforme:'sul cambio di campo del 1982', diverge:{ 'urne':'Nel 1982, davanti al cambio di campo dei liberali, ha chiesto le urne subito.', 'trattenuta':'Nel 1982 ha tenuto insieme la coalizione dei socialdemocratici e dei liberali fino alle urne.' } },
+  deSvolta82Opp:   { storico:['subito'], conforme:'sul cambio di campo del 1982, dall’opposizione', diverge:{ 'programma':'Nel 1982 ha chiesto ai liberali un programma scritto prima di votare il Cancelliere.' } },
+  deMissili83:     { storico:['installati'], conforme:'sui missili del 1983', diverge:{ 'rinvio':'Nel 1983 ha rinviato di un anno l’installazione dei missili.', 'rifiuto':'Nel 1983 ha rifiutato i missili a medio raggio.' } },
+  deMissili83Opp:  { storico:['contro'], conforme:'sui missili del 1983, dall’opposizione', diverge:{ 'astensione':'Nel 1983 si è astenuto sui missili.', 'favore':'Nel 1983 ha votato i missili dall’opposizione.' } },
+  deUnita90:       { storico:['adesione'], conforme:'sulla strada dell’unità', diverge:{ 'costituzione':'Nel 1990 ha proposto una costituzione nuova per il paese unito.', 'confederazione':'Nel 1990 ha proposto una confederazione a tappe con l’Est.' } },
+  deUnita90Opp:    { storico:['costituzione'], conforme:'sulla strada dell’unità, dall’opposizione', diverge:{ 'rapida':'Nel 1990 ha sostenuto dall’opposizione l’adesione rapida dell’Est.', 'frenare':'Nel 1990 ha chiesto di frenare sull’unità.' } },
+  deMarco90:       { storico:['unoauno'], conforme:'sul marco all’Est', diverge:{ 'dueauno':'Nel 1990 ha portato il marco all’Est col cambio di due a uno.', 'mercato':'Nel 1990 ha portato il marco all’Est al cambio di mercato, con aiuti diretti.' } },
+  deMarco90Opp:    { storico:['si'], conforme:'sul marco all’Est, dall’opposizione', diverge:{ 'contro':'Nel 1990 ha votato contro il trattato sull’unione monetaria.', 'astensione':'Nel 1990 si è astenuto sul trattato sull’unione monetaria.' } },
+  deCapitale91:    { storico:['berlino'], conforme:'sulla capitale del paese unito', diverge:{ 'bonn':'Nel 1991 ha votato per restare a Bonn.', 'divisa':'Nel 1991 ha votato per dividere la capitale fra Berlino e Bonn.' } },
 };
 
 /* ==============================================================================================================
@@ -16179,7 +16405,8 @@ const CRISI08FR_OPP_EV = {
    del presente (genera-mappe.js): le otto aree che il presente già ha escono identiche byte per byte, e lo sfondo unito pure.
    Le tre città-stato (Berlino, Amburgo, Brema) sono cerchi, come oggi. Chiavi per id: una porta sceglie l'ordine dei suoi
    territori (paralleli per indice alle aree, L107-3). SFONDO_DE_OVEST è la Repubblica federale prima del 1990: i dieci Länder
-   dell'Ovest, Saar compresa, con Amburgo e Brema dentro; Berlino Ovest è un cerchio fuori dal contorno. Non ancora usate.
+   dell'Ovest, Saar compresa, con Amburgo e Brema dentro; Berlino Ovest è un cerchio fuori dal contorno. Le cinque aree dell'Est (meclemburgo, brandeburgo, sassoniaanhalt, turingia,
+   sassonia) e lo `sfondo` intero le porta la tappa dell'unità, 1990/10 (L147-2: territori in coda, `mappa` che toglie `oltre`).
    ================================================================================================================ */
 const MAPPA_DE_LAND = { viewBox:'0 0 100 134', sfondo:'M91.9,69.9 L90.7,69.5 L90.2,70.4 L91.7,71.4 L91.4,72.1 L87.3,73.4 L85.9,74.7 L83.0,75.0 L81.8,76.9 L81.0,76.4 L78.8,78.6 L77.2,78.6 L76.6,80.1 L75.2,79.5 L71.9,80.4 L69.7,84.2 L69.1,82.6 L67.3,81.6 L69.1,86.2 L72.1,88.6 L70.6,91.3 L73.3,96.6 L74.8,98.2 L77.1,98.9 L79.0,101.8 L80.3,102.2 L82.0,104.8 L83.5,104.7 L85.7,107.8 L84.7,111.9 L81.9,111.0 L81.4,114.3 L74.3,118.8 L77.0,123.3 L76.0,125.4 L77.9,126.4 L77.1,129.7 L74.8,128.2 L74.6,126.3 L71.8,127.0 L71.0,125.9 L69.1,126.1 L69.1,125.2 L68.4,127.4 L62.5,127.6 L58.5,130.9 L58.0,130.3 L55.7,131.0 L54.5,128.6 L50.5,128.6 L49.9,127.8 L49.9,130.9 L47.1,133.0 L47.6,131.3 L46.3,131.5 L44.8,128.4 L43.6,128.5 L43.1,127.6 L41.3,128.8 L36.7,126.3 L33.5,126.5 L30.1,124.1 L28.4,126.3 L30.6,126.5 L30.3,127.6 L26.7,127.1 L24.7,128.1 L20.1,128.0 L20.6,127.5 L19.8,127.7 L19.1,125.6 L20.2,121.2 L19.8,118.8 L21.6,114.9 L22.2,110.3 L26.3,104.5 L23.5,103.2 L20.4,103.2 L18.0,101.0 L16.5,102.1 L14.5,101.4 L14.1,102.0 L12.7,100.3 L10.7,101.2 L8.5,96.7 L6.7,96.1 L8.4,90.4 L6.3,89.7 L4.1,86.1 L4.6,83.3 L7.0,81.6 L6.6,78.8 L4.9,78.2 L5.7,76.6 L3.2,75.0 L2.8,73.8 L3.7,71.6 L1.6,69.8 L4.6,67.5 L3.7,66.5 L5.3,63.5 L5.1,61.5 L2.3,56.5 L4.7,55.9 L4.4,55.0 L6.7,56.2 L10.9,54.8 L11.6,53.6 L10.3,52.2 L13.9,49.3 L13.4,45.6 L10.6,45.4 L10.2,44.1 L10.9,42.5 L13.8,42.7 L15.7,36.4 L15.7,32.2 L16.3,31.0 L17.5,31.2 L13.9,30.0 L14.2,27.7 L15.1,27.3 L14.6,26.4 L16.0,25.1 L24.5,24.4 L26.0,27.0 L25.0,28.4 L26.4,29.4 L27.6,28.3 L26.7,27.5 L27.1,26.0 L30.1,27.2 L29.6,30.3 L30.2,27.1 L29.4,24.5 L30.4,21.7 L33.3,22.3 L37.0,21.6 L41.0,26.4 L43.6,27.2 L41.0,26.0 L39.0,22.3 L33.9,20.5 L33.0,18.9 L34.8,19.0 L35.0,17.8 L32.8,16.4 L34.4,14.1 L31.4,14.9 L30.6,13.8 L31.6,13.4 L31.1,12.6 L33.6,12.4 L34.9,10.9 L31.5,7.1 L31.2,4.4 L33.8,4.3 L37.4,5.9 L40.9,4.9 L43.5,6.7 L44.8,6.3 L45.7,10.0 L43.7,11.5 L46.9,11.2 L47.5,11.7 L46.9,14.0 L48.7,12.0 L53.1,14.2 L57.4,13.0 L56.7,13.4 L56.7,16.4 L53.3,18.6 L54.9,20.1 L57.8,19.2 L58.5,20.4 L60.8,21.1 L63.2,16.9 L67.5,16.2 L67.7,17.8 L67.7,16.4 L72.2,11.2 L76.3,12.2 L71.2,12.9 L70.4,14.2 L70.9,15.2 L72.3,13.2 L74.0,12.5 L73.8,13.2 L75.6,13.4 L77.2,12.1 L78.3,14.7 L82.2,17.9 L84.6,16.5 L85.7,17.7 L85.0,18.9 L86.7,20.4 L85.8,22.0 L88.1,23.6 L90.5,23.7 L89.9,24.4 L92.4,32.1 L91.3,35.5 L89.2,37.0 L89.0,38.9 L94.5,43.5 L93.5,46.8 L95.2,49.2 L94.9,51.2 L95.7,51.9 L93.9,56.5 L95.4,59.0 L95.2,61.1 L97.7,62.5 L98.5,65.5 L95.9,73.2 L94.2,72.7 L94.3,71.4 L93.5,71.6 L93.8,70.5 L92.8,69.5 ZM58.7,11.4 L59.3,12.5 L56.0,11.6 L57.2,10.4 ZM29.5,6.7 L30.5,7.2 L30.2,7.9 L28.4,7.4 ZM28.0,3.5 L28.3,4.4 L31.1,4.4 L27.5,4.9 L27.2,6.9 L28.6,1.5 ZM89.9,20.5 L89.8,21.5 L86.0,22.0 L87.0,21.2 L86.7,19.5 L88.2,20.5 L88.2,19.4 L87.1,18.3 L86.5,19.3 L86.2,18.6 L85.3,19.1 L85.2,16.7 ZM84.5,12.9 L85.2,13.7 L84.8,14.8 L84.0,14.5 L84.6,13.9 L83.6,14.1 L84.1,13.5 L82.2,13.8 L80.9,14.8 L81.4,15.6 L80.7,14.7 L78.7,14.6 L78.7,13.1 L79.9,13.0 L78.8,12.3 L80.0,11.3 L78.6,10.3 L80.3,10.7 L81.0,9.6 L80.8,10.6 L81.1,9.9 L81.7,11.2 L82.6,10.8 L82.6,9.8 L81.0,9.1 L79.8,9.9 L80.2,8.6 L79.6,8.5 L81.5,7.9 L81.6,9.6 L83.9,9.6 L84.3,10.4 L83.2,11.8 ZM29.7,32.5 L34.2,33.6 L34.5,35.5 L31.7,35.5 ZM82.1,42.0 L84.0,44.1 L83.7,45.0 L85.1,45.6 L84.5,47.0 L78.1,46.2 L78.7,43.1 Z',
   aree:{
@@ -16614,6 +16841,226 @@ const AUTUNNO77_OPP_EV = {
         S.log.unshift({t:T('L\'ordine'),x:T('Nell\'autunno del 1977 è rimasto fuori dal gabinetto di crisi.')}); } },
   ],
 };
+/* ==============================================================================================================
+   L148-2 · IL DECENNIO TEDESCO '80 — I QUATTRO SNODI, LE AULE E LA CAPITALE (scheda PRESET-GERMANIA-1980 §I-A, testi di Cowork approvati).
+   Valute del livello 3 (Cancelliere, parlamentare). Flag nuovi cercati in tutto S e in SNODI_STORICI prima di usarli (L99-2):
+   deSvolta82Opp, deMissili83, deMissili83Opp, deUnita90, deUnita90Opp, deMarco90, deMarco90Opp, deCapitale91 — zero occorrenze al 29/9;
+   `S.deSvolta82` c'era già ed è quello che legge la tappa del 1982/10 (L147-1): gli snodi lo SCRIVONO.
+   ⚑ CHI RICEVE CHE COSA (gate in game.js): S1 settembre 1982 — la SPD al governo con la FDP in coalizione (SVOLTA82_EV), la FDP al
+   governo con la SPD (SVOLTA82FDP_EV), la CDU all'opposizione (SVOLTA82_OPP_EV); S2 novembre-dicembre 1983 al governo, dall'aula a chi
+   è all'opposizione (la SPD con la frase sul congresso, gli altri senza: MISSILI83_OPP_ALTRO_EV); S3 febbraio-marzo 1990; S4 maggio-
+   giugno 1990 (dall'aula la SPD col candidato del suo campo, gli altri senza: MARCO90_OPP_ALTRO_EV); la capitale giugno-luglio 1991 a
+   tutti al livello 3. Le aule non muovono valute del governo (repd, stampad, fiducia: no-op dall'opposizione, L12-2): solo gruppi.
+   ⚑ S1 (b) e FDP (c) «le urne subito»: le liste del 1982/10 si applicano PRIMA dello scioglimento con `applicaTappaOra('1982/10')`
+   (game.js: la stessa direttiva della tappa, segnata come fatta — idempotente quando ottobre arriva). Senza, la FDP rotta tornava
+   ordinaria all'urna (tenutaLiv si azzera, L111-2) e la SPD rifaceva la coalizione di prima.
+   ⚑ LA CAPITALE: la scelta «Bonn» e «divisa» della scheda muovono reputazione e stampa, che dall'opposizione non contano (L12-2):
+   lì la stessa scelta sposta un gruppo (capitaleEffetto).
+   ============================================================================================================== */
+/* Il moltiplicatore dei gruppi è di questa porta (sweep in L148-2: vedi il rapporto in CODA-LAVORI e il valore qui sotto). */
+let DE80_GRUPPI = 5;   // let e non const: la sweep lo varia sul banco
+function gdDe80(g, n){ gd(g, Math.round(n*DE80_GRUPPI)); }
+function fidDe80(n){ fidFr60(n); }   // la fiducia non ha moltiplicatore: la stessa leva delle porte tedesche prima
+function baseDe80(n){
+  var P=(PAESE && PAESE.partiti) ? PAESE.partiti.filter(function(x){ return x.id===S.partito; })[0] : null;
+  if(!P || !P.base) return;
+  Object.keys(P.base).forEach(function(g){ gd(g, Math.round(n*P.base[g]*DE80_GRUPPI)); });
+}
+const SVOLTA82_EV = {
+  id:'snodo_svolta82', snodo:true, era:'de1980', kick:'La coalizione', tono:'grave',
+  t:'Il cambio di campo',
+  text:'Il ministro liberale dell\'economia ha consegnato un documento che chiede tagli allo Stato sociale e meno tasse alle imprese: è il programma dell\'opposizione, scritto da un tuo ministro. Tutti a Bonn sanno che cosa vuol dire. I liberali cercano la porta, e dall\'altra parte dell\'aula la porta è già aperta.',
+  ch:[
+    { l:'Lasciarli andare, e affrontare l\'aula', e:'La storia · i ministri liberali si dimettono · il mese dopo l\'opposizione ha i numeri per un Cancelliere nuovo, senza urne',
+      f:function(){ S.deSvolta82='lasciata'; rompiPartner('de_fdp'); baseDe80(3); gdDe80('lavoratori',2); stampad(1);
+        S.log.unshift({t:T('La coalizione'),x:T('Ha lasciato andare i liberali, e ha affrontato l\'aula.')}); } },
+    { l:'La questione di fiducia, persa apposta: alle urne subito', e:'Si vota prima che cambino campo · ma i liberali stanno già dall\'altra parte, e l\'urna si combatte col blocco nuovo',
+      f:function(){ S.deSvolta82='urne'; rompiPartner('de_fdp'); applicaTappaOra('1982/10'); baseDe80(1);
+        S.log.unshift({t:T('La coalizione'),x:T('Davanti al cambio di campo dei liberali ha chiesto le urne subito.')}); azioneScioglimentoForzato(); } },
+    { l:'Trattenerli: il documento diventa il programma', e:'La coalizione arriva alle urne · i sindacati non te lo perdonano, e nel partito c\'è chi parla di tradimento',
+      f:function(){ S.deSvolta82='trattenuta'; gdDe80('lavoratori',-5); gdDe80('imprenditori',3); baseDe80(-4); fidDe80(2);
+        S.log.unshift({t:T('La coalizione'),x:T('Ha trattenuto i liberali facendo suo il loro programma.')}); } },
+  ],
+};
+const SVOLTA82FDP_EV = {
+  id:'snodo_svolta82fdp', snodo:true, era:'de1980', kick:'La coalizione', tono:'grave',
+  t:'Il cambio di campo',
+  text:'Il documento del tuo ministro dell\'economia è sul tavolo del Cancelliere socialdemocratico, e nessuno dei due finge più. Nel tuo partito metà dei deputati vuole cambiare alleato prima che la barca affondi, l\'altra metà dice che si tradiscono gli elettori. L\'opposizione aspetta la tua telefonata.',
+  ch:[
+    { l:'Cambiare campo: un Cancelliere nuovo, senza urne', e:'La storia · il governo cambia a metà legislatura · una parte del partito se ne va, e i sondaggi ti danno sotto il cinque',
+      f:function(){ S.deSvolta82='cambio'; rompiPartner('de_spd'); baseDe80(-3); gdDe80('imprenditori',3); gdDe80('cetomedio',1);
+        S.log.unshift({t:T('La coalizione'),x:T('Ha portato i liberali dall\'altra parte dell\'aula.')}); } },
+    { l:'Restare con i socialdemocratici fino alle urne', e:'Il patto regge · gli imprenditori, che ti votavano per frenare la sinistra, se ne ricordano',
+      f:function(){ S.deSvolta82='trattenuta'; gdDe80('imprenditori',-4); gdDe80('lavoratori',1); baseDe80(1);
+        S.log.unshift({t:T('La coalizione'),x:T('È rimasto con i socialdemocratici fino alle urne.')}); } },
+    { l:'Uscire dal governo e chiedere le urne', e:'Nessun tradimento in aula · ma la campagna comincia domani, e i due ex alleati ti attaccano insieme',
+      f:function(){ S.deSvolta82='urne'; applicaTappaOra('1982/10'); baseDe80(1); stampad(1);
+        S.log.unshift({t:T('La coalizione'),x:T('Ha chiesto le urne invece di cambiare campo in aula.')}); azioneScioglimentoForzato(); } },
+  ],
+};
+const SVOLTA82_OPP_EV = {
+  id:'snodo_svolta82_opp', snodo:true, era:'de1980', kick:'La coalizione', tono:'grave',
+  t:'Il cambio di campo, dall\'aula',
+  text:'I liberali sono pronti a votare con voi un Cancelliere nuovo, senza passare dalle urne. Si può prendere il governo subito e promettere il voto per la primavera, o chiedere prima un programma scritto, parola per parola.',
+  ch:[
+    { l:'Eleggere ora il Cancelliere, e le urne in primavera', e:'La storia · il governo cambia senza passare dal voto · la primavera dirà se gli elettori sono d\'accordo',
+      f:function(){ S.deSvolta82Opp='subito'; baseDe80(2); gdDe80('cetomedio',1);
+        S.log.unshift({t:T('La coalizione'),x:T('Ha preso il governo con i liberali, promettendo le urne per la primavera.')}); } },
+    { l:'Prima un programma scritto, parola per parola', e:'I liberali firmano · gli imprenditori applaudono, i sindacati prendono nota',
+      f:function(){ S.deSvolta82Opp='programma'; gdDe80('imprenditori',3); gdDe80('lavoratori',-3); baseDe80(1);
+        S.log.unshift({t:T('La coalizione'),x:T('Ha chiesto ai liberali un programma scritto prima di votare il Cancelliere.')}); } },
+  ],
+};
+const MISSILI83_EV = {
+  id:'snodo_missili83', snodo:true, era:'de1980', kick:'La difesa', tono:'grave',
+  t:'I missili',
+  text:'A Ginevra il negoziato è fallito, e il doppio binario deciso quattro anni fa arriva alla stazione: i missili americani a medio raggio devono essere installati entro dicembre, anche qui. Il mese scorso una catena umana di cento chilometri ha unito due caserme. Il Bundestag vota fra una settimana.',
+  ch:[
+    { l:'Installarli, come promesso all\'Alleanza', e:'La storia · i primi missili arrivano pochi giorni dopo il voto · le piazze restano piene, ma non crescono più',
+      f:function(){ S.deMissili83='installati'; repd(5); gdDe80('giovani',-6); gdDe80('cetomedio',1); baseDe80(S.partito==='de_spd'?-4:-1);
+        S.log.unshift({t:T('La difesa'),x:T('Ha fatto installare i missili a medio raggio.')}); } },
+    { l:'Rinviare di un anno: ancora tempo a Ginevra', e:'Washington è irritata, Mosca non si muove · il movimento per la pace canta vittoria troppo presto',
+      f:function(){ S.deMissili83='rinvio'; repd(-4); gdDe80('giovani',2); stampad(-1);
+        S.log.unshift({t:T('La difesa'),x:T('Ha rinviato di un anno l\'installazione dei missili.')}); } },
+    { l:'Rifiutare i missili sul territorio del paese', e:'La crisi più grave con gli alleati dalla nascita della Repubblica · i giovani ti applaudono, le borse no',
+      f:function(){ S.deMissili83='rifiuto'; repd(-9); gdDe80('giovani',5); gdDe80('pensionati',-2); fidDe80(-2);
+        S.log.unshift({t:T('La difesa'),x:T('Ha rifiutato i missili a medio raggio.')}); } },
+  ],
+};
+/* S2 dall'aula: la versione della SPD (il congresso che vota contro i missili che il suo governo aveva chiesto) e quella di chiunque
+   altro sia all'opposizione nel novembre 1983 (senza la frase sul congresso e senza il marcatore «La storia»: la storia è della SPD). */
+const MISSILI83_OPP_EV = {
+  id:'snodo_missili83_opp', snodo:true, era:'de1980', kick:'La difesa', tono:'grave',
+  t:'I missili, dall\'aula',
+  text:'Il tuo partito, al congresso, ha appena votato contro i missili che il suo stesso governo aveva chiesto quattro anni fa. In aula si può votare contro, astenersi, o votare a favore contro il congresso.',
+  ch:[
+    { l:'Votare contro, come ha deciso il congresso', e:'La storia · il partito ritrova la piazza · il centro ti guarda come chi ha cambiato idea',
+      f:function(){ S.deMissili83Opp='contro'; baseDe80(3); gdDe80('giovani',3); gdDe80('cetomedio',-2);
+        S.log.unshift({t:T('La difesa'),x:T('Ha votato contro i missili a medio raggio.')}); } },
+    { l:'Astenersi', e:'Né con la piazza né con l\'Alleanza · nessuno ti ringrazia',
+      f:function(){ S.deMissili83Opp='astensione'; baseDe80(-2);
+        S.log.unshift({t:T('La difesa'),x:T('Si è astenuto sui missili a medio raggio.')}); } },
+    { l:'Votare a favore, contro il congresso', e:'Gli alleati e il centro apprezzano · il partito si spacca in aula',
+      f:function(){ S.deMissili83Opp='favore'; baseDe80(-5); gdDe80('cetomedio',3); gdDe80('pensionati',2);
+        S.log.unshift({t:T('La difesa'),x:T('Ha votato a favore dei missili a medio raggio dall\'opposizione.')}); } },
+  ],
+};
+const MISSILI83_OPP_ALTRO_EV = {
+  id:'snodo_missili83_opp', snodo:true, era:'de1980', kick:'La difesa', tono:'grave',
+  t:'I missili, dall\'aula',
+  text:'Il Bundestag vota i missili: si può votare contro, astenersi, o votare a favore.',
+  ch:[
+    { l:'Votare contro', e:'Con la piazza · il centro ti guarda con sospetto',
+      f:function(){ S.deMissili83Opp='contro'; baseDe80(3); gdDe80('giovani',3); gdDe80('cetomedio',-2);
+        S.log.unshift({t:T('La difesa'),x:T('Ha votato contro i missili a medio raggio.')}); } },
+    { l:'Astenersi', e:'Né con la piazza né con l\'Alleanza · nessuno ti ringrazia',
+      f:function(){ S.deMissili83Opp='astensione'; baseDe80(-2);
+        S.log.unshift({t:T('La difesa'),x:T('Si è astenuto sui missili a medio raggio.')}); } },
+    { l:'Votare a favore', e:'Gli alleati e il centro apprezzano · i tuoi elettori più giovani no',
+      f:function(){ S.deMissili83Opp='favore'; baseDe80(-5); gdDe80('cetomedio',3); gdDe80('pensionati',2);
+        S.log.unshift({t:T('La difesa'),x:T('Ha votato a favore dei missili a medio raggio dall\'opposizione.')}); } },
+  ],
+};
+const UNITA90_EV = {
+  id:'snodo_unita90', snodo:true, era:'de1980', kick:'L\'unità', tono:'grave',
+  t:'La strada dell\'unità',
+  text:'Da novembre il Muro non c\'è più, e ogni giorno duemila persone passano a ovest per restarci. A marzo l\'Est vota libero per la prima volta. Che ci sarà un paese solo lo dicono tutti; il come no. La Legge fondamentale ha un articolo che permette ai Länder dell\'Est di aderire, e un altro che prevede una costituzione nuova per tutti i tedeschi.',
+  ch:[
+    { l:'L\'adesione: i Länder dell\'Est entrano nella Legge fondamentale', e:'La storia · la strada più corta · all\'Est qualcuno dirà che non è stato chiesto niente a nessuno',
+      f:function(){ S.deUnita90='adesione'; repd(3); gdDe80('pensionati',2); gdDe80('cetomedio',2); baseDe80(2);
+        S.log.unshift({t:T('L\'unità'),x:T('Ha scelto l\'adesione dei Länder dell\'Est alla Legge fondamentale.')}); } },
+    { l:'Una costituzione nuova, votata da tutti i tedeschi', e:'Un paese nuovo e non uno allargato · ma l\'assemblea costituente prende tempo, e l\'Est non aspetta',
+      f:function(){ S.deUnita90='costituzione'; gdDe80('giovani',3); repd(-1); baseDe80(-1); stampad(1);
+        S.log.unshift({t:T('L\'unità'),x:T('Ha proposto una costituzione nuova per il paese unito.')}); } },
+    { l:'Una confederazione a tappe, come diceva il piano di novembre', e:'Prudenza con Mosca e con gli alleati · ma la piazza dell\'Est ha già deciso che le tappe sono troppe',
+      f:function(){ S.deUnita90='confederazione'; repd(-3); gdDe80('pensionati',-2); gdDe80('cetomedio',-2); gdDe80('giovani',1);
+        S.log.unshift({t:T('L\'unità'),x:T('Ha proposto una confederazione a tappe con l\'Est.')}); } },
+  ],
+};
+const UNITA90_OPP_EV = {
+  id:'snodo_unita90_opp', snodo:true, era:'de1980', kick:'L\'unità', tono:'grave',
+  t:'La strada dell\'unità, dall\'aula',
+  text:'Il governo vuole l\'adesione dei Länder dell\'Est, la strada più corta. Si può chiedere invece una costituzione nuova, sostenere l\'adesione rapida, o frenare: prima il conto, poi l\'unità.',
+  ch:[
+    { l:'Sì, ma con una costituzione nuova', e:'La storia, in parte · un paese nuovo e non uno allargato · all\'Est ti rispondono che non c\'è tempo',
+      f:function(){ S.deUnita90Opp='costituzione'; baseDe80(1); gdDe80('giovani',2); gdDe80('pensionati',-2);
+        S.log.unshift({t:T('L\'unità'),x:T('Dall\'opposizione ha chiesto una costituzione nuova per il paese unito.')}); } },
+    { l:'Sì all\'adesione rapida', e:'Con il governo, per una volta · i tuoi elettori più giovani non capiscono',
+      f:function(){ S.deUnita90Opp='rapida'; gdDe80('pensionati',3); gdDe80('cetomedio',2); gdDe80('giovani',-2); baseDe80(-2);
+        S.log.unshift({t:T('L\'unità'),x:T('Dall\'opposizione ha sostenuto l\'adesione rapida dell\'Est.')}); } },
+    { l:'Frenare: prima il conto, poi l\'unità', e:'La prudenza dei conti · e la piazza dell\'Est ti ricorda che il Muro è caduto per non aspettare',
+      f:function(){ S.deUnita90Opp='frenare'; gdDe80('lavoratori',1); gdDe80('pensionati',-4); gdDe80('cetomedio',-3); baseDe80(-1);
+        S.log.unshift({t:T('L\'unità'),x:T('Dall\'opposizione ha chiesto di frenare sull\'unità.')}); } },
+  ],
+};
+const MARCO90_EV = {
+  id:'snodo_marco90', snodo:true, era:'de1980', kick:'Il marco', tono:'grave',
+  t:'Il marco all\'Est',
+  text:'Il trattato sull\'unione monetaria va firmato questo mese, e dal primo luglio all\'Est si pagherà in marchi. Resta la cifra: a quanto si cambia. Nelle piazze dell\'Est gridano che se il marco non viene da loro, andranno loro dal marco. La banca centrale avverte che un cambio generoso costerà le fabbriche dell\'Est e un debito che pagheranno tutti.',
+  ch:[
+    { l:'Uno a uno per salari e risparmi, fino a un tetto', e:'La storia · contro il parere della banca centrale · all\'Est si festeggia, e il conto arriverà con le fabbriche', costo:{debito:3},
+      f:function(){ S.deMarco90='unoauno'; S.ind.debt+=3; gdDe80('lavoratori',2); gdDe80('pensionati',3); fidDe80(-2); repd(1);
+        S.log.unshift({t:T('Il marco'),x:T('Ha portato il marco all\'Est col cambio di uno a uno.')}); } },
+    { l:'Due a uno, come chiede la banca centrale', e:'Il marco resta solido · all\'Est i risparmi di una vita valgono la metà, e le piazze lo gridano', costo:{debito:1.5},
+      f:function(){ S.deMarco90='dueauno'; S.ind.debt+=1.5; gdDe80('pensionati',-3); gdDe80('lavoratori',-2); fidDe80(3); stampad(-2);
+        S.log.unshift({t:T('Il marco'),x:T('Ha portato il marco all\'Est col cambio di due a uno.')}); } },
+    { l:'Il cambio di mercato, e aiuti diretti a chi ne ha bisogno', e:'Nessun regalo sul cambio · un fondo che aiuta chi resta indietro, e che nessuno all\'Est chiama regalo', costo:{debito:2},
+      f:function(){ S.deMarco90='mercato'; S.ind.debt+=2; gdDe80('pensionati',-2); gdDe80('imprenditori',2); fidDe80(1); repd(-1);
+        S.log.unshift({t:T('Il marco'),x:T('Ha portato il marco all\'Est al cambio di mercato, con aiuti diretti.')}); } },
+  ],
+};
+/* S4 dall'aula: la versione della SPD (il candidato del suo campo, storico: la maggioranza dell'opposizione votò il trattato) e quella
+   di chiunque altro sia all'opposizione (senza la frase sul candidato e senza il marcatore). */
+const MARCO90_OPP_EV = {
+  id:'snodo_marco90_opp', snodo:true, era:'de1980', kick:'Il marco', tono:'grave',
+  t:'Il marco all\'Est, dall\'aula',
+  text:'Il trattato arriva al voto. Il candidato del tuo campo dice che il conto sarà enorme e che nessuno lo sta dicendo agli elettori; metà dei tuoi deputati vuole votarlo comunque.',
+  ch:[
+    { l:'Votare il trattato', e:'La storia · la maggioranza dell\'opposizione dice sì · e il conto resta da scrivere',
+      f:function(){ S.deMarco90Opp='si'; baseDe80(-1); gdDe80('pensionati',2);
+        S.log.unshift({t:T('Il marco'),x:T('Dall\'opposizione ha votato il trattato sull\'unione monetaria.')}); } },
+    { l:'Votare contro: il conto arriverà', e:'Il conto arriverà davvero · ma oggi all\'Est si festeggia, e tu non c\'eri',
+      f:function(){ S.deMarco90Opp='contro'; gdDe80('lavoratori',1); gdDe80('pensionati',-4); gdDe80('cetomedio',-2); baseDe80(1);
+        S.log.unshift({t:T('Il marco'),x:T('Ha votato contro il trattato sull\'unione monetaria.')}); } },
+    { l:'Astenersi', e:'Né sì né no · la scelta che nessuno ricorderà',
+      f:function(){ S.deMarco90Opp='astensione'; baseDe80(-2);
+        S.log.unshift({t:T('Il marco'),x:T('Si è astenuto sul trattato sull\'unione monetaria.')}); } },
+  ],
+};
+const MARCO90_OPP_ALTRO_EV = {
+  id:'snodo_marco90_opp', snodo:true, era:'de1980', kick:'Il marco', tono:'grave',
+  t:'Il marco all\'Est, dall\'aula',
+  text:'Il trattato sull\'unione monetaria arriva al voto. Metà dei tuoi deputati vuole votarlo; l\'altra metà teme il conto.',
+  ch:[
+    { l:'Votare il trattato', e:'Con il governo, sul giorno più atteso dell\'Est · e il conto resta da scrivere',
+      f:function(){ S.deMarco90Opp='si'; baseDe80(-1); gdDe80('pensionati',2);
+        S.log.unshift({t:T('Il marco'),x:T('Dall\'opposizione ha votato il trattato sull\'unione monetaria.')}); } },
+    { l:'Votare contro: il conto arriverà', e:'Il conto arriverà davvero · ma oggi all\'Est si festeggia, e tu non c\'eri',
+      f:function(){ S.deMarco90Opp='contro'; gdDe80('lavoratori',1); gdDe80('pensionati',-4); gdDe80('cetomedio',-2); baseDe80(1);
+        S.log.unshift({t:T('Il marco'),x:T('Ha votato contro il trattato sull\'unione monetaria.')}); } },
+    { l:'Astenersi', e:'Né sì né no · la scelta che nessuno ricorderà',
+      f:function(){ S.deMarco90Opp='astensione'; baseDe80(-2);
+        S.log.unshift({t:T('Il marco'),x:T('Si è astenuto sul trattato sull\'unione monetaria.')}); } },
+  ],
+};
+/* L'aula della capitale: a tutti al livello 3, al governo e all'opposizione. Non cambia niente (D61): la capitale resta Bonn. Dove la
+   scheda muove reputazione e stampa, dall'opposizione la stessa scelta sposta un gruppo (quelle valute lì non contano, L12-2). */
+function capitaleEffetto(gov, alt){ if(!S.opposizione) gov(); else alt(); }
+const CAPITALE91_EV = {
+  id:'snodo_capitale91', snodo:true, era:'de1980', kick:'Il Bundestag', t:'La capitale',
+  text:'Il Bundestag vota dove avrà sede il paese unito: Berlino, la capitale di prima della divisione, o Bonn, la città provvisoria che è durata quarant\'anni. Il voto è libero, i partiti si dividono al loro interno, e ogni deputato parla per sé. Anche tu.',
+  ch:[
+    { l:'Berlino', e:'La storia · trecentotrentotto a trecentoventi · il trasloco durerà anni',
+      f:function(){ S.deCapitale91='berlino'; baseDe80(1); gdDe80('cetomedio',-1);
+        S.log.unshift({t:T('Il Bundestag'),x:T('Ha votato per Berlino capitale.')}); } },
+    { l:'Bonn', e:'Una capitale piccola per un paese che non vuole sembrare grande · a Berlino non lo dimenticano',
+      f:function(){ S.deCapitale91='bonn'; gdDe80('cetomedio',1); capitaleEffetto(function(){ repd(-1); }, function(){ gdDe80('giovani',-1); });
+        S.log.unshift({t:T('Il Bundestag'),x:T('Ha votato per restare a Bonn.')}); } },
+    { l:'Il Parlamento a Berlino, i ministeri a Bonn', e:'Il compromesso che scontenta tutti e due i sindaci · i funzionari faranno la spola in aereo',
+      f:function(){ S.deCapitale91='divisa'; capitaleEffetto(function(){ stampad(1); }, function(){ gdDe80('pensionati',1); });
+        S.log.unshift({t:T('Il Bundestag'),x:T('Ha votato per dividere la capitale fra Berlino e Bonn.')}); } },
+  ],
+};
 /* L110-2 · I TERRITORI E LA MAPPA DI de1960: quelli di de1950 più la Saar in coda (è entrata alla tappa del 1957/1), con lo stesso
    sfondo dell'Ovest. Lo stesso ordine di de1950, così gli indici delle due porte si corrispondono. */
 (function(){
@@ -16624,3 +17071,6 @@ const AUTUNNO77_OPP_EV = {
 /* L112-1 · de1970 RIUSA territori e mappa di de1960 (dieci Länder con la Saar, Berlino Ovest): lo stesso oggetto, non una copia. */
 SCENARI.de1970.territori = SCENARI.de1960.territori;
 SCENARI.de1970.mappa = SCENARI.de1960.mappa;
+/* L147-1 · de1980 RIUSA territori e mappa di de1970 (e quindi di de1960): lo stesso oggetto. L'Est entra alla tappa del 1990/10 (L147-2). */
+SCENARI.de1980.territori = SCENARI.de1970.territori;
+SCENARI.de1980.mappa = SCENARI.de1970.mappa;

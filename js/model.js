@@ -789,11 +789,20 @@ function compatibili(idTuo, seggi){
      il partito più la lista qui sopra, coi seggi in vigore — non arriva a 50. Così il banco «ampio» e la trattativa non fanno la
      grande coalizione quando la maggioranza ordinaria c'è, e la fanno quando non c'è. Senza seggi non si giudica: niente riserve.
      ⚠ NON passano da `staColBlocco`: per la sfiducia costruttiva un partner di riserva resta avverso finché non è in coalizione
-     (bloccoAvverso e criccaMia lo trattano come gli altri). Senza il campo la lista è quella di sempre, byte per byte. */
+     (bloccoAvverso e criccaMia lo trattano come gli altri). Senza il campo la lista è quella di sempre, byte per byte.
+     ⚑ L148-1 (D63, 29/9) · LA RISERVA SI CHIEDE ANCHE AL PARTNER DI RISERVA. Il partner entra solo se ANCHE lui, coi suoi alleati
+     ordinari (la SUA lista, letta da `staColBlocco(q, p)`, coi seggi in vigore, senza chi chiede), è sotto 50: la grande coalizione
+     si fa «solo quando non c'è un'altra maggioranza» (D41). Con la sola metà di chi chiede, in de1980 la SPD al 36% «vinceva» il
+     1983 in grande coalizione con una CDU che aveva da sola il 51-59% dei seggi, e dopo la pantedesca del 1991 governava sempre
+     con CDU+FDP al 61-67%. È la variante V misurata in `.claude/ab-l147-riserva.js` (L147-1), portata qui senza riscriverla. */
   const tuo=part(idTuo);
   if(tuo && Array.isArray(tuo.alleatiRiserva) && tuo.alleatiRiserva.length && sg){
     const ord=list.reduce((s,p)=>s+(sg[p.id]||0), sg[idTuo]||0);
-    if(ord<50) PAESE.partiti.forEach(p=>{ if(tuo.alleatiRiserva.indexOf(p.id)>=0 && !fuori(p) && list.indexOf(p)<0) list.push(p); });
+    if(ord<50) PAESE.partiti.forEach(p=>{
+      if(tuo.alleatiRiserva.indexOf(p.id)<0 || fuori(p) || list.indexOf(p)>=0) return;
+      const suo=PAESE.partiti.filter(q=>q.id!==p.id && q.id!==idTuo && !fuori(q) && staColBlocco(q.id, p.id)).reduce((s,q)=>s+(sg[q.id]||0), sg[p.id]||0);
+      if(suo<50) list.push(p);
+    });
   }
   return seggi ? list.sort((x,y)=>(seggi[y.id]||0)-(seggi[x.id]||0)) : list;
 }
