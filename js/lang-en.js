@@ -5657,6 +5657,11 @@ const EN = {
   "Tieni la spesa sotto controllo":"Keep spending under control",
   "Il bilancio regge; il malcontento cova":"The budget holds; discontent simmers",
   "sotto pressione":"under pressure",
+  "Apri tutto":"Open all",
+  "Mostra la scena":"Show the scene",
+  "Riduci la scena":"Shrink the scene",
+  "Chiudi tutto":"Close all",
+  "%N in vigore":"%N in force",
   "una politica sotto pressione":"a policy under pressure",
   "%POL sotto pressione. Rivedi la politica (l'anello indica dove porta) o tienila — entrambe le strade sono legittime.":"%POL under pressure. Revise the policy (the ring shows where it leads) or hold it — both roads are legitimate.",
 

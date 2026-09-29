@@ -23,7 +23,8 @@
   <!-- START (home / landing): SOLO identità + Nuova partita / Continua / Lingua. Tutte le impostazioni di partita
        (paese, partito, difficoltà, ruolo, personaggio) vivono ora nel SETUP (#crea), raggiunto da "Nuova partita". -->
   <div id="start">
-    <div class="screen center">
+    <!-- L144-2: .home-2col — sopra i 1000 px la schermata è una griglia (la scena a sinistra, logo, testo e bottoni a destra) -->
+    <div class="screen center home-2col">
       <div id="start-continue"></div>
       <!-- L120-1 — accanto alla lingua, il bottone «Suono»: apre gli stessi controlli del menu Partita (showSuonoHome, ui.js) -->
       <div class="lang-riga">
@@ -37,7 +38,8 @@
            al posto dell'emblema con la colonna e del logotipo che stava sotto: il titolo ora è nel logo, due sarebbero doppi.
            L'src lo mette il boot da EMBLEMA_IMG (js/emblema.js); le misure le dà il CSS (#home-emblema). -->
       <!-- L126-2 — la VETRINA: logo e comizio. Sul telefono e sull'iPad verticale il contenitore non esiste per il layout
-           (display:contents: uno sotto l'altro come prima); da 900 px in orizzontale stanno sulla stessa riga, alla stessa altezza. -->
+           (display:contents: uno sotto l'altro come prima); da 900 a 999 px in orizzontale stanno sulla stessa riga, alla stessa altezza;
+           dai 1000 px decide la griglia di .home-2col (L144-2: la scena a sinistra, logo e testo a destra). -->
       <div class="home-vetrina">
       <img id="home-emblema" alt="" aria-hidden="true" width="640" height="640" decoding="async">
       <!-- la HERO (il comizio in piazza, 16:9): la accende applyPaese (ui.js) con `.on` A OGNI LARGHEZZA, telefono compreso,
@@ -74,7 +76,7 @@
        ripetuta a mano, quindi una porta nuova compare da sola. -->
   <div id="storici" style="display:none;">
     <div class="screen">
-      <div style="max-width:420px;margin:0 auto;padding:18px 14px 40px;">
+      <div class="storici-col">   <!-- L144-2: 420 px, 960 sopra i 1000 (css) -->
         <!-- L68-1 — il ritorno è un bersaglio toccabile come gli altri: min-height 44px e testo 13px.
              Era alto 28,6px, e l'ha trovato la sonda generale (non quella mirata alle porte). -->
         <button class="suono-btn" style="float:right" onclick="showSuonoHome()"><span aria-hidden="true">♪</span> <span data-i18n>Suono</span></button>
@@ -96,6 +98,9 @@
       <!-- intro per-paese/ruolo (dinamica, spostata dalla home): applyPaese la ri-tesse quando cambi paese/ruolo qui -->
       <p id="setup-intro"></p>
 
+      <!-- L144-2 — sopra i 1000 px due colonne: a sinistra «La partita — dove» (paese, partito), a destra «come e chi» (difficoltà,
+           ruolo, «Chi sei»). Sotto i 1000 px i tre contenitori non esistono per il layout (display:contents): tutto come prima. -->
+      <div class="crea-2col"><div class="crea-dove">
       <!-- SEZIONE 1 — LA PARTITA (paese/partito/difficoltà/ruolo, spostati dalla home; stessi id e onclick) -->
       <div data-i18n style="font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--brand);margin:22px 0 4px;font-weight:600;">La partita</div>
       <!-- L62-1 — LA PORTA SCELTA, quando si arriva dalla pagina storica: un'ETICHETTA, non un selettore.
@@ -131,6 +136,7 @@
            (`portePaese`), quindi una porta nuova continua a comparire da sola. La misura lo verifica contando. -->
       <div data-i18n class="crea-etich" style="margin-top:16px;">Il tuo partito</div>
       <div class="cands" id="party-list" style="max-width:360px;margin:0 auto;"></div>
+      </div><!-- /crea-dove --><div class="crea-come">
       <div data-i18n class="crea-etich" style="margin-top:18px;">Difficoltà</div>
       <div class="seg" id="diff-seg" style="max-width:360px;margin:0 auto;">
         <button data-i18n onclick="setDiff('facile',this)">Facile</button>
@@ -149,6 +155,7 @@
       <div data-i18n style="font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--brand);margin:26px 0 4px;font-weight:600;">Chi sei</div>
       <p data-i18n>Dai un volto alla carriera. Ogni scelta è colore e una <b>spinta d'esordio</b> che i mesi riassorbono: poi conta solo come governi.</p>
       <div id="crea-campi"></div>
+      </div></div><!-- /crea-come /crea-2col -->
       <!-- input file nascosto per «Carica la tua foto» (fuori da #crea-campi: persiste ai re-render). -->
       <input type="file" id="crea-foto" accept="image/*" style="display:none" onchange="caricaAvatarFile(this)">
       <!-- L140-2: «Avanti» nella barra in fondo (sticky, figlia diretta della pagina), con «Salta» accanto -->

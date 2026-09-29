@@ -115,7 +115,11 @@ function famigliaPresente(){ return !!(S.famiglia && (S.famiglia.coniuge || (S.f
    la crisi familiare (il popup). Vale solo se hai una famiglia. */
 function serenitaMuovi(n){ if(S.famiglia && S.famiglia.serenita!=null) S.famiglia.serenita=clamp(S.famiglia.serenita+n,0,100); }
 function haFiglioInEta(a,b){ return !!(S.famiglia && S.famiglia.figli && S.famiglia.figli.some(function(f){return f.eta>=a && f.eta<=b;})); }
-function figlioNome(a,b){ if(!S.famiglia||!S.famiglia.figli) return 'tuo figlio'; const f=S.famiglia.figli.find(function(x){return x.eta>=a && x.eta<=b;}); return f?f.nome:'tuo figlio'; }
+function figlioNome(a,b){ if(!S.famiglia||!S.famiglia.figli) return T('tuo figlio'); const f=S.famiglia.figli.find(function(x){return x.eta>=a && x.eta<=b;}); return f?f.nome:T('tuo figlio'); }
+/* L143-1 · IL risolutore dei nomi della famiglia nei testi della vita privata: %FIGLIO e %CONIUGE. Lo usano la carta
+   (ui.js, ramo personale), la scelta (resolveItem: fatto in biografia, esito, registro) e la scheda Persona in lettura
+   (così un fatto salvato grezzo prima del L143-1 si legge giusto, col nome del figlio di oggi). Gli archi hanno arcoSub. */
+function subFamiglia(s){ return String(s==null?'':s).replace(/%FIGLIO/g, figlioNome(0,99)).replace(/%CONIUGE/g, ((S&&S.famiglia&&S.famiglia.coniuge&&S.famiglia.coniuge.nome)||T('chi ti ama'))); }
 /* convalescente = nei mesi di riguardo dopo una cura (energia ridotta, deleghi). Temporaneo e lieve. */
 function convalescente(){ return S.convalescenza!=null && (S.year*12+S.month) < S.convalescenza; }
 /* Il participio giusto per il giocatore (genere NARRATIVO, mai statistico): gn('eletto','eletta').
@@ -5739,10 +5743,10 @@ function resolveItemCore(idx,ci){
     /* eventi personali singoli (lotto 5): coscienza, carriera/affetti, momenti lieti */
     const d=it.data; const choice=d.ch[ci]; if(!choice) return;
     if(choice.f) choice.f();
-    if(choice.fatto) bioFatto(T(choice.fatto));
+    if(choice.fatto) bioFatto(subFamiglia(T(choice.fatto)));   // L143-1: il fatto si salva coi nomi veri
     S.ind.consenso=computeConsenso();
-    it.resolved=true; it.outcome=T('Scelta:')+' <b>'+T(choice.l)+'</b>.';
-    S.log.unshift({t:T(d.t), x:T('Decisione:')+' '+T(choice.l)});
+    it.resolved=true; it.outcome=T('Scelta:')+' <b>'+subFamiglia(T(choice.l))+'</b>.';
+    S.log.unshift({t:subFamiglia(T(d.t)), x:T('Decisione:')+' '+subFamiglia(T(choice.l))});
   } else if(it.kind==='arco'){
     /* gli archi narrativi (lotto 4): la scelta esegue gli effetti e determina il nodo successivo (o chiude) */
     const a=S.archi && S.archi.find(function(x){return x.id===it.arco;});

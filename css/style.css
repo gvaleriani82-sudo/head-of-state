@@ -36,7 +36,7 @@
   @media (min-width:700px){ #home-emblema{ width:280px; } }
   /* L126-2 · la VETRINA della home: sul telefono e sull'iPad verticale il contenitore non conta (uno sotto l'altro, come prima);
      da 900 px in ORIZZONTALE logo e comizio sulla stessa riga, alla stessa altezza — il logo quadrato a sinistra, il 16:9 a destra
-     (--vetrina-h: 240 px → 240 + 427 + 16 di spazio = 683 px, dentro la colonna). */
+     (--vetrina-h: 240 px → 240 + 427 + 16 di spazio = 683 px, dentro la colonna). Dai 1000 px la sostituisce la griglia .home-2col (L144-2). */
   .home-vetrina{ display:contents; }
   @media (min-width:900px) and (orientation:landscape){
     .home-vetrina{ --vetrina-h:240px; display:flex; justify-content:center; align-items:center; gap:16px; margin:2px auto 14px; }
@@ -126,6 +126,14 @@
   .grp .pc{font-family:'IBM Plex Mono',monospace; font-weight:600;}
 
   .pol{padding:12px 14px; border-top:1px solid var(--line);} .pol:first-of-type{border-top:none;}
+  /* L143-2 · il Bilancio a sezioni: l'intestazione è il bottone (≥ 44 px), chiusa porta il riassunto dei livelli (12 px, una riga) */
+  .bil-tot{display:flex; align-items:flex-start; gap:8px;} .bil-tot .fiscbar{flex:1; min-width:0;} .bil-tot .bil-tutto{flex:none; min-height:44px; margin-bottom:10px;}
+  .bil-sez-h{display:grid; grid-template-columns:1fr auto; align-items:center; column-gap:8px; width:100%; min-height:44px; padding:11px 14px 9px; background:none; border:0; color:var(--mut); text-align:left; font:inherit;}
+  .bil-sez-h .bil-nm{font-size:11px; letter-spacing:.13em; text-transform:uppercase;}
+  .bil-sez-h .bil-fr{font-size:12px; color:var(--mut2);}
+  .bil-sez-h .bil-riass{grid-column:1 / -1; margin-top:4px; font-size:12px; color:var(--txt); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .bil-sez.aperta > .pol:first-of-type{border-top:1px solid var(--line);}
+  .g2 > .bil-sez-h, .sec.on .card.g2 > .bil-sez-h{column-span:all;}
   .pol .pn{font-weight:600; font-size:14px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:baseline; gap:8px;}
   .polcost{font-family:'IBM Plex Mono',monospace; font-weight:600; font-size:12px; color:var(--mut); white-space:nowrap;}   /* cantiere Budget: costo ricorrente per-politica / per-leva */
   .seg{display:flex; gap:5px;}
@@ -405,6 +413,12 @@
   #home-hero img{ width:100%; height:100%; object-fit:cover; display:block; }
   .ag-scene{ display:none; width:100%; margin:0 0 10px; overflow:hidden; aspect-ratio:16/9; max-height:180px; background:var(--panel2); }   /* striscia cinematografica: il cap letterboxa (cover) su card larghe, così non domina lo schermo */
   .ag-scene.on{ display:block; }
+  /* L143-3 · la fascia: 88 px (il tetto dell'altezza scende, l'aspect-ratio resta: la larghezza è la stessa), intera al tocco.
+     Il passaggio d'altezza è movimento: in ridotto/spento lo spegne la regola unica, senza eccezioni. */
+  .ag-scene{ transition:max-height .32s ease; cursor:pointer; }
+  .ag-scene.fascia{ max-height:88px; }
+  .ag-scene.fascia img, .ag-scene.fascia .scena-video{ object-position:50% 40%; }
+  .ag-scene:focus-visible{ outline:2px solid var(--brand); outline-offset:-2px; }
   .ag-scene img{ width:100%; height:100%; object-fit:cover; display:block; }
   /* L9-1 — SCENA-MOMENTO in cima al modale (intervista/telefono/finale): banner 16/9, letterboxato dal cap */
   .mscene{ display:block; width:100%; aspect-ratio:16/9; max-height:172px; object-fit:cover; background:var(--panel2); }
@@ -479,6 +493,32 @@
     /* ritocco lieve di font/respiro */
     html,body{ font-size:15.5px; }
     main{ padding:12px 16px 24px; }
+  }
+
+  /* L144-2 (29/9) · IPAD IN ORIZZONTALE: CREAZIONE, HOME E STORICI A DUE COLONNE SOPRA I 1000 PX. Solo CSS e contenitori nel
+     markup, nessun nodo spostato da javascript, stessi id e onclick. Sotto i 1000 px i contenitori nuovi non esistono per il
+     layout (display:contents, come .home-vetrina di L126-2) e .storici-col è la vecchia colonna da 420: tutto come prima. */
+  .crea-2col, .crea-dove, .crea-come{ display:contents; }
+  .storici-col{ max-width:420px; margin:0 auto; padding:18px 14px 40px; }
+  @media (min-width:1000px){
+    /* CREAZIONE: a sinistra «La partita — dove» (paese, partito), a destra «come e chi» (difficoltà, ruolo, Chi sei);
+       la barra «Avanti» resta a tutta larghezza, sticky, fuori dalla griglia */
+    .crea-2col{ display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); column-gap:36px; align-items:start; }
+    .crea-dove, .crea-come{ display:block; min-width:0; }
+    /* HOME: la griglia prende il posto della vetrina di L126-2 (fra 900 e 999 in orizzontale resta quella). A sinistra la
+       scena 16:9 larga quanto la colonna; a destra il logo (più piccolo), l'occhiello, il testo, la nota, i bottoni; lingua e
+       Suono in alto a tutta larghezza. La vetrina diventa display:contents: il nodo della hero non si sposta nel DOM
+       (la clip home-hero non rinasce), lo sposta solo la griglia. La hero copre 20 righe implicite (quelle vuote sono alte 0)
+       e si centra sulla colonna di destra. */
+    #start .home-2col{ display:grid; grid-template-columns:minmax(0,1.25fr) minmax(0,1fr); column-gap:32px; align-items:center; }
+    #start .home-2col > *{ grid-column:2; }
+    #start .home-2col > .lang-riga{ grid-column:1 / -1; grid-row:1; }
+    #start .home-2col .home-vetrina{ display:contents; }
+    #start .home-2col #home-emblema{ grid-column:2; width:240px; height:240px; margin:0 auto 10px; }
+    #start .home-2col #home-hero.on{ grid-column:1; grid-row:2 / span 20; align-self:center; width:100%; max-width:none; height:auto; margin:0; }
+    /* STORICI: la colonna sale a 960 e le linee (poi le porte di una linea) in una griglia da 300 px in su (tre colonne a 960) */
+    .storici-col{ max-width:960px; }
+    #storici-body .cands, #storici-linea{ display:grid; grid-template-columns:repeat(auto-fill, minmax(300px, 1fr)); gap:10px; }
   }
 
   /* ============================================================

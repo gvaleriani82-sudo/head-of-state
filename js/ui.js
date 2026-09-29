@@ -655,7 +655,20 @@ function agScene(it){ if(!it || typeof SCENA_MAJOR==='undefined' || !SCENA_MAJOR
   const d=it.data||{}, ferma=(d.cronaca===true || d.tono==='grave' || scenaTono(it)==='grave');
   const clip=ferma ? '' : clipDaSrc(src);   // L95-4: la clip con lo stesso nome del .webp, se c'e'
   const vkey=clip ? ((S?(S.year*12+S.month):0)+':'+seed+':'+clip) : '';   // L119-1: la chiave del nodo vivo (mese + carta + clip)
-  return `<div class="ag-scene on${clip?' con-video':''}${ferma?' ferma':''}"><img src="${src}" alt="" loading="lazy" decoding="async">${clip?videoHtml(clip, vkey):''}</div>`; }
+  /* L143-3 · LA FASCIA: la scena della carta d'agenda è una fascia di 88 px, intera (16/9, tetto 180) al tocco; un altro tocco la
+     richiude. Lo stato è TRANSITORIO (SCENE_APERTE, chiave mese + carta), mai in S: sopravvive ai render, al mese nuovo tutte
+     fasce. Non un <button>: dentro c'è la clip (lezione 212). Le scene-momento (scenaMomentoHtml) e la hero non passano da qui. */
+  const fkey=(S?(S.year*12+S.month):0)+':'+seed, aperta=SCENE_APERTE.has(fkey);
+  return `<div class="ag-scene on${aperta?'':' fascia'}${clip?' con-video':''}${ferma?' ferma':''}" role="button" tabindex="0" aria-expanded="${aperta?'true':'false'}" aria-label="${escAttr(T(aperta?'Riduci la scena':'Mostra la scena'))}" data-fkey="${escAttr(fkey)}" onclick="toccaScena(event,this)" onkeydown="if(event.key==='Enter'||event.key===' '){ event.preventDefault(); toccaScena(event,this); }"><img src="${src}" alt="" loading="lazy" decoding="async">${clip?videoHtml(clip, vkey):''}</div>`; }
+const SCENE_APERTE=new Set();   // L143-3: le scene aperte (chiave mese:carta), transitorio
+let SCENE_APERTE_MESE=null;
+function toccaScena(ev, el){
+  if(ev){ ev.stopPropagation(); }   // il tocco sulla fascia non arriva alla carta né al tavolo
+  const mk=S?(S.year*12+S.month):0; if(SCENE_APERTE_MESE!==mk){ SCENE_APERTE.clear(); SCENE_APERTE_MESE=mk; }
+  const k=el.getAttribute('data-fkey'), ap=!SCENE_APERTE.has(k);
+  if(ap) SCENE_APERTE.add(k); else SCENE_APERTE.delete(k);
+  el.classList.toggle('fascia', !ap); el.setAttribute('aria-expanded', ap?'true':'false'); el.setAttribute('aria-label', T(ap?'Riduci la scena':'Mostra la scena'));   // nessun render: il nodo (e la clip dentro) resta lui
+}
 /* Bandiere nei bottoni del selettore paese (schermata iniziale): iniettate da PAESI[c].flag. Una volta, al boot. */
 function decorateCountrySelector(){
   document.querySelectorAll('#country-seg button').forEach(function(b){ const P=PAESI[b.dataset.c]; if(P) b.innerHTML=`<span class="flag">${P.flag||''}</span><span>${T(P.nome)}</span>`; });
@@ -1936,6 +1949,9 @@ function vitaPersonaleCard(){
 }
 /* RIGA-BILANCIO persistente (cantiere Budget): le cifre in € del livello corrente, SEMPRE in vista mentre decidi — non più
    sepolte nella scheda Paese. Liv.1 = bilancio del Comune/Regione; liv.3/2 = Bilancio dello Stato + saldo annuo (segno+colore). */
+/* L144-1: nel cassetto del Governo la riga del bilancio sta sopra l'agenda se, con lei, la prima scelta della prima carta resta
+   nella prima finestra del cassetto in tutti i casi a 375 IT (la misura è .claude/l144-1-cdp.js); altrimenti scende con gli altri. */
+const BILANCIO_SOPRA_AGENDA=true;
 function bilancioRiga(){
   if(S.opposizione || S.livello===4 || S.livello===5) return '';
   if(S.livello===1){ if(!S.locale || S.locale.budget==null) return '';
@@ -2052,7 +2068,7 @@ function renderGov(){
   if(S.livello===0){ document.getElementById('sec-gov').innerHTML=renderAttivista(); return; }   // ATTIVISTA (Build A): scheda focalizzata sulla militanza
   if(!S.opposizione && S.ministeroAperto==='__locale__'){ document.getElementById('sec-gov').innerHTML=renderLocalePage(); return; }   // drill-down: cruscotto locale (livello 1)
   if(!S.opposizione && S.ministeroAperto){ document.getElementById('sec-gov').innerHTML=renderMinisteroPage(S.ministeroAperto); return; }   // drill-down: pagina del ministero
-  let h='';
+  let h='', ruolo='';   // L144-1: il blocco del ruolo (opposizione, livello 1, livello 2) si scrive a parte e si mette dopo
   let fioreB='';   // fioretto promozione: il banner-ruolo (liv 4/5) lo consuma; premier/ministro lo lasciano alla cronaca
   if(PROMO_FIORE && (S.livello===4||S.livello===5)){ fioreB=' promo-fiore'; PROMO_FIORE=false; }
   if(S.livello===4){
@@ -2072,43 +2088,56 @@ function renderGov(){
     h+=`<div class="card"><div class="ct">${T('La scala diplomatica')} · ${T(D.grado>=2?'Sottosegretario generale':'Ambasciatore')}</div>${ob(T('Credito diplomatico'),T('la tua reputazione tra i diplomatici'),D.credito)}${ob(T('Rapporto con l\'ONU'),T('il favore dei fori multilaterali: la porta del vertice'),cons)}</div>`;
   }
   else if(S.opposizione){
-    h+=`<div class="banner" style="border-color:var(--neg)">${T('<b>All\'opposizione.</b> Governa %P: niente bilancio né ministri. Ogni mese una mossa; segui la tua risalita nella scheda <b>Partiti</b>.').replace('%P',T((part(S.governoAvversario)||{}).nome||'—'))}</div>`;
+    ruolo+=`<div class="banner" style="border-color:var(--neg)">${T('<b>All\'opposizione.</b> Governa %P: niente bilancio né ministri. Ogni mese una mossa; segui la tua risalita nella scheda <b>Partiti</b>.').replace('%P',T((part(S.governoAvversario)||{}).nome||'—'))}</div>`;
     const ob=(l,sub,v)=>{ const c=v<33?'var(--neg)':v<60?'var(--warn)':'var(--pos)'; return `<div class="grp"><div class="top"><div class="nm">${l}<small>${sub}</small></div><div class="pc mono" style="color:${c}">${Math.round(v)}</div></div><div class="bar"><i style="width:${clamp(v,2,100)}%;background:${c}"></i></div></div>`; };
-    h+=`<div class="card"><div class="ct">${T('La tua opposizione')}</div>${ob(T('Visibilità'),T('quanto i media parlano di te'),S.visibilita||0)}${ob(T('Credibilità'),T('quanto sei un\'alternativa seria'),S.credibilita||0)}</div>`;
+    ruolo+=`<div class="card"><div class="ct">${T('La tua opposizione')}</div>${ob(T('Visibilità'),T('quanto i media parlano di te'),S.visibilita||0)}${ob(T('Credibilità'),T('quanto sei un\'alternativa seria'),S.credibilita||0)}</div>`;
   }
   else if(S.livello===1){
     /* livello 1 — POLITICO LOCALE: la tua città/regione è tutto il gioco; notorietà = capitale */
     const L=S.locale, cap=Math.round(S.capitale||0), cons=Math.round(L.consenso||0);
     const capCol=cap>=65?'var(--pos)':cap<35?'var(--neg)':'var(--txt)', consCol=cons<40?'var(--neg)':cons<55?'var(--warn)':'var(--pos)';
-    h+=`<div class="banner">${luoghiSub(T('<b>Sei %R</b>. Amministra %L: i risultati costruiscono la tua notorietà, e il partito ti chiamerà %ACAPITALE.')).replace('%R',escAttr(ruoloLocale())).replace('%L',escAttr(localeNome()))}</div>`;
-    h+=`<div class="card" style="padding:10px 14px;margin-bottom:10px"><div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-size:12.5px;color:var(--mut)">${T('Notorietà')}</span><span class="mono" style="font-weight:600;font-size:16px;color:${capCol}">${cap}<span class="contorno" style="color:var(--mut2);">/100</span></span></div>
+    ruolo+=`<div class="banner">${luoghiSub(T('<b>Sei %R</b>. Amministra %L: i risultati costruiscono la tua notorietà, e il partito ti chiamerà %ACAPITALE.')).replace('%R',escAttr(ruoloLocale())).replace('%L',escAttr(localeNome()))}</div>`;
+    ruolo+=`<div class="card" style="padding:10px 14px;margin-bottom:10px"><div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-size:12.5px;color:var(--mut)">${T('Notorietà')}</span><span class="mono" style="font-weight:600;font-size:16px;color:${capCol}">${cap}<span class="contorno" style="color:var(--mut2);">/100</span></span></div>
       <div class="bar">${fillI('cap:loc', clamp(cap,2,100), capCol)}</div>
       <div style="display:flex;justify-content:space-between;margin-top:7px;font-size:12px"><span style="color:var(--mut2)">${T(L.tipo==='città'?'Consenso cittadino':'Consenso regionale')}</span><span style="color:${consCol};font-weight:600">${cons}/100</span></div>
-      <div style="font-size:11px;color:var(--mut2);margin-top:5px">${luoghiSub(T('Sopra ~65 di notorietà, il partito può offrirti un posto %ACAPITALE. Sotto 40 di consenso rischi la mancata rielezione.'))}</div></div>`;
-    h+=`<div class="card uno" onclick="apriMinistero('__locale__')" style="cursor:pointer;display:flex;justify-content:space-between;align-items:center;padding:12px 14px;margin-bottom:12px"><span><b>${T(entitaLocale()).charAt(0).toUpperCase()+T(entitaLocale()).slice(1)}</b><br><span style="font-size:12px;color:var(--mut)">${T('i tuoi indicatori e le tue leve')}</span></span><span style="color:var(--acc-ink);font-size:13px">${T('Apri →')}</span></div>`;
+      <div class="contorno" style="font-size:11px;color:var(--mut2);margin-top:5px">${luoghiSub(T('Sopra ~65 di notorietà, il partito può offrirti un posto %ACAPITALE. Sotto 40 di consenso rischi la mancata rielezione.'))}</div></div>`;
+    ruolo+=`<div class="card uno" onclick="apriMinistero('__locale__')" style="cursor:pointer;display:flex;justify-content:space-between;align-items:center;padding:12px 14px;margin-bottom:12px"><span><b>${T(entitaLocale()).charAt(0).toUpperCase()+T(entitaLocale()).slice(1)}</b><br><span style="font-size:12px;color:var(--mut)">${T('i tuoi indicatori e le tue leve')}</span></span><span style="color:var(--acc-ink);font-size:13px">${T('Apri →')}</span></div>`;
   }
   else if(S.livello===2){
     /* livello 2 — MINISTRO: il tuo dicastero è la home, gli indicatori nazionali sono del premier (in lettura) */
     const pn=(S.premier||{}).nome||'il premier', leal=Math.round((S.premier||{}).lealta||0), cap=Math.round(S.capitale||0);
     const Mn=(typeof dicNm==='function'?dicNm(S.dicastero):((MINISTRIES.find(x=>x.id===S.dicastero)||{}).nm||''));   // D3: nome era-aware
     const capCol=cap>=65?'var(--pos)':cap<35?'var(--neg)':'var(--txt)', lealCol=leal<25?'var(--neg)':leal<50?'var(--warn)':'var(--pos)';
-    h+=`<div class="banner">${T('<b>Sei %R</b> nel governo di <b>%P</b>. Governa lui il paese; tu costruisci il tuo capitale e punti al vertice.').replace('%R',escAttr(ruoloDicastero())).replace('%P',escAttr(pn))}</div>`;
-    h+=`<div class="card" style="padding:10px 14px;margin-bottom:10px"><div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-size:12.5px;color:var(--mut)">${T('Capitale politico')}</span><span class="mono" style="font-weight:600;font-size:16px;color:${capCol}">${cap}<span class="contorno" style="color:var(--mut2);">/100</span></span></div>
+    ruolo+=`<div class="banner">${T('<b>Sei %R</b> nel governo di <b>%P</b>. Governa lui il paese; tu costruisci il tuo capitale e punti al vertice.').replace('%R',escAttr(ruoloDicastero())).replace('%P',escAttr(pn))}</div>`;
+    ruolo+=`<div class="card" style="padding:10px 14px;margin-bottom:10px"><div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-size:12.5px;color:var(--mut)">${T('Capitale politico')}</span><span class="mono" style="font-weight:600;font-size:16px;color:${capCol}">${cap}<span class="contorno" style="color:var(--mut2);">/100</span></span></div>
       <div class="bar">${fillI('cap:min', clamp(cap,2,100), capCol)}</div>
       <div style="display:flex;justify-content:space-between;margin-top:7px;font-size:12px"><span style="color:var(--mut2)">${T('Fiducia del premier')}</span><span style="color:${lealCol};font-weight:600">${leal}/100${leal<25?T(' · sei in bilico'):''}</span></div>
-      <div style="font-size:11px;color:var(--mut2);margin-top:5px">${T('Sopra ~65 di capitale, un\'occasione per salire può aprirsi. Distinguerti dal premier rende, ma se la sua fiducia crolla rischi il rimpasto.')}</div></div>`;
-    h+=`<div class="card uno" onclick="apriMinistero('${S.dicastero}')" style="cursor:pointer;display:flex;justify-content:space-between;align-items:center;padding:12px 14px;margin-bottom:12px"><span><b>${T('Il tuo dicastero')}</b><br><span style="font-size:12px;color:var(--mut)">${Mn} — ${T('le tue leve, leggi e dossier')}</span></span><span style="color:var(--acc-ink);font-size:13px">${T('Apri →')}</span></div>`;
+      <div class="contorno" style="font-size:11px;color:var(--mut2);margin-top:5px">${T('Sopra ~65 di capitale, un\'occasione per salire può aprirsi. Distinguerti dal premier rende, ma se la sua fiducia crolla rischi il rimpasto.')}</div></div>`;
+    ruolo+=`<div class="card uno" onclick="apriMinistero('${S.dicastero}')" style="cursor:pointer;display:flex;justify-content:space-between;align-items:center;padding:12px 14px;margin-bottom:12px"><span><b>${T('Il tuo dicastero')}</b><br><span style="font-size:12px;color:var(--mut)">${Mn} — ${T('le tue leve, leggi e dossier')}</span></span><span style="color:var(--acc-ink);font-size:13px">${T('Apri →')}</span></div>`;
   }
   else if(S.month===1 && !S.coabitazione) h+=`<div class="banner">${T('È <b>gennaio</b>: vai alla scheda <b>Bilancio</b> per varare la manovra dell\'anno (hai %N punti riforma).').replace('%N',rpLeft())}</div>`;   // L100-2: in coabitazione la manovra è del Primo ministro
+  /* L144-1 (29/9) — NEL CASSETTO LA DECISIONE VIENE PRIMA. Quando il Governo è un cassetto del tavolo (tavoloAttivo(): livelli
+     1-3, opposizione compresa) sopra l'agenda restano solo le cose da fare subito — il banner di gennaio (sopra, nella catena)
+     e il conto alla rovescia di un gruppo in rivolta — più la riga del bilancio (BILANCIO_SOPRA_AGENDA: la tiene sopra la
+     misura, non il gusto — col bilancio sopra la prima scelta della prima carta resta nella prima finestra in tutti i casi a
+     375 IT, rapporto in DESIGN-PAGINE.md § L144-1). Il blocco del ruolo, la stampa del mese e la vita personale scendono SOTTO
+     l'agenda, in quest'ordine, prima della prerogativa e dei ministeri. Fuori dal cassetto (livelli 4-5) l'ordine è quello di prima. */
+  const cassetto=tavoloAttivo();
+  let sotto='';
+  if(!cassetto) h+=ruolo;   // fuori dal cassetto il ruolo sta in testa, come prima (il banner di gennaio esclude il ruolo: nessun conflitto d'ordine)
   h+=rivoltaBanner();   // L72-1: se un gruppo e' sotto il pavimento, il conto alla rovescia sta in testa al Governo
-  h+=bilancioRiga();   // il € del livello corrente, persistente in cima al Governo (cantiere Budget): sempre sott'occhio mentre decidi
+  if(cassetto && !BILANCIO_SOPRA_AGENDA) sotto+=bilancioRiga();
+  else h+=bilancioRiga();   // il € del livello corrente (cantiere Budget): sempre sott'occhio mentre decidi
   /* la prima pagina del mese: presenza fissa della stampa + scorciatoia alla tab Stampa (solo al governo) */
+  let stampa='';
   if(!S.opposizione && S.livello!==4 && S.livello!==5 && S.titoloMese){   // la striscia-stampa nazionale non vale per il Segretario (liv 4) né per il diplomatico (liv 5)
     const tm=S.titoloMese;
-    h+=`<div class="pressa" onclick="setTab('stampa')"><div class="pk">${T('La stampa')} · ${T(MONTHS[S.month-1])} · <span style="color:${tm.tono==='amica'?'var(--pos)':'var(--neg)'}">${T(tm.tono==='amica'?'benevola':'ostile')}</span></div>
+    stampa=`<div class="pressa" onclick="setTab('stampa')"><div class="pk">${T('La stampa')} · ${T(MONTHS[S.month-1])} · <span style="color:${tm.tono==='amica'?'var(--pos)':'var(--neg)'}">${T(tm.tono==='amica'?'benevola':'ostile')}</span></div>
       <div class="pt">«${tm.testo}»</div><div class="pl">${T('Ufficio stampa →')}</div></div>`;
   }
-  h+=vitaPersonaleCard();   // vita personale: indicatore visibile (valore/100 + barra animata + etichetta umana), prima dell'agenda
+  /* vita personale: indicatore visibile (valore/100 + barra animata + etichetta umana) — prima dell'agenda fuori dal cassetto, dopo nel cassetto */
+  if(cassetto){ sotto=ruolo+sotto+stampa+vitaPersonaleCard(); }
+  else h+=stampa+vitaPersonaleCard();
   // agenda
   h+=`<div class="contorno" style="font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--mut);margin:2px 2px 8px;">${T('Agenda di')} ${T(MONTHS[S.month-1])}</div>`;
   /* L95-1 — l'entrata non è più della SCATOLA. La classe stava qui, sulla firma dell'agenda, e scattava una
@@ -2176,7 +2205,7 @@ function renderGov(){
     } else if(it.kind==='personale'){
       /* eventi personali singoli (lotto 5 + vita personale): registro sobrio. %FIGLIO/%CONIUGE = nomi reali della famiglia. */
       const d=it.data;
-      const sub=(s)=>String(s==null?'':s).replace(/%FIGLIO/g, (typeof figlioNome==='function'?figlioNome(0,99):T('tuo figlio'))).replace(/%CONIUGE/g, ((S.famiglia&&S.famiglia.coniuge&&S.famiglia.coniuge.nome)||T('chi ti ama')));
+      const sub=subFamiglia;   // L143-1: un risolutore solo, in game.js
       h+=`<div class="ag major ${it.resolved?'done':''}">${agScene(it)}<div class="ah"><div class="kick">${T(d.kick)}</div><h3>${sub(T(d.t))}</h3></div>
         <div class="atext">${sub(T(d.text))}</div>`;
       if(!it.resolved){ h+=`<div class="opts">`+d.ch.map((c,i)=>
@@ -2337,6 +2366,7 @@ function renderGov(){
     }
   });
   h+=`</div>`;   // chiude .agbox
+  h+=sotto;   // L144-1: nel cassetto il ruolo, la stampa e la vita personale vengono dopo l'agenda (vuoto fuori dal cassetto)
   // ministri (o, all'opposizione, l'avviso di sola lettura)
   if(S.opposizione){
     h+=`<div class="card"><div class="ct">${T('Il Governo')}</div><div class="min"><div class="msum">${T("Governa <b>%P</b>. Non hai ministri: sei all'opposizione. Tornerai a nominare il governo vincendo le elezioni.").replace('%P',T((part(S.governoAvversario)||{}).nome||'—'))}</div></div></div>`;
@@ -2568,16 +2598,43 @@ function renderPol(){
   const _spP=(typeof politicaSottoPressione==='function')?politicaSottoPressione():null;
   if(_spP){ const P=POLICIES.find(function(x){return x.id===_spP.pol;})||{}; const pnm=(typeof naLabel==='function'&&naLabel()&&P.nmNA)?P.nmNA:P.nm;
     h+=`<div class="banner" style="border-color:var(--acc)"><b>${T(_spP.kick)}.</b> ${T('%POL sotto pressione. Rivedi la politica (l\'anello indica dove porta) o tienila — entrambe le strade sono legittime.').replace('%POL','<b>'+T(pnm||'')+'</b>')}</div>`; }
-  h+=politicheTotRiga();   // il conto complessivo delle politiche, ogni anno (cantiere Budget): il totale del ricorrente in cima alla manovra
   const polVis=(typeof eraVivaT==='function')?POLICIES.filter(eraVivaT):POLICIES;   // Build B (ii): le leve moderne (ambiente/immigrazione) sono nascoste nel '50 (restano neutre → math invariata); nel presente passano tutte
   const cats=[...new Set(polVis.map(p=>p.cat))];
+  /* L143-2 · LE SEZIONI CHE SI CHIUDONO (solo qui, il capo del governo): ogni categoria e le leggi sono una sezione con
+     un'intestazione toccabile; chiusa, dice il livello di ogni leva. Aperta all'arrivo solo quella della politica sotto
+     pressione. Lo stato è TRANSITORIO (BIL_APERTE, chiave del mese), mai in S: sopravvive ai render di setPol. */
+  const ap=bilAperte(_spP, polVis), leggi=leggiDelPaese(), chiavi=cats.concat(['__leggi']);
+  const tutte=chiavi.every(k=>ap[k]);
+  h+=`<div class="bil-tot">${politicheTotRiga()}<button class="mini-btn bil-tutto" onclick="bilTutte(${tutte?0:1})">${T(tutte?'Chiudi tutto':'Apri tutto')}</button></div>`;   // il conto complessivo delle politiche, ogni anno (cantiere Budget), e il bottone solo
   for(const cat of cats){
-    h+=`<div class="card"><div class="ct">${T(cat)}</div>`;
-    for(const p of polVis.filter(x=>x.cat===cat)) h+=renderPolicySlider(p);   // stesso componente delle pagine-ministero
+    const pp=polVis.filter(x=>x.cat===cat), aperta=!!ap[cat];
+    const press=_spP && pp.some(x=>x.id===_spP.pol);
+    const riass=pp.map(function(p){ const plev=(typeof naLabel==='function'&&naLabel()&&p.levelsNA)?p.levelsNA:p.levels; return T(plev[S.pol[p.id]!=null?S.pol[p.id]:1]||''); }).join(' · ');
+    h+=`<div class="card bil-sez${aperta?' aperta':''}">${bilTesta(cat, T(cat), aperta, riass, press)}`;
+    if(aperta) for(const p of pp) h+=renderPolicySlider(p);   // stesso componente delle pagine-ministero
     h+=`</div>`;
   }
-  h+=`<div class="card g2"><div class="ct">${T('Leggi del paese')}</div>${leggiDelPaese().map(renderLegge).join('')}</div>`;   // leggi: riforme on/off, costano RP come il bilancio
+  const nv=leggi.filter(L=>!!S.leggi[L.id]).length, apL=!!ap.__leggi;
+  h+=`<div class="card g2 bil-sez${apL?' aperta':''}">${bilTesta('__leggi', T('Leggi del paese'), apL, T('%N in vigore').replace('%N', nv), false)}${apL?leggi.map(renderLegge).join(''):''}</div>`;   // leggi: riforme on/off, costano RP come il bilancio
   document.getElementById('sec-pol').innerHTML=h;
+}
+/* L143-2 · lo stato delle sezioni del Bilancio: transitorio, per mese (al mese nuovo si riparte dalla regola: aperta solo la
+   sezione della politica sotto pressione). ⚠ Mai in S né in localStorage. */
+let BIL_APERTE={chiave:null, set:{}};
+function bilAperte(sp, polVis){
+  const k=S.year*12+S.month+'|'+S.paese+'|'+(S.scenario||'');
+  if(BIL_APERTE.chiave!==k){ BIL_APERTE={chiave:k, set:{}};
+    if(sp){ const P=(polVis||POLICIES).find(function(x){ return x.id===sp.pol; }); if(P) BIL_APERTE.set[P.cat]=true; } }
+  return BIL_APERTE.set;
+}
+function bilTesta(k, nome, aperta, riass, press){
+  return `<button class="bil-sez-h" aria-expanded="${aperta?'true':'false'}" data-k="${escAttr(k)}" onclick="bilSez(this.dataset.k)"><span class="bil-nm contorno">${nome}${press?` <span class="chip" style="background:var(--acc);color:#1a1408">${T('sotto pressione')}</span>`:''}</span><span class="bil-fr" aria-hidden="true">${aperta?'▴':'▾'}</span>${aperta?'':`<span class="bil-riass">${riass}</span>`}</button>`;
+}
+function bilSez(k){ const ap=BIL_APERTE.set; ap[k]=!ap[k]; renderPol(); }
+function bilTutte(apri){
+  const polVis=(typeof eraVivaT==='function')?POLICIES.filter(eraVivaT):POLICIES;
+  [...new Set(polVis.map(p=>p.cat))].concat(['__leggi']).forEach(function(k){ BIL_APERTE.set[k]=!!apri; });
+  renderPol();
 }
 function setPol(id,i){
   if(S.livello===2 && (POLICIES.find(p=>p.id===id)||{}).min!==S.dicastero) return;   // da ministro: solo le leve del TUO dicastero
@@ -3831,7 +3888,7 @@ function renderPartitoPage(){
     h+=tr.map(function(id){ const D=TRATTI_DEF.find(function(d){return d.id===id;})||{}; return `<div style="font-size:12px;color:var(--mut2);margin-top:2px"><b style="color:var(--mut)">${D.nome}.</b> ${T(D.riga||'')}</div>`; }).join('');
   } else h+=`<div style="font-size:12.5px;color:var(--mut2);margin-top:4px">${T('Ancora nessun tratto: le scelte ripetute ti definiranno.')}</div>`;
   const ff=(S.biografia&&S.biografia.fatti.slice(-4).reverse())||[];
-  if(ff.length) h+=`<div class="log" style="margin-top:9px">`+ff.map(function(f){return `<div class="li"><b>${f.anno}.</b> ${f.testo}</div>`;}).join('')+`</div>`;
+  if(ff.length) h+=`<div class="log" style="margin-top:9px">`+ff.map(function(f){return `<div class="li"><b>${f.anno}.</b> ${subFamiglia(f.testo)}</div>`;}).join('')+`</div>`;
   h+=`</div></div>`;
   /* le azioni di gestione: una mossa di partito ogni cdPartito() mesi (l'energia segue l'età) */
   /* Lotto 2: la scheda EVIDENZIA quale corrente curare + quale mossa (affinamento #1) */
