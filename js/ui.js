@@ -566,7 +566,15 @@ function scenaPaese(p){
   if(typeof p!=='string' || typeof SCENE_PAESE==='undefined' || typeof S==='undefined' || !S || !S.paese) return p;
   var m=/^(.*\/)?([^\/]+)\.webp$/.exec(p); if(!m) return p;
   var n=m[2]+'-'+S.paese;
-  return SCENE_PAESE.indexOf(n)>=0 ? (m[1]||'')+n+'.webp' : p;
+  if(SCENE_PAESE.indexOf(n)>=0) return (m[1]||'')+n+'.webp';
+  /* L151-2 · LA VARIANTE D'AREA, dopo quella di paese (il paese vince): `<file>-<area del paese>` se è in SCENE_AREA.
+     ⚠ SOLO NEL PRESENTE: le porte storiche sono tutte europee oggi, ma gli Stati Uniti arriveranno, e una strada
+     «nordamericana di oggi» sulla carta del 1950 sarebbe peggio della neutra. Senza file in lista: tutto come prima. */
+  if(typeof SCENE_AREA==='undefined' || !SCENE_AREA.length || typeof AREA_DI_PAESE==='undefined') return p;
+  if(S.scenario && S.scenario!=='presente') return p;
+  var a=AREA_DI_PAESE[S.paese]; if(!a) return p;
+  var na=m[2]+'-'+a;
+  return SCENE_AREA.indexOf(na)>=0 ? (m[1]||'')+na+'.webp' : p;
 }
 function scenaSrc(id, tono, seed){ return scenaPaese(scenaSrcComune(id, tono, seed)); }
 function scenaSrcComune(id, tono, seed){
@@ -612,7 +620,6 @@ function scenaTelefono(missed){ var M=_sm('telefono'); if(!M) return null;
   if(missed) return M.corridoio;                                               // la chiamata appena chiusa (universale)
   if(typeof eraCombacia==='function' && (eraCombacia('italia1950')||eraCombacia('italia1960'))) return M.storico;
   return M.oggi; }
-function scenaSoglia(tag){ var M=_sm('soglia'); return M ? (M[tag]||null) : null; }
 /* L9-1 — mappa gli ESITI reali di gameOver sui 4 finali (accorpati per tono; vedi report L9-1). */
 function scenaFinale(reason){ var M=_sm('finale'); if(!M) return null;
   var trionf = ((typeof S!=='undefined'&&S) ? ((S.mandatesWon||0)>=3 || (S.biografia&&S.biografia.trionfi>=2)) : false);
@@ -1003,9 +1010,18 @@ var SOGLIE={ presente:'assets/scenes/soglia-presente.webp', italia1950:'assets/s
              italia1960:'assets/scenes/soglia-1960.webp', italia1970:'assets/scenes/soglia-1970.webp',
              italia1980:'assets/scenes/soglia-1980.webp', italia1990:'assets/scenes/soglia-1990.webp',
              italia2000:'assets/scenes/soglia-2000.webp' };
+/* L151-2 · le porte NON italiane ripiegano sull'immagine del loro DECENNIO (`porta-decennio-<anno>.webp`, europee, senza
+   bandiere: fatte per le clip delle partite storiche), se l'anno è in `PORTE_DECENNIO` (scenes.js, lista-promessa guardata da
+   `verifica-asset.js`: niente 404). Le porte italiane tengono le loro `soglia-*`. */
+function sogliaSrc(id){
+  if(SOGLIE[id]) return SOGLIE[id];
+  var m=/([0-9]{4})$/.exec(String(id||''));
+  return (m && typeof PORTE_DECENNIO!=='undefined' && PORTE_DECENNIO.indexOf(+m[1])>=0) ? 'assets/scenes/porta-decennio-'+m[1]+'.webp' : null;
+}
 function sogliaHtml(id){   // degrado pulito: chi non ha la miniatura riceve il segnaposto, non un'immagine rotta
-  return SOGLIE[id] ? '<img class="soglia-thumb" src="'+SOGLIE[id]+'" alt="">'
-                    : '<span class="soglia-thumb soglia-vuota" aria-hidden="true"></span>';
+  var src=sogliaSrc(id);
+  return src ? '<img class="soglia-thumb" src="'+src+'" alt="">'
+             : '<span class="soglia-thumb soglia-vuota" aria-hidden="true"></span>';
 }
 /* le porte STORICHE di un paese, in ordine cronologico (il presente non è una porta storica) */
 function portePaese(c){
@@ -2954,7 +2970,8 @@ const TAVOLO_CAPITALI={
   argentina:{ 'Buenos Aires':[60.3,64.8] }, germania:{ 'Berlino':[81.4,44.4], 'Bonn':[14.7,74.5] },
   /* nelle porte tedesche la capitale Berlino (se una tappa ce la portasse) È la città del cerchio «Berlino Ovest» */
   de1950:{ 'Bonn':[14.7,74.4], 'Berlino':{ xy:[81.5,44.4], stessa:'Berlino Ovest' } }, de1960:{ 'Bonn':[14.7,74.4], 'Berlino':{ xy:[81.5,44.4], stessa:'Berlino Ovest' } }, de1970:{ 'Bonn':[14.7,74.4], 'Berlino':{ xy:[81.5,44.4], stessa:'Berlino Ovest' } },
-  de1980:{ 'Bonn':[14.7,74.4], 'Berlino':{ xy:[81.5,44.4], stessa:'Berlino Ovest' } }   // L147-1
+  de1980:{ 'Bonn':[14.7,74.4], 'Berlino':{ xy:[81.5,44.4], stessa:'Berlino Ovest' } },   // L147-1
+  de1990:{ 'Bonn':[14.7,74.4], 'Berlino':{ xy:[81.5,44.4], stessa:'Berlino Ovest' } }   // L151-3: dal 1990/10 il territorio si chiama «Berlino» e il palazzo del 1999 viene dall'area
 };
 let TAVOLO_MIS=null;         // L129-2: l'ultima scala del tavolo { k, wh } (transitoria, la scrive aggiornaTavolo a tavolo misurato)
 /* un nome senza segni diacritici, per confrontare grafie («Brasilia» e «Brasília») */

@@ -187,6 +187,7 @@ const PAESI = {
     ],
   },
   australia: {
+    emisfero:'sud',   // L151-1: l'emisfero e' del paese (assente = nord); lo legge stagioneMese()
     /* L94-1 · i nomi dei gruppi, del paese (v. italia) */
     nomiGruppi:{ lavoratori:'Lavoratori e sindacati', pensionati:'Pensionati', cetomedio:'Ceto medio',
                  imprenditori:'Imprese e industria', giovani:'Giovani e studenti', cattolici:{nm:'Chiese e comunità rurali', plurale:true} },
@@ -263,6 +264,7 @@ const PAESI = {
     ],
   },
   sudafrica: {
+    emisfero:'sud',   // L151-1: l'emisfero e' del paese (assente = nord); lo legge stagioneMese()
     /* L94-1 · i nomi dei gruppi, del paese (v. italia) */
     nomiGruppi:{ lavoratori:'Lavoratori e sindacati', pensionati:'Pensionati', cetomedio:'Ceto medio',
                  imprenditori:'Imprese e industria', giovani:'Giovani e studenti', cattolici:{nm:'Comunità religiose', plurale:true} },
@@ -300,6 +302,7 @@ const PAESI = {
     ],
   },
   argentina: {
+    emisfero:'sud',   // L151-1: l'emisfero e' del paese (assente = nord); lo legge stagioneMese()
     /* L94-1 · i nomi dei gruppi, del paese (v. italia) */
     nomiGruppi:{ lavoratori:'Lavoratori e sindacati', pensionati:'Pensionati', cetomedio:'Ceto medio',
                  imprenditori:'Imprese e industria', giovani:'Giovani e studenti', cattolici:'Mondo cattolico' },
@@ -523,6 +526,7 @@ const PAESI = {
     ],
   },
   brasile: {
+    emisfero:'sud',   // L151-1: l'emisfero e' del paese (assente = nord). Il Brasile sta a cavallo dell'equatore, ma le sue citta' grandi hanno l'estate a dicembre
     /* L94-1 · i nomi dei gruppi, del paese (v. italia) */
     nomiGruppi:{ lavoratori:'Lavoratori e sindacati', pensionati:'Pensionati', cetomedio:'Ceto medio',
                  imprenditori:'Imprese e industria', giovani:'Giovani e studenti', cattolici:{nm:'Evangelici e cattolici', plurale:true} },
@@ -1677,6 +1681,58 @@ const SCENARI = {
       "Germania, 1980. Il secondo shock del petrolio morde: la crescita si ferma, e i disoccupati tornano verso il milione.",
       "Nelle piazze il movimento per la pace si oppone ai missili che la NATO vuole installare; nei comuni i Verdi raccolgono i primi seggi.",
       "Socialdemocratici e liberali governano da più di dieci anni. L'Unione cristiana è il primo partito e aspetta: basta che i liberali cambino campo.",
+    ],
+  },
+  /* ============================================================================================================
+     L151-3 · GERMANIA 1990 — la quinta porta tedesca (scheda PRESET-GERMANIA-1990.md, D74-D82). Si apre nel GENNAIO 1990, A OVEST,
+     col Muro caduto da due mesi: il primo anno è quello dell'unità, che la LINEA ha già (tappe 1990/10 e 1990/12, snodi del
+     1990-91 di de1980). Istituzioni come de1980 (parlamentare, sfiducia costruttiva, sbarramento 5, 48 mesi), capitale Bonn fino
+     alla tappa del 1999/9; `ue:true` (de1980 ha false: la differenza è di porta).
+     ROSTER: i quattro del dopo-1982 con le liste già cambiate (CDU↔FDP · SPD↔Verdi · CDU↔SPD di riserva); la PDS entra alla tappa
+     del 1990/10. FORZE: le urne del 1987 sui quattro (44,26 · 37,04 · 9,09 · 8,26, somma 98,65) → 44,9 · 37,5 · 9,2 · 8,4 — NON il
+     voto del 1990: fra l'avvio e il dicembre 1990 ci sono le due tappe dell'unità, che sono delta dal 1987 (partire dal 1990 le
+     conterebbe due volte; niente `saltaDeltaPer`). SEGGI: il Bundestag del 1987 senza Berlino (44,9 · 37,4 · 9,3 · 8,5).
+     `forzaAncora` (L111-1): la media pantedesca 1990-94-98 rinormalizzata, MENO l'àncora che arriva con la tappa marcata del
+     1990/10 (CDU −0,5 · SPD −2,2 · FDP +0,4 · Verdi +0,2) → 42,6 · 40,9 · 8,0 · 6,4.
+     L'URNA DEL MOTORE: `turnMandato:3` (la legislatura del gennaio 1987 è al quarto anno) → 1991/1 · 1995/1 · 1999/1 (la storia:
+     1990/12, 1994/10, 1998/9 — D76). Crescita di partenza 4,5 come le altre porte tedesche: le righe di linea sono scostamenti
+     da questa base, e quelle del 1990-91 le leggono de1980 (la sua coda) e questa porta.
+     CHI SI SCEGLIE (D75): CDU/CSU e FDP; SPD e Verdi restano nel roster, nei seggi e nelle urne (la misura è nella scheda).
+     ============================================================================================================ */
+  de1990: {
+    id:'de1990', era:LINEA_DE, nome:'Germania 1990', anno:1990, paese:'germania',
+    turnMandato: 3,
+    sistema: 'parlamentare', comeSiVince: 'parlamentare', coalizione: true, cadutaGoverno: true,
+    sfiduciaCostruttiva: true, sbarramento: 5,
+    mandatoMesi: 48, mandatiMax: null,
+    titoloRuolo: 'Cancelliere', sedeGoverno: 'la Cancelleria',
+    capitale: 'Bonn',
+    ue: true,
+    intermedie: [ {tipo:'Elezioni nei Länder', mese:24, tocca:'regione'} ],
+    partiti: [
+      { id:'de_cdu', nome:'CDU/CSU', orientamento:'centrodestra',   base:{ cattolici:0.35, cetomedio:0.35, imprenditori:0.3 }, forza:44.9, forzaAncora:42.6, asse:1,  alleati:['de_fdp'], alleatiRiserva:['de_spd'] },
+      { id:'de_spd', nome:'SPD',     orientamento:'centrosinistra', base:{ lavoratori:0.6, pensionati:0.2, giovani:0.2 },    forza:37.5, forzaAncora:40.9, asse:-1, alleati:['de_grn'], alleatiRiserva:['de_cdu'],
+        selezionabile:false, nota:"All'opposizione fino al 1998: con due sconfitte prima della vittoria la carriera chiuderebbe al primo anno" },   // D75: misurato, congresso 20/20 al 1991/1
+      { id:'de_fdp', nome:'FDP',     orientamento:'liberale',       base:{ imprenditori:0.5, cetomedio:0.5 },                forza:9.2,  forzaAncora:8.0,  asse:1,  alleati:['de_cdu'] },
+      { id:'de_grn', nome:'Verdi',   orientamento:'ecologista',     base:{ giovani:0.6, cetomedio:0.4 },                     forza:8.4,  forzaAncora:6.4,  asse:-2, alleati:['de_spd'],
+        selezionabile:false, nota:"All'opposizione fino al 1998: con due sconfitte prima della vittoria la carriera chiuderebbe al primo anno" },   // D75: misurato, congresso 20/20 al 1991/1
+    ],
+    /* il Bundestag del 25 gennaio 1987 senza Berlino (497), in carica all'avvio */
+    seggi: { de_cdu:44.9, de_spd:37.4, de_fdp:9.3, de_grn:8.5 },
+    /* ⚠ cifre della scheda §2, ordine di grandezza (Destatis/Bundesbank da confermare): miliardi di marchi, l'Ovest nel 1990. `S.pil` non
+       cresce (D67) e all'unità non salta (D60). */
+    economia: { pil:2430, debito:41.8, deficit:-2.0, inflazione:2.7, inflazioneTetto:8, crescita:4.5, disoccupazione:7.2, disoccupazionePavimento:0.5 },
+    debtAncora: 41.8,
+    inflazione: 2.7,
+    crescita: 4.5,
+    logorioEra: 0.008,                          // come de1980 (scheda §0): da misurare
+    valuta: VALUTA_MARCO,
+    quotaSpesa: 0.30,                           // ⚠ come le porte tedesche prima: da confermare
+    intro: "Germania, 1990. Il Muro è caduto da due mesi, e ogni giorno duemila persone passano a ovest per restarci. Il Cancelliere ha un piano in dieci punti e un anno prima delle urne.",
+    contesto: [
+      "Germania, gennaio 1990. A Berlino si passa da una parte all'altra senza più visto; a Lipsia il lunedì si scende ancora in piazza, e adesso si grida “un popolo solo”.",
+      "L'economia dell'Ovest corre come non faceva da anni. Quella dell'Est nessuno sa quanto vale: a marzo l'Est vota libero per la prima volta, e tutti parlano del marco.",
+      "L'Unione cristiana governa con i liberali dal 1982. I socialdemocratici avvertono che l'unità costerà cara, e i sondaggi per ora danno loro ragione.",
     ],
   },
   /* ============================================================================================================
@@ -3004,7 +3060,7 @@ const BEAT_LEGGERI = [
   {id:'lg50_ballo', era:'italia1950', registro:'leggero', kick:'Il paese', t:'Il ballo del sabato', text:'Nella sala da ballo la fisarmonica attacca alle nove: qualche fidanzamento comincia lì, tra un valzer e una mazurca.', ch:[
     {l:'Fai un ballo anche tu', e:'Le gambe ricordano', f:function(){}},
     {l:'Resti a guardare dal bordo', e:'Si sta bene anche così', f:function(){}} ]},
-  {id:'lg50_mare', era:'italia1950', codaFino:1969, registro:'leggero', kick:'Il paese', t:'I primi bagni', text:'Col treno della domenica le famiglie scoprono il mare: ombrelloni prestati, panini nella carta, e il ritorno con la sabbia nelle scarpe.', ch:[
+  {id:'lg50_mare', era:'italia1950', codaFino:1969, registro:'leggero', cond:()=>S.month>=6&&S.month<=8, kick:'Il paese', t:'I primi bagni', text:'Col treno della domenica le famiglie scoprono il mare: ombrelloni prestati, panini nella carta, e il ritorno con la sabbia nelle scarpe.', ch:[
     {l:'Ci porti la famiglia', e:'Una domenica che si ricorda', f:function(){}},
     {l:'Rimandi a un\'altra volta', e:'Il mare non scappa', f:function(){}} ]},
   // ---- Anni '60 ----
@@ -3103,7 +3159,7 @@ const BEAT_LEGGERI = [
   {id:'lg_derby', era:'universale', registro:'leggero', kick:'Il paese', t:'Il derby divide la città', text:'Per una domenica la città si spacca in due colori, e nei bar non si parla d\'altro.', ch:[
     {l:'Dici la tua sul risultato', e:'Rischi di scontentare metà città', f:function(){}},
     {l:'Ti tieni fuori, sorridendo', e:'Su questo non si media', f:function(){}} ]},
-  {id:'lg_estate', era:'contemporanea', registro:'leggero', kick:'Il paese', t:'L\'estate che svuota le città', text:'Serrande abbassate, traffico sparito, la città che respira: per qualche settimana tutto rallenta.', ch:[
+  {id:'lg_estate', era:'contemporanea', registro:'leggero', cond:()=>stagioneMese()==='estate', kick:'Il paese', t:'L\'estate che svuota le città', text:'Serrande abbassate, traffico sparito, la città che respira: per qualche settimana tutto rallenta.', ch:[
     {l:'Ti concedi qualche giorno', e:'Anche il lavoro rallenta', f:function(){}},
     {l:'Resti, con la città vuota', e:'Si ragiona meglio', f:function(){}} ]},
   {id:'lg_festival_oggi', era:'contemporanea', registro:'leggero', kick:'Il paese', t:'Il festival di questi giorni', text:'Per una settimana il paese si divide su canzoni e classifiche, e ne parlano tutti — anche chi giura di non guardarlo.', ch:[
@@ -3118,22 +3174,22 @@ const BEAT_LEGGERI = [
   {id:'lg_ricetta', era:'contemporanea', registro:'leggero', kick:'Il paese', t:'La ricetta che divide', text:'Una variante di un piatto tradizionale finisce in mezzo a una discussione infinita: ognuno ha la versione di sua nonna.', ch:[
     {l:'Dici come la fai tu', e:'Anche questa è identità', f:function(){}},
     {l:'Non ti immischi', e:'Su queste cose non si vince', f:function(){}} ]},
-  {id:'lg_caldo', era:'contemporanea', registro:'leggero', kick:'Il paese', t:'Il caldo di cui parlano tutti', text:'Tre giorni sopra la media e non si parla d\'altro: ventilatori esauriti, città deserte al pomeriggio.', ch:[
+  {id:'lg_caldo', era:'contemporanea', registro:'leggero', cond:()=>stagioneMese()==='estate', kick:'Il paese', t:'Il caldo di cui parlano tutti', text:'Tre giorni sopra la media e non si parla d\'altro: ventilatori esauriti, città deserte al pomeriggio.', ch:[
     {l:'Ti lamenti come tutti', e:'Un rito nazionale', f:function(){}},
     {l:'Fai finta di niente', e:'Passerà anche questo', f:function(){}} ]},
-  {id:'lg_rientro', era:'contemporanea', registro:'leggero', kick:'Il paese', t:'Il rientro di settembre', text:'Le città si riempiono di nuovo, i quaderni nuovi, e la sensazione che l\'anno cominci adesso.', ch:[
+  {id:'lg_rientro', era:'contemporanea', registro:'leggero', cond:()=>S.month===9&&!emisferoSud(), kick:'Il paese', t:'Il rientro di settembre', text:'Le città si riempiono di nuovo, i quaderni nuovi, e la sensazione che l\'anno cominci adesso.', ch:[
     {l:'Ti concedi l\'ottimismo del rientro', e:'Settembre è il vero capodanno', f:function(){}},
     {l:'Riprendi senza cerimonie', e:'Il lavoro non guarda il calendario', f:function(){}} ]},
   {id:'lg_giochi', era:'contemporanea', registro:'leggero', kick:'Il paese', t:'I giochi che uniscono per due settimane', text:'Ci si sveglia presto per gare che nessuno seguiva l\'anno prima — e si diventa esperti di tutto.', ch:[
     {l:'Ti alzi presto anche tu', e:'Due settimane di entusiasmo', f:function(){}},
     {l:'Leggi i risultati la sera', e:'Il risultato non cambia', f:function(){}} ]},
-  {id:'lg_estiva', era:'contemporanea', registro:'leggero', kick:'Il paese', t:'La canzone dell\'estate', text:'Una melodia che a giugno nessuno conosceva e ad agosto sanno a memoria tutti, senza che nessuno l\'abbia scelta.', ch:[
+  {id:'lg_estiva', era:'contemporanea', registro:'leggero', cond:()=>S.month>=7&&S.month<=8&&!emisferoSud(), kick:'Il paese', t:'La canzone dell\'estate', text:'Una melodia che a giugno nessuno conosceva e ad agosto sanno a memoria tutti, senza che nessuno l\'abbia scelta.', ch:[
     {l:'Ti arrendi e la canticchi', e:'Non c\'è scampo', f:function(){}},
     {l:'Cambi stazione', e:'La ritroverai altrove', f:function(){}} ]},
   /* ===== AMPLIAMENTO leggeri (sweep: pool-leggeri per era magro → ripetizione). +10 colore d'epoca, effetti-zero,
      de-dup fatto vs esistenti (5 candidati coperti tagliati: '60 spiaggia=agosto/autostrada=gita · presente sport-mondiale=giochi/tormentone+virale=fenomeno). Paletti: nessun nome reale, nessun titolo di canzone/film/marca. ===== */
   // --- '50 (+5 → pool 15) ---
-  {id:'lg50_arena', era:'universale', registro:'leggero', kick:'Il paese', t:'Il cinema sotto le stelle', text:'D\'estate montano lo schermo tra due case: sedie di legno prese in prestito, il lenzuolo teso, e mezzo vicinato col naso all\'insù fino a mezzanotte.', ch:[
+  {id:'lg50_arena', era:'universale', registro:'leggero', cond:()=>stagioneMese()==='estate', kick:'Il paese', t:'Il cinema sotto le stelle', text:'D\'estate montano lo schermo tra due case: sedie di legno prese in prestito, il lenzuolo teso, e mezzo vicinato col naso all\'insù fino a mezzanotte.', ch:[
     {l:'Ti porti la sedia da casa', e:'Meglio del salotto', f:function(){}},
     {l:'Guardi in piedi dall\'ultima fila', e:'Si vede lo stesso', f:function(){}} ]},
   {id:'lg50_fiera', era:'universale', registro:'leggero', kick:'Il paese', t:'La fiera campionaria', text:'Arriva la fiera: padiglioni pieni di novità mai viste, la folla che spinge per guardare, e per i bambini il gelato come premio della giornata.', ch:[
@@ -3142,7 +3198,7 @@ const BEAT_LEGGERI = [
   {id:'lg50_stadio', era:'italia1950', codaFino:1969, registro:'leggero', kick:'Il paese', t:'La partita della domenica', text:'Il tram verso il campo è stracolmo di sciarpe; sugli spalti la radiolina all\'orecchio per gli altri risultati, e novanta minuti in cui il paese dimentica tutto.', ch:[
     {l:'Ci vai col tram delle undici', e:'Meglio arrivare presto', f:function(){}},
     {l:'Segui tutto dalla radiolina', e:'Il campo è troppo lontano', f:function(){}} ]},
-  {id:'lg50_dicembre', era:'universale', registro:'leggero', kick:'Il paese', t:'Le feste di dicembre', text:'Le luci in strada, i presepi alle finestre, e i parenti che tornano a tavola: per qualche giorno anche i musi lunghi si ammorbidiscono.', ch:[
+  {id:'lg50_dicembre', era:'universale', registro:'leggero', cond:()=>S.month===12, kick:'Il paese', t:'Le feste di fine anno', text:'Le luci in strada, le vetrine addobbate, e i parenti che tornano a tavola: per qualche giorno anche i musi lunghi si ammorbidiscono.', ch:[   // L150-2: era «i presepi alle finestre», un segno cristiano e italiano in una carta di tutti i paesi
     {l:'Apparecchi per tutti', e:'Più siamo meglio è', f:function(){}},
     {l:'Ti godi la calma prima dei parenti', e:'Durerà poco', f:function(){}} ]},
   {id:'lg50_fotoromanzo', era:'italia1950', codaFino:1969, registro:'leggero', kick:'Il paese', t:'Il fotoromanzo che gira', text:'Il fascicolo passa di mano in mano: le storie a puntate, i sospiri, e le lettrici che se lo prestano finché non torna tutto sgualcito.', ch:[
@@ -3159,7 +3215,7 @@ const BEAT_LEGGERI = [
     {l:'Concedi che il ritmo è contagioso', e:'Anche a te un piede batte', f:function(){}},
     {l:'Scuoti la testa come i grandi', e:'Ai tuoi tempi era altro', f:function(){}} ]},
   // --- presente (+2 → pool 11; sport-mondiale/tormentone/virale tagliati per de-dup) ---
-  {id:'lg_concerto', era:'contemporanea', registro:'leggero', kick:'Il paese', t:'Il concerto dell\'estate', text:'Lo stadio pieno all\'inverosimile, e a un certo punto mille schermi accesi insieme fanno un cielo di lucine: per una sera è l\'unico posto dove essere.', ch:[
+  {id:'lg_concerto', era:'contemporanea', registro:'leggero', cond:()=>stagioneMese()==='estate', kick:'Il paese', t:'Il concerto dell\'estate', text:'Lo stadio pieno all\'inverosimile, e a un certo punto mille schermi accesi insieme fanno un cielo di lucine: per una sera è l\'unico posto dove essere.', ch:[
     {l:'Alzi lo schermo anche tu', e:'Ci sei anche tu in quel cielo', f:function(){}},
     {l:'Ti godi il buio senza filmare', e:'Resterà solo a te', f:function(){}} ]},
   {id:'lg_festa_paese', era:'contemporanea', registro:'leggero', kick:'Il paese', t:'La festa di paese, oggi', text:'La piazza si riempie di banchi di cibo di strada e di un concertino dal vivo: la sagra di una volta, con le luci nuove e la fila per il panino gourmet.', ch:[
@@ -3415,7 +3471,7 @@ const BEAT_LEGGERI = [
  {id:'au_p_b_salsiccia', era:'contemporanea', paesi:['australia'], registro:'leggero', kick:'Il paese', t:'La salsiccia della democrazia', text:'Ai seggi elettorali le scuole vendono salsicce alla griglia nel pane per raccogliere fondi, e c\'è una mappa nazionale che dice dove trovarle. Il voto è obbligatorio, la salsiccia no, ma nessuno se la perde.', ch:[
    {l:'Mangi la salsiccia davanti alle telecamere', e:'Attento a come la mordi: c\'è un precedente', f:function(){}},
    {l:'La compri e la offri a un elettore', e:'Diplomazia', f:function(){}}]},
- {id:'au_p_b_gazza', era:'contemporanea', paesi:['australia'], registro:'leggero', kick:'Il paese', t:'La stagione delle gazze', text:'In primavera le gazze australiane difendono il nido buttandosi in picchiata su chiunque passi, e il paese gira con i caschi da bicicletta pieni di fascette di plastica. Una ti ha preso in testa davanti ai fotografi.', ch:[
+ {id:'au_p_b_gazza', era:'contemporanea', paesi:['australia'], registro:'leggero', cond:()=>stagioneMese()==='primavera', kick:'Il paese', t:'La stagione delle gazze', text:'In primavera le gazze australiane difendono il nido buttandosi in picchiata su chiunque passi, e il paese gira con i caschi da bicicletta pieni di fascette di plastica. Una ti ha preso in testa davanti ai fotografi.', ch:[
    {l:'Ridi, e mostri il graffio', e:'Umano', f:function(){}},
    {l:'Fai finta di niente', e:'Il video gira lo stesso', f:function(){}}]},
  /* ===== L85-1 · GIAPPONE, sei beat leggeri (scheda §C). ===== */
@@ -3575,13 +3631,13 @@ const BEAT_LEGGERI = [
      realtà — la scheda dice tre e ne elenca quattro senza ancora). Ancore dentro `cond`: tram 1950-56 · terza
      settimana ≥1956 · negozio senza banco ≥1957 · scooter ≥1954 · Coppa d'Europa solo 1956 · frigorifero ≥1955 ·
      Nouvelle Vague ≥1959. La 2CV e le colonie «dal 1950» sono tutto il decennio. Nessun nome, nessun marchio. ---- */
-  {id:'lgfr_tour', era:'fr1950', registro:'leggero', kick:'Il paese', t:'Il Tour', text:'A luglio il paese si ferma ai bordi delle strade per vedere passare una carovana di biciclette e camioncini pubblicitari: si sa chi vince, ma si va lo stesso.', ch:[
+  {id:'lgfr_tour', era:'fr1950', registro:'leggero', cond:()=>S.month===7, kick:'Il paese', t:'Il Tour', text:'A luglio il paese si ferma ai bordi delle strade per vedere passare una carovana di biciclette e camioncini pubblicitari: si sa chi vince, ma si va lo stesso.', ch:[
     {l:'Ti fermi anche tu sul ciglio', e:'Tre secondi di biciclette, e un pomeriggio intero', f:function(){}},
     {l:'Leggi la tappa sul giornale', e:'Il giorno dopo, come tutti gli altri', f:function(){}} ]},
   {id:'lgfr_bartabac', era:'fr1950', registro:'leggero', kick:'Il paese', t:'Il bar-tabac', text:'Al banco di zinco si beve un bianco alle sette del mattino e si commenta il giornale di chi l\'ha comprato: è lì che si fa la politica, non in sezione.', ch:[
     {l:'Ti fermi al banco', e:'Un bianco e le notizie di chi c\'è', f:function(){}},
     {l:'Prendi il giornale e vai', e:'La politica, per oggi, la leggi soltanto', f:function(){}} ]},
-  {id:'lgfr_ballo', era:'fr1950', registro:'leggero', kick:'Il paese', t:'Il ballo del 14 luglio', text:'Nelle piazze si monta il palco dei pompieri e si balla fino alle due: il sindaco apre le danze, e il giorno dopo nessuno ricorda con chi.', ch:[
+  {id:'lgfr_ballo', era:'fr1950', registro:'leggero', cond:()=>S.month===7, kick:'Il paese', t:'Il ballo del 14 luglio', text:'Nelle piazze si monta il palco dei pompieri e si balla fino alle due: il sindaco apre le danze, e il giorno dopo nessuno ricorda con chi.', ch:[
     {l:'Balli un giro', e:'Uno solo, poi un altro', f:function(){}},
     {l:'Guardi dal bordo della piazza', e:'Anche guardare è festa', f:function(){}} ]},
   {id:'lgfr_2cv', era:'fr1950', registro:'leggero', kick:'Il paese', t:'La 2CV in coda', text:'Un\'auto con il tettuccio di tela e le sospensioni che fanno attraversare un campo con le uova sul sedile: si aspetta un anno per averla, e intanto si va a vederla nei saloni.', ch:[
@@ -3599,7 +3655,7 @@ const BEAT_LEGGERI = [
   {id:'lgfr_canzone', era:'fr1950', registro:'leggero', kick:'Il paese', t:'La canzone alla radio', text:'Una voce di donna, un valzer musette, e tutte le cucine del paese che canticchiano la stessa cosa nella stessa settimana.', ch:[
     {l:'La canticchi anche tu', e:'Fino a sera, senza accorgertene', f:function(){}},
     {l:'Alzi il volume', e:'Per una settimana, è di tutti', f:function(){}} ]},
-  {id:'lgfr_colonie', era:'fr1950', registro:'leggero', kick:'Il paese', t:'Le colonie di vacanza', text:'I bambini delle città partono a luglio con il cappellino e il fischietto per un mese di mare o di montagna, pagato dal Comune o dalla fabbrica. Tornano abbronzati e con un accento nuovo.', ch:[
+  {id:'lgfr_colonie', era:'fr1950', registro:'leggero', cond:()=>S.month>=7&&S.month<=8, kick:'Il paese', t:'Le colonie di vacanza', text:'I bambini delle città partono a luglio con il cappellino e il fischietto per un mese di mare o di montagna, pagato dal Comune o dalla fabbrica. Tornano abbronzati e con un accento nuovo.', ch:[
     {l:'Saluti il treno dei bambini', e:'Un mese, e tornano più alti', f:function(){}},
     {l:'Aspetti il ritorno', e:'Abbronzati, e con parole nuove', f:function(){}} ]},
   {id:'lgfr_scooter', era:'fr1950', registro:'leggero', cond:()=>S.year>=1954, kick:'Il paese', t:'Lo scooter', text:'Motorette italiane a due tempi riempiono i viali: costano poco, non sporcano il vestito e ci si va a ballare in due.', ch:[
@@ -3623,7 +3679,7 @@ const BEAT_LEGGERI = [
    {l:'Prosegui', e:'', f:function(){}}]},
   {id:'lgfr60_pane', era:'fr1960', registro:'leggero', kick:'Il paese', t:'Il prezzo del pane', text:'Il prezzo del pane lo fissa ancora lo Stato, e ogni aumento è una notizia da prima pagina.', ch:[
    {l:'Prosegui', e:'', f:function(){}}]},
-  {id:'lgfr60_agosto', era:'fr1960', registro:'leggero', kick:'Il paese', t:'Le vacanze di agosto', text:'A Ferragosto Parigi è vuota e la strada del sud è piena: dodici ore di coda per vedere il mare, e dal \'69 la quarta settimana di ferie.', ch:[
+  {id:'lgfr60_agosto', era:'fr1960', registro:'leggero', cond:()=>S.month===8, kick:'Il paese', t:'Le vacanze di agosto', text:'A Ferragosto Parigi è vuota e la strada del sud è piena: dodici ore di coda per vedere il mare, e dal \'69 la quarta settimana di ferie.', ch:[
    {l:'Prosegui', e:'', f:function(){}}]},
   {id:'lgfr60_yeye', era:'fr1960', registro:'leggero', cond:()=>S.year>=1963, kick:'Il paese', t:'La piazza dei ragazzi', text:'Una trasmissione radio per ragazzi raduna centomila persone in una piazza di Parigi per un concerto gratuito: i giornali scoprono che esiste una generazione, e che compra dischi.', ch:[
    {l:'Prosegui', e:'', f:function(){}}]},
@@ -3633,7 +3689,7 @@ const BEAT_LEGGERI = [
    {l:'Prosegui', e:'', f:function(){}}]},
   {id:'lgfr60_supermercato', era:'fr1960', registro:'leggero', cond:()=>S.year>=1963, kick:'Il paese', t:'Il supermercato', text:'Alla periferia apre un negozio grande come un capannone con il parcheggio davanti: si compra per una settimana, e il droghiere del quartiere chiude.', ch:[
    {l:'Prosegui', e:'', f:function(){}}]},
-  {id:'lgfr60_tour', era:'fr1960', registro:'leggero', kick:'Il paese', t:'Il Tour in diretta', text:'A luglio il paese si ferma ai bordi delle strade, e la televisione lo porta in diretta nei salotti per la prima volta.', ch:[
+  {id:'lgfr60_tour', era:'fr1960', registro:'leggero', cond:()=>S.month===7, kick:'Il paese', t:'Il Tour in diretta', text:'A luglio il paese si ferma ai bordi delle strade, e la televisione lo porta in diretta nei salotti per la prima volta.', ch:[
    {l:'Prosegui', e:'', f:function(){}}]},
   {id:'lgfr60_mondiale', era:'fr1960', registro:'leggero', cond:()=>S.year===1966, kick:'Il paese', t:'Il Mondiale', text:'La squadra esce al primo turno, e il paese parla di calcio per una settimana come si parla del tempo.', ch:[
    {l:'Prosegui', e:'', f:function(){}}]},
@@ -3649,7 +3705,7 @@ const BEAT_LEGGERI = [
      «L'utilitaria tonda», «Il supermercato ipermercato» → «L'ipermercato». ---- */
   {id:'lgfr70_calcolatrice', era:'fr1970', registro:'leggero', cond:()=>S.year>=1972, kick:'Il paese', t:'La calcolatrice tascabile', text:'Costa quanto un mese di stipendio e sta in tasca: a scuola la vietano, in ufficio la nascondono.', ch:[
    {l:'Prosegui', e:'', f:function(){}}]},
-  {id:'lgfr70_spiaggia', era:'fr1970', registro:'leggero', kick:'Il paese', t:'Il transistor in spiaggia', text:'Ferragosto in autostrada e la radio che dice i chilometri di coda.', ch:[
+  {id:'lgfr70_spiaggia', era:'fr1970', registro:'leggero', cond:()=>S.month===8, kick:'Il paese', t:'Il transistor in spiaggia', text:'Ferragosto in autostrada e la radio che dice i chilometri di coda.', ch:[
    {l:'Prosegui', e:'', f:function(){}}]},
   {id:'lgfr70_limiti', era:'fr1970', registro:'leggero', cond:()=>(S.year===1973&&S.month===12)||S.year===1974, kick:'Il paese', t:'I limiti di velocità', text:'Novanta sulle statali, centotrenta in autostrada: per la prima volta il paese rallenta per decreto, e le multe piovono.', ch:[
    {l:'Prosegui', e:'', f:function(){}}]},
@@ -3659,7 +3715,7 @@ const BEAT_LEGGERI = [
    {l:'Prosegui', e:'', f:function(){}}]},
   {id:'lgfr70_utilitaria', era:'fr1970', registro:'leggero', cond:()=>S.year>=1972, kick:'Il paese', t:'L\'utilitaria tonda', text:'Piccola, tonda, con il paraurti di plastica: la prima auto che non ha vergogna di essere piccola.', ch:[
    {l:'Prosegui', e:'', f:function(){}}]},
-  {id:'lgfr70_tour', era:'fr1970', registro:'leggero', kick:'Il paese', t:'Il Tour', text:'A luglio il paese si ferma ai bordi delle strade e in salotto.', ch:[
+  {id:'lgfr70_tour', era:'fr1970', registro:'leggero', cond:()=>S.month===7, kick:'Il paese', t:'Il Tour', text:'A luglio il paese si ferma ai bordi delle strade e in salotto.', ch:[
    {l:'Prosegui', e:'', f:function(){}}]},
   {id:'lgfr70_beaubourg', era:'fr1970', registro:'leggero', cond:()=>S.year===1977, kick:'Il paese', t:'Il Beaubourg', text:'Un museo con le tubature fuori e le scale mobili in facciata: i parigini lo odiano per un anno e poi ci fanno la coda.', ch:[
    {l:'Prosegui', e:'', f:function(){}}]},
@@ -3667,7 +3723,7 @@ const BEAT_LEGGERI = [
    {l:'Prosegui', e:'', f:function(){}}]},
   {id:'lgfr70_colore', era:'fr1970', registro:'leggero', cond:()=>S.year>=1975, kick:'Il paese', t:'La televisione a colori in ogni casa', text:'Sette case su dieci hanno il colore; il telegiornale delle venti è la piazza del paese.', ch:[
    {l:'Prosegui', e:'', f:function(){}}]},
-  {id:'lgfr70_roulotte', era:'fr1970', registro:'leggero', kick:'Il paese', t:'La roulotte', text:'Ad agosto un milione di roulotte partono per il sud e la costa spagnola: la vacanza si porta dietro la casa.', ch:[
+  {id:'lgfr70_roulotte', era:'fr1970', registro:'leggero', cond:()=>S.month===8, kick:'Il paese', t:'La roulotte', text:'Ad agosto un milione di roulotte partono per il sud e la costa spagnola: la vacanza si porta dietro la casa.', ch:[
    {l:'Prosegui', e:'', f:function(){}}]},
   {id:'lgfr70_pallone', era:'fr1970', registro:'leggero', cond:()=>S.year===1976, kick:'Il paese', t:'Il pallone a Saint-Étienne', text:'Una squadra di provincia arriva in finale di Coppa dei Campioni e la perde sui pali quadrati; il paese si scopre tifoso.', ch:[
    {l:'Prosegui', e:'', f:function(){}}]},
@@ -3699,6 +3755,25 @@ const BEAT_LEGGERI = [
    {l:'Prosegui', e:'', f:function(){}}]},
   {id:'lgfr80_lunedi', era:'fr1980', registro:'leggero', cond:()=>S.year===1987&&S.month>=10&&S.month<=12, kick:'Il paese', t:'Il lunedì nero', text:'La Borsa di New York perde un quarto in un giorno e quella di Parigi la segue: chi ha comprato le azioni delle privatizzazioni scopre che cosa vuol dire.', ch:[
    {l:'Prosegui', e:'', f:function(){}}]},
+  // L150-2 · respiro quotidiano: sei beat senza data (o di stagione) per fr1980 (LOTTO-L150-2-RESPIRO.md).
+  {id:'lgfr80_festamusica', era:'fr1980', registro:'leggero', cond:()=>S.year>=1982&&S.month===6, kick:'Il paese', t:'La festa della musica', text:'Nel giorno più lungo dell\'anno chiunque può suonare in strada: fanfare, cantine rock, fisarmoniche, e le città che non dormono fino all\'alba.', ch:[
+    {l:'Ti fermi davanti a un gruppo', e:'Per una canzone, poi due', f:function(){}},
+    {l:'Chiudi le finestre', e:'Domani si lavora', f:function(){}} ]},
+  {id:'lgfr80_filone', era:'fr1980', registro:'leggero', kick:'Il paese', t:'Il pane del mattino', text:'Alle sette la fila dal fornaio, il filone sotto il braccio e la punta già mangiata prima di arrivare a casa.', ch:[
+    {l:'Mangi la punta anche tu', e:'Nessuno resiste', f:function(){}},
+    {l:'La porti a casa intera', e:'Un piccolo eroismo', f:function(){}} ]},
+  {id:'lgfr80_bocce', era:'fr1980', registro:'leggero', cond:()=>S.month>=4&&S.month<=10, kick:'Il paese', t:'Le bocce sotto i platani', text:'Dopo cena, sulla ghiaia della piazza, la partita a bocce: si misura col metro, si discute a voce alta, e si finisce sempre col bicchiere.', ch:[
+    {l:'Accetti di tirare', e:'Il pubblico è severo', f:function(){}},
+    {l:'Guardi dalla panchina', e:'Il posto migliore', f:function(){}} ]},
+  {id:'lgfr80_soffitte', era:'fr1980', registro:'leggero', kick:'Il paese', t:'Lo svuota-soffitte', text:'La domenica le strade del paese si riempiono di bancarelle: giocattoli, dischi, pentole di rame, e ognuno vende il passato del vicino.', ch:[
+    {l:'Compri un giocattolo di latta', e:'Un pezzo d\'infanzia', f:function(){}},
+    {l:'Porti via solo un caffè', e:'Il resto è polvere', f:function(){}} ]},
+  {id:'lgfr80_torneo', era:'fr1980', registro:'leggero', cond:()=>S.month>=1&&S.month<=3, kick:'Il paese', t:'Il torneo d\'inverno', text:'D\'inverno il sabato pomeriggio è del rugby: la partita contro i vicini d\'oltremanica si guarda al bar, e nel Sud-Ovest non si parla d\'altro.', ch:[
+    {l:'La guardi al bar', e:'Si canta anche chi non sa le regole', f:function(){}},
+    {l:'Leggi il risultato la sera', e:'Sarà stata epica', f:function(){}} ]},
+  {id:'lgfr80_mercato', era:'fr1980', registro:'leggero', kick:'Il paese', t:'Il mercato del sabato', text:'Formaggi, polli allo spiedo, le ceste dei contadini: il mercato coperto è il salotto del quartiere, e il banco del pesce il suo giornale.', ch:[
+    {l:'Fai il giro dei banchi', e:'Si torna con troppo', f:function(){}},
+    {l:'Compri solo il pollo', e:'Il resto la prossima volta', f:function(){}} ]},
   /* L103-2 · i beat leggeri del decennio francese '90 (scheda §I-D). */
   {id:'lgfr90_albertville', era:'fr1990', registro:'leggero', cond:()=>S.year===1992&&S.month>=1&&S.month<=3, kick:'Il paese', t:'I Giochi sulla neve', text:'Sedici giorni di gare fra tredici paesi delle Alpi, la cerimonia d\'apertura come un balletto: la Savoia si scopre al mondo.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
   {id:'lgfr90_parco', era:'fr1990', registro:'leggero', cond:()=>S.year>=1992&&S.year<=1994, kick:'Il paese', t:'Il parco americano', text:'Un parco a tema fuori Parigi, con un castello e i topi con i guanti: gli intellettuali gridano alla colonizzazione culturale, le famiglie fanno la fila.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
@@ -3712,6 +3787,25 @@ const BEAT_LEGGERI = [
   {id:'lgfr90_tour', era:'fr1990', registro:'leggero', cond:()=>S.year===1998&&S.month>=7&&S.month<=8, kick:'Il paese', t:'Il Tour dei sospetti', text:'Un\'auto della squadra fermata alla frontiera piena di fiale, una squadra intera espulsa, i corridori che scendono di sella per protesta. Il Tour arriva a Parigi lo stesso, e nessuno guarda più allo stesso modo.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
   {id:'lgfr90_millennio', era:'fr1990', registro:'leggero', cond:()=>S.year===2000&&S.month<=2, kick:'Il paese', t:'Il baco', text:'Il primo gennaio 2000 gli aerei non sono caduti e gli ascensori funzionano: i miliardi spesi per il baco del millennio hanno funzionato, o non servivano. La torre ha fatto le scintille lo stesso.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
   {id:'lgfr90_sciopero', era:'fr1990', registro:'leggero', cond:()=>S.year===1995&&S.month===12, kick:'Il paese', t:'Il paese a piedi', text:'Tre settimane senza treni né metrò: si va al lavoro in bicicletta, in autostop, a piedi lungo la Senna. Le famiglie si scoprono vicine di casa.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  // L150-2 · respiro quotidiano: sei beat senza data (o di stagione) per fr1990 (LOTTO-L150-2-RESPIRO.md).
+  {id:'lgfr90_bar', era:'fr1990', registro:'leggero', kick:'Il paese', t:'La partita al bar', text:'Il campionato si vede sempre più a pagamento, e chi non ha l\'abbonamento scende al bar sotto casa: si esulta coi vicini che non si conoscono.', ch:[
+    {l:'Scendi anche tu', e:'Un tavolino e un tifo nuovo', f:function(){}},
+    {l:'La segui alla radio', e:'Come una volta', f:function(){}} ]},
+  {id:'lgfr90_esodo', era:'fr1990', registro:'leggero', cond:()=>S.month>=7&&S.month<=8, kick:'Il paese', t:'L\'esodo d\'agosto', text:'Il primo sabato d\'agosto il paese intero si mette in autostrada: code nere sulle mappe del traffico e la radio che conta i chilometri.', ch:[
+    {l:'Parti la notte', e:'Per battere tutti sul tempo', f:function(){}},
+    {l:'Resti in città', e:'Mai stata così tranquilla', f:function(){}} ]},
+  {id:'lgfr90_pattini', era:'fr1990', registro:'leggero', cond:()=>S.year>=1994, kick:'Il paese', t:'I pattini in linea', text:'La sera, lungo il fiume, sfilano centinaia di pattinatori; il venerdì le strade si chiudono e la città diventa una pista.', ch:[
+    {l:'Ci provi, con prudenza', e:'Un equilibrio precario', f:function(){}},
+    {l:'Guardi dal marciapiede', e:'Con le ginocchia intatte', f:function(){}} ]},
+  {id:'lgfr90_argento', era:'fr1990', registro:'leggero', kick:'Il paese', t:'Il disco d\'argento', text:'I vinili salgono in soffitta: il lettore di dischi argentati entra in ogni salotto, e con lui la stessa musica da ricomprare da capo.', ch:[
+    {l:'Ricompri i tuoi preferiti', e:'Suonano meglio, dicono', f:function(){}},
+    {l:'Tieni il giradischi', e:'Il fruscio è un amico', f:function(){}} ]},
+  {id:'lgfr90_fumetto', era:'fr1990', registro:'leggero', cond:()=>S.month===1, kick:'Il paese', t:'Il festival del fumetto', text:'A fine gennaio una cittadina di provincia si riempie di disegnatori, e i lettori fanno la fila al freddo per un disegno sulla prima pagina.', ch:[
+    {l:'Fai la fila per una dedica', e:'Un\'ora per uno schizzo', f:function(){}},
+    {l:'Compri l\'album e basta', e:'La dedica è di chi ha pazienza', f:function(){}} ]},
+  {id:'lgfr90_bistrot', era:'fr1990', registro:'leggero', kick:'Il paese', t:'Il bar che chiude', text:'Nei paesi i bar chiudono uno dopo l\'altro; in città ne aprono di nuovi, con le sedie di design e il caffè più caro.', ch:[
+    {l:'Passi a salutare l\'ultimo oste', e:'Un caffè per l\'addio', f:function(){}},
+    {l:'Provi quello nuovo', e:'Il caffè è buono, il resto si vedrà', f:function(){}} ]},
   /* L105-4 · i beat leggeri del decennio francese 2000 (scheda §I-D): id e testi senza marchi. */
   {id:'lgfr00_euro', era:'fr2000', registro:'leggero', cond:()=>S.year===2002&&S.month<=3, kick:'Il paese', t:'Le monete nuove', text:'Le cassiere con due cassetti, i prezzi scritti due volte, le calcolatrici tascabili sulla cassa. In tre settimane i franchi spariscono; il conto del caffè no.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
   {id:'lgfr00_primomaggio', era:'fr2000', registro:'leggero', cond:()=>S.year===2002&&S.month>=4&&S.month<=5, kick:'Il paese', t:'Un milione il primo maggio', text:'Studenti, pensionati, famiglie intere dietro lo stesso striscione: mai visto un primo maggio così, e mai uno contro qualcuno invece che per qualcosa.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
@@ -3725,6 +3819,25 @@ const BEAT_LEGGERI = [
   {id:'lgfr00_nuvola', era:'fr2000', registro:'leggero', cond:()=>S.year===2010&&S.month>=4&&S.month<=5, kick:'Il paese', t:'Il cielo chiuso', text:'Un vulcano islandese dal nome impronunciabile sputa cenere su mezza Europa: per sei giorni non vola nessun aereo. Le stazioni si riempiono come nel dopoguerra.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
   {id:'lgfr00_londra', era:'fr2000', registro:'leggero', cond:()=>S.year===2005&&S.month>=6&&S.month<=8, kick:'Il paese', t:'I Giochi a Londra', text:'Il comitato olimpico sceglie Londra per quattro voti. Parigi aveva già preparato la festa sotto la torre; la festa è a Trafalgar Square.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
   {id:'lgfr00_rete', era:'fr2000', registro:'leggero', cond:()=>S.year>=2008&&S.year<=2012, kick:'Il paese', t:'Gli amici in rete', text:'Tutti hanno una pagina, anche i nonni: le foto delle vacanze, i compleanni, i compagni di scuola ritrovati. I giornalisti la chiamano la piazza nuova.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  // L150-2 · respiro quotidiano: sei beat senza data (o di stagione) per fr2000 (LOTTO-L150-2-RESPIRO.md).
+  {id:'lgfr00_spiaggia', era:'fr2000', registro:'leggero', cond:()=>S.year>=2002&&S.month>=7&&S.month<=8, kick:'Il paese', t:'La spiaggia in città', text:'D\'estate il lungofiume si copre di sabbia, sdraio e ombrelloni: chi non parte ha il suo mare in città.', ch:[
+    {l:'Ti concedi un\'ora di sdraio', e:'In giacca, ma sulla sabbia', f:function(){}},
+    {l:'Passi oltre', e:'Il mare vero aspetta', f:function(){}} ]},
+  {id:'lgfr00_nottebianca', era:'fr2000', registro:'leggero', cond:()=>S.year>=2002&&S.month===10, kick:'Il paese', t:'La notte bianca', text:'Una notte d\'ottobre musei, chiese e piscine restano aperti fino all\'alba, e la città cammina senza dormire.', ch:[
+    {l:'Fai tardi anche tu', e:'Una mostra alle tre del mattino', f:function(){}},
+    {l:'Vai a letto presto', e:'Qualcuno deve pur lavorare domani', f:function(){}} ]},
+  {id:'lgfr00_tram', era:'fr2000', registro:'leggero', kick:'Il paese', t:'Il tram che torna', text:'Una città dopo l\'altra rimette i binari che aveva tolto: il tram torna in centro, e i negozianti prima protestano e poi lo pretendono.', ch:[
+    {l:'Sali alla prima corsa', e:'Silenzioso, puntuale', f:function(){}},
+    {l:'Aspetti che finiscano i lavori', e:'Due anni di cantieri', f:function(){}} ]},
+  {id:'lgfr00_multisala', era:'fr2000', registro:'leggero', kick:'Il paese', t:'Il cinema con dieci sale', text:'Dieci schermi, i secchielli di popcorn e un parcheggio grande come uno stadio: la sala di quartiere chiude, quella di periferia fa il pieno.', ch:[
+    {l:'Vai al multisala', e:'Si sceglie all\'ultimo', f:function(){}},
+    {l:'Resti fedele alla sala piccola', e:'Finché resiste', f:function(){}} ]},
+  {id:'lgfr00_brunch', era:'fr2000', registro:'leggero', kick:'Il paese', t:'Il brunch', text:'Una parola nuova per una colazione lunga: uova, succhi, pane caldo, e il tavolo prenotato a mezzogiorno della domenica.', ch:[
+    {l:'Ti fai convincere', e:'Un pranzo che si chiama colazione', f:function(){}},
+    {l:'Resti al caffè e cornetto', e:'A mezzogiorno si pranza', f:function(){}} ]},
+  {id:'lgfr00_natale', era:'fr2000', registro:'leggero', cond:()=>S.month===12, kick:'Il paese', t:'Il mercato di Natale', text:'Casette di legno in piazza, vin brulé, dolci di spezie: il mercato dell\'Alsazia si è copiato in tutto il paese, e ogni città ha il suo.', ch:[
+    {l:'Ti fermi per un bicchiere', e:'Il freddo passa', f:function(){}},
+    {l:'Compri un regalo e riparti', e:'Il dovere prima', f:function(){}} ]},
   /* L109-2 · i dieci beat leggeri del decennio tedesco '50 (scheda PRESET-GERMANIA-1950 §I-D). */
   {id:'lgde50_berna', era:'de1950', registro:'leggero', cond:()=>S.year===1954&&S.month>=7&&S.month<=8, kick:'Il paese', t:'Il miracolo di Berna', text:'Sotto la pioggia di Berna la nazionale batte la squadra imbattibile dell\'Ungheria, tre a due. Alla radio il telecronista grida per un minuto intero, e il paese per la prima volta dal 1945 si permette di essere contento di sé.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
   {id:'lgde50_maggiolino', era:'de1950', registro:'leggero', cond:()=>S.year>=1953, kick:'Il paese', t:'L\'automobile tonda', text:'Quella che era la macchina del popolo promessa da un altro regime esce dalla fabbrica di Wolfsburg a centinaia al giorno: la compra l\'operaio, la compra il medico, la esportano in America.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
@@ -3736,6 +3849,25 @@ const BEAT_LEGGERI = [
   {id:'lgde50_ricostruzione', era:'de1950', registro:'leggero', cond:()=>S.year<=1954, kick:'Il paese', t:'Le donne delle macerie', text:'Nelle città ancora a metà, file di donne passano i mattoni di mano in mano e li puliscono uno a uno. Con quelli si rifanno le case.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
   {id:'lgde50_carnevale', era:'de1950', registro:'leggero', cond:()=>S.month===2, kick:'Il paese', t:'Il carnevale del Reno', text:'A Colonia e a Magonza i carri tornano in strada: i potenti in cartapesta, le bande, i discorsi in dialetto. Quest\'anno sul carro più grande c\'è Bonn.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
   {id:'lgde50_frigo', era:'de1950', registro:'leggero', cond:()=>S.year>=1957, kick:'Il paese', t:'Il frigorifero', text:'Uno su dieci ce l\'ha: la pubblicità lo mostra accanto a una casalinga sorridente e a un pollo intero. La banca presta i soldi a rate; le rate si pagano col miracolo.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  // L150-2 · respiro quotidiano: sei beat senza data (o di stagione) per de1950 (LOTTO-L150-2-RESPIRO.md).
+  {id:'lgde50_birreria', era:'de1950', registro:'leggero', cond:()=>S.month>=5&&S.month<=9, kick:'Il paese', t:'La birreria all\'aperto', text:'Sotto i castagni, tavoli lunghi e boccali da un litro: la domenica pomeriggio ci si porta la merenda da casa e si divide il tavolo con chi capita.', ch:[
+    {l:'Ti siedi fra sconosciuti', e:'Qui si fa così', f:function(){}},
+    {l:'Resti in piedi col tuo boccale', e:'Una sosta breve', f:function(){}} ]},
+  {id:'lgde50_circolo', era:'de1950', registro:'leggero', kick:'Il paese', t:'Il circolo', text:'Tiro a segno, coro, ginnastica: ogni paese ha il suo circolo, con la sua sala, il suo stendardo e la festa dell\'anno in cui tutti si chiamano per nome.', ch:[
+    {l:'Accetti la tessera d\'onore', e:'Un posto a tavola per sempre', f:function(){}},
+    {l:'Mandi un saluto per la festa', e:'Qualcuno ci resta male', f:function(){}} ]},
+  {id:'lgde50_domenica', era:'de1950', registro:'leggero', kick:'Il paese', t:'L\'arrosto della domenica', text:'Arrosto, cavolo rosso e il dolce della nonna: dopo gli anni delle tessere, la domenica a tavola si ricomincia a esagerare.', ch:[
+    {l:'Chiedi il bis', e:'Il paese ha fame di normalità', f:function(){}},
+    {l:'Ti fermi al caffè', e:'Qualcuno lo nota', f:function(){}} ]},
+  {id:'lgde50_edicola', era:'de1950', registro:'leggero', kick:'Il paese', t:'L\'edicola della stazione', text:'Riviste illustrate, romanzi a puntate da pochi soldi, le figurine per i ragazzi: davanti all\'edicola si fa la fila prima del treno.', ch:[
+    {l:'Compri un fascicolo anche tu', e:'Per il viaggio', f:function(){}},
+    {l:'Leggi i titoli sopra le spalle degli altri', e:'Gratis', f:function(){}} ]},
+  {id:'lgde50_gru', era:'de1950', registro:'leggero', cond:()=>S.year>=1951, kick:'Il paese', t:'Le gru', text:'Le gru sono ovunque: ogni mese un palazzo nuovo al posto di un vuoto, e il martello pneumatico diventa il suono della città.', ch:[
+    {l:'Ti fermi a guardare, come tutti', e:'I pensionati hanno trovato un passatempo', f:function(){}},
+    {l:'Allunghi il passo', e:'Domani ce ne sarà un altro', f:function(){}} ]},
+  {id:'lgde50_ballo', era:'de1950', registro:'leggero', kick:'Il paese', t:'Il corso di ballo', text:'Il corso di ballo dei sedicenni: guanti bianchi, il valzer contato a voce alta, le madri sedute lungo le pareti.', ch:[
+    {l:'Ricordi il tuo', e:'Il valzer non si dimentica', f:function(){}},
+    {l:'Sorridi del rito', e:'Ogni generazione ha il suo', f:function(){}} ]},
   /* L111-2 · i dieci beat leggeri del decennio tedesco '60 (scheda PRESET-GERMANIA-1960 §I-D). */
   {id:'lgde60_lengede', era:'de1960', registro:'leggero', cond:()=>S.year===1963&&S.month>=11, kick:'Il paese', t:'Il miracolo di Lengede', text:'Quattordici giorni dopo il crollo della miniera, una sonda trova undici minatori vivi in una sacca d\'aria. Il paese li guarda uscire uno per uno alla televisione, alle tre di notte.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
   {id:'lgde60_beat', era:'de1960', registro:'leggero', cond:()=>S.year>=1965, kick:'Il paese', t:'I capelloni', text:'Ad Amburgo i ragazzi con i capelli lunghi fanno la fila per i gruppi inglesi che hanno imparato il mestiere proprio lì, nei locali del porto. I padri parlano di decadenza; i figli comprano chitarre.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
@@ -3747,6 +3879,25 @@ const BEAT_LEGGERI = [
   {id:'lgde60_autostrada', era:'de1960', registro:'leggero', cond:()=>S.year>=1963, kick:'Il paese', t:'La domenica in autostrada', text:'Il sabato pomeriggio libero, la macchina nuova, e l\'autostrada senza limiti di velocità: la domenica il paese va a trovare i parenti a centoquaranta all\'ora.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
   {id:'lgde60_krimi', era:'de1960', registro:'leggero', cond:()=>S.year>=1962&&S.year<=1966, kick:'Il paese', t:'Le strade vuote', text:'Quando la televisione trasmette il giallo a puntate, le strade si svuotano e la polizia registra un calo dei furti: i ladri, dicono, sono davanti al televisore anche loro.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
   {id:'lgde60_luna', era:'de1960', registro:'leggero', cond:()=>S.year===1969&&S.month>=7&&S.month<=8, kick:'Il paese', t:'La notte della Luna', text:'Alle quattro del mattino mezzo paese è sveglio davanti al televisore. Il giorno dopo, negli uffici, nessuno lavora e tutti parlano della stessa cosa.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  // L150-2 · respiro quotidiano: sei beat senza data (o di stagione) per de1960 (LOTTO-L150-2-RESPIRO.md).
+  {id:'lgde60_sabato', era:'de1960', registro:'leggero', kick:'Il paese', t:'Il sabato libero', text:'In molte fabbriche il sabato non si lavora più: nasce il fine settimana, e davanti alle case compaiono secchi, spugne e auto da lucidare.', ch:[
+    {l:'Lo passi a lavare l\'auto', e:'Come mezzo quartiere', f:function(){}},
+    {l:'Lo passi coi figli', e:'Era quello che si chiedeva', f:function(){}} ]},
+  {id:'lgde60_mensa', era:'de1960', registro:'leggero', kick:'Il paese', t:'I colleghi arrivati da lontano', text:'In fabbrica si lavora accanto a uomini arrivati dal Sud dell\'Europa; alla mensa compaiono sapori nuovi, e qualcuno impara le prime parole dell\'altra lingua.', ch:[
+    {l:'Assaggi quello che portano', e:'Il pranzo si allarga', f:function(){}},
+    {l:'Ti fai insegnare un saluto', e:'Si comincia da lì', f:function(){}} ]},
+  {id:'lgde60_campeggio', era:'de1960', registro:'leggero', cond:()=>S.month>=6&&S.month<=8, kick:'Il paese', t:'Il campeggio', text:'Tenda, fornellino e la cartina stesa sul cofano: le famiglie scoprono il campeggio, e le rive dei laghi si riempiono di teli colorati.', ch:[
+    {l:'Monti la tenda anche tu', e:'Col picchetto storto', f:function(){}},
+    {l:'Preferisci la pensione', e:'Con le lenzuola pulite', f:function(){}} ]},
+  {id:'lgde60_sabatosera', era:'de1960', registro:'leggero', kick:'Il paese', t:'Lo spettacolo del sabato sera', text:'Tutta la famiglia davanti allo schermo: il presentatore, le scommesse, il gran finale. Il lunedì se ne parla in ufficio come di una cosa successa davvero.', ch:[
+    {l:'Lo guardi anche tu', e:'Il lunedì saprai di che parlano', f:function(){}},
+    {l:'Esci a cena', e:'Te lo racconteranno', f:function(){}} ]},
+  {id:'lgde60_orto', era:'de1960', registro:'leggero', kick:'Il paese', t:'L\'orto in affitto', text:'Un fazzoletto di terra fuori città, una casetta di legno, e il regolamento del circolo che fissa l\'altezza della siepe al centimetro.', ch:[
+    {l:'Accetti un cesto di ribes', e:'Il premio del sabato', f:function(){}},
+    {l:'Ti fai spiegare il regolamento', e:'Tre pagine sulla siepe', f:function(){}} ]},
+  {id:'lgde60_cantina', era:'de1960', registro:'leggero', kick:'Il paese', t:'La festa in cantina', text:'I ragazzi portano i dischi, i genitori restano di sopra e fingono di non sentire: si balla al buio fra le casse di mele.', ch:[
+    {l:'Scendi a salutare', e:'Il volume si abbassa per un minuto', f:function(){}},
+    {l:'Resti di sopra coi genitori', e:'Anche questo è un rito', f:function(){}} ]},
   /* L135-3 · i dieci beat leggeri del decennio tedesco '70 (scheda §I-D). */
   {id:'lgde70_giallo', era:'de1970', registro:'leggero', cond:()=>S.year>=1970&&S.year<=1973, kick:'Il paese', t:'Il giallo della domenica', text:'La domenica sera il giallo della televisione cambia città ogni settimana: un commissario ad Amburgo, uno a Monaco, uno a Duisburg. Il lunedì in ufficio si discute di chi era l\'assassino.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
   {id:'lgde70_percorsi', era:'de1970', registro:'leggero', cond:()=>S.year>=1970&&S.year<=1974, kick:'Il paese', t:'I percorsi vita', text:'Nei boschi di ogni città spuntano i percorsi con le stazioni di ginnastica: flessioni al cartello tre, sbarra al cartello sette. La campagna nazionale ha una mascotte che alza il pollice, e la domenica gli impiegati corrono.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
@@ -3758,6 +3909,25 @@ const BEAT_LEGGERI = [
   {id:'lgde70_panino', era:'de1970', registro:'leggero', cond:()=>S.year>=1974, kick:'Il paese', t:'Il panino di Kreuzberg', text:'A Berlino, vicino alla stazione, un cuoco turco mette la carne dello spiedo dentro il pane con l\'insalata e la salsa. Costa poco, si mangia camminando, e gli operai del turno di notte fanno la fila.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
   {id:'lgde70_sintetizzatori', era:'de1970', registro:'leggero', cond:()=>S.year>=1975&&S.year<=1979, kick:'Il paese', t:'Le macchine che suonano', text:'A Düsseldorf quattro musicisti in giacca e cravatta suonano soltanto macchine elettroniche e cantano di autostrade e di treni. In patria li prendono in giro; in Inghilterra e in America li copiano.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
   {id:'lgde70_discoteca', era:'de1970', registro:'leggero', cond:()=>S.year>=1977, kick:'Il paese', t:'Il sabato in discoteca', text:'Le sale da ballo dei paesi diventano discoteche con le luci colorate sotto il pavimento. I genitori aspettano in macchina nel parcheggio fino alle due; i figli escono sudati e dicono che è stata una serata normale.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  // L150-2 · respiro quotidiano: sei beat senza data (o di stagione) per de1970 (LOTTO-L150-2-RESPIRO.md).
+  {id:'lgde70_pulci', era:'de1970', registro:'leggero', kick:'Il paese', t:'Il mercatino delle pulci', text:'La domenica mattina, nei parcheggi vuoti, si vende di tutto: dischi, lampade, servizi di porcellana della nonna che nessuno vuole più.', ch:[
+    {l:'Contratti per una lampada', e:'Uno sconto e una storia', f:function(){}},
+    {l:'Guardi e basta', e:'Il bello è girare', f:function(){}} ]},
+  {id:'lgde70_torta', era:'de1970', registro:'leggero', kick:'Il paese', t:'Caffè e torta', text:'Alle quattro del pomeriggio la tavola si apparecchia di nuovo: torta di frutta, panna montata e la caffettiera sempre piena per chi passa.', ch:[
+    {l:'Ti siedi per una fetta', e:'Mezz\'ora rubata', f:function(){}},
+    {l:'Ringrazi e riparti', e:'La torta aspetterà', f:function(){}} ]},
+  {id:'lgde70_catalogo', era:'de1970', registro:'leggero', kick:'Il paese', t:'La vacanza in vetrina', text:'La vacanza si compra in agenzia: il catalogo lucido, la pensione completa, e la foto della piscina che sembra più grande di com\'è.', ch:[
+    {l:'Sfogli il catalogo', e:'Si sogna gratis', f:function(){}},
+    {l:'Resti fedele al solito lago', e:'Senza sorprese', f:function(){}} ]},
+  {id:'lgde70_festavia', era:'de1970', registro:'leggero', cond:()=>S.month>=5&&S.month<=9, kick:'Il paese', t:'La festa di via', text:'La strada chiusa al traffico, tavoli sull\'asfalto, salsicce alla griglia: vicini che per anni si sono solo salutati si parlano davvero.', ch:[
+    {l:'Ti fermi al tavolo lungo', e:'Un bicchiere e dieci nomi nuovi', f:function(){}},
+    {l:'Passi e saluti', e:'La festa va avanti da sola', f:function(){}} ]},
+  {id:'lgde70_cabina', era:'de1970', registro:'leggero', kick:'Il paese', t:'La cabina del telefono', text:'La sera, davanti alla cabina gialla, la fila con le monete contate: le telefonate lunghe si fanno dopo le sei, quando costa meno.', ch:[
+    {l:'Aspetti il tuo turno', e:'C\'è chi racconta tutta la settimana', f:function(){}},
+    {l:'Rimandi a domani', e:'La fila sarà la stessa', f:function(){}} ]},
+  {id:'lgde70_faidate', era:'de1970', registro:'leggero', kick:'Il paese', t:'Il fai da te', text:'Il sabato si passa al negozio del bricolage: mensole, piastrelle, carta da parati a fiori grandi — ogni casa diventa un cantiere.', ch:[
+    {l:'Monti una mensola anche tu', e:'Quasi dritta', f:function(){}},
+    {l:'Chiami un artigiano', e:'Costa, ma sta su', f:function(){}} ]},
   /* L148-2 · i dieci beat leggeri del decennio tedesco '80 (scheda §I-D). La canzone dei palloncini si descrive e non si nomina (G5). */
   {id:'lgde80_onda', era:'de1980', registro:'leggero', cond:()=>S.year>=1981&&S.year<=1984, kick:'Il paese', t:'La nuova onda', text:'Le radio passano canzoni in tedesco con i sintetizzatori: testi strani, ritornelli da cantare in macchina. Una canzone su novantanove palloncini che fanno scoppiare una guerra arriva nelle classifiche americane, e là nessuno capisce le parole.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
   {id:'lgde80_computer', era:'de1980', registro:'leggero', cond:()=>S.year>=1983&&S.year<=1988, kick:'Il paese', t:'Il computer in cameretta', text:'Sotto l\'albero di Natale c\'è un computer che si collega al televisore. I ragazzi passano la notte a ricopiare programmi dalle riviste riga per riga, e il lunedì a scuola si scambiano le cassette.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
@@ -3769,6 +3939,25 @@ const BEAT_LEGGERI = [
   {id:'lgde80_picchi', era:'de1980', registro:'leggero', cond:()=>(S.year===1989&&S.month===12)||(S.year===1990&&S.month<=6), kick:'Il paese', t:'I picchi del Muro', text:'A Berlino la gente arriva con martello e scalpello e si porta via un pezzo di Muro. I ragazzi li vendono ai turisti in sacchetti di plastica; quelli con la vernice colorata costano di più.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
   {id:'lgde80_roma', era:'de1980', registro:'leggero', cond:()=>S.year===1990&&S.month>=7&&S.month<=8, kick:'Il paese', t:'Campioni a Roma', text:'La finale dei Mondiali si gioca a Roma, e il paese vince il suo terzo titolo con un rigore a pochi minuti dalla fine. È l\'ultima volta di una squadra dell\'Ovest da sola: dalla prossima, giocheranno anche quelli dell\'Est.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
   {id:'lgde80_sacco', era:'de1980', registro:'leggero', cond:()=>S.year===1991, kick:'Il paese', t:'Il sacco giallo', text:'Sugli imballaggi compare un bollino, e in ogni casa arriva un sacco giallo: la plastica e le lattine da una parte, la carta dall\'altra, il vetro per colore. Le famiglie discutono di dove va il tappo dello yogurt.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  // L150-2 · respiro quotidiano: sei beat senza data (o di stagione) per de1980 (LOTTO-L150-2-RESPIRO.md).
+  {id:'lgde80_vetro', era:'de1980', registro:'leggero', kick:'Il paese', t:'Il vetro per colore', text:'Bianco, verde, marrone: le bottiglie si dividono per colore, i bidoni spuntano a ogni angolo, e sono i bambini a insegnare ai genitori dove va cosa.', ch:[
+    {l:'Porti le bottiglie la domenica', e:'Il fracasso fa parte del rito', f:function(){}},
+    {l:'Lasci fare ai ragazzi', e:'Loro sanno le regole', f:function(){}} ]},
+  {id:'lgde80_cuffie', era:'de1980', registro:'leggero', cond:()=>S.year>=1981, kick:'Il paese', t:'Le cuffie in metropolitana', text:'Nel vagone tutti con le cuffie e una cassetta registrata dalla radio: il viaggio verso il lavoro ha la sua colonna sonora.', ch:[
+    {l:'Ti fai prestare le cuffie', e:'Un minuto di musica altrui', f:function(){}},
+    {l:'Leggi il giornale', e:'Come sempre', f:function(){}} ]},
+  {id:'lgde80_sabato', era:'de1980', registro:'leggero', kick:'Il paese', t:'Il sabato lungo', text:'Il primo sabato del mese i negozi restano aperti fino a sera: il centro si riempie come a una festa, e gli altri sabati alle due del pomeriggio le saracinesche sono già giù.', ch:[   // L151-1: al posto di lgde80_teleromanzo, doppione di lgde80_strada
+    {l:'Vai in centro con tutti', e:'Code e sacchetti', f:function(){}},
+    {l:'Fai la spesa il venerdì sera', e:'Come sempre', f:function(){}} ]},
+  {id:'lgde80_maratona', era:'de1980', registro:'leggero', kick:'Il paese', t:'La maratona della città', text:'Migliaia di persone in maglietta di cotone per le strade chiuse, e lungo il percorso i vicini con l\'acqua e i campanacci.', ch:[
+    {l:'Fai il tifo al chilometro trenta', e:'Dove serve di più', f:function(){}},
+    {l:'Guardi l\'arrivo in televisione', e:'Senza sudare', f:function(){}} ]},
+  {id:'lgde80_bio', era:'de1980', registro:'leggero', kick:'Il paese', t:'Il negozio biologico', text:'Legno chiaro, sacchi di cereali e il cartello scritto a mano: il negozio biologico apre anche nel quartiere borghese, e il muesli arriva a colazione.', ch:[
+    {l:'Compri un sacchetto di cereali', e:'Sano, e caro', f:function(){}},
+    {l:'Resti al pane del fornaio', e:'Anche quello è naturale', f:function(){}} ]},
+  {id:'lgde80_diapositive', era:'de1980', registro:'leggero', kick:'Il paese', t:'La serata delle diapositive', text:'L\'aereo non è più una stravaganza: isole d\'inverno, spiagge d\'estate, e al ritorno le diapositive da proiettare agli amici sul muro del salotto.', ch:[
+    {l:'Ti fai invitare', e:'Duecento fotografie di spiaggia', f:function(){}},
+    {l:'Trovi una scusa', e:'Sarà per la prossima volta', f:function(){}} ]},
 ];
 
 /* ===== F1 — LA TELEFONATA. Un'interruzione, non una carta: overlay a squillo, due opzioni secche, decisione a
@@ -9136,7 +9325,7 @@ const EVENTS=[
   text:'La nube di Chernobyl è passata, ma in Baviera l\'insalata e il latte si buttano ancora, e i bambini non giocano nei prati. Il paese ha scoperto che nessuno era responsabile di dire che cosa fosse sicuro. Un Land dice una cosa, il vicino un\'altra.',ch:[
    {l:'Un ministero dell\'ambiente, subito',e:'La storia · nasce in giugno · un ministro solo che risponde di tutto',f:()=>{gdDe80('giovani',2); gdDe80('cetomedio',1); repd(1);}},
    {l:'Uscire dal nucleare in dieci anni',e:'I Verdi e i giovani esultano · le imprese elettriche fanno i conti, e li mandano a te',f:()=>{gdDe80('giovani',5); gdDe80('imprenditori',-4); fidDe80(-1);}},
-   {l:'Rassicurare: le nostre centrali sono diverse',e:'Tecnicamente è vero · nessuno ci crede',f:()=>{gdDe80('imprenditori',2); gdDe80('giovani',-4); stampad(-2);}}]},
+   {l:'Rassicurare: le nostre centrali sono diverse',e:'Tecnicamente è vero · nessuno ci crede',f:()=>{gdDe80('imprenditori',2); gdDe80('giovani',-2); stampad(-2);}}]},   // L150-3 (D73): era −4 (×5 = −20): in s81 la scelta portava da sola −20,9 dei 20,8 punti di caduta dei giovani nella rivolta della SPD del 1987
  {id:'de80_censimento', era:'de1980', cond:()=>S.year===1987&&S.month>=3&&S.month<=5, kick:'Lo Stato', t:'Il censimento',
   text:'Quattro anni fa la Corte costituzionale ha fermato il censimento in nome del diritto di ciascuno a decidere dei propri dati. Ora si riparte, con la legge riscritta. Nelle città i comitati invitano a non rispondere, o a strappare il numero dal questionario.',ch:[
    {l:'Si risponde: multe per chi boicotta',e:'La storia · quasi tutti rispondono · qualche migliaio paga, e ne fa un vanto',f:()=>{gdDe80('pensionati',1); gdDe80('giovani',-3); fidDe80(1);}},
@@ -13758,7 +13947,11 @@ const GOVERNO_EV = [
    da 6 mesi di scelte, e i sondaggi mensili lo riflettono. Entrambe le opzioni sempre legittime (la cura).
    campPiazza()/campPromessa() = contatori/promesse in game.js. ===== */
 const CAMPAGNA_EV=[
- {id:'cn_apertura', era:'universale', kick:'Campagna elettorale', t:'L\'apertura della campagna', text:'La corsa comincia: dove pianti la prima bandiera?',ch:[
+ /* L151-2 · IL TONO DELLE PIAZZE: `cn_apertura` e `cn_piazza` sono le due carte della piazza piena e dichiarano `tono:'florido'` —
+    senza un tono nessuna carta di campagna arrivava a `elezioni-florido` e alle sue varianti di paese (L150-1: mai viste).
+    `cn_attacco` NON prende `tono:'grave'`: oltre alla scena e al fermo-immagine il grave spegne il suono della carta
+    (`suonoCarta`, audio.js) e segna il mese come nero per `graveInCorso()` (niente beat leggeri). */
+ {id:'cn_apertura', era:'universale', kick:'Campagna elettorale', tono:'florido', t:'L\'apertura della campagna', text:'La corsa comincia: dove pianti la prima bandiera?',ch:[
    {l:'Nella grande piazza, davanti alla tua gente',e:'La base si accende: lavoratori e giovani in marcia',f:()=>{campPiazza(); gd('lavoratori',2); gd('giovani',2); campSlancio(0.6);}},
    {l:'Nel teatro, coi corpi intermedi e i notabili',e:'Il mondo produttivo e i moderati prendono nota',f:()=>{gd('cetomedio',2); gd('imprenditori',2); stampad(2); campSlancio(0.6);}}]},
  {id:'cn_economia', era:'universale', kick:'Campagna elettorale', t:'Il tema dei conti', text:'L\'economia è il terreno dove si vincono le elezioni. Che racconto porti nelle piazze?',ch:[
@@ -13771,7 +13964,7 @@ const CAMPAGNA_EV=[
  {id:'cn_attacco', era:'universale', kick:'Campagna elettorale', t:'Il colpo all\'avversario', text:'Il tuo rivale più forte guadagna terreno. Come lo affronti?',ch:[
    {l:'Attacco frontale, senza guanti',e:'Gli mordi la rincorsa · i toni si fanno velenosi',f:()=>{campSlancio(0.9); stampad(-3);}},
    {l:'Contrasto nel merito, toni fermi',e:'Meno sangue, più sostanza: tieni la linea',f:()=>{campSlancio(0.5); stampad(2);}}]},
- {id:'cn_piazza', era:'universale', kick:'Campagna elettorale', t:'Il grande comizio', text:'La settimana clou: un solo evento, tutte le energie. Dove le metti?',ch:[
+ {id:'cn_piazza', era:'universale', kick:'Campagna elettorale', tono:'florido', t:'Il grande comizio', text:'La settimana clou: un solo evento, tutte le energie. Dove le metti?',ch:[
    {l:'Il comizio oceanico nella capitale',e:'Una piazza piena vale mille manifesti',f:()=>{campPiazza(); gd('lavoratori',2); gd('giovani',2); campSlancio(0.7);}},
    {l:'Il porta a porta nei territori incerti',e:'Meno clamore, voti veri dove si decide',f:()=>{gd('cetomedio',2); gd('pensionati',1); campSlancio(0.5);}}]},
  {id:'cn_visione', era:'universale', kick:'Campagna elettorale', t:'Il messaggio finale', text:'Gli ultimi manifesti: con quale idea del paese chiudi la corsa?',ch:[
@@ -17074,3 +17267,6 @@ SCENARI.de1970.mappa = SCENARI.de1960.mappa;
 /* L147-1 · de1980 RIUSA territori e mappa di de1970 (e quindi di de1960): lo stesso oggetto. L'Est entra alla tappa del 1990/10 (L147-2). */
 SCENARI.de1980.territori = SCENARI.de1970.territori;
 SCENARI.de1980.mappa = SCENARI.de1970.mappa;
+/* L151-3 · de1990 parte A OVEST (D74) con gli stessi territori e la stessa mappa: l'Est entra alla tappa del 1990/10, come per de1980. */
+SCENARI.de1990.territori = SCENARI.de1980.territori;
+SCENARI.de1990.mappa = SCENARI.de1980.mappa;

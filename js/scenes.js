@@ -152,6 +152,28 @@ const PARTENZA_VOCE = {
 const SCENE_PAESE = ['elezioni-florido-italia', 'elezioni-grave-italia',
                      'elezioni-florido-francia', 'elezioni-florido-regnounito', 'elezioni-florido-germania'];
 
+/* ===== L151-2 — LE SCENE D'AREA (`assets/scenes/<scena>-<area>.webp`). Una strada, un mercato, un tribunale «neutri» sono
+   europei: fuori dall'Europa la scena si veste con l'AREA del paese, se la variante c'è. Sei aree (decise al vaglio di
+   L150-1): europa · nordamerica · latina · asiaest · asiasud · africa; l'Europa NON ha varianti (è la scena-base).
+   `AREA_DI_PAESE` dice l'area di ogni id di PAESI; `SCENE_AREA` è la sesta lista-promessa, stesso contratto di
+   `SCENE_PAESE`: `scenaPaese()` (ui.js) prova prima `<file>-<paese>`, poi `<file>-<area del paese>` — IL PAESE VINCE
+   SULL'AREA — e solo se il nome è qui; `.claude/verifica-asset.js` tiene allineate lista e cartella. Additivo: con la
+   lista vuota tutto come prima. ⚠ SOLO NEL PRESENTE: una strada «nordamericana di oggi» sulla carta di una porta del
+   1950 sarebbe peggio della neutra (la riga è in `scenaPaese`). Un'area non può chiamarsi come un id di PAESI.
+   Le sorgenti arrivano in `arte-sorgente/scene-mondo/` e le porta il turno di Code (PROTOCOLLO-AUTONOMO, passo 2-bis). */
+const AREA_DI_PAESE = { italia:'europa', francia:'europa', regnounito:'europa', germania:'europa', spagna:'europa',
+                        usa:'nordamerica', canada:'nordamerica', australia:'nordamerica',
+                        messico:'latina', brasile:'latina', argentina:'latina',
+                        giappone:'asiaest', coreasud:'asiaest', india:'asiasud',
+                        nigeria:'africa', sudafrica:'africa' };
+const SCENE_AREA = [];
+
+/* ===== L151-2 — LE IMMAGINI DEI DECENNI (`assets/scenes/porta-decennio-<anno>.webp`): la miniatura delle porte storiche che non
+   hanno una `soglia-*` loro (Regno Unito, Francia, Germania) nella pagina degli storici — `sogliaSrc()` in ui.js. Lista-promessa:
+   qui stanno gli ANNI che hanno il file. ⚠ Il 1950 NON c'è: la sorgente (`arte-sorgente/porte/porta-decennio-1950.jpg`) ha
+   un'insegna che si legge («CAFE»), e nessuna immagine del gioco porta un testo leggibile; le porte del 1950 tengono il segnaposto. */
+const PORTE_DECENNIO = [1960, 1970, 1980, 1990, 2000];
+
 /* ===== L113-2 — LE PEDINE DEL TAVOLO (`assets/tavolo/<nome>.webp`, 256 × 256 con trasparenza, ≤ 60 KB, appoggiate in
    basso al centro). Terza lista-promessa, stesso contratto di AUDIO_PRESENTI e VIDEO_PRESENTI: il tavolo disegna SOLO
    le pedine di questa lista (zero 404, e niente segnaposto inventati finché il file non c'è), e `.claude/verifica-asset.js`
@@ -171,9 +193,8 @@ const SCENA_MOMENTO = {
   telefono:   { oggi:S_+'telefono-oggi.webp', storico:S_+'telefono-anni50.webp', corridoio:S_+'telefono-corridoio.webp' },
   finale:     { trionfo:S_+'finale-trionfo.webp', dignita:S_+'finale-dignita.webp', caduta:S_+'finale-caduta.webp', oblio:S_+'finale-oblio.webp',
                 silurato:S_+'ministro-cacciato.webp' },   // L127-1b: la fine `silurato` è la scrivania svuotata
-  soglia:     { contemporanea:S_+'soglia-presente.webp', italia1950:S_+'soglia-1950.webp',
-                italia1960:S_+'soglia-1960.webp', italia1970:S_+'soglia-1970.webp', italia1980:S_+'soglia-1980.webp',
-                italia1990:S_+'soglia-1990.webp' },
+  /* L151-2: la voce `soglia` e il suo lettore `scenaSoglia()` (ui.js) sono tolti — nessuno li chiamava. I file `soglia-*.webp`
+     restano VIVI: li usa `SOGLIE` (ui.js) per le miniature delle porte nella pagina degli storici. */
 };
 
 /* kicker (stringa-sorgente italiana, com'è nei pool) → id-scena */

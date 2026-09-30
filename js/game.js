@@ -213,7 +213,11 @@ const DRIFT_INFLAZIONE_ERA = {
                    crolla) e il 3,6 dell'unità. Il motore regge l'inflazione negativa: inflazioneAnno() la rende com'è, e il debito la legge
                    senza pavimenti (model.js, il termine growth+inflazione). */
                 {da:1982, inf:5.3}, {da:1983, inf:3.3}, {da:1984, inf:2.4}, {da:1985, inf:2.1}, {da:1986, inf:-0.1}, {da:1987, inf:0.2},
-                {da:1988, inf:1.3}, {da:1989, inf:2.8}, {da:1990, inf:2.7}, {da:1991, inf:3.6} ]
+                {da:1988, inf:1.3}, {da:1989, inf:2.8}, {da:1990, inf:2.7}, {da:1991, inf:3.6},
+                /* L151-3 · il '90 (scheda PRESET-GERMANIA-1990 §2, ⚠ ordine di grandezza): il 5,1 del 1992 (il conto dell'unità), poi la
+                   disinflazione fino allo 0,6 del 1999. Prima di queste righe il 3,6 del 1991 valeva per sempre. */
+                {da:1992, inf:5.1}, {da:1993, inf:4.4}, {da:1994, inf:2.7}, {da:1995, inf:1.7}, {da:1996, inf:1.4}, {da:1997, inf:1.9},
+                {da:1998, inf:0.9}, {da:1999, inf:0.6}, {da:2000, inf:1.4}, {da:2001, inf:2.0} ]
 };
 function inflazioneAnno(){
   if(typeof S==='undefined' || !S) return 0;
@@ -264,7 +268,13 @@ const DRIFT_DEFICIT_ERA = {
                    47,8 (1985) → 53,1 (1989) → 51,5 (1991) contro ~38 → 41 → 41 → 42. ⚠ Il residuo (~+10) nasce nel 1980-81: disavanzo reso 5,8 e 8,9
                    contro 2,9 e 3,7 della scheda, dalle righe condivise con de1970 — dichiarato, decide Cowork se separarle. */
                 {da:1982, def:-3.5}, {da:1983, def:-4},   {da:1984, def:-4.5}, {da:1985, def:-4.5}, {da:1986, def:-4},
-                {da:1987, def:-3.5}, {da:1988, def:-3.5}, {da:1989, def:-4},   {da:1990, def:-1.5}, {da:1991, def:-0.5} ],
+                {da:1987, def:-3.5}, {da:1988, def:-3.5}, {da:1989, def:-4},   {da:1990, def:-1.5}, {da:1991, def:-0.5},
+                /* L151-3 · il '90 (de1990): CERCATO con la sweep sul DISAVANZO dell'anno, non sul debito (misura-de1990-struttura.js sweep def, CDU al
+                   governo, 5 semi, luglio): il salto del debito del 1995 non è un meccanismo (D79), e un bersaglio sul debito avrebbe chiesto alle righe
+                   di fabbricarlo. Resa e scarti nella scheda PRESET-GERMANIA-1990.md («E quello che il codice ha detto»). Prima di queste righe il
+                   −0,5 del 1991 valeva per sempre. */
+                {da:1992, def:-2.5}, {da:1993, def:-3.5}, {da:1994, def:-3},   {da:1995, def:-3.5}, {da:1996, def:-3.5},
+                {da:1997, def:-3.5}, {da:1998, def:-4.5}, {da:1999, def:-1.5}, {da:2000, def:-2.5}, {da:2001, def:-2.5} ],
   /* italia1970: 37 nel 1970 → 60 nel 1979, il decennio in cui il debito italiano parte. Chiusa al 1980: la porta
      dell'80 ha il suo seme e non deve ereditare il '79. */
   [LINEA_IT]: [ {da:1970, def:0},    {da:1971, def:6.5},  {da:1972, def:8},    {da:1973, def:5},    {da:1974, def:5.5},
@@ -715,11 +725,20 @@ function ministroDovuto(){ const mese=S.year*12+S.month; return S.ministroUltimo
 /* SACCHETTO-SHUFFLE (anti-ripetizione, lotto 0): estrazione-senza-rimpiazzo per-chiave. `candidati` e la lista GIA
    filtrata (tipo/cond/dicastero...) dalla pick-fn; l'helper non conosce i filtri. Ogni carta valida esce UNA volta
    prima che una qualsiasi torni; svuotato il sacchetto, si rimescola. Rispetta i filtri dinamici (chiavi separate:
-   loc|citta != loc|regione) e i pool piccoli (li cicla). S.bag serializza nel salvataggio (lazy-init, retrocompat). */
+   loc|citta != loc|regione) e i pool piccoli (li cicla). S.bag serializza nel salvataggio (lazy-init, retrocompat).
+   ⚠ IL SACCO SI RIEMPIE CON LE CARTE VIVE AL RIMESCOLO (L150-2): una carta con una `cond` di un mese solo entra solo
+   se il rimescolo cade in quel mese. L151-1 · `opt.vivePrima:true` (terzo parametro, facoltativo: senza, tutto come
+   prima) lo cura PER QUEL SACCHETTO: `S.bagVisti[chiave]` tiene gli id usciti nel giro in corso (si azzera al
+   rimescolo), e prima di pescare le carte vive che non sono nel sacco NE' nel registro vanno IN TESTA, mescolate fra
+   loro. Oggi lo passa solo `pescaLeggero()` (effetti zero). Un salvataggio vecchio arriva col sacco a meta' giro e
+   senza registro: li' NON si sa chi e' gia' uscito, quindi non si mette niente in testa fino al rimescolo dopo
+   (metterle tutte farebbe rivedere subito le carte appena uscite). */
 function mescola(a){ a=a.slice(); for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)), t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
-function pescaBag(chiave, candidati){
+function pescaBag(chiave, candidati, opt){
   if(!candidati || !candidati.length) return null;
   S.bag=S.bag||{}; S.bagCoda=S.bagCoda||{};
+  var vive=!!(opt && opt.vivePrima);
+  if(vive) S.bagVisti=S.bagVisti||{};
   var validi={}; candidati.forEach(function(c){ validi[c.id]=c; });
   var K=Math.min(2, Math.floor(candidati.length/3));   // hold-back: pool<6 -> K=0 (niente sui piccolissimi)
   var sacco=S.bag[chiave];
@@ -727,11 +746,17 @@ function pescaBag(chiave, candidati){
     sacco=mescola(candidati.map(function(c){return c.id;}));
     var coda=S.bagCoda[chiave]||[];   // gli ultimi K del ciclo precedente vanno in FONDO -> niente ripetizione a cavallo di due cicli
     if(K>0 && coda.length) sacco=sacco.filter(function(id){return coda.indexOf(id)<0;}).concat(sacco.filter(function(id){return coda.indexOf(id)>=0;}));
+    if(vive) S.bagVisti[chiave]=[];
+  } else if(vive && S.bagVisti[chiave]){
+    var visti=S.bagVisti[chiave];
+    var nuove=candidati.map(function(c){return c.id;}).filter(function(id){ return sacco.indexOf(id)<0 && visti.indexOf(id)<0; });
+    if(nuove.length) sacco=mescola(nuove).concat(sacco);   // vive adesso, assenti al rimescolo e non ancora uscite nel giro: in testa
   }
   var scelto=null;
   while(sacco.length){ var id=sacco.shift(); if(validi[id]){ scelto=id; break; } }   // salta gli id usciti dal set valido (cond cambiata)
-  if(scelto===null){ sacco=mescola(candidati.map(function(c){return c.id;})); scelto=sacco.shift(); }   // sacco tutto invalido -> ricarica
+  if(scelto===null){ sacco=mescola(candidati.map(function(c){return c.id;})); scelto=sacco.shift(); if(vive) S.bagVisti[chiave]=[]; }   // sacco tutto invalido -> ricarica
   S.bag[chiave]=sacco;
+  if(vive && S.bagVisti[chiave]) S.bagVisti[chiave].push(scelto);
   if(K>0){ var q=S.bagCoda[chiave]||[]; q.push(scelto); while(q.length>K) q.shift(); S.bagCoda[chiave]=q; }
   return validi[scelto];
 }
@@ -1462,7 +1487,13 @@ const DRIFT_ECONOMICO_ERA = {
                    massimo 0,32. Il 1990-91 sta sul tetto del 5 (la scheda dice 5,3 e 5,1): tre decimi, `crescitaTetto` non serve (dichiarato). Le righe
                    1980-81 sono quelle di de1970 (la sua coda) e non si toccano. Prima di queste righe il −5 del 1981 valeva per sempre. */
                 {da:1982, ciclo:-6.5}, {da:1983, ciclo:-3}, {da:1984, ciclo:-2.5}, {da:1985, ciclo:-3.5}, {da:1986, ciclo:-2.5}, {da:1987, ciclo:-4},
-                {da:1988, ciclo:-1.5}, {da:1989, ciclo:-1.5}, {da:1990, ciclo:0.5}, {da:1991, ciclo:0.5} ]
+                {da:1988, ciclo:-1.5}, {da:1989, ciclo:-1.5}, {da:1990, ciclo:0.5}, {da:1991, ciclo:0.5},
+                /* L151-3 · il '90 (de1990, crescita di partenza 4,5, tetto 5 del motore), CERCATO con la sweep (misura-de1990-struttura.js sweep ciclo,
+                   CDU al governo, 5 semi, luglio): resa 4,9 · 4,9 · 1,9 · **−0,9 (la recessione del 1993)** · 2,4 · 1,7 · 1,0 · 1,8 · 2,0 · 2,1 · 3,0 · 1,5
+                   contro la scheda 5,3 · 5,1 · 1,9 · −1,0 · 2,5 · 1,7 · 0,8 · 1,8 · 2,0 · 2,0 · 3,0 · 1,7, scarto massimo 0,2 dal 1992. Le righe del 1990-91
+                   sono quelle di de1980 (la sua coda) e non si toccano. Prima di queste righe il +0,5 del 1991 valeva per sempre. */
+                {da:1992, ciclo:-3.5}, {da:1993, ciclo:-6.5}, {da:1994, ciclo:-2}, {da:1995, ciclo:-4}, {da:1996, ciclo:-4.5}, {da:1997, ciclo:-3},
+                {da:1998, ciclo:-3.5}, {da:1999, ciclo:-4}, {da:2000, ciclo:-2}, {da:2001, ciclo:-4.5} ]
 };
 /* L60-2 · LA DISOCCUPAZIONE D'EPOCA. Il motore non aveva un posto dove un decennio potesse dire «qui i senza
    lavoro sono il doppio»: `S.uMod` decade dell'80% al mese e le carte danno solo colpi. Stessa forma di cicloBase():
@@ -1529,7 +1560,14 @@ const DRIFT_DISOCCUPAZIONE_ERA = {
                    le righe di de1970 (che lì rendono 3,8 e 5,4): in de1980, che parte nel 1980, rendono 3,4 e 4,4 — non si toccano per non spostare la
                    coda di de1970 (dichiarato). Il 1991 è la riga unita della scheda (7,3). Prima di queste righe il −4,5 del 1981 valeva per sempre. */
                 {da:1982, un:-1.25}, {da:1983, un:0}, {da:1984, un:1}, {da:1985, un:1}, {da:1986, un:0}, {da:1987, un:0.25},
-                {da:1988, un:0.75}, {da:1989, un:-0.25}, {da:1990, un:0.5}, {da:1991, un:1} ]
+                {da:1988, un:0.75}, {da:1989, un:-0.25}, {da:1990, un:0.5}, {da:1991, un:1},
+                /* L151-3 · il '90 (de1990, pavimento 0,5), CERCATO con la sweep (misura-de1990-struttura.js sweep un, CDU al governo, 5 semi, luglio) SOPRA
+                   le righe del ciclo: resa 7,6 · 8,2 · 8,5 · 9,7 · 10,6 · 10,4 · 11,5 · **12,7 (il 1997)** · 12,2 · 11,8 · 10,7 · 10,3 contro la scheda 7,2 · 7,3 ·
+                   8,5 · 9,8 · 10,6 · 10,4 · 11,5 · 12,7 · 12,3 · 11,7 · 10,7 · 10,3, scarto massimo 0,1 dal 1992. ⚠ Il 1990-91 sono le righe di de1980 (che lì
+                   rendono 7,2 e 7,3): in de1990, che parte nel 1990 con la crescita sul tetto, rendono 7,6 e 8,2 — non si toccano per non spostare la
+                   coda di de1980 (dichiarato). Prima di queste righe il +1 del 1991 valeva per sempre. */
+                {da:1992, un:-1.25}, {da:1993, un:-1.5}, {da:1994, un:1.25}, {da:1995, un:1}, {da:1996, un:3}, {da:1997, un:4},
+                {da:1998, un:2.5}, {da:1999, un:2.75}, {da:2000, un:1.75}, {da:2001, un:1.25} ]
 };
 function disoccupazioneEra(){
   if(typeof S==='undefined' || !S) return 0;
@@ -2121,7 +2159,23 @@ const RIALLINEAMENTI_ERA = {
                            selezionabile:false, nota:'Il PDS è l\'erede del partito che governava l\'Est: nel decennio non governa, e la sua carriera comincia nel decennio dopo' } ],
                  delta:[ {id:'de_cdu',delta:-0.5,ancora:true}, {id:'de_spd',delta:-2.2,ancora:true}, {id:'de_fdp',delta:0.4,ancora:true}, {id:'de_grn',delta:0.2,ancora:true} ] },   // Σ −2,1 = la PDS che entra
     '1990/12': { delta:[ {id:'de_cdu',delta:0}, {id:'de_spd',delta:-1.3}, {id:'de_fdp',delta:1.5}, {id:'de_grn',delta:-3.5}, {id:'de_lnk',delta:0.3} ],   // Σ −3,0
-                 urne:  { de_cdu:43.8, de_spd:33.5, de_fdp:11.0, de_grn:5.0, de_lnk:2.4 } }
+                 urne:  { de_cdu:43.8, de_spd:33.5, de_fdp:11.0, de_grn:5.0, de_lnk:2.4 } },
+    /* L151-3 · il decennio '90 (scheda PRESET-GERMANIA-1990 §1; urne verificate da Cowork su Wikipedia che cita il Bundeswahlleiter: 1994
+       CDU/CSU 41,4 · SPD 36,4 · Verdi 7,3 · FDP 6,9 · PDS 4,4 · 1998 SPD 40,93 · CDU/CSU 35,14 · Verdi 6,70 · FDP 6,25 · PDS 5,10 — ⚠ la
+       conferma sul sito del Bundeswahlleiter non si è fatta da un turno automatico: dichiarato).
+       · 1994/12 e 1998/12: il voto del 1994 e del 1998 come DELTA prima dell'urna del motore di gennaio (niente seggi: li fa l'urna,
+         D76). 1994 meno 1990 pantedesco Σ +0,7 · 1998 meno 1994 Σ −2,4 (DVU, Repubblicani e gli altri fuori roster).
+         `se` (D77): valgono solo se alla vigilia governa la CDU (`deGovernoCdu()`): sono il giudizio su sedici anni dello stesso
+         governo; con un altro governo (una carriera SPD arrivata da de1980, una sfiducia costruttiva) il logorio del motore fa da sé.
+       · 1999/9: IL TRASLOCO (D78). `capitale:'Berlino'`, nessun delta: sul tavolo il palazzo passa da Bonn al cerchio di Berlino (il
+         territorio rinominato nel 1990/10). Incondizionata: il voto del 1991 (`S.deCapitale91`) colora solo un testo del contenuto. */
+    '1994/12': { se:function(){ return deGovernoCdu(); },
+                 delta:[ {id:'de_cdu',delta:-2.4}, {id:'de_spd',delta:2.9}, {id:'de_fdp',delta:-4.1}, {id:'de_grn',delta:2.3}, {id:'de_lnk',delta:2.0} ],   // Σ +0,7
+                 urne:  { de_cdu:41.4, de_spd:36.4, de_fdp:6.9, de_grn:7.3, de_lnk:4.4 } },
+    '1998/12': { se:function(){ return deGovernoCdu(); },
+                 delta:[ {id:'de_cdu',delta:-6.3}, {id:'de_spd',delta:4.5}, {id:'de_fdp',delta:-0.7}, {id:'de_grn',delta:-0.6}, {id:'de_lnk',delta:0.7} ],   // Σ −2,4
+                 urne:  { de_cdu:35.1, de_spd:40.9, de_fdp:6.3, de_grn:6.7, de_lnk:5.1 } },
+    '1999/9':  { capitale:'Berlino' }
   }
 };
 /* L101-1 · D17 · DI CHI È L'ELISEO. Una funzione sola, letta dalle tappe condizionate del 1981 e del 1988: la
@@ -2134,6 +2188,18 @@ function eliseoDiSinistra(){
   var pid = S.opposizione ? S.governoAvversario : S.partito;
   var p = (pid!=null && typeof part==='function') ? part(pid) : null;
   return !!p && (p.asse||0) < 0;
+}
+/* L151-3 · D77 · «ALLA VIGILIA GOVERNA LA CDU». Il lettore delle tappe del 1994/12 e del 1998/12 (il voto contro sedici anni dello
+   stesso governo). Stessa forma di `eliseoDiSinistra()`: il capo del governo è il tuo partito se governi, `S.governoAvversario` se
+   sei all'opposizione (entraOpposizione, L98-2). Vero se il capo è la CDU — e anche se il capo è la FDP con la CDU in coalizione:
+   chi gioca i liberali al governo è «il Cancelliere» per il gioco, ma il governo è lo stesso cristiano-liberale che la storia
+   giudica (`S.coalizione` è la coalizione di chi governa da tutti e due i lati). Falso con un Cancelliere socialdemocratico,
+   anche in grande coalizione con la CDU. */
+function deGovernoCdu(){
+  if(typeof S==='undefined' || !S) return false;
+  var capo = S.opposizione ? S.governoAvversario : S.partito;
+  if(capo==='de_cdu') return true;
+  return capo==='de_fdp' && Array.isArray(S.coalizione) && S.coalizione.indexOf('de_cdu')>=0;
 }
 /* L75-1 · I SONDAGGI CHE SBAGLIANO. La proiezione di L59-4 è onesta per costruzione (legge le forze); il 1992 inglese è
    il caso in cui i sondaggi sbagliarono davvero. Qui, nei mesi prima di una tappa che lo dichiara, il numero RESO al
@@ -3747,7 +3813,7 @@ function pescaRetro(){
 function pescaLeggero(){
   var pool=BEAT_LEGGERI.filter(function(b){ return (typeof eraViva!=='function'||eraViva(b)) && (!b.cond||b.cond()); });
   if(!pool.length) return null;
-  return (typeof pescaBag==='function') ? pescaBag('leggeri|'+((S&&S.era)||'p'), pool) : pool[0];
+  return (typeof pescaBag==='function') ? pescaBag('leggeri|'+((S&&S.era)||'p'), pool, {vivePrima:true}) : pool[0];   // L151-1: il sacchetto dei beat vede le carte di stagione quando diventano vive
 }
 /* L27-1 — il gate vale ora anche all'OPPOSIZIONE (`S.livello` è 3 anche da sfidante, verificato a terra): la
    sfida alla leadership scatta a 35 e l'avviso a 40, quindi da qualunque parte del campo il guaio bussa prima.
@@ -4557,6 +4623,18 @@ function resolveTerritorio(ci){
    quasi tutti questi casi l'inglese era GIA' neutro («in the capital»), segno che il difetto era della sola sorgente.
    ================================================================================================================ */
 function capitalePaese(){ return (typeof S!=='undefined' && S && S.capitaleSede) || (typeof PAESE!=='undefined' && PAESE && PAESE.capitale) || 'Roma'; }   // L107-3: prima la capitale cambiata a una tappa
+/* L151-1 · LA STAGIONE È DEL PAESE. `PAESE.emisfero:'sud'` (Argentina, Brasile, Sudafrica, Australia; assente = nord) e
+   due lettori puri: `emisferoSud()` e `stagioneMese(mese)` — nord: 6-8 estate, 9-11 autunno, 12-2 inverno, 3-5 primavera;
+   sud rovesciato. Li leggono le `cond` dei beat di stagione: una carta che nomina una STAGIONE chiede
+   `stagioneMese()==='estate'`; una che nomina un MESE chiede il mese, e se quel mese a sud non ha senso (il rientro
+   di settembre) aggiunge `!emisferoSud()`. Non `paesi:[…]`: è un gancio di calendario, non di paese. */
+function emisferoSud(){ return !!(typeof PAESE!=='undefined' && PAESE && PAESE.emisfero==='sud'); }
+function stagioneMese(mese){
+  var m=(mese!=null) ? mese : ((typeof S!=='undefined' && S && S.month) || 1);
+  var NORD=['inverno','inverno','primavera','primavera','primavera','estate','estate','estate','autunno','autunno','autunno','inverno'];
+  var SUD =['estate','estate','autunno','autunno','autunno','inverno','inverno','inverno','primavera','primavera','primavera','estate'];
+  return (emisferoSud() ? SUD : NORD)[((m-1)%12+12)%12];
+}
 function sedeGovernoPaese(){ return (typeof PAESE!=='undefined' && PAESE && PAESE.sedeGoverno) || 'Palazzo Chigi'; }
 function aCapitale(){ var c=capitalePaese(); return (/^[Aa]/.test(c) ? 'ad ' : 'a ') + c; }
 function luoghiSub(str){
