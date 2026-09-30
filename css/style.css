@@ -914,5 +914,20 @@
     font-family:'IBM Plex Sans',system-ui,sans-serif; font-size:clamp(16px, 2.8vmin, 24px); line-height:1.35;}
   /* in verticale la clip (16:9, a tutta larghezza) è una fascia in mezzo: i sottotitoli le stanno subito sotto, non in fondo allo schermo */
   @media (orientation:portrait){ #partenza-sott{top:calc(50% + 28.125vw + 14px); bottom:auto;} }
+  /* L153-5 · le clip delle partite storiche (paese, poi decennio): lo stesso velo della partenza; i video stanno uno sopra l'altro
+     e il secondo passa sopra il primo quando tocca a lui. La didascalia (paese, anno) in basso a sinistra dell'immagine. */
+  #clip-porta, #clip-porta-uscente{position:fixed; inset:0; z-index:10000; background:#000; opacity:0; transition:opacity .35s ease; cursor:pointer;}
+  #clip-porta.on{opacity:1;}
+  #clip-porta video, #clip-porta-uscente video{position:absolute; inset:0; width:100%; height:100%; object-fit:contain; background:#000; display:block; opacity:0; transition:opacity .25s ease;}
+  #clip-porta video.on, #clip-porta-uscente video.on{opacity:1;}
+  #clip-porta-salta{position:absolute; top:max(12px, env(safe-area-inset-top)); right:max(12px, env(safe-area-inset-right)); min-height:44px; min-width:44px;
+    padding:8px 16px; border:1px solid rgba(255,255,255,.35); border-radius:22px; background:rgba(0,0,0,.45); color:#f3efe6;
+    font-family:inherit; font-size:13px; font-weight:500; letter-spacing:.04em; cursor:pointer;}
+  #clip-porta-salta:focus-visible{outline:2px solid #f3efe6; outline-offset:2px;}
+  #clip-porta-did{position:absolute; left:max(16px, env(safe-area-inset-left)); bottom:max(20px, calc(env(safe-area-inset-bottom) + 12px)); pointer-events:none;
+    padding:5px 12px; border-radius:4px; background:rgba(0,0,0,.55); color:#f3efe6; text-shadow:0 1px 3px rgba(0,0,0,.8);
+    font-family:'Fraunces',serif; font-size:clamp(15px, 2.6vmin, 22px); letter-spacing:.02em;}
+  /* in verticale la clip (16:9, a tutta larghezza) è una fascia in mezzo: la didascalia sta nell'angolo in basso a sinistra della fascia */
+  @media (orientation:portrait){ #clip-porta-did{bottom:calc(50% - 28.125vw + 10px);} }
   .intro-rivedi{display:block; margin:10px auto 2px; min-height:44px; padding:8px 14px; border:1px solid var(--line); background:var(--bg2); color:inherit;
     border-radius:9px; font-size:12px; font-family:inherit; cursor:pointer;}

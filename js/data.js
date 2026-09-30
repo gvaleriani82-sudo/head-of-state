@@ -1579,6 +1579,8 @@ const SCENARI = {
      CDU nel decennio si gioca da de1960 (che arriva al 1971) e riparte con de1980. La CDU resta nel roster, nei seggi, nelle
      urne e come governo avversario; `selezionabile` lo legge solo il selettore, quindi un salvataggio CDU già iniziato si
      carica e prosegue.
+     ⚑ L154-1 (30/9): con la regola B (L153-1) il congresso al 1972 non è più 20/20 — ma 16 carriere su 20 chiudono comunque entro
+     il 1976; la CDU resta non selezionabile per decisione di Giacomo del 28/9. La `nota` a schermo è vera e non cambia.
      FORZE: urne del 1969 sui quattro (46,1 · 42,7 · 5,8 · 4,3, somma 98,9) → 46,6 · 43,2 · 5,9 · 4,3. SEGGI: il Bundestag del 1969
      senza Berlino, come lo lascia la tappa del 1969/9 di de1960 (48,8 · 45,2 · 6,0).
      `forzaAncora` (L111-1, la media del decennio): urne 1972 · 1976 · 1980 → CDU/CSU 46,01 · SPD 43,76 · FDP 8,97 · NPD 0,35
@@ -1662,7 +1664,7 @@ const SCENARI = {
       { id:'de_spd', nome:'SPD',     orientamento:'centrosinistra', base:{ lavoratori:0.6, pensionati:0.2, giovani:0.2 },    forza:43.1, forzaAncora:39.7, asse:-1, alleati:['de_fdp'], alleatiRiserva:['de_cdu'] },
       { id:'de_fdp', nome:'FDP',     orientamento:'liberale',       base:{ imprenditori:0.5, cetomedio:0.5 },                forza:10.7, forzaAncora:8.9,  asse:1,  alleati:['de_spd'] },
       { id:'de_grn', nome:'Verdi',   orientamento:'ecologista',     base:{ giovani:0.6, cetomedio:0.4 },                     forza:1.5,  forzaAncora:5.2,  asse:-2, alleati:[],
-        selezionabile:false, nota:'I Verdi entrano nel Bundestag nel 1983 e non governano nel decennio: all\'opposizione la prima sconfitta chiuderebbe la carriera' },   // D56
+        selezionabile:false, nota:'I Verdi entrano nel Bundestag nel 1983 e non governano nel decennio: non è una carriera che si possa giocare' },   // D56 (la nota riscritta in L154-1: con la regola B la prima sconfitta non chiude più)
     ],
     /* il Bundestag del 1976 senza Berlino (496), in carica all'avvio, come lo lascia de1970 */
     seggi: { de_cdu:49.0, de_spd:43.1, de_fdp:7.9, de_grn:0 },
@@ -1697,7 +1699,8 @@ const SCENARI = {
      L'URNA DEL MOTORE: `turnMandato:3` (la legislatura del gennaio 1987 è al quarto anno) → 1991/1 · 1995/1 · 1999/1 (la storia:
      1990/12, 1994/10, 1998/9 — D76). Crescita di partenza 4,5 come le altre porte tedesche: le righe di linea sono scostamenti
      da questa base, e quelle del 1990-91 le leggono de1980 (la sua coda) e questa porta.
-     CHI SI SCEGLIE (D75): CDU/CSU e FDP; SPD e Verdi restano nel roster, nei seggi e nelle urne (la misura è nella scheda).
+     CHI SI SCEGLIE (D75, D105): CDU/CSU, FDP e — dal L154-1 — la SPD, che parte all'opposizione e con la regola B (L153-1) sopravvive al 1991
+     15 volte su 20; i Verdi restano nel roster, nei seggi e nelle urne (le misure sono nella scheda).
      ============================================================================================================ */
   de1990: {
     id:'de1990', era:LINEA_DE, nome:'Germania 1990', anno:1990, paese:'germania',
@@ -1711,11 +1714,10 @@ const SCENARI = {
     intermedie: [ {tipo:'Elezioni nei Länder', mese:24, tocca:'regione'} ],
     partiti: [
       { id:'de_cdu', nome:'CDU/CSU', orientamento:'centrodestra',   base:{ cattolici:0.35, cetomedio:0.35, imprenditori:0.3 }, forza:44.9, forzaAncora:42.6, asse:1,  alleati:['de_fdp'], alleatiRiserva:['de_spd'] },
-      { id:'de_spd', nome:'SPD',     orientamento:'centrosinistra', base:{ lavoratori:0.6, pensionati:0.2, giovani:0.2 },    forza:37.5, forzaAncora:40.9, asse:-1, alleati:['de_grn'], alleatiRiserva:['de_cdu'],
-        selezionabile:false, nota:"All'opposizione fino al 1998: con due sconfitte prima della vittoria la carriera chiuderebbe al primo anno" },   // D75: misurato, congresso 20/20 al 1991/1
+      { id:'de_spd', nome:'SPD',     orientamento:'centrosinistra', base:{ lavoratori:0.6, pensionati:0.2, giovani:0.2 },    forza:37.5, forzaAncora:40.9, asse:-1, alleati:['de_grn'], alleatiRiserva:['de_cdu'] },   // L154-1 (D105): la SPD è una carriera. Con la regola B (L153-1) parte all'opposizione, perde il 1991 e resta 15 volte su 20; il congresso entro 60 mesi 5/20 (misura-l154-1.js)
       { id:'de_fdp', nome:'FDP',     orientamento:'liberale',       base:{ imprenditori:0.5, cetomedio:0.5 },                forza:9.2,  forzaAncora:8.0,  asse:1,  alleati:['de_cdu'] },
       { id:'de_grn', nome:'Verdi',   orientamento:'ecologista',     base:{ giovani:0.6, cetomedio:0.4 },                     forza:8.4,  forzaAncora:6.4,  asse:-2, alleati:['de_spd'],
-        selezionabile:false, nota:"All'opposizione fino al 1998: con due sconfitte prima della vittoria la carriera chiuderebbe al primo anno" },   // D75: misurato, congresso 20/20 al 1991/1
+        selezionabile:false, nota:'I Verdi restano all\'opposizione fino al 1998 e nel 1990 perdono voti: non è una carriera che si possa giocare' },   // D75; L154-1: congresso 20/20 al 1991/1 anche con la regola B (il partito non cresce)
     ],
     /* il Bundestag del 25 gennaio 1987 senza Berlino (497), in carica all'avvio */
     seggi: { de_cdu:44.9, de_spd:37.4, de_fdp:9.3, de_grn:8.5 },
@@ -1725,7 +1727,7 @@ const SCENARI = {
     debtAncora: 41.8,
     inflazione: 2.7,
     crescita: 4.5,
-    logorioEra: 0.008,                          // come de1980 (scheda §0): da misurare
+    logorioEra: 0.0024,                         // L152-1 (30/9, D83): era 0,008 «come de1980», una taratura trasportata (L55). Sweep CDU al governo, 20 semi, il 1995/1 tenuto: 0,008 → 0/20 · 0,004 → 0/20 · 0,003 → 5/20 · 0,0026 → 9/20 · 0,0024 → 13/20 · 0,0022 → 14/20 · 0,002 → 17/20 · 0,001 → 20/20 (il 1991 tenuto 20/20 con ogni valore). La soglia è ripida: un punto di forza fra 0/20 e 17/20, come i dieci seggi di margine del 1994. Vicino al presente (0,002): la porta eredita un governo di otto anni ma il motore lo fa partire da zero. I salvataggi avviati tengono il loro valore (S.logorioEra).
     valuta: VALUTA_MARCO,
     quotaSpesa: 0.30,                           // ⚠ come le porte tedesche prima: da confermare
     intro: "Germania, 1990. Il Muro è caduto da due mesi, e ogni giorno duemila persone passano a ovest per restarci. Il Cancelliere ha un piano in dieci punti e un anno prima delle urne.",
@@ -1733,6 +1735,58 @@ const SCENARI = {
       "Germania, gennaio 1990. A Berlino si passa da una parte all'altra senza più visto; a Lipsia il lunedì si scende ancora in piazza, e adesso si grida “un popolo solo”.",
       "L'economia dell'Ovest corre come non faceva da anni. Quella dell'Est nessuno sa quanto vale: a marzo l'Est vota libero per la prima volta, e tutti parlano del marco.",
       "L'Unione cristiana governa con i liberali dal 1982. I socialdemocratici avvertono che l'unità costerà cara, e i sondaggi per ora danno loro ragione.",
+    ],
+  },
+  /* ============================================================================================================
+     L154-3 · GERMANIA 2000 — la sesta e ultima porta tedesca (scheda PRESET-GERMANIA-2000.md, D94-D104). Si apre nel GENNAIO 2000 a
+     Berlino, col governo rosso-verde in carica da quindici mesi; chiude col 2013 e si salda al presente (`contemporanea` dal 2012).
+     Istituzioni come de1990 (parlamentare, sfiducia costruttiva, sbarramento 5, 48 mesi). Capitale Berlino dall'avvio (il trasloco è
+     la tappa del 1999/9 di de1990). TERRITORI E MAPPA: quelli della linea dopo l'unità, DERIVATI dalla tappa del 1990/10 (game.js,
+     sotto RIALLINEAMENTI_ERA: non una seconda lista).
+     ROSTER: i cinque del 1998 con gli id della linea (la PDS è `de_lnk`, l'id della Linke del presente: si rinomina alla tappa del
+     2007/6; l'AfD entra alla tappa del 2013/2). FORZE: le urne del 27 settembre 1998 rinormalizzate sui cinque (40,93 · 35,14 · 6,70 ·
+     6,25 · 5,10, somma 94,12) → 43,5 · 37,3 · 7,1 · 6,6 · 5,4. SEGGI: il Bundestag del 1998 (669: 298 · 245 · 47 · 43 · 36).
+     `forzaAncora` (L111-1, D98): la media delle urne 2002-05-09 rinormalizzata, con la Linke a parte — 4,5 all'avvio, e il delta del
+     2005 marcato `ancora:true` (+4,7): SPD 33,2 · CDU 37,2 · Verdi 9,4 · FDP 11,0 (90,8) + 4,5 = 95,3 prima del 2005, 100 dopo.
+     L'URNA DEL MOTORE: `turnMandato:2` (D94: la legislatura del settembre 1998 è al secondo anno) → 2002/1 · 2006/1 · 2010/1 · 2014/1
+     (la storia: 2002/9, 2005/9, 2009/9, 2013/9). Crescita di partenza 4,5 come le altre porte tedesche: le righe di linea sono
+     scostamenti da questa base. Il marco fino al dicembre 2001, l'euro dal gennaio 2002 (CHANGEOVER, game.js).
+     CHI SI SCEGLIE (D96): SPD, Verdi, CDU/CSU e FDP; la PDS no (la misura è nella scheda, «L154-3»).
+     ============================================================================================================ */
+  de2000: {
+    id:'de2000', era:LINEA_DE, nome:'Germania 2000', anno:2000, paese:'germania',
+    turnMandato: 2,
+    sistema: 'parlamentare', comeSiVince: 'parlamentare', coalizione: true, cadutaGoverno: true,
+    sfiduciaCostruttiva: true, sbarramento: 5,
+    mandatoMesi: 48, mandatiMax: null,
+    titoloRuolo: 'Cancelliere', sedeGoverno: 'la Cancelleria',
+    capitale: 'Berlino',
+    ue: true,
+    intermedie: [ {tipo:'Elezioni nei Länder', mese:24, tocca:'regione'} ],
+    partiti: [
+      { id:'de_spd', nome:'SPD',     orientamento:'centrosinistra', base:{ lavoratori:0.6, pensionati:0.2, giovani:0.2 },    forza:43.5, forzaAncora:33.2, asse:-1, alleati:['de_grn'], alleatiRiserva:['de_cdu'] },
+      { id:'de_cdu', nome:'CDU/CSU', orientamento:'centrodestra',   base:{ cattolici:0.35, cetomedio:0.35, imprenditori:0.3 }, forza:37.3, forzaAncora:37.2, asse:1,  alleati:['de_fdp'], alleatiRiserva:['de_spd'] },
+      { id:'de_grn', nome:'Verdi',   orientamento:'ecologista',     base:{ giovani:0.6, cetomedio:0.4 },                     forza:7.1,  forzaAncora:9.4,  asse:-2, alleati:['de_spd'] },
+      { id:'de_fdp', nome:'FDP',     orientamento:'liberale',       base:{ imprenditori:0.5, cetomedio:0.5 },                forza:6.6,  forzaAncora:11.0, asse:1,  alleati:['de_cdu'] },
+      { id:'de_lnk', nome:'PDS',     orientamento:'sinistra',       base:{ lavoratori:0.6, giovani:0.4 },                    forza:5.4,  forzaAncora:4.5,  asse:-2, alleati:[],
+        selezionabile:false, nota:'La PDS non governa mai a livello federale: non è una carriera che si possa giocare' },   // D96
+    ],
+    /* il Bundestag del 27 settembre 1998 (669), in carica all'avvio */
+    seggi: { de_spd:44.5, de_cdu:36.6, de_grn:7.0, de_fdp:6.4, de_lnk:5.4 },
+    /* ⚠ cifre della scheda §2, ordine di grandezza (Destatis/Bundesbank da confermare): miliardi di marchi fino al 2001; il changeover
+       del gennaio 2002 divide il PIL per 1,95583 e passa all'euro. `S.pil` non cresce (D67). */
+    economia: { pil:4030, debito:59, deficit:-1.2, inflazione:1.4, inflazioneTetto:8, crescita:4.5, disoccupazione:10.7, disoccupazionePavimento:0.5 },
+    debtAncora: 59,
+    inflazione: 1.4,
+    crescita: 4.5,
+    logorioEra: 0.0024,                         // D104: il valore di de1990 come PUNTO DI PARTENZA; la sweep sull'urna del 2002/1 è nel rapporto di L154-3 (scheda)
+    valuta: VALUTA_MARCO,
+    quotaSpesa: 0.30,                           // ⚠ come le porte tedesche prima: da confermare
+    intro: "Germania, 2000. Il governo lavora a Berlino da pochi mesi, e per la prima volta è rosso-verde. I disoccupati sono ancora intorno ai quattro milioni, e fra due anni il marco non ci sarà più.",
+    contesto: [
+      "Germania, gennaio 2000. Berlino è un cantiere: le gru sopra il vecchio confine, la cupola di vetro del Parlamento aperta ai visitatori. Nei ministeri ci sono ancora gli scatoloni nei corridoi.",
+      "L'economia cresce, ma all'Est la disoccupazione è il doppio che all'Ovest. Dal 2002 i prezzi si scriveranno in euro, e i sondaggi dicono che la maggioranza avrebbe tenuto il marco.",
+      "Socialdemocratici e Verdi governano insieme dal 1998: è la prima volta. L'Unione cristiana è all'opposizione dopo sedici anni di governo, alle prese con lo scandalo dei suoi conti.",
     ],
   },
   /* ============================================================================================================
@@ -2708,6 +2762,18 @@ const PILASTRI_LINEA = [
     t:'La notte del Muro',
     text:'Da settembre l\'Est si svuota: l\'Ungheria ha aperto la frontiera, a Praga il giardino dell\'ambasciata si è riempito di tende, a Lipsia ogni lunedì la piazza è più grande e nessuno spara. La sera del 9 novembre un portavoce dell\'Est legge male un foglio in conferenza stampa, e in poche ore i berlinesi dell\'est sono ai posti di blocco. I soldati aprono. A Bonn i deputati si alzano in piedi e cantano l\'inno. Stanotte, al centro di Berlino, il paese non ha più un confine.',
     logx:'La notte del Muro: i berlinesi dell\'est passano i posti di blocco, e il paese si ritrova a Berlino.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  /* L153-2 · i due pilastri del decennio tedesco '90 (scheda §I-H, byte-identici). G8: «List of disasters in Germany by death toll» (en.wikipedia,
+     letta il 30/9) fra il 1992 e il 1999 dà sopra i 50 solo questi due; il Concorde del luglio 2000 (97 tedeschi) è fuori dalla finestra del lotto. */
+  { id:'pde90_puertoplata', linea:LINEA_DE, anno:1996, mese:2, era:'de1990', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Puerto Plata',
+    text:'Nella notte fra il 6 e il 7 febbraio un aereo a noleggio decollato da Puerto Plata, nella Repubblica Dominicana, e diretto a Berlino e a Francoforte precipita nell\'Atlantico pochi minuti dopo il decollo. A bordo ci sono centottantanove persone, quasi tutte turisti che tornavano a casa dalle vacanze: centosessantasette sono tedeschi. Non si salva nessuno.',
+    logx:'Puerto Plata: un aereo a noleggio cade in mare dopo il decollo. Centottantanove morti, centosessantasette tedeschi.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pde90_eschede', linea:LINEA_DE, anno:1998, mese:6, era:'de1990', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Eschede',
+    text:'La mattina del 3 giugno un treno ad alta velocità partito da Monaco e diretto ad Amburgo deraglia a duecento chilometri all\'ora a Eschede, in Bassa Sassonia: il cerchione di una ruota si è spezzato. Le carrozze urtano il pilone di un ponte stradale, che crolla sul treno. Muoiono centouno persone; i feriti sono un centinaio. Accorrono soccorritori da tutta la regione, e lavorano per giorni.',
+    logx:'Eschede: un treno ad alta velocità deraglia e un ponte gli crolla sopra. Centouno morti.',
     ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
 ];
 
@@ -3753,7 +3819,7 @@ const BEAT_LEGGERI = [
    {l:'Prosegui', e:'', f:function(){}}]},
   {id:'lgfr80_deserto', era:'fr1980', registro:'leggero', cond:()=>S.month===1, kick:'Il paese', t:'La corsa nel deserto', text:'A gennaio, per due settimane, il paese segue moto e camion attraverso il Sahara. Ogni anno qualcuno non torna.', ch:[
    {l:'Prosegui', e:'', f:function(){}}]},
-  {id:'lgfr80_lunedi', era:'fr1980', registro:'leggero', cond:()=>S.year===1987&&S.month>=10&&S.month<=12, kick:'Il paese', t:'Il lunedì nero', text:'La Borsa di New York perde un quarto in un giorno e quella di Parigi la segue: chi ha comprato le azioni delle privatizzazioni scopre che cosa vuol dire.', ch:[
+  {id:'lgfr80_lunedi', era:'fr1980', registro:'leggero', cond:()=>(S.year===1987&&S.month>=10)||(S.year===1988&&S.month<=3), kick:'Il paese', t:'Il lunedì nero', text:'La Borsa di New York perde un quarto in un giorno e quella di Parigi la segue: chi ha comprato le azioni delle privatizzazioni scopre che cosa vuol dire.', ch:[
    {l:'Prosegui', e:'', f:function(){}}]},
   // L150-2 · respiro quotidiano: sei beat senza data (o di stagione) per fr1980 (LOTTO-L150-2-RESPIRO.md).
   {id:'lgfr80_festamusica', era:'fr1980', registro:'leggero', cond:()=>S.year>=1982&&S.month===6, kick:'Il paese', t:'La festa della musica', text:'Nel giorno più lungo dell\'anno chiunque può suonare in strada: fanfare, cantine rock, fisarmoniche, e le città che non dormono fino all\'alba.', ch:[
@@ -3958,6 +4024,19 @@ const BEAT_LEGGERI = [
   {id:'lgde80_diapositive', era:'de1980', registro:'leggero', kick:'Il paese', t:'La serata delle diapositive', text:'L\'aereo non è più una stravaganza: isole d\'inverno, spiagge d\'estate, e al ritorno le diapositive da proiettare agli amici sul muro del salotto.', ch:[
     {l:'Ti fai invitare', e:'Duecento fotografie di spiaggia', f:function(){}},
     {l:'Trovi una scusa', e:'Sarà per la prossima volta', f:function(){}} ]},
+  // L153-2 · i dodici beat del decennio tedesco '90 (scheda §I-D).
+  {id:'lgde90_televisioni', era:'de1990', registro:'leggero', cond:()=>S.year>=1992&&S.year<=1994, kick:'Il paese', t:'Il calcio cambia canale', text:'Le televisioni private hanno comprato il campionato: il sabato sera le partite non sono più sul canale di sempre, e fra un gol e l\'altro c\'è la pubblicità. Nei bar si discute più del telecomando che del fuorigioco.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde90_utilitaria', era:'de1990', registro:'leggero', cond:()=>S.year>=1991&&S.year<=1993, kick:'Il paese', t:'L\'ultima utilitaria', text:'In Sassonia esce dalla fabbrica l\'ultima piccola automobile dell\'Est, quella che per più di trent\'anni ha avuto il motore a due tempi. Per averne una si aspettava dodici anni; adesso c\'è chi la lascia al primo che passa in cambio di una cassa di birra.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde90_sapori', era:'de1990', registro:'leggero', cond:()=>S.year>=1993&&S.year<=1997, kick:'Il paese', t:'I sapori di prima', text:'Nei supermercati dell\'Est tornano sugli scaffali i cetriolini, la senape e lo spumante di prima dell\'unità, che nel 1990 nessuno voleva più vedere. Qualcuno li compra per il gusto, qualcuno per dire una cosa senza dirla.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde90_impacchettato', era:'de1990', registro:'leggero', cond:()=>S.year===1995&&S.month>=6&&S.month<=9, kick:'Il paese', t:'Il palazzo impacchettato', text:'Due artisti hanno avvolto il vecchio palazzo del Parlamento, a Berlino, in centomila metri quadrati di tela argentata. Il Bundestag ne ha discusso in aula prima di dire sì; adesso sul prato davanti ci sono i pic-nic, e in due settimane passano cinque milioni di persone.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde90_europei', era:'de1990', registro:'leggero', cond:()=>S.year===1996&&S.month>=6&&S.month<=9, kick:'Il paese', t:'Il gol che chiude la partita', text:'A Londra la nazionale vince il campionato d\'Europa con un gol nei supplementari che, per una regola nuova, fa finire la partita in quell\'istante. È il primo titolo della squadra unita: in campo c\'è anche chi è cresciuto all\'Est.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde90_omino', era:'de1990', registro:'leggero', cond:()=>S.year>=1996, kick:'Il paese', t:'L\'omino del semaforo', text:'L\'omino dei semafori dell\'Est, quello col cappello, doveva sparire per far posto a quello dell\'Ovest. È nata una petizione, e l\'omino è rimasto: adesso lo stampano sulle magliette e lo vendono ai turisti.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde90_ortografia', era:'de1990', registro:'leggero', cond:()=>S.year>=1996&&S.year<=1998, kick:'Il paese', t:'La riforma dell\'ortografia', text:'A scuola si impara a scrivere con le regole nuove: tre consonanti di fila, doppie esse dove prima non c\'erano. Un gruppo di scrittori protesta, i giornali si dividono, e i nonni correggono i compiti dei nipoti sbagliando.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde90_negozi', era:'de1990', registro:'leggero', cond:()=>S.year>=1997, kick:'Il paese', t:'I negozi fino alle otto', text:'Per quarant\'anni i negozi hanno chiuso alle sei e mezza. Ora possono restare aperti fino alle otto di sera, e il sabato fino alle quattro. I clienti scoprono che si può fare la spesa dopo il lavoro; le commesse, che l\'autobus delle otto e un quarto è l\'ultimo.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde90_azioni', era:'de1990', registro:'leggero', cond:()=>S.year>=1997&&S.year<=1998, kick:'Il paese', t:'Le azioni del telefono', text:'La società dei telefoni è andata in Borsa, con una campagna di pubblicità in televisione. Quasi due milioni di piccoli risparmiatori hanno comprato le azioni, molti per la prima volta: il paese del libretto di risparmio guarda i listini ogni mattina.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde90_pulcino', era:'de1990', registro:'leggero', cond:()=>S.year>=1997&&S.year<=1998, kick:'Il paese', t:'Il pulcino in tasca', text:'I bambini portano a scuola un uovo di plastica con uno schermo: dentro c\'è un pulcino da nutrire e pulire, che suona quando ha fame e muore se lo si dimentica. Le maestre li sequestrano, e durante la lezione i cassetti della cattedra cinguettano.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde90_parata', era:'de1990', registro:'leggero', cond:()=>S.year>=1996&&stagioneMese()==='estate', kick:'Il paese', t:'La parata dei camion', text:'D\'estate, a Berlino, centinaia di migliaia di ragazzi ballano dietro camion carichi di altoparlanti lungo il viale che attraversa il parco. La musica non ha parole; ufficialmente è una manifestazione politica, e il motto cambia ogni anno.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde90_telefonino', era:'de1990', registro:'leggero', cond:()=>S.year>=1998, kick:'Il paese', t:'Il telefono in tasca', text:'Con le schede ricaricabili il telefono portatile non è più una cosa da dirigenti. Sui treni tutti imparano la stessa frase, detta a voce alta: «Sono in treno». E a tavola qualcuno comincia a posarlo accanto al piatto.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
 ];
 
 /* ===== F1 — LA TELEFONATA. Un'interruzione, non una carta: overlay a squillo, due opzioni secche, decisione a
@@ -5880,6 +5959,43 @@ const DOSSIERS=[
    {l:'Calmiere e canone concordato',e:'Sollievo agli inquilini; i proprietari protestano',pleases:'progressista',f:()=>{gd('giovani',4); gd('lavoratori',2); gd('cetomedio',-3);}},
    {l:'Incentivi a costruire e affittare',e:'Più offerta domani, debito oggi',pleases:'conservatore',costo:{debito:0.4},f:()=>{S.ind.debt+=0.4; gd('imprenditori',3); gd('giovani',1);}},
  ]},
+ // L153-4 · varietà del ministro (30/9): 9 dossier del presente per il ministro dell'Economia — era 'contemporanea', senza paesi e senza cond (LOTTO-L153-4-DOSSIER.md).
+ {id:'ms_ec_eredita',era:'contemporanea',min:'economia',kick:'Fisco',t:'La tassa sulle grandi eredità',text:'Una proposta alza l\'imposta sulle eredità sopra una soglia molto alta, per abbassare le tasse sul lavoro. Le famiglie con un\'impresa temono di doverla vendere.',ch:[
+   {l:'Alzala, sopra la soglia',e:'Entrate nuove; le grandi famiglie fanno le valigie',pleases:'progressista',costo:{debito:-0.2},f:()=>{S.ind.debt-=0.2; gd('lavoratori',2); gd('giovani',1); gd('imprenditori',-3);}},
+   {l:'Resta com\'è',e:'Nessuno scossone; il lavoro resta il più tassato',pleases:'conservatore',f:()=>{gd('imprenditori',2); gd('lavoratori',-1);}},
+ ]},
+ {id:'ms_ec_giudizio',era:'contemporanea',min:'economia',kick:'Mercati',t:'Un\'agenzia minaccia di abbassare il voto al debito',text:'Un\'agenzia di valutazione annuncia che rivedrà il giudizio sul debito pubblico. I mercati aspettano un segnale entro poche settimane.',ch:[
+   {l:'Una correzione dei conti, subito',e:'I mercati si calmano; qualcuno paga',pleases:'tecnico',costo:{debito:-0.3},f:()=>{S.ind.debt-=0.3; gd('lavoratori',-2); gd('pensionati',-1); gd('imprenditori',1);}},
+   {l:'I conti sono in ordine: nessuna manovra',e:'Si tiene il punto; i giornali contano i giorni',pleases:'populista',f:()=>{gd('lavoratori',1); stampad(-2);}},
+ ]},
+ {id:'ms_ec_sale',era:'contemporanea',min:'economia',kick:'Gioco d\'azzardo',t:'Le sale da gioco davanti alle scuole',text:'Le macchinette rendono allo Stato quanto una piccola tassa. I sindaci chiedono di allontanarle dalle scuole e di spegnerle la sera.',ch:[
+   {l:'Distanze minime e orari ridotti',e:'Meno rovine in famiglia; meno entrate',pleases:'progressista',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; gd('cattolici',2); gd('cetomedio',2); gd('imprenditori',-1);}},
+   {l:'Il gettito serve: più controlli e basta',e:'Le casse tengono; i sindaci protestano',pleases:'tecnico',f:()=>{gd('cattolici',-2); stampad(-1);}},
+ ]},
+ {id:'ms_ec_sportello',era:'contemporanea',min:'economia',kick:'Banche',t:'L\'ultimo sportello chiude in paese',text:'Le banche chiudono le filiali nei paesi piccoli: il primo sportello è a quaranta minuti. Chi non usa il telefono resta senza contanti.',ch:[
+   {l:'Un servizio minimo obbligatorio',e:'Lo sportello resta; le banche si lamentano',pleases:'populista',f:()=>{gd('pensionati',3); gd('imprenditori',-2);}},
+   {l:'Il contante negli uffici postali',e:'Una soluzione che costa poco; il paese perde comunque la sua banca',pleases:'tecnico',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; gd('pensionati',1); gd('cetomedio',1);}},
+ ]},
+ {id:'ms_ec_giganti',era:'contemporanea',min:'economia',kick:'Fisco',t:'I giganti della rete pagano l\'uno per cento',text:'Le grandi piattaforme fatturano miliardi nel paese e versano le tasse altrove. Si propone un\'imposta sui ricavi realizzati qui.',ch:[
+   {l:'Un\'imposta nazionale, da subito',e:'Entrate nuove; minacce di ritorsioni',pleases:'populista',costo:{debito:-0.2},f:()=>{S.ind.debt-=0.2; gd('lavoratori',2); gd('cetomedio',1); repd(-2);}},
+   {l:'Aspetta l\'accordo fra i governi',e:'Nessuna lite; le tasse restano altrove',pleases:'tecnico',f:()=>{repd(1); gd('lavoratori',-1); stampad(-1);}},
+ ]},
+ {id:'ms_ec_rata',era:'contemporanea',min:'economia',kick:'Casa',t:'La rata del mutuo è salita di un terzo',text:'Con i tassi in salita chi ha un mutuo variabile paga un terzo in più. Le famiglie giovani sono le più esposte.',ch:[
+   {l:'Un fondo per chi non riesce a pagare',e:'Nessuno perde la casa; spesa nuova',pleases:'progressista',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; gd('cetomedio',3); gd('giovani',1);}},
+   {l:'Le banche allunghino le scadenze',e:'Rate più leggere, per più anni; le banche brontolano',pleases:'tecnico',f:()=>{gd('cetomedio',1); gd('imprenditori',-1);}},
+ ]},
+ {id:'ms_ec_bonus',era:'contemporanea',min:'economia',kick:'Spesa',t:'Cento piccoli sconti che nessuno conta più',text:'Il fisco ha accumulato centinaia di detrazioni: ognuna ha i suoi beneficiari, tutte insieme valgono quanto una riforma. Si propone di cancellarle e abbassare le aliquote.',ch:[
+   {l:'Cancellale e abbassa le tasse a tutti',e:'Un fisco più semplice; chi perde il suo sconto si fa sentire',pleases:'tecnico',f:()=>{gd('imprenditori',2); gd('cetomedio',1); gd('lavoratori',-2);}},
+   {l:'Restano: ognuna ha la sua ragione',e:'Nessuno protesta; nessuno ci capisce più niente',pleases:'conservatore',f:()=>{gd('lavoratori',1); stampad(-1);}},
+ ]},
+ {id:'ms_ec_sottocosto',era:'contemporanea',min:'economia',kick:'Commercio',t:'Merci che arrivano sottocosto',text:'Acciaio e pannelli arrivano dall\'estero a prezzi che nessuna fabbrica del paese può reggere. I produttori chiedono dazi.',ch:[
+   {l:'Chiedi i dazi',e:'Le fabbriche respirano; i prezzi salgono',pleases:'populista',f:()=>{gd('lavoratori',2); gd('imprenditori',1); gd('cetomedio',-1); repd(-1);}},
+   {l:'Mercato aperto',e:'Prezzi bassi per le famiglie; qualche fabbrica chiude',pleases:'tecnico',f:()=>{gd('cetomedio',1); gd('lavoratori',-2);}},
+ ]},
+ {id:'ms_ec_adeguamento',era:'contemporanea',min:'economia',kick:'Previdenza',t:'Le pensioni inseguono i prezzi',text:'Con i prezzi in salita le pensioni hanno perso potere d\'acquisto. Adeguarle tutte costa quanto una manovra.',ch:[
+   {l:'Adeguamento pieno per tutti',e:'I pensionati ringraziano; i giovani pagano',pleases:'populista',costo:{debito:0.4},f:()=>{S.ind.debt+=0.4; gd('pensionati',4); gd('giovani',-2);}},
+   {l:'Pieno solo per le pensioni basse',e:'Si protegge chi ha meno; gli altri protestano',pleases:'tecnico',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; gd('pensionati',1); gd('cetomedio',-1);}},
+ ]},
  // ----- LAVORO (+6) -----
  {id:'rider',min:'lavoro',kick:'Piattaforme',t:'I rider chiedono tutele',text:'I lavoratori delle piattaforme digitali chiedono contratti, contributi e assicurazione.',ch:[
    {l:'Tutele piene da dipendenti',e:'Diritti estesi; le piattaforme minacciano rincari',pleases:'progressista',f:()=>{gd('lavoratori',4); gd('giovani',3); gd('imprenditori',-4);}},
@@ -5904,6 +6020,57 @@ const DOSSIERS=[
  {id:'quattro_giorni',min:'lavoro',kick:'Tempi di lavoro',t:'La settimana corta entra nel dibattito',text:'Una grande azienda sperimenta la settimana di quattro giorni a parità di salario. Il governo che dice?',ch:[
    {l:'Incoraggia la sperimentazione',e:'Modernità; gli industriali storcono il naso',pleases:'progressista',f:()=>{gd('giovani',3); gd('lavoratori',2); gd('imprenditori',-2);}},
    {l:'Questione privata tra le parti',e:'Neutralità prudente',pleases:'conservatore',f:()=>{gd('imprenditori',1);}},
+ ]},
+ // L152-3 · varietà del ministro (30/9): 11 dossier del presente per il ministro del Lavoro — era 'contemporanea', senza paesi e senza cond (LOTTO-L152-3-DOSSIER.md).
+ {id:'ms_lv_apprendistato',era:'contemporanea',min:'lavoro',kick:'Formazione',t:'L\'apprendistato che nessuno usa',text:'Le imprese dicono di non trovare tecnici, i ragazzi di non trovare un posto. Il contratto di apprendistato esiste, ma lo firmano in pochi.',ch:[
+   {l:'Paga lo Stato il primo anno',e:'Più apprendisti; il conto al bilancio',pleases:'progressista',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; gd('giovani',3); gd('imprenditori',2);}},
+   {l:'Meno carte, stessi soldi',e:'Regole più snelle; i sindacati temono abusi',pleases:'tecnico',f:()=>{gd('imprenditori',2); gd('lavoratori',-1);}},
+ ]},
+ {id:'ms_lv_uscita',era:'contemporanea',min:'lavoro',kick:'Pensioni',t:'Uscire prima dal lavoro',text:'Chi fa lavori pesanti chiede di andare in pensione qualche anno prima. I conti della previdenza dicono che ogni anno costa.',ch:[
+   {l:'Uscita anticipata per i lavori gravosi',e:'Sollievo per chi non ce la fa più; spesa in più',pleases:'populista',costo:{debito:0.4},f:()=>{S.ind.debt+=0.4; gd('lavoratori',4); gd('giovani',-1);}},
+   {l:'Le regole restano quelle',e:'Conti in ordine; delusione nelle fabbriche',pleases:'tecnico',f:()=>{gd('lavoratori',-3); gd('imprenditori',1);}},
+ ]},
+ {id:'ms_lv_padri',era:'contemporanea',min:'lavoro',kick:'Famiglia',t:'Il congedo dei padri',text:'Una proposta porta il congedo di paternità a tre mesi, pagati e non cedibili alla madre. Le piccole imprese temono i buchi in organico.',ch:[
+   {l:'Tre mesi, pagati',e:'Famiglie e giovani contenti; costa',pleases:'progressista',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; gd('giovani',3); gd('cetomedio',1); gd('imprenditori',-2);}},
+   {l:'Facoltativo, a carico di chi lo chiede',e:'Nessuna spesa; lo useranno in pochi',pleases:'conservatore',f:()=>{gd('imprenditori',2); gd('giovani',-2);}},
+ ]},
+ {id:'ms_lv_fabbrica',era:'contemporanea',min:'lavoro',kick:'Crisi aziendale',t:'Una fabbrica ferma e mille famiglie',text:'Uno stabilimento ha fermato le linee per mancanza di commesse. I lavoratori chiedono che lo Stato paghi l\'orario ridotto finché non riparte.',ch:[
+   {l:'Un anno di sostegno al reddito',e:'Nessuno a casa; il bilancio paga',pleases:'progressista',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; gd('lavoratori',4);}},
+   {l:'Sostegno solo con un piano di rilancio',e:'Soldi legati ai fatti; mesi d\'incertezza',pleases:'tecnico',f:()=>{gd('lavoratori',-2); gd('imprenditori',2);}},
+ ]},
+ {id:'ms_lv_campi',era:'contemporanea',min:'lavoro',kick:'Agricoltura',t:'Braccianti pagati a giornata, in nero',text:'Un\'inchiesta mostra squadre di braccianti reclutate all\'alba e pagate una miseria. I produttori dicono che ai prezzi di oggi non c\'è altro modo.',ch:[
+   {l:'Controlli e pene per chi recluta',e:'Legalità nei campi; i produttori protestano',pleases:'progressista',f:()=>{gd('lavoratori',3); gd('cattolici',1); gd('imprenditori',-2);}},
+   {l:'Un marchio per chi è in regola',e:'Si premia chi è onesto; chi sfrutta continua',pleases:'tecnico',f:()=>{gd('imprenditori',1); gd('lavoratori',-1);}},
+ ]},
+ {id:'ms_lv_assistenti',era:'contemporanea',min:'lavoro',kick:'Cura',t:'Chi assiste gli anziani in casa lavora senza contratto',text:'Centinaia di migliaia di persone assistono gli anziani nelle case, quasi tutte senza contratto. Metterle in regola costa alle famiglie.',ch:[
+   {l:'Sconto fiscale a chi mette in regola',e:'Contratti veri; entrate in meno',pleases:'progressista',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; gd('pensionati',2); gd('lavoratori',2);}},
+   {l:'Più controlli nelle case',e:'La legge vale per tutti; le famiglie si sentono nel mirino',pleases:'tecnico',f:()=>{gd('lavoratori',1); gd('pensionati',-2); gd('cetomedio',-1);}},
+ ]},
+ {id:'ms_lv_cinquanta',era:'contemporanea',min:'lavoro',kick:'Riqualificazione',t:'Licenziati a cinquant\'anni',text:'Chi perde il posto dopo i cinquanta raramente ne trova un altro. Si propone un assegno per tornare a studiare un mestiere.',ch:[
+   {l:'Un assegno di formazione',e:'Una seconda possibilità; spesa nuova',pleases:'progressista',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; gd('lavoratori',3); gd('cetomedio',1);}},
+   {l:'Sgravi a chi li assume',e:'Decide il mercato; aiuto alle imprese',pleases:'conservatore',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; gd('imprenditori',2); gd('lavoratori',1);}},
+ ]},
+ {id:'ms_lv_servizi',era:'contemporanea',min:'lavoro',kick:'Scioperi',t:'Scioperi nei trasporti ogni venerdì',text:'Il terzo sciopero del mese ferma treni e autobus. I pendolari sono esasperati, i sindacati dicono che è l\'unica voce che hanno.',ch:[
+   {l:'Regole più strette sui servizi minimi',e:'I pendolari respirano; i sindacati insorgono',pleases:'conservatore',f:()=>{gd('cetomedio',3); gd('lavoratori',-3);}},
+   {l:'Un tavolo sui contratti scaduti',e:'Si tratta; gli scioperi per ora continuano',pleases:'progressista',f:()=>{gd('lavoratori',2); gd('cetomedio',-2);}},
+ ]},
+ {id:'ms_lv_buste',era:'contemporanea',min:'lavoro',kick:'Parità',t:'Le buste paga allo scoperto',text:'A parità di mansione le donne guadagnano meno. Una proposta obbliga le aziende a pubblicare le differenze di paga.',ch:[
+   {l:'Obbligo di trasparenza',e:'I numeri in chiaro; le imprese contano le carte',pleases:'progressista',f:()=>{gd('giovani',2); gd('lavoratori',2); gd('imprenditori',-2);}},
+   {l:'Una certificazione volontaria',e:'Nessun obbligo; cambierà poco',pleases:'conservatore',f:()=>{gd('imprenditori',2); gd('giovani',-1);}},
+ ]},
+ {id:'ms_lv_tirocini',era:'contemporanea',min:'lavoro',kick:'Giovani',t:'Tirocini gratis, uno dopo l\'altro',text:'Molti ragazzi passano anni fra un tirocinio e l\'altro senza paga. Le associazioni chiedono un compenso minimo per legge.',ch:[
+   {l:'Compenso minimo obbligatorio',e:'Fine del lavoro gratis; meno posti offerti',pleases:'progressista',f:()=>{gd('giovani',4); gd('imprenditori',-2);}},
+   {l:'Un limite alla durata',e:'Si ferma la catena; la paga resta facoltativa',pleases:'tecnico',f:()=>{gd('giovani',1); gd('imprenditori',-1);}},
+ ]},
+ {id:'ms_lv_sportelli',era:'contemporanea',min:'lavoro',kick:'Collocamento',t:'Gli uffici del lavoro non trovano lavoro a nessuno',text:'Una relazione dice che gli uffici pubblici per l\'impiego collocano una persona su trenta. Rifarli costa, chiuderli fa rumore.',ch:[
+   {l:'Rifarli: personale e computer',e:'Un servizio che funziona, fra qualche anno',pleases:'tecnico',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; gd('lavoratori',2); gd('giovani',2);}},
+   {l:'Affida il servizio alle agenzie private',e:'Più rapido; i sindacati parlano di resa',pleases:'conservatore',f:()=>{gd('imprenditori',2); gd('lavoratori',-2);}},
+ ]},
+ // L153-3 · al posto di ms_lv_ispettori (doppione di sicurezza_lavoro): il Lavoro a dodici. Non è il fatto di `rider` (le tutele di chi lavora
+ // per le piattaforme) né di `ia_lavoro` (i reparti sostituiti dalle macchine): qui è la macchina che licenzia.
+ {id:'ms_lv_programma',era:'contemporanea',min:'lavoro',kick:'Tecnologia',t:'Licenziati da un programma',text:'Nei magazzini un programma misura ogni minuto di lavoro, assegna un punteggio e manda la lettera di licenziamento a chi scende sotto la soglia. Nessuna persona la firma.',ch:[
+   {l:'Ogni licenziamento lo firma una persona',e:'Qualcuno risponde delle decisioni; le imprese parlano di passo indietro',pleases:'progressista',f:()=>{gd('lavoratori',3); gd('imprenditori',-2);}},
+   {l:'I criteri siano pubblici, e basta',e:'Si sa come si viene giudicati; la lettera la manda ancora il programma',pleases:'tecnico',f:()=>{gd('lavoratori',1); gd('imprenditori',1);}},
  ]},
  // ----- INTERNO (+7) -----
  {id:'baby_gang',era:'universale',min:'interno',cond:()=>S.ind.sicurezza<55,kick:'Ordine pubblico',t:'Criminalità minorile in crescita',text:'Cresce il numero di reati commessi da minorenni nelle città. Repressione o percorso educativo?',ch:[
@@ -5934,16 +6101,57 @@ const DOSSIERS=[
    {l:'Campagna nazionale e numero dedicato',e:'Prevenzione capillare',pleases:'progressista',f:()=>{gd('pensionati',5);}},
    {l:'Aggravante specifica e pattuglie',e:'Deterrenza giudiziaria',pleases:'conservatore',f:()=>{S.ind.sicurezza+=1; gd('pensionati',3);}},
  ]},
+ // L153-4 · varietà del ministro (30/9): 10 dossier del presente per il ministro dell'Interno — era 'contemporanea', senza paesi e senza cond (LOTTO-L153-4-DOSSIER.md).
+ {id:'ms_in_volti',era:'contemporanea',min:'interno',kick:'Sicurezza',t:'Le telecamere che riconoscono i volti',text:'La polizia chiede di accendere nelle stazioni il riconoscimento automatico dei volti. Funziona, e sbaglia: soprattutto con alcuni.',ch:[
+   {l:'Accendile nelle stazioni',e:'Qualche ricercato preso; tutti gli altri schedati',pleases:'conservatore',f:()=>{S.ind.sicurezza+=2; gd('pensionati',2); gd('giovani',-3);}},
+   {l:'Solo telecamere normali',e:'I diritti restano interi; la polizia dice che le hai legato le mani',pleases:'progressista',f:()=>{gd('giovani',2); gd('pensionati',-1);}},
+ ]},
+ {id:'ms_in_autoscale',era:'contemporanea',min:'interno',kick:'Soccorso',t:'I pompieri con le autoscale di trent\'anni fa',text:'In metà delle caserme dei vigili del fuoco i mezzi hanno trent\'anni. L\'ultima autoscala si è fermata durante un intervento.',ch:[
+   {l:'Un piano di mezzi nuovi',e:'Soccorsi più rapidi; spesa vera',pleases:'tecnico',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; S.ind.sicurezza+=1; gd('cetomedio',2); gd('lavoratori',1);}},
+   {l:'Mezzi condivisi fra i comuni vicini',e:'Si spende poco; l\'autoscala può essere altrove',pleases:'conservatore',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; gd('cetomedio',-1);}},
+ ]},
+ {id:'ms_in_lontani',era:'contemporanea',min:'interno',kick:'Voto',t:'Chi vive lontano da casa non riesce a votare',text:'Milioni di studenti e lavoratori vivono lontano dal comune dove sono iscritti. Per votare devono attraversare il paese a loro spese.',ch:[
+   {l:'Si vota dove si vive',e:'Più giovani alle urne; c\'è chi teme i brogli',pleases:'progressista',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; gd('giovani',3); gd('pensionati',-1);}},
+   {l:'Un rimborso per il viaggio',e:'Un aiuto; il viaggio resta da fare',pleases:'conservatore',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; gd('giovani',1);}},
+ ]},
+ {id:'ms_in_notti',era:'contemporanea',min:'interno',kick:'Città',t:'Le notti in piazza e chi vuole dormire',text:'Nei centri delle città si beve e si canta fino all\'alba. I residenti fanno causa ai comuni, e vincono.',ch:[
+   {l:'Locali chiusi a mezzanotte nei centri',e:'Si dorme; i locali e i ragazzi protestano',pleases:'conservatore',f:()=>{gd('pensionati',2); gd('cetomedio',1); gd('giovani',-3); gd('imprenditori',-1);}},
+   {l:'Decidano i sindaci, strada per strada',e:'Ogni città a modo suo; le cause continuano',pleases:'tecnico',f:()=>{gd('giovani',1); gd('pensionati',-2);}},
+ ]},
+ {id:'ms_in_sindaci',era:'contemporanea',min:'interno',kick:'Comuni',t:'I sindaci minacciati si dimettono',text:'Lettere con proiettili, auto bruciate, insulti davanti a casa: in un anno decine di sindaci hanno lasciato. Nei comuni piccoli nessuno si candida più.',ch:[
+   {l:'Protezione e spese legali pagate',e:'Chi amministra non è solo; costa',pleases:'tecnico',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; S.ind.sicurezza+=1; gd('cetomedio',2);}},
+   {l:'Pene più dure per chi minaccia un eletto',e:'Un segnale; i processi arrivano dopo anni',pleases:'conservatore',f:()=>{gd('pensionati',1); gd('cetomedio',1); gd('giovani',-1);}},
+ ]},
+ {id:'ms_in_allerta',era:'contemporanea',min:'interno',kick:'Emergenze',t:'L\'allarme sul telefono non è arrivato',text:'Alla prova generale il messaggio d\'allerta ha raggiunto un telefono su tre. Il sistema è costato molto e va rifatto.',ch:[
+   {l:'Rifai il sistema d\'allerta',e:'Funzionerà; si paga due volte',pleases:'tecnico',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; S.ind.sicurezza+=1; gd('cetomedio',2);}},
+   {l:'Sirene e volontari: quelli funzionano',e:'La vecchia strada; chi è sordo alle sirene resta fuori',pleases:'conservatore',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; gd('pensionati',2); gd('giovani',-1);}},
+ ]},
+ {id:'ms_in_documenti',era:'contemporanea',min:'interno',kick:'Servizi',t:'Tre mesi per un documento d\'identità',text:'Per rinnovare un documento si aspetta un trimestre; c\'è chi perde un viaggio o un lavoro. Gli sportelli chiudono alle due.',ch:[
+   {l:'Sportelli aperti la sera e il sabato',e:'Le code si accorciano; straordinari da pagare',pleases:'progressista',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; gd('lavoratori',2); gd('cetomedio',2);}},
+   {l:'Tutto dal telefono',e:'Rapido per chi sa usarlo; gli anziani restano in coda',pleases:'tecnico',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; gd('giovani',2); gd('pensionati',-2);}},
+ ]},
+ {id:'ms_in_campanili',era:'contemporanea',min:'interno',kick:'Comuni',t:'Comuni da trecento abitanti',text:'Migliaia di comuni hanno meno di cinquecento abitanti e un solo impiegato. Si propone di fonderli; nessuno vuole perdere il nome sul cartello.',ch:[
+   {l:'Fusione obbligatoria sotto una soglia',e:'Risparmi e servizi migliori; i paesi insorgono',pleases:'tecnico',costo:{debito:-0.2},f:()=>{S.ind.debt-=0.2; gd('pensionati',-3); gd('cattolici',-1); gd('imprenditori',1);}},
+   {l:'Servizi in comune, campanili salvi',e:'Nessuno perde il cartello; si risparmia poco',pleases:'conservatore',f:()=>{gd('pensionati',1); gd('cattolici',1);}},
+ ]},
+ {id:'ms_in_divisa',era:'contemporanea',min:'interno',kick:'Forze dell\'ordine',t:'La telecamera sulla divisa',text:'Dopo un fermo finito male, si chiede che ogni agente porti una telecamera accesa. I sindacati di polizia dicono che è sfiducia.',ch:[
+   {l:'Obbligatoria per ogni pattuglia',e:'Ogni intervento ha una prova; gli agenti mugugnano',pleases:'progressista',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; gd('giovani',2); gd('cetomedio',1); gd('pensionati',-1);}},
+   {l:'Solo per i reparti che la chiedono',e:'La polizia ringrazia; la prossima volta mancherà il video',pleases:'conservatore',f:()=>{gd('pensionati',1); gd('giovani',-2);}},
+ ]},
+ {id:'ms_in_accoglienza',era:'contemporanea',min:'interno',kick:'Migrazioni',t:'Duecento profughi in un paese di mille abitanti',text:'Un vecchio albergo di un paese di mille abitanti è diventato un centro d\'accoglienza per duecento persone. Il sindaco l\'ha saputo dai giornali.',ch:[
+   {l:'Piccoli gruppi, distribuiti in tutti i comuni',e:'Nessun paese è sommerso; ogni sindaco ha la sua parte',pleases:'progressista',f:()=>{gd('cattolici',2); gd('giovani',1); gd('cetomedio',-2);}},
+   {l:'Grandi centri fuori dagli abitati',e:'I paesi respirano; i centri diventano un problema a sé',pleases:'conservatore',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; gd('cetomedio',2); gd('cattolici',-2); gd('giovani',-1);}},
+ ]},
  // ----- SALUTE (+5) -----
  {id:'medici_fuga',era:'contemporanea',min:'salute',cond:()=>S.ind.sanita<60,kick:'Sanità',t:'I medici lasciano il servizio pubblico',text:'Stipendi e turni spingono medici e infermieri verso il privato o l\'estero.',ch:[
    {l:'Aumenti mirati a chi resta',e:'Trattenere costa, ma il sistema regge',pleases:'progressista',costo:{debito:0.4},f:()=>{S.ind.debt+=0.4; S.ind.sanita+=3; gd('lavoratori',3);}},
    {l:'Vincolo di permanenza dopo la specializzazione',e:'Costo zero, malumore tra i giovani medici',pleases:'tecnico',f:()=>{S.ind.sanita+=1; gd('giovani',-3);}},
  ]},
- {id:'pronto_soccorso',era:'contemporanea',min:'salute',cond:()=>[12,1,2].includes(S.month),kick:'Sanità',t:'Pronto soccorso sotto pressione invernale',text:'Influenza e freddo riempiono i pronto soccorso: barelle nei corridoi e attese lunghissime.',ch:[
+ {id:'pronto_soccorso',era:'contemporanea',min:'salute',cond:()=>stagioneMese()==='inverno',kick:'Sanità',t:'Pronto soccorso sotto pressione invernale',text:'Influenza e freddo riempiono i pronto soccorso: barelle nei corridoi e attese lunghissime.',ch:[
    {l:'Medici a gettone per l\'emergenza',e:'Tampone immediato, costoso',pleases:'tecnico',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; S.ind.sanita+=3;}},
    {l:'Potenzia la medicina territoriale',e:'Meno accessi impropri, effetto lento',pleases:'progressista',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; S.ind.sanita+=2; gd('pensionati',2);}},
  ]},
- {id:'vaccini_stagione',era:'universale',min:'salute',cond:()=>[10,11].includes(S.month),kick:'Prevenzione',t:'Campagna vaccinale d\'autunno fiacca',text:'Le adesioni alla vaccinazione stagionale dei fragili sono sotto le attese.',ch:[
+ {id:'vaccini_stagione',era:'universale',min:'salute',cond:()=>stagioneMese()==='autunno'&&stagioneMese(S.month-1)==='autunno',kick:'Prevenzione',t:'Campagna vaccinale d\'autunno fiacca',text:'Le adesioni alla vaccinazione stagionale dei fragili sono sotto le attese.',ch:[
    {l:'Chiamata attiva di anziani e fragili',e:'Organizzazione capillare',pleases:'tecnico',f:()=>{S.ind.sanita+=2; gd('pensionati',3);}},
    {l:'Solo informazione, nessuna pressione',e:'Libertà di scelta; i numeri restano bassi',pleases:'conservatore',f:()=>{gd('cetomedio',1); S.ind.sanita-=1;}},
  ]},
@@ -5954,6 +6162,43 @@ const DOSSIERS=[
  {id:'zuccheri',min:'salute',kick:'Prevenzione',t:'Tassa sulle bibite zuccherate',text:'I medici la chiedono, i produttori la combattono: tassare le bevande zuccherate?',ch:[
    {l:'Tassa e fondi alla prevenzione',e:'Salute pubblica; un settore protesta',pleases:'progressista',costo:{debito:-0.2},f:()=>{S.ind.debt-=0.2; S.ind.sanita+=1; gd('imprenditori',-3);}},
    {l:'Niente nuove tasse',e:'I consumi non si toccano',pleases:'conservatore',f:()=>{gd('imprenditori',2); gd('cetomedio',1);}},
+ ]},
+ // L153-4 · varietà del ministro (30/9): 9 dossier del presente per il ministro della Salute — era 'contemporanea', senza paesi e senza cond (LOTTO-L153-4-DOSSIER.md).
+ {id:'ms_sa_corsia',era:'contemporanea',min:'salute',kick:'Ospedali',t:'Pugni in corsia',text:'Le aggressioni a medici e infermieri sono raddoppiate: parenti esasperati dalle attese, pazienti fuori di sé. Il personale chiede di non lavorare più da solo la notte.',ch:[
+   {l:'Un presidio di polizia nei grandi ospedali',e:'Il personale respira; agenti tolti alle strade',pleases:'conservatore',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; S.ind.sanita+=1; S.ind.sicurezza+=1; gd('lavoratori',1);}},
+   {l:'Più personale nei turni di notte',e:'Meno attese e meno rabbia; spesa fissa',pleases:'progressista',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; S.ind.sanita+=2; gd('lavoratori',2);}},
+ ]},
+ {id:'ms_sa_antibiotici',era:'contemporanea',min:'salute',kick:'Prevenzione',t:'Gli antibiotici che non funzionano più',text:'Le infezioni resistenti ai farmaci uccidono più degli incidenti stradali. Gli antibiotici si prendono troppo e male, anche negli allevamenti.',ch:[
+   {l:'Limiti stretti, anche negli allevamenti',e:'Meno resistenze fra qualche anno; gli allevatori protestano',pleases:'tecnico',f:()=>{S.ind.sanita+=2; gd('imprenditori',-2); gd('cattolici',-1);}},
+   {l:'Una campagna d\'informazione',e:'Costa poco; cambia poco',pleases:'conservatore',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; S.ind.sanita+=1;}},
+ ]},
+ {id:'ms_sa_vapore',era:'contemporanea',min:'salute',kick:'Prevenzione',t:'Le sigarette elettroniche fra i ragazzi',text:'Un ragazzo su quattro usa le sigarette elettroniche usa e getta, colorate e al gusto di frutta. I pediatri chiedono di vietarle.',ch:[
+   {l:'Vieta le usa e getta e gli aromi',e:'Meno ragazzi che cominciano; il mercato nero ringrazia',pleases:'progressista',f:()=>{S.ind.sanita+=1; gd('pensionati',1); gd('giovani',-2); gd('imprenditori',-1);}},
+   {l:'Tassale come il tabacco',e:'Entrate nuove; i ragazzi pagano e fumano',pleases:'tecnico',costo:{debito:-0.1},f:()=>{S.ind.debt-=0.1; gd('giovani',-1);}},
+ ]},
+ {id:'ms_sa_denti',era:'contemporanea',min:'salute',kick:'Cure',t:'Il dentista è un lusso',text:'Una persona su tre rinuncia al dentista perché costa troppo. I bambini delle famiglie povere arrivano a scuola con i denti guasti.',ch:[
+   {l:'Cure gratuite per bambini e anziani poveri',e:'Sorrisi che tornano; spesa nuova',pleases:'progressista',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; S.ind.sanita+=2; gd('lavoratori',2); gd('pensionati',1);}},
+   {l:'Tariffe concordate con gli studi privati',e:'Qualche sconto; chi non può pagare resta fuori',pleases:'conservatore',f:()=>{gd('cetomedio',1); gd('imprenditori',-1);}},
+ ]},
+ {id:'ms_sa_donatori',era:'contemporanea',min:'salute',kick:'Donazioni',t:'Mancano donatori di organi',text:'In lista d\'attesa per un trapianto si muore. Si propone che tutti siano donatori, salvo chi dichiara di non volerlo.',ch:[
+   {l:'Tutti donatori, salvo rifiuto',e:'Più trapianti; c\'è chi parla di corpo dello Stato',pleases:'tecnico',f:()=>{S.ind.sanita+=2; gd('giovani',1); gd('cattolici',-2);}},
+   {l:'Una campagna e un registro semplice',e:'Nessuna polemica; le liste restano lunghe',pleases:'conservatore',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; S.ind.sanita+=1;}},
+ ]},
+ {id:'ms_sa_cartella',era:'contemporanea',min:'salute',kick:'Digitale',t:'La cartella clinica che non segue il paziente',text:'Ogni ospedale ha il suo archivio: chi cambia città ripete gli esami da capo. Una cartella unica esiste, ma quasi nessuno l\'ha attivata.',ch:[
+   {l:'Attiva per tutti, salvo chi rifiuta',e:'Meno esami doppi; i dati di tutti in un posto solo',pleases:'tecnico',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; S.ind.sanita+=2; gd('giovani',1); gd('pensionati',-1);}},
+   {l:'Solo per chi la chiede',e:'La riservatezza è salva; gli esami si ripetono',pleases:'conservatore',f:()=>{S.ind.sanita+=1;}},
+ ]},
+ {id:'ms_sa_alcol',era:'contemporanea',min:'salute',kick:'Prevenzione',t:'Un prezzo minimo per l\'alcol',text:'La birra al supermercato costa meno dell\'acqua. I medici chiedono un prezzo minimo per grado; i produttori parlano di tassa sui poveri.',ch:[
+   {l:'Prezzo minimo per grado',e:'Meno ricoveri; la spesa costa di più',pleases:'tecnico',f:()=>{S.ind.sanita+=2; gd('imprenditori',-2); gd('lavoratori',-1); gd('giovani',-1);}},
+   {l:'Niente vendita di notte',e:'Un divieto che si aggira in un\'ora; i residenti ringraziano',pleases:'conservatore',f:()=>{S.ind.sanita+=1; gd('pensionati',1); gd('giovani',-2);}},
+ ]},
+ {id:'ms_sa_ambulanza',era:'contemporanea',min:'salute',kick:'Emergenza',t:'L\'ambulanza arriva dopo quaranta minuti',text:'Fuori dalle città i tempi di soccorso sono il triplo. Mancano i mezzi, e soprattutto chi ci sale sopra.',ch:[
+   {l:'Più mezzi e più equipaggi',e:'Si arriva in tempo; spesa fissa',pleases:'progressista',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; S.ind.sanita+=3; gd('pensionati',2);}},
+   {l:'Una centrale unica che smista meglio',e:'Qualche minuto guadagnato; i mezzi restano quelli',pleases:'tecnico',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; S.ind.sanita+=1;}},
+ ]},
+ {id:'ms_sa_merendine',era:'contemporanea',min:'salute',kick:'Alimentazione',t:'La pubblicità delle merendine ai bambini',text:'Un bambino su tre è in sovrappeso. Si propone di vietare la pubblicità dei cibi più grassi e dolci nelle ore in cui guardano i piccoli.',ch:[
+   {l:'Vietala nelle fasce dei bambini',e:'I pediatri applaudono; televisioni e industria no',pleases:'progressista',f:()=>{S.ind.sanita+=1; gd('cetomedio',1); gd('imprenditori',-2);}},
+   {l:'Un codice volontario delle imprese',e:'Nessun divieto; gli spot restano',pleases:'conservatore',f:()=>{gd('imprenditori',1); gd('cetomedio',-1);}},
  ]},
  // ----- ISTRUZIONE (+5) -----
  {id:'smartphone_scuola',min:'istruzione',kick:'Scuola',t:'Smartphone in classe: vietarli?',text:'Cresce il fronte che chiede il divieto totale degli smartphone a scuola.',ch:[
@@ -5976,6 +6221,56 @@ const DOSSIERS=[
    {l:'Tutela legale e presidi di supporto',e:'Protezione della funzione pubblica',pleases:'progressista',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; gd('lavoratori',4); gd('cetomedio',2);}},
    {l:'Aggravante penale specifica',e:'Deterrenza',pleases:'conservatore',f:()=>{S.ind.sicurezza+=1; gd('pensionati',2); gd('lavoratori',2);}},
  ]},
+ // L152-3 · varietà del ministro (30/9): 9 dossier del presente per il ministro dell'Istruzione — era 'contemporanea', senza paesi e senza cond (LOTTO-L152-3-DOSSIER.md).
+ {id:'ms_is_pomeriggio',era:'contemporanea',min:'istruzione',kick:'Scuola',t:'La scuola aperta il pomeriggio',text:'Dove le scuole restano aperte fino alle quattro i bambini imparano di più e le madri lavorano. Nella metà del paese chiudono all\'una.',ch:[
+   {l:'Tempo pieno dove manca',e:'Insegnanti e mense in più; costa',pleases:'progressista',costo:{debito:0.4},f:()=>{S.ind.debt+=0.4; gd('cetomedio',2); gd('giovani',2); gd('lavoratori',1);}},
+   {l:'Decidono le scuole, coi loro fondi',e:'Nessuna spesa; il divario resta',pleases:'conservatore',f:()=>{gd('cetomedio',-1); gd('lavoratori',-1);}},
+ ]},
+ {id:'ms_is_prove',era:'contemporanea',min:'istruzione',kick:'Valutazione',t:'Le prove uguali per tutti',text:'Le prove nazionali dicono che a quindici anni un ragazzo su tre non capisce un testo. Gli insegnanti contestano le prove, non il risultato.',ch:[
+   {l:'Pubblica i risultati scuola per scuola',e:'Le famiglie sanno; i professori si sentono in classifica',pleases:'tecnico',f:()=>{gd('cetomedio',2); gd('imprenditori',1); gd('lavoratori',-2);}},
+   {l:'I dati restano alle scuole',e:'Niente classifiche; niente scossa',pleases:'progressista',f:()=>{gd('lavoratori',1); gd('cetomedio',-1);}},
+ ]},
+ {id:'ms_is_classi',era:'contemporanea',min:'istruzione',kick:'Scuola',t:'Trenta alunni per classe',text:'Nelle città le classi arrivano a trenta alunni, nei paesi si chiudono scuole con dieci bambini. Le regole sui numeri sono le stesse per tutti.',ch:[
+   {l:'Un tetto a ventidue alunni',e:'Classi vivibili; servono aule e insegnanti',pleases:'progressista',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; gd('cetomedio',2); gd('lavoratori',2);}},
+   {l:'Salva le scuole dei paesi piccoli',e:'I paesi tengono la scuola; in città non cambia niente',pleases:'conservatore',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; gd('pensionati',2); gd('cattolici',1); gd('giovani',-1);}},
+ ]},
+ {id:'ms_is_tende',era:'contemporanea',min:'istruzione',kick:'Università',t:'Gli studenti dormono in tenda davanti all\'ateneo',text:'Una stanza costa più della borsa di studio. Gli studenti fuori sede hanno piantato le tende davanti al rettorato.',ch:[
+   {l:'Residenze pubbliche',e:'Posti letto fra qualche anno; spesa vera',pleases:'progressista',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; gd('giovani',4);}},
+   {l:'Un contributo per l\'affitto',e:'Aiuto subito; gli affitti saliranno ancora',pleases:'populista',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; gd('giovani',2); gd('cetomedio',1);}},
+ ]},
+ {id:'ms_is_medicina',era:'contemporanea',min:'istruzione',kick:'Università',t:'Aprire a tutti la facoltà di medicina',text:'Ogni anno decine di migliaia di candidati per pochi posti a medicina, mentre negli ospedali mancano medici. Si propone di togliere la selezione all\'ingresso.',ch:[
+   {l:'Ingresso libero, selezione dopo un anno',e:'Fine del test; aule strapiene',pleases:'populista',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; gd('giovani',3); gd('cetomedio',1);}},
+   {l:'Più posti, ma col test',e:'Più medici per gradi; la selezione resta',pleases:'tecnico',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; gd('giovani',1);}},
+ ]},
+ {id:'ms_is_mestieri',era:'contemporanea',min:'istruzione',kick:'Scuola e lavoro',t:'Le scuole tecniche senza iscritti',text:'Le imprese cercano periti e non li trovano; le scuole tecniche perdono iscritti ogni anno. Gli industriali offrono laboratori e docenti.',ch:[
+   {l:'Le imprese entrano nelle scuole tecniche',e:'Laboratori nuovi; la scuola al servizio delle aziende, dicono alcuni',pleases:'conservatore',f:()=>{gd('imprenditori',3); gd('giovani',1); gd('lavoratori',-1);}},
+   {l:'Laboratori pubblici, programmi pubblici',e:'Indipendenza; e il conto',pleases:'progressista',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; gd('lavoratori',2); gd('giovani',1);}},
+ ]},
+ {id:'ms_is_macchina',era:'contemporanea',min:'istruzione',kick:'Tecnologia',t:'I compiti li scrive la macchina',text:'Metà dei temi consegnati nelle scuole superiori esce da un programma di intelligenza artificiale. I professori non sanno più che cosa valutare.',ch:[
+   {l:'Vietala, e più prove in classe',e:'Si torna alla penna; i ragazzi la useranno lo stesso',pleases:'conservatore',f:()=>{gd('pensionati',2); gd('giovani',-2);}},
+   {l:'Insegna a usarla',e:'Scuola al passo; molti genitori perplessi',pleases:'progressista',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; gd('giovani',2); gd('imprenditori',1); gd('pensionati',-1);}},
+ ]},
+ {id:'ms_is_ricercatori',era:'contemporanea',min:'istruzione',kick:'Ricerca',t:'Ricercatori a quarant\'anni, ancora precari',text:'Nei laboratori pubblici si lavora per anni con contratti di dodici mesi. I migliori vanno nelle imprese, o in un altro mestiere.',ch:[
+   {l:'Concorsi e posti stabili',e:'I laboratori tengono la loro gente; spesa fissa',pleases:'progressista',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; gd('giovani',3); repd(1);}},
+   {l:'Contratti più lunghi, stessi fondi',e:'Meno incertezza; meno posti in tutto',pleases:'tecnico',f:()=>{gd('giovani',1);}},
+ ]},
+ {id:'ms_is_affetti',era:'contemporanea',min:'istruzione',kick:'Programmi',t:'L\'educazione affettiva entra in classe?',text:'Una proposta introduce un\'ora settimanale di educazione affettiva e sessuale. Una parte delle famiglie dice che è compito loro, non della scuola.',ch:[
+   {l:'Obbligatoria per tutti',e:'I ragazzi la chiedono; una parte delle famiglie no',pleases:'progressista',f:()=>{gd('giovani',3); gd('cattolici',-3);}},
+   {l:'Solo col consenso dei genitori',e:'Decidono le famiglie; chi ne ha più bisogno resta fuori',pleases:'conservatore',f:()=>{gd('cattolici',2); gd('giovani',-2);}},
+ ]},
+ // L153-3 · i tre dell'Istruzione lasciati fuori da L152-3, coi testi senza il mese e senza la stagione (Cowork, 30/9).
+ {id:'ms_is_libri',era:'contemporanea',min:'istruzione',kick:'Famiglie',t:'Lo zaino costa uno stipendio',text:'All\'inizio dell\'anno scolastico libri e quaderni di due figli valgono quanto uno stipendio. Si propone il prestito gratuito dei libri; gli editori protestano.',ch:[
+   {l:'Libri in prestito gratuito',e:'Sollievo per le famiglie; gli editori sul piede di guerra',pleases:'progressista',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; gd('lavoratori',2); gd('cetomedio',2); gd('imprenditori',-2);}},
+   {l:'Un tetto ai prezzi di copertina',e:'Un piccolo sconto; nessuna spesa',pleases:'tecnico',f:()=>{gd('cetomedio',1); gd('imprenditori',-1);}},
+ ]},
+ {id:'ms_is_sostegno',era:'contemporanea',min:'istruzione',kick:'Inclusione',t:'Gli insegnanti di sostegno cambiano ogni anno',text:'Gli alunni con disabilità cambiano insegnante di sostegno a ogni inizio d\'anno, e molti non sono formati. Le famiglie fanno causa, e vincono.',ch:[
+   {l:'Posti stabili e formazione',e:'Continuità per i ragazzi; spesa fissa',pleases:'progressista',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; gd('cetomedio',2); gd('cattolici',2); gd('lavoratori',1);}},
+   {l:'Conferma chi c\'è per tre anni',e:'Un po\' di continuità; nessun posto nuovo',pleases:'tecnico',f:()=>{gd('cetomedio',1);}},
+ ]},
+ {id:'ms_is_calendario',era:'contemporanea',min:'istruzione',kick:'Calendario',t:'La pausa lunga è troppo lunga?',text:'Dopo la pausa più lunga dell\'anno i ragazzi hanno dimenticato un mese di programma, dicono gli studi. Accorciarla tocca le ferie di mezza nazione.',ch:[
+   {l:'Due settimane di scuola in più',e:'Più scuola; albergatori e insegnanti contrari',pleases:'tecnico',f:()=>{gd('cetomedio',1); gd('imprenditori',-2); gd('lavoratori',-1);}},
+   {l:'Il calendario non si tocca',e:'Le ferie sono salve; il problema resta',pleases:'conservatore',f:()=>{gd('imprenditori',1); gd('pensionati',1);}},
+ ]},
  // ----- INFRASTRUTTURE (+4) -----
  {id:'aeroporto',min:'infrastrutture',kick:'Trasporti',t:'Ampliare il grande aeroporto',text:'Il principale scalo del paese è saturo: l\'ampliamento promette traffico e lavoro, il territorio protesta.',ch:[
    {l:'Ampliamento con compensazioni',e:'Crescita e cantieri; ambiente sotto stress',pleases:'conservatore',f:()=>{S.gMod+=0.2; S.ind.ambiente-=2; gd('imprenditori',4); gd('giovani',-2);}},
@@ -5993,12 +6288,61 @@ const DOSSIERS=[
    {l:'Commissario e cronoprogramma',e:'Si riparte, con poteri straordinari',pleases:'tecnico',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; S.gMod+=0.1; gd('imprenditori',3);}},
    {l:'Revoca e bonifica dell\'area',e:'Fine dell\'emorragia, opera persa',pleases:'progressista',f:()=>{S.ind.ambiente+=2; gd('imprenditori',-3); gd('giovani',2);}},
  ]},
+ // L152-3 · varietà del ministro (30/9): 12 dossier del presente per il ministro delle Infrastrutture — era 'contemporanea', senza paesi e senza cond (LOTTO-L152-3-DOSSIER.md).
+ {id:'ms_if_pedaggi',era:'contemporanea',min:'infrastrutture',kick:'Autostrade',t:'I pedaggi aumentano',text:'Il gestore delle autostrade chiede l\'aumento previsto dal contratto. I camionisti minacciano il blocco, il gestore di fermare le manutenzioni.',ch:[
+   {l:'Blocca l\'aumento',e:'Automobilisti contenti; il gestore chiede i danni',pleases:'populista',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; gd('cetomedio',2); gd('lavoratori',1); gd('imprenditori',-1);}},
+   {l:'L\'aumento è nel contratto',e:'I patti si rispettano; il pieno costa di più',pleases:'tecnico',f:()=>{gd('cetomedio',-2); gd('imprenditori',1);}},
+ ]},
+ {id:'ms_if_alloggi',era:'contemporanea',min:'infrastrutture',kick:'Casa',t:'Le case popolari vuote',text:'Migliaia di alloggi pubblici restano chiusi perché nessuno paga per rimetterli a posto, mentre le graduatorie si allungano.',ch:[
+   {l:'Un piano per riaprirli',e:'Case assegnate; spesa subito',pleases:'progressista',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; gd('lavoratori',3); gd('giovani',1);}},
+   {l:'Vendi i peggiori e ripara gli altri',e:'Si fa cassa; il patrimonio pubblico si riduce',pleases:'conservatore',f:()=>{gd('imprenditori',2); gd('lavoratori',-2);}},
+ ]},
+ {id:'ms_if_rami',era:'contemporanea',min:'infrastrutture',kick:'Ferrovie',t:'Le linee minori da chiudere',text:'Trenta linee locali portano pochi passeggeri e molte perdite. Le ferrovie propongono gli autobus; i paesi lungo i binari non ci stanno.',ch:[
+   {l:'Tieni aperte le linee',e:'I paesi restano collegati; le perdite anche',pleases:'populista',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; gd('pensionati',2); gd('cetomedio',1);}},
+   {l:'Autobus al posto dei treni',e:'Risparmio; binari che arrugginiscono',pleases:'tecnico',costo:{debito:-0.2},f:()=>{S.ind.debt-=0.2; S.ind.ambiente-=1; gd('pensionati',-2);}},
+ ]},
+ {id:'ms_if_ricarica',era:'contemporanea',min:'infrastrutture',kick:'Mobilità',t:'Le colonnine che non ci sono',text:'Le auto elettriche si vendono, ma fuori dalle grandi città non c\'è dove ricaricarle. I costruttori chiedono una rete pubblica.',ch:[
+   {l:'Una rete pagata dallo Stato',e:'Colonnine ovunque; il conto è pubblico',pleases:'progressista',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; S.ind.ambiente+=2; gd('giovani',2);}},
+   {l:'Obbligo per i distributori',e:'Pagano i privati; la rete crescerà piano',pleases:'tecnico',f:()=>{S.ind.ambiente+=1; gd('imprenditori',-2);}},
+ ]},
+ {id:'ms_if_invasi',era:'contemporanea',min:'infrastrutture',kick:'Acqua',t:'Le dighe hanno sessant\'anni',text:'Un rapporto tecnico segnala che molti invasi sono pieni di fango e andrebbero svuotati e consolidati. Nessun pericolo immediato, dice il rapporto; l\'acqua però è sempre meno.',ch:[
+   {l:'Un piano decennale di manutenzione',e:'Si lavora prima dell\'emergenza; costa',pleases:'tecnico',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; S.ind.sicurezza+=1; gd('imprenditori',1);}},
+   {l:'Interventi solo dove serve subito',e:'Spesa contenuta; il problema resta lì',pleases:'conservatore',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; gd('cetomedio',-1);}},
+ ]},
+ {id:'ms_if_licenze',era:'contemporanea',min:'infrastrutture',kick:'Città',t:'Non si trova un taxi',text:'Nelle grandi città la sera non si trova un taxi. Si propone di raddoppiare le licenze; i tassisti promettono di fermare il traffico.',ch:[
+   {l:'Più licenze, subito',e:'Più auto in strada; clacson sotto il ministero',pleases:'tecnico',f:()=>{gd('giovani',2); gd('cetomedio',1); gd('lavoratori',-2);}},
+   {l:'Le licenze restano quelle',e:'I tassisti ringraziano; la fila resta',pleases:'conservatore',f:()=>{gd('lavoratori',1); gd('giovani',-2);}},
+ ]},
+ {id:'ms_if_isole',era:'contemporanea',min:'infrastrutture',kick:'Collegamenti',t:'I traghetti per le isole minori',text:'La compagnia che collega le isole minori lascia: d\'inverno le corse non rendono. Gli isolani chiedono che lo Stato garantisca il servizio.',ch:[
+   {l:'Lo Stato paga le corse d\'inverno',e:'Le isole restano vive; sussidio fisso',pleases:'populista',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; gd('pensionati',2); gd('cetomedio',1);}},
+   {l:'Una gara, e chi vince decide gli orari',e:'Nessun sussidio; d\'inverno una nave a settimana',pleases:'tecnico',f:()=>{gd('pensionati',-2); gd('imprenditori',1);}},
+ ]},
+ {id:'ms_if_valle',era:'contemporanea',min:'infrastrutture',kick:'Territorio',t:'Una strada franata, una valle isolata',text:'Una frana ha portato via la sola strada di una valle: nessun ferito, tremila persone isolate. Il ponte provvisorio costa quanto mezza strada nuova.',ch:[
+   {l:'Ponte provvisorio in un mese',e:'La valle riapre; si paga due volte',pleases:'populista',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; gd('cetomedio',2); gd('pensionati',2);}},
+   {l:'Strada nuova, in un anno',e:'Soldi spesi bene; un inverno d\'isolamento',pleases:'tecnico',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; gd('pensionati',-2); gd('imprenditori',1);}},
+ ]},
+ {id:'ms_if_gare',era:'contemporanea',min:'infrastrutture',kick:'Appalti',t:'Gare più rapide o più controlli?',text:'Per aprire un cantiere pubblico servono in media quattro anni di carte. Le imprese chiedono di tagliare i passaggi; chi vigila teme gli amici degli amici.',ch:[
+   {l:'Meno passaggi, affidamenti diretti',e:'Cantieri più rapidi; il sospetto resta',pleases:'conservatore',f:()=>{S.gMod+=0.1; gd('imprenditori',3); repd(-1);}},
+   {l:'Le gare restano, con più personale',e:'Regole salve; tempi un po\' più brevi',pleases:'tecnico',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; gd('imprenditori',-1); repd(1);}},
+ ]},
+ {id:'ms_if_metro',era:'contemporanea',min:'infrastrutture',kick:'Città',t:'Una metropolitana per la seconda città',text:'La seconda città del paese chiede la sua metropolitana. Con gli stessi soldi si rinnovano gli autobus di cento città medie.',ch:[
+   {l:'La metropolitana',e:'Un\'opera che resta; le altre città aspettano',pleases:'tecnico',costo:{debito:0.4},f:()=>{S.ind.debt+=0.4; S.gMod+=0.1; gd('giovani',2); gd('pensionati',-1);}},
+   {l:'Autobus nuovi per cento città',e:'Un po\' a tutti; nessuna grande opera',pleases:'populista',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; S.ind.ambiente+=1; gd('pensionati',2); gd('cetomedio',1);}},
+ ]},
+ {id:'ms_if_camion',era:'contemporanea',min:'infrastrutture',kick:'Trasporto merci',t:'I camionisti fermano i caselli',text:'Il gasolio è salito e i padroncini lavorano in perdita. Dopo tre giorni di presidi gli scaffali dei supermercati cominciano a svuotarsi.',ch:[
+   {l:'Uno sconto sul gasolio per chi trasporta',e:'I camion ripartono; entrate in meno',pleases:'populista',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; S.ind.ambiente-=1; gd('lavoratori',2); gd('imprenditori',2);}},
+   {l:'Nessuno sconto sotto ricatto',e:'Fermezza; ancora giorni di scaffali vuoti',pleases:'tecnico',f:()=>{gd('cetomedio',-3); gd('lavoratori',-1);}},
+ ]},
+ {id:'ms_if_gradini',era:'contemporanea',min:'infrastrutture',kick:'Accessibilità',t:'Stazioni con le scale e senza ascensore',text:'Una persona in carrozzina non può prendere il treno in due stazioni su tre. Le associazioni chiedono una data certa.',ch:[
+   {l:'Tutte accessibili in cinque anni',e:'Un diritto con una scadenza; spesa certa',pleases:'progressista',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; gd('pensionati',3); gd('cattolici',1);}},
+   {l:'Prima le stazioni grandi',e:'Si comincia; le piccole aspettano ancora',pleases:'tecnico',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; gd('pensionati',1);}},
+ ]},
  // ----- SVILUPPO (+7) -----
  {id:'ia_lavoro',min:'sviluppo',kick:'Tecnologia',t:'L\'intelligenza artificiale entra nei servizi',text:'Le aziende introducono sistemi automatici al posto di interi reparti. Tutele o via libera?',ch:[
    {l:'Fondo di transizione e riqualificazione',e:'Accompagni il cambiamento',pleases:'progressista',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; gd('lavoratori',4); gd('giovani',2);}},
    {l:'Via libera: l\'innovazione non si frena',e:'Competitività; chi perde il posto paga il conto',pleases:'conservatore',f:()=>{S.gMod+=0.2; gd('imprenditori',4); gd('lavoratori',-4);}},
  ]},
- {id:'overtourism',min:'sviluppo',cond:()=>[6,7,8].includes(S.month),kick:'Turismo',t:'Overtourism nelle città d\'arte',text:'Folle record nei centri storici: residenti esasperati, commercianti divisi. Ticket d\'ingresso o limiti?',ch:[
+ {id:'overtourism',min:'sviluppo',cond:()=>stagioneMese()==='estate',kick:'Turismo',t:'Overtourism nelle città d\'arte',text:'Folle record nei centri storici: residenti esasperati, commercianti divisi. Ticket d\'ingresso o limiti?',ch:[
    {l:'Ticket e numero chiuso nei picchi',e:'Vivibilità; il turismo low cost protesta',pleases:'tecnico',f:()=>{gd('cetomedio',3); gd('imprenditori',-2);}},
    {l:'Nessun limite: il turismo è ricchezza',e:'Cassa piena, residenti in fuga',pleases:'conservatore',f:()=>{S.gMod+=0.1; gd('imprenditori',3); gd('cetomedio',-2);}},
  ]},
@@ -6021,6 +6365,55 @@ const DOSSIERS=[
  {id:'trivelle',min:'sviluppo',cond:()=>lv('ambiente')===0,kick:'Energia',t:'Nuove concessioni estrattive',text:'Con la transizione al palo, arrivano richieste di nuove trivellazioni nazionali.',ch:[
    {l:'Concessioni con royalties alte',e:'Energia e gettito; ambiente in secondo piano',pleases:'conservatore',costo:{debito:-0.2},f:()=>{S.gMod+=0.2; S.ind.debt-=0.2; S.ind.ambiente-=3; gd('giovani',-4); gd('imprenditori',3);}},
    {l:'Moratoria: si punta sulle rinnovabili',e:'Linea verde; il fabbisogno resta',pleases:'progressista',f:()=>{S.ind.ambiente+=3; gd('giovani',4); gd('imprenditori',-2);}},
+ ]},
+ // L153-4 · varietà del ministro (30/9): 12 dossier del presente per il ministro dello Sviluppo — era 'contemporanea', senza paesi e senza cond (LOTTO-L153-4-DOSSIER.md).
+ {id:'ms_sv_acciaio',era:'contemporanea',min:'sviluppo',kick:'Industria',t:'L\'acciaieria che inquina e dà lavoro',text:'La grande acciaieria dà lavoro a una città intera e le avvelena l\'aria. I giudici minacciano il sequestro degli impianti, gli operai il blocco delle strade.',ch:[
+   {l:'Bonifica a spese dello Stato, la fabbrica resta',e:'Posti salvi e aria migliore; il conto al bilancio',pleases:'progressista',costo:{debito:0.4},f:()=>{S.ind.debt+=0.4; S.ind.ambiente+=2; gd('lavoratori',3);}},
+   {l:'Chi inquina paga: bonifichi o chiuda',e:'Il principio è salvo; la città trema',pleases:'tecnico',f:()=>{S.ind.ambiente+=3; gd('lavoratori',-3); gd('imprenditori',-2);}},
+ ]},
+ {id:'ms_sv_bollette',era:'contemporanea',min:'sviluppo',kick:'Energia',t:'La bolletta delle fabbriche è raddoppiata',text:'Il prezzo dell\'energia è raddoppiato in un anno. Le fonderie e le cartiere dicono che a queste cifre conviene spegnere i forni.',ch:[
+   {l:'Un tetto al prezzo, la differenza la paga lo Stato',e:'I forni restano accesi; costa caro',pleases:'populista',costo:{debito:0.4},f:()=>{S.ind.debt+=0.4; gd('imprenditori',3); gd('lavoratori',2);}},
+   {l:'Aiuti solo a chi investe per consumare meno',e:'Spesa minore; qualcuno spegne davvero',pleases:'tecnico',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; S.ind.ambiente+=1; gd('imprenditori',1); gd('lavoratori',-2);}},
+ ]},
+ {id:'ms_sv_pale',era:'contemporanea',min:'sviluppo',kick:'Energia',t:'Le pale sul crinale',text:'Un parco eolico è pronto da cinque anni sulla carta. Il comitato degli abitanti ha vinto tre ricorsi: dicono che rovina il paesaggio e il sonno.',ch:[
+   {l:'Autorizzazione nazionale: si costruisce',e:'Energia pulita; la valle non perdona',pleases:'tecnico',f:()=>{S.ind.ambiente+=2; gd('imprenditori',2); gd('cetomedio',-2); gd('pensionati',-1);}},
+   {l:'L\'ultima parola ai comuni',e:'Il paesaggio è salvo; il parco resta sulla carta',pleases:'conservatore',f:()=>{gd('cetomedio',2); gd('imprenditori',-2); S.ind.ambiente-=1;}},
+ ]},
+ {id:'ms_sv_serrande',era:'contemporanea',min:'sviluppo',kick:'Commercio',t:'Le serrande abbassate in centro',text:'Un negozio su cinque ha chiuso: si compra dal telefono e il furgone arriva a casa. I commercianti chiedono di tassare le consegne.',ch:[
+   {l:'Una piccola tassa sulle consegne a casa',e:'Ossigeno per i negozi; i clienti pagano di più',pleases:'conservatore',f:()=>{gd('cetomedio',2); gd('pensionati',1); gd('giovani',-2);}},
+   {l:'Aiuti a chi rinnova il negozio',e:'Si premia chi cambia; molti chiuderanno lo stesso',pleases:'tecnico',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; gd('imprenditori',2); gd('pensionati',-1);}},
+ ]},
+ {id:'ms_sv_brevetti',era:'contemporanea',min:'sviluppo',kick:'Ricerca',t:'Le invenzioni che partono',text:'I laboratori del paese depositano brevetti che poi si trasformano in fabbriche altrove. Si propone un fondo che li compri e li tenga in patria.',ch:[
+   {l:'Un fondo pubblico per i brevetti',e:'Le idee restano; il fondo può sbagliare',pleases:'progressista',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; gd('imprenditori',2); gd('giovani',2);}},
+   {l:'Meno tasse a chi produce qui ciò che inventa',e:'Decide il mercato; entrate in meno',pleases:'conservatore',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; S.gMod+=0.1; gd('imprenditori',2);}},
+ ]},
+ {id:'ms_sv_partenza',era:'contemporanea',min:'sviluppo',kick:'Industria',t:'La fabbrica prende i sussidi e se ne va',text:'Una multinazionale chiude lo stabilimento aperto dieci anni fa con soldi pubblici e porta le linee dove il lavoro costa meno. Quattrocento lettere di licenziamento.',ch:[
+   {l:'Restituisca i sussidi, fino all\'ultimo centesimo',e:'Applausi ai cancelli; gli investitori prendono nota',pleases:'populista',f:()=>{gd('lavoratori',3); gd('imprenditori',-3); repd(-1);}},
+   {l:'Una trattativa: resti almeno una linea',e:'Cento posti salvi; gli altri no',pleases:'tecnico',f:()=>{gd('lavoratori',1); gd('imprenditori',1);}},
+ ]},
+ {id:'ms_sv_reti',era:'contemporanea',min:'sviluppo',kick:'Pesca',t:'Le reti restano a terra',text:'Gli scienziati dicono che il pesce sta finendo e chiedono di dimezzare le catture. I pescatori dicono che a finire saranno i porti.',ch:[
+   {l:'Dimezza le catture e indennizza le barche',e:'Il mare respira; il bilancio paga',pleases:'progressista',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; S.ind.ambiente+=2; gd('lavoratori',-1);}},
+   {l:'Un taglio leggero, e si rivede fra tre anni',e:'I porti lavorano; il pesce continua a calare',pleases:'conservatore',f:()=>{gd('lavoratori',2); S.ind.ambiente-=2;}},
+ ]},
+ {id:'ms_sv_acquisizione',era:'contemporanea',min:'sviluppo',kick:'Industria strategica',t:'Un gruppo straniero compra un\'azienda chiave',text:'Un gruppo estero offre una cifra enorme per l\'azienda che produce componenti per la difesa e per le reti. I soci vogliono vendere.',ch:[
+   {l:'Blocca la vendita',e:'La tecnologia resta in casa; i capitali ci pensano due volte',pleases:'conservatore',f:()=>{gd('lavoratori',2); gd('imprenditori',-2); repd(-1);}},
+   {l:'Via libera, con garanzie su posti e brevetti',e:'Soldi freschi; le garanzie durano cinque anni',pleases:'tecnico',f:()=>{S.gMod+=0.1; gd('imprenditori',2); gd('lavoratori',-1);}},
+ ]},
+ {id:'ms_sv_dati',era:'contemporanea',min:'sviluppo',kick:'Tecnologia',t:'Il centro dati che beve come una città',text:'Una grande azienda vuole costruire un centro dati: mille posti nei cantieri, cinquanta a regime, e l\'acqua e l\'elettricità di una città media.',ch:[
+   {l:'Autorizza: è il futuro',e:'Investimento record; la rete elettrica scricchiola',pleases:'conservatore',f:()=>{S.gMod+=0.1; gd('imprenditori',2); S.ind.ambiente-=2;}},
+   {l:'Solo con energia propria e acqua riciclata',e:'Regole serie; l\'azienda guarda altrove',pleases:'tecnico',f:()=>{S.ind.ambiente+=1; gd('imprenditori',-2); gd('cetomedio',1);}},
+ ]},
+ {id:'ms_sv_pannelli',era:'contemporanea',min:'sviluppo',kick:'Agricoltura',t:'Pannelli solari al posto del grano',text:'Affittare un campo per i pannelli rende il triplo che coltivarlo. Nelle pianure migliori il grano lascia il posto al silicio.',ch:[
+   {l:'Niente pannelli sui terreni fertili',e:'I campi restano campi; l\'energia pulita rallenta',pleases:'conservatore',f:()=>{gd('cattolici',2); gd('pensionati',1); gd('imprenditori',-2); S.ind.ambiente-=1;}},
+   {l:'Decida chi possiede la terra',e:'Reddito per gli agricoltori; il paesaggio cambia',pleases:'tecnico',f:()=>{S.ind.ambiente+=1; gd('imprenditori',2); gd('cattolici',-2);}},
+ ]},
+ {id:'ms_sv_confezioni',era:'contemporanea',min:'sviluppo',kick:'Consumatori',t:'Stessa confezione, meno prodotto',text:'Il pacco di biscotti costa uguale ma pesa un quinto in meno. Le associazioni dei consumatori parlano di aumento nascosto.',ch:[
+   {l:'Un avviso obbligatorio sulla confezione',e:'Chi compra sa; le imprese contano le etichette',pleases:'progressista',f:()=>{gd('cetomedio',2); gd('pensionati',1); gd('imprenditori',-2);}},
+   {l:'Un richiamo alle imprese, senza obblighi',e:'Nessuna carta in più; il pacco resta leggero',pleases:'conservatore',f:()=>{gd('imprenditori',1); gd('cetomedio',-1);}},
+ ]},
+ {id:'ms_sv_zona',era:'contemporanea',min:'sviluppo',kick:'Territori',t:'Una zona a tasse ridotte dove le fabbriche hanno chiuso',text:'Nell\'area dove l\'industria è sparita si propone di dimezzare le tasse a chi apre un\'impresa. Le zone vicine dicono che così si spostano i posti, non si creano.',ch:[
+   {l:'Istituisci la zona',e:'Qualche capannone riapre; entrate in meno',pleases:'conservatore',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; gd('lavoratori',2); gd('imprenditori',2);}},
+   {l:'Niente zone speciali: strade e scuole',e:'Un lavoro lungo; nessun nastro da tagliare',pleases:'tecnico',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; gd('cetomedio',1); gd('giovani',1);}},
  ]},
  // ----- GIUSTIZIA (+8) -----
  {id:'prescrizione',era:'contemporanea',min:'giustizia',kick:'Giustizia',t:'Processi che muoiono di prescrizione',text:'Troppi procedimenti si estinguono per decorrenza dei termini. Dove intervieni?',ch:[
@@ -6054,6 +6447,55 @@ const DOSSIERS=[
  {id:'ostativo',era:'universale',min:'giustizia',kick:'Giustizia',t:'Benefici ai condannati che non collaborano',text:'La Corte chiede di rivedere l\'automatismo che nega benefici a chi non collabora. Tema tecnico, nervi scoperti.',ch:[
    {l:'Adeguarsi: valutazione caso per caso',e:'Stato di diritto; polemiche garantite',pleases:'tecnico',f:()=>{gd('giovani',2); gd('pensionati',-3);}},
    {l:'Difendere il rigore con una nuova legge',e:'Linea dura confermata',pleases:'conservatore',f:()=>{S.ind.sicurezza+=1; gd('pensionati',3); gd('giovani',-2);}},
+ ]},
+ // L152-3 · varietà del ministro (30/9): 12 dossier del presente per il ministro della Giustizia — era 'contemporanea', senza paesi e senza cond (LOTTO-L152-3-DOSSIER.md).
+ {id:'ms_gi_sedi',era:'contemporanea',min:'giustizia',kick:'Tribunali',t:'Chiudere i tribunali più piccoli',text:'Decine di piccoli tribunali trattano poche cause e costano molto. Accorparli fa risparmiare; le città che li perdono si sentono abbandonate.',ch:[
+   {l:'Accorpa i tribunali',e:'Risparmio; sindaci e avvocati in piazza',pleases:'tecnico',costo:{debito:-0.2},f:()=>{S.ind.debt-=0.2; gd('cetomedio',-2); gd('pensionati',-1);}},
+   {l:'Un tribunale resta in ogni territorio',e:'Giustizia vicina, e il suo costo',pleases:'populista',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; gd('cetomedio',2);}},
+ ]},
+ {id:'ms_gi_telematico',era:'contemporanea',min:'giustizia',kick:'Digitale',t:'Il processo al computer si blocca',text:'Il sistema informatico dei tribunali si è fermato per tre giorni: udienze rinviate, atti persi nel nulla. Gli avvocati chiedono di tornare alla carta.',ch:[
+   {l:'Rifai il sistema da capo',e:'Spesa oggi, udienze più rapide domani',pleases:'tecnico',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; gd('imprenditori',2); gd('cetomedio',1);}},
+   {l:'Doppio binario: carta e computer',e:'Nessuno resta bloccato; i tempi si allungano',pleases:'conservatore',f:()=>{gd('cetomedio',1); gd('imprenditori',-2);}},
+ ]},
+ {id:'ms_gi_bracciale',era:'contemporanea',min:'giustizia',kick:'Pene',t:'Il braccialetto al posto della cella',text:'Per le pene brevi si propone il braccialetto elettronico a casa invece del carcere. Costa meno di una cella; a molti sembra un premio.',ch:[
+   {l:'Braccialetto per le pene brevi',e:'Celle più vuote; il quartiere mugugna',pleases:'tecnico',costo:{debito:-0.1},f:()=>{S.ind.debt-=0.1; gd('giovani',1); gd('pensionati',-2);}},
+   {l:'La pena si sconta in carcere',e:'Fermezza; celle sempre più piene',pleases:'conservatore',f:()=>{S.ind.sicurezza+=1; gd('pensionati',2); gd('giovani',-1);}},
+ ]},
+ {id:'ms_gi_patrocinio',era:'contemporanea',min:'giustizia',kick:'Patrocinio',t:'L\'avvocato pagato dallo Stato',text:'Chi non ha soldi ha diritto a un avvocato pagato dallo Stato, ma i compensi arrivano dopo anni e sempre meno avvocati accettano.',ch:[
+   {l:'Paga in tempo e alza le tariffe',e:'Difesa vera per tutti; costa',pleases:'progressista',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; gd('lavoratori',2); gd('cetomedio',1);}},
+   {l:'Stringi i requisiti di reddito',e:'Meno spesa; più persone senza difensore',pleases:'conservatore',costo:{debito:-0.1},f:()=>{S.ind.debt-=0.1; gd('lavoratori',-2);}},
+ ]},
+ {id:'ms_gi_onorari',era:'contemporanea',min:'giustizia',kick:'Magistratura',t:'I giudici pagati a udienza',text:'Metà delle cause minori è decisa da giudici non di carriera, pagati a udienza e senza tutele. Minacciano di fermarsi.',ch:[
+   {l:'Un contratto e uno stipendio',e:'Le udienze continuano; spesa stabile in più',pleases:'progressista',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; gd('lavoratori',2); gd('cetomedio',1);}},
+   {l:'Un\'indennità e niente di più',e:'Si spende poco; lo sciopero delle udienze resta nell\'aria',pleases:'tecnico',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; gd('cetomedio',-1);}},
+ ]},
+ {id:'ms_gi_officine',era:'contemporanea',min:'giustizia',kick:'Carcere',t:'Il lavoro dietro le sbarre',text:'Chi in carcere impara un mestiere torna a delinquere molto meno. Oggi lavora un detenuto su quattro, e quasi solo a pulire i corridoi.',ch:[
+   {l:'Officine in carcere e sgravi a chi assume',e:'Meno recidiva domani; spesa oggi',pleases:'progressista',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; S.ind.sicurezza+=1; gd('cattolici',2); gd('pensionati',-1);}},
+   {l:'Prima le vittime, poi i detenuti',e:'Applausi; nelle celle non cambia niente',pleases:'populista',f:()=>{gd('pensionati',2); gd('cattolici',-2);}},
+ ]},
+ {id:'ms_gi_segnalanti',era:'contemporanea',min:'giustizia',kick:'Trasparenza',t:'Proteggere chi denuncia dall\'interno',text:'Un impiegato che ha segnalato un appalto truccato è stato trasferito in un ufficio senza finestre. Si chiede una legge che protegga chi parla.',ch:[
+   {l:'Tutele forti e anonimato',e:'Più denunce; gli uffici temono i veleni',pleases:'progressista',f:()=>{repd(2); gd('giovani',2); gd('imprenditori',-1);}},
+   {l:'Tutele solo dopo una verifica',e:'Prudenza; chi sa resterà zitto',pleases:'conservatore',f:()=>{gd('imprenditori',1); repd(-1);}},
+ ]},
+ {id:'ms_gi_mediazione',era:'contemporanea',min:'giustizia',kick:'Cause civili',t:'Prima di fare causa, provare a mettersi d\'accordo',text:'Per alleggerire i tribunali si propone un tentativo obbligatorio di accordo prima di ogni causa civile. Gli avvocati sono divisi.',ch:[
+   {l:'Obbligatorio per tutte le cause',e:'Meno cause; un passaggio in più da pagare',pleases:'tecnico',f:()=>{gd('imprenditori',2); gd('cetomedio',-1);}},
+   {l:'Solo per chi lo sceglie',e:'Libertà di fare causa; tribunali intasati come prima',pleases:'conservatore',f:()=>{gd('cetomedio',1); gd('imprenditori',-1);}},
+ ]},
+ {id:'ms_gi_vittime',era:'contemporanea',min:'giustizia',kick:'Vittime',t:'Un fondo per le vittime dei reati',text:'Chi subisce un reato violento spesso non vede un soldo: il colpevole non ha niente. Le associazioni chiedono che anticipi lo Stato.',ch:[
+   {l:'Lo Stato anticipa i risarcimenti',e:'Giustizia che si vede; spesa nuova',pleases:'populista',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; gd('pensionati',2); gd('cetomedio',2);}},
+   {l:'Sportelli di aiuto, non assegni',e:'Assistenza sì, soldi no',pleases:'tecnico',f:()=>{gd('cetomedio',-1); gd('cattolici',1);}},
+ ]},
+ {id:'ms_gi_agenti',era:'contemporanea',min:'giustizia',kick:'Carcere',t:'Mancano gli agenti nelle carceri',text:'Turni doppi, ferie saltate, reparti con un agente per cento detenuti. Il sindacato degli agenti annuncia la protesta.',ch:[
+   {l:'Assunzioni straordinarie',e:'Turni umani; spesa stabile in più',pleases:'conservatore',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; S.ind.sicurezza+=1; gd('lavoratori',1);}},
+   {l:'Telecamere e meno reparti aperti',e:'Si tampona con la tecnologia; gli agenti non ci stanno',pleases:'tecnico',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; gd('lavoratori',-2);}},
+ ]},
+ {id:'ms_gi_querele',era:'contemporanea',min:'giustizia',kick:'Stampa',t:'Cause milionarie contro i giornali',text:'Un cronista è stato citato per una cifra enorme da un potente locale: la causa è infondata, ma difendersi costa anni. Le redazioni chiedono una legge.',ch:[
+   {l:'Chi fa causa a vuoto paga',e:'La stampa respira; qualcuno parla di impunità',pleases:'progressista',f:()=>{stampad(3); gd('imprenditori',-1);}},
+   {l:'L\'onore delle persone viene prima',e:'Nessuna legge; le redazioni prendono nota',pleases:'conservatore',f:()=>{gd('pensionati',1); stampad(-2);}},
+ ]},
+ {id:'ms_gi_riprese',era:'contemporanea',min:'giustizia',kick:'Udienze',t:'Le telecamere in aula',text:'Una televisione chiede di trasmettere in diretta un grande processo. I giudici temono lo spettacolo, il pubblico vuole vedere.',ch:[
+   {l:'Dirette ammesse, con regole',e:'Giustizia alla luce; il rischio del teatro',pleases:'populista',f:()=>{stampad(2); gd('giovani',1); gd('pensionati',-1);}},
+   {l:'L\'aula non è uno studio televisivo',e:'Sobrietà; le televisioni protestano',pleases:'conservatore',f:()=>{gd('pensionati',1); stampad(-1);}},
  ]},
  // ----- ESTERI (+4, dossier domestici) -----
  {id:'expo',era:'universale',min:'esteri',kick:'Diplomazia pubblica',t:'Candidare il paese a un\'esposizione mondiale',text:'Una grande esposizione porterebbe vetrina e turismo, ma la candidatura costa.',ch:[
@@ -6543,6 +6985,17 @@ const DOSSIERS=[
    {l:'Diciotto mesi, dal 1989',e:'La storia · la legge passa · e alla vigilia sarà ritirata, perché il mondo è cambiato',f:()=>{repd(1); gdDe80('giovani',-2); gdDe80('pensionati',1);}},   // L149-1 (D70): era −4 (×5 = −20): portava da sola più di metà della caduta dei giovani nelle rivolte della SPD 1987-89 (101,6 su 92,2 punti in 8 carriere)
    {l:'Una parte di soldati di mestiere',e:'Caserme piene · bilancio della difesa più pesante',costo:{debito:0.5},f:()=>{S.ind.debt+=0.5; gdDe80('giovani',2); repd(1);}},
    {l:'Quindici mesi, e meno reparti',e:'I ragazzi ringraziano · l\'Alleanza chiede come pensi di difendere la frontiera più esposta d\'Europa',f:()=>{repd(-3); gdDe80('giovani',3);}}]},
+ /* L153-2 · i due dossier del decennio tedesco '90 (scheda §I-F). */
+ {id:'dde90_esercito',era:'de1990',cond:()=>S.year>=1991&&S.year<=1994,min:'difesa',kick:'La difesa',t:'L\'esercito dell\'Est',
+  text:'Dell\'esercito dell\'altra Germania restano novantamila uomini, migliaia di carri armati e depositi pieni di munizioni. Il trattato sull\'unità fissa un tetto di trecentosettantamila soldati per tutto il paese. Bisogna decidere quanti ufficiali dell\'Est tenere, e che cosa fare dei carri.',ch:[
+   {l:'Pochi ufficiali, scelti uno per uno, e i carri in fonderia',e:'La storia · ne restano undicimila, quasi tutti con un grado in meno · gli altri vanno a casa con una liquidazione',f:()=>{repd(2); gdDe90('lavoratori',-1);}},
+   {l:'Tenerne il più possibile: sono soldati tedeschi anche loro',e:'All\'Est se ne accorgono · gli alleati chiedono chi comandava quei reparti fino a ieri',costo:{debito:0.5},f:()=>{S.ind.debt+=0.5; repd(-2); gdDe90('lavoratori',2);}},
+   {l:'Vendere carri e navi a chi li compra',e:'Cassa per il bilancio · le armi finiscono in posti di cui poi si legge sui giornali',costo:{debito:-0.5},f:()=>{S.ind.debt-=0.5; repd(-3); stampad(-2);}}]},
+ {id:'dde90_bosnia',era:'de1990',cond:()=>S.year>=1992&&S.year<=1995,min:'esteri',kick:'L\'Europa',t:'I profughi della Bosnia',
+  text:'Dalla Bosnia in guerra sono arrivate più di trecentomila persone: nessun paese d\'Europa ne ha accolte tante. Hanno un permesso che si rinnova di sei mesi in sei mesi. I Länder chiedono chi paga; gli alleati chiedono soldati, non solo letti.',ch:[
+   {l:'Protezione temporanea, e ritorno a guerra finita',e:'La storia · si resta finché si spara · poi i rimpatri, anche di chi qui ha messo radici',f:()=>{repd(1); gdDe90('pensionati',1); gdDe90('giovani',-1);}},
+   {l:'Un permesso stabile, di soggiorno e di lavoro',e:'Le chiese e le imprese ringraziano · i sindaci ti mandano il conto degli alloggi',costo:{debito:0.5},f:()=>{S.ind.debt+=0.5; gdDe90('cattolici',2); gdDe90('giovani',2); gdDe90('cetomedio',-3);}},
+   {l:'Quote per tutta l\'Europa: ognuno faccia la sua parte',e:'Gli altri governi annuiscono · e non prendono nessuno',f:()=>{repd(-1); gdDe90('cetomedio',1);}}]},
  {id:'d50_marshall_dip',era:'italia1950',cond:()=>S.year<=1953,min:'esteri',kick:'Piano Marshall',t:'La dipendenza dagli aiuti',text:'Gli aiuti americani hanno rimesso in moto il paese, ma ora chiedono allineamento politico e commerciale. Fin dove seguire l\'alleato?',ch:[
    {l:'Allineamento pieno con l\'alleato',e:'Aiuti e protezione; la pancia mormora',pleases:'tecnico',f:()=>{repd(4); if(S.gMod!=null)S.gMod+=0.1; gd('cetomedio',-1);}},
    {l:'Amicizia sì, ma con margini nostri',e:'Autonomia rivendicata; l\'alleato prende nota',pleases:'populista',f:()=>{repd(-2); gd('cetomedio',2);}},
@@ -9341,6 +9794,58 @@ const EVENTS=[
    {l:'Accettare: i treni passano dall\'Est',e:'La storia · il ministro degli esteri lo annuncia dal balcone · alle stazioni dell\'Est la folla prova a salire',f:()=>{repd(4); gdDe80('pensionati',2); gdDe80('cetomedio',1);}},
    {l:'Chiedere che vengano direttamente a ovest',e:'Giorni di trattativa in più nel fango · alla fine i treni passano lo stesso',f:()=>{repd(-1); stampad(-2);}},
    {l:'Chiudere l\'ambasciata ai nuovi arrivi',e:'Il giardino non si riempie più · il paese ti guarda come chi ha chiuso la porta',f:()=>{repd(-4); gdDe80('pensionati',-3); baseDe80(-2);}}]},
+ /* L153-2 · i dieci eventi del decennio tedesco '90 (scheda §I-C; verifiche ⚠ nel rapporto). `de90_soldati` è datato 1995: la sentenza è del
+    luglio 1994, ma il secondo semestre del 1994 è campagna e la coda non gira. */
+ {id:'de90_sciopero92', era:'de1990', cond:()=>S.year===1992&&S.month>=4&&S.month<=7, kick:'Il lavoro', t:'I bidoni sul marciapiede',
+  text:'Undici giorni di sciopero del pubblico impiego: i bidoni restano sui marciapiedi, treni e poste sono fermi, gli aeroporti chiusi. Il sindacato chiede il nove e mezzo per cento; gli arbitri hanno proposto il cinque e quattro, e il governo ha detto no: l\'unità costa, e qualcuno deve cominciare a dirlo.',ch:[
+   {l:'Accettare la proposta degli arbitri',e:'La storia · si chiude al cinque e quattro · i giornali scrivono che hai ceduto, gli iscritti che ha ceduto il sindacato',costo:{debito:0.5},f:()=>{S.ind.debt+=0.5; gdDe90('lavoratori',2); fidDe90(-1); stampad(-1);}},
+   {l:'Tenere il punto: quattro e otto, non un marco di più',e:'Lo sciopero si allunga · la banca centrale approva, i pendolari no',f:()=>{gdDe90('lavoratori',-4); gdDe90('cetomedio',-1); gdDe90('imprenditori',2); fidDe90(2);}},
+   {l:'Un aumento in cifra fissa: di più a chi guadagna meno',e:'I netturbini ci guadagnano, i dirigenti no · il sindacato si divide sul sì',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; gdDe90('lavoratori',3); gdDe90('cetomedio',-1);}}]},
+ {id:'de90_rostock', era:'de1990', cond:()=>S.year===1992&&S.month>=8&&S.month<=11, tono:'grave', kick:'L\'ordine', t:'Rostock',
+  text:'A Rostock, notte dopo notte, centinaia di giovani hanno assediato un palazzo dove vivevano profughi e operai vietnamiti, e alla fine gli hanno dato fuoco, mentre migliaia di vicini applaudivano dal prato. La polizia si era ritirata. Più di cento persone si sono salvate passando dal tetto. Non è morto nessuno, e nessuno sa dire perché.',ch:[
+   {l:'Andare a Rostock, e parlare da lì',e:'Il paese vede il suo governo davanti al palazzo bruciato · nel quartiere ti fischiano',f:()=>{repd(2); gdDe90('giovani',2); gdDe90('cattolici',1); gdDe90('pensionati',-1);}},
+   {l:'Spostare i profughi e chiudere il centro',e:'La storia · i pullman partono di notte · chi ha lanciato le bottiglie dice di aver vinto',f:()=>{repd(-3); gdDe90('cetomedio',1); gdDe90('giovani',-2); stampad(-2);}},
+   {l:'Polizia federale e processi rapidi',e:'Centinaia di fermi in un mese · le condanne saranno poche e lievi, ma le notti tornano calme',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; gdDe90('pensionati',1); gdDe90('cetomedio',1); repd(1);}}]},
+ {id:'de90_quattrogiorni', era:'de1990', cond:()=>(S.year===1993&&S.month>=11)||(S.year===1994&&S.month<=3), kick:'Il lavoro', t:'La settimana di quattro giorni',
+  text:'La più grande fabbrica di automobili del paese ha trentamila operai di troppo. Invece di licenziarli, azienda e sindacato firmano la settimana di quattro giorni: si lavora un quinto in meno e si guadagna meno. Tutti guardano a quell\'accordo, e ti chiedono se è un modello o un\'eccezione.',ch:[
+   {l:'Un modello: sgravi a chi riduce l\'orario invece di licenziare',e:'Altre fabbriche ci provano · il conto degli sgravi arriva al bilancio',costo:{debito:0.5},f:()=>{S.ind.debt+=0.5; gdDe90('lavoratori',3); gdDe90('imprenditori',-1); fidDe90(-1);}},
+   {l:'Un\'eccezione: ogni azienda faccia i suoi conti',e:'La storia · l\'accordo resta un caso · le altre licenziano',f:()=>{gdDe90('imprenditori',2); gdDe90('lavoratori',-2);}},
+   {l:'Un tavolo nazionale sull\'orario di lavoro',e:'I sindacati ci credono · le imprese mandano i vice',f:()=>{gdDe90('lavoratori',2); gdDe90('imprenditori',-3); stampad(1);}}]},
+ {id:'de90_cura', era:'de1990', cond:()=>S.year===1994&&S.month>=1&&S.month<=5, kick:'La previdenza', t:'Chi paga la vecchiaia',
+  text:'Sempre più anziani non ce la fanno più da soli, e a pagare l\'ospizio sono i risparmi di una vita, poi i figli, poi il comune. La quinta assicurazione sociale, quella per l\'assistenza, è pronta; le imprese accettano di versare la loro metà solo se in cambio si lavora un giorno in più.',ch:[
+   {l:'Via un giorno festivo: la festa di penitenza',e:'La storia · la legge passa · le chiese protestanti perdono il loro giorno, e un Land solo se lo tiene, pagando di più',f:()=>{gdDe90('pensionati',4); gdDe90('cattolici',-2); gdDe90('imprenditori',1);}},
+   {l:'La pagano i lavoratori, da soli',e:'Nessuna festa cancellata · la busta paga si assottiglia, e il sindacato lo fa notare',f:()=>{gdDe90('pensionati',3); gdDe90('lavoratori',-4); gdDe90('imprenditori',2);}},
+   {l:'Un\'assicurazione privata obbligatoria',e:'I liberali applaudono · chi ha ottant\'anni oggi non ha più tempo per metterla da parte',f:()=>{gdDe90('imprenditori',3); gdDe90('pensionati',-3); baseDe90(S.partito==='de_fdp'?2:-1);}}]},
+ {id:'de90_soldati', era:'de1990', cond:()=>S.year===1995&&S.month>=1&&S.month<=6, kick:'La difesa', t:'Fuori area',
+  text:'La Corte costituzionale ha deciso: i soldati possono partecipare a missioni fuori dal territorio dell\'Alleanza, se il Bundestag lo vota ogni volta. Finora il paese ha mandato medici, dragamine e assegni. Gli alleati, che durante la guerra del Golfo hanno incassato l\'assegno senza ringraziare, aspettano di vedere che cosa farai della sentenza.',ch:[
+   {l:'Dire sì alla prossima richiesta: aerei da trasporto e da ricognizione',e:'La storia · i primi aerei partono per i Balcani · metà del paese guarda le immagini con la gola stretta',f:()=>{repd(4); gdDe90('giovani',-3); gdDe90('pensionati',-1);}},
+   {l:'Solo caschi blu, e solo medici e genieri',e:'Una presenza che nessuno contesta · e che nessuno, fra gli alleati, conta',f:()=>{repd(1); gdDe90('giovani',1);}},
+   {l:'Prima una legge che fissi i limiti di ogni missione',e:'Mesi di commissioni · gli alleati capiscono che la risposta, per ora, è no',f:()=>{repd(-2); gdDe90('cetomedio',1); stampad(1);}}]},
+ {id:'de90_piattaforma', era:'de1990', cond:()=>S.year===1995&&S.month>=5&&S.month<=8, kick:'L\'ambiente', t:'La piattaforma',
+  text:'Una compagnia petrolifera vuole affondare nell\'Atlantico una vecchia piattaforma di stoccaggio, col permesso del governo britannico. Un gruppo di ambientalisti l\'ha occupata, e qui gli automobilisti hanno smesso di fare benzina ai suoi distributori: le vendite sono crollate. Qualcuno ha anche sparato contro una pompa.',ch:[
+   {l:'Dirlo al vertice dei grandi: l\'affondamento va fermato',e:'La storia · lo dici davanti agli altri capi di governo · pochi giorni dopo la compagnia rinuncia',f:()=>{gdDe90('giovani',3); repd(-1); gdDe90('imprenditori',-1);}},
+   {l:'È una faccenda fra un\'impresa e un altro governo',e:'Nessun incidente diplomatico · i distributori restano vuoti, e tu resti zitto',f:()=>{gdDe90('imprenditori',1); gdDe90('giovani',-3); stampad(-1);}},
+   {l:'Una regola europea: niente più piattaforme in fondo al mare',e:'Anni di negoziato · arriverà, quando della piattaforma non parlerà più nessuno',f:()=>{gdDe90('giovani',2); repd(1); gdDe90('imprenditori',-2);}}]},
+ {id:'de90_crocifisso', era:'de1990', cond:()=>S.year===1995&&S.month>=8&&S.month<=12, kick:'La Corte', t:'Il crocifisso in aula',
+  text:'La Corte costituzionale ha dato ragione a una famiglia: la regola bavarese che impone il crocifisso in ogni aula delle scuole pubbliche viola la libertà di coscienza. In Baviera decine di migliaia di persone scendono in piazza, e il governo del Land annuncia che i crocifissi restano dove sono. C\'è chi dice che le sentenze non si commentano, e chi le commenta dal pulpito.',ch:[
+   {l:'Criticare la sentenza: il paese ha radici cristiane',e:'Le piazze bavaresi applaudono · i giudici ricordano che la Corte non è un partito',f:()=>{gdDe90('cattolici',4); gdDe90('giovani',-2); stampad(-1); baseDe90(S.partito==='de_cdu'?2:-2);}},
+   {l:'Le sentenze della Corte si rispettano',e:'La Costituzione ringrazia · in Baviera ti chiedono da che parte stai',f:()=>{gdDe90('cattolici',-3); gdDe90('giovani',2); gdDe90('cetomedio',1); baseDe90(S.partito==='de_cdu'?-2:1);}},
+   {l:'Tacere: è una faccenda del Land',e:'Nessuno può citarti · tutti notano il silenzio',f:()=>{gdDe90('cattolici',-1); stampad(-1);}}]},
+ {id:'de90_scorie', era:'de1990', cond:()=>(S.year===1996&&S.month>=5)||(S.year===1997&&S.month<=3), kick:'L\'energia', t:'Il treno delle scorie',
+  text:'Un treno coi contenitori delle scorie nucleari attraversa il paese verso il deposito della Bassa Sassonia. Lungo gli ultimi chilometri migliaia di persone sono sedute sui binari e sulla strada, e i contadini hanno messo di traverso i trattori. Per farlo passare servono decine di migliaia di agenti: è la più grande operazione di polizia dalla nascita della Repubblica.',ch:[
+   {l:'Il treno passa: lo Stato non tratta sui binari',e:'La storia · il treno arriva · il conto della polizia supera quello del trasporto, e l\'anno prossimo si ricomincia',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; gdDe90('imprenditori',2); gdDe90('giovani',-4); gdDe90('pensionati',1);}},
+   {l:'Sospendere i trasporti e aprire un tavolo sull\'uscita dal nucleare',e:'I binari si svuotano · le imprese elettriche fanno i conti, e li mandano a te',f:()=>{gdDe90('giovani',4); gdDe90('imprenditori',-4); fidDe90(-1);}},
+   {l:'Depositi accanto alle centrali, e niente più treni',e:'Le scorie restano dove nascono · i sindaci delle centrali scoprono di avere un deposito',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; gdDe90('giovani',1); gdDe90('cetomedio',-2);}}]},
+ {id:'de90_oder', era:'de1990', cond:()=>S.year===1997&&S.month>=7&&S.month<=9, tono:'grave', kick:'Il paese', t:'L\'Oder',
+  text:'L\'Oder è uscito dagli argini in Polonia e nella Repubblica Ceca, dove i morti sono più di cento, e ora l\'onda preme sul Brandeburgo. Trentamila soldati riempiono sacchi di sabbia giorno e notte accanto alla gente dei paesi: ragazzi dell\'Ovest su un argine dell\'Est. Una pianura di fattorie è già sott\'acqua.',ch:[
+   {l:'Andare sugli argini, e promettere che nessuno resterà solo',e:'La storia · stivali di gomma e telecamere · la promessa va poi pagata',costo:{debito:0.5},f:()=>{S.ind.debt+=0.5; gdDe90('pensionati',2); gdDe90('cetomedio',2); stampad(1);}},
+   {l:'Un fondo nazionale per le alluvioni',e:'Chi ha perso la casa sa a chi rivolgersi · il bilancio ha una voce in più, per sempre',costo:{debito:1},f:()=>{S.ind.debt+=1; gdDe90('lavoratori',2); gdDe90('cetomedio',2); fidDe90(-1);}},
+   {l:'Aiuti d\'emergenza, e i danni alle assicurazioni',e:'I conti restano in ordine · chi non era assicurato lo racconta ai giornali',f:()=>{gdDe90('imprenditori',1); gdDe90('cetomedio',-3); stampad(-2);}}]},
+ {id:'de90_trasloco', era:'de1990', cond:()=>S.year===1999&&S.month>=4&&S.month<=9, kick:'La capitale', t:'Il trasloco',
+  text:'Governo e Bundestag traslocano a Berlino: migliaia di casse, treni speciali, funzionari che cercano casa. La legge promette alla vecchia capitale un risarcimento, e che sei ministeri terranno la sede principale sul Reno. A Berlino i cantieri non sono finiti; a Bonn contano quanti posti restano.',ch:[
+   {l:'Rispettare la legge: sei ministeri restano sul Reno',e:'La storia · i funzionari fanno la spola in aereo · a Bonn nessuno perde la faccia',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; gdDe90('cetomedio',1); stampad(-1);}},
+   {l:'Tutto a Berlino, e subito',e:'Una capitale sola · sul Reno parlano di parola mancata',f:()=>{repd(1); gdDe90('cetomedio',-2); fidDe90(1);}},
+   {l:'Rinviare di due anni: i cantieri non sono finiti',e:'Nessuno lavora fra le gru · il paese resta con due mezze capitali',f:()=>{stampad(-2); gdDe90('imprenditori',-1);}}]},
  {id:'fr_ceca', era:'fr1950', cond:()=>S.year>=1951&&S.year<=1953, kick:'L\'Europa', t:'Il carbone e l\'acciaio con Bonn',
   text:'Sei paesi mettono in comune carbone e acciaio sotto un\'Alta Autorità che non risponde a nessun governo: per i siderurgici del nord è un mercato, per i minatori una minaccia, per i gollisti una rinuncia. Il tuo partito deve ratificare.',ch:[
    {l:'Ratifichi',e:'Le acciaierie del nord con te · i minatori temono il mercato comune',f:()=>{gdFr('imprenditori',3); gdFr('cetomedio',2); gdFr('lavoratori',-3); repd(1);}},
@@ -10491,6 +10996,32 @@ const SFIDE=[
  {id:'de80_q_berlino', era:'de1980', codaFino:Infinity, paese:'germania', ruolo:'governo', diff:'difficile', cond:()=>S.year>=1992||(S.year===1991&&S.month>=7), q:'Con quale voto il Bundestag sceglie Berlino capitale nel 1991?',
   op:['All\'unanimità','400 a 250','338 a 320'], giusta:2,
   perche:'Il 20 giugno 1991, dopo un giorno intero di dibattito, Berlino vince per diciotto voti.'},
+ /* L153-2 · le otto sfide del decennio tedesco '90 (scheda §I-G; i «perché» sono di Code). Nessuna su una tragedia, nessuna su un fatto
+    che una scelta del giocatore può aver cambiato. Giusta ruotata: 0,1,2,1,2,0,1,2. */
+ {id:'de90_q_asilo', era:'de1990', codaFino:Infinity, paese:'germania', ruolo:'governo', diff:'media', cond:()=>S.year>=1993, q:'Quante domande d\'asilo riceve il paese nel 1992?',
+  op:['Più di 400.000','Circa 100.000','Circa 50.000'], giusta:0,
+  perche:'Nel 1992 le domande sono 438.000: nessun altro paese d\'Europa ne riceve tante.'},
+ {id:'de90_q_crocifisso', era:'de1990', codaFino:Infinity, paese:'germania', ruolo:'governo', diff:'media', cond:()=>S.year>=1996||(S.year===1995&&S.month>=10), q:'Quale sentenza della Corte costituzionale fa scendere in piazza la Baviera nel 1995?',
+  op:['Quella sull\'aborto','Quella sui crocifissi nelle aule','Quella sui soldati all\'estero'], giusta:1,
+  perche:'La sentenza pubblicata nell\'agosto 1995 dichiara incostituzionale l\'obbligo del crocifisso nelle aule delle scuole pubbliche bavaresi.'},
+ {id:'de90_q_reichstag', era:'de1990', codaFino:Infinity, paese:'germania', ruolo:'governo', diff:'facile', cond:()=>S.year>=1996||(S.year===1995&&S.month>=8), q:'Quale palazzo di Berlino viene «impacchettato» nell\'estate del 1995?',
+  op:['Il castello','La porta di Brandeburgo','Il Reichstag'], giusta:2,
+  perche:'Per due settimane, fra giugno e luglio, il Reichstag resta avvolto nella tela: lo vedono cinque milioni di persone.'},
+ {id:'de90_q_disoccupati', era:'de1990', codaFino:Infinity, paese:'germania', ruolo:'governo', diff:'media', cond:()=>S.year>=1999||(S.year===1998&&S.month>=3), q:'Quanti disoccupati conta il paese nel febbraio 1998?',
+  op:['2,8 milioni','4,8 milioni','6,8 milioni'], giusta:1,
+  perche:'Nell\'inverno del 1998 i disoccupati superano i 4,8 milioni: mai tanti dal dopoguerra.'},
+ {id:'de90_q_oder', era:'de1990', codaFino:Infinity, paese:'germania', ruolo:'governo', diff:'facile', cond:()=>S.year>=1998||(S.year===1997&&S.month>=9), q:'Quale fiume minaccia il Brandeburgo nell\'estate del 1997?',
+  op:['L\'Elba','Il Reno','L\'Oder'], giusta:2,
+  perche:'L\'Oder esce dagli argini in Polonia e nella Repubblica Ceca; nel Brandeburgo trentamila soldati difendono le dighe.'},
+ {id:'de90_q_russi', era:'de1990', codaFino:Infinity, paese:'germania', ruolo:'governo', diff:'media', cond:()=>S.year>=1995||(S.year===1994&&S.month>=10), q:'In che anno gli ultimi soldati russi lasciano il paese?',
+  op:['1994','1991','1999'], giusta:0,
+  perche:'Il ritiro si chiude nell\'estate del 1994, quattro anni dopo il trattato che lo aveva fissato.'},
+ {id:'de90_q_governo99', era:'de1990', codaFino:Infinity, paese:'germania', ruolo:'governo', diff:'facile', cond:()=>S.year>=2000||(S.year===1999&&S.month>=10), q:'Dove lavora il governo dall\'autunno del 1999?',
+  op:['A Bonn','A Berlino','A Francoforte'], giusta:1,
+  perche:'Otto anni dopo il voto del Bundestag, governo e Parlamento traslocano a Berlino.'},
+ {id:'de90_q_moneta', era:'de1990', codaFino:Infinity, paese:'germania', ruolo:'governo', diff:'facile', cond:()=>S.year>=1999||(S.year===1998&&S.month>=5), q:'Che cosa vota il Bundestag nell\'aprile 1998?',
+  op:['La capitale a Berlino','La riforma dell\'ortografia','L\'ingresso nella moneta unica'], giusta:2,
+  perche:'Il 23 aprile 1998 il Bundestag approva a larghissima maggioranza l\'ingresso nella moneta unica dal 1° gennaio 1999.'},
  {id:'uk60_svalut67', era:'uk1960', codaFino:Infinity, paese:'regnounito', ruolo:'governo', diff:'difficile', cond:()=>S.year>=1967, q:'Che cosa accadde alla sterlina nel novembre 1967?',
   op:['Fu lasciata fluttuare liberamente','Fu svalutata da 2,80 a 2,40 dollari','Fu agganciata all\'oro'], giusta:1,
   perche:'Arrivò dopo tre anni di difesa del cambio.'},
@@ -12784,8 +13315,8 @@ const TITOLI=[
  {id:'ti50_reputazione', era:'italia1950', cond:()=>S.ind.reputazione!=null&&S.ind.reputazione<40, amico:'L\'Italia tratta da pari nei consessi d\'Occidente', ostile:'Isolata nei consessi: l\'Italia conta poco'},
  {id:'ti60_reputazione', era:'italia1960', cond:()=>S.ind.reputazione!=null&&S.ind.reputazione<40, amico:'Realismo nelle alleanze: il Paese tratta da pari', ostile:'Nei tavoli che contano l\'Italia resta ai margini'},
  {id:'ti_giovani_finestra', cond:()=>(S.groups&&S.groups.giovani!=null)?S.groups.giovani<=50:false, amico:'I giovani chiedono spazio: il governo apre', ostile:'Una generazione alla finestra'},
- {id:'ti_estate', cond:()=>S.month>=7&&S.month<=8, amico:'Il paese rallenta, il governo resta al lavoro', ostile:'Ferie per tutti, risposte per nessuno'},
- {id:'ti_rientro', cond:()=>S.month>=9&&S.month<=10, amico:'Il rientro: l\'agenda d\'autunno del governo', ostile:'L\'autunno dei dossier: il tavolo è pieno'},
+ {id:'ti_estate', cond:()=>stagioneMese()==='estate'&&stagioneMese(S.month-1)==='estate', amico:'Il paese rallenta, il governo resta al lavoro', ostile:'Ferie per tutti, risposte per nessuno'},
+ {id:'ti_rientro', cond:()=>stagioneMese()==='autunno'&&stagioneMese(S.month+1)==='autunno', amico:'Il rientro: l\'agenda d\'autunno del governo', ostile:'L\'autunno dei dossier: il tavolo è pieno'},
  /* ===== D2 — TITOLI D'EPOCA '50 (pri 2, era italia1950): la scheda-materia-prima §3-bis di PRESET-ITALIA-1950.md,
     sourceata; ancore-anno e DUE scadenze (Corea ≤'53, TV-sperimentale '52-'54) via cond su S.year. Dedup rispettato:
     la CECA è angolo-titolo (la carta-evento resta distinta), niente Polesine (solo carta-shock), niente Anno Santo. ===== */
@@ -13225,6 +13756,41 @@ const TITOLI=[
  {id:'ti_de80_berlino', era:'de1980', pri:1, cond:()=>S.year===1991&&S.month>=6&&S.month<=7, amico:'Berlino capitale', ostile:'Berlino capitale: trecentotrentotto a trecentoventi'},
  {id:'ti_de80_solidarieta', era:'de1980', pri:1, cond:()=>S.year===1991&&S.month>=7&&S.month<=8, amico:'Il contributo di solidarietà', ostile:'Il contributo di solidarietà: le tasse salgono per l\'Est'},
  {id:'ti_de80_hoyerswerda', era:'de1980', pri:1, cond:()=>S.year===1991&&S.month>=9&&S.month<=10, amico:'Hoyerswerda', ostile:'Hoyerswerda: gli alloggi dei profughi assediati, la polizia li porta via'},
+ /* L153-2 · i titoli del decennio tedesco '90 (scheda §I-E): 32 e una gemella (il trasloco, col colore del voto del 1991). Sobri sui morti,
+    nessuno sull'esito delle urne (D76), nessuno su un fatto di UN governo preciso salvo `ti_de90_calzini` col suo cond. */
+ {id:'ti_de90_maastricht', era:'de1990', pri:1, cond:()=>S.year===1992&&S.month>=2&&S.month<=3, amico:'Firmato il trattato di Maastricht', ostile:'Maastricht: il marco ha una data di scadenza'},
+ {id:'ti_de90_sciopero', era:'de1990', pri:1, cond:()=>S.year===1992&&S.month===5, amico:'Undici giorni di sciopero', ostile:'Pubblico impiego: undici giorni di sciopero, il più lungo dal dopoguerra'},
+ {id:'ti_de90_rostock', era:'de1990', pri:1, cond:()=>S.year===1992&&S.month>=8&&S.month<=9, amico:'Rostock', ostile:'Rostock: il palazzo dei profughi in fiamme, fra gli applausi'},
+ {id:'ti_de90_monete', era:'de1990', pri:1, cond:()=>S.year===1992&&S.month>=9&&S.month<=10, amico:'La tempesta delle monete', ostile:'Lira e sterlina fuori dal sistema monetario: il marco è troppo forte'},
+ {id:'ti_de90_moelln', era:'de1990', pri:1, cond:()=>S.year===1992&&S.month>=11&&S.month<=12, amico:'Mölln', ostile:'Mölln: una casa incendiata, tre morti'},
+ {id:'ti_de90_luci', era:'de1990', pri:1, cond:()=>(S.year===1992&&S.month===12)||(S.year===1993&&S.month===1), amico:'Le catene di luci', ostile:'Centinaia di migliaia in strada con le candele'},
+ {id:'ti_de90_solingen', era:'de1990', pri:1, cond:()=>S.year===1993&&S.month===6, amico:'Solingen', ostile:'Solingen: cinque morti nella casa incendiata'},
+ {id:'ti_de90_asilo', era:'de1990', pri:1, cond:()=>S.year===1993&&S.month>=7&&S.month<=8&&(S.deAsilo92==null||S.deAsilo92==='costituzione'), amico:'Il nuovo diritto d\'asilo', ostile:'In vigore il nuovo diritto d\'asilo: le domande calano'},
+ {id:'ti_de90_recessione', era:'de1990', pri:1, cond:()=>S.year===1993&&S.month>=9&&S.month<=10, amico:'La recessione', ostile:'La recessione più dura dal dopoguerra'},
+ {id:'ti_de90_corte', era:'de1990', pri:1, cond:()=>S.year===1993&&S.month>=10&&S.month<=11, amico:'La Corte lascia passare il trattato', ostile:'Maastricht: la Corte costituzionale dà il via libera, con riserva'},
+ {id:'ti_de90_calzini', era:'de1990', pri:1, cond:()=>S.year===1994&&S.month>=7&&S.month<=8&&deGovernoCdu(), amico:'I calzini rossi', ostile:'Un Land governato coi voti degli eredi del partito dell\'Est'},
+ {id:'ti_de90_russi', era:'de1990', pri:1, cond:()=>S.year===1994&&S.month===9, amico:'Gli ultimi soldati russi', ostile:'Gli ultimi soldati russi lasciano il paese'},
+ {id:'ti_de90_alleati', era:'de1990', pri:1, cond:()=>S.year===1994&&S.month>=9&&S.month<=10, amico:'Gli alleati lasciano Berlino', ostile:'Berlino: americani, inglesi e francesi ammainano le bandiere'},
+ {id:'ti_de90_privatizzazioni', era:'de1990', pri:1, cond:()=>(S.year===1994&&S.month===12)||(S.year===1995&&S.month===1), amico:'L\'agenzia delle privatizzazioni chiude', ostile:'L\'agenzia che ha venduto l\'Est chiude: restano i debiti'},
+ {id:'ti_de90_solidarieta', era:'de1990', pri:1, cond:()=>S.year===1995&&S.month>=1&&S.month<=2&&(S.deConto93==null||S.deConto93==='patto'), amico:'Torna il contributo di solidarietà', ostile:'Il contributo di solidarietà torna, e non ha una scadenza'},
+ {id:'ti_de90_assistenza', era:'de1990', pri:1, cond:()=>S.year===1995&&S.month===4, amico:'L\'assicurazione per l\'assistenza', ostile:'Anziani: parte l\'assicurazione per l\'assistenza'},
+ {id:'ti_de90_piattaforma', era:'de1990', pri:1, cond:()=>S.year===1995&&S.month===6, amico:'La piattaforma non si affonda', ostile:'Boicottaggio: la compagnia petrolifera rinuncia'},
+ {id:'ti_de90_impacchettato', era:'de1990', pri:1, cond:()=>S.year===1995&&S.month>=6&&S.month<=7, amico:'Il Reichstag impacchettato', ostile:'Cinque milioni davanti al Reichstag impacchettato'},
+ {id:'ti_de90_puertoplata', era:'de1990', pri:1, cond:()=>S.year===1996&&S.month===3, amico:'Dopo Puerto Plata', ostile:'Dopo Puerto Plata: chi controlla gli aerei a noleggio'},
+ {id:'ti_de90_duesseldorf', era:'de1990', pri:1, cond:()=>S.year===1996&&S.month===4, amico:'Düsseldorf', ostile:'Düsseldorf: incendio all\'aeroporto, diciassette morti'},
+ {id:'ti_de90_bonn', era:'de1990', pri:1, cond:()=>S.year===1996&&S.month>=6&&S.month<=7, amico:'Trecentocinquantamila a Bonn', ostile:'Trecentocinquantamila a Bonn contro i tagli'},
+ {id:'ti_de90_malattia', era:'de1990', pri:1, cond:()=>S.year===1996&&S.month>=10&&S.month<=11&&S.dePacchetto96==='votato', amico:'La paga di malattia', ostile:'Malattia all\'ottanta per cento: le fabbriche si fermano'},
+ {id:'ti_de90_minatori', era:'de1990', pri:1, cond:()=>S.year===1997&&S.month===3, amico:'I minatori a Bonn', ostile:'I minatori assediano il quartiere del governo'},
+ {id:'ti_de90_scossa', era:'de1990', pri:1, cond:()=>S.year===1997&&S.month>=4&&S.month<=5, amico:'Il discorso della scossa', ostile:'Il Presidente della Repubblica: il paese ha bisogno di una scossa'},
+ {id:'ti_de90_oder', era:'de1990', pri:1, cond:()=>S.year===1997&&S.month===8, amico:'L\'Oder', ostile:'L\'Oder: gli argini reggono, i soldati restano'},
+ {id:'ti_de90_blocco', era:'de1990', pri:1, cond:()=>S.year===1997&&S.month>=10&&S.month<=12, amico:'Il blocco delle riforme', ostile:'La parola dell\'anno: blocco delle riforme'},
+ {id:'ti_de90_disoccupati', era:'de1990', pri:1, cond:()=>S.year===1998&&S.month>=2&&S.month<=3, amico:'Quattro milioni e ottocentomila', ostile:'Disoccupati: quattro milioni e ottocentomila, mai tanti dal dopoguerra'},
+ {id:'ti_de90_moneta', era:'de1990', pri:1, cond:()=>S.year===1998&&S.month===5, amico:'Il sì alla moneta', ostile:'Il Bundestag dice sì alla moneta unica'},
+ {id:'ti_de90_eschede', era:'de1990', pri:1, cond:()=>S.year===1998&&S.month===7, amico:'Dopo Eschede', ostile:'Dopo Eschede: i treni veloci tornano in officina'},
+ {id:'ti_de90_listini', era:'de1990', pri:1, cond:()=>S.year===1999&&S.month===2, amico:'La moneta sui listini', ostile:'La moneta unica parte: per ora solo nelle banche e sui listini'},
+ {id:'ti_de90_cupola', era:'de1990', pri:1, cond:()=>S.year===1999&&S.month>=4&&S.month<=5, amico:'La cupola di vetro', ostile:'Berlino: il Bundestag si riunisce sotto la cupola di vetro'},
+ {id:'ti_de90_trasloco', era:'de1990', pri:1, cond:()=>S.year===1999&&S.month>=9&&S.month<=10&&(S.deCapitale91==null||S.deCapitale91==='berlino'), amico:'Berlino, finalmente', ostile:'Il governo lavora a Berlino'},
+ {id:'ti_de90_trasloco_bonn', era:'de1990', pri:1, cond:()=>S.year===1999&&S.month>=9&&S.month<=10&&(S.deCapitale91==='bonn'||S.deCapitale91==='divisa'), amico:'Addio a Bonn', ostile:'Bonn saluta il governo: quarant\'anni da capitale provvisoria'},
  {id:'ng_p_ti_petrolio', era:'contemporanea', paesi:['nigeria'], amico:'La produzione di petrolio torna a salire', ostile:'Un barile su dieci sparisce: il furto record'},
 ];
 
@@ -14887,12 +15453,23 @@ const SNODI_STORICI = {
   deSvolta82:      { storico:['lasciata','cambio'], conforme:'sul cambio di campo del 1982', diverge:{ 'urne':'Nel 1982, davanti al cambio di campo dei liberali, ha chiesto le urne subito.', 'trattenuta':'Nel 1982 ha tenuto insieme la coalizione dei socialdemocratici e dei liberali fino alle urne.' } },
   deSvolta82Opp:   { storico:['subito'], conforme:'sul cambio di campo del 1982, dall’opposizione', diverge:{ 'programma':'Nel 1982 ha chiesto ai liberali un programma scritto prima di votare il Cancelliere.' } },
   deMissili83:     { storico:['installati'], conforme:'sui missili del 1983', diverge:{ 'rinvio':'Nel 1983 ha rinviato di un anno l’installazione dei missili.', 'rifiuto':'Nel 1983 ha rifiutato i missili a medio raggio.' } },
-  deMissili83Opp:  { storico:['contro'], conforme:'sui missili del 1983, dall’opposizione', diverge:{ 'astensione':'Nel 1983 si è astenuto sui missili.', 'favore':'Nel 1983 ha votato i missili dall’opposizione.' } },
+  deMissili83Opp:  { storico:['contro'], conforme:'sui missili del 1983, dall’opposizione', diverge:{ 'astensione':'Nel 1983 ha scelto l’astensione sui missili.', 'favore':'Nel 1983 ha votato i missili dall’opposizione.' } },
   deUnita90:       { storico:['adesione'], conforme:'sulla strada dell’unità', diverge:{ 'costituzione':'Nel 1990 ha proposto una costituzione nuova per il paese unito.', 'confederazione':'Nel 1990 ha proposto una confederazione a tappe con l’Est.' } },
   deUnita90Opp:    { storico:['costituzione'], conforme:'sulla strada dell’unità, dall’opposizione', diverge:{ 'rapida':'Nel 1990 ha sostenuto dall’opposizione l’adesione rapida dell’Est.', 'frenare':'Nel 1990 ha chiesto di frenare sull’unità.' } },
   deMarco90:       { storico:['unoauno'], conforme:'sul marco all’Est', diverge:{ 'dueauno':'Nel 1990 ha portato il marco all’Est col cambio di due a uno.', 'mercato':'Nel 1990 ha portato il marco all’Est al cambio di mercato, con aiuti diretti.' } },
-  deMarco90Opp:    { storico:['si'], conforme:'sul marco all’Est, dall’opposizione', diverge:{ 'contro':'Nel 1990 ha votato contro il trattato sull’unione monetaria.', 'astensione':'Nel 1990 si è astenuto sul trattato sull’unione monetaria.' } },
+  deMarco90Opp:    { storico:['si'], conforme:'sul marco all’Est, dall’opposizione', diverge:{ 'contro':'Nel 1990 ha votato contro il trattato sull’unione monetaria.', 'astensione':'Nel 1990 ha scelto l’astensione sul trattato sull’unione monetaria.' } },
   deCapitale91:    { storico:['berlino'], conforme:'sulla capitale del paese unito', diverge:{ 'bonn':'Nel 1991 ha votato per restare a Bonn.', 'divisa':'Nel 1991 ha votato per dividere la capitale fra Berlino e Bonn.' } },
+  /* L153-2 · i quattro snodi del decennio tedesco '90, le aule e la moneta (frasi di Code). D89: le righe …Opp dicono che cosa fece
+     l'opposizione di allora. */
+  deAsilo92:       { storico:['costituzione'], conforme:'sull’asilo del 1992', diverge:{ 'procedure':'Nel 1992 ha lasciato intatto il diritto d’asilo e ha accelerato le procedure.', 'quote':'Nel 1992 ha proposto una legge sull’immigrazione con le quote, senza toccare l’asilo.' } },
+  deAsilo92Opp:    { storico:['compromesso'], conforme:'sull’asilo del 1992, dall’opposizione', diverge:{ 'rifiuto':'Nel 1992 ha rifiutato dall’opposizione di cambiare l’articolo sull’asilo.', 'astensione':'Nel 1992 ha scelto l’astensione sulla riforma dell’asilo.' } },
+  deConto93:       { storico:['patto'], conforme:'sul conto dell’unità', diverge:{ 'debito':'Nel 1993 ha messo a debito il conto dell’Est, senza tasse nuove.', 'tagli':'Nel 1993 ha pagato il conto dell’Est tagliando lo Stato sociale.' } },
+  deConto93Opp:    { storico:['firma','senzatagli'], conforme:'sul conto dell’unità, dall’opposizione', diverge:{ 'rifiuto':'Nel 1993 si è alzato dal tavolo sul conto dell’Est.' } },
+  dePacchetto96:   { storico:['votato'], conforme:'sul pacchetto di risparmi del 1996', diverge:{ 'tavolo':'Nel 1996 ha ritirato il pacchetto di risparmi ed è tornato al tavolo coi sindacati.', 'rinvio':'Nel 1996 ha rinviato il pacchetto di risparmi a dopo le urne.' } },
+  dePacchetto96Opp:{ storico:['blocco'], conforme:'sul pacchetto di risparmi del 1996, dall’opposizione', diverge:{ 'trattativa':'Nel 1996 ha trattato col governo un pacchetto di risparmi più piccolo.', 'piazza':'Nel 1996 ha portato il partito in piazza coi sindacati contro il pacchetto di risparmi.' } },
+  deKosovo99:      { storico:['attacchi'], conforme:'sul Kosovo', diverge:{ 'basi':'Nel 1999 ha dato agli alleati basi e ricognizione, ma nessun aereo da attacco.', 'fuori':'Nel 1999 ha tenuto il paese fuori dalla guerra del Kosovo.' } },
+  deKosovo99Opp:   { storico:['si'], conforme:'sul Kosovo, dall’opposizione', diverge:{ 'astensione':'Nel 1999 ha scelto l’astensione sulla guerra del Kosovo.', 'contro':'Nel 1999 ha votato contro la guerra del Kosovo.' } },
+  deMoneta98:      { storico:['si'], conforme:'sulla moneta unica', diverge:{ 'no':'Nel 1998 ha votato no alla moneta unica.', 'rinvio':'Nel 1998 ha chiesto un rinvio controllato della moneta unica.' } },
 };
 
 /* ==============================================================================================================
@@ -17007,7 +17584,7 @@ const TRATTATI72_OPP_EV = {
   ch:[
     { l:'Astenersi, con una risoluzione comune', e:'La storia · i trattati passano · i profughi del tuo elettorato non te lo perdonano',
       f:function(){ S.deTrattati72Opp='astensione'; baseDe70(-2); gdDe70('pensionati',-2); gdDe70('giovani',2);
-        S.log.unshift({t:T('L\'Est'),x:T('Dall\'opposizione si è astenuto sui trattati con l\'Est.')}); } },
+        S.log.unshift({t:T('L\'Est'),x:T('Dall\'opposizione ha scelto l\'astensione sui trattati con l\'Est.')}); } },
     { l:'Votare contro', e:'La tua base con te · i giovani vedono un partito fermo al passato',
       f:function(){ S.deTrattati72Opp='contro'; baseDe70(3); gdDe70('pensionati',2); gdDe70('giovani',-3);
         S.log.unshift({t:T('L\'Est'),x:T('Ha votato contro i trattati con l\'Est.')}); } },
@@ -17132,7 +17709,7 @@ const MISSILI83_OPP_EV = {
         S.log.unshift({t:T('La difesa'),x:T('Ha votato contro i missili a medio raggio.')}); } },
     { l:'Astenersi', e:'Né con la piazza né con l\'Alleanza · nessuno ti ringrazia',
       f:function(){ S.deMissili83Opp='astensione'; baseDe80(-2);
-        S.log.unshift({t:T('La difesa'),x:T('Si è astenuto sui missili a medio raggio.')}); } },
+        S.log.unshift({t:T('La difesa'),x:T('Astensione sui missili a medio raggio.')}); } },
     { l:'Votare a favore, contro il congresso', e:'Gli alleati e il centro apprezzano · il partito si spacca in aula',
       f:function(){ S.deMissili83Opp='favore'; baseDe80(-5); gdDe80('cetomedio',3); gdDe80('pensionati',2);
         S.log.unshift({t:T('La difesa'),x:T('Ha votato a favore dei missili a medio raggio dall\'opposizione.')}); } },
@@ -17148,7 +17725,7 @@ const MISSILI83_OPP_ALTRO_EV = {
         S.log.unshift({t:T('La difesa'),x:T('Ha votato contro i missili a medio raggio.')}); } },
     { l:'Astenersi', e:'Né con la piazza né con l\'Alleanza · nessuno ti ringrazia',
       f:function(){ S.deMissili83Opp='astensione'; baseDe80(-2);
-        S.log.unshift({t:T('La difesa'),x:T('Si è astenuto sui missili a medio raggio.')}); } },
+        S.log.unshift({t:T('La difesa'),x:T('Astensione sui missili a medio raggio.')}); } },
     { l:'Votare a favore', e:'Gli alleati e il centro apprezzano · i tuoi elettori più giovani no',
       f:function(){ S.deMissili83Opp='favore'; baseDe80(-5); gdDe80('cetomedio',3); gdDe80('pensionati',2);
         S.log.unshift({t:T('La difesa'),x:T('Ha votato a favore dei missili a medio raggio dall\'opposizione.')}); } },
@@ -17217,7 +17794,7 @@ const MARCO90_OPP_EV = {
         S.log.unshift({t:T('Il marco'),x:T('Ha votato contro il trattato sull\'unione monetaria.')}); } },
     { l:'Astenersi', e:'Né sì né no · la scelta che nessuno ricorderà',
       f:function(){ S.deMarco90Opp='astensione'; baseDe80(-2);
-        S.log.unshift({t:T('Il marco'),x:T('Si è astenuto sul trattato sull\'unione monetaria.')}); } },
+        S.log.unshift({t:T('Il marco'),x:T('Astensione sul trattato sull\'unione monetaria.')}); } },
   ],
 };
 const MARCO90_OPP_ALTRO_EV = {
@@ -17233,7 +17810,7 @@ const MARCO90_OPP_ALTRO_EV = {
         S.log.unshift({t:T('Il marco'),x:T('Ha votato contro il trattato sull\'unione monetaria.')}); } },
     { l:'Astenersi', e:'Né sì né no · la scelta che nessuno ricorderà',
       f:function(){ S.deMarco90Opp='astensione'; baseDe80(-2);
-        S.log.unshift({t:T('Il marco'),x:T('Si è astenuto sul trattato sull\'unione monetaria.')}); } },
+        S.log.unshift({t:T('Il marco'),x:T('Astensione sul trattato sull\'unione monetaria.')}); } },
   ],
 };
 /* L'aula della capitale: a tutti al livello 3, al governo e all'opposizione. Non cambia niente (D61): la capitale resta Bonn. Dove la
@@ -17252,6 +17829,183 @@ const CAPITALE91_EV = {
     { l:'Il Parlamento a Berlino, i ministeri a Bonn', e:'Il compromesso che scontenta tutti e due i sindaci · i funzionari faranno la spola in aereo',
       f:function(){ S.deCapitale91='divisa'; capitaleEffetto(function(){ stampad(1); }, function(){ gdDe80('pensionati',1); });
         S.log.unshift({t:T('Il Bundestag'),x:T('Ha votato per dividere la capitale fra Berlino e Bonn.')}); } },
+  ],
+};
+/* ==============================================================================================================
+   L153-2 · IL DECENNIO TEDESCO '90 — I QUATTRO SNODI, LE AULE E LA MONETA (scheda PRESET-GERMANIA-1990 §I-A, testi di Cowork approvati;
+   generato da .claude/genera-l153-2.js). Valute del livello 3. Flag nuovi cercati in tutto js/ il 30/9 prima di scriverli (L99-2), zero
+   occorrenze: deAsilo92, deAsilo92Opp, deConto93, deConto93Opp, dePacchetto96, dePacchetto96Opp, deKosovo99, deKosovo99Opp, deMoneta98.
+   ⚑ CHI RICEVE CHE COSA (cancelli in game.js, finestre di due mesi): S1 l'asilo 1992/12-1993/1 · S2 il conto dell'unità 1993/3-4 ·
+   S3 il pacchetto 1996/9-10 · S4 il Kosovo 1999/3-4 — al governo la versione piena, all'opposizione quella dall'aula; la moneta
+   1998/4-5 a tutti al livello 3 (forzata come la capitale del 1991: il Bundestag vota sì in ogni caso).
+   ⚑ D89: le aule di S1-S3 non dicono chi governa e non portano «La storia» (in questa porta all'opposizione ci arriva un giocatore CDU
+   o FDP che ha perso un'urna: l'opposizione storica era la SPD, che non si può scegliere); quella di S4 lo porta.
+   ⚑ Le aule muovono SOLO gruppi e base (repd, stampad e la fiducia dall'opposizione sono no-op, L12-2); la moneta passa da monetaEffetto.
+   ============================================================================================================== */
+/* Il moltiplicatore dei gruppi è di questa porta. Sweep di L153-2 (misura-de1990-contenuto.js sweep, 20 semi, 120 mesi, CDU e FDP al governo,
+   gruppo peggiore contro il fondo ×0 = 40,8, sd 2,9): ×3 1,2 sd · ×4 2,6 e 2,3 sd · ×5 2,4 e 2,8 sd · ×6 3,8 e 4,3 sd; zero crisi e zero rivolte a ogni
+   valore. In banda (1,5-4 sd) stanno ×4 e ×5: si tiene ×4, il solo che lascia dentro i tre bersagli d'urna per tutti e due i partiti (1995 tenuto
+   11/20 e 11/20; a ×5 7/20 e 10/20). ⚠ Il 1995 è sul filo di un seggio: a contenuto dentro oscilla fra 7 e 14 su 20 senza un verso (×0 dà 9).
+   ⚑ BASELINE A 60 (D91, L154-1, 30/9 sera; misura-l154-1.js --base=0|1000|2000, tre gruppi di venti semi, il gioco dopo L153-1…5 e L154-1): il
+   1995/1 tenuto da chi governa alla vigilia — CDU **27/60** (7 · 11 · 9), FDP **37/60** (12 · 13 · 12); bersaglio 30-48: la CDU è fuori di tre,
+   la FDP dentro. Il 1991/1 60/60 tutti e due; il 1999/1 tenuto 4 su 23 (CDU) e 6 su 36 (FDP). Non curato (la consegna: solo misura). Ogni
+   lotto che tocca de1990 rimisura così: venti semi non distinguono «dentro» da «fuori». */
+let DE90_GRUPPI = 4;   // let e non const: la sweep lo varia sul banco
+function gdDe90(g, n){ gd(g, Math.round(n*DE90_GRUPPI)); }
+function fidDe90(n){ fidFr60(n); }   // la fiducia non ha moltiplicatore: la stessa leva delle porte tedesche prima
+function baseDe90(n){
+  var P=(PAESE && PAESE.partiti) ? PAESE.partiti.filter(function(x){ return x.id===S.partito; })[0] : null;
+  if(!P || !P.base) return;
+  Object.keys(P.base).forEach(function(g){ gd(g, Math.round(n*P.base[g]*DE90_GRUPPI)); });
+}
+/* L'aula della moneta: gli stessi gruppi e la base al governo e all'opposizione; reputazione e stampa solo al governo (capitaleEffetto). */
+function monetaEffetto(k){
+  var gov=!S.opposizione;
+  if(k==='si'){ if(gov) repd(2); gdDe90('imprenditori',2); gdDe90('pensionati',-2); }
+  else if(k==='no'){ if(gov) repd(-3); gdDe90('pensionati',3); gdDe90('imprenditori',-3); baseDe90(-2); }
+  else { if(gov){ repd(-1); stampad(-1); } gdDe90('pensionati',1); gdDe90('cetomedio',1); }
+}
+const ASILO92_EV = {
+  id:'snodo_asilo92', snodo:true, era:'de1990', kick:'L\'asilo', tono:'grave',
+  t:'L\'asilo',
+  text:'Quest\'anno le domande d\'asilo hanno passato le quattrocentomila: nessun paese d\'Europa ne riceve tante. I comuni non hanno più letti, e le palestre sono piene. In agosto, a Rostock, una folla ha assediato e incendiato un palazzo di profughi e di operai stranieri fra gli applausi; a novembre, a Mölln, tre persone sono morte in una casa data alle fiamme. La Legge fondamentale dice, in una riga, che i perseguitati politici godono del diritto d\'asilo. Per cambiarla servono i due terzi, cioè i voti dell\'opposizione.',
+  ch:[
+    { l:'Cambiare la Costituzione, coi voti dell\'opposizione', e:'La storia · l\'asilo resta, ma non per chi arriva attraverso un paese sicuro · le domande crollano, e le chiese dicono che si è ceduto alla piazza sbagliata',
+      f:function(){ S.deAsilo92='costituzione'; gdDe90('pensionati',2); gdDe90('cetomedio',2); gdDe90('giovani',-3); gdDe90('cattolici',-1); repd(-1); baseDe90(1);
+        S.log.unshift({t:T('L\'asilo'),x:T('Ha ristretto il diritto d\'asilo nella Costituzione, coi voti dell\'opposizione.')}); } },
+    { l:'L\'articolo resta: più giudici, più alloggi, procedure in sei settimane', e:'La Costituzione non si tocca · le domande calano piano, e i sindaci continuano a telefonare', costo:{debito:1},
+      f:function(){ S.deAsilo92='procedure'; S.ind.debt+=1; gdDe90('giovani',2); gdDe90('cattolici',2); gdDe90('cetomedio',-3); gdDe90('pensionati',-2); baseDe90(S.partito==='de_cdu'?-2:0);
+        S.log.unshift({t:T('L\'asilo'),x:T('Ha lasciato intatto il diritto d\'asilo, e ha accelerato le procedure.')}); } },
+    { l:'Una legge sull\'immigrazione: quote per chi viene a lavorare, e l\'asilo resta', e:'Il paese ammette di essere una terra d\'immigrazione · metà del tuo campo non vuole sentirselo dire',
+      f:function(){ S.deAsilo92='quote'; gdDe90('imprenditori',3); gdDe90('giovani',2); gdDe90('pensionati',-3); baseDe90(S.partito==='de_fdp'?1:-3); stampad(1);
+        S.log.unshift({t:T('L\'asilo'),x:T('Ha proposto una legge sull\'immigrazione con le quote, senza toccare l\'asilo.')}); } },
+  ],
+};
+const ASILO92_OPP_EV = {
+  id:'snodo_asilo92_opp', snodo:true, era:'de1990', kick:'L\'asilo', tono:'grave',
+  t:'L\'asilo, dall\'aula',
+  text:'Il governo chiede i tuoi voti per cambiare l\'articolo della Legge fondamentale sull\'asilo: senza i due terzi non passa. Dopo Rostock e Mölln, nel tuo partito metà dice che ai comuni va data una risposta, metà che la Costituzione non si riscrive sotto la pressione di chi incendia.',
+  ch:[
+    { l:'Trattare, e votare il compromesso', e:'Il compromesso passa · una parte della base straccia la tessera',
+      f:function(){ S.deAsilo92Opp='compromesso'; baseDe90(-3); gdDe90('cetomedio',3); gdDe90('pensionati',1); gdDe90('giovani',-2);
+        S.log.unshift({t:T('L\'asilo'),x:T('Dall\'opposizione ha votato il compromesso sull\'asilo.')}); } },
+    { l:'Rifiutare: la Costituzione non si tocca', e:'L\'articolo resta com\'è · i sindaci, anche i tuoi, chiedono che cosa devono fare lunedì',
+      f:function(){ S.deAsilo92Opp='rifiuto'; baseDe90(2); gdDe90('giovani',3); gdDe90('cetomedio',-3); gdDe90('pensionati',-2);
+        S.log.unshift({t:T('L\'asilo'),x:T('Dall\'opposizione ha rifiutato di cambiare l\'articolo sull\'asilo.')}); } },
+    { l:'Astenersi', e:'Né sì né no · nessuno ti ringrazia',
+      f:function(){ S.deAsilo92Opp='astensione'; baseDe90(-2);
+        S.log.unshift({t:T('L\'asilo'),x:T('Astensione sulla riforma dell\'asilo.')}); } },
+  ],
+};
+const CONTO93_EV = {
+  id:'snodo_conto93', snodo:true, era:'de1990', kick:'L\'unità', tono:'grave',
+  t:'Il conto dell\'unità',
+  text:'Tre anni fa si era detto che l\'unità non sarebbe costata tasse nuove. Da allora all\'Est migliaia di fabbriche sono state vendute o chiuse, un posto di lavoro su tre non c\'è più, e ogni anno passano da Ovest a Est più di cento miliardi di marchi. Dal 1995 i Länder dell\'Est entreranno nella cassa comune dei Länder, e i debiti dell\'agenzia delle privatizzazioni e del vecchio Stato andranno messi a bilancio. Governo, Länder e opposizione sono chiusi da tre giorni nella stessa stanza.',
+  ch:[
+    { l:'Il patto: il contributo di solidarietà torna dal 1995, e ognuno paga la sua parte', e:'La storia · firmano tutti, anche l\'opposizione · una tassa nata per durare un anno, e che resterà', costo:{debito:2},
+      f:function(){ S.deConto93='patto'; S.ind.debt+=2; gdDe90('lavoratori',-2); gdDe90('cetomedio',-2); fidDe90(2); repd(1); baseDe90(-1);
+        S.log.unshift({t:T('L\'unità'),x:T('Ha firmato il patto di solidarietà: il conto dell\'Est si paga con una tassa.')}); } },
+    { l:'A debito: nessuna tassa nuova prima delle urne', e:'La promessa di tre anni fa regge ancora un po\' · la banca centrale tiene alti i tassi, e il conto cresce da solo', costo:{debito:5},
+      f:function(){ S.deConto93='debito'; S.ind.debt+=5; gdDe90('cetomedio',2); gdDe90('imprenditori',-1); fidDe90(-3);
+        S.log.unshift({t:T('L\'unità'),x:T('Ha messo a debito il conto dell\'Est, senza tasse nuove.')}); } },
+    { l:'Tagli allo Stato sociale dell\'Ovest', e:'Il conto lo paga chi riceve, non chi versa · i sindacati parlano di unità pagata dai deboli', costo:{debito:1},
+      f:function(){ S.deConto93='tagli'; S.ind.debt+=1; gdDe90('lavoratori',-4); gdDe90('pensionati',-3); gdDe90('imprenditori',3); fidDe90(1); baseDe90(S.partito==='de_fdp'?1:-1);
+        S.log.unshift({t:T('L\'unità'),x:T('Ha pagato il conto dell\'Est tagliando lo Stato sociale.')}); } },
+  ],
+};
+const CONTO93_OPP_EV = {
+  id:'snodo_conto93_opp', snodo:true, era:'de1990', kick:'L\'unità', tono:'grave',
+  t:'Il conto dell\'unità, dall\'aula',
+  text:'Il governo ti ha invitato al tavolo sul conto dell\'Est, coi presidenti dei Länder. Si può firmare, firmare solo se i tagli sociali spariscono dal testo, o alzarsi e lasciare il conto a chi governa.',
+  ch:[
+    { l:'Firmare il patto', e:'La tua firma accanto a quella del Cancelliere · il conto è anche tuo',
+      f:function(){ S.deConto93Opp='firma'; baseDe90(-1); gdDe90('cetomedio',2); gdDe90('pensionati',1);
+        S.log.unshift({t:T('L\'unità'),x:T('Dall\'opposizione ha firmato il patto sul conto dell\'Est.')}); } },
+    { l:'Firmare solo se i tagli sociali spariscono dal testo', e:'I tagli escono dal testo · il patto costa di più, e lo sai',
+      f:function(){ S.deConto93Opp='senzatagli'; baseDe90(1); gdDe90('lavoratori',3); gdDe90('imprenditori',-2);
+        S.log.unshift({t:T('L\'unità'),x:T('Dall\'opposizione ha firmato il patto sul conto dell\'Est, senza i tagli sociali.')}); } },
+    { l:'Alzarsi dal tavolo', e:'Il conto resta a loro · e l\'Est ricorda chi non c\'era',
+      f:function(){ S.deConto93Opp='rifiuto'; baseDe90(2); gdDe90('lavoratori',1); gdDe90('cetomedio',-3);
+        S.log.unshift({t:T('L\'unità'),x:T('Ha lasciato il tavolo sul conto dell\'Est.')}); } },
+  ],
+};
+const PACCHETTO96_EV = {
+  id:'snodo_pacchetto96', snodo:true, era:'de1990', kick:'Il lavoro', tono:'grave',
+  t:'Il pacchetto',
+  text:'I disoccupati sono quasi quattro milioni, e il tavolo con sindacati e imprese, il patto per il lavoro, è saltato in primavera. Resta il pacchetto di risparmi: la paga dei giorni di malattia scende dal cento all\'ottanta per cento, i licenziamenti diventano più facili nelle imprese sotto i dieci dipendenti, l\'età della pensione sale. A giugno a Bonn hanno sfilato in trecentocinquantamila, la più grande manifestazione sindacale che il paese ricordi. Il Bundestag vota questo mese.',
+  ch:[
+    { l:'Votarlo com\'è', e:'La storia · la legge passa · nelle fabbriche gli scioperi rimettono il cento per cento nei contratti, e i sindacati non dimenticano',
+      f:function(){ S.dePacchetto96='votato'; gdDe90('imprenditori',4); gdDe90('lavoratori',-5); gdDe90('pensionati',-1); fidDe90(2); baseDe90(S.partito==='de_fdp'?2:-1);
+        S.log.unshift({t:T('Il lavoro'),x:T('Ha fatto votare il pacchetto di risparmi: la paga di malattia all\'ottanta per cento.')}); } },
+    { l:'Tornare al tavolo coi sindacati: un patto per il lavoro', e:'Un\'altra stagione di riunioni · le imprese dicono che si perde un anno, i sindacati che si guadagna la pace',
+      f:function(){ S.dePacchetto96='tavolo'; gdDe90('lavoratori',3); gdDe90('imprenditori',-3); fidDe90(-1); stampad(1);
+        S.log.unshift({t:T('Il lavoro'),x:T('Ha ritirato il pacchetto ed è tornato al tavolo coi sindacati.')}); } },
+    { l:'Rinviare tutto a dopo le urne', e:'Nessuno in piazza, e nessuna riforma · i giornali hanno già la parola per dirlo',
+      f:function(){ S.dePacchetto96='rinvio'; gdDe90('lavoratori',1); gdDe90('imprenditori',-2); fidDe90(-2); stampad(-2); baseDe90(-1);
+        S.log.unshift({t:T('Il lavoro'),x:T('Ha rinviato il pacchetto di risparmi a dopo le urne.')}); } },
+  ],
+};
+const PACCHETTO96_OPP_EV = {
+  id:'snodo_pacchetto96_opp', snodo:true, era:'de1990', kick:'Il lavoro', tono:'grave',
+  t:'Il pacchetto, dall\'aula',
+  text:'Il governo porta in aula un pacchetto di risparmi: la paga di malattia all\'ottanta per cento, licenziamenti più facili nelle piccole imprese. I sindacati hanno riempito Bonn. Una parte delle leggi deve passare dalla seconda camera, dove contano i Länder.',
+  ch:[
+    { l:'Bloccare nella seconda camera quello che si può', e:'Mezza riforma si ferma fra le due camere · il governo ti chiama il partito del no',
+      f:function(){ S.dePacchetto96Opp='blocco'; baseDe90(1); gdDe90('lavoratori',3); gdDe90('imprenditori',-3);
+        S.log.unshift({t:T('Il lavoro'),x:T('Dall\'opposizione ha bloccato nella seconda camera una parte del pacchetto di risparmi.')}); } },
+    { l:'Trattare un pacchetto più piccolo', e:'Un pacchetto che nessuno ama · e che porta anche la tua firma',
+      f:function(){ S.dePacchetto96Opp='trattativa'; gdDe90('cetomedio',2); gdDe90('imprenditori',1); baseDe90(-2);
+        S.log.unshift({t:T('Il lavoro'),x:T('Dall\'opposizione ha trattato col governo un pacchetto di risparmi più piccolo.')}); } },
+    { l:'In piazza coi sindacati', e:'La piazza ti applaude · il ceto medio guarda il corteo dal marciapiede',
+      f:function(){ S.dePacchetto96Opp='piazza'; gdDe90('lavoratori',4); gdDe90('cetomedio',-2); gdDe90('imprenditori',-2); baseDe90(1);
+        S.log.unshift({t:T('Il lavoro'),x:T('Ha portato il partito in piazza coi sindacati contro il pacchetto di risparmi.')}); } },
+  ],
+};
+const KOSOVO99_EV = {
+  id:'snodo_kosovo99', snodo:true, era:'de1990', kick:'La guerra', tono:'grave',
+  t:'Il Kosovo',
+  text:'Il negoziato di Rambouillet è fallito. Nel Kosovo l\'esercito serbo brucia i villaggi, e centinaia di migliaia di persone sono in fuga verso i confini. L\'Alleanza è pronta a colpire dal cielo, senza un mandato delle Nazioni Unite: al Consiglio di sicurezza c\'è un veto annunciato. Gli alleati chiedono i tuoi aerei. Sarebbe la prima volta in guerra dal 1945, e il paese lo sa.',
+  ch:[
+    { l:'Partecipare agli attacchi, con gli aerei', e:'La storia · gli aerei decollano la sera del 24 · nelle piazze e nei partiti ci si divide fra chi dice «mai più guerra» e chi dice «mai più stare a guardare»',
+      f:function(){ S.deKosovo99='attacchi'; repd(5); gdDe90('giovani',-4); gdDe90('cetomedio',1); gdDe90('cattolici',-1); baseDe90(-2);
+        S.log.unshift({t:T('La guerra'),x:T('Ha mandato gli aerei sul Kosovo con l\'Alleanza: la prima volta in guerra dal 1945.')}); } },
+    { l:'Basi, ricognizione e ospedali: nessuna bomba tedesca', e:'Gli alleati accettano, senza entusiasmo · a casa nessuno sa dire se il paese è in guerra o no',
+      f:function(){ S.deKosovo99='basi'; repd(-2); gdDe90('giovani',1); gdDe90('pensionati',1); stampad(-1);
+        S.log.unshift({t:T('La guerra'),x:T('Ha dato agli alleati basi e ricognizione, ma nessun aereo da attacco.')}); } },
+    { l:'Restarne fuori, senza un mandato delle Nazioni Unite', e:'Il diritto internazionale è dalla tua parte · gli alleati no, e le immagini dei profughi arrivano ogni sera',
+      f:function(){ S.deKosovo99='fuori'; repd(-8); gdDe90('giovani',3); gdDe90('cetomedio',-2); fidDe90(-1); stampad(-2);
+        S.log.unshift({t:T('La guerra'),x:T('Ha tenuto il paese fuori dalla guerra del Kosovo.')}); } },
+  ],
+};
+const KOSOVO99_OPP_EV = {
+  id:'snodo_kosovo99_opp', snodo:true, era:'de1990', kick:'La guerra', tono:'grave',
+  t:'Il Kosovo, dall\'aula',
+  text:'Il governo manda gli aerei sul Kosovo con l\'Alleanza, senza un mandato delle Nazioni Unite: la prima volta in guerra dal 1945. In aula la maggioranza per il sì è larga; il tuo voto conta per quello che dice al paese.',
+  ch:[
+    { l:'Votare col governo', e:'La storia · governo e opposizione votano insieme · il dubbio resta fuori dall\'aula',
+      f:function(){ S.deKosovo99Opp='si'; gdDe90('cetomedio',2); gdDe90('giovani',-2); baseDe90(1);
+        S.log.unshift({t:T('La guerra'),x:T('Dall\'opposizione ha votato col governo sulla guerra del Kosovo.')}); } },
+    { l:'Astenersi', e:'Né con gli alleati né contro · la stampa ti chiede che cosa avresti fatto tu',
+      f:function(){ S.deKosovo99Opp='astensione'; baseDe90(-2);
+        S.log.unshift({t:T('La guerra'),x:T('Astensione sulla guerra del Kosovo.')}); } },
+    { l:'Votare contro', e:'L\'unico no dei grandi partiti · i pacifisti ti citano, gli alleati prendono nota',
+      f:function(){ S.deKosovo99Opp='contro'; gdDe90('giovani',3); gdDe90('cetomedio',-3); baseDe90(-2);
+        S.log.unshift({t:T('La guerra'),x:T('Ha votato contro la guerra del Kosovo.')}); } },
+  ],
+};
+const MONETA98_EV = {
+  id:'snodo_moneta98', snodo:true, era:'de1990', kick:'Il Bundestag', t:'La moneta',
+  text:'Il Bundestag vota l\'ingresso nella moneta unica europea dal primo gennaio: undici paesi, e non tutti con la fama di tenere i conti in ordine. Il marco è la cosa di cui il paese è più fiero da cinquant\'anni, e nei sondaggi la maggioranza non vuole lasciarlo. In aula quasi tutti i partiti dicono sì. Anche tu devi dire qualcosa.',
+  ch:[
+    { l:'Sì', e:'La storia · il Bundestag dice sì a larghissima maggioranza · il marco resta in tasca ancora tre anni e mezzo',
+      f:function(){ S.deMoneta98='si'; monetaEffetto('si');
+        S.log.unshift({t:T('Il Bundestag'),x:T('Ha votato sì alla moneta unica.')}); } },
+    { l:'No: il marco resta', e:'Il voto passa lo stesso · tu sei quello che ha detto no, e mezzo paese la pensa come te',
+      f:function(){ S.deMoneta98='no'; monetaEffetto('no');
+        S.log.unshift({t:T('Il Bundestag'),x:T('Ha votato no alla moneta unica.')}); } },
+    { l:'Sì, ma con un rinvio controllato', e:'La formula di chi vuole la moneta e teme la data · a Bruxelles e a Parigi la leggono come un no detto piano',
+      f:function(){ S.deMoneta98='rinvio'; monetaEffetto('rinvio');
+        S.log.unshift({t:T('Il Bundestag'),x:T('Ha chiesto un rinvio controllato della moneta unica.')}); } },
   ],
 };
 /* L110-2 · I TERRITORI E LA MAPPA DI de1960: quelli di de1950 più la Saar in coda (è entrata alla tappa del 1957/1), con lo stesso

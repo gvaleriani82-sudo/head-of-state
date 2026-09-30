@@ -123,7 +123,12 @@ const VIDEO_PRESENTI = ['home-hero', 'partito-base', 'vitaprivata-base', 'retro-
   'ministro-cacciato', 'ministro-dimissioni',
   /* 28/9 sera (L127-2): le cinque clip del PUNTO DI PARTENZA — non sono carte: le apre `apriPartenza()` (ui.js) all'ingresso
      in carriera; il .webp sta in assets/scenes/ come per ogni clip (fa da poster), nessuna carta lo nomina. */
-  'partenza-attivista', 'partenza-locale', 'partenza-ministro', 'partenza-capo', 'partenza-diplomatico'];
+  'partenza-attivista', 'partenza-locale', 'partenza-ministro', 'partenza-capo', 'partenza-diplomatico',
+  /* 30/9 (L153-5): le clip delle PARTITE STORICHE — il paese (5 s, 960×540, mute; qui le bandiere ci vogliono), poi il decennio. Non sono
+     carte: le apre `apriClipPorta()` (ui.js) quando si sceglie una porta, e la sequenza si DERIVA dalla porta (`porta-paese-<paese>`,
+     `porta-decennio-<anno>`): una clip vale solo se il suo nome è qui. Le clip dei decenni non sono ancora arrivate: il loro nome è
+     quello delle miniature `porta-decennio-*.webp`, che ci sono già e faranno da poster — entreranno qui senza toccare il codice. */
+  'porta-paese-italia', 'porta-paese-francia', 'porta-paese-regnounito'];
 
 /* ===== L124-1 — IL VIDEO INTRODUTTIVO (`assets/video/intro.*`). Non è una scena: sta FUORI da VIDEO_PRESENTI (non ha una
    carta né un .webp in assets/scenes) ma sotto la stessa guardia (`.claude/verifica-asset.js`): i file dichiarati qui devono
@@ -181,7 +186,7 @@ const PORTE_DECENNIO = [1960, 1970, 1980, 1990, 2000];
    un nome fuori da lì è rosso. Le sorgenti stanno in `arte-sorgente/tavolo/` e si convertono con
    `node .claude/tavolo-prova/converti-pedine.js`. Dove va ogni pedina lo decide `pedinaDi()` in ui.js. */
 const PEDINE_NOMI = ['palazzo','citta','industria','campagna','porto','universita','montagna','sede'];
-const PEDINE_PRESENTI = ['palazzo'];
+const PEDINE_PRESENTI = ['palazzo','citta','campagna','porto','universita','sede'];   // L152-4 (30/9): le cinque dello stile C ritagliate pulite (ritaglia-pedine.js). `industria` e `montagna` non sono pulite e restano fuori (il tentativo è in .claude/tavolo-prova/ritaglio-prove/). Sul tavolo oggi non se ne vede nessuna: tutte aspettano il campo `carattere` (il ripiego «tipo città → citta» di pedinaDi è spento: la pedina finiva sotto il cerchio della sua città).
 
 /* ===== L9-1 — SCENE DEI MOMENTI (NON card): fondi/illustrazioni per i modali di solo testo.
    Cablate direttamente nei render (intervista/notte/telefonata/finale) e nel selettore-scenario,

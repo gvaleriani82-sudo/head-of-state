@@ -842,6 +842,66 @@ function chiudiPartenza(){
   try{ if(typeof musicaSottovoce==='function') musicaSottovoce(false); }catch(e){}   // L146-1: la musica torna piena
   PARTENZA_FERME.forEach(function(v){ try{ if(v.isConnected){ const p=v.play(); if(p && p.catch) p.catch(function(){}); } }catch(e){} }); PARTENZA_FERME=[];
 }
+/* ================================================================================================================
+   L153-5 · LE CLIP DELLE PARTITE STORICHE: IL PAESE, POI IL DECENNIO (richiesta di Giacomo del 28/9). Scelta una porta dalla
+   linea del tempo (`storiciPorta`), sopra la creazione già pronta un velo a tutto schermo suona in sequenza fino a due clip
+   MUTE, senza voce né sottotitoli: `porta-paese-<paese>` e `porta-decennio-<anno>`.
+   · NESSUNA LISTA NUOVA: la sequenza si DERIVA dalla porta, e ogni nome vale solo se è in VIDEO_PRESENTI (scenes.js, sotto la
+     guardia degli asset). Chi non ha nessuna clip non vede niente e non chiede niente alla rete; chi ha solo il paese vede il paese.
+   · QUANDO NO: movimento «ridotto»/«spento», `reteLeggera()`, o le clip già viste in questa sessione. ⚑ L154-1: il segno è per
+     NOME DI CLIP, non per porta (`PORTA_CLIP_VISTE[nome]`, transitorio: mai in S né in localStorage) — la sequenza di una porta è
+     fatta delle sue clip non ancora viste; se non ne resta nessuna, niente velo. Chi sceglie Italia 1950 e poi Italia 1960 non
+     rivede l'Italia (col segno per porta la rivedeva), e quando arriveranno i decenni vedrà solo il decennio nuovo. Una clip è
+     «vista» quando il velo che la contiene si apre, anche se poi si salta.
+   · LA FORMA: una gemella corta di `apriPartenza` (stesso velo nel CSS, stesso «Salta», stessa entrata col reflow forzato, stessa
+     regola sulle altre clip: ferme finché c'è il velo, ripartono dopo) — la strada della voce non è toccata. I <video> nascono
+     insieme, uno sopra l'altro: il secondo si precarica mentre suona il primo e gli passa sopra quando finisce (niente nero in mezzo).
+   · «Salta», un tocco ovunque o Esc chiudono tutto; una clip che non arriva (`error`) chiude il velo. Una didascalia in basso a
+     sinistra dice paese e anno. La musica non cambia (siamo fuori partita: `mus-tema`).
+   ================================================================================================================ */
+let PORTA_CLIP_APERTA=false, PORTA_CLIP_FERME=[];
+const PORTA_CLIP_VISTE={};
+function clipDellaPorta(id){
+  const sc=(typeof SCENARI!=='undefined' && id && id!=='presente') ? SCENARI[id] : null;
+  if(!sc || typeof VIDEO_PRESENTI==='undefined') return [];
+  return ['porta-paese-'+sc.paese, 'porta-decennio-'+sc.anno].filter(function(n){ return VIDEO_PRESENTI.indexOf(n)>=0; });
+}
+function apriClipPorta(id){
+  if(PORTA_CLIP_APERTA || PARTENZA_APERTA || typeof document==='undefined' || !document.body) return;
+  if(motionReduced() || reteLeggera()) return;
+  const seq=clipDellaPorta(id).filter(function(n){ return !PORTA_CLIP_VISTE[n]; }); if(!seq.length) return;   // L154-1: per nome di clip
+  seq.forEach(function(n){ PORTA_CLIP_VISTE[n]=true; }); PORTA_CLIP_APERTA=true;
+  PORTA_CLIP_FERME=[]; try{ document.querySelectorAll('video').forEach(function(v){ if(!v.paused){ v.pause(); PORTA_CLIP_FERME.push(v); } }); }catch(e){}
+  const sc=SCENARI[id], paese=(typeof PAESI!=='undefined' && PAESI[sc.paese]) ? T(PAESI[sc.paese].nome) : '';
+  const el=document.createElement('div');
+  el.id='clip-porta'; el.setAttribute('role','dialog'); el.setAttribute('aria-label', paese+', '+sc.anno);
+  el.innerHTML=seq.map(function(n,i){ return '<video class="cp-v'+(i===0?' on':'')+'" src="'+VIDEO_DIR+n+'.mp4" poster="assets/scenes/'+n+'.webp" muted playsinline preload="auto" disablepictureinpicture></video>'; }).join('')
+    +'<div id="clip-porta-did">'+paese+', '+sc.anno+'</div>'
+    +'<button id="clip-porta-salta" type="button">'+T('Salta')+'</button>';
+  el.addEventListener('click', chiudiClipPorta);           // un tocco ovunque salta (anche su «Salta»)
+  document.body.appendChild(el);
+  const vv=[].slice.call(el.querySelectorAll('video'));
+  vv.forEach(function(v, i){ v.muted=true;
+    v.addEventListener('error', chiudiClipPorta, {once:true});   // un file che non arriva non lascia lo schermo nero
+    v.addEventListener('ended', function(){ const n=vv[i+1];
+      if(!n || !PORTA_CLIP_APERTA){ chiudiClipPorta(); return; }
+      n.classList.add('on'); try{ const p=n.play(); if(p && p.catch) p.catch(function(){}); }catch(e){} }, {once:true}); });
+  try{ const p=vv[0].play(); if(p && p.catch) p.catch(function(){}); }catch(e){}
+  document.addEventListener('keydown', clipPortaTasto, true);
+  void el.offsetWidth; el.classList.add('on');   // col reflow forzato, non con rAF (come apriPartenza)
+  setTimeout(function(){ try{ document.getElementById('clip-porta-salta').focus({preventScroll:true}); }catch(e){} }, 50);
+}
+function clipPortaTasto(e){ if(e.key==='Escape'){ e.preventDefault(); chiudiClipPorta(); } }
+function chiudiClipPorta(){
+  if(!PORTA_CLIP_APERTA) return;
+  PORTA_CLIP_APERTA=false;
+  document.removeEventListener('keydown', clipPortaTasto, true);
+  const el=document.getElementById('clip-porta');
+  if(el){ el.id='clip-porta-uscente';
+    el.querySelectorAll('video').forEach(function(v){ try{ v.pause(); v.removeAttribute('src'); v.load(); }catch(e){} });   // smette di scaricare
+    el.classList.remove('on'); setTimeout(function(){ try{ el.remove(); }catch(e){} }, 400); }
+  PORTA_CLIP_FERME.forEach(function(v){ try{ if(v.isConnected){ const p=v.play(); if(p && p.catch) p.catch(function(){}); } }catch(e){} }); PORTA_CLIP_FERME=[];
+}
 function confermaCreazione(){ proseguiAvvio(); }                  // CREA resta: initStatoBase la consuma
 function saltaCreazione(){ CREA=null; proseguiAvvio(); }          // neutro: nessun credito, età 52
 /* le età credibili per la carica locale: sindaco di una grande città 35-48 (def 38), presidente di regione
@@ -1119,6 +1179,7 @@ function storiciPorta(id){     // scelta la porta: si entra nel setup con paese 
   if(typeof setScenario==='function') setScenario(id);
   DA_STORICI=id;               // L62-1 — dopo setScenario: il setup la mostra come etichetta e sa dove tornare
   apriCreazione();
+  apriClipPorta(id);           // L153-5: sopra la creazione già pronta, il paese e poi il decennio (chi non ha la clip non vede niente)
 }
 function renderStorici(){
   var b=document.getElementById('storici-body'); if(!b) return;
@@ -2153,7 +2214,7 @@ function renderGov(){
   else if(S.opposizione){
     ruolo+=`<div class="banner" style="border-color:var(--neg)">${T('<b>All\'opposizione.</b> Governa %P: niente bilancio né ministri. Ogni mese una mossa; segui la tua risalita nella scheda <b>Partiti</b>.').replace('%P',T((part(S.governoAvversario)||{}).nome||'—'))}</div>`;
     const ob=(l,sub,v)=>{ const c=v<33?'var(--neg)':v<60?'var(--warn)':'var(--pos)'; return `<div class="grp"><div class="top"><div class="nm">${l}<small>${sub}</small></div><div class="pc mono" style="color:${c}">${Math.round(v)}</div></div><div class="bar"><i style="width:${clamp(v,2,100)}%;background:${c}"></i></div></div>`; };
-    ruolo+=`<div class="card"><div class="ct">${T('La tua opposizione')}</div>${ob(T('Visibilità'),T('quanto i media parlano di te'),S.visibilita||0)}${ob(T('Credibilità'),T('quanto sei un\'alternativa seria'),S.credibilita||0)}</div>`;
+    ruolo+=`<div class="card"><div class="ct">${T('La tua opposizione')}</div>${ob(T('Visibilità'),T('quanto i media parlano di te'),S.visibilita||0)}${ob(T('Credibilità'),T('quanto sei un\'alternativa seria'),S.credibilita||0)}${(S.salvezzeOpp||0)>=1?`<div class="contorno" style="font-size:12px;color:var(--mut);line-height:1.45;margin-top:8px">${T('Il congresso ti ha già confermato una volta: la prossima sconfitta chiude la carriera.')}</div>`:''}</div>`;   // L153-1: la riga fissa dopo la salvezza (salvezzaOpp in game.js)
   }
   else if(S.livello===1){
     /* livello 1 — POLITICO LOCALE: la tua città/regione è tutto il gioco; notorietà = capitale */
@@ -2948,7 +3009,7 @@ function renderMappaSVG(){
    ⚑ LA TEXTURE: finché le texture dipinte non ci sono (`C-terra`, `C-mare`), un fondo PROCEDURALE sobrio nel tono (terra
    olivastra spenta a chiazze, mare ardesia nel CSS del contenitore) — nessun asset inventato. Arrivata la texture, cambia il
    contenuto del `<pattern id="tv-terra">` e basta.
-   ⚑ LE PEDINE: solo quelle di `PEDINE_PRESENTI` (scenes.js, guardata da verifica-asset.js) — oggi il palazzo. Dove va ogni
+   ⚑ LE PEDINE: solo quelle di `PEDINE_PRESENTI` (scenes.js, guardata da verifica-asset.js) — sul tavolo oggi c'è il palazzo; le cinque entrate col L152-4 aspettano il campo `carattere` (il ripiego della città è spento: vedi pedinaDi). Dove va ogni
    pedina lo dice `pedinaDi(i)`; la regola delle sovrapposizioni è `tavoloPedine()`.
    ⚑ DOVE C'È: ai livelli con la scheda Partiti e la mappa del paese (1, 2 e 3: `tavoloAttivo()`); l'attivista, il Segretario e
    il diplomatico tengono le loro superfici come prima, e un paese senza mappa torna alle schede (S.tab 'tavolo' → 'gov'). ===== */
@@ -3035,11 +3096,17 @@ function palazzoCedeCalcola(p, stessa, k){
     if(libero(q)) return q; }
   return q0;
 }
-/* la pedina di un territorio: il carattere dichiarato (`carattere`, campo facoltativo che nessun paese ha ancora) o, per le
-   città, la pedina città; le regioni senza carattere non hanno pedina. Solo se il file è in PEDINE_PRESENTI. */
+/* la pedina di un territorio: il carattere dichiarato (`carattere`, campo facoltativo che nessun paese ha ancora); chi non lo
+   dichiara non ha pedina. Solo se il file è in PEDINE_PRESENTI. */
 function pedinaDi(i){
   const TE=(PAESE.territori||[])[i]; if(!TE || !luogoHaArea(i)) return null;
-  const n=TE.carattere || (TE.tipo==='città' ? 'citta' : null);
+  /* L152-4 (30/9) · IL RIPIEGO «città → pedina città» È SPENTO. Misurato su sei tavoli a 375 e a 1024 (citta-pedine-cdp.js, schermate
+     `l152-4-*-con-la-citta.png`): la pedina poggia sul punto della città, cioè SOTTO il cerchio della città stessa, che ne copre il
+     70-80% — ne resta una striscia di tetti; in Giappone la pedina di Yokohama finisce dietro il cerchio di Tokyo e il palazzo.
+     Il cerchio e i bersagli non si spostano: la pedina-città si disegnerà solo dove un territorio dichiara `carattere:'citta'`
+     (oggi nessuno). Il file resta in cartella e in lista (la guardia vuole lista = cartella). Il ripiego di prima:
+     const n=TE.carattere || (TE.tipo==='città' ? 'citta' : null); */
+  const n=TE.carattere || null;
   return (n && typeof PEDINE_PRESENTI!=='undefined' && PEDINE_PRESENTI.indexOf(n)>=0) ? n : null;
 }
 /* le pedine da disegnare, con la REGOLA DELLE SOVRAPPOSIZIONI: il palazzo per primo, poi i territori nell'ordine del roster;
