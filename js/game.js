@@ -2083,10 +2083,19 @@ const RIALLINEAMENTI_ERA = {
          CDU+FDP se non ricompra i numeri (il rimpasto offre la grande coalizione). `se`: spenta se lo snodo S1 (contenuto) ha trattenuto
          i liberali, `S.deSvolta82==='trattenuta'` (il flag è nuovo: cercato in tutto S, L99-2). Nessun delta, nessun seggio.
        · 1982/12 e 1986/12: il voto del 1983 e del 1987 come DELTA prima dell'urna del motore di gennaio (niente seggi: li fa l'urna).
-         1982/12 Σ +0,1 · 1986/12 Σ −0,8 (NPD e altri fuori roster). In de1970 (roster con la NPD) valgono uguali: la NPD non è nominata. */
+         1982/12 Σ +0,1 · 1986/12 Σ −0,8 (NPD e altri fuori roster). In de1970 (roster con la NPD) valgono uguali: la NPD non è nominata.
+       · L149-1 (D69) · IL VOTO DEL 1983 DIPENDE DAL 1982. Il delta del 1982/12 è il voto vero, fatto del cambio di campo: si spegne per
+         `'trattenuta'` (la coalizione ha tenuto: con il delta vero la CDU governava da sola il 1983 20/20, L148-2) e per `'urne'` (S1 b
+         della SPD e c della FDP: l'urna c'è già stata nel 1982, e il delta cadeva a metà di una legislatura nuova). Per `'trattenuta'`
+         la tappa 1982/11, un delta più piccolo e ⚠ CONTROFATTUALE (Σ 0): la parte del calo liberale che veniva dal cambio di campo non
+         c'è, e la SPD ha già pagato il programma nella scelta (lavoratori −5, base −4). Chi arriva al 1982 senza S1 (null, 'lasciata',
+         'cambio', le porte di prima) ha il 1982/12 di sempre. */
     '1982/10': { se:function(){ return typeof S!=='undefined' && S && S.deSvolta82!=='trattenuta'; },
                  alleati:{ de_fdp:['de_cdu'], de_cdu:['de_fdp'], de_spd:['de_grn'], de_grn:['de_spd'] } },
-    '1982/12': { delta:[ {id:'de_cdu',delta:4.3}, {id:'de_spd',delta:-4.7}, {id:'de_fdp',delta:-3.6}, {id:'de_grn',delta:4.1} ],   // Σ +0,1
+    '1982/11': { se:function(){ return typeof S!=='undefined' && S && S.deSvolta82==='trattenuta'; },
+                 delta:[ {id:'de_cdu',delta:1.5}, {id:'de_spd',delta:-3.0}, {id:'de_fdp',delta:-1.5}, {id:'de_grn',delta:3.0} ] },   // Σ 0
+    '1982/12': { se:function(){ return typeof S!=='undefined' && S && S.deSvolta82!=='trattenuta' && S.deSvolta82!=='urne'; },
+                 delta:[ {id:'de_cdu',delta:4.3}, {id:'de_spd',delta:-4.7}, {id:'de_fdp',delta:-3.6}, {id:'de_grn',delta:4.1} ],   // Σ +0,1
                  urne:  { de_cdu:48.8, de_spd:38.2, de_fdp:7.0, de_grn:5.6, de_npd:0.2 } },
     '1986/12': { delta:[ {id:'de_cdu',delta:-4.5}, {id:'de_spd',delta:-1.1}, {id:'de_fdp',delta:2.1}, {id:'de_grn',delta:2.7} ],   // Σ −0,8
                  urne:  { de_cdu:44.3, de_spd:37.0, de_fdp:9.1, de_grn:8.3, de_npd:0.6 } },
@@ -2679,6 +2688,7 @@ function riallineamentoTappa(){
     else if(S.era===LINEA_DE && S.year===1980) S.log.unshift({t:T('Elezioni dell\'ottobre 1980'), x:T('I liberali crescono e l\'Unione cristiana perde quattro punti: socialdemocratici e liberali hanno quarantacinque seggi di margine. I Verdi restano sotto la soglia.')});
     /* L147-1 · le tappe tedesche dell'80: il cambio di campo, e i due inverni prima dell'urna del motore (nessun «risultato»: le urne le fa il gioco) */
     else if(S.era===LINEA_DE && S.year===1982 && S.month===10) S.log.unshift({t:T('I liberali cambiano campo'), x:T('Dopo tredici anni i liberali lasciano i socialdemocratici: da oggi la loro maggioranza si fa con l\'Unione cristiana. I socialdemocratici guardano ai Verdi.')});
+    else if(S.era===LINEA_DE && S.year===1982 && S.month===11) S.log.unshift({t:T('Il paese'), x:T('I sondaggi di fine anno: la coalizione ha tenuto, il paese no. I Verdi raccolgono chi manifestava a Bonn, e i liberali non sanno più per chi stanno.')});   // L149-1: la tappa della coalizione trattenuta
     else if(S.era===LINEA_DE && S.year===1982) S.log.unshift({t:T('Verso le urne'), x:T('Il paese va al voto con due milioni di disoccupati. I Verdi, per la prima volta, sono dati sopra la soglia; i liberali rischiano di restarne sotto.')});
     else if(S.era===LINEA_DE && S.year===1986) S.log.unshift({t:T('Verso le urne'), x:T('A un mese dal voto i due partiti grandi perdono terreno tutti e due: i liberali risalgono, e i Verdi crescono ancora dopo Chernobyl.')});
     else if(S.era===LINEA_DE && S.year===1990 && S.month===10) S.log.unshift({t:T('L\'unità'), x:T('Il 3 ottobre la Repubblica democratica entra nella Repubblica federale: cinque Länder nuovi, e Berlino torna una città sola. Gli eredi del partito che governava l\'Est si presentano col nome nuovo di PDS.')});
@@ -2929,11 +2939,17 @@ function partnerSostegno(){
   return null;
 }
 /* il partner per il RIMPASTO: compatibile per asse (entra DENTRO, quindi la regola è quella della coalizione) */
-/* L111-1 · IL RIMPASTO È LA CERIMONIA DELL'EMERGENZA: considera SEMPRE gli alleati di riserva (`alleatiRiserva`), ma DOPO quelli
+/* L111-1 · IL RIMPASTO È LA CERIMONIA DELL'EMERGENZA: considera gli alleati di riserva (`alleatiRiserva`; «sempre» fino a L149-1, R qui sotto), ma DOPO quelli
    ordinari — la grande coalizione si offre solo se nessun partner ordinario porta i numeri. E sotto la sfiducia costruttiva il
    partner che ha appena rotto (`tenutaLiv===2`) non si ricompra col rimpasto: è la stessa regola di `bloccoAvverso`, che lo conta
    come avverso (senza, la FDP del 1966 tornava al governo alla prima carta e la grande coalizione non usciva mai).
-   Senza i due campi la lista e l'ordine sono quelli di sempre. */
+   Senza i due campi la lista e l'ordine sono quelli di sempre.
+   ⚑ L149-1 (D71, 29/9) · LA RISERVA NEL RIMPASTO SEGUE LA REGOLA DELLA FORMAZIONE (R). «Sempre» offriva la grande coalizione alla SPD
+   al 34% da una CDU col 52-53% dei seggi da sola (L148-1, s61 s131 s201), e metà delle volte la SPD accettava. Ora il partner di
+   riserva si offre solo se ANCHE lui, coi SUOI alleati ordinari (`staColBlocco(q, p)`, coi seggi in vigore), è sotto 50 — senza chi
+   chiede e senza chi ha rotto col giocatore (`haRotto`, la parentesi V' di L148-1): nel 1966 di `de1960` la FDP ha rotto con la
+   CDU, quindi la SPD si conta senza di lei e la grande coalizione resta offerta. È la stessa domanda di `compatibili()` (V, L148-1),
+   con in più chi ha rotto: la formazione non la chiede perché alle urne `tenutaLiv` si azzera. */
 function partnerRimpasto(){
   if(typeof S==='undefined' || !S || !S.seggi || typeof compatibili!=='function') return null;
   var c=(compatibili(S.partito, S.seggi)||[]).slice();
@@ -2941,7 +2957,13 @@ function partnerRimpasto(){
   var mio=part(S.partito);
   if(mio && Array.isArray(mio.alleatiRiserva)){
     c=c.filter(function(p){ return !alleatoRiserva(p.id, S.partito); });   // le riserve che compatibili ha già messo vanno in coda
-    var ris=PAESE.partiti.filter(function(p){ return alleatoRiserva(p.id, S.partito) && !(PAESE.sbarramento && S.seggi[p.id]===0); })
+    var fuori=function(p){ return !!(PAESE.sbarramento && S.seggi[p.id]===0); };
+    var senzaAltraMaggioranza=function(p){   // R: il partner di riserva coi suoi alleati ordinari, senza chi chiede e senza chi ha rotto
+      var suo=PAESE.partiti.filter(function(q){ return q.id!==p.id && q.id!==S.partito && !fuori(q) && !haRotto(q.id) && staColBlocco(q.id, p.id); })
+                           .reduce(function(s,q){ return s+(S.seggi[q.id]||0); }, S.seggi[p.id]||0);
+      return suo<50;
+    };
+    var ris=PAESE.partiti.filter(function(p){ return alleatoRiserva(p.id, S.partito) && !fuori(p) && senzaAltraMaggioranza(p); })
                         .sort(function(x,y){ return (S.seggi[y.id]||0)-(S.seggi[x.id]||0); });
     c=c.concat(ris);
   }

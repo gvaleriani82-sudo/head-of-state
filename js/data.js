@@ -6351,7 +6351,7 @@ const DOSSIERS=[
    {l:'Chiedere una moratoria di un anno da tutte e due le parti',e:'Mosca la vorrebbe solo per sé · l\'Alleanza non la vuole per niente',f:()=>{repd(-3); gdDe80('giovani',1);}}]},
  {id:'dde80_leva',era:'de1980',cond:()=>S.year>=1985&&S.year<=1988,min:'difesa',kick:'La difesa',t:'Diciotto mesi',
   text:'Nascono meno bambini da vent\'anni, e fra qualche anno non ci saranno abbastanza ragazzi per riempire le caserme. Lo stato maggiore chiede di portare la leva da quindici a diciotto mesi. I ragazzi di diciott\'anni fanno i conti.',ch:[
-   {l:'Diciotto mesi, dal 1989',e:'La storia · la legge passa · e alla vigilia sarà ritirata, perché il mondo è cambiato',f:()=>{repd(1); gdDe80('giovani',-4); gdDe80('pensionati',1);}},
+   {l:'Diciotto mesi, dal 1989',e:'La storia · la legge passa · e alla vigilia sarà ritirata, perché il mondo è cambiato',f:()=>{repd(1); gdDe80('giovani',-2); gdDe80('pensionati',1);}},   // L149-1 (D70): era −4 (×5 = −20): portava da sola più di metà della caduta dei giovani nelle rivolte della SPD 1987-89 (101,6 su 92,2 punti in 8 carriere)
    {l:'Una parte di soldati di mestiere',e:'Caserme piene · bilancio della difesa più pesante',costo:{debito:0.5},f:()=>{S.ind.debt+=0.5; gdDe80('giovani',2); repd(1);}},
    {l:'Quindici mesi, e meno reparti',e:'I ragazzi ringraziano · l\'Alleanza chiede come pensi di difendere la frontiera più esposta d\'Europa',f:()=>{repd(-3); gdDe80('giovani',3);}}]},
  {id:'d50_marshall_dip',era:'italia1950',cond:()=>S.year<=1953,min:'esteri',kick:'Piano Marshall',t:'La dipendenza dagli aiuti',text:'Gli aiuti americani hanno rimesso in moto il paese, ma ora chiedono allineamento politico e commerciale. Fin dove seguire l\'alleato?',ch:[
