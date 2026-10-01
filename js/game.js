@@ -4107,7 +4107,10 @@ function provaAttivistaEvento(){
   var recent = S.attivista.evRecent || [];
   var cand = ATTIVISTA_EV.filter(function(E){ return eraViva(E) && recent.indexOf(E.id)<0 && (!E.cond || E.cond()); });
   if(!cand.length) return null;
-  var c = pescaBag('attEv', cand); if(!c) return null;                         // anti-ripetizione sacchetto (S.bag serializza)
+  /* L163-1: vivePrima — con le trenta senza tempo il sacchetto (37 carte) non si rimescola in una gavetta (~18 pescate), e
+     le carte con una cond sulle valute, false al primo pescaggio (base 10, autorevolezza 15), non entravano mai: 0 uscite
+     su 120 gavette con la cond vera il 70% dei mesi. È la cura del L151-1 (pescaLeggero). */
+  var c = pescaBag('attEv', cand, {vivePrima:true}); if(!c) return null;   // anti-ripetizione sacchetto (S.bag e S.bagVisti serializzano)
   S.attivista.evUltimo = mese;
   recent.push(c.id); if(recent.length>2) recent.shift(); S.attivista.evRecent = recent;
   return c.id;
