@@ -219,7 +219,7 @@ const DRIFT_INFLAZIONE_ERA = {
                 {da:1992, inf:5.1}, {da:1993, inf:4.4}, {da:1994, inf:2.7}, {da:1995, inf:1.7}, {da:1996, inf:1.4}, {da:1997, inf:1.9},
                 {da:1998, inf:0.9}, {da:1999, inf:0.6}, {da:2000, inf:1.4}, {da:2001, inf:2.0},
                 /* L154-3 · il 2000 (de2000, scheda PRESET-GERMANIA-2000 §2, ⚠ ordine di grandezza), CERCATO (assoluta, non cercata) sulle carriere AL GOVERNO a luglio
-                   (misura-de2000-struttura.js cerca, SPD e CDU insieme — nel gioco di adesso la CDU governa dal 2002 —, 10 semi per partito, 168 mesi): la riga è il valore della scheda.
+                   (misura-de2000-struttura.js cerca, SPD e CDU insieme — cercate con l'àncora t=0,6 di L155-1; dal L158-1 t=0,55 e la SPD tiene il 2002 34 volte su 60 (a t=0,6 erano 23/60: il «10 su 20» di allora era un'estrazione fortunata), e la resa al governo si sposta al più di 0,3 (debito di 1 punto, al 2005) —, 10 semi per partito, 168 mesi): la riga è il valore della scheda.
                    Le righe 2000-2001 sono di de1990 (la sua coda) e non si toccano. Nessuna chiusura al 2014: una carriera de2000 oltre il 2013 continua con
                    la riga del 2013 (⚠ dichiarato, decide Cowork). Prima di queste righe la riga del 2001 valeva per sempre. */
                 {da:2002, inf:1.4}, {da:2003, inf:1}, {da:2004, inf:1.7}, {da:2005, inf:1.5}, {da:2006, inf:1.6}, {da:2007, inf:2.3},
@@ -229,6 +229,12 @@ const DRIFT_INFLAZIONE_ERA = {
      Prima del 1970 nessuna riga: italia1950 e italia1960 leggono il loro seme come sempre (la coda di italia1960 oltre il 1969 legge queste). */
   [LINEA_IT]: [ {da:1970, inf:5}, {da:1971, inf:4.8}, {da:1972, inf:5.7}, {da:1973, inf:10.8}, {da:1974, inf:19.2},
                 {da:1975, inf:17}, {da:1976, inf:16.7}, {da:1977, inf:17}, {da:1978, inf:12.1}, {da:1979, inf:14.8},
+                {da:1980, inf:null} ],
+  /* L154-2 · il Regno Unito del '70 — il RIPIEGO di L154-2, applicato in L155-3 (30/9): inflazione, disoccupazione e disavanzo per anno, il
+     ciclo nominale com'è (⚠ indice dei prezzi al dettaglio, ordine di grandezza; la scheda dà solo il picco «~24-25 nel 1975»).
+     Prima la porta leggeva il seme (13 fisso). `{da:1980, inf:null}` chiude: uk1980 torna al suo seme (6). */
+  [LINEA_UK]: [ {da:1970, inf:6.4}, {da:1971, inf:9.4}, {da:1972, inf:7.1}, {da:1973, inf:9.2}, {da:1974, inf:16},
+                {da:1975, inf:24.2}, {da:1976, inf:16.5}, {da:1977, inf:15.8}, {da:1978, inf:8.3}, {da:1979, inf:13.4},
                 {da:1980, inf:null} ]
 };
 function inflazioneAnno(){
@@ -255,15 +261,25 @@ const DRIFT_DEFICIT_ERA = {
      disavanzo — queste righe restituiscono quello che il drift toglieva. Si leggono sul debito reso, non da sole.
      Bersagli e resa (luglio, 5 semi, partito della baseline) nel rapporto di L102-2 e nelle schede delle porte. */
   [LINEA_UK]: [ /* uk1970: 55 nel 1970 → 45 nel 1975 → 45 nel 1979 (la discesa del dopoguerra si ferma sui 45) */
-                {da:1970, def:0},    {da:1971, def:10.5}, {da:1972, def:3.5},  {da:1973, def:5.5},  {da:1974, def:0},
-                {da:1975, def:-5.5}, {da:1976, def:-2.5}, {da:1977, def:-3.5}, {da:1978, def:-1},   {da:1979, def:0},
-                /* uk1990: 35 → 45 nel 1996 → 40 nel 1999 (la recessione dei primi anni e il rientro) */
+                /* ⚑ L154-2 · il ripiego, APPLICATO in L155-3 (30/9: Conservatori prima urna 12/20, Liberali al congresso 15 → 10, minoranza e
+                   anticipate dentro i criteri, le altre porte identiche): RIFATTE con l'inflazione per anno (il ciclo resta nominale): bersaglio 55 → 45 nel 1975 →
+                   45 nel 1979; debito reso 56,4 · 52,0 · 50,6 · 49,4 · 47,7 · 45,7 · 43,9 · 44,0 · 44,6 · 44,5. Le righe di
+                   L102-2 (10,5 · 3,5 · 5,5 · 0 · −5,5 · −2,5 · −3,5 · −1 · 0) il 30/9 rendevano 16 nel 1979. `{da:1980, def:0}` chiude: uk1980 non
+                   eredita il 1979. */
+                {da:1970, def:0}, {da:1971, def:7.5}, {da:1972, def:4}, {da:1973, def:2}, {da:1974, def:4},
+                {da:1975, def:6.5}, {da:1976, def:7}, {da:1977, def:6.5}, {da:1978, def:7}, {da:1979, def:7.5},
+                {da:1980, def:0},
+                /* uk1990: 35 → 45 nel 1996 → 40 nel 1999 (la recessione dei primi anni e il rientro). ⚠ L158-2: queste righe restituiscono
+                   l'avanzo del ciclo nominale; col ciclo reale cercato in L158-2 (non applicato: vedi DRIFT_ECONOMICO_ERA) andrebbero tutte a zero. */
                 {da:1990, def:0},    {da:1991, def:-1.5}, {da:1992, def:1.5},  {da:1993, def:4.5},  {da:1994, def:6},
                 {da:1995, def:7},    {da:1996, def:3.5},  {da:1997, def:-2},   {da:1998, def:-4},   {da:1999, def:-2.5},
-                /* uk2000: 35 → 40 nel 2007 → 65 nel 2010 → 80 nel 2013 (il salto è del 2008-2010) */
-                {da:2000, def:0},    {da:2001, def:8.5},  {da:2002, def:5.5},  {da:2003, def:6.5},  {da:2004, def:4.5},
-                {da:2005, def:5},    {da:2006, def:5},    {da:2007, def:6.5},  {da:2008, def:1},    {da:2009, def:5},
-                {da:2010, def:5},    {da:2011, def:4.5},  {da:2012, def:8.5},  {da:2013, def:8} ],
+                /* uk2000: 35 → 40 nel 2007 → 65 nel 2010 → 80 nel 2013 (il salto è del 2008-2010). ⚑ L155-3 (30/9): RIFATTE — le righe di
+                   L102-2 (8,5 · 5,5 · 6,5 · 4,5 · 5 · 5 · 6,5 · 1 · 5 · 5 · 4,5 · 8,5 · 8) il 30/9 rendevano 66 nel 2013. Stessa sweep di L102-2
+                   (misura-deficit-era.js sweep uk2000, partito della baseline, 5 semi, luglio, 168 mesi): debito reso 33 · 34 · 35 · 36 · 38 · 39 ·
+                   40 · 41 · 46 · 57 · 66 · 70 · 75 · 80, scarto massimo 2,3 (il 2008). */
+                {da:2000, def:0},    {da:2001, def:11},   {da:2002, def:3},    {da:2003, def:6},    {da:2004, def:4},
+                {da:2005, def:7},    {da:2006, def:4},    {da:2007, def:8},    {da:2008, def:2},    {da:2009, def:6.5},
+                {da:2010, def:7},    {da:2011, def:7},    {da:2012, def:11},   {da:2013, def:10} ],
   /* L112-1 · de1970: 18,5 nel 1970 → ~25 nel 1975 → 31 nel 1980 (la scheda dà gli estremi; il 1975 e il 1981 a 33 sono di Code). Righe
      modeste: la recessione del 1975 e l'inflazione fanno già quasi tutto. CERCATE con la sweep (misura-de1970-struttura.js sweep def
      de_spd, SPD al governo, 5 semi, luglio): debito reso 18,1 · 19,6 · 21,1 · 22,4 · 22,5 · 25,1 · 26,8 · 27,7 · 29,1 · 29,8 · 30,6 · 33,0,
@@ -288,11 +304,11 @@ const DRIFT_DEFICIT_ERA = {
                 {da:1992, def:-2.5}, {da:1993, def:-3.5}, {da:1994, def:-3},   {da:1995, def:-3.5}, {da:1996, def:-3.5},
                 {da:1997, def:-3.5}, {da:1998, def:-4.5}, {da:1999, def:-1.5}, {da:2000, def:-2.5}, {da:2001, def:-2.5},
                 /* L154-3 · il 2000 (de2000, scheda PRESET-GERMANIA-2000 §2, ⚠ ordine di grandezza), CERCATO sul DISAVANZO dell'anno (come de1990: il salto del debito del 2010, le banche a bilancio, non è un meccanismo) sulle carriere AL GOVERNO a luglio
-                   (misura-de2000-struttura.js cerca, SPD e CDU insieme — nel gioco di adesso la CDU governa dal 2002 —, 10 semi per partito, 168 mesi): disavanzo reso 4,0 · 3,9 · 3,8 · 3,3 · 1,5 · -0,3 · 0,0 · 3,2 · 4,2 · 0,8 · -0,4 · -0,2 contro 3,9 · 4,1 · 3,7 · 3,3 · 1,6 · −0,3 · 0,1 · 3,2 · 4,2 · 0,9 · 0,0 · 0,0; debito reso 63,7 · 69,4 · 73,5 · 75,8 · 78,2 · 75,7 · 73,7 · 76,8 · 82,4 · 81,4 · 79,2 · 79,2 contro 59,5 · 63 · 65 · 67 · 66,5 · 64 · 65 · 72,5 · 81 · 79 · 80 · 77,5 (sopra di 4-10 punti fino al 2008: il 2000-01 di de1990 lo porta già a 63,5).
+                   (misura-de2000-struttura.js cerca, SPD e CDU insieme — cercate con l'àncora t=0,6 di L155-1; dal L158-1 t=0,55 e la SPD tiene il 2002 34 volte su 60 (a t=0,6 erano 23/60: il «10 su 20» di allora era un'estrazione fortunata), e la resa al governo si sposta al più di 0,3 (debito di 1 punto, al 2005) —, 10 semi per partito, 168 mesi): disavanzo reso (L155-1, RICERCATO dopo l'àncora di D106) 4,0 · 3,9 · 3,8 · 3,4 · 2,0 · -0,3 · 0,1 · 3,3 · 3,8 · 0,5 · -0,3 · -0,2 contro 3,9 · 4,1 · 3,7 · 3,3 · 1,6 · −0,3 · 0,1 · 3,2 · 4,2 · 0,9 · 0,0 · 0,0; debito reso 64,7 · 70,2 · 75,2 · 78,0 · 76,6 · 74,3 · 71,9 · 75,7 · 82,1 · 82,6 · 81,6 · 81,5 contro 59,5 · 63 · 65 · 67 · 66,5 · 64 · 65 · 72,5 · 81 · 79 · 80 · 77,5 (sopra di 4-10 punti fino al 2008: il 2000-01 di de1990 lo porta già a 63,5).
                    Le righe 2000-2001 sono di de1990 (la sua coda) e non si toccano. Nessuna chiusura al 2014: una carriera de2000 oltre il 2013 continua con
                    la riga del 2013 (⚠ dichiarato, decide Cowork). Prima di queste righe la riga del 2001 valeva per sempre. */
-                {da:2002, def:-2.25}, {da:2003, def:-2.5}, {da:2004, def:-1.5}, {da:2005, def:-2.25}, {da:2006, def:-2.75}, {da:2007, def:-5},
-                {da:2008, def:-6}, {da:2009, def:-7.5}, {da:2010, def:-0.75}, {da:2011, def:-3.5}, {da:2012, def:-7}, {da:2013, def:-6.75} ],
+                {da:2002, def:-3.5}, {da:2003, def:-3.5}, {da:2004, def:-2.5}, {da:2005, def:-3.5}, {da:2006, def:-3}, {da:2007, def:-5.75},
+                {da:2008, def:-6.75}, {da:2009, def:-8.25}, {da:2010, def:-0.5}, {da:2011, def:-3.5}, {da:2012, def:-6.75}, {da:2013, def:-6.75} ],
   /* italia1970: 37 nel 1970 → 60 nel 1979, il decennio in cui il debito italiano parte. Chiusa al 1980: la porta
      dell'80 ha il suo seme e non deve ereditare il '79. */
   /* ⚑ L154-2 (30/9): RIFATTE dopo l'inflazione per anno (l'erosione è la sola lettrice dell'inflazione) e il ciclo nuovo (lo stabilizzatore):
@@ -442,6 +458,7 @@ function initStatoBase(){
   S.deTrattati72=null; S.deTrattati72Opp=null; S.dePetrolio73=null; S.deSpia74=null; S.deAutunno77=null; S.deAutunno77Opp=null;   // L135-3: il decennio tedesco '70 (⚠ S.petrolio73 è francese)
   S.deSvolta82=null; S.deSvolta82Opp=null; S.deMissili83=null; S.deMissili83Opp=null; S.deUnita90=null; S.deUnita90Opp=null; S.deMarco90=null; S.deMarco90Opp=null; S.deCapitale91=null;   // L148-2: il decennio tedesco '80 (S.deSvolta82 lo legge la tappa del 1982/10)
   S.deAsilo92=null; S.deAsilo92Opp=null; S.deConto93=null; S.deConto93Opp=null; S.dePacchetto96=null; S.dePacchetto96Opp=null; S.deKosovo99=null; S.deKosovo99Opp=null; S.deMoneta98=null;   // L153-2: il decennio tedesco '90
+  S.deIraq02=null; S.deIraq02Opp=null; S.deAgenda03=null; S.deAgenda03Opp=null; S.deFiducia05=null; S.deFiducia05Opp=null; S.deBanche08=null; S.deBanche08Opp=null;   // L157-1: il decennio tedesco 2000
   S.scioglimento97=null;   // L103-1: lo scioglimento del '97 (null = storico; 'no' = «aspetta», tappa 1998/3). Lo scrive S4 in L103-2
   S.coabitazione=false;   // L100-2: il Presidente con l'Assemblea degli altri (derivato dai seggi, dato puro, round-trip)
   S.governiCaduti=0;                    // L80-5: quante volte il governo e caduto senza che si andasse a votare
@@ -1301,6 +1318,15 @@ function eraCartaViva(E, def){
     var pp = (typeof S!=='undefined' && S) ? S.paese : null;
     if(!pp || E.paesi.indexOf(pp) < 0) return false;
   }
+  /* L155-4 · `dal:<anno>` — la carta non esce PRIMA di quell'anno. Serve alla saldatura: dal 2012 ogni linea storica apre
+     `contemporanea` (il presente di oggi), e una carta del presente che racconta un fatto di dopo (le criptovalute, l'ultimo reattore
+     tedesco, i profughi del 2015) usciva nel 2012. Si DICHIARA come `paesi`, non si simula con un `cond` sull'anno (opaco a guardie e
+     censimenti); additivo: senza il campo tutto come prima, e nel presente di oggi (dal 2026) non spegne niente. Lo stesso nome, con lo
+     stesso senso, c'è sulle righe di SUONO_CARTA (audio.js). La guardia è in verifica-paese.js (un intero fra 1945 e il 2026). */
+  if(E && E.dal!=null){
+    var ya = (typeof S!=='undefined' && S && S.year!=null) ? S.year : Infinity;
+    if(ya < E.dal) return false;
+  }
   var t = (E && E.era) || def;
   if(t==='universale') return true;
   var cur = (typeof S!=='undefined' && S && S.era) || 'contemporanea';
@@ -1359,37 +1385,38 @@ const DRIFT_ECONOMICO_ERA = {
                 {da:2008, ciclo:-0.5}, {da:2009, ciclo:-0.7}, {da:2010, ciclo:-0.1},
                 {da:2011, ciclo:-0.4}, {da:2012, ciclo:0} ],
   /* ==========================================================================================================
-     L48-2 · IL DRIFT BRITANNICO — e una regola che vale per TUTTA la fase γ.
-     ⚑ **QUANDO UNA SCHEDA CHIEDE UN DEBITO CHE SCENDE, IL DRIFT DEV'ESSERE NOMINALE.** Il rapporto debito/PIL
-     non cala perché il bilancio è virtuoso: cala perché il PIL corre — crescita reale PIÙ inflazione. Il gioco
-     **non ha un indicatore d'inflazione** (limite dichiarato in L28-1), quindi quel pezzo di storia può stare
-     in un posto solo: qui dentro. Vale per la Germania, la Francia e il Giappone del dopoguerra allo stesso
-     modo: chi scrive la prossima scheda lo trovi scritto.
-     Il Regno Unito degli anni '50 fa ~3% reale + ~4% d'inflazione ≈ 7% nominale, e porta 195% a ~117%.
-     LA FORMA — e non è simmetrica, di proposito: PICCHI ALTISSIMI (18-21) e AVVALLAMENTI BASSI (3 e 5,4).
-     I numeri sembrano assurdi finché non si sa che **la crescita a schermo è clampata a 5**: sopra quella
-     soglia il drift non si vede più nell'indicatore, agisce solo sul bersaglio di reversione — cioè sul
-     debito. Quindi i picchi li alzo quanto serve al debito (sono invisibili comunque) e gli avvallamenti
-     li tengo SOTTO il clamp, perché sono loro, e soli loro, a rendere leggibile lo stop-go. Misurato:
-     5 · 3,5 · 3,3 · 5 · 5 · 5 · 4,3 · 4,1 · 5 · 5 — i due incavi cadono dove devono, **1951 (Corea) e
-     1956-57 (Suez: è la corsa alla sterlina che ferma l'avventura, non i carri armati)**.
-     ⚠ LA BANDA È PIÙ STRETTA DELLA DISPERSIONE DEL GIOCO. La scheda chiede il '59 fra 110 e 125 (15 punti),
-     ma su 20 semi il debito finale si sparge su 19 punti (109→128). Tarato sulla MEDIANA (117, il centro
-     esatto della banda): 16 semi su 20 dentro, gli altri quattro sul bordo. Non è taratura da migliorare,
-     è la varianza della partita: chi la volesse più stretta deve stringere il gioco, non il drift.
-     ⚠ LE INSOLVENZE ERANO GIÀ ZERO PRIMA DI QUESTO LOTTO (0/4 col drift vecchio, debito che saliva a 230).
-     Non è il debito che rende difficile il decennio britannico: quella leva, qui, non è mai stata attaccata.
+     L157-2 (D113, strada c) · IL '50 INGLESE È CICLO REALE (il '60 cercato e NON applicato: sotto, alle sue righe). Fino al 1/10 queste righe erano il «drift NOMINALE» di
+     L48-2/L55-1: picchi di 18-20,5 negli anni pari, scritti quando il gioco NON aveva l'inflazione, perché il debito scendesse
+     (195 → 117 → 66) erodendo col PIL nominale. Poi il gioco l'inflazione l'ha avuta (L90-1 l'erosione nominale, L101-1b
+     l'inflazione per anno), e il decennio pagava l'erosione DUE VOLTE: come inflazione vera (3,5-4) e come ciclo-avanzo — lo
+     stabilizzatore del disavanzo (`d -= S.ciclo*0,7`, model.js) trasformava i picchi in avanzi di 10-14 punti, e `uk1960` chiudeva
+     il 1969 a 8,6 di debito (bersaglio 65-70), `uk1950` il 1959 a 46,5 (110-120). Misurato in L156-2: la sola base del ciclo nel
+     disavanzo spiegava 61 punti su 61.
+     ⚑ ORA: una riga per anno, cercata (misura-l157-2.js cerca, 20 semi × i due partiti di governo, luglio, carriere AL GOVERNO in quel
+     mese) perché la CRESCITA RESA sia quella reale della scheda (§2: ~3% di media), con lo stop-go negli stessi anni di prima — alti
+     3,5-4,5, bassi 1,5 (i bersagli anno per anno sono di Code: la scheda dà la media, non la serie). Il '50: Corea 1951-52, Suez
+     1956-57. La crescita non tocca più il tetto 5: lo stop-go
+     ora SI VEDE nell'indicatore anche negli anni alti.
+     Resa (crescita, luglio): '50 3,5 1,5 1,5 4,6 4,7 2,9 1,3 1,2 3,9 4,1.
+     Debito: `uk1950` 1959 **129** (bersaglio 110-120: fuori di 9, sotto la soglia dei 10 punti → si tiene, dichiarato, nessuna riga
+     `def`). Urne e fini di `uk1950` quasi identiche prima e dopo (misura-l157-2-urne.js). ⚠ La disoccupazione resa sale con la crescita
+     più bassa (5,6-7,8), e la scheda la vuole all'1-2%: era già fuori (4,6-6,7) col drift vecchio. Le righe dal 1960 non si toccano.
      ========================================================================================================== */
-  [LINEA_UK]: [ {da:1950, ciclo:18.4}, {da:1951, ciclo:3},  {da:1953, ciclo:20},
-                {da:1955, ciclo:5.4},  {da:1956, ciclo:3},  {da:1958, ciclo:20.8},
+  [LINEA_UK]: [ {da:1950, ciclo:2.25}, {da:1951, ciclo:-1},   {da:1952, ciclo:-1},   {da:1953, ciclo:2.75}, {da:1954, ciclo:2},
+                {da:1955, ciclo:-0.75},{da:1956, ciclo:-2.5}, {da:1957, ciclo:-1.75},{da:1958, ciclo:0.75}, {da:1959, ciclo:0},
                 /* L55-1 · IL DECENNIO '60, stessa forma e stessa ragione: **drift nominale**, perché la scheda
                    chiede un debito che scende (110 → 65-70) e il gioco non ha un indicatore d'inflazione. La
-                   nota generale sta qui sopra; questa è la sua seconda applicazione, e la prima volta che la
+                   nota generale era L48-2 (il drift nominale del '50, ritirato in L157-2: il blocco qui sopra); questa era la sua seconda applicazione, e la prima volta che la
                    regola scritta in L48-2 viene usata da una scheda successiva senza doverla riscoprire.
                    Le dentellature sono le crisi di sterlina del decennio (scheda §2): **1961**, **1964** subito
                    dopo il voto, **1966** col congelamento di salari e prezzi, e il **1967** della svalutazione —
                    che è l'unica a lasciare un segno che non si riassorbe. Gli avvallamenti restano sotto il
-                   clamp-5 perché siano leggibili; i picchi sono alti e invisibili, e lavorano sul debito. */
+                   clamp-5 perché siano leggibili; i picchi sono alti e invisibili, e lavorano sul debito.
+                   ⚠ L156-2/L157-2: «il gioco non ha un indicatore d'inflazione» NON è più vero (L90-1, L101-1b), e questi picchi contano
+                   l'erosione due volte (debito 8,6 nel 1969 contro 65-70). Le righe del ciclo reale per il '60 sono state cercate in
+                   L157-2 (1 · −2,25 · 1 · 0,5 · −2,25 · 1 · −3 · −2 · 0,5 · 0,25, con righe `def` −2 dal 1961: debito 74) ma NON applicate:
+                   la carriera dei Liberali chiude al congresso all'urna del 1970 17 volte su 20 invece di 2 (porta chiusa che peggiora:
+                   decide Giacomo). Rapporto in CIFRE-ECONOMICHE.md, «L157-2». */
                 {da:1960, ciclo:19},   {da:1961, ciclo:1.5}, {da:1962, ciclo:19.5},
                 {da:1964, ciclo:1.3},  {da:1965, ciclo:20},  {da:1966, ciclo:0.9},
                 {da:1968, ciclo:20.5},
@@ -1433,7 +1460,14 @@ const DRIFT_ECONOMICO_ERA = {
                 {da:1980, ciclo:-1.5}, {da:1982, ciclo:2},  {da:1984, ciclo:4},
                 {da:1986, ciclo:9},    {da:1988, ciclo:11},
                 /* L75-1 · IL DECENNIO '90 (scheda §2): recessione 1990-92 (sotto zero), poi la ripresa lunga. Il debito ~35
-                   sale nella recessione e scende dopo. Niente changeover: la sterlina resta. */
+                   sale nella recessione e scende dopo. Niente changeover: la sterlina resta.
+                   ⚠ L158-2 (D113, strada c): anche queste righe sono drift NOMINALE (crescita al tetto 5 dal 1993, la base del ciclo 6-8 nello
+                   stabilizzatore del disavanzo fa avanzi di 7-9 punti, compensati fino al 1996 dalle righe «def» di L102-2 e poi no: debito 15,7
+                   nel 1999 contro 35 → 45 → 40). Le righe del CICLO REALE sono state cercate in L158-2 (misura-l157-2.js cerca --porta=uk1990,
+                   bersagli di Code 0,7 · −1,1 · 0,4 · 2,5 · 3,8 · 2,5 · 2,5 · 3,0 · 3,4 · 3,0): −2,75 · −4,5 · −2 · 0,25 · 1,25 · −1 · −0,25 ·
+                   −0,5 · 0,25 · −0,75, con le righe «def» del decennio a zero (debito 36 → 47,5 ('96) → 36,8 ('99) al governo, 40,0 e 39,5 su
+                   tutte) — ma NON applicate: SNP e Plaid chiudono al congresso 10 volte su 20 invece di 2 (6 prima del mese 96) e i Laburisti
+                   prendono 3 rivolte (porta chiusa che peggiora: decide Giacomo). Rapporto in CIFRE-ECONOMICHE.md, «L158-2». */
                 {da:1990, ciclo:-1},   {da:1991, ciclo:-2},  {da:1993, ciclo:3},
                 {da:1995, ciclo:6},    {da:1997, ciclo:8},
                 /* L77-1 · IL DECENNIO 2000 (scheda §2): crescita lunga fino al 2007, poi la recessione piu' profonda
@@ -1531,11 +1565,11 @@ const DRIFT_ECONOMICO_ERA = {
                 {da:1992, ciclo:-3.5}, {da:1993, ciclo:-6.5}, {da:1994, ciclo:-2}, {da:1995, ciclo:-4}, {da:1996, ciclo:-4.5}, {da:1997, ciclo:-3},
                 {da:1998, ciclo:-3.5}, {da:1999, ciclo:-4}, {da:2000, ciclo:-2}, {da:2001, ciclo:-4.5},
                 /* L154-3 · il 2000 (de2000, scheda PRESET-GERMANIA-2000 §2, ⚠ ordine di grandezza), CERCATO col passo di Newton sul reso sulle carriere AL GOVERNO a luglio
-                   (misura-de2000-struttura.js cerca, SPD e CDU insieme — nel gioco di adesso la CDU governa dal 2002 —, 10 semi per partito, 168 mesi): crescita resa -0,0 · -0,6 · 1,2 · 0,8 · 3,6 · 3,1 · 1,0 · -5,7 · 4,2 · 4,0 · 0,5 · 0,5 contro 0,0 · −0,7 · 1,2 · 0,7 · 3,8 · 3,0 · 1,0 · −5,7 · 4,2 · 3,9 · 0,4 · 0,4; il 2009 a un passo dal pavimento (−6) del motore.
+                   (misura-de2000-struttura.js cerca, SPD e CDU insieme — cercate con l'àncora t=0,6 di L155-1; dal L158-1 t=0,55 e la SPD tiene il 2002 34 volte su 60 (a t=0,6 erano 23/60: il «10 su 20» di allora era un'estrazione fortunata), e la resa al governo si sposta al più di 0,3 (debito di 1 punto, al 2005) —, 10 semi per partito, 168 mesi): crescita resa (L155-1, RICERCATA dopo l'àncora di D106) 0,0 · -0,7 · 1,4 · 0,6 · 3,9 · 3,1 · 1,0 · -5,7 · 4,2 · 3,9 · 0,4 · 0,2 contro 0,0 · −0,7 · 1,2 · 0,7 · 3,8 · 3,0 · 1,0 · −5,7 · 4,2 · 3,9 · 0,4 · 0,4; il 2009 a un passo dal pavimento (−6) del motore.
                    Le righe 2000-2001 sono di de1990 (la sua coda) e non si toccano. Nessuna chiusura al 2014: una carriera de2000 oltre il 2013 continua con
                    la riga del 2013 (⚠ dichiarato, decide Cowork). Prima di queste righe la riga del 2001 valeva per sempre. */
-                {da:2002, ciclo:-6}, {da:2003, ciclo:-6.5}, {da:2004, ciclo:-3.75}, {da:2005, ciclo:-5}, {da:2006, ciclo:-1.25}, {da:2007, ciclo:-2.75},
-                {da:2008, ciclo:-4.75}, {da:2009, ciclo:-11.5}, {da:2010, ciclo:-1}, {da:2011, ciclo:-1.75}, {da:2012, ciclo:-5.25}, {da:2013, ciclo:-4.75} ]
+                {da:2002, ciclo:-5.75}, {da:2003, ciclo:-6.25}, {da:2004, ciclo:-3.5}, {da:2005, ciclo:-5}, {da:2006, ciclo:-1.25}, {da:2007, ciclo:-2.75},
+                {da:2008, ciclo:-4.75}, {da:2009, ciclo:-11.5}, {da:2010, ciclo:-0.75}, {da:2011, ciclo:-1.5}, {da:2012, ciclo:-5.25}, {da:2013, ciclo:-4.75} ]
 };
 /* L60-2 · LA DISOCCUPAZIONE D'EPOCA. Il motore non aveva un posto dove un decennio potesse dire «qui i senza
    lavoro sono il doppio»: `S.uMod` decade dell'80% al mese e le carte danno solo colpi. Stessa forma di cicloBase():
@@ -1574,7 +1608,12 @@ const DRIFT_DISOCCUPAZIONE_ERA = {
                 {da:2002, un:0.25}, {da:2003, un:0.75}, {da:2004, un:1.75}, {da:2005, un:1.5},  {da:2006, un:0.75}, {da:2007, un:0.75},
                 {da:2008, un:-2},   {da:2009, un:-0.5}, {da:2010, un:1},    {da:2011, un:2.5},  {da:2012, un:0.75}, {da:2013, un:1.25},
                 {da:2014, un:0} ],
-  [LINEA_UK]: [ {da:1980, un:1}, {da:1981, un:3}, {da:1982, un:4.5}, {da:1983, un:5}, {da:1986, un:4.5},
+  [LINEA_UK]: [ /* L154-2 (ripiego, applicato in L155-3) · il '70: la FORMA (bassa e piatta fino al 1974, in salita dal 1975, più alta alla fine che all'inizio), non il livello —
+                   la porta non dichiara un seme e parte dal 7,8 del motore. CERCATE sul reso SOPRA il ciclo (misura-l154-2.js cerca UK un): resa
+                   6,4 · 5,5 · 5,5 · 5,3 · 5,1 · 6,2 · 7,5 · 8,2 · 7,9 · 7,6 (⚠ dal 1975 governano poche carriere: vedi la scheda). */
+                {da:1970, un:0}, {da:1971, un:0}, {da:1972, un:0.25}, {da:1973, un:-0.25}, {da:1974, un:-0.25},
+                {da:1975, un:1.5}, {da:1976, un:3.25}, {da:1977, un:3.5}, {da:1978, un:2.75}, {da:1979, un:2.5},
+                {da:1980, un:1}, {da:1981, un:3}, {da:1982, un:4.5}, {da:1983, un:5}, {da:1986, un:4.5},
                 {da:1987, un:3.5}, {da:1988, un:2}, {da:1989, un:1},
                 /* L75-1 · '90: da ~7% (1990) a ~10,5% (1993) e giù a ~6% (1999) */
                 {da:1990, un:0}, {da:1991, un:2}, {da:1992, un:3.5}, {da:1994, un:2.5}, {da:1995, un:1.5}, {da:1997, un:0.5},
@@ -1616,11 +1655,11 @@ const DRIFT_DISOCCUPAZIONE_ERA = {
                 {da:1992, un:-1.25}, {da:1993, un:-1.5}, {da:1994, un:1.25}, {da:1995, un:-0.5}, {da:1996, un:1.5}, {da:1997, un:3},
                 {da:1998, un:1.5}, {da:1999, un:2.5}, {da:2000, un:1.25}, {da:2001, un:0.75},
                 /* L154-3 · il 2000 (de2000, scheda PRESET-GERMANIA-2000 §2, ⚠ ordine di grandezza), CERCATO col passo di Newton sul reso, SOPRA le righe del ciclo sulle carriere AL GOVERNO a luglio
-                   (misura-de2000-struttura.js cerca, SPD e CDU insieme — nel gioco di adesso la CDU governa dal 2002 —, 10 semi per partito, 168 mesi): disoccupazione resa 10,7 · 11,5 · 11,5 · 12,9 · 12,1 · 10,1 · 8,7 · 9,1 · 8,3 · 8,0 · 7,9 · 7,3 contro 10,8 · 11,6 · 11,7 · 13,0 · 12,0 · 10,1 · 8,7 · 9,1 · 8,6 · 7,9 · 7,6 · 7,7.
+                   (misura-de2000-struttura.js cerca, SPD e CDU insieme — cercate con l'àncora t=0,6 di L155-1; dal L158-1 t=0,55 e la SPD tiene il 2002 34 volte su 60 (a t=0,6 erano 23/60: il «10 su 20» di allora era un'estrazione fortunata), e la resa al governo si sposta al più di 0,3 (debito di 1 punto, al 2005) —, 10 semi per partito, 168 mesi): disoccupazione resa (L155-1, RICERCATA dopo l'àncora di D106: prima il 2012 stava a 8,2, fuori di 0,6) 10,8 · 11,5 · 11,5 · 13,0 · 11,9 · 10,1 · 8,7 · 9,1 · 8,6 · 8,3 · 7,8 · 7,9 contro 10,8 · 11,6 · 11,7 · 13,0 · 12,0 · 10,1 · 8,7 · 9,1 · 8,6 · 7,9 · 7,6 · 7,7.
                    Le righe 2000-2001 sono di de1990 (la sua coda) e non si toccano. Nessuna chiusura al 2014: una carriera de2000 oltre il 2013 continua con
                    la riga del 2013 (⚠ dichiarato, decide Cowork). Prima di queste righe la riga del 2001 valeva per sempre. */
-                {da:2002, un:0.75}, {da:2003, un:1}, {da:2004, un:1.75}, {da:2005, un:4.5}, {da:2006, un:2.5}, {da:2007, un:1},
-                {da:2008, un:-2}, {da:2009, un:-5.25}, {da:2010, un:-1.25}, {da:2011, un:0.75}, {da:2012, un:-3}, {da:2013, un:-3.75} ],
+                {da:2002, un:0.25}, {da:2003, un:0.75}, {da:2004, un:1.5}, {da:2005, un:4.25}, {da:2006, un:2.25}, {da:2007, un:1},
+                {da:2008, un:-2.25}, {da:2009, un:-5.75}, {da:2010, un:-0.5}, {da:2011, un:0.5}, {da:2012, un:-3.75}, {da:2013, un:-3} ],
   /* L154-2 · l'Italia del '70 (PRESET-ITALIA-1970 §2: 6,4 nel 1977 ✓; prima «~5-6» ⚠). La porta non dichiara un seme e partiva dal 7,8 del
      motore: 7,6-8,3 piatta. CERCATE sul reso SOPRA le righe del ciclo (misura-l154-2.js cerca IT un, DC al governo, 20 semi, luglio): resa
      5,6 · 5,4 · 5,4 · 5,4 · 5,7 · 6,2 · 5,6 · 6,4 · 7,2 · 7,6 contro 5,5 (1970-74) · 6 · 6 · 6,4 · 7,1 · 7,6. `{da:1980, un:0}` chiude: italia1980 è
@@ -2255,8 +2294,17 @@ const RIALLINEAMENTI_ERA = {
     '2001/12': { se:function(){ return deGovernoSpd() && vigiliaUrnaOrdinaria(); },
                  delta:[ {id:'de_spd',delta:-2.4}, {id:'de_cdu',delta:3.4}, {id:'de_grn',delta:1.9}, {id:'de_fdp',delta:1.1}, {id:'de_lnk',delta:-1.1} ],   // Σ +2,8
                  urne:  { de_spd:38.5, de_cdu:38.5, de_grn:8.6, de_fdp:7.4, de_lnk:4.0 } },
-    '2005/12': { se:function(){ return deGovernoSpd() && vigiliaUrnaOrdinaria(); },
+    /* L157-1 · il 2005 è anche la tappa di S3 (a) «le urne subito» (lo snodo scrive `S.deFiducia05='urne'` e la applica PRIMA dello
+       scioglimento, con applicaTappaOra('2005/12', true): segnata fatta, a dicembre non riscatta). D95: chi ha avuto un Cancelliere
+       giocatore che NON ha fatto l'Agenda (`S.deAgenda03` scritto e diverso da 'riforme') paga SPD −2,0 e Linke +2,4 (`deltaAlt`, letto da
+       `deltaTappa`); `S.deAgenda03==null` (nessun Cancelliere giocatore nel 2003) vale come storico. ⚠ Il ramo «urne» della `se` vale solo
+       nella finestra di S3 (2005/5-6): con la `se` della scheda (`|| S.deFiducia05==='urne'`) un Cancelliere CDU che sceglieva (a) non
+       applicava la tappa (non è SPD), perdeva le urne anticipate, e a dicembre il governo SPD nato da quelle urne la riceveva senza un'urna
+       dopo (misurato: 3 carriere CDU su 20). */
+    '2005/12': { se:function(){ return deGovernoSpd() && (vigiliaUrnaOrdinaria() || (S.deFiducia05==='urne' && S.year===2005 && S.month>=5 && S.month<=6)); },
                  delta:[ {id:'de_spd',delta:-4.3}, {id:'de_cdu',delta:-3.3}, {id:'de_fdp',delta:2.5}, {id:'de_lnk',delta:4.7,ancora:true}, {id:'de_grn',delta:-0.4} ],   // Σ −0,9 (con l'arrotondamento dei cinque: −0,8)
+                 deltaAlt:{ se:function(){ return S.deAgenda03!=null && S.deAgenda03!=='riforme'; },
+                            delta:[ {id:'de_spd',delta:-2.0}, {id:'de_cdu',delta:-3.3}, {id:'de_fdp',delta:2.5}, {id:'de_lnk',delta:2.4,ancora:true}, {id:'de_grn',delta:-0.4} ] },   // Σ +0,8
                  urne:  { de_cdu:35.2, de_spd:34.3, de_fdp:9.8, de_lnk:8.7, de_grn:8.1 } },
     '2007/6':  { rinomina:[ {id:'de_lnk', nome:'Linke'} ] },
     '2009/12': { se:function(){ return deGrandeCoalizione() && vigiliaUrnaOrdinaria(); },
@@ -2270,6 +2318,13 @@ const RIALLINEAMENTI_ERA = {
                  urne:  { de_cdu:41.6, de_spd:25.7, de_lnk:8.6, de_grn:8.5, de_fdp:4.8, de_afd:4.7 } }
   }
 };
+/* L155-1 (D107) · IL CALENDARIO ANTICIPATO della linea tedesca 2000: se uno scioglimento (lo snodo S3 del 2005, del contenuto) sposta le urne,
+   l'orologio del motore riparte e le ordinarie dopo cadono a GENNAIO 2009 e 2013 — le chiavi della vigilia sono 2008/12 e 2012/12. Stesse
+   direttive e stessa `se` delle chiavi ordinarie (2009/12 e 2013/12), copiate e non riscritte: `vigiliaUrnaOrdinaria()` accende ognuna solo
+   nel suo calendario, quindi in una carriera ne scatta al più una. Nel 2012/12 l'AfD non c'è ancora (entra nel 2013/2): il suo delta non
+   trova il partito e si salta, come ogni delta di un id assente. */
+RIALLINEAMENTI_ERA[LINEA_DE]['2008/12'] = Object.assign({}, RIALLINEAMENTI_ERA[LINEA_DE]['2009/12']);
+RIALLINEAMENTI_ERA[LINEA_DE]['2012/12'] = Object.assign({}, RIALLINEAMENTI_ERA[LINEA_DE]['2013/12']);
 /* L154-3 · de2000: I TERRITORI E LA MAPPA SONO QUELLI DELLA LINEA DOPO L'UNITÀ, DERIVATI DALLA TAPPA DEL 1990/10 — non una seconda lista.
    Gli stessi passi di `applicaTerritoriDelta` (la rinomina allo stesso indice, poi i cinque Länder in coda, ciascuno con la sua area; lo
    sfondo intero, niente `oltre`), fatti UNA volta sulla base di de1990: una carriera de2000 parte con gli stessi nomi, lo stesso ordine e
@@ -2721,6 +2776,32 @@ function climaMorale(){
   var v=0; for(var i=0;i<MORALE90.length;i++){ if(S.year>=MORALE90[i].da) v=MORALE90[i].v; }
   return v;
 }
+/* L157-1 · I DELTA DI UNA TAPPA: UN LETTORE SOLO, per il mese della tappa (riallineamentoTappa) e per uno snodo che la anticipa
+   (applicaTappaOra con `conDelta`: S3 a del 2005 tedesco, le urne subito). Prima stava dentro riallineamentoTappa; spostato qui senza
+   cambiare una riga, perché la chiamata dello snodo non ne sia una copia. `deltaTappa(entry)` sceglie i delta: `entry.delta`, oppure
+   `entry.deltaAlt.delta` se `entry.deltaAlt.se()` è vero (D95: il 2005 ridotto per chi non ha fatto l'Agenda — una tappa, due delta,
+   un lettore che sceglie; la chiave di calendario resta una). */
+function deltaTappa(entry){
+  if(!entry || Array.isArray(entry)) return [];
+  if(entry.deltaAlt && typeof entry.deltaAlt.se==='function'){ var alt=false; try{ alt=entry.deltaAlt.se(); }catch(_){ alt=false; } if(alt) return entry.deltaAlt.delta||[]; }
+  return entry.delta||[];
+}
+function applicaDeltaTappa(shifts){
+  if(!shifts || !shifts.length || !S.forze || !PAESE || !PAESE.partiti) return;
+  shifts.forEach(function(sh){ if(S.forze[sh.id]!=null) S.forze[sh.id]=Math.max(2, S.forze[sh.id]+sh.delta); });
+  /* L106-3 · L'ÀNCORA SI SPOSTA SOLO ALLE TAPPE MARCATE. La molla di evolvePartiti riporta ogni partito verso la forza
+     d'inizio porta (`p.forza`): riassorbe gli scossoni e tiene in vita le carriere che la storia punisce, ed è giusto
+     (L106-1: con l'àncora mobile per tutti, `italia1980` finiva al congresso 20 volte su 20). Ma cancellava anche i
+     cambiamenti di NATURA di un partito: l'RPR fuso nell'UMP (+22 nel 2002) tornava a 12 nel 2007 e la tappa del
+     2007 saltava 18 volte su 20. Un delta marcato `ancora:true` sposta anche l'àncora (`S.ancoraTappa`, letto da
+     evolvePartiti). ⚑ CRITERIO per chi marcherà: si marca una fusione, una scissione o una rifondazione che cambia
+     CHI STA nel partito; non si marca una frana o una vittoria elettorale. ⚑ ESTESO in L109-1: si marca anche una
+     CONCENTRAZIONE del sistema dei partiti che assorbe i minori (la CDU/CSU del 1953, e chi ne perde gli elettori). */
+  shifts.forEach(function(sh){ if(sh.ancora && S.forze[sh.id]!=null){ if(!S.ancoraTappa) S.ancoraTappa={}; S.ancoraTappa[sh.id]=(S.ancoraTappa[sh.id]||0)+sh.delta; } });
+  var sum=0; PAESE.partiti.forEach(function(p){ sum+=(S.forze[p.id]||0); });
+  if(sum>0) PAESE.partiti.forEach(function(p){ S.forze[p.id]=(S.forze[p.id]||0)/sum*100; });   // rinormalizza a 100
+  S.forzePrev=Object.assign({}, S.forze);
+}
 function riallineamentoTappa(){
   if(typeof S==='undefined' || !S) return;
   if(typeof changeoverEuro==='function') changeoverEuro();   // L44-1: lo scatto della valuta vive qui, dove il mese comincia
@@ -2745,7 +2826,7 @@ function riallineamentoTappa(){
        storia si gioca come snodo (L40-2). La tappa resta marcata come fatta: non deve ritentare ogni anno. */
     if(typeof entry.se==='function'){ var ok=false; try{ ok=entry.se(); }catch(_){ ok=false; }
       if(!ok){ S.riallineamenti[chiave]=true; return; } }
-    shifts=entry.delta||[]; direttive=entry;
+    shifts=deltaTappa(entry); direttive=entry;
     /* L106-3 · `saltaDeltaPer`: le porte che PARTONO già con i voti di questa tappa nel roster. `uk1970` ha le urne del
        1970 come forze d'avvio e la tappa del 1970 le rispostava al secondo mese (Liberali 7,5 → 3,9): il 1970 contato due
        volte, nascosto dalla molla che lo riassorbiva in un anno. Per quelle porte i delta si saltano; le direttive
@@ -2758,21 +2839,7 @@ function riallineamentoTappa(){
      a zero). Le forze non si toccano. Le tappe senza delta e senza seggi escono come prima. */
   var senzaDelta = (!shifts || !shifts.length);
   if(senzaDelta && !(entry && !Array.isArray(entry) && entry.seggi)){ if(direttive){ S.riallineamenti[chiave]=true; } return; }
-  if(!senzaDelta && S.forze && PAESE && PAESE.partiti){
-    shifts.forEach(function(sh){ if(S.forze[sh.id]!=null) S.forze[sh.id]=Math.max(2, S.forze[sh.id]+sh.delta); });
-    /* L106-3 · L'ÀNCORA SI SPOSTA SOLO ALLE TAPPE MARCATE. La molla di evolvePartiti riporta ogni partito verso la forza
-       d'inizio porta (`p.forza`): riassorbe gli scossoni e tiene in vita le carriere che la storia punisce, ed è giusto
-       (L106-1: con l'àncora mobile per tutti, `italia1980` finiva al congresso 20 volte su 20). Ma cancellava anche i
-       cambiamenti di NATURA di un partito: l'RPR fuso nell'UMP (+22 nel 2002) tornava a 12 nel 2007 e la tappa del
-       2007 saltava 18 volte su 20. Un delta marcato `ancora:true` sposta anche l'àncora (`S.ancoraTappa`, letto da
-       evolvePartiti). ⚑ CRITERIO per chi marcherà: si marca una fusione, una scissione o una rifondazione che cambia
-       CHI STA nel partito; non si marca una frana o una vittoria elettorale. ⚑ ESTESO in L109-1: si marca anche una
-       CONCENTRAZIONE del sistema dei partiti che assorbe i minori (la CDU/CSU del 1953, e chi ne perde gli elettori). */
-    shifts.forEach(function(sh){ if(sh.ancora && S.forze[sh.id]!=null){ if(!S.ancoraTappa) S.ancoraTappa={}; S.ancoraTappa[sh.id]=(S.ancoraTappa[sh.id]||0)+sh.delta; } });
-    var sum=0; PAESE.partiti.forEach(function(p){ sum+=(S.forze[p.id]||0); });
-    if(sum>0) PAESE.partiti.forEach(function(p){ S.forze[p.id]=(S.forze[p.id]||0)/sum*100; });   // rinormalizza a 100
-    S.forzePrev=Object.assign({}, S.forze);
-  }
+  if(!senzaDelta) applicaDeltaTappa(shifts);
   /* ============================================================================================================
      L61-2 · I SEGGI DICHIARATI A UNA TAPPA — forma PIENA (decisione Cowork+Giacomo su L59-1).
      Il principio: **le urne storiche sono dati, non simulazioni**. Il simulatore serve le elezioni del
@@ -3851,18 +3918,40 @@ function snodoPacchetto96OppDovuta(){ return typeof S!=='undefined' && S && S.er
 function snodoKosovo99Dovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_DE && S.livello===3 && !S.opposizione && S.deKosovo99==null && (S.year===1999 && S.month>=3 && S.month<=4); }
 function snodoKosovo99OppDovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_DE && S.livello===3 && S.opposizione && S.deKosovo99Opp==null && S.deKosovo99==null && (S.year===1999 && S.month>=3 && S.month<=4); }
 function snodoMoneta98Dovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_DE && S.livello===3 && S.deMoneta98==null && (S.year===1998 && S.month>=4 && S.month<=5); }
+/* L157-1 · i cancelli degli snodi del decennio tedesco 2000 (finestre di due mesi, come L153-2). Nessun pilastro né fatto-mondo in quei
+   mesi: pde00_ueberlingen è del 2002/7, pm_tsunami del 2005/1, pm_crollo del 2008/9. S3 «La questione di fiducia» al governo solo per un
+   Cancelliere giocatore (D97: livello 3 e non all'opposizione); dall'aula senza urne (D107). */
+function snodoIraq02Dovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_DE && S.livello===3 && !S.opposizione && S.deIraq02==null && (S.year===2002 && S.month>=9 && S.month<=10); }
+function snodoIraq02OppDovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_DE && S.livello===3 && S.opposizione && S.deIraq02Opp==null && S.deIraq02==null && (S.year===2002 && S.month>=9 && S.month<=10); }
+function snodoAgenda03Dovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_DE && S.livello===3 && !S.opposizione && S.deAgenda03==null && (S.year===2003 && S.month>=3 && S.month<=4); }
+function snodoAgenda03OppDovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_DE && S.livello===3 && S.opposizione && S.deAgenda03Opp==null && S.deAgenda03==null && (S.year===2003 && S.month>=3 && S.month<=4); }
+function snodoFiducia05Dovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_DE && S.livello===3 && !S.opposizione && S.deFiducia05==null && (S.year===2005 && S.month>=5 && S.month<=6); }
+function snodoFiducia05OppDovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_DE && S.livello===3 && S.opposizione && S.deFiducia05Opp==null && S.deFiducia05==null && (S.year===2005 && S.month>=5 && S.month<=6); }
+function snodoBanche08Dovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_DE && S.livello===3 && !S.opposizione && S.deBanche08==null && (S.year===2008 && S.month>=10 && S.month<=11); }
+function snodoBanche08OppDovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_DE && S.livello===3 && S.opposizione && S.deBanche08Opp==null && S.deBanche08==null && (S.year===2008 && S.month>=10 && S.month<=11); }
 /* L148-2 · APPLICA ORA LA DIRETTIVA DI UNA TAPPA (S1 b e FDP c, «le urne subito»: le liste del cambio di campo valgono PRIMA dello
    scioglimento, altrimenti la FDP rotta torna ordinaria all'urna e la SPD rifà la coalizione di prima). La stessa voce di
    RIALLINEAMENTI_ERA, col suo `se`, segnata come fatta: quando il mese della tappa arriva, riallineamentoTappa la salta (idempotente).
-   Solo per le tappe di sole direttive (niente delta né seggi: quelli hanno il loro mese, e anticiparli sposterebbe le urne). */
-function applicaTappaOra(chiave){
+   Solo per le tappe di sole direttive (niente delta né seggi: quelli hanno il loro mese, e anticiparli sposterebbe le urne).
+   L157-1 · `conDelta` (secondo parametro): la tappa può portare DELTA, applicati con lo stesso lettore del mese della tappa
+   (`deltaTappa` + `applicaDeltaTappa`: `ancora:true`, rinormalizzazione, `saltaDeltaPer`), e il riferimento della traiettoria si
+   aggiorna come in riallineamentoTappa. Serve allo snodo che ANTICIPA le urne a cui la tappa si riferisce (S3 a del 2005 tedesco:
+   il voto del 2005 subito prima dello scioglimento). Le tappe coi seggi restano escluse anche così. Senza il parametro, come prima. */
+function applicaTappaOra(chiave, conDelta){
   if(typeof S==='undefined' || !S) return false;
   var perAnno=S.era && RIALLINEAMENTI_ERA[S.era], entry=perAnno && perAnno[chiave];
-  if(!entry || Array.isArray(entry) || (entry.delta && entry.delta.length) || entry.seggi) return false;
+  if(!entry || Array.isArray(entry) || entry.seggi) return false;
+  if(!conDelta && entry.delta && entry.delta.length) return false;
   if(!S.riallineamenti) S.riallineamenti={};
   if(S.riallineamenti[chiave]) return false;
   if(typeof entry.se==='function'){ var ok=false; try{ ok=entry.se(); }catch(_){ ok=false; } if(!ok) return false; }
   applicaDirettive(entry);
+  if(conDelta){
+    var shifts=deltaTappa(entry);
+    if(Array.isArray(entry.saltaDeltaPer) && entry.saltaDeltaPer.indexOf(S.scenario)>=0) shifts=[];
+    applicaDeltaTappa(shifts);
+    if(S.forze && S.forze[S.partito]!=null) S.tappaForzaPrec=S.forze[S.partito];
+  }
   S.riallineamenti[chiave]=true;
   return true;
 }
@@ -5700,6 +5789,10 @@ function genAgendaRamo(first){
     if(!first && typeof snodoPacchetto96OppDovuta==='function' && snodoPacchetto96OppDovuta()){ S.agenda.push({kind:'event', data:PACCHETTO96_OPP_EV, resolved:false}); agendaSolo(); return; }   // L153-2: il pacchetto, dall'aula
     if(!first && typeof snodoMoneta98Dovuta==='function' && snodoMoneta98Dovuta()){ S.agenda.push({kind:'event', data:MONETA98_EV, resolved:false}); agendaSolo(); return; }   // L153-2: la moneta, dall'aula
     if(!first && typeof snodoKosovo99OppDovuta==='function' && snodoKosovo99OppDovuta()){ S.agenda.push({kind:'event', data:KOSOVO99_OPP_EV, resolved:false}); agendaSolo(); return; }   // L153-2: il Kosovo, dall'aula
+    if(!first && typeof snodoIraq02OppDovuta==='function' && snodoIraq02OppDovuta()){ S.agenda.push({kind:'event', data:IRAQ02_OPP_EV, resolved:false}); agendaSolo(); return; }   // L157-1: l'Iraq, dall'aula
+    if(!first && typeof snodoAgenda03OppDovuta==='function' && snodoAgenda03OppDovuta()){ S.agenda.push({kind:'event', data:AGENDA03_OPP_EV, resolved:false}); agendaSolo(); return; }   // L157-1: l'Agenda, dall'aula
+    if(!first && typeof snodoFiducia05OppDovuta==='function' && snodoFiducia05OppDovuta()){ S.agenda.push({kind:'event', data:FIDUCIA05_OPP_EV, resolved:false}); agendaSolo(); return; }   // L157-1: la questione di fiducia, dall'aula (senza urne)
+    if(!first && typeof snodoBanche08OppDovuta==='function' && snodoBanche08OppDovuta()){ S.agenda.push({kind:'event', data:BANCHE08_OPP_EV, resolved:false}); agendaSolo(); return; }   // L157-1: le banche, dall'aula
     // Cantiere C: la stagione elettorale vale anche da SFIDANTE (bloccoIds = il tuo blocco d'opposizione)
     if(typeof pickCampagnaNazionale==='function'){ const cnbO=pickCampagnaNazionale(); if(cnbO){ S.agenda.push(cnbO); agendaSolo(); return; } }
     const inq=aggiornaInchiesta();   // anche da sfidante l'esposizione conta: bersaglio sempre tu (niente ministri qui)
@@ -5842,6 +5935,10 @@ function genAgendaRamo(first){
   if(!first && typeof snodoPacchetto96Dovuta==='function' && snodoPacchetto96Dovuta()){ S.agenda.push({kind:'event', data:PACCHETTO96_EV, resolved:false}); agendaSolo(); return; }   // L153-2: il pacchetto
   if(!first && typeof snodoMoneta98Dovuta==='function' && snodoMoneta98Dovuta()){ S.agenda.push({kind:'event', data:MONETA98_EV, resolved:false}); agendaSolo(); return; }   // L153-2: la moneta
   if(!first && typeof snodoKosovo99Dovuta==='function' && snodoKosovo99Dovuta()){ S.agenda.push({kind:'event', data:KOSOVO99_EV, resolved:false}); agendaSolo(); return; }   // L153-2: il Kosovo
+  if(!first && typeof snodoIraq02Dovuta==='function' && snodoIraq02Dovuta()){ S.agenda.push({kind:'event', data:IRAQ02_EV, resolved:false}); agendaSolo(); return; }   // L157-1: l'Iraq
+  if(!first && typeof snodoAgenda03Dovuta==='function' && snodoAgenda03Dovuta()){ S.agenda.push({kind:'event', data:AGENDA03_EV, resolved:false}); agendaSolo(); return; }   // L157-1: l'Agenda
+  if(!first && typeof snodoFiducia05Dovuta==='function' && snodoFiducia05Dovuta()){ S.agenda.push({kind:'event', data:FIDUCIA05_EV, resolved:false}); agendaSolo(); return; }   // L157-1: la questione di fiducia
+  if(!first && typeof snodoBanche08Dovuta==='function' && snodoBanche08Dovuta()){ S.agenda.push({kind:'event', data:BANCHE08_EV, resolved:false}); agendaSolo(); return; }   // L157-1: le banche
   if(!first && typeof franco90AncoraDovuta==='function'){ var _f9=franco90AncoraDovuta();   // L103-2: la corsa al franco del '92 e del '93
     if(_f9){ S.francoAncore=S.francoAncore||{}; S.francoAncore[_f9]=true; if(_f9==='a92' && pesoFranco92()>1) S.francoGrave=true;   // col no a Maastricht pesa doppio
       S.agenda.push({kind:'event', data:(_f9==='a92' ? FRANCO92_EV : FRANCO93_EV), resolved:false}); agendaSolo(); return; } }
@@ -6605,8 +6702,7 @@ function avanzaMese(){
   }
   if(S.opposizione){                                              // all'opposizione: niente crisi/insolvenza/sfiducia tue
     S.rivolta=null;                                               // L72-1: il conto alla rovescia e' della TUA linea di bilancio; all'opposizione le leve non sono tue
-    const f0=mioPartito().forza;
-    if(S.forze[S.partito] < Math.max(f0*0.5, 5)){ return gameOver('congresso'); }   // forza crollata: il partito ti scarica
+    if(S.forze[S.partito] < sogliaCrollo(mioPartito().forza)){ return gameOver('congresso'); }   // forza crollata: il partito ti scarica (la soglia: sogliaCrollo, L155-2)
     if(S.month===1 && S.turnInMandate>=PAESE.mandatoMesi/12){ if(sfidaAttiva()) return apriPrimaria('vigilia'); return election(); }   // a fine mandato: prima la primaria (se la sfida è viva), poi sfidi
     /* L91-2 — la vita del governo avversario: quanti mesi ha, e la sua stampella. Nell'ordine: prima invecchia
        (l'anno di grazia si conta da qui), poi il logorio dell'accordo, poi la ricerca di un partner se serve. */
@@ -7721,6 +7817,13 @@ function nextMandate(){
    la quarta è gameOver('congresso'), dove non serve più. Il rientro della sfiducia costruttiva non è un'urna e non la tocca.
    Un salvataggio preso col modale d'esito aperto non esiste: il modale non è in S e l'ultimo commitSnap è quello del
    mese prima — al caricamento il mese si rigioca, l'urna si rifà, e il confronto è ancora quello. */
+/* L155-2 · LA «FORZA CROLLATA» ALL'OPPOSIZIONE: sotto questa forza il partito ti scarica (gameOver('congresso'), ramo d'opposizione di
+   corpoMese). Era max(f0·0,5; 5), f0 = la forza di porta del partito: per chi nasce sotto il 10 la soglia era il 5 fisso, e 36 dei 203
+   partiti selezionabili partivano già sulla soglia o sotto — sedici righe chiudevano al congresso AL PRIMO MESE, 20 volte su 20 (MSI e
+   Monarchici italiani, SNP e Plaid, i Radicali di fr1970: la trappola del RPF di L93-2, su partiti che il selettore offre; L154-1 punto 7).
+   Ora per chi nasce piccolo la soglia è il 60% della forza di porta: max(f0·0,5; min(5; f0·0,6)) — IDENTICA per f0 ≥ 8,33 (quindi per
+   tutti i partiti grandi, per costruzione). Pura: la legge anche lo strumento di misura (misura-l143-5.js, variante `sprima`). */
+function sogliaCrollo(f0){ return Math.max(f0*0.5, Math.min(5, f0*0.6)); }
 function salvezzaOpp(){ return !!S && !!S.opposizione && (S.salvezzeOpp||0)<1 && S.forzaUrnaPrec!=null && (S.forze[S.partito]||0) > S.forzaUrnaPrec; }
 function segnaForzaUrna(){ S.forzaUrnaPrec=(S.forze && S.forze[S.partito]) || 0; }
 function segnaSalvezza(){ S.salvezzeOpp=(S.salvezzeOpp||0)+1; S.credibilita=Math.max(0,(S.credibilita||0)-10); }   // DOPO entraOpposizione, che la azzera a 50: 40 invece di 50 (il costo misurato in L143-5). La chiama anche il banco.
@@ -8158,6 +8261,7 @@ function applySnap(snap){
   if(S.deTrattati72===undefined){ S.deTrattati72=null; S.deTrattati72Opp=null; S.dePetrolio73=null; S.deSpia74=null; S.deAutunno77=null; S.deAutunno77Opp=null; }   // L135-3
   ['deSvolta82','deSvolta82Opp','deMissili83','deMissili83Opp','deUnita90','deUnita90Opp','deMarco90','deMarco90Opp','deCapitale91'].forEach(function(k){ if(S[k]===undefined) S[k]=null; });   // L148-2: uno per uno, mai azzerare un flag già scritto (L99-2)
   ['deAsilo92','deAsilo92Opp','deConto93','deConto93Opp','dePacchetto96','dePacchetto96Opp','deKosovo99','deKosovo99Opp','deMoneta98'].forEach(function(k){ if(S[k]===undefined) S[k]=null; });   // L153-2: uno per uno
+  ['deIraq02','deIraq02Opp','deAgenda03','deAgenda03Opp','deFiducia05','deFiducia05Opp','deBanche08','deBanche08Opp'].forEach(function(k){ if(S[k]===undefined) S[k]=null; });   // L157-1: uno per uno
   if(S.scioglimento97===undefined) S.scioglimento97=null;   // L103-1
   if(S.coabitazione===undefined) S.coabitazione=false;   // L100-2
   if(S.governiCaduti===undefined) S.governiCaduti=0;   // L80-5

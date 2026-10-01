@@ -479,9 +479,18 @@ function applyPaese(){
   const hdr=document.getElementById('hdr-paese'); if(hdr) hdr.textContent=T(P.nome);
   const intro=document.getElementById('setup-intro');   // la intro per-paese/ruolo (dinamica) vive nel SETUP; la home ha un pitch generico statico
   const introPaese=(typeof curLang==='function'&&curLang()==='en')?T(P.nome):P.nomeArt;
+  /* L155-2 · gli anni fino alla PRIMA urna li conta il motore: una porta parte a legislatura in corso (`turnMandato`, lo stesso campo che
+     initStatoBase copia in S.turnInMandate) e il motore vota a gennaio quando turnInMandate arriva a mandatoMesi/12 — le porte partono a
+     gennaio, quindi gli anni sono mandatoMesi/12 − turnMandato (de2000: 2; fr1980: 1). Il presente non ha turnMandato: il mandato intero. */
+  const scI=(typeof SCENARI!=='undefined' && typeof chosenScenario!=='undefined') ? SCENARI[chosenScenario] : null;
+  const anniUrna=Math.max(1, P.mandatoMesi/12 - ((scI && scI.id!=='presente' && scI.turnMandato) || 0));
   if(intro) intro.textContent = (typeof chosenMode!=='undefined' && chosenMode==='opposizione')
-    ? T("Parti da sfidante: a governare %PAESE è l'avversario più forte. Niente nomina dei ministri — costruisci visibilità e credibilità mese per mese e, alle prossime elezioni (tra %A anni), riprenditi il paese.").replace('%PAESE',introPaese).replace('%A',P.mandatoMesi/12)
-    : T('Guiderai %PAESE come %RUOLO per %A anni. Nomina i ministri, vara ogni anno la legge di bilancio e governa mese per mese tra dossier, opportunità e imprevisti. A fine mandato, i cittadini decidono se confermarti.').replace('%PAESE',introPaese).replace('%RUOLO',T(P.titoloRuolo)).replace('%A',P.mandatoMesi/12);
+    ? (anniUrna===1
+        ? T("Parti da sfidante: a governare %PAESE è l'avversario più forte. Niente nomina dei ministri — costruisci visibilità e credibilità mese per mese e, alle prossime elezioni (tra un anno), riprenditi il paese.")
+        : T("Parti da sfidante: a governare %PAESE è l'avversario più forte. Niente nomina dei ministri — costruisci visibilità e credibilità mese per mese e, alle prossime elezioni (tra %A anni), riprenditi il paese.")).replace('%PAESE',introPaese).replace('%A',anniUrna)
+    : (anniUrna===1
+        ? T('Guiderai %PAESE come %RUOLO per un anno. Nomina i ministri, vara ogni anno la legge di bilancio e governa mese per mese tra dossier, opportunità e imprevisti. A fine mandato, i cittadini decidono se confermarti.')
+        : T('Guiderai %PAESE come %RUOLO per %A anni. Nomina i ministri, vara ogni anno la legge di bilancio e governa mese per mese tra dossier, opportunità e imprevisti. A fine mandato, i cittadini decidono se confermarti.')).replace('%PAESE',introPaese).replace('%RUOLO',T(P.titoloRuolo)).replace('%A',anniUrna);
   /* hero home (raster, DORMIENTE): override per-paese P.hero, poi la hero condivisa SCENES.hero.
      Vuoto → slot spento (nessun .on) → home identica finché non arriva l'arte. */
   const hero=document.getElementById('home-hero');

@@ -126,9 +126,11 @@ const VIDEO_PRESENTI = ['home-hero', 'partito-base', 'vitaprivata-base', 'retro-
   'partenza-attivista', 'partenza-locale', 'partenza-ministro', 'partenza-capo', 'partenza-diplomatico',
   /* 30/9 (L153-5): le clip delle PARTITE STORICHE — il paese (5 s, 960×540, mute; qui le bandiere ci vogliono), poi il decennio. Non sono
      carte: le apre `apriClipPorta()` (ui.js) quando si sceglie una porta, e la sequenza si DERIVA dalla porta (`porta-paese-<paese>`,
-     `porta-decennio-<anno>`): una clip vale solo se il suo nome è qui. Le clip dei decenni non sono ancora arrivate: il loro nome è
-     quello delle miniature `porta-decennio-*.webp`, che ci sono già e faranno da poster — entreranno qui senza toccare il codice. */
-  'porta-paese-italia', 'porta-paese-francia', 'porta-paese-regnounito'];
+     `porta-decennio-<anno>`): una clip vale solo se il suo nome è qui. Il poster di un decennio è la sua miniatura `porta-decennio-*.webp`.
+     30/9 sera: Francia e Regno Unito rifatte (immagine e clip), arrivate Germania e USA (gli USA non hanno porte oggi: la clip aspetta)
+     e la prima clip di decennio, il 1950. */
+  'porta-paese-italia', 'porta-paese-francia', 'porta-paese-regnounito', 'porta-paese-germania', 'porta-paese-usa',
+  'porta-decennio-1950'];
 
 /* ===== L124-1 — IL VIDEO INTRODUTTIVO (`assets/video/intro.*`). Non è una scena: sta FUORI da VIDEO_PRESENTI (non ha una
    carta né un .webp in assets/scenes) ma sotto la stessa guardia (`.claude/verifica-asset.js`): i file dichiarati qui devono
@@ -175,9 +177,9 @@ const SCENE_AREA = [];
 
 /* ===== L151-2 — LE IMMAGINI DEI DECENNI (`assets/scenes/porta-decennio-<anno>.webp`): la miniatura delle porte storiche che non
    hanno una `soglia-*` loro (Regno Unito, Francia, Germania) nella pagina degli storici — `sogliaSrc()` in ui.js. Lista-promessa:
-   qui stanno gli ANNI che hanno il file. ⚠ Il 1950 NON c'è: la sorgente (`arte-sorgente/porte/porta-decennio-1950.jpg`) ha
-   un'insegna che si legge («CAFE»), e nessuna immagine del gioco porta un testo leggibile; le porte del 1950 tengono il segnaposto. */
-const PORTE_DECENNIO = [1960, 1970, 1980, 1990, 2000];
+   qui stanno gli ANNI che hanno il file. Il 1950 è entrato il 30/9 sera: la prima sorgente aveva un'insegna leggibile («CAFE»),
+   quella rifatta (cantiere e radio, senza scritte) no. */
+const PORTE_DECENNIO = [1950, 1960, 1970, 1980, 1990, 2000];
 
 /* ===== L113-2 — LE PEDINE DEL TAVOLO (`assets/tavolo/<nome>.webp`, 256 × 256 con trasparenza, ≤ 60 KB, appoggiate in
    basso al centro). Terza lista-promessa, stesso contratto di AUDIO_PRESENTI e VIDEO_PRESENTI: il tavolo disegna SOLO
