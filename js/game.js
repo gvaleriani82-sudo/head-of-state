@@ -772,15 +772,21 @@ function ministroDovuto(){ const mese=S.year*12+S.month; return S.ministroUltimo
    prima) lo cura PER QUEL SACCHETTO: `S.bagVisti[chiave]` tiene gli id usciti nel giro in corso (si azzera al
    rimescolo), e prima di pescare le carte vive che non sono nel sacco NE' nel registro vanno IN TESTA, mescolate fra
    loro. Lo passano `pescaLeggero()` (effetti zero) e, dal L152-2, `pickDossierSettore()` (il sacchetto 'doss|<dicastero>' del
-   ministro; il premier non ha un sacchetto: pesca con `rnd` e la finestra `S.recentDoss`). Un salvataggio vecchio arriva col sacco a meta' giro e
+   ministro; il premier non ha un sacchetto: pesca con `rnd` e la finestra `S.recentDoss`) e, dal L164-1, `pescaSfida()`
+   (i sacchetti 'sfide|<paese>|<livello>'). In testa va UNA copia per id: i candidati delle sfide sono pesati con le copie
+   (`mixSfida`), le altre copie la carta le riprende al rimescolo dopo. Un salvataggio vecchio arriva col sacco a meta' giro e
    senza registro: li' NON si sa chi e' gia' uscito, quindi non si mette niente in testa fino al rimescolo dopo
-   (metterle tutte farebbe rivedere subito le carte appena uscite). */
+   (metterle tutte farebbe rivedere subito le carte appena uscite). L165-1 · `opt.parcheggiate` (lista di id, facoltativa, solo con
+   `vivePrima`): le carte che il CHIAMANTE ha tolto apposta dai candidati (oggi pescaSfida: le viste di recente). Al rimescolo e
+   alla ricarica il registro nasce con loro dentro invece che vuoto: per il sacchetto sono gia' uscite nel giro, quindi il ramo
+   «nuove» non le mette in testa quando tornano fra i candidati, e rientrano al rimescolo dopo (come prima di L164-1). */
 function mescola(a){ a=a.slice(); for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)), t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
 function pescaBag(chiave, candidati, opt){
   if(!candidati || !candidati.length) return null;
   S.bag=S.bag||{}; S.bagCoda=S.bagCoda||{};
   var vive=!!(opt && opt.vivePrima);
   if(vive) S.bagVisti=S.bagVisti||{};
+  var parcheggiate=(vive && opt.parcheggiate) ? opt.parcheggiate.filter(function(id, i, a){ return a.indexOf(id)===i; }) : [];   // L165-1: tolte apposta dal chiamante (viste di recente): il registro nasce con loro dentro, cosi' il ramo «nuove» non le rimette in testa e rientrano al rimescolo dopo
   var validi={}; candidati.forEach(function(c){ validi[c.id]=c; });
   var K=Math.min(2, Math.floor(candidati.length/3));   // hold-back: pool<6 -> K=0 (niente sui piccolissimi)
   var sacco=S.bag[chiave];
@@ -788,15 +794,15 @@ function pescaBag(chiave, candidati, opt){
     sacco=mescola(candidati.map(function(c){return c.id;}));
     var coda=S.bagCoda[chiave]||[];   // gli ultimi K del ciclo precedente vanno in FONDO -> niente ripetizione a cavallo di due cicli
     if(K>0 && coda.length) sacco=sacco.filter(function(id){return coda.indexOf(id)<0;}).concat(sacco.filter(function(id){return coda.indexOf(id)>=0;}));
-    if(vive) S.bagVisti[chiave]=[];
+    if(vive) S.bagVisti[chiave]=parcheggiate.slice();
   } else if(vive && S.bagVisti[chiave]){
     var visti=S.bagVisti[chiave];
-    var nuove=candidati.map(function(c){return c.id;}).filter(function(id){ return sacco.indexOf(id)<0 && visti.indexOf(id)<0; });
+    var nuove=candidati.map(function(c){return c.id;}).filter(function(id, i, tutti){ return tutti.indexOf(id)===i && sacco.indexOf(id)<0 && visti.indexOf(id)<0; });   // L164-1: UNA copia per id (i candidati di mixSfida ne hanno fino a 3: il peso pieno torna al rimescolo)
     if(nuove.length) sacco=mescola(nuove).concat(sacco);   // vive adesso, assenti al rimescolo e non ancora uscite nel giro: in testa
   }
   var scelto=null;
   while(sacco.length){ var id=sacco.shift(); if(validi[id]){ scelto=id; break; } }   // salta gli id usciti dal set valido (cond cambiata)
-  if(scelto===null){ sacco=mescola(candidati.map(function(c){return c.id;})); scelto=sacco.shift(); if(vive) S.bagVisti[chiave]=[]; }   // sacco tutto invalido -> ricarica
+  if(scelto===null){ sacco=mescola(candidati.map(function(c){return c.id;})); scelto=sacco.shift(); if(vive) S.bagVisti[chiave]=parcheggiate.slice(); }   // sacco tutto invalido -> ricarica
   S.bag[chiave]=sacco;
   if(vive && S.bagVisti[chiave]) S.bagVisti[chiave].push(scelto);
   if(K>0){ var q=S.bagCoda[chiave]||[]; q.push(scelto); while(q.length>K) q.shift(); S.bagCoda[chiave]=q; }
@@ -4426,7 +4432,7 @@ function pescaSfida(ruoli, cornice){
   if(!pool.length) return null;
   /* Q-fix #2 — MEMORIA CONDIVISA con F5: escludi le domande viste di recente (S.recentSfide, aggiornata da ENTRAMBE le
      sorgenti: Sfida singola + intervista). Rilassa se svuoterebbe il pool (< 3 restanti → degrado grazioso). */
-  var _rs=S.recentSfide||[]; if(_rs.length){ var _ex=pool.filter(function(q){ return _rs.indexOf(q.id)<0; }); if(_ex.length>=3) pool=_ex; }
+  var _rs=S.recentSfide||[], parcheggiate=[]; if(_rs.length){ var _ex=pool.filter(function(q){ return _rs.indexOf(q.id)<0; }); if(_ex.length>=3){ parcheggiate=pool.filter(function(q){ return _rs.indexOf(q.id)>=0; }).map(function(q){ return q.id; }); pool=_ex; } }   // L165-1: le tolte DAVVERO (nel degrado grazioso nessuna) vanno a pescaBag come parcheggiate
   /* Q-fix #6 — MIX-DIFFICOLTÀ table-driven (v. PESI_SFIDA/mixSfida sopra): UNA regola leggibile [difficoltà-partita ×
      fascia-livello] al posto delle condizioni sparse. La difficoltà-partita è lo skew primario, la scala-livello la
      modula. facile → facile/media (la #6: la servita SCENDE); normale → perno sul medio; difficile → predominanza
@@ -4435,7 +4441,7 @@ function pescaSfida(ruoli, cornice){
   pool=mixSfida(pool, dgame, liv);
   /* D5 — sacchetto PER-CONTESTO (paese+livello): l'anti-ripetizione regge anche coi pool piccoli dei paesi senza banca
      (hold-back K = min(2, floor(len/3)) → mai la stessa domanda a raffica; degrado grazioso, misurato). */
-  var q=pescaBag('sfide|'+(S.paese||'')+'|'+(liv||0), pool);
+  var q=pescaBag('sfide|'+(S.paese||'')+'|'+(liv||0), pool, {vivePrima:true, parcheggiate:parcheggiate});   // L164-1: le domande con la `cond` d'anno (200 su 735) entravano nel sacco solo se il rimescolo cadeva nel loro tempo, e il sacco (~100 voci con le copie) in una carriera non si rimescola: in italia1990 le cinque «dal 1993» a L1 non uscivano mai (L163-2)
   if(!q) return null;
   S.sfideUltimo=mese;
   markSfida(q.id);                                          // Q-fix #2 — registra nella memoria condivisa

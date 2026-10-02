@@ -3238,6 +3238,132 @@ const BEAT_LEGGERI = [
   {id:'lg90_fantacalcio', era:'italia1990', registro:'leggero', cond:()=>S.year>=1994, kick:'Il paese', t:'Il fantacalcio', text:'Aste notturne fra amici, formazioni schierate sul giornale del lunedì: metà del paese allena una squadra che non esiste.', ch:[
     {l:'Ti fai spiegare le regole', e:'Sono più complicate di una legge finanziaria', f:function(){}},
     {l:'Preferisci la squadra vera', e:'Anche quella perde', f:function(){}} ]},
+  /* L164-2 · quaranta beat leggeri per i decenni italiani '70-2000 (VARIETA-L164-RESPIRO-IT.md): dieci per decennio, che
+     ne avevano 6/6/5/5 (il '90 parlava col '50). Effetti zero; date come cond solo dove il fatto ha una data; stagioni
+     con stagioneMese(). Nessun nome, marchio o morte (G5, G8). */
+  {id:'lg70_radiolibere', era:'italia1970', registro:'leggero', cond:()=>S.year>=1976, kick:'Il paese', t:'Le radio libere', text:'Un\'antenna sul tetto, due giradischi in cantina e un ragazzo che parla al microfono fino alle tre di notte: in ogni città nasce una radio, e qualcuna dura perfino un anno.', ch:[
+    {l:'Telefoni in diretta per una dedica', e:'Il conduttore ti ringrazia, e sbaglia il nome', f:function(){}},
+    {l:'Torni al giornale radio di sempre', e:'Le notizie, senza chitarre', f:function(){}} ]},
+  {id:'lg70_colore', era:'italia1970', registro:'leggero', cond:()=>S.year>=1977, kick:'Il paese', t:'La televisione a colori', text:'Davanti alla vetrina degli elettrodomestici la gente si ferma a guardare il prato verde della partita. Il primo del palazzo che la compra riceve visite per un mese.', ch:[
+    {l:'Vai a vederla dai vicini', e:'Caffè, pasticcini, e la partita in tinta', f:function(){}},
+    {l:'Aspetti che cali il prezzo', e:'Il bianco e nero regge ancora', f:function(){}} ]},
+  {id:'lg70_eskimo', era:'italia1970', registro:'leggero', kick:'Il paese', t:'L\'eskimo', text:'Il giaccone verde col cappuccio è diventato una divisa: lo portano gli studenti, i professori giovani e qualche impiegato che vuole sembrarlo.', ch:[
+    {l:'Ne compri uno anche tu', e:'Ti dicono che ti dona; non è vero', f:function(){}},
+    {l:'Resti col cappotto buono', e:'L\'ordine ha i suoi estimatori', f:function(){}} ]},
+  {id:'lg70_figurine', era:'italia1970', registro:'leggero', kick:'Il paese', t:'Le figurine', text:'Nei cortili si scambiano doppioni a mazzetti: «ce l\'ho, ce l\'ho, mi manca». Il portiere della squadra di provincia vale più di un campione.', ch:[
+    {l:'Ti fai spiegare le quotazioni', e:'Un mercato più spietato di quello vero', f:function(){}},
+    {l:'Regali i tuoi doppioni al più piccolo', e:'Un tifoso in più, per sempre', f:function(){}} ]},
+  {id:'lg70_autostop', era:'italia1970', registro:'leggero', cond:()=>stagioneMese()==='estate', kick:'Il paese', t:'L\'autostop', text:'D\'estate le statali verso il mare sono piene di ragazzi col pollice alzato e lo zaino in spalla: si parte senza sapere dove si dorme.', ch:[
+    {l:'Ne carichi due fino al casello', e:'Ti raccontano mezza vita in venti chilometri', f:function(){}},
+    {l:'Tiri dritto', e:'La macchina è già piena di valigie', f:function(){}} ]},
+  {id:'lg70_moviola', era:'italia1970', registro:'leggero', kick:'Il paese', t:'La moviola', text:'La domenica sera la televisione rivede il rigore al rallentatore, fotogramma per fotogramma. Il lunedì in ufficio se ne discute come in tribunale.', ch:[
+    {l:'Dici la tua: era rigore', e:'Mezzo ufficio non ti parla fino a mercoledì', f:function(){}},
+    {l:'Dici che non hai visto la partita', e:'Nessuno ti crede', f:function(){}} ]},
+  {id:'lg70_zampa', era:'italia1970', registro:'leggero', kick:'Il paese', t:'I pantaloni a zampa', text:'Pantaloni larghi in fondo, camicie a fiori, capelli sulle spalle: le foto di famiglia di questi anni faranno ridere i nipoti.', ch:[
+    {l:'Ti adegui alla moda', e:'Per le foto di famiglia, il danno è fatto', f:function(){}},
+    {l:'Resti fedele al sarto', e:'Un decennio di risvolti stretti', f:function(){}} ]},
+  {id:'lg70_ciclostile', era:'italia1970', registro:'leggero', kick:'Il paese', t:'Il ciclostile', text:'In ogni scuola e in ogni fabbrica gira un ciclostile: volantini all\'inchiostro viola, mani sporche, e un comunicato al giorno su qualunque cosa.', ch:[
+    {l:'Ne leggi uno fino in fondo', e:'Undici punti, tre dei quali giusti', f:function(){}},
+    {l:'Ne usi il retro per la lista della spesa', e:'Il retro è bianco, e serve', f:function(){}} ]},
+  {id:'lg70_palazzetto', era:'italia1970', registro:'leggero', cond:()=>S.year>=1971, kick:'Il paese', t:'Il concerto al palazzetto', text:'Il cantautore suona al palazzetto dello sport; fuori un gruppo protesta perché la musica dovrebbe essere gratis, e a metà concerto entra comunque.', ch:[
+    {l:'Paghi il biglietto ed entri', e:'Tre ore di canzoni tristi, ed esci contento', f:function(){}},
+    {l:'Resti fuori a discutere', e:'La musica si sente lo stesso, da lontano', f:function(){}} ]},
+  {id:'lg70_centocinquanta', era:'italia1970', registro:'leggero', cond:()=>S.year>=1974, kick:'Il paese', t:'Le centocinquanta ore', text:'Il contratto dà agli operai ore pagate per studiare: la sera, nelle scuole, lavoratori di cinquant\'anni prendono la licenza media accanto ai ragazzi.', ch:[
+    {l:'Vai alla consegna dei diplomi', e:'Qualcuno si commuove, e non se ne vergogna', f:function(){}},
+    {l:'Mandi un biglietto di auguri', e:'Lo appendono in bacheca', f:function(){}} ]},
+
+  {id:'lg80_private', era:'italia1980', registro:'leggero', kick:'Il paese', t:'Le televisioni private', text:'Il pomeriggio è dei cartoni animati giapponesi, la sera dei telefilm americani, la notte delle televendite: i canali si moltiplicano e il telecomando diventa una questione di famiglia.', ch:[
+    {l:'Ti lasci prendere dalla telenovela', e:'Duecento puntate, e nessuno si sposa', f:function(){}},
+    {l:'Chiedi chi ha nascosto il telecomando', e:'Non lo saprai mai', f:function(){}} ]},
+  {id:'lg80_aerobica', era:'italia1980', registro:'leggero', cond:()=>S.year>=1983, kick:'Il paese', t:'L\'aerobica', text:'In palestra si salta a tempo di musica, con body colorati, fasce in fronte e scaldamuscoli. I vecchi maestri di ginnastica non si capacitano.', ch:[
+    {l:'Ti iscrivi al corso del martedì', e:'Il mercoledì non cammini', f:function(){}},
+    {l:'Guardi dalla porta', e:'Il fiato, intanto, è salvo', f:function(){}} ]},
+  {id:'lg80_aperitivo', era:'italia1980', registro:'leggero', cond:()=>S.year>=1984, kick:'Il paese', t:'L\'aperitivo in centro', text:'Giacche con le spalline, telefoni grossi come mattoni in macchina, e alle sette tutti al bar del centro: lavorare tanto è di moda, e farlo vedere ancora di più.', ch:[
+    {l:'Ti fermi per un bicchiere', e:'Scopri tre affari che non farai', f:function(){}},
+    {l:'Torni a casa per cena', e:'Il centro fa a meno di te', f:function(){}} ]},
+  {id:'lg80_cubo', era:'italia1980', registro:'leggero', cond:()=>S.year>=1981, kick:'Il paese', t:'Il cubo dei colori', text:'Un cubo di plastica a sei colori da rimettere in ordine: c\'è chi ci riesce in un minuto, e c\'è chi stacca gli adesivi e li riattacca.', ch:[
+    {l:'Ci provi per una sera intera', e:'Una faccia sola, ma tutta gialla', f:function(){}},
+    {l:'Stacchi gli adesivi', e:'Nessuno ti ha visto', f:function(){}} ]},
+  {id:'lg80_stadio', era:'italia1980', registro:'leggero', cond:()=>S.year>=1985, kick:'Il paese', t:'Il concerto allo stadio', text:'Le grandi rockstar straniere passano dagli stadi: biglietti introvabili, ragazzi accampati dalla mattina, e un quartiere intero che non dorme.', ch:[
+    {l:'Ti procuri un biglietto', e:'Torni senza voce e con una maglietta', f:function(){}},
+    {l:'Ascolti dal balcone', e:'Si sente benissimo, purtroppo', f:function(){}} ]},
+  {id:'lg80_segreteria', era:'italia1980', registro:'leggero', cond:()=>S.year>=1986, kick:'Il paese', t:'La segreteria telefonica', text:'«Lasciate un messaggio dopo il segnale»: la macchinetta col nastro registra le telefonate quando non ci sei. C\'è chi riattacca offeso e chi detta romanzi.', ch:[
+    {l:'Registri un saluto spiritoso', e:'Te ne pentirai a ogni chiamata di lavoro', f:function(){}},
+    {l:'Registri un saluto serio', e:'Sembra il centralino di un ministero', f:function(){}} ]},
+  {id:'lg80_charter', era:'italia1980', registro:'leggero', cond:()=>S.year>=1984, kick:'Il paese', t:'Il viaggio organizzato', text:'Il volo charter e l\'albergo tutto compreso portano le famiglie al di là del mare: si torna abbronzati, con un tamburo e trecento diapositive.', ch:[
+    {l:'Accetti la serata delle diapositive', e:'Trecento, una per una', f:function(){}},
+    {l:'Racconti le tue ferie al lago', e:'Nessuno ti chiede le diapositive', f:function(){}} ]},
+  {id:'lg80_tormentone', era:'italia1980', registro:'leggero', cond:()=>stagioneMese()==='estate', kick:'Il paese', t:'Il tormentone', text:'Ogni estate ha la sua canzone: la suonano i juke-box dei lidi, le radio, le feste di paese, finché a settembre nessuno la sopporta più.', ch:[
+    {l:'La canticchi anche tu', e:'Non te la togli fino a ottobre', f:function(){}},
+    {l:'Cambi stazione ogni volta', e:'È anche sull\'altra', f:function(){}} ]},
+  {id:'lg80_breakdance', era:'italia1980', registro:'leggero', cond:()=>S.year>=1984, kick:'Il paese', t:'La breakdance', text:'Un cartone steso sull\'asfalto, uno stereo portatile, e i ragazzi girano sulla schiena davanti ai passanti. I vigili non sanno se multarli o applaudire.', ch:[
+    {l:'Ti fermi a guardare', e:'Ti invitano a provare: declini', f:function(){}},
+    {l:'Chiedi di abbassare la musica', e:'La abbassano, per un minuto', f:function(){}} ]},
+  {id:'lg80_cometa', era:'italia1980', registro:'leggero', cond:()=>S.year===1986, kick:'Il paese', t:'La cometa', text:'Torna la cometa che passa ogni settantasei anni: binocoli sui terrazzi, gite in collina lontano dalle luci, e una scia più piccola di quanto promettessero i giornali.', ch:[
+    {l:'Sali in collina a cercarla', e:'Una macchia chiara, e un ricordo per la vita', f:function(){}},
+    {l:'Ti accontenti delle foto sul giornale', e:'Sul giornale è bellissima', f:function(){}} ]},
+
+  {id:'lg90_telefonino', era:'italia1990', registro:'leggero', cond:()=>S.year>=1995, kick:'Il paese', t:'Il telefonino al ristorante', text:'Squilla a metà cena e il proprietario risponde ad alta voce, perché tutti sappiano che ce l\'ha. I vicini di tavolo alzano gli occhi al cielo: fra un anno ce l\'avranno anche loro.', ch:[
+    {l:'Ne compri uno', e:'Lo tieni spento per non pagare le chiamate', f:function(){}},
+    {l:'Giuri che non lo avrai mai', e:'Un giuramento a scadenza', f:function(){}} ]},
+  {id:'lg90_modem', era:'italia1990', registro:'leggero', cond:()=>S.year>=1997, kick:'Il paese', t:'Il modem', text:'Un fischio, un gracchiare, e il computer è «in rete»: si aspetta un minuto per una pagina, e intanto a casa nessuno può telefonare.', ch:[
+    {l:'Passi la sera a navigare', e:'La bolletta arriverà fra due mesi', f:function(){}},
+    {l:'Liberi la linea per la nonna', e:'La nonna ringrazia', f:function(){}} ]},
+  {id:'lg90_riviera', era:'italia1990', registro:'leggero', cond:()=>stagioneMese()==='estate', kick:'Il paese', t:'La riviera di notte', text:'D\'estate la costa non dorme: discoteche fino all\'alba, colazioni al bar alle sei, e i paesi dell\'entroterra che si lamentano del rumore.', ch:[
+    {l:'Passi una sera in riviera', e:'Torni all\'alba, e ti riconoscono', f:function(){}},
+    {l:'Resti in città', e:'Il silenzio d\'estate ha i suoi estimatori', f:function(){}} ]},
+  {id:'lg90_talkshow', era:'italia1990', registro:'leggero', kick:'Il paese', t:'Il talk show della sera', text:'Un salotto, un conduttore, sei ospiti che si parlano sopra: la televisione scopre che la lite fa ascolti, e la lite si adegua.', ch:[
+    {l:'Accetti l\'invito come ospite', e:'Parli quaranta secondi in un\'ora', f:function(){}},
+    {l:'Declini con garbo', e:'Invitano il tuo avversario', f:function(){}} ]},
+  {id:'lg90_doppioprezzo', era:'italia1990', registro:'leggero', cond:()=>S.year>=1999, kick:'Il paese', t:'Il prezzo in due monete', text:'Sui cartellini compare il prezzo in lire e quello nella moneta nuova: al mercato tutti fanno i conti col convertitore di cartone regalato dalla banca.', ch:[
+    {l:'Ti eserciti col convertitore', e:'Sbagli i decimali, come tutti', f:function(){}},
+    {l:'Dici che si capirà quando arriva', e:'Arriverà, e non si capirà', f:function(){}} ]},
+  {id:'lg90_jackpot', era:'italia1990', registro:'leggero', cond:()=>S.year>=1997, kick:'Il paese', t:'Il montepremi', text:'Il montepremi della lotteria non viene vinto da settimane e cresce: code in ricevitoria, schedine di condominio, sogni divisi in quote.', ch:[
+    {l:'Entri nella quota del condominio', e:'Perdi, ma in compagnia', f:function(){}},
+    {l:'Ricordi che il banco vince sempre', e:'Ti guardano come un guastafeste', f:function(){}} ]},
+  {id:'lg90_cucciolo', era:'italia1990', registro:'leggero', cond:()=>S.year>=1997&&S.year<=1999, kick:'Il paese', t:'Il cucciolo elettronico', text:'Un uovo di plastica con un animaletto sullo schermo da nutrire, pulire e coccolare: i bambini lo portano a scuola, le maestre lo sequestrano, i genitori lo accudiscono di notte.', ch:[
+    {l:'Lo accudisci tu per un fine settimana', e:'Sopravvive, per miracolo', f:function(){}},
+    {l:'Proponi un cane vero', e:'Proposta rinviata a data da destinarsi', f:function(){}} ]},
+  {id:'lg90_diario', era:'italia1990', registro:'leggero', kick:'Il paese', t:'Il diario di scuola', text:'Il diario è più gonfio dei libri: dediche, biglietti del cinema, frasi di canzoni, e i compiti scritti in un angolo.', ch:[
+    {l:'Ci scrivi una dedica', e:'Finisce incorniciata fra due cantanti', f:function(){}},
+    {l:'Chiedi dove sono i compiti', e:'In un angolo, a matita', f:function(){}} ]},
+  {id:'lg90_cd', era:'italia1990', registro:'leggero', cond:()=>S.year<=1995, kick:'Il paese', t:'Il compact disc', text:'Il disco argentato prende il posto del vinile: i negozi svendono i trentatré giri, e i collezionisti li comprano a casse, convinti che un giorno torneranno.', ch:[
+    {l:'Passi al disco nuovo', e:'Il suono è pulito, la copertina minuscola', f:function(){}},
+    {l:'Tieni il giradischi', e:'Un giorno ti daranno ragione', f:function(){}} ]},
+  {id:'lg90_rigore', era:'italia1990', registro:'leggero', cond:()=>S.year===1994&&stagioneMese()==='estate', kick:'Il paese', t:'La finale ai rigori', text:'La finale del mondiale si decide ai rigori, dall\'altra parte dell\'oceano, in una sera d\'estate: un pallone alto sopra la traversa, e un paese intero che spegne la televisione in silenzio.', ch:[
+    {l:'Resti sveglio a commentare', e:'Si commenta fino all\'alba, a bassa voce', f:function(){}},
+    {l:'Vai a dormire', e:'Il giorno dopo nessuno parla d\'altro', f:function(){}} ]},
+
+  {id:'lg00_monete', era:'italia2000', registro:'leggero', cond:()=>S.year===2002, kick:'Il paese', t:'Le monete nuove', text:'Il portafoglio cambia in una notte: monete che non si riconoscono, banconote tutte uguali, e per mesi ogni prezzo si ritraduce nella moneta vecchia, «per capire».', ch:[
+    {l:'Fai i conti nella moneta vecchia', e:'Ancora per anni, come tutti', f:function(){}},
+    {l:'Ti abitui subito', e:'Il caffè, però, costa di più', f:function(){}} ]},
+  {id:'lg00_blog', era:'italia2000', registro:'leggero', cond:()=>S.year>=2004, kick:'Il paese', t:'Il diario in rete', text:'Tutti scrivono un diario in rete: il vicino racconta le sue ricette, il nipote le sue opinioni sul mondo, e qualcuno, ogni tanto, legge.', ch:[
+    {l:'Ne apri uno anche tu', e:'Tre lettori: due sono parenti', f:function(){}},
+    {l:'Leggi quello del nipote', e:'Ha opinioni anche su di te', f:function(){}} ]},
+  {id:'lg00_ritrovati', era:'italia2000', registro:'leggero', cond:()=>S.year>=2008, kick:'Il paese', t:'I compagni ritrovati', text:'Un sito rimette in contatto i vecchi compagni di classe: richieste di amicizia dopo trent\'anni, foto delle gite riesumate, e una cena di classe che nessuno voleva davvero.', ch:[
+    {l:'Vai alla cena di classe', e:'Tutti uguali, tranne i capelli', f:function(){}},
+    {l:'Ignori le richieste', e:'Ti ritrovi comunque in una foto del liceo', f:function(){}} ]},
+  {id:'lg00_mp3', era:'italia2000', registro:'leggero', cond:()=>S.year>=2003, kick:'Il paese', t:'Mille canzoni in tasca', text:'Un lettore grande come un accendino contiene più musica di tutti i dischi di casa: gli auricolari spuntano su ogni autobus.', ch:[
+    {l:'Ti fai riempire il lettore dai figli', e:'Scopri generi che non sapevi esistessero', f:function(){}},
+    {l:'Resti alla radio', e:'Almeno lì qualcuno sceglie per te', f:function(){}} ]},
+  {id:'lg00_decoder', era:'italia2000', registro:'leggero', cond:()=>S.year>=2009, kick:'Il paese', t:'Il decoder', text:'La televisione passa al digitale, e in ogni casa arriva una scatoletta con un telecomando in più: i nipoti fanno la sintonia, i nonni perdono il loro canale.', ch:[
+    {l:'Fai la sintonia ai nonni', e:'Il canale torna, al numero 527', f:function(){}},
+    {l:'Lasci fare al tecnico', e:'Il tecnico arriva fra tre settimane', f:function(){}} ]},
+  {id:'lg00_giapponese', era:'italia2000', registro:'leggero', cond:()=>S.year>=2005, kick:'Il paese', t:'Il ristorante giapponese', text:'In centro apre il primo ristorante di pesce crudo: i giovani ci vanno il sabato, i vecchi lo guardano con sospetto dalla vetrina.', ch:[
+    {l:'Ci provi', e:'Le bacchette, al terzo boccone, quasi', f:function(){}},
+    {l:'Resti alla trattoria', e:'Il pesce, lì, è cotto', f:function(){}} ]},
+  {id:'lg00_apericena', era:'italia2000', registro:'leggero', cond:()=>S.year>=2006, kick:'Il paese', t:'L\'apericena', text:'Con un bicchiere si ha diritto al buffet: pasta fredda, focaccia, olive. Per molti ragazzi la cena del venerdì costa quanto un cocktail.', ch:[
+    {l:'Ti fermi anche tu', e:'Ceni in piedi, e paghi come da seduto', f:function(){}},
+    {l:'Torni a casa per cena', e:'La tradizione resiste', f:function(){}} ]},
+  {id:'lg00_digitale', era:'italia2000', registro:'leggero', cond:()=>S.year>=2003, kick:'Il paese', t:'La macchina fotografica digitale', text:'Niente più rullini da sviluppare: si scatta, si guarda, si cancella. Le vacanze tornano a casa con duemila foto che nessuno guarderà.', ch:[
+    {l:'Scatti a raffica', e:'Duemila foto, quattro belle', f:function(){}},
+    {l:'Tieni la macchina a rullino', e:'Trentasei pose, tutte pensate', f:function(){}} ]},
+  {id:'lg00_talent', era:'italia2000', registro:'leggero', cond:()=>S.year>=2006, kick:'Il paese', t:'Il talent show', text:'Ragazzi sconosciuti cantano davanti a una giuria severa e a un pubblico che vota da casa: il paese si divide su chi meritava di passare.', ch:[
+    {l:'Voti dal divano', e:'Il tuo preferito esce alla terza puntata', f:function(){}},
+    {l:'Cambi canale', e:'Il giorno dopo, al bar, ne parlano tutti', f:function(){}} ]},
+  {id:'lg00_annosanto', era:'italia2000', registro:'leggero', cond:()=>S.year===2000, kick:'Il paese', t:'L\'anno santo', text:'Pellegrini da tutto il mondo per l\'anno santo: la capitale è prima un cantiere e poi una processione, gli albergatori fanno i conti, i romani fanno lo slalom.', ch:[
+    {l:'Accogli un gruppo di pellegrini', e:'Ti regalano un rosario e una cartolina', f:function(){}},
+    {l:'Eviti il centro per un anno', e:'Missione quasi impossibile', f:function(){}} ]},
 
   // ---- Presente / universale ----
   {id:'lg_derby', era:'universale', registro:'leggero', kick:'Il paese', t:'Il derby divide la città', text:'Per una domenica la città si spacca in due colori, e nei bar non si parla d\'altro.', ch:[
@@ -11541,6 +11667,106 @@ const SFIDE=[
  {id:'uk70_inverno_q', era:'uk1970', codaFino:Infinity, paese:'regnounito', ruolo:'governo', diff:'media', cond:()=>S.year>=1979, q:'Che cosa fu l\'«inverno del malcontento» del 1978-79?',
   op:['Una stagione di scioperi nei servizi pubblici','Una crisi energetica','Un\'ondata di gelo eccezionale'], giusta:0,
   perche:'Le immagini di quell\'inverno pesarono sulle elezioni successive.'},
+ /* L168-2 · trentuno domande (la trentaduesima, uk80_q_privatizzazioni, tolta in integrazione: in 1985-86 dava per venduto il gas, venduto nel dicembre 1986) di GOVERNO britanniche (VARIETA-L168-UK.md): la banca del Regno Unito non ne aveva nessuna
+    per uk1980, uk1990, uk2000 e il presente. Le d'epoca con codaFino:Infinity come uk50_/uk60_/uk70_ e la cond d'anno;
+    le contemporanee di dopo il 2012 col dal (L155-4). */
+ // uk1980
+ {id:'uk80_q_comprare', era:'uk1980', codaFino:Infinity, paese:'regnounito', ruolo:'governo', diff:'media', cond:()=>S.year>=1981, q:'Che cosa diede agli inquilini delle case popolari la legge sulla casa del 1980?',
+  op:['Un affitto bloccato per dieci anni','Il diritto di scegliere il quartiere','Il diritto di comprare la casa in cui vivevano, con uno sconto'], giusta:2,
+  perche:'Con il «diritto di comprare» milioni di inquilini dei comuni diventarono proprietari, con uno sconto legato agli anni d\'affitto.'},   // Housing Act 1980
+ {id:'uk80_q_bigbang', era:'uk1980', codaFino:Infinity, paese:'regnounito', ruolo:'governo', diff:'difficile', cond:()=>S.year>=1987||(S.year===1986&&S.month>=11), q:'Che cosa fu il «Big Bang» della City di Londra nell\'ottobre 1986?',
+  op:['Un crollo improvviso della Borsa','La liberalizzazione della Borsa, con le contrattazioni passate agli schermi','L\'ingresso della sterlina nel cambio europeo'], giusta:1,
+  perche:'Il 27 ottobre 1986 caddero le commissioni fisse e le vecchie regole, e le contrattazioni passarono dalla sala agli schermi.'},
+ {id:'uk80_q_dublino', era:'uk1980', codaFino:Infinity, paese:'regnounito', ruolo:'governo', diff:'difficile', cond:()=>S.year>=1986, q:'Che cosa riconobbe al governo di Dublino l\'accordo anglo-irlandese del 1985?',
+  op:['L\'unificazione dell\'isola entro dieci anni','Il diritto di nominare il governatore di Belfast','Un ruolo consultivo negli affari dell\'Irlanda del Nord'], giusta:2,
+  perche:'L\'accordo del novembre 1985 diede a Dublino voce consultiva su Belfast, senza cambiare la sovranità.'},
+ {id:'uk80_q_hongkong', era:'uk1980', codaFino:Infinity, paese:'regnounito', ruolo:'governo', diff:'media', cond:()=>S.year>=1985, q:'Che cosa stabilì la dichiarazione firmata con la Cina nel dicembre 1984?',
+  op:['Che Hong Kong sarebbe tornata alla Cina nel 1997','Che Hong Kong sarebbe diventata indipendente','Che Hong Kong sarebbe rimasta britannica per altri cento anni'], giusta:0,
+  perche:'La dichiarazione congiunta fissò il ritorno di Hong Kong alla Cina il 1° luglio 1997.'},
+ {id:'uk80_q_tunnel', era:'uk1980', codaFino:Infinity, paese:'regnounito', ruolo:'governo', diff:'facile', cond:()=>S.year>=1986, q:'Che cosa decisero di costruire insieme, nel 1986, il Regno Unito e la Francia?',
+  op:['Un aereo supersonico','Un tunnel ferroviario sotto la Manica','Una centrale nucleare comune'], giusta:1,
+  perche:'Con il trattato di Canterbury del 1986 i due paesi decisero il tunnel sotto la Manica, aperto nel 1994.'},
+ {id:'uk80_q_rimborso', era:'uk1980', codaFino:Infinity, paese:'regnounito', ruolo:'governo', diff:'difficile', cond:()=>S.year>=1985, q:'Che cosa ottenne il Regno Unito al vertice europeo di Fontainebleau del 1984?',
+  op:['Un rimborso su una parte dei contributi versati al bilancio comunitario','L\'uscita dalla politica agricola comune','Il diritto di veto su ogni nuova legge'], giusta:0,
+  perche:'A Fontainebleau, nel giugno 1984, il paese ottenne il rimborso di due terzi dello squilibrio fra quanto versava e quanto riceveva.'},
+ {id:'uk80_q_attounico', era:'uk1980', codaFino:Infinity, paese:'regnounito', ruolo:'governo', diff:'media', cond:()=>S.year>=1987, q:'Che cosa voleva completare entro il 1992 l\'Atto unico europeo, firmato anche dal Regno Unito?',
+  op:['La moneta unica','L\'esercito europeo','Il mercato unico, con merci, servizi e capitali liberi'], giusta:2,
+  perche:'L\'Atto unico, in vigore dal 1987, fissò al 1992 il mercato unico senza frontiere interne.'},
+ // uk1990
+ {id:'uk90_q_polltax', era:'uk1990', codaFino:Infinity, paese:'regnounito', ruolo:'governo', diff:'media', cond:()=>S.year>=1990, q:'Che cos\'era la «poll tax», la tassa locale introdotta in Inghilterra nel 1990?',
+  op:['Un\'imposta sulle case di lusso','Una cifra uguale per ogni adulto, ricco o povero','Un\'imposta sui voti per posta'], giusta:1,
+  perche:'La tassa per testa prese il posto di quella sulla casa; le proteste la fecero sostituire nel 1993.'},   // community charge: Scozia 1989, Inghilterra e Galles aprile 1990; council tax dall'aprile 1993
+ {id:'uk90_q_mercoledi', era:'uk1990', codaFino:Infinity, paese:'regnounito', ruolo:'governo', diff:'media', cond:()=>S.year>=1993||(S.year===1992&&S.month>=10), q:'Che cosa accadde alla sterlina il «mercoledì nero» del settembre 1992?',
+  op:['Uscì dagli accordi europei di cambio','Fu sostituita da una moneta comune','Fu agganciata al dollaro'], giusta:0,
+  perche:'Il 16 settembre 1992, dopo una giornata di vendite, la sterlina lasciò il meccanismo di cambio europeo.'},
+ {id:'uk90_q_maastricht', era:'uk1990', codaFino:Infinity, paese:'regnounito', ruolo:'governo', diff:'difficile', cond:()=>S.year>=1992, q:'Che cosa ottenne il Regno Unito nel trattato di Maastricht?',
+  op:['La presidenza fissa della Commissione','Il diritto di restare fuori dalla moneta unica','L\'esenzione dal mercato unico'], giusta:1,
+  perche:'Con una clausola d\'esenzione il paese poté non adottare la moneta unica.'},   // trattato firmato il 7 febbraio 1992
+ {id:'uk90_q_venerdisanto', era:'uk1990', codaFino:Infinity, paese:'regnounito', ruolo:'governo', diff:'media', cond:()=>S.year>=1999||(S.year===1998&&S.month>=5), q:'Che cosa mise fine, nell\'aprile 1998, a trent\'anni di violenze in Irlanda del Nord?',
+  op:['Un trattato firmato alle Nazioni Unite','L\'accordo del Venerdì Santo','Il ritiro dell\'esercito in una notte'], giusta:1,
+  perche:'L\'accordo del Venerdì Santo, approvato con un referendum nelle due parti dell\'isola, creò un governo condiviso a Belfast.'},
+ {id:'uk90_q_devoluzione', era:'uk1990', codaFino:Infinity, paese:'regnounito', ruolo:'governo', diff:'media', cond:()=>S.year>=1998, q:'Che cosa approvarono Scozia e Galles nei referendum del 1997?',
+  op:['L\'indipendenza','L\'uscita dal Commonwealth','Un parlamento e un\'assemblea propri'], giusta:2,
+  perche:'Scozia e Galles votarono per un parlamento e un\'assemblea propri, eletti per la prima volta nel 1999.'},
+ {id:'uk90_q_tassi', era:'uk1990', codaFino:Infinity, paese:'regnounito', ruolo:'governo', diff:'difficile', cond:()=>S.year>=1998||(S.year===1997&&S.month>=6), q:'Che cosa ottenne la Banca d\'Inghilterra nel maggio 1997?',
+  op:['L\'indipendenza nel fissare i tassi d\'interesse','Il potere di stampare la moneta europea','La gestione delle pensioni pubbliche'], giusta:0,
+  perche:'Dal 1997 i tassi li decide un comitato della Banca centrale, non più il ministro del Tesoro.'},
+ {id:'uk90_q_salariominimo', era:'uk1990', codaFino:Infinity, paese:'regnounito', ruolo:'governo', diff:'facile', cond:()=>S.year>=2000||(S.year===1999&&S.month>=4), q:'Che cosa entrò in vigore per la prima volta in tutto il Regno Unito nell\'aprile 1999?',
+  op:['La settimana di 35 ore','La pensione a sessant\'anni per tutti','Il salario minimo nazionale'], giusta:2,
+  perche:'Il salario minimo nazionale partì il 1° aprile 1999.'},
+ {id:'uk90_q_lord', era:'uk1990', codaFino:Infinity, paese:'regnounito', ruolo:'governo', diff:'media', cond:()=>S.year>=2000, q:'Che cosa cambiò alla Camera dei Lord con la riforma del 1999?',
+  op:['Fu abolita','Persero il seggio quasi tutti i membri per diritto di nascita','Diventò elettiva'], giusta:1,
+  perche:'Dei membri ereditari ne restarono 92: gli altri seggi sono di nomina a vita.'},
+ // uk2000
+ {id:'uk00_q_sportelli', era:'uk2000', codaFino:Infinity, paese:'regnounito', ruolo:'governo', diff:'media', cond:()=>S.year>=2008||(S.year===2007&&S.month>=10), q:'Che cosa accadde nel settembre 2007 davanti agli sportelli di una grande banca del Nord dell\'Inghilterra?',
+  op:['La prima corsa agli sportelli del paese da oltre un secolo','Uno sciopero dei bancari','Il cambio delle banconote vecchie'], giusta:0,
+  perche:'I correntisti fecero la fila per ritirare i risparmi; la banca fu nazionalizzata nel febbraio 2008.'},
+ {id:'uk00_q_cinquetest', era:'uk2000', codaFino:Infinity, paese:'regnounito', ruolo:'governo', diff:'difficile', cond:()=>S.year>=2004||(S.year===2003&&S.month>=7), q:'Che cosa concluse il Tesoro britannico nel giugno 2003 sull\'ingresso nell\'euro?',
+  op:['Di entrare subito','Che i cinque test economici non erano ancora superati','Di indire un referendum entro un anno'], giusta:1,
+  perche:'Il Tesoro giudicò superato uno solo dei cinque test: la sterlina restò.'},
+ {id:'uk00_q_fumo', era:'uk2000', codaFino:Infinity, paese:'regnounito', ruolo:'governo', diff:'facile', cond:()=>S.year>=2008||(S.year===2007&&S.month>=7), q:'Che cosa vietò in Inghilterra la legge entrata in vigore nel luglio 2007?',
+  op:['La pubblicità degli alcolici in televisione','Il fumo nei locali pubblici chiusi','La vendita di sigarette ai minori di 21 anni'], giusta:1,
+  perche:'Dal 1° luglio 2007 in Inghilterra non si fuma più in pub, uffici e locali chiusi; la Scozia l\'aveva fatto un anno prima.'},
+ {id:'uk00_q_caccia', era:'uk2000', codaFino:Infinity, paese:'regnounito', ruolo:'governo', diff:'media', cond:()=>S.year>=2006||(S.year===2005&&S.month>=3), q:'Che cosa vietò in Inghilterra e Galles la legge in vigore dal febbraio 2005, dopo anni di proteste nelle campagne?',
+  op:['La caccia alla volpe con i cani','La pesca nei fiumi','I pesticidi nei campi'], giusta:0,
+  perche:'La legge sulla caccia del 2004 vietò di cacciare mammiferi selvatici con le mute di cani.'},
+ {id:'uk00_q_unionicivili', era:'uk2000', codaFino:Infinity, paese:'regnounito', ruolo:'governo', diff:'media', cond:()=>S.year>=2006, q:'Che cosa permise la legge sulle unioni civili in vigore dal dicembre 2005?',
+  op:['Il divorzio in tre mesi','Il matrimonio civile senza testimoni','Alle coppie dello stesso sesso di unirsi con diritti simili al matrimonio'], giusta:2,
+  perche:'Le unioni civili diedero alle coppie dello stesso sesso quasi gli stessi diritti del matrimonio.'},
+ {id:'uk00_q_rette', era:'uk2000', codaFino:Infinity, paese:'regnounito', ruolo:'governo', diff:'media', cond:()=>S.year>=2007, q:'Che cosa cambiò per gli studenti universitari inglesi dall\'autunno 2006?',
+  op:['Rette fino a 3.000 sterline l\'anno, pagate dopo la laurea con un prestito','L\'università gratuita per tutti','Un esame d\'ingresso unico nazionale'], giusta:0,
+  perche:'Le rette salirono fino a 3.000 sterline, da restituire solo quando lo stipendio supera una soglia.'},
+ {id:'uk00_q_belfast', era:'uk2000', codaFino:Infinity, paese:'regnounito', ruolo:'governo', diff:'difficile', cond:()=>S.year>=2008||(S.year===2007&&S.month>=6), q:'Che cosa riprese a Belfast nel maggio 2007?',
+  op:['Il controllo diretto di Londra','Il coprifuoco','Il governo condiviso fra unionisti e repubblicani'], giusta:2,
+  perche:'L\'8 maggio 2007, dopo quasi cinque anni di sospensione, tornò il governo condiviso dell\'Irlanda del Nord.'},
+ {id:'uk00_q_salvataggio', era:'uk2000', codaFino:Infinity, paese:'regnounito', ruolo:'governo', diff:'media', cond:()=>S.year>=2009||(S.year===2008&&S.month>=11), q:'Che cosa fece il governo britannico nell\'ottobre 2008, nel pieno della crisi finanziaria?',
+  op:['Lasciò fallire le banche in perdita','Mise capitale pubblico nelle grandi banche per salvarle','Chiuse la Borsa per un mese'], giusta:1,
+  perche:'Nell\'ottobre 2008 lo Stato entrò nel capitale delle grandi banche in difficoltà, diventandone in parte proprietario.'},
+ // contemporanea (il presente, e dal 2012 la linea storica)
+ {id:'ukc_brexit', era:'contemporanea', paese:'regnounito', ruolo:'governo', diff:'facile', dal:2017, q:'Che cosa decise il referendum britannico del giugno 2016?',
+  op:['L\'indipendenza della Scozia','L\'abolizione della monarchia','L\'uscita dall\'Unione europea'], giusta:2,
+  perche:'Il 23 giugno 2016 il 52% votò per lasciare l\'Unione europea.'},
+ {id:'ukc_uscita', era:'contemporanea', paese:'regnounito', ruolo:'governo', diff:'media', dal:2020, q:'Quando il Regno Unito è uscito formalmente dall\'Unione europea?',
+  op:['Il giorno dopo il referendum, nel 2016','Il 31 gennaio 2020','Non è mai uscito formalmente'], giusta:1,
+  perche:'Il paese è uscito il 31 gennaio 2020; il periodo di transizione è finito a dicembre.'},
+ {id:'ukc_scozia', era:'contemporanea', paese:'regnounito', ruolo:'governo', diff:'media', dal:2015, q:'Come finì il referendum sull\'indipendenza della Scozia del settembre 2014?',
+  op:['Vinse il no: la Scozia restò nel Regno Unito','Vinse il sì, ma Londra non lo riconobbe','Non si votò: fu rinviato'], giusta:0,
+  perche:'Il no vinse con il 55%: la Scozia restò nel Regno Unito.'},
+ {id:'ukc_matrimonio', era:'contemporanea', paese:'regnounito', ruolo:'governo', diff:'media', dal:2015, q:'Da quando le coppie dello stesso sesso possono sposarsi in Inghilterra e Galles?',
+  op:['Dal 1967','Non possono ancora','Dal 2014'], giusta:2,
+  perche:'I primi matrimoni fra persone dello stesso sesso in Inghilterra e Galles sono del marzo 2014.'},
+ {id:'ukc_sanita', era:'contemporanea', paese:'regnounito', ruolo:'governo', diff:'facile', q:'Come si finanzia soprattutto il servizio sanitario nazionale britannico?',
+  op:['Con le tasse generali','Con assicurazioni private obbligatorie','Con un ticket fisso per ogni visita'], giusta:0,
+  perche:'Dal 1948 il servizio sanitario si paga con le imposte ed è gratuito nel momento della cura.'},
+ {id:'ukc_voto2011', era:'contemporanea', paese:'regnounito', ruolo:'governo', diff:'difficile', q:'Che cosa respinsero gli elettori britannici nel referendum del maggio 2011?',
+  op:['L\'abolizione della Camera dei Lord','Un nuovo sistema elettorale, con i candidati messi in ordine di preferenza','L\'ingresso nell\'euro'], giusta:1,
+  perche:'Due elettori su tre dissero no al voto alternativo: i Comuni restarono al maggioritario a turno unico.'},
+ {id:'ukc_lord', era:'contemporanea', paese:'regnounito', ruolo:'governo', diff:'media', q:'Come entra oggi alla Camera dei Lord la gran parte dei suoi membri?',
+  op:['Per elezione popolare','Per estrazione a sorte fra i cittadini','Per nomina a vita'], giusta:2,
+  perche:'Quasi tutti i Lord sono nominati a vita; i seggi ereditari sono pochi e i vescovi ventisei.'},
+ {id:'ukc_clima', era:'contemporanea', paese:'regnounito', ruolo:'governo', diff:'media', dal:2020, q:'Quale obiettivo ha fissato per legge il Regno Unito nel 2019?',
+  op:['Zero emissioni nette di gas serra entro il 2050','Il divieto dei voli sotto i 500 chilometri','La chiusura di tutte le centrali nucleari'], giusta:0,
+  perche:'Nel giugno 2019 il paese è stato la prima grande economia a scrivere in legge le emissioni nette zero al 2050.'},
  /* L45-1 · le SFIDE degli anni 2000 (scheda §CONTENUTO PRONTO-2 B). `codaFino:Infinity` come le altre della
     banca: una domanda di storia resta valida anche dopo la coda del decennio che racconta. */
  {id:'i00_cambio', era:'italia2000', codaFino:Infinity, paese:'italia', ruolo:'governo', diff:'facile', cond:()=>S.year>=2002, q:'A quante lire corrisponde un euro al cambio fissato?',
@@ -11596,6 +11822,128 @@ const SFIDE=[
  {id:'u_sdg', dal:2015, era:'contemporanea', ruolo:'intl', diff:'facile', q:'Cosa sono gli Obiettivi di Sviluppo Sostenibile dell\'ONU?',
   op:['I 17 obiettivi dell\'Agenda 2030','Un trattato di libero scambio','Le regole del Consiglio di Sicurezza'], giusta:0,
   perche:'Sono i 17 obiettivi dell\'Agenda 2030, adottati dall\'ONU nel 2015 per sviluppo e ambiente.'},   // contemporanea (adottati 2015)
+ /* L167-1 · quaranta domande INTERNAZIONALI per tutti i paesi (VARIETA-L167-INTL.md): ruolo 'intl' (sfida al vertice
+    L4-L5 e intervista da L4), nessun paese; le universali sono vere dal 1950, e dove il fatto è di dopo la cond sull'anno. */
+ {id:'u_i_ginevra', era:'universale', ruolo:'intl', diff:'media', q:'Che cosa regolano le Convenzioni di Ginevra del 1949?',
+  op:['Il commercio delle armi fra gli Stati','Il trattamento di feriti, prigionieri e civili in guerra','La navigazione nei porti neutrali'], giusta:1,
+  perche:'Le quattro Convenzioni di Ginevra proteggono chi non combatte o non combatte più.'},   // Convenzioni di Ginevra I-IV, 12 agosto 1949
+ {id:'u_i_onu_paese', era:'universale', ruolo:'intl', diff:'facile', q:'In quale paese ha sede il quartier generale dell\'ONU?',
+  op:['Negli Stati Uniti','In Svizzera','In Francia'], giusta:0,
+  perche:'Il quartier generale dell\'ONU è a New York, negli Stati Uniti; a Ginevra c\'è una sede distaccata.'},   // sede provvisoria a Lake Success (NY) dal 1946, palazzo di Manhattan dal 1952
+ {id:'u_i_assemblea', era:'universale', ruolo:'intl', diff:'media', q:'Quanti voti ha ogni Stato nell\'Assemblea generale dell\'ONU?',
+  op:['In proporzione agli abitanti','In proporzione ai contributi versati','Uno ciascuno'], giusta:2,
+  perche:'Nell\'Assemblea generale ogni Stato membro, grande o piccolo, ha un voto.'},   // Carta ONU art. 18
+ {id:'u_i_segretario', era:'universale', ruolo:'intl', diff:'media', q:'Chi dirige l\'amministrazione delle Nazioni Unite?',
+  op:['Il presidente del Consiglio di Sicurezza','Il Segretario generale','Il presidente della Corte internazionale di giustizia'], giusta:1,
+  perche:'Il Segretario generale è il più alto funzionario dell\'ONU e ne guida il Segretariato.'},   // Carta ONU art. 97
+ {id:'u_i_immunita', era:'universale', ruolo:'intl', diff:'media', q:'Che cos\'è l\'immunità diplomatica?',
+  op:['La protezione di un diplomatico dai tribunali del paese che lo ospita','Il diritto di un diplomatico a non pagare le multe nel proprio paese','L\'esenzione dal servizio militare per i figli dei diplomatici'], giusta:0,
+  perche:'Il diplomatico accreditato non può essere arrestato né processato dal paese ospite.'},   // consuetudine, codificata dalla Convenzione di Vienna 1961 art. 29-31
+ {id:'u_i_nongrata', era:'universale', ruolo:'intl', diff:'media', q:'Che cosa può fare uno Stato con un diplomatico straniero sgradito?',
+  op:['Processarlo davanti ai propri giudici','Chiedere al suo paese di sostituirlo con un voto dell\'ONU','Dichiararlo «persona non grata» e chiederne la partenza'], giusta:2,
+  perche:'Lo Stato ospite può dichiarare un diplomatico persona non grata senza dover spiegare perché.'},   // consuetudine; Convenzione di Vienna 1961 art. 9
+ {id:'u_i_ambasciata', era:'universale', ruolo:'intl', diff:'facile', q:'Come si chiama la rappresentanza di uno Stato nella capitale di un altro Stato?',
+  op:['La prefettura','L\'ambasciata','La dogana'], giusta:1,
+  perche:'L\'ambasciata è la missione diplomatica di uno Stato presso il governo di un altro.'},
+ {id:'u_i_consolato', era:'universale', ruolo:'intl', diff:'media', q:'Di che cosa si occupa soprattutto un consolato?',
+  op:['Di assistere i propri cittadini all\'estero, con passaporti e documenti','Di trattare le alleanze militari','Di riscuotere i dazi alla frontiera'], giusta:0,
+  perche:'Il consolato serve i propri cittadini che vivono o viaggiano all\'estero.'},   // Convenzione di Vienna sulle relazioni consolari 1963 art. 5 (prassi più antica)
+ {id:'u_i_ratifica', era:'universale', ruolo:'intl', diff:'media', q:'Che cosa vuol dire «ratificare» un trattato?',
+  op:['Discuterne il testo con l\'altro Stato','Annunciarlo alla stampa','Accettare formalmente di esserne vincolati, di solito dopo il voto del parlamento'], giusta:2,
+  perche:'Con la ratifica lo Stato si impegna davvero: la firma da sola di solito non basta.'},
+ {id:'u_i_dichiarazione', era:'universale', ruolo:'intl', diff:'media', q:'Che cosa adottò l\'Assemblea generale dell\'ONU nel dicembre 1948?',
+  op:['Il primo trattato sul disarmo','La Dichiarazione universale dei diritti umani','La carta della Corte dell\'Aia'], giusta:1,
+  perche:'La Dichiarazione universale dei diritti umani fu adottata a Parigi il 10 dicembre 1948.'},   // ris. AG 217 A (III)
+ {id:'u_i_unicef', era:'universale', ruolo:'intl', diff:'media', q:'Di chi si occupa l\'UNICEF?',
+  op:['Dei bambini','Dei rifugiati di guerra','Dei lavoratori migranti'], giusta:0,
+  perche:'L\'UNICEF è il fondo delle Nazioni Unite per l\'infanzia.'},   // istituito dall'AG nel 1946
+ {id:'u_i_oms', era:'universale', ruolo:'intl', diff:'facile', q:'Di che cosa si occupa l\'Organizzazione mondiale della sanità?',
+  op:['Del commercio dei farmaci fra gli Stati','Della salute','Delle assicurazioni dei lavoratori'], giusta:1,
+  perche:'L\'OMS è l\'agenzia delle Nazioni Unite per la salute pubblica.'},   // costituzione in vigore dal 1948, sede Ginevra
+ {id:'u_i_fao', era:'universale', ruolo:'intl', diff:'media', cond:()=>S.year>=1951, q:'In quale città ha sede la FAO, l\'agenzia dell\'ONU per l\'alimentazione e l\'agricoltura?',
+  op:['A Ginevra','A Vienna','A Roma'], giusta:2,
+  perche:'La FAO ha sede a Roma dal 1951.'},   // FAO a Washington 1945-1951, poi Roma
+ {id:'u_i_unesco', era:'universale', ruolo:'intl', diff:'difficile', q:'In quale città ha sede l\'UNESCO, l\'agenzia dell\'ONU per l\'educazione, la scienza e la cultura?',
+  op:['A Parigi','A Bruxelles','A Londra'], giusta:0,
+  perche:'L\'UNESCO ha sede a Parigi fin dalla sua nascita, nel 1945-46.'},
+ {id:'u_i_crocerossa', era:'universale', ruolo:'intl', diff:'media', q:'In quale città ha sede il Comitato internazionale della Croce Rossa?',
+  op:['A Vienna','A Ginevra','A Stoccolma'], giusta:1,
+  perche:'Il Comitato internazionale della Croce Rossa è nato a Ginevra e ha lì la sua sede.'},   // fondato nel 1863
+ {id:'u_i_aiea', era:'universale', ruolo:'intl', diff:'difficile', cond:()=>S.year>=1957, q:'In quale città ha sede l\'Agenzia internazionale per l\'energia atomica?',
+  op:['A Ginevra','A New York','A Vienna'], giusta:2,
+  perche:'L\'Agenzia internazionale per l\'energia atomica, nata nel 1957, ha sede a Vienna.'},
+ {id:'u_i_caschiblu', era:'universale', ruolo:'intl', diff:'media', cond:()=>S.year>=1957, q:'Come si chiamano i soldati delle missioni di pace dell\'ONU?',
+  op:['I caschi blu','Le guardie svizzere','Le truppe alpine'], giusta:0,
+  perche:'I soldati delle forze di pace dell\'ONU portano elmetti e berretti blu.'},   // la prima forza armata di pace è l'UNEF, novembre 1956
+ {id:'u_i_quindici', era:'universale', ruolo:'intl', diff:'difficile', cond:()=>S.year>=1966, q:'Quanti membri siedono, in tutto, nel Consiglio di Sicurezza dell\'ONU?',
+  op:['Cinque','Quindici','Cinquanta'], giusta:1,
+  perche:'Il Consiglio ha quindici membri: cinque permanenti e dieci eletti per due anni.'},   // Carta art. 23 emendato nel 1963, in vigore dal 1965; Consiglio a 15 dal 1966 (prima 11)
+ {id:'u_i_votocontro', era:'universale', ruolo:'intl', diff:'difficile', q:'Che cosa deve fare un membro permanente del Consiglio di Sicurezza per bloccare una risoluzione?',
+  op:['Astenersi','Non presentarsi al voto','Votare contro'], giusta:2,
+  perche:'Il veto è un voto contrario di un membro permanente; l\'astensione, per prassi, non blocca.'},   // Carta art. 27.3 e prassi del Consiglio dal 1946
+ {id:'u_i_territorio', era:'universale', ruolo:'intl', diff:'difficile', q:'Un\'ambasciata straniera è territorio del paese che rappresenta?',
+  op:['Sì, a tutti gli effetti','No: resta territorio del paese che la ospita, ma è inviolabile','Solo in tempo di guerra'], giusta:1,
+  perche:'L\'ambasciata non è un pezzo di un altro Stato: è inviolabile, e la polizia locale non può entrarvi senza permesso.'},   // Convenzione di Vienna 1961 art. 22 (consuetudine prima)
+ {id:'u_i_valigia', era:'universale', ruolo:'intl', diff:'difficile', q:'Che cos\'è la «valigia diplomatica»?',
+  op:['Il plico che un\'ambasciata spedisce e riceve senza che il paese ospite possa aprirlo','Il bagaglio personale dell\'ambasciatore in vacanza','Il fondo spese di un\'ambasciata'], giusta:0,
+  perche:'La valigia diplomatica non può essere aperta né trattenuta dal paese ospite.'},   // Convenzione di Vienna 1961 art. 27 (consuetudine prima)
+ {id:'u_i_neutrale', era:'universale', ruolo:'intl', diff:'media', q:'Quale di questi paesi europei è per tradizione neutrale e non fa parte dell\'Alleanza Atlantica?',
+  op:['Il Belgio','La Norvegia','La Svizzera'], giusta:2,
+  perche:'La Svizzera è neutrale da secoli e non è mai entrata nell\'Alleanza Atlantica.'},   // Belgio e Norvegia fondatori della NATO, 1949
+ {id:'u_i_embargo', era:'universale', ruolo:'intl', diff:'media', q:'Che cos\'è un embargo?',
+  op:['Una tassa sulle merci importate','Il divieto di commerciare, in tutto o in parte, con un paese','Un prestito fra due governi'], giusta:1,
+  perche:'L\'embargo vieta gli scambi con un paese, spesso per fare pressione sul suo governo.'},
+ {id:'u_i_trattato', era:'universale', ruolo:'intl', diff:'facile', q:'Che cos\'è un trattato internazionale?',
+  op:['Un accordo scritto fra Stati, che li impegna','Una legge che l\'ONU vota per tutti i paesi','Il verbale di un vertice'], giusta:0,
+  perche:'Il trattato è un accordo fra Stati, scritto, che obbliga chi lo ratifica.'},   // Convenzione di Vienna sul diritto dei trattati 1969 (consuetudine prima); u_dazio c'è già fra le sfide di governo
+ {id:'u_i_gatt', era:'universale', ruolo:'intl', diff:'difficile', q:'Quale accordo, firmato a Ginevra nel 1947, si propone di abbassare i dazi fra i paesi aderenti?',
+  op:['La Carta atlantica','Il Piano Marshall','L\'Accordo generale sulle tariffe e il commercio'], giusta:2,
+  perche:'L\'Accordo generale sulle tariffe e il commercio (GATT) del 1947 abbassa i dazi a forza di negoziati.'},   // GATT 30 ottobre 1947; dal 1995 assorbito nell'OMC, ancora in vigore
+ {id:'u_i_bretton', era:'universale', ruolo:'intl', diff:'difficile', q:'Dove si decisero, nel 1944, le regole monetarie del dopoguerra?',
+  op:['A Bretton Woods, negli Stati Uniti','A Jalta, in Crimea','A Potsdam, in Germania'], giusta:0,
+  perche:'La conferenza di Bretton Woods del luglio 1944 creò il Fondo monetario e la Banca mondiale.'},
+ {id:'u_i_vertice', era:'universale', ruolo:'intl', diff:'facile', q:'Che cos\'è un «vertice» in politica internazionale?',
+  op:['Una riunione di ambasciatori in pensione','Il punto più alto di una crisi','Un incontro fra capi di Stato o di governo'], giusta:2,
+  perche:'Si chiama vertice l\'incontro diretto fra i massimi responsabili dei paesi.'},
+ {id:'u_i_richiamo', era:'universale', ruolo:'intl', diff:'media', q:'Che cosa segnala un governo quando richiama il suo ambasciatore «per consultazioni»?',
+  op:['Una promozione dell\'ambasciatore','Una protesta verso il paese che lo ospitava','La chiusura delle frontiere'], giusta:1,
+  perche:'Il richiamo per consultazioni è un gesto di protesta, un gradino prima della rottura.'},
+ {id:'u_i_asilo', era:'universale', ruolo:'intl', diff:'media', q:'Che cos\'è l\'asilo politico?',
+  op:['La protezione che uno Stato concede a chi è perseguitato nel suo paese','Il permesso di lavoro stagionale','La scuola per i figli dei diplomatici'], giusta:0,
+  perche:'L\'asilo protegge chi rischia la persecuzione per le sue idee, la sua fede o la sua origine.'},   // Dichiarazione universale 1948 art. 14
+ {id:'u_i_rifugiati', era:'universale', ruolo:'intl', diff:'difficile', cond:()=>S.year>=1951, q:'In quale anno fu firmata a Ginevra la Convenzione sullo status dei rifugiati?',
+  op:['Nel 1919','Nel 1975','Nel 1951'], giusta:2,
+  perche:'La Convenzione di Ginevra sui rifugiati è del luglio 1951.'},
+ {id:'u_i_miglia', era:'universale', ruolo:'intl', diff:'difficile', cond:()=>S.year>=1982, q:'Fino a quante miglia dalla costa arrivano le acque territoriali, secondo la Convenzione dell\'ONU sul diritto del mare?',
+  op:['Tre','Dodici','Duecento'], giusta:1,
+  perche:'La Convenzione del 1982 fissa le acque territoriali a dodici miglia marine; duecento è la zona economica.'},   // UNCLOS 1982 art. 3 e 57
+ {id:'u_i_carta', era:'universale', ruolo:'intl', diff:'difficile', q:'In quale città fu firmata, nel giugno 1945, la Carta delle Nazioni Unite?',
+  op:['A Ginevra','A Londra','A San Francisco'], giusta:2,
+  perche:'La Carta dell\'ONU fu firmata a San Francisco il 26 giugno 1945.'},
+ {id:'u_i_antartide', era:'universale', ruolo:'intl', diff:'difficile', cond:()=>S.year>=1960, q:'Che cosa stabilisce il Trattato sull\'Antartide del 1959?',
+  op:['La divisione del continente fra sette Stati','Che il continente si usa solo per scopi pacifici e per la ricerca','Il diritto di pesca esclusivo dei paesi più vicini'], giusta:1,
+  perche:'Il Trattato del 1959 vieta le basi militari in Antartide e la riserva alla scienza.'},   // firmato a Washington il 1 dicembre 1959
+ {id:'u_i_cerimoniale', era:'universale', ruolo:'intl', diff:'facile', q:'Quale ufficio del ministero degli Esteri cura le visite ufficiali, le precedenze e le cerimonie?',
+  op:['La ragioneria','L\'ufficio legislativo','Il cerimoniale'], giusta:2,
+  perche:'Il cerimoniale (o protocollo) organizza visite, ricevimenti e ordine delle precedenze.'},
+ {id:'u_i_estradizione', era:'universale', ruolo:'intl', diff:'media', q:'Che cos\'è l\'estradizione?',
+  op:['La consegna di un ricercato da uno Stato a un altro che lo vuole processare','L\'espulsione di un diplomatico','Il ritiro della cittadinanza'], giusta:0,
+  perche:'Con l\'estradizione uno Stato consegna una persona alla giustizia di un altro, di solito in base a un trattato.'},
+ {id:'u_i_cpi', era:'contemporanea', ruolo:'intl', diff:'difficile', q:'Chi giudica la Corte penale internazionale dell\'Aia?',
+  op:['Gli Stati che violano un trattato','Le persone accusate di genocidio, crimini di guerra e contro l\'umanità','Le imprese che inquinano i mari'], giusta:1,
+  perche:'La Corte penale internazionale giudica persone, non Stati; le liti fra Stati vanno alla Corte internazionale di giustizia.'},   // Statuto di Roma 1998, Corte attiva dal 2002
+ {id:'u_i_g20', era:'contemporanea', ruolo:'intl', diff:'media', q:'Che cos\'è il G20?',
+  op:['Il forum dei governi delle maggiori economie del mondo','Un\'alleanza militare di venti paesi','Il gruppo dei venti paesi più poveri del mondo'], giusta:0,
+  perche:'Il G20 riunisce le maggiori economie del mondo, e dal 2008 anche i loro capi di governo.'},
+ {id:'u_i_parigi', dal:2015, era:'contemporanea', ruolo:'intl', diff:'media', q:'A che cosa impegna gli Stati l\'Accordo di Parigi del 2015?',
+  op:['A tenere il riscaldamento globale ben sotto i due gradi','A vietare le auto a benzina','A dividere a metà i fondi dell\'ONU'], giusta:0,
+  perche:'L\'Accordo di Parigi punta a tenere il riscaldamento ben sotto i 2 gradi, possibilmente a 1,5.'},   // dal:2015 (L155-4)
+ {id:'u_i_193', era:'contemporanea', ruolo:'intl', diff:'media', q:'Quanti sono oggi gli Stati membri dell\'ONU?',
+  op:['Una cinquantina','Centonovantatré','Più di trecento'], giusta:1,
+  perche:'Con il Sudan del Sud, nel 2011, gli Stati membri dell\'ONU sono diventati 193.'},   // contemporanea: vero dal 2011, la linea storica lo apre nel 2012
+ {id:'u_i_omc', era:'contemporanea', ruolo:'intl', diff:'media', q:'Di che cosa si occupa l\'Organizzazione mondiale del commercio?',
+  op:['Del prezzo del petrolio','Dei brevetti dei farmaci e basta','Delle regole del commercio fra gli Stati e delle loro liti'], giusta:2,
+  perche:'L\'OMC, nata nel 1995, fissa le regole degli scambi e risolve le controversie commerciali.'},
  {id:'i50_schuman', era:'italia1950', ruolo:'intl', diff:'difficile', cond:()=>S.year>=1951, q:'Che cos\'era il Piano Schuman del 1950?',
   op:['La proposta di mettere in comune carbone e acciaio','Un piano di aiuti militari all\'Italia','Un accordo per stabilizzare la lira'], giusta:0,
   perche:'La dichiarazione Schuman del 9 maggio 1950 propose di mettere in comune carbone e acciaio: nacque così la CECA.'},   // italia1950, ancora ≥1951 (dichiarazione 9 mag 1950 → evita l'uscita prima del fatto)
@@ -13473,6 +13821,13 @@ const TITOLI=[
  {id:'ti_uk60_luna', era:'uk1960', pri:1, cond:()=>S.year===1969&&S.month>=7&&S.month<=8, amico:'Un uomo sulla Luna', ostile:'Un uomo sulla Luna, e quaggiù la sterlina'},
  {id:'ti_uk60_decimale', era:'uk1960', cond:()=>S.year>=1966, amico:'Cento penny per una sterlina', ostile:'Cento penny per una sterlina: e i conti da rifare'},
  {id:'ti_uk60_liverpool', era:'uk1960', cond:()=>S.year>=1963, amico:'I quattro di Liverpool riempiono i teatri', ostile:'I quattro di Liverpool: i giornali contano i biglietti'},
+ // uk1960 — L167-2 · titoli di stato senza pri (VARIETA-L167-TITOLI-UK.md)
+ {id:'ti_uk60_s_tecnologia', era:'uk1960', amico:'La rivoluzione tecnologica: il paese si rimette a correre', ostile:'La rivoluzione tecnologica: e le fabbriche restano quelle di prima'},
+ {id:'ti_uk60_s_binari', era:'uk1960', cond:()=>S.year>=1963, amico:'Le linee secondarie chiudono: il treno si fa moderno', ostile:'Le linee secondarie chiudono: i paesi restano a piedi'},
+ {id:'ti_uk60_s_torri', era:'uk1960', amico:'Le torri nuove al posto delle case malsane', ostile:'Le torri nuove: e nessuno ha chiesto a chi ci va ad abitare'},
+ {id:'ti_uk60_s_reparti', era:'uk1960', amico:'Gli accordi di reparto: in fabbrica si tratta', ostile:'Scioperi a sorpresa: si ferma un reparto, si ferma la fabbrica'},
+ {id:'ti_uk60_s_costumi', era:'uk1960', cond:()=>S.year>=1965, amico:'La società cambia, le leggi la seguono', ostile:'La società cambia troppo in fretta, protestano le chiese'},
+ {id:'ti_uk60_s_oriente', era:'uk1960', cond:()=>S.year>=1967, amico:'Le basi d\'Oriente tornano a casa: si risparmia', ostile:'Le basi d\'Oriente tornano a casa: un impero chiude bottega'},
  /* ---- L58-1bis · i 16 titoli del decennio inglese '70 (scheda PRESET-UK-1970 §F) ---- */
  {id:'ti_uk70_decimale', era:'uk1970', cond:()=>S.year>=1971, amico:'Cento penny per una sterlina, da lunedì', ostile:'Cento penny per una sterlina: e i conti da rifare a mano'},
  {id:'ti_uk70_mercato', era:'uk1970', pri:1, cond:()=>S.europa70==='dentro'||S.europa70==='confermato', amico:'Dentro il mercato comune', ostile:'Dentro il mercato comune: e il partito diviso in due'},
@@ -13493,6 +13848,13 @@ const TITOLI=[
  {id:'ti_uk70_assemblee', era:'uk1970', cond:()=>S.year>=1976, amico:'Assemblee rimandate: se ne riparla a mente fredda', ostile:'Assemblee rimandate'},
  {id:'ti_uk70_derry', era:'uk1970', pri:1, cond:()=>S.year===1972&&S.month<=4, amico:'Tredici morti a Derry: il governo promette un\'inchiesta', ostile:'Tredici morti a Derry'},
  {id:'ti_uk70_donna', era:'uk1970', pri:1, cond:()=>S.year>=1979&&(S.year>1979||S.month>=5), amico:'Downing Street, per la prima volta una donna', ostile:'Downing Street, per la prima volta una donna: e un\'idea nuova di economia'},
+ // uk1970 — L167-2 · titoli di stato senza pri (VARIETA-L167-TITOLI-UK.md)
+ {id:'ti_uk70_s_patto', era:'uk1970', amico:'I sindacati al tavolo: il patto sociale regge', ostile:'I sindacati dettano l\'agenda al governo'},
+ {id:'ti_uk70_s_salvataggi', era:'uk1970', amico:'Lo Stato salva le grandi fabbriche', ostile:'Lo Stato salva le grandi fabbriche: anatre zoppe a spese di tutti'},
+ {id:'ti_uk70_s_ulster', era:'uk1970', amico:'Ulster: un altro mese, e le trattative continuano', ostile:'Ulster: un altro mese di pattuglie e di paura'},
+ {id:'ti_uk70_s_paga', era:'uk1970', cond:()=>S.year>=1975, amico:'La stessa paga per le donne: è legge', ostile:'La stessa paga per le donne: sulla carta'},
+ {id:'ti_uk70_s_fluttua', era:'uk1970', cond:()=>S.year>=1972, amico:'La sterlina libera di fluttuare: l\'export ringrazia', ostile:'La sterlina scivola, ogni giorno un po\''},
+ {id:'ti_uk70_s_scuole', era:'uk1970', amico:'La scuola unica arriva in ogni contea', ostile:'La scuola unica: i vecchi licei chiudono uno dopo l\'altro'},
  {id:'ti_uk50_tessere', era:'uk1950', cond:()=>S.year<=1954, amico:'Le ultime tessere bruciate: la normalità torna a pezzi', ostile:'Ancora in coda per la carne: la normalità si fa attendere'},
  {id:'ti_uk50_incoronazione', era:'uk1950', pri:1, cond:()=>S.year===1953&&S.month>=5&&S.month<=7, amico:'L\'Incoronazione in ogni salotto', ostile:'L\'Incoronazione in ogni salotto, il conto in ogni bilancio'},
  {id:'ti_uk50_everest', era:'uk1950', pri:1, cond:()=>S.year===1953, amico:'L\'Everest è nostro', ostile:'L\'Everest è nostro: e quaggiù?'},
@@ -13509,6 +13871,22 @@ const TITOLI=[
  {id:'ti_uk50_autostrada', era:'uk1950', cond:()=>S.year>=1958, amico:'Autostrada, nessun limite: il paese si accorcia', ostile:'Autostrada, nessun limite: e nessun bilancio'},
  {id:'ti_uk50_mini', era:'uk1950', cond:()=>S.year>=1959, amico:'Una macchina piccola per tutti', ostile:'Una macchina piccola per tutti, una casa per pochi'},
  {id:'ti_uk50_teddy', era:'uk1950', cond:()=>S.year>=1954, amico:'I ragazzi in giacca edoardiana: il paese cambia pelle', ostile:'I ragazzi in giacca edoardiana: i negozi contano, i vicini no'},
+ // uk1950 — L167-2 · titoli di stato senza pri (VARIETA-L167-TITOLI-UK.md)
+ {id:'ti_uk50_s_sanita', era:'uk1950', amico:'La sanità gratuita compie gli anni: il paese si cura', ostile:'La sanità gratuita: arrivano i ticket su occhiali e dentiere'},
+ {id:'ti_uk50_s_carbone', era:'uk1950', amico:'Il carbone tiene accese le fabbriche', ostile:'Il carbone tiene accese le fabbriche: e i pozzi chiedono di più'},
+ {id:'ti_uk50_s_commonwealth', era:'uk1950', amico:'Il Commonwealth, una famiglia di nazioni', ostile:'Il Commonwealth: l\'impero cambia nome, non i conti'},
+ {id:'ti_uk50_s_leva', era:'uk1950', amico:'Diciotto anni e due di divisa: la leva tiene insieme il paese', ostile:'Due anni di divisa: i ragazzi chiedono a che cosa servono'},
+ {id:'ti_uk50_s_caraibi', era:'uk1950', amico:'Arrivano dai Caraibi: ospedali e autobus trovano braccia', ostile:'Arrivano dai Caraibi: e trovano cartelli sulle porte delle stanze in affitto'},
+ {id:'ti_uk50_s_bomba', era:'uk1950', cond:()=>S.year>=1953, amico:'La bomba britannica: un posto al tavolo dei grandi', ostile:'La bomba britannica: e quanto costa?'},
+ // uk1950 — L168-1 · otto titoli di stato senza cond né pri: le gemelle vive nei primi anni da 9-10 a 17-18 (VARIETA-L168-UK.md)
+ {id:'ti_uk50_s_pensioni', era:'uk1950', amico:'La pensione per tutti: lo Stato sociale regge', ostile:'La pensione per tutti: e il Tesoro conta i centesimi'},
+ {id:'ti_uk50_s_ferrovie', era:'uk1950', amico:'Le ferrovie dello Stato promettono treni nuovi', ostile:'Le ferrovie dello Stato: carrozze vecchie e biglietti cari'},
+ {id:'ti_uk50_s_export', era:'uk1950', amico:'Esportare o morire: i cantieri lavorano per l\'estero', ostile:'Esportare o morire: e nei negozi di casa mancano le cose'},
+ {id:'ti_uk50_s_prestito', era:'uk1950', amico:'Il prestito americano si paga a rate: la sterlina tiene', ostile:'Il prestito americano pesa ancora sui conti del paese'},
+ {id:'ti_uk50_s_malesia', era:'uk1950', amico:'L\'emergenza in Malesia: i soldati tengono le piantagioni', ostile:'Malesia: una guerra che non si chiama guerra'},
+ {id:'ti_uk50_s_undici', era:'uk1950', amico:'L\'esame a undici anni apre le porte delle scuole migliori', ostile:'L\'esame a undici anni: il destino deciso in una mattina'},
+ {id:'ti_uk50_s_cittanuove', era:'uk1950', amico:'Le città nuove nei campi: aria pulita per chi lascia Londra', ostile:'Le città nuove: case belle, e niente intorno'},
+ {id:'ti_uk50_s_areasterlina', era:'uk1950', amico:'L\'area della sterlina: mezzo mondo paga in sterline', ostile:'L\'area della sterlina: un peso che il paese non regge più'},
  {id:'ti_inchiesta', pri:1, cond:()=>!!S.inchiesta, amico:'L\'inchiesta al vertice: garantismo, finché parlano le carte', ostile:'Il vertice sotto inchiesta: il palazzo trema'},
  {id:'ti_voci', cond:()=>(S.esposizione||0)>=40&&!S.inchiesta, amico:'Veleni e fascicoli: il governo denuncia la macchina del fango', ostile:'Sussurri nei palazzi: ombre sul vertice del governo'},
  {id:'ti_scandalo', pri:1, cond:()=>S.agenda&&S.agenda.some(a=>a.kind==='scandalo'), amico:'Il caso al ministero: garantismo e nervi saldi', ostile:'Scandalo al governo: la credibilità scricchiola'},
@@ -13934,6 +14312,13 @@ const TITOLI=[
  {id:'ti_uk80_terzo', era:'uk1980', cond:()=>S.year>=1987&&S.mandatesWon>=2, amico:'Terzo mandato di fila', ostile:'Terzo mandato di fila: un paese che non sa più votare altro'},
  {id:'ti_uk80_alleanza', era:'uk1980', cond:()=>S.year>=1983&&S.partito!=='uk_lib', amico:'L\'Alleanza a un punto e mezzo dal secondo posto', ostile:'L\'Alleanza a un punto e mezzo dal secondo posto, e ventitré seggi'},
  {id:'ti_uk80_spaccato', era:'uk1980', cond:()=>S.year>=1981&&S.partito!=='uk_lab', amico:'Il partito che si è spaccato in due', ostile:'Il partito che si è spaccato in due, e adesso litiga con entrambe le metà'},
+ // uk1980 — L167-2 · titoli di stato senza pri (VARIETA-L167-TITOLI-UK.md)
+ {id:'ti_uk80_s_moneta', era:'uk1980', cond:()=>S.year<=1985, amico:'La moneta sotto controllo: l\'inflazione scende', ostile:'La moneta sotto controllo: e le fabbriche sotto zero'},
+ {id:'ti_uk80_s_divario', era:'uk1980', amico:'Il Sud corre, il Nord si rimette in piedi', ostile:'Due paesi: il Sud che corre e il Nord che aspetta'},
+ {id:'ti_uk80_s_periferie', era:'uk1980', cond:()=>S.year>=1981, amico:'Le periferie in fiamme: un\'inchiesta per capire', ostile:'Le periferie in fiamme'},
+ {id:'ti_uk80_s_accampate', era:'uk1980', cond:()=>S.year>=1982, amico:'Le donne accampate davanti alla base dei missili: il paese discute', ostile:'Le donne accampate davanti alla base dei missili: e il governo finge di non vederle'},
+ {id:'ti_uk80_s_virus', era:'uk1980', cond:()=>S.year>=1986, amico:'Un opuscolo in ogni casa contro il nuovo virus', ostile:'Il nuovo virus: la paura corre più delle informazioni'},
+ {id:'ti_uk80_s_mercatounico', era:'uk1980', cond:()=>S.year>=1986, amico:'Il mercato unico europeo: Londra ne disegna le regole', ostile:'Il mercato unico europeo: e Bruxelles chiede sempre di più'},
  /* ===== L75-1 · i sedici titoli del decennio inglese '90 (scheda §6) ===== */
  {id:'ti_uk90_undici', era:'uk1990', cond:()=>S.year>=1990&&(S.year>1990||S.month>=11), amico:'Undici anni, e cadde dai suoi', ostile:'Undici anni, e cadde dai suoi: nessuno pianse a lungo'},
  {id:'ti_uk90_mercoledi', era:'uk1990', cond:()=>S.mercoledi!=null, amico:'Il mercoledì nero è passato', ostile:'Il mercoledì nero'},
@@ -13951,6 +14336,13 @@ const TITOLI=[
  {id:'ti_uk90_lotteria', era:'uk1990', cond:()=>S.year>=1994, amico:'La lotteria del sabato', ostile:'La lotteria del sabato: una tassa sui poveri con i palloncini'},
  {id:'ti_uk90_dome', era:'uk1990', cond:()=>S.year>=1999, amico:'Il Dome è finito', ostile:'Il Dome vuoto'},
  {id:'ti_uk90_kosovo', era:'uk1990', cond:()=>S.year>=1999, amico:'Kosovo: la guerra giusta', ostile:'Kosovo'},
+ // uk1990 — L167-2 · titoli di stato senza pri (VARIETA-L167-TITOLI-UK.md)
+ {id:'ti_uk90_s_mutui', era:'uk1990', cond:()=>S.year<=1993, amico:'La recessione finisce, giura il Tesoro', ostile:'Case pignorate e mutui più alti del valore della casa'},
+ {id:'ti_uk90_s_treni', era:'uk1990', cond:()=>S.year>=1994, amico:'I treni ai privati: concorrenza sui binari', ostile:'I treni ai privati: venticinque compagnie e un orario solo'},
+ {id:'ti_uk90_s_manzo', era:'uk1990', cond:()=>S.year>=1996, amico:'Il manzo è sicuro, giurano i ministri', ostile:'La mucca pazza: l\'Europa chiude le frontiere al manzo'},
+ {id:'ti_uk90_s_buste', era:'uk1990', cond:()=>S.year>=1994, amico:'Il governo fa pulizia nei suoi banchi', ostile:'Domande in Parlamento pagate in buste: lo scandalo arriva in aula'},
+ {id:'ti_uk90_s_carta', era:'uk1990', cond:()=>S.year<=1996, amico:'La carta del cittadino: i servizi pubblici promettono tempi certi', ostile:'La carta del cittadino: i treni restano in ritardo'},
+ {id:'ti_uk90_s_centro', era:'uk1990', cond:()=>S.year>=1995, amico:'Né destra né sinistra: la politica si sposta al centro', ostile:'La terza via: ma dove porta?'},
  /* ===== L77-1 · i sedici titoli del decennio inglese 2000 (scheda §6) ===== */
  {id:'ti_uk00_marcia', era:'uk2000', cond:()=>S.year>=2003, amico:'Un milione in strada, e il Parlamento decide', ostile:'Un milione in strada contro la guerra'},
  {id:'ti_uk00_armi', era:'uk2000', cond:()=>S.iraq==='guerra'&&S.year>=2004, amico:'Le armi non trovate: la ricerca continua', ostile:'Le armi che non c\'erano'},
@@ -13968,6 +14360,13 @@ const TITOLI=[
  {id:'ti_uk00_affluenza', era:'uk2000', cond:()=>S.year>=2001, amico:'Sessanta per cento: l\'affluenza più bassa', ostile:'Sessanta per cento: e gli altri quaranta?'},
  {id:'ti_uk00_trentacinque', era:'uk2000', cond:()=>S.year>=2005&&(S.year>2005||S.month>=5), amico:'Trentacinque per cento e una maggioranza', ostile:'Trentacinque per cento e una maggioranza: il sistema funziona così'},
  {id:'ti_uk00_euro', era:'uk2000', cond:()=>S.year>=2003, amico:'Fuori dall\'euro, per sempre', ostile:'Fuori dall\'euro: e adesso?'},
+ // uk2000 — L167-2 · titoli di stato senza pri (VARIETA-L167-TITOLI-UK.md)
+ {id:'ti_uk00_s_pompe', era:'uk2000', cond:()=>S.year<=2001, amico:'Le autobotti tornano a girare', ostile:'Le pompe a secco: i camion bloccano i depositi'},
+ {id:'ti_uk00_s_stalle', era:'uk2000', cond:()=>S.year>=2001&&S.year<=2002, amico:'L\'epidemia nelle stalle è contenuta', ostile:'Le pire di bestiame bruciano nelle campagne'},
+ {id:'ti_uk00_s_obiettivi', era:'uk2000', amico:'Gli ospedali centrano gli obiettivi: le attese scendono', ostile:'Ospedali a obiettivi: si conta tutto, si cura come prima'},
+ {id:'ti_uk00_s_est', era:'uk2000', cond:()=>S.year>=2004, amico:'Arrivano dall\'Est: i cantieri trovano braccia', ostile:'Arrivano dall\'Est: e le paghe si fermano'},
+ {id:'ti_uk00_s_mattone', era:'uk2000', cond:()=>S.year<=2007, amico:'Le case valgono il doppio: il paese si sente ricco', ostile:'Le case valgono il doppio: e i figli non possono comprarle'},
+ {id:'ti_uk00_s_fumo', era:'uk2000', cond:()=>S.year>=2007, amico:'Niente fumo nei locali: si respira', ostile:'Niente fumo nei locali: e i locali chiudono'},
  /* ===== L133-1 (28/9) · I TITOLI-PAESE STANNO AL GRADINO 2, «STATO del paese» (il default di generaTitolo). Fino al 28/9 i 56 titoli
     `*_p_ti_*` qui sotto (e `ng_p_ti_petrolio` in fondo all elenco) portavano pri:1, il gradino «EVENTO del mese»: senza cond, lo tenevano sempre pieno e quattro titoli
     coprivano quasi metà delle prime pagine (81-86% di ripetizioni, L132-1). Sono lo stato permanente del paese: a pri 2 si
@@ -14150,6 +14549,16 @@ const TITOLI=[
  {id:'ti_fr60_dieci', era:'fr1960', pri:1, cond:()=>S.year===1968&&S.month>=5&&S.month<=7, amico:'Dieci milioni fermi', ostile:'Dieci milioni fermi: Grenelle non basta'},
  {id:'ti_fr60_franco', era:'fr1960', pri:1, cond:()=>S.year===1968&&S.month>=11, amico:'Il franco non si svaluta', ostile:'Il franco non si svaluta: pagano i piccoli'},
  {id:'ti_fr60_ventisette', era:'fr1960', pri:1, cond:()=>S.year===1969&&S.month>=4, amico:'Il no del 27 aprile', ostile:'Il no del 27 aprile: undici anni finiscono in due righe'},
+ /* L166-1 · i titoli di STATO del decennio (pri 2): la gemella d'epoca nei mesi senza evento (L165-2) */
+ {id:'ti_fr60_s_complessi', era:'fr1960', cond:()=>S.year>=1962, amico:'I grandi complessi crescono: un bagno per ogni famiglia', ostile:'I grandi complessi crescono: e intorno non c\'è niente'},
+ {id:'ti_fr60_s_auto', era:'fr1960', amico:'Le auto si moltiplicano: ogni famiglia la sua', ostile:'Le auto si moltiplicano: e Parigi si ferma nel traffico'},
+ {id:'ti_fr60_s_esodo', era:'fr1960', amico:'I paesi si svuotano, le città crescono', ostile:'I paesi si svuotano: chi resta a coltivare?'},
+ {id:'ti_fr60_s_piano', era:'fr1960', amico:'Il Piano fissa la rotta: cinque anni di crescita', ostile:'Il Piano fissa la rotta: e le regioni povere restano indietro'},
+ {id:'ti_fr60_s_ferie', era:'fr1960', cond:()=>S.year>=1963, amico:'Le ferie si allungano: la strada del sud intasata', ostile:'Le ferie si allungano: e la strada del sud è un parcheggio'},
+ {id:'ti_fr60_s_rimpatriati', era:'fr1960', cond:()=>S.year>=1962&&S.year<=1965, amico:'I rimpatriati trovano casa e lavoro', ostile:'I rimpatriati aspettano ancora: le promesse restano nei porti'},
+ {id:'ti_fr60_s_secondarete', era:'fr1960', cond:()=>S.year>=1964, amico:'La seconda rete accende la sera', ostile:'La seconda rete accende la sera: e il notiziario resta del governo'},
+ {id:'ti_fr60_s_ragazzi', era:'fr1960', cond:()=>S.year>=1962, amico:'I ragazzi ballano: la radio dei giovani fa il pieno', ostile:'I ragazzi ballano: i genitori non capiscono'},
+ {id:'ti_fr60_s_crescita', era:'fr1960', cond:()=>S.ind.growth>3, amico:'La crescita corre: il paese si scopre moderno', ostile:'La crescita corre: e i salari restano a piedi'},
  /* ---- L99-2 · I TITOLI DEL DECENNIO FRANCESE '70 (scheda §E), ciascuno con la gemella ostile; tutti datati nel cond.
     Tre titoli guardano la scelta fatta allo snodo: «Tredici centrali» non esce per chi ha scelto un piano diverso
     (all'opposizione, dove lo snodo non c'è, è la cronaca che il pilastro non dà), e così «Il piano di rigore» e «Il
@@ -14173,6 +14582,16 @@ const TITOLI=[
  {id:'ti_fr70_shock', era:'fr1970', pri:1, cond:()=>S.year===1979&&S.month>=2&&S.month<=9, amico:'Il secondo shock', ostile:'Il secondo shock: e le centrali non bastano ancora'},
  {id:'ti_fr70_europa', era:'fr1970', pri:1, cond:()=>S.year===1979&&S.month>=6&&S.month<=8, amico:'L\'Europa vota', ostile:'L\'Europa vota: e sei su dieci restano a casa'},
  {id:'ti_fr70_treno', era:'fr1970', pri:1, cond:()=>S.year===1979, amico:'Il treno veloce corre', ostile:'Il treno veloce corre, a debito'},
+ /* L166-1 · i titoli di STATO del decennio (pri 2): la gemella d'epoca nei mesi senza evento (L165-2) */
+ {id:'ti_fr70_s_autostrade', era:'fr1970', amico:'Le autostrade arrivano al mare', ostile:'Le autostrade arrivano al mare: a pedaggio'},
+ {id:'ti_fr70_s_ipermercato', era:'fr1970', amico:'L\'ipermercato in periferia: tutto sotto un tetto', ostile:'L\'ipermercato in periferia: e la bottega in centro chiude'},
+ {id:'ti_fr70_s_telefono', era:'fr1970', cond:()=>S.year>=1975, amico:'Un telefono in ogni casa: il piano accelera', ostile:'Un telefono in ogni casa: tra due anni, se va bene'},
+ {id:'ti_fr70_s_donne', era:'fr1970', amico:'Le donne al lavoro: la busta paga è loro', ostile:'Le donne al lavoro: e a casa il resto del lavoro'},
+ {id:'ti_fr70_s_altopiano', era:'fr1970', cond:()=>S.year>=1971&&S.year<=1978, amico:'Il campo militare e i pastori: si tratta', ostile:'Il campo militare e i pastori: l\'altopiano non si arrende'},
+ {id:'ti_fr70_s_prezzi', era:'fr1970', cond:()=>S.year>=1974, amico:'I prezzi salgono, il paese si adatta', ostile:'I prezzi salgono, il borsellino no'},
+ {id:'ti_fr70_s_sprechi', era:'fr1970', cond:()=>S.year>=1974, amico:'Caccia agli sprechi: il paese spegne le luci', ostile:'Caccia agli sprechi: niente petrolio, solo idee'},
+ {id:'ti_fr70_s_regioni', era:'fr1970', cond:()=>S.year<=1976, amico:'Le regioni chiedono voce', ostile:'Le regioni chiedono voce: Parigi decide ancora tutto'},
+ {id:'ti_fr70_s_fabbriche', era:'fr1970', cond:()=>S.ind.unemp>6, amico:'Le fabbriche riducono: il governo promette la riconversione', ostile:'Le fabbriche riducono: chi ha cinquant\'anni non trova più'},
  /* L101-2 · i titoli del decennio francese '80 (scheda §I-E). I `cond` sugli esiti sono quelli della scheda: chi non ha
     giocato lo snodo (l'opposizione) non vede il titolo che ne racconta l'esito. */
  {id:'ti_fr80_eliseo', era:'fr1980', pri:1, cond:()=>S.year===1981&&S.month>=5&&S.month<=7&&eliseoDiSinistra(), amico:'La sinistra all\'Eliseo', ostile:'La sinistra all\'Eliseo: e la Borsa chiude'},
@@ -14193,6 +14612,16 @@ const TITOLI=[
  {id:'ti_fr80_carpentras', era:'fr1980', pri:1, cond:()=>S.year===1990&&S.month>=5&&S.month<=6, amico:'Carpentras', ostile:'Carpentras: le tombe profanate, il paese in piazza'},
  {id:'ti_fr80_golfo', era:'fr1980', pri:1, cond:()=>S.year===1991&&S.month>=1&&S.month<=3, amico:'Il Golfo', ostile:'Il Golfo: diecimila francesi nel deserto'},
  {id:'ti_fr80_matignon', era:'fr1980', pri:1, cond:()=>S.year===1991&&S.month>=5&&S.month<=7&&eliseoDiSinistra(), amico:'La prima donna a Matignon', ostile:'La prima donna a Matignon: dieci mesi, dicono i giornali'},
+ /* L166-1 · i titoli di STATO del decennio (pri 2): la gemella d'epoca nei mesi senza evento (L165-2) */
+ {id:'ti_fr80_s_radio', era:'fr1980', cond:()=>S.year>=1981, amico:'Le radio libere riempiono l\'etere', ostile:'Le radio libere riempiono l\'etere: e la pubblicità le compra'},
+ {id:'ti_fr80_s_musica', era:'fr1980', cond:()=>S.year>=1982, amico:'La festa della musica in ogni piazza', ostile:'La festa della musica in ogni piazza: e il giorno dopo i conti'},
+ {id:'ti_fr80_s_acciaio', era:'fr1980', cond:()=>S.year>=1983, amico:'L\'acciaio si ristruttura: il governo accompagna', ostile:'L\'acciaio si ristruttura: la Lorena perde il lavoro'},
+ {id:'ti_fr80_s_borsa', era:'fr1980', cond:()=>S.year>=1986, amico:'La Borsa scopre i piccoli azionisti', ostile:'La Borsa scopre i piccoli azionisti: e i piccoli scoprono la Borsa'},
+ {id:'ti_fr80_s_territori', era:'fr1980', cond:()=>S.year>=1982, amico:'I poteri ai territori: il prefetto lascia il passo', ostile:'I poteri ai territori: e le tasse locali salgono'},
+ {id:'ti_fr80_s_marcia', era:'fr1980', cond:()=>S.year>=1983, amico:'Le periferie marciano per l\'uguaglianza', ostile:'Le periferie marciano: chi le ascolta?'},
+ {id:'ti_fr80_s_virus', era:'fr1980', cond:()=>S.year>=1985, amico:'Il virus nuovo: la ricerca francese in prima linea', ostile:'Il virus nuovo: le campagne arrivano tardi'},
+ {id:'ti_fr80_s_lavoro', era:'fr1980', cond:()=>S.ind.unemp>8, amico:'Lavoro: i contratti per i giovani partono', ostile:'La disoccupazione non scende: la piaga del decennio'},
+ {id:'ti_fr80_s_bicentenario', era:'fr1980', cond:()=>S.year>=1988, amico:'Il bicentenario si prepara: Parigi cambia volto', ostile:'Il bicentenario si prepara: i cantieri del principe'},
  /* L103-2 · i titoli del decennio francese '90 (scheda §I-E). Le gemelle «…: X» sono scritte per intero. */
  {id:'ti_fr90_matignon', era:'fr1990', pri:1, cond:()=>S.year===1991&&S.month>=5&&S.month<=7&&eliseoDiSinistra(), amico:'La prima donna a Matignon', ostile:'La prima donna a Matignon: e la maggioranza mormora'},
  {id:'ti_fr90_furiani', era:'fr1990', pri:1, cond:()=>S.year===1992&&S.month>=5&&S.month<=6, amico:'Furiani', ostile:'Furiani: la tribuna crolla prima del calcio d\'inizio'},
@@ -14213,6 +14642,16 @@ const TITOLI=[
  {id:'ti_fr90_concorde', era:'fr1990', pri:1, cond:()=>S.year===2000&&S.month>=7&&S.month<=8, amico:'Il Concorde cade', ostile:'Il Concorde cade: centotredici morti'},
  {id:'ti_fr90_70', era:'fr1990', pri:1, cond:()=>S.year===2000&&S.month>=9&&S.month<=10&&S.quinquennato00==='referendum', amico:'Settanta per cento a casa', ostile:'Settanta per cento a casa: il quinquennato passa lo stesso'},
  {id:'ti_fr90_torri', era:'fr1990', pri:1, cond:()=>S.year===2001&&S.month>=9&&S.month<=10, amico:'Le torri', ostile:'Le torri: siamo tutti americani'},
+ /* L166-1 · i titoli di STATO del decennio (pri 2): la gemella d'epoca nei mesi senza evento (L165-2) */
+ {id:'ti_fr90_s_citta', era:'fr1990', amico:'Le periferie: il piano per la città', ostile:'Le periferie: un piano ogni anno, e niente cambia'},
+ {id:'ti_fr90_s_contributo', era:'fr1990', cond:()=>S.year>=1991, amico:'Il nuovo contributo sociale finanzia la protezione', ostile:'Il nuovo contributo sociale: una tassa che non si chiama tassa'},
+ {id:'ti_fr90_s_francoforte', era:'fr1990', cond:()=>S.year<=1998, amico:'Il franco forte: la disciplina paga', ostile:'Il franco forte: e il lavoro debole'},
+ {id:'ti_fr90_s_manica', era:'fr1990', cond:()=>S.year>=1994, amico:'Sotto la Manica in tre ore: Londra è vicina', ostile:'Sotto la Manica in tre ore: e i debiti del tunnel restano'},
+ {id:'ti_fr90_s_carne', era:'fr1990', cond:()=>S.year>=1996, amico:'Carne sotto controllo: l\'etichetta dice tutto', ostile:'La paura nel piatto: il macellaio vende meno'},
+ {id:'ti_fr90_s_rete', era:'fr1990', cond:()=>S.year>=1996, amico:'La rete arriva nelle case', ostile:'La rete arriva nelle case: il paese che aveva già il suo terminale arriva tardi'},
+ {id:'ti_fr90_s_borsa', era:'fr1990', cond:()=>S.year>=1993, amico:'Le grandi aziende in Borsa: lo Stato fa cassa', ostile:'Le grandi aziende in Borsa: i gioielli in vendita'},
+ {id:'ti_fr90_s_criteri', era:'fr1990', cond:()=>S.year>=1993&&S.year<=1998, amico:'I conti verso la moneta unica', ostile:'I conti verso la moneta unica: tre per cento, a ogni costo'},
+ {id:'ti_fr90_s_documenti', era:'fr1990', cond:()=>S.year>=1996, amico:'I senza documenti: la regolarizzazione caso per caso', ostile:'I senza documenti chiedono di esistere'},
  /* L105-4 · i titoli del decennio francese 2000 (scheda §I-E). */
  {id:'ti_fr00_euro', era:'fr2000', pri:1, cond:()=>S.year===2002&&S.month<=2, amico:'Sei franchi e cinquantasei', ostile:'Sei franchi e cinquantasei: i prezzi arrotondati all\'insù'},
  {id:'ti_fr00_aprile', era:'fr2000', pri:1, cond:()=>S.year===2002&&S.month<=3, amico:'Il 21 aprile', ostile:'Il 21 aprile: l\'estrema destra al ballottaggio'},
@@ -14232,6 +14671,16 @@ const TITOLI=[
  {id:'ti_fr00_alternanza', era:'fr2000', pri:1, cond:()=>S.year===2012&&S.month<=3&&eliseoDiSinistra(), amico:'La sinistra torna', ostile:'La sinistra torna all\'Eliseo'},
  {id:'ti_fr00_matrimonio', era:'fr2000', pri:1, cond:()=>S.year===2013&&S.month>=4&&S.month<=6, amico:'Il matrimonio per tutti', ostile:'Il matrimonio per tutti: centotrentasei ore in aula'},
  {id:'ti_fr00_mali', era:'fr2000', pri:1, cond:()=>S.year===2013&&S.month<=2, amico:'Il Mali', ostile:'Il Mali: le colonne fermate'},
+ /* L166-1 · i titoli di STATO del decennio (pri 2): la gemella d'epoca nei mesi senza evento (L165-2) */
+ {id:'ti_fr00_s_tempo', era:'fr2000', cond:()=>S.year<=2007, amico:'Le 35 ore: il tempo libero cresce', ostile:'Le 35 ore: e le aziende contano i costi'},
+ {id:'ti_fr00_s_radar', era:'fr2000', cond:()=>S.year>=2003, amico:'I radar sulle strade: i morti calano', ostile:'I radar sulle strade: la multa arriva per posta'},
+ {id:'ti_fr00_s_acquisto', era:'fr2000', cond:()=>S.year>=2005, amico:'Il potere d\'acquisto, la priorità del governo', ostile:'Il potere d\'acquisto: il carrello costa di più'},
+ {id:'ti_fr00_s_portafogli', era:'fr2000', cond:()=>S.year>=2002&&S.year<=2005, amico:'L\'euro nei portafogli: si conta ancora in franchi', ostile:'L\'euro nei portafogli: il caffè arrotondato in su'},
+ {id:'ti_fr00_s_est', era:'fr2000', amico:'Le fabbriche vanno a Est: il governo cerca investitori', ostile:'Le fabbriche vanno a Est: il paese chiude i cancelli'},
+ {id:'ti_fr00_s_alloggio', era:'fr2000', cond:()=>S.year>=2006, amico:'La casa per tutti: la legge sul diritto all\'alloggio', ostile:'Le tende lungo i canali: la casa che manca'},
+ {id:'ti_fr00_s_torri', era:'fr2000', cond:()=>S.year>=2006, amico:'Le periferie ricostruite: si abbattono le torri', ostile:'Le periferie ricostruite: si abbattono le torri, restano i problemi'},
+ {id:'ti_fr00_s_crisi', era:'fr2000', cond:()=>S.year>=2008&&S.ind.growth<0.5, amico:'Lo Stato in campo contro la crisi', ostile:'La crisi morde: chi paga il conto?'},
+ {id:'ti_fr00_s_tasca', era:'fr2000', cond:()=>S.year>=2008, amico:'Il telefono in tasca è un computer', ostile:'Il telefono in tasca: il paese sempre connesso, sempre stanco'},
  /* L109-2 · i titoli del decennio tedesco '50 (scheda §I-E). «Se al governo CDU» = il giocatore è della CDU/CSU e governa:
     il titolo parla del Cancelliere, e con un Cancelliere di un altro partito sarebbe falso. */
  {id:'ti_de50_bonn', era:'de1950', pri:1, cond:()=>S.year===1950&&S.month<=3, amico:'Il governo a Bonn', ostile:'Il governo a Bonn: capitale provvisoria'},
@@ -14250,6 +14699,15 @@ const TITOLI=[
  {id:'ti_de50_cinquanta', era:'de1950', pri:1, cond:()=>S.year===1957&&S.month>=9&&S.month<=10&&S.partito==='de_cdu'&&!S.opposizione, amico:'Cinquanta per cento', ostile:'Cinquanta per cento: nessuno l\'aveva mai fatto'},
  {id:'ti_de50_sputnik', era:'de1950', pri:1, cond:()=>S.year===1957&&S.month>=10&&S.month<=11, amico:'Il satellite', ostile:'Il satellite: e l\'America ha paura'},
  {id:'ti_de50_atomica', era:'de1950', pri:1, cond:()=>S.year===1958&&S.month>=3&&S.month<=5, amico:'La morte atomica', ostile:'La morte atomica: le piazze contro il voto'},
+ /* L166-2 · i titoli di STATO del decennio (pri 2): la gemella d'epoca nei mesi senza evento (L165-2) */
+ {id:'ti_de50_s_miracolo', era:'de1950', cond:()=>S.ind.growth>3, amico:'Il miracolo continua: le vetrine sono piene', ostile:'Il miracolo continua: per chi ha un lavoro'},
+ {id:'ti_de50_s_profughi', era:'de1950', cond:()=>S.year<=1956, amico:'I profughi trovano casa: i quartieri nuovi crescono', ostile:'I profughi aspettano ancora: le baracche restano'},
+ {id:'ti_de50_s_macerie', era:'de1950', cond:()=>S.year<=1955, amico:'Le città risorgono dalle macerie', ostile:'Le città risorgono: e le macerie sono ancora lì'},
+ {id:'ti_de50_s_alpi', era:'de1950', cond:()=>S.year>=1955, amico:'Oltre le Alpi in vacanza: tutti verso il sud', ostile:'Oltre le Alpi in vacanza: chi può'},
+ {id:'ti_de50_s_marco', era:'de1950', amico:'Il marco tiene: i risparmi sono al sicuro', ostile:'Il marco tiene: i salari meno'},
+ {id:'ti_de50_s_braccia', era:'de1950', cond:()=>S.year>=1955, amico:'Arrivano i lavoratori dal sud: le fabbriche respirano', ostile:'Arrivano i lavoratori dal sud: dormono nelle baracche'},
+ {id:'ti_de50_s_pensioni', era:'de1950', cond:()=>S.year>=1957, amico:'Le pensioni seguono i salari', ostile:'Le pensioni seguono i salari: e chi le paga domani?'},
+ {id:'ti_de50_s_frontiera', era:'de1950', amico:'La frontiera divide le famiglie', ostile:'La frontiera divide le famiglie: e Bonn guarda a ovest'},
  /* L111-2 · i titoli del decennio tedesco '60 (scheda §I-E). Tre condizioni (voce L111-2, correzione 6): «La prima recessione: i
     liberali escono» solo se i liberali sono usciti nel 1966 (S3 «tasse», o la FDP rotta e fuori dal governo senza che sia stato lo
     Spiegel — approssimazione dichiarata: una rottura spontanea del 1963-66 conta come «del 1966»), altrimenti la sola prima riga
@@ -14271,6 +14729,15 @@ const TITOLI=[
  {id:'ti_de60_emergenza', era:'de1960', pri:1, cond:()=>S.year===1968&&S.month>=6&&S.month<=7, amico:'Le leggi d\'emergenza', ostile:'Le leggi d\'emergenza: sessantamila su Bonn'},
  {id:'ti_de60_praga', era:'de1960', pri:1, cond:()=>S.year===1968&&S.month>=8&&S.month<=9, amico:'Praga', ostile:'Praga: i carri nella primavera'},
  {id:'ti_de60_alternanza', era:'de1960', pri:1, cond:()=>S.year===1969&&S.month>=10&&S.month<=11&&S.coalizione.includes('de_spd')&&S.coalizione.includes('de_fdp')&&!S.coalizione.includes('de_cdu'), amico:'Il primo Cancelliere socialdemocratico', ostile:'Il primo Cancelliere socialdemocratico: con i liberali, dopo vent\'anni'},
+ /* L166-2 · i titoli di STATO del decennio (pri 2): la gemella d'epoca nei mesi senza evento (L165-2) */
+ {id:'ti_de60_s_benessere', era:'de1960', amico:'Il benessere entra nelle case: la lavatrice, il televisore', ostile:'Il benessere entra nelle case, a rate'},
+ {id:'ti_de60_s_passato', era:'de1960', cond:()=>S.year>=1963, amico:'Il paese guarda al suo passato', ostile:'Il paese guarda al suo passato: i figli fanno le domande'},
+ {id:'ti_de60_s_isola', era:'de1960', cond:()=>S.year>=1961, amico:'Berlino Ovest resiste, isola nella città divisa', ostile:'Berlino Ovest: i lasciapassare a Natale, e poi niente'},
+ {id:'ti_de60_s_pozzi', era:'de1960', cond:()=>S.year>=1964, amico:'Le miniere della Ruhr si riconvertono', ostile:'Le miniere della Ruhr chiudono: la bandiera nera sui pozzi'},
+ {id:'ti_de60_s_atenei', era:'de1960', cond:()=>S.year>=1965, amico:'Gli atenei si moltiplicano: la scuola si apre a tutti', ostile:'Gli atenei sovraffollati: le aule non bastano'},
+ {id:'ti_de60_s_utilitaria', era:'de1960', amico:'L\'utilitaria per tutti: le autostrade si riempiono', ostile:'L\'utilitaria per tutti: e le città soffocano'},
+ {id:'ti_de60_s_piena', era:'de1960', cond:()=>S.ind.unemp<=3, amico:'Piena occupazione: le fabbriche cercano braccia', ostile:'Piena occupazione: e i prezzi cominciano a salire'},
+ {id:'ti_de60_s_giovani', era:'de1960', cond:()=>S.year>=1966, amico:'I giovani contestano: il paese discute', ostile:'I giovani in piazza: i padri non rispondono'},
  /* L135-3 · i titoli del decennio tedesco '70 (scheda §I-E). Tre condizioni leggono chi governa (SPD e liberali senza la CDU, la
     forma di ti_de60_alternanza): Varsavia, il Nobel, i due voti; la spia vuole la SPD in coalizione; Mogadiscio esce se non c'è
     stato lo scambio, la domenica a piedi se non si è scelto altro. I titoli non portano `tono` (come i ti_de60_*): la gravità sta
@@ -14296,6 +14763,15 @@ const TITOLI=[
  {id:'ti_de70_binario', era:'de1970', pri:1, cond:()=>(S.year===1979&&S.month===12)||(S.year===1980&&S.month===1), amico:'Il doppio binario', ostile:'Il doppio binario: missili, se Mosca non tratta'},
  {id:'ti_de70_verdi', era:'de1970', pri:1, cond:()=>S.year===1980&&S.month>=1&&S.month<=2, amico:'Nascono i Verdi', ostile:'Nascono i Verdi: girasoli a Karlsruhe'},
  {id:'ti_de70_oktoberfest', era:'de1970', pri:1, cond:()=>S.year===1980&&S.month>=9&&S.month<=10, amico:'La bomba all\'Oktoberfest', ostile:'La bomba all\'Oktoberfest: tredici morti'},
+ /* L166-2 · i titoli di STATO del decennio (pri 2): la gemella d'epoca nei mesi senza evento (L165-2) */
+ {id:'ti_de70_s_trattati', era:'de1970', cond:()=>S.year<=1975, amico:'I trattati con l\'Est: la distensione avanza', ostile:'I trattati con l\'Est: l\'opposizione grida al tradimento'},
+ {id:'ti_de70_s_terrore', era:'de1970', cond:()=>S.year>=1972, amico:'Lo Stato non si piega al terrore', ostile:'Lo Stato si blinda: posti di blocco e schedature'},
+ {id:'ti_de70_s_prezzi', era:'de1970', cond:()=>S.year>=1974, amico:'I prezzi corrono: la banca centrale tiene il punto', ostile:'I prezzi corrono, i posti calano'},
+ {id:'ti_de70_s_riforme', era:'de1970', cond:()=>S.year<=1976, amico:'Più democrazia: le riforme toccano scuola e lavoro', ostile:'Le riforme costano: e il conto arriva'},
+ {id:'ti_de70_s_centrali', era:'de1970', cond:()=>S.year>=1975, amico:'Le centrali promettono energia sicura', ostile:'Le centrali e le piazze: i contadini contro il cantiere'},
+ {id:'ti_de70_s_famiglie', era:'de1970', cond:()=>S.year>=1974, amico:'I lavoratori stranieri restano: arrivano le famiglie', ostile:'I lavoratori stranieri restano: nessuno ha previsto le scuole'},
+ {id:'ti_de70_s_modello', era:'de1970', cond:()=>S.ind.growth>1.5, amico:'Il modello tedesco: l\'Europa ci guarda', ostile:'Il modello tedesco: e chi resta fuori?'},
+ {id:'ti_de70_s_ambiente', era:'de1970', cond:()=>S.year>=1977, amico:'L\'ambiente diventa politica', ostile:'L\'ambiente diventa politica: i partiti arrivano tardi'},
  /* L148-2 · i titoli del decennio tedesco '80 (scheda §I-E). Niente `tono` (come i ti_de60_* e i ti_de70_*: la gravità sta nel testo).
     Le gemelle: il piano in dieci punti ha la sua versione per chi È il Cancelliere (la forma di ti_de60_alternanza, chi governa); il
     marco all'Est la sua per il cambio di due a uno. ⚑ `ti_de80_documento` esce SOLO a settembre: il documento dei liberali è del 9
@@ -14330,6 +14806,15 @@ const TITOLI=[
  {id:'ti_de80_berlino', era:'de1980', pri:1, cond:()=>S.year===1991&&S.month>=6&&S.month<=7, amico:'Berlino capitale', ostile:'Berlino capitale: trecentotrentotto a trecentoventi'},
  {id:'ti_de80_solidarieta', era:'de1980', pri:1, cond:()=>S.year===1991&&S.month>=7&&S.month<=8, amico:'Il contributo di solidarietà', ostile:'Il contributo di solidarietà: le tasse salgono per l\'Est'},
  {id:'ti_de80_hoyerswerda', era:'de1980', pri:1, cond:()=>S.year===1991&&S.month>=9&&S.month<=10, amico:'Hoyerswerda', ostile:'Hoyerswerda: gli alloggi dei profughi assediati, la polizia li porta via'},
+ /* L166-2 · i titoli di STATO del decennio (pri 2): la gemella d'epoca nei mesi senza evento (L165-2) */
+ {id:'ti_de80_s_foreste', era:'de1980', cond:()=>S.year<=1987, amico:'Le foreste malate: il governo impone i filtri', ostile:'Le foreste muoiono: e le ciminiere fumano'},
+ {id:'ti_de80_s_disoccupati', era:'de1980', cond:()=>S.ind.unemp>7, amico:'Due milioni senza lavoro: il governo punta sulla ripresa', ostile:'Due milioni senza lavoro: la svolta non si vede'},
+ {id:'ti_de80_s_canali', era:'de1980', cond:()=>S.year>=1984, amico:'Le televisioni private accendono i canali', ostile:'Le televisioni private: più canali, meno notizie'},
+ {id:'ti_de80_s_pace', era:'de1980', cond:()=>S.year<=1986, amico:'Il movimento per la pace riempie le strade', ostile:'Il movimento per la pace: e i missili restano'},
+ {id:'ti_de80_s_bidoni', era:'de1980', cond:()=>S.year>=1985, amico:'La raccolta differenziata entra in casa', ostile:'Quattro bidoni in cortile: e il resto finisce lo stesso in discarica'},
+ {id:'ti_de80_s_visite', era:'de1980', cond:()=>S.year>=1984&&S.year<=1989, amico:'Le visite all\'Est si moltiplicano', ostile:'Le visite all\'Est: e il Muro resta'},
+ {id:'ti_de80_s_export', era:'de1980', cond:()=>S.ind.growth>1.5, amico:'Il marco forte: le esportazioni corrono', ostile:'Il marco forte: il mondo compra tedesco, il paese risparmia'},
+ {id:'ti_de80_s_computer', era:'de1980', cond:()=>S.year>=1983, amico:'Il computer arriva in ufficio', ostile:'Il computer arriva in ufficio: e il censimento fa paura'},
  /* L153-2 · i titoli del decennio tedesco '90 (scheda §I-E): 32 e una gemella (il trasloco, col colore del voto del 1991). Sobri sui morti,
     nessuno sull'esito delle urne (D76), nessuno su un fatto di UN governo preciso salvo `ti_de90_calzini` col suo cond. */
  {id:'ti_de90_maastricht', era:'de1990', pri:1, cond:()=>S.year===1992&&S.month>=2&&S.month<=3, amico:'Firmato il trattato di Maastricht', ostile:'Maastricht: il marco ha una data di scadenza'},
@@ -14365,6 +14850,15 @@ const TITOLI=[
  {id:'ti_de90_cupola', era:'de1990', pri:1, cond:()=>S.year===1999&&S.month>=4&&S.month<=5, amico:'La cupola di vetro', ostile:'Berlino: il Bundestag si riunisce sotto la cupola di vetro'},
  {id:'ti_de90_trasloco', era:'de1990', pri:1, cond:()=>S.year===1999&&S.month>=9&&S.month<=10&&(S.deCapitale91==null||S.deCapitale91==='berlino'), amico:'Berlino, finalmente', ostile:'Il governo lavora a Berlino'},
  {id:'ti_de90_trasloco_bonn', era:'de1990', pri:1, cond:()=>S.year===1999&&S.month>=9&&S.month<=10&&(S.deCapitale91==='bonn'||S.deCapitale91==='divisa'), amico:'Addio a Bonn', ostile:'Bonn saluta il governo: quarant\'anni da capitale provvisoria'},
+ /* L166-2 · i titoli di STATO del decennio (pri 2): la gemella d'epoca nei mesi senza evento (L165-2) */
+ {id:'ti_de90_s_paesaggi', era:'de1990', cond:()=>S.year<=1996, amico:'Paesaggi fioriti: l\'Est si ricostruisce', ostile:'L\'Est si svuota: i giovani partono verso ovest'},
+ {id:'ti_de90_s_agenzia', era:'de1990', cond:()=>S.year<=1994, amico:'L\'agenzia vende le fabbriche dell\'Est', ostile:'L\'agenzia chiude le fabbriche dell\'Est'},
+ {id:'ti_de90_s_teste', era:'de1990', amico:'Il muro nelle teste: l\'unità si costruisce', ostile:'Il muro nelle teste: Est e Ovest si guardano storto'},
+ {id:'ti_de90_s_costo', era:'de1990', cond:()=>S.year>=1993, amico:'Il costo dell\'unità: i conti reggono', ostile:'Il costo dell\'unità: le tasse salgono'},
+ {id:'ti_de90_s_sede', era:'de1990', cond:()=>S.year>=1994, amico:'Produrre in Germania: le aziende investono', ostile:'Produrre in Germania? Le aziende guardano all\'estero'},
+ {id:'ti_de90_s_telefonino', era:'de1990', cond:()=>S.year>=1996, amico:'Il telefonino in ogni tasca', ostile:'Il telefonino in ogni tasca: e la bolletta'},
+ {id:'ti_de90_s_marco', era:'de1990', cond:()=>S.year>=1995&&S.year<=1999, amico:'La moneta unica sarà stabile come il marco', ostile:'Addio al marco: il paese non è convinto'},
+ {id:'ti_de90_s_rinvio', era:'de1990', cond:()=>S.ind.unemp>9, amico:'Le riforme si preparano: il lavoro deve ripartire', ostile:'Riforme rinviate: e il lavoro non riparte'},
  /* L157-1 · i titoli del decennio tedesco 2000 (scheda §I-E): 33 e una gemella (l'Iraq, col colore di S1). Sobri sui morti, nessuno
     sull'esito delle urne (D76) né su un fatto di UN governo preciso; `ti_de00_risparmi` e la coppia dell'Iraq leggono lo snodo. Gli ultimi
     sei sono della coda (2010-2013, D103). `ti_de00_disoccupati` dice «più di cinque milioni»: esce solo se la
@@ -14403,6 +14897,15 @@ const TITOLI=[
  {id:'ti_de00_fukushima', era:'de2000', pri:1, cond:()=>S.year===2011&&S.month>=3&&S.month<=4, amico:'Dopo Fukushima', ostile:'Fukushima: il paese guarda le sue centrali'},
  {id:'ti_de00_cellula', era:'de2000', pri:1, cond:()=>S.year===2011&&S.month>=11&&S.month<=12, amico:'La cellula', ostile:'Scoperta una cellula che ha ucciso dieci persone in sette anni'},
  {id:'ti_de00_acqua', era:'de2000', pri:1, cond:()=>S.year===2013&&S.month===6, amico:'Di nuovo l\'acqua', ostile:'L\'Elba e il Danubio fuori dagli argini, undici anni dopo'},
+ /* L166-2 · i titoli di STATO del decennio (pri 2): la gemella d'epoca nei mesi senza evento (L165-2) */
+ {id:'ti_de00_s_malato', era:'de2000', cond:()=>S.year<=2005, amico:'Il malato d\'Europa si cura', ostile:'Il malato d\'Europa: crescita zero, conti in rosso'},
+ {id:'ti_de00_s_sussidi', era:'de2000', cond:()=>S.year>=2003&&S.year<=2008, amico:'La riforma del lavoro: chi cerca trova', ostile:'La riforma del lavoro: i sussidi tagliati'},
+ {id:'ti_de00_s_export', era:'de2000', cond:()=>S.year>=2004&&S.ind.growth>1, amico:'Campioni del mondo dell\'export', ostile:'Campioni dell\'export: e i salari fermi'},
+ {id:'ti_de00_s_vento', era:'de2000', amico:'Il vento e il sole: l\'energia nuova cresce', ostile:'Il vento e il sole: la bolletta sale'},
+ {id:'ti_de00_s_tempopieno', era:'de2000', cond:()=>S.year>=2002, amico:'La scuola tutto il giorno: i cantieri partono', ostile:'La scuola tutto il giorno: i soldi non arrivano'},
+ {id:'ti_de00_s_congedo', era:'de2000', cond:()=>S.year>=2006, amico:'Il congedo per i genitori: nascono più bambini', ostile:'Il congedo per i genitori: e gli asili mancano'},
+ {id:'ti_de00_s_immigrazione', era:'de2000', cond:()=>S.year>=2005, amico:'Paese di immigrazione: il governo lo dice', ostile:'Paese di immigrazione: lo dice tardi'},
+ {id:'ti_de00_s_orariocorto', era:'de2000', cond:()=>S.year>=2008&&S.ind.growth<0.5, amico:'Il lavoro ridotto salva i posti', ostile:'La crisi arriva: le fabbriche a orario corto'},
  {id:'ng_p_ti_petrolio', era:'contemporanea', paesi:['nigeria'], amico:'La produzione di petrolio torna a salire', ostile:'Un barile su dieci sparisce: il furto record'},
 ];
 

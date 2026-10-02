@@ -130,7 +130,7 @@ const VIDEO_PRESENTI = ['home-hero', 'partito-base', 'vitaprivata-base', 'retro-
      30/9 sera: Francia e Regno Unito rifatte (immagine e clip), arrivate Germania e USA (gli USA non hanno porte oggi: la clip aspetta)
      e la prima clip di decennio, il 1950. */
   'porta-paese-italia', 'porta-paese-francia', 'porta-paese-regnounito', 'porta-paese-germania', 'porta-paese-usa',
-  'porta-decennio-1950'];
+  'porta-decennio-1950', 'porta-decennio-1960', 'porta-decennio-1970', 'porta-decennio-1980', 'porta-decennio-1990', 'porta-decennio-2000'];
 
 /* ===== L124-1 — IL VIDEO INTRODUTTIVO (`assets/video/intro.*`). Non è una scena: sta FUORI da VIDEO_PRESENTI (non ha una
    carta né un .webp in assets/scenes) ma sotto la stessa guardia (`.claude/verifica-asset.js`): i file dichiarati qui devono
