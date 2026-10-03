@@ -124,13 +124,27 @@ const VIDEO_PRESENTI = ['home-hero', 'partito-base', 'vitaprivata-base', 'retro-
   /* 28/9 sera (L127-2): le cinque clip del PUNTO DI PARTENZA — non sono carte: le apre `apriPartenza()` (ui.js) all'ingresso
      in carriera; il .webp sta in assets/scenes/ come per ogni clip (fa da poster), nessuna carta lo nomina. */
   'partenza-attivista', 'partenza-locale', 'partenza-ministro', 'partenza-capo', 'partenza-diplomatico',
+  /* 3/10 (L178-4): la partenza «di oggi» per le partite NEL PRESENTE (`partenza-oggi-<ruolo>`, senza luogo): la sceglie
+     `partenzaDelRuolo()` se il nome è qui, altrimenti la clip di sempre; la voce è quella del ruolo. Ministro, capo, diplomatico
+     (l'attivista è arrivata e aspetta: sulla lavagna ci sono scarabocchi che sembrano scrittura; il locale non c'è ancora). */
+  'partenza-oggi-ministro', 'partenza-oggi-capo', 'partenza-oggi-diplomatico',
   /* 30/9 (L153-5): le clip delle PARTITE STORICHE — il paese (5 s, 960×540, mute; qui le bandiere ci vogliono), poi il decennio. Non sono
      carte: le apre `apriClipPorta()` (ui.js) quando si sceglie una porta, e la sequenza si DERIVA dalla porta (`porta-paese-<paese>`,
      `porta-decennio-<anno>`): una clip vale solo se il suo nome è qui. Il poster di un decennio è la sua miniatura `porta-decennio-*.webp`.
      30/9 sera: Francia e Regno Unito rifatte (immagine e clip), arrivate Germania e USA (gli USA non hanno porte oggi: la clip aspetta)
      e la prima clip di decennio, il 1950. */
   'porta-paese-italia', 'porta-paese-francia', 'porta-paese-regnounito', 'porta-paese-germania', 'porta-paese-usa',
-  'porta-decennio-1950', 'porta-decennio-1960', 'porta-decennio-1970', 'porta-decennio-1980', 'porta-decennio-1990', 'porta-decennio-2000'];
+  'porta-decennio-1950', 'porta-decennio-1960', 'porta-decennio-1970', 'porta-decennio-1980', 'porta-decennio-1990', 'porta-decennio-2000',
+  /* 3/10 (L174-4): le clip di FINE ANNO, una per verdetto del bilancio di gennaio (`verdettoBilancio().k`). Non sono carte: le mette
+     `mostraBilancio()` in cima al modale con `scenaMomentoHtml` (striscia, come intervista e telefonata); il poster è il .webp omonimo. */
+  'fineanno-buono', 'fineanno-lucieombre', 'fineanno-difficile', 'fineanno-nuovocapitolo'];
+
+/* ===== L178-3 — I RITRATTI VIVI (`assets/video/pg-<id>.mp4`, 6 s, 540×960, muti; poster `assets/ui/pg-<id>-vivo.webp`). Solo il
+   TUO personaggio è vivo (`S.personaggio.avatar`, un id di AVATARS): i ritratti dei ministri e dei candidati restano fermi. La clip
+   la mette `ritrattoVivoHtml()` (ui.js) nei quattro momenti grandi — partenza, bilancio di gennaio, notte finita, finale — solo se
+   l'id è qui; senza (o con la foto propria) l'animazione del codice. Fuori da VIDEO_PRESENTI (non sono scene), sotto la stessa
+   guardia (`.claude/verifica-asset.js`, sezione sua): cartella = lista, ogni clip col poster, tetto 300 KB. */
+const RITRATTI_VIVI = ['pg-occ-m', 'pg-occ-f', 'pg-lat-m', 'pg-lat-f', 'pg-asi-m', 'pg-asi-f', 'pg-sud-m', 'pg-sud-f', 'pg-afr-m', 'pg-afr-f'];
 
 /* ===== L124-1 — IL VIDEO INTRODUTTIVO (`assets/video/intro.*`). Non è una scena: sta FUORI da VIDEO_PRESENTI (non ha una
    carta né un .webp in assets/scenes) ma sotto la stessa guardia (`.claude/verifica-asset.js`): i file dichiarati qui devono
@@ -173,12 +187,12 @@ const AREA_DI_PAESE = { italia:'europa', francia:'europa', regnounito:'europa', 
                         messico:'latina', brasile:'latina', argentina:'latina',
                         giappone:'asiaest', coreasud:'asiaest', india:'asiasud',
                         nigeria:'africa', sudafrica:'africa' };
-/* 2/10 (turno Code delle 23): le prime diciotto, da arte-sorgente/scene-mondo/. Mancano casa-base-asiasud (il marchio
-   «Jupiter» leggibile su un motorino) e societacivile-base-asiasud («CNG» leggibile sul risciò): segnalate, da ritoccare. */
-const SCENE_AREA = ['casa-base-nordamerica', 'casa-base-latina', 'casa-base-asiaest', 'casa-base-africa',
+/* 2/10 (turno Code delle 23): le prime diciotto, da arte-sorgente/scene-mondo/. 3/10 (turno Code delle 09): casa-base-asiasud
+   e societacivile-base-asiasud, ritoccate da Cowork (tolti il marchio sul motorino e la scritta sul risciò): venti, tutte. */
+const SCENE_AREA = ['casa-base-nordamerica', 'casa-base-latina', 'casa-base-asiaest', 'casa-base-asiasud', 'casa-base-africa',
                     'crisi-base-nordamerica', 'crisi-base-latina', 'crisi-base-asiaest', 'crisi-base-asiasud',
                     'crisi-base-africa', 'ordinepubblico-base-nordamerica', 'ordinepubblico-base-latina', 'ordinepubblico-base-asiaest',
-                    'ordinepubblico-base-asiasud', 'ordinepubblico-base-africa', 'societacivile-base-nordamerica', 'societacivile-base-latina',
+                    'ordinepubblico-base-asiasud', 'ordinepubblico-base-africa', 'societacivile-base-nordamerica', 'societacivile-base-latina', 'societacivile-base-asiasud',
                     'societacivile-base-asiaest', 'societacivile-base-africa'];
 
 /* ===== L151-2 — LE IMMAGINI DEI DECENNI (`assets/scenes/porta-decennio-<anno>.webp`): la miniatura delle porte storiche che non
@@ -194,7 +208,7 @@ const PORTE_DECENNIO = [1950, 1960, 1970, 1980, 1990, 2000];
    un nome fuori da lì è rosso. Le sorgenti stanno in `arte-sorgente/tavolo/` e si convertono con
    `node .claude/tavolo-prova/converti-pedine.js`. Dove va ogni pedina lo decide `pedinaDi()` in ui.js. */
 const PEDINE_NOMI = ['palazzo','citta','industria','campagna','porto','universita','montagna','sede'];
-const PEDINE_PRESENTI = ['palazzo','citta','campagna','porto','universita','sede'];   // L152-4 (30/9): le cinque dello stile C ritagliate pulite (ritaglia-pedine.js). `industria` e `montagna` non sono pulite e restano fuori (il tentativo è in .claude/tavolo-prova/ritaglio-prove/). Sul tavolo oggi non se ne vede nessuna: tutte aspettano il campo `carattere` (il ripiego «tipo città → citta» di pedinaDi è spento: la pedina finiva sotto il cerchio della sua città).
+const PEDINE_PRESENTI = ['palazzo','citta','campagna','porto','universita','sede','industria','montagna'];   // L152-4 (30/9): le cinque dello stile C ritagliate pulite (ritaglia-pedine.js). L173-5 (3/10): `industria` e `montagna` rifatte su fondo grigio e ritagliate pulite col modo «misurato» (le -v1 non lo erano). Sul tavolo oggi non se ne vede nessuna: tutte aspettano il campo `carattere` (il ripiego «tipo città → citta» di pedinaDi è spento: la pedina finiva sotto il cerchio della sua città).
 
 /* ===== L9-1 — SCENE DEI MOMENTI (NON card): fondi/illustrazioni per i modali di solo testo.
    Cablate direttamente nei render (intervista/notte/telefonata/finale) e nel selettore-scenario,

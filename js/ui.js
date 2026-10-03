@@ -483,7 +483,10 @@ function applyPaese(){
      initStatoBase copia in S.turnInMandate) e il motore vota a gennaio quando turnInMandate arriva a mandatoMesi/12 — le porte partono a
      gennaio, quindi gli anni sono mandatoMesi/12 − turnMandato (de2000: 2; fr1980: 1). Il presente non ha turnMandato: il mandato intero. */
   const scI=(typeof SCENARI!=='undefined' && typeof chosenScenario!=='undefined') ? SCENARI[chosenScenario] : null;
-  const anniUrna=Math.max(1, P.mandatoMesi/12 - ((scI && scI.id!=='presente' && scI.turnMandato) || 0));
+  /* L173-1 · con `meseUrna` (l'urna a novembre) il primo anno del mandato finisce al mese dell'urna, non a dicembre: i mesi alla prima urna
+     da gennaio sono ((mu−2) mod 12)+1 più gli anni pieni (12 con gennaio: la formula di prima), e si arrotondano ad anni. */
+  const muI=(scI && scI.meseUrna) || P.meseUrna || 1, tmI=((scI && scI.id!=='presente' && scI.turnMandato) || 0);
+  const anniUrna=Math.max(1, Math.round(((((muI-2)+12)%12)+1 + (P.mandatoMesi/12 - tmI - 1)*12)/12));
   if(intro) intro.textContent = (typeof chosenMode!=='undefined' && chosenMode==='opposizione')
     ? (anniUrna===1
         ? T("Parti da sfidante: a governare %PAESE è l'avversario più forte. Niente nomina dei ministri — costruisci visibilità e credibilità mese per mese e, alle prossime elezioni (tra un anno), riprenditi il paese.")
@@ -658,6 +661,43 @@ function scenaMomentoHtml(src, opt){
   if(opt.sfondo) return `<div class="mbg-img${clip?' con-video':''}" style="background-image:url('${src}')">${vid}</div>`;
   return `<div class="mscene-box${opt.fin?' fin':''}${clip?' con-video':''}"><img class="mscene" src="${src}" alt="">${vid}</div>`;
 }
+/* ================================================================================================================
+   L178-3 · IL RITRATTO VIVO (risposta di Giacomo del 30/9: «clip + codice»). Solo il TUO personaggio (`S.personaggio.avatar`):
+   i ritratti dei ministri e dei candidati restano fermi. Un helper solo, accanto a scenaMomentoHtml, per i quattro momenti grandi
+   — partenza, bilancio di gennaio, notte finita, finale —: un medaglione verticale 3:4.
+   · La CLIP (`assets/video/pg-<id>.mp4`, muta, in loop) se l'id è in `RITRATTI_VIVI` (scenes.js, la lista-promessa) e il video è
+     consentito (movimento «pieno», niente `reteLeggera()`), e il momento non è fermo (G8: il finale per morte, un pilastro-tragedia
+     in agenda). Non è una clip di carta né del momento: non porta `data-vkey`, non entra nel testimone (`VIDEO_QUOTA`).
+   · Senza clip (la foto propria, un id fuori lista) l'ANIMAZIONE DEL CODICE (`.rv-codice`: avvicinamento lento, respiro, una luce
+     che scorre) sul poster o sulla foto. Con «ridotto»/«spento» la classe sul <html> spegne tutto (la regola del CSS: qui non si
+     riaccende), con `reteLeggera()` o un momento fermo il poster sta fermo (`.rv-fermo`).
+   · La CORNICE cambia tono col momento: `opt.tono` 'trionfo' (oro) · 'sconfitta' (grigio-ardesia) · niente (neutra).
+   · Mai più di un ritratto vivo per momento; quando il modale si chiude la clip si ferma (`fermaRitrattiVivi`). Niente in S.
+   ================================================================================================================ */
+function ritrattoVivoHtml(opt){
+  opt=opt||{};
+  const id=(typeof S!=='undefined' && S && S.personaggio) ? S.personaggio.avatar : null;
+  const img=id ? avatarImg(id) : null; if(!img) return '';
+  const foto=String(id).slice(0,5)==='data:';
+  const conLista=!foto && typeof RITRATTI_VIVI!=='undefined' && RITRATTI_VIVI.indexOf(id)>=0;
+  const poster=conLista ? 'assets/ui/'+id+'-vivo.webp' : img;
+  const trag=(typeof musicaTragedia==='function') && musicaTragedia();
+  const fermo=!!opt.ferma || trag || reteLeggera();
+  const clip=(conLista && !fermo && videoConsentito()) ? VIDEO_DIR+id+'.mp4' : '';
+  const tono=(opt.tono==='trionfo'||opt.tono==='sconfitta') ? ' rv-'+opt.tono : '';
+  const cls='ritratto-vivo'+tono+(opt.cls?' '+opt.cls:'')+(clip?' rv-clip':(fermo?' rv-fermo':' rv-codice'));
+  return `<div class="${cls}" aria-hidden="true"><img src="${poster}" alt="">`
+    +(clip ? `<video class="rv-video" src="${clip}" poster="${poster}" muted loop playsinline autoplay preload="none" disablepictureinpicture onplaying="this.classList.add('on')"></video>` : '')
+    +`</div>`;
+}
+function fermaRitrattiVivi(dentro){   // L178-3: chiuso il momento, la clip smette di suonare e di scaricare
+  try{ (dentro||document).querySelectorAll('video.rv-video').forEach(function(v){ v.pause(); v.removeAttribute('src'); v.load(); }); }catch(e){}
+}
+/* L178-3: il velo dei modali (#ov) si chiude togliendo la classe `on`, da tanti punti — un osservatore solo ferma la clip-ritratto */
+(function(){ try{ if(typeof document==='undefined' || typeof MutationObserver==='undefined') return;
+  const aggancia=function(){ const ov=document.getElementById('ov'); if(!ov) return;
+    new MutationObserver(function(){ if(!ov.classList.contains('on')) fermaRitrattiVivi(ov); }).observe(ov, {attributes:true, attributeFilter:['class']}); };
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', aggancia); else aggancia(); }catch(e){} })();
 function agScene(it){ if(!it || typeof SCENA_MAJOR==='undefined' || !SCENA_MAJOR[it.kind]) return '';   // display selettivo (ora incl. le carte locali)
   const bucket=scenaId(it); if(!bucket) return '';
   const seed=(it.data&&it.data.id) || (it.kind==='rimpasto'&&it.min ? 'rimpasto:'+it.min : null) || it.kind || bucket;   // hash stabile: id-carta → stessa variante per quella carta (L127-1b: due rimpasti nello stesso mese sono due chiavi della clip, non un nodo conteso)
@@ -785,7 +825,7 @@ function avviaRuolo(){
 const PARTENZA_NOMI={0:'attivista', 1:'locale', 2:'ministro', 3:'capo', 5:'diplomatico'};
 let PARTENZA_APERTA=false, PARTENZA_FERME=[], PARTENZA_FINE={clip:false, voce:true};
 function partenzaVoce(nome){       // L146-1: la voce della clip, o null (dall'opposizione, o senza dichiarazione)
-  const k=String(nome||'').replace(/^partenza-/, '');
+  const k=String(nome||'').replace(/^partenza-(oggi-)?/, '');   // L178-4: la clip «di oggi» ha la stessa voce del ruolo
   const PV=(typeof PARTENZA_VOCE!=='undefined' && PARTENZA_VOCE) ? PARTENZA_VOCE[k] : null;
   if(!PV || !PV.voce) return null;
   if(k==='capo' && typeof S!=='undefined' && S && S.opposizione) return null;
@@ -798,8 +838,10 @@ function partenzaFinita(chi){      // L146-1: si chiude da sola solo quando clip
 }
 function partenzaDelRuolo(){
   const n=PARTENZA_NOMI[(CREA && CREA.livello!=null) ? CREA.livello : 3];
-  const nome=n ? 'partenza-'+n : null;
-  return (nome && typeof VIDEO_PRESENTI!=='undefined' && VIDEO_PRESENTI.indexOf(nome)>=0) ? nome : null;
+  const c=function(x){ return (x && typeof VIDEO_PRESENTI!=='undefined' && VIDEO_PRESENTI.indexOf(x)>=0) ? x : null; };
+  /* L178-4: nel PRESENTE (nessuna porta) la versione «di oggi» se è in lista, altrimenti la clip di sempre; le storiche non cambiano */
+  const presente=(typeof chosenScenario==='undefined' || !chosenScenario || chosenScenario==='presente');
+  return (n && presente && c('partenza-oggi-'+n)) || (n ? c('partenza-'+n) : null);
 }
 function apriPartenza(nome){
   if(!nome || PARTENZA_APERTA || typeof document==='undefined' || !document.body) return;
@@ -814,7 +856,8 @@ function apriPartenza(nome){
     +(PV ? '<audio id="partenza-voce" src="'+VIDEO_DIR+PV.voce+'" preload="auto">'
         +(st ? '<track kind="subtitles" srclang="'+lin+'" label="'+(lin==='en'?'English':'Italiano')+'" src="'+VIDEO_DIR+st+'">' : '')+'</audio>'
         +'<div id="partenza-sott" aria-live="polite"><span></span></div>' : '')
-    +'<button id="partenza-salta" type="button">'+T('Salta')+'</button>';
+    +'<button id="partenza-salta" type="button">'+T('Salta')+'</button>'
+    +((typeof ritrattoVivoHtml==='function') ? ritrattoVivoHtml({cls:'rv-partenza'}) : '');   // L178-3: il ritratto vivo in basso a sinistra (entra dopo ~1 s)
   el.addEventListener('click', chiudiPartenza);            // un tocco ovunque salta (anche su «Salta»)
   document.body.appendChild(el);
   const v=document.getElementById('partenza-video');
@@ -826,7 +869,7 @@ function apriPartenza(nome){
     try{ const tt=a.textTracks && a.textTracks[0];
       if(tt){ tt.mode='hidden';
         tt.addEventListener('cuechange', function(){ try{ const c=tt.activeCues, r=[]; for(let i=0;c && i<c.length;i++) r.push(c[i].text);
-          sott.textContent=r.join('\n'); sott.parentNode.classList.toggle('on', r.length>0); }catch(e){} }); } }catch(e){}
+          sott.textContent=r.join('\n'); sott.parentNode.classList.toggle('on', r.length>0); partenzaRitrattoGuardia(); }catch(e){} }); } }catch(e){}
     a.addEventListener('playing', function(){ if(!a.muted && PARTENZA_APERTA){ try{ if(typeof musicaSottovoce==='function') musicaSottovoce(true); }catch(e){} } }, {once:true});
     a.addEventListener('ended', function(){ partenzaFinita('voce'); }, {once:true});
     a.addEventListener('error', function(){ try{ sott.textContent=''; sott.parentNode.classList.remove('on'); }catch(e){} partenzaFinita('voce'); }, {once:true});
@@ -840,13 +883,18 @@ function apriPartenza(nome){
   void el.offsetWidth; el.classList.add('on');   // la dissolvenza d'entrata col reflow forzato, non con rAF: senza frame (scheda nascosta) il velo resterebbe trasparente
   setTimeout(function(){ try{ document.getElementById('partenza-salta').focus({preventScroll:true}); }catch(e){} }, 50);
 }
+/* L178-3: il medaglione della partenza non copre MAI i sottotitoli — a ogni battuta si confrontano i riquadri, e se si toccano
+   il ritratto esce per il resto della clip (niente va-e-vieni). */
+function partenzaRitrattoGuardia(){ try{ const rv=document.querySelector('#partenza .rv-partenza'), sp=document.querySelector('#partenza-sott span');
+  if(!rv || !sp || !sp.textContent) return; const a=rv.getBoundingClientRect(), b=sp.getBoundingClientRect();
+  if(a.left<b.right && b.left<a.right && a.top<b.bottom && b.top<a.bottom){ rv.classList.add('rv-via'); fermaRitrattiVivi(rv.parentNode); } }catch(e){} }
 function partenzaTasto(e){ if(e.key==='Escape'){ e.preventDefault(); chiudiPartenza(); } }
 function chiudiPartenza(){
   if(!PARTENZA_APERTA) return;
   PARTENZA_APERTA=false;
   document.removeEventListener('keydown', partenzaTasto, true);
   const el=document.getElementById('partenza');
-  if(el){ el.id='partenza-uscente'; const v=el.querySelector('video'), a=el.querySelector('audio');
+  if(el){ el.id='partenza-uscente'; const v=el.querySelector('video'), a=el.querySelector('audio'); fermaRitrattiVivi(el);   // L178-3
     try{ if(v){ v.pause(); v.removeAttribute('src'); v.load(); } }catch(e){}   // smette di scaricare
     try{ if(a){ a.pause(); a.removeAttribute('src'); a.load(); } }catch(e){}   // L146-1: e la voce tace subito
     el.classList.remove('on'); setTimeout(function(){ try{ el.remove(); }catch(e){} }, 400); }
@@ -1637,7 +1685,10 @@ function render(){
   document.getElementById('yr').textContent=S.year;
   /* Volto in-game: ritrattino del giocatore nell'header (statico, immagine già inline). Si nasconde se non scelto. */
   const hav=document.getElementById('hdr-avatar'); if(hav){ const pim=avatarImg(S.personaggio&&S.personaggio.avatar);
-    if(pim){ hav.innerHTML=`<img src="${pim}" alt="Il tuo volto">`; hav.style.display=''; } else { hav.innerHTML=''; hav.style.display='none'; } }
+    /* L178-3: il ritratto del giocatore respira (l'animazione del codice, `.vivo`: niente <video> in cima allo schermo). Si riscrive solo
+       se cambia: a ogni render il nodo nuovo ripartirebbe da capo (fra due render non c'è un frame). */
+    if(pim){ if(hav.getAttribute('data-src')!==pim){ hav.innerHTML=`<img src="${pim}" alt="Il tuo volto">`; hav.setAttribute('data-src', pim); } hav.classList.add('vivo'); hav.style.display=''; }
+    else { hav.innerHTML=''; hav.removeAttribute('data-src'); hav.classList.remove('vivo'); hav.style.display='none'; } }
   const liv4=(S.livello===4 && S.intl);
   const liv5=(S.livello===5 && S.diplo);
   const liv0=(S.livello===0 && S.attivista);   // ATTIVISTA (Build A): superficie focalizzata sulla militanza
@@ -2589,6 +2640,7 @@ function renderPaese(){
   }
   let h=`<div class="contorno" style="font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--mut);margin:2px 2px 8px;">${T('Stato del paese')}</div>`;
   if(S.livello===2) h+=`<div class="banner">${T('<b>Governa %PM.</b> Vedi gli indicatori nazionali, ma non li guidi: la politica generale è del premier. Tu incidi dal <b>tuo dicastero</b>.').replace('%PM', escAttr((S.premier||{}).nome||T('il premier')))}</div>`;
+  if(S.governoDiviso && S.livello===3) h+=`<div class="banner">${T(S.opposizione ? '<b>Il Congresso è del tuo partito.</b> Il Presidente governa diviso.' : '<b>Il Congresso è dell\'altro partito.</b> Un punto riforma in meno alla manovra.')}</div>`;   // L173-2: il governo diviso, in sola lettura
   if(S.coabitazione) h+=`<div class="banner">${T('<b>Governa %PM.</b> Tieni esteri e difesa; il resto non lo guidi.').replace('%PM', escAttr((S.premier||{}).nome||T('il Primo ministro')))}</div>`;   // L100-2: la coabitazione riusa il banner del livello 2
   h+=`<div class="budget">
     <div class="b"><div class="l">${T('Saldo di bilancio')}</div><div class="v" style="color:${def<=3?'var(--pos)':def<=4?'var(--warn)':'var(--neg)'}">${balText}</div></div>

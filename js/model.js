@@ -822,10 +822,19 @@ function bloccoIds(){
 function bloccoQuota(){ return bloccoIds().reduce((s,id)=>s+((S.forze&&S.forze[id])||0),0); }
 
 /* Testa a testa (sistemi a candidato): tu vs l'avversario più forte; gli altri travasano la forza al lato
-   più vicino per asse (equidistanti: metà e metà). Vinci se superi il 50%. Ritorna {opp, mine, his, myPct, win}. */
+   più vicino per asse (equidistanti: metà e metà). Vinci se superi il 50%. Ritorna {opp, mine, his, myPct, win}.
+   ⚑ L175-2 (variante c1) · AL GOVERNO L'AVVERSARIO È IL PIÙ FORTE FUORI DAL MIO BLOCCO (staColBlocco). Il difetto misurato in L173-3 era
+   il Presidente in carica che perde la presidenziale contro un suo alleato (fr1970, fr1990, Brasile, Nigeria: «contro un alleato» 114
+   volte al governo in (a)); i minori restano dove li mette l'asse, come prima. DALL'OPPOSIZIONE NON CAMBIA NIENTE: «sfidare il più forte
+   degli altri» è già la regola di oggi, e curarla anche lì faceva della presidenziale una formalità (b′ di L174-2: 90,9% vinte). Se fuori
+   dal blocco non c'è nessuno, si torna al più forte degli altri. Misura e regola: BASELINE-175.md. */
 function testaATesta(){
   const me=S.partito, meA=part(me).asse;
-  const altri=PAESE.partiti.filter(p=>p.id!==me).sort((a,b)=>(S.forze[b.id]||0)-(S.forze[a.id]||0));
+  let altri=PAESE.partiti.filter(p=>p.id!==me).sort((a,b)=>(S.forze[b.id]||0)-(S.forze[a.id]||0));
+  if(!S.opposizione && typeof staColBlocco==='function'){
+    const fuori=altri.filter(p=>!staColBlocco(p.id, me));
+    if(fuori.length) altri=[fuori[0]].concat(altri.filter(p=>p.id!==fuori[0].id));
+  }
   const opp=altri[0], oppA=opp.asse;
   let mine=S.forze[me]||0, his=S.forze[opp.id]||0;
   for(const p of altri.slice(1)){

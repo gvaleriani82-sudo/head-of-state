@@ -16,6 +16,10 @@ const LINEA_FR = 'francia_repubbliche';
    all'euro; le porte arriveranno con le schede. */
 const LINEA_DE = 'germania_repubbliche';
 const VALUTA_MARCO = { sym:'DM', mld:'mld marchi', mln:'mln marchi' };   // L107-3: la valuta delle porte tedesche fino al 2001 (valuta: VALUTA_MARCO)
+/* L175-1 — la quinta linea storica, gli Stati Uniti del dopoguerra (PIANO-LINEA-USA.md): presidenziale, due partiti, il Congresso
+   derivato di L173-2; niente changeover (il dollaro resta il dollaro). */
+const LINEA_US = 'usa_dopoguerra';
+const VALUTA_DOLLARO = { sym:'$', mld:'mld dollari', mln:'mln dollari' };   // L175-1 (L171-4 §9): la valuta delle porte americane
 
 "use strict";
 /* ============================================================

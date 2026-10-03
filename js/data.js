@@ -1168,6 +1168,8 @@ const SCENARI = {
      mandatoMesi/12`, game.js): il dicembre non è rappresentabile, e il valore che ci arriva più vicino è
      `turnMandato: 1` → **urna a gennaio 1966**, un mese dopo la storia. `turnMandato: 2` la porterebbe al gennaio
      1965, undici mesi PRIMA. Dichiarato, non aggirato: spostare il voto fuori gennaio è un lotto di motore.
+     ⚑ L173-1: il lotto di motore c'è (`meseUrna`, l'urna a scadenza a un altro mese, il mandato contato da lì); questa porta
+     non lo dichiara — portarla al dicembre 1965 cambierebbe il calendario di una porta chiusa, ed è una scelta di Cowork.
 
      ⚠ IL SEED È IN NUOVI FRANCHI (1 NF = 100 F dal 1° gennaio 1960): 300 miliardi, non 30.000. Il cambio di unità
      è il fatto della soglia e sta nel dato, non in una cerimonia — il changeover del gioco è quello dell'euro e
@@ -1792,6 +1794,58 @@ const SCENARI = {
       "Germania, gennaio 2000. Berlino è un cantiere: le gru sopra il vecchio confine, la cupola di vetro del Parlamento aperta ai visitatori. Nei ministeri ci sono ancora gli scatoloni nei corridoi.",
       "L'economia cresce, ma all'Est la disoccupazione è il doppio che all'Ovest. Dal 2002 i prezzi si scriveranno in euro, e i sondaggi dicono che la maggioranza avrebbe tenuto il marco.",
       "Socialdemocratici e Verdi governano insieme dal 1998: è la prima volta. L'Unione cristiana è all'opposizione dopo sedici anni di governo, alle prese con lo scandalo dei suoi conti.",
+    ],
+  },
+  /* ============================================================================================================
+     L175-1 · STATI UNITI 1950 — la prima porta della linea americana (scheda PRESET-USA-1950.md, D125-D133; ricognizione L171-4 in
+     PIANO-LINEA-USA.md). Si apre nel GENNAIO 1950 a Washington col Presidente democratico eletto a sorpresa nel novembre 1948 e un
+     Congresso democratico; chiude con la presidenziale del novembre 1960 e si salda a us1960.
+     LE ISTITUZIONI sono scritte per intero (come de2000), anche dove coincidono col presente: paeseConScenario sovrascrive coi campi di
+     SCENARIO_ISTITUZIONI (sistema, comeSiVince, coalizione, cadutaGoverno, mandatoMesi, titoloRuolo, sedeGoverno, meseUrna, congresso),
+     più ue, capitale, intermedie e mandatiMax; `mandatiConsecutivi` NON è fra quei campi e lo dà comunque il paese (false: il limite è
+     sui mandati totali) — qui è scritto per chi legge, non lo legge nessuno.
+     IL CALENDARIO (D125, L173-1): `meseUrna:11` e `turnMandato:1` contato dal novembre 1948 → metà mandato 1950/11 · presidenziale
+     1952/11 · 1954/11 · 1956/11 · 1958/11 · 1960/11. Voto e insediamento sono lo stesso gesto di novembre (l'«anatra zoppa» non c'è).
+     IL CONGRESSO (D126, L173-2): la Camera del 1948 (263/434 democratici, 60,6) e la metà mandato con `penalitaGoverno:0.5` (D134, L176-1: era 1,5).
+     CHI SI GIOCA (D130): i Democratici al governo con `mandatiVinti:1` (rivincono il 1952 → `mandatoCompiuto` alla vigilia del 1956) e i
+     Repubblicani dall'opposizione (dal L175-1 senza l'anzianità dell'avversario: startOpposizione). ⚠ Il 22° emendamento (febbraio 1951)
+     esentava il Presidente in carica: nel gioco il limite di due vale anche per lui — dichiarato qui, non modellato.
+     NIENTE TAPPE (§H): la Camera la decidono la metà mandato e la presidenziale, il roster non cambia nel decennio.
+     I TERRITORI (D129) sono i 18 del presente nello stesso ordine (paralleli per indice a mappa.aree: mai riordinare), col lean del 1950.
+     ============================================================================================================ */
+  us1950: {
+    id:'us1950', era:LINEA_US, nome:'Stati Uniti 1950', anno:1950, paese:'usa',
+    turnMandato: 1, meseUrna: 11,               // D125: il mandato del novembre 1948 al secondo anno → presidenziale 1952/11
+    sistema: 'presidenziale', comeSiVince: 'candidato', coalizione: false, cadutaGoverno: false,
+    mandatoMesi: 48, mandatiMax: 2, mandatiConsecutivi: false,
+    titoloRuolo: 'Presidente', sedeGoverno: 'la Casa Bianca',
+    capitale: 'Washington',
+    ue: false,
+    congresso: { camera: 60.6 },                // D126: 263 democratici su 434 (la Camera del 1948)
+    intermedie: [ {tipo:'Elezioni di metà mandato', mese:24, tocca:'tutti', penalitaGoverno:0.5} ],   // L173-2 · D134 (L176-1): col logorio di porta 0,014 la penalità non serve a far perdere chi governa — 0 · 0,5 · 1 · 1,5 → 85 · 92 · 98 · 98% (L175-1); banda storica 85-95 (dal 1946 il partito del Presidente perde seggi in 18 metà mandato su 20, ⚠)
+    mandatiVinti: 1,                            // D130: il Presidente ha vinto il 1948 (vale solo per chi parte al governo: L175-1, startOpposizione)
+    partiti: [
+      { id:'us_dem', nome:'Democratici',  orientamento:'centrosinistra', base:{ giovani:0.4, lavoratori:0.35, cetomedio:0.25 },                  forza:52, forzaAncora:50, asse:-1 },
+      { id:'us_rep', nome:'Repubblicani', orientamento:'centrodestra',   base:{ imprenditori:0.4, cetomedio:0.25, cattolici:0.2, pensionati:0.15 }, forza:48, forzaAncora:50, asse:1 },
+    ],
+    territori: [
+      {nome:'New York', tipo:'città', carica:'Sindaco', lean:-2, simbolo:true}, {nome:'la California', tipo:'regione', carica:'Governatore', lean:1, simbolo:true}, {nome:'il Texas', tipo:'regione', carica:'Governatore', lean:-2, simbolo:true}, {nome:'la Pennsylvania', tipo:'regione', carica:'Governatore', lean:1, simbolo:true},
+      {nome:'la Florida', tipo:'regione', carica:'Governatore', lean:-1}, {nome:"l'Ohio", tipo:'regione', carica:'Governatore', lean:1}, {nome:'il Michigan', tipo:'regione', carica:'Governatore', lean:0}, {nome:'la Georgia', tipo:'regione', carica:'Governatore', lean:-2},
+      {nome:"l'Illinois", tipo:'regione', carica:'Governatore', lean:0}, {nome:'lo stato di Washington', nomeEn:'Washington State', tipo:'regione', carica:'Governatore', lean:0}, {nome:"l'Arizona", tipo:'regione', carica:'Governatore', lean:0}, {nome:"l'Alabama", tipo:'regione', carica:'Governatore', lean:-2},
+      {nome:'Los Angeles', tipo:'città', carica:'Sindaco', lean:0}, {nome:'Chicago', tipo:'città', carica:'Sindaco', lean:-2}, {nome:'Houston', tipo:'città', carica:'Sindaco', lean:-1}, {nome:'Phoenix', tipo:'città', carica:'Sindaco', lean:1}, {nome:'Filadelfia', nomeEn:'Philadelphia', tipo:'città', carica:'Sindaco', lean:-1}, {nome:'San Francisco', tipo:'città', carica:'Sindaco', lean:0}
+    ],
+    /* ⚠ cifre della scheda §2, ordine di grandezza (BEA/BLS/OMB da confermare): PIL nominale in miliardi di dollari, debito federale lordo. */
+    economia: { pil:300, debito:92, deficit:-1.1, inflazione:1.3, crescita:4, crescitaTetto:9, disoccupazione:5.3 },   // crescitaTetto (L109-1): il 1950-51 a 8,7 · 8,0 passa il tetto di 5
+    debtAncora: 92,
+    inflazione: 1.3,   // l'anno per anno sta in DRIFT_INFLAZIONE_ERA (la Corea del 1951)
+    crescita: 4,       // la base: la media del decennio (~3,9); recessioni e picchi stanno nel drift (DRIFT_ECONOMICO_ERA)
+    logorioEra: 0.014,                          // L175-1: sweep 0,002-0,025 (20 carriere per lato, 132 mesi): i Democratici al governo vincono il 1952 20/20 fino a 0,006, 13 a 0,012, 8 a 0,014, 7 a 0,016, 3 a 0,018 (bersaglio 6-12); i Repubblicani dall'opposizione il 1952 20/20 sempre, il 1956 13 su 16 a 0,014. Tabella in PRESET-USA-1950.md («L175-1»)
+    valuta: VALUTA_DOLLARO,
+    intro: "Stati Uniti, 1950. Il Presidente che nessuno aspettava ha vinto le elezioni di quindici mesi fa contro tutti i sondaggi. Il paese è il più ricco del mondo, e ha appena scoperto di non essere più il solo ad avere la bomba.",
+    contesto: [
+      "Washington, gennaio 1950. La Casa Bianca è in restauro e il Presidente vive nella residenza per gli ospiti dall'altra parte della strada. Al Congresso comandano i Democratici, ma i senatori del Sud votano spesso con l'opposizione.",
+      "Le fabbriche che hanno vinto la guerra ora fanno automobili, frigoriferi e televisori. I reduci comprano casa nei sobborghi col mutuo garantito dallo Stato, e le famiglie fanno figli come non si era mai visto.",
+      "La Cina è diventata comunista in ottobre, e a Mosca hanno la bomba da agosto. Sui giornali e nelle commissioni del Congresso si comincia a chiedere chi, a Washington, abbia «perso» la Cina.",
     ],
   },
   /* ============================================================================================================
@@ -2792,6 +2846,135 @@ const PILASTRI_LINEA = [
     t:'Überlingen',
     text:'Nella notte del 1° luglio, a più di diecimila metri sopra il lago di Costanza, un aereo passeggeri diretto a Barcellona e un aereo cargo si scontrano. A bordo dell\'aereo passeggeri c\'erano decine di ragazzi in viaggio premio per le vacanze. I rottami cadono sui campi e sui frutteti attorno a Überlingen. Muoiono settantuno persone; non si salva nessuno.',
     logx:'Überlingen: due aerei si scontrano di notte sopra il lago di Costanza. Settantuno morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  /* L176-2 · i venticinque pilastri di us1950 (scheda §I-H, D136: ventinove sciagure sopra i 50 morti in 132 mesi, accorpate per settimana o
+     per tipo nello stesso mese; nessuno nel mese di un'urna di novembre né di uno snodo — le sciagure del 22 novembre 1950 e 1952 escono a
+     dicembre, col giorno vero nel testo). Verifiche ⚠ su en.wikipedia nel rapporto (PRESET-USA-1950.md, «⚑ L176-2»). G5: nessuna compagnia,
+     modello, nave, scuola, miniera nominata; i luoghi sì. */
+  { id:'pus50_lago', linea:LINEA_US, anno:1950, mese:6, era:'us1950', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Il lago Michigan',
+    text:'La notte del 23 giugno un aereo di linea partito da New York e diretto a Seattle entra in un temporale sopra il lago Michigan e scompare dai radar. Al mattino sull\'acqua galleggiano rottami e cuscini dei sedili. Il relitto non verrà mai trovato. A bordo c\'erano cinquantotto persone; non si salva nessuno.',
+    logx:'Il lago Michigan: un aereo di linea scompare nel temporale. Cinquantotto morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus50_novembre', linea:LINEA_US, anno:1950, mese:12, era:'us1950', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Fine novembre',
+    text:'Il 22 novembre, all\'ora di punta, un treno di pendolari viene tamponato da un altro treno nel Queens, a New York: settantotto morti. Due giorni dopo una tempesta arriva sull\'Est del paese, con più di un metro di neve sugli Appalachi, vento da uragano sulla costa e fiumi fuori dagli argini. In una settimana muoiono più di trecentottanta persone, molte nelle case rimaste senza riscaldamento.',
+    logx:'Il treno nel Queens e la tempesta di fine novembre: più di quattrocentocinquanta morti in una settimana.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus50_woodbridge', linea:LINEA_US, anno:1951, mese:2, era:'us1950', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Woodbridge',
+    text:'Il 6 febbraio, all\'ora di punta della sera, un treno di pendolari entra troppo veloce in una deviazione provvisoria a Woodbridge, nel New Jersey, aperta al traffico quello stesso pomeriggio. Le carrozze escono dai binari e cadono dal terrapieno. Muoiono ottantacinque persone, più di cinquecento sono ferite.',
+    logx:'Woodbridge: un treno di pendolari deraglia su una deviazione provvisoria. Ottantacinque morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus50_dicembre51', linea:LINEA_US, anno:1951, mese:12, era:'us1950', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Elizabeth e la miniera',
+    text:'Il 16 dicembre un aereo di linea prende fuoco poco dopo il decollo da Newark e cade sulla riva di un fiume a Elizabeth, nel New Jersey: cinquantasei morti. Cinque giorni dopo, la sera del 21, un\'esplosione di gas in una miniera di carbone dell\'Illinois meridionale uccide centodiciannove minatori.',
+    logx:'Un aereo a Elizabeth e una miniera nell\'Illinois: centosettantacinque morti in cinque giorni.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus50_tornado52', linea:LINEA_US, anno:1952, mese:3, era:'us1950', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'I tornado di marzo',
+    text:'Il 21 e il 22 marzo una ventina di tornado attraversano l\'Arkansas, il Tennessee e gli stati vicini, in una notte e un giorno. Intere cittadine di campagna sono rase al suolo. Muoiono duecentonove persone.',
+    logx:'I tornado di marzo nel Sud: duecentonove morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus50_aerei52', linea:LINEA_US, anno:1952, mese:12, era:'us1950', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Due aerei militari',
+    text:'Il 22 novembre un aereo militare da trasporto si schianta contro un monte dell\'Alaska con cinquantadue uomini a bordo; il relitto sparisce sotto la neve. Il 20 dicembre un altro, carico di soldati che tornavano a casa per Natale, cade appena decollato dalla base di Moses Lake, nello stato di Washington: ottantasette morti.',
+    logx:'Due aerei militari, in Alaska e a Moses Lake: centotrentanove morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus50_waco', linea:LINEA_US, anno:1953, mese:5, era:'us1950', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Waco',
+    text:'L\'11 maggio, nel pomeriggio, un tornado entra nel centro di Waco, nel Texas, mentre la gente è nei negozi e negli uffici. Gli edifici di mattoni crollano sulle strade e sulle automobili. Muoiono centoquattordici persone; i soccorritori scavano per giorni.',
+    logx:'Waco: un tornado nel centro della città. Centoquattordici morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus50_flint', linea:LINEA_US, anno:1953, mese:6, era:'us1950', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Flint e Worcester',
+    text:'L\'8 giugno, al tramonto, un tornado attraversa i quartieri a nord di Flint, nel Michigan: centosedici morti. Il giorno dopo un altro colpisce Worcester, nel Massachusetts, dove i tornado non arrivano quasi mai: novantaquattro. In tre giorni, con quelli dell\'Ohio e del New England, i morti sono più di duecentoquaranta.',
+    logx:'Flint e Worcester: più di duecentoquaranta morti in tre giorni di tornado.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus50_portaerei', linea:LINEA_US, anno:1954, mese:5, era:'us1950', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'La portaerei',
+    text:'La mattina del 26 maggio, al largo del Rhode Island, un\'esplosione sotto il ponte di volo di una portaerei della Marina scatena un incendio nei locali dell\'equipaggio. Muoiono centotré marinai, più di duecento sono feriti.',
+    logx:'Un\'esplosione su una portaerei al largo del Rhode Island. Centotré marinai morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus50_carol', linea:LINEA_US, anno:1954, mese:9, era:'us1950', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'L\'uragano sul New England',
+    text:'Il 31 agosto un uragano risale la costa e colpisce il Connecticut, il Rhode Island e il Massachusetts quasi senza preavviso. Il mare entra nelle città fino alle piazze. Muoiono più di settanta persone.',
+    logx:'L\'uragano sul New England: più di settanta morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus50_hazel', linea:LINEA_US, conCampagna:true, anno:1954, mese:10, era:'us1950', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'L\'uragano d\'ottobre',
+    text:'Il 15 ottobre un uragano tocca terra fra le due Caroline e risale verso nord attraverso la Virginia, la Pennsylvania e lo stato di New York. Sulla costa intere file di case spariscono dalla spiaggia. Negli Stati Uniti muoiono novantacinque persone.',
+    logx:'L\'uragano d\'ottobre dalle Caroline a New York: novantacinque morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus50_oahu', linea:LINEA_US, anno:1955, mese:3, era:'us1950', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Oahu',
+    text:'La notte del 22 marzo un aereo da trasporto della Marina, in avvicinamento alla base vicino a Honolulu, si schianta contro una montagna dell\'isola di Oahu, nel territorio delle Hawaii. Muoiono tutti i sessantasei a bordo.',
+    logx:'Oahu: un aereo della Marina contro una montagna. Sessantasei morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus50_udall', linea:LINEA_US, anno:1955, mese:5, era:'us1950', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Udall',
+    text:'La sera del 25 maggio un tornado distrugge mezza Blackwell, nell\'Oklahoma; poco dopo un altro cancella quasi del tutto Udall, un paese del Kansas di poche centinaia di abitanti, mentre dormono. Muoiono più di cento persone, quasi ottanta solo a Udall.',
+    logx:'Blackwell e Udall: più di cento morti in una notte di tornado.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus50_uragani55', linea:LINEA_US, anno:1955, mese:8, era:'us1950', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Due uragani',
+    text:'Il 12 agosto un uragano porta piogge torrenziali sulle Caroline e sul medio Atlantico; cinque giorni dopo ne arriva un secondo, sui terreni già zuppi. In Pennsylvania, nel Connecticut e nel Massachusetts i fiumi escono di notte dagli argini e portano via ponti, fabbriche e case. Muoiono più di duecentocinquanta persone.',
+    logx:'Due uragani in una settimana e le alluvioni del Nord-Est: più di duecentocinquanta morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus50_wyoming', linea:LINEA_US, anno:1955, mese:10, era:'us1950', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Il monte del Wyoming',
+    text:'Il 6 ottobre un aereo di linea in volo da Denver a Salt Lake City si schianta contro una montagna del Wyoming. Muoiono tutti i sessantasei a bordo.',
+    logx:'Un aereo di linea contro una montagna del Wyoming. Sessantasei morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus50_california55', linea:LINEA_US, anno:1955, mese:12, era:'us1950', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Natale sott\'acqua',
+    text:'Dopo una settimana di piogge, la vigilia di Natale un fiume rompe un argine nella California settentrionale e allaga di notte una cittadina intera. In tutto lo stato, nei giorni delle feste, muoiono settantaquattro persone.',
+    logx:'Le alluvioni di Natale in California: settantaquattro morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus50_neve56', linea:LINEA_US, anno:1956, mese:3, era:'us1950', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'La neve di marzo',
+    text:'Fra il 18 e il 20 marzo una tempesta di neve tardiva copre il Nord-Est, da Washington al Maine. Le città restano isolate per giorni. Muoiono più di centocinquanta persone, nel freddo, nelle automobili ferme, spalando la neve.',
+    logx:'La tempesta di neve di marzo sul Nord-Est: più di centocinquanta morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus50_canyon', linea:LINEA_US, conCampagna:true, anno:1956, mese:6, era:'us1950', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Il Grand Canyon',
+    text:'Il 30 giugno due aerei di linea partiti da Los Angeles a pochi minuti di distanza si scontrano in volo sopra il Grand Canyon, fuori dalle rotte controllate, nascosti l\'uno all\'altro dalle nuvole. I rottami cadono sul fondo della gola. Muoiono centoventotto persone; non si salva nessuno.',
+    logx:'Due aerei di linea si scontrano sopra il Grand Canyon. Centoventotto morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus50_tornado57', linea:LINEA_US, anno:1957, mese:5, era:'us1950', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'I tornado delle pianure',
+    text:'Fra il 19 e il 22 maggio una serie di tornado attraversa le pianure, dal Texas al Missouri; il più forte colpisce i sobborghi a sud di Kansas City. Muoiono cinquantanove persone.',
+    logx:'I tornado delle pianure: cinquantanove morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus50_audrey', linea:LINEA_US, anno:1957, mese:6, era:'us1950', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'L\'uragano sulla Louisiana',
+    text:'Il 27 giugno un uragano arriva sulla costa della Louisiana prima del previsto. Molte famiglie dei paesi fra le paludi pensavano di avere ancora un giorno per partire. Il mare entra per chilometri. Muoiono almeno quattrocentosedici persone.',
+    logx:'L\'uragano sulla Louisiana: almeno quattrocentosedici morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus50_scuola', linea:LINEA_US, anno:1958, mese:12, era:'us1950', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'La scuola di Chicago',
+    text:'Il 1° dicembre, nel primo pomeriggio, durante le lezioni, un incendio scoppia in una scuola elementare di Chicago. Muoiono novantacinque persone, quasi tutti bambini.',
+    logx:'Chicago: incendio in una scuola elementare. Novantacinque morti, quasi tutti bambini.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus50_eastriver', linea:LINEA_US, anno:1959, mese:2, era:'us1950', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'L\'East River',
+    text:'La notte del 3 febbraio un aereo di linea in avvicinamento a un aeroporto di New York cade nell\'East River, nell\'acqua gelata, a poche centinaia di metri dalla pista. Muoiono sessantacinque persone; se ne salvano otto.',
+    logx:'Un aereo di linea nell\'East River. Sessantacinque morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus50_indiana', linea:LINEA_US, anno:1960, mese:3, era:'us1950', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'L\'ala',
+    text:'Il 17 marzo un aereo di linea perde un\'ala in volo, a grande altezza, sopra i campi dell\'Indiana. Muoiono tutti i sessantatré a bordo.',
+    logx:'Un aereo di linea perde un\'ala sopra l\'Indiana. Sessantatré morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus50_boston', linea:LINEA_US, conCampagna:true, anno:1960, mese:10, era:'us1950', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Boston',
+    text:'Il 4 ottobre, pochi secondi dopo il decollo da Boston, un aereo di linea attraversa uno stormo di uccelli: i motori si spengono e l\'aereo cade nella baia. Muoiono sessantadue persone.',
+    logx:'Boston: un aereo di linea cade nella baia dopo il decollo. Sessantadue morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus50_dicembre60', linea:LINEA_US, anno:1960, mese:12, era:'us1950', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'La neve e i due aerei',
+    text:'A metà dicembre una tempesta di neve paralizza il Nord-Est per giorni. La mattina del 16, nella pioggia e nella nebbia, due aerei di linea in attesa di atterrare si scontrano sopra New York: uno cade su Staten Island, l\'altro in una strada di Brooklyn. Muoiono centotrentaquattro persone, sei a terra. Con la tempesta, in quella settimana i morti sono più di quattrocento.',
+    logx:'La tempesta di dicembre e i due aerei sopra New York: più di quattrocento morti.',
     ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
 ];
 
@@ -4310,6 +4493,19 @@ const BEAT_LEGGERI = [
   {id:'lgde00_sale', era:'de2000', registro:'leggero', cond:()=>S.year===2010&&S.month>=1&&S.month<=2, kick:'Il paese', t:'Il sale finito', text:'L\'inverno non finisce più: neve da dicembre, ghiaccio sui marciapiedi, e i comuni hanno finito il sale per le strade. I camion aspettano in fila davanti alle saline, i negozi di bricolage razionano i sacchi. Nei condomini si torna alla pala, alla sabbia e ai turni fra vicini.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
   {id:'lgde00_polpo', era:'de2000', registro:'leggero', cond:()=>S.year===2010&&S.month>=6&&S.month<=7, kick:'Il paese', t:'L\'oracolo dell\'acquario', text:'In un acquario della Ruhr un polpo sceglie fra due vaschette con le bandiere delle squadre, e indovina tutte le partite dei mondiali. Le televisioni aspettano la sua scelta prima di ogni incontro; quando prevede la sconfitta della nazionale, c\'è chi lo vorrebbe in padella.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
   {id:'lgde00_strade', era:'de2000', registro:'leggero', cond:()=>S.year===2010&&S.month>=8, kick:'Il paese', t:'Le strade fotografate', text:'Un servizio di mappe su internet ha fotografato le strade delle grandi città, casa per casa, e sta per metterle in rete. Quasi duecentocinquantamila famiglie chiedono che la loro facciata venga sfocata. Quando le immagini escono, in certe vie una casa su tre è una macchia grigia.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  /* L177-3 · Stati Uniti 1950, parte 2: dodici beat leggeri (PRESET-USA-1950 §I, correzioni ⚠ nel rapporto «⚑ L177-3») */
+  {id:'lgus50_televisore', era:'us1950', registro:'leggero', cond:()=>S.year>=1950&&S.year<=1951, kick:'Il paese', t:'Il televisore nel salotto', text:'Nelle case dove c\'è un televisore, la sera arrivano i vicini, con le sedie portate da casa loro. Le tende restano tirate anche di giorno; il martedì sera i ristoranti sono vuoti, perché c\'è il varietà. I proprietari dei cinema contano le poltrone vuote.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgus50_tessera', era:'us1950', registro:'leggero', cond:()=>S.year===1950&&S.month>=3, kick:'Il paese', t:'La tessera della cena', text:'A New York un uomo d\'affari ha inventato una tessera di cartone: si mostra al ristorante, si firma, e il conto arriva a fine mese. All\'inizio la accettano una ventina di ristoranti. I camerieri non si fidano; gli uomini d\'affari, che al ristorante ci vanno ogni sera, sì.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgus50_sobborgo', era:'us1950', registro:'leggero', cond:()=>S.year>=1951&&S.year<=1954, kick:'Il paese', t:'Una casa al giorno', text:'Sui campi di patate fuori città un costruttore tira su case tutte uguali, una dopo l\'altra, come in una catena di montaggio: trenta al giorno nei giorni buoni. Le comprano i reduci col mutuo del governo, con un anticipo quasi nullo. Dentro c\'è già la lavatrice; fuori, un prato da tagliare il sabato. E una clausola del contratto dice chi può comprarle e chi no.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgus50_banco', era:'us1950', registro:'leggero', cond:()=>S.year>=1951&&S.year<=1953, kick:'Il paese', t:'Sotto il banco', text:'A scuola, oltre all\'alfabeto, si impara a nascondersi: quando la maestra grida, ci si butta sotto il banco con le mani sulla testa. Un cartone animato con una tartaruga lo spiega ai più piccoli. I bambini ci giocano nell\'intervallo; i genitori, la sera, sfogliano gli opuscoli dei rifugi da costruire in giardino.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgus50_occhiali', era:'us1950', registro:'leggero', cond:()=>S.year===1953&&S.month<=9, kick:'Il paese', t:'Gli occhiali di cartone', text:'All\'ingresso del cinema danno occhiali di cartone con le lenti grigie, e dallo schermo le lance e i leoni sembrano uscire in sala. Le signore della prima fila si spostano indietro. Dopo qualche mese il pubblico si stanca del mal di testa, e gli occhiali finiscono nei cassetti.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgus50_vassoio', era:'us1950', registro:'leggero', cond:()=>S.year>=1954&&S.year<=1955, kick:'Il paese', t:'La cena nel vassoio', text:'Nei supermercati è arrivata la cena già pronta, congelata in un vassoio d\'alluminio a tre scomparti: tacchino, piselli, patate dolci. Si scalda nel forno e si mangia davanti alla televisione, sulle ginocchia. Le nonne sono scandalizzate; il primo anno se ne vendono milioni.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgus50_drivein', era:'us1950', registro:'leggero', cond:()=>S.year>=1951&&S.year<=1959&&stagioneMese()==='estate', kick:'Il paese', t:'Il cinema in automobile', text:'Fuori città, in un prato, c\'è uno schermo grande come una casa: si entra in automobile, si aggancia un altoparlante al finestrino, e il film comincia quando fa buio. I bambini in pigiama sul sedile dietro, i fidanzati in ultima fila. D\'estate i parcheggi sono pieni fino all\'ultimo posto.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgus50_vita', era:'us1950', registro:'leggero', cond:()=>S.year===1957&&S.month<=4, kick:'Il paese', t:'Dalla vita in su', text:'Il cantante che fa impazzire le ragazze torna in televisione la domenica sera, e questa volta lo inquadrano solo dalla vita in su: i suoi fianchi, dicono, non sono adatti alle famiglie. Mezzo paese lo guarda lo stesso. I predicatori parlano di musica del demonio; i ragazzi comprano i dischi a quarantacinque giri.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgus50_squadre', era:'us1950', registro:'leggero', cond:()=>(S.year===1957&&S.month>=11)||(S.year===1958&&S.month<=4), kick:'Il paese', t:'Le squadre partono', text:'Le due squadre di baseball di New York, quella di Brooklyn e quella di Manhattan, giocheranno dalla primavera in California: lì ci sono gli stadi nuovi, i parcheggi e milioni di abitanti senza una squadra. A Brooklyn c\'è chi dice che è come se se ne fosse andata la parrocchia. I ragazzini staccano i manifesti dalle pareti.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgus50_cerchio', era:'us1950', registro:'leggero', cond:()=>S.year===1958&&S.month>=6&&S.month<=9, kick:'Il paese', t:'Il cerchio', text:'Quest\'estate tutti i bambini del paese fanno girare intorno ai fianchi un cerchio di plastica colorata, e molti genitori anche, quando nessuno guarda. Se ne vendono milioni in pochi mesi; poi, con l\'autunno, finiscono in cantina tutti insieme, come erano arrivati.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgus50_pinne', era:'us1950', registro:'leggero', cond:()=>S.year===1959, kick:'Il paese', t:'Le pinne', text:'Le automobili del nuovo anno hanno le pinne posteriori alte come quelle di un razzo, e i fanali rossi a forma di ugello. Sono lunghe quasi sei metri, bevono benzina come nessuna prima, e nei garage delle case nuove non entrano. Dopo la recessione, le vendite ripartono.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgus50_quiz', era:'us1950', registro:'leggero', cond:()=>(S.year===1959&&S.month>=9)||(S.year===1960&&S.month<=4), kick:'Il paese', t:'Le risposte in busta', text:'Il professore che per settimane ha risposto a tutto, in diretta, chiuso in una cabina di vetro, ha confessato al Congresso: le domande e le risposte gliele davano prima. Anche il sudore sulla fronte era una regia. I quiz spariscono dalla prima serata, e il paese scopre che la televisione può recitare anche quando dice di no.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
 ];
 
 /* ===== F1 — LA TELEFONATA. Un'interruzione, non una carta: overlay a squillo, due opzioni secche, decisione a
@@ -7404,6 +7600,17 @@ const DOSSIERS=[
    {l:'Sette anni di attesa, il massimo',e:'La storia · le porte si apriranno nel 2011 · gli operai polacchi intanto vanno in Inghilterra e in Irlanda',f:()=>{gdDe00('lavoratori',2); gdDe00('imprenditori',-2); repd(-2);}},
    {l:'Aprire subito, come Londra e Dublino',e:'Le imprese assumono · nei cantieri i sindacati parlano di salari in caduta',f:()=>{gdDe00('imprenditori',3); gdDe00('lavoratori',-3); repd(2);}},
    {l:'Due anni, poi si vede',e:'La formula di chi non vuole scegliere · rivotata ogni due anni, finisce come la prima',f:()=>{repd(-1);}}]},
+ /* L177-3 · Stati Uniti 1950, parte 2: due dossier (PRESET-USA-1950 §I, correzioni ⚠ nel rapporto «⚑ L177-3») */
+ {id:'dus50_divisioni',era:'us1950',cond:()=>(S.year===1950&&S.month===12)||(S.year===1951&&S.month<=6),min:'difesa',kick:'La difesa',t:'Le divisioni per l\'Europa',
+  text:'L\'Alleanza atlantica ha un comandante, un generale della guerra mondiale, ma quasi nessun soldato: in Europa ci sono due divisioni americane, contro le oltre cento che si attribuiscono ai sovietici. Il comando ne chiede altre quattro. Al Senato un senatore che ha già cercato due volte la candidatura alla presidenza chiede chi abbia dato al Presidente il potere di mandare soldati in Europa senza un voto.',ch:[
+   {l:'Quattro divisioni, col voto del Senato',e:'La storia · il Senato approva dopo tre mesi di dibattito · i soldati resteranno in Germania per generazioni',costo:{debito:0.5},f:()=>{S.ind.debt+=0.5; repd(3); gdUs50('pensionati',-1);}},
+   {l:'Aerei e flotta: i soldati li mettano gli europei',e:'Il Senato è d\'accordo · a Parigi e a Bonn ci si chiede quanto valga una promessa senza uomini',f:()=>{repd(-2); gdUs50('cetomedio',1);}},
+   {l:'Aspettare che gli europei facciano il loro esercito comune',e:'Il bilancio respira · l\'esercito comune non nascerà mai, e lo sanno anche a Washington',f:()=>{repd(-1); fidUs50(1);}}]},
+ {id:'dus50_indocina',era:'us1950',cond:()=>S.year===1954&&S.month>=3&&S.month<=6,min:'esteri',kick:'L\'Asia',t:'La valle assediata',
+  text:'In Indocina un campo trincerato francese, in fondo a una valle, è circondato dai ribelli comunisti con l\'artiglieria sulle colline. Parigi chiede gli aerei: un bombardamento massiccio, forse perfino con armi atomiche. Gli inglesi non ne vogliono sapere; il Congresso non vuole un\'altra Corea. Paghiamo già quasi quattro quinti del costo della guerra francese.',ch:[
+   {l:'Nessun intervento senza gli alleati e senza il Congresso',e:'La storia · il campo cade a maggio · a Ginevra il paese viene diviso in due, e da quel giorno il Sud è un problema nostro',f:()=>{repd(-1); gdUs50('giovani',1);}},
+   {l:'I bombardieri, subito',e:'Parigi ti ringrazia · Londra prende le distanze, e Pechino fa sapere che non resterà a guardare',costo:{debito:0.8},f:()=>{S.ind.debt+=0.8; repd(-3); gdUs50('cattolici',2); gdUs50('giovani',-3);}},
+   {l:'Soldi e armi, non aerei',e:'Il Congresso approva · il campo cade lo stesso, e i soldi restano nei conti di una guerra perduta',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; repd(-1);}}]},
  {id:'d50_marshall_dip',era:'italia1950',cond:()=>S.year<=1953,min:'esteri',kick:'Piano Marshall',t:'La dipendenza dagli aiuti',text:'Gli aiuti americani hanno rimesso in moto il paese, ma ora chiedono allineamento politico e commerciale. Fin dove seguire l\'alleato?',ch:[
    {l:'Allineamento pieno con l\'alleato',e:'Aiuti e protezione; la pancia mormora',pleases:'tecnico',f:()=>{repd(4); if(S.gMod!=null)S.gMod+=0.1; gd('cetomedio',-1);}},
    {l:'Amicizia sì, ma con margini nostri',e:'Autonomia rivendicata; l\'alleato prende nota',pleases:'populista',f:()=>{repd(-2); gd('cetomedio',2);}},
@@ -10306,6 +10513,67 @@ const EVENTS=[
    {l:'Il premio, finché ci sono i soldi',e:'La storia · quasi due milioni di domande · le auto vendute sono piccole, e molte vengono da fabbriche all\'estero',costo:{debito:1},f:()=>{S.ind.debt+=1; gdDe00('lavoratori',2); gdDe00('cetomedio',2); fidDe00(-1);}},
    {l:'Il lavoro a orario ridotto: lo Stato paga le ore che mancano',e:'Nessuno viene licenziato · le fabbriche aspettano la ripresa con gli operai a casa metà settimana',costo:{debito:1},f:()=>{S.ind.debt+=1; gdDe00('lavoratori',3); gdDe00('imprenditori',1);}},
    {l:'Niente premi: chi produce troppo si adatta',e:'Il bilancio ringrazia · nelle città delle fabbriche la cassa integrazione la paga il Comune',f:()=>{gdDe00('lavoratori',-4); gdDe00('imprenditori',-1); fidDe00(2);}}]},
+ /* L177-3 · Stati Uniti 1950, parte 2: dodici eventi (PRESET-USA-1950 §I, correzioni ⚠ nel rapporto «⚑ L177-3») */
+ {id:'us50_superbomba', era:'us1950', cond:()=>S.year===1950&&S.month>=1&&S.month<=3, kick:'La bomba', t:'La superbomba',
+  text:'L\'Unione Sovietica ha fatto esplodere la sua prima bomba atomica in agosto, anni prima di quanto dicevano gli esperti. Ora i fisici sono divisi su un\'arma centinaia di volte più potente, alimentata dalla fusione: il comitato degli scienziati consiglia di non costruirla, per ragioni morali; i militari e una parte del Congresso dicono che, se non la fanno qui, la faranno a Mosca.',ch:[
+   {l:'Avanti con la superbomba',e:'La storia · il laboratorio lavora giorno e notte · fra meno di tre anni un\'isola del Pacifico sparirà dalle carte',costo:{debito:0.5},f:()=>{S.ind.debt+=0.5; repd(2); gdUs50('cattolici',1); gdUs50('giovani',-2);}},
+   {l:'Prima una proposta a Mosca: nessuno dei due la costruisce',e:'Gli scienziati ti ringraziano · i tuoi avversari parlano di ingenuità, e Mosca non risponde',f:()=>{repd(-2); gdUs50('giovani',2); gdUs50('cattolici',-2); stampad(-1);}},
+   {l:'Studiarla in segreto, senza decidere',e:'Nessuno può accusarti · i fisici lasciano il laboratorio uno alla volta',f:()=>{repd(-1);}}]},
+ {id:'us50_lista', era:'us1950', cond:()=>S.year===1950&&S.month>=2&&S.month<=5, kick:'La paura', t:'La lista',
+  text:'In un discorso davanti a un club di signore in West Virginia, un senatore ha sventolato un foglio: dice che contiene i nomi di duecentocinque comunisti al Dipartimento di Stato. Pochi giorni dopo i nomi sono cinquantasette, poi ottantuno. Nessuno ha visto il foglio; tutti i giornali ne parlano.',ch:[
+   {l:'Una commissione del Senato: che mostri le prove',e:'La storia · la commissione parla di frode e di inganno · il senatore dice che è la prova del complotto, e il suo pubblico cresce',f:()=>{stampad(1); gdUs50('cetomedio',1); gdUs50('cattolici',-1);}},
+   {l:'Un esame di lealtà più duro per tutti i dipendenti federali',e:'Chi ha paura si sente protetto · negli uffici si comincia a guardare chi legge che cosa',f:()=>{gdUs50('cattolici',2); gdUs50('giovani',-2); repd(-1);}},
+   {l:'Sfidarlo in pubblico a leggere i nomi',e:'Le università ti applaudono · lui risponde che chi lo attacca ha qualcosa da nascondere, e mezzo paese gli crede',f:()=>{gdUs50('giovani',2); gdUs50('cattolici',-2); stampad(-1);}}]},
+ {id:'us50_prezzi', era:'us1950', cond:()=>(S.year===1950&&S.month===9)||(S.year===1951&&S.month<=4), kick:'I prezzi', t:'Lo zucchero e le gomme',
+  text:'Da quando è cominciata la guerra in Corea le famiglie fanno scorte: zucchero, caffè, gomme per l\'automobile, come se tornasse il razionamento. I prezzi corrono, e il riarmo spinge le fabbriche al massimo. Gli economisti del governo propongono di congelare prezzi e salari; le imprese dicono che il blocco svuoterà i negozi, i sindacati che i salari si congelano sempre e i prezzi mai.',ch:[
+   {l:'Congelare prezzi e salari',e:'La storia · un ufficio nuovo controlla i listini di mezzo paese · i prezzi rallentano, e ogni categoria chiede la sua eccezione',f:()=>{gdUs50('pensionati',2); gdUs50('imprenditori',-3); gdUs50('lavoratori',-1); fidUs50(1);}},
+   {l:'Più tasse e meno credito: raffreddare senza blocchi',e:'I banchieri approvano · chi compra a rate l\'automobile o il frigorifero, no',f:()=>{gdUs50('cetomedio',-2); gdUs50('imprenditori',-1); fidUs50(2);}},
+   {l:'Lasciar correre: passerà con la paura',e:'I negozi restano pieni · i pensionati contano i dollari, e i dollari valgono meno ogni mese',f:()=>{gdUs50('pensionati',-3); gdUs50('cetomedio',-1); gdUs50('imprenditori',2); fidUs50(-1);}}]},
+ {id:'us50_atomi', era:'us1950', cond:()=>S.year===1953&&S.month>=9&&S.month<=12, kick:'L\'atomo', t:'L\'atomo per la pace',
+  text:'Anche Mosca, ad agosto, ha fatto esplodere una bomba all\'idrogeno, o qualcosa che le somiglia. I consiglieri propongono un discorso alle Nazioni Unite: mettere una parte dell\'uranio delle due potenze in una banca internazionale, per farne centrali elettriche, medicine, concimi. I militari temono di regalare segreti; i diplomatici dicono che almeno, per una volta, si parlerebbe d\'altro che di bombe.',ch:[
+   {l:'Il discorso alle Nazioni Unite, e la banca dell\'uranio',e:'La storia · l\'assemblea applaude · Mosca non ci mette un grammo, ma l\'agenzia nascerà lo stesso, a Vienna, quattro anni dopo',f:()=>{repd(3); stampad(1); gdUs50('giovani',1);}},
+   {l:'Niente regali: il vantaggio è nostro, e lo teniamo',e:'I militari approvano · all\'estero si parla della potenza che non vuole parlare',f:()=>{repd(-2); gdUs50('cattolici',1);}},
+   {l:'Centrali atomiche, ma solo per noi e per gli alleati',e:'Le imprese elettriche ne vogliono una per ogni Stato · i paesi neutrali capiscono a chi conviene stare vicino',f:()=>{gdUs50('imprenditori',2); repd(1); gdUs50('giovani',-1);}}]},
+ {id:'us50_udienze', era:'us1950', cond:()=>S.year===1954&&S.month>=3&&S.month<=8, kick:'La paura', t:'Le udienze in televisione',
+  text:'Il senatore delle liste ora accusa l\'esercito: dice che protegge i comunisti, e l\'esercito risponde che lui ha chiesto favori per un suo collaboratore chiamato alle armi. Il Senato fa le udienze in diretta televisiva, e per la prima volta il paese lo vede al lavoro, ogni pomeriggio, per settimane: le interruzioni, le carte agitate, i sorrisi.',ch:[
+   {l:'Lasciare che il paese guardi',e:'La storia · trentasei giorni di diretta · un avvocato gli chiede se gli sia rimasto un briciolo di decenza, e da quel giorno il vento cambia',f:()=>{stampad(1); gdUs50('cetomedio',2); gdUs50('cattolici',-1);}},
+   {l:'Chiedere subito al Senato di censurarlo',e:'I giornali ti applaudono · i suoi elettori, che sono anche nel tuo campo, non ti perdonano la fretta',f:()=>{gdUs50('giovani',2); gdUs50('cattolici',-2); baseUs50(S.partito==='us_rep'?-2:1);}},
+   {l:'Difenderlo: le domande sono giuste, anche se i modi no',e:'La sua gente è con te · in televisione, ogni pomeriggio, si vede accanto a chi stai',f:()=>{gdUs50('cattolici',2); gdUs50('cetomedio',-3); stampad(-2);}}]},
+ {id:'us50_vaccino', era:'us1950', cond:()=>S.year===1955&&S.month>=4&&S.month<=7, kick:'La salute', t:'Il vaccino',
+  text:'Un milione e ottocentomila bambini hanno fatto da prova, e il risultato è arrivato: il vaccino contro la poliomielite funziona. Le campane suonano, le madri fanno la fila davanti agli ambulatori. Ma le dosi non bastano per tutti, un laboratorio ha dovuto ritirare un lotto difettoso, e chi viene vaccinato per primo è una domanda che arriva sulla tua scrivania.',ch:[
+   {l:'Fondi federali agli Stati: i bambini prima, gratis',e:'La storia · il Congresso vota i soldi in estate · i casi di poliomielite crollano in pochi anni',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; gdUs50('cetomedio',2); gdUs50('pensionati',1); gdUs50('imprenditori',-1);}},
+   {l:'Lasciar fare ai produttori e ai medici di famiglia',e:'Le imprese approvano · nei quartieri ricchi le dosi arrivano prima',f:()=>{gdUs50('imprenditori',2); gdUs50('lavoratori',-2); gdUs50('cetomedio',-1); stampad(-1);}},
+   {l:'Un programma nazionale: il governo compra tutte le dosi',e:'Nessun bambino resta indietro · i medici parlano di medicina di Stato, e al Congresso ti chiamano col nome di un altro paese',costo:{debito:0.6},f:()=>{S.ind.debt+=0.6; gdUs50('lavoratori',2); gdUs50('cetomedio',1); gdUs50('imprenditori',-3); fidUs50(-1);}}]},
+ {id:'us50_autostrade', era:'us1950', cond:()=>(S.year===1955&&S.month>=6&&S.month<=11)||(S.year===1956&&S.month<=4), kick:'Le strade', t:'Quarantamila miglia',
+  text:'Il piano è pronto: quarantamila miglia di autostrade che uniscono tutte le grandi città, da costa a costa, senza un incrocio né un semaforo. I militari dicono che servono anche a evacuare le città in caso di bomba. Il Congresso ha già bocciato una volta il modo di pagarle; adesso il conto torna, e qualcuno deve dire chi lo paga.',ch:[
+   {l:'Un fondo pagato dalla benzina: chi guida, paga',e:'La storia · la tassa sulla benzina sale da due a tre centesimi al gallone · in dieci anni i cantieri cambiano la faccia del paese, e le città si svuotano verso i sobborghi',f:()=>{gdUs50('imprenditori',2); gdUs50('cetomedio',1); gdUs50('lavoratori',1); gdUs50('pensionati',-1);}},
+   {l:'Obbligazioni federali: le pagheranno i figli',e:'Nessuno paga oggi · i banchieri guardano il debito, e il debito guarda loro',costo:{debito:1},f:()=>{S.ind.debt+=1; gdUs50('imprenditori',3); gdUs50('lavoratori',2); fidUs50(-2);}},
+   {l:'Lasciarle agli Stati, come le strade di sempre',e:'I governatori ringraziano · fra uno Stato e l\'altro la strada cambia larghezza, e in certi Stati non c\'è',f:()=>{gdUs50('cetomedio',-1); gdUs50('imprenditori',-2); fidUs50(1);}}]},
+ {id:'us50_autobus', era:'us1950', cond:()=>S.year===1956&&S.month<=4, kick:'I diritti civili', t:'Gli autobus',
+  text:'In una città dell\'Alabama una sarta, tornando dal lavoro, non ha ceduto il suo posto sull\'autobus a un passeggero bianco, ed è stata arrestata. Da allora i neri della città non salgono più sugli autobus: vanno a piedi, a volte per chilometri, o con le automobili delle chiese. La compagnia perde soldi, la città arresta i pastori che organizzano. I giornalisti ti chiedono che cosa ne pensi.',ch:[
+   {l:'Lasciare la questione ai tribunali',e:'La storia · la Corte suprema, a novembre, dichiara illegale la segregazione sugli autobus · fino ad allora, a piedi',f:()=>{gdUs50('giovani',-1); baseUs50(S.partito==='us_dem'?1:0);}},
+   {l:'Una parola pubblica per chi va a piedi',e:'Nelle chiese nere e nelle città del Nord il tuo nome gira di bocca in bocca · al Sud le tue fotografie si strappano',f:()=>{gdUs50('giovani',3); gdUs50('cetomedio',1); repd(1); baseUs50(S.partito==='us_dem'?-2:0);}},
+   {l:'È una questione dello Stato e della città',e:'I governatori del Sud apprezzano · i giornali del mondo pubblicano le strade piene di gente che cammina',f:()=>{gdUs50('giovani',-3); repd(-2); stampad(-1); baseUs50(S.partito==='us_dem'?1:0);}}]},
+ {id:'us50_satellite', era:'us1950', cond:()=>(S.year===1957&&S.month===12)||(S.year===1958&&S.month<=3), kick:'Lo spazio', t:'Il bip',
+  text:'Il primo satellite artificiale della storia è sovietico: una sfera di metallo che gira intorno alla Terra in un\'ora e mezza, e per tre settimane ha mandato un bip che i radioamatori ascoltavano dalla cucina. Un mese dopo i sovietici ne hanno lanciato un altro, con un cane a bordo. Il nostro razzo, in diretta televisiva, si è alzato di un metro ed è esploso. I giornali chiedono come sia potuto succedere; i genitori, che cosa insegnano le scuole.',ch:[
+   {l:'Una legge per la scienza nelle scuole, e un\'agenzia spaziale civile',e:'La storia · borse di studio per la matematica e le lingue · nasce l\'agenzia, e la corsa diventa una gara che si vede in televisione',costo:{debito:1},f:()=>{S.ind.debt+=1; gdUs50('giovani',3); gdUs50('cetomedio',1); repd(1);}},
+   {l:'Più missili, subito: lo spazio lo lasciamo ai militari',e:'Le fabbriche della difesa assumono · gli alleati si chiedono se la corsa sia allo spazio o alla guerra',costo:{debito:1.5},f:()=>{S.ind.debt+=1.5; gdUs50('lavoratori',2); gdUs50('cattolici',1); repd(-1); fidUs50(-1);}},
+   {l:'Calmare il paese: è una palla nel cielo',e:'Il bilancio resta in ordine · nessuno ci crede, e la sera la gente esce in giardino a cercare il puntino che si muove',f:()=>{stampad(-3); gdUs50('cetomedio',-2); repd(-2);}}]},
+ {id:'us50_recessione', era:'us1950', cond:()=>S.year===1958&&S.month>=2&&S.month<=7, kick:'Il lavoro', t:'Le fabbriche ferme',
+  text:'A Detroit le catene di montaggio lavorano a mezzo servizio, e le automobili nuove restano nei piazzali. In pochi mesi i disoccupati sono più di cinque milioni, e i sussidi, in molti Stati, finiscono dopo sei mesi. I sindacati chiedono lavori pubblici e sussidi più lunghi; il Tesoro dice che il bilancio va tenuto in ordine, perché l\'inflazione è dietro l\'angolo.',ch:[
+   {l:'Sussidi più lunghi e i cantieri delle autostrade anticipati',e:'La storia · fino a tredici settimane in più per chi è senza lavoro · la ripresa arriva in estate, e il disavanzo dell\'anno dopo è il più grande mai visto in tempo di pace',costo:{debito:1},f:()=>{S.ind.debt+=1; gdUs50('lavoratori',3); gdUs50('cetomedio',1); fidUs50(-1);}},
+   {l:'Un taglio delle tasse, subito',e:'Le imprese e le famiglie respirano · il Tesoro conta quello che non entra',costo:{debito:1.5},f:()=>{S.ind.debt+=1.5; gdUs50('imprenditori',2); gdUs50('cetomedio',2); fidUs50(-2);}},
+   {l:'Tenere il bilancio: la recessione passa da sola',e:'I banchieri approvano · nelle città dell\'automobile, a novembre, se ne ricorderanno',f:()=>{gdUs50('lavoratori',-3); gdUs50('cetomedio',-1); fidUs50(2);}}]},
+ {id:'us50_cuba', era:'us1950', cond:()=>S.year===1959&&S.month>=1&&S.month<=4, kick:'Le Americhe', t:'L\'isola',
+  text:'A novanta miglia dalla Florida, il dittatore di Cuba è fuggito la notte di capodanno, e i ribelli della montagna sono entrati all\'Avana fra la folla. Il loro capo ha trentadue anni, la barba lunga, e parla per ore alla radio e in televisione. Promette elezioni e riforma agraria; nei primi tribunali rivoluzionari si fucila. Le imprese americane dell\'isola, lo zucchero e gli alberghi, chiedono che cosa farai.',ch:[
+   {l:'Riconoscere il governo nuovo, e aspettare',e:'La storia · l\'ambasciatore resta · in primavera il capo dei ribelli viene a Washington a parlare ai giornali, e si capisce poco di che cosa voglia',f:()=>{repd(1); gdUs50('imprenditori',-1);}},
+   {l:'Riconoscerlo, con aiuti e un patto sullo zucchero',e:'L\'isola ti guarda come un amico · le compagnie dello zucchero vogliono garanzie che nessuno può dare',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; repd(2); gdUs50('giovani',1); gdUs50('imprenditori',-2);}},
+   {l:'Nessun riconoscimento senza elezioni',e:'Le imprese approvano · all\'Avana la folla brucia la tua bandiera, e il capo dei ribelli ha trovato il suo nemico',f:()=>{repd(-2); gdUs50('imprenditori',2); gdUs50('cattolici',1); stampad(-1);}}]},
+ {id:'us50_acciaio59', era:'us1950', cond:()=>S.year===1959&&S.month>=8&&S.month<=11, kick:'Il lavoro', t:'Centosedici giorni',
+  text:'Mezzo milione di siderurgici è in sciopero da luglio: le imprese vogliono cambiare le regole sui turni e sul numero di uomini per macchina, il sindacato dice che è un modo di licenziare. L\'acciaio straniero comincia ad arrivare nei porti. Le scorte delle fabbriche d\'automobili stanno finendo, e la legge degli ottanta giorni è sempre lì, nel cassetto.',ch:[
+   {l:'La legge degli ottanta giorni: si torna al lavoro',e:'La storia · la Corte suprema conferma l\'ordine · l\'accordo arriva a gennaio, e l\'acciaio straniero resta nei porti per sempre',f:()=>{gdUs50('lavoratori',-3); gdUs50('imprenditori',2); fidUs50(1);}},
+   {l:'Chiudere le due parti in una stanza, e non aprire la porta',e:'La trattativa dura settimane · i giornali la chiamano mediazione, gli industriali pressione',f:()=>{gdUs50('lavoratori',1); gdUs50('imprenditori',-1); stampad(1);}},
+   {l:'Aspettare: lo sciopero è affare loro',e:'Nessuno può dire che hai scelto un campo · le fabbriche d\'automobili, a novembre, mandano a casa gli operai',f:()=>{gdUs50('lavoratori',-1); gdUs50('cetomedio',-2); fidUs50(-1);}}]},
  {id:'fr_ceca', era:'fr1950', cond:()=>S.year>=1951&&S.year<=1953, kick:'L\'Europa', t:'Il carbone e l\'acciaio con Bonn',
   text:'Sei paesi mettono in comune carbone e acciaio sotto un\'Alta Autorità che non risponde a nessun governo: per i siderurgici del nord è un mercato, per i minatori una minaccia, per i gollisti una rinuncia. Il tuo partito deve ratificare.',ch:[
    {l:'Ratifichi',e:'Le acciaierie del nord con te · i minatori temono il mercato comune',f:()=>{gdFr('imprenditori',3); gdFr('cetomedio',2); gdFr('lavoratori',-3); repd(1);}},
@@ -11631,6 +11899,31 @@ const SFIDE=[
  {id:'de00_q_linke', era:'de2000', codaFino:Infinity, paese:'germania', ruolo:'governo', diff:'media', cond:()=>S.year>=2008||(S.year===2007&&S.month>=7), q:'Come si chiama dal giugno 2007 il partito nato dalla PDS e da una lista dell\'Ovest?',
   op:['Verdi','Pirati','Linke'], giusta:2,
   perche:'Il 16 giugno 2007 la PDS e una lista nata all\'Ovest contro le riforme del lavoro si fondono in un partito solo, la Linke.'},
+ /* L177-3 · Stati Uniti 1950, parte 2: otto domande (PRESET-USA-1950 §I, correzioni ⚠ nel rapporto «⚑ L177-3») */
+ {id:'us50_q_corea', era:'us1950', codaFino:Infinity, paese:'usa', ruolo:'governo', diff:'facile', cond:()=>S.year>1950||(S.year===1950&&S.month>=8), q:'In che anno comincia la guerra di Corea?',
+  op:['1950','1948','1953'], giusta:0,
+  perche:'L\'esercito del Nord passa il confine il 25 giugno 1950; l\'armistizio arriva nel luglio 1953.'},
+ {id:'us50_q_emendamento', era:'us1950', codaFino:Infinity, paese:'usa', ruolo:'governo', diff:'media', cond:()=>S.year>1951||(S.year===1951&&S.month>=3), q:'Quale emendamento della Costituzione, ratificato nel 1951, limita il Presidente a due mandati?',
+  op:['Il diciannovesimo','Il ventiduesimo','Il venticinquesimo'], giusta:1,
+  perche:'Il ventiduesimo emendamento, ratificato nel febbraio 1951: nessuno può essere eletto Presidente più di due volte.'},
+ {id:'us50_q_sentenza', era:'us1950', codaFino:Infinity, paese:'usa', ruolo:'governo', diff:'facile', cond:()=>S.year>1954||(S.year===1954&&S.month>=6), q:'Che cosa stabilisce la Corte suprema nel maggio 1954?',
+  op:['Che l\'istruzione è materia federale','Che la scuola è obbligatoria fino ai sedici anni','Che le scuole separate per razza sono contro la Costituzione'], giusta:2,
+  perche:'Il 17 maggio 1954, all\'unanimità: separare gli studenti per razza nelle scuole pubbliche viola la Costituzione.'},
+ {id:'us50_q_vaccino', era:'us1950', codaFino:Infinity, paese:'usa', ruolo:'governo', diff:'facile', cond:()=>S.year>1955||(S.year===1955&&S.month>=5), q:'Contro quale malattia è il vaccino annunciato nell\'aprile 1955?',
+  op:['Il morbillo','La poliomielite','La tubercolosi'], giusta:1,
+  perche:'Il 12 aprile 1955 si annuncia che il vaccino contro la poliomielite, provato su quasi due milioni di bambini, è sicuro ed efficace.'},
+ {id:'us50_q_satellite', era:'us1950', codaFino:Infinity, paese:'usa', ruolo:'governo', diff:'facile', cond:()=>S.year>1957||(S.year===1957&&S.month>=11), q:'Chi mette in orbita il primo satellite artificiale, nell\'ottobre 1957?',
+  op:['Gli Stati Uniti','Il Regno Unito','L\'Unione Sovietica'], giusta:2,
+  perche:'Il 4 ottobre 1957 l\'Unione Sovietica lancia il primo satellite artificiale; il primo americano va in orbita a fine gennaio 1958.'},
+ {id:'us50_q_autobus', era:'us1950', codaFino:Infinity, paese:'usa', ruolo:'governo', diff:'media', cond:()=>S.year>=1956, q:'In quale città dell\'Alabama comincia nel dicembre 1955 il boicottaggio degli autobus?',
+  op:['Montgomery','Birmingham','Mobile'], giusta:0,
+  perche:'A Montgomery, la capitale dello Stato: il boicottaggio dura più di un anno e finisce dopo la sentenza della Corte suprema del novembre 1956.'},
+ {id:'us50_q_alaska', era:'us1950', codaFino:Infinity, paese:'usa', ruolo:'governo', diff:'media', cond:()=>S.year>1959||(S.year===1959&&S.month>=2), q:'Quale territorio diventa nel gennaio 1959 il quarantanovesimo Stato?',
+  op:['Le Hawaii','L\'Alaska','Porto Rico'], giusta:1,
+  perche:'L\'Alaska entra nell\'Unione il 3 gennaio 1959; le Hawaii la seguono in agosto, cinquantesimo Stato.'},
+ {id:'us50_q_cuba', era:'us1950', codaFino:Infinity, paese:'usa', ruolo:'governo', diff:'facile', cond:()=>S.year>1959||(S.year===1959&&S.month>=2), q:'Quale isola a novanta miglia dalla Florida cambia governo con una rivoluzione nel gennaio 1959?',
+  op:['Haiti','Porto Rico','Cuba'], giusta:2,
+  perche:'Il 1° gennaio 1959 il dittatore di Cuba fugge e i ribelli entrano all\'Avana.'},
  {id:'uk60_svalut67', era:'uk1960', codaFino:Infinity, paese:'regnounito', ruolo:'governo', diff:'difficile', cond:()=>S.year>=1967, q:'Che cosa accadde alla sterlina nel novembre 1967?',
   op:['Fu lasciata fluttuare liberamente','Fu svalutata da 2,80 a 2,40 dollari','Fu agganciata all\'oro'], giusta:1,
   perche:'Arrivò dopo tre anni di difesa del cambio.'},
@@ -12080,6 +12373,32 @@ const SFIDE=[
  {id:'usa_property', era:'universale', paese:'usa', ruolo:'locale', diff:'difficile', q:'Con quale imposta si finanziano soprattutto le scuole pubbliche locali negli USA?',
   op:['L\'imposta sulla proprietà immobiliare (property tax)','Un dazio doganale','Un\'imposta federale sulle vendite'], giusta:0,
   perche:'Le scuole pubbliche locali americane sono finanziate soprattutto dalla property tax, l\'imposta sugli immobili.'},
+
+ // L174-3 — il governo locale degli Stati Uniti
+ {id:'us_l_schoolboard', era:'contemporanea', paese:'usa', ruolo:'locale', diff:'facile', q:'Chi governa di solito le scuole pubbliche di un distretto americano?',
+  op:['Un consiglio scolastico eletto','Il governo federale','Il governatore dello Stato'], giusta:0,
+  perche:'Nella gran parte dei distretti scolastici il consiglio è eletto dai cittadini e nomina il sovrintendente.'},
+ {id:'us_l_sceriffo', era:'contemporanea', paese:'usa', ruolo:'locale', diff:'facile', q:'Come diventa sceriffo nella grande maggioranza delle contee americane?',
+  op:['È eletto dai cittadini','È nominato dal Presidente','È un ufficiale dell\'esercito'], giusta:0,
+  perche:'Lo sceriffo è uno dei pochi capi di polizia al mondo scelti direttamente dagli elettori.'},
+ {id:'us_l_manager', era:'contemporanea', paese:'usa', ruolo:'locale', diff:'media', q:'Che cos\'è il sistema «council-manager», diffuso in molte città americane?',
+  op:['Il consiglio eletto assume un direttore professionista che guida l\'amministrazione','Il sindaco nomina il consiglio','La città è governata dalla contea'], giusta:0,
+  perche:'Il city manager non è eletto: risponde al consiglio, che può licenziarlo.'},
+ {id:'us_l_iniziativa', era:'contemporanea', paese:'usa', ruolo:'locale', diff:'media', q:'In Stati come la California, come può una legge arrivare sulla scheda elettorale senza passare dal parlamento dello Stato?',
+  op:['Con un\'iniziativa popolare firmata da abbastanza elettori','Con un decreto del governatore','Non può'], giusta:0,
+  perche:'In circa metà degli Stati i cittadini possono proporre leggi o emendamenti e votarli direttamente.'},
+ {id:'us_l_obbligazioni', era:'contemporanea', paese:'usa', ruolo:'locale', diff:'media', q:'Come finanziano spesso le città americane strade, scuole e acquedotti?',
+  op:['Con obbligazioni comunali, i cui interessi sono in genere esenti dall\'imposta federale','Con prestiti della banca centrale','Con le multe'], giusta:0,
+  perche:'Le obbligazioni municipali sono uno dei grandi mercati del debito americano.'},
+ {id:'us_l_zoning', era:'contemporanea', paese:'usa', ruolo:'locale', diff:'media', q:'In molte città americane gran parte del suolo residenziale è riservata per legge a un solo tipo di costruzione. Quale?',
+  op:['Le case unifamiliari','I grattacieli','Le fattorie'], giusta:0,
+  perche:'La zonizzazione «solo unifamiliare» è al centro del dibattito sul prezzo delle case.'},
+ {id:'us_l_homerule', era:'contemporanea', paese:'usa', ruolo:'locale', diff:'media', q:'Che cosa vuol dire, per una città americana, avere l\'«home rule»?',
+  op:['Può darsi uno statuto e decidere ciò che la legge dello Stato non le vieta','Può battere moneta','Non paga imposte allo Stato'], giusta:0,
+  perche:'Senza home rule una città può fare solo ciò che lo Stato le permette espressamente.'},
+ {id:'us_l_nonpartisan', era:'contemporanea', paese:'usa', ruolo:'locale', diff:'media', q:'In molte città americane sulla scheda per il sindaco non compare il partito dei candidati. Come si chiamano queste elezioni?',
+  op:['Elezioni non di partito','Primarie chiuse','Elezioni di metà mandato'], giusta:0,
+  perche:'La maggior parte delle elezioni comunali americane è formalmente senza partiti.'},
  {id:'usa_congresso', era:'universale', paese:'usa', ruolo:'governo', diff:'facile', q:'Da quali due camere è composto il Congresso degli Stati Uniti?',
   op:['Camera dei Rappresentanti e Senato','Assemblea e Consiglio','Camera e Corte'], giusta:0,
   perche:'Il Congresso americano è composto dalla Camera dei Rappresentanti e dal Senato.'},
@@ -12531,6 +12850,32 @@ const SFIDE=[
  {id:'es_ibi', era:'contemporanea', paese:'spagna', ruolo:'locale', diff:'difficile', q:'Con quale imposta sugli immobili si finanziano i comuni spagnoli?',
   op:['L\'IBI (imposta sui beni immobili)','Un dazio comunale','Un\'imposta comunale sul reddito'], giusta:0,
   perche:'L\'IBI, l\'imposta sui beni immobili, è una risorsa propria dei comuni spagnoli.'},   // ⚠ contemporanea
+
+ // L174-3 — il governo locale della Spagna
+ {id:'es_l_diputacion', era:'contemporanea', paese:'spagna', ruolo:'locale', diff:'media', q:'Che cosa fa la «diputación provincial» spagnola?',
+  op:['Aiuta i piccoli comuni della provincia con servizi e finanziamenti','È il parlamento di una comunità autonoma','È il tribunale della provincia'], giusta:0,
+  perche:'La deputazione, eletta in modo indiretto dai consiglieri comunali, sostiene soprattutto i comuni piccoli.'},
+ {id:'es_l_concejales', era:'contemporanea', paese:'spagna', ruolo:'locale', diff:'media', q:'Come si eleggono i consiglieri comunali nella gran parte dei comuni spagnoli?',
+  op:['Con liste di partito chiuse e il metodo proporzionale','In collegi uninominali','Per sorteggio fra i residenti'], giusta:0,
+  perche:'Si vota una lista bloccata; i seggi si dividono col metodo D\'Hondt, con una soglia del cinque per cento.'},
+ {id:'es_l_concejoabierto', era:'contemporanea', paese:'spagna', ruolo:'locale', diff:'media', q:'In alcuni comuni spagnoli piccolissimi non c\'è un consiglio eletto. Chi decide?',
+  op:['L\'assemblea di tutti i vicini, con l\'alcalde','Il delegato del governo','La diocesi'], giusta:0,
+  perche:'Il «concejo abierto» è un\'antica forma di democrazia diretta, rimasta nei comuni minuscoli che la praticano per tradizione.'},
+ {id:'es_l_cabildo', era:'contemporanea', paese:'spagna', ruolo:'locale', diff:'media', q:'Come si chiama l\'ente che governa ciascuna delle isole Canarie?',
+  op:['Il cabildo insulare','La deputazione forale','La giunta provinciale'], giusta:0,
+  perche:'Ogni isola delle Canarie ha il suo cabildo, eletto dai suoi abitanti.'},
+ {id:'es_l_svuotata', era:'contemporanea', paese:'spagna', ruolo:'locale', diff:'facile', q:'Che cosa si intende con «la Spagna svuotata»?',
+  op:['Le province dell\'interno che perdono abitanti da decenni','Le coste dopo l\'estate','Le città dopo la crisi del 2008'], giusta:0,
+  perche:'Molte province dell\'interno hanno meno abitanti di cento anni fa; il tema è diventato politico.'},
+ {id:'es_l_andalusia', era:'contemporanea', paese:'spagna', ruolo:'locale', diff:'facile', q:'Qual è la comunità autonoma più popolosa della Spagna?',
+  op:['L\'Andalusia','La Catalogna','La Comunità di Madrid'], giusta:0,
+  perche:'L\'Andalusia supera gli otto milioni e mezzo di abitanti, davanti a Catalogna e Madrid.'},
+ {id:'es_l_turisti', era:'contemporanea', paese:'spagna', ruolo:'locale', diff:'media', q:'Quali comunità autonome fanno pagare un\'imposta sui pernottamenti dei turisti?',
+  op:['Fra le altre, la Catalogna e le Baleari','Tutte, per legge dello Stato','Nessuna: è vietata'], giusta:0,
+  perche:'La Catalogna la applica dal 2012, le Baleari dal 2016; altre regioni ne discutono.'},
+ {id:'es_l_padron', era:'contemporanea', paese:'spagna', ruolo:'locale', diff:'facile', q:'Che cos\'è il «padrón municipal»?',
+  op:['Il registro dei residenti del comune','L\'imposta sulle automobili','Il piano regolatore'], giusta:0,
+  perche:'Iscriversi al padrón è il primo passo per la scuola, il medico e il voto locale.'},
  {id:'es_dhondt', era:'contemporanea', paese:'spagna', ruolo:'governo', diff:'difficile', q:'Con quale sistema si elegge il Congresso dei Deputati spagnolo?',
   op:['Un proporzionale per circoscrizioni provinciali (metodo D\'Hondt)','Il maggioritario a turno unico','Il voto per acclamazione'], giusta:0,
   perche:'Il Congresso si elegge con un proporzionale per province, ripartito col metodo D\'Hondt.'},   // ⚠ contemporanea
@@ -12918,6 +13263,32 @@ const SFIDE=[
  {id:'jp_fixedasset', era:'universale', paese:'giappone', ruolo:'locale', diff:'difficile', q:'Con quale imposta si finanziano i comuni giapponesi sugli immobili?',
   op:['L\'imposta sui beni immobili (fixed asset tax)','Un dazio interno','Un\'imposta imperiale sul reddito'], giusta:0,
   perche:'I comuni giapponesi si finanziano con l\'imposta sui beni immobili (fixed asset tax).'},   // dal 1950 (riforme Shoup) → universale
+
+ // L174-3 — il governo locale del Giappone
+ {id:'jp_l_23ku', era:'contemporanea', paese:'giappone', ruolo:'locale', diff:'media', q:'Il cuore di Tokyo è diviso in ventitré enti, ciascuno con un suo sindaco e una sua assemblea eletti. Come si chiamano?',
+  op:['I quartieri speciali','Le città designate','Le prefetture'], giusta:0,
+  perche:'I ventitré quartieri speciali hanno sindaco e assemblea propri; acqua e vigili del fuoco restano al governo metropolitano.'},
+ {id:'jp_l_designate', era:'contemporanea', paese:'giappone', ruolo:'locale', diff:'media', q:'Che cosa ottiene una grande città giapponese quando diventa «città designata per ordinanza»?',
+  op:['Molti poteri che altrove spettano alla prefettura, e la divisione in quartieri','Lo statuto di capitale','L\'esenzione dalle imposte nazionali'], giusta:0,
+  perche:'Le città designate, una ventina, gestiscono da sé servizi che negli altri comuni sono della prefettura.'},   // ⚠ 20 città dal 2012
+ {id:'jp_l_hokkaido', era:'contemporanea', paese:'giappone', ruolo:'locale', diff:'facile', q:'Qual è la prefettura giapponese più estesa?',
+  op:['Lo Hokkaido','Okinawa','Osaka'], giusta:0,
+  perche:'Lo Hokkaido, l\'isola del nord, copre più di un quinto del territorio del paese.'},
+ {id:'jp_l_osaka', era:'contemporanea', paese:'giappone', ruolo:'locale', diff:'media', q:'Nel 2015 e nel 2020 gli abitanti della città di Osaka hanno votato due volte sulla stessa proposta. Quale?',
+  op:['Abolire la città e dividerla in quartieri speciali, come Tokyo','Spostare la capitale a Osaka','Unire Osaka a Kyoto'], giusta:0,
+  perche:'Il «piano della metropoli» è stato respinto tutte e due le volte, di poco.'},
+ {id:'jp_l_fusioni', era:'contemporanea', paese:'giappone', ruolo:'locale', diff:'media', q:'Fra il 1999 e il 2010 i comuni giapponesi sono scesi da oltre tremila a circa millesettecento. Perché?',
+  op:['Fusioni incoraggiate e finanziate dal governo','Una sentenza della Corte suprema','L\'abolizione delle prefetture'], giusta:0,
+  perche:'Le «grandi fusioni» dell\'era Heisei hanno quasi dimezzato i comuni, con incentivi dello Stato.'},   // ⚠ 3.232 nel 1999, 1.727 nel 2010
+ {id:'jp_l_revoca', era:'contemporanea', paese:'giappone', ruolo:'locale', diff:'media', q:'Che cosa possono chiedere gli elettori di un comune giapponese raccogliendo le firme di un terzo degli iscritti?',
+  op:['Un voto per revocare il sindaco o sciogliere l\'assemblea','La nomina di un nuovo governatore','L\'uscita del comune dalla prefettura'], giusta:0,
+  perche:'La legge sull\'autonomia locale prevede la revoca e lo scioglimento su richiesta dei cittadini.'},   // ⚠ un terzo nei comuni piccoli; la soglia scende sopra i 400.000 elettori
+ {id:'jp_l_vicinato', era:'contemporanea', paese:'giappone', ruolo:'locale', diff:'facile', q:'Che cosa sono i chōnaikai, presenti in quasi ogni quartiere giapponese?',
+  op:['Associazioni di vicinato che curano feste, pulizie e avvisi','Posti di polizia di quartiere','Seggi elettorali permanenti'], giusta:0,
+  perche:'Le associazioni di vicinato fanno da tramite fra il comune e le famiglie.'},
+ {id:'jp_l_akiya', era:'contemporanea', paese:'giappone', ruolo:'locale', diff:'facile', q:'Nei comuni rurali giapponesi si moltiplicano le «akiya». Che cosa sono?',
+  op:['Case vuote, lasciate dallo spopolamento','Scuole nuove','Templi restaurati'], giusta:0,
+  perche:'Molti comuni tengono un registro delle case vuote e le offrono a chi viene ad abitarci.'},
  {id:'jp_mixed', era:'contemporanea', paese:'giappone', ruolo:'governo', diff:'difficile', q:'Con quale sistema si elegge oggi la Camera dei Rappresentanti giapponese?',
   op:['Un sistema misto (collegi uninominali più proporzionale)','Il solo maggioritario secco','La nomina da parte dell\'Imperatore'], giusta:0,
   perche:'La Camera dei Rappresentanti si elegge con un sistema misto: collegi uninominali e quota proporzionale.'},   // ⚠ riforma 1994 → contemporanea
@@ -13077,6 +13448,32 @@ const SFIDE=[
  {id:'kr_fisco', era:'universale', paese:'coreasud', ruolo:'locale', diff:'difficile', q:'Con quale imposta si finanziano gli enti locali coreani sugli immobili?',
   op:['L\'imposta sulla proprietà riscossa dagli enti locali','Un dazio interno','Un\'imposta imperiale'], giusta:0,
   perche:'Gli enti locali riscuotono un\'imposta sulla proprietà immobiliare.'},   // formulazione generica (jaesanse, senza traslitterazione a schermo)
+
+ // L174-3 — il governo locale della Corea del Sud
+ {id:'kr_l_seul', era:'contemporanea', paese:'coreasud', ruolo:'locale', diff:'media', q:'Che statuto ha Seul nell\'ordinamento locale coreano?',
+  op:['È una «città speciale», allo stesso livello delle province','È un comune della provincia di Gyeonggi','È governata dal Presidente'], giusta:0,
+  perche:"Seul è l'unica «città speciale» del paese (Sejong, nata nel 2012, ha uno statuto suo di «città speciale autonoma»); il suo sindaco è eletto direttamente."},
+ {id:'kr_l_gyeonggi', era:'contemporanea', paese:'coreasud', ruolo:'locale', diff:'facile', q:'Qual è la provincia più popolosa della Corea del Sud, attorno a Seul?',
+  op:['Il Gyeonggi','Il Gangwon','Lo Jeolla del Sud'], giusta:0,
+  perche:'Il Gyeonggi supera i tredici milioni di abitanti, più della stessa Seul.'},
+ {id:'kr_l_istruzione', era:'contemporanea', paese:'coreasud', ruolo:'locale', diff:'media', q:'Oltre al sindaco o al governatore, chi eleggono i cittadini di ogni grande città e provincia coreana?',
+  op:['Il sovrintendente all\'istruzione','Il capo della polizia','Il giudice di pace'], giusta:0,
+  perche:'Il sovrintendente all\'istruzione si elegge direttamente, senza simbolo di partito.'},
+ {id:'kr_l_1995', era:'contemporanea', paese:'coreasud', ruolo:'locale', diff:'media', q:'In quale anno i coreani tornarono a eleggere direttamente sindaci e governatori, dopo decenni di nomine dall\'alto?',
+  op:['Nel 1995','Nel 1948','Nel 2010'], giusta:0,
+  perche:'Le prime elezioni locali generali della democrazia si tennero nel giugno 1995.'},
+ {id:'kr_l_dong', era:'contemporanea', paese:'coreasud', ruolo:'locale', diff:'facile', q:'Che cos\'è il «dong» nelle città coreane?',
+  op:['Il quartiere, con un suo ufficio per i servizi ai residenti','Una moneta locale','Una festa di villaggio'], giusta:0,
+  perche:'Il centro servizi del dong è il primo sportello del comune per i cittadini.'},
+ {id:'kr_l_spopolamento', era:'contemporanea', paese:'coreasud', ruolo:'locale', diff:'facile', q:'Che cosa minaccia molti comuni rurali coreani?',
+  op:['Lo spopolamento: le nascite sono fra le più basse del mondo','L\'innalzamento del mare','Gli scontri di confine'], giusta:0,
+  perche:'Molte contee di campagna rischiano di svuotarsi, e lo Stato ha un fondo apposito per loro.'},
+ {id:'kr_l_metropolitane', era:'contemporanea', paese:'coreasud', ruolo:'locale', diff:'media', q:'Quante sono le «città metropolitane» della Corea del Sud, come Busan, Daegu e Incheon?',
+  op:['Sei','Due','Venti'], giusta:0,
+  perche:'Busan, Daegu, Incheon, Gwangju, Daejeon e Ulsan: stanno allo stesso livello delle province.'},
+ {id:'kr_l_torrente', era:'contemporanea', paese:'coreasud', ruolo:'locale', diff:'media', q:'Che cosa ha fatto Seul a metà degli anni Duemila al posto di una strada sopraelevata in pieno centro?',
+  op:['Ha riportato alla luce un torrente coperto e ne ha fatto un parco lungo le sue rive','Ha costruito un eliporto','Ha aperto un circuito automobilistico'], giusta:0,
+  perche:'Il torrente Cheonggyecheon, sepolto sotto il cemento, è tornato all\'aperto nel 2005.'},
  {id:'kr_mandato', era:'contemporanea', paese:'coreasud', ruolo:'governo', diff:'difficile', q:'Quanto dura il mandato del Presidente sudcoreano e può essere rinnovato?',
   op:['Cinque anni, mandato unico non rinnovabile','Quattro anni, rinnovabile una volta','A vita'], giusta:0,
   perche:'Il Presidente sudcoreano ha un mandato unico di cinque anni, non rinnovabile.'},   // ⚠ 1987 → contemporanea
@@ -13169,6 +13566,32 @@ const SFIDE=[
  {id:'br_iptu', era:'universale', paese:'brasile', ruolo:'locale', diff:'difficile', q:'Con quale imposta si finanziano i comuni brasiliani sugli immobili urbani?',
   op:['L\'IPTU (imposta sulla proprietà urbana)','Un dazio interstatale','Un\'imposta federale sul reddito'], giusta:0,
   perche:'L\'IPTU, imposta sulla proprietà urbana, è un tributo proprio dei comuni brasiliani.'},
+
+ // L174-3 — il governo locale del Brasile
+ {id:'br_l_camara', era:'contemporanea', paese:'brasile', ruolo:'locale', diff:'facile', q:'Come si chiama il consiglio comunale di una città brasiliana?',
+  op:['La Câmara Municipal, coi suoi vereadores','L\'Assemblea legislativa','Il Senato municipale'], giusta:0,
+  perche:'I vereadores siedono nella Câmara Municipal; l\'Assemblea legislativa è quella dello Stato.'},
+ {id:'br_l_ballottaggio', era:'contemporanea', paese:'brasile', ruolo:'locale', diff:'media', q:'In quali comuni brasiliani il prefeito può essere eletto al secondo turno?',
+  op:['In quelli con più di duecentomila elettori','In tutti','In nessuno: vince sempre il più votato'], giusta:0,
+  perche:'Sopra i duecentomila elettori, se nessuno ha la maggioranza assoluta dei voti validi, si torna alle urne.'},
+ {id:'br_l_fpm', era:'contemporanea', paese:'brasile', ruolo:'locale', diff:'media', q:'Da dove viene gran parte delle entrate dei piccoli comuni brasiliani?',
+  op:['Dal Fondo di partecipazione dei comuni, una quota delle imposte federali','Dall\'imposta sugli immobili urbani','Dai pedaggi delle strade statali'], giusta:0,
+  perche:'Per migliaia di comuni piccoli il Fondo di partecipazione è la prima entrata.'},
+ {id:'br_l_curitiba', era:'contemporanea', paese:'brasile', ruolo:'locale', diff:'media', q:'Per quale idea di trasporto pubblico è nota nel mondo la città di Curitiba?',
+  op:['Gli autobus veloci su corsie riservate, con fermate a tubo','La prima metropolitana del Sudamerica','I tram a cavalli'], giusta:0,
+  perche:'Dagli anni Settanta Curitiba ha costruito una rete di autobus su corsie proprie, imitata in molte città.'},
+ {id:'br_l_partecipativo', era:'contemporanea', paese:'brasile', ruolo:'locale', diff:'media', q:'Quale città brasiliana ha inventato, alla fine degli anni Ottanta, il «bilancio partecipativo»?',
+  op:['Porto Alegre','Manaus','Recife'], giusta:0,
+  perche:'A Porto Alegre, dal 1989, i cittadini decidono in assemblea una parte degli investimenti del comune.'},
+ {id:'br_l_saopaulo', era:'contemporanea', paese:'brasile', ruolo:'locale', diff:'facile', q:'Qual è il comune più popoloso del Brasile?',
+  op:['San Paolo','Rio de Janeiro','Brasilia'], giusta:0,
+  perche:'Il comune di San Paolo ha più di undici milioni di abitanti.'},
+ {id:'br_l_mandato', era:'contemporanea', paese:'brasile', ruolo:'locale', diff:'facile', q:'Quanto dura il mandato di un prefeito brasiliano?',
+  op:['Quattro anni, rinnovabile una volta di seguito','Sei anni, non rinnovabile','Due anni'], giusta:0,
+  perche:'Il prefeito resta quattro anni e può essere rieletto per un secondo mandato consecutivo.'},
+ {id:'br_l_distretto', era:'contemporanea', paese:'brasile', ruolo:'locale', diff:'media', q:'Che cosa ha di particolare il Distretto federale, dove sorge Brasilia?',
+  op:['Non può essere diviso in comuni: ha i compiti di uno Stato e di un comune','È governato direttamente dal Presidente','Non elegge rappresentanti al Congresso'], giusta:0,
+  perche:'L\'articolo 32 della Costituzione vieta di dividerlo in comuni; elegge un suo governatore.'},
  {id:'br_voto', era:'universale', paese:'brasile', ruolo:'governo', diff:'media', q:'Cosa caratterizza il voto in Brasile?',
   op:['È obbligatorio','È facoltativo','Si vota per acclamazione'], giusta:0,
   perche:'In Brasile il voto è obbligatorio.'},   // dal 1932
@@ -13286,6 +13709,17 @@ const SFIDE=[
  {id:'mx_l_servizi', era:'contemporanea', paese:'messico', ruolo:'locale', diff:'media', q:'A chi affida la Costituzione messicana l\'acqua potabile, le fognature e la raccolta dei rifiuti?',
   op:['Ai comuni','Alla federazione','Alle imprese private, per legge'], giusta:0,
   perche:'L\'articolo 115 elenca i servizi pubblici che spettano ai comuni.'},
+
+ // L174-3 — il governo locale del Messico (seguito di L170-2: tre facili/medie)
+ {id:'mx_l_rielezione', era:'contemporanea', paese:'messico', ruolo:'locale', diff:'media', q:'Dalla riforma del 2014, un presidente municipale messicano può essere rieletto?',
+  op:['Sì, per un mandato di seguito, se la costituzione del suo Stato lo prevede','No, mai','Sì, senza limiti'], giusta:0,
+  perche:'La riforma ha tolto il divieto di rielezione immediata dei sindaci, lasciando le regole agli Stati.'},
+ {id:'mx_l_monterrey', era:'contemporanea', paese:'messico', ruolo:'locale', diff:'facile', q:'Qual è la capitale dello Stato di Nuevo León?',
+  op:['Monterrey','Tijuana','Mérida'], giusta:0,
+  perche:'Monterrey, capitale del Nuevo León, è il grande centro industriale del nord.'},
+ {id:'mx_l_triennio', era:'contemporanea', paese:'messico', ruolo:'locale', diff:'facile', q:'Quanto dura di norma il mandato di un ayuntamiento messicano?',
+  op:['Tre anni','Sei anni','Un anno'], giusta:0,
+  perche:'La Costituzione fissa il mandato dei governi comunali in tre anni.'},
  {id:'mx_sexenio', era:'universale', paese:'messico', ruolo:'governo', diff:'difficile', q:'Cosa caratterizza il mandato presidenziale messicano?',
   op:['Un mandato unico di sei anni senza rielezione (il «sexenio»)','Un mandato di quattro anni rinnovabile','Un mandato a vita'], giusta:0,
   perche:'La non-rielezione viene dalla Costituzione del 1917; il mandato di sei anni (il «sexenio») dal 1928.'},   // correzione fattuale del vaglio
@@ -13403,6 +13837,17 @@ const SFIDE=[
  {id:'in_l_chandigarh', era:'contemporanea', paese:'india', ruolo:'locale', diff:'media', q:'Quale città è la capitale di due Stati, il Punjab e l\'Haryana?',
   op:['Chandigarh','Amritsar','Lucknow'], giusta:0,
   perche:'Chandigarh, città progettata negli anni Cinquanta, è un territorio dell\'Unione e capitale di entrambi.'},
+
+ // L174-3 — il governo locale dell'India (seguito di L170-2: tre facili/medie)
+ {id:'in_l_sarpanch', era:'contemporanea', paese:'india', ruolo:'locale', diff:'facile', q:'Come si chiama di solito il capo eletto di un panchayat di villaggio?',
+  op:['Il sarpanch','Il collector','Lo speaker'], giusta:0,
+  perche:'Il sarpanch presiede il panchayat del villaggio; in molti Stati lo eleggono direttamente gli abitanti.'},
+ {id:'in_l_collector', era:'contemporanea', paese:'india', ruolo:'locale', diff:'media', q:'Chi è il «collector» di un distretto indiano?',
+  op:['Il funzionario dello Stato che ne guida l\'amministrazione','Il sindaco della città più grande','L\'esattore eletto dei villaggi'], giusta:0,
+  perche:'Il collector è un alto funzionario di carriera: il nome viene dalla riscossione dell\'imposta fondiaria.'},
+ {id:'in_l_bengala', era:'contemporanea', paese:'india', ruolo:'locale', diff:'facile', q:'Qual è la capitale del Bengala Occidentale?',
+  op:['Calcutta','Patna','Dacca'], giusta:0,
+  perche:'Calcutta, capitale dell\'India britannica fino al 1911, è oggi capitale del Bengala Occidentale.'},
  {id:'in_voto', era:'universale', paese:'india', ruolo:'governo', diff:'difficile', q:'Cosa caratterizza le elezioni politiche in India?',
   op:['Il suffragio universale e il maggioritario a turno unico','Il voto per censo','La nomina da parte del Presidente'], giusta:0,
   perche:'L\'India vota a suffragio universale, con sistema maggioritario a turno unico.'},
@@ -13744,6 +14189,29 @@ const SFIDE=[
  {id:'za_capitali', era:'universale', paese:'sudafrica', ruolo:'locale', diff:'difficile', q:'Quante capitali ha il Sudafrica?',
   op:['Tre: Pretoria (esecutiva), Città del Capo (legislativa), Bloemfontein (giudiziaria)','Una: Pretoria','Due: Pretoria e Johannesburg'], giusta:0,
   perche:'Il Sudafrica ha tre capitali: Pretoria (esecutiva), Città del Capo (legislativa) e Bloemfontein (giudiziaria).'},   // assetto dal 1910 → universale
+
+ // L174-3 — il governo locale del Sudafrica
+ {id:'za_l_metro', era:'contemporanea', paese:'sudafrica', ruolo:'locale', diff:'media', q:'Come si chiamano in Sudafrica i grandi comuni come Johannesburg, Città del Capo e Durban, che governano da soli tutta l\'area urbana?',
+  op:['Comuni metropolitani','Comuni di distretto','Aree tribali'], giusta:0,
+  perche:'I comuni metropolitani sono otto e non stanno dentro un distretto.'},
+ {id:'za_l_ward', era:'contemporanea', paese:'sudafrica', ruolo:'locale', diff:'media', q:'Come si eleggono i consiglieri di un comune metropolitano sudafricano?',
+  op:['Metà nei quartieri e metà con liste proporzionali','Tutti nominati dalla provincia','Tutti nelle liste nazionali dei partiti'], giusta:0,
+  perche:'Ogni quartiere elegge un consigliere; gli altri seggi si dividono in proporzione ai voti dei partiti.'},
+ {id:'za_l_tradizionali', era:'contemporanea', paese:'sudafrica', ruolo:'locale', diff:'media', q:'Che ruolo riconosce la Costituzione sudafricana ai capi tradizionali?',
+  op:['Un ruolo nelle comunità e in consigli consultivi, accanto ai comuni eletti','Governano le province al posto dei premier','Nessuno: sono stati aboliti nel 1994'], giusta:0,
+  perche:'Il capitolo 12 della Costituzione riconosce l\'istituzione e le case dei capi tradizionali.'},
+ {id:'za_l_acqua', era:'contemporanea', paese:'sudafrica', ruolo:'locale', diff:'media', q:'Quanta acqua al mese garantisce gratis la politica nazionale di base a una famiglia povera?',
+  op:['Seimila litri','Seicento litri','Sessantamila litri'], giusta:0,
+  perche:'La «acqua di base gratuita», dal 2001, è di seimila litri al mese per famiglia; la erogano i comuni.'},
+ {id:'za_l_kzn', era:'contemporanea', paese:'sudafrica', ruolo:'locale', diff:'media', q:'Qual è la capitale della provincia del KwaZulu-Natal?',
+  op:['Pietermaritzburg','Durban','Bloemfontein'], giusta:0,
+  perche:'Durban è la città più grande della provincia, ma la capitale è Pietermaritzburg.'},
+ {id:'za_l_premier', era:'contemporanea', paese:'sudafrica', ruolo:'locale', diff:'facile', q:'Chi guida il governo di una provincia sudafricana?',
+  op:['Il premier, eletto dall\'assemblea della provincia','Un governatore nominato dal Presidente','Il sindaco del capoluogo'], giusta:0,
+  perche:'Ognuna delle nove province ha una sua assemblea legislativa, che elegge il premier.'},
+ {id:'za_l_revisore', era:'contemporanea', paese:'sudafrica', ruolo:'locale', diff:'media', q:'Chi controlla ogni anno i conti dei comuni sudafricani e ne pubblica i giudizi?',
+  op:['Il Revisore generale','La banca centrale','La Corte costituzionale'], giusta:0,
+  perche:'Il Revisore generale è un\'istituzione indipendente prevista dalla Costituzione; pochi comuni ottengono un giudizio pulito.'},
  // ----- FILL-ITALIA (audit-griglia): Camera+Senato, Corte cost (≥1956), Banca d'Italia, IMU, legislatura -----
  {id:'it_parlamento', era:'universale', paese:'italia', ruolo:'governo', diff:'facile', q:'Da quali due camere è composto il Parlamento italiano?',
   op:['La Camera dei Deputati e il Senato della Repubblica','Un\'assemblea unicamerale','La Dieta e il Consiglio'], giusta:0,
@@ -15181,6 +15649,34 @@ const TITOLI=[
  {id:'ti_de00_s_congedo', era:'de2000', cond:()=>S.year>=2006, amico:'Il congedo per i genitori: nascono più bambini', ostile:'Il congedo per i genitori: e gli asili mancano'},
  {id:'ti_de00_s_immigrazione', era:'de2000', cond:()=>S.year>=2005, amico:'Paese di immigrazione: il governo lo dice', ostile:'Paese di immigrazione: lo dice tardi'},
  {id:'ti_de00_s_orariocorto', era:'de2000', cond:()=>S.year>=2008&&S.ind.growth<0.5, amico:'Il lavoro ridotto salva i posti', ostile:'La crisi arriva: le fabbriche a orario corto'},
+ /* L177-3 · Stati Uniti 1950, parte 2: ventisette titoli (PRESET-USA-1950 §I, correzioni ⚠ nel rapporto «⚑ L177-3») */
+ {id:'ti_us50_corea', era:'us1950', pri:1, cond:()=>S.year===1950&&S.month>=9&&S.month<=10&&S.usCorea==='truppe', amico:'Lo sbarco alle spalle', ostile:'Corea: sbarco a sorpresa alle spalle del nemico, Seul ripresa'},
+ {id:'ti_us50_corea_sola', era:'us1950', pri:1, cond:()=>S.year===1950&&S.month>=9&&S.month<=10&&(S.usCorea==='aria'||S.usCorea==='armi'), amico:'Il Sud resiste', ostile:'Corea: il Sud resiste, chiuso in un angolo della costa'},
+ {id:'ti_us50_cina', era:'us1950', pri:1, cond:()=>((S.year===1950&&S.month===12)||(S.year===1951&&S.month===1))&&S.usCorea==='truppe', amico:'La ritirata d\'inverno', ostile:'Corea: la Cina entra in guerra, la ritirata nel gelo'},
+ {id:'ti_us50_generale', era:'us1950', pri:1, cond:()=>S.year===1951&&S.month>=5&&S.month<=6&&S.usGenerale==='richiamo', amico:'Il generale torna a casa', ostile:'Il generale richiamato: le città lo accolgono da trionfatore'},
+ {id:'ti_us50_generale_mano', era:'us1950', pri:1, cond:()=>S.year===1951&&S.month>=6&&S.month<=7&&S.usGenerale==='mano', amico:'Oltre il fiume', ostile:'Corea: bombardate le basi in Cina, gli alleati protestano'},
+ {id:'ti_us50_acciaio_corte', era:'us1950', pri:1, cond:()=>S.year===1952&&S.month>=6&&S.month<=7&&S.usAcciaio==='sequestro', amico:'La Corte e le acciaierie', ostile:'La Corte suprema: il sequestro delle acciaierie è illegittimo'},
+ {id:'ti_us50_acciaio_ottanta', era:'us1950', pri:1, cond:()=>S.year===1952&&S.month>=6&&S.month<=7&&S.usAcciaio==='ottanta', amico:'Lo sciopero sospeso', ostile:'Acciaio: sciopero fermato per ottanta giorni, il sindacato non dimentica'},
+ {id:'ti_us50_acciaio_prezzi', era:'us1950', pri:1, cond:()=>S.year===1952&&S.month>=6&&S.month<=7&&S.usAcciaio==='prezzi', amico:'L\'acciaio costa di più', ostile:'Acciaio: firmato l\'accordo, i prezzi salgono'},
+ {id:'ti_us50_armistizio', era:'us1950', pri:1, cond:()=>S.year===1953&&S.month>=7&&S.month<=8&&S.usCorea==='truppe', amico:'L\'armistizio', ostile:'Corea: firmato l\'armistizio, il confine resta dov\'era'},
+ {id:'ti_us50_scuola_truppe', era:'us1950', pri:1, cond:()=>S.year===1957&&S.month===11&&S.usScuola==='truppe', amico:'I nove sono entrati', ostile:'Arkansas: i nove studenti entrano a scuola scortati dai soldati'},
+ {id:'ti_us50_scuola_guardia', era:'us1950', pri:1, cond:()=>S.year===1957&&S.month===11&&S.usScuola==='guardia', amico:'La Guardia cambia comandante', ostile:'Arkansas: la Guardia nazionale passa agli ordini di Washington'},
+ {id:'ti_us50_scuola_tribunali', era:'us1950', pri:1, cond:()=>S.year===1957&&S.month===11&&S.usScuola==='tribunali', amico:'La folla davanti alla scuola', ostile:'Arkansas: i nove ancora fuori, la folla resta davanti al liceo'},
+ {id:'ti_us50_lista', era:'us1950', pri:1, cond:()=>S.year===1950&&S.month>=2&&S.month<=3, amico:'La lista del senatore', ostile:'Un senatore: «Ho i nomi dei comunisti al Dipartimento di Stato»'},
+ {id:'ti_us50_emendamento', era:'us1950', pri:1, cond:()=>S.year===1951&&S.month===3, amico:'Due mandati, non di più', ostile:'Ratificato il ventiduesimo emendamento: al Presidente non più di due mandati'},
+ {id:'ti_us50_televisione', era:'us1950', pri:1, cond:()=>S.year===1951&&S.month>=9&&S.month<=10, amico:'Da costa a costa', ostile:'Il primo programma televisivo visto da costa a costa'},
+ {id:'ti_us50_mosca', era:'us1950', pri:1, cond:()=>S.year===1953&&S.month===3, amico:'La morte del capo', ostile:'È morto il capo dell\'Unione Sovietica: a Mosca comincia la successione'},
+ {id:'ti_us50_sentenza', era:'us1950', pri:1, cond:()=>S.year===1954&&S.month>=5&&S.month<=6, amico:'La Corte e le scuole', ostile:'La Corte suprema, all\'unanimità: le scuole separate sono contro la Costituzione'},
+ {id:'ti_us50_censura', era:'us1950', pri:1, cond:()=>S.year===1954&&S.month===12, amico:'Il Senato giudica uno dei suoi', ostile:'Il Senato censura il senatore delle liste'},
+ {id:'ti_us50_vaccino', era:'us1950', pri:1, cond:()=>S.year===1955&&S.month>=4&&S.month<=5, amico:'Il vaccino funziona', ostile:'Poliomielite: il vaccino funziona, è sicuro ed efficace'},
+ {id:'ti_us50_budapest', era:'us1950', pri:1, cond:()=>S.year===1956&&S.month>=11&&S.month<=12, amico:'Budapest e Suez', ostile:'Carri sovietici a Budapest, paracadutisti sul canale di Suez'},
+ {id:'ti_us50_satellite', era:'us1950', pri:1, cond:()=>S.year===1957&&S.month>=10&&S.month<=11, amico:'Il bip dallo spazio', ostile:'Mosca mette in orbita il primo satellite artificiale'},
+ {id:'ti_us50_orbita', era:'us1950', pri:1, cond:()=>S.year===1958&&S.month===2, amico:'Anche noi in orbita', ostile:'Lanciato il primo satellite americano'},
+ {id:'ti_us50_detroit', era:'us1950', pri:1, cond:()=>S.year===1958&&S.month>=3&&S.month<=5, amico:'La recessione morde', ostile:'Detroit: le catene di montaggio a mezzo servizio'},
+ {id:'ti_us50_cuba', era:'us1950', pri:1, cond:()=>S.year===1959&&S.month===1, amico:'L\'Avana cambia padrone', ostile:'Cuba: il dittatore fugge, i ribelli entrano all\'Avana'},
+ {id:'ti_us50_alaska', era:'us1950', pri:1, cond:()=>S.year===1959&&S.month>=1&&S.month<=2, amico:'La quarantanovesima stella', ostile:'L\'Alaska è il quarantanovesimo Stato'},
+ {id:'ti_us50_hawaii', era:'us1950', pri:1, cond:()=>S.year===1959&&S.month>=8&&S.month<=9, amico:'La cinquantesima stella', ostile:'Le Hawaii sono il cinquantesimo Stato'},
+ {id:'ti_us50_aereo', era:'us1950', pri:1, cond:()=>S.year===1960&&S.month>=5&&S.month<=6, amico:'L\'aereo spia', ostile:'Abbattuto un aereo spia sull\'Unione Sovietica: salta il vertice di Parigi'},
  {id:'ng_p_ti_petrolio', era:'contemporanea', paesi:['nigeria'], amico:'La produzione di petrolio torna a salire', ostile:'Un barile su dieci sparisce: il furto record'},
 ];
 
@@ -17052,6 +17548,16 @@ const SNODI_STORICI = {
   deFiducia05Opp:  { storico:['urne'], conforme:'sulla questione di fiducia del 2005, dall’opposizione', diverge:{ 'grande':'Nel 2005 ha offerto dall’opposizione una grande coalizione.', 'attesa':'Nel 2005 ha aspettato la scadenza della legislatura.' } },
   deBanche08:      { storico:['garanzia'], conforme:'sulle banche del 2008', diverge:{ 'depositi':'Nel 2008 ha garantito i depositi e lasciato fallire le banche.', 'nazionalizzare':'Nel 2008 ha nazionalizzato le banche salvate.' } },
   deBanche08Opp:   { storico:['si'], conforme:'sulle banche del 2008, dall’opposizione', diverge:{ 'tetto':'Nel 2008 ha votato il fondo per le banche solo con un tetto agli stipendi dei banchieri.', 'contro':'Nel 2008 ha votato contro il fondo per le banche.' } },
+  /* L176-2 · i quattro snodi di us1950 e le aule (frasi di Code dalle righe-effetto di Cowork). ⚠ usScuolaOpp ha due voci storiche: il
+     partito d'opposizione del 1957 fu diviso (il Nord approvò, la guida al Senato restò cauta), come `enel`. */
+  usCorea:         { storico:['truppe'], conforme:'sulla Corea', diverge:{ 'aria':'Nel 1950 ha mandato in Corea aerei e navi, ma nessun soldato a terra.', 'armi':'Nel 1950 ha mandato al Sud della Corea armi, e nessun soldato.' } },
+  usCoreaOpp:      { storico:['sostegno'], conforme:'sulla Corea, dall’opposizione', diverge:{ 'congresso':'Nel 1950 ha chiesto dall’opposizione un voto del Congresso sulla guerra in Corea.', 'silenzio':'Nel 1950 ha taciuto sulla guerra in Corea.' } },
+  usGenerale:      { storico:['richiamo'], conforme:'sul generale', diverge:{ 'mano':'Nel 1951 ha dato al comandante in Corea mano libera oltre il fiume.', 'ordine':'Nel 1951 ha lasciato al suo posto il comandante in Corea che sfidava gli ordini.' } },
+  usGeneraleOpp:   { storico:['discorso'], conforme:'sul generale, dall’opposizione', diverge:{ 'accusa':'Nel 1951 ha chiesto la messa in stato d’accusa del Presidente per il richiamo del generale.', 'udienze':'Nel 1951 ha portato il richiamo del generale in commissione, senza processo al Presidente.' } },
+  usAcciaio:       { storico:['sequestro'], conforme:'sulle acciaierie', diverge:{ 'ottanta':'Nel 1952 ha sospeso per ottanta giorni lo sciopero dell’acciaio.', 'prezzi':'Nel 1952 ha concesso agli industriali dell’acciaio l’aumento dei prezzi.' } },
+  usAcciaioOpp:    { storico:['corte'], conforme:'sulle acciaierie, dall’opposizione', diverge:{ 'fondi':'Nel 1952 ha proposto di togliere i fondi al sequestro delle acciaierie.', 'accusa':'Nel 1952 ha chiesto la messa in stato d’accusa del Presidente per il sequestro delle acciaierie.' } },
+  usScuola:        { storico:['truppe'], conforme:'sulla scuola dell’Arkansas', diverge:{ 'guardia':'Nel 1957 ha preso il comando della Guardia nazionale dell’Arkansas, senza soldati da fuori.', 'tribunali':'Nel 1957 ha lasciato ai tribunali la scuola dell’Arkansas.' } },
+  usScuolaOpp:     { storico:['approva','silenzio'], conforme:'sulla scuola dell’Arkansas, dall’opposizione', diverge:{ 'stati':'Nel 1957 ha condannato in nome dei diritti degli Stati l’intervento in Arkansas.' } },
 };
 
 /* ==============================================================================================================
@@ -19737,6 +20243,168 @@ const BANCHE08_OPP_EV = {
     { l:'Votare contro', e:'Il tuo no resta agli atti · se la fila agli sportelli arriva, non è colpa tua',
       f:function(){ S.deBanche08Opp='contro'; gdDe00('lavoratori',2); gdDe00('pensionati',-3); baseDe00(-1);
         S.log.unshift({t:T('L\'economia'),x:T('Ha votato contro il fondo per le banche.')}); } },
+  ],
+};
+/* ==============================================================================================================
+   L176-2 · STATI UNITI 1950 — I QUATTRO SNODI E LE AULE (scheda PRESET-USA-1950 §I-A, testi di Cowork approvati; generato da
+   .claude/genera-l176-2.js). Valute del livello 3. Flag nuovi cercati in tutto js/ il 3/10 prima di scriverli (L99-2), zero occorrenze:
+   usCorea, usCoreaOpp, usGenerale, usGeneraleOpp, usAcciaio, usAcciaioOpp, usScuola, usScuolaOpp.
+   ⚑ CHI RICEVE CHE COSA (cancelli in game.js, finestre di due mesi): S1 la Corea 1950/7-8 · S2 il generale 1951/4-5 (al governo solo
+   dopo le truppe di S1: S.usCorea==='truppe') · S3 le acciaierie 1952/4-5 · S4 la scuola 1957/9-10 — al governo la versione piena,
+   all'opposizione quella dall'aula (che non guarda il flag di governo: dall'opposizione il governo è dell'IA, e la storia la dà per fatta).
+   ⚑ Il Sud segregazionista non ha un gruppo: lo porta la base del partito (baseUs50, col segno che dipende da S.partito), mai «cattolici».
+   ⚑ Le aule muovono SOLO gruppi e base (repd, stampad e la fiducia dall'opposizione sono no-op, L12-2).
+   ============================================================================================================== */
+/* Il moltiplicatore dei gruppi è di questa porta (sweep in L176-2: il valore e il rapporto in PRESET-USA-1950.md). */
+let US50_GRUPPI = 2;   // let e non const: la sweep lo varia sul banco
+/* D137 (L177-1): a ×4 il 1952 dei Democratici al governo scende a 4/20 (banda D132 6-12) e il limite non lo danno i gruppi, che
+   reggono a ogni valore; a ×2 torna a 8 (sweep di L176-2: 8 · 8 · 8 · 5 · 4 · 2 · 2 a ×0…×6). */
+function gdUs50(g, n){ gd(g, Math.round(n*US50_GRUPPI)); }
+function fidUs50(n){ fidFr60(n); }   // la fiducia non ha moltiplicatore: la stessa leva delle porte tedesche e francesi
+function baseUs50(n){
+  var P=(PAESE && PAESE.partiti) ? PAESE.partiti.filter(function(x){ return x.id===S.partito; })[0] : null;
+  if(!P || !P.base) return;
+  Object.keys(P.base).forEach(function(g){ gd(g, Math.round(n*P.base[g]*US50_GRUPPI)); });
+}
+const COREA50_EV = {
+  id:'snodo_corea50', snodo:true, era:'us1950', kick:'La guerra', tono:'grave',
+  t:'La Corea',
+  text:'Il 25 giugno l\'esercito del Nord ha passato il confine della Corea, e in tre giorni ha preso Seul. Le truppe del Sud ripiegano verso il mare. Il Consiglio di sicurezza delle Nazioni Unite, che i sovietici disertano da gennaio, ha chiesto ai paesi membri di aiutare il Sud, e ora propone un comando unificato sotto la sua bandiera. Nelle basi del Giappone ci sono quattro divisioni, a ranghi ridotti e senza carri pesanti.',
+  ch:[
+    { l:'Le truppe, sotto la bandiera delle Nazioni Unite', e:'La storia · i primi soldati sbarcano in pochi giorni · una guerra senza dichiarazione, e senza una data di fine', costo:{debito:1},
+      f:function(){ S.usCorea='truppe'; S.ind.debt+=1; repd(4); gdUs50('giovani',-2); gdUs50('pensionati',-1); fidUs50(-1);
+        S.log.unshift({t:T('La guerra'),x:T('Ha mandato le truppe in Corea sotto la bandiera delle Nazioni Unite.')}); } },
+    { l:'Aviazione e flotta, ma nessun soldato a terra', e:'Gli aerei partono dal Giappone · il Sud chiede uomini, e a Washington si comincia a parlare di un\'altra Cina',
+      f:function(){ S.usCorea='aria'; repd(-1); gdUs50('giovani',1); stampad(-1);
+        S.log.unshift({t:T('La guerra'),x:T('Ha mandato aerei e navi in Corea, ma nessun soldato a terra.')}); } },
+    { l:'Armi al Sud e una protesta alle Nazioni Unite', e:'Nessun americano muore in Corea · se il Sud cade, il conto arriva al Congresso con un nome: chi ha perso l\'Asia',
+      f:function(){ S.usCorea='armi'; repd(-4); gdUs50('cattolici',-2); gdUs50('cetomedio',-1); stampad(-2);
+        S.log.unshift({t:T('La guerra'),x:T('Ha mandato armi al Sud della Corea, e nessun soldato.')}); } },
+  ],
+};
+const COREA50_OPP_EV = {
+  id:'snodo_corea50_opp', snodo:true, era:'us1950', kick:'La guerra', tono:'grave',
+  t:'La Corea, dall\'aula',
+  text:'Il Presidente ha mandato le truppe in Corea sotto la bandiera delle Nazioni Unite, senza chiedere al Congresso una dichiarazione di guerra. Il paese, per ora, è con lui. Il tuo partito deve dire che cosa ne pensa.',
+  ch:[
+    { l:'Votare gli stanziamenti, e chiedere più fermezza in Asia', e:'La storia · votate i soldi per la guerra · fra un anno sarà "la guerra del Presidente", e lo dirai tu',
+      f:function(){ S.usCoreaOpp='sostegno'; baseUs50(1); gdUs50('cattolici',1);
+        S.log.unshift({t:T('La guerra'),x:T('Dall\'opposizione ha votato gli stanziamenti per la Corea, chiedendo più fermezza in Asia.')}); } },
+    { l:'«Nessuna guerra senza un voto del Congresso»', e:'I costituzionalisti ti danno ragione · il paese, a luglio, non ascolta i costituzionalisti',
+      f:function(){ S.usCoreaOpp='congresso'; gdUs50('cetomedio',1); gdUs50('giovani',1); baseUs50(-1);
+        S.log.unshift({t:T('La guerra'),x:T('Dall\'opposizione ha chiesto un voto del Congresso sulla guerra in Corea.')}); } },
+    { l:'Tacere', e:'Nessuno può citarti · se la guerra va male, nessuno ricorderà che avevi un\'idea',
+      f:function(){ S.usCoreaOpp='silenzio'; baseUs50(-1);
+        S.log.unshift({t:T('La guerra'),x:T('Ha taciuto sulla guerra in Corea.')}); } },
+  ],
+};
+const GENERALE51_EV = {
+  id:'snodo_generale51', snodo:true, era:'us1950', kick:'Il comando', tono:'grave',
+  t:'Il generale',
+  text:'Il comandante in Corea, l\'eroe della guerra nel Pacifico, vuole bombardare le basi oltre il fiume, in Cina, e armare i nazionalisti di Formosa. Lo ha scritto a un deputato dell\'opposizione, che ieri ha letto la lettera in aula: in guerra, dice, niente può prendere il posto della vittoria. Gli ordini di Washington dicono il contrario, e lui lo sa. I capi di stato maggiore aspettano la tua decisione; gli alleati europei anche.',
+  ch:[
+    { l:'Richiamarlo: il comandante supremo è il Presidente', e:'La storia · lo sostituisci con un comunicato all\'una di notte · lui torna a casa da trionfatore, e il tuo consenso tocca il fondo',
+      f:function(){ S.usGenerale='richiamo'; repd(2); stampad(-3); gdUs50('cattolici',-3); gdUs50('pensionati',-2); gdUs50('cetomedio',-1); baseUs50(-1);
+        S.log.unshift({t:T('Il comando'),x:T('Ha richiamato il comandante in Corea che sfidava gli ordini.')}); } },
+    { l:'Mano libera oltre il fiume', e:'La guerra si allarga alla Cina · gli alleati minacciano di ritirarsi, e a Mosca qualcuno conta le bombe', costo:{debito:1},
+      f:function(){ S.usGenerale='mano'; S.ind.debt+=1; repd(-5); gdUs50('cattolici',2); gdUs50('pensionati',1); gdUs50('giovani',-3); fidUs50(-2);
+        S.log.unshift({t:T('Il comando'),x:T('Ha dato al comandante in Corea mano libera oltre il fiume.')}); } },
+    { l:'Un richiamo all\'ordine, e resta al suo posto', e:'Il generale tace per un mese · poi parla di nuovo, e questa volta tutti sanno che hai già perdonato una volta',
+      f:function(){ S.usGenerale='ordine'; repd(-2); stampad(-1); gdUs50('cetomedio',-1);
+        S.log.unshift({t:T('Il comando'),x:T('Ha richiamato all\'ordine il comandante in Corea, lasciandolo al suo posto.')}); } },
+  ],
+};
+const GENERALE51_OPP_EV = {
+  id:'snodo_generale51_opp', snodo:true, era:'us1950', kick:'Il comando', tono:'grave',
+  t:'Il generale, dall\'aula',
+  text:'Il Presidente ha richiamato il comandante in Corea. Il generale torna in patria fra folle mai viste, e il tuo partito lo ha invitato a parlare al Congresso. Molti dei tuoi chiedono la messa in stato d\'accusa del Presidente.',
+  ch:[
+    { l:'Farlo parlare a Camere riunite, e lasciare che il paese ascolti', e:'La storia · trenta interruzioni per gli applausi · poi le udienze al Senato, e la febbre scende in qualche settimana',
+      f:function(){ S.usGeneraleOpp='discorso'; baseUs50(1); gdUs50('cattolici',2); gdUs50('pensionati',1);
+        S.log.unshift({t:T('Il comando'),x:T('Dall\'opposizione ha fatto parlare il generale richiamato davanti alle Camere riunite.')}); } },
+    { l:'Chiedere la messa in stato d\'accusa del Presidente', e:'La tua base è in piedi · il centro del paese ti guarda come si guarda chi grida in chiesa',
+      f:function(){ S.usGeneraleOpp='accusa'; baseUs50(2); gdUs50('cetomedio',-2); gdUs50('giovani',-2);
+        S.log.unshift({t:T('Il comando'),x:T('Ha chiesto la messa in stato d\'accusa del Presidente per il richiamo del generale.')}); } },
+    { l:'Udienze in commissione, senza processo al Presidente', e:'Le carte della guerra diventano pubbliche · i tuoi volevano una piazza, hai dato loro un verbale',
+      f:function(){ S.usGeneraleOpp='udienze'; gdUs50('cetomedio',2); baseUs50(-1);
+        S.log.unshift({t:T('Il comando'),x:T('Dall\'opposizione ha portato il richiamo del generale in commissione, senza processo al Presidente.')}); } },
+  ],
+};
+const ACCIAIO52_EV = {
+  id:'snodo_acciaio52', snodo:true, era:'us1950', kick:'Il lavoro', tono:'grave',
+  t:'Le acciaierie',
+  text:'Il contratto dei siderurgici è scaduto a dicembre, e il sindacato ha fissato lo sciopero per la mezzanotte di mercoledì. Il comitato dei salari ha proposto un aumento; gli industriali dicono che lo pagano solo se il governo li lascia alzare il prezzo dell\'acciaio. Il paese si riarma, e senza acciaio non si fanno né proiettili né carri. Una legge del 1947 permette di sospendere uno sciopero per ottanta giorni: il sindacato la chiama la legge degli schiavi.',
+  ch:[
+    { l:'Sequestrare le acciaierie per decreto: le gestisce lo Stato', e:'La storia · le fabbriche lavorano · gli industriali vanno in tribunale, e la Corte suprema può darti torto davanti a tutto il paese',
+      f:function(){ S.usAcciaio='sequestro'; gdUs50('lavoratori',3); gdUs50('imprenditori',-4); stampad(-2); fidUs50(-1);
+        S.log.unshift({t:T('Il lavoro'),x:T('Ha sequestrato le acciaierie per decreto per evitare lo sciopero.')}); } },
+    { l:'La legge degli ottanta giorni', e:'Lo sciopero si ferma · il sindacato non lo dimentica, e a novembre si vota',
+      f:function(){ S.usAcciaio='ottanta'; gdUs50('lavoratori',-4); gdUs50('imprenditori',2); baseUs50(S.partito==='us_dem'?-2:1);
+        S.log.unshift({t:T('Il lavoro'),x:T('Ha sospeso lo sciopero dell\'acciaio per ottanta giorni.')}); } },
+    { l:'Concedere agli industriali l\'aumento dei prezzi', e:'L\'accordo si firma in una settimana · l\'acciaio costa di più, e con lui tutto quello che è fatto d\'acciaio',
+      f:function(){ S.usAcciaio='prezzi'; gdUs50('imprenditori',2); gdUs50('lavoratori',1); gdUs50('pensionati',-2); gdUs50('cetomedio',-2); fidUs50(-1);
+        S.log.unshift({t:T('Il lavoro'),x:T('Ha concesso agli industriali dell\'acciaio l\'aumento dei prezzi.')}); } },
+  ],
+};
+const ACCIAIO52_OPP_EV = {
+  id:'snodo_acciaio52_opp', snodo:true, era:'us1950', kick:'Il lavoro', tono:'grave',
+  t:'Le acciaierie, dall\'aula',
+  text:'Il Presidente ha sequestrato le acciaierie per decreto, per evitare lo sciopero mentre il paese si riarma. Gli industriali sono andati in tribunale; al Congresso i tuoi parlano di dittatura, e qualcuno di messa in stato d\'accusa.',
+  ch:[
+    { l:'Lasciar decidere la Corte, e dirlo', e:'La storia · a giugno la Corte dà ragione agli industriali, sei a tre · e tu non hai dovuto gridare',
+      f:function(){ S.usAcciaioOpp='corte'; gdUs50('cetomedio',2); gdUs50('imprenditori',1);
+        S.log.unshift({t:T('Il lavoro'),x:T('Dall\'opposizione ha lasciato alla Corte suprema il sequestro delle acciaierie.')}); } },
+    { l:'Un emendamento che toglie i fondi al sequestro', e:'Le imprese ti ringraziano · i siderurgici, che votano in Ohio e in Pennsylvania, no',
+      f:function(){ S.usAcciaioOpp='fondi'; gdUs50('imprenditori',3); gdUs50('lavoratori',-3); baseUs50(1);
+        S.log.unshift({t:T('Il lavoro'),x:T('Ha proposto di togliere i fondi al sequestro delle acciaierie.')}); } },
+    { l:'Chiedere la messa in stato d\'accusa del Presidente', e:'La tua base applaude · nessuno pensa davvero che passi, e lo sai anche tu',
+      f:function(){ S.usAcciaioOpp='accusa'; baseUs50(2); gdUs50('cetomedio',-2); gdUs50('lavoratori',-1);
+        S.log.unshift({t:T('Il lavoro'),x:T('Ha chiesto la messa in stato d\'accusa del Presidente per il sequestro delle acciaierie.')}); } },
+  ],
+};
+const SCUOLA57_EV = {
+  id:'snodo_scuola57', snodo:true, era:'us1950', kick:'I diritti civili', tono:'grave',
+  t:'La scuola',
+  text:'Tre anni fa la Corte suprema ha detto che le scuole separate per i neri e per i bianchi sono contro la Costituzione. Questo mese, in una città dell\'Arkansas, nove studenti neri dovrebbero entrare nel liceo della città. Il governatore ha schierato la Guardia nazionale davanti al portone per tenerli fuori; un giudice federale gli ha ordinato di toglierla, e ora davanti alla scuola c\'è una folla. I nove sono tornati a casa scortati dalla polizia, dalla porta di dietro.',
+  ch:[
+    { l:'I paracadutisti, e il comando della Guardia nazionale', e:'La storia · i nove entrano scortati dai soldati · al Sud non lo dimenticheranno, e lo diranno nelle urne per una generazione',
+      f:function(){ S.usScuola='truppe'; gdUs50('giovani',3); gdUs50('cetomedio',1); repd(3); stampad(1); baseUs50(S.partito==='us_dem'?-2:0);
+        S.log.unshift({t:T('I diritti civili'),x:T('Ha mandato i paracadutisti a scortare nove studenti neri dentro il liceo.')}); } },
+    { l:'Il comando della Guardia nazionale, senza soldati da fuori', e:'Gli stessi soldati del governatore ora obbediscono a te · davanti alla scuola nessuno sa più da che parte stanno',
+      f:function(){ S.usScuola='guardia'; gdUs50('giovani',1); repd(1); baseUs50(S.partito==='us_dem'?-1:0);
+        S.log.unshift({t:T('I diritti civili'),x:T('Ha preso il comando della Guardia nazionale dell\'Arkansas.')}); } },
+    { l:'Aspettare i tribunali: è una questione dello Stato', e:'Al Sud ti ringraziano · nel resto del paese, e a Mosca, le fotografie della folla fanno il giro del mondo',
+      f:function(){ S.usScuola='tribunali'; gdUs50('giovani',-3); gdUs50('cetomedio',-1); repd(-4); stampad(-2); baseUs50(S.partito==='us_dem'?1:0);
+        S.log.unshift({t:T('I diritti civili'),x:T('Ha lasciato ai tribunali la scuola dell\'Arkansas.')}); } },
+  ],
+};
+const SCUOLA57_OPP_EV = {
+  id:'snodo_scuola57_opp', snodo:true, era:'us1950', kick:'I diritti civili', tono:'grave',
+  t:'La scuola, dall\'aula',
+  text:'Il Presidente ha mandato i paracadutisti in una città dell\'Arkansas per scortare nove studenti neri dentro il liceo. Il tuo partito è diviso: al Nord lo approvano, al Sud i tuoi senatori parlano di occupazione militare.',
+  ch:[
+    { l:'Approvare l\'intervento', e:'Il Nord del tuo partito ti applaude · i senatori del Sud non vengono più alle riunioni',
+      f:function(){ S.usScuolaOpp='approva'; gdUs50('giovani',2); gdUs50('cetomedio',1); baseUs50(S.partito==='us_dem'?-2:0);
+        S.log.unshift({t:T('I diritti civili'),x:T('Dall\'opposizione ha approvato l\'intervento dei paracadutisti in Arkansas.')}); } },
+    { l:'I diritti degli Stati: condannare l\'intervento', e:'Il Sud è con te · le fotografie della folla, sui giornali di tutto il mondo, accanto al tuo nome',
+      f:function(){ S.usScuolaOpp='stati'; baseUs50(S.partito==='us_dem'?2:-1); gdUs50('giovani',-3); gdUs50('cetomedio',-1);
+        S.log.unshift({t:T('I diritti civili'),x:T('Ha condannato in nome dei diritti degli Stati l\'intervento dei paracadutisti in Arkansas.')}); } },
+    { l:'Tacere', e:'Il partito resta unito · per ora, e nessuno sa su che cosa',
+      f:function(){ S.usScuolaOpp='silenzio'; baseUs50(-1); gdUs50('giovani',-1);
+        S.log.unshift({t:T('I diritti civili'),x:T('Ha taciuto sull\'intervento dei paracadutisti in Arkansas.')}); } },
+  ],
+};
+/* D139 (L177-1) · la stessa aula per un REPUBBLICANO: nel 1957 i senatori del Sud erano democratici, e la frase «al Sud i tuoi senatori»
+   era falsa per lui. Cambiano testo ed etichette; id, effetti (le stesse funzioni f), righe del log e il flag usScuolaOpp sono quelli
+   di SCUOLA57_OPP_EV, quindi la riga di SNODI_STORICI resta una e le misure non si muovono. La sceglie l'iniezione (game.js) da S.partito. */
+const SCUOLA57_OPP_REP_EV = {
+  id:'snodo_scuola57_opp', snodo:true, era:'us1950', kick:'I diritti civili', tono:'grave',
+  t:'La scuola, dall\'aula',
+  text:'Il Presidente ha mandato i paracadutisti in una città dell\'Arkansas per scortare nove studenti neri dentro il liceo. Il tuo è il partito che ha abolito la schiavitù, e al Nord i tuoi elettori approvano; ma da qualche anno i tuoi strateghi contano sui bianchi del Sud stanchi del partito del Presidente, e ti chiedono di non regalare loro niente.',
+  ch:[
+    { l:'Approvare l\'intervento', e:'La storia del tuo partito è con te · al Sud i bianchi delusi tornano a votare per il partito di sempre', f:SCUOLA57_OPP_EV.ch[0].f },
+    { l:'I diritti degli Stati: condannare l\'intervento', e:'Al Sud qualcuno ti guarda per la prima volta · al Nord, nel partito che ha abolito la schiavitù, ti chiedono che cosa ti è successo', f:SCUOLA57_OPP_EV.ch[1].f },
+    { l:'Tacere', e:'Il partito resta unito · e il Sud resta del partito del Presidente', f:SCUOLA57_OPP_EV.ch[2].f },
   ],
 };
 /* L110-2 · I TERRITORI E LA MAPPA DI de1960: quelli di de1950 più la Saar in coda (è entrata alla tappa del 1957/1), con lo stesso
