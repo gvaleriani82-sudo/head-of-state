@@ -719,6 +719,7 @@ function avviaPartita(){ apriCreazione(); }
    e applica i crediti d'esordio. «Salta» = CREA null = personaggio neutro (identico a prima del lotto). ===== */
 function apriCreazione(){
   CREA={nome:'', genere:'m', eta:52, background:null, famiglia:'borghese', orientamento:0, religiosita:'laico', livello:3, dicastero:'economia', terrIdx:1, avatar:null, avatarCustom:null};
+  if(typeof musicaPorta==='function') musicaPorta(null);   // L172-5: si entra dal presente (la porta la rimette storiciPorta, subito dopo)
   document.getElementById('start').style.display='none';
   document.getElementById('crea').style.display='block';
   window.scrollTo(0,0);
@@ -727,6 +728,7 @@ function apriCreazione(){
 /* L62-1 — il «← Indietro» del setup: se ci sei arrivato da una porta storica torna alla LINEA DEL TEMPO,
    non alla home. Altrimenti il giocatore che vuole cambiare porta deve rifare tutto il giro dall'inizio. */
 function chiudiCreazione(){
+  if(typeof musicaPorta==='function') musicaPorta(null);   // L172-5: indietro, la porta non è più scelta (torna mus-tema)
   if(DA_STORICI){ tornaAiStorici(); return; }
   CREA=null; document.getElementById('crea').style.display='none'; document.getElementById('start').style.display='block';
 }
@@ -866,7 +868,9 @@ function chiudiPartenza(){
      regola sulle altre clip: ferme finché c'è il velo, ripartono dopo) — la strada della voce non è toccata. I <video> nascono
      insieme, uno sopra l'altro: il secondo si precarica mentre suona il primo e gli passa sopra quando finisce (niente nero in mezzo).
    · «Salta», un tocco ovunque o Esc chiudono tutto; una clip che non arriva (`error`) chiude il velo. Una didascalia in basso a
-     sinistra dice paese e anno. La musica non cambia (siamo fuori partita: `mus-tema`).
+     sinistra dice paese e anno. ⚑ L172-5: le clip restano senza traccia audio, ma da qui all'avvio della partita suona il TEMA DEL
+     DECENNIO della porta (musicaPorta, audio.js) — anche senza clip (porta già vista, movimento ridotto, rete leggera): la musica è
+     dell'audio, non del movimento. Il suono «soglia» fra le due clip non c'è: va ascoltato sopra il tema prima di metterlo.
    ================================================================================================================ */
 let PORTA_CLIP_APERTA=false, PORTA_CLIP_FERME=[];
 const PORTA_CLIP_VISTE={};
@@ -1188,6 +1192,7 @@ function storiciPorta(id){     // scelta la porta: si entra nel setup con paese 
   if(typeof setScenario==='function') setScenario(id);
   DA_STORICI=id;               // L62-1 — dopo setScenario: il setup la mostra come etichetta e sa dove tornare
   apriCreazione();
+  if(typeof musicaPorta==='function' && SCENARI[id]) musicaPorta(SCENARI[id].anno);   // L172-5: il tema del decennio entra in dissolvenza con la prima clip, e resta fino alla partita
   apriClipPorta(id);           // L153-5: sopra la creazione già pronta, il paese e poi il decennio (chi non ha la clip non vede niente)
 }
 function renderStorici(){

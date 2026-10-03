@@ -260,7 +260,10 @@ const DRIFT_DEFICIT_ERA = {
      ciclo è il drift NOMINALE (L48-2, valori 3-11) e lo stabilizzatore di computeDeficit toglie `ciclo × 0,7` dal
      disavanzo — queste righe restituiscono quello che il drift toglieva. Si leggono sul debito reso, non da sole.
      Bersagli e resa (luglio, 5 semi, partito della baseline) nel rapporto di L102-2 e nelle schede delle porte. */
-  [LINEA_UK]: [ /* uk1970: 55 nel 1970 → 45 nel 1975 → 45 nel 1979 (la discesa del dopoguerra si ferma sui 45) */
+  [LINEA_UK]: [ /* uk1960: 110 → 65-70 nel 1969. ⚑ L172-1 (D117, scelta (a) di Giacomo): con il ciclo reale del '60 (DRIFT_ECONOMICO_ERA)
+                   −2 dal 1961, cercato in L157-2 (la riga del 1960 la assorbe la calibrazione d'avvio, quindi 0). {da:1970, def:0} chiude. */
+                {da:1960, def:0}, {da:1961, def:-2},
+                /* uk1970: 55 nel 1970 → 45 nel 1975 → 45 nel 1979 (la discesa del dopoguerra si ferma sui 45) */
                 /* ⚑ L154-2 · il ripiego, APPLICATO in L155-3 (30/9: Conservatori prima urna 12/20, Liberali al congresso 15 → 10, minoranza e
                    anticipate dentro i criteri, le altre porte identiche): RIFATTE con l'inflazione per anno (il ciclo resta nominale): bersaglio 55 → 45 nel 1975 →
                    45 nel 1979; debito reso 56,4 · 52,0 · 50,6 · 49,4 · 47,7 · 45,7 · 43,9 · 44,0 · 44,6 · 44,5. Le righe di
@@ -269,10 +272,10 @@ const DRIFT_DEFICIT_ERA = {
                 {da:1970, def:0}, {da:1971, def:7.5}, {da:1972, def:4}, {da:1973, def:2}, {da:1974, def:4},
                 {da:1975, def:6.5}, {da:1976, def:7}, {da:1977, def:6.5}, {da:1978, def:7}, {da:1979, def:7.5},
                 {da:1980, def:0},
-                /* uk1990: 35 → 45 nel 1996 → 40 nel 1999 (la recessione dei primi anni e il rientro). ⚠ L158-2: queste righe restituiscono
-                   l'avanzo del ciclo nominale; col ciclo reale cercato in L158-2 (non applicato: vedi DRIFT_ECONOMICO_ERA) andrebbero tutte a zero. */
-                {da:1990, def:0},    {da:1991, def:-1.5}, {da:1992, def:1.5},  {da:1993, def:4.5},  {da:1994, def:6},
-                {da:1995, def:7},    {da:1996, def:3.5},  {da:1997, def:-2},   {da:1998, def:-4},   {da:1999, def:-2.5},
+                /* uk1990: 35 → 45 nel 1996 → 40 nel 1999 (la recessione dei primi anni e il rientro). ⚑ L172-1 (D119): col ciclo reale di L158-2,
+                   APPLICATO, il decennio non ha righe `def` (quelle di L102-2, −1,5 · 1,5 · 4,5 · 6 · 7 · 3,5 · −2 · −4 · −2,5, restituivano
+                   l'avanzo del ciclo nominale e sono tolte); resta la riga 0 del 1990, che chiude il '80. */
+                {da:1990, def:0},
                 /* uk2000: 35 → 40 nel 2007 → 65 nel 2010 → 80 nel 2013 (il salto è del 2008-2010). ⚑ L155-3 (30/9): RIFATTE — le righe di
                    L102-2 (8,5 · 5,5 · 6,5 · 4,5 · 5 · 5 · 6,5 · 1 · 5 · 5 · 4,5 · 8,5 · 8) il 30/9 rendevano 66 nel 2013. Stessa sweep di L102-2
                    (misura-deficit-era.js sweep uk2000, partito della baseline, 5 semi, luglio, 168 mesi): debito reso 33 · 34 · 35 · 36 · 38 · 39 ·
@@ -354,6 +357,7 @@ function crescitaSeed(sc){
    Costruisce S e i derivati INDIPENDENTI dal ruolo: indicatori iniziali, leggi del paese, forze di partenza.
    Il ruolo (ministri/coalizione/territori) lo aggiunge il chiamante. Condiviso → un solo punto di verità. */
 function initStatoBase(){
+  if(typeof MUSICA_PORTA!=='undefined') MUSICA_PORTA=null;   // L172-5: nasce la partita — da qui il tema lo dà musicaEpoca() da S.year, lo stesso brano della porta (nessuno stacco). Non prima: con goAppoint S nasce alla conferma dei ministri
   try{ resetUIAnim(); }catch(e){}   // nuova partita: prima apparizione senza animazioni
   S={
     year:2026, annoInizio:2026, month:1, mandate:1, turnInMandate:0, mandatesWon:0, mandatiConsecutivi:0, avvisoUltimoMandato:false, rp:3, diff:chosenDiff, partito:chosenPartito, lingua:(typeof chosenLang!=='undefined'?chosenLang:'it'),   // lingua = dato puro (it/en); annoInizio = anno d'avvio · L86-1: mandatiConsecutivi si azzera alla sconfitta, mandatesWon no
@@ -1391,7 +1395,7 @@ const DRIFT_ECONOMICO_ERA = {
                 {da:2008, ciclo:-0.5}, {da:2009, ciclo:-0.7}, {da:2010, ciclo:-0.1},
                 {da:2011, ciclo:-0.4}, {da:2012, ciclo:0} ],
   /* ==========================================================================================================
-     L157-2 (D113, strada c) · IL '50 INGLESE È CICLO REALE (il '60 cercato e NON applicato: sotto, alle sue righe). Fino al 1/10 queste righe erano il «drift NOMINALE» di
+     L157-2 (D113, strada c) · IL '50 INGLESE È CICLO REALE (e dal L172-1 anche il '60 e il '90: sotto, alle loro righe). Fino al 1/10 queste righe erano il «drift NOMINALE» di
      L48-2/L55-1: picchi di 18-20,5 negli anni pari, scritti quando il gioco NON aveva l'inflazione, perché il debito scendesse
      (195 → 117 → 66) erodendo col PIL nominale. Poi il gioco l'inflazione l'ha avuta (L90-1 l'erosione nominale, L101-1b
      l'inflazione per anno), e il decennio pagava l'erosione DUE VOLTE: come inflazione vera (3,5-4) e come ciclo-avanzo — lo
@@ -1420,12 +1424,12 @@ const DRIFT_ECONOMICO_ERA = {
                    clamp-5 perché siano leggibili; i picchi sono alti e invisibili, e lavorano sul debito.
                    ⚠ L156-2/L157-2: «il gioco non ha un indicatore d'inflazione» NON è più vero (L90-1, L101-1b), e questi picchi contano
                    l'erosione due volte (debito 8,6 nel 1969 contro 65-70). Le righe del ciclo reale per il '60 sono state cercate in
-                   L157-2 (1 · −2,25 · 1 · 0,5 · −2,25 · 1 · −3 · −2 · 0,5 · 0,25, con righe `def` −2 dal 1961: debito 74) ma NON applicate:
-                   la carriera dei Liberali chiude al congresso all'urna del 1970 17 volte su 20 invece di 2 (porta chiusa che peggiora:
-                   decide Giacomo). Rapporto in CIFRE-ECONOMICHE.md, «L157-2». */
-                {da:1960, ciclo:19},   {da:1961, ciclo:1.5}, {da:1962, ciclo:19.5},
-                {da:1964, ciclo:1.3},  {da:1965, ciclo:20},  {da:1966, ciclo:0.9},
-                {da:1968, ciclo:20.5},
+                   L157-2 (1 · −2,25 · 1 · 0,5 · −2,25 · 1 · −3 · −2 · 0,5 · 0,25, con righe `def` −2 dal 1961: debito 74) e APPLICATE in
+                   L172-1 (D117, scelta (a) di Giacomo dell'1/10, sapendo che la carriera dei Liberali chiude al congresso all'urna del 1970
+                   molto più spesso: 17/20 in L157-2). Le righe di L55-1 (19 · 1,5 · 19,5 · 1,3 · 20 · 0,9 · 20,5) sono ritirate.
+                   Cifre misurate oggi: CIFRE-ECONOMICHE.md, «L172-1». */
+                {da:1960, ciclo:1},    {da:1961, ciclo:-2.25}, {da:1962, ciclo:1},    {da:1963, ciclo:0.5},  {da:1964, ciclo:-2.25},
+                {da:1965, ciclo:1},    {da:1966, ciclo:-3},    {da:1967, ciclo:-2},   {da:1968, ciclo:0.5},  {da:1969, ciclo:0.25},
                 /* ==========================================================================================
                    L58-1 · IL DECENNIO '70 — **IL DRIFT SI INVERTE**, ed è il primo caso sulla linea.
                    Per vent'anni il nominale alto ha fatto scendere il debito (195 → 117 → 66). Qui la scheda
@@ -1472,10 +1476,10 @@ const DRIFT_ECONOMICO_ERA = {
                    nel 1999 contro 35 → 45 → 40). Le righe del CICLO REALE sono state cercate in L158-2 (misura-l157-2.js cerca --porta=uk1990,
                    bersagli di Code 0,7 · −1,1 · 0,4 · 2,5 · 3,8 · 2,5 · 2,5 · 3,0 · 3,4 · 3,0): −2,75 · −4,5 · −2 · 0,25 · 1,25 · −1 · −0,25 ·
                    −0,5 · 0,25 · −0,75, con le righe «def» del decennio a zero (debito 36 → 47,5 ('96) → 36,8 ('99) al governo, 40,0 e 39,5 su
-                   tutte) — ma NON applicate: SNP e Plaid chiudono al congresso 10 volte su 20 invece di 2 (6 prima del mese 96) e i Laburisti
-                   prendono 3 rivolte (porta chiusa che peggiora: decide Giacomo). Rapporto in CIFRE-ECONOMICHE.md, «L158-2». */
-                {da:1990, ciclo:-1},   {da:1991, ciclo:-2},  {da:1993, ciclo:3},
-                {da:1995, ciclo:6},    {da:1997, ciclo:8},
+                   tutte) — APPLICATE in L172-1 (D119, scelta (a) di Giacomo dell'1/10, sapendo che SNP e Plaid chiudono al congresso più spesso:
+                   10/20 in L158-2). Le righe di L75-1 (−1 · −2 · 3 · 6 · 8) sono ritirate. Cifre misurate oggi: CIFRE-ECONOMICHE.md, «L172-1». */
+                {da:1990, ciclo:-2.75}, {da:1991, ciclo:-4.5}, {da:1992, ciclo:-2},   {da:1993, ciclo:0.25}, {da:1994, ciclo:1.25},
+                {da:1995, ciclo:-1},    {da:1996, ciclo:-0.25},{da:1997, ciclo:-0.5}, {da:1998, ciclo:0.25}, {da:1999, ciclo:-0.75},
                 /* L77-1 · IL DECENNIO 2000 (scheda §2): crescita lunga fino al 2007, poi la recessione piu' profonda
                    del dopoguerra (2008-09) e una ripresa lenta. Il debito passa da 35 a oltre 75: il raddoppio piu'
                    rapido della linea, ed e' la crisi. */
@@ -5263,12 +5267,20 @@ function sfidaAffronta(){
   S.log.unshift({t:T('Lo sfidante'), x:T('Hai affrontato %V subito, alle tue condizioni: si va ai militanti.').replace('%V',S.sfida.volto)});
   apriPrimaria('anticipata', 3);
 }
-function apriPrimaria(tipo, bonus){
+/* L171-2 (2/10) · IL PUNTEGGIO DELLA PRIMARIA SENZA IL DADO, in una funzione pura: lo leggono apriPrimaria e lo stub del
+   banco (.claude/harness.js, cerimonia 13), che tira il suo rumore con un generatore indipendente dal seme. Prima la formula
+   stava solo qui dentro e il banco ne avrebbe tenuto una copia: una formula cambiata qui si sarebbe persa là. */
+function basePrimaria(bonus){
   const pl=(S.potereLocale!=null)?S.potereLocale:bloccoQuota();
+  const soglia=50 + (S.sfida && S.sfida.fonte==='territorio' && S.sfida.simbolo ? 2 : 0);
+  return { base:umoreMedio()*0.5 + S.ind.consenso*0.3 + pl*0.2 + (bonus||0), soglia:soglia, pl:pl };   // L64-3: +3 se scegli tu il momento
+}
+function apriPrimaria(tipo, bonus){
+  const BP=basePrimaria(bonus), pl=BP.pl;
   /* rumore ±3 e bonus-simbolo +2 (tarati col test della cura: governo solido + UNA corrente arrabbiata
      deve sopravvivere con margine; si perde solo deboli su più fronti insieme — mai a sorpresa) */
-  const punteggio=umoreMedio()*0.5 + S.ind.consenso*0.3 + pl*0.2 + (Math.random()*6-3) + (bonus||0);   // L64-3: +3 se scegli tu il momento
-  const soglia=50 + (S.sfida && S.sfida.fonte==='territorio' && S.sfida.simbolo ? 2 : 0);
+  const punteggio=BP.base + (Math.random()*6-3);
+  const soglia=BP.soglia;
   PRIM={ tipo:tipo, punteggio:punteggio, soglia:soglia, win:punteggio>=soglia };
   if(typeof suona==='function') suona('aula');   // L95-3: il brusio d'aula, in loop fino all'esito
   const v=S.sfida||{};
@@ -6967,21 +6979,32 @@ function applicaSpintaForze(){
   if(amount>0 && typeof applicaSlancio==='function') applicaSlancio(bloccoElettorale(), amount);
   return amount;
 }
-/* Il voto nazionale decide i territori DAL BASSO: quota locale = 50 + onda (seggi del blocco − 50, contenuta) + lean×asse×4
-   + spinta×0,5 + rumore. Prima il voto nazionale non toccava i territori (solo le intermedie): la campagna che li ha
-   lavorati deve poterli conquistare. Poi la spinta si consuma: la stagione dopo si ricomincia da zero. */
+/* Il voto nazionale decide i territori DAL BASSO: quota locale = 50 + onda + lean×asse×4 + spinta×0,5 + rumore. Prima il voto
+   nazionale non toccava i territori (solo le intermedie): la campagna che li ha lavorati deve poterli conquistare. Poi la spinta si
+   consuma: la stagione dopo si ricomincia da zero.
+   L'ONDA: coi seggi, quelli del tuo blocco − 50 (bloccoSeggi). ⚑ L172-3 (2/10): SENZA seggi (i presenti a candidato senza parlamento
+   modellato: USA, Corea del Sud, Nigeria) la funzione usciva subito, quindi la campagna non conquistava niente dopo il voto e la spinta
+   NON si azzerava — tornava nelle intermedie e nella presidenziale dopo (applicaSpintaForze la rilegge: +1,8 di forza nella prova di
+   L171-4). Ora senza seggi l'onda è il voto nazionale: la tua quota nel testa a testa (testaATesta().myPct, SENZA il bonus di
+   credibilità dell'opposizione, che è un voto di fiducia e non una quota) − 50, con lo stesso clamp ±12 — 0 a pari voti. E l'azzeramento
+   della spinta è in un finally: avviene sempre, anche se la decisione si interrompe. Coi seggi tutto come prima (stesso ordine, stesso
+   rumore: le carriere dei paesi con S.seggi sono identiche). */
 function decidiTerritoriNazionale(){
-  if(!S.territori||!PAESE.territori||!S.seggi) return [];
-  const asseTuo=mioPartito().asse, aB=asseBlocco();
-  const wave=clamp((typeof bloccoSeggi==='function'?bloccoSeggi():50)-50, -12, 12);
+  if(!S.territori||!PAESE.territori) return [];
   const vinte=[];
-  PAESE.territori.forEach(function(TE,i){ const t=S.territori[i]; if(!t) return;
-    const sp=t.spinta||0; if(!sp) return;   // solo le aree lavorate in campagna si decidono qui (le altre le decidono le intermedie)
-    const localShare=50 + wave + (TE.lean*aB*4) + sp*0.5 + (Math.random()*6-3);
-    const nuovoTuo=localShare>50, eraTuo=compatibile(t.partito, asseTuo, S.partito);
-    if(nuovoTuo && !eraTuo){ S.territori[i]={ titolare:nomePersona(), partito:scegliPartito(true, TE.lean, asseTuo, S.partito) }; vinte.push(TE); }
-  });
-  S.territori.forEach(function(t){ if(t) t.spinta=0; });
+  try{
+    const asseTuo=mioPartito().asse, aB=asseBlocco();
+    let onda;
+    if(S.seggi) onda=(typeof bloccoSeggi==='function'?bloccoSeggi():50)-50;
+    else { const tt=testaATesta(); onda=tt.myPct-(tt.cb||0)-50; }
+    const wave=clamp(onda, -12, 12);
+    PAESE.territori.forEach(function(TE,i){ const t=S.territori[i]; if(!t) return;
+      const sp=t.spinta||0; if(!sp) return;   // solo le aree lavorate in campagna si decidono qui (le altre le decidono le intermedie)
+      const localShare=50 + wave + (TE.lean*aB*4) + sp*0.5 + (Math.random()*6-3);
+      const nuovoTuo=localShare>50, eraTuo=compatibile(t.partito, asseTuo, S.partito);
+      if(nuovoTuo && !eraTuo){ S.territori[i]={ titolare:nomePersona(), partito:scegliPartito(true, TE.lean, asseTuo, S.partito) }; vinte.push(TE); }
+    });
+  } finally { S.territori.forEach(function(t){ if(t) t.spinta=0; }); }
   if(vinte.length && typeof initPotereLocale==='function') initPotereLocale();   // solo se qualcosa è cambiato: il gioco senza campagna resta identico
   if(vinte.length) S.log.unshift({t:T('Campagna sul territorio'), x:T('La campagna sul territorio ha pagato: %N aree sono passate al tuo blocco.').replace('%N',vinte.length)});
   return vinte;

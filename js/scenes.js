@@ -173,7 +173,13 @@ const AREA_DI_PAESE = { italia:'europa', francia:'europa', regnounito:'europa', 
                         messico:'latina', brasile:'latina', argentina:'latina',
                         giappone:'asiaest', coreasud:'asiaest', india:'asiasud',
                         nigeria:'africa', sudafrica:'africa' };
-const SCENE_AREA = [];
+/* 2/10 (turno Code delle 23): le prime diciotto, da arte-sorgente/scene-mondo/. Mancano casa-base-asiasud (il marchio
+   «Jupiter» leggibile su un motorino) e societacivile-base-asiasud («CNG» leggibile sul risciò): segnalate, da ritoccare. */
+const SCENE_AREA = ['casa-base-nordamerica', 'casa-base-latina', 'casa-base-asiaest', 'casa-base-africa',
+                    'crisi-base-nordamerica', 'crisi-base-latina', 'crisi-base-asiaest', 'crisi-base-asiasud',
+                    'crisi-base-africa', 'ordinepubblico-base-nordamerica', 'ordinepubblico-base-latina', 'ordinepubblico-base-asiaest',
+                    'ordinepubblico-base-asiasud', 'ordinepubblico-base-africa', 'societacivile-base-nordamerica', 'societacivile-base-latina',
+                    'societacivile-base-asiaest', 'societacivile-base-africa'];
 
 /* ===== L151-2 — LE IMMAGINI DEI DECENNI (`assets/scenes/porta-decennio-<anno>.webp`): la miniatura delle porte storiche che non
    hanno una `soglia-*` loro (Regno Unito, Francia, Germania) nella pagina degli storici — `sogliaSrc()` in ui.js. Lista-promessa:

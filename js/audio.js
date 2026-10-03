@@ -418,6 +418,13 @@ const MUSICA_SOTTOVOCE_K = 0.3;
 let MUSICA_SOTTOVOCE = false, MUSICA_LIVELLO = 1;
 function musicaSottovoce(on){ on=!!on; if(on===MUSICA_SOTTOVOCE) return; MUSICA_SOTTOVOCE=on; musica(); }
 let MUSICA_FORZATA = null, MUSICA_FORZATA_S = null;
+/* L172-5 · L'ANNO DELLA PORTA SCELTA (richiesta di Giacomo dell'1/10): dalla scelta di una porta sulla linea del tempo (storiciPorta,
+   ui.js) all'avvio della partita (fine di avviaRuolo) musicaScelta() dà il tema del decennio della porta invece di mus-tema — sotto le
+   clip del paese e del decennio, sulla creazione, sul briefing «La situazione». Transitorio: mai in S né in localStorage; lo azzerano
+   apriCreazione (chi entra dal presente), chiudiCreazione (indietro alla home o alla linea del tempo) e initStatoBase (game.js: nasce la partita; da
+   lì il tema lo dà musicaEpoca() da S.year, che per l'anno della porta è LO STESSO brano — musica() non vede un cambio e non fa stacchi). */
+let MUSICA_PORTA = null;
+function musicaPorta(anno){ const a=(anno==null)?null:anno; if(a===MUSICA_PORTA) return; MUSICA_PORTA=a; musica(); }
 let MUSICA_GIRO = {};                 // L118-1: {tema: n} — quanti giri ha fatto il tema; il resto sceglie A o B. Transitorio
 let MUSICA_REGISTRO = [];             // {brano, t, esito} — la sequenza dei cambi, per le misure; transitorio
 
@@ -442,7 +449,11 @@ function musicaSegna(brano, esito){
 function musicaEpoca(){
   if(typeof S==='undefined' || !S) return null;
   if(!S.scenario || S.scenario==='presente' || S.year>=2014) return 'mus-presente';
-  const y=S.year;
+  return musicaEpocaAnno(S.year);
+}
+/* L172-5 · il tema d'epoca di un anno storico: una tabella sola per la partita (musicaEpoca) e per la porta scelta (MUSICA_PORTA) */
+function musicaEpocaAnno(y){
+  if(y>=2014) return 'mus-presente';
   return y<1960?'mus-1950' : y<1970?'mus-1960' : y<1980?'mus-1970' : y<1990?'mus-1980' : y<2000?'mus-1990' : 'mus-2000';
 }
 function musicaCrisi(){
@@ -470,6 +481,7 @@ function musicaTema(brano){ const M=MUSICA_MANIFEST[brano]; return (M && M.varia
 /* ⚑ IL PUNTO DI VERITÀ del brano: puro, legge lo stato e non tocca niente (lo usa anche la misura nel banco) */
 function musicaScelta(){
   if(typeof INTRO_APERTA!=='undefined' && INTRO_APERTA) return null;   // L124-1: sotto il video introduttivo la musica tace (è nel video)
+  if(MUSICA_PORTA!=null) return musicaGiroVariante(musicaEpocaAnno(MUSICA_PORTA));   // L172-5: dalla porta scelta all'avvio, il tema del suo decennio (con la sua -b)
   if(fuoriPartita()) return 'mus-tema';                          // L118-1: fuori partita, il tema del gioco (dentro non vale mai)
   if(MUSICA_FORZATA && MUSICA_FORZATA_S===S) return MUSICA_FORZATA;
   if(typeof NOTTE!=='undefined' && NOTTE) return 'mus-notte';
