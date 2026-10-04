@@ -122,7 +122,9 @@ let VIDEO_VIVI={}, OSS_VIDEO=null;
    così lo scorrimento la aggiorna); tutto transitorio, niente in S. La hero della home parte da sé ma dal L127-1 è osservata (fuori vista in pausa, sulla home è il testimone); la clip di un MOMENTO vince su tutte.
    ================================================================================================================ */
 const VIDEO_QUOTA=new Map();
-function videoRiprendiOra(el){ try{ const nome=el.dataset.clip, d=el.duration; if(VIDEO_T0[nome]!=null && d && isFinite(d)) el.currentTime=((oraMovimento()-VIDEO_T0[nome])/1000)%d; }catch(e){} }
+/* L181-4: una clip di CLIP_UNA_VOLTA (scenes.js) non gira — senza `loop`, sempre dal fotogramma 0, finita resta sull'ultimo */
+function clipUnaVolta(nome){ return typeof CLIP_UNA_VOLTA!=='undefined' && CLIP_UNA_VOLTA.indexOf(nome)>=0; }
+function videoRiprendiOra(el){ try{ const nome=el.dataset.clip, d=el.duration; if(clipUnaVolta(nome)) return; if(VIDEO_T0[nome]!=null && d && isFinite(d)) el.currentTime=((oraMovimento()-VIDEO_T0[nome])/1000)%d; }catch(e){} }
 /* L127-1 · la clip di un MOMENTO (modale o finale, `.momento`) vince su ogni carta: l'osservatore non vede l'occlusione, quindi
    le carte sotto il modale restano «in vista» e senza la precedenza la carta più alta rubava il posto. Quando il modale si chiude
    (`.ov` torna display:none) la clip del momento esce dalla vista, perde la quota e il testimone torna quello di prima. */
@@ -143,12 +145,12 @@ function videoAggiornaTestimone(){
   if(!t) return;
   if(!t.getAttribute('src') && t.dataset.src) t.src=t.dataset.src;
   else if(t.paused) videoRiprendiOra(t);
-  if(t.paused){ try{ const p=t.play(); if(p && p.catch) p.catch(function(){}); }catch(e){} }
+  if(t.paused && !t.ended){ try{ const p=t.play(); if(p && p.catch) p.catch(function(){}); }catch(e){} }   // L181-4: una clip finita (le CLIP_UNA_VOLTA) resta sull'ultimo fotogramma: play() la riavvolgerebbe
 }
 function videoHtml(nome, vkey, momento){
   const sorg=VIDEO_DIR+nome+'.mp4';
   return '<video class="scena-video'+(momento?' momento':'')+'" '+(vkey?('data-src="'+sorg+'" data-vkey="'+escAttr(vkey)+'" preload="none"'):('src="'+sorg+'" preload="auto"'))
-    +' data-clip="'+nome+'" muted'+(vkey?'':' autoplay')+' loop playsinline disablepictureinpicture aria-hidden="true" tabindex="-1"></video>'; }   // L120-1: la clip di una carta non parte da sola (la fa partire il testimone)
+    +' data-clip="'+nome+'" muted'+(vkey?'':' autoplay')+(clipUnaVolta(nome)?'':' loop')+' playsinline disablepictureinpicture aria-hidden="true" tabindex="-1"></video>'; }   // L120-1: la clip di una carta non parte da sola (la fa partire il testimone)
 function ossVideo(){
   if(OSS_VIDEO || typeof IntersectionObserver==='undefined') return OSS_VIDEO;
   /* L'osservatore resta attaccato: una clip che esce dalla vista (cassetto chiuso, carta scorsa via) va IN PAUSA e smette di
@@ -176,7 +178,8 @@ function agganciaVideo(v){
   try{ v.muted=true; }catch(e){}   // la proprietà, non solo l'attributo: senza, l'autoplay può essere negato
   const nome=v.dataset.clip;
   v.addEventListener('loadedmetadata', function(){
-    try{ if(VIDEO_T0[nome]==null){ VIDEO_T0[nome]=oraMovimento(); return; }
+    try{ if(clipUnaVolta(nome)) return;   // L181-4: dal fotogramma 0, mai «all'ora»
+      if(VIDEO_T0[nome]==null){ VIDEO_T0[nome]=oraMovimento(); return; }
       const d=v.duration; if(d && isFinite(d)) v.currentTime=((oraMovimento()-VIDEO_T0[nome])/1000)%d; }catch(e){}
   });
   v.addEventListener('playing', function(){ v.classList.add('vivo'); }, {once:true});   // gli eventi media non risalgono: il target è lui
@@ -191,6 +194,32 @@ function agganciaVideoTutti(){ try{ document.querySelectorAll('video.scena-video
   let tolte=0; VIDEO_QUOTA.forEach(function(q, el){ if(!el.isConnected){ VIDEO_QUOTA.delete(el); tolte++; } }); if(tolte) videoAggiornaTestimone();   // L120-1: se è uscito il testimone, il testimone passa
   for(const k in VIDEO_VIVI){ const v=VIDEO_VIVI[k]; if(!v.isConnected){ if(OSS_VIDEO) OSS_VIDEO.unobserve(v); delete VIDEO_VIVI[k]; } }   // L119-1: fuori dal documento, dimenticata
 }catch(e){} }
+
+/* ================================================================================================================
+   L181-4 · I VELI A TUTTO SCHERMO ESCONO SFUMANDO, NON A TAGLIO (intro, partenza, clip delle porte; chiesto da Giacomo il 4/10:
+   le clip devono entrare e uscire «come parte del gioco, non come un video incollato sopra»).
+   Prima la chiusura toglieva la sorgente SUBITO e poi dissolveva il velo in 350 ms: senza sorgente un <video> mostra il suo
+   POSTER, quindi durante la dissolvenza tornava il primo fotogramma (la partenza dalla fine al principio: cucitura 27-61 su 255
+   misurata sullo schermo; l'intro sulla piazza del suo vecchio poster), e la voce o il sonoro dell'intro si troncavano di colpo.
+   Ora il velo si dissolve con il video che continua dal punto in cui è (o fermo sull'ultimo fotogramma se è finito), l'audio scende
+   in dissolvenza nello stesso tempo (`volume`: su iOS è di sola lettura, lì resta il taglio), e la sorgente si toglie alla fine,
+   nello stesso task in cui il nodo esce (niente frame col poster). Chi riapre lo stesso velo prima della fine toglie il vecchio
+   (`veloVecchioVia`), perché i figli portano ancora i loro id. Tutto transitorio.
+   ================================================================================================================ */
+const VELO_USCITA_MS=650, INTRO_USCITA_MS=900;
+function sfumaVolume(m, ms){ try{ if(!m || m.muted || m.paused) return; const v0=m.volume, t0=performance.now();
+  (function passo(){ const k=Math.min(1, (performance.now()-t0)/ms); try{ m.volume=Math.max(0, v0*(1-k)); }catch(e){} if(k<1 && m.isConnected) setTimeout(passo, 30); })(); }catch(e){} }
+function veloEsce(el, ms, poi){
+  if(!el) return;
+  el.style.transitionDuration=ms+'ms';
+  try{ el.querySelectorAll('video, audio').forEach(function(m){ sfumaVolume(m, ms); }); }catch(e){}
+  el.classList.remove('on');
+  setTimeout(function(){
+    try{ if(poi) poi(); }catch(e){}
+    try{ el.querySelectorAll('video, audio').forEach(function(m){ m.pause(); m.removeAttribute('src'); m.load(); }); }catch(e){}   // smette di scaricare
+    try{ el.remove(); }catch(e){} }, ms+60);
+}
+function veloVecchioVia(id){ try{ const e=document.getElementById(id); if(e){ e.querySelectorAll('video, audio').forEach(function(m){ m.pause(); m.removeAttribute('src'); m.load(); }); e.remove(); } }catch(e){} }
 
 /* ================================================================================================================
    L124-1 · IL VIDEO INTRODUTTIVO: dopo il primo tocco, prima della home. Chiesto da Giacomo il 27/9.
@@ -229,6 +258,7 @@ function apriIntro(){
   try{ if(typeof hideMenu==='function') hideMenu(); }catch(e){}
   /* la hero della home sta sotto: si ferma finché c'è il video (due decodifiche su un telefono sono troppe) */
   INTRO_HERO_FERME=[]; try{ document.querySelectorAll('#home-hero video').forEach(function(v){ if(!v.paused){ v.pause(); INTRO_HERO_FERME.push(v); } }); }catch(e){}
+  veloVecchioVia('intro-uscente');   // L181-4: un «Rivedi» durante la dissolvenza d'uscita
   const D=VIDEO_DIR, lin=(typeof curLang==='function' && curLang()==='en')?'en':'it', st=(INTRO_VIDEO.sottotitoli||{})[lin];
   const el=document.createElement('div');
   el.id='intro'; el.setAttribute('role','dialog'); el.setAttribute('aria-label', T('Introduzione'));
@@ -258,9 +288,8 @@ function chiudiIntro(){
   INTRO_APERTA=false;
   document.removeEventListener('keydown', introTasto, true);
   const el=document.getElementById('intro');
-  if(el){ const v=el.querySelector('video');
-    try{ if(v){ v.pause(); v.removeAttribute('src'); v.load(); } }catch(e){}   // smette di scaricare
-    el.classList.remove('on'); setTimeout(function(){ try{ el.remove(); }catch(e){} }, 400); }
+  /* L181-4: il film esce in dissolvenza sulla home (900 ms) mentre il sonoro scende e il tema entra: «Salta» non taglia più sul poster */
+  if(el){ el.id='intro-uscente'; veloEsce(el, INTRO_USCITA_MS); }
   INTRO_HERO_FERME.forEach(function(v){ try{ if(v.isConnected){ const p=v.play(); if(p && p.catch) p.catch(function(){}); } }catch(e){} }); INTRO_HERO_FERME=[];
   try{ if(typeof musica==='function') musica(); }catch(e){}   // il tema entra in dissolvenza
 }
@@ -588,6 +617,28 @@ function scenaPaese(p){
   var na=m[2]+'-'+a;
   return SCENE_AREA.indexOf(na)>=0 ? (m[1]||'')+na+'.webp' : p;
 }
+/* L181-1 · LE VARIANTI NUMERATE. Sul file che scenaPaese ha scelto (paese › area › neutra), se `<nome>-v2`, `-v3`… sono in
+   SCENE_VARIANTI (scenes.js) e ROTAZIONE_VARIANTI è accesa, la scena ruota fra il nome e le sue varianti: l'indice parte dall'hash della
+   chiave della carta (mese + carta) e, se cade sulla stessa immagine dell'ultima volta che QUELLA scena è uscita, passa alla successiva
+   — mai due volte di fila la stessa. La scelta di una carta è ferma finché la carta vive (VARIANTE_SCELTA, per chiave), così i render
+   dello stesso mese non la cambiano. Tutto TRANSITORIO, niente in S: l'agenda di un salvataggio si rigenera comunque al caricamento
+   (applySnap), quindi non c'è una scelta da riportare; dopo un caricamento l'«ultima» si perde e una ripetizione di fila è possibile una
+   volta. Spenta o senza varianti: il nome torna intatto. */
+const VARIANTE_SCELTA={}, VARIANTE_ULTIMA={};   // transitori (mai in S)
+let VARIANTE_MESE=null;
+function scenaVariante(p, chiave){
+  if(typeof p!=='string' || typeof ROTAZIONE_VARIANTI==='undefined' || !ROTAZIONE_VARIANTI || typeof SCENE_VARIANTI==='undefined' || !SCENE_VARIANTI.length) return p;
+  var m=/^(.*\/)?([^\/]+)\.webp$/.exec(p); if(!m) return p;
+  var nome=m[2], pre=nome+'-v', lista=[nome];
+  SCENE_VARIANTI.forEach(function(n){ if(n.indexOf(pre)===0 && /^\d+$/.test(n.slice(pre.length))) lista.push(n); });
+  if(lista.length<2) return p;
+  var mk=(typeof S!=='undefined'&&S)?(S.year*12+S.month):0;
+  if(VARIANTE_MESE!==mk){ for(var k in VARIANTE_SCELTA) delete VARIANTE_SCELTA[k]; VARIANTE_MESE=mk; }
+  var kk=chiave+'|'+nome, scelta=VARIANTE_SCELTA[kk];
+  if(!scelta){ var i=hashId(chiave)%lista.length; if(lista[i]===VARIANTE_ULTIMA[nome]) i=(i+1)%lista.length;
+    scelta=lista[i]; VARIANTE_SCELTA[kk]=scelta; VARIANTE_ULTIMA[nome]=scelta; }
+  return (m[1]||'')+scelta+'.webp';
+}
 function scenaSrc(id, tono, seed){ return scenaPaese(scenaSrcComune(id, tono, seed)); }
 function scenaSrcComune(id, tono, seed){
   if(!id) return null;
@@ -701,7 +752,7 @@ function fermaRitrattiVivi(dentro){   // L178-3: chiuso il momento, la clip smet
 function agScene(it){ if(!it || typeof SCENA_MAJOR==='undefined' || !SCENA_MAJOR[it.kind]) return '';   // display selettivo (ora incl. le carte locali)
   const bucket=scenaId(it); if(!bucket) return '';
   const seed=(it.data&&it.data.id) || (it.kind==='rimpasto'&&it.min ? 'rimpasto:'+it.min : null) || it.kind || bucket;   // hash stabile: id-carta → stessa variante per quella carta (L127-1b: due rimpasti nello stesso mese sono due chiavi della clip, non un nodo conteso)
-  const src=scenaSrc(bucket, scenaTono(it), seed);
+  const src=scenaVariante(scenaSrc(bucket, scenaTono(it), seed), (S?(S.year*12+S.month):0)+':'+seed);   // L181-1: la variante numerata (spenta senza file), sulla stessa chiave della fascia
   /* loading=lazy + decoding=async: con le scene su file (assets/) le carte fuori schermo non pagano la rete
      e la decodifica non blocca il render. Nessun salto di layout: .ag-scene ha aspect-ratio 16/9 + fondo panel2,
      quindi lo slot occupa il suo posto anche prima che l'immagine arrivi. Inerte sui base64 (già in memoria). */
@@ -847,6 +898,7 @@ function apriPartenza(nome){
   if(!nome || PARTENZA_APERTA || typeof document==='undefined' || !document.body) return;
   if(motionReduced() || reteLeggera()) return;
   PARTENZA_APERTA=true;
+  veloVecchioVia('partenza-uscente');   // L181-4: il velo di prima, se sta ancora uscendo
   PARTENZA_FERME=[]; try{ document.querySelectorAll('video').forEach(function(v){ if(!v.paused){ v.pause(); PARTENZA_FERME.push(v); } }); }catch(e){}
   const el=document.createElement('div');
   el.id='partenza'; el.setAttribute('role','dialog'); el.setAttribute('aria-label', T('Inizio della carriera'));
@@ -894,10 +946,9 @@ function chiudiPartenza(){
   PARTENZA_APERTA=false;
   document.removeEventListener('keydown', partenzaTasto, true);
   const el=document.getElementById('partenza');
-  if(el){ el.id='partenza-uscente'; const v=el.querySelector('video'), a=el.querySelector('audio'); fermaRitrattiVivi(el);   // L178-3
-    try{ if(v){ v.pause(); v.removeAttribute('src'); v.load(); } }catch(e){}   // smette di scaricare
-    try{ if(a){ a.pause(); a.removeAttribute('src'); a.load(); } }catch(e){}   // L146-1: e la voce tace subito
-    el.classList.remove('on'); setTimeout(function(){ try{ el.remove(); }catch(e){} }, 400); }
+  /* L181-4: clip e voce non si troncano più (sorgente via e poster visibile per 350 ms): la voce scende in dissolvenza col velo,
+     e il ritratto vivo (L178-3) si ferma alla fine, nello stesso task in cui il velo esce */
+  if(el){ el.id='partenza-uscente'; veloEsce(el, VELO_USCITA_MS, function(){ fermaRitrattiVivi(el); }); }
   try{ if(typeof musicaSottovoce==='function') musicaSottovoce(false); }catch(e){}   // L146-1: la musica torna piena
   PARTENZA_FERME.forEach(function(v){ try{ if(v.isConnected){ const p=v.play(); if(p && p.catch) p.catch(function(){}); } }catch(e){} }); PARTENZA_FERME=[];
 }
@@ -931,7 +982,7 @@ function apriClipPorta(id){
   if(PORTA_CLIP_APERTA || PARTENZA_APERTA || typeof document==='undefined' || !document.body) return;
   if(motionReduced() || reteLeggera()) return;
   const seq=clipDellaPorta(id).filter(function(n){ return !PORTA_CLIP_VISTE[n]; }); if(!seq.length) return;   // L154-1: per nome di clip
-  seq.forEach(function(n){ PORTA_CLIP_VISTE[n]=true; }); PORTA_CLIP_APERTA=true;
+  seq.forEach(function(n){ PORTA_CLIP_VISTE[n]=true; }); PORTA_CLIP_APERTA=true; veloVecchioVia('clip-porta-uscente');   // L181-4
   PORTA_CLIP_FERME=[]; try{ document.querySelectorAll('video').forEach(function(v){ if(!v.paused){ v.pause(); PORTA_CLIP_FERME.push(v); } }); }catch(e){}
   const sc=SCENARI[id], paese=(typeof PAESI!=='undefined' && PAESI[sc.paese]) ? T(PAESI[sc.paese].nome) : '';
   const el=document.createElement('div');
@@ -958,9 +1009,7 @@ function chiudiClipPorta(){
   PORTA_CLIP_APERTA=false;
   document.removeEventListener('keydown', clipPortaTasto, true);
   const el=document.getElementById('clip-porta');
-  if(el){ el.id='clip-porta-uscente';
-    el.querySelectorAll('video').forEach(function(v){ try{ v.pause(); v.removeAttribute('src'); v.load(); }catch(e){} });   // smette di scaricare
-    el.classList.remove('on'); setTimeout(function(){ try{ el.remove(); }catch(e){} }, 400); }
+  if(el){ el.id='clip-porta-uscente'; veloEsce(el, VELO_USCITA_MS); }   // L181-4: niente ritorno al poster durante la dissolvenza
   PORTA_CLIP_FERME.forEach(function(v){ try{ if(v.isConnected){ const p=v.play(); if(p && p.catch) p.catch(function(){}); } }catch(e){} }); PORTA_CLIP_FERME=[];
 }
 function confermaCreazione(){ proseguiAvvio(); }                  // CREA resta: initStatoBase la consuma
@@ -1387,7 +1436,7 @@ function showPartita(){
   /* L95-1 — IL MOVIMENTO, dove sta la lingua. Non e' un'opzione di partita: vive in localStorage e non entra
      mai in S (il round-trip non lo vede, ed e' giusto cosi': e' del dispositivo, non della carriera). */
   const _mv=movimentoModo();
-  h+=`<div class="contorno" style="font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--mut);text-align:center;margin:2px 0 4px">${T('Movimento')}</div>`;
+  h+=`<div class="contorno" style="font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--mut);text-align:center;margin:2px 0 4px">${T('Animazioni')}</div>`;   // L184-2 (D178): «Animazioni», non «Movimento» — in inglese «Movimento» è «Movement» (l'attivista); qui è «Motion»
   h+=`<div class="seg" id="mov-seg" style="max-width:280px;margin:0 auto 4px;">
       <button class="${_mv==='pieno'?'on':''}" onclick="setMovimento('pieno')">${T('Pieno')}</button>
       <button class="${_mv==='ridotto'?'on':''}" onclick="setMovimento('ridotto')">${T('Ridotto')}</button>
@@ -3285,7 +3334,7 @@ function aggiornaTavolo(){
   nota.innerHTML = camp ? T('Campagna sul territorio: <b>%N punti</b> da spendere sulla mappa, %M mesi al voto.').replace('%N',campSforzo()).replace('%M',mesiAllaFine())
     : (chiamaIdx!=null && MAPSEL!==chiamaIdx) ? `<b>${T('Il territorio ti chiama')}</b> · ${cap(nomeTerr(TE[chiamaIdx]))}` : '';
   nota.style.display=nota.innerHTML?'':'none';
-  if(MAPSEL!=null && S.tab==='tavolo'){ info.innerHTML=`<button class="tv-chiudi" onclick="selArea(${MAPSEL})" aria-label="${escAttr(T('Chiudi'))}">✕</button>`+renderMappaInfo(); info.style.display=''; }
+  if(MAPSEL!=null && S.tab==='tavolo' && !(typeof GIRO_APERTO!=='undefined' && GIRO_APERTO)){ info.innerHTML=   /* L185-1: con la scena del giro aperta il pannello dell'area si toglie — copriva le scelte del foglietto (giro-cdp.js, prova di occlusione); chiuso il giro torna */`<button class="tv-chiudi" onclick="selArea(${MAPSEL})" aria-label="${escAttr(T('Chiudi'))}">✕</button>`+renderMappaInfo(); info.style.display=''; }
   else { info.innerHTML=''; info.style.display='none'; }
 }
 /* ================================================================================================================
@@ -3872,6 +3921,7 @@ function toccaFisso(key){
 }
 function fissoFoglio(){
   const f=document.querySelector('#tavolo .tv-foglio'); if(!f) return;
+  if(typeof GIRO_APERTO!=='undefined' && GIRO_APERTO){ if(giroFoglio(f)) return; }   // L182-3: la scena del giro ha la precedenza (la apre un gesto esplicito)
   const R=FISSO_APERTO && TAVOLO_FISSI[FISSO_APERTO];
   if((!R || !R.F) && QUALE_APERTO){ qualeFoglio(f); return; }   // L129-1: lo stesso foglietto, per il tocco ambiguo
   if(!R || !R.F){ if(f.style.display!=='none'){ f.innerHTML=''; f.style.display='none'; } return; }
@@ -3922,6 +3972,32 @@ function toccaBersaglio(ev, i){
   fissoFoglio();
 }
 function sceglieQuale(i){ QUALE_APERTO=null; fissoFoglio(); selArea(i); }
+/* ================================================================================================================
+   L182-3 · IL GIRO SUL TAVOLO — la presentazione (D168). La scena si apre nel FOGLIETTO del tavolo (lo stesso dei segni fissi e
+   di «Quale?»), mai in un modale a tutto schermo: titolo, testo, le scelte con la riga-effetto e la riga dell'umore; scelta fatta,
+   il foglietto si chiude e la riga va nel registro. Il tavolo non si riscrive: nessun svg nuovo. Lo stato aperto è GIRO_APERTO
+   (game.js, transitorio): a mese cambiato, o se la scena non c'è più, il foglietto lo lascia cadere.
+   ================================================================================================================ */
+function umoreParola(u){ return T(u>0 ? 'caldo' : u<0 ? 'freddo' : 'tiepido'); }
+function giroFoglio(f){
+  const G=GIRO_APERTO;
+  if(!S || G.mese!==S.year*12+S.month){ GIRO_APERTO=null; return false; }
+  const def=G.f2 ? (typeof defProblemaTerr==='function' ? defProblemaTerr(S.territorioChiama && S.territorioChiama.prob) : null) : defGiro(G.id);
+  if(!def || (G.f2 && !(S.territorioChiama && S.territorioChiama.idx===G.idx))){ GIRO_APERTO=null; return false; }
+  const TE=PAESE.territori[G.idx];
+  const h=`<button class="tv-chiudi" onclick="chiudiGiro()" aria-label="${escAttr(T('Chiudi'))}">✕</button>`+
+    `<div class="contorno" style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--acc-ink);font-weight:700">${T(G.f2?'Il territorio ti chiama':'In visita')} · ${cap(nomeTerr(TE))}</div>`+
+    `<div class="tv-foglio-t">${arcoTerrSub(T(def.t),TE)}</div>`+
+    `<div class="tv-foglio-r" style="font-size:12.5px">${arcoTerrSub(T(def.text),TE)}</div>`+
+    `<div class="choices" style="display:flex;flex-direction:column;gap:7px;margin-top:8px">`+
+    def.ch.map(function(c,i){ const u=c.u||0, ur=u ? `<span class="oe">${cap(arcoTerrSub(T(u>0?'%TERR: più caldo':'%TERR: più freddo'),TE))}</span>` : '';
+      return `<button class="opt" onclick="resolveGiro(${i})"><span class="ol">${T(c.l)}</span><span class="oe">${T(c.e)}</span>${ur}</button>`; }).join('')+
+    `</div>`;
+  if(f.innerHTML!==h) f.innerHTML=h;
+  f.setAttribute('aria-label', arcoTerrSub(T(def.t),TE));
+  f.style.top='auto'; f.style.bottom='10px'; f.style.display='';   // sale dal basso, come sul telefono verticale
+  return true;
+}
 function qualeFoglio(f){
   const TE=PAESE.territori||[];
   const h=`<button class="tv-chiudi" onclick="QUALE_APERTO=null;fissoFoglio()" aria-label="${escAttr(T('Chiudi'))}">✕</button>`+
@@ -3956,7 +4032,9 @@ function renderMappaInfo(){
       return `<div class="camp-area" style="margin:2px 14px 10px;padding:10px 12px;border:1px solid var(--brand);border-radius:11px;background:var(--brand-bg)">
         <div style="font-size:12px;color:var(--txt2);margin-bottom:6px">${nota}${qui?' · '+T('già investito: %C').replace('%C',qui):''}</div>
         <button class="opt" ${sf>=c?'':'disabled style="opacity:.5"'} onclick="investiTerritorio(${MAPSEL})"><span class="ol">${T('Investi qui')}</span><span class="oe">${T('costo %C · spinta +%S').replace('%C',c).replace('%S',r)} · ${sf} ${T('punti')}</span></button></div>`; })():'';
-  const scheda=(chiama&&def)?`<div class="terr-call" style="margin:2px 14px 10px;padding:10px 12px;border:1px solid var(--acc);border-radius:11px;background:var(--acc-bg)">
+  /* L182-3 — col giro acceso il territorio che chiama apre la sua scena dal bottone «Vai in visita», nel foglietto: la mini-scheda qui sotto non si disegna */
+  const giroOn=(typeof GIRO_SUL_TAVOLO!=='undefined' && GIRO_SUL_TAVOLO);
+  const scheda=(chiama&&def&&!giroOn)?`<div class="terr-call" style="margin:2px 14px 10px;padding:10px 12px;border:1px solid var(--acc);border-radius:11px;background:var(--acc-bg)">
       <div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--acc-ink);font-weight:700">${T('Il territorio ti chiama')}</div>
       <div style="font-weight:600;font-size:14px;margin:4px 0 2px">${arcoTerrSub(T(def.t),TE)}</div>
       <div style="font-size:12.5px;color:var(--txt2);margin-bottom:8px">${arcoTerrSub(T(def.text),TE)}</div>
@@ -3966,7 +4044,14 @@ function renderMappaInfo(){
   return `<div style="padding:2px 14px 12px">
     <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px"><b style="font-size:14.5px">${cap(nomeTerr(TE))}</b><span class="chip" style="background:${tuo?'var(--acc-bg)':'var(--line2)'};color:${tuo?'var(--acc-ink)':'var(--mut)'}">${T(tuo?'tuo blocco':'avversario')}</span></div>
     <div style="font-size:12.5px;color:var(--mut);margin-top:3px">${caricaTerr(TE)}: <b style="color:var(--txt)">${t.titolare||'—'}</b> · ${pn}</div>
-    <div style="font-size:12px;color:var(--mut2);margin-top:2px">${cap(leanLabel(TE.lean))}${TE.simbolo?' · '+T('area simbolo'):''}</div></div>${scheda}${investi}`;
+    <div style="font-size:12px;color:var(--mut2);margin-top:2px">${cap(leanLabel(TE.lean))}${TE.simbolo?' · '+T('area simbolo'):''}</div>${giroOn?`<div style="font-size:12px;color:var(--mut);margin-top:2px">${T('Umore')}: <b style="color:var(--txt)">${umoreParola(t.umore||0)}</b></div>`:''}</div>${scheda}${investi}${giroBottone(MAPSEL, chiama&&!!def)}`;
+}
+/* L182-3 — «Vai in visita»: col gettone del mese (giroPossibile) o sull'area che chiama; con la costante spenta, niente */
+function giroBottone(i, chiama){
+  if(typeof GIRO_SUL_TAVOLO==='undefined' || !GIRO_SUL_TAVOLO) return '';
+  if(!(chiama || giroPossibile())) return '';
+  if(!chiama && !scenePerTerr(i).length) return '';
+  return `<div style="margin:2px 14px 10px"><button class="opt" style="min-height:44px" onclick="apriGiro(${i})"><span class="ol">${T('Vai in visita')}</span></button></div>`;
 }
 function renderMappaPage(){
   const asseTuo=part(S.partito).asse;
@@ -3994,7 +4079,15 @@ function renderMappaPage(){
 let QSEL=null;
 function selQuartiere(i){ QSEL=(QSEL===i)?null:i; render(); }
 function qCol(v){ return v<33?'var(--neg)':v<60?'var(--warn)':'var(--pos)'; }   // stessa scala degli indicatori locali
-function mappaLocale(){ if(typeof MAPPE_LOCALI==='undefined'||!S.locale) return null; return MAPPE_LOCALI[S.paese+'_'+S.locale.terrIdx]||null; }
+/* L182-4 (D171) · le mappe sono del PRESENTE, per indice: nelle porte l'indice può cadere su un altro territorio (le porte tedesche:
+   Renania-Palatinato → la Sassonia, Brema → il Brandeburgo, Berlino Ovest → la Berlino unita). La mappa si trova per NOME: il nome
+   del territorio della porta (`PAESE.territori`, rinomine di tappa comprese) contro quello del presente a quell'indice; se non
+   coincidono, il territorio del presente con lo stesso nome; se non c'è, nessuna mappa. Nel presente e nelle porte con lo stesso
+   ordine dei territori è la regola di prima. Misura: .claude/misura-l182-4-mappa.js (--rosso rimette la regola per indice). */
+function mappaLocale(){ if(typeof MAPPE_LOCALI==='undefined'||!S.locale) return null;
+  let i=S.locale.terrIdx; const pres=(PAESI[S.paese]||{}).territori, qui=PAESE&&PAESE.territori&&PAESE.territori[i];
+  if(pres&&qui&&(!pres[i]||pres[i].nome!==qui.nome)){ i=pres.findIndex(function(t){ return t.nome===qui.nome; }); if(i<0) return null; }
+  return MAPPE_LOCALI[S.paese+'_'+i]||null; }
 /* tema-indicatori per zona, dal centro (peri basso) alla periferia (peri alto): la periferia attinge alle leve
    più fragili (casa/sicurezza/servizi) — è il payoff della «cura», ora su geometria vera. */
 function quartiereTema(peri,tipo){

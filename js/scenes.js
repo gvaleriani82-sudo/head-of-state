@@ -125,9 +125,9 @@ const VIDEO_PRESENTI = ['home-hero', 'partito-base', 'vitaprivata-base', 'retro-
      in carriera; il .webp sta in assets/scenes/ come per ogni clip (fa da poster), nessuna carta lo nomina. */
   'partenza-attivista', 'partenza-locale', 'partenza-ministro', 'partenza-capo', 'partenza-diplomatico',
   /* 3/10 (L178-4): la partenza «di oggi» per le partite NEL PRESENTE (`partenza-oggi-<ruolo>`, senza luogo): la sceglie
-     `partenzaDelRuolo()` se il nome è qui, altrimenti la clip di sempre; la voce è quella del ruolo. Ministro, capo, diplomatico
-     (l'attivista è arrivata e aspetta: sulla lavagna ci sono scarabocchi che sembrano scrittura; il locale non c'è ancora). */
-  'partenza-oggi-ministro', 'partenza-oggi-capo', 'partenza-oggi-diplomatico',
+     `partenzaDelRuolo()` se il nome è qui, altrimenti la clip di sempre; la voce è quella del ruolo. Tutti e cinque dal 4/10
+     (L181-2: locale e l'attivista rifatta senza lavagna). */
+  'partenza-oggi-ministro', 'partenza-oggi-capo', 'partenza-oggi-diplomatico', 'partenza-oggi-locale', 'partenza-oggi-attivista',
   /* 30/9 (L153-5): le clip delle PARTITE STORICHE — il paese (5 s, 960×540, mute; qui le bandiere ci vogliono), poi il decennio. Non sono
      carte: le apre `apriClipPorta()` (ui.js) quando si sceglie una porta, e la sequenza si DERIVA dalla porta (`porta-paese-<paese>`,
      `porta-decennio-<anno>`): una clip vale solo se il suo nome è qui. Il poster di un decennio è la sua miniatura `porta-decennio-*.webp`.
@@ -139,6 +139,13 @@ const VIDEO_PRESENTI = ['home-hero', 'partito-base', 'vitaprivata-base', 'retro-
      `mostraBilancio()` in cima al modale con `scenaMomentoHtml` (striscia, come intervista e telefonata); il poster è il .webp omonimo. */
   'fineanno-buono', 'fineanno-lucieombre', 'fineanno-difficile', 'fineanno-nuovocapitolo'];
 
+/* ===== L181-4 — LE CLIP CHE NON GIRANO: un giro solo, poi l'ultimo fotogramma tenuto. Le altre clip di scena girano in tondo
+   (`loop`) perché il loro ultimo fotogramma torna sul primo (cucitura ≤ 3,6 su 255, misurata sullo schermo); queste no — le porte
+   che si aprono di fine anno (cucitura 19-73) e la festa della notte vinta (28) — e girando saltavano indietro ogni 4-5 secondi.
+   `videoHtml` (ui.js) non mette loro `loop`, non le rimette «all'ora» (VIDEO_T0: partono sempre dal fotogramma 0) e il testimone non
+   le fa ripartire finite. Misura: `.claude/l181-4-schermo.js`; ogni nome dev'essere in VIDEO_PRESENTI (`verifica-asset.js`). */
+const CLIP_UNA_VOLTA = ['fineanno-buono', 'fineanno-lucieombre', 'fineanno-difficile', 'fineanno-nuovocapitolo', 'notte-vittoria'];
+
 /* ===== L178-3 — I RITRATTI VIVI (`assets/video/pg-<id>.mp4`, 6 s, 540×960, muti; poster `assets/ui/pg-<id>-vivo.webp`). Solo il
    TUO personaggio è vivo (`S.personaggio.avatar`, un id di AVATARS): i ritratti dei ministri e dei candidati restano fermi. La clip
    la mette `ritrattoVivoHtml()` (ui.js) nei quattro momenti grandi — partenza, bilancio di gennaio, notte finita, finale — solo se
@@ -149,7 +156,9 @@ const RITRATTI_VIVI = ['pg-occ-m', 'pg-occ-f', 'pg-lat-m', 'pg-lat-f', 'pg-asi-m
 /* ===== L124-1 — IL VIDEO INTRODUTTIVO (`assets/video/intro.*`). Non è una scena: sta FUORI da VIDEO_PRESENTI (non ha una
    carta né un .webp in assets/scenes) ma sotto la stessa guardia (`.claude/verifica-asset.js`): i file dichiarati qui devono
    esserci, un `intro.*` in cartella dev’essere dichiarato qui, e la clip non supera 10 MB. Lo apre `apriIntro()` (ui.js) al
-   primo tocco sulla home, una volta per dispositivo. Montaggio di Cowork: `arte-sorgente/intro/monta.sh`. */
+   primo tocco sulla home, una volta per dispositivo. Montaggio di Cowork: `arte-sorgente/intro/monta.sh`.
+   ⚑ L181-4: il poster è il PRIMO FOTOGRAMMA (nero: il film entra dal nero) — prima era una piazza di paese, che si vedeva durante
+   il caricamento e poi tagliava sul nero. Rifatto con `.claude/poster-da-fotogramma.js`; il vecchio in arte-sorgente/scene-ritirate/poster-l181-4/. */
 const INTRO_VIDEO = { clip:'intro.mp4', poster:'intro.webp', sottotitoli:{ it:'intro.it.vtt', en:'intro.en.vtt' } };
 
 /* ===== L146-1 — LA VOCE DELLE CLIP DEL PUNTO DI PARTENZA (`assets/video/partenza-<nome>.voce.mp3` e `.it/.en.vtt`). La voce
@@ -194,6 +203,16 @@ const SCENE_AREA = ['casa-base-nordamerica', 'casa-base-latina', 'casa-base-asia
                     'crisi-base-africa', 'ordinepubblico-base-nordamerica', 'ordinepubblico-base-latina', 'ordinepubblico-base-asiaest',
                     'ordinepubblico-base-asiasud', 'ordinepubblico-base-africa', 'societacivile-base-nordamerica', 'societacivile-base-latina', 'societacivile-base-asiasud',
                     'societacivile-base-asiaest', 'societacivile-base-africa'];
+/* ===== L181-1 — LE VARIANTI NUMERATE (`assets/scenes/<scena>-v2.webp`, `-v3`…): più immagini per la stessa scena, perché una carriera
+   di dieci anni non veda sempre la stessa (oggi `vitaprivata-base` fa la gran parte della vita privata: DESIGN-SCENE-VARIANTI.md).
+   Lista-promessa accanto a SCENE_PAESE e SCENE_AREA: qui stanno i NOMI che hanno il file (`<nome reso>-v<N>`, dove il nome
+   reso è quello che `scenaPaese()` ha già scelto: la variante d'area resta il primo tentativo, le numerate valgono dentro la stessa
+   area/paese). La rotazione la fa `scenaVariante()` (ui.js) e la accende `ROTAZIONE_VARIANTI`: spenta finché le immagini non
+   arrivano (le fa Cowork in arte-sorgente/scene-varianti/, le porta Code con un lotto a parte, che accende la costante). La guardia è
+   in verifica-asset.js (cartella = lista). La clip segue da sé: `clipDaSrc` legge il nome, quindi una variante ha la clip solo se
+   `<nome>-vN` è in VIDEO_PRESENTI, altrimenti l'immagine ferma. */
+const SCENE_VARIANTI = [];
+const ROTAZIONE_VARIANTI = false;
 
 /* ===== L151-2 — LE IMMAGINI DEI DECENNI (`assets/scenes/porta-decennio-<anno>.webp`): la miniatura delle porte storiche che non
    hanno una `soglia-*` loro (Regno Unito, Francia, Germania) nella pagina degli storici — `sogliaSrc()` in ui.js. Lista-promessa:

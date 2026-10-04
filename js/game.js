@@ -506,6 +506,7 @@ function initStatoBase(){
   S.famigliaVivaUltimo=null;   // G1 — cooldown dei giorni buoni / scelte di tempo (dato puro, round-trip)
   S.famigliaVivaFatti=[];      // G1 — once-in-vita già vissuti (matrimonio del figlio…)
   S.recentFamigliaViva=[];     // G1 — finestra anti-ripetizione dei beat ripetibili (domenica, compleanno…)
+  S.giroMese=null;             // L182-3 — il mese dell ultimo giro sul tavolo (dato puro); l umore vive in S.territori[i].umore
   S.territorioChiama=null;     // F2 — il territorio che chiama {idx,prob,nato} (dato puro, round-trip); il pulse è derivato
   S.territorioUltimo=null;     // F2 — cooldown dell'innesco-territorio
   S.territorioRecente=null;    // F2 — ultima area chiamata (anti-ripetizione)
@@ -4106,11 +4107,18 @@ function graveInCorso(){
   if(S.agenda && S.agenda.some(function(a){ return a && a.data && a.data.tono==='grave'; })) return true;   // un grave già sul tavolo
   return false;
 }
+/* L183-1 (D173) — LA CADENZA DEL RESPIRO È DELLA PARTITA: nelle PORTE un beat leggero ogni 3 mesi, nel presente ogni 2 come prima.
+   Misurato in L182-2 (`audit-varieta.js --cadenza`, rapporto in DESIGN-VARIETA-2.md «⚑ L182-2»): a 3 la mediana della ripetizione
+   del locale delle porte scende da 51 a 37% e il pavimento del 10% vuole ~30 carte vive per decennio invece di ~45; a 4 il capo del
+   governo avrebbe un leggero ogni quattro mesi, troppo poco tessuto. Porta = `S.scenario` presente e diverso da 'presente' (lo stesso
+   criterio dell'audit e della soglia del decennio in advanceMonth). Il retroscena, la gavetta e `graveInCorso` non cambiano. */
+var LEGGERO_CADENZA_PORTE = 3;
 function leggeroDovuto(){
   if(typeof S==='undefined' || !S || typeof BEAT_LEGGERI==='undefined') return false;
   if(S.livello===0) return false;                     // la gavetta ha il suo flusso (A.5): niente iniezioni qui
   var mese=S.year*12+S.month;
-  if(S.leggeroUltimo!=null && mese-S.leggeroUltimo<2) return false;   // ~1 ogni 2 mesi
+  var soglia=(S.scenario && S.scenario!=='presente') ? LEGGERO_CADENZA_PORTE : 2;   // L183-1: porte 3, presente 2
+  if(S.leggeroUltimo!=null && mese-S.leggeroUltimo<soglia) return false;   // ~1 ogni 2 mesi (porte: ogni 3)
   return !graveInCorso();
 }
 /* L14-1 — IL TESSUTO DEL FUORI-VERBALE: innesco dei beat-retroscena. Gemello di `leggeroDovuto`, con tre differenze:
@@ -4128,10 +4136,14 @@ function retroDovuto(){
   if(S.retroUltimo!=null && mese-S.retroUltimo<4) return false;
   return true;
 }
+/* L182-2 · il retroscena passa dal filtro unico dell'epoca (`eraVivaT`: senza `era` è universale, quindi oggi — 16 voci, nessuna con
+   `era`/`paesi`/`dal`, tutte senza tempo — non cambia niente; una voce del presente scritta domani non uscirà nelle porte) e il suo
+   sacchetto ha `vivePrima` come i leggeri (L151-1): le voci con una `cond` che diventa vera a metà sacchetto vanno in testa.
+   Misura in DESIGN-VARIETA-2.md («⚑ L182-2»). */
 function pescaRetro(){
-  var pool=RETRO_BEAT.filter(function(b){ try{ return (!b.cond||b.cond()); }catch(e){ return false; } });
+  var pool=RETRO_BEAT.filter(function(b){ try{ return (typeof eraVivaT!=='function'||eraVivaT(b)) && (!b.cond||b.cond()); }catch(e){ return false; } });
   if(!pool.length) return null;
-  return (typeof pescaBag==='function') ? pescaBag('retro', pool) : pool[0];
+  return (typeof pescaBag==='function') ? pescaBag('retro', pool, {vivePrima:true}) : pool[0];
 }
 function pescaLeggero(){
   var pool=BEAT_LEGGERI.filter(function(b){ return (typeof eraViva!=='function'||eraViva(b)) && (!b.cond||b.cond()); });
@@ -4620,7 +4632,7 @@ function concludiIntervista(){
   var I=INTERVISTA, deltas=[];
   I.done.forEach(function(d){ var s=premiaSfida(I.cornice, d.ok); if(s) deltas.push(s); });
   var perfetto=(I.correct===I.done.length && I.done.length===I.qs.length && I.qs.length>=2);
-  if(perfetto){ if(I.cornice==='vertice') autorevMuovi(1); else if(I.cornice==='piazza') attA(1); else repd(1); deltas.push(T('tenuta')+' +1'); }   // bonus-tenuta piatto
+  if(perfetto){ if(I.cornice==='vertice') autorevMuovi(1); else if(I.cornice==='piazza') attA(1); else repd(1); deltas.push(T('sangue freddo')+' +1'); }   // bonus-tenuta piatto (L184-2, D178: il chip dice «sangue freddo», EN «composure»; «tenuta» è la tenuta degli alleati, EN «loyalty»)
   var testo = perfetto ? T('Hai retto l\'incalzare fino in fondo: prova piena.')
             : (I.correct>0 ? T('Hai retto le prime, poi il cronista ti ha messo in difficoltà: una cavata onorevole.')
                            : T('Il cronista ti ha spiazzato subito: capita, si rimonta.'));
@@ -4941,6 +4953,7 @@ function pickTerritorioChiama(){
   var avv=idxs.filter(function(i){ return !compatibile(S.territori[i].partito,a,S.partito) && i!==S.territorioRecente; });
   var pool=avv.length?avv:idxs.filter(function(i){return i!==S.territorioRecente;});
   if(!pool.length) pool=idxs;
+  pool=pool.concat(pool.filter(function(i){ return (S.territori[i].umore||0)<0; }));   // L182-3 (D170): i trascurati chiamano, peso doppio (nessun umore: pool identico)
   return pool[Math.floor(Math.random()*pool.length)];
 }
 function pickProblemaTerr(){
@@ -4968,14 +4981,115 @@ function resolveTerritorio(ci){
   if(!S || !S.territorioChiama) return;
   var def=defProblemaTerr(S.territorioChiama.prob); if(!def){ S.territorioChiama=null; render(); return; }
   var opt=def.ch[ci]; if(!opt) return;
-  if(opt.f){ try{ opt.f(); }catch(e){} }
-  var TE=(PAESE.territori||[])[S.territorioChiama.idx];
-  var nome=(typeof nomeTerr==='function' && TE)?nomeTerr(TE):T('il territorio');
-  S.log.unshift({ t:arcoTerrSub(T(def.t), TE), x:T('Sul territorio:')+' '+T(opt.l) });
+  risolviScenaTerr(def, opt, S.territorioChiama.idx);   // L182-3: F2 è il caso particolare del giro (con GIRO_SUL_TAVOLO spento: identico a prima)
   S.territorioChiama=null;
   S.ind.consenso=computeConsenso();   // gli effetti su gruppi/indicatori si riflettono sul consenso derivato
   render(); commitSnap();
 }
+/* ================================================================================================================
+   L182-3 · IL GIRO SUL TAVOLO (DESIGN-FORMATI.md, D166-D170). F2 allargata: «vai su un territorio». Il territorio che chiama
+   (S.territorioChiama) è l'invito a fare il giro proprio lì; la visita libera è il giro su un'area scelta dal giocatore. Un
+   gettone al mese (S.giroMese = il mese dell'ultimo giro, dato puro), facoltativo, non si accumula. La scena viene da
+   GIRO_SCENE (data.js) e su ogni scelta dichiara `u` (−2…+2): l'umore che lascia sul territorio, S.territori[i].umore
+   (intero fra −3 e +3; S.territori[i].ud = il mese dell'ultima visita o dell'ultimo passo di decadimento). L'umore lo legge
+   UN lettore solo, spintaTerr(i), in applicaSpintaForze e decidiTerritoriNazionale (umore 0 = identico a prima).
+   ⚠ Le voci di S.territori si SOSTITUISCONO intere quando un'area cambia mano (decidiTerritori, decidiTerritoriNazionale): lì
+   l'umore e `ud` si portano nella voce nuova (portaUmore) — il design vuole che il voto non lo azzeri.
+   Dietro GIRO_SUL_TAVOLO (let e non const: il banco la varia); spenta: nessun bottone, nessuna riga, nessun umore, F2 identica.
+   ACCESA dal 4/10 (L185-1, D174/D183): 29 scene (FORMATI-L185-GIRO-SCENE.md), K = 2. La regola contro __GIRO_PLACEBO, 40 carriere per
+   lato, due semi, 46 fette (16 presenti + 6 porte tedesche + us1950, governo e opposizione, 120 mesi): (i) nessuna sconfitta peggiora
+   di ≥ 6/40 nei due semi; (ii) prima urna vinta fra −6 e +8 su 40 ovunque (il massimo: us1950 governo +7 e +3); (iii) un mese in node
+   +7,9%; (iv) il salvataggio senza S.log +268 byte (massimo 652). CDP a 375 verde IT/EN (.claude/tavolo-prova/giro-cdp.js). Misura:
+   .claude/misura-l185-1.js. ⚠ Accesa, anche il BANCO fa giri (cerimonia 17): le misure prese prima del 4/10 non li avevano;
+   __GIRO_SPENTO rimette il banco di prima.
+   ================================================================================================================ */
+let GIRO_SUL_TAVOLO = true;    // L185-1: accesa (la regola di D174 passa a K = 2; vedi la testata)
+let GIRO_UMORE_K = 2;          // let: la misura lo varia (2, poi 1 e 0,5)
+let GIRO_APERTO = null;        // TRANSITORIO {idx, id, f2}: la scena aperta nel foglietto, mai in S
+function meseAss(){ return S.year*12+S.month; }
+/* le porte che dichiarano territori di quel paese e di quel decennio (le tedesche, us1950); il presente vale sempre. Dichiarato, mai dedotto. */
+function territoriDEpoca(){
+  if(!S.scenario || S.scenario==='presente') return true;
+  var sc=(typeof SCENARI!=='undefined') ? SCENARI[S.scenario] : null;
+  return !!(sc && sc.territoriDEpoca);
+}
+/* il punto unico (D167): livello 3, gettone del mese, niente campagna, notte, pilastro-tragedia, primo mese; territori d'epoca */
+function giroPossibile(){
+  if(!GIRO_SUL_TAVOLO) return false;
+  if(typeof S==='undefined' || !S || S.livello!==3) return false;
+  if(!PAESE || !PAESE.mappa || !PAESE.territori || !S.territori || !S.territori.length) return false;
+  if(S.giroMese===meseAss()) return false;                                         // il gettone del mese è speso
+  if(inCampagna()) return false;                                                   // in campagna c'è «Investi qui», che è già un giro
+  if(NOTTE) return false;
+  if(typeof musicaTragedia==='function' && musicaTragedia()) return false;         // G8: sulle sciagure vere niente meccanica
+  if(S.year===S.annoInizio && S.month===1) return false;                           // il primo mese di una carriera
+  return territoriDEpoca();
+}
+function tipoTerrNorm(TE){ return String((TE&&TE.tipo)||'').normalize('NFD').replace(/[̀-ͯ]/g,''); }   // «città» dei dati → «citta» delle scene
+function casaTerr(i){ var t=S.territori[i]||{}; return compatibile(t.partito, mioPartito().asse, S.partito) ? 'amica' : 'avversa'; }
+/* le scene vive per l'area i: filtro per tipo/ruolo/casa, poi il passaggio unico d'epoca e la cond */
+function scenePerTerr(i){
+  if(typeof GIRO_SCENE==='undefined') return [];
+  var TE=PAESE.territori[i], tipo=tipoTerrNorm(TE), ruolo=S.opposizione?'opposizione':'governo', casa=casaTerr(i);
+  return GIRO_SCENE.filter(function(g){
+    if(g.tipo && g.tipo!==tipo) return false;
+    if(g.ruolo && g.ruolo!==ruolo) return false;
+    if(g.casa && g.casa!==casa) return false;
+    if(!eraVivaT(g)) return false;
+    if(g.cond){ try{ if(!g.cond()) return false; }catch(e){ return false; } }
+    return true;
+  });
+}
+/* la scena del giro sull'area i: il territorio che chiama prende la sua scena F2; altrimenti il sacchetto curato */
+function scenaGiro(i){
+  if(S.territorioChiama && S.territorioChiama.idx===i){ var d=defProblemaTerr(S.territorioChiama.prob); if(d) return { def:d, f2:true }; }
+  var c=scenePerTerr(i); if(!c.length) return null;
+  var def=pescaBag('giro|'+(S.era||'p'), c, {vivePrima:true}) || c[0];   // L185-1: pescaBag rende la CARTA, non l'id — col confronto per id di L182-3 usciva sempre c[0] (gi_comizio 313 giri su 313)
+  return { def:def, f2:false };
+}
+function defGiro(id){ return (typeof GIRO_SCENE!=='undefined') ? GIRO_SCENE.filter(function(g){ return g.id===id; })[0] : null; }
+/* il cuore comune di F2 e del giro: effetti, riga nel registro e — solo col giro acceso — umore e gettone */
+function risolviScenaTerr(def, opt, idx){
+  if(opt.f){ try{ opt.f(); }catch(e){} }
+  var TE=(PAESE.territori||[])[idx];
+  S.log.unshift({ t:arcoTerrSub(T(def.t), TE), x:T('Sul territorio:')+' '+T(opt.l) });
+  if(GIRO_SUL_TAVOLO){
+    var t=S.territori[idx];
+    if(t){ t.umore=clamp((t.umore||0)+(opt.u||0), -3, 3); t.ud=meseAss(); }
+    S.giroMese=meseAss();
+  }
+}
+/* apre la scena del giro nel foglietto (la presentazione la disegna ui.js); la pesca avviene qui, una volta */
+function apriGiro(i){
+  if(!giroPossibile() && !(GIRO_SUL_TAVOLO && S.territorioChiama && S.territorioChiama.idx===i)) return;
+  var sg=scenaGiro(i); if(!sg) return;
+  GIRO_APERTO={ idx:i, id:sg.def.id, f2:sg.f2, mese:meseAss() };   // il mese: a mese cambiato il foglietto lo lascia cadere (ui.js, giroFoglio)
+  if(typeof render==='function') render();
+}
+function chiudiGiro(){ GIRO_APERTO=null; if(typeof render==='function') render(); }
+function resolveGiro(ci){
+  if(!S || !GIRO_APERTO) return;
+  var G=GIRO_APERTO; GIRO_APERTO=null;
+  if(G.f2){ resolveTerritorio(ci); return; }   // F2 caso particolare: stessa risoluzione (col giro acceso porta l'umore e spende il gettone)
+  var def=defGiro(G.id); if(!def) { render(); return; }
+  var opt=def.ch[ci]; if(!opt) { render(); return; }
+  risolviScenaTerr(def, opt, G.idx);
+  S.ind.consenso=computeConsenso();
+  if(typeof suona==='function') suona('mappa');
+  render(); commitSnap();
+}
+/* il lettore unico dell'umore (D170): la spinta di campagna più l'umore pesato. Umore 0 → la spinta di sempre. */
+function spintaTerr(i){ var t=(S.territori&&S.territori[i])||{}; return (t.spinta||0) + (t.umore||0)*GIRO_UMORE_K; }
+/* un territorio dimentica: ogni 6 mesi senza visite l'umore fa un passo verso 0 (no-op se nessuno ha umore) */
+function decadiUmore(){
+  if(!S || !S.territori) return;
+  var m=meseAss();
+  S.territori.forEach(function(t){ if(!t || !t.umore) return;
+    if(t.ud==null) t.ud=m;
+    if(m-t.ud>=6){ t.umore+= (t.umore>0?-1:1); t.ud=m; } });
+}
+/* chi sostituisce una voce di S.territori (cambio di mano) porta l'umore nella voce nuova: il voto non lo azzera */
+function portaUmore(vecchia, nuova){ if(vecchia && vecchia.umore){ nuova.umore=vecchia.umore; if(vecchia.ud!=null) nuova.ud=vecchia.ud; } return nuova; }
 /* ================================================================================================================
    L76-1 · I LUOGHI DEL PAESE NEI TESTI UNIVERSALI. «Il partito ti chiamerà a Roma» girava anche su Manchester nel 1950:
    un testo universale non può nominare la capitale di UN paese. I luoghi sono dati (PAESE.capitale, PAESE.sedeGoverno)
@@ -5018,7 +5132,7 @@ function decidiTerritori(ris){
     const nuovoTuo=localShare>50, eraTuo=compatibile(dopo[i].partito, asseTuo, S.partito);
     if(nuovoTuo!==eraTuo){
       const partito=scegliPartito(nuovoTuo, TE.lean, asseTuo, S.partito), nome=nomePersona();
-      dopo[i]={ titolare:nome, partito:partito };
+      dopo[i]=portaUmore(dopo[i], { titolare:nome, partito:partito });   // L182-3: il voto non azzera l umore del giro
       ris.aree.push({ nome:TE.nome, nomeEn:TE.nomeEn, carica:TE.carica, caricaEn:TE.caricaEn, titolare:nome, partito:partito, tuo:nuovoTuo });   // FIX: era T.nome/T.carica (T = funzione traduzione → undefined); porta i campi grezzi, risolti in-lingua dal render
     }
   });
@@ -5745,7 +5859,7 @@ function seedScandaloArco(mese){
   if(!cand.length) cand=ARCHI_DEF.filter(function(A){ return A.famiglia==='Scandali' && !arcoInCorso(A.id); });
   if(!cand.length) return;
   var A=cand[Math.floor(Math.random()*cand.length)];
-  var f=(A.filo?A.filo():null); if(f&&f.ruolo)f.ruolo=T(f.ruolo);   // filo() stampa S.scandaloUltimo alla nascita
+  var f=(A.filo?filoArco(A):null); if(f&&f.ruolo)f.ruolo=T(f.ruolo);   // filo() stampa S.scandaloUltimo alla nascita
   S.archi.push({id:A.id, nodo:A.start||'start', scelte:[], nato:mese, prossimo:mese, filo:f, eco:'', peso:0});
   S.recentArchi=recent; S.recentArchi.push(A.id); if(S.recentArchi.length>2) S.recentArchi.shift();
 }
@@ -5762,7 +5876,7 @@ function provaAvviaArco(mese){
   const ord=cand.slice().sort(function(){ return Math.random()-0.5; });        // ordine casuale: nessun arco ha la precedenza fissa
   for(const A of ord){
     if(Math.random() < (A.prob!=null?A.prob:0.12)){
-      S.archi.push({id:A.id, nodo:A.start||'start', scelte:[], nato:mese, prossimo:mese, filo:(function(){const f=(A.filo?A.filo():null); if(f&&f.ruolo)f.ruolo=T(f.ruolo); return f;})(), eco:'', peso:0});   // nasce col suo FILO (fase A); i18n: il RUOLO (testo display) tradotto alla creazione, il nome generato resta
+      S.archi.push({id:A.id, nodo:A.start||'start', scelte:[], nato:mese, prossimo:mese, filo:(function(){const f=(A.filo?filoArco(A):null); if(f&&f.ruolo)f.ruolo=T(f.ruolo); return f;})(), eco:'', peso:0});   // nasce col suo FILO (fase A); i18n: il RUOLO (testo display) tradotto alla creazione, il nome generato resta
       S.archiUltimoStart=mese;
       S.recentArchi=recent; S.recentArchi.push(A.id); if(S.recentArchi.length>2) S.recentArchi.shift();
       return;
@@ -6315,10 +6429,93 @@ function genAgendaRamo(first){
 let AG_SOLO=false;
 function agendaSolo(){ AG_SOLO=true; }
 function genAgenda(first){
+  /* L180-1: lo stato di PRIMA di questa generazione, per lo snapshot (vedi `SNAP_PRIMA_AGENDA` qui sotto) */
+  AG_PRIMA=null; AG_TOLTE=[]; AG_ESCLUSI={};   // prima della foto: le esclusioni sono di QUESTA generazione
+  const _pre=(SNAP_PRIMA_AGENDA && S) ? fotoPrimaAgenda() : null;
   AG_SOLO=false;
   genAgendaRamo(first);
-  if(first || AG_SOLO) return;      // primo mese e mesi-setpiece: nessuna coda
-  codaAgenda();
+  if(!(first || AG_SOLO)) codaAgenda();      // primo mese e mesi-setpiece: nessuna coda
+  if(_pre) segnaPrimaAgenda(_pre);
+}
+/* ================================================================================================================
+   L180-1 (D150) · IL CARICAMENTO A INIZIO MESE RITROVA LE CARTE DOVUTE — l'opzione (e) di L179-3.
+   Lo snapshot si prende DOPO `genAgenda`, che all'ingresso ha già segnato i suoi registri (il pilastro visto, la campagna, le
+   ancore, la questione di fiducia, il rimpasto offerto, il rimpasto obbligato, il richiamo, l'occasione…); `applySnap` rigenera
+   l'agenda e, sui registri già scritti, quelle carte non tornavano più (L179-3, la tabella). Qui: `genAgenda` confronta `S` prima
+   e dopo, a due livelli (`S.x` o `S.x.y`, così un sacchetto è un campo a sé), e tiene in due TRANSITORIE (mai in `S`) il valore di
+   prima e quello di dopo; `snapshotStr` scrive accanto a `s` il campo `pa` = {campi: i valori di prima, risolte: le carte del mese
+   già risolte}; `applySnap` rimette i valori di prima e rigenera dallo stato d'inizio mese → le carte dovute tornano, le
+   estrazioni si rifanno (come prima: «rigioca il mese da capo»).
+   · Esclusi i campi `archi*` e `recentArchi`: l'inizio di un arco è un'estrazione dentro `genAgenda` (`archiRoll`), e rimettendo lo
+     stato di prima si rilancerebbe (L179-3: l'arco da uguale 3/4 a perso 4/4). Per lo stesso motivo `inchiesta*` (lo stato che
+     avanza ha il suo tiro: la sentenza) e `qfMese` (il mese della questione di fiducia è estratto e stampato una volta l'anno:
+     rimesso, un caricamento lo sposterebbe). E `log`: è cronaca, le righe d'ingresso si riscrivono (come prima).
+     E i campi che il FILO di un arco nato in questa generazione scrive (`filoArco`: `S.tavoloPid`, `S.scandaloUltimo`).
+   · ⚠ IL SALVATAGGIO DOPO UNA CARTA RISOLTA (la regola di D150: una carta risolta nel mese non torna mai). Due difese:
+     (1) i campi si rimettono solo se al momento del salvataggio valgono TUTTI ancora quello che `genAgenda` ha lasciato — se una
+     risoluzione (o chiunque dopo) ne ha cambiato uno, non se ne rimette nessuno e il caricamento è quello di prima: i campi si
+     tengono fra loro (la promessa di campagna rimessa sopra i gruppi già toccati da una carta raddoppierebbe il conto);
+     (2) le carte già risolte nel mese viaggiano per chiave (`chiaveCartaAgenda`: kind + id/tipo/ministero) e dopo la
+     rigenerazione si tolgono: i loro segni d'ingresso li riscrive la rigenerazione stessa (stessi valori di dopo), gli effetti
+     della scelta sono già in `s` una volta. Le carte tolte restano in `AG_TOLTE` fino alla generazione dopo, così anche un
+     secondo caricamento dello stesso mese non le rimette. Una carta senza id né tipo né ministero non si toglie (non si sa
+     quale sia): sono estrazioni, e si ripescano come prima.
+   · Un salvataggio senza `pa` (vecchio, o preso fuori da una generazione) si carica come prima. `AG_S` lega le transitorie
+     allo stato che le ha prodotte: una partita nuova (o un caricamento) non eredita quelle di prima; `AG_MESE` al mese: un mese che
+     non passa da `genAgenda` (le urne aperte all'inizio del mese, il rinnovo del mandato internazionale) non porta la `pa` del mese prima.
+   L'interruttore spento rimette il gioco di L179-3. Misura: `.claude/sonda-l180-1.js`. ============================== */
+let SNAP_PRIMA_AGENDA=true;   // let e non const: la sonda lo spegne in memoria (la rossa)
+let AG_PRIMA=null, AG_DOPO=null, AG_S=null, AG_MESE=null, AG_TOLTE=[];
+let AG_ESCLUSI={};   // transitoria: i campi che l'avvio di un arco ha scritto in questa generazione (filoArco)
+function agendaCampoEscluso(k){ return k==='agenda' || k==='log' || /^archi/.test(k) || k==='recentArchi' || /^inchiesta/.test(k) || k==='qfMese' || !!AG_ESCLUSI[k]; }
+/* il FILO di un arco nasce con l'arco e può scrivere in S (`S.tavoloPid`, `S.scandaloUltimo`): quei campi seguono l'arco — restano
+   quelli di dopo, o l'arco tenuto si troverebbe senza il suo partito o lo scandalo senza il suo raffreddamento. Si guardano qui,
+   attorno alla sola chiamata (rara), così un filo nuovo che scrive un campo nuovo è coperto senza una lista da tenere a mano. */
+function filoArco(A){
+  const f0=SNAP_PRIMA_AGENDA ? fotoPrimaAgenda() : null;
+  const f=A.filo();
+  if(f0) Object.keys(S).forEach(function(k){ if(!agendaCampoEscluso(k) && (k in f0 ? f0[k] : _jsAg(undefined))!==_jsAg(S[k])) AG_ESCLUSI[k]=true; });
+  return f;
+}
+function _jsAg(v){ return v===undefined ? '\u0000u' : JSON.stringify(v); }
+/* la foto è una stringa per campo (niente copia profonda, niente `log`: 31 KB su 45 a metà carriera); si legge solo dove cambia */
+function fotoPrimaAgenda(){ const f={}; Object.keys(S).forEach(function(k){ if(!agendaCampoEscluso(k)) f[k]=_jsAg(S[k]); }); return f; }
+function segnaPrimaAgenda(foto){
+  const P={}, D={};
+  Object.keys(Object.assign({},foto,S)).forEach(function(k){
+    if(agendaCampoEscluso(k)) return;
+    const fs=(k in foto) ? foto[k] : _jsAg(undefined);
+    if(fs===_jsAg(S[k])) return;
+    const a=(fs===_jsAg(undefined)) ? undefined : JSON.parse(fs), b=S[k];
+    if(a && b && typeof a==='object' && typeof b==='object' && !Array.isArray(a) && !Array.isArray(b)){
+      Object.keys(Object.assign({},a,b)).forEach(function(j){ const sb=_jsAg(b[j]); if(_jsAg(a[j])!==sb){ P[k+'.'+j]=(a[j]===undefined?{__undef:1}:a[j]); D[k+'.'+j]=sb; } });
+    } else { const sb=_jsAg(b); if(_jsAg(a)!==sb){ P[k]=(a===undefined?{__undef:1}:a); D[k]=sb; } }
+  });
+  AG_PRIMA=P; AG_DOPO=D; AG_S=S; AG_MESE=S.year*12+S.month;
+}
+function _valAg(s, p){ const q=p.split('.'); if(q.length===1) return s[q[0]]; const o=s[q[0]]; return (o && typeof o==='object') ? o[q[1]] : undefined; }
+function chiaveCartaAgenda(it){ if(!it) return null; const x=(it.data&&it.data.id)||it.tipo||it.min||''; return x ? (it.kind+'|'+x) : null; }
+function primaAgendaSnap(){
+  if(!SNAP_PRIMA_AGENDA || !AG_PRIMA || AG_S!==S || AG_MESE!==S.year*12+S.month) return null;   // di un altro stato o di un altro mese: niente
+  const campi={};
+  let tocco=false;
+  Object.keys(AG_PRIMA).forEach(function(p){ if(_jsAg(_valAg(S,p))===AG_DOPO[p]) campi[p]=AG_PRIMA[p]; else tocco=true; });   // difesa (1)
+  if(tocco) Object.keys(campi).forEach(function(p){ delete campi[p]; });   // difesa (1): o tutti o nessuno (i campi si tengono fra loro)
+  const risolte=AG_TOLTE.slice();
+  (S.agenda||[]).forEach(function(it){ if(it && it.resolved){ const c=chiaveCartaAgenda(it); if(c) risolte.push(c); } });   // difesa (2)
+  if(!Object.keys(campi).length && !risolte.length) return null;
+  return {campi:campi, risolte:risolte};
+}
+function rimettiPrimaAgenda(s, campi){
+  Object.keys(campi||{}).forEach(function(p){ const v=campi[p], u=v&&v.__undef, q=p.split('.');
+    if(q.length===1){ if(u) delete s[q[0]]; else s[q[0]]=v; }
+    else { if(!s[q[0]] || typeof s[q[0]]!=='object') s[q[0]]={}; if(u) delete s[q[0]][q[1]]; else s[q[0]][q[1]]=v; } });
+}
+function togliRisolteAgenda(risolte){
+  const tolte=[];
+  (risolte||[]).forEach(function(c){ const i=(S.agenda||[]).findIndex(function(it){ return it && !it.resolved && chiaveCartaAgenda(it)===c; });
+    if(i>=0){ S.agenda.splice(i,1); tolte.push(c); } });
+  AG_TOLTE=tolte;
 }
 function codaAgenda(){
   /* G4 — il RESPIRO del mese. Additivo (niente `return`): il paese parla d'altro SENZA rubare il posto alla politica. */
@@ -6812,13 +7009,22 @@ function maturaRP(){
    (MESE_FINITO) non si rende e non si salva: la carriera è chiusa e l'autosave cancellato (prima un scadiTerritorio dopo la fine
    poteva riscriverlo). Transitorio, mai in S. */
 let MESE_IN_CORSO=false, MESE_RENDER=false, MESE_SNAP=false, MESE_FINITO=false;
+/* L184-2 (D179) · IL TETTO DEL REGISTRO. `S.log` cresceva senza fine (L183-3: ~2,9 KB l'anno, il peso più grande del salvataggio
+   dopo vent'anni) e il gioco ne mostra 7 righe (ui.js, `S.log.slice`): nessun lettore del gioco ne legge di più. Le righe oltre
+   LOG_TETTO si tolgono in DUE punti soli: alla fine del mese (qui sotto, accanto al render e al salvataggio rinviati) e in
+   applySnap (un salvataggio vecchio si accorcia al caricamento). Dentro il mese il registro può superare il tetto: le carte che
+   confrontano la lunghezza prima e dopo una scelta restano vere. Lo snapshot d'inizio mese (L180-1, `pa`) non porta `log`:
+   il tetto non lo tocca. Gli strumenti che vogliono la storia intera la contano nel banco (harness.js, `__logTutto()`), mai in S.
+   `let` e non `const`: la misura lo spegne (null = niente tetto, come prima). */
+let LOG_TETTO=60;
+function tagliaLog(){ if(LOG_TETTO && typeof S!=='undefined' && S && Array.isArray(S.log) && S.log.length>LOG_TETTO) S.log.length=LOG_TETTO; }
 function advanceMonth(){
   if(MESE_IN_CORSO) return corpoMese();
   MESE_IN_CORSO=true; MESE_RENDER=false; MESE_SNAP=false; MESE_FINITO=false;
   try{ corpoMese(); }
   finally{
     MESE_IN_CORSO=false;
-    if(!MESE_FINITO){ if(MESE_RENDER) render(); if(MESE_SNAP) commitSnap(); }
+    if(!MESE_FINITO){ tagliaLog(); if(MESE_RENDER) render(); if(MESE_SNAP) commitSnap(); }   // L184-2: il tetto del registro, una volta per mese, prima del salvataggio
   }
 }
 function corpoMese(){
@@ -6831,7 +7037,7 @@ function corpoMese(){
   if(S && S.year!==_anno0 && S.month===1 && S.year%10===0 && S.scenario && S.scenario!=='presente' && S.year<2014 && typeof suona==='function') suona('soglia');
   try{ forseBilancio(); }catch(e){}
   try{ forseTelefonata(); }catch(e){}   // F1 — la telefonata DOPO il bilancio: se il bilancio (o un altro modale) è aperto, lo squillo salta e ritenta il mese dopo (cooldown non consumato)
-  try{ scadiTerritorio(); forseTerritorio(); }catch(e){}   // F2 — la mappa che chiama: scade il vecchio invito, poi ne prova uno nuovo (mai lo stesso mese della telefonata: la gate controlla !S.telPendente)
+  try{ scadiTerritorio(); forseTerritorio(); decadiUmore(); }catch(e){}   // F2 — la mappa che chiama (e L182-3: decadiUmore, un territorio dimentica; no-op senza umore): scade il vecchio invito, poi ne prova uno nuovo (mai lo stesso mese della telefonata: la gate controlla !S.telPendente)
   try{ forseIntervista(); }catch(e){}   // F5 — l'intervista incalzante: dopo tutto il resto (skip se un modale è aperto o se c'è già una Sfida singola nel mese)
 }
 function avanzaMese(){
@@ -7157,7 +7363,7 @@ function investiTerritorio(i){
    Peso: simbolo ×2, regione ×1,5. Scala: 10 di spinta (un'area in bilico) ≈ 0,5 punti di forza al blocco. */
 function applicaSpintaForze(){
   if(!S.territori||!PAESE.territori) return 0;
-  let tot=0; PAESE.territori.forEach(function(TE,i){ const sp=(S.territori[i]||{}).spinta||0; if(!sp) return; tot+=sp*(TE.simbolo?2:1)*(TE.tipo==='regione'?1.5:1); });
+  let tot=0; PAESE.territori.forEach(function(TE,i){ const sp=spintaTerr(i); if(!sp) return; tot+=sp*(TE.simbolo?2:1)*(TE.tipo==='regione'?1.5:1); });
   const amount=Math.round(tot/20*10)/10;
   if(amount>0 && typeof applicaSlancio==='function') applicaSlancio(bloccoElettorale(), amount);
   return amount;
@@ -7182,10 +7388,10 @@ function decidiTerritoriNazionale(){
     else { const tt=testaATesta(); onda=tt.myPct-(tt.cb||0)-50; }
     const wave=clamp(onda, -12, 12);
     PAESE.territori.forEach(function(TE,i){ const t=S.territori[i]; if(!t) return;
-      const sp=t.spinta||0; if(!sp) return;   // solo le aree lavorate in campagna si decidono qui (le altre le decidono le intermedie)
+      const sp=spintaTerr(i); if(!sp) return;   // L182-3: il lettore unico (spinta + umore del giro; umore 0 = come prima) · solo le aree lavorate in campagna si decidono qui (le altre le decidono le intermedie)
       const localShare=50 + wave + (TE.lean*aB*4) + sp*0.5 + (Math.random()*6-3);
       const nuovoTuo=localShare>50, eraTuo=compatibile(t.partito, asseTuo, S.partito);
-      if(nuovoTuo && !eraTuo){ S.territori[i]={ titolare:nomePersona(), partito:scegliPartito(true, TE.lean, asseTuo, S.partito) }; vinte.push(TE); }
+      if(nuovoTuo && !eraTuo){ S.territori[i]=portaUmore(t, { titolare:nomePersona(), partito:scegliPartito(true, TE.lean, asseTuo, S.partito) }); vinte.push(TE); }   // L182-3: l umore resta
     });
   } finally { S.territori.forEach(function(t){ if(t) t.spinta=0; }); }
   if(vinte.length && typeof initPotereLocale==='function') initPotereLocale();   // solo se qualcosa è cambiato: il gioco senza campagna resta identico
@@ -8397,7 +8603,7 @@ function resetAll(){
 
 /* ============================================================
    PERSISTENZA — carriere lunghe (localStorage). TUTTI i salvataggi sono la fotografia dell'ULTIMO confine
-   di mese (lastSnap): l'agenda (closure) non si serializza mai, si RIGENERA al caricamento. Anti-exploit:
+   di mese (lastSnap): l'agenda (closure) non si serializza mai, si RIGENERA al caricamento (dal L180-1 dallo stato d'inizio mese, `pa`: le carte dovute tornano, quelle già risolte no). Anti-exploit:
    anche il salvataggio manuale scrive lastSnap, mai lo stato a metà mese → ricaricare rigioca il mese da capo.
    Formato {v:VERSIONE, s:<S senza agenda>}. Ogni accesso a localStorage è protetto: degrada con grazia.
    ============================================================ */
@@ -8407,7 +8613,7 @@ function storageOK(){ try{ localStorage.setItem('__hos_t','1'); localStorage.rem
 function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
 function lsSet(k,v){ try{ localStorage.setItem(k,v); return true; }catch(e){ return false; } }
 function lsDel(k){ try{ localStorage.removeItem(k); }catch(e){} }
-function snapshotStr(){ const c=Object.assign({},S); c.agenda=[]; c.ministeroAperto=null; c.mappaAperta=null; c.partitoAperto=null; return JSON.stringify({v:SAVE_VERSION, s:c}); }
+function snapshotStr(){ const c=Object.assign({},S); c.agenda=[]; c.ministeroAperto=null; c.mappaAperta=null; c.partitoAperto=null; const o={v:SAVE_VERSION, s:c}; const pa=primaAgendaSnap(); if(pa) o.pa=pa; return JSON.stringify(o); }   // L180-1: `pa` = lo stato di prima dell'agenda del mese, FUORI da `s`
 function snapshot(){ return JSON.parse(snapshotStr()); }   // deep, indipendente, senza funzioni
 /* confine di mese: aggiorna fotografia + autosave. L123-1 · due passaggi invece di tre: la stringa si fa UNA volta, lastSnap è il
    suo parse e il salvataggio scrive quella stessa stringa (identica byte per byte a JSON.stringify(lastSnap): dati puri).
@@ -8425,6 +8631,9 @@ function parseSave(text){
 function applySnap(snap){
   if(typeof taciTutto==='function') taciTutto();   // L95-3
   S = snap.s;
+  const _pa=(SNAP_PRIMA_AGENDA && snap.pa && typeof snap.pa==="object") ? snap.pa : null;   // L180-1: lo stato di prima dell'agenda del mese (assente nei salvataggi vecchi: come prima)
+  if(_pa) rimettiPrimaAgenda(S, _pa.campi);
+  tagliaLog();   // L184-2 (D179): un salvataggio vecchio, col registro lungo, si accorcia al caricamento
   chosenCountry=S.paese; PAESE=PAESI[S.paese]; chosenPartito=S.partito; chosenDiff=S.diff||'normale';
   /* Build B — era: dato puro (migrazione: i vecchi salvataggi non ce l'hanno → presente). Se è attivo uno
      scenario d'epoca, ri-sovrapponi la sua lista-partiti al PAESE base (S.forze è già nello snapshot). */
@@ -8562,6 +8771,7 @@ function applySnap(snap){
   if(S.famigliaVivaUltimo===undefined) S.famigliaVivaUltimo=null;   // G1 — migrazione: cooldown giorni buoni/scelte
   if(S.famigliaVivaFatti===undefined) S.famigliaVivaFatti=[];       // G1 — migrazione: once-in-vita vissuti
   if(S.recentFamigliaViva===undefined) S.recentFamigliaViva=[];     // G1 — migrazione: finestra ripetibili
+  if(S.giroMese===undefined) S.giroMese=null;                       // L182-3 — migrazione: nessun giro fatto (l umore assente vale 0, nessuna migrazione)
   if(S.territorioChiama===undefined) S.territorioChiama=null;       // F2 — migrazione: nessun territorio in chiamata
   if(S.territorioUltimo===undefined) S.territorioUltimo=null;       // F2 — migrazione: cooldown territorio
   if(S.territorioRecente===undefined) S.territorioRecente=null;     // F2 — migrazione: anti-ripetizione area
@@ -8684,6 +8894,7 @@ function applySnap(snap){
   document.getElementById('game').style.display='block';
   applyPaese();
   genAgenda(false);   // agenda fresca: il mese riparte pulito
+  if(_pa) togliRisolteAgenda(_pa.risolte);   // L180-1: una carta risolta nel mese non torna (D150)
   if(!S.titoloMese){ try{ generaTitolo(); }catch(e){} }   // vecchi salvataggi senza titolo: la striscia c'è sempre
   if(!S.tab) S.tab='gov';
   render();

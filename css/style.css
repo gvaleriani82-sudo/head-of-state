@@ -844,6 +844,7 @@
   html.mov-ridotto .tv-fisso-contorno{ transition:opacity .32s ease !important; }
   /* il foglietto del segno: sopra il tavolo, sotto la nota (la posizione verticale la mette il javascript) */
   .tv-foglio{ position:absolute; top:10px; left:12px; right:12px; z-index:3; max-width:420px; margin:0 auto; padding:10px 12px 10px 14px;
+    max-height:calc(100% - 20px); overflow:auto; overscroll-behavior:contain;   /* L185-1: una scena del giro con tre scelte su uno schermo basso scorre dentro il foglietto, non esce dal tavolo */
     background:var(--panel); color:var(--txt); border:1px solid var(--tv-rame); border-left-width:4px; border-radius:12px; box-shadow:0 6px 20px rgba(0,0,0,.3); }
   .tv-foglio .tv-chiudi{ margin:-10px -8px 0 6px; }
   .tv-foglio-t{ font-weight:700; font-size:14px; line-height:1.3; margin-bottom:3px; }
@@ -890,14 +891,19 @@
   /* L124-1 — IL VIDEO INTRODUTTIVO (apriIntro, ui.js): a tutto schermo su fondo nero, `contain` (niente tagli né a 375 px né
      sull'iPad orizzontale), «Salta» sempre visibile in alto a destra (bersaglio 44 px, 13 px). I sottotitoli: sobri, in basso,
      mai sotto 13 px resi. Con movimento spento la dissolvenza la spegne la regola di sempre. */
-  #intro{position:fixed; inset:0; z-index:10000; background:#000; opacity:0; transition:opacity .35s ease; display:flex; align-items:center; justify-content:center;}
+  #intro, #intro-uscente{position:fixed; inset:0; z-index:10000; background:#000; opacity:0; transition:opacity .35s ease; display:flex; align-items:center; justify-content:center;}
   #intro.on{opacity:1;}
-  #intro video{width:100%; height:100%; object-fit:contain; background:#000; display:block;}
+  #intro video, #intro-uscente video{width:100%; height:100%; object-fit:contain; background:#000; display:block;}
   #intro video::cue{font-family:'IBM Plex Sans',system-ui,sans-serif; font-size:clamp(13px, 2.6vmin, 22px); line-height:1.35; color:#f3efe6; background:rgba(0,0,0,.55);}
   #intro-salta{position:absolute; top:max(12px, env(safe-area-inset-top)); right:max(12px, env(safe-area-inset-right)); min-height:44px; min-width:44px;
     padding:8px 16px; border:1px solid rgba(255,255,255,.35); border-radius:22px; background:rgba(0,0,0,.45); color:#f3efe6;
     font-family:inherit; font-size:13px; font-weight:500; letter-spacing:.04em; cursor:pointer;}
   #intro-salta:focus-visible{outline:2px solid #f3efe6; outline-offset:2px;}
+  /* L181-4 · L'INTERFACCIA ARRIVA DOPO IL PRIMO SECONDO: «Salta» e la didascalia delle porte entrano in dissolvenza a 1 s, così il
+     primo sguardo è sull'immagine e non su un bottone (il bottone c'è e si tocca da subito; partenza e porte si saltano anche toccando
+     ovunque). L'uscita dei veli la regola ui.js (`veloEsce`: 650 ms, l'intro 900) scrivendo la durata sul nodo. */
+  @keyframes uiDopo{ from{ opacity:0; } to{ opacity:1; } }
+  #intro-salta, #partenza-salta, #clip-porta-salta, #clip-porta-did{ animation:uiDopo .5s ease 1s both; }
   /* L127-2 · la clip del punto di partenza: stessa veste dell'intro (velo nero, «Salta» in alto a destra, 44 px) */
   #partenza, #partenza-uscente{position:fixed; inset:0; z-index:10000; background:#000; opacity:0; transition:opacity .35s ease; display:flex; align-items:center; justify-content:center; cursor:pointer;}
   #partenza.on{opacity:1;}
@@ -918,7 +924,7 @@
      e il secondo passa sopra il primo quando tocca a lui. La didascalia (paese, anno) in basso a sinistra dell'immagine. */
   #clip-porta, #clip-porta-uscente{position:fixed; inset:0; z-index:10000; background:#000; opacity:0; transition:opacity .35s ease; cursor:pointer;}
   #clip-porta.on{opacity:1;}
-  #clip-porta video, #clip-porta-uscente video{position:absolute; inset:0; width:100%; height:100%; object-fit:contain; background:#000; display:block; opacity:0; transition:opacity .25s ease;}
+  #clip-porta video, #clip-porta-uscente video{position:absolute; inset:0; width:100%; height:100%; object-fit:contain; background:#000; display:block; opacity:0; transition:opacity .5s ease;}   /* L181-4: dissolvenza incrociata fra paese e decennio da .25 a .5 s */
   #clip-porta video.on, #clip-porta-uscente video.on{opacity:1;}
   #clip-porta-salta{position:absolute; top:max(12px, env(safe-area-inset-top)); right:max(12px, env(safe-area-inset-right)); min-height:44px; min-width:44px;
     padding:8px 16px; border:1px solid rgba(255,255,255,.35); border-radius:22px; background:rgba(0,0,0,.45); color:#f3efe6;

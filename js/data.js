@@ -1464,7 +1464,7 @@ const SCENARI = {
      riportano il Bundestag dei libri.
      ============================================================================================================ */
   de1950: {
-    id:'de1950', era:LINEA_DE, nome:'Germania 1950', anno:1950, paese:'germania',
+    id:'de1950', era:LINEA_DE, nome:'Germania 1950', anno:1950, paese:'germania', territoriDEpoca:true,   /* L182-3 (D167): territori di quel paese e di quel decennio: il giro sul tavolo esce */
     turnMandato: 1,
     sistema: 'parlamentare', comeSiVince: 'parlamentare', coalizione: true, cadutaGoverno: true,
     sfiduciaCostruttiva: true, sbarramento: 5,
@@ -1516,7 +1516,7 @@ const SCENARI = {
      quelle vere, la convenzione delle porte parlamentari).
      ============================================================================================================ */
   de1960: {
-    id:'de1960', era:LINEA_DE, nome:'Germania 1960', anno:1960, paese:'germania',
+    id:'de1960', era:LINEA_DE, nome:'Germania 1960', anno:1960, paese:'germania', territoriDEpoca:true,   /* L182-3 (D167): territori di quel paese e di quel decennio: il giro sul tavolo esce */
     turnMandato: 3,
     sistema: 'parlamentare', comeSiVince: 'parlamentare', coalizione: true, cadutaGoverno: true,
     sfiduciaCostruttiva: true, sbarramento: 5,
@@ -1597,7 +1597,7 @@ const SCENARI = {
      con due basi diverse la stessa riga darebbe due anni diversi.
      ============================================================================================================ */
   de1970: {
-    id:'de1970', era:LINEA_DE, nome:'Germania 1970', anno:1970, paese:'germania',
+    id:'de1970', era:LINEA_DE, nome:'Germania 1970', anno:1970, paese:'germania', territoriDEpoca:true,   /* L182-3 (D167): territori di quel paese e di quel decennio: il giro sul tavolo esce */
     turnMandato: 2,
     sistema: 'parlamentare', comeSiVince: 'parlamentare', coalizione: true, cadutaGoverno: true,
     sfiduciaCostruttiva: true, sbarramento: 5,
@@ -1652,7 +1652,7 @@ const SCENARI = {
      1980-81 le leggono tutte e due le porte.
      ============================================================================================================ */
   de1980: {
-    id:'de1980', era:LINEA_DE, nome:'Germania 1980', anno:1980, paese:'germania',
+    id:'de1980', era:LINEA_DE, nome:'Germania 1980', anno:1980, paese:'germania', territoriDEpoca:true,   /* L182-3 (D167): territori di quel paese e di quel decennio: il giro sul tavolo esce */
     turnMandato: 1,
     sistema: 'parlamentare', comeSiVince: 'parlamentare', coalizione: true, cadutaGoverno: true,
     sfiduciaCostruttiva: true, sbarramento: 5,
@@ -1705,7 +1705,7 @@ const SCENARI = {
      15 volte su 20; i Verdi restano nel roster, nei seggi e nelle urne (le misure sono nella scheda).
      ============================================================================================================ */
   de1990: {
-    id:'de1990', era:LINEA_DE, nome:'Germania 1990', anno:1990, paese:'germania',
+    id:'de1990', era:LINEA_DE, nome:'Germania 1990', anno:1990, paese:'germania', territoriDEpoca:true,   /* L182-3 (D167): territori di quel paese e di quel decennio: il giro sul tavolo esce */
     turnMandato: 3,
     sistema: 'parlamentare', comeSiVince: 'parlamentare', coalizione: true, cadutaGoverno: true,
     sfiduciaCostruttiva: true, sbarramento: 5,
@@ -1756,7 +1756,7 @@ const SCENARI = {
      CHI SI SCEGLIE (D96): SPD, Verdi, CDU/CSU e FDP; la PDS no (la misura è nella scheda, «L154-3»).
      ============================================================================================================ */
   de2000: {
-    id:'de2000', era:LINEA_DE, nome:'Germania 2000', anno:2000, paese:'germania',
+    id:'de2000', era:LINEA_DE, nome:'Germania 2000', anno:2000, paese:'germania', territoriDEpoca:true,   /* L182-3 (D167): territori di quel paese e di quel decennio: il giro sul tavolo esce */
     turnMandato: 2,
     sistema: 'parlamentare', comeSiVince: 'parlamentare', coalizione: true, cadutaGoverno: true,
     sfiduciaCostruttiva: true, sbarramento: 5,
@@ -1814,7 +1814,7 @@ const SCENARI = {
      I TERRITORI (D129) sono i 18 del presente nello stesso ordine (paralleli per indice a mappa.aree: mai riordinare), col lean del 1950.
      ============================================================================================================ */
   us1950: {
-    id:'us1950', era:LINEA_US, nome:'Stati Uniti 1950', anno:1950, paese:'usa',
+    id:'us1950', era:LINEA_US, nome:'Stati Uniti 1950', anno:1950, paese:'usa', territoriDEpoca:true,   /* L182-3 (D167): territori di quel paese e di quel decennio: il giro sul tavolo esce */
     turnMandato: 1, meseUrna: 11,               // D125: il mandato del novembre 1948 al secondo anno → presidenziale 1952/11
     sistema: 'presidenziale', comeSiVince: 'candidato', coalizione: false, cadutaGoverno: false,
     mandatoMesi: 48, mandatiMax: 2, mandatiConsecutivi: false,
@@ -4162,6 +4162,42 @@ const BEAT_LEGGERI = [
   {id:'lgfr_nouvellevague', era:'fr1950', registro:'leggero', cond:()=>S.year>=1959, kick:'Il paese', t:'La Nouvelle Vague', text:'Un gruppo di critici prende la macchina da presa e gira per strada, con la luce che c\'è: i film costano un decimo e la critica si divide. I ragazzi fanno la coda.', ch:[
     {l:'Fai la coda con i ragazzi', e:'Un film girato per strada', f:function(){}},
     {l:'Leggi la critica, e aspetti', e:'Divisa a metà, come sempre', f:function(){}} ]},
+  /* L184-1 · trenta beat leggeri per `fr1950` (VARIETA-L184-LEGGERI-FR50.md): con la cadenza 3 (D173) il locale della porta
+     francese degli anni '50 era la fetta peggiore (49%, pool vivo 8; L182-2). Cond larghe apposta: a un mese qualunque ne vivono 11-15.
+     Effetti zero, G5, niente G8 (i coscritti fino al 1955: dopo il servizio è l'Algeria).
+     L185-2 (D181): la coda del decennio (coda:1961) le porta anche nel 1960-61 di fr1960, e va bene; il tetto sta solo dove il
+     testo diventerebbe falso — il jet fino al 1957 («una cosa mai vista»: dal 1959 vola in linea), il grembiule d'ottobre fino al 1959
+     (dal 1960-61 la rentrée è a metà settembre). */
+  {id:'lgfr50_pane', era:'fr1950', registro:'leggero', kick:'Il paese', t:'Il pane sotto il braccio', text:'Ogni mattina, e nelle famiglie numerose due volte al giorno, qualcuno va dal fornaio e torna col filone lungo sotto il braccio, la punta già mangiata per strada. La fornaia sa chi lo vuole ben cotto e chi lo vuole chiaro. Il pane di ieri finisce nella zuppa o nel caffellatte.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr50_carte', era:'fr1950', registro:'leggero', kick:'Il paese', t:'La partita a carte', text:'Nel retro del caffè, la sera, quattro uomini giocano a carte su un tappetino verde consumato, e annunciano i punti ad alta voce perché tutto il locale senta. Il quarto posto si eredita: quando uno se ne va, c\'è sempre un cognato pronto. Le discussioni sull\'ultima mano durano più della mano.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr50_bocce', era:'fr1950', registro:'leggero', cond:()=>stagioneMese()==='estate', kick:'Il paese', t:'Le bocce sulla piazza', text:'D\'estate, quando il sole cala dietro i platani, sulla piazza polverosa si traccia un cerchio col tacco e si gioca a bocce. Si misura con un metro da sarto, si litiga per due centimetri, si beve un aperitivo all\'anice fra un tiro e l\'altro. I bambini fanno il tifo per chi perde, così la partita dura di più.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr50_vendemmia', era:'fr1950', registro:'leggero', cond:()=>S.month===9||S.month===10, kick:'Il paese', t:'La vendemmia', text:'A fine settembre nei paesi del vino arrivano i vendemmiatori: studenti, operai in ferie, famiglie intere venute dal Sud o da oltre i Pirenei. Si taglia dall\'alba con la schiena piegata, si mangia tutti insieme a una tavola lunga nell\'aia. L\'ultima sera c\'è la festa, e il padrone apre le bottiglie buone.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr50_mercato', era:'fr1950', registro:'leggero', kick:'Il paese', t:'Il giorno di mercato', text:'Una volta alla settimana la piazza del capoluogo si riempie di bancarelle: i formaggi, le galline vive nelle gabbie, le stoffe, i coltelli che il venditore giura indistruttibili. I contadini vengono a vendere e a sapere le notizie; il notaio e il medico ricevono più gente che in tutto il resto della settimana. A mezzogiorno le trattorie sono piene.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr50_ciclomotore', era:'fr1950', registro:'leggero', kick:'Il paese', t:'La bicicletta col motore', text:'Un piccolo motore nero appoggiato sulla ruota davanti, e la bicicletta va da sola: niente patente, pochi soldi, un consumo da ridere. I curati ci fanno il giro delle parrocchie, le levatrici le visite, gli operai la strada per la fabbrica. In salita, però, bisogna ancora pedalare.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr50_cantine', era:'fr1950', registro:'leggero', cond:()=>S.year<=1956, kick:'Il paese', t:'Le cantine della riva sinistra', text:'Sotto i caffè della riva sinistra di Parigi, nelle cantine a volta dove un tempo si teneva il vino, si suona il jazz fino all\'alba. Ragazzi vestiti di nero discutono di libertà e di assurdo, e le ragazze portano i capelli lunghi e lisci. I giornali di provincia ne scrivono come di uno scandalo; i figli della provincia prendono il treno per vedere.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr50_diploma', era:'fr1950', registro:'leggero', cond:()=>S.month===7, kick:'Il paese', t:'I risultati sul muro', text:'A luglio i risultati del diploma si affiggono su grandi fogli nel cortile del liceo, in ordine alfabetico. Le famiglie arrivano presto e cercano il nome col dito; c\'è chi grida, chi piange, chi fa finta di niente. Il diploma lo prende ancora una piccola parte dei ragazzi, e in paese si sa di ognuno se è passato.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr50_certificato', era:'fr1950', registro:'leggero', cond:()=>S.month===6, kick:'Il paese', t:'Il certificato di studi', text:'A giugno i ragazzi che finiscono le elementari vanno nel capoluogo del cantone per l\'esame che chiude la scuola: un dettato, i problemi coi treni che si incrociano, una lettura ad alta voce. Per molti è l\'ultimo giorno di scuola della vita, e il certificato si incornicia in salotto. Chi arriva primo finisce sul giornale locale.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr50_mughetto', era:'fr1950', registro:'leggero', cond:()=>S.month===5, kick:'Il paese', t:'Il mughetto del primo maggio', text:'Il primo maggio, agli angoli delle strade, bambini e venditori improvvisati offrono mazzetti di mughetto legati con un filo: porta fortuna, e quel giorno lo si può vendere senza licenza. Lo si regala alla madre, alla vicina, alla collega che non si ha il coraggio di invitare a ballare. La sera i mazzetti appassiti stanno nei bicchieri di tutte le cucine.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr50_mamma', era:'fr1950', registro:'leggero', cond:()=>S.month===5&&S.year>=1951, kick:'Il paese', t:'La festa della mamma', text:'Da qualche anno una legge ha fissato una domenica di fine maggio per la festa della mamma. A scuola i bambini preparano un biglietto dipinto, un portauovo di cartapesta, una poesia da recitare in piedi sulla sedia. I fioristi e le pasticcerie ringraziano; le madri fingono ogni anno la stessa sorpresa.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr50_re', era:'fr1950', registro:'leggero', cond:()=>S.month===1, kick:'Il paese', t:'La torta dei re', text:'A gennaio, per l\'Epifania, sulla tavola arriva una torta di pasta sfoglia con una fava nascosta dentro. Il più piccolo va sotto il tavolo e decide a chi tocca ogni fetta, perché nessuno possa barare. Chi trova la fava porta la corona di carta dorata e sceglie la regina; chi ci si rompe un dente, quella sera non ride.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr50_crepes', era:'fr1950', registro:'leggero', cond:()=>S.month===2, kick:'Il paese', t:'Le crêpes della Candelora', text:'Il due febbraio, in tutte le cucine, si fanno saltare le crêpes nella padella tenendo una moneta nell\'altra mano: se la crêpe ricade intera, l\'anno porterà soldi. Le prime finiscono sul soffitto, le altre nei piatti, con lo zucchero o la marmellata. La nonna, che non ne sbaglia una, guarda e non dice niente.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr50_coscritti', era:'fr1950', registro:'leggero', cond:()=>S.year<=1955, kick:'Il paese', t:'La festa dei coscritti', text:'I ragazzi del paese nati nello stesso anno, prima di partire per il servizio militare, fanno festa insieme: girano le case con un nastro tricolore sul cappello, cantano, chiedono uova e vino per il banchetto. Le ragazze della stessa classe cuciono le coccarde. Per qualche giorno il paese sopporta il chiasso: l\'ha fatto anche lui.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr50_salone', era:'fr1950', registro:'leggero', cond:()=>S.month===2||S.month===3, kick:'Il paese', t:'Il salone della casa', text:'A Parigi, sotto le volte di un grande palazzo delle esposizioni, si apre il salone degli apparecchi per la casa: lavatrici, aspirapolvere, cucine a gas, macchine che sbattono le uova da sole. Le casalinghe vengono in pullman dalla provincia, provano tutto, si fanno spiegare tutto, e tornano con una borsa piena di opuscoli. La cucina del futuro, dicono i cartelli, è già qui; il prezzo, quello, è ancora del futuro.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr50_maschera', era:'fr1950', registro:'leggero', kick:'Il paese', t:'La maschera del cinema', text:'Al cinema di quartiere, quando le luci si spengono, una maschera con la torcia accompagna al posto e aspetta la mancia: dimenticarla è una scortesia che si paga con un\'occhiataccia. Prima del film ci sono il cinegiornale e un documentario; all\'intervallo la stessa ragazza gira fra le file col vassoio dei gelati. Il programma cambia il mercoledì.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr50_dilettanti', era:'fr1950', registro:'leggero', kick:'Il paese', t:'Il concorso dei dilettanti', text:'Una volta alla settimana la radio va in una sala di provincia e chiama sul palco chi vuole cantare: il garzone del macellaio, la ragazza della merceria, un pensionato che fa le imitazioni. Se il pubblico non gradisce suona una campana, e il cantante deve smettere a metà. Chi arriva in fondo vince un premio e una settimana di gloria in paese.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr50_spiaggia', era:'fr1950', registro:'leggero', cond:()=>S.year>=1957&&stagioneMese()==='estate', kick:'Il paese', t:'Il porto dei pescatori', text:'Un piccolo porto di pescatori sulla costa del Sud è diventato di moda in un\'estate sola, dopo un film girato sulle sue banchine. Arrivano i fotografi, gli yacht, le ragazze in costume a due pezzi che le zie non approvano. I pescatori, che non hanno chiesto niente, affittano le stanze e alzano il prezzo del pesce.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr50_treno', era:'fr1950', registro:'leggero', cond:()=>S.year===1955&&S.month>=3&&S.month<=8, kick:'Il paese', t:'Il treno più veloce del mondo', text:'Su un rettilineo fra le pinete del Sud-Ovest due locomotive elettriche hanno superato i trecentotrenta chilometri all\'ora, un record mondiale. Le fotografie mostrano i fili della linea fusi e i binari storti dietro il treno. Gli ingegneri dicono che un giorno si viaggerà così tutti i giorni; i passeggeri del locale delle sette ridono.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr50_jet', era:'fr1950', registro:'leggero', cond:()=>((S.year===1955&&S.month>=6)||S.year>=1956)&&S.year<=1957, kick:'Il paese', t:'Il jet di Tolosa', text:'A Tolosa è decollato un aereo di linea con i due motori a reazione attaccati alla coda, una cosa mai vista: la cabina è silenziosa, e i finestrini hanno una strana forma triangolare. Gli operai della fabbrica sono usciti sul prato a guardarlo. Le compagnie di mezzo mondo mandano i loro ingegneri a vederlo.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr50_rientro', era:'fr1950', registro:'leggero', cond:()=>S.month===10&&S.year<=1959, kick:'Il paese', t:'Il grembiule nuovo', text:'Quando riaprono le scuole, i bambini partono col grembiule nero nuovo, la cartella di cuoio che sa ancora di negozio, il pennino e la boccetta d\'inchiostro viola. In classe le stufe non sono ancora accese e le carte geografiche sono le stesse dei genitori. Il maestro scrive la data alla lavagna con una calligrafia perfetta.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr50_domenica', era:'fr1950', registro:'leggero', kick:'Il paese', t:'Il pranzo della domenica', text:'La domenica, dopo la messa, la famiglia si riunisce a casa dei nonni: il pollo arrosto, i fagiolini, il formaggio, la torta comprata in pasticceria e portata a mano nel suo cartone con lo spago. Si sta a tavola fino alle quattro. Gli uomini parlano di politica, le donne di tutto il resto, i bambini chiedono quando possono alzarsi.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr50_cartolina', era:'fr1950', registro:'leggero', cond:()=>S.month===8, kick:'Il paese', t:'Saluti dal mare', text:'Ad agosto le cassette della posta si riempiono di cartoline: una spiaggia dai colori troppo vivi, una chiesa di montagna, un tramonto con le barche. Sul retro c\'è sempre la stessa frase, il tempo è bello e si mangia bene. Arrivano a casa quasi sempre dopo chi le ha spedite.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr50_tenda', era:'fr1950', registro:'leggero', cond:()=>S.year>=1953&&stagioneMese()==='estate', kick:'Il paese', t:'La tenda sul prato', text:'Chi non può pagarsi l\'albergo va in vacanza con la tenda: la si monta in un prato in riva al fiume o in un campeggio con le docce fredde, e si cucina su un fornelletto a gas. Le famiglie arrivano in bicicletta, in moto, in utilitarie cariche fino al tetto. La sera si gioca a carte alla luce della lampada e si scopre che le zanzare non vanno in vacanza.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr50_lavatoio', era:'fr1950', registro:'leggero', kick:'Il paese', t:'Il lavatoio', text:'Al lavatoio del paese, sotto la tettoia, le donne inginocchiate battono i panni sulla pietra e si raccontano tutto: chi si sposa, chi è malato, chi ha comprato la lavatrice e quindi non verrà più. È il giornale più informato del cantone. Il sindaco lo sa, e ogni tanto passa a salutare.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr50_calendario', era:'fr1950', registro:'leggero', cond:()=>S.month===12, kick:'Il paese', t:'Il calendario del postino', text:'A dicembre il postino suona alle porte con una pila di calendari illustrati: gattini, paesaggi di montagna, cavalli. Si sceglie la figura, si dà la mancia di fine anno, e il calendario resta appeso in cucina vicino alla stufa per dodici mesi. Dentro ci sono le fasi della luna, i santi del giorno e la carta del dipartimento.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr50_caldarroste', era:'fr1950', registro:'leggero', cond:()=>stagioneMese()==='inverno', kick:'Il paese', t:'Le caldarroste all\'angolo', text:'D\'inverno, all\'uscita del metrò, il venditore di caldarroste scalda le castagne in un bidone bucato e le serve in un cartoccio fatto con le pagine di un vecchio giornale. Gli impiegati le comprano più per scaldarsi le mani che per mangiarle. Quando il venditore sparisce, vuol dire che è arrivata la primavera.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr50_pulci', era:'fr1950', registro:'leggero', kick:'Il paese', t:'Il mercato delle pulci', text:'La domenica mattina, alle porte della città, chilometri di bancarelle vendono di tutto: orologi fermi, divise di guerre dimenticate, sedie spagliate, ritratti degli antenati di qualcun altro. Gli intenditori arrivano all\'alba con la torcia; i curiosi a mezzogiorno, quando i prezzi scendono. Tutti giurano di aver fatto l\'affare della vita.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr50_mondiali', era:'fr1950', registro:'leggero', cond:()=>S.year===1958&&S.month>=7&&S.month<=9, kick:'Il paese', t:'Tredici gol in Svezia', text:'Ai mondiali di calcio in Svezia la nazionale è arrivata terza, e il suo centravanti ha segnato tredici gol in sei partite, un record che nessuno pensa si possa battere. Chi ha la televisione ha invitato i vicini; gli altri hanno ascoltato la radio al caffè. Nei caffè si discute ancora della semifinale persa contro i brasiliani.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgfr50_rugby', era:'fr1950', registro:'leggero', cond:()=>S.year===1959&&S.month>=4&&S.month<=6, kick:'Il paese', t:'Il torneo vinto da soli', text:'Per la prima volta la squadra di rugby vince il torneo delle cinque nazioni senza doverlo dividere con nessuno. Nei paesi del Sud-Ovest, dove il rugby è una religione, si festeggia in piazza e i bar offrono da bere. A Parigi qualcuno chiede quali siano le regole.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
   /* ---- L97-2 · I TREDICI BEAT DEL DECENNIO FRANCESE '60 (scheda PRESET-FRANCIA-1960 §D) — effetto ZERO, come
      tutto il registro leggero. Quattro senza ancora (il transistor, il bistrot, il pane, le vacanze d'agosto);
      gli altri hanno l'anno dentro il cond, come i beat del '50. ---- */
@@ -4463,6 +4499,39 @@ const BEAT_LEGGERI = [
   {id:'lgde90_pulcino', era:'de1990', registro:'leggero', cond:()=>S.year>=1997&&S.year<=1998, kick:'Il paese', t:'Il pulcino in tasca', text:'I bambini portano a scuola un uovo di plastica con uno schermo: dentro c\'è un pulcino da nutrire e pulire, che suona quando ha fame e muore se lo si dimentica. Le maestre li sequestrano, e durante la lezione i cassetti della cattedra cinguettano.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
   {id:'lgde90_parata', era:'de1990', registro:'leggero', cond:()=>S.year>=1996&&stagioneMese()==='estate', kick:'Il paese', t:'La parata dei camion', text:'D\'estate, a Berlino, centinaia di migliaia di ragazzi ballano dietro camion carichi di altoparlanti lungo il viale che attraversa il parco. La musica non ha parole; ufficialmente è una manifestazione politica, e il motto cambia ogni anno.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
   {id:'lgde90_telefonino', era:'de1990', registro:'leggero', cond:()=>S.year>=1998, kick:'Il paese', t:'Il telefono in tasca', text:'Con le schede ricaricabili il telefono portatile non è più una cosa da dirigenti. Sui treni tutti imparano la stessa frase, detta a voce alta: «Sono in treno». E a tavola qualcuno comincia a posarlo accanto al piatto.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  /* L186-1 · trenta beat leggeri per `de1990` (VARIETA-L186-LEGGERI-DE90.md): con la cadenza 3 (D173) il locale della porta
+     tedesca degli anni '90 era la fetta peggiore dopo us1950 e fr1950 (44%, pool vivo 5; L182-2). Cond larghe apposta: a un mese
+     qualunque ne vivono 10-14. La porta parte all'Ovest: l'Est e il 3 ottobre dal 1991. Effetti zero, G5, niente G8. */
+  {id:'lgde90_spargel', era:'de1990', registro:'leggero', cond:()=>S.month>=4&&S.month<=6, kick:'Il paese', t:'Il tempo degli asparagi', text:'Da aprile ai bordi delle strade di campagna spuntano le baracche di legno che vendono gli asparagi bianchi appena tagliati. Nei ristoranti c\'è un menu solo per loro, con il prosciutto, le patate novelle e la salsa al burro. Il 24 giugno la stagione finisce, e chi non li ha mangiati abbastanza aspetta un anno.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde90_mercatino', era:'de1990', registro:'leggero', cond:()=>S.month===12, kick:'Il paese', t:'Il mercatino di Natale', text:'Sulla piazza del municipio le casette di legno vendono stelle di paglia, candele, pan di zenzero e vin brulé in tazze di ceramica che si restituiscono per riavere il deposito. Gli uffici ci vanno insieme dopo il lavoro e restano più del previsto. Il giorno dopo, al lavoro, nessuno ha voglia di parlare forte.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde90_lanterne', era:'de1990', registro:'leggero', cond:()=>S.month===11, kick:'Il paese', t:'Le lanterne di San Martino', text:'L\'11 novembre, appena fa buio, i bambini dell\'asilo sfilano per il quartiere con le lanterne di carta fatte a scuola, dietro un uomo a cavallo col mantello rosso. Cantano le stesse canzoni dei genitori, sbagliando le stesse strofe. Alla fine c\'è il falò e una brioche a forma d\'omino.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde90_birra', era:'de1990', registro:'leggero', cond:()=>S.month===9||S.month===10, kick:'Il paese', t:'La festa della birra', text:'A Monaco, sul grande prato, le tende delle birrerie servono boccali da un litro per due settimane a sei milioni di persone venute da tutto il mondo. Le cameriere ne portano dieci alla volta. Chi viene dal Nord indossa i calzoni di cuoio per la prima volta, e si vede.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde90_maibaum', era:'de1990', registro:'leggero', cond:()=>S.month===5, kick:'Il paese', t:'L\'albero di maggio', text:'Il primo maggio, nei paesi del Sud, si alza in piazza un tronco alto come una casa, dipinto a spirale bianca e azzurra e decorato con gli stemmi dei mestieri. La notte prima i giovani del paese gli fanno la guardia: se quelli del paese vicino riescono a rubarlo, il riscatto si paga in birra. La banda suona, e nessuno si ricorda chi l\'ha rubato l\'ultima volta.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde90_cono', era:'de1990', registro:'leggero', cond:()=>S.month===8||S.month===9, kick:'Il paese', t:'Il cono del primo giorno', text:'Il primo giorno di scuola i bambini arrivano con un grande cono di cartone colorato, alto quasi quanto loro, pieno di dolci, matite e piccoli regali. I genitori fotografano, i nonni si commuovono, la maestra fa finta di non vedere i cioccolatini già aperti. In ogni Land il primo giorno cade in una settimana diversa.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde90_capodanno', era:'de1990', registro:'leggero', cond:()=>S.month===1, kick:'Il paese', t:'La mattina di Capodanno', text:'I botti si vendono solo negli ultimi giorni dell\'anno, e a mezzanotte le città sembrano sotto un bombardamento allegro. La sera, prima, la televisione ha trasmesso come sempre un vecchio sketch inglese in bianco e nero, che tutti sanno a memoria. La mattina dopo i marciapiedi sono coperti di cartoni bruciati e di tappi di spumante.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde90_domenica', era:'de1990', registro:'leggero', kick:'Il paese', t:'La quiete della domenica', text:'La domenica non si taglia l\'erba, non si trapana, non si portano le bottiglie al cassonetto: lo dice il regolamento del condominio, e se non lo dice lo dice il vicino. Il silenzio è così profondo che si sente il campanile del paese accanto. Il lunedì alle sette, tutti i tosaerba partono insieme.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde90_vuoti', era:'de1990', registro:'leggero', kick:'Il paese', t:'Le casse dell\'acqua', text:'Il sabato le famiglie riportano al negozio delle bevande le casse di bottiglie vuote, acqua frizzante e birra, e tornano a casa con le casse piene. Il bagagliaio della macchina è misurato su quattro casse. I ragazzi che raccolgono le bottiglie dopo le feste si pagano il cinema col deposito.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde90_chiosco', era:'de1990', registro:'leggero', kick:'Il paese', t:'Il chiosco della stazione', text:'Davanti alla stazione, a qualunque ora, il chiosco serve la salsiccia tagliata a rondelle con la salsa al curry e una spolverata di paprica, nel piattino di cartone con la forchettina di plastica. Ci mangiano in piedi il manager in cravatta e il muratore in tuta, uno accanto all\'altro. Sulla salsa giusta si litiga da quarant\'anni.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde90_barzellette', era:'de1990', registro:'leggero', cond:()=>S.year>=1991, kick:'Il paese', t:'Le barzellette fra Est e Ovest', text:'In ufficio circolano le barzellette su quelli dell\'altra parte: all\'Ovest raccontano di quelli dell\'Est che si lamentano, all\'Est di quelli dell\'Ovest che sanno tutto loro. Sono le stesse barzellette, con i ruoli scambiati. Chi è nato a Berlino le sa in tutte e due le versioni.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde90_tecno', era:'de1990', registro:'leggero', cond:()=>S.year>=1991&&S.year<=1997, kick:'Il paese', t:'La musica nei sotterranei', text:'A Berlino Est, negli edifici che nessuno reclama più, aprono locali senza insegna: il caveau di un vecchio grande magazzino, una centrale elettrica spenta, un bunker. Si balla musica elettronica dal venerdì sera al lunedì mattina. Da tutta Europa arrivano ragazzi con lo zaino e l\'indirizzo scritto su un foglietto.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde90_talkshow', era:'de1990', registro:'leggero', cond:()=>S.year>=1994, kick:'Il paese', t:'I talk show del pomeriggio', text:'Ogni pomeriggio, su ogni rete privata, c\'è un talk show: il vicino che fa rumore, la suocera che si intromette, il fidanzato che non vuole sposarsi, tutti seduti in fila davanti al pubblico che fischia. I titoli delle puntate sembrano domande di un quiz. Le casalinghe dicono di non guardarli, e sanno tutto di tutti.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde90_modem', era:'de1990', registro:'leggero', cond:()=>S.year>=1997, kick:'Il paese', t:'Il modem che fischia', text:'Nelle camere dei ragazzi il computer si collega al mondo con una serie di fischi e gracchi, e per tutto quel tempo il telefono di casa è occupato. La nonna che chiama trova sempre la linea staccata. Sui biglietti da visita, sotto il numero di fax, compare uno strano indirizzo con la chiocciola.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde90_pattini', era:'de1990', registro:'leggero', cond:()=>S.year>=1995&&stagioneMese()==='estate', kick:'Il paese', t:'I pattini in linea', text:'D\'estate le piste ciclabili e i lungofiume si riempiono di pattinatori con le ruote in fila, le ginocchiere colorate e le cuffie nelle orecchie. Gli impiegati ci vanno al lavoro, i pensionati ci provano e tornano con un polso fasciato. I ciclisti hanno trovato un nuovo nemico.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde90_coppa', era:'de1990', registro:'leggero', cond:()=>S.month===5||S.month===6, kick:'Il paese', t:'La finale a Berlino', text:'La finale della coppa nazionale si gioca ogni anno a Berlino, nel vecchio stadio olimpico, e i tifosi delle due squadre attraversano mezzo paese in treni speciali, cantando dalla partenza all\'arrivo. Per un giorno la capitale si divide in due colori. La squadra di provincia che ci arriva per la prima volta ne parla per vent\'anni.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde90_coperte', era:'de1990', registro:'leggero', kick:'Il paese', t:'La gita con le coperte', text:'Una lettera promette una gita in pullman quasi gratis, col pranzo compreso, in una bella città sul fiume. A metà strada il pullman si ferma in una trattoria dove un signore molto simpatico presenta coperte di lana miracolose, pentole indistruttibili e cuscini contro il mal di schiena. I pensionati tornano a casa con una coperta che non volevano e una gita che è piaciuta lo stesso.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde90_neve', era:'de1990', registro:'leggero', cond:()=>stagioneMese()==='inverno', kick:'Il paese', t:'La settimana bianca in Austria', text:'Il sabato delle vacanze d\'inverno le autostrade verso le Alpi sono una fila di macchine con gli sci sul tetto e i bambini già in tuta da neve sul sedile di dietro. Al confine con l\'Austria si sta fermi un\'ora. La sera, nella baita, i cori in tedesco coprono la musica del locale.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde90_scaglioni', era:'de1990', registro:'leggero', cond:()=>stagioneMese()==='estate', kick:'Il paese', t:'Le vacanze a scaglioni', text:'Le scuole non chiudono tutte insieme: ogni Land ha la sua data, e il calendario cambia ogni anno perché a nessuno tocchi sempre agosto. Il primo sabato di vacanze di un Land grande la radio annuncia code di cento chilometri. Chi parte il venerdì notte per evitarle trova in autostrada tutti quelli che hanno avuto la stessa idea.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde90_baltico', era:'de1990', registro:'leggero', cond:()=>S.year>=1991&&stagioneMese()==='estate', kick:'Il paese', t:'Le spiagge del Baltico', text:'Le spiagge dell\'Est, sulle isole del Baltico, tornano a riempirsi di villeggianti venuti da tutto il paese. Le poltrone di vimini col tettuccio si affittano a settimana, e chi arriva dall\'Ovest scopre che qui da sempre una parte della spiaggia è senza costume. Le pensioni ridipingono le facciate; i prezzi salgono più in fretta della vernice.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde90_unita', era:'de1990', registro:'leggero', cond:()=>S.month===10&&S.year>=1991, kick:'Il paese', t:'Il 3 ottobre', text:'Il 3 ottobre è festa nazionale: la festa ufficiale si tiene ogni anno in una città diversa, con le bancarelle dei Länder, i concerti e i fuochi d\'artificio. Per molti è soprattutto un giorno libero in più prima dell\'autunno. Nelle famiglie divise fino a pochi anni fa, è il giorno in cui si telefona a un cugino.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde90_cap', era:'de1990', registro:'leggero', cond:()=>S.year===1993&&S.month>=6&&S.month<=10, kick:'Il paese', t:'Cinque cifre', text:'Dal primo luglio i codici postali hanno cinque cifre invece di quattro. In ogni casa arriva un librone con tutti i numeri nuovi; le aziende ristampano le buste, gli anziani continuano a scrivere quello vecchio. I postini, per qualche mese, li correggono a penna.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde90_lotteria', era:'de1990', registro:'leggero', kick:'Il paese', t:'L\'estrazione del sabato', text:'Il sabato sera, dopo il telegiornale, una signora elegante fa girare le palline in una sfera di vetro, e milioni di persone controllano la schedina con la penna in mano. In ufficio si gioca in società, sempre gli stessi numeri: compleanni, targhe, il numero di casa. Nessuno ha il coraggio di smettere la settimana in cui potrebbero uscire.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde90_trenobianco', era:'de1990', registro:'leggero', cond:()=>(S.year===1991&&S.month>=6)||S.year===1992, kick:'Il paese', t:'Il treno bianco', text:'Sulla linea fra Amburgo e Monaco corre un treno nuovo, bianco con una riga rossa, che sulle tratte nuove va oltre i duecentocinquanta all\'ora. I sedili hanno la radio con le cuffie, il vagone ristorante ha i tavolini con le tovaglie. Gli uomini d\'affari smettono di prendere l\'aereo per Francoforte; i pendolari guardano il biglietto e continuano a prendere l\'altro.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde90_interrail', era:'de1990', registro:'leggero', cond:()=>stagioneMese()==='estate', kick:'Il paese', t:'Un mese in treno', text:'Finita la scuola, i ragazzi partono con un biglietto che vale un mese su tutti i treni d\'Europa, uno zaino più grande di loro e una guida spiegazzata. Dormono nei vagoni di notte per risparmiare l\'albergo, mandano cartoline da Lisbona e da Atene. Tornano abbronzati, senza soldi, con un indirizzo in Svezia scritto sul braccio.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde90_cantiere', era:'de1990', registro:'leggero', cond:()=>S.year>=1996&&S.year<=1999, kick:'Il paese', t:'Il cantiere più grande d\'Europa', text:'Dove c\'era la terra di nessuno del Muro, nel centro di Berlino, sorge il cantiere più grande d\'Europa: decine di gru, buche profonde come laghi, camion in fila giorno e notte. Su una scatola rossa sopraelevata i turisti salgono a guardare il paesaggio che cambia. La domenica i berlinesi ci portano i parenti in visita, come a un monumento.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde90_donne', era:'de1990', registro:'leggero', cond:()=>S.month===2&&S.year!==1991, kick:'Il paese', t:'Il giovedì delle donne', text:'In Renania, il giovedì grasso, le donne prendono il comando: occupano i municipi, girano per gli uffici con le forbici e tagliano la cravatta a ogni uomo che incontrano, in cambio di un bacio. I furbi quel giorno vengono al lavoro con la cravatta più brutta che hanno. Dalle undici e undici, in città, non si lavora più.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde90_contanti', era:'de1990', registro:'leggero', kick:'Il paese', t:'Il paese dei contanti', text:'Al ristorante, al supermercato, dal meccanico si paga in contanti: la carta di credito la accettano gli alberghi e pochi altri, e chi la tira fuori viene guardato con sospetto. Nel portafoglio si tengono sempre un paio di banconote grosse, per sicurezza. Il conto si divide al tavolo fino all\'ultimo pfennig, ognuno il suo.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde90_usate', era:'de1990', registro:'leggero', cond:()=>(S.year===1990&&S.month>=7)||S.year===1991, kick:'Il paese', t:'Le macchine usate', text:'Adesso che all\'Est si è pagati in marchi dell\'Ovest, chi arriva da là vuole subito una macchina vera. Nei piazzali dei rivenditori di usato lungo la vecchia frontiera le berline di dieci anni si vendono in un pomeriggio, a prezzi che a Ovest nessuno avrebbe pagato. Sulle strade dell\'Est le piccole automobili col motore a due tempi restano sole a fumare.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde90_gelateria', era:'de1990', registro:'leggero', cond:()=>S.month>=3&&S.month<=10, kick:'Il paese', t:'La gelateria italiana', text:'In ogni città, da marzo a ottobre, c\'è una gelateria tenuta da una famiglia venuta da una valle delle Dolomiti, con le coppe giganti fotografate sul menu e i nomi dei gusti in italiano. D\'inverno chiude e la famiglia torna a casa, fra le montagne. In primavera il giorno della riapertura c\'è la fila sul marciapiede, anche se fa ancora freddo.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
   // L157-1 · i dodici beat del decennio tedesco 2000 (scheda §I-D; vive fino alla fine dell'era solo `lgde00_spiaggia`: `lgde00_lupo` è la notizia del 2003-2006, D116 in L158-1).
   {id:'lgde00_casa', era:'de2000', registro:'leggero', cond:()=>S.year===2000&&S.month>=3&&S.month<=8, kick:'Il paese', t:'Cento giorni in una casa', text:'Una televisione privata ha chiuso una dozzina di sconosciuti in una casa piena di telecamere, per cento giorni. I vescovi protestano, un ministro chiede di vietarlo; intanto metà del paese guarda chi lava i piatti e chi no, e la mattina se ne parla in ufficio.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
   {id:'lgde00_messaggini', era:'de2000', registro:'leggero', cond:()=>S.year>=2000&&S.year<=2003, kick:'Il paese', t:'Centosessanta caratteri', text:'I ragazzi si scrivono messaggi col telefono, centosessanta caratteri alla volta, senza vocali e con le cifre al posto delle parole. Gli insegnanti di tedesco li trovano nei temi; le compagnie telefoniche, nei bilanci.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
@@ -4506,6 +4575,40 @@ const BEAT_LEGGERI = [
   {id:'lgus50_cerchio', era:'us1950', registro:'leggero', cond:()=>S.year===1958&&S.month>=6&&S.month<=9, kick:'Il paese', t:'Il cerchio', text:'Quest\'estate tutti i bambini del paese fanno girare intorno ai fianchi un cerchio di plastica colorata, e molti genitori anche, quando nessuno guarda. Se ne vendono milioni in pochi mesi; poi, con l\'autunno, finiscono in cantina tutti insieme, come erano arrivati.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
   {id:'lgus50_pinne', era:'us1950', registro:'leggero', cond:()=>S.year===1959, kick:'Il paese', t:'Le pinne', text:'Le automobili del nuovo anno hanno le pinne posteriori alte come quelle di un razzo, e i fanali rossi a forma di ugello. Sono lunghe quasi sei metri, bevono benzina come nessuna prima, e nei garage delle case nuove non entrano. Dopo la recessione, le vendite ripartono.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
   {id:'lgus50_quiz', era:'us1950', registro:'leggero', cond:()=>(S.year===1959&&S.month>=9)||(S.year===1960&&S.month<=4), kick:'Il paese', t:'Le risposte in busta', text:'Il professore che per settimane ha risposto a tutto, in diretta, chiuso in una cabina di vetro, ha confessato al Congresso: le domande e le risposte gliele davano prima. Anche il sudore sulla fronte era una regia. I quiz spariscono dalla prima serata, e il paese scopre che la televisione può recitare anche quando dice di no.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  /* L183-2 · trenta beat leggeri per `us1950` (VARIETA-L183-LEGGERI-US.md): il respiro del locale e del capo del governo della porta
+     americana aveva un pool vivo di 4 (L181-0). Cond larghe apposta: a un mese qualunque ne vivono 14-20. Effetti zero, G5, niente G8.
+     Date guardate su en.wikipedia (Code, 4/10): il poema assolto il 3 ottobre 1957 (`lgus50_poeti` da 1957/10, non da 1957/1); il primo televisore
+     a colori in vendita nel marzo 1954 (`lgus50_colore` da 1954/3). Le altre tornano. */
+  {id:'lgus50_jukebox', era:'us1950', registro:'leggero', kick:'Il paese', t:'Il juke-box del diner', text:'Nel locale lungo e stretto sulla statale, col bancone cromato e gli sgabelli che girano, una monetina compra una canzone. I ragazzi scelgono le novità; il camionista al bancone, sempre la stessa. La cameriera conosce a memoria tutto l\'elenco dei dischi, e dice di non sopportarne nemmeno uno.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgus50_lattaio', era:'us1950', registro:'leggero', kick:'Il paese', t:'Il lattaio all\'alba', text:'Prima che suoni la sveglia il furgone del lattaio si ferma davanti a ogni casa: lascia le bottiglie di vetro sul gradino e si porta via quelle vuote, sciacquate, col biglietto infilato nel collo. «Due in più, domenica abbiamo ospiti.» Nei sobborghi nuovi qualcuno comincia a comprare il latte in cartone al supermercato, e il lattaio fa finta di non saperlo.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgus50_motel', era:'us1950', registro:'leggero', cond:()=>S.year>=1952, kick:'Il paese', t:'L\'insegna del motel', text:'Lungo le statali sono spuntati gli alberghi per chi viaggia in automobile: una fila di stanze tutte uguali al piano terra, la macchina parcheggiata davanti alla porta, un\'insegna al neon che lampeggia «libero». Le famiglie partono in vacanza con la cartina sul cruscotto e i bambini che chiedono ogni mezz\'ora se manca tanto. In qualche stanza c\'è perfino la televisione.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgus50_ballo', era:'us1950', registro:'leggero', cond:()=>S.year>=1955, kick:'Il paese', t:'Il ballo in palestra', text:'Il venerdì sera la palestra della scuola diventa una sala da ballo: le scarpe si tolgono per non rovinare il parquet, e si balla in calzini. Il preside controlla che tra i ragazzi e le ragazze resti la distanza di un dito; il giradischi ha altre idee. Le madri, che hanno preparato il punch, fingono di non vedere.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgus50_fumetti', era:'us1950', registro:'leggero', cond:()=>(S.year===1954&&S.month>=4)||(S.year===1955&&S.month<=6), kick:'Il paese', t:'I fumetti sotto accusa', text:'Uno psichiatra ha scritto un libro per dimostrare che i fumetti dell\'orrore e del crimine rovinano i ragazzi, e una commissione del Senato ne discute davanti alle telecamere. Gli editori corrono ai ripari con un bollino di buona condotta da stampare in copertina: niente vampiri, niente sangue, i cattivi perdono sempre. In qualche parrocchia i fumetti si raccolgono per bruciarli; nelle camerette si leggono sotto le coperte.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgus50_galleria', era:'us1950', registro:'leggero', cond:()=>(S.year===1956&&S.month>=10)||S.year>=1957, kick:'Il paese', t:'La piazza al chiuso', text:'Vicino a una grande città del Nord hanno costruito un mercato tutto al coperto: due piani di negozi intorno a un cortile con le piante, le fontane e una gabbia di uccelli, riscaldato d\'inverno e fresco d\'estate. L\'architetto dice di aver voluto rifare la piazza di un paese europeo. Ci si va anche senza comprare niente, per passeggiare.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgus50_catalogo', era:'us1950', registro:'leggero', kick:'Il paese', t:'Il negozio per posta', text:'Nelle fattorie lontane da tutto il negozio arriva per posta: un catalogo grosso come un elenco del telefono, con dentro i vestiti, gli attrezzi, i giocattoli e perfino le case da montare. Le sere d\'inverno lo sfogliano i genitori per le cose che servono e i bambini per quelle che non avranno. Quello dell\'anno prima finisce nel gabinetto in fondo al cortile.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgus50_serie', era:'us1950', registro:'leggero', cond:()=>S.month===10, kick:'Il paese', t:'La serie d\'autunno', text:'A ottobre le due squadre migliori del baseball si sfidano per il titolo, e le partite si giocano di pomeriggio, in settimana. Nelle fabbriche i capireparto chiudono un occhio sulle radio portatili; nelle scuole qualche maestra porta in classe il televisore. Per una settimana il paese chiede a tutti, anche agli sconosciuti, come sta andando.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgus50_parata', era:'us1950', registro:'leggero', cond:()=>S.month===11, kick:'Il paese', t:'La parata del giovedì', text:'Il giorno del Ringraziamento, la mattina, palloni giganteschi a forma di personaggi dei cartoni sfilano sopra le strade di New York, tenuti a terra da decine di persone con le corde. Il resto del paese la guarda in televisione mentre il tacchino è nel forno. Il pomeriggio è del football; la sera, degli avanzi.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgus50_quattro', era:'us1950', registro:'leggero', cond:()=>S.month===7, kick:'Il paese', t:'La festa in paese', text:'Il quattro luglio la banda dei pompieri apre la sfilata nella via principale, seguita dai reduci, dalle majorette e dai trattori addobbati. Nel parco ci sono la gara delle torte e la corsa nei sacchi; il sindaco parla troppo a lungo, come ogni anno. Quando fa buio, i fuochi d\'artificio sopra il campo sportivo.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgus50_dolcetto', era:'us1950', registro:'leggero', cond:()=>S.month===10&&S.year>=1952, kick:'Il paese', t:'Dolcetto o scherzetto', text:'La sera dell\'ultimo di ottobre i bambini dei sobborghi girano di casa in casa travestiti da fantasmi e da cowboy, con un sacchetto per le caramelle. Ormai la festa sta diventando soprattutto una caccia ai dolci; i più anziani ricordano notti di scherzi e di finestre insaponate, e qualche vicino brontola ancora che è un ricatto in maschera. Le zucche intagliate restano sui gradini finché marciscono.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgus50_campo', era:'us1950', registro:'leggero', cond:()=>stagioneMese()==='estate', kick:'Il paese', t:'Il campo estivo', text:'D\'estate le famiglie che possono mandano i figli per qualche settimana in un campo sul lago: tende o capanne di legno, canoe, falò, canzoni, e lettere a casa che dicono tutte «qui si mangia malissimo». Le madri si godono il silenzio. Al ritorno i figli sono più alti, più abbronzati e pieni di punture di zanzara.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgus50_neve', era:'us1950', registro:'leggero', cond:()=>stagioneMese()==='inverno', kick:'Il paese', t:'Le scuole chiuse per neve', text:'Quando nevica, la radio legge al mattino l\'elenco delle scuole chiuse, e in ogni cucina si ascolta in silenzio fino al nome giusto. Poi le slitte escono dai garage, i padri spalano il vialetto prima di andare al lavoro e i bambini costruiscono fortini per la guerra a palle di neve con la strada accanto. La sera le muffole bagnate fumano sul termosifone.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgus50_medico', era:'us1950', registro:'leggero', kick:'Il paese', t:'Il medico con la borsa nera', text:'Il medico di famiglia viene ancora a casa: suona il campanello con la sua borsa di cuoio nero, si siede sul bordo del letto, ascolta il petto col disco freddo dello stetoscopio e scrive la ricetta sul comò. Conosce tutti per nome, anche il cane. La parcella si paga in contanti, e a volte con una torta.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgus50_carrello', era:'us1950', registro:'leggero', kick:'Il paese', t:'Il carrello di metallo', text:'Nel supermercato nuovo, grande come un hangar, non c\'è più il droghiere dietro il bancone: si spinge un carrello di metallo fra gli scaffali e si prende da sé, poi si paga tutto insieme all\'uscita. La musica di sottofondo non smette mai. Le massaie ci passano il sabato mattina, e il conto è sempre più alto del previsto.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgus50_barbecue', era:'us1950', registro:'leggero', cond:()=>stagioneMese()==='estate', kick:'Il paese', t:'Il fuoco nel cortile', text:'La domenica d\'estate i padri dei sobborghi indossano un grembiule con una scritta spiritosa e governano la griglia in fondo al giardino come un altare. Le salsicce bruciano fuori e restano crude dentro; i vicini arrivano con l\'insalata di patate e una sedia pieghevole. È l\'unico giorno della settimana in cui gli uomini cucinano, e lo fanno sapere a tutti.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgus50_classifica', era:'us1950', registro:'leggero', cond:()=>S.year>=1955, kick:'Il paese', t:'La classifica del sabato', text:'Il sabato la radio trasmette le quaranta canzoni più vendute della settimana, dall\'ultima alla prima, e i ragazzi le annotano su un quaderno. Per salire bastano poche settimane; per sparire, ancora meno. Nei negozi di dischi si ascolta un pezzo in cabina, con la cuffia, prima di comprarlo.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgus50_luci', era:'us1950', registro:'leggero', cond:()=>S.year===1952&&S.month>=7&&S.month<=9, kick:'Il paese', t:'Le luci sopra la capitale', text:'Per due sabati di fila i radar dell\'aeroporto della capitale vedono strane luci muoversi sopra la città, e i caccia decollano a cercarle senza trovare niente. L\'aviazione tiene una conferenza stampa per spiegare che si tratta di inversioni di temperatura. Nessuno ci crede fino in fondo, e per tutta l\'estate si guarda il cielo un po\' più a lungo.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgus50_schermo', era:'us1950', registro:'leggero', cond:()=>(S.year===1953&&S.month>=9)||(S.year>=1954&&S.year<=1955), kick:'Il paese', t:'Lo schermo largo', text:'Per riportare la gente al cinema gli studi hanno inventato uno schermo largo quasi il doppio, curvo, col suono che arriva da più punti della sala. I film biblici e i western ci stanno a meraviglia. I proiezionisti cambiano le lenti, i cinema cambiano lo schermo, e per due ore il televisore del salotto sembra piccolissimo.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgus50_berretto', era:'us1950', registro:'leggero', cond:()=>S.year===1955, kick:'Il paese', t:'Il berretto con la coda', text:'Una serie televisiva su un eroe della frontiera ha fatto impazzire i bambini: ognuno vuole il berretto di pelliccia con la coda che pende dietro, e le pellicce di procione salgono di prezzo in tutto il paese. La canzone della sigla la cantano anche gli adulti, senza volerlo. A Natale la moda è già finita, e i magazzini restano pieni di code.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgus50_colore', era:'us1950', registro:'leggero', cond:()=>(S.year===1954&&S.month>=3)||(S.year>=1955&&S.year<=1957), kick:'Il paese', t:'Il televisore a colori', text:'Nella vetrina del negozio di elettrodomestici c\'è il primo televisore a colori: costa quanto un\'automobile usata, e i programmi a colori sono sì e no un\'ora alla settimana. La gente si ferma sul marciapiede a guardare uno spettacolo di varietà con i vestiti rossi e il cielo azzurro. Poi torna a casa, al suo bianco e nero.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgus50_poeti', era:'us1950', registro:'leggero', cond:()=>(S.year===1957&&S.month>=10)||S.year>=1958, kick:'Il paese', t:'I poeti col maglione nero', text:'Nei caffè di San Francisco e del Greenwich Village ragazzi con la barba e il maglione nero leggono poesie lunghissime accompagnati da un contrabbasso, e il pubblico, invece di applaudire, schiocca le dita. Un poema è finito in tribunale per oscenità, ed è stato assolto. I giornali li prendono in giro; le librerie non riescono a tenerne una copia sugli scaffali.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgus50_treno', era:'us1950', registro:'leggero', cond:()=>S.year>=1955, kick:'Il paese', t:'L\'ultimo treno della valle', text:'La compagnia ferroviaria ha annunciato che il treno passeggeri della valle farà l\'ultima corsa a fine mese: troppa gente ha l\'automobile, troppo pochi comprano il biglietto. Alla stazione si presentano il sindaco, la banda e mezzo paese, con le macchine fotografiche. Il capostazione, che ci lavora da trent\'anni, saluta con la lanterna per l\'ultima volta.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgus50_jet', era:'us1950', registro:'leggero', cond:()=>(S.year===1958&&S.month>=10)||S.year>=1959, kick:'Il paese', t:'Sette ore per l\'Europa', text:'Il primo aereo di linea a reazione attraversa l\'Atlantico in meno di sette ore: la metà del tempo di un aereo a elica, un quinto di una nave. Il biglietto costa ancora un mese di stipendio, ma le riviste parlano già dell\'età del jet. Negli aeroporti la gente va a vederli decollare, col naso contro i vetri.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgus50_lega', era:'us1950', registro:'leggero', cond:()=>stagioneMese()==='primavera'||stagioneMese()==='estate', kick:'Il paese', t:'La lega dei ragazzi', text:'Ogni paese ha ormai la sua lega di baseball per ragazzi, con le divise pagate dal ferramenta e dal barbiere e il nome del negozio stampato sulla schiena. I padri allenano dopo il lavoro e gridano più dei figli. In tribuna le madri tengono il conto dei punti e delle ginocchia sbucciate.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgus50_gettoni', era:'us1950', registro:'leggero', cond:()=>S.year>=1957, kick:'Il paese', t:'La lavanderia a gettoni', text:'Nei quartieri dove non tutti hanno la lavatrice ha aperto una lavanderia self-service: una fila di macchine bianche, una moneta per lavare e una per asciugare, aperta anche la sera. Mentre i panni girano si legge una rivista, si chiacchiera, a volte ci si innamora. Il gestore passa a svuotare le cassette con un secchio.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgus50_figurine', era:'us1950', registro:'leggero', kick:'Il paese', t:'Le figurine dei giocatori', text:'Nella bustina c\'è una gomma da masticare rosa, dura come il cartone, e cinque figurine di giocatori di baseball con le statistiche sul retro. I ragazzini le scambiano in cortile, le contano, le fissano con una molletta ai raggi della bicicletta perché facciano il rumore di un motore. Un giorno le madri, facendo pulizia, le butteranno via.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgus50_gelato', era:'us1950', registro:'leggero', cond:()=>stagioneMese()==='estate', kick:'Il paese', t:'Il furgoncino del gelato', text:'Nei pomeriggi d\'estate, appena si sente il carillon del furgoncino in fondo alla strada, i bambini corrono in casa a chiedere una moneta e tornano fuori prima che il furgone sia passato. Ghiaccioli, coni, biscotti col gelato in mezzo. Il conducente conosce il gusto preferito di ogni bambino del quartiere, e anche chi non ha mai i soldi.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgus50_finestra', era:'us1950', registro:'leggero', cond:()=>S.year>=1952&&stagioneMese()==='estate', kick:'Il paese', t:'La scatola nella finestra', text:'Il condizionatore da finestra è sceso di prezzo, e d\'estate le facciate dei palazzi si riempiono di scatole che ronzano e gocciolano sul marciapiede. Chi ce l\'ha dorme con la coperta; chi non ce l\'ha va al cinema, dove fa fresco, e guarda lo stesso film due volte. Le compagnie elettriche contano i nuovi record di consumo.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgus50_cucina', era:'us1950', registro:'leggero', cond:()=>S.year>=1954&&S.year<=1958, kick:'Il paese', t:'La cucina color pastello', text:'Quest\'anno le cucine si comprano rosa, verde menta o giallo canarino: il frigorifero, il forno e perfino il telefono a muro, tutti dello stesso colore. Le riviste femminili pubblicano le fotografie delle cucine dei sogni, con la padrona di casa in tacchi e grembiule. Il bianco, dicono i venditori, è roba da ospedale.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
 ];
 
 /* ===== F1 — LA TELEFONATA. Un'interruzione, non una carta: overlay a squillo, due opzioni secche, decisione a
@@ -5632,25 +5735,159 @@ const FAMIGLIA_VIVA=[
 const TERRITORIO_PROB=[
  {id:'tp_fabbrica', era:'universale', kind:'F2',
   t:'Una fabbrica che chiude', text:'Un grande stabilimento annuncia la chiusura, e %TERR trema: migliaia di posti a rischio, la piazza che monta. La decisione arriva sul tuo tavolo.',
-  ch:[ {costo:{debito:0.3}, l:'Fondi pubblici per salvare i posti', e:'Salvi l\'occupazione; il conto sale', f:()=>{ gd('lavoratori',2); if(S.ind) S.ind.debt+=0.3; }},
-       {l:'Lasci al mercato, punti sulla riconversione', e:'Disciplina di mercato; la piazza freme', f:()=>{ gd('imprenditori',2); gd('lavoratori',-2); }} ]},
+  ch:[ {u:2, costo:{debito:0.3}, l:'Fondi pubblici per salvare i posti', e:'Salvi l\'occupazione; il conto sale', f:()=>{ gd('lavoratori',2); if(S.ind) S.ind.debt+=0.3; }},
+       {u:-2, l:'Lasci al mercato, punti sulla riconversione', e:'Disciplina di mercato; la piazza freme', f:()=>{ gd('imprenditori',2); gd('lavoratori',-2); }} ]},
  {id:'tp_servizio', era:'universale', kind:'F2',
   t:'Un ospedale a rischio', text:'Un ospedale rischia la chiusura, e %TERR si mobilita: a te tocca scegliere tra il servizio e i conti.',
-  ch:[ {costo:{debito:0.2}, l:'Lo tieni aperto, costi quel che costi', e:'Il territorio respira; il bilancio pesa', f:()=>{ gd('pensionati',2); if(S.ind&&S.ind.sanita!=null) S.ind.sanita=clamp(S.ind.sanita+1,0,100); if(S.ind) S.ind.debt+=0.2; }},
-       {costo:{debito:-0.2}, l:'Razionalizzi: prima i conti', e:'Salvi la cassa; il territorio incassa il no', f:()=>{ if(S.ind) S.ind.debt-=0.2; gd('pensionati',-2); }} ]},
+  ch:[ {u:2, costo:{debito:0.2}, l:'Lo tieni aperto, costi quel che costi', e:'Il territorio respira; il bilancio pesa', f:()=>{ gd('pensionati',2); if(S.ind&&S.ind.sanita!=null) S.ind.sanita=clamp(S.ind.sanita+1,0,100); if(S.ind) S.ind.debt+=0.2; }},
+       {u:-2, costo:{debito:-0.2}, l:'Razionalizzi: prima i conti', e:'Salvi la cassa; il territorio incassa il no', f:()=>{ if(S.ind) S.ind.debt-=0.2; gd('pensionati',-2); }} ]},
  {id:'tp_ordine', era:'universale', kind:'F2',
   t:'Tensione sul territorio', text:'La tensione sociale sale, e %TERR è nervosa: cortei, qualche scontro, la stampa che incalza. Fermezza o prudenza?',
-  ch:[ {l:'Linea di fermezza, più presidio', e:'Ordine ristabilito; i giovani mugugnano', f:()=>{ if(S.ind&&S.ind.sicurezza!=null) S.ind.sicurezza=clamp(S.ind.sicurezza+1,0,100); gd('giovani',-1); }},
-       {l:'Prudenza: apri un tavolo', e:'La piazza si calma da sé; qualcuno ti dà il molle', f:()=>{ gd('giovani',1); if(S.ind&&S.ind.sicurezza!=null) S.ind.sicurezza=clamp(S.ind.sicurezza-1,0,100); }} ]},
+  ch:[ {u:0, l:'Linea di fermezza, più presidio', e:'Ordine ristabilito; i giovani mugugnano', f:()=>{ if(S.ind&&S.ind.sicurezza!=null) S.ind.sicurezza=clamp(S.ind.sicurezza+1,0,100); gd('giovani',-1); }},
+       {u:1, l:'Prudenza: apri un tavolo', e:'La piazza si calma da sé; qualcuno ti dà il molle', f:()=>{ gd('giovani',1); if(S.ind&&S.ind.sicurezza!=null) S.ind.sicurezza=clamp(S.ind.sicurezza-1,0,100); }} ]},
  /* la periferia che chiede — era-split: '50 il Mezzogiorno (storia radicata), presente le infrastrutture */
  {id:'tp_periferia', era:'contemporanea', kind:'F2',
   t:'Un\'area lasciata indietro', text:'C\'è un\'area che chiede attenzione: %TERR domanda infrastrutture e servizi — strade, treni, presidi. Un piano costa, ma cambia il volto del territorio.',
-  ch:[ {costo:{debito:0.3}, l:'Un piano di investimenti per l\'area', e:'Il territorio riparte; il conto sale', f:()=>{ gd('lavoratori',2); if(S.ind) S.ind.debt+=0.3; }},
-       {l:'Le priorità nazionali sono altrove', e:'Tieni i conti; l\'area resta indietro', f:()=>{ gd('cetomedio',1); gd('lavoratori',-1); }} ]},
+  ch:[ {u:2, costo:{debito:0.3}, l:'Un piano di investimenti per l\'area', e:'Il territorio riparte; il conto sale', f:()=>{ gd('lavoratori',2); if(S.ind) S.ind.debt+=0.3; }},
+       {u:-1, l:'Le priorità nazionali sono altrove', e:'Tieni i conti; l\'area resta indietro', f:()=>{ gd('cetomedio',1); gd('lavoratori',-1); }} ]},
  {id:'tp_mezzogiorno', era:'italia1950', kind:'F2',
   t:'Il Mezzogiorno chiama', text:'Dal Sud sale la questione di sempre — terra, lavoro, l\'emigrazione che svuota i paesi — e %TERR aspetta una risposta dal governo.',
-  ch:[ {costo:{debito:0.3}, l:'Fondi per la terra e il lavoro al Sud', e:'Una promessa al Mezzogiorno; il conto sale', f:()=>{ gd('lavoratori',2); gd('cattolici',1); if(S.ind) S.ind.debt+=0.3; }},
-       {l:'Prima il Nord che produce', e:'Punti sull\'industria; il Sud incassa l\'ennesima attesa', f:()=>{ gd('imprenditori',2); gd('lavoratori',-2); }} ]},
+  ch:[ {u:2, costo:{debito:0.3}, l:'Fondi per la terra e il lavoro al Sud', e:'Una promessa al Mezzogiorno; il conto sale', f:()=>{ gd('lavoratori',2); gd('cattolici',1); if(S.ind) S.ind.debt+=0.3; }},
+       {u:-2, l:'Prima il Nord che produce', e:'Punti sull\'industria; il Sud incassa l\'ennesima attesa', f:()=>{ gd('imprenditori',2); gd('lavoratori',-2); }} ]},
+];
+
+/* L182-3 · IL GIRO SUL TAVOLO (D166-D170): le scene di una visita su un territorio. u = l'umore che la scelta lascia sul
+   territorio (−2…+2), letto dal motore (risolviScenaTerr, game.js); f = gli effetti nazionali, piccoli, mai su potereLocale
+   (derivato). Filtri facoltativi: tipo 'citta'|'regione' (confrontato con PAESE.territori[i].tipo senza accento: «città» dei
+   dati), ruolo 'governo'|'opposizione', casa 'amica'|'avversa' (compatibile(), come pickTerritorioChiama); paesi/era/dal/cond
+   dal passaggio unico eraCartaViva. %TERR e %CARICA come in F2 (soggetto a metà frase).
+   L185-1 (D174-D176): trenta scene — le sei semi riscritte col conto di D175 (al più +1 netto per scelta sugli effetti
+   nazionali, debito escluso; almeno una scelta con un costo per scena), diciassette universali e sette del presente
+   (era 'contemporanea'). Valute: solo gd, stampad e, nelle scene ruolo:'governo', la cassa (costo:{debito}). Testi e conto
+   in FORMATI-L185-GIRO-SCENE.md; la sonda del conto è .claude/sonda-l185-1-conto.js. */
+const GIRO_SCENE=[
+ /* — le sei semi di L182-3, riscritte con D175 (L185-1) — */
+ {id:'gi_comizio', era:'universale', kind:'giro',
+  t:'Un comizio in piazza', text:'Il partito ha montato un palco e chiamato a raccolta i suoi: %TERR ti aspetta in piazza, con qualche striscione e molta curiosità.',
+  ch:[ {u:2, l:'Discorso dal palco, toni alti', e:'Piazza piena e applausi; i giornali parlano di comizio urlato', f:()=>{ gd('giovani',1); stampad(-1); }},
+       {u:1, l:'Scendi dal palco e stringi mani', e:'Meno clamore, più ricordi', f:()=>{ gd('pensionati',1); }} ]},
+ {id:'gi_nastro', era:'universale', kind:'giro', ruolo:'governo',
+  t:'Un nastro da tagliare', text:'Una strada nuova è finita con due anni di ritardo, e %TERR vuole festeggiarla con te: le forbici sono già pronte.',
+  ch:[ {u:2, l:'Taglia il nastro e ringrazia chi ci ha lavorato', e:'Foto e buonumore; l\'opposizione ricorda il ritardo', f:()=>{ gd('lavoratori',1); stampad(-1); }},
+       {u:1, l:'Niente cerimonia: chiedi scusa per il ritardo', e:'Onestà apprezzata; nessuna foto', f:()=>{ stampad(1); }} ]},
+ {id:'gi_corsia', era:'universale', kind:'giro',
+  t:'La visita in corsia', text:'Medici e infermieri ti hanno chiesto di vedere il reparto: mancano letti e personale, e %TERR lo sa bene.',
+  ch:[ {u:2, l:'Prometti di batterti per i rinforzi', e:'Speranza in corsia; la promessa resterà agli atti', f:()=>{ gd('pensionati',1); }},
+       {u:1, l:'Ascolta e prendi appunti, senza promettere', e:'Rispetto; qualcuno si aspettava di più', f:()=>{ stampad(1); gd('pensionati',-1); }} ]},
+ {id:'gi_palestra', era:'universale', kind:'giro',
+  t:'Una scuola di periferia', text:'Una scuola di periferia ti ha invitato: %TERR ne parla da settimane, perché la palestra è chiusa da tre anni.',
+  ch:[ {u:2, l:'Prometti la palestra entro l\'anno', e:'Ragazzi entusiasti; i giornali tengono il conto delle promesse', f:()=>{ gd('giovani',1); stampad(-1); }},
+       {u:1, l:'Una partita nel cortile coi ragazzi', e:'Una bella giornata; della palestra si riparlerà', f:()=>{ gd('giovani',1); }} ]},
+ {id:'gi_mercato', era:'universale', kind:'giro',
+  t:'Il mercato del sabato', text:'Il mercato del sabato è il posto dove si sente che cosa pensa la gente, e %TERR non fa eccezione: oggi i banchi hanno molto da dire.',
+  ch:[ {u:2, l:'Fermati a ogni banco', e:'Ore di chiacchiere e lamentele: se ne ricorderanno', f:()=>{ gd('cetomedio',1); }},
+       {u:-1, l:'Un giro veloce davanti ai fotografi', e:'Belle immagini; i banchi notano la fretta', f:()=>{ stampad(1); gd('cetomedio',-1); }} ]},
+ {id:'gi_fischi', era:'universale', kind:'giro', casa:'avversa',
+  t:'In casa d\'altri', text:'Qui il tuo partito non vince da decenni, e %TERR te lo fa capire subito: fischi all\'arrivo e un cartello poco gentile.',
+  ch:[ {u:1, l:'Affronta i fischi e parla lo stesso', e:'Coraggio riconosciuto anche dagli avversari', f:()=>{ stampad(1); }},
+       {u:0, l:'Un incontro a porte chiuse coi notabili', e:'Niente fischi, niente piazza', f:()=>{ gd('imprenditori',1); gd('lavoratori',-1); }} ]},
+
+ /* — universali nuove (L185-1): ogni paese, ogni decennio in cui il giro esce — */
+ {id:'gi_fiera', era:'universale', kind:'giro', tipo:'regione',
+  t:'La fiera agricola', text:'Alla fiera agricola i trattori sono lucidati e il bestiame è pettinato: %TERR ti aspetta fra gli stand, e gli allevatori hanno una lista di richieste.',
+  ch:[ {u:2, l:'Ascolta gli allevatori e assaggia tutto', e:'Gli allevatori ti adottano; in città si parla di sussidi', f:()=>{ gd('cattolici',1); gd('imprenditori',-1); }},
+       {u:0, l:'Un discorso sul mercato che cambia', e:'Parole oneste; applausi tiepidi', f:()=>{ stampad(1); gd('cattolici',-1); }} ]},
+ {id:'gi_cancelli', era:'universale', kind:'giro',
+  t:'Davanti ai cancelli', text:'Al cambio turno gli operai escono dai cancelli e ti trovano lì: %TERR vive di quella fabbrica, e i delegati vogliono sapere da che parte stai.',
+  ch:[ {u:2, l:'Stringi le mani al cambio turno', e:'Gli operai apprezzano; la direzione prende nota', f:()=>{ gd('lavoratori',1); gd('imprenditori',-1); }},
+       {u:1, l:'Visita anche gli uffici della direzione', e:'Un colpo al cerchio e uno alla botte; i delegati storcono il naso', f:()=>{ gd('imprenditori',1); gd('lavoratori',-1); }} ]},
+ {id:'gi_sera', era:'universale', kind:'giro',
+  t:'Una sera fra la gente', text:'Nel locale più frequentato del paese la sera si discute di tutto: %TERR ti ha invitato a un tavolo, e nessuno ha intenzione di essere gentile.',
+  ch:[ {u:2, l:'Resta fino alla chiusura', e:'Ti raccontano tutto; un\'intervista del mattino salta', f:()=>{ gd('pensionati',1); stampad(-1); }},
+       {u:1, l:'Un bicchiere e via', e:'Una stretta di mano e una foto', f:()=>{ gd('cetomedio',1); }} ]},
+ {id:'gi_argini', era:'universale', kind:'giro', ruolo:'governo', tipo:'regione',
+  t:'Dopo l\'esondazione', text:'Il fiume è uscito dagli argini la settimana scorsa: nessuna vittima, ma cantine allagate e campi sotto il fango, e %TERR aspetta di vedere chi si presenta con gli stivali.',
+  ch:[ {u:2, l:'Stivali e pala, coi volontari', e:'Ti vedono spalare; qualcuno dice che è una posa', f:()=>{ gd('cattolici',1); }},
+       {u:2, costo:{debito:0.2}, l:'Annuncia i fondi per i danni', e:'Il paese respira; il conto sale', f:()=>{ gd('cetomedio',1); if(S.ind) S.ind.debt+=0.2; }},
+       {u:-1, l:'Un sorvolo e una conferenza stampa', e:'Belle immagini dall\'alto; giù nel fango non sono piaciute', f:()=>{ stampad(1); gd('cattolici',-1); }} ]},
+ {id:'gi_fango', era:'universale', kind:'giro', ruolo:'opposizione', tipo:'regione',
+  t:'Il fango e i rimborsi', text:'Il fiume è esondato senza vittime due settimane fa, i rimborsi non sono arrivati e %TERR ha voglia di prendersela con qualcuno: ti chiedono di stare dalla loro parte.',
+  ch:[ {u:2, l:'Alza la voce contro i ritardi del governo', e:'Il paese ti applaude; il governo ti accusa di sciacallaggio', f:()=>{ gd('cattolici',1); stampad(-1); }},
+       {u:1, l:'Stivali e pala, senza dichiarazioni', e:'Nessun titolo; chi c\'era se lo ricorda', f:()=>{ gd('cattolici',1); }} ]},
+ {id:'gi_sezione', era:'universale', kind:'giro', ruolo:'opposizione', casa:'amica',
+  t:'La sede del partito', text:'La sede locale è stata ridipinta per la tua visita: %TERR è terra amica, ma i militanti si sentono dimenticati dalla direzione.',
+  ch:[ {u:2, l:'Cena coi militanti fino a tardi', e:'Ti chiedono di tornare; la sede ha di nuovo la luce accesa', f:()=>{ gd('lavoratori',1); }},
+       {u:0, l:'Chiedi conto dei volontari che mancano', e:'Un richiamo all\'ordine; qualcuno se ne va prima del dolce', f:()=>{ stampad(1); gd('lavoratori',-1); }} ]},
+ {id:'gi_sciopero', era:'universale', kind:'giro', ruolo:'opposizione',
+  t:'Uno sciopero in corso', text:'Da dieci giorni il magazzino è fermo per uno sciopero, e %TERR guarda come si comporterà l\'opposizione: gli scioperanti ti hanno lasciato un posto vicino al fuoco.',
+  ch:[ {u:2, l:'Fermati al picchetto', e:'Gli scioperanti ti applaudono; i commercianti meno', f:()=>{ gd('lavoratori',1); gd('cetomedio',-1); }},
+       {u:0, l:'Chiedi alle due parti di sedersi a un tavolo', e:'I giornali lodano il senso di responsabilità; al picchetto si sentono soli', f:()=>{ stampad(1); gd('lavoratori',-1); }} ]},
+ {id:'gi_circolo', era:'universale', kind:'giro',
+  t:'Il circolo degli anziani', text:'Al circolo le carte si mettono da parte per te: %TERR ha molti pensionati, e oggi ti chiedono delle pensioni e del medico che manca.',
+  ch:[ {u:2, l:'Una partita a carte e due promesse', e:'Ti lasciano vincere; un giornale parla di promesse da circolo', f:()=>{ gd('pensionati',1); stampad(-1); }},
+       {u:1, l:'Ascolta e porta le domande in parlamento', e:'Gratitudine composta; nessuno si fa illusioni', f:()=>{ gd('pensionati',1); }} ]},
+ {id:'gi_aula', era:'universale', kind:'giro', tipo:'citta',
+  t:'L\'aula magna', text:'Gli studenti ti hanno invitato in aula magna, e %TERR sa che non sarà una passeggiata: domande preparate da settimane e un servizio d\'ordine nervoso.',
+  ch:[ {u:1, l:'Rispondi a tutte le domande', e:'Due ore di botta e risposta; una tua frase gira male', f:()=>{ gd('giovani',1); stampad(-1); }},
+       {u:0, l:'Un intervento breve e via', e:'Niente incidenti; gli studenti si sentono snobbati', f:()=>{ stampad(1); gd('giovani',-1); }} ]},
+ {id:'gi_festa', era:'universale', kind:'giro', tipo:'citta',
+  t:'La festa del quartiere', text:'Bancarelle, musica e un palco per i bambini: %TERR festeggia il suo quartiere più popolare, e gli organizzatori ti hanno messo in giuria al concorso dei dolci.',
+  ch:[ {u:2, l:'Fai il giudice con serietà', e:'Una giornata di festa; la seconda classificata ti toglie il saluto', f:()=>{ gd('cetomedio',1); }},
+       {u:1, l:'Dichiara tutti vincitori', e:'Risate e applausi; un giornale ti chiama «il premiatutto»', f:()=>{ gd('pensionati',1); stampad(-1); }} ]},
+ {id:'gi_ditta', era:'universale', kind:'giro',
+  t:'La ditta che cresce', text:'Una ditta di famiglia è diventata la prima azienda della zona, e %TERR se ne vanta: il titolare ti mostra i capannoni nuovi e ti chiede meno burocrazia.',
+  ch:[ {u:1, l:'Prometti di snellire le pratiche', e:'Il titolare è soddisfatto; il sindacato chiede di quali pratiche si parli', f:()=>{ gd('imprenditori',1); gd('lavoratori',-1); }},
+       {u:2, l:'Chiedi di parlare con i dipendenti', e:'Gli operai ti raccontano i turni; il titolare sorride meno', f:()=>{ gd('lavoratori',1); gd('imprenditori',-1); }} ]},
+ {id:'gi_pendolari', era:'universale', kind:'giro',
+  t:'Il treno dei pendolari', text:'Alle sei del mattino il treno per la città è già pieno: %TERR ci viaggia ogni giorno, e oggi ci viaggi anche tu.',
+  ch:[ {u:2, l:'In piedi nel corridoio, come tutti', e:'Due ore di racconti di ritardi; ti ricorderanno lì in mezzo', f:()=>{ gd('cetomedio',1); }},
+       {u:-1, l:'Lavora sui dossier in prima classe', e:'Hai finito il lavoro; qualcuno ti ha visto nel vagone vuoto', f:()=>{ gd('cetomedio',-1); }} ]},
+ {id:'gi_ponte', era:'universale', kind:'giro', ruolo:'governo',
+  t:'Un cantiere fermo', text:'Un ponte promesso da anni è fermo a metà, con le gru immobili: %TERR ci passa sotto ogni giorno e ti ha portato a vederlo.',
+  ch:[ {u:2, costo:{debito:0.2}, l:'Sblocca i fondi e fissa una data', e:'Gli operai tornano al lavoro; il conto sale', f:()=>{ gd('lavoratori',1); if(S.ind) S.ind.debt+=0.2; }},
+       {u:0, l:'Prima un\'inchiesta sui ritardi', e:'I giornali approvano; il ponte resta a metà', f:()=>{ stampad(1); gd('lavoratori',-1); }} ]},
+ {id:'gi_cartello', era:'universale', kind:'giro', ruolo:'opposizione',
+  t:'La promessa mancata', text:'Il governo aveva promesso qui una strada che non è mai arrivata, e %TERR non l\'ha dimenticato: ti portano davanti al cartello del cantiere, sbiadito dal sole.',
+  ch:[ {u:2, l:'Una foto davanti al cartello', e:'La foto fa il giro dei giornali; il governo risponde piccato', f:()=>{ stampad(1); }},
+       {u:1, l:'Prometti la strada se vincerete', e:'Applausi; un cronista ricorda che le promesse le faceva anche il governo', f:()=>{ gd('lavoratori',1); stampad(-1); }} ]},
+ {id:'gi_vetrine', era:'universale', kind:'giro', tipo:'citta',
+  t:'Le vetrine rotte', text:'Furti e vetrine rotte nell\'ultimo mese: %TERR chiede più sicurezza, e i commercianti ti aspettano davanti ai negozi chiusi.',
+  ch:[ {u:2, l:'Chiedi più pattuglie, subito', e:'I commercianti respirano; i ragazzi del quartiere si sentono sotto accusa', f:()=>{ gd('cetomedio',1); gd('giovani',-1); }},
+       {u:1, l:'Un centro per i ragazzi del quartiere', e:'Un\'idea per domani; i negozianti volevano qualcosa per oggi', f:()=>{ gd('giovani',1); gd('cetomedio',-1); }} ]},
+ {id:'gi_scuri', era:'universale', kind:'giro', tipo:'regione',
+  t:'Il paese che si svuota', text:'I giovani partono per la città o per l\'estero, e %TERR conta le case chiuse: un vecchio maestro ti accompagna per una via dove gli scuri restano sbarrati.',
+  ch:[ {u:2, l:'Prometti incentivi a chi resta', e:'Una speranza per chi resta; in città si chiede chi paga', f:()=>{ gd('giovani',1); gd('cetomedio',-1); }},
+       {u:0, l:'Racconta che il mondo cambia', e:'Parole franche; qui le hanno sentite come un addio', f:()=>{ stampad(1); gd('pensionati',-1); }} ]},
+ {id:'gi_stadio', era:'universale', kind:'giro', tipo:'citta',
+  t:'La squadra promossa', text:'La squadra della città ha appena conquistato la promozione, e %TERR è in festa: ti hanno invitato allo stadio per la prima partita.',
+  ch:[ {u:2, l:'In curva con la sciarpa', e:'Cori e abbracci; un editorialista parla di populismo da stadio', f:()=>{ gd('giovani',1); stampad(-1); }},
+       {u:1, l:'In tribuna, composto', e:'Una giornata tranquilla; la curva non ti ha visto', f:()=>{ gd('cetomedio',1); }} ]},
+
+ /* — del presente (L185-1): era contemporanea, solo dove il giro esce oggi — */
+ {id:'gi_segnale', era:'contemporanea', kind:'giro', tipo:'regione',
+  t:'Il segnale che non c\'è', text:'Nelle valli il telefono prende a tratti e la rete arriva a singhiozzo: %TERR ti invita in un\'azienda che fa le riunioni dal parcheggio, l\'unico punto dove il segnale c\'è.',
+  ch:[ {u:2, l:'Prometti la fibra in due anni', e:'Applausi nel parcheggio; i giornali ricordano le promesse del passato', f:()=>{ gd('imprenditori',1); stampad(-1); }},
+       {u:1, l:'Fai anche tu una riunione dal parcheggio', e:'Il video gira ovunque; la fibra resta da fare', f:()=>{ stampad(1); }} ]},
+ {id:'gi_pacchi', era:'contemporanea', kind:'giro',
+  t:'Il banco alimentare', text:'I volontari distribuiscono pacchi a famiglie che fino a un anno fa non ne avevano bisogno, e %TERR non ama parlarne: ti chiedono di dare una mano senza fotografi.',
+  ch:[ {u:2, l:'Distribuisci pacchi, niente foto', e:'Nessuno lo saprà; chi c\'era sì', f:()=>{ gd('cattolici',1); }},
+       {u:0, l:'Una dichiarazione sulla povertà che cresce', e:'I telegiornali la riprendono; i volontari si sentono usati', f:()=>{ stampad(1); gd('cattolici',-1); }} ]},
+ {id:'gi_fattorini', era:'contemporanea', kind:'giro', tipo:'citta',
+  t:'I fattorini sotto la pioggia', text:'Sotto la pioggia i fattorini in bicicletta aspettano le consegne davanti ai ristoranti, e %TERR ne conta centinaia: ti chiedono di provare un turno con loro.',
+  ch:[ {u:2, l:'Un turno in bicicletta sotto la pioggia', e:'Torni fradicio e convinto; le piattaforme parlano di passerella', f:()=>{ gd('giovani',1); gd('imprenditori',-1); }},
+       {u:0, l:'Un incontro con le piattaforme', e:'La promessa di un tavolo; i fattorini restano sotto la pioggia', f:()=>{ gd('imprenditori',1); gd('giovani',-1); }} ]},
+ {id:'gi_pannelli', era:'contemporanea', kind:'giro', tipo:'regione',
+  t:'I pannelli nei campi', text:'Un\'azienda vuole coprire di pannelli solari cento ettari di campi, e %TERR si divide a metà: in municipio ti aspettano i favorevoli, in piazza i contrari.',
+  ch:[ {u:1, l:'Sì ai pannelli, con un\'indennità ai paesi', e:'I ragazzi applaudono; gli agricoltori no', f:()=>{ gd('giovani',1); gd('cattolici',-1); }},
+       {u:1, l:'Prima i campi: pannelli sui tetti', e:'Gli agricoltori respirano; l\'azienda minaccia di andare altrove', f:()=>{ gd('cattolici',1); gd('imprenditori',-1); }} ]},
+ {id:'gi_saracinesche', era:'contemporanea', kind:'giro', tipo:'citta',
+  t:'Il centro che si spegne', text:'Da quando ha aperto il grande centro commerciale fuori città, le vetrine del centro si spengono una dopo l\'altra: %TERR ti porta a vederle.',
+  ch:[ {u:2, l:'Proponi sgravi per i negozi del centro', e:'I negozianti ci sperano; le grandi catene protestano', f:()=>{ gd('cetomedio',1); gd('imprenditori',-1); }},
+       {u:0, l:'Il commercio cambia: bisogna adattarsi', e:'Parole da economista; il centro si sente abbandonato', f:()=>{ stampad(1); gd('cetomedio',-1); }} ]},
+ {id:'gi_affitti', era:'contemporanea', kind:'giro', tipo:'citta',
+  t:'Gli affitti alle stelle', text:'Gli affitti brevi per turisti hanno svuotato i palazzi del centro, e %TERR vede partire maestre e infermieri: un comitato di inquilini ti aspetta sotto casa.',
+  ch:[ {u:2, l:'Prometti un tetto agli affitti brevi', e:'Gli inquilini esultano; i piccoli proprietari no', f:()=>{ gd('giovani',1); gd('cetomedio',-1); }},
+       {u:0, l:'Più case nuove, non più regole', e:'I costruttori approvano; il comitato si sente liquidato', f:()=>{ gd('imprenditori',1); gd('giovani',-1); }} ]},
 ];
 
 /* ===== PARLAMENTO EUROPEO (solo paesi ue:true) — le famiglie politiche continentali, stilizzate.
@@ -6337,11 +6574,11 @@ const POLICIES=[
   {id:'fisco', nm:'Pressione fiscale', cat:'Conti pubblici', levels:['Bassa','Media','Alta']},
   {id:'pensioni', nm:'Sistema pensionistico', cat:'Welfare', levels:['Riforma','Invariato','Generoso']},
   {id:'sanita', nm:'Spesa sanitaria', cat:'Servizi', levels:['Tagli','Standard','Potenziata']},
-  {id:'investimenti', nm:'Investimenti pubblici', cat:'Sviluppo', levels:['Minimi','Moderati','Forti']},
+  {id:'investimenti', nm:'Investimenti pubblici', cat:'Sviluppo', levels:['Minimi','Medi','Forti']},
   {id:'istruzione', nm:'Scuola', cat:'Istruzione', levels:['Tagli','Standard','Investimento']},
   {id:'lavoro', nm:'Mercato del lavoro', cat:'Economia', levels:['Rigido','Equilibrato','Flessibile']},
   {id:'welfare', nm:'Welfare e sussidi', cat:'Welfare', levels:['Ridotto','Standard','Esteso']},
-  {id:'imprese', nm:'Incentivi alle imprese', cat:'Economia', levels:['Nessuno','Moderati','Forti']},
+  {id:'imprese', nm:'Incentivi alle imprese', cat:'Economia', levels:['Nessuno','Medi','Forti']},
   {id:'sicurezza', nm:'Sicurezza e ordine pubblico', cat:'Stato', levels:['Ridotta','Standard','Rafforzata']},
   {id:'ambiente', era:'contemporanea', nm:'Transizione ecologica', cat:'Sviluppo', levels:['Minima','Graduale','Ambiziosa']},   // Build B (ii): leva moderna → nascosta nel '50 (resta neutra, 0 FISCAL)
   {id:'immigrazione', era:'contemporanea', nm:'Politica migratoria', cat:'Stato', levels:['Restrittiva','Equilibrata','Aperta']},   // Build B (ii): nel '50 l'Italia emigra, non accoglie → nascosta
@@ -7172,6 +7409,67 @@ const DOSSIERS=[
    {l:'Espulsione pubblica',e:'Fermezza mostrata; ritorsione probabile',pleases:'populista',f:()=>{gd('pensionati',2); S.ind.sicurezza+=1; repd(-2);}},
    {l:'Allontanamento discreto',e:'Nessuna crisi; la stampa lo scopre dopo',pleases:'tecnico',f:()=>{repd(1); stampad(-1);}},
  ]},
+ // L182-1 · varietà del ministro (4/10): quindici dossier del presente per il ministro degli Esteri — era 'contemporanea', senza paesi.
+ {id:'ms_es_adozioni',era:'contemporanea',min:'esteri',kick:'Affari consolari',t:'Le adozioni internazionali bloccate',text:'Un paese d\'origine sospende le adozioni internazionali dopo uno scandalo. Duecento famiglie avevano già conosciuto il loro bambino.',ch:[
+   {l:'Missione diplomatica per sbloccare le pratiche avviate',e:'Famiglie riconoscenti; il partner chiede qualcosa in cambio',pleases:'progressista',f:()=>{gd('cetomedio',2); gd('cattolici',2); repd(-1);}},
+   {l:'Rispetta la sospensione e aspetta le nuove regole',e:'Rapporti corretti; le famiglie protestano davanti al ministero',pleases:'tecnico',f:()=>{repd(2); gd('cetomedio',-2); stampad(-1);}},
+ ]},
+ {id:'ms_es_cooperante',era:'contemporanea',min:'esteri',kick:'Crisi consolare',t:'Un cooperante rapito',text:'Un volontario di un\'organizzazione umanitaria è stato rapito in una zona di guerra. I sequestratori fanno sapere che vogliono soldi.',ch:[
+   {l:'Tratta in silenzio, con ogni mezzo',e:'Probabile ritorno a casa; gli alleati temono un precedente',pleases:'populista',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; gd('cattolici',3); gd('giovani',2); repd(-2);}},
+   {l:'Nessun riscatto: lavorano i servizi e i mediatori locali',e:'Linea della fermezza; giorni di angoscia in diretta',pleases:'conservatore',f:()=>{repd(2); gd('pensionati',1); stampad(-2);}},
+ ]},
+ {id:'ms_es_riconoscimento',era:'contemporanea',min:'esteri',kick:'Diplomazia',t:'Riconoscere un nuovo stato?',text:'Una regione di un paese lontano ha proclamato l\'indipendenza dopo un referendum contestato. Alcuni alleati la riconoscono, altri no. Tocca a noi.',ch:[
+   {l:'Riconoscila subito',e:'Al fianco di chi l\'ha già fatto; il paese d\'origine rompe',pleases:'progressista',f:()=>{repd(-1); gd('giovani',2); gd('imprenditori',-2);}},
+   {l:'Aspetta una soluzione negoziata',e:'Prudenza apprezzata dalle cancellerie; accusa di ignavia in patria',pleases:'tecnico',f:()=>{repd(2); gd('giovani',-1); stampad(-1);}},
+ ]},
+ {id:'ms_es_dissidente',era:'contemporanea',min:'esteri',kick:'Crisi diplomatica',t:'Un dissidente in ambasciata',text:'Un oppositore di un regime si è rifugiato nella nostra ambasciata e chiede asilo. La polizia locale circonda l\'edificio.',ch:[
+   {l:'Concedi l\'asilo e tratta la sua uscita',e:'Coerenza sui diritti; mesi di assedio diplomatico',pleases:'progressista',f:()=>{repd(1); gd('giovani',3); gd('imprenditori',-2);}},
+   {l:'Convincilo a uscire con delle garanzie',e:'Crisi chiusa in fretta; le garanzie valgono quel che valgono',pleases:'tecnico',f:()=>{repd(-2); gd('imprenditori',2); stampad(-2);}},
+ ]},
+ {id:'ms_es_osservatori',era:'contemporanea',min:'esteri',kick:'Diplomazia',t:'Un voto truccato in un paese amico',text:'I nostri osservatori elettorali hanno visto brogli in un paese con cui facciamo molti affari. Il presidente rieletto aspetta le congratulazioni.',ch:[
+   {l:'Pubblica il rapporto degli osservatori',e:'Credibilità sui diritti; contratti a rischio',pleases:'progressista',f:()=>{repd(2); gd('imprenditori',-3); gd('giovani',2);}},
+   {l:'Congratulazioni di rito, rapporto nel cassetto',e:'Affari salvi; la stampa scopre il rapporto',pleases:'conservatore',f:()=>{gd('imprenditori',3); stampad(-3); repd(-1);}},
+ ]},
+ {id:'ms_es_debitopovero',era:'contemporanea',min:'esteri',kick:'Cooperazione',t:'Cancellare il debito di un paese povero',text:'Uno dei paesi più poveri del mondo non riesce a pagare quello che ci deve. Le comunità religiose e le organizzazioni umanitarie chiedono di cancellarlo.',ch:[
+   {l:'Cancellalo',e:'Gesto apprezzato nel mondo; un buco nei conti',pleases:'progressista',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; repd(3); gd('cattolici',3); gd('cetomedio',-1);}},
+   {l:'Allunga le scadenze',e:'Conti in ordine; delusione fra chi l\'aveva chiesto',pleases:'tecnico',f:()=>{gd('cattolici',-2); repd(1);}},
+ ]},
+ {id:'ms_es_reperti',era:'contemporanea',min:'esteri',kick:'Diplomazia pubblica',t:'Reperti trafugati in un museo straniero',text:'Un museo straniero espone reperti antichi portati via di nascosto dal nostro paese decenni fa, e rifiuta di restituirli. Gli archeologi chiedono di alzare la voce.',ch:[
+   {l:'Causa e pressione pubblica',e:'Orgoglio nazionale; il paese del museo si irrigidisce',pleases:'populista',f:()=>{gd('pensionati',2); gd('cetomedio',1); repd(-2);}},
+   {l:'Proponi un prestito lungo e mostre comuni',e:'Accordo possibile; agli archeologi non basta',pleases:'tecnico',f:()=>{repd(2); gd('giovani',1); stampad(-1);}},
+ ]},
+ {id:'ms_es_epidemia',era:'contemporanea',min:'esteri',kick:'Cooperazione',t:'Un\'epidemia in un paese lontano',text:'Un\'epidemia si allarga in un paese con cui abbiamo pochi rapporti. Il suo governo chiede medici e farmaci; le nostre scorte non sono infinite.',ch:[
+   {l:'Manda medici e farmaci',e:'Riconoscenza e prestigio; qualcuno teme il contagio',pleases:'progressista',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; repd(3); gd('pensionati',-2); gd('cattolici',1);}},
+   {l:'Fondi alle organizzazioni internazionali, scorte a casa',e:'Prudente; l\'aiuto arriva lento',pleases:'tecnico',f:()=>{repd(1); gd('pensionati',1);}},
+ ]},
+ {id:'ms_es_cittadinanza',era:'contemporanea',min:'esteri',kick:'Esteri',t:'La doppia cittadinanza con un paese amico',text:'Un paese da cui sono arrivati molti dei nostri lavoratori propone un accordo di doppia cittadinanza. Le sue comunità da noi lo aspettano da anni.',ch:[
+   {l:'Firma l\'accordo',e:'Comunità riconoscenti; c\'è chi parla di passaporti regalati',pleases:'progressista',f:()=>{gd('giovani',2); gd('lavoratori',2); gd('pensionati',-3);}},
+   {l:'Rinvia: prima una legge sulla cittadinanza',e:'Nessuna polemica; l\'altro paese si raffredda',pleases:'conservatore',f:()=>{gd('pensionati',2); repd(-2);}},
+ ]},
+ {id:'ms_es_ambasciatore',era:'contemporanea',min:'esteri',kick:'Rete diplomatica',t:'Il nostro ambasciatore nei dispacci rubati',text:'Un sito pubblica i dispacci riservati del nostro ambasciatore: giudizi sprezzanti sul governo che lo ospita. Il paese ospite chiede la sua testa.',ch:[
+   {l:'Richiamalo',e:'Crisi chiusa; la diplomazia si sente scaricata',pleases:'tecnico',f:()=>{repd(2); stampad(1); gd('cetomedio',-1);}},
+   {l:'Difendilo: scriveva il vero',e:'Orgoglio della rete; gelo col paese ospite',pleases:'populista',f:()=>{repd(-3); gd('pensionati',2); stampad(-1);}},
+ ]},
+ {id:'ms_es_tribuna',era:'contemporanea',min:'esteri',kick:'Diplomazia',t:'I grandi giochi in un paese che reprime',text:'Il prossimo grande evento sportivo internazionale si terrà in un paese accusato di incarcerare gli oppositori. Si discute se il governo debba sedere in tribuna.',ch:[
+   {l:'Nessun membro del governo in tribuna',e:'Segnale chiaro; gli atleti si sentono soli',pleases:'progressista',f:()=>{gd('giovani',3); repd(-1); gd('imprenditori',-1);}},
+   {l:'Delegazione ufficiale, come sempre',e:'Rapporti tranquilli; polemica in rete',pleases:'conservatore',f:()=>{repd(1); gd('imprenditori',1); gd('giovani',-2); stampad(-1);}},
+ ]},
+ {id:'ms_es_porto',era:'contemporanea',min:'esteri',kick:'Sicurezza nazionale',t:'Una potenza straniera vuole gestire un porto',text:'Una grande potenza lontana offre di ammodernare uno dei nostri porti e di gestirlo per cinquant\'anni. Gli alleati sono preoccupati.',ch:[
+   {l:'Accetta l\'offerta',e:'Investimenti e lavoro; gli alleati si raffreddano',pleases:'tecnico',f:()=>{gd('lavoratori',2); gd('imprenditori',2); repd(-3);}},
+   {l:'Rifiuta e cerca capitali altrove',e:'Fiducia degli alleati; il porto aspetta',pleases:'conservatore',f:()=>{repd(2); gd('lavoratori',-2);}},
+ ]},
+ {id:'ms_es_mediazione',era:'contemporanea',min:'esteri',kick:'Diplomazia',t:'Offrirsi come mediatori',text:'Due paesi confinanti sono sull\'orlo della guerra. Tutti e due si fidano abbastanza di noi da accettare una mediazione: se fallisce, la colpa sarà nostra.',ch:[
+   {l:'Offri la mediazione',e:'Prestigio se riesce; mesi di lavoro e rischio di figuraccia',pleases:'tecnico',f:()=>{repd(2); stampad(1);}},
+   {l:'Lascia fare alle organizzazioni internazionali',e:'Nessun rischio, nessuna gloria',pleases:'conservatore',f:()=>{repd(-1); gd('pensionati',1);}},
+ ]},
+ {id:'ms_es_turisti',era:'contemporanea',min:'esteri',kick:'Mobilità',t:'Niente visto per i turisti di un grande paese?',text:'Un grande paese da cui partono milioni di turisti chiede di abolire il visto per i suoi cittadini. Albergatori entusiasti, polizia di frontiera perplessa.',ch:[
+   {l:'Abolisci il visto',e:'Più turisti e più incassi; controlli più difficili',pleases:'tecnico',f:()=>{gd('imprenditori',3); gd('cetomedio',1); S.ind.sicurezza-=1;}},
+   {l:'Visto semplificato, ma resta',e:'Prudenza; il turismo protesta',pleases:'conservatore',f:()=>{S.ind.sicurezza+=1; gd('imprenditori',-2);}},
+ ]},
+ {id:'ms_es_scuse',era:'contemporanea',min:'esteri',kick:'Diplomazia pubblica',t:'Un paese chiede scuse ufficiali',text:'Il governo di un paese vicino chiede scuse ufficiali per un torto subito dal suo popolo molti decenni fa. Gli storici concordano sui fatti; una parte del paese no.',ch:[
+   {l:'Scuse ufficiali, con una cerimonia',e:'Pagina chiusa; i nazionalisti insorgono',pleases:'progressista',f:()=>{repd(3); gd('giovani',1); gd('pensionati',-3);}},
+   {l:'Rammarico, ma niente scuse formali',e:'Nessuna rottura in casa; rapporti freddi',pleases:'conservatore',f:()=>{gd('pensionati',2); repd(-2);}},
+ ]},
  // ----- DIFESA (+4) -----
  {id:'caserme',era:'universale',min:'difesa',kick:'Patrimonio',t:'Caserme dismesse da riusare',text:'Decine di caserme vuote nei centri urbani: alloggi, spazi pubblici o vendita?',ch:[
    {l:'Alloggi e servizi pubblici',e:'Patrimonio restituito alle città',pleases:'progressista',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; gd('giovani',3); gd('lavoratori',2);}},
@@ -7253,6 +7551,67 @@ const DOSSIERS=[
  {id:'ms_df_ospedali',era:'contemporanea',min:'difesa',kick:'Sanità militare',t:'Aprire gli ospedali militari ai civili',text:'Gli ospedali militari hanno letti vuoti mentre quelli civili sono pieni. Il ministero della salute propone di aprirli a tutti.',ch:[
    {l:'Aprili ai civili',e:'Letti in più per tutti',pleases:'progressista',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; gd('pensionati',2); gd('cetomedio',1);}},
    {l:'Restino militari',e:'Prontezza per le emergenze',pleases:'conservatore',f:()=>{S.ind.sicurezza+=1;}},
+ ]},
+ // L182-1 · varietà del ministro (4/10): quindici dossier del presente per il ministro della Difesa — era 'contemporanea', senza paesi.
+ {id:'ms_df_sindacato',era:'contemporanea',min:'difesa',kick:'Forze armate',t:'Un sindacato per i militari?',text:'Un gruppo di sottufficiali chiede di potersi associare in sindacato, come i poliziotti. I generali temono per la disciplina.',ch:[
+   {l:'Riconosci le associazioni, senza sciopero',e:'Personale ascoltato; i vertici mugugnano',pleases:'progressista',f:()=>{gd('lavoratori',2); gd('giovani',1); S.ind.sicurezza-=1;}},
+   {l:'No: la disciplina prima di tutto',e:'Vertici soddisfatti; malumore nelle caserme',pleases:'conservatore',f:()=>{gd('pensionati',1); S.ind.sicurezza+=1; gd('lavoratori',-2);}},
+ ]},
+ {id:'ms_df_piloti',era:'contemporanea',min:'difesa',kick:'Forze armate',t:'I piloti lasciano per le compagnie aeree',text:'I piloti militari, formati a spese dello stato, se ne vanno alle compagnie civili che pagano il triplo. Gli stormi restano a metà.',ch:[
+   {l:'Un premio forte per chi resta',e:'Gli stormi tengono; costa caro',pleases:'tecnico',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; S.ind.sicurezza+=2; gd('cetomedio',-1);}},
+   {l:'Obbligo di restare dieci anni dopo il brevetto',e:'Gratis per lo stato; ricorsi e meno domande',pleases:'conservatore',f:()=>{S.ind.sicurezza+=1; gd('giovani',-2);}},
+ ]},
+ {id:'ms_df_rumore',era:'contemporanea',min:'difesa',kick:'La difesa',t:'I caccia sopra le case',text:'Un quartiere vicino a una base aerea chiede di spostare i voli notturni di addestramento: nessuno dorme più. L\'aeronautica dice che di notte si vola anche in guerra.',ch:[
+   {l:'Sposta i voli notturni',e:'Quartiere sollevato; addestramento ridotto',pleases:'progressista',f:()=>{gd('cetomedio',2); S.ind.sicurezza-=1;}},
+   {l:'I voli restano: la prontezza non si tratta',e:'Piloti pronti; il quartiere fa ricorso',pleases:'conservatore',f:()=>{S.ind.sicurezza+=1; gd('cetomedio',-2); stampad(-1);}},
+ ]},
+ {id:'ms_df_strade',era:'contemporanea',min:'difesa',kick:'Sicurezza',t:'Soldati nelle strade delle città',text:'Dopo una serie di aggressioni, alcuni sindaci chiedono pattuglie dell\'esercito nelle stazioni e nelle piazze. I generali dicono che non è il loro mestiere.',ch:[
+   {l:'Manda i soldati, per sei mesi',e:'Cittadini rassicurati; reparti tolti all\'addestramento',pleases:'populista',f:()=>{gd('pensionati',3); gd('cetomedio',1); S.ind.sicurezza+=1; gd('giovani',-2);}},
+   {l:'Più poliziotti, non soldati',e:'Linea istituzionale; i sindaci si sentono soli',pleases:'tecnico',f:()=>{gd('pensionati',-2); gd('giovani',1);}},
+ ]},
+ {id:'ms_df_navi',era:'contemporanea',min:'difesa',kick:'La difesa',t:'Una flotta che invecchia',text:'Metà delle navi ha più di trent\'anni. La marina chiede un programma di costruzione; i cantieri nazionali sono pronti, i conti meno.',ch:[
+   {l:'Navi nuove nei cantieri nazionali',e:'Lavoro nei cantieri e flotta moderna; spesa per anni',pleases:'conservatore',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; gd('lavoratori',3); S.ind.sicurezza+=1;}},
+   {l:'Allunga la vita a quelle che ci sono',e:'Risparmio; avarie e navi ferme in porto',pleases:'tecnico',f:()=>{gd('lavoratori',-2); S.ind.sicurezza-=1;}},
+ ]},
+ {id:'ms_df_acquisizione',era:'contemporanea',min:'difesa',kick:'Industria della difesa',t:'Un\'azienda della difesa in vendita all\'estero',text:'Un fondo straniero vuole comprare un\'azienda che costruisce componenti per i nostri sistemi d\'arma. Il governo può fermare la vendita.',ch:[
+   {l:'Blocca la vendita',e:'Tecnologia protetta; gli investitori storcono il naso',pleases:'conservatore',f:()=>{S.ind.sicurezza+=1; gd('imprenditori',-2); gd('lavoratori',1);}},
+   {l:'Lascia vendere, con garanzie',e:'Capitali freschi; le garanzie dovranno reggere',pleases:'tecnico',f:()=>{gd('imprenditori',3); S.ind.sicurezza-=1;}},
+ ]},
+ {id:'ms_df_ufficiale',era:'contemporanea',min:'difesa',kick:'Forze armate',t:'Un ufficiale parla alla stampa',text:'Un ufficiale ha consegnato a un giornale documenti sugli errori di una missione all\'estero. Per alcuni è un traditore, per altri un testimone onesto.',ch:[
+   {l:'Commissione d\'inchiesta sugli errori',e:'Trasparenza; i vertici si sentono sotto accusa',pleases:'progressista',f:()=>{stampad(3); gd('giovani',2); S.ind.sicurezza-=1;}},
+   {l:'Procedimento disciplinare per l\'ufficiale',e:'Disciplina salva; la stampa grida alla censura',pleases:'conservatore',f:()=>{stampad(-3); gd('pensionati',1); S.ind.sicurezza+=1;}},
+ ]},
+ {id:'ms_df_reduci',era:'contemporanea',min:'difesa',kick:'Sicurezza del personale',t:'Il disagio di chi torna dalle missioni',text:'Un rapporto interno racconta di soldati tornati dalle missioni con insonnia, incubi e famiglie in pezzi. Pochi chiedono aiuto: si vergognano.',ch:[
+   {l:'Sostegno psicologico per tutti i reduci',e:'Un debito d\'onore pagato; costa',pleases:'progressista',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; gd('cetomedio',2); gd('cattolici',1);}},
+   {l:'Rafforza i servizi sanitari militari che ci sono',e:'Spesa contenuta; le associazioni chiedono di più',pleases:'tecnico',f:()=>{gd('cetomedio',-1); gd('pensionati',1);}},
+ ]},
+ {id:'ms_df_incendi',era:'contemporanea',min:'difesa',kick:'La difesa',t:'Gli aerei militari contro gli incendi',text:'Gli incendi dei boschi sono sempre più grandi e la protezione civile chiede gli aerei e gli elicotteri militari. Le ore di volo le paga la difesa.',ch:[
+   {l:'Un reparto antincendio stabile nell\'aeronautica',e:'Boschi difesi; addestramento ridotto',pleases:'progressista',f:()=>{gd('cetomedio',2); S.ind.ambiente+=1; S.ind.sicurezza-=1;}},
+   {l:'Solo nelle emergenze, e a rimborso',e:'Conti in ordine; ritardi nei giorni peggiori',pleases:'tecnico',f:()=>{gd('cetomedio',-1); stampad(-1);}},
+ ]},
+ {id:'ms_df_cybercomando',era:'contemporanea',min:'difesa',kick:'Sicurezza informatica',t:'Un comando per la guerra informatica',text:'La difesa vuole un comando cibernetico con informatici civili pagati come in un\'azienda privata: molto più dei colonnelli.',ch:[
+   {l:'Crea il comando con stipendi di mercato',e:'Talenti assunti; malumore fra gli ufficiali',pleases:'tecnico',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; S.ind.sicurezza+=2; gd('giovani',2);}},
+   {l:'Forma i militari che ci sono',e:'Nessuno scavalca la gerarchia; anni per essere pronti',pleases:'conservatore',f:()=>{gd('giovani',-1); gd('pensionati',1);}},
+ ]},
+ {id:'ms_df_pista',era:'contemporanea',min:'difesa',kick:'Patrimonio',t:'Un aeroporto militare per i voli civili',text:'Una città chiede di aprire la pista di una base aerea ai voli delle compagnie a basso costo. Il turismo ci guadagna; la base perde spazio.',ch:[
+   {l:'Apri la pista ai voli civili',e:'Turisti e lavoro in città; la base convive coi passeggeri',pleases:'tecnico',f:()=>{gd('imprenditori',2); gd('cetomedio',2); S.ind.sicurezza-=1;}},
+   {l:'La base resta militare',e:'Operatività intatta; la città protesta',pleases:'conservatore',f:()=>{S.ind.sicurezza+=1; gd('cetomedio',-2);}},
+ ]},
+ {id:'ms_df_carro',era:'contemporanea',min:'difesa',kick:'Cooperazione militare',t:'Il nuovo carro armato: da soli o con altri?',text:'I carri armati vanno sostituiti. Si può progettare il nuovo in casa, o insieme a due paesi alleati: costa meno, ma si decide in tre.',ch:[
+   {l:'Progetto comune con gli alleati',e:'Costi divisi e alleanze più strette; meno lavoro in patria',pleases:'tecnico',f:()=>{repd(2); gd('lavoratori',-2);}},
+   {l:'Progetto nazionale',e:'Lavoro e tecnologia in casa; conto più alto',pleases:'conservatore',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; gd('lavoratori',3); gd('imprenditori',1);}},
+ ]},
+ {id:'ms_df_ateneo',era:'contemporanea',min:'difesa',kick:'Industria della difesa',t:'Le università e la ricerca militare',text:'Un ateneo rifiuta un contratto di ricerca con la difesa: gli studenti hanno occupato il rettorato. Gli altri atenei aspettano di vedere come finisce.',ch:[
+   {l:'Rispetta la scelta e finanzia altri centri',e:'Pace negli atenei; la ricerca va altrove',pleases:'progressista',f:()=>{gd('giovani',3); gd('imprenditori',-1);}},
+   {l:'Niente fondi della difesa a chi rifiuta',e:'Messaggio chiaro; le piazze si riempiono',pleases:'conservatore',f:()=>{gd('giovani',-3); gd('pensionati',1); stampad(-1);}},
+ ]},
+ {id:'ms_df_archivi',era:'contemporanea',min:'difesa',kick:'La difesa',t:'Aprire gli archivi militari riservati',text:'Gli storici chiedono di aprire gli archivi militari di un periodo buio di molti decenni fa. Qualche famiglia scoprirebbe la verità; qualche nome ne uscirebbe male.',ch:[
+   {l:'Togli il segreto a tutto',e:'Verità e gratitudine degli storici; vecchie ferite riaperte',pleases:'progressista',f:()=>{gd('giovani',2); stampad(2); gd('pensionati',-2);}},
+   {l:'Apertura graduale, con una commissione',e:'Prudenza; accuse di insabbiamento',pleases:'tecnico',f:()=>{stampad(-1); gd('pensionati',1);}},
+ ]},
+ {id:'ms_df_mense',era:'contemporanea',min:'difesa',kick:'Forze armate',t:'Il rancio delle caserme',text:'Le foto dei pasti di una caserma girano in rete: porzioni scarse e cibo scadente. La ditta dell\'appalto aveva offerto il prezzo più basso.',ch:[
+   {l:'Revoca l\'appalto e rifai la gara sulla qualità',e:'Soldati soddisfatti; costa di più e ci vogliono mesi',pleases:'populista',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; gd('cetomedio',1); gd('pensionati',1);}},
+   {l:'Multa la ditta e controlli a sorpresa',e:'Risposta rapida; la ditta fa ricorso',pleases:'tecnico',f:()=>{stampad(1); gd('imprenditori',-1);}},
  ]},
  // ----- TRASVERSALE (+1) -----
  /* D3: kick rimappato (era 'Ricorrenza', orfano di scena) → bucket societacivile */
@@ -16781,7 +17140,7 @@ const ATTIVISTA_CAMP = [
     avvio:'Chiami allo sciopero: la piazza, veloce e rischiosa. La nutri con le battaglie pubbliche.',
     esito:'Lo sciopero riesce: la base ti riconosce come uno dei suoi — ma i poteri forti si raffreddano.',
     resa:function(q){ attB(Math.round(18*q)); gd('lavoratori',Math.round(10*q)); gd('giovani',Math.round(6*q)); gd('imprenditori',Math.round(-6*q)); gd('cetomedio',Math.round(-5*q)); } },   // SOLO base + affini (−moderati)
-  { id:'occupazione', tipo:'Occupazione', lane:'piazza', mesi:4, kick:'Casa',
+  { id:'occupazione', tipo:'Occupazione di case', lane:'piazza', mesi:4, kick:'Casa',
     avvio:'Occupi uno spazio abbandonato: un gesto forte. Lo nutri con le battaglie pubbliche.',
     esito:'L\'occupazione diventa un simbolo: i giovani ti seguono — ma i moderati si allontanano.',
     resa:function(q){ attB(Math.round(15*q)); gd('giovani',Math.round(10*q)); gd('lavoratori',Math.round(5*q)); gd('imprenditori',Math.round(-5*q)); gd('cetomedio',Math.round(-4*q)); } },   // SOLO base + affini (−moderati)
