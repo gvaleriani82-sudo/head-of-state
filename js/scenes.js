@@ -71,6 +71,7 @@ const SCENES = {
                     italia1970:S_+'stampa-anni70.webp', italia1980:S_+'stampa-anni80.webp',
                     italia1990:S_+'stampa-anni90.webp' },
   vitaprivata:    { base:S_+'vitaprivata-base.webp', florido:S_+'vitaprivata-florido.webp',
+                    grave:S_+'vitaprivata-grave.webp',                                             // L181-5: corridoio, cappotto e valigia (senza epoca: vale anche nelle porte, e il tono vince sull'epoca)
                     italia1950:S_+'vitaprivata-anni50.webp', italia1960:S_+'vitaprivata-anni60.webp',
                     italia1970:S_+'vitaprivata-anni70.webp', italia1980:S_+'vitaprivata-anni80.webp',
                     italia1990:S_+'vitaprivata-anni90.webp' },
@@ -207,12 +208,27 @@ const SCENE_AREA = ['casa-base-nordamerica', 'casa-base-latina', 'casa-base-asia
    di dieci anni non veda sempre la stessa (oggi `vitaprivata-base` fa la gran parte della vita privata: DESIGN-SCENE-VARIANTI.md).
    Lista-promessa accanto a SCENE_PAESE e SCENE_AREA: qui stanno i NOMI che hanno il file (`<nome reso>-v<N>`, dove il nome
    reso è quello che `scenaPaese()` ha già scelto: la variante d'area resta il primo tentativo, le numerate valgono dentro la stessa
-   area/paese). La rotazione la fa `scenaVariante()` (ui.js) e la accende `ROTAZIONE_VARIANTI`: spenta finché le immagini non
-   arrivano (le fa Cowork in arte-sorgente/scene-varianti/, le porta Code con un lotto a parte, che accende la costante). La guardia è
+   area/paese). La rotazione la fa `scenaVariante()` (ui.js) e la accende `ROTAZIONE_VARIANTI`: accesa dal L181-5 (5/10), quando
+   sono arrivate le immagini (le fa Cowork in arte-sorgente/scene-varianti/, le porta Code). La guardia è
    in verifica-asset.js (cartella = lista). La clip segue da sé: `clipDaSrc` legge il nome, quindi una variante ha la clip solo se
    `<nome>-vN` è in VIDEO_PRESENTI, altrimenti l'immagine ferma. */
-const SCENE_VARIANTI = [];
-const ROTAZIONE_VARIANTI = false;
+/* L181-5 (5/10): le 38 varianti di Cowork (arte-sorgente/scene-varianti/, giri 1 e 2). Non portate perché hanno un marchio o un testo
+   leggibile: `societacivile-base-nordamerica-v3` (l'ovale Ford sulla griglia del pick-up) e `vitaprivata-anni80-v4` («Happy …» sulla torta). */
+const SCENE_VARIANTI = ['vitaprivata-base-v2', 'vitaprivata-base-v3', 'vitaprivata-base-v4', 'vitaprivata-base-v5',
+  'vitaprivata-anni50-v2', 'vitaprivata-anni50-v3', 'vitaprivata-anni60-v2', 'vitaprivata-anni60-v3', 'vitaprivata-anni60-v4',
+  'vitaprivata-anni70-v2', 'vitaprivata-anni70-v3', 'vitaprivata-anni70-v4', 'vitaprivata-anni80-v2', 'vitaprivata-anni80-v3',
+  'vitaprivata-anni90-v2', 'vitaprivata-anni90-v3', 'vitaprivata-anni90-v4',
+  'esteri-base-v2', 'esteri-base-v3', 'esteri-base-v4', 'retro-canale-v2', 'retro-canale-v3', 'retro-canale-v4',
+  'telefono-oggi-v2', 'telefono-oggi-v3', 'telefono-oggi-v4',
+  'societacivile-base-v2', 'societacivile-base-v3', 'societacivile-base-v4', 'societacivile-base-nordamerica-v2',
+  'societacivile-base-latina-v2', 'societacivile-base-latina-v3', 'societacivile-base-africa-v2', 'societacivile-base-africa-v3',
+  'societacivile-base-asiaest-v2', 'societacivile-base-asiaest-v3', 'societacivile-base-asiasud-v2', 'societacivile-base-asiasud-v3'];
+const ROTAZIONE_VARIANTI = true;
+/* L181-5 · LE VARIANTI D'EUROPA: varianti di una scena neutra che mostrano l'Europa (tetti e abbaini dalla finestra, delegati tutti
+   europei, la sala gotica). `scenaVariante()` le salta quando il paese della partita non è in Europa (`AREA_DI_PAESE[S.paese]` diverso
+   da 'europa': il presente americano o asiatico e la porta `us1950`); la neutra e le altre varianti restano. Ogni nome deve stare anche in
+   SCENE_VARIANTI (lo controlla verifica-asset.js). */
+const SCENE_VARIANTI_EUROPA = ['vitaprivata-base-v2', 'vitaprivata-base-v3', 'esteri-base-v2', 'esteri-base-v4'];
 
 /* ===== L151-2 — LE IMMAGINI DEI DECENNI (`assets/scenes/porta-decennio-<anno>.webp`): la miniatura delle porte storiche che non
    hanno una `soglia-*` loro (Regno Unito, Francia, Germania) nella pagina degli storici — `sogliaSrc()` in ui.js. Lista-promessa:

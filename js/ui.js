@@ -630,7 +630,9 @@ function scenaVariante(p, chiave){
   if(typeof p!=='string' || typeof ROTAZIONE_VARIANTI==='undefined' || !ROTAZIONE_VARIANTI || typeof SCENE_VARIANTI==='undefined' || !SCENE_VARIANTI.length) return p;
   var m=/^(.*\/)?([^\/]+)\.webp$/.exec(p); if(!m) return p;
   var nome=m[2], pre=nome+'-v', lista=[nome];
-  SCENE_VARIANTI.forEach(function(n){ if(n.indexOf(pre)===0 && /^\d+$/.test(n.slice(pre.length))) lista.push(n); });
+  /* L181-5: le varianti che mostrano l'Europa (SCENE_VARIANTI_EUROPA, scenes.js) solo dove il paese è in Europa (AREA_DI_PAESE). */
+  var fuoriEuropa=(typeof SCENE_VARIANTI_EUROPA!=='undefined' && typeof AREA_DI_PAESE!=='undefined' && typeof S!=='undefined' && S && S.paese && AREA_DI_PAESE[S.paese] && AREA_DI_PAESE[S.paese]!=='europa');
+  SCENE_VARIANTI.forEach(function(n){ if(n.indexOf(pre)===0 && /^\d+$/.test(n.slice(pre.length)) && !(fuoriEuropa && SCENE_VARIANTI_EUROPA.indexOf(n)>=0)) lista.push(n); });
   if(lista.length<2) return p;
   var mk=(typeof S!=='undefined'&&S)?(S.year*12+S.month):0;
   if(VARIANTE_MESE!==mk){ for(var k in VARIANTE_SCELTA) delete VARIANTE_SCELTA[k]; VARIANTE_MESE=mk; }
@@ -682,6 +684,8 @@ function scenaNotte(stadio, ultima, vinta){ var M=_sm('notte'); if(!M) return nu
 function scenaTelefono(missed){ var M=_sm('telefono'); if(!M) return null;
   if(missed) return M.corridoio;                                               // la chiamata appena chiusa (universale)
   if(typeof eraCombacia==='function' && (eraCombacia('italia1950')||eraCombacia('italia1960'))) return M.storico;
+  /* L181-5: le varianti di `telefono-oggi` (smartphone) ruotano SOLO nel presente; nelle porte la scena resta quella di sempre. */
+  if(typeof S!=='undefined' && S && (!S.scenario || S.scenario==='presente')) return scenaVariante(M.oggi, (S.year*12+S.month)+':telefono');
   return M.oggi; }
 /* L9-1 — mappa gli ESITI reali di gameOver sui 4 finali (accorpati per tono; vedi report L9-1). */
 function scenaFinale(reason){ var M=_sm('finale'); if(!M) return null;
@@ -1553,8 +1557,8 @@ function pickCand(mid,i){APT.sel[mid]=i; renderAppoint();}
 /* --- Helper di disegno --- */
 function barColor(v){return v>=66?'var(--pos)':v>=40?'var(--warn)':'var(--neg)';}
 /* CANTIERE BUDGET — formattatore denaro (valore in MILIONI; separatore via fmt()). VALUTA-AWARE (fix cifre d'epoca):
-   se S.valuta è impostata (es. lira nel '50) → simbolo d'epoca, ancorato a «mld» (14.900 mld di lire, niente auto-«tln»
-   che suonerebbe posticcio). Default (presente, S.valuta null) = comportamento € IDENTICO. */
+   se S.valuta è impostata (es. lira nel '50) → simbolo d'epoca, ancorato a «mld» («L. 14.900 mld», niente auto-«tln»
+   che suonerebbe posticcio; dal L189-2 il simbolo senza il nome della valuta). Default (presente, S.valuta null) = comportamento € IDENTICO. */
 function euro(mln){ if(mln==null||isNaN(mln)) return ''; var a=Math.abs(mln);
   var V=(typeof S!=='undefined' && S && S.valuta) || null;
   /* L75-3 — LA VALUTA D'EPOCA HA DUE GRADINI, non uno. Fino a oggi il ramo d'epoca stampava SEMPRE in miliardi e il
@@ -1565,10 +1569,14 @@ function euro(mln){ if(mln==null||isNaN(mln)) return ''; var a=Math.abs(mln);
      viene letto. E la soglia NON sposta l'Italia, misurato prima di scriverla (.claude/misura-valuta.js): su tutte e
      sei le porte italiane nessuna cifra resa scende sotto i 1.000 mln (la più piccola è 47.680), quindi il ramo-lira
      è byte-identico per costruzione, non per fiducia. Decimali: la stessa regola del gradino dei miliardi (uno sotto
-     la decina), così «£ 42 mln» e «£ 5,2 mln» si leggono come «£ 4,7 mld» e «£ 228 mld». */
+     la decina), così «£ 42 mln» e «£ 5,2 mln» si leggono come «£ 4,7 mld» e «£ 228 mld».
+     ⚑ L189-2 (D195) — IL SIMBOLO E BASTA, senza la parola. Fino al 5/10 il ramo stampava il simbolo E il nome della valuta
+     («$ 600 mln dollari», «£ 4,7 mld sterline», «L. 14.900 mld lire»), mentre gli esempi qui sopra e il ramo del presente
+     (`CUR.sym` + cifra + `mld`) dicevano solo il simbolo. Ora le unità sono le chiavi del presente, T('mln')/T('mld'); i
+     campi `mln`/`mld` della porta non si stampano più: `mln` resta il segno che la porta ha il gradino dei milioni. */
   if(V){ var gl=a/1000;
-    if(a<1000 && V.mln) return V.sym+' '+fmtMigliaia(a, a<10?1:0)+' '+T(V.mln);
-    return V.sym+' '+fmtMigliaia(gl, gl<10?1:0)+' '+T(V.mld); }   // valuta d'epoca: mld (con separatore migliaia)
+    if(a<1000 && V.mln) return V.sym+' '+fmtMigliaia(a, a<10?1:0)+' '+T('mln');
+    return V.sym+' '+fmtMigliaia(gl, gl<10?1:0)+' '+T('mld'); }   // valuta d'epoca: mld (con separatore migliaia)
   /* P2 — la valuta segue il paese. L'EUROZONA (e ogni paese non mappato) resta al RAMO € ATTUALE, INTATTO al byte.
      Gli altri passano dal ramo convertito: cross PRIMA dei gradini, «tln» sbloccato, separatore migliaia, decimali a scalare. */
   var CUR=(typeof VALUTE!=='undefined' && typeof S!=='undefined' && S) ? VALUTE[S.paese] : null;
@@ -3975,7 +3983,8 @@ function sceglieQuale(i){ QUALE_APERTO=null; fissoFoglio(); selArea(i); }
 /* ================================================================================================================
    L182-3 · IL GIRO SUL TAVOLO — la presentazione (D168). La scena si apre nel FOGLIETTO del tavolo (lo stesso dei segni fissi e
    di «Quale?»), mai in un modale a tutto schermo: titolo, testo, le scelte con la riga-effetto e la riga dell'umore; scelta fatta,
-   il foglietto si chiude e la riga va nel registro. Il tavolo non si riscrive: nessun svg nuovo. Lo stato aperto è GIRO_APERTO
+   il foglietto si chiude e la riga va nel registro; dal L188-2 (D190) una scelta con `costo` porta la targhetta `costoChip`, come
+   nelle carte dell'agenda (prima la cassa si toccava senza dirlo). Il tavolo non si riscrive: nessun svg nuovo. Lo stato aperto è GIRO_APERTO
    (game.js, transitorio): a mese cambiato, o se la scena non c'è più, il foglietto lo lascia cadere.
    ================================================================================================================ */
 function umoreParola(u){ return T(u>0 ? 'caldo' : u<0 ? 'freddo' : 'tiepido'); }
@@ -3991,7 +4000,7 @@ function giroFoglio(f){
     `<div class="tv-foglio-r" style="font-size:12.5px">${arcoTerrSub(T(def.text),TE)}</div>`+
     `<div class="choices" style="display:flex;flex-direction:column;gap:7px;margin-top:8px">`+
     def.ch.map(function(c,i){ const u=c.u||0, ur=u ? `<span class="oe">${cap(arcoTerrSub(T(u>0?'%TERR: più caldo':'%TERR: più freddo'),TE))}</span>` : '';
-      return `<button class="opt" onclick="resolveGiro(${i})"><span class="ol">${T(c.l)}</span><span class="oe">${T(c.e)}</span>${ur}</button>`; }).join('')+
+      return `<button class="opt" onclick="resolveGiro(${i})"><span class="ol">${T(c.l)}</span><span class="oe">${T(c.e)}</span>${ur}${costoChip(c)}</button>`; }).join('')+   // L188-2 (D190): la targhetta del costo, come in ogni altra carta
     `</div>`;
   if(f.innerHTML!==h) f.innerHTML=h;
   f.setAttribute('aria-label', arcoTerrSub(T(def.t),TE));

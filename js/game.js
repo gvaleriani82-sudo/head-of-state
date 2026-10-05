@@ -5119,7 +5119,17 @@ function luoghiSub(str){
   return String(str).replace(/%ACAPITALE/g, aCapitale()).replace(/%CAPITALE/g, capitalePaese()).replace(/%SEDE/g, sedeGovernoPaese());
 }
 /* %TERR → il nome dell'area, risolto a render (come %FILO per gli archi) */
-function arcoTerrSub(str, TE){ if(str==null) return str; var nome=(typeof nomeTerr==='function' && TE)?nomeTerr(TE):T('il territorio'); return String(str).replace(/%TERR/g, nome); }
+/* L187-2 (D188) · IL NUMERO DEL TERRITORIO. Dove %TERR è soggetto, il verbo (e solo ciò che si accorda con lui) si scrive
+   %TV{singolare|plurale}: «e %TERR %TV{trema|tremano}». Lo risolve QUI, lo stesso punto che sostituisce %TERR, leggendo il numero
+   DICHIARATO sul territorio — `plurale:true` per l'italiano (l'articolo: i Paesi Baschi, le West Midlands), `pluraleEn:true` per
+   l'inglese (East/West Midlands); assente = singolare, quindi per ogni altro territorio la frase resa è identica a prima (prova:
+   .claude/prova-l187-2-identita.js). Senza territorio («il territorio») vale il singolare. È la stessa idea di nomeGruppo/gruppoPlurale. */
+function arcoTerrSub(str, TE){ if(str==null) return str; var nome=(typeof nomeTerr==='function' && TE)?nomeTerr(TE):T('il territorio');
+  var pl=!!(TE && ((typeof curLang==='function' && curLang()==='en') ? TE.pluraleEn : TE.plurale));
+  /* L188-2 (D192): in inglese, DENTRO la frase (non all'inizio della stringa), un territorio può dichiarare `nomeEnFrase` col suo
+     articolo («and the East Midlands are waiting»); all'inizio di stringa (le righe dell'umore «%TERR: …») vale nomeEn. nomeTerr() non cambia. */
+  var nomeFrase=(TE && TE.nomeEnFrase && typeof curLang==='function' && curLang()==='en') ? TE.nomeEnFrase : nome;
+  return String(str).replace(/%TV\{([^|}]*)\|([^}]*)\}/g, function(m, s, p){ return pl ? p : s; }).replace(/%TERR/g, function(m, off){ return off>0 ? nomeFrase : nome; }); }
 /* Decompone il risultato nazionale nei territori interessati: quota locale = 50 + onda (margine) + lean×asseBlocco×4 + rumore.
    >50 = controllato dal tuo blocco. Cambio lato → nuovo titolare (partito vincente più vicino al lean). Popola ris.aree + ris.territoriDopo. */
 function decidiTerritori(ris){
