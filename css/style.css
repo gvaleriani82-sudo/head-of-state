@@ -741,6 +741,11 @@
   /* RIDOTTO (L113-1 §5): il cambio di mano delle aree è informazione e resta come transizione di fill; il cassetto
      che sale diventa una dissolvenza. SPENTO: tutto di colpo (la regola unica di sopra). */
   html.mov-ridotto .tv-area{ transition:fill .6s ease, fill-opacity .6s ease !important; }
+  /* L196-3 · la terra dipinta (ui.js, terraDipintaHtml): nasce trasparente sopra la terra del codice e arriva con una
+     dissolvenza breve quando il file è pronto (D165: nessun salto). Ridotto la tiene (è una dissolvenza), spento no. */
+  .tv-terra-d{ opacity:0; transition:opacity .45s ease; }
+  .tv-terra-d.pronta{ opacity:1; }
+  html.mov-ridotto .tv-terra-d{ transition:opacity .45s ease !important; }
   /* L113-5 · LA NOTTE SUL TAVOLO (ui.js, notteTavolo). Il tavolo — lo stesso nodo — sale in alto e prende il 42% dello schermo,
      il contenuto della notte sta in un foglio in basso (58%); lo sfondo-scena resta dentro il foglio. Sopra il tavolo le RIGHE
      (il voto dell'area); il colore pieno sotto resta il controllo. Durante la notte il tavolo non si tocca e i segnalini, la

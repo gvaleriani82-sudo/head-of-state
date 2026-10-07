@@ -138,14 +138,46 @@ const VIDEO_PRESENTI = ['home-hero', 'partito-base', 'vitaprivata-base', 'retro-
   'porta-decennio-1950', 'porta-decennio-1960', 'porta-decennio-1970', 'porta-decennio-1980', 'porta-decennio-1990', 'porta-decennio-2000',
   /* 3/10 (L174-4): le clip di FINE ANNO, una per verdetto del bilancio di gennaio (`verdettoBilancio().k`). Non sono carte: le mette
      `mostraBilancio()` in cima al modale con `scenaMomentoHtml` (striscia, come intervista e telefonata); il poster è il .webp omonimo. */
-  'fineanno-buono', 'fineanno-lucieombre', 'fineanno-difficile', 'fineanno-nuovocapitolo'];
+  'fineanno-buono', 'fineanno-lucieombre', 'fineanno-difficile', 'fineanno-nuovocapitolo',
+  /* 5/10 (L192-5): la clip della variante della cucina (`vitaprivata-base-v2`, giro 3 di Cowork); quella del balcone (-v3) no: la coperta
+     si muove troppo e l'ultimo fotogramma non torna sull'immagine ferma (D165), la rifà Cowork. */
+  'vitaprivata-base-v2',
+  /* 5/10 (L192-6): balcone rifatto, camera con la pioggia, poltrona col giradischi — 10 s, tornano sull'immagine alla fine (cucitura
+     sullo schermo 1,1-1,7: girano in tondo come le basi). */
+  'vitaprivata-base-v3', 'vitaprivata-base-v4', 'vitaprivata-base-v5',
+  /* 5/10 (L192-7): la sala circolare e la terrazza (esteri -v5, -v6: la -v6 esce dal 1990 come la sua immagine, SCENE_VARIANTI_REGOLE)
+     e il soggiorno con la poltrona (vitaprivata -v6); la cucina -v2 rifatta a camera ferma sostituisce l'avvicinamento (file vecchio in
+     arte-sorgente/scene-ritirate/clip-l192-7/). Cuciture sullo schermo: cucina 3,1, -v5 3,1, terrazza 4,0, soggiorno 1,4.
+     6/10 (L195-0, D223): il soggiorno (vitaprivata -v6) è uscito — un buio del 42% a 1,5 s si vede anche in un giro solo, e
+     CLIP_UNA_VOLTA non lo toglie; l'immagine resta in rotazione, ferma col Ken Burns; la clip è in
+     arte-sorgente/scene-ritirate/clip-l195-0/ e la rifà Cowork-chat senza variazione di luce.
+     6/10 (L192-8): il soggiorno rifatto (luce ferma: escursione 1,2 su 255 contro 14,5 della clip ritirata), la veranda (-v7, +7% di luce
+     nei primi due secondi, nessun calo) e la via europea al tramonto (casa-base-v2: esce dal 1970 e solo in Europa come la sua immagine,
+     la sua riga in SCENE_VARIANTI_REGOLE, aree:['europa']). Cuciture sullo schermo 1,2 · 2,2 · 2,4: girano in tondo.
+     6/10 (L197-9): le case d'area di Asia del Sud (il vicolo col risciò), America Latina (la salita con la buganvillea, 9,2 s: tagliata
+     prima che entri una donna in primo piano) e Nord America (villette e aceri, dal 1990 come la sua immagine): seguono le regole delle
+     loro immagini, nessuna riga nuova.
+     6/10 (L197-10): la casa d'Africa rifatta (panni stesi, cucitura 3,3: gira), il vicolo giapponese (cucitura 5,0, la luce sale del
+     4% nel primo secondo: un giro solo, in CLIP_UNA_VOLTA), il tavolo dei negoziati (esteri -v2, 1,5: gira) e il banchetto di stato
+     (esteri -v4, i camerieri si spostano: 7,1, in CLIP_UNA_VOLTA). Seguono le regole delle loro immagini (Giappone; Europa).
+     6/10 (L197-11): il vicolo giapponese RIFATTO a luce ferma (cucitura 2,2: gira in tondo, uscito da CLIP_UNA_VOLTA; la vecchia in
+     arte-sorgente/scene-ritirate/l197-11/) e i due telefoni d'epoca, momenti della telefonata (telefonoEpoca, ui.js): anni '70
+     (1975-89; la camera si avvicina e sale il fumo, cucitura 5,9: un giro solo, in CLIP_UNA_VOLTA) e anni '90 (1990-2009, cucitura 2,0). */
+  'esteri-base-v5', 'esteri-base-v6', 'vitaprivata-base-v6', 'vitaprivata-base-v7', 'casa-base-v2',
+  'casa-base-asiasud-v2', 'casa-base-latina-v2', 'casa-base-nordamerica-v2',
+  'casa-base-africa-v2', 'casa-base-asiaest-v2', 'esteri-base-v2', 'esteri-base-v4',
+  'telefono-anni70', 'telefono-anni90'];
 
 /* ===== L181-4 — LE CLIP CHE NON GIRANO: un giro solo, poi l'ultimo fotogramma tenuto. Le altre clip di scena girano in tondo
    (`loop`) perché il loro ultimo fotogramma torna sul primo (cucitura ≤ 3,6 su 255, misurata sullo schermo); queste no — le porte
    che si aprono di fine anno (cucitura 19-73) e la festa della notte vinta (28) — e girando saltavano indietro ogni 4-5 secondi.
    `videoHtml` (ui.js) non mette loro `loop`, non le rimette «all'ora» (VIDEO_T0: partono sempre dal fotogramma 0) e il testimone non
    le fa ripartire finite. Misura: `.claude/l181-4-schermo.js`; ogni nome dev'essere in VIDEO_PRESENTI (`verifica-asset.js`). */
-const CLIP_UNA_VOLTA = ['fineanno-buono', 'fineanno-lucieombre', 'fineanno-difficile', 'fineanno-nuovocapitolo', 'notte-vittoria'];
+const CLIP_UNA_VOLTA = ['fineanno-buono', 'fineanno-lucieombre', 'fineanno-difficile', 'fineanno-nuovocapitolo', 'notte-vittoria',
+  'esteri-base-v4', 'telefono-anni70'];   // L197-10: cucitura 7,1 (i camerieri si spostano) · L197-11: 5,9 (la camera si avvicina, sale il fumo)
+                            // (Il vicolo casa-base-asiaest-v2 di L197-10 è uscito da qui: rifatto a luce ferma, cucitura 2,2, L197-11.)
+                            // (Il soggiorno vitaprivata-base-v6 di L192-7 è uscito con la sua clip: L195-0, D223.)
+                            // (La cucina -v2 di L192-6 è uscita da qui: rifatta a camera ferma, cucitura 3,1, gira in tondo.)
 
 /* ===== L178-3 — I RITRATTI VIVI (`assets/video/pg-<id>.mp4`, 6 s, 540×960, muti; poster `assets/ui/pg-<id>-vivo.webp`). Solo il
    TUO personaggio è vivo (`S.personaggio.avatar`, un id di AVATARS): i ritratti dei ministri e dei candidati restano fermi. La clip
@@ -213,7 +245,7 @@ const SCENE_AREA = ['casa-base-nordamerica', 'casa-base-latina', 'casa-base-asia
    in verifica-asset.js (cartella = lista). La clip segue da sé: `clipDaSrc` legge il nome, quindi una variante ha la clip solo se
    `<nome>-vN` è in VIDEO_PRESENTI, altrimenti l'immagine ferma. */
 /* L181-5 (5/10): le 38 varianti di Cowork (arte-sorgente/scene-varianti/, giri 1 e 2). Non portate perché hanno un marchio o un testo
-   leggibile: `societacivile-base-nordamerica-v3` (l'ovale Ford sulla griglia del pick-up) e `vitaprivata-anni80-v4` («Happy …» sulla torta). */
+   leggibile: `societacivile-base-nordamerica-v3` (l'ovale Ford sulla griglia del pick-up) e `vitaprivata-anni80-v4` («Happy …» sulla torta) — rifatte da Cowork e portate in L192-6. */
 const SCENE_VARIANTI = ['vitaprivata-base-v2', 'vitaprivata-base-v3', 'vitaprivata-base-v4', 'vitaprivata-base-v5',
   'vitaprivata-anni50-v2', 'vitaprivata-anni50-v3', 'vitaprivata-anni60-v2', 'vitaprivata-anni60-v3', 'vitaprivata-anni60-v4',
   'vitaprivata-anni70-v2', 'vitaprivata-anni70-v3', 'vitaprivata-anni70-v4', 'vitaprivata-anni80-v2', 'vitaprivata-anni80-v3',
@@ -222,13 +254,37 @@ const SCENE_VARIANTI = ['vitaprivata-base-v2', 'vitaprivata-base-v3', 'vitapriva
   'telefono-oggi-v2', 'telefono-oggi-v3', 'telefono-oggi-v4',
   'societacivile-base-v2', 'societacivile-base-v3', 'societacivile-base-v4', 'societacivile-base-nordamerica-v2',
   'societacivile-base-latina-v2', 'societacivile-base-latina-v3', 'societacivile-base-africa-v2', 'societacivile-base-africa-v3',
-  'societacivile-base-asiaest-v2', 'societacivile-base-asiaest-v3', 'societacivile-base-asiasud-v2', 'societacivile-base-asiasud-v3'];
+  'societacivile-base-asiaest-v2', 'societacivile-base-asiaest-v3', 'societacivile-base-asiasud-v2', 'societacivile-base-asiasud-v3',
+  /* L192-5 (5/10): il giro 3 di Cowork, 17 varianti. Non portate (testo leggibile o marchio): `casa-base-v2` (l'insegna sopra la serranda)
+     e `casa-base-nordamerica-v2` (l'ovale sulla griglia del pick-up e la sigla sul parafango) — rifatte e portate in L192-6. Le varianti d'area e di decennio seguono
+     già la loro base (l'area vale solo nel presente, il decennio solo nel suo); le regole d'anno e d'area in SCENE_VARIANTI_REGOLE. */
+  'vitaprivata-base-v6', 'vitaprivata-base-v7', 'esteri-base-v5', 'esteri-base-v6',
+  'lavoro-anni50-v2', 'lavoro-anni80-v2', 'lavoro-anni90-v2', 'crisi-base-nordamerica-v2', 'crisi-base-latina-v2',
+  'partito-base-v2', 'partito-anni90-v2', 'casa-base-africa-v2', 'casa-base-asiasud-v2', 'casa-base-latina-v2', 'casa-base-asiaest-v2',
+  'elezioni-base-v2', 'lavoro-base-v2',
+  /* L192-6 (5/10): le due rifatte (`casa-base-v2` senza insegne, `casa-base-nordamerica-v2` senza il pick-up) e due delle «da rifare» di
+     L181-5 (`societacivile-base-nordamerica-v3` senza veicoli in primo piano, `vitaprivata-anni80-v4` con la torta senza scritte); la
+     terza, `societacivile-base-asiaest-v3`, è lo stesso nome rifatto in fotografia (il file è nuovo, la lista no). */
+  'casa-base-v2', 'casa-base-nordamerica-v2', 'societacivile-base-nordamerica-v3', 'vitaprivata-anni80-v4'];
 const ROTAZIONE_VARIANTI = true;
 /* L181-5 · LE VARIANTI D'EUROPA: varianti di una scena neutra che mostrano l'Europa (tetti e abbaini dalla finestra, delegati tutti
    europei, la sala gotica). `scenaVariante()` le salta quando il paese della partita non è in Europa (`AREA_DI_PAESE[S.paese]` diverso
    da 'europa': il presente americano o asiatico e la porta `us1950`); la neutra e le altre varianti restano. Ogni nome deve stare anche in
    SCENE_VARIANTI (lo controlla verifica-asset.js). */
 const SCENE_VARIANTI_EUROPA = ['vitaprivata-base-v2', 'vitaprivata-base-v3', 'esteri-base-v2', 'esteri-base-v4'];
+/* L192-5 · LE REGOLE D'EPOCA E DI LUOGO di una variante (coerenza paese e decennio, regola di Giacomo): `dal`/`fino` (anni compresi, letti
+   su S.year), `aree` (AREA_DI_PAESE[S.paese]) e `paesi` (S.paese). `scenaVariante()` (ui.js) salta la variante dove una regola non vale;
+   la base e le altre varianti restano. Additiva: una variante senza riga ruota ovunque, come prima. Ogni nome deve stare anche in
+   SCENE_VARIANTI (lo controlla verifica-asset.js, sezione (ao)). */
+const SCENE_VARIANTI_REGOLE = {
+  'partito-base-v2':      { fino:1974, aree:['europa', 'nordamerica'] },   // la riunione notturna col fumo e la caffettiera: anni '50-'60
+  'elezioni-base-v2':     { dal:1990, aree:['europa'] },                   // il seggio in palestra con l'urna trasparente
+  'lavoro-base-v2':       { dal:1990 },                                    // i giubbotti ad alta visibilità
+  'casa-base-asiaest-v2': { paesi:['giappone'] },                          // un vicolo giapponese (la Corea tiene la base d'area)
+  'casa-base-v2':         { dal:1970, aree:['europa'] },                   // L192-6: la via di palazzine europee
+  'casa-base-nordamerica-v2': { dal:1990 },                                // L192-6: la base d'area esce solo nel presente: la riga dice la regola
+  'esteri-base-v6':       { dal:1990 }                                     // L192-6: la piscina a sfioro, l'architettura di oggi
+};
 
 /* ===== L151-2 — LE IMMAGINI DEI DECENNI (`assets/scenes/porta-decennio-<anno>.webp`): la miniatura delle porte storiche che non
    hanno una `soglia-*` loro (Regno Unito, Francia, Germania) nella pagina degli storici — `sogliaSrc()` in ui.js. Lista-promessa:
@@ -242,6 +298,14 @@ const PORTE_DECENNIO = [1950, 1960, 1970, 1980, 1990, 2000];
    tiene allineate lista e cartella. I nomi possibili sono i sette di PEDINE_NOMI (lo stile C di PROMPT-TAVOLO-CAMPIONI.md):
    un nome fuori da lì è rosso. Le sorgenti stanno in `arte-sorgente/tavolo/` e si convertono con
    `node .claude/tavolo-prova/converti-pedine.js`. Dove va ogni pedina lo decide `pedinaDi()` in ui.js. */
+/* L196-3 (D230) · LA TERRA DIPINTA del tavolo: `assets/tavolo/<file>.webp` (da `arte-sorgente/tavolo-campioni/C-terra.jpg`,
+   `node .claude/tavolo-prova/converti-terra.js --scrivi=1280:0.75`), stesa UNA volta sola sul disegno del paese (scalata a
+   coprire il viewBox, centrata: niente ripetizione, niente cucitura). `w`/`h` sono le dimensioni del file (il rapporto serve a
+   coprire). La mette `terraDipintaHtml()` (ui.js) SOPRA la terra del codice, che resta il ripiego: con `reteLeggera()` la
+   dipinta non nasce, e finché il file non è caricato sta a opacità 0 (poi una dissolvenza breve). Non è una pedina:
+   `verifica-asset.js` la toglie dal conto delle pedine e la guarda a parte (file presente, tetto 400 KB). `null` = solo la
+   terra del codice, come prima. */
+const TERRA_DIPINTA = { file:'terra', w:1280, h:1714 };
 const PEDINE_NOMI = ['palazzo','citta','industria','campagna','porto','universita','montagna','sede'];
 const PEDINE_PRESENTI = ['palazzo','citta','campagna','porto','universita','sede','industria','montagna'];   // L152-4 (30/9): le cinque dello stile C ritagliate pulite (ritaglia-pedine.js). L173-5 (3/10): `industria` e `montagna` rifatte su fondo grigio e ritagliate pulite col modo «misurato» (le -v1 non lo erano). Sul tavolo oggi non se ne vede nessuna: tutte aspettano il campo `carattere` (il ripiego «tipo città → citta» di pedinaDi è spento: la pedina finiva sotto il cerchio della sua città).
 
@@ -252,7 +316,8 @@ const SCENA_MOMENTO = {
   intervista: { aula:S_+'intervista-aula.webp', studio:S_+'intervista-studio.webp', vertice:S_+'intervista-vertice.webp',
                 studio_italia1950:S_+'intervista-studio-anni50.webp', studio_italia1960:S_+'intervista-studio-anni60.webp' },
   notte:      { attesa:S_+'notte-attesa.webp', spoglio:S_+'notte-spoglio.webp', vittoria:S_+'notte-vittoria.webp', sconfitta:S_+'notte-sconfitta.webp' },
-  telefono:   { oggi:S_+'telefono-oggi.webp', storico:S_+'telefono-anni50.webp', corridoio:S_+'telefono-corridoio.webp' },
+  telefono:   { oggi:S_+'telefono-oggi.webp', storico:S_+'telefono-anni50.webp', corridoio:S_+'telefono-corridoio.webp',
+                anni70:S_+'telefono-anni70.webp', anni90:S_+'telefono-anni90.webp' },   // L192-5: i telefoni d'epoca che L191-2 aspettava (telefonoEpoca in ui.js: 1975-89, 1990-2009)
   finale:     { trionfo:S_+'finale-trionfo.webp', dignita:S_+'finale-dignita.webp', caduta:S_+'finale-caduta.webp', oblio:S_+'finale-oblio.webp',
                 silurato:S_+'ministro-cacciato.webp' },   // L127-1b: la fine `silurato` è la scrivania svuotata
   /* L151-2: la voce `soglia` e il suo lettore `scenaSoglia()` (ui.js) sono tolti — nessuno li chiamava. I file `soglia-*.webp`

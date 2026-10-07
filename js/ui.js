@@ -626,13 +626,23 @@ function scenaPaese(p){
    volta. Spenta o senza varianti: il nome torna intatto. */
 const VARIANTE_SCELTA={}, VARIANTE_ULTIMA={};   // transitori (mai in S)
 let VARIANTE_MESE=null;
+/* L192-5: la regola d'epoca e di luogo di una variante (SCENE_VARIANTI_REGOLE, scenes.js) — senza riga, vale ovunque. */
+function varianteRegolaOk(n){
+  var R=(typeof SCENE_VARIANTI_REGOLE!=='undefined' && SCENE_VARIANTI_REGOLE) ? SCENE_VARIANTI_REGOLE[n] : null; if(!R) return true;
+  var y=(typeof S!=='undefined' && S && S.year) || null, pa=(typeof S!=='undefined' && S && S.paese) || null;
+  if(R.dal!=null && (y==null || y<R.dal)) return false;
+  if(R.fino!=null && (y==null || y>R.fino)) return false;
+  if(R.aree && !(pa && typeof AREA_DI_PAESE!=='undefined' && R.aree.indexOf(AREA_DI_PAESE[pa])>=0)) return false;
+  if(R.paesi && !(pa && R.paesi.indexOf(pa)>=0)) return false;
+  return true;
+}
 function scenaVariante(p, chiave){
   if(typeof p!=='string' || typeof ROTAZIONE_VARIANTI==='undefined' || !ROTAZIONE_VARIANTI || typeof SCENE_VARIANTI==='undefined' || !SCENE_VARIANTI.length) return p;
   var m=/^(.*\/)?([^\/]+)\.webp$/.exec(p); if(!m) return p;
   var nome=m[2], pre=nome+'-v', lista=[nome];
   /* L181-5: le varianti che mostrano l'Europa (SCENE_VARIANTI_EUROPA, scenes.js) solo dove il paese è in Europa (AREA_DI_PAESE). */
   var fuoriEuropa=(typeof SCENE_VARIANTI_EUROPA!=='undefined' && typeof AREA_DI_PAESE!=='undefined' && typeof S!=='undefined' && S && S.paese && AREA_DI_PAESE[S.paese] && AREA_DI_PAESE[S.paese]!=='europa');
-  SCENE_VARIANTI.forEach(function(n){ if(n.indexOf(pre)===0 && /^\d+$/.test(n.slice(pre.length)) && !(fuoriEuropa && SCENE_VARIANTI_EUROPA.indexOf(n)>=0)) lista.push(n); });
+  SCENE_VARIANTI.forEach(function(n){ if(n.indexOf(pre)===0 && /^\d+$/.test(n.slice(pre.length)) && !(fuoriEuropa && SCENE_VARIANTI_EUROPA.indexOf(n)>=0) && varianteRegolaOk(n)) lista.push(n); });
   if(lista.length<2) return p;
   var mk=(typeof S!=='undefined'&&S)?(S.year*12+S.month):0;
   if(VARIANTE_MESE!==mk){ for(var k in VARIANTE_SCELTA) delete VARIANTE_SCELTA[k]; VARIANTE_MESE=mk; }
@@ -681,12 +691,27 @@ function scenaIntervista(cornice){ var M=_sm('intervista'); if(!M) return null;
 function scenaNotte(stadio, ultima, vinta){ var M=_sm('notte'); if(!M) return null;
   if(ultima) return vinta ? M.vittoria : M.sconfitta;
   return (stadio===0) ? M.attesa : M.spoglio; }
+/* L191-2 · IL TELEFONO DEL DECENNIO (regola di Giacomo del 4/10: tutto coerente col decennio). Fino al 5/10 il telefono a disco
+   (`telefono-anni50`) l'avevano solo italia1950 e italia1960, e ogni altra porta — anche la Francia e l'Inghilterra degli anni '50 —
+   mostrava `telefono-oggi`, uno smartphone. Ora decide l'ANNO, non la porta: `telefonoEpoca(anno, scenario)` (pura) dà la chiave di
+   SCENA_MOMENTO.telefono — nel presente le varianti di sempre (L181-5); nelle porte prima del 1975 il telefono a disco, 1975-1989
+   `anni70`, 1990-2009 `anni90`, dal 2010 `oggi` (senza rotazione). Le due chiavi di mezzo stanno in SCENA_MOMENTO.telefono (scenes.js) SOLO quando i
+   file arrivano (PROMPT-GEMINI §8, giro 3): finché mancano si ripiega sul telefono a disco, e la guardia degli asset resta verde.
+   Arrivati il 5/10 (L192-5): le due chiavi ci sono, e il ripiego sul telefono a disco resta solo per un file che sparisse.
+   La clip segue il file (clipDaSrc). Niente in S. */
+function telefonoEpoca(anno, scenario){
+  if(!scenario || scenario==='presente') return 'presente';
+  if(anno<1975) return 'storico';
+  if(anno<1990) return 'anni70';
+  if(anno<2010) return 'anni90';
+  return 'oggi'; }
 function scenaTelefono(missed){ var M=_sm('telefono'); if(!M) return null;
   if(missed) return M.corridoio;                                               // la chiamata appena chiusa (universale)
-  if(typeof eraCombacia==='function' && (eraCombacia('italia1950')||eraCombacia('italia1960'))) return M.storico;
-  /* L181-5: le varianti di `telefono-oggi` (smartphone) ruotano SOLO nel presente; nelle porte la scena resta quella di sempre. */
-  if(typeof S!=='undefined' && S && (!S.scenario || S.scenario==='presente')) return scenaVariante(M.oggi, (S.year*12+S.month)+':telefono');
-  return M.oggi; }
+  if(typeof S==='undefined' || !S) return M.oggi;
+  var k=telefonoEpoca(S.year, S.scenario);
+  /* L181-5: le varianti di `telefono-oggi` (smartphone) ruotano SOLO nel presente. */
+  if(k==='presente') return scenaVariante(M.oggi, (S.year*12+S.month)+':telefono');
+  return M[k] || M.storico; }
 /* L9-1 — mappa gli ESITI reali di gameOver sui 4 finali (accorpati per tono; vedi report L9-1). */
 function scenaFinale(reason){ var M=_sm('finale'); if(!M) return null;
   var trionf = ((typeof S!=='undefined'&&S) ? ((S.mandatesWon||0)>=3 || (S.biografia&&S.biografia.trionfi>=2)) : false);
@@ -3129,9 +3154,9 @@ function renderMappaSVG(){
    ⚑ GLI STRATI, dal basso: la terra (lo sfondo del paese riempito dal `<pattern>` della texture) → le aree-regione con la
    velatura del blocco → le pedine → le aree-città (cerchi) → i bersagli di tocco trasparenti. Le città stanno SOPRA le pedine:
    il palazzo non copre mai il cerchio della capitale.
-   ⚑ LA TEXTURE: finché le texture dipinte non ci sono (`C-terra`, `C-mare`), un fondo PROCEDURALE sobrio nel tono (terra
-   olivastra spenta a chiazze, mare ardesia nel CSS del contenitore) — nessun asset inventato. Arrivata la texture, cambia il
-   contenuto del `<pattern id="tv-terra">` e basta.
+   ⚑ LA TEXTURE: sotto, un fondo PROCEDURALE sobrio nel tono (terra olivastra spenta a chiazze, `<pattern id="tv-terra">`;
+   mare ardesia nel CSS del contenitore). Dal L196-3 (D230) sopra c'è la terra DIPINTA (`C-terra`, `terraDipintaHtml`), stesa
+   una volta sola; la procedurale resta il ripiego (rete lenta, file non ancora caricato). Il mare dipinto non c'è.
    ⚑ LE PEDINE: solo quelle di `PEDINE_PRESENTI` (scenes.js, guardata da verifica-asset.js) — sul tavolo oggi c'è il palazzo; le cinque entrate col L152-4 aspettano il campo `carattere` (il ripiego della città è spento: vedi pedinaDi). Dove va ogni
    pedina lo dice `pedinaDi(i)`; la regola delle sovrapposizioni è `tavoloPedine()`.
    ⚑ DOVE C'È: ai livelli con la scheda Partiti e la mappa del paese (1, 2 e 3: `tavoloAttivo()`); l'attivista, il Segretario e
@@ -3240,6 +3265,30 @@ function tavoloPedine(lato){
   (PAESE.territori||[]).forEach(function(_, i){ const n=pedinaDi(i); if(!n) return; const c=tavoloCentro(i); if(c && !vicina(c)) out.push({ nome:n, x:c[0], y:c[1], id:'t'+i }); });
   return out;
 }
+/* L196-3 (D230) · LA TERRA DIPINTA (`TERRA_DIPINTA`, scenes.js): un secondo tracciato della terra, sopra quello del codice,
+   riempito da un `<pattern>` con l'immagine stesa UNA volta sola (scalata a coprire il viewBox, centrata, come la prova di
+   L173-5). Stesso contorno del tracciato di sotto, così da 0 a 1 di opacità non cambia niente ai bordi.
+   ⚑ Il ripiego è la terra del codice: con `reteLeggera()` la dipinta non nasce nemmeno (il `<pattern>` chiederebbe il file
+   anche a opacità 0); altrimenti nasce a opacità 0 e prende `.pronta` quando il file è caricato e decodificato
+   (`caricaTerraDipinta`, un `Image` a parte): la dissolvenza è nel CSS. Dal secondo tavolo in poi (`TERRA_PRONTA`) nasce già
+   piena. Transitorio, mai in S. */
+let TERRA_PRONTA=false, TERRA_IN_CARICO=false;
+function terraDipintaHtml(M, vb){
+  if(typeof TERRA_DIPINTA==='undefined' || !TERRA_DIPINTA || reteLeggera()) return '';
+  const D=TERRA_DIPINTA, k=Math.max(vb[2]/D.w, vb[3]/D.h), w=D.w*k, hh=D.h*k, x=vb[0]+(vb[2]-w)/2, y=vb[1]+(vb[3]-hh)/2, src='assets/tavolo/'+D.file+'.webp';
+  if(!TERRA_PRONTA) caricaTerraDipinta(src);
+  return `<defs><pattern id="tv-terra-d" patternUnits="userSpaceOnUse" x="${x.toFixed(2)}" y="${y.toFixed(2)}" width="${w.toFixed(2)}" height="${hh.toFixed(2)}">`+
+    `<image href="${src}" width="${w.toFixed(2)}" height="${hh.toFixed(2)}" preserveAspectRatio="none"/></pattern></defs>`+
+    `<path class="tv-terra-d${TERRA_PRONTA?' pronta':''}" d="${M.sfondo}" fill="url(#tv-terra-d)" stroke="${M.oltre?'#2e2d20':'#4d4b33'}" stroke-width="${(vb[2]/(M.oltre?110:160)).toFixed(2)}" stroke-linejoin="round" pointer-events="none"/>`;
+}
+function caricaTerraDipinta(src){
+  if(TERRA_IN_CARICO) return; TERRA_IN_CARICO=true;
+  const im=new Image();
+  const pronta=function(){ TERRA_PRONTA=true; const n=document.querySelector('#tavolo .tv-terra-d'); if(n) n.classList.add('pronta'); };
+  im.onload=function(){ (im.decode ? im.decode() : Promise.resolve()).then(pronta, pronta); };
+  im.onerror=function(){ TERRA_IN_CARICO=false; };   // resta la terra del codice; il tavolo dopo riprova
+  im.src=src;
+}
 function costruisciTavolo(box){
   const M=PAESE.mappa, TE=PAESE.territori, vb=tavoloVB(), u=vb[2]/24, lato=vb[2]*0.13;
   let h=`<svg class="tv-svg" viewBox="${M.viewBox}" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${escAttr(T('Mappa del controllo politico'))}">`;
@@ -3260,6 +3309,7 @@ function costruisciTavolo(box){
   if(M.oltre) h+=oltrePath('tv-oltre', M.oltre, vb[2]);
   /* con la terra oltre il confine, il contorno della terra è anche il CONFINE: una linea netta, più marcata */
   h+=`<path class="tv-terra" d="${M.sfondo}" fill="url(#tv-terra)" stroke="${M.oltre?'#2e2d20':'#4d4b33'}" stroke-width="${(vb[2]/(M.oltre?110:160)).toFixed(2)}" stroke-linejoin="round"/>`;
+  h+=terraDipintaHtml(M, vb);   // L196-3: la terra dipinta sopra quella del codice (che resta il ripiego)
   const regioni=[], citta=[];
   TE.forEach(function(_, i){ const A=M.aree[i]; if(!A) return; (A.d?regioni:citta).push(i); });
   regioni.forEach(function(i){ h+=`<path class="tv-area" data-i="${i}" d="${M.aree[i].d}" onclick="selArea(${i})"/>`; });

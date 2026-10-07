@@ -396,6 +396,7 @@ function initStatoBase(){
      l'elezione naturale sull'anno dello snodo. Percorso d'ingresso diverso dal reset turnInMandate=0 di A.5
      (quello è diventaLocale/rielezione; qui è l'avvio-governo → startGame non lo ritocca). */
   if(_SC && _SC.turnMandato!=null){ S.turnInMandate=_SC.turnMandato; }
+  S.meseUrnaPorta=meseUrna();   // L192-4: il calendario si fissa nella carriera (lo legge meseUrna()); un salvataggio vecchio lo riceve da applySnap
   initCongresso();   // L173-2: la Camera d'avvio, se la porta (o il paese) la dichiara; altrimenti S.congresso=null
   if(_SC && _SC.mandatiVinti!=null){ S.mandatesWon=_SC.mandatiVinti; S.mandate=_SC.mandatiVinti+1; S.mandatiConsecutivi=_SC.mandatiVinti; }   // L75-1: la porta parte con l'anzianità (uk1990: undici anni, tre vittorie) · L86-1: l'anzianità è consecutiva per definizione (chi è lì da undici anni non ha perso in mezzo) · L176-1: L'ANZIANITÀ DI PORTA È DI CHI GOVERNA — qui il livello non si sa ancora (lo scrive applicaPersonaggio, sotto): ai livelli 0-2 e 5 la toglie la riga dopo applicaPersonaggio, all'opposizione startOpposizione
   S.leggeTruffa=null;   // Build B (b) — scelta di governo sul premio: null=non decisa · 'approvata' · 'respinta' (dato puro, round-trip)
@@ -4874,7 +4875,10 @@ function azioneAttacco(id, tono){
    da un'anticipata conta il suo primo anno fino al prossimo meseUrna (come con gennaio da sempre). Una porta che parte a gennaio a
    mandato in corso dichiara `turnMandato` contato dall'ultimo meseUrna: gennaio 1950 col mandato del novembre 1948 = turnMandato 1,
    meseUrna 11 (mese del mandato 14: metà mandato 1950/11, urna 1952/11). */
-function meseUrna(){ return (typeof PAESE!=='undefined' && PAESE && PAESE.meseUrna) || 1; }
+/* L192-4 · il mese dell'urna è FISSATO NELLA CARRIERA (`S.meseUrnaPorta`, scritto da initStatoBase col valore della porta): così
+   una porta che cambia calendario (uk1960, gennaio → ottobre) non sposta le urne dei salvataggi presi prima — applySnap li migra
+   col calendario di allora. Senza S (prima dell'avvio) vale la porta, come prima. */
+function meseUrna(){ return (typeof S!=='undefined' && S && S.meseUrnaPorta) || (typeof PAESE!=='undefined' && PAESE && PAESE.meseUrna) || 1; }
 function meseMandato(){ return (S.turnInMandate||0)*12 + ((S.month - meseUrna() + 12) % 12); }
 function avanzaAnnoMandato(){ if(S.month>12){ S.month=1; S.year++; } if(S.month===meseUrna()) S.turnInMandate++; }   // chiamata dopo S.month++
 /* L173-2 · IL CONGRESSO DERIVATO (D126). `S.congresso = {camera}` è la quota della Camera del PARTITO DEL PRESIDENTE — chiunque
@@ -5163,7 +5167,10 @@ function pickIntermedia(){
    `PILASTRO_CON_CAMPAGNA` vale per tutti i pilastri; `conCampagna:true` su un pilastro vale per lui solo (la variante (b)).
    ⚑ COM'È FINITA (L178-1, D140): l'interruttore resta SPENTO ((a) spostava urne in quattro porte chiuse); `conCampagna:true` è
    ACCESO su tre pilastri di us1950 (`pus50_hazel`, `pus50_canyon`, `pus50_boston`): il 1956 del Presidente repubblicano, fra chi
-   ci arriva, 11/30 → 25/30 (83%, soglia scritta prima 75%; 40 carriere, gioco col contenuto di L177-3). Nessun'altra porta lo legge. */
+   ci arriva, 11/30 → 25/30 (83%, soglia scritta prima 75%; 40 carriere, gioco col contenuto di L177-3). Dal L191-1 (D202) anche cinque
+   pilastri G8 britannici che cadono in una campagna: `puk80_piper` (la campagna dell'urna del 1989) e `puk_catalogna`, `puk_lewisham`,
+   `puk80_manchester`, `puk80_tamigi` (campagne di chi arriva da una porta prima o di un'anticipata). Dal L194-1 due francesi:
+   `pfr70_forez` (la campagna delle legislative del marzo 1973) e `pfr_merignac` (campagne di alcune carriere di fr1950). */
 let PILASTRO_CON_CAMPAGNA = false;   // let e non const: il banco lo varia (L177-2)
 function campagnaColPilastro(P){
   if(!(PILASTRO_CON_CAMPAGNA || (P && P.conCampagna)) || typeof S==='undefined' || !S || S.livello!==3) return null;
@@ -5176,10 +5183,13 @@ function campagnaColPilastro(P){
    l'interruttore il pilastro e la carta del risultato escono insieme: il pilastro prima, poi la carta che `pickIntermedia()` darebbe
    senza il pilastro (stesso calcolo, `cartaRisultato`; nella stagione nazionale la carta di campagna precede il voto anche senza
    pilastro, quindi lì niente). Le urne fuori dall'agenda (l'urna a scadenza, la primaria della vigilia) un pilastro non le tocca.
-   ⚑ COM'È FINITA (3/10): l'interruttore resta SPENTO, quindi il lettore è DORMIENTE (esce alla prima riga, nessun dado: gioco
-   identico). Acceso, i 148 voti cancellati (7 urne in 6 porte, 20 carriere per lato) si tengono tutti, ma in fr1960 dall'opposizione
-   `rivolta` passa da 1 a 4 su 20: la regola scritta prima (nessuna causa di fine peggiora di 3/20 o più) non passa. Numeri a Cowork. */
-let PILASTRO_COL_VOTO = false;   // let e non const: il banco lo varia (L178-2)
+   ⚑ COM'È FINITA (3/10): l'interruttore restò SPENTO (acceso, in fr1960 dall'opposizione `rivolta` 1 → 4 su 20: la regola di L178-2,
+   nessuna causa di fine peggiora di 3/20 o più, non passava di un soffio).
+   ⚑ ACCESO il 6/10 (L179-4, D225: Giacomo ha scelto (a)). Rimisurato sul motore di quel giorno (`censimento-l178-2.js cura`, 20
+   carriere × 132 mesi per lato, tutte le porte e cinque presenti): 144 voti cancellati da un pilastro → 0, in sette casi (fr1960
+   gov e opp 20+20, fr1970 20+15, uk1980 gov 20, uk1960 18+7, uk2000 gov 17, italia1970 opp 7); la causa di fine che peggiora di più
+   +2/20 (fr1960 opposizione, primaria 14 → 16), quindi anche la regola di L178-2 oggi passa. */
+let PILASTRO_COL_VOTO = true;    // let e non const: il banco lo varia (L178-2)
 function votoColPilastro(){
   if(!PILASTRO_COL_VOTO || typeof S==='undefined' || !S || S.livello!==3) return null;
   const m=meseMandato(), fine=(PAESE.mandatoMesi||60);
@@ -5989,6 +5999,11 @@ function genAgendaRamo(first){
       if((S.year*12+S.month) < (_M.anno*12+_M.mese)) continue;
       S.pilastriMondo[_M.id]=true;
       if(_sost[_M.id]) continue;                       // la linea ha la sua versione: cede il posto
+      /* L196-1 (D228) · `nonAlCapo:[id di PAESI]`: il fatto-mondo non esce a chi in quel paese è il capo del governo (livello 3 al governo) —
+         oggi Dallas al Presidente americano. Segnato visto come sopra: è un fatto datato, non torna se dopo il giocatore lascia la carica.
+         Additivo (senza il campo tutto come prima); la guardia è in verifica-paese.js (--rosso-noncapo). Dall'opposizione e dagli altri
+         paesi la cronaca resta com'è. */
+      if(_M.nonAlCapo && _M.nonAlCapo.indexOf(S.paese)>=0 && S.livello===3 && !S.opposizione) continue;
       S.agenda.push({kind:'event', data:_M, resolved:false});
       var _cm=campagnaColPilastro(_M); if(_cm) S.agenda.push(_cm);   // L177-2 (D138): nel mese di campagna esce anche la carta di campagna
       var _vm=votoColPilastro(); if(_vm) S.agenda.push(_vm);         // L178-2 (D141): nel mese del voto esce anche la carta del risultato
@@ -7788,7 +7803,7 @@ function renderTelefonata(){
   var dur=(typeof F1_TIMER_MS!=='undefined'?F1_TIMER_MS:13000);
   var barra=(typeof F1_TIMER!=='undefined' && F1_TIMER)
     ? `<div class="telbar" aria-hidden="true"><i style="--teldur:${dur}ms"></i></div>` : '';
-  var scT=(typeof scenaTelefono==='function')?scenaTelefono(TEL.missed):null;   // L9-1: oggi (presente) / storico ('50-'60) / corridoio (chiamata chiusa)
+  var scT=(typeof scenaTelefono==='function')?scenaTelefono(TEL.missed):null;   // L191-2: il telefono del decennio (telefonoEpoca, ui.js) / corridoio (chiamata chiusa)
   var scImgT=scenaMomentoHtml(scT);   // L127-1: immagine + clip, le regole delle carte
   if(TEL.missed){
     document.getElementById('modal').innerHTML=`${scImgT}<div class="mt"><div class="kicker">${T('Squillo perso')}</div><h2>${T('Hai lasciato squillare')}</h2></div>
@@ -8727,6 +8742,11 @@ function applySnap(snap){
   /* L153-1 — migrazione, un campo per volta: un salvataggio di prima non ha mai avuto una salvezza (0), e come «urna
      precedente» prende la forza del momento del caricamento — dichiarato: la prima urna dopo il caricamento si confronta con quella. */
   if(S.salvezzeOpp===undefined) S.salvezzeOpp=0;
+  /* L192-4 — il calendario della carriera. Un salvataggio di prima non ha `S.meseUrnaPorta`: prende il mese dell'urna che la sua
+     porta aveva quando è stato preso. Tutte le porte e i presenti hanno lo stesso di oggi, tranne `uk1960`, che fino al 6/10 votava
+     a gennaio (turnMandato 4, l'urna del 1961): il salvataggio continua a votare quando votava (gennaio 1961, 1966, …). */
+  if(S.meseUrnaPorta===undefined){ const _scU=(typeof SCENARI!=='undefined' && SCENARI[S.scenario]) || null;
+    S.meseUrnaPorta = (S.scenario==='uk1960') ? 1 : ((_scU && _scU.meseUrna) || (PAESI[S.paese] && PAESI[S.paese].meseUrna) || 1); }
   if(S.congresso===undefined) S.congresso=null;   // L173-2: un salvataggio di prima non ha Congresso
   if(S.governoDiviso===undefined) S.governoDiviso=!!(S.congresso && S.congresso.camera<50);
   if(S.forzaUrnaPrec===undefined) S.forzaUrnaPrec=(S.forze && S.forze[S.partito]) || 0;
