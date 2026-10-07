@@ -4137,8 +4137,9 @@ function retroDovuto(){
   if(S.retroUltimo!=null && mese-S.retroUltimo<4) return false;
   return true;
 }
-/* L182-2 · il retroscena passa dal filtro unico dell'epoca (`eraVivaT`: senza `era` è universale, quindi oggi — 16 voci, nessuna con
-   `era`/`paesi`/`dal`, tutte senza tempo — non cambia niente; una voce del presente scritta domani non uscirà nelle porte) e il suo
+/* L182-2 · il retroscena passa dal filtro unico dell'epoca (`eraVivaT`: senza `era` è universale, quindi oggi — 16 voci (44 dal L204-1), nessuna con
+   `era`/`dal`, tutte senza tempo; dal L205-2 `rb_onorificenza` dichiara `paesi` — quattordici, senza Canada e Australia (D248) — e qui si
+   spegne dove non vale, provato a runtime in .claude/prova-l205-2-onorificenza.js; una voce del presente scritta domani non uscirà nelle porte) e il suo
    sacchetto ha `vivePrima` come i leggeri (L151-1): le voci con una `cond` che diventa vera a metà sacchetto vanno in testa.
    Misura in DESIGN-VARIETA-2.md («⚑ L182-2»). */
 function pescaRetro(){
