@@ -8178,6 +8178,67 @@ const DOSSIERS=[
    {l:'Adeguamento pieno per tutti',e:'I pensionati ringraziano; i giovani pagano',pleases:'populista',costo:{debito:0.4},f:()=>{S.ind.debt+=0.4; gd('pensionati',4); gd('giovani',-2);}},
    {l:'Pieno solo per le pensioni basse',e:'Si protegge chi ha meno; gli altri protestano',pleases:'tecnico',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; gd('pensionati',1); gd('cetomedio',-1);}},
  ]},
+ // L210-1 · varietà del ministro (8/10): quindici dossier del presente per il ministro dell'Economia — era 'contemporanea', senza paesi.
+ {id:'ms_ec_extraprofitti',era:'contemporanea',min:'economia',kick:'Energia',t:'I guadagni piovuti dal cielo',text:'Con i prezzi dell\'energia alle stelle, le compagnie che la vendono hanno triplicato gli utili senza fare niente di diverso. Si propone di tassare la parte che eccede gli anni normali.',ch:[
+   {l:'Una tassa sui guadagni in eccesso',e:'Soldi per le bollette delle famiglie; le compagnie minacciano di investire altrove',pleases:'populista',costo:{debito:-0.3},f:()=>{S.ind.debt-=0.3; gd('lavoratori',2); gd('cetomedio',1); gd('imprenditori',-3);}},
+   {l:'Nessuna tassa: chiedi di reinvestirli qui',e:'Il mercato non si spaventa; le bollette restano alte',pleases:'tecnico',f:()=>{S.gMod+=0.1; gd('imprenditori',2); gd('lavoratori',-1);}},
+ ]},
+ {id:'ms_ec_carta',era:'contemporanea',min:'economia',kick:'Banche',t:'Le commissioni sulla carta',text:'I piccoli negozianti non vogliono i pagamenti con la carta: su ogni caffè la banca trattiene una commissione. Il fisco li vorrebbe tutti tracciati.',ch:[
+   {l:'Un tetto alle commissioni sui piccoli pagamenti',e:'La carta conviene a tutti; le banche protestano',pleases:'populista',f:()=>{gd('cetomedio',2); gd('giovani',1); gd('imprenditori',-1);}},
+   {l:'Un credito d\'imposta a chi accetta la carta',e:'I negozi si convincono; paga lo stato',pleases:'tecnico',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; gd('cetomedio',1); gd('imprenditori',1);}},
+ ]},
+ {id:'ms_ec_garanzia',era:'contemporanea',min:'economia',kick:'Casa',t:'Il primo mutuo dei giovani',text:'I giovani con un lavoro stabile non riescono a comprare casa: la banca chiede un anticipo che nessuno ha. Si propone che lo stato faccia da garante per una parte del mutuo.',ch:[
+   {l:'Lo stato garantisce fino all\'ottanta per cento',e:'Chiavi in mano a migliaia di coppie; se il mercato crolla, paga il pubblico',pleases:'populista',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; gd('giovani',3); gd('cetomedio',1); gd('pensionati',-1);}},
+   {l:'Solo per chi ha un reddito basso',e:'Un aiuto mirato; i prezzi delle case non si muovono',pleases:'tecnico',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; gd('giovani',1); gd('lavoratori',1);}},
+ ]},
+ {id:'ms_ec_dirigenti',era:'contemporanea',min:'economia',kick:'Spesa',t:'Quanto guadagna chi dirige lo stato',text:'Il capo di un\'azienda pubblica guadagna dieci volte un ministro. Si propone un tetto agli stipendi di tutti i dirigenti pagati dal pubblico.',ch:[
+   {l:'Un tetto per tutti, senza eccezioni',e:'Applausi e qualche risparmio; i migliori se ne vanno nel privato',pleases:'populista',costo:{debito:-0.1},f:()=>{S.ind.debt-=0.1; gd('lavoratori',2); gd('cetomedio',1); gd('imprenditori',-1);}},
+   {l:'Stipendi legati ai risultati',e:'Chi rende guadagna; nessuno capisce come si misura',pleases:'tecnico',f:()=>{S.gMod+=0.1; gd('imprenditori',1); gd('lavoratori',-1);}},
+ ]},
+ {id:'ms_ec_scudo',era:'contemporanea',min:'economia',kick:'Fisco',t:'I capitali nascosti all\'estero',text:'Si stima che i cittadini tengano all\'estero, non dichiarati, quanto un anno di spesa per la scuola. Si propone di farli rientrare pagando un\'aliquota bassa e senza domande.',ch:[
+   {l:'Rientro agevolato, una volta sola',e:'Un incasso grosso e subito; chi ha pagato tutto si sente preso in giro',pleases:'conservatore',costo:{debito:-0.3},f:()=>{S.ind.debt-=0.3; gd('imprenditori',2); gd('lavoratori',-2); gd('cetomedio',-1);}},
+   {l:'Niente sconti: scambio d\'informazioni e controlli',e:'Chi ha nascosto paga tutto, quando lo trovano',pleases:'progressista',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; gd('lavoratori',2); gd('imprenditori',-1);}},
+ ]},
+ {id:'ms_ec_fusione',era:'contemporanea',min:'economia',kick:'Concorrenza',t:'Le due catene della spesa si fondono',text:'Le due più grandi catene di supermercati annunciano la fusione: insieme avrebbero un negozio su tre. Promettono prezzi più bassi; i fornitori temono di dover accettare qualsiasi prezzo.',ch:[
+   {l:'Sì, ma vendano un negozio su cinque',e:'La concorrenza resta viva; la fusione si complica',pleases:'tecnico',f:()=>{S.gMod+=0.1; gd('cetomedio',1); gd('imprenditori',-1);}},
+   {l:'Via libera: più forti sui mercati',e:'Un gigante del paese; i piccoli fornitori stringono i denti',pleases:'conservatore',f:()=>{gd('imprenditori',2); gd('lavoratori',-1); gd('cetomedio',-1);}},
+ ]},
+ {id:'ms_ec_paniere',era:'contemporanea',min:'economia',kick:'Prezzi',t:'La spesa a prezzo concordato',text:'Pane, latte, pasta e frutta costano un quinto più dell\'anno scorso. Il governo può chiedere ai supermercati un carrello di prodotti di base a prezzo bloccato per tre mesi.',ch:[
+   {l:'Un patto coi supermercati, con lo sconto',e:'Le famiglie respirano; i produttori pagano la differenza',pleases:'populista',f:()=>{gd('lavoratori',2); gd('pensionati',2); gd('imprenditori',-2);}},
+   {l:'Un buono spesa per le famiglie povere',e:'Aiuto a chi ne ha bisogno; i prezzi corrono lo stesso',pleases:'tecnico',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; gd('lavoratori',1); gd('pensionati',1);}},
+ ]},
+ {id:'ms_ec_aliquota',era:'contemporanea',min:'economia',kick:'Fisco',t:'Un\'aliquota sola per tutti',text:'Una proposta sostituisce gli scaglioni dell\'imposta sul reddito con un\'aliquota unica, uguale per tutti, e un minimo esente. Semplice, dicono; un regalo ai ricchi, rispondono.',ch:[
+   {l:'Aliquota unica, con un minimo esente',e:'Un fisco che si capisce; il conto lo paga il bilancio',pleases:'populista',costo:{debito:0.4},f:()=>{S.ind.debt+=0.4; gd('imprenditori',3); gd('cetomedio',2); gd('lavoratori',-2);}},
+   {l:'Gli scaglioni restano, meno e più semplici',e:'Un ritocco prudente; nessuno festeggia',pleases:'tecnico',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; gd('cetomedio',1); gd('imprenditori',-1);}},
+ ]},
+ {id:'ms_ec_conto',era:'contemporanea',min:'economia',kick:'Banche',t:'Chi un conto in banca non ce l\'ha',text:'Centinaia di migliaia di persone non hanno un conto: senza, non ricevono lo stipendio né un sussidio, e pagano caro per incassare un assegno. Le banche dicono che non conviene.',ch:[
+   {l:'Un conto di base gratuito per tutti',e:'Nessuno resta fuori; le banche alzano le altre commissioni',pleases:'progressista',f:()=>{gd('lavoratori',2); gd('giovani',1); gd('imprenditori',-2);}},
+   {l:'Una carta prepagata pubblica',e:'Una soluzione rapida; il conto vero resta un lusso',pleases:'tecnico',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; gd('lavoratori',1); gd('pensionati',1);}},
+ ]},
+ {id:'ms_ec_assicurazione',era:'contemporanea',min:'economia',kick:'Casa',t:'Assicurare le case contro i disastri',text:'Dopo ogni frana o alluvione lo stato paga i danni delle case, anno dopo anno. Si propone di rendere obbligatoria un\'assicurazione su ogni abitazione.',ch:[
+   {l:'Obbligatoria, con un fondo per chi ha poco',e:'Il conto non ricade più su tutti; una tassa nuova, dicono',pleases:'tecnico',costo:{debito:-0.2},f:()=>{S.ind.debt-=0.2; S.ind.fiducia+=1; gd('cetomedio',-2); gd('pensionati',-1);}},
+   {l:'Resta facoltativa, con uno sconto fiscale',e:'Nessun obbligo; pochi la faranno',pleases:'conservatore',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; gd('cetomedio',1);}},
+ ]},
+ {id:'ms_ec_titoli',era:'contemporanea',min:'economia',kick:'Risparmio',t:'Titoli di stato per le famiglie',text:'Il debito pubblico è in mano soprattutto a banche e fondi esteri. Il ministero può emettere titoli riservati alle famiglie, con un premio per chi li tiene fino alla scadenza.',ch:[
+   {l:'Emettili, col premio di fedeltà',e:'Il debito torna in casa; il premio costa',pleases:'populista',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; S.ind.fiducia+=2; gd('pensionati',2); gd('cetomedio',1);}},
+   {l:'Si vende all\'asta, come sempre',e:'Il costo più basso; i risparmiatori restano spettatori',pleases:'tecnico',f:()=>{S.gMod+=0.1; gd('imprenditori',1); gd('pensionati',-1);}},
+ ]},
+ {id:'ms_ec_mance',era:'contemporanea',min:'economia',kick:'Fisco',t:'Le mance senza tasse',text:'Camerieri e fattorini chiedono che le mance non siano tassate: sono pochi soldi, dicono, e spesso in contanti. Gli economisti avvertono che molti stipendi diventerebbero mance.',ch:[
+   {l:'Mance esenti, fino a un tetto',e:'Qualche soldo in più a chi serve ai tavoli; il fisco perde qualcosa',pleases:'populista',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; gd('lavoratori',2); gd('giovani',2);}},
+   {l:'Le mance restano reddito',e:'Il fisco resta uguale per tutti; i camerieri si sentono ignorati',pleases:'tecnico',f:()=>{gd('cetomedio',1); gd('giovani',-2);}},
+ ]},
+ {id:'ms_ec_borsa',era:'contemporanea',min:'economia',kick:'Finanza',t:'Una piccola tassa su ogni compravendita',text:'Una proposta mette un\'imposta minima su ogni acquisto di azioni e titoli. Frenerebbe la speculazione più veloce, dicono; le borse rispondono che i capitali andranno altrove.',ch:[
+   {l:'Una tassa minima, su tutto',e:'Entrate nuove e meno corse; la borsa perde scambi',pleases:'progressista',costo:{debito:-0.2},f:()=>{S.ind.debt-=0.2; gd('lavoratori',1); gd('giovani',1); gd('imprenditori',-2);}},
+   {l:'Nessuna tassa: i mercati restano aperti',e:'Capitali che restano; nessun incasso',pleases:'conservatore',f:()=>{S.ind.fiducia+=1; gd('imprenditori',2); gd('lavoratori',-1);}},
+ ]},
+ {id:'ms_ec_debiti',era:'contemporanea',min:'economia',kick:'Finanza',t:'Ricominciare dopo i debiti',text:'Migliaia di famiglie e piccoli artigiani sono schiacciati da debiti che non potranno mai pagare: lavorano solo per gli interessi. Si propone una procedura per cancellare il resto dopo qualche anno di rate.',ch:[
+   {l:'Una procedura per ripartire da zero',e:'Una seconda possibilità; le banche alzano i tassi a tutti',pleases:'progressista',f:()=>{gd('lavoratori',2); gd('cetomedio',1); gd('imprenditori',-2);}},
+   {l:'Solo per chi non ha colpa, verificata',e:'Prudenza; pochi ci passeranno',pleases:'conservatore',f:()=>{S.ind.fiducia+=1; gd('imprenditori',1); gd('lavoratori',-1);}},
+ ]},
+ {id:'ms_ec_monetine',era:'contemporanea',min:'economia',kick:'Moneta',t:'Le monetine che costano più di quanto valgono',text:'Coniare le due monete più piccole costa più del loro valore, e la gente le lascia nei cassetti. Si propone di smettere di produrle e arrotondare i prezzi in cassa.',ch:[
+   {l:'Basta monetine, si arrotonda',e:'La zecca risparmia; c\'è chi teme che si arrotondi solo all\'insù',pleases:'tecnico',costo:{debito:-0.1},f:()=>{S.ind.debt-=0.1; gd('imprenditori',1); gd('pensionati',-2);}},
+   {l:'Restano: ogni centesimo conta',e:'Nessun sospetto sui prezzi; la zecca continua a perderci',pleases:'conservatore',f:()=>{gd('pensionati',2); gd('imprenditori',-1);}},
+ ]},
  // ----- LAVORO (+6) -----
  {id:'rider', dal:2017,min:'lavoro',kick:'Piattaforme',t:'I rider chiedono tutele',text:'I lavoratori delle piattaforme digitali chiedono contratti, contributi e assicurazione.',ch:[
    {l:'Tutele piene da dipendenti',e:'Diritti estesi; le piattaforme minacciano rincari',pleases:'progressista',f:()=>{gd('lavoratori',4); gd('giovani',3); gd('imprenditori',-4);}},
@@ -8385,6 +8446,67 @@ const DOSSIERS=[
    {l:'Piccoli gruppi, distribuiti in tutti i comuni',e:'Nessun paese è sommerso; ogni sindaco ha la sua parte',pleases:'progressista',f:()=>{gd('cattolici',2); gd('giovani',1); gd('cetomedio',-2);}},
    {l:'Grandi centri fuori dagli abitati',e:'I paesi respirano; i centri diventano un problema a sé',pleases:'conservatore',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; gd('cetomedio',2); gd('cattolici',-2); gd('giovani',-1);}},
  ]},
+ // L212-1 · varietà del ministro (8/10): quindici dossier del presente per il ministro dell'Interno — era 'contemporanea', senza paesi.
+ {id:'ms_in_ronde',era:'contemporanea',min:'interno',kick:'Sicurezza',t:'Le ronde di quartiere',text:'In un quartiere dove i furti sono raddoppiati, un gruppo di residenti gira di notte con le torce e i giubbotti gialli. Chiedono di essere riconosciuti; la polizia dice che è un lavoro suo.',ch:[
+   {l:'Riconoscile, disarmate e collegate alla polizia',e:'Occhi in più nelle strade; qualcuno si sentirà poliziotto',pleases:'conservatore',f:()=>{S.ind.sicurezza+=1; gd('pensionati',2); gd('giovani',-2);}},
+   {l:'Niente ronde: più pattuglie nel quartiere',e:'La sicurezza resta dello stato; le pattuglie si pagano',pleases:'tecnico',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; S.ind.sicurezza+=1; gd('cetomedio',1);}},
+ ]},
+ {id:'ms_in_droni',era:'contemporanea',min:'interno',kick:'Ordine pubblico',t:'I droni sopra i cortei',text:'La polizia chiede di far volare droni con le telecamere sopra i cortei, per seguire dall\'alto chi rompe le vetrine. Chi manifesta dice che nessuno andrà più in piazza sapendo di essere filmato.',ch:[
+   {l:'Droni ai cortei, immagini cancellate dopo un mese',e:'Chi spacca si trova; chi manifesta si sente osservato',pleases:'conservatore',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; S.ind.sicurezza+=2; gd('pensionati',1); gd('giovani',-2);}},
+   {l:'Solo con l\'autorizzazione di un giudice',e:'I diritti restano; la polizia dice che arriverà sempre tardi',pleases:'progressista',f:()=>{gd('giovani',2); gd('pensionati',-1);}},
+ ]},
+ {id:'ms_in_scrutatori',era:'contemporanea',min:'interno',kick:'Voto',t:'I seggi senza scrutatori',text:'Alle ultime elezioni centinaia di seggi hanno aperto in ritardo: mancavano presidenti e scrutatori, pagati poco per una giornata intera di lavoro. I comuni hanno dovuto chiamare i loro impiegati.',ch:[
+   {l:'Il doppio del compenso e un giorno di riposo',e:'I seggi si riempiono; si paga a ogni elezione',pleases:'tecnico',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; gd('giovani',1); gd('lavoratori',1);}},
+   {l:'Scrutatori sorteggiati, come un dovere civico',e:'Non costa nulla; chi è sorteggiato la vive come una multa',pleases:'conservatore',f:()=>{gd('pensionati',1); gd('giovani',-2);}},
+ ]},
+ {id:'ms_in_volontari',era:'contemporanea',min:'interno',kick:'Soccorso',t:'I volontari che non possono partire',text:'Quando una frana o un\'alluvione colpisce, metà del soccorso lo fanno i volontari. Ma molti non partono più: il datore di lavoro non li lascia andare, o i giorni d\'assenza si perdono.',ch:[
+   {l:'Permessi pagati dallo stato per ogni chiamata',e:'Più squadre pronte; le imprese chiedono chi li sostituisce',pleases:'progressista',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; S.ind.sicurezza+=1; gd('cattolici',1); gd('lavoratori',1); gd('imprenditori',-1);}},
+   {l:'Uno sgravio alle imprese che li lasciano andare',e:'Si premia chi collabora; chi lavora in una piccola impresa resta a casa',pleases:'tecnico',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; S.ind.sicurezza+=1; gd('imprenditori',1); gd('lavoratori',-1);}},
+ ]},
+ {id:'ms_in_zone',era:'contemporanea',min:'interno',kick:'Città',t:'Le zone vietate davanti alle stazioni',text:'Si propone di vietare la sosta davanti alle grandi stazioni a chi ha precedenti per spaccio o rapina, con l\'allontanamento immediato. Gli avvocati parlano di una pena senza processo.',ch:[
+   {l:'Zone vietate, con l\'allontanamento',e:'Le piazze delle stazioni respirano; il problema si sposta di due strade',pleases:'conservatore',f:()=>{S.ind.sicurezza+=1; gd('pensionati',2); gd('cetomedio',1); gd('giovani',-2);}},
+   {l:'Più agenti e servizi sociali nelle stazioni',e:'Si lavora sulle persone; servono tempo e personale',pleases:'progressista',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; S.ind.sicurezza+=1; gd('cattolici',1); gd('pensionati',-1);}},
+ ]},
+ {id:'ms_in_strade',era:'contemporanea',min:'interno',kick:'Comuni',t:'La via col nome sbagliato',text:'In molte città le strade portano ancora il nome di uomini del passato che oggi pochi difendono. Un comitato chiede di cambiarli tutti; i residenti dovrebbero rifare documenti e indirizzi.',ch:[
+   {l:'Una commissione decide, caso per caso',e:'Qualche nome cambia; ogni scelta apre una polemica',pleases:'tecnico',f:()=>{gd('giovani',1); gd('pensionati',-1);}},
+   {l:'I nomi restano, con una targa che racconta la storia',e:'Nessun indirizzo da rifare; il comitato si sente preso in giro',pleases:'conservatore',f:()=>{gd('pensionati',2); gd('giovani',-2);}},
+ ]},
+ {id:'ms_in_asilo',era:'contemporanea',min:'interno',kick:'Migrazioni',t:'Aspettare l\'asilo senza lavorare',text:'Chi chiede asilo aspetta la risposta per un anno o due, e in tutto quel tempo non può lavorare: resta nei centri, a carico dello stato. Le imprese che cercano braccia chiedono di cambiare la regola.',ch:[
+   {l:'Lavoro permesso dopo tre mesi',e:'Meno spesa e meno ozio nei centri; c\'è chi teme un richiamo per altri arrivi',pleases:'tecnico',costo:{debito:-0.1},f:()=>{S.ind.debt-=0.1; gd('imprenditori',2); gd('cattolici',1); gd('cetomedio',-2);}},
+   {l:'Prima la risposta, poi il lavoro: tempi più brevi',e:'La regola resta; servono più commissioni',pleases:'conservatore',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; gd('cetomedio',1); gd('imprenditori',-1);}},
+ ]},
+ {id:'ms_in_barriere',era:'contemporanea',min:'interno',kick:'Sicurezza',t:'I blocchi di cemento alle feste di piazza',text:'Contro il rischio di un attentato, le regole chiedono barriere di cemento, varchi e guardie a ogni festa in piazza. I piccoli comuni non possono pagarle, e le feste si cancellano.',ch:[
+   {l:'Lo stato paga le barriere ai comuni piccoli',e:'Le feste tornano; una spesa per ogni piazza',pleases:'progressista',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; S.ind.sicurezza+=1; gd('pensionati',1); gd('cattolici',1);}},
+   {l:'Regole più leggere per le feste piccole',e:'I paesi fanno festa; se succede qualcosa, la colpa sarà di chi ha allentato',pleases:'tecnico',f:()=>{S.ind.sicurezza-=1; gd('pensionati',1); gd('cetomedio',1);}},
+ ]},
+ {id:'ms_in_rete',era:'contemporanea',min:'interno',kick:'Sicurezza',t:'Il ragazzo che si radicalizza in rete',text:'Un quindicenne passa le notti in gruppi chiusi dove si esalta la violenza, e la polizia lo scopre per caso. Gli esperti dicono che ce ne sono centinaia, e che le famiglie non se ne accorgono.',ch:[
+   {l:'Un programma di uscita, con educatori e famiglie',e:'Ragazzi recuperati, piano; c\'è chi lo chiama buonismo',pleases:'progressista',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; S.ind.sicurezza+=1; gd('cattolici',1); gd('pensionati',-1);}},
+   {l:'Più poteri alla polizia sui gruppi chiusi',e:'Qualche piano sventato; le conversazioni di tutti un po\' meno private',pleases:'conservatore',f:()=>{S.ind.sicurezza+=2; gd('pensionati',1); gd('giovani',-2);}},
+ ]},
+ {id:'ms_in_rave',era:'contemporanea',min:'interno',kick:'Ordine pubblico',t:'La festa nel capannone',text:'Diecimila ragazzi arrivano da tutto il paese in un capannone abbandonato, con la musica a tutto volume per tre giorni. Il proprietario chiede lo sgombero; la polizia teme di fare peggio entrando.',ch:[
+   {l:'Un reato nuovo, e lo sgombero subito',e:'Un segnale forte; sgomberare diecimila persone è un rischio',pleases:'conservatore',f:()=>{S.ind.sicurezza+=1; gd('pensionati',2); gd('giovani',-3);}},
+   {l:'Si lascia finire, con medici e controlli all\'uscita',e:'Nessuno si fa male; il proprietario si sente abbandonato',pleases:'tecnico',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; gd('giovani',1); gd('imprenditori',-1); gd('pensionati',-1);}},
+ ]},
+ {id:'ms_in_spot',era:'contemporanea',min:'interno',kick:'Voto',t:'Le pubblicità elettorali su misura',text:'In campagna elettorale ogni elettore vede in rete un messaggio diverso, scelto da un programma che conosce le sue paure. Nessuno sa che cosa i partiti dicano a chi, e gli avversari non possono rispondere.',ch:[
+   {l:'Un archivio pubblico di tutte le pubblicità politiche',e:'Si vede chi dice cosa a chi; i siti parlano di un costo',pleases:'tecnico',f:()=>{gd('giovani',1); gd('cetomedio',1); gd('imprenditori',-1);}},
+   {l:'Vietati i messaggi su misura in campagna',e:'Una piazza uguale per tutti; i partiti tornano ai manifesti',pleases:'progressista',f:()=>{gd('pensionati',1); gd('cetomedio',1); gd('imprenditori',-2);}},
+ ]},
+ {id:'ms_in_rame',era:'contemporanea',min:'interno',kick:'Sicurezza',t:'Il rame rubato dai binari',text:'Ogni settimana una linea ferroviaria si ferma per ore: di notte qualcuno ha tagliato e portato via i cavi di rame, per rivenderli ai rottamai. I pendolari aspettano; le bande quasi mai si prendono sul fatto.',ch:[
+   {l:'Rottamai controllati: niente contanti, ogni carico registrato',e:'Il rame rubato non si vende più facilmente; i rottamai onesti protestano',pleases:'tecnico',f:()=>{S.ind.sicurezza+=1; gd('lavoratori',1); gd('imprenditori',-1);}},
+   {l:'Pattuglie e telecamere lungo le linee',e:'Qualche banda presa; i binari sono troppo lunghi',pleases:'conservatore',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; S.ind.sicurezza+=1; gd('pensionati',1);}},
+ ]},
+ {id:'ms_in_spray',era:'contemporanea',min:'interno',kick:'Sicurezza',t:'Lo spray urticante in borsetta',text:'Dopo una serie di aggressioni per strada, molti chiedono di poter portare uno spray urticante per difendersi. La polizia avverte che finirà anche nelle mani di chi aggredisce.',ch:[
+   {l:'Libero per gli adulti, venduto con un documento',e:'Chi ha paura si sente più sicuro; qualche rissa finirà peggio',pleases:'conservatore',f:()=>{S.ind.sicurezza-=1; gd('pensionati',1); gd('cetomedio',1);}},
+   {l:'Resta vietato: più luce e più pattuglie nelle strade',e:'Nessuno spray in borsetta; la paura resta finché le strade restano buie',pleases:'progressista',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; S.ind.sicurezza+=1; gd('pensionati',-1);}},
+ ]},
+ {id:'ms_in_allarmi',era:'contemporanea',min:'interno',kick:'Sicurezza',t:'Gli allarmi bomba per posta elettronica',text:'Ogni settimana decine di scuole vengono evacuate per un messaggio anonimo che annuncia una bomba. Non c\'è mai niente, ma ogni volta arrivano gli artificieri e le lezioni saltano.',ch:[
+   {l:'Una squadra che rintraccia chi scrive, e pene dure',e:'Qualcuno verrà preso; molti scrivono dall\'estero',pleases:'conservatore',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; S.ind.sicurezza+=1; gd('pensionati',1); gd('giovani',-1);}},
+   {l:'Un protocollo: prima si valuta, poi si evacua',e:'Le lezioni non saltano più; il giorno in cui la bomba c\'è, nessuno vorrà aver deciso',pleases:'tecnico',f:()=>{S.ind.sicurezza-=1; gd('cetomedio',1); gd('giovani',1);}},
+ ]},
+ {id:'ms_in_fantasmi',era:'contemporanea',min:'interno',kick:'Voto',t:'Gli elettori fantasma',text:'Nelle liste elettorali risultano ancora migliaia di persone morte o trasferite da anni. Nessuno ha mai votato al loro posto, dicono i comuni; gli avversari non ci credono e chiedono di ripulirle.',ch:[
+   {l:'Liste ripulite incrociando tutti gli archivi',e:'Liste pulite; qualche elettore vero cancellato per errore',pleases:'conservatore',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; gd('pensionati',1); gd('cetomedio',1); gd('giovani',-1);}},
+   {l:'Controlli a campione, nessuno cancellato senza avviso',e:'Nessun diritto perso; le liste restano gonfie',pleases:'progressista',f:()=>{gd('giovani',1); gd('pensionati',-1);}},
+ ]},
  // ----- SALUTE (+5) -----
  {id:'medici_fuga',era:'contemporanea',min:'salute',cond:()=>S.ind.sanita<60,kick:'Sanità',t:'I medici lasciano il servizio pubblico',text:'Stipendi e turni spingono medici e infermieri verso il privato o l\'estero.',ch:[
    {l:'Aumenti mirati a chi resta',e:'Trattenere costa, ma il sistema regge',pleases:'progressista',costo:{debito:0.4},f:()=>{S.ind.debt+=0.4; S.ind.sanita+=3; gd('lavoratori',3);}},
@@ -8442,6 +8564,67 @@ const DOSSIERS=[
  {id:'ms_sa_merendine',era:'contemporanea',min:'salute',kick:'Alimentazione',t:'La pubblicità delle merendine ai bambini',text:'Un bambino su tre è in sovrappeso. Si propone di vietare la pubblicità dei cibi più grassi e dolci nelle ore in cui guardano i piccoli.',ch:[
    {l:'Vietala nelle fasce dei bambini',e:'I pediatri applaudono; televisioni e industria no',pleases:'progressista',f:()=>{S.ind.sanita+=1; gd('cetomedio',1); gd('imprenditori',-2);}},
    {l:'Un codice volontario delle imprese',e:'Nessun divieto; gli spot restano',pleases:'conservatore',f:()=>{gd('imprenditori',1); gd('cetomedio',-1);}},
+ ]},
+ // L212-1 · varietà del ministro (8/10): quindici dossier del presente per il ministro della Salute — era 'contemporanea', senza paesi.
+ {id:'ms_sa_infermiere',era:'contemporanea',min:'salute',kick:'Cure',t:'L\'infermiere che prescrive',text:'Per rinnovare la ricetta di una medicina che si prende da anni bisogna aspettare il medico per settimane. Si propone che gli infermieri esperti possano prescrivere i farmaci di tutti i giorni.',ch:[
+   {l:'Sì, con un corso e un elenco di farmaci',e:'Meno attese; i medici parlano di cure di serie B',pleases:'tecnico',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; S.ind.sanita+=2; gd('pensionati',2); gd('cetomedio',-1);}},
+   {l:'La ricetta resta del medico',e:'I medici ringraziano; le attese restano',pleases:'conservatore',f:()=>{gd('cetomedio',1); gd('pensionati',-1);}},
+ ]},
+ {id:'ms_sa_fumo',era:'contemporanea',min:'salute',kick:'Prevenzione',t:'Il fumo alla fermata dell\'autobus',text:'Nei locali chiusi non si fuma più da anni. Ora i medici chiedono il divieto anche all\'aperto: alle fermate, davanti alle scuole, agli ingressi degli ospedali.',ch:[
+   {l:'Divieto alle fermate, davanti a scuole e ospedali',e:'Aria pulita dove si aspetta; i fumatori si sentono braccati',pleases:'progressista',f:()=>{S.ind.sanita+=1; gd('pensionati',1); gd('cetomedio',1); gd('lavoratori',-2);}},
+   {l:'Solo davanti a scuole e ospedali',e:'Un divieto che si fa rispettare; alle fermate si fuma come prima',pleases:'tecnico',f:()=>{S.ind.sanita+=1; gd('lavoratori',-1);}},
+ ]},
+ {id:'ms_sa_lampade',era:'contemporanea',min:'salute',kick:'Prevenzione',t:'Le lampade abbronzanti ai ragazzi',text:'I tumori della pelle crescono fra i giovani, e i dermatologi accusano i centri abbronzanti: molti ragazzi ci vanno ogni settimana. Si propone di vietarli ai minorenni.',ch:[
+   {l:'Vietati ai minorenni, con multe ai centri',e:'Meno scottature a quindici anni; qualche centro chiude',pleases:'progressista',f:()=>{S.ind.sanita+=1; gd('pensionati',1); gd('imprenditori',-2);}},
+   {l:'Un cartello sui rischi e la firma dei genitori',e:'Nessun divieto; si firma e si entra',pleases:'conservatore',f:()=>{gd('imprenditori',1); gd('cetomedio',-1);}},
+ ]},
+ {id:'ms_sa_udito',era:'contemporanea',min:'salute',kick:'Cure',t:'Gli anziani che non sentono più',text:'Un anziano su tre sente male, ma pochi portano l\'apparecchio: costa quanto un mese di pensione. Chi non sente si chiude in casa, e i medici dicono che la memoria se ne va prima.',ch:[
+   {l:'Apparecchi gratuiti dopo una visita',e:'Gli anziani tornano a parlare; una spesa che cresce ogni anno',pleases:'progressista',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; S.ind.sanita+=2; gd('pensionati',3);}},
+   {l:'Apparecchi semplici in farmacia, senza ricetta',e:'Costano un terzo; chi ha bisogno di più resta senza',pleases:'tecnico',f:()=>{S.ind.sanita+=1; gd('pensionati',1); gd('imprenditori',1); gd('cetomedio',-1);}},
+ ]},
+ {id:'ms_sa_rete',era:'contemporanea',min:'salute',kick:'Prevenzione',t:'Le false cure in rete',text:'Un giovane seguito da milioni di persone consiglia di curare l\'ansia col digiuno e di smettere le medicine. I medici chiedono di fermare chi vende false cure in rete.',ch:[
+   {l:'Multe a chi promuove false cure, e ai siti che le ospitano',e:'Meno inganni; c\'è chi grida alla censura',pleases:'tecnico',f:()=>{S.ind.sanita+=1; gd('pensionati',1); gd('giovani',-2);}},
+   {l:'Medici veri in rete, con una campagna',e:'Si risponde con la scienza; i video falsi corrono più in fretta',pleases:'progressista',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; S.ind.sanita+=1; gd('giovani',1);}},
+ ]},
+ {id:'ms_sa_neonati',era:'contemporanea',min:'salute',kick:'Innovazione',t:'Il genoma dei neonati',text:'Con una goccia di sangue si può leggere tutto il genoma di un neonato e scoprire centinaia di malattie rare prima che compaiano. I genitori sono divisi: sapere tutto, e subito, non è sempre un regalo.',ch:[
+   {l:'Il test a tutti i neonati, salvo rifiuto',e:'Cure prima dei sintomi; il genoma di ogni bambino in un archivio',pleases:'tecnico',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; S.ind.sanita+=2; gd('giovani',1); gd('cattolici',-2);}},
+   {l:'Solo le malattie che si possono curare',e:'Si cerca quello che serve; il resto non si sa',pleases:'conservatore',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; S.ind.sanita+=1; gd('cattolici',1);}},
+ ]},
+ {id:'ms_sa_piombo',era:'contemporanea',min:'salute',kick:'Prevenzione',t:'I tubi di piombo',text:'Nelle case più vecchie molti tubi dell\'acqua sono ancora di piombo. Le analisi ne trovano tracce nel sangue dei bambini di alcuni quartieri; cambiarli tutti vuol dire anni di lavori.',ch:[
+   {l:'Un piano per cambiarli tutti, cominciando dalle scuole',e:'Acqua sicura; strade aperte per anni',pleases:'progressista',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; S.ind.sanita+=2; gd('lavoratori',2); gd('cetomedio',1);}},
+   {l:'Filtri gratuiti nelle case a rischio',e:'Subito e a poco; i tubi restano dove sono',pleases:'tecnico',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; S.ind.sanita+=1; gd('cetomedio',1);}},
+ ]},
+ {id:'ms_sa_turni',era:'contemporanea',min:'salute',kick:'Ospedali',t:'I turni di trentasei ore',text:'I giovani medici in formazione restano in reparto anche trentasei ore di fila, e gli studi dicono che gli errori si concentrano nelle ultime. Gli ospedali rispondono che senza di loro i reparti chiudono.',ch:[
+   {l:'Un tetto di dodici ore, e più assunzioni',e:'Medici riposati; servono migliaia di persone in più',pleases:'progressista',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; S.ind.sanita+=2; gd('giovani',2);}},
+   {l:'Il tetto solo nei reparti d\'urgenza',e:'Un passo; altrove si continua come prima',pleases:'tecnico',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; S.ind.sanita+=1; gd('giovani',-1);}},
+ ]},
+ {id:'ms_sa_obbligo',era:'contemporanea',min:'salute',kick:'Prevenzione',t:'I vaccini per entrare al nido',text:'In alcune città i bambini vaccinati sono scesi sotto la soglia che protegge tutti, e una malattia infantile che sembrava scomparsa è tornata. Si propone di ammettere al nido e alla materna solo i bambini vaccinati.',ch:[
+   {l:'Senza vaccini non si entra',e:'Le coperture risalgono; una parte dei genitori si sente ricattata',pleases:'tecnico',f:()=>{S.ind.sanita+=2; gd('pensionati',2); gd('cetomedio',-2);}},
+   {l:'Chiamata attiva delle famiglie, senza obbligo',e:'Nessuna guerra con i genitori; la soglia si riprende piano',pleases:'progressista',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; S.ind.sanita+=1; gd('cetomedio',1);}},
+ ]},
+ {id:'ms_sa_banco',era:'contemporanea',min:'salute',kick:'Cure',t:'Le medicine da banco al supermercato',text:'Per un antidolorifico o uno sciroppo per la tosse bisogna andare in farmacia, e di notte ce n\'è una aperta ogni tanti quartieri. I supermercati chiedono di vendere i farmaci senza ricetta; i farmacisti dicono che nessuno controllerà più.',ch:[
+   {l:'Sì, nei supermercati con un farmacista',e:'Prezzi più bassi e orari lunghi; le farmacie di paese soffrono',pleases:'tecnico',f:()=>{gd('cetomedio',2); gd('giovani',1); gd('pensionati',-1);}},
+   {l:'Solo in farmacia, con più turni di notte',e:'Il consiglio del farmacista resta; i turni si pagano',pleases:'conservatore',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; S.ind.sanita+=1; gd('pensionati',1);}},
+ ]},
+ {id:'ms_sa_macchina',era:'contemporanea',min:'salute',kick:'Digitale',t:'La macchina che legge le radiografie',text:'Un programma legge le radiografie e le mammografie più in fretta dei radiologi, e in una prova ha trovato tumori che erano sfuggiti. I radiologi chiedono chi risponderà quando sbaglia.',ch:[
+   {l:'In ogni ospedale, con un medico che firma',e:'Referti in un giorno; la responsabilità resta del medico, e lui lo sa',pleases:'tecnico',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; S.ind.sanita+=2; gd('giovani',1); gd('cetomedio',-1);}},
+   {l:'Solo come secondo parere, per ora',e:'Prudenza; le attese dei referti restano lunghe',pleases:'conservatore',f:()=>{S.ind.sanita+=1; gd('cetomedio',1);}},
+ ]},
+ {id:'ms_sa_ritocchi',era:'contemporanea',min:'salute',kick:'Prevenzione',t:'I ritocchi estetici a sedici anni',text:'Le iniezioni per gonfiare le labbra si fanno anche a sedici anni, a volte in un appartamento e da chi non è medico. I pronto soccorso vedono le complicazioni; si propone di vietare i ritocchi ai minorenni.',ch:[
+   {l:'Vietati ai minorenni, e solo dai medici',e:'Meno danni a sedici anni; il mercato va sottobanco',pleases:'progressista',f:()=>{S.ind.sanita+=1; gd('pensionati',1); gd('cetomedio',1); gd('giovani',-2);}},
+   {l:'Solo i medici possono farli, l\'età resta libera',e:'Basta studi improvvisati; i ragazzi continuano',pleases:'tecnico',f:()=>{S.ind.sanita+=1; gd('imprenditori',-1);}},
+ ]},
+ {id:'ms_sa_famiglia',era:'contemporanea',min:'salute',kick:'Cure',t:'Il medico di famiglia diventa dipendente',text:'I medici di famiglia lavorano da soli, ognuno col suo studio e i suoi orari. Si propone di farne dipendenti pubblici, in centri aperti tutto il giorno insieme ad altri medici e agli infermieri.',ch:[
+   {l:'Dipendenti, in centri aperti tutto il giorno',e:'C\'è sempre qualcuno a cui chiedere; il medico di sempre non c\'è più',pleases:'tecnico',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; S.ind.sanita+=2; gd('giovani',1); gd('pensionati',-1);}},
+   {l:'Restano liberi, con un incentivo a lavorare insieme',e:'La fiducia resta; anche gli studi chiusi il pomeriggio',pleases:'conservatore',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; S.ind.sanita+=1; gd('pensionati',1);}},
+ ]},
+ {id:'ms_sa_avanzi',era:'contemporanea',min:'salute',kick:'Cure',t:'Le medicine buttate',text:'Una scatola di trenta compresse per una cura di cinque giorni: il resto finisce nei rifiuti, ancora buono. Si propone di vendere i farmaci a dose, e di dare quelli integri a chi non può comprarli.',ch:[
+   {l:'Farmaci a dose e raccolta di quelli integri',e:'Meno sprechi e qualche cura donata; l\'industria deve rifare le confezioni',pleases:'progressista',f:()=>{S.ind.sanita+=1; gd('cattolici',2); gd('imprenditori',-2);}},
+   {l:'Confezioni più piccole, d\'accordo con le imprese',e:'Un passo senza obblighi; le scatole cambiano piano',pleases:'tecnico',f:()=>{gd('imprenditori',1); gd('cetomedio',-1);}},
+ ]},
+ {id:'ms_sa_sangue',era:'contemporanea',min:'salute',kick:'Donazioni',t:'Il sangue che manca',text:'I donatori di sangue invecchiano e i giovani non li sostituiscono: gli ospedali rinviano gli interventi programmati perché mancano le sacche. Qualcuno propone di pagare chi dona.',ch:[
+   {l:'Un giorno libero pagato per ogni donazione',e:'I giovani tornano a donare; le imprese contano le assenze',pleases:'progressista',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; S.ind.sanita+=2; gd('lavoratori',1); gd('imprenditori',-1);}},
+   {l:'Un compenso a chi dona',e:'Le sacche arrivano; donare diventa un mestiere',pleases:'tecnico',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; S.ind.sanita+=1; gd('giovani',1); gd('cattolici',-2);}},
  ]},
  // ----- ISTRUZIONE (+5) -----
  {id:'smartphone_scuola',min:'istruzione',kick:'Scuola',t:'Smartphone in classe: vietarli?',text:'Cresce il fronte che chiede il divieto totale degli smartphone a scuola.',ch:[
@@ -8513,6 +8696,67 @@ const DOSSIERS=[
  {id:'ms_is_calendario',era:'contemporanea',min:'istruzione',kick:'Calendario',t:'La pausa lunga è troppo lunga?',text:'Dopo la pausa più lunga dell\'anno i ragazzi hanno dimenticato un mese di programma, dicono gli studi. Accorciarla tocca le ferie di mezza nazione.',ch:[
    {l:'Due settimane di scuola in più',e:'Più scuola; albergatori e insegnanti contrari',pleases:'tecnico',f:()=>{gd('cetomedio',1); gd('imprenditori',-2); gd('lavoratori',-1);}},
    {l:'Il calendario non si tocca',e:'Le ferie sono salve; il problema resta',pleases:'conservatore',f:()=>{gd('imprenditori',1); gd('pensionati',1);}},
+ ]},
+ // L211-1 · varietà del ministro (8/10): quindici dossier del presente per il ministro dell'Istruzione — era 'contemporanea', senza paesi.
+ {id:'ms_is_cattedre',era:'contemporanea',min:'istruzione',kick:'Scuola',t:'Nessuno vuole insegnare matematica',text:'Al concorso per insegnare matematica e scienze si presentano meno candidati dei posti. Mille classi cominciano l\'anno con un supplente che cambia ogni mese.',ch:[
+   {l:'Ingegneri e laureati in cattedra, abilitati dopo',e:'Le classi hanno un professore; chi ha studiato per insegnare protesta',pleases:'tecnico',f:()=>{gd('cetomedio',2); gd('imprenditori',1); gd('lavoratori',-2);}},
+   {l:'Un premio in busta paga a chi sceglie quelle materie',e:'Il mestiere torna attraente, piano; una spesa fissa',pleases:'progressista',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; gd('lavoratori',2); gd('giovani',1);}},
+ ]},
+ {id:'ms_is_rete',era:'contemporanea',min:'istruzione',kick:'Scuola',t:'Le offese nel gruppo della classe',text:'Una ragazza di tredici anni non va a scuola da un mese: nel gruppo della classe, sul telefono, girano sue foto e insulti. Alcuni genitori dicono che fuori dall\'orario non è affare della scuola.',ch:[
+   {l:'La scuola risponde anche di quello che succede in rete',e:'I ragazzi sanno che c\'è un adulto; i presidi temono le cause',pleases:'progressista',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; S.ind.sicurezza+=1; gd('cattolici',2); gd('pensionati',1); gd('giovani',-1);}},
+   {l:'Un reato per chi diffonde, e lo giudicano i tribunali',e:'La legge è chiara; la scuola resta a guardare',pleases:'conservatore',f:()=>{S.ind.sicurezza+=1; gd('pensionati',2); gd('giovani',-2);}},
+ ]},
+ {id:'ms_is_compiti',era:'contemporanea',min:'istruzione',kick:'Famiglie',t:'Basta compiti a casa?',text:'Un gruppo di genitori chiede di abolire i compiti a casa alle elementari: i bambini passano la sera sui quaderni, e chi ha qualcuno che lo aiuta va avanti, gli altri restano indietro.',ch:[
+   {l:'Niente compiti alle elementari, si lavora in classe',e:'Sere libere; molti insegnanti si sentono scavalcati',pleases:'progressista',f:()=>{gd('lavoratori',2); gd('cetomedio',1); gd('pensionati',-2);}},
+   {l:'Decide ogni scuola, con un tetto alle ore',e:'Un limite di buon senso; la differenza fra le famiglie resta',pleases:'conservatore',f:()=>{gd('pensionati',1); gd('cetomedio',1); gd('lavoratori',-1);}},
+ ]},
+ {id:'ms_is_soldi',era:'contemporanea',min:'istruzione',kick:'Programmi',t:'Imparare a fare i conti con i soldi',text:'Un giovane su due non sa che cosa sia un tasso d\'interesse, e molti firmano il primo prestito a rate senza leggerlo. Le banche si offrono di mandare i loro esperti nelle scuole.',ch:[
+   {l:'Un\'ora alla settimana, con gli insegnanti della scuola',e:'Ragazzi più accorti; un\'ora tolta a qualcos\'altro',pleases:'tecnico',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; gd('giovani',2); gd('cetomedio',1); gd('pensionati',-1);}},
+   {l:'Accetta gli esperti delle banche',e:'Gratis e subito; c\'è chi teme le lezioni che fanno pubblicità',pleases:'conservatore',f:()=>{gd('imprenditori',2); gd('lavoratori',-1);}},
+ ]},
+ {id:'ms_is_ripetenti',era:'contemporanea',min:'istruzione',kick:'Valutazione',t:'Ripetere l\'anno serve?',text:'Ogni anno decine di migliaia di ragazzi ripetono la classe, e metà di loro lascia la scuola prima del diploma. Gli studi dicono che ripetere non aiuta; molti insegnanti dicono che promuovere tutti è peggio.',ch:[
+   {l:'Basta ripetenze: un recupero obbligatorio l\'anno dopo',e:'Meno abbandoni; il diploma vale un po\' meno',pleases:'progressista',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; gd('giovani',2); gd('lavoratori',1); gd('pensionati',-2);}},
+   {l:'La bocciatura resta, con più recupero durante l\'anno',e:'Il voto pesa ancora; chi resta indietro spesso molla',pleases:'conservatore',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; gd('pensionati',2); gd('giovani',-1);}},
+ ]},
+ {id:'ms_is_sport',era:'contemporanea',min:'istruzione',kick:'Scuola',t:'Un\'ora di movimento al giorno',text:'I bambini passano sei ore seduti in classe e altre tre davanti a uno schermo, e uno su tre è in sovrappeso. Si propone un\'ora di movimento ogni giorno, in ogni scuola.',ch:[
+   {l:'Un\'ora al giorno, con insegnanti nuovi',e:'Bambini più svegli; mancano le palestre e i soldi',pleases:'progressista',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; gd('giovani',2); gd('cetomedio',2);}},
+   {l:'Cortili aperti e gare fra scuole, senza ore nuove',e:'Costa poco; si muove chi si muoveva già',pleases:'conservatore',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; gd('pensionati',1); gd('cetomedio',1); gd('giovani',-1);}},
+ ]},
+ {id:'ms_is_votoprof',era:'contemporanea',min:'istruzione',kick:'Valutazione',t:'Il voto agli insegnanti',text:'Si propone che gli insegnanti siano valutati ogni anno, anche coi questionari di studenti e famiglie, e che i migliori guadagnino di più. I sindacati della scuola minacciano lo sciopero.',ch:[
+   {l:'Valutazione ogni anno e premi ai migliori',e:'Il merito entra in classe; i professori si sentono sotto esame',pleases:'conservatore',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; gd('cetomedio',2); gd('imprenditori',1); gd('lavoratori',-2);}},
+   {l:'Aggiornamento obbligatorio, aumenti uguali per tutti',e:'Pace nelle scuole; chi lavora bene e chi no prendono lo stesso',pleases:'progressista',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; gd('lavoratori',2); gd('cetomedio',-1);}},
+ ]},
+ {id:'ms_is_ospedale',era:'contemporanea',min:'istruzione',kick:'Inclusione',t:'La scuola in corsia',text:'I bambini ricoverati per mesi negli ospedali perdono l\'anno. In pochi reparti c\'è un\'aula con un maestro; negli altri si studia da soli, quando la cura lo permette.',ch:[
+   {l:'Un\'aula e degli insegnanti in ogni reparto dei bambini',e:'Nessuno perde l\'anno per una malattia; posti nuovi da pagare',pleases:'progressista',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; gd('cattolici',2); gd('cetomedio',1);}},
+   {l:'Lezioni in collegamento con la propria classe',e:'Costa poco e tiene vicini i compagni; uno schermo non è un maestro',pleases:'tecnico',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; gd('giovani',1); gd('cetomedio',1); gd('cattolici',-1);}},
+ ]},
+ {id:'ms_is_storia',era:'contemporanea',min:'istruzione',kick:'Programmi',t:'Che cosa si studia di storia',text:'Una commissione propone programmi di storia nuovi: più storia del mondo, meno battaglie e date della nazione. Metà dei giornali parla di una scuola finalmente aperta, l\'altra metà di memoria cancellata.',ch:[
+   {l:'I programmi nuovi, aperti al mondo',e:'I ragazzi capiscono il presente; i nostalgici insorgono',pleases:'progressista',f:()=>{gd('giovani',2); gd('cetomedio',1); gd('pensionati',-2); gd('cattolici',-1);}},
+   {l:'La storia della nazione resta al centro',e:'Le radici sono salve; il mondo resta sullo sfondo',pleases:'conservatore',f:()=>{gd('pensionati',2); gd('cattolici',1); gd('giovani',-2);}},
+ ]},
+ {id:'ms_is_distanza',era:'contemporanea',min:'istruzione',kick:'Università',t:'Le lauree a distanza',text:'Gli atenei che insegnano solo in rete hanno ormai più iscritti delle università più antiche: costano di più, ma si studia quando si vuole. I rettori tradizionali accusano: esami troppo facili.',ch:[
+   {l:'Controlli severi e gli stessi requisiti per tutti',e:'Una laurea vale una laurea; qualche ateneo in rete chiude',pleases:'tecnico',f:()=>{gd('cetomedio',2); gd('lavoratori',-1); gd('imprenditori',-1);}},
+   {l:'Lasciali crescere: aprono l\'università a chi lavora',e:'Chi lavora si laurea; i titoli perdono credito',pleases:'conservatore',f:()=>{gd('lavoratori',2); gd('imprenditori',1); gd('cetomedio',-2);}},
+ ]},
+ {id:'ms_is_gita',era:'contemporanea',min:'istruzione',kick:'Famiglie',t:'La gita che non tutti pagano',text:'Il viaggio di fine anno costa quanto mezzo stipendio, e in ogni classe tre o quattro ragazzi restano a casa con una scusa. I genitori chiedono una gita uguale per tutti, pagata dalla scuola.',ch:[
+   {l:'Un fondo perché nessuno resti a casa',e:'Tutta la classe parte; una spesa che si vede',pleases:'progressista',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; gd('lavoratori',2); gd('cattolici',1);}},
+   {l:'Un tetto alla spesa delle gite',e:'Viaggi più vicini e più poveri; nessuno resta a casa per i soldi',pleases:'tecnico',f:()=>{gd('lavoratori',1); gd('cetomedio',-1);}},
+ ]},
+ {id:'ms_is_registro',era:'contemporanea',min:'istruzione',kick:'Tecnologia',t:'Il voto arriva sul telefono dei genitori',text:'Col registro in rete i genitori ricevono un avviso a ogni voto, anche alle undici di sera. Gli psicologi parlano di ragazzi sorvegliati minuto per minuto; molti genitori non vogliono rinunciarci.',ch:[
+   {l:'Gli avvisi una volta alla settimana',e:'Più respiro per i ragazzi; i genitori si sentono tagliati fuori',pleases:'progressista',f:()=>{gd('giovani',2); gd('cetomedio',-1);}},
+   {l:'Tutto subito, come vogliono le famiglie',e:'Genitori informati; i ragazzi raccontano sempre meno',pleases:'conservatore',f:()=>{gd('cetomedio',2); gd('giovani',-1);}},
+ ]},
+ {id:'ms_is_codice',era:'contemporanea',min:'istruzione',kick:'Tecnologia',t:'Programmare dalle elementari',text:'Le imprese non trovano programmatori e propongono di insegnare a scrivere codice dai sei anni, come una lingua. Gli insegnanti chiedono chi lo insegnerà, e a quale materia si toglierà l\'ora.',ch:[
+   {l:'Un\'ora di codice in ogni classe',e:'I ragazzi imparano presto; mancano insegnanti e computer',pleases:'tecnico',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; S.gMod+=0.1; gd('imprenditori',2); gd('pensionati',-1);}},
+   {l:'Prima leggere e contare bene',e:'Le basi sono salve; le imprese cercano all\'estero',pleases:'conservatore',f:()=>{gd('pensionati',2); gd('imprenditori',-2);}},
+ ]},
+ {id:'ms_is_estero',era:'contemporanea',min:'istruzione',kick:'Università',t:'Un semestre all\'estero per tutti',text:'Uno studente su dieci passa qualche mese in un\'università straniera, e sono quasi sempre figli di famiglie che possono pagare. Si propone una borsa che copra tutto, per chiunque.',ch:[
+   {l:'Una borsa piena per tutti',e:'Parte anche chi non ha soldi; qualcuno non torna',pleases:'progressista',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; gd('giovani',3); gd('cetomedio',1); gd('pensionati',-1);}},
+   {l:'Borse solo ai più bravi',e:'Si spende meno; partono i soliti',pleases:'conservatore',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; gd('cetomedio',2); gd('lavoratori',-1);}},
+ ]},
+ {id:'ms_is_sveglia',era:'contemporanea',min:'istruzione',kick:'Calendario',t:'Le lezioni che cominciano più tardi',text:'Gli studi sul sonno dicono che gli adolescenti rendono poco alle otto del mattino. Alcuni medici propongono di far entrare le scuole superiori alle nove; i trasporti e le famiglie che lavorano presto non sono d\'accordo.',ch:[
+   {l:'Entrata alle nove per i più grandi',e:'Ragazzi più svegli; gli orari degli autobus e dei genitori da rifare',pleases:'progressista',f:()=>{gd('giovani',2); gd('cetomedio',-1); gd('lavoratori',-1);}},
+   {l:'L\'orario resta, con una pausa in più a metà mattina',e:'Niente da rifare; si sbadiglia come prima',pleases:'conservatore',f:()=>{gd('lavoratori',1); gd('cetomedio',1); gd('giovani',-1);}},
  ]},
  // ----- INFRASTRUTTURE (+4) -----
  {id:'aeroporto',min:'infrastrutture',kick:'Trasporti',t:'Ampliare il grande aeroporto',text:'Il principale scalo del paese è saturo: l\'ampliamento promette traffico e lavoro, il territorio protesta.',ch:[
@@ -8719,6 +8963,67 @@ const DOSSIERS=[
    {l:'Istituisci la zona',e:'Qualche capannone riapre; entrate in meno',pleases:'conservatore',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; gd('lavoratori',2); gd('imprenditori',2);}},
    {l:'Niente zone speciali: strade e scuole',e:'Un lavoro lungo; nessun nastro da tagliare',pleases:'tecnico',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; gd('cetomedio',1); gd('giovani',1);}},
  ]},
+ // L211-1 · varietà del ministro (8/10): quindici dossier del presente per il ministro dello Sviluppo — era 'contemporanea', senza paesi.
+ {id:'ms_sv_riparare',era:'contemporanea',min:'sviluppo',kick:'Consumatori',t:'Il diritto di riparare',text:'Una lavatrice di sei anni si ferma: il pezzo che serve non si trova più, e il tecnico dice che conviene comprarne una nuova. Si propone di obbligare i produttori a vendere i ricambi per dieci anni.',ch:[
+   {l:'Ricambi obbligatori per dieci anni',e:'Gli apparecchi durano di più; i produttori alzano i prezzi',pleases:'progressista',f:()=>{S.ind.ambiente+=2; gd('cetomedio',2); gd('pensionati',1); gd('imprenditori',-2);}},
+   {l:'Un bonus a chi ripara invece di ricomprare',e:'Le botteghe dei riparatori respirano; lo stato paga',pleases:'tecnico',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; S.ind.ambiente+=1; gd('lavoratori',1); gd('cetomedio',1);}},
+ ]},
+ {id:'ms_sv_cassetti',era:'contemporanea',min:'sviluppo',kick:'Industria',t:'La miniera nei cassetti',text:'Nelle case ci sono milioni di telefoni vecchi, con dentro oro, rame e metalli che il paese compra all\'estero. Quasi nessuno li riporta: finiscono nella spazzatura.',ch:[
+   {l:'Una cauzione sul telefono nuovo, resa a chi riporta il vecchio',e:'I cassetti si svuotano; il telefono nuovo costa un po\' di più',pleases:'tecnico',f:()=>{S.ind.ambiente+=2; gd('imprenditori',1); gd('giovani',-1);}},
+   {l:'Impianti pubblici per recuperare i metalli',e:'Una filiera nuova; servono anni e soldi',pleases:'progressista',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; S.gMod+=0.1; gd('lavoratori',2);}},
+ ]},
+ {id:'ms_sv_carne',era:'contemporanea',min:'sviluppo',kick:'Agricoltura',t:'La carne fatta in laboratorio',text:'Un\'azienda chiede il permesso di vendere carne cresciuta in laboratorio da poche cellule, senza allevare né macellare un animale. Gli allevatori chiedono di vietarla prima che arrivi.',ch:[
+   {l:'Vietala: la carne viene dagli allevamenti',e:'Gli allevatori festeggiano; l\'azienda va a produrre altrove',pleases:'conservatore',f:()=>{gd('pensionati',2); gd('cattolici',1); gd('giovani',-2);}},
+   {l:'Permettila, con controlli e un\'etichetta chiara',e:'Chi vuole la prova; le campagne si sentono tradite',pleases:'tecnico',f:()=>{S.ind.ambiente+=1; gd('giovani',2); gd('imprenditori',1); gd('pensionati',-2);}},
+ ]},
+ {id:'ms_sv_origine',era:'contemporanea',min:'sviluppo',kick:'Consumatori',t:'Da dove viene quello che mangi',text:'Un vasetto di miele, una confezione di riso: sull\'etichetta c\'è scritto dove sono stati confezionati, non dove è cresciuto il raccolto. Gli agricoltori chiedono che lo si scriva.',ch:[
+   {l:'L\'origine del raccolto in etichetta, sempre',e:'Chi compra sa; l\'industria alimentare parla di costi e di ostacoli al commercio',pleases:'conservatore',f:()=>{gd('cetomedio',2); gd('pensionati',1); gd('imprenditori',-2);}},
+   {l:'Un marchio facoltativo per chi vuole dirlo',e:'Nessun obbligo; le etichette restano vaghe',pleases:'tecnico',f:()=>{gd('imprenditori',2); gd('cetomedio',-1);}},
+ ]},
+ {id:'ms_sv_fallimento',era:'contemporanea',min:'sviluppo',kick:'Innovazione',t:'Ripartire dopo il fallimento',text:'Chi ha visto fallire la sua piccola impresa resta segnato per anni: niente credito, i debiti personali, il nome nelle liste. Molti non ci riprovano più. Si propone di cancellare i debiti rimasti dopo tre anni.',ch:[
+   {l:'Debiti cancellati dopo tre anni, se in buona fede',e:'Una seconda occasione; le banche alzano i tassi a tutti',pleases:'progressista',f:()=>{gd('giovani',2); gd('imprenditori',1); gd('pensionati',-1);}},
+   {l:'Un fondo che garantisce il secondo prestito',e:'Si riparte con lo stato accanto; il fondo può perderci',pleases:'tecnico',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; S.gMod+=0.1; gd('imprenditori',2);}},
+ ]},
+ {id:'ms_sv_cooperativa',era:'contemporanea',min:'sviluppo',kick:'Industria',t:'Gli operai comprano la fabbrica',text:'Il padrone di una fabbrica di mobili va in pensione e vuole chiudere. Gli operai chiedono di ricevere in una volta sola l\'indennità di disoccupazione, per rilevarla insieme in cooperativa.',ch:[
+   {l:'Indennità in anticipo e un prestito pubblico',e:'La fabbrica riapre con gli operai padroni; se va male, lo stato ci perde',pleases:'progressista',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; gd('lavoratori',3); gd('cattolici',1); gd('imprenditori',-1);}},
+   {l:'Si cerca un compratore sul mercato',e:'Nessun rischio pubblico; nessuno si presenta',pleases:'conservatore',f:()=>{gd('imprenditori',1); gd('lavoratori',-2);}},
+ ]},
+ {id:'ms_sv_vicini',era:'contemporanea',min:'sviluppo',kick:'Energia',t:'L\'energia dei vicini di casa',text:'Un condominio ha messo i pannelli sul tetto e vorrebbe dividere la corrente con la scuola e i negozi della via. Le regole non lo permettono: l\'energia in più va venduta alla rete, a poco.',ch:[
+   {l:'Le comunità di quartiere possono scambiarsela',e:'Bollette più leggere; la rete deve cambiare le sue regole',pleases:'progressista',f:()=>{S.ind.ambiente+=2; gd('cetomedio',2); gd('imprenditori',-1);}},
+   {l:'Un prezzo migliore per l\'energia venduta alla rete',e:'Semplice; ogni tetto resta da solo',pleases:'tecnico',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; S.ind.ambiente+=1; gd('cetomedio',1);}},
+ ]},
+ {id:'ms_sv_api',era:'contemporanea',min:'sviluppo',kick:'Agricoltura',t:'Il veleno delle api',text:'Gli apicoltori trovano gli alveari vuoti, e gli studi indicano un insetticida usato su quasi tutte le colture. Gli agricoltori dicono che senza quel prodotto perderanno un raccolto su cinque.',ch:[
+   {l:'Vietalo, con un aiuto a chi cambia',e:'Le api tornano; il raccolto costa di più',pleases:'progressista',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; S.ind.ambiente+=2; gd('giovani',2); gd('imprenditori',-1);}},
+   {l:'Limitalo alle colture senza fiori',e:'Un compromesso; gli apicoltori non si fidano',pleases:'tecnico',f:()=>{S.ind.ambiente+=1; gd('imprenditori',1); gd('giovani',-1);}},
+ ]},
+ {id:'ms_sv_idrogeno',era:'contemporanea',min:'sviluppo',kick:'Energia',t:'La valle dell\'idrogeno',text:'Un consorzio di imprese propone di produrre idrogeno col sole e col vento in un\'area industriale abbandonata, per le fornaci e per i camion. Chiede che lo stato copra metà dell\'investimento.',ch:[
+   {l:'Lo stato mette la sua metà',e:'Un\'industria nuova; nessuno sa se costerà mai meno del gas',pleases:'tecnico',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; S.gMod+=0.1; S.ind.ambiente+=2; gd('imprenditori',1);}},
+   {l:'Prima le reti elettriche, l\'idrogeno aspetta',e:'Una spesa più sicura; il consorzio va dove lo pagano',pleases:'conservatore',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; gd('cetomedio',1); gd('imprenditori',-2);}},
+ ]},
+ {id:'ms_sv_giochi',era:'contemporanea',min:'sviluppo',kick:'Innovazione',t:'Gli studi che fanno videogiochi',text:'Un piccolo studio del paese ha venduto un videogioco in milioni di copie, poi si è trasferito dove le tasse sono più basse. Il settore chiede uno sgravio per chi sviluppa qui.',ch:[
+   {l:'Uno sgravio per chi sviluppa qui',e:'Gli studi restano; qualcuno dice che si pagano i giochi con le tasse',pleases:'tecnico',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; S.gMod+=0.1; gd('giovani',2); gd('pensionati',-1);}},
+   {l:'Niente sgravi: i giochi non sono un\'industria da aiutare',e:'Nessuna spesa; i programmatori fanno le valigie',pleases:'conservatore',f:()=>{gd('pensionati',1); gd('giovani',-2);}},
+ ]},
+ {id:'ms_sv_moda',era:'contemporanea',min:'sviluppo',kick:'Consumatori',t:'I vestiti usa e getta',text:'Magliette a pochi spiccioli, ordinate dal telefono e spedite da fabbriche lontane: durano un mese, poi finiscono nei rifiuti. I sarti e i negozi chiedono una tassa sui capi più economici.',ch:[
+   {l:'Una tassa sui capi usa e getta e sulla loro pubblicità',e:'Meno montagne di stracci; chi ha poco paga di più',pleases:'progressista',f:()=>{S.ind.ambiente+=2; gd('cetomedio',1); gd('giovani',-2);}},
+   {l:'Un\'etichetta che dice quanto inquina',e:'Chi compra sa; chi ha poco compra lo stesso',pleases:'tecnico',f:()=>{S.ind.ambiente+=1; gd('giovani',1); gd('cetomedio',-1);}},
+ ]},
+ {id:'ms_sv_giorno',era:'contemporanea',min:'sviluppo',kick:'Innovazione',t:'Aprire un\'impresa in un giorno',text:'Per aprire un piccolo laboratorio servono undici permessi di sette uffici diversi e otto mesi di attesa. Si propone uno sportello unico in rete: tutto in un giorno, i controlli dopo.',ch:[
+   {l:'Tutto in un giorno, i controlli dopo',e:'Le imprese nascono in fretta; qualcuna aprirà senza averne i requisiti',pleases:'conservatore',f:()=>{S.gMod+=0.1; gd('imprenditori',2); gd('giovani',1); gd('pensionati',-1);}},
+   {l:'Meno permessi, ma i controlli prima',e:'Più sicuro; gli otto mesi diventano quattro',pleases:'tecnico',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; gd('cetomedio',1); gd('imprenditori',1); gd('giovani',-1);}},
+ ]},
+ {id:'ms_sv_geotermia',era:'contemporanea',min:'sviluppo',kick:'Energia',t:'Il calore sotto la città',text:'Un pozzo profondo sotto la periferia potrebbe scaldare cinquantamila case col calore della terra. Durante le prove il terreno ha tremato due volte, appena; gli abitanti hanno firmato contro.',ch:[
+   {l:'Avanti, con i sensori e un fondo per i danni',e:'Riscaldamento pulito; al primo tremore torneranno le firme',pleases:'tecnico',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; S.ind.ambiente+=2; gd('imprenditori',1); gd('cetomedio',-1);}},
+   {l:'Il pozzo si ferma finché non c\'è certezza',e:'Gli abitanti dormono tranquilli; le case restano a gas',pleases:'conservatore',f:()=>{S.ind.ambiente-=1; gd('cetomedio',1); gd('pensionati',1);}},
+ ]},
+ {id:'ms_sv_recensioni',era:'contemporanea',min:'sviluppo',kick:'Consumatori',t:'Le stelline comprate',text:'Un ristorante scopre che un concorrente ha pagato cento recensioni false per affondarlo. In rete si comprano stelle e giudizi a pacchetti, e chi legge non sa più a chi credere.',ch:[
+   {l:'Multe ai siti che non le tolgono',e:'Giudizi più puliti; i siti minacciano di andarsene',pleases:'progressista',f:()=>{gd('cetomedio',2); gd('pensionati',1); gd('imprenditori',-1);}},
+   {l:'Un reato per chi le vende, il sito no',e:'Si colpiscono i venditori; quelli all\'estero ridono',pleases:'conservatore',f:()=>{gd('imprenditori',2); gd('cetomedio',-1);}},
+ ]},
+ {id:'ms_sv_prezzi',era:'contemporanea',min:'sviluppo',kick:'Commercio',t:'Il prezzo cambia per ogni cliente',text:'Due vicini di casa cercano lo stesso volo sullo stesso sito, alla stessa ora: a uno costa un terzo in più. Il programma ha capito che lui ha fretta e un telefono costoso.',ch:[
+   {l:'Vietati i prezzi su misura del cliente',e:'Lo stesso prezzo per tutti; i siti dicono che le offerte spariranno',pleases:'progressista',f:()=>{gd('cetomedio',2); gd('giovani',1); gd('imprenditori',-2);}},
+   {l:'L\'obbligo di dirlo, accanto al prezzo',e:'Chi compra è avvisato; il prezzo resta su misura',pleases:'tecnico',f:()=>{gd('imprenditori',1); gd('giovani',1); gd('cetomedio',-1);}},
+ ]},
  // ----- GIUSTIZIA (+8) -----
  {id:'prescrizione', dal:2019,era:'contemporanea',min:'giustizia',kick:'Giustizia',t:'Processi che muoiono di prescrizione',text:'Troppi procedimenti si estinguono per decorrenza dei termini. Dove intervieni?',ch:[
    {l:'Stop alla prescrizione dopo il primo grado',e:'Nessun processo nel nulla; garantisti contrari',pleases:'progressista',f:()=>{gd('lavoratori',2); gd('cetomedio',-2); S.ind.sicurezza+=1;}},
@@ -8800,6 +9105,67 @@ const DOSSIERS=[
  {id:'ms_gi_riprese',era:'contemporanea',min:'giustizia',kick:'Udienze',t:'Le telecamere in aula',text:'Una televisione chiede di trasmettere in diretta un grande processo. I giudici temono lo spettacolo, il pubblico vuole vedere.',ch:[
    {l:'Dirette ammesse, con regole',e:'Giustizia alla luce; il rischio del teatro',pleases:'populista',f:()=>{stampad(2); gd('giovani',1); gd('pensionati',-1);}},
    {l:'L\'aula non è uno studio televisivo',e:'Sobrietà; le televisioni protestano',pleases:'conservatore',f:()=>{gd('pensionati',1); stampad(-1);}},
+ ]},
+ // L210-1 · varietà del ministro (8/10): quindici dossier del presente per il ministro della Giustizia — era 'contemporanea', senza paesi.
+ {id:'ms_gi_interpreti',era:'contemporanea',min:'giustizia',kick:'Udienze',t:'Il processo senza interprete',text:'Un imputato straniero non capisce una parola dell\'udienza: l\'interprete non si è presentato, pagato poco e mesi dopo. Il processo viene rinviato per la terza volta.',ch:[
+   {l:'Un albo di interpreti pagati il giusto',e:'Udienze che si tengono; una spesa fissa in più',pleases:'tecnico',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; gd('cetomedio',1); gd('giovani',1);}},
+   {l:'Interpreti a distanza, in collegamento',e:'Si spende poco; la traduzione va e viene col segnale',pleases:'conservatore',f:()=>{gd('imprenditori',1); gd('giovani',-1);}},
+ ]},
+ {id:'ms_gi_dna',era:'contemporanea',min:'giustizia',kick:'Sicurezza',t:'La banca dati del DNA',text:'La polizia propone di prendere il DNA a chiunque venga arrestato, anche per reati minori, e di conservarlo per sempre. Molti casi irrisolti si chiuderebbero; molti innocenti resterebbero schedati.',ch:[
+   {l:'DNA a ogni arrestato, conservato',e:'Casi vecchi che si chiudono; schedati anche gli assolti',pleases:'conservatore',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; S.ind.sicurezza+=2; gd('pensionati',2); gd('giovani',-2);}},
+   {l:'Solo per i reati gravi, cancellato se assolti',e:'Garanzie salve; la banca dati cresce piano',pleases:'progressista',f:()=>{S.ind.sicurezza+=1; gd('giovani',1); gd('pensionati',-1);}},
+ ]},
+ {id:'ms_gi_divorzio',era:'contemporanea',min:'giustizia',kick:'Famiglia',t:'Separarsi senza giudice',text:'Una coppia senza figli minori e d\'accordo su tutto aspetta un anno per un\'udienza di cinque minuti. Si propone di separarsi davanti a un ufficiale pubblico, senza passare dal tribunale.',ch:[
+   {l:'Basta l\'ufficiale, se c\'è l\'accordo',e:'Tribunali più leggeri; qualcuno parla di matrimonio svalutato',pleases:'progressista',costo:{debito:-0.1},f:()=>{S.ind.debt-=0.1; gd('giovani',2); gd('cetomedio',1); gd('cattolici',-2);}},
+   {l:'Il giudice resta, con un\'udienza più rapida',e:'Una garanzia in più; l\'attesa si accorcia di poco',pleases:'conservatore',f:()=>{gd('cattolici',2); gd('giovani',-1);}},
+ ]},
+ {id:'ms_gi_algoritmo',era:'contemporanea',min:'giustizia',kick:'Digitale',t:'Il programma che aiuta i giudici',text:'Un programma legge migliaia di sentenze e suggerisce al giudice la decisione più probabile nelle cause semplici. Nei tribunali dove è stato provato i tempi si sono dimezzati.',ch:[
+   {l:'Estendilo alle cause minori',e:'Arretrati che si sciolgono; chi decide davvero?',pleases:'tecnico',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; gd('imprenditori',2); gd('pensionati',-1);}},
+   {l:'Solo per cercare i precedenti, mai per suggerire',e:'Il giudice resta solo; i tempi restano quelli',pleases:'conservatore',f:()=>{gd('pensionati',1); gd('imprenditori',-1);}},
+ ]},
+ {id:'ms_gi_giornimulta',era:'contemporanea',min:'giustizia',kick:'Pene',t:'Multe in proporzione al reddito',text:'Per lo stesso reato chi guadagna poco paga una multa che pesa un mese di stipendio, chi è ricco non se ne accorge. Una proposta calcola le multe penali in giorni di reddito.',ch:[
+   {l:'Multe in giorni di reddito',e:'La pena pesa uguale per tutti; i ricchi gridano all\'esproprio',pleases:'progressista',costo:{debito:-0.1},f:()=>{S.ind.debt-=0.1; gd('lavoratori',2); gd('giovani',1); gd('imprenditori',-2);}},
+   {l:'Cifre fisse, più alte per chi ricade',e:'Semplice da applicare; il ricco continua a pagare poco',pleases:'conservatore',f:()=>{S.ind.sicurezza+=1; gd('cetomedio',1); gd('lavoratori',-1);}},
+ ]},
+ {id:'ms_gi_chiaro',era:'contemporanea',min:'giustizia',kick:'Tribunali',t:'Sentenze che nessuno capisce',text:'Una sentenza di quaranta pagine dà ragione a un pensionato, ma lui non riesce a capire se ha vinto. Si propone che ogni decisione abbia un riassunto in parole semplici.',ch:[
+   {l:'Un riassunto chiaro, obbligatorio',e:'Chi ha fatto causa capisce com\'è finita; i giudici scrivono una pagina in più',pleases:'populista',f:()=>{gd('pensionati',2); gd('cetomedio',1); gd('imprenditori',-1);}},
+   {l:'Una guida di stile, senza obblighi',e:'Nessuna fatica in più; le sentenze restano quelle',pleases:'tecnico',f:()=>{gd('imprenditori',1); gd('pensionati',-1);}},
+ ]},
+ {id:'ms_gi_ambiente',era:'contemporanea',min:'giustizia',kick:'Ambiente',t:'I reati contro l\'ambiente',text:'Un\'impresa ha scaricato per anni rifiuti nel fiume e se la cava con una multa più bassa di quanto ha risparmiato. Le associazioni chiedono pene vere e una procura dedicata.',ch:[
+   {l:'Pene dure e una procura specializzata',e:'Chi inquina rischia il carcere; le imprese temono le inchieste',pleases:'progressista',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; S.ind.sicurezza+=1; gd('giovani',3); gd('imprenditori',-2);}},
+   {l:'Multe più alte, niente carcere',e:'Un segnale senza paura; il fiume aspetta',pleases:'tecnico',costo:{debito:-0.1},f:()=>{S.ind.debt-=0.1; gd('imprenditori',1); gd('giovani',-1);}},
+ ]},
+ {id:'ms_gi_oblio',era:'contemporanea',min:'giustizia',kick:'Pene',t:'La fedina che non si pulisce mai',text:'Un uomo condannato vent\'anni fa per un piccolo furto viene scartato a ogni colloquio di lavoro. Si propone di cancellare dal certificato le condanne lievi dopo dieci anni senza reati.',ch:[
+   {l:'Cancellate dopo dieci anni puliti',e:'Una seconda occasione vera; chi assume vuole sapere',pleases:'progressista',f:()=>{S.ind.sicurezza+=1; gd('cattolici',2); gd('lavoratori',1); gd('pensionati',-2);}},
+   {l:'Restano, ma si possono chiedere solo per certi lavori',e:'Un passo prudente; il certificato resta sporco',pleases:'conservatore',f:()=>{gd('pensionati',1); gd('cattolici',-1);}},
+ ]},
+ {id:'ms_gi_reclutamento',era:'contemporanea',min:'giustizia',kick:'Magistratura',t:'Avvocati esperti in toga',text:'Mancano centinaia di giudici e il concorso ne forma pochi ogni anno. Si propone di nominare giudici gli avvocati con vent\'anni di professione, senza concorso.',ch:[
+   {l:'Nomina gli avvocati esperti',e:'Aule coperte in un anno; i magistrati temono favori e amicizie',pleases:'tecnico',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; gd('imprenditori',2); gd('cetomedio',1); gd('giovani',-1);}},
+   {l:'Più concorsi, più grandi',e:'La toga si conquista come sempre; i vuoti restano per anni',pleases:'conservatore',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; gd('giovani',1); gd('imprenditori',-1);}},
+ ]},
+ {id:'ms_gi_madri',era:'contemporanea',min:'giustizia',kick:'Carcere',t:'I bambini in cella con le madri',text:'Alcune decine di bambini sotto i tre anni vivono in carcere con le madri detenute. Si propone di farle scontare la pena in case protette, fuori dalle prigioni.',ch:[
+   {l:'Case protette per tutte',e:'Nessun bambino dietro le sbarre; qualcuno teme le fughe',pleases:'progressista',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; gd('cattolici',3); gd('giovani',1); gd('pensionati',-1);}},
+   {l:'Solo per le pene brevi',e:'Un passo avanti; per le condanne lunghe non cambia niente',pleases:'conservatore',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; S.ind.sicurezza+=1; gd('cattolici',1);}},
+ ]},
+ {id:'ms_gi_confisca',era:'contemporanea',min:'giustizia',kick:'Sicurezza',t:'I beni tolti alla criminalità',text:'Lo stato ha confiscato migliaia di case, terreni e aziende alla criminalità organizzata, ma la metà resta chiusa e va in rovina. Le associazioni le chiedono; le banche vogliono venderle.',ch:[
+   {l:'Ai comuni e alle associazioni',e:'La villa del boss diventa una scuola; le aziende chiudono',pleases:'progressista',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; S.ind.sicurezza+=1; gd('giovani',2); gd('cattolici',1);}},
+   {l:'All\'asta, e i soldi alla giustizia',e:'Entrate subito; c\'è il rischio che li ricompri il vecchio padrone',pleases:'tecnico',costo:{debito:-0.2},f:()=>{S.ind.debt-=0.2; gd('imprenditori',1); gd('giovani',-1);}},
+ ]},
+ {id:'ms_gi_animali',era:'contemporanea',min:'giustizia',kick:'Pene',t:'Chi maltratta gli animali',text:'Un uomo che ha lasciato morire di fame i suoi cani se la cava con una multa. Le associazioni raccolgono un milione di firme per pene più dure e il divieto di tenere animali.',ch:[
+   {l:'Pene più dure e il divieto di tenerne',e:'Le firme sono accontentate; i tribunali hanno un reato in più da seguire',pleases:'populista',f:()=>{gd('giovani',2); gd('cetomedio',1); gd('imprenditori',-2);}},
+   {l:'Ispettori negli allevamenti, pene come prima',e:'Si guarda dove gli animali sono di più; le associazioni volevano il carcere',pleases:'tecnico',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; gd('cetomedio',1); gd('giovani',-1);}},
+ ]},
+ {id:'ms_gi_rimpatrio',era:'contemporanea',min:'giustizia',kick:'Carcere',t:'Scontare la pena a casa propria',text:'Molti detenuti sono stranieri. Si propone di trasferirli a scontare la pena nei loro paesi d\'origine, con accordi che quei paesi non hanno fretta di firmare.',ch:[
+   {l:'Accordi e trasferimenti, anche senza consenso',e:'Celle che si liberano; c\'è chi teme che a casa sua esca dopo un mese',pleases:'conservatore',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; S.ind.sicurezza+=1; gd('pensionati',2); gd('giovani',-1);}},
+   {l:'Solo chi lo chiede, con garanzie sulla pena',e:'Pochi partiranno; i diritti restano saldi',pleases:'progressista',f:()=>{gd('cattolici',1); gd('giovani',1); gd('pensionati',-1);}},
+ ]},
+ {id:'ms_gi_affido',era:'contemporanea',min:'giustizia',kick:'Famiglia',t:'I figli dopo la separazione',text:'Le associazioni dei padri separati chiedono che i figli passino per legge metà del tempo con ciascun genitore. Le associazioni delle madri temono che la regola valga anche nei casi più difficili.',ch:[
+   {l:'Metà e metà, per legge',e:'Due genitori alla pari; i giudici perdono margine',pleases:'conservatore',f:()=>{gd('cetomedio',2); gd('cattolici',1); gd('giovani',-2);}},
+   {l:'Decide il giudice, caso per caso',e:'Ogni famiglia ha la sua storia; i padri si sentono di serie B',pleases:'progressista',f:()=>{gd('giovani',1); gd('cetomedio',-1);}},
+ ]},
+ {id:'ms_gi_psichiatria',era:'contemporanea',min:'giustizia',kick:'Carcere',t:'I detenuti malati di mente',text:'Un detenuto su dieci ha una malattia mentale grave e in cella peggiora. Le strutture di cura che dovrebbero accoglierli hanno liste d\'attesa di mesi; gli agenti non sanno come gestirli.',ch:[
+   {l:'Strutture di cura fuori dal carcere',e:'Cure vere e celle più tranquille; posti nuovi da pagare',pleases:'progressista',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; S.ind.sicurezza+=1; gd('cattolici',2); gd('pensionati',-1);}},
+   {l:'Un reparto sanitario in ogni carcere',e:'Si fa presto e costa meno; la cella resta una cella',pleases:'conservatore',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; gd('lavoratori',1); gd('cattolici',-1);}},
  ]},
  // ----- ESTERI (+4, dossier domestici) -----
  {id:'expo',era:'universale',min:'esteri',kick:'Diplomazia pubblica',t:'Candidare il paese a un\'esposizione mondiale',text:'Una grande esposizione porterebbe vetrina e turismo, ma la candidatura costa.',ch:[
