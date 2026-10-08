@@ -170,12 +170,14 @@ const VIDEO_PRESENTI = ['home-hero', 'partito-base', 'vitaprivata-base', 'retro-
      girano tutte e tre in tondo; i telefoni di oggi ruotano solo nel presente (scenaTelefono).
      7/10 (L197-14): la cucina col caffè e il telefono acceso (telefono-oggi -v4: la mano si ritrae ed esce dal quadro, cucitura 3,7;
      un giro solo, in CLIP_UNA_VOLTA, solo nel presente) e il lento accanto al giradischi (vitaprivata-anni60 -v2, cucitura 4,3: un giro
-     solo, in CLIP_UNA_VOLTA; segue la regola della sua immagine, anni '60). */
+     solo, in CLIP_UNA_VOLTA; segue la regola della sua immagine, anni '60).
+     7/10 (L197-15): la fonduta a quattro (vitaprivata-anni70 -v2, cucitura 4,0: un giro solo, in CLIP_UNA_VOLTA) e il tè col dolce
+     davanti alla finestra innevata rifatto a luce ferma (vitaprivata-anni50 -v2, cucitura 2,1: gira); seguono la regola della loro immagine. */
   'esteri-base-v5', 'esteri-base-v6', 'vitaprivata-base-v6', 'vitaprivata-base-v7', 'casa-base-v2',
   'casa-base-asiasud-v2', 'casa-base-latina-v2', 'casa-base-nordamerica-v2',
   'casa-base-africa-v2', 'casa-base-asiaest-v2', 'esteri-base-v2', 'esteri-base-v4',
   'telefono-anni70', 'telefono-anni90', 'retro-canale-v3', 'retro-canale-v4', 'telefono-oggi-v2', 'telefono-oggi-v3',
-  'telefono-oggi-v4', 'vitaprivata-anni60-v2'];
+  'telefono-oggi-v4', 'vitaprivata-anni60-v2', 'vitaprivata-anni70-v2', 'vitaprivata-anni50-v2'];
 
 /* ===== L181-4 — LE CLIP CHE NON GIRANO: un giro solo, poi l'ultimo fotogramma tenuto. Le altre clip di scena girano in tondo
    (`loop`) perché il loro ultimo fotogramma torna sul primo (cucitura ≤ 3,6 su 255, misurata sullo schermo); queste no — le porte
@@ -184,7 +186,8 @@ const VIDEO_PRESENTI = ['home-hero', 'partito-base', 'vitaprivata-base', 'retro-
    le fa ripartire finite. Misura: `.claude/l181-4-schermo.js`; ogni nome dev'essere in VIDEO_PRESENTI (`verifica-asset.js`). */
 const CLIP_UNA_VOLTA = ['fineanno-buono', 'fineanno-lucieombre', 'fineanno-difficile', 'fineanno-nuovocapitolo', 'notte-vittoria',
   'esteri-base-v4',   // L197-10: cucitura 7,1 (i camerieri si spostano)
-  'telefono-oggi-v4', 'vitaprivata-anni60-v2'];   // L197-14: la mano esce dal quadro (3,7); il lento, cucitura 4,3
+  'telefono-oggi-v4', 'vitaprivata-anni60-v2',   // L197-14: la mano esce dal quadro (3,7); il lento, cucitura 4,3
+  'vitaprivata-anni70-v2'];   // L197-15: la fonduta, cucitura 4,0 (sopra il 3,6 delle clip che girano: i gesti a tavola non tornano)
                             // (Il telefono anni '70 di L197-11 è uscito da qui: rifatto a camera ferma, cucitura 1,4, L197-12.)
                             // (Il vicolo casa-base-asiaest-v2 di L197-10 è uscito da qui: rifatto a luce ferma, cucitura 2,2, L197-11.)
                             // (Il soggiorno vitaprivata-base-v6 di L192-7 è uscito con la sua clip: L195-0, D223.)
