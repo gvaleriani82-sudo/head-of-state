@@ -1005,7 +1005,8 @@ const PORTA_CLIP_VISTE={};
 function clipDellaPorta(id){
   const sc=(typeof SCENARI!=='undefined' && id && id!=='presente') ? SCENARI[id] : null;
   if(!sc || typeof VIDEO_PRESENTI==='undefined') return [];
-  return ['porta-paese-'+sc.paese, 'porta-decennio-'+sc.anno].filter(function(n){ return VIDEO_PRESENTI.indexOf(n)>=0; });
+  /* L180-2 · il DECENNIO di `anno`, non l'anno: us1960 parte nel 1961 (D151) e la clip è porta-decennio-1960. Per le porte di prima (anno tondo) è lo stesso nome. */
+  return ['porta-paese-'+sc.paese, 'porta-decennio-'+(Math.floor(sc.anno/10)*10)].filter(function(n){ return VIDEO_PRESENTI.indexOf(n)>=0; });
 }
 function apriClipPorta(id){
   if(PORTA_CLIP_APERTA || PARTENZA_APERTA || typeof document==='undefined' || !document.body) return;

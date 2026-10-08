@@ -1852,6 +1852,64 @@ const SCENARI = {
     ],
   },
   /* ============================================================================================================
+     L180-2 · STATI UNITI 1960 — la seconda porta della linea americana (scheda PRESET-USA-1960.md, D151-D161). Si apre nel GENNAIO
+     1961 col Presidente democratico eletto per un soffio nel novembre 1960 (D151: non nel 1960, dove il Presidente repubblicano al
+     secondo mandato non poteva correre) e un Congresso democratico; chiude con la presidenziale del novembre 1968 e si salda a us1970.
+     Stessa forma di us1950 (le istituzioni scritte per intero; `mandatiConsecutivi` scritto per chi legge, lo dà il paese).
+     IL CALENDARIO (D151, L173-1): `meseUrna:11` e `turnMandato:0` contato dal novembre 1960 → metà mandato 1962/11 · presidenziale
+     1964/11 · metà mandato 1966/11 · presidenziale 1968/11; avviso dell'ultimo mandato 1967/11 per chi rivince il 1964 dal governo.
+     È la prima porta che parte due mesi DOPO il proprio voto: il calendario stampato sul gioco è in sonda-us1960-calendario.js.
+     ⚠ `anno:1961` (l'anno d'avvio vero): la miniatura della linea del tempo si deriva dall'id (porta-decennio-1960), la clip del
+     decennio dal decennio di `anno` (clipDellaPorta, ui.js, dal L180-2).
+     IL CONGRESSO (D161): la Camera del 1960 (262/437 democratici, 60,0); la metà mandato con `penalitaGoverno:0.5` come us1950 (D134).
+     CHI SI GIOCA (D152): i Democratici al governo con `mandatiVinti:1` (rivincono il 1964 → `mandatoCompiuto` alla vigilia del 1968) e i
+     Repubblicani dall'opposizione. LA TAPPA DEL SUD (D157) è della linea, non della porta: RIALLINEAMENTI_ERA[LINEA_US]['1964/11'].
+     I TERRITORI sono i 18 del presente nello stesso ordine (paralleli per indice a mappa.aree: mai riordinare), col lean del 1960 (D157).
+     NIENTE `territoriDEpoca` (nota di Cowork alla riapertura): le scene del giro del decennio (`gus60_`) non ci sono ancora.
+     ============================================================================================================ */
+  us1960: {
+    id:'us1960', era:LINEA_US, nome:'Stati Uniti 1960', anno:1961, paese:'usa',
+    turnMandato: 0, meseUrna: 11,               // D151: il mandato del novembre 1960 al primo anno → metà mandato 1962/11, presidenziale 1964/11
+    sistema: 'presidenziale', comeSiVince: 'candidato', coalizione: false, cadutaGoverno: false,
+    mandatoMesi: 48, mandatiMax: 2, mandatiConsecutivi: false,
+    titoloRuolo: 'Presidente', sedeGoverno: 'la Casa Bianca',
+    capitale: 'Washington',
+    ue: false,
+    congresso: { camera: 60.0 },                // D161: 262 democratici su 437 (la Camera del 1960, con i seggi di Alaska e Hawaii)
+    intermedie: [ {tipo:'Elezioni di metà mandato', mese:24, tocca:'tutti', penalitaGoverno:0.5} ],   // D161: come us1950 (D134)
+    /* L216-1 (D270) · la valanga del 1964 e la vittoria dello sfidante nel 1968: punti sul VOTO della presidenziale, positivo = al
+       partito del Presidente in carica; li legge solo spintaPresidenziale() (model.js), 0 se il Presidente sei tu. v68 = 4, il più piccolo
+       che a 40 carriere prende i bersagli di D266 (misura-us1960.js gioc --semi=40 --spinta=no,4,5): Repubblicani dall'opposizione 1964
+       vinte 1/40 (senza: 34), perse e restano 26 (regola B), al 1968 arrivano 25 e vincono 23 (senza: 14 · 0), D96 12; Democratici al
+       governo identici carriera per carriera (40/40); Democratici all'opposizione (fuori storia, spinta contro) 1964 24/37 (senza: 37), i
+       13 che perdono chiudono al congresso, la regola B non ne salva nessuno. Tabella in PRESET-USA-1960.md («⚑ L216-1»). */
+    spintaPresidenziale: { 1964: 6, 1968: -4 },
+    mandatiVinti: 1,                            // D152: il Presidente ha vinto il 1960 (vale solo al livello 3 al governo: D135)
+    partiti: [
+      { id:'us_dem', nome:'Democratici',  orientamento:'centrosinistra', base:{ giovani:0.4, lavoratori:0.35, cetomedio:0.25 },                  forza:52, forzaAncora:51, asse:-1 },
+      { id:'us_rep', nome:'Repubblicani', orientamento:'centrodestra',   base:{ imprenditori:0.4, cetomedio:0.25, cattolici:0.2, pensionati:0.15 }, forza:48, forzaAncora:49, asse:1 },
+    ],
+    territori: [
+      {nome:'New York', tipo:'città', carica:'Sindaco', lean:-2, simbolo:true}, {nome:'la California', tipo:'regione', carica:'Governatore', lean:0, simbolo:true}, {nome:'il Texas', tipo:'regione', carica:'Governatore', lean:-1, simbolo:true}, {nome:'la Pennsylvania', tipo:'regione', carica:'Governatore', lean:0, simbolo:true},
+      {nome:'la Florida', tipo:'regione', carica:'Governatore', lean:0}, {nome:"l'Ohio", tipo:'regione', carica:'Governatore', lean:1}, {nome:'il Michigan', tipo:'regione', carica:'Governatore', lean:-1}, {nome:'la Georgia', tipo:'regione', carica:'Governatore', lean:-2},
+      {nome:"l'Illinois", tipo:'regione', carica:'Governatore', lean:0}, {nome:'lo stato di Washington', nomeEn:'Washington State', tipo:'regione', carica:'Governatore', lean:0}, {nome:"l'Arizona", tipo:'regione', carica:'Governatore', lean:1}, {nome:"l'Alabama", tipo:'regione', carica:'Governatore', lean:-2},
+      {nome:'Los Angeles', tipo:'città', carica:'Sindaco', lean:0}, {nome:'Chicago', tipo:'città', carica:'Sindaco', lean:-2}, {nome:'Houston', tipo:'città', carica:'Sindaco', lean:-1}, {nome:'Phoenix', tipo:'città', carica:'Sindaco', lean:1}, {nome:'Filadelfia', nomeEn:'Philadelphia', tipo:'città', carica:'Sindaco', lean:-2}, {nome:'San Francisco', tipo:'città', carica:'Sindaco', lean:-1}
+    ],
+    /* ⚠ cifre della scheda §2, ordine di grandezza (BEA/BLS/OMB da confermare): PIL nominale in miliardi di dollari, debito federale lordo. */
+    economia: { pil:560, debito:54, deficit:-0.6, inflazione:1.0, crescita:5, crescitaTetto:9, disoccupazione:6.7 },   // crescitaTetto (L109-1): il 1965-66 a 6,5 · 6,6 passa il tetto di 5
+    debtAncora: 54,
+    inflazione: 1.0,   // l'anno per anno sta in DRIFT_INFLAZIONE_ERA (la guerra e la spesa sociale dal 1966)
+    crescita: 5,       // la base: la media del decennio (~4,95); la recessione del 1961 e i picchi stanno nel drift (DRIFT_ECONOMICO_ERA)
+    logorioEra: 0.006,                          // L180-2 · PROVVISORIO, decide Cowork: sweep 0-0,025 (misura-us1960.js gioc, 20 carriere × 95 mesi, banco di oggi) — i Democratici al governo vincono il 1964 20/20 fino a 0,004, 18 a 0,006, 12 a 0,007, 6 a 0,008, 2 a 0,010, 0 da 0,012 (bersaglio D159 12-18: 0,006-0,007; metà mandato perse 85% a 0,006, 77% a 0,007); i Repubblicani dall'opposizione vincono il 1964 15-20/20 e il 1968 0-1 fra chi ci arriva A OGNI VALORE (bersagli ≤ 8 e ≥ 12): nessun logorio li prende — li prende spintaPresidenziale (sopra, L216-1). Tabella in PRESET-USA-1960.md («L180-2»)
+    valuta: VALUTA_DOLLARO,
+    intro: "Stati Uniti, 1961. Alla Casa Bianca entra il Presidente più giovane mai eletto, vincitore per un soffio contro il vicepresidente uscente. Il paese è il più ricco del mondo, e la gara con Mosca si è spostata nello spazio.",
+    contesto: [
+      "Washington, gennaio 1961. Il generale lascia la Casa Bianca dopo otto anni e, nel discorso di commiato, mette in guardia il paese dal peso dell'industria delle armi. Il Congresso è democratico, ma i senatori del Sud votano con l'opposizione quando si parla di diritti civili.",
+      "Nel Sud la segregazione è ancora legge: scuole, autobus, tavole calde e seggi elettorali divisi per colore. Gli studenti neri si siedono ai banconi dove non li servono, e ogni settimana le proteste arrivano in un'altra città.",
+      "Mosca ha mandato in orbita il primo satellite più di tre anni fa e ora si prepara a mandarci un uomo. A centocinquanta chilometri dalla Florida, l'isola dei Caraibi ha un governo nuovo che guarda a Mosca, e a Miami gli esuli aspettano di tornarci.",
+    ],
+  },
+  /* ============================================================================================================
      L44-3 · ITALIA 2000 — la settima e ultima porta. Stessa LINEA; il roster è quello uscito dalla frana del '94
      (PPI, PDS, AN, Rifondazione, Lega, FI, CCD e i laici superstiti), anno d'avvio 2000.
 
@@ -6287,7 +6345,14 @@ const RETRO_BEAT = [
    (+32% al locale). La regola della voce: oltre il +10% relativo in un livello, TUTTI i `p` (vecchi e nuovi) per un fattore unico.
    Sweep: k 0,8 → 36,1 · 0,6 → 34,0 · 0,5 → 31,9 · 0,45 → 31,5 (+10,2%) · 0,4 → 30,3 · 22,2 · 10,4 (+6% · +1% · −5%). I `p` qui
    sotto restano quelli scritti; il fattore lo applica pickPersonale (game.js) al tiro. FAMIGLIA_VIVA non lo legge (cadenza sua). */
-const PERSONALI_K=0.4;
+/* L213-1 · k da 0,4 a 0,28 (8/10). Con le trenta carte di L213-1 (in coda all'array) le carte `personale` per 100 mesi giocati
+   (stessa misura, .claude/misura-l213-1.js freq) erano prima 31,3 · 22,5 · 10,8 (livelli 1 · 2 · 3, k = 0,4 senza il lotto) e
+   con il lotto e k = 0,4 36,1 · 24,7 · 11,8: +15% al locale, oltre il +10% della regola di L142-2. Sweep (--k moltiplica sopra
+   0,4; tra parentesi il k del gioco): 0,95 (0,38) → 36,0 · 24,5 · 11,6 · 0,9 (0,36) → 35,5 · 24,3 · 11,3 · 0,85 (0,34) → 35,3 ·
+   24,2 · 11,2 · 0,8 (0,32) → 34,6 · 23,8 · 11,1 (+10,5% al locale) · 0,7 (0,28) → 33,6 · 23,4 · 11,0 (+7% · +4% · +2%) · 0,6
+   (0,24) → 31,9 · 23,0 · 10,4. La curva è piatta: il tetto delle carte del mese e FAMIGLIA_VIVA (che il fattore non tocca, ~14 al
+   locale) ne tengono metà. Scelto 0,28, il primo valore dello sweep entro il +10% in ogni livello. */
+const PERSONALI_K=0.28;
 const EVENTI_PERSONALI=[
  /* coscienza: solo a integrità bassa e personaggio dissonante — il dilemma linea/coscienza. RIPETIBILE. */
  {id:'coscienza', tono:'grave', tipo:'coscienza', ripetibile:true, p:0.12,
@@ -6297,16 +6362,25 @@ const EVENTI_PERSONALI=[
    {l:'Segui la tua coscienza', e:'Ti ritrovi; la tua base però non capisce', fatto:'Hai seguito la coscienza contro la linea del partito.', f:()=>{ if(S.integrita!=null) S.integrita=clamp(S.integrita+12,0,100); if(typeof corrented==='function') corrented('militanti',-6); }},
    {l:'Resta sulla linea del partito', e:'Tieni i tuoi; dentro, qualcosa cede', fatto:'Hai messo a tacere la coscienza per il partito.', f:()=>{ if(S.integrita!=null) S.integrita=clamp(S.integrita-6,0,100); if(typeof corrented==='function') corrented('militanti',2); }},
   ]},
- /* crisi familiare: il popup — serenità bassa = hai trascurato troppo. RIPETIBILE. Il sacrificio è NOMINABILE. */
- {id:'crisi_familiare', tono:'grave', tipo:'crisi', ripetibile:true, p:0.12,
+ /* crisi familiare: il popup — serenità bassa = hai trascurato troppo. RIPETIBILE. Il sacrificio è NOMINABILE.
+    L215-1 (D264): p da 0,12 a 0,17 (× 0,4/0,28): il tiro per mese eleggibile torna a quello di prima di L213-1, che aveva
+    abbassato PERSONALI_K per tenere il totale, non per rendere più rare le risposte a una famiglia in crisi. */
+ {id:'crisi_familiare', tono:'grave', tipo:'crisi', ripetibile:true, p:0.17,
   cond:()=>famigliaPresente() && S.famiglia.serenita!=null && S.famiglia.serenita<35,
   kick:'Vita privata', t:'La famiglia ti presenta il conto',
   text:'Le assenze, le promesse rimandate, le cene saltate: a casa si è arrivati a un punto di rottura. Stavolta non puoi rimandare.', ch:[
    {l:'Disdici tutto per una settimana', e:'Ricuci lo strappo; salti gli impegni di giorni', fatto:'Una settimana ferma per la famiglia, a costo di un po\' di slancio.', f:()=>{ serenitaMuovi(35); bioConta('affetti'); if(S.visibilita!=null) S.visibilita=clamp(S.visibilita-3,0,100); if(S.ind.consenso!=null) S.ind.consenso=clamp(S.ind.consenso-1,0,100); }},
    {l:'Il potere non aspetta', e:'Vai avanti; a casa resta una ferita aperta — e tornerà', fatto:'Hai messo il potere prima della famiglia, di nuovo.', f:()=>{ serenitaMuovi(6); bioConta('affettiSacrificati'); if(S.ind.consenso!=null) S.ind.consenso=clamp(S.ind.consenso-2,0,100); }},
   ]},
- /* carriera/affetti: il dilemma base, driver della serenità */
- {id:'carriera_affetti', tipo:'affetti', p:0.16, cond:()=>famigliaPresente(),
+ /* carriera/affetti: il dilemma base, driver della serenità.
+    L214-1 (D263, 8/10) · p da 0,16 a 0,23. Con le trenta carte di L213-1 e PERSONALI_K 0,28 usciva il 30% di meno; la misura
+    (.claude/misura-l214-1.js, 6 presenti × livelli 1-2-3 × 40 carriere × 120 mesi, semi fissi; uscite per 100 mesi, livelli
+    1 · 2 · 3): prima di L213-1 (le trenta tolte, k 0,4) 0,91 · 0,58 · 0,18; oggi (p 0,16) 0,70 · 0,37 · 0,14. Sweep del p:
+    0,21 → 0,91 · 0,48 · 0,18 (L2 −16%) · 0,23 → 0,98 · 0,53 · 0,19 (+9% · −9% · +7%) · 0,25 → 1,04 · 0,61 · 0,19 (L1 +15%) ·
+    0,32 → 1,21 · 0,74 · 0,24 · 0,40 → 1,43 · 0,82 · 0,30 · 0,48 → 1,65 · 0,90 · 0,36. Scelto 0,23, l'unico dentro ±10% in tutti e
+    tre (con 10 carriere le uscite sono 6-100 e il ±10% sta nel rumore: per questo 40). Il totale delle carte `personale` non
+    si muove (32,7 · 23,3 · 11,3 per 100 mesi, come col p di prima). */
+ {id:'carriera_affetti', tipo:'affetti', p:0.23, cond:()=>famigliaPresente(),
   kick:'Vita privata', t:'La carriera o gli affetti',
   text:'Un\'occasione politica importante cade nello stesso giorno di un momento che conta per chi ti ama. Non puoi essere in due posti.', ch:[
    {l:'L\'occasione politica viene prima', e:'Un passo avanti; un\'assenza che pesa', fatto:'Hai scelto la carriera, sacrificando un momento con i tuoi.', f:()=>{ bioConta('affettiSacrificati'); serenitaMuovi(-16); if(S.visibilita!=null) S.visibilita=clamp(S.visibilita+3,0,100); }},
@@ -6385,8 +6459,10 @@ const EVENTI_PERSONALI=[
   text:'%FIGLIO ti dà una notizia che ti spiazza di tenerezza: sta per arrivare un nipote. Il tempo, all\'improvviso, si misura in un altro modo.', ch:[
    {l:'Un momento di pura gioia', e:'La vita che continua, oltre la politica', fatto:'È arrivato un nipote durante la carriera.', f:()=>{ if(famigliaPresente()) serenitaMuovi(12); if(S.ind.consenso!=null) S.ind.consenso=clamp(S.ind.consenso+1,0,100); }},
   ]},
- /* una riconciliazione: un gesto che ricuce, quando le cose non sono al meglio */
- {id:'riconciliazione', tono:'florido', tipo:'lieto', p:0.10, cond:()=>famigliaPresente() && S.famiglia.serenita!=null && S.famiglia.serenita>=35 && S.famiglia.serenita<58,
+ /* una riconciliazione: un gesto che ricuce, quando le cose non sono al meglio.
+    L215-1 (D264): p da 0,10 a 0,14 (× 0,4/0,28), come crisi_familiare. ⚠ Misurato: per mese eleggibile resta ~−30% da prima di
+    L213-1, perché è `lieto` e in pickPersonale passa per ULTIMA, dietro le trenta vp_ che prendono lo slot prima di lei. */
+ {id:'riconciliazione', tono:'florido', tipo:'lieto', p:0.14, cond:()=>famigliaPresente() && S.famiglia.serenita!=null && S.famiglia.serenita>=35 && S.famiglia.serenita<58,
   kick:'Vita privata', t:'Un gesto che ricuce',
   text:'Senza dirlo, chi ti ama fa un passo verso di te: un biglietto, una cena preparata, una porta lasciata aperta. Tocca a te raccoglierlo.',  ch:[
    {l:'Lo raccogli, e ti fermi un attimo', e:'Un piccolo ritorno a casa', fatto:'Hai colto un gesto di chi ti ama, e ricucito.', f:()=>{ serenitaMuovi(14); bioConta('affetti'); }},
@@ -6504,6 +6580,190 @@ const EVENTI_PERSONALI=[
   text:'Il vicino di casa non ti ha mai votato, e te lo ricorda ogni volta che vi incrociate. Stamattina ha lasciato davanti alla tua porta un vasetto di marmellata fatta in casa, con un biglietto: «Tenga duro».', ch:[
    {l:'Suoni alla sua porta per ringraziare', e:'Un caffè e una discussione accesa; vi lasciate ridendo', fatto:'Hai preso un caffè col vicino che non ti vota.', f:()=>{ serenitaMuovi(3); if(S.integrita!=null) S.integrita=clamp(S.integrita+2,0,100); }},
    {l:'Un biglietto di ringraziamento sotto la porta', e:'Garbo, e distanza', fatto:'Hai ringraziato il vicino con un biglietto.', f:()=>{ serenitaMuovi(1); }},
+  ]},
+ /* ================================================================================================================
+ L213-1 · VARIETÀ: TRENTA MOMENTI di vita privata (8/10, Cowork per delega; VARIETA-L213-VITA-PRIVATA.md). Come L142-2: senza tempo
+ e senza paese (default universale), niente oggetti di dopo il 1950, niente stagioni né feste, nessun genere al giocatore né a
+ %FIGLIO e %CONIUGE, nessun tono grave; effetti con l'idioma di sopra (visibilità e integrità con la guardia). ===================== */
+ {id:'vp_controllo', tipo:'dubbio', p:0.09, cond:()=>true,
+  kick:'Vita privata', t:'Il controllo rimandato',
+  text:'Il tuo medico ha telefonato tre volte: le analisi dell\'anno scorso vanno ripetute, e tu le rimandi da mesi. Non è niente, dice; ma vuole vederti questa settimana.', ch:[
+   {l:'Ci vai, e sposti tutto il resto', e:'Mezza giornata persa; una preoccupazione in meno in casa', fatto:'Hai fatto il controllo che rimandavi da mesi.', f:()=>{ serenitaMuovi(4); if(S.visibilita!=null) S.visibilita=clamp(S.visibilita-1,0,100); }},
+   {l:'Il mese prossimo, promesso', e:'L\'agenda è salva; il medico richiamerà', fatto:'Hai rimandato ancora il controllo dal medico.', f:()=>{ serenitaMuovi(-3); }},
+  ]},
+ {id:'vp_prestito', tipo:'affetti', p:0.09, cond:()=>true,
+  kick:'Vita privata', t:'Tuo cognato chiede una firma',
+  text:'Tuo cognato apre una bottega e la banca vuole un garante. Ti chiede una firma, solo quella. Se le cose andassero male, il tuo nome finirebbe sui giornali insieme al suo.', ch:[
+   {l:'Firmi: è famiglia', e:'In famiglia ti sono grati; un rischio che porta il tuo nome', fatto:'Hai fatto da garante a tuo cognato.', f:()=>{ bioConta('affetti'); serenitaMuovi(5); if(S.visibilita!=null) S.visibilita=clamp(S.visibilita-1,0,100); }},
+   {l:'Gli spieghi che non puoi', e:'Il tuo nome resta fuori; a tavola, la prossima volta, un po\' di freddo', fatto:'Hai negato la firma a tuo cognato.', f:()=>{ serenitaMuovi(-5); if(S.integrita!=null) S.integrita=clamp(S.integrita+1,0,100); }},
+  ]},
+ {id:'vp_cane', tipo:'affetti', p:0.08, cond:()=>famigliaPresente(),
+  kick:'Vita privata', t:'Un cane in casa',
+  text:'A casa vogliono un cane. Tutti promettono che se ne occuperanno; tutti sanno che a portarlo fuori la sera, quando torni, saresti tu.', ch:[
+   {l:'Sì, un cane dal canile', e:'Una festa in casa; un\'altra cosa da fare a mezzanotte', fatto:'In casa è arrivato un cane.', f:()=>{ bioConta('affetti'); serenitaMuovi(6); }},
+   {l:'Non ora, con questa vita', e:'Niente cane; qualche muso lungo a cena', fatto:'Hai detto di no al cane.', f:()=>{ serenitaMuovi(-4); }},
+  ]},
+ {id:'vp_agenda', tipo:'dubbio', p:0.08, cond:()=>true,
+  kick:'Vita privata', t:'Chi ti tiene l\'agenda',
+  text:'La persona che da anni ti tiene l\'agenda, risponde al telefono e sa dove sei prima di te ti dice che vuole cambiare lavoro: qualcosa di più tranquillo, con orari normali.', ch:[
+   {l:'Le chiedi di restare, con orari migliori', e:'Resta; gli orari migliori dureranno un mese', fatto:'Hai convinto chi ti tiene l\'agenda a restare.', f:()=>{ if(S.visibilita!=null) S.visibilita=clamp(S.visibilita+1,0,100); if(S.integrita!=null) S.integrita=clamp(S.integrita-1,0,100); }},
+   {l:'La lasci andare, con una lettera di referenze', e:'Un saluto affettuoso; per settimane non trovi niente', fatto:'Hai lasciato andare chi ti teneva l\'agenda.', f:()=>{ if(S.integrita!=null) S.integrita=clamp(S.integrita+2,0,100); if(S.visibilita!=null) S.visibilita=clamp(S.visibilita-2,0,100); }},
+  ]},
+ {id:'vp_tema', tipo:'affetti', p:0.10, cond:()=>haFiglioInEta(7,13),
+  kick:'Vita privata', t:'Il tema di %FIGLIO',
+  text:'Ti chiamano da scuola: %FIGLIO ha scritto un tema sul genitore che fa politica. Dice che sei una persona importante e che a casa non ci sei mai. L\'insegnante te lo legge al telefono, con un certo imbarazzo.', ch:[
+   {l:'Il giorno dopo aspetti %FIGLIO all\'uscita', e:'Una passeggiata fino a casa; salti una riunione', fatto:'Hai aspettato %FIGLIO all\'uscita di scuola, dopo il tema.', f:()=>{ bioConta('affetti'); serenitaMuovi(8); if(S.visibilita!=null) S.visibilita=clamp(S.visibilita-1,0,100); }},
+   {l:'Ne parlate a cena, con calma', e:'Prometti di più; il calendario non cambia', fatto:'Hai parlato con %FIGLIO del tema, e nient\'altro.', f:()=>{ serenitaMuovi(-3); }},
+  ]},
+ {id:'vp_libro', tipo:'lieto', p:0.07, cond:()=>true,
+  kick:'Vita privata', t:'Il libro con la dedica',
+  text:'Un amico scrittore ti manda il suo romanzo nuovo con una dedica affettuosa. Fra un mese lo presenta in città, e spera di vederti in prima fila. Non l\'hai ancora aperto.', ch:[
+   {l:'Lo leggi di notte, e alla presentazione ci sei', e:'Qualche ora di sonno in meno; un amico felice', fatto:'Hai letto il libro di un amico, e l\'hai applaudito in prima fila.', f:()=>{ if(S.integrita!=null) S.integrita=clamp(S.integrita+1,0,100); if(S.visibilita!=null) S.visibilita=clamp(S.visibilita+1,0,100); }},
+   {l:'Un biglietto gentile, e il libro sul comodino', e:'Il pensiero arriva; l\'amico capisce che non l\'hai letto', fatto:'Hai lasciato sul comodino il libro di un amico.', f:()=>{ if(S.integrita!=null) S.integrita=clamp(S.integrita-1,0,100); }},
+  ]},
+ {id:'vp_testimone', tipo:'affetti', p:0.09, cond:()=>true,
+  kick:'Vita privata', t:'Fare da testimone',
+  text:'Un amico di sempre si sposa e ti chiede di fargli da testimone. Il giorno delle nozze è anche quello di una riunione del partito che si aspetta da mesi.', ch:[
+   {l:'Ci sei: un amico si sposa una volta', e:'Un brindisi vero; la riunione decide senza di te', fatto:'Hai fatto da testimone a un amico di sempre.', f:()=>{ serenitaMuovi(3); if(S.integrita!=null) S.integrita=clamp(S.integrita+2,0,100); if(S.visibilita!=null) S.visibilita=clamp(S.visibilita-2,0,100); }},
+   {l:'Chiedi a un altro di prendere il tuo posto', e:'La riunione la guidi tu; all\'amico resta una foto senza di te', fatto:'Hai rinunciato a fare da testimone a un amico di sempre.', f:()=>{ if(S.visibilita!=null) S.visibilita=clamp(S.visibilita+2,0,100); if(S.integrita!=null) S.integrita=clamp(S.integrita-1,0,100); }},
+  ]},
+ {id:'vp_avversario', tipo:'dubbio', p:0.07, cond:()=>true,
+  kick:'Vita privata', t:'L\'avversario in ospedale',
+  text:'L\'avversario con cui ti scontri da anni è in ospedale, e non per pochi giorni. Lo sanno in pochi. Potresti andarlo a trovare senza dirlo a nessuno.', ch:[
+   {l:'Ci vai, senza fotografi', e:'Mezz\'ora di parole che nessuno saprà; un rispetto che resta', fatto:'Hai fatto visita in ospedale a un avversario di sempre.', f:()=>{ if(S.integrita!=null) S.integrita=clamp(S.integrita+3,0,100); if(S.visibilita!=null) S.visibilita=clamp(S.visibilita-1,0,100); }},
+   {l:'Un biglietto, e nessuna visita', e:'Un gesto giusto, a distanza', fatto:'Hai mandato un biglietto a un avversario in ospedale.', f:()=>{ if(S.integrita!=null) S.integrita=clamp(S.integrita+1,0,100); }},
+  ]},
+ {id:'vp_orto', tipo:'lieto', p:0.07, cond:()=>true,
+  kick:'Vita privata', t:'L\'orto sul retro',
+  text:'Dietro casa c\'è un pezzo di terra che nessuno curava. Ci hai piantato qualche ortaggio, la domenica mattina, con le mani nella terra. Un fotografo di passaggio chiede se può tornare.', ch:[
+   {l:'Sì, ma senza pose', e:'Una foto simpatica sui giornali; l\'orto non è più solo tuo', fatto:'L\'orto dietro casa è finito sui giornali.', f:()=>{ if(S.visibilita!=null) S.visibilita=clamp(S.visibilita+2,0,100); serenitaMuovi(-1); }},
+   {l:'No: l\'orto resta tuo', e:'Ortaggi storti e nessuna foto', fatto:'Hai tenuto l\'orto lontano dai fotografi.', f:()=>{ serenitaMuovi(3); if(S.integrita!=null) S.integrita=clamp(S.integrita+1,0,100); }},
+  ]},
+ {id:'vp_leggere', tipo:'affetti', p:0.08, cond:()=>S.eta==null||S.eta<70,
+  kick:'Vita privata', t:'Chi ti ha insegnato a leggere',
+  text:'Ti arriva una lettera dalla persona che, alle elementari, ti ha insegnato a leggere. Oggi è molto anziana e vive in una casa di riposo. Scrive che ti segue sui giornali, e che sarebbe felice di rivederti.', ch:[
+   {l:'Le fai visita, un pomeriggio', e:'Un pomeriggio di ricordi; la casa di riposo lo racconta a tutti', fatto:'Hai fatto visita a chi ti ha insegnato a leggere.', f:()=>{ if(S.integrita!=null) S.integrita=clamp(S.integrita+2,0,100); if(S.visibilita!=null) S.visibilita=clamp(S.visibilita+1,0,100); }},
+   {l:'Rispondi con una lunga lettera', e:'Ogni parola scritta a mano; la visita resta un proposito', fatto:'Hai risposto con una lettera a chi ti ha insegnato a leggere.', f:()=>{ if(S.integrita!=null) S.integrita=clamp(S.integrita+1,0,100); }},
+  ]},
+ {id:'vp_treno', tipo:'lieto', p:0.07, cond:()=>true,
+  kick:'Vita privata', t:'Lo sconosciuto in treno',
+  text:'In treno, il passeggero seduto davanti a te non ti riconosce e ti spiega per un\'ora che cosa pensa dei politici. Ne pensa male, e con argomenti. Manca mezz\'ora all\'arrivo.', ch:[
+   {l:'Ti presenti, e ne discutete', e:'Imbarazzo, poi una discussione vera; scende stringendoti la mano', fatto:'Hai discusso di politica in treno con uno sconosciuto.', f:()=>{ if(S.integrita!=null) S.integrita=clamp(S.integrita+2,0,100); if(S.visibilita!=null) S.visibilita=clamp(S.visibilita+1,0,100); }},
+   {l:'Ascolti, e non dici chi sei', e:'Un\'ora di verità che nessun sondaggio ti avrebbe dato', fatto:'Hai ascoltato in silenzio uno sconosciuto parlare dei politici.', f:()=>{ if(S.integrita!=null) S.integrita=clamp(S.integrita+1,0,100); }},
+  ]},
+ {id:'vp_teleobiettivo', tipo:'dubbio', p:0.08, cond:()=>famigliaPresente(),
+  kick:'Vita privata', t:'Il teleobiettivo',
+  text:'Un settimanale pubblica le foto di un vostro pranzo in famiglia, scattate da lontano con il teleobiettivo. Non c\'è niente di male nelle foto; c\'è nel fatto che le abbiano fatte.', ch:[
+   {l:'Denunci il settimanale', e:'La legge è dalla tua parte; per un mese le foto girano ancora di più', fatto:'Hai denunciato il settimanale delle foto rubate.', f:()=>{ serenitaMuovi(2); if(S.visibilita!=null) S.visibilita=clamp(S.visibilita+1,0,100); }},
+   {l:'Lasci correre: domani è un altro giornale', e:'Il caso si spegne; in casa ci si sente guardati', fatto:'Hai lasciato correre le foto rubate della tua famiglia.', f:()=>{ serenitaMuovi(-4); }},
+  ]},
+ {id:'vp_due_case', tipo:'affetti', p:0.09, cond:()=>famigliaPresente() && S.livello>=2,
+  kick:'Vita privata', t:'Due case',
+  text:'Passi la settimana lontano da casa, e la famiglia ti vede il sabato e la domenica. Si potrebbe trasferire tutti vicino a te: un\'altra scuola, un\'altra città, gli amici da rifare.', ch:[
+   {l:'Vi trasferite tutti', e:'Insieme ogni sera; per i tuoi un anno di fatica', fatto:'Hai portato la famiglia a vivere vicino al lavoro.', f:()=>{ bioConta('affetti'); serenitaMuovi(4); }},
+   {l:'Resta tutto com\'è', e:'Le loro vite restano intere; la tua resta divisa in due', fatto:'Hai lasciato la famiglia dov\'era, e il fine settimana per vedervi.', f:()=>{ bioConta('affettiSacrificati'); serenitaMuovi(-4); }},
+  ]},
+ {id:'vp_suoceri', tipo:'lieto', p:0.08, cond:()=>!!(S.famiglia&&S.famiglia.coniuge),
+  kick:'Vita privata', t:'I genitori di %CONIUGE',
+  text:'I genitori di %CONIUGE vengono a stare da voi per una settimana. Non ti hanno mai votato e a tavola, ogni sera, te lo ricordano con molti particolari.', ch:[
+   {l:'Discuti, con pazienza e qualche battuta', e:'Sette cene di dibattito; alla partenza un abbraccio vero', fatto:'Hai passato una settimana a discutere di politica con i genitori di %CONIUGE.', f:()=>{ serenitaMuovi(3); if(S.integrita!=null) S.integrita=clamp(S.integrita+1,0,100); }},
+   {l:'Trovi un impegno per ogni sera', e:'La pace a tavola; %CONIUGE non ti guarda con simpatia', fatto:'Hai evitato le cene con i genitori di %CONIUGE.', f:()=>{ serenitaMuovi(-5); }},
+  ]},
+ {id:'vp_presenta', tipo:'affetti', p:0.09, cond:()=>haFiglioInEta(18,40),
+  kick:'Vita privata', t:'%FIGLIO presenta qualcuno',
+  text:'%FIGLIO porta a cena la persona con cui sta da un anno. È simpatica, educata, e scrive per un giornale che ti attacca ogni mattina.', ch:[
+   {l:'La accogli come chiunque altro', e:'Una cena serena; qualche domanda di troppo sul tuo lavoro', fatto:'Hai accolto a tavola la persona che %FIGLIO ama, giornale compreso.', f:()=>{ bioConta('affetti'); serenitaMuovi(6); }},
+   {l:'Metti in chiaro che di politica non si parla', e:'Una regola di casa; %FIGLIO la prende male', fatto:'Hai messo dei paletti alla persona che %FIGLIO ama.', f:()=>{ serenitaMuovi(-5); }},
+  ]},
+ {id:'vp_lingua', tipo:'lieto', p:0.07, cond:()=>true,
+  kick:'Vita privata', t:'Una lingua nuova',
+  text:'Quando incontri delegazioni straniere capisci metà di quello che si dice, e l\'altra metà la capisce l\'interprete. Un insegnante ti propone due lezioni alla settimana, la sera tardi.', ch:[
+   {l:'Cominci, anche a mezzanotte', e:'Fatica e qualche progresso; una sera in meno a casa', fatto:'Hai cominciato a studiare una lingua straniera.', f:()=>{ if(S.visibilita!=null) S.visibilita=clamp(S.visibilita+1,0,100); serenitaMuovi(-2); }},
+   {l:'C\'è l\'interprete', e:'Tempo risparmiato; resti a metà', fatto:'Hai lasciato le lingue straniere all\'interprete.', f:()=>{ serenitaMuovi(1); }},
+  ]},
+ {id:'vp_strada_scuola', tipo:'affetti', p:0.09, cond:()=>haFiglioInEta(5,11),
+  kick:'Vita privata', t:'La strada per la scuola',
+  text:'%FIGLIO ti chiede una cosa sola: fare insieme la strada per la scuola, una mattina alla settimana. Venti minuti a piedi, prima di tutto il resto.', ch:[
+   {l:'Una mattina alla settimana è vostra', e:'Venti minuti di chiacchiere; le riunioni del mattino cominciano senza di te', fatto:'Hai fatto la strada per la scuola con %FIGLIO, una mattina alla settimana.', f:()=>{ bioConta('affetti'); serenitaMuovi(8); if(S.visibilita!=null) S.visibilita=clamp(S.visibilita-1,0,100); }},
+   {l:'Prometti, e poi non riesci', e:'Due mattine, poi più niente; %FIGLIO smette di chiedere', fatto:'Hai promesso a %FIGLIO la strada per la scuola, e non hai mantenuto la promessa.', f:()=>{ bioConta('affettiSacrificati'); serenitaMuovi(-7); }},
+  ]},
+ {id:'vp_favola', tipo:'affetti', p:0.09, cond:()=>haFiglioInEta(3,8),
+  kick:'Vita privata', t:'La favola al telefono',
+  text:'Sei fuori città per tre giorni. La sera alle nove %FIGLIO aspetta la favola, come sempre. Alle nove hai una cena con persone che contano.', ch:[
+   {l:'Esci dalla cena e chiami', e:'Dieci minuti di favola da un corridoio; a tavola notano la sedia vuota', fatto:'Hai raccontato la favola a %FIGLIO al telefono, da un corridoio.', f:()=>{ bioConta('affetti'); serenitaMuovi(6); if(S.visibilita!=null) S.visibilita=clamp(S.visibilita-1,0,100); }},
+   {l:'Chiami dopo, quando dorme già', e:'La cena va bene; la favola la racconta qualcun altro', fatto:'Hai saltato la favola della sera per una cena.', f:()=>{ serenitaMuovi(-5); if(S.visibilita!=null) S.visibilita=clamp(S.visibilita+1,0,100); }},
+  ]},
+ {id:'vp_lettera_lontano', tipo:'dubbio', p:0.06, cond:()=>!!(S.famiglia&&S.famiglia.coniuge),
+  kick:'Vita privata', t:'Una lettera da lontano',
+  text:'Ti scrive una persona che hai amato a vent\'anni, prima di tutto questo. Niente di più che un saluto: ha visto il tuo nome sul giornale e ha ripensato a quei tempi.', ch:[
+   {l:'Rispondi, e lo dici a %CONIUGE', e:'Due righe gentili; a casa nessun segreto', fatto:'Hai risposto a un vecchio amore, senza segreti in casa.', f:()=>{ serenitaMuovi(1); if(S.integrita!=null) S.integrita=clamp(S.integrita+1,0,100); }},
+   {l:'Non rispondi', e:'La lettera finisce in un cassetto, e il cassetto pesa', fatto:'Hai lasciato senza risposta la lettera di un vecchio amore.', f:()=>{ serenitaMuovi(-1); }},
+  ]},
+ {id:'vp_casa_figlio', tipo:'affetti', p:0.09, cond:()=>haFiglioInEta(22,40),
+  kick:'Vita privata', t:'La casa di %FIGLIO',
+  text:'%FIGLIO vuole comprare casa, ma la banca chiede un anticipo che non c\'è. Non ti chiede niente: te lo racconta a cena, guardando il piatto.', ch:[
+   {l:'Aiuti tu, con i tuoi risparmi', e:'Una casa per %FIGLIO; qualcuno troverà da ridire sul regalo', fatto:'Hai aiutato %FIGLIO a comprare casa.', f:()=>{ bioConta('affetti'); serenitaMuovi(6); if(S.visibilita!=null) S.visibilita=clamp(S.visibilita-1,0,100); }},
+   {l:'Che ce la faccia con le sue forze', e:'Una lezione di vita; un muso lungo per mesi', fatto:'Hai lasciato che %FIGLIO comprasse casa con le sue forze.', f:()=>{ serenitaMuovi(-4); if(S.integrita!=null) S.integrita=clamp(S.integrita+1,0,100); }},
+  ]},
+ {id:'vp_nome', tipo:'lieto', p:0.07, cond:()=>true,
+  kick:'Vita privata', t:'Il nome che non ricordi',
+  text:'Alla fine di un incontro qualcuno ti abbraccia come un vecchio amico e ti chiede della famiglia e dei tempi della scuola. Non hai la minima idea di chi sia, e la conversazione va avanti.', ch:[
+   {l:'Confessi: «Mi aiuti, il nome?»', e:'Una risata, e un nome; ve lo ricorderete tutti e due', fatto:'Hai confessato a un vecchio conoscente di non ricordarne il nome.', f:()=>{ if(S.integrita!=null) S.integrita=clamp(S.integrita+1,0,100); }},
+   {l:'Reciti fino in fondo', e:'Dieci minuti di acrobazie; nessuno se n\'è accorto, forse', fatto:'Hai recitato fino in fondo con un vecchio conoscente di cui non ricordavi il nome.', f:()=>{ if(S.visibilita!=null) S.visibilita=clamp(S.visibilita+1,0,100); }},
+  ]},
+ {id:'vp_madre', tipo:'lieto', p:0.07, cond:()=>S.eta==null||S.eta<70,
+  kick:'Vita privata', t:'Tua madre vota contro',
+  text:'A una cena di famiglia tua madre annuncia che alle prossime elezioni voterà per i tuoi avversari. «Ti voglio bene, ma hanno ragione loro», dice, e ti passa il sale.', ch:[
+   {l:'Provi a convincerla', e:'Una serata di argomenti; lei non cambia idea, tu forse sì', fatto:'Hai provato a convincere tua madre a votarti.', f:()=>{ serenitaMuovi(1); if(S.integrita!=null) S.integrita=clamp(S.integrita+1,0,100); }},
+   {l:'Ridi, e le passi il pane', e:'Una storia da raccontare per anni', fatto:'Hai riso del voto di tua madre per gli avversari.', f:()=>{ serenitaMuovi(3); }},
+  ]},
+ {id:'vp_amico_critica', tipo:'dubbio', p:0.08, cond:()=>true,
+  kick:'Vita privata', t:'L\'amico che ti critica',
+  text:'Un amico di vecchia data scrive un articolo duro contro una tua scelta. Lo fa con rispetto, ma lo fa in pubblico. Gli altri aspettano di vedere come rispondi.', ch:[
+   {l:'Lo chiami e ne parlate', e:'Un\'ora al telefono; restate amici e restate in disaccordo', fatto:'Hai chiamato l\'amico che ti aveva criticato in pubblico.', f:()=>{ if(S.integrita!=null) S.integrita=clamp(S.integrita+2,0,100); }},
+   {l:'Rispondi anche tu, in pubblico', e:'Il dibattito sale; l\'amicizia si raffredda', fatto:'Hai risposto in pubblico all\'amico che ti aveva criticato.', f:()=>{ if(S.visibilita!=null) S.visibilita=clamp(S.visibilita+2,0,100); if(S.integrita!=null) S.integrita=clamp(S.integrita-1,0,100); }},
+  ]},
+ {id:'vp_porta_aperta', tipo:'dubbio', p:0.07, cond:()=>true,
+  kick:'Vita privata', t:'La porta lasciata aperta',
+  text:'Chi ti dava lavoro prima della politica ti scrive: se un giorno volessi tornare, il tuo posto c\'è. Basta una risposta, anche solo per tenere la porta aperta.', ch:[
+   {l:'Rispondi: non si sa mai', e:'Una via d\'uscita in un cassetto; respiri meglio', fatto:'Hai tenuto aperta la porta del tuo vecchio mestiere.', f:()=>{ serenitaMuovi(2); }},
+   {l:'Ringrazi e chiudi: indietro non si torna', e:'Tutto su questa carta; nessuna rete sotto', fatto:'Hai chiuso la porta del tuo vecchio mestiere.', f:()=>{ if(S.integrita!=null) S.integrita=clamp(S.integrita+2,0,100); serenitaMuovi(-2); }},
+  ]},
+ {id:'vp_insulto', tipo:'affetti', p:0.08, cond:()=>haFiglioInEta(6,16),
+  kick:'Vita privata', t:'L\'insulto per strada',
+  text:'Cammini con %FIGLIO quando un uomo ti riconosce e ti insulta ad alta voce. %FIGLIO ti stringe la mano e guarda te, per capire che cosa si fa.', ch:[
+   {l:'Ti fermi e gli rispondi con calma', e:'Lo lasci senza argomenti; %FIGLIO ha visto come si fa', fatto:'Hai risposto con calma a chi ti insultava, davanti a %FIGLIO.', f:()=>{ serenitaMuovi(2); if(S.integrita!=null) S.integrita=clamp(S.integrita+2,0,100); }},
+   {l:'Tiri dritto, senza voltarti', e:'Nessuna scena; a casa ci sono domande a cui rispondere', fatto:'Hai tirato dritto davanti agli insulti, con %FIGLIO per mano.', f:()=>{ serenitaMuovi(-2); }},
+  ]},
+ {id:'vp_ballo', tipo:'lieto', p:0.07, cond:()=>!!(S.famiglia&&S.famiglia.coniuge),
+  kick:'Vita privata', t:'Un ballo con %CONIUGE',
+  text:'A un ricevimento l\'orchestra attacca un lento, e %CONIUGE ti guarda: era la vostra canzone, tanti anni fa. Intorno ci sono fotografi e ospiti importanti.', ch:[
+   {l:'Balli, davanti a tutti', e:'Una foto che girerà; a casa se ne parlerà con un sorriso', fatto:'Hai ballato con %CONIUGE davanti a tutti.', f:()=>{ bioConta('affetti'); serenitaMuovi(6); if(S.visibilita!=null) S.visibilita=clamp(S.visibilita+1,0,100); }},
+   {l:'Sorridi, e torni a parlare con gli ospiti', e:'Gli affari vanno avanti; la canzone finisce', fatto:'Hai lasciato finire la vostra canzone senza ballare.', f:()=>{ serenitaMuovi(-4); if(S.visibilita!=null) S.visibilita=clamp(S.visibilita+1,0,100); }},
+  ]},
+ {id:'vp_chiavi', tipo:'lieto', p:0.06, cond:()=>famigliaPresente(),
+  kick:'Vita privata', t:'Le chiavi dimenticate',
+  text:'Torni a casa alle due di notte e scopri di aver lasciato le chiavi in ufficio. Dentro dormono tutti. Il campanello è lì; anche il divano dell\'ufficio, a mezz\'ora di strada.', ch:[
+   {l:'Suoni il campanello', e:'Una porta aperta in pigiama, e una risata il giorno dopo', fatto:'Hai svegliato tutta la casa alle due di notte, senza chiavi.', f:()=>{ serenitaMuovi(2); }},
+   {l:'Torni a dormire in ufficio', e:'Una notte scomoda; a colazione il tuo posto era vuoto', fatto:'Hai dormito in ufficio per non svegliare i tuoi.', f:()=>{ serenitaMuovi(-2); }},
+  ]},
+ {id:'vp_soprannome', tipo:'lieto', p:0.07, cond:()=>true,
+  kick:'Vita privata', t:'Il soprannome',
+  text:'Un giornale scopre il soprannome che avevi a scuola, e i vignettisti lo adorano. Da una settimana ti chiamano così anche alcuni colleghi, a mezza voce.', ch:[
+   {l:'Ci ridi sopra, in pubblico', e:'Il soprannome diventa simpatico; non te lo toglierai più', fatto:'Hai riso in pubblico del tuo soprannome di scuola.', f:()=>{ if(S.visibilita!=null) S.visibilita=clamp(S.visibilita+2,0,100); }},
+   {l:'Fai capire che non ti diverte', e:'Il soprannome sparisce dai giornali; resta nei corridoi', fatto:'Hai fatto capire che il soprannome non ti divertiva.', f:()=>{ if(S.visibilita!=null) S.visibilita=clamp(S.visibilita-1,0,100); }},
+  ]},
+ {id:'vp_carcere', tipo:'dubbio', p:0.07, cond:()=>true,
+  kick:'Vita privata', t:'Una lettera dal carcere',
+  text:'Un compagno di scuola, finito in carcere anni fa, ti scrive: sta per uscire e cerca lavoro. Chiede una lettera che dica chi era prima, quando lo conoscevi.', ch:[
+   {l:'Scrivi la lettera', e:'Una seconda occasione con la tua firma sotto; qualcuno lo verrà a sapere', fatto:'Hai scritto una lettera per un compagno di scuola che usciva dal carcere.', f:()=>{ if(S.integrita!=null) S.integrita=clamp(S.integrita+3,0,100); if(S.visibilita!=null) S.visibilita=clamp(S.visibilita-1,0,100); }},
+   {l:'Gli fai sapere che non puoi', e:'Prudenza; una lettera che resta senza una risposta vera', fatto:'Non hai scritto la lettera per un compagno di scuola che usciva dal carcere.', f:()=>{ if(S.integrita!=null) S.integrita=clamp(S.integrita-2,0,100); }},
+  ]},
+ {id:'vp_cugina', tipo:'dubbio', p:0.07, cond:()=>true,
+  kick:'Vita privata', t:'Una cugina nell\'altra lista',
+  text:'Tua cugina si candida alle elezioni comunali, nella lista dei tuoi avversari. I giornali locali titolano «Guerra in famiglia». Lei ti telefona per dirti che non è niente di personale.', ch:[
+   {l:'Le auguri buona fortuna, in pubblico', e:'Un gesto elegante; i tuoi ti chiedono da che parte stai', fatto:'Hai augurato buona fortuna a tua cugina, candidata contro di te.', f:()=>{ if(S.integrita!=null) S.integrita=clamp(S.integrita+2,0,100); if(S.visibilita!=null) S.visibilita=clamp(S.visibilita+1,0,100); }},
+   {l:'Non commenti', e:'Il caso si sgonfia; alle riunioni di famiglia vi sedete lontano', fatto:'Hai taciuto sulla candidatura di tua cugina contro di te.', f:()=>{ serenitaMuovi(-1); }},
   ]},
 ];
 
@@ -20000,7 +20260,7 @@ const PILASTRI_MONDO = [
     text:'In una notte d\'agosto Berlino si sveglia tagliata in due da filo spinato, poi da cemento. Le famiglie che abitavano ai due lati della stessa strada scoprono di vivere in due mondi. Il confine fra i blocchi smette di essere una linea sulla carta e diventa un muro che si può toccare.',
     logx:'Berlino tagliata in due: il confine fra i blocchi diventa un muro.',
     ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
-  { id:'pm_cuba', anno:1962, mese:10, tono:'grave', cronaca:true, kick:'Il mondo',
+  { id:'pm_cuba', anno:1962, mese:10, tono:'grave', cronaca:true, kick:'Il mondo', nonInPaesi:['usa'],   // L180-2 (D156): negli Stati Uniti non esce a nessuno — l'ottobre 1962 americano è lo snodo della porta us1960 (il contenuto), e il mese resta libero
     t:'I tredici giorni',
     text:'Per due settimane d\'ottobre il mondo guarda due flotte avvicinarsi intorno a Cuba e impara a memoria la parola «missili». Poi le navi si fermano e tornano indietro. Non è successo niente, e per questo è la settimana più importante del secolo.',
     logx:'Due flotte attorno a Cuba, poi le navi tornano indietro.',

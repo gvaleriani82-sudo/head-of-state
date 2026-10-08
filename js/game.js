@@ -239,7 +239,9 @@ const DRIFT_INFLAZIONE_ERA = {
   /* L175-1 · gli Stati Uniti del '50 (scheda PRESET-USA-1950 §2, ⚠ ordine di grandezza, BLS da confermare): prezzi fermi, salvo la Corea del 1951
      (7,9) e il −0,4 del 1955. Assoluta come le altre righe d'inflazione: si scrive dalla scheda, non si cerca. `{da:1961, inf:null}` chiude. */
   [LINEA_US]: [ {da:1950, inf:1.3}, {da:1951, inf:7.9}, {da:1952, inf:1.9}, {da:1953, inf:0.8}, {da:1954, inf:0.7}, {da:1955, inf:-0.4},
-                {da:1956, inf:1.5}, {da:1957, inf:3.3}, {da:1958, inf:2.8}, {da:1959, inf:0.7}, {da:1960, inf:1.7}, {da:1961, inf:null} ]
+                {da:1956, inf:1.5}, {da:1957, inf:3.3}, {da:1958, inf:2.8}, {da:1959, inf:0.7}, {da:1960, inf:1.7},
+                /* L180-2 · us1960 (PRESET-USA-1960 §2, verificata su FRED/BEA/BLS/OMB): righe 1961-1968; l'inflazione è ASSOLUTA dalla scheda, non cercata (FRED: 1,1 · 1,2 · 1,2 · 1,3 · 1,6 · 3,0 · 2,8 · 4,3); la chiusura a 1969 */
+                {da:1961, inf:1.0}, {da:1962, inf:1.0}, {da:1963, inf:1.3}, {da:1964, inf:1.3}, {da:1965, inf:1.6}, {da:1966, inf:2.9}, {da:1967, inf:3.1}, {da:1968, inf:4.2}, {da:1969, inf:null} ]
 };
 function inflazioneAnno(){
   if(typeof S==='undefined' || !S) return 0;
@@ -344,7 +346,9 @@ const DRIFT_DEFICIT_ERA = {
      −1,0 · −0,8 · 0,4 · 2,9 · 0,2 (bersagli −1,9 · 0,4 · 1,7 · 0,3 · 0,7 · −0,9 · −0,8 · 0,6 · 2,6 · −0,1). Debito reso 87,2 (1950) → 65,8 (1955) → 55,9 (1960)
      contro ~92 → ~67 → ~54: lo fa la crescita nominale (crescita + inflazione ≈ 6-10 punti l'anno), non il disavanzo. `{da:1961, def:0}` chiude. */
   [LINEA_US]: [ {da:1950, def:0},     {da:1951, def:0},     {da:1952, def:-0.5},  {da:1953, def:1},     {da:1954, def:-4},    {da:1955, def:2},
-                {da:1956, def:-3.25}, {da:1957, def:-3.25}, {da:1958, def:-3.75}, {da:1959, def:4.25},  {da:1960, def:-1.5},  {da:1961, def:0} ]
+                {da:1956, def:-3.25}, {da:1957, def:-3.25}, {da:1958, def:-3.75}, {da:1959, def:4.25},  {da:1960, def:-1.5},
+                /* L180-2 · us1960 (PRESET-USA-1960 §2, verificata su FRED/BEA/BLS/OMB): righe 1961-1968 CERCATE sul reso, misura-us1960.js cerca, 20 semi per lato, luglio, carriere al governo; la chiusura a 1969 */
+                {da:1961, def:0}, {da:1962, def:1}, {da:1963, def:-0.5}, {da:1964, def:0.75}, {da:1965, def:0.25}, {da:1966, def:0.5}, {da:1967, def:-1.75}, {da:1968, def:1.5}, {da:1969, def:0} ]
 };
 function deficitEra(){
   if(typeof S==='undefined' || !S || !S.era) return 0;
@@ -1629,7 +1633,9 @@ const DRIFT_ECONOMICO_ERA = {
      −0,6 · 7,1 · 2,1 · 2,1 · −0,7 · 6,9 · 2,6: le tre recessioni si vedono. Il tetto 5 non basta al 1950-51 e al 1955/1959: la porta dichiara
      `economia.crescitaTetto:9` (L109-1). `{da:1961, ciclo:0}` chiude. */
   [LINEA_US]: [ {da:1950, ciclo:4.75}, {da:1951, ciclo:3.25}, {da:1952, ciclo:-1},   {da:1953, ciclo:0},     {da:1954, ciclo:-6},   {da:1955, ciclo:2.75},
-                {da:1956, ciclo:-3.25}, {da:1957, ciclo:-3.5}, {da:1958, ciclo:-6.25}, {da:1959, ciclo:2.25}, {da:1960, ciclo:-3},   {da:1961, ciclo:0} ]
+                {da:1956, ciclo:-3.25}, {da:1957, ciclo:-3.5}, {da:1958, ciclo:-6.25}, {da:1959, ciclo:2.25}, {da:1960, ciclo:-3},
+                /* L180-2 · us1960 (PRESET-USA-1960 §2, verificata su FRED/BEA/BLS/OMB): righe 1961-1968 CERCATE sul reso, misura-us1960.js cerca, 20 semi per lato, luglio, carriere al governo; la chiusura a 1969 */
+                {da:1961, ciclo:-3.5}, {da:1962, ciclo:1}, {da:1963, ciclo:-1.75}, {da:1964, ciclo:0.75}, {da:1965, ciclo:0.5}, {da:1966, ciclo:0.25}, {da:1967, ciclo:-4}, {da:1968, ciclo:-1}, {da:1969, ciclo:0} ]
 };
 /* L60-2 · LA DISOCCUPAZIONE D'EPOCA. Il motore non aveva un posto dove un decennio potesse dire «qui i senza
    lavoro sono il doppio»: `S.uMod` decade dell'80% al mese e le carte danno solo colpi. Stessa forma di cicloBase():
@@ -1731,7 +1737,9 @@ const DRIFT_DISOCCUPAZIONE_ERA = {
      contro 5,3 · 3,3 · 3,0 · 2,9 · 5,5 · 4,4 · 4,1 · 4,3 · 6,8 · 5,5 · 5,5: il 1951-53 sta sul pavimento del motore (3) e il 1951 non ci arriva in luglio
      (la disoccupazione converge, non salta: 4,0 contro 3,3). `{da:1961, un:0}` chiude. */
   [LINEA_US]: [ {da:1950, un:1.5},  {da:1951, un:-3.75}, {da:1952, un:-5},   {da:1953, un:-5},    {da:1954, un:-3},    {da:1955, un:-3.5},
-                {da:1956, un:-4},   {da:1957, un:-3.25}, {da:1958, un:-1.25}, {da:1959, un:-0.5}, {da:1960, un:-0.75}, {da:1961, un:0} ]
+                {da:1956, un:-4},   {da:1957, un:-3.25}, {da:1958, un:-1.25}, {da:1959, un:-0.5}, {da:1960, un:-0.75},
+                /* L180-2 · us1960 (PRESET-USA-1960 §2, verificata su FRED/BEA/BLS/OMB): righe 1961-1968 CERCATE sul reso, misura-us1960.js cerca, 20 semi per lato, luglio, carriere al governo; la chiusura a 1969 */
+                {da:1961, un:-2.75}, {da:1962, un:-2.5}, {da:1963, un:-1.25}, {da:1964, un:-2.5}, {da:1965, un:0.25}, {da:1966, un:-2}, {da:1967, un:-4.25}, {da:1968, un:-4}, {da:1969, un:0} ]
 };
 function disoccupazioneEra(){
   if(typeof S==='undefined' || !S) return 0;
@@ -2381,7 +2389,18 @@ const RIALLINEAMENTI_ERA = {
     '2013/12': { se:function(){ return deGovernoCdu() && Array.isArray(S.coalizione) && S.coalizione.indexOf('de_fdp')>=0 && vigiliaUrnaOrdinaria(); },
                  delta:[ {id:'de_cdu',delta:7.8}, {id:'de_spd',delta:2.7}, {id:'de_lnk',delta:-3.3}, {id:'de_grn',delta:-2.3}, {id:'de_fdp',delta:-9.8}, {id:'de_afd',delta:1.7} ],   // Σ −3,2
                  urne:  { de_cdu:41.6, de_spd:25.7, de_lnk:8.6, de_grn:8.5, de_fdp:4.8, de_afd:4.7 } }
-  }
+  },
+  /* L180-2 · LA LINEA AMERICANA, la prima tappa (D157): IL SUD GIRA. La porta us1960 dichiara il lean del 1960 (Georgia e Alabama −2, il
+     Sud democratico dalla Ricostruzione); al voto del novembre 1964 — la legge sui diritti civili dell'estate, il Profondo Sud ai
+     Repubblicani per la prima volta — il lean dei due stati va a +1. Solo la direttiva nuova `territori:{lean}` (applicaDirettive →
+     S.territoriDelta.lean, riapplicato in applySnap da applicaTerritoriDelta): niente delta, niente seggi, niente `se` — vale per tutte
+     le carriere della linea che ci arrivano, anche quelle partite nel 1950 (il flag dello snodo della scuola del 1957 non si legge: la
+     svolta è della legge del 1964). Nel mese dell'urna: la tappa gira PRIMA del voto (advanceMonth), quindi le aree decise dopo la
+     presidenziale (decidiTerritoriNazionale) leggono già il lean nuovo; la presidenziale no (testaATesta legge le forze) — misurato in
+     L180-2, PRESET-USA-1960.md. */
+  [LINEA_US]: {
+    '1964/11': { territori:{ lean:{ 'la Georgia':1, "l'Alabama":1 } } },
+  },
 };
 /* L155-1 (D107) · IL CALENDARIO ANTICIPATO della linea tedesca 2000: se uno scioglimento (lo snodo S3 del 2005, del contenuto) sposta le urne,
    l'orologio del motore riparte e le ordinarie dopo cadono a GENNAIO 2009 e 2013 — le chiavi della vigilia sono 2008/12 e 2012/12. Stesse
@@ -2535,7 +2554,7 @@ function applicaRosterDelta(ricalcolaSeggi){
 function applicaTerritoriDelta(){
   if(typeof S==='undefined' || !S || !S.territoriDelta || !PAESE || !PAESE.territori) return;
   var R=S.territoriDelta;
-  if(!(R.entra||[]).length && !(R.rinomina||[]).length && !R.mappa) return;
+  if(!(R.entra||[]).length && !(R.rinomina||[]).length && !R.mappa && !(R.lean && Object.keys(R.lean).length)) return;
   var lista=PAESE.territori.slice(), mappa=PAESE.mappa ? Object.assign({}, PAESE.mappa, {aree:(PAESE.mappa.aree||[]).slice()}) : null;
   /* L147-2 · LA RINOMINA DI UN TERRITORIO (Berlino Ovest → Berlino, 1990/10): stesso indice, stessa area, cambia il nome (e l'esonimo).
      Idempotente: un nome già rinominato non si trova più. Prima di `entra`, così un territorio che entra non incontra il nome vecchio. */
@@ -2557,6 +2576,13 @@ function applicaTerritoriDelta(){
        con dei vuoti prima di aggiungere, altrimenti l'area nuova finirebbe sotto l'indice di un'altra città. */
     if(mappa){ while(mappa.aree.length < lista.length-1) mappa.aree.push(null); mappa.aree.push(te.area || null); }
   });
+  /* L180-2 (D157) · IL LEAN A UNA TAPPA (il Sud del 1964): `territori:{lean:{<nome>:<valore>}}`, per nome (dopo la rinomina e gli
+     ingressi, così vale anche per un territorio entrato), stesso indice, si cambia solo il lean. Idempotente. Chi governa il territorio
+     non cambia qui: lo decide il voto dopo (decidiTerritori, decidiTerritoriNazionale leggono TE.lean). */
+  if(R.lean) Object.keys(R.lean).forEach(function(nome){
+    var i=lista.findIndex(function(x){ return x.nome===nome; }); if(i<0) return;
+    lista[i]=Object.assign({}, lista[i], {lean:R.lean[nome]});
+  });
   PAESE=Object.assign({}, PAESE, {territori:lista}, mappa?{mappa:mappa}:{});
 }
 /* Applica UNA direttiva: aggiorna il registro in S e i dizionari per-id che sarebbero rimasti orfani. */
@@ -2569,7 +2595,7 @@ function applicaDirettive(d){
   /* L147-2 · `territori:{rinomina:[{nome, in, nomeEn}]}` e `mappa:{sfondo, oltre}` (l'unità del 1990/10) vanno nello STESSO registro,
      riapplicato in applySnap. La rinomina porta con sé anche la carriera locale che governava quel territorio (S.locale.nome: il
      sindaco di Berlino Ovest diventa sindaco di Berlino). */
-  var terrTocca = d.territori && ((d.territori.entra||[]).length || (d.territori.rinomina||[]).length);
+  var terrTocca = d.territori && ((d.territori.entra||[]).length || (d.territori.rinomina||[]).length || (d.territori.lean && Object.keys(d.territori.lean).length));
   if(terrTocca || d.mappa){
     S.territoriDelta = S.territoriDelta || {entra:[]};
     if(!S.territoriDelta.entra) S.territoriDelta.entra=[];
@@ -2578,6 +2604,7 @@ function applicaDirettive(d){
       if(S.locale && S.locale.nome===r.nome) S.locale.nome=r.in;
     });
     if(d.mappa) S.territoriDelta.mappa = Object.assign({}, S.territoriDelta.mappa||{}, d.mappa);
+    if(d.territori && d.territori.lean) S.territoriDelta.lean = Object.assign({}, S.territoriDelta.lean||{}, d.territori.lean);   // L180-2 (D157): nel registro, riapplicato in applySnap
   }
   if(d.territori && d.territori.entra && d.territori.entra.length){
     d.territori.entra.forEach(function(te){ S.territoriDelta.entra.push(te); });
@@ -3059,7 +3086,8 @@ const SCENARIO_ISTITUZIONI = ['sistema','comeSiVince','coalizione','cadutaGovern
                               'crisiMinisteriale',   // L93-4: la IV Repubblica cade senza urne (assente = come prima)
                               'meseUrna',            // L173-1: il mese dell'urna a scadenza (assente = gennaio, come prima)
                               'congresso',           // L173-2: la Camera d'avvio del partito del Presidente (assente = nessun Congresso)
-                              'sbarramento', 'sfiduciaCostruttiva'];   // L107-2: la soglia dei seggi e l'art. 67 (assenti = come prima)
+                              'sbarramento', 'sfiduciaCostruttiva',    // L107-2: la soglia dei seggi e l'art. 67 (assenti = come prima)
+                              'spintaPresidenziale'];                  // L216-1: punti sul voto della presidenziale per anno (assente = nessuna)
 function paeseConScenario(base, sc){
   if(!sc) return base;
   var ov={};
@@ -6005,6 +6033,11 @@ function genAgendaRamo(first){
          Additivo (senza il campo tutto come prima); la guardia è in verifica-paese.js (--rosso-noncapo). Dall'opposizione e dagli altri
          paesi la cronaca resta com'è. */
       if(_M.nonAlCapo && _M.nonAlCapo.indexOf(S.paese)>=0 && S.livello===3 && !S.opposizione) continue;
+      /* L180-2 (D156) · `nonInPaesi:[id di PAESI]`, il gemello: in quei paesi il fatto-mondo non esce a NESSUNO (qualunque livello e lato) —
+         oggi pm_cuba negli Stati Uniti, dove l'ottobre 1962 lo decide il Presidente (lo snodo di us1960) e la cronaca del mondo sarebbe falsa.
+         Segnato visto come sopra, e il ciclo prosegue: il mese resta libero per un altro fatto o per i pilastri di linea. Guardia in
+         verifica-paese.js (--rosso-noninpaesi). */
+      if(_M.nonInPaesi && _M.nonInPaesi.indexOf(S.paese)>=0) continue;
       S.agenda.push({kind:'event', data:_M, resolved:false});
       var _cm=campagnaColPilastro(_M); if(_cm) S.agenda.push(_cm);   // L177-2 (D138): nel mese di campagna esce anche la carta di campagna
       var _vm=votoColPilastro(); if(_vm) S.agenda.push(_vm);         // L178-2 (D141): nel mese del voto esce anche la carta del risultato
@@ -7411,7 +7444,7 @@ function decidiTerritoriNazionale(){
     const asseTuo=mioPartito().asse, aB=asseBlocco();
     let onda;
     if(S.seggi) onda=(typeof bloccoSeggi==='function'?bloccoSeggi():50)-50;
-    else { const tt=testaATesta(); onda=tt.myPct-(tt.cb||0)-50; }
+    else { const tt=testaATesta(); onda=tt.myPct-(tt.cb||0)-(tt.sv||0)-50; }   // L216-1: senza la spinta presidenziale della porta
     const wave=clamp(onda, -12, 12);
     PAESE.territori.forEach(function(TE,i){ const t=S.territori[i]; if(!t) return;
       const sp=spintaTerr(i); if(!sp) return;   // L182-3: il lettore unico (spinta + umore del giro; umore 0 = come prima) · solo le aree lavorate in campagna si decidono qui (le altre le decidono le intermedie)

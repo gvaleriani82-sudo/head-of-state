@@ -843,6 +843,23 @@ function testaATesta(){
   }
   const tot=(mine+his)||1;
   const cb=S.opposizione?(S.credibilita-50)*0.1:0;              // bonus/malus credibilità al voto (solo in opposizione)
-  const myPct=clamp(mine/tot*100+cb, 0, 100);
-  return { opp, mine, his, myPct, cb, win:myPct>50 };
+  const sp=spintaPresidenziale(), pres=S.opposizione ? S.governoAvversario : S.partito;
+  const sv=sp ? (me===pres ? sp : -sp) : 0;                     // L216-1: la spinta dell'anno, vista dal tuo lato (0 = come prima)
+  const myPct=clamp(mine/tot*100+cb+sv, 0, 100);
+  return { opp, mine, his, myPct, cb, sv, win:myPct>50 };
+}
+/* ⚑ L216-1 (D270) · LA SPINTA SUL VOTO DELLA PRESIDENZIALE. `spintaPresidenziale:{<anno>:<punti>}` è un campo di porta (o di paese:
+   SCENARIO_ISTITUZIONI, quindi PAESE lo porta già risolto; assente = nessuna spinta, tutto come prima). Segno: positivo = a favore del
+   partito del Presidente in carica. Oggi lo dichiara solo `us1960` (la valanga del 1964 e la vittoria del 1968). Perché sul voto e non
+   sulle forze (L215-3): con due partiti un delta di tappa si rinormalizza («+ al Presidente» = «− allo sfidante») e chi perde il 1964
+   dall'opposizione scende sotto la forza dell'urna prima, quindi la regola B non lo salva mai; qui S.forze non si tocca.
+   UN LETTORE SOLO, questo; lo legge solo testaATesta() (sopra), con la stessa condizione del fatto-mondo `nonAlCapo` (L196-1): se il
+   Presidente sei tu (livello 3 al governo) vale 0 — la tua presidenza è un'altra storia dal primo giorno, come Dallas. Vale solo al
+   livello 3: ai livelli 0-2 e 5 la presidenziale non passa dal testa a testa del giocatore. La legge tutto l'anno della chiave, quindi
+   anche il sondaggio (sondaggioVero: «il numero che deciderà il voto») la mostra da gennaio; decidiTerritoriNazionale la toglie, come
+   il bonus di credibilità (l'onda dei territori è una quota, non la spinta della storia), e le intermedie non leggono testaATesta. */
+function spintaPresidenziale(){
+  if(S.livello!==3 || !S.opposizione) return 0;
+  const t=PAESE.spintaPresidenziale, v=t ? t[S.year] : 0;
+  return (typeof v==='number' && isFinite(v)) ? v : 0;
 }
