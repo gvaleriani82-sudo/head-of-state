@@ -181,14 +181,27 @@ const VIDEO_PRESENTI = ['home-hero', 'partito-base', 'vitaprivata-base', 'retro-
      cucitura 3,7: un giro solo, in CLIP_UNA_VOLTA); seguono la regola della loro immagine.
      8/10 (L197-18): l'uomo con la tazza alla finestra appannata accanto al fax (vitaprivata-anni90 -v4, cucitura 3,7: un giro solo, in
      CLIP_UNA_VOLTA), gli amici davanti alla partita (vitaprivata-anni90 -v3, 2,2: gira) e il compleanno con la torta (vitaprivata-anni80
-     -v4, 3,1: gira — tornano quasi alla posa); seguono la regola della loro immagine. */
+     -v4, 3,1: gira — tornano quasi alla posa); seguono la regola della loro immagine.
+     10/10 (L197-19): la coppia sul divano davanti alla tv col videoregistratore, rifatta senza le applique (vitaprivata-anni80 -v3,
+     cucitura 1,9: gira; poster↔f0 1,8); segue la regola della sua immagine.
+     10/10 (L197-20): la filanda coi telai nei raggi delle finestre, rifatta (lavoro-anni50 -v2, cucitura 2,8: gira; poster↔f0 3,4);
+     segue la regola della sua immagine.
+     11/10 (L197-22): il magazzino col muletto e il monitor a tubo (lavoro-anni90 -v2, cucitura 1,7: gira; poster↔f0 2,2) e
+     l'acciaieria col vapore e le tute (lavoro-anni80 -v2, cucitura 8,2: la fine non torna all'immagine, un giro solo, in
+     CLIP_UNA_VOLTA; poster↔f0 3,4, luce ferma); seguono la regola della loro immagine.
+     11/10 (L197-23): l'ufficio col fax e il monitor a tubo (partito-anni90 -v2, cucitura 2,6: gira; poster↔f0 2,6), la riunione
+     col fumo rifatta a camera ferma (partito-base -v2, 2,6: gira; 2,1), il seggio in palestra (elezioni-base -v2, cucitura 5,5:
+     la fila non torna, in CLIP_UNA_VOLTA; 3,3) e la fila davanti alla saracinesca (crisi-base-latina -v2, 5,2: in CLIP_UNA_VOLTA;
+     4,2, come le case d'area); luce ferma in tutte e quattro; seguono la regola della loro immagine. */
   'esteri-base-v5', 'esteri-base-v6', 'vitaprivata-base-v6', 'vitaprivata-base-v7', 'casa-base-v2',
   'casa-base-asiasud-v2', 'casa-base-latina-v2', 'casa-base-nordamerica-v2',
   'casa-base-africa-v2', 'casa-base-asiaest-v2', 'esteri-base-v2', 'esteri-base-v4',
   'telefono-anni70', 'telefono-anni90', 'retro-canale-v3', 'retro-canale-v4', 'telefono-oggi-v2', 'telefono-oggi-v3',
   'telefono-oggi-v4', 'vitaprivata-anni60-v2', 'vitaprivata-anni70-v2', 'vitaprivata-anni50-v2',
   'vitaprivata-anni80-v2', 'vitaprivata-anni90-v2', 'vitaprivata-anni50-v3', 'vitaprivata-anni60-v3', 'vitaprivata-anni70-v3',
-  'vitaprivata-anni70-v4', 'vitaprivata-anni90-v4', 'vitaprivata-anni90-v3', 'vitaprivata-anni80-v4'];
+  'vitaprivata-anni70-v4', 'vitaprivata-anni90-v4', 'vitaprivata-anni90-v3', 'vitaprivata-anni80-v4',
+  'vitaprivata-anni80-v3', 'lavoro-anni50-v2', 'lavoro-anni90-v2', 'lavoro-anni80-v2',
+  'partito-anni90-v2', 'partito-base-v2', 'elezioni-base-v2', 'crisi-base-latina-v2'];
 
 /* ===== L181-4 — LE CLIP CHE NON GIRANO: un giro solo, poi l'ultimo fotogramma tenuto. Le altre clip di scena girano in tondo
    (`loop`) perché il loro ultimo fotogramma torna sul primo (cucitura ≤ 3,6 su 255, misurata sullo schermo); queste no — le porte
@@ -201,7 +214,9 @@ const CLIP_UNA_VOLTA = ['fineanno-buono', 'fineanno-lucieombre', 'fineanno-diffi
   'vitaprivata-anni70-v2',   // L197-15: la fonduta, cucitura 4,0 (sopra il 3,6 delle clip che girano: i gesti a tavola non tornano)
   'vitaprivata-anni80-v2',   // L197-16: la cucina verde menta, cucitura 4,0 (come la fonduta)
   'vitaprivata-anni70-v4',   // L197-17: i bagagli al tramonto, cucitura 3,7 (sopra il 3,6: foglie e cinghie non tornano)
-  'vitaprivata-anni90-v4'];   // L197-18: la tazza alla finestra appannata, cucitura 3,7 (come i bagagli e la mano di telefono-oggi-v4)
+  'vitaprivata-anni90-v4',   // L197-18: la tazza alla finestra appannata, cucitura 3,7 (come i bagagli e la mano di telefono-oggi-v4)
+  'lavoro-anni80-v2',   // L197-22: l'acciaieria, cucitura 8,2 (la fine non torna all'immagine; luce ferma — come il banchetto)
+  'elezioni-base-v2', 'crisi-base-latina-v2'];   // L197-23: il seggio (5,5) e la fila alla saracinesca (5,2): le file non tornano
                             // (Il telefono anni '70 di L197-11 è uscito da qui: rifatto a camera ferma, cucitura 1,4, L197-12.)
                             // (Il vicolo casa-base-asiaest-v2 di L197-10 è uscito da qui: rifatto a luce ferma, cucitura 2,2, L197-11.)
                             // (Il soggiorno vitaprivata-base-v6 di L192-7 è uscito con la sua clip: L195-0, D223.)
@@ -233,6 +248,27 @@ const PARTENZA_VOCE = {
   ministro:    { voce:'partenza-ministro.voce.mp3',    sottotitoli:{ it:'partenza-ministro.it.vtt',    en:'partenza-ministro.en.vtt' } },
   capo:        { voce:'partenza-capo.voce.mp3',        sottotitoli:{ it:'partenza-capo.it.vtt',        en:'partenza-capo.en.vtt' } },
   diplomatico: { voce:'partenza-diplomatico.voce.mp3', sottotitoli:{ it:'partenza-diplomatico.it.vtt', en:'partenza-diplomatico.en.vtt' } } };
+
+/* ===== L218-7 — LA VOCE DELLE CLIP DELLE PORTE STORICHE (`assets/video/porta-<clip>.voce.mp3` e `.it/.en.vtt`). La gemella di
+   PARTENZA_VOCE per il velo di `apriClipPorta` (ui.js): la chiave è il NOME DELLA CLIP (`porta-paese-<paese>`, `porta-decennio-<anno>`),
+   e una voce suona solo se la sua clip è in VIDEO_PRESENTI. Una clip senza riga qui resta muta come prima (dal L218-8 tutte e
+   undici hanno la voce: 1980, 1990, 2000 col giro suoni 8). Voce «Statista» (Eleven v4, giri suoni 7 e 8, testi in PROPOSTA-AUDIO.md §E1); un
+   sottotitolo solo per voce (una frase), dal parlato −0,15 s alla fine del file (`.claude/porta-voce/vtt.js`, tempi misurati da
+   `misura-cdp.js`). `volume`: l'<audio> suona a volume pieno come la partenza, quindi le voci più forti si abbassano al livello
+   medio delle cinque partenze (RMS del parlato −16,5 dBFS): volume = 10^((−16,5 − RMS)/20), tetto 1. Guardata da
+   `.claude/verifica-asset.js` (sezione L218-7: dichiarato = in cartella, ≤ 300 KB, la clip in lista, volume in (0, 1]). */
+const PORTA_VOCE = {
+  'porta-paese-italia':     { voce:'porta-paese-italia.voce.mp3',     volume:0.98, sottotitoli:{ it:'porta-paese-italia.it.vtt',     en:'porta-paese-italia.en.vtt' } },       // RMS −16,3
+  'porta-paese-francia':    { voce:'porta-paese-francia.voce.mp3',    volume:0.82, sottotitoli:{ it:'porta-paese-francia.it.vtt',    en:'porta-paese-francia.en.vtt' } },      // −14,8
+  'porta-paese-germania':   { voce:'porta-paese-germania.voce.mp3',   volume:0.90, sottotitoli:{ it:'porta-paese-germania.it.vtt',   en:'porta-paese-germania.en.vtt' } },     // −15,6
+  'porta-paese-regnounito': { voce:'porta-paese-regnounito.voce.mp3', volume:0.87, sottotitoli:{ it:'porta-paese-regnounito.it.vtt', en:'porta-paese-regnounito.en.vtt' } },   // −15,3
+  'porta-paese-usa':        { voce:'porta-paese-usa.voce.mp3',        volume:0.90, sottotitoli:{ it:'porta-paese-usa.it.vtt',        en:'porta-paese-usa.en.vtt' } },          // −15,6
+  'porta-decennio-1950':    { voce:'porta-decennio-1950.voce.mp3',    volume:1,    sottotitoli:{ it:'porta-decennio-1950.it.vtt',    en:'porta-decennio-1950.en.vtt' } },      // −17,1
+  'porta-decennio-1960':    { voce:'porta-decennio-1960.voce.mp3',    volume:0.82, sottotitoli:{ it:'porta-decennio-1960.it.vtt',    en:'porta-decennio-1960.en.vtt' } },      // −14,8
+  'porta-decennio-1970':    { voce:'porta-decennio-1970.voce.mp3',    volume:1,    sottotitoli:{ it:'porta-decennio-1970.it.vtt',    en:'porta-decennio-1970.en.vtt' } },      // −17,0
+  'porta-decennio-1980':    { voce:'porta-decennio-1980.voce.mp3',    volume:1,    sottotitoli:{ it:'porta-decennio-1980.it.vtt',    en:'porta-decennio-1980.en.vtt' } },      // −16,6 (L218-8)
+  'porta-decennio-1990':    { voce:'porta-decennio-1990.voce.mp3',    volume:0.83, sottotitoli:{ it:'porta-decennio-1990.it.vtt',    en:'porta-decennio-1990.en.vtt' } },      // −14,9 (L218-8)
+  'porta-decennio-2000':    { voce:'porta-decennio-2000.voce.mp3',    volume:0.86, sottotitoli:{ it:'porta-decennio-2000.it.vtt',    en:'porta-decennio-2000.en.vtt' } } };    // −15,2 (L218-8)
 
 /* ===== L127-3 — LE SCENE DEL PAESE (`assets/scenes/<scena>-<paese>.webp`, <paese> = un id di PAESI). Decisione di Giacomo
    del 27/9: le bandiere nazionali sono ammesse SOLO in un'immagine legata a un paese; una scena che il gioco mostra ovunque

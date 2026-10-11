@@ -879,7 +879,9 @@ function avviaRuolo(){
   else if(CREA && CREA.livello===5) startDiplomatico();  // C2: percorso diplomatico (Ambasciatore → … → Segretario)
   else if(chosenMode==='opposizione') startOpposizione();
   else goAppoint();
-  apriPartenza(partenza); }
+  if(typeof guidaInizia==='function') guidaInizia();   // L218-6: la prima partita nuova di questo dispositivo accende la guida
+  apriPartenza(partenza);
+  if(!PARTENZA_APERTA && typeof guida==='function') guida(1); }   // L218-6: senza clip di partenza il benvenuto subito (con la clip, a velo chiuso)
 /* ================================================================================================================
    L127-2 · LA CLIP DEL PUNTO DI PARTENZA. Decisione di Giacomo (28/9): a OGNI nuova partita (non una volta per dispositivo come
    l'intro), si salta, non parte alla ripresa di un salvataggio.
@@ -974,6 +976,7 @@ function chiudiPartenza(){
   if(!PARTENZA_APERTA) return;
   PARTENZA_APERTA=false;
   document.removeEventListener('keydown', partenzaTasto, true);
+  if(typeof guida==='function') guida(1);   // L218-6: il benvenuto della guida, a velo chiuso (la voce di partenza è finita o è stata saltata)
   const el=document.getElementById('partenza');
   /* L181-4: clip e voce non si troncano più (sorgente via e poster visibile per 350 ms): la voce scende in dissolvenza col velo,
      e il ritratto vivo (L178-3) si ferma alla fine, nello stesso task in cui il velo esce */
@@ -984,7 +987,7 @@ function chiudiPartenza(){
 /* ================================================================================================================
    L153-5 · LE CLIP DELLE PARTITE STORICHE: IL PAESE, POI IL DECENNIO (richiesta di Giacomo del 28/9). Scelta una porta dalla
    linea del tempo (`storiciPorta`), sopra la creazione già pronta un velo a tutto schermo suona in sequenza fino a due clip
-   MUTE, senza voce né sottotitoli: `porta-paese-<paese>` e `porta-decennio-<anno>`.
+   MUTE (`porta-paese-<paese>` e `porta-decennio-<anno>`); la voce, dove c'è, è un file a parte (⚑ L218-7, sotto).
    · NESSUNA LISTA NUOVA: la sequenza si DERIVA dalla porta, e ogni nome vale solo se è in VIDEO_PRESENTI (scenes.js, sotto la
      guardia degli asset). Chi non ha nessuna clip non vede niente e non chiede niente alla rete; chi ha solo il paese vede il paese.
    · QUANDO NO: movimento «ridotto»/«spento», `reteLeggera()`, o le clip già viste in questa sessione. ⚑ L154-1: il segno è per
@@ -999,9 +1002,19 @@ function chiudiPartenza(){
      sinistra dice paese e anno. ⚑ L172-5: le clip restano senza traccia audio, ma da qui all'avvio della partita suona il TEMA DEL
      DECENNIO della porta (musicaPorta, audio.js) — anche senza clip (porta già vista, movimento ridotto, rete leggera): la musica è
      dell'audio, non del movimento. Il suono «soglia» fra le due clip non c'è: va ascoltato sopra il tema prima di metterlo.
+   · ⚑ L218-7 (11/10) · LA VOCE. Le clip restano mute, ma una clip con la riga in `PORTA_VOCE` (scenes.js; la chiave è il nome
+     della clip) ha la sua voce in un <audio> nato qui, come la partenza (L146-1): parte al primo `playing` della SUA clip, segue
+     `audioVivo()` (spento o silenziato = muta, il sottotitolo resta a tempo), suona al `volume` dichiarato, e mentre parla il tema
+     scende a ×0,3 (`musicaSottovoce`). La clip passa alla successiva — o chiude il velo — solo quando sono finite clip E voce:
+     quella che finisce prima resta sull'ultimo fotogramma. Il sottotitolo (`#clip-porta-sott`, nella lingua del gioco) segue la
+     voce. Una clip senza riga va come prima (dal L218-8 le hanno tutte e undici); una voce che non arriva (`error`) = la clip muta.
    ================================================================================================================ */
 let PORTA_CLIP_APERTA=false, PORTA_CLIP_FERME=[];
 const PORTA_CLIP_VISTE={};
+function portaVoce(nome){        // L218-7: la voce di una clip di porta (PORTA_VOCE, scenes.js), o null
+  const PV=(typeof PORTA_VOCE!=='undefined' && PORTA_VOCE) ? PORTA_VOCE[nome] : null;
+  return (PV && PV.voce) ? PV : null;
+}
 function clipDellaPorta(id){
   const sc=(typeof SCENARI!=='undefined' && id && id!=='presente') ? SCENARI[id] : null;
   if(!sc || typeof VIDEO_PRESENTI==='undefined') return [];
@@ -1017,17 +1030,42 @@ function apriClipPorta(id){
   const sc=SCENARI[id], paese=(typeof PAESI!=='undefined' && PAESI[sc.paese]) ? T(PAESI[sc.paese].nome) : '';
   const el=document.createElement('div');
   el.id='clip-porta'; el.setAttribute('role','dialog'); el.setAttribute('aria-label', paese+', '+sc.anno);
+  const lin=(typeof curLang==='function' && curLang()==='en')?'en':'it', PVS=seq.map(portaVoce);
   el.innerHTML=seq.map(function(n,i){ return '<video class="cp-v'+(i===0?' on':'')+'" src="'+VIDEO_DIR+n+'.mp4" poster="assets/scenes/'+n+'.webp" muted playsinline preload="auto" disablepictureinpicture></video>'; }).join('')
+    +PVS.map(function(PV,i){ if(!PV) return ''; const st=(PV.sottotitoli||{})[lin];   // L218-7: la voce della clip, in un <audio> nato qui
+      return '<audio class="cp-a" data-i="'+i+'" src="'+VIDEO_DIR+PV.voce+'" preload="auto">'
+        +(st ? '<track kind="subtitles" srclang="'+lin+'" label="'+(lin==='en'?'English':'Italiano')+'" src="'+VIDEO_DIR+st+'">' : '')+'</audio>'; }).join('')
+    +(PVS.some(Boolean) ? '<div id="clip-porta-sott" aria-live="polite"><span></span></div>' : '')
     +'<div id="clip-porta-did">'+paese+', '+sc.anno+'</div>'
     +'<button id="clip-porta-salta" type="button">'+T('Salta')+'</button>';
   el.addEventListener('click', chiudiClipPorta);           // un tocco ovunque salta (anche su «Salta»)
   document.body.appendChild(el);
-  const vv=[].slice.call(el.querySelectorAll('video'));
-  vv.forEach(function(v, i){ v.muted=true;
+  const vv=[].slice.call(el.querySelectorAll('video')), sott=el.querySelector('#clip-porta-sott span');
+  const aa=vv.map(function(v,i){ return el.querySelector('audio.cp-a[data-i="'+i+'"]'); });
+  /* L218-7: la clip i passa alla successiva (o chiude il velo) quando sono finite clip E voce; quella che finisce prima resta
+     sull'ultimo fotogramma o in silenzio, come la partenza (L146-1) */
+  const fine=vv.map(function(v,i){ return {clip:false, voce:!aa[i]}; });
+  const avanti=function(i, chi){ if(!PORTA_CLIP_APERTA || fine[i][chi]) return; fine[i][chi]=true;
+    if(chi==='voce'){ try{ sott.textContent=''; sott.parentNode.classList.remove('on'); }catch(e){} try{ if(typeof musicaSottovoce==='function') musicaSottovoce(false); }catch(e){} }
+    if(!(fine[i].clip && fine[i].voce)) return;
+    const n=vv[i+1]; if(!n){ chiudiClipPorta(); return; }
+    n.classList.add('on'); try{ const p=n.play(); if(p && p.catch) p.catch(function(){}); }catch(e){} };
+  vv.forEach(function(v, i){ v.muted=true; const a=aa[i];
     v.addEventListener('error', chiudiClipPorta, {once:true});   // un file che non arriva non lascia lo schermo nero
-    v.addEventListener('ended', function(){ const n=vv[i+1];
-      if(!n || !PORTA_CLIP_APERTA){ chiudiClipPorta(); return; }
-      n.classList.add('on'); try{ const p=n.play(); if(p && p.catch) p.catch(function(){}); }catch(e){} }, {once:true}); });
+    v.addEventListener('ended', function(){ avanti(i, 'clip'); }, {once:true});
+    if(!a) return;
+    try{ a.muted=!(typeof audioVivo==='function' && audioVivo()); }catch(e){ a.muted=true; }   // spento o silenziato: muta, i sottotitoli restano a tempo
+    try{ a.volume=Math.min(1, Math.max(0, +PVS[i].volume || 1)); }catch(e){}
+    try{ const tt=a.textTracks && a.textTracks[0];
+      if(tt){ tt.mode='hidden';
+        tt.addEventListener('cuechange', function(){ try{ if(fine[i].voce) return; const c=tt.activeCues, r=[]; for(let k=0;c && k<c.length;k++) r.push(c[k].text);
+          sott.textContent=r.join('\n'); sott.parentNode.classList.toggle('on', r.length>0); }catch(e){} }); } }catch(e){}
+    a.addEventListener('playing', function(){ if(!a.muted && PORTA_CLIP_APERTA){ try{ if(typeof musicaSottovoce==='function') musicaSottovoce(true); }catch(e){} } }, {once:true});
+    a.addEventListener('ended', function(){ avanti(i, 'voce'); }, {once:true});
+    a.addEventListener('error', function(){ avanti(i, 'voce'); }, {once:true});   // una voce che non arriva = la clip come prima
+    /* parte col primo `playing` della SUA clip; se il browser nega il sonoro, muta */
+    v.addEventListener('playing', function(){ if(!PORTA_CLIP_APERTA) return;
+      try{ const p=a.play(); if(p && p.catch) p.catch(function(){ try{ if(!PORTA_CLIP_APERTA) return; a.muted=true; const q=a.play(); if(q && q.catch) q.catch(function(){}); }catch(e){} }); }catch(e){} }, {once:true}); });
   try{ const p=vv[0].play(); if(p && p.catch) p.catch(function(){}); }catch(e){}
   document.addEventListener('keydown', clipPortaTasto, true);
   void el.offsetWidth; el.classList.add('on');   // col reflow forzato, non con rAF (come apriPartenza)
@@ -1039,7 +1077,8 @@ function chiudiClipPorta(){
   PORTA_CLIP_APERTA=false;
   document.removeEventListener('keydown', clipPortaTasto, true);
   const el=document.getElementById('clip-porta');
-  if(el){ el.id='clip-porta-uscente'; veloEsce(el, VELO_USCITA_MS); }   // L181-4: niente ritorno al poster durante la dissolvenza
+  if(el){ el.id='clip-porta-uscente'; veloEsce(el, VELO_USCITA_MS); }   // L181-4: niente ritorno al poster durante la dissolvenza (la voce scende con lui)
+  try{ if(typeof musicaSottovoce==='function') musicaSottovoce(false); }catch(e){}   // L218-7: il tema del decennio torna pieno
   PORTA_CLIP_FERME.forEach(function(v){ try{ if(v.isConnected){ const p=v.play(); if(p && p.catch) p.catch(function(){}); } }catch(e){} }); PORTA_CLIP_FERME=[];
 }
 function confermaCreazione(){ proseguiAvvio(); }                  // CREA resta: initStatoBase la consuma

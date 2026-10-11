@@ -3259,6 +3259,142 @@ const PILASTRI_LINEA = [
     text:'A metà dicembre una tempesta di neve paralizza il Nord-Est per giorni. La mattina del 16, nella pioggia e nella nebbia, due aerei di linea in attesa di atterrare si scontrano sopra New York: uno cade su Staten Island, l\'altro in una strada di Brooklyn. Muoiono centotrentaquattro persone, sei a terra. Con la tempesta, in quella settimana i morti sono più di quattrocento.',
     logx:'La tempesta di dicembre e i due aerei sopra New York: più di quattrocento morti.',
     ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  // ── us1960 · L217-2 (D154, D268, D275): ventisette pilastri — venticinque sciagure G8 e due cronache del 1968. Cifre: L180-2.
+  { id:'pus60_hinsdale', linea:LINEA_US, anno:1961, mese:9, era:'us1960', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Il campo dell\'Illinois',
+    text:'Il 1° settembre un aereo di linea, decollato da pochi minuti da Chicago, perde il controllo e precipita in un campo dell\'Illinois. Muoiono tutte le settantotto persone a bordo.',
+    logx:'Un aereo di linea precipita appena decollato da Chicago: settantotto morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus60_reclute', linea:LINEA_US, anno:1961, mese:11, era:'us1960', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Le reclute',
+    text:'La sera dell\'8 novembre un aereo noleggiato dall\'esercito per portare le reclute al campo di addestramento si schianta in un bosco vicino a Richmond, in Virginia, in avvicinamento all\'aeroporto. Muoiono settantasette persone, quasi tutte ragazzi appena arruolati.',
+    logx:'Un aereo con le reclute dell\'esercito cade in Virginia: settantasette morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus60_jamaica', linea:LINEA_US, anno:1962, mese:3, era:'us1960', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'La baia di Jamaica',
+    text:'La mattina del 1° marzo un aereo di linea diretto a Los Angeles, appena decollato da New York, piega su un fianco e cade nelle acque basse della baia di Jamaica, davanti alla pista. Muoiono tutte le novantacinque persone a bordo.',
+    logx:'Un aereo di linea cade nella baia di Jamaica, a New York: novantacinque morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus60_sommergibile', linea:LINEA_US, anno:1963, mese:4, era:'us1960', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Il sommergibile',
+    text:'Il 10 aprile un sommergibile nucleare della Marina, in prova di immersione profonda nell\'Atlantico al largo del New England, smette di rispondere alla nave d\'appoggio. Non tornerà in superficie. Muoiono centoventinove uomini, marinai e tecnici civili.',
+    logx:'Un sommergibile nucleare si perde in prova nell\'Atlantico: centoventinove morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus60_indianapolis', linea:LINEA_US, anno:1963, mese:10, era:'us1960', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Lo spettacolo sul ghiaccio',
+    text:'La sera del 31 ottobre, durante uno spettacolo di pattinaggio nel palazzetto della fiera di Indianapolis, il gas di una bombola esplode sotto le tribune piene di famiglie. Muoiono più di settanta persone.',
+    logx:'Un\'esplosione durante uno spettacolo sul ghiaccio a Indianapolis: più di settanta morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus60_casariposo', linea:LINEA_US, anno:1963, mese:11, era:'us1960', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'La casa di riposo dell\'Ohio',
+    text:'Il 23 novembre un incendio scoppia in una casa di riposo di campagna nell\'Ohio settentrionale. Molti ospiti non possono camminare da soli e il fuoco corre più veloce dei soccorsi. Muoiono sessantatré persone.',
+    logx:'Un incendio in una casa di riposo dell\'Ohio: sessantatré morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus60_fulmine', linea:LINEA_US, anno:1963, mese:12, era:'us1960', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Il fulmine',
+    text:'La sera dell\'8 dicembre un aereo di linea in attesa di atterrare a Filadelfia gira nel temporale sopra il Maryland. Un fulmine lo colpisce, un serbatoio esplode, l\'aereo cade in fiamme in un campo vicino a Elkton. Muoiono tutte le ottantuno persone a bordo.',
+    logx:'Un aereo di linea colpito da un fulmine cade nel Maryland: ottantuno morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus60_pontchartrain', linea:LINEA_US, anno:1964, mese:2, era:'us1960', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Il lago Pontchartrain',
+    text:'Il 25 febbraio un aereo di linea decollato da New Orleans precipita nel lago Pontchartrain pochi minuti dopo il decollo. Muoiono tutte le cinquantotto persone a bordo.',
+    logx:'Un aereo di linea cade nel lago Pontchartrain: cinquantotto morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus60_tahoe', linea:LINEA_US, anno:1964, mese:3, era:'us1960', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'La montagna del lago Tahoe',
+    text:'Il 1° marzo un aereo di linea in avvicinamento al lago Tahoe, nella neve, rinuncia ad atterrare e si schianta contro una montagna della Sierra Nevada. Muoiono tutte le ottantacinque persone a bordo.',
+    logx:'Un aereo di linea contro una montagna vicino al lago Tahoe: ottantacinque morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus60_alaska', linea:LINEA_US, anno:1964, mese:4, era:'us1960', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Il Venerdì santo dell\'Alaska',
+    text:'Il paese conta ancora i danni della sera del Venerdì santo, il 27 marzo: il terremoto più forte mai registrato in America del Nord scuote l\'Alaska per quattro minuti, Anchorage si spacca, le onde cancellano i porti e arrivano fino all\'Oregon e alla California. Muoiono centotrentanove persone.',
+    logx:'Il terremoto e le onde dell\'Alaska: centotrentanove morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus60_longisland', linea:LINEA_US, anno:1965, mese:2, era:'us1960', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Al largo di Long Island',
+    text:'La sera dell\'8 febbraio un aereo di linea decollato da New York cade nell\'oceano al largo di Long Island pochi minuti dopo il decollo, nel buio. Muoiono tutte le ottantaquattro persone a bordo.',
+    logx:'Un aereo di linea cade in mare al largo di Long Island: ottantaquattro morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus60_palme', linea:LINEA_US, anno:1965, mese:4, era:'us1960', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'La domenica delle Palme',
+    text:'L\'11 aprile, domenica delle Palme, decine di tornado attraversano in poche ore l\'Indiana, l\'Ohio, il Michigan e l\'Illinois, mentre le famiglie tornano dalla messa o siedono a cena. Muoiono duecentosessantasei persone.',
+    logx:'I tornado della domenica delle Palme nel Midwest: duecentosessantasei morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus60_silo', linea:LINEA_US, anno:1965, mese:8, era:'us1960', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Il silo',
+    text:'Il 9 agosto, nell\'Arkansas, un incendio scoppia nel silo sotterraneo di un missile mentre squadre di operai civili lavorano all\'ammodernamento. Il fumo riempie i cunicoli. Muoiono cinquantatré operai; il missile non è toccato.',
+    logx:'Un incendio nel silo di un missile in Arkansas: cinquantatré operai morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus60_betsy', linea:LINEA_US, anno:1965, mese:9, era:'us1960', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'L\'uragano su New Orleans',
+    text:'Nella notte fra il 9 e il 10 settembre un uragano si abbatte sulla Louisiana; l\'acqua scavalca gli argini dei canali e allaga i quartieri bassi di New Orleans fino ai tetti. Negli Stati Uniti muoiono più di settanta persone.',
+    logx:'L\'uragano su New Orleans: più di settanta morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus60_cincinnati', linea:LINEA_US, anno:1965, mese:11, era:'us1960', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'La collina sul fiume Ohio',
+    text:'La sera dell\'8 novembre un aereo di linea in atterraggio a Cincinnati, nella pioggia, scende troppo presto e urta una collina sulla riva del fiume Ohio. Su sessantadue persone a bordo ne sopravvivono quattro.',
+    logx:'Un aereo di linea in atterraggio a Cincinnati urta una collina: cinquantotto morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus60_neve66', linea:LINEA_US, anno:1966, mese:1, era:'us1960', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'La neve di fine gennaio',
+    text:'Dal 27 gennaio, per cinque giorni, una tempesta di neve e di vento gelido copre l\'Est, dalla Virginia allo stato di New York, dove la neve sale oltre i tetti delle automobili. Muoiono circa duecento persone, nel freddo, nelle case senza corrente, sulle strade.',
+    logx:'La tempesta di neve di fine gennaio sull\'Est: circa duecento morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus60_jackson', linea:LINEA_US, anno:1966, mese:3, era:'us1960', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Jackson',
+    text:'Il pomeriggio del 3 marzo un tornado enorme attraversa Jackson, la capitale del Mississippi, e prosegue per più di trecento chilometri verso l\'Alabama. Muoiono almeno cinquantasette persone.',
+    logx:'Il tornado di Jackson, nel Mississippi: almeno cinquantasette morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus60_ardmore', linea:LINEA_US, anno:1966, mese:4, era:'us1960', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Ardmore',
+    text:'La sera del 22 aprile un aereo charter in avvicinamento all\'aeroporto di Ardmore, nell\'Oklahoma, si schianta su una collina. Muoiono ottantatré persone; quindici sopravvivono.',
+    logx:'Un aereo charter cade vicino ad Ardmore, nell\'Oklahoma: ottantatré morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus60_chicago67', linea:LINEA_US, anno:1967, mese:1, era:'us1960', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'La neve su Chicago',
+    text:'Il 26 gennaio comincia a nevicare su Chicago e non smette per ventinove ore: è la neve più alta mai misurata in città. Autobus e automobili restano sepolti nelle strade, i quartieri isolati per giorni. Nella regione muoiono decine di persone.',
+    logx:'La grande nevicata di Chicago: decine di morti nella regione.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus60_oaklawn', linea:LINEA_US, anno:1967, mese:4, era:'us1960', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'I tornado dell\'Illinois',
+    text:'Il pomeriggio del 21 aprile una serie di tornado colpisce l\'Illinois settentrionale: uno attraversa Oak Lawn, a sud-ovest di Chicago, nell\'ora di punta; un altro investe una scuola di Belvidere mentre gli scolari salgono sugli autobus. Muoiono cinquantotto persone.',
+    logx:'I tornado dell\'Illinois, da Belvidere a Oak Lawn: cinquantotto morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus60_hendersonville', linea:LINEA_US, anno:1967, mese:7, era:'us1960', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Sopra le montagne della Carolina',
+    text:'Il 19 luglio, sopra Hendersonville, nella Carolina del Nord, un aereo di linea appena decollato si scontra in volo con un piccolo aereo privato. Muoiono tutte le ottantadue persone dei due aerei.',
+    logx:'Uno scontro in volo nella Carolina del Nord: ottantadue morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus60_kentucky', linea:LINEA_US, anno:1967, mese:11, era:'us1960', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Di nuovo Cincinnati',
+    text:'La sera del 20 novembre, per la seconda volta in due anni, un aereo di linea in atterraggio a Cincinnati scende troppo basso e cade sulle colline del Kentucky, a pochi chilometri dalla pista. Muoiono settanta persone.',
+    logx:'Un altro aereo di linea cade in atterraggio a Cincinnati: settanta morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus60_aprile68', linea:LINEA_US, anno:1968, mese:4, era:'us1960', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Memphis',
+    text:'La sera del 4 aprile, a Memphis, il pastore che da più di dieci anni guida il movimento per i diritti civili viene ucciso da un colpo di fucile sul balcone del suo motel. Nelle notti seguenti bruciano più di cento città; a Washington i soldati presidiano il Campidoglio.',
+    logx:'Memphis: ucciso il pastore del movimento per i diritti civili. Le città bruciano.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus60_texas', linea:LINEA_US, conCampagna:true, anno:1968, mese:5, era:'us1960', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese', sostituisce:'pm_1968',   /* D275: il '68 del mondo negli Stati Uniti lo racconta il contenuto della porta */
+    t:'Il temporale sul Texas',
+    text:'La sera del 3 maggio un aereo di linea diretto a Dallas entra in un temporale invece di aggirarlo e si spezza in volo sopra la campagna del Texas. Muoiono tutte le ottantacinque persone a bordo.',
+    logx:'Un aereo di linea si spezza in un temporale sul Texas: ottantacinque morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus60_giugno68', linea:LINEA_US, conCampagna:true, anno:1968, mese:6, era:'us1960', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Los Angeles',
+    text:'Nella notte del 5 giugno, a Los Angeles, il senatore che ha appena vinto le primarie della California attraversa le cucine dell\'albergo dove ha parlato ai suoi. Lo colpiscono alcuni colpi di pistola. Muore il giorno dopo.',
+    logx:'Los Angeles: colpito il senatore che aveva vinto le primarie della California.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus60_tornado68', linea:LINEA_US, conCampagna:true, anno:1968, mese:7, era:'us1960', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'I tornado di maggio',
+    text:'Il paese ricorda ancora il 15 maggio: i tornado colpiscono le cittadine dell\'Iowa settentrionale, dove interi isolati spariscono, e poi Jonesboro, nell\'Arkansas. Muoiono settantadue persone.',
+    logx:'I tornado di maggio in Arkansas e Iowa: settantadue morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus60_farmington', linea:LINEA_US, anno:1968, mese:11, era:'us1960', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'La miniera di Farmington',
+    text:'All\'alba del 20 novembre un\'esplosione scuote una miniera di carbone vicino a Farmington, nella Virginia Occidentale, durante il turno di notte. Il fuoco brucia per giorni; la miniera viene sigillata con i minatori dentro. Muoiono settantotto uomini.',
+    logx:'L\'esplosione nella miniera di Farmington: settantotto minatori morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
 ];
 
 /* ============================================================================================================
@@ -4093,6 +4229,28 @@ const BEAT_LEGGERI = [
   {id:'lg_p_linea', era:'contemporanea', registro:'leggero', kick:'Il paese', t:'La linea nuova', text:'Apre la linea nuova della metropolitana: il primo giorno la gente sale solo per provarla, va fino al capolinea e torna indietro, fotografando le fermate.', ch:[
     {l:'Fai il primo viaggio anche tu', e:'Fino al capolinea, per curiosità', f:function(){}},
     {l:'La proverai quando serve', e:'Cioè fra qualche anno', f:function(){}} ]},
+  /* L223-1 · leggeri del presente (11/10): venti beat condivisi lg_p_ per il respiro dei ministri del presente (VARIETA-L223-LEGGERI-PRESENTE.md), scritti da Code.
+     Senza paesi e senza cond: reggono nei sedici paesi del presente e, dal 2012, nelle linee storiche (la saldatura di L44-1); chi racconta una cosa nata dopo porta dal:. */
+  {id:'lg_p_foto', dal:2014, era:'contemporanea', registro:'leggero', kick:'Il paese', t:'La foto di tutti', text:'In un quartiere c\'è una scalinata dipinta a colori che è finita sui telefoni di mezzo mondo. Il sabato c\'è la fila per scattare la stessa foto, nella stessa posa, dallo stesso gradino; gli abitanti scendono a comprare il pane passando fra i treppiedi.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lg_p_menu', dal:2020, era:'contemporanea', registro:'leggero', kick:'Il paese', t:'Il menù da inquadrare', text:'Al ristorante il menù di carta non c\'è più: sul tavolo c\'è un quadratino adesivo da inquadrare col telefono. I ragazzi ordinano in un minuto; al tavolo accanto un signore con gli occhiali sulla fronte allarga le braccia, finché il cameriere non tira fuori dal cassetto l\'ultimo menù rimasto.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lg_p_codice', dal:2019, era:'contemporanea', registro:'leggero', kick:'Il paese', t:'Il codice di sei cifre', text:'Per pagare, per entrare nel conto della banca, per prenotare una visita serve un codice di sei cifre che arriva sul telefono e scade dopo un minuto. Se il telefono è in un\'altra stanza, si ricomincia. In casa si sentono gridare numeri da una stanza all\'altra, e chi ha cambiato telefono passa la mattina allo sportello.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lg_p_genitori', dal:2015, era:'contemporanea', registro:'leggero', kick:'Il paese', t:'La chat dei genitori', text:'La chat dei genitori della classe ha centoquaranta messaggi non letti: chi ha preso per sbaglio la felpa di un altro, la colletta per il pullman della gita, una discussione sui compiti delle vacanze che va avanti da tre giorni. Qualcuno scrive «grazie», e ne arrivano altri trenta.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lg_p_parola', dal:2022, era:'contemporanea', registro:'leggero', kick:'Il paese', t:'La parola del giorno', text:'Ogni mattina c\'è una parola nuova da indovinare in sei tentativi, ed è la stessa per tutti. Sull\'autobus, a colazione, nelle pause in ufficio la gente si manda il risultato: una griglia di quadratini colorati, senza la parola, per non rovinare la sorpresa a chi non ha ancora giocato.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lg_p_immersiva', dal:2018, era:'contemporanea', registro:'leggero', kick:'Il paese', t:'I quadri sulle pareti', text:'In un vecchio capannone ha aperto una mostra senza un quadro appeso: le opere di un pittore famoso sono proiettate in grande su pareti e pavimento, si muovono, e c\'è la musica. La gente si siede per terra per un\'ora. I critici storcono il naso; i biglietti sono finiti fino al mese prossimo.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lg_p_stanza', dal:2014, era:'contemporanea', registro:'leggero', kick:'Il paese', t:'Un\'ora per uscire', text:'Ci si fa chiudere in una stanza arredata come lo studio di un investigatore o la cabina di una nave, e si ha un\'ora per uscire risolvendo indovinelli, lucchetti e messaggi nascosti. Ci vanno le compagnie di amici il sabato sera e gli uffici per fare squadra: si scopre chi comanda e chi trova le chiavi.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lg_p_lemure', era:'contemporanea', registro:'leggero', kick:'Il paese', t:'Il lemure in fuga', text:'Un lemure è scappato dallo zoo e da due giorni salta fra i tetti e gli alberi di un quartiere. La gente lo fotografa dai balconi, i bambini gli hanno dato un nome, e il telegiornale apre con la mappa degli avvistamenti. Lo riprendono la terza mattina, in un cortile, mentre mangia una banana lasciata da qualcuno.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lg_p_tasti', dal:2023, era:'contemporanea', registro:'leggero', kick:'Il paese', t:'Il telefono coi tasti', text:'Fra i ragazzi è tornato di moda il telefono di una volta, coi tasti e senza internet: serve solo a chiamare e a mandare messaggi, e la batteria dura una settimana. Lo usano per staccare la sera e nei fine settimana. I genitori, che lo avevano chiuso in un cassetto anni fa, non sanno se ridere o preoccuparsi.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lg_p_scorciatoia', dal:2015, era:'contemporanea', registro:'leggero', kick:'Il paese', t:'La scorciatoia di tutti', text:'L\'applicazione delle mappe ha scoperto una via di villette che evita il semaforo dello stradone, e la suggerisce a tutti: dalle sette alle nove, sotto le finestre, passa una fila di automobili che prima non c\'era. Gli abitanti appendono cartelli scritti a mano; il comune promette un dosso.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lg_p_dinosauro', era:'contemporanea', registro:'leggero', kick:'Il paese', t:'Lo scheletro nell\'atrio', text:'Il museo di storia naturale ha montato nell\'atrio lo scheletro di un dinosauro lungo come un autobus, arrivato in casse da un altro continente. Le scuole prenotano le visite fino alla fine dell\'anno scolastico, la domenica c\'è la fila sulla scalinata, e nel negozio del museo i dinosauri di pezza finiscono in tre giorni.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lg_p_casetta', era:'contemporanea', registro:'leggero', kick:'Il paese', t:'La casetta dei libri', text:'All\'angolo di una strada qualcuno ha piantato su un palo una cassetta di legno con lo sportello di vetro, piena di libri: chi passa ne prende uno e ne lascia un altro. Ci sono gialli senza copertina, manuali di cucina, un dizionario. In un mese ne spuntano altre dieci nel quartiere, una davanti alla fermata dell\'autobus.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lg_p_scacchi', dal:2021, era:'contemporanea', registro:'leggero', kick:'Il paese', t:'Le scacchiere del parco', text:'Gli scacchi e gli altri giochi da scacchiera sono tornati di moda: le partite dei campioni si seguono in diretta sul telefono, e nei parchi i tavolini con la scacchiera dipinta sono sempre occupati. Si sfidano pensionati e ragazzi, gli altri guardano in silenzio da dietro le spalle, e qualcuno ha portato l\'orologio coi due pulsanti.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lg_p_vocale', dal:2021, era:'contemporanea', registro:'leggero', kick:'Il paese', t:'Il vocale di quattro minuti', text:'Sempre più gente non scrive: ci si mandano messaggi vocali. C\'è chi li ascolta a velocità doppia, chi solo a casa, chi risponde per iscritto per dispetto. Il record della settimana è di un cugino: un vocale di quattro minuti per dire che arriva in ritardo, con la strada, il traffico e il tempo che fa.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lg_p_yoga', era:'contemporanea', registro:'leggero', kick:'Il paese', t:'Lo yoga sul prato', text:'Il sabato mattina, sul prato più grande del parco, decine di persone stendono il tappetino e seguono un istruttore con una cassa portatile: studenti, pensionati, impiegati in tuta nuova. I passanti si fermano a guardare la posizione più difficile; un cane si sdraia in mezzo, e nessuno ha il coraggio di spostarlo.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lg_p_droni', dal:2019, era:'contemporanea', registro:'leggero', kick:'Il paese', t:'Le luci senza botti', text:'Quest\'anno, alla festa della città, al posto dei fuochi d\'artificio si alzano cinquecento droni luminosi: disegnano nel cielo una nave, un cuore, lo stemma del comune, e poi si spengono tutti insieme. I cani del quartiere ringraziano; i nonni dicono che senza il botto finale non è una festa.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lg_p_sacchi', era:'contemporanea', registro:'leggero', kick:'Il paese', t:'La domenica dei sacchi', text:'Un gruppo di vicini si è dato appuntamento sulla riva del fiume con guanti e sacchi: a mezzogiorno sono duecento, e fra le canne vengono fuori bottiglie, pneumatici, un carrello del supermercato e una bicicletta di trent\'anni fa. La foto dei sacchi in fila fa il giro della città; la domenica dopo sono il doppio.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lg_p_gatto', era:'contemporanea', registro:'leggero', kick:'Il paese', t:'Il gatto sui volantini', text:'Su tutti i pali del quartiere c\'è lo stesso volantino: un gatto rosso, un nome, un numero di telefono, «ricompensa». Il messaggio gira fra i vicini, qualcuno giura di averlo visto al mercato, altri sul tetto della scuola. Dopo nove giorni il gatto si ripresenta da solo davanti alla porta di casa, grasso e tranquillo.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lg_p_tornio', dal:2018, era:'contemporanea', registro:'leggero', kick:'Il paese', t:'Il tornio del giovedì', text:'I corsi di ceramica hanno la lista d\'attesa: la sera, dopo l\'ufficio, ragazzi e quarantenni si sporcano le mani d\'argilla davanti al tornio, e il primo vaso viene sempre storto. Ormai in ogni casa c\'è una tazza sbilenca fatta da qualcuno, e guai a dire che perde.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lg_p_murales', era:'contemporanea', registro:'leggero', kick:'Il paese', t:'I muri del quartiere', text:'Per una settimana un festival di artisti di strada dipinge le facciate di un quartiere popolare: sul fianco di un palazzo di otto piani compare una bambina che soffia su un fiore. Gli abitanti portano da bere ai pittori sui ponteggi. Il fine settimana dopo arrivano i turisti, con la cartina dei muri in mano.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
   {id:'it_p_b_caffe', era:'contemporanea', paesi:['italia'], registro:'leggero', kick:'Il paese', t:'Il caffè al banco', text:'Il caffè al banco costa dieci centesimi in più e sembra una questione di Stato: i baristi si giustificano, i clienti contano gli spiccioli, e un giornale fa la mappa delle città più care.', ch:[
     {l:'Paghi senza commentare', e:'Dieci centesimi, in fondo', f:function(){}},
     {l:'Dici che il caffè è un bene comune', e:'Applausi al bar, meno sui giornali', f:function(){}} ]},
@@ -5363,6 +5521,29 @@ const BEAT_LEGGERI = [
   {id:'lgde00_sale', era:'de2000', registro:'leggero', cond:()=>S.year===2010&&S.month>=1&&S.month<=2, kick:'Il paese', t:'Il sale finito', text:'L\'inverno non finisce più: neve da dicembre, ghiaccio sui marciapiedi, e i comuni hanno finito il sale per le strade. I camion aspettano in fila davanti alle saline, i negozi di bricolage razionano i sacchi. Nei condomini si torna alla pala, alla sabbia e ai turni fra vicini.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
   {id:'lgde00_polpo', era:'de2000', registro:'leggero', cond:()=>S.year===2010&&S.month>=6&&S.month<=7, kick:'Il paese', t:'L\'oracolo dell\'acquario', text:'In un acquario della Ruhr un polpo sceglie fra due vaschette con le bandiere delle squadre, e indovina tutte le partite dei mondiali. Le televisioni aspettano la sua scelta prima di ogni incontro; quando prevede la sconfitta della nazionale, c\'è chi lo vorrebbe in padella.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
   {id:'lgde00_strade', era:'de2000', registro:'leggero', cond:()=>S.year===2010&&S.month>=8, kick:'Il paese', t:'Le strade fotografate', text:'Un servizio di mappe su internet ha fotografato le strade delle grandi città, casa per casa, e sta per metterle in rete. Quasi duecentocinquantamila famiglie chiedono che la loro facciata venga sfocata. Quando le immagini escono, in certe vie una casa su tre è una macchia grigia.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  /* L221-1 · leggeri de2000 (11/10): venti beat per il locale delle porte (VARIETA-L221-LEGGERI-DE00.md), scritti da Code.
+     Il decennio vive dal 1999 al 2013 (de1990 le vede dal 1999); le carriere di de2000 vanno dal 2000 al 2009, e ogni cond è viva lì.
+     Nessuna carta di un mese solo; nessuna tutta in un mese di pilastro o in una campagna del 2001, 2005, 2009. */
+  {id:'lgde00_expo', era:'de2000', registro:'leggero', cond:()=>S.year===2000&&S.month>=6&&S.month<=10, kick:'Il paese', t:'L\'esposizione mondiale', text:'Per cinque mesi, alla fiera di Hannover, i paesi del mondo hanno ciascuno il suo padiglione: uno è una foresta su più piani, un altro una catasta di travi che profuma di bosco. Gli organizzatori aspettavano quaranta milioni di visitatori, ne arrivano meno della metà. Chi c\'è stato racconta dei padiglioni; chi non c\'è andato, dei conti.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde00_monopattino', era:'de2000', registro:'leggero', cond:()=>(S.year===2000&&S.month>=4)||S.year===2001, kick:'Il paese', t:'Il monopattino che si piega', text:'Il monopattino è tornato, ma è d\'alluminio, ha le ruote piccole e dure e si piega in due per portarlo sotto il braccio. Lo usano i bambini per andare a scuola e gli impiegati per l\'ultimo tratto dalla stazione all\'ufficio. Sui marciapiedi i pensionati si scansano; l\'anno dopo ce n\'è uno in ogni cantina.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde00_fila', era:'de2000', registro:'leggero', cond:()=>S.year>=2000&&S.year<=2005, kick:'Il paese', t:'La fila per il computer', text:'Il volantino del discount è arrivato il lunedì: giovedì, insieme al detersivo e ai biscotti, c\'è un computer a un prezzo che i negozi specializzati non fanno. Alle sette meno un quarto davanti alla porta c\'è già la fila, coi thermos e le sedie pieghevoli. Alle otto e dieci gli scatoloni sono finiti.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde00_aste', era:'de2000', registro:'leggero', cond:()=>S.year>=2000&&S.year<=2007, kick:'Il paese', t:'L\'asta dell\'ultimo secondo', text:'Sul sito delle aste si vende di tutto: il servizio della nonna, i trenini di quando si era bambini, un\'automobile intera. Chi vuole vincere aspetta davanti allo schermo e offre negli ultimi dieci secondi, quando gli altri non fanno più in tempo. Nelle soffitte del paese non resta niente da buttare: tutto ha un prezzo.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde00_punti', era:'de2000', registro:'leggero', cond:()=>(S.year===2000&&S.month>=3)||(S.year>=2001&&S.year<=2009), kick:'Il paese', t:'La tessera dei punti', text:'Alla cassa del supermercato, della farmacia e del benzinaio la domanda è la stessa: ha la tessera? Una tessera sola raccoglie i punti di negozi diversi, e a fine anno ci si compra un frullatore o un ombrello. Nei portafogli le tessere sono più delle banconote, e qualcuno si chiede chi tenga il conto di tutto quello che compra.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde00_cialde', era:'de2000', registro:'leggero', cond:()=>S.year>=2003&&S.year<=2009, kick:'Il paese', t:'Il caffè in cialda', text:'In cucina la vecchia macchina col filtro di carta va in cantina: quella nuova fa una tazza alla volta, con una cialda rotonda, e la schiuma sopra. Le cialde si comprano a pacchi, e c\'è chi le confronta come si confrontavano i vini. La nonna dice che il caffè era meglio prima, e intanto se ne fa un altro.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde00_suonerie', era:'de2000', registro:'leggero', cond:()=>S.year>=2003&&S.year<=2006, kick:'Il paese', t:'La suoneria nuova', text:'Fra un film e l\'altro la televisione trasmette le pubblicità delle suonerie per il telefonino: animali che cantano, la sigla del cartone animato, l\'ultima canzone dell\'estate. Basta mandare un messaggio. I ragazzi le comprano a decine, e a fine mese i genitori trovano sulla bolletta un abbonamento che nessuno ricorda di aver fatto.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde00_navigatore', era:'de2000', registro:'leggero', cond:()=>S.year>=2005&&S.year<=2011, kick:'Il paese', t:'La voce sul parabrezza', text:'Sul parabrezza, attaccata con la ventosa, c\'è una scatoletta con la cartina che si muove e una voce che dice dove girare. Le cartine stradali restano nel portaoggetti. Ogni tanto la voce manda qualcuno in una strada di campagna chiusa, o dritto in un canale; i giornali raccolgono i casi.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde00_racchette', era:'de2000', registro:'leggero', cond:()=>S.year>=2003&&S.year<=2009, kick:'Il paese', t:'Le racchette senza neve', text:'Nei parchi e lungo i fiumi si cammina con due bastoni, come gli sciatori di fondo, ma senza neve. Lo fanno le signore in gruppo la mattina, i pensionati, chiunque abbia un medico che lo consiglia. I corsi si fanno alla polisportiva, e la domenica, all\'ingresso delle trattorie di campagna, c\'è una fila di bastoni appoggiati al muro.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde00_sushi', era:'de2000', registro:'leggero', cond:()=>S.year>=2001&&S.year<=2009, kick:'Il paese', t:'I piattini che girano', text:'Nel centro delle città aprono locali dove il pesce crudo e il riso passano davanti ai clienti su un nastro che gira, e i piattini hanno colori diversi a seconda del prezzo. Al supermercato arrivano le vaschette pronte con le bacchette. Gli zii a cena chiedono se si può avere il pesce cotto; i nipoti insegnano a tenere le bacchette.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde00_chiamate', era:'de2000', registro:'leggero', cond:()=>S.year>=2000&&S.year<=2009, kick:'Il paese', t:'Il negozio delle telefonate', text:'Nelle vie vicine alla stazione aprono negozi con cinque o sei cabine di legno e un bancone: si telefona in Turchia, in Polonia o in Ghana per pochi centesimi al minuto, e si paga all\'uscita. Sulle vetrine, le bandierine dei paesi e le tariffe scritte a pennarello. La domenica pomeriggio c\'è la fila, e dalle cabine escono dieci lingue.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde00_zucche', era:'de2000', registro:'leggero', cond:()=>S.year>=2000&&S.year<=2011&&S.month>=10&&S.month<=11, kick:'Il paese', t:'Le zucche sugli scalini', text:'Da qualche anno, a fine ottobre, sugli scalini delle villette compaiono le zucche intagliate con la candela dentro, e i bambini travestiti suonano ai campanelli chiedendo dolci. I vecchi del paese non sanno da dove sia arrivata questa festa; i negozi sì. Dieci giorni dopo gli stessi bambini girano con le lanterne di carta, cantando le canzoni di sempre.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde00_aglio', era:'de2000', registro:'leggero', cond:()=>S.year>=2002&&S.year<=2011&&S.month>=3&&S.month<=4, kick:'Il paese', t:'L\'aglio del bosco', text:'In primavera, nei boschi umidi lungo i fiumi, le foglie larghe dell\'aglio selvatico coprono il terreno e l\'aria sa d\'aglio. Fino a ieri le raccoglievano le nonne; adesso ci vanno le famiglie col cestino, e l\'aglio del bosco finisce nel pesto, nel burro, nel pane del fornaio. Ogni anno il giornale ricorda le foglie velenose che gli somigliano.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde00_griglia', era:'de2000', registro:'leggero', cond:()=>S.year>=2001&&S.year<=2011&&stagioneMese()==='estate', kick:'Il paese', t:'Il barbecue nel parco', text:'Nelle sere d\'estate i prati dei grandi parchi cittadini si riempiono di griglie usa e getta, coperte, casse di birra e radioline, e il fumo si vede dai palazzi intorno. Le famiglie arrivano a mezzogiorno per prendere il posto all\'ombra. Il comune disegna le zone dove si può accendere il fuoco, e la mattina dopo i netturbini contano i sacchi.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde00_lampadine', era:'de2000', registro:'leggero', cond:()=>(S.year===2009&&S.month>=3)||S.year===2010, kick:'Il paese', t:'Le lampadine di scorta', text:'L\'Europa ha deciso che le vecchie lampadine col filamento escono dai negozi, a cominciare dalle più forti. Nei negozi di bricolage c\'è chi ne compra scatoloni interi, per tenerle in cantina vent\'anni. Quelle nuove consumano poco, costano molto e ci mettono un minuto ad accendersi del tutto; in salotto la luce sembra quella di un ufficio.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde00_antenna', era:'de2000', registro:'leggero', cond:()=>S.year>=2003&&S.year<=2008, kick:'Il paese', t:'L\'antenna che non riceve più', text:'Regione dopo regione, la vecchia antenna sul tetto smette di ricevere i canali: si spengono le trasmissioni di sempre e partono quelle nuove, con più canali e un\'immagine più nitida. Serve una scatoletta da attaccare al televisore. Nei negozi di elettronica le scatolette finiscono la settimana prima, e i nipoti passano la domenica a montarle dai nonni.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde00_biatlon', era:'de2000', registro:'leggero', cond:()=>S.year>=2001&&S.year<=2011&&(S.month===12||S.month<=3), kick:'Il paese', t:'Il biatlon della domenica', text:'La domenica d\'inverno, dopo pranzo, la televisione trasmette lo sci di fondo col fucile in spalla: si corre, ci si ferma, si spara a cinque piccoli bersagli neri, si riparte. Milioni di persone che non hanno mai messo gli sci guardano col fiato sospeso l\'ultimo poligono. Al bar, il lunedì, si discute dei bersagli mancati come di un rigore.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde00_lista', era:'de2000', registro:'leggero', cond:()=>S.year>=2004&&S.year<=2008, kick:'Il paese', t:'La lista dei numeri', text:'Il conto in banca si guarda dal computer di casa, e i bonifici si fanno la sera in pigiama. Per ogni operazione serve un numero diverso, preso da una lista di carta che la banca manda per posta: si cancella a penna e si tiene nel cassetto. Gli sportelli chiudono il pomeriggio; le lettere false che chiedono i numeri arrivano ogni settimana.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde00_enciclopedia', era:'de2000', registro:'leggero', cond:()=>S.year>=2005&&S.year<=2009, kick:'Il paese', t:'L\'enciclopedia scritta da tutti', text:'C\'è un\'enciclopedia su internet che può scrivere chiunque: un professore in pensione, uno studente di notte, un appassionato di treni. In tedesco ha già centinaia di migliaia di voci, più di quelle che stanno sugli scaffali dei salotti. Gli insegnanti trovano le stesse frasi in dieci compiti; le enciclopedie di carta, in venti volumi, restano in libreria a fare figura.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde00_campionesse', era:'de2000', registro:'leggero', cond:()=>(S.year===2003||S.year===2007)&&S.month>=10&&S.month<=12, kick:'Il paese', t:'Le campionesse del mondo', text:'La nazionale di calcio femminile ha vinto il campionato del mondo, giocato dall\'altra parte del pianeta. Al ritorno le giocatrici salutano dal balcone del municipio, e per una settimana i giornali sportivi le mettono in prima pagina. Nei paesi le squadre di ragazze si riempiono, e le società scoprono che il campo del martedì sera non basta più.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
   /* L177-3 · Stati Uniti 1950, parte 2: dodici beat leggeri (PRESET-USA-1950 §I, correzioni ⚠ nel rapporto «⚑ L177-3») */
   {id:'lgus50_televisore', era:'us1950', registro:'leggero', cond:()=>S.year>=1950&&S.year<=1951, kick:'Il paese', t:'Il televisore nel salotto', text:'Nelle case dove c\'è un televisore, la sera arrivano i vicini, con le sedie portate da casa loro. Le tende restano tirate anche di giorno; il martedì sera i ristoranti sono vuoti, perché c\'è il varietà. I proprietari dei cinema contano le poltrone vuote.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
   {id:'lgus50_tessera', era:'us1950', registro:'leggero', cond:()=>S.year===1950&&S.month>=3, kick:'Il paese', t:'La tessera della cena', text:'A New York un uomo d\'affari ha inventato una tessera di cartone: si mostra al ristorante, si firma, e il conto arriva a fine mese. All\'inizio la accettano una ventina di ristoranti. I camerieri non si fidano; gli uomini d\'affari, che al ristorante ci vanno ogni sera, sì.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
@@ -6126,6 +6307,85 @@ const ARCHI_DEF=[
    ]},
    freddo2:{kick:'Palazzo', t:'Cordiale fino alla fine', text:'%ECO %FILO ringrazia per il tempo dedicato. La settimana dopo lo stesso studio è sul tavolo di qualcun altro.', ch:[
      {l:'Prendi atto', e:'Hai tenuto il testo; il canale è andato altrove', goto:null, fatto:'Il testo tenuto fermo davanti a %FILO.', epi:'Tenne fermo il testo davanti alla rappresentante del settore, e la vide bussare altrove.', f:()=>{ corrented('pontieri',-2); credd(1); }},
+   ]},
+  }},
+
+ /* ================================================================================================================
+    L216-2 · VARIETÀ: TRE ARCHI UNIVERSALI per tutti i livelli (il quarto, `compagno`, tenuto fuori in integrazione: è la scena di `rb_compagno`, «Il vecchio compagno» — vedi DESIGN-VARIETA-2.md «⚑ L216-2») (8/10, Cowork per delega; VARIETA-L216-ARCHI.md). Da L214-2
+    e L215-2: gli archi sono la famiglia che rende di più sulle fette locali delle porte, e un arco `dove:'entrambi'` vale
+    anche per il ministro, il capo del governo, il diplomatico e l'opposizione. Senza tempo e senza paese (niente oggetti di
+    dopo il 1950), nessun aggettivo accordato al giocatore, persone inventate. Valute dei vicini `fonte`/`ascolto`: credd/visd
+    (no-op al capo del governo, voluto), stampad, corrented, spregiudicata, serenità, integrità con la guardia; niente gd()
+    né debito.
+    L217-1 (D274): tutti e tre `unaVolta:true` — nascono al più una volta per carriera (un arco che tornava dopo il suo `cooldown`
+    faceva dei suoi nodi delle ripetute) e non entrano nella finestra `S.recentArchi` (un arco nuovo che ci entrava liberava un
+    arco vecchio: al ministro e al diplomatico gli eleggibili erano tre). Il `cooldown` resta scritto ma non serve più. ===================================================================================================== */
+ {id:'promessa', era:'universale', famiglia:'Società', dove:'entrambi', prob:0.10, cooldown:36, unaVolta:true, titolo:'la promessa di un tempo',
+  cond:()=> S.livello>=1,
+  filo:()=>({nome: nomeGenere('f')+' '+rnd(PAESE.cognomi), ruolo:'la maestra del paese'}),
+  nodi:{
+   start:{kick:'Società', t:'Una lettera di molti anni fa', text:'%FILO, %RUOLO di un piccolo paese fuori mano dove tenesti uno dei tuoi primi comizi, ti scrive. Allega la lettera che le mandasti allora: prometteva che la strada per il paese sarebbe stata finita. La strada è ancora a metà, e la tua firma lei l\'ha conservata.', ch:[
+     {l:'Ci vai di persona', e:'Un giorno tolto all\'agenda; la promessa torna tua', eco:'Dopo il viaggio fino al paese, ', goto:'visita', f:()=>{ credd(2); visd(-1); stampad(1); }},
+     {l:'Rispondi con una lettera gentile', e:'Nessun impegno nuovo; la tua lettera finisce nel suo cassetto, accanto all\'altra', eco:'Dopo la tua risposta cortese, ', goto:'attesa', f:()=>{ credd(-1); corrented('militanti',-1); }},
+   ]},
+   visita:{kick:'Società', t:'La strada a metà', text:'%ECO %FILO ti porta a vedere il punto dove l\'asfalto finisce. Il paese si è svuotato da allora: chi è rimasto ti stringe la mano e aspetta. Finirla costa più di quanto valgano i voti di qui, e lo sanno tutti, anche loro.', ch:[
+     {l:'Ti impegni a trovare i fondi', e:'Una promessa rinnovata; ora devi spendere peso per mantenerla', eco:'Dopo l\'impegno preso in piazza, ', goto:'fondi', f:()=>{ credd(2); corrented('pontieri',-2); }},
+     {l:'Dici la verità: i soldi non ci sono', e:'Una delusione detta in faccia; nessuno potrà dire che li hai presi in giro', eco:'Dopo la verità detta in piazza, ', goto:'verita', f:()=>{ if(S.integrita!=null) S.integrita=clamp(S.integrita+2,0,100); visd(-1); }},
+   ]},
+   attesa:{kick:'Società', t:'La lettera sul giornale', text:'%ECO passano i mesi. Un giornale di provincia pubblica la tua vecchia lettera accanto alla fotografia della strada interrotta. Il titolo è una domanda, e la domanda è rivolta a te.', ch:[
+     {l:'Ammetti: era una promessa, e non l\'hai mantenuta', e:'Ti prendi la colpa; chi legge lo apprezza', goto:null, fatto:'La promessa al paese di %FILO, ammessa e non mantenuta.', epi:'Ammise una promessa non mantenuta a un piccolo paese, e glielo riconobbero.', f:()=>{ credd(2); stampad(1); if(S.integrita!=null) S.integrita=clamp(S.integrita+1,0,100); }},
+     {l:'Lasci che la storia passi', e:'Domani si parla d\'altro; in quel paese no', goto:null, fatto:'La lettera di %FILO pubblicata, e lasciata senza risposta.', epi:'Lasciò senza risposta la sua vecchia promessa a un piccolo paese.', f:()=>{ stampad(-2); credd(-1); }},
+   ]},
+   fondi:{kick:'Palazzo', t:'Il prezzo della strada', text:'%ECO i fondi si trovano, ma solo togliendoli a un altro cantiere, in una zona dove i voti contano di più. Chi lo perde se ne accorgerà.', ch:[
+     {l:'Li sposti: la parola data viene prima', e:'La strada si finisce; un alleato perde il suo cantiere', goto:null, fatto:'La strada promessa al paese di %FILO, finita.', epi:'Finì la strada che aveva promesso da giovane a un piccolo paese, a spese di un alleato.', f:()=>{ credd(3); stampad(2); corrented('fedelissimi',-2); }},
+     {l:'Ti fermi: non puoi togliere a chi conta', e:'Il cantiere resta dov\'è; la promessa, di nuovo, a metà', eco:'Dopo la marcia indietro sui fondi, ', goto:'verita', f:()=>{ corrented('fedelissimi',1); credd(-2); }},
+   ]},
+   verita:{kick:'Società', t:'Quello che resta della promessa', text:'%ECO al paese arriva la notizia: la strada non si farà. %FILO ti scrive un\'ultima volta. Non è arrabbiata: dice che almeno adesso il paese sa come stanno le cose, e ti chiede una cosa sola, più piccola della strada — che la corriera torni a salire due volte a settimana.', ch:[
+     {l:'Fai tornare la corriera', e:'Poco, ma vero: il paese se ne ricorderà', goto:null, fatto:'La corriera tornata al paese di %FILO, al posto della strada.', epi:'Al posto della strada promessa, riportò la corriera in un piccolo paese: poco, ma vero.', f:()=>{ credd(1); stampad(1); corrented('militanti',1); }},
+     {l:'Nemmeno quella: le dici di no', e:'Coerente con i conti; il paese chiude la lettera nel cassetto', goto:null, fatto:'Il no a %FILO, anche sulla corriera.', epi:'Disse di no due volte a un piccolo paese, per tenere in ordine i conti.', f:()=>{ visd(-1); stampad(-1); corrented('pontieri',1); }},
+   ]},
+  }},
+
+ {id:'omonimo', era:'universale', famiglia:'Società', dove:'entrambi', prob:0.08, cooldown:60, unaVolta:true, titolo:'l\'omonimo',
+  cond:()=> S.livello>=1,
+  nodi:{
+   start:{kick:'Società', t:'Un uomo col tuo nome', text:'Un uomo che porta il tuo stesso nome e cognome è stato fermato per una truffa da poco, lontano da qui. Un giornale sbaglia la fotografia: sopra la notizia c\'è la tua faccia.', ch:[
+     {l:'Chiedi una rettifica in prima pagina', e:'La rettifica esce; così la storia la leggono il doppio', eco:'Dopo la rettifica chiesta in prima pagina, ', goto:'lettera', f:()=>{ stampad(-1); visd(2); }},
+     {l:'Ci scherzi sopra in pubblico', e:'Una battuta che gira; qualcuno la trova fuori luogo', eco:'Dopo la battuta sul tuo omonimo, ', goto:'lettera', f:()=>{ visd(3); credd(-1); stampad(1); }},
+   ]},
+   lettera:{kick:'Società', t:'L\'omonimo si fa vivo', text:'%ECO l\'uomo, rilasciato dopo pochi giorni, ti scrive. Si scusa per il disturbo. Poi, nella stessa lettera, chiede se potresti aiutarlo a trovare un lavoro: col nome che porta, scrive, adesso nessuno lo assume.', ch:[
+     {l:'Lo aiuti con discrezione', e:'Una telefonata a un conoscente; se si sapesse, sembrerebbe un favore', eco:'Dopo la telefonata per il tuo omonimo, ', goto:'favore', f:()=>{ spregiudicata(2); serenitaMuovi(1); }},
+     {l:'Gli rispondi che non puoi', e:'La lettera finisce lì; o così credi', eco:'Dopo la tua risposta gentile e ferma, ', goto:'intervista', f:()=>{ credd(1); }},
+   ]},
+   favore:{kick:'Palazzo', t:'Un lavoro, e un giornalista', text:'%ECO l\'uomo lavora da un mese in un magazzino quando un giornalista scopre chi l\'ha raccomandato. La notizia è minuscola, ma è una notizia.', ch:[
+     {l:'Lo racconti tu, com\'è andata', e:'Un gesto umano detto a voce alta; qualcuno ci crede', goto:null, fatto:'Il lavoro trovato al tuo omonimo, e raccontato.', epi:'Aiutò un uomo che portava il suo stesso nome, e non se ne nascose.', f:()=>{ stampad(1); visd(1); }},
+     {l:'Neghi di saperne qualcosa', e:'La storia muore; il tuo conoscente dorme un po\' meno tranquillo', goto:null, fatto:'La raccomandazione del tuo omonimo, negata.', epi:'Aiutò di nascosto un uomo col suo stesso nome, e poi negò.', f:()=>{ spregiudicata(3); stampad(-1); }},
+   ]},
+   intervista:{kick:'Società', t:'L\'omonimo parla ai giornali', text:'%ECO un settimanale intervista l\'uomo: racconta che ti ha chiesto aiuto e che gli hai detto di no. Non è arrabbiato; dice che al tuo posto avrebbe fatto lo stesso. La gente ride, e un po\' ti guarda con simpatia.', ch:[
+     {l:'Lo inviti a prendere un caffè, davanti ai fotografi', e:'Una fotografia che fa il giro; per qualcuno è teatro', goto:null, fatto:'Il caffè con il tuo omonimo, davanti ai fotografi.', epi:'Prese un caffè, davanti ai fotografi, con un uomo che portava il suo nome.', f:()=>{ visd(3); stampad(1); credd(-1); }},
+     {l:'Lasci correre', e:'Una storia simpatica che non ti costa niente', goto:null, fatto:'L\'intervista del tuo omonimo, lasciata correre.', epi:'Un uomo col suo stesso nome lo rese simpatico, per una settimana.', f:()=>{ stampad(1); }},
+   ]},
+  }},
+
+ {id:'allieva', era:'universale', famiglia:'Società', dove:'entrambi', prob:0.10, cooldown:36, unaVolta:true, titolo:'la giovane che ti ha scelto',
+  cond:()=> S.livello>=1,
+  filo:()=>({nome: nomeGenere('f')+' '+rnd(PAESE.cognomi), ruolo:'la giovane collaboratrice'}),
+  nodi:{
+   start:{kick:'Palazzo', t:'La lettera di una studentessa', text:'%FILO, una studentessa, ti scrive che si è iscritta al partito dopo averti sentito parlare. Chiede di lavorare con te, anche senza paga, anche solo per rispondere alla posta.', ch:[
+     {l:'La prendi nel tuo ufficio', e:'Una persona in più che ci crede; qualcuno dello staff storce il naso', eco:'Dopo che l\'hai presa con te, ', goto:'lavoro', f:()=>{ corrented('militanti',1); visd(1); }},
+     {l:'Le rispondi di fare la gavetta nel partito', e:'Un consiglio giusto; la tua lettera lei la tiene lo stesso', eco:'Dopo il consiglio di fare la gavetta, ', goto:'ritorno', f:()=>{ credd(1); corrented('fedelissimi',1); }},
+   ]},
+   lavoro:{kick:'Palazzo', t:'Il primo errore', text:'%ECO %FILO lavora bene, finché un giorno parla con un giornalista a nome tuo e dice una cosa che tu non avresti detto. Il giornale la mette nel titolo.', ch:[
+     {l:'La copri: la frase la fai tua', e:'Ti prendi l\'uscita; lei impara la lezione', eco:'Dopo che hai fatto tua quella frase, ', goto:'crescita', f:()=>{ stampad(-2); credd(-1); corrented('militanti',1); }},
+     {l:'La smentisci, e la sposti ad altro', e:'La frase non è più tua; lei la paga da sola', goto:null, fatto:'La frase di %FILO smentita, e lei spostata ad altro.', epi:'Smentì una frase della sua giovane collaboratrice, e lei la pagò da sola.', f:()=>{ stampad(1); corrented('militanti',-1); serenitaMuovi(-1); }},
+   ]},
+   crescita:{kick:'Palazzo', t:'Una candidatura', text:'%ECO un anno dopo %FILO ti dice che vorrebbe candidarsi, al suo primo giro. Le serve il tuo nome sul suo manifesto. Nel partito c\'è chi aspetta quel posto da più tempo.', ch:[
+     {l:'Le dai il tuo nome', e:'Una giovane che porta la tua impronta; un veterano che non te lo perdona', goto:null, fatto:'La prima candidatura di %FILO, col tuo nome sul manifesto.', epi:'Lanciò la prima candidatura di una giovane collaboratrice, e un veterano non glielo perdonò.', f:()=>{ corrented('militanti',2); corrented('fedelissimi',-3); visd(1); }},
+     {l:'Le chiedi di aspettare il suo turno', e:'Le regole del partito rispettate; lei capisce, o finge', goto:null, fatto:'A %FILO hai chiesto di aspettare il suo turno.', epi:'Chiese alla sua giovane collaboratrice di aspettare il suo turno.', f:()=>{ corrented('fedelissimi',2); corrented('militanti',-1); }},
+   ]},
+   ritorno:{kick:'Palazzo', t:'La sezione di %FILO', text:'%ECO qualche tempo dopo %FILO ti scrive di nuovo: ha fatto la gavetta, ora guida una sezione e ti invita a parlare ai suoi iscritti. Aggiunge che la tua risposta di allora l\'ha appesa sopra la scrivania.', ch:[
+     {l:'Vai a parlare ai suoi iscritti', e:'Una serata in una sala piccola; qualcuno la racconterà', goto:null, fatto:'La serata con gli iscritti della sezione di %FILO.', epi:'Andò a parlare agli iscritti di una giovane a cui aveva consigliato la gavetta.', f:()=>{ corrented('militanti',2); visd(1); serenitaMuovi(-1); }},
+     {l:'Mandi un saluto da leggere in sala', e:'Lo legge lei; la sala applaude lo stesso', goto:null, fatto:'Il tuo saluto letto da %FILO in sala.', epi:'Mandò un saluto alla sezione di una giovane che aveva incoraggiato.', f:()=>{ corrented('militanti',1); stampad(1); }},
    ]},
   }},
 ];
@@ -8499,6 +8759,43 @@ const DOSSIERS=[
    {l:'Basta monetine, si arrotonda',e:'La zecca risparmia; c\'è chi teme che si arrotondi solo all\'insù',pleases:'tecnico',costo:{debito:-0.1},f:()=>{S.ind.debt-=0.1; gd('imprenditori',1); gd('pensionati',-2);}},
    {l:'Restano: ogni centesimo conta',e:'Nessun sospetto sui prezzi; la zecca continua a perderci',pleases:'conservatore',f:()=>{gd('pensionati',2); gd('imprenditori',-1);}},
  ]},
+ // L220-1 · varietà del ministro (10/10): nove dossier del presente per il ministro dell'Economia — era 'contemporanea', senza paesi.
+ {id:'ms_ec_fornitori',era:'contemporanea',min:'economia',kick:'Credito',t:'Pagati dopo quattro mesi',text:'Le grandi catene e i grandi gruppi pagano i piccoli fornitori dopo quattro, a volte sei mesi. Nel frattempo l\'artigiano anticipa stipendi e materiali, e chiede un prestito alla banca per lavorare.',ch:[
+   {l:'Un termine massimo per legge, con gli interessi a chi sfora',e:'I piccoli respirano; i grandi gruppi parlano di rapporti rovinati',pleases:'progressista',f:()=>{gd('cetomedio',2); gd('lavoratori',1); gd('imprenditori',-2);}},
+   {l:'Un fondo pubblico che anticipa le fatture',e:'Nessun obbligo per nessuno; il conto lo paga il bilancio',pleases:'tecnico',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; gd('imprenditori',2); gd('cetomedio',1);}},
+ ]},
+ {id:'ms_ec_rate',era:'contemporanea',min:'economia',kick:'Finanza',t:'Compra adesso, paga dopo',text:'Scarpe, telefoni, perfino la spesa: in rete basta un tocco per dividere il prezzo in tre rate senza interessi. Nessuno controlla quante rate uno ha già, e chi ne salta una paga penali pesanti.',ch:[
+   {l:'Le stesse regole di un prestito, controllo del reddito compreso',e:'Meno ragazzi indebitati senza saperlo; le piattaforme vendono meno',pleases:'progressista',f:()=>{gd('giovani',2); gd('cetomedio',1); gd('imprenditori',-2);}},
+   {l:'Solo un avviso più chiaro prima del tocco',e:'Il commercio in rete resta veloce; chi si indebita lo sa, forse',pleases:'conservatore',f:()=>{gd('imprenditori',2); gd('giovani',-2);}},
+ ]},
+ {id:'ms_ec_bibite',era:'contemporanea',min:'economia',kick:'Fisco',t:'La tassa sulle bibite zuccherate',text:'I medici chiedono una tassa sulle bibite piene di zucchero, come quella sul tabacco: dove c\'è, i produttori hanno tolto zucchero dalle ricette. I produttori rispondono che pagheranno le famiglie che hanno meno.',ch:[
+   {l:'La tassa, e il gettito alle mense delle scuole',e:'Entrate nuove e bibite meno dolci; il carrello costa un po\' di più',pleases:'tecnico',costo:{debito:-0.2},f:()=>{S.ind.debt-=0.2; gd('cetomedio',1); gd('imprenditori',-2); gd('lavoratori',-1);}},
+   {l:'Nessuna tassa: un accordo per ridurre lo zucchero',e:'Nessun prezzo sale; le ricette cambiano quando conviene',pleases:'conservatore',f:()=>{gd('imprenditori',2); gd('cetomedio',-1);}},
+ ]},
+ {id:'ms_ec_appalti',era:'contemporanea',min:'economia',kick:'Concorrenza',t:'La gara che solo i grandi possono vincere',text:'Lo stato compra mobili, computer e pulizie con gare enormi, una per tutto il paese. Le vincono sempre le stesse tre aziende: le piccole non hanno nemmeno la dimensione per partecipare.',ch:[
+   {l:'Gare divise in lotti più piccoli, per territorio',e:'Entrano le piccole imprese; si spende un po\' di più',pleases:'populista',f:()=>{gd('cetomedio',2); gd('lavoratori',1); gd('imprenditori',-1);}},
+   {l:'Gare grandi: comprando tanto si paga meno',e:'Il bilancio risparmia; i piccoli restano fuori',pleases:'tecnico',costo:{debito:-0.1},f:()=>{S.ind.debt-=0.1; gd('imprenditori',2); gd('cetomedio',-2);}},
+ ]},
+ {id:'ms_ec_precompilata',era:'contemporanea',min:'economia',kick:'Fisco',t:'La dichiarazione che arriva già scritta',text:'Il fisco sa già quasi tutto: stipendi, pensioni, spese mediche, mutui. Si propone di mandare a ogni cittadino la dichiarazione dei redditi già compilata, da controllare e firmare. Chi aiuta a compilarla per mestiere protesta.',ch:[
+   {l:'Precompilata per tutti, da subito',e:'Moduli e code spariscono per milioni di persone; un sistema da costruire',pleases:'tecnico',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; gd('pensionati',2); gd('lavoratori',1); gd('imprenditori',-1);}},
+   {l:'Resta com\'è, con un aiuto gratuito per chi ha poco',e:'Nessuno perde il lavoro; per gli altri cambia niente',pleases:'conservatore',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; gd('lavoratori',1); gd('cetomedio',-1);}},
+ ]},
+ {id:'ms_ec_prezzi',era:'contemporanea',min:'economia',kick:'Consumatori',t:'Il prezzo che cambia per ognuno',text:'Due persone cercano lo stesso volo nello stesso minuto e vedono due prezzi diversi: il programma del venditore indovina chi pagherà di più. Succede anche con gli alberghi, i biglietti dei concerti e la spesa a domicilio.',ch:[
+   {l:'Vietato il prezzo cucito sul cliente',e:'Lo stesso prezzo per tutti; i venditori parlano di offerte che spariscono',pleases:'progressista',f:()=>{gd('cetomedio',2); gd('giovani',1); gd('imprenditori',-2);}},
+   {l:'Ammesso, purché il cliente sia avvisato',e:'I prezzi restano mobili; chi legge l\'avviso può cercare altrove',pleases:'tecnico',f:()=>{S.gMod+=0.1; gd('imprenditori',2); gd('cetomedio',-1);}},
+ ]},
+ {id:'ms_ec_neonati',era:'contemporanea',min:'economia',kick:'Risparmio',t:'Un capitale per ogni bambino che nasce',text:'Si propone che lo stato versi una somma a ogni neonato su un conto che si apre solo a diciotto anni: per studiare, per una casa o per un\'impresa. Chi nasce povero partirebbe con qualcosa in tasca.',ch:[
+   {l:'Il conto per tutti, versato dallo stato',e:'Un inizio uguale per ogni ragazzo; un impegno che dura diciotto anni',pleases:'progressista',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; gd('giovani',2); gd('cattolici',2); gd('pensionati',-1);}},
+   {l:'Uno sconto sulle tasse a chi risparmia per i figli',e:'Costa meno; ne approfitta chi può già risparmiare',pleases:'conservatore',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; gd('cetomedio',2); gd('lavoratori',-1);}},
+ ]},
+ {id:'ms_ec_pacchi',era:'contemporanea',min:'economia',kick:'Commercio',t:'I pacchi che passano la dogana senza pagare',text:'Ogni giorno arrivano dall\'estero milioni di piccoli pacchi comprati in rete: vestiti, giocattoli, cavi. Sotto una certa soglia non pagano dazi, e i negozi sotto casa non reggono quei prezzi.',ch:[
+   {l:'Un dazio su ogni pacco, anche il più piccolo',e:'I negozi tirano il fiato; chi compra in rete paga di più',pleases:'populista',costo:{debito:-0.1},f:()=>{S.ind.debt-=0.1; gd('cetomedio',1); gd('imprenditori',1); gd('giovani',-2);}},
+   {l:'La soglia resta: si compra dove si vuole',e:'Prezzi bassi per le famiglie; le vetrine continuano a chiudere',pleases:'tecnico',f:()=>{gd('giovani',2); gd('cetomedio',-2);}},
+ ]},
+ {id:'ms_ec_dormienti',era:'contemporanea',min:'economia',kick:'Banche',t:'I conti che nessuno reclama',text:'Nelle banche ci sono migliaia di conti fermi da più di dieci anni: chi li aveva aperti è morto o li ha dimenticati, e gli eredi non sanno che esistono. Le banche li tengono, e ci guadagnano.',ch:[
+   {l:'Dopo dieci anni passano a un fondo pubblico',e:'Entrate per il bilancio; gli eredi possono reclamarli, se li trovano',pleases:'tecnico',costo:{debito:-0.2},f:()=>{S.ind.debt-=0.2; gd('lavoratori',1); gd('pensionati',-2);}},
+   {l:'Le banche cerchino gli eredi, a spese loro',e:'I soldi tornano alle famiglie; le banche protestano',pleases:'populista',f:()=>{gd('pensionati',2); gd('cetomedio',1); gd('imprenditori',-1);}},
+ ]},
  // ----- LAVORO (+6) -----
  {id:'rider', dal:2017,min:'lavoro',kick:'Piattaforme',t:'I rider chiedono tutele',text:'I lavoratori delle piattaforme digitali chiedono contratti, contributi e assicurazione.',ch:[
    {l:'Tutele piene da dipendenti',e:'Diritti estesi; le piattaforme minacciano rincari',pleases:'progressista',f:()=>{gd('lavoratori',4); gd('giovani',3); gd('imprenditori',-4);}},
@@ -8635,6 +8932,43 @@ const DOSSIERS=[
  {id:'ms_lv_statali',era:'contemporanea',min:'lavoro',kick:'Salari',t:'Il contratto pubblico scaduto',text:'Il contratto dei dipendenti pubblici è scaduto da tre anni e l\'inflazione si è mangiata gli stipendi. I sindacati chiedono un aumento pieno; il bilancio ne regge la metà.',ch:[
    {l:'Aumento pieno',e:'Dipendenti pubblici soddisfatti; il deficit sale',pleases:'populista',costo:{debito:0.4},f:()=>{S.ind.debt+=0.4; gd('lavoratori',3); gd('cetomedio',2);}},
    {l:'Metà subito, metà fra due anni',e:'Conti salvi; minacce di sciopero',pleases:'tecnico',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; gd('lavoratori',-2);}},
+ ]},
+ // L219-1 · varietà del ministro (10/10): nove dossier del presente per il ministro del Lavoro — era 'contemporanea', senza paesi.
+ {id:'ms_lv_concorrenza',era:'contemporanea',min:'lavoro',kick:'Lavoro',t:'Il divieto di passare alla concorrenza',text:'Sempre più contratti, anche per commessi e magazzinieri, vietano di lavorare per un concorrente per uno o due anni dopo le dimissioni. Chi vuole cambiare resta a casa, o resta dov\'è con lo stesso stipendio.',ch:[
+   {l:'Vietati, tranne che per i dirigenti',e:'Chi cambia lavoro guadagna di più; le imprese temono di perdere i loro segreti',pleases:'progressista',f:()=>{gd('lavoratori',2); gd('giovani',1); gd('imprenditori',-2);}},
+   {l:'Ammessi solo se l\'attesa è pagata',e:'Chi aspetta riceve metà stipendio; i contratti cambiano poco',pleases:'tecnico',f:()=>{gd('imprenditori',1); gd('lavoratori',-1);}},
+ ]},
+ {id:'ms_lv_previdenza',era:'contemporanea',min:'lavoro',kick:'Pensioni',t:'La pensione integrativa per tutti',text:'Chi oggi ha trent\'anni avrà una pensione molto più bassa di quella dei genitori. Si propone di iscrivere ogni nuovo assunto a un fondo pensione con una piccola parte dello stipendio: chi non vuole può uscirne.',ch:[
+   {l:'Iscrizione automatica, con un contributo pubblico',e:'Quasi tutti restano dentro; il contributo pesa sul bilancio',pleases:'tecnico',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; gd('giovani',2); gd('cetomedio',1); gd('imprenditori',-1);}},
+   {l:'Resta una scelta di ciascuno',e:'Nessuno tocca lo stipendio; si iscrive chi ci pensa, cioè pochi',pleases:'conservatore',f:()=>{gd('lavoratori',1); gd('giovani',-2);}},
+ ]},
+ {id:'ms_lv_malattia',era:'contemporanea',min:'lavoro',kick:'Lavoro',t:'Il primo giorno di malattia',text:'Le assenze per malattia di un giorno solo cadono quasi sempre di lunedì o di venerdì. Le imprese propongono che il primo giorno non sia pagato; i medici rispondono che chi è malato verrà al lavoro lo stesso, e contagerà i colleghi.',ch:[
+   {l:'Il primo giorno non si paga',e:'Meno assenze brevi; chi è malato davvero ci rimette',pleases:'conservatore',f:()=>{gd('imprenditori',2); gd('lavoratori',-2);}},
+   {l:'La paga resta, con visite di controllo a sorpresa',e:'Si colpisce chi fa il furbo; servono medici e soldi',pleases:'tecnico',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; gd('lavoratori',1); gd('imprenditori',-1);}},
+ ]},
+ {id:'ms_lv_orario',era:'contemporanea',min:'lavoro',kick:'Tempi di lavoro',t:'Il part-time che nessuno ha scelto',text:'Un dipendente su cinque lavora a orario ridotto, e metà di loro vorrebbe lavorare a tempo pieno: è l\'azienda a non concederlo. Con mezzo stipendio non si paga un affitto.',ch:[
+   {l:'Diritto al tempo pieno quando si libera un posto',e:'Chi aspettava ore in più le ottiene; le aziende perdono flessibilità',pleases:'progressista',f:()=>{gd('lavoratori',2); gd('cetomedio',1); gd('imprenditori',-2);}},
+   {l:'Uno sgravio a chi allunga l\'orario',e:'Qualche ora in più, pagata in parte dal bilancio',pleases:'tecnico',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; gd('imprenditori',1); gd('lavoratori',1);}},
+ ]},
+ {id:'ms_lv_messaggio',era:'contemporanea',min:'lavoro',kick:'Lavoro',t:'Licenziati con un messaggio',text:'Quattrocento dipendenti di un\'azienda di consegne hanno saputo di essere stati licenziati da un messaggio sul telefono, alle sei del mattino. Il paese si indigna; nessuna legge lo vieta.',ch:[
+   {l:'Obbligo di un colloquio e di un preavviso scritto',e:'Nessuno lo saprà più dal telefono; le imprese parlano di burocrazia',pleases:'populista',f:()=>{gd('lavoratori',2); gd('cetomedio',1); gd('imprenditori',-1);}},
+   {l:'Un codice di condotta firmato con le imprese',e:'Nessuna legge nuova; la prossima volta si vedrà',pleases:'conservatore',f:()=>{gd('imprenditori',1); gd('lavoratori',-2);}},
+ ]},
+ {id:'ms_lv_garanzia',era:'contemporanea',min:'lavoro',kick:'Occupazione',t:'Un lavoro per chi è fermo da anni',text:'Chi è senza lavoro da più di due anni quasi non viene più chiamato a un colloquio. Si propone che lo stato offra a tutti loro un posto vero e pagato nei comuni e nelle associazioni: manutenzione, assistenza, biblioteche.',ch:[
+   {l:'Un posto garantito, a paga piena',e:'Migliaia tornano a lavorare; il conto è alto e dura',pleases:'progressista',costo:{debito:0.4},f:()=>{S.ind.debt+=0.4; gd('lavoratori',3); gd('cattolici',1); gd('imprenditori',-1);}},
+   {l:'Sgravi per due anni a chi li assume',e:'Costa meno; le imprese scelgono i più facili da sistemare',pleases:'tecnico',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; gd('imprenditori',2); gd('lavoratori',-1);}},
+ ]},
+ {id:'ms_lv_utili',era:'contemporanea',min:'lavoro',kick:'Salari',t:'Una parte degli utili a chi lavora',text:'Le grandi aziende hanno chiuso l\'anno con profitti mai visti, mentre gli stipendi sono fermi. Si propone che ogni impresa sopra una certa dimensione divida con i dipendenti una parte degli utili.',ch:[
+   {l:'Obbligatorio per le grandi imprese',e:'Un premio in busta paga; gli investitori storcono il naso',pleases:'progressista',f:()=>{gd('lavoratori',3); gd('imprenditori',-3);}},
+   {l:'Volontario, ma senza tasse sul premio',e:'Chi lo fa viene premiato; le entrate calano un po\'',pleases:'conservatore',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; gd('imprenditori',2); gd('cetomedio',1);}},
+ ]},
+ {id:'ms_lv_molestie',era:'contemporanea',min:'lavoro',kick:'Pari opportunità',t:'Le molestie sul posto di lavoro',text:'Un\'indagine dice che una dipendente su quattro ha subito avances o battute pesanti da un superiore, e che quasi nessuna ha denunciato per paura di perdere il posto.',ch:[
+   {l:'Un referente esterno nelle aziende grandi, e multe a chi copre',e:'Denunciare diventa possibile; le imprese pagano il servizio',pleases:'progressista',f:()=>{gd('giovani',2); gd('cetomedio',1); gd('imprenditori',-2);}},
+   {l:'Una campagna e un numero da chiamare',e:'Se ne parla; dentro le aziende cambia poco',pleases:'tecnico',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; gd('giovani',1);}},
+ ]},
+ {id:'ms_lv_stipendio',era:'contemporanea',min:'lavoro',kick:'Salari',t:'Lo stipendio che non arriva',text:'Centinaia di piccole imprese in difficoltà pagano gli stipendi con mesi di ritardo, e quando chiudono i dipendenti perdono anche le ultime buste paga. Si propone un fondo pubblico che paghi subito e si rifaccia poi sull\'impresa.',ch:[
+   {l:'Il fondo, pagato con un piccolo contributo di tutte le imprese',e:'Nessuno resta senza le ultime paghe; le imprese sane pagano per le altre',pleases:'progressista',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; gd('lavoratori',3); gd('imprenditori',-2);}},
+   {l:'Chi lavora viene pagato per primo quando l\'impresa fallisce',e:'Nessuna spesa; i soldi arrivano, se arrivano, dopo anni',pleases:'conservatore',f:()=>{gd('imprenditori',1); gd('lavoratori',-1);}},
  ]},
  // ----- INTERNO (+7) -----
  {id:'baby_gang',era:'universale',min:'interno',cond:()=>S.ind.sicurezza<55,kick:'Ordine pubblico',t:'Criminalità minorile in crescita',text:'Cresce il numero di reati commessi da minorenni nelle città. Repressione o percorso educativo?',ch:[
@@ -9145,6 +9479,43 @@ const DOSSIERS=[
    {l:'Date ai comuni e alle associazioni',e:'Biblioteche, bar, luoghi d\'incontro di paese; nessun incasso',pleases:'progressista',f:()=>{gd('pensionati',2); gd('cattolici',1); gd('imprenditori',-1);}},
    {l:'All\'asta, a chi offre di più',e:'Si incassa; qualche stazione diventa una villa privata',pleases:'conservatore',costo:{debito:-0.1},f:()=>{S.ind.debt-=0.1; gd('imprenditori',2); gd('pensionati',-2);}},
  ]},
+ // L219-1 · varietà del ministro (10/10): nove dossier del presente per il ministro delle Infrastrutture — era 'contemporanea', senza paesi.
+ {id:'ms_if_cantieri',era:'contemporanea',min:'infrastrutture',kick:'Città',t:'La stessa strada scavata tre volte',text:'In un anno la stessa via è stata aperta per il gas, richiusa, riaperta per la fibra e poi per l\'acqua. Ogni gestore ha il suo calendario, e chi abita lì ha passato dodici mesi fra le transenne.',ch:[
+   {l:'Un calendario unico: chi arriva tardi rifà l\'asfalto',e:'Un cantiere solo per tutti; i gestori protestano per i ritardi',pleases:'tecnico',f:()=>{gd('cetomedio',2); gd('pensionati',1); gd('imprenditori',-2);}},
+   {l:'Ognuno scava quando serve, ma ripara meglio',e:'Lavori più rapidi; le transenne restano',pleases:'conservatore',f:()=>{gd('imprenditori',2); gd('cetomedio',-2);}},
+ ]},
+ {id:'ms_if_gallerie',era:'contemporanea',min:'infrastrutture',kick:'Autostrade',t:'Le gallerie senza uscita di sicurezza',text:'Metà delle gallerie delle strade principali ha più di cinquant\'anni e nessuna via di fuga. Le regole nuove chiedono di adeguarle: vuol dire chiuderle per mesi, una dopo l\'altra.',ch:[
+   {l:'Lavori subito, chiudendole a turno',e:'Più sicurezza; anni di code e deviazioni',pleases:'tecnico',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; S.ind.sicurezza+=1; gd('pensionati',1); gd('imprenditori',-2);}},
+   {l:'Senso unico alternato e lavori di notte',e:'Il traffico passa; i lavori durano il doppio',pleases:'populista',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; gd('imprenditori',1); gd('pensionati',-1);}},
+ ]},
+ {id:'ms_if_passaggi',era:'contemporanea',min:'infrastrutture',kick:'Ferrovie',t:'Le sbarre del passaggio a livello',text:'Sulle linee ferroviarie restano migliaia di passaggi a livello: le sbarre si abbassano cento volte al giorno, le code arrivano fino al centro e qualcuno passa lo stesso a sbarre chiuse.',ch:[
+   {l:'Un piano per toglierli tutti, con sottopassi e cavalcavia',e:'Niente più sbarre; un\'opera lunga e cara',pleases:'tecnico',costo:{debito:0.4},f:()=>{S.ind.debt+=0.4; S.ind.sicurezza+=2; gd('cetomedio',2); gd('imprenditori',1);}},
+   {l:'Prima i più pericolosi, gli altri con le telecamere',e:'Si spende poco; le code restano',pleases:'conservatore',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; S.ind.sicurezza+=1; gd('cetomedio',-1);}},
+ ]},
+ {id:'ms_if_navetta',era:'contemporanea',min:'infrastrutture',kick:'Trasporti',t:'Il treno che non arriva all\'aeroporto',text:'Il grande aeroporto è fuori città, e ci si arriva solo in auto, in taxi o con un autobus ogni ora, su una strada sempre in coda. Un treno diretto è promesso da vent\'anni.',ch:[
+   {l:'Il treno diretto, finalmente',e:'Un\'opera che si vede; anni di cantiere e un conto alto',pleases:'tecnico',costo:{debito:0.4},f:()=>{S.ind.debt+=0.4; S.ind.ambiente+=1; S.gMod+=0.1; gd('imprenditori',2); gd('pensionati',-1);}},
+   {l:'Una corsia riservata e un autobus ogni dieci minuti',e:'Si fa in un anno; per le auto la coda resta',pleases:'populista',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; S.ind.ambiente+=1; gd('lavoratori',1); gd('cetomedio',-1);}},
+ ]},
+ {id:'ms_if_antenne',era:'contemporanea',min:'infrastrutture',kick:'Digitale',t:'L\'antenna vicino alla scuola',text:'Un comitato di genitori blocca da mesi un\'antenna per i cellulari accanto a una scuola: dicono che le onde fanno male. Gli esperti rispondono che i valori sono bassissimi, ma intanto nel quartiere il telefono non prende.',ch:[
+   {l:'L\'antenna si monta, con le misure pubblicate ogni mese',e:'Il segnale arriva; il comitato porta la protesta in piazza',pleases:'tecnico',f:()=>{gd('imprenditori',2); gd('giovani',1); gd('cetomedio',-2);}},
+   {l:'Si sposta lontano dalla scuola, a spese pubbliche',e:'I genitori si calmano; il conto lo pagano tutti',pleases:'populista',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; gd('cetomedio',2); gd('imprenditori',-1);}},
+ ]},
+ {id:'ms_if_funivia',era:'contemporanea',min:'infrastrutture',kick:'Città',t:'Una funivia per il quartiere in collina',text:'Il quartiere più povero sta in cima a una collina, e per scendere in centro ci vuole più di un\'ora di autobus fra le curve. Un\'impresa propone una funivia urbana: dieci minuti, e una cabina ogni mezzo minuto.',ch:[
+   {l:'La funivia, col biglietto dell\'autobus',e:'Il quartiere scende in dieci minuti; un\'opera che fa discutere',pleases:'progressista',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; S.ind.ambiente+=1; gd('lavoratori',2); gd('giovani',1);}},
+   {l:'Più autobus e una strada nuova',e:'Una soluzione che tutti conoscono; il viaggio si accorcia di poco',pleases:'conservatore',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; S.ind.ambiente-=1; gd('imprenditori',1); gd('pensionati',1);}},
+ ]},
+ {id:'ms_if_depuratori',era:'contemporanea',min:'infrastrutture',kick:'Acqua',t:'Le fogne che finiscono nel fiume',text:'Un comune su tre scarica le fogne nei fiumi o nel mare con un depuratore vecchio, o senza. I pescatori protestano, i giudici condannano i comuni, e nessuno ha i soldi per rifarli.',ch:[
+   {l:'Un piano nazionale: lo stato paga, i comuni costruiscono',e:'Fiumi più puliti in dieci anni; un conto pesante',pleases:'progressista',costo:{debito:0.4},f:()=>{S.ind.debt+=0.4; S.ind.ambiente+=3; gd('giovani',1); gd('imprenditori',1);}},
+   {l:'Lo paga la bolletta dell\'acqua',e:'Nessun debito nuovo; le famiglie pagano di più',pleases:'tecnico',f:()=>{S.ind.ambiente+=2; gd('cetomedio',-2); gd('pensionati',-1);}},
+ ]},
+ {id:'ms_if_cavi',era:'contemporanea',min:'infrastrutture',kick:'Territorio',t:'I fili della corrente sui pali',text:'Nei paesi e nelle periferie i cavi della corrente corrono ancora su pali di legno. A ogni temporale forte un albero ne abbatte qualcuno, e intere zone restano al buio per giorni.',ch:[
+   {l:'Interrarli tutti in dieci anni',e:'Niente più buio dopo i temporali; lavori dappertutto e una spesa enorme',pleases:'tecnico',costo:{debito:0.4},f:()=>{S.ind.debt+=0.4; S.ind.sicurezza+=1; gd('pensionati',2); gd('cetomedio',1);}},
+   {l:'Solo dove cadono più spesso, e alberi potati',e:'Si spende poco; il buio torna, ma meno',pleases:'conservatore',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; gd('imprenditori',1); gd('pensionati',-1);}},
+ ]},
+ {id:'ms_if_chiamata',era:'contemporanea',min:'infrastrutture',kick:'Mobilità',t:'L\'autobus che si prenota',text:'Nelle valli e nelle campagne gli autobus di linea passano vuoti tre volte al giorno. Si propone di sostituirli con minibus che si prenotano dal telefono e passano a prendere sotto casa.',ch:[
+   {l:'Minibus a chiamata al posto delle linee',e:'Un servizio su misura; chi non usa il telefono resta a piedi',pleases:'tecnico',f:()=>{S.ind.ambiente+=1; gd('giovani',2); gd('pensionati',-2);}},
+   {l:'Le linee restano, con qualche corsa in più',e:'Gli orari che tutti conoscono; autobus vuoti e costi alti',pleases:'populista',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; gd('pensionati',2);}},
+ ]},
  // ----- SVILUPPO (+7) -----
  {id:'ia_lavoro', dal:2023,min:'sviluppo',kick:'Tecnologia',t:'L\'intelligenza artificiale entra nei servizi',text:'Le aziende introducono sistemi automatici al posto di interi reparti. Tutele o via libera?',ch:[
    {l:'Fondo di transizione e riqualificazione',e:'Accompagni il cambiamento',pleases:'progressista',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; gd('lavoratori',4); gd('giovani',2);}},
@@ -9426,6 +9797,43 @@ const DOSSIERS=[
  {id:'ms_gi_psichiatria',era:'contemporanea',min:'giustizia',kick:'Carcere',t:'I detenuti malati di mente',text:'Un detenuto su dieci ha una malattia mentale grave e in cella peggiora. Le strutture di cura che dovrebbero accoglierli hanno liste d\'attesa di mesi; gli agenti non sanno come gestirli.',ch:[
    {l:'Strutture di cura fuori dal carcere',e:'Cure vere e celle più tranquille; posti nuovi da pagare',pleases:'progressista',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; S.ind.sicurezza+=1; gd('cattolici',2); gd('pensionati',-1);}},
    {l:'Un reparto sanitario in ogni carcere',e:'Si fa presto e costa meno; la cella resta una cella',pleases:'conservatore',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; gd('lavoratori',1); gd('cattolici',-1);}},
+ ]},
+ // L220-1 · varietà del ministro (10/10): nove dossier del presente per il ministro della Giustizia — era 'contemporanea', senza paesi.
+ {id:'ms_gi_coltelli',era:'contemporanea',min:'giustizia',kick:'Sicurezza',t:'I coltelli in tasca dei ragazzi',text:'Nei quartieri delle grandi città sempre più ragazzi di quindici anni escono di casa con un coltello in tasca: per difendersi, dicono, o per farsi rispettare. Le scuole chiedono aiuto, i genitori hanno paura.',ch:[
+   {l:'Vietata la vendita ai minori, e controlli fuori dalle scuole',e:'Meno lame in giro; i ragazzi si sentono trattati da sospettati',pleases:'conservatore',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; S.ind.sicurezza+=1; gd('pensionati',2); gd('giovani',-2);}},
+   {l:'Educatori di strada nei quartieri',e:'Si lavora sul perché; i risultati si vedranno fra anni',pleases:'progressista',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; gd('giovani',2); gd('cattolici',1); gd('pensionati',-1);}},
+ ]},
+ {id:'ms_gi_telefoni',era:'contemporanea',min:'giustizia',kick:'Carcere',t:'I telefoni che volano oltre il muro',text:'Di notte piccoli droni lasciano cadere telefoni e droga nei cortili delle carceri. Dalle celle i capi continuano a dare ordini a chi sta fuori, e gli agenti ne sequestrano a centinaia.',ch:[
+   {l:'Il segnale schermato in tutte le carceri',e:'I telefoni smettono di funzionare; anche le case vicine perdono la linea',pleases:'conservatore',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; S.ind.sicurezza+=1; gd('pensionati',2); gd('cetomedio',-1);}},
+   {l:'Un telefono controllato per tutti, con chiamate registrate',e:'Meno mercato nero e più contatti con le famiglie; qualcuno lo chiama un premio',pleases:'progressista',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; gd('cattolici',2); gd('pensionati',-1);}},
+ ]},
+ {id:'ms_gi_testimoni',era:'contemporanea',min:'giustizia',kick:'Giustizia',t:'I testimoni che ritrattano',text:'In un processo contro una banda del porto, quattro testimoni su cinque hanno ritrattato in aula quello che avevano detto alla polizia. Nessuno ha denunciato minacce; tutti hanno cambiato casa.',ch:[
+   {l:'Un programma di protezione più largo, con casa e lavoro altrove',e:'Chi parla sa di essere protetto; un programma che costa',pleases:'tecnico',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; S.ind.sicurezza+=1; gd('cetomedio',1); gd('cattolici',1);}},
+   {l:'La prima testimonianza filmata vale anche in aula',e:'Ritrattare serve a meno; gli avvocati parlano di difesa ridotta',pleases:'conservatore',f:()=>{S.ind.sicurezza+=1; gd('pensionati',1); gd('giovani',-1);}},
+ ]},
+ {id:'ms_gi_falsi',era:'contemporanea',min:'giustizia',kick:'Digitale',t:'I video falsi fatti al computer',text:'Con un programma gratuito si mette il volto di chiunque in un video che non ha mai girato. Un\'insegnante di provincia si è ritrovata in rete in un filmato inventato da due studenti, e nessuna legge dice che cosa sia.',ch:[
+   {l:'Un reato nuovo, con il carcere nei casi gravi',e:'Chi lo fa rischia davvero; i giudici dovranno capire la tecnica',pleases:'conservatore',f:()=>{S.ind.sicurezza+=1; gd('pensionati',2); gd('cetomedio',1); gd('giovani',-1);}},
+   {l:'Le piattaforme li tolgano entro un giorno, o pagano',e:'I video spariscono in fretta; le piattaforme parlano di censura',pleases:'progressista',f:()=>{gd('giovani',2); gd('cetomedio',1); gd('imprenditori',-2);}},
+ ]},
+ {id:'ms_gi_ricorsi',era:'contemporanea',min:'giustizia',kick:'Tribunali',t:'Le multe che finiscono in tribunale',text:'Un ricorso su tre davanti ai giudici dei casi minori riguarda una multa stradale. I comuni aspettano anni per incassare, i giudici non fanno altro, e le cause vere restano in fila.',ch:[
+   {l:'Un contributo per ricorrere, restituito a chi vince',e:'Meno ricorsi per perdere tempo; chi ha poco ci pensa due volte',pleases:'tecnico',costo:{debito:-0.1},f:()=>{S.ind.debt-=0.1; gd('imprenditori',1); gd('lavoratori',-2);}},
+   {l:'Ricorsi in rete e gratuiti, decisi da un ufficio apposito',e:'I giudici si liberano; un ufficio nuovo da pagare',pleases:'populista',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; gd('lavoratori',1); gd('cetomedio',1);}},
+ ]},
+ {id:'ms_gi_revisione',era:'contemporanea',min:'giustizia',kick:'Giustizia',t:'Riaprire una condanna',text:'Un uomo condannato vent\'anni fa giura di essere innocente, e un testimone di allora oggi dice di aver mentito. Riaprire un processo chiuso è quasi impossibile: deve chiederlo lui, agli stessi giudici.',ch:[
+   {l:'Una commissione indipendente che riesamina i casi dubbi',e:'Gli errori possono venire a galla; i magistrati la vivono come un controllo',pleases:'progressista',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; gd('giovani',2); gd('cattolici',1); gd('pensionati',-1);}},
+   {l:'Solo con prove nuove, davanti ai giudici di sempre',e:'Le sentenze restano solide; chi è dentro per errore resta dentro',pleases:'conservatore',f:()=>{gd('pensionati',1); gd('giovani',-1);}},
+ ]},
+ {id:'ms_gi_anziani',era:'contemporanea',min:'giustizia',kick:'Carcere',t:'I detenuti di ottant\'anni',text:'Nelle carceri ci sono sempre più vecchi: malati, in sedia a rotelle, alcuni che non ricordano più perché sono lì. Gli agenti fanno gli infermieri, e ogni posto letto in infermeria costa come tre celle.',ch:[
+   {l:'A casa o in una struttura di cura, salvo i reati più gravi',e:'Si libera spazio e si risparmia; le vittime non sono d\'accordo',pleases:'progressista',costo:{debito:-0.1},f:()=>{S.ind.debt-=0.1; gd('cattolici',2); gd('pensionati',-2);}},
+   {l:'Restano dentro, in reparti attrezzati',e:'La pena si sconta tutta; i reparti vanno costruiti',pleases:'conservatore',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; S.ind.sicurezza+=1; gd('pensionati',1); gd('cattolici',-1);}},
+ ]},
+ {id:'ms_gi_account',era:'contemporanea',min:'giustizia',kick:'Famiglia',t:'Le fotografie di chi non c\'è più',text:'Quando qualcuno muore, le sue fotografie, i messaggi e i documenti restano chiusi in un account che la famiglia non può aprire. Le aziende dicono che la riservatezza vale anche dopo la morte.',ch:[
+   {l:'Gli eredi ereditano anche gli account',e:'Le famiglie recuperano i ricordi; le aziende temono di aprire segreti',pleases:'progressista',f:()=>{gd('cetomedio',2); gd('pensionati',1); gd('imprenditori',-1);}},
+   {l:'Decide ciascuno in vita, con una scelta nelle impostazioni',e:'Si rispetta la volontà di chi c\'era; chi non ha scelto resta chiuso',pleases:'tecnico',f:()=>{gd('imprenditori',1); gd('giovani',1); gd('pensionati',-1);}},
+ ]},
+ {id:'ms_gi_piccole',era:'contemporanea',min:'giustizia',kick:'Cause civili',t:'Le piccole cause senza avvocato',text:'Il meccanico che non restituisce l\'anticipo, il vicino che non ripaga un danno: per somme piccole fare causa costa più di quanto si recupera, e quasi nessuno ci prova. Si propone una procedura semplice, in rete, senza avvocato.',ch:[
+   {l:'La procedura semplice per le piccole somme',e:'Chiunque può farsi ragione; gli avvocati perdono un pezzo di lavoro',pleases:'populista',costo:{debito:0.1},f:()=>{S.ind.debt+=0.1; gd('cetomedio',2); gd('pensionati',1); gd('imprenditori',-1);}},
+   {l:'L\'avvocato resta, ma il patrocinio pagato si allarga',e:'Le garanzie restano; i tempi pure',pleases:'conservatore',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; gd('lavoratori',1); gd('cetomedio',-1);}},
  ]},
  // ----- ESTERI (+4, dossier domestici) -----
  {id:'expo',era:'universale',min:'esteri',kick:'Diplomazia pubblica',t:'Candidare il paese a un\'esposizione mondiale',text:'Una grande esposizione porterebbe vetrina e turismo, ma la candidatura costa.',ch:[

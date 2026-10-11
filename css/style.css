@@ -925,6 +925,14 @@
     font-family:'IBM Plex Sans',system-ui,sans-serif; font-size:clamp(16px, 2.8vmin, 24px); line-height:1.35;}
   /* in verticale la clip (16:9, a tutta larghezza) è una fascia in mezzo: i sottotitoli le stanno subito sotto, non in fondo allo schermo */
   @media (orientation:portrait){ #partenza-sott{top:calc(50% + 28.125vw + 14px); bottom:auto;} }
+  /* L218-4 · il sottotitolo delle VOCI dei grandi momenti (audio.js, `voceSottotitolo`): in ALTO, perché in basso coprirebbe i
+     bottoni dei modali; sopra il modale (#ov, 60), sotto i veli a tutto schermo (10000). C'è solo mentre la voce suona; un tocco la zittisce. */
+  #voce-sott{position:fixed; left:max(16px, env(safe-area-inset-left)); right:max(16px, env(safe-area-inset-right)); top:max(12px, calc(env(safe-area-inset-top) + 8px));
+    z-index:9000; text-align:center; pointer-events:none; opacity:0; transition:opacity .2s ease;}
+  #voce-sott.on{opacity:1;}
+  #voce-sott span{display:inline-block; max-width:40em; min-height:44px; box-sizing:border-box; padding:10px 14px; border-radius:6px; background:rgba(24,22,20,.92);
+    color:#f3efe6; font-family:'IBM Plex Sans',system-ui,sans-serif; font-size:15px; line-height:1.4; cursor:pointer; pointer-events:none;}
+  #voce-sott.on span{pointer-events:auto;}
   /* L153-5 · le clip delle partite storiche (paese, poi decennio): lo stesso velo della partenza; i video stanno uno sopra l'altro
      e il secondo passa sopra il primo quando tocca a lui. La didascalia (paese, anno) in basso a sinistra dell'immagine. */
   #clip-porta, #clip-porta-uscente{position:fixed; inset:0; z-index:10000; background:#000; opacity:0; transition:opacity .35s ease; cursor:pointer;}
@@ -940,6 +948,14 @@
     font-family:'Fraunces',serif; font-size:clamp(15px, 2.6vmin, 22px); letter-spacing:.02em;}
   /* in verticale la clip (16:9, a tutta larghezza) è una fascia in mezzo: la didascalia sta nell'angolo in basso a sinistra della fascia */
   @media (orientation:portrait){ #clip-porta-did{bottom:calc(50% - 28.125vw + 10px);} }
+  /* L218-7 · il sottotitolo della voce di una clip di porta: la veste di #partenza-sott; in orizzontale SOPRA la didascalia (che sta in
+     basso a sinistra), in verticale subito sotto la fascia della clip, come la partenza */
+  #clip-porta-sott{position:absolute; left:max(16px, env(safe-area-inset-left)); right:max(16px, env(safe-area-inset-right)); bottom:max(76px, calc(env(safe-area-inset-bottom) + 68px));
+    text-align:center; pointer-events:none; opacity:0; transition:opacity .2s ease;}
+  #clip-porta-sott.on{opacity:1;}
+  #clip-porta-sott span{display:inline-block; max-width:44em; padding:4px 10px; border-radius:4px; background:rgba(0,0,0,.62); color:#f3efe6; white-space:pre-line;
+    font-family:'IBM Plex Sans',system-ui,sans-serif; font-size:clamp(16px, 2.8vmin, 24px); line-height:1.35;}
+  @media (orientation:portrait){ #clip-porta-sott{top:calc(50% + 28.125vw + 14px); bottom:auto;} }
   .intro-rivedi{display:block; margin:10px auto 2px; min-height:44px; padding:8px 14px; border:1px solid var(--line); background:var(--bg2); color:inherit;
     border-radius:9px; font-size:12px; font-family:inherit; cursor:pointer;}
   /* L178-3 · IL RITRATTO VIVO. Il medaglione dei momenti grandi (ritrattoVivoHtml, ui.js): verticale 3:4, il volto in alto

@@ -170,8 +170,11 @@ function pavimentoGruppo(id){ const save=S.pol; const neu={}; for(const p of POL
 function aggiornaRivolta(){
   if(S.opposizione || (S.livello||3)!==3 || !S.groups){ S.rivolta=null; return; }
   const R=S.rivolta||{};
-  for(const gr of GROUPS){ if(S.groups[gr.id]<pavimentoGruppo(gr.id)) R[gr.id]=(R[gr.id]||0)+1; else delete R[gr.id]; }
+  let nuovo=false;   // L218-11: un gruppo comincia OGGI a voltarti le spalle (il conto passa da 0 a 1)
+  for(const gr of GROUPS){ if(S.groups[gr.id]<pavimentoGruppo(gr.id)){ R[gr.id]=(R[gr.id]||0)+1; if(R[gr.id]===1) nuovo=true; } else delete R[gr.id]; }
   S.rivolta=Object.keys(R).length?R:null;
+  /* L218-11: la voce della piazza in protesta (F4m) — dentro advanceMonth (MESE_IN_CORSO, game.js), zitta se un'altra voce parla. */
+  if(nuovo && typeof MESE_IN_CORSO!=='undefined' && MESE_IN_CORSO && typeof parla==='function' && !(typeof voceInCorso==='function' && voceInCorso())) parla('voce-protesta');
 }
 function rivoltaMatura(){ if(!S.rivolta) return null; const N=dif().mesiRivolta||6; for(const g of GROUPS){ if((S.rivolta[g.id]||0)>=N) return g.id; } return null; }
 function computeConsenso(){let s=0,w=0; for(const gr of GROUPS){s+=S.groups[gr.id]*gr.w; w+=gr.w;} return s/w;}
