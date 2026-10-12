@@ -184,7 +184,7 @@
         <div style="display:flex; align-items:flex-end; gap:10px;"><div id="hdr-avatar" class="hdr-avatar" style="display:none;"></div>
         <div class="brand"><span class="k">Head of State</span><div class="namerow"><span class="flag" id="hdr-flag"></span><h1 id="hdr-paese"></h1></div></div></div>
         <div style="display:flex; align-items:center; gap:10px;">
-          <button onclick="showPartita()" aria-label="Salva e carica" class="tondo-btn">≡</button>
+          <button onclick="if(typeof suona==='function')suona('scorri');showPartita()" aria-label="Salva e carica" class="tondo-btn">≡</button>
           <button onclick="showHelp()" aria-label="Come si gioca" class="tondo-btn">?</button>
           <div class="clock"><div class="yr mono" id="yr">2025</div><div class="el" id="el"></div></div>
         </div>

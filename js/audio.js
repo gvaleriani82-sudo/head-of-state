@@ -101,7 +101,30 @@ const AUDIO_MANIFEST = {
   'negoziato-fogli':    { file:'negoziato-fogli.mp3',    loop:false, gain:1.10 },  // negoziato: la controproposta · L218-9 (giro 9, rifatto) 1,5 s: RMS −24,7, picco −1,8 → tetto del picco (la regola dava 1,16; quello del giro 8, −30,0, è in giro-suoni/prove/negoziato-fogli-giro8.mp3)
   'discorso-microfono': { file:'discorso-microfono.mp3', loop:false, gain:0.84 },  // discorso: l'inizio · 1,5 s: RMS −21,9, picco −0,5 → regola di sopra
   'discorso-eco':       { file:'discorso-eco.mp3',       loop:false, gain:0.82 },  // discorso: la pausa, la sala vuota · 2,5 s: RMS −21,7, picco −0,3 → regola di sopra
-  'discorso-leggio':    { file:'discorso-leggio.mp3',    loop:false, gain:1.58 }   // discorso: si prende la parola (E2j) · L218-9 (giro 9) 1,5 s: RMS −27,4, picco −10,3 → regola di sopra (tetto 2,93): il «+6 dB» della consegna sta nel gain, non nel file (niente ffmpeg; rende come gli altri, picco reso −6,3)
+  'discorso-leggio':    { file:'discorso-leggio.mp3',    loop:false, gain:1.58 },  // discorso: si prende la parola (E2j) · L218-9 (giro 9) 1,5 s: RMS −27,4, picco −10,3 → regola di sopra (tetto 2,93): il «+6 dB» della consegna sta nel gain, non nel file (niente ffmpeg; rende come gli altri, picco reso −6,3)
+  /* ⚑ L218-13 (12/10) · F5, I MOMENTI MUTI (PROPOSTA-AUDIO.md §F5, giro suoni 13, ElevenLabs). Gain con la regola di sopra sul volume
+     misurato in Chrome (`.claude/musica-prova/rms-cdp.js`), tetto del picco −1 dBFS. Agganci: timbro → `chiudiBilancio` (il bilancio
+     dell'anno); calcolatrice → la manovra che entra (`SUONO_CARTA`, specie `budget`); consenso-su/-giu e sondaggio → `forseSondaggio`
+     (uno solo: la direzione se il sondaggio si è mosso di almeno un margine dal consecutivo di prima, altrimenti `sondaggio`); nomina →
+     `rimpastoEntra` e la scelta del ministro nuovo (carta `rimpasto`); banchi → `goOpposizione` dopo una sconfitta dal governo;
+     votazione → la questione di fiducia votata; dimissioni → «Chiedi le dimissioni» nello scandalo e `condannaLieve`; traguardo → una
+     promessa di campagna mantenuta (`resaPromesseCampagna`, nel mese nuovo); salva → `uiSlotSave` riuscito; scorri → il bottone ≡ del
+     pannello Partita (i cassetti hanno già `pagina`). Nei gesti di una scelta il nuovo è il SECONDO suono, dopo `tocco`: `suonoEsito`
+     resta oltre il tetto (AUDIO_TETTO_GESTO), cioè il nuovo suona AL POSTO dell'esito. ⚠ `no` (azione non disponibile): file e gain,
+     NESSUN aggancio — i bottoni non disponibili del gioco sono `disabled` e il tocco su di loro non arriva a nessun gestore. */
+  timbro:          { file:'timbro.mp3',          loop:false, gain:0.89 },  // F5a · 0,8 s: RMS −25,1, picco 0 → tetto del picco (la regola dava 1,21)
+  calcolatrice:    { file:'calcolatrice.mp3',    loop:false, gain:0.80 },  // F5b · 1,5 s: RMS −21,5, picco +0,9 decodificato in Chrome → regola di sopra (tetto 0,80)
+  'consenso-su':   { file:'consenso-su.mp3',     loop:false, gain:0.93 },  // F5c · 0,8 s: RMS −22,8, picco −2,0 → regola di sopra
+  'consenso-giu':  { file:'consenso-giu.mp3',    loop:false, gain:0.82 },  // F5d · 0,8 s: RMS −21,7, picco −6,2 → regola di sopra
+  nomina:          { file:'nomina.mp3',          loop:false, gain:0.75 },  // F5e · 1,5 s: RMS −20,9, picco +0,1 → regola di sopra (tetto 0,88)
+  banchi:          { file:'banchi.mp3',          loop:false, gain:0.93 },  // F5f · 2,0 s: RMS −24,5, picco −0,4 → tetto del picco (la regola dava 1,13)
+  votazione:       { file:'votazione.mp3',       loop:false, gain:1.14 },  // F5g · 1,5 s: RMS −24,6, picco −6,7 → regola di sopra
+  dimissioni:      { file:'dimissioni.mp3',      loop:false, gain:0.83 },  // F5i · 1,5 s: RMS −21,8, picco −3,0 → regola di sopra
+  traguardo:       { file:'traguardo.mp3',       loop:false, gain:1.21 },  // F5j · 1,2 s: RMS −25,1, picco −3,5 → regola di sopra (tetto 1,33)
+  salva:           { file:'salva.mp3',           loop:false, gain:1.88 },  // F5k · 0,6 s: RMS −33,2, picco −6,5 → tetto del picco (la regola dava 3,08: un clic, resta basso)
+  scorri:          { file:'scorri.mp3',          loop:false, gain:0.71 },  // F5l · 0,5 s: RMS −20,5, picco −2,9 → regola di sopra
+  no:              { file:'no.mp3',              loop:false, gain:1.00 },  // F5m · 0,5 s: RMS −23,4, picco −3,1 → regola di sopra · senza aggancio
+  sondaggio:       { file:'sondaggio.mp3',       loop:false, gain:0.67 }   // F5o · 1,2 s: RMS −19,9, picco −6,3 → regola di sopra
 };
 /* ⚠ I FILE CHE ESISTONO DAVVERO in assets/audio/. Il motore carica SOLO questi: un nome del manifesto che non è
    qui non genera nessuna richiesta di rete. Si aggiorna a mano quando un file cambia, e se la lista e la cartella
@@ -120,7 +143,9 @@ const AUDIO_PRESENTI = ['tocco.mp3','carta.mp3','chip.mp3','mese.mp3','giornale.
                         'discorso-leggio.mp3',   // L218-9 (11/10, giro 9: E2j, senza aggancio come gli altri E2)
                         'vibrazione.mp3',   // L218-2 (10/10, giro suoni 2; mappa, snodo, soglia, mese, negativo, firma, allarme cambiano solo il file)
                         'positivo.mp3','negativo.mp3','firma.mp3','monete.mp3','applauso.mp3','folla.mp3',
-                        'protesta.mp3','fischi.mp3','flash.mp3','bussare.mp3','macchina.mp3','allarme.mp3'];         // L116-1
+                        'protesta.mp3','fischi.mp3','flash.mp3','bussare.mp3','macchina.mp3','allarme.mp3',          // L116-1
+                        'timbro.mp3','calcolatrice.mp3','consenso-su.mp3','consenso-giu.mp3','nomina.mp3','banchi.mp3','votazione.mp3',
+                        'dimissioni.mp3','traguardo.mp3','salva.mp3','scorri.mp3','no.mp3','sondaggio.mp3'];   // L218-13 (12/10, giro suoni 13: F5)
 
 /* ── 6 · NIENTE SINTETICO A RUNTIME ────────────────────────────────────────────────────────────────────────
    Il motore carica FILE. I suoni li genera `.claude/genera-audio.js` una volta, fuori dal gioco (L95-3a); la prima
@@ -330,6 +355,7 @@ const SUONO_CARTA = [
   ['notifica', ['stampa'],                    /social(?![a-z])|online|virale|sul web/i, { dal:2000 }],   // «social» col confine: senza, prendeva «Conflitto sociale» (L118-1, lezione 202)
   ['flash',    ['stampa','scandalo'],         /stampa|comunicazione|televisione|scandalo|intervista|giornal|conferenza/i],
   ['campanella',[],                           /question time|dibattito|seduta|interpellanz|in aula|mozione/i],   // L140-1: PRIMA di `macchina` — un dossier che parla di un dibattito in aula suona la campanella (dopo `macchina` non usciva mai)
+  ['calcolatrice',['budget'],                 /^$/],   // L218-13 (F5b): la manovra che entra — prima di `macchina`, che la prendeva per «conti pubblici»
   ['macchina', ['dossier','inchiesta'],       /dossier|rapporto|inchiesta|indagine|toghe|giustizia|procura|conti pubblici/i],
   ['allarme',  ['crisiInt'],                  /crisi|emergenz|allarme|calamit|attentat|terror|i mercati|default/i],
   ['passi',    [],                            /visita|sopralluogo/i],   // senza «corridoi»: prendeva il kicker «Corridoio» (il treno veloce)
@@ -756,7 +782,7 @@ function ambiente(stato){
      gradino della voce di partenza, L146-1) e risale alla fine.
    · Il SOTTOTITOLO (`#voce-sott`, nato qui la prima volta, in alto: in basso coprirebbe i bottoni dei modali) c'è solo mentre la
      voce suona; un tocco sul sottotitolo zittisce la voce.
-   · Il file si carica alla prima richiesta (nessun precaricamento: ventitré file da 100-205 KB); se non è pronto entro VOCI_ATTESA_MS
+   · Il file si carica alla prima richiesta (nessun precaricamento: quarantatré file da 100-205 KB dal L218-12); se non è pronto entro VOCI_ATTESA_MS
      la voce si perde (niente voce in ritardo a momento finito).
    I FILE: `assets/audio/voci/<id>.mp3`, mono 44,1 kHz (ElevenLabs, modello Eleven v4: 130-150 kbps, non ricodificati — niente ffmpeg
    sul mini-PC), promessi da `VOCI_PRESENTI`, che `.claude/verifica-asset.js` tiene allineata alla cartella (un nome senza file è silenzio).
@@ -765,7 +791,7 @@ function ambiente(stato){
    ⚠ Tutto qui è transitorio: nulla entra in S.
    ================================================================================================================ */
 const VOCI_MANIFEST = {
-  'voce-insediamento':        { file:'voce-insediamento.mp3',        gain:0.40, en:'Today I accept this office not as a reward, but as a duty. I will govern for those who voted for me, and for those who did not. The work begins now.', it:'Oggi accetto questo incarico non come un premio, ma come un dovere. Governerò per chi mi ha votato e per chi non l\'ha fatto. Il lavoro comincia adesso.' },   // C1 · −15,6 / −1,2 (la presa Multilingual v2 è in giro-suoni/prova/: Giacomo sceglie)
+  'voce-insediamento-a':      { file:'voce-insediamento.mp3',        gain:0.40, en:'Today I accept this office not as a reward, but as a duty. I will govern for those who voted for me, and for those who did not. The work begins now.', it:'Oggi accetto questo incarico non come un premio, ma come un dovere. Governerò per chi mi ha votato e per chi non l\'ha fatto. Il lavoro comincia adesso.' },   // C1 · −15,6 / −1,2 (la presa Multilingual v2 è in giro-suoni/prova/: Giacomo sceglie) · dal L218-12 la -a della coppia (il file tiene il nome)
   'voce-vittoria-a':          { file:'voce-vittoria-a.mp3',          gain:0.37, en:'The people have spoken, and they have trusted us. Tonight we celebrate. Tomorrow, we keep our promises.', it:'Il popolo ha parlato e ci ha dato fiducia. Stanotte festeggiamo. Domani manteniamo le promesse.' },   // C2 · −16,2 / −1,0
   'voce-vittoria-b':          { file:'voce-vittoria-b.mp3',          gain:0.39, en:'It was a long campaign, and every vote counted. This victory belongs to all of you. Now the real work starts.', it:'È stata una campagna lunga, e ogni voto ha contato. Questa vittoria è di tutti voi. Ora comincia il lavoro vero.' },   // C3 · −15,7 / −1,1
   'voce-sconfitta-a':         { file:'voce-sconfitta-a.mp3',         gain:0.39, en:'The voters have made their choice, and I respect it. We lost tonight, but we did not lose our purpose. We will be back.', it:'Gli elettori hanno scelto, e io rispetto la loro scelta. Stanotte abbiamo perso, ma non abbiamo perso la ragione per cui siamo qui. Torneremo.' },   // C4 · −15,7 / −1,1
@@ -823,6 +849,21 @@ const VOCI_MANIFEST = {
   'voce-sondaggio-su':        { file:'voce-sondaggio-su.mp3',        gain:0.45, en:'People are starting to notice. Let us not celebrate yet. Let us keep earning it.', it:'La gente comincia ad accorgersene. Non festeggiamo ancora. Continuiamo a meritarcelo.' },   // F4k · −16,5 / −1,5 (L218-11)
   'voce-bilancio-si':         { file:'voce-bilancio-si.mp3',         gain:0.44, en:'The budget is approved. Every number in it is a choice, and we stand by ours.', it:'Il bilancio è approvato. Ogni numero è una scelta, e noi difendiamo le nostre.' },   // F4l · −16,3 / −1,3 (L218-11) · senza aggancio
   'voce-protesta':            { file:'voce-protesta.mp3',            gain:0.42, en:'I hear the voices in the streets. Protest is a right, and I will not ignore it.', it:'Sento le voci delle piazze. Protestare è un diritto, e non lo ignorerò.' },   // F4m · −15,9 / −1,3 (L218-11)
+  /* L218-12 (giro suoni 12): F4n-F4t, gain dalla stessa regola sull'RMS dichiarato dal giro. Agganci (game.js): insediamento-b →
+     la seconda della coppia `voce-insediamento` (dal L218-12 la C1 è la -a, il suo file tiene il nome voce-insediamento.mp3:
+     diventaPremier e tornaAlGoverno chiamano la coppia e voceScelta alterna); candidatura → `diventaLocale` (l'attivista sceglie
+     dove candidarsi: la prima carica); scandalo-chiuso → un arco della famiglia Scandali che si chiude al nodo `chiuso` con la
+     prima scelta («Rivendichi la trasparenza»: non «Archivi in silenzio», nessun trionfo); sciopero, vertice, lutto, dibattito →
+     `voceAgendaMese` (la carta entra in agenda nel mese nuovo, solo dentro advanceMonth: VOCI_CARTA). Tutte zitte se un'altra
+     voce parla (voceInCorso). ⚠ `voce-lutto` («tragedia o disastro») NON sui pilastri-tragedia: lì `parla` tace per regola (L218,
+     «mai sopra una tragedia»); la dicono i disastri inventati del gioco (`sisma`, `crollo`). */
+  'voce-sciopero':            { file:'voce-sciopero.mp3',            gain:0.36, en:'This strike is a sign of real anger. My door is open, and I want an agreement by the end of the week.', it:'Questo sciopero è il segno di una rabbia vera. La mia porta è aperta, e voglio un accordo entro la settimana.' },   // F4n · −14,5 / −1,0 (L218-12)
+  'voce-insediamento-b':      { file:'voce-insediamento-b.mp3',      gain:0.39, en:'I know the weight of this moment. I will not promise miracles. I promise work, honesty, and an open door.', it:'Conosco il peso di questo momento. Non prometto miracoli. Prometto lavoro, onestà e una porta aperta.' },   // F4o · −15,3 / −1,2 (L218-12)
+  'voce-candidatura':         { file:'voce-candidatura.mp3',         gain:0.38, en:'I am standing for election because I believe things can be better, and I am ready to prove it.', it:'Mi candido perché credo che le cose possano andare meglio, e sono pronto a dimostrarlo.' },   // F4p · −15,0 / −1,4 (L218-12)
+  'voce-vertice':             { file:'voce-vertice.mp3',             gain:0.48, en:'At this summit, our country speaks with one voice. We came to listen, and to be heard.', it:'A questo vertice il nostro paese parla con una voce sola. Siamo venuti ad ascoltare, e a farci ascoltare.' },   // F4q · −17,0 / −1,3 (L218-12)
+  'voce-scandalo-chiuso':     { file:'voce-scandalo-chiuso.mp3',     gain:0.43, en:'The inquiry is closed, and the facts are clear. Now let us return to the questions that matter to people.', it:'L\'inchiesta è chiusa, e i fatti sono chiari. Ora torniamo alle domande che contano per la gente.' },   // F4r · −16,1 / −1,1 (L218-12)
+  'voce-lutto':               { file:'voce-lutto.mp3',               gain:0.46, en:'Our thoughts are with the families tonight. Every resource of the state is already on its way.', it:'Stanotte il nostro pensiero va alle famiglie. Tutte le risorse dello stato sono già in viaggio.' },   // F4s · −16,6 / −1,2 (L218-12)
+  'voce-dibattito':           { file:'voce-dibattito.mp3',           gain:0.37, en:'Tonight, millions are watching. Speak clearly, answer honestly, and never lose your temper.', it:'Stasera ci guardano milioni di persone. Parla chiaro, rispondi con onestà, e non perdere mai la calma.' },   // F4t · −14,8 / −1,1 (L218-12)
 };
 const VOCI_PRESENTI = ['voce-insediamento.mp3', 'voce-vittoria-a.mp3', 'voce-vittoria-b.mp3', 'voce-sconfitta-a.mp3', 'voce-sconfitta-b.mp3',
                        'voce-fineanno-buono.mp3', 'voce-fineanno-lucieombre.mp3', 'voce-fineanno-difficile.mp3',   // L218-4 (giro suoni 4)
@@ -833,14 +874,16 @@ const VOCI_PRESENTI = ['voce-insediamento.mp3', 'voce-vittoria-a.mp3', 'voce-vit
                        'voce-scandalo.mp3', 'voce-rimpasto.mp3', 'voce-alleanza.mp3', 'voce-opposizione.mp3', 'voce-legge-si.mp3',
                        'voce-vittoria-c.mp3',   // L218-10 (giro suoni 10)
                        'voce-sconfitta-c.mp3', 'voce-coalizione-rotta.mp3', 'voce-legge-no.mp3', 'voce-sondaggio-giu.mp3',
-                       'voce-sondaggio-su.mp3', 'voce-bilancio-si.mp3', 'voce-protesta.mp3'];   // L218-11 (giro suoni 11)
+                       'voce-sondaggio-su.mp3', 'voce-bilancio-si.mp3', 'voce-protesta.mp3',   // L218-11 (giro suoni 11)
+                       'voce-sciopero.mp3', 'voce-insediamento-b.mp3', 'voce-candidatura.mp3', 'voce-vertice.mp3', 'voce-scandalo-chiuso.mp3',
+                       'voce-lutto.mp3', 'voce-dibattito.mp3'];   // L218-12 (giro suoni 12)
 const VOCI_DIR = 'assets/audio/voci/', VOCI_K = 1, VOCI_ATTESA_MS = 2500, VOCI_FADE_S = 0.3;
 let VOCI_BUF = {}, VOCI_CARICO = {}, VOCI_GIRO = {}, VOCE_ORA = null, VOCE_TOKEN = 0, VOCE_ATTESA = null;   // L218-6: VOCE_ATTESA = la voce chiesta e in caricamento {tok, t0}
 let VOCI_REGISTRO = [];               // {id, t, esito} — per le misure; transitorio
 function voceSegna(id, esito){ VOCI_REGISTRO.push({ id:id, t:(typeof performance!=='undefined'?Math.round(performance.now()):0), esito:esito }); if(VOCI_REGISTRO.length>500) VOCI_REGISTRO.splice(0, VOCI_REGISTRO.length-500); }
 function voceHaFile(id){ const M=VOCI_MANIFEST[id]; return !!M && VOCI_PRESENTI.indexOf(M.file)>=0; }
 /* PURA (salvo il turno della coppia): dal nome chiesto al nome che suona. Un nome del manifesto vale com'è; il nome di una coppia
-   sceglie fra `-a`, `-b` e `-c` (L218-10: la vittoria ne ha tre; L218-11: anche la sconfitta) QUELLE COL FILE, a turno. Null se non c'è niente da dire. */
+   sceglie fra `-a`, `-b` e `-c` (L218-10: la vittoria ne ha tre; L218-11: anche la sconfitta; L218-12: l'insediamento ne ha due) QUELLE COL FILE, a turno. Null se non c'è niente da dire. */
 function voceScelta(id){
   if(VOCI_MANIFEST[id]) return voceHaFile(id) ? id : null;
   const V=['-a','-b','-c'].map(function(s){ return id+s; }).filter(voceHaFile);   // L218-10: la terza della vittoria (-c)

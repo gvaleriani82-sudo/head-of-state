@@ -3543,6 +3543,7 @@ function rimpastoEntra(){
   tutteCorrenti(-8); stampad(-3);
   if(p.base) for(var g in p.base) gd(g,2);
   S.log.unshift({t:T('La maggioranza'),x:T('%P entra nel governo: due ministeri cambiano padrone e i numeri tornano.').replace('%P',T(p.nome))});
+  if(typeof suona==='function') suona('nomina');   // L218-13 (F5e): il rimpasto — due ministeri cambiano padrone
   if(typeof parla==='function' && !(typeof voceInCorso==='function' && voceInCorso())) parla('voce-rimpasto');   // L218-10: il rimpasto (F4b)
 }
 /* IL CONTO DEL SOSTEGNO, ogni mese: il prezzo si paga e si controlla se regge. Chiamata da avanzaMese. */
@@ -4305,6 +4306,7 @@ function diventaLocale(terrIdx){
   if(typeof PROMO_FIORE!=='undefined') PROMO_FIORE=true;
   S.tab='gov';
   genAgenda(false); generaTitolo(); render(); commitSnap();
+  if(typeof parla==='function' && !(typeof voceInCorso==='function' && voceInCorso())) parla('voce-candidatura');   // L218-12: l'attivista si candida alla prima carica (F4p)
 }
 /* il consenso locale: media dei servizi − impopolarità delle tasse, col bilancio come vincolo (rosso = malus).
    Mirror su S.ind.consenso così i sistemi generici (correnti) vedono un valore sensato. */
@@ -6503,6 +6505,24 @@ function genAgenda(first){
   genAgendaRamo(first);
   if(!(first || AG_SOLO)) codaAgenda();      // primo mese e mesi-setpiece: nessuna coda
   if(_pre) segnaPrimaAgenda(_pre);
+  if(MESE_IN_CORSO) voceAgendaMese();        // L218-12: solo nel mese nuovo (genAgenda gira anche in applySnap e dopo una carta)
+}
+/* L218-12 · LE VOCI DELLE CARTE CHE ENTRANO (F4n, F4q, F4s, F4t): l'id della carta → la voce, detta UNA volta quando la carta entra
+   nell'agenda del mese nuovo. Sciopero e lutto sono del capo del governo (livello 3, al governo); il vertice parla a chi ci va
+   (premier, ministro degli esteri, diplomatico: la carta arriva già a chi deve); il dibattito è il confronto in TV della campagna.
+   `voce-lutto` sui disastri inventati del gioco: sui pilastri-tragedia `parla` tace da sé (musicaTragedia, L218 «mai sopra una
+   tragedia»). Zitta se un'altra voce parla. */
+const VOCI_CARTA = { sciopero:'voce-sciopero', sisma:'voce-lutto', crollo:'voce-lutto', cn_tv:'voce-dibattito',
+  g7:'voce-vertice', nato_vertice:'voce-vertice', mg_vertice:'voce-vertice', dp_summit:'voce-vertice', dp_comunicato:'voce-vertice' };
+const VOCI_CARTA_CAPO = ['voce-sciopero', 'voce-lutto'];
+function voceAgendaMese(){
+  if(typeof parla!=='function' || (typeof voceInCorso==='function' && voceInCorso()) || !S || !Array.isArray(S.agenda)) return;
+  for(const it of S.agenda){
+    const d=it && !it.resolved && it.data, v=d && d.id && VOCI_CARTA[d.id];
+    if(!v) continue;
+    if(VOCI_CARTA_CAPO.indexOf(v)>=0 && !(S.livello===3 && !S.opposizione)) continue;
+    parla(v); return;
+  }
 }
 /* ================================================================================================================
    L180-1 (D150) · IL CARICAMENTO A INIZIO MESE RITROVA LE CARTE DOVUTE — l'opzione (e) di L179-3.
@@ -6648,6 +6668,7 @@ function resolveItemCore(idx,ci){
   const it=S.agenda[idx]; if(it.resolved) return;
   STAMPA_FX=0;   // bandierina dell'amplificatore: pulita prima degli effetti della scelta
   if(it.kind==='rimpasto'){
+    if(typeof suona==='function') suona('nomina');   // L218-13 (F5e): nomini il ministro nuovo — il secondo suono del gesto, dopo il tocco
     const c=it.cands[ci]; const m=getMin(it.min);
     m.nm=c.nm; m.g=c.g; m.profile=c.profile; m.comp=c.comp; m.loyalty=58; m.resigning=false;
     /* L20-1 — SOLO il nuovo arrivato risolve il suo volto, evitando quelli dei colleghi IN CARICA (escluso il
@@ -6786,7 +6807,10 @@ function resolveItemCore(idx,ci){
     if(choice.gameover){ S.esitoSalute=choice.tono; chiudiArco(a, arcoSub(T(choice.fatto),a), arcoSub(T(choice.epi),a)); it.resolved=true; return gameOver(choice.gameover); }   // finale di salute (ritiro dignitoso o fatale)
     const dest=(typeof choice.goto==='function')?choice.goto(a):choice.goto;   // goto ADATTIVO (fase A): può leggere a.peso/a.scelte → climax diverso secondo come hai giocato
     if(dest){ a.nodo=dest; a.prossimo=(S.year*12+S.month)+2; it.outcome=T('Scelta:')+' <b>'+arcoSub(T(choice.l),a)+'</b>. '+T('La storia continua.'); }   // passo +2: l'arco respira su più mesi e lascia spazio all'intreccio
-    else { chiudiArco(a, arcoSub(T(choice.fatto),a), arcoSub(T(choice.epi),a)); it.outcome='<b>'+arcoSub(T(choice.l),a)+'</b>.'+(choice.fatto?' '+arcoSub(T(choice.fatto),a):''); }
+    else { chiudiArco(a, arcoSub(T(choice.fatto),a), arcoSub(T(choice.epi),a)); it.outcome='<b>'+arcoSub(T(choice.l),a)+'</b>.'+(choice.fatto?' '+arcoSub(T(choice.fatto),a):'');
+      /* L218-12: lo scandalo si chiude a favore (F4r) — nodo `chiuso` dei quattro archi Scandali, prima scelta «Rivendichi la trasparenza»
+         (la seconda, «Archivi in silenzio», è «nessun trionfo»: niente voce) */
+      if(A.famiglia==='Scandali' && a.nodo==='chiuso' && ci===0 && typeof parla==='function' && !(typeof voceInCorso==='function' && voceInCorso())) parla('voce-scandalo-chiuso'); }
     S.ind.consenso=computeConsenso();
     it.resolved=true;
   } else if(it.kind==='inchiesta'){
@@ -6856,6 +6880,7 @@ function resolveItemCore(idx,ci){
       bioConta('difesi'); spregiudicata(it.scn.giudiziario?8:6);   // difendere l'indifendibile si paga; se l'inchiesta è giudiziaria il fango ti schizza (+8)
     } else { // Chiedi le dimissioni
       if(m && !m.resigning){ m.resigning=true; S.pendingRimpasto.push({id:it.min, uscita:'dimissioni'});   // L127-1b: la scalinata coi cronisti
+        if(typeof suona==='function') suona('dimissioni');   // L218-13 (F5i): la porta che si chiude — il secondo suono del gesto, dopo il tocco (suonoEsito resta oltre il tetto)
         if(typeof parla==='function') parla('voce-ministro-via');   // L218-6: hai chiesto le dimissioni del ministro (C20)
         S.log.unshift({t:T('Dimissioni'),x:T('Il Ministro %M (%D) si è dimesso dopo lo scandalo.').replace('%M',m.nm).replace('%D',T(role))}); }
       gd('cattolici',3); gd('giovani',2); gd('cetomedio',2);
@@ -6930,6 +6955,7 @@ function resolveItemCore(idx,ci){
       S.logorioAcc=(S.logorioAcc||0) + (typeof rateLogorioMese==='function' ? rateLogorioMese()*CONCESSIONE_LOGORIO_K : 0);
       S.concessioni=(S.concessioni||0)+1; S.ultimaConcessione=S.year*12+S.month;
     }
+    if(d.id===QUESTIONE_FIDUCIA_EV.id && !S.opposizione && typeof suona==='function') suona('votazione');   // L218-13 (F5g): l'aula vota la fiducia, qualunque esito — il secondo suono del gesto
     if(_cadeGov && !S.opposizione){ CAUSA_CRISI=d.id||'?'; S.log.unshift({t:T('Sfiducia'), x:T('%A vota contro: il governo cade.').replace('%A', _cadeGov.nomi)}); crisiMinisteriale(); CAUSA_CRISI=null; }
     else if(d.id===QUESTIONE_FIDUCIA_EV.id && !S.opposizione && typeof parla==='function') parla('voce-fiducia-si');   // L218-5: la questione di fiducia passata (concessa, o rifiutata senza chi toglie la maggioranza)
   }
@@ -6994,7 +7020,9 @@ function resaPromesseCampagna(){
     const mantenuta=!((p.colpi||0)>=6);
     S.promesseEsito=S.promesseEsito||[]; S.promesseEsito.push({grp:p.grp, anno:S.year, mantenuta:mantenuta});   // L73-2: il finale tira le somme
     if(!mantenuta){ gd(p.grp,-5); stampad(-4); S.log.unshift({t:T('La promessa tradita'), x:T('In campagna avevi promesso attenzione a %G, poi i fatti: ora te la rinfacciano.').replace('%G',nome)}); }
-    else { if(S.campNaz) S.campNaz.promMantenuta=true; gd(p.grp,4); S.log.unshift({t:T('La promessa mantenuta'), x:T('%G ricorda la parola data — e mantenuta.').replace('%G',nome)}); }
+    else { if(S.campNaz) S.campNaz.promMantenuta=true; gd(p.grp,4);
+      S.log.unshift({t:T('La promessa mantenuta'), x:T('%G ricorda la parola data — e mantenuta.').replace('%G',nome)});
+      if(MESE_IN_CORSO && typeof suona==='function') suona('traguardo'); }   // L218-13 (F5j): la promessa mantenuta (una per frame: suona non ripete un nome); solo nel mese nuovo, non in applySnap
   });
   S.promesseCampagna=S.promesseCampagna.filter(function(p){return mese-p.mese<=12;});
 }
@@ -7058,6 +7086,12 @@ function forseSondaggio(){
   if(prec && mm>prec.mm && mm-prec.mm<=E.ogni && S.livello===3 && MESE_IN_CORSO && typeof parla==='function' && !(typeof voceInCorso==='function' && voceInCorso())){
     const d=valR-prec.val;
     if(Math.abs(d)>=SONDAGGIO_VOCE_SCARTO*m) parla(d>0 ? 'voce-sondaggio-su' : 'voce-sondaggio-giu');
+  }
+  /* L218-13 (F5c, F5d, F5o): il sondaggio esce — `consenso-su`/`consenso-giu` se dal consecutivo di prima si è mosso di almeno UN margine
+     (sotto è rumore), altrimenti `sondaggio`. Un effetto solo; livello 3, dentro advanceMonth (forseSondaggio gira anche fuori: no). */
+  if(S.livello===3 && MESE_IN_CORSO && typeof suona==='function'){
+    const dd=(prec && mm>prec.mm && mm-prec.mm<=E.ogni) ? valR-prec.val : 0;
+    suona(dd>=m && m>0 ? 'consenso-su' : dd<=-m && m>0 ? 'consenso-giu' : 'sondaggio');
   }
   S.log.unshift({ t:T('Sondaggio'), x:testo });
 }
@@ -7990,7 +8024,7 @@ function mostraBilancio(prev, cur){
   if(typeof parla==='function') parla('voce-fineanno-'+(verd.k||'lucieombre'));   // L218-4: la voce del verdetto, la stessa chiave della scena (nuovocapitolo col file dal L218-5)
   try{ playAnims(); }catch(e){}   // vetrina: le barre salgono da 0 al valore (transform scaleX, 60fps)
 }
-function chiudiBilancio(){ document.getElementById('ov').classList.remove('on'); }   // presentazione: il mese è già reso sotto (il render unico di fine mese, L123-1)
+function chiudiBilancio(){ document.getElementById('ov').classList.remove('on'); if(typeof suona==='function') suona('timbro'); }   // L218-13 (F5a): il timbro sul bilancio dell'anno   // presentazione: il mese è già reso sotto (il render unico di fine mese, L123-1)
 
 /* --- Trattativa di coalizione (avvio e rielezione). Riusa l'overlay #ov/#modal. --- */
 function openTrattativa(ctx){
@@ -8382,7 +8416,8 @@ function goOpposizione(salvata){
   const w=vincitore();
   entraOpposizione(w);
   if(salvata) segnaSalvezza();
-  else if(typeof parla==='function' && !(typeof voceInCorso==='function' && voceInCorso())) parla('voce-opposizione');   // L218-10: dal governo all'opposizione dopo le urne (F4d); non la salvezza (eri già all'opposizione), non l'avvio (startOpposizione), e mai sopra la voce della sconfitta
+  else if(typeof suona==='function') suona('banchi');   // L218-13 (F5f): dal governo all'opposizione dopo le urne (lo stesso punto della voce qui sotto)
+  if(!salvata && typeof parla==='function' && !(typeof voceInCorso==='function' && voceInCorso())) parla('voce-opposizione');   // L218-10: dal governo all'opposizione dopo le urne (F4d); non la salvezza (eri già all'opposizione), non l'avvio (startOpposizione), e mai sopra la voce della sconfitta
   segnaForzaUrna();   // L153-1: l'urna persa è chiusa
   if(S.congresso) aggiornaCongresso(quotaPartitoPresidente());   // L173-2: la Camera del Presidente nuovo (dopo entraOpposizione: governoAvversario è lui)
   chiudiSforzo(); decidiTerritoriNazionale();   // L64-2: anche in sconfitta le aree lavorate possono passare al tuo blocco
@@ -8404,6 +8439,7 @@ function goOpposizione(salvata){
 function condannaLieve(){
   const w=vincitore();
   entraOpposizione(w);
+  if(typeof suona==='function') suona('dimissioni');   // L218-13 (F5i): la porta che si chiude dietro il capo del governo che lascia
   if(typeof parla==='function') parla('voce-dimissioni');   // L218-6: le dimissioni dopo la condanna (C17); il ritiro ha la voce del finale
   S.bloccoAtteso=bloccoQuota();
   S.log.unshift({t:T('All\'opposizione'),x:T('Dimissioni dopo la condanna: governa %W. La rimonta parte da qui, col marchio addosso.').replace('%W',w.nome)});

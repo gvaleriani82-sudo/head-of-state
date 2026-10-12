@@ -1547,7 +1547,7 @@ function abbandonaPartita(){
   try{ if(typeof musica==='function') musica(); if(typeof ambiente==='function') ambiente(); }catch(e){}   // L118-1: sulla home il tema, e l'ambiente tace
   window.scrollTo(0,0);
 }
-function uiSlotSave(i){ const cur=(slotInfo(i)||{}).nome || (S&&S.personaggio&&S.personaggio.nome) || T('Carriera'); const nome=prompt(T('Nome dello slot %N:').replace('%N',i+1), cur); if(nome===null) return; if(!salvaSlot(i,nome)) alert(T('Salvataggio non riuscito (storage non disponibile).')); showPartita(); }
+function uiSlotSave(i){ const cur=(slotInfo(i)||{}).nome || (S&&S.personaggio&&S.personaggio.nome) || T('Carriera'); const nome=prompt(T('Nome dello slot %N:').replace('%N',i+1), cur); if(nome===null) return; if(!salvaSlot(i,nome)) alert(T('Salvataggio non riuscito (storage non disponibile).')); else if(typeof suona==='function') suona('salva'); showPartita(); }   // L218-13 (F5k): la cartella che si chiude, a salvataggio riuscito
 function uiSlotLoad(i){ if(!confirm(T('Caricare lo slot %N? La partita in corso verrà sostituita.').replace('%N',i+1))) return; const r=caricaSlot(i); if(r.err) alert(r.err); else { hideMenu(); if(r.warn) alert(r.warn); } }
 function uiSlotDel(i){ if(!confirm(T('Eliminare lo slot %N?').replace('%N',i+1))) return; eliminaSlot(i); showPartita(); }
 function uiExport(){ const ta=document.getElementById('io-text'); ta.readOnly=true; ta.value=exportText(); ta.focus(); ta.select(); document.getElementById('io-msg').textContent=T('Pronto: copia il testo o scarica il file.'); }

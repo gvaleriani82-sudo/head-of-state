@@ -192,7 +192,12 @@ const VIDEO_PRESENTI = ['home-hero', 'partito-base', 'vitaprivata-base', 'retro-
      11/10 (L197-23): l'ufficio col fax e il monitor a tubo (partito-anni90 -v2, cucitura 2,6: gira; poster↔f0 2,6), la riunione
      col fumo rifatta a camera ferma (partito-base -v2, 2,6: gira; 2,1), il seggio in palestra (elezioni-base -v2, cucitura 5,5:
      la fila non torna, in CLIP_UNA_VOLTA; 3,3) e la fila davanti alla saracinesca (crisi-base-latina -v2, 5,2: in CLIP_UNA_VOLTA;
-     4,2, come le case d'area); luce ferma in tutte e quattro; seguono la regola della loro immagine. */
+     4,2, come le case d'area); luce ferma in tutte e quattro; seguono la regola della loro immagine.
+     12/10 (L197-24): il mercato con la fontana (societacivile-base -v2, cucitura 2,8: gira; poster↔f0 3,8) e la sala di lettura
+     con le lampade verdi (societacivile-base -v3, 3,4: gira; 3,5). 12/10 (L197-25): la passeggiata sulla riva al tramonto
+     (societacivile-base -v4, cucitura 4,0: foglie e coda del cane non tornano, in CLIP_UNA_VOLTA; 3,4) e l'assemblea sotto
+     l'albero (societacivile-base-africa -v2, 3,7: in CLIP_UNA_VOLTA; 4,3, come le case d'area); luce ferma in tutte e quattro;
+     seguono la regola della loro immagine. */
   'esteri-base-v5', 'esteri-base-v6', 'vitaprivata-base-v6', 'vitaprivata-base-v7', 'casa-base-v2',
   'casa-base-asiasud-v2', 'casa-base-latina-v2', 'casa-base-nordamerica-v2',
   'casa-base-africa-v2', 'casa-base-asiaest-v2', 'esteri-base-v2', 'esteri-base-v4',
@@ -201,7 +206,8 @@ const VIDEO_PRESENTI = ['home-hero', 'partito-base', 'vitaprivata-base', 'retro-
   'vitaprivata-anni80-v2', 'vitaprivata-anni90-v2', 'vitaprivata-anni50-v3', 'vitaprivata-anni60-v3', 'vitaprivata-anni70-v3',
   'vitaprivata-anni70-v4', 'vitaprivata-anni90-v4', 'vitaprivata-anni90-v3', 'vitaprivata-anni80-v4',
   'vitaprivata-anni80-v3', 'lavoro-anni50-v2', 'lavoro-anni90-v2', 'lavoro-anni80-v2',
-  'partito-anni90-v2', 'partito-base-v2', 'elezioni-base-v2', 'crisi-base-latina-v2'];
+  'partito-anni90-v2', 'partito-base-v2', 'elezioni-base-v2', 'crisi-base-latina-v2',
+  'societacivile-base-v2', 'societacivile-base-v3', 'societacivile-base-v4', 'societacivile-base-africa-v2'];
 
 /* ===== L181-4 — LE CLIP CHE NON GIRANO: un giro solo, poi l'ultimo fotogramma tenuto. Le altre clip di scena girano in tondo
    (`loop`) perché il loro ultimo fotogramma torna sul primo (cucitura ≤ 3,6 su 255, misurata sullo schermo); queste no — le porte
@@ -216,7 +222,8 @@ const CLIP_UNA_VOLTA = ['fineanno-buono', 'fineanno-lucieombre', 'fineanno-diffi
   'vitaprivata-anni70-v4',   // L197-17: i bagagli al tramonto, cucitura 3,7 (sopra il 3,6: foglie e cinghie non tornano)
   'vitaprivata-anni90-v4',   // L197-18: la tazza alla finestra appannata, cucitura 3,7 (come i bagagli e la mano di telefono-oggi-v4)
   'lavoro-anni80-v2',   // L197-22: l'acciaieria, cucitura 8,2 (la fine non torna all'immagine; luce ferma — come il banchetto)
-  'elezioni-base-v2', 'crisi-base-latina-v2'];   // L197-23: il seggio (5,5) e la fila alla saracinesca (5,2): le file non tornano
+  'elezioni-base-v2', 'crisi-base-latina-v2',   // L197-23: il seggio (5,5) e la fila alla saracinesca (5,2): le file non tornano
+  'societacivile-base-v4', 'societacivile-base-africa-v2'];   // L197-25: la riva (4,0) e l'assemblea sotto l'albero (3,7): foglie e gesti non tornano
                             // (Il telefono anni '70 di L197-11 è uscito da qui: rifatto a camera ferma, cucitura 1,4, L197-12.)
                             // (Il vicolo casa-base-asiaest-v2 di L197-10 è uscito da qui: rifatto a luce ferma, cucitura 2,2, L197-11.)
                             // (Il soggiorno vitaprivata-base-v6 di L192-7 è uscito con la sua clip: L195-0, D223.)
