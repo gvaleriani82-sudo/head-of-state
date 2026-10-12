@@ -208,7 +208,8 @@ const VIDEO_PRESENTI = ['home-hero', 'partito-base', 'vitaprivata-base', 'retro-
   'vitaprivata-anni80-v3', 'lavoro-anni50-v2', 'lavoro-anni90-v2', 'lavoro-anni80-v2',
   'partito-anni90-v2', 'partito-base-v2', 'elezioni-base-v2', 'crisi-base-latina-v2',
   'societacivile-base-v2', 'societacivile-base-v3', 'societacivile-base-v4', 'societacivile-base-africa-v2',
-  'societacivile-base-asiaest-v2', 'societacivile-base-asiasud-v3'];   // L197-26: il tai chi all'alba, il vicolo al mattino
+  'societacivile-base-asiaest-v2', 'societacivile-base-asiasud-v3',   // L197-26: il tai chi all'alba, il vicolo al mattino
+  'societacivile-base-nordamerica-v3', 'societacivile-base-nordamerica-v2', 'societacivile-base-africa-v3'];   // L197-27: main street, la palestra, il mercato
 
 /* ===== L181-4 — LE CLIP CHE NON GIRANO: un giro solo, poi l'ultimo fotogramma tenuto. Le altre clip di scena girano in tondo
    (`loop`) perché il loro ultimo fotogramma torna sul primo (cucitura ≤ 3,6 su 255, misurata sullo schermo); queste no — le porte
@@ -225,7 +226,8 @@ const CLIP_UNA_VOLTA = ['fineanno-buono', 'fineanno-lucieombre', 'fineanno-diffi
   'lavoro-anni80-v2',   // L197-22: l'acciaieria, cucitura 8,2 (la fine non torna all'immagine; luce ferma — come il banchetto)
   'elezioni-base-v2', 'crisi-base-latina-v2',   // L197-23: il seggio (5,5) e la fila alla saracinesca (5,2): le file non tornano
   'societacivile-base-v4', 'societacivile-base-africa-v2',   // L197-25: la riva (4,0) e l'assemblea sotto l'albero (3,7): foglie e gesti non tornano
-  'societacivile-base-asiaest-v2', 'societacivile-base-asiasud-v3'];   // L197-26: il tai chi all'alba (4,8) e il vicolo al mattino (4,0): nebbia e bucato non tornano
+  'societacivile-base-asiaest-v2', 'societacivile-base-asiasud-v3',   // L197-26: il tai chi all'alba (4,8) e il vicolo al mattino (4,0): nebbia e bucato non tornano
+  'societacivile-base-nordamerica-v3', 'societacivile-base-africa-v3'];   // L197-27: main street (4,8) e il mercato (6,2): foglie, passanti e teloni non tornano
                             // (Il telefono anni '70 di L197-11 è uscito da qui: rifatto a camera ferma, cucitura 1,4, L197-12.)
                             // (Il vicolo casa-base-asiaest-v2 di L197-10 è uscito da qui: rifatto a luce ferma, cucitura 2,2, L197-11.)
                             // (Il soggiorno vitaprivata-base-v6 di L192-7 è uscito con la sua clip: L195-0, D223.)
