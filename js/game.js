@@ -4784,7 +4784,7 @@ function generaTitolo(){
   var _wTit=(S.era===LINEA_IT)?6:8;   // L30-1: la seconda condizione (S.era==='italia1960') era MORTA — S.era e la LINEA, non il decennio
   S.recentTit.push(q.id); if(S.recentTit.length>_wTit) S.recentTit.shift();
   S.titoloMese={ id:q.id, testo:T(amica?q.amico:q.ostile), tono:(amica?'amica':'ostile') };   // i18n: tradotto allo store (pattern-log)
-  if(typeof suona==='function') suona(suonoGiornale());   // L95-3: il titolo del mese nasce qui (i titoli non sono carte d'agenda: vedi CODA L95-3) · L118-1: dal 2000 `notifica`
+  if(typeof suona==='function') suona(typeof suonoTitolo==='function' ? suonoTitolo(q) : suonoGiornale());   // L95-3: il titolo del mese nasce qui (i titoli non sono carte d'agenda: vedi CODA L95-3) · L118-1: dal 2000 `notifica` · L218-14: l'edizione straordinaria (titolo-evento) suona `rotativa`
 }
 /* La prima pagina a LIVELLO 1: pesca da TITOLI_LOCALI (tipo gata città/regione + cond su S.locale), tono dal
    CONSENSO locale, %LUOGO=nome dell'area (soggetto). Stessa anti-ripetizione lastTitolo. Mai temi nazionali. */

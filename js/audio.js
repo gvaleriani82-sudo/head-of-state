@@ -121,10 +121,16 @@ const AUDIO_MANIFEST = {
   votazione:       { file:'votazione.mp3',       loop:false, gain:1.14 },  // F5g · 1,5 s: RMS −24,6, picco −6,7 → regola di sopra
   dimissioni:      { file:'dimissioni.mp3',      loop:false, gain:0.83 },  // F5i · 1,5 s: RMS −21,8, picco −3,0 → regola di sopra
   traguardo:       { file:'traguardo.mp3',       loop:false, gain:1.21 },  // F5j · 1,2 s: RMS −25,1, picco −3,5 → regola di sopra (tetto 1,33)
-  salva:           { file:'salva.mp3',           loop:false, gain:1.88 },  // F5k · 0,6 s: RMS −33,2, picco −6,5 → tetto del picco (la regola dava 3,08: un clic, resta basso)
+  salva:           { file:'salva.mp3',           loop:false, gain:0.76 },  // F5k · 0,6 s · L218-15 (12/10): rifatto (cartella di cuoio che si chiude), RMS −21,0, picco −1,4 → regola 0,76 (il primo, −33,2, stava al tetto 1,88 e restava basso)
   scorri:          { file:'scorri.mp3',          loop:false, gain:0.71 },  // F5l · 0,5 s: RMS −20,5, picco −2,9 → regola di sopra
   no:              { file:'no.mp3',              loop:false, gain:1.00 },  // F5m · 0,5 s: RMS −23,4, picco −3,1 → regola di sopra · senza aggancio
-  sondaggio:       { file:'sondaggio.mp3',       loop:false, gain:0.67 }   // F5o · 1,2 s: RMS −19,9, picco −6,3 → regola di sopra
+  sondaggio:       { file:'sondaggio.mp3',       loop:false, gain:0.67 },  // F5o · 1,2 s: RMS −19,9, picco −6,3 → regola di sopra
+  /* ⚑ L218-14 (12/10, giro suoni 14) · gli ultimi due di §F5. brusio → la carta-scandalo che entra (riga di `SUONO_CARTA` per specie,
+     PRIMA di `sussurro`: lo scandalo del ministro suonava `sussurro`, ora `brusio` al suo posto; `sussurro` resta ai testi d'indiscrezione);
+     rotativa → la prima pagina «edizione straordinaria»: il titolo del mese che è un EVENTO fuori calendario (`pri:1` senza `serie`:
+     inchiesta, scandalo, legge, voto locale; ~5% dei titoli nel banco), al posto di giornale/notifica — `suonoTitolo()` qui sotto. */
+  brusio:          { file:'brusio.mp3',          loop:false, gain:0.27 },  // F5h · 2,0 s: RMS −12,1, picco +0,1 → regola di sopra (tetto 0,88)
+  rotativa:        { file:'rotativa.mp3',        loop:false, gain:0.86 }   // F5n · 2,0 s: RMS −22,1, picco −0,5 → regola di sopra (tetto 0,94)
 };
 /* ⚠ I FILE CHE ESISTONO DAVVERO in assets/audio/. Il motore carica SOLO questi: un nome del manifesto che non è
    qui non genera nessuna richiesta di rete. Si aggiorna a mano quando un file cambia, e se la lista e la cartella
@@ -145,7 +151,8 @@ const AUDIO_PRESENTI = ['tocco.mp3','carta.mp3','chip.mp3','mese.mp3','giornale.
                         'positivo.mp3','negativo.mp3','firma.mp3','monete.mp3','applauso.mp3','folla.mp3',
                         'protesta.mp3','fischi.mp3','flash.mp3','bussare.mp3','macchina.mp3','allarme.mp3',          // L116-1
                         'timbro.mp3','calcolatrice.mp3','consenso-su.mp3','consenso-giu.mp3','nomina.mp3','banchi.mp3','votazione.mp3',
-                        'dimissioni.mp3','traguardo.mp3','salva.mp3','scorri.mp3','no.mp3','sondaggio.mp3'];   // L218-13 (12/10, giro suoni 13: F5)
+                        'dimissioni.mp3','traguardo.mp3','salva.mp3','scorri.mp3','no.mp3','sondaggio.mp3',   // L218-13 (12/10, giro suoni 13: F5)
+                        'brusio.mp3','rotativa.mp3'];   // L218-14 (12/10, giro suoni 14: F5h, F5n — §F5 completa)
 
 /* ── 6 · NIENTE SINTETICO A RUNTIME ────────────────────────────────────────────────────────────────────────
    Il motore carica FILE. I suoni li genera `.claude/genera-audio.js` una volta, fuori dal gioco (L95-3a); la prima
@@ -328,6 +335,9 @@ function suonoPreferito(nome, ripiego){ return audioHaFile(nome) ? nome : ripieg
 function audioAnno(){ return (typeof S!=='undefined' && S && S.year) ? S.year : 2026; }
 function suonoTelefono(){ return audioAnno()>=2000 ? suonoPreferito('vibrazione','telefono') : 'telefono'; }
 function suonoGiornale(){ return audioAnno()>=2000 ? suonoPreferito('notifica','giornale') : 'giornale'; }
+/* L218-14 · il suono della PRIMA PAGINA del mese (`generaTitolo`): l'«edizione straordinaria» — un titolo-evento fuori calendario,
+   `pri:1` senza `serie` (le serie manovra e voto sono il calendario) — suona la rotativa, gli altri giornale/notifica come prima. */
+function suonoTitolo(t){ return (t && t.pri===1 && !t.serie) ? suonoPreferito('rotativa', suonoGiornale()) : suonoGiornale(); }
 
 /* IL SUONO DI UNA CARTA CHE ENTRA, oltre a `carta`/`snodo` (il secondo del gesto): dalla SPECIE della carta (`kind`) o da
    KICKER E TITOLO, con la tabella qui sotto, la prima riga che risponde. MAI su un pilastro-cronaca (`cronaca:true`, che è muto
@@ -342,6 +352,7 @@ function suonoGiornale(){ return audioAnno()>=2000 ? suonoPreferito('notifica','
 const SUONO_CARTA = [
   ['orologio', [],                            /scadenz|ultimatum|questione di fiducia|voto di fiducia|conto alla rovescia/i],
   ['porta',    [],                            /^$/, { id:/^rb_/ }],
+  ['brusio',   ['scandalo'],                  /^$/],   // L218-14 (F5h): lo scandalo del ministro che esplode — PRIMA di `sussurro`, che lo prendeva per specie e ora resta ai testi d'indiscrezione
   ['sussurro', ['scandalo'],                  /fuori verbale|indiscrezion|confidenz|sussurr|soffiat|veleni/i],   // lo scandalo sussurra (prima era `flash`, che resta per la stampa)
   ['protesta', [],                            /sciopero|scioperi|ordine pubblico|corteo|cortei|manifestaz|protest|occupaz|piazza|picchett/i],
   ['sirena',   [],                            /polizia|criminalit|mafi[ao]|camorr|ndrangheta|rapin|carabinier|sequestr/i],
@@ -447,7 +458,11 @@ const MUSICA_MANIFEST = {
   'mus-finale-b':   { file:'mus-finale-b.mp3',   loop:false, gain:0.52, variante:'mus-finale' },    // −19,5, picco −0,4 (reso −6,1) · 1:00
   /* ⚑ L118-1 · IL TEMA DEL GIOCO, fuori partita (home, scelta del paese e del partito, scenari storici). Lista-promessa: il file
      arriva da Gemini (`arte-sorgente/audio-elevenlabs/mus-tema.mp3`); L122-1: arrivato, −14,7 dB RMS misurati, 3:00. */
-  'mus-tema':     { file:'mus-tema.mp3',     loop:true,  gain:0.30 }
+  'mus-tema':     { file:'mus-tema.mp3',     loop:true,  gain:0.30 },
+  /* ⚑ L218-16 (12/10) · LA VARIANTE DEL TEMA (Eleven Music v2.5, 2:00, 192 kbps così com'è: niente ffmpeg per i 128, 2,9 MB sotto il
+     tetto dei 3). Gain sul volume reso degli altri brani (−25,2 dB): −17,9 RMS, picco −0,4 → 0,43 (picco reso −7,7). Fuori partita il
+     tema alterna con lei a ogni giro, come i temi d'epoca. Misure in Chrome: `.claude/misura-l218-16.js`. */
+  'mus-tema-b':   { file:'mus-tema-b.mp3',   loop:true,  gain:0.43, variante:'mus-tema' }    // −17,9, picco −0,4 · 2:00
 };
 /* ⚠ I BRANI CHE ESISTONO DAVVERO in assets/audio/: solo questi si chiedono alla rete. Si aggiorna a mano quando un file arriva;
    se lista e cartella divergono `.claude/verifica-asset.js` diventa rossa. L114-2 (26/9): TUTTI E UNDICI, a 192 kbps così come
@@ -458,7 +473,8 @@ const MUSICA_PRESENTI = ['mus-1950.mp3','mus-1960.mp3','mus-1970.mp3','mus-1980.
                          'mus-1970-b.mp3',    // L118-1: la prima variante (Gemini)
                          'mus-tema.mp3','mus-1950-b.mp3','mus-1960-b.mp3','mus-1980-b.mp3','mus-1990-b.mp3','mus-2000-b.mp3',
                          'mus-presente-b.mp3','mus-crisi-b.mp3','mus-campagna-b.mp3',   // L122-1: il tema e le altre otto varianti
-                         'mus-notte-b.mp3','mus-finale-b.mp3'];   // L218-9: le varianti di notte e finale
+                         'mus-notte-b.mp3','mus-finale-b.mp3',    // L218-9: le varianti di notte e finale
+                         'mus-tema-b.mp3'];                       // L218-16: la variante del tema della home
 const MUSICA_CHIAVE = 'hos_musica', MUSICA_GAIN = 0.35, MUSICA_XFADE_S = 2.5, MUSICA_DUCK_S = 0.8;
 let MUSICA_DIR = 'assets/audio/';     // `let`: la pagina di prova di L114-1 la punta ai segnaposto di .claude/musica-prova/
 let MUSICA_BUF = {}, MUSICA_CARICO = {}, MUSICA_ORA = null, MUSICA_VOCE = null, MUSICA_ZITTA = false;
@@ -534,7 +550,7 @@ function musicaTema(brano){ const M=MUSICA_MANIFEST[brano]; return (M && M.varia
 function musicaScelta(){
   if(typeof INTRO_APERTA!=='undefined' && INTRO_APERTA) return null;   // L124-1: sotto il video introduttivo la musica tace (è nel video)
   if(MUSICA_PORTA!=null) return musicaGiroVariante(musicaEpocaAnno(MUSICA_PORTA));   // L172-5: dalla porta scelta all'avvio, il tema del suo decennio (con la sua -b)
-  if(fuoriPartita()) return 'mus-tema';                          // L118-1: fuori partita, il tema del gioco (dentro non vale mai)
+  if(fuoriPartita()) return musicaGiroVariante('mus-tema');     // L118-1: fuori partita, il tema del gioco (dentro non vale mai); L218-16: con la sua -b
   if(MUSICA_FORZATA && MUSICA_FORZATA_S===S) return MUSICA_FORZATA;
   if(typeof NOTTE!=='undefined' && NOTTE) return musicaGiroVariante('mus-notte');                   // L218-9: anche la notte ha la sua -b
   if(musicaCrisi()) return musicaGiroVariante('mus-crisi');                                          // L122-1: anche crisi e campagna
