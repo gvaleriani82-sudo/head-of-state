@@ -7422,6 +7422,96 @@ const GIRO_SCENE=[
   ch:[ {u:2, l:'Metti il tratto nel piano federale delle strade', e:'I sindaci festeggiano; le altre regioni chiedono perché non loro', f:()=>{ gd('imprenditori',1); stampad(-1); }},
        {u:1, costo:{debito:0.2}, l:'Un viadotto provvisorio subito, e il resto dopo', e:'Il traffico torna in autostrada; il conto del ministero sale', f:()=>{ gd('cetomedio',1); if(S.ind) S.ind.debt+=0.2; }},
        {u:-1, l:'Prima le case, poi le strade', e:'I sindacati approvano; la valle si sente dimenticata', f:()=>{ gd('lavoratori',1); }} ]},
+ /* L226-1 · venti scene del giro per de1950 (FORMATI-L226-GIRO-DE1950.md): L225-1 dà de1950 al 44·37% di scene già viste,
+    perché sulle regioni le dieci gde50_ ne lasciano viva una sola a gennaio 1950. Dieci regioni (cinque senza anno) e dieci
+    città, la Repubblica Federale del 1949-59 vista da un territorio; conto di D189, tre di governo con la cassa. */
+ {id:'gde50_villaggio', era:'de1950', paesi:['germania'], kind:'giro', tipo:'regione',
+  t:'Il paese nuovo', text:'Su un vecchio deposito di munizioni, fra i pini, le famiglie arrivate dall\'Est hanno tirato su un paese intero, con le loro mani e i prestiti dello Stato: %TERR ti %TV{ha|hanno} chiesto di esserci all\'inaugurazione della scuola, e il primo consiglio comunale ti aspetta col nastro.',
+  ch:[ {u:2, l:'Prometti la ferrovia fino al paese', e:'Il paese nuovo ti applaude; i comuni vecchi della zona chiedono perché a loro no', f:()=>{ gd('lavoratori',1); gd('cattolici',-1); }},
+       {u:1, l:'Parla dei mestieri che hanno portato con sé', e:'Vetrai e orafi ti mostrano il loro lavoro; i giornali parlano di un discorso di circostanza', f:()=>{ gd('imprenditori',1); stampad(-1); }},
+       {u:-1, l:'Chiedi che il paese si unisca al comune vicino', e:'I conti tornano meglio; i fondatori si sentono ospiti a casa loro', f:()=>{ stampad(1); }} ]},
+ {id:'gde50_reduce', era:'de1950', paesi:['germania'], kind:'giro', tipo:'regione', cond:()=>S.year<=1955,
+  t:'Il reduce', text:'Dopo anni in un campo di prigionia in Unione Sovietica, un uomo è sceso dal treno con un cappotto troppo grande e una cassetta di legno, e la banda del paese è andata a prenderlo: %TERR %TV{aspetta|aspettano} ancora molti uomini, e il sindaco ti ha invitato alla festa.',
+  ch:[ {u:2, l:'Promettigli un posto in comune', e:'Il reduce ti stringe la mano; i disoccupati del paese chiedono se c\'è una fila', f:()=>{ gd('pensionati',1); gd('lavoratori',-1); }},
+       {u:1, l:'Un brindisi, e due parole per chi non è tornato', e:'Le madri dei dispersi piangono con te; il giornale scrive che hai fatto una passerella', f:()=>{ gd('cattolici',1); stampad(-1); }} ]},
+ {id:'gde50_vedove', era:'de1950', paesi:['germania'], kind:'giro', tipo:'regione',
+  t:'Le donne dei campi', text:'Nei villaggi molte fattorie le mandano avanti donne sole: i mariti sono morti in guerra o non sono tornati, e i figli sono troppo piccoli per l\'aratro, e %TERR ti %TV{ha|hanno} invitato all\'assemblea delle contadine, che vogliono parlare della pensione di guerra.',
+  ch:[ {u:2, l:'Prometti di aumentare le pensioni di guerra', e:'Le contadine applaudono; in città i contribuenti fanno i conti', f:()=>{ gd('pensionati',1); gd('cetomedio',-1); }},
+       {u:1, l:'Braccianti pagati dal comune nei mesi del raccolto', e:'Un aiuto concreto; i contadini che pagano da sé i loro braccianti si sentono dimenticati', f:()=>{ gd('cattolici',1); gd('imprenditori',-1); }} ]},
+ {id:'gde50_zona', era:'de1950', paesi:['germania'], kind:'giro', tipo:'regione',
+  t:'Il pullman dal campo', text:'Ogni settimana arriva dal campo di accoglienza un pullman di famiglie fuggite dalla zona sovietica, che lo Stato ha assegnato alla regione: hanno con sé quello che stava in una borsa, e %TERR %TV{deve|devono} trovar loro un tetto, e il funzionario del distretto ti aspetta alla fermata con la lista dei nomi.',
+  ch:[ {u:2, l:'Alloggi requisiti nelle case troppo grandi', e:'Le famiglie hanno un tetto stasera; i proprietari scrivono ai giornali', f:()=>{ gd('lavoratori',1); gd('cetomedio',-1); }},
+       {u:1, l:'Un posto di lavoro per ogni capofamiglia', e:'Le fabbriche della zona prendono gente; i disoccupati del posto mugugnano', f:()=>{ gd('imprenditori',1); gd('lavoratori',-1); }},
+       {u:-1, l:'Chiedi a Bonn di mandarli altrove', e:'I conti della regione tirano il fiato; alla fermata nessuno ti saluta', f:()=>{ gd('cetomedio',1); }} ]},
+ {id:'gde50_braccianti', era:'de1950', paesi:['germania'], kind:'giro', tipo:'regione', cond:()=>S.year>=1956,
+  t:'I braccianti venuti dal Sud', text:'Per il raccolto sono arrivati i lavoratori italiani, con un contratto di pochi mesi e una baracca in fondo all\'aia: %TERR ne %TV{ha|hanno} visti arrivare a centinaia, e i contadini ti aspettano all\'osteria per parlare di chi verrà l\'anno prossimo.',
+  ch:[ {u:2, l:'Chiedi alloggi veri, non baracche', e:'Gli italiani ti ringraziano; i contadini dicono che i conti non tornano', f:()=>{ gd('lavoratori',1); gd('imprenditori',-1); }},
+       {u:1, l:'Sostieni i contratti: senza braccia il grano marcisce', e:'I contadini brindano; i sindacati chiedono chi controllerà le paghe', f:()=>{ gd('imprenditori',1); gd('lavoratori',-1); }} ]},
+ {id:'gde50_curva', era:'de1950', paesi:['germania'], kind:'giro', ruolo:'governo', tipo:'regione', cond:()=>S.year>=1953&&S.year<=1956,
+  t:'La curva della scuola', text:'Da quando automobili e motociclette hanno riempito le strade, le auto sulla statale attraversano il paese a tutta velocità, e i limiti non ci sono più: nella curva davanti alla scuola è morto un bambino, e %TERR ti %TV{chiede|chiedono} di parlare alle famiglie.',
+  ch:[ {u:2, l:'Prometti un limite di velocità nei paesi', e:'Le madri ti ringraziano; il club degli automobilisti parla di libertà tradita', f:()=>{ gd('cattolici',1); gd('imprenditori',-1); }},
+       {u:1, costo:{debito:0.1}, l:'Un vigile e un semaforo davanti alla scuola, subito', e:'Il paese vede un segno; il conto del ministero sale', f:()=>{ gd('cetomedio',1); if(S.ind) S.ind.debt+=0.1; }},
+       {u:-1, l:'Più educazione stradale nelle scuole', e:'I maestri approvano; le famiglie volevano di più', f:()=>{ gd('giovani',1); }} ]},
+ {id:'gde50_proiettore', era:'de1950', paesi:['germania'], kind:'giro', tipo:'regione',
+  t:'Il cinema nella sala della locanda', text:'Una volta alla settimana arriva il furgone del cinema ambulante, e nella sala della locanda si spengono le luci: stavolta il film ha una scena che il clero del paese non vuole far vedere, e il paese è in subbuglio. Il gestore ti ha tenuto un posto in prima fila, e %TERR %TV{aspetta|aspettano} di sapere che cosa dirai.',
+  ch:[ {u:2, l:'Il film si proietta: decidono gli adulti', e:'I giovani applaudono; domenica, dal pulpito, si parlerà di te', f:()=>{ gd('giovani',1); gd('cattolici',-1); }},
+       {u:1, l:'Un pomeriggio per le famiglie e una sera per gli adulti', e:'Il gestore è contento; i giornali scrivono che hai spostato il peccato di qualche ora', f:()=>{ gd('imprenditori',1); stampad(-1); }},
+       {u:-1, l:'Resta fuori dalla questione', e:'Nessuno ti può accusare di niente; nessuno ti ringrazia', f:()=>{ stampad(1); }} ]},
+ {id:'gde50_osteria', era:'de1950', paesi:['germania'], kind:'giro', tipo:'regione', cond:()=>S.year>=1954,
+  t:'La partita all\'osteria', text:'L\'oste ha comprato il primo televisore del paese, e quando gioca la nazionale la sala è così piena che la gente guarda dalle finestre: %TERR ti %TV{ha|hanno} invitato a vedere la partita in mezzo ai contadini, e il maestro chiede un apparecchio per la sala del comune, per i ragazzi.',
+  ch:[ {u:2, l:'Prometti il televisore alla sala del comune', e:'Il maestro è raggiante; l\'oste teme di perdere i clienti', f:()=>{ gd('giovani',1); gd('imprenditori',-1); }},
+       {u:1, l:'Guarda la partita in piedi, coi contadini', e:'Si urla e si brinda insieme; il giornale scrive che hai fatto il tifoso per i voti', f:()=>{ gd('lavoratori',1); stampad(-1); }} ]},
+ {id:'gde50_duechiese', era:'de1950', paesi:['germania'], kind:'giro', tipo:'regione',
+  t:'Due chiese in un paese', text:'Le famiglie arrivate dall\'Est sono di un\'altra confessione rispetto al paese che le ha accolte, e la domenica celebrano in un\'aula della scuola: %TERR %TV{deve|devono} decidere se dar loro un terreno per una chiesa, e il prete del paese ti aspetta sul sagrato, quello dei nuovi arrivati sulla porta della scuola.',
+  ch:[ {u:2, l:'Il terreno per la chiesa nuova, a spese del comune', e:'I nuovi arrivati festeggiano; i vecchi del paese parlano di soldi buttati', f:()=>{ gd('cattolici',1); gd('cetomedio',-1); }},
+       {u:1, l:'Chiedi alle due comunità di dividersi la chiesa che c\'è', e:'I più anziani dei nuovi arrivati ringraziano; i fedeli di sempre non ci stanno', f:()=>{ gd('pensionati',1); gd('cattolici',-1); }} ]},
+ {id:'gde50_danni', era:'de1950', paesi:['germania'], kind:'giro', ruolo:'governo', tipo:'regione', cond:()=>S.year>=1952,
+  t:'Il modulo dei danni', text:'All\'ufficio dei danni di guerra la fila arriva al portone: chi ha perso casa e terra all\'Est deve dimostrare con un modulo lunghissimo quanto aveva, e chi ha conservato i suoi beni paga un\'imposta sul patrimonio a rate per trent\'anni, e %TERR ti %TV{chiede|chiedono} di sveltire le pratiche.',
+  ch:[ {u:2, l:'Anticipi a chi ha perso di più, gli anziani prima', e:'Gli anziani piangono di gioia allo sportello; chi paga la rata sul patrimonio brontola', f:()=>{ gd('pensionati',1); gd('imprenditori',-1); }},
+       {u:1, costo:{debito:0.3}, l:'Più impiegati all\'ufficio, a spese dello Stato', e:'Le pratiche corrono; il bilancio federale ne sente il peso', f:()=>{ gd('pensionati',1); if(S.ind) S.ind.debt+=0.3; }},
+       {u:-1, l:'Controlli severi: niente danni gonfiati', e:'I contabili approvano; in fila si parla di sospetti offensivi', f:()=>{ gd('cetomedio',1); }} ]},
+ {id:'gde50_macerie', era:'de1950', paesi:['germania'], kind:'giro', tipo:'citta', cond:()=>S.year<=1955,
+  t:'La montagna di macerie', text:'Il trenino delle macerie porta da anni i resti delle case bombardate ai margini della città, dove è cresciuta una collina di mattoni rotti: %TERR %TV{deve|devono} decidere che farne, e i ragazzi del quartiere ti aspettano in cima con un aquilone.',
+  ch:[ {u:2, l:'Farne un parco, con gli alberi e la vista sulla città', e:'Le famiglie ci porteranno i bambini; le imprese dicono che quei mattoni valevano soldi', f:()=>{ gd('giovani',1); gd('imprenditori',-1); }},
+       {u:1, l:'Macinare i mattoni per le case nuove', e:'I costruttori ringraziano; il quartiere si tiene la polvere per anni', f:()=>{ gd('imprenditori',1); gd('cetomedio',-1); }} ]},
+ {id:'gde50_negozi', era:'de1950', paesi:['germania'], kind:'giro', tipo:'citta', cond:()=>S.year<=1956,
+  t:'L\'orario dei negozi', text:'Ora che le vetrine si sono riempite, i commercianti vorrebbero tenere aperto la sera; le commesse, che lavorano già nove ore, chiedono di chiudere presto e di avere libero il sabato pomeriggio, e %TERR ti %TV{invita|invitano} a sentire le due parti in una sala del municipio.',
+  ch:[ {u:2, l:'Chiusura presto, e il sabato pomeriggio libero', e:'Le commesse ti applaudono; i bottegai dicono che perderanno i clienti', f:()=>{ gd('lavoratori',1); gd('cetomedio',-1); }},
+       {u:1, l:'Aperti la sera, coi turni per le commesse', e:'I negozianti sono soddisfatti; il sindacato parla di sfruttamento', f:()=>{ gd('cetomedio',1); gd('lavoratori',-1); }} ]},
+ {id:'gde50_consiglio', era:'de1950', paesi:['germania'], kind:'giro', tipo:'citta', cond:()=>S.year>=1953,
+  t:'Le elezioni in fabbrica', text:'Nella fabbrica più grande della città si vota per il consiglio di fabbrica e, come vuole la legge nuova, per i rappresentanti dei lavoratori nel consiglio di sorveglianza: %TERR %TV{segue|seguono} lo spoglio come una partita, e sia il direttore sia i delegati ti hanno invitato alla mensa.',
+  ch:[ {u:2, l:'Mangia coi delegati, al tavolo degli operai', e:'In mensa si parla di te; in direzione ti trovano poco imparziale', f:()=>{ gd('lavoratori',1); gd('imprenditori',-1); }},
+       {u:1, l:'Un discorso sull\'impresa come una famiglia', e:'La direzione approva; dai tavoli degli operai qualcuno ride', f:()=>{ gd('imprenditori',1); gd('lavoratori',-1); }} ]},
+ {id:'gde50_capannone', era:'de1950', paesi:['germania'], kind:'giro', tipo:'citta', cond:()=>S.year<=1952,
+  t:'Il capannone vuoto', text:'Le macchine di una fabbrica della città sono partite anni fa per le riparazioni di guerra, e nel capannone vuoto lavora metà della gente di prima: la direzione vuole comprarne di nuove coi crediti del Piano Marshall, e %TERR %TV{aspetta|aspettano} la risposta. Il consiglio di fabbrica ti chiede di parlare al cancello.',
+  ch:[ {u:2, l:'Chiedi i crediti per questa fabbrica, subito', e:'Il cancello ti applaude; i giornali chiedono perché questa e non le altre', f:()=>{ gd('lavoratori',1); stampad(-1); }},
+       {u:1, l:'Lascia decidere alle banche: crediti a chi rende di più', e:'Gli industriali apprezzano il realismo; dal cancello ti fischiano', f:()=>{ gd('imprenditori',1); gd('lavoratori',-1); }} ]},
+ {id:'gde50_pensione', era:'de1950', paesi:['germania'], kind:'giro', ruolo:'opposizione', tipo:'citta', cond:()=>S.year<=1956,
+  t:'La pensione che non basta', text:'Alla mensa dei poveri, a mezzogiorno, la fila è fatta quasi tutta di vecchi: la pensione di una vita di lavoro non arriva a fine mese, mentre intorno le vetrine sono piene, e %TERR %TV{conta|contano} migliaia di vecchi come loro: i pensionati ti aspettano a tavola.',
+  ch:[ {u:2, l:'Porta la loro storia in parlamento', e:'I vecchi ti ringraziano; il governo dice che fai demagogia', f:()=>{ gd('pensionati',1); stampad(-1); }},
+       {u:1, l:'Chiedi pensioni che crescano coi salari', e:'Una proposta seria; i giovani che le pagheranno fanno i conti', f:()=>{ gd('pensionati',1); gd('giovani',-1); }} ]},
+ {id:'gde50_orti', era:'de1950', paesi:['germania'], kind:'giro', tipo:'citta', cond:()=>S.year<=1957,
+  t:'Le casette degli orti', text:'Negli orti ai margini della città, nelle casette degli attrezzi, vivono ancora famiglie che hanno perso la casa sotto le bombe: il comune vuole costruirci un quartiere popolare, e %TERR ti %TV{chiede|chiedono} di parlare alle famiglie degli orti, che non vogliono andarsene.',
+  ch:[ {u:2, l:'Prima un appartamento a chi ci vive, poi le ruspe', e:'Le famiglie ti credono; il cantiere slitta di un anno', f:()=>{ gd('lavoratori',1); gd('imprenditori',-1); }},
+       {u:1, l:'Salva una parte degli orti accanto alle case nuove', e:'Gli anziani degli orti respirano; gli architetti dicono che il quartiere sarà più piccolo', f:()=>{ gd('pensionati',1); gd('cetomedio',-1); }},
+       {u:-1, l:'Si costruisce subito: le case servono a tutti', e:'Le ruspe arrivano in primavera; le famiglie degli orti portano via le piante in carriola', f:()=>{ gd('imprenditori',1); }} ]},
+ {id:'gde50_opera', era:'de1950', paesi:['germania'], kind:'giro', ruolo:'governo', tipo:'citta', cond:()=>S.year>=1951,
+  t:'Il teatro da ricostruire', text:'Del teatro della città è rimasta in piedi solo la facciata, e l\'orchestra suona da anni in un cinema: %TERR %TV{vuole|vogliono} ricostruirlo con un contributo straordinario da Bonn, ma in città mancano ancora migliaia di case. Il sovrintendente ti accompagna fra le impalcature.',
+  ch:[ {u:1, costo:{debito:0.2}, l:'Il contributo da Bonn, per la sera della prima', e:'La città avrà il suo teatro; il ministro delle finanze sospira', f:()=>{ gd('cetomedio',1); if(S.ind) S.ind.debt+=0.2; }},
+       {u:2, l:'Prima le case: il teatro aspetterà', e:'Chi aspetta un alloggio approva; il pubblico dei concerti non te lo perdona', f:()=>{ gd('lavoratori',1); gd('cetomedio',-1); }},
+       {u:-1, l:'Che lo paghino i privati, con una lotteria', e:'Un\'idea che piace ai giornali; il sovrintendente si sente abbandonato', f:()=>{ stampad(1); }} ]},
+ {id:'gde50_requisite', era:'de1950', paesi:['germania'], kind:'giro', tipo:'citta', cond:()=>S.year<=1955,
+  t:'Le case requisite', text:'Le villette del quartiere migliore sono ancora requisite per le famiglie dei militari alleati, con un recinto e un cartello in inglese, e i proprietari vivono da parenti: %TERR %TV{chiede|chiedono} di riaverle, e il comitato dei proprietari ti aspetta davanti al recinto.',
+  ch:[ {u:2, l:'Chiedi agli alleati di restituirle entro l\'anno', e:'I proprietari ti applaudono; il comando alleato non gradisce', f:()=>{ gd('cetomedio',1); stampad(-1); }},
+       {u:1, l:'Case nuove per gli alleati, e il cambio', e:'I proprietari tornano a casa; chi vive in baracca chiede perché si costruisce prima per i soldati', f:()=>{ gd('cetomedio',1); gd('lavoratori',-1); }} ]},
+ {id:'gde50_ragazzi', era:'de1950', paesi:['germania'], kind:'giro', tipo:'citta', cond:()=>S.year>=1956,
+  t:'I ragazzi del giubbotto', text:'La sera, davanti al bar col juke-box, si ritrovano ragazzi in giubbotto di cuoio, coi motorini accesi fino a mezzanotte e qualche rissa ogni sabato: %TERR %TV{vuole|vogliono} chiudere il bar, e i ragazzi ti aspettano sul marciapiede.',
+  ch:[ {u:2, l:'Una sala per loro, col giradischi', e:'I ragazzi non ci credono, ma ci sperano; i vicini dicono che premi i teppisti', f:()=>{ gd('giovani',1); gd('cetomedio',-1); }},
+       {u:1, l:'Più polizia la sera, e il bar chiude alle dieci', e:'Il quartiere dorme; dal marciapiede ti chiamano nonno', f:()=>{ gd('cetomedio',1); gd('giovani',-1); }} ]},
+ {id:'gde50_viale', era:'de1950', paesi:['germania'], kind:'giro', tipo:'citta',
+  t:'Il viale nuovo', text:'Il piano della ricostruzione vuole un viale a quattro corsie dove c\'erano i vicoli del centro vecchio, per le automobili che verranno: %TERR ne %TV{discute|discutono} da mesi, fra la città moderna e le strade di prima, e l\'urbanista ti aspetta col plastico.',
+  ch:[ {u:2, l:'Il viale largo: la città deve respirare', e:'Urbanisti e commercianti brindano; gli anziani del centro piangono le loro strade', f:()=>{ gd('imprenditori',1); gd('pensionati',-1); }},
+       {u:1, l:'Le vie di prima, con le case nuove', e:'Il centro ritrova il suo volto; gli ingegneri del traffico prevedono ingorghi', f:()=>{ gd('pensionati',1); stampad(-1); }} ]},
  /* — le scene del decennio per la Germania 1960 (L190-2, D196 = la regola di D189): ogni umore guadagnato si paga altrove — */
  {id:'gde60_binario', era:'de1960', paesi:['germania'], kind:'giro', tipo:'citta', cond:()=>S.year>=1962,
   t:'Il binario dei treni speciali', text:'Al binario dei treni speciali scendono uomini con la valigia legata con lo spago, arrivati dal Sud dell\'Europa e dalla Turchia per lavorare nelle fabbriche: %TERR ne accoglie qualche centinaio ogni settimana, e l\'ufficio del lavoro ti ha chiesto di esserci all\'arrivo del treno della mattina.',
@@ -20513,6 +20603,15 @@ const SNODI_STORICI = {
   usAcciaioOpp:    { storico:['corte'], conforme:'sulle acciaierie, dall’opposizione', diverge:{ 'fondi':'Nel 1952 ha proposto di togliere i fondi al sequestro delle acciaierie.', 'accusa':'Nel 1952 ha chiesto la messa in stato d’accusa del Presidente per il sequestro delle acciaierie.' } },
   usScuola:        { storico:['truppe'], conforme:'sulla scuola dell’Arkansas', diverge:{ 'guardia':'Nel 1957 ha preso il comando della Guardia nazionale dell’Arkansas, senza soldati da fuori.', 'tribunali':'Nel 1957 ha lasciato ai tribunali la scuola dell’Arkansas.' } },
   usScuolaOpp:     { storico:['approva','silenzio'], conforme:'sulla scuola dell’Arkansas, dall’opposizione', diverge:{ 'stati':'Nel 1957 ha condannato in nome dei diritti degli Stati l’intervento in Arkansas.' } },
+  /* L227-1 · i quattro snodi di us1960 e le aule (frasi di Code). */
+  usBaia:          { storico:['senza'], conforme:'sulla baia dei Porci', diverge:{ 'aerei':'Nel 1961 ha mandato i nostri aerei a coprire lo sbarco degli esuli a Cuba.', 'annulla':'Nel 1961 ha annullato lo sbarco degli esuli a Cuba.' } },
+  usBaiaOpp:       { storico:['unita'], conforme:'sulla baia dei Porci, dall’opposizione', diverge:{ 'inchiesta':'Nel 1961 ha chiesto un\'inchiesta del Congresso sullo sbarco fallito a Cuba.', 'accusa':'Nel 1961 ha accusato il Presidente di aver abbandonato gli esuli a Cuba.' } },
+  usMissili:       { storico:['blocco'], conforme:'sui missili di Cuba', diverge:{ 'bombe':'Nel 1962 ha fatto bombardare le rampe dei missili sovietici a Cuba.', 'onu':'Nel 1962 ha portato i missili di Cuba alle Nazioni Unite, senza blocco navale.' } },
+  usMissiliOpp:    { storico:['sostegno'], conforme:'sui missili di Cuba, dall’opposizione', diverge:{ 'invasione':'Nel 1962 ha chiesto dall’opposizione l’invasione di Cuba.', 'conto':'Nel 1962 ha accusato il governo di aver aspettato sui missili di Cuba.' } },
+  usDiritti:       { storico:['intera'], conforme:'sulla legge dei diritti civili', diverge:{ 'leggera':'Nel 1964 ha fatto passare una legge sui diritti civili senza il capitolo sui luoghi pubblici.', 'rinvio':'Nel 1964 ha rimandato la legge sui diritti civili a dopo le elezioni.' } },
+  usDirittiOpp:    { storico:['con'], conforme:'sulla legge dei diritti civili, dall’opposizione', diverge:{ 'contro':'Nel 1964 ha votato contro la legge sui diritti civili.', 'coscienza':'Nel 1964 ha lasciato al suo partito libertà di coscienza sulla legge dei diritti civili.' } },
+  usVietnam:       { storico:['escalation'], conforme:'sul Vietnam', diverge:{ 'consiglieri':'Nel 1965 ha tenuto in Vietnam solo consiglieri e aiuti.', 'trattativa':'Nel 1965 ha aperto una trattativa sul Vietnam e richiamato i consiglieri.' } },
+  usVietnamOpp:    { storico:['sostegno'], conforme:'sul Vietnam, dall’opposizione', diverge:{ 'congresso':'Nel 1965 ha chiesto un voto del Congresso prima dei soldati in Vietnam.', 'contro':'Nel 1965 si è opposto alla guerra in Vietnam.' } },
 };
 
 /* ==============================================================================================================
@@ -20710,7 +20809,7 @@ const COALIZIONE2010_EV = {
   text:'Il voto non ha dato la maggioranza a nessuno. Il terzo partito ha i numeri che ti mancano e sta parlando anche con gli altri; il governo uscente resta in carica finché non si decide. Hai pochi giorni: una coalizione vera con i ministeri divisi, un accordo di sostegno senza entrare, o un governo di minoranza che conta i voti ogni sera.',
   ch:[
     { l:'Coalizione piena: programma comune e ministeri divisi', e:'La storia · governi cinque anni, e il terzo partito lo pagherà per un decennio',
-      f:function(){ S.coalizione2010='piena'; if(S.coalizione && S.coalizione.indexOf('uk_lib')<0) S.coalizione.push('uk_lib'); S.minoranza=false; if(typeof initTenuta==='function') initTenuta(); if(S.ind.fiducia!=null) S.ind.fiducia=clamp(S.ind.fiducia+(8),0,100); repd(4); gd('cetomedio',4); corrented('militanti',-8); corrented('pontieri',6); if(typeof applicaSlancio==='function') applicaSlancio(['uk_lib'], -3); S.log.unshift({t:T('Il partito'),x:T('Coalizione: due partiti, un programma, i ministeri divisi.')}); } },
+      f:function(){ S.coalizione2010='piena'; var _prima=(S.coalizione||[]).slice(); if(S.coalizione && S.coalizione.indexOf('uk_lib')<0) S.coalizione.push('uk_lib'); if(S.coalizione && typeof voceAlleanza==='function') voceAlleanza('uk_lib', _prima); S.minoranza=false; if(typeof initTenuta==='function') initTenuta(); if(S.ind.fiducia!=null) S.ind.fiducia=clamp(S.ind.fiducia+(8),0,100); repd(4); gd('cetomedio',4); corrented('militanti',-8); corrented('pontieri',6); if(typeof applicaSlancio==='function') applicaSlancio(['uk_lib'], -3); S.log.unshift({t:T('Il partito'),x:T('Coalizione: due partiti, un programma, i ministeri divisi.')}); } },
     { l:'Sostegno esterno: ci votano, non entrano', e:'Le mani libere · e un prezzo da pagare a ogni voto',
       f:function(){ S.coalizione2010='sostegno'; if(typeof partnerSostegno==='function'){ var _p=partnerSostegno(); if(_p) S.sostegno={ pid:_p.id, prezzo:2, mesi:0 }; } if(S.ind.fiducia!=null) S.ind.fiducia=clamp(S.ind.fiducia+(2),0,100); corrented('militanti',3); corrented('pontieri',-2); S.log.unshift({t:T('Il partito'),x:T('Sostegno esterno: ci votano da fuori, e ce lo ricorderanno.')}); } },
     { l:'Minoranza: si governa contando i voti', e:'Nessun compromesso · e ogni sera una conta',
@@ -23360,6 +23459,160 @@ const SCUOLA57_OPP_REP_EV = {
     { l:'Approvare l\'intervento', e:'La storia del tuo partito è con te · al Sud i bianchi delusi tornano a votare per il partito di sempre', f:SCUOLA57_OPP_EV.ch[0].f },
     { l:'I diritti degli Stati: condannare l\'intervento', e:'Al Sud qualcuno ti guarda per la prima volta · al Nord, nel partito che ha abolito la schiavitù, ti chiedono che cosa ti è successo', f:SCUOLA57_OPP_EV.ch[1].f },
     { l:'Tacere', e:'Il partito resta unito · e il Sud resta del partito del Presidente', f:SCUOLA57_OPP_EV.ch[2].f },
+  ],
+};
+/* ==============================================================================================================
+   L227-1 · STATI UNITI 1960 — I QUATTRO SNODI E LE AULE (scheda PRESET-USA-1960 §4, testi di Code dagli abbozzi; generato da
+   .claude/genera-l227-1.js). Valute del livello 3. Flag nuovi cercati in tutto js/ e .claude/ il 12/10 prima di scriverli (L99-2),
+   zero occorrenze: usBaia, usBaiaOpp, usMissili, usMissiliOpp, usDiritti, usDirittiOpp, usVietnam, usVietnamOpp.
+   ⚑ CHI RICEVE CHE COSA (cancelli in game.js): S1 la baia 1961/4-5 · S2 i missili 1962/10 SOLO (novembre è il voto di metà
+   mandato: uno snodo nel mese del voto lo cancellerebbe; il mese è libero apposta, `pm_cuba` ha `nonInPaesi:['usa']`, D156; ottobre
+   ha la carta di campagna della metà mandato, che esce insieme allo snodo) ·
+   S3 la legge 1964/6-7, DENTRO la campagna presidenziale (1964/5-10): esce INSIEME alla carta di campagna, come i pilastri
+   `conCampagna` (L177-2) · S4 il Vietnam 1965/2-3 (la finestra fuori dalla campagna; febbraio è di `pus60_longisland`, quindi
+   di norma marzo, il mese dei marines a Da Nang). Al governo la versione piena, all'opposizione l'aula, che non guarda il flag di
+   governo (dall'opposizione la storia la dà per fatta) ma non esce a chi ha già giocato la versione di governo.
+   ⚑ S.usVietnam ('escalation' | 'consiglieri' | 'trattativa') per ora NON lo legge nessuno: gli eventi 1966-68 sono un lotto dopo.
+   ⚑ S3 (a) non tocca il lean del Sud: lo gira la tappa del 1964/11 (D157), che non legge usDiritti.
+   ⚑ Il Sud segregazionista non ha un gruppo: lo porta la base del partito (baseUs60, col segno che dipende da S.partito), come nel 1950.
+   ⚑ Le aule muovono SOLO gruppi e base (repd, stampad e la fiducia dall'opposizione sono no-op, L12-2).
+   ============================================================================================================== */
+/* I gemelli degli helper del 1950, col moltiplicatore della porta (stesso valore, 2: la sweep di L176-2 non si trasporta, quindi è
+   una variabile sua — L227-1 non l'ha variata). */
+let US60_GRUPPI = 2;   // let e non const: una sweep lo può variare sul banco
+function gdUs60(g, n){ gd(g, Math.round(n*US60_GRUPPI)); }
+function fidUs60(n){ fidFr60(n); }
+function baseUs60(n){
+  var P=(PAESE && PAESE.partiti) ? PAESE.partiti.filter(function(x){ return x.id===S.partito; })[0] : null;
+  if(!P || !P.base) return;
+  Object.keys(P.base).forEach(function(g){ gd(g, Math.round(n*P.base[g]*US60_GRUPPI)); });
+}
+const BAIA61_EV = {
+  id:'snodo_baia61', snodo:true, era:'us1960', kick:'Cuba', tono:'grave',
+  t:'La baia',
+  text:'L\'operazione l\'ha preparata l\'amministrazione di prima: millequattrocento esuli cubani, addestrati in segreto, sono pronti a sbarcare in una baia sulla costa meridionale di Cuba. Il piano dice che l\'isola si solleverà; i tuoi consiglieri non ne sono sicuri. Gli esuli chiedono una cosa sola: che i loro pochi aerei abbiano il cielo libero, e che se serve arrivino i nostri. Le navi sono pronte a salpare.',
+  ch:[
+    { l:'Via libera, senza i nostri aerei', e:'La storia · in tre giorni è finita, più di mille prigionieri · ti assumi la colpa davanti al paese, e il paese, stranamente, ti stringe la mano',
+      f:function(){ S.usBaia='senza'; repd(-3); stampad(1); gdUs60('cetomedio',2); gdUs60('giovani',1); gdUs60('cattolici',-1);
+        S.log.unshift({t:T('Cuba'),x:T('Ha dato via libera allo sbarco degli esuli a Cuba senza la copertura dei nostri aerei.')}); } },
+    { l:'Via libera, con la copertura dei nostri aerei', e:'La testa di ponte regge · l\'America è in guerra con un\'isola a novanta miglia da casa, e a Mosca e a Berlino qualcuno prende appunti', costo:{debito:0.8},
+      f:function(){ S.usBaia='aerei'; S.ind.debt+=0.8; repd(-6); stampad(-1); gdUs60('cattolici',2); gdUs60('giovani',-3); fidUs60(-1);
+        S.log.unshift({t:T('Cuba'),x:T('Ha mandato i nostri aerei a coprire lo sbarco degli esuli a Cuba.')}); } },
+    { l:'Annullare tutto', e:'Nessun americano coinvolto · gli esuli tornano in Florida e raccontano a chi li vuole ascoltare che li hai traditi',
+      f:function(){ S.usBaia='annulla'; repd(1); stampad(-2); gdUs60('cattolici',-2); baseUs60(-1);
+        S.log.unshift({t:T('Cuba'),x:T('Ha annullato lo sbarco degli esuli a Cuba.')}); } },
+  ],
+};
+const BAIA61_OPP_EV = {
+  id:'snodo_baia61_opp', snodo:true, era:'us1960', kick:'Cuba', tono:'grave',
+  t:'La baia, dall\'aula',
+  text:'Lo sbarco degli esuli a Cuba è finito in tre giorni: più di mille prigionieri, e il regime dell\'isola più forte di prima. Il Presidente ha detto in pubblico che la responsabilità è sua, e il paese sembra apprezzarlo. Tutti aspettano di sentire che cosa dice l\'opposizione.',
+  ch:[
+    { l:'Stringersi attorno al Presidente: all\'estero il paese parla con una voce', e:'La storia · le critiche restano nei corridoi · il paese apprezza chi non attacca la bandiera nella settimana sbagliata',
+      f:function(){ S.usBaiaOpp='unita'; gdUs60('cetomedio',2); baseUs60(-1);
+        S.log.unshift({t:T('Cuba'),x:T('Dall\'opposizione si è stretto attorno al Presidente dopo lo sbarco fallito a Cuba.')}); } },
+    { l:'Un\'inchiesta del Congresso: chi ha deciso, e perché', e:'Le carte escono, un po\' alla volta · il paese scopre quanto poco sapeva, e la Casa Bianca ricorda chi aveva cominciato',
+      f:function(){ S.usBaiaOpp='inchiesta'; gdUs60('giovani',1); gdUs60('cetomedio',-1); baseUs60(1);
+        S.log.unshift({t:T('Cuba'),x:T('Ha chiesto un\'inchiesta del Congresso sullo sbarco fallito a Cuba.')}); } },
+    { l:'L\'accusa: ha abbandonato gli esuli sulla spiaggia', e:'In Florida ti applaudono · nel resto del paese sembra che tu faccia il tifo per la sconfitta',
+      f:function(){ S.usBaiaOpp='accusa'; baseUs60(2); gdUs60('cattolici',1); gdUs60('cetomedio',-2);
+        S.log.unshift({t:T('Cuba'),x:T('Ha accusato il Presidente di aver abbandonato gli esuli sulla spiaggia di Cuba.')}); } },
+  ],
+};
+const MISSILI62_EV = {
+  id:'snodo_missili62', snodo:true, era:'us1960', kick:'Cuba', tono:'grave',
+  t:'I missili',
+  text:'Le fotografie degli aerei spia non lasciano dubbi: a Cuba i sovietici stanno montando le rampe per missili che da lì possono colpire Washington. Fra qualche settimana saranno pronte. Lo stato maggiore chiede di bombardarle prima, e poi di sbarcare sull\'isola; al Consiglio di sicurezza delle Nazioni Unite ti aspettano. Il mondo non sa ancora niente. Hai pochi giorni, forse meno.',
+  ch:[
+    { l:'Il blocco navale, e una trattativa senza testimoni', e:'La storia · tredici giorni con le navi a vista · Mosca ritira i missili, e quello che tu ritiri in Turchia nessuno lo saprà per anni',
+      f:function(){ S.usMissili='blocco'; repd(5); stampad(2); gdUs60('cetomedio',2); gdUs60('pensionati',1); fidUs60(1);
+        S.log.unshift({t:T('Cuba'),x:T('Ha scelto il blocco navale intorno a Cuba e una trattativa segreta con Mosca.')}); } },
+    { l:'Bombardare le rampe, come chiede lo stato maggiore', e:'Le rampe saltano in una notte · nessuno sa quante ne restino né che cosa farà Mosca a Berlino, e per giorni il paese dorme nelle cantine', costo:{debito:1.5},
+      f:function(){ S.usMissili='bombe'; S.ind.debt+=1.5; repd(-8); stampad(-2); gdUs60('giovani',-3); gdUs60('pensionati',-2); gdUs60('cattolici',2); fidUs60(-3);
+        S.log.unshift({t:T('Cuba'),x:T('Ha fatto bombardare le rampe dei missili sovietici a Cuba.')}); } },
+    { l:'Alle Nazioni Unite, in pubblico, senza blocco', e:'Il mondo vede le fotografie · le rampe intanto si finiscono, e al Congresso ti chiamano debole',
+      f:function(){ S.usMissili='onu'; repd(2); gdUs60('giovani',2); gdUs60('cattolici',-3); gdUs60('cetomedio',-1); baseUs60(-1);
+        S.log.unshift({t:T('Cuba'),x:T('Ha portato i missili di Cuba alle Nazioni Unite, senza blocco navale.')}); } },
+  ],
+};
+const MISSILI62_OPP_EV = {
+  id:'snodo_missili62_opp', snodo:true, era:'us1960', kick:'Cuba', tono:'grave',
+  t:'I missili, dall\'aula',
+  text:'Il Presidente ha parlato alla televisione: missili sovietici a Cuba, e un blocco navale intorno all\'isola. Le navi di Mosca sono in mare. Fra poche settimane si vota per il Congresso, e c\'era chi in Senato denunciava le rampe da settimane senza che nessuno lo ascoltasse.',
+  ch:[
+    { l:'Con il Presidente: la politica si ferma sulla riva del mare', e:'La storia · la campagna si ferma per due settimane · a novembre il partito del Presidente perde quasi niente',
+      f:function(){ S.usMissiliOpp='sostegno'; gdUs60('cetomedio',2); baseUs60(-1);
+        S.log.unshift({t:T('Cuba'),x:T('Dall\'opposizione ha sostenuto il blocco navale intorno a Cuba.')}); } },
+    { l:'Il blocco non basta: bisogna prendersi l\'isola', e:'I falchi ti applaudono · se le navi si sparano, il paese si ricorderà chi le spingeva',
+      f:function(){ S.usMissiliOpp='invasione'; baseUs60(2); gdUs60('cattolici',1); gdUs60('giovani',-2); gdUs60('pensionati',-1);
+        S.log.unshift({t:T('Cuba'),x:T('Ha chiesto dall\'opposizione l\'invasione di Cuba.')}); } },
+    { l:'Chiedere conto: il governo sapeva, e ha aspettato', e:'Un\'inchiesta, a crisi finita · ora il paese non vuole sentire domande, vuole sentire che si è uniti',
+      f:function(){ S.usMissiliOpp='conto'; gdUs60('cetomedio',-1); baseUs60(1);
+        S.log.unshift({t:T('Cuba'),x:T('Ha accusato il governo di aver aspettato sui missili di Cuba.')}); } },
+  ],
+};
+const DIRITTI64_EV = {
+  id:'snodo_diritti64', snodo:true, era:'us1960', kick:'I diritti civili', tono:'grave',
+  t:'La legge',
+  text:'La legge sui diritti civili — niente più cartelli «solo bianchi» nei ristoranti, negli alberghi e nei cinema, niente più discriminazioni sul lavoro — è passata alla Camera a febbraio. Al Senato i senatori del Sud parlano senza sosta da quasi due mesi per non farla votare, e per chiudere il dibattito servono due terzi. I voti ci sono, forse, se la legge resta intera. A novembre si vota per la Casa Bianca.',
+  ch:[
+    { l:'Fino in fondo: la legge intera, e i voti per chiudere il dibattito', e:'La storia · il dibattito si chiude a giugno e la firmi a luglio · al Sud, a novembre, qualcosa si rompe per una generazione',
+      f:function(){ S.usDiritti='intera'; gdUs60('giovani',3); gdUs60('cetomedio',1); repd(2); stampad(1); baseUs60(S.partito==='us_dem'?-2:0);
+        S.log.unshift({t:T('I diritti civili'),x:T('Ha portato fino in fondo la legge sui diritti civili.')}); } },
+    { l:'Una legge più leggera, senza il capitolo sui luoghi pubblici', e:'Il dibattito si chiude in una settimana · i ristoranti del Sud restano come sono, e i movimenti marciano contro di te',
+      f:function(){ S.usDiritti='leggera'; gdUs60('giovani',-2); gdUs60('cetomedio',1); stampad(-1); baseUs60(S.partito==='us_dem'?-1:0);
+        S.log.unshift({t:T('I diritti civili'),x:T('Ha fatto passare una legge sui diritti civili senza il capitolo sui luoghi pubblici.')}); } },
+    { l:'Rimandare a dopo le elezioni', e:'Il Sud ti ringrazia · nelle città del Nord e nelle chiese nere si contano le promesse, e si conta anche questa',
+      f:function(){ S.usDiritti='rinvio'; gdUs60('giovani',-3); repd(-2); stampad(-2); baseUs60(S.partito==='us_dem'?1:0);
+        S.log.unshift({t:T('I diritti civili'),x:T('Ha rimandato la legge sui diritti civili a dopo le elezioni.')}); } },
+  ],
+};
+const DIRITTI64_OPP_EV = {
+  id:'snodo_diritti64_opp', snodo:true, era:'us1960', kick:'I diritti civili', tono:'grave',
+  t:'La legge, dall\'aula',
+  text:'Al Senato i senatori del Sud fanno ostruzionismo da quasi due mesi contro la legge del Presidente sui diritti civili. Per chiudere il dibattito servono due terzi, e senza i voti del tuo partito i due terzi non ci sono. A novembre sarai sulla scheda contro il Presidente, e c\'è chi ti consiglia di votare contro per prenderti il Sud.',
+  ch:[
+    { l:'I voti del tuo partito per chiudere il dibattito', e:'La storia · la legge passa con i voti dei due partiti · il Presidente la firma, e la fotografia è sua',
+      f:function(){ S.usDirittiOpp='con'; gdUs60('giovani',2); gdUs60('cetomedio',1); baseUs60(S.partito==='us_dem'?-2:0);
+        S.log.unshift({t:T('I diritti civili'),x:T('Dall\'opposizione ha dato i voti per chiudere il dibattito sulla legge dei diritti civili.')}); } },
+    { l:'Votare contro: la legge è giusta, ma non tocca a Washington imporla', e:'Il Profondo Sud ti scopre · nel resto del paese, in un anno di elezioni, ti guardano come il candidato del Sud',
+      f:function(){ S.usDirittiOpp='contro'; baseUs60(S.partito==='us_dem'?2:-1); gdUs60('giovani',-3); gdUs60('cetomedio',-2);
+        S.log.unshift({t:T('I diritti civili'),x:T('Ha votato contro la legge sui diritti civili, in nome dei diritti degli Stati.')}); } },
+    { l:'Libertà di coscienza', e:'Il partito vota diviso, e resta unito · nessuno sa che cosa pensi tu, e qualcuno comincia a chiederselo',
+      f:function(){ S.usDirittiOpp='coscienza'; gdUs60('giovani',-1); gdUs60('cetomedio',-1);
+        S.log.unshift({t:T('I diritti civili'),x:T('Ha lasciato al suo partito libertà di coscienza sulla legge dei diritti civili.')}); } },
+  ],
+};
+const VIETNAM65_EV = {
+  id:'snodo_vietnam65', snodo:true, era:'us1960', kick:'La guerra', tono:'grave',
+  t:'Il Vietnam',
+  text:'L\'estate scorsa, dopo uno scontro notturno nel golfo del Tonchino fra le nostre navi e le motosiluranti del Nord, il Congresso ha votato quasi all\'unanimità una risoluzione che ti dà mano libera nel Sud-est asiatico. A febbraio i guerriglieri hanno attaccato di notte una base americana nel Sud del Vietnam. Il governo di Saigon cambia ogni pochi mesi e perde terreno. Lo stato maggiore ha pronto un piano: bombardare il Nord, e mandare i marines a difendere le basi.',
+  ch:[
+    { l:'Bombardare il Nord, e poi le truppe', e:'La storia · i marines sbarcano a Da Nang a marzo · a fine anno i soldati sono quasi duecentomila, e nel 1968 più di mezzo milione', costo:{debito:1.5},
+      f:function(){ S.usVietnam='escalation'; S.ind.debt+=1.5; repd(-1); gdUs60('cattolici',2); gdUs60('giovani',-3); fidUs60(-2);
+        S.log.unshift({t:T('La guerra'),x:T('Ha cominciato a bombardare il Nord del Vietnam e ha mandato le truppe di terra.')}); } },
+    { l:'Consiglieri e aiuti, nessun soldato a combattere', e:'Saigon resta in piedi, per ora · al Congresso si comincia a chiedere chi sta perdendo il Vietnam',
+      f:function(){ S.usVietnam='consiglieri'; repd(-1); stampad(-1); gdUs60('cattolici',-2);
+        S.log.unshift({t:T('La guerra'),x:T('Ha tenuto in Vietnam consiglieri e aiuti, senza soldati a combattere.')}); } },
+    { l:'Trattare, e richiamare i consiglieri', e:'Nessun ragazzo parte · a Saigon il governo cade, e nel mondo ci si chiede quanto valga una garanzia americana',
+      f:function(){ S.usVietnam='trattativa'; repd(-4); gdUs60('giovani',2); gdUs60('cattolici',-3); baseUs60(-1);
+        S.log.unshift({t:T('La guerra'),x:T('Ha aperto una trattativa sul Vietnam e richiamato i consiglieri.')}); } },
+  ],
+};
+const VIETNAM65_OPP_EV = {
+  id:'snodo_vietnam65_opp', snodo:true, era:'us1960', kick:'La guerra', tono:'grave',
+  t:'Il Vietnam, dall\'aula',
+  text:'Il Presidente ha cominciato a bombardare il Nord del Vietnam, e i primi marines sono sbarcati per difendere le basi. Al Congresso quasi nessuno si oppone: l\'estate scorsa la risoluzione sul golfo del Tonchino è passata con due soli voti contrari in Senato. Il tuo partito deve dire che cosa pensa di una guerra che nessuno chiama ancora così.',
+  ch:[
+    { l:'Sostenere la guerra, e chiedere di vincerla', e:'La storia · votate i soldi e chiedete più bombe · se la guerra va male, sarà la guerra del Presidente',
+      f:function(){ S.usVietnamOpp='sostegno'; baseUs60(1); gdUs60('cattolici',1);
+        S.log.unshift({t:T('La guerra'),x:T('Dall\'opposizione ha sostenuto la guerra in Vietnam, chiedendo di vincerla.')}); } },
+    { l:'Un voto vero del Congresso, prima dei soldati', e:'I costituzionalisti ti danno ragione · il paese, per ora, sta con il Presidente',
+      f:function(){ S.usVietnamOpp='congresso'; gdUs60('cetomedio',1); gdUs60('giovani',1); baseUs60(-1);
+        S.log.unshift({t:T('La guerra'),x:T('Ha chiesto un voto del Congresso prima di mandare soldati in Vietnam.')}); } },
+    { l:'Contro: è una guerra che non si può vincere', e:'Le università ti ascoltano · nelle sedi dei reduci, e in molte famiglie, no',
+      f:function(){ S.usVietnamOpp='contro'; gdUs60('giovani',3); gdUs60('cattolici',-2); gdUs60('pensionati',-1); baseUs60(-1);
+        S.log.unshift({t:T('La guerra'),x:T('Si è opposto dall\'opposizione alla guerra in Vietnam.')}); } },
   ],
 };
 /* L110-2 · I TERRITORI E LA MAPPA DI de1960: quelli di de1950 più la Saar in coda (è entrata alla tappa del 1957/1), con lo stesso

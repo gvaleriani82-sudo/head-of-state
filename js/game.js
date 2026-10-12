@@ -481,6 +481,7 @@ function initStatoBase(){
   S.deAsilo92=null; S.deAsilo92Opp=null; S.deConto93=null; S.deConto93Opp=null; S.dePacchetto96=null; S.dePacchetto96Opp=null; S.deKosovo99=null; S.deKosovo99Opp=null; S.deMoneta98=null;   // L153-2: il decennio tedesco '90
   S.deIraq02=null; S.deIraq02Opp=null; S.deAgenda03=null; S.deAgenda03Opp=null; S.deFiducia05=null; S.deFiducia05Opp=null; S.deBanche08=null; S.deBanche08Opp=null;   // L157-1: il decennio tedesco 2000
   S.usCorea=null; S.usCoreaOpp=null; S.usGenerale=null; S.usGeneraleOpp=null; S.usAcciaio=null; S.usAcciaioOpp=null; S.usScuola=null; S.usScuolaOpp=null;   // L176-2: gli snodi di us1950
+  S.usBaia=null; S.usBaiaOpp=null; S.usMissili=null; S.usMissiliOpp=null; S.usDiritti=null; S.usDirittiOpp=null; S.usVietnam=null; S.usVietnamOpp=null;   // L227-1: gli snodi di us1960
   S.scioglimento97=null;   // L103-1: lo scioglimento del '97 (null = storico; 'no' = «aspetta», tappa 1998/3). Lo scrive S4 in L103-2
   S.coabitazione=false;   // L100-2: il Presidente con l'Assemblea degli altri (derivato dai seggi, dato puro, round-trip)
   S.governiCaduti=0;                    // L80-5: quante volte il governo e caduto senza che si andasse a votare
@@ -3533,6 +3534,7 @@ function sostegnoApri(prezzo){
 /* il rimpasto: l'alleato entra davvero. Costo concreto — due dicasteri passano di mano — e la base lo vede. */
 function rimpastoEntra(){
   var p=partnerRimpasto(); if(!p) return;
+  var prima=(S.coalizione||[S.partito]).slice();   // L229-1: chi c'era prima, per la voce dell'alleanza
   S.coalizione=(S.coalizione||[S.partito]).concat([p.id]);
   S.minoranza=bloccoSeggi()<50;
   S.rimpastoOfferto=(S.mandate||0);
@@ -3544,7 +3546,23 @@ function rimpastoEntra(){
   if(p.base) for(var g in p.base) gd(g,2);
   S.log.unshift({t:T('La maggioranza'),x:T('%P entra nel governo: due ministeri cambiano padrone e i numeri tornano.').replace('%P',T(p.nome))});
   if(typeof suona==='function') suona('nomina');   // L218-13 (F5e): il rimpasto — due ministeri cambiano padrone
-  if(typeof parla==='function' && !(typeof voceInCorso==='function' && voceInCorso())) parla('voce-rimpasto');   // L218-10: il rimpasto (F4b)
+  /* L218-10: il rimpasto (F4b) · L229-1 (Giacomo 12/10): il partito che ENTRA al governo parla con `voce-alleanza`; `voce-rimpasto`
+     resta il ripiego se la voce dell'alleanza non può parlare (file assente, partner che c'era già) */
+  if(!voceAlleanza(p.id, prima) && typeof parla==='function' && !(typeof voceInCorso==='function' && voceInCorso())) parla('voce-rimpasto');
+}
+/* L229-1 · LA VOCE DELL'ALLEANZA (F4c, decisione di Giacomo del 12/10): parla quando un partito che PRIMA non era in `S.coalizione`
+   entra nel governo del giocatore — livello 3, al governo, fuori dalla coabitazione —, dentro il gesto o dentro advanceMonth. Due
+   agganci: `rimpastoEntra` (il rimpasto e «La grande coalizione», stessa cerimonia) e la coalizione piena del 2010 britannico
+   (`COALIZIONE2010_EV`, data.js). Non all'avvio (`confirmCoal`: lì `voce-governo`), non alla rielezione (`finalizeVoto`/`confirmRinnovo`:
+   `voce-governo`), mai da `applySnap` (non chiama nessuno dei due). Zitta se un'altra voce parla. Ritorna true se ha chiesto la voce.
+   `prima` = la coalizione prima dell'ingresso. */
+function voceAlleanza(id, prima){
+  if(!id || (prima||[]).indexOf(id)>=0) return false;   // il partner c'era già: niente alleanza nuova
+  if(typeof S==='undefined' || !S || S.livello!==3 || S.opposizione || S.coabitazione) return false;
+  if(typeof parla!=='function' || (typeof voceInCorso==='function' && voceInCorso())) return false;
+  if(typeof voceHaFile==='function' && !voceHaFile('voce-alleanza')) return false;
+  parla('voce-alleanza');
+  return true;
 }
 /* IL CONTO DEL SOSTEGNO, ogni mese: il prezzo si paga e si controlla se regge. Chiamata da avanzaMese. */
 function sostegnoTick(){
@@ -4043,6 +4061,34 @@ function snodoAcciaio52Dovuta(){ return typeof S!=='undefined' && S && S.era===L
 function snodoAcciaio52OppDovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_US && S.livello===3 && S.opposizione && S.usAcciaioOpp==null && S.usAcciaio==null && (S.year===1952 && S.month>=4 && S.month<=5); }
 function snodoScuola57Dovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_US && S.livello===3 && !S.opposizione && S.usScuola==null && (S.year===1957 && S.month>=9 && S.month<=10); }
 function snodoScuola57OppDovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_US && S.livello===3 && S.opposizione && S.usScuolaOpp==null && S.usScuola==null && (S.year===1957 && S.month>=9 && S.month<=10); }
+/* L227-1 · i cancelli degli snodi di us1960 (chi occupa il mese, guardato sul gioco dai due lati: data.js, testa del blocco BAIA61_EV).
+   S1 1961/4-5 (il primo pilastro è pus60_hinsdale, 1961/9; pm_muro 1961/8). S2 SOLO 1962/10: novembre è il voto di metà mandato,
+   e uno snodo con agendaSolo nel mese del voto lo cancellerebbe; pm_cuba non esce negli Stati Uniti (D156). S3 1964/6-7, dentro la
+   campagna presidenziale, e S2 nel mese prima del voto di metà mandato (che ha la sua carta di campagna): l'iniezione mette
+   anche la carta di campagna (snodoColCampagna). S4 1965/2-3: febbraio è di
+   pus60_longisland (i pilastri vengono prima), quindi di norma marzo. Le aule non guardano il flag del governo, ma non escono a chi
+   ha già giocato la versione di governo (lo stesso patto di us1950). Valgono per tutta la linea (anche chi arriva da us1950). */
+function snodoBaia61Dovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_US && S.livello===3 && !S.opposizione && S.usBaia==null && (S.year===1961 && S.month>=4 && S.month<=5); }
+function snodoBaia61OppDovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_US && S.livello===3 && S.opposizione && S.usBaiaOpp==null && S.usBaia==null && (S.year===1961 && S.month>=4 && S.month<=5); }
+function snodoMissili62Dovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_US && S.livello===3 && !S.opposizione && S.usMissili==null && (S.year===1962 && S.month===10); }
+function snodoMissili62OppDovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_US && S.livello===3 && S.opposizione && S.usMissiliOpp==null && S.usMissili==null && (S.year===1962 && S.month===10); }
+function snodoDiritti64Dovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_US && S.livello===3 && !S.opposizione && S.usDiritti==null && (S.year===1964 && S.month>=6 && S.month<=7); }
+function snodoDiritti64OppDovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_US && S.livello===3 && S.opposizione && S.usDirittiOpp==null && S.usDiritti==null && (S.year===1964 && S.month>=6 && S.month<=7); }
+function snodoVietnam65Dovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_US && S.livello===3 && !S.opposizione && S.usVietnam==null && (S.year===1965 && S.month>=2 && S.month<=3); }
+function snodoVietnam65OppDovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_US && S.livello===3 && S.opposizione && S.usVietnamOpp==null && S.usVietnam==null && (S.year===1965 && S.month>=2 && S.month<=3); }
+/* L227-1 · uno snodo nella stagione della campagna nazionale esce INSIEME alla carta di campagna (la forma di L177-2 per i pilastri
+   `conCampagna`: due carte, uno snodo solo). Fuori stagione campagnaColPilastro dà null e non c'è niente in più. */
+/* L227-1 · il richiamo delle correnti passa prima di ogni snodo e fa agendaSolo: uno snodo con la finestra di UN mese solo (S2, i
+   missili: il mese dopo è il voto di metà mandato) ci si perderebbe — misurato, 1 carriera su 20 dall'opposizione. Nel suo mese
+   esce ACCANTO al richiamo (con la carta di campagna, come sempre in ottobre). Gli snodi a due mesi non ne hanno bisogno: il
+   richiamo ha 8 mesi di pausa, il secondo mese è libero. */
+function snodoAccantoAlRichiamo(){
+  var EV = (typeof snodoMissili62Dovuta==='function' && snodoMissili62Dovuta()) ? MISSILI62_EV
+         : ((typeof snodoMissili62OppDovuta==='function' && snodoMissili62OppDovuta()) ? MISSILI62_OPP_EV : null);
+  if(!EV) return;
+  S.agenda.push({kind:'event', data:EV, resolved:false}); var c=campagnaColPilastro({conCampagna:true}); if(c) S.agenda.push(c);
+}
+function snodoColCampagna(carta){ S.agenda.push(carta); var c=campagnaColPilastro({conCampagna:true}); if(c) S.agenda.push(c); agendaSolo(); }   // `carta` scritta per esteso dal chiamante: verifica-snodi riconosce l'innesco da `data:X_EV`
 /* L148-2 · APPLICA ORA LA DIRETTIVA DI UNA TAPPA (S1 b e FDP c, «le urne subito»: le liste del cambio di campo valgono PRIMA dello
    scioglimento, altrimenti la FDP rotta torna ordinaria all'urna e la SPD rifà la coalizione di prima). La stessa voce di
    RIALLINEAMENTI_ERA, col suo `se`, segnata come fatta: quando il mese della tappa arriva, riallineamentoTappa la salta (idempotente).
@@ -6132,7 +6178,7 @@ function genAgendaRamo(first){
     /* L27-1 — LA CARTA-RICHIAMO DELLE CORRENTI ANCHE QUI. Togliere il gate non bastava: l'iniezione del richiamo
        sta in fondo a genAgendaRamo, DOPO il `return` di questo ramo (misurato: gate aperto → 0 carte uscite in
        216 mesi). Stessa precedenza che ha al governo (prima della stagione elettorale), stesso `agendaSolo()`. */
-    if(!first && typeof richiamoCorrentiDovuto==='function' && richiamoCorrentiDovuto()){ S.richiamoCorrUltimo=S.year*12+S.month; S.agenda.push({kind:'event', data:cartaRichiamoCorrenti(), resolved:false}); agendaSolo(); return; }
+    if(!first && typeof richiamoCorrentiDovuto==='function' && richiamoCorrentiDovuto()){ S.richiamoCorrUltimo=S.year*12+S.month; S.agenda.push({kind:'event', data:cartaRichiamoCorrenti(), resolved:false}); snodoAccantoAlRichiamo(); agendaSolo(); return; }   // L227-1: S2 di us1960 non si perde sotto il richiamo
     if(!first && typeof snodoAlleanza81Dovuta==='function' && snodoAlleanza81Dovuta()){ S.agenda.push({kind:'event', data:(S.partito==='uk_lib'?QUATTRO_EV:SCISSIONE81_EV), resolved:false}); agendaSolo(); return; }   // L60-2: la scissione dell'81 arriva anche all'opposizione
     if(!first && typeof snodoAnimaDovuta==='function' && snodoAnimaDovuta()){ S.agenda.push({kind:'event', data:ANIMA_EV, resolved:false}); agendaSolo(); return; }   // L75-1: l'anima del partito, all'opposizione
     if(!first && typeof snodoSuezOppDovuta==='function' && snodoSuezOppDovuta()){ S.agenda.push({kind:'event', data:SUEZ_OPP_EV, resolved:false}); agendaSolo(); return; }   // L77-4: Suez dall'aula
@@ -6174,6 +6220,10 @@ function genAgendaRamo(first){
     if(!first && typeof snodoCorea50OppDovuta==='function' && snodoCorea50OppDovuta()){ S.agenda.push({kind:'event', data:COREA50_OPP_EV, resolved:false}); agendaSolo(); return; }   // L176-2: la Corea, dall'aula
     if(!first && typeof snodoGenerale51OppDovuta==='function' && snodoGenerale51OppDovuta()){ S.agenda.push({kind:'event', data:GENERALE51_OPP_EV, resolved:false}); agendaSolo(); return; }   // L176-2: il generale, dall'aula
     if(!first && typeof snodoAcciaio52OppDovuta==='function' && snodoAcciaio52OppDovuta()){ S.agenda.push({kind:'event', data:ACCIAIO52_OPP_EV, resolved:false}); agendaSolo(); return; }   // L176-2: le acciaierie, dall'aula
+    if(!first && typeof snodoBaia61OppDovuta==='function' && snodoBaia61OppDovuta()){ S.agenda.push({kind:'event', data:BAIA61_OPP_EV, resolved:false}); agendaSolo(); return; }   // L227-1: la baia, dall'aula
+    if(!first && typeof snodoMissili62OppDovuta==='function' && snodoMissili62OppDovuta()){ snodoColCampagna({kind:'event', data:MISSILI62_OPP_EV, resolved:false}); return; }   // L227-1: i missili, dall'aula (con la carta di campagna della metà mandato)
+    if(!first && typeof snodoDiritti64OppDovuta==='function' && snodoDiritti64OppDovuta()){ snodoColCampagna({kind:'event', data:DIRITTI64_OPP_EV, resolved:false}); return; }   // L227-1: la legge, dall'aula (con la carta di campagna)
+    if(!first && typeof snodoVietnam65OppDovuta==='function' && snodoVietnam65OppDovuta()){ S.agenda.push({kind:'event', data:VIETNAM65_OPP_EV, resolved:false}); agendaSolo(); return; }   // L227-1: il Vietnam, dall'aula
     if(!first && typeof snodoScuola57OppDovuta==='function' && snodoScuola57OppDovuta()){ S.agenda.push({kind:'event', data:(S.partito==='us_rep' ? SCUOLA57_OPP_REP_EV : SCUOLA57_OPP_EV), resolved:false}); agendaSolo(); return; }   // L176-2: la scuola, dall'aula · D139 (L177-1): il testo repubblicano, stessi effetti
     // Cantiere C: la stagione elettorale vale anche da SFIDANTE (bloccoIds = il tuo blocco d'opposizione)
     if(typeof pickCampagnaNazionale==='function'){ const cnbO=pickCampagnaNazionale(); if(cnbO){ S.agenda.push(cnbO); agendaSolo(); return; } }
@@ -6325,6 +6375,10 @@ function genAgendaRamo(first){
   if(!first && typeof snodoGenerale51Dovuta==='function' && snodoGenerale51Dovuta()){ S.agenda.push({kind:'event', data:GENERALE51_EV, resolved:false}); agendaSolo(); return; }   // L176-2: il generale
   if(!first && typeof snodoAcciaio52Dovuta==='function' && snodoAcciaio52Dovuta()){ S.agenda.push({kind:'event', data:ACCIAIO52_EV, resolved:false}); agendaSolo(); return; }   // L176-2: le acciaierie
   if(!first && typeof snodoScuola57Dovuta==='function' && snodoScuola57Dovuta()){ S.agenda.push({kind:'event', data:SCUOLA57_EV, resolved:false}); agendaSolo(); return; }   // L176-2: la scuola
+  if(!first && typeof snodoBaia61Dovuta==='function' && snodoBaia61Dovuta()){ S.agenda.push({kind:'event', data:BAIA61_EV, resolved:false}); agendaSolo(); return; }   // L227-1: la baia
+  if(!first && typeof snodoMissili62Dovuta==='function' && snodoMissili62Dovuta()){ snodoColCampagna({kind:'event', data:MISSILI62_EV, resolved:false}); return; }   // L227-1: i missili (con la carta di campagna della metà mandato)
+  if(!first && typeof snodoDiritti64Dovuta==='function' && snodoDiritti64Dovuta()){ snodoColCampagna({kind:'event', data:DIRITTI64_EV, resolved:false}); return; }   // L227-1: la legge (con la carta di campagna)
+  if(!first && typeof snodoVietnam65Dovuta==='function' && snodoVietnam65Dovuta()){ S.agenda.push({kind:'event', data:VIETNAM65_EV, resolved:false}); agendaSolo(); return; }   // L227-1: il Vietnam
   if(!first && typeof franco90AncoraDovuta==='function'){ var _f9=franco90AncoraDovuta();   // L103-2: la corsa al franco del '92 e del '93
     if(_f9 && !cedeVoto(ancoraReggeRinvio(FRANCO90_ANCORE, _f9))){ S.francoAncore=S.francoAncore||{}; S.francoAncore[_f9]=true; if(_f9==='a92' && pesoFranco92()>1) S.francoGrave=true;   // col no a Maastricht pesa doppio
       S.agenda.push({kind:'event', data:(_f9==='a92' ? FRANCO92_EV : FRANCO93_EV), resolved:false}); agendaSolo(); return; } }
@@ -6353,7 +6407,7 @@ function genAgendaRamo(first){
   if(!first && typeof snodoMattarellumDovuta==='function' && snodoMattarellumDovuta()){ S.agenda.push({kind:'event', data:MATTARELLUM_EV, resolved:false}); agendaSolo(); return; }
   if(!first && typeof snodoMaastrichtDovuta==='function' && snodoMaastrichtDovuta()){ S.agenda.push({kind:'event', data:MAASTRICHT_EV, resolved:false}); agendaSolo(); return; }
   // CURA Lotto P3 (#9): la CARTA-RICHIAMO delle correnti — chiama alla scheda PRIMA che sia tardi (mai l'imboscata a 30)
-  if(!first && typeof richiamoCorrentiDovuto==='function' && richiamoCorrentiDovuto()){ S.richiamoCorrUltimo=S.year*12+S.month; S.agenda.push({kind:'event', data:cartaRichiamoCorrenti(), resolved:false}); agendaSolo(); return; }
+  if(!first && typeof richiamoCorrentiDovuto==='function' && richiamoCorrentiDovuto()){ S.richiamoCorrUltimo=S.year*12+S.month; S.agenda.push({kind:'event', data:cartaRichiamoCorrenti(), resolved:false}); snodoAccantoAlRichiamo(); agendaSolo(); return; }   // L227-1: S2 di us1960 non si perde sotto il richiamo
   // Cantiere C: la STAGIONE ELETTORALE (ultimi 6 mesi) — il beat-campagna è LA carta del mese (setpiece: la campagna assorbe l'agenda)
   if(!first && typeof pickCampagnaNazionale==='function'){ const cnb=pickCampagnaNazionale(); if(cnb){ S.agenda.push(cnb); agendaSolo(); return; } }
   // ATTO FINALE (fase C1a): la chiamata a guidare il Consesso (gated su relInt alto) — quando arriva, è LA carta del mese
@@ -8842,6 +8896,7 @@ function applySnap(snap){
   ['deAsilo92','deAsilo92Opp','deConto93','deConto93Opp','dePacchetto96','dePacchetto96Opp','deKosovo99','deKosovo99Opp','deMoneta98'].forEach(function(k){ if(S[k]===undefined) S[k]=null; });   // L153-2: uno per uno
   ['deIraq02','deIraq02Opp','deAgenda03','deAgenda03Opp','deFiducia05','deFiducia05Opp','deBanche08','deBanche08Opp'].forEach(function(k){ if(S[k]===undefined) S[k]=null; });   // L157-1: uno per uno
   ['usCorea','usCoreaOpp','usGenerale','usGeneraleOpp','usAcciaio','usAcciaioOpp','usScuola','usScuolaOpp'].forEach(function(k){ if(S[k]===undefined) S[k]=null; });   // L176-2: uno per uno
+  ['usBaia','usBaiaOpp','usMissili','usMissiliOpp','usDiritti','usDirittiOpp','usVietnam','usVietnamOpp'].forEach(function(k){ if(S[k]===undefined) S[k]=null; });   // L227-1: i salvataggi di us1960 di prima caricano
   if(S.scioglimento97===undefined) S.scioglimento97=null;   // L103-1
   if(S.coabitazione===undefined) S.coabitazione=false;   // L100-2
   if(S.governiCaduti===undefined) S.governiCaduti=0;   // L80-5

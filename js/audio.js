@@ -111,7 +111,8 @@ const AUDIO_MANIFEST = {
      promessa di campagna mantenuta (`resaPromesseCampagna`, nel mese nuovo); salva → `uiSlotSave` riuscito; scorri → il bottone ≡ del
      pannello Partita (i cassetti hanno già `pagina`). Nei gesti di una scelta il nuovo è il SECONDO suono, dopo `tocco`: `suonoEsito`
      resta oltre il tetto (AUDIO_TETTO_GESTO), cioè il nuovo suona AL POSTO dell'esito. ⚠ `no` (azione non disponibile): file e gain,
-     NESSUN aggancio — i bottoni non disponibili del gioco sono `disabled` e il tocco su di loro non arriva a nessun gestore. */
+     NESSUN aggancio — i bottoni non disponibili del gioco sono `disabled` e il tocco su di loro non arriva a nessun gestore; resta
+     muto per decisione di Giacomo del 12/10 (L229-1): non si aggiunge un ascoltatore. */
   timbro:          { file:'timbro.mp3',          loop:false, gain:0.89 },  // F5a · 0,8 s: RMS −25,1, picco 0 → tetto del picco (la regola dava 1,21)
   calcolatrice:    { file:'calcolatrice.mp3',    loop:false, gain:0.80 },  // F5b · 1,5 s: RMS −21,5, picco +0,9 decodificato in Chrome → regola di sopra (tetto 0,80)
   'consenso-su':   { file:'consenso-su.mp3',     loop:false, gain:0.93 },  // F5c · 0,8 s: RMS −22,8, picco −2,0 → regola di sopra
@@ -842,10 +843,11 @@ const VOCI_MANIFEST = {
      anche in applySnap); rimpasto → `rimpastoEntra`; opposizione → `goOpposizione` dopo una sconfitta dal governo (non la salvezza
      dall'opposizione, non l'avvio all'opposizione); legge-si → `applicaLegge` quando approva; vittoria-c → terza della coppia
      `voce-vittoria` (voceScelta alterna -a/-b/-c). Tutte e quattro le nuove con agganci tacciono se un'altra voce parla (voceInCorso).
-     ⚠ `voce-alleanza`: il punto d'uso della consegna (`snodoAlleanza`) non esiste nel codice — file e manifesto, NESSUN aggancio. */
+     `voce-alleanza`: dal L229-1 (Giacomo 12/10) parla quando un partito NUOVO entra al governo del giocatore — `voceAlleanza()` in
+     game.js, chiamata da `rimpastoEntra` (al posto di voce-rimpasto, che resta il ripiego) e dalla coalizione piena del 2010 britannico. */
   'voce-scandalo':            { file:'voce-scandalo.mp3',            gain:0.40, en:'I have read the reports, like everyone else. If anyone on my team broke the rules, they will answer for it.', it:'Ho letto i giornali, come tutti. Se qualcuno della mia squadra ha violato le regole, ne risponderà.' },   // F4a · −15,4 / −1,2 (L218-10)
   'voce-rimpasto':            { file:'voce-rimpasto.mp3',            gain:0.38, en:'Today I have reshaped the team. New energy, the same direction. The country cannot wait.', it:'Oggi ho cambiato la squadra. Energie nuove, la stessa direzione. Il paese non può aspettare.' },   // F4b · −15,0 / −1,0 (L218-10)
-  'voce-alleanza':            { file:'voce-alleanza.mp3',            gain:0.38, en:'We do not agree on everything. But we agree on what matters most, and that is enough to govern together.', it:'Non siamo d\'accordo su tutto. Ma lo siamo su ciò che conta di più, e basta per governare insieme.' },   // F4c · −15,0 / −1,3 (L218-10) · senza aggancio
+  'voce-alleanza':            { file:'voce-alleanza.mp3',            gain:0.38, en:'We do not agree on everything. But we agree on what matters most, and that is enough to govern together.', it:'Non siamo d\'accordo su tutto. Ma lo siamo su ciò che conta di più, e basta per governare insieme.' },   // F4c · −15,0 / −1,3 (L218-10) · aggancio L229-1: voceAlleanza
   'voce-opposizione':         { file:'voce-opposizione.mp3',         gain:0.46, en:'From today, we sit in opposition. We will watch, we will question, and we will be ready.', it:'Da oggi siamo all\'opposizione. Vigileremo, faremo domande, e saremo pronti.' },   // F4d · −16,7 / −1,2 (L218-10)
   'voce-legge-si':            { file:'voce-legge-si.mp3',            gain:0.44, en:'The law has passed. It was not easy, but it was right, and people will feel the difference.', it:'La legge è passata. Non è stato facile, ma era giusto, e la gente sentirà la differenza.' },   // F4e · −16,3 / −1,4 (L218-10)
   'voce-vittoria-c':          { file:'voce-vittoria-c.mp3',          gain:0.45, en:'They said it could not be done. Tonight, you proved them wrong. Thank you.', it:'Dicevano che era impossibile. Stanotte gli avete dato torto. Grazie.' },   // F4f · −16,5 / −1,5 (L218-10)
@@ -857,7 +859,9 @@ const VOCI_MANIFEST = {
      `aggiornaRivolta` (model.js) quando un gruppo comincia a voltarti le spalle (il conto della rivolta passa da 0 a 1), dentro
      advanceMonth. Tutte zitte se un'altra voce parla (voceInCorso).
      ⚠ `voce-legge-no` e `voce-bilancio-si`: file e manifesto, NESSUN aggancio — nel gioco una legge non viene mai respinta (setLegge
-     la approva o non parte), e `chiudiBilancio` chiude il bilancio DELL'ANNO, che parla già con voce-fineanno-<k>. */
+     la approva o non parte), e `chiudiBilancio` chiude il bilancio DELL'ANNO, che parla già con voce-fineanno-<k>.
+     Decisioni di Giacomo del 12/10 (L229-1): `voce-bilancio-si` RESTA senza aggancio (ogni gennaio si accavallerebbe a
+     voce-fineanno-<k>); `voce-legge-no` la decide il voto in aula (L228-1, studio). */
   'voce-sconfitta-c':         { file:'voce-sconfitta-c.mp3',         gain:0.47, en:'It is a bitter night, and I take full responsibility. Our party deserves a fresh start.', it:'È una notte amara, e me ne assumo tutta la responsabilità. Il partito merita di ripartire.' },   // F4g · −16,9 / −1,4 (L218-11)
   'voce-coalizione-rotta':    { file:'voce-coalizione-rotta.mp3',    gain:0.48, en:'Our partners have chosen to leave. I regret it, but this government will not stop working.', it:'I nostri alleati hanno scelto di andarsene. Mi dispiace, ma questo governo non smette di lavorare.' },   // F4h · −17,0 / −1,3 (L218-11)
   'voce-legge-no':            { file:'voce-legge-no.mp3',            gain:0.43, en:'The vote did not go our way. We will listen, we will improve it, and we will try again.', it:'Il voto non è andato come speravamo. Ascolteremo, la miglioreremo, e ci riproveremo.' },   // F4i · −16,1 / −1,5 (L218-11) · senza aggancio
@@ -872,7 +876,7 @@ const VOCI_MANIFEST = {
      prima scelta («Rivendichi la trasparenza»: non «Archivi in silenzio», nessun trionfo); sciopero, vertice, lutto, dibattito →
      `voceAgendaMese` (la carta entra in agenda nel mese nuovo, solo dentro advanceMonth: VOCI_CARTA). Tutte zitte se un'altra
      voce parla (voceInCorso). ⚠ `voce-lutto` («tragedia o disastro») NON sui pilastri-tragedia: lì `parla` tace per regola (L218,
-     «mai sopra una tragedia»); la dicono i disastri inventati del gioco (`sisma`, `crollo`). */
+     «mai sopra una tragedia»); la dicono i disastri inventati del gioco (`sisma`, `crollo`). Confermato da Giacomo il 12/10 (L229-1). */
   'voce-sciopero':            { file:'voce-sciopero.mp3',            gain:0.36, en:'This strike is a sign of real anger. My door is open, and I want an agreement by the end of the week.', it:'Questo sciopero è il segno di una rabbia vera. La mia porta è aperta, e voglio un accordo entro la settimana.' },   // F4n · −14,5 / −1,0 (L218-12)
   'voce-insediamento-b':      { file:'voce-insediamento-b.mp3',      gain:0.39, en:'I know the weight of this moment. I will not promise miracles. I promise work, honesty, and an open door.', it:'Conosco il peso di questo momento. Non prometto miracoli. Prometto lavoro, onestà e una porta aperta.' },   // F4o · −15,3 / −1,2 (L218-12)
   'voce-candidatura':         { file:'voce-candidatura.mp3',         gain:0.38, en:'I am standing for election because I believe things can be better, and I am ready to prove it.', it:'Mi candido perché credo che le cose possano andare meglio, e sono pronto a dimostrarlo.' },   // F4p · −15,0 / −1,4 (L218-12)
