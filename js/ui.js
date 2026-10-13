@@ -900,7 +900,7 @@ function avviaRuolo(){
      aspetta la fine di ENTRAMBE: la clip che finisce prima resta sull'ultimo fotogramma (decisione di Giacomo, niente tagli);
      «Salta», tocco ed Esc chiudono subito e fermano la voce. Una voce che non arriva (`error`) = la clip come prima.
      I sottotitoli seguono la VOCE, non il video: la traccia sta sull'<audio> in modalità `hidden` e i cue attivi si scrivono
-     in `#partenza-sott`, sempre visibili, nella lingua del gioco. Mentre la voce suona (non muta) la musica scende a ×0,3
+     in `#partenza-sott`, sempre visibili, nella lingua del gioco. Mentre la voce suona (non muta) la musica scende a ×0,3 (⚑ L231-1: dall'apertura del velo, e il suono è nel contesto Web Audio: `voceClipAggancia`)
      (`musicaSottovoce`, audio.js: lo stesso punto che la porta a zero sotto una tragedia). Dall'opposizione niente voce né
      sottotitoli: la clip è quella del capo del governo e la voce dice «Govern.» (letto da `S.opposizione` dopo l'avvio).
    ================================================================================================================ */
@@ -917,6 +917,59 @@ function partenzaFinita(chi){      // L146-1: si chiude da sola solo quando clip
   PARTENZA_FINE[chi]=true;
   if(chi==='voce'){ try{ if(typeof musicaSottovoce==='function') musicaSottovoce(false); }catch(e){} }
   if(PARTENZA_FINE.clip && PARTENZA_FINE.voce) chiudiPartenza();
+}
+/* ================================================================================================================
+   L231-1 (13/10) · LA VOCE DELLE CLIP SUONA NEL CONTESTO WEB AUDIO (partenza e clip della porta). Giacomo, su iPhone, Italia 1980:
+   «la musica del decennio copre l'audio del video». In Chrome la voce stava 26-32 dB sopra la musica (sonda-l231-1.js): non era il
+   livello. Era la strada: l'<audio> partiva con `play()` dentro il `playing` del video, FUORI dal gesto, e Safari iOS nega il sonoro a
+   un elemento che non ha mai suonato in un gesto → il ripiego lo faceva muto (sottotitoli sì, voce no, e la musica non scendeva,
+   perché il gradino scattava solo su una voce non muta). E Safari iOS ignora `volume`. Il contesto Web Audio invece è già sbloccato
+   dal primo gesto (audio.js) e lì una sorgente parte quando vuole, col suo gain.
+   · L'<audio> resta, MUTO: è l'orologio — sottotitoli (il <track>), fine (`ended`) e attesa «clip E voce». Il suono è un buffer
+     decodificato nel contesto, che parte al primo `playing` dell'<audio> dal suo `currentTime`, col gain = `volume` dichiarato,
+     collegato DIRETTO all'uscita come suonava l'elemento (fuori da bus e master: stesso livello di prima, misurato).
+   · Il file si chiede all'apertura del velo; l'<audio> aspetta il buffer prima di partire (al più VOCI_ATTESA_MS, poi la strada di
+     prima: elemento col sonoro e ripiego muto). Audio spento o silenziato: niente buffer, voce muta come prima.
+   · LA MUSICA SCENDE ALL'APERTURA del velo (`voceClipDuck`), non al `playing` della voce: nei primi istanti il gradino non c'era
+     mai (MUSICA_SOTTOVOCE falso al primo playing in tutti i casi misurati). Il gradino resta ×0,3: col suono nel contesto la voce sta
+     ~28 dB sopra la musica abbassata, il ×0,15 proposto non serve.
+   · `VOCE_CLIP_ORA` (le sorgenti che suonano) si svuota con `voceClipFerma()`: chiusura del velo (dissolvenza come il velo) e fine.
+   Transitorio, mai in S. Prova: `.claude/sonda-l231-1.js` (rossa con --rosso: il gradino all'apertura tolto).
+   ================================================================================================================ */
+let VOCE_CLIP_ORA=[];
+function voceClipViva(){ try{ return typeof audioVivo==='function' && audioVivo() && typeof AUDIO_CTX!=='undefined' && !!AUDIO_CTX && AUDIO_CTX.state!=='closed'; }catch(e){ return false; } }
+function voceClipDuck(on){ try{ if(typeof musicaSottovoce==='function') musicaSottovoce(on); }catch(e){} }   // un nome solo: la sonda lo spegne per vedersi rossa
+function voceClipCarica(file){
+  try{ return fetch(VIDEO_DIR+file).then(function(r){ return r.ok ? r.arrayBuffer() : null; })
+    .then(function(ab){ if(!ab || !AUDIO_CTX) return null; return new Promise(function(ok, ko){ AUDIO_CTX.decodeAudioData(ab, ok, ko); }); })
+    .catch(function(){ return null; }); }catch(e){ return Promise.resolve(null); }
+}
+function voceClipFerma(ms){
+  const L=VOCE_CLIP_ORA; VOCE_CLIP_ORA=[];
+  L.forEach(function(x){ try{ const t=AUDIO_CTX.currentTime, d=Math.max(0.02, (ms||0)/1000); x.g.gain.cancelScheduledValues(t); x.g.gain.setValueAtTime(x.g.gain.value, t); x.g.gain.linearRampToValueAtTime(0, t+d); x.src.stop(t+d+0.05); }catch(e){} });
+}
+/* aggancia la voce `file` all'<audio> `a` (l'orologio) e al video `v`; `aperta()` dice se il velo c'è ancora; `vol` il volume dichiarato */
+function voceClipAggancia(a, v, file, vol, aperta){
+  const P=voceClipViva() ? voceClipCarica(file) : null;
+  let buf=null;
+  const elemento=function(){   // la strada di prima: l'elemento col sonoro (se l'audio è vivo), e muto se il browser lo nega
+    try{ a.muted=!voceClipViva(); a.volume=vol; }catch(e){}
+    try{ const p=a.play(); if(p && p.catch) p.catch(function(){ try{ if(!aperta()) return; a.muted=true; const q=a.play(); if(q && q.catch) q.catch(function(){}); }catch(e){} }); }catch(e){} };
+  a.addEventListener('playing', function(){ if(!buf || !aperta()) return;
+    try{ const src=AUDIO_CTX.createBufferSource(), g=AUDIO_CTX.createGain(); src.buffer=buf; g.gain.value=vol;
+      src.connect(g); g.connect(AUDIO_CTX.destination);
+      const x={src:src, g:g}; VOCE_CLIP_ORA.push(x);
+      src.onended=function(){ const i=VOCE_CLIP_ORA.indexOf(x); if(i>=0) VOCE_CLIP_ORA.splice(i, 1); };
+      src.start(0, Math.min(Math.max(0, a.currentTime||0), Math.max(0, buf.duration-0.05))); }catch(e){} }, {once:true});
+  v.addEventListener('playing', function(){ if(!aperta()) return;
+    if(!P){ elemento(); return; }
+    let fatto=false;
+    const via=setTimeout(function(){ if(fatto) return; fatto=true; elemento(); }, (typeof VOCI_ATTESA_MS!=='undefined') ? VOCI_ATTESA_MS : 2500);
+    P.then(function(b){ if(fatto || !aperta()) return; fatto=true; clearTimeout(via);
+      if(!b){ elemento(); return; }
+      buf=b; a.muted=true;
+      try{ const p=a.play(); if(p && p.catch) p.catch(function(){}); }catch(e){} });
+  }, {once:true});
 }
 function partenzaDelRuolo(){
   const n=PARTENZA_NOMI[(CREA && CREA.livello!=null) ? CREA.livello : 3];
@@ -956,9 +1009,9 @@ function apriPartenza(nome){
     a.addEventListener('playing', function(){ if(!a.muted && PARTENZA_APERTA){ try{ if(typeof musicaSottovoce==='function') musicaSottovoce(true); }catch(e){} } }, {once:true});
     a.addEventListener('ended', function(){ partenzaFinita('voce'); }, {once:true});
     a.addEventListener('error', function(){ try{ sott.textContent=''; sott.parentNode.classList.remove('on'); }catch(e){} partenzaFinita('voce'); }, {once:true});
-    /* parte col primo `playing` del video; se il browser nega il sonoro, muta (i sottotitoli restano a tempo) */
-    v.addEventListener('playing', function(){ if(!PARTENZA_APERTA) return;
-      try{ const p=a.play(); if(p && p.catch) p.catch(function(){ try{ if(!PARTENZA_APERTA) return; a.muted=true; const q=a.play(); if(q && q.catch) q.catch(function(){}); }catch(e){} }); }catch(e){} }, {once:true});
+    /* parte col primo `playing` del video; L231-1: il suono nel contesto Web Audio, l'<audio> muto fa da orologio (sottotitoli a tempo) */
+    voceClipAggancia(a, v, PV.voce, 1, function(){ return PARTENZA_APERTA; });
+    if(voceClipViva()) voceClipDuck(true);   // L231-1: la musica scende all'apertura, non al playing della voce
   }
   try{ const p=v.play(); if(p && p.catch) p.catch(function(){}); }catch(e){}
   document.addEventListener('keydown', partenzaTasto, true);
@@ -981,6 +1034,7 @@ function chiudiPartenza(){
   /* L181-4: clip e voce non si troncano più (sorgente via e poster visibile per 350 ms): la voce scende in dissolvenza col velo,
      e il ritratto vivo (L178-3) si ferma alla fine, nello stesso task in cui il velo esce */
   if(el){ el.id='partenza-uscente'; veloEsce(el, VELO_USCITA_MS, function(){ fermaRitrattiVivi(el); }); }
+  voceClipFerma(VELO_USCITA_MS);   // L231-1: la voce nel contesto scende col velo
   try{ if(typeof musicaSottovoce==='function') musicaSottovoce(false); }catch(e){}   // L146-1: la musica torna piena
   PARTENZA_FERME.forEach(function(v){ try{ if(v.isConnected){ const p=v.play(); if(p && p.catch) p.catch(function(){}); } }catch(e){} }); PARTENZA_FERME=[];
 }
@@ -1004,7 +1058,7 @@ function chiudiPartenza(){
      dell'audio, non del movimento. Il suono «soglia» fra le due clip non c'è: va ascoltato sopra il tema prima di metterlo.
    · ⚑ L218-7 (11/10) · LA VOCE. Le clip restano mute, ma una clip con la riga in `PORTA_VOCE` (scenes.js; la chiave è il nome
      della clip) ha la sua voce in un <audio> nato qui, come la partenza (L146-1): parte al primo `playing` della SUA clip, segue
-     `audioVivo()` (spento o silenziato = muta, il sottotitolo resta a tempo), suona al `volume` dichiarato, e mentre parla il tema
+     `audioVivo()` (spento o silenziato = muta, il sottotitolo resta a tempo), suona al `volume` dichiarato (⚑ L231-1: nel contesto Web Audio, `voceClipAggancia`; il tema scende all'apertura del velo), e mentre parla il tema
      scende a ×0,3 (`musicaSottovoce`). La clip passa alla successiva — o chiude il velo — solo quando sono finite clip E voce:
      quella che finisce prima resta sull'ultimo fotogramma. Il sottotitolo (`#clip-porta-sott`, nella lingua del gioco) segue la
      voce. Una clip senza riga va come prima (dal L218-8 le hanno tutte e undici); una voce che non arriva (`error`) = la clip muta.
@@ -1046,7 +1100,7 @@ function apriClipPorta(id){
      sull'ultimo fotogramma o in silenzio, come la partenza (L146-1) */
   const fine=vv.map(function(v,i){ return {clip:false, voce:!aa[i]}; });
   const avanti=function(i, chi){ if(!PORTA_CLIP_APERTA || fine[i][chi]) return; fine[i][chi]=true;
-    if(chi==='voce'){ try{ sott.textContent=''; sott.parentNode.classList.remove('on'); }catch(e){} try{ if(typeof musicaSottovoce==='function') musicaSottovoce(false); }catch(e){} }
+    if(chi==='voce'){ try{ sott.textContent=''; sott.parentNode.classList.remove('on'); }catch(e){} if(!aa.slice(i+1).some(Boolean)) voceClipDuck(false); }   // L231-1: risale dopo l'ULTIMA voce del velo
     if(!(fine[i].clip && fine[i].voce)) return;
     const n=vv[i+1]; if(!n){ chiudiClipPorta(); return; }
     n.classList.add('on'); try{ const p=n.play(); if(p && p.catch) p.catch(function(){}); }catch(e){} };
@@ -1055,7 +1109,6 @@ function apriClipPorta(id){
     v.addEventListener('ended', function(){ avanti(i, 'clip'); }, {once:true});
     if(!a) return;
     try{ a.muted=!(typeof audioVivo==='function' && audioVivo()); }catch(e){ a.muted=true; }   // spento o silenziato: muta, i sottotitoli restano a tempo
-    try{ a.volume=Math.min(1, Math.max(0, +PVS[i].volume || 1)); }catch(e){}
     try{ const tt=a.textTracks && a.textTracks[0];
       if(tt){ tt.mode='hidden';
         tt.addEventListener('cuechange', function(){ try{ if(fine[i].voce) return; const c=tt.activeCues, r=[]; for(let k=0;c && k<c.length;k++) r.push(c[k].text);
@@ -1063,9 +1116,9 @@ function apriClipPorta(id){
     a.addEventListener('playing', function(){ if(!a.muted && PORTA_CLIP_APERTA){ try{ if(typeof musicaSottovoce==='function') musicaSottovoce(true); }catch(e){} } }, {once:true});
     a.addEventListener('ended', function(){ avanti(i, 'voce'); }, {once:true});
     a.addEventListener('error', function(){ avanti(i, 'voce'); }, {once:true});   // una voce che non arriva = la clip come prima
-    /* parte col primo `playing` della SUA clip; se il browser nega il sonoro, muta */
-    v.addEventListener('playing', function(){ if(!PORTA_CLIP_APERTA) return;
-      try{ const p=a.play(); if(p && p.catch) p.catch(function(){ try{ if(!PORTA_CLIP_APERTA) return; a.muted=true; const q=a.play(); if(q && q.catch) q.catch(function(){}); }catch(e){} }); }catch(e){} }, {once:true}); });
+    /* parte col primo `playing` della SUA clip; L231-1: il suono nel contesto Web Audio al `volume` dichiarato, l'<audio> muto fa da orologio */
+    voceClipAggancia(a, v, PVS[i].voce, Math.min(1, Math.max(0, +PVS[i].volume || 1)), function(){ return PORTA_CLIP_APERTA; }); });
+  if(aa.some(Boolean) && voceClipViva()) voceClipDuck(true);   // L231-1: il tema scende all'apertura del velo, non al playing della voce
   try{ const p=vv[0].play(); if(p && p.catch) p.catch(function(){}); }catch(e){}
   document.addEventListener('keydown', clipPortaTasto, true);
   void el.offsetWidth; el.classList.add('on');   // col reflow forzato, non con rAF (come apriPartenza)
@@ -1078,6 +1131,7 @@ function chiudiClipPorta(){
   document.removeEventListener('keydown', clipPortaTasto, true);
   const el=document.getElementById('clip-porta');
   if(el){ el.id='clip-porta-uscente'; veloEsce(el, VELO_USCITA_MS); }   // L181-4: niente ritorno al poster durante la dissolvenza (la voce scende con lui)
+  voceClipFerma(VELO_USCITA_MS);   // L231-1: la voce nel contesto scende col velo
   try{ if(typeof musicaSottovoce==='function') musicaSottovoce(false); }catch(e){}   // L218-7: il tema del decennio torna pieno
   PORTA_CLIP_FERME.forEach(function(v){ try{ if(v.isConnected){ const p=v.play(); if(p && p.catch) p.catch(function(){}); } }catch(e){} }); PORTA_CLIP_FERME=[];
 }
@@ -2834,14 +2888,22 @@ function leggeRischio(L){   // alleati che perderebbero (rischio) o guadagnerebb
   }
   return {rischio, graditi};
 }
+/* L230-1 · la riga «In aula» accanto a «rischio»: dallo STESSO pBocciatura che decide l'esito in setLegge, e solo dove il voto
+   c'è (votoInAulaAttivo): niente riga, niente bocciatura — la regola di cadeChip (L93-5). Nessun numero di probabilità a schermo. */
+function aulaRiga(L){
+  if(typeof votoInAulaAttivo!=='function' || !votoInAulaAttivo(L)) return '';
+  const k=aulaEsito(pBocciatura(L).p), col=k==='sicura'?'var(--pos)':k==='incerta'?'var(--warn)':'var(--neg)';
+  return ` · ${T('In aula')}: <b class="aula-esito" style="color:${col}">${T(k)}</b>`;
+}
 function renderLegge(L){
   const inVigore=!!S.leggi[L.id], oppo=S.opposizione;
   S.leggi[L.id]=!inVigore; const cost=rpUsed(); S.leggi[L.id]=inVigore;   // costo RP del toggle (per disabilitare il bottone)
   const troppo=cost>curRpMax(), r=leggeRischio(L);
   const badge=inVigore?`<span class="chip" style="background:var(--pos-bg);color:var(--pos)">${T('In vigore')}</span>`:`<span class="chip" style="background:var(--line2);color:var(--mut)">${T('Non in vigore')}</span>`;
-  const meta=`${asseLabel(L.asse)} · ${L.costo} RP`
-    + (!oppo&&r.rischio.length?` · <span style="color:var(--neg)">rischio: ${r.rischio.join(', ')}</span>`:'')
-    + (!oppo&&r.graditi.length?` · <span style="color:var(--pos)">gradita a: ${r.graditi.join(', ')}</span>`:'');
+  const meta=`${T(asseLabel(L.asse))} · ${L.costo} RP`   // L230-1: asse, «rischio» e «gradita a» passano da T() (in inglese restavano in italiano accanto alla riga nuova)
+    + (!oppo&&r.rischio.length?` · <span style="color:var(--neg)">${T('rischio')}: ${r.rischio.join(', ')}</span>`:'')
+    + (!oppo&&r.graditi.length?` · <span style="color:var(--pos)">${T('gradita a')}: ${r.graditi.join(', ')}</span>`:'')
+    + aulaRiga(L);
   return `<div style="padding:11px 14px;border-top:1px solid var(--line)">
     <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px"><div style="font-weight:600;font-size:14px">${T(L.nome)}</div>${badge}</div>
     <div style="color:var(--mut2);font-size:12.5px;margin:3px 0 5px">${T(L.desc)}</div>

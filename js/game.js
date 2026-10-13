@@ -8686,6 +8686,7 @@ function setLegge(id){
   const cur=!!S.leggi[id];
   S.leggi[id]=!cur; const over=rpUsed()>curRpMax(); S.leggi[id]=cur;   // prova il costo RP del toggle
   if(over) return;                                                     // punti riforma insufficienti
+  if(votoInAulaAttivo(L)){ const V=votoInAula(L); if(V.respinta){ leggeRespinta(L, V.contro); return; } }   // L230-1: il voto in aula (solo l'approvazione del capo del governo)
   if(!cur && typeof suona==='function'){ suona('martelletto'); suona('firma'); }   // L116-1: la legge firmata, dopo i controlli (un tocco a vuoto non suona) · L118-1: prima il martelletto dell'aula
   applicaLegge(L, !cur);
   if(!cur && typeof parla==='function' && !(typeof voceInCorso==='function' && voceInCorso())) parla('voce-legge-si');   // L218-10: la legge approvata (F4e); qui e non in applicaLegge (che ha solo questo chiamante) perché è il gesto del giocatore, dopo i controlli
@@ -8708,7 +8709,57 @@ function applicaLegge(L, approva){
     if(S.tenuta[id]!=null) S.tenuta[id]=clamp(S.tenuta[id]+seg*6*align, 0, 100);
   }
   S.ind.consenso=computeConsenso();
-  S.log.unshift({t:(approva?'Legge approvata':'Legge abrogata'), x:L.nome+'.'});
+  S.log.unshift({t:T(approva?'Legge approvata':'Legge abrogata'), x:T(L.nome)+'.'});   // L230-1: il registro si scrive già tradotto (ui.js lo stampa crudo)
+}
+/* L230-1 · IL VOTO IN AULA (DESIGN-LEGGI-VOTO.md §1 e «⚑ L230-1»; variante «media» di L228-1, pesi del prototipo
+   .claude/prova-l228-1-leggi.js). Solo l'APPROVAZIONE di una legge del capo del governo (livello 3, al governo, fuori dalla
+   coabitazione): l'abrogazione e il ministro restano come prima. p = margine + partner + diviso + consenso, fra 0 e 0,5:
+     margine  m = seggi della coalizione − 50 (S.seggi): m ≥ 8 → 0; 0 ≤ m < 8 → Km·(8−m)/8; m < 0 → Kmin·(1 + 0,04·min(10, −m)).
+              Dove c'è solo il Congresso (us1950, us1960) il margine non conta: lo porta «diviso». Senza parlamento (USA del presente) 0.
+     partner  per ogni alleato: Kp·max(0, |asse alleato − asse legge| − 1)·(1,6 − tenuta/100); pieno se DECISIVO (senza di lui
+              la coalizione scende sotto 50), un quarto se no. Il decisivo col termine più alto è chi «vota contro».
+     diviso   S.governoDiviso → Kdiv·(1 + max(0, 50 − Camera)/20).    consenso  Kc·min(1, max(0, 45 − consenso)/20).
+   Legge solo distanze d'asse e numeri, mai il colore della legge o del governo. Lo STESSO calcolo decide la riga «In aula» di
+   renderLegge (ui.js) e l'esito qui: niente riga, niente bocciatura (votoInAulaAttivo, la regola di cadeChip, L93-5).
+   A p = 0 non si estrae niente: a pesi zero il gioco è identico a prima del lotto (la misura: .claude/misura-l230-1.js).
+   Respinta (leggeRespinta): niente applicaLegge (né unaTantum né tenuta di gradimento), punti riforma intatti, correnti −3,
+   stampa −2, −5 di tenuta al decisivo che vota contro, una riga nel registro, `negativo` dopo il martelletto e voce-legge-no. */
+let LEGGI_VOTO_K = { Km:0.08, Kmin:0.25, Kp:0.04, Kdiv:0.18, Kc:0.08 };   // let: la misura li azzera (A/B a pesi zero)
+function votoInAulaAttivo(L){ return !!L && S.livello===3 && !S.opposizione && !S.coabitazione && !(S.leggi && S.leggi[L.id]); }
+function pBocciatura(L){
+  const K=LEGGI_VOTO_K; let tipo, m;
+  if(S.seggi){ tipo='seggi'; m=seggiCoalizione(S.coalizione||[S.partito], S.seggi)-50; }
+  else if(S.congresso && S.congresso.camera!=null){ tipo='congresso'; m=S.congresso.camera-50; }
+  else { tipo='nessuno'; m=10; }
+  let p=0, contro=null, qmax=0;
+  if(tipo==='seggi' && m<8) p+= m>=0 ? K.Km*(8-m)/8 : K.Kmin*(1+0.04*Math.min(10,-m));
+  (S.coalizione||[]).forEach(id=>{ if(id===S.partito) return; const P=part(id); if(!P) return;
+    const d=Math.abs((P.asse||0)-(L.asse||0)), ten=(S.tenuta && S.tenuta[id]!=null)?S.tenuta[id]:60;
+    const q=K.Kp*Math.max(0,d-1)*(1.6-ten/100), decisivo=tipo==='seggi' && (m-(S.seggi[id]||0))<0;
+    p+= decisivo ? q : q*0.25; if(decisivo && q>qmax){ qmax=q; contro=id; } });
+  if(S.governoDiviso) p+=K.Kdiv*(1+Math.max(0,50-((S.congresso&&S.congresso.camera)||50))/20);
+  p+=K.Kc*Math.min(1, Math.max(0,45-(S.ind.consenso||50))/20);
+  return { p:Math.max(0,Math.min(0.5,p)), contro:contro, m:m, tipo:tipo };
+}
+function votoInAula(L){ const V=pBocciatura(L); if(!(V.p>0)) return { respinta:false, contro:null };   // a p = 0 nessuna estrazione
+  return { respinta: Math.random()<V.p, contro:V.contro }; }
+function aulaEsito(p){ return p<0.05 ? 'sicura' : p<=0.2 ? 'incerta' : 'a rischio'; }   // la riga «In aula» (renderLegge): nessun numero a schermo
+/* Chi il registro nomina: il decisivo che vota contro; se nessun alleato è decisivo (monocolore, minoranza, governo diviso),
+   il partito più forte fuori dal governo — l'aula che vota contro. */
+function partitoControAula(contro){
+  if(contro) return contro;
+  const fuori=(PAESE.partiti||[]).filter(p=>(S.coalizione||[S.partito]).indexOf(p.id)<0 && p.id!==S.partito && S.forze && S.forze[p.id]!=null);
+  fuori.sort((a,b)=>S.forze[b.id]-S.forze[a.id]);
+  return fuori.length ? fuori[0].id : null;
+}
+function leggeRespinta(L, contro){
+  if(typeof suona==='function'){ suona('martelletto'); suona('negativo'); }   // il martelletto prima del voto, la firma solo se passa
+  tutteCorrenti(-3); stampad(-2);
+  if(contro && S.tenuta && S.tenuta[contro]!=null) S.tenuta[contro]=clamp(S.tenuta[contro]-5,0,100);
+  const chi=partitoControAula(contro), nm=chi ? T((part(chi)||{}).nome||'') : '';
+  S.log.unshift({t:T('Legge respinta'), x:T(L.nome)+'.'+(nm ? ' '+T('%P vota contro: la legge è respinta.').replace('%P',nm) : '')});
+  if(typeof parla==='function' && !(typeof voceInCorso==='function' && voceInCorso())) parla('voce-legge-no');   // L230-1 (F4i): solo sulla bocciatura, zitta se un'altra voce parla
+  render();
 }
 /* L72-1 — la rivolta: il testo di chiusura dipende dal gruppo che ti ha voltato le spalle (S.rivoltaGruppo). */
 const RIVOLTA_TESTI={

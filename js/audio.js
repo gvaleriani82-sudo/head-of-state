@@ -482,7 +482,7 @@ let MUSICA_BUF = {}, MUSICA_CARICO = {}, MUSICA_ORA = null, MUSICA_VOCE = null, 
 /* L146-1 · SOTTO LA VOCE: mentre parla la voce di una clip di partenza la musica scende a ×0,3 (≈ −10 dB) e poi torna piena.
    Non è un secondo meccanismo: il livello del brano lo decide UN punto solo, `musica()`, fra tre gradini — zero sotto un
    pilastro-tragedia (vince sempre), sotto-voce, pieno — e `musicaParti` parte al gradino in vigore. `MUSICA_SOTTOVOCE` lo
-   accende e lo spegne `musicaSottovoce()` (la chiama ui.js, `apriPartenza`/`chiudiPartenza`). Transitorio, mai in S. */
+   accende e lo spegne `musicaSottovoce()` (la chiama ui.js, `apriPartenza`/`chiudiPartenza` e le clip della porta; ⚑ L231-1: all'APERTURA del velo con la voce, `voceClipDuck`). Transitorio, mai in S. */
 const MUSICA_SOTTOVOCE_K = 0.3;
 let MUSICA_SOTTOVOCE = false, MUSICA_LIVELLO = 1;
 function musicaSottovoce(on){ on=!!on; if(on===MUSICA_SOTTOVOCE) return; MUSICA_SOTTOVOCE=on; musica(); }
@@ -858,13 +858,14 @@ const VOCI_MANIFEST = {
      sondaggio si sposta dal precedente (consecutivo) di almeno SONDAGGIO_VOCE_SCARTO volte il margine, livello 3; protesta →
      `aggiornaRivolta` (model.js) quando un gruppo comincia a voltarti le spalle (il conto della rivolta passa da 0 a 1), dentro
      advanceMonth. Tutte zitte se un'altra voce parla (voceInCorso).
-     ⚠ `voce-legge-no` e `voce-bilancio-si`: file e manifesto, NESSUN aggancio — nel gioco una legge non viene mai respinta (setLegge
-     la approva o non parte), e `chiudiBilancio` chiude il bilancio DELL'ANNO, che parla già con voce-fineanno-<k>.
+     ⚠ `voce-bilancio-si`: file e manifesto, NESSUN aggancio — `chiudiBilancio` chiude il bilancio DELL'ANNO, che parla già con
+     voce-fineanno-<k>. `voce-legge-no` dal L230-1 la chiama `leggeRespinta` (game.js): la legge del capo del governo respinta in
+     aula (`pBocciatura`/`votoInAula`), zitta se un'altra voce parla.
      Decisioni di Giacomo del 12/10 (L229-1): `voce-bilancio-si` RESTA senza aggancio (ogni gennaio si accavallerebbe a
      voce-fineanno-<k>); `voce-legge-no` la decide il voto in aula (L228-1, studio). */
   'voce-sconfitta-c':         { file:'voce-sconfitta-c.mp3',         gain:0.47, en:'It is a bitter night, and I take full responsibility. Our party deserves a fresh start.', it:'È una notte amara, e me ne assumo tutta la responsabilità. Il partito merita di ripartire.' },   // F4g · −16,9 / −1,4 (L218-11)
   'voce-coalizione-rotta':    { file:'voce-coalizione-rotta.mp3',    gain:0.48, en:'Our partners have chosen to leave. I regret it, but this government will not stop working.', it:'I nostri alleati hanno scelto di andarsene. Mi dispiace, ma questo governo non smette di lavorare.' },   // F4h · −17,0 / −1,3 (L218-11)
-  'voce-legge-no':            { file:'voce-legge-no.mp3',            gain:0.43, en:'The vote did not go our way. We will listen, we will improve it, and we will try again.', it:'Il voto non è andato come speravamo. Ascolteremo, la miglioreremo, e ci riproveremo.' },   // F4i · −16,1 / −1,5 (L218-11) · senza aggancio
+  'voce-legge-no':            { file:'voce-legge-no.mp3',            gain:0.43, en:'The vote did not go our way. We will listen, we will improve it, and we will try again.', it:'Il voto non è andato come speravamo. Ascolteremo, la miglioreremo, e ci riproveremo.' },   // F4i · −16,1 / −1,5 (L218-11) · dal L230-1 in leggeRespinta
   'voce-sondaggio-giu':       { file:'voce-sondaggio-giu.mp3',       gain:0.45, en:'The polls are not kind this week. Polls change. Our work does not.', it:'I sondaggi non sono generosi questa settimana. I sondaggi cambiano. Il nostro lavoro no.' },   // F4j · −16,5 / −1,5 (L218-11)
   'voce-sondaggio-su':        { file:'voce-sondaggio-su.mp3',        gain:0.45, en:'People are starting to notice. Let us not celebrate yet. Let us keep earning it.', it:'La gente comincia ad accorgersene. Non festeggiamo ancora. Continuiamo a meritarcelo.' },   // F4k · −16,5 / −1,5 (L218-11)
   'voce-bilancio-si':         { file:'voce-bilancio-si.mp3',         gain:0.44, en:'The budget is approved. Every number in it is a choice, and we stand by ours.', it:'Il bilancio è approvato. Ogni numero è una scelta, e noi difendiamo le nostre.' },   // F4l · −16,3 / −1,3 (L218-11) · senza aggancio
