@@ -6438,8 +6438,8 @@ function genAgendaRamo(first){
   // evento grave raro (solo se non c'è già l'evento mercati)
   if(!hadEvent && Math.random()<0.10*dif().freqEventi){
     S.recentEvent=S.recentEvent||[];   // finestra anti-ripetizione (5): prima escludevamo solo l'ULTIMO evento
-    const pool=EVENTS.filter(e=>(!e.cond||e.cond())&&eraViva(e)&&!S.recentEvent.includes(e.id));   // Build B: eraViva ADDITIVO — gli eventi senza tag passano sempre (nessuna regressione); abilita i pilastri d'epoca taggati
-    if(pool.length){ const ev=rnd(pool); S.recentEvent.push(ev.id); if(S.recentEvent.length>5) S.recentEvent.shift(); S.agenda.push({kind:'event', data:ev, resolved:false}); hadEvent=true; }
+    const pool=EVENTS.filter(e=>(!e.cond||e.cond())&&eraViva(e)&&!S.recentEvent.includes(e.id)&&!giaUscitaUnaCarriera(e));   // L232-1: unaCarriera (la finestra dei recenti ha 5 posti: un evento con una finestra di mesi tornava) · Build B: eraViva ADDITIVO — gli eventi senza tag passano sempre (nessuna regressione); abilita i pilastri d'epoca taggati
+    if(pool.length){ const ev=rnd(pool); if(ev.unaCarriera) segnaUnaCarriera(ev.id); S.recentEvent.push(ev.id); if(S.recentEvent.length>5) S.recentEvent.shift(); S.agenda.push({kind:'event', data:ev, resolved:false}); hadEvent=true; }
   }
   // CONFLITTI internazionali (cantiere paesi reali, Fetta B): i flashpoint coi volti nominati, PRIMA della routine diplomatica (presenza ricorrente)
   if(!hadEvent){ const cv=pickConflittoInt(); if(cv){ S.agenda.push({kind:'event', data:cv, resolved:false}); hadEvent=true; } }
@@ -8584,8 +8584,14 @@ function applyOppEffect(spec){
   if(spec.promessa && typeof campPromessa==='function') campPromessa(spec.promessa);
 }
 /* Carta d'opposizione del mese: cornice + le 3 azioni SPECIFICHE della carta (spec→closure). */
+/* L232-1 · `unaCarriera:true` su una voce di EVENTS o di OPPOSIZIONE_EV = esce al più una volta per carriera (le carte datate di
+   us1960). Il registro è S.carteUnaCarriera (id → true; S rinasce a ogni carriera in initStatoBase). Due lettori: il pescaggio degli
+   eventi in genAgendaRamo e pickOpposizione (che in più la mette davanti al sacchetto). Additivo: senza il campo, tutto come prima.
+   Non è `unaVolta` degli archi (L217-1): quello vale per ARCHI_DEF e ha i suoi due lettori. */
+function giaUscitaUnaCarriera(e){ return !!(e && e.unaCarriera && S.carteUnaCarriera && S.carteUnaCarriera[e.id]); }
+function segnaUnaCarriera(id){ S.carteUnaCarriera=S.carteUnaCarriera||{}; S.carteUnaCarriera[id]=true; }
 function pickOpposizione(){
-  const ok=i=>(!OPPOSIZIONE_EV[i].cond || OPPOSIZIONE_EV[i].cond()) && (typeof eraVivaT!=='function'||eraVivaT(OPPOSIZIONE_EV[i]));   // FIX: era-gate anche il percorso opposizione (default eraVivaT: l'opposizione è senza-tempo; i moderni TV → contemporanea). Prima nel '50 usciva «il duello in TV»
+  const ok=i=>(!OPPOSIZIONE_EV[i].cond || OPPOSIZIONE_EV[i].cond()) && (typeof eraVivaT!=='function'||eraVivaT(OPPOSIZIONE_EV[i])) && !giaUscitaUnaCarriera(OPPOSIZIONE_EV[i]);   // L232-1: unaCarriera · FIX: era-gate anche il percorso opposizione (default eraVivaT: l'opposizione è senza-tempo; i moderni TV → contemporanea). Prima nel '50 usciva «il duello in TV»
   /* ================================================================================================================
      L66-1 · IL SACCHETTO, RIPRISTINATO. Non è una scelta di design: `CLAUDE.md` dice da sempre che **`pescaBag()`
      è l'unico punto di pescaggio anti-ripetizione**, e questa funzione lo aggirava — `rnd` più una finestra di 17.
@@ -8599,7 +8605,12 @@ function pickOpposizione(){
      ================================================================================================================ */
   const cand=OPPOSIZIONE_EV.filter((e,i)=>ok(i));
   if(!cand.length) return null;
-  const ev=pescaBag('opposizione', cand);
+  /* L232-1 · `unaCarriera:true` (le carte datate o_us60_, finestre di 2-10 mesi): la prima viva e non ancora uscita passa DAVANTI al
+     sacchetto, e una volta uscita non torna (S.carteUnaCarriera; `ok` qui sopra la toglie). Nel sacchetto, anche curato (vivePrima),
+     una carta viva al momento del rimescolo finiva in un punto a caso e poteva perdere la sua finestra. Senza il campo, come prima. */
+  const prima=cand.filter(function(e){ return e.unaCarriera; });
+  const ev=prima.length ? prima[0] : pescaBag('opposizione', cand);
+  if(ev && ev.unaCarriera) segnaUnaCarriera(ev.id);
   if(!ev) return null;
   /* porta pleases/rischio/trasparenza attraverso la map → il ramo `dossier` di resolveItem alimenta
      biografia/tratti/integrità/esposizione come per gli altri livelli (prima l'opposizione era muta). */

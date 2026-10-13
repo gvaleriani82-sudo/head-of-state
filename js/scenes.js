@@ -211,7 +211,10 @@ const VIDEO_PRESENTI = ['home-hero', 'partito-base', 'vitaprivata-base', 'retro-
   'societacivile-base-asiaest-v2', 'societacivile-base-asiasud-v3',   // L197-26: il tai chi all'alba, il vicolo al mattino
   'societacivile-base-nordamerica-v3', 'societacivile-base-nordamerica-v2', 'societacivile-base-africa-v3',   // L197-27: main street, la palestra, il mercato
   'societacivile-base-latina-v3', 'societacivile-base-asiaest-v3',   // L197-28: la piazza coi musicisti, il vicolo dei chioschi
-  'retro-canale-v2'];   // L197-29: i due uomini di spalle nel parco, nella nebbia
+  'retro-canale-v2',   // L197-29: i due uomini di spalle nel parco, nella nebbia
+  'retro-auto', 'scandalo-grave',   // L197-30: l'auto ferma sotto la pioggia (gocce e riflessi), il podio vuoto (qualche flash)
+  'societacivile-base',   // L197-31: i dehors coi tendoni e i passanti (cucitura 14,1: in CLIP_UNA_VOLTA)
+  'emergenza-grave', 'ambiente-base', 'casa-base'];   // L197-32: i soccorsi fermi sotto le nuvole scure (7: in CLIP_UNA_VOLTA), il fiume col tram (3,4: gira), il giardino (5,1: in CLIP_UNA_VOLTA)
 
 /* ===== L181-4 — LE CLIP CHE NON GIRANO: un giro solo, poi l'ultimo fotogramma tenuto. Le altre clip di scena girano in tondo
    (`loop`) perché il loro ultimo fotogramma torna sul primo (cucitura ≤ 3,6 su 255, misurata sullo schermo); queste no — le porte
@@ -231,7 +234,9 @@ const CLIP_UNA_VOLTA = ['fineanno-buono', 'fineanno-lucieombre', 'fineanno-diffi
   'societacivile-base-asiaest-v2', 'societacivile-base-asiasud-v3',   // L197-26: il tai chi all'alba (4,8) e il vicolo al mattino (4,0): nebbia e bucato non tornano
   'societacivile-base-nordamerica-v3', 'societacivile-base-africa-v3',   // L197-27: main street (4,8) e il mercato (6,2): foglie, passanti e teloni non tornano
   'societacivile-base-latina-v3', 'societacivile-base-asiaest-v3',   // L197-28: la piazza (6,3) e i chioschi (11): mani, coppia e vapore non tornano
-  'retro-canale-v2'];   // L197-29: il parco nella nebbia (4,9): foglie e vestiti non tornano
+  'retro-canale-v2',   // L197-29: il parco nella nebbia (4,9): foglie e vestiti non tornano
+  'societacivile-base',   // L197-31: i dehors (14,1): i passanti si spostano e non tornano
+  'emergenza-grave', 'casa-base'];   // L197-32: i soccorsi (7: le luci blu e il fumo non tornano) e il giardino (5,1: foglie e nuvole dorate non tornano)
                             // (Il telefono anni '70 di L197-11 è uscito da qui: rifatto a camera ferma, cucitura 1,4, L197-12.)
                             // (Il vicolo casa-base-asiaest-v2 di L197-10 è uscito da qui: rifatto a luce ferma, cucitura 2,2, L197-11.)
                             // (Il soggiorno vitaprivata-base-v6 di L192-7 è uscito con la sua clip: L195-0, D223.)
