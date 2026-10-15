@@ -2584,8 +2584,9 @@ function applicaTerritoriDelta(){
     if(lista.some(function(x){ return x.nome===te.nome; })) return;
     var t2=Object.assign({}, te); delete t2.area;
     lista.push(t2);
-    /* ⚠ le aree possono essere MENO dei territori (le città senza cerchio: il presente tedesco ne ha 15 e 11): si allinea
-       con dei vuoti prima di aggiungere, altrimenti l'area nuova finirebbe sotto l'indice di un'altra città. */
+    /* ⚠ le aree potevano essere MENO dei territori (le città senza cerchio: fino al L239-2 il presente tedesco ne aveva 15 e 11;
+       dal 15/10 ogni territorio di ogni paese e porta ha la sua area, lo pretende .claude/prova-l239-2-aree.js): si allinea con dei
+       vuoti prima di aggiungere, altrimenti l'area nuova finirebbe sotto l'indice di un'altra città. Resta come difesa. */
     if(mappa){ while(mappa.aree.length < lista.length-1) mappa.aree.push(null); mappa.aree.push(te.area || null); }
   });
   /* L180-2 (D157) · IL LEAN A UNA TAPPA (il Sud del 1964): `territori:{lean:{<nome>:<valore>}}`, per nome (dopo la rinomina e gli

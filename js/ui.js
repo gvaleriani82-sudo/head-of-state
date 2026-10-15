@@ -4128,7 +4128,10 @@ function toccaBersaglio(ev, i){
   const p=new DOMPoint(ev.clientX, ev.clientY).matrixTransform(M.inverse()), dentro=[];
   svg.querySelectorAll('.tv-tocco').forEach(function(c){ const r=+c.getAttribute('r'); if(!(r>0)) return;
     const d=Math.hypot(+c.getAttribute('cx')-p.x, +c.getAttribute('cy')-p.y); if(d<=r) dentro.push({ i:+c.getAttribute('data-i'), d:d }); });
-  if(dentro.length<2){ QUALE_APERTO=null; fissoFoglio(); selArea(i); return; }
+  /* L239-2 · con UN bersaglio sotto il dito si sceglie QUELLO, non il cerchio che ha ricevuto il clic: sul bordo di due bersagli il
+     browser dà il clic a quello di sopra anche quando il conto qui sopra (sul punto esatto) lo lascia fuori — misurato su iPad, Leeds
+     toccata al centro apriva Sheffield (il centro di Leeds a 6,33 dal centro di Sheffield, raggio 6,39). */
+  if(dentro.length<2){ QUALE_APERTO=null; fissoFoglio(); selArea(dentro.length ? dentro[0].i : i); return; }
   dentro.sort(function(a, b){ return a.d-b.d; });
   FISSO_APERTO=null; QUALE_APERTO={ aree:dentro.map(function(x){ return x.i; }), y:ev.clientY };
   fissoFoglio();
