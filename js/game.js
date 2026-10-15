@@ -396,6 +396,7 @@ function initStatoBase(){
      Fondamentale quanto i partiti: l'immersione (la data dice il '50) e gli snodi ancorati a un anno reale
      (la legge truffa si ancora al '53 → se l'orologio partisse dal 2026, il '53 non arriverebbe mai). */
   if(_SC && _SC.anno){ S.year=_SC.anno; S.annoInizio=_SC.anno; }
+  S.onuFatto=onuGiaStoria();   // L243-1: chi parte dopo il dicembre 1955 trova l'Italia già all'ONU (storia, non cronaca: niente carta)
   /* Build B 1b — anni di mandato già trascorsi (l'orologio-mandato parte a metà, non da zero): fa cadere
      l'elezione naturale sull'anno dello snodo. Percorso d'ingresso diverso dal reset turnInMandate=0 di A.5
      (quello è diventaLocale/rielezione; qui è l'avvio-governo → startGame non lo ritocca). */
@@ -6052,10 +6053,18 @@ function pickPersonale(){
   return null;
 }
 
+/* L243-1 · l'ingresso dell'Italia all'ONU (dicembre 1955) è già storia per la carriera? Il paletto di L34-3 dei pilastri: il mese
+   del fatto prima del primo mese della carriera. Solo la linea italiana (le altre non hanno la carta). */
+function onuGiaStoria(){ return !!(S && S.era===LINEA_IT && (1955*12+12) < ((S.annoInizio||S.year)*12+1)); }
 function genAgendaRamo(first){
   S.agenda=[];
   // D4 — il PILASTRO datato: l'Italia entra alle Nazioni Unite (14 dic 1955). One-shot per l'era '50 (qualsiasi livello):
-  // da lì l'orizzonte ONU si apre (ruoloIntl/nodo passano all'ONU con l'orologio). S.onuFatto: campo nuovo, migrazione undefined→false.
+  // L'orizzonte ONU (ruoloIntl, nodo, sede) lo apre l'OROLOGIO (S.year≥1955), non S.onuFatto: il flag serve solo a dare la carta una volta.
+  /* L243-1 · IL PALETTO DI L34-3 MANCAVA QUI: senza limite sull'inizio della carriera, chi partiva nel 1960-2000 riceveva la
+     carta al secondo mese, da sola (agendaSolo), come se l'Italia entrasse all'ONU allora (segnalazione di Giacomo, Italia 1980,
+     ambasciatore). Un fatto avvenuto prima dell'inizio è storia: si segna fatto e non esce. Lo stesso calcolo, `onuGiaStoria()`,
+     lo scrivono anche l'avvio (initStatoBase) e la migrazione (applySnap); questa riga copre le partite salvate col difetto. */
+  if(!S.onuFatto && onuGiaStoria()) S.onuFatto=true;
   if(!first && S.era===LINEA_IT && !S.onuFatto && typeof PILASTRO_ONU_EV!=='undefined' && (S.year>1955 || (S.year===1955 && S.month>=12)) && !S.opposizione){
     S.onuFatto=true; S.agenda.push({kind:'event', data:PILASTRO_ONU_EV, resolved:false}); agendaSolo(); return;
   }
@@ -8094,7 +8103,7 @@ function renderTrattativa(){
   const total=seggiCoalizione(COAL.membri, seggi);
   const cb=(ctx==='voto')?Math.round(credBonus()*10)/10:0;   // bonus credibilità: solo al voto vero (non avvio/rinnovo)
   const eff=total+cb;
-  const comp=compatibili(mine, seggi).filter(p=>!COAL.membri.includes(p.id));
+  const comp=compatibiliMiei(seggi).filter(p=>!COAL.membri.includes(p.id));   // L237-2: all'opposizione chi guida il governo non si imbarca (model.js)
   const reached=eff>=50;
   const memberRows=COAL.membri.map(id=>{ const p=part(id), you=id===mine;
     return `<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-top:1px solid var(--line)">
@@ -8991,6 +9000,7 @@ function applySnap(snap){
   if(S.austerity===undefined){ S.austerity=null; S.divorzio=null; S.solidarieta=null; }   // L28-3 — migrazione snodi '70
   if(S.divorzioBdi===undefined){ S.divorzioBdi=null; S.scalaMobile=null; S.nucleare=null; }   // L33-1 — migrazione snodi '80
   if(!S.pilastri70 || typeof S.pilastri70!=='object') S.pilastri70={};   // L28-4 — migrazione pilastri '70
+  if(!S.onuFatto && onuGiaStoria()) S.onuFatto=true;   // L243-1 — migrazione: chi è partito dopo il 1955 non riceve più la carta ONU
   /* L40-2 — i nuovi flag del '90: dato puro, migrazione per i salvataggi anteriori al lotto */
   if(S.maastricht===undefined) S.maastricht=null;
   if(S.maastrichtEsito===undefined) S.maastrichtEsito=null;

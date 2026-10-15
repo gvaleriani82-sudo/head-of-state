@@ -820,7 +820,26 @@ function seggiCoalizione(ids, seggi){ return ids.reduce((s,id)=>s+(seggi[id]||0)
    compatibili per asse (la coalizione che raduneresti). bloccoQuota() = somma delle forze correnti del blocco. */
 function bloccoIds(){
   if(!S.opposizione) return (S.coalizione||[S.partito]).slice();
-  return [S.partito].concat(compatibili(S.partito).map(p=>p.id));
+  return [S.partito].concat(compatibiliMiei().map(p=>p.id));   // L237-2: all'opposizione senza chi guida il governo
+}
+/* L237-2 (15/10, D-P1 di Giacomo, scelte (a)-(b) di Cowork) · I COMPATIBILI DEL GIOCATORE, ALL'OPPOSIZIONE SENZA CHI GUIDA IL GOVERNO.
+   compatibili() resta pura (la chiamano entraOpposizione con l'id del vincitore e il rimpasto): questo involucro è la domanda «con chi
+   vado al voto e con chi formo il governo» del giocatore. Al governo è compatibili(S.partito) e basta. All'opposizione toglie
+   governoGuida() — solo chi guida il governo (g1), NON i suoi partner: possono cambiare campo dopo il voto (la FDP del 1982).
+   Prima il blocco dell'opposizione conteneva chi governa: nel Regno Unito un centro al 4% «vinceva» coi seggi del Labour.
+   I lettori sono DUE e devono restare insieme: bloccoIds() (margine della notte, aspettativa, slancio, sondaggio, intermedie e il
+   banco) e la trattativa dopo il voto (renderTrattativa, game.js). Il potere locale e la truffa del 1953 non passano di qui. */
+function governoGuida(){
+  if(!S || !S.opposizione) return null;
+  if(S.governoAvversario) return S.governoAvversario;
+  var w=(typeof vincitore==='function') ? vincitore() : null;   // salvataggi senza il campo: il partito più forte che non è il tuo
+  return w ? w.id : null;
+}
+function compatibiliMiei(seggi){
+  var l=compatibili(S.partito, seggi);
+  if(!S.opposizione) return l;
+  var g=governoGuida();
+  return g ? l.filter(p=>p.id!==g) : l;
 }
 function bloccoQuota(){ return bloccoIds().reduce((s,id)=>s+((S.forze&&S.forze[id])||0),0); }
 

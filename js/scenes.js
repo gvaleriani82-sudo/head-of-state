@@ -216,7 +216,10 @@ const VIDEO_PRESENTI = ['home-hero', 'partito-base', 'vitaprivata-base', 'retro-
   'societacivile-base',   // L197-31: i dehors coi tendoni e i passanti (cucitura 14,1: in CLIP_UNA_VOLTA)
   'emergenza-grave', 'ambiente-base', 'casa-base',   // L197-32: i soccorsi fermi sotto le nuvole scure (7: in CLIP_UNA_VOLTA), il fiume col tram (3,4: gira), il giardino (5,1: in CLIP_UNA_VOLTA)
   'ordinepubblico-base', 'societacivile-base-latina-v2',   // L197-33: le due figure di spalle nel viale (6,1: in CLIP_UNA_VOLTA), la cucina col vapore (7,7: in CLIP_UNA_VOLTA)
-  'societacivile-base-latina', 'societacivile-base-africa'];   // L197-34: i jacaranda (4,5) e le palme sulla spiaggia (5): tutte e due in CLIP_UNA_VOLTA. (economia-florido NON portata: nata dalla vecchia immagine con le auto anni '60, non dal .webp del gioco)
+  'societacivile-base-latina', 'societacivile-base-africa',   // L197-34: i jacaranda (4,5) e le palme sulla spiaggia (5): tutte e due in CLIP_UNA_VOLTA. (economia-florido NON portata: nata dalla vecchia immagine con le auto anni '60, non dal .webp del gioco)
+  'societacivile-anni90',   // L197-36: la piazza coi lenzuoli bianchi ai balconi (anni '90): si muovono i lenzuoli e le nuvole
+  'sanita-base', 'ordinepubblico-base-nordamerica', 'elezioni-florido-francia',   // L197-37: il corridoio d'ospedale (tende e monitor), i due agenti sul marciapiede (riflessi), la piazza francese di notte (foglie e bandiera)
+  'crisi-base'];   // L197-38: la strada di città in rovina, quasi ferma (cucitura 2,1 sullo schermo: gira; poster↔f0 3)
 
 /* ===== L181-4 — LE CLIP CHE NON GIRANO: un giro solo, poi l'ultimo fotogramma tenuto. Le altre clip di scena girano in tondo
    (`loop`) perché il loro ultimo fotogramma torna sul primo (cucitura ≤ 3,6 su 255, misurata sullo schermo); queste no — le porte
@@ -240,7 +243,9 @@ const CLIP_UNA_VOLTA = ['fineanno-buono', 'fineanno-lucieombre', 'fineanno-diffi
   'societacivile-base',   // L197-31: i dehors (14,1): i passanti si spostano e non tornano
   'emergenza-grave', 'casa-base',   // L197-32: i soccorsi (7: le luci blu e il fumo non tornano) e il giardino (5,1: foglie e nuvole dorate non tornano)
   'ordinepubblico-base', 'societacivile-base-latina-v2',   // L197-33: il viale (6,1: le figure si allontanano e non tornano) e la cucina (7,7: vapore e piante non tornano)
-  'societacivile-base-latina', 'societacivile-base-africa'];   // L197-34: i jacaranda (4,5) e le palme sulla spiaggia (5): petali, teli e la coppia che cammina non tornano
+  'societacivile-base-latina', 'societacivile-base-africa',   // L197-34: i jacaranda (4,5) e le palme sulla spiaggia (5): petali, teli e la coppia che cammina non tornano
+  'societacivile-anni90',   // L197-36: la piazza coi lenzuoli (7,3): lenzuoli e nuvole non tornano
+  'ordinepubblico-base-nordamerica', 'elezioni-florido-francia'];   // L197-37: gli agenti sul marciapiede (5,4: si allontanano e non tornano) e la piazza francese di notte (6,3: foglie e bandiera non tornano)
                             // (Il telefono anni '70 di L197-11 è uscito da qui: rifatto a camera ferma, cucitura 1,4, L197-12.)
                             // (Il vicolo casa-base-asiaest-v2 di L197-10 è uscito da qui: rifatto a luce ferma, cucitura 2,2, L197-11.)
                             // (Il soggiorno vitaprivata-base-v6 di L192-7 è uscito con la sua clip: L195-0, D223.)
