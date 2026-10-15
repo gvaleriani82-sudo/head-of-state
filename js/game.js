@@ -1041,12 +1041,20 @@ function diventaAltoRappresentante(){   // grado 1→2: la promozione (gated sul
   if(typeof PROMO_FIORE!=='undefined') PROMO_FIORE=true;
   genAgenda(false); render(); commitSnap();
 }
+/* L244-3 (15/10) · UNA CARTA volto:'rivale' ESCE SOLO SE C'È UN RIVALE VIVO, e allora passa sempre da potSub. Il rivale è di
+   POTENZE (data.js), filtrato per epoca da potenzeDi(): fuori dalla linea italiana `urss` (era 'italia1950') non è viva e le
+   altre sono 'contemporanea' — nelle porte britanniche, francesi, tedesche e americane prima del 2012 nessun rivale, e il ramo
+   senza volto mandava a schermo «Un confine conteso con %POTdet». Il controllo è puro: il volto si pesca DOPO la carta, come
+   prima (rivaleNominato scrive la finestra S.recentPot), così dove il rivale c'è le carriere restano identiche. Due lettori,
+   pickDiplo e pickCrisiInt: gli unici che pescano carte volto:'rivale'. Nessun ripiego nella resa (renderGov). */
+function rivaleVivo(){ return typeof potenzeDi==='function' && potenzeDi('rivale').length>0; }
 function pickDiplo(){   // il loop: una missione la maggior parte dei mesi, col volto reale dove serve
   if(typeof DIPLO_EV==='undefined') return null;
   if(Math.random()>=0.55) return null;
-  let pool=DIPLO_EV.filter(function(e){return (!e.cond||e.cond())&&(typeof eraVivaT!=='function'||eraVivaT(e));});   // FIX era-gate percorso diplomatico (astratto-senza-tempo: default eraVivaT; i pochi moderni → contemporanea)
+  const rv=rivaleVivo();   // L244-3: una carta volto:'rivale' esce solo se c'è un rivale vivo (stessa regola in pickCrisiInt)
+  let pool=DIPLO_EV.filter(function(e){return (!e.cond||e.cond())&&(typeof eraVivaT!=='function'||eraVivaT(e))&&(rv||e.volto!=='rivale');});   // FIX era-gate percorso diplomatico (astratto-senza-tempo: default eraVivaT; i pochi moderni → contemporanea)
   const ev=pescaBag('diplo', pool); if(!ev) return null;
-  let p=null; if(ev.volto==='rivale' && typeof rivaleNominato==='function') p=rivaleNominato();
+  let p=null; if(ev.volto==='rivale') p=rivaleNominato();   // non null: il pool l'ha già garantito
   /* i18n: T() PRIMA di potSub — si traduce il TEMPLATE (coi %POT intatti), poi la sostituzione gira
      nella lingua corrente (ramo EN di potSub). La carta nasce nella lingua del pescaggio (pattern log). */
   const base=(p && typeof potSub==='function') ? Object.assign({}, ev, {
@@ -1077,15 +1085,16 @@ function pickCrisiInt(){
   const mese=S.year*12+S.month;
   if(S.intl.crisiUltimo!=null && mese-S.intl.crisiUltimo<2) return null;   // cadenza ~ogni 2-3 mesi
   if(Math.random()>=0.55) return null;
-  let pool=CRISI_INT.filter(function(e){return (!e.cond||e.cond())&&(typeof eraVivaT!=='function'||eraVivaT(e));});   // FIX era-gate crisi da Segretario (astratte-senza-tempo: default eraVivaT; i moderni → contemporanea)
+  const rv=rivaleVivo();   // L244-3: come in pickDiplo
+  let pool=CRISI_INT.filter(function(e){return (!e.cond||e.cond())&&(typeof eraVivaT!=='function'||eraVivaT(e))&&(rv||e.volto!=='rivale');});   // FIX era-gate crisi da Segretario (astratte-senza-tempo: default eraVivaT; i moderni → contemporanea)
   const ev=pescaBag('crisiint', pool); if(!ev) return null;
   S.intl.crisiUltimo=mese;
   /* Fetta C: le crisi ANTAGONISTE (volto:'rivale') prendono un volto reale PESCATO (vario nel mandato, anti-ripetizione
-     in S.recentPot) e tornano già passate in potSub; le 6 interne/sistemiche/UE restano astratte (nessun volto). */
+     in S.recentPot) e tornano già passate in potSub; le altre (interne/sistemiche/UE, 9 su 17 dal L244-3) restano astratte (nessun volto). */
   let base=ev;
-  if(ev.volto==='rivale' && typeof rivaleNominato==='function' && typeof potSub==='function'){
-    const p=rivaleNominato();
-    if(p) base=Object.assign({}, ev, {   // i18n: T() prima di potSub (template coi %POT intatti → sostituzione nella lingua corrente)
+  if(ev.volto==='rivale'){
+    const p=rivaleNominato();   // non null: il pool l'ha già garantito (L244-3)
+    base=Object.assign({}, ev, {   // i18n: T() prima di potSub (template coi %POT intatti → sostituzione nella lingua corrente)
       t: potSub(T(ev.t),p), text: potSub(T(ev.text),p), kick: potSub(T(ev.kick||''),p)||T(ev.kick),
       ch: ev.ch.map(function(c){ return Object.assign({}, c, {l:potSub(T(c.l),p), e:potSub(T(c.e),p), mondo:potSub(T(c.mondo||''),p)||c.mondo}); })
     });
