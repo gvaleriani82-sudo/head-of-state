@@ -30148,4 +30148,12 @@ const EN = {
   "I ragazzi tornano in galleria; il sindacato degli attori annuncia uno sciopero":"The young people come back to the gallery; the actors' union announces a strike",
   "Biglietti più cari: chi va a teatro paga":"Dearer tickets: those who go to the theatre pay",
   "Il tesoriere approva; in galleria restano posti vuoti":"The treasurer approves; seats stay empty in the gallery",
+  /* L237-2bis · chi guida il governo: il partner */
+  "Entra nel governo di %P da partner, come %R.":"Joins the government of %P as a junior partner, as %R.",
+  "Al governo, da partner":"In government, as a partner",
+  "Entri nel governo di %P da partner: guida il partito più forte della coalizione.":"You join the government of %P as a junior partner: the largest party in the coalition leads.",
+  "Il Parlamento elegge un nuovo capo del governo di %P: il governo cambia senza elezioni, e tu ci entri da partner.":"Parliament elects a new head of government from %P: the government changes without an election, and you join it as a partner.",
+  "%G sostituisce il premier con %P. Tu resti ministro, da partner.":"%G replaces the prime minister with %P. You stay on as minister, as a partner.",
+  "Entra nel governo da partner →":"Join the government as a partner →",
+  "Firma: governo guidato da %P (tu da partner)":"Sign: government led by %P (you as partner)",
 };

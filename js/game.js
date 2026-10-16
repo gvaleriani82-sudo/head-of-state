@@ -626,7 +626,7 @@ function startOpposizione(){
 
 /* ============================================================
    IL LIVELLO 2 — MINISTRO sotto un premier-AI (lotto ascesa). Riusa il modello del governo-AI
-   dell'opposizione: il premier (leader del TUO partito) governa la nazione (S.pol = GOVERNI_PROFILI
+   dell'opposizione: il premier (leader del TUO partito; dal L237-2bis, da partner, di quello che guida la coalizione: entraDaPartner) governa la nazione (S.pol = GOVERNI_PROFILI
    del suo asse) e il motore fa girare gli indicatori; tu controlli UN dicastero e costruisci
    S.capitale (la credenziale per il vertice). Quando il capitale è alto e si apre un'occasione →
    la salita → diventaPremier() = transizione FLUIDA al livello 3, ZERO reset del narrativo.
@@ -644,7 +644,8 @@ function installaProfilo(pol){
   if(prima!=null){ var dopo=computeDeficit(); S.deficitBase=(S.deficitBase!=null?S.deficitBase:3.0)+(prima-dopo); }
 }
 function profByAsse(asse){ return asse>=1?'destra':(asse<=-1?'sinistra':'centro'); }
-function generaPremier(){ const p=part(S.partito)||{}; return { nome:nomePersona(), partito:S.partito, asse:(p.asse||0), lealta:60 }; }
+/* L237-2bis (R0 2) · `partito` facoltativo: da partner il partito che guida sceglie un altro dei SUOI («Cambio al vertice»); senza, il tuo come prima. */
+function generaPremier(partito){ const pid=partito||S.partito, p=part(pid)||{}; return { nome:nomePersona(), partito:pid, asse:(p.asse||0), lealta:60 }; }
 /* D3 asse-3 — era giocata (S se in partita, altrimenti lo scenario scelto nel setup: CREA vive prima di S). */
 function eraGiocata(){
   if(typeof S!=='undefined' && S) return S.era||'contemporanea';
@@ -892,13 +893,86 @@ function pickOccasione(){
   if(S.livello!==2) return null;
   if(S.occUltima!=null && mese-S.occUltima<6) return null;
   /* SOLO vie reali (niente più candidatura offerta a freddo): il premier cade (successione) o lo batti in primaria. */
-  if(S.premCrisiMesi>=3 && S.capitale>=40){ S.occUltima=mese; return { kind:'occasione', tipo:'successione', resolved:false }; }
-  if(S.capitale>=70){ S.occUltima=mese; return { kind:'occasione', tipo:'primaria', resolved:false }; }   // INNESCABILE costruendo capitale; l'umore delle correnti pesa sull'ESITO (resolveItem), non sull'innesco
+  /* L237-2bis (R1) · da PARTNER la primaria è di un altro partito: non si offre; la successione solo se il tuo partito è ORA il più
+     forte della coalizione per seggi (altrimenti il partito che guida sceglie un altro dei suoi: «Cambio al vertice», advanceMonth). */
+  if(S.premCrisiMesi>=3 && S.capitale>=40 && (!partnerAttivo() || partnerPuoSuccedere())){ S.occUltima=mese; return { kind:'occasione', tipo:'successione', resolved:false }; }
+  if(S.capitale>=70 && !partnerAttivo()){ S.occUltima=mese; return { kind:'occasione', tipo:'primaria', resolved:false }; }   // INNESCABILE costruendo capitale; l'umore delle correnti pesa sull'ESITO (resolveItem), non sull'innesco
   return null;
 }
-/* fine mandato da ministro: il premier (= il tuo partito) corre per la rielezione. Vince → continui ministro;
-   perde → vai all'opposizione, da volto del partito (resti livello 2). */
-function vinceIlGoverno(){ const w=vincitore(); return (S.forze[S.partito]||0) >= (S.forze[(w||{}).id]||0); }
+/* ===== L237-2bis (16/10, D-P1 (ii) di Giacomo, decisioni R0-R5 di Cowork) · CHI GUIDA IL GOVERNO. =====
+   Dall'opposizione, nel parlamentare con coalizione, la trattativa vinta mette insieme il 50%: guida il governo il membro con PIÙ
+   SEGGI (a parità il tuo partito). Se non sei tu, entri DA PARTNER: livello 2 (un dicastero) sotto un premier del partito che guida
+   (`S.premier.partito`). Il partner si riconosce SOLO da lì (`partnerAttivo()`): nessun campo nuovo in S, e un salvataggio vecchio
+   (premier senza `partito`, o col tuo) è il ministro di sempre. Lo stesso vale per il rientro della sfiducia costruttiva (R3,
+   advanceMonth); il semipresidenziale resta fuori (guida chi vince la presidenziale) e il Regno Unito non ha coalizione.
+   Lettori: la trattativa (renderTrattativa, la riga «Firma: governo guidato da…»), l'esito (esitoSeggi, il bottone), vinciElezione
+   e il banco (harness.js, la rimonta, `__BANCO_PARTNER_OFF` → REGOLA_PARTNER=false). */
+let REGOLA_PARTNER=true;   // L237-2bis: spenta = il gioco di prima (la usa il banco per la colonna «prima»)
+function partnerAttivo(){ return !!(S && S.livello===2 && S.premier && S.premier.partito && S.premier.partito!==S.partito); }
+function guidaCoalizione(membri, seggi){
+  var g=S.partito, gs=(seggi&&seggi[S.partito])||0;
+  (membri||[]).forEach(function(id){ var s=(seggi&&seggi[id])||0; if(s>gs){ g=id; gs=s; } });   // strettamente di più: a parità resti tu (e fra gli altri il primo in lista)
+  return g;
+}
+function partnerPuoSuccedere(){ return guidaCoalizione(S.coalizione, S.seggi)===S.partito; }
+/* chi guiderebbe la coalizione appena vinta alle urne, se non sei tu (null = guidi tu, o la regola non vale qui) */
+function guidaPartnerVoto(){
+  if(!REGOLA_PARTNER || !S || !S.opposizione || !PAESE.coalizione || PAESE.comeSiVince!=='parlamentare' || !S.seggi) return null;
+  if(typeof urnaLegislativa==='function' && urnaLegislativa()) return null;
+  var g=guidaCoalizione(S.coalizione, S.seggi);
+  return g!==S.partito ? g : null;
+}
+/* Entri nel governo da partner: lo stato del livello 2 di diventaMinistro (dicastero, premier, profilo del premier) più la chiusura
+   dell'urna di nextMandate/tornaAlGoverno (maturaRP, forza all'urna, mandato, sforzo e territori, correnti). `rc` = il rientro della
+   sfiducia costruttiva ({membri, turno}): niente urna, la legislatura continua. L'elezione vinta si conta UNA volta (R4: il doppio
+   conto di tornaAlGoverno è un bug noto, in coda a parte); i mandati vinti da candidato (`mandatesWon`) no: il candidato era l'altro. */
+function entraDaPartner(guida, rc){
+  const pg=part(guida)||{};
+  S.opposizione=false; S.governoAvversario=null; S.ministers=[];
+  S.livello=2; S.occUltima=null; S.mesiAltoCap=0;
+  S.dicastero=dicasteroDefault(S.personaggio&&S.personaggio.background);
+  S.premier={ nome:nomePersona(), partito:guida, asse:(pg.asse||0), lealta:60 };
+  installaProfilo(GOVERNI_PROFILI[profByAsse(S.premier.asse)]);   // L104-3: la politica nazionale è del premier
+  S.capitale=40; S.silAvviso=null; S.premCrisiMesi=0; S.premMossaUltimo=null;
+  S.prevSettore=(DICASTERO_IND[S.dicastero]?S.ind[DICASTERO_IND[S.dicastero][0]]:null);
+  if(rc){ S.coalizione=rc.membri.slice(); S.turnInMandate=rc.turno; }   // la cricca della sfiducia costruttiva; altrimenti S.coalizione l'ha già scritta la trattativa
+  else {
+    maturaRP(); segnaForzaUrna();   // l'urna vinta è chiusa (come nextMandate)
+    S.mandate=(S.mandate||0)+1; S.turnInMandate=0;
+    if(!sistemaSemipres()) S.seggi=calcSeggi();
+    S.sostegno=null; S.sostegnoStrappi=0;
+    chiudiSforzo(); decidiTerritoriNazionale(); S.campNaz=null; S.campNazUltimo=null;
+    tutteCorrenti(8);   // la vittoria ricompatta il partito
+    bioConta('elezioniVinte');
+  }
+  S.snap=Object.assign({},S.pol); S.leggiSnap=Object.assign({},S.leggi);
+  S.minoranza=false; S.mesiMinoranza=0; S.caduteMandato=0; S.elezioniAnticipate=false;
+  S.tenuta={}; S.tenutaForza0={}; S.tenutaLiv={}; S.tenutaUltimo={};
+  S.logorioAvv=0; S.mesiMinoranzaAvv=0; S.mesiGovernoAvv=0; S.sostegnoAvv=null;
+  S.mesiSottoCrisi=0; S.fidLivello=0; S.fidUltimo={}; S.ultimoSondaggio=null; S.sondStorico=[];
+  S.ind.consenso=computeConsenso(); S.ind.deficit=computeDeficit(); S.ind.fiducia=targetFiducia();
+  S.bloccoAtteso=bloccoQuota();
+  const chi=S.premier.nome+' ('+T(pg.nome||'')+')';
+  bioFatto(T('Entra nel governo di %P da partner, come %R.').replace('%P',chi).replace('%R',T(ruoloDicastero())));
+  S.log.unshift({t:T('Al governo, da partner'), x:T('Entri nel governo di %P da partner: guida il partito più forte della coalizione.').replace('%P',chi)});
+  if(typeof PROMO_FIORE!=='undefined') PROMO_FIORE=true;
+  document.getElementById('appoint').style.display='none';
+  document.getElementById('over').style.display='none';
+  document.getElementById('ov').classList.remove('on');
+  document.getElementById('game').style.display='block';
+  genAgenda(false); generaTitolo(); render(); commitSnap();
+}
+/* L237-2bis (R0 1) · il rivale del governo del premier: il più forte FUORI da {partito del premier, tuo partito}. Per il ministro del
+   proprio partito è vincitore() (stesso filtro, stesso ordinamento: A/B identico); da partner vincitore() poteva rendere il partito del
+   premier stesso (il PD primo partito: PD contro PD, sempre vero). */
+function rivaleGoverno(){
+  const pp=(S.premier && S.premier.partito) || S.partito;
+  return PAESE.partiti.filter(p=>p.id!==S.partito && p.id!==pp).sort((a,b)=>(S.forze[b.id]||0)-(S.forze[a.id]||0))[0];
+}
+/* fine mandato da ministro: il premier corre per la rielezione (il partito del premier: il tuo, o da partner quello che guida).
+   Vince → continui ministro; perde → il ministro del proprio partito va all'opposizione da volto del partito (resti livello 2),
+   il partner torna capo del suo partito all'opposizione (livello 3, la strada di goOpposizione: R2). */
+function vinceIlGoverno(){ const g=(S.premier && S.premier.partito) || S.partito, w=rivaleGoverno(); return (S.forze[g]||0) >= (S.forze[(w||{}).id]||0); }
 function esitoElezioneMinistro(){
   maturaRP();
   if(vinceIlGoverno()){
@@ -909,8 +983,12 @@ function esitoElezioneMinistro(){
     S.log.unshift({t:T('Governo confermato'),x:T('%P vince le elezioni: resti ministro, il tuo capitale cresce.').replace('%P',(S.premier?S.premier.nome:T('Il premier')))});
     genAgenda(false); generaTitolo(); render(); commitSnap(); return;
   }
+  if(partnerAttivo()){   // L237-2bis (R2): il partner torna capo del suo partito, all'opposizione (lo stato del livello 2 si chiude come in diventaPremier)
+    S.livello=3; S.premier=null; S.dicastero=null; S.capitale=null; S.prevSettore=null; S.silAvviso=null; S.premCrisiMesi=0; S.occUltima=null; S.mesiAltoCap=0;
+    return goOpposizione();   // vincitore() là = rivaleGoverno() qui: il governo ha perso, quindi il rivale supera il partito del premier e tutti gli altri
+  }
   S.premier=null;
-  entraOpposizione(vincitore());
+  entraOpposizione(rivaleGoverno());   // L237-2bis: per il ministro del proprio partito è vincitore(), come prima
   S.bloccoAtteso=bloccoQuota();
   bioFatto(gn('Sconfitto','Sconfitta')+' alle urne col tuo governo: la traversata comincia da ex ministro.');
   S.log.unshift({t:'All\'opposizione',x:'Il tuo governo ha perso le elezioni: ne diventi il volto all\'opposizione.'});
@@ -922,11 +1000,12 @@ function esitoElezioneMinistro(){
    della STESSA persona, non una nuova partita. Cambiano solo: livello→3, premier→null, controllo nazionale pieno. */
 function diventaPremier(viaElezione){
   const ruoloPrima=ruoloDicastero();
+  const daPartner=partnerAttivo();   // L237-2bis (R1): la successione del partner diventato il più forte tiene la coalizione com'era
   S.livello=3; S.premier=null; S.dicastero=null; S.capitale=null; S.prevSettore=null; S.silAvviso=null; S.premCrisiMesi=0; S.occUltima=null; S.mesiAltoCap=0;
   S.opposizione=false; S.governoAvversario=null; S.mesiSottoCrisi=0; S.fidLivello=0; S.fidUltimo={};
   S.ministers=MINISTRIES.map(function(M){ const c=mkCand(); return { min:M.id, nm:c.nm, g:c.g, profile:c.profile, comp:c.comp, loyalty:62 }; });   // formi un governo (transizione fluida, niente schermata)
   if(typeof assegnaVoltiGruppo==='function') assegnaVoltiGruppo(S.ministers);   // L20-1: volti distinti nel gabinetto generato alla salita
-  S.coalizione=[S.partito];
+  if(!daPartner) S.coalizione=[S.partito];
   S.seggi=(sistemaSemipres() && S.seggi) ? S.seggi : ((PAESE.coalizione||PAESE.comeSiVince==='parlamentare')?calcSeggi():null);   // L104-2: nel semipresidenziale la salita eredita l'Assemblea
   S.minoranza = (PAESE.coalizione||PAESE.comeSiVince==='parlamentare') ? bloccoSeggi()<50 : false;   // L61-5 - il blocco, non il solo partito: nell appeso il Regno Unito puo averne uno
   S.tenuta={}; S.tenutaForza0={}; S.tenutaLiv={}; S.tenutaUltimo={}; S.mesiMinoranza=0; initTenuta(); S.bloccoAtteso=bloccoQuota();
@@ -7321,6 +7400,14 @@ function avanzaMese(){
     if(PAESE.sfiduciaCostruttiva && PAESE.cadutaGoverno){
       if(bloccoSeggi()<50){ var cm=criccaMia();
         if(cm.seggi>=50){
+          /* L237-2bis (R3) · la cricca la guida il membro con più seggi: se non sei tu, entri da partner (niente nomina dei ministri,
+             niente urna: la legislatura continua). Detto qui, prima di goAppoint, e non nel ramo di tornaAlGoverno: il partner non nomina
+             un gabinetto. */
+          var gCo=REGOLA_PARTNER ? guidaCoalizione(cm.membri, S.seggi) : S.partito;
+          if(gCo!==S.partito){
+            S.log.unshift({t:T('Sfiducia costruttiva'), x:T('Il Parlamento elegge un nuovo capo del governo di %P: il governo cambia senza elezioni, e tu ci entri da partner.').replace('%P', T((part(gCo)||{}).nome||''))});
+            return entraDaPartner(gCo, { membri:cm.membri.slice(), turno:S.turnInMandate });
+          }
           S.rientroCostruttivo={ membri:cm.membri.slice(), turno:S.turnInMandate };
           S.log.unshift({t:T('Sfiducia costruttiva'), x:T('%P elegge un nuovo Cancelliere: il governo cambia senza elezioni.').replace('%P', T((part(S.partito)||{}).nome||''))});
           goAppoint(); return;
@@ -7352,7 +7439,11 @@ function avanzaMese(){
       else if((S.year*12+S.month)-S.silAvviso>=2){ return gameOver('silurato'); }
     } else { S.silAvviso=null; }
     S.premCrisiMesi = (S.ind.consenso<33) ? (S.premCrisiMesi||0)+1 : 0;   // premier in crisi (consenso nazionale basso a lungo)
-    if(S.premCrisiMesi>=3 && S.capitale<50){ S.premier=generaPremier(); S.premCrisiMesi=0; S.log.unshift({t:T('Cambio al vertice'),x:T('Il partito sostituisce il premier con %P. Tu, ancora acerbo, resti ministro.').replace('%P',S.premier.nome)}); }   // se non sei pronto, un nuovo premier; se lo sei, scatta l'occasione (pickOccasione)
+    if(S.premCrisiMesi>=3 && partnerAttivo() && !partnerPuoSuccedere()){   // L237-2bis (R1): da partner, col tuo partito non il più forte, il partito che guida sceglie un altro dei suoi
+      S.premier=generaPremier(S.premier.partito); S.premCrisiMesi=0;
+      S.log.unshift({t:T('Cambio al vertice'),x:T('%G sostituisce il premier con %P. Tu resti ministro, da partner.').replace('%G',T((part(S.premier.partito)||{}).nome||'')).replace('%P',S.premier.nome)});
+    }
+    else if(S.premCrisiMesi>=3 && S.capitale<50){ S.premier=generaPremier(partnerAttivo()?S.premier.partito:undefined); S.premCrisiMesi=0; S.log.unshift({t:T('Cambio al vertice'),x:T('Il partito sostituisce il premier con %P. Tu, ancora acerbo, resti ministro.').replace('%P',S.premier.nome)}); }   // se non sei pronto, un nuovo premier; se lo sei, scatta l'occasione (pickOccasione) · L237-2bis (R0 2): da partner il premier resta del partito che guida
     if(urnaScadenzaOra()){ return esitoElezioneMinistro(); }
     maturaRP();
     S.snap=Object.assign({},S.pol); S.leggiSnap=Object.assign({},S.leggi);
@@ -8121,7 +8212,10 @@ function renderTrattativa(){
       <span class="mono" style="font-size:13px">${seggi[id]}${you?'':` <span onclick="removeAlly('${id}')" style="cursor:pointer;color:var(--neg);font-weight:700;padding:0 5px">×</span>`}</span></div>`; }).join('');
   const addRows=comp.map(p=>`<button class="opt" onclick="addAlly('${p.id}')"><span class="ol">+ ${T(p.nome)} <small style="color:var(--mut2);font-weight:400">${T(p.orientamento)}</small></span><span class="oe">${seggi[p.id]} ${T('seggi')}</span></button>`).join('');
   let action='';
-  if(reached) action=`<button class="opt" style="border-color:var(--acc);background:var(--acc-bg)" onclick="${confirmFn}"><span class="ol" style="color:var(--acc-ink)">${T(voto?'Conferma la maggioranza':'Forma il governo')} →</span><span class="oe">${total} ${T('seggi')}${cb?` +${cb} ${T('credibilità')} → ${Math.round(eff)}`:' '+T('su 100')}</span></button>`;
+  /* L237-2bis (d) · prima di firmare, chi guiderà: dall'opposizione, se la coalizione scelta ha un partito più forte del tuo, la firma lo dice (la stessa guidaCoalizione di vinciElezione) */
+  const gFirma=(voto && REGOLA_PARTNER && S.opposizione && PAESE.comeSiVince==='parlamentare' && !(typeof urnaLegislativa==='function' && urnaLegislativa())) ? guidaCoalizione(COAL.membri, seggi) : mine;
+  const firmaTxt = gFirma!==mine ? T('Firma: governo guidato da %P (tu da partner)').replace('%P',T((part(gFirma)||{}).nome||'')) : T(voto?'Conferma la maggioranza':'Forma il governo');
+  if(reached) action=`<button class="opt" style="border-color:var(--acc);background:var(--acc-bg)" onclick="${confirmFn}"><span class="ol" style="color:var(--acc-ink)">${firmaTxt} →</span><span class="oe">${total} ${T('seggi')}${cb?` +${cb} ${T('credibilità')} → ${Math.round(eff)}`:' '+T('su 100')}</span></button>`;
   else if(comp.length===0) action= voto
       ? `<button class="opt" style="border-color:var(--neg)" onclick="finalizeVoto(false)"><span class="ol">${T('Nessuna maggioranza possibile')}</span><span class="oe">${T("Vedi l'esito del voto")}</span></button>`
       : (coabitazioneInVista() ? `<button class="opt" style="border-color:var(--acc)" onclick="${confirmFn}"><span class="ol">${T('Coabitazione')} →</span><span class="oe">${T('solo %N seggi · l\'Assemblea è degli altri: il Primo ministro sarà del loro blocco').replace('%N',total)}</span></button>`
@@ -8379,7 +8473,7 @@ function esitoSeggi(win, total){
   document.getElementById('modal').innerHTML=`<div class="mt"><div class="kicker">${T(urnaLegislativa()?'Legislative anticipate':(S.elezioniAnticipate?'Elezioni anticipate':'Elezioni'))} · ${S.year}</div><h2>${titoloEsito(win)}</h2></div>
     <div class="mtext">${sub}</div>
     <div style="padding:0 18px 6px">${rows}</div>${salv?salvezzaRiga():''}
-    <div class="choices"><button class="opt" style="border-color:${win?'var(--acc)':'var(--neg)'}" onclick="${win?'vinciElezione()':'perdiElezione()'}"><span class="ol">${T(win?(S.opposizione?'Torna al governo →':'Forma il nuovo governo →'):(S.opposizione?(salv?'Resta alla guida dell\'opposizione →':'Vedi il bilancio finale'):'Vai all\'opposizione →'))}</span>${win&&!S.opposizione?`<span class="oe">${T('Mandato')} ${S.mandate+1}</span>`:''}</button></div>`;
+    <div class="choices"><button class="opt" style="border-color:${win?'var(--acc)':'var(--neg)'}" onclick="${win?'vinciElezione()':'perdiElezione()'}"><span class="ol">${T(win?(S.opposizione?(guidaPartnerVoto()?'Entra nel governo da partner →':'Torna al governo →'):'Forma il nuovo governo →'):(S.opposizione?(salv?'Resta alla guida dell\'opposizione →':'Vedi il bilancio finale'):'Vai all\'opposizione →'))}</span>${win&&!S.opposizione?`<span class="oe">${T('Mandato')} ${S.mandate+1}</span>`:''}</button></div>`;
   document.getElementById('ov').classList.add('on');
 }
 /* L104-2 · l'esito delle legislative anticipate nel semipresidenziale: la tabella dei seggi di esitoSeggi, ma nessun
@@ -8460,7 +8554,7 @@ function salvezzaOpp(){ return !!S && !!S.opposizione && (S.salvezzeOpp||0)<1 &&
 function segnaForzaUrna(){ S.forzaUrnaPrec=(S.forze && S.forze[S.partito]) || 0; }
 function segnaSalvezza(){ S.salvezzeOpp=(S.salvezzeOpp||0)+1; S.credibilita=Math.max(0,(S.credibilita||0)-10); }   // DOPO entraOpposizione, che la azzera a 50: 40 invece di 50 (il costo misurato in L143-5). La chiama anche il banco.
 function vincitore(){ return PAESE.partiti.filter(p=>p.id!==S.partito).sort((a,b)=>(S.forze[b.id]||0)-(S.forze[a.id]||0))[0]; }
-function vinciElezione(){ if(S.opposizione) goAppoint(); else nextMandate(); }   // dall'opposizione si ri-nominano i ministri
+function vinciElezione(){ if(S.opposizione){ const gP=guidaPartnerVoto(); if(gP) return entraDaPartner(gP); goAppoint(); } else nextMandate(); }   // dall'opposizione si ri-nominano i ministri · L237-2bis: o si entra da partner, se la coalizione la guida un altro
 function perdiElezione(){ if(S.opposizione){ if(salvezzaOpp()) goOpposizione(true); else gameOver('congresso'); } else goOpposizione(); }
 /* Stato d'opposizione: governa il vincitore w (col suo profilo-politiche), tu passi a sfidante. Solo stato:
    nessun log/genAgenda/commit (li fa il chiamante) né potere locale (persiste alla sconfitta, si ri-fissa all'avvio).
