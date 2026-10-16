@@ -177,6 +177,8 @@
   .linea-porte .pt-anno{ display:block; font-family:'IBM Plex Mono',monospace; font-size:20px;
     font-weight:600; line-height:1.1; letter-spacing:.02em; }
   .linea-porte .pt-brief{ display:block; font-size:12px; color:var(--mut); line-height:1.45; margin-top:4px; }
+  .tv-oltre-nome{ fill:#c9c6a6; opacity:.78; letter-spacing:.04em; font-style:italic; }   /* L249-1: «Germania Est» sulla terra oltre il confine */
+  .linea-porte .pt-stato{ display:block; font-size:12px; color:var(--txt); line-height:1.4; margin-top:3px; }   /* L249-1: «Germania Ovest · Repubblica Federale…» */
   /* selettore paese: bandiera impilata sopra l'etichetta. GRIGLIA responsive (16 paesi) → va a capo su più righe,
      niente sforo orizzontale a 375px (prima era un flex-row che con 16 bottoni schiacciava/sforava). */
   /* L68-1 — con sedici paesi la griglia a QUATTRO colonne dà 80px di larghezza e costringeva l'etichetta a

@@ -505,7 +505,7 @@ function applyPaese(){
   const P=PAESE;
   document.documentElement.style.setProperty('--acc', P.colori.accento);
   const hf=document.getElementById('hdr-flag'); if(hf) hf.innerHTML=P.flag||'';   // bandiera nell'header (rete di sicurezza: applyPaese è chiamata in render)
-  const hdr=document.getElementById('hdr-paese'); if(hdr) hdr.textContent=T(P.nome);
+  const hdr=document.getElementById('hdr-paese'); if(hdr) hdr.textContent=T((typeof nomePaeseOra==='function' && typeof S!=='undefined' && S) ? nomePaeseOra() : P.nome);   // L249-1: «Germania Ovest» fino all'unità
   const intro=document.getElementById('setup-intro');   // la intro per-paese/ruolo (dinamica) vive nel SETUP; la home ha un pitch generico statico
   const introPaese=(typeof curLang==='function'&&curLang()==='en')?T(P.nome):P.nomeArt;
   /* L155-2 · gli anni fino alla PRIMA urna li conta il motore: una porta parte a legislatura in corso (`turnMandato`, lo stesso campo che
@@ -1080,7 +1080,7 @@ function apriClipPorta(id){
   const seq=clipDellaPorta(id).filter(function(n){ return !PORTA_CLIP_VISTE[n]; }); if(!seq.length) return;   // L154-1: per nome di clip
   seq.forEach(function(n){ PORTA_CLIP_VISTE[n]=true; }); PORTA_CLIP_APERTA=true; veloVecchioVia('clip-porta-uscente');   // L181-4
   PORTA_CLIP_FERME=[]; try{ document.querySelectorAll('video').forEach(function(v){ if(!v.paused){ v.pause(); PORTA_CLIP_FERME.push(v); } }); }catch(e){}
-  const sc=SCENARI[id], paese=(typeof PAESI!=='undefined' && PAESI[sc.paese]) ? T(PAESI[sc.paese].nome) : '';
+  const sc=SCENARI[id], paese=T(nomePaesePorta(sc));   // L249-1: «Germania Ovest» per le porte di Bonn
   const el=document.createElement('div');
   el.id='clip-porta'; el.setAttribute('role','dialog'); el.setAttribute('aria-label', paese+', '+sc.anno);
   const lin=(typeof curLang==='function' && curLang()==='en')?'en':'it', PVS=seq.map(portaVoce);
@@ -1348,6 +1348,9 @@ function paesiConLinea(){
    arrivato) e non sopravvive a un reload — e non deve, perché al reload si riparte dalla home.
    ================================================================================================================ */
 var DA_STORICI=null;
+/* L249-1 · il nome del PAESE di una porta: `nomePaese` della porta (la Germania di Bonn è «Germania Ovest» fino all'unità), se no
+   quello del paese. Lo leggono la linea del tempo, il riepilogo della porta e la didascalia delle clip; `sottotitolo` accanto. */
+function nomePaesePorta(sc){ return (sc && sc.nomePaese) || ((PAESI[sc && sc.paese]||{}).nome) || (sc && sc.paese) || ''; }
 function renderPortaSetup(){
   var box=document.getElementById('porta-fissa'), bp=document.getElementById('blocco-paese');
   if(!box) return;
@@ -1358,13 +1361,14 @@ function renderPortaSetup(){
   /* dalla porta storica il paese NON si sceglie: lo fissa la porta. Mostrarlo come selettore sarebbe la stessa
      ambiguità di prima, al contrario — un comando che non comanda. Chi cambia idea torna alla linea del tempo. */
   if(bp) bp.style.display='none';
-  var sc=SCENARI[DA_STORICI], pn=(PAESI[sc.paese]||{}).nome||sc.paese;
+  var sc=SCENARI[DA_STORICI], pn=nomePaesePorta(sc);
   box.innerHTML='<div style="max-width:360px;margin:14px auto 0;display:flex;align-items:center;gap:10px;'
     +'padding:10px 12px;border:1px solid var(--line2);border-radius:10px;text-align:left">'
     +sogliaHtml(sc.id)
     +'<div style="flex:1;min-width:0">'
       +'<div style="font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--mut)">'+T('Scenario')+'</div>'
       +'<div style="font-weight:600">'+T(pn)+', '+(sc.anno||'')+'</div>'
+      +(sc.sottotitolo?'<div style="font-size:12.5px;line-height:1.35;color:var(--mut)">'+T(sc.sottotitolo)+'</div>':'')   // L249-1
     +'</div></div>'
     /* L68-1 — anche il ritorno è un bersaglio toccabile: era alto 20,6px, il peggiore di tutta la strada
        storica (ed era mio, di L62-1). min-height 44 e il testo resta a 13px. */
@@ -1443,6 +1447,7 @@ function renderStorici(){
           +sogliaHtml(sc.id)
           +'<span class="pt-txt">'
             +'<span class="pt-anno">'+(sc.anno||T(sc.nome))+'</span>'
+            +(sc.sottotitolo?'<span class="pt-stato"><b>'+T(nomePaesePorta(sc))+'</b> · '+T(sc.sottotitolo)+'</span>':'')   // L249-1
             +(riga?'<span class="pt-brief">'+T(riga)+'</span>':'')
           +'</span></button>';
       }).join('')+'</div>';
@@ -3224,10 +3229,17 @@ function oltrePattern(id, u){
 /* L113-5 · una trama a righe diagonali (45°): righe piene del colore, larghe poco meno di metà del periodo, e vuoto fra l'una e l'altra */
 function righePattern(id, colore, p){ return `<pattern id="${id}" patternUnits="userSpaceOnUse" width="${p.toFixed(3)}" height="${p.toFixed(3)}" patternTransform="rotate(45)"><rect width="${(p*0.45).toFixed(3)}" height="${p.toFixed(3)}" fill="${colore}"/></pattern>`; }
 function oltrePath(id, d, larghezza){ return `<path class="tv-oltre" d="${d}" fill="url(#${id})" stroke="#3a3b33" stroke-width="${(larghezza/200).toFixed(2)}" stroke-linejoin="round" pointer-events="none"/>`; }
+/* L249-1 · il NOME della terra oltre il confine (`mappa.oltreNome` in `mappa.oltreEtichetta`, unità del disegno): «Germania Est», così
+   la RDT si legge come un altro stato e non come una parte del tuo paese spenta. Niente tocco. Il corpo è in unità del disegno:
+   0,044 della larghezza perché resti ≥ 11 px anche col tavolo più piccolo (la notte, al 42% dell'altezza a 375). */
+function oltreNomeSvg(M, larghezza){
+  if(!M || !M.oltre || !M.oltreNome || !M.oltreEtichetta) return '';
+  return `<text class="tv-oltre-nome" x="${M.oltreEtichetta[0]}" y="${M.oltreEtichetta[1]}" text-anchor="middle" font-size="${(larghezza*0.044).toFixed(2)}" pointer-events="none">${T(M.oltreNome)}</text>`;
+}
 function renderMappaSVG(){
   const M=PAESE.mappa, TE=PAESE.territori, asseTuo=part(S.partito).asse;
   let h=`<svg viewBox="${M.viewBox}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${T('Mappa del controllo politico')}">`;
-  if(M.oltre){ const vb=tavoloVB(); h+=`<defs>${oltrePattern('mp-oltre', vb[2]/24)}</defs>`+oltrePath('mp-oltre', M.oltre, vb[2]); }   // L120-1: la RDT anche qui, sotto la terra
+  if(M.oltre){ const vb=tavoloVB(); h+=`<defs>${oltrePattern('mp-oltre', vb[2]/24)}</defs>`+oltrePath('mp-oltre', M.oltre, vb[2])+oltreNomeSvg(M, vb[2]); }   // L120-1: la RDT anche qui, sotto la terra; L249-1 col suo nome
   h+=`<path d="${M.sfondo}" fill="var(--bg2)" stroke="${M.oltre?'#2e2d20':'var(--line2)'}" stroke-width="${M.oltre?1.1:0.7}"/>`;
   const idx=TE.map((_,i)=>i).sort((a,b)=>((M.aree[a]&&M.aree[a].d?0:1)-(M.aree[b]&&M.aree[b].d?0:1))||(a-b));   // prima le regioni, poi le città sopra
   const chiamaIdx=(S.territorioChiama&&typeof S.territorioChiama.idx==='number')?S.territorioChiama.idx:null;   // F2
@@ -3408,7 +3420,7 @@ function costruisciTavolo(box){
      /* L113-5 · le RIGHE della notte (come ha votato l'area): due trame a righe diagonali, oro e ardesia, un periodo di 1/60 della
         larghezza del disegno. Nascono qui, col tavolo; la notte cambia solo quale delle due e l'opacità (notteTavolo). */
      righePattern('tv-righe-tuo', 'var(--tv-tuo)', vb[2]/60)+righePattern('tv-righe-avv', 'var(--tv-avv)', vb[2]/60)+`</defs>`;
-  if(M.oltre) h+=oltrePath('tv-oltre', M.oltre, vb[2]);
+  if(M.oltre) h+=oltrePath('tv-oltre', M.oltre, vb[2])+oltreNomeSvg(M, vb[2]);   // L249-1: «Germania Est»
   /* con la terra oltre il confine, il contorno della terra è anche il CONFINE: una linea netta, più marcata */
   h+=`<path class="tv-terra" d="${M.sfondo}" fill="url(#tv-terra)" stroke="${M.oltre?'#2e2d20':'#4d4b33'}" stroke-width="${(vb[2]/(M.oltre?110:160)).toFixed(2)}" stroke-linejoin="round"/>`;
   h+=terraDipintaHtml(M, vb);   // L196-3: la terra dipinta sopra quella del codice (che resta il ripiego)

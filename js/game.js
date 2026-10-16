@@ -929,6 +929,7 @@ function guidaPartnerVoto(){
 function entraDaPartner(guida, rc){
   const pg=part(guida)||{};
   S.opposizione=false; S.governoAvversario=null; S.ministers=[];
+  delete S.f0Rientro;   // L237-2ter: di nuovo al governo (da partner); la scrive R2 se si riperde
   S.livello=2; S.occUltima=null; S.mesiAltoCap=0;
   S.dicastero=dicasteroDefault(S.personaggio&&S.personaggio.background);
   S.premier={ nome:nomePersona(), partito:guida, asse:(pg.asse||0), lealta:60 };
@@ -972,6 +973,13 @@ function rivaleGoverno(){
 /* fine mandato da ministro: il premier corre per la rielezione (il partito del premier: il tuo, o da partner quello che guida).
    Vince → continui ministro; perde → il ministro del proprio partito va all'opposizione da volto del partito (resti livello 2),
    il partner torna capo del suo partito all'opposizione (livello 3, la strada di goOpposizione: R2). */
+/* Il partner che lascia il livello 2 e torna capo del suo partito (livello 3): lo stato del dicastero si chiude come in diventaPremier.
+   Due chiamanti: R2 qui sotto (la coalizione del premier perde l'urna) e l'uscita dal governo della svolta del 1982 (L237-2quater,
+   partnerEsceDalGoverno). L237-2ter: la soglia del crollo riparte dalla forza al rientro (mai più severa di prima: f0Crollo). */
+function partnerTornaCapo(){
+  S.livello=3; S.premier=null; S.dicastero=null; S.capitale=null; S.prevSettore=null; S.silAvviso=null; S.premCrisiMesi=0; S.occUltima=null; S.mesiAltoCap=0;
+  if(REGOLA_F0RIENTRO) S.f0Rientro=Math.min(mioPartito().forza, S.forze[S.partito]||0);
+}
 function vinceIlGoverno(){ const g=(S.premier && S.premier.partito) || S.partito, w=rivaleGoverno(); return (S.forze[g]||0) >= (S.forze[(w||{}).id]||0); }
 function esitoElezioneMinistro(){
   maturaRP();
@@ -984,7 +992,7 @@ function esitoElezioneMinistro(){
     genAgenda(false); generaTitolo(); render(); commitSnap(); return;
   }
   if(partnerAttivo()){   // L237-2bis (R2): il partner torna capo del suo partito, all'opposizione (lo stato del livello 2 si chiude come in diventaPremier)
-    S.livello=3; S.premier=null; S.dicastero=null; S.capitale=null; S.prevSettore=null; S.silAvviso=null; S.premCrisiMesi=0; S.occUltima=null; S.mesiAltoCap=0;
+    partnerTornaCapo();
     return goOpposizione();   // vincitore() là = rivaleGoverno() qui: il governo ha perso, quindi il rivale supera il partito del premier e tutti gli altri
   }
   S.premier=null;
@@ -3180,6 +3188,14 @@ const SCENARIO_ISTITUZIONI = ['sistema','comeSiVince','coalizione','cadutaGovern
                               'congresso',           // L173-2: la Camera d'avvio del partito del Presidente (assente = nessun Congresso)
                               'sbarramento', 'sfiduciaCostruttiva',    // L107-2: la soglia dei seggi e l'art. 67 (assenti = come prima)
                               'spintaPresidenziale'];                  // L216-1: punti sul voto della presidenziale per anno (assente = nessuna)
+/* L249-1 · IL NOME DEL PAESE IN PARTITA: la porta che dichiara `nomePaese` (le porte di Bonn: «Germania Ovest») lo tiene finché la
+   mappa ha la terra `oltre` il confine — la RDT, che la tappa dell'unità (1990/10) toglie con `mappa:{oltre:null}`: dal mese
+   dell'unità il paese torna «Germania». Lo leggono i titoli della notte e dell'esito; il presente e le altre porte non cambiano. */
+function nomePaeseOra(){
+  var sc=(typeof SCENARI!=='undefined' && S && S.scenario) ? SCENARI[S.scenario] : null;
+  if(sc && sc.nomePaese && PAESE && PAESE.mappa && PAESE.mappa.oltre) return sc.nomePaese;
+  return (PAESE && PAESE.nome) || '';
+}
 function paeseConScenario(base, sc){
   if(!sc) return base;
   var ov={};
@@ -4109,6 +4125,34 @@ function snodoAutunno77OppDovuta(){  return typeof S!=='undefined' && S && S.era
    1988/8, 1989/11, pm_golfo 1991/1, pm_urss 1991/12). */
 function deCoal(id){ return Array.isArray(S.coalizione) && S.coalizione.includes(id); }
 function snodoSvolta82Dovuta(){    return typeof S!=='undefined' && S && S.era===LINEA_DE && S.livello===3 && !S.opposizione && S.deSvolta82==null && S.year===1982 && S.month===9 && ((S.partito==='de_spd' && deCoal('de_fdp')) || (S.partito==='de_fdp' && deCoal('de_spd'))); }
+/* L237-2quater (16/10, decisioni di Cowork) · GLI SNODI DEL MINORE VANNO AL PARTNER. Da partner (livello 2, `partnerAttivo()`) si
+   ricevono solo gli snodi scritti per il partito MINORE della coalizione: censiti, è uno solo, «Il cambio di campo» della FDP
+   (SVOLTA82FDP_EV). Quelli scritti per chi guida (Spiegel '62, recessione '66, spia '74, la svolta della SPD, i missili, l'unità, il
+   marco, la capitale) restano al capo del governo; le aule `_OPP` all'opposizione. Iniezione in testa al ramo del livello 2 di genAgendaRamo (il partner non arriva alla riga degli snodi di governo).
+   Le tre scelte da partner (rami in data.js, guardati da svoltaDaPartner()): (a) il premier diventa CDU senza urne, la legislatura
+   continua (svoltaPartnerCambio); (b) come da capo; (c) al livello 2 non c'è una strada per l'urna anticipata (l'urna del partner è
+   solo quella a scadenza, esitoElezioneMinistro): il partner esce dal governo e torna capo all'opposizione del governo SPD, senza
+   scioglimento (partnerEsceDalGoverno). Interruttore REGOLA_SNODI_PARTNER (`let`), rimesso dal banco in __reseed
+   (`__BANCO_SNODI_PARTNER_OFF` = prima). */
+let REGOLA_SNODI_PARTNER=true;
+function snodoSvolta82PartnerDovuta(){ return REGOLA_SNODI_PARTNER && typeof S!=='undefined' && S && S.era===LINEA_DE && partnerAttivo() && S.deSvolta82==null && S.year===1982 && S.month===9 && S.partito==='de_fdp' && S.premier.partito==='de_spd'; }
+function svoltaDaPartner(){ return REGOLA_SNODI_PARTNER && partnerAttivo(); }
+function svoltaPartnerCambio(){
+  rompiPartner('de_spd');
+  S.premier=generaPremier('de_cdu'); S.silAvviso=null; S.premCrisiMesi=0;
+  installaProfilo(GOVERNI_PROFILI[profByAsse(S.premier.asse)]);   // come entraDaPartner: la politica nazionale è del premier
+  if(S.coalizione.indexOf('de_cdu')<0) S.coalizione.push('de_cdu');
+  S.minoranza=seggiCoalizione(S.coalizione,S.seggi)<50;
+  applicaTappaOra('1982/10');   // le liste del cambio di campo valgono da subito (con la coalizione già nuova, nessuno esce)
+}
+function partnerEsceDalGoverno(){
+  var gov=part(S.premier.partito), tim=S.turnInMandate;
+  partnerTornaCapo();
+  entraOpposizione(gov);
+  S.turnInMandate=tim;   // niente urne: la legislatura è quella di prima (entraOpposizione ne apre una nuova solo dopo un voto)
+  S.bloccoAtteso=bloccoQuota();
+  applicaTappaOra('1982/10');
+}
 function snodoSvolta82OppDovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_DE && S.livello===3 && S.opposizione && S.deSvolta82Opp==null && S.partito==='de_cdu' && S.year===1982 && S.month===9 && deCoal('de_fdp'); }
 function snodoMissili83Dovuta(){    return typeof S!=='undefined' && S && S.era===LINEA_DE && S.livello===3 && !S.opposizione && S.deMissili83==null && S.year===1983 && S.month>=11; }
 function snodoMissili83OppDovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_DE && S.livello===3 && S.opposizione && S.deMissili83Opp==null && S.deMissili83==null && S.year===1983 && S.month>=11; }
@@ -6345,6 +6389,7 @@ function genAgendaRamo(first){
     return;
   }
   if(S.livello===2){   // MINISTRO: agenda di SETTORE + politica interna + l'occasione (la salita). Tetto 2 carte.
+    if(!first && typeof snodoSvolta82PartnerDovuta==='function' && snodoSvolta82PartnerDovuta()){ S.agenda.push({kind:'event', data:SVOLTA82FDP_EV, resolved:false}); agendaSolo(); return; }   // L237-2quater: lo snodo del minore al partner, la carta del mese (prima dell'occasione, come gli snodi al livello 3)
     const occ=pickOccasione();
     if(occ){ S.agenda.push(occ); agendaSolo(); return; }          // l'occasione è LA carta del mese
     const inq=aggiornaInchiesta();                  // ti bersaglia sempre (a livello 2 non hai ministri da scaricare)
@@ -7377,7 +7422,7 @@ function avanzaMese(){
   }
   if(S.opposizione){                                              // all'opposizione: niente crisi/insolvenza/sfiducia tue
     S.rivolta=null;                                               // L72-1: il conto alla rovescia e' della TUA linea di bilancio; all'opposizione le leve non sono tue
-    if(S.forze[S.partito] < sogliaCrollo(mioPartito().forza)){ return gameOver('congresso'); }   // forza crollata: il partito ti scarica (la soglia: sogliaCrollo, L155-2)
+    if(S.forze[S.partito] < sogliaCrollo(f0Crollo())){ return gameOver('congresso'); }   // forza crollata: il partito ti scarica (la soglia: sogliaCrollo, L155-2; f0Crollo: il partner che rientra, L237-2ter)
     if(urnaScadenzaOra()){ if(sfidaAttiva()) return apriPrimaria('vigilia'); return election(); }   // a fine mandato: prima la primaria (se la sfida è viva), poi sfidi
     /* L91-2 — la vita del governo avversario: quanti mesi ha, e la sua stampella. Nell'ordine: prima invecchia
        (l'anno di grazia si conta da qui), poi il logorio dell'accordo, poi la ricerca di un partner se serve. */
@@ -7706,7 +7751,7 @@ function renderAttesa(){
   const truffaNota = (snodoTruffaAttivo() && S.leggeTruffa==='approvata')
     ? `<div class="mtext" style="color:var(--acc-ink);border-left:2px solid var(--acc);padding-left:10px">${T('Hai approvato il premio di maggioranza: se il tuo blocco supera il 50% dei voti, ottiene il 64,4% dei seggi — se manchi, la legge ti si ritorce contro.')}</div>`
     : '';
-  document.getElementById('modal').innerHTML=`<div class="mt"><div class="kicker">${T(PAESE.nome)} · ${T(urnaLegislativa()?'Legislative anticipate':(S.elezioniAnticipate?'Elezioni anticipate':'Elezioni'))} ${S.year}</div><h2>${T('La chiusura della campagna')}</h2></div>
+  document.getElementById('modal').innerHTML=`<div class="mt"><div class="kicker">${T(nomePaeseOra())} · ${T(urnaLegislativa()?'Legislative anticipate':(S.elezioniAnticipate?'Elezioni anticipate':'Elezioni'))} ${S.year}</div><h2>${T('La chiusura della campagna')}</h2></div>
     <div class="mtext">${clima} ${T(stakesPersonali())}</div>
     ${truffaNota}
     <div class="mtext" style="color:var(--mut2)">${T('L\'ultima parola è tua. Domani si vota.')}</div>
@@ -7764,7 +7809,7 @@ function notteSuonaEsito(){
   if(typeof taci==='function') taci('urne');
   var onda=NOTTE.onde[SD_NOTTE.length-1], vinta;
   var quota;   // L118-1: la stessa lettura, in numero — oltre 55 la vittoria è LARGA e la piazza suona le campane
-  if(NOTTE.sistema==='parlamentare'){ var _bl=(typeof bloccoElettorale==='function')?bloccoElettorale():bloccoIds(); quota=_bl.reduce(function(s,id){return s+(onda[id]||0);},0); vinta=quota>=50; }
+  if(NOTTE.sistema==='parlamentare'){ quota=quotaNotte(onda); vinta=quota>=50; }   // L247-1: senza coalizione i seggi del tuo partito + credBonus, come l'esito
   else { quota=onda.myPct; vinta=(onda.myPct>50); }
   if(typeof suona==='function'){ suona(vinta?'esito':'esito_no'); suona(vinta?(quota>=55?suonoPreferito('campane','folla'):'folla'):'fischi'); }   // L116-1: la piazza, sotto l'esito
 }
@@ -7807,15 +7852,30 @@ function concludiNotte(){
   }
 }
 /* Il MARGINE come spettro (fase B): segno = vittoria/sconfitta, |entità| = quanto netta. Parlamentare: il TUO blocco
-   vs 50. Candidato: la tua percentuale vs 50. Solo lettura del `vero` congelato — nessuna casualità nuova. */
+   vs 50. Candidato: la tua percentuale vs 50. Solo lettura del `vero` congelato — nessuna casualità nuova.
+   L247-1 (16/10): nel parlamentare SENZA coalizione (Regno Unito e porte uk*) il margine conta quello che conta esitoSeggi in
+   concludiNotte — i seggi del tuo partito + credBonus() — e non bloccoIds(): col blocco un partito piccolo poteva avere il margine
+   di una vittoria e l'esito di una sconfitta. Lo stesso numero lo leggono lo sfondo e il suono della proclamazione (quotaNotte). */
 function calcMargineEsito(sistema, vero){
   let m, win;
-  if(sistema==='parlamentare'){ const bloc=bloccoIds().reduce(function(s,id){return s+(vero.seggi[id]||0);},0); m=bloc-50; win=bloc>=50; }
+  if(sistema==='parlamentare' && notteSenzaCoalizione()){ const q=quotaNotte(vero.seggi); m=q-50; win=q>=50; }
+  else if(sistema==='parlamentare'){ const bloc=bloccoIds().reduce(function(s,id){return s+(vero.seggi[id]||0);},0); m=bloc-50; win=bloc>=50; }
   else { m=(vero.myPct||0)-50; win=!!vero.win; }
   const a=Math.abs(m); let tag;
   if(win) tag = a>=10?'trionfo':(a>=4?'netta':'misura');
   else    tag = a>=10?'valanga':(a>=4?'sconfittaNetta':'sconfittaMisura');
   return { m:Math.round(m), win:win, tag:tag, sistema:sistema };
+}
+/* L247-1 · la notte del parlamentare senza coalizione: un interruttore e due lettori puri. REGOLA_MARGINE_SEGGI spenta = il gioco
+   di prima (margine, sfondo e suono dal blocco; «Governo» sulla tua riga anche da sconfitto); la rimette il banco in __reseed
+   (globalThis.__BANCO_MARGINE_SEGGI_OFF = prima). L'esito non passa di qui: lo decide esitoSeggi in concludiNotte, sempre così. */
+let REGOLA_MARGINE_SEGGI=true;
+function notteSenzaCoalizione(){ return REGOLA_MARGINE_SEGGI && !PAESE.coalizione; }
+/* il blocco che la notte mostra e il numero che la decide: senza coalizione il tuo partito da solo (+ credBonus nel numero) */
+function bloccoNotte(){ return notteSenzaCoalizione() ? [S.partito] : ((typeof bloccoElettorale==='function')?bloccoElettorale():bloccoIds()); }
+function quotaNotte(seggi){
+  const q=bloccoNotte().reduce(function(s,id){return s+(seggi[id]||0);},0);
+  return notteSenzaCoalizione() ? q+credBonus() : q;
 }
 /* Solo gli ESTREMI memorabili lasciano traccia (niente flood): trionfo e disfatta → fatto datato + UN contatore. */
 function applicaMargineBio(mg){
@@ -7855,7 +7915,7 @@ function renderNotte(){
   if(!NOTTE) return;
   const ultima=NOTTE.stadio>=SD_NOTTE.length-1;
   const onda=NOTTE.onde[NOTTE.stadio];
-  const kicker=`${T(PAESE.nome)} · ${T(urnaLegislativa()?'Legislative anticipate':(S.elezioniAnticipate?'Elezioni anticipate':'Elezioni'))} ${S.year}`;
+  const kicker=`${T(nomePaeseOra())} · ${T(urnaLegislativa()?'Legislative anticipate':(S.elezioniAnticipate?'Elezioni anticipate':'Elezioni'))} ${S.year}`;
   const sulTavolo=(typeof notteSuTavolo==='function') && notteSuTavolo();   // L113-5: dove c'è il tavolo la notte sta in un foglio in basso, sopra si vede il paese
   const body = NOTTE.sistema==='parlamentare' ? notteSeggi(onda, ultima, sulTavolo) : notteCandidato(onda);
   const narr = notteNarr(NOTTE.stadio);   // la riga di narrazione (fase B): tensione/respiro secondo l'andamento
@@ -7873,7 +7933,7 @@ function renderNotte(){
   /* L9-1 — lo SFONDO della notte: attesa (stadio 0) / spoglio (in corso) / vittoria|sconfitta (proclamazione). Vinta =
      il blocco tocca 50 (parlamentare) o la mia % supera 50 (candidato); solo lettura del VERO congelato, non lo decide. */
   var vinta=false;
-  if(ultima){ if(NOTTE.sistema==='parlamentare'){ var _bl=(typeof bloccoElettorale==='function')?bloccoElettorale():bloccoIds(); vinta=_bl.reduce(function(s,id){return s+(onda[id]||0);},0)>=50; } else { vinta=(onda.myPct>50); } }
+  if(ultima){ if(NOTTE.sistema==='parlamentare'){ vinta=quotaNotte(onda)>=50; } else { vinta=(onda.myPct>50); } }   // L247-1: lo stesso numero di notteSuonaEsito
   var scN=(typeof scenaNotte==='function')?scenaNotte(NOTTE.stadio, ultima, vinta):null;
   var rvN=(ultima && typeof ritrattoVivoHtml==='function') ? ritrattoVivoHtml({tono:(vinta?'trionfo':'sconfitta')}) : '';   // L178-3: il ritratto vivo quando la notte finisce, accanto al risultato
   var mbg=scenaMomentoHtml(scN, {sfondo:true});   // L127-1: lo sfondo con la clip sotto il velo (la scelta e il perché in DESIGN-MOVIMENTO § L127-1)
@@ -7945,8 +8005,8 @@ function notteSeggi(shown, ultima, compatto){
   const sd=ultima?0:1;   // solo per l'emiciclo finale (compat: la vecchia firma usava sd)
   /* F4 — il blocco mostrato è quello che DECIDE: nel '53 con la legge approvata è l'APPARENTAMENTO (bloccoElettorale),
      non la sola coalizione. Guardi salire la riga che vale davvero: la soglia si vive, non si legge dopo. */
-  const bloc=(typeof bloccoElettorale==='function')?bloccoElettorale():bloccoIds();
-  const blocTot=bloc.reduce((s,id)=>s+(shown[id]||0),0), reached=blocTot>=50;
+  const bloc=bloccoNotte();   // L247-1: senza coalizione (Regno Unito) il blocco che decide è il tuo partito da solo
+  const blocTot=bloc.reduce((s,id)=>s+(shown[id]||0),0), reached=quotaNotte(shown)>=50;   // la barra verde quando l'esito è vinto (+ credBonus)
   const sorted=[...ps].sort((a,b)=>shown[b.id]-shown[a.id]);
   /* L113-5 · sul tavolo il foglio è più basso: si vedono i primi quattro partiti (e il tuo), gli altri dietro «Tutti i partiti».
      Lo stato aperto/chiuso vive nel transitorio NOTTE, non in S. */
@@ -8223,7 +8283,7 @@ function renderTrattativa(){
   const kicker = voto?`${T(urnaLegislativa()?'Legislative anticipate':(S.elezioniAnticipate?'Elezioni anticipate':'Elezioni'))} ${S.year}` : T(ctx==='rinnovo'?'Nuovo mandato':'Formazione del governo');
   const titolo = T(voto?'Trattativa per il nuovo governo' : ctx==='rinnovo'?'Ricostruisci la maggioranza' : 'Forma la tua maggioranza');
   const mgFrase = (voto && S.margineEsito) ? `<b>${margineFraseTrattativa(S.margineEsito)}</b> ` : '';   // fase B: il verdetto delle urne prima della trattativa
-  document.getElementById('modal').innerHTML=`<div class="mt"><div class="kicker">${T(PAESE.nome)} · ${kicker}</div><h2>${titolo}</h2></div>
+  document.getElementById('modal').innerHTML=`<div class="mt"><div class="kicker">${T(nomePaeseOra())} · ${kicker}</div><h2>${titolo}</h2></div>
     <div class="mtext">${mgFrase}${T('Servono <b>50 seggi</b> su 100. La tua coalizione ha')} <b class="mono" style="color:${reached?'var(--pos)':'var(--acc)'}">${total}</b> ${T('seggi')}${cb?` <b class="mono" style="color:${cb>=0?'var(--pos)':'var(--neg)'}">${cb>=0?'+':''}${cb}</b> ${T('dalla credibilità')} → <b class="mono">${Math.round(eff)}</b>`:''}.
       <div class="bar" style="margin-top:8px"><i style="width:${clamp(eff,2,100)}%;background:${reached?'var(--pos)':'var(--acc)'}"></i></div></div>
     <div style="padding:0 18px">${memberRows}</div>
@@ -8460,7 +8520,7 @@ function salvezzaRiga(){
 function esitoSeggi(win, total){
   if(urnaLegislativa()) return esitoLegislativa(win, total);   // L104-2
   const seggi=S.seggi, ps=[...PAESE.partiti].sort((a,b)=>seggi[b.id]-seggi[a.id]);
-  const rows=ps.map(p=>{ const gov=S.coalizione.includes(p.id);
+  const rows=ps.map(p=>{ const gov=S.coalizione.includes(p.id) && (win || !notteSenzaCoalizione());   // L247-1: senza coalizione, da sconfitto la tua riga non dice «Governo»
     return `<div style="padding:6px 0">
       <div style="display:flex;justify-content:space-between;font-size:13px"><span style="font-weight:${gov?700:500}">${T(p.nome)} ${gov?'<span class="chip" style="background:var(--acc-bg);color:var(--acc-ink)">'+T('Governo')+'</span>':''}</span><span class="mono">${seggi[p.id]}</span></div>
       <div class="bar"><i style="width:${clamp(seggi[p.id],2,100)}%;background:${gov?'var(--acc)':'var(--mut2)'}"></i></div></div>`; }).join('');
@@ -8550,6 +8610,15 @@ function nextMandate(){
    Ora per chi nasce piccolo la soglia è il 60% della forza di porta: max(f0·0,5; min(5; f0·0,6)) — IDENTICA per f0 ≥ 8,33 (quindi per
    tutti i partiti grandi, per costruzione). Pura: la legge anche lo strumento di misura (misura-l143-5.js, variante `sprima`). */
 function sogliaCrollo(f0){ return Math.max(f0*0.5, Math.min(5, f0*0.6)); }
+/* L237-2ter (16/10, Cowork) · IL PARTNER CHE RIENTRA ALL'OPPOSIZIONE. Da partner (L237-2bis) la forza segue il decennio, e se la
+   coalizione del premier perde il partner torna capo all'opposizione (R2, esitoElezioneMinistro) spesso già sotto sogliaCrollo(f0):
+   la FDP di de1980 chiudeva al congresso il mese dopo 20/20. Sulla SOLA strada R2 la soglia riparte dalla forza al rientro, come una
+   porta nuova all'opposizione: S.f0Rientro = min(forza di porta, forza al rientro) — campo facoltativo, assente = la forza di porta
+   (i salvataggi di prima e ogni altra strada: capo sconfitto, opposizione di partenza, salvezza L153-1, costruttiva). Lo scrive R2,
+   lo tolgono i ritorni al governo (tornaAlGoverno, entraDaPartner). REGOLA_F0RIENTRO spenta = il gioco di prima (il banco:
+   globalThis.__BANCO_F0RIENTRO_OFF in __reseed). */
+let REGOLA_F0RIENTRO=true;
+function f0Crollo(){ return (REGOLA_F0RIENTRO && S.f0Rientro!=null) ? S.f0Rientro : mioPartito().forza; }
 function salvezzaOpp(){ return !!S && !!S.opposizione && (S.salvezzeOpp||0)<1 && S.forzaUrnaPrec!=null && (S.forze[S.partito]||0) > S.forzaUrnaPrec; }
 function segnaForzaUrna(){ S.forzaUrnaPrec=(S.forze && S.forze[S.partito]) || 0; }
 function segnaSalvezza(){ S.salvezzeOpp=(S.salvezzeOpp||0)+1; S.credibilita=Math.max(0,(S.credibilita||0)-10); }   // DOPO entraOpposizione, che la azzera a 50: 40 invece di 50 (il costo misurato in L143-5). La chiama anche il banco.
@@ -8616,6 +8685,7 @@ function condannaLieve(){
 /* Torna al governo (dopo la nomina dei ministri dall'opposizione): nessuno strascico dall'era avversaria. */
 function tornaAlGoverno(mins){
   S.ministers=mins; S.opposizione=false; S.governoAvversario=null;
+  delete S.f0Rientro;   // L237-2ter: al governo la soglia del rientro da partner non vale più
   if(typeof parla==='function') parla('voce-insediamento');   // L218-4: torni capo del governo (dalle urne o con la sfiducia costruttiva); l'altro punto è diventaPremier
   /* L108-1 · il rientro della sfiducia costruttiva: niente urne, niente mandato nuovo. Il governo è la cricca che ha eletto
      il Cancelliere, e la legislatura è quella dell'avversario caduto (turnInMandate conservato). */

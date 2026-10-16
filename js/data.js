@@ -1467,7 +1467,7 @@ const SCENARI = {
      riportano il Bundestag dei libri.
      ============================================================================================================ */
   de1950: {
-    id:'de1950', era:LINEA_DE, nome:'Germania 1950', anno:1950, paese:'germania', territoriDEpoca:true,   /* L182-3 (D167): territori di quel paese e di quel decennio: il giro sul tavolo esce */
+    id:'de1950', era:LINEA_DE, nome:'Germania Ovest 1950', nomePaese:'Germania Ovest', sottotitolo:"Repubblica Federale · capitale Bonn · la Germania Est è un altro stato", anno:1950, paese:'germania', territoriDEpoca:true,   /* L182-3 (D167): territori di quel paese e di quel decennio: il giro sul tavolo esce */
     turnMandato: 1,
     sistema: 'parlamentare', comeSiVince: 'parlamentare', coalizione: true, cadutaGoverno: true,
     sfiduciaCostruttiva: true, sbarramento: 5,
@@ -1497,11 +1497,12 @@ const SCENARI = {
     logorioEra: 0.012,                          // come le altre porte del '50
     valuta: VALUTA_MARCO,
     quotaSpesa: 0.30,                           // ⚠ la scheda non la dà: ~30% è l'ordine della spesa federale e dei Länder di quegli anni. Da confermare.
-    intro: "Germania, 1950. La Repubblica ha un anno, la capitale è una città universitaria sul Reno, e il Cancelliere governa con un voto di scarto.",
+    intro: "Germania Ovest, 1950. La Repubblica ha un anno, la capitale è una città universitaria sul Reno, e il Cancelliere governa con un voto di scarto.",
     contesto: [
-      "Germania, 1950. Le città sono ancora macerie, ma il marco nuovo ha riempito le vetrine in una notte: la ricostruzione corre più in fretta di chiunque avesse previsto.",
+      "Germania Ovest, 1950. Le città sono ancora macerie, ma il marco nuovo ha riempito le vetrine in una notte: la ricostruzione corre più in fretta di chiunque avesse previsto.",
       "Dieci milioni di profughi dall'Est cercano casa e lavoro. Un disoccupato su dieci, e la metà del paese dall'altra parte di un confine che nessuno riconosce.",
       "Il Cancelliere governa con i liberali e con un piccolo partito nazionale; l'opposizione socialdemocratica vuole l'unità prima dell'Occidente.",
+      "Il tuo paese è la Repubblica Federale, capitale Bonn. Oltre il confine c'è la Germania Est, uno stato a partito unico dove non si vota liberamente.",   // L249-1: la riga d'avvio, RFT = tu, DDR = altro stato
     ],
   },
   /* ============================================================================================================
@@ -1519,7 +1520,7 @@ const SCENARI = {
      quelle vere, la convenzione delle porte parlamentari).
      ============================================================================================================ */
   de1960: {
-    id:'de1960', era:LINEA_DE, nome:'Germania 1960', anno:1960, paese:'germania', territoriDEpoca:true,   /* L182-3 (D167): territori di quel paese e di quel decennio: il giro sul tavolo esce */
+    id:'de1960', era:LINEA_DE, nome:'Germania Ovest 1960', nomePaese:'Germania Ovest', sottotitolo:"Repubblica Federale · capitale Bonn · la Germania Est è un altro stato", anno:1960, paese:'germania', territoriDEpoca:true,   /* L182-3 (D167): territori di quel paese e di quel decennio: il giro sul tavolo esce */
     turnMandato: 3,
     sistema: 'parlamentare', comeSiVince: 'parlamentare', coalizione: true, cadutaGoverno: true,
     sfiduciaCostruttiva: true, sbarramento: 5,
@@ -1556,11 +1557,12 @@ const SCENARI = {
     logorioEra: 0.012,
     valuta: VALUTA_MARCO,
     quotaSpesa: 0.30,                           // ⚠ come de1950: da confermare
-    intro: "Germania, 1960. Il Cancelliere ha la maggioranza assoluta e ottantaquattro anni; il paese ha il pieno impiego e cerca braccia fuori dai suoi confini.",
+    intro: "Germania Ovest, 1960. Il Cancelliere ha la maggioranza assoluta e ottantaquattro anni; il paese ha il pieno impiego e cerca braccia fuori dai suoi confini.",
     contesto: [
-      "Germania, 1960. Il miracolo è diventato abitudine: un'automobile, un frigorifero, le vacanze al Sud. La disoccupazione non esiste quasi più.",
+      "Germania Ovest, 1960. Il miracolo è diventato abitudine: un'automobile, un frigorifero, le vacanze al Sud. La disoccupazione non esiste quasi più.",
       "A Berlino il confine è ancora aperto, e ogni giorno migliaia di persone passano da Est a Ovest per restare.",
       "Il Cancelliere governa da solo con i voti del 1957; il suo ministro dell'economia aspetta il suo turno, e l'opposizione socialdemocratica ha appena rinunciato al marxismo.",
+      "Il tuo paese è la Repubblica Federale, capitale Bonn. Oltre il confine c'è la Germania Est, uno stato a partito unico dove non si vota liberamente.",   // L249-1: la riga d'avvio, RFT = tu, DDR = altro stato
     ],
   },
   /* ============================================================================================================
@@ -1600,7 +1602,7 @@ const SCENARI = {
      con due basi diverse la stessa riga darebbe due anni diversi.
      ============================================================================================================ */
   de1970: {
-    id:'de1970', era:LINEA_DE, nome:'Germania 1970', anno:1970, paese:'germania', territoriDEpoca:true,   /* L182-3 (D167): territori di quel paese e di quel decennio: il giro sul tavolo esce */
+    id:'de1970', era:LINEA_DE, nome:'Germania Ovest 1970', nomePaese:'Germania Ovest', sottotitolo:"Repubblica Federale · capitale Bonn · la Germania Est è un altro stato", anno:1970, paese:'germania', territoriDEpoca:true,   /* L182-3 (D167): territori di quel paese e di quel decennio: il giro sul tavolo esce */
     turnMandato: 2,
     sistema: 'parlamentare', comeSiVince: 'parlamentare', coalizione: true, cadutaGoverno: true,
     sfiduciaCostruttiva: true, sbarramento: 5,
@@ -1627,11 +1629,12 @@ const SCENARI = {
     logorioEra: 0.008,                          // L140-3 (28/9, D51, deciso da Giacomo): era 0,012. L138-3: la SPD perdeva il 1976 20/20 per il LOGORIO della porta (−60 punti nella finestra contro un'economia netta a favore); senza lo shock petrolifero lo perdeva 17/20. A 0,008 la seconda urna si tiene 8/20 (la storia: −3,2 punti e il governo resta). I salvataggi avviati tengono il loro valore.
     valuta: VALUTA_MARCO,
     quotaSpesa: 0.30,                           // ⚠ come de1950 e de1960: da confermare
-    intro: "Germania, 1970. Per la prima volta in vent'anni il Cancelliere è socialdemocratico, e governa con i liberali con dodici seggi di margine.",
+    intro: "Germania Ovest, 1970. Per la prima volta in vent'anni il Cancelliere è socialdemocratico, e governa con i liberali con dodici seggi di margine.",
     contesto: [
-      "Germania, 1970. Il paese è ricco e inquieto: le università sono ancora in fermento, e la disoccupazione non arriva all'uno per cento.",
+      "Germania Ovest, 1970. Il paese è ricco e inquieto: le università sono ancora in fermento, e la disoccupazione non arriva all'uno per cento.",
       "Il nuovo governo vuole parlare con l'Est: con Mosca, con Varsavia, perfino con l'altra Germania. L'opposizione la chiama una svendita.",
       "L'Unione cristiana resta il primo partito e siede all'opposizione per la prima volta; nella sua ala destra c'è chi aspetta che i liberali cambino campo.",
+      "Il tuo paese è la Repubblica Federale, capitale Bonn. Oltre il confine c'è la Germania Est, uno stato a partito unico dove non si vota liberamente.",   // L249-1: la riga d'avvio, RFT = tu, DDR = altro stato
     ],
   },
   /* ============================================================================================================
@@ -1655,7 +1658,7 @@ const SCENARI = {
      1980-81 le leggono tutte e due le porte.
      ============================================================================================================ */
   de1980: {
-    id:'de1980', era:LINEA_DE, nome:'Germania 1980', anno:1980, paese:'germania', territoriDEpoca:true,   /* L182-3 (D167): territori di quel paese e di quel decennio: il giro sul tavolo esce */
+    id:'de1980', era:LINEA_DE, nome:'Germania Ovest 1980', nomePaese:'Germania Ovest', sottotitolo:"Repubblica Federale · capitale Bonn · la Germania Est è un altro stato", anno:1980, paese:'germania', territoriDEpoca:true,   /* L182-3 (D167): territori di quel paese e di quel decennio: il giro sul tavolo esce */
     turnMandato: 1,
     sistema: 'parlamentare', comeSiVince: 'parlamentare', coalizione: true, cadutaGoverno: true,
     sfiduciaCostruttiva: true, sbarramento: 5,
@@ -1683,11 +1686,12 @@ const SCENARI = {
     logorioEra: 0.008,                          // come de1970 dopo D51 (scheda §0): da misurare
     valuta: VALUTA_MARCO,
     quotaSpesa: 0.30,                           // ⚠ come le porte tedesche prima: da confermare
-    intro: "Germania, 1980. Il Cancelliere socialdemocratico va verso le urne d'autunno da favorito, ma i liberali che lo tengono al governo guardano già dall'altra parte.",
+    intro: "Germania Ovest, 1980. Il Cancelliere socialdemocratico va verso le urne d'autunno da favorito, ma i liberali che lo tengono al governo guardano già dall'altra parte.",
     contesto: [
-      "Germania, 1980. Il secondo shock del petrolio morde: la crescita si ferma, e i disoccupati tornano verso il milione.",
+      "Germania Ovest, 1980. Il secondo shock del petrolio morde: la crescita si ferma, e i disoccupati tornano verso il milione.",
       "Nelle piazze il movimento per la pace si oppone ai missili che la NATO vuole installare; nei comuni i Verdi raccolgono i primi seggi.",
       "Socialdemocratici e liberali governano da più di dieci anni. L'Unione cristiana è il primo partito e aspetta: basta che i liberali cambino campo.",
+      "Il tuo paese è la Repubblica Federale, capitale Bonn. Oltre il confine c'è la Germania Est, uno stato a partito unico dove non si vota liberamente.",   // L249-1: la riga d'avvio, RFT = tu, DDR = altro stato
     ],
   },
   /* ============================================================================================================
@@ -1708,7 +1712,7 @@ const SCENARI = {
      15 volte su 20; i Verdi restano nel roster, nei seggi e nelle urne (le misure sono nella scheda).
      ============================================================================================================ */
   de1990: {
-    id:'de1990', era:LINEA_DE, nome:'Germania 1990', anno:1990, paese:'germania', territoriDEpoca:true,   /* L182-3 (D167): territori di quel paese e di quel decennio: il giro sul tavolo esce */
+    id:'de1990', era:LINEA_DE, nome:'Germania 1990', sottotitolo:"Si parte nella Repubblica Federale, mesi prima dell'unità", anno:1990, paese:'germania', territoriDEpoca:true,   /* L182-3 (D167): territori di quel paese e di quel decennio: il giro sul tavolo esce */
     turnMandato: 3,
     sistema: 'parlamentare', comeSiVince: 'parlamentare', coalizione: true, cadutaGoverno: true,
     sfiduciaCostruttiva: true, sbarramento: 5,
@@ -1740,6 +1744,7 @@ const SCENARI = {
       "Germania, gennaio 1990. A Berlino si passa da una parte all'altra senza più visto; a Lipsia il lunedì si scende ancora in piazza, e adesso si grida “un popolo solo”.",
       "L'economia dell'Ovest corre come non faceva da anni. Quella dell'Est nessuno sa quanto vale: a marzo l'Est vota libero per la prima volta, e tutti parlano del marco.",
       "L'Unione cristiana governa con i liberali dal 1982. I socialdemocratici avvertono che l'unità costerà cara, e i sondaggi per ora danno loro ragione.",
+      "Il tuo paese è la Repubblica Federale, capitale Bonn. Oltre il confine c'è ancora la Germania Est: fra pochi mesi le due Germanie saranno una sola.",   // L249-1: la riga d'avvio, mesi prima dell'unità
     ],
   },
   /* ============================================================================================================
@@ -5244,7 +5249,7 @@ const BEAT_LEGGERI = [
      tedesca del 1950 è la fetta di D197 dopo uk1970 (sedici leggeri, 8-11 vivi a un mese qualunque). Cond larghe apposta:
      a un mese qualunque ne vivono 13-19. Effetti zero, G5 (niente nomi, niente marchi, niente titoli di trasmissioni), niente G8. */
   {id:'lgde50_tessere', era:'de1950', registro:'leggero', cond:()=>S.year===1950&&S.month>=5&&S.month<=7, kick:'Il paese', t:'Senza bollini', text:'Al negozio di alimentari si paga e basta: anche lo zucchero, l\'ultimo, si compra senza la tessera e senza ritagliare il bollino. Le nonne tengono le vecchie tessere nel cassetto della credenza, non si sa mai. I bambini non sanno già più che cosa fosse la fila col foglio in mano.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
-  {id:'lgde50_caffe', era:'de1950', registro:'leggero', cond:()=>S.year<=1952||(S.year===1953&&S.month<=8), kick:'Il paese', t:'Il caffè di contrabbando', text:'Lungo il confine col Belgio, vicino ad Aquisgrana, il caffè passa di notte nei boschi, nelle gomme e nei serbatoi delle macchine: in Germania la tassa lo rende un lusso. Le donne del paese sanno a quale porta bussare per un pacchetto. I doganieri, a volte, bussano alla stessa porta.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  {id:'lgde50_caffe', era:'de1950', registro:'leggero', cond:()=>S.year<=1952||(S.year===1953&&S.month<=8), kick:'Il paese', t:'Il caffè di contrabbando', text:'Lungo il confine col Belgio, vicino ad Aquisgrana, il caffè passa di notte nei boschi, nelle gomme e nei serbatoi delle macchine: in Germania Ovest la tassa lo rende un lusso. Le donne del paese sanno a quale porta bussare per un pacchetto. I doganieri, a volte, bussano alla stessa porta.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
   {id:'lgde50_tavolino', era:'de1950', registro:'leggero', cond:()=>S.year>=1951, kick:'Il paese', t:'Il tavolino a forma di rene', text:'Nei salotti rifatti entra un tavolino basso col piano a forma di rene e le gambe sottili e storte, accanto a una lampada a stelo con tre bracci colorati. Le tende hanno disegni geometrici, la poltrona è imbottita di gommapiuma. La vecchia credenza scura finisce in cantina.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
   {id:'lgde50_scooter', era:'de1950', registro:'leggero', cond:()=>S.year>=1951&&S.year<=1958, kick:'Il paese', t:'Lo scooter della domenica', text:'Chi non può ancora permettersi la macchina compra lo scooter: la domenica lui guida col casco di cuoio, lei siede di lato dietro, col foulard annodato sotto il mento e il cestino della merenda sulle ginocchia. Ai laghi i parcheggi sono pieni di scooter in fila. La prima macchina, dicono, l\'anno prossimo.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
   {id:'lgde50_microvettura', era:'de1950', registro:'leggero', cond:()=>S.year>=1955&&S.year<=1961, kick:'Il paese', t:'La macchina che si apre davanti', text:'Per le strade girano macchine piccolissime a due posti, con la porta che si apre sul davanti, tutta intera, col volante attaccato; altre sembrano la cabina di un aereo, coi passeggeri uno dietro l\'altro. Costano poco più di una moto e tengono fuori la pioggia. Quattro ragazzi bastano a sollevarne una per spostarla dal parcheggio.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
@@ -7912,7 +7917,7 @@ const GIRO_SCENE=[
        {u:1, l:'La scuola sì, ma con un educatore del comune', e:'I genitori sono più tranquilli; i ragazzi dicono che volevano altro', f:()=>{ gd('cetomedio',1); gd('giovani',-1); }},
        {u:-1, l:'Ci sono già le parrocchie e i circoli sportivi', e:'I parroci approvano; nel cortile qualcuno ripone la chitarra', f:()=>{ gd('cattolici',1); }} ]},
  {id:'gde70_vietnamiti', era:'de1970', paesi:['germania'], kind:'giro', ruolo:'governo', tipo:'citta', cond:()=>S.year>=1979,
-  t:'Le famiglie arrivate dal mare', text:'Gli aerei portano in Germania i profughi vietnamiti scappati su barche da pesca, raccolti nei campi e in mare, e la città ne accoglie qualche centinaio in una vecchia caserma: %TERR ti %TV{ha|hanno} chiesto di essere all\'arrivo, e i volontari ti aspettano con le coperte e un interprete.',
+  t:'Le famiglie arrivate dal mare', text:'Gli aerei portano in Germania Ovest i profughi vietnamiti scappati su barche da pesca, raccolti nei campi e in mare, e la città ne accoglie qualche centinaio in una vecchia caserma: %TERR ti %TV{ha|hanno} chiesto di essere all\'arrivo, e i volontari ti aspettano con le coperte e un interprete.',
   ch:[ {u:2, costo:{debito:0.1}, l:'Un contributo federale per le case e i corsi di lingua', e:'I volontari tirano il fiato; il conto finisce nel bilancio di Bonn', f:()=>{ gd('cattolici',1); if(S.ind) S.ind.debt+=0.1; }},
        {u:1, l:'Chiedi alle famiglie della città di ospitarne una ciascuna', e:'Decine di famiglie aprono la porta; altre dicono che lo Stato scarica su di loro', f:()=>{ gd('cattolici',1); gd('cetomedio',-1); }},
        {u:-1, l:'Accoglienza sì, ma con un numero fisso per ogni Land', e:'I sindaci approvano; i volontari dicono che il mare non conta i numeri', f:()=>{ gd('cetomedio',1); }} ]},
@@ -13829,7 +13834,7 @@ const EVENTS=[
    {l:'Prima i tedeschi dell\'Est',e:'Si aspetta chi scappa dall\'altra parte · le fabbriche aspettano con loro',f:()=>{gdDe50('imprenditori',-3); gdDe50('lavoratori',2); gdDe50('pensionati',1);}}]},
  {id:'de50_saar', era:'de1950', cond:()=>S.year===1955&&S.month>=9&&S.month<=11, kick:'L\'Europa', t:'La Saar al voto',
   text:'Parigi e Bonn hanno firmato uno statuto europeo per la Saar: un territorio né francese né tedesco, sotto un commissario europeo. Ora vota la Saar. Il Cancelliere ha firmato lo statuto; i partiti della Saar fanno campagna per il no.',ch:[
-   {l:'Sostieni lo statuto che hai firmato',e:'Il no vince col due terzi · la Saar torna alla Germania lo stesso, e Parigi si ricorda che l\'avevi difeso',f:()=>{repd(3); baseDe50(-2);}},
+   {l:'Sostieni lo statuto che hai firmato',e:'Il no vince col due terzi · la Saar entra nella Repubblica Federale lo stesso, e Parigi si ricorda che l\'avevi difeso',f:()=>{repd(3); baseDe50(-2);}},
    {l:'Resta neutrale: decidano loro',e:'La storia, più o meno · il no vince, la Saar torna, e nessuno ti accusa di niente',f:()=>{repd(1); gdDe50('cetomedio',1);}},
    {l:'Fai campagna per il no',e:'La Saar torna con la tua bandiera · Parigi non ti perdona l\'ambiguità',f:()=>{repd(-4); baseDe50(3); gdDe50('pensionati',2);}}]},
  {id:'de50_kpd', era:'de1950', cond:()=>S.year===1956&&S.month>=6&&S.month<=9, kick:'La giustizia', t:'Il partito comunista',
@@ -15418,7 +15423,7 @@ const SFIDE=[
  {id:'de50_q_berna', era:'de1950', codaFino:Infinity, paese:'germania', ruolo:'governo', diff:'facile', cond:()=>S.year>=1955||(S.year===1954&&S.month>=8), q:'Chi vince il Mondiale di calcio del 1954?',
   op:['L\'Ungheria','Il Brasile','La Germania Ovest'], giusta:2,
   perche:'A Berna la Germania Ovest batte in finale l\'Ungheria, la squadra che nessuno batteva, tre a due.'},
- {id:'de50_q_saar', era:'de1950', codaFino:Infinity, paese:'germania', ruolo:'governo', diff:'facile', cond:()=>S.year>=1958||(S.year===1957&&S.month>=2), q:'Quale territorio torna alla Germania il 1° gennaio 1957?',
+ {id:'de50_q_saar', era:'de1950', codaFino:Infinity, paese:'germania', ruolo:'governo', diff:'facile', cond:()=>S.year>=1958||(S.year===1957&&S.month>=2), q:'Quale territorio entra nella Repubblica Federale il 1° gennaio 1957?',
   op:['La Saar','L\'Alsazia','Il Tirolo'], giusta:0,
   perche:'Dopo il no allo statuto europeo nel referendum del 1955, la Saar entra nella Repubblica federale come Land.'},
  {id:'de50_q_pensioni', era:'de1950', codaFino:Infinity, paese:'germania', ruolo:'governo', diff:'media', cond:()=>S.year>=1958||(S.year===1957&&S.month>=3), q:'Che cosa ottengono le pensioni con la riforma del 1957?',
@@ -23015,7 +23020,8 @@ const SFONDO_DE_OVEST = 'M67.6,81.7 L67.4,82.9 L69.1,86.2 L72.1,88.6 L70.6,91.3 
   /* L117-1 · `oltre`: la terra oltre il confine (la RDT), disegnata dal tavolo sotto l'Ovest, più scura e spenta. NON è un'area
      (niente tocco, niente dati) e NON è terra libera per i punti di luogoCarta, che leggono solo `sfondo`. È lo sfondo della
      Germania intera, stessa proiezione: la parte che l'Ovest non copre è l'Est, e Berlino Ovest ci sta dentro invece che nel mare. */
-  SCENARI.de1950.mappa = { viewBox:MAPPA_DE_LAND.viewBox, sfondo:SFONDO_DE_OVEST, oltre:MAPPA_DE_LAND.sfondo, aree:T.map(function(x){ return x[1]; }) };
+  SCENARI.de1950.mappa = { viewBox:MAPPA_DE_LAND.viewBox, sfondo:SFONDO_DE_OVEST, oltre:MAPPA_DE_LAND.sfondo, aree:T.map(function(x){ return x[1]; }),
+    oltreNome:'Germania Est', oltreEtichetta:[74,62] };   // L249-1: la RDT è un altro stato, e il tavolo lo scrive (sotto Berlino Ovest, a 81,4·44,4 r4)
 })();
 
 /* ==============================================================================================================
@@ -23444,13 +23450,16 @@ const SVOLTA82FDP_EV = {
   text:'Il documento del tuo ministro dell\'economia è sul tavolo del Cancelliere socialdemocratico, e nessuno dei due finge più. Nel tuo partito metà dei deputati vuole cambiare alleato prima che la barca affondi, l\'altra metà dice che si tradiscono gli elettori. L\'opposizione aspetta la tua telefonata.',
   ch:[
     { l:'Cambiare campo: un Cancelliere nuovo, senza urne', e:'La storia · il governo cambia a metà legislatura · una parte del partito se ne va, e i sondaggi ti danno sotto il cinque',
-      f:function(){ S.deSvolta82='cambio'; rompiPartner('de_spd'); baseDe80(-3); gdDe80('imprenditori',3); gdDe80('cetomedio',1);
+      f:function(){ S.deSvolta82='cambio'; if(svoltaDaPartner()) svoltaPartnerCambio(); else rompiPartner('de_spd'); baseDe80(-3); gdDe80('imprenditori',3); gdDe80('cetomedio',1);
         S.log.unshift({t:T('La coalizione'),x:T('Ha portato i liberali dall\'altra parte dell\'aula.')}); } },
     { l:'Restare con i socialdemocratici fino alle urne', e:'Il patto regge · gli imprenditori, che ti votavano per frenare la sinistra, se ne ricordano',
       f:function(){ S.deSvolta82='trattenuta'; gdDe80('imprenditori',-4); gdDe80('lavoratori',1); baseDe80(1);
         S.log.unshift({t:T('La coalizione'),x:T('Ha scelto di restare con i socialdemocratici fino alle urne.')}); } },
     { l:'Uscire dal governo e chiedere le urne', e:'Nessun tradimento in aula · ma la campagna comincia domani, e i due ex alleati ti attaccano insieme',
-      f:function(){ S.deSvolta82='urne'; applicaTappaOra('1982/10'); baseDe80(1); stampad(1);
+      f:function(){ S.deSvolta82='urne';
+        if(svoltaDaPartner()){ partnerEsceDalGoverno(); baseDe80(1); stampad(1);   // L237-2quater: al livello 2 non c'è l'urna anticipata, il partner esce dal governo
+          S.log.unshift({t:T('La coalizione'),x:T('Ha lasciato il governo per chiedere le urne: il Cancelliere socialdemocratico resta, senza maggioranza.')}); return; }
+        applicaTappaOra('1982/10'); baseDe80(1); stampad(1);
         S.log.unshift({t:T('La coalizione'),x:T('Ha chiesto le urne invece di cambiare campo in aula.')}); azioneScioglimentoForzato(); } },
   ],
 };
@@ -24268,7 +24277,7 @@ const VIETNAM65_OPP_EV = {
 (function(){
   var s=SCENARI.de1950;
   SCENARI.de1960.territori = s.territori.concat([ { nome:'la Saar', nomeEn:'Saarland', tipo:'regione', carica:'Ministro presidente', lean:1 } ]);
-  SCENARI.de1960.mappa = { viewBox:s.mappa.viewBox, sfondo:s.mappa.sfondo, oltre:s.mappa.oltre, aree:s.mappa.aree.concat([ MAPPA_DE_LAND.aree.saar ]) };   // L117-1: anche la terra oltre il confine
+  SCENARI.de1960.mappa = { viewBox:s.mappa.viewBox, sfondo:s.mappa.sfondo, oltre:s.mappa.oltre, oltreNome:s.mappa.oltreNome, oltreEtichetta:s.mappa.oltreEtichetta, aree:s.mappa.aree.concat([ MAPPA_DE_LAND.aree.saar ]) };   // L117-1: anche la terra oltre il confine
 })();
 /* L112-1 · de1970 RIUSA territori e mappa di de1960 (dieci Länder con la Saar, Berlino Ovest): lo stesso oggetto, non una copia. */
 SCENARI.de1970.territori = SCENARI.de1960.territori;
