@@ -410,13 +410,16 @@ function audioSuonaBuffer(nome, M){
    `FINALI_CON_SUONO`. Sempre sicura, come `suona()`: senza contesto, senza file, a musica spenta non fa nulla e non lancia.
    QUALE BRANO, in quest'ordine:
      0. fuori partita (home, creazione, scenari storici: `fuoriPartita()`) → mus-tema (L118-1; dentro una partita non vale mai);
-     1. 'finale'  — forzato da gameOver (non in loop), vale finché S è la stessa carriera; dal L218-9 mus-finale o mus-finale-b, a caso;
-     2. la notte elettorale (NOTTE non nullo)                          → mus-notte (dal L218-9 alterna con mus-notte-b a ogni giro);
+     1. 'finale'  — forzato da gameOver (non in loop), vale finché S è la stessa carriera; dal L218-9 mus-finale o mus-finale-b, a caso
+                    (dal L218-22 anche mus-finale-c: una delle tre);
+     2. la notte elettorale (NOTTE non nullo)                          → mus-notte (dal L218-9 alterna con mus-notte-b a ogni giro;
+                                                                         dal L218-22 A → B → C, come tutti i temi con la -c);
      3. la crisi: al governo, livello 3, con l'allarme insolvenza acceso (`S.mesiSottoCrisi>0`) oppure in minoranza fuori
         dalla coabitazione (`S.minoranza && !S.coabitazione`)          → mus-crisi   (proposta di Code, L114-1);
      4. la campagna (`inCampagna()`, gli ultimi sei mesi del mandato)   → mus-campagna;
      5. l'epoca, dall'anno: fino al 1959 mus-1950 … 2000-2013 mus-2000; il presente (lo scenario 'presente', o dal 2014 una
         linea storica saldata al presente)                              → mus-presente.
+        ⚑ L218-22: in Italia, USA, Regno Unito, Francia e Germania la A del decennio è la traccia del paese (`musicaAPaese()`).
    E UN VOLUME: a zero finché in agenda c'è un pilastro-tragedia non risolto (`cronaca:true` e `tono:'grave'`, G8), poi torna.
    COMPORTAMENTO: dissolvenza incrociata di 2,5 s al cambio; volume sotto gli effetti (MUSICA_GAIN); pausa col secondo piano
    (il contesto si sospende quando la pagina si nasconde, riprende quando torna); si carica solo il brano che serve, e al più
@@ -463,7 +466,62 @@ const MUSICA_MANIFEST = {
   /* ⚑ L218-16 (12/10) · LA VARIANTE DEL TEMA (Eleven Music v2.5, 2:00, 192 kbps così com'è: niente ffmpeg per i 128, 2,9 MB sotto il
      tetto dei 3). Gain sul volume reso degli altri brani (−25,2 dB): −17,9 RMS, picco −0,4 → 0,43 (picco reso −7,7). Fuori partita il
      tema alterna con lei a ogni giro, come i temi d'epoca. Misure in Chrome: `.claude/misura-l218-16.js`. */
-  'mus-tema-b':   { file:'mus-tema-b.mp3',   loop:true,  gain:0.43, variante:'mus-tema' }    // −17,9, picco −0,4 · 2:00
+  'mus-tema-b':   { file:'mus-tema-b.mp3',   loop:true,  gain:0.43, variante:'mus-tema' },   // −17,9, picco −0,4 · 2:00
+  /* ⚑ L218-22 (15/10) · LE TERZE VARIANTI `-c` (§G3, Eleven Music v2.5, ~2:00, 192 kbps così come sono: niente ffmpeg per i 128).
+     Come le `-b`: `variante:` = il tema, in loop, e `musicaVarianti()` le prende da sole → la rotazione è A → B → C a ogni giro; il
+     finale non è in loop e `musica('finale')` sceglie fra tre dall'orologio. Gain sul volume reso degli altri brani (−25,2 dB), picco
+     reso ≤ −1 dBFS (regola di L218-9). Misure in Chrome: `.claude/misura-l218-22.js` (RMS, picco del file · durata). */
+  'mus-1950-c':       { file:'mus-1950-c.mp3',     loop:true,  gain:0.34, variante:'mus-1950' },      // −15,8, picco −0,3 · 2:00
+  'mus-1960-c':       { file:'mus-1960-c.mp3',     loop:true,  gain:0.28, variante:'mus-1960' },      // −14,3, picco −0,2 · 2:00
+  'mus-1970-c':       { file:'mus-1970-c.mp3',     loop:true,  gain:0.24, variante:'mus-1970' },      // −12,7, picco 0,0 · 2:00
+  'mus-1980-c':       { file:'mus-1980-c.mp3',     loop:true,  gain:0.24, variante:'mus-1980' },      // −13,0, picco 0,0 · 2:00
+  'mus-1990-c':       { file:'mus-1990-c.mp3',     loop:true,  gain:0.33, variante:'mus-1990' },      // −15,5, picco −0,3 · 2:00
+  'mus-2000-c':       { file:'mus-2000-c.mp3',     loop:true,  gain:0.29, variante:'mus-2000' },      // −14,4, picco −0,2 · 1:52
+  'mus-presente-c':   { file:'mus-presente-c.mp3', loop:true,  gain:0.53, variante:'mus-presente' },  // −19,6, picco −0,8 · 2:00
+  'mus-campagna-c':   { file:'mus-campagna-c.mp3', loop:true,  gain:0.31, variante:'mus-campagna' },  // −15,0, picco −0,1 · 2:00
+  'mus-crisi-c':      { file:'mus-crisi-c.mp3',    loop:true,  gain:0.35, variante:'mus-crisi' },     // −16,1, picco −0,7 · 2:00
+  'mus-notte-c':      { file:'mus-notte-c.mp3',    loop:true,  gain:0.45, variante:'mus-notte' },     // −18,3, picco −1,0 · 2:00
+  'mus-finale-c':     { file:'mus-finale-c.mp3',   loop:false, gain:0.40, variante:'mus-finale' },    // −17,3, picco −1,0 · 2:00
+  /* ⚑ L218-22 · LE MUSICHE DEL PAESE (§G2, 35 brani: it us uk fr de × sei decenni e il presente; 192 kbps così come sono). Campo `paese:`
+     (la sigla di `musicaPaese()`) e `decennio:` (il tema generico che sostituiscono). Nella partita di uno dei cinque paesi la traccia del
+     paese PRENDE IL POSTO DELLA A nella rotazione del suo decennio (giro 0 → `mus-<p>-<d>`, giro 1 → `-b`, giro 2 → `-c`): lo fa un punto
+     solo, `musicaAPaese()`, dentro `musicaVarianti()`; se il file non è in MUSICA_PRESENTI resta la A generica. Gli altri paesi suonano la
+     generica. Gain come sopra (−25,2 dB resi, picco reso ≤ −1). */
+  'mus-it-1950':       { file:'mus-it-1950.mp3',     loop:true, gain:0.49, paese:'it', decennio:'mus-1950' },     // −18,9, picco −1,5 · 2:00
+  'mus-it-1960':       { file:'mus-it-1960.mp3',     loop:true, gain:0.28, paese:'it', decennio:'mus-1960' },     // −14,2, picco −0,1 · 2:00
+  'mus-it-1970':       { file:'mus-it-1970.mp3',     loop:true, gain:0.31, paese:'it', decennio:'mus-1970' },     // −14,9, picco −0,3 · 2:00
+  'mus-it-1980':       { file:'mus-it-1980.mp3',     loop:true, gain:0.28, paese:'it', decennio:'mus-1980' },     // −14,2, picco −0,2 · 2:00
+  'mus-it-1990':       { file:'mus-it-1990.mp3',     loop:true, gain:0.42, paese:'it', decennio:'mus-1990' },     // −17,6, picco −0,7 · 2:00
+  'mus-it-2000':       { file:'mus-it-2000.mp3',     loop:true, gain:0.33, paese:'it', decennio:'mus-2000' },     // −15,5, picco 0,0 · 2:00
+  'mus-it-presente':   { file:'mus-it-presente.mp3', loop:true, gain:0.36, paese:'it', decennio:'mus-presente' }, // −16,4, picco −1,0 · 1:50
+  'mus-us-1950':       { file:'mus-us-1950.mp3',     loop:true, gain:0.47, paese:'us', decennio:'mus-1950' },     // −18,7, picco −0,9 · 2:00
+  'mus-us-1960':       { file:'mus-us-1960.mp3',     loop:true, gain:0.35, paese:'us', decennio:'mus-1960' },     // −16,1, picco −0,5 · 2:00
+  'mus-us-1970':       { file:'mus-us-1970.mp3',     loop:true, gain:0.29, paese:'us', decennio:'mus-1970' },     // −14,4, picco 0,0 · 1:50
+  'mus-us-1980':       { file:'mus-us-1980.mp3',     loop:true, gain:0.25, paese:'us', decennio:'mus-1980' },     // −13,3, picco −0,1 · 2:00
+  'mus-us-1990':       { file:'mus-us-1990.mp3',     loop:true, gain:0.34, paese:'us', decennio:'mus-1990' },     // −15,9, picco −0,8 · 2:00
+  'mus-us-2000':       { file:'mus-us-2000.mp3',     loop:true, gain:0.31, paese:'us', decennio:'mus-2000' },     // −15,0, picco −0,1 · 2:00
+  'mus-us-presente':   { file:'mus-us-presente.mp3', loop:true, gain:0.34, paese:'us', decennio:'mus-presente' }, // −15,8, picco −0,1 · 2:00
+  'mus-uk-1950':       { file:'mus-uk-1950.mp3',     loop:true, gain:0.55, paese:'uk', decennio:'mus-1950' },     // −20,0, picco −0,5 · 2:00
+  'mus-uk-1960':       { file:'mus-uk-1960.mp3',     loop:true, gain:0.29, paese:'uk', decennio:'mus-1960' },     // −14,5, picco −0,3 · 2:00
+  'mus-uk-1970':       { file:'mus-uk-1970.mp3',     loop:true, gain:0.31, paese:'uk', decennio:'mus-1970' },     // −15,0, picco −0,3 · 1:50
+  'mus-uk-1980':       { file:'mus-uk-1980.mp3',     loop:true, gain:0.27, paese:'uk', decennio:'mus-1980' },     // −13,8, picco 0,0 · 2:00
+  'mus-uk-1990':       { file:'mus-uk-1990.mp3',     loop:true, gain:0.45, paese:'uk', decennio:'mus-1990' },     // −18,3, picco −1,0 · 1:55
+  'mus-uk-2000':       { file:'mus-uk-2000.mp3',     loop:true, gain:0.34, paese:'uk', decennio:'mus-2000' },     // −15,8, picco −0,4 · 2:00
+  'mus-uk-presente':   { file:'mus-uk-presente.mp3', loop:true, gain:0.50, paese:'uk', decennio:'mus-presente' }, // −19,1, picco −1,1 · 2:00
+  'mus-fr-1950':       { file:'mus-fr-1950.mp3',     loop:true, gain:0.46, paese:'fr', decennio:'mus-1950' },     // −18,5, picco −0,9 · 2:00
+  'mus-fr-1960':       { file:'mus-fr-1960.mp3',     loop:true, gain:0.33, paese:'fr', decennio:'mus-1960' },     // −15,6, picco −1,1 · 1:56
+  'mus-fr-1970':       { file:'mus-fr-1970.mp3',     loop:true, gain:0.28, paese:'fr', decennio:'mus-1970' },     // −14,1, picco −0,1 · 2:00
+  'mus-fr-1980':       { file:'mus-fr-1980.mp3',     loop:true, gain:0.32, paese:'fr', decennio:'mus-1980' },     // −15,4, picco −0,3 · 1:55
+  'mus-fr-1990':       { file:'mus-fr-1990.mp3',     loop:true, gain:0.30, paese:'fr', decennio:'mus-1990' },     // −14,9, picco −0,4 · 2:00
+  'mus-fr-2000':       { file:'mus-fr-2000.mp3',     loop:true, gain:0.34, paese:'fr', decennio:'mus-2000' },     // −15,8, picco −0,4 · 2:00
+  'mus-fr-presente':   { file:'mus-fr-presente.mp3', loop:true, gain:0.32, paese:'fr', decennio:'mus-presente' }, // −15,3, picco −1,1 · 2:00
+  'mus-de-1950':       { file:'mus-de-1950.mp3',     loop:true, gain:0.43, paese:'de', decennio:'mus-1950' },     // −17,8, picco −0,7 · 2:00
+  'mus-de-1960':       { file:'mus-de-1960.mp3',     loop:true, gain:0.35, paese:'de', decennio:'mus-1960' },     // −16,0, picco −0,2 · 2:00
+  'mus-de-1970':       { file:'mus-de-1970.mp3',     loop:true, gain:0.44, paese:'de', decennio:'mus-1970' },     // −18,1, picco −0,8 · 2:00
+  'mus-de-1980':       { file:'mus-de-1980.mp3',     loop:true, gain:0.30, paese:'de', decennio:'mus-1980' },     // −14,7, picco −0,2 · 2:00
+  'mus-de-1990':       { file:'mus-de-1990.mp3',     loop:true, gain:0.35, paese:'de', decennio:'mus-1990' },     // −16,0, picco −0,1 · 2:00
+  'mus-de-2000':       { file:'mus-de-2000.mp3',     loop:true, gain:0.29, paese:'de', decennio:'mus-2000' },     // −14,5, picco −0,3 · 2:00
+  'mus-de-presente':   { file:'mus-de-presente.mp3', loop:true, gain:0.57, paese:'de', decennio:'mus-presente' }  // −20,3, picco −1,2 · 2:00
 };
 /* ⚠ I BRANI CHE ESISTONO DAVVERO in assets/audio/: solo questi si chiedono alla rete. Si aggiorna a mano quando un file arriva;
    se lista e cartella divergono `.claude/verifica-asset.js` diventa rossa. L114-2 (26/9): TUTTI E UNDICI, a 192 kbps così come
@@ -475,25 +533,47 @@ const MUSICA_PRESENTI = ['mus-1950.mp3','mus-1960.mp3','mus-1970.mp3','mus-1980.
                          'mus-tema.mp3','mus-1950-b.mp3','mus-1960-b.mp3','mus-1980-b.mp3','mus-1990-b.mp3','mus-2000-b.mp3',
                          'mus-presente-b.mp3','mus-crisi-b.mp3','mus-campagna-b.mp3',   // L122-1: il tema e le altre otto varianti
                          'mus-notte-b.mp3','mus-finale-b.mp3',    // L218-9: le varianti di notte e finale
-                         'mus-tema-b.mp3'];                       // L218-16: la variante del tema della home
+                         'mus-tema-b.mp3',                        // L218-16: la variante del tema della home
+                         'mus-1950-c.mp3','mus-1960-c.mp3','mus-1970-c.mp3','mus-1980-c.mp3','mus-1990-c.mp3','mus-2000-c.mp3',
+                         'mus-presente-c.mp3','mus-campagna-c.mp3','mus-crisi-c.mp3','mus-notte-c.mp3','mus-finale-c.mp3',   // L218-22: le terze varianti
+                         'mus-it-1950.mp3','mus-it-1960.mp3','mus-it-1970.mp3','mus-it-1980.mp3','mus-it-1990.mp3','mus-it-2000.mp3','mus-it-presente.mp3',
+                         'mus-us-1950.mp3','mus-us-1960.mp3','mus-us-1970.mp3','mus-us-1980.mp3','mus-us-1990.mp3','mus-us-2000.mp3','mus-us-presente.mp3',
+                         'mus-uk-1950.mp3','mus-uk-1960.mp3','mus-uk-1970.mp3','mus-uk-1980.mp3','mus-uk-1990.mp3','mus-uk-2000.mp3','mus-uk-presente.mp3',
+                         'mus-fr-1950.mp3','mus-fr-1960.mp3','mus-fr-1970.mp3','mus-fr-1980.mp3','mus-fr-1990.mp3','mus-fr-2000.mp3','mus-fr-presente.mp3',
+                         'mus-de-1950.mp3','mus-de-1960.mp3','mus-de-1970.mp3','mus-de-1980.mp3','mus-de-1990.mp3','mus-de-2000.mp3','mus-de-presente.mp3'];   // L218-22: le 35 musiche del paese
 const MUSICA_CHIAVE = 'hos_musica', MUSICA_GAIN = 0.35, MUSICA_XFADE_S = 2.5, MUSICA_DUCK_S = 0.8;
 let MUSICA_DIR = 'assets/audio/';     // `let`: la pagina di prova di L114-1 la punta ai segnaposto di .claude/musica-prova/
 let MUSICA_BUF = {}, MUSICA_CARICO = {}, MUSICA_ORA = null, MUSICA_VOCE = null, MUSICA_ZITTA = false;
 /* L146-1 · SOTTO LA VOCE: mentre parla la voce di una clip di partenza la musica scende a ×0,3 (≈ −10 dB) e poi torna piena.
    Non è un secondo meccanismo: il livello del brano lo decide UN punto solo, `musica()`, fra tre gradini — zero sotto un
    pilastro-tragedia (vince sempre), sotto-voce, pieno — e `musicaParti` parte al gradino in vigore. `MUSICA_SOTTOVOCE` lo
-   accende e lo spegne `musicaSottovoce()` (la chiama ui.js, `apriPartenza`/`chiudiPartenza` e le clip della porta; ⚑ L231-1: all'APERTURA del velo con la voce, `voceClipDuck`). Transitorio, mai in S. */
+   accende e lo spegne `musicaSottovoce()` (oggi la chiama solo `parla()`, le voci del gioco: ⚑ L246-1, le clip di partenza e della porta hanno il gradino `MUSICA_CLIP_ZITTA`, a zero, qui sotto). Transitorio, mai in S. */
 const MUSICA_SOTTOVOCE_K = 0.3;
 let MUSICA_SOTTOVOCE = false, MUSICA_LIVELLO = 1;
 function musicaSottovoce(on){ on=!!on; if(on===MUSICA_SOTTOVOCE) return; MUSICA_SOTTOVOCE=on; musica(); }
+/* L246-1 (15/10) · ZITTA SOTTO LA VOCE DI UNA CLIP. Giacomo, iPhone, porta Italia anni '80: la musica copriva ancora la voce della clip
+   anche dopo L231-1 (×0,3 all'apertura del velo; in Chrome la voce stava ~28 dB sopra: la misura di Chrome non dice Safari iOS). Durante
+   le clip CON VOCE (partenza L146-1, porta L218-7) la musica non scende: si FERMA — un gradino suo, accanto a MUSICA_SOTTOVOCE e sopra
+   di lui (che resta ai `parla()` del gioco: una voce del gioco che finisce a velo aperto non riaccende più la musica, perché spegne il
+   suo flag e non questo). Dissolvenza a 0 in MUSICA_CLIP_ZITTA_S, ripresa in MUSICA_CLIP_RIPRESA_S. Lo accende e lo spegne SOLO
+   `voceClipDuck()` (ui.js): apertura del velo con almeno una voce (anche sulla strada di ripiego dell'elemento: il gradino non guarda
+   come suona la voce), fine dell'ultima voce, chiusura del velo («Salta», tocco, Esc, fine). Un brano che cambia a velo aperto
+   (il paese e il decennio si fissano lì) parte già a zero: `musicaParti` legge `musicaGradino()`. Vale solo finché un velo è aperto
+   (`veloClipAperto()`): un flag rimasto acceso non può tenere muta la partita. Transitorio, mai in S. Prova `.claude/prova-l246-1-musica-clip.js`. */
+const MUSICA_CLIP_ZITTA_S = 0.4, MUSICA_CLIP_RIPRESA_S = 1;
+let MUSICA_CLIP_ZITTA = false;
+function veloClipAperto(){ try{ return (typeof PARTENZA_APERTA!=='undefined' && !!PARTENZA_APERTA) || (typeof PORTA_CLIP_APERTA!=='undefined' && !!PORTA_CLIP_APERTA); }catch(e){ return false; } }
+function musicaClipZitta(on){ on=!!on; if(on===MUSICA_CLIP_ZITTA) return; MUSICA_CLIP_ZITTA=on; musica(); }
+/* il gradino in vigore: zero sotto un pilastro-tragedia o sotto la voce di una clip, ×0,3 sotto una voce del gioco, pieno */
+function musicaGradino(){ return (musicaTragedia() || (MUSICA_CLIP_ZITTA && veloClipAperto())) ? 0 : (MUSICA_SOTTOVOCE ? MUSICA_SOTTOVOCE_K : 1); }
 let MUSICA_FORZATA = null, MUSICA_FORZATA_S = null;
 /* L172-5 · L'ANNO DELLA PORTA SCELTA (richiesta di Giacomo dell'1/10): dalla scelta di una porta sulla linea del tempo (storiciPorta,
    ui.js) all'avvio della partita (fine di avviaRuolo) musicaScelta() dà il tema del decennio della porta invece di mus-tema — sotto le
    clip del paese e del decennio, sulla creazione, sul briefing «La situazione». Transitorio: mai in S né in localStorage; lo azzerano
    apriCreazione (chi entra dal presente), chiudiCreazione (indietro alla home o alla linea del tempo) e initStatoBase (game.js: nasce la partita; da
    lì il tema lo dà musicaEpoca() da S.year, che per l'anno della porta è LO STESSO brano — musica() non vede un cambio e non fa stacchi). */
-let MUSICA_PORTA = null;
-function musicaPorta(anno){ const a=(anno==null)?null:anno; if(a===MUSICA_PORTA) return; MUSICA_PORTA=a; musica(); }
+let MUSICA_PORTA = null, MUSICA_PORTA_PAESE = null;   // L218-22: e la chiave di PAESI della porta (la sua musica del paese)
+function musicaPorta(anno, paese){ const a=(anno==null)?null:anno, p=(a==null)?null:(paese||null); if(a===MUSICA_PORTA && p===MUSICA_PORTA_PAESE) return; MUSICA_PORTA=a; MUSICA_PORTA_PAESE=p; musica(); }
 let MUSICA_GIRO = {};                 // L118-1: {tema: n} — quanti giri ha fatto il tema; il resto sceglie A o B. Transitorio
 let MUSICA_REGISTRO = [];             // {brano, t, esito} — la sequenza dei cambi, per le misure; transitorio
 
@@ -538,19 +618,36 @@ function fuoriPartita(){
   if(typeof document==='undefined' || typeof getComputedStyle!=='function') return false;
   return ['start','crea','storici'].some(function(id){ const e=document.getElementById(id); return !!(e && getComputedStyle(e).display!=='none'); });
 }
-/* L118-1 · le varianti di un tema che HANNO IL FILE, nell'ordine A, B… (senza varianti: il tema solo) */
+/* ⚑ L218-22 · LA MUSICA DEL PAESE. Punto di verità unico: `musicaPaese()` (puro) dà la sigla dei cinque paesi con le loro tracce o null —
+   dalla porta scelta finché c'è (MUSICA_PORTA_PAESE, messo da storiciPorta con SCENARI[id].paese), poi da S.paese (la stessa chiave per
+   il presente e per le porte: `italia`, `usa`, `regnounito`, `francia`, `germania`). `musicaAPaese(tema)` dà la traccia del paese al posto
+   della A del decennio, se è nel manifesto con quel `decennio` e il file è in MUSICA_PRESENTI; altrimenti il tema stesso (il ripiego). La
+   chiama SOLO `musicaVarianti()`, quindi la usano insieme `musicaScelta()` (ramo dell'epoca e ramo della porta, via musicaGiroVariante),
+   `musicaParti()` (alternanza e precarico: si carica la traccia del paese, non la generica) e nessun altro tema: notte, crisi, campagna,
+   finale e tema del gioco non hanno tracce di paese. Transitorio, niente in S. */
+const MUSICA_SIGLA_PAESE = { italia:'it', usa:'us', regnounito:'uk', francia:'fr', germania:'de' };
+function musicaPaese(){
+  const k=(MUSICA_PORTA!=null) ? MUSICA_PORTA_PAESE : ((typeof S!=='undefined' && S) ? S.paese : null);
+  return (k && MUSICA_SIGLA_PAESE[k]) || null;
+}
+function musicaAPaese(tema){
+  const p=musicaPaese(); if(!p || !tema) return tema;
+  const k='mus-'+p+'-'+String(tema).replace(/^mus-/,''), M=MUSICA_MANIFEST[k];
+  return (M && M.decennio===tema && MUSICA_PRESENTI.indexOf(M.file)>=0) ? k : tema;
+}
+/* L118-1 · le varianti di un tema che HANNO IL FILE, nell'ordine A, B, C (senza varianti: il tema solo); L218-22: la A è quella del paese */
 function musicaVarianti(tema){
-  const V=[tema];
+  const V=[musicaAPaese(tema)];
   Object.keys(MUSICA_MANIFEST).forEach(function(k){ const M=MUSICA_MANIFEST[k]; if(M.variante===tema && MUSICA_PRESENTI.indexOf(M.file)>=0) V.push(k); });
   return V;
 }
 function musicaGiroVariante(tema){ const V=musicaVarianti(tema); return V[(MUSICA_GIRO[tema]||0)%V.length]; }
 /* il tema di un brano (una variante risponde col suo tema) */
-function musicaTema(brano){ const M=MUSICA_MANIFEST[brano]; return (M && M.variante) || brano; }
+function musicaTema(brano){ const M=MUSICA_MANIFEST[brano]; return (M && (M.variante || M.decennio)) || brano; }   // L218-22: la traccia del paese risponde col suo decennio
 /* ⚑ IL PUNTO DI VERITÀ del brano: puro, legge lo stato e non tocca niente (lo usa anche la misura nel banco) */
 function musicaScelta(){
   if(typeof INTRO_APERTA!=='undefined' && INTRO_APERTA) return null;   // L124-1: sotto il video introduttivo la musica tace (è nel video)
-  if(MUSICA_PORTA!=null) return musicaGiroVariante(musicaEpocaAnno(MUSICA_PORTA));   // L172-5: dalla porta scelta all'avvio, il tema del suo decennio (con la sua -b)
+  if(MUSICA_PORTA!=null) return musicaGiroVariante(musicaEpocaAnno(MUSICA_PORTA));   // L172-5: dalla porta scelta all'avvio, il tema del suo decennio (con la sua -b); L218-22: e la traccia del suo paese
   if(fuoriPartita()) return musicaGiroVariante('mus-tema');     // L118-1: fuori partita, il tema del gioco (dentro non vale mai); L218-16: con la sua -b
   if(MUSICA_FORZATA && MUSICA_FORZATA_S===S) return MUSICA_FORZATA;
   if(typeof NOTTE!=='undefined' && NOTTE) return musicaGiroVariante('mus-notte');                   // L218-9: anche la notte ha la sua -b
@@ -582,7 +679,7 @@ function musicaParti(brano){
   const tema=musicaTema(brano), alterna=musicaVarianti(tema).length>1 && !!(MUSICA_MANIFEST[tema]||{}).loop;   // L218-9: il finale (non in loop) non alterna
   src.buffer=buf; src.loop=!!M.loop && !alterna; g.gain.setValueAtTime(0, t);
   const pieno=(M.gain!=null)?M.gain:MUSICA_GAIN;       // L114-2: il gain del brano, sul volume misurato
-  g.gain.linearRampToValueAtTime(pieno*MUSICA_LIVELLO, t+MUSICA_XFADE_S);   // L146-1: al gradino in vigore (zero, sotto-voce, pieno)
+  g.gain.linearRampToValueAtTime(pieno*musicaGradino(), t+MUSICA_XFADE_S);   // L146-1: al gradino in vigore (zero, sotto-voce, pieno); L246-1: letto ora, non dall'ultima musica() — un brano nuovo a velo aperto parte a zero
   src.connect(g); g.connect(AUDIO_BUS.musica||AUDIO_MASTER_GAIN); src.start();   // L118-1: sul bus della musica (il cursore)
   const V={ brano:brano, src:src, g:g, pieno:pieno, t0:t, dur:buf.duration };
   MUSICA_VOCE=V;
@@ -621,11 +718,14 @@ function musica(stato){
     if(!AUDIO_CTX) return;                             // prima del primo gesto: niente (la prossima resa riprova)
     const brano=musicaScelta();
     /* il volume: a zero per la durata di un pilastro-tragedia, poi torna; sotto una voce di partenza a ×0,3 (L146-1). La tragedia vince. */
-    const zitta=musicaTragedia(), liv=zitta?0:(MUSICA_SOTTOVOCE?MUSICA_SOTTOVOCE_K:1);
-    if(liv!==MUSICA_LIVELLO){ MUSICA_ZITTA=zitta; MUSICA_LIVELLO=liv;
+    const zitta=musicaTragedia(), clip=!zitta && MUSICA_CLIP_ZITTA && veloClipAperto(), liv=musicaGradino();   // L246-1: zero anche sotto la voce di una clip
+    if(liv!==MUSICA_LIVELLO){ const eraTragedia=MUSICA_ZITTA; MUSICA_ZITTA=zitta;
+      /* L246-1: verso lo zero della clip 0,4 s, dallo zero della clip 1 s; il resto (tragedia, sotto-voce) con la rampa di sempre */
+      const dur=clip ? MUSICA_CLIP_ZITTA_S : (MUSICA_LIVELLO===0 && !zitta && !eraTragedia ? MUSICA_CLIP_RIPRESA_S : MUSICA_DUCK_S);
+      MUSICA_LIVELLO=liv;
       if(MUSICA_VOCE){ const t=AUDIO_CTX.currentTime, g=MUSICA_VOCE.g.gain;
-        try{ g.cancelScheduledValues(t); g.setValueAtTime(g.value, t); g.linearRampToValueAtTime((MUSICA_VOCE.pieno||MUSICA_GAIN)*liv, t+MUSICA_DUCK_S); }catch(e){} }
-      musicaSegna(brano, zitta?'a zero (tragedia)':(liv<1?'sotto la voce':'torna')); }
+        try{ g.cancelScheduledValues(t); g.setValueAtTime(g.value, t); g.linearRampToValueAtTime((MUSICA_VOCE.pieno||MUSICA_GAIN)*liv, t+dur); }catch(e){} }
+      musicaSegna(brano, zitta?'a zero (tragedia)':(clip?'a zero (voce della clip)':(liv<1?'sotto la voce':'torna'))); }
     /* il successivo probabile: il brano della campagna due mesi prima che cominci */
     try{ if(typeof meseMandato==='function' && S && S.livello===3){ const fine=(PAESE.mandatoMesi||60), mm=meseMandato(); if(mm>=fine-8 && mm<fine-6) musicaCarica('mus-campagna'); } }catch(e){}
     if(brano===MUSICA_ORA) return;

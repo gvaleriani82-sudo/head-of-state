@@ -900,8 +900,8 @@ function avviaRuolo(){
      aspetta la fine di ENTRAMBE: la clip che finisce prima resta sull'ultimo fotogramma (decisione di Giacomo, niente tagli);
      «Salta», tocco ed Esc chiudono subito e fermano la voce. Una voce che non arriva (`error`) = la clip come prima.
      I sottotitoli seguono la VOCE, non il video: la traccia sta sull'<audio> in modalità `hidden` e i cue attivi si scrivono
-     in `#partenza-sott`, sempre visibili, nella lingua del gioco. Mentre la voce suona (non muta) la musica scende a ×0,3 (⚑ L231-1: dall'apertura del velo, e il suono è nel contesto Web Audio: `voceClipAggancia`)
-     (`musicaSottovoce`, audio.js: lo stesso punto che la porta a zero sotto una tragedia). Dall'opposizione niente voce né
+     in `#partenza-sott`, sempre visibili, nella lingua del gioco. ⚑ L246-1: dall'apertura del velo alla fine della voce la musica è FERMA (a zero:
+     `voceClipDuck` → `musicaClipZitta`, audio.js; L231-1 la portava a ×0,3, e su iPhone la musica copriva ancora la voce). Dall'opposizione niente voce né
      sottotitoli: la clip è quella del capo del governo e la voce dice «Govern.» (letto da `S.opposizione` dopo l'avvio).
    ================================================================================================================ */
 const PARTENZA_NOMI={0:'attivista', 1:'locale', 2:'ministro', 3:'capo', 5:'diplomatico'};
@@ -915,7 +915,7 @@ function partenzaVoce(nome){       // L146-1: la voce della clip, o null (dall'o
 }
 function partenzaFinita(chi){      // L146-1: si chiude da sola solo quando clip e voce sono finite tutte e due
   PARTENZA_FINE[chi]=true;
-  if(chi==='voce'){ try{ if(typeof musicaSottovoce==='function') musicaSottovoce(false); }catch(e){} }
+  if(chi==='voce') voceClipDuck(false);   // L246-1: finita la voce la musica riprende (in 1 s), anche se la clip resta sull'ultimo fotogramma
   if(PARTENZA_FINE.clip && PARTENZA_FINE.voce) chiudiPartenza();
 }
 /* ================================================================================================================
@@ -931,14 +931,14 @@ function partenzaFinita(chi){      // L146-1: si chiude da sola solo quando clip
    · Il file si chiede all'apertura del velo; l'<audio> aspetta il buffer prima di partire (al più VOCI_ATTESA_MS, poi la strada di
      prima: elemento col sonoro e ripiego muto). Audio spento o silenziato: niente buffer, voce muta come prima.
    · LA MUSICA SCENDE ALL'APERTURA del velo (`voceClipDuck`), non al `playing` della voce: nei primi istanti il gradino non c'era
-     mai (MUSICA_SOTTOVOCE falso al primo playing in tutti i casi misurati). Il gradino resta ×0,3: col suono nel contesto la voce sta
-     ~28 dB sopra la musica abbassata, il ×0,15 proposto non serve.
+     mai (MUSICA_SOTTOVOCE falso al primo playing in tutti i casi misurati). ⚑ L246-1 (15/10): su iPhone il ×0,3 non bastava
+     (Giacomo, porta Italia 1980) — ora la musica va a ZERO (`musicaClipZitta`, un gradino suo in audio.js) e riprende alla fine.
    · `VOCE_CLIP_ORA` (le sorgenti che suonano) si svuota con `voceClipFerma()`: chiusura del velo (dissolvenza come il velo) e fine.
    Transitorio, mai in S. Prova: `.claude/sonda-l231-1.js` (rossa con --rosso: il gradino all'apertura tolto).
    ================================================================================================================ */
 let VOCE_CLIP_ORA=[];
 function voceClipViva(){ try{ return typeof audioVivo==='function' && audioVivo() && typeof AUDIO_CTX!=='undefined' && !!AUDIO_CTX && AUDIO_CTX.state!=='closed'; }catch(e){ return false; } }
-function voceClipDuck(on){ try{ if(typeof musicaSottovoce==='function') musicaSottovoce(on); }catch(e){} }   // un nome solo: la sonda lo spegne per vedersi rossa
+function voceClipDuck(on){ try{ if(typeof musicaClipZitta==='function') musicaClipZitta(on); }catch(e){} }   // un nome solo: la sonda lo spegne per vedersi rossa; ⚑ L246-1: la musica si FERMA (0 in 0,4 s, ripresa in 1 s), non scende a ×0,3
 function voceClipCarica(file){
   try{ return fetch(VIDEO_DIR+file).then(function(r){ return r.ok ? r.arrayBuffer() : null; })
     .then(function(ab){ if(!ab || !AUDIO_CTX) return null; return new Promise(function(ok, ko){ AUDIO_CTX.decodeAudioData(ab, ok, ko); }); })
@@ -1006,12 +1006,11 @@ function apriPartenza(nome){
       if(tt){ tt.mode='hidden';
         tt.addEventListener('cuechange', function(){ try{ const c=tt.activeCues, r=[]; for(let i=0;c && i<c.length;i++) r.push(c[i].text);
           sott.textContent=r.join('\n'); sott.parentNode.classList.toggle('on', r.length>0); partenzaRitrattoGuardia(); }catch(e){} }); } }catch(e){}
-    a.addEventListener('playing', function(){ if(!a.muted && PARTENZA_APERTA){ try{ if(typeof musicaSottovoce==='function') musicaSottovoce(true); }catch(e){} } }, {once:true});
     a.addEventListener('ended', function(){ partenzaFinita('voce'); }, {once:true});
     a.addEventListener('error', function(){ try{ sott.textContent=''; sott.parentNode.classList.remove('on'); }catch(e){} partenzaFinita('voce'); }, {once:true});
     /* parte col primo `playing` del video; L231-1: il suono nel contesto Web Audio, l'<audio> muto fa da orologio (sottotitoli a tempo) */
     voceClipAggancia(a, v, PV.voce, 1, function(){ return PARTENZA_APERTA; });
-    if(voceClipViva()) voceClipDuck(true);   // L231-1: la musica scende all'apertura, non al playing della voce
+    voceClipDuck(true);   // L231-1: all'apertura, non al playing della voce; ⚑ L246-1: a zero, e anche sulla strada di ripiego (la voce come elemento) e a voce muta
   }
   try{ const p=v.play(); if(p && p.catch) p.catch(function(){}); }catch(e){}
   document.addEventListener('keydown', partenzaTasto, true);
@@ -1035,7 +1034,7 @@ function chiudiPartenza(){
      e il ritratto vivo (L178-3) si ferma alla fine, nello stesso task in cui il velo esce */
   if(el){ el.id='partenza-uscente'; veloEsce(el, VELO_USCITA_MS, function(){ fermaRitrattiVivi(el); }); }
   voceClipFerma(VELO_USCITA_MS);   // L231-1: la voce nel contesto scende col velo
-  try{ if(typeof musicaSottovoce==='function') musicaSottovoce(false); }catch(e){}   // L146-1: la musica torna piena
+  voceClipDuck(false);   // L146-1: la musica torna piena (⚑ L246-1: in 1 s, dallo zero)
   PARTENZA_FERME.forEach(function(v){ try{ if(v.isConnected){ const p=v.play(); if(p && p.catch) p.catch(function(){}); } }catch(e){} }); PARTENZA_FERME=[];
 }
 /* ================================================================================================================
@@ -1058,8 +1057,8 @@ function chiudiPartenza(){
      dell'audio, non del movimento. Il suono «soglia» fra le due clip non c'è: va ascoltato sopra il tema prima di metterlo.
    · ⚑ L218-7 (11/10) · LA VOCE. Le clip restano mute, ma una clip con la riga in `PORTA_VOCE` (scenes.js; la chiave è il nome
      della clip) ha la sua voce in un <audio> nato qui, come la partenza (L146-1): parte al primo `playing` della SUA clip, segue
-     `audioVivo()` (spento o silenziato = muta, il sottotitolo resta a tempo), suona al `volume` dichiarato (⚑ L231-1: nel contesto Web Audio, `voceClipAggancia`; il tema scende all'apertura del velo), e mentre parla il tema
-     scende a ×0,3 (`musicaSottovoce`). La clip passa alla successiva — o chiude il velo — solo quando sono finite clip E voce:
+     `audioVivo()` (spento o silenziato = muta, il sottotitolo resta a tempo), suona al `volume` dichiarato (⚑ L231-1: nel contesto Web Audio, `voceClipAggancia`), e
+     dall'apertura del velo alla fine dell'ultima voce il tema è FERMO (⚑ L246-1: `voceClipDuck` → `musicaClipZitta`; prima ×0,3). La clip passa alla successiva — o chiude il velo — solo quando sono finite clip E voce:
      quella che finisce prima resta sull'ultimo fotogramma. Il sottotitolo (`#clip-porta-sott`, nella lingua del gioco) segue la
      voce. Una clip senza riga va come prima (dal L218-8 le hanno tutte e undici); una voce che non arriva (`error`) = la clip muta.
    ================================================================================================================ */
@@ -1113,12 +1112,11 @@ function apriClipPorta(id){
       if(tt){ tt.mode='hidden';
         tt.addEventListener('cuechange', function(){ try{ if(fine[i].voce) return; const c=tt.activeCues, r=[]; for(let k=0;c && k<c.length;k++) r.push(c[k].text);
           sott.textContent=r.join('\n'); sott.parentNode.classList.toggle('on', r.length>0); }catch(e){} }); } }catch(e){}
-    a.addEventListener('playing', function(){ if(!a.muted && PORTA_CLIP_APERTA){ try{ if(typeof musicaSottovoce==='function') musicaSottovoce(true); }catch(e){} } }, {once:true});
     a.addEventListener('ended', function(){ avanti(i, 'voce'); }, {once:true});
     a.addEventListener('error', function(){ avanti(i, 'voce'); }, {once:true});   // una voce che non arriva = la clip come prima
     /* parte col primo `playing` della SUA clip; L231-1: il suono nel contesto Web Audio al `volume` dichiarato, l'<audio> muto fa da orologio */
     voceClipAggancia(a, v, PVS[i].voce, Math.min(1, Math.max(0, +PVS[i].volume || 1)), function(){ return PORTA_CLIP_APERTA; }); });
-  if(aa.some(Boolean) && voceClipViva()) voceClipDuck(true);   // L231-1: il tema scende all'apertura del velo, non al playing della voce
+  if(aa.some(Boolean)) voceClipDuck(true);   // L231-1: all'apertura del velo, non al playing della voce; ⚑ L246-1: a zero, anche sulla strada di ripiego e a voce muta
   try{ const p=vv[0].play(); if(p && p.catch) p.catch(function(){}); }catch(e){}
   document.addEventListener('keydown', clipPortaTasto, true);
   void el.offsetWidth; el.classList.add('on');   // col reflow forzato, non con rAF (come apriPartenza)
@@ -1132,7 +1130,7 @@ function chiudiClipPorta(){
   const el=document.getElementById('clip-porta');
   if(el){ el.id='clip-porta-uscente'; veloEsce(el, VELO_USCITA_MS); }   // L181-4: niente ritorno al poster durante la dissolvenza (la voce scende con lui)
   voceClipFerma(VELO_USCITA_MS);   // L231-1: la voce nel contesto scende col velo
-  try{ if(typeof musicaSottovoce==='function') musicaSottovoce(false); }catch(e){}   // L218-7: il tema del decennio torna pieno
+  voceClipDuck(false);   // L218-7: il tema del decennio torna pieno (⚑ L246-1: in 1 s, dallo zero)
   PORTA_CLIP_FERME.forEach(function(v){ try{ if(v.isConnected){ const p=v.play(); if(p && p.catch) p.catch(function(){}); } }catch(e){} }); PORTA_CLIP_FERME=[];
 }
 function confermaCreazione(){ proseguiAvvio(); }                  // CREA resta: initStatoBase la consuma
@@ -1412,7 +1410,7 @@ function storiciPorta(id){     // scelta la porta: si entra nel setup con paese 
   if(typeof setScenario==='function') setScenario(id);
   DA_STORICI=id;               // L62-1 — dopo setScenario: il setup la mostra come etichetta e sa dove tornare
   apriCreazione();
-  if(typeof musicaPorta==='function' && SCENARI[id]) musicaPorta(SCENARI[id].anno);   // L172-5: il tema del decennio entra in dissolvenza con la prima clip, e resta fino alla partita
+  if(typeof musicaPorta==='function' && SCENARI[id]) musicaPorta(SCENARI[id].anno, SCENARI[id].paese);   // L172-5: il tema del decennio entra in dissolvenza con la prima clip, e resta fino alla partita; L218-22: col paese, la sua traccia
   apriClipPorta(id);           // L153-5: sopra la creazione già pronta, il paese e poi il decennio (chi non ha la clip non vede niente)
 }
 function renderStorici(){
