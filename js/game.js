@@ -4608,9 +4608,96 @@ function pickConflittoInt(){
   else if(ev.potPool && ev.potPool.length) p=potDi(rnd(ev.potPool));
   const inst = p ? Object.assign({}, ev, {   // i18n: T() prima di potSub (template coi %POT intatti → sostituzione nella lingua corrente)
     t: potSub(T(ev.t),p), text: potSub(T(ev.text),p), kick: potSub(T(ev.kick||''),p)||T(ev.kick),
-    ch: ev.ch.map(function(c){ return Object.assign({}, c, {l:potSub(T(c.l),p), e:potSub(T(c.e),p)}); })
+    ch: ev.ch.map(function(c){ var o=Object.assign({}, c, {l:potSub(T(c.l),p), e:potSub(T(c.e),p)}); if(c.crisi) o.crisi=Object.assign({con:p.id}, c.crisi); return o; })   // L245-2: la crisi è con la potenza della carta (un `con` scritto nel campo vince)
   }) : ev;
   return inst;
+}
+/* ================================================================================================================
+   L245-2 · LA SCALA DELLA CRISI (DESIGN-POLITICA-ESTERA.md, «⚑ L245-2»). Un oggetto solo in S: `S.crisi` = null (o assente) in
+   pace, altrimenti {con, t, da, ultimo, alleati} — `con` id di POTENZE, `t` 1-4 (tensione · sanzioni · mobilitazione · ultimatum),
+   `da`/`ultimo` mesi assoluti (S.year*12+S.month: l'apertura e l'ultimo fatto), `alleati` 'seguono'|'frenano'|null (detto alla
+   salita da t ≥ 3). Dato puro, una crisi per volta. Solo il capo del governo (livello 3 al governo): altrove non si apre (L245-6).
+   · CHI LA APRE: il campo `crisi:{t:1}` su una scelta (oggi le scelte di fermezza di sette carte di CONFLITTI_INT; cv_profughi non
+     ha una potenza, cv_swing non ha una scelta di fermezza), letto in UN punto, crisiApplica, nel ramo generico di resolveItemCore.
+     Con una crisi aperta su un'altra potenza non apre niente; sulla stessa potenza è un fatto nuovo: un gradino in più (tetto 4).
+   · LA SCALA: una carta al mese al più (CRISI_SCALA_EV, data.js), nello slot dell'evento estero del livello 3 e con p 0,5 nei mesi
+     con la crisi aperta (pickCrisiScala); tre scelte, sali · tieni · scendi (crisiScala). A t ≥ 3 con relInt.alleanza < 50 gli
+     alleati frenano con p 0,55 (la salita non passa, stampa −1). All'ultimatum (t = 4) la salita è la scadenza: il rivale cede con
+     p 0,6 (t torna a 2, reputazione +2) o respinge (t resta a 3: la guerra, t = 5, non esiste fino a L245-4 — crisiTettoBlocco).
+   · IL TEMPO: −1 gradino ogni 4 mesi senza fatti nuovi (crisiMese, chiamata da advanceMonth prima dei rami); a 0 → S.crisi=null.
+     «Tieni» non è un fatto nuovo.
+   · I COSTI: dalle sanzioni in su (t ≥ 2) gMod −0,1 al mese (come fanno le carte; gMod decade ×0,8); dalla mobilitazione in su
+     (t ≥ 3) deficit +0,05 (crisiDeficit, letto da computeDeficit). Nessun effetto sui gruppi: le scelte non hanno colore politico.
+   Interruttore REGOLA_CRISI_SCALA (let; il banco lo rimette in __reseed, __BANCO_CRISI_SCALA_OFF = prima): spento, nessuno
+   scrive S.crisi e nessuno estrae un numero in più — il gioco di prima carriera per carriera. Prova .claude/prova-l245-2-crisi.js
+   (--rosso), misura .claude/misura-l245-2.js. */
+let REGOLA_CRISI_SCALA=true;
+const CRISI_GRADINI=['','tensione','sanzioni','mobilitazione','ultimatum'];
+const CRISI_K={ scelta:0.5, cede:0.6, freno:0.55, alleanzaMin:50, quiete:4, sanzGrowth:0.1, mobDeficit:0.05, premioCede:2 };
+function crisiCapo(){ return S.livello===3 && !S.opposizione; }
+function crisiMeseAss(){ return S.year*12+S.month; }
+function crisiPot(){ return S.crisi ? potDi(S.crisi.con) : null; }
+/* L245-4 · il tetto della guerra fredda: nelle porte 1950-1989 la crisi con la potenza del blocco rivale non supera l'ultimatum.
+   Oggi è già vero per costruzione (t = 5 non esiste): la funzione c'è perché la legga la guerra, non fa niente. */
+function crisiTettoBlocco(){ return 4; }
+function crisiLog(x){ var p=crisiPot(); S.log.unshift({t:T('Crisi internazionale'), x:potSub(T(x),p)}); }
+/* il punto unico del campo `crisi:` (resolveItemCore, ramo generico, subito dopo choice.f) */
+function crisiApplica(campo){
+  if(!REGOLA_CRISI_SCALA || !campo || !campo.con || !crisiCapo()) return;
+  var ora=crisiMeseAss();
+  if(S.crisi && S.crisi.con!==campo.con) return;                 // una crisi per volta
+  if(!S.crisi){ S.crisi={con:campo.con, t:0, da:ora, ultimo:ora, alleati:null}; }
+  var t0=S.crisi.t; S.crisi.t=Math.min(crisiTettoBlocco(), S.crisi.t+(campo.t||1)); S.crisi.ultimo=ora;
+  if(t0===0) crisiLog('Si apre una crisi con %POTdet: la tensione sale.');
+  else if(S.crisi.t>t0) crisiLog(T('La crisi con %POTdet sale di un gradino: %G.').replace('%G', T(CRISI_GRADINI[S.crisi.t])));
+}
+/* le tre scelte delle carte della scala */
+function crisiScala(mossa){
+  if(!REGOLA_CRISI_SCALA || !S.crisi) return;
+  var c=S.crisi, ora=crisiMeseAss();
+  if(mossa==='tieni') return;
+  c.ultimo=ora;
+  if(mossa==='scendi'){
+    c.t--;
+    if(c.t<=0){ crisiLog('La crisi con %POTdet è rientrata.'); S.crisi=null; }
+    else crisiLog(T('La crisi con %POTdet scende di un gradino: %G.').replace('%G', T(CRISI_GRADINI[c.t])));
+    return;
+  }
+  if(c.t>=3){
+    var al=(S.relInt && S.relInt.alleanza!=null) ? S.relInt.alleanza : 50;
+    if(al<CRISI_K.alleanzaMin && Math.random()<CRISI_K.freno){ c.alleati='frenano'; stampad(-1); crisiLog('Gli alleati frenano: la crisi con %POTdet non sale.'); return; }
+    c.alleati='seguono';
+  }
+  if(c.t>=4){
+    if(Math.random()<CRISI_K.cede){ c.t=2; repd(CRISI_K.premioCede); crisiLog('%POTDet cede all\'ultimatum: la crisi torna alle sanzioni.'); }
+    else { c.t=3; crisiLog('%POTDet respinge l\'ultimatum: la crisi resta alla mobilitazione.'); }
+    return;
+  }
+  c.t++;
+  crisiLog(T('La crisi con %POTdet sale di un gradino: %G.').replace('%G', T(CRISI_GRADINI[c.t])));
+}
+/* il mese (advanceMonth, dopo riallineamentoTappa e prima dei rami: vale a ogni livello, una crisi aperta da capo del governo
+   che lascia la carica rientra col tempo) */
+function crisiMese(){
+  if(!REGOLA_CRISI_SCALA || !S.crisi) return;
+  var c=S.crisi, ora=crisiMeseAss();
+  if(ora-c.ultimo>=CRISI_K.quiete){ c.t--; c.ultimo=ora;
+    if(c.t<=0){ crisiLog('La crisi con %POTdet si è spenta col tempo.'); S.crisi=null; return; }
+    crisiLog(T('Senza fatti nuovi, la crisi con %POTdet scende di un gradino: %G.').replace('%G', T(CRISI_GRADINI[c.t]))); }
+  if(c.t>=2) S.gMod-=CRISI_K.sanzGrowth;
+}
+function crisiDeficit(){ return (REGOLA_CRISI_SCALA && S.crisi && S.crisi.t>=3) ? CRISI_K.mobDeficit : 0; }
+/* la carta della scala del mese (genAgendaRamo, livello 3, slot dell'evento estero, prima dei conflitti) */
+function pickCrisiScala(){
+  if(!REGOLA_CRISI_SCALA || !S.crisi || !crisiCapo() || typeof CRISI_SCALA_EV==='undefined') return null;
+  if(Math.random()>=CRISI_K.scelta) return null;
+  var t=S.crisi.t, p=crisiPot(); if(!p) return null;
+  var ev=CRISI_SCALA_EV.find(function(e){ return e.gradino===Math.min(t,3); }); if(!ev) return null;
+  var a4=(t>=4);
+  return Object.assign({}, ev, {
+    t: potSub(T(a4&&ev.t4t?ev.t4t:ev.t),p), text: potSub(T(a4&&ev.t4text?ev.t4text:ev.text),p), kick: T(ev.kick),
+    ch: ev.ch.map(function(c){ return Object.assign({}, c, {l:potSub(T(a4&&c.l4?c.l4:c.l),p), e:potSub(T(a4&&c.e4?c.e4:c.e),p)}); })
+  });
 }
 function pickInternazionale(){
   if(typeof INTERNAZIONALI==='undefined') return null;
@@ -6595,6 +6682,7 @@ function genAgendaRamo(first){
     if(pool.length){ const ev=rnd(pool); if(ev.unaCarriera) segnaUnaCarriera(ev.id); S.recentEvent.push(ev.id); if(S.recentEvent.length>5) S.recentEvent.shift(); S.agenda.push({kind:'event', data:ev, resolved:false}); hadEvent=true; }
   }
   // CONFLITTI internazionali (cantiere paesi reali, Fetta B): i flashpoint coi volti nominati, PRIMA della routine diplomatica (presenza ricorrente)
+  if(!hadEvent){ const cs=pickCrisiScala(); if(cs){ S.agenda.push({kind:'event', data:cs, resolved:false}); hadEvent=true; } }   // L245-2: la scala della crisi aperta, prima di un conflitto nuovo
   if(!hadEvent){ const cv=pickConflittoInt(); if(cv){ S.agenda.push({kind:'event', data:cv, resolved:false}); hadEvent=true; } }
   // grande evento internazionale (lotto Esteri+Difesa): esclusivo, ~ogni 6-9 mesi
   if(!hadEvent){ const iv=pickInternazionale(); if(iv){ S.agenda.push({kind:'event', data:iv, resolved:false}); hadEvent=true; } }
@@ -7136,6 +7224,7 @@ function resolveItemCore(idx,ci){
     var _cadeGov=(typeof cadeAttivo==='function') ? cadeAttivo(choice) : null;   // L93-5: letto PRIMA della scelta, cioè quello che il chip mostrava
     var _b0=(S.attivista?S.attivista.base:0), _a0=(S.attivista?S.attivista.autorev:0);   // A.5 L2: snapshot per l'auto-detect del feeding campagna (la corsia = la valuta costruita)
     try{ ACT_PACE=pace(); choice.f(); } finally{ ACT_PACE=1; }   // A.5 ritmo: durante una carta ATTIVISTA i gd() scalano; il finally GARANTISCE il reset anche se f() eccepisce → mai ACT_PACE≠1 nel gioco nazionale (raggio d'esplosione: tutti i gruppi)
+    if(choice.crisi) crisiApplica(choice.crisi);   // L245-2: il punto unico del campo `crisi:` (la scala della crisi)
     if(S.attivista && S.attivista.campagna && !S.attivista.campagna.resaPending){ var _dB=S.attivista.base-_b0, _dA=S.attivista.autorev-_a0; if(_dB>0||_dA>0) nutriCampagna(_dB>=_dA?'piazza':'istituzionale'); }   // la carta ha costruito base→piazza / autorev→istituzionale → nutre la campagna (mossa O evento) se la corsia coincide; un mese-evento in-corsia NON è incuria
     // lealtà del ministro collegato
     if(d.min){ const m=getMin(d.min); if(m && choice.pleases){ m.loyalty=clamp(m.loyalty+(m.profile===choice.pleases?7:-3),0,100); } }
@@ -7390,6 +7479,7 @@ function avanzaMese(){
   S.month++;
   avanzaAnnoMandato();   // L173-1: l'anno del mandato cresce al mese dell'urna (gennaio senza meseUrna)
   riallineamentoTappa();  // AVANZAMENTO — riallineamento-partiti alle tappe '58/'63 (Fase 1: inerte, tabella vuota → no-op)
+  if(S.crisi) crisiMese();   // L245-2: la crisi scende col tempo e costa (a ogni livello: una crisi aperta che la carica lascia rientra da sola)
   /* l'orologio biografico (lotto 2): a gennaio l'età avanza; verso gli 80 il CONGEDO — la fine
      naturale dell'arco (§2 del design), prima di qualunque urna. Le avvisaglie a 77/79 preparano
      il commiato, che non deve arrivare a sorpresa. */
@@ -9339,6 +9429,7 @@ function applySnap(snap){
   if(!S.recentOng) S.recentOng=[];   // fase B: finestra anti-ripetizione eventi ONG
   if(!S.recentPot) S.recentPot=[];   // cantiere paesi reali (Fetta A): finestra anti-ripetizione dei volti nominati
   if(!S.recentConflInt) S.recentConflInt=[];   // cantiere paesi reali (Fetta B): finestra anti-ripetizione dei conflitti da premier
+  if(S.crisi!=null && !(S.crisi.con && typeof potDi==='function' && potDi(S.crisi.con) && S.crisi.t>=1 && S.crisi.t<=4)) S.crisi=null;   // L245-2: una crisi illeggibile (potenza sconosciuta, gradino fuori scala) torna pace; assente resta assente
   if(S.intl===undefined) S.intl=null;   // fase C1a: i salvataggi non-internazionali restano tali (S.intl dato puro)
   if(S.diplo===undefined) S.diplo=null;   // C2: percorso diplomatico (dato puro migrato)
   if(!S.recentDiplo) S.recentDiplo=[];   // C2: finestra anti-ripetizione missioni diplomatiche

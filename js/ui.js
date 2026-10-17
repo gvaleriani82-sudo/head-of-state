@@ -2847,6 +2847,7 @@ function renderPaese(){
   if(S.relInt && typeof ENTI_INT!=='undefined' && Object.keys(S.relInt).length){
     const cap=function(s){return s.charAt(0).toUpperCase()+s.slice(1);};
     h+=`<div class="card"><div class="ct">${T('Relazioni internazionali')}</div>`;
+    h+=crisiRiga();   // L245-2: la scala della crisi, una riga quando c'è
     ENTI_INT.forEach(function(E){ if(E.societa || S.relInt[E.id]==null) return; const v=S.relInt[E.id];   // prima gli enti GEOPOLITICI
       const _nm=(E.id==='consesso'&&typeof consessoNome==='function')?consessoNome():(naLabel()&&E.nomeNA?E.nomeNA:E.nome);   // D4: nodo era-aware
       h+=indRow(cap(T(_nm)), naLabel()&&E.descNA?E.descNA:E.desc, fmt(v,0), v); });   // sedia-swing: etichette "i due poli" per i non allineati (liv. nazionale)
@@ -2875,6 +2876,15 @@ function renderPaese(){
   h+=`<div class="card"><div class="ct">${T('Come funziona')}</div><div class="log">
     <div class="li">${T("Il consenso è la media dei gruppi, pesata per il loro peso elettorale. L'umore dei gruppi muove le <b>forze dei partiti</b>, che al voto decidono le elezioni (seggi o testa a testa, secondo il paese). Sotto il <b>%N%</b> rischi la crisi di governo. I ministri leali rendono più efficaci le tue politiche.").replace('%N',dif().sogliaCrisi)}</div></div></div>`;
   document.getElementById('sec-paese').innerHTML=h;
+}
+/* L245-2 · la riga della crisi nel cruscotto (scheda Paese, in testa alle relazioni internazionali): «Crisi con %POT · <gradino>»,
+   il gradino su quattro e, da t ≥ 3, che cosa fanno gli alleati. Niente se S.crisi è null o assente. */
+function crisiRiga(){
+  if(!S || !S.crisi || typeof crisiPot!=='function') return '';
+  var p=crisiPot(); if(!p) return '';
+  var g=T(CRISI_GRADINI[S.crisi.t]||'');
+  var sub=T('gradino %N di 4').replace('%N', S.crisi.t) + (S.crisi.alleati ? ' · '+T(S.crisi.alleati==='frenano'?'gli alleati frenano':'gli alleati seguono') : '');
+  return `<div class="ind crisi-riga"><div class="nm"><b>${escAttr(potSub(T('Crisi con %POT'),p))} · ${g}</b><small>${sub}</small></div><div class="num" style="color:${S.crisi.t>=3?'var(--neg)':'var(--warn-ink)'}">${S.crisi.t}/4</div></div>`;
 }
 function indRow(nm,sub,num,pct,ic,gk){pct=clamp(pct,2,100);
   return `<div class="ind"><div class="nm"><b>${ic?icon(ic,T(nm))+' ':''}${gk?gergo(T(nm),gk):T(nm)}</b><small>${T(sub)}</small>

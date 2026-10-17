@@ -14419,22 +14419,22 @@ const ONG_EV=[
    prende posizione (aggressore nominato, vittima generica); scenari archetipici, sobri. ===== */
 const CONFLITTI_INT=[
  {id:'cv_alleanza', tono:'grave', occ:true, min:'difesa', potPool:['russia','cina'], kick:'Difesa collettiva', t:'Un alleato sotto minaccia', text:'%POTdet minaccia apertamente un paese alleato, e l\'Alleanza invoca la difesa comune. Quanto ti esponi?', ch:[
-   {l:'Un contributo pieno', e:'Affidabile agli alleati; %POTdet ti segna', pleases:'conservatore', costo:{debito:1},f:()=>{relIntMuovi('alleanza',8); relIntMuovi('rivale',-7); repd(3); S.ind.debt+=1; gd('giovani',-2);}},
+   {l:'Un contributo pieno', crisi:{t:1}, e:'Affidabile agli alleati; %POTdet ti segna', pleases:'conservatore', costo:{debito:1},f:()=>{relIntMuovi('alleanza',8); relIntMuovi('rivale',-7); repd(3); S.ind.debt+=1; gd('giovani',-2);}},
    {l:'Solo sostegno politico', e:'Prudenza; gli alleati ti trovano tiepido', pleases:'tecnico', f:()=>{relIntMuovi('alleanza',-3); gd('cetomedio',1);}},
    {l:'Resti fuori: non è guerra tua', e:'Eviti l\'esposizione; l\'Alleanza prende nota', pleases:'populista', f:()=>{relIntMuovi('alleanza',-7); relIntMuovi('rivale',3); repd(-3); gd('giovani',2);}},
  ]},
  {id:'cv_nucleare', tono:'grave', min:'esteri', potPool:['iran','corea_nord'], kick:'Allarme nucleare', t:'%POTdet accelera sul nucleare', text:'%POTdet annuncia un avanzamento del suo programma nucleare. Le Nazioni Unite chiedono una risposta: fermezza e diplomazia tirano in direzioni opposte.', ch:[
-   {l:'Sanzioni e pressione', e:'Fermezza con le Nazioni Unite; %POTdet si arrocca', pleases:'conservatore', f:()=>{relIntMuovi('rivale',-6); relIntMuovi('consesso',5); relIntMuovi('alleanza',3); repd(2);}},
+   {l:'Sanzioni e pressione', crisi:{t:1}, e:'Fermezza con le Nazioni Unite; %POTdet si arrocca', pleases:'conservatore', f:()=>{relIntMuovi('rivale',-6); relIntMuovi('consesso',5); relIntMuovi('alleanza',3); repd(2);}},
    {l:'Apri un canale negoziale', e:'Tendi la mano; i falchi storcono il naso', pleases:'progressista', f:()=>{relIntMuovi('rivale',5); relIntMuovi('consesso',2); gd('cetomedio',-2);}},
    {l:'Lasci la regia ai grandi', e:'Ti chiami fuori; pesi di meno', f:()=>{relIntMuovi('consesso',-3); repd(-2);}},
  ]},
  {id:'cv_stretto', occ:true, min:'difesa', pot:'cina', kick:'Rotte contese', t:'Tensione nello stretto', text:'%POTdet rivendica le acque di uno stretto conteso e ne ostacola il traffico: una rotta vitale per il commercio mondiale è a rischio.', ch:[
-   {l:'Ti allinei agli alleati', e:'Compatto con l\'Occidente; il commercio %POTdi si raffredda', pleases:'conservatore', f:()=>{relIntMuovi('alleanza',7); relIntMuovi('rivale',-7); S.gMod-=0.2; gd('imprenditori',-3);}},
+   {l:'Ti allinei agli alleati', crisi:{t:1}, e:'Compatto con l\'Occidente; il commercio %POTdi si raffredda', pleases:'conservatore', f:()=>{relIntMuovi('alleanza',7); relIntMuovi('rivale',-7); S.gMod-=0.2; gd('imprenditori',-3);}},
    {l:'Navighi in mezzo', e:'Tieni aperto col mercato; gli alleati diffidano', pleases:'populista', f:()=>{relIntMuovi('alleanza',-5); relIntMuovi('rivale',4); gd('imprenditori',3);}},
    {l:'Spingi per una mediazione delle Nazioni Unite', e:'Da mediatore credibile, se ne hai il peso', ente:'consesso', enteMin:60, pleases:'tecnico', f:()=>{relIntMuovi('consesso',6); relIntMuovi('rivale',2); repd(4);}},
  ]},
  {id:'cv_energia', min:'sviluppo', pot:'russia', kick:'Arma-energia', t:'Il ricatto dell\'energia', text:'%POTdet taglia le forniture di energia per piegare chi ne dipende: i prezzi schizzano, le imprese tremano.', ch:[
-   {l:'Tieni la linea, cerchi alternative', e:'Non cedi al ricatto; l\'inverno sarà caro', pleases:'conservatore', f:()=>{relIntMuovi('alleanza',5); relIntMuovi('rivale',-5); S.gMod-=0.25; gd('lavoratori',-2); repd(3);}},
+   {l:'Tieni la linea, cerchi alternative', crisi:{t:1}, e:'Non cedi al ricatto; l\'inverno sarà caro', pleases:'conservatore', f:()=>{relIntMuovi('alleanza',5); relIntMuovi('rivale',-5); S.gMod-=0.25; gd('lavoratori',-2); repd(3);}},
    {l:'Apri uno spiraglio %POTa', e:'Allenti la pressione sui prezzi; gli alleati protestano', pleases:'populista', f:()=>{relIntMuovi('alleanza',-5); relIntMuovi('rivale',5); S.gMod+=0.1; gd('imprenditori',2); repd(-3);}},
  ]},
  {id:'cv_profughi', min:'interno', kick:'Emergenza umanitaria', t:'Ondata di profughi', text:'Un conflitto oltre confine spinge decine di migliaia di profughi verso le frontiere: l\'accoglienza divide il paese.', ch:[
@@ -14448,16 +14448,16 @@ const CONFLITTI_INT=[
    {l:'La lasci ai rivali', e:'Niente sforzo; %POTdet guarda altrove', pleases:'populista', f:()=>{relIntMuovi('rivale',5); relIntMuovi('alleanza',-2);}},
  ]},
  {id:'cv_missile', min:'difesa', pot:'corea_nord', kick:'Provocazione', t:'Lancio di prova', text:'%POTdet lancia un missile di prova che sorvola acque trafficate: una provocazione in cerca di attenzione.', ch:[
-   {l:'Condanna ferma e coordinata', e:'Compatto cogli alleati; %POTdet incassa l\'isolamento', pleases:'conservatore', f:()=>{relIntMuovi('alleanza',4); relIntMuovi('rivale',-3); relIntMuovi('consesso',2);}},
+   {l:'Condanna ferma e coordinata', crisi:{t:1}, e:'Compatto cogli alleati; %POTdet incassa l\'isolamento', pleases:'conservatore', f:()=>{relIntMuovi('alleanza',4); relIntMuovi('rivale',-3); relIntMuovi('consesso',2);}},
    {l:'Minimizzi, per non dare palco', e:'Niente scena %POTa; qualcuno ti dice molle', pleases:'tecnico', f:()=>{gd('cetomedio',-1);}},
  ]},
  {id:'cv_sanzioni', occ:true, min:'esteri', potPool:['russia','cina','iran'], kick:'Il voto', t:'Il voto sulle sanzioni', text:'Il fronte occidentale propone nuove sanzioni contro %POTdet. Unirti ha un costo per le tue imprese; sfilarti, un costo con gli alleati.', ch:[
-   {l:'Ti unisci alle sanzioni', e:'Affidabile; le tue imprese pagano il conto', pleases:'conservatore', f:()=>{relIntMuovi('alleanza',5); relIntMuovi('rivale',-5); gd('imprenditori',-3); S.gMod-=0.1; repd(2);}},
+   {l:'Ti unisci alle sanzioni', crisi:{t:1}, e:'Affidabile; le tue imprese pagano il conto', pleases:'conservatore', f:()=>{relIntMuovi('alleanza',5); relIntMuovi('rivale',-5); gd('imprenditori',-3); S.gMod-=0.1; repd(2);}},
    {l:'Sanzioni annacquate', e:'Cerchi il compromesso; scontenti un po\' tutti', pleases:'tecnico', f:()=>{relIntMuovi('alleanza',-2); relIntMuovi('rivale',1);}},
    {l:'Ti sfili', e:'Salvi l\'export; gli alleati se lo legano al dito', pleases:'populista', f:()=>{relIntMuovi('alleanza',-6); relIntMuovi('rivale',4); gd('imprenditori',3); repd(-3);}},
  ]},
  {id:'cv_incidente', min:'difesa', potPool:['russia','cina'], kick:'Incidente', t:'Incidente al confine', text:'Un incidente militare con %POTdet — uno sconfinamento, un\'unità intercettata — rischia di degenerare. Tutti aspettano la tua reazione.', ch:[
-   {l:'Reazione ferma', e:'Mostri i muscoli; sale la tensione con %POTdet', pleases:'conservatore', rischio:2, f:()=>{relIntMuovi('alleanza',3); relIntMuovi('rivale',-5); gd('cetomedio',2);}},
+   {l:'Reazione ferma', crisi:{t:1}, e:'Mostri i muscoli; sale la tensione con %POTdet', pleases:'conservatore', rischio:2, f:()=>{relIntMuovi('alleanza',3); relIntMuovi('rivale',-5); gd('cetomedio',2);}},
    {l:'Gestione diplomatica', e:'Abbassi i toni; eviti l\'escalation', pleases:'tecnico', f:()=>{relIntMuovi('rivale',2); repd(2);}},
  ]},
 ];
@@ -14492,6 +14492,33 @@ const CONFLITTI_SWING=[
  {id:'cs_palco', min:'esteri', kick:'Il tuo palco', t:'Guidare i non allineati', text:'Un gruppo di paesi non allineati cerca un portavoce in un foro globale: l\'occasione di pesare come ponte tra i poli — la forza della tua posizione di terzo.', ch:[
    {l:'Ti fai portavoce dei non allineati', e:'Sali sul palco: le Nazioni Unite ti riconoscono', pleases:'progressista', f:()=>{relIntMuovi('consesso',9); repd(5); gd('giovani',2);}},
    {l:'Resti defilato', e:'Niente esposizione; un\'occasione persa', f:()=>{relIntMuovi('consesso',-2);}},
+ ]},
+];
+
+/* ===== L245-2 · LA SCALA DELLA CRISI (DESIGN-POLITICA-ESTERA.md, «⚑ L245-2») — le carte dei gradini 2-4, solo per il capo
+   del governo (livello 3) con `S.crisi` aperta. Il primo gradino (tensione) non ha una carta sua: lo apre il campo `crisi:{t:1}`
+   sulle scelte di fermezza di CONFLITTI_INT (la potenza è quella della carta: `pot` o quella pescata da `potPool`; un `con`
+   scritto nel campo la sostituisce), letto in un punto solo, `crisiApplica` (game.js). Le carte le pesca `pickCrisiScala`
+   per il gradino in corso: a t = 1 «le sanzioni», a t = 2 «la mobilitazione», a t = 3 e 4 «l'ultimatum» (a t = 4 col testo
+   della scadenza, i campi `t4*`). Tre scelte, sempre nello stesso ordine: sali · tieni · scendi (`crisiScala`). Niente
+   `pleases` e niente gruppi: le scelte non hanno un colore politico (regola fissa, partiti neutri). Niente persone, niente
+   dettagli militari. La guerra (t = 5) non c'è: arriva con L245-4. ===== */
+const CRISI_SCALA_EV=[
+ {id:'crs_sanzioni', gradino:1, min:'esteri', kick:'Crisi internazionale', t:'Le sanzioni contro %POTdet', text:'La tensione con %POTdet non si scioglie. Gli alleati discutono un pacchetto di sanzioni: aderire alza la pressione, ma costa al commercio.', ch:[
+   {l:'Vari le sanzioni', e:'La pressione sale di un gradino; il commercio ne risente', f:()=>{relIntMuovi('alleanza',3); relIntMuovi('rivale',-4); crisiScala('sali');}},
+   {l:'Tieni la linea, senza nuove misure', e:'Né un passo avanti né uno indietro', f:()=>{crisiScala('tieni');}},
+   {l:'Apri un canale di dialogo', e:'La tensione scende; gli alleati ti trovano tiepido', f:()=>{relIntMuovi('rivale',3); relIntMuovi('alleanza',-2); crisiScala('scendi');}},
+ ]},
+ {id:'crs_mobilitazione', gradino:2, min:'difesa', kick:'Crisi internazionale', t:'Le sanzioni non bastano', text:'Le sanzioni contro %POTdet sono in vigore, ma la crisi non rientra. Si propone di alzare lo stato di allerta delle forze armate: un segnale forte, e una spesa.', ch:[
+   {l:'Alzi lo stato di allerta', e:'Un segnale di fermezza; costa al bilancio ogni mese', f:()=>{relIntMuovi('alleanza',2); relIntMuovi('rivale',-4); crisiScala('sali');}},
+   {l:'Restano le sanzioni, niente di più', e:'La pressione resta quella che è', f:()=>{crisiScala('tieni');}},
+   {l:'Allenti le sanzioni', e:'La crisi scende di un gradino; gli alleati storcono il naso', f:()=>{relIntMuovi('rivale',3); relIntMuovi('alleanza',-3); crisiScala('scendi');}},
+ ]},
+ {id:'crs_ultimatum', gradino:3, min:'esteri', kick:'Crisi internazionale', t:'L\'ultimatum', text:'Con le forze in allerta, la crisi con %POTdet è a un passo dalla rottura. Puoi porre un ultimatum: una richiesta pubblica, con una scadenza.',
+  t4t:'La scadenza dell\'ultimatum', t4text:'La scadenza dell\'ultimatum %POTa si avvicina. Tutti aspettano la risposta, e la tua prossima mossa.', ch:[
+   {l:'Poni l\'ultimatum', l4:'Tieni il punto fino alla scadenza', e:'Tutto su una carta: %POTdet deve rispondere', e4:'%POTDet cede, o respinge', f:()=>{relIntMuovi('rivale',-3); crisiScala('sali');}},
+   {l:'Mantieni l\'allerta, senza ultimatum', l4:'Concedi altro tempo', e:'La crisi resta dov\'è', e4:'La scadenza si allunga', f:()=>{crisiScala('tieni');}},
+   {l:'Smobiliti', l4:'Ritiri l\'ultimatum', e:'La crisi scende; la fermezza si incrina', e4:'La crisi scende; la tua parola perde peso', f:()=>{relIntMuovi('rivale',3); repd(-1); crisiScala('scendi');}},
  ]},
 ];
 

@@ -42,6 +42,7 @@ function computeDeficit(){
   const interesse=(S.ind.debt-(S.debtAncora!=null?S.debtAncora:135))*0.025*D.interessi;
   d+= interesse>0 ? interesse*(1+(100-fid)/100*D.spreadMult) : interesse;   // lo spread morde SOLO gli interessi positivi (debito>135)
   d+=ministerMods().deficit;
+  if(typeof crisiDeficit==='function') d+=crisiDeficit();   // L245-2: la mobilitazione costa (0 senza crisi o a interruttore spento)
   d-=(S.ciclo||0)*0.7;   // stabilizzatore automatico: recessione (ciclo<0) → meno gettito → deficit su da solo
   d+=leggiMods().deficit;   // leggi di spesa (+) o di entrata/risparmio (−)
   d+=(typeof deficitEra==='function')?deficitEra():0;   // L102-2: il deficit d'epoca (DRIFT_DEFICIT_ERA, game.js; 0 fuori tabella)
