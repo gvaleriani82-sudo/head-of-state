@@ -4962,7 +4962,7 @@ const EN = {
   "la Regione %L":"the Region of %L",
   "i tuoi indicatori e le tue leve":"your indicators and your levers",
   "Apri →":"Open →",
-  "<b>Sei %R</b> nel governo di <b>%P</b>. Governa lui il paese; tu costruisci il tuo capitale e punti al vertice.":"<b>You are %R</b> in <b>%P</b>'s government. They run the country; you build your capital and aim for the top.",
+  "<b>Sei %R</b> nel governo di <b>%P</b>. È il suo governo a guidare il paese; tu costruisci il tuo capitale e punti al vertice.":"<b>You are %R</b> in <b>%P</b>'s government. They run the country; you build your capital and aim for the top.",
   "Capitale politico":"Political capital",
   "Fiducia del premier":"The premier's trust",
   " · sei in bilico":" · you are on the edge",
@@ -30164,4 +30164,13 @@ const EN = {
   "%G sostituisce il premier con %P. Tu resti ministro, da partner.":"%G replaces the prime minister with %P. You stay on as minister, as a partner.",
   "Entra nel governo da partner →":"Join the government as a partner →",
   "Firma: governo guidato da %P (tu da partner)":"Sign: government led by %P (you as partner)",
+  /* L248-2 — le battute del personaggio (BATTUTE_PERSONAGGIO, personaggio.js): non ancora usate, testi per il giro suoni */
+  "Avete scelto la fiducia. Ora tocca a noi meritarla.":"You chose trust. Now we have to earn it.",
+  "Gli elettori hanno deciso. Rispetto il loro voto.":"The voters have decided. I respect their vote.",
+  "Un anno buono. Il prossimo dovrà essere migliore.":"A good year. The next one must be better.",
+  "È stato un anno duro. Lo dico senza giri di parole.":"It was a hard year. I will say it plainly.",
+  "Giuro di servire il paese, tutto il paese.":"I swear to serve the country, all of it.",
+  "Ecco la firma. Da oggi questa legge è di tutti.":"Signed. From today, this law belongs to everyone.",
+  "Sono qui per ascoltarvi, e per chiedervi il voto.":"I am here to listen, and to ask for your vote.",
+  "Non la pensiamo uguale su tutto. Ma su questo sì.":"We do not agree on everything. But on this, we do.",
 };

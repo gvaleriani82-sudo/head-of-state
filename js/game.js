@@ -68,6 +68,7 @@ function applicaPersonaggio(){
   S.personaggio = c ? { nome:(c.nome||'').trim().slice(0,24), genere:(c.genere==='f'?'f':'m'), etaIniziale:c.eta||52,
     background:c.background||null, famiglia:c.famiglia||null, avatar:c.avatar||null,
     orientamento:clamp(c.orientamento!=null?c.orientamento:0,-2,2), religiosita:c.religiosita||'laico' } : defaultPersonaggio();
+  if(c && ['chiara','media','scura'].indexOf(c.carnagione)>=0) S.personaggio.carnagione=c.carnagione;   // L248-2 (D-A4): il campo nasce solo se la creazione lo chiede (L248-4); senza, ripiego dall'avatar (personaggioCarnagione, personaggio.js)
   S.eta=S.personaggio.etaIniziale;
   const B=S.personaggio.background ? BACKGROUNDS.find(function(b){return b.id===S.personaggio.background;}) : null;
   if(B){
@@ -9270,6 +9271,7 @@ function applySnap(snap){
   if(!S.biografia) S.biografia=bioVuota();                                     // migrazione vecchi salvataggi (pre-biografia): memoria vuota, i tratti maturano da qui
   else { const c0=bioVuota().c; for(const k in c0){ if(S.biografia.c[k]==null) S.biografia.c[k]=0; } }   // contatori nuovi (inchieste, condanne...) sui salvataggi vecchi
   if(!S.personaggio) S.personaggio=defaultPersonaggio();                       // migrazione pre-personaggio: neutro (lotto 2)
+  if(S.personaggio.carnagione!=null && ['chiara','media','scura'].indexOf(S.personaggio.carnagione)<0) delete S.personaggio.carnagione;   // L248-2: un valore sconosciuto cade sul ripiego dall'avatar (personaggioCarnagione, personaggio.js)
   if(S.annoInizio==null) S.annoInizio=2025;   // i vecchi salvataggi sono nati nel 2025: mantengono il loro ancoraggio per gli "anni trascorsi"
   if(S.eta==null) S.eta=(S.personaggio.etaIniziale||52)+Math.max(0,(S.year||2025)-(S.annoInizio||2025));   // età coerente con gli anni già giocati
   /* migrazione pre-giudiziario (lotto 3): esposizione iniziale dal personaggio, nessuna inchiesta in corso */

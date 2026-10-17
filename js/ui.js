@@ -2476,7 +2476,7 @@ function renderGov(){
     const pn=(S.premier||{}).nome||'il premier', leal=Math.round((S.premier||{}).lealta||0), cap=Math.round(S.capitale||0);
     const Mn=(typeof dicNm==='function'?dicNm(S.dicastero):((MINISTRIES.find(x=>x.id===S.dicastero)||{}).nm||''));   // D3: nome era-aware
     const capCol=cap>=65?'var(--pos)':cap<35?'var(--neg)':'var(--txt)', lealCol=leal<25?'var(--neg)':leal<50?'var(--warn)':'var(--pos)';
-    ruolo+=`<div class="banner">${T('<b>Sei %R</b> nel governo di <b>%P</b>. Governa lui il paese; tu costruisci il tuo capitale e punti al vertice.').replace('%R',escAttr(ruoloDicastero())).replace('%P',escAttr(pn))}</div>`;
+    ruolo+=`<div class="banner">${T('<b>Sei %R</b> nel governo di <b>%P</b>. È il suo governo a guidare il paese; tu costruisci il tuo capitale e punti al vertice.').replace('%R',escAttr(ruoloDicastero())).replace('%P',escAttr(pn))}</div>`;
     ruolo+=`<div class="card" style="padding:10px 14px;margin-bottom:10px"><div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-size:12.5px;color:var(--mut)">${T('Capitale politico')}</span><span class="mono" style="font-weight:600;font-size:16px;color:${capCol}">${cap}<span class="contorno" style="color:var(--mut2);">/100</span></span></div>
       <div class="bar">${fillI('cap:min', clamp(cap,2,100), capCol)}</div>
       <div style="display:flex;justify-content:space-between;margin-top:7px;font-size:12px"><span style="color:var(--mut2)">${T('Fiducia del premier')}</span><span style="color:${lealCol};font-weight:600">${leal}/100${leal<25?T(' · sei in bilico'):''}</span></div>
