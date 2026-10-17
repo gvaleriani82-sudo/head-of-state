@@ -1881,7 +1881,7 @@ function render(){
     : liv5
     ? `${meseSpan()} · ${typeof ruoloDiplo==='function'?ruoloDiplo():T('Ambasciatore')}`
     : S.opposizione
-    ? `${meseSpan()} · <span style="color:var(--neg);font-weight:700">${T('OPPOSIZIONE')}</span> · ${T('governa')} ${(part(S.governoAvversario)||{}).nome||'—'} · ${T('anno')} ${S.turnInMandate+1}/${PAESE.mandatoMesi/12} ${T('al voto')}`
+    ? `${meseSpan()} · <span style="color:var(--neg);font-weight:700">${T('OPPOSIZIONE')}</span> · ${T('governa')} ${T((part(S.governoAvversario)||{}).nome||'—')} · ${T('anno')} ${S.turnInMandate+1}/${PAESE.mandatoMesi/12} ${T('al voto')}`
     : `${meseSpan()} · ${T('Mandato')} ${S.mandate}, ${T('anno')} ${S.turnInMandate+1}/${PAESE.mandatoMesi/12}`;
   const I=S.ind,P=S.prev; const riK=S.relInt||{}; const rk=id=>riK[id]!=null?riK[id]:50;
   document.getElementById('keys').innerHTML= liv0
@@ -2642,11 +2642,11 @@ function renderGov(){
     } else if(it.kind==='rinnovoInt'){
       /* fine mandato internazionale (fase C1a): rinnovo o ritiro all'apice */
       const I=S.intl||{};
-      h+=`<div class="ag major ${it.resolved?'done':''}">${agScene(it)}<div class="ah"><div class="kick">Fine del mandato</div><h3>Le Nazioni Unite decidono</h3></div>
-        <div class="atext">Cinque anni al vertice del mondo volgono al termine. I membri sono pronti a riconfermarti: puoi continuare, o ritirarti all'apice di una carriera che ha toccato il cielo.</div>`;
+      h+=`<div class="ag major ${it.resolved?'done':''}">${agScene(it)}<div class="ah"><div class="kick">${T('Fine del mandato')}</div><h3>${T('Le Nazioni Unite decidono')}</h3></div>
+        <div class="atext">${T("Cinque anni al vertice del mondo volgono al termine. I membri sono pronti a riconfermarti: puoi continuare, o ritirarti all'apice di una carriera che ha toccato il cielo.")}</div>`;   // L244-4: la carta passa dal dizionario
       if(!it.resolved){ h+=`<div class="opts">
-        <button class="opt" style="border-color:var(--acc)" onclick="resolveItem(${idx},0)"><span class="ol">Accetti un nuovo mandato</span><span class="oe">Continui a guidare le Nazioni Unite</span></button>
-        <button class="opt" onclick="resolveItem(${idx},1)"><span class="ol">Ti ritiri all'apice</span><span class="oe">Lasci da protagonista: la parola passa alla storia</span></button></div>`; }
+        <button class="opt" style="border-color:var(--acc)" onclick="resolveItem(${idx},0)"><span class="ol">${T('Accetti un nuovo mandato')}</span><span class="oe">${T('Continui a guidare le Nazioni Unite')}</span></button>
+        <button class="opt" onclick="resolveItem(${idx},1)"><span class="ol">${T("Ti ritiri all'apice")}</span><span class="oe">${T('Lasci da protagonista: la parola passa alla storia')}</span></button></div>`; }
       else h+=`<div class="outcome">${it.outcome}</div>${esitiHtml(it)}${tornaTavoloHtml(it)}`;
       h+=`</div>`;
     } else if(it.kind==='inchiesta'){
@@ -4196,7 +4196,7 @@ function premiAvanza(){
 function renderMappaInfo(){
   if(MAPSEL==null) return `<div style="padding:4px 14px 12px;font-size:12px;color:var(--mut2)">${T("Tocca un'area per i dettagli.")}</div>`;
   const TE=PAESE.territori[MAPSEL], t=S.territori[MAPSEL]||{}, tuo=compatibile(t.partito, part(S.partito).asse, S.partito);
-  const pn=(part(t.partito)||{}).nome||'—';
+  const pn=T((part(t.partito)||{}).nome||'—');   // L244-4: il nome del partito passa da T()
   /* F2 — se l'area selezionata è quella che CHIAMA, la mini-scheda con la scelta prende il posto dell'info piatta.
      Map-native: la decisione vive qui (S.territorioChiama, dato puro), non come carta-agenda. */
   const chiama=(S.territorioChiama && S.territorioChiama.idx===MAPSEL);
@@ -4240,7 +4240,7 @@ function renderMappaPage(){
   h+=`<div class="card uno"><div class="ct">${T('La mappa')}</div><div class="mappa-wrap">${renderMappaSVG()}</div>
     <div class="mappa-leg"><span><i style="background:var(--acc)"></i>${T('il tuo blocco')}</span><span><i style="background:var(--mut2)"></i>${T('avversario')}</span><span><i style="background:var(--acc);opacity:.5"></i>${T('tinta chiara = contendibile')}</span><span><i style="border:1.6px solid var(--brand)"></i>${T('area simbolo')}</span></div>
     ${renderMappaInfo()}</div>`;
-  h+=`<div class="card"><div class="ct">${T('Aree simbolo')}</div>`+PAESE.territori.map(function(TE,i){ if(!TE.simbolo) return ''; const t=S.territori[i]||{}; const tuo=compatibile(t.partito,asseTuo,S.partito); const pn=(part(t.partito)||{}).nome||'';
+  h+=`<div class="card"><div class="ct">${T('Aree simbolo')}</div>`+PAESE.territori.map(function(TE,i){ if(!TE.simbolo) return ''; const t=S.territori[i]||{}; const tuo=compatibile(t.partito,asseTuo,S.partito); const pn=T((part(t.partito)||{}).nome||'');
     return `<div class="grp"><div class="top"><div class="nm">${nomeTerr(TE)}<small>${caricaTerr(TE)}</small></div><span class="chip" style="background:${tuo?'var(--acc-bg)':'var(--line2)'};color:${tuo?'var(--acc-ink)':'var(--mut)'}">${T(tuo?'tuo':'avversario')}</span></div><div style="font-size:12px;color:var(--mut)">${t.titolare||'—'} · ${pn}</div></div>`; }).join('')+`</div>`;
   h+=`<div class="card"><div class="ct">${T('Come funziona')}</div><div class="log"><div class="li">${T('Ogni area ha una tendenza storica (tinta piena = roccaforte, chiara = contendibile) e un eletto locale. Alle <b>elezioni intermedie</b> le aree possono cambiare colore: più aree controlla il tuo blocco, più sale il <b>potere locale</b> (sopra 50 → <b>+1 punto riforma</b> a gennaio).')}</div></div></div>`;
   return h;
@@ -4476,7 +4476,7 @@ function renderPartiti(){
   const campRiga=(typeof inCampagna==='function' && inCampagna() && PAESE.mappa)?`<div class="banner camp-banner" style="margin-bottom:12px">${T('Campagna sul territorio: <b>%N punti</b> da spendere sulla mappa, %M mesi al voto.').replace('%N',campSforzo()).replace('%M',mesiAllaFine())} <a href="#" onclick="apriMappa();return false;" style="font-weight:600">${T('Apri la mappa →')}</a></div>`:'';   // L64-2
   const territBox=(campRiga)+((S.territori&&S.territori.length)?(PAESE.mappa
     ? `<div class="card" style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 14px;margin-bottom:12px"><span style="font-size:12.5px;color:var(--mut)">${T('Il territorio · <b>%N</b> aree su %M al tuo blocco').replace('%N',S.territori.filter(function(t){return compatibile(t.partito,asseTuo,S.partito);}).length).replace('%M',S.territori.length)}</span><button class="mini-btn" style="margin-top:0;flex-shrink:0;background:var(--brand-bg);border-color:var(--brand);color:var(--brand);font-weight:600" onclick="apriMappa()">${T('Apri la mappa →')}</button></div>`
-    : `<div class="card"><div class="ct">${T('Il territorio')}</div>`+PAESE.territori.map(function(TE,i){ const t=S.territori[i]||{}; const tuo=compatibile(t.partito,asseTuo,S.partito); const pn=(part(t.partito)||{}).nome||''; return `<div class="grp"><div class="top"><div class="nm">${nomeTerr(TE)}<small>${caricaTerr(TE)}</small></div><span class="chip" style="background:${tuo?'var(--acc-bg)':'var(--line2)'};color:${tuo?'var(--acc-ink)':'var(--mut)'}">${T(tuo?'tuo':'avversario')}</span></div><div style="font-size:12px;color:var(--mut)">${t.titolare||'—'} · ${pn}</div></div>`; }).join('')+`</div>`):'');
+    : `<div class="card"><div class="ct">${T('Il territorio')}</div>`+PAESE.territori.map(function(TE,i){ const t=S.territori[i]||{}; const tuo=compatibile(t.partito,asseTuo,S.partito); const pn=T((part(t.partito)||{}).nome||''); return `<div class="grp"><div class="top"><div class="nm">${nomeTerr(TE)}<small>${caricaTerr(TE)}</small></div><span class="chip" style="background:${tuo?'var(--acc-bg)':'var(--line2)'};color:${tuo?'var(--acc-ink)':'var(--mut)'}">${T(tuo?'tuo':'avversario')}</span></div><div style="font-size:12px;color:var(--mut)">${t.titolare||'—'} · ${pn}</div></div>`; }).join('')+`</div>`):'');
   const mediaU=S.correnti?Math.round(umoreMedio()):null;
   const dcP=S.correnti?correnteDaCurare():null;   // loop attivo Lotto 2: evidenzia già sulla landing quale corrente curare
   const dcNome=dcP?T((CORRENTI_DEF.find(function(d){return d.id===dcP.corrente;})||{}).nome||''):'';
