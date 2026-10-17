@@ -4633,7 +4633,16 @@ function pickConflittoInt(){
    (--rosso), misura .claude/misura-l245-2.js. */
 let REGOLA_CRISI_SCALA=true;
 const CRISI_GRADINI=['','tensione','sanzioni','mobilitazione','ultimatum'];
-const CRISI_K={ scelta:0.5, cede:0.6, freno:0.55, alleanzaMin:50, quiete:4, sanzGrowth:0.1, mobDeficit:0.05, premioCede:2 };
+const CRISI_K={ cede:0.6, freno:0.55, alleanzaMin:50, sanzGrowth:0.1, mobDeficit:0.05, premioCede:2 };
+/* L245-2bis · LA FREQUENZA (DESIGN-POLITICA-ESTERA.md, «⚑ L245-2bis»): tre costanti, ciascuna letta in UN punto —
+   CRISI_P_APRE (crisiApplica: la fermezza apre una crisi NUOVA con questa probabilità, estratta solo se la scelta ha il campo
+   `crisi:` e non c'è una crisi aperta; sulla stessa potenza la fermezza sale sempre, è un fatto nuovo), CRISI_P_SCALA
+   (pickCrisiScala: la carta della scala nei mesi con la crisi aperta), CRISI_QUIETE (crisiMese: i mesi senza fatti nuovi per
+   scendere di un gradino). let: il banco le rimette a ogni carriera in __reseed con crisiTaratura() — __BANCO_CRISI_TARATA_OFF
+   = i valori di L245-2 (CRISI_PRIMA: 1 · 0,5 · 4, nessuna estrazione in più). */
+const CRISI_TARATA={ apre:0.15, scala:0.5, quiete:4 }, CRISI_PRIMA={ apre:1, scala:0.5, quiete:4 };
+let CRISI_P_APRE=CRISI_TARATA.apre, CRISI_P_SCALA=CRISI_TARATA.scala, CRISI_QUIETE=CRISI_TARATA.quiete;
+function crisiTaratura(prima){ var v=prima?CRISI_PRIMA:CRISI_TARATA; CRISI_P_APRE=v.apre; CRISI_P_SCALA=v.scala; CRISI_QUIETE=v.quiete; }
 function crisiCapo(){ return S.livello===3 && !S.opposizione; }
 function crisiMeseAss(){ return S.year*12+S.month; }
 function crisiPot(){ return S.crisi ? potDi(S.crisi.con) : null; }
@@ -4646,7 +4655,9 @@ function crisiApplica(campo){
   if(!REGOLA_CRISI_SCALA || !campo || !campo.con || !crisiCapo()) return;
   var ora=crisiMeseAss();
   if(S.crisi && S.crisi.con!==campo.con) return;                 // una crisi per volta
-  if(!S.crisi){ S.crisi={con:campo.con, t:0, da:ora, ultimo:ora, alleati:null}; }
+  if(!S.crisi){
+    if(CRISI_P_APRE<=0 || (CRISI_P_APRE<1 && Math.random()>=CRISI_P_APRE)) return;   // L245-2bis: l'apertura non è certa (a 1 nessuna estrazione)
+    S.crisi={con:campo.con, t:0, da:ora, ultimo:ora, alleati:null}; }
   var t0=S.crisi.t; S.crisi.t=Math.min(crisiTettoBlocco(), S.crisi.t+(campo.t||1)); S.crisi.ultimo=ora;
   if(t0===0) crisiLog('Si apre una crisi con %POTdet: la tensione sale.');
   else if(S.crisi.t>t0) crisiLog(T('La crisi con %POTdet sale di un gradino: %G.').replace('%G', T(CRISI_GRADINI[S.crisi.t])));
@@ -4681,7 +4692,7 @@ function crisiScala(mossa){
 function crisiMese(){
   if(!REGOLA_CRISI_SCALA || !S.crisi) return;
   var c=S.crisi, ora=crisiMeseAss();
-  if(ora-c.ultimo>=CRISI_K.quiete){ c.t--; c.ultimo=ora;
+  if(ora-c.ultimo>=CRISI_QUIETE){ c.t--; c.ultimo=ora;   // L245-2bis
     if(c.t<=0){ crisiLog('La crisi con %POTdet si è spenta col tempo.'); S.crisi=null; return; }
     crisiLog(T('Senza fatti nuovi, la crisi con %POTdet scende di un gradino: %G.').replace('%G', T(CRISI_GRADINI[c.t]))); }
   if(c.t>=2) S.gMod-=CRISI_K.sanzGrowth;
@@ -4690,7 +4701,7 @@ function crisiDeficit(){ return (REGOLA_CRISI_SCALA && S.crisi && S.crisi.t>=3) 
 /* la carta della scala del mese (genAgendaRamo, livello 3, slot dell'evento estero, prima dei conflitti) */
 function pickCrisiScala(){
   if(!REGOLA_CRISI_SCALA || !S.crisi || !crisiCapo() || typeof CRISI_SCALA_EV==='undefined') return null;
-  if(Math.random()>=CRISI_K.scelta) return null;
+  if(Math.random()>=CRISI_P_SCALA) return null;   // L245-2bis
   var t=S.crisi.t, p=crisiPot(); if(!p) return null;
   var ev=CRISI_SCALA_EV.find(function(e){ return e.gradino===Math.min(t,3); }); if(!ev) return null;
   var a4=(t>=4);
