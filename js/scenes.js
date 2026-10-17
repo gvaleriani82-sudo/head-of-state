@@ -267,7 +267,7 @@ const RITRATTI_VIVI = ['pg-occ-m', 'pg-occ-f', 'pg-lat-m', 'pg-lat-f', 'pg-asi-m
 const INTRO_VIDEO = { clip:'intro.mp4', poster:'intro.webp', sottotitoli:{ it:'intro.it.vtt', en:'intro.en.vtt' } };
 
 /* ===== L146-1 — LA VOCE DELLE CLIP DEL PUNTO DI PARTENZA (`assets/video/partenza-<nome>.voce.mp3` e `.it/.en.vtt`). La voce
-   (ElevenLabs, voce «Statista» come l'intro) NON è dentro l'mp4: è un file a parte, perché la clip deve poter restare ferma
+   (ElevenLabs, voce «Statista» come lui nell'intro — dal L253-1 lei vi parla con «Violetta») NON è dentro l'mp4: è un file a parte, perché la clip deve poter restare ferma
    sull'ultimo fotogramma mentre la voce finisce. La chiave è il nome di `PARTENZA_NOMI` (ui.js). Stessa guardia delle altre
    liste (`.claude/verifica-asset.js`): dichiarato = in cartella, in cartella = dichiarato, una voce ≤ 300 KB. I tempi dei cue
    sono MISURATI sulla voce (`.claude/partenza-voce/pause-cdp.js` → `cue.js`), non stimati. */
