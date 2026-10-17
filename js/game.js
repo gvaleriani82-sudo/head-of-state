@@ -4639,10 +4639,17 @@ const CRISI_K={ cede:0.6, freno:0.55, alleanzaMin:50, sanzGrowth:0.1, mobDeficit
    `crisi:` e non c'è una crisi aperta; sulla stessa potenza la fermezza sale sempre, è un fatto nuovo), CRISI_P_SCALA
    (pickCrisiScala: la carta della scala nei mesi con la crisi aperta), CRISI_QUIETE (crisiMese: i mesi senza fatti nuovi per
    scendere di un gradino). let: il banco le rimette a ogni carriera in __reseed con crisiTaratura() — __BANCO_CRISI_TARATA_OFF
-   = i valori di L245-2 (CRISI_PRIMA: 1 · 0,5 · 4, nessuna estrazione in più). */
-const CRISI_TARATA={ apre:0.15, scala:0.5, quiete:4 }, CRISI_PRIMA={ apre:1, scala:0.5, quiete:4 };
-let CRISI_P_APRE=CRISI_TARATA.apre, CRISI_P_SCALA=CRISI_TARATA.scala, CRISI_QUIETE=CRISI_TARATA.quiete;
-function crisiTaratura(prima){ var v=prima?CRISI_PRIMA:CRISI_TARATA; CRISI_P_APRE=v.apre; CRISI_P_SCALA=v.scala; CRISI_QUIETE=v.quiete; }
+   = i valori di L245-2 (CRISI_PRIMA: 1 · 0,5 · 4, nessuna estrazione in più).
+   L245-2ter · LA PAUSA (DESIGN-POLITICA-ESTERA.md, «⚑ L245-2ter»): CRISI_PAUSA, letta in UN punto (crisiApplica) — dopo che una
+   crisi si chiude (S.crisi torna null: «scendi» in crisiScala o la quiete in crisiMese; cede e respinge non la chiudono) nessuna
+   fermezza ne apre una nuova per CRISI_PAUSA mesi, con qualunque potenza, e il dado non si tira. Il mese di chiusura è
+   S.crisiFine (mese assoluto come S.crisi.da), scritto solo alla chiusura e solo con CRISI_PAUSA > 0 (a pausa 0 nessun campo
+   nuovo: i valori di L245-2 e di L245-2bis restano byte per byte); applySnap toglie un valore illeggibile. crisiTaratura(true) =
+   L245-2 (pausa 0), crisiTaratura(false, true) = L245-2bis (pausa 0, __BANCO_CRISI_PAUSA_OFF). */
+const CRISI_TARATA={ apre:0.07, scala:0.5, quiete:4, pausa:36 }, CRISI_PRIMA={ apre:1, scala:0.5, quiete:4, pausa:0 }, CRISI_2BIS={ apre:0.15, scala:0.5, quiete:4, pausa:0 };
+let CRISI_P_APRE=CRISI_TARATA.apre, CRISI_P_SCALA=CRISI_TARATA.scala, CRISI_QUIETE=CRISI_TARATA.quiete, CRISI_PAUSA=CRISI_TARATA.pausa;
+function crisiTaratura(prima, pausaOff){ var v=prima?CRISI_PRIMA:(pausaOff?CRISI_2BIS:CRISI_TARATA); CRISI_P_APRE=v.apre; CRISI_P_SCALA=v.scala; CRISI_QUIETE=v.quiete; CRISI_PAUSA=v.pausa; }
+function crisiChiudi(ora){ S.crisi=null; if(CRISI_PAUSA>0) S.crisiFine=ora; }   // L245-2ter: le due chiusure passano di qui
 function crisiCapo(){ return S.livello===3 && !S.opposizione; }
 function crisiMeseAss(){ return S.year*12+S.month; }
 function crisiPot(){ return S.crisi ? potDi(S.crisi.con) : null; }
@@ -4656,6 +4663,7 @@ function crisiApplica(campo){
   var ora=crisiMeseAss();
   if(S.crisi && S.crisi.con!==campo.con) return;                 // una crisi per volta
   if(!S.crisi){
+    if(CRISI_PAUSA>0 && S.crisiFine!=null && ora-S.crisiFine<CRISI_PAUSA) return;   // L245-2ter: la pausa dopo una crisi chiusa, prima del dado
     if(CRISI_P_APRE<=0 || (CRISI_P_APRE<1 && Math.random()>=CRISI_P_APRE)) return;   // L245-2bis: l'apertura non è certa (a 1 nessuna estrazione)
     S.crisi={con:campo.con, t:0, da:ora, ultimo:ora, alleati:null}; }
   var t0=S.crisi.t; S.crisi.t=Math.min(crisiTettoBlocco(), S.crisi.t+(campo.t||1)); S.crisi.ultimo=ora;
@@ -4670,7 +4678,7 @@ function crisiScala(mossa){
   c.ultimo=ora;
   if(mossa==='scendi'){
     c.t--;
-    if(c.t<=0){ crisiLog('La crisi con %POTdet è rientrata.'); S.crisi=null; }
+    if(c.t<=0){ crisiLog('La crisi con %POTdet è rientrata.'); crisiChiudi(ora); }
     else crisiLog(T('La crisi con %POTdet scende di un gradino: %G.').replace('%G', T(CRISI_GRADINI[c.t])));
     return;
   }
@@ -4693,7 +4701,7 @@ function crisiMese(){
   if(!REGOLA_CRISI_SCALA || !S.crisi) return;
   var c=S.crisi, ora=crisiMeseAss();
   if(ora-c.ultimo>=CRISI_QUIETE){ c.t--; c.ultimo=ora;   // L245-2bis
-    if(c.t<=0){ crisiLog('La crisi con %POTdet si è spenta col tempo.'); S.crisi=null; return; }
+    if(c.t<=0){ crisiLog('La crisi con %POTdet si è spenta col tempo.'); crisiChiudi(ora); return; }
     crisiLog(T('Senza fatti nuovi, la crisi con %POTdet scende di un gradino: %G.').replace('%G', T(CRISI_GRADINI[c.t]))); }
   if(c.t>=2) S.gMod-=CRISI_K.sanzGrowth;
 }
@@ -9441,6 +9449,7 @@ function applySnap(snap){
   if(!S.recentPot) S.recentPot=[];   // cantiere paesi reali (Fetta A): finestra anti-ripetizione dei volti nominati
   if(!S.recentConflInt) S.recentConflInt=[];   // cantiere paesi reali (Fetta B): finestra anti-ripetizione dei conflitti da premier
   if(S.crisi!=null && !(S.crisi.con && typeof potDi==='function' && potDi(S.crisi.con) && S.crisi.t>=1 && S.crisi.t<=4)) S.crisi=null;   // L245-2: una crisi illeggibile (potenza sconosciuta, gradino fuori scala) torna pace; assente resta assente
+  if(S.crisiFine!==undefined && !(Number.isInteger(S.crisiFine) && S.crisiFine>=1900*12 && S.crisiFine<=(S.year+1)*12)) delete S.crisiFine;   // L245-2ter: il mese di chiusura illeggibile sparisce (niente pausa)
   if(S.intl===undefined) S.intl=null;   // fase C1a: i salvataggi non-internazionali restano tali (S.intl dato puro)
   if(S.diplo===undefined) S.diplo=null;   // C2: percorso diplomatico (dato puro migrato)
   if(!S.recentDiplo) S.recentDiplo=[];   // C2: finestra anti-ripetizione missioni diplomatiche
