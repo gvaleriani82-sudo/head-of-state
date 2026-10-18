@@ -1081,13 +1081,14 @@ const EN = {
   "%POTDet cede all'ultimatum: la crisi torna alle sanzioni.":"%POTDet gives way to the ultimatum: the crisis goes back to sanctions.",
   "%POTDet respinge l'ultimatum: la crisi resta alla mobilitazione.":"%POTDet rejects the ultimatum: the crisis stays at mobilisation.",
   "La crisi con %POTdet si è spenta col tempo.":"The crisis with %POTdet has faded with time.",
+  "La crisi con %POTdet si chiude: il mondo è cambiato.":"The crisis with %POTdet ends: the world has changed.",   // L245-3
   "Senza fatti nuovi, la crisi con %POTdet scende di un gradino: %G.":"With nothing new, the crisis with %POTdet comes down a step: %G.",
   "tensione":"tension",
   "sanzioni":"sanctions",
   "mobilitazione":"mobilisation",
   "ultimatum":"ultimatum",
   "Crisi con %POT":"Crisis with %POT",
-  "gradino %N di 4":"step %N of 4",
+  "gradino %N di %M":"step %N of %M",
   "gli alleati frenano":"the allies hold back",
   "gli alleati seguono":"the allies follow",
   /* --- internazionali blocco 3 (conflitti %POT + sedia-swing) --- */

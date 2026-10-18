@@ -1130,8 +1130,10 @@ function diventaAltoRappresentante(){   // grado 1→2: la promozione (gated sul
   genAgenda(false); render(); commitSnap();
 }
 /* L244-3 (15/10) · UNA CARTA volto:'rivale' ESCE SOLO SE C'È UN RIVALE VIVO, e allora passa sempre da potSub. Il rivale è di
-   POTENZE (data.js), filtrato per epoca da potenzeDi(): fuori dalla linea italiana `urss` (era 'italia1950') non è viva e le
-   altre sono 'contemporanea' — nelle porte britanniche, francesi, tedesche e americane prima del 2012 nessun rivale, e il ramo
+   POTENZE (data.js), filtrato per epoca da potenzeDi(): fino al L245-3 fuori dalla linea italiana `urss` (era 'italia1950') non era
+   viva e le altre erano 'contemporanea' — nelle porte britanniche, francesi, tedesche e americane prima del 2012 nessun rivale (dal
+   L245-3 `urss` vive su tutte le linee fino al 1991 e `russia` dal 1992: nelle porte storiche un rivale c'è sempre, il controllo
+   resta come guardia), e il ramo
    senza volto mandava a schermo «Un confine conteso con %POTdet». Il controllo è puro: il volto si pesca DOPO la carta, come
    prima (rivaleNominato scrive la finestra S.recentPot), così dove il rivale c'è le carriere restano identiche. Due lettori,
    pickDiplo e pickCrisiInt: gli unici che pescano carte volto:'rivale'. Nessun ripiego nella resa (renderGov). */
@@ -1484,6 +1486,13 @@ function eraCartaViva(E, def){
   if(E && E.dal!=null){
     var ya = (typeof S!=='undefined' && S && S.year!=null) ? S.year : Infinity;
     if(ya < E.dal) return false;
+  }
+  /* L245-3 · `fino:<anno>` — il gemello di `dal`: la carta non esce DOPO quell'anno (compreso). Oggi solo `urss` in POTENZE
+     (era:'universale', fino:1991: il rivale di tutte le linee storiche fino alla fine dell'Unione Sovietica). Additivo: nessun'altra
+     voce dei pool lo porta (censito il 18/10). */
+  if(E && E.fino!=null){
+    var yf = (typeof S!=='undefined' && S && S.year!=null) ? S.year : -Infinity;
+    if(yf > E.fino) return false;
   }
   var t = (E && E.era) || def;
   if(t==='universale') return true;
@@ -4653,9 +4662,20 @@ function crisiChiudi(ora){ S.crisi=null; if(CRISI_PAUSA>0) S.crisiFine=ora; }   
 function crisiCapo(){ return S.livello===3 && !S.opposizione; }
 function crisiMeseAss(){ return S.year*12+S.month; }
 function crisiPot(){ return S.crisi ? potDi(S.crisi.con) : null; }
-/* L245-4 · il tetto della guerra fredda: nelle porte 1950-1989 la crisi con la potenza del blocco rivale non supera l'ultimatum.
-   Oggi è già vero per costruzione (t = 5 non esiste): la funzione c'è perché la legga la guerra, non fa niente. */
-function crisiTettoBlocco(){ return 4; }
+/* L245-3 · CON CHI E FIN DOVE (DESIGN-POLITICA-ESTERA.md, «⚑ L245-3»). rivaleRiga(con) = la riga di RIVALI (data.js) per la
+   partita (la porta, S.scenario; nel presente il paese, S.paese) e la potenza `con`, viva nell'anno corrente, o null. È il punto
+   unico: lo leggono crisiApplica (senza riga la crisi non si apre: la carta si gioca come prima, e il dado non si tira),
+   crisiTettoBlocco (il gradino più alto) e crisiMese (una crisi aperta la cui riga è finita si chiude). Nessun campo in S. */
+function rivaleChiave(){ return (S.scenario && S.scenario!=='presente' && typeof SCENARI!=='undefined' && SCENARI[S.scenario]) ? S.scenario : S.paese; }
+function rivaleRiga(con){
+  if(typeof RIVALI==='undefined' || !con) return null;
+  var k=rivaleChiave(), y=S.year;
+  for(var i=0;i<RIVALI.length;i++){ var r=RIVALI[i]; if(r.paese===k && r.con===con && y>=r.dal && y<=r.fino) return r; }
+  return null;
+}
+/* L245-3 · il tetto della scala: min(4, massimo della riga) — 4 è l'ultimatum, il 5 (la guerra) è di L245-4. Il Brasile con la
+   Russia si ferma alle sanzioni (massimo 2). Senza riga (non dovrebbe succedere: la crisi non si apre) il tetto di prima, 4. */
+function crisiTettoBlocco(){ var r=S.crisi ? rivaleRiga(S.crisi.con) : null; return r ? Math.min(4, r.massimo) : 4; }
 function crisiLog(x){ var p=crisiPot(); S.log.unshift({t:T('Crisi internazionale'), x:potSub(T(x),p)}); }
 /* il punto unico del campo `crisi:` (resolveItemCore, ramo generico, subito dopo choice.f) */
 function crisiApplica(campo){
@@ -4663,6 +4683,7 @@ function crisiApplica(campo){
   var ora=crisiMeseAss();
   if(S.crisi && S.crisi.con!==campo.con) return;                 // una crisi per volta
   if(!S.crisi){
+    if(!rivaleRiga(campo.con)) return;                               // L245-3: con questa potenza, qui e ora, non nasce una crisi
     if(CRISI_PAUSA>0 && S.crisiFine!=null && ora-S.crisiFine<CRISI_PAUSA) return;   // L245-2ter: la pausa dopo una crisi chiusa, prima del dado
     if(CRISI_P_APRE<=0 || (CRISI_P_APRE<1 && Math.random()>=CRISI_P_APRE)) return;   // L245-2bis: l'apertura non è certa (a 1 nessuna estrazione)
     S.crisi={con:campo.con, t:0, da:ora, ultimo:ora, alleati:null}; }
@@ -4675,6 +4696,7 @@ function crisiScala(mossa){
   if(!REGOLA_CRISI_SCALA || !S.crisi) return;
   var c=S.crisi, ora=crisiMeseAss();
   if(mossa==='tieni') return;
+  if(mossa==='sali'){ var tt=crisiTettoBlocco(); if(tt<4 && c.t>=tt) return; }   // L245-3: al tetto della riga (sotto l'ultimatum) salire è tenere — dal L245-3bis la carta al tetto non offre «sali» (pickCrisiScala): questa resta come difesa
   c.ultimo=ora;
   if(mossa==='scendi'){
     c.t--;
@@ -4700,6 +4722,7 @@ function crisiScala(mossa){
 function crisiMese(){
   if(!REGOLA_CRISI_SCALA || !S.crisi) return;
   var c=S.crisi, ora=crisiMeseAss();
+  if(!rivaleRiga(c.con)){ crisiLog('La crisi con %POTdet si chiude: il mondo è cambiato.'); crisiChiudi(ora); return; }   // L245-3: la riga è finita (l'URSS nel gennaio 1992)
   if(ora-c.ultimo>=CRISI_QUIETE){ c.t--; c.ultimo=ora;   // L245-2bis
     if(c.t<=0){ crisiLog('La crisi con %POTdet si è spenta col tempo.'); crisiChiudi(ora); return; }
     crisiLog(T('Senza fatti nuovi, la crisi con %POTdet scende di un gradino: %G.').replace('%G', T(CRISI_GRADINI[c.t]))); }
@@ -4712,10 +4735,11 @@ function pickCrisiScala(){
   if(Math.random()>=CRISI_P_SCALA) return null;   // L245-2bis
   var t=S.crisi.t, p=crisiPot(); if(!p) return null;
   var ev=CRISI_SCALA_EV.find(function(e){ return e.gradino===Math.min(t,3); }); if(!ev) return null;
-  var a4=(t>=4);
+  var a4=(t>=4), tt=crisiTettoBlocco(), ch=ev.ch;
+  if(tt<4 && t>=tt){ ch=ch.filter(function(c){ return c.scala!=='sali'; }); if(ch.length<2) return null; }   // L245-3bis: al tetto della riga (sotto l'ultimatum) la carta non offre la salita
   return Object.assign({}, ev, {
     t: potSub(T(a4&&ev.t4t?ev.t4t:ev.t),p), text: potSub(T(a4&&ev.t4text?ev.t4text:ev.text),p), kick: T(ev.kick),
-    ch: ev.ch.map(function(c){ return Object.assign({}, c, {l:potSub(T(a4&&c.l4?c.l4:c.l),p), e:potSub(T(a4&&c.e4?c.e4:c.e),p)}); })
+    ch: ch.map(function(c){ return Object.assign({}, c, {l:potSub(T(a4&&c.l4?c.l4:c.l),p), e:potSub(T(a4&&c.e4?c.e4:c.e),p)}); })
   });
 }
 function pickInternazionale(){

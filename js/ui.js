@@ -2878,13 +2878,14 @@ function renderPaese(){
   document.getElementById('sec-paese').innerHTML=h;
 }
 /* L245-2 · la riga della crisi nel cruscotto (scheda Paese, in testa alle relazioni internazionali): «Crisi con %POT · <gradino>»,
-   il gradino su quattro e, da t ≥ 3, che cosa fanno gli alleati. Niente se S.crisi è null o assente. */
+   il gradino sul tetto della crisi (quattro, o il `massimo` della riga di RIVALI: L245-3bis) e, da t ≥ 3, che cosa fanno gli alleati. Niente se S.crisi è null o assente. */
 function crisiRiga(){
   if(!S || !S.crisi || typeof crisiPot!=='function') return '';
   var p=crisiPot(); if(!p) return '';
   var g=T(CRISI_GRADINI[S.crisi.t]||'');
-  var sub=T('gradino %N di 4').replace('%N', S.crisi.t) + (S.crisi.alleati ? ' · '+T(S.crisi.alleati==='frenano'?'gli alleati frenano':'gli alleati seguono') : '');
-  return `<div class="ind crisi-riga"><div class="nm"><b>${escAttr(potSub(T('Crisi con %POT'),p))} · ${g}</b><small>${sub}</small></div><div class="num" style="color:${S.crisi.t>=3?'var(--neg)':'var(--warn-ink)'}">${S.crisi.t}/4</div></div>`;
+  var tt=(typeof crisiTettoBlocco==='function') ? crisiTettoBlocco() : 4;   // L245-3bis: il tetto vero della riga di RIVALI (Brasile con la Russia: 2)
+  var sub=T('gradino %N di %M').replace('%N', S.crisi.t).replace('%M', tt) + (S.crisi.alleati ? ' · '+T(S.crisi.alleati==='frenano'?'gli alleati frenano':'gli alleati seguono') : '');
+  return `<div class="ind crisi-riga"><div class="nm"><b>${escAttr(potSub(T('Crisi con %POT'),p))} · ${g}</b><small>${sub}</small></div><div class="num" style="color:${S.crisi.t>=3?'var(--neg)':'var(--warn-ink)'}">${S.crisi.t}/${tt}</div></div>`;
 }
 function indRow(nm,sub,num,pct,ic,gk){pct=clamp(pct,2,100);
   return `<div class="ind"><div class="nm"><b>${ic?icon(ic,T(nm))+' ':''}${gk?gergo(T(nm),gk):T(nm)}</b><small>${T(sub)}</small>

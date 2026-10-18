@@ -14301,13 +14301,44 @@ const ENTI_INT=[
    senza — es. Israele — chiederebbe un ramo a parte.) Comparse (Turchia, Golfo) e alleati nominati (Germania, Giappone)
    restano COLORE per più avanti, non blocchi. ===== */
 const POTENZE=[
- {id:'russia',     nome:'Russia',         art:'la', nomeEn:'Russia',      artEn:false, blocco:'rivale', carattere:'una potenza revanscista',   carattereEn:'a revanchist power',   tipi:['aggressione','energia','sanzioni']},
+ {id:'russia',     nome:'Russia',         art:'la', nomeEn:'Russia',      artEn:false, blocco:'rivale', era:'universale', dal:1992, carattere:'una potenza revanscista',   carattereEn:'a revanchist power',   tipi:['aggressione','energia','sanzioni']},   // L245-3: anche nelle porte 1990 e 2000 dal 1992 (era:'universale' + dal); prima solo il presente (dal 2012, come le altre senza era)
  {id:'cina',       nome:'Cina',           art:'la', nomeEn:'China',       artEn:false, blocco:'rivale', carattere:'un rivale sistemico',       carattereEn:'a systemic rival',       tipi:['stretto','commercio','influenza']},
  {id:'iran',       nome:'Iran',           art:"l'", nomeEn:'Iran',        artEn:false, blocco:'rivale', carattere:'una potenza regionale',     carattereEn:'a regional power',     tipi:['nucleare','stretto']},
  {id:'corea_nord', nome:'Corea del Nord', art:'la', nomeEn:'North Korea', artEn:false, blocco:'rivale', carattere:'un regime imprevedibile',   carattereEn:'an unpredictable regime',   tipi:['missili','nucleare']},
- {id:'urss',       nome:'Unione Sovietica', art:"l'", nomeEn:'Soviet Union', artEn:true, blocco:'rivale', era:'italia1950', codaFino:9999, carattere:'la potenza del blocco orientale', carattereEn:'the power of the Eastern bloc', tipi:['aggressione','influenza']},   // FIX era: il rivale d'epoca del '50 (esclusa dal presente via eraViva). codaFino:∞ (audit C3): rivale di TUTTA la linea storica — non invecchia al '61, resta il rivale anche nei '60
+ {id:'urss',       nome:'Unione Sovietica', art:"l'", nomeEn:'Soviet Union', artEn:true, blocco:'rivale', era:'universale', fino:1991, carattere:'la potenza del blocco orientale', carattereEn:'the power of the Eastern bloc', tipi:['aggressione','influenza']},   // L245-3: il rivale di TUTTE le linee storiche dal 1945 al 1991 compreso (era:'universale' + fino, letti da eraCartaViva), mai nel presente. Fino al L245-3 era:'italia1950', codaFino:9999: solo la linea italiana, e viva anche dopo il 1991 accanto alla Russia
  {id:'india',      nome:'India',          art:"l'", nomeEn:'India',       artEn:false, blocco:'swing',  carattere:'una potenza non allineata', carattereEn:'a non-aligned power', tipi:['corteggiamento']},
 ];
+/* L245-3 · I RIVALI (DESIGN-POLITICA-ESTERA.md, «⚑ L245-3»): CON CHI può nascere una crisi e FIN DOVE può salire. Una riga per
+   paese (o porta) e potenza: `paese` = una chiave di SCENARI (le porte) o di PAESI (il presente), `con` = un id di POTENZE, `dal`/`fino`
+   gli anni (compresi) in cui la riga vale, `massimo` il gradino più alto della scala (1-5; oggi la scala si ferma a 4, il 5 è la guerra
+   di L245-4), `tipo` blocco · confine · lontano · coloniale · alleato. La legge UN punto, rivaleRiga() (game.js, accanto alla scala):
+   senza riga la crisi non si apre (crisiApplica) e una crisi aperta la cui riga è finita (il 1991 → 1992) si chiude (crisiMese); il
+   tetto della scala è min(4, massimo) (crisiTettoBlocco). I volti delle carte non la leggono (potenzeDi resta com'è).
+   ⚠ Il Pakistan non è in POTENZE: l'India ha solo la Cina. Dal L245-3bis le porte 1990 e 2000 che arrivano al presente hanno dal
+   2012 le righe del presente del loro paese (prima solo la Russia: Cina e Iran lì non aprivano crisi). La guardia è in .claude/verifica-paese.js. */
+const RIVALI=(function(){
+  var r=[];
+  function riga(paesi, con, dal, fino, massimo, tipo){ paesi.split(' ').forEach(function(p){ r.push({paese:p, con:con, dal:dal, fino:fino, massimo:massimo, tipo:tipo}); }); }
+  riga('italia1950 italia1960 italia1970 italia1980 uk1950 uk1960 uk1970 uk1980 fr1950 fr1960 fr1970 fr1980 de1950 de1960 de1970 de1980 us1950 us1960', 'urss', 1945, 1991, 4, 'blocco');   // la guerra fredda: Cuba e Berlino si fermano all'ultimatum
+  riga('italia1990 uk1990 fr1990 de1990', 'urss', 1945, 1991, 4, 'blocco');
+  riga('italia1990 uk1990 fr1990 de1990 italia2000 uk2000 fr2000 de2000', 'russia', 1992, 2099, 4, 'blocco');
+  ['russia','cina','iran'].forEach(function(c){ riga('italia francia regnounito germania spagna canada australia', c, 2012, 2099, 4, 'blocco'); });
+  ['russia','cina','iran','corea_nord'].forEach(function(c){ riga('usa', c, 2012, 2099, 4, 'blocco'); });
+  ['russia','cina','corea_nord'].forEach(function(c){ riga('giappone', c, 2012, 2099, 4, 'blocco'); });
+  riga('coreasud', 'corea_nord', 2012, 2099, 5, 'confine');
+  riga('coreasud', 'cina', 2012, 2099, 4, 'blocco');
+  riga('india', 'cina', 2012, 2099, 4, 'confine');
+  ['russia','cina'].forEach(function(c){ riga('brasile messico argentina sudafrica nigeria', c, 2012, 2099, 2, 'lontano'); });   // al più le sanzioni
+  // L245-3bis: le porte 1990 e 2000 arrivano al presente (dal 2012 ogni linea apre `contemporanea`): da lì hanno i rivali del
+  // presente del loro paese, stessi `massimo` e `tipo`, letti dalle righe qui sopra. La Russia dal 1992 c'è già e non si raddoppia.
+  var PORTE_AL_PRESENTE={italia1990:'italia', italia2000:'italia', uk1990:'regnounito', uk2000:'regnounito', fr1990:'francia', fr2000:'francia', de1990:'germania', de2000:'germania'};
+  Object.keys(PORTE_AL_PRESENTE).forEach(function(porta){
+    r.filter(function(x){ return x.paese===PORTE_AL_PRESENTE[porta]; }).forEach(function(x){
+      if(r.some(function(y){ return y.paese===porta && y.con===x.con && y.fino>=x.dal; })) return;
+      r.push({paese:porta, con:x.con, dal:x.dal, fino:x.fino, massimo:x.massimo, tipo:x.tipo}); });
+  });
+  return r;
+})();
 
 const INTERNAZIONALI=[
  {id:'nato_vertice',era:'universale', tono:'florido', min:'difesa', kick:'Alleanza atlantica', t:'Vertice dell\'Alleanza', text:'Gli alleati chiedono un impegno di spesa militare più alto. La tua risposta pesa sul rapporto con l\'Alleanza — e su chi la guarda da fuori.',ch:[
@@ -14500,25 +14531,26 @@ const CONFLITTI_SWING=[
    sulle scelte di fermezza di CONFLITTI_INT (la potenza è quella della carta: `pot` o quella pescata da `potPool`; un `con`
    scritto nel campo la sostituisce), letto in un punto solo, `crisiApplica` (game.js). Le carte le pesca `pickCrisiScala`
    per il gradino in corso: a t = 1 «le sanzioni», a t = 2 «la mobilitazione», a t = 3 e 4 «l'ultimatum» (a t = 4 col testo
-   della scadenza, i campi `t4*`). Tre scelte, sempre nello stesso ordine: sali · tieni · scendi (`crisiScala`). Niente
+   della scadenza, i campi `t4*`). Tre scelte, sempre nello stesso ordine: sali · tieni · scendi (`crisiScala`; dal L245-3bis il campo `scala` le nomina, e al
+   tetto della riga di RIVALI sotto 4 `pickCrisiScala` toglie quella che sale). Niente
    `pleases` e niente gruppi: le scelte non hanno un colore politico (regola fissa, partiti neutri). Niente persone, niente
    dettagli militari. La guerra (t = 5) non c'è: arriva con L245-4. ===== */
 const CRISI_SCALA_EV=[
  {id:'crs_sanzioni', gradino:1, min:'esteri', kick:'Crisi internazionale', t:'Le sanzioni contro %POTdet', text:'La tensione con %POTdet non si scioglie. Gli alleati discutono un pacchetto di sanzioni: aderire alza la pressione, ma costa al commercio.', ch:[
-   {l:'Vari le sanzioni', e:'La pressione sale di un gradino; il commercio ne risente', f:()=>{relIntMuovi('alleanza',3); relIntMuovi('rivale',-4); crisiScala('sali');}},
-   {l:'Tieni la linea, senza nuove misure', e:'Né un passo avanti né uno indietro', f:()=>{crisiScala('tieni');}},
-   {l:'Apri un canale di dialogo', e:'La tensione scende; gli alleati ti trovano tiepido', f:()=>{relIntMuovi('rivale',3); relIntMuovi('alleanza',-2); crisiScala('scendi');}},
+   {l:'Vari le sanzioni', e:'La pressione sale di un gradino; il commercio ne risente', f:()=>{relIntMuovi('alleanza',3); relIntMuovi('rivale',-4); crisiScala('sali');}, scala:'sali'},
+   {l:'Tieni la linea, senza nuove misure', e:'Né un passo avanti né uno indietro', f:()=>{crisiScala('tieni');}, scala:'tieni'},
+   {l:'Apri un canale di dialogo', e:'La tensione scende; gli alleati ti trovano tiepido', f:()=>{relIntMuovi('rivale',3); relIntMuovi('alleanza',-2); crisiScala('scendi');}, scala:'scendi'},
  ]},
  {id:'crs_mobilitazione', gradino:2, min:'difesa', kick:'Crisi internazionale', t:'Le sanzioni non bastano', text:'Le sanzioni contro %POTdet sono in vigore, ma la crisi non rientra. Si propone di alzare lo stato di allerta delle forze armate: un segnale forte, e una spesa.', ch:[
-   {l:'Alzi lo stato di allerta', e:'Un segnale di fermezza; costa al bilancio ogni mese', f:()=>{relIntMuovi('alleanza',2); relIntMuovi('rivale',-4); crisiScala('sali');}},
-   {l:'Restano le sanzioni, niente di più', e:'La pressione resta quella che è', f:()=>{crisiScala('tieni');}},
-   {l:'Allenti le sanzioni', e:'La crisi scende di un gradino; gli alleati storcono il naso', f:()=>{relIntMuovi('rivale',3); relIntMuovi('alleanza',-3); crisiScala('scendi');}},
+   {l:'Alzi lo stato di allerta', e:'Un segnale di fermezza; costa al bilancio ogni mese', f:()=>{relIntMuovi('alleanza',2); relIntMuovi('rivale',-4); crisiScala('sali');}, scala:'sali'},
+   {l:'Restano le sanzioni, niente di più', e:'La pressione resta quella che è', f:()=>{crisiScala('tieni');}, scala:'tieni'},
+   {l:'Allenti le sanzioni', e:'La crisi scende di un gradino; gli alleati storcono il naso', f:()=>{relIntMuovi('rivale',3); relIntMuovi('alleanza',-3); crisiScala('scendi');}, scala:'scendi'},
  ]},
  {id:'crs_ultimatum', gradino:3, min:'esteri', kick:'Crisi internazionale', t:'L\'ultimatum', text:'Con le forze in allerta, la crisi con %POTdet è a un passo dalla rottura. Puoi porre un ultimatum: una richiesta pubblica, con una scadenza.',
   t4t:'La scadenza dell\'ultimatum', t4text:'La scadenza dell\'ultimatum %POTa si avvicina. Tutti aspettano la risposta, e la tua prossima mossa.', ch:[
-   {l:'Poni l\'ultimatum', l4:'Tieni il punto fino alla scadenza', e:'Tutto su una carta: %POTdet deve rispondere', e4:'%POTDet cede, o respinge', f:()=>{relIntMuovi('rivale',-3); crisiScala('sali');}},
-   {l:'Mantieni l\'allerta, senza ultimatum', l4:'Concedi altro tempo', e:'La crisi resta dov\'è', e4:'La scadenza si allunga', f:()=>{crisiScala('tieni');}},
-   {l:'Smobiliti', l4:'Ritiri l\'ultimatum', e:'La crisi scende; la fermezza si incrina', e4:'La crisi scende; la tua parola perde peso', f:()=>{relIntMuovi('rivale',3); repd(-1); crisiScala('scendi');}},
+   {l:'Poni l\'ultimatum', l4:'Tieni il punto fino alla scadenza', e:'Tutto su una carta: %POTdet deve rispondere', e4:'%POTDet cede, o respinge', f:()=>{relIntMuovi('rivale',-3); crisiScala('sali');}, scala:'sali'},
+   {l:'Mantieni l\'allerta, senza ultimatum', l4:'Concedi altro tempo', e:'La crisi resta dov\'è', e4:'La scadenza si allunga', f:()=>{crisiScala('tieni');}, scala:'tieni'},
+   {l:'Smobiliti', l4:'Ritiri l\'ultimatum', e:'La crisi scende; la fermezza si incrina', e4:'La crisi scende; la tua parola perde peso', f:()=>{relIntMuovi('rivale',3); repd(-1); crisiScala('scendi');}, scala:'scendi'},
  ]},
 ];
 
