@@ -223,7 +223,8 @@ const VIDEO_PRESENTI = ['home-hero', 'partito-base', 'vitaprivata-base', 'retro-
   'crisi-base',   // L197-38: la strada di città in rovina, quasi ferma (cucitura 2,1 sullo schermo: gira; poster↔f0 3)
   'retro-industriale', 'trattativa-notte', 'infrastrutture-base', 'lavoro-base',   // L197-39: immagini NUOVE (le vecchie .webp in arte-sorgente/scene-ritirate/webp-l197-39/): l'ufficio notturno con l'uomo alla finestra (finestre e tenda), la sala riunioni vuota di notte (tenda e acqua), gli svincoli sul fiume (auto), la fabbrica coi bracci robotici (nastro e braccio)
   'partito-florido', 'economia-base', 'societacivile-base-nordamerica',   // L197-40: le clip delle tre immagini sostituite in L197-39 — due fogli che si sollevano sui banchi dell'aula, foglie e piccioni sulla via alberata, una mossa a scacchi e foglie nel parco
-  'economia-florido', 'elezioni-florido-germania', 'societacivile-base-asiaest', 'vitaprivata-anni50'];   // L197-41 (giro clip 38): la gru che ruota il braccio, le bandiere e la folla che applaude piano, panni stesi e ginkgo, la tenda del salotto anni '50
+  'economia-florido', 'elezioni-florido-germania', 'societacivile-base-asiaest', 'vitaprivata-anni50',   // L197-41 (giro clip 38): la gru che ruota il braccio, le bandiere e la folla che applaude piano, panni stesi e ginkgo, la tenda del salotto anni '50
+  'vitaprivata-anni70', 'elezioni-florido-italia', 'ambiente-florido'];   // L197-42 (giro clip 39): il vapore della moka e il cucchiaino, bandiere e applausi lenti in piazza, pale eoliche lontane ed erba
 
 /* ===== L181-4 — LE CLIP CHE NON GIRANO: un giro solo, poi l'ultimo fotogramma tenuto. Le altre clip di scena girano in tondo
    (`loop`) perché il loro ultimo fotogramma torna sul primo (cucitura ≤ 3,6 su 255, misurata sullo schermo); queste no — le porte

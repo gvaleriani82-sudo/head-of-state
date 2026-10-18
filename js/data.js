@@ -19388,6 +19388,23 @@ const TITOLI=[
  {id:'ti_us60_s_acciaio', era:'us1960', amico:'Acciaio: sindacati e aziende al tavolo, i prezzi tengono', ostile:'Acciaio: le aziende alzano i listini, e il governo sta a guardare'},
  {id:'ti_us60_s_oro', era:'us1960', amico:'Trentacinque dollari l\'oncia: il dollaro vale come l\'oro', ostile:'Le riserve d\'oro calano: il mondo si fida meno del dollaro'},
  {id:'ti_us60_s_fiducia', era:'us1960', cond:()=>S.year>=1965, amico:'Il governo spiega le sue scelte: conferenze stampa ogni settimana', ostile:'La fiducia nel governo cala: il paese non crede alle cifre ufficiali'},
+ // us1960 — L254-2 · altri titoli di stato (VARIETA-L254-TITOLI-US60.md)
+ {id:'ti_us60_s_automazione', era:'us1960', amico:'Le macchine nelle fabbriche: più produzione, salari più alti', ostile:'Le macchine al posto degli operai: e chi pensa ai licenziati?'},
+ {id:'ti_us60_s_periferie', era:'us1960', amico:'Una villetta in periferia: la casa per ogni famiglia che lavora', ostile:'Le periferie crescono, e i centri delle città si svuotano'},
+ {id:'ti_us60_s_aria', era:'us1960', amico:'Aria e fiumi più puliti: Washington prepara regole nuove', ostile:'Fumo sulle città, schiuma nei fiumi: e le regole tardano'},
+ {id:'ti_us60_s_tasse', era:'us1960', amico:'Tagliare le tasse? Più soldi in tasca, più lavoro per tutti', ostile:'Tasse giù e spesa su: il bilancio federale finirebbe in rosso'},
+ {id:'ti_us60_s_jet', era:'us1960', amico:'L\'era dei jet: da costa a costa in poche ore', ostile:'Aeroporti pieni, e il rombo dei jet sveglia i quartieri'},
+ {id:'ti_us60_s_treni', era:'us1960', amico:'Le ferrovie chiedono aiuto: Washington studia i treni veloci', ostile:'I treni passeggeri viaggiano vuoti, e le stazioni chiudono'},
+ {id:'ti_us60_s_rifugi', era:'us1960', cond:()=>S.year<=1964, amico:'La difesa civile: un rifugio per ogni quartiere', ostile:'Rifugi antiatomici in cantina: un paese che vive nella paura'},
+ {id:'ti_us60_s_volontari', era:'us1960', amico:'Giovani volontari per il mondo: Washington discute l\'idea', ostile:'Miliardi di aiuti all\'estero: e a casa nostra chi ci pensa?'},
+ {id:'ti_us60_s_strade', era:'us1960', amico:'Più agenti nelle strade? Washington offre fondi alle città', ostile:'La criminalità cresce: di sera la gente non esce più'},
+ {id:'ti_us60_s_salario', era:'us1960', amico:'Alzare il salario minimo: chi lavora deve poter vivere', ostile:'Salario minimo più alto? I piccoli negozi smetterebbero di assumere'},
+ {id:'ti_us60_s_voto', era:'us1960', amico:'Diritto di voto: il governo promette che tutti potranno votare', ostile:'Diritto di voto: belle parole, e ai seggi non cambia niente'},
+ {id:'ti_us60_s_campus', era:'us1960', cond:()=>S.year>=1964, amico:'Le università si allargano: mai tanti ragazzi al college', ostile:'Campus in fermento: gli studenti occupano gli edifici'},
+ {id:'ti_us60_s_turni', era:'us1960', amico:'Fabbriche a pieno ritmo: turni di notte e straordinari per tutti', ostile:'Le tessiture del Nord chiudono: il lavoro scende al Sud'},
+ {id:'ti_us60_s_mutui', era:'us1960', amico:'Mutui facili e case nuove: la famiglia americana mette radici', ostile:'Nei quartieri vecchi le case cadono a pezzi, e le banche non prestano'},
+ {id:'ti_us60_s_aiuti', era:'us1960', amico:'Il grano americano sfama i paesi poveri: un\'amicizia che conta', ostile:'Aiuti a governi amici: e i soldi finiscono nelle tasche sbagliate'},
+ {id:'ti_us60_s_debito', era:'us1960', amico:'Il debito federale tiene: il paese cresce più dei suoi conti', ostile:'Il tetto del debito sale ancora: Washington spende a credito'},
  {id:'ng_p_ti_petrolio', era:'contemporanea', paesi:['nigeria'], amico:'La produzione di petrolio torna a salire', ostile:'Un barile su dieci sparisce: il furto record'},
 ];
 
