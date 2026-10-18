@@ -899,7 +899,7 @@ function ambiente(stato){
      gradino della voce di partenza, L146-1) e risale alla fine.
    · Il SOTTOTITOLO (`#voce-sott`, nato qui la prima volta, in alto: in basso coprirebbe i bottoni dei modali) c'è solo mentre la
      voce suona; un tocco sul sottotitolo zittisce la voce.
-   · Il file si carica alla prima richiesta (nessun precaricamento: quarantatré file da 100-205 KB dal L218-12); se non è pronto entro VOCI_ATTESA_MS
+   · Il file si carica alla prima richiesta (nessun precaricamento: quarantatré file da 100-205 KB dal L218-12, più le 39 di lei dal L255-1); se non è pronto entro VOCI_ATTESA_MS
      la voce si perde (niente voce in ritardo a momento finito).
    I FILE: `assets/audio/voci/<id>.mp3`, mono 44,1 kHz (ElevenLabs, modello Eleven v4: 130-150 kbps, non ricodificati — niente ffmpeg
    sul mini-PC), promessi da `VOCI_PRESENTI`, che `.claude/verifica-asset.js` tiene allineata alla cartella (un nome senza file è silenzio).
@@ -908,32 +908,32 @@ function ambiente(stato){
    ⚠ Tutto qui è transitorio: nulla entra in S.
    ================================================================================================================ */
 const VOCI_MANIFEST = {
-  'voce-insediamento-a':      { file:'voce-insediamento.mp3',        gain:0.40, en:'Today I accept this office not as a reward, but as a duty. I will govern for those who voted for me, and for those who did not. The work begins now.', it:'Oggi accetto questo incarico non come un premio, ma come un dovere. Governerò per chi mi ha votato e per chi non l\'ha fatto. Il lavoro comincia adesso.' },   // C1 · −15,6 / −1,2 (la presa Multilingual v2 è in giro-suoni/prova/: Giacomo sceglie) · dal L218-12 la -a della coppia (il file tiene il nome)
-  'voce-vittoria-a':          { file:'voce-vittoria-a.mp3',          gain:0.37, en:'The people have spoken, and they have trusted us. Tonight we celebrate. Tomorrow, we keep our promises.', it:'Il popolo ha parlato e ci ha dato fiducia. Stanotte festeggiamo. Domani manteniamo le promesse.' },   // C2 · −16,2 / −1,0
-  'voce-vittoria-b':          { file:'voce-vittoria-b.mp3',          gain:0.39, en:'It was a long campaign, and every vote counted. This victory belongs to all of you. Now the real work starts.', it:'È stata una campagna lunga, e ogni voto ha contato. Questa vittoria è di tutti voi. Ora comincia il lavoro vero.' },   // C3 · −15,7 / −1,1
-  'voce-sconfitta-a':         { file:'voce-sconfitta-a.mp3',         gain:0.39, en:'The voters have made their choice, and I respect it. We lost tonight, but we did not lose our purpose. We will be back.', it:'Gli elettori hanno scelto, e io rispetto la loro scelta. Stanotte abbiamo perso, ma non abbiamo perso la ragione per cui siamo qui. Torneremo.' },   // C4 · −15,7 / −1,1
-  'voce-sconfitta-b':         { file:'voce-sconfitta-b.mp3',         gain:0.37, en:'Defeat is part of democracy. I congratulate our opponents. Tomorrow, we begin again.', it:'La sconfitta fa parte della democrazia. Faccio i complimenti ai nostri avversari. Domani si ricomincia.' },   // C5 · −16,3 / −1,0
-  'voce-fineanno-buono':      { file:'voce-fineanno-buono.mp3',      gain:0.35, en:'We close this year stronger than we began it. Much remains to be done, but we are on the right road.', it:'Chiudiamo quest\'anno più forti di come l\'abbiamo cominciato. Resta molto da fare, ma la strada è quella giusta.' },   // C6 · −14,6 / −1,1
-  'voce-fineanno-lucieombre': { file:'voce-fineanno-lucieombre.mp3', gain:0.39, en:'Another year behind us. Some promises kept, others still waiting. Let us keep going.', it:'Un altro anno alle spalle. Alcune promesse mantenute, altre ancora in attesa. Andiamo avanti.' },   // C7 · −15,7 / −1,3
-  'voce-fineanno-difficile':  { file:'voce-fineanno-difficile.mp3',  gain:0.40, en:'It has been a hard year, and I will not pretend otherwise. Next year we must do better, and we will.', it:'È stato un anno difficile, e non farò finta che non lo sia stato. L\'anno prossimo dobbiamo fare meglio, e lo faremo.' },   // C8 · −15,6 / −1,0
+  'voce-insediamento-a':      { file:'voce-insediamento.mp3',        gain:0.40, f:{ file:'voce-insediamento-a-f.mp3', gain:0.64 }, en:'Today I accept this office not as a reward, but as a duty. I will govern for those who voted for me, and for those who did not. The work begins now.', it:'Oggi accetto questo incarico non come un premio, ma come un dovere. Governerò per chi mi ha votato e per chi non l\'ha fatto. Il lavoro comincia adesso.' },   // C1 · −15,6 / −1,2 (la presa Multilingual v2 è in giro-suoni/prova/: Giacomo sceglie) · dal L218-12 la -a della coppia (il file tiene il nome)
+  'voce-vittoria-a':          { file:'voce-vittoria-a.mp3',          gain:0.37, f:{ file:'voce-vittoria-a-f.mp3', gain:0.83 }, en:'The people have spoken, and they have trusted us. Tonight we celebrate. Tomorrow, we keep our promises.', it:'Il popolo ha parlato e ci ha dato fiducia. Stanotte festeggiamo. Domani manteniamo le promesse.' },   // C2 · −16,2 / −1,0
+  'voce-vittoria-b':          { file:'voce-vittoria-b.mp3',          gain:0.39, f:{ file:'voce-vittoria-b-f.mp3', gain:0.70 }, en:'It was a long campaign, and every vote counted. This victory belongs to all of you. Now the real work starts.', it:'È stata una campagna lunga, e ogni voto ha contato. Questa vittoria è di tutti voi. Ora comincia il lavoro vero.' },   // C3 · −15,7 / −1,1
+  'voce-sconfitta-a':         { file:'voce-sconfitta-a.mp3',         gain:0.39, f:{ file:'voce-sconfitta-a-f.mp3', gain:0.72 }, en:'The voters have made their choice, and I respect it. We lost tonight, but we did not lose our purpose. We will be back.', it:'Gli elettori hanno scelto, e io rispetto la loro scelta. Stanotte abbiamo perso, ma non abbiamo perso la ragione per cui siamo qui. Torneremo.' },   // C4 · −15,7 / −1,1
+  'voce-sconfitta-b':         { file:'voce-sconfitta-b.mp3',         gain:0.37, f:{ file:'voce-sconfitta-b-f.mp3', gain:0.72 }, en:'Defeat is part of democracy. I congratulate our opponents. Tomorrow, we begin again.', it:'La sconfitta fa parte della democrazia. Faccio i complimenti ai nostri avversari. Domani si ricomincia.' },   // C5 · −16,3 / −1,0
+  'voce-fineanno-buono':      { file:'voce-fineanno-buono.mp3',      gain:0.35, f:{ file:'voce-fineanno-buono-f.mp3', gain:0.70 }, en:'We close this year stronger than we began it. Much remains to be done, but we are on the right road.', it:'Chiudiamo quest\'anno più forti di come l\'abbiamo cominciato. Resta molto da fare, ma la strada è quella giusta.' },   // C6 · −14,6 / −1,1
+  'voce-fineanno-lucieombre': { file:'voce-fineanno-lucieombre.mp3', gain:0.39, f:{ file:'voce-fineanno-lucieombre-f.mp3', gain:0.64 }, en:'Another year behind us. Some promises kept, others still waiting. Let us keep going.', it:'Un altro anno alle spalle. Alcune promesse mantenute, altre ancora in attesa. Andiamo avanti.' },   // C7 · −15,7 / −1,3
+  'voce-fineanno-difficile':  { file:'voce-fineanno-difficile.mp3',  gain:0.40, f:{ file:'voce-fineanno-difficile-f.mp3', gain:0.74 }, en:'It has been a hard year, and I will not pretend otherwise. Next year we must do better, and we will.', it:'È stato un anno difficile, e non farò finta che non lo sia stato. L\'anno prossimo dobbiamo fare meglio, e lo faremo.' },   // C8 · −15,6 / −1,0
   /* L218-5 (giro suoni 5): C9 e C11-C16, gain dalla regola sull'RMS misurato in Chrome. ⚠ Le otto di L218-4 qui sopra stanno fino a 0,07
      SOTTO la regola (C2 e C5 a −16,2/−16,3 darebbero 0,44, scritte 0,37): da ascoltare con Giacomo prima di ritoccarle. */
-  'voce-fineanno-nuovocapitolo': { file:'voce-fineanno-nuovocapitolo.mp3', gain:0.41, en:'A new chapter begins. New faces, new choices, the same country to serve.', it:'Comincia un nuovo capitolo. Volti nuovi, scelte nuove, lo stesso paese da servire.' },   // C9 · −15,6 / −1,2 (L218-5)
-  'voce-fiducia-si':          { file:'voce-fiducia-si.mp3',          gain:0.39, nonPaesi:['usa'], en:'The chamber has renewed its confidence. The majority holds. Now, back to work.', it:'L\'aula ha rinnovato la fiducia. La maggioranza tiene. E adesso, al lavoro.' },   // C11 · −15,2 / −1,1 (L218-5)
-  'voce-fiducia-no':          { file:'voce-fiducia-no.mp3',          gain:0.39, nonPaesi:['usa'], en:'The chamber has withdrawn its confidence. This government ends tonight, but our duty to the country does not.', it:'L\'aula ha tolto la fiducia. Questo governo finisce stanotte, ma il nostro dovere verso il paese no.' },   // C12 · −15,3 / −1,2 (L218-5)
-  'voce-crisi':               { file:'voce-crisi.mp3',               gain:0.44, en:'This is a serious moment for our country. I ask for calm, for unity, and for courage. We will face this together.', it:'È un momento grave per il nostro paese. Chiedo calma, unità e coraggio. Lo affronteremo insieme.' },   // C13 · −16,3 / −1,1 (L218-5)
-  'voce-notte':               { file:'voce-notte.mp3',               gain:0.47, en:'The polls are closed. Now we wait, and every vote will be counted.', it:'I seggi sono chiusi. Ora si aspetta, e ogni voto sarà contato.' },   // C14 · −16,8 / −1,6 (L218-5)
-  'voce-finale-alto':         { file:'voce-finale-alto.mp3',         gain:0.44, en:'My time in office is over. History will judge what we built. I believe it will be kind.', it:'Il mio tempo al governo è finito. La storia giudicherà ciò che abbiamo costruito. Credo che sarà generosa.' },   // C15 · −16,3 / −1,1 (L218-5)
-  'voce-finale-basso':        { file:'voce-finale-basso.mp3',        gain:0.46, en:'My career ends here, not as I had hoped. But every defeat teaches something to those who come next.', it:'La mia carriera finisce qui, non come speravo. Ma ogni sconfitta insegna qualcosa a chi viene dopo.' },   // C16 · −16,6 / −1,2 (L218-5)
+  'voce-fineanno-nuovocapitolo': { file:'voce-fineanno-nuovocapitolo.mp3', gain:0.41, f:{ file:'voce-fineanno-nuovocapitolo-f.mp3', gain:0.69 }, en:'A new chapter begins. New faces, new choices, the same country to serve.', it:'Comincia un nuovo capitolo. Volti nuovi, scelte nuove, lo stesso paese da servire.' },   // C9 · −15,6 / −1,2 (L218-5)
+  'voce-fiducia-si':          { file:'voce-fiducia-si.mp3',          gain:0.39, f:{ file:'voce-fiducia-si-f.mp3', gain:0.77 }, nonPaesi:['usa'], en:'The chamber has renewed its confidence. The majority holds. Now, back to work.', it:'L\'aula ha rinnovato la fiducia. La maggioranza tiene. E adesso, al lavoro.' },   // C11 · −15,2 / −1,1 (L218-5)
+  'voce-fiducia-no':          { file:'voce-fiducia-no.mp3',          gain:0.39, f:{ file:'voce-fiducia-no-f.mp3', gain:0.74 }, nonPaesi:['usa'], en:'The chamber has withdrawn its confidence. This government ends tonight, but our duty to the country does not.', it:'L\'aula ha tolto la fiducia. Questo governo finisce stanotte, ma il nostro dovere verso il paese no.' },   // C12 · −15,3 / −1,2 (L218-5)
+  'voce-crisi':               { file:'voce-crisi.mp3',               gain:0.44, f:{ file:'voce-crisi-f.mp3', gain:0.75 }, en:'This is a serious moment for our country. I ask for calm, for unity, and for courage. We will face this together.', it:'È un momento grave per il nostro paese. Chiedo calma, unità e coraggio. Lo affronteremo insieme.' },   // C13 · −16,3 / −1,1 (L218-5)
+  'voce-notte':               { file:'voce-notte.mp3',               gain:0.47, f:{ file:'voce-notte-f.mp3', gain:0.75 }, en:'The polls are closed. Now we wait, and every vote will be counted.', it:'I seggi sono chiusi. Ora si aspetta, e ogni voto sarà contato.' },   // C14 · −16,8 / −1,6 (L218-5)
+  'voce-finale-alto':         { file:'voce-finale-alto.mp3',         gain:0.44, f:{ file:'voce-finale-alto-f.mp3', gain:0.72 }, en:'My time in office is over. History will judge what we built. I believe it will be kind.', it:'Il mio tempo al governo è finito. La storia giudicherà ciò che abbiamo costruito. Credo che sarà generosa.' },   // C15 · −16,3 / −1,1 (L218-5)
+  'voce-finale-basso':        { file:'voce-finale-basso.mp3',        gain:0.46, f:{ file:'voce-finale-basso-f.mp3', gain:0.82 }, en:'My career ends here, not as I had hoped. But every defeat teaches something to those who come next.', it:'La mia carriera finisce qui, non come speravo. Ma ogni sconfitta insegna qualcosa a chi viene dopo.' },   // C16 · −16,6 / −1,2 (L218-5)
   /* L218-6 (giro suoni 6): C17-C24, gain dalla regola sull'RMS dichiarato dal giro (come L218-5). Agganci: dimissioni → `condannaLieve`
      (le dimissioni dopo la condanna: l'unico punto in cui il capo del governo si dimette e la carriera continua; il ritiro ha già
      la voce del finale); campagna → `campSforzo` quando apre la campagna sul territorio (una volta per campagna: `S.campNaz.sforzo`);
      governo → la conferma di una COALIZIONE (avvio e rielezione, la stessa condizione dei bicchieri, `suonoFormazione`) se nessuna
      voce sta parlando; ministro-via → «Chiedi le dimissioni» nello scandalo di un ministro; le quattro della guida → `guida(n)` qui sotto. */
-  'voce-dimissioni':          { file:'voce-dimissioni.mp3',          gain:0.45, en:'I have decided to step down. It is the right thing to do, for the country and for the institutions I have served.', it:'Ho deciso di dimettermi. È la cosa giusta da fare, per il paese e per le istituzioni che ho servito.' },   // C17 · −16,5 / −1,0 (L218-6)
-  'voce-campagna':            { file:'voce-campagna.mp3',            gain:0.42, en:'The campaign begins today. Every vote must be earned, street by street, town by town.', it:'La campagna comincia oggi. Ogni voto va conquistato, strada per strada, città per città.' },   // C18 · −15,9 / −1,0 (L218-6)
-  'voce-governo':             { file:'voce-governo.mp3',             gain:0.44, en:'We have a government. Different voices, one commitment: to serve the country.', it:'Abbiamo un governo. Voci diverse, un solo impegno: servire il paese.' },   // C19 · −16,4 / −1,3 (L218-6)
-  'voce-ministro-via':        { file:'voce-ministro-via.mp3',        gain:0.40, en:'I have asked the minister to step aside. No one in this government is above accountability.', it:'Ho chiesto al ministro di farsi da parte. In questo governo nessuno è al di sopra delle proprie responsabilità.' },   // C20 · −15,5 / −1,2 (L218-6)
+  'voce-dimissioni':          { file:'voce-dimissioni.mp3',          gain:0.45, f:{ file:'voce-dimissioni-f.mp3', gain:0.81 }, en:'I have decided to step down. It is the right thing to do, for the country and for the institutions I have served.', it:'Ho deciso di dimettermi. È la cosa giusta da fare, per il paese e per le istituzioni che ho servito.' },   // C17 · −16,5 / −1,0 (L218-6)
+  'voce-campagna':            { file:'voce-campagna.mp3',            gain:0.42, f:{ file:'voce-campagna-f.mp3', gain:0.70 }, en:'The campaign begins today. Every vote must be earned, street by street, town by town.', it:'La campagna comincia oggi. Ogni voto va conquistato, strada per strada, città per città.' },   // C18 · −15,9 / −1,0 (L218-6)
+  'voce-governo':             { file:'voce-governo.mp3',             gain:0.44, f:{ file:'voce-governo-f.mp3', gain:0.64 }, en:'We have a government. Different voices, one commitment: to serve the country.', it:'Abbiamo un governo. Voci diverse, un solo impegno: servire il paese.' },   // C19 · −16,4 / −1,3 (L218-6)
+  'voce-ministro-via':        { file:'voce-ministro-via.mp3',        gain:0.40, f:{ file:'voce-ministro-via-f.mp3', gain:0.76 }, en:'I have asked the minister to step aside. No one in this government is above accountability.', it:'Ho chiesto al ministro di farsi da parte. In questo governo nessuno è al di sopra delle proprie responsabilità.' },   // C20 · −15,5 / −1,2 (L218-6)
   'voce-guida-1':             { file:'voce-guida-1.mp3',             gain:0.42, en:'Welcome. Every decision you take here will shape your career, and your country.', it:'Benvenuto. Ogni decisione che prendi qui darà forma alla tua carriera, e al tuo paese.' },   // C21 · −16,0 / −1,2 (L218-6)
   'voce-guida-2':             { file:'voce-guida-2.mp3',             gain:0.50, en:'Read every card carefully. Every choice has a price, and someone will remember it.', it:'Leggi ogni carta con attenzione. Ogni scelta ha un prezzo, e qualcuno se ne ricorderà.' },   // C22 · −17,5 / −1,2 (L218-6)
   'voce-guida-3':             { file:'voce-guida-3.mp3',             gain:0.48, en:'Watch your approval and your allies. Lose both, and you lose everything.', it:'Tieni d\'occhio il consenso e gli alleati. Se li perdi entrambi, perdi tutto.' },   // C23 · −17,1 / −1,2 (L218-6)
@@ -945,12 +945,12 @@ const VOCI_MANIFEST = {
      `voce-vittoria` (voceScelta alterna -a/-b/-c). Tutte e quattro le nuove con agganci tacciono se un'altra voce parla (voceInCorso).
      `voce-alleanza`: dal L229-1 (Giacomo 12/10) parla quando un partito NUOVO entra al governo del giocatore — `voceAlleanza()` in
      game.js, chiamata da `rimpastoEntra` (al posto di voce-rimpasto, che resta il ripiego) e dalla coalizione piena del 2010 britannico. */
-  'voce-scandalo':            { file:'voce-scandalo.mp3',            gain:0.40, en:'I have read the reports, like everyone else. If anyone on my team broke the rules, they will answer for it.', it:'Ho letto i giornali, come tutti. Se qualcuno della mia squadra ha violato le regole, ne risponderà.' },   // F4a · −15,4 / −1,2 (L218-10)
-  'voce-rimpasto':            { file:'voce-rimpasto.mp3',            gain:0.38, en:'Today I have reshaped the team. New energy, the same direction. The country cannot wait.', it:'Oggi ho cambiato la squadra. Energie nuove, la stessa direzione. Il paese non può aspettare.' },   // F4b · −15,0 / −1,0 (L218-10)
-  'voce-alleanza':            { file:'voce-alleanza.mp3',            gain:0.38, en:'We do not agree on everything. But we agree on what matters most, and that is enough to govern together.', it:'Non siamo d\'accordo su tutto. Ma lo siamo su ciò che conta di più, e basta per governare insieme.' },   // F4c · −15,0 / −1,3 (L218-10) · aggancio L229-1: voceAlleanza
-  'voce-opposizione':         { file:'voce-opposizione.mp3',         gain:0.46, en:'From today, we sit in opposition. We will watch, we will question, and we will be ready.', it:'Da oggi siamo all\'opposizione. Vigileremo, faremo domande, e saremo pronti.' },   // F4d · −16,7 / −1,2 (L218-10)
-  'voce-legge-si':            { file:'voce-legge-si.mp3',            gain:0.44, en:'The law has passed. It was not easy, but it was right, and people will feel the difference.', it:'La legge è passata. Non è stato facile, ma era giusto, e la gente sentirà la differenza.' },   // F4e · −16,3 / −1,4 (L218-10)
-  'voce-vittoria-c':          { file:'voce-vittoria-c.mp3',          gain:0.45, en:'They said it could not be done. Tonight, you proved them wrong. Thank you.', it:'Dicevano che era impossibile. Stanotte gli avete dato torto. Grazie.' },   // F4f · −16,5 / −1,5 (L218-10)
+  'voce-scandalo':            { file:'voce-scandalo.mp3',            gain:0.40, f:{ file:'voce-scandalo-f.mp3', gain:0.82 }, en:'I have read the reports, like everyone else. If anyone on my team broke the rules, they will answer for it.', it:'Ho letto i giornali, come tutti. Se qualcuno della mia squadra ha violato le regole, ne risponderà.' },   // F4a · −15,4 / −1,2 (L218-10)
+  'voce-rimpasto':            { file:'voce-rimpasto.mp3',            gain:0.38, f:{ file:'voce-rimpasto-f.mp3', gain:0.79 }, en:'Today I have reshaped the team. New energy, the same direction. The country cannot wait.', it:'Oggi ho cambiato la squadra. Energie nuove, la stessa direzione. Il paese non può aspettare.' },   // F4b · −15,0 / −1,0 (L218-10)
+  'voce-alleanza':            { file:'voce-alleanza.mp3',            gain:0.38, f:{ file:'voce-alleanza-f.mp3', gain:0.79 }, en:'We do not agree on everything. But we agree on what matters most, and that is enough to govern together.', it:'Non siamo d\'accordo su tutto. Ma lo siamo su ciò che conta di più, e basta per governare insieme.' },   // F4c · −15,0 / −1,3 (L218-10) · aggancio L229-1: voceAlleanza
+  'voce-opposizione':         { file:'voce-opposizione.mp3',         gain:0.46, f:{ file:'voce-opposizione-f.mp3', gain:0.81 }, en:'From today, we sit in opposition. We will watch, we will question, and we will be ready.', it:'Da oggi siamo all\'opposizione. Vigileremo, faremo domande, e saremo pronti.' },   // F4d · −16,7 / −1,2 (L218-10)
+  'voce-legge-si':            { file:'voce-legge-si.mp3',            gain:0.44, f:{ file:'voce-legge-si-f.mp3', gain:0.71 }, en:'The law has passed. It was not easy, but it was right, and people will feel the difference.', it:'La legge è passata. Non è stato facile, ma era giusto, e la gente sentirà la differenza.' },   // F4e · −16,3 / −1,4 (L218-10)
+  'voce-vittoria-c':          { file:'voce-vittoria-c.mp3',          gain:0.45, f:{ file:'voce-vittoria-c-f.mp3', gain:0.68 }, en:'They said it could not be done. Tonight, you proved them wrong. Thank you.', it:'Dicevano che era impossibile. Stanotte gli avete dato torto. Grazie.' },   // F4f · −16,5 / −1,5 (L218-10)
   /* L218-11 (giro suoni 11): F4g-F4m, gain dalla stessa regola. Agganci: sconfitta-c → terza della coppia `voce-sconfitta` (voceScelta
      gira su -a/-b/-c); coalizione-rotta → `rompiPartner` (game.js) SOLO dentro advanceMonth, al governo, livello 3, fuori dalla
      coabitazione: la rottura per tenuta (pickAlleato, in genAgenda — che gira anche in applySnap) e la tappa del 1982; non gli snodi
@@ -963,13 +963,13 @@ const VOCI_MANIFEST = {
      aula (`pBocciatura`/`votoInAula`), zitta se un'altra voce parla.
      Decisioni di Giacomo del 12/10 (L229-1): `voce-bilancio-si` RESTA senza aggancio (ogni gennaio si accavallerebbe a
      voce-fineanno-<k>); `voce-legge-no` la decide il voto in aula (L228-1, studio). */
-  'voce-sconfitta-c':         { file:'voce-sconfitta-c.mp3',         gain:0.47, en:'It is a bitter night, and I take full responsibility. Our party deserves a fresh start.', it:'È una notte amara, e me ne assumo tutta la responsabilità. Il partito merita di ripartire.' },   // F4g · −16,9 / −1,4 (L218-11)
-  'voce-coalizione-rotta':    { file:'voce-coalizione-rotta.mp3',    gain:0.48, en:'Our partners have chosen to leave. I regret it, but this government will not stop working.', it:'I nostri alleati hanno scelto di andarsene. Mi dispiace, ma questo governo non smette di lavorare.' },   // F4h · −17,0 / −1,3 (L218-11)
-  'voce-legge-no':            { file:'voce-legge-no.mp3',            gain:0.43, en:'The vote did not go our way. We will listen, we will improve it, and we will try again.', it:'Il voto non è andato come speravamo. Ascolteremo, la miglioreremo, e ci riproveremo.' },   // F4i · −16,1 / −1,5 (L218-11) · dal L230-1 in leggeRespinta
-  'voce-sondaggio-giu':       { file:'voce-sondaggio-giu.mp3',       gain:0.45, en:'The polls are not kind this week. Polls change. Our work does not.', it:'I sondaggi non sono generosi questa settimana. I sondaggi cambiano. Il nostro lavoro no.' },   // F4j · −16,5 / −1,5 (L218-11)
-  'voce-sondaggio-su':        { file:'voce-sondaggio-su.mp3',        gain:0.45, en:'People are starting to notice. Let us not celebrate yet. Let us keep earning it.', it:'La gente comincia ad accorgersene. Non festeggiamo ancora. Continuiamo a meritarcelo.' },   // F4k · −16,5 / −1,5 (L218-11)
-  'voce-bilancio-si':         { file:'voce-bilancio-si.mp3',         gain:0.44, en:'The budget is approved. Every number in it is a choice, and we stand by ours.', it:'Il bilancio è approvato. Ogni numero è una scelta, e noi difendiamo le nostre.' },   // F4l · −16,3 / −1,3 (L218-11) · senza aggancio
-  'voce-protesta':            { file:'voce-protesta.mp3',            gain:0.42, en:'I hear the voices in the streets. Protest is a right, and I will not ignore it.', it:'Sento le voci delle piazze. Protestare è un diritto, e non lo ignorerò.' },   // F4m · −15,9 / −1,3 (L218-11)
+  'voce-sconfitta-c':         { file:'voce-sconfitta-c.mp3',         gain:0.47, f:{ file:'voce-sconfitta-c-f.mp3', gain:0.84 }, en:'It is a bitter night, and I take full responsibility. Our party deserves a fresh start.', it:'È una notte amara, e me ne assumo tutta la responsabilità. Il partito merita di ripartire.' },   // F4g · −16,9 / −1,4 (L218-11)
+  'voce-coalizione-rotta':    { file:'voce-coalizione-rotta.mp3',    gain:0.48, f:{ file:'voce-coalizione-rotta-f.mp3', gain:0.73 }, en:'Our partners have chosen to leave. I regret it, but this government will not stop working.', it:'I nostri alleati hanno scelto di andarsene. Mi dispiace, ma questo governo non smette di lavorare.' },   // F4h · −17,0 / −1,3 (L218-11)
+  'voce-legge-no':            { file:'voce-legge-no.mp3',            gain:0.43, f:{ file:'voce-legge-no-f.mp3', gain:0.72 }, en:'The vote did not go our way. We will listen, we will improve it, and we will try again.', it:'Il voto non è andato come speravamo. Ascolteremo, la miglioreremo, e ci riproveremo.' },   // F4i · −16,1 / −1,5 (L218-11) · dal L230-1 in leggeRespinta
+  'voce-sondaggio-giu':       { file:'voce-sondaggio-giu.mp3',       gain:0.45, f:{ file:'voce-sondaggio-giu-f.mp3', gain:0.75 }, en:'The polls are not kind this week. Polls change. Our work does not.', it:'I sondaggi non sono generosi questa settimana. I sondaggi cambiano. Il nostro lavoro no.' },   // F4j · −16,5 / −1,5 (L218-11)
+  'voce-sondaggio-su':        { file:'voce-sondaggio-su.mp3',        gain:0.45, f:{ file:'voce-sondaggio-su-f.mp3', gain:0.85 }, en:'People are starting to notice. Let us not celebrate yet. Let us keep earning it.', it:'La gente comincia ad accorgersene. Non festeggiamo ancora. Continuiamo a meritarcelo.' },   // F4k · −16,5 / −1,5 (L218-11)
+  'voce-bilancio-si':         { file:'voce-bilancio-si.mp3',         gain:0.44, f:{ file:'voce-bilancio-si-f.mp3', gain:0.72 }, en:'The budget is approved. Every number in it is a choice, and we stand by ours.', it:'Il bilancio è approvato. Ogni numero è una scelta, e noi difendiamo le nostre.' },   // F4l · −16,3 / −1,3 (L218-11) · senza aggancio
+  'voce-protesta':            { file:'voce-protesta.mp3',            gain:0.42, f:{ file:'voce-protesta-f.mp3', gain:0.70 }, en:'I hear the voices in the streets. Protest is a right, and I will not ignore it.', it:'Sento le voci delle piazze. Protestare è un diritto, e non lo ignorerò.' },   // F4m · −15,9 / −1,3 (L218-11)
   /* L218-12 (giro suoni 12): F4n-F4t, gain dalla stessa regola sull'RMS dichiarato dal giro. Agganci (game.js): insediamento-b →
      la seconda della coppia `voce-insediamento` (dal L218-12 la C1 è la -a, il suo file tiene il nome voce-insediamento.mp3:
      diventaPremier e tornaAlGoverno chiamano la coppia e voceScelta alterna); candidatura → `diventaLocale` (l'attivista sceglie
@@ -978,13 +978,13 @@ const VOCI_MANIFEST = {
      `voceAgendaMese` (la carta entra in agenda nel mese nuovo, solo dentro advanceMonth: VOCI_CARTA). Tutte zitte se un'altra
      voce parla (voceInCorso). ⚠ `voce-lutto` («tragedia o disastro») NON sui pilastri-tragedia: lì `parla` tace per regola (L218,
      «mai sopra una tragedia»); la dicono i disastri inventati del gioco (`sisma`, `crollo`). Confermato da Giacomo il 12/10 (L229-1). */
-  'voce-sciopero':            { file:'voce-sciopero.mp3',            gain:0.36, en:'This strike is a sign of real anger. My door is open, and I want an agreement by the end of the week.', it:'Questo sciopero è il segno di una rabbia vera. La mia porta è aperta, e voglio un accordo entro la settimana.' },   // F4n · −14,5 / −1,0 (L218-12)
-  'voce-insediamento-b':      { file:'voce-insediamento-b.mp3',      gain:0.39, en:'I know the weight of this moment. I will not promise miracles. I promise work, honesty, and an open door.', it:'Conosco il peso di questo momento. Non prometto miracoli. Prometto lavoro, onestà e una porta aperta.' },   // F4o · −15,3 / −1,2 (L218-12)
-  'voce-candidatura':         { file:'voce-candidatura.mp3',         gain:0.38, en:'I am standing for election because I believe things can be better, and I am ready to prove it.', it:'Mi candido perché credo che le cose possano andare meglio, e sono pronto a dimostrarlo.' },   // F4p · −15,0 / −1,4 (L218-12)
-  'voce-vertice':             { file:'voce-vertice.mp3',             gain:0.48, en:'At this summit, our country speaks with one voice. We came to listen, and to be heard.', it:'A questo vertice il nostro paese parla con una voce sola. Siamo venuti ad ascoltare, e a farci ascoltare.' },   // F4q · −17,0 / −1,3 (L218-12)
-  'voce-scandalo-chiuso':     { file:'voce-scandalo-chiuso.mp3',     gain:0.43, en:'The inquiry is closed, and the facts are clear. Now let us return to the questions that matter to people.', it:'L\'inchiesta è chiusa, e i fatti sono chiari. Ora torniamo alle domande che contano per la gente.' },   // F4r · −16,1 / −1,1 (L218-12)
-  'voce-lutto':               { file:'voce-lutto.mp3',               gain:0.46, en:'Our thoughts are with the families tonight. Every resource of the state is already on its way.', it:'Stanotte il nostro pensiero va alle famiglie. Tutte le risorse dello stato sono già in viaggio.' },   // F4s · −16,6 / −1,2 (L218-12)
-  'voce-dibattito':           { file:'voce-dibattito.mp3',           gain:0.37, en:'Tonight, millions are watching. Speak clearly, answer honestly, and never lose your temper.', it:'Stasera ci guardano milioni di persone. Parla chiaro, rispondi con onestà, e non perdere mai la calma.' },   // F4t · −14,8 / −1,1 (L218-12)
+  'voce-sciopero':            { file:'voce-sciopero.mp3',            gain:0.36, f:{ file:'voce-sciopero-f.mp3', gain:0.82 }, en:'This strike is a sign of real anger. My door is open, and I want an agreement by the end of the week.', it:'Questo sciopero è il segno di una rabbia vera. La mia porta è aperta, e voglio un accordo entro la settimana.' },   // F4n · −14,5 / −1,0 (L218-12)
+  'voce-insediamento-b':      { file:'voce-insediamento-b.mp3',      gain:0.39, f:{ file:'voce-insediamento-b-f.mp3', gain:0.70 }, en:'I know the weight of this moment. I will not promise miracles. I promise work, honesty, and an open door.', it:'Conosco il peso di questo momento. Non prometto miracoli. Prometto lavoro, onestà e una porta aperta.' },   // F4o · −15,3 / −1,2 (L218-12)
+  'voce-candidatura':         { file:'voce-candidatura.mp3',         gain:0.38, f:{ file:'voce-candidatura-f.mp3', gain:0.75, it:'Mi candido perché credo che le cose possano andare meglio, e sono pronta a dimostrarlo.' }, en:'I am standing for election because I believe things can be better, and I am ready to prove it.', it:'Mi candido perché credo che le cose possano andare meglio, e sono pronto a dimostrarlo.' },   // F4p · −15,0 / −1,4 (L218-12)
+  'voce-vertice':             { file:'voce-vertice.mp3',             gain:0.48, f:{ file:'voce-vertice-f.mp3', gain:0.89 }, en:'At this summit, our country speaks with one voice. We came to listen, and to be heard.', it:'A questo vertice il nostro paese parla con una voce sola. Siamo venuti ad ascoltare, e a farci ascoltare.' },   // F4q · −17,0 / −1,3 (L218-12)
+  'voce-scandalo-chiuso':     { file:'voce-scandalo-chiuso.mp3',     gain:0.43, f:{ file:'voce-scandalo-chiuso-f.mp3', gain:0.93 }, en:'The inquiry is closed, and the facts are clear. Now let us return to the questions that matter to people.', it:'L\'inchiesta è chiusa, e i fatti sono chiari. Ora torniamo alle domande che contano per la gente.' },   // F4r · −16,1 / −1,1 (L218-12)
+  'voce-lutto':               { file:'voce-lutto.mp3',               gain:0.46, f:{ file:'voce-lutto-f.mp3', gain:0.85 }, en:'Our thoughts are with the families tonight. Every resource of the state is already on its way.', it:'Stanotte il nostro pensiero va alle famiglie. Tutte le risorse dello stato sono già in viaggio.' },   // F4s · −16,6 / −1,2 (L218-12)
+  'voce-dibattito':           { file:'voce-dibattito.mp3',           gain:0.37, f:{ file:'voce-dibattito-f.mp3', gain:0.80 }, en:'Tonight, millions are watching. Speak clearly, answer honestly, and never lose your temper.', it:'Stasera ci guardano milioni di persone. Parla chiaro, rispondi con onestà, e non perdere mai la calma.' },   // F4t · −14,8 / −1,1 (L218-12)
 };
 const VOCI_PRESENTI = ['voce-insediamento.mp3', 'voce-vittoria-a.mp3', 'voce-vittoria-b.mp3', 'voce-sconfitta-a.mp3', 'voce-sconfitta-b.mp3',
                        'voce-fineanno-buono.mp3', 'voce-fineanno-lucieombre.mp3', 'voce-fineanno-difficile.mp3',   // L218-4 (giro suoni 4)
@@ -997,12 +997,33 @@ const VOCI_PRESENTI = ['voce-insediamento.mp3', 'voce-vittoria-a.mp3', 'voce-vit
                        'voce-sconfitta-c.mp3', 'voce-coalizione-rotta.mp3', 'voce-legge-no.mp3', 'voce-sondaggio-giu.mp3',
                        'voce-sondaggio-su.mp3', 'voce-bilancio-si.mp3', 'voce-protesta.mp3',   // L218-11 (giro suoni 11)
                        'voce-sciopero.mp3', 'voce-insediamento-b.mp3', 'voce-candidatura.mp3', 'voce-vertice.mp3', 'voce-scandalo-chiuso.mp3',
-                       'voce-lutto.mp3', 'voce-dibattito.mp3'];   // L218-12 (giro suoni 12)
+                       'voce-lutto.mp3', 'voce-dibattito.mp3',   // L218-12 (giro suoni 12)
+                       /* L255-1 (giro suoni 24): le 39 voci di lei, «Violetta» (Eleven Multilingual v2), `<id>-f.mp3` con l'id del manifesto */
+                       'voce-insediamento-a-f.mp3', 'voce-vittoria-a-f.mp3', 'voce-vittoria-b-f.mp3', 'voce-sconfitta-a-f.mp3', 'voce-sconfitta-b-f.mp3',
+                       'voce-fineanno-buono-f.mp3', 'voce-fineanno-lucieombre-f.mp3', 'voce-fineanno-difficile-f.mp3', 'voce-fineanno-nuovocapitolo-f.mp3',
+                       'voce-fiducia-si-f.mp3', 'voce-fiducia-no-f.mp3', 'voce-crisi-f.mp3', 'voce-notte-f.mp3', 'voce-finale-alto-f.mp3', 'voce-finale-basso-f.mp3',
+                       'voce-dimissioni-f.mp3', 'voce-campagna-f.mp3', 'voce-governo-f.mp3', 'voce-ministro-via-f.mp3',
+                       'voce-scandalo-f.mp3', 'voce-rimpasto-f.mp3', 'voce-alleanza-f.mp3', 'voce-opposizione-f.mp3', 'voce-legge-si-f.mp3', 'voce-vittoria-c-f.mp3',
+                       'voce-sconfitta-c-f.mp3', 'voce-coalizione-rotta-f.mp3', 'voce-legge-no-f.mp3', 'voce-sondaggio-giu-f.mp3', 'voce-sondaggio-su-f.mp3',
+                       'voce-bilancio-si-f.mp3', 'voce-protesta-f.mp3',
+                       'voce-sciopero-f.mp3', 'voce-insediamento-b-f.mp3', 'voce-candidatura-f.mp3', 'voce-vertice-f.mp3', 'voce-scandalo-chiuso-f.mp3',
+                       'voce-lutto-f.mp3', 'voce-dibattito-f.mp3'];
 const VOCI_DIR = 'assets/audio/voci/', VOCI_K = 1, VOCI_ATTESA_MS = 2500, VOCI_FADE_S = 0.3;
-let VOCI_BUF = {}, VOCI_CARICO = {}, VOCI_GIRO = {}, VOCE_ORA = null, VOCE_TOKEN = 0, VOCE_ATTESA = null;   // L218-6: VOCE_ATTESA = la voce chiesta e in caricamento {tok, t0}
-let VOCI_REGISTRO = [];               // {id, t, esito} — per le misure; transitorio
-function voceSegna(id, esito){ VOCI_REGISTRO.push({ id:id, t:(typeof performance!=='undefined'?Math.round(performance.now()):0), esito:esito }); if(VOCI_REGISTRO.length>500) VOCI_REGISTRO.splice(0, VOCI_REGISTRO.length-500); }
-function voceHaFile(id){ const M=VOCI_MANIFEST[id]; return !!M && VOCI_PRESENTI.indexOf(M.file)>=0; }
+let VOCI_BUF = {}, VOCI_CARICO = {}, VOCI_GIRO = {}, VOCE_ORA = null, VOCE_TOKEN = 0, VOCE_ATTESA = null;   // L218-6: VOCE_ATTESA = la voce chiesta e in caricamento {tok, t0} · L255-1: BUF e CARICO per FILE, non per id
+let VOCI_REGISTRO = [];               // {id, t, esito, file} — per le misure; transitorio (file: L255-1, sulla riga «parla»)
+function voceSegna(id, esito, file){ VOCI_REGISTRO.push({ id:id, t:(typeof performance!=='undefined'?Math.round(performance.now()):0), esito:esito, file:file }); if(VOCI_REGISTRO.length>500) VOCI_REGISTRO.splice(0, VOCI_REGISTRO.length-500); }
+/* L255-1 · LA VOCE DI LEI. `voceGenere()` (pura) = 'f' se il personaggio è una donna (`S.personaggio.genere`, già in S: nessun
+   campo nuovo), altrimenti 'm'. `voceVariante(id)` = ciò che suona per quell'id: la voce di lei (`M.f`: file, gain e, dove l'accordo
+   cambia, `it`) se il genere è 'f' E il suo file è in VOCI_PRESENTI, altrimenti la voce di lui; null se non c'è nessun file. Il
+   genere non fa mai silenzio: senza `-f` (le quattro della guida) parla lui. Buffer e caricamenti sono per FILE, così una partita
+   nuova di genere diverso nella stessa pagina non suona il buffer dell'altra. */
+function voceGenere(){ return (typeof S!=='undefined' && S && S.personaggio && S.personaggio.genere==='f') ? 'f' : 'm'; }
+function voceVariante(id){
+  const M=VOCI_MANIFEST[id]; if(!M) return null;
+  if(voceGenere()==='f' && M.f && VOCI_PRESENTI.indexOf(M.f.file)>=0) return { file:M.f.file, gain:M.f.gain, it:M.f.it||M.it, en:M.f.en||M.en, f:true };
+  return VOCI_PRESENTI.indexOf(M.file)>=0 ? { file:M.file, gain:M.gain, it:M.it, en:M.en, f:false } : null;
+}
+function voceHaFile(id){ return !!voceVariante(id); }
 /* PURA (salvo il turno della coppia): dal nome chiesto al nome che suona. Un nome del manifesto vale com'è; il nome di una coppia
    sceglie fra `-a`, `-b` e `-c` (L218-10: la vittoria ne ha tre; L218-11: anche la sconfitta; L218-12: l'insediamento ne ha due) QUELLE COL FILE, a turno. Null se non c'è niente da dire. */
 function voceScelta(id){
@@ -1012,14 +1033,14 @@ function voceScelta(id){
   const n=VOCI_GIRO[id]||0; VOCI_GIRO[id]=n+1;
   return V[n%V.length];
 }
-function voceCarica(id){
-  if(VOCI_CARICO[id]) return VOCI_CARICO[id];
+function voceCarica(file){
+  if(VOCI_CARICO[file]) return VOCI_CARICO[file];
   if(!AUDIO_CTX) return null;
-  VOCI_CARICO[id]=fetch(VOCI_DIR+VOCI_MANIFEST[id].file).then(function(r){ return r.ok ? r.arrayBuffer() : null; })
+  VOCI_CARICO[file]=fetch(VOCI_DIR+file).then(function(r){ return r.ok ? r.arrayBuffer() : null; })
     .then(function(ab){ if(!ab || !AUDIO_CTX) return null; return new Promise(function(ok, ko){ AUDIO_CTX.decodeAudioData(ab, ok, ko); }); })
-    .then(function(buf){ if(buf) VOCI_BUF[id]=buf; delete VOCI_CARICO[id]; return buf; })
-    .catch(function(){ delete VOCI_CARICO[id]; return null; });
-  return VOCI_CARICO[id];
+    .then(function(buf){ if(buf) VOCI_BUF[file]=buf; delete VOCI_CARICO[file]; return buf; })
+    .catch(function(){ delete VOCI_CARICO[file]; return null; });
+  return VOCI_CARICO[file];
 }
 function voceSottotitolo(testo){
   try{
@@ -1045,18 +1066,17 @@ function taciVoce(){
     if(typeof musicaSottovoce==='function') musicaSottovoce(false);
   }catch(e){}
 }
-function voceParti(id){
-  const M=VOCI_MANIFEST[id];
+function voceParti(id, M){
   if(VOCE_ORA) taciVoce();
-  const src=AUDIO_CTX.createBufferSource(); src.buffer=VOCI_BUF[id];
+  const src=AUDIO_CTX.createBufferSource(); src.buffer=VOCI_BUF[M.file];
   const g=AUDIO_CTX.createGain(); g.gain.value=M.gain*VOCI_K;
   src.connect(g); g.connect(AUDIO_BUS.effetti||AUDIO_MASTER_GAIN);
-  const V={ id:id, src:src, g:g }; VOCE_ORA=V;
+  const V={ id:id, file:M.file, src:src, g:g }; VOCE_ORA=V;
   src.onended=function(){ if(VOCE_ORA!==V) return; VOCE_ORA=null; voceSottotitolo(null); if(typeof musicaSottovoce==='function') musicaSottovoce(false); voceSegna(id, 'finita'); };
   src.start();
   if(typeof musicaSottovoce==='function') musicaSottovoce(true);
   voceSottotitolo((typeof curLang==='function' && curLang()==='en') ? M.en : M.it);
-  voceSegna(id, 'parla');
+  voceSegna(id, 'parla', M.file);
 }
 /* vero se una voce sta parlando o sta arrivando (chiesta e in caricamento, entro VOCI_ATTESA_MS): chi non vuole interrompere chiede
    prima (la voce del governo, la guida). Una voce in caricamento non è ancora VOCE_ORA: senza il secondo termine la voce del
@@ -1091,18 +1111,18 @@ function parla(richiesta){
     if(typeof musicaTragedia==='function' && musicaTragedia()){ voceSegna(richiesta, 'tragedia'); return; }
     const id=voceScelta(richiesta);
     if(!id){ voceSegna(richiesta, (VOCI_MANIFEST[richiesta] || VOCI_MANIFEST[richiesta+'-a']) ? 'file assente' : 'fuori manifesto'); return; }
-    const M=VOCI_MANIFEST[id];
-    if(M.nonPaesi && typeof S!=='undefined' && S && M.nonPaesi.indexOf(S.paese)>=0){ voceSegna(id, 'non in questo paese'); return; }
+    const MM=VOCI_MANIFEST[id], M=voceVariante(id);   // L255-1: la variante (lei o lui) si decide qui, una volta per richiesta
+    if(MM.nonPaesi && typeof S!=='undefined' && S && MM.nonPaesi.indexOf(S.paese)>=0){ voceSegna(id, 'non in questo paese'); return; }
     if(!AUDIO_CTX){ voceSegna(id, 'nessun contesto (prima del primo gesto)'); return; }
     const tok=++VOCE_TOKEN;
-    if(VOCI_BUF[id]){ voceParti(id); return; }
+    if(VOCI_BUF[M.file]){ voceParti(id, M); return; }
     const t0=Date.now(); voceSegna(id, 'in caricamento'); VOCE_ATTESA={ tok:tok, t0:t0 };
-    const p=voceCarica(id);
+    const p=voceCarica(M.file);
     if(p) p.then(function(buf){
       if(!buf || tok!==VOCE_TOKEN) return;                                      // un'altra voce (o un tocco) è arrivata prima
       if(Date.now()-t0>VOCI_ATTESA_MS){ voceSegna(id, 'troppo tardi'); return; }  // niente voce in ritardo a momento finito
       if(!audioStratoVivo('effetti')) return;
-      voceParti(id);
+      voceParti(id, M);
     });
   }catch(e){}
 }

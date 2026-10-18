@@ -19375,6 +19375,19 @@ const TITOLI=[
  {id:'ti_us60_diritti_meta', era:'us1960', pri:1, cond:()=>S.year===1964&&S.month>=7&&S.month<=8&&S.usDiritti==='leggera', amico:'Una legge senza ristoranti e alberghi', ostile:'Diritti civili: passa la legge, ma ai banconi del Sud non cambia niente'},
  {id:'ti_us60_ritiro', era:'us1960', pri:1, cond:()=>S.year===1965&&S.month>=4&&S.month<=5&&S.usVietnam==='trattativa', amico:'Gli ultimi consiglieri tornano a casa', ostile:'Vietnam: richiamati i consiglieri, Saigon parla di abbandono'},
  {id:'ti_us60_offensiva', era:'us1960', pri:1, cond:()=>S.year===1968&&S.month===2&&S.usVietnam==='escalation', amico:'L\'offensiva respinta', ostile:'Vietnam: un commando dentro l\'ambasciata di Saigon'},
+ // us1960 — L254-1 · titoli di stato senza pri (VARIETA-L254-TITOLI-US60.md)
+ {id:'ti_us60_s_spazio', era:'us1960', amico:'I razzi partono dalla Florida: il paese guarda il cielo', ostile:'I razzi costano miliardi: e quaggiù le strade hanno le buche'},
+ {id:'ti_us60_s_autostrade', era:'us1960', amico:'Le interstatali avanzano: presto da costa a costa senza semafori', ostile:'Le autostrade interstatali: e i quartieri tagliati in due'},
+ {id:'ti_us60_s_poverta', era:'us1960', cond:()=>S.year>=1963, amico:'La povertà in un paese ricco: Washington prepara i suoi programmi', ostile:'La povertà in un paese ricco: i programmi restano sulla carta'},
+ {id:'ti_us60_s_anziani', era:'us1960', amico:'Le cure agli anziani: Washington studia un piano', ostile:'Le cure agli anziani: i medici gridano alla medicina di Stato'},
+ {id:'ti_us60_s_citta', era:'us1960', cond:()=>S.year>=1965, amico:'Dopo i disordini: case e lavoro per i quartieri, promette Washington', ostile:'Dopo i disordini: coprifuoco, vetrine rotte e le solite promesse'},
+ {id:'ti_us60_s_prezzi', era:'us1960', cond:()=>S.year>=1966, amico:'I prezzi salgono: una febbre passeggera, giura il Tesoro', ostile:'La spesa federale corre, e i prezzi le vanno dietro'},
+ {id:'ti_us60_s_leva', era:'us1960', cond:()=>S.year>=1966&&us60Guerra(), amico:'La leva chiama di più: il paese fa il suo dovere', ostile:'La leva chiama di più: le cartoline arrivano nelle case dei poveri'},
+ {id:'ti_us60_s_aule', era:'us1960', amico:'Più aule e più maestri: la scuola cresce coi figli del dopoguerra', ostile:'Classi da quaranta: i figli del dopoguerra non ci stanno più'},
+ {id:'ti_us60_s_fattorie', era:'us1960', amico:'Le fattorie producono più che mai: il grano parte per il mondo', ostile:'Le piccole fattorie chiudono: i figli vanno in città'},
+ {id:'ti_us60_s_acciaio', era:'us1960', amico:'Acciaio: sindacati e aziende al tavolo, i prezzi tengono', ostile:'Acciaio: le aziende alzano i listini, e il governo sta a guardare'},
+ {id:'ti_us60_s_oro', era:'us1960', amico:'Trentacinque dollari l\'oncia: il dollaro vale come l\'oro', ostile:'Le riserve d\'oro calano: il mondo si fida meno del dollaro'},
+ {id:'ti_us60_s_fiducia', era:'us1960', cond:()=>S.year>=1965, amico:'Il governo spiega le sue scelte: conferenze stampa ogni settimana', ostile:'La fiducia nel governo cala: il paese non crede alle cifre ufficiali'},
  {id:'ng_p_ti_petrolio', era:'contemporanea', paesi:['nigeria'], amico:'La produzione di petrolio torna a salire', ostile:'Un barile su dieci sparisce: il furto record'},
 ];
 

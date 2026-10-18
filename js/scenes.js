@@ -81,10 +81,11 @@ const SCENES = {
                     italia1990:S_+'partito-anni90.webp' },
 
   /* --- bucket NUOVI (lotti 4-5): soggetti che prima non esistevano, cablati sotto in SCENA_DI_* --- */
-  /* il retroscena: 8 stanze del fuori-verbale in rotazione — l'anti-ripetizione più ricca del set */
+  /* il retroscena: 9 stanze del fuori-verbale in rotazione — l'anti-ripetizione più ricca del set */
   retro:          { base:[S_+'retro-accordo.webp', S_+'retro-industriale.webp', S_+'retro-cronista.webp',
                           S_+'retro-anticamera.webp', S_+'retro-stanza.webp', S_+'retro-canale.webp',
-                          S_+'retro-sezione.webp', S_+'retro-auto.webp'] },
+                          S_+'retro-sezione.webp', S_+'retro-auto.webp',
+                          S_+'trattativa-notte.webp'] },   // L197-39: la sala riunioni vuota di notte (CENSIMENTO-ASSET §2a: «accanto a retro-accordo», finché il formato delle trattative non ha un secchio suo)
   elezioniScrutinio:{ base:S_+'elezioni-scrutinio.webp' },                    // le mani che contano le schede
   partitoNotte:   { base:S_+'partito-notte.webp' },                           // la sede la notte dello spoglio
   /* i tre bucket d'epoca con ripiego al presente: nel '50/'60 la scena giusta, oggi una neutra già in casa */
@@ -219,7 +220,10 @@ const VIDEO_PRESENTI = ['home-hero', 'partito-base', 'vitaprivata-base', 'retro-
   'societacivile-base-latina', 'societacivile-base-africa',   // L197-34: i jacaranda (4,5) e le palme sulla spiaggia (5): tutte e due in CLIP_UNA_VOLTA. (economia-florido NON portata: nata dalla vecchia immagine con le auto anni '60, non dal .webp del gioco)
   'societacivile-anni90',   // L197-36: la piazza coi lenzuoli bianchi ai balconi (anni '90): si muovono i lenzuoli e le nuvole
   'sanita-base', 'ordinepubblico-base-nordamerica', 'elezioni-florido-francia',   // L197-37: il corridoio d'ospedale (tende e monitor), i due agenti sul marciapiede (riflessi), la piazza francese di notte (foglie e bandiera)
-  'crisi-base'];   // L197-38: la strada di città in rovina, quasi ferma (cucitura 2,1 sullo schermo: gira; poster↔f0 3)
+  'crisi-base',   // L197-38: la strada di città in rovina, quasi ferma (cucitura 2,1 sullo schermo: gira; poster↔f0 3)
+  'retro-industriale', 'trattativa-notte', 'infrastrutture-base', 'lavoro-base',   // L197-39: immagini NUOVE (le vecchie .webp in arte-sorgente/scene-ritirate/webp-l197-39/): l'ufficio notturno con l'uomo alla finestra (finestre e tenda), la sala riunioni vuota di notte (tenda e acqua), gli svincoli sul fiume (auto), la fabbrica coi bracci robotici (nastro e braccio)
+  'partito-florido', 'economia-base', 'societacivile-base-nordamerica',   // L197-40: le clip delle tre immagini sostituite in L197-39 — due fogli che si sollevano sui banchi dell'aula, foglie e piccioni sulla via alberata, una mossa a scacchi e foglie nel parco
+  'economia-florido', 'elezioni-florido-germania', 'societacivile-base-asiaest', 'vitaprivata-anni50'];   // L197-41 (giro clip 38): la gru che ruota il braccio, le bandiere e la folla che applaude piano, panni stesi e ginkgo, la tenda del salotto anni '50
 
 /* ===== L181-4 — LE CLIP CHE NON GIRANO: un giro solo, poi l'ultimo fotogramma tenuto. Le altre clip di scena girano in tondo
    (`loop`) perché il loro ultimo fotogramma torna sul primo (cucitura ≤ 3,6 su 255, misurata sullo schermo); queste no — le porte
@@ -245,7 +249,8 @@ const CLIP_UNA_VOLTA = ['fineanno-buono', 'fineanno-lucieombre', 'fineanno-diffi
   'ordinepubblico-base', 'societacivile-base-latina-v2',   // L197-33: il viale (6,1: le figure si allontanano e non tornano) e la cucina (7,7: vapore e piante non tornano)
   'societacivile-base-latina', 'societacivile-base-africa',   // L197-34: i jacaranda (4,5) e le palme sulla spiaggia (5): petali, teli e la coppia che cammina non tornano
   'societacivile-anni90',   // L197-36: la piazza coi lenzuoli (7,3): lenzuoli e nuvole non tornano
-  'ordinepubblico-base-nordamerica', 'elezioni-florido-francia'];   // L197-37: gli agenti sul marciapiede (5,4: si allontanano e non tornano) e la piazza francese di notte (6,3: foglie e bandiera non tornano)
+  'ordinepubblico-base-nordamerica', 'elezioni-florido-francia',   // L197-37: gli agenti sul marciapiede (5,4: si allontanano e non tornano) e la piazza francese di notte (6,3: foglie e bandiera non tornano)
+  'infrastrutture-base', 'lavoro-base'];   // L197-39: gli svincoli sul fiume (4,1: le auto saltano alla cucitura) e la fabbrica coi bracci (4,9: nastro e braccio non tornano)
                             // (Il telefono anni '70 di L197-11 è uscito da qui: rifatto a camera ferma, cucitura 1,4, L197-12.)
                             // (Il vicolo casa-base-asiaest-v2 di L197-10 è uscito da qui: rifatto a luce ferma, cucitura 2,2, L197-11.)
                             // (Il soggiorno vitaprivata-base-v6 di L192-7 è uscito con la sua clip: L195-0, D223.)
@@ -474,7 +479,7 @@ const SCENA_DI_KICK = {
 
 /* kind strutturale (carte narrative senza kicker tematico) → id-scena.
    B2: `intermedia` → partitoNotte (la sede la notte dello spoglio, non il seggio); `occasione` → retro
-   (l'occasione di carriera si gioca in corridoio: 8 stanze in rotazione, addio wallpaper). */
+   (l'occasione di carriera si gioca in corridoio: 9 stanze in rotazione dal L197-39, addio wallpaper). */
 const SCENA_DI_KIND = {
   scandalo:'scandalo', inchiesta:'scandalo', conflitto:'partito', personale:'vitaprivata',
   intermedia:'partitoNotte', puntopartito:'partito', premier:'partito', occasione:'retro',
@@ -520,14 +525,14 @@ const SCENA_TONO_KIND = { conflitto:'grave', puntopartito:'florido', occasione:'
    (tipografia '50, studio TV '60), quindi basta escludere la variante moderna. Il supporto a
    `_annoMin` resta nel selettore, semplicemente non serve più a nessuno. */
 const SCENA_ERA = {
-  economia:       { base:'contemporanea' },                              // via commerciale «al presente» (florido gru/cantieri = universale)
+  economia:       { base:'contemporanea' },                              // L197-39: via alberata coi dehors (prima la via commerciale «al presente»); florido gru/cantieri = universale
   lavoro:         { base:'contemporanea', florido:'contemporanea' },     // robot e muletto / officina moderna (grave capannone dismesso = universale)
   sanita:         { base:'contemporanea', florido:'contemporanea' },     // L8-4: base = corridoio moderno (linoleum/alluminio); grave (corsia con la muffa) = universale
   scuola:         { base:'contemporanea' },                              // L8-4: base = banchi in laminato/sedie di plastica/termosifoni; grave/florido universali, e c'è scuola-anni50 per il '50
   ambiente:       { base:'contemporanea', florido:'contemporanea' },     // pannelli solari / eolico (grave torre di raffreddamento = universale)
   infrastrutture: { florido:'contemporanea' },                           // città verde, tram, ciclabile
   elezioni:       { grave:'contemporanea' },                             // maxischermo in piazza
-  partito:        { florido:'contemporanea' },                           // «emiciclo moderno» con gli schermi
+  partito:        { florido:'contemporanea' },                           // L197-39: l'aula piena vista dalla tribuna (prima l'«emiciclo moderno» con gli schermi; il gate resta)
   stampa:         { base:'contemporanea', grave:'contemporanea' },       // L8-4: base = open space con monitor su ogni scrivania; grave (podio+telecamere) già contemporanea; c'è stampa-anni50/60 per l'epoca
   ordinepubblico: 'contemporanea',                                       // antisommossa moderno / strada serale (intero bucket-stringa, invariato)
   emergenza:      'contemporanea',                                       // mezzi e soccorsi moderni (intero bucket-stringa, invariato)
