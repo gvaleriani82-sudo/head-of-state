@@ -934,7 +934,7 @@ const VOCI_MANIFEST = {
   'voce-campagna':            { file:'voce-campagna.mp3',            gain:0.42, f:{ file:'voce-campagna-f.mp3', gain:0.70 }, en:'The campaign begins today. Every vote must be earned, street by street, town by town.', it:'La campagna comincia oggi. Ogni voto va conquistato, strada per strada, città per città.' },   // C18 · −15,9 / −1,0 (L218-6)
   'voce-governo':             { file:'voce-governo.mp3',             gain:0.44, f:{ file:'voce-governo-f.mp3', gain:0.64 }, en:'We have a government. Different voices, one commitment: to serve the country.', it:'Abbiamo un governo. Voci diverse, un solo impegno: servire il paese.' },   // C19 · −16,4 / −1,3 (L218-6)
   'voce-ministro-via':        { file:'voce-ministro-via.mp3',        gain:0.40, f:{ file:'voce-ministro-via-f.mp3', gain:0.65 }, en:'I have asked the minister to step aside. No one in this government is above accountability.', it:'Ho chiesto al ministro di farsi da parte. In questo governo nessuno è al di sopra delle proprie responsabilità.' },   // C20 · −15,5 / −1,2 (L218-6)
-  'voce-guida-1':             { file:'voce-guida-1.mp3',             gain:0.42, en:'Welcome. Every decision you take here will shape your career, and your country.', it:'Benvenuto. Ogni decisione che prendi qui darà forma alla tua carriera, e al tuo paese.' },   // C21 · −16,0 / −1,2 (L218-6)
+  'voce-guida-1':             { file:'voce-guida-1.mp3',             gain:0.42, en:'Welcome. Every decision you take here will shape your career, and your country.', it:'Benvenuto. Ogni decisione che prendi qui darà forma alla tua carriera, e al tuo paese.', itf:'Benvenuta. Ogni decisione che prendi qui darà forma alla tua carriera, e al tuo paese.' },   // C21 · −16,0 / −1,2 (L218-6)
   'voce-guida-2':             { file:'voce-guida-2.mp3',             gain:0.50, en:'Read every card carefully. Every choice has a price, and someone will remember it.', it:'Leggi ogni carta con attenzione. Ogni scelta ha un prezzo, e qualcuno se ne ricorderà.' },   // C22 · −17,5 / −1,2 (L218-6)
   'voce-guida-3':             { file:'voce-guida-3.mp3',             gain:0.48, en:'Watch your approval and your allies. Lose both, and you lose everything.', it:'Tieni d\'occhio il consenso e gli alleati. Se li perdi entrambi, perdi tutto.' },   // C23 · −17,1 / −1,2 (L218-6)
   'voce-guida-4':             { file:'voce-guida-4.mp3',             gain:0.44, en:'When the phone rings, answer. Some calls can wait. Most cannot.', it:'Quando squilla il telefono, rispondi. Alcune chiamate possono aspettare. Quasi tutte no.' },   // C24 · −16,3 / −1,1 (L218-6)
@@ -1018,12 +1018,17 @@ function voceSegna(id, esito, file){ VOCI_REGISTRO.push({ id:id, t:(typeof perfo
    campo nuovo), altrimenti 'm'. `voceVariante(id)` = ciò che suona per quell'id: la voce di lei (`M.f`: file, gain e, dove l'accordo
    cambia, `it`) se il genere è 'f' E il suo file è in VOCI_PRESENTI, altrimenti la voce di lui; null se non c'è nessun file. Il
    genere non fa mai silenzio: senza `-f` (le quattro della guida) parla lui. Buffer e caricamenti sono per FILE, così una partita
-   nuova di genere diverso nella stessa pagina non suona il buffer dell'altra. */
-function voceGenere(){ return (typeof S!=='undefined' && S && S.personaggio && S.personaggio.genere==='f') ? 'f' : 'm'; }
+   nuova di genere diverso nella stessa pagina non suona il buffer dell'altra.
+   L255-2: `itf` sul manifesto = il sottotitolo IT per la giocatrice sulle voci SENZA `-f` (parla lui, il testo si rivolge a lei;
+   oggi solo voce-guida-1, «Benvenuta»; l'inglese non accorda). Il genere lo dà CREA finché la carriera si compone (prima di
+   initStatoBase: dal capo del governo la guida parla durante la nomina del gabinetto), poi S. */
+function voceGenere(){
+  if(typeof CREA!=='undefined' && CREA) return CREA.genere==='f' ? 'f' : 'm';   // L255-2: una carriera in composizione (CREA non ancora consumata: la nomina del gabinetto, dove suona voce-guida-1) vince su una S vecchia
+  return (typeof S!=='undefined' && S && S.personaggio && S.personaggio.genere==='f') ? 'f' : 'm'; }
 function voceVariante(id){
   const M=VOCI_MANIFEST[id]; if(!M) return null;
   if(voceGenere()==='f' && M.f && VOCI_PRESENTI.indexOf(M.f.file)>=0) return { file:M.f.file, gain:M.f.gain, it:M.f.it||M.it, en:M.f.en||M.en, f:true };
-  return VOCI_PRESENTI.indexOf(M.file)>=0 ? { file:M.file, gain:M.gain, it:M.it, en:M.en, f:false } : null;
+  return VOCI_PRESENTI.indexOf(M.file)>=0 ? { file:M.file, gain:M.gain, it:(voceGenere()==='f' && M.itf) ? M.itf : M.it, en:M.en, f:false } : null;   // L255-2: `itf`, la voce di lui che si rivolge a lei
 }
 function voceHaFile(id){ return !!voceVariante(id); }
 /* PURA (salvo il turno della coppia): dal nome chiesto al nome che suona. Un nome del manifesto vale com'è; il nome di una coppia

@@ -14541,7 +14541,8 @@ const CRISI_SCALA_EV=[
    {l:'Tieni la linea, senza nuove misure', e:'Né un passo avanti né uno indietro', f:()=>{crisiScala('tieni');}, scala:'tieni'},
    {l:'Apri un canale di dialogo', e:'La tensione scende; gli alleati ti trovano tiepido', f:()=>{relIntMuovi('rivale',3); relIntMuovi('alleanza',-2); crisiScala('scendi');}, scala:'scendi'},
  ]},
- {id:'crs_mobilitazione', gradino:2, min:'difesa', kick:'Crisi internazionale', t:'Le sanzioni non bastano', text:'Le sanzioni contro %POTdet sono in vigore, ma la crisi non rientra. Si propone di alzare lo stato di allerta delle forze armate: un segnale forte, e una spesa.', ch:[
+ {id:'crs_mobilitazione', gradino:2, min:'difesa', kick:'Crisi internazionale', t:'Le sanzioni non bastano', text:'Le sanzioni contro %POTdet sono in vigore, ma la crisi non rientra. Si propone di alzare lo stato di allerta delle forze armate: un segnale forte, e una spesa.',
+  ttext:'Le sanzioni contro %POTdet sono in vigore, ma la crisi non rientra. Più in là di così, con %POTdet, non si va: resta da decidere se tenere la pressione o allentarla.', ch:[   // L255-2: `ttext` al tetto della riga di RIVALI (oggi solo i `massimo:2`), letto da pickCrisiScala
    {l:'Alzi lo stato di allerta', e:'Un segnale di fermezza; costa al bilancio ogni mese', f:()=>{relIntMuovi('alleanza',2); relIntMuovi('rivale',-4); crisiScala('sali');}, scala:'sali'},
    {l:'Restano le sanzioni, niente di più', e:'La pressione resta quella che è', f:()=>{crisiScala('tieni');}, scala:'tieni'},
    {l:'Allenti le sanzioni', e:'La crisi scende di un gradino; gli alleati storcono il naso', f:()=>{relIntMuovi('rivale',3); relIntMuovi('alleanza',-3); crisiScala('scendi');}, scala:'scendi'},

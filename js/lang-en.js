@@ -1051,6 +1051,7 @@ const EN = {
   "La tensione scende; gli alleati ti trovano tiepido":"The tension eases; the allies find you lukewarm",
   "Le sanzioni non bastano":"Sanctions are not enough",
   "Le sanzioni contro %POTdet sono in vigore, ma la crisi non rientra. Si propone di alzare lo stato di allerta delle forze armate: un segnale forte, e una spesa.":"The sanctions against %POTdet are in force, but the crisis does not subside. There is a proposal to raise the alert level of the armed forces: a strong signal, and an expense.",
+  "Le sanzioni contro %POTdet sono in vigore, ma la crisi non rientra. Più in là di così, con %POTdet, non si va: resta da decidere se tenere la pressione o allentarla.":"The sanctions against %POTdet are in force, but the crisis will not go away. With %POTdet, there is no going further than this: the choice is whether to keep up the pressure or ease it.",   // L255-2 (ttext al tetto)
   "Alzi lo stato di allerta":"Raise the alert level",
   "Un segnale di fermezza; costa al bilancio ogni mese":"A signal of resolve; it costs the budget every month",
   "Restano le sanzioni, niente di più":"The sanctions stay, nothing more",

@@ -4735,10 +4735,11 @@ function pickCrisiScala(){
   if(Math.random()>=CRISI_P_SCALA) return null;   // L245-2bis
   var t=S.crisi.t, p=crisiPot(); if(!p) return null;
   var ev=CRISI_SCALA_EV.find(function(e){ return e.gradino===Math.min(t,3); }); if(!ev) return null;
-  var a4=(t>=4), tt=crisiTettoBlocco(), ch=ev.ch;
-  if(tt<4 && t>=tt){ ch=ch.filter(function(c){ return c.scala!=='sali'; }); if(ch.length<2) return null; }   // L245-3bis: al tetto della riga (sotto l'ultimatum) la carta non offre la salita
+  var a4=(t>=4), tt=crisiTettoBlocco(), ch=ev.ch, alTetto=(tt<4 && t>=tt);
+  if(alTetto){ ch=ch.filter(function(c){ return c.scala!=='sali'; }); if(ch.length<2) return null; }   // L245-3bis: al tetto della riga (sotto l'ultimatum) la carta non offre la salita
+  var tx=(a4&&ev.t4text) ? ev.t4text : (alTetto&&ev.ttext) ? ev.ttext : ev.text;   // L255-2: al tetto nemmeno a parole (`ttext`); `t4text` resta all'ultimatum
   return Object.assign({}, ev, {
-    t: potSub(T(a4&&ev.t4t?ev.t4t:ev.t),p), text: potSub(T(a4&&ev.t4text?ev.t4text:ev.text),p), kick: T(ev.kick),
+    t: potSub(T(a4&&ev.t4t?ev.t4t:ev.t),p), text: potSub(T(tx),p), kick: T(ev.kick),
     ch: ch.map(function(c){ return Object.assign({}, c, {l:potSub(T(a4&&c.l4?c.l4:c.l),p), e:potSub(T(a4&&c.e4?c.e4:c.e),p)}); })
   });
 }
