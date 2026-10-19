@@ -3414,6 +3414,24 @@ function caricaTerraDipinta(src){
   im.onerror=function(){ TERRA_IN_CARICO=false; };   // resta la terra del codice; il tavolo dopo riprova
   im.src=src;
 }
+/* ⚑ L239-4 · «DOVE SEI FORTE». Una vista del tavolo, sola lettura: acceso l'interruttore, ogni area con `S.territori[i].q` (la tua quota
+   all'ultimo voto che l'ha toccata, game.js) si colora in tre toni della velatura del controllo — sotto 40 ardesia, 40-50 oro tenue,
+   sopra 50 oro — con una legenda di una riga; le aree senza q restano col controllo. Spento (predefinito) il tavolo è quello di sempre.
+   La scelta è del dispositivo: `hos_vista_forza` in localStorage, MAI in S. Durante la notte la vista non c'è (la notte ha le sue
+   righe, notteLettura) e l'interruttore si nasconde; senza nessuna q (prima del primo voto, le mappe senza voto) non c'è. */
+let VISTA_FORZA=null;   // la preferenza letta una volta (transitoria; la verità è in localStorage)
+function vistaForzaPreferita(){ if(VISTA_FORZA===null){ try{ VISTA_FORZA=localStorage.getItem('hos_vista_forza')==='1'; }catch(e){ VISTA_FORZA=false; } } return VISTA_FORZA; }
+function vistaForzaPossibile(){ return !!(S && S.territori && !NOTTE && S.territori.some(function(t){ return t && typeof t.q==='number'; })); }
+function vistaForzaAttiva(){ return vistaForzaPreferita() && vistaForzaPossibile(); }
+function vistaForzaCambia(){ VISTA_FORZA=!vistaForzaPreferita(); try{ localStorage.setItem('hos_vista_forza', VISTA_FORZA?'1':'0'); }catch(e){} try{ aggiornaTavolo(); }catch(e){} }
+const FORZA_TONI=[ { fill:'var(--tv-avv)', op:0.55, citta:0.9 }, { fill:'var(--tv-tuo)', op:0.22, citta:0.5 }, { fill:'var(--tv-tuo)', op:0.6, citta:0.95 } ];
+function forzaTono(q){ return FORZA_TONI[q<40 ? 0 : q<=50 ? 1 : 2]; }
+function vistaForzaHtml(){
+  const on=vistaForzaPreferita();
+  const camp=function(k, et){ const c=FORZA_TONI[k]; return `<span class="tv-vista-v"><i style="background:${c.fill};opacity:${Math.min(1, c.op+0.3)}"></i>${et}</span>`; };
+  return `<button class="tv-vista-b${on?' on':''}" aria-pressed="${on?'true':'false'}" onclick="vistaForzaCambia()">${T('Dove sei forte')}</button>`+
+    (on ? `<span class="tv-vista-leg contorno">${camp(0, T('sotto 40'))}${camp(1, '40-50')}${camp(2, T('sopra 50'))}</span>` : '');
+}
 function costruisciTavolo(box){
   const M=PAESE.mappa, TE=PAESE.territori, vb=tavoloVB(), u=vb[2]/24, lato=vb[2]*0.13;
   let h=`<svg class="tv-svg" viewBox="${M.viewBox}" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${escAttr(T('Mappa del controllo politico'))}">`;
@@ -3457,7 +3475,7 @@ function costruisciTavolo(box){
   h+=`<g class="tv-fissi"></g>`;       // L126-1: i segni di ciò che resta aperto, SOTTO le carte del mese (le carte restano sopra al tocco)
   h+=`<g class="tv-segnalini"></g>`;   // L113-3: i segnalini delle carte, sopra tutto (il segnalino vince sull'area)
   h+=`</svg>`;
-  box.innerHTML=`<div class="tv-nota" aria-live="polite"></div>${h}<div class="tv-foglio" style="display:none"></div><div class="tv-info"></div>`;
+  box.innerHTML=`<div class="tv-nota" aria-live="polite"></div>${h}<div class="tv-vista" style="display:none"></div><div class="tv-foglio" style="display:none"></div><div class="tv-info"></div>`;   // L239-4: l'interruttore «Dove sei forte» (vistaForzaHtml)
   TAVOLO_CHIAMA=null; TAVOLO_SEG={}; TAVOLO_FISSI={}; FISSO_APERTO=null; QUALE_APERTO=null; TAVOLO_MIS=null;   // L113-3 · L126-1: l'svg nuovo non ha segnalini (ripartono, senza rientrare se già entrati)
   TAVOLO_CODA={ mese:null, voci:[] }; SEG_PRONTO=null; LUCE_MESE=null;   // L113-4: un tavolo nuovo (paese, caricamento) non eredita code né luci
 }
@@ -3481,12 +3499,15 @@ function aggiornaTavolo(){
   const RQ=svg.getBoundingClientRect(), w=RQ.width, vb=tavoloVB();
   if(w>0) TAVOLO_MIS={ k:Math.min(w/vb[2], RQ.height/vb[3]), wh:[w, RQ.height] };   // L129-2: la scala per il palazzo che cede (tavoloPalazzoCede)
   const chiamaIdx=(S.territorioChiama && typeof S.territorioChiama.idx==='number') ? S.territorioChiama.idx : null;
+  const forza=vistaForzaAttiva();   // L239-4: «Dove sei forte» acceso (e possibile): le aree con q si colorano dalla quota
   svg.querySelectorAll('.tv-area').forEach(function(el){
     const i=+el.getAttribute('data-i'), t=S.territori[i]||{}, tuo=compatibile(t.partito, asseTuo, S.partito), L=Math.abs(TE[i].lean||0);
     const sel=(MAPSEL===i), chiama=(chiamaIdx===i), lav=!!t.spinta, citta=!!el.getAttribute('r');
-    /* la VELATURA del blocco: oro il tuo, ardesia l'avversario; la trasparenza dice il radicamento (lean) */
-    el.setAttribute('fill', tuo ? 'var(--tv-tuo)' : 'var(--tv-avv)');
-    el.setAttribute('fill-opacity', citta ? (L>=2?0.95:L===1?0.85:0.75) : (L>=2?0.55:L===1?0.42:0.3));
+    const fq=(forza && typeof t.q==='number') ? forzaTono(t.q) : null;
+    /* la VELATURA del blocco: oro il tuo, ardesia l'avversario; la trasparenza dice il radicamento (lean) · L239-4: con la vista
+       accesa, sulle aree con q, tre toni della stessa velatura (forzaTono) al posto del controllo */
+    el.setAttribute('fill', fq ? fq.fill : (tuo ? 'var(--tv-tuo)' : 'var(--tv-avv)'));
+    el.setAttribute('fill-opacity', fq ? (citta ? fq.citta : fq.op) : (citta ? (L>=2?0.95:L===1?0.85:0.75) : (L>=2?0.55:L===1?0.42:0.3)));
     el.setAttribute('stroke', chiama ? 'var(--acc-ink)' : ((sel||TE[i].simbolo||lav) ? 'var(--tv-segno)' : 'var(--tv-bordo)'));
     el.setAttribute('stroke-width', (chiama?2.2:(sel?1.8:(lav?1.5:(TE[i].simbolo?0.9:0.45))))*vb[2]/100);
     el.classList.toggle('mappa-chiama', chiama);
@@ -3517,6 +3538,8 @@ function aggiornaTavolo(){
   nota.innerHTML = camp ? T('Campagna sul territorio: <b>%N punti</b> da spendere sulla mappa, %M mesi al voto.').replace('%N',campSforzo()).replace('%M',mesiAllaFine())
     : (chiamaIdx!=null && MAPSEL!==chiamaIdx) ? `<b>${T('Il territorio ti chiama')}</b> · ${cap(nomeTerr(TE[chiamaIdx]))}` : '';
   nota.style.display=nota.innerHTML?'':'none';
+  const vista=box.querySelector('.tv-vista');
+  if(vista){ const vh=vistaForzaPossibile() ? vistaForzaHtml() : ''; if(vista.innerHTML!==vh) vista.innerHTML=vh; vista.style.display=vh?'':'none'; }   // L239-4: si riscrive solo se cambia
   if(MAPSEL!=null && S.tab==='tavolo' && !(typeof GIRO_APERTO!=='undefined' && GIRO_APERTO)){ info.innerHTML=   /* L185-1: con la scena del giro aperta il pannello dell'area si toglie — copriva le scelte del foglietto (giro-cdp.js, prova di occlusione); chiuso il giro torna */`<button class="tv-chiudi" onclick="selArea(${MAPSEL})" aria-label="${escAttr(T('Chiudi'))}">✕</button>`+renderMappaInfo(); info.style.display=''; }
   else { info.innerHTML=''; info.style.display='none'; }
 }
@@ -4246,7 +4269,7 @@ function renderMappaInfo(){
   return `<div style="padding:2px 14px 12px">
     <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px"><b style="font-size:14.5px">${cap(nomeTerr(TE))}</b><span class="chip" style="background:${tuo?'var(--acc-bg)':'var(--line2)'};color:${tuo?'var(--acc-ink)':'var(--mut)'}">${T(tuo?'tuo blocco':'avversario')}</span></div>
     <div style="font-size:12.5px;color:var(--mut);margin-top:3px">${caricaTerr(TE)}: <b style="color:var(--txt)">${t.titolare||'—'}</b> · ${pn}</div>
-    <div style="font-size:12px;color:var(--mut2);margin-top:2px">${cap(leanLabel(TE.lean))}${TE.simbolo?' · '+T('area simbolo'):''}</div>${giroOn?`<div style="font-size:12px;color:var(--mut);margin-top:2px">${T('Umore')}: <b style="color:var(--txt)">${umoreParola(t.umore||0)}</b></div>`:''}</div>${scheda}${investi}${giroBottone(MAPSEL, chiama&&!!def)}`;
+    <div style="font-size:12px;color:var(--mut2);margin-top:2px">${cap(leanLabel(TE.lean))}${TE.simbolo?' · '+T('area simbolo'):''}</div>${giroOn?`<div style="font-size:12px;color:var(--mut);margin-top:2px">${T('Umore')}: <b style="color:var(--txt)">${umoreParola(t.umore||0)}</b></div>`:''}${(vistaForzaAttiva() && typeof t.q==='number')?`<div style="font-size:12px;color:var(--mut);margin-top:2px">${T('Ultimo voto: <b>%N%</b>').replace('%N',t.q)}</div>`:''}</div>${scheda}${investi}${giroBottone(MAPSEL, chiama&&!!def)}`;
 }
 /* L182-3 — «Vai in visita»: col gettone del mese (giroPossibile) o sull'area che chiama; con la costante spenta, niente */
 function giroBottone(i, chiama){

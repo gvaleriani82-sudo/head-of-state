@@ -25435,6 +25435,7 @@ const EN = {
   "freddo":"cold", "tiepido":"lukewarm", "caldo":"warm",
   "%TERR: più caldo":"%TERR: warmer", "%TERR: più freddo":"%TERR: colder",
   "Umore":"Mood",
+  "Dove sei forte":"Where you're strong", "sotto 40":"under 40", "sopra 50":"over 50", "Ultimo voto: <b>%N%</b>":"Last vote: <b>%N%</b>",   // L239-4
   "In visita":"Visiting",
   "Un comizio in piazza":"A rally in the square",
   "Il partito ha montato un palco e chiamato a raccolta i suoi: %TERR %TV{ti aspetta|ti aspettano} in piazza, con qualche striscione e molta curiosità.":"The party has put up a stage and rallied its people: %TERR %TV{is|are} waiting for you in the square, with a few banners and plenty of curiosity.",

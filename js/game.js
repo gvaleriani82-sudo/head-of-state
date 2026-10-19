@@ -5593,6 +5593,7 @@ function decidiTerritori(ris){
       dopo[i]=portaUmore(dopo[i], { titolare:nome, partito:partito });   // L182-3: il voto non azzera l umore del giro
       ris.aree.push({ nome:TE.nome, nomeEn:TE.nomeEn, carica:TE.carica, caricaEn:TE.caricaEn, titolare:nome, partito:partito, tuo:nuovoTuo });   // FIX: era T.nome/T.carica (T = funzione traduzione → undefined); porta i campi grezzi, risolti in-lingua dal render
     }
+    dopo[i].q=quotaArea(localShare);   // L239-4: la tua quota in quest'area a questo voto (sola lettura; dopo portaUmore, sull'oggetto nuovo). Arriva in S col commit di ris.territoriDopo (esitoIntermedia)
   });
   ris.territoriDopo=dopo;
 }
@@ -7949,25 +7950,35 @@ function ondaTerritoriNazionale(){
   if(S.seggi) return (typeof bloccoSeggi==='function'?bloccoSeggi():50)-50;
   const tt=testaATesta(); return tt.myPct-(tt.cb||0)-(tt.sv||0)-50;   // L216-1: senza la spinta presidenziale della porta
 }
-function calcolaTerritoriNazionale(onda){
+/* ⚑ L239-4 (19/10) · «DOVE SEI FORTE». S.territori[i].q = la tua quota (intero 0-100) nell'area all'ultimo voto che l'ha toccata: sola
+   lettura, nessun effetto sul gioco (la legge solo la vista del tavolo, ui.js). Al voto nazionale `quote`, se passato, riceve {i, q} per
+   OGNI area: le aree lavorate con la quota della loro estrazione (la stessa che decide il cambio), le altre con la formula SENZA rumore
+   (50 + onda + lean × asse del blocco × 4: nessuna estrazione nuova, le carriere restano identiche). Le scrive applicaTerritoriNazionale
+   al clic dell'esito, mai la notte; le intermedie le scrivono in decidiTerritori sulle sole aree del loro `tocca`. ⚠ La q può non
+   coincidere col controllo: al voto nazionale le aree passano solo verso di te, quindi un'area tua resta tua anche con q < 50. */
+function quotaArea(x){ return Math.round(clamp(x, 0, 100)); }
+function calcolaTerritoriNazionale(onda, quote){
   if(!S.territori||!PAESE.territori) return [];
   const asseTuo=mioPartito().asse, aB=asseBlocco();
   const wave=clamp(onda==null?ondaTerritoriNazionale():onda, -12, 12), cambi=[];
   PAESE.territori.forEach(function(TE,i){ const t=S.territori[i]; if(!t) return;
-    const sp=spintaTerr(i); if(!sp) return;   // L182-3: il lettore unico (spinta + umore del giro; umore 0 = come prima) · solo le aree lavorate in campagna si decidono qui (le altre le decidono le intermedie)
+    const sp=spintaTerr(i);
+    if(!sp){ if(quote) quote.push({ i:i, q:quotaArea(50 + wave + (TE.lean*aB*4)) }); return; }   // L182-3: il lettore unico (spinta + umore del giro; umore 0 = come prima) · solo le aree lavorate in campagna si decidono qui (le altre le decidono le intermedie) · L239-4: la quota senza dado
     const localShare=50 + wave + (TE.lean*aB*4) + sp*0.5 + (Math.random()*6-3);
+    if(quote) quote.push({ i:i, q:quotaArea(localShare) });
     const nuovoTuo=localShare>50, eraTuo=compatibile(t.partito, asseTuo, S.partito);
     if(nuovoTuo && !eraTuo){ const tit=nomePersona(); cambi.push({ i:i, titolareNuovo:tit, partitoNuovo:scegliPartito(true, TE.lean, asseTuo, S.partito), quota:localShare }); }
   });
   return cambi;
 }
-function applicaTerritoriNazionale(cambi){
+function applicaTerritoriNazionale(cambi, quote){
   if(!S.territori||!PAESE.territori) return [];
   const vinte=[];
   try{
     const asseTuo=mioPartito().asse;
     (cambi||[]).forEach(function(c){ const t=S.territori[c.i]; if(!t || compatibile(t.partito, asseTuo, S.partito)) return;
       S.territori[c.i]=portaUmore(t, { titolare:c.titolareNuovo, partito:c.partitoNuovo }); vinte.push(PAESE.territori[c.i]); });   // L182-3: l umore resta
+    (quote||[]).forEach(function(x){ const t=S.territori[x.i]; if(t) t.q=x.q; });   // L239-4: dopo i cambi (portaUmore ha fatto l'oggetto nuovo)
   } finally { S.territori.forEach(function(t){ if(t) t.spinta=0; }); }
   if(vinte.length && typeof initPotereLocale==='function') initPotereLocale();   // solo se qualcosa è cambiato: il gioco senza campagna resta identico
   if(vinte.length) S.log.unshift({t:T('Campagna sul territorio'), x:T('La campagna sul territorio ha pagato: %N aree sono passate al tuo blocco.').replace('%N',vinte.length)});
@@ -7975,9 +7986,9 @@ function applicaTerritoriNazionale(cambi){
 }
 function decidiTerritoriNazionale(){
   if(!S.territori||!PAESE.territori) return [];
-  let cambi=null;
-  try{ cambi=calcolaTerritoriNazionale(); } finally { if(cambi===null) S.territori.forEach(function(t){ if(t) t.spinta=0; }); }   // un'eccezione azzera la spinta come prima
-  return applicaTerritoriNazionale(cambi);
+  let cambi=null; const quote=[];
+  try{ cambi=calcolaTerritoriNazionale(null, quote); } finally { if(cambi===null) S.territori.forEach(function(t){ if(t) t.spinta=0; }); }   // un'eccezione azzera la spinta come prima
+  return applicaTerritoriNazionale(cambi, quote);
 }
 /* NOTTE_TERR = i cambi decisi dalla notte, in attesa del clic dell'esito: {mese, cambi}. Transitorio come NOTTE, MAI in S (resetAll e
    applySnap lo azzerano): un salvataggio a notte aperta non esiste, e al caricamento il ripiego decide come prima. */
@@ -7989,7 +8000,8 @@ function ondaNotteTerritori(sistema, vero){
 /* solo dove l'esito li applica: il capo di partito (livello 3) a un'urna che non è di soli seggi (chiudiLegislativa non decide i territori) */
 function notteDecideTerritori(){ return !!(S && S.livello===3 && S.territori && PAESE.territori && !(typeof urnaLegislativa==='function' && urnaLegislativa())); }
 function notteTerritori(N){
-  N.cambiTerr=notteDecideTerritori() ? calcolaTerritoriNazionale(ondaNotteTerritori(N.sistema, N.vero)) : [];
+  N.quoteTerr=[];   // L239-4: le quote di tutte le aree, in attesa dell'esito come i cambi (mai in S alla notte)
+  N.cambiTerr=notteDecideTerritori() ? calcolaTerritoriNazionale(ondaNotteTerritori(N.sistema, N.vero), N.quoteTerr) : [];
   const asseTuo=mioPartito().asse, cambiati={};
   N.cambiTerr.forEach(function(c){ cambiati[c.i]=c; });
   N.pienoTerr=(S.territori||[]).map(function(t, i){ return cambiati[i] ? true : !!(t && compatibile(t.partito, asseTuo, S.partito)); });
@@ -7997,7 +8009,7 @@ function notteTerritori(N){
 }
 function territoriDopoUrna(){
   const nt=NOTTE_TERR; NOTTE_TERR=null;
-  if(nt && nt.mese===S.year*12+S.month) return applicaTerritoriNazionale(nt.cambi);
+  if(nt && nt.mese===S.year*12+S.month) return applicaTerritoriNazionale(nt.cambi, nt.quote);
   return decidiTerritoriNazionale();
 }
 function chiudiSforzo(){ if(S.campNaz && S.campNaz.sforzo>0) S.log.unshift({t:T('Campagna sul territorio'), x:T('Fine della campagna: %N punti di sforzo non spesi, persi.').replace('%N',S.campNaz.sforzo)}); }
@@ -8096,7 +8108,7 @@ function dichiaraNotte(i){ if(!NOTTE) return; NOTTE.dich=i; stopTimerNotte(); av
 function concludiNotte(){
   stopTimerNotte();
   if(typeof taci==='function') taci('urne');   // L95-3: rete di sicurezza, il loop non sopravvive alla notte
-  NOTTE_TERR=NOTTE.cambiTerr ? { mese:S.year*12+S.month, cambi:NOTTE.cambiTerr } : null;   // L239-3: i cambi decisi alla notte aspettano l'esito (territoriDopoUrna)
+  NOTTE_TERR=NOTTE.cambiTerr ? { mese:S.year*12+S.month, cambi:NOTTE.cambiTerr, quote:NOTTE.quoteTerr||[] } : null;   // L239-3: i cambi decisi alla notte aspettano l'esito (territoriDopoUrna) · L239-4: con le quote
   const sistema=NOTTE.sistema, vero=NOTTE.vero, dich=NOTTE.dich; NOTTE=null;   // svuota il transitorio PRIMA del flusso a valle
   if(typeof notteTavoloFine==='function') notteTavoloFine();   // L113-5: le righe svaniscono, il tavolo torna al suo posto
   if(typeof musica==='function') musica();       // L114-1: finita la notte, la musica torna all'epoca (o alla crisi)
