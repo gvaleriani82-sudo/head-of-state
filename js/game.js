@@ -373,6 +373,7 @@ function crescitaSeed(sc){
    Costruisce S e i derivati INDIPENDENTI dal ruolo: indicatori iniziali, leggi del paese, forze di partenza.
    Il ruolo (ministri/coalizione/territori) lo aggiunge il chiamante. Condiviso → un solo punto di verità. */
 function initStatoBase(){
+  NOTTE_TERR=null;   // L239-3: una partita nuova non eredita i cambi di una notte (transitorio, mai in S)
   if(typeof MUSICA_PORTA!=='undefined') MUSICA_PORTA=null;   // L172-5: nasce la partita — da qui il tema lo dà musicaEpoca() da S.year, lo stesso brano della porta (nessuno stacco). Non prima: con goAppoint S nasce alla conferma dei ministri
   try{ resetUIAnim(); }catch(e){}   // nuova partita: prima apparizione senza animazioni
   S={
@@ -943,9 +944,9 @@ function entraDaPartner(guida, rc){
     S.mandate=(S.mandate||0)+1; S.turnInMandate=0;
     if(!sistemaSemipres()) S.seggi=calcSeggi();
     S.sostegno=null; S.sostegnoStrappi=0;
-    chiudiSforzo(); decidiTerritoriNazionale(); S.campNaz=null; S.campNazUltimo=null;
+    chiudiSforzo(); territoriDopoUrna(); S.campNaz=null; S.campNazUltimo=null;
     tutteCorrenti(8);   // la vittoria ricompatta il partito
-    bioConta('elezioniVinte');
+    bioConta('elezioniVinte'); contaMandatoProprio();   // L237-3
   }
   S.snap=Object.assign({},S.pol); S.leggiSnap=Object.assign({},S.leggi);
   S.minoranza=false; S.mesiMinoranza=0; S.caduteMandato=0; S.elezioniAnticipate=false;
@@ -1019,7 +1020,7 @@ function diventaPremier(viaElezione){
   S.minoranza = (PAESE.coalizione||PAESE.comeSiVince==='parlamentare') ? bloccoSeggi()<50 : false;   // L61-5 - il blocco, non il solo partito: nell appeso il Regno Unito puo averne uno
   S.tenuta={}; S.tenutaForza0={}; S.tenutaLiv={}; S.tenutaUltimo={}; S.mesiMinoranza=0; initTenuta(); S.bloccoAtteso=bloccoQuota();
   if(typeof aggiornaCoabitazione==='function') aggiornaCoabitazione();   // L100-2/L104-2 (dopo il reset di mesiMinoranza): alla salita si deriva
-  if(viaElezione){ bioConta('elezioniVinte'); S.mandatesWon=(S.mandatesWon||0)+1; S.mandatiConsecutivi=(S.mandatiConsecutivi||0)+1; }   // L86-1: i due contatori salgono insieme; solo il secondo si azzera alla sconfitta
+  if(viaElezione){ bioConta('elezioniVinte'); contaMandatoProprio(); S.mandatesWon=(S.mandatesWon||0)+1; S.mandatiConsecutivi=(S.mandatiConsecutivi||0)+1; }   // L86-1: i due contatori salgono insieme; solo il secondo si azzera alla sconfitta
   S.mandate=S.mandate||1; S.turnInMandate=0; S.elezioniAnticipate=false; S.ultimoSondaggio=null; S.sondStorico=[];
   S.snap=Object.assign({},S.pol); S.leggiSnap=Object.assign({},S.leggi);
   bioFatto(T('Da %A a %B: la scalata è compiuta.').replace('%A',ruoloPrima).replace('%B',T(PAESE.titoloRuolo)));
@@ -2641,6 +2642,10 @@ function applicaRosterDelta(ricalcolaSeggi){
     if(Array.isArray(n.alleati)) np.alleati=n.alleati.slice();
     if(n.selezionabile===false) np.selezionabile=false;
     if(n.nota) np.nota=n.nota;
+    /* L237-3 · e i campi del partito proprio (e di chiunque nasca nel Regno Unito): `sigla` e `colore` (nuovi, solo `pp_proprio`),
+       `terreno` e `concentrazione` (i collegi, model.js pesoCollegio: senza, un partito nato a Londra tornava «uniforme» al
+       caricamento). L'asse c'era già. Additivo: una voce senza i campi ricostruisce la stessa voce di prima. */
+    ['sigla','colore','terreno','concentrazione'].forEach(function(k){ if(n[k]!=null) np[k]=n[k]; });
     lista.push(np);
   });
   (R.rinomina||[]).forEach(function(r){ var p=lista.find(function(x){ return x.id===r.id; }); if(p) p.nome=r.nome; });
@@ -2649,9 +2654,14 @@ function applicaRosterDelta(ricalcolaSeggi){
      de1980). `alleatiRiserva` non si tocca: la direttiva riscrive solo le alleanze ordinarie. */
   if(R.alleati) Object.keys(R.alleati).forEach(function(id){ var p=lista.find(function(x){ return x.id===id; }); if(p) p.alleati=R.alleati[id].slice(); });
   (R.esce||[]).forEach(function(e){ lista = lista.filter(function(p){ return p.id!==e.id; }); });
+  alleatiPartitoProprio(lista);   // L237-3 (D-P4): India e Brasile, rifatto a ogni ricostruzione, mai salvato
   var cambiato = (lista.length!==PAESE.partiti.length) ||
                  lista.some(function(p,i){ return !PAESE.partiti[i] || PAESE.partiti[i].id!==p.id; });
-  PAESE.partiti = lista;
+  /* L237-3 · UN PAESE NUOVO, NON LO STESSO. Nel presente PAESE È l'oggetto di PAESI (paeseConScenario senza porta rende `base`):
+     `PAESE.partiti = lista` scriveva il partito nato dentro PAESI, e la partita dopo — e `applySnap`, che rifà PAESE «dai dati
+     puliti» — se lo ritrovava nel roster. Fino al partito proprio nel presente il registro era sempre vuoto (nessuna tappa), quindi
+     il difetto non si vedeva. Come applicaTerritoriDelta: una copia con la lista nuova. */
+  PAESE = Object.assign({}, PAESE, {partiti:lista});
   /* e i SEGGI vanno ricalcolati, se l'insieme dei partiti è cambiato: erano la seconda metà dello stesso
      difetto — il roster si muoveva e `S.seggi` restava quello di prima, con voci mancanti o orfane. */
   if(ricalcolaSeggi && cambiato && S.seggi && typeof calcSeggi==='function' && (PAESE.coalizione||PAESE.comeSiVince==='parlamentare')){
@@ -2873,7 +2883,84 @@ function rinormalizzaForze(){
   if(sum>0) PAESE.partiti.forEach(function(p){ S.forze[p.id]=(S.forze[p.id]||0)/sum*100; });
   S.forzePrev=Object.assign({}, S.forze);
 }
-function _partitoDef(d){ return { id:d.id, nome:d.nome, orientamento:d.orientamento||'centro', base:d.base||{}, forza:d.forza||1, asse:(d.asse!=null?d.asse:0), gruppoUE:d.gruppoUE||'noniscritti' }; }
+function _partitoDef(d){ var o={ id:d.id, nome:d.nome, orientamento:d.orientamento||'centro', base:d.base||{}, forza:d.forza||1, asse:(d.asse!=null?d.asse:0), gruppoUE:d.gruppoUE||'noniscritti' };
+  ['sigla','colore','terreno','concentrazione'].forEach(function(k){ if(d[k]!=null) o[k]=d[k]; });   // L237-3: gli stessi campi della ricostruzione (additivo)
+  return o; }
+
+/* ============================================================================================================
+   L237-3 · IL PARTITO PROPRIO (DESIGN-PARTITO-PROPRIO.md §2, D-P2…D-P4). Solo nel presente, solo ai livelli 0 e 1, una volta per
+   carriera, id fisso `pp_proprio`. Si chiama DOPO l'avvio (startAttivista / startLocale): oggi la chiama solo il banco
+   (`cfg.proprio`), l'interfaccia è L237-4. Il partito nasce dove nasce ogni partito che entra (le scissioni): nel registro
+   `S.rosterDelta.entra` — è LUI che viaggia nel salvataggio — e proiettato da `applicaRosterDelta` nel roster vivo.
+   · forza 4, presa agli altri in proporzione a 1/(1+|Δasse|) × (1 + sovrapposizione delle basi) (la formula del prototipo
+     `.claude/prova-l237-1-partito.js`, la stessa per ogni posizione: nessuna ha un bonus). Gli altri restano ≥ 1; poi la somma
+     torna a 100 con il partito nuovo esattamente a 4.
+   · l'àncora della molla degli altri scende di quanto hanno dato (`S.ancoraTappa`, il canale delle tappe marcate, L106-3): il
+     prototipo toglieva la forza dal roster, cioè anche dall'àncora; senza, la molla restituiva i 4 punti in pochi anni.
+   · nei collegi (Regno Unito) `terreno:0, concentrazione:24` — il valore di `uk_libdem` (data.js): senza, il partito è uniforme e
+     non vince mai un collegio (L237-1, 0/80).
+   · `S.partitoProprio = {mandati}`: finché < 2 niente sfida (quindi niente primaria) e niente richiamo delle correnti
+     (`fondatoreProtetto()`); sale una volta per elezione politica vinta (`contaMandatoProprio`).
+   Rende false (e non tocca niente) fuori dal presente, ai livelli 2-5, o se il partito c'è già.
+   ============================================================================================================ */
+const PP_ID='pp_proprio', PP_FORZA=4, PP_CONCENTRAZIONE=24;   // 24 = uk_libdem.concentrazione (data.js): la specie-Liberal
+function orientamentoDaAsse(a){ return a<=-2?'sinistra':a===-1?'centrosinistra':a===0?'centro':a===1?'centrodestra':'destra'; }
+function _sovrapBasi(a, b){ var s=0; Object.keys(a||{}).forEach(function(g){ s+=Math.min(a[g]||0, (b||{})[g]||0); }); return s; }
+function fondaPartitoProprio(def){
+  if(typeof S==='undefined' || !S || !def || !S.forze || !PAESE || !PAESE.partiti) return false;
+  if((S.scenario && S.scenario!=='presente') || S.era) return false;   // solo il presente
+  if(S.livello!==0 && S.livello!==1) return false;   // D-P2: attivista o politico locale (L237-4 disabiliterà gli altri a schermo)
+  if(part(PP_ID) || S.partitoProprio) return false;   // uno per carriera
+  var asse=Math.max(-2, Math.min(2, Math.round(+def.asse||0)));
+  var vecchio=S.partito;
+  /* le forze: quanto dà ciascuno, in proporzione al peso (gli altri restano ≥ 1) */
+  var w={}, sw=0; PAESE.partiti.forEach(function(p){ w[p.id]=(1/(1+Math.abs((p.asse||0)-asse)))*(1+_sovrapBasi(p.base, def.base)); sw+=w[p.id]; });
+  var dato={};
+  PAESE.partiti.forEach(function(p){ var f=S.forze[p.id]||0, nf=Math.max(Math.min(1,f), f-PP_FORZA*w[p.id]/sw); dato[p.id]=f-nf; S.forze[p.id]=nf; });
+  var resto=0; PAESE.partiti.forEach(function(p){ resto+=S.forze[p.id]; });
+  if(resto>0) PAESE.partiti.forEach(function(p){ var f0=S.forze[p.id]+dato[p.id]; S.forze[p.id]=S.forze[p.id]/resto*(100-PP_FORZA); dato[p.id]=f0-S.forze[p.id]; });
+  S.ancoraTappa=S.ancoraTappa||{};
+  PAESE.partiti.forEach(function(p){ if(dato[p.id]) S.ancoraTappa[p.id]=(S.ancoraTappa[p.id]||0)-dato[p.id]; });
+  var n={ id:PP_ID, nome:String(def.nome||''), orientamento:orientamentoDaAsse(asse), base:Object.assign({}, def.base||{}), forza:PP_FORZA, asse:asse, gruppoUE:'noniscritti' };
+  if(def.sigla) n.sigla=String(def.sigla);
+  if(def.colore) n.colore=String(def.colore);
+  if(PAESE.sistemaSeggi==='collegi'){ n.terreno=0; n.concentrazione=PP_CONCENTRAZIONE; }
+  S.rosterDelta=S.rosterDelta||{entra:[], esce:[], rinomina:[]};
+  S.rosterDelta.entra.push(n);
+  S.forze[PP_ID]=PP_FORZA;
+  S.forzePrev=Object.assign({}, S.forze);
+  if(S.seggi) S.seggi[PP_ID]=0;
+  applicaRosterDelta(true);
+  /* il giocatore passa al partito nuovo: è l'avvio, quindi quello che initStatoBase/start* avevano derivato dal partito di prima
+     si rifà col nuovo (coalizione, territori, potere locale, peso UE, integrità, la forza dell'ultima urna) */
+  S.partito=PP_ID; if(typeof chosenPartito!=='undefined') chosenPartito=PP_ID;
+  S.coalizione=[PP_ID];
+  if(S.intese){ delete S.intese[vecchio]; delete S.intese[PP_ID]; }
+  S.forzaUrnaPrec=PP_FORZA;
+  S.pesoUE=pesoUEBase();
+  if(S.personaggio) S.integrita=integritaIniziale();
+  if(S.territori){ initTerritori(); initPotereLocale(); }
+  S.partitoProprio={mandati:0};
+  return true;
+}
+/* D-P4 · India e Brasile dichiarano le alleanze a liste chiuse: lì `pp_proprio` non sarebbe nella lista di nessuno. Si aggiunge in
+   memoria alle liste dei partiti a |Δasse| ≤ 1 e riceve le loro sigle (simmetrico per costruzione). Lo chiama solo applicaRosterDelta,
+   sul clone: le liste di PAESI non si toccano e nel salvataggio non va niente (al caricamento si rifà). Senza liste `alleati` nel
+   paese, o senza `pp_proprio`, non fa niente. */
+function alleatiPartitoProprio(lista){
+  var pp=lista.find(function(p){ return p.id===PP_ID; });
+  if(!pp || !lista.some(function(p){ return Array.isArray(p.alleati) && p.id!==PP_ID; })) return;
+  var vicini=lista.filter(function(p){ return p.id!==PP_ID && Math.abs((p.asse||0)-(pp.asse||0))<=1; }).map(function(p){ return p.id; });
+  pp.alleati=vicini.slice();
+  lista.forEach(function(p){ if(vicini.indexOf(p.id)>=0 && Array.isArray(p.alleati) && p.alleati.indexOf(PP_ID)<0) p.alleati=p.alleati.concat([PP_ID]); });
+}
+/* D-P3 · il fondatore è il partito: per i primi due mandati niente sfida alla leadership (quindi niente primaria: la apre solo una
+   sfida viva) e niente richiamo delle correnti. Le correnti restano come umore. Lo leggono aggiornaSfida e richiamoCorrentiDovuto. */
+function fondatoreProtetto(){ return !!(S && S.partito===PP_ID && S.partitoProprio && (S.partitoProprio.mandati||0)<2); }
+/* una volta per elezione politica vinta: nextMandate (rielezione, e la rimonta via tornaAlGoverno, che lo chiama), la salita
+   per elezione (diventaPremier) e l'ingresso da partner dopo il voto (entraDaPartner). NON in tornaAlGoverno, che ha già il suo
+   doppio bioConta noto (R4): lì il conto lo fa nextMandate. */
+function contaMandatoProprio(){ if(S && S.partitoProprio && S.partito===PP_ID) S.partitoProprio.mandati=(S.partitoProprio.mandati||0)+1; }
 
 /* A · TI DIVIDI: tieni `resto` della tua forza col nome nuovo, il resto se ne va come partito NPC. */
 function scissioneDividi(nomeNuovo, quotaMia, npc, asseNuovo){
@@ -4382,6 +4469,7 @@ function pescaLeggero(){
    non cadano mai nello stesso mese. Chi sceglie la carta la ottiene diversa (RICHIAMO_CORRENTI_OPP_EV). */
 function richiamoCorrentiDovuto(){
   if(typeof S==='undefined' || !S || S.livello!==3 || !S.correnti || S.sfida) return false;
+  if(fondatoreProtetto()) return false;   // L237-3 (D-P3): il fondatore non si richiama per i primi due mandati
   var mese=S.year*12+S.month;
   if(S.richiamoCorrUltimo!=null && mese-S.richiamoCorrUltimo<8) return false;
   var c=S.correnti.slice().sort(function(a,b){return a.umore-b.umore;})[0];
@@ -5867,6 +5955,7 @@ function aggiornaSfida(){
     return;
   }
   if(S.primariaUltima!=null && mese-S.primariaUltima<12) return;   // raffreddamento dopo una primaria vinta
+  if(fondatoreProtetto()) return;   // L237-3 (D-P3): contro il fondatore nessuna sfida nasce nei primi due mandati — quindi nessuna primaria (la apre solo una sfida viva)
   /* L64-4 — chi hai messo in lista ti sfida: se la sua corrente scende sotto 40 (non 35), la sfida nasce col SUO volto */
   const seme=S.sfidaSeme;
   const arrS=(seme && S.correnti.find(function(c){return c.id===seme.corrente && c.umore<40;}))||null;
@@ -7846,25 +7935,70 @@ function applicaSpintaForze(){
    credibilità dell'opposizione, che è un voto di fiducia e non una quota) − 50, con lo stesso clamp ±12 — 0 a pari voti. E l'azzeramento
    della spinta è in un finally: avviene sempre, anche se la decisione si interrompe. Coi seggi tutto come prima (stesso ordine, stesso
    rumore: le carriere dei paesi con S.seggi sono identiche). */
-function decidiTerritoriNazionale(){
+/* ⚑ L239-3 (19/10) · DECIDERE PRIMA, APPLICARE DOPO. La regola qui sopra è spezzata in due, senza cambiarla: calcolaTerritoriNazionale(onda)
+   rende i cambi [{i, partitoNuovo, titolareNuovo, quota}] SENZA toccare S (stesse estrazioni, nello stesso ordine: rumore dell'area, poi il
+   titolare e il partito), applicaTerritoriNazionale(cambi) li scrive (portaUmore, spinta azzerata, potere locale, registro).
+   decidiTerritoriNazionale() = applica(calcola()) resta per le strade senza notte (il banco, che salta la notte; un salvataggio caricato).
+   La notte (avviaNotte → notteTerritori) calcola i cambi PRIMA dello spoglio, con l'onda del suo stesso vero (ondaNotteTerritori: i seggi
+   di bloccoNotte() − 50, o la tua quota nel testa a testa senza cb e sv − 50) e li tiene nel transitorio NOTTE_TERR; li applica, al clic
+   dell'esito, territoriDopoUrna() nelle tre uscite che li decidevano (nextMandate, goOpposizione, entraDaPartner).
+   ⚠ L'onda di prima si leggeva DOPO l'esito: bloccoSeggi() = i seggi di S.coalizione, che a quel punto è la coalizione nuova (vittoria) o
+   quella del vincitore (sconfitta: entraOpposizione l'ha appena scritta — l'onda di una sconfitta era quella di chi ti ha battuto). Alla
+   notte la coalizione nuova non c'è ancora: l'onda è quella del vero che la notte mostra. Misurato nel rapporto ⚑ L239-3 (DESIGN-MAPPA.md). */
+function ondaTerritoriNazionale(){
+  if(S.seggi) return (typeof bloccoSeggi==='function'?bloccoSeggi():50)-50;
+  const tt=testaATesta(); return tt.myPct-(tt.cb||0)-(tt.sv||0)-50;   // L216-1: senza la spinta presidenziale della porta
+}
+function calcolaTerritoriNazionale(onda){
+  if(!S.territori||!PAESE.territori) return [];
+  const asseTuo=mioPartito().asse, aB=asseBlocco();
+  const wave=clamp(onda==null?ondaTerritoriNazionale():onda, -12, 12), cambi=[];
+  PAESE.territori.forEach(function(TE,i){ const t=S.territori[i]; if(!t) return;
+    const sp=spintaTerr(i); if(!sp) return;   // L182-3: il lettore unico (spinta + umore del giro; umore 0 = come prima) · solo le aree lavorate in campagna si decidono qui (le altre le decidono le intermedie)
+    const localShare=50 + wave + (TE.lean*aB*4) + sp*0.5 + (Math.random()*6-3);
+    const nuovoTuo=localShare>50, eraTuo=compatibile(t.partito, asseTuo, S.partito);
+    if(nuovoTuo && !eraTuo){ const tit=nomePersona(); cambi.push({ i:i, titolareNuovo:tit, partitoNuovo:scegliPartito(true, TE.lean, asseTuo, S.partito), quota:localShare }); }
+  });
+  return cambi;
+}
+function applicaTerritoriNazionale(cambi){
   if(!S.territori||!PAESE.territori) return [];
   const vinte=[];
   try{
-    const asseTuo=mioPartito().asse, aB=asseBlocco();
-    let onda;
-    if(S.seggi) onda=(typeof bloccoSeggi==='function'?bloccoSeggi():50)-50;
-    else { const tt=testaATesta(); onda=tt.myPct-(tt.cb||0)-(tt.sv||0)-50; }   // L216-1: senza la spinta presidenziale della porta
-    const wave=clamp(onda, -12, 12);
-    PAESE.territori.forEach(function(TE,i){ const t=S.territori[i]; if(!t) return;
-      const sp=spintaTerr(i); if(!sp) return;   // L182-3: il lettore unico (spinta + umore del giro; umore 0 = come prima) · solo le aree lavorate in campagna si decidono qui (le altre le decidono le intermedie)
-      const localShare=50 + wave + (TE.lean*aB*4) + sp*0.5 + (Math.random()*6-3);
-      const nuovoTuo=localShare>50, eraTuo=compatibile(t.partito, asseTuo, S.partito);
-      if(nuovoTuo && !eraTuo){ S.territori[i]=portaUmore(t, { titolare:nomePersona(), partito:scegliPartito(true, TE.lean, asseTuo, S.partito) }); vinte.push(TE); }   // L182-3: l umore resta
-    });
+    const asseTuo=mioPartito().asse;
+    (cambi||[]).forEach(function(c){ const t=S.territori[c.i]; if(!t || compatibile(t.partito, asseTuo, S.partito)) return;
+      S.territori[c.i]=portaUmore(t, { titolare:c.titolareNuovo, partito:c.partitoNuovo }); vinte.push(PAESE.territori[c.i]); });   // L182-3: l umore resta
   } finally { S.territori.forEach(function(t){ if(t) t.spinta=0; }); }
   if(vinte.length && typeof initPotereLocale==='function') initPotereLocale();   // solo se qualcosa è cambiato: il gioco senza campagna resta identico
   if(vinte.length) S.log.unshift({t:T('Campagna sul territorio'), x:T('La campagna sul territorio ha pagato: %N aree sono passate al tuo blocco.').replace('%N',vinte.length)});
   return vinte;
+}
+function decidiTerritoriNazionale(){
+  if(!S.territori||!PAESE.territori) return [];
+  let cambi=null;
+  try{ cambi=calcolaTerritoriNazionale(); } finally { if(cambi===null) S.territori.forEach(function(t){ if(t) t.spinta=0; }); }   // un'eccezione azzera la spinta come prima
+  return applicaTerritoriNazionale(cambi);
+}
+/* NOTTE_TERR = i cambi decisi dalla notte, in attesa del clic dell'esito: {mese, cambi}. Transitorio come NOTTE, MAI in S (resetAll e
+   applySnap lo azzerano): un salvataggio a notte aperta non esiste, e al caricamento il ripiego decide come prima. */
+let NOTTE_TERR=null;
+function ondaNotteTerritori(sistema, vero){
+  if(sistema==='parlamentare'){ const bl=(typeof bloccoNotte==='function')?bloccoNotte():bloccoIds(); return bl.reduce(function(s,id){ return s+((vero.seggi&&vero.seggi[id])||0); },0)-50; }
+  return (vero.myPct||0)-(vero.cb||0)-(vero.sv||0)-50;
+}
+/* solo dove l'esito li applica: il capo di partito (livello 3) a un'urna che non è di soli seggi (chiudiLegislativa non decide i territori) */
+function notteDecideTerritori(){ return !!(S && S.livello===3 && S.territori && PAESE.territori && !(typeof urnaLegislativa==='function' && urnaLegislativa())); }
+function notteTerritori(N){
+  N.cambiTerr=notteDecideTerritori() ? calcolaTerritoriNazionale(ondaNotteTerritori(N.sistema, N.vero)) : [];
+  const asseTuo=mioPartito().asse, cambiati={};
+  N.cambiTerr.forEach(function(c){ cambiati[c.i]=c; });
+  N.pienoTerr=(S.territori||[]).map(function(t, i){ return cambiati[i] ? true : !!(t && compatibile(t.partito, asseTuo, S.partito)); });
+  N.quotaTerr=cambiati;   // per la lettura che converge (ui.js, notteLettura): la quota vera delle aree che cambiano
+}
+function territoriDopoUrna(){
+  const nt=NOTTE_TERR; NOTTE_TERR=null;
+  if(nt && nt.mese===S.year*12+S.month) return applicaTerritoriNazionale(nt.cambi);
+  return decidiTerritoriNazionale();
 }
 function chiudiSforzo(){ if(S.campNaz && S.campNaz.sforzo>0) S.log.unshift({t:T('Campagna sul territorio'), x:T('Fine della campagna: %N punti di sforzo non spesi, persi.').replace('%N',S.campNaz.sforzo)}); }
 function avviaAttesa(){
@@ -7919,6 +8053,7 @@ function avviaNotte(){
     else { if((PAESE.coalizione||PAESE.comeSiVince==='parlamentare') && !sistemaSemipres()) S.seggi=calcSeggi(); sistema='candidato'; vero=testaATesta(); }   // L104-2
   }
   NOTTE={ sistema:sistema, vero:vero, stadio:0, onde:generaOnde(sistema, vero), dich:null, saltata:false, timer:null };
+  NOTTE_TERR=null; try{ notteTerritori(NOTTE); }catch(e){ NOTTE.cambiTerr=null; NOTTE.pienoTerr=null; }   // L239-3: i territori si decidono qui, dopo le onde (D-M2), e si applicano al clic dell'esito
   try{ seedNotteAnim(); }catch(e){}   // l'exit poll sale da zero; le tappe successive partono dalla precedente
   if(typeof suona==='function') suona('urne');   // L95-3: il brusio dello spoglio, in loop fino alla proclamazione
   if(typeof musica==='function') musica();       // L114-1: la musica della notte (NOTTE è appena nato)
@@ -7961,6 +8096,7 @@ function dichiaraNotte(i){ if(!NOTTE) return; NOTTE.dich=i; stopTimerNotte(); av
 function concludiNotte(){
   stopTimerNotte();
   if(typeof taci==='function') taci('urne');   // L95-3: rete di sicurezza, il loop non sopravvive alla notte
+  NOTTE_TERR=NOTTE.cambiTerr ? { mese:S.year*12+S.month, cambi:NOTTE.cambiTerr } : null;   // L239-3: i cambi decisi alla notte aspettano l'esito (territoriDopoUrna)
   const sistema=NOTTE.sistema, vero=NOTTE.vero, dich=NOTTE.dich; NOTTE=null;   // svuota il transitorio PRIMA del flusso a valle
   if(typeof notteTavoloFine==='function') notteTavoloFine();   // L113-5: le righe svaniscono, il tavolo torna al suo posto
   if(typeof musica==='function') musica();       // L114-1: finita la notte, la musica torna all'epoca (o alla crisi)
@@ -8175,7 +8311,7 @@ function notteSeggi(shown, ultima, compatto){
 }
 /* Candidato: le due percentuali oscillano attorno al 50 e convergono (ondata PRE-GENERATA, nessun dado qui). */
 function notteCandidato(onda){
-  const r=NOTTE.vero, me=part(S.partito);
+  const r=NOTTE.vero, me=mioPartito();   // L237-3: la guardia del roster
   const myP=onda.myPct, oppP=clamp(100-myP,0,100);
   return `<div class="mtext">${T('Testa a testa con %O.').replace('%O','<b>'+T(r.opp.nome)+'</b>')}</div>
     <div style="padding:0 18px 6px">
@@ -8697,7 +8833,7 @@ function esitoLegislativa(win, total){
   document.getElementById('ov').classList.add('on');
 }
 function esitoCandidato(r){
-  const me=part(S.partito), myP=r.myPct, oppP=100-myP;
+  const me=mioPartito(), myP=r.myPct, oppP=100-myP;   // L237-3: la guardia del roster
   const salv=!r.win && salvezzaOpp();   // L153-1
   document.getElementById('modal').innerHTML=`<div class="mt"><div class="kicker">${T(urnaLegislativa()?'Legislative anticipate':(S.elezioniAnticipate?'Elezioni anticipate':'Elezioni'))} · ${S.year}</div><h2>${titoloEsito(r.win)}</h2></div>
     <div class="mtext">${T('Testa a testa con <b>%O</b>: gli altri partiti si schierano per vicinanza politica.').replace('%O',T(r.opp.nome))}${(S.opposizione&&r.cb)?` ${T('Credibilità:')} <b style="color:${r.cb>=0?'var(--pos)':'var(--neg)'}">${r.cb>=0?'+':''}${Math.round(r.cb*10)/10}</b> ${T('punti')}.`:''}</div>
@@ -8724,10 +8860,10 @@ function nextMandate(){
   /* L53-2 — l'accordo esterno FINISCE COL MANDATO (design §A): le stampelle valgono per la legislatura che le
      ha chieste, non per quella dopo. Le due occasioni si riaprono col mandato nuovo. */
   S.sostegno=null; S.sostegnoStrappi=0;
-  chiudiSforzo(); decidiTerritoriNazionale();   // L64-2: lo sforzo non speso si perde; le aree lavorate si decidono dal basso
+  chiudiSforzo(); territoriDopoUrna();   // L64-2: lo sforzo non speso si perde; le aree lavorate si decidono dal basso
   S.campNaz=null; S.campNazUltimo=null;   // Cantiere C: la stagione si chiude col voto (le promesseCampagna PERSISTONO: resa dei conti alla prossima)
   tutteCorrenti(8);   // la vittoria ricompatta il partito
-  bioConta('elezioniVinte'); bioFatto(gn('Rieletto','Rieletta')+': comincia il mandato '+S.mandate+'.');
+  bioConta('elezioniVinte'); contaMandatoProprio(); bioFatto(gn('Rieletto','Rieletta')+': comincia il mandato '+S.mandate+'.');   // L237-3: il conto del fondatore qui, non in tornaAlGoverno (che chiama nextMandate)
   S.log.unshift({t:gn('Rieletto','Rieletta'),x:T(S.minoranza?'Inizia il mandato %N — governo di minoranza.':'Inizia il mandato %N.').replace('%N',S.mandate)});
   document.getElementById('ov').classList.remove('on');
   genAgenda(false); generaTitolo(); render(); commitSnap();
@@ -8800,7 +8936,7 @@ function goOpposizione(salvata){
   if(!salvata && typeof parla==='function' && !(typeof voceInCorso==='function' && voceInCorso())) parla('voce-opposizione');   // L218-10: dal governo all'opposizione dopo le urne (F4d); non la salvezza (eri già all'opposizione), non l'avvio (startOpposizione), e mai sopra la voce della sconfitta
   segnaForzaUrna();   // L153-1: l'urna persa è chiusa
   if(S.congresso) aggiornaCongresso(quotaPartitoPresidente());   // L173-2: la Camera del Presidente nuovo (dopo entraOpposizione: governoAvversario è lui)
-  chiudiSforzo(); decidiTerritoriNazionale();   // L64-2: anche in sconfitta le aree lavorate possono passare al tuo blocco
+  chiudiSforzo(); territoriDopoUrna();   // L64-2: anche in sconfitta le aree lavorate possono passare al tuo blocco
   S.campNaz=null; S.campNazUltimo=null;   // Cantiere C: stagione chiusa anche in sconfitta (le promesse restano: da sfidante non le puoi tradire — la resa le premierà)
   S.bloccoAtteso=bloccoQuota();   // aspettativa = quota del tuo blocco d'opposizione (potere locale persiste)
   if(salvata){
@@ -8878,7 +9014,7 @@ function lineaMediaMod(){
   return {vp:1, vm:1, cp:1, cm:1};                                    // documentata = oggi (baseline)
 }
 function applyOppEffect(spec){
-  const me=S.partito, base=part(me).base;
+  const me=S.partito, base=mioPartito().base;   // L237-3: la guardia del roster
   const govBase={}; (S.coalizione||[]).forEach(function(id){ const pb=(part(id)||{}).base||{}; for(const g in pb) govBase[g]=(govBase[g]||0)+pb[g]; });
   const aV=0.5+(S.visibilita||0)/100, aC=0.4+(S.credibilita||0)/100;   // amplificazioni (lette PRIMA dei delta)
   if(spec.gov)    for(const g in govBase) gd(g, spec.gov*aV*aC);
@@ -9182,6 +9318,7 @@ function resetAll(){
   if(typeof fermaRitrattiVivi==='function') fermaRitrattiVivi(document.getElementById('over'));   // L178-3
   if(typeof taciVoce==='function') taciVoce();   // L218-4: la voce della carriera finita non segue sulla home
   if(typeof guidaFine==='function') guidaFine();   // L218-6: la guida è della prima partita sola
+  NOTTE_TERR=null;   // L239-3: i cambi di una notte della carriera finita non passano alla prossima
   document.getElementById('over').style.display='none';
   document.getElementById('start').style.display='block';
   try{ if(typeof musica==='function') musica(); if(typeof ambiente==='function') ambiente(); }catch(e){}   // L118-1: sulla home il tema del gioco
@@ -9483,7 +9620,7 @@ function applySnap(snap){
   if(S.puntoUltimo===undefined) S.puntoUltimo=null;
   if(!S.recentPunto) S.recentPunto=[];
   S.partitoAperto=null;
-  COAL=null; try{ stopTimerNotte(); }catch(e){} NOTTE=null; try{ notteTavoloFine(); }catch(e){} ATTESA=null; PRIM=null; try{ stopTimerTel(); }catch(e){} TEL=null; INTERVISTA=null;   // F4: il timer della notte muore col transitorio; F1/F5: telefonata e intervista sono transitorie → il reload le abbandona (S intatto), la telefonata richiama da S.telPendente try{ resetUIAnim(); }catch(e){} try{ document.getElementById('ov').classList.remove('on'); }catch(e){}   // nessun residuo di trattativa/attesa/notte/primaria/animazioni dopo un caricamento
+  COAL=null; try{ stopTimerNotte(); }catch(e){} NOTTE=null; NOTTE_TERR=null; try{ notteTavoloFine(); }catch(e){} ATTESA=null; PRIM=null; try{ stopTimerTel(); }catch(e){} TEL=null; INTERVISTA=null;   // F4: il timer della notte muore col transitorio; F1/F5: telefonata e intervista sono transitorie → il reload le abbandona (S intatto), la telefonata richiama da S.telPendente try{ resetUIAnim(); }catch(e){} try{ document.getElementById('ov').classList.remove('on'); }catch(e){}   // nessun residuo di trattativa/attesa/notte/primaria/animazioni dopo un caricamento
   document.getElementById('start').style.display='none';
   document.getElementById('over').style.display='none';
   document.getElementById('appoint').style.display='none';
@@ -9502,7 +9639,19 @@ function continuaCarriera(){ const t=lsGet('hos_autosave'); if(t){ const r=caric
 function chiudiAutosave(){ lsDel('hos_autosave'); lastSnap=null; }   // fine carriera: via l'autosave
 /* Slot manuali (3): scrivono SEMPRE lastSnap (la fotografia del confine), mai lo stato a metà mese. */
 function slotKey(i){ return 'hos_slot_'+i; }
-function slotInfo(i){ const t=lsGet(slotKey(i)); if(!t) return null; const p=parseSave(t); if(!p.save) return {corrotto:true}; const s=p.save.s; return {nome:p.save.nome||('Slot '+(i+1)), paese:(PAESI[s.paese]||{}).nome||'?', partito:((PAESI[s.paese]||{partiti:[]}).partiti.find(function(x){return x.id===s.partito;})||{}).nome||'', anno:s.year, mandato:s.mandate, opp:!!s.opposizione}; }
+/* L237-3 · IL NOME DEL PARTITO DI UN SALVATAGGIO, senza caricarlo (slotInfo, la scheda «Carriera in corso»). Prima si cercava in
+   PAESI[s.paese].partiti: un partito nato in carriera (il partito proprio, le scissioni) o di una porta (i roster d'epoca stanno in
+   SCENARI) dava il nome vuoto. Ordine: l'ultima rinomina del registro, poi l'ultima nascita, poi il roster della porta, poi del paese. */
+function nomePartitoSalvato(s){
+  if(!s || !s.partito) return '';
+  var R=s.rosterDelta||{}, id=s.partito, ult=function(a){ var x=null; (a||[]).forEach(function(v){ if(v && v.id===id) x=v; }); return x; };
+  var r=ult(R.rinomina)||ult(R.entra); if(r && r.nome) return r.nome;
+  var sc=(typeof SCENARI!=='undefined' && s.scenario && SCENARI[s.scenario]) ? SCENARI[s.scenario] : null;
+  var lista=(sc && sc.partiti && sc.partiti.length) ? sc.partiti : ((PAESI[s.paese]||{}).partiti||[]);
+  var p=lista.find(function(x){ return x.id===id; }) || ((PAESI[s.paese]||{partiti:[]}).partiti.find(function(x){ return x.id===id; }));
+  return (p && p.nome) || '';
+}
+function slotInfo(i){ const t=lsGet(slotKey(i)); if(!t) return null; const p=parseSave(t); if(!p.save) return {corrotto:true}; const s=p.save.s; return {nome:p.save.nome||('Slot '+(i+1)), paese:(PAESI[s.paese]||{}).nome||'?', partito:nomePartitoSalvato(s), anno:s.year, mandato:s.mandate, opp:!!s.opposizione}; }
 function salvaSlot(i, nome){ if(!lastSnap) commitSnap(); if(!lastSnap) return false; return lsSet(slotKey(i), JSON.stringify(Object.assign({}, lastSnap, {nome:(nome||'').slice(0,24)||('Slot '+(i+1))}))); }
 function caricaSlot(i){ const t=lsGet(slotKey(i)); if(!t) return {err:'Slot vuoto.'}; return caricaSalvataggio(t); }
 function eliminaSlot(i){ lsDel(slotKey(i)); }

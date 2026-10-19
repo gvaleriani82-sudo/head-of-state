@@ -225,7 +225,9 @@ const VIDEO_PRESENTI = ['home-hero', 'partito-base', 'vitaprivata-base', 'retro-
   'partito-florido', 'economia-base', 'societacivile-base-nordamerica',   // L197-40: le clip delle tre immagini sostituite in L197-39 — due fogli che si sollevano sui banchi dell'aula, foglie e piccioni sulla via alberata, una mossa a scacchi e foglie nel parco
   'economia-florido', 'elezioni-florido-germania', 'societacivile-base-asiaest', 'vitaprivata-anni50',   // L197-41 (giro clip 38): la gru che ruota il braccio, le bandiere e la folla che applaude piano, panni stesi e ginkgo, la tenda del salotto anni '50
   'vitaprivata-anni70', 'elezioni-florido-italia', 'ambiente-florido',   // L197-42 (giro clip 39): il vapore della moka e il cucchiaino, bandiere e applausi lenti in piazza, pale eoliche lontane ed erba
-  'vitaprivata-anni80', 'giustizia-base', 'elezioni-florido-regnounito', 'ordinepubblico-base-asiaest'];   // L197-43 (giro clip 40): lo schermo del televisore e la palma, il giudice che gira una pagina, bandiere e applausi lenti, fronde e fili
+  'vitaprivata-anni80', 'giustizia-base', 'elezioni-florido-regnounito', 'ordinepubblico-base-asiaest',   // L197-43 (giro clip 40): lo schermo del televisore e la palma, il giudice che gira una pagina, bandiere e applausi lenti, fronde e fili
+  'ordinepubblico-base-africa', 'societacivile-anni60', 'societacivile-anni70',   // L197-44 (giro clip 41): fronde dell'acacia e fili, i cartelli bianchi che oscillano, striscioni e fiume (scuola-base non portata: l'aula d'epoca di L197-40)
+  'societacivile-anni80', 'istituzioni-anni50'];   // L197-45 (giro clip 42): le fronde nella galleria del 1980 (la folla ferma), i fogli che si sollevano nell'aula del 1950 (guerra-porto e guerra-base non portate: nessuna scena di guerra nel gioco, L245-4/5)
 
 /* ===== L181-4 — LE CLIP CHE NON GIRANO: un giro solo, poi l'ultimo fotogramma tenuto. Le altre clip di scena girano in tondo
    (`loop`) perché il loro ultimo fotogramma torna sul primo (cucitura ≤ 3,6 su 255, misurata sullo schermo); queste no — le porte
@@ -253,7 +255,8 @@ const CLIP_UNA_VOLTA = ['fineanno-buono', 'fineanno-lucieombre', 'fineanno-diffi
   'societacivile-anni90',   // L197-36: la piazza coi lenzuoli (7,3): lenzuoli e nuvole non tornano
   'ordinepubblico-base-nordamerica', 'elezioni-florido-francia',   // L197-37: gli agenti sul marciapiede (5,4: si allontanano e non tornano) e la piazza francese di notte (6,3: foglie e bandiera non tornano)
   'infrastrutture-base', 'lavoro-base',   // L197-39: gli svincoli sul fiume (4,1: le auto saltano alla cucitura) e la fabbrica coi bracci (4,9: nastro e braccio non tornano)
-  'ordinepubblico-base-asiaest'];   // L197-43: la strada con gli agenti (5,0: fronde e fili non tornano)
+  'ordinepubblico-base-asiaest',   // L197-43: la strada con gli agenti (5,0: fronde e fili non tornano)
+  'societacivile-anni70'];   // L197-44: il corteo sul lungofiume (9,5: il corteo si sposta e non torna)
                             // (Il telefono anni '70 di L197-11 è uscito da qui: rifatto a camera ferma, cucitura 1,4, L197-12.)
                             // (Il vicolo casa-base-asiaest-v2 di L197-10 è uscito da qui: rifatto a luce ferma, cucitura 2,2, L197-11.)
                             // (Il soggiorno vitaprivata-base-v6 di L192-7 è uscito con la sua clip: L195-0, D223.)

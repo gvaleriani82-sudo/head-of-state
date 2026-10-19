@@ -852,7 +852,7 @@ function bloccoQuota(){ return bloccoIds().reduce((s,id)=>s+((S.forze&&S.forze[i
    degli altri» è già la regola di oggi, e curarla anche lì faceva della presidenziale una formalità (b′ di L174-2: 90,9% vinte). Se fuori
    dal blocco non c'è nessuno, si torna al più forte degli altri. Misura e regola: BASELINE-175.md. */
 function testaATesta(){
-  const me=S.partito, meA=part(me).asse;
+  const me=S.partito, meA=(typeof mioPartito==='function'?mioPartito():part(me)).asse;   // L237-3: la guardia del roster
   let altri=PAESE.partiti.filter(p=>p.id!==me).sort((a,b)=>(S.forze[b.id]||0)-(S.forze[a.id]||0));
   if(!S.opposizione && typeof staColBlocco==='function'){
     const fuori=altri.filter(p=>!staColBlocco(p.id, me));

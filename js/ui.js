@@ -1482,7 +1482,7 @@ function renderStartPersistence(){
   if(cont){
     let html='';
     const t=lsGet('hos_autosave');
-    if(t){ const p=parseSave(t); if(p.save){ const s=p.save.s; const pn=((PAESI[s.paese]||{partiti:[]}).partiti.find(function(x){return x.id===s.partito;})||{}).nome||'';
+    if(t){ const p=parseSave(t); if(p.save){ const s=p.save.s; const pn=nomePartitoSalvato(s);   // L237-3: dal registro del salvataggio, non da PAESI grezzo
       html=`<div class="card" style="border-color:var(--brand);max-width:420px;margin:0 auto 16px;text-align:left"><div style="padding:12px 14px">
         <div class="contorno" style="letter-spacing:.16em;text-transform:uppercase;color:var(--brand)">${T('Carriera in corso')}</div>
         <div style="font-weight:600;font-size:15px;margin:3px 0 1px">${(PAESI[s.paese]||{}).nome||''} · ${escAttr(pn)}</div>
@@ -3248,7 +3248,7 @@ function oltreNomeSvg(M, larghezza){
   return `<text class="tv-oltre-nome" x="${M.oltreEtichetta[0]}" y="${M.oltreEtichetta[1]}" text-anchor="middle" font-size="${(larghezza*0.044).toFixed(2)}" pointer-events="none">${T(M.oltreNome)}</text>`;
 }
 function renderMappaSVG(){
-  const M=PAESE.mappa, TE=PAESE.territori, asseTuo=part(S.partito).asse;
+  const M=PAESE.mappa, TE=PAESE.territori, asseTuo=mioPartito().asse;
   let h=`<svg viewBox="${M.viewBox}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${T('Mappa del controllo politico')}">`;
   if(M.oltre){ const vb=tavoloVB(); h+=`<defs>${oltrePattern('mp-oltre', vb[2]/24)}</defs>`+oltrePath('mp-oltre', M.oltre, vb[2])+oltreNomeSvg(M, vb[2]); }   // L120-1: la RDT anche qui, sotto la terra; L249-1 col suo nome
   h+=`<path d="${M.sfondo}" fill="var(--bg2)" stroke="${M.oltre?'#2e2d20':'var(--line2)'}" stroke-width="${M.oltre?1.1:0.7}"/>`;
@@ -3475,7 +3475,7 @@ function aggiornaTavolo(){
   try{ tavoloAltezze(); }catch(e){}
   const chiave=[PAESE.mappa, (PAESE.territori||[]).length, S.paese, S.scenario||''];
   if(!TAVOLO_DI || TAVOLO_DI.some(function(v, k){ return v!==chiave[k]; }) || !box.querySelector('svg')){ costruisciTavolo(box); TAVOLO_DI=chiave; }
-  const TE=PAESE.territori, asseTuo=part(S.partito).asse, svg=box.querySelector('svg');
+  const TE=PAESE.territori, asseTuo=mioPartito().asse, svg=box.querySelector('svg');
   /* L123-1 · la scala REALE si legge UNA volta, qui, prima di ogni scrittura di questo passaggio (una lettura dopo un setAttribute
      è un layout forzato); a tavolo nascosto è 0 e si riprova al fotogramma dopo */
   const RQ=svg.getBoundingClientRect(), w=RQ.width, vb=tavoloVB();
@@ -3532,22 +3532,36 @@ function aggiornaTavolo(){
    Un'area può votarti e restare governata dall'avversario: righe e pieno che non coincidono sono un FATTO, non un errore (il
    voto nazionale non decide il controllo: lo decidono le intermedie e la campagna; misura di L113-5 §0).
    ⚠ Nessun numero casuale, niente in S: legge NOTTE.onde (già generate) e le funzioni pure del blocco.
+   ⚑ L239-3 (19/10): la notte CONVERGE SUL VERO. I territori si decidono prima dello spoglio (notteTerritori, game.js: NOTTE.cambiTerr,
+   NOTTE.pienoTerr, NOTTE.quotaTerr) e si applicano al clic dell'esito: all'ultima ondata ogni area dice il suo controllo finale
+   (NOTTE.pienoTerr: le righe coincidono col pieno che il tavolo avrà dopo l'esito), e nelle ondate prima un'area che CAMBIA mano va dalla
+   lettura di sempre verso la sua quota vera, con uno pseudo-rumore deterministico (indice dell'area e dell'ondata, niente Math.random:
+   la lettura resta ricalcolabile e non sposta le estrazioni) che scende come SD_NOTTE. Le aree che non cambiano: come prima fino alla
+   penultima ondata.
    I tre stati: pieno = scaglionato (60 ms per area, dalla capitale verso fuori) con l'onda (un lampo di luce sulla riga) ·
    ridotto = scaglionato, senza onde (la dissolvenza dell'opacità resta: è l'eccezione nel CSS) · spento = tutto lo stadio di colpo.
    ================================================================================================================ */
 const NOTTE_RIGA_MS=60;
 let NOTTE_RIGHE={ stadio:null, timer:[] };
 let ONDE_RIGHE=0;                            // onde partite (per la misura)   // lo stadio già disegnato e i timer dello scaglionamento (transitori)
-function notteLettura(onda){
+function notteRumore(i, k){ const x=Math.sin((i+1)*12.9898+(k+1)*78.233)*43758.5453; return (x-Math.floor(x))*2-1; }   // L239-3: pseudo-rumore in [-1, 1], deterministico
+function notteLettura(onda, k){
   const TE=PAESE.territori||[], M=PAESE.mappa, out=[];
+  if(k==null) k=NOTTE.stadio;
+  const sd=SD_NOTTE[k]||0, s0=SD_NOTTE[0]||1, ultima=k>=SD_NOTTE.length-1, P=NOTTE.pienoTerr, Q=NOTTE.quotaTerr||{};
   let wave;
   if(NOTTE.sistema==='parlamentare'){ const bl=(typeof bloccoElettorale==='function')?bloccoElettorale():bloccoIds(); wave=bl.reduce(function(s,id){ return s+(onda[id]||0); },0)-50; }
   else wave=(onda.myPct||0)-50;
   wave=clamp(wave, -12, 12);
   const aB=asseBlocco();
   TE.forEach(function(T1, i){ if(!M.aree[i]) return;
-    const q=50+wave+(T1.lean||0)*aB*4, d=Math.abs(q-50);
-    out.push({ i:i, mio:q>50, op:+(0.35+Math.min(d,15)/15*0.5).toFixed(2) }); });
+    let q=50+wave+(T1.lean||0)*aB*4;
+    const c=Q[i];
+    if(c){ const f=sd/s0; q=c.quota*(1-f) + q*f + notteRumore(i, k)*sd; }   // L239-3: l'area che cambia mano converge sulla sua quota vera
+    let mio=q>50;
+    if(ultima && P && P[i]!=null) mio=!!P[i];   // L239-3: la proclamazione dice il controllo finale, area per area
+    const d=Math.abs(q-50);
+    out.push({ i:i, mio:mio, op:+(0.35+Math.min(d,15)/15*0.5).toFixed(2) }); });
   return out;
 }
 /* l'ordine dello spoglio: dalla capitale verso fuori (senza capitale sul tavolo, l'ordine del roster) */
@@ -3572,7 +3586,7 @@ function notteTavolo(){
   NOTTE_RIGHE.stadio=NOTTE.stadio;
   notteRigheFerma();
   const spento=(typeof motionSpento==='function') && motionSpento(), pieno=!((typeof motionReduced==='function') && motionReduced());
-  const lett=notteOrdine(notteLettura(NOTTE.onde[NOTTE.stadio]));
+  const lett=notteOrdine(notteLettura(NOTTE.onde[NOTTE.stadio], NOTTE.stadio));
   const metti=function(x){ svg.querySelectorAll('.tv-riga[data-i="'+x.i+'"]').forEach(function(el){
     const f='url(#tv-righe-'+(x.mio?'tuo':'avv')+')';
     el.setAttribute('fill', f); el.setAttribute('opacity', String(x.op));
@@ -3582,7 +3596,8 @@ function notteTavolo(){
   return true;
 }
 /* fine della notte (concludiNotte, e il reset di un caricamento): le righe svaniscono (0,6 s; in spento di colpo) e il tavolo torna
-   al suo posto. Il `fill` delle aree che la campagna conquista cambia al render dopo, con la transizione di sempre. */
+   al suo posto. Il `fill` delle aree che la campagna conquista cambia al render dopo il clic dell'esito (territoriDopoUrna), con la
+   transizione di sempre: dal L239-3 è il pieno che l'ultima ondata ha già mostrato a righe (NOTTE.pienoTerr), quindi niente salto. */
 function notteTavoloFine(){
   notteRigheFerma(); NOTTE_RIGHE.stadio=null;
   const ov=document.getElementById('ov'); if(ov) ov.classList.remove('notte-tavolo');
@@ -4206,7 +4221,7 @@ function premiAvanza(){
 }
 function renderMappaInfo(){
   if(MAPSEL==null) return `<div style="padding:4px 14px 12px;font-size:12px;color:var(--mut2)">${T("Tocca un'area per i dettagli.")}</div>`;
-  const TE=PAESE.territori[MAPSEL], t=S.territori[MAPSEL]||{}, tuo=compatibile(t.partito, part(S.partito).asse, S.partito);
+  const TE=PAESE.territori[MAPSEL], t=S.territori[MAPSEL]||{}, tuo=compatibile(t.partito, mioPartito().asse, S.partito);
   const pn=T((part(t.partito)||{}).nome||'—');   // L244-4: il nome del partito passa da T()
   /* F2 — se l'area selezionata è quella che CHIAMA, la mini-scheda con la scelta prende il posto dell'info piatta.
      Map-native: la decisione vive qui (S.territorioChiama, dato puro), non come carta-agenda. */
@@ -4241,7 +4256,7 @@ function giroBottone(i, chiama){
   return `<div style="margin:2px 14px 10px"><button class="opt" style="min-height:44px" onclick="apriGiro(${i})"><span class="ol">${T('Vai in visita')}</span></button></div>`;
 }
 function renderMappaPage(){
-  const asseTuo=part(S.partito).asse;
+  const asseTuo=mioPartito().asse;
   const pl=(S.potereLocale!=null)?Math.round(S.potereLocale):null;
   const mie=S.territori.filter(t=>compatibile(t.partito,asseTuo,S.partito)).length;
   let h=`<button class="mini-btn" style="margin-bottom:10px" onclick="chiudiMappa()">← ${T('Partiti')}</button>`;
@@ -4454,7 +4469,7 @@ function renderPartiti(){
   const coal=S.coalizione||[S.partito], hasSeats=!!S.seggi;
   const pl=(S.potereLocale!=null)?Math.round(S.potereLocale):null;
   const plBox = pl!=null ? `<div class="card" style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;margin-bottom:12px"><span style="font-size:12.5px;color:var(--mut)">${gergo(T('Potere locale'),'potereLocale')}${pl>50?` · <b style="color:var(--acc-ink)">${T('controlli il territorio')}</b>`:''}</span><span class="mono" style="font-weight:600;font-size:16px;color:${pl>50?'var(--acc-ink)':'var(--txt)'}">${pl}<span class="contorno" style="color:var(--mut2);">/100</span></span></div>` : '';
-  const asseTuo=part(S.partito).asse;
+  const asseTuo=mioPartito().asse;
   const so=S.ultimoSondaggio;
   /* F3 — IL GRAFICO-TREND: la serie dei sondaggi con la banda d'incertezza, invece dei numeri nudi. Puro render
      di `S.sondStorico` (nessuna casualità qui: il valore è già stato generato e persistito al confine di mese →
