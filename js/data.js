@@ -16,6 +16,7 @@
    mandatoMesi resta 60 per tutti finché la logica elezioni non lo legge (durata per-paese: passo successivo). */
 const PAESI = {
   italia: {
+    votoGuerra:true,   // L245-4: la dichiarazione di guerra passa dal voto in aula (votoGuerraPaese, game.js; assente = nessun voto)
     /* L94-1 · I NOMI DEI GRUPPI SONO DEL PAESE. Il gruppo come PESO ha senso ovunque (un elettorato religioso-
        tradizionale al 12% ce l'hanno tutti e sedici); e' il NOME che era italiano in tutti e sedici. Il campo
        dichiara tutti e sei per completezza — cinque uguali a oggi, il sesto suo. `plurale:true` serve alla sola
@@ -98,6 +99,7 @@ const PAESI = {
     ],
   },
   usa: {
+    votoGuerra:true,   // L245-4: la dichiarazione di guerra passa dal voto in aula (votoGuerraPaese, game.js; assente = nessun voto)
     /* L94-1 · i nomi dei gruppi, del paese (v. italia) */
     nomiGruppi:{ lavoratori:'Lavoratori e sindacati', pensionati:'Pensionati', cetomedio:'Ceto medio',
                  imprenditori:'Imprese e industria', giovani:'Giovani e studenti', cattolici:'America religiosa' },
@@ -341,6 +343,7 @@ const PAESI = {
   /* ===== ROSTER A 16 — 8 paesi nuovi. Dati (partiti reali, territori, nomi, allineamento); il campo `mappa` (Natural
      Earth) e le mappe-locali (OSM) si generano dopo: senza `mappa` il territorio degrada a lista testuale. ===== */
   germania: {
+    votoGuerra:true,   // L245-4: la dichiarazione di guerra passa dal voto in aula (votoGuerraPaese, game.js; assente = nessun voto)
     /* L94-1 · i nomi dei gruppi, del paese (v. italia) */
     nomiGruppi:{ lavoratori:'Lavoratori e sindacati', pensionati:'Pensionati', cetomedio:'Ceto medio',
                  imprenditori:'Imprese e industria', giovani:'Giovani e studenti', cattolici:{nm:'Chiese e campagne', plurale:true} },
@@ -7255,6 +7258,19 @@ const TERRITORIO_PROB=[
    `gde90_`, `gus60_` e le `gi_` del presente, lotto per lotto): il conto vivo e la storia dei lotti stanno in CLAUDE.md («Il giro sul
    tavolo»), che è il posto da aggiornare — qui un numero invecchia a ogni lotto. Dal L239-2 anche le città che vivevano solo nei dati
    hanno un cerchio sul tavolo: le scene `tipo:'citta'` escono anche lì. */
+/* L239-6 · i testi dei segni sul territorio (ui.js: fissoTitolo e fissoFoglio). %TERR sempre all'inizio («%TERR: …»), mai dopo una
+   preposizione (la nota di lingua di L239-5); `r1` è la riga a un mese. Le chiavi EN sono in lang-en.js. */
+const SEGNO_TERR_TESTI={
+  crisi:   { t:'Crisi in corso',   r:'%TERR: crisi in corso, ancora %N mesi.',                     r1:'%TERR: crisi in corso, ancora un mese.' },
+  cantiere:{ t:'Cantiere aperto',  r:'%TERR: cantiere aperto, ancora %N mesi di lavori.',          r1:'%TERR: cantiere aperto, ancora un mese di lavori.' },
+  opera:   { t:'Opera inaugurata', r:'%TERR: opera inaugurata, se ne parlerà ancora per %N mesi.', r1:'%TERR: opera inaugurata, se ne parlerà ancora per un mese.' },
+  /* L245-5 · i segni di guerra (segniGuerra, game.js): fronte, base e colpita valgono finché c'è la guerra e non dicono i mesi.
+     «area colpita» e non «colpita»: un aggettivo accordato col territorio è falso per metà dei nomi (D191) */
+  fronte:  { t:'Zona del fronte',  r:'%TERR: zona del fronte.' },
+  base:    { t:'Mobilitazione',    r:'%TERR: mobilitazione in corso.' },
+  colpita: { t:'Area colpita',     r:'%TERR: area colpita dai combattimenti.' },
+  ricostruzione:{ t:'Ricostruzione', r:'%TERR: ricostruzione, ancora %N mesi.', r1:'%TERR: ricostruzione, ancora un mese.' }
+};
 const GIRO_SCENE=[
  /* — le sei semi di L182-3, riscritte con D175 (L185-1) — */
  {id:'gi_comizio', era:'universale', kind:'giro',
@@ -12014,10 +12030,10 @@ const DOSSIERS=[
 
 /* eventi gravi, rari */
 const EVENTS=[
- {id:'sisma',era:'universale', kick:'Calamità naturale', t:'Un forte terremoto colpisce il paese', text:'Città colpite: servono soccorsi e ricostruzione.',ch:[
-   {l:'Stato d\'emergenza e fondi pieni',e:'Costa, ma riconoscono la prontezza',costo:{debito:2.5},f:()=>{S.ind.debt+=2.5; S.ind.sanita+=3; allG(4);}},
+ {id:'sisma', luogo:'terr', segnoTerr:'crisi',era:'universale', kick:'Calamità naturale', t:'Un forte terremoto colpisce il paese', text:'Città colpite: servono soccorsi e ricostruzione, e %TERR %TV{conta|contano} i danni.',ch:[
+   {l:'Stato d\'emergenza e fondi pieni', segnoTerr:'cantiere',e:'Costa, ma riconoscono la prontezza',costo:{debito:2.5},f:()=>{S.ind.debt+=2.5; S.ind.sanita+=3; allG(4);}},
    {l:'Risposta minima',e:'Salvi i conti, l\'opinione pubblica non perdona',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; allG(-5); gd('cattolici',-4);}}]},
- {id:'sciopero',era:'universale', kick:'Conflitto sociale', t:'Sciopero generale dei sindacati', text:'I sindacati bloccano il Paese.',ch:[
+ {id:'sciopero', luogo:'terr', segnoTerr:'crisi',era:'universale', kick:'Conflitto sociale', t:'Sciopero generale dei sindacati', text:'I sindacati bloccano il Paese, e %TERR %TV{dà|danno} il via.',ch:[
    {l:'Concedi aumenti e tutele',e:'Lavoratori soddisfatti, imprese irritate',costo:{debito:1.5},f:()=>{S.ind.debt+=1.5; gd('lavoratori',10);gd('imprenditori',-6);}},
    {l:'Tieni il punto',e:'Linea di rigore che divide',f:()=>{gd('lavoratori',-8);gd('imprenditori',6);gd('cetomedio',2);}}]},
  {id:'corruzione',era:'universale', kick:'Scandalo', t:'Inchiesta per corruzione tocca il governo', text:'Un sottosegretario è indagato.',ch:[
@@ -12038,7 +12054,7 @@ const EVENTS=[
    {l:'Rispetta i parametri',e:'Rigore: pesa su crescita e lavoratori',costo:{debito:-1.5},f:()=>{S.ind.debt-=1.5; S.gMod-=0.4; gd('lavoratori',-4);gd('imprenditori',4);}},
    {l:'Rivendica sovranità di bilancio',e:'Piace all\'orgoglio, spaventa i mercati',costo:{debito:2},f:()=>{gd('cetomedio',4);gd('imprenditori',-4); S.ind.debt+=2;}},
    {l:'Fai pesare il tuo gruppo a Bruxelles',e:'Il tuo peso compra flessibilità: tempo, senza stangata',pesoUE:18,f:()=>{gd('cetomedio',2); S.gMod+=0.1;}}]},
- {id:'industria',era:'universale', kick:'Crisi industriale', t:'Un grande gruppo annuncia la chiusura', text:'Migliaia di posti a rischio.',ch:[
+ {id:'industria', luogo:'terr', segnoTerr:'crisi',era:'universale', kick:'Crisi industriale', t:'Un grande gruppo annuncia la chiusura', text:'Migliaia di posti a rischio, e %TERR %TV{trattiene|trattengono} il fiato.',ch:[
    {l:'Salvataggio pubblico',e:'Salvi i posti, spendi denaro pubblico',costo:{debito:2},f:()=>{S.ind.debt+=2; gd('lavoratori',8); S.uMod-=0.4;}},
    {l:'Lascia al mercato',e:'Disciplina di bilancio dal costo sociale alto',f:()=>{S.uMod+=0.8; gd('lavoratori',-8);gd('imprenditori',3);}}]},
  {id:'boom',era:'universale', kick:'Colpo di fortuna', t:'Un\'annata eccezionale', text:'Export e consumi oltre le attese: uno slancio una tantum, sopra l\'andamento di fondo.',ch:[
@@ -12199,8 +12215,8 @@ const EVENTS=[
   text:'Corrente razionata, insegne spente, il traffico regolato a mano agli incroci. Chi ha vissuto la guerra dice che si sopravvive; chi non l\'ha vissuta non è d\'accordo.',ch:[
    {l:'Le fabbriche prima delle case',e:'La produzione tiene · e la sera si cena al buio',f:()=>{gd('imprenditori',7); gd('lavoratori',-4); gd('pensionati',-8); gd('cetomedio',-5);}},
    {l:'Le case prima delle fabbriche',e:'Le famiglie hanno luce · e i capannoni fermi tre giorni su cinque',f:()=>{ if(S.gMod!=null)S.gMod-=0.5; gd('pensionati',7); gd('cetomedio',5); gd('imprenditori',-11);}}]},
- {id:'uk70_picchetto', era:'uk1970', tono:'grave', kick:'Industria', t:'Il picchetto',
-  text:'Davanti al cancello ci sono i picchetti e la fila di camion che non entra. Trattare significa cedere qualcosa; non trattare significa un\'altra settimana così.',ch:[
+ {id:'uk70_picchetto', luogo:'terr', segnoTerr:'crisi', era:'uk1970', tono:'grave', kick:'Industria', t:'Il picchetto',
+  text:'Davanti al cancello ci sono i picchetti e la fila di camion che non entra, e %TERR %TV{guarda|guardano}. Trattare significa cedere qualcosa; non trattare significa un\'altra settimana così.',ch:[
    {l:'Si tratta, e si firma qualcosa',e:'I cancelli riaprono lunedì · e si mette in fila chi chiederà lo stesso',f:()=>{gd('lavoratori',8); gd('imprenditori',-6); gd('cetomedio',-3); repd(-3);}},
    {l:'Non si tratta sotto ricatto',e:'Il principio è salvo · e la settimana pure, identica a quella prima',f:()=>{gd('imprenditori',6); gd('cetomedio',3); gd('lavoratori',-10); stampad(-3);}}]},
  {id:'uk70_mercato', era:'uk1970', cond:()=>S.year>=1973, kick:'Europa', t:'Il mercato comune',
@@ -12348,7 +12364,7 @@ const EVENTS=[
  {id:'i70_194', era:'italia1970', cond:()=>S.year>=1978, tono:'grave', kick:'Diritti', t:'La legge sull\'interruzione di gravidanza', text:'La legge sull\'interruzione di gravidanza arriva dopo anni di scontro. Le coscienze restano divise; la legge è legge.',ch:[
    {l:'Applicarla per intero, con i consultori',e:'La legge esiste per essere applicata · una parte del paese non ci si riconosce',f:()=>{gd('giovani',3); gd('lavoratori',2); gd('cattolici',-4);}},
    {l:'Applicarla garantendo l\'obiezione',e:'Si tiene conto delle coscienze · l\'accesso resta diseguale',f:()=>{gd('cattolici',3); gd('giovani',-2); gd('cetomedio',1);}}]},
- {id:'i70_scioperi', era:'italia1970', cond:()=>S.year>=1970, kick:'Conflitto sociale', t:'L\'autunno degli scioperi', text:'Le vertenze si allargano di categoria in categoria: cortei, presidi, trattative notturne. La contingenza copre l\'inflazione, dicono i sindacati; la copre troppo, dicono le imprese.',ch:[
+ {id:'i70_scioperi', luogo:'terr', segnoTerr:'crisi', era:'italia1970', cond:()=>S.year>=1970, kick:'Conflitto sociale', t:'L\'autunno degli scioperi', text:'Le vertenze si allargano di categoria in categoria: cortei, presidi, trattative notturne, e %TERR %TV{è|sono} in prima fila. La contingenza copre l\'inflazione, dicono i sindacati; la copre troppo, dicono le imprese.',ch:[
    {costo:{debito:0.5}, l:'Tavolo aperto, si tratta a oltranza',e:'Pace sociale comprata · qualcosa costa',f:()=>{gd('lavoratori',4); gd('imprenditori',-2); S.ind.debt+=0.5;}},
    {l:'Fermezza: i conti non reggono tutto',e:'Disciplina di bilancio · l\'autunno si allunga',f:()=>{gd('imprenditori',3); gd('lavoratori',-4); if(S.gMod!=null)S.gMod-=0.1;}}]},
  {id:'i70_fugalira', era:'italia1970', cond:()=>S.year>=1973, tono:'grave', kick:'Credito', t:'La fuga dalla lira', text:'La lira scivola, i capitali espatriano in valigia. Controlli alle frontiere, polemiche sulle banche svizzere.',ch:[
@@ -12484,8 +12500,8 @@ const EVENTS=[
  {id:'i70_riflusso', era:'italia1970', cond:()=>S.year>=1977, kick:'Il paese', t:'Il riflusso', text:'Dopo anni di piazze, una parte del paese torna al privato: la casa, il weekend, il corpo. I militanti lo chiamano riflusso, con disprezzo; i sociologi, normalità.',ch:[
    {l:'Il paese ha diritto alla sua tregua',e:'Normalità riconosciuta · chi ha lottato si sente liquidato',f:()=>{gd('cetomedio',3); gd('pensionati',2); tutteCorrenti(-3);}},
    {l:'Chiami alla partecipazione',e:'Tieni desta la militanza · una parte del paese non ti ascolta più',f:()=>{tutteCorrenti(4); gd('giovani',2); gd('cetomedio',-2);}}]},
- {id:'crollo',era:'universale', cond:()=>lv('manutenzione')===0, kick:'Emergenza infrastrutture', t:'Crolla un\'infrastruttura', text:'Cede un\'opera pubblica: anni di manutenzione rinviata presentano il conto. Vittime e disagi, il Paese chiede risposte.',ch:[
-   {l:'Stato d\'emergenza e messa in sicurezza',e:'Ispezioni e cantieri ovunque, costo pesante',costo:{debito:2},f:()=>{S.ind.debt+=2; S.ind.sicurezza+=4; gd('cetomedio',-3); allG(-2);}},
+ {id:'crollo', luogo:'terr', segnoTerr:'crisi',era:'universale', cond:()=>lv('manutenzione')===0, kick:'Emergenza infrastrutture', t:'Crolla un\'infrastruttura', text:'Cede un\'opera pubblica: anni di manutenzione rinviata presentano il conto. Vittime e disagi, %TERR %TV{resta|restano} senza collegamenti e il Paese chiede risposte.',ch:[
+   {l:'Stato d\'emergenza e messa in sicurezza', segnoTerr:'cantiere',e:'Ispezioni e cantieri ovunque, costo pesante',costo:{debito:2},f:()=>{S.ind.debt+=2; S.ind.sicurezza+=4; gd('cetomedio',-3); allG(-2);}},
    {l:'Gestione ordinaria e rassicurazioni',e:'Salvi i conti, ma la fiducia crolla',f:()=>{S.ind.sicurezza-=4; gd('cetomedio',-5); gd('cattolici',-3); allG(-3);}}]},
 
  /* ===== L60-2 · i dodici eventi del decennio inglese '80 (scheda §D; il n. 9 è «Il picchetto e la telecamera», come da nota) ===== */
@@ -12900,7 +12916,7 @@ const EVENTS=[
    {l:'Il sistema resta: è la campagna del paese', e:'Le fattorie ringraziano, il negoziato si complica', f:()=>{gd('cattolici',3); gd('lavoratori',1); gd('imprenditori',-1);}},
    {l:'Apri un po\', con compensazioni', e:'Il modo di sempre, con un assegno', costo:{debito:0.4}, f:()=>{S.ind.debt+=0.4; gd('cattolici',1); gd('imprenditori',1);}},
    {l:'Smantella: i prezzi scendono', e:'I consumatori esultano, le campagne votano', f:()=>{S.ind.fiducia+=1; gd('cetomedio',3); gd('imprenditori',2); gd('cattolici',-5); gd('lavoratori',-1);}}]},                                              // ④
- {id:'ca_p_incendi', era:'contemporanea', paesi:['canada'], min:'interno', kick:'Estate', t:'La stagione degli incendi', text:'Ogni estate le foreste bruciano più a lungo e più lontano; il fumo arriva nelle città e oltre il confine. Le province chiedono aerei e soldati, e la domanda è se prepararsi ogni anno o costruire un\'agenzia che ci pensi tutto l\'anno.', ch:[
+ {id:'ca_p_incendi', luogo:'terr', segnoTerr:'crisi', era:'contemporanea', paesi:['canada'], min:'interno', kick:'Estate', t:'La stagione degli incendi', text:'Ogni estate le foreste bruciano più a lungo e più lontano; il fumo arriva nelle città e oltre il confine, e %TERR %TV{respira|respirano} cenere. Le province chiedono aerei e soldati, e la domanda è se prepararsi ogni anno o costruire un\'agenzia che ci pensi tutto l\'anno.', ch:[
    {l:'Un\'agenzia nazionale per gli incendi', e:'Una struttura, non un\'emergenza', costo:{debito:0.5}, f:()=>{S.ind.debt+=0.5; gd('cetomedio',2); gd('giovani',2); gd('pensionati',1);}},
    {l:'Esercito e fondi, quando serve', e:'Come ogni estate', costo:{debito:0.3}, f:()=>{S.ind.debt+=0.3; gd('pensionati',1);}},
    {l:'Sono foreste provinciali: tocca a loro', e:'Vero, e il fumo non lo sa', f:()=>{gd('cetomedio',-2); gd('giovani',-2);}}]},
@@ -12930,7 +12946,7 @@ const EVENTS=[
    {l:'Avanti tutta: è la difesa del secolo', e:'Il patto regge, il debito con lui', costo:{debito:1.2}, f:()=>{S.ind.debt+=1.2; gd('imprenditori',3); gd('lavoratori',2); gd('pensionati',2); gd('giovani',-3);}},
    {l:'Avanti, ma con una revisione dei costi ogni due anni', e:'Prudente, e gli alleati lo notano', costo:{debito:0.8}, f:()=>{S.ind.debt+=0.8; gd('cetomedio',1);}},
    {l:'Rinegozia: meno navi, più droni', e:'Moderno, e sembra un ripensamento', costo:{debito:0.4}, f:()=>{S.ind.debt+=0.4; gd('giovani',2); gd('pensionati',-3); gd('imprenditori',-2);}}]},
- {id:'au_p_incendi', era:'contemporanea', paesi:['australia'], min:'interno', kick:'Estate', t:'L\'estate nera', text:'Un\'estate in cui il fumo copre le città per settimane e il paese guarda le coste bruciare in televisione. Gli Stati hanno i vigili del fuoco volontari, il federale ha l\'esercito, e la domanda è sempre la stessa: prepararsi o spegnere.', ch:[
+ {id:'au_p_incendi', luogo:'terr', segnoTerr:'crisi', era:'contemporanea', paesi:['australia'], min:'interno', kick:'Estate', t:'L\'estate nera', text:'Un\'estate in cui il fumo copre le città per settimane e il paese guarda le coste bruciare in televisione, e %TERR %TV{è|sono} sotto la cenere. Gli Stati hanno i vigili del fuoco volontari, il federale ha l\'esercito, e la domanda è sempre la stessa: prepararsi o spegnere.', ch:[
    {l:'Un\'agenzia nazionale e mezzi aerei propri', e:'Si smette di noleggiare aerei dall\'altro emisfero', costo:{debito:0.6}, f:()=>{S.ind.debt+=0.6; gd('cetomedio',2); gd('cattolici',2); gd('giovani',2);}},
    {l:'Esercito e fondi, quando brucia', e:'Come ogni estate', costo:{debito:0.3}, f:()=>{S.ind.debt+=0.3; gd('pensionati',1);}},
    {l:'Riduzione delle emissioni: la causa, non l\'effetto', e:'Giusto per il clima, e non spegne un incendio', f:()=>{gd('giovani',3); gd('imprenditori',-2); gd('lavoratori',-1);}}]},
@@ -13385,8 +13401,8 @@ const EVENTS=[
    {l:'La voti',cade:['fr_sfio','fr_rad'],e:'Le parrocchie con te · i laici della maggioranza no',f:()=>{gdFr('cattolici',6); gdFr('lavoratori',-4); gdFr('giovani',-3);}},
    {l:'La affossi',cade:['fr_mrp'],e:'La scuola della Repubblica resta sola · i cattolici non lo dimenticano',f:()=>{gdFr('cattolici',-6); gdFr('lavoratori',4);}},
    {l:'La rinvii in commissione',e:'Nessuno vince · nessuno ti ringrazia, e gli alleati ti trovano debole',f:()=>{gdFr('cattolici',-2); gdFr('lavoratori',-2); repd(-2);}}]},
- {id:'fr_sciopero53', era:'fr1950', cond:()=>S.year===1953&&S.month>=7&&S.month<=9, tono:'grave', kick:'Il lavoro', t:'Lo sciopero d\'agosto',
-  text:'Il governo tocca l\'età della pensione nel pubblico impiego e in tre giorni si fermano poste, ferrovie e telefoni: milioni di persone, in pieno agosto, senza un sindacato che l\'abbia deciso. Le vacanze sono bloccate e il paese con loro.',ch:[
+ {id:'fr_sciopero53', luogo:'terr', segnoTerr:'crisi', era:'fr1950', cond:()=>S.year===1953&&S.month>=7&&S.month<=9, tono:'grave', kick:'Il lavoro', t:'Lo sciopero d\'agosto',
+  text:'Il governo tocca l\'età della pensione nel pubblico impiego e in tre giorni si fermano poste, ferrovie e telefoni: milioni di persone, in pieno agosto, senza un sindacato che l\'abbia deciso, e %TERR %TV{resta|restano} senza treni. Le vacanze sono bloccate e il paese con loro.',ch:[
    {l:'Ritiri il decreto',cade:['fr_mod'],e:'Il paese riparte · e chi voleva il rigore ti chiama arrendevole',f:()=>{gdFr('lavoratori',5); gdFr('pensionati',3); gdFr('imprenditori',-4); repd(-3);}},
    {l:'Tratti settore per settore',e:'Un accordo alla volta · costa un po\' a tutti, e nessuno ne esce vincitore',costo:{debito:0.5},f:()=>{S.ind.debt+=0.5; gdFr('lavoratori',1); gdFr('imprenditori',-1);}},
    {l:'Tieni duro',cade:['fr_sfio'],e:'Il decreto resta · agosto resta fermo, e i giornali contano i treni',f:()=>{gdFr('lavoratori',-8); gdFr('pensionati',-4); gdFr('imprenditori',4); stampad(-3);}}]},
@@ -14015,8 +14031,8 @@ const EVENTS=[
    {l:'Chiudere l\'ambasciata ai nuovi arrivi',e:'Il giardino non si riempie più · il paese ti guarda come chi ha chiuso la porta',f:()=>{repd(-4); gdDe80('pensionati',-3); baseDe80(-2);}}]},
  /* L153-2 · i dieci eventi del decennio tedesco '90 (scheda §I-C; verifiche ⚠ nel rapporto). `de90_soldati` è datato 1995: la sentenza è del
     luglio 1994, ma il secondo semestre del 1994 è campagna e la coda non gira. */
- {id:'de90_sciopero92', era:'de1990', cond:()=>S.year===1992&&S.month>=4&&S.month<=7, kick:'Il lavoro', t:'I bidoni sul marciapiede',
-  text:'Undici giorni di sciopero del pubblico impiego: i bidoni restano sui marciapiedi, treni e poste sono fermi, gli aeroporti chiusi. Il sindacato chiede il nove e mezzo per cento; gli arbitri hanno proposto il cinque e quattro, e il governo ha detto no: l\'unità costa, e qualcuno deve cominciare a dirlo.',ch:[
+ {id:'de90_sciopero92', luogo:'terr', segnoTerr:'crisi', era:'de1990', cond:()=>S.year===1992&&S.month>=4&&S.month<=7, kick:'Il lavoro', t:'I bidoni sul marciapiede',
+  text:'Undici giorni di sciopero del pubblico impiego: i bidoni restano sui marciapiedi, treni e poste sono fermi, gli aeroporti chiusi, e %TERR %TV{conta|contano} i giorni. Il sindacato chiede il nove e mezzo per cento; gli arbitri hanno proposto il cinque e quattro, e il governo ha detto no: l\'unità costa, e qualcuno deve cominciare a dirlo.',ch:[
    {l:'Accettare la proposta degli arbitri',e:'La storia · si chiude al cinque e quattro · i giornali scrivono che hai ceduto, gli iscritti che ha ceduto il sindacato',costo:{debito:0.5},f:()=>{S.ind.debt+=0.5; gdDe90('lavoratori',2); fidDe90(-1); stampad(-1);}},
    {l:'Tenere il punto: quattro e otto, non un marco di più',e:'Lo sciopero si allunga · la banca centrale approva, i pendolari no',f:()=>{gdDe90('lavoratori',-4); gdDe90('cetomedio',-1); gdDe90('imprenditori',2); fidDe90(2);}},
    {l:'Un aumento in cifra fissa: di più a chi guadagna meno',e:'I netturbini ci guadagnano, i dirigenti no · il sindacato si divide sul sì',costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; gdDe90('lavoratori',3); gdDe90('cetomedio',-1);}}]},
@@ -14310,10 +14326,10 @@ const POTENZE=[
 ];
 /* L245-3 · I RIVALI (DESIGN-POLITICA-ESTERA.md, «⚑ L245-3»): CON CHI può nascere una crisi e FIN DOVE può salire. Una riga per
    paese (o porta) e potenza: `paese` = una chiave di SCENARI (le porte) o di PAESI (il presente), `con` = un id di POTENZE, `dal`/`fino`
-   gli anni (compresi) in cui la riga vale, `massimo` il gradino più alto della scala (1-5; oggi la scala si ferma a 4, il 5 è la guerra
-   di L245-4), `tipo` blocco · confine · lontano · coloniale · alleato. La legge UN punto, rivaleRiga() (game.js, accanto alla scala):
+   gli anni (compresi) in cui la riga vale, `massimo` il gradino più alto della scala (1-5; il 5 è la guerra
+   di L245-4, oggi solo coreasud), `tipo` blocco · confine · lontano · coloniale · alleato. La legge UN punto, rivaleRiga() (game.js, accanto alla scala):
    senza riga la crisi non si apre (crisiApplica) e una crisi aperta la cui riga è finita (il 1991 → 1992) si chiude (crisiMese); il
-   tetto della scala è min(4, massimo) (crisiTettoBlocco). I volti delle carte non la leggono (potenzeDi resta com'è).
+   tetto della scala è min(5, massimo) (crisiTettoBlocco). I volti delle carte non la leggono (potenzeDi resta com'è).
    ⚠ Il Pakistan non è in POTENZE: l'India ha solo la Cina. Dal L245-3bis le porte 1990 e 2000 che arrivano al presente hanno dal
    2012 le righe del presente del loro paese (prima solo la Russia: Cina e Iran lì non aprivano crisi). La guardia è in .claude/verifica-paese.js. */
 const RIVALI=(function(){
@@ -14326,6 +14342,7 @@ const RIVALI=(function(){
   ['russia','cina','iran','corea_nord'].forEach(function(c){ riga('usa', c, 2012, 2099, 4, 'blocco'); });
   ['russia','cina','corea_nord'].forEach(function(c){ riga('giappone', c, 2012, 2099, 4, 'blocco'); });
   riga('coreasud', 'corea_nord', 2012, 2099, 5, 'confine');
+  r[r.length-1].fronte=['il Gyeonggi', 'il Gangwon'];   // L245-5: le aree di casa sulla linea di demarcazione (nomi esatti di PAESI.coreasud.territori); settore k ↔ area k (segniGuerra)
   riga('coreasud', 'cina', 2012, 2099, 4, 'blocco');
   riga('india', 'cina', 2012, 2099, 4, 'confine');
   ['russia','cina'].forEach(function(c){ riga('brasile messico argentina sudafrica nigeria', c, 2012, 2099, 2, 'lontano'); });   // al più le sanzioni
@@ -14534,7 +14551,7 @@ const CONFLITTI_SWING=[
    della scadenza, i campi `t4*`). Tre scelte, sempre nello stesso ordine: sali · tieni · scendi (`crisiScala`; dal L245-3bis il campo `scala` le nomina, e al
    tetto della riga di RIVALI sotto 4 `pickCrisiScala` toglie quella che sale). Niente
    `pleases` e niente gruppi: le scelte non hanno un colore politico (regola fissa, partiti neutri). Niente persone, niente
-   dettagli militari. La guerra (t = 5) non c'è: arriva con L245-4. ===== */
+   dettagli militari. La guerra (t = 5) è di L245-4: la carta `crs_guerra` dopo l'ultimatum respinto, poi GUERRA_EV. ===== */
 const CRISI_SCALA_EV=[
  {id:'crs_sanzioni', gradino:1, min:'esteri', kick:'Crisi internazionale', t:'Le sanzioni contro %POTdet', text:'La tensione con %POTdet non si scioglie. Gli alleati discutono un pacchetto di sanzioni: aderire alza la pressione, ma costa al commercio.', ch:[
    {l:'Vari le sanzioni', e:'La pressione sale di un gradino; il commercio ne risente', f:()=>{relIntMuovi('alleanza',3); relIntMuovi('rivale',-4); crisiScala('sali');}, scala:'sali'},
@@ -14552,6 +14569,103 @@ const CRISI_SCALA_EV=[
    {l:'Poni l\'ultimatum', l4:'Tieni il punto fino alla scadenza', e:'Tutto su una carta: %POTdet deve rispondere', e4:'%POTDet cede, o respinge', f:()=>{relIntMuovi('rivale',-3); crisiScala('sali');}, scala:'sali'},
    {l:'Mantieni l\'allerta, senza ultimatum', l4:'Concedi altro tempo', e:'La crisi resta dov\'è', e4:'La scadenza si allunga', f:()=>{crisiScala('tieni');}, scala:'tieni'},
    {l:'Smobiliti', l4:'Ritiri l\'ultimatum', e:'La crisi scende; la fermezza si incrina', e4:'La crisi scende; la tua parola perde peso', f:()=>{relIntMuovi('rivale',3); repd(-1); crisiScala('scendi');}, scala:'scendi'},
+ ]},
+ /* L245-4 · dopo l'ultimatum RESPINTO, solo dove la riga di RIVALI arriva a 5 (crisiCartaRespinto, game.js): la guerra la dichiara
+    il capo del governo, mai la scala da sola. `vtext`/`ve` dove la dichiarazione passa dal voto in aula (votoGuerra). */
+ {id:'crs_guerra', gradino:'respinto', min:'difesa', kick:'Crisi internazionale', t:'L\'ultimatum respinto', text:'%POTDet ha respinto l\'ultimatum. La diplomazia non ha più niente da offrire: puoi dichiarare la guerra, concedere altro tempo o fare un passo indietro.',
+  vtext:'%POTDet ha respinto l\'ultimatum. La diplomazia non ha più niente da offrire: puoi chiedere all\'aula di dichiarare la guerra, concedere altro tempo o fare un passo indietro.', ch:[
+   {l:'Dichiari la guerra', e:'Si apre la guerra con %POTdet', ve:'L\'aula vota: se approva, è guerra con %POTdet', f:()=>{crisiScala('guerra');}, scala:'guerra'},
+   {l:'Concedi altro tempo', e:'La crisi resta all\'ultimatum', f:()=>{crisiScala('tieni');}, scala:'tieni'},
+   {l:'Ritiri l\'ultimatum', e:'La crisi scende; la tua parola perde peso', f:()=>{relIntMuovi('rivale',3); repd(-1); crisiScala('scendi');}, scala:'scendi'},
+ ]},
+];
+
+/* ===== L245-4 · LE CARTE DEL FRONTE (DESIGN-POLITICA-ESTERA.md §2 (b), «⚑ L245-4»). Una al mese, nello slot dell'evento estero del
+   capo del governo, al posto della carta della scala quando c'è la guerra (pickCrisiScala → guerraCarta, game.js), pescata dal
+   sacchetto `guerra|<fase>`. La fase la sceglie guerraFase(): 'inizio' (i primi due mesi), 'fronte', 'logoramento' (dopo il sesto
+   mese), 'trattativa' (trattativa ≥ 2) e 'pace' (trattativa a 3: «L'accordo sul tavolo», l'unica che chiude la guerra al tavolo).
+   Regole fisse (§2 (f)): partiti neutri (nessun `pleases`, nessun gruppo), nessuna persona, nessun dettaglio operativo, nessuna
+   immagine di violenza; i caduti sono un numero nel cassetto, mai nei testi. Gli effetti passano da guerraEffetto
+   ({forze, opinione, trattativa, costo, linea}) e restano piccoli. ===== */
+/* ===== L245-5 · IL RITORNO (DESIGN-POLITICA-ESTERA.md «⚑ L245-5»). Una carta sola, una per guerra: la pesca guerraRitornoCarta
+   (game.js) nello slot dell'evento estero del capo del governo, dal mese dopo guerraFine (finestra di GUERRA_RITORNO_MESI mesi se
+   lo slot è già preso); la scelta la segna fatta (S.dopoguerra.ritorno). Scena: l'hangar del ritorno (`scena:'guerra:ritorno'`,
+   letto da agScene in ui.js). Regole fisse di GUERRA_EV: nessun pleases, nessun gruppo, nessun nome, nessuna potenza (la crisi è
+   chiusa: %POT non c'è più), effetti piccoli. ===== */
+const DOPOGUERRA_EV=[
+ {id:'dg_ritorno', min:'difesa', kick:'La guerra', scena:'guerra:ritorno', t:'Il ritorno', text:'La guerra è finita, e i reparti rientrano. Nell\'hangar dell\'aeroporto militare le famiglie aspettano dietro le transenne: resta da decidere come accogliere chi torna.', ch:[
+   {l:'Un\'accoglienza pubblica', e:'Il paese si stringe attorno a chi torna; la cerimonia ha un costo', costo:{debito:0.2}, f:()=>{S.ind.debt+=0.2; stampad(1); guerraRitornoFatto();}},
+   {l:'Una cerimonia raccolta', e:'Sobria e senza clamore; all\'estero la apprezzano', f:()=>{repd(1); guerraRitornoFatto();}},
+ ]},
+];
+const GUERRA_EV=[
+ {id:'gu_discorso', fase:'inizio', min:'difesa', kick:'La guerra', t:'Il discorso alla nazione', text:'Il paese è in guerra con %POTdet da pochi giorni. Ti chiedono di parlare alla nazione: la gente vuole sapere che cosa aspettarsi.', ch:[
+   {l:'Parli chiaro: sarà lunga', e:'Meno entusiasmo oggi; il paese si prepara', f:()=>{guerraEffetto({opinione:-2, forze:2});}},
+   {l:'Prometti una guerra breve', e:'L\'opinione si scalda; la promessa resterà agli atti', f:()=>{guerraEffetto({opinione:3}); stampad(-1);}},
+ ]},
+ {id:'gu_riservisti', fase:'inizio', min:'difesa', kick:'La guerra', t:'I riservisti', text:'Per tenere i settori servono più uomini. Richiamare i riservisti rafforza il fronte, ma svuota fabbriche e uffici.', ch:[
+   {l:'Richiami i riservisti', e:'Il fronte si rafforza; l\'economia ne risente', f:()=>{guerraEffetto({forze:5}); S.gMod-=0.1;}},
+   {l:'Ti affidi ai volontari', e:'Meno forze, ma il paese apprezza', f:()=>{guerraEffetto({forze:2, opinione:1});}},
+ ]},
+ {id:'gu_alleati', fase:'inizio', min:'esteri', kick:'La guerra', t:'La telefonata degli alleati', text:'Gli alleati chiedono come intendi condurre la guerra con %POTdet: vogliono sapere fin dove ti spingerai prima di decidere quanto aiutarti.', ch:[
+   {l:'Chiedi il loro aiuto', e:'Arrivano rinforzi; in cambio avranno voce sulla pace', f:()=>{guerraEffetto({forze:4, trattativa:1}); relIntMuovi('alleanza',2);}},
+   {l:'Vai avanti da solo', e:'Il paese si stringe; gli alleati restano a guardare', f:()=>{guerraEffetto({opinione:2}); relIntMuovi('alleanza',-3);}},
+ ]},
+ {id:'gu_bilancio', fase:'inizio', min:'economia', kick:'La guerra', t:'Il conto dei primi mesi', text:'Il Tesoro presenta il conto della guerra. Si può finanziarla col debito o con un\'imposta straordinaria.', ch:[
+   {l:'Col debito', e:'Nessuna tassa oggi; il conto cresce ogni mese', f:()=>{guerraEffetto({costo:0.05});}},
+   {l:'Con un\'imposta straordinaria', e:'Il costo del mese scende; il paese la sente', f:()=>{guerraEffetto({costo:-0.05, opinione:-2});}},
+ ]},
+ {id:'gu_offensiva', fase:'fronte', min:'difesa', kick:'La guerra', t:'La proposta degli stati maggiori', text:'Gli stati maggiori propongono di spingere su un settore dove %POTdet sembra più debole. Può spostare la linea, a un prezzo.', ch:[
+   {l:'Approvi la spinta', e:'La linea si sposta in avanti; le forze ne pagano il prezzo', f:()=>{guerraEffetto({linea:1, forze:-4});}},
+   {l:'Prudenza', e:'Nessun passo avanti; le forze si riposano', f:()=>{guerraEffetto({forze:2});}},
+ ]},
+ {id:'gu_cedimento', fase:'fronte', min:'difesa', kick:'La guerra', t:'Il settore che cede', text:'Su un settore la linea non regge: i comandanti chiedono di arretrare per non perdere di più.', ch:[
+   {l:'Arretri', e:'Si perde terreno; le forze si salvano', f:()=>{guerraEffetto({linea:-1, forze:3});}},
+   {l:'Resisti', e:'La linea tiene, a caro prezzo', f:()=>{guerraEffetto({forze:-5, opinione:1});}},
+ ]},
+ {id:'gu_inviati', fase:'fronte', min:'difesa', kick:'La guerra', t:'Gli inviati al fronte', text:'I giornali chiedono di mandare inviati sui settori. Il paese vuole vedere; i comandi vogliono silenzio.', ch:[
+   {l:'Apri ai giornalisti', e:'Il paese vede la guerra com\'è; la stampa apprezza', f:()=>{guerraEffetto({opinione:-2}); stampad(2);}},
+   {l:'Chiudi il fronte alla stampa', e:'Meno notizie cattive; i giornali protestano', f:()=>{guerraEffetto({opinione:1}); stampad(-3);}},
+ ]},
+ {id:'gu_mediatore', fase:'fronte', min:'esteri', kick:'La guerra', t:'Un mediatore si offre', text:'Un paese neutrale si offre di portare messaggi fra te e %POTdet. Accettare non ferma la guerra, ma apre un canale.', ch:[
+   {l:'Accetti il canale', e:'Una porta si apre; qualcuno la legge come debolezza', f:()=>{guerraEffetto({trattativa:1, opinione:-1});}},
+   {l:'Rifiuti', e:'Nessun canale; la fermezza piace', f:()=>{guerraEffetto({opinione:1});}},
+ ]},
+ {id:'gu_famiglie', fase:'logoramento', min:'difesa', kick:'La guerra', t:'Le famiglie dei soldati', text:'Le famiglie dei soldati chiedono un incontro. Vogliono sapere quando torneranno i loro figli, e tu non hai una data.', ch:[
+   {l:'Le incontri tu', e:'Ascolti senza promettere; il paese lo vede', f:()=>{guerraEffetto({opinione:2}); stampad(1);}},
+   {l:'Mandi il ministro', e:'Un gesto dovuto, niente di più', f:()=>{guerraEffetto({opinione:-1});}},
+ ]},
+ {id:'gu_piazza', fase:'logoramento', min:'interno', kick:'La guerra', t:'La piazza per la pace', text:'Una grande manifestazione chiede di fermare la guerra con %POTdet. È pacifica, e cresce ogni settimana.', ch:[
+   {l:'Ricevi una delegazione', e:'Apri alla pace; al fronte lo leggono come stanchezza', f:()=>{guerraEffetto({trattativa:1, forze:-2});}},
+   {l:'Tieni la linea', e:'La piazza resta; l\'opinione si raffredda', f:()=>{guerraEffetto({opinione:-2});}},
+ ]},
+ {id:'gu_conti', fase:'logoramento', min:'economia', kick:'La guerra', t:'I conti della guerra', text:'La guerra costa più del previsto. Il Tesoro chiede di scegliere fra tagliare altrove e allargare il debito.', ch:[
+   {l:'Tagli altrove', e:'Il costo del mese scende; qualcuno se ne accorge', f:()=>{guerraEffetto({costo:-0.05, opinione:-1});}},
+   {l:'Più debito', e:'Nessun taglio; il conto cresce', f:()=>{guerraEffetto({costo:0.05});}},
+ ]},
+ {id:'gu_rotazione', fase:'logoramento', min:'difesa', kick:'La guerra', t:'Il cambio al fronte', text:'I reparti al fronte sono stanchi. Ruotarli costa mesi e denaro; lasciarli dove sono costa altro.', ch:[
+   {l:'Ruoti i reparti', e:'Forze fresche; il conto sale', f:()=>{guerraEffetto({forze:4, costo:0.05});}},
+   {l:'Restano dove sono', e:'Nessuna spesa; la stanchezza si fa sentire', f:()=>{guerraEffetto({forze:-3});}},
+ ]},
+ {id:'gu_tregua', fase:'trattativa', min:'esteri', kick:'La guerra', t:'La tregua per le feste', text:'Si propone una tregua di qualche giorno su tutti i settori. È un segnale: per %POTdet e per il tuo paese.', ch:[
+   {l:'Accetti la tregua', e:'La trattativa fa un passo; il paese respira', f:()=>{guerraEffetto({trattativa:1, opinione:1});}},
+   {l:'Rifiuti', e:'Le forze si riorganizzano; la trattativa arretra', f:()=>{guerraEffetto({forze:2, trattativa:-1});}},
+ ]},
+ {id:'gu_prigionieri', fase:'trattativa', min:'esteri', kick:'La guerra', t:'Lo scambio dei prigionieri', text:'%POTDet propone uno scambio di prigionieri, il primo della guerra. In patria lo chiedono in molti.', ch:[
+   {l:'Accetti lo scambio', e:'Tornano a casa; la trattativa avanza', f:()=>{guerraEffetto({opinione:3, trattativa:1});}},
+   {l:'Chiedi di più', e:'Lo scambio si ferma; la trattativa arretra', f:()=>{guerraEffetto({trattativa:-1, opinione:-1});}},
+ ]},
+ {id:'gu_condizioni', fase:'trattativa', min:'esteri', kick:'La guerra', t:'Le condizioni', text:'Al tavolo %POTdet mette le sue condizioni. Alcune sono accettabili, altre no.', ch:[
+   {l:'Tratti punto per punto', e:'La trattativa avanza; qualcuno parla di cedimento', f:()=>{guerraEffetto({trattativa:1, opinione:-1});}},
+   {l:'Alzi la posta', e:'La trattativa arretra; la fermezza piace', f:()=>{guerraEffetto({trattativa:-1, opinione:1});}},
+ ]},
+ {id:'gu_chiudere', fase:'trattativa', min:'esteri', kick:'La guerra', t:'Gli alleati chiedono di chiudere', text:'Gli alleati premono perché la guerra finisca: i mercati soffrono, e le elezioni si avvicinano anche da loro.', ch:[
+   {l:'Li assecondi', e:'La trattativa avanza; gli alleati apprezzano', f:()=>{guerraEffetto({trattativa:1}); relIntMuovi('alleanza',3);}},
+   {l:'Tieni il punto', e:'Gli alleati si raffreddano', f:()=>{guerraEffetto({opinione:1}); relIntMuovi('alleanza',-4);}},
+ ]},
+ {id:'gu_accordo', fase:'pace', min:'esteri', kick:'La guerra', t:'L\'accordo sul tavolo', text:'Dopo mesi di trattativa l\'accordo con %POTdet è scritto. Nessuno ha avuto tutto, e i settori restano dove sono.', ch:[
+   {l:'Firmi l\'accordo', e:'La guerra finisce al tavolo', f:()=>{guerraFine('pace');}},
+   {l:'Non firmi', e:'La trattativa torna indietro; la guerra continua', f:()=>{guerraEffetto({trattativa:-2, opinione:-2});}},
  ]},
 ];
 

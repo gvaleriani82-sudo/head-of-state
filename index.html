@@ -136,6 +136,8 @@
            (`portePaese`), quindi una porta nuova continua a comparire da sola. La misura lo verifica contando. -->
       <div data-i18n class="crea-etich" style="margin-top:16px;">Il tuo partito</div>
       <div class="cands" id="party-list" style="max-width:360px;margin:0 auto;"></div>
+      <!-- L237-4 · il riquadro «Fonda il tuo partito» (renderPPRiquadro, ui.js): sotto la lista, non un modale; vuoto e nascosto finché non si apre -->
+      <div class="pp-riquadro" id="pp-riquadro" style="display:none"></div>
       </div><!-- /crea-dove --><div class="crea-come">
       <div data-i18n class="crea-etich" style="margin-top:18px;">Difficoltà</div>
       <div class="seg" id="diff-seg" style="max-width:360px;margin:0 auto;">
@@ -197,6 +199,7 @@
         <div class="tab" data-t="pol" data-i18n onclick="setTab('pol')">Bilancio</div>
         <div class="tab" data-t="par" data-i18n onclick="setTab('par')">Partiti</div>
         <div class="tab" data-t="stampa" data-i18n onclick="setTab('stampa')">Stampa</div>
+        <div class="tab" data-t="guerra" data-i18n onclick="setTab('guerra')" style="display:none">Guerra</div>
       </nav>
     </header>
     <!-- L113-2 · IL TAVOLO: un nodo solo, persistente; lo costruisce e lo aggiorna aggiornaTavolo() (ui.js) -->
@@ -209,6 +212,7 @@
       <section class="sec" id="sec-stampa"></section>
       <section class="sec" id="sec-pol"></section>
       <section class="sec" id="sec-par"></section>
+      <section class="sec" id="sec-guerra"></section>
     </main>
     <div class="endbar"><div class="inner">
       <div class="ctx" id="ctx"></div>

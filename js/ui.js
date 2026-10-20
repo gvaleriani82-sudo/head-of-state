@@ -781,7 +781,9 @@ function fermaRitrattiVivi(dentro){   // L178-3: chiuso il momento, la clip smet
 function agScene(it){ if(!it || typeof SCENA_MAJOR==='undefined' || !SCENA_MAJOR[it.kind]) return '';   // display selettivo (ora incl. le carte locali)
   const bucket=scenaId(it); if(!bucket) return '';
   const seed=(it.data&&it.data.id) || (it.kind==='rimpasto'&&it.min ? 'rimpasto:'+it.min : null) || it.kind || bucket;   // hash stabile: id-carta → stessa variante per quella carta (L127-1b: due rimpasti nello stesso mese sono due chiavi della clip, non un nodo conteso)
-  const src=scenaVariante(scenaSrc(bucket, scenaTono(it), seed), (S?(S.year*12+S.month):0)+':'+seed);   // L181-1: la variante numerata (spenta senza file), sulla stessa chiave della fascia
+  const scF=(it.data && typeof it.data.scena==='string') ? it.data.scena.split(':') : null;   // L245-5: una carta può dichiarare la scena «secchio:chiave» (dg_ritorno → guerra:ritorno)
+  const src=(scF && typeof SCENES!=='undefined' && SCENES[scF[0]] && typeof SCENES[scF[0]][scF[1]]==='string') ? scenaPaese(SCENES[scF[0]][scF[1]])
+    : scenaVariante(scenaSrc(bucket, scenaTono(it), seed), (S?(S.year*12+S.month):0)+':'+seed);   // L181-1: la variante numerata (spenta senza file), sulla stessa chiave della fascia
   /* loading=lazy + decoding=async: con le scene su file (assets/) le carte fuori schermo non pagano la rete
      e la decodifica non blocca il render. Nessun salto di layout: .ag-scene ha aspect-ratio 16/9 + fondo panel2,
      quindi lo slot occupa il suo posto anche prima che l'immagine arrivi. Inerte sui base64 (già in memoria). */
@@ -839,6 +841,7 @@ function avviaPartita(){ apriCreazione(); }
    e applica i crediti d'esordio. «Salta» = CREA null = personaggio neutro (identico a prima del lotto). ===== */
 function apriCreazione(){
   CREA={nome:'', genere:'m', eta:52, background:null, famiglia:'borghese', orientamento:0, religiosita:'laico', livello:3, dicastero:'economia', terrIdx:1, avatar:null, avatarCustom:null};
+  PP_BOZZA=null; renderStartParties();   // L237-4: ogni creazione riparte senza partito proprio
   if(typeof musicaPorta==='function') musicaPorta(null);   // L172-5: si entra dal presente (la porta la rimette storiciPorta, subito dopo)
   document.getElementById('start').style.display='none';
   document.getElementById('crea').style.display='block';
@@ -1134,12 +1137,19 @@ function chiudiClipPorta(){
   PORTA_CLIP_FERME.forEach(function(v){ try{ if(v.isConnected){ const p=v.play(); if(p && p.catch) p.catch(function(){}); } }catch(e){} }); PORTA_CLIP_FERME=[];
 }
 function confermaCreazione(){ proseguiAvvio(); }                  // CREA resta: initStatoBase la consuma
-function saltaCreazione(){ CREA=null; proseguiAvvio(); }          // neutro: nessun credito, età 52
+function saltaCreazione(){   // neutro: nessun credito, età 52
+  const pp=(CREA && CREA.proprio) ? {proprio:CREA.proprio, partito:CREA.partito, livello:(CREA.livello===1?1:0), terrIdx:CREA.terrIdx} : null;
+  CREA=null;
+  if(pp){ CREA={nome:'', genere:'m', eta:(pp.livello===1?40:25), background:null, orientamento:0, religiosita:'laico', livello:pp.livello, terrIdx:pp.terrIdx, proprio:pp.proprio, partito:pp.partito};   // L237-4: col partito proprio il «neutro» parte dal basso (D-P2)
+    if(pp.livello===1){ const o=etaOptLocale(pp.terrIdx); CREA.eta=o[1]; } }
+  proseguiAvvio(); }
 /* le età credibili per la carica locale: sindaco di una grande città 35-48 (def 38), presidente di regione
    40-52 (def 44 — carica di più peso). Col ritmo della scalata, da ~38 si arriva al vertice intorno ai 50. */
 function etaOptLocale(terrIdx){ const TE=(PAESE.territori||[])[terrIdx]||{}; return (TE.tipo==='regione')?[40,45,50]:[35,40,45]; }   // A.5 rework: età a scatti di 5
 function allineaEtaLocale(){ if(!CREA) return; const opts=etaOptLocale(CREA.terrIdx); if(opts.indexOf(CREA.eta)<0) CREA.eta=opts[1]; }   // fuori fascia → al default della carica (2ª opzione)
-function setCrea(campo,val){ if(!CREA) return; CREA[campo]=val;
+function setCrea(campo,val){ if(!CREA) return;
+  if(campo==='livello' && CREA.proprio && val!==0 && val!==1) return;   // L237-4 (D-P2): col partito proprio solo attivista o locale
+  CREA[campo]=val;
   if(campo==='livello'){   // età coerente col gradino di partenza
     if(val===0 && [25,30,35].indexOf(CREA.eta)<0) CREA.eta=25;         // attivista: 25/30/35 (l'età di partenza tara il ritmo, paceMul)
     if(val===1) allineaEtaLocale();                                    // locale: la fascia dipende dalla CARICA (città/regione)
@@ -1157,7 +1167,7 @@ function renderCreazione(){
      leggibile (10,5px per «Punto di partenza», 11,5px per «Orientamento»). Tolto il parametro, non solo
      i due casi: finché il meccanismo esiste, l'eccezione torna. Le etichette lunghe adesso vanno a capo
      dentro i 44px, che è il comportamento giusto. */
-  const seg=(campo,opts)=>`<div class="seg" style="max-width:360px;margin:0 auto;">`+opts.map(o=>`<button class="${C[campo]===o.v?'on':''}" onclick="setCrea('${campo}',${typeof o.v==='string'?`'${o.v}'`:o.v})">${o.l}</button>`).join('')+`</div>`;
+  const seg=(campo,opts)=>`<div class="seg" style="max-width:360px;margin:0 auto;">`+opts.map(o=>`<button class="${C[campo]===o.v?'on':''}"${o.dis?' disabled aria-disabled="true"':''} onclick="setCrea('${campo}',${typeof o.v==='string'?`'${o.v}'`:o.v})">${o.l}</button>`).join('')+`</div>`;
   const nota=t=>`<div style="font-size:12px;color:var(--mut2);margin:8px auto 0;max-width:360px;">${t}</div>`;
   let h='';
   /* L145-1 · ogni campo in un contenitore (.crea-campo): sotto i 1000 px è display:contents (nessuna differenza), sopra è un
@@ -1193,7 +1203,9 @@ function renderCreazione(){
     h+=nota(T('Scegli un volto per il tuo personaggio, o lascia l\'iniziale del nome.'))+fine;
   }
   /* punto di partenza (lotto ascesa): dal politico locale fino al capo del governo — la stessa carriera, da gradini diversi */
-  h+=campo()+tit(T('Punto di partenza'))+seg('livello',[{v:0,l:T('Attivista')},{v:1,l:T('Politico locale')},{v:2,l:T('Ministro')},{v:3,l:T('Capo del governo')},{v:5,l:T('Diplomatico')}]);
+  const ppDal=!!C.proprio;   // L237-4 (D-P2): col partito proprio confermato la partenza è attivista o politico locale; gli altri grigi, non nascosti
+  h+=campo()+tit(T('Punto di partenza'))+seg('livello',[{v:0,l:T('Attivista')},{v:1,l:T('Politico locale')},{v:2,l:T('Ministro'),dis:ppDal},{v:3,l:T('Capo del governo'),dis:ppDal},{v:5,l:T('Diplomatico'),dis:ppDal}]);
+  if(ppDal) h+=`<div class="pp-livelli-nota" style="font-size:12px;color:var(--mut);margin:6px auto 0;max-width:360px;">${T('Con un partito nuovo parti dal basso')}</div>`;
   if(C.livello===0){
     h+=nota(T('Il gradino zero: un attivista di 25 anni, senza carica né bilancio. Costruisci una base militante e la reputazione presso i gruppi, mese dopo mese, fino alla prima candidatura — da cui comincia la scala.'));
   } else if(C.livello===1){
@@ -1267,7 +1279,8 @@ async function caricaAvatarFile(input){
 /* --- Selettore Paese + Partito (schermata iniziale). Cambiando paese, PAESE diventa attivo, la cornice
    si aggiorna (applyPaese) e il partito di default torna al più forte (primo in elenco) del nuovo paese. --- */
 function setCountry(c){
-  chosenCountry=c; chosenScenario='presente'; PAESE=PAESI[c]; chosenPartito=PAESE.partiti[0].id;   // Build B: cambiare paese riazzera lo scenario (gli scenari sono per-paese)
+  chosenCountry=c; chosenScenario='presente'; PAESE=PAESI[c]; chosenPartito=PAESE.partiti[0].id;
+  ppAzzera();   // L237-4: i doppioni e i gruppi sono del paese: la fondazione si rifà   // Build B: cambiare paese riazzera lo scenario (gli scenari sono per-paese)
   document.querySelectorAll('#country-seg button').forEach(b=>b.classList.toggle('on', b.dataset.c===c));
   applyPaese(); renderStartParties();
   if(typeof CREA!=='undefined' && CREA) renderCreazione();   // setup aperto: il punto-di-partenza locale dipende dai territori del paese → rirendi i campi
@@ -1281,6 +1294,7 @@ function setScenario(id){
   const base=PAESI[chosenCountry];
   PAESE = (typeof paeseConScenario==='function') ? paeseConScenario(base, sc.id==='presente'?null:sc) : base;   // (ii) overlay partiti+ue+intermedie
   chosenPartito=PAESE.partiti[0].id;
+  ppAzzera();   // L237-4: nelle porte il partito proprio non c'è
   document.querySelectorAll('#country-seg button').forEach(b=>b.classList.toggle('on', b.dataset.c===chosenCountry));
   applyPaese(); renderStartParties();
   if(typeof CREA!=='undefined' && CREA) renderCreazione();
@@ -1461,16 +1475,124 @@ function renderStartParties(){
   const el=document.getElementById('party-list'); if(!el) return;
   const cur=PAESE.partiti.filter(p=>p.id===chosenPartito)[0];
   if(!partitoSelezionabile(cur)){ const primo=PAESE.partiti.filter(partitoSelezionabile)[0]; if(primo) chosenPartito=primo.id; }
+  const pp=ppFondato();   // L237-4: col partito proprio confermato nessun partito del paese è acceso
   el.innerHTML=PAESE.partiti.map(p=>partitoSelezionabile(p)
-    ? `<button class="cand ${p.id===chosenPartito?'on':''}" onclick="setPartito('${p.id}')">
+    ? `<button class="cand ${(p.id===chosenPartito && !pp)?'on':''}" onclick="setPartito('${p.id}')">
     <span class="cn">${T(p.nome)}</span>
     <span class="cmeta"><small style="color:var(--mut2)">${T(p.orientamento)}</small> <span class="mono" style="color:var(--mut)">${p.forza}%</span></span></button>`
     : `<button class="cand" disabled aria-disabled="true" style="flex-wrap:wrap;opacity:.6;cursor:default">
     <span class="cn">${T(p.nome)}</span>
     <span class="cmeta"><small style="color:var(--mut2)">${T(p.orientamento)}</small> <span class="mono" style="color:var(--mut)">${p.forza}%</span></span>
-    ${p.nota?`<small style="flex-basis:100%;font-size:12px;line-height:1.35;color:var(--mut);text-align:left">${T(p.nota)}</small>`:''}</button>`).join('');
+    ${p.nota?`<small style="flex-basis:100%;font-size:12px;line-height:1.35;color:var(--mut);text-align:left">${T(p.nota)}</small>`:''}</button>`).join('')
+    +ppBottoneHtml();   // L237-4: «Fonda il tuo partito», solo nel presente
+  renderPPRiquadro();
 }
-function setPartito(id){ const p=PAESE.partiti.filter(x=>x.id===id)[0]; if(!partitoSelezionabile(p)) return; chosenPartito=id; renderStartParties(); }
+function setPartito(id){ const p=PAESE.partiti.filter(x=>x.id===id)[0]; if(!partitoSelezionabile(p)) return; chosenPartito=id;
+  if(ppFondato() || PP_BOZZA){ ppAzzera(); if(typeof CREA!=='undefined' && CREA && typeof renderCreazione==='function') renderCreazione(); }   // L237-4: un partito esistente chiude il riquadro e toglie la fondazione
+  renderStartParties(); }
+/* ================================================================================================================
+   L237-4 · «FONDA IL TUO PARTITO» — l'interfaccia (A) di DESIGN-PARTITO-PROPRIO.md §4. Solo nel presente: in fondo a #party-list un
+   bottone della forma `.cand`; il tocco apre SOTTO la lista (#pp-riquadro, non un modale) nome, sigla, colore, posizione e base.
+   · La bozza è `PP_BOZZA` (transitoria, mai in S né in CREA finché non si conferma). «Fonda il partito» la controlla e la scrive
+     in `CREA.proprio = {nome, sigla, colore, asse, base}` (con `CREA.partito='pp_proprio'` come segno); il motore la legge in
+     startAttivista/startLocale prima di genAgenda (game.js). Il salvataggio la porta già con S.rosterDelta.
+   · Con `CREA.proprio` la partenza è solo attivista o politico locale (D-P2): gli altri livelli disabilitati, con la ragione.
+   · `chosenPartito` diventa il «ponte»: il partito del paese più vicino per asse (a pari distanza il più forte). È il partito che
+     initStatoBase vede per un istante, prima che fondaPartitoProprio passi il giocatore a `pp_proprio`; nella lista non si accende.
+   · Scegliere un partito esistente, cambiare paese o porta, o riaprire la creazione azzera la fondazione.
+   · Nome e sigla escono sempre escapati (escAttr); in partita il roster li ha già in HTML sicuro (applicaRosterDelta, game.js).
+   ================================================================================================================ */
+const PP_PALETTE=['#c0392b','#2e6fd8','#1e8a4c','#7b3fb0','#138a8a','#c2387a','#1f3a68','#e0661c'];   // niente ori (--acc) né grigi-oliva (--mut2)
+const PP_NOME_MAX=24, PP_SIGLA_MAX=6;
+let PP_BOZZA=null;   // {aperto, nome, sigla, colore, asse, base:[gruppi], err:{campo:testo}} — transitoria
+function ppPossibile(){ return typeof chosenScenario==='undefined' || chosenScenario==='presente'; }
+function ppNuovaBozza(){ return {aperto:false, nome:'', sigla:'', colore:PP_PALETTE[0], asse:0, base:[], err:{}}; }
+function ppFondato(){ return !!(typeof CREA!=='undefined' && CREA && CREA.proprio); }
+function ppAzzera(){ PP_BOZZA=null; if(typeof CREA!=='undefined' && CREA){ delete CREA.proprio; delete CREA.partito; } }
+function ppNorm(x){ return senzaAccenti(String(x==null?'':x)).toLowerCase().replace(/\s+/g,' ').trim(); }
+function ppUsati(){   // nomi e sigle dei partiti del paese (anche il nome inglese), normalizzati
+  const u={}; (PAESE.partiti||[]).forEach(function(p){ [p.nome, T(p.nome), p.sigla].forEach(function(v){ if(v) u[ppNorm(v)]=true; }); }); return u;
+}
+function ppControlla(B){
+  const e={}, u=ppUsati(), n=String(B.nome||'').trim(), s=String(B.sigla||'').trim();
+  if(!n) e.nome=T('Scrivi il nome del partito'); else if(u[ppNorm(n)]) e.nome=T('Nome già usato');
+  if(!s) e.sigla=T('Scrivi la sigla'); else if(u[ppNorm(s)]) e.sigla=T('Sigla già usata');
+  if(B.base.length<2 || B.base.length>3) e.base=T('Scegli due o tre gruppi');
+  return e;
+}
+function ppPonte(asse){   // il partito del paese più vicino per asse (a pari distanza il più forte): lo vede initStatoBase
+  const sel=(PAESE.partiti||[]).filter(partitoSelezionabile).slice();
+  sel.sort(function(a,b){ const d=Math.abs((a.asse||0)-asse)-Math.abs((b.asse||0)-asse); return d || ((b.forza||0)-(a.forza||0)); });
+  return sel[0] ? sel[0].id : chosenPartito;
+}
+function ppApri(){
+  if(!ppPossibile()) return;
+  if(!PP_BOZZA) PP_BOZZA=ppNuovaBozza();
+  PP_BOZZA.aperto=!PP_BOZZA.aperto;
+  renderStartParties();
+}
+function ppSfonda(){   // cambiato qualcosa dopo la conferma: la fondazione va confermata di nuovo
+  if(!ppFondato()) return;
+  delete CREA.proprio; delete CREA.partito;
+  if(typeof renderCreazione==='function') renderCreazione();
+  const el=document.getElementById('pp-fonda'); if(el) el.outerHTML=ppBottoneHtml();
+}
+function ppCampo(campo, val){
+  if(!PP_BOZZA) return;
+  if(campo==='base'){
+    const i=PP_BOZZA.base.indexOf(val);
+    if(i>=0) PP_BOZZA.base.splice(i,1);
+    else if(PP_BOZZA.base.length<3) PP_BOZZA.base.push(val);
+    else { PP_BOZZA.err.base=T('Scegli due o tre gruppi'); renderPPRiquadro(); return; }
+  } else PP_BOZZA[campo]=val;
+  delete PP_BOZZA.err[campo];
+  ppSfonda();
+  renderPPRiquadro();
+}
+function ppTesto(campo, el){   // oninput: niente render del riquadro (si perderebbe il fuoco), solo la bozza e l'errore del campo
+  if(!PP_BOZZA) return;
+  let v=el.value;
+  if(campo==='sigla'){ const up=v.toUpperCase(); if(up!==v){ const pos=el.selectionStart; el.value=up; try{ el.setSelectionRange(pos,pos); }catch(e){} v=up; } }
+  PP_BOZZA[campo]=v.slice(0, campo==='sigla'?PP_SIGLA_MAX:PP_NOME_MAX);
+  if(PP_BOZZA.err[campo]){ delete PP_BOZZA.err[campo]; const m=document.getElementById('pp-err-'+campo); if(m) m.textContent=''; }
+  if(ppFondato()){ ppSfonda(); const c=document.getElementById('pp-conferma'); if(c) c.textContent=T('Fonda il partito'); }
+}
+function ppConferma(){
+  if(!PP_BOZZA || !(typeof CREA!=='undefined' && CREA)) return;
+  const B=PP_BOZZA; B.err=ppControlla(B);
+  if(Object.keys(B.err).length){ renderPPRiquadro(); return; }
+  const base={}; B.base.forEach(function(g){ base[g]=1/B.base.length; });   // peso uguale fra i gruppi scelti (la forma `base` dei partiti)
+  CREA.proprio={ nome:String(B.nome).trim(), sigla:String(B.sigla).trim().toUpperCase(), colore:B.colore, asse:B.asse, base:base };
+  CREA.partito='pp_proprio';
+  chosenPartito=ppPonte(B.asse);
+  if(CREA.livello!==0 && CREA.livello!==1) setCrea('livello', 0);   // D-P2: dal ministro in su si torna all'attivista (setCrea riallinea l'età e rende)
+  else if(typeof renderCreazione==='function') renderCreazione();
+  renderStartParties();
+}
+function ppDiscoHtml(colore){ return /^#[0-9a-f]{6}$/i.test(String(colore||'')) ? `<span class="pp-disco" style="background:${colore}" aria-hidden="true"></span>` : ''; }
+function ppBottoneHtml(){
+  if(!ppPossibile()) return '';
+  const on=ppFondato(), P=on?CREA.proprio:null;
+  return `<button class="cand pp-fonda ${on?'on':''}" id="pp-fonda" aria-expanded="${PP_BOZZA&&PP_BOZZA.aperto?'true':'false'}" onclick="ppApri()" style="flex-wrap:wrap">
+    <span class="cn">${on?ppDiscoHtml(P.colore)+escAttr(P.nome):T('Fonda il tuo partito')}</span>
+    <span class="cmeta"><small style="color:var(--mut2)">${on?escAttr(P.sigla):'+'}</small></span>
+    <small style="flex-basis:100%;font-size:12px;line-height:1.35;color:var(--mut);text-align:left">${T('Parti attivista o politico locale')}</small></button>`;
+}
+function renderPPRiquadro(){
+  const r=document.getElementById('pp-riquadro'); if(!r) return;
+  if(!ppPossibile() || !PP_BOZZA || !PP_BOZZA.aperto){ r.innerHTML=''; r.style.display='none'; return; }
+  const B=PP_BOZZA, fondato=ppFondato();
+  const err=c=>`<div class="pp-err" id="pp-err-${c}" role="alert">${B.err[c]?escAttr(B.err[c]):''}</div>`;
+  const tit=t=>`<div class="crea-etich">${t}</div>`;
+  let h='';
+  h+=tit(T('Nome del partito'))+`<input id="pp-nome" class="pp-input" value="${escAttr(B.nome)}" maxlength="${PP_NOME_MAX}" autocomplete="off" oninput="ppTesto('nome',this)">`+err('nome');
+  h+=tit(T('Sigla'))+`<input id="pp-sigla" class="pp-input" value="${escAttr(B.sigla)}" maxlength="${PP_SIGLA_MAX}" autocomplete="off" autocapitalize="characters" oninput="ppTesto('sigla',this)" style="text-transform:uppercase">`+err('sigla');
+  h+=tit(T('Colore'))+`<div class="pp-colori">`+PP_PALETTE.map(function(c,i){ return `<button class="pp-colore ${B.colore===c?'on':''}" style="background:${c}" aria-label="${T('Colore')} ${i+1}" aria-pressed="${B.colore===c?'true':'false'}" onclick="ppCampo('colore','${c}')"></button>`; }).join('')+`</div>`;
+  h+=tit(T('Posizione'))+`<div class="seg">`+[-2,-1,0,1,2].map(function(a){ return `<button class="${B.asse===a?'on':''}" onclick="ppCampo('asse',${a})">${cap(T(orientamentoDaAsse(a)))}</button>`; }).join('')+`</div>`;
+  h+=tit(T('Chi vuoi rappresentare'))+`<div class="pp-gruppi">`+GROUPS.map(function(g){ const on=B.base.indexOf(g.id)>=0; return `<button class="pp-gruppo ${on?'on':''}" aria-pressed="${on?'true':'false'}" onclick="ppCampo('base','${g.id}')">${escAttr(nomeGruppo(g.id))}</button>`; }).join('')+`</div>`+err('base');
+  h+=`<button class="btn" id="pp-conferma" style="width:100%;margin-top:12px" onclick="ppConferma()">${fondato?T('Partito pronto ✓'):T('Fonda il partito')}</button>`;
+  r.innerHTML=h; r.style.display='';
+}
 
 /* ===== Persistenza — UI (schermata iniziale, modale "Partita", carriere). Il nucleo è in game.js. ===== */
 function escAttr(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
@@ -1485,7 +1607,7 @@ function renderStartPersistence(){
     if(t){ const p=parseSave(t); if(p.save){ const s=p.save.s; const pn=nomePartitoSalvato(s);   // L237-3: dal registro del salvataggio, non da PAESI grezzo
       html=`<div class="card" style="border-color:var(--brand);max-width:420px;margin:0 auto 16px;text-align:left"><div style="padding:12px 14px">
         <div class="contorno" style="letter-spacing:.16em;text-transform:uppercase;color:var(--brand)">${T('Carriera in corso')}</div>
-        <div style="font-weight:600;font-size:15px;margin:3px 0 1px">${(PAESI[s.paese]||{}).nome||''} · ${escAttr(pn)}</div>
+        <div style="font-weight:600;font-size:15px;margin:3px 0 1px">${escAttr(T((PAESI[s.paese]||{}).nome||''))} · ${escAttr(pn)}</div>
         <div style="font-size:12.5px;color:var(--mut)">${T("Anno")} ${s.year} · ${s.opposizione ? (s.mandate>0 ? `${T("Mandato")} ${s.mandate} ${T("· all'opposizione")}` : T("Sfidante all'opposizione")) : `${T("Mandato")} ${s.mandate}`}</div>
         <button class="btn" style="margin-top:10px;width:100%" onclick="continuaCarriera()">${T('Continua la carriera →')}</button></div></div>`;
     }}
@@ -1874,7 +1996,8 @@ function render(){
   const noNaz=liv4||liv5||liv0;   // Segretario (4)/diplomatico (5)/attivista (0): superfici focalizzate, niente cruscotto nazionale
   if(liv0){ if(S.tab!=='gov' && S.tab!=='attorno') S.tab='gov'; }   // ATTIVISTA (A.5): due tab — Movimento (gov) + Attorno; coerce solo i tab non validi
   else if(noNaz && S.tab!=='gov' && S.tab!=='paese') S.tab='gov';   // solo Governo + Paese (lo stato del mondo)
-  document.getElementById('el').innerHTML = liv0
+  const mp=part(S.partito)||{}, dsk=ppDiscoHtml(mp.colore) ? ` · <span class="hdr-pp">${ppDiscoHtml(mp.colore)}${mp.sigla||mp.nome||''}</span>` : '';   // L237-4 (D-P5): il disco solo per un partito con `colore` (oggi il partito proprio); sigla già in HTML sicuro dal roster
+  document.getElementById('el').innerHTML = (liv0
     ? `${meseSpan()} · ${T('Attivista')}`
     : liv4
     ? `${meseSpan()} · ${T('Segretario')} · ${T('mandato')} ${S.intl.mandato} · ${T('mese')} ${(S.intl.mesiInCarica||0)+1}/${S.intl.mandatoMesi}`
@@ -1882,7 +2005,7 @@ function render(){
     ? `${meseSpan()} · ${typeof ruoloDiplo==='function'?ruoloDiplo():T('Ambasciatore')}`
     : S.opposizione
     ? `${meseSpan()} · <span style="color:var(--neg);font-weight:700">${T('OPPOSIZIONE')}</span> · ${T('governa')} ${T((part(S.governoAvversario)||{}).nome||'—')} · ${T('anno')} ${S.turnInMandate+1}/${PAESE.mandatoMesi/12} ${T('al voto')}`
-    : `${meseSpan()} · ${T('Mandato')} ${S.mandate}, ${T('anno')} ${S.turnInMandate+1}/${PAESE.mandatoMesi/12}`;
+    : `${meseSpan()} · ${T('Mandato')} ${S.mandate}, ${T('anno')} ${S.turnInMandate+1}/${PAESE.mandatoMesi/12}`)+((liv4||liv5)?'':dsk);
   const I=S.ind,P=S.prev; const riK=S.relInt||{}; const rk=id=>riK[id]!=null?riK[id]:50;
   document.getElementById('keys').innerHTML= liv0
     ? keyCard('Base','base',S.attivista.base,fmt(S.attivista.base,0),0,false,'')+   // ATTIVISTA (Build A): le 3 valute della gavetta, così il gate di laurea è VISIBILE (niente gate invisibile)
@@ -1904,7 +2027,7 @@ function render(){
       keyCard('Consenso','consenso',I.consenso,fmt(I.consenso,0)+'%',0,false,dlt(I.consenso,P.consenso,0));
   const pend=S.agenda.filter(a=>!a.resolved).length;
   const att=attenzioni(); const attSet={}; att.forEach(function(a){ attSet[a.tab]=a; });   // cruscotto attenzione (Lotto 0): pallini per-scheda
-  const TABNM={gov:'Governo', attorno:'Campagne', paese:'Paese', pol:'Bilancio', par:'Partiti', stampa:'Stampa'};   // a liv0 il tab 'attorno' si chiama "Campagne" (rework L3); mostrato solo a liv0
+  const TABNM={gov:'Governo', attorno:'Campagne', paese:'Paese', pol:'Bilancio', par:'Partiti', stampa:'Stampa', guerra:'Guerra'};   // L245-4: «Guerra» solo mentre c'è (guerraTab)   // a liv0 il tab 'attorno' si chiama "Campagne" (rework L3); mostrato solo a liv0
   document.querySelectorAll('.tab').forEach(el=>{
     const t=el.dataset.t;
     el.classList.toggle('on',t===S.tab);
@@ -1912,16 +2035,18 @@ function render(){
     if(t==='gov'){ if(pend) badge=`<span class="badge">${pend}</span>`; }
     else if(attSet[t]) badge=`<span class="badge dot${lastDots[t]?'':' pulse'}" title="${escAttr(T(attSet[t].motivo))}"></span>`;   // pallino "questa scheda ti chiama" — pulse SOLO alla comparsa (E5): 2 battiti poi fermo, mai nagging
     if(TABNM[t]) el.innerHTML=T((liv0 && t==='gov')?'Movimento':TABNM[t])+badge;   // a liv0 la scheda "Governo" si chiama "Movimento"
-    el.style.display = (t==='attorno') ? (liv0?'':'none')                        // "Attorno" esiste SOLO a liv0
+    el.style.display = (t==='guerra') ? (guerraTab()?'':'none')                  // L245-4: il cassetto della guerra, solo mentre c'è
+      : (t==='attorno') ? (liv0?'':'none')                        // "Attorno" esiste SOLO a liv0
       : (liv0 && t!=='gov') ? 'none'                                             // attivista: solo Movimento(gov) + Attorno
       : (noNaz && t!=='gov' && t!=='paese') ? 'none' : '';                       // Segretario/diplomatico: Governo+Paese
   });
   lastDots={}; att.forEach(function(a){ lastDots[a.tab]=1; });   // E5: fotografa i pallini di questo render → il pulse scatta solo alla PROSSIMA comparsa
   /* L113-2 · il tavolo è la casa: S.tab 'tavolo' = nessun cassetto aperto. Dove il tavolo non c'è (attivista, Segretario,
      diplomatico, un paese senza mappa) 'tavolo' torna 'gov' e le schede restano pagine come prima. */
+  if(S.tab==='guerra' && !guerraTab()) S.tab='tavolo';   // L245-4: finita la guerra il cassetto si chiude
   const tv=tavoloAttivo(); if(S.tab==='tavolo' && !tv) S.tab='gov';
   const cch=document.querySelector('.cassetto-chiudi'); if(cch) cch.setAttribute('aria-label', T('Chiudi'));
-  const gm=document.getElementById('game'); gm.classList.toggle('con-tavolo', tv); gm.classList.toggle('cassetto-aperto', tv && S.tab!=='tavolo'); document.body.classList.toggle('con-tavolo', tv);
+  const gm=document.getElementById('game'); gm.classList.toggle('con-tavolo', tv); gm.classList.toggle('cassetto-aperto', tv && S.tab!=='tavolo'); gm.classList.toggle('cassetto-guerra', tv && S.tab==='guerra'); document.body.classList.toggle('con-tavolo', tv);
   try{ const eh=document.querySelector('.endbar').offsetHeight; if(eh>0) document.documentElement.style.setProperty('--endH', eh+'px'); }catch(e){}   // a #game ancora nascosto l'altezza è 0: resta l'ultima buona (o i 72 del CSS)
   document.querySelectorAll('.sec').forEach(el=>el.classList.remove('on'));
   const secEl=document.getElementById('sec-'+S.tab); if(secEl) secEl.classList.add('on');
@@ -1935,6 +2060,7 @@ function render(){
   if(S.tab==='pol') renderPol();
   if(S.tab==='par') renderPartiti();
   if(S.tab==='stampa') renderStampaTab();
+  if(S.tab==='guerra') renderGuerra();   // L245-4
   if(tv) vaiACartaDalTavolo();   // L113-3: la carta aperta da un segnalino, scorsa e segnata nel cassetto
   // endbar
   document.getElementById('advbtn').disabled = pend>0 && !(tv && S.tab!=='gov');   // L113-2: dal tavolo il bottone apre le decisioni
@@ -2721,8 +2847,8 @@ function renderGov(){
       const d=it.data; const major=it.kind==='event';
       let kicker=T(d.kick);
       if(!major && d.min){ const mn=getMin(d.min); if(mn) kicker=T('Proposta')+' · '+mn.nm; }
-      h+=`<div class="ag ${major?'major':''} ${it.resolved?'done':''}">${agScene(it)}<div class="ah"><div class="kick">${kicker}</div><h3>${T(d.t)}</h3></div>
-        <div class="atext">${T(d.text)}</div>`;
+      h+=`<div class="ag ${major?'major':''} ${it.resolved?'done':''}">${agScene(it)}<div class="ah"><div class="kick">${kicker}</div><h3>${testoLuogo(it, T(d.t))}</h3></div>
+        <div class="atext">${testoLuogo(it, T(d.text))}</div>`;
       if(!it.resolved){ h+=`<div class="opts">`+d.ch.map((c,i)=>{
         const lockedRep=c.need!=null && (S.ind.reputazione==null || S.ind.reputazione<c.need);     // opzione da mediatore: a soglia di reputazione, mostrata onesta
         const lockedUE=c.pesoUE!=null && (S.pesoUE==null || S.pesoUE<c.pesoUE);                    // soglia gemella: peso del tuo gruppo a Bruxelles
@@ -2848,6 +2974,7 @@ function renderPaese(){
     const cap=function(s){return s.charAt(0).toUpperCase()+s.slice(1);};
     h+=`<div class="card"><div class="ct">${T('Relazioni internazionali')}</div>`;
     h+=crisiRiga();   // L245-2: la scala della crisi, una riga quando c'è
+    h+=dopoguerraRiga();   // L245-4: i 24 mesi dopo una guerra
     ENTI_INT.forEach(function(E){ if(E.societa || S.relInt[E.id]==null) return; const v=S.relInt[E.id];   // prima gli enti GEOPOLITICI
       const _nm=(E.id==='consesso'&&typeof consessoNome==='function')?consessoNome():(naLabel()&&E.nomeNA?E.nomeNA:E.nome);   // D4: nodo era-aware
       h+=indRow(cap(T(_nm)), naLabel()&&E.descNA?E.descNA:E.desc, fmt(v,0), v); });   // sedia-swing: etichette "i due poli" per i non allineati (liv. nazionale)
@@ -2886,6 +3013,65 @@ function crisiRiga(){
   var tt=(typeof crisiTettoBlocco==='function') ? crisiTettoBlocco() : 4;   // L245-3bis: il tetto vero della riga di RIVALI (Brasile con la Russia: 2)
   var sub=T('gradino %N di %M').replace('%N', S.crisi.t).replace('%M', tt) + (S.crisi.alleati ? ' · '+T(S.crisi.alleati==='frenano'?'gli alleati frenano':'gli alleati seguono') : '');
   return `<div class="ind crisi-riga"><div class="nm"><b>${escAttr(potSub(T('Crisi con %POT'),p))} · ${g}</b><small>${sub}</small></div><div class="num" style="color:${S.crisi.t>=3?'var(--neg)':'var(--warn-ink)'}">${S.crisi.t}/${tt}</div></div>`;
+}
+/* ⚑ L245-4 · IL CASSETTO «GUERRA» (DESIGN-POLITICA-ESTERA.md §2 (b), D-G1). Una scheda in più, solo mentre S.crisi.guerra esiste e sei
+   il capo del governo (guerraTab), sopra il tavolo che resta visibile (L113-2: il tavolo è un nodo solo, qui non si tocca); a 375 px
+   il cassetto è alto al più il 60% della finestra (style.css, `.cassetto-guerra`), sopra i 1000 px in orizzontale la colonna di
+   sempre. Dentro: la scena (il porto d'imbarco nei primi due mesi, poi la sala, del decennio), costo, Forze e Opinione, i settori con
+   la linea −3…+3 (un tocco sceglie il settore: GUERRA_SETTORE, transitorio, mai in S) e i tre ordini da 44 px, la carta del fronte
+   del mese con le sue scelte (le stesse di Governo: resolveItem), trattativa, alleati, caduti arrotondati alle decine (D-G5).
+   Il governo continua: le altre schede restano. Le etichette sono in GUERRA_UI (la prova le passa a T in inglese). */
+let GUERRA_SETTORE=0;
+const GUERRA_UI=['La guerra · mese %N', 'con %POTdet', 'Costo', 'punti di deficit al mese', 'Forze', 'Opinione', 'Ordini del mese: %N di %M',
+  'Avanza', 'Tieni', 'Tratta', 'Questo mese', 'Trattativa', 'Alleati', 'con te', 'frenano', 'nessun impegno', 'Caduti: circa %N',
+  'Nessuna carta del fronte questo mese.', 'Tocca un settore, poi dai l\'ordine.', 'Dopoguerra', 'vittoria', 'sconfitta', 'pace negoziata',
+  'cessate il fuoco', 'ancora %N mesi', 'Hai dato gli ordini del mese.'];
+function guerraTab(){ return typeof guerraAttiva==='function' && guerraAttiva() && crisiCapo(); }
+function guerraScena(){
+  if(typeof SCENES==='undefined' || !SCENES.guerra) return null;
+  const g=S.crisi.guerra;
+  if(g.mesi<=2 && SCENES.guerra.porto) return SCENES.guerra.porto;   // l'imbarco: la mobilitazione appena fatta
+  return scenaSrc('guerra', null, 'guerra');
+}
+function guerraBarra(nm, v){ v=Math.round(v);
+  return `<div class="gu-bar"><div class="gu-bar-top"><span class="contorno">${T(nm)}</span><b>${v}</b></div><div class="bar"><i style="width:${clamp(v,2,100)}%;background:${barColor(v)}"></i></div></div>`; }
+function guerraSettoreScegli(i){ GUERRA_SETTORE=i; render(); }
+function guerraOrdineUI(i, tipo){ if(guerraOrdine(i, tipo)){ if(typeof suona==='function') suona('tocco'); render(); commitSnap(); } }
+function renderGuerra(){
+  const el=document.getElementById('sec-guerra'); if(!el) return;
+  if(!guerraTab()){ el.innerHTML=''; return; }
+  const g=S.crisi.guerra, p=crisiPot(); if(GUERRA_SETTORE>=g.fronti.length) GUERRA_SETTORE=0;
+  const sc=guerraScena(), pieni=g.ordini>=GUERRA_K.ordini;
+  let h=`<div class="card gu">`;
+  if(sc) h+=`<img class="gu-scena" src="${sc}" alt="" loading="lazy" decoding="async">`;
+  h+=`<div class="gu-testa"><div><div class="ct" style="margin:0">${T('La guerra · mese %N').replace('%N', g.mesi+1)}</div><div class="contorno gu-con">${escAttr(potSub(T('con %POTdet'),p))}</div></div>`
+    +`<div class="gu-costo"><span class="contorno">${T('Costo')}</span><b>${fmt(g.costo,2)}</b><span class="contorno">${T('punti di deficit al mese').replace('%N','')}</span></div></div>`;
+  h+=`<div class="gu-bars">${guerraBarra('Forze', g.forze)}${guerraBarra('Opinione', g.opinione)}</div>`;
+  h+=`<div class="gu-fronti">`+g.fronti.map(function(f,i){
+    let pall=''; for(let k=-3;k<=3;k++) pall+=`<i class="${k===f.linea?'on':''}${k===0?' zero':''}"></i>`;
+    return `<button class="gu-fronte${i===GUERRA_SETTORE?' on':''}" onclick="guerraSettoreScegli(${i})" aria-pressed="${i===GUERRA_SETTORE?'true':'false'}"><span class="gu-nome">${T(f.n)}</span><span class="gu-linea" aria-hidden="true">${pall}</span><b class="gu-val">${f.linea>0?'+':''}${f.linea}</b></button>`;
+  }).join('')+`</div>`;
+  h+=`<div class="contorno gu-nota">${pieni ? T('Hai dato gli ordini del mese.') : T('Tocca un settore, poi dai l\'ordine.')} · ${T('Ordini del mese: %N di %M').replace('%N', g.ordini).replace('%M', GUERRA_K.ordini)}</div>`;
+  h+=`<div class="gu-ordini">`+['avanza','tieni','tratta'].map(function(o){
+    return `<button class="gu-ordine" ${pieni?'disabled':''} onclick="guerraOrdineUI(${GUERRA_SETTORE},'${o}')">${T(o==='avanza'?'Avanza':o==='tieni'?'Tieni':'Tratta')}</button>`; }).join('')+`</div>`;
+  /* la carta del fronte del mese, con le sue scelte (la stessa voce dell'agenda: resolveItem) */
+  const idx=S.agenda.findIndex(function(it){ return it && it.kind==='event' && !it.resolved && it.data && /^gu_/.test(it.data.id||''); });
+  h+=`<div class="contorno gu-sez">${T('Questo mese')}</div>`;
+  if(idx>=0){ const d=S.agenda[idx].data;
+    h+=`<div class="gu-carta"><b>${d.t}</b><p>${d.text}</p><div class="opts">`+d.ch.map(function(c,ci){ return `<button class="opt" onclick="resolveItem(${idx},${ci})"><span class="ol">${c.l}</span><span class="oe">${c.e}</span></button>`; }).join('')+`</div></div>`; }
+  else h+=`<div class="gu-carta contorno">${T('Nessuna carta del fronte questo mese.')}</div>`;
+  let tr=''; for(let k=1;k<=3;k++) tr+=(k<=g.trattativa?'●':'○');
+  const al=S.crisi.alleati==='seguono' ? T('con te') : S.crisi.alleati==='frenano' ? T('frenano') : T('nessun impegno');
+  h+=`<div class="gu-piede"><span><span class="contorno">${T('Trattativa')}</span> <b aria-label="${g.trattativa}/3">${tr}</b></span><span><span class="contorno">${T('Alleati')}:</span> <b>${al}</b></span><span class="contorno">${T('Caduti: circa %N').replace('%N', fmt(Math.round(g.caduti/10)*10,0))}</span></div>`;
+  h+=`</div>`;
+  el.innerHTML=h;
+}
+/* la riga del dopoguerra nel cruscotto (scheda Paese, accanto alla crisi): 24 mesi dopo la fine */
+function dopoguerraRiga(){
+  if(!S || !S.dopoguerra || typeof crisiMeseAss!=='function') return '';
+  const n=Math.max(0, S.dopoguerra.fino-crisiMeseAss()), e=S.dopoguerra.esito;
+  const nm={vittoria:'vittoria', sconfitta:'sconfitta', pace:'pace negoziata', stallo:'cessate il fuoco'}[e]||'';
+  return `<div class="ind crisi-riga"><div class="nm"><b>${T('Dopoguerra')} · ${T(nm)}</b><small>${T('ancora %N mesi').replace('%N', n)}</small></div><div class="num">${n}</div></div>`;
 }
 function indRow(nm,sub,num,pct,ic,gk){pct=clamp(pct,2,100);
   return `<div class="ind"><div class="nm"><b>${ic?icon(ic,T(nm))+' ':''}${gk?gergo(T(nm),gk):T(nm)}</b><small>${T(sub)}</small>
@@ -3194,6 +3380,7 @@ function luogoCarta(item){
     if(kind==='locale' && S.locale && typeof S.locale.terrIdx==='number') return luogoTerr(S.locale.terrIdx, 'locale');
     let src=txt; (d.ch||[]).forEach(function(c){ if(typeof c.f==='function') src+=' '+c.f.toString(); });
     if(/territorioChiama/.test(src) && S.territorioChiama && typeof S.territorioChiama.idx==='number') return luogoTerr(S.territorioChiama.idx, 'territorio che chiama');
+    if(cartaLuogoTerr(d) && typeof item.terr==='number' && luogoHaArea(item.terr)) return luogoTerr(item.terr, 'luogo dichiarato');   // L239-5: prima del nome nel testo
     const nom=luogoNominato(txt);
     if(nom>=0) return luogoTerr(nom, 'nomina un territorio');
     if(LUOGO_RE.sede.test(src)) return { tipo:'palazzo', via:'segnaposto della sede' };
@@ -3982,6 +4169,10 @@ function fissiAperti(){
     S.promesseCampagna.forEach(function(p){ const c=Math.max(0, p.colpi||0); per[p.grp]=(p.grp in per) ? Math.max(per[p.grp], c) : c; });
     GROUPS.forEach(function(g){ if(g.id in per) out.push({ key:'promessa:'+g.id, tipo:'promessa', grp:g.id,
       punti:Math.min(6, Math.floor(per[g.id])), tacche:Math.min(3, Math.floor(per[g.id]/2)) }); }); }
+  /* L239-6 · i segni sul territorio: uno per area con un segno vivo, dove l'area ha un posto sul tavolo. `segnoTerr` (game.js) è
+     l'unica lettura del dato; la chiave è lo stato ('terr:'+indice), quindi il cantiere che diventa opera è lo stesso nodo */
+  if(Array.isArray(S.territori) && typeof segnoTerr==='function') S.territori.forEach(function(_, i){ const g=segnoTerr(i);
+    if(g && luogoHaArea(i)) out.push({ key:'terr:'+i, tipo:'segno', terr:i, specie:g.specie, mesi:g.mesi, da:g.da }); });
   return out;
 }
 /* il luogo di base, in unità del disegno: il fronte SOPRA il palazzo, la rivolta in basso a sinistra (col suo anello), la sfida
@@ -3989,6 +4180,7 @@ function fissiAperti(){
 function fissoBase(F){
   const vb=tavoloVB(), lato=vb[2]*0.13, cap=tavoloCapitale()||[vb[0]+vb[2]/2, vb[1]+vb[3]/2];
   if(F.tipo==='sfida' && F.terr!=null){ const c=tavoloCentro(F.terr); if(c) return c; }
+  if(F.tipo==='segno'){ const c=tavoloCentro(F.terr); if(c) return c; }   // L239-6: sul suo territorio (poi il posto libero lo scosta dal cerchio della città)
   if(F.tipo==='fronte') return [cap[0], cap[1]-lato*1.05];
   if(F.tipo==='promessa') return [cap[0]-lato*0.95, cap[1]-lato*1.2];   // la casa, SOPRA: il segnalino-casa sta a sinistra del palazzo (−0,55; −0,3), il fronte sopra il palazzo
   return [cap[0]-lato*0.62, cap[1]+lato*0.42];   // in basso a SINISTRA del palazzo: sotto, dritto, c'è il cerchio della capitale-città (Roma) e il suo bersaglio
@@ -4033,11 +4225,15 @@ const FISSO_SCUDO='M0,-12 L10.5,-8.5 L10.5,1 C10.5,7 5.5,10.5 0,12.5 C-5.5,10.5 
 /* il bersaglio ha mezzo pixel oltre i 22 di raggio: sull'iPad il riquadro reso usciva 43,99 e la sonda lo dava sotto soglia */
 function fissoNodo(F){
   const g=document.createElementNS('http://www.w3.org/2000/svg', 'g');
-  g.setAttribute('class', 'tv-fisso tv-fisso-'+F.tipo); g.setAttribute('data-f', F.key); g.setAttribute('role', 'button'); g.setAttribute('tabindex', '0');
+  const luogo=(F.tipo==='segno');   // L239-6: la classe del gruppo NON è 'tv-fisso-segno' (è già quella del pittogramma)
+  g.setAttribute('class', luogo ? 'tv-fisso tv-fisso-luogo' : 'tv-fisso tv-fisso-'+F.tipo); g.setAttribute('data-f', F.key); g.setAttribute('role', 'button'); g.setAttribute('tabindex', '0');
   g.setAttribute('onclick', 'toccaFisso(this.getAttribute("data-f"))');
   g.setAttribute('onkeydown', 'if(event.key==="Enter"||event.key===" "){ event.preventDefault(); toccaFisso(this.getAttribute("data-f")); }');
-  g.innerHTML=`<g class="tv-seg-s"><circle class="tv-seg-toc" r="${SEG_TOCCO+0.5}"/><g class="tv-fisso-anim">`+
-    `<circle class="tv-fisso-anello" r="16.5"/><path class="tv-fisso-scudo" d="${FISSO_SCUDO}"/><path class="tv-fisso-segno" d="${FISSO_SEGNO[F.tipo]}"/>`+
+  /* L239-6 · il segno sul territorio è più piccolo e d'un'altra forma: un disco d'ardesia orlato di rame, col glifo di ICONS
+     (icons.js, griglia 24 a tratto) che aggiornaFissi cambia quando la specie cambia; il bersaglio resta quello di tutti i fissi */
+  const corpo=luogo ? `<circle class="tv-luogo-disco" r="11.5"/><g class="tv-luogo-glifo" transform="translate(-7.2 -7.2) scale(0.6)"></g>`
+    : `<circle class="tv-fisso-anello" r="16.5"/><path class="tv-fisso-scudo" d="${FISSO_SCUDO}"/><path class="tv-fisso-segno" d="${FISSO_SEGNO[F.tipo]}"/>`;
+  g.innerHTML=`<g class="tv-seg-s"><circle class="tv-seg-toc" r="${SEG_TOCCO+0.5}"/><g class="tv-fisso-anim">`+corpo+
     `<g class="tv-fisso-tacche"><circle cx="-6" cy="17.5" r="2.4"/><circle cx="0" cy="17.5" r="2.4"/><circle cx="6" cy="17.5" r="2.4"/></g>`+
     `<g class="tv-fisso-num"><circle cx="10.5" cy="-11" r="8.5"/><text x="10.5" y="-7" text-anchor="middle"></text></g></g></g>`;
   return g;
@@ -4056,7 +4252,15 @@ function fissoTitolo(F){
   if(F.tipo==='sfida') return T('La sfida nel partito');
   if(F.tipo==='fronte') return T('Il fronte giudiziario');
   if(F.tipo==='promessa') return T('Promessa: %G').replace('%G', nomeGruppo(F.grp));   // il gruppo dopo i due punti: «Promessa a Lavoratori» non reggeva
+  if(F.tipo==='segno') return T((SEGNO_TERR_TESTI[F.specie]||{}).t||'');   // L239-6
   return T('%G in rivolta').replace('%G', nomeGruppo(F.grp));
+}
+/* L239-6 · la riga del segno sul territorio, già tradotta e resa: T() sul modello, poi %N, poi il territorio (arcoTerrSub, %TERR
+   all'inizio: maiuscola, il nome italiano di un plurale porta l'articolo) */
+function segnoRiga(F){
+  const X=SEGNO_TERR_TESTI[F.specie]; if(!X) return '';
+  const TE=(PAESE.territori||[])[F.terr]||null, r=arcoTerrSub(T(F.mesi===1 ? X.r1 : X.r).replace('%N', F.mesi), TE);
+  return r.charAt(0).toUpperCase()+r.slice(1);
 }
 /* ⚑ l'aggiornamento: dopo aggiornaSegnalini (i posti delle carte ci sono già), a tavolo misurato */
 function aggiornaFissi(svg, k, wh){
@@ -4096,7 +4300,10 @@ function aggiornaFissi(svg, k, wh){
     const tacche=(F.tipo==='sfida' || F.tipo==='promessa');
     el.classList.toggle('con-tacche', tacche);
     el.querySelectorAll('.tv-fisso-tacche circle').forEach(function(c, j){ c.classList.toggle('piena', tacche && j<F.tacche); });
-    el.setAttribute('aria-label', fissoTitolo(F));
+    if(F.tipo==='segno'){ const gl=el.querySelector('.tv-luogo-glifo');   // L239-6: il glifo segue la specie (cantiere → opera sullo stesso nodo)
+      if(gl && gl.getAttribute('data-s')!==F.specie){ gl.innerHTML=(typeof ICONS!=='undefined' && ICONS['segno_'+F.specie])||''; gl.setAttribute('data-s', F.specie); }
+      el.setAttribute('data-specie', F.specie); }
+    el.setAttribute('aria-label', F.tipo==='segno' ? segnoRiga(F) : fissoTitolo(F));
     R.F=F;
   });
   Object.keys(TAVOLO_FISSI).forEach(function(key){
@@ -4117,8 +4324,18 @@ function tavoloCodaMetti(v){
   if(TAVOLO_CODA.mese!==mese){ tavoloCodaSvuota(); TAVOLO_CODA.mese=mese; }
   TAVOLO_CODA.voci.push(v);
 }
+/* L245-5 · il suono del segno nuovo: `mappa-segno` quando un segno sul territorio compare sul tavolo (anche crisi e cantiere), solo
+   se è nato in questo mese (un caricamento non lo risuona) e una volta per segno (chiave + mese di nascita, transitorio) */
+const SEGNI_SUONATI={};
+function segnoSuonaNuovo(F){
+  if(!F || F.tipo!=='segno' || typeof suona!=='function') return;
+  if(F.da!==S.year*12+S.month) return;   // F.da viene da segnoTerr (fissiAperti): il dato non si legge qui
+  const k=F.key+'@'+F.da+':'+F.specie; if(SEGNI_SUONATI[k]) return; SEGNI_SUONATI[k]=1;
+  suona('mappa-segno');
+}
 function fissoEntra(el, key){
   el.classList.remove('attende'); const R=TAVOLO_FISSI[key]; if(R && R.cont) R.cont.classList.remove('attende');
+  if(R) segnoSuonaNuovo(R.F);   // L245-5
   if(motionReduced()){ FISSI_VISTI[key]=1; return; }
   const an=el.querySelector('.tv-fisso-anim');
   const su=function(ev){ if(ev.target!==an || ev.animationName!=='segIn') return; an.removeEventListener('animationstart', su); FISSI_VISTI[key]=1; FISSI_ENTRATE++; };
@@ -4153,6 +4370,7 @@ function fissoFoglio(){
     if(F.inchiesta) righe.push(T('La magistratura sta indagando.')); }
   else if(F.tipo==='promessa'){ righe.push(F.tacche>=3 ? T('Ormai è tradita: alla prossima campagna te la rinfacceranno.') : T('Alla prossima campagna chiederanno conto.'));
     tacche=T('Consenso perso: %N punti su 6').replace('%N', F.punti); }
+  else if(F.tipo==='segno') righe.push(segnoRiga(F));   // L239-6
   else righe.push(F.n===1 ? T('Un altro mese sotto il limite e la carriera finisce.') : T('Ancora %N mesi sotto il limite e la carriera finisce.').replace('%N', F.n));
   const h=`<button class="tv-chiudi" onclick="toccaFisso(null)" aria-label="${escAttr(T('Chiudi'))}">✕</button>`+
     `<div class="tv-foglio-t">${fissoTitolo(F)}</div>`+righe.map(function(r){ return `<div class="tv-foglio-r">${r}</div>`; }).join('')+
@@ -4554,7 +4772,7 @@ function renderPartiti(){
     const segBtn = (ten!=null && ten<55 && !S.opposizione && typeof mossaDisponibile==='function' && mossaDisponibile() && typeof azioneSegnale==='function')
       ? `<div style="margin-top:6px"><button class="mini-btn" style="margin-top:0" onclick="azioneSegnale('${p.id}','felpata')">${T('Rinsalda l\'alleato')} · <small>${T('mossa stampa')}</small></button></div>` : '';
     h+=`<div class="grp" style="${mine?'box-shadow:inset 0 0 0 1px var(--acc);border-radius:10px;':''}">
-      <div class="top"><div class="nm">${T(p.nome)} ${badge}${tenChip}<small>${T(p.orientamento)}</small></div>
+      <div class="top"><div class="nm">${mine?ppDiscoHtml(p.colore):''}${T(p.nome)} ${badge}${tenChip}<small>${T(p.orientamento)}</small></div>
       <div class="pc mono" style="color:${gov?'var(--acc)':'var(--txt)'}">${fmt(f,1)}%${seatTxt} <small style="font-weight:400">${arr}</small></div></div>
       <div class="bar">${fillI('forza:'+p.id, clamp(f,2,100), gov?'var(--acc)':'var(--mut2)')}</div>${segBtn}${rigaIntesa(p, mine)}</div>`;
   }

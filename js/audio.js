@@ -131,7 +131,16 @@ const AUDIO_MANIFEST = {
      rotativa → la prima pagina «edizione straordinaria»: il titolo del mese che è un EVENTO fuori calendario (`pri:1` senza `serie`:
      inchiesta, scandalo, legge, voto locale; ~5% dei titoli nel banco), al posto di giornale/notifica — `suonoTitolo()` qui sotto. */
   brusio:          { file:'brusio.mp3',          loop:false, gain:0.27 },  // F5h · 2,0 s: RMS −12,1, picco +0,1 → regola di sopra (tetto 0,88)
-  rotativa:        { file:'rotativa.mp3',        loop:false, gain:0.86 }   // F5n · 2,0 s: RMS −22,1, picco −0,5 → regola di sopra (tetto 0,94)
+  rotativa:        { file:'rotativa.mp3',        loop:false, gain:0.86 },  // F5n · 2,0 s: RMS −22,1, picco −0,5 → regola di sopra (tetto 0,94)
+  /* ⚑ L245-5 (20/10) · LA GUERRA SUL TAVOLO (L218-17, giro suoni 17: ElevenLabs, 192 kbps così come sono). Gain con la regola di sopra
+     (0,6 × 10^((−19 − RMS)/20), tetto del picco −1 dBFS) sulle misure del giro suoni. Agganci: mappa-segno → un segno sul territorio
+     nato in questo mese che compare sul tavolo (fissoEntra, ui.js; anche crisi e cantiere); colonna → la dichiarazione di guerra
+     (guerraDichiara); nave → la dichiarazione, se la riga di RIVALI non è `confine`; sirena-aerea → un'area che diventa `colpita`
+     (crisiMese, una volta per passaggio). */
+  'mappa-segno':   { file:'mappa-segno.mp3',     loop:false, gain:0.91 },  // 0,65 s: RMS −24,3, picco −0,2 → tetto del picco (la regola dava 1,10)
+  colonna:         { file:'colonna.mp3',         loop:false, gain:0.39 },  // 3,0 s: RMS −15,3, picco 0,0 → regola di sopra (abbassato)
+  nave:            { file:'nave.mp3',            loop:false, gain:0.20 },  // 3,0 s: RMS −9,5, picco 0,0 → regola di sopra (≈ −14 dB: molto forte)
+  'sirena-aerea':  { file:'sirena-aerea.mp3',    loop:false, gain:0.35 }   // 4,0 s: RMS −14,3, picco −0,2 → regola di sopra (abbassato)
 };
 /* ⚠ I FILE CHE ESISTONO DAVVERO in assets/audio/. Il motore carica SOLO questi: un nome del manifesto che non è
    qui non genera nessuna richiesta di rete. Si aggiorna a mano quando un file cambia, e se la lista e la cartella
@@ -153,7 +162,8 @@ const AUDIO_PRESENTI = ['tocco.mp3','carta.mp3','chip.mp3','mese.mp3','giornale.
                         'protesta.mp3','fischi.mp3','flash.mp3','bussare.mp3','macchina.mp3','allarme.mp3',          // L116-1
                         'timbro.mp3','calcolatrice.mp3','consenso-su.mp3','consenso-giu.mp3','nomina.mp3','banchi.mp3','votazione.mp3',
                         'dimissioni.mp3','traguardo.mp3','salva.mp3','scorri.mp3','no.mp3','sondaggio.mp3',   // L218-13 (12/10, giro suoni 13: F5)
-                        'brusio.mp3','rotativa.mp3'];   // L218-14 (12/10, giro suoni 14: F5h, F5n — §F5 completa)
+                        'brusio.mp3','rotativa.mp3',   // L218-14 (12/10, giro suoni 14: F5h, F5n — §F5 completa)
+                        'mappa-segno.mp3','colonna.mp3','nave.mp3','sirena-aerea.mp3'];   // L245-5 (20/10: la guerra sul tavolo, file di L218-17)
 
 /* ── 6 · NIENTE SINTETICO A RUNTIME ────────────────────────────────────────────────────────────────────────
    Il motore carica FILE. I suoni li genera `.claude/genera-audio.js` una volta, fuori dal gioco (L95-3a); la prima
@@ -521,7 +531,16 @@ const MUSICA_MANIFEST = {
   'mus-de-1980':       { file:'mus-de-1980.mp3',     loop:true, gain:0.30, paese:'de', decennio:'mus-1980' },     // −14,7, picco −0,2 · 2:00
   'mus-de-1990':       { file:'mus-de-1990.mp3',     loop:true, gain:0.35, paese:'de', decennio:'mus-1990' },     // −16,0, picco −0,1 · 2:00
   'mus-de-2000':       { file:'mus-de-2000.mp3',     loop:true, gain:0.29, paese:'de', decennio:'mus-2000' },     // −14,5, picco −0,3 · 2:00
-  'mus-de-presente':   { file:'mus-de-presente.mp3', loop:true, gain:0.57, paese:'de', decennio:'mus-presente' }  // −20,3, picco −1,2 · 2:00
+  'mus-de-presente':   { file:'mus-de-presente.mp3', loop:true, gain:0.57, paese:'de', decennio:'mus-presente' }, // −20,3, picco −1,2 · 2:00
+  /* ⚑ L245-5 (20/10) · LA MUSICA DELLA GUERRA (L218-17 e L218-28: Eleven Music v2.5, 192 kbps così come sono, tutti sotto i 3 MB). Gain sul
+     volume reso degli altri brani (−25,2 dB: regola di L218-9), picco reso ≤ −1 dBFS. La sceglie musicaGuerra(), letta per prima in
+     musicaScelta: tensione e guerra alternano A/B a ogni giro come le altre `-b`. */
+  'mus-tensione':     { file:'mus-tensione.mp3',    loop:true,  gain:0.51 },                              // −19,4, picco −0,8 · 1:50
+  'mus-tensione-b':   { file:'mus-tensione-b.mp3',  loop:true,  gain:0.42, variante:'mus-tensione' },     // −17,6, picco −0,7 · 2:00
+  'mus-guerra':       { file:'mus-guerra.mp3',      loop:true,  gain:0.42 },                              // −17,6, picco −1,1 · 2:00
+  'mus-guerra-b':     { file:'mus-guerra-b.mp3',    loop:true,  gain:0.51, variante:'mus-guerra' },       // −19,4, picco −0,4 · 2:00
+  'mus-armistizio':   { file:'mus-armistizio.mp3',  loop:true,  gain:0.45 },                              // −18,3, picco −0,4 · 1:30
+  'mus-dopoguerra':   { file:'mus-dopoguerra.mp3',  loop:true,  gain:0.47 }                               // −18,7, picco −1,1 · 1:30
 };
 /* ⚠ I BRANI CHE ESISTONO DAVVERO in assets/audio/: solo questi si chiedono alla rete. Si aggiorna a mano quando un file arriva;
    se lista e cartella divergono `.claude/verifica-asset.js` diventa rossa. L114-2 (26/9): TUTTI E UNDICI, a 192 kbps così come
@@ -540,7 +559,8 @@ const MUSICA_PRESENTI = ['mus-1950.mp3','mus-1960.mp3','mus-1970.mp3','mus-1980.
                          'mus-us-1950.mp3','mus-us-1960.mp3','mus-us-1970.mp3','mus-us-1980.mp3','mus-us-1990.mp3','mus-us-2000.mp3','mus-us-presente.mp3',
                          'mus-uk-1950.mp3','mus-uk-1960.mp3','mus-uk-1970.mp3','mus-uk-1980.mp3','mus-uk-1990.mp3','mus-uk-2000.mp3','mus-uk-presente.mp3',
                          'mus-fr-1950.mp3','mus-fr-1960.mp3','mus-fr-1970.mp3','mus-fr-1980.mp3','mus-fr-1990.mp3','mus-fr-2000.mp3','mus-fr-presente.mp3',
-                         'mus-de-1950.mp3','mus-de-1960.mp3','mus-de-1970.mp3','mus-de-1980.mp3','mus-de-1990.mp3','mus-de-2000.mp3','mus-de-presente.mp3'];   // L218-22: le 35 musiche del paese
+                         'mus-de-1950.mp3','mus-de-1960.mp3','mus-de-1970.mp3','mus-de-1980.mp3','mus-de-1990.mp3','mus-de-2000.mp3','mus-de-presente.mp3',   // L218-22: le 35 musiche del paese
+                         'mus-tensione.mp3','mus-tensione-b.mp3','mus-guerra.mp3','mus-guerra-b.mp3','mus-armistizio.mp3','mus-dopoguerra.mp3'];   // L245-5: la guerra
 const MUSICA_CHIAVE = 'hos_musica', MUSICA_GAIN = 0.35, MUSICA_XFADE_S = 2.5, MUSICA_DUCK_S = 0.8;
 let MUSICA_DIR = 'assets/audio/';     // `let`: la pagina di prova di L114-1 la punta ai segnaposto di .claude/musica-prova/
 let MUSICA_BUF = {}, MUSICA_CARICO = {}, MUSICA_ORA = null, MUSICA_VOCE = null, MUSICA_ZITTA = false;
@@ -644,12 +664,30 @@ function musicaVarianti(tema){
 function musicaGiroVariante(tema){ const V=musicaVarianti(tema); return V[(MUSICA_GIRO[tema]||0)%V.length]; }
 /* il tema di un brano (una variante risponde col suo tema) */
 function musicaTema(brano){ const M=MUSICA_MANIFEST[brano]; return (M && (M.variante || M.decennio)) || brano; }   // L218-22: la traccia del paese risponde col suo decennio
+/* ⚑ L245-5 · LA MUSICA DELLA GUERRA (puro): in guerra mus-guerra/-b a rotazione, con la trattativa a 2 o più mus-armistizio; una crisi
+   al gradino 3-4 senza guerra mus-tensione/-b; nel dopoguerra mus-armistizio i primi sei mesi se l'esito è pace o stallo, poi (e da
+   subito per vittoria e sconfitta) mus-dopoguerra; altrimenti null — e musicaScelta va avanti come prima, byte per byte. */
+const MUSICA_ARMISTIZIO_MESI = 6;
+function musicaGuerra(){
+  if(typeof S==='undefined' || !S) return null;
+  if(typeof REGOLA_GUERRA!=='undefined' && !REGOLA_GUERRA) return null;
+  const c=S.crisi;
+  if(c && c.guerra) return (c.guerra.trattativa>=2) ? 'mus-armistizio' : musicaGiroVariante('mus-guerra');
+  if(c && c.t>=3 && c.t<=4) return musicaGiroVariante('mus-tensione');
+  const d=S.dopoguerra;
+  if(d && typeof d.fino==='number' && S.year!=null){
+    const dopo=(typeof GUERRA_K!=='undefined' && GUERRA_K.dopo) || 24, mesi=(S.year*12+S.month)-(d.fino-dopo);
+    return ((d.esito==='pace' || d.esito==='stallo') && mesi<MUSICA_ARMISTIZIO_MESI) ? 'mus-armistizio' : 'mus-dopoguerra';
+  }
+  return null;
+}
 /* ⚑ IL PUNTO DI VERITÀ del brano: puro, legge lo stato e non tocca niente (lo usa anche la misura nel banco) */
 function musicaScelta(){
   if(typeof INTRO_APERTA!=='undefined' && INTRO_APERTA) return null;   // L124-1: sotto il video introduttivo la musica tace (è nel video)
   if(MUSICA_PORTA!=null) return musicaGiroVariante(musicaEpocaAnno(MUSICA_PORTA));   // L172-5: dalla porta scelta all'avvio, il tema del suo decennio (con la sua -b); L218-22: e la traccia del suo paese
   if(fuoriPartita()) return musicaGiroVariante('mus-tema');     // L118-1: fuori partita, il tema del gioco (dentro non vale mai); L218-16: con la sua -b
   if(MUSICA_FORZATA && MUSICA_FORZATA_S===S) return MUSICA_FORZATA;
+  const mg=musicaGuerra(); if(mg) return mg;                                                          // L245-5: guerra, tensione, dopoguerra — prima di ogni stato della partita
   if(typeof NOTTE!=='undefined' && NOTTE) return musicaGiroVariante('mus-notte');                   // L218-9: anche la notte ha la sua -b
   if(musicaCrisi()) return musicaGiroVariante('mus-crisi');                                          // L122-1: anche crisi e campagna
   if(typeof inCampagna==='function' && inCampagna()) return musicaGiroVariante('mus-campagna');      // hanno la loro variante

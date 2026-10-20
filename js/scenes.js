@@ -60,6 +60,10 @@ const SCENES = {
   esteri:         { base:S_+'esteri-base.webp', florido:S_+'esteri-florido.webp',
                     grave:[S_+'esteri-grave.webp', S_+'esteri-tavolo.webp'] },   // due stanze fredde: ruotano
   crisi:          { base:S_+'crisi-base.webp', grave:S_+'crisi-grave.webp', italia1950:S_+'crisi-anni50.webp' },
+  /* L245-4 · la guerra: la sala vuota (anni '50: la carta sul tavolo), le carte del fronte (kick «La guerra») e il cassetto «Guerra».
+     `porto` (l'imbarco) il cassetto lo mostra nei primi mesi, `ritorno` (l'hangar coi reduci) è per il dopoguerra di L245-5: le legge
+     guerraScena() (ui.js), scenaSrcComune non le vede (non sono toni). Nessuna variante grave: la guerra non si mostra, si governa. */
+  guerra:         { base:S_+'guerra-sala.webp', italia1950:S_+'guerra-sala-anni50.webp', porto:S_+'guerra-porto.webp', ritorno:S_+'guerra-ritorno.webp' },
   /* i soccorsi tra le macerie stanno in `base`, non in `grave`: l'emergenza senza tono è già grave di suo
      (una carta-calamità neutra deve accendere la scena, non restare vuota). `florido` = i mezzi all'alba. */
   emergenza:      { base:S_+'emergenza-grave.webp', florido:S_+'emergenza-florido.webp' },
@@ -227,7 +231,11 @@ const VIDEO_PRESENTI = ['home-hero', 'partito-base', 'vitaprivata-base', 'retro-
   'vitaprivata-anni70', 'elezioni-florido-italia', 'ambiente-florido',   // L197-42 (giro clip 39): il vapore della moka e il cucchiaino, bandiere e applausi lenti in piazza, pale eoliche lontane ed erba
   'vitaprivata-anni80', 'giustizia-base', 'elezioni-florido-regnounito', 'ordinepubblico-base-asiaest',   // L197-43 (giro clip 40): lo schermo del televisore e la palma, il giudice che gira una pagina, bandiere e applausi lenti, fronde e fili
   'ordinepubblico-base-africa', 'societacivile-anni60', 'societacivile-anni70',   // L197-44 (giro clip 41): fronde dell'acacia e fili, i cartelli bianchi che oscillano, striscioni e fiume (scuola-base non portata: l'aula d'epoca di L197-40)
-  'societacivile-anni80', 'istituzioni-anni50'];   // L197-45 (giro clip 42): le fronde nella galleria del 1980 (la folla ferma), i fogli che si sollevano nell'aula del 1950 (guerra-porto e guerra-base non portate: nessuna scena di guerra nel gioco, L245-4/5)
+  'societacivile-anni80', 'istituzioni-anni50',
+  'guerra-sala', 'guerra-sala-anni50', 'guerra-porto',
+  'societacivile-florido', 'societacivile-base-asiasud', 'crisi-base-africa',
+  'partito-anni50', 'stampa-base', 'partito-anni70', 'ordinepubblico-base-asiasud',
+  'casa-base-latina', 'guerra-ritorno', 'casa-base-asiaest'];   // L197-48 (giro clip 45): palme, jacaranda e panni nel cortile latinoamericano (poster↔f0 3,5 · cucitura 1,6), la bandiera nell'hangar del ritorno (2,2 · 1,6), panni e foglie sui ballatoi dell'Asia orientale (3,7 · 2,0)   // L197-47 (giro clip 44): i teli e l'albero del partito nel 1950 (poster↔f0 3,3 · cucitura 2,6), la mano sui fogli in redazione (3,2 · 2,8), la festa serale del 1970 (3,0 · 4,8: in CLIP_UNA_VOLTA), fronde e fili in India (4,5 · 4,5: in CLIP_UNA_VOLTA)   // L197-46 (giro clip 43): le foglie del grande albero (poster↔f0 4,1 · cucitura 2,3), fronde, telo e scacchiera in India (4,5 · 4,2: in CLIP_UNA_VOLTA), i panni stesi in Africa (3,1 · 2,0; pochi uccelli lontani a metà clip)   // L245-4 (con L197-40, L197-45, L197-46): la sala di guerra (cornetta e fogli), quella del 1950, il porto d'imbarco — ora che la guerra c'è (le carte del fronte e il cassetto); guerra-base resta per L245-5   // L197-45 (giro clip 42): le fronde nella galleria del 1980 (la folla ferma), i fogli che si sollevano nell'aula del 1950 (guerra-porto e guerra-base non portate: nessuna scena di guerra nel gioco, L245-4/5)
 
 /* ===== L181-4 — LE CLIP CHE NON GIRANO: un giro solo, poi l'ultimo fotogramma tenuto. Le altre clip di scena girano in tondo
    (`loop`) perché il loro ultimo fotogramma torna sul primo (cucitura ≤ 3,6 su 255, misurata sullo schermo); queste no — le porte
@@ -256,7 +264,9 @@ const CLIP_UNA_VOLTA = ['fineanno-buono', 'fineanno-lucieombre', 'fineanno-diffi
   'ordinepubblico-base-nordamerica', 'elezioni-florido-francia',   // L197-37: gli agenti sul marciapiede (5,4: si allontanano e non tornano) e la piazza francese di notte (6,3: foglie e bandiera non tornano)
   'infrastrutture-base', 'lavoro-base',   // L197-39: gli svincoli sul fiume (4,1: le auto saltano alla cucitura) e la fabbrica coi bracci (4,9: nastro e braccio non tornano)
   'ordinepubblico-base-asiaest',   // L197-43: la strada con gli agenti (5,0: fronde e fili non tornano)
-  'societacivile-anni70'];   // L197-44: il corteo sul lungofiume (9,5: il corteo si sposta e non torna)
+  'societacivile-anni70',   // L197-44: il corteo sul lungofiume (9,5: il corteo si sposta e non torna)
+  'societacivile-base-asiasud',   // L197-46: la tettoia e la scacchiera in India (4,2: la mano sulla scacchiera non torna)
+  'partito-anni70', 'ordinepubblico-base-asiasud'];   // L197-47: la festa del 1970 (4,8) e la strada indiana (4,5): la coda resta lontana dall'immagine
                             // (Il telefono anni '70 di L197-11 è uscito da qui: rifatto a camera ferma, cucitura 1,4, L197-12.)
                             // (Il vicolo casa-base-asiaest-v2 di L197-10 è uscito da qui: rifatto a luce ferma, cucitura 2,2, L197-11.)
                             // (Il soggiorno vitaprivata-base-v6 di L192-7 è uscito con la sua clip: L195-0, D223.)
@@ -459,6 +469,7 @@ const SCENA_DI_KICK = {
   // crisi tra potenze
   'Crisi tra potenze':'crisi','Crisi diplomatica':'crisi','Crisi regionale':'crisi','Conflitto regionale':'crisi',
   'Allarme nucleare':'crisi','Crisi da disinnescare':'crisi','Caso consolare':'crisi',
+  'La guerra':'guerra',   // L245-4: le carte del fronte (GUERRA_EV)
   // emergenza & calamità
   'Calamità naturale':'emergenza','Emergenza':'emergenza','Emergenza umanitaria':'emergenza',
   // elezioni — 'Voto conteso' va allo scrutinio (le mani che contano), non al seggio generico

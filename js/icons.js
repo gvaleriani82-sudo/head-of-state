@@ -35,6 +35,15 @@ const ICONS = {
   stampa:      '<path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8"/><path d="M15 18h-5"/><path d="M18 6h-8M18 10h-8"/>',   // giornale (Lucide)
   esposizione: '<path d="M2.06 12.35a1 1 0 0 1 0-.7C3.42 8.1 7.4 5 12 5s8.58 3.1 9.94 6.65a1 1 0 0 1 0 .7C20.58 15.9 16.6 19 12 19s-8.58-3.1-9.94-6.65Z"/><circle cx="12" cy="12" r="3"/>',   // occhio (Lucide)
   mercati:     '<path d="M3.5 3.5v15a2 2 0 0 0 2 2h15"/><path d="M8.5 16v-4.5M13 16V8M17.5 16v-6"/>',                                                                  // grafico a barre con assi
+  /* --- L239-6 · i segni sul territorio (il tavolo: fissoNodo in ui.js, tipo 'segno') --- */
+  segno_crisi:   '<path d="M12 3.6 21.2 19.6H2.8Z"/><path d="M12 9.6v4.6"/><path d="M12 17.1v.1"/>',                                                                     // triangolo d'avviso
+  segno_cantiere:'<path d="M7 21V3.8"/><path d="M3.6 3.8h16.8"/><path d="M7 7.6 10.8 3.8"/><path d="M17.4 3.8v5.4"/><path d="M15.4 9.2h4v3.2h-4z"/><path d="M3.8 21h6.4"/>',   // gru col gancio
+  /* L245-5 · i segni di guerra: stesso tratto, nessun simbolo militare realistico né bandiere */
+  segno_fronte:  '<path d="M2.6 12.6 6.4 9.4 9.6 14.2 13.4 8.6 16.8 13.8 21.4 10.4"/><path d="M3.6 19.6h16.8"/>',                                  // linea spezzata sopra la terra
+  segno_base:    '<path d="M12 4.2 20.6 19.4H3.4Z"/><path d="M12 4.2v15.2"/><path d="M9.4 19.4 12 14.6 14.6 19.4"/>',                            // tenda
+  segno_colpita: '<path d="M4 4h16v16H4z"/><path d="M12.6 4 10.4 8.6 13.8 11.4 10 15.6 11.4 20"/>',                                                // crepa nel muro
+  segno_ricostruzione:'<path d="M5 3.6v16.8"/><path d="M19 3.6v16.8"/><path d="M5 7.6h14"/><path d="M5 13.4h14"/><path d="M5 7.6 19 13.4"/><path d="M3.4 20.4h17.2"/>',   // impalcatura (due montanti e la croce: non la gru del cantiere)
+  segno_opera:   '<path d="M4.6 6.6h14.8"/><path d="M6 3.6h12"/><path d="M8 6.6v11.2"/><path d="M12 6.6v11.2"/><path d="M16 6.6v11.2"/><path d="M5.2 17.8h13.6"/><path d="M3.8 20.8h16.4"/>',   // pilastri col frontone
 };
 /* alias: alcuni indicatori-servizio riusano l'icona di settore */
 ICONS.sanita = ICONS.salute;

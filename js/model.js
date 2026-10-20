@@ -178,7 +178,7 @@ function aggiornaRivolta(){
   if(nuovo && typeof MESE_IN_CORSO!=='undefined' && MESE_IN_CORSO && typeof parla==='function' && !(typeof voceInCorso==='function' && voceInCorso())) parla('voce-protesta');
 }
 function rivoltaMatura(){ if(!S.rivolta) return null; const N=dif().mesiRivolta||6; for(const g of GROUPS){ if((S.rivolta[g.id]||0)>=N) return g.id; } return null; }
-function computeConsenso(){let s=0,w=0; for(const gr of GROUPS){s+=S.groups[gr.id]*gr.w; w+=gr.w;} return s/w;}
+function computeConsenso(){let s=0,w=0; for(const gr of GROUPS){s+=S.groups[gr.id]*gr.w; w+=gr.w;} const gc=(typeof guerraConsenso==='function')?guerraConsenso():0; return gc ? clamp(s/w+gc,0,100) : s/w;}   // L245-4: in guerra rally e opinione (guerraConsenso, game.js); in pace 0, il calcolo di prima
 
 /* --- Mutazioni dirette sul consenso dei gruppi (usate dai dossier/eventi) --- */
 /* RAPPORTO CON LA STAMPA come AMPLIFICATORE: i soli MALUS (n<0) da carte/eventi/scelte sono modulati —
@@ -414,7 +414,7 @@ function etaLogorio(){ return etaFase()==='vecchio'?1.25:1; }
    ================================================================================================================ */
 function fLogorioConsenso(cons){ return clamp(1 + (56.6 - cons)*0.10, 0.15, 1.8); }
 function rateLogorioMese(){
-  const cons=(S.ind&&S.ind.consenso!=null)?S.ind.consenso:50;
+  const cons=((S.ind&&S.ind.consenso!=null)?S.ind.consenso:50) - ((typeof guerraEccesso==='function')?guerraEccesso():0);   // L245-4: anche il logorio (che finisce nelle forze) vede la guerra al più a +GUERRA_K.votoMax
   const rate=((S.logorioEra!=null)?S.logorioEra:0.002)*(dif().logorioMult!=null?dif().logorioMult:1)*etaLogorio();
   return rate*fLogorioConsenso(cons)*((S.coabitazione && typeof COABITAZIONE_LOGORIO_K!=='undefined') ? COABITAZIONE_LOGORIO_K : 1);   // L100-2
 }
@@ -493,7 +493,7 @@ function evolvePartiti(){
      logorio → govF max = 1−logorio·0,3 < 1: il blocco erode SEMPRE, come la DC storica 48,5→40,1); governare male
      ACCELERA. Rate per-scenario (S.logorioEra; presente resta 0.002) × difficoltà (logorioMult) × età.
      Nel presente il delta è il solo cap-del-bonus: niente più incumbent che cresce all'infinito (documentato). */
-  const cons=(S.ind&&S.ind.consenso!=null)?S.ind.consenso:50;
+  const cons=((S.ind&&S.ind.consenso!=null)?S.ind.consenso:50) - ((typeof guerraEccesso==='function')?guerraEccesso():0);   // L245-4 (D-G3): al voto la guerra non vale più di GUERRA_K.votoMax punti — qui le forze leggono il consenso
   /* L90-2 — `S.coalizione` è la coalizione DI GOVERNO, e all'opposizione quella di governo è dell'avversario:
      è a lui che govF si applica, quindi è il SUO accumulatore che deve entrare qui. Prima entrava comunque
      `logorioTotale()`, che all'opposizione è zero — ed è per questo che il blocco avversario non si logorava. */
