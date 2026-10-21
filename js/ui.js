@@ -4675,7 +4675,7 @@ function emiciclo(seggi, opts){
     const fill=me?'var(--acc)':inCoal?'var(--acc)':'var(--mut2)';
     const op=me?'1':inCoal?'0.4':'0.45';
     for(let i=0;i<(seggi[p.id]||0) && k<posti.length;i++,k++){ const pt=posti[k];
-      dots+=`<circle class="emi-dot${anim?' emi-anim':''}" cx="${pt.x.toFixed(1)}" cy="${pt.y.toFixed(1)}" r="2.6" fill="${fill}" fill-opacity="${op}"${anim?` style="animation-delay:${k*7}ms"`:''}><title>${escAttr(T(p.nome))}</title></circle>`; }
+      dots+=`<circle class="emi-dot${anim?' emi-anim':''}" cx="${pt.x.toFixed(1)}" cy="${pt.y.toFixed(1)}" r="2.6" fill="${fill}" fill-opacity="${op}"${anim?` style="animation-delay:${k*7}ms"`:''}><title>${escAttr(p.nomeTesto!=null?p.nomeTesto:T(p.nome))}</title></circle>`; }   /* L237-5: il nome del partito proprio dal testo (nomeTesto), non dalla voce escapata: escAttr non escapa due volte */
   }
   return `<svg viewBox="0 0 116 66" role="img" aria-label="${T('Emiciclo')}: ${tot} ${T('seggi')}" style="display:block;width:100%;max-width:340px;margin:0 auto;overflow:visible">
     ${dots}

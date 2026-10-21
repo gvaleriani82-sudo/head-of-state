@@ -30592,6 +30592,9 @@ const EN = {
   "Nome già usato":"Name already taken", "Sigla già usata":"Short name already taken", "Scrivi il nome del partito":"Write the party name",
   "Scrivi la sigla":"Write the short name", "Scegli due o tre gruppi":"Pick two or three groups", "Fonda il partito":"Found the party",
   "Partito pronto ✓":"Party ready ✓", "Con un partito nuovo parti dal basso":"With a new party you start at the bottom",
+  /* L237-5 · la fondazione raccontata (game.js fondaPartitoProprio, data.js ti_pp_fondazione) */
+  "Fonda %P: un partito nuovo, %SIG.":"Founds %P: a new party, %SIG.", "Fonda %P: un partito nuovo.":"Founds %P: a new party.",
+  "Nasce %P: un nuovo nome sulla scheda":"%P is born: a new name on the ballot",
   /* L239-6 · i segni sul territorio (data.js SEGNO_TERR_TESTI; ui.js fissoTitolo/fissoFoglio) */
   "Crisi in corso":"Crisis under way", "Cantiere aperto":"Works under way", "Opera inaugurata":"Project opened",
   "%TERR: crisi in corso, ancora %N mesi.":"%TERR: crisis under way, %N more months.",

@@ -6540,7 +6540,7 @@ const RETRO_BEAT = [
     {l:'Lasci correre', e:'La stampa ti tratta meglio; nel tuo ufficio si è capito chi scrive', f:()=>{ stampad(2); corrented('fedelissimi',-1); }},
     {l:'Gli spieghi chi decide', e:'L\'ufficio torna in riga; il portavoce scriverà con più prudenza, e peggio', f:()=>{ corrented('fedelissimi',2); stampad(-1); }},
   ]},
-  {id:'rb_rivale', kick:'Palazzo', t:'La pace offerta a pranzo', cond:()=>!S.opposizione, text:'Il capo della corrente che ti ha combattuto per anni ti invita a pranzo. Propone la pace, senza giri di parole: un incarico nel governo per uno dei suoi, e il silenzio dei suoi fino alla fine del mandato.', ch:[
+  {id:'rb_rivale', storia:true, kick:'Palazzo', t:'La pace offerta a pranzo', cond:()=>!S.opposizione, text:'Il capo della corrente che ti ha combattuto per anni ti invita a pranzo. Propone la pace, senza giri di parole: un incarico nel governo per uno dei suoi, e il silenzio dei suoi fino alla fine del mandato.', ch:[
     {l:'Accetti', e:'Pace in casa; i tuoi vedono un posto andare a chi ti ha combattuto', f:()=>{ corrented('militanti',3); corrented('fedelissimi',-2); }},
     {l:'Rifiuti', e:'I tuoi ti stimano; la guerra continua', f:()=>{ corrented('fedelissimi',2); corrented('militanti',-2); }},
   ]},
@@ -8765,7 +8765,7 @@ const LOCALE_EV=[
     {l:'Nuovi nidi comunali',e:'Rispondi alle famiglie; investimento sul bilancio',pleases:'progressista',costo:{pct:1.5},f:()=>{locInd('servizi',8); locInd('bilancio',-7); gd('lavoratori',3); gd('giovani',2);}},
     {l:'Convenzioni e buoni per i nidi privati',e:'Più posti in fretta; meno controllo pubblico',pleases:'conservatore',costo:{pct:0.6},f:()=>{locInd('servizi',5); locInd('bilancio',-3); gd('imprenditori',2);}},
   ]},
-  {id:'l_assunzioni', tipo:'città', kick:'Palazzo', t:'Le raccomandazioni per il concorso', text:'Si apre un concorso per posti in Comune. Alleati e capicorrente ti mandano nomi di parenti e amici da «sistemare».', ch:[
+  {id:'l_assunzioni', storia:true, tipo:'città', kick:'Palazzo', t:'Le raccomandazioni per il concorso', text:'Si apre un concorso per posti in Comune. Alleati e capicorrente ti mandano nomi di parenti e amici da «sistemare».', ch:[
     {l:'Concorso trasparente, nessuna eccezione',e:'Merito e fiducia; qualche alleato si offende',pleases:'tecnico',trasparenza:5,f:()=>{locInd('servizi',4); gd('giovani',3); gd('cetomedio',2);}},
     {l:'Qualche assunzione di riguardo',e:'Tieni buona la maggioranza; una prassi che pesa',rischio:6,f:()=>{gd('cetomedio',2); locInd('servizi',-2);}},
   ]},
@@ -18226,22 +18226,22 @@ const SFIDE=[
    buone, male/evasivamente le inasprisce (e la sfida monta — ma sei stato avvisato, niente sorprese).
    Gli effetti negativi sono scalati da degradoMult (l'inazione morde di più a difficile). ===== */
 const PUNTO_PARTITO=[
- {id:'pp_linea', t:'Il partito chiede la linea', text:'I capicorrente ti chiedono conto della direzione: dove sta andando il partito sotto la tua guida?', ch:[
+ {id:'pp_linea', storia:true, t:'Il partito chiede la linea', text:'I capicorrente ti chiedono conto della direzione: dove sta andando il partito sotto la tua guida?', ch:[
    {l:'Li ascolto e li coinvolgo nelle scelte', e:'Le correnti si sentono parte; un po\' di autonomia ceduta', f:()=>{ tutteCorrenti(6); }},
    {l:'La linea la detto io', e:'Fermezza; i fedelissimi gradiscono, gli altri mugugnano', f:()=>{ corrented('fedelissimi',6); corrented('pontieri',-4); corrented('militanti',-4); }},
    {l:'Non è il momento di discutere', e:'Liquidi la cosa: tutte le correnti si raffreddano', f:()=>{ tutteDegrado(7); }},
  ]},
- {id:'pp_nomine', t:'Pressioni sulle nomine', text:'Le correnti spingono per piazzare i loro uomini nei posti che contano. Come gestisci le pretese?', ch:[
+ {id:'pp_nomine', storia:true, t:'Pressioni sulle nomine', text:'Le correnti spingono per piazzare i loro uomini nei posti che contano. Come gestisci le pretese?', ch:[
    {l:'Accontento le correnti principali', e:'Pace interna comprata con qualche poltrona', f:()=>{ tutteCorrenti(5); }},
    {l:'Nomino per merito, non per quota', e:'Scelta nobile; i tecnici apprezzano, i capicorrente no', f:()=>{ corrented('pontieri',6); corrented('fedelissimi',-4); corrented('militanti',-3); }},
    {l:'Rinvio ogni decisione', e:'Evasivo: il malcontento cova sotto la cenere', f:()=>{ tutteDegrado(6); }},
  ]},
- {id:'pp_malumori', t:'Malumori nel partito', text:'Gira voce di scontento tra i tuoi: una corrente si sente esclusa dalle decisioni del governo.', ch:[
+ {id:'pp_malumori', storia:true, t:'Malumori nel partito', text:'Gira voce di scontento tra i tuoi: una corrente si sente esclusa dalle decisioni del governo.', ch:[
    {l:'Un incontro per ricucire', e:'Gesto d\'ascolto: gli animi si placano', f:()=>{ tutteCorrenti(6); }},
    {l:'Concedo qualcosa alla corrente più fredda', e:'Mediazione mirata: spegni il focolaio', f:()=>{ const c=(S.correnti||[]).slice().sort((a,b)=>a.umore-b.umore)[0]; if(c) corrented(c.id,12); }},
    {l:'Chi non è contento può farsi avanti', e:'Sfida aperta: rischi di compattare i critici contro di te', f:()=>{ tutteDegrado(8); }},
  ]},
- {id:'pp_congresso', t:'Il partito reclama un congresso', text:'Le correnti chiedono di rimettere in discussione la linea con un congresso. Apri o tieni la barra?', ch:[
+ {id:'pp_congresso', storia:true, t:'Il partito reclama un congresso', text:'Le correnti chiedono di rimettere in discussione la linea con un congresso. Apri o tieni la barra?', ch:[
    {l:'Apro al confronto congressuale', e:'Democrazia interna: le correnti si distendono', f:()=>{ tutteCorrenti(5); }},
    {l:'Tengo la barra, niente resa dei conti', e:'Eviti l\'arena; il rancore resta', f:()=>{ tutteDegrado(5); corrented('fedelissimi',4); }},
    {l:'Non se ne parla nemmeno', e:'Chiusura netta: le correnti si gelano', f:()=>{ tutteDegrado(9); }},
@@ -18262,12 +18262,12 @@ const PUNTO_PARTITO=[
    {l:'Tagli alle strutture centrali', e:'Rigore interno; l\'apparato mugugna', f:()=>{ corrented('fedelissimi',-4); corrented('pontieri',4); }},
    {l:'Rinvii il problema di un anno', e:'I conti non si aggiustano da soli', f:()=>{ tutteDegrado(5); }},
  ]},
- {id:'pp_voce', t:'Il partito vuole una voce più forte', text:'Le correnti lamentano che il partito parli solo attraverso di te: serve una voce collettiva?', ch:[
+ {id:'pp_voce', storia:true, t:'Il partito vuole una voce più forte', text:'Le correnti lamentano che il partito parli solo attraverso di te: serve una voce collettiva?', ch:[
    {l:'Porto il partito in piazza con me', e:'La base al centro della scena', f:()=>{ corrented('militanti',6); corrented('fedelissimi',2); }},
    {l:'Affido ai pontieri il dialogo pubblico', e:'Toni misurati, ponti aperti', f:()=>{ corrented('pontieri',6); corrented('militanti',-2); }},
    {l:'La voce del partito sono io', e:'Chiarezza che accentra; gli altri tacciono', f:()=>{ corrented('fedelissimi',5); corrented('pontieri',-3); corrented('militanti',-3); }},
  ]},
- {id:'pp_regole', t:'Regole interne da riscrivere', text:'Lo statuto mostra gli anni: le correnti chiedono regole nuove su iscritti, candidature e congressi.', ch:[
+ {id:'pp_regole', storia:true, t:'Regole interne da riscrivere', text:'Lo statuto mostra gli anni: le correnti chiedono regole nuove su iscritti, candidature e congressi.', ch:[
    {l:'Più peso agli iscritti', e:'La base conta di più; i capicorrente meno', f:()=>{ corrented('militanti',7); corrented('fedelissimi',-4); }},
    {l:'Regole condivise scritte coi capicorrente', e:'Mediazione paziente: tutti dentro', f:()=>{ tutteCorrenti(4); }},
    {l:'Lo statuto va bene com\'è', e:'Conservi l\'esistente; la richiesta resta', f:()=>{ tutteDegrado(5); }},
@@ -18310,7 +18310,7 @@ const MINISTRO_CARTE=[
    {l:'Rassicuro il premier sulla mia lealtà', e:'Spegni i sospetti; ascesa più lenta', f:()=>{ leald(7); }},
    {l:'Cavalco l\'onda mediatica', e:'Visibilità e capitale; la sua fiducia cala', f:()=>{ visd(7); capd(3); leald(-7); }},
  ]},
- {id:'mi_rimpasto',era:'universale', tipo:'interno', t:'Aria di rimpasto', text:'Si parla di un rimpasto di governo. È il momento di posizionare la tua corrente.', ch:[
+ {id:'mi_rimpasto', storia:true,era:'universale', tipo:'interno', t:'Aria di rimpasto', text:'Si parla di un rimpasto di governo. È il momento di posizionare la tua corrente.', ch:[
    {l:'Tesso alleanze tra le correnti', e:'Costruisci consenso interno', pleases:'conservatore',f:()=>{ tutteCorrenti(4); capd(1); }},
    {l:'Resto fuori dalle manovre', e:'Mani pulite; ma altri si muovono', f:()=>{ leald(2); }},
    {l:'Premo sul premier per un posto migliore', e:'Ambizione scoperta; rischi', f:()=>{ capd(2); leald(-5); }},
@@ -18845,6 +18845,9 @@ const TITOLI=[
  {id:'ti50_reputazione', era:'italia1950', cond:()=>S.ind.reputazione!=null&&S.ind.reputazione<40, amico:'L\'Italia tratta da pari nei consessi d\'Occidente', ostile:'Isolata nei consessi: l\'Italia conta poco'},
  {id:'ti60_reputazione', era:'italia1960', cond:()=>S.ind.reputazione!=null&&S.ind.reputazione<40, amico:'Realismo nelle alleanze: il Paese tratta da pari', ostile:'Nei tavoli che contano l\'Italia resta ai margini'},
  {id:'ti_giovani_finestra', cond:()=>(S.groups&&S.groups.giovani!=null)?S.groups.giovani<=50:false, amico:'I giovani chiedono spazio: il governo apre', ostile:'Una generazione alla finestra'},
+ /* L237-5 · la fondazione del partito proprio: la sceglie generaTitolo nel mese della fondazione o in quello dopo (titoloFondazioneDovuto),
+    una volta per carriera; la cond la tiene fuori dal pool degli altri mesi. Neutro: amico e ostile uguali. */
+ {id:'ti_pp_fondazione', cond:()=>titoloFondazioneDovuto(), amico:'Nasce %P: un nuovo nome sulla scheda', ostile:'Nasce %P: un nuovo nome sulla scheda'},
  {id:'ti_estate', cond:()=>stagioneMese()==='estate'&&stagioneMese(S.month-1)==='estate', amico:'Il paese rallenta, il governo resta al lavoro', ostile:'Ferie per tutti, risposte per nessuno'},
  {id:'ti_rientro', cond:()=>stagioneMese()==='autunno'&&stagioneMese(S.month+1)==='autunno', amico:'Il rientro: l\'agenda d\'autunno del governo', ostile:'L\'autunno dei dossier: il tavolo è pieno'},
  /* ===== D2 — TITOLI D'EPOCA '50 (pri 2, era italia1950): la scheda-materia-prima §3-bis di PRESET-ITALIA-1950.md,
@@ -19674,7 +19677,7 @@ const OPPOSIZIONE_EV = [
       { l:'Conferenza stampa coi numeri', e:'Titoli e credibilità, se regge', vis:6, cred:4, gov:-3, rischio:true },
       { l:'Lo passi a un giornalista che lo sa scrivere', e:'Esce meglio, ma non porta il tuo nome', stampa:7, vis:-3, gov:-3 },
       { l:'Lo tieni per il dibattito sul bilancio', e:'Arriva quando conta di più, se nessuno lo trova prima', cred:4, pleases:'tecnico' } ]},
-  { id:'o_eco3', era:'universale', delega:'economia', kick:'Opposizione', t:'La tassa che non piace a nessuno',
+  { id:'o_eco3', storia:true, era:'universale', delega:'economia', kick:'Opposizione', t:'La tassa che non piace a nessuno',
     text:'Nel programma c\'è un\'imposta che serve a far tornare i conti e che nessuna corrente vuole difendere in pubblico.', ch:[
       { l:'La difendi tu, di persona', e:'Coraggio riconosciuto, voti persi', cred:6, gruppi:{cetomedio:-4}, correnti:3, pleases:'tecnico' },
       { l:'La togli dal programma', e:'Sollievo generale, un buco nei conti che qualcuno troverà', gruppi:{cetomedio:3}, cred:-4, rischio:true } ]},
@@ -19687,7 +19690,7 @@ const OPPOSIZIONE_EV = [
     text:'Trecento posti in una città che ne ha pochi. Il governo tratta e non conclude. Tu puoi andarci — o mandarci qualcuno.', ch:[
       { l:'Ci vai e ci resti finché serve', e:'La città non lo dimenticherà; l\'agenda nazionale si ferma per una settimana', gruppi:{lavoratori:5, pensionati:3}, vis:6, cred:-3, pleases:'populista' },
       { l:'Mandi il responsabile e prepari una proposta', e:'Serio, invisibile', cred:5, gruppi:{lavoratori:2}, vis:-3, pleases:'tecnico' } ]},
-  { id:'o_lav3', era:'universale', delega:'lavoro', kick:'Opposizione', t:'Il contratto che divide',
+  { id:'o_lav3', storia:true, era:'universale', delega:'lavoro', kick:'Opposizione', t:'Il contratto che divide',
     text:'Una riforma del lavoro spacca il tuo campo: chi ha il posto la teme, chi non ce l\'ha la spera.', ch:[
       { l:'Stai con chi il posto ce l\'ha', e:'La base storica ti ringrazia', gruppi:{lavoratori:4, giovani:-3}, corrente:{militanti:5} },
       { l:'Stai con chi il posto lo cerca', e:'I giovani ti scoprono, il sindacato ti guarda male', gruppi:{giovani:5, lavoratori:-3}, cred:4 } ]},
@@ -19715,7 +19718,7 @@ const OPPOSIZIONE_EV = [
     text:'Le tasse universitarie salgono. Puoi chiederne l\'abolizione, o un sistema che le leghi al reddito.', ch:[
       { l:'Abolizione', e:'Semplice, gridabile, costosissimo', gruppi:{giovani:5}, vis:5, cred:-4, promessa:'giovani', pleases:'populista' },
       { l:'Legarle al reddito', e:'Giusto e difficile da mettere su un cartello', cred:6, gruppi:{giovani:2}, pleases:'tecnico' } ]},
-  { id:'o_giu1', era:'universale', delega:'giustizia', kick:'Opposizione', t:'L\'inchiesta che tocca i tuoi',
+  { id:'o_giu1', storia:true, era:'universale', delega:'giustizia', kick:'Opposizione', t:'L\'inchiesta che tocca i tuoi',
     text:'Un\'inchiesta arriva vicino a un tuo amministratore locale. Non c\'è ancora nulla, ma c\'è già il titolo.', ch:[
       { l:'Lo sospendi subito', e:'Coerenza pagata cara: la sua corrente non te la perdona', cred:6, stampa:4, correnti:-6, trasparenza:true },
       { l:'Aspetti i fatti', e:'Garantista e sospetto', correnti:4, stampa:-4, rischio:true },
@@ -19841,7 +19844,7 @@ const OPPOSIZIONE_EV = [
     { l:'Linea moderata, da governo', e:'Ti accrediti come alternativa seria', cred:6, centro:3, base:-2, pleases:'tecnico' },
     { l:'Tieni il piede in due scarpe', e:'Non scegli; un po\' di rumore, poca chiarezza', vis:3, cred:-1 },
   ]},
-  { id:'opp_congresso_tesseramento', kick:'Partito', t:'Congresso e tesseramento', text:'Si avvicina il congresso: è il momento di dare forma al partito e contare le truppe.', ch:[
+  { id:'opp_congresso_tesseramento', storia:true, kick:'Partito', t:'Congresso e tesseramento', text:'Si avvicina il congresso: è il momento di dare forma al partito e contare le truppe.', ch:[
     { l:'Mobiliti la base militante', e:'Partito in fermento, identità marcata', base:5, vis:2, pleases:'populista' },
     { l:'Apri a moderati e società civile', e:'Allarghi il campo: credibilità su', centro:3, cred:4, pleases:'tecnico' },
     { l:'Rafforzi la presa sull\'apparato', e:'Più controllo, meno respiro interno', cred:2, base:2, pleases:'conservatore' },
@@ -19861,7 +19864,7 @@ const OPPOSIZIONE_EV = [
     { l:'Accetti, ma con paletti pubblici', e:'Provi a cautelarti; resta un\'ombra', vis:2, cred:1, rischio:3 },
     { l:'Rifiuti e lo rendi pubblico', e:'Pulizia che fa notizia', cred:6, centro:2, trasparenza:5, pleases:'tecnico' },
   ]},
-  { id:'opp_corrente_contesta', kick:'Partito', t:'Una corrente ti contesta', text:'Una corrente interna mette in discussione la tua leadership: rumori di un nome alternativo.', ch:[
+  { id:'opp_corrente_contesta', storia:true, kick:'Partito', t:'Una corrente ti contesta', text:'Una corrente interna mette in discussione la tua leadership: rumori di un nome alternativo.', ch:[
     { l:'La integri, dai spazio', e:'Unità ricucita; condividi il potere', cred:4, base:3, pleases:'progressista' },
     { l:'La marginalizzi senza pietà', e:'Comandi tu; qualcuno se ne va', cred:2, base:-2, pleases:'conservatore' },
     { l:'Apri una mediazione interna', e:'Tieni insieme il partito con pazienza', cred:5, centro:1, pleases:'tecnico' },
@@ -20188,21 +20191,21 @@ const OPPOSIZIONE_BASE = [
     { l:'Lo concentri nelle roccaforti', e:'Meno strada, base blindata; non allarghi niente', base:2,
       extra:function(){ corrented('fedelissimi',3); } },
   ]},
-  { id:'ob_tema', kick:'Identità', t:'Il tema scomodo',
+  { id:'ob_tema', storia:true, kick:'Identità', t:'Il tema scomodo',
     text:'C\'è un tema che la tua base storica non vuole sentire — e che invece parla a un pezzo di paese che non ti ha mai votato. Il congresso si avvicina, e il silenzio non è più una posizione.', ch:[
     { l:'Lo abbracci', e:'Allarghi davvero; i tuoi lo chiamano tradimento', cred:3, pleases:'progressista',
       extra:function(){ var n=gruppoNuovo(), s=gruppoStorico(); if(n) gd(n,5); if(s) gd(s,-3); corrented('militanti',-4); } },
     { l:'Riaffermi la linea di sempre', e:'La base respira; il paese nuovo passa oltre', pleases:'conservatore',
       extra:function(){ var s=gruppoStorico(); if(s) gd(s,2); corrented('militanti',5); } },
   ]},
-  { id:'ob_volto', kick:'Territorio', t:'Il volto nuovo',
+  { id:'ob_volto', storia:true, kick:'Territorio', t:'Il volto nuovo',
     text:'In un territorio dove perdi da vent\'anni c\'è una figura civica che vince da sola: sindaco di frontiera, popolare, non tesserato. Vuole correre con te — alle sue condizioni.', ch:[
     { l:'Lo imbarchi alle sue condizioni', e:'Il territorio si apre; la vecchia guardia locale minaccia lo strappo', vis:2,
       extra:function(){ var n=gruppoNuovo(); if(n) gd(n,4); corrented('fedelissimi',-4); } },
     { l:'Proteggi la filiera dei tuoi', e:'Nessuno strappo; il territorio resta degli altri', base:1, pleases:'conservatore',
       extra:function(){ corrented('fedelissimi',4); } },
   ]},
-  { id:'ob_festa', kick:'Partito', t:'La festa di partito',
+  { id:'ob_festa', storia:true, kick:'Partito', t:'La festa di partito',
     text:'La festa nazionale è la vetrina dell\'anno: tre giorni, i giornali guardano. La regia decide chi deve sentirsi a casa — e chi deve sentirsi invitato per la prima volta.', ch:[
     { l:'La tari sulla base storica', e:'Identità, calore, nessun volto nuovo', base:2, pleases:'conservatore',
       extra:function(){ corrented('militanti',5); } },
@@ -21272,7 +21275,7 @@ const FMI_EV = {
    della prossima sfida (S.sfidaSeme: volto = il leader della corrente favorita, innesco a 40 invece che a 35).
    ============================================================================================================== */
 const LISTE_EV = {
-  id:'liste', kick:'Il partito', tono:'grave',
+  id:'liste', storia:true, kick:'Il partito', tono:'grave',
   t:'Le liste',
   text:'Prima del voto si decidono i posti sicuri: chi entra, chi scala, chi resta fuori. Ne hai un numero, e tre destinazioni che competono. La lista si chiude oggi e non si riapre.',
   ch:[

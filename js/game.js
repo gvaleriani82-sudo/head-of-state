@@ -1497,6 +1497,11 @@ function eraCartaViva(E, def){
     var yf = (typeof S!=='undefined' && S && S.year!=null) ? S.year : -Infinity;
     if(yf > E.fino) return false;
   }
+  /* L237-5 · `storia:true` — la carta presuppone un partito con una storia (correnti, congressi, la base storica, «da anni nel partito»):
+     non esce finché il TUO partito è giovane (`partitoGiovane()`: il partito proprio nei primi due mandati, la finestra di D-P3).
+     Qui e solo qui (la guardia prove/l237-5/guardia-storia.js lo pretende); senza partito proprio il campo non conta niente. Le carte
+     che non passano dai pool (le liste della campagna) ci passano apposta: `eraVivaT(LISTE_EV)` in campagnaNazionale. */
+  if(E && E.storia===true && typeof partitoGiovane==='function' && partitoGiovane()) return false;
   var t = (E && E.era) || def;
   if(t==='universale') return true;
   var cur = (typeof S!=='undefined' && S && S.era) || 'contemporanea';
@@ -2908,7 +2913,7 @@ function _partitoDef(d){ var o={ id:d.id, nome:d.nome, orientamento:d.orientamen
    · nei collegi (Regno Unito) `terreno:0, concentrazione:24` — il valore di `uk_libdem` (data.js): senza, il partito è uniforme e
      non vince mai un collegio (L237-1, 0/80).
    · `S.partitoProprio = {mandati}`: finché < 2 niente sfida (quindi niente primaria) e niente richiamo delle correnti
-     (`fondatoreProtetto()`); sale una volta per elezione politica vinta (`contaMandatoProprio`).
+     (`partitoGiovane()`, L237-5); sale una volta per elezione politica vinta (`contaMandatoProprio`).
    Rende false (e non tocca niente) fuori dal presente, ai livelli 2-5, o se il partito c'è già.
    ============================================================================================================ */
 const PP_ID='pp_proprio', PP_FORZA=4, PP_CONCENTRAZIONE=24;
@@ -2949,8 +2954,21 @@ function fondaPartitoProprio(def){
   S.pesoUE=pesoUEBase();
   if(S.personaggio) S.integrita=integritaIniziale();
   if(S.territori){ initTerritori(); initPotereLocale(); }
-  S.partitoProprio={mandati:0};
+  S.partitoProprio={mandati:0, da:S.year*12+S.month};   // L237-5: `da` = il mese assoluto della fondazione (lo legge solo titoloFondazioneDovuto)
+  /* L237-5 · la fondazione nella biografia, una volta (qui: un partito per carriera). Tradotta allo store come il registro (L244-4);
+     la biografia si stampa in HTML (ui.js, scheda Partito), quindi nome e sigla dalla voce viva, che è escapata (L237-4). */
+  var ppv=part(PP_ID)||{};
+  var ppN=function(){ return ppv.nome||''; }, ppS=function(){ return ppv.sigla; };   // sostituzioni con funzione: un «$&» nel nome resta com'è
+  bioFatto(ppv.sigla ? T('Fonda %P: un partito nuovo, %SIG.').replace('%SIG', ppS).replace('%P', ppN) : T('Fonda %P: un partito nuovo.').replace('%P', ppN));
   return true;
+}
+/* L237-5 · il titolo della fondazione (`ti_pp_fondazione`, TITOLI): esce nel mese della fondazione o in quello dopo (all'attivista il
+   primo titolo è del mese 1: startAttivista non ne genera), una volta per carriera — finché è fra i titoli recenti non è più dovuto, e
+   dopo il mese 1 non lo è comunque. Lo legge generaTitolo, che quel mese lo dà anche al livello 1 (dove la prima pagina è locale). */
+function titoloFondazioneDovuto(){
+  if(!S || S.partito!==PP_ID || !S.partitoProprio || S.partitoProprio.da==null) return false;
+  var d=(S.year*12+S.month)-S.partitoProprio.da;
+  return d>=0 && d<=1 && (S.recentTit||[]).indexOf('ti_pp_fondazione')<0;
 }
 /* D-P4 · India e Brasile dichiarano le alleanze a liste chiuse: lì `pp_proprio` non sarebbe nella lista di nessuno. Si aggiunge in
    memoria alle liste dei partiti a |Δasse| ≤ 1 e riceve le loro sigle (simmetrico per costruzione). Lo chiama solo applicaRosterDelta,
@@ -2964,8 +2982,11 @@ function alleatiPartitoProprio(lista){
   lista.forEach(function(p){ if(vicini.indexOf(p.id)>=0 && Array.isArray(p.alleati) && p.alleati.indexOf(PP_ID)<0) p.alleati=p.alleati.concat([PP_ID]); });
 }
 /* D-P3 · il fondatore è il partito: per i primi due mandati niente sfida alla leadership (quindi niente primaria: la apre solo una
-   sfida viva) e niente richiamo delle correnti. Le correnti restano come umore. Lo leggono aggiornaSfida e richiamoCorrentiDovuto. */
-function fondatoreProtetto(){ return !!(S && S.partito===PP_ID && S.partitoProprio && (S.partitoProprio.mandati||0)<2); }
+   sfida viva) e niente richiamo delle correnti. Le correnti restano come umore. Lo leggono aggiornaSfida e richiamoCorrentiDovuto.
+   L237-5 · è anche LA finestra del partito giovane (una regola sola: prima si chiamava `fondatoreProtetto`): nei primi due mandati le
+   carte che presuppongono un partito con una storia (`storia:true`: correnti, congressi, «da anni nel partito», la base storica) non
+   escono — le scarta `eraCartaViva`, il passaggio unico dei pool. */
+function partitoGiovane(){ return !!(S && S.partito===PP_ID && S.partitoProprio && (S.partitoProprio.mandati||0)<2); }
 /* una volta per elezione politica vinta: nextMandate (rielezione, e la rimonta via tornaAlGoverno, che lo chiama), la salita
    per elezione (diventaPremier) e l'ingresso da partner dopo il voto (entraDaPartner). NON in tornaAlGoverno, che ha già il suo
    doppio bioConta noto (R4): lì il conto lo fa nextMandate. */
@@ -4478,7 +4499,7 @@ function pescaLeggero(){
    non cadano mai nello stesso mese. Chi sceglie la carta la ottiene diversa (RICHIAMO_CORRENTI_OPP_EV). */
 function richiamoCorrentiDovuto(){
   if(typeof S==='undefined' || !S || S.livello!==3 || !S.correnti || S.sfida) return false;
-  if(fondatoreProtetto()) return false;   // L237-3 (D-P3): il fondatore non si richiama per i primi due mandati
+  if(partitoGiovane()) return false;   // L237-3 (D-P3): il fondatore non si richiama per i primi due mandati (L237-5: la finestra del partito giovane)
   var mese=S.year*12+S.month;
   if(S.richiamoCorrUltimo!=null && mese-S.richiamoCorrUltimo<8) return false;
   var c=S.correnti.slice().sort(function(a,b){return a.umore-b.umore;})[0];
@@ -5286,14 +5307,23 @@ function pickPuntoPartito(){
    Pesca il PRIMO di TITOLI con cond vera (anti-ripetizione), variante amica/ostile dal rapporto stampa.
    Cornice pura: niente effetti, niente tetto. Vive in S.titoloMese (dato puro → si salva). --- */
 var TITOLI_PER_ID=null;   // L138-1b: indice id→titolo, costruito alla prima richiesta (TITOLI non cambia a partita in corso)
+/* L237-5 · %P nei titoli = il TUO partito (oggi solo `ti_pp_fondazione`: nessun altro titolo lo porta, quindi gli altri restano byte per
+   byte). Il titolo si stampa in HTML: il partito proprio dalla voce viva (escapata), gli altri dal nome tradotto. Dopo T(): la chiave è
+   il modello coi segnaposto (L244-4). */
+function titoloPartitoSub(x){
+  if(String(x).indexOf('%P')<0) return x;
+  var pp=part(S.partito)||{};
+  var n=pp.id===PP_ID ? (pp.nome||'') : T(pp.nome||''); return String(x).replace(/%P/g, function(){ return n; });
+}
 function titoloPerId(id){
   if(!TITOLI_PER_ID){ TITOLI_PER_ID={}; TITOLI.forEach(t=>{ TITOLI_PER_ID[t.id]=t; }); }
   return TITOLI_PER_ID[id];
 }
 function generaTitolo(){
   if(typeof TITOLI==='undefined' || !S || S.opposizione) return;
-  if(S.livello===1){ generaTitoloLocale(); return; }   // rifinitura locale: a livello 1 la prima pagina parla LOCALE
-  let pool=TITOLI.filter(t=>(!t.cond||t.cond()) && eraVivaT(t));
+  const _fz=titoloFondazioneDovuto() ? titoloPerId('ti_pp_fondazione') : null;   // L237-5: il mese della fondazione la prima pagina è sua (anche al livello 1)
+  if(S.livello===1 && !_fz){ generaTitoloLocale(); return; }   // rifinitura locale: a livello 1 la prima pagina parla LOCALE
+  let pool=_fz ? [_fz] : TITOLI.filter(t=>(!t.cond||t.cond()) && eraVivaT(t));
   if(!pool.length) return;
   /* D2 (fix meccanico ACCANTO al contenuto — scoperto in build): il vecchio primo-match+finestra-3 ruotava AL
      MASSIMO 4 titoli anche con un pool grande (il primo-fresco in ordine di lista cicla su sé stesso). Ora: TIER
@@ -5350,7 +5380,7 @@ function generaTitolo(){
   // 6 nel '50/'60 così la prima-pagina d'epoca resta BYTE-IDENTICA (recentTit è globale: allargarla toccherebbe anche le ere sigillate).
   var _wTit=(S.era===LINEA_IT)?6:8;   // L30-1: la seconda condizione (S.era==='italia1960') era MORTA — S.era e la LINEA, non il decennio
   S.recentTit.push(q.id); if(S.recentTit.length>_wTit) S.recentTit.shift();
-  S.titoloMese={ id:q.id, testo:T(amica?q.amico:q.ostile), tono:(amica?'amica':'ostile') };   // i18n: tradotto allo store (pattern-log)
+  S.titoloMese={ id:q.id, testo:titoloPartitoSub(T(amica?q.amico:q.ostile)), tono:(amica?'amica':'ostile') };   // i18n: tradotto allo store (pattern-log) · L237-5: %P dopo T()
   if(typeof suona==='function') suona(typeof suonoTitolo==='function' ? suonoTitolo(q) : suonoGiornale());   // L95-3: il titolo del mese nasce qui (i titoli non sono carte d'agenda: vedi CODA L95-3) · L118-1: dal 2000 `notifica` · L218-14: l'edizione straordinaria (titolo-evento) suona `rotativa`
 }
 /* La prima pagina a LIVELLO 1: pesca da TITOLI_LOCALI (tipo gata città/regione + cond su S.locale), tono dal
@@ -6240,7 +6270,7 @@ function aggiornaSfida(){
     return;
   }
   if(S.primariaUltima!=null && mese-S.primariaUltima<12) return;   // raffreddamento dopo una primaria vinta
-  if(fondatoreProtetto()) return;   // L237-3 (D-P3): contro il fondatore nessuna sfida nasce nei primi due mandati — quindi nessuna primaria (la apre solo una sfida viva)
+  if(partitoGiovane()) return;   // L237-3 (D-P3): contro il fondatore nessuna sfida nasce nei primi due mandati — quindi nessuna primaria (la apre solo una sfida viva)
   /* L64-4 — chi hai messo in lista ti sfida: se la sua corrente scende sotto 40 (non 35), la sfida nasce col SUO volto */
   const seme=S.sfidaSeme;
   const arrS=(seme && S.correnti.find(function(c){return c.id===seme.corrente && c.umore<40;}))||null;
@@ -7753,7 +7783,8 @@ function pickCampagnaNazionale(){
   campSforzo();   // L64-2: apre lo sforzo della stagione (una volta) e lo annuncia nel log
   if(S.campNaz.n===0) resaPromesseCampagna();          // la resa apre la stagione (le forze si muovono, i sondaggi la prezzano)
   /* L64-4 — il primo mese di stagione è LE LISTE: obbligata (prende il posto del beat, da sola) e senza ritorno (una per stagione) */
-  if(!S.campNaz.liste && S.correnti && typeof LISTE_EV!=='undefined'){ S.campNaz.liste=true; S.campNazUltimo=mese; S.campNaz.n++; return {kind:'event', data:LISTE_EV, resolved:false}; }
+  if(!S.campNaz.liste && S.correnti && typeof LISTE_EV!=='undefined' && eraVivaT(LISTE_EV)){   // L237-5: dal passaggio unico (LISTE_EV ha `storia:true`; senza era né paesi passa sempre)
+    S.campNaz.liste=true; S.campNazUltimo=mese; S.campNaz.n++; return {kind:'event', data:LISTE_EV, resolved:false}; }
   var pool=CAMPAGNA_EV.filter(function(e){return eraViva(e) && (!e.cond||e.cond());});
   var q=pool.length?pescaBag('campnaz',pool):null; if(!q) return null;
   S.campNazUltimo=mese; S.campNaz.n++;

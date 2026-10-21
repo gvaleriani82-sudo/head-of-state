@@ -687,8 +687,8 @@ function musicaScelta(){
   if(MUSICA_PORTA!=null) return musicaGiroVariante(musicaEpocaAnno(MUSICA_PORTA));   // L172-5: dalla porta scelta all'avvio, il tema del suo decennio (con la sua -b); L218-22: e la traccia del suo paese
   if(fuoriPartita()) return musicaGiroVariante('mus-tema');     // L118-1: fuori partita, il tema del gioco (dentro non vale mai); L218-16: con la sua -b
   if(MUSICA_FORZATA && MUSICA_FORZATA_S===S) return MUSICA_FORZATA;
-  const mg=musicaGuerra(); if(mg) return mg;                                                          // L245-5: guerra, tensione, dopoguerra — prima di ogni stato della partita
   if(typeof NOTTE!=='undefined' && NOTTE) return musicaGiroVariante('mus-notte');                   // L218-9: anche la notte ha la sua -b
+  const mg=musicaGuerra(); if(mg) return mg;                                                          // L245-5: guerra, tensione, dopoguerra — L237-5 (passo 0): DOPO la notte, che suona anche in guerra
   if(musicaCrisi()) return musicaGiroVariante('mus-crisi');                                          // L122-1: anche crisi e campagna
   if(typeof inCampagna==='function' && inCampagna()) return musicaGiroVariante('mus-campagna');      // hanno la loro variante
   const ep=musicaEpoca();
