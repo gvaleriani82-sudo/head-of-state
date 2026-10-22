@@ -23,6 +23,7 @@ function leggiMods(){
     if(p.growth)m.growth+=p.growth; if(p.deficit)m.deficit+=p.deficit; if(p.sicurezza)m.sicurezza+=p.sicurezza; if(p.ambiente)m.ambiente+=p.ambiente; if(p.unemp)m.unemp+=p.unemp;
     if(p.grp) for(const g in p.grp) m.grp[g]=(m.grp[g]||0)+p.grp[g];
   }}
+  if(S.attacco && S.attacco.sic) m.sicurezza+=S.attacco.sic;   // L245-7: la legge d'emergenza (+2) e la risposta «libertà» (+1) dopo un attacco, nello stesso campo
   return m;
 }
 function rpLeft(){return curRpMax()-rpUsed();}

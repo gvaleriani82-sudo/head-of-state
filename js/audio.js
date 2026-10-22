@@ -140,7 +140,12 @@ const AUDIO_MANIFEST = {
   'mappa-segno':   { file:'mappa-segno.mp3',     loop:false, gain:0.91 },  // 0,65 s: RMS −24,3, picco −0,2 → tetto del picco (la regola dava 1,10)
   colonna:         { file:'colonna.mp3',         loop:false, gain:0.39 },  // 3,0 s: RMS −15,3, picco 0,0 → regola di sopra (abbassato)
   nave:            { file:'nave.mp3',            loop:false, gain:0.20 },  // 3,0 s: RMS −9,5, picco 0,0 → regola di sopra (≈ −14 dB: molto forte)
-  'sirena-aerea':  { file:'sirena-aerea.mp3',    loop:false, gain:0.35 }   // 4,0 s: RMS −14,3, picco −0,2 → regola di sopra (abbassato)
+  'sirena-aerea':  { file:'sirena-aerea.mp3',    loop:false, gain:0.35 },  // 4,0 s: RMS −14,3, picco −0,2 → regola di sopra (abbassato)
+  /* ⚑ L245-7 (22/10) · L'ATTACCO (L218-17, giro suoni 17: ElevenLabs, così come sono). Gain con la regola di sopra sulle misure del giro
+     suoni. Agganci: campane-lutto → la carta d'attacco grave che entra (suonoCarta, `attacco:'grave'`; la leggera suona `allarme`);
+     candele → la risposta «unità nazionale» (attaccoRisposta, game.js). */
+  'campane-lutto': { file:'campane-lutto.mp3',   loop:false, gain:1.10 },  // 4,0 s: RMS −24,3, picco −4,0 → regola di sopra (picco reso −3,2)
+  candele:         { file:'candele.mp3',         loop:false, gain:0.84 }   // 3,0 s: RMS −21,9, picco −5,5 → regola di sopra
 };
 /* ⚠ I FILE CHE ESISTONO DAVVERO in assets/audio/. Il motore carica SOLO questi: un nome del manifesto che non è
    qui non genera nessuna richiesta di rete. Si aggiorna a mano quando un file cambia, e se la lista e la cartella
@@ -163,7 +168,8 @@ const AUDIO_PRESENTI = ['tocco.mp3','carta.mp3','chip.mp3','mese.mp3','giornale.
                         'timbro.mp3','calcolatrice.mp3','consenso-su.mp3','consenso-giu.mp3','nomina.mp3','banchi.mp3','votazione.mp3',
                         'dimissioni.mp3','traguardo.mp3','salva.mp3','scorri.mp3','no.mp3','sondaggio.mp3',   // L218-13 (12/10, giro suoni 13: F5)
                         'brusio.mp3','rotativa.mp3',   // L218-14 (12/10, giro suoni 14: F5h, F5n — §F5 completa)
-                        'mappa-segno.mp3','colonna.mp3','nave.mp3','sirena-aerea.mp3'];   // L245-5 (20/10: la guerra sul tavolo, file di L218-17)
+                        'mappa-segno.mp3','colonna.mp3','nave.mp3','sirena-aerea.mp3',   // L245-5 (20/10: la guerra sul tavolo, file di L218-17)
+                        'campane-lutto.mp3','candele.mp3'];   // L245-7 (22/10: l'attacco, file di L218-17)
 
 /* ── 6 · NIENTE SINTETICO A RUNTIME ────────────────────────────────────────────────────────────────────────
    Il motore carica FILE. I suoni li genera `.claude/genera-audio.js` una volta, fuori dal gioco (L95-3a); la prima
@@ -390,6 +396,7 @@ const SUONO_CARTA = [
 function suonoCarta(item){
   if(!item) return null;
   const d=item.data||{};
+  if(d.attacco) return d.attacco==='grave' ? (audioHaFile('campane-lutto') ? 'campane-lutto' : null) : (audioHaFile('allarme') ? 'allarme' : null);   // L245-7: la carta d'attacco
   if(d.cronaca===true || d.tono==='grave') return null;
   const testo=String(d.kick||'')+' · '+String(d.t||''), anno=audioAnno();
   for(let i=0;i<SUONO_CARTA.length;i++){ const R=SUONO_CARTA[i], O=R[3]||{};
@@ -540,7 +547,8 @@ const MUSICA_MANIFEST = {
   'mus-guerra':       { file:'mus-guerra.mp3',      loop:true,  gain:0.42 },                              // −17,6, picco −1,1 · 2:00
   'mus-guerra-b':     { file:'mus-guerra-b.mp3',    loop:true,  gain:0.51, variante:'mus-guerra' },       // −19,4, picco −0,4 · 2:00
   'mus-armistizio':   { file:'mus-armistizio.mp3',  loop:true,  gain:0.45 },                              // −18,3, picco −0,4 · 1:30
-  'mus-dopoguerra':   { file:'mus-dopoguerra.mp3',  loop:true,  gain:0.47 }                               // −18,7, picco −1,1 · 1:30
+  'mus-dopoguerra':   { file:'mus-dopoguerra.mp3',  loop:true,  gain:0.47 },                              // −18,7, picco −1,1 · 1:30
+  'mus-lutto':        { file:'mus-lutto.mp3',       loop:true,  gain:0.97 }                               // L245-7: −24,9, picco −7,2 · 1:30 (stessa regola: picco reso −7,5) — il mese dopo un attacco grave, musicaLutto()
 };
 /* ⚠ I BRANI CHE ESISTONO DAVVERO in assets/audio/: solo questi si chiedono alla rete. Si aggiorna a mano quando un file arriva;
    se lista e cartella divergono `.claude/verifica-asset.js` diventa rossa. L114-2 (26/9): TUTTI E UNDICI, a 192 kbps così come
@@ -560,7 +568,8 @@ const MUSICA_PRESENTI = ['mus-1950.mp3','mus-1960.mp3','mus-1970.mp3','mus-1980.
                          'mus-uk-1950.mp3','mus-uk-1960.mp3','mus-uk-1970.mp3','mus-uk-1980.mp3','mus-uk-1990.mp3','mus-uk-2000.mp3','mus-uk-presente.mp3',
                          'mus-fr-1950.mp3','mus-fr-1960.mp3','mus-fr-1970.mp3','mus-fr-1980.mp3','mus-fr-1990.mp3','mus-fr-2000.mp3','mus-fr-presente.mp3',
                          'mus-de-1950.mp3','mus-de-1960.mp3','mus-de-1970.mp3','mus-de-1980.mp3','mus-de-1990.mp3','mus-de-2000.mp3','mus-de-presente.mp3',   // L218-22: le 35 musiche del paese
-                         'mus-tensione.mp3','mus-tensione-b.mp3','mus-guerra.mp3','mus-guerra-b.mp3','mus-armistizio.mp3','mus-dopoguerra.mp3'];   // L245-5: la guerra
+                         'mus-tensione.mp3','mus-tensione-b.mp3','mus-guerra.mp3','mus-guerra-b.mp3','mus-armistizio.mp3','mus-dopoguerra.mp3',   // L245-5: la guerra
+                         'mus-lutto.mp3'];   // L245-7: il lutto dopo un attacco grave
 const MUSICA_CHIAVE = 'hos_musica', MUSICA_GAIN = 0.35, MUSICA_XFADE_S = 2.5, MUSICA_DUCK_S = 0.8;
 let MUSICA_DIR = 'assets/audio/';     // `let`: la pagina di prova di L114-1 la punta ai segnaposto di .claude/musica-prova/
 let MUSICA_BUF = {}, MUSICA_CARICO = {}, MUSICA_ORA = null, MUSICA_VOCE = null, MUSICA_ZITTA = false;
@@ -585,7 +594,7 @@ let MUSICA_CLIP_ZITTA = false;
 function veloClipAperto(){ try{ return (typeof PARTENZA_APERTA!=='undefined' && !!PARTENZA_APERTA) || (typeof PORTA_CLIP_APERTA!=='undefined' && !!PORTA_CLIP_APERTA); }catch(e){ return false; } }
 function musicaClipZitta(on){ on=!!on; if(on===MUSICA_CLIP_ZITTA) return; MUSICA_CLIP_ZITTA=on; musica(); }
 /* il gradino in vigore: zero sotto un pilastro-tragedia o sotto la voce di una clip, ×0,3 sotto una voce del gioco, pieno */
-function musicaGradino(){ return (musicaTragedia() || (MUSICA_CLIP_ZITTA && veloClipAperto())) ? 0 : (MUSICA_SOTTOVOCE ? MUSICA_SOTTOVOCE_K : 1); }
+function musicaGradino(){ return (musicaTragedia() || musicaAttaccoZitta() || (MUSICA_CLIP_ZITTA && veloClipAperto())) ? 0 : (MUSICA_SOTTOVOCE ? MUSICA_SOTTOVOCE_K : 1); }
 let MUSICA_FORZATA = null, MUSICA_FORZATA_S = null;
 /* L172-5 · L'ANNO DELLA PORTA SCELTA (richiesta di Giacomo dell'1/10): dalla scelta di una porta sulla linea del tempo (storiciPorta,
    ui.js) all'avvio della partita (fine di avviaRuolo) musicaScelta() dà il tema del decennio della porta invece di mus-tema — sotto le
@@ -627,6 +636,16 @@ function musicaEpocaAnno(y){
 }
 function musicaCrisi(){
   return !!(S && S.livello===3 && !S.opposizione && ((S.mesiSottoCrisi||0)>0 || (S.minoranza && !S.coabitazione)));
+}
+/* L245-7 · la carta d'attacco grave nell'agenda del mese (risolta o no): la musica a zero per tutto il mese, come sotto un
+   pilastro-tragedia — ma letta a parte, perché musicaTragedia spegne anche il giro, le voci e gli ambienti, e la carta d'attacco è una
+   decisione (la legge respinta deve poter dire voce-legge-no). Poi musicaLutto(): `mus-lutto` per il solo mese dopo. */
+function musicaAttaccoZitta(){
+  return !!(S && Array.isArray(S.agenda) && S.agenda.some(function(a){ return a && a.data && a.data.attacco==='grave'; }));
+}
+function musicaLutto(){
+  const A=(typeof S!=='undefined' && S) ? S.attacco : null;
+  return (A && A.grave && typeof A.ultimo==='number' && S.year!=null && (S.year*12+S.month)===A.ultimo+1) ? 'mus-lutto' : null;
 }
 function musicaTragedia(){
   return !!(S && Array.isArray(S.agenda) && S.agenda.some(function(a){ const d=a&&a.data; return a && !a.resolved && d && d.cronaca && d.tono==='grave'; }));
@@ -688,7 +707,8 @@ function musicaScelta(){
   if(fuoriPartita()) return musicaGiroVariante('mus-tema');     // L118-1: fuori partita, il tema del gioco (dentro non vale mai); L218-16: con la sua -b
   if(MUSICA_FORZATA && MUSICA_FORZATA_S===S) return MUSICA_FORZATA;
   if(typeof NOTTE!=='undefined' && NOTTE) return musicaGiroVariante('mus-notte');                   // L218-9: anche la notte ha la sua -b
-  const mg=musicaGuerra(); if(mg) return mg;                                                          // L245-5: guerra, tensione, dopoguerra — L237-5 (passo 0): DOPO la notte, che suona anche in guerra
+  const mg=musicaGuerra(); if(mg) return mg;
+  const ml=musicaLutto(); if(ml) return ml;                                                          // L245-7: il mese dopo un attacco grave, sotto la musica di guerra                                                          // L245-5: guerra, tensione, dopoguerra — L237-5 (passo 0): DOPO la notte, che suona anche in guerra
   if(musicaCrisi()) return musicaGiroVariante('mus-crisi');                                          // L122-1: anche crisi e campagna
   if(typeof inCampagna==='function' && inCampagna()) return musicaGiroVariante('mus-campagna');      // hanno la loro variante
   const ep=musicaEpoca();
@@ -756,7 +776,7 @@ function musica(stato){
     if(!AUDIO_CTX) return;                             // prima del primo gesto: niente (la prossima resa riprova)
     const brano=musicaScelta();
     /* il volume: a zero per la durata di un pilastro-tragedia, poi torna; sotto una voce di partenza a ×0,3 (L146-1). La tragedia vince. */
-    const zitta=musicaTragedia(), clip=!zitta && MUSICA_CLIP_ZITTA && veloClipAperto(), liv=musicaGradino();   // L246-1: zero anche sotto la voce di una clip
+    const zitta=musicaTragedia() || musicaAttaccoZitta(), clip=!zitta && MUSICA_CLIP_ZITTA && veloClipAperto(), liv=musicaGradino();   // L246-1: zero anche sotto la voce di una clip
     if(liv!==MUSICA_LIVELLO){ const eraTragedia=MUSICA_ZITTA; MUSICA_ZITTA=zitta;
       /* L246-1: verso lo zero della clip 0,4 s, dallo zero della clip 1 s; il resto (tragedia, sotto-voce) con la rampa di sempre */
       const dur=clip ? MUSICA_CLIP_ZITTA_S : (MUSICA_LIVELLO===0 && !zitta && !eraTragedia ? MUSICA_CLIP_RIPRESA_S : MUSICA_DUCK_S);

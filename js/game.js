@@ -1883,13 +1883,41 @@ function disoccupazioneEra(){
    clima sarebbe partito a gennaio '70 — un mese dopo il fatto che lo apre. */
 /* L33-1 - il clima NON e solo dei 70: dagli 80 DECADE, perche il terrorismo declina (pentiti 82, dissociazione
    87). Percettibile fino all 82, residuale dopo: la decade in superficie e luminosa, ed e questo il contrasto. */
-const CLIMA70 = [ {da:1969.9, sicurezza:-4, titoli:4}, {da:1974, sicurezza:-7, titoli:7}, {da:1977, sicurezza:-9, titoli:8},
-                  {da:1981, sicurezza:-6, titoli:6}, {da:1983, sicurezza:-3, titoli:3}, {da:1986, sicurezza:-1, titoli:1} ];
+/* ⚑ L245-7 · CLIMA_SICUREZZA: la tabella del clima per linea (DESIGN-POLITICA-ESTERA.md §(d), «⚑ L245-7»). Righe {da, sicurezza,
+   titoli, livello}. L'Italia è CLIMA70 di sempre, con gli stessi `da`, `sicurezza` e `titoli` (prova d'identità in
+   prove/l245-7/prova-clima.js) più il `livello` (0-3) che muove la sola frequenza della carta d'attacco (attaccoDovuto). Fuori
+   dall'Italia solo `livello`: sicurezza e titoli a 0, il bersaglio e la prima pagina restano come prima. Numeri di design, non
+   storici. Il presente (S.era null) legge la riga della linea del suo paese (PAESE_LINEA_CLIMA) e dal 2001 almeno il livello 1;
+   la sicurezza e i titoli del presente restano a 0 (clima70 vale solo per S.era===LINEA_IT). */
+const CLIMA_SICUREZZA = {
+  [LINEA_IT]: [ {da:1969.9, sicurezza:-4, titoli:4, livello:2}, {da:1974, sicurezza:-7, titoli:7, livello:3}, {da:1977, sicurezza:-9, titoli:8, livello:3},
+                {da:1981, sicurezza:-6, titoli:6, livello:2}, {da:1983, sicurezza:-3, titoli:3, livello:1}, {da:1986, sicurezza:-1, titoli:1, livello:1} ],
+  [LINEA_UK]: [ {da:1969.9, sicurezza:0, titoli:0, livello:2}, {da:1972, sicurezza:0, titoli:0, livello:3}, {da:1977, sicurezza:0, titoli:0, livello:2},
+                {da:1994, sicurezza:0, titoli:0, livello:1}, {da:1998.3, sicurezza:0, titoli:0, livello:0} ],
+  [LINEA_DE]: [ {da:1970, sicurezza:0, titoli:0, livello:2}, {da:1975, sicurezza:0, titoli:0, livello:3}, {da:1978, sicurezza:0, titoli:0, livello:2},
+                {da:1986, sicurezza:0, titoli:0, livello:1}, {da:1993.5, sicurezza:0, titoli:0, livello:0} ],
+  [LINEA_FR]: [ {da:1955, sicurezza:0, titoli:0, livello:2}, {da:1962.5, sicurezza:0, titoli:0, livello:0}, {da:1985, sicurezza:0, titoli:0, livello:2},
+                {da:1996.5, sicurezza:0, titoli:0, livello:0}, {da:2012, sicurezza:0, titoli:0, livello:2}, {da:2015, sicurezza:0, titoli:0, livello:3},
+                {da:2018, sicurezza:0, titoli:0, livello:1} ],
+  [LINEA_US]: [ {da:2001.7, sicurezza:0, titoli:0, livello:2}, {da:2004, sicurezza:0, titoli:0, livello:1} ]
+};
+const CLIMA70 = CLIMA_SICUREZZA[LINEA_IT];   // il nome di sempre (data.js lo cita): le stesse righe
+const PAESE_LINEA_CLIMA = { italia:LINEA_IT, regnounito:LINEA_UK, germania:LINEA_DE, francia:LINEA_FR, usa:LINEA_US };
+function climaRiga(righe){
+  if(!righe || typeof S==='undefined' || !S) return null;
+  var t=S.year+((S.month||1)-1)/12, out=null;
+  for(var i=0;i<righe.length;i++){ if(t>=righe[i].da) out=righe[i]; }
+  return out;
+}
 function clima70(){
   if(typeof S==='undefined' || !S || S.era!==LINEA_IT) return null;   // solo la linea storica; presente intatto
-  var t=S.year+((S.month||1)-1)/12, out=null;
-  for(var i=0;i<CLIMA70.length;i++){ if(t>=CLIMA70[i].da) out=CLIMA70[i]; }
-  return out;
+  return climaRiga(CLIMA_SICUREZZA[LINEA_IT]);
+}
+function climaLivello(){
+  if(typeof S==='undefined' || !S) return 0;
+  if(S.era){ var r=climaRiga(CLIMA_SICUREZZA[S.era]); return r ? r.livello : 0; }
+  var rp=climaRiga(CLIMA_SICUREZZA[PAESE_LINEA_CLIMA[S.paese]]), lv=rp ? rp.livello : 0;
+  return S.year>=2001 ? Math.max(lv, 1) : lv;
 }
 function climaSicurezza(){ var c=clima70(); return c?c.sicurezza:0; }   // offset sul BERSAGLIO (model.js)
 function climaTitoli(){    var c=clima70(); return c?c.titoli:0;    }   // alza la soglia amico/ostile della prima pagina
@@ -4430,6 +4458,32 @@ function snodoPacchetto96Dovuta(){ return typeof S!=='undefined' && S && S.era==
 function snodoPacchetto96OppDovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_DE && S.livello===3 && S.opposizione && S.dePacchetto96Opp==null && S.dePacchetto96==null && (S.year===1996 && S.month>=9 && S.month<=10); }
 function snodoKosovo99Dovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_DE && S.livello===3 && !S.opposizione && S.deKosovo99==null && (S.year===1999 && S.month>=3 && S.month<=4); }
 function snodoKosovo99OppDovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_DE && S.livello===3 && S.opposizione && S.deKosovo99Opp==null && S.deKosovo99==null && (S.year===1999 && S.month>=3 && S.month<=4); }
+/* ⚑ L245-8-1 · gli snodi che aprono la scala nella linea italiana (TRIESTE53_EV, LAMPEDUSA86_EV in data.js): il capo del governo
+   riceve lo snodo, l'opposizione la versione dall'aula (G1: chi lo ha giocato al governo non la riceve). Finestre di due mesi, come Suez
+   (un mese occupato non lo perde). Solo dove RIVALI ha la riga della potenza per la partita (rivaleRiga): oggi italia1950 con la
+   Jugoslavia e italia1980 con la Libia — una carriera di un'altra porta della linea che arriva a quella data non lo riceve, perché la
+   sua fermezza non aprirebbe niente. Interruttore SNODI_SCALA_IT (let; il banco lo segue: __BANCO_SNODI_IT_OFF = prima). */
+let SNODI_SCALA_IT=true;   // L245-8-1: ACCESA il 22/10 (misura del passo 4 verde: .claude/misura-l245-8-1.js, rapporto «⚑ L245-8-1»)
+function snodoScalaItOk(con){ return SNODI_SCALA_IT && typeof S!=='undefined' && S && S.era===LINEA_IT && S.livello===3 && !!rivaleRiga(con); }
+function snodoTrieste53Dovuta(){      return snodoScalaItOk('jugoslavia') && !S.opposizione && S.trieste53==null && S.year===1953 && S.month>=9 && S.month<=10; }
+function snodoTrieste53OppDovuta(){   return snodoScalaItOk('jugoslavia') && S.opposizione && S.trieste53Opp==null && S.trieste53==null && S.year===1953 && S.month>=9 && S.month<=10; }
+function snodoLampedusa86Dovuta(){    return snodoScalaItOk('libia') && !S.opposizione && S.lampedusa86==null && S.year===1986 && S.month>=4 && S.month<=5; }
+function snodoLampedusa86OppDovuta(){ return snodoScalaItOk('libia') && S.opposizione && S.lampedusa86Opp==null && S.lampedusa86==null && S.year===1986 && S.month>=4 && S.month<=5; }
+/* ⚑ L245-8-2 · il Kosovo 1999 (italia1990, con la federazione jugoslava `rfj`) e la Libia 2011 (italia2000): stessa regola di Trieste e
+   Lampedusa (snodoScalaItOk: linea italiana, livello 3, riga di RIVALI viva) più un interruttore suo, SNODI_SCALA_IT2 (il banco lo segue:
+   __BANCO_SNODI_IT2_OFF = prima, __BANCO_SNODI_IT2_ON = acceso a mano). */
+let SNODI_SCALA_IT2=true;   // L245-8-2: ACCESA il 22/10 (misura del passo 4 verde: .claude/misura-l245-8-2.js, rapporto «⚑ L245-8-2»)
+function snodoKosovo99ItDovuta(){    return SNODI_SCALA_IT2 && snodoScalaItOk('rfj') && !S.opposizione && S.kosovo99It==null && S.year===1999 && S.month>=3 && S.month<=4; }
+function snodoKosovo99ItOppDovuta(){ return SNODI_SCALA_IT2 && snodoScalaItOk('rfj') && S.opposizione && S.kosovo99ItOpp==null && S.kosovo99It==null && S.year===1999 && S.month>=3 && S.month<=4; }
+function snodoLibia11Dovuta(){       return SNODI_SCALA_IT2 && snodoScalaItOk('libia') && !S.opposizione && S.libia11==null && S.year===2011 && S.month>=3 && S.month<=4; }
+function snodoLibia11OppDovuta(){    return SNODI_SCALA_IT2 && snodoScalaItOk('libia') && S.opposizione && S.libia11Opp==null && S.libia11==null && S.year===2011 && S.month>=3 && S.month<=4; }
+/* ⚑ L245-8-3 · la terza guerra del merluzzo (uk1970, con l'Islanda, gennaio-febbraio 1976): la forma di snodoScalaItOk per la linea
+   britannica, con l'interruttore suo SNODI_SCALA_UK (il banco lo segue: __BANCO_SNODI_UK_OFF = prima, __BANCO_SNODI_UK_ON = acceso a
+   mano). La riga di RIVALI ha massimo 3: la scala si ferma alla mobilitazione. */
+let SNODI_SCALA_UK=true;   // L245-8-3: ACCESA il 22/10 (misura del passo 4 verde: .claude/misura-l245-8-3.js, rapporto «⚑ L245-8-3»)
+function snodoScalaUkOk(con){ return SNODI_SCALA_UK && typeof S!=='undefined' && S && S.era===LINEA_UK && S.livello===3 && !!rivaleRiga(con); }
+function snodoMerluzzo76Dovuta(){    return snodoScalaUkOk('islanda') && !S.opposizione && S.merluzzo76==null && S.year===1976 && S.month>=1 && S.month<=2; }
+function snodoMerluzzo76OppDovuta(){ return snodoScalaUkOk('islanda') && S.opposizione && S.merluzzo76Opp==null && S.merluzzo76==null && S.year===1976 && S.month>=1 && S.month<=2; }
 function snodoMoneta98Dovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_DE && S.livello===3 && S.deMoneta98==null && (S.year===1998 && S.month>=4 && S.month<=5); }
 /* L157-1 · i cancelli degli snodi del decennio tedesco 2000 (finestre di due mesi, come L153-2). Nessun pilastro né fatto-mondo in quei
    mesi: pde00_ueberlingen è del 2002/7, pm_tsunami del 2005/1, pm_crollo del 2008/9. S3 «La questione di fiducia» al governo solo per un
@@ -4910,7 +4964,8 @@ const CRISI_K={ cede:0.6, freno:0.55, alleanzaMin:50, sanzGrowth:0.1, mobDeficit
 const CRISI_TARATA={ apre:0.07, scala:0.5, quiete:4, pausa:36 }, CRISI_PRIMA={ apre:1, scala:0.5, quiete:4, pausa:0 }, CRISI_2BIS={ apre:0.15, scala:0.5, quiete:4, pausa:0 };
 let CRISI_P_APRE=CRISI_TARATA.apre, CRISI_P_SCALA=CRISI_TARATA.scala, CRISI_QUIETE=CRISI_TARATA.quiete, CRISI_PAUSA=CRISI_TARATA.pausa;
 function crisiTaratura(prima, pausaOff){ var v=prima?CRISI_PRIMA:(pausaOff?CRISI_2BIS:CRISI_TARATA); CRISI_P_APRE=v.apre; CRISI_P_SCALA=v.scala; CRISI_QUIETE=v.quiete; CRISI_PAUSA=v.pausa; }
-function crisiChiudi(ora){ S.crisi=null; if(CRISI_PAUSA>0) S.crisiFine=ora; }   // L245-2ter: le due chiusure passano di qui
+function crisiChiudi(ora){ var sn=S.crisi && S.crisi.snodo; S.crisi=null; if(CRISI_PAUSA>0) S.crisiFine=ora;   // L245-2ter: le due chiusure passano di qui
+  if(sn && typeof SNODI_SCALA_STORIA!=='undefined' && SNODI_SCALA_STORIA[sn]) S.log.unshift({t:T('Crisi internazionale'), x:T(SNODI_SCALA_STORIA[sn])}); }   // L245-8-1: la crisi aperta da uno snodo si chiude con la riga della storia (D-G6)
 function crisiCapo(){ return S.livello===3 && !S.opposizione; }
 function crisiMeseAss(){ return S.year*12+S.month; }
 function crisiPot(){ return S.crisi ? potDi(S.crisi.con) : null; }
@@ -4938,9 +4993,11 @@ function crisiApplica(campo){
   if(S.crisi && S.crisi.subita) return;                            // L245-6: la crisi subita sale coi segnali del rivale (crisiMese), mai con una carta
   if(!S.crisi){
     if(!rivaleRiga(campo.con)) return;                               // L245-3: con questa potenza, qui e ora, non nasce una crisi
-    if(CRISI_PAUSA>0 && S.crisiFine!=null && ora-S.crisiFine<CRISI_PAUSA) return;   // L245-2ter: la pausa dopo una crisi chiusa, prima del dado
-    if(CRISI_P_APRE<=0 || (CRISI_P_APRE<1 && Math.random()>=CRISI_P_APRE)) return;   // L245-2bis: l'apertura non è certa (a 1 nessuna estrazione)
-    S.crisi={con:campo.con, t:0, da:ora, ultimo:ora, alleati:null}; }
+    if(!campo.snodo){   // L245-8-1: lo snodo storico apre la crisi sempre (niente pausa né dado: è la data che la apre)
+      if(CRISI_PAUSA>0 && S.crisiFine!=null && ora-S.crisiFine<CRISI_PAUSA) return;   // L245-2ter: la pausa dopo una crisi chiusa, prima del dado
+      if(CRISI_P_APRE<=0 || (CRISI_P_APRE<1 && Math.random()>=CRISI_P_APRE)) return; }   // L245-2bis: l'apertura non è certa (a 1 nessuna estrazione)
+    S.crisi={con:campo.con, t:0, da:ora, ultimo:ora, alleati:null};
+    if(campo.snodo) S.crisi.snodo=campo.snodo; }   // L245-8-1: il nome dello snodo resta sulla crisi (crisiChiudi, attaccoDovuto)
   var t0=S.crisi.t; S.crisi.t=Math.min(crisiTettoBlocco(), 4, S.crisi.t+(campo.t||1)); S.crisi.ultimo=ora;   // L245-4: una carta non porta mai alla guerra (il 4 resta il tetto del campo `crisi:`)
   if(t0===0) crisiLog('Si apre una crisi con %POTdet: la tensione sale.');
   else if(S.crisi.t>t0) crisiLog(T('La crisi con %POTdet sale di un gradino: %G.').replace('%G', T(CRISI_GRADINI[S.crisi.t])));
@@ -5236,6 +5293,89 @@ function crisiRicevuto(mossa){
   if(Math.random()<pc){ c.t=2; delete c.subita; repd(CRISI_K.premioCede); crisiLog('%POTDet ritira l\'ultimatum: la crisi torna alle sanzioni.'); return; }
   if(crisiTettoBlocco()>=5){ guerraApri(true, '%POTDet ci attacca: è guerra.'); return; }
   c.t=3; delete c.subita; crisiLog('L\'ultimatum %POTdi scade senza armi: la crisi resta alla mobilitazione.');
+}
+/* ⚑ L245-7 · L'ATTACCO (DESIGN-POLITICA-ESTERA.md §(d), «⚑ L245-7»). La carta ATTACCO_EV (data.js, sei voci: tre `attacco:'leggero'`,
+   tre `attacco:'grave'`) esce SOLO al capo del governo (attaccoCapo: la condizione di votoInAulaAttivo senza la legge), nello slot
+   dell'evento del mese (genAgendaRamo, dopo l'intermedia), con p = ATTACCO_K.p × climaLivello() al mese, dimezzata nelle linee che
+   hanno pilastri veri del terrorismo (ATTACCO_LINEE_VERE: Italia, Regno Unito, Germania — la Francia no: i suoi pilastri gravi sono
+   sciagure e guerre); mai con un pilastro grave della linea (o del mondo, dove arriva) entro ±ATTACCO_K.vicino mesi
+   (pilastroGraveVicino), mai con un pilastro-cronaca in agenda, mai con S.crisi.guerra, al più una ogni S.attacco.gap mesi (24; 12
+   dopo la risposta «libertà», per quella volta sola). Tono grave con p ATTACCO_K.gravi. IL DADO NON È Math.random: un hash della
+   carriera e del mese (attaccoDado, la mescola di scissioneDado), quindi la carta non consuma la sequenza del banco, e una
+   rigenerazione dell'agenda (applySnap) ritrova la stessa carta; il luogo è quello di L239-5 (`luogo:'terr'`, sceltaLuogoTerr, hash).
+   Le quattro risposte sono il campo `attacco:` della scelta, letto in UN punto, attaccoRisposta (resolveItemCore): sicurezza (la legge
+   d'emergenza al voto in aula di L230-1; se passa sicurezza +ATTACCO_K.sicLegge nel modello — leggiMods, model.js —, giovani −1;
+   respinta: leggeRespinta come le altre) · liberta (sicurezza +ATTACCO_K.sicLiberta, la finestra scende a ATTACCO_K.gapLibera) ·
+   unita (+1 una volta ai sei gruppi: il gioco non ha un effetto a tempo sui gruppi; suono `candele`) · alleati (relInt.alleanza +5,
+   la scelta c'è solo se S.relInt esiste). Lo stato è S.attacco = {ultimo, gap, n, sic, grave} (mese assoluto, mesi, conto, punti di
+   sicurezza, l'ultimo era grave), scritto alla risposta. Il segno `colpita` sull'area (il campo segno di S.territori[i], con `fino` = 6 mesi e
+   `attacco:true`, letto da segnoTerr, mai ricostruzione). Suono e musica in audio.js (suonoCarta, musicaAttaccoZitta, musicaLutto).
+   Interruttore ATTACCO_TERR (let, ACCESO dal 22/10; il banco lo segue: __BANCO_ATTACCO_OFF = prima, __BANCO_ATTACCO_ON in __reseed):
+   spento, nessuno scrive S.attacco e la carta non nasce — il gioco di prima. */
+let ATTACCO_TERR=true;   // L245-7: ACCESA il 22/10 (misura del passo 6 verde: .claude/misura-l245-7.js, rapporto «⚑ L245-7»)
+const ATTACCO_K={ p:0.004, gravi:0.3, gap:24, gapLibera:12, vicino:6, mesiSegno:6, sicLegge:2, sicLiberta:1, alleanza:5 };
+const ATTACCO_LINEE_VERE=[LINEA_IT, LINEA_UK, LINEA_DE];
+const ATTACCO_GRUPPI_UNITA=['lavoratori','pensionati','cetomedio','imprenditori','giovani','cattolici'];
+function attaccoCapo(){ return S.livello===3 && !S.opposizione && !S.coabitazione; }
+/* FNV-1a su tutta la stringa e il finalizzatore di murmur3: hashId (ui.js) su due mesi vicini dà numeri consecutivi, e la mescola di
+   scissioneDado non riempie la coda bassa (in 240 mesi il minimo era 0,02: con p 0,006 non usciva mai, misurato) */
+function attaccoDado(sale){
+  var s='att|'+sale+'|'+scissioneCarriera()+'|'+meseAss(), h=2166136261;
+  for(var i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619); }
+  h^=h>>>16; h=Math.imul(h,0x85ebca6b); h^=h>>>13; h=Math.imul(h,0xc2b2ae35); h^=h>>>16;
+  return (h>>>0)/4294967296;
+}
+/* un pilastro grave della linea della partita (o un fatto-mondo grave, dove i fatti-mondo arrivano: non nella linea italiana, non nei
+   paesi di `nonInPaesi`) entro ±mesi dal mese di oggi; per data, visto o no */
+function pilastroGraveVicino(mesi){
+  if(typeof S==='undefined' || !S) return false;
+  var ora=S.year*12+S.month, vicino=function(p){ return !!p && p.tono==='grave' && Math.abs(p.anno*12+p.mese-ora)<=mesi; };
+  if(typeof PILASTRI_LINEA!=='undefined' && PILASTRI_LINEA.some(function(p){ return S.era===(p.linea||LINEA_IT) && vicino(p); })) return true;
+  if(typeof PILASTRI_MONDO!=='undefined' && S.era!==LINEA_IT && PILASTRI_MONDO.some(function(p){ return vicino(p) && !(p.nonInPaesi && p.nonInPaesi.indexOf(S.paese)>=0); })) return true;
+  return false;
+}
+/* il tono della carta del mese ('leggero'|'grave') o null; il dado solo dopo tutte le condizioni */
+function attaccoDovuto(){
+  if(!ATTACCO_TERR || typeof S==='undefined' || !S || !attaccoCapo()) return null;
+  if(S.crisi && (S.crisi.guerra || S.crisi.snodo)) return null;   // L245-8-1: nemmeno con la crisi aperta da uno snodo storico
+  var lv=climaLivello(); if(!(lv>0)) return null;
+  var ora=S.year*12+S.month, A=S.attacco;
+  if(A && typeof A.ultimo==='number' && ora-A.ultimo<(A.gap||ATTACCO_K.gap)) return null;
+  if(pilastroGraveVicino(ATTACCO_K.vicino)) return null;
+  if(Array.isArray(S.agenda) && S.agenda.some(function(a){ return a && a.data && a.data.cronaca; })) return null;
+  var p=ATTACCO_K.p*lv*(ATTACCO_LINEE_VERE.indexOf(S.era)>=0 ? 0.5 : 1);
+  if(attaccoDado('p')>=p) return null;
+  return attaccoDado('tono')<ATTACCO_K.gravi ? 'grave' : 'leggero';
+}
+function pickAttacco(){
+  if(typeof ATTACCO_EV==='undefined') return null;
+  var tono=attaccoDovuto(); if(!tono) return null;
+  var pool=ATTACCO_EV.filter(function(e){ return e.attacco===tono; }); if(!pool.length) return null;
+  var ev=pool[Math.min(pool.length-1, Math.floor(attaccoDado('testo')*pool.length))];
+  return Object.assign({}, ev, { ch: ev.ch.filter(function(c){ return c.attacco!=='alleati' || !!(S.relInt && S.relInt.alleanza!=null); }) });
+}
+/* la legge d'emergenza: una voce sola per mese (non è in LEGGI: S.leggi non la vede mai), nel formato che legge pBocciatura */
+function leggeEmergenza(){ return { id:'emergenza_'+S.year+'_'+S.month, nome:'La legge d\'emergenza', asse:0 }; }
+function attaccoRisposta(it, d, mossa){
+  if(!d || !d.attacco) return;
+  var ora=S.year*12+S.month, A=S.attacco=(S.attacco && typeof S.attacco==='object') ? S.attacco : { n:0, sic:0 };
+  A.ultimo=ora; A.gap=ATTACCO_K.gap; A.n=(A.n||0)+1; A.grave=(d.attacco==='grave');
+  if(it && typeof it.terr==='number' && Array.isArray(S.territori) && S.territori[it.terr] && !segnoDiGuerra(it.terr))
+    S.territori[it.terr].segno={ t:'colpita', da:ora, fino:ora+ATTACCO_K.mesiSegno, attacco:true };
+  if(mossa==='sicurezza'){
+    var L=leggeEmergenza();
+    if(votoInAulaAttivo(L)){ var V=votoInAula(L); if(V.respinta){ leggeRespinta(L, V.contro); return; } }
+    if(typeof suona==='function') suona('martelletto');
+    A.sic=(A.sic||0)+ATTACCO_K.sicLegge; gd('giovani',-1);
+    S.log.unshift({t:T('Legge approvata'), x:T('La legge d\'emergenza')+'. '+T('La stampa si divide.')});
+  } else if(mossa==='liberta'){
+    A.sic=(A.sic||0)+ATTACCO_K.sicLiberta; A.gap=ATTACCO_K.gapLibera;
+  } else if(mossa==='unita'){
+    ATTACCO_GRUPPI_UNITA.forEach(function(g){ gd(g,1); });
+    if(typeof suona==='function') suona('candele');
+  } else if(mossa==='alleati'){
+    relIntMuovi('alleanza', ATTACCO_K.alleanza);
+  }
 }
 function pickInternazionale(){
   if(typeof INTERNAZIONALI==='undefined') return null;
@@ -6103,6 +6243,7 @@ function segnoTerrApplica(it, d, choice){
 function segnoTerr(i){
   var v=S && Array.isArray(S.territori) ? S.territori[i] : null, s=v ? v.segno : null;
   if(!s || typeof s.da!=='number') return null;
+  if(s.attacco){ var oa=S.year*12+S.month; return (s.t==='colpita' && typeof s.fino==='number' && oa>=s.da && oa<s.fino) ? { specie:'colpita', mesi:s.fino-oa, da:s.da, attacco:true } : null; }   // L245-7: l'area colpita da un attacco, 6 mesi, mai ricostruzione
   if(SEGNO_GUERRA_APERTO[s.t]) return (S.crisi && S.crisi.guerra && REGOLA_GUERRA) ? { specie:s.t, mesi:null, da:s.da } : null;   // L245-5: finché c'è la guerra (fino:null), i mesi non si dicono
   if(typeof s.fino!=='number') return null;
   var ora=S.year*12+S.month;
@@ -6157,7 +6298,7 @@ function segniGuerra(evento){
       if(g.specie!==t){ S.territori[k].segno={ t:t, da:g.da, fino:null }; if(t==='colpita') colpite.push(k); } });
   } else if(evento==='fine'){   // chiamata da guerraFine PRIMA di crisiChiudi: segnoTerr vede ancora la guerra
     var fino=ora+GUERRA_K.dopo;   // = S.dopoguerra.fino, scritto subito dopo
-    S.territori.forEach(function(v, i){ var g=segnoTerr(i); if(!g || !v) return;
+    S.territori.forEach(function(v, i){ var g=segnoTerr(i); if(!g || !v || g.attacco) return;   // L245-7: l'area colpita da un attacco non diventa ricostruzione
       if(g.specie==='base') delete v.segno;
       else if(g.specie==='fronte' || g.specie==='colpita') v.segno={ t:'ricostruzione', da:ora, fino:fino }; });
   }
@@ -7141,6 +7282,11 @@ function genAgendaRamo(first){
     if(!first && scissioneMiaDovuta()){ S.agenda.push({kind:'event', data:cartaScissioneMia(), resolved:false}); agendaSolo(); return; }   // L237-6: «Il partito ti sta stretto», carta dovuta accanto al richiamo
     if(!first && typeof snodoAlleanza81Dovuta==='function' && snodoAlleanza81Dovuta()){ S.agenda.push({kind:'event', data:(S.partito==='uk_lib'?QUATTRO_EV:SCISSIONE81_EV), resolved:false}); agendaSolo(); return; }   // L60-2: la scissione dell'81 arriva anche all'opposizione
     if(!first && typeof snodoAnimaDovuta==='function' && snodoAnimaDovuta()){ S.agenda.push({kind:'event', data:ANIMA_EV, resolved:false}); agendaSolo(); return; }   // L75-1: l'anima del partito, all'opposizione
+    if(!first && typeof snodoTrieste53OppDovuta==='function' && snodoTrieste53OppDovuta()){ S.agenda.push({kind:'event', data:TRIESTE53_OPP_EV, resolved:false}); agendaSolo(); return; }   // L245-8-1: Trieste, dall'aula
+    if(!first && typeof snodoLampedusa86OppDovuta==='function' && snodoLampedusa86OppDovuta()){ S.agenda.push({kind:'event', data:LAMPEDUSA86_OPP_EV, resolved:false}); agendaSolo(); return; }   // L245-8-1: Lampedusa, dall'aula
+    if(!first && typeof snodoKosovo99ItOppDovuta==='function' && snodoKosovo99ItOppDovuta()){ S.agenda.push({kind:'event', data:KOSOVO99_IT_OPP_EV, resolved:false}); agendaSolo(); return; }   // L245-8-2: il Kosovo, dall'aula
+    if(!first && typeof snodoLibia11OppDovuta==='function' && snodoLibia11OppDovuta()){ S.agenda.push({kind:'event', data:LIBIA11_OPP_EV, resolved:false}); agendaSolo(); return; }   // L245-8-2: la Libia, dall'aula
+    if(!first && typeof snodoMerluzzo76OppDovuta==='function' && snodoMerluzzo76OppDovuta()){ S.agenda.push({kind:'event', data:MERLUZZO76_OPP_EV, resolved:false}); agendaSolo(); return; }   // L245-8-3: il merluzzo, dall'aula
     if(!first && typeof snodoSuezOppDovuta==='function' && snodoSuezOppDovuta()){ S.agenda.push({kind:'event', data:SUEZ_OPP_EV, resolved:false}); agendaSolo(); return; }   // L77-4: Suez dall'aula
     if(!first && typeof snodoCoal2010OppDovuta==='function' && snodoCoal2010OppDovuta()){ S.agenda.push({kind:'event', data:COAL2010_OPP_EV, resolved:false}); agendaSolo(); return; }   // L77-4: i cinque giorni, visti da chi ha perso
     if(!first && typeof snodoPoteriOppDovuta==='function' && snodoPoteriOppDovuta()){ S.agenda.push({kind:'event', data:POTERI_OPP_EV, resolved:false}); agendaSolo(); return; }   // L93-2: i poteri speciali, dall'aula
@@ -7229,6 +7375,11 @@ function genAgendaRamo(first){
   }
   // Build B (b): lo snodo «legge truffa» come SCELTA di governo — carta prioritaria one-shot nell'anno pre-voto (1952), solo per il premier nel '50
   if(!first && typeof snodoSceltaDovuta==='function' && snodoSceltaDovuta()){ S.agenda.push({kind:'event', data:LEGGE_TRUFFA_EV, resolved:false}); agendaSolo(); return; }
+  if(!first && typeof snodoTrieste53Dovuta==='function' && snodoTrieste53Dovuta()){ S.agenda.push({kind:'event', data:TRIESTE53_EV, resolved:false}); agendaSolo(); return; }   // L245-8-1: Trieste apre la scala
+  if(!first && typeof snodoLampedusa86Dovuta==='function' && snodoLampedusa86Dovuta()){ S.agenda.push({kind:'event', data:LAMPEDUSA86_EV, resolved:false}); agendaSolo(); return; }   // L245-8-1: Lampedusa apre la scala
+  if(!first && typeof snodoKosovo99ItDovuta==='function' && snodoKosovo99ItDovuta()){ S.agenda.push({kind:'event', data:KOSOVO99_IT_EV, resolved:false}); agendaSolo(); return; }   // L245-8-2: il Kosovo apre la scala
+  if(!first && typeof snodoLibia11Dovuta==='function' && snodoLibia11Dovuta()){ S.agenda.push({kind:'event', data:LIBIA11_EV, resolved:false}); agendaSolo(); return; }   // L245-8-2: la Libia apre la scala
+  if(!first && typeof snodoMerluzzo76Dovuta==='function' && snodoMerluzzo76Dovuta()){ S.agenda.push({kind:'event', data:MERLUZZO76_EV, resolved:false}); agendaSolo(); return; }   // L245-8-3: il merluzzo apre la scala (prima del FMI, che ha due anni)
   // AVANZAMENTO Lotto 4: gli snodi '60 come SCELTA (Enel poi apertura) — carte one-shot nel '62-63, solo per il premier nel '50
   if(!first && typeof snodoEnelDovuta==='function' && snodoEnelDovuta()){ S.agenda.push({kind:'event', data:ENEL_EV, resolved:false}); agendaSolo(); return; }
   if(!first && typeof snodoAperturaDovuta==='function' && snodoAperturaDovuta()){ S.agenda.push({kind:'event', data:APERTURA_EV, resolved:false}); agendaSolo(); return; }
@@ -7391,6 +7542,7 @@ function genAgendaRamo(first){
   let hadEvent=false;
   const inter=pickIntermedia();
   if(inter){ S.agenda.push(inter); hadEvent=true; }
+  if(!hadEvent){ const att=pickAttacco(); if(att){ S.agenda.push({kind:'event', data:att, resolved:false}); hadEvent=true; } }   // L245-7: l'attacco (spento: null, nessuna estrazione)
   // evento di soglia sui mercati (fiducia): l'evento del mese (solo se non c'è già un'intermedia)
   // PRESSIONE SU UNA POLITICA (loop attivo — Lotto 3): una politica lasciata a un estremo ti richiama a rivederla — il pezzo che CHIUDE
   // il loop economico (costo ricorrente → deficit → pressione). Va PRIMA dell'evento-mercati generico: se la causa è una politica
@@ -7950,6 +8102,7 @@ function resolveItemCore(idx,ci){
     try{ ACT_PACE=pace(); choice.f(); } finally{ ACT_PACE=1; }   // A.5 ritmo: durante una carta ATTIVISTA i gd() scalano; il finally GARANTISCE il reset anche se f() eccepisce → mai ACT_PACE≠1 nel gioco nazionale (raggio d'esplosione: tutti i gruppi)
     if(choice.crisi) crisiApplica(choice.crisi);   // L245-2: il punto unico del campo `crisi:` (la scala della crisi)
     if(choice.ricevuto) crisiRicevuto(choice.ricevuto);   // L245-6: il punto unico del campo `ricevuto:` (l'ultimatum ricevuto)
+    if(choice.attacco) attaccoRisposta(it, d, choice.attacco);   // L245-7: il punto unico del campo `attacco:` (le quattro risposte all'attacco)
     segnoTerrApplica(it, d, choice);   // L239-6: il segno sul territorio (`segnoTerr:` sulla carta o sulla scelta), solo racconto
     if(S.attivista && S.attivista.campagna && !S.attivista.campagna.resaPending){ var _dB=S.attivista.base-_b0, _dA=S.attivista.autorev-_a0; if(_dB>0||_dA>0) nutriCampagna(_dB>=_dA?'piazza':'istituzionale'); }   // la carta ha costruito base→piazza / autorev→istituzionale → nutre la campagna (mossa O evento) se la corsia coincide; un mese-evento in-corsia NON è incuria
     // lealtà del ministro collegato
@@ -10063,6 +10216,7 @@ function applySnap(snap){
   if(S.austerity===undefined){ S.austerity=null; S.divorzio=null; S.solidarieta=null; }   // L28-3 — migrazione snodi '70
   if(S.divorzioBdi===undefined){ S.divorzioBdi=null; S.scalaMobile=null; S.nucleare=null; }   // L33-1 — migrazione snodi '80
   if(!S.pilastri70 || typeof S.pilastri70!=='object') S.pilastri70={};   // L28-4 — migrazione pilastri '70
+  if(S.attacco!=null && (typeof S.attacco!=='object' || typeof S.attacco.ultimo!=='number')) delete S.attacco;   // L245-7: lo stato dell'attacco illeggibile si toglie (assente = nessun attacco)
   if(!S.onuFatto && onuGiaStoria()) S.onuFatto=true;   // L243-1 — migrazione: chi è partito dopo il 1955 non riceve più la carta ONU
   /* L40-2 — i nuovi flag del '90: dato puro, migrazione per i salvataggi anteriori al lotto */
   if(S.maastricht===undefined) S.maastricht=null;

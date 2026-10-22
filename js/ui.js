@@ -790,7 +790,7 @@ function agScene(it){ if(!it || typeof SCENA_MAJOR==='undefined' || !SCENA_MAJOR
   if(!src) return '';
   /* L119-1 · G8: un pilastro-cronaca o una tragedia non si anima — niente clip e niente Ken Burns (`.ferma`), l'immagine sta ferma.
      Si decide sulla CARTA, non sulla scena: la stessa scena può servire una carta qualunque e un pilastro. */
-  const d=it.data||{}, ferma=(d.cronaca===true || d.tono==='grave' || scenaTono(it)==='grave');
+  const d=it.data||{}, ferma=(d.cronaca===true || d.tono==='grave' || d.attacco==='grave' || scenaTono(it)==='grave');   // L245-7: anche la carta d'attacco grave sta ferma
   const clip=ferma ? '' : clipDaSrc(src);   // L95-4: la clip con lo stesso nome del .webp, se c'e'
   const vkey=clip ? ((S?(S.year*12+S.month):0)+':'+seed+':'+clip) : '';   // L119-1: la chiave del nodo vivo (mese + carta + clip)
   /* L143-3 · LA FASCIA: la scena della carta d'agenda è una fascia di 88 px, intera (16/9, tetto 180) al tocco; un altro tocco la
@@ -3027,6 +3027,7 @@ function renderPaese(){
     }
     h+=`</div>`;
   }
+  else if((S.crisi || S.dopoguerra) && (crisiRiga() || dopoguerraRiga())) h+=`<div class="card"><div class="ct">${T('Relazioni internazionali')}</div>`+crisiRiga()+dopoguerraRiga()+`</div>`;   // L245-8-1: senza S.relInt (le porte storiche) la crisi si vede lo stesso
   h+=`<div class="card"><div class="ct">${T('Servizi')}</div>
     ${indRow('Sanità','qualità del servizio',fmt(I.sanita,0),I.sanita,'sanita')}
     ${indRow('Sicurezza','ordine pubblico',fmt(I.sicurezza,0),I.sicurezza,'sicurezza')}
@@ -3053,7 +3054,7 @@ function crisiRiga(){
   var g=T(CRISI_GRADINI[S.crisi.t]||'');
   var tt=(typeof crisiTettoBlocco==='function') ? crisiTettoBlocco() : 4;   // L245-3bis: il tetto vero della riga di RIVALI (Brasile con la Russia: 2)
   var sub=T('gradino %N di %M').replace('%N', S.crisi.t).replace('%M', tt) + (S.crisi.alleati ? ' · '+T(S.crisi.alleati==='frenano'?'gli alleati frenano':'gli alleati seguono') : '');
-  return `<div class="ind crisi-riga"><div class="nm"><b>${escAttr(potSub(T('Crisi con %POT'),p))} · ${g}</b><small>${sub}</small></div><div class="num" style="color:${S.crisi.t>=3?'var(--neg)':'var(--warn-ink)'}">${S.crisi.t}/${tt}</div></div>`;
+  return `<div class="ind crisi-riga"><div class="nm"><b>${escAttr(potSub(T('Crisi con %POTdet'),p))} · ${g}</b><small>${sub}</small></div><div class="num" style="color:${S.crisi.t>=3?'var(--neg)':'var(--warn-ink)'}">${S.crisi.t}/${tt}</div></div>`;
 }
 /* ⚑ L245-4 · IL CASSETTO «GUERRA» (DESIGN-POLITICA-ESTERA.md §2 (b), D-G1). Una scheda in più, solo mentre S.crisi.guerra esiste e sei
    il capo del governo (guerraTab), sopra il tavolo che resta visibile (L113-2: il tavolo è un nodo solo, qui non si tocca); a 375 px
@@ -4213,7 +4214,7 @@ function fissiAperti(){
   /* L239-6 · i segni sul territorio: uno per area con un segno vivo, dove l'area ha un posto sul tavolo. `segnoTerr` (game.js) è
      l'unica lettura del dato; la chiave è lo stato ('terr:'+indice), quindi il cantiere che diventa opera è lo stesso nodo */
   if(Array.isArray(S.territori) && typeof segnoTerr==='function') S.territori.forEach(function(_, i){ const g=segnoTerr(i);
-    if(g && luogoHaArea(i)) out.push({ key:'terr:'+i, tipo:'segno', terr:i, specie:g.specie, mesi:g.mesi, da:g.da }); });
+    if(g && luogoHaArea(i)) out.push({ key:'terr:'+i, tipo:'segno', terr:i, specie:g.specie, mesi:g.mesi, da:g.da, attacco:!!g.attacco }); });   // L245-7: l'area colpita da un attacco ha i suoi testi
   return out;
 }
 /* il luogo di base, in unità del disegno: il fronte SOPRA il palazzo, la rivolta in basso a sinistra (col suo anello), la sfida
@@ -4293,13 +4294,13 @@ function fissoTitolo(F){
   if(F.tipo==='sfida') return T('La sfida nel partito');
   if(F.tipo==='fronte') return T('Il fronte giudiziario');
   if(F.tipo==='promessa') return T('Promessa: %G').replace('%G', nomeGruppo(F.grp));   // il gruppo dopo i due punti: «Promessa a Lavoratori» non reggeva
-  if(F.tipo==='segno') return T((SEGNO_TERR_TESTI[F.specie]||{}).t||'');   // L239-6
+  if(F.tipo==='segno') return T((SEGNO_TERR_TESTI[F.attacco ? 'attacco' : F.specie]||{}).t||'');   // L239-6 · L245-7: l'attacco ha i suoi testi
   return T('%G in rivolta').replace('%G', nomeGruppo(F.grp));
 }
 /* L239-6 · la riga del segno sul territorio, già tradotta e resa: T() sul modello, poi %N, poi il territorio (arcoTerrSub, %TERR
    all'inizio: maiuscola, il nome italiano di un plurale porta l'articolo) */
 function segnoRiga(F){
-  const X=SEGNO_TERR_TESTI[F.specie]; if(!X) return '';
+  const X=SEGNO_TERR_TESTI[F.attacco ? 'attacco' : F.specie]; if(!X) return '';
   const TE=(PAESE.territori||[])[F.terr]||null, r=arcoTerrSub(T(F.mesi===1 ? X.r1 : X.r).replace('%N', F.mesi), TE);
   return r.charAt(0).toUpperCase()+r.slice(1);
 }

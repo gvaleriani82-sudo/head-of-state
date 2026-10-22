@@ -7282,8 +7282,53 @@ const SEGNO_TERR_TESTI={
   fronte:  { t:'Zona del fronte',  r:'%TERR: zona del fronte.' },
   base:    { t:'Mobilitazione',    r:'%TERR: mobilitazione in corso.' },
   colpita: { t:'Area colpita',     r:'%TERR: area colpita dai combattimenti.' },
-  ricostruzione:{ t:'Ricostruzione', r:'%TERR: ricostruzione, ancora %N mesi.', r1:'%TERR: ricostruzione, ancora un mese.' }
+  ricostruzione:{ t:'Ricostruzione', r:'%TERR: ricostruzione, ancora %N mesi.', r1:'%TERR: ricostruzione, ancora un mese.' },
+  /* L245-7 · l'area colpita da un attacco (la legge segnoTerr(), specie `colpita` con `attacco:true`, 6 mesi) */
+  attacco: { t:'Area colpita', r:'%TERR: area colpita da un attentato, ancora %N mesi.', r1:'%TERR: area colpita da un attentato, ancora un mese.' }
 };
+/* ⚑ L245-7 · LA CARTA D'ATTACCO (game.js: pickAttacco, attaccoRisposta; «⚑ L245-7» in DESIGN-POLITICA-ESTERA.md). Sei voci, due toni
+   (`attacco:'leggero'|'grave'`), nessuna sigla, nessuna matrice, nessun nome reale; il luogo è L239-5 (`luogo:'terr'`, %TERR soggetto a
+   metà frase col verbo segnato da %TV{…}). Le quattro scelte sono la RISPOSTA, mai l'attacco: il campo `attacco:` della scelta (letto
+   solo da attaccoRisposta). «Coordinati con gli alleati» c'è solo con S.relInt (pickAttacco la toglie). Scena dichiarata `crisi:base` o
+   `crisi:grave` (le scene del lutto non ci sono ancora); la grave sta ferma (agScene) e suona `campane-lutto` (suonoCarta). */
+const ATTACCO_EV=[
+ {id:'att_leggero_ordigno', attacco:'leggero', luogo:'terr', kick:'Sicurezza', scena:'crisi:base', t:'Un ordigno nella notte',
+  text:'Poco dopo le tre un ordigno esplode davanti a un ufficio pubblico: vetri in frantumi, nessun ferito. Nessuno rivendica, e %TERR %TV{si sveglia|si svegliano} con le transenne in strada e una domanda che passa di bocca in bocca: chi, e perché.',
+  ch:[ {attacco:'sicurezza', l:'Una legge d\'emergenza', e:'Più poteri alle forze dell\'ordine, ma va votata in aula · i giovani diffidano', f:function(){}},
+       {attacco:'liberta', l:'Nessuna legge nuova: lo Stato di diritto regge', e:'Più controlli, senza leggi speciali · il pericolo resta più vicino', f:function(){}},
+       {attacco:'unita', l:'Un appello all\'unità nazionale', e:'Il paese si stringe: un piccolo sollievo per tutti', f:function(){}},
+       {attacco:'alleati', l:'Coordinati con gli alleati', e:'Intelligence condivisa · l\'alleanza si rafforza', f:function(){}} ]},
+ {id:'att_leggero_pacco', attacco:'leggero', luogo:'terr', kick:'Sicurezza', scena:'crisi:base', t:'Un pacco esplode alla stazione',
+  text:'Un pacco abbandonato nel deposito bagagli esplode a stazione chiusa: danni, nessuna vittima. Gli artificieri lavorano tutta la mattina, e %TERR %TV{aspetta|aspettano} di sapere chi è stato.',
+  ch:[ {attacco:'sicurezza', l:'Una legge d\'emergenza', e:'Più poteri alle forze dell\'ordine, ma va votata in aula · i giovani diffidano', f:function(){}},
+       {attacco:'liberta', l:'Nessuna legge nuova: lo Stato di diritto regge', e:'Più controlli, senza leggi speciali · il pericolo resta più vicino', f:function(){}},
+       {attacco:'unita', l:'Un appello all\'unità nazionale', e:'Il paese si stringe: un piccolo sollievo per tutti', f:function(){}},
+       {attacco:'alleati', l:'Coordinati con gli alleati', e:'Intelligence condivisa · l\'alleanza si rafforza', f:function(){}} ]},
+ {id:'att_leggero_tribunale', attacco:'leggero', luogo:'terr', kick:'Sicurezza', scena:'crisi:base', t:'Un attentato al tribunale',
+  text:'Nella notte una carica esplosiva danneggia l\'ingresso del tribunale. Il palazzo era vuoto e nessuno è rimasto ferito. Gli inquirenti non escludono nessuna pista, e %TERR %TV{chiede|chiedono} di sentirsi al sicuro.',
+  ch:[ {attacco:'sicurezza', l:'Una legge d\'emergenza', e:'Più poteri alle forze dell\'ordine, ma va votata in aula · i giovani diffidano', f:function(){}},
+       {attacco:'liberta', l:'Nessuna legge nuova: lo Stato di diritto regge', e:'Più controlli, senza leggi speciali · il pericolo resta più vicino', f:function(){}},
+       {attacco:'unita', l:'Un appello all\'unità nazionale', e:'Il paese si stringe: un piccolo sollievo per tutti', f:function(){}},
+       {attacco:'alleati', l:'Coordinati con gli alleati', e:'Intelligence condivisa · l\'alleanza si rafforza', f:function(){}} ]},
+ {id:'att_grave_piazza', attacco:'grave', luogo:'terr', kick:'Il paese', scena:'crisi:grave', t:'Una strage',
+  text:'Una bomba esplode in una piazza affollata, a metà mattina. I morti sono molti, i feriti di più: le ambulanze fanno la spola per ore, e %TERR %TV{piange|piangono} i morti. Il paese si ferma e guarda a te.',
+  ch:[ {attacco:'sicurezza', l:'Una legge d\'emergenza', e:'Più poteri alle forze dell\'ordine, ma va votata in aula · i giovani diffidano', f:function(){}},
+       {attacco:'liberta', l:'Nessuna legge nuova: lo Stato di diritto regge', e:'Più controlli, senza leggi speciali · il pericolo resta più vicino', f:function(){}},
+       {attacco:'unita', l:'Un appello all\'unità nazionale', e:'Il paese si stringe: un piccolo sollievo per tutti', f:function(){}},
+       {attacco:'alleati', l:'Coordinati con gli alleati', e:'Intelligence condivisa · l\'alleanza si rafforza', f:function(){}} ]},
+ {id:'att_grave_treno', attacco:'grave', luogo:'terr', kick:'Il paese', scena:'crisi:grave', t:'La bomba sul treno',
+  text:'Un ordigno esplode su un treno di pendolari all\'ora di punta: decine di vittime, carrozze sventrate, soccorritori al lavoro fino a sera, e %TERR %TV{vive|vivono} il giorno più nero che si ricordi.',
+  ch:[ {attacco:'sicurezza', l:'Una legge d\'emergenza', e:'Più poteri alle forze dell\'ordine, ma va votata in aula · i giovani diffidano', f:function(){}},
+       {attacco:'liberta', l:'Nessuna legge nuova: lo Stato di diritto regge', e:'Più controlli, senza leggi speciali · il pericolo resta più vicino', f:function(){}},
+       {attacco:'unita', l:'Un appello all\'unità nazionale', e:'Il paese si stringe: un piccolo sollievo per tutti', f:function(){}},
+       {attacco:'alleati', l:'Coordinati con gli alleati', e:'Intelligence condivisa · l\'alleanza si rafforza', f:function(){}} ]},
+ {id:'att_grave_mercato', attacco:'grave', luogo:'terr', kick:'Il paese', scena:'crisi:grave', t:'Il giorno del lutto',
+  text:'Un\'esplosione devasta un mercato coperto nel giorno di maggiore affluenza. Il conto delle vittime sale per tutto il pomeriggio, e %TERR %TV{è|sono} in lutto. Nessuno rivendica: resta da decidere come risponde lo Stato.',
+  ch:[ {attacco:'sicurezza', l:'Una legge d\'emergenza', e:'Più poteri alle forze dell\'ordine, ma va votata in aula · i giovani diffidano', f:function(){}},
+       {attacco:'liberta', l:'Nessuna legge nuova: lo Stato di diritto regge', e:'Più controlli, senza leggi speciali · il pericolo resta più vicino', f:function(){}},
+       {attacco:'unita', l:'Un appello all\'unità nazionale', e:'Il paese si stringe: un piccolo sollievo per tutti', f:function(){}},
+       {attacco:'alleati', l:'Coordinati con gli alleati', e:'Intelligence condivisa · l\'alleanza si rafforza', f:function(){}} ]}
+];
 const GIRO_SCENE=[
  /* — le sei semi di L182-3, riscritte con D175 (L185-1) — */
  {id:'gi_comizio', era:'universale', kind:'giro',
@@ -11087,7 +11132,7 @@ const DOSSIERS=[
    {l:'Aderisci con convinzione',e:'L\'Italia tra i fondatori d\'Europa; qualcuno teme',pleases:'progressista',f:()=>{repd(5); gd('imprenditori',2);}},
    {l:'Aderisci, ma difendi le condizioni',e:'Dentro, con cautela sui nostri interessi',pleases:'tecnico',f:()=>{repd(2); gd('cetomedio',1);}},
  ]},
- {id:'d50_trieste',era:'italia1950',min:'esteri',kick:'Alleanza atlantica',t:'La questione di Trieste',text:'Trieste resta contesa e divisa: la diplomazia lavora per riportarla all\'Italia, ma un passo falso può incendiare gli animi e i rapporti col vicino.',ch:[
+ {id:'d50_trieste',era:'italia1950',cond:()=>S.trieste53==null&&S.trieste53Opp==null,min:'esteri',kick:'Alleanza atlantica',t:'La questione di Trieste',text:'Trieste resta contesa e divisa: la diplomazia lavora per riportarla all\'Italia, ma un passo falso può incendiare gli animi e i rapporti col vicino.',ch:[
    {l:'Trattativa paziente con gli alleati',e:'Via diplomatica; risultati lenti',pleases:'tecnico',f:()=>{repd(4);}},
    {l:'Rivendicazione ferma e pubblica',e:'Piaci in patria; il tavolo si irrigidisce',pleases:'populista',f:()=>{repd(-2); gd('cetomedio',3); visd(3);}},
  ]},
@@ -12284,7 +12329,7 @@ const EVENTS=[
  {id:'i50_tv', era:'italia1950', cond:()=>S.year>=1954, tono:'florido', kick:'Televisione', t:'La televisione accende l\'Italia', text:'Dal gennaio 1954 la RAI trasmette in tutto il paese: nei bar la gente si accalca davanti a uno schermo. Un mezzo nuovo, che cambia anche la politica.',ch:[
    {l:'Porta il governo sul piccolo schermo',e:'Parli alle famiglie nel salotto · i puristi storcono il naso',f:()=>{gd('cetomedio',3); gd('giovani',2); stampad(3);}},
    {l:'La politica resta nelle piazze',e:'Fedele al comizio · il mezzo nuovo corre senza di te',f:()=>{gd('lavoratori',2); gd('pensionati',2);}}]},
- {id:'i50_trieste', era:'italia1950', cond:()=>S.year>=1954&&S.year<=1955, tono:'florido', kick:'Trieste', t:'Trieste torna all\'Italia', text:'Col Memorandum di Londra Trieste torna sotto amministrazione italiana: il tricolore in piazza Unità, il paese col fiato sospeso.',ch:[
+ {id:'i50_trieste', era:'italia1950', cond:()=>S.year>=1954&&S.year<=1955&&!(S.crisi&&S.crisi.con==='jugoslavia'), tono:'florido', kick:'Trieste', t:'Trieste torna all\'Italia', text:'Col Memorandum di Londra Trieste torna sotto amministrazione italiana: il tricolore in piazza Unità, il paese col fiato sospeso.',ch:[
    {l:'Una grande festa nazionale',e:'L\'orgoglio unisce il paese · Belgrado osserva',f:()=>{allG(2); repd(-1);}},
    {l:'Sobrietà e ponti verso Belgrado',e:'La diplomazia ringrazia · la piazza voleva la festa',f:()=>{repd(3); gd('cetomedio',-1);}}]},
  {id:'i50_ungheria', era:'italia1950', cond:()=>S.year>=1956&&S.year<=1957, tono:'grave', kick:'Ungheria', t:'I carri su Budapest', text:'La rivolta ungherese è schiacciata dai carri sovietici: profughi ai confini, il paese scosso, la sinistra attraversata da un travaglio profondo.',ch:[
@@ -14336,6 +14381,14 @@ const POTENZE=[
  {id:'corea_nord', nome:'Corea del Nord', art:'la', nomeEn:'North Korea', artEn:false, blocco:'rivale', carattere:'un regime imprevedibile',   carattereEn:'an unpredictable regime',   tipi:['missili','nucleare']},
  {id:'urss',       nome:'Unione Sovietica', art:"l'", nomeEn:'Soviet Union', artEn:true, blocco:'rivale', era:'universale', fino:1991, carattere:'la potenza del blocco orientale', carattereEn:'the power of the Eastern bloc', tipi:['aggressione','influenza']},   // L245-3: il rivale di TUTTE le linee storiche dal 1945 al 1991 compreso (era:'universale' + fino, letti da eraCartaViva), mai nel presente. Fino al L245-3 era:'italia1950', codaFino:9999: solo la linea italiana, e viva anche dopo il 1991 accanto alla Russia
  {id:'india',      nome:'India',          art:"l'", nomeEn:'India',       artEn:false, blocco:'swing',  carattere:'una potenza non allineata', carattereEn:'a non-aligned power', tipi:['corteggiamento']},
+ /* L245-8-1 · le potenze MINORI: solo il nome della crisi che uno snodo storico apre (TRIESTE53_EV, LAMPEDUSA86_EV). `blocco:'minore'`
+    non lo chiede nessuno (potenzeDi legge 'rivale' e 'swing'): nessun volto di carta, nessuna crisi subita, nessun conflitto del presente. */
+ {id:'jugoslavia', nome:'Jugoslavia',     art:'la', nomeEn:'Yugoslavia',  artEn:false, blocco:'minore', era:'universale', dal:1946, fino:1991, carattere:'un vicino non allineato', carattereEn:'a non-aligned neighbour', tipi:[]},
+ {id:'libia',      nome:'Libia',          art:'la', nomeEn:'Libya',       artEn:false, blocco:'minore', era:'universale', dal:1951, carattere:'un regime ostile',       carattereEn:'a hostile regime',       tipi:[]},
+ /* L245-8-2: la federazione di Serbia e Montenegro (KOSOVO99_IT_EV), id distinto da `jugoslavia` che finisce nel 1991 */
+ {id:'rfj',        nome:'Jugoslavia',     art:'la', nomeEn:'Yugoslavia',  artEn:false, blocco:'minore', era:'universale', dal:1992, fino:2003, carattere:'la federazione di Serbia e Montenegro', carattereEn:'the federation of Serbia and Montenegro', tipi:[]},
+ /* L245-8-3: la terza guerra del merluzzo (MERLUZZO76_EV), un alleato della NATO: la riga di RIVALI si ferma alla mobilitazione */
+ {id:'islanda',    nome:'Islanda',        art:"l'", nomeEn:'Iceland',     artEn:false, blocco:'minore', era:'universale', dal:1944, carattere:'un alleato della NATO con le sue acque di pesca', carattereEn:'a NATO ally with its own fishing grounds', tipi:[]},
 ];
 /* L245-3 · I RIVALI (DESIGN-POLITICA-ESTERA.md, «⚑ L245-3»): CON CHI può nascere una crisi e FIN DOVE può salire. Una riga per
    paese (o porta) e potenza: `paese` = una chiave di SCENARI (le porte) o di PAESI (il presente), `con` = un id di POTENZE, `dal`/`fino`
@@ -14358,6 +14411,18 @@ const RIVALI=(function(){
   r[r.length-1].fronte=['il Gyeonggi', 'il Gangwon'];   // L245-5: le aree di casa sulla linea di demarcazione (nomi esatti di PAESI.coreasud.territori); settore k ↔ area k (segniGuerra)
   riga('coreasud', 'cina', 2012, 2099, 4, 'blocco');
   riga('india', 'cina', 2012, 2099, 4, 'confine');
+  // L245-8-1: le crisi aperte da uno snodo storico della linea italiana (TRIESTE53_EV, LAMPEDUSA86_EV), mai oltre l'ultimatum. Gli anni
+  // sono interi come tutte le righe: «fino 1954» vale fino a dicembre (il Memorandum è di ottobre), e a gennaio 1955 crisiMese la chiude.
+  riga('italia1950', 'jugoslavia', 1953, 1954, 4, 'confine');
+  riga('italia1980', 'libia', 1986, 1987, 4, 'confine');
+  // L245-8-2: il Kosovo 1999 e la Libia 2011 (KOSOVO99_IT_EV, LIBIA11_EV), una porta per data come in L245-8-1 (la porta del decennio:
+  // una carriera di italia1980 nel 1999 o di italia1990 nel 2011 non li riceve). Anno intero: a gennaio dopo crisiMese chiude.
+  riga('italia1990', 'rfj', 1999, 1999, 4, 'confine');
+  riga('italia2000', 'libia', 2011, 2011, 4, 'confine');
+  // L245-8-3: la terza guerra del merluzzo (MERLUZZO76_EV), solo uk1970 (uk1960 ci arriva solo oltre i 180 mesi). Massimo 3: fra
+  // alleati la crisi arriva alla mobilitazione navale (le fregate) e mai all'ultimatum né alla guerra. `confine` non accende segni:
+  // il fronte vuole il campo `fronte` e la guerra (segniGuerra), e qui la guerra non c'è. A gennaio 1977 crisiMese la chiude.
+  riga('uk1970', 'islanda', 1975, 1976, 3, 'confine');
   ['russia','cina'].forEach(function(c){ riga('brasile messico argentina sudafrica nigeria', c, 2012, 2099, 2, 'lontano'); });   // al più le sanzioni
   // L245-3bis: le porte 1990 e 2000 arrivano al presente (dal 2012 ogni linea apre `contemporanea`): da lì hanno i rivali del
   // presente del loro paese, stessi `massimo` e `tipo`, letti dalle righe qui sopra. La Russia dal 1992 c'è già e non si raddoppia.
@@ -14578,6 +14643,7 @@ const CRISI_SCALA_EV=[
    {l:'Allenti le sanzioni', e:'La crisi scende di un gradino; gli alleati storcono il naso', f:()=>{relIntMuovi('rivale',3); relIntMuovi('alleanza',-3); crisiScala('scendi');}, scala:'scendi'},
  ]},
  {id:'crs_ultimatum', gradino:3, min:'esteri', kick:'Crisi internazionale', t:'L\'ultimatum', text:'Con le forze in allerta, la crisi con %POTdet è a un passo dalla rottura. Puoi porre un ultimatum: una richiesta pubblica, con una scadenza.',
+  ttext:'Le forze sono in allerta, ma la crisi con %POTdet non rientra. Più in là di così, con %POTdet, non si va: resta da decidere se tenere l\'allerta o smobilitare.',   // L245-8-3: al tetto 3 (oggi solo uk1970 con l'Islanda) la carta della mobilitazione non parla d'ultimatum (pickCrisiScala toglie «sali»)
   t4t:'La scadenza dell\'ultimatum', t4text:'La scadenza dell\'ultimatum %POTa si avvicina. Tutti aspettano la risposta, e la tua prossima mossa.', ch:[
    {l:'Poni l\'ultimatum', l4:'Tieni il punto fino alla scadenza', e:'Tutto su una carta: %POTdet deve rispondere', e4:'%POTDet cede, o respinge', f:()=>{relIntMuovi('rivale',-3); crisiScala('sali');}, scala:'sali'},
    {l:'Mantieni l\'allerta, senza ultimatum', l4:'Concedi altro tempo', e:'La crisi resta dov\'è', e4:'La scadenza si allunga', f:()=>{crisiScala('tieni');}, scala:'tieni'},
@@ -21326,6 +21392,16 @@ const SNODI_STORICI = {
   divorzioBdi: { storico:['sciolto','sciolto_contestato'], conforme:'sul divorzio fra Tesoro e Banca d\'Italia', diverge:{ 'conservato':'Il vincolo fra Tesoro e Banca d\'Italia non è mai stato sciolto: i titoli li ha continuati a comprare lo Stato.' } },
   scalaMobile: { storico:['taglio_confermato'], conforme:'sulla scala mobile', diverge:{ 'taglio_respinto':'Il taglio della contingenza è stato cancellato dal referendum: la scala mobile è tornata piena.', 'invariata':'La scala mobile non è mai stata toccata: nessun decreto, nessun referendum.' } },
   questioneMorale: { storico:['difendi'], conforme:'sulla questione morale', diverge:{ 'collabora':'Davanti ai giudici il tuo partito ha collaborato invece di difendersi: una scelta che nessun partito di allora fece.', 'rinnova':'Davanti ai giudici il tuo partito ha cambiato il gruppo dirigente in piena tempesta: una scelta che nessun partito di allora fece in tempo.' } },
+  trieste53: { storico:['fermezza'], conforme:'su Trieste', diverge:{ 'trattativa':'Nel 1953 su Trieste non si sono mossi reparti: la questione è restata sul tavolo dei diplomatici.', 'corre':'Nel 1953 la tensione su Trieste è stata lasciata correre: nessun reparto alla frontiera, nessuna nota.' } },   // L245-8-1
+  trieste53Opp: { storico:['unita'], conforme:'su Trieste, dall\'opposizione', diverge:{ 'distinguo':'Nel 1953 l\'opposizione si è distinta dal governo su Trieste: sì alla città, no alle armi.' } },
+  lampedusa86: { storico:['trattativa'], conforme:'su Lampedusa', diverge:{ 'fermezza':'Nel 1986, dopo i missili su Lampedusa, la Marina è andata nel canale di Sicilia e la crisi è salita.', 'corre':'Nel 1986 i missili su Lampedusa sono stati lasciati correre, senza nemmeno una protesta formale.' } },
+  lampedusa86Opp: { storico:['unita'], conforme:'su Lampedusa, dall\'opposizione', diverge:{ 'dura':'Nel 1986 l\'opposizione ha chiesto la linea dura contro Tripoli.' } },
+  kosovo99It: { storico:['fermezza'], conforme:'sul Kosovo', diverge:{ 'prudenza':'Nel 1999 il governo ha dato le basi agli alleati ma nessun aereo, e ha cercato una mediazione.', 'fuori':'Nel 1999 il governo ha tenuto il paese fuori dalla guerra del Kosovo.' } },   // L245-8-2
+  kosovo99ItOpp: { storico:['unita'], conforme:'sul Kosovo, dall\'opposizione', diverge:{ 'contro':'Nel 1999 l\'opposizione ha votato contro la guerra del Kosovo.' } },
+  libia11: { storico:['fermezza'], conforme:'sulla Libia', diverge:{ 'prudenza':'Nel 2011 il governo ha dato le basi agli alleati, ma è rimasto fuori dai raid.', 'fuori':'Nel 2011 il governo ha tenuto il paese fuori dalla guerra in Libia.' } },
+  libia11Opp: { storico:['unita'], conforme:'sulla Libia, dall\'opposizione', diverge:{ 'contro':'Nel 2011 l\'opposizione ha votato contro la missione in Libia.' } },
+  merluzzo76: { storico:['fermezza'], conforme:'sulle acque di pesca', diverge:{ 'trattativa':'Nel 1976 il governo ha ritirato subito le fregate e ha trattato le quote di pesca.', 'cede':'Nel 1976 il governo ha accettato le 200 miglia senza mandare le fregate: nella storia ci arrivò dopo mesi di scontri in mare.' } },   // L245-8-3
+  merluzzo76Opp: { storico:['unita'], conforme:'sulle acque di pesca, dall\'opposizione', diverge:{ 'accordo':'Nel 1976 l\'opposizione ha chiesto un accordo con l\'Islanda mentre le fregate erano in mare.' } },
   nucleare: { storico:['uscita'], conforme:'sul nucleare dopo l\'incidente', diverge:{ 'ridimensionato':'Il nucleare non è stato chiuso dopo l\'incidente: il piano è andato avanti, ridimensionato.', 'ridimensionato_conteso':'Il nucleare non è stato chiuso dopo l\'incidente: il piano è andato avanti, ridimensionato e contestato.' } },
   scissione: { storico:['svolta'], conforme:'sulla svolta del partito comunista', diverge:{ 'rifondazione':'Il partito comunista non ha cambiato nome: la svolta è stata respinta e la storia ha preso un\'altra strada.' } },
   maastricht: { storico:['corri'], conforme:'sulla corsa a Maastricht', diverge:{ 'rallenta':'L\'Italia non è entrata nella moneta unica con la prima ondata: ha preso il treno dopo.' } },
@@ -24016,6 +24092,171 @@ const KOSOVO99_OPP_EV = {
     { l:'Votare contro', e:'L\'unico no dei grandi partiti · i pacifisti ti citano, gli alleati prendono nota',
       f:function(){ S.deKosovo99Opp='contro'; gdDe90('giovani',3); gdDe90('cetomedio',-3); baseDe90(-2);
         S.log.unshift({t:T('La guerra'),x:T('Ha votato contro la guerra del Kosovo.')}); } },
+  ],
+};
+/* ⚑ L245-8-1 · LA SCALA APERTA DA UNO SNODO (DESIGN-POLITICA-ESTERA.md, «⚑ L245-8-1»; D-G6: esito non scritto). Due date della linea
+   italiana, al capo del governo (come Suez e il Kosovo; il ministro degli Esteri della linea non riceve snodi) e una versione corta
+   all'opposizione, senza crisi. La fermezza entra nella scala al gradino 2, la trattativa al gradino 1 (il campo `crisi:` con `snodo:`,
+   letto da crisiApplica: niente dado d'apertura né pausa, la crisi porta il nome dello snodo), il «lasciar correre» non apre niente.
+   Da lì la crisi segue le regole della scala (L245-2/3), fino al tetto 4 della riga di RIVALI; quando si chiude — o quando la riga
+   finisce — il registro dice che cosa fece la storia (SNODI_SCALA_STORIA, crisiChiudi). Interruttore SNODI_SCALA_IT (game.js). */
+const TRIESTE53_EV = {
+  id:'snodo_trieste53', snodo:true, era:'italia1950', kick:'La frontiera orientale', tono:'grave',
+  t:'Trieste',
+  text:'La questione di Trieste torna a scottare. La zona A, con la città, è sotto il governo militare alleato; la zona B la amministrano gli jugoslavi, e da Belgrado arrivano voci di annessione. Lo stato maggiore chiede di spostare reparti verso la frontiera orientale, gli alleati raccomandano calma. A Trieste la piazza chiede di non essere dimenticata.',
+  ch:[
+    { l:'L\'esercito alla frontiera orientale', crisi:{con:'jugoslavia', t:2, snodo:'trieste53'}, e:'La storia · i reparti si muovono verso il confine · Belgrado risponde con le sue divisioni, e la crisi sale',
+      f:function(){ S.trieste53='fermezza'; repd(1); gd('cetomedio',2);
+        S.log.unshift({t:T('La frontiera orientale'),x:T('Ha mandato i reparti alla frontiera orientale per Trieste.')}); } },
+    { l:'La via diplomatica, con gli alleati', crisi:{con:'jugoslavia', t:1, snodo:'trieste53'}, e:'Una nota a Belgrado e una agli alleati · la tensione c\'è, ma resta sul tavolo',
+      f:function(){ S.trieste53='trattativa'; repd(2);
+        S.log.unshift({t:T('La frontiera orientale'),x:T('Su Trieste ha scelto la via diplomatica, con gli alleati.')}); } },
+    { l:'Lasciar correre: non è il momento', e:'Nessuna crisi · a Trieste si sentono soli, e il paese se ne accorge',
+      f:function(){ S.trieste53='corre'; allG(-1);
+        S.log.unshift({t:T('La frontiera orientale'),x:T('Ha lasciato correre la tensione su Trieste.')}); } },
+  ],
+};
+const TRIESTE53_OPP_EV = {
+  id:'snodo_trieste53_opp', snodo:true, era:'italia1950', kick:'La frontiera orientale', tono:'grave',
+  t:'Trieste, dall\'aula',
+  text:'Il governo ha spostato reparti verso la frontiera orientale: Trieste è di nuovo una questione aperta, e da Belgrado rispondono con le loro divisioni. In aula si vota una mozione sulla città. Tutti la vogliono italiana, nessuno vuole una guerra.',
+  ch:[
+    { l:'Con il governo: Trieste prima di tutto', e:'La storia · sulla città l\'aula è unita · i tuoi chiedono che cosa ci guadagni',
+      f:function(){ S.trieste53Opp='unita'; gd('cetomedio',2); gd('lavoratori',-1);
+        S.log.unshift({t:T('La frontiera orientale'),x:T('Dall\'opposizione ha votato col governo su Trieste.')}); } },
+    { l:'Sì alla città, no alle armi', e:'Ti distingui · chi vuole fermezza ti chiama tiepido',
+      f:function(){ S.trieste53Opp='distinguo'; gd('giovani',1); gd('cetomedio',-1);
+        S.log.unshift({t:T('La frontiera orientale'),x:T('Su Trieste ha detto sì alla città e no alle armi.')}); } },
+  ],
+};
+const LAMPEDUSA86_EV = {
+  id:'snodo_lampedusa86', snodo:true, era:'italia1980', kick:'Il Mediterraneo', tono:'grave',
+  t:'Lampedusa',
+  text:'Dopo il bombardamento americano su Tripoli, dalla Libia partono due missili verso la base americana di Lampedusa. Cadono in mare, al largo dell\'isola: nessun danno, ma è la prima volta che il territorio della Repubblica viene preso di mira. Lo stato maggiore chiede di rinforzare la base e di pattugliare il canale di Sicilia; gli alleati vogliono sapere che cosa farai.',
+  ch:[
+    { l:'Rinforzi alla base e navi nel canale', crisi:{con:'libia', t:2, snodo:'lampedusa86'}, e:'Il paese vede la Marina muoversi · Tripoli alza la voce, e la crisi sale',
+      f:function(){ S.lampedusa86='fermezza'; repd(1); gd('cetomedio',2);
+        S.log.unshift({t:T('Il Mediterraneo'),x:T('Dopo i missili su Lampedusa ha mandato la Marina nel canale di Sicilia.')}); } },
+    { l:'Una protesta ferma, e il canale diplomatico aperto', crisi:{con:'libia', t:1, snodo:'lampedusa86'}, e:'La storia · nessuna rappresaglia, una protesta formale · la tensione resta, ma sul tavolo',
+      f:function(){ S.lampedusa86='trattativa'; repd(2);
+        S.log.unshift({t:T('Il Mediterraneo'),x:T('Sui missili di Lampedusa ha protestato, senza rappresaglie.')}); } },
+    { l:'Lasciar correre: i missili sono caduti in mare', e:'Nessuna crisi · gli alleati prendono nota, e sull\'isola non si sentono protetti',
+      f:function(){ S.lampedusa86='corre'; allG(-1);
+        S.log.unshift({t:T('Il Mediterraneo'),x:T('Ha lasciato correre i missili caduti al largo di Lampedusa.')}); } },
+  ],
+};
+const LAMPEDUSA86_OPP_EV = {
+  id:'snodo_lampedusa86_opp', snodo:true, era:'italia1980', kick:'Il Mediterraneo', tono:'grave',
+  t:'Lampedusa, dall\'aula',
+  text:'Due missili libici sono caduti in mare al largo di Lampedusa, dopo il bombardamento americano su Tripoli. Il governo ha protestato e rinforzato la base; in aula si discute la risposta. Nessuno vuole una guerra nel Mediterraneo, e nessuno vuole sembrare debole.',
+  ch:[
+    { l:'Con il governo, e contro ogni escalation', e:'La storia · l\'aula si stringe attorno all\'isola · e tu non ti distingui dal governo',
+      f:function(){ S.lampedusa86Opp='unita'; gd('cetomedio',1); gd('pensionati',1);
+        S.log.unshift({t:T('Il Mediterraneo'),x:T('Dall\'opposizione ha votato col governo su Lampedusa.')}); } },
+    { l:'Chiedere la linea dura contro Tripoli', e:'Chi si sente esposto ti applaude · chi teme la guerra ti chiama avventato',
+      f:function(){ S.lampedusa86Opp='dura'; gd('cetomedio',2); gd('giovani',-2);
+        S.log.unshift({t:T('Il Mediterraneo'),x:T('Su Lampedusa ha chiesto la linea dura contro Tripoli.')}); } },
+  ],
+};
+/* che cosa fece la storia, scritto nel registro quando la crisi aperta dallo snodo si chiude (crisiChiudi): l'esito non è scritto (D-G6) */
+const SNODI_SCALA_STORIA = {
+  trieste53: 'La storia · Nel 1954 la questione si chiuse con un accordo.',
+  lampedusa86: 'La storia · Nel 1986 la tensione rientrò senza altri colpi.',
+  kosovo99it: 'La storia · Nel giugno 1999 la guerra finì con il ritiro dal Kosovo.',   // L245-8-2
+  libia11: 'La storia · Nell\'ottobre 2011 il regime cadde e la missione si chiuse.',
+  merluzzo76: 'La storia · Nel giugno 1976 un accordo pose fine alla guerra del merluzzo: i pescherecci britannici lasciarono le acque islandesi.',   // L245-8-3
+};
+/* ⚑ L245-8-3 · la terza guerra del merluzzo (1975-76), il primo snodo della scala nella linea britannica: stesso meccanismo di
+   L245-8-1/2 (campo `crisi:` con `snodo:`), funzione snodoScalaUkOk e interruttore SNODI_SCALA_UK in game.js. La riga di RIVALI
+   ha massimo 3: la scala si ferma alla mobilitazione (le fregate), e la carta al tetto è crs_ultimatum col suo `ttext`. */
+const MERLUZZO76_EV = {
+  id:'snodo_merluzzo76', snodo:true, era:'uk1970', kick:'Le acque di pesca', tono:'grave',
+  t:'La guerra del merluzzo',
+  text:'L\'Islanda ha portato le sue acque di pesca a 200 miglia, e il negoziato si è rotto. In mare le motovedette islandesi tagliano le reti dei pescherecci di Hull e Grimsby, e ci sono stati speronamenti. I porti chiedono che la Royal Navy torni a scortare le flotte. Da Reykjavík minacciano di chiudere la base NATO di Keflavík, e gli alleati chiedono di chiudere in fretta.',
+  ch:[
+    { l:'Le fregate a scortare i pescherecci', crisi:{con:'islanda', t:2, snodo:'merluzzo76'}, e:'La storia · la Royal Navy torna nelle acque contese · l\'Islanda parla di rompere le relazioni, e la crisi sale',
+      f:function(){ S.merluzzo76='fermezza'; gd('lavoratori',1); relIntMuovi('alleanza',-2);
+        S.log.unshift({t:T('Le acque di pesca'),x:T('Ha mandato le fregate a scortare i pescherecci nelle acque islandesi.')}); } },
+    { l:'Ritiri le navi e tratti sulle quote', crisi:{con:'islanda', t:1, snodo:'merluzzo76'}, e:'Le fregate tornano in porto e si negozia quanto pescare · la tensione resta, ma sul tavolo',
+      f:function(){ S.merluzzo76='trattativa'; repd(1);
+        S.log.unshift({t:T('Le acque di pesca'),x:T('Ha ritirato le navi e aperto una trattativa sulle quote di pesca.')}); } },
+    { l:'Accetti le 200 miglia', e:'Nessuna crisi · gli alleati respirano, e nei porti di pesca si perde il lavoro',
+      f:function(){ S.merluzzo76='cede'; allG(-1); gd('lavoratori',-1);
+        S.log.unshift({t:T('Le acque di pesca'),x:T('Ha accettato le 200 miglia islandesi.')}); } },
+  ],
+};
+const MERLUZZO76_OPP_EV = {
+  id:'snodo_merluzzo76_opp', snodo:true, era:'uk1970', kick:'Le acque di pesca', tono:'grave',
+  t:'La guerra del merluzzo, dall\'aula',
+  text:'Le fregate della Royal Navy scortano i pescherecci nelle acque che l\'Islanda dice sue, e in mare ci sono stati speronamenti. Ai Comuni si discute la linea del governo. Nei porti di Hull e Grimsby si teme per il lavoro; fra gli alleati si teme per la base di Keflavík.',
+  ch:[
+    { l:'Con le fregate e con i porti', e:'La storia · voti con il governo · i tuoi chiedono che cosa ci guadagni',
+      f:function(){ S.merluzzo76Opp='unita'; gd('lavoratori',1); gd('giovani',-1);
+        S.log.unshift({t:T('Le acque di pesca'),x:T('Dall\'opposizione ha sostenuto le fregate nelle acque islandesi.')}); } },
+    { l:'Un accordo, prima che sia tardi', e:'Ti distingui · nei porti di pesca ti accusano di averli lasciati soli',
+      f:function(){ S.merluzzo76Opp='accordo'; gd('cetomedio',1); gd('lavoratori',-1);
+        S.log.unshift({t:T('Le acque di pesca'),x:T('Dall\'opposizione ha chiesto un accordo con l\'Islanda.')}); } },
+  ],
+};
+/* ⚑ L245-8-2 · le ultime due date della linea italiana, con il meccanismo di L245-8-1 (stesso campo `crisi:` con `snodo:`, stessa
+   funzione snodoScalaItOk, più l'interruttore suo SNODI_SCALA_IT2 in game.js). Il Kosovo 1999 con la federazione jugoslava (`rfj`),
+   la Libia 2011; la versione dall'aula non apre crisi. Lo snodo tedesco KOSOVO99_EV resta com'era (niente `crisi:`). */
+const KOSOVO99_IT_EV = {
+  id:'snodo_kosovo99it', snodo:true, era:'italia1990', kick:'I Balcani', tono:'grave',
+  t:'Il Kosovo',
+  text:'Il negoziato sul Kosovo è fallito. L\'esercito jugoslavo entra nei villaggi, e i profughi cominciano ad arrivare sull\'Adriatico. L\'Alleanza è pronta a colpire dal cielo, senza un mandato delle Nazioni Unite: chiede le basi aeree del Nord-Est e gli aerei italiani. Da Belgrado avvertono che chi presta le basi entra nella guerra. In maggioranza non tutti sono d\'accordo.',
+  ch:[
+    { l:'Basi e aerei con l\'Alleanza', crisi:{con:'rfj', t:2, snodo:'kosovo99it'}, e:'La storia · gli aerei partono dalle basi del Nord-Est · Belgrado vi chiama nemici, e la crisi sale',
+      f:function(){ S.kosovo99It='fermezza'; repd(2); gd('cetomedio',1); gd('giovani',-1);
+        S.log.unshift({t:T('I Balcani'),x:T('Ha dato basi e aerei all\'Alleanza per il Kosovo.')}); } },
+    { l:'Le basi sì, gli aerei no: e una mediazione', crisi:{con:'rfj', t:1, snodo:'kosovo99it'}, e:'Le basi restano aperte agli alleati, e si cerca una via con Belgrado · la tensione c\'è, ma resta sul tavolo',
+      f:function(){ S.kosovo99It='prudenza'; repd(-1); gd('cattolici',1);
+        S.log.unshift({t:T('I Balcani'),x:T('Sul Kosovo ha dato le basi agli alleati e ha cercato una mediazione.')}); } },
+    { l:'Tenersi fuori dalla guerra', e:'Nessuna crisi · gli alleati prendono nota, e i profughi arrivano lo stesso',
+      f:function(){ S.kosovo99It='fuori'; allG(-1); relIntMuovi('alleanza',-4);
+        S.log.unshift({t:T('I Balcani'),x:T('Ha tenuto il paese fuori dalla guerra del Kosovo.')}); } },
+  ],
+};
+const KOSOVO99_IT_OPP_EV = {
+  id:'snodo_kosovo99it_opp', snodo:true, era:'italia1990', kick:'I Balcani', tono:'grave',
+  t:'Il Kosovo, dall\'aula',
+  text:'Gli aerei dell\'Alleanza colpiscono la Jugoslavia dalle basi del Nord-Est, senza un mandato delle Nazioni Unite. In aula si vota sulla partecipazione. I profughi arrivano sull\'Adriatico: nessuno vuole sembrare indifferente, e nessuno vuole la guerra in casa.',
+  ch:[
+    { l:'Con il governo e con gli alleati', e:'La storia · voti sì insieme a chi governa · i tuoi chiedono che cosa ci guadagni',
+      f:function(){ S.kosovo99ItOpp='unita'; gd('cetomedio',1); gd('giovani',-1);
+        S.log.unshift({t:T('I Balcani'),x:T('Dall\'opposizione ha votato col governo sul Kosovo.')}); } },
+    { l:'Contro una guerra senza mandato', e:'Ti distingui · chi sta con gli alleati ti chiama inaffidabile',
+      f:function(){ S.kosovo99ItOpp='contro'; gd('giovani',2); gd('cetomedio',-1);
+        S.log.unshift({t:T('I Balcani'),x:T('Ha votato contro la guerra del Kosovo.')}); } },
+  ],
+};
+const LIBIA11_EV = {
+  id:'snodo_libia11', snodo:true, era:'italia2000', kick:'Il Mediterraneo', tono:'grave',
+  t:'La Libia',
+  text:'In Libia la rivolta contro il regime è diventata guerra, e le truppe del regime marciano su Bengasi. Le Nazioni Unite autorizzano una no-fly zone; gli alleati chiedono le basi del Sud e gli aerei. Con Tripoli il paese ha un trattato d\'amicizia recente e i contratti energetici più grandi del Mediterraneo, e dall\'altra parte del mare partono i barconi.',
+  ch:[
+    { l:'Le basi, e poi gli aerei con gli alleati', crisi:{con:'libia', t:2, snodo:'libia11'}, e:'La storia · dopo un\'esitazione, le basi e poi i raid · Tripoli minaccia i contratti e il mare, e la crisi sale',
+      f:function(){ S.libia11='fermezza'; repd(2); gd('cetomedio',1); gd('imprenditori',-1);
+        S.log.unshift({t:T('Il Mediterraneo'),x:T('Sulla Libia ha dato le basi e poi gli aerei agli alleati.')}); } },
+    { l:'Le basi sì, i raid no', crisi:{con:'libia', t:1, snodo:'libia11'}, e:'Gli alleati decollano dal Sud, il paese resta fuori dai raid · la tensione resta, ma sul tavolo',
+      f:function(){ S.libia11='prudenza'; repd(-1); gd('imprenditori',1);
+        S.log.unshift({t:T('Il Mediterraneo'),x:T('Sulla Libia ha dato le basi agli alleati, senza i raid.')}); } },
+    { l:'Tenersi fuori: il trattato e i contratti', e:'Nessuna crisi · gli alleati prendono nota, e il paese si chiede da che parte sta',
+      f:function(){ S.libia11='fuori'; allG(-1); relIntMuovi('alleanza',-4);
+        S.log.unshift({t:T('Il Mediterraneo'),x:T('Ha tenuto il paese fuori dalla guerra in Libia.')}); } },
+  ],
+};
+const LIBIA11_OPP_EV = {
+  id:'snodo_libia11_opp', snodo:true, era:'italia2000', kick:'Il Mediterraneo', tono:'grave',
+  t:'La Libia, dall\'aula',
+  text:'Gli aerei degli alleati colpiscono il regime libico con il mandato delle Nazioni Unite, e il governo ha aperto le basi del Sud. In aula si vota sulla missione. Ci sono i civili di Bengasi, i contratti energetici e i barconi: ogni voto pesa su qualcosa.',
+  ch:[
+    { l:'Con la missione delle Nazioni Unite', e:'La storia · voti la missione insieme al governo · e non ti distingui da chi governa',
+      f:function(){ S.libia11Opp='unita'; gd('cetomedio',1); gd('cattolici',1);
+        S.log.unshift({t:T('Il Mediterraneo'),x:T('Dall\'opposizione ha votato la missione in Libia.')}); } },
+    { l:'Contro la guerra, per la mediazione', e:'Ti distingui · chi vuole proteggere i civili ti chiama tiepido',
+      f:function(){ S.libia11Opp='contro'; gd('giovani',1); gd('cetomedio',-1);
+        S.log.unshift({t:T('Il Mediterraneo'),x:T('Ha votato contro la missione in Libia.')}); } },
   ],
 };
 const MONETA98_EV = {
