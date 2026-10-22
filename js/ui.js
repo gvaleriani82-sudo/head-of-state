@@ -1558,6 +1558,7 @@ function ppTesto(campo, el){   // oninput: niente render del riquadro (si perder
   if(ppFondato()){ ppSfonda(); const c=document.getElementById('pp-conferma'); if(c) c.textContent=T('Fonda il partito'); }
 }
 function ppConferma(){
+  if(PP_BOZZA && PP_BOZZA.modo==='scissione') return ppConfermaScissione();   // L237-6: il foglio della scissione, in partita
   if(!PP_BOZZA || !(typeof CREA!=='undefined' && CREA)) return;
   const B=PP_BOZZA; B.err=ppControlla(B);
   if(Object.keys(B.err).length){ renderPPRiquadro(); return; }
@@ -1579,6 +1580,7 @@ function ppBottoneHtml(){
     <small style="flex-basis:100%;font-size:12px;line-height:1.35;color:var(--mut);text-align:left">${T('Parti attivista o politico locale')}</small></button>`;
 }
 function renderPPRiquadro(){
+  if(PP_BOZZA && PP_BOZZA.modo==='scissione') return renderScissioneFoglio();   // L237-6: lo stesso riquadro, nel foglio sopra la carta
   const r=document.getElementById('pp-riquadro'); if(!r) return;
   if(!ppPossibile() || !PP_BOZZA || !PP_BOZZA.aperto){ r.innerHTML=''; r.style.display='none'; return; }
   const B=PP_BOZZA, fondato=ppFondato();
@@ -1593,6 +1595,45 @@ function renderPPRiquadro(){
   h+=`<button class="btn" id="pp-conferma" style="width:100%;margin-top:12px" onclick="ppConferma()">${fondato?T('Partito pronto ✓'):T('Fonda il partito')}</button>`;
   r.innerHTML=h; r.style.display='';
 }
+
+/* L237-6 · IL FOGLIO DEL NOME DELLA SCISSIONE. Lo stesso riquadro di L237-4 (bozza `PP_BOZZA`, stessi campi e controlli: nome ≤ 24,
+   sigla ≤ 6, niente doppioni coi partiti del paese — compreso quello che lasci, che è ancora nel roster —, 8 colori, 2-3 gruppi), in
+   modalità `scissione`, scritto in #modal sopra la carta (un foglio, mai `alert`). Due differenze: la posizione solo fra l'asse del
+   partito lasciato −1, uguale, +1 (di partenza uguale), e in cima quanta parte del partito ti segue. «Fonda il partito» chiama
+   scissioneFonda (game.js); «Annulla» = «Resta» (l'apertura è già contata dalla carta). Transitorio: niente in S finché non confermi. */
+function apriScissioneFoglio(){
+  if(typeof S==='undefined' || !S) return;
+  const v=part(S.partito)||{}, a=v.asse||0;
+  PP_BOZZA={aperto:true, modo:'scissione', nome:'', sigla:'', colore:PP_PALETTE[0], asse:a, asseV:a, base:[], err:{}, quota:scissioneQuota(), vecchio:S.partito};
+  renderScissioneFoglio();
+  document.getElementById('ov').classList.add('on');
+}
+function renderScissioneFoglio(){
+  const B=PP_BOZZA, m=document.getElementById('modal'); if(!B || !m) return;
+  const err=c=>`<div class="pp-err" id="pp-err-${c}" role="alert">${B.err[c]?escAttr(B.err[c]):''}</div>`;
+  const tit=t=>`<div class="crea-etich">${t}</div>`;
+  const assi=[B.asseV-1, B.asseV, B.asseV+1].filter(function(x){ return x>=-2 && x<=2; });
+  let h=`<div class="mt"><div class="kicker">${T('Scissione')}</div><h2>${T('Il tuo partito')}</h2></div>`;
+  h+=`<div class="mtext">${T('Ti porti dietro circa il %Q% di %V').replace('%Q', String(Math.round(B.quota*100))).replace('%V', function(){ return T((part(B.vecchio)||{}).nome||''); })}</div>`;
+  h+=`<div class="pp-sciss" style="padding:0 18px 4px">`;
+  h+=tit(T('Nome del partito'))+`<input id="pp-nome" class="pp-input" value="${escAttr(B.nome)}" maxlength="${PP_NOME_MAX}" autocomplete="off" oninput="ppTesto('nome',this)">`+err('nome');
+  h+=tit(T('Sigla'))+`<input id="pp-sigla" class="pp-input" value="${escAttr(B.sigla)}" maxlength="${PP_SIGLA_MAX}" autocomplete="off" autocapitalize="characters" oninput="ppTesto('sigla',this)" style="text-transform:uppercase">`+err('sigla');
+  h+=tit(T('Colore'))+`<div class="pp-colori">`+PP_PALETTE.map(function(c,i){ return `<button class="pp-colore ${B.colore===c?'on':''}" style="background:${c}" aria-label="${T('Colore')} ${i+1}" aria-pressed="${B.colore===c?'true':'false'}" onclick="ppCampo('colore','${c}')"></button>`; }).join('')+`</div>`;
+  h+=tit(T('Posizione'))+`<div class="seg">`+assi.map(function(a){ return `<button class="${B.asse===a?'on':''}" onclick="ppCampo('asse',${a})">${cap(T(orientamentoDaAsse(a)))}</button>`; }).join('')+`</div>`;
+  h+=tit(T('Chi vuoi rappresentare'))+`<div class="pp-gruppi">`+GROUPS.map(function(g){ const on=B.base.indexOf(g.id)>=0; return `<button class="pp-gruppo ${on?'on':''}" aria-pressed="${on?'true':'false'}" onclick="ppCampo('base','${g.id}')">${escAttr(nomeGruppo(g.id))}</button>`; }).join('')+`</div>`+err('base');
+  h+=`</div><div class="choices"><button class="opt" id="pp-conferma" style="border-color:var(--brand)" onclick="ppConferma()"><span class="ol">${T('Fonda il partito')}</span></button>`;
+  h+=`<button class="opt" id="pp-annulla" onclick="ppAnnullaScissione()"><span class="ol">${T('Annulla')}</span></button></div>`;
+  m.innerHTML=h;
+}
+function ppChiudiScissione(){ PP_BOZZA=null; document.getElementById('ov').classList.remove('on'); render(); commitSnap(); }
+function ppConfermaScissione(){
+  const B=PP_BOZZA; B.err=ppControlla(B);
+  if(Object.keys(B.err).length){ renderScissioneFoglio(); return; }
+  const base={}; B.base.forEach(function(g){ base[g]=1/B.base.length; });
+  scissioneFonda({ nome:String(B.nome).trim(), sigla:String(B.sigla).trim().toUpperCase(), colore:B.colore, asse:B.asse, base:base }, B.quota);
+  ppChiudiScissione();
+}
+function ppAnnullaScissione(){ if(!PP_BOZZA) return; scissioneAnnulla(); ppChiudiScissione(); }
 
 /* ===== Persistenza — UI (schermata iniziale, modale "Partita", carriere). Il nucleo è in game.js. ===== */
 function escAttr(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
@@ -4489,9 +4530,23 @@ function renderMappaInfo(){
     <div style="font-size:12.5px;color:var(--mut);margin-top:3px">${caricaTerr(TE)}: <b style="color:var(--txt)">${t.titolare||'—'}</b> · ${pn}</div>
     <div style="font-size:12px;color:var(--mut2);margin-top:2px">${cap(leanLabel(TE.lean))}${TE.simbolo?' · '+T('area simbolo'):''}</div>${giroOn?`<div style="font-size:12px;color:var(--mut);margin-top:2px">${T('Umore')}: <b style="color:var(--txt)">${umoreParola(t.umore||0)}</b></div>`:''}${(vistaForzaAttiva() && typeof t.q==='number')?`<div style="font-size:12px;color:var(--mut);margin-top:2px">${T('Ultimo voto: <b>%N%</b>').replace('%N',t.q)}</div>`:''}</div>${scheda}${investi}${giroBottone(MAPSEL, chiama&&!!def)}`;
 }
-/* L182-3 — «Vai in visita»: col gettone del mese (giroPossibile) o sull'area che chiama; con la costante spenta, niente */
+/* L182-3 — «Vai in visita»: col gettone del mese (giroPossibile) o sull'area che chiama; con la costante spenta, niente.
+   L239-7 — con FORME_GIRO e un gettone libero, tre bottoni in colonna (visita, comizio, investimento: formeGiro in game.js);
+   l'investimento resta visibile `disabled` con la nota al tetto annuo. Spenta, il bottone di sempre.
+   L239-7bis — l'investimento solo al capo del governo (FORME_INVESTIMENTO): all'opposizione il bottone non c'è, nemmeno disabled. */
 function giroBottone(i, chiama){
   if(typeof GIRO_SUL_TAVOLO==='undefined' || !GIRO_SUL_TAVOLO) return '';
+  if(typeof FORME_GIRO!=='undefined' && FORME_GIRO){
+    const fo=formeGiro(i);
+    if(fo.length){
+      const inv=fo.indexOf('investimento')>=0, invQui=formeGiro(i, true).indexOf('investimento')>=0, resto=Math.max(0, FORME_TETTO_ANNO-formeAnnoN());   // L239-7bis: invQui = l'investimento esiste qui (capo del governo), anche al tetto
+      return `<div style="margin:2px 14px 10px;display:flex;flex-direction:column;gap:7px">`+
+        (fo.indexOf('visita')>=0 ? `<button class="opt" style="min-height:44px" onclick="apriGiro(${i})"><span class="ol">${T('Vai in visita')}</span></button>` : '')+
+        `<button class="opt" style="min-height:44px" onclick="comizioTerr(${i})"><span class="ol">${T('Tieni un comizio')}</span></button>`+
+        (invQui ? `<button class="opt" style="min-height:44px${inv?'':';opacity:.5'}" ${inv?'':'disabled'} onclick="investimentoTerr(${i})"><span class="ol">${T("Annuncia un investimento (%N rimasti quest'anno)").replace('%N',resto)}</span>${inv?'':`<span class="oe">${T("Tetto annuo raggiunto: due investimenti all'anno.")}</span>`}</button>` : '')+
+        `</div>`;
+    }
+  }
   if(!(chiama || giroPossibile())) return '';
   if(!chiama && !scenePerTerr(i).length) return '';
   return `<div style="margin:2px 14px 10px"><button class="opt" style="min-height:44px" onclick="apriGiro(${i})"><span class="ol">${T('Vai in visita')}</span></button></div>`;

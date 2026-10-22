@@ -1023,6 +1023,11 @@ const VOCI_MANIFEST = {
   'voce-scandalo-chiuso':     { file:'voce-scandalo-chiuso.mp3',     gain:0.43, f:{ file:'voce-scandalo-chiuso-f.mp3', gain:0.93 }, en:'The inquiry is closed, and the facts are clear. Now let us return to the questions that matter to people.', it:'L\'inchiesta è chiusa, e i fatti sono chiari. Ora torniamo alle domande che contano per la gente.' },   // F4r · −16,1 / −1,1 (L218-12)
   'voce-lutto':               { file:'voce-lutto.mp3',               gain:0.46, f:{ file:'voce-lutto-f.mp3', gain:0.85 }, en:'Our thoughts are with the families tonight. Every resource of the state is already on its way.', it:'Stanotte il nostro pensiero va alle famiglie. Tutte le risorse dello stato sono già in viaggio.' },   // F4s · −16,6 / −1,2 (L218-12)
   'voce-dibattito':           { file:'voce-dibattito.mp3',           gain:0.37, f:{ file:'voce-dibattito-f.mp3', gain:0.80 }, en:'Tonight, millions are watching. Speak clearly, answer honestly, and never lose your temper.', it:'Stasera ci guardano milioni di persone. Parla chiaro, rispondi con onestà, e non perdere mai la calma.' },   // F4t · −14,8 / −1,1 (L218-12)
+  /* L245-6 (giro suoni 25, S2): la crisi subita. `voce-attacco-a` all'apertura della guerra difensiva (guerraApri, game.js),
+     `voce-attacco-b` alla risposta «Chiami gli alleati» (crisiRicevuto). Gain dalla regola 0,6 × 10^((−19 − RMS)/20) sull'RMS del
+     giro (lui −14,8 · −19,2, lei −22,6 · −20,1): lei pareggiata a lui (−19 reso). Le altre voci di S2 restano ai loro lotti. */
+  'voce-attacco-a':           { file:'voce-attacco-a.mp3',           gain:0.37, f:{ file:'voce-attacco-a-f.mp3', gain:0.91 }, en:'We have been attacked. Our country will defend itself, with resolve and without hatred.', it:'Siamo stati attaccati. Il paese si difenderà, con fermezza e senza odio.' },   // S2 · −14,8 / −1,4 · lei −22,6 / −6,4
+  'voce-attacco-b':           { file:'voce-attacco-b.mp3',           gain:0.61, f:{ file:'voce-attacco-b-f.mp3', gain:0.68 }, en:'I have asked our allies for help, and they will answer. We are not alone.', it:'Ho chiesto aiuto ai nostri alleati, e risponderanno. Non siamo soli.' },   // S2 · −19,2 / −2,5 · lei −20,1 / −4,4
 };
 const VOCI_PRESENTI = ['voce-insediamento.mp3', 'voce-vittoria-a.mp3', 'voce-vittoria-b.mp3', 'voce-sconfitta-a.mp3', 'voce-sconfitta-b.mp3',
                        'voce-fineanno-buono.mp3', 'voce-fineanno-lucieombre.mp3', 'voce-fineanno-difficile.mp3',   // L218-4 (giro suoni 4)
@@ -1047,7 +1052,8 @@ const VOCI_PRESENTI = ['voce-insediamento.mp3', 'voce-vittoria-a.mp3', 'voce-vit
                        'voce-sconfitta-c-f.mp3', 'voce-coalizione-rotta-f.mp3', 'voce-legge-no-f.mp3', 'voce-sondaggio-giu-f.mp3', 'voce-sondaggio-su-f.mp3',
                        'voce-bilancio-si-f.mp3', 'voce-protesta-f.mp3',
                        'voce-sciopero-f.mp3', 'voce-insediamento-b-f.mp3', 'voce-candidatura-f.mp3', 'voce-vertice-f.mp3', 'voce-scandalo-chiuso-f.mp3',
-                       'voce-lutto-f.mp3', 'voce-dibattito-f.mp3'];
+                       'voce-lutto-f.mp3', 'voce-dibattito-f.mp3',
+                       'voce-attacco-a.mp3', 'voce-attacco-a-f.mp3', 'voce-attacco-b.mp3', 'voce-attacco-b-f.mp3'];   // L245-6 (giro suoni 25, S2)
 const VOCI_DIR = 'assets/audio/voci/', VOCI_K = 1, VOCI_ATTESA_MS = 2500, VOCI_FADE_S = 0.3;
 let VOCI_BUF = {}, VOCI_CARICO = {}, VOCI_GIRO = {}, VOCE_ORA = null, VOCE_TOKEN = 0, VOCE_ATTESA = null;   // L218-6: VOCE_ATTESA = la voce chiesta e in caricamento {tok, t0} · L255-1: BUF e CARICO per FILE, non per id
 let VOCI_REGISTRO = [];               // {id, t, esito, file} — per le misure; transitorio (file: L255-1, sulla riga «parla»)

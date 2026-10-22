@@ -398,6 +398,7 @@ function initStatoBase(){
      Fondamentale quanto i partiti: l'immersione (la data dice il '50) e gli snodi ancorati a un anno reale
      (la legge truffa si ancora al '53 → se l'orologio partisse dal 2026, il '53 non arriverebbe mai). */
   if(_SC && _SC.anno){ S.year=_SC.anno; S.annoInizio=_SC.anno; }
+  S.partitoDa=S.year*12+S.month;   // L237-6: il mese in cui il giocatore entra nel partito di oggi (partitoDaMese; dopo l'anno della porta)
   S.onuFatto=onuGiaStoria();   // L243-1: chi parte dopo il dicembre 1955 trova l'Italia già all'ONU (storia, non cronaca: niente carta)
   /* Build B 1b — anni di mandato già trascorsi (l'orologio-mandato parte a metà, non da zero): fa cadere
      l'elezione naturale sull'anno dello snodo. Percorso d'ingresso diverso dal reset turnInMandate=0 di A.5
@@ -516,6 +517,7 @@ function initStatoBase(){
   S.famigliaVivaFatti=[];      // G1 — once-in-vita già vissuti (matrimonio del figlio…)
   S.recentFamigliaViva=[];     // G1 — finestra anti-ripetizione dei beat ripetibili (domenica, compleanno…)
   S.giroMese=null;             // L182-3 — il mese dell ultimo giro sul tavolo (dato puro); l umore vive in S.territori[i].umore
+  S.formeAnno={anno:S.year, n:0};   // L239-7 — gli investimenti del gettone nell'anno (dato puro, round-trip; un anno diverso da S.year vale 0)
   S.territorioChiama=null;     // F2 — il territorio che chiama {idx,prob,nato} (dato puro, round-trip); il pulse è derivato
   S.territorioUltimo=null;     // F2 — cooldown dell'innesco-territorio
   S.territorioRecente=null;    // F2 — ultima area chiamata (anti-ripetizione)
@@ -2628,7 +2630,7 @@ function biasSondaggio(){
 function applicaRosterDelta(ricalcolaSeggi){
   if(typeof S==='undefined' || !S || !S.rosterDelta || !PAESE || !PAESE.partiti) return;
   var R=S.rosterDelta;
-  if(!(R.entra||[]).length && !(R.esce||[]).length && !(R.rinomina||[]).length && !(R.alleati && Object.keys(R.alleati).length)) return;
+  if(!(R.entra||[]).length && !(R.esce||[]).length && !(R.rinomina||[]).length && !(R.alleati && Object.keys(R.alleati).length) && !(R.asse && Object.keys(R.asse).length)) return;
   var lista = PAESE.partiti.map(function(p){ return Object.assign({}, p); });   // clone: `paeseConScenario` condivide l'array con SCENARI, mutarlo lo corromperebbe
   /* ============================================================================================================
      L53-3 · L'ORDINE È ENTRA → RINOMINA → ESCE, e prima era il contrario. Il registro è un DIARIO: un partito
@@ -2666,6 +2668,11 @@ function applicaRosterDelta(ricalcolaSeggi){
      id → lista, l'ultima scrittura vince; si proietta sul clone come i nomi. Un id che non è nel roster si ignora (la NPD in
      de1980). `alleatiRiserva` non si tocca: la direttiva riscrive solo le alleanze ordinarie. */
   if(R.alleati) Object.keys(R.alleati).forEach(function(id){ var p=lista.find(function(x){ return x.id===id; }); if(p) p.alleati=R.alleati[id].slice(); });
+  /* L256-1 · L'ASSE CAMBIATO DA UNA SCISSIONE DEL TUO PARTITO (la svolta del PCI, i tre snodi della frana). Il registro è una mappa
+     id → {asse, orientamento}, scritta da `segnaAssePartito`; si proietta sul clone come le liste. Prima l'asse si scriveva solo su
+     PAESE.partiti e al caricamento tornava quello della porta. */
+  if(R.asse) Object.keys(R.asse).forEach(function(id){ var p=lista.find(function(x){ return x.id===id; }), a=R.asse[id]; if(!p || !a) return;
+    if(a.asse!=null) p.asse=a.asse; if(a.orientamento) p.orientamento=a.orientamento; });
   (R.esce||[]).forEach(function(e){ lista = lista.filter(function(p){ return p.id!==e.id; }); });
   alleatiPartitoProprio(lista);   // L237-3 (D-P4): India e Brasile, rifatto a ogni ricostruzione, mai salvato
   var cambiato = (lista.length!==PAESE.partiti.length) ||
@@ -2872,7 +2879,7 @@ function scissioneApplica(ramo){
   if(S.seggi && S.seggi[nuovo.id]==null) S.seggi[nuovo.id]=0;
   applicaRosterDelta(true);
   /* l'asse del giocatore si sposta col nome: la svolta apre al centro, la rifondazione resta dov'era */
-  if(svolta){ var mp=PAESE.partiti.filter(function(x){return x.id===mio;})[0]; if(mp){ mp.asse=-1; mp.orientamento='centrosinistra'; } }
+  if(svolta) segnaAssePartito(mio, -1, 'centrosinistra');   // L256-1: nel registro, non su PAESE.partiti (si perdeva al caricamento)
   if(svolta){ stampad(3); gd('giovani',2); gd('cetomedio',2); gd('lavoratori',-2);
     bioFatto('La svolta: il partito ha cambiato nome, e tu c\'eri.'); }
   else { stampad(-2); gd('lavoratori',3); gd('giovani',1); gd('cetomedio',-3); gd('imprenditori',-2);
@@ -2918,6 +2925,28 @@ function _partitoDef(d){ var o={ id:d.id, nome:d.nome, orientamento:d.orientamen
    ============================================================================================================ */
 const PP_ID='pp_proprio', PP_FORZA=4, PP_CONCENTRAZIONE=24;
 function ppEsc(x){ return String(x==null?'':x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }   // L237-4: lo stesso di escAttr (ui.js), qui perché lo usa la ricostruzione del roster   // 24 = uk_libdem.concentrazione (data.js): la specie-Liberal
+/* L237-6 · LA PARTE COMUNE della fondazione (A, fondaPartitoProprio) e della scissione (B, scissioneFonda): la voce `pp_proprio` nel
+   registro `S.rosterDelta.entra` (il testo com'è: l'escape lo fa applicaRosterDelta, ⚠ 2 di L237-4), la forza, i seggi, il roster
+   vivo, il giocatore che passa al partito nuovo, `S.partitoProprio` e `S.partitoDa`. Il controllo «uno per carriera» resta FUORI,
+   in chi la chiama (decisione (d) di Cowork). `forza` è anche l'àncora della molla del partito nuovo (la `forza` di roster).
+   `ricalcolaSeggi`: la fondazione all'avvio rifà il parlamento dalle forze (come prima); la scissione a metà legislatura no, i
+   seggi li divide lei (`seggiPP`). */
+function ppNasce(def, asse, forza, seggiPP, ricalcolaSeggi){
+  var n={ id:PP_ID, nome:String(def.nome||''), orientamento:orientamentoDaAsse(asse), base:Object.assign({}, def.base||{}), forza:forza, asse:asse, gruppoUE:'noniscritti' };
+  if(def.sigla) n.sigla=String(def.sigla);
+  if(def.colore) n.colore=String(def.colore);
+  if(PAESE.sistemaSeggi==='collegi'){ n.terreno=0; n.concentrazione=PP_CONCENTRAZIONE; }
+  S.rosterDelta=S.rosterDelta||{entra:[], esce:[], rinomina:[]};
+  S.rosterDelta.entra.push(n);
+  S.forze[PP_ID]=forza;
+  S.forzePrev=Object.assign({}, S.forze);
+  if(S.seggi) S.seggi[PP_ID]=seggiPP;
+  applicaRosterDelta(ricalcolaSeggi);
+  S.partito=PP_ID; if(typeof chosenPartito!=='undefined') chosenPartito=PP_ID;
+  S.partitoProprio={mandati:0, da:S.year*12+S.month};   // L237-5: `da` = il mese assoluto della fondazione (lo legge titoloFondazioneDovuto; L237-6: anche titoloScissioneDovuto)
+  S.partitoDa=S.partitoProprio.da;                      // L237-6: il mese in cui il giocatore è entrato nel partito di oggi
+  return n;
+}
 function orientamentoDaAsse(a){ return a<=-2?'sinistra':a===-1?'centrosinistra':a===0?'centro':a===1?'centrodestra':'destra'; }
 function _sovrapBasi(a, b){ var s=0; Object.keys(a||{}).forEach(function(g){ s+=Math.min(a[g]||0, (b||{})[g]||0); }); return s; }
 function fondaPartitoProprio(def){
@@ -2935,26 +2964,15 @@ function fondaPartitoProprio(def){
   if(resto>0) PAESE.partiti.forEach(function(p){ var f0=S.forze[p.id]+dato[p.id]; S.forze[p.id]=S.forze[p.id]/resto*(100-PP_FORZA); dato[p.id]=f0-S.forze[p.id]; });
   S.ancoraTappa=S.ancoraTappa||{};
   PAESE.partiti.forEach(function(p){ if(dato[p.id]) S.ancoraTappa[p.id]=(S.ancoraTappa[p.id]||0)-dato[p.id]; });
-  var n={ id:PP_ID, nome:String(def.nome||''), orientamento:orientamentoDaAsse(asse), base:Object.assign({}, def.base||{}), forza:PP_FORZA, asse:asse, gruppoUE:'noniscritti' };
-  if(def.sigla) n.sigla=String(def.sigla);
-  if(def.colore) n.colore=String(def.colore);
-  if(PAESE.sistemaSeggi==='collegi'){ n.terreno=0; n.concentrazione=PP_CONCENTRAZIONE; }
-  S.rosterDelta=S.rosterDelta||{entra:[], esce:[], rinomina:[]};
-  S.rosterDelta.entra.push(n);
-  S.forze[PP_ID]=PP_FORZA;
-  S.forzePrev=Object.assign({}, S.forze);
-  if(S.seggi) S.seggi[PP_ID]=0;
-  applicaRosterDelta(true);
+  ppNasce(def, asse, PP_FORZA, 0, true);
   /* il giocatore passa al partito nuovo: è l'avvio, quindi quello che initStatoBase/start* avevano derivato dal partito di prima
      si rifà col nuovo (coalizione, territori, potere locale, peso UE, integrità, la forza dell'ultima urna) */
-  S.partito=PP_ID; if(typeof chosenPartito!=='undefined') chosenPartito=PP_ID;
   S.coalizione=[PP_ID];
   if(S.intese){ delete S.intese[vecchio]; delete S.intese[PP_ID]; }
   S.forzaUrnaPrec=PP_FORZA;
   S.pesoUE=pesoUEBase();
   if(S.personaggio) S.integrita=integritaIniziale();
   if(S.territori){ initTerritori(); initPotereLocale(); }
-  S.partitoProprio={mandati:0, da:S.year*12+S.month};   // L237-5: `da` = il mese assoluto della fondazione (lo legge solo titoloFondazioneDovuto)
   /* L237-5 · la fondazione nella biografia, una volta (qui: un partito per carriera). Tradotta allo store come il registro (L244-4);
      la biografia si stampa in HTML (ui.js, scheda Partito), quindi nome e sigla dalla voce viva, che è escapata (L237-4). */
   var ppv=part(PP_ID)||{};
@@ -2966,7 +2984,7 @@ function fondaPartitoProprio(def){
    primo titolo è del mese 1: startAttivista non ne genera), una volta per carriera — finché è fra i titoli recenti non è più dovuto, e
    dopo il mese 1 non lo è comunque. Lo legge generaTitolo, che quel mese lo dà anche al livello 1 (dove la prima pagina è locale). */
 function titoloFondazioneDovuto(){
-  if(!S || S.partito!==PP_ID || !S.partitoProprio || S.partitoProprio.da==null) return false;
+  if(!S || S.partito!==PP_ID || !S.partitoProprio || S.partitoProprio.da==null || S.partitoProprio.scissioneDa) return false;   // L237-6: dopo una scissione il titolo è ti_pp_scissione (niente doppio)
   var d=(S.year*12+S.month)-S.partitoProprio.da;
   return d>=0 && d<=1 && (S.recentTit||[]).indexOf('ti_pp_fondazione')<0;
 }
@@ -2992,6 +3010,110 @@ function partitoGiovane(){ return !!(S && S.partito===PP_ID && S.partitoProprio 
    doppio bioConta noto (R4): lì il conto lo fa nextMandate. */
 function contaMandatoProprio(){ if(S && S.partitoProprio && S.partito===PP_ID) S.partitoProprio.mandati=(S.partitoProprio.mandati||0)+1; }
 
+/* ============================================================================================================
+   L237-6 · LA SCISSIONE (B) — «Il partito ti sta stretto» (DESIGN-PARTITO-PROPRIO.md §3, decisioni di Cowork del 21/10). Uscire dal
+   proprio partito e fondarne uno. Solo nel presente, solo ai livelli 1 e 3 (governo e opposizione), una volta per carriera.
+   · QUANDO: la carta è DOVUTA (genAgendaRamo la mette accanto al richiamo delle correnti, livello 3, e dopo l'occasione al livello
+     1) se `scissioneMiaDovuta()`: ≥ 24 mesi nello stesso partito (`S.partitoDa`), fuori dagli ultimi sei mesi del mandato
+     (`vigiliaMandato()`, che vale anche per il sindaco), non il primo mese, non sotto un pilastro-tragedia, al più 2 aperture a 24
+     mesi l'una dall'altra (`S.scissioneAperture`), e un dado `SCISSIONE_P` al mese dal mese e dalla carriera (`scissioneDado`, un
+     hash: niente Math.random, quindi da spenta non sposta niente). L'apertura conta quando la carta si risolve (anche «Annulla»).
+   · CHE COSA: `scissioneFonda(def, quota)` — il nuovo prende `quota` della forza del vecchio e solo da lui; l'àncora del vecchio
+     scende di altrettanto (`S.ancoraTappa`, il canale delle tappe marcate L106-3: la molla non riassorbe); seggi divisi con la stessa
+     quota (il parlamento non si ricalcola dalle forze a metà legislatura). Al governo il vecchio diventa partner con tenuta
+     `SCISSIONE_TENUTA`; all'opposizione resti capo del tuo partito; al livello 1 cambi bandiera (il tuo territorio passa con te).
+   · Lo stato: `S.scissioneMia` = {da, quota, vecchio, leaderVecchio, stampaDovuta} (null prima; lo leggono SOLO le funzioni di questo
+     blocco, guardia prove/l237-6/guardia-scissione.js), `S.partitoProprio.scissioneDa` = il vecchio. Il racconto: registro, biografia,
+     titolo `ti_pp_scissione` il mese dopo (non all'opposizione: lì non ci sono prime pagine), stampa −3 il mese dopo.
+   Interruttore `SCISSIONE_MIA` (spento = il gioco di prima). Prova prove/l237-6/prova-scissione.js.
+   ============================================================================================================ */
+let SCISSIONE_MIA=true;       // L237-6: l'interruttore — ACCESO il 21/10 (prova, A/B e CDP verdi nello stesso turno, D183)
+let SCISSIONE_P=0.0075;       // L237-6: il dado al mese (decisione di Cowork del 21/10; taratura ammessa 0,005-0,012)
+let SCISSIONE_ANCORA=true;    // L237-6: l'àncora del vecchio si sposta (la prova la spegne per il confronto «senza àncora»)
+const SCISSIONE_MESI=24, SCISSIONE_APERTURE=2, SCISSIONE_TENUTA=35, SCISSIONE_STAMPA=-3;
+function partitoDaMese(){ return S.partitoDa!=null ? S.partitoDa : (S.annoInizio||S.year)*12+1; }   // senza il campo (salvataggi vecchi): il mese 0 della carriera
+/* la carriera, per il dado: il personaggio (scritto alla creazione, mai più) e l'avvio — niente estrazioni */
+function scissioneCarriera(){ var p=S.personaggio||{}; return [p.nome||'', p.genere||'', p.etaIniziale||'', S.paese||'', S.annoInizio||''].join('|'); }
+function scissioneDado(){
+  var h=hashId('sciss|'+scissioneCarriera()+'|'+meseAss())>>>0;
+  h^=h>>>16; h=Math.imul(h,0x45d9f3b)>>>0; h^=h>>>16; h=Math.imul(h,0x45d9f3b)>>>0; h^=h>>>16;   // mescola: hashId da solo cambia poco fra un mese e il dopo
+  return (h>>>0)/4294967296;
+}
+function scissioneMiaPuo(){
+  if(!SCISSIONE_MIA || typeof S==='undefined' || !S || !S.forze || !PAESE || !PAESE.partiti) return false;
+  if((S.scenario && S.scenario!=='presente') || S.era) return false;   // solo il presente, come fondaPartitoProprio
+  if(S.livello!==1 && S.livello!==3) return false;                    // livelli 1 e 3 (il ministro no: decisione di Cowork)
+  return S.partito!==PP_ID && !part(PP_ID) && S.scissioneMia==null;
+}
+function scissioneMiaDovuta(senzaDado){
+  if(!scissioneMiaPuo()) return false;
+  if(S.year===S.annoInizio && S.month===1) return false;                                    // il primo mese di una carriera
+  var m=meseAss();
+  if(m-partitoDaMese()<SCISSIONE_MESI) return false;                                         // ≥ 24 mesi nello stesso partito
+  if(vigiliaMandato() || inCampagna()) return false;                                         // non negli ultimi sei mesi del mandato
+  if(typeof musicaTragedia==='function' && musicaTragedia()) return false;                   // G8
+  if(typeof eraCartaViva==='function' && !eraCartaViva(SCISSIONE_MIA_EV)) return false;
+  var ap=S.scissioneAperture||[];
+  if(ap.length>=SCISSIONE_APERTURE || (ap.length && m-ap[ap.length-1]<SCISSIONE_MESI)) return false;
+  return senzaDado ? true : scissioneDado()<SCISSIONE_P;
+}
+/* la carta: senza correnti niente «trattativa» (al passo 0 le correnti c'erano a tutti e tre i livelli) */
+function cartaScissioneMia(){ return S.correnti ? SCISSIONE_MIA_EV : Object.assign({}, SCISSIONE_MIA_EV, {ch:SCISSIONE_MIA_EV.ch.filter(function(c){ return c.scissione!=='tratta'; })}); }
+function scissioneQuota(){ var u=(S.correnti && S.correnti.length) ? umoreMedio() : 50; return clamp(0.15+0.25*(u-50)/50, 0.10, 0.40); }
+function scissioneApertura(){ S.scissioneAperture=(S.scissioneAperture||[]).concat([meseAss()]); }
+function nomeVecchio(id){ var p=part(id); return p ? T(p.nome) : ''; }
+/* le tre scelte (data.js SCISSIONE_MIA_EV): `scissione:'resta'|'tratta'|'rompi'` */
+function scissioneScelta(tipo){
+  var v=S.partito;
+  scissioneApertura();
+  if(tipo==='tratta'){ tutteCorrenti(4); S.log.unshift({t:T('Il partito'), x:T('Tratti con le correnti di %V: per ora restano con te.').replace('%V', function(){ return nomeVecchio(v); })}); return; }
+  if(tipo==='rompi' && typeof apriScissioneFoglio==='function'){ apriScissioneFoglio(); return; }   // il foglio del nome (ui.js): conferma → scissioneFonda, «Annulla» → scissioneAnnulla
+  scissioneAnnulla();
+}
+function scissioneAnnulla(){ S.log.unshift({t:T('Il partito'), x:T('Resti in %V e tieni duro.').replace('%V', function(){ return nomeVecchio(S.partito); })}); }
+function scissioneFonda(def, quota){
+  if(!scissioneMiaPuo() || !def) return false;
+  var vecchio=S.partito, pv=part(vecchio)||{}, asseV=pv.asse||0;
+  var q=clamp(quota!=null ? +quota : scissioneQuota(), 0.10, 0.40);
+  var fv=S.forze[vecchio]||0, delta=fv*q;
+  var asse=Math.max(-2, Math.min(2, Math.max(asseV-1, Math.min(asseV+1, Math.round(def.asse!=null ? +def.asse : asseV)))));   // solo asse del vecchio −1, uguale, +1
+  S.forze[vecchio]=fv-delta;
+  if(SCISSIONE_ANCORA){ S.ancoraTappa=S.ancoraTappa||{}; S.ancoraTappa[vecchio]=(S.ancoraTappa[vecchio]||0)-delta; }
+  var sp=0; if(S.seggi && S.seggi[vecchio]!=null){ sp=Math.round(S.seggi[vecchio]*q); S.seggi[vecchio]-=sp; }
+  ppNasce(def, asse, delta, sp, false);
+  S.partitoProprio.scissioneDa=vecchio;
+  /* coalizione, intese e territori: i tuoi passano al nuovo, quelli del partito restano al vecchio */
+  var coal=(S.coalizione||[]).filter(function(id){ return id!==vecchio && id!==PP_ID; });
+  S.coalizione=[PP_ID].concat(S.livello===3 ? coal : []);
+  if(S.livello===3 && coalizionePossibile()) S.coalizione.push(vecchio);
+  if(S.livello===3 && !S.opposizione && S.tenuta && coalizionePossibile()){ S.tenuta[vecchio]=SCISSIONE_TENUTA; if(S.tenutaForza0) S.tenutaForza0[vecchio]=S.forze[vecchio]; if(S.tenutaLiv) delete S.tenutaLiv[vecchio]; }
+  if(S.livello===3 && !S.opposizione && !S.coabitazione && PAESE.coalizione && S.seggi && typeof seggiCoalizione==='function') S.minoranza=seggiCoalizione(S.coalizione, S.seggi)<50;
+  if(S.livello===1 && S.locale && S.territori && S.territori[S.locale.terrIdx] && S.territori[S.locale.terrIdx].partito===vecchio) S.territori[S.locale.terrIdx].partito=PP_ID;
+  if(S.territori) initPotereLocale();
+  S.forzaUrnaPrec=delta;
+  S.pesoUE=pesoUEBase();
+  if(S.personaggio) S.integrita=integritaIniziale();
+  var leader=nomePersona();
+  S.scissioneMia={ da:meseAss(), quota:Math.round(q*1000)/1000, vecchio:vecchio, leaderVecchio:leader, stampaDovuta:true };
+  /* il racconto: registro e biografia (tradotti allo store, L244-4; il nome del partito proprio dalla voce viva, escapata) */
+  var ppv=part(PP_ID)||{}, ppN=function(){ return ppv.nome||''; }, ppS=function(){ return ppv.sigla||''; }, vN=function(){ return nomeVecchio(vecchio); }, lN=function(){ return leader; };
+  S.log.unshift({t:T('Scissione'), x:T('Lasci %V e fondi %P: ti segue circa il %Q% del partito.').replace('%V', vN).replace('%P', ppN).replace('%Q', String(Math.round(q*100)))});
+  S.log.unshift({t:T('Scissione'), x:T('%V sceglie un nuovo leader: %L.').replace('%V', vN).replace('%L', lN)});
+  bioFatto(ppv.sigla ? T('Lascia %V e fonda %P, %SIG.').replace('%SIG', ppS).replace('%V', vN).replace('%P', ppN) : T('Lascia %V e fonda %P.').replace('%V', vN).replace('%P', ppN));
+  return true;
+}
+/* il mese dopo la scissione: la stampa −3 (la valuta c'è a tutti i livelli, passo 0 b). Lo chiama corpoMese. */
+function scissioneMese(){
+  if(!S || !S.scissioneMia || !S.scissioneMia.stampaDovuta || meseAss()<=S.scissioneMia.da) return;
+  stampad(SCISSIONE_STAMPA); S.scissioneMia.stampaDovuta=false;
+}
+/* il titolo della scissione (`ti_pp_scissione`): come quello della fondazione, nel mese della scissione o in quello dopo, una volta */
+function titoloScissioneDovuto(){
+  if(!S || S.partito!==PP_ID || !S.partitoProprio || !S.partitoProprio.scissioneDa || S.partitoProprio.da==null) return false;
+  var d=meseAss()-S.partitoProprio.da;
+  return d>=0 && d<=1 && (S.recentTit||[]).indexOf('ti_pp_scissione')<0;
+}
+
 /* A · TI DIVIDI: tieni `resto` della tua forza col nome nuovo, il resto se ne va come partito NPC. */
 function scissioneDividi(nomeNuovo, quotaMia, npc, asseNuovo){
   if(typeof S==='undefined' || !S || !S.partito) return;
@@ -3005,8 +3127,17 @@ function scissioneDividi(nomeNuovo, quotaMia, npc, asseNuovo){
   if(S.forzePrev){ S.forzePrev[mio]=mia; S.forzePrev[n.id]=loro; }
   if(S.seggi && S.seggi[n.id]==null) S.seggi[n.id]=0;
   applicaRosterDelta(true);
-  if(asseNuovo!=null){ var mp=PAESE.partiti.filter(function(x){return x.id===mio;})[0]; if(mp) mp.asse=asseNuovo; }
+  if(asseNuovo!=null) segnaAssePartito(mio, asseNuovo);   // L256-1: nel registro, non su PAESE.partiti (si perdeva al caricamento)
   rinormalizzaForze();
+}
+/* L256-1 · l'asse (e l'orientamento) del partito che cambia casa con una scissione: nel registro `S.rosterDelta.asse`, che il
+   salvataggio porta e `applicaRosterDelta` riproietta (anche in applySnap). Ricostruisce un PAESE nuovo: mai PAESE.partiti in loco. */
+function segnaAssePartito(id, asse, orientamento){
+  S.rosterDelta = S.rosterDelta || {entra:[], esce:[], rinomina:[]};
+  S.rosterDelta.asse = S.rosterDelta.asse || {};
+  var a = S.rosterDelta.asse[id] = Object.assign({}, S.rosterDelta.asse[id] || {});
+  if(asse!=null) a.asse=asse; if(orientamento) a.orientamento=orientamento;
+  applicaRosterDelta(false);
 }
 /* B · CROLLI: resti, ma ridotto al minimo. Quello che perdi NON va a nessuno — si redistribuisce alla
    rinormalizzazione, che è la dispersione vera (la stessa scelta fatta per il PSI della tappa-NPC). */
@@ -3036,6 +3167,7 @@ function scissioneTrasloca(destId, destDef){
     applicaRosterDelta(true);
   }
   S.partito=destId;                                        // PRIMA di far uscire il vecchio: così la guardia
+  S.partitoDa=meseAss();                                   // L237-6: il partito di oggi comincia qui (lo legge partitoDaMese)
   S.rosterDelta.esce.push({id:vecchio, confluisce_in:destId});   // di `applicaDirettive` non lo scambia per il tuo
   if(S.forze && S.forze[vecchio]!=null){ if(S.forze[destId]!=null) S.forze[destId]+=S.forze[vecchio]; delete S.forze[vecchio]; }
   if(S.forzePrev && S.forzePrev[vecchio]!=null){ if(S.forzePrev[destId]!=null) S.forzePrev[destId]+=S.forzePrev[vecchio]; delete S.forzePrev[vecchio]; }
@@ -4803,6 +4935,7 @@ function crisiApplica(campo){
   var ora=crisiMeseAss();
   if(S.crisi && S.crisi.con!==campo.con) return;                 // una crisi per volta
   if(S.crisi && S.crisi.guerra) return;                            // L245-4: in guerra la fermezza di una carta non cambia niente
+  if(S.crisi && S.crisi.subita) return;                            // L245-6: la crisi subita sale coi segnali del rivale (crisiMese), mai con una carta
   if(!S.crisi){
     if(!rivaleRiga(campo.con)) return;                               // L245-3: con questa potenza, qui e ora, non nasce una crisi
     if(CRISI_PAUSA>0 && S.crisiFine!=null && ora-S.crisiFine<CRISI_PAUSA) return;   // L245-2ter: la pausa dopo una crisi chiusa, prima del dado
@@ -4844,9 +4977,18 @@ function crisiScala(mossa){
 /* il mese (advanceMonth, dopo riallineamentoTappa e prima dei rami: vale a ogni livello, una crisi aperta da capo del governo
    che lascia la carica rientra col tempo) */
 function crisiMese(){
-  if(!REGOLA_CRISI_SCALA || !S.crisi) return;
+  if(!REGOLA_CRISI_SCALA) return;
+  if(!S.crisi){ crisiSubitaMese(); return; }   // L245-6: senza crisi, il rivale può aprirne una da sé
   var c=S.crisi, ora=crisiMeseAss();
   if(!rivaleRiga(c.con)){ if(c.guerra){ guerraFine('stallo'); return; } crisiLog('La crisi con %POTdet si chiude: il mondo è cambiato.'); crisiChiudi(ora); return; }   // L245-3: la riga è finita (l'URSS nel gennaio 1992)
+  if(c.subita && !c.guerra){   // L245-6: il preavviso della crisi subita — un gradino al mese fino all'ultimatum, mai una discesa col tempo
+    if(!crisiCapo()){ delete c.subita; delete c.ricevuto; c.ultimo=ora; }   // chi lascia la carica: la crisi torna una crisi di sempre, e rientra col tempo
+    else {
+      if(c.t<4){ c.t++; c.ultimo=ora; crisiLog(SUBITA_SEGNALI[c.t]); if(c.t>=4) c.ricevuto=true; }
+      if(c.t>=2) S.gMod-=CRISI_K.sanzGrowth;
+      return;
+    }
+  }
   if(c.guerra){ guerraMese();
     if(S.crisi && S.crisi.guerra && segniGuerra('mese').length && typeof suona==='function') suona('sirena-aerea');   // L245-5: a fine mese il settore a −2 fa «colpita» l'area (la sirena una volta per passaggio)
     if(S.crisi && S.crisi.t>=2) S.gMod-=CRISI_K.sanzGrowth; return; }   // L245-4: in guerra il tempo non fa scendere la crisi
@@ -4861,6 +5003,8 @@ function crisiDeficit(){ if(REGOLA_CRISI_SCALA && S.crisi && S.crisi.guerra) ret
 function pickCrisiScala(){
   if(!REGOLA_CRISI_SCALA || !S.crisi || !crisiCapo() || typeof CRISI_SCALA_EV==='undefined') return null;
   if(S.crisi.guerra) return guerraCarta();   // L245-4: in guerra la carta del fronte, una al mese (nessuna estrazione per la carta)
+  if(S.crisi.ricevuto) return crisiCartaRicevuto();   // L245-6: l'ultimatum ricevuto, certo (nessuna estrazione per la carta)
+  if(S.crisi.subita) return null;                     // L245-6: nel preavviso nessuna carta della scala (i segnali sono del rivale)
   if(Math.random()>=CRISI_P_SCALA) return null;   // L245-2bis
   if(S.crisi.respinto && S.crisi.t>=4) return crisiCartaRespinto();   // L245-4: dopo l'ultimatum respinto, la carta che offre la guerra
   var t=S.crisi.t, p=crisiPot(); if(!p) return null;
@@ -4920,17 +5064,27 @@ function guerraNuova(){
 function guerraLeggibile(g){   // applySnap: la forma di S.crisi.guerra
   var num=function(v){ return typeof v==='number' && isFinite(v); };
   return !!(g && Array.isArray(g.fronti) && g.fronti.length>=1 && g.fronti.length<=3 && g.fronti.every(function(f){ return f && typeof f.n==='string' && Number.isInteger(f.linea) && f.linea>=-3 && f.linea<=3; })
-    && ['forze','opinione','costo','mesi','caduti','trattativa','ordini','rally','fermo'].every(function(k){ return num(g[k]); }) && Number.isInteger(g.caduti));
+    && ['forze','opinione','costo','mesi','caduti','trattativa','ordini','rally','fermo'].every(function(k){ return num(g[k]); }) && Number.isInteger(g.caduti)
+    && (g.difesa===undefined || typeof g.difesa==='boolean'));   // L245-6: la guerra difensiva, booleano facoltativo
 }
 function guerraDichiara(){
   if(!REGOLA_GUERRA || !S.crisi || S.crisi.guerra || !S.crisi.respinto || !crisiCapo() || crisiTettoBlocco()<5) return false;
   var V=guerraVotoAula();
   if(V.respinta){ repd(-2); crisiLog('L\'aula respinge la dichiarazione di guerra: la crisi con %POTdet resta all\'ultimatum.'); return false; }
-  delete S.crisi.respinto; S.crisi.t=5; S.crisi.ultimo=crisiMeseAss(); S.crisi.guerra=guerraNuova();
-  crisiLog(V.vota ? 'L\'aula approva: è guerra con %POTdet.' : 'È guerra con %POTdet.');
+  guerraApri(false, V.vota ? 'L\'aula approva: è guerra con %POTdet.' : 'È guerra con %POTdet.');
+  return true;
+}
+/* il pezzo comune delle due guerre (L245-6): la dichiarata (guerraDichiara, difesa false) e la difensiva (crisiRicevuto, difesa
+   true: la dichiara il rivale, niente voto in aula — D3 di Cowork —, opinione +SUBITA_K.difesaOpinione, stanchezza dimezzata in
+   guerraMese, e la voce `voce-attacco-a`) */
+function guerraApri(difesa, riga){
+  delete S.crisi.respinto; delete S.crisi.subita; delete S.crisi.ricevuto;
+  S.crisi.t=5; S.crisi.ultimo=crisiMeseAss(); S.crisi.guerra=guerraNuova();
+  if(difesa){ S.crisi.guerra.difesa=true; S.crisi.guerra.opinione=clamp(S.crisi.guerra.opinione+SUBITA_K.difesaOpinione, 0, 100); }
+  crisiLog(riga);
   segniGuerra('dichiara');   // L245-5: fronte e base sul tavolo
   if(typeof suona==='function'){ suona('colonna'); if(guerraTipo()!=='confine') suona('nave'); }   // L245-5: la colonna, e la nave per una guerra di mare
-  return true;
+  if(difesa && typeof parla==='function') parla('voce-attacco-a');
 }
 function guerraMuoviLinea(i, d){ var g=S.crisi.guerra, f=g.fronti[i]; if(!f) return false; var v=clamp(f.linea+d, -3, 3); if(v===f.linea) return false; f.linea=v; g.fermo=0; return true; }
 function guerraPerdite(n){ var g=S.crisi.guerra; g.forze=clamp(g.forze-n, 0, 100); g.caduti+=n*GUERRA_K.caduti; }
@@ -4961,7 +5115,8 @@ function guerraMese(){
   if(!crisiCapo()){ guerraFine('stallo', 'Il nuovo governo firma il cessate il fuoco.'); return; }   // la guerra è dello Stato, non del giocatore
   g.mesi++; g.ordini=0; g.fermo++;
   if(g.mesi%3===0) g.rally=Math.round(g.rally*50)/100;
-  if(g.mesi>12) g.opinione=clamp(g.opinione-2, 0, 100); else if(g.mesi>6) g.opinione=clamp(g.opinione-1, 0, 100);
+  var ks=g.difesa ? SUBITA_K.difesaStanchezza : 1;   // L245-6: la guerra difensiva stanca la metà
+  if(g.mesi>12) g.opinione=clamp(g.opinione-2*ks, 0, 100); else if(g.mesi>6) g.opinione=clamp(g.opinione-1*ks, 0, 100);
   var perd=1, pr=Math.max(0, (60-g.forze)/100);
   if(pr>0 && Math.random()<pr){ if(guerraMuoviLinea(Math.floor(Math.random()*g.fronti.length), -1)) perd+=2; }
   guerraPerdite(perd);
@@ -5018,6 +5173,69 @@ function crisiCartaRespinto(){
   var vota=votoGuerraPaese() && votoInAulaAttivo(GUERRA_LEGGE);
   return Object.assign({}, ev, { t:potSub(T(ev.t),p), text:potSub(T(vota && ev.vtext ? ev.vtext : ev.text),p), kick:T(ev.kick),
     ch: ev.ch.map(function(c){ return Object.assign({}, c, {l:potSub(T(c.l),p), e:potSub(T(vota && c.ve ? c.ve : c.e),p)}); }) });
+}
+/* ⚑ L245-6 · LA CRISI SUBITA (DESIGN-POLITICA-ESTERA.md §2 (c) e §5, «⚑ L245-6»). Fino al L245-5 S.crisi nasceva solo dalla
+   fermezza del giocatore (crisiApplica); qui la apre il rivale, una volta per carriera (S.attaccoSubito, booleano).
+   · CHI LA APRE: crisiSubitaMese, chiamata da crisiMese quando non c'è una crisi. Solo il capo del governo (crisiCapo), mai con
+     S.attaccoSubito, rispettata la pausa CRISI_PAUSA dopo una crisi chiusa (S.crisiFine, come crisiApplica), e solo con una riga
+     di RIVALI viva per la partita (rivaleChiave) e l'anno, con `massimo` ≥ 4 e una potenza fra potenzeDi('rivale'): la prima in
+     ordine di RIVALI, senza estrazione. Solo DOPO tutte le condizioni il dado, SUBITA_K.p al mese. S.crisi = {…, t:1, subita:true}.
+   · IL PREAVVISO (crisiMese, ramo `subita`): un gradino al mese, 1 → 2 → 3 → 4 (SUBITA_K.preavviso mesi fra la tensione e
+     l'ultimatum, più quello dell'ultimatum), un segnale nel registro per gradino (SUBITA_SEGNALI); il tempo non la fa scendere, le
+     carte della scala non escono (pickCrisiScala) e la fermezza di una carta non la muove (crisiApplica). All'ultimatum
+     `ricevuto:true`: la carta crs_ricevuto (crisiCartaRicevuto) esce certa nello slot dell'evento estero, prima del dado della scala.
+     Chi lascia la carica a preavviso aperto: `subita` e `ricevuto` si tolgono, la crisi rientra col tempo come le altre.
+   · LE QUATTRO RISPOSTE (crisiRicevuto, letta in UN punto: il campo `ricevuto` della scelta in resolveItemCore):
+     resisti (il rivale cede con p CRISI_K.cede; altrimenti, col tetto 5, la guerra difensiva — guerraApri(true) —, col tetto 4 la
+     crisi resta alla mobilitazione e diventa una crisi di sempre) · alleati (con relInt.alleanza ≥ SUBITA_K.alleanzaMin seguono e
+     il rivale cede con p SUBITA_K.cedeAlleati, altrimenti frenano: stampa −1 e p CRISI_K.cede; se non cede, come resisti) · onu
+     (con relInt.consesso ≥ SUBITA_K.consessoMin la crisi scende alle sanzioni, altrimenti come resisti) · cedi (la crisi si chiude,
+     reputazione −SUBITA_K.cediRep, stampa −SUBITA_K.cediStampa; nessun gruppo: partiti neutri).
+   Interruttore REGOLA_CRISI_SUBITA (let; il banco lo rimette in __reseed — dal L245-6bis acceso come il gioco —, __BANCO_SUBITA_OFF = prima): spento, nessuno scrive
+   S.attaccoSubito né `subita`, e nessuno estrae un numero in più — il gioco di prima. Guardia prove/l245-6/guardia-subita.js, prova
+   prove/l245-6/prova-subita.js (--rosso), A/B .claude/ab-l245-6.js, misura .claude/misura-l245-6.js. */
+let REGOLA_CRISI_SUBITA=true;    // ACCESA dal 21/10 (L245-6bis): a p 0,0006, col dado indipendente, 7,7% sul totale degli otto presenti (5-8%) e 5-10% per paese (2-12%), D174 verde (rapporto «⚑ L245-6bis»); spenta il 21/10 alle 07 (L245-6: fascia 3-10% per paese); il banco la segue, __BANCO_SUBITA_OFF = prima
+const SUBITA_K={ p:0.0006,   // L245-6bis (21/10): 0,0008 → 0,0006, bersaglio sul TOTALE degli otto presenti 5-8% e per paese 2-12% (rapporto «⚑ L245-6bis»)
+  preavviso:2, cedeAlleati:0.8, alleanzaMin:60, consessoMin:60, difesaOpinione:10, difesaStanchezza:0.5, cediRep:3, cediStampa:2 };
+const SUBITA_SEGNALI=['','%POTDet alza la tensione: movimenti alla frontiera, toni duri.','%POTDet annuncia sanzioni contro di noi.','%POTDet mobilita le sue forze.','%POTDet ci pone un ultimatum.'];
+function crisiSubitaMese(){
+  if(!REGOLA_CRISI_SUBITA || !REGOLA_CRISI_SCALA || !crisiCapo() || S.crisi || S.attaccoSubito) return;
+  var ora=crisiMeseAss();
+  if(CRISI_PAUSA>0 && S.crisiFine!=null && ora-S.crisiFine<CRISI_PAUSA) return;   // la pausa dopo una crisi chiusa, come crisiApplica
+  if(typeof RIVALI==='undefined') return;
+  var vive=potenzeDi('rivale').map(function(p){ return p.id; }), k=rivaleChiave(), y=S.year, con=null;
+  for(var i=0;i<RIVALI.length && !con;i++){ var r=RIVALI[i]; if(r.paese===k && y>=r.dal && y<=r.fino && r.massimo>=4 && vive.indexOf(r.con)>=0 && rivaleRiga(r.con)) con=r.con; }
+  if(!con) return;
+  if(Math.random()>=SUBITA_K.p) return;   // il dado, solo dopo tutte le condizioni
+  S.crisi={con:con, t:1, da:ora, ultimo:ora, alleati:null, subita:true};
+  S.attaccoSubito=true;
+  crisiLog(SUBITA_SEGNALI[1]);
+}
+/* la carta dell'ultimatum ricevuto (pickCrisiScala, con S.crisi.ricevuto) */
+function crisiCartaRicevuto(){
+  var ev=CRISI_SCALA_EV.find(function(e){ return e.gradino==='ricevuto'; }), p=crisiPot(); if(!ev || !p) return null;
+  return Object.assign({}, ev, { t:potSub(T(ev.t),p), text:potSub(T(ev.text),p), kick:T(ev.kick),
+    ch: ev.ch.map(function(c){ return Object.assign({}, c, {l:potSub(T(c.l),p), e:potSub(T(c.e),p)}); }) });
+}
+/* le quattro risposte all'ultimatum ricevuto (il campo `ricevuto` della scelta, resolveItemCore) */
+function crisiRicevuto(mossa){
+  var c=S.crisi; if(!c || !c.ricevuto || c.guerra) return;
+  var ora=crisiMeseAss(); delete c.ricevuto; c.ultimo=ora;
+  var rel=function(k){ return (S.relInt && S.relInt[k]!=null) ? S.relInt[k] : 50; };
+  if(mossa==='cedi'){ repd(-SUBITA_K.cediRep); stampad(-SUBITA_K.cediStampa); crisiLog('Cedi all\'ultimatum %POTdi: la crisi si chiude, a un prezzo.'); crisiChiudi(ora); return; }
+  if(mossa==='onu'){
+    if(rel('consesso')>=SUBITA_K.consessoMin){ c.t=2; delete c.subita; crisiLog('L\'Assemblea si muove: la crisi con %POTdet scende alle sanzioni.'); return; }
+    crisiLog('All\'ONU nessuna maggioranza.');
+  }
+  var pc=CRISI_K.cede;
+  if(mossa==='alleati'){
+    if(typeof parla==='function') parla('voce-attacco-b');
+    if(rel('alleanza')>=SUBITA_K.alleanzaMin){ c.alleati='seguono'; pc=SUBITA_K.cedeAlleati; crisiLog('Gli alleati sono con noi davanti %POTa.'); }
+    else { c.alleati='frenano'; stampad(-1); crisiLog('Gli alleati frenano: davanti %POTa restiamo soli.'); }
+  }
+  if(Math.random()<pc){ c.t=2; delete c.subita; repd(CRISI_K.premioCede); crisiLog('%POTDet ritira l\'ultimatum: la crisi torna alle sanzioni.'); return; }
+  if(crisiTettoBlocco()>=5){ guerraApri(true, '%POTDet ci attacca: è guerra.'); return; }
+  c.t=3; delete c.subita; crisiLog('L\'ultimatum %POTdi scade senza armi: la crisi resta alla mobilitazione.');
 }
 function pickInternazionale(){
   if(typeof INTERNAZIONALI==='undefined') return null;
@@ -5313,7 +5531,8 @@ var TITOLI_PER_ID=null;   // L138-1b: indice id→titolo, costruito alla prima r
 function titoloPartitoSub(x){
   if(String(x).indexOf('%P')<0) return x;
   var pp=part(S.partito)||{};
-  var n=pp.id===PP_ID ? (pp.nome||'') : T(pp.nome||''); return String(x).replace(/%P/g, function(){ return n; });
+  var n=pp.id===PP_ID ? (pp.nome||'') : T(pp.nome||''), v=(S.partitoProprio && S.partitoProprio.scissioneDa) ? nomeVecchio(S.partitoProprio.scissioneDa) : '';   // L237-6: %V = il partito lasciato
+  return String(x).replace(/%P/g, function(){ return n; }).replace(/%V/g, function(){ return v; });
 }
 function titoloPerId(id){
   if(!TITOLI_PER_ID){ TITOLI_PER_ID={}; TITOLI.forEach(t=>{ TITOLI_PER_ID[t.id]=t; }); }
@@ -5321,7 +5540,7 @@ function titoloPerId(id){
 }
 function generaTitolo(){
   if(typeof TITOLI==='undefined' || !S || S.opposizione) return;
-  const _fz=titoloFondazioneDovuto() ? titoloPerId('ti_pp_fondazione') : null;   // L237-5: il mese della fondazione la prima pagina è sua (anche al livello 1)
+  const _fz=titoloFondazioneDovuto() ? titoloPerId('ti_pp_fondazione') : titoloScissioneDovuto() ? titoloPerId('ti_pp_scissione') : null;   // L237-6: e quello della scissione   // L237-5: il mese della fondazione la prima pagina è sua (anche al livello 1)
   if(S.livello===1 && !_fz){ generaTitoloLocale(); return; }   // rifinitura locale: a livello 1 la prima pagina parla LOCALE
   let pool=_fz ? [_fz] : TITOLI.filter(t=>(!t.cond||t.cond()) && eraVivaT(t));
   if(!pool.length) return;
@@ -5704,6 +5923,58 @@ function apriGiro(i){
   if(typeof render==='function') render();
 }
 function chiudiGiro(){ GIRO_APERTO=null; if(typeof render==='function') render(); }
+/* ⚑ L239-7 · LE TRE FORME DEL GETTONE (DESIGN-MAPPA.md §2 (d) e §3 punto 6; decisioni di Cowork del 21/10 sulle valute).
+   Lo stesso gettone del mese (giroPossibile, S.giroMese) si spende in una di tre forme, scelte dal foglietto dell'area:
+   · VISITA = apriGiro di sempre (la scena F2 o di GIRO_SCENE, umore dalla scelta);
+   · COMIZIO (comizioTerr) = solo l'umore dell'area, +1 col tetto 3; nessun secondo effetto: al livello 3 al governo la
+     visibilità non c'è e il capitale politico vale 0/null (L239-7, nota di Code del 21/10), e nessuna distinzione per area
+     (partiti neutri);
+   · INVESTIMENTO (investimentoTerr) = SENZA COSTO, solo col tetto annuo FORME_TETTO_ANNO (2): spinta dell'area +
+     round(ritornoInvestimento/3) — un terzo di «Investi qui», che resta più forte in campagna. Il conto è S.formeAnno = {anno, n}
+     (dato puro, nel round-trip; un anno diverso da S.year vale n = 0).
+   In campagna nessuna forma (lì c'è «Investi qui»: giroPossibile è falso). L'area che chiama (F2) senza gettone resta col solo
+   bottone di sempre. FORME_GIRO (let: il banco la varia) è letta SOLO qui e in giroBottone (ui.js): spenta, formeGiro dà [] e
+   il foglietto, il banco (harness.js, cerimonia 17) e il gioco sono quelli di prima (A/B .claude/ab-l239-7.js; S ha in più
+   solo formeAnno). Guardia prove/l239-7/guardia-forme.js, prova prove/l239-7/prova-forme.js, misura .claude/misura-l239-7.js.
+   Spenta il 21/10 alle 10 (vedi «⚑ L239-7» in DESIGN-MAPPA.md), riaccesa da L239-7bis.
+   ⚑ L239-7bis (21/10): visita e comizio ACCESI (FORME_GIRO=true); l'investimento dietro una costante sua, FORME_INVESTIMENTO,
+   e solo al CAPO DEL GOVERNO (livello 3 al governo, S.livello===3 && !S.opposizione: la condizione di sempre); all'opposizione
+   il bottone non c'è. FORME_INVESTIMENTO è letta SOLO in formeGiro; giroBottone sa se mostrare l'investimento al tetto (disabled)
+   chiedendo formeGiro(i, true), che ignora il tetto annuo. FORME_TETTO_ANNO è let (la misura lo varia). Vedi «⚑ L239-7bis».
+   ACCESE tutte e due dal 21/10 (D174 passa: comizio contro placebo, poi investimento contro investimento spento, tetto 2). */
+let FORME_GIRO = true;
+let FORME_INVESTIMENTO = true;
+let FORME_TETTO_ANNO = 2;
+function formeAnnoN(){ var f=S.formeAnno; return (f && f.anno===S.year) ? (f.n||0) : 0; }
+function formeGiro(i, senzaTetto){
+  if(!FORME_GIRO || !giroPossibile() || !S.territori[i]) return [];
+  var f=[];
+  if((S.territorioChiama && S.territorioChiama.idx===i) || scenePerTerr(i).length) f.push('visita');
+  f.push('comizio');
+  if(FORME_INVESTIMENTO && S.livello===3 && !S.opposizione && (senzaTetto || formeAnnoN()<FORME_TETTO_ANNO)) f.push('investimento');
+  return f;
+}
+function spintaFormaInvestimento(i){ return Math.round(ritornoInvestimento(i)/3); }
+function comizioTerr(i){
+  if(formeGiro(i).indexOf('comizio')<0) return;
+  var t=S.territori[i], TE=PAESE.territori[i];
+  t.umore=clamp((t.umore||0)+1, -3, 3); t.ud=meseAss();
+  S.giroMese=meseAss();
+  S.log.unshift({ t:T('Comizio · %T').replace('%T', cap(nomeTerr(TE))), x:T("La piazza risponde: l'umore dell'area sale.") });
+  if(typeof suona==='function') suona('mappa');
+  if(typeof render==='function') render(); if(typeof commitSnap==='function') commitSnap();
+}
+function investimentoTerr(i){
+  if(formeGiro(i).indexOf('investimento')<0) return;
+  var t=S.territori[i], TE=PAESE.territori[i];
+  t.spinta=(t.spinta||0)+spintaFormaInvestimento(i);
+  if(!S.formeAnno || S.formeAnno.anno!==S.year) S.formeAnno={ anno:S.year, n:0 };
+  S.formeAnno.n++;
+  S.giroMese=meseAss();
+  S.log.unshift({ t:T('Fondi · %T').replace('%T', cap(nomeTerr(TE))), x:T("Un investimento annunciato: la spinta dell'area sale.") });
+  if(typeof suona==='function') suona('mappa');
+  if(typeof render==='function') render(); if(typeof commitSnap==='function') commitSnap();
+}
 function resolveGiro(ci){
   if(!S || !GIRO_APERTO) return;
   var G=GIRO_APERTO; GIRO_APERTO=null;
@@ -6849,6 +7120,7 @@ function genAgendaRamo(first){
   if(S.livello===1){   // POLITICO LOCALE: occasione (salita) > inchiesta/archi personali > evento locale + personale
     const occ=pickOccasione();
     if(occ){ S.agenda.push(occ); agendaSolo(); return; }
+    if(!first && scissioneMiaDovuta()){ S.agenda.push({kind:'event', data:cartaScissioneMia(), resolved:false}); agendaSolo(); return; }   // L237-6: dopo l'occasione (la salita viene prima)
     const inq=aggiornaInchiesta();      // l'esposizione ti segue anche da locale (bersaglio sempre tu)
     const inqA=aggiornaArchi(!!inq);    // archi personali (vita/coscienza/salute)
     if(!inq && !inqA){
@@ -6866,6 +7138,7 @@ function genAgendaRamo(first){
        sta in fondo a genAgendaRamo, DOPO il `return` di questo ramo (misurato: gate aperto → 0 carte uscite in
        216 mesi). Stessa precedenza che ha al governo (prima della stagione elettorale), stesso `agendaSolo()`. */
     if(!first && typeof richiamoCorrentiDovuto==='function' && richiamoCorrentiDovuto()){ S.richiamoCorrUltimo=S.year*12+S.month; S.agenda.push({kind:'event', data:cartaRichiamoCorrenti(), resolved:false}); snodoAccantoAlRichiamo(); agendaSolo(); return; }   // L227-1: S2 di us1960 non si perde sotto il richiamo
+    if(!first && scissioneMiaDovuta()){ S.agenda.push({kind:'event', data:cartaScissioneMia(), resolved:false}); agendaSolo(); return; }   // L237-6: «Il partito ti sta stretto», carta dovuta accanto al richiamo
     if(!first && typeof snodoAlleanza81Dovuta==='function' && snodoAlleanza81Dovuta()){ S.agenda.push({kind:'event', data:(S.partito==='uk_lib'?QUATTRO_EV:SCISSIONE81_EV), resolved:false}); agendaSolo(); return; }   // L60-2: la scissione dell'81 arriva anche all'opposizione
     if(!first && typeof snodoAnimaDovuta==='function' && snodoAnimaDovuta()){ S.agenda.push({kind:'event', data:ANIMA_EV, resolved:false}); agendaSolo(); return; }   // L75-1: l'anima del partito, all'opposizione
     if(!first && typeof snodoSuezOppDovuta==='function' && snodoSuezOppDovuta()){ S.agenda.push({kind:'event', data:SUEZ_OPP_EV, resolved:false}); agendaSolo(); return; }   // L77-4: Suez dall'aula
@@ -7096,6 +7369,7 @@ function genAgendaRamo(first){
   if(!first && typeof snodoMaastrichtDovuta==='function' && snodoMaastrichtDovuta()){ S.agenda.push({kind:'event', data:MAASTRICHT_EV, resolved:false}); agendaSolo(); return; }
   // CURA Lotto P3 (#9): la CARTA-RICHIAMO delle correnti — chiama alla scheda PRIMA che sia tardi (mai l'imboscata a 30)
   if(!first && typeof richiamoCorrentiDovuto==='function' && richiamoCorrentiDovuto()){ S.richiamoCorrUltimo=S.year*12+S.month; S.agenda.push({kind:'event', data:cartaRichiamoCorrenti(), resolved:false}); snodoAccantoAlRichiamo(); agendaSolo(); return; }   // L227-1: S2 di us1960 non si perde sotto il richiamo
+  if(!first && scissioneMiaDovuta()){ S.agenda.push({kind:'event', data:cartaScissioneMia(), resolved:false}); agendaSolo(); return; }   // L237-6: «Il partito ti sta stretto», carta dovuta accanto al richiamo
   // Cantiere C: la STAGIONE ELETTORALE (ultimi 6 mesi) — il beat-campagna è LA carta del mese (setpiece: la campagna assorbe l'agenda)
   if(!first && typeof pickCampagnaNazionale==='function'){ const cnb=pickCampagnaNazionale(); if(cnb){ S.agenda.push(cnb); agendaSolo(); return; } }
   // ATTO FINALE (fase C1a): la chiamata a guidare il Consesso (gated su relInt alto) — quando arriva, è LA carta del mese
@@ -7675,6 +7949,7 @@ function resolveItemCore(idx,ci){
     var _b0=(S.attivista?S.attivista.base:0), _a0=(S.attivista?S.attivista.autorev:0);   // A.5 L2: snapshot per l'auto-detect del feeding campagna (la corsia = la valuta costruita)
     try{ ACT_PACE=pace(); choice.f(); } finally{ ACT_PACE=1; }   // A.5 ritmo: durante una carta ATTIVISTA i gd() scalano; il finally GARANTISCE il reset anche se f() eccepisce → mai ACT_PACE≠1 nel gioco nazionale (raggio d'esplosione: tutti i gruppi)
     if(choice.crisi) crisiApplica(choice.crisi);   // L245-2: il punto unico del campo `crisi:` (la scala della crisi)
+    if(choice.ricevuto) crisiRicevuto(choice.ricevuto);   // L245-6: il punto unico del campo `ricevuto:` (l'ultimatum ricevuto)
     segnoTerrApplica(it, d, choice);   // L239-6: il segno sul territorio (`segnoTerr:` sulla carta o sulla scelta), solo racconto
     if(S.attivista && S.attivista.campagna && !S.attivista.campagna.resaPending){ var _dB=S.attivista.base-_b0, _dA=S.attivista.autorev-_a0; if(_dB>0||_dA>0) nutriCampagna(_dB>=_dA?'piazza':'istituzionale'); }   // la carta ha costruito base→piazza / autorev→istituzionale → nutre la campagna (mossa O evento) se la corsia coincide; un mese-evento in-corsia NON è incuria
     // lealtà del ministro collegato
@@ -7894,6 +8169,7 @@ function corpoMese(){
   if(S && S.snapAnnuale===undefined && S.month!=null){ try{ S.snapAnnuale=snapAnnuale(); }catch(e){} }   // baseline (dato puro, migrato)
   const _anno0=S.year;
   avanzaMese();
+  try{ scissioneMese(); }catch(e){}   // L237-6: la stampa −3 il mese dopo una scissione (no-op senza)
   /* L116-1 · la soglia: il decennio che cambia in una linea storica (gennaio di un anno che finisce per zero, fino al 2013: dopo
      è il presente); il primo mese di una porta suona in confirmCoal */
   if(S && S.year!==_anno0 && S.month===1 && S.year%10===0 && S.scenario && S.scenario!=='presente' && S.year<2014 && typeof suona==='function') suona('soglia');
@@ -7933,7 +8209,7 @@ function avanzaMese(){
   avanzaAnnoMandato();   // L173-1: l'anno del mandato cresce al mese dell'urna (gennaio senza meseUrna)
   riallineamentoTappa();  // AVANZAMENTO — riallineamento-partiti alle tappe '58/'63 (Fase 1: inerte, tabella vuota → no-op)
   if(S.dopoguerra) dopoguerraMese();   // L245-4: i 24 mesi del dopoguerra finiscono
-  if(S.crisi) crisiMese();   // L245-2: la crisi scende col tempo e costa (a ogni livello: una crisi aperta che la carica lascia rientra da sola)
+  crisiMese();   // L245-6: anche senza crisi (il rivale può aprirne una da sé: crisiSubitaMese; a regola spenta esce subito, nessuna estrazione) · L245-2: la crisi scende col tempo e costa (a ogni livello: una crisi aperta che la carica lascia rientra da sola)
   /* l'orologio biografico (lotto 2): a gennaio l'età avanza; verso gli 80 il CONGEDO — la fine
      naturale dell'arco (§2 del design), prima di qualunque urna. Le avvisaglie a 77/79 preparano
      il commiato, che non deve arrivare a sorpresa. */
@@ -8234,7 +8510,7 @@ function investiTerritorio(i){
   if(tipoTerritorio(i)==='avversario') repd(1);   // il terreno avversario paga in prestigio anche quando perdi
   S.decisioniScadenza=(S.decisioniScadenza||0)+1;   // la misura del cantiere: decisioni a scadenza originate da una scheda
   const TE=PAESE.territori[i];
-  S.log.unshift({t:T('Campagna sul territorio'), x:T('Sforzo di campagna su %T: %C punti spesi, ne restano %R.').replace('%T',nomeTerr(TE)).replace('%C',c).replace('%R',S.campNaz.sforzo)});
+  S.log.unshift({t:T('Campagna sul territorio'), x:T('Sforzo di campagna · %T: %C punti spesi, ne restano %R.').replace('%T',cap(nomeTerr(TE))).replace('%C',c).replace('%R',S.campNaz.sforzo)});
   if(typeof render==='function') render(); if(typeof commitSnap==='function') commitSnap();
 }
 /* Alla vigilia: la spinta confluisce nelle forze del blocco (il punto di giunzione con i seggi: avviaAttesa → calcSeggi).
@@ -9326,7 +9602,7 @@ function tornaAlGoverno(mins){
   S.mesiGovernoAvv=0; S.sostegnoAvv=null;   // L91-2
   S.mesiSottoCrisi=0; S.fidLivello=0; S.fidUltimo={};        // azzera i contatori del governo precedente
   S.snap=Object.assign({},S.pol);                             // contabilità RP pulita: erediti le politiche e le cambi coi tuoi punti
-  bioConta('elezioniVinte'); bioFatto('La rimonta è completa: di nuovo al governo.');
+  bioFatto('La rimonta è completa: di nuovo al governo.');   // L256-1: l'elezione la conta nextMandate qui sotto (bioConta + contaMandatoProprio): un'elezione vinta = un conteggio
   S.log.unshift({t:T('Al governo'),x:T('Hai vinto le elezioni: torni a guidare il paese.')});   // L244-4
   document.getElementById('appoint').style.display='none';
   document.getElementById('game').style.display='block';
@@ -9834,6 +10110,7 @@ function applySnap(snap){
   if(S.famigliaVivaFatti===undefined) S.famigliaVivaFatti=[];       // G1 — migrazione: once-in-vita vissuti
   if(S.recentFamigliaViva===undefined) S.recentFamigliaViva=[];     // G1 — migrazione: finestra ripetibili
   if(S.giroMese===undefined) S.giroMese=null;                       // L182-3 — migrazione: nessun giro fatto (l umore assente vale 0, nessuna migrazione)
+  if(!S.formeAnno || typeof S.formeAnno!=='object') S.formeAnno={anno:S.year, n:0};   // L239-7 — migrazione: nessun investimento del gettone quest'anno
   if(S.territorioChiama===undefined) S.territorioChiama=null;       // F2 — migrazione: nessun territorio in chiamata
   if(S.territorioUltimo===undefined) S.territorioUltimo=null;       // F2 — migrazione: cooldown territorio
   if(S.territorioRecente===undefined) S.territorioRecente=null;     // F2 — migrazione: anti-ripetizione area
@@ -9845,7 +10122,7 @@ function applySnap(snap){
     var _f=S.forze.i50_fronte; S.forze.i50_pci=_f*22/31; S.forze.i50_psi=_f*9/31; delete S.forze.i50_fronte;
     if(S.forzePrev && S.forzePrev.i50_fronte!=null){ var _fp=S.forzePrev.i50_fronte; S.forzePrev.i50_pci=_fp*22/31; S.forzePrev.i50_psi=_fp*9/31; delete S.forzePrev.i50_fronte; }
     if(S.seggi && S.seggi.i50_fronte!=null){ delete S.seggi.i50_fronte; }   // i seggi si ricalcolano alla prossima urna
-    if(S.partito==='i50_fronte') S.partito='i50_pci';
+    if(S.partito==='i50_fronte'){ S.partito='i50_pci'; S.partitoDa=meseAss(); }   // L237-6: il punto dove S.partito cambia (una porta: partitoDaMese lo legge solo nel presente)
     if(Array.isArray(S.coalizione)){ S.coalizione=S.coalizione.map(function(id){return id==='i50_fronte'?'i50_pci':id;}); }
   }
   if(S.leggeTruffa===undefined) S.leggeTruffa=null;                            // Build B (b) — scelta legge truffa: default per i salvataggi pre-(b)
@@ -9945,6 +10222,8 @@ function applySnap(snap){
   if(S.crisi!=null && !(S.crisi.con && typeof potDi==='function' && potDi(S.crisi.con) && S.crisi.t>=1 && S.crisi.t<=5)) S.crisi=null;
   if(S.crisi && S.crisi.guerra!==undefined && !guerraLeggibile(S.crisi.guerra)){ delete S.crisi.guerra; if(S.crisi.t>4) S.crisi.t=4; }   // L245-4: una guerra illeggibile sparisce, la crisi torna all'ultimatum
   if(S.crisi && S.crisi.t===5 && !S.crisi.guerra) S.crisi.t=4;
+  if(S.crisi){ ['subita','ricevuto'].forEach(function(k){ if(S.crisi[k]!==undefined && S.crisi[k]!==true) delete S.crisi[k]; }); if(S.crisi.ricevuto && !S.crisi.subita) delete S.crisi.ricevuto; }   // L245-6: la crisi subita (segni illeggibili si tolgono)
+  if(S.attaccoSubito!==undefined && typeof S.attaccoSubito!=='boolean') delete S.attaccoSubito;   // L245-6
   if(S.dopoguerra!==undefined && !(S.dopoguerra && ['vittoria','sconfitta','pace','stallo'].indexOf(S.dopoguerra.esito)>=0 && Number.isInteger(S.dopoguerra.fino))) delete S.dopoguerra;   // L245-4   // L245-2: una crisi illeggibile (potenza sconosciuta, gradino fuori scala) torna pace; assente resta assente
   if(S.dopoguerra && S.dopoguerra.ritorno!==undefined && S.dopoguerra.ritorno!==true) delete S.dopoguerra.ritorno;   // L245-5
   try{ segniScaduti(); }catch(e){}   // L245-5: un segno di guerra senza la guerra (o la ricostruzione senza il dopoguerra) si toglie — segnoTerr dà null, e segniScaduti è il punto che toglie

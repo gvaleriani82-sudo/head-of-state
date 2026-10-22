@@ -3555,6 +3555,19 @@ const RICHIAMO_CORRENTI_EV = {
       f:function(){ S.log.unshift({t:T('Il partito'),x:T('Hai rimandato: una scelta legittima, ma il malumore cova.')}); } },
   ],
 };
+/* L237-6 · «Il partito ti sta stretto» (DESIGN-PARTITO-PROPRIO.md §3): la carta DOVUTA della scissione — la mette genAgendaRamo se
+   scissioneMiaDovuta() (game.js), passa da eraCartaViva. Testi neutri: nessuna area politica premiata o punita. `scissione:` dice la
+   scelta a scissioneScelta (game.js); la «trattativa» si toglie dove non ci sono correnti (cartaScissioneMia). */
+const SCISSIONE_MIA_EV = {
+  id:'pp_sciss_stretto', kick:'Il partito', era:'contemporanea',
+  t:'Il partito ti sta stretto',
+  text:'Da mesi le riunioni finiscono male. Qualcuno ti dice a mezza voce che fuori di qui ti seguirebbero.',
+  ch:[
+    { l:'Resta e tieni duro', e:'Nessun cambiamento · la tensione resta', scissione:'resta', f:function(){ scissioneScelta('resta'); } },
+    { l:'Tratta con le correnti', e:'Le correnti si calmano, per ora', scissione:'tratta', f:function(){ scissioneScelta('tratta'); } },
+    { l:'Rompi: fonda un partito tuo', e:'Scegli nome e sigla · una parte del partito viene con te', scissione:'rompi', f:function(){ scissioneScelta('rompi'); } },
+  ],
+};
 /* L27-1 — la GEMELLA D'OPPOSIZIONE del richiamo. La cornice (`t`/`text`) e le due etichette sono già neutre e
    restano IDENTICHE: cambia solo il costo, perché al governo il gesto si paga in consenso e da sfidante il
    consenso non è tuo — «un mese in sezione è un mese fuori dalle prime pagine», quindi si paga in visibilità
@@ -14578,6 +14591,15 @@ const CRISI_SCALA_EV=[
    {l:'Concedi altro tempo', e:'La crisi resta all\'ultimatum', f:()=>{crisiScala('tieni');}, scala:'tieni'},
    {l:'Ritiri l\'ultimatum', e:'La crisi scende; la tua parola perde peso', f:()=>{relIntMuovi('rivale',3); repd(-1); crisiScala('scendi');}, scala:'scendi'},
  ]},
+ /* L245-6 · l'ultimatum RICEVUTO: la crisi che apre il rivale (crisiSubitaMese, game.js) arriva qui dopo tre mesi di segnali; la
+    pesca crisiCartaRicevuto, certa, nello slot dell'evento estero. Quattro risposte, campo `ricevuto` letto in UN punto
+    (crisiRicevuto, dal ramo generico di resolveItemCore): le `f` sono vuote. Partiti neutri, niente gruppi, niente persone. */
+ {id:'crs_ricevuto', gradino:'ricevuto', min:'difesa', kick:'Crisi internazionale', t:'L\'ultimatum %POTdi', text:'Dopo le sanzioni e la mobilitazione, %POTdet ci pone un ultimatum, con una scadenza. Si può resistere, chiamare gli alleati, portare la crisi alle Nazioni Unite o cedere.', ch:[
+   {l:'Resisti', e:'Nessuna concessione: %POTdet può cedere, o tirare dritto', ricevuto:'resisti', f:()=>{}},
+   {l:'Chiami gli alleati', e:'Se l\'Alleanza ti segue, %POTdet ci pensa due volte', ricevuto:'alleati', f:()=>{}},
+   {l:'Porti la crisi alle Nazioni Unite', e:'Con una maggioranza in Assemblea, la crisi scende', ricevuto:'onu', f:()=>{}},
+   {l:'Cedi all\'ultimatum', e:'La crisi si chiude; la tua parola perde peso, e la stampa non perdona', ricevuto:'cedi', f:()=>{}},
+ ]},
 ];
 
 /* ===== L245-4 · LE CARTE DEL FRONTE (DESIGN-POLITICA-ESTERA.md §2 (b), «⚑ L245-4»). Una al mese, nello slot dell'evento estero del
@@ -18848,6 +18870,7 @@ const TITOLI=[
  /* L237-5 · la fondazione del partito proprio: la sceglie generaTitolo nel mese della fondazione o in quello dopo (titoloFondazioneDovuto),
     una volta per carriera; la cond la tiene fuori dal pool degli altri mesi. Neutro: amico e ostile uguali. */
  {id:'ti_pp_fondazione', cond:()=>titoloFondazioneDovuto(), amico:'Nasce %P: un nuovo nome sulla scheda', ostile:'Nasce %P: un nuovo nome sulla scheda'},
+ {id:'ti_pp_scissione', cond:()=>titoloScissioneDovuto(), amico:'Scissione da %V: nasce %P', ostile:'Scissione da %V: nasce %P'},   // L237-6
  {id:'ti_estate', cond:()=>stagioneMese()==='estate'&&stagioneMese(S.month-1)==='estate', amico:'Il paese rallenta, il governo resta al lavoro', ostile:'Ferie per tutti, risposte per nessuno'},
  {id:'ti_rientro', cond:()=>stagioneMese()==='autunno'&&stagioneMese(S.month+1)==='autunno', amico:'Il rientro: l\'agenda d\'autunno del governo', ostile:'L\'autunno dei dossier: il tavolo è pieno'},
  /* ===== D2 — TITOLI D'EPOCA '50 (pri 2, era italia1950): la scheda-materia-prima §3-bis di PRESET-ITALIA-1950.md,
