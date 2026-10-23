@@ -4484,6 +4484,16 @@ let SNODI_SCALA_UK=true;   // L245-8-3: ACCESA il 22/10 (misura del passo 4 verd
 function snodoScalaUkOk(con){ return SNODI_SCALA_UK && typeof S!=='undefined' && S && S.era===LINEA_UK && S.livello===3 && !!rivaleRiga(con); }
 function snodoMerluzzo76Dovuta(){    return snodoScalaUkOk('islanda') && !S.opposizione && S.merluzzo76==null && S.year===1976 && S.month>=1 && S.month<=2; }
 function snodoMerluzzo76OppDovuta(){ return snodoScalaUkOk('islanda') && S.opposizione && S.merluzzo76Opp==null && S.merluzzo76==null && S.year===1976 && S.month>=1 && S.month<=2; }
+/* ⚑ L245-8-4 · le due crisi dello stretto di Formosa (us1950, con la Cina: 1955/1-2 e 1958/8-9): la forma di snodoScalaUkOk per la
+   linea americana, con l'interruttore suo SNODI_SCALA_US (il banco lo segue: __BANCO_SNODI_US_OFF = prima, __BANCO_SNODI_US_ON = acceso
+   a mano). Le righe di RIVALI hanno massimo 4: l'ultimatum sì, la guerra no. Nessun pilastro, fatto-mondo né snodo americano in quei
+   mesi (guardato il 22/10: pus50_oahu è del 1955/3, pus50_scuola del 1958/12; la scuola è del 1957/9-10). */
+let SNODI_SCALA_US=false;   // L245-8-4bis (22/10): ancora SPENTO — fermezza a t:3 nel 1958 (r1), il 1955 a t:2; la misura a 20×2 non passa per un soffio (rapporto «⚑ L245-8-4bis»)
+function snodoScalaUsOk(con){ return SNODI_SCALA_US && typeof S!=='undefined' && S && S.era===LINEA_US && S.livello===3 && !!rivaleRiga(con); }
+function snodoFormosa55Dovuta(){    return snodoScalaUsOk('cina') && !S.opposizione && S.usFormosa55==null && S.year===1955 && S.month>=1 && S.month<=2; }
+function snodoFormosa55OppDovuta(){ return snodoScalaUsOk('cina') && S.opposizione && S.usFormosa55Opp==null && S.usFormosa55==null && S.year===1955 && S.month>=1 && S.month<=2; }
+function snodoFormosa58Dovuta(){    return snodoScalaUsOk('cina') && !S.opposizione && S.usFormosa58==null && S.year===1958 && S.month>=8 && S.month<=9; }
+function snodoFormosa58OppDovuta(){ return snodoScalaUsOk('cina') && S.opposizione && S.usFormosa58Opp==null && S.usFormosa58==null && S.year===1958 && S.month>=8 && S.month<=9; }
 function snodoMoneta98Dovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_DE && S.livello===3 && S.deMoneta98==null && (S.year===1998 && S.month>=4 && S.month<=5); }
 /* L157-1 · i cancelli degli snodi del decennio tedesco 2000 (finestre di due mesi, come L153-2). Nessun pilastro né fatto-mondo in quei
    mesi: pde00_ueberlingen è del 2002/7, pm_tsunami del 2005/1, pm_crollo del 2008/9. S3 «La questione di fiducia» al governo solo per un
@@ -7287,6 +7297,8 @@ function genAgendaRamo(first){
     if(!first && typeof snodoKosovo99ItOppDovuta==='function' && snodoKosovo99ItOppDovuta()){ S.agenda.push({kind:'event', data:KOSOVO99_IT_OPP_EV, resolved:false}); agendaSolo(); return; }   // L245-8-2: il Kosovo, dall'aula
     if(!first && typeof snodoLibia11OppDovuta==='function' && snodoLibia11OppDovuta()){ S.agenda.push({kind:'event', data:LIBIA11_OPP_EV, resolved:false}); agendaSolo(); return; }   // L245-8-2: la Libia, dall'aula
     if(!first && typeof snodoMerluzzo76OppDovuta==='function' && snodoMerluzzo76OppDovuta()){ S.agenda.push({kind:'event', data:MERLUZZO76_OPP_EV, resolved:false}); agendaSolo(); return; }   // L245-8-3: il merluzzo, dall'aula
+    if(!first && typeof snodoFormosa55OppDovuta==='function' && snodoFormosa55OppDovuta()){ S.agenda.push({kind:'event', data:FORMOSA55_OPP_EV, resolved:false}); agendaSolo(); return; }   // L245-8-4: Formosa 1955, dall'aula
+    if(!first && typeof snodoFormosa58OppDovuta==='function' && snodoFormosa58OppDovuta()){ S.agenda.push({kind:'event', data:FORMOSA58_OPP_EV, resolved:false}); agendaSolo(); return; }   // L245-8-4: Quemoy 1958, dall'aula
     if(!first && typeof snodoSuezOppDovuta==='function' && snodoSuezOppDovuta()){ S.agenda.push({kind:'event', data:SUEZ_OPP_EV, resolved:false}); agendaSolo(); return; }   // L77-4: Suez dall'aula
     if(!first && typeof snodoCoal2010OppDovuta==='function' && snodoCoal2010OppDovuta()){ S.agenda.push({kind:'event', data:COAL2010_OPP_EV, resolved:false}); agendaSolo(); return; }   // L77-4: i cinque giorni, visti da chi ha perso
     if(!first && typeof snodoPoteriOppDovuta==='function' && snodoPoteriOppDovuta()){ S.agenda.push({kind:'event', data:POTERI_OPP_EV, resolved:false}); agendaSolo(); return; }   // L93-2: i poteri speciali, dall'aula
@@ -7380,6 +7392,8 @@ function genAgendaRamo(first){
   if(!first && typeof snodoKosovo99ItDovuta==='function' && snodoKosovo99ItDovuta()){ S.agenda.push({kind:'event', data:KOSOVO99_IT_EV, resolved:false}); agendaSolo(); return; }   // L245-8-2: il Kosovo apre la scala
   if(!first && typeof snodoLibia11Dovuta==='function' && snodoLibia11Dovuta()){ S.agenda.push({kind:'event', data:LIBIA11_EV, resolved:false}); agendaSolo(); return; }   // L245-8-2: la Libia apre la scala
   if(!first && typeof snodoMerluzzo76Dovuta==='function' && snodoMerluzzo76Dovuta()){ S.agenda.push({kind:'event', data:MERLUZZO76_EV, resolved:false}); agendaSolo(); return; }   // L245-8-3: il merluzzo apre la scala (prima del FMI, che ha due anni)
+  if(!first && typeof snodoFormosa55Dovuta==='function' && snodoFormosa55Dovuta()){ S.agenda.push({kind:'event', data:FORMOSA55_EV, resolved:false}); agendaSolo(); return; }   // L245-8-4: Formosa 1955 apre la scala
+  if(!first && typeof snodoFormosa58Dovuta==='function' && snodoFormosa58Dovuta()){ S.agenda.push({kind:'event', data:FORMOSA58_EV, resolved:false}); agendaSolo(); return; }   // L245-8-4: Quemoy 1958 apre la scala
   // AVANZAMENTO Lotto 4: gli snodi '60 come SCELTA (Enel poi apertura) — carte one-shot nel '62-63, solo per il premier nel '50
   if(!first && typeof snodoEnelDovuta==='function' && snodoEnelDovuta()){ S.agenda.push({kind:'event', data:ENEL_EV, resolved:false}); agendaSolo(); return; }
   if(!first && typeof snodoAperturaDovuta==='function' && snodoAperturaDovuta()){ S.agenda.push({kind:'event', data:APERTURA_EV, resolved:false}); agendaSolo(); return; }

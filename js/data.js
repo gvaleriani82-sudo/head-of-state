@@ -14423,6 +14423,12 @@ const RIVALI=(function(){
   // alleati la crisi arriva alla mobilitazione navale (le fregate) e mai all'ultimatum né alla guerra. `confine` non accende segni:
   // il fronte vuole il campo `fronte` e la guerra (segniGuerra), e qui la guerra non c'è. A gennaio 1977 crisiMese la chiude.
   riga('uk1970', 'islanda', 1975, 1976, 3, 'confine');
+  // L245-8-4: le due crisi dello stretto di Formosa (FORMOSA55_EV, FORMOSA58_EV), solo us1950 (us1960 parte nel 1961). La potenza è
+  // `cina` com'è: rivaleRiga legge solo questa tabella, e i volti (potenzeDi) e la crisi subita (che vuole una potenza viva per
+  // eraViva) nel 1955-58 non la vedono — la Cina senza `era` è del presente. Massimo 4: si arriva all'ultimatum, mai alla guerra.
+  // `lontano`: nessun segno sulla mappa. Due righe di un anno: a gennaio dopo crisiMese chiude («il mondo è cambiato»).
+  riga('us1950', 'cina', 1955, 1955, 4, 'lontano');
+  riga('us1950', 'cina', 1958, 1958, 4, 'lontano');
   ['russia','cina'].forEach(function(c){ riga('brasile messico argentina sudafrica nigeria', c, 2012, 2099, 2, 'lontano'); });   // al più le sanzioni
   // L245-3bis: le porte 1990 e 2000 arrivano al presente (dal 2012 ogni linea apre `contemporanea`): da lì hanno i rivali del
   // presente del loro paese, stessi `massimo` e `tipo`, letti dalle righe qui sopra. La Russia dal 1992 c'è già e non si raddoppia.
@@ -21402,6 +21408,10 @@ const SNODI_STORICI = {
   libia11Opp: { storico:['unita'], conforme:'sulla Libia, dall\'opposizione', diverge:{ 'contro':'Nel 2011 l\'opposizione ha votato contro la missione in Libia.' } },
   merluzzo76: { storico:['fermezza'], conforme:'sulle acque di pesca', diverge:{ 'trattativa':'Nel 1976 il governo ha ritirato subito le fregate e ha trattato le quote di pesca.', 'cede':'Nel 1976 il governo ha accettato le 200 miglia senza mandare le fregate: nella storia ci arrivò dopo mesi di scontri in mare.' } },   // L245-8-3
   merluzzo76Opp: { storico:['unita'], conforme:'sulle acque di pesca, dall\'opposizione', diverge:{ 'accordo':'Nel 1976 l\'opposizione ha chiesto un accordo con l\'Islanda mentre le fregate erano in mare.' } },
+  usFormosa55: { storico:['fermezza'], conforme:'sullo stretto di Formosa', diverge:{ 'ambiguita':'Nel 1955 ha difeso Formosa senza dire quali isole, e non ha chiesto un voto al Congresso.', 'lascia':'Nel 1955 ha lasciato le isole di Quemoy e Matsu ai nazionalisti, da soli.' } },   // L245-8-4
+  usFormosa55Opp: { storico:['vota'], conforme:'sullo stretto di Formosa, dall\'opposizione', diverge:{ 'limiti':'Nel 1955 l\'opposizione ha votato la risoluzione su Formosa chiedendo di nominare le isole una per una.' } },
+  usFormosa58: { storico:['fermezza'], conforme:'su Quemoy', diverge:{ 'trattativa':'Nel 1958 ha scortato i convogli solo dopo l\'apertura dei colloqui fra ambasciatori.', 'lascia':'Nel 1958 ha consigliato ai nazionalisti di lasciare le isole.' } },
+  usFormosa58Opp: { storico:['unita'], conforme:'su Quemoy, dall\'opposizione', diverge:{ 'limiti':'Nel 1958 l\'opposizione ha detto no a una guerra per Quemoy.' } },
   nucleare: { storico:['uscita'], conforme:'sul nucleare dopo l\'incidente', diverge:{ 'ridimensionato':'Il nucleare non è stato chiuso dopo l\'incidente: il piano è andato avanti, ridimensionato.', 'ridimensionato_conteso':'Il nucleare non è stato chiuso dopo l\'incidente: il piano è andato avanti, ridimensionato e contestato.' } },
   scissione: { storico:['svolta'], conforme:'sulla svolta del partito comunista', diverge:{ 'rifondazione':'Il partito comunista non ha cambiato nome: la svolta è stata respinta e la storia ha preso un\'altra strada.' } },
   maastricht: { storico:['corri'], conforme:'sulla corsa a Maastricht', diverge:{ 'rallenta':'L\'Italia non è entrata nella moneta unica con la prima ondata: ha preso il treno dopo.' } },
@@ -24165,6 +24175,8 @@ const SNODI_SCALA_STORIA = {
   kosovo99it: 'La storia · Nel giugno 1999 la guerra finì con il ritiro dal Kosovo.',   // L245-8-2
   libia11: 'La storia · Nell\'ottobre 2011 il regime cadde e la missione si chiuse.',
   merluzzo76: 'La storia · Nel giugno 1976 un accordo pose fine alla guerra del merluzzo: i pescherecci britannici lasciarono le acque islandesi.',   // L245-8-3
+  formosa55: 'La storia · Nel gennaio 1955 il Congresso autorizzò il presidente a difendere Formosa; in primavera i bombardamenti sulle isole cessarono.',   // L245-8-4
+  formosa58: 'La storia · Nell\'ottobre 1958 i bombardamenti su Quemoy si fermarono, poi ripresero a giorni alterni: le isole restarono ai nazionalisti.',
 };
 /* ⚑ L245-8-3 · la terza guerra del merluzzo (1975-76), il primo snodo della scala nella linea britannica: stesso meccanismo di
    L245-8-1/2 (campo `crisi:` con `snodo:`), funzione snodoScalaUkOk e interruttore SNODI_SCALA_UK in game.js. La riga di RIVALI
@@ -24196,6 +24208,70 @@ const MERLUZZO76_OPP_EV = {
     { l:'Un accordo, prima che sia tardi', e:'Ti distingui · nei porti di pesca ti accusano di averli lasciati soli',
       f:function(){ S.merluzzo76Opp='accordo'; gd('cetomedio',1); gd('lavoratori',-1);
         S.log.unshift({t:T('Le acque di pesca'),x:T('Dall\'opposizione ha chiesto un accordo con l\'Islanda.')}); } },
+  ],
+};
+/* ⚑ L245-8-4 · le due crisi dello stretto di Formosa (us1950, con la Cina: 1955/1-2 e 1958/8-9), lo stesso meccanismo di L245-8-1/2/3
+   (campo `crisi:` con `snodo:`), funzione snodoScalaUsOk e interruttore SNODI_SCALA_US in game.js. Le righe di RIVALI hanno massimo 4:
+   si arriva all'ultimatum, mai alla guerra. Flag nuovi cercati in tutto js/ il 22/10 prima di scriverli (L99-2), zero occorrenze:
+   usFormosa55, usFormosa55Opp, usFormosa58, usFormosa58Opp. Effetti piccoli come il merluzzo (gd, non gdUs50); le aule muovono solo gruppi.
+   L245-8-4bis: la fermezza del 1958 apre alla mobilitazione (t:3, le navi che scortano i convogli), quella del 1955 resta al gradino 2
+   (ripiego r1: col t:3 anche nel 1955 la fetta forzata del 1955 andava al 61%). */
+const FORMOSA55_EV = {
+  id:'snodo_formosa55', snodo:true, era:'us1950', kick:'Lo stretto di Formosa', tono:'grave',
+  t:'Lo stretto di Formosa',
+  text:'Da mesi le batterie sulla costa cinese bombardano le isole di Quemoy e Matsu, tenute dai nazionalisti di Formosa. A gennaio le truppe comuniste sono sbarcate su un isolotto più a nord e l\'hanno preso. La Settima flotta incrocia nello stretto. Il Congresso aspetta di sapere fin dove arriva la difesa di Formosa; gli alleati europei temono un\'altra Corea.',
+  ch:[
+    { l:'Chiedi al Congresso il potere di difendere Formosa e le posizioni vicine', crisi:{con:'cina', t:2, snodo:'formosa55'}, e:'La storia · il Congresso vota quasi all\'unanimità · la flotta resta nello stretto, e Pechino alza la voce',
+      f:function(){ S.usFormosa55='fermezza'; repd(1); gd('giovani',-1); relIntMuovi('alleanza',-1);
+        S.log.unshift({t:T('Lo stretto di Formosa'),x:T('Ha chiesto al Congresso il potere di difendere Formosa e le posizioni vicine.')}); } },
+    { l:'Difendi Formosa, ma non dici quali isole', crisi:{con:'cina', t:1, snodo:'formosa55'}, e:'La flotta aiuta a evacuare l\'isolotto più esposto · Pechino resta nel dubbio, e la tensione resta sul tavolo',
+      f:function(){ S.usFormosa55='ambiguita'; gd('cetomedio',1);
+        S.log.unshift({t:T('Lo stretto di Formosa'),x:T('Ha promesso di difendere Formosa senza dire quali isole.')}); } },
+    { l:'Le isole si arrangino', e:'Nessuna crisi · gli alleati respirano, e al Congresso ti chiedono chi ha perso le isole',
+      f:function(){ S.usFormosa55='lascia'; allG(-1); repd(-1);
+        S.log.unshift({t:T('Lo stretto di Formosa'),x:T('Ha lasciato le isole di Quemoy e Matsu ai nazionalisti, da soli.')}); } },
+  ],
+};
+const FORMOSA55_OPP_EV = {
+  id:'snodo_formosa55_opp', snodo:true, era:'us1950', kick:'Lo stretto di Formosa', tono:'grave',
+  t:'Lo stretto di Formosa, dall\'aula',
+  text:'Il Presidente chiede al Congresso il potere di usare le forze armate per difendere Formosa e «le posizioni vicine», senza dire quali. Le batterie cinesi bombardano le isole di Quemoy e Matsu. La risoluzione arriva al voto, e il tuo partito deve dire che cosa ne pensa.',
+  ch:[
+    { l:'La voti', e:'La storia · la risoluzione passa quasi all\'unanimità · la difesa di Formosa diventa anche tua',
+      f:function(){ S.usFormosa55Opp='vota'; gd('cattolici',1); gd('giovani',-1);
+        S.log.unshift({t:T('Lo stretto di Formosa'),x:T('Dall\'opposizione ha votato la risoluzione su Formosa.')}); } },
+    { l:'La voti, chiedendo dei limiti', e:'Chiedi che le isole siano nominate una per una · ti accusano di legare le mani al Presidente',
+      f:function(){ S.usFormosa55Opp='limiti'; gd('cetomedio',1); gd('cattolici',-1);
+        S.log.unshift({t:T('Lo stretto di Formosa'),x:T('Dall\'opposizione ha votato la risoluzione su Formosa, chiedendo dei limiti.')}); } },
+  ],
+};
+const FORMOSA58_EV = {
+  id:'snodo_formosa58', snodo:true, era:'us1950', kick:'Lo stretto di Formosa', tono:'grave',
+  t:'Quemoy sotto il fuoco',
+  text:'Le batterie sulla costa cinese hanno ripreso a bombardare Quemoy: decine di migliaia di granate in pochi giorni, e i rifornimenti alla guarnigione dei nazionalisti di Formosa non passano. La Settima flotta è nello stretto. Il Congresso è diviso, e gli alleati europei temono un\'altra Corea per un\'isola che pochi sanno trovare sulla carta.',
+  ch:[
+    { l:'La flotta scorta i convogli fino al limite delle acque', crisi:{con:'cina', t:3, snodo:'formosa58'}, e:'La storia · le navi accompagnano i convogli fino a poche miglia dalla costa · Pechino minaccia, e la crisi sale',
+      f:function(){ S.usFormosa58='fermezza'; repd(1); gd('giovani',-1); relIntMuovi('alleanza',-1);
+        S.log.unshift({t:T('Lo stretto di Formosa'),x:T('Ha mandato la flotta a scortare i convogli verso Quemoy.')}); } },
+    { l:'Scorta, e colloqui fra ambasciatori a Varsavia', crisi:{con:'cina', t:1, snodo:'formosa58'}, e:'I convogli passano e i due ambasciatori si incontrano · la tensione resta, ma sul tavolo',
+      f:function(){ S.usFormosa58='trattativa'; repd(1);
+        S.log.unshift({t:T('Lo stretto di Formosa'),x:T('Ha scortato i convogli e aperto i colloqui fra ambasciatori a Varsavia.')}); } },
+    { l:'Consigli ai nazionalisti di lasciare le isole', e:'Nessuna crisi · gli alleati respirano, e a Formosa ti accusano di averli lasciati soli',
+      f:function(){ S.usFormosa58='lascia'; allG(-1); gd('cattolici',-1);
+        S.log.unshift({t:T('Lo stretto di Formosa'),x:T('Ha consigliato ai nazionalisti di lasciare le isole.')}); } },
+  ],
+};
+const FORMOSA58_OPP_EV = {
+  id:'snodo_formosa58_opp', snodo:true, era:'us1950', kick:'Lo stretto di Formosa', tono:'grave',
+  t:'Quemoy sotto il fuoco, dall\'aula',
+  text:'La Settima flotta scorta i convogli verso Quemoy sotto il fuoco delle batterie cinesi. Il Presidente dice che non si cede sotto le bombe; al Congresso c\'è chi chiede perché rischiare una guerra per delle isole a pochi chilometri dalla Cina. Il tuo partito deve dire da che parte sta.',
+  ch:[
+    { l:'Con il Presidente e con la flotta', e:'La storia · voti con il governo · i tuoi chiedono che cosa ci guadagni',
+      f:function(){ S.usFormosa58Opp='unita'; gd('cattolici',1); gd('giovani',-1);
+        S.log.unshift({t:T('Lo stretto di Formosa'),x:T('Dall\'opposizione ha sostenuto la flotta nello stretto.')}); } },
+    { l:'Non una guerra per Quemoy', e:'Ti distingui · ti accusano di lasciare soli gli alleati in Asia',
+      f:function(){ S.usFormosa58Opp='limiti'; gd('cetomedio',1); gd('cattolici',-1);
+        S.log.unshift({t:T('Lo stretto di Formosa'),x:T('Dall\'opposizione ha detto no a una guerra per Quemoy.')}); } },
   ],
 };
 /* ⚑ L245-8-2 · le ultime due date della linea italiana, con il meccanismo di L245-8-1 (stesso campo `crisi:` con `snodo:`, stessa
