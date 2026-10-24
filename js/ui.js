@@ -858,6 +858,59 @@ function personaggioStratoChiudi(){
   }catch(e){}
 }
 function personaggioStratoAperto(){ const el=typeof document!=='undefined' && document.getElementById('pers-strato'); return !!(el && el.classList.contains('on')); }
+/* ================================================================================================================
+   L248-6 · IL FUMETTO. Quando la battuta `voce-pers-<momento>` non può suonare (audio.js, `voceFumetto`: voci spente, audio non
+   sbloccato, file che non arriva entro VOCI_ATTESA_MS) e il personaggio è a schermo — il modale del bilancio (battute bilancio-*) o
+   lo strato dei gesti (i quattro gesti) —, il testo della battuta compare in un fumetto accanto a lui, nella lingua del gioco
+   (`BATTUTE_PERSONAGGIO` passato da T(): nessun testo nuovo), e la bocca va a 26 lettere al secondo (`personaggioBoccaParla` sulle
+   istanze vive; in posa — movimento ridotto, `reteLeggera()`, modo 'posa' — la bocca socchiusa ferma, `personaggioBoccaFerma`).
+   Dura lettere/26 s + 1 s, tetto 4,5 s; lo strato si chiude col fumetto. La notte (in posa) non ha fumetto, né la tragedia (lì il
+   personaggio non c'è). Con la voce che suona il fumetto non nasce: c'è il sottotitolo. Dietro `PERS_FUMETTO` (personaggio.js).
+   Rende true se l'ha scritto. Niente in S.
+   ================================================================================================================ */
+const PERS_FUMETTO_TETTO_MS = 4500;
+let PERS_FUMETTO_TIMER = 0;
+function personaggioFumettoDurata(testo){ return Math.min(PERS_FUMETTO_TETTO_MS, Math.round(String(testo||'').length/PERS_FUMETTO_LPS*1000)+1000); }
+function personaggioFumetto(id){
+  try{
+    if(typeof PERSONAGGIO_ANIMATO==='undefined' || !PERSONAGGIO_ANIMATO || typeof PERS_FUMETTO==='undefined' || !PERS_FUMETTO) return false;
+    if(typeof document==='undefined' || !document.body || typeof id!=='string' || id.indexOf('voce-pers-')!==0) return false;
+    if(typeof musicaTragedia==='function' && musicaTragedia()) return false;
+    const momento=id.slice(10), base=BATTUTE_PERSONAGGIO[momento]; if(!base) return false;
+    let cont=null;
+    if(momento.indexOf('bilancio-')===0){ const ov=document.getElementById('ov'); if(ov && ov.classList.contains('on')) cont=document.querySelector('#modal .rv-riga'); }
+    else if(PERS_STRATO_AZIONE[momento] && personaggioStratoAperto()) cont=document.getElementById('pers-strato');
+    const host=cont && cont.querySelector('.ritratto-vivo.rv-pers'); if(!host) return false;
+    const testo=T(base), dur=personaggioFumettoDurata(testo);
+    personaggioFumettoVia();
+    const f=document.createElement('div'); f.className='pers-fumetto'; f.setAttribute('aria-live','polite');
+    f.appendChild(document.createElement('span')).textContent=testo;
+    if(cont.id!=='pers-strato'){   // nel bilancio: a destra del ritratto, all'altezza della testa
+      cont.classList.add('con-fumetto');
+      f.style.left=(host.offsetLeft+host.offsetWidth+10)+'px'; f.style.top=Math.round(host.offsetTop+host.offsetHeight*0.04)+'px';
+      f.style.maxWidth=Math.max(120, Math.min(220, cont.clientWidth-(host.offsetLeft+host.offsetWidth+10)-4))+'px';
+    } else {                       // nello strato: a destra del personaggio, dentro la finestra (mai scorrimento orizzontale)
+      const r=cont.getBoundingClientRect();
+      f.style.maxWidth=Math.max(120, Math.min(220, Math.round(innerWidth-r.right-10-16)))+'px';
+      clearTimeout(PERS_STRATO_TIMER); PERS_STRATO_TIMER=0;   // lo strato si chiude col fumetto
+    }
+    cont.appendChild(f);
+    void f.offsetWidth; f.classList.add('on');
+    const vivi=[].some.call(host.querySelectorAll('[data-pers]'), function(b){ return !!b.__pers; });
+    if(vivi && typeof personaggioBoccaParla==='function') personaggioBoccaParla(testo, Math.round(testo.length/PERS_FUMETTO_LPS*1000));
+    else if(typeof personaggioBoccaFerma==='function') personaggioBoccaFerma(host, 0.3);
+    PERS_FUMETTO_TIMER=setTimeout(function(){
+      if(!f.isConnected) return;
+      if(cont.id==='pers-strato') personaggioStratoChiudi();
+      else { personaggioFumettoVia(); if(!vivi && typeof personaggioBoccaFerma==='function') personaggioBoccaFerma(host, 0); }
+    }, dur);
+    return true;
+  }catch(e){ return false; }
+}
+function personaggioFumettoVia(){
+  clearTimeout(PERS_FUMETTO_TIMER); PERS_FUMETTO_TIMER=0;
+  try{ document.querySelectorAll('.pers-fumetto').forEach(function(x){ const p=x.parentNode; x.remove(); if(p && p.classList) p.classList.remove('con-fumetto'); }); }catch(e){}
+}
 function personaggioMomentoHtml(opt){
   if(typeof PERSONAGGIO_ANIMATO==='undefined' || !PERSONAGGIO_ANIMATO || typeof personaggioSVG!=='function') return '';
   const azione=personaggioMomentoAzione(opt||{}); if(!azione) return '';
@@ -1181,8 +1234,9 @@ function portaVoce(nome){        // L218-7: la voce di una clip di porta (PORTA_
 function clipDellaPorta(id){
   const sc=(typeof SCENARI!=='undefined' && id && id!=='presente') ? SCENARI[id] : null;
   if(!sc || typeof VIDEO_PRESENTI==='undefined') return [];
-  /* L180-2 · il DECENNIO di `anno`, non l'anno: us1960 parte nel 1961 (D151) e la clip è porta-decennio-1960. Per le porte di prima (anno tondo) è lo stesso nome. */
-  return ['porta-paese-'+sc.paese, 'porta-decennio-'+(Math.floor(sc.anno/10)*10)].filter(function(n){ return VIDEO_PRESENTI.indexOf(n)>=0; });
+  /* L180-2 · il DECENNIO di `anno`, non l'anno: us1960 parte nel 1961 (D151) e la clip è porta-decennio-1960. Per le porte di prima (anno tondo) è lo stesso nome.
+     L258-2 · una porta che parte l'anno PRIMA del suo decennio lo dichiara (`decennio`, facoltativo): us1970 parte nel 1969 (D276) e la clip è porta-decennio-1970. */
+  return ['porta-paese-'+sc.paese, 'porta-decennio-'+(sc.decennio || Math.floor(sc.anno/10)*10)].filter(function(n){ return VIDEO_PRESENTI.indexOf(n)>=0; });
 }
 function apriClipPorta(id){
   if(PORTA_CLIP_APERTA || PARTENZA_APERTA || typeof document==='undefined' || !document.body) return;

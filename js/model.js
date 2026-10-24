@@ -874,7 +874,7 @@ function testaATesta(){
 }
 /* ⚑ L216-1 (D270) · LA SPINTA SUL VOTO DELLA PRESIDENZIALE. `spintaPresidenziale:{<anno>:<punti>}` è un campo di porta (o di paese:
    SCENARIO_ISTITUZIONI, quindi PAESE lo porta già risolto; assente = nessuna spinta, tutto come prima). Segno: positivo = a favore del
-   partito del Presidente in carica. Oggi lo dichiara solo `us1960` (la valanga del 1964 e la vittoria del 1968). Perché sul voto e non
+   partito del Presidente in carica. Oggi lo dichiarano `us1960` (la valanga del 1964 e la vittoria del 1968) e, dal L258-2, `us1970` (la valanga del 1972 e la sconfitta del 1976). Perché sul voto e non
    sulle forze (L215-3): con due partiti un delta di tappa si rinormalizza («+ al Presidente» = «− allo sfidante») e chi perde il 1964
    dall'opposizione scende sotto la forza dell'urna prima, quindi la regola B non lo salva mai; qui S.forze non si tocca.
    UN LETTORE SOLO, questo; lo legge solo testaATesta() (sopra), con la stessa condizione del fatto-mondo `nonAlCapo` (L196-1): se il

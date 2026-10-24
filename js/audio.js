@@ -1152,6 +1152,33 @@ function voceSottotitolo(testo){
     el.classList.add('on');
   }catch(e){}
 }
+/* L248-6 · L'AMPIEZZA DELLA VOCE. `voceAmpiezza()` = l'RMS (0-1) della battuta che suona adesso, letto dall'analyser della sua catena;
+   null se non c'è (nessuna voce, una voce senza analyser). Un array solo, riusato: nessuna allocazione per fotogramma. La legge
+   `persApertura` (personaggio.js) una volta per passo. `voceAnalyserVia(V)` toglie l'analyser e rimette il gain sull'uscita di
+   sempre (in taciVoce la voce continua a sfumare), alla fine della sorgente e quando la voce è zittita. */
+const VOCE_AMP_FFT = 256;
+let VOCE_AMP_BUF = null;
+function voceAmpiezza(){
+  const V=VOCE_ORA; if(!V || !V.an) return null;
+  try{
+    if(!VOCE_AMP_BUF || VOCE_AMP_BUF.length!==V.an.fftSize) VOCE_AMP_BUF=new Float32Array(V.an.fftSize);
+    V.an.getFloatTimeDomainData(VOCE_AMP_BUF);
+    let s=0; for(let i=0;i<VOCE_AMP_BUF.length;i++){ const x=VOCE_AMP_BUF[i]; s+=x*x; }
+    return Math.min(1, Math.sqrt(s/VOCE_AMP_BUF.length));
+  }catch(e){ return null; }
+}
+function voceAnalyserVia(V){
+  if(!V || !V.an) return;
+  const an=V.an; V.an=null;
+  try{ V.g.disconnect(); V.g.connect(V.dest); }catch(e){}
+  try{ an.disconnect(); }catch(e){}
+}
+/* L248-6 · il fumetto: la battuta del personaggio che NON può suonare (voci spente, audio non sbloccato, file che non arriva) la
+   scrive ui.js accanto al personaggio, se è a schermo (`personaggioFumetto`); una volta per richiesta (`st`). */
+function voceFumetto(id, st){
+  if(st){ if(st.fatto) return; st.fatto=true; }
+  if(typeof id==='string' && id.indexOf('voce-pers-')===0 && typeof personaggioFumetto==='function'){ try{ if(personaggioFumetto(id)) voceSegna(id, 'fumetto'); }catch(e){} }
+}
 /* zittisce la voce in corso (sfumando) e chiude il sottotitolo; la musica risale */
 function taciVoce(){
   try{
@@ -1159,6 +1186,7 @@ function taciVoce(){
     voceSottotitolo(null);
     if(V && V.id.indexOf('voce-pers-')===0 && typeof personaggioBoccaParla==='function') personaggioBoccaParla(null);   // L248-5: la voce zittita chiude la bocca
     if((!V || V.id.indexOf('voce-pers-')===0) && typeof personaggioStratoChiudi==='function') personaggioStratoChiudi();   // L248-5bis: zittita la battuta (o tutto, da resetAll), lo strato dei gesti si chiude
+    if(V) voceAnalyserVia(V);   // L248-6: l'analyser esce subito (la voce sfuma sull'uscita di sempre)
     if(V && AUDIO_CTX){ const t=AUDIO_CTX.currentTime; try{ V.g.gain.cancelScheduledValues(t); V.g.gain.setValueAtTime(V.g.gain.value, t); V.g.gain.linearRampToValueAtTime(0, t+VOCI_FADE_S); V.src.stop(t+VOCI_FADE_S+0.05); }catch(e){} voceSegna(V.id, 'taciuta'); }
     if(typeof musicaSottovoce==='function') musicaSottovoce(false);
   }catch(e){}
@@ -1167,9 +1195,16 @@ function voceParti(id, M){
   if(VOCE_ORA) taciVoce();
   const src=AUDIO_CTX.createBufferSource(); src.buffer=VOCI_BUF[M.file];
   const g=AUDIO_CTX.createGain(); g.gain.value=M.gain*VOCI_K;
-  src.connect(g); g.connect(AUDIO_BUS.effetti||AUDIO_MASTER_GAIN);
-  const V={ id:id, file:M.file, src:src, g:g }; VOCE_ORA=V;
-  src.onended=function(){ if(VOCE_ORA!==V) return; VOCE_ORA=null; voceSottotitolo(null); if(typeof musicaSottovoce==='function') musicaSottovoce(false); voceSegna(id, 'finita'); };
+  const dest=AUDIO_BUS.effetti||AUDIO_MASTER_GAIN;
+  /* L248-6 · la bocca vera: per una battuta del personaggio, con l'interruttore acceso e un personaggio vivo da muovere, un AnalyserNode
+     sulla catena (src → g → analyser → uscita di sempre: volume e bus non cambiano); lo legge `voceAmpiezza()` */
+  let an=null;
+  if(id.indexOf('voce-pers-')===0 && typeof PERS_BOCCA_VERA!=='undefined' && PERS_BOCCA_VERA && typeof personaggioViviN==='function' && personaggioViviN()>0){
+    try{ an=AUDIO_CTX.createAnalyser(); an.fftSize=VOCE_AMP_FFT; }catch(e){ an=null; } }
+  src.connect(g);
+  if(an){ g.connect(an); an.connect(dest); } else g.connect(dest);
+  const V={ id:id, file:M.file, src:src, g:g, an:an, dest:dest }; VOCE_ORA=V;
+  src.onended=function(){ voceAnalyserVia(V); if(VOCE_ORA!==V) return; VOCE_ORA=null; voceSottotitolo(null); if(typeof musicaSottovoce==='function') musicaSottovoce(false); voceSegna(id, 'finita'); };
   src.start();
   if(typeof musicaSottovoce==='function') musicaSottovoce(true);
   voceSottotitolo((typeof curLang==='function' && curLang()==='en') ? M.en : M.it);
@@ -1206,21 +1241,25 @@ function guidaMese(){ if(!GUIDA_ATTIVA) return; GUIDA_MESI++; if(GUIDA_MESI>=1) 
 /* ⚑ L'INTERFACCIA per il gioco */
 function parla(richiesta){
   try{
-    if(!audioStratoVivo('effetti')){ voceSegna(richiesta, 'audio spento'); return; }
+    if(!audioStratoVivo('effetti')){ voceSegna(richiesta, 'audio spento'); voceFumetto(richiesta); return; }   // L248-6: la battuta in un fumetto
     if(typeof musicaTragedia==='function' && musicaTragedia()){ voceSegna(richiesta, 'tragedia'); return; }
     const id=voceScelta(richiesta);
     if(!id){ voceSegna(richiesta, (VOCI_MANIFEST[richiesta] || VOCI_MANIFEST[richiesta+'-a']) ? 'file assente' : 'fuori manifesto'); return; }
     const MM=VOCI_MANIFEST[id], M=voceVariante(id);   // L255-1: la variante (lei o lui) si decide qui, una volta per richiesta
     if(MM.nonPaesi && typeof S!=='undefined' && S && MM.nonPaesi.indexOf(S.paese)>=0){ voceSegna(id, 'non in questo paese'); return; }
-    if(!AUDIO_CTX){ voceSegna(id, 'nessun contesto (prima del primo gesto)'); return; }
+    if(!AUDIO_CTX){ voceSegna(id, 'nessun contesto (prima del primo gesto)'); voceFumetto(id); return; }   // L248-6: audio non sbloccato, il fumetto
     const tok=++VOCE_TOKEN;
     if(VOCI_BUF[M.file]){ voceParti(id, M); return; }
     const t0=Date.now(); voceSegna(id, 'in caricamento'); VOCE_ATTESA={ tok:tok, t0:t0 };
-    const p=voceCarica(M.file);
+    const p=voceCarica(M.file), st={ fatto:false };
+    if(id.indexOf('voce-pers-')===0) setTimeout(function(){ if(tok===VOCE_TOKEN && !VOCE_ORA) voceFumetto(id, st); }, VOCI_ATTESA_MS+20);   // L248-6: il file non è arrivato in tempo
+    if(!p){ voceFumetto(id, st); return; }
     if(p) p.then(function(buf){
+      if(!buf && tok===VOCE_TOKEN) voceFumetto(id, st);                          // L248-6: il file non c'è (o non si decodifica)
       if(!buf || tok!==VOCE_TOKEN) return;                                      // un'altra voce (o un tocco) è arrivata prima
-      if(Date.now()-t0>VOCI_ATTESA_MS){ voceSegna(id, 'troppo tardi'); return; }  // niente voce in ritardo a momento finito
-      if(!audioStratoVivo('effetti')) return;
+      if(Date.now()-t0>VOCI_ATTESA_MS){ voceSegna(id, 'troppo tardi'); voceFumetto(id, st); return; }  // niente voce in ritardo a momento finito (L248-6: il fumetto, se il timer non l'ha già scritto)
+      if(!audioStratoVivo('effetti')){ voceFumetto(id, st); return; }
+      st.fatto=true;                                                            // L248-6: partita in tempo, il timer del fumetto non scatta più
       voceParti(id, M);
     });
   }catch(e){}

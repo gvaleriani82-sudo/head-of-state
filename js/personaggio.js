@@ -33,11 +33,23 @@
 let PERSONAGGIO_ANIMATO = true;   // L248-4bis: ACCESO col passo 1/30 nei momenti e la notte finita in posa (ripiego (4): «⚑ L248-4bis»); false = il medaglione di L178-3 e niente carnagione in creazione
 /* L248-5bis (24/10) · LO STRATO DEI GESTI. I quattro momenti senza modale — insediamento, legge approvata dal giocatore, comizio
    d'apertura della campagna, alleanza nuova — mostrano il personaggio per i secondi della battuta in `#pers-strato` (ui.js,
-   `personaggioStratoMostra`: fuori da ciò che render() ridisegna, in basso a destra, senza tocchi), e la battuta `voce-pers-<momento>`
+   `personaggioStratoMostra`: fuori da ciò che render() ridisegna, in basso a sinistra sopra la barra in fondo, senza tocchi), e la battuta `voce-pers-<momento>`
    prende il posto della voce di oggi del gesto (`voceGesto`, game.js, terzo chiamante di `voceMomento`). Vale solo con
    `PERSONAGGIO_ANIMATO` acceso; spento = gioco identico a prima (HTML e voci). `PERS_STRATO_MODO` è il ripiego per momento dei
    fotogrammi: 'mosso' · 'posa' (`data-pers-ferma`) · 'battuta' (solo la voce, niente strato). Il tetto: legge e alleanza una volta
    ogni 12 mesi di gioco (`PERS_ULTIMO_MOMENTO`, mese assoluto; TRANSITORIO, mai in `S`: un caricamento lo azzera). */
+/* L248-6 (24/10) · LA BOCCA VERA E IL FUMETTO. `PERS_BOCCA_VERA`: mentre suona una battuta `voce-pers-*` con un personaggio vivo,
+   audio.js mette un AnalyserNode sulla catena della voce (`voceParti`: src → g → analyser → uscita di sempre) e `persApertura` legge
+   l'ampiezza vera (`voceAmpiezza()`, RMS 0-1) una volta per passo, con la curva di `PERS_BOCCA_K` (soglia di silenzio, guadagno,
+   chiusura smorzata); senza analyser, o con l'interruttore spento, la bocca a tempi fissi di L248-5 (`persAperturaDa`).
+   `PERS_FUMETTO`: quando la battuta NON può suonare (voci spente, audio non sbloccato, file che non arriva entro VOCI_ATTESA_MS) e il
+   personaggio è a schermo (modale del bilancio o strato dei gesti), il testo della battuta in un fumetto accanto a lui
+   (`personaggioFumetto`, ui.js), la bocca a 26 lettere al secondo; con la voce che suona resta il sottotitolo (niente doppione).
+   La notte in posa non ha fumetto. Niente in `S`. */
+let PERS_BOCCA_VERA = true;   // L248-6: ACCESO («⚑ L248-6»: prove e fotogrammi a CPU ×4 e ×6 verdi); false = la bocca a tempi fissi di L248-5
+let PERS_FUMETTO = true;      // L248-6: ACCESO; false = nessun fumetto, la battuta che non suona resta muta come prima
+const PERS_BOCCA_K = { soglia:0.02, k:8, chiusura:0.08 };   // RMS sotto la soglia = bocca chiusa; apertura = min(1, rms×k); in chiusura al più 1 in 80 ms
+const PERS_FUMETTO_LPS = 26;  // lettere al secondo del fumetto (il prototipo §1)
 let PERS_STRATO = true;   // L248-5bis: ACCESO («⚑ L248-5bis»: prove e fotogrammi a CPU ×4 verdi); false = i quattro gesti con la voce di oggi, niente strato
 const PERS_STRATO_MODO = { insediamento:'mosso', legge:'mosso', comizio:'mosso', alleanza:'mosso' };
 const PERS_STRATO_TETTO = { legge:12, alleanza:12 };   // mesi di gioco fra due strati dello stesso momento; gli altri due hanno già il loro ritmo (una salita, una campagna)
@@ -307,8 +319,8 @@ function persLerp(a,b,k){ return a+(b-a)*k; }
 function persMescola(A, B, k){ if(k>=1) return B; const R=Object.assign({}, B);
   ['sx','dx'].forEach(function(l){ R[l]=[persLerp(A[l][0],B[l][0],k), persLerp(A[l][1],B[l][1],k)]; });
   ['testaR','testaY','corpoY','salto','umore','palpebra'].forEach(function(n){ R[n]=persLerp(A[n]||0,B[n]||0,k); }); return R; }
-/* la bocca «a tempi fissi» (l'AnalyserNode resta fuori: L248-6): dal testo spalmato sulla durata, o da un
-   ritmo di sillabe se il testo non c'è */
+/* la bocca «a tempi fissi»: dal testo spalmato sulla durata, o da un ritmo di sillabe se il testo non c'è (con la voce che suona e
+   un analyser sulla sua catena, dal L248-6 vince l'ampiezza vera: `persAperturaVera`) */
 function persApertaDaLettera(ch){ if(!ch) return 0; if(/[aeiouàèéìòù]/i.test(ch)) return 0.85; if(/[,.;:!?]/.test(ch)) return 0; if(ch===' ') return 0.08; if(/[mbp]/i.test(ch)) return 0.05; return 0.35; }
 function persAperturaDa(mov, tx, durataMs, t){
   const dur=Math.max(0.2, (durataMs||2000)/1000);
@@ -320,18 +332,37 @@ function persAperturaDa(mov, tx, durataMs, t){
 function persApertura(I, t){
   if(I.bocca){   // L248-5: la battuta del personaggio (personaggioBoccaParla), sopra qualunque azione; finita, la bocca torna alla posa
     if(I.bocca.t0==null) I.bocca.t0=t;
-    const tb=t-I.bocca.t0, ap=persAperturaDa(I.mov, I.bocca.testo, I.bocca.durataMs, tb);
-    if(tb>=Math.max(0.2, I.bocca.durataMs/1000)) I.bocca=null;
+    const tb=t-I.bocca.t0, vera=persAperturaVera(I, t), ap=(vera!=null) ? vera : persAperturaDa(I.mov, I.bocca.testo, I.bocca.durataMs, tb);
+    if(tb>=Math.max(0.2, I.bocca.durataMs/1000)){ I.bocca=null; I.boccaV=0; I.boccaT=null; }
     return ap;
   }
   if(I.azione!=='parla') return 0;
   return persAperturaDa(I.mov, I.opz.testo, I.opz.durataMs, t);
 }
+/* L248-6 · l'apertura dall'ampiezza vera della voce (solo movimento «pieno»: in «ridotto» la bocca socchiusa di sempre); null = non c'è
+   (interruttore spento, nessun analyser: la voce non suona o non è una battuta) e vale il tempo fisso. Smorzata solo in chiusura. */
+function persAperturaVera(I, t){
+  if(!PERS_BOCCA_VERA || I.mov!=='pieno' || typeof voceAmpiezza!=='function') return null;
+  const r=voceAmpiezza(); if(r==null) return null;
+  const K=PERS_BOCCA_K, tgt=r<K.soglia ? 0 : Math.min(1, r*K.k), prev=I.boccaV||0, dt=(I.boccaT==null) ? 0 : Math.max(0, t-I.boccaT);
+  const v=tgt>=prev ? tgt : Math.max(tgt, prev-dt/K.chiusura);
+  I.boccaV=v; I.boccaT=t; return v;
+}
+/* quante istanze vive (audio.js mette l'analyser solo se c'è qualcuno da muovere) */
+function personaggioViviN(){ return PERS_VIVE.length; }
+/* L248-6 · la bocca ferma di un personaggio in posa (nessuna istanza): `a` 0..1 sul `d` della bocca, con l'umore della posa chiave;
+   il fumetto col movimento ridotto la socchiude (0,3) e a fumetto finito la richiude (0) */
+function personaggioBoccaFerma(dentro, a){
+  try{ (dentro||document).querySelectorAll('[data-pers]').forEach(function(box){
+    if(box.__pers) return;
+    const az=PERS_AZIONI.indexOf(box.getAttribute('data-pers'))>=0 ? box.getAttribute('data-pers') : 'respiro';
+    const b=box.querySelector('[data-p="bocca"]'); if(b) b.setAttribute('d', persBocca(a, persPosa(az, PERS_POSE_CHIAVE[az]).umore)); }); }catch(e){}
+}
 /* L248-5 · la bocca sulla voce: `parla()` (audio.js, voceParti) la chiama quando parte una battuta `voce-pers-*`, col sottotitolo
    e la durata del buffer; tocca solo i personaggi VIVI (un momento in posa, `data-pers-ferma`, non ha istanze: resta muto).
    `testo` null = la voce è stata zittita, la bocca si chiude. */
 function personaggioBoccaParla(testo, durataMs){
-  PERS_VIVE.forEach(function(I){ I.bocca = testo ? { testo:String(testo), durataMs:(+durataMs>0 ? +durataMs : 2000), t0:null } : null; });
+  PERS_VIVE.forEach(function(I){ I.bocca = testo ? { testo:String(testo), durataMs:(+durataMs>0 ? +durataMs : 2000), t0:null } : null; I.boccaV=0; I.boccaT=null; });
 }
 
 /* ---------- il ciclo: UNO per tutto il modulo ---------- */

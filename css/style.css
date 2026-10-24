@@ -1000,6 +1000,19 @@
     width:clamp(96px, 15.6vw, 128px); z-index:58; pointer-events:none; opacity:0; transition:opacity .2s ease;}
   #pers-strato.on{opacity:1;}
   #pers-strato .ritratto-vivo{width:100%; box-shadow:0 4px 14px rgba(0,0,0,.35);}
+  /* L248-6 · il fumetto (ui.js, `personaggioFumetto`): la battuta che non può suonare, accanto al personaggio, col codino verso la
+     testa. Fondo carta e testo scuro in tutti e due i temi (è un foglio, non un pannello); ≥ 13 px, al più 220 px (due righe a 375);
+     nessun tocco. Nello strato a destra del personaggio (sopra la barra in fondo, mai sopra «Avanza»); nel bilancio la posizione la
+     scrive il JS, a destra del ritratto all'altezza della testa. Entra in dissolvenza (che il movimento ridotto tiene). */
+  .pers-fumetto{position:absolute; z-index:2; pointer-events:none; width:max-content; max-width:220px; box-sizing:border-box;
+    padding:6px 10px; background:#f8f1e0; color:#2a201c; border:1px solid #a8987a; border-radius:10px;
+    box-shadow:0 2px 8px rgba(0,0,0,.28); font-size:13px; line-height:1.3; opacity:0; transition:opacity .18s ease;}
+  .pers-fumetto.on{opacity:1;}
+  .pers-fumetto::before{content:''; position:absolute; left:-7px; top:12px; width:11px; height:11px; background:#f8f1e0;
+    border-left:1px solid #a8987a; border-bottom:1px solid #a8987a; transform:rotate(45deg);}
+  .pers-fumetto span{position:relative; display:block; overflow-wrap:break-word;}
+  #pers-strato .pers-fumetto{left:calc(100% + 10px); top:4%;}
+  .rv-riga.con-fumetto{position:relative;}
   /* L153-5 · le clip delle partite storiche (paese, poi decennio): lo stesso velo della partenza; i video stanno uno sopra l'altro
      e il secondo passa sopra il primo quando tocca a lui. La didascalia (paese, anno) in basso a sinistra dell'immagine. */
   #clip-porta, #clip-porta-uscente{position:fixed; inset:0; z-index:10000; background:#000; opacity:0; transition:opacity .35s ease; cursor:pointer;}

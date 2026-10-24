@@ -242,7 +242,11 @@ const DRIFT_INFLAZIONE_ERA = {
   [LINEA_US]: [ {da:1950, inf:1.3}, {da:1951, inf:7.9}, {da:1952, inf:1.9}, {da:1953, inf:0.8}, {da:1954, inf:0.7}, {da:1955, inf:-0.4},
                 {da:1956, inf:1.5}, {da:1957, inf:3.3}, {da:1958, inf:2.8}, {da:1959, inf:0.7}, {da:1960, inf:1.7},
                 /* L180-2 · us1960 (PRESET-USA-1960 §2, verificata su FRED/BEA/BLS/OMB): righe 1961-1968; l'inflazione è ASSOLUTA dalla scheda, non cercata (FRED: 1,1 · 1,2 · 1,2 · 1,3 · 1,6 · 3,0 · 2,8 · 4,3); la chiusura a 1969 */
-                {da:1961, inf:1.0}, {da:1962, inf:1.0}, {da:1963, inf:1.3}, {da:1964, inf:1.3}, {da:1965, inf:1.6}, {da:1966, inf:2.9}, {da:1967, inf:3.1}, {da:1968, inf:4.2}, {da:1969, inf:null} ]
+                {da:1961, inf:1.0}, {da:1962, inf:1.0}, {da:1963, inf:1.3}, {da:1964, inf:1.3}, {da:1965, inf:1.6}, {da:1966, inf:2.9}, {da:1967, inf:3.1}, {da:1968, inf:4.2},
+                /* L258-2 · us1970 (PRESET-USA-1970 §2, prezzi al consumo, media annua ⚠ ordine di grandezza): la stagflazione, l'11 del 1974 e del 1979;
+                   assoluta dalla scheda, non cercata, e nessun tetto (gli Stati Uniti non dichiarano inflazioneTetto). La chiusura a 1980 (us1980). */
+                {da:1969, inf:5.5}, {da:1970, inf:5.7}, {da:1971, inf:4.4}, {da:1972, inf:3.2}, {da:1973, inf:6.2}, {da:1974, inf:11.0},
+                {da:1975, inf:9.1}, {da:1976, inf:5.8}, {da:1977, inf:6.5}, {da:1978, inf:7.6}, {da:1979, inf:11.3}, {da:1980, inf:null} ]
 };
 function inflazioneAnno(){
   if(typeof S==='undefined' || !S) return 0;
@@ -349,7 +353,9 @@ const DRIFT_DEFICIT_ERA = {
   [LINEA_US]: [ {da:1950, def:0},     {da:1951, def:0},     {da:1952, def:-0.5},  {da:1953, def:1},     {da:1954, def:-4},    {da:1955, def:2},
                 {da:1956, def:-3.25}, {da:1957, def:-3.25}, {da:1958, def:-3.75}, {da:1959, def:4.25},  {da:1960, def:-1.5},
                 /* L180-2 · us1960 (PRESET-USA-1960 §2, verificata su FRED/BEA/BLS/OMB): righe 1961-1968 CERCATE sul reso, misura-us1960.js cerca, 20 semi per lato, luglio, carriere al governo; la chiusura a 1969 */
-                {da:1961, def:0}, {da:1962, def:1}, {da:1963, def:-0.5}, {da:1964, def:0.75}, {da:1965, def:0.25}, {da:1966, def:0.5}, {da:1967, def:-1.75}, {da:1968, def:1.5}, {da:1969, def:0} ]
+                {da:1961, def:0}, {da:1962, def:1}, {da:1963, def:-0.5}, {da:1964, def:0.75}, {da:1965, def:0.25}, {da:1966, def:0.5}, {da:1967, def:-1.75}, {da:1968, def:1.5},
+                /* L258-2 · us1970 (PRESET-USA-1970 §2, ⚠ ordine di grandezza): righe 1969-1979 CERCATE sul reso, misura-us1970.js cerca, 20 semi per lato, luglio, carriere al governo, crescita di porta 5 (come us1960: la saldatura); resa 1,3 · 0,3 · 2,2 · 1,8 · 1,0 · 0,5 · 3,3 · 4,0 · 2,6 · 2,8 · 1,8 contro 0,3 · 2,1 · 1,9 · 1,1 · 0,4 · 3,3 · 4,1 · 2,6 · 2,6 · 1,6 (la riga del 1969 la assorbe la calibrazione d'avvio: 0); debito 36,9 → 32,1. La chiusura a 1980 (us1980). */
+                {da:1969, def:0}, {da:1970, def:-2.25}, {da:1971, def:1.75}, {da:1972, def:2.75}, {da:1973, def:1.75}, {da:1974, def:-2.75}, {da:1975, def:0.25}, {da:1976, def:4.75}, {da:1977, def:2.75}, {da:1978, def:3.5}, {da:1979, def:1}, {da:1980, def:0} ]
 };
 function deficitEra(){
   if(typeof S==='undefined' || !S || !S.era) return 0;
@@ -1759,7 +1765,9 @@ const DRIFT_ECONOMICO_ERA = {
   [LINEA_US]: [ {da:1950, ciclo:4.75}, {da:1951, ciclo:3.25}, {da:1952, ciclo:-1},   {da:1953, ciclo:0},     {da:1954, ciclo:-6},   {da:1955, ciclo:2.75},
                 {da:1956, ciclo:-3.25}, {da:1957, ciclo:-3.5}, {da:1958, ciclo:-6.25}, {da:1959, ciclo:2.25}, {da:1960, ciclo:-3},
                 /* L180-2 · us1960 (PRESET-USA-1960 §2, verificata su FRED/BEA/BLS/OMB): righe 1961-1968 CERCATE sul reso, misura-us1960.js cerca, 20 semi per lato, luglio, carriere al governo; la chiusura a 1969 */
-                {da:1961, ciclo:-3.5}, {da:1962, ciclo:1}, {da:1963, ciclo:-1.75}, {da:1964, ciclo:0.75}, {da:1965, ciclo:0.5}, {da:1966, ciclo:0.25}, {da:1967, ciclo:-4}, {da:1968, ciclo:-1}, {da:1969, ciclo:0} ]
+                {da:1961, ciclo:-3.5}, {da:1962, ciclo:1}, {da:1963, ciclo:-1.75}, {da:1964, ciclo:0.75}, {da:1965, ciclo:0.5}, {da:1966, ciclo:0.25}, {da:1967, ciclo:-4}, {da:1968, ciclo:-1},
+                /* L258-2 · us1970 (PRESET-USA-1970 §2, ⚠ ordine di grandezza): righe 1969-1979 CERCATE sul reso, misura-us1970.js cerca, 20 semi per lato, luglio, carriere al governo, crescita di porta 5 (come us1960: la saldatura); resa 3,0 · 0,2 · 3,4 · 5,4 · 5,4 · −0,5 · −0,2 · 5,5 · 4,5 · 5,3 · 3,1 contro la scheda 3,1 · 0,2 · 3,3 · 5,3 · 5,6 · −0,5 · −0,2 · 5,4 · 4,6 · 5,5 · 3,2 (le due recessioni). La chiusura a 1980 (us1980). */
+                {da:1969, ciclo:-3}, {da:1970, ciclo:-5.75}, {da:1971, ciclo:-1.75}, {da:1972, ciclo:0.25}, {da:1973, ciclo:-1}, {da:1974, ciclo:-7}, {da:1975, ciclo:-6}, {da:1976, ciclo:-0.25}, {da:1977, ciclo:-2.25}, {da:1978, ciclo:-0.5}, {da:1979, ciclo:-3.5}, {da:1980, ciclo:0} ]
 };
 /* L60-2 · LA DISOCCUPAZIONE D'EPOCA. Il motore non aveva un posto dove un decennio potesse dire «qui i senza
    lavoro sono il doppio»: `S.uMod` decade dell'80% al mese e le carte danno solo colpi. Stessa forma di cicloBase():
@@ -1863,7 +1871,9 @@ const DRIFT_DISOCCUPAZIONE_ERA = {
   [LINEA_US]: [ {da:1950, un:1.5},  {da:1951, un:-3.75}, {da:1952, un:-5},   {da:1953, un:-5},    {da:1954, un:-3},    {da:1955, un:-3.5},
                 {da:1956, un:-4},   {da:1957, un:-3.25}, {da:1958, un:-1.25}, {da:1959, un:-0.5}, {da:1960, un:-0.75},
                 /* L180-2 · us1960 (PRESET-USA-1960 §2, verificata su FRED/BEA/BLS/OMB): righe 1961-1968 CERCATE sul reso, misura-us1960.js cerca, 20 semi per lato, luglio, carriere al governo; la chiusura a 1969 */
-                {da:1961, un:-2.75}, {da:1962, un:-2.5}, {da:1963, un:-1.25}, {da:1964, un:-2.5}, {da:1965, un:0.25}, {da:1966, un:-2}, {da:1967, un:-4.25}, {da:1968, un:-4}, {da:1969, un:0} ]
+                {da:1961, un:-2.75}, {da:1962, un:-2.5}, {da:1963, un:-1.25}, {da:1964, un:-2.5}, {da:1965, un:0.25}, {da:1966, un:-2}, {da:1967, un:-4.25}, {da:1968, un:-4},
+                /* L258-2 · us1970 (PRESET-USA-1970 §2, ⚠ ordine di grandezza): righe 1969-1979 CERCATE sul reso, misura-us1970.js cerca, 20 semi per lato, luglio, carriere al governo, crescita di porta 5 (come us1960: la saldatura); resa 3,7 · 4,7 · 5,8 · 5,8 · 5,0 · 5,6 · 8,2 · 7,8 · 7,1 · 6,2 · 5,8 contro 3,5 · 4,9 · 5,9 · 5,6 · 4,9 · 5,6 · 8,5 · 7,7 · 7,1 · 6,1 · 5,8. La chiusura a 1980 (us1980). */
+                {da:1969, un:-5.25}, {da:1970, un:-5.75}, {da:1971, un:-2.5}, {da:1972, un:-1.75}, {da:1973, un:-2.5}, {da:1974, un:-5.75}, {da:1975, un:-1.75}, {da:1976, un:-0.75}, {da:1977, un:1.25}, {da:1978, un:-1.25}, {da:1979, un:-2}, {da:1980, un:0} ]
 };
 function disoccupazioneEra(){
   if(typeof S==='undefined' || !S) return 0;

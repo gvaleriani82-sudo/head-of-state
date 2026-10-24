@@ -1919,6 +1919,65 @@ const SCENARI = {
     ],
   },
   /* ============================================================================================================
+     L258-2 · STATI UNITI 1970 — la terza porta della linea americana (scheda PRESET-USA-1970.md, D276-D287). Si apre nel GENNAIO
+     1969 col Presidente repubblicano eletto per un soffio nel novembre 1968 e un Congresso democratico: è la prima porta che parte
+     col GOVERNO DIVISO (D283). Chiude nel dicembre 1979 e si salda a us1980 (la presidenziale del 1980 è della porta dopo).
+     Stessa forma di us1960 (le istituzioni scritte per intero).
+     IL CALENDARIO (D276, L173-1): `meseUrna:11` e `turnMandato:0` contato dal novembre 1968 → metà mandato 1970/11 · presidenziale
+     1972/11 · metà mandato 1974/11 · presidenziale 1976/11 · metà mandato 1978/11; avviso dell'ultimo mandato 1975/11 per chi rivince
+     il 1972 dal governo. Stampato sul gioco da sonda-us1970-calendario.js.
+     ⚠ `anno:1969` è nel decennio 1960: `decennio:1970` (campo facoltativo, lo dichiara solo questa porta) lo legge clipDellaPorta
+     (ui.js) per la clip porta-decennio-1970; la miniatura si deriva già dall'id (sogliaSrc).
+     IL CONGRESSO (D283): la Camera del 1968 (192 repubblicani su 435, 44,1); metà mandato con `penalitaGoverno:0.5` come us1950/us1960.
+     CHI SI GIOCA (D277): i Repubblicani al governo con `mandatiVinti:1` (rivincono il 1972 → `mandatoCompiuto` alla vigilia del 1976)
+     e i Democratici dall'opposizione. Nessuna tappa di linea nel decennio (il Sud è girato nel 1964/11).
+     I TERRITORI sono i 18 del presente nello stesso ordine (paralleli per indice a mappa.aree: mai riordinare), col lean del 1968
+     (PRESET-USA-1970 §H riga 2; positivo = repubblicano). `territoriDEpoca` NON si dichiara finché non ci sono le scene `gus70_` (D167).
+     LA CRESCITA DI PORTA è 5 come us1960 (non la media del decennio, ~3,2): è il «normale» della disoccupazione (model.js) e la base
+     del ciclo, e con lo stesso valore le carriere che arrivano da us1960 leggono le righe d'era del decennio come le legge questa
+     porta (D158, la saldatura); il decennio lo fanno le righe del ciclo, cercate sul reso (misura-us1970.js cerca).
+     ============================================================================================================ */
+  us1970: {
+    id:'us1970', era:LINEA_US, nome:'Stati Uniti 1970', anno:1969, decennio:1970, paese:'usa',
+    turnMandato: 0, meseUrna: 11,               // D276: il mandato del novembre 1968 al primo anno → metà mandato 1970/11, presidenziale 1972/11
+    sistema: 'presidenziale', comeSiVince: 'candidato', coalizione: false, cadutaGoverno: false,
+    mandatoMesi: 48, mandatiMax: 2, mandatiConsecutivi: false,
+    titoloRuolo: 'Presidente', sedeGoverno: 'la Casa Bianca',
+    capitale: 'Washington',
+    ue: false,
+    congresso: { camera: 44.1 },                // D283: 192 repubblicani su 435 (la Camera del 1968): governo diviso dal primo giorno
+    intermedie: [ {tipo:'Elezioni di metà mandato', mese:24, tocca:'tutti', penalitaGoverno:0.5} ],   // D283: come us1950 e us1960
+    /* D284 (L216-1, D270) · la valanga del Presidente in carica nel 1972 e la sconfitta del partito al governo nel 1976: punti sul VOTO
+       della presidenziale, positivo = al partito del Presidente in carica; li legge solo spintaPresidenziale() (model.js), 0 se il
+       Presidente sei tu. Valori dalla sweep di L258-2 (misura-us1970.js gioc --spinta, rapporto «⚑ L258-2» in PRESET-USA-1970.md). */
+    spintaPresidenziale: { 1972: 8, 1976: -3 },
+    mandatiVinti: 1,                            // D276: il Presidente ha vinto il 1968 (vale solo al livello 3 al governo: D135)
+    partiti: [
+      { id:'us_dem', nome:'Democratici',  orientamento:'centrosinistra', base:{ giovani:0.4, lavoratori:0.35, cetomedio:0.25 },                  forza:51, forzaAncora:51, asse:-1 },
+      { id:'us_rep', nome:'Repubblicani', orientamento:'centrodestra',   base:{ imprenditori:0.4, cetomedio:0.25, cattolici:0.2, pensionati:0.15 }, forza:49, forzaAncora:49, asse:1 },
+    ],
+    territori: [
+      {nome:'New York', tipo:'città', carica:'Sindaco', lean:-1, simbolo:true}, {nome:'la California', tipo:'regione', carica:'Governatore', lean:0, simbolo:true}, {nome:'il Texas', tipo:'regione', carica:'Governatore', lean:0, simbolo:true}, {nome:'la Pennsylvania', tipo:'regione', carica:'Governatore', lean:0, simbolo:true},
+      {nome:'la Florida', tipo:'regione', carica:'Governatore', lean:1}, {nome:"l'Ohio", tipo:'regione', carica:'Governatore', lean:1}, {nome:'il Michigan', tipo:'regione', carica:'Governatore', lean:-1}, {nome:'la Georgia', tipo:'regione', carica:'Governatore', lean:1},
+      {nome:"l'Illinois", tipo:'regione', carica:'Governatore', lean:0}, {nome:'lo stato di Washington', nomeEn:'Washington State', tipo:'regione', carica:'Governatore', lean:0}, {nome:"l'Arizona", tipo:'regione', carica:'Governatore', lean:2}, {nome:"l'Alabama", tipo:'regione', carica:'Governatore', lean:1},
+      {nome:'Los Angeles', tipo:'città', carica:'Sindaco', lean:0}, {nome:'Chicago', tipo:'città', carica:'Sindaco', lean:-2}, {nome:'Houston', tipo:'città', carica:'Sindaco', lean:0}, {nome:'Phoenix', tipo:'città', carica:'Sindaco', lean:2}, {nome:'Filadelfia', nomeEn:'Philadelphia', tipo:'città', carica:'Sindaco', lean:-2}, {nome:'San Francisco', tipo:'città', carica:'Sindaco', lean:-1}
+    ],
+    /* ⚠ cifre della scheda §2, ordine di grandezza (BEA/BLS/OMB non riaperti in L258-2): PIL nominale 1969 in miliardi di dollari
+       (il primo «trilione»), debito federale lordo/PIL, saldo federale del 1969 (avanzo +0,3), inflazione e disoccupazione del 1969. */
+    economia: { pil:1020, debito:37, deficit:0.3, inflazione:5.5, crescita:5, crescitaTetto:9, disoccupazione:3.5 },   // crescitaTetto (L109-1): il 1972-73 e il 1976-78 sopra 5
+    debtAncora: 37,
+    inflazione: 5.5,   // l'anno per anno sta in DRIFT_INFLAZIONE_ERA (assoluta, dalla scheda: l'11 del 1974 e del 1979; nessun tetto per gli Stati Uniti)
+    crescita: 5,       // vedi la testata: la base di us1960, per la saldatura; il decennio sta nelle righe del ciclo (DRIFT_ECONOMICO_ERA)
+    logorioEra: 0.005,                          // L258-2 · dalla sweep (misura-us1970.js gioc --logorio=0,…,0.012, 20 carriere; conferma 40 × 2 semi: Repubblicani al governo 1972 27-28/40, metà mandato perse 69-72% ⚠), rapporto «⚑ L258-2» in PRESET-USA-1970.md
+    valuta: VALUTA_DOLLARO,
+    intro: "Stati Uniti, 1969. Il nuovo Presidente ha vinto per un soffio, con un governatore del Sud candidato da solo che ha preso quasi un voto su sette. Mezzo milione di soldati è in Vietnam, le università sono in rivolta, e fra sei mesi due uomini scenderanno sulla Luna.",
+    contesto: [
+      "Washington, gennaio 1969. Per la prima volta da più di un secolo un Presidente comincia il mandato con tutte e due le Camere in mano all'altro partito. Il Presidente uscente torna nel suo ranch del Texas, e la guerra che non ha saputo chiudere resta sul tavolo di chi arriva.",
+      "A Parigi i negoziatori hanno discusso per settimane persino della forma del tavolo, mentre in Vietnam muoiono centinaia di soldati americani a settimana. Nelle università gli studenti bruciano le cartoline della leva, e la primavera scorsa, dopo l'assassinio del pastore di Atlanta, la Guardia nazionale presidiava gli incroci di cento città.",
+      "Il razzo più grande mai costruito è pronto in Florida: a Natale tre astronauti hanno fatto il giro della Luna e letto la Genesi in diretta. Ma i prezzi salgono come non salivano dai tempi della Corea, e per pagare la guerra il Congresso ha votato una sovrattassa sui redditi.",
+    ],
+  },
+  /* ============================================================================================================
      L44-3 · ITALIA 2000 — la settima e ultima porta. Stessa LINEA; il roster è quello uscito dalla frana del '94
      (PPI, PDS, AN, Rifondazione, Lega, FI, CCD e i laici superstiti), anno d'avvio 2000.
 
@@ -3411,6 +3470,137 @@ const PILASTRI_LINEA = [
     t:'La miniera di Farmington',
     text:'All\'alba del 20 novembre un\'esplosione scuote una miniera di carbone vicino a Farmington, nella Virginia Occidentale, durante il turno di notte. Il fuoco brucia per giorni; la miniera viene sigillata con i minatori dentro. Muoiono settantotto uomini.',
     logx:'L\'esplosione nella miniera di Farmington: settantotto minatori morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  // ── us1970 · L258-3 (D136, D282 a): venticinque sciagure G8 dal §5 di PRESET-USA-1970.md (cifre aperte su en.wikipedia in L258-1 e L258-3) e il petrolio americano al posto di pm_petrolio.
+  { id:'pus70_camille', linea:LINEA_US, anno:1969, mese:8, era:'us1970', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'L\'uragano sul Mississippi',
+    text:'Nella notte fra il 17 e il 18 agosto un uragano della forza più alta investe la costa del Mississippi: il mare entra nelle città per chilometri. Due giorni dopo le sue piogge scendono sulle montagne della Virginia e gonfiano i fiumi nella notte. Muoiono più di trecento persone.',
+    logx:'L\'uragano sulla costa del Mississippi e le piene in Virginia: più di trecento morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus70_indiana', linea:LINEA_US, anno:1969, mese:9, era:'us1970', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Il cielo dell\'Indiana',
+    text:'Il pomeriggio del 9 settembre un aereo di linea in discesa verso Indianapolis si scontra con un piccolo aereo da turismo. Cadono tutti e due nei campi. Muoiono ottantatré persone.',
+    logx:'Un aereo di linea e un aereo da turismo si scontrano sopra l\'Indiana: ottantatré morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus70_squadra', linea:LINEA_US, anno:1970, mese:12, era:'us1970', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'La squadra',
+    text:'Il paese non ha dimenticato la sera del 14 novembre: l\'aereo che riportava a casa la squadra di football di un\'università della Virginia Occidentale, con gli allenatori e i tifosi, è caduto sulla collina davanti all\'aeroporto. Settantacinque morti, nessun sopravvissuto.',
+    logx:'L\'aereo della squadra universitaria cade in Virginia Occidentale: settantacinque morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus70_sanfernando', linea:LINEA_US, anno:1971, mese:2, era:'us1970', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'La valle di San Fernando',
+    text:'All\'alba del 9 febbraio la terra trema sotto la valle di San Fernando, a nord di Los Angeles. Crollano un ospedale e i cavalcavia delle autostrade; una diga di terra resiste per poco, e decine di migliaia di persone lasciano le case. Muoiono circa sessanta persone.',
+    logx:'Il terremoto della valle di San Fernando: circa sessanta morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus70_delta', linea:LINEA_US, anno:1971, mese:3, era:'us1970', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'I tornado del delta',
+    text:'Il paese ricorda ancora il 21 febbraio: nel pomeriggio e nella notte i tornado hanno attraversato il delta del Mississippi, dalla Louisiana al Mississippi, e spazzato via le cittadine e le case dei campi. Muoiono centoventitré persone.',
+    logx:'I tornado del delta del Mississippi: centoventitré morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus70_juneau', linea:LINEA_US, anno:1971, mese:9, era:'us1970', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Le montagne di Juneau',
+    text:'Il 4 settembre un aereo di linea in avvicinamento a Juneau, in Alaska, nella pioggia e nelle nuvole, urta il fianco di una montagna. Muoiono tutte le centoundici persone a bordo.',
+    logx:'Un aereo di linea urta una montagna vicino a Juneau: centoundici morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus70_buffalocreek', linea:LINEA_US, anno:1972, mese:2, era:'us1970', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Buffalo Creek',
+    text:'La mattina del 26 febbraio, dopo giorni di pioggia, cede la diga di scorie di una miniera di carbone sopra la valle di Buffalo Creek, in Virginia Occidentale. Un\'onda nera scende lungo la valle e cancella i villaggi dei minatori. Muoiono centoventicinque persone; migliaia restano senza casa.',
+    logx:'Cede la diga di scorie di Buffalo Creek: centoventicinque morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus70_miniera', linea:LINEA_US, anno:1972, mese:5, era:'us1970', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'La miniera d\'argento',
+    text:'Il 2 maggio scoppia un incendio in una miniera d\'argento dell\'Idaho, vicino a Kellogg: il fumo riempie le gallerie centinaia di metri sotto terra. Muoiono novantuno minatori.',
+    logx:'L\'incendio nella miniera d\'argento dell\'Idaho: novantuno minatori morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus70_rapidcity', linea:LINEA_US, conCampagna:true, anno:1972, mese:6, era:'us1970', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Le acque di giugno',
+    text:'La notte del 9 giugno, dopo un temporale che non si ferma, i torrenti delle Black Hills travolgono Rapid City, nel Dakota del Sud: duecentotrentotto morti. Dieci giorni dopo un uragano risale la costa atlantica e allaga la Pennsylvania e lo stato di New York: altri centodiciannove.',
+    logx:'La piena di Rapid City e l\'uragano sulla costa atlantica: più di trecentocinquanta morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus70_everglades', linea:LINEA_US, anno:1972, mese:12, era:'us1970', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Le paludi della Florida',
+    text:'La notte del 29 dicembre un aereo di linea in arrivo a Miami perde quota lentamente, mentre l\'equipaggio guarda una spia accesa, e cade nelle paludi delle Everglades. Muoiono centouno persone; settantacinque si salvano nel fango.',
+    logx:'Un aereo di linea cade nelle paludi della Florida: centouno morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus70_boston73', linea:LINEA_US, anno:1973, mese:7, era:'us1970', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'La nebbia di Boston',
+    text:'La mattina del 31 luglio, nella nebbia, un aereo di linea in atterraggio a Boston scende troppo basso e urta il muro sul mare davanti alla pista. Muoiono ottantanove persone.',
+    logx:'Un aereo di linea si schianta nella nebbia di Boston: ottantanove morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus70_petrolio', linea:LINEA_US, anno:1973, mese:10, era:'us1970', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese', sostituisce:'pm_petrolio',   /* D282 (a): «le domeniche senza automobili» è europeo; vale solo nella LINEA_US (anche per chi arriva da us1960) */
+    t:'L\'embargo',
+    text:'In ottobre i paesi arabi produttori smettono di vendere petrolio agli Stati Uniti, e il prezzo del greggio quadruplica in pochi mesi. Nell\'inverno le code davanti ai distributori fanno il giro dell\'isolato; in molti stati si fa benzina a giorni alterni, secondo l\'ultima cifra della targa, pari o dispari, e la domenica le stazioni restano chiuse. Finisce l\'America della benzina che costava poco.',
+    logx:'L\'embargo dei paesi arabi: il greggio quadruplica, le code ai distributori.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus70_tornado74', linea:LINEA_US, anno:1974, mese:4, era:'us1970', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Centoquarantotto tornado',
+    text:'Il 3 e il 4 aprile centoquarantotto tornado attraversano tredici stati, dall\'Alabama all\'Ohio, in meno di un giorno. Xenia, nell\'Ohio, è rasa al suolo per metà. Muoiono più di trecento persone.',
+    logx:'Centoquarantotto tornado in tredici stati: più di trecento morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus70_charlotte', linea:LINEA_US, anno:1974, mese:9, era:'us1970', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'La nebbia di Charlotte',
+    text:'La mattina dell\'11 settembre un aereo di linea in avvicinamento a Charlotte, nella Carolina del Nord, scende troppo presto nella nebbia e cade fra gli alberi a pochi chilometri dalla pista. Muoiono settantadue persone.',
+    logx:'Un aereo di linea cade nella nebbia vicino a Charlotte: settantadue morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus70_virginia74', linea:LINEA_US, anno:1974, mese:12, era:'us1970', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'La montagna della Virginia',
+    text:'La mattina del 1° dicembre, nella pioggia e nella neve, un aereo di linea diretto a Washington scende troppo presto e urta una montagna della Virginia. Muoiono tutte le novantadue persone a bordo.',
+    logx:'Un aereo di linea urta una montagna della Virginia: novantadue morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus70_newyork75', linea:LINEA_US, anno:1975, mese:6, era:'us1970', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Il temporale sull\'aeroporto',
+    text:'Il pomeriggio del 24 giugno un aereo di linea in atterraggio all\'aeroporto di New York entra nel vento di un temporale e cade sulle luci della pista. Muoiono centotredici persone.',
+    logx:'Un aereo di linea cade nel temporale all\'aeroporto di New York: centotredici morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus70_bigthompson', linea:LINEA_US, conCampagna:true, anno:1976, mese:7, era:'us1970', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Il canyon del Big Thompson',
+    text:'La sera del 31 luglio, alla vigilia dei cento anni del Colorado, un temporale fermo sulle Montagne Rocciose scarica in poche ore una pioggia mai vista. Il fiume del canyon del Big Thompson si alza come un muro e travolge campeggi, case e automobili. Muoiono centoquarantaquattro persone.',
+    logx:'La piena del canyon del Big Thompson, in Colorado: centoquarantaquattro morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus70_luling', linea:LINEA_US, conCampagna:true, anno:1976, mese:10, era:'us1970', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Il traghetto di Luling',
+    text:'All\'alba del 20 ottobre un traghetto carico di operai che attraversa il Mississippi a Luling, in Louisiana, viene speronato da una petroliera e si rovescia. Muoiono settantotto persone.',
+    logx:'Il traghetto speronato sul Mississippi a Luling: settantotto morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus70_grandine', linea:LINEA_US, anno:1977, mese:4, era:'us1970', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'La grandine sulla Georgia',
+    text:'Il pomeriggio del 4 aprile un aereo di linea attraversa un temporale e la grandine spegne i due motori. I piloti provano ad atterrare su una strada statale della Georgia; l\'aereo urta le automobili e le case lungo la strada. Muoiono settantadue persone, nove a terra.',
+    logx:'Un aereo di linea senza motori cade su una strada della Georgia: settantadue morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus70_southgate', linea:LINEA_US, anno:1977, mese:5, era:'us1970', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Southgate',
+    text:'La sera del 28 maggio scoppia un incendio in un grande locale notturno di Southgate, nel Kentucky, mentre nel salone dello spettacolo ci sono più di mille persone. Le uscite non bastano. Muoiono centosessantacinque persone.',
+    logx:'L\'incendio del locale notturno di Southgate: centosessantacinque morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus70_johnstown', linea:LINEA_US, anno:1977, mese:7, era:'us1970', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Johnstown',
+    text:'Nella notte fra il 19 e il 20 luglio un temporale che dura fino all\'alba si ferma sulle colline di Johnstown, in Pennsylvania: cedono le piccole dighe di terra e l\'acqua scende sulle case. Muoiono quasi ottanta persone. È la terza volta che la città finisce sott\'acqua.',
+    logx:'L\'alluvione di Johnstown: quasi ottanta morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus70_bufere', linea:LINEA_US, anno:1978, mese:2, era:'us1970', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Le due bufere',
+    text:'Dal 5 al 7 febbraio una bufera di neve e di vento blocca il Nord-Est: il mare entra nelle città della costa, migliaia di automobili restano sepolte sulle strade del Massachusetts e del Rhode Island. È la seconda in due settimane: dal 25 al 27 gennaio un\'altra aveva sepolto i Grandi Laghi e l\'Ohio. Insieme, più di centocinquanta morti.',
+    logx:'Le due bufere di neve, sui Grandi Laghi e sul Nord-Est: più di centocinquanta morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus70_torre', linea:LINEA_US, anno:1978, mese:4, era:'us1970', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'La torre di raffreddamento',
+    text:'La mattina del 27 aprile, in Virginia Occidentale, cede l\'impalcatura in cima a una torre di raffreddamento in costruzione: il cemento colato il giorno prima non regge. Muoiono cinquantuno operai, tutti quelli che erano lassù.',
+    logx:'Crolla l\'impalcatura di una torre di raffreddamento in Virginia Occidentale: cinquantuno operai morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus70_sandiego', linea:LINEA_US, anno:1978, mese:9, era:'us1970', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Il cielo di San Diego',
+    text:'La mattina del 25 settembre, in un cielo limpido, un aereo di linea in atterraggio a San Diego urta un piccolo aereo da addestramento e cade in fiamme su un quartiere di case. Muoiono centoquarantaquattro persone, sette a terra.',
+    logx:'Lo scontro in volo sopra San Diego: centoquarantaquattro morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus70_redriver', linea:LINEA_US, anno:1979, mese:4, era:'us1970', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Wichita Falls',
+    text:'Il 10 aprile una serie di tornado attraversa la valle del Red River, fra il Texas e l\'Oklahoma; il più forte passa su Wichita Falls all\'ora in cui la gente torna a casa dal lavoro. Muoiono sessantuno persone.',
+    logx:'I tornado della valle del Red River: sessantuno morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus70_chicago79', linea:LINEA_US, anno:1979, mese:5, era:'us1970', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Il motore',
+    text:'Il pomeriggio del 25 maggio, al decollo da Chicago, un aereo di linea perde un motore, che si stacca dall\'ala. L\'aereo si piega su un fianco e cade in un campo accanto all\'aeroporto. Muoiono duecentosettantatré persone, due a terra: è la sciagura aerea più grave nella storia del paese.',
+    logx:'Un aereo di linea perde un motore al decollo da Chicago: duecentosettantatré morti.',
     ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
 ];
 
@@ -14408,7 +14598,7 @@ const POTENZE=[
 const RIVALI=(function(){
   var r=[];
   function riga(paesi, con, dal, fino, massimo, tipo){ paesi.split(' ').forEach(function(p){ r.push({paese:p, con:con, dal:dal, fino:fino, massimo:massimo, tipo:tipo}); }); }
-  riga('italia1950 italia1960 italia1970 italia1980 uk1950 uk1960 uk1970 uk1980 fr1950 fr1960 fr1970 fr1980 de1950 de1960 de1970 de1980 us1950 us1960', 'urss', 1945, 1991, 4, 'blocco');   // la guerra fredda: Cuba e Berlino si fermano all'ultimatum
+  riga('italia1950 italia1960 italia1970 italia1980 uk1950 uk1960 uk1970 uk1980 fr1950 fr1960 fr1970 fr1980 de1950 de1960 de1970 de1980 us1950 us1960 us1970', 'urss', 1945, 1991, 4, 'blocco');   // la guerra fredda: Cuba e Berlino si fermano all'ultimatum (L258-2, D286: us1970)
   riga('italia1990 uk1990 fr1990 de1990', 'urss', 1945, 1991, 4, 'blocco');
   riga('italia1990 uk1990 fr1990 de1990 italia2000 uk2000 fr2000 de2000', 'russia', 1992, 2099, 4, 'blocco');
   ['russia','cina','iran'].forEach(function(c){ riga('italia francia regnounito germania spagna canada australia', c, 2012, 2099, 4, 'blocco'); });
@@ -18967,6 +19157,24 @@ const TITOLI=[
  {id:'ti50_tv_sper', era:'italia1950', cond:()=>S.year>=1952&&S.year<=1954, amico:'Prove di televisione nelle grandi città', ostile:'La televisione arriva: per pochi, per ora'},
  {id:'ti50_serali', era:'italia1950', amico:'Scuole serali contro l\'analfabetismo', ostile:'Analfabetismo: la strada è ancora lunga'},
  {id:'ti50_idro', era:'italia1950', amico:'Nuove centrali: l\'idroelettrico tira il paese', ostile:'L\'energia cresce, i divari restano'},
+ // italia1950 — L257-1 · titoli di stato senza pri (VARIETA-L257-TITOLI-I50.md)
+ {id:'ti50_s_autostrada', era:'italia1950', cond:()=>S.year>=1956, amico:'L\'autostrada verso il Sud: i cantieri avanzano', ostile:'Un\'autostrada per i pochi che hanno l\'auto, e paesi senza strada'},
+ {id:'ti50_s_frigorifero', era:'italia1950', cond:()=>S.year>=1957, amico:'Frigorifero e lavatrice entrano nelle case', ostile:'Elettrodomestici a rate: le famiglie si indebitano'},
+ {id:'ti50_s_tributaria', era:'italia1950', cond:()=>S.year>=1951, amico:'La dichiarazione dei redditi: ognuno paghi secondo quanto ha', ostile:'Dichiarazione dei redditi: chi ha di più si nasconde meglio'},
+ {id:'ti50_s_mercato', era:'italia1950', cond:()=>S.year>=1958, amico:'Il Mercato comune è nato: le industrie si preparano alla concorrenza', ostile:'Mercato comune: le campagne temono i prodotti d\'oltralpe'},
+ {id:'ti50_s_malaria', era:'italia1950', cond:()=>S.year<=1955, amico:'La malaria arretra: il DDT libera le pianure', ostile:'Paludi e febbri: nelle campagne la malaria resiste'},
+ {id:'ti50_s_radio', era:'italia1950', amico:'La radio entra in ogni casa: abbonamenti in crescita', ostile:'Il canone della radio: un lusso per chi conta le lire'},
+ {id:'ti50_s_energia', era:'italia1950', cond:()=>S.year>=1953, amico:'Un ente di Stato per il petrolio e il gas: l\'energia è affare nazionale', ostile:'Lo Stato si fa petroliere, e i privati gridano al monopolio'},
+ {id:'ti50_s_treni', era:'italia1950', amico:'Le ferrovie si rinnovano: linee elettrificate e treni più rapidi', ostile:'Treni affollati: gli emigranti viaggiano in piedi fino al Nord'},
+ {id:'ti50_s_fitti', era:'italia1950', amico:'Affitti bloccati: le famiglie restano nelle loro case', ostile:'Fitti bloccati: i palazzi vecchi cadono a pezzi'},
+ {id:'ti50_s_fabbriche', era:'italia1950', amico:'Contratti in fabbrica: salari e cottimi al tavolo', ostile:'Licenziamenti e reparti isolati: in fabbrica il sindacato fatica'},
+ {id:'ti50_s_moda', era:'italia1950', cond:()=>S.year>=1951, amico:'La moda italiana sfila per i compratori d\'America', ostile:'Alta moda per l\'estero, e le sarte di paese senza lavoro'},
+ {id:'ti50_s_turismo', era:'italia1950', amico:'Turisti stranieri sulle riviere: entrano dollari e marchi', ostile:'Alberghi per gli stranieri, e gli italiani in vacanza non ci vanno'},
+ // L257-1 · i quattro in più del passo 2
+ {id:'ti50_s_pane', era:'italia1950', amico:'Pane e pasta: i prezzi tengono sulle tavole', ostile:'Pane e pasta più cari: la spesa pesa sui salari'},
+ {id:'ti50_s_acqua', era:'italia1950', amico:'L\'acqua corrente arriva nei paesi del Sud', ostile:'Paesi senza acquedotto: in fila alla fontana come un secolo fa'},
+ {id:'ti50_s_pensioni', era:'italia1950', cond:()=>S.year<=1957, amico:'Pensione ai coltivatori: il governo prepara la legge', ostile:'I contadini chiedono la pensione, e aspettano ancora'},
+ {id:'ti50_s_scuola', era:'italia1950', amico:'Più bambini sui banchi: l\'obbligo scolastico si fa rispettare', ostile:'Bambini nei campi invece che a scuola: l\'obbligo resta sulla carta'},
  /* ===== D2 — ORDINARI DI TONO (pri 3, universali): il fallback non è più una coppia — otto voci variate nel
     colore, così anche il mese quieto cambia faccia. ===== */
  {id:'ti_ordinario1', pri:3, amico:'Governo al lavoro: agenda fitta e toni misurati', ostile:'Mesi che passano, risposte che mancano'},
