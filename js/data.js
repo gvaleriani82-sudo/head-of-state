@@ -3565,7 +3565,7 @@ const SCISSIONE_MIA_EV = {
   ch:[
     { l:'Resta e tieni duro', e:'Nessun cambiamento · la tensione resta', scissione:'resta', f:function(){ scissioneScelta('resta'); } },
     { l:'Tratta con le correnti', e:'Le correnti si calmano, per ora', scissione:'tratta', f:function(){ scissioneScelta('tratta'); } },
-    { l:'Rompi: fonda un partito tuo', e:'Scegli nome e sigla · una parte del partito viene con te', scissione:'rompi', f:function(){ scissioneScelta('rompi'); } },
+    { l:'Rompi: fonda un partito tuo', tmin:'Rompi: lasci il ministero e fondi il tuo partito', e:'Scegli nome e sigla · una parte del partito viene con te', scissione:'rompi', f:function(){ scissioneScelta('rompi'); } },
   ],
 };
 /* L27-1 — la GEMELLA D'OPPOSIZIONE del richiamo. La cornice (`t`/`text`) e le due etichette sono già neutre e
@@ -7355,6 +7355,13 @@ const GIRO_SCENE=[
   t:'In casa d\'altri', text:'Qui il tuo partito non vince da decenni, e %TERR te lo %TV{fa|fanno} capire subito: fischi all\'arrivo e un cartello poco gentile.',
   ch:[ {u:1, l:'Affronta i fischi e parla lo stesso', e:'Coraggio riconosciuto anche dagli avversari', f:()=>{ stampad(1); }},
        {u:0, l:'Un incontro a porte chiuse coi notabili', e:'Niente fischi, niente piazza', f:()=>{ gd('imprenditori',1); gd('lavoratori',-1); }} ]},
+
+ /* — L237-8 · la scena DOVUTA del partito nuovo: `dovuta:true` la toglie dal sacchetto (scenePerTerr), esce solo da scenaGiro quando
+      primaSedeDovuta() (game.js), una volta per carriera (il consumo è alla scelta, in resolveGiro: S.partitoProprio.sede) — */
+ {id:'gi_prima_sede', era:'universale', kind:'giro', dovuta:true,
+  t:'La prima sede', text:'Il partito nuovo non ha ancora un indirizzo, e %TERR %TV{è|sono} il posto dove aprirlo: i primi iscritti hanno trovato un negozio sfitto sulla via principale e il retro di un vecchio circolo.',
+  ch:[ {u:1, l:'Il negozio sulla via principale, con le vetrine', e:'Ti vedono tutti; i giornali scrivono che il partito spende già troppo', f:()=>{ gd('cetomedio',1); gd('giovani',1); stampad(-1); }},
+       {u:2, l:'Il retro del circolo, prestato dai primi iscritti', e:'Sedie spaiate e un fornello per il caffè: la base si sente a casa, fuori non se ne accorge nessuno', f:()=>{ gd('lavoratori',1); gd('pensionati',1); gd('giovani',-1); }} ]},
 
  /* — universali nuove (L185-1): ogni paese, ogni decennio in cui il giro esce — */
  {id:'gi_fiera', era:'universale', kind:'giro', tipo:'regione',
@@ -14395,7 +14402,7 @@ const POTENZE=[
    gli anni (compresi) in cui la riga vale, `massimo` il gradino più alto della scala (1-5; il 5 è la guerra
    di L245-4, oggi solo coreasud), `tipo` blocco · confine · lontano · coloniale · alleato. La legge UN punto, rivaleRiga() (game.js, accanto alla scala):
    senza riga la crisi non si apre (crisiApplica) e una crisi aperta la cui riga è finita (il 1991 → 1992) si chiude (crisiMese); il
-   tetto della scala è min(5, massimo) (crisiTettoBlocco). I volti delle carte non la leggono (potenzeDi resta com'è).
+   tetto della scala è min(5, massimo) (crisiTettoBlocco). I volti delle carte non la leggono (potenzeDi resta com'è). Dal L256-2 la legge anche rivaleDesc() (game.js), solo per il testo del tabellone: le righe con fino−dal ≥ 10.
    ⚠ Il Pakistan non è in POTENZE: l'India ha solo la Cina. Dal L245-3bis le porte 1990 e 2000 che arrivano al presente hanno dal
    2012 le righe del presente del loro paese (prima solo la Russia: Cina e Iran lì non aprivano crisi). La guardia è in .claude/verifica-paese.js. */
 const RIVALI=(function(){

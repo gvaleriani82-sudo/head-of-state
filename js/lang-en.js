@@ -5335,6 +5335,10 @@ const EN = {
   "Solo narrativo: cambia qualche testo, mai i numeri. I titoli istituzionali restano invariabili.":"Narrative only: it changes some text, never the numbers. Institutional titles remain invariable.",
   "Volto (facoltativo)":"Face (optional)",
   "Nessun volto":"No face",
+  "Carnagione":"Skin tone",
+  "Carnagione chiara":"Light skin tone",
+  "Carnagione media":"Medium skin tone",
+  "Carnagione scura":"Dark skin tone",
   "Scegli un volto per il tuo personaggio, o lascia l'iniziale del nome.":"Choose a face for your character, or keep the initial of your name.",
   "Punto di partenza":"Starting point",
   "Ministro":"Minister",
@@ -30633,6 +30637,10 @@ const EN = {
   "Tratti con le correnti di %V: per ora restano con te.":"You bargain with the factions of %V: for now they stay with you.",
   "Resti in %V e tieni duro.":"You stay in %V and hold on.",
   "Lasci %V e fondi %P: ti segue circa il %Q% del partito.":"You leave %V and found %P: about %Q% of the party follows you.",
+  "Rompi: lasci il ministero e fondi il tuo partito":"Break away: leave the ministry and found your own party",   // L237-7
+  "Lasci il ministero: %P passa all'opposizione.":"You leave the ministry: %P goes into opposition.",
+  "Lasci il ministero %D e vai all'opposizione.":"You leave the ministry %D and go into opposition.",
+  "Lasci il ministero e vai all'opposizione.":"You leave the ministry and go into opposition.",
   "%V sceglie un nuovo leader: %L.":"%V picks a new leader: %L.",
   "Lascia %V e fonda %P, %SIG.":"Leaves %V and founds %P, %SIG.", "Lascia %V e fonda %P.":"Leaves %V and founds %P.",
   "Scissione da %V: nasce %P":"Split from %V: %P is born",
@@ -30857,4 +30865,11 @@ const EN = {
   "Nel 1958 ha consigliato ai nazionalisti di lasciare le isole.":"In 1958 advised the Nationalists to leave the islands.",
   "su Quemoy, dall'opposizione":"on Quemoy, from the opposition",
   "Nel 1958 l'opposizione ha detto no a una guerra per Quemoy.":"In 1958 the opposition said no to a war over Quemoy.",
+  // L237-8 · la scena del giro «La prima sede» del partito nuovo (gi_prima_sede)
+  "La prima sede":"The first office",
+  "Il partito nuovo non ha ancora un indirizzo, e %TERR %TV{è|sono} il posto dove aprirlo: i primi iscritti hanno trovato un negozio sfitto sulla via principale e il retro di un vecchio circolo.":"The new party has no address yet, and %TERR %TV{is|are} the place to open one: the first members have found an empty shop on the main street and the back room of an old club.",
+  "Il negozio sulla via principale, con le vetrine":"The shop on the main street, with windows",
+  "Ti vedono tutti; i giornali scrivono che il partito spende già troppo":"Everyone sees you; the papers say the party is already spending too much",
+  "Il retro del circolo, prestato dai primi iscritti":"The back room of the club, lent by the first members",
+  "Sedie spaiate e un fornello per il caffè: la base si sente a casa, fuori non se ne accorge nessuno":"Odd chairs and a kettle: the members feel at home, outside nobody notices",
 };

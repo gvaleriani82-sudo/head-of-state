@@ -946,7 +946,7 @@ function ambiente(stato){
 /* ================================================================================================================
    L218-4 · LE VOCI — il quarto strato dello stesso modulo (paletto: l'audio è un modulo solo). Frasi corte della voce
    «Statista» di ElevenLabs (in inglese: la lingua di scena del personaggio) nei grandi momenti della carriera, col
-   SOTTOTITOLO nella lingua del gioco. Regole di L218 (CODA-LAVORI, 10/10):
+   SOTTOTITOLO nella lingua del gioco (dal L248-5 le otto battute `voce-pers-*` hanno anche la presa italiana: `voceLingua`). Regole di L218 (CODA-LAVORI, 10/10):
    · L'INTERFACCIA è una: `parla(id)`. Sempre sicura come `suona()`: senza contesto, senza file, ad audio spento non fa nulla e non lancia.
      `id` può essere il nome di una COPPIA (`voce-vittoria` → `voce-vittoria-a` / `-b`, alternate a ogni chiamata: `VOCI_GIRO`).
    · Suona SOLO se `audioStratoVivo('effetti')` (audio acceso, non silenziato, cursore degli effetti sopra zero): passa dal bus degli
@@ -1048,6 +1048,20 @@ const VOCI_MANIFEST = {
      giro (lui −14,8 · −19,2, lei −22,6 · −20,1): lei pareggiata a lui (−19 reso). Le altre voci di S2 restano ai loro lotti. */
   'voce-attacco-a':           { file:'voce-attacco-a.mp3',           gain:0.37, f:{ file:'voce-attacco-a-f.mp3', gain:0.91 }, en:'We have been attacked. Our country will defend itself, with resolve and without hatred.', it:'Siamo stati attaccati. Il paese si difenderà, con fermezza e senza odio.' },   // S2 · −14,8 / −1,4 · lei −22,6 / −6,4
   'voce-attacco-b':           { file:'voce-attacco-b.mp3',           gain:0.61, f:{ file:'voce-attacco-b-f.mp3', gain:0.68 }, en:'I have asked our allies for help, and they will answer. We are not alone.', it:'Ho chiesto aiuto ai nostri alleati, e risponderanno. Non siamo soli.' },   // S2 · −19,2 / −2,5 · lei −20,1 / −4,4
+  /* L248-5 (giro suoni 22, L218-23): le otto battute del personaggio, le PRIME voci con l'audio nelle due lingue — `file`/`f` sono la
+     presa italiana (`<id>-it-m`/`-it-f`), `l.en` quella inglese con la sua voce di lei (`voceLingua`). Testi = BATTUTE_PERSONAGGIO
+     (personaggio.js) e le chiavi EN di lang-en.js. Gain dalla regola sull'RMS dichiarato dal giro (rapporto L218-23); `vittoria-en-f`
+     (−23,9) ne vorrebbe 1,06: tenuto a 1 (il tetto della guardia). Agganci: vittoria/sconfitta in `concludiNotte`, bilancio-buono/
+     -difficile in `mostraBilancio`, solo col personaggio disegnato in quel modale (`voceMomento`, game.js); insediamento, legge,
+     comizio e alleanza senza aggancio (i loro gesti non aprono un modale: «⚑ L248-5» in DESIGN-PERSONAGGIO.md). */
+  'voce-pers-vittoria':           { file:'voce-pers-vittoria-it-m.mp3',           gain:0.40, f:{ file:'voce-pers-vittoria-it-f.mp3', gain:0.64 },           l:{ en:{ file:'voce-pers-vittoria-en-m.mp3', gain:0.37, f:{ file:'voce-pers-vittoria-en-f.mp3', gain:1.00 } } },           en:'You chose trust. Now we have to earn it.', it:'Avete scelto la fiducia. Ora tocca a noi meritarla.' },   // it −15,4 · −19,5 lei · en −14,9 · −23,9 lei
+  'voce-pers-sconfitta':          { file:'voce-pers-sconfitta-it-m.mp3',          gain:0.33, f:{ file:'voce-pers-sconfitta-it-f.mp3', gain:0.69 },          l:{ en:{ file:'voce-pers-sconfitta-en-m.mp3', gain:0.48, f:{ file:'voce-pers-sconfitta-en-f.mp3', gain:0.76 } } },          en:'The voters have decided. I respect their vote.', it:'Gli elettori hanno deciso. Rispetto il loro voto.' },   // it −13,8 · −20,2 · en −17,1 · −21,0
+  'voce-pers-bilancio-buono':     { file:'voce-pers-bilancio-buono-it-m.mp3',     gain:0.47, f:{ file:'voce-pers-bilancio-buono-it-f.mp3', gain:0.76 },     l:{ en:{ file:'voce-pers-bilancio-buono-en-m.mp3', gain:0.37, f:{ file:'voce-pers-bilancio-buono-en-f.mp3', gain:0.90 } } },     en:'A good year. The next one must be better.', it:'Un anno buono. Il prossimo dovrà essere migliore.' },   // it −16,8 · −21,1 · en −14,7 · −22,5
+  'voce-pers-bilancio-difficile': { file:'voce-pers-bilancio-difficile-it-m.mp3', gain:0.43, f:{ file:'voce-pers-bilancio-difficile-it-f.mp3', gain:0.66 }, l:{ en:{ file:'voce-pers-bilancio-difficile-en-m.mp3', gain:0.32, f:{ file:'voce-pers-bilancio-difficile-en-f.mp3', gain:0.68 } } }, en:'It was a hard year. I will say it plainly.', it:'È stato un anno duro. Lo dico senza giri di parole.' },   // it −16,2 · −19,8 · en −13,6 · −20,1
+  'voce-pers-insediamento':       { file:'voce-pers-insediamento-it-m.mp3',       gain:0.42, f:{ file:'voce-pers-insediamento-it-f.mp3', gain:0.64 },       l:{ en:{ file:'voce-pers-insediamento-en-m.mp3', gain:0.47, f:{ file:'voce-pers-insediamento-en-f.mp3', gain:0.85 } } },       en:'I swear to serve the country, all of it.', it:'Giuro di servire il paese, tutto il paese.' },   // it −15,8 · −19,5 · en −16,8 · −22,0 · senza aggancio
+  'voce-pers-legge':              { file:'voce-pers-legge-it-m.mp3',              gain:0.47, f:{ file:'voce-pers-legge-it-f.mp3', gain:0.80 },              l:{ en:{ file:'voce-pers-legge-en-m.mp3', gain:0.44, f:{ file:'voce-pers-legge-en-f.mp3', gain:0.83 } } },              en:'Signed. From today, this law belongs to everyone.', it:'Ecco la firma. Da oggi questa legge è di tutti.' },   // it −16,9 · −21,5 · en −16,4 · −21,8 · senza aggancio
+  'voce-pers-comizio':            { file:'voce-pers-comizio-it-m.mp3',            gain:0.44, f:{ file:'voce-pers-comizio-it-f.mp3', gain:0.72 },            l:{ en:{ file:'voce-pers-comizio-en-m.mp3', gain:0.32, f:{ file:'voce-pers-comizio-en-f.mp3', gain:0.85 } } },            en:'I am here to listen, and to ask for your vote.', it:'Sono qui per ascoltarvi, e per chiedervi il voto.' },   // it −16,3 · −20,6 · en −13,5 · −22,0 · senza aggancio
+  'voce-pers-alleanza':           { file:'voce-pers-alleanza-it-m.mp3',           gain:0.63, f:{ file:'voce-pers-alleanza-it-f.mp3', gain:0.90 },           l:{ en:{ file:'voce-pers-alleanza-en-m.mp3', gain:0.53, f:{ file:'voce-pers-alleanza-en-f.mp3', gain:0.67 } } },           en:'We do not agree on everything. But on this, we do.', it:'Non la pensiamo uguale su tutto. Ma su questo sì.' },   // it −19,4 · −22,5 · en −17,9 · −19,9 · senza aggancio
 };
 const VOCI_PRESENTI = ['voce-insediamento.mp3', 'voce-vittoria-a.mp3', 'voce-vittoria-b.mp3', 'voce-sconfitta-a.mp3', 'voce-sconfitta-b.mp3',
                        'voce-fineanno-buono.mp3', 'voce-fineanno-lucieombre.mp3', 'voce-fineanno-difficile.mp3',   // L218-4 (giro suoni 4)
@@ -1073,7 +1087,10 @@ const VOCI_PRESENTI = ['voce-insediamento.mp3', 'voce-vittoria-a.mp3', 'voce-vit
                        'voce-bilancio-si-f.mp3', 'voce-protesta-f.mp3',
                        'voce-sciopero-f.mp3', 'voce-insediamento-b-f.mp3', 'voce-candidatura-f.mp3', 'voce-vertice-f.mp3', 'voce-scandalo-chiuso-f.mp3',
                        'voce-lutto-f.mp3', 'voce-dibattito-f.mp3',
-                       'voce-attacco-a.mp3', 'voce-attacco-a-f.mp3', 'voce-attacco-b.mp3', 'voce-attacco-b-f.mp3'];   // L245-6 (giro suoni 25, S2)
+                       'voce-attacco-a.mp3', 'voce-attacco-a-f.mp3', 'voce-attacco-b.mp3', 'voce-attacco-b-f.mp3',   // L245-6 (giro suoni 25, S2)
+                       /* L248-5 (giro suoni 22, L218-23): le 32 battute del personaggio, voce-pers-<momento>-<it|en>-<m|f>.mp3 */
+                       ].concat(['vittoria','sconfitta','bilancio-buono','bilancio-difficile','insediamento','legge','comizio','alleanza'].reduce(function(a, m){
+                         return a.concat(['it-m','it-f','en-m','en-f'].map(function(s){ return 'voce-pers-'+m+'-'+s+'.mp3'; })); }, []));
 const VOCI_DIR = 'assets/audio/voci/', VOCI_K = 1, VOCI_ATTESA_MS = 2500, VOCI_FADE_S = 0.3;
 let VOCI_BUF = {}, VOCI_CARICO = {}, VOCI_GIRO = {}, VOCE_ORA = null, VOCE_TOKEN = 0, VOCE_ATTESA = null;   // L218-6: VOCE_ATTESA = la voce chiesta e in caricamento {tok, t0} · L255-1: BUF e CARICO per FILE, non per id
 let VOCI_REGISTRO = [];               // {id, t, esito, file} — per le misure; transitorio (file: L255-1, sulla riga «parla»)
@@ -1089,8 +1106,15 @@ function voceSegna(id, esito, file){ VOCI_REGISTRO.push({ id:id, t:(typeof perfo
 function voceGenere(){
   if(typeof CREA!=='undefined' && CREA) return CREA.genere==='f' ? 'f' : 'm';   // L255-2: una carriera in composizione (CREA non ancora consumata: la nomina del gabinetto, dove suona voce-guida-1) vince su una S vecchia
   return (typeof S!=='undefined' && S && S.personaggio && S.personaggio.genere==='f') ? 'f' : 'm'; }
+/* L248-5 · la LINGUA dell'audio: le battute del personaggio hanno una presa per lingua (`l.en` sul manifesto = file, gain e voce di
+   lei dell'inglese); le altre voci parlano inglese in tutte e due le lingue e cambiano solo il sottotitolo. I testi restano di M. */
+function voceLingua(M){
+  const L=(M.l && typeof curLang==='function' && curLang()==='en') ? M.l.en : null;
+  return L ? { file:L.file, gain:L.gain, f:L.f, it:M.it, en:M.en, itf:M.itf } : M;
+}
 function voceVariante(id){
-  const M=VOCI_MANIFEST[id]; if(!M) return null;
+  const M0=VOCI_MANIFEST[id]; if(!M0) return null;
+  const M=voceLingua(M0);
   if(voceGenere()==='f' && M.f && VOCI_PRESENTI.indexOf(M.f.file)>=0) return { file:M.f.file, gain:M.f.gain, it:M.f.it||M.it, en:M.f.en||M.en, f:true };
   return VOCI_PRESENTI.indexOf(M.file)>=0 ? { file:M.file, gain:M.gain, it:(voceGenere()==='f' && M.itf) ? M.itf : M.it, en:M.en, f:false } : null;   // L255-2: `itf`, la voce di lui che si rivolge a lei
 }
@@ -1133,6 +1157,7 @@ function taciVoce(){
   try{
     const V=VOCE_ORA; VOCE_ORA=null; VOCE_TOKEN++;
     voceSottotitolo(null);
+    if(V && V.id.indexOf('voce-pers-')===0 && typeof personaggioBoccaParla==='function') personaggioBoccaParla(null);   // L248-5: la voce zittita chiude la bocca
     if(V && AUDIO_CTX){ const t=AUDIO_CTX.currentTime; try{ V.g.gain.cancelScheduledValues(t); V.g.gain.setValueAtTime(V.g.gain.value, t); V.g.gain.linearRampToValueAtTime(0, t+VOCI_FADE_S); V.src.stop(t+VOCI_FADE_S+0.05); }catch(e){} voceSegna(V.id, 'taciuta'); }
     if(typeof musicaSottovoce==='function') musicaSottovoce(false);
   }catch(e){}
@@ -1147,6 +1172,7 @@ function voceParti(id, M){
   src.start();
   if(typeof musicaSottovoce==='function') musicaSottovoce(true);
   voceSottotitolo((typeof curLang==='function' && curLang()==='en') ? M.en : M.it);
+  if(id.indexOf('voce-pers-')===0 && typeof personaggioBoccaParla==='function') personaggioBoccaParla((typeof curLang==='function' && curLang()==='en') ? M.en : M.it, src.buffer.duration*1000);   // L248-5: la battuta del personaggio muove la bocca dei personaggi vivi (a tempi fissi, dal testo e dalla durata)
   voceSegna(id, 'parla', M.file);
 }
 /* vero se una voce sta parlando o sta arrivando (chiesta e in caricamento, entro VOCI_ATTESA_MS): chi non vuole interrompere chiede

@@ -694,6 +694,12 @@ function dicNm(id){
   const M=(typeof MINISTRIES!=='undefined') && MINISTRIES.find(function(x){return x.id===id;});
   return (M&&M.nm)||'';
 }
+/* il complemento del dicastero («dell'Economia»), tradotto: lo legge ruoloDicastero e (L237-7) il foglio della scissione da ministro.
+   Fuori dal 1950 italiano; senza dicastero rende T('') come prima. */
+function dicasteroDi(){
+  const gen={economia:'dell\'Economia', interno:'dell\'Interno', giustizia:'della Giustizia', esteri:'degli Esteri', difesa:'della Difesa', lavoro:'del Lavoro', salute:'della Salute', istruzione:'dell\'Istruzione', sviluppo:'dello Sviluppo', infrastrutture:'delle Infrastrutture'};
+  return T(gen[S.dicastero]||'');
+}
 function ruoloDicastero(){
   const id=S.dicastero;
   if(eraGiocata()==='italia1950' && typeof MINISTRI_50!=='undefined' && MINISTRI_50[id]){
@@ -701,8 +707,7 @@ function ruoloDicastero(){
     const capo = o.capo ? gn(o.capo,o.capoF||o.capo) : gn('Ministro','Ministra');   // Salute '50 → «Alto Commissario/a», gli altri → «Ministro/a»
     return capo+' '+T(o.di);
   }
-  const gen={economia:'dell\'Economia', interno:'dell\'Interno', giustizia:'della Giustizia', esteri:'degli Esteri', difesa:'della Difesa', lavoro:'del Lavoro', salute:'della Salute', istruzione:'dell\'Istruzione', sviluppo:'dello Sviluppo', infrastrutture:'delle Infrastrutture'};
-  return gn('Ministro','Ministra')+' '+T(gen[S.dicastero]||'');
+  return gn('Ministro','Ministra')+' '+dicasteroDi();
 }
 /* --- Nuova partita (da MINISTRO) --- */
 function startMinistro(){
@@ -978,7 +983,7 @@ function rivaleGoverno(){
    Vince → continui ministro; perde → il ministro del proprio partito va all'opposizione da volto del partito (resti livello 2),
    il partner torna capo del suo partito all'opposizione (livello 3, la strada di goOpposizione: R2). */
 /* Il partner che lascia il livello 2 e torna capo del suo partito (livello 3): lo stato del dicastero si chiude come in diventaPremier.
-   Due chiamanti: R2 qui sotto (la coalizione del premier perde l'urna) e l'uscita dal governo della svolta del 1982 (L237-2quater,
+   Tre chiamanti: R2 qui sotto (la coalizione del premier perde l'urna), la scissione da ministro (L237-7, ministroEsceScissione) e l'uscita dal governo della svolta del 1982 (L237-2quater,
    partnerEsceDalGoverno). L237-2ter: la soglia del crollo riparte dalla forza al rientro (mai più severa di prima: f0Crollo). */
 function partnerTornaCapo(){
   S.livello=3; S.premier=null; S.dicastero=null; S.capitale=null; S.prevSettore=null; S.silAvviso=null; S.premCrisiMesi=0; S.occUltima=null; S.mesiAltoCap=0;
@@ -3033,6 +3038,16 @@ function alleatiPartitoProprio(lista){
    carte che presuppongono un partito con una storia (`storia:true`: correnti, congressi, «da anni nel partito», la base storica) non
    escono — le scarta `eraCartaViva`, il passaggio unico dei pool. */
 function partitoGiovane(){ return !!(S && S.partito===PP_ID && S.partitoProprio && (S.partitoProprio.mandati||0)<2); }
+/* L237-8 · LA PRIMA SEDE: la scena del giro `gi_prima_sede` (data.js, `dovuta:true`, fuori dal sacchetto) è dovuta al partito nuovo nei
+   primi `PRIMA_SEDE_MESI` mesi dalla nascita (`S.partitoProprio.da`, scritto da ppNasce per fondazione e scissione) finché non è stata
+   scelta (`S.partitoProprio.sede` = il mese della scelta, scritto SOLO in resolveGiro: aprire e chiudere il foglietto non la consuma).
+   Pura. La leggono scenaGiro (dopo il territorio che chiama, prima del sacchetto), formeGiro e giroBottone (ui.js: la visita c'è anche
+   senza altre scene). Il giro esiste solo al livello 3 (giroPossibile): la vede chi guida il partito nuovo. Interruttore PRIMA_SEDE. */
+function primaSedeDovuta(){
+  if(!PRIMA_SEDE || !S || S.partito!==PP_ID || !S.partitoProprio || S.partitoProprio.sede || S.partitoProprio.da==null) return false;
+  var d=meseAss()-S.partitoProprio.da;
+  return d>=0 && d<PRIMA_SEDE_MESI;
+}
 /* una volta per elezione politica vinta: nextMandate (rielezione, e la rimonta via tornaAlGoverno, che lo chiama), la salita
    per elezione (diventaPremier) e l'ingresso da partner dopo il voto (entraDaPartner). NON in tornaAlGoverno, che ha già il suo
    doppio bioConta noto (R4): lì il conto lo fa nextMandate. */
@@ -3054,8 +3069,13 @@ function contaMandatoProprio(){ if(S && S.partitoProprio && S.partito===PP_ID) S
      blocco, guardia prove/l237-6/guardia-scissione.js), `S.partitoProprio.scissioneDa` = il vecchio. Il racconto: registro, biografia,
      titolo `ti_pp_scissione` il mese dopo (non all'opposizione: lì non ci sono prime pagine), stampa −3 il mese dopo.
    Interruttore `SCISSIONE_MIA` (spento = il gioco di prima). Prova prove/l237-6/prova-scissione.js.
+   L237-7 · con `SCISSIONE_MINISTRO` anche il ministro (livello 2): la carta dopo l'occasione, «Rompi» col testo `tmin`, e la scissione
+   lo porta fuori dal governo, capo del partito nuovo all'opposizione (ministroEsceScissione). Prova prove/l237-7/prova-scissione-ministro.js.
    ============================================================================================================ */
 let SCISSIONE_MIA=true;       // L237-6: l'interruttore — ACCESO il 21/10 (prova, A/B e CDP verdi nello stesso turno, D183)
+let PRIMA_SEDE=true;          // L237-8: ACCESA il 23/10 (prova, A/B e CDP verdi nello stesso turno, D183) — la scena del giro «La prima sede» del partito nuovo (primaSedeDovuta); spenta = il gioco di prima
+const PRIMA_SEDE_MESI=24;
+let SCISSIONE_MINISTRO=true;  // L237-7: ACCESA il 23/10 (prova, A/B e CDP verdi nello stesso turno, D183) — la scissione anche da ministro (livello 2): rompi, lasci il ministero, guidi il partito nuovo all'opposizione
 let SCISSIONE_P=0.0075;       // L237-6: il dado al mese (decisione di Cowork del 21/10; taratura ammessa 0,005-0,012)
 let SCISSIONE_ANCORA=true;    // L237-6: l'àncora del vecchio si sposta (la prova la spegne per il confronto «senza àncora»)
 const SCISSIONE_MESI=24, SCISSIONE_APERTURE=2, SCISSIONE_TENUTA=35, SCISSIONE_STAMPA=-3;
@@ -3070,7 +3090,7 @@ function scissioneDado(){
 function scissioneMiaPuo(){
   if(!SCISSIONE_MIA || typeof S==='undefined' || !S || !S.forze || !PAESE || !PAESE.partiti) return false;
   if((S.scenario && S.scenario!=='presente') || S.era) return false;   // solo il presente, come fondaPartitoProprio
-  if(S.livello!==1 && S.livello!==3) return false;                    // livelli 1 e 3 (il ministro no: decisione di Cowork)
+  if(S.livello!==1 && S.livello!==3 && !(S.livello===2 && SCISSIONE_MINISTRO && !S.opposizione)) return false;   // livelli 1 e 3; il ministro (2) solo con SCISSIONE_MINISTRO e al governo (L237-7: il volto all'opposizione dopo l'urna persa non ha un ministero da lasciare)
   return S.partito!==PP_ID && !part(PP_ID) && S.scissioneMia==null;
 }
 function scissioneMiaDovuta(senzaDado){
@@ -3085,8 +3105,14 @@ function scissioneMiaDovuta(senzaDado){
   if(ap.length>=SCISSIONE_APERTURE || (ap.length && m-ap[ap.length-1]<SCISSIONE_MESI)) return false;
   return senzaDado ? true : scissioneDado()<SCISSIONE_P;
 }
-/* la carta: senza correnti niente «trattativa» (al passo 0 le correnti c'erano a tutti e tre i livelli) */
-function cartaScissioneMia(){ return S.correnti ? SCISSIONE_MIA_EV : Object.assign({}, SCISSIONE_MIA_EV, {ch:SCISSIONE_MIA_EV.ch.filter(function(c){ return c.scissione!=='tratta'; })}); }
+/* la carta: senza correnti niente «trattativa» (al passo 0 le correnti c'erano a tutti e tre i livelli). L237-7: al livello 2 la scelta
+   che ha `tmin` (oggi «Rompi») mostra quel testo — lasci il ministero; letto solo qui. */
+function cartaScissioneMia(){
+  var ch=SCISSIONE_MIA_EV.ch;
+  if(!S.correnti) ch=ch.filter(function(c){ return c.scissione!=='tratta'; });
+  if(S.livello===2) ch=ch.map(function(c){ return c.tmin ? Object.assign({}, c, {l:c.tmin}) : c; });
+  return ch===SCISSIONE_MIA_EV.ch ? SCISSIONE_MIA_EV : Object.assign({}, SCISSIONE_MIA_EV, {ch:ch});
+}
 function scissioneQuota(){ var u=(S.correnti && S.correnti.length) ? umoreMedio() : 50; return clamp(0.15+0.25*(u-50)/50, 0.10, 0.40); }
 function scissioneApertura(){ S.scissioneAperture=(S.scissioneAperture||[]).concat([meseAss()]); }
 function nomeVecchio(id){ var p=part(id); return p ? T(p.nome) : ''; }
@@ -3102,6 +3128,7 @@ function scissioneAnnulla(){ S.log.unshift({t:T('Il partito'), x:T('Resti in %V 
 function scissioneFonda(def, quota){
   if(!scissioneMiaPuo() || !def) return false;
   var vecchio=S.partito, pv=part(vecchio)||{}, asseV=pv.asse||0;
+  var gov=S.livello===2 ? part((S.premier && S.premier.partito) || vecchio) : null;   // L237-7: il governo che lasci, letto PRIMA della scissione
   var q=clamp(quota!=null ? +quota : scissioneQuota(), 0.10, 0.40);
   var fv=S.forze[vecchio]||0, delta=fv*q;
   var asse=Math.max(-2, Math.min(2, Math.max(asseV-1, Math.min(asseV+1, Math.round(def.asse!=null ? +def.asse : asseV)))));   // solo asse del vecchio −1, uguale, +1
@@ -3128,7 +3155,19 @@ function scissioneFonda(def, quota){
   S.log.unshift({t:T('Scissione'), x:T('Lasci %V e fondi %P: ti segue circa il %Q% del partito.').replace('%V', vN).replace('%P', ppN).replace('%Q', String(Math.round(q*100)))});
   S.log.unshift({t:T('Scissione'), x:T('%V sceglie un nuovo leader: %L.').replace('%V', vN).replace('%L', lN)});
   bioFatto(ppv.sigla ? T('Lascia %V e fonda %P, %SIG.').replace('%SIG', ppS).replace('%V', vN).replace('%P', ppN) : T('Lascia %V e fonda %P.').replace('%V', vN).replace('%P', ppN));
+  if(gov) ministroEsceScissione(gov, ppN);
   return true;
+}
+/* L237-7 · il ministro che rompe esce dal governo e guida il partito nuovo all'opposizione (livello 3), come il partner che torna capo
+   (partnerEsceDalGoverno): lo stato del dicastero si chiude (partnerTornaCapo), il governo che resta è quello del premier (`gov`, che
+   può essere il partito lasciato), la legislatura continua (niente urne). Senza applicaTappaOra. Chiamata solo da scissioneFonda. */
+function ministroEsceScissione(gov, ppN){
+  var tim=S.turnInMandate;
+  partnerTornaCapo();
+  entraOpposizione(gov);
+  S.turnInMandate=tim;   // la legislatura è quella di prima (entraOpposizione ne apre una nuova solo dopo un voto)
+  S.bloccoAtteso=bloccoQuota();
+  S.log.unshift({t:T('Scissione'), x:T('Lasci il ministero: %P passa all\'opposizione.').replace('%P', ppN)});
 }
 /* il mese dopo la scissione: la stampa −3 (la valuta c'è a tutti i livelli, passo 0 b). Lo chiama corpoMese. */
 function scissioneMese(){
@@ -4488,7 +4527,7 @@ function snodoMerluzzo76OppDovuta(){ return snodoScalaUkOk('islanda') && S.oppos
    linea americana, con l'interruttore suo SNODI_SCALA_US (il banco lo segue: __BANCO_SNODI_US_OFF = prima, __BANCO_SNODI_US_ON = acceso
    a mano). Le righe di RIVALI hanno massimo 4: l'ultimatum sì, la guerra no. Nessun pilastro, fatto-mondo né snodo americano in quei
    mesi (guardato il 22/10: pus50_oahu è del 1955/3, pus50_scuola del 1958/12; la scuola è del 1957/9-10). */
-let SNODI_SCALA_US=false;   // L245-8-4bis (22/10): ancora SPENTO — fermezza a t:3 nel 1958 (r1), il 1955 a t:2; la misura a 20×2 non passa per un soffio (rapporto «⚑ L245-8-4bis»)
+let SNODI_SCALA_US=true;   // L245-8-4ter (23/10): ACCESO, (r1) misurata a 40×2 (fermezza a t:3 nel 1958, t:2 nel 1955; rapporti «⚑ L245-8-4bis» e «⚑ L245-8-4ter»)
 function snodoScalaUsOk(con){ return SNODI_SCALA_US && typeof S!=='undefined' && S && S.era===LINEA_US && S.livello===3 && !!rivaleRiga(con); }
 function snodoFormosa55Dovuta(){    return snodoScalaUsOk('cina') && !S.opposizione && S.usFormosa55==null && S.year===1955 && S.month>=1 && S.month<=2; }
 function snodoFormosa55OppDovuta(){ return snodoScalaUsOk('cina') && S.opposizione && S.usFormosa55Opp==null && S.usFormosa55==null && S.year===1955 && S.month>=1 && S.month<=2; }
@@ -4989,6 +5028,20 @@ function rivaleRiga(con){
   var k=rivaleChiave(), y=S.year;
   for(var i=0;i<RIVALI.length;i++){ var r=RIVALI[i]; if(r.paese===k && r.con===con && y>=r.dal && y<=r.fino) return r; }
   return null;
+}
+/* L256-2 · la descrizione della «potenza rivale» nella scheda Paese e nel tabellone (ui.js, al posto di ENTI_INT.rivale.desc, mai
+   quando vale descNA). Le potenze delle righe di RIVALI DI LUNGO PERIODO (fino−dal ≥ 10: le crisi a tempo di L245-8 — Jugoslavia,
+   Libia, Islanda, Formosa — non entrano) per la partita (rivaleChiave) e l'anno, nell'ordine delle righe, nome senza articolo nella
+   lingua attiva. Senza righe lunghe: l'Unione Sovietica fino al 1991, la Russia fino al 2011, poi la stringa di sempre. Solo testo. */
+function rivaleDesc(){
+  var k=rivaleChiave(), y=S.year, en=(typeof curLang==='function' && curLang()==='en'), visti={}, nomi=[];
+  if(typeof RIVALI!=='undefined' && typeof POTENZE!=='undefined') RIVALI.forEach(function(r){
+    if(r.paese!==k || y<r.dal || y>r.fino || r.fino-r.dal<10 || visti[r.con]) return;
+    var p=POTENZE.find(function(x){ return x.id===r.con; }); if(!p) return;
+    visti[r.con]=true; nomi.push(en ? (p.nomeEn||p.nome) : p.nome); });
+  if(nomi.length) return nomi.join(', ');
+  var rip=(y<=2011 && typeof POTENZE!=='undefined') ? POTENZE.find(function(x){ return x.id===(y<=1991?'urss':'russia'); }) : null;   // i nomi da POTENZE: nessuna chiave nuova
+  return rip ? (en ? (rip.nomeEn||rip.nome) : rip.nome) : T('Russia, Cina, Iran, Corea del Nord');
 }
 /* L245-3 · il tetto della scala: min(5, massimo della riga) — 4 è l'ultimatum, 5 la guerra (L245-4; a REGOLA_GUERRA spenta min(4, …)). Il Brasile con la
    Russia si ferma alle sanzioni (massimo 2). Senza riga (non dovrebbe succedere: la crisi non si apre) il tetto di prima, 4. */
@@ -6038,6 +6091,7 @@ function scenePerTerr(i){
   if(typeof GIRO_SCENE==='undefined') return [];
   var TE=PAESE.territori[i], tipo=tipoTerrNorm(TE), ruolo=S.opposizione?'opposizione':'governo', casa=casaTerr(i);
   return GIRO_SCENE.filter(function(g){
+    if(g.dovuta) return false;   // L237-8: una scena dovuta (gi_prima_sede) non entra nel sacchetto: la mette scenaGiro
     if(g.tipo && g.tipo!==tipo) return false;
     if(g.ruolo && g.ruolo!==ruolo) return false;
     if(g.casa && g.casa!==casa) return false;
@@ -6049,6 +6103,7 @@ function scenePerTerr(i){
 /* la scena del giro sull'area i: il territorio che chiama prende la sua scena F2; altrimenti il sacchetto curato */
 function scenaGiro(i){
   if(S.territorioChiama && S.territorioChiama.idx===i){ var d=defProblemaTerr(S.territorioChiama.prob); if(d) return { def:d, f2:true }; }
+  if(primaSedeDovuta()){ var ps=defGiro('gi_prima_sede'); if(ps) return { def:ps, f2:false }; }   // L237-8: il territorio che chiama vince, poi la prima sede
   var c=scenePerTerr(i); if(!c.length) return null;
   var def=pescaBag('giro|'+(S.era||'p'), c, {vivePrima:true}) || c[0];   // L185-1: pescaBag rende la CARTA, non l'id — col confronto per id di L182-3 usciva sempre c[0] (gi_comizio 313 giri su 313)
   return { def:def, f2:false };
@@ -6099,7 +6154,7 @@ function formeAnnoN(){ var f=S.formeAnno; return (f && f.anno===S.year) ? (f.n||
 function formeGiro(i, senzaTetto){
   if(!FORME_GIRO || !giroPossibile() || !S.territori[i]) return [];
   var f=[];
-  if((S.territorioChiama && S.territorioChiama.idx===i) || scenePerTerr(i).length) f.push('visita');
+  if((S.territorioChiama && S.territorioChiama.idx===i) || primaSedeDovuta() || scenePerTerr(i).length) f.push('visita');   // L237-8: la prima sede è una visita
   f.push('comizio');
   if(FORME_INVESTIMENTO && S.livello===3 && !S.opposizione && (senzaTetto || formeAnnoN()<FORME_TETTO_ANNO)) f.push('investimento');
   return f;
@@ -6132,6 +6187,7 @@ function resolveGiro(ci){
   var def=defGiro(G.id); if(!def) { render(); return; }
   var opt=def.ch[ci]; if(!opt) { render(); return; }
   risolviScenaTerr(def, opt, G.idx);
+  if(def.id==='gi_prima_sede' && S.partitoProprio) S.partitoProprio.sede=meseAss();   // L237-8: la prima sede si consuma SOLO alla scelta
   S.ind.consenso=computeConsenso();
   if(typeof suona==='function') suona('mappa');
   render(); commitSnap();
@@ -7368,6 +7424,7 @@ function genAgendaRamo(first){
     if(!first && typeof snodoSvolta82PartnerDovuta==='function' && snodoSvolta82PartnerDovuta()){ S.agenda.push({kind:'event', data:SVOLTA82FDP_EV, resolved:false}); agendaSolo(); return; }   // L237-2quater: lo snodo del minore al partner, la carta del mese (prima dell'occasione, come gli snodi al livello 3)
     const occ=pickOccasione();
     if(occ){ S.agenda.push(occ); agendaSolo(); return; }          // l'occasione è LA carta del mese
+    if(!first && scissioneMiaDovuta()){ S.agenda.push({kind:'event', data:cartaScissioneMia(), resolved:false}); agendaSolo(); return; }   // L237-7: dopo l'occasione, come al livello 1 (solo con SCISSIONE_MINISTRO)
     const inq=aggiornaInchiesta();                  // ti bersaglia sempre (a livello 2 non hai ministri da scaricare)
     const inqA=aggiornaArchi(!!inq);                // archi personali (vita/coscienza/salute)
     if(!inq && !inqA){
@@ -8872,12 +8929,12 @@ function concludiNotte(){
   stopTimerNotte();
   if(typeof taci==='function') taci('urne');   // L95-3: rete di sicurezza, il loop non sopravvive alla notte
   NOTTE_TERR=NOTTE.cambiTerr ? { mese:S.year*12+S.month, cambi:NOTTE.cambiTerr, quote:NOTTE.quoteTerr||[] } : null;   // L239-3: i cambi decisi alla notte aspettano l'esito (territoriDopoUrna) · L239-4: con le quote
-  const sistema=NOTTE.sistema, vero=NOTTE.vero, dich=NOTTE.dich; NOTTE=null;   // svuota il transitorio PRIMA del flusso a valle
+  const sistema=NOTTE.sistema, vero=NOTTE.vero, dich=NOTTE.dich, persFin=!!NOTTE.persFin; NOTTE=null;   // svuota il transitorio PRIMA del flusso a valle · L248-5: persFin = la notte finita aveva il personaggio
   if(typeof notteTavoloFine==='function') notteTavoloFine();   // L113-5: le righe svaniscono, il tavolo torna al suo posto
   if(typeof musica==='function') musica();       // L114-1: finita la notte, la musica torna all'epoca (o alla crisi)
   if(typeof ambiente==='function') ambiente();   // L116-2: finita la notte, l'ambiente torna
   const mg=calcMargineEsito(sistema, vero); S.margineEsito=mg; // il MARGINE (fase B): caratterizza l'esito (tono + biografia + epilogo)
-  if(typeof parla==='function') parla(mg.win?'voce-vittoria':'voce-sconfitta');   // L218-4: la voce del risultato (coppie -a/-b alternate), la stessa lettura del margine
+  if(typeof parla==='function') parla(voceMomento(persFin, mg.win?'voce-pers-vittoria':'voce-pers-sconfitta', mg.win?'voce-vittoria':'voce-sconfitta'));   // L218-4: la voce del risultato (coppie -a/-b alternate), la stessa lettura del margine · L248-5: la battuta del personaggio, se era disegnato
   applicaMargineBio(mg);                                       // fatto datato + contatori trionfi/sconfitteNette (solo gli estremi memorabili)
   /* F4 — LA DICHIARAZIONE A CALDO, applicata QUI: dopo il risultato, mai prima. I seggi sono già congelati nel VERO
      → la parola della notte non può spostarne uno. Muove solo il DOPO (stampa, morale delle correnti). Effetti
@@ -8990,7 +9047,8 @@ function renderNotte(){
   var vinta=false;
   if(ultima){ if(NOTTE.sistema==='parlamentare'){ vinta=quotaNotte(onda)>=50; } else { vinta=(onda.myPct>50); } }   // L247-1: lo stesso numero di notteSuonaEsito
   var scN=(typeof scenaNotte==='function')?scenaNotte(NOTTE.stadio, ultima, vinta):null;
-  var rvN=(ultima && typeof ritrattoVivoHtml==='function') ? ritrattoVivoHtml({tono:(vinta?'trionfo':'sconfitta')}) : '';   // L178-3: il ritratto vivo quando la notte finisce, accanto al risultato
+  var rvN=(ultima && typeof ritrattoVivoHtml==='function') ? ritrattoVivoHtml({momento:'notte', tono:(vinta?'trionfo':'sconfitta')}) : '';   // L178-3: il ritratto vivo quando la notte finisce, accanto al risultato
+  if(ultima) NOTTE.persFin=persDisegnato(rvN);   // L248-5: la voce del risultato (concludiNotte) sarà la battuta del personaggio
   var mbg=scenaMomentoHtml(scN, {sfondo:true});   // L127-1: lo sfondo con la clip sotto il velo (la scelta e il perché in DESIGN-MOVIMENTO § L127-1)
   /* 375px senza salti: altezza minima riservata → le ondate non fanno ballare il modale. Sfondo su WRAPPER (no leak di classe). */
   /* L113-5 · la legenda delle due lingue del tavolo: le righe sono il voto dell'area, il colore pieno chi la governa */
@@ -9005,6 +9063,7 @@ function renderNotte(){
     ${azioni}</div>`;
   document.getElementById('ov').classList.add('on');
   agganciaVideoTutti();   // L127-1: la clip dello stadio (lo stesso nodo attraversa gli stadi con la stessa scena)
+  if(rvN && typeof personaggioMomentoAvvia==='function') personaggioMomentoAvvia(document.getElementById('modal'));   // L248-4: il personaggio della notte finita (con l'interruttore acceso)
   if(typeof notteTavolo==='function') notteTavolo();   // L113-5: le righe dello stadio sul tavolo (scaglionate), il foglio in basso
   notteMovimento(scN, ultima);    // L95-2: scaglionamento delle barre, sfondo in dissolvenza, verdetto dopo le barre
   try{ playAnims(); }catch(e){}   // vetrina: le barre dello spoglio scorrono tappa dopo tappa
@@ -9289,7 +9348,7 @@ function mostraBilancio(prev, cur){
     return `<div class="bil-row"><div style="display:flex;justify-content:space-between;align-items:baseline;font-size:13px"><span>${x.nm}</span><span style="color:${dir.c};font-size:12px">${x.a||''}<b style="font-family:inherit">${dir.a}</b> ${dir.s}</span></div><div class="bar">${fillI('bilancio:'+x.key, clamp(x.val,2,100), col)}</div></div>`;
   }).join('');
   /* L178-3: il ritratto vivo accanto al verdetto (prima un volto fermo da 46 px accanto al titolo): oro se l'anno è buono, ardesia se difficile */
-  const rvB=(typeof ritrattoVivoHtml==='function')?ritrattoVivoHtml({tono:(verd.k==='buono'?'trionfo':(verd.k==='difficile'?'sconfitta':null))}):'';
+  const rvB=(typeof ritrattoVivoHtml==='function')?ritrattoVivoHtml({momento:'bilancio', tono:(verd.k==='buono'?'trionfo':(verd.k==='difficile'?'sconfitta':null))}):'';
   /* L174-4 · la scena di fine anno, una per verdetto, in cima al modale come intervista e telefonata: scenaMomentoHtml decide la
      clip con le regole dei momenti (movimento «pieno», niente reteLeggera(), niente clip sotto un pilastro-tragedia: lì resta l'immagine) */
   const scFa=scenaMomentoHtml('assets/scenes/fineanno-'+(verd.k||'lucieombre')+'.webp');
@@ -9300,7 +9359,8 @@ function mostraBilancio(prev, cur){
     <div class="choices"><button class="opt" style="border-color:var(--brand)" onclick="chiudiBilancio()"><span class="ol">${T('Continua →')}</span></button></div>`;
   document.getElementById('ov').classList.add('on');
   if(typeof agganciaVideoTutti==='function') agganciaVideoTutti();   // L174-4: la clip del momento, nello stesso task (L127-1)
-  if(typeof parla==='function') parla('voce-fineanno-'+(verd.k||'lucieombre'));   // L218-4: la voce del verdetto, la stessa chiave della scena (nuovocapitolo col file dal L218-5)
+  if(rvB && typeof personaggioMomentoAvvia==='function') personaggioMomentoAvvia(document.getElementById('modal'));   // L248-4: il personaggio del bilancio (con l'interruttore acceso)
+  if(typeof parla==='function') parla(voceMomento(persDisegnato(rvB), (verd.k==='buono'||verd.k==='difficile') ? 'voce-pers-bilancio-'+verd.k : null, 'voce-fineanno-'+(verd.k||'lucieombre')));   // L218-4: la voce del verdetto, la stessa chiave della scena (nuovocapitolo col file dal L218-5) · L248-5: la battuta del personaggio negli anni buoni e difficili
   try{ playAnims(); }catch(e){}   // vetrina: le barre salgono da 0 al valore (transform scaleX, 60fps)
 }
 function chiudiBilancio(){ document.getElementById('ov').classList.remove('on'); if(typeof suona==='function') suona('timbro'); }   // L218-13 (F5a): il timbro sul bilancio dell'anno   // presentazione: il mese è già reso sotto (il render unico di fine mese, L123-1)
@@ -9362,6 +9422,13 @@ function governoDiCoalizione(){   // L218-6: la stessa condizione per i bicchier
     && !(typeof musicaTragedia==='function' && musicaTragedia()));
 }
 /* L218-6 · la voce «Abbiamo un governo» (C19) alla conferma di una coalizione, se nessun'altra voce sta parlando (la guida, l'insediamento) */
+/* L248-5 · LA VOCE DEL MOMENTO COL PERSONAGGIO. Con `PERSONAGGIO_ANIMATO` acceso e il personaggio disegnato nel modale del momento
+   (`persDisegnato` sul markup di `ritrattoVivoHtml`: niente con l'interruttore spento, sotto un pilastro-tragedia, nel momento fermo),
+   la battuta `voce-pers-<momento>` prende il posto della voce di oggi; senza file per il genere e la lingua, o senza battuta (gli anni
+   «luci e ombre» e «nuovo capitolo»), resta la voce di oggi. Due chiamanti: `concludiNotte` (la notte finita, letta da NOTTE.persFin)
+   e `mostraBilancio`. I quattro momenti nuovi del lotto non ci sono: i loro gesti non aprono un modale («⚑ L248-5»). */
+function persDisegnato(html){ return typeof html==='string' && html.indexOf('data-pers=')>=0; }
+function voceMomento(disegnato, pers, oggi){ return (disegnato && pers && typeof voceHaFile==='function' && voceHaFile(pers)) ? pers : oggi; }
 function voceGoverno(coal){ if(coal && typeof parla==='function' && !(typeof voceInCorso==='function' && voceInCorso())) parla('voce-governo'); }
 function suonoFormazione(ripiego){
   const brinda = governoDiCoalizione();
@@ -10066,7 +10133,7 @@ function gameOver(reason){
   const scFimg=scenaMomentoHtml(scF, {fin:true, ferma:(reason==='salute' && S.esitoSalute==='fatale')});
   /* L178-3: il ritratto vivo accanto al titolo — oro sui finali con suono, ardesia sulle cadute; fermo nel finale per morte (G8) */
   const _mortoF=(reason==='salute' && S.esitoSalute==='fatale');
-  const rvF=(typeof ritrattoVivoHtml==='function') ? ritrattoVivoHtml({ferma:_mortoF, tono:(FINALI_CON_SUONO.indexOf(reason)>=0 ? 'trionfo' : (reason==='salute' && !_mortoF ? null : 'sconfitta'))}) : '';
+  const rvF=(typeof ritrattoVivoHtml==='function') ? ritrattoVivoHtml({momento:'finale', ferma:_mortoF, tono:(FINALI_CON_SUONO.indexOf(reason)>=0 ? 'trionfo' : (reason==='salute' && !_mortoF ? null : 'sconfitta'))}) : '';
   document.getElementById('over').innerHTML=`${scFimg}<div style="text-align:center;padding-top:14px"><span class="flag" style="width:54px;height:36px;display:inline-block">${PAESE.flag||''}</span></div>
    <div class="screen center"><div class="em">${T('Fine partita')}</div>${F?`<div class="epitaffio">${F.titolo}</div>`:''}${rvF?`<div class="rv-riga rv-fine">${rvF}<h2>${title}</h2></div>`:`<h2>${title}</h2>`}<p>${desc}</p>
    <div style="text-align:left;max-width:430px;margin:12px auto 4px;font-size:13.5px;line-height:1.5;color:var(--txt2);border-top:1px solid var(--line);padding-top:12px">

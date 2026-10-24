@@ -3,7 +3,17 @@
    Il personaggio del giocatore disegnato dal codice a pezzi (SVG) e animato da UN SOLO requestAnimationFrame per
    tutto il modulo. Viene dal prototipo `prove/personaggio/prototipo.html` (L248-1): stesso corpo, stesse pose, stessa
    cinematica inversa `ik()`, solo lo stile B; gli stili A e C restano nella prova.
-   ⚑ SPENTO: `PERSONAGGIO_ANIMATO=false`. Oggi nessuno lo chiama dal gioco; l'aggancio ai momenti è L248-4.
+   ⚑ AGGANCIATO dal L248-4, ACCESO dal L248-4bis (`PERSONAGGIO_ANIMATO=true`): nei tre momenti le istanze ridisegnano a 30 al secondo
+     (`passo`, `PERS_PASSO_MOMENTI`) e scrivono solo gli attributi che cambiano (`persAttr`); con le due cure la notte finita a CPU ×4
+     restava a 48-60, quindi col ripiego (4) la notte è in posa (`data-pers-ferma`, ui.js) e si muove solo il bilancio.
+     Acceso, lo chiamano i tre momenti del medaglione — notte finita, bilancio di gennaio, finale — da `personaggioMomentoHtml`/
+     `personaggioMomentoAvvia` (ui.js), e la creazione disegna la riga della carnagione (`carnagioneRigaHtml`); spento, tutto è il
+     medaglione di L178-3, byte per byte.
+   ⚑ L248-5 (24/10): la VOCE del personaggio — le otto battute `voce-pers-<momento>` (audio.js, IT ed EN, lui e lei) prendono il
+     posto della voce di oggi nella notte finita (vittoria/sconfitta) e nel bilancio buono o difficile, solo col personaggio disegnato
+     (`voceMomento`, game.js); mentre la battuta suona la bocca dei personaggi vivi va a tempi fissi (`personaggioBoccaParla`, chiamata
+     da audio.js). I quattro momenti nuovi (insediamento, legge, comizio, alleanza) sono SALTATI: i loro gesti non aprono un modale
+     (passo 0 del lotto, «⚑ L248-5» in DESIGN-PERSONAGGIO.md); le loro battute stanno nel manifesto senza aggancio.
    ⚑ NIENTE IN `S`: legge `S.personaggio` (genere, carnagione o ripiego), `S.eta`, `S.year`; scrive solo nel DOM.
      L'unico campo nuovo di `S` è `S.personaggio.carnagione` (D-A4, 'chiara'|'media'|'scura'), facoltativo: senza,
      vale il ripiego dalla macro-area dell'avatar (`personaggioCarnagione()`), quindi nessun salvataggio cambia.
@@ -18,8 +28,9 @@
    ⚑ IL GUARDAROBA (L248-3): sette epoche dal decennio dell'anno (persEpoca: '1950'…'2000', 'oggi' dal 2010), 14 vestiti,
      13 forme di capelli, il palmo aperto nel giuramento (persMano); schermate .claude/schermate-l248-3.js.
    azioni: respiro · vittoria · sconfitta · firma · stretta · comizio · giuramento · parla (opz.durataMs, opz.testo)
+   opz.passo (L248-4bis): secondi fra due disegni dell'istanza (i momenti 1/30); assente = ogni fotogramma
    ================================================================================================================ */
-let PERSONAGGIO_ANIMATO = false;   // L248-4 lo accende
+let PERSONAGGIO_ANIMATO = true;   // L248-4bis: ACCESO col passo 1/30 nei momenti e la notte finita in posa (ripiego (4): «⚑ L248-4bis»); false = il medaglione di L178-3 e niente carnagione in creazione
 
 const PERS_CARNAGIONI = ['chiara','media','scura'];
 const PERS_PELLI = { chiara:{p:'#f0c8a6', o:'#d6a07c'}, media:{p:'#c78c5e', o:'#a46c40'}, scura:{p:'#7a4a2d', o:'#5c351f'} };
@@ -31,8 +42,9 @@ const PERS_SPALLA = { sx:[62,112], dx:[138,112] }, PERS_L1=54, PERS_L2=50;
 const PERS_AZIONI = ['respiro','vittoria','sconfitta','firma','stretta','comizio','giuramento','parla'];
 /* l'istante della posa chiave (s) per il movimento ridotto */
 const PERS_POSE_CHIAVE = { respiro:0, vittoria:0.52, sconfitta:0, firma:1.2, stretta:0, comizio:0.65, giuramento:1.5, parla:0 };
-/* le battute del personaggio (D-A3), per la voce nuova: non ancora usate. Testi e file in DESIGN-PERSONAGGIO.md
-   («Battute per il giro suoni (L248-2)»); l'inglese in lang-en.js. File: voce-pers-<momento>-<it|en>-<m|f>.mp3 */
+/* le battute del personaggio (D-A3), la voce nuova. Testi e file in DESIGN-PERSONAGGIO.md («Battute per il giro suoni (L248-2)»);
+   l'inglese in lang-en.js. File: voce-pers-<momento>-<it|en>-<m|f>.mp3, nel manifesto delle voci (audio.js) dal L248-5 con gli stessi
+   testi: vittoria, sconfitta e i due bilanci agganciati, le altre quattro no (i loro gesti non hanno un modale) */
 const BATTUTE_PERSONAGGIO = {
   'vittoria':           'Avete scelto la fiducia. Ora tocca a noi meritarla.',
   'sconfitta':          'Gli elettori hanno deciso. Rispetto il loro voto.',
@@ -277,22 +289,42 @@ function persLerp(a,b,k){ return a+(b-a)*k; }
 function persMescola(A, B, k){ if(k>=1) return B; const R=Object.assign({}, B);
   ['sx','dx'].forEach(function(l){ R[l]=[persLerp(A[l][0],B[l][0],k), persLerp(A[l][1],B[l][1],k)]; });
   ['testaR','testaY','corpoY','salto','umore','palpebra'].forEach(function(n){ R[n]=persLerp(A[n]||0,B[n]||0,k); }); return R; }
-/* la bocca «a tempi fissi» (l'ampiezza vera con l'AnalyserNode è L248-5): dal testo spalmato sulla durata, o da un
+/* la bocca «a tempi fissi» (l'AnalyserNode resta fuori: L248-6): dal testo spalmato sulla durata, o da un
    ritmo di sillabe se il testo non c'è */
 function persApertaDaLettera(ch){ if(!ch) return 0; if(/[aeiouàèéìòù]/i.test(ch)) return 0.85; if(/[,.;:!?]/.test(ch)) return 0; if(ch===' ') return 0.08; if(/[mbp]/i.test(ch)) return 0.05; return 0.35; }
-function persApertura(I, t){
-  if(I.azione!=='parla') return 0;
-  const dur=Math.max(0.2, (I.opz.durataMs||2000)/1000);
+function persAperturaDa(mov, tx, durataMs, t){
+  const dur=Math.max(0.2, (durataMs||2000)/1000);
   if(t>=dur) return 0;
-  if(I.mov!=='pieno') return 0.3;
-  const tx=I.opz.testo;
+  if(mov!=='pieno') return 0.3;
   if(tx) return persApertaDaLettera(tx[Math.floor(t/dur*tx.length)])*(0.75+0.25*Math.sin(t*31));
   const sill=(t*5.2)%1; return sill<0.6 ? 0.25+0.6*Math.sin(sill/0.6*Math.PI) : 0;
+}
+function persApertura(I, t){
+  if(I.bocca){   // L248-5: la battuta del personaggio (personaggioBoccaParla), sopra qualunque azione; finita, la bocca torna alla posa
+    if(I.bocca.t0==null) I.bocca.t0=t;
+    const tb=t-I.bocca.t0, ap=persAperturaDa(I.mov, I.bocca.testo, I.bocca.durataMs, tb);
+    if(tb>=Math.max(0.2, I.bocca.durataMs/1000)) I.bocca=null;
+    return ap;
+  }
+  if(I.azione!=='parla') return 0;
+  return persAperturaDa(I.mov, I.opz.testo, I.opz.durataMs, t);
+}
+/* L248-5 · la bocca sulla voce: `parla()` (audio.js, voceParti) la chiama quando parte una battuta `voce-pers-*`, col sottotitolo
+   e la durata del buffer; tocca solo i personaggi VIVI (un momento in posa, `data-pers-ferma`, non ha istanze: resta muto).
+   `testo` null = la voce è stata zittita, la bocca si chiude. */
+function personaggioBoccaParla(testo, durataMs){
+  PERS_VIVE.forEach(function(I){ I.bocca = testo ? { testo:String(testo), durataMs:(+durataMs>0 ? +durataMs : 2000), t0:null } : null; });
 }
 
 /* ---------- il ciclo: UNO per tutto il modulo ---------- */
 const PERS_VIVE = [];
 let PERS_RAF = 0;
+/* L248-4bis: mezzo fotogramma a 120 Hz di tolleranza sul passo — senza, a 60 Hz due fotogrammi (33,3 ms) cadono a un soffio
+   sotto 1/30 e il ciclo disegnerebbe a 20 al secondo invece che a 30 */
+const PERS_PASSO_TOLL = 0.004;
+let PERS_PASSO_MOMENTI = 1/30;   // L248-4bis: il passo delle istanze dei tre momenti (personaggioMomentoAvvia, ui.js); le altre ridisegnano a ogni fotogramma
+/* L248-4bis: un attributo si scrive solo se la stringa cambia (l'ultima scritta in el.__pv); un svg nuovo riparte vuoto */
+function persAttr(el, nome, valore){ const pv=el.__pv||(el.__pv={}); if(pv[nome]===valore) return; pv[nome]=valore; el.setAttribute(nome, valore); }
 function persMov(){ try{ if(typeof movimentoModo==='function') return movimentoModo(); }catch(e){} return 'pieno'; }
 function persAvvia(){ if(!PERS_RAF && PERS_VIVE.length) PERS_RAF=requestAnimationFrame(persFotogramma); }
 function persFotogramma(ms){
@@ -301,6 +333,8 @@ function persFotogramma(ms){
   for(let i=PERS_VIVE.length-1;i>=0;i--){
     const I=PERS_VIVE[i];
     if(!I.el.isConnected || !I.svg.isConnected){ I.vivo=false; PERS_VIVE.splice(i,1); continue; }   // l'elemento è uscito dal documento: l'istanza esce da sola
+    if(I.passo && I.ultimo!=null && now-I.ultimo < I.passo-PERS_PASSO_TOLL) continue;   // L248-4bis: col passo (i momenti, 1/30) si saltano fotogrammi, il tempo resta now−t0
+    I.ultimo=now;
     try{ persDisegna(I, now); }catch(e){ I.vivo=false; PERS_VIVE.splice(i,1); }
   }
   persAvvia();   // senza istanze non chiede il fotogramma dopo
@@ -314,22 +348,22 @@ function persDisegna(I, now){
   if(I.da && k<1) P=persMescola(I.da, P, k*k*(3-2*k));
   I.ora=P;
   const resp=piena ? Math.sin(now*1.7)*0.9 : 0, y=(P.corpoY||0)+(P.salto||0), R=I.ref;
-  R.corpo.setAttribute('transform','translate(0,'+(y+resp*0.3).toFixed(2)+')');
-  R.braccia.setAttribute('transform','translate(0,'+(y+resp*0.8).toFixed(2)+')');
-  R.busto.setAttribute('transform','translate(0,'+(resp*0.5).toFixed(2)+')');
-  R.gambe.setAttribute('transform','translate(0,'+(-(y)+(P.salto||0)).toFixed(2)+')');
-  R.testa.setAttribute('transform','translate(0,'+(P.testaY+resp*0.25).toFixed(2)+') rotate('+P.testaR.toFixed(2)+' 100 92)');
-  R.brsx.setAttribute('transform','rotate('+P.sx[0].toFixed(2)+' 62 112)'); R.avsx.setAttribute('transform','rotate('+P.sx[1].toFixed(2)+' 62 166)');
-  R.brdx.setAttribute('transform','rotate('+P.dx[0].toFixed(2)+' 138 112)'); R.avdx.setAttribute('transform','rotate('+P.dx[1].toFixed(2)+' 138 166)');
+  persAttr(R.corpo, 'transform','translate(0,'+(y+resp*0.3).toFixed(2)+')');
+  persAttr(R.braccia, 'transform','translate(0,'+(y+resp*0.8).toFixed(2)+')');
+  persAttr(R.busto, 'transform','translate(0,'+(resp*0.5).toFixed(2)+')');
+  persAttr(R.gambe, 'transform','translate(0,'+(-(y)+(P.salto||0)).toFixed(2)+')');
+  persAttr(R.testa, 'transform','translate(0,'+(P.testaY+resp*0.25).toFixed(2)+') rotate('+P.testaR.toFixed(2)+' 100 92)');
+  persAttr(R.brsx, 'transform','rotate('+P.sx[0].toFixed(2)+' 62 112)'); persAttr(R.avsx, 'transform','rotate('+P.sx[1].toFixed(2)+' 62 166)');
+  persAttr(R.brdx, 'transform','rotate('+P.dx[0].toFixed(2)+' 138 112)'); persAttr(R.avdx, 'transform','rotate('+P.dx[1].toFixed(2)+' 138 166)');
   let pal=P.palpebra;
   if(piena){ if(now>I.blink+0.14) I.blink=now+2+Math.random()*3; if(now>I.blink) pal=Math.min(pal, 0.08); }
   const sc=function(cx){ return 'translate('+cx+',58) scale(1,'+pal.toFixed(2)+') translate('+(-cx)+',-58)'; };
-  R.occhioSx.setAttribute('transform', sc(89)); R.occhioDx.setAttribute('transform', sc(111));
+  persAttr(R.occhioSx, 'transform', sc(89)); persAttr(R.occhioDx, 'transform', sc(111));
   const ap=persApertura(I, ta); I.apertura=persLerp(I.apertura||0, ap, piena?0.45:1);
   const festa=(I.azione==='vittoria' && piena) ? 0.35+0.25*Math.sin(now*6) : 0;
-  R.bocca.setAttribute('d', persBocca(Math.max(I.apertura, festa), P.umore));
-  if(R.altro) R.altro.setAttribute('transform','translate(0,'+((P.scuoti||0)).toFixed(2)+')');
-  if(R.inchiostro) R.inchiostro.setAttribute('stroke-dashoffset', (40*(1-(P.inchiostro==null?1:P.inchiostro))).toFixed(1));
+  persAttr(R.bocca, 'd', persBocca(Math.max(I.apertura, festa), P.umore));
+  if(R.altro) persAttr(R.altro, 'transform','translate(0,'+((P.scuoti||0)).toFixed(2)+')');
+  if(R.inchiostro) persAttr(R.inchiostro, 'stroke-dashoffset', (40*(1-(P.inchiostro==null?1:P.inchiostro))).toFixed(1));
 }
 /* anima il personaggio dentro `el`: se `el` non ha già il disegno di questa azione lo scrive; un'animazione già
    viva sullo stesso elemento passa la mano (la posa nuova parte da quella di prima, tranne con il movimento spento) */
@@ -342,7 +376,7 @@ function personaggioAnima(el, azione, opz){
   el.innerHTML=personaggioSVG(opz);
   const svg=el.querySelector('svg.personaggio'), ref={};
   svg.querySelectorAll('[data-p]').forEach(function(n){ ref[n.getAttribute('data-p')]=n; });
-  const I={ el:el, svg:svg, ref:ref, azione:azione, opz:opz, mov:persMov(), da:da, ora:null, t0:null, apertura:0, vivo:true };
+  const I={ el:el, svg:svg, ref:ref, azione:azione, opz:opz, mov:persMov(), da:da, ora:null, t0:null, apertura:0, vivo:true, passo:(+opz.passo>0 ? +opz.passo : 0), ultimo:null };   // L248-4bis: `passo` in secondi (i momenti 1/30), 0 = ogni fotogramma
   I.stop=function(){ if(!I.vivo) return; I.vivo=false; const j=PERS_VIVE.indexOf(I); if(j>=0) PERS_VIVE.splice(j,1); if(el.__pers===I) el.__pers=null;
     if(!PERS_VIVE.length && PERS_RAF){ cancelAnimationFrame(PERS_RAF); PERS_RAF=0; } };
   el.__pers=I; PERS_VIVE.push(I); persAvvia();

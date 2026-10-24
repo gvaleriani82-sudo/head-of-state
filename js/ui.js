@@ -756,6 +756,7 @@ function scenaMomentoHtml(src, opt){
    ================================================================================================================ */
 function ritrattoVivoHtml(opt){
   opt=opt||{};
+  const pers=personaggioMomentoHtml(opt); if(pers) return pers;   // L248-4: nei tre momenti del medaglione, con l'interruttore acceso, il personaggio disegnato
   const id=(typeof S!=='undefined' && S && S.personaggio) ? S.personaggio.avatar : null;
   const img=id ? avatarImg(id) : null; if(!img) return '';
   const foto=String(id).slice(0,5)==='data:';
@@ -772,6 +773,46 @@ function ritrattoVivoHtml(opt){
 }
 function fermaRitrattiVivi(dentro){   // L178-3: chiuso il momento, la clip smette di suonare e di scaricare
   try{ (dentro||document).querySelectorAll('video.rv-video').forEach(function(v){ v.pause(); v.removeAttribute('src'); v.load(); }); }catch(e){}
+  try{ (dentro||document).querySelectorAll('[data-pers]').forEach(function(el){ if(el.__pers) el.__pers.stop(); }); }catch(e){}   // L248-4: e il personaggio smette di muoversi
+}
+/* ================================================================================================================
+   L248-4 · IL PERSONAGGIO NEI MOMENTI DEL MEDAGLIONE (decisioni del giro del 23/10, piano «⚑ L248-1» §4). Dietro
+   `PERSONAGGIO_ANIMATO` (personaggio.js): spento, `personaggioMomentoHtml` dà '' e il medaglione è quello di L178-3.
+   · Dove: `opt.momento` 'notte' | 'bilancio' | 'finale' (i tre chiamanti di game.js); la partenza resta il ritratto vivo.
+   · Azione: notte vinta (tono 'trionfo') `vittoria`, persa `sconfitta`; bilancio `respiro`; finale e (dal L248-4bis) notte la posa
+     ferma (`data-pers-ferma`: nessun ciclo; si muove solo il bilancio). La stessa cornice 3:4 (classi e toni di sempre), il disegno in `[data-pers]`.
+   · Quando no: momento fermo (`opt.ferma`: finale per morte; pilastro-tragedia) → il medaglione di oggi. Con
+     `reteLeggera()` o movimento «ridotto»/«spento» il personaggio resta in posa (nessun `personaggioAnima`).
+   · La foto caricata (avatar `data:`): il personaggio resta, la foto in un tondo in basso a sinistra.
+   · Parte con `personaggioMomentoAvvia(dentro)` subito dopo che il modale è nel documento; si ferma in `fermaRitrattiVivi`.
+   · L248-4bis: le istanze dei momenti hanno il passo `PERS_PASSO_MOMENTI` (1/30: 30 disegni al secondo, il rAF resta uno).
+   ================================================================================================================ */
+function personaggioMomentoAzione(opt){
+  if(opt.momento==='notte') return opt.tono==='trionfo' ? 'vittoria' : 'sconfitta';
+  if(opt.momento==='bilancio' || opt.momento==='finale') return 'respiro';
+  return null;
+}
+function personaggioMomentoHtml(opt){
+  if(typeof PERSONAGGIO_ANIMATO==='undefined' || !PERSONAGGIO_ANIMATO || typeof personaggioSVG!=='function') return '';
+  const azione=personaggioMomentoAzione(opt||{}); if(!azione) return '';
+  const trag=(typeof musicaTragedia==='function') && musicaTragedia();
+  if(opt.ferma || trag) return '';   // G8: il momento fermo tiene il medaglione di oggi
+  const id=(typeof S!=='undefined' && S && S.personaggio) ? S.personaggio.avatar : null;
+  const foto=(typeof id==='string' && id.slice(0,5)==='data:') ? id : null;
+  const tono=(opt.tono==='trionfo'||opt.tono==='sconfitta') ? ' rv-'+opt.tono : '';
+  const ferma=opt.momento==='finale' || opt.momento==='notte';   // L248-4bis, ripiego (4): anche la notte finita in posa (a CPU ×4 col ciclo a 30 un campione su sei sotto 50)
+  const svg=personaggioSVG(Object.assign(personaggioOpzioniDaS(), {posa:azione}));
+  return `<div class="ritratto-vivo rv-pers${tono}${opt.cls?' '+opt.cls:''}" aria-hidden="true"><div class="rv-pers-box" data-pers="${azione}"${ferma?' data-pers-ferma="1"':''}>${svg}</div>`
+    +(foto ? `<img class="rv-pers-foto" src="${foto}" alt="">` : '')+`</div>`;
+}
+function personaggioMomentoAvvia(dentro){
+  if(typeof personaggioAnima!=='function') return;
+  try{
+    if(movimentoModo()!=='pieno' || reteLeggera()) return;   // in posa: il disegno fermo è già nel markup
+    (dentro||document).querySelectorAll('[data-pers]').forEach(function(el){
+      if(el.__pers || el.hasAttribute('data-pers-ferma')) return;
+      personaggioAnima(el, el.getAttribute('data-pers'), Object.assign(personaggioOpzioniDaS(), {passo:PERS_PASSO_MOMENTI})); });   // L248-4bis: a 30 al secondo
+  }catch(e){}
 }
 /* L178-3: il velo dei modali (#ov) si chiude togliendo la classe `on`, da tanti punti — un osservatore solo ferma la clip-ritratto */
 (function(){ try{ if(typeof document==='undefined' || typeof MutationObserver==='undefined') return;
@@ -1200,6 +1241,7 @@ function renderCreazione(){
       h+=`<button onclick="document.getElementById('crea-foto').click()" title="${T('Carica la tua foto')}" style="width:72px;height:72px;border-radius:50%;border:2px dashed var(--line2);background:var(--panel);color:var(--mut);font-family:inherit;font-size:12px;line-height:1.15;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:5px;"><span style="font-size:19px;line-height:1">+</span>${T('La tua foto')}</button>`;   /* L69-1: 10,5px → 12 (il «+» scende a 19 per far stare l'etichetta nei 72px) */
     }
     h+=`</div>`;
+    h+=carnagioneRigaHtml(C);   // L248-4: col personaggio animato, la carnagione (nessuna preselezionata: senza scelta vale il ripiego dall'avatar)
     h+=nota(T('Scegli un volto per il tuo personaggio, o lascia l\'iniziale del nome.'))+fine;
   }
   /* punto di partenza (lotto ascesa): dal politico locale fino al capo del governo — la stessa carriera, da gradini diversi */
@@ -1242,6 +1284,17 @@ function renderCreazione(){
   h+=tit(T('Religiosità'))+seg('religiosita',[{v:'laico',l:gnCrea('Laico','Laica')},{v:'credente',l:T('Credente')},{v:'devoto',l:gnCrea('Devoto','Devota')}]);
   h+=nota(T('Le tue convinzioni personali, non la linea del partito. Per ora solo registrate: conteranno più avanti.'))+fine;
   el.innerHTML=h;
+}
+/* L248-4 · la riga della carnagione nella creazione, solo con `PERSONAGGIO_ANIMATO`: tre dischi (chiara · media · scura), nessuno
+   preselezionato; scrive `CREA.carnagione`, che `applicaPersonaggio` porta in `S.personaggio.carnagione`. Il bersaglio è 44 px,
+   la riga ne occupa 36 (i bottoni sporgono di 4 sopra e sotto): la schermata si allunga di 40 px al più. */
+function carnagioneRigaHtml(C){
+  if(typeof PERSONAGGIO_ANIMATO==='undefined' || !PERSONAGGIO_ANIMATO || typeof PERS_PELLI==='undefined') return '';
+  const nomi={chiara:'Carnagione chiara', media:'Carnagione media', scura:'Carnagione scura'};
+  return `<div class="crea-carnagione"><span class="cc-tit">${T('Carnagione')}</span>`
+    +['chiara','media','scura'].map(function(k){ const sel=C.carnagione===k;
+      return `<button class="cc-disco${sel?' on':''}" onclick="setCrea('carnagione','${k}')" aria-label="${T(nomi[k])}" title="${T(nomi[k])}" aria-pressed="${sel?'true':'false'}"><span style="background:${PERS_PELLI[k].p}"></span></button>`; }).join('')
+    +`</div>`;
 }
 /* il participio nella schermata di creazione (S non esiste ancora: legge CREA, non S.personaggio) */
 function gnCrea(m,f){ return T((CREA&&CREA.genere==='f')?f:m); }
@@ -1615,6 +1668,7 @@ function renderScissioneFoglio(){
   const assi=[B.asseV-1, B.asseV, B.asseV+1].filter(function(x){ return x>=-2 && x<=2; });
   let h=`<div class="mt"><div class="kicker">${T('Scissione')}</div><h2>${T('Il tuo partito')}</h2></div>`;
   h+=`<div class="mtext">${T('Ti porti dietro circa il %Q% di %V').replace('%Q', String(Math.round(B.quota*100))).replace('%V', function(){ return T((part(B.vecchio)||{}).nome||''); })}</div>`;
+  if(S.livello===2){ const di=dicasteroDi(); h+=`<div class="mtext">${di ? T("Lasci il ministero %D e vai all'opposizione.").replace('%D', function(){ return di; }) : T("Lasci il ministero e vai all'opposizione.")}</div>`; }   // L237-7: da ministro esci dal governo
   h+=`<div class="pp-sciss" style="padding:0 18px 4px">`;
   h+=tit(T('Nome del partito'))+`<input id="pp-nome" class="pp-input" value="${escAttr(B.nome)}" maxlength="${PP_NOME_MAX}" autocomplete="off" oninput="ppTesto('nome',this)">`+err('nome');
   h+=tit(T('Sigla'))+`<input id="pp-sigla" class="pp-input" value="${escAttr(B.sigla)}" maxlength="${PP_SIGLA_MAX}" autocomplete="off" autocapitalize="characters" oninput="ppTesto('sigla',this)" style="text-transform:uppercase">`+err('sigla');
@@ -2972,7 +3026,7 @@ function renderPaese(){
       hw+=`<div class="card"><div class="ct">${T('Rapporti tra i blocchi')}</div>`;
       ENTI_INT.forEach(function(E){ if(E.societa || (S.livello===4 && E.id==='consesso') || ri[E.id]==null) return; const v=ri[E.id];   // a liv 4 il Consesso sei TU (nascosto); a liv 5 è il tuo OBIETTIVO (mostrato)
         const _nm=(E.id==='consesso'&&typeof consessoNome==='function')?consessoNome():(naLabel()&&E.nomeNA?E.nomeNA:E.nome);   // D4: nodo era-aware
-        hw+=indRow(cap(T(_nm)), T(naLabel()&&E.descNA?E.descNA:E.desc), fmt(v,0), v); });
+        hw+=indRow(cap(T(_nm)), T(naLabel()&&E.descNA?E.descNA:(E.id==='rivale'&&typeof rivaleDesc==='function'?rivaleDesc():E.desc)), fmt(v,0), v); });   // L256-2: il rivale del decennio e del paese
       const soc=ENTI_INT.filter(function(E){return E.societa && ri[E.id]!=null;});
       if(soc.length){
         hw+=`<div class="contorno" style="letter-spacing:.12em;text-transform:uppercase;color:var(--mut2);border-top:1px solid var(--line);margin-top:8px;padding-top:9px">${T('Società civile')}</div>`;
@@ -3018,7 +3072,7 @@ function renderPaese(){
     h+=dopoguerraRiga();   // L245-4: i 24 mesi dopo una guerra
     ENTI_INT.forEach(function(E){ if(E.societa || S.relInt[E.id]==null) return; const v=S.relInt[E.id];   // prima gli enti GEOPOLITICI
       const _nm=(E.id==='consesso'&&typeof consessoNome==='function')?consessoNome():(naLabel()&&E.nomeNA?E.nomeNA:E.nome);   // D4: nodo era-aware
-      h+=indRow(cap(T(_nm)), naLabel()&&E.descNA?E.descNA:E.desc, fmt(v,0), v); });   // sedia-swing: etichette "i due poli" per i non allineati (liv. nazionale)
+      h+=indRow(cap(T(_nm)), naLabel()&&E.descNA?E.descNA:(E.id==='rivale'&&typeof rivaleDesc==='function'?rivaleDesc():E.desc), fmt(v,0), v); });   // L256-2: il rivale del decennio e del paese   // sedia-swing: etichette "i due poli" per i non allineati (liv. nazionale)
     /* la SOCIETÀ CIVILE è un attore di natura diversa (fase B): sotto-titolo + separatore, non «un'altra potenza» */
     const soc=ENTI_INT.filter(function(E){return E.societa && S.relInt[E.id]!=null;});
     if(soc.length){
@@ -4549,7 +4603,7 @@ function giroBottone(i, chiama){
     }
   }
   if(!(chiama || giroPossibile())) return '';
-  if(!chiama && !scenePerTerr(i).length) return '';
+  if(!chiama && !(typeof primaSedeDovuta==='function' && primaSedeDovuta()) && !scenePerTerr(i).length) return '';   // L237-8: la prima sede è una visita anche senza altre scene
   return `<div style="margin:2px 14px 10px"><button class="opt" style="min-height:44px" onclick="apriGiro(${i})"><span class="ol">${T('Vai in visita')}</span></button></div>`;
 }
 function renderMappaPage(){
