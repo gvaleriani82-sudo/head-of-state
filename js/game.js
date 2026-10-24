@@ -1031,7 +1031,7 @@ function diventaPremier(viaElezione){
   S.mandate=S.mandate||1; S.turnInMandate=0; S.elezioniAnticipate=false; S.ultimoSondaggio=null; S.sondStorico=[];
   S.snap=Object.assign({},S.pol); S.leggiSnap=Object.assign({},S.leggi);
   bioFatto(T('Da %A a %B: la scalata è compiuta.').replace('%A',ruoloPrima).replace('%B',T(PAESE.titoloRuolo)));
-  if(typeof parla==='function') parla('voce-insediamento');   // L218-4: diventi capo del governo (l'altro punto è tornaAlGoverno, la rimonta)
+  if(typeof parla==='function') parla(voceGesto('insediamento', 'voce-insediamento', {chiudeOv:true}));   // L218-4: diventi capo del governo (l'altro punto è tornaAlGoverno, la rimonta) · L248-5bis: col personaggio nello strato, la sua battuta
   S.log.unshift({t:T('Al vertice'),x:T('Sei %R. Il paese è nelle tue mani.').replace('%R',T(PAESE.titoloRuolo))});
   if(typeof PROMO_FIORE!=='undefined') PROMO_FIORE=true;   // fioretto sul nuovo titolo
   document.getElementById('appoint').style.display='none';
@@ -3993,7 +3993,7 @@ function voceAlleanza(id, prima){
   if(typeof S==='undefined' || !S || S.livello!==3 || S.opposizione || S.coabitazione) return false;
   if(typeof parla!=='function' || (typeof voceInCorso==='function' && voceInCorso())) return false;
   if(typeof voceHaFile==='function' && !voceHaFile('voce-alleanza')) return false;
-  parla('voce-alleanza');
+  parla(voceGesto('alleanza', 'voce-alleanza'));   // L248-5bis: l'alleato nuovo nello strato (tetto 12 mesi)
   return true;
 }
 /* IL CONTO DEL SOSTEGNO, ogni mese: il prezzo si paga e si controlla se regge. Chiamata da avanzaMese. */
@@ -8722,7 +8722,7 @@ const CAMP_SFORZO_BASE=6;
 function inCampagna(){ if(typeof S==='undefined'||!S||S.livello!==3||!PAESE.territori||!S.territori) return false; const fine=(PAESE.mandatoMesi||60), mm=meseMandato(); return mm>=fine-6 && mm<fine; }
 function mesiAllaFine(){ const fine=(PAESE.mandatoMesi||60); return Math.max(0, fine-meseMandato()); }
 function sforzoIniziale(){ const pl=(S.potereLocale!=null)?S.potereLocale:50; return CAMP_SFORZO_BASE + (pl>=60?1:0); }
-function campSforzo(){ if(!inCampagna()) return 0; if(!S.campNaz) S.campNaz={piazza:0,promMantenuta:false,n:0}; if(S.campNaz.sforzo==null){ S.campNaz.sforzo=sforzoIniziale(); S.campNaz.sforzo0=S.campNaz.sforzo; S.campNaz.speso={}; if(typeof parla==='function') parla('voce-campagna');   /* L218-6: si apre la campagna (C18), una volta per campagna */ S.log.unshift({t:T('Campagna sul territorio'), x:T('La campagna è aperta: hai %N punti di sforzo da spendere sulla mappa entro %M mesi. Quelli non spesi si perdono.').replace('%N',S.campNaz.sforzo).replace('%M',mesiAllaFine())}); } return S.campNaz.sforzo; }
+function campSforzo(){ if(!inCampagna()) return 0; if(!S.campNaz) S.campNaz={piazza:0,promMantenuta:false,n:0}; if(S.campNaz.sforzo==null){ S.campNaz.sforzo=sforzoIniziale(); S.campNaz.sforzo0=S.campNaz.sforzo; S.campNaz.speso={}; if(typeof parla==='function') parla(voceGesto('comizio', 'voce-campagna'));   /* L248-5bis: il comizio d'apertura nello strato · L218-6: si apre la campagna (C18), una volta per campagna */ S.log.unshift({t:T('Campagna sul territorio'), x:T('La campagna è aperta: hai %N punti di sforzo da spendere sulla mappa entro %M mesi. Quelli non spesi si perdono.').replace('%N',S.campNaz.sforzo).replace('%M',mesiAllaFine())}); } return S.campNaz.sforzo; }
 function tipoTerritorio(i){ const TE=PAESE.territori[i], t=S.territori[i]||{}; const tuo=compatibile(t.partito, mioPartito().asse, S.partito); const L=Math.abs(TE.lean); if(L>=2) return tuo?'roccaforte':'avversario'; return tuo?'bilico':'bilico'; }
 function costoInvestimento(i){ const tipo=tipoTerritorio(i); let c=(tipo==='avversario')?2:1; if(tipo==='avversario' && (S.potereLocale||0)>=60) c=1; return c; }
 function ritornoInvestimento(i){ const tipo=tipoTerritorio(i); const base=(tipo==='roccaforte')?4:(tipo==='bilico'?10:6); return base + ((S.potereLocale||0)>=60?2:0); }
@@ -9426,8 +9426,15 @@ function governoDiCoalizione(){   // L218-6: la stessa condizione per i bicchier
    (`persDisegnato` sul markup di `ritrattoVivoHtml`: niente con l'interruttore spento, sotto un pilastro-tragedia, nel momento fermo),
    la battuta `voce-pers-<momento>` prende il posto della voce di oggi; senza file per il genere e la lingua, o senza battuta (gli anni
    «luci e ombre» e «nuovo capitolo»), resta la voce di oggi. Due chiamanti: `concludiNotte` (la notte finita, letta da NOTTE.persFin)
-   e `mostraBilancio`. I quattro momenti nuovi del lotto non ci sono: i loro gesti non aprono un modale («⚑ L248-5»). */
+   e `mostraBilancio`. I quattro gesti senza modale passano da `voceGesto` (L248-5bis, sotto). */
 function persDisegnato(html){ return typeof html==='string' && html.indexOf('data-pers=')>=0; }
+/* L248-5bis · LA VOCE DEL GESTO (terzo chiamante di voceMomento): i quattro gesti senza modale chiedono lo strato del personaggio
+   (`personaggioStratoMostra`, ui.js: decide e mostra; 'strato' o 'battuta' = la battuta, null = la voce di oggi, identica a prima).
+   Chiamanti: diventaPremier e tornaAlGoverno (insediamento), setLegge col gesto (legge), campSforzo (comizio), voceAlleanza (alleanza). */
+function voceGesto(momento, oggi, opt){
+  const esito=(typeof personaggioStratoMostra==='function') ? personaggioStratoMostra(momento, 0, opt) : null;
+  return voceMomento(!!esito, 'voce-pers-'+momento, oggi);
+}
 function voceMomento(disegnato, pers, oggi){ return (disegnato && pers && typeof voceHaFile==='function' && voceHaFile(pers)) ? pers : oggi; }
 function voceGoverno(coal){ if(coal && typeof parla==='function' && !(typeof voceInCorso==='function' && voceInCorso())) parla('voce-governo'); }
 function suonoFormazione(ripiego){
@@ -9808,7 +9815,7 @@ function condannaLieve(){
 function tornaAlGoverno(mins){
   S.ministers=mins; S.opposizione=false; S.governoAvversario=null;
   delete S.f0Rientro;   // L237-2ter: al governo la soglia del rientro da partner non vale più
-  if(typeof parla==='function') parla('voce-insediamento');   // L218-4: torni capo del governo (dalle urne o con la sfiducia costruttiva); l'altro punto è diventaPremier
+  if(typeof parla==='function') parla(voceGesto('insediamento', 'voce-insediamento', {chiudeOv:true}));   // L218-4: torni capo del governo (dalle urne o con la sfiducia costruttiva); l'altro punto è diventaPremier · L248-5bis: lo strato
   /* L108-1 · il rientro della sfiducia costruttiva: niente urne, niente mandato nuovo. Il governo è la cricca che ha eletto
      il Cancelliere, e la legislatura è quella dell'avversario caduto (turnInMandate conservato). */
   if(S.rientroCostruttivo){
@@ -9994,7 +10001,7 @@ function credBonus(){ return S.opposizione ? (S.credibilita-50)*0.1 : 0; }
 /* ===== Leggi (riforme on/off, distinte dalle politiche a cursore) ===== */
 function leggiDelPaese(){ return (typeof LEGGI==='undefined')?[]:LEGGI.filter(L=> (!L.paesi || L.paesi.indexOf(S.paese)>-1) && (typeof eraVivaT!=='function' || eraVivaT(L))); }   // Build B: eraVivaT (default universale) — le leggi moderne (matrimonio/droghe/reddito_citt…) non compaiono nel '50
 /* Approva/abroga una legge: paga gli RP, applica gli effetti, fa reagire la coalizione. */
-function setLegge(id){
+function setLegge(id, gesto){   // L248-5bis: `gesto` = il tocco del giocatore (il bottone della scheda Leggi); il banco (leggiBanco) chiama senza
   if(S.opposizione) return;                                            // all'opposizione non si legifera
   const L=LEGGI.find(x=>x.id===id); if(!L) return;
   if(S.livello===2 && L.min!==S.dicastero) return;                     // da ministro: solo le leggi del TUO dicastero
@@ -10005,7 +10012,7 @@ function setLegge(id){
   if(votoInAulaAttivo(L)){ const V=votoInAula(L); if(V.respinta){ leggeRespinta(L, V.contro); return; } }   // L230-1: il voto in aula (solo l'approvazione del capo del governo)
   if(!cur && typeof suona==='function'){ suona('martelletto'); suona('firma'); }   // L116-1: la legge firmata, dopo i controlli (un tocco a vuoto non suona) · L118-1: prima il martelletto dell'aula
   applicaLegge(L, !cur);
-  if(!cur && typeof parla==='function' && !(typeof voceInCorso==='function' && voceInCorso())) parla('voce-legge-si');   // L218-10: la legge approvata (F4e); qui e non in applicaLegge (che ha solo questo chiamante) perché è il gesto del giocatore, dopo i controlli
+  if(!cur && typeof parla==='function' && !(typeof voceInCorso==='function' && voceInCorso())) parla(gesto ? voceGesto('legge', 'voce-legge-si') : 'voce-legge-si');   // L248-5bis: lo strato solo per la legge del giocatore · L218-10: la legge approvata (F4e); qui e non in applicaLegge (che ha solo questo chiamante) perché è il gesto del giocatore, dopo i controlli
   S.ultimaLegge={id:L.id, mese:S.year*12+S.month};                     // traccia per la conferenza stampa ("la legge contestata")
   /* biografia: le leggi col tuo nome */
   S.leggiStorico=S.leggiStorico||[];   // L73-2: {id, nome, anno, abrogataAnno} — il finale dice quanto è durata

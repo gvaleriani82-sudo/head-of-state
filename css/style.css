@@ -993,6 +993,13 @@
   #voce-sott span{display:inline-block; max-width:40em; min-height:44px; box-sizing:border-box; padding:10px 14px; border-radius:6px; background:rgba(24,22,20,.92);
     color:#f3efe6; font-family:'IBM Plex Sans',system-ui,sans-serif; font-size:15px; line-height:1.4; cursor:pointer; pointer-events:none;}
   #voce-sott.on span{pointer-events:auto;}
+  /* L248-5bis · lo strato dei gesti (ui.js, `personaggioStratoMostra`): il personaggio per i secondi della battuta, fuori da ciò che
+     render() ridisegna; nessun tocco (passano al tavolo), sotto il modale (#ov, 60) e sotto il sottotitolo (9000). In basso a SINISTRA:
+     a destra copriva «Avanza» (CDP a 375 e iPad); il JS lo alza sopra la barra in fondo (.endbar) quando c'è, il `bottom` qui è il ripiego */
+  #pers-strato{position:fixed; left:max(16px, env(safe-area-inset-left)); bottom:max(16px, calc(env(safe-area-inset-bottom) + 12px));
+    width:clamp(96px, 15.6vw, 128px); z-index:58; pointer-events:none; opacity:0; transition:opacity .2s ease;}
+  #pers-strato.on{opacity:1;}
+  #pers-strato .ritratto-vivo{width:100%; box-shadow:0 4px 14px rgba(0,0,0,.35);}
   /* L153-5 · le clip delle partite storiche (paese, poi decennio): lo stesso velo della partenza; i video stanno uno sopra l'altro
      e il secondo passa sopra il primo quando tocca a lui. La didascalia (paese, anno) in basso a sinistra dell'immagine. */
   #clip-porta, #clip-porta-uscente{position:fixed; inset:0; z-index:10000; background:#000; opacity:0; transition:opacity .35s ease; cursor:pointer;}

@@ -13,7 +13,7 @@
      posto della voce di oggi nella notte finita (vittoria/sconfitta) e nel bilancio buono o difficile, solo col personaggio disegnato
      (`voceMomento`, game.js); mentre la battuta suona la bocca dei personaggi vivi va a tempi fissi (`personaggioBoccaParla`, chiamata
      da audio.js). I quattro momenti nuovi (insediamento, legge, comizio, alleanza) sono SALTATI: i loro gesti non aprono un modale
-     (passo 0 del lotto, «⚑ L248-5» in DESIGN-PERSONAGGIO.md); le loro battute stanno nel manifesto senza aggancio.
+     (passo 0 del lotto, «⚑ L248-5» in DESIGN-PERSONAGGIO.md); dal L248-5bis compaiono nello strato dei gesti (`PERS_STRATO`, sotto).
    ⚑ NIENTE IN `S`: legge `S.personaggio` (genere, carnagione o ripiego), `S.eta`, `S.year`; scrive solo nel DOM.
      L'unico campo nuovo di `S` è `S.personaggio.carnagione` (D-A4, 'chiara'|'media'|'scura'), facoltativo: senza,
      vale il ripiego dalla macro-area dell'avatar (`personaggioCarnagione()`), quindi nessun salvataggio cambia.
@@ -31,6 +31,24 @@
    opz.passo (L248-4bis): secondi fra due disegni dell'istanza (i momenti 1/30); assente = ogni fotogramma
    ================================================================================================================ */
 let PERSONAGGIO_ANIMATO = true;   // L248-4bis: ACCESO col passo 1/30 nei momenti e la notte finita in posa (ripiego (4): «⚑ L248-4bis»); false = il medaglione di L178-3 e niente carnagione in creazione
+/* L248-5bis (24/10) · LO STRATO DEI GESTI. I quattro momenti senza modale — insediamento, legge approvata dal giocatore, comizio
+   d'apertura della campagna, alleanza nuova — mostrano il personaggio per i secondi della battuta in `#pers-strato` (ui.js,
+   `personaggioStratoMostra`: fuori da ciò che render() ridisegna, in basso a destra, senza tocchi), e la battuta `voce-pers-<momento>`
+   prende il posto della voce di oggi del gesto (`voceGesto`, game.js, terzo chiamante di `voceMomento`). Vale solo con
+   `PERSONAGGIO_ANIMATO` acceso; spento = gioco identico a prima (HTML e voci). `PERS_STRATO_MODO` è il ripiego per momento dei
+   fotogrammi: 'mosso' · 'posa' (`data-pers-ferma`) · 'battuta' (solo la voce, niente strato). Il tetto: legge e alleanza una volta
+   ogni 12 mesi di gioco (`PERS_ULTIMO_MOMENTO`, mese assoluto; TRANSITORIO, mai in `S`: un caricamento lo azzera). */
+let PERS_STRATO = true;   // L248-5bis: ACCESO («⚑ L248-5bis»: prove e fotogrammi a CPU ×4 verdi); false = i quattro gesti con la voce di oggi, niente strato
+const PERS_STRATO_MODO = { insediamento:'mosso', legge:'mosso', comizio:'mosso', alleanza:'mosso' };
+const PERS_STRATO_TETTO = { legge:12, alleanza:12 };   // mesi di gioco fra due strati dello stesso momento; gli altri due hanno già il loro ritmo (una salita, una campagna)
+const PERS_ULTIMO_MOMENTO = {};
+/* il tetto: vero (e segnato) se il momento può tornare ora; `ora` = S.year*12+S.month */
+function persTettoPassa(momento, ora){
+  const t=PERS_STRATO_TETTO[momento]; if(!t) return true;
+  const u=PERS_ULTIMO_MOMENTO[momento];
+  if(u!=null && ora-u < t) return false;
+  PERS_ULTIMO_MOMENTO[momento]=ora; return true;
+}
 
 const PERS_CARNAGIONI = ['chiara','media','scura'];
 const PERS_PELLI = { chiara:{p:'#f0c8a6', o:'#d6a07c'}, media:{p:'#c78c5e', o:'#a46c40'}, scura:{p:'#7a4a2d', o:'#5c351f'} };

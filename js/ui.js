@@ -790,8 +790,74 @@ function fermaRitrattiVivi(dentro){   // L178-3: chiuso il momento, la clip smet
 function personaggioMomentoAzione(opt){
   if(opt.momento==='notte') return opt.tono==='trionfo' ? 'vittoria' : 'sconfitta';
   if(opt.momento==='bilancio' || opt.momento==='finale') return 'respiro';
+  if(PERS_STRATO_AZIONE[opt.momento]) return PERS_STRATO_AZIONE[opt.momento];   // L248-5bis: i quattro gesti dello strato
   return null;
 }
+/* ================================================================================================================
+   L248-5bis · LO STRATO DEI GESTI (`#pers-strato`). Insediamento, legge, comizio e alleanza non aprono un modale: il personaggio
+   compare in uno strato suo, creato una volta in `document.body` (come `#voce-sott`), fuori da ciò che render() ridisegna — in basso a
+   sinistra sopra la barra in fondo (a destra copriva «Avanza»), `pointer-events:none`, sotto `#ov` e sotto `#voce-sott` —, per i
+   secondi della battuta.
+   · `personaggioStratoMostra(momento, durataMs, opt)` decide e mostra; rende 'strato' (il personaggio c'è), 'battuta' (il ripiego (c)
+     di `PERS_STRATO_MODO`: niente strato, solo la voce) o null (la voce di oggi). Null con: un interruttore spento, un pilastro-tragedia,
+     una voce che parla o sta arrivando, un modale aperto (`#ov.on`; `opt.chiudeOv` per l'insediamento, il cui gesto lo chiude), la
+     battuta senza file per genere e lingua, il tetto dei 12 mesi (legge e alleanza: `persTettoPassa`, personaggio.js).
+   · Il markup è quello dei momenti (`personaggioMomentoHtml`, azione da `personaggioMomentoAzione`); in posa (`data-pers-ferma`) col
+     modo 'posa', con movimento ridotto/spento o `reteLeggera()`; altrimenti `personaggioMomentoAvvia` a passo `PERS_PASSO_MOMENTI`.
+   · Chiusura (`personaggioStratoChiudi`): alla fine della battuta (durata del buffer + 400 ms, tetto 4,5 s: `personaggioStratoDurata`,
+     chiamata da voceParti), su `taciVoce`, subito se `#ov` si apre (l'osservatore di #ov qui sotto), e in `resetAll`. Le istanze si
+     fermano e lo strato si svuota: niente personaggi vivi nascosti. Niente in S.
+   ================================================================================================================ */
+const PERS_STRATO_AZIONE = { insediamento:'giuramento', legge:'firma', comizio:'comizio', alleanza:'stretta' };
+const PERS_STRATO_TETTO_MS = 4500, PERS_STRATO_CODA_MS = 400, PERS_STRATO_ATTESA_MS = 4500;
+let PERS_STRATO_TIMER = 0;
+function personaggioStratoEl(){
+  let el=document.getElementById('pers-strato');
+  if(!el){ el=document.createElement('div'); el.id='pers-strato'; el.setAttribute('aria-hidden','true'); document.body.appendChild(el); }
+  return el;
+}
+function personaggioStratoMostra(momento, durataMs, opt){
+  opt=opt||{};
+  try{
+    if(typeof PERSONAGGIO_ANIMATO==='undefined' || !PERSONAGGIO_ANIMATO || typeof PERS_STRATO==='undefined' || !PERS_STRATO) return null;
+    if(!PERS_STRATO_AZIONE[momento] || typeof document==='undefined' || !document.body || typeof S==='undefined' || !S) return null;
+    if(typeof musicaTragedia==='function' && musicaTragedia()) return null;
+    if(typeof voceInCorso==='function' && voceInCorso()) return null;
+    const ov=document.getElementById('ov'); if(!opt.chiudeOv && ov && ov.classList.contains('on')) return null;
+    if(typeof voceHaFile!=='function' || !voceHaFile('voce-pers-'+momento)) return null;
+    if(!persTettoPassa(momento, S.year*12+S.month)) return null;
+    const modo=PERS_STRATO_MODO[momento]||'mosso';
+    if(modo==='battuta') return 'battuta';
+    const html=personaggioMomentoHtml({momento:momento, cls:'rv-strato'}); if(!html) return null;
+    const el=personaggioStratoEl();
+    personaggioStratoChiudi();
+    el.innerHTML=html;
+    const box=el.querySelector('[data-pers]');
+    if(box && (modo==='posa' || movimentoModo()!=='pieno' || reteLeggera())) box.setAttribute('data-pers-ferma','1');
+    const eb=document.querySelector('.endbar'), qb=(eb && getComputedStyle(eb).display!=='none') ? eb.getBoundingClientRect() : null;   // (offsetParent è sempre null per un elemento fisso)
+    el.style.bottom=(qb && qb.height>0 && qb.top<innerHeight) ? Math.round(innerHeight-qb.top+12)+'px' : '';   // sopra la barra in fondo (#ctx e «Avanza»), se c'è
+    void el.offsetWidth;              // reflow forzato prima della classe: la dissolvenza entra nel task che lo crea (come #voce-sott)
+    el.classList.add('on');
+    personaggioMomentoAvvia(el);
+    personaggioStratoDurata(durataMs>0 ? durataMs : PERS_STRATO_ATTESA_MS);
+    return 'strato';
+  }catch(e){ return null; }
+}
+/* la durata dello strato: da ora, la battuta più la coda, mai oltre il tetto; voceParti la richiama quando la voce parte davvero */
+function personaggioStratoDurata(durataMs){
+  const el=document.getElementById('pers-strato'); if(!el || !el.classList.contains('on')) return;
+  clearTimeout(PERS_STRATO_TIMER);
+  PERS_STRATO_TIMER=setTimeout(personaggioStratoChiudi, Math.min(PERS_STRATO_TETTO_MS, (+durataMs||0)+PERS_STRATO_CODA_MS));
+}
+function personaggioStratoChiudi(){
+  try{
+    clearTimeout(PERS_STRATO_TIMER); PERS_STRATO_TIMER=0;
+    const el=document.getElementById('pers-strato'); if(!el) return;
+    fermaRitrattiVivi(el);
+    el.classList.remove('on'); el.innerHTML='';
+  }catch(e){}
+}
+function personaggioStratoAperto(){ const el=typeof document!=='undefined' && document.getElementById('pers-strato'); return !!(el && el.classList.contains('on')); }
 function personaggioMomentoHtml(opt){
   if(typeof PERSONAGGIO_ANIMATO==='undefined' || !PERSONAGGIO_ANIMATO || typeof personaggioSVG!=='function') return '';
   const azione=personaggioMomentoAzione(opt||{}); if(!azione) return '';
@@ -817,7 +883,7 @@ function personaggioMomentoAvvia(dentro){
 /* L178-3: il velo dei modali (#ov) si chiude togliendo la classe `on`, da tanti punti — un osservatore solo ferma la clip-ritratto */
 (function(){ try{ if(typeof document==='undefined' || typeof MutationObserver==='undefined') return;
   const aggancia=function(){ const ov=document.getElementById('ov'); if(!ov) return;
-    new MutationObserver(function(){ if(!ov.classList.contains('on')) fermaRitrattiVivi(ov); }).observe(ov, {attributes:true, attributeFilter:['class']}); };
+    new MutationObserver(function(){ if(!ov.classList.contains('on')) fermaRitrattiVivi(ov); else personaggioStratoChiudi(); }).observe(ov, {attributes:true, attributeFilter:['class']}); };   // L248-5bis: un modale che si apre vince sullo strato dei gesti
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', aggancia); else aggancia(); }catch(e){} })();
 function agScene(it){ if(!it || typeof SCENA_MAJOR==='undefined' || !SCENA_MAJOR[it.kind]) return '';   // display selettivo (ora incl. le carte locali)
   const bucket=scenaId(it); if(!bucket) return '';
@@ -3206,7 +3272,7 @@ function renderLegge(L){
     <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px"><div style="font-weight:600;font-size:14px">${T(L.nome)}</div>${badge}</div>
     <div style="color:var(--mut2);font-size:12.5px;margin:3px 0 5px">${T(L.desc)}</div>
     <div style="font-size:12px;color:var(--mut)${oppo?'':';margin-bottom:7px'}">${meta}</div>
-    ${oppo?'':`<button class="opt" ${troppo?'disabled':''} style="${troppo?'opacity:.5;':''}" onclick="setLegge('${L.id}')"><span class="ol">${T(inVigore?'Abroga':'Approva')}${troppo?T(' — RP insufficienti'):' · '+L.costo+' RP'}</span></button>`}
+    ${oppo?'':`<button class="opt" ${troppo?'disabled':''} style="${troppo?'opacity:.5;':''}" onclick="setLegge('${L.id}', true)"><span class="ol">${T(inVigore?'Abroga':'Approva')}${troppo?T(' — RP insufficienti'):' · '+L.costo+' RP'}</span></button>`}
   </div>`;
 }
 

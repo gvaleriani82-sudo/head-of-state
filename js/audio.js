@@ -1053,7 +1053,7 @@ const VOCI_MANIFEST = {
      (personaggio.js) e le chiavi EN di lang-en.js. Gain dalla regola sull'RMS dichiarato dal giro (rapporto L218-23); `vittoria-en-f`
      (−23,9) ne vorrebbe 1,06: tenuto a 1 (il tetto della guardia). Agganci: vittoria/sconfitta in `concludiNotte`, bilancio-buono/
      -difficile in `mostraBilancio`, solo col personaggio disegnato in quel modale (`voceMomento`, game.js); insediamento, legge,
-     comizio e alleanza senza aggancio (i loro gesti non aprono un modale: «⚑ L248-5» in DESIGN-PERSONAGGIO.md). */
+     comizio e alleanza dal L248-5bis nello strato dei gesti (`voceGesto`, game.js; `#pers-strato`, ui.js: i loro gesti non aprono un modale). */
   'voce-pers-vittoria':           { file:'voce-pers-vittoria-it-m.mp3',           gain:0.40, f:{ file:'voce-pers-vittoria-it-f.mp3', gain:0.64 },           l:{ en:{ file:'voce-pers-vittoria-en-m.mp3', gain:0.37, f:{ file:'voce-pers-vittoria-en-f.mp3', gain:1.00 } } },           en:'You chose trust. Now we have to earn it.', it:'Avete scelto la fiducia. Ora tocca a noi meritarla.' },   // it −15,4 · −19,5 lei · en −14,9 · −23,9 lei
   'voce-pers-sconfitta':          { file:'voce-pers-sconfitta-it-m.mp3',          gain:0.33, f:{ file:'voce-pers-sconfitta-it-f.mp3', gain:0.69 },          l:{ en:{ file:'voce-pers-sconfitta-en-m.mp3', gain:0.48, f:{ file:'voce-pers-sconfitta-en-f.mp3', gain:0.76 } } },          en:'The voters have decided. I respect their vote.', it:'Gli elettori hanno deciso. Rispetto il loro voto.' },   // it −13,8 · −20,2 · en −17,1 · −21,0
   'voce-pers-bilancio-buono':     { file:'voce-pers-bilancio-buono-it-m.mp3',     gain:0.47, f:{ file:'voce-pers-bilancio-buono-it-f.mp3', gain:0.76 },     l:{ en:{ file:'voce-pers-bilancio-buono-en-m.mp3', gain:0.37, f:{ file:'voce-pers-bilancio-buono-en-f.mp3', gain:0.90 } } },     en:'A good year. The next one must be better.', it:'Un anno buono. Il prossimo dovrà essere migliore.' },   // it −16,8 · −21,1 · en −14,7 · −22,5
@@ -1158,6 +1158,7 @@ function taciVoce(){
     const V=VOCE_ORA; VOCE_ORA=null; VOCE_TOKEN++;
     voceSottotitolo(null);
     if(V && V.id.indexOf('voce-pers-')===0 && typeof personaggioBoccaParla==='function') personaggioBoccaParla(null);   // L248-5: la voce zittita chiude la bocca
+    if((!V || V.id.indexOf('voce-pers-')===0) && typeof personaggioStratoChiudi==='function') personaggioStratoChiudi();   // L248-5bis: zittita la battuta (o tutto, da resetAll), lo strato dei gesti si chiude
     if(V && AUDIO_CTX){ const t=AUDIO_CTX.currentTime; try{ V.g.gain.cancelScheduledValues(t); V.g.gain.setValueAtTime(V.g.gain.value, t); V.g.gain.linearRampToValueAtTime(0, t+VOCI_FADE_S); V.src.stop(t+VOCI_FADE_S+0.05); }catch(e){} voceSegna(V.id, 'taciuta'); }
     if(typeof musicaSottovoce==='function') musicaSottovoce(false);
   }catch(e){}
@@ -1173,6 +1174,7 @@ function voceParti(id, M){
   if(typeof musicaSottovoce==='function') musicaSottovoce(true);
   voceSottotitolo((typeof curLang==='function' && curLang()==='en') ? M.en : M.it);
   if(id.indexOf('voce-pers-')===0 && typeof personaggioBoccaParla==='function') personaggioBoccaParla((typeof curLang==='function' && curLang()==='en') ? M.en : M.it, src.buffer.duration*1000);   // L248-5: la battuta del personaggio muove la bocca dei personaggi vivi (a tempi fissi, dal testo e dalla durata)
+  if(id.indexOf('voce-pers-')===0 && typeof personaggioStratoDurata==='function') personaggioStratoDurata(src.buffer.duration*1000);   // L248-5bis: lo strato dei gesti dura la battuta (+400 ms, tetto 4,5 s), contata da quando parte davvero
   voceSegna(id, 'parla', M.file);
 }
 /* vero se una voce sta parlando o sta arrivando (chiesta e in caricamento, entro VOCI_ATTESA_MS): chi non vuole interrompere chiede
