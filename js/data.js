@@ -1968,7 +1968,7 @@ const SCENARI = {
     debtAncora: 37,
     inflazione: 5.5,   // l'anno per anno sta in DRIFT_INFLAZIONE_ERA (assoluta, dalla scheda: l'11 del 1974 e del 1979; nessun tetto per gli Stati Uniti)
     crescita: 5,       // vedi la testata: la base di us1960, per la saldatura; il decennio sta nelle righe del ciclo (DRIFT_ECONOMICO_ERA)
-    logorioEra: 0.005,                          // L258-2 · dalla sweep (misura-us1970.js gioc --logorio=0,…,0.012, 20 carriere; conferma 40 × 2 semi: Repubblicani al governo 1972 27-28/40, metà mandato perse 69-72% ⚠), rapporto «⚑ L258-2» in PRESET-USA-1970.md
+    logorioEra: 0.004,                          // L258-4 · ritarato dopo pilastri e snodi (misura-us1970.js gioc --logorio=0.005,…,0.003, 20 carriere: 0,004 il primo in banda; conferma 40 × 2 semi: Repubblicani al governo 1972 29·32/40, Democratici all'opposizione 0/15·0/16; a 0,005 con pilastri e snodi 10·12/40), rapporto «⚑ L258-4». Prima: L258-2 · dalla sweep (misura-us1970.js gioc --logorio=0,…,0.012, 20 carriere; conferma 40 × 2 semi: Repubblicani al governo 1972 27-28/40, metà mandato perse 69-72% ⚠), rapporto «⚑ L258-2» in PRESET-USA-1970.md
     valuta: VALUTA_DOLLARO,
     intro: "Stati Uniti, 1969. Il nuovo Presidente ha vinto per un soffio, con un governatore del Sud candidato da solo che ha preso quasi un voto su sette. Mezzo milione di soldati è in Vietnam, le università sono in rivolta, e fra sei mesi due uomini scenderanno sulla Luna.",
     contesto: [
@@ -21790,6 +21790,13 @@ const SNODI_STORICI = {
   usDirittiOpp:    { storico:['con'], conforme:'sulla legge dei diritti civili, dall’opposizione', diverge:{ 'contro':'Nel 1964 ha votato contro la legge sui diritti civili.', 'coscienza':'Nel 1964 ha lasciato al suo partito libertà di coscienza sulla legge dei diritti civili.' } },
   usVietnam:       { storico:['escalation'], conforme:'sul Vietnam', diverge:{ 'consiglieri':'Nel 1965 ha tenuto in Vietnam solo consiglieri e aiuti.', 'trattativa':'Nel 1965 ha aperto una trattativa sul Vietnam e richiamato i consiglieri.' } },
   usVietnamOpp:    { storico:['sostegno'], conforme:'sul Vietnam, dall’opposizione', diverge:{ 'congresso':'Nel 1965 ha chiesto un voto del Congresso prima dei soldati in Vietnam.', 'contro':'Nel 1965 si è opposto alla guerra in Vietnam.' } },
+  /* L258-4 · i tre snodi di us1970 e le aule (frasi di Code). */
+  usLuna70:        { storico:['ridimensiona'], conforme:'sullo spazio dopo la Luna', diverge:{ 'marte':'Nel 1970 ha promesso un equipaggio americano su Marte entro il decennio.', 'navetta':'Nel 1970 ha voluto subito una stazione in orbita e una navetta riutilizzabile.' } },
+  usLuna70Opp:     { storico:['taglio'], conforme:'sullo spazio dopo la Luna, dall’opposizione', diverge:{ 'posti':'Nel 1970 ha difeso dall’opposizione i posti di lavoro del programma spaziale.', 'rilancio':'Nel 1970 ha chiesto dall’opposizione di andare su Marte con i soldi della difesa.' } },
+  usPace73:        { storico:['firma'], conforme:'sulla pace di Parigi', diverge:{ 'garanzie':'Nel 1973 ha chiesto garanzie per Saigon e ripreso i bombardamenti sul Vietnam del Nord.', 'ritiro':'Nel 1973 ha ritirato le truppe dal Vietnam senza condizioni.' } },
+  usPace73Opp:     { storico:['saluto'], conforme:'sulla pace di Parigi, dall’opposizione', diverge:{ 'fondi':'Nel 1973 ha proposto di tagliare i fondi per ogni nuova operazione in Indocina.', 'abbandono':'Nel 1973 ha accusato la pace di Parigi di abbandonare il Vietnam del Sud.' } },
+  usPetrolio73:    { storico:['blocco'], conforme:'sulle code ai distributori', diverge:{ 'prezzo':'Nel 1973 ha lasciato salire il prezzo della benzina per far finire le code.', 'tessere':'Nel 1973 ha distribuito le tessere di razionamento della benzina.' } },
+  usPetrolio73Opp: { storico:['emergenza'], conforme:'sulle code ai distributori, dall’opposizione', diverge:{ 'utili':'Nel 1973 ha chiesto una tassa sugli utili delle compagnie del petrolio.', 'mercato':'Nel 1973 ha chiesto dall’opposizione di togliere i controlli sul prezzo della benzina.' } },
 };
 
 /* ==============================================================================================================
@@ -25032,6 +25039,115 @@ const VIETNAM65_OPP_EV = {
     { l:'Contro: è una guerra che non si può vincere', e:'Le università ti ascoltano · nelle sedi dei reduci, e in molte famiglie, no',
       f:function(){ S.usVietnamOpp='contro'; gdUs60('giovani',3); gdUs60('cattolici',-2); gdUs60('pensionati',-1); baseUs60(-1);
         S.log.unshift({t:T('La guerra'),x:T('Si è opposto dall\'opposizione alla guerra in Vietnam.')}); } },
+  ],
+};
+/* ==============================================================================================================
+   L258-4 · STATI UNITI 1970 — TRE SNODI E LE AULE (scheda PRESET-USA-1970 §4, testi di Code dagli abbozzi). La forma delle coppie
+   di us1960 (gli stessi helper: gdUs60, baseUs60, fidUs60 valgono per la linea). Flag nuovi cercati in tutto js/ e .claude/ il 24/10
+   prima di scriverli (L99-2), zero occorrenze: usLuna70, usLuna70Opp, usPace73, usPace73Opp, usPetrolio73, usPetrolio73Opp.
+   ⚑ CHI RICEVE CHE COSA (cancelli in game.js): S1 lo spazio 1970/2-3 · S2 la pace 1973/1-2 · S3 le code 1973/11-12 (ottobre è di
+   pus70_petrolio). Nessuna delle tre finestre tocca un mese del voto né la campagna (1970/11 e 1974/11 metà mandato, 1972/11 la
+   presidenziale con la campagna 1972/5-10), e nessun pilastro le occupa (rapporto «⚑ L258-3»).
+   ⚑ S2 LEGGE IL FLAG DI us1960: esce solo dove la guerra di terra c'è — us60Guerra(), cioè l'escalation del 1965 o il flag nullo
+   (le carriere nate nel 1969: la storia). Con 'trattativa' (i consiglieri richiamati nel 1965) e con 'consiglieri' (nessun soldato
+   a combattere: us60Guerra() è falsa, le carte di guerra 1966-68 non escono) non c'è una guerra da chiudere: niente snodo.
+   ⚑ S.usPetrolio73 per ora NON lo legge nessuno: gli eventi del 1974 e del 1979 sono un lotto dopo. Le aule muovono SOLO gruppi e
+   base (L12-2). La riga «La storia ·» sta sull'opzione storica, come in us1960 (verifica-snodi la pretende una e lì).
+   ============================================================================================================== */
+const LUNA70_EV = {
+  id:'snodo_luna70', snodo:true, era:'us1970', kick:'Lo spazio',
+  t:'Dopo la Luna',
+  text:'Gli astronauti sono tornati dalla Luna, due volte, e il paese li ha già visti sfilare in tutte le città. Ora sul tavolo c\'è il rapporto del gruppo di studio: una base sulla Luna, una stazione in orbita, e un equipaggio su Marte negli anni \'80. Il bilancio chiede tagli, i prezzi salgono, e in Florida e in California decine di migliaia di posti dipendono da quello che deciderai.',
+  ch:[
+    { l:'Ridimensionare: il grande salto è fatto', e:'La storia · nel 1970 il programma lunare perde gli ultimi tre voli · nel 1972 si decide la navetta riutilizzabile · in Florida e in California si chiudono i cantieri', costo:{debito:-0.3},
+      f:function(){ S.usLuna70='ridimensiona'; S.ind.debt-=0.3; gdUs60('lavoratori',-2); gdUs60('cetomedio',1); repd(-1);
+        S.log.unshift({t:T('Lo spazio'),x:T('Ha ridimensionato il programma spaziale dopo lo sbarco sulla Luna.')}); } },
+    { l:'Marte entro il decennio', e:'Il mondo guarda di nuovo l\'America · i conti no: una spesa che cresce ogni anno, e i prezzi con lei', costo:{debito:1.5},
+      f:function(){ S.usLuna70='marte'; S.ind.debt+=1.5; repd(3); stampad(1); gdUs60('giovani',1); gdUs60('lavoratori',1); gdUs60('pensionati',-2); fidUs60(-2);
+        S.log.unshift({t:T('Lo spazio'),x:T('Ha promesso un equipaggio americano su Marte entro il decennio.')}); } },
+    { l:'La stazione e la navetta, subito', e:'I cantieri restano aperti · costa meno di Marte e più di quanto il bilancio sopporti', costo:{debito:0.8},
+      f:function(){ S.usLuna70='navetta'; S.ind.debt+=0.8; repd(1); gdUs60('lavoratori',1); gdUs60('imprenditori',1); fidUs60(-1);
+        S.log.unshift({t:T('Lo spazio'),x:T('Ha voluto subito una stazione in orbita e una navetta riutilizzabile.')}); } },
+  ],
+};
+const LUNA70_OPP_EV = {
+  id:'snodo_luna70_opp', snodo:true, era:'us1970', kick:'Lo spazio',
+  t:'Dopo la Luna, dall\'aula',
+  text:'La Casa Bianca ha mandato al Congresso un bilancio dello spazio più magro: niente Marte, gli ultimi voli verso la Luna in forse. In commissione i deputati della Florida, del Texas e della California difendono i loro cantieri; altri dicono che con le città in difficoltà e i conti da pagare la Luna può aspettare. Il tuo partito deve decidere come votare.',
+  ch:[
+    { l:'Votare il taglio: prima la Terra', e:'La storia · il bilancio passa quasi com\'è · nei cantieri della Florida le lettere di licenziamento arrivano con il tuo voto sopra',
+      f:function(){ S.usLuna70Opp='taglio'; gdUs60('cetomedio',1); gdUs60('lavoratori',-2); baseUs60(1);
+        S.log.unshift({t:T('Lo spazio'),x:T('Dall\'opposizione ha votato il taglio al programma spaziale.')}); } },
+    { l:'Difendere i posti di lavoro dei cantieri', e:'I sindacati dell\'industria aerospaziale ti ringraziano · nel resto del paese ti chiedono perché la Luna sì e le città no',
+      f:function(){ S.usLuna70Opp='posti'; gdUs60('lavoratori',2); gdUs60('giovani',-1); baseUs60(-1);
+        S.log.unshift({t:T('Lo spazio'),x:T('Ha difeso dall\'opposizione i posti di lavoro del programma spaziale.')}); } },
+    { l:'Rilanciare: Marte, e i soldi presi dalla difesa', e:'Le università applaudono · al Pentagono e nelle sedi dei reduci prendono nota',
+      f:function(){ S.usLuna70Opp='rilancio'; gdUs60('giovani',2); gdUs60('cattolici',-1); gdUs60('pensionati',-1);
+        S.log.unshift({t:T('Lo spazio'),x:T('Ha chiesto dall\'opposizione di andare su Marte con i soldi della difesa.')}); } },
+  ],
+};
+const PACE73_EV = {
+  id:'snodo_pace73', snodo:true, era:'us1970', kick:'La guerra', tono:'grave',
+  t:'La pace',
+  text:'Da quattro anni i soldati tornano dal Vietnam a scaglioni, e a Parigi la trattativa è a un passo. A dicembre i bombardieri sono tornati sul Nord per undici notti, e il paese ha visto in televisione che cosa vuol dire. L\'accordo sul tavolo riporta a casa i prigionieri e gli ultimi soldati, ma lascia le truppe del Nord dove sono, dentro il Sud. Il governo di Saigon dice che non firmerà. Al Congresso c\'è chi prepara la legge per tagliare i fondi.',
+  ch:[
+    { l:'Firmare così com\'è', e:'La storia · il 27 gennaio si firma a Parigi · due mesi dopo gli ultimi soldati lasciano il Vietnam e i prigionieri tornano · nel 1975 il Sud cade',
+      f:function(){ S.usPace73='firma'; repd(2); stampad(1); gdUs60('giovani',2); gdUs60('pensionati',1); gdUs60('cattolici',-1);
+        S.log.unshift({t:T('La guerra'),x:T('Ha firmato a Parigi l\'accordo che chiude la guerra in Vietnam.')}); } },
+    { l:'Chiedere garanzie, e riprendere i bombardamenti', e:'Saigon ti ringrazia · la guerra si allunga di mesi, e al Congresso la legge sui fondi trova i voti', costo:{debito:1},
+      f:function(){ S.usPace73='garanzie'; S.ind.debt+=1; repd(-2); stampad(-2); gdUs60('giovani',-3); gdUs60('cattolici',2); fidUs60(-1);
+        S.log.unshift({t:T('La guerra'),x:T('Ha chiesto garanzie per Saigon e ripreso i bombardamenti sul Vietnam del Nord.')}); } },
+    { l:'Il ritiro, senza condizioni', e:'Finisce subito · i prigionieri tornano dopo, e per anni ti chiameranno quello che ha perso la guerra',
+      f:function(){ S.usPace73='ritiro'; repd(-3); gdUs60('giovani',3); gdUs60('cattolici',-3); gdUs60('pensionati',-1); baseUs60(-1);
+        S.log.unshift({t:T('La guerra'),x:T('Ha ritirato le truppe dal Vietnam senza condizioni.')}); } },
+  ],
+};
+const PACE73_OPP_EV = {
+  id:'snodo_pace73_opp', snodo:true, era:'us1970', kick:'La guerra', tono:'grave',
+  t:'La pace, dall\'aula',
+  text:'A Parigi si è firmato: gli ultimi soldati tornano a casa entro sessanta giorni, e con loro i prigionieri. Il paese è stanco e sollevato. Nell\'accordo le truppe del Nord restano nel Sud, e chi conosce la regione dice che fra due anni non ci sarà più niente da difendere. Il tuo partito deve dire che cosa pensa della pace del Presidente.',
+  ch:[
+    { l:'Salutare la pace, e voltare pagina', e:'La storia · i prigionieri scendono dagli aerei e il paese guarda avanti · la pace è del Presidente, ma la stanchezza è di tutti',
+      f:function(){ S.usPace73Opp='saluto'; gdUs60('cetomedio',2); gdUs60('pensionati',1); baseUs60(-1);
+        S.log.unshift({t:T('La guerra'),x:T('Dall\'opposizione ha salutato la pace firmata a Parigi.')}); } },
+    { l:'Tagliare i fondi: nessun soldato potrà tornare laggiù', e:'Le università ti danno ragione · a Saigon, e nelle sedi dei reduci, ti accusano di chiudere la porta agli alleati',
+      f:function(){ S.usPace73Opp='fondi'; gdUs60('giovani',3); gdUs60('cattolici',-2); baseUs60(1);
+        S.log.unshift({t:T('La guerra'),x:T('Ha proposto di tagliare i fondi per ogni nuova operazione in Indocina.')}); } },
+    { l:'Una pace che abbandona l\'alleato', e:'I falchi ti applaudono · il paese, che vuole solo che finisca, ti guarda storto',
+      f:function(){ S.usPace73Opp='abbandono'; gdUs60('cattolici',2); gdUs60('giovani',-2); gdUs60('cetomedio',-1);
+        S.log.unshift({t:T('La guerra'),x:T('Ha accusato la pace di Parigi di abbandonare il Vietnam del Sud.')}); } },
+  ],
+};
+const PETROLIO73_US_EV = {
+  id:'snodo_petrolio73_us', snodo:true, era:'us1970', kick:'Il petrolio', tono:'grave',
+  t:'Le code',
+  text:'Da un mese i paesi arabi del petrolio non vendono più un barile all\'America, e il prezzo del greggio è quadruplicato. Davanti ai distributori le code girano attorno all\'isolato, e in qualche stazione si arriva alle mani per un pieno. L\'inverno arriva, e nel Nord-est si scalda la casa col gasolio. I tuoi consiglieri hanno pronte tre strade, e nessuna è indolore.',
+  ch:[
+    { l:'Prezzi bloccati, e risparmio per legge', e:'La storia · il limite di 55 miglia, l\'ora legale anche d\'inverno, le stazioni chiuse il sabato sera e la domenica, l\'oleodotto dell\'Alaska approvato · le code restano fino alla fine dell\'embargo, nel marzo 1974',
+      f:function(){ S.usPetrolio73='blocco'; gdUs60('lavoratori',-1); gdUs60('imprenditori',-1); gdUs60('pensionati',1); stampad(-1);
+        S.log.unshift({t:T('Il petrolio'),x:T('Ha tenuto bloccati i prezzi della benzina e imposto il risparmio per legge.')}); } },
+    { l:'Lasciar salire il prezzo', e:'Le code finiscono in tre settimane · i prezzi corrono, e pagano i poveri e chi si scalda nel Nord freddo',
+      f:function(){ S.usPetrolio73='prezzo'; gdUs60('imprenditori',2); gdUs60('pensionati',-3); gdUs60('lavoratori',-2); fidUs60(-2);
+        S.log.unshift({t:T('Il petrolio'),x:T('Ha lasciato salire il prezzo della benzina per far finire le code.')}); } },
+    { l:'Le tessere di razionamento', e:'Le tessere sono già stampate, e tutti sono uguali davanti alla pompa · un ufficio nuovo in ogni contea, e la rabbia di chi lavora con l\'automobile', costo:{debito:0.3},
+      f:function(){ S.usPetrolio73='tessere'; S.ind.debt+=0.3; gdUs60('lavoratori',1); gdUs60('cetomedio',-2); gdUs60('imprenditori',-1); stampad(-1);
+        S.log.unshift({t:T('Il petrolio'),x:T('Ha distribuito le tessere di razionamento della benzina.')}); } },
+  ],
+};
+const PETROLIO73_US_OPP_EV = {
+  id:'snodo_petrolio73_us_opp', snodo:true, era:'us1970', kick:'Il petrolio', tono:'grave',
+  t:'Le code, dall\'aula',
+  text:'Il Presidente ha parlato alla televisione: termostati più bassi, niente luci di Natale sugli edifici pubblici, il limite di velocità a 55 miglia. Le code davanti ai distributori non si accorciano. Al Congresso si votano le leggi d\'emergenza una dopo l\'altra, e il tuo partito deve dire da che parte sta.',
+  ch:[
+    { l:'Votare le leggi d\'emergenza', e:'La storia · il limite di velocità e l\'oleodotto passano con i voti dei due partiti · le code restano, e restano anche di chi le ha votate',
+      f:function(){ S.usPetrolio73Opp='emergenza'; gdUs60('cetomedio',1); gdUs60('pensionati',1); baseUs60(-1);
+        S.log.unshift({t:T('Il petrolio'),x:T('Dall\'opposizione ha votato le leggi d\'emergenza sul petrolio.')}); } },
+    { l:'Una tassa sugli utili delle compagnie', e:'Nelle fabbriche e nei quartieri ti applaudono · nelle sale riunioni del Texas no',
+      f:function(){ S.usPetrolio73Opp='utili'; gdUs60('lavoratori',2); gdUs60('imprenditori',-2); baseUs60(1);
+        S.log.unshift({t:T('Il petrolio'),x:T('Ha chiesto una tassa sugli utili delle compagnie del petrolio.')}); } },
+    { l:'Via i controlli: il mercato farà finire le code', e:'Gli economisti ti danno ragione · chi si scalda col gasolio fa i conti, e li fa su di te',
+      f:function(){ S.usPetrolio73Opp='mercato'; gdUs60('imprenditori',2); gdUs60('pensionati',-2); gdUs60('lavoratori',-1);
+        S.log.unshift({t:T('Il petrolio'),x:T('Ha chiesto dall\'opposizione di togliere i controlli sul prezzo della benzina.')}); } },
   ],
 };
 /* L110-2 · I TERRITORI E LA MAPPA DI de1960: quelli di de1950 più la Saar in coda (è entrata alla tappa del 1957/1), con lo stesso

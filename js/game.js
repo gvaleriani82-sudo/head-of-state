@@ -491,7 +491,7 @@ function initStatoBase(){
   S.deAsilo92=null; S.deAsilo92Opp=null; S.deConto93=null; S.deConto93Opp=null; S.dePacchetto96=null; S.dePacchetto96Opp=null; S.deKosovo99=null; S.deKosovo99Opp=null; S.deMoneta98=null;   // L153-2: il decennio tedesco '90
   S.deIraq02=null; S.deIraq02Opp=null; S.deAgenda03=null; S.deAgenda03Opp=null; S.deFiducia05=null; S.deFiducia05Opp=null; S.deBanche08=null; S.deBanche08Opp=null;   // L157-1: il decennio tedesco 2000
   S.usCorea=null; S.usCoreaOpp=null; S.usGenerale=null; S.usGeneraleOpp=null; S.usAcciaio=null; S.usAcciaioOpp=null; S.usScuola=null; S.usScuolaOpp=null;   // L176-2: gli snodi di us1950
-  S.usBaia=null; S.usBaiaOpp=null; S.usMissili=null; S.usMissiliOpp=null; S.usDiritti=null; S.usDirittiOpp=null; S.usVietnam=null; S.usVietnamOpp=null;   // L227-1: gli snodi di us1960
+  S.usBaia=null; S.usBaiaOpp=null; S.usMissili=null; S.usMissiliOpp=null; S.usDiritti=null; S.usDirittiOpp=null; S.usVietnam=null; S.usVietnamOpp=null; S.usLuna70=null; S.usLuna70Opp=null; S.usPace73=null; S.usPace73Opp=null; S.usPetrolio73=null; S.usPetrolio73Opp=null;   // L227-1: gli snodi di us1960
   S.scioglimento97=null;   // L103-1: lo scioglimento del '97 (null = storico; 'no' = «aspetta», tappa 1998/3). Lo scrive S4 in L103-2
   S.coabitazione=false;   // L100-2: il Presidente con l'Assemblea degli altri (derivato dai seggi, dato puro, round-trip)
   S.governiCaduti=0;                    // L80-5: quante volte il governo e caduto senza che si andasse a votare
@@ -4582,6 +4582,16 @@ function snodoDiritti64Dovuta(){ return typeof S!=='undefined' && S && S.era===L
 function snodoDiritti64OppDovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_US && S.livello===3 && S.opposizione && S.usDirittiOpp==null && S.usDiritti==null && (S.year===1964 && S.month>=6 && S.month<=7); }
 function snodoVietnam65Dovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_US && S.livello===3 && !S.opposizione && S.usVietnam==null && (S.year===1965 && S.month>=2 && S.month<=3); }
 function snodoVietnam65OppDovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_US && S.livello===3 && S.opposizione && S.usVietnamOpp==null && S.usVietnam==null && (S.year===1965 && S.month>=2 && S.month<=3); }
+/* L258-4 · i cancelli degli snodi di us1970 (chi occupa il mese, guardato sul gioco: rapporto «⚑ L258-3» e data.js, testa del blocco
+   LUNA70_EV). S1 1970/2-3, S2 1973/1-2, S3 1973/11-12 (ottobre è di pus70_petrolio). Nessuna finestra tocca un voto né la campagna.
+   S2 solo dove c'è la guerra di terra: us60Guerra() (data.js) — l'escalation del 1965 o il flag nullo; con 'trattativa' o 'consiglieri'
+   non c'è niente da chiudere. Le aule non guardano il flag del governo, ma non escono a chi ha già giocato la versione di governo. */
+function snodoLuna70Dovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_US && S.livello===3 && !S.opposizione && S.usLuna70==null && (S.year===1970 && S.month>=2 && S.month<=3); }
+function snodoLuna70OppDovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_US && S.livello===3 && S.opposizione && S.usLuna70Opp==null && S.usLuna70==null && (S.year===1970 && S.month>=2 && S.month<=3); }
+function snodoPace73Dovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_US && S.livello===3 && !S.opposizione && S.usPace73==null && us60Guerra() && (S.year===1973 && S.month>=1 && S.month<=2); }
+function snodoPace73OppDovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_US && S.livello===3 && S.opposizione && S.usPace73Opp==null && S.usPace73==null && us60Guerra() && (S.year===1973 && S.month>=1 && S.month<=2); }
+function snodoPetrolio73UsDovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_US && S.livello===3 && !S.opposizione && S.usPetrolio73==null && (S.year===1973 && S.month>=11 && S.month<=12); }
+function snodoPetrolio73UsOppDovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_US && S.livello===3 && S.opposizione && S.usPetrolio73Opp==null && S.usPetrolio73==null && (S.year===1973 && S.month>=11 && S.month<=12); }
 /* L227-1 · uno snodo nella stagione della campagna nazionale esce INSIEME alla carta di campagna (la forma di L177-2 per i pilastri
    `conCampagna`: due carte, uno snodo solo). Fuori stagione campagnaColPilastro dà null e non c'è niente in più. */
 /* L227-1 · il richiamo delle correnti passa prima di ogni snodo e fa agendaSolo: uno snodo con la finestra di UN mese solo (S2, i
@@ -7408,6 +7418,9 @@ function genAgendaRamo(first){
     if(!first && typeof snodoMissili62OppDovuta==='function' && snodoMissili62OppDovuta()){ snodoColCampagna({kind:'event', data:MISSILI62_OPP_EV, resolved:false}); return; }   // L227-1: i missili, dall'aula (con la carta di campagna della metà mandato)
     if(!first && typeof snodoDiritti64OppDovuta==='function' && snodoDiritti64OppDovuta()){ snodoColCampagna({kind:'event', data:DIRITTI64_OPP_EV, resolved:false}); return; }   // L227-1: la legge, dall'aula (con la carta di campagna)
     if(!first && typeof snodoVietnam65OppDovuta==='function' && snodoVietnam65OppDovuta()){ S.agenda.push({kind:'event', data:VIETNAM65_OPP_EV, resolved:false}); agendaSolo(); return; }   // L227-1: il Vietnam, dall'aula
+    if(!first && typeof snodoLuna70OppDovuta==='function' && snodoLuna70OppDovuta()){ S.agenda.push({kind:'event', data:LUNA70_OPP_EV, resolved:false}); agendaSolo(); return; }   // L258-4: lo spazio, dall'aula
+    if(!first && typeof snodoPace73OppDovuta==='function' && snodoPace73OppDovuta()){ S.agenda.push({kind:'event', data:PACE73_OPP_EV, resolved:false}); agendaSolo(); return; }   // L258-4: la pace, dall'aula
+    if(!first && typeof snodoPetrolio73UsOppDovuta==='function' && snodoPetrolio73UsOppDovuta()){ S.agenda.push({kind:'event', data:PETROLIO73_US_OPP_EV, resolved:false}); agendaSolo(); return; }   // L258-4: le code, dall'aula
     if(!first && typeof snodoScuola57OppDovuta==='function' && snodoScuola57OppDovuta()){ S.agenda.push({kind:'event', data:(S.partito==='us_rep' ? SCUOLA57_OPP_REP_EV : SCUOLA57_OPP_EV), resolved:false}); agendaSolo(); return; }   // L176-2: la scuola, dall'aula · D139 (L177-1): il testo repubblicano, stessi effetti
     // Cantiere C: la stagione elettorale vale anche da SFIDANTE (bloccoIds = il tuo blocco d'opposizione)
     if(typeof pickCampagnaNazionale==='function'){ const cnbO=pickCampagnaNazionale(); if(cnbO){ S.agenda.push(cnbO); agendaSolo(); return; } }
@@ -7572,6 +7585,9 @@ function genAgendaRamo(first){
   if(!first && typeof snodoMissili62Dovuta==='function' && snodoMissili62Dovuta()){ snodoColCampagna({kind:'event', data:MISSILI62_EV, resolved:false}); return; }   // L227-1: i missili (con la carta di campagna della metà mandato)
   if(!first && typeof snodoDiritti64Dovuta==='function' && snodoDiritti64Dovuta()){ snodoColCampagna({kind:'event', data:DIRITTI64_EV, resolved:false}); return; }   // L227-1: la legge (con la carta di campagna)
   if(!first && typeof snodoVietnam65Dovuta==='function' && snodoVietnam65Dovuta()){ S.agenda.push({kind:'event', data:VIETNAM65_EV, resolved:false}); agendaSolo(); return; }   // L227-1: il Vietnam
+  if(!first && typeof snodoLuna70Dovuta==='function' && snodoLuna70Dovuta()){ S.agenda.push({kind:'event', data:LUNA70_EV, resolved:false}); agendaSolo(); return; }   // L258-4: lo spazio
+  if(!first && typeof snodoPace73Dovuta==='function' && snodoPace73Dovuta()){ S.agenda.push({kind:'event', data:PACE73_EV, resolved:false}); agendaSolo(); return; }   // L258-4: la pace
+  if(!first && typeof snodoPetrolio73UsDovuta==='function' && snodoPetrolio73UsDovuta()){ S.agenda.push({kind:'event', data:PETROLIO73_US_EV, resolved:false}); agendaSolo(); return; }   // L258-4: le code
   if(!first && typeof franco90AncoraDovuta==='function'){ var _f9=franco90AncoraDovuta();   // L103-2: la corsa al franco del '92 e del '93
     if(_f9 && !cedeVoto(ancoraReggeRinvio(FRANCO90_ANCORE, _f9))){ S.francoAncore=S.francoAncore||{}; S.francoAncore[_f9]=true; if(_f9==='a92' && pesoFranco92()>1) S.francoGrave=true;   // col no a Maastricht pesa doppio
       S.agenda.push({kind:'event', data:(_f9==='a92' ? FRANCO92_EV : FRANCO93_EV), resolved:false}); agendaSolo(); return; } }
@@ -10281,7 +10297,7 @@ function applySnap(snap){
   ['deAsilo92','deAsilo92Opp','deConto93','deConto93Opp','dePacchetto96','dePacchetto96Opp','deKosovo99','deKosovo99Opp','deMoneta98'].forEach(function(k){ if(S[k]===undefined) S[k]=null; });   // L153-2: uno per uno
   ['deIraq02','deIraq02Opp','deAgenda03','deAgenda03Opp','deFiducia05','deFiducia05Opp','deBanche08','deBanche08Opp'].forEach(function(k){ if(S[k]===undefined) S[k]=null; });   // L157-1: uno per uno
   ['usCorea','usCoreaOpp','usGenerale','usGeneraleOpp','usAcciaio','usAcciaioOpp','usScuola','usScuolaOpp'].forEach(function(k){ if(S[k]===undefined) S[k]=null; });   // L176-2: uno per uno
-  ['usBaia','usBaiaOpp','usMissili','usMissiliOpp','usDiritti','usDirittiOpp','usVietnam','usVietnamOpp'].forEach(function(k){ if(S[k]===undefined) S[k]=null; });   // L227-1: i salvataggi di us1960 di prima caricano
+  ['usBaia','usBaiaOpp','usMissili','usMissiliOpp','usDiritti','usDirittiOpp','usVietnam','usVietnamOpp','usLuna70','usLuna70Opp','usPace73','usPace73Opp','usPetrolio73','usPetrolio73Opp'].forEach(function(k){ if(S[k]===undefined) S[k]=null; });   // L227-1: i salvataggi di us1960 di prima caricano
   if(S.scioglimento97===undefined) S.scioglimento97=null;   // L103-1
   if(S.coabitazione===undefined) S.coabitazione=false;   // L100-2
   if(S.governiCaduti===undefined) S.governiCaduti=0;   // L80-5
