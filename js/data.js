@@ -1951,7 +1951,12 @@ const SCENARI = {
        della presidenziale, positivo = al partito del Presidente in carica; li legge solo spintaPresidenziale() (model.js), 0 se il
        Presidente sei tu. Valori dalla sweep di L258-2 (misura-us1970.js gioc --spinta, rapporto «⚑ L258-2» in PRESET-USA-1970.md). */
     spintaPresidenziale: { 1972: 8, 1976: -3 },
-    mandatiVinti: 1,                            // D276: il Presidente ha vinto il 1968 (vale solo al livello 3 al governo: D135)
+    /* L258-6 (D285) · la soglia della primaria all'opposizione di questa porta (assente = 48, PRIMARIA_SOGLIA_OPP; la legge solo
+       basePrimaria(), il +2 del simbolo resta sopra): l'economia del decennio tiene l'umore delle correnti democratiche ~44 e la base
+       mediana ~50, e con 48 (50 col simbolo) i Democratici dall'opposizione perdevano la primaria 40 · 39 volte su 40. Sweep 46→42
+       (misura-us1970.js gioc --soglia, 40 × 2 semi): D96 2,5·4 · 3·6 · 8,5·9 · 10,5·11,5 · 13,5·12 — 42 è il primo che centra ≥ 12. */
+    sogliaPrimariaOpp: 42,
+    mandatiVinti: 1,                           // D276: il Presidente ha vinto il 1968 (vale solo al livello 3 al governo: D135)
     partiti: [
       { id:'us_dem', nome:'Democratici',  orientamento:'centrosinistra', base:{ giovani:0.4, lavoratori:0.35, cetomedio:0.25 },                  forza:51, forzaAncora:51, asse:-1 },
       { id:'us_rep', nome:'Repubblicani', orientamento:'centrodestra',   base:{ imprenditori:0.4, cetomedio:0.25, cattolici:0.2, pensionati:0.15 }, forza:49, forzaAncora:49, asse:1 },
@@ -1968,7 +1973,7 @@ const SCENARI = {
     debtAncora: 37,
     inflazione: 5.5,   // l'anno per anno sta in DRIFT_INFLAZIONE_ERA (assoluta, dalla scheda: l'11 del 1974 e del 1979; nessun tetto per gli Stati Uniti)
     crescita: 5,       // vedi la testata: la base di us1960, per la saldatura; il decennio sta nelle righe del ciclo (DRIFT_ECONOMICO_ERA)
-    logorioEra: 0.004,                          // L258-4 · ritarato dopo pilastri e snodi (misura-us1970.js gioc --logorio=0.005,…,0.003, 20 carriere: 0,004 il primo in banda; conferma 40 × 2 semi: Repubblicani al governo 1972 29·32/40, Democratici all'opposizione 0/15·0/16; a 0,005 con pilastri e snodi 10·12/40), rapporto «⚑ L258-4». Prima: L258-2 · dalla sweep (misura-us1970.js gioc --logorio=0,…,0.012, 20 carriere; conferma 40 × 2 semi: Repubblicani al governo 1972 27-28/40, metà mandato perse 69-72% ⚠), rapporto «⚑ L258-2» in PRESET-USA-1970.md
+    logorioEra: 0.00375,                        // L258-5 · ritarato dopo lo scandalo (S4a toglie un mese di campagna al Presidente): a 0,004 Repubblicani al governo 1972 23·31/40 (seme 11 fuori banda 24-36), a 0,00375 31·35/40 (misura-us1970.js gioc --semi=40, semi 11 · 2011), rapporto «⚑ L258-5». Prima: L258-4 · ritarato dopo pilastri e snodi (misura-us1970.js gioc --logorio=0.005,…,0.003, 20 carriere: 0,004 il primo in banda; conferma 40 × 2 semi: Repubblicani al governo 1972 29·32/40, Democratici all'opposizione 0/15·0/16; a 0,005 con pilastri e snodi 10·12/40), rapporto «⚑ L258-4». Prima: L258-2 · dalla sweep (misura-us1970.js gioc --logorio=0,…,0.012, 20 carriere; conferma 40 × 2 semi: Repubblicani al governo 1972 27-28/40, metà mandato perse 69-72% ⚠), rapporto «⚑ L258-2» in PRESET-USA-1970.md
     valuta: VALUTA_DOLLARO,
     intro: "Stati Uniti, 1969. Il nuovo Presidente ha vinto per un soffio, con un governatore del Sud candidato da solo che ha preso quasi un voto su sette. Mezzo milione di soldati è in Vietnam, le università sono in rivolta, e fra sei mesi due uomini scenderanno sulla Luna.",
     contesto: [
@@ -21797,6 +21802,10 @@ const SNODI_STORICI = {
   usPace73Opp:     { storico:['saluto'], conforme:'sulla pace di Parigi, dall’opposizione', diverge:{ 'fondi':'Nel 1973 ha proposto di tagliare i fondi per ogni nuova operazione in Indocina.', 'abbandono':'Nel 1973 ha accusato la pace di Parigi di abbandonare il Vietnam del Sud.' } },
   usPetrolio73:    { storico:['blocco'], conforme:'sulle code ai distributori', diverge:{ 'prezzo':'Nel 1973 ha lasciato salire il prezzo della benzina per far finire le code.', 'tessere':'Nel 1973 ha distribuito le tessere di razionamento della benzina.' } },
   usPetrolio73Opp: { storico:['emergenza'], conforme:'sulle code ai distributori, dall’opposizione', diverge:{ 'utili':'Nel 1973 ha chiesto una tassa sugli utili delle compagnie del petrolio.', 'mercato':'Nel 1973 ha chiesto dall’opposizione di togliere i controlli sul prezzo della benzina.' } },
+  usScandalo:      { storico:['coperto'], conforme:'sull’irruzione del 1972', diverge:{ 'pulizia':'Nel 1972 ha licenziato i responsabili dell’irruzione e ha collaborato con l’inchiesta.', 'giudici':'Nel 1972 ha negato ogni legame con l’irruzione e ha lasciato il caso ai giudici.' } },   // L258-5
+  usScandaloOpp:   { storico:['campagna'], conforme:'sull’irruzione del 1972, dall’opposizione', diverge:{ 'giudici':'Nel 1972 ha lasciato ai giudici l’irruzione negli uffici del suo partito.', 'commissione':'Nel 1972 ha chiesto subito una commissione d’inchiesta sull’irruzione.' } },
+  usNastri74:      { storico:['consegna'], conforme:'sui nastri dello Studio Ovale', diverge:{ 'corte':'Nel 1974 ha resistito fino alla Corte suprema per non consegnare i nastri.', 'trascrizioni':'Nel 1974 ha consegnato le trascrizioni ritoccate dei nastri invece dei nastri.' } },
+  usNastri74Opp:   { storico:['accusa'], conforme:'sui nastri dello Studio Ovale, dall’opposizione', diverge:{ 'corte':'Nel 1974 ha aspettato dall’opposizione la sentenza della Corte sui nastri.', 'uscita':'Nel 1974 ha cercato dall’opposizione un’uscita onorevole per il Presidente.' } },
 };
 
 /* ==============================================================================================================
@@ -25148,6 +25157,96 @@ const PETROLIO73_US_OPP_EV = {
     { l:'Via i controlli: il mercato farà finire le code', e:'Gli economisti ti danno ragione · chi si scalda col gasolio fa i conti, e li fa su di te',
       f:function(){ S.usPetrolio73Opp='mercato'; gdUs60('imprenditori',2); gdUs60('pensionati',-2); gdUs60('lavoratori',-1);
         S.log.unshift({t:T('Il petrolio'),x:T('Ha chiesto dall\'opposizione di togliere i controlli sul prezzo della benzina.')}); } },
+  ],
+};
+/* ==============================================================================================================
+   L258-5 · STATI UNITI 1970 — LO SCANDALO IN DUE TEMPI (scheda PRESET-USA-1970 §4 S4, D278 (i), D279 (a), D280). Flag nuovi cercati
+   in tutto js/ e .claude/ il 25/10 prima di scriverli (L99-2), zero occorrenze: usScandalo, usScandaloOpp, usNastri74, usNastri74Opp
+   (e i campi facoltativi usNastriRitorno, usDimissioni). La chiave del finale è `dimissioni`: in gameOver non esisteva (`'dimissioni'`
+   c'era solo come VALORE di S.caduta90 e come `uscita` del rimpasto, altri sensi, nessun conflitto).
+   ⚑ LEGATO AL RUOLO, NON AL PARTITO (Cowork): esce al Presidente in carica dal 1969 che si ricandida nel 1972 — il giocatore al governo
+   (cancello in game.js: !limiteMandatiRaggiunto()), o l'avversario se il giocatore è all'opposizione (la sua ricandidatura non si
+   modella: si dà per fatta, come nella storia). Nel 1972/7-8 il Presidente è per forza quello del voto del 1968: negli Stati Uniti il
+   governo non cambia fra un'urna e l'altra. I testi non nominano partiti né persone.
+   ⚑ S4a 1972/7-8 in campagna (snodoColCampagna, come S2-S3 di us1960; giugno è di pus70_rapidcity). S4b 1974/5-6 (aprile è di
+   pus70_tornado74): solo dopo 'coperto' o 'giudici' (il Presidente-giocatore che ha rivinto il 1972: chi l'ha perso non è più al
+   governo), o dall'aula a chi ha giocato S4a dall'aula ed è ancora all'opposizione (il Presidente del 1969 ha rivinto il 1972; quello
+   che decide al posto suo è l'IA, e fa la storia: copre). Il seguito (voto d'accusa, trascrizioni, successione) lo decide
+   usNastriMese() in advanceMonth, al mese scritto in S.usNastriRitorno: game.js, accanto a ACCUSA_LEGGE.
+   ============================================================================================================== */
+const SCANDALO72_EV = {
+  id:'snodo_scandalo72', snodo:true, era:'us1970', kick:'Lo scandalo',
+  t:'L\'irruzione',
+  text:'A metà giugno, di notte, cinque uomini sono stati arrestati negli uffici del partito avversario, con i microfoni, le macchine fotografiche e banconote nuove in tasca. Gli assegni portano al comitato per la tua rielezione. Per ora ne scrivono un quotidiano della capitale e due cronisti giovani; mancano tre mesi al voto, e i tuoi collaboratori aspettano di sapere che cosa devono dire.',
+  ch:[
+    { l:'Coprire: nessuno sa niente, fino al voto', e:'La storia · gli arrestati tacciono, e qualcuno li paga perché tacciano · a novembre la valanga · ma alla Casa Bianca si è cominciato a mentire, e chi mente deve continuare',
+      f:function(){ S.usScandalo='coperto'; espoSale(10);
+        S.log.unshift({t:T('Lo scandalo'),x:T('Ha coperto l\'irruzione negli uffici del partito avversario.')}); } },
+    { l:'Fare pulizia: fuori i responsabili, e tutto ai giudici', e:'La campagna perde un mese e qualche punto · il caso si chiude qui, con i nomi di chi l\'ha voluto',
+      f:function(){ S.usScandalo='pulizia'; espoSale(-6); stampad(2); gdUs60('cetomedio',-2); gdUs60('imprenditori',-2); gdUs60('pensionati',-1);
+        S.log.unshift({t:T('Lo scandalo'),x:T('Ha licenziato i responsabili dell\'irruzione e ha collaborato con l\'inchiesta.')}); } },
+    { l:'Negare, e lasciar fare ai giudici', e:'Nessuno della Casa Bianca è indagato, per ora · il caso resta aperto, e cammina piano',
+      f:function(){ S.usScandalo='giudici'; espoSale(5); stampad(-1); gdUs60('cetomedio',-1);
+        S.log.unshift({t:T('Lo scandalo'),x:T('Ha negato ogni legame con l\'irruzione e ha lasciato il caso ai giudici.')}); } },
+  ],
+};
+const SCANDALO72_OPP_EV = {
+  id:'snodo_scandalo72_opp', snodo:true, era:'us1970', kick:'Lo scandalo',
+  t:'L\'irruzione, dall\'aula',
+  text:'A metà giugno, di notte, cinque uomini sono stati arrestati negli uffici del tuo partito, con i microfoni e banconote nuove in tasca. Gli assegni portano al comitato per la rielezione del Presidente. La Casa Bianca parla di un furto da niente, i giornali quasi non ne parlano, e mancano tre mesi al voto.',
+  ch:[
+    { l:'Farne il cuore della campagna', e:'La storia · lo ripeti in ogni comizio, per tre mesi · il paese non ascolta: a novembre la valanga è dell\'altro',
+      f:function(){ S.usScandaloOpp='campagna'; gdUs60('giovani',2); gdUs60('cetomedio',-1); baseUs60(1);
+        S.log.unshift({t:T('Lo scandalo'),x:T('Ha fatto dell\'irruzione il cuore della campagna.')}); } },
+    { l:'Aspettare i giudici', e:'Nessuno ti accusa di sciacallaggio · e nessuno ne parla',
+      f:function(){ S.usScandaloOpp='giudici'; gdUs60('cetomedio',1); gdUs60('giovani',-1);
+        S.log.unshift({t:T('Lo scandalo'),x:T('Dall\'opposizione ha lasciato l\'irruzione ai giudici.')}); } },
+    { l:'Chiedere subito una commissione d\'inchiesta', e:'Prima del voto non si fa in tempo · intanto ti accusano di usare un furto per la campagna',
+      f:function(){ S.usScandaloOpp='commissione'; gdUs60('giovani',1); gdUs60('pensionati',-1); baseUs60(1);
+        S.log.unshift({t:T('Lo scandalo'),x:T('Ha chiesto una commissione d\'inchiesta sull\'irruzione.')}); } },
+  ],
+};
+/* S4b · i nastri. Con 'coperto' gli effetti sono più duri che con 'giudici' (usScandaloK: 1,5 contro 1). (a) chiude la carriera
+   subito (il finale `dimissioni`, volontarie); (b) e (c) mettono il seguito in S.usNastriRitorno: il voto d'accusa due mesi dopo,
+   o il ritorno delle trascrizioni tre mesi dopo, fuori dai mesi del voto e dei pilastri (usNastriPianifica). */
+const NASTRI74_EV = {
+  id:'snodo_nastri74', snodo:true, era:'us1970', kick:'Lo scandalo', tono:'grave',
+  t:'I nastri',
+  text:'L\'irruzione di due anni fa non è più un furto da niente. Due degli arrestati hanno parlato, una commissione del Senato ha interrogato i tuoi collaboratori in diretta televisiva, e uno di loro ha detto quello che nessuno sapeva: nel tuo studio un registratore ascolta tutto, da anni. Il procuratore speciale chiede i nastri, e i giudici gli danno ragione.',
+  ch:[
+    { l:'Consegnare i nastri', e:'La storia · nei nastri c\'è la prova che l\'insabbiamento è partito dal tuo studio · il 9 agosto 1974 il Presidente lascia la Casa Bianca; giura il vicepresidente, che nessuno aveva eletto · un mese dopo gli concede la grazia',
+      f:function(){ S.usNastri74='consegna';
+        S.log.unshift({t:T('Lo scandalo'),x:T('Ha consegnato i nastri dello Studio Ovale e ha lasciato la carica.')});
+        usDimetti('volontarie'); } },
+    { l:'Resistere fino alla Corte suprema', e:'Il segreto del Presidente, davanti alla Corte · intanto alla Camera si prepara il voto d\'accusa, e lo decideranno i numeri',
+      f:function(){ var k=usScandaloK(); S.usNastri74='corte'; espoSale(Math.round(6*k)); stampad(-Math.round(2*k)); gdUs60('cetomedio',-Math.round(2*k)); gdUs60('cattolici',-1);
+        S.log.unshift({t:T('Lo scandalo'),x:T('Ha rifiutato di consegnare i nastri e ha portato il caso alla Corte suprema.')});
+        usNastriPianifica('voto', 2); } },
+    { l:'Consegnare le trascrizioni, ritoccate', e:'Mille pagine, con «parole cancellate» dove serve · compri qualche mese, e il paese legge come parla il suo Presidente quando nessuno ascolta',
+      f:function(){ var k=usScandaloK(); S.usNastri74='trascrizioni'; espoSale(Math.round(4*k)); stampad(-1); gdUs60('cattolici',-Math.round(2*k)); gdUs60('pensionati',-1);
+        S.log.unshift({t:T('Lo scandalo'),x:T('Ha consegnato le trascrizioni dei nastri, ritoccate, invece dei nastri.')});
+        usNastriPianifica('trascrizioni', 3); } },
+  ],
+};
+/* L'aula: la sorte del Presidente-IA la decide un dado sul suo consenso (usNastriPianifica('successione', 2, p)), come le altre cadute
+   dei governi avversari; se se ne va, il volto del governo avversario cambia senza urne (D280) e la presidenziale del 1976 resta lì. */
+const NASTRI74_OPP_EV = {
+  id:'snodo_nastri74_opp', snodo:true, era:'us1970', kick:'Lo scandalo', tono:'grave',
+  t:'I nastri, dall\'aula',
+  text:'L\'irruzione di due anni fa è diventata il caso del secolo. Una commissione del Senato ha scoperto che nello studio del Presidente un registratore ascoltava tutto, il procuratore speciale chiede i nastri, e la Casa Bianca risponde con mille pagine di trascrizioni piene di «parole cancellate». Alla Camera la commissione Giustizia aspetta di sapere che cosa farà il tuo partito.',
+  ch:[
+    { l:'Aprire la procedura d\'accusa', e:'La storia · a fine luglio la commissione Giustizia vota tre articoli d\'accusa · il Presidente non arriverà al voto dell\'aula',
+      f:function(){ S.usNastri74Opp='accusa'; gdUs60('giovani',2); gdUs60('cattolici',-1); baseUs60(1);
+        S.log.unshift({t:T('Lo scandalo'),x:T('Dall\'opposizione ha aperto la procedura d\'accusa contro il Presidente.')});
+        usNastriPianifica('successione', 2, 0.75); } },
+    { l:'Aspettare la Corte suprema', e:'Nessuno ti accusa di avere fretta · la sentenza arriverà, e deciderà lei',
+      f:function(){ S.usNastri74Opp='corte'; gdUs60('cetomedio',1); gdUs60('giovani',-1);
+        S.log.unshift({t:T('Lo scandalo'),x:T('Dall\'opposizione ha aspettato la sentenza della Corte sui nastri.')});
+        usNastriPianifica('successione', 2, 0.55); } },
+    { l:'Cercare un\'uscita onorevole per il Presidente', e:'Le dimissioni in cambio di niente · il paese apprezza la misura, i tuoi militanti meno',
+      f:function(){ S.usNastri74Opp='uscita'; gdUs60('pensionati',1); gdUs60('cetomedio',1); baseUs60(-1);
+        S.log.unshift({t:T('Lo scandalo'),x:T('Dall\'opposizione ha cercato un\'uscita onorevole per il Presidente.')});
+        usNastriPianifica('successione', 2, 0.65); } },
   ],
 };
 /* L110-2 · I TERRITORI E LA MAPPA DI de1960: quelli di de1950 più la Saar in coda (è entrata alla tappa del 1957/1), con lo stesso

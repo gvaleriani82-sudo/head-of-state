@@ -718,7 +718,7 @@ function scenaFinale(reason){ var M=_sm('finale'); if(!M) return null;
   if(reason==='ritiro' || (reason==='salute'&&(typeof S==='undefined'||!S||S.esitoSalute!=='fatale')) || reason==='mandatoInt')
     return trionf ? M.trionfo : M.dignita;                                     // uscite dignitose; carriera trionfale → trionfo
   if(reason==='silurato' && M.silurato) return M.silurato;                     // L127-1b: il premier ti toglie la scrivania
-  if(reason==='crisi'||reason==='insolvenza'||reason==='rivolta'||reason==='condanna'||reason==='silurato'||(reason==='salute'&&typeof S!=='undefined'&&S&&S.esitoSalute==='fatale'))
+  if(reason==='crisi'||reason==='insolvenza'||reason==='rivolta'||reason==='condanna'||reason==='silurato'||reason==='dimissioni'||(reason==='salute'&&typeof S!=='undefined'&&S&&S.esitoSalute==='fatale'))
     return M.caduta;                                                           // cadute: sfiducia/insolvenza/condanna/silurato/fine-salute
   return M.oblio; }                                                            // congresso/primaria/sconfittaLocale/sconfitta netta
 /* ================================================================================================================
@@ -1297,8 +1297,9 @@ function chiudiClipPorta(){
   voceClipDuck(false);   // L218-7: il tema del decennio torna pieno (⚑ L246-1: in 1 s, dallo zero)
   PORTA_CLIP_FERME.forEach(function(v){ try{ if(v.isConnected){ const p=v.play(); if(p && p.catch) p.catch(function(){}); } }catch(e){} }); PORTA_CLIP_FERME=[];
 }
-function confermaCreazione(){ proseguiAvvio(); }                  // CREA resta: initStatoBase la consuma
+function confermaCreazione(){ if(!ppAvvioPronto()) return; proseguiAvvio(); }   // L259-1: una bozza del partito proprio aperta e compilata non si perde in silenzio                  // CREA resta: initStatoBase la consuma
 function saltaCreazione(){   // neutro: nessun credito, età 52
+  if(!ppAvvioPronto()) return;   // L259-1
   const pp=(CREA && CREA.proprio) ? {proprio:CREA.proprio, partito:CREA.partito, livello:(CREA.livello===1?1:0), terrIdx:CREA.terrIdx} : null;
   CREA=null;
   if(pp){ CREA={nome:'', genere:'m', eta:(pp.livello===1?40:25), background:null, orientamento:0, religiosita:'laico', livello:pp.livello, terrIdx:pp.terrIdx, proprio:pp.proprio, partito:pp.partito};   // L237-4: col partito proprio il «neutro» parte dal basso (D-P2)
@@ -1743,6 +1744,23 @@ function ppConferma(){
   else if(typeof renderCreazione==='function') renderCreazione();
   renderStartParties();
 }
+/* L259-1 (25/10) · LA BOZZA NON CONFERMATA. Il riquadro si compila e si conferma con «Fonda il partito»; «Avanti» sta sempre in basso
+   (barra fissa) e fino a qui avviava la carriera ignorando la bozza aperta: il partito restava il predefinito del paese (in Italia
+   Fratelli d'Italia: il primo del roster, setCountry) — il caso segnalato da Giacomo il 25/10, riprodotto in prove/l259-1. Ora,
+   all'avvio (Avanti e Salta), una bozza aperta e TOCCATA (nome, sigla, base, posizione o colore cambiati) si conferma come se si
+   fosse premuto «Fonda il partito»: valida e con la partenza da attivista o locale → si parte col partito nuovo; con errori → restano
+   scritti nel riquadro e non si parte; valida ma da un livello alto → ppConferma riporta all'attivista e non si parte (il giocatore
+   vede il cambio). Una bozza aperta e intatta (solo il tocco sul bottone) non ferma niente. true = si può avviare. */
+function ppAvvioPronto(){
+  if(!PP_BOZZA || !PP_BOZZA.aperto || PP_BOZZA.modo==='scissione' || ppFondato() || !ppPossibile() || !(typeof CREA!=='undefined' && CREA)) return true;
+  const B=PP_BOZZA, toccata=!!(String(B.nome||'').trim() || String(B.sigla||'').trim() || B.base.length || B.asse!==0 || B.colore!==PP_PALETTE[0]);
+  if(!toccata) return true;
+  const basso=(CREA.livello===0 || CREA.livello===1);
+  ppConferma();
+  if(ppFondato() && basso) return true;
+  const r=document.getElementById('pp-riquadro'); if(r && r.scrollIntoView) r.scrollIntoView({block:'start'});
+  return false;
+}
 function ppDiscoHtml(colore){ return /^#[0-9a-f]{6}$/i.test(String(colore||'')) ? `<span class="pp-disco" style="background:${colore}" aria-hidden="true"></span>` : ''; }
 function ppBottoneHtml(){
   if(!ppPossibile()) return '';
@@ -1813,7 +1831,7 @@ function ppAnnullaScissione(){ if(!PP_BOZZA) return; scissioneAnnulla(); ppChiud
 function escAttr(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 /* participi concordati col genere del personaggio IN CORSO (gn, game.js); per le carriere passate
    showCarriere usa l'etichetta CONGELATA alla chiusura (c.esitoTesto) — il genere era di quel personaggio */
-function esitoLabel(r){ return ({crisi:gn('caduto per crisi di governo','caduta per crisi di governo'), insolvenza:gn('travolto dall\'insolvenza','travolta dall\'insolvenza'), rivolta:gn('caduto per la rivolta di un gruppo','caduta per la rivolta di un gruppo'), congresso:gn('sostituito dal partito','sostituita dal partito'), voto:gn('battuto al voto','battuta al voto'), primaria:gn('sconfitto alle primarie','sconfitta alle primarie'), ritiro:gn('ritirato a vita privata','ritirata a vita privata'), condanna:gn('travolto da una condanna','travolta da una condanna'), salute:T('per ragioni di salute'), silurato:gn('silurato dal premier','silurata dal premier'), sconfittaLocale:gn('sconfitto alle comunali','sconfitta alle comunali')})[r] || (r||T('concluso')); }   // i18n: frasi INTERE dentro gn (in EN convergono)
+function esitoLabel(r){ return ({crisi:gn('caduto per crisi di governo','caduta per crisi di governo'), insolvenza:gn('travolto dall\'insolvenza','travolta dall\'insolvenza'), rivolta:gn('caduto per la rivolta di un gruppo','caduta per la rivolta di un gruppo'), congresso:gn('sostituito dal partito','sostituita dal partito'), voto:gn('battuto al voto','battuta al voto'), primaria:gn('sconfitto alle primarie','sconfitta alle primarie'), ritiro:gn('ritirato a vita privata','ritirata a vita privata'), condanna:gn('travolto da una condanna','travolta da una condanna'), salute:T('per ragioni di salute'), silurato:gn('silurato dal premier','silurata dal premier'), sconfittaLocale:gn('sconfitto alle comunali','sconfitta alle comunali'), mandatoCompiuto:T('mandato compiuto'), mandatoInt:T('fine del mandato internazionale'), dimissioni:((typeof S!=='undefined'&&S&&S.usDimissioni==='rimosso')?gn('rimosso dalla carica','rimossa dalla carica'):gn('dimesso dopo lo scandalo','dimessa dopo lo scandalo'))})[r] || (r||T('concluso')); }   // i18n: frasi INTERE dentro gn (in EN convergono)
 function renderStartPersistence(){
   const cont=document.getElementById('start-continue');
   if(cont){

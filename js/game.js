@@ -492,6 +492,7 @@ function initStatoBase(){
   S.deIraq02=null; S.deIraq02Opp=null; S.deAgenda03=null; S.deAgenda03Opp=null; S.deFiducia05=null; S.deFiducia05Opp=null; S.deBanche08=null; S.deBanche08Opp=null;   // L157-1: il decennio tedesco 2000
   S.usCorea=null; S.usCoreaOpp=null; S.usGenerale=null; S.usGeneraleOpp=null; S.usAcciaio=null; S.usAcciaioOpp=null; S.usScuola=null; S.usScuolaOpp=null;   // L176-2: gli snodi di us1950
   S.usBaia=null; S.usBaiaOpp=null; S.usMissili=null; S.usMissiliOpp=null; S.usDiritti=null; S.usDirittiOpp=null; S.usVietnam=null; S.usVietnamOpp=null; S.usLuna70=null; S.usLuna70Opp=null; S.usPace73=null; S.usPace73Opp=null; S.usPetrolio73=null; S.usPetrolio73Opp=null;   // L227-1: gli snodi di us1960
+  S.usScandalo=null; S.usScandaloOpp=null; S.usNastri74=null; S.usNastri74Opp=null;   // L258-5: lo scandalo di us1970 (usNastriRitorno e usDimissioni sono facoltativi: nascono solo quando servono)
   S.scioglimento97=null;   // L103-1: lo scioglimento del '97 (null = storico; 'no' = «aspetta», tappa 1998/3). Lo scrive S4 in L103-2
   S.coabitazione=false;   // L100-2: il Presidente con l'Assemblea degli altri (derivato dai seggi, dato puro, round-trip)
   S.governiCaduti=0;                    // L80-5: quante volte il governo e caduto senza che si andasse a votare
@@ -3523,7 +3524,8 @@ const SCENARIO_ISTITUZIONI = ['sistema','comeSiVince','coalizione','cadutaGovern
                               'meseUrna',            // L173-1: il mese dell'urna a scadenza (assente = gennaio, come prima)
                               'congresso',           // L173-2: la Camera d'avvio del partito del Presidente (assente = nessun Congresso)
                               'sbarramento', 'sfiduciaCostruttiva',    // L107-2: la soglia dei seggi e l'art. 67 (assenti = come prima)
-                              'spintaPresidenziale'];                  // L216-1: punti sul voto della presidenziale per anno (assente = nessuna)
+                              'spintaPresidenziale',                   // L216-1: punti sul voto della presidenziale per anno (assente = nessuna)
+                              'sogliaPrimariaOpp'];                    // L258-6: la soglia della primaria all'opposizione (assente = PRIMARIA_SOGLIA_OPP); la legge solo basePrimaria()
 /* L249-1 · IL NOME DEL PAESE IN PARTITA: la porta che dichiara `nomePaese` (le porte di Bonn: «Germania Ovest») lo tiene finché la
    mappa ha la terra `oltre` il confine — la RDT, che la tappa dell'unità (1990/10) toglie con `mappa:{oltre:null}`: dal mese
    dell'unità il paese torna «Germania». Lo leggono i titoli della notte e dell'esito; il presente e le altre porte non cambiano. */
@@ -4592,6 +4594,15 @@ function snodoPace73Dovuta(){ return typeof S!=='undefined' && S && S.era===LINE
 function snodoPace73OppDovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_US && S.livello===3 && S.opposizione && S.usPace73Opp==null && S.usPace73==null && us60Guerra() && (S.year===1973 && S.month>=1 && S.month<=2); }
 function snodoPetrolio73UsDovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_US && S.livello===3 && !S.opposizione && S.usPetrolio73==null && (S.year===1973 && S.month>=11 && S.month<=12); }
 function snodoPetrolio73UsOppDovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_US && S.livello===3 && S.opposizione && S.usPetrolio73Opp==null && S.usPetrolio73==null && (S.year===1973 && S.month>=11 && S.month<=12); }
+/* L258-5 · i cancelli dello scandalo (data.js, testa del blocco SCANDALO72_EV). S4a 1972/7-8 dentro la campagna presidenziale (giugno è di
+   pus70_rapidcity): l'iniezione mette anche la carta di campagna (snodoColCampagna). Il Presidente-giocatore deve potersi ricandidare
+   (!limiteMandatiRaggiunto(): chi ha già vinto due volte chiude alla vigilia e non ha una rielezione da proteggere); il Presidente-IA
+   si ricandida sempre. S4b 1974/5-6 (aprile è di pus70_tornado74), solo dopo 'coperto' o 'giudici' al governo — chi ha perso il 1972
+   è all'opposizione e non lo riceve —, e dall'aula solo a chi ha giocato S4a dall'aula (il Presidente del 1969 ha rivinto il 1972). */
+function snodoScandalo72Dovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_US && S.livello===3 && !S.opposizione && S.usScandalo==null && !limiteMandatiRaggiunto() && (S.year===1972 && S.month>=7 && S.month<=8); }
+function snodoScandalo72OppDovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_US && S.livello===3 && S.opposizione && S.usScandaloOpp==null && S.usScandalo==null && (S.year===1972 && S.month>=7 && S.month<=8); }
+function snodoNastri74Dovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_US && S.livello===3 && !S.opposizione && S.usNastri74==null && (S.usScandalo==='coperto' || S.usScandalo==='giudici') && (S.year===1974 && S.month>=5 && S.month<=6); }
+function snodoNastri74OppDovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_US && S.livello===3 && S.opposizione && S.usNastri74Opp==null && S.usNastri74==null && S.usScandaloOpp!=null && (S.year===1974 && S.month>=5 && S.month<=6); }
 /* L227-1 · uno snodo nella stagione della campagna nazionale esce INSIEME alla carta di campagna (la forma di L177-2 per i pilastri
    `conCampagna`: due carte, uno snodo solo). Fuori stagione campagnaColPilastro dà null e non c'è niente in più. */
 /* L227-1 · il richiamo delle correnti passa prima di ogni snodo e fa agendaSolo: uno snodo con la finestra di UN mese solo (S2, i
@@ -6615,6 +6626,7 @@ function generaFinale(reason){
   else if(reason==='voto') pag=T(', battuto alle urne nel %Y da %V').replace('%Y',anno).replace('%V',(vs&&vs.v)||'');
   else if(reason==='ritiro') pag=T(', ritirato nel %Y con %G ancora al %V').replace('%Y',anno).replace('%G',gN).replace('%V',gV);
   else if(reason==='condanna') pag=T(', condannato nel %Y').replace('%Y',anno);
+  else if(reason==='dimissioni') pag=(S.usDimissioni==='rimosso' ? gn(', rimosso dalla carica nel %Y',', rimossa dalla carica nel %Y') : T(', che lasciò la carica nel %Y prima del voto d\'accusa')).replace('%Y',anno);   // L258-5
   else if(reason==='salute') pag=T(', fermato dalla salute nel %Y').replace('%Y',anno);
   /* L86-1 — DUE code, e le separa un DATO, non un aggettivo: il consenso con cui si lascia. La soglia è la
      MEDIANA misurata sulle 280 carriere che arrivano al limite nei sette paesi (53,6), non un numero tondo:
@@ -6642,6 +6654,7 @@ function generaEpilogo(reason){
   if(c.scaricati) t2.push(c.scaricati===1?T('un ministro scaricato'):c.scaricati+' '+T('ministri scaricati'));
   if(t2.length) par.push(T('Sul cammino: ')+t2.join(', ')+'.');
   /* L72-1: la rivolta entra nella storia, fra i primi paragrafi (aggiungiCarriera ne conserva tre) */
+  if(reason==='dimissioni') par.push(T('Lo scandalo cominciato con un\'irruzione notturna è finito nello Studio Ovale: la carriera si chiude lì, a metà del mandato, e la storia lo racconterà prima di tutto il resto.'));   // L258-5
   if(reason==='rivolta'){ const gN=S.rivoltaGruppo?nomeGruppo(S.rivoltaGruppo):null; if(gN) par.push(T('Cadde perché un pezzo di paese — %G — tenuto per mesi sotto la soglia della pazienza dalla sua stessa politica, scese in piazza.').replace('%G',gN)); }
   /* la statura internazionale (lotto internazionale fase A): la media delle relazioni coi grandi enti */
   if(typeof relIntMean==='function' && S.relInt && Object.keys(S.relInt).length){
@@ -6824,7 +6837,9 @@ function sfidaAffronta(){
 const PRIMARIA_SOGLIA=50, PRIMARIA_SOGLIA_OPP=48;
 function basePrimaria(bonus){
   const pl=(S.potereLocale!=null)?S.potereLocale:bloccoQuota();
-  const sogliaBase=S.opposizione ? PRIMARIA_SOGLIA_OPP : PRIMARIA_SOGLIA;
+  /* L258-6 · una porta può dichiarare la SUA soglia dell'opposizione (`sogliaPrimariaOpp`, campo di SCENARIO_ISTITUZIONI: PAESE la
+     porta già risolta, anche dopo un caricamento); assente = 48 come sempre. Al governo resta 50, e il +2 del simbolo si somma sopra. */
+  const sogliaBase=S.opposizione ? ((PAESE && PAESE.sogliaPrimariaOpp!=null) ? PAESE.sogliaPrimariaOpp : PRIMARIA_SOGLIA_OPP) : PRIMARIA_SOGLIA;
   const soglia=sogliaBase + (S.sfida && S.sfida.fonte==='territorio' && S.sfida.simbolo ? 2 : 0);
   return { base:umoreMedio()*0.5 + S.ind.consenso*0.3 + pl*0.2 + (bonus||0), soglia:soglia, sogliaBase:sogliaBase, pl:pl };   // L64-3: +3 se scegli tu il momento
 }
@@ -7421,6 +7436,8 @@ function genAgendaRamo(first){
     if(!first && typeof snodoLuna70OppDovuta==='function' && snodoLuna70OppDovuta()){ S.agenda.push({kind:'event', data:LUNA70_OPP_EV, resolved:false}); agendaSolo(); return; }   // L258-4: lo spazio, dall'aula
     if(!first && typeof snodoPace73OppDovuta==='function' && snodoPace73OppDovuta()){ S.agenda.push({kind:'event', data:PACE73_OPP_EV, resolved:false}); agendaSolo(); return; }   // L258-4: la pace, dall'aula
     if(!first && typeof snodoPetrolio73UsOppDovuta==='function' && snodoPetrolio73UsOppDovuta()){ S.agenda.push({kind:'event', data:PETROLIO73_US_OPP_EV, resolved:false}); agendaSolo(); return; }   // L258-4: le code, dall'aula
+    if(!first && typeof snodoScandalo72OppDovuta==='function' && snodoScandalo72OppDovuta()){ snodoColCampagna({kind:'event', data:SCANDALO72_OPP_EV, resolved:false}); return; }   // L258-5: l'irruzione, dall'aula (con la carta di campagna della presidenziale)
+    if(!first && typeof snodoNastri74OppDovuta==='function' && snodoNastri74OppDovuta()){ S.agenda.push({kind:'event', data:NASTRI74_OPP_EV, resolved:false}); agendaSolo(); return; }   // L258-5: i nastri, dall'aula
     if(!first && typeof snodoScuola57OppDovuta==='function' && snodoScuola57OppDovuta()){ S.agenda.push({kind:'event', data:(S.partito==='us_rep' ? SCUOLA57_OPP_REP_EV : SCUOLA57_OPP_EV), resolved:false}); agendaSolo(); return; }   // L176-2: la scuola, dall'aula · D139 (L177-1): il testo repubblicano, stessi effetti
     // Cantiere C: la stagione elettorale vale anche da SFIDANTE (bloccoIds = il tuo blocco d'opposizione)
     if(typeof pickCampagnaNazionale==='function'){ const cnbO=pickCampagnaNazionale(); if(cnbO){ S.agenda.push(cnbO); agendaSolo(); return; } }
@@ -7588,6 +7605,8 @@ function genAgendaRamo(first){
   if(!first && typeof snodoLuna70Dovuta==='function' && snodoLuna70Dovuta()){ S.agenda.push({kind:'event', data:LUNA70_EV, resolved:false}); agendaSolo(); return; }   // L258-4: lo spazio
   if(!first && typeof snodoPace73Dovuta==='function' && snodoPace73Dovuta()){ S.agenda.push({kind:'event', data:PACE73_EV, resolved:false}); agendaSolo(); return; }   // L258-4: la pace
   if(!first && typeof snodoPetrolio73UsDovuta==='function' && snodoPetrolio73UsDovuta()){ S.agenda.push({kind:'event', data:PETROLIO73_US_EV, resolved:false}); agendaSolo(); return; }   // L258-4: le code
+  if(!first && typeof snodoScandalo72Dovuta==='function' && snodoScandalo72Dovuta()){ snodoColCampagna({kind:'event', data:SCANDALO72_EV, resolved:false}); return; }   // L258-5: l'irruzione (con la carta di campagna della presidenziale)
+  if(!first && typeof snodoNastri74Dovuta==='function' && snodoNastri74Dovuta()){ S.agenda.push({kind:'event', data:NASTRI74_EV, resolved:false}); agendaSolo(); return; }   // L258-5: i nastri
   if(!first && typeof franco90AncoraDovuta==='function'){ var _f9=franco90AncoraDovuta();   // L103-2: la corsa al franco del '92 e del '93
     if(_f9 && !cedeVoto(ancoraReggeRinvio(FRANCO90_ANCORE, _f9))){ S.francoAncore=S.francoAncore||{}; S.francoAncore[_f9]=true; if(_f9==='a92' && pesoFranco92()>1) S.francoGrave=true;   // col no a Maastricht pesa doppio
       S.agenda.push({kind:'event', data:(_f9==='a92' ? FRANCO92_EV : FRANCO93_EV), resolved:false}); agendaSolo(); return; } }
@@ -8459,6 +8478,7 @@ function avanzaMese(){
   avanzaAnnoMandato();   // L173-1: l'anno del mandato cresce al mese dell'urna (gennaio senza meseUrna)
   riallineamentoTappa();  // AVANZAMENTO — riallineamento-partiti alle tappe '58/'63 (Fase 1: inerte, tabella vuota → no-op)
   if(S.dopoguerra) dopoguerraMese();   // L245-4: i 24 mesi del dopoguerra finiscono
+  if(usNastriMese()) return;   // L258-5: il voto d'accusa, il ritorno delle trascrizioni o la successione dall'aula, al mese suo (no-op senza S.usNastriRitorno)
   crisiMese();   // L245-6: anche senza crisi (il rivale può aprirne una da sé: crisiSubitaMese; a regola spenta esce subito, nessuna estrazione) · L245-2: la crisi scende col tempo e costa (a ogni livello: una crisi aperta che la carica lascia rientra da sola)
   /* l'orologio biografico (lotto 2): a gennaio l'età avanza; verso gli 80 il CONGEDO — la fine
      naturale dell'arco (§2 del design), prima di qualunque urna. Le avvisaglie a 77/79 preparano
@@ -10110,6 +10130,64 @@ function leggeRespinta(L, contro){
   if(typeof parla==='function' && !(typeof voceInCorso==='function' && voceInCorso())) parla('voce-legge-no');   // L230-1 (F4i): solo sulla bocciatura, zitta se un'altra voce parla
   render();
 }
+/* L258-5 · IL VOTO D'ACCUSA DI us1970 (D278 i) e il seguito dei nastri. ACCUSA_LEGGE è la voce finta che passa da pBocciatura, come
+   GUERRA_LEGGE (L245-4): non è in LEGGI e S.leggi non la vede mai. pBocciatura dà la probabilità che il governo PERDA un voto in aula
+   (governo diviso, consenso; negli Stati Uniti il margine dei seggi non conta, lo porta il Congresso): qui è la probabilità che la Camera
+   voti l'accusa, più l'esito di S4a (coperto pesa di più) e l'esposizione (il Presidente non ha la credibilità, che è delle valute
+   d'opposizione). Il Senato giudica con una seconda estrazione a peso più basso (i due terzi): p × 0,6. Tutto con Math.random, come
+   votoInAula: nel banco consuma la sequenza solo nelle carriere che arrivano qui.
+   S.usNastriRitorno = {mese, tipo[, p]} (facoltativo, mese = anno×12 + mese): lo scrive usNastriPianifica dalle scelte di NASTRI74_EV
+   e NASTRI74_OPP_EV (data.js), lo legge e lo toglie usNastriMese in advanceMonth. Il mese salta i mesi del voto (novembre degli anni
+   pari) e quelli con un pilastro della linea o del mondo. S.usDimissioni ('volontarie'|'rimosso', facoltativo) lo scrive usDimetti
+   un attimo prima di gameOver('dimissioni'): lo legge solo il testo del finale. */
+const ACCUSA_LEGGE={ id:'accusa', nome:'La messa in stato d\'accusa', asse:0 };
+function usScandaloK(){ return S.usScandalo==='coperto' ? 1.5 : 1; }
+function usAccusaP(){
+  var V=pBocciatura(ACCUSA_LEGGE).p, extra=(S.usScandalo==='coperto' ? 0.25 : 0.12) + Math.max(0,(S.esposizione||0)-30)/150;
+  return Math.max(0.05, Math.min(0.9, V+extra));
+}
+function usMeseLibero(m){
+  var y=Math.floor((m-1)/12), mo=m-y*12;
+  if(mo===11 && y%2===0) return false;   // la presidenziale e la metà mandato (1970/11 … 1978/11)
+  if((PILASTRI_LINEA||[]).some(function(P){ return P.linea===LINEA_US && P.anno===y && P.mese===mo; })) return false;
+  if((PILASTRI_MONDO||[]).some(function(P){ return P.anno===y && P.mese===mo && (P.nonInPaesi||[]).indexOf('usa')<0; })) return false;
+  return true;
+}
+function usNastriPianifica(tipo, dopo, p){
+  var m=S.year*12+S.month+dopo; while(!usMeseLibero(m)) m++;
+  S.usNastriRitorno={mese:m, tipo:tipo}; if(p!=null) S.usNastriRitorno.p=p;
+}
+function usDimetti(k){ S.usDimissioni=k; gameOver('dimissioni'); return true; }
+function usSalvato(){ espoSale(20); stampad(-2); gdUs60('cetomedio',-3); gdUs60('pensionati',-2); gdUs60('cattolici',-2); }
+/* true = la carriera è finita (advanceMonth esce). */
+function usNastriMese(){
+  var R=S.usNastriRitorno; if(!R) return false;
+  if(S.year*12+S.month < R.mese) return false;
+  delete S.usNastriRitorno;
+  if(S.era!==LINEA_US || S.livello!==3) return false;
+  if(R.tipo==='successione'){
+    if(!S.opposizione) return false;
+    var fa=(S.forze && S.forze[S.governoAvversario]) || 50, p=Math.max(0.1, Math.min(0.95, (R.p||0.6) + (50-fa)/100));
+    if(Math.random()<p){
+      S.governoAvversarioVolto=generaPremier(S.governoAvversario).nome;   // D280: il volto cambia senza urne, la presidenziale del 1976 resta lì
+      S.log.unshift({t:T('Lo scandalo'),x:T('Il Presidente lascia la carica prima del voto d\'accusa. Giura %V, il successore che nessuno ha eletto.').replace('%V',S.governoAvversarioVolto)});
+    } else S.log.unshift({t:T('Lo scandalo'),x:T('Il Presidente resta: la Camera non trova i voti per l\'accusa, e il caso si trascina fino al voto.')});
+    return false;
+  }
+  if(S.opposizione) return false;
+  var pa=usAccusaP();
+  if(R.tipo==='trascrizioni'){
+    espoSale(15);
+    if(Math.random()<pa){ S.log.unshift({t:T('Lo scandalo'),x:T('Le trascrizioni non bastano: la Corte ordina di consegnare i nastri, e dentro c\'è la prova. Lasci la carica prima del voto della Camera.')}); return usDimetti('volontarie'); }
+    S.log.unshift({t:T('Lo scandalo'),x:T('Le trascrizioni comprano tre mesi: la Corte decide, e la Camera prepara il voto d\'accusa.')});
+    usNastriPianifica('voto', 2); return false;
+  }
+  /* R.tipo==='voto' */
+  if(Math.random()>=pa){ S.log.unshift({t:T('Lo scandalo'),x:T('La Camera non trova i voti per l\'accusa: resti alla Casa Bianca, ma il caso non si chiude.')}); usSalvato(); return false; }
+  if(Math.random()>=pa*0.6){ S.log.unshift({t:T('Lo scandalo'),x:T('La Camera ti mette in stato d\'accusa; al Senato mancano i due terzi per rimuoverti. Resti, ma il paese non lo dimentica.')}); usSalvato(); return false; }
+  S.log.unshift({t:T('Lo scandalo'),x:gn('La Camera ti mette in stato d\'accusa e il Senato raggiunge i due terzi: sei rimosso dalla carica.','La Camera ti mette in stato d\'accusa e il Senato raggiunge i due terzi: sei rimossa dalla carica.')});
+  return usDimetti('rimosso');
+}
 /* L72-1 — la rivolta: il testo di chiusura dipende dal gruppo che ti ha voltato le spalle (S.rivoltaGruppo). */
 const RIVOLTA_TESTI={
   lavoratori:  'Sciopero generale a oltranza: le fabbriche si fermano e i sindacati non trattano più. Il governo cade davanti alla piazza.',
@@ -10134,7 +10212,7 @@ function gameOver(reason){
   try{ aggiungiCarriera(reason); }catch(e){} chiudiAutosave();   // carriera chiusa: aggiorna lo storico e cancella l'autosave (niente "Continua")
   document.getElementById('ov').classList.remove('on');
   const years=S.year-(S.annoInizio||2025);
-  const title= T(reason==='crisi'?'Crisi di governo' : reason==='insolvenza'?'Il paese è insolvente' : reason==='rivolta'?'Un pezzo di paese ti ha voltato le spalle' : reason==='congresso'?'Il partito sceglie un nuovo leader' : reason==='primaria'?'Il partito sceglie lo sfidante' : reason==='ritiro'?'Il congedo' : reason==='condanna'?'La condanna' : reason==='salute'?(S.esitoSalute==='fatale'?'L\'ultimo giorno':'Le ragioni della salute') : reason==='silurato'?'Fuori dal governo' : reason==='sconfittaLocale'?'Sconfitta alle urne locali' : reason==='mandatoInt'?'Fine del mandato internazionale' : reason==='mandatoCompiuto'?'Il mandato compiuto' : 'Fine del percorso');
+  const title= T(reason==='crisi'?'Crisi di governo' : reason==='insolvenza'?'Il paese è insolvente' : reason==='rivolta'?'Un pezzo di paese ti ha voltato le spalle' : reason==='congresso'?'Il partito sceglie un nuovo leader' : reason==='primaria'?'Il partito sceglie lo sfidante' : reason==='ritiro'?'Il congedo' : reason==='condanna'?'La condanna' : reason==='salute'?(S.esitoSalute==='fatale'?'L\'ultimo giorno':'Le ragioni della salute') : reason==='silurato'?'Fuori dal governo' : reason==='sconfittaLocale'?'Sconfitta alle urne locali' : reason==='mandatoInt'?'Fine del mandato internazionale' : reason==='mandatoCompiuto'?'Il mandato compiuto' : reason==='dimissioni'?'Le dimissioni' : 'Fine del percorso');
   const desc= reason==='crisi'?T('Una mozione di sfiducia ha fatto cadere il governo: il consenso era crollato.')
     : reason==='insolvenza'?T('I conti pubblici sono fuori controllo: nessuno finanzia più il debito. Il governo cade travolto dalla crisi finanziaria.')
     : reason==='rivolta'?T(RIVOLTA_TESTI[S.rivoltaGruppo]||RIVOLTA_TESTI.lavoratori)
@@ -10146,6 +10224,12 @@ function gameOver(reason){
     : reason==='mandatoCompiuto'?(PAESE.mandatiMax===1
         ? T('La Costituzione dà un mandato solo, e il tuo è finito. Non ci sono urne che ti riguardino: consegni il paese a chi verrà dopo, con il consenso al <b>%C per cento</b>.').replace('%C',Math.round(S.ind.consenso))
         : T('Hai vinto i <b>%N mandati</b> che la Costituzione concede, e li hai fatti fino in fondo. Nessuna sconfitta: il tempo che ti era dato è finito, e lasci con il consenso al <b>%C per cento</b>.').replace('%N',PAESE.mandatiMax).replace('%C',Math.round(S.ind.consenso)))
+    /* L258-5 (D279 a) · le dimissioni del Presidente dopo lo scandalo di us1970: volontarie (S4b «consegna», o le trascrizioni che
+       non bastano) o la rimozione dopo il voto d'accusa (S.usDimissioni, scritto da usDimetti). Non è una sconfitta elettorale né una
+       condanna, e il partito resta al governo col vicepresidente; muto (non in FINALI_CON_SUONO). */
+    : reason==='dimissioni'?(S.usDimissioni==='rimosso'
+        ? gn('La Camera ti ha messo in stato d\'accusa e il Senato ha trovato i due terzi: sei rimosso dalla carica. Giura il vicepresidente, e il partito resta al governo senza di te.','La Camera ti ha messo in stato d\'accusa e il Senato ha trovato i due terzi: sei rimossa dalla carica. Giura il vicepresidente, e il partito resta al governo senza di te.')
+        : T('Nei nastri c\'era la prova, e lo sapevi. Prima che la Camera voti, lasci la carica con una lettera di una riga: giura il vicepresidente, e il partito resta al governo senza di te.'))
     : reason==='condanna'?T('Il collegio legge il dispositivo: condanna. Le scelte che l\'hanno resa possibile portano la tua firma. La carriera politica finisce in tribunale.')
     : reason==='salute'?(S.esitoSalute==='fatale'
         ? T('Avevi ignorato ogni avvertimento. Il corpo ha presentato il conto, e stavolta non c\'è stato ritorno. La corsa finisce qui, a %E anni.').replace('%E',S.eta)
@@ -10298,6 +10382,8 @@ function applySnap(snap){
   ['deIraq02','deIraq02Opp','deAgenda03','deAgenda03Opp','deFiducia05','deFiducia05Opp','deBanche08','deBanche08Opp'].forEach(function(k){ if(S[k]===undefined) S[k]=null; });   // L157-1: uno per uno
   ['usCorea','usCoreaOpp','usGenerale','usGeneraleOpp','usAcciaio','usAcciaioOpp','usScuola','usScuolaOpp'].forEach(function(k){ if(S[k]===undefined) S[k]=null; });   // L176-2: uno per uno
   ['usBaia','usBaiaOpp','usMissili','usMissiliOpp','usDiritti','usDirittiOpp','usVietnam','usVietnamOpp','usLuna70','usLuna70Opp','usPace73','usPace73Opp','usPetrolio73','usPetrolio73Opp'].forEach(function(k){ if(S[k]===undefined) S[k]=null; });   // L227-1: i salvataggi di us1960 di prima caricano
+  ['usScandalo','usScandaloOpp','usNastri74','usNastri74Opp'].forEach(function(k){ if(S[k]===undefined) S[k]=null; });   // L258-5
+  if(S.usNastriRitorno!=null && !(typeof S.usNastriRitorno==='object' && typeof S.usNastriRitorno.mese==='number' && /^(voto|trascrizioni|successione)$/.test(S.usNastriRitorno.tipo||''))) delete S.usNastriRitorno;   // L258-5: un seguito illeggibile si toglie
   if(S.scioglimento97===undefined) S.scioglimento97=null;   // L103-1
   if(S.coabitazione===undefined) S.coabitazione=false;   // L100-2
   if(S.governiCaduti===undefined) S.governiCaduti=0;   // L80-5
