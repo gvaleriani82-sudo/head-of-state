@@ -1928,7 +1928,7 @@ const SCENARI = {
      il 1972 dal governo. Stampato sul gioco da sonda-us1970-calendario.js.
      ⚠ `anno:1969` è nel decennio 1960: `decennio:1970` (campo facoltativo, lo dichiara solo questa porta) lo legge clipDellaPorta
      (ui.js) per la clip porta-decennio-1970; la miniatura si deriva già dall'id (sogliaSrc).
-     IL CONGRESSO (D283): la Camera del 1968 (192 repubblicani su 435, 44,1); metà mandato con `penalitaGoverno:0.5` come us1950/us1960.
+     IL CONGRESSO (D283): la Camera del 1968 (192 repubblicani su 435, 44,1); metà mandato con `penalitaGoverno:2` (L258-7; era 0,5 come us1950/us1960).
      CHI SI GIOCA (D277): i Repubblicani al governo con `mandatiVinti:1` (rivincono il 1972 → `mandatoCompiuto` alla vigilia del 1976)
      e i Democratici dall'opposizione. Nessuna tappa di linea nel decennio (il Sud è girato nel 1964/11).
      I TERRITORI sono i 18 del presente nello stesso ordine (paralleli per indice a mappa.aree: mai riordinare), col lean del 1968
@@ -1946,7 +1946,7 @@ const SCENARI = {
     capitale: 'Washington',
     ue: false,
     congresso: { camera: 44.1 },                // D283: 192 repubblicani su 435 (la Camera del 1968): governo diviso dal primo giorno
-    intermedie: [ {tipo:'Elezioni di metà mandato', mese:24, tocca:'tutti', penalitaGoverno:0.5} ],   // D283: come us1950 e us1960
+    intermedie: [ {tipo:'Elezioni di metà mandato', mese:24, tocca:'tutti', penalitaGoverno:2} ],   // D283 (era 0,5 come us1950 e us1960) · L258-7 (25/10): 2 — il partito del Presidente perdeva la metà mandato il 67% delle volte (D285: 85-95%; la storia 1970-74-78 tre su tre); sweep 0,75 · 1 · 1,5 · 2 (20 carriere: 67 · 72 · 83 · 91%), 2 il più basso ≥ 85 col 1972 dei Repubblicani al governo in banda (PRESET-USA-1970 «⚑ L258-7»)
     /* D284 (L216-1, D270) · la valanga del Presidente in carica nel 1972 e la sconfitta del partito al governo nel 1976: punti sul VOTO
        della presidenziale, positivo = al partito del Presidente in carica; li legge solo spintaPresidenziale() (model.js), 0 se il
        Presidente sei tu. Valori dalla sweep di L258-2 (misura-us1970.js gioc --spinta, rapporto «⚑ L258-2» in PRESET-USA-1970.md). */

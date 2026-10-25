@@ -2702,6 +2702,34 @@ function rivoltaBanner(){ const R=S.rivolta; if(S.opposizione||!R) return ''; le
     h+=`<div class="banner rivolta-banner">${T('<b>%G</b> — un pezzo di paese ti ha voltato le spalle: sotto la soglia di %P da %M mesi. Riportalo sopra con le politiche, o fra <b>%N mesi</b> la crisi ti travolge.').replace('%G',nomeGruppo(gr.id)).replace('%P',fmt(pavimentoGruppo(gr.id),0)).replace('%M',R[gr.id]).replace('%N',n)}</div>`; }
   return h; }
 function mediaGruppi(){ if(typeof GROUPS==='undefined'||!S.groups) return 0; var s=0,n=0; GROUPS.forEach(function(g){ if(S.groups[g.id]!=null){ s+=S.groups[g.id]; n++; } }); return n?s/n:0; }
+/* L260-2 · LE RADICI DEL MOVIMENTO (game.js, accanto alla gavetta): «Dove lavori questo mese» — la scelta libera del mese, non una
+   carta — e «Tu contro <sigla>», il movimento rivale. Solo con radiciAttive() (ATT_RADICI acceso, prima della laurea). Bersagli ≥ 44 px. */
+function radiciScegliUi(i){ if(typeof radiciScegli==='function' && radiciScegli(i)){ if(typeof suona==='function') suona('tocco'); render(); commitSnap(); } }
+function radiciCifre(i){ const A=S.attivista; return T('tu %A · %S %B').replace('%A',fmt(A.radici[i]||0,0)).replace('%S',rivaleSigla()).replace('%B',fmt(A.rivale.radici[i]||0,0)); }
+function radiciLaureaRiga(i){   // la griglia della laurea: le tue radici e quelle del rivale, e il bonus dove sei davanti
+  if(typeof ATT_RADICI==='undefined' || !ATT_RADICI || !S.attivista || !S.attivista.radici || !S.attivista.rivale) return '';
+  const dav=radiciDavanti(i);
+  return `<br><span style="font-size:12px;color:${dav?'var(--pos)':'var(--mut2)'}">${radiciCifre(i)}${dav?' · '+T('servizi +%N').replace('%N',RADICI_K.laurea):''}</span>`;
+}
+function radiciHtml(){
+  if(typeof radiciAttive!=='function' || !radiciAttive()) return '';
+  const A=S.attivista, ora=radiciLavoroOra(), sig=rivaleSigla(), c=radiciConto(), tr=radiciTraguardi();
+  let h=`<div class="card rad-card"><div class="ct">${T('Dove lavori questo mese')}</div>`;
+  h+=`<div class="log"><div class="li">${ora!=null ? T('Questo mese lavori a <b>%T</b>: la carta del mese ci mette radici.').replace('%T',nomeTerr(PAESE.territori[ora])) : T('Scegli un territorio: la carta del mese ci mette radici. Non è obbligatorio, ma dove non torni le radici calano piano.')}</div></div>`;
+  h+=`<div class="rad-griglia" style="display:grid;grid-template-columns:1fr 1fr;gap:7px;padding:2px 12px 12px;">`
+    +(PAESE.territori||[]).map(function(TE,i){ const sel=(ora===i), dav=radiciDavanti(i);
+      return `<button class="rad-terr" onclick="radiciScegliUi(${i})" style="min-height:44px;padding:7px 8px;border-radius:9px;border:1px solid ${sel?'var(--acc)':'var(--line2)'};background:${sel?'var(--acc-bg)':'var(--panel)'};color:var(--txt);font-family:inherit;font-size:12px;cursor:pointer;text-align:left;"><b>${sel?'✓ ':''}${nomeTerr(TE)}</b><br><span style="font-size:12px;color:${dav?'var(--pos)':'var(--mut2)'}">${radiciCifre(i)}</span></button>`; }).join('')
+    +`</div></div>`;
+  const quota=(c.tu+c.lui)>0 ? Math.round(c.tu/(c.tu+c.lui)*100) : 50;
+  const prossimo=tr.find(function(x){ return c.davanti<x; });
+  h+=`<div class="card rad-contro"><div class="ct">${T('Tu contro %S').replace('%S',sig)}</div>`;
+  h+=`<div class="log"><div class="li">${T('<b>%N</b> (%S) è un movimento rivale · gruppo di riferimento: %G. Cresce ogni mese in uno o due territori; dove lo superi, risponde.').replace('%N',T(A.rivale.nome)).replace('%S',sig).replace('%G',nomeGruppo(A.rivale.grp))}</div></div>`;
+  h+=`<div class="grp"><div class="top"><div class="nm">${T('Territori in cui sei davanti: %N su %M').replace('%N',c.davanti).replace('%M',c.n)}<small>${T('dietro: %K').replace('%K',c.dietro)}</small></div><div class="pc" style="color:${barColor(quota)}">${quota}%</div></div>
+    <div class="bar"><i style="width:${clamp(quota,2,100)}%;background:${barColor(quota)}"></i></div></div>`;
+  h+=`<div class="log"><div class="li">${prossimo!=null ? T('Traguardi: davanti in %A, in %B, in %C territori · il prossimo: <b>%P</b>.').replace('%A',tr[0]).replace('%B',tr[1]).replace('%C',tr[2]).replace('%P',prossimo) : T('Traguardi: tutti raggiunti. Il movimento è il più radicato del paese.')}${' '}${T('Alla candidatura, dove sei davanti parti con i servizi un po\' più su.')}</div></div>`;
+  h+=`</div>`;
+  return h;
+}
 /* Scheda ATTIVISTA (Build A) — L1: cruscotto della militanza. Le 3 valute (base/autorev/reputazione media) con la SOGLIA
    di laurea visibile (gate non invisibile, rifinitura 2a) + i 6 gruppi col template `.grp` esistente. Le mosse arrivano a L2. */
 function renderAttivista(){
@@ -2724,7 +2752,7 @@ function renderAttivista(){
     h+=`<div class="atext">${T('Hai costruito una base militante, la fiducia dei gruppi e l\'autorevolezza sul campo. Il partito ti offre la prima candidatura: scegli dove correre.')}</div>`;
     h+=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;padding:2px 12px 12px;">`
       +(PAESE.territori||[]).map(function(TE,i){ const isC=TE.tipo==='città';
-        return `<button onclick="diventaLocale(${i})" style="padding:8px;border-radius:9px;border:1px solid var(--line2);background:var(--panel);color:var(--txt);font-family:inherit;font-size:12px;cursor:pointer;text-align:left;"><b>${nomeTerr(TE)}</b><br><span style="font-size:12px;color:var(--mut2)">${caricaTerr(TE)} · ${T(isC?'città':'regione')}</span></button>`; }).join('')
+        return `<button onclick="diventaLocale(${i})" style="padding:8px;border-radius:9px;border:1px solid var(--line2);background:var(--panel);color:var(--txt);font-family:inherit;font-size:12px;cursor:pointer;text-align:left;"><b>${nomeTerr(TE)}</b><br><span style="font-size:12px;color:var(--mut2)">${caricaTerr(TE)} · ${T(isC?'città':'regione')}</span>${radiciLaureaRiga(i)}</button>`; }).join('')
       +`</div></div>`;
   } else {
     /* la CARTA-MOSSA del mese (Build A, L2): scena (RUOTA per tema, anti-wallpaper) + le 3 scelte. resolveItem le applica
@@ -2736,6 +2764,7 @@ function renderAttivista(){
       h+=`</div>`;
     });
   }
+  h+=radiciHtml();   // L260-2: dove lavori questo mese e il movimento rivale (vuoto con ATT_RADICI spento)
   h+=`<div class="banner"><b>${T('La tua militanza.')}</b> ${T('Nessuna carica, nessun bilancio: costruisci mese per mese la tua base, la reputazione presso i gruppi e l\'autorevolezza sul campo, fino alla prima candidatura.')}</div>`;
   /* le tre valute del gate, con barra */
   h+=`<div class="card"><div class="ct">${T('Le tue tre valute')}</div>`;

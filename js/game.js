@@ -1374,6 +1374,103 @@ function cardCampResa(){   // CARTA-RESA nel flusso: l'esito visibile (non più 
     t:'La campagna arriva al dunque', text:'Mesi di impegno convergono in un esito: quanto l\'hai nutrita, tanto rende.',
     ch:[ { l:'Incassa il risultato', e:T('Il risultato scala sul progresso: %P%').replace('%P',Math.round(C.progresso||0)), f:function(){ risolviCampagna(); } } ] }, resolved:false };
 }
+/* L260-2 · LE RADICI DEL MOVIMENTO (DESIGN-OLTRE-LE-CARTE.md §3, D-OC2). All'attivista, oltre la carta del mese, una scelta libera:
+   DOVE lavori questo mese (un territorio di PAESE.territori, gli stessi della griglia della laurea). La carta del mese aggiunge radici
+   in quel territorio al confine del mese (`radiciMese`, da avanzaMese): RADICI_K.base, +piazza se la carta ha costruito base più che
+   autorevolezza (la corsia «piazza» di resolveItem, segnata in `lavoro.p`), +campagna con una campagna in corso; tetto 100. Ogni
+   RADICI_K.decadeOgni mesi i territori non lavorati perdono 1. Contro, un MOVIMENTO RIVALE generato all'avvio (nome di fantasia da
+   RIVALI_MOVIMENTO, mai un movimento vero; il gruppo di riferimento è il più lontano dalla base del tuo partito): cresce in 1-2
+   territori al mese col dado `radiciDado` (un hash del personaggio e del mese, come attaccoDado: niente Math.random, nessuna estrazione
+   del banco) e risponde dove lo hai appena superato. Traguardi: davanti in 3 territori, nella metà, in tutti meno uno (`radiciTraguardi`).
+   Alla laurea, davanti nel territorio scelto = +RADICI_K.laurea ai servizi di partenza (il consenso locale è DERIVATO dai servizi:
+   calcConsensoLocale lo riscrive, quindi il bonus va sui servizi e il consenso iniziale sale di altrettanto).
+   Dati in S.attivista (puri): `radici` {indice: 0-100}, `rivale` {id, nome, sigla, grp, radici}, `lavoro` {m, i, p} (il mese assoluto,
+   il territorio scelto o null, la corsia piazza), `radTappa` (0-3, il traguardo più alto già raggiunto). Nascono solo con l'interruttore
+   acceso (startAttivista e, per un salvataggio di prima, applySnap): spento, il gioco è quello di prima. Lettori: radiciAttive (il
+   punto unico dell'azione), radiciScegli (ui.js radiciScegliUi; il banco: cerimonia 32), radiciMese, radiciDavanti, il bilancio di
+   gennaio del livello 0 e la griglia della laurea. */
+let ATT_RADICI=true;   // L260-2: ACCESO il 25/10 (decisioni/anno dell'attivista 11,2 → 23,2, A/B fuori dal livello 0 0/225; rapporto «⚑ L260-2» in DESIGN-OLTRE-LE-CARTE.md)
+const RADICI_K={ casa:10, base:3, piazza:2, campagna:1, decadeOgni:3, rivCasa:10, rivCresce:3, rivRisponde:4, tetto:100, laurea:3 };
+const RIVALI_MOVIMENTO=[
+  { nome:'Lanterne Civiche', sigla:'LC', siglaEn:'CL' }, { nome:'Cantiere Civico', sigla:'CC', siglaEn:'CW' },
+  { nome:'Officina dei Diritti', sigla:'OD', siglaEn:'RW' }, { nome:'Quartieri in Movimento', sigla:'QM', siglaEn:'NM' },
+  { nome:'Rete Sentinella', sigla:'RS', siglaEn:'SN' }, { nome:'Coro Civico', sigla:'CoC', siglaEn:'CCh' },
+  { nome:'Bussola Comune', sigla:'BC', siglaEn:'CC' }, { nome:'Mano Aperta', sigla:'MA', siglaEn:'OH' },
+  { nome:'Orizzonte Locale', sigla:'OL', siglaEn:'LH' }, { nome:'Semi di Città', sigla:'SC', siglaEn:'CS' },
+  { nome:'Faro Civico', sigla:'FC', siglaEn:'CB' }, { nome:'Lievito Civico', sigla:'LiC', siglaEn:'CY' } ];
+function radiciAttive(){ return ATT_RADICI && typeof S!=='undefined' && !!S && S.livello===0 && !!S.attivista && !S.attivista.laurea && !!S.attivista.radici && !!S.attivista.rivale && (PAESE.territori||[]).length>0; }
+function radiciDado(sale, mese){   // FNV-1a + finalizzatore murmur3, come attaccoDado: personaggio e mese, mai Math.random
+  var s='rad|'+sale+'|'+scissioneCarriera()+'|'+(mese!=null?mese:meseAss()), h=2166136261;
+  for(var i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619); }
+  h^=h>>>16; h=Math.imul(h,0x85ebca6b); h^=h>>>13; h=Math.imul(h,0xc2b2ae35); h^=h>>>16;
+  return (h>>>0)/4294967296;
+}
+/* il territorio di casa: il primo che il tuo partito governa (S.territori[i].partito); senza, quello col lean più vicino all'asse del
+   tuo partito (a parità il primo). Il personaggio non ha un luogo di nascita: la regola è questa, deterministica. Col rivale
+   (`lontano`) il lean più lontano. */
+function radiciCasa(asse, lontano){
+  var TT=PAESE.territori||[], best=0, bd=null;
+  if(!lontano && S.territori) for(var i=0;i<TT.length;i++){ if(S.territori[i] && S.territori[i].partito===S.partito) return i; }
+  for(var j=0;j<TT.length;j++){ var d=Math.abs((TT[j].lean||0)-(asse||0)); if(bd==null || (lontano ? d>bd : d<bd)){ bd=d; best=j; } }
+  return best;
+}
+function radiciInit(){
+  if(!ATT_RADICI || !S.attivista || !(PAESE.territori||[]).length) return;
+  var P=part(S.partito)||{}, asse=P.asse||0, base=P.base||{};
+  var A=S.attivista, casa=radiciCasa(asse, false), rc=radiciCasa(asse, true);
+  if(rc===casa) rc=(casa+1)%PAESE.territori.length;
+  var gs=GROUPS.map(function(g){ return g.id; }).sort(function(a,b){ return (base[a]||0)-(base[b]||0); });   // il più lontano dalla tua base (a parità l'ordine di GROUPS)
+  var n=Math.floor(radiciDado('nome', 0)*RIVALI_MOVIMENTO.length), R=RIVALI_MOVIMENTO[n];
+  A.radici={}; A.radici[casa]=RADICI_K.casa;
+  A.rivale={ id:n, nome:R.nome, sigla:R.sigla, grp:gs[0], radici:{} }; A.rivale.radici[rc]=RADICI_K.rivCasa;
+  A.lavoro=null; A.radTappa=0;
+}
+function rivaleSigla(){ var R=S.attivista && S.attivista.rivale; if(!R) return ''; var d=RIVALI_MOVIMENTO[R.id]; return (curLang()==='en' && d && d.siglaEn) ? d.siglaEn : R.sigla; }
+function radiciScegli(i){
+  if(!radiciAttive()) return false;
+  if(!((PAESE.territori||[])[i])) return false;
+  var m=meseAss(), L=S.attivista.lavoro;
+  S.attivista.lavoro={ m:m, i:i, p:!!(L && L.m===m && L.p) };
+  return true;
+}
+function radiciLavoroOra(){ var L=S.attivista && S.attivista.lavoro; return (L && L.m===meseAss() && L.i!=null) ? L.i : null; }
+/* resolveItem: la carta dell'attivista ha costruito più base che autorevolezza (la corsia «piazza») */
+function radiciSegnaPiazza(dB, dA){
+  if(!radiciAttive() || !(dB>0 && dB>=dA)) return;
+  var m=meseAss(), L=S.attivista.lavoro;
+  if(L && L.m===m) L.p=true; else S.attivista.lavoro={ m:m, i:null, p:true };
+}
+function radiciDavanti(i){ var A=S.attivista; if(!A || !A.radici || !A.rivale) return false; var a=A.radici[i]||0, b=A.rivale.radici[i]||0; return a>0 && a>b; }
+function radiciConto(){
+  var N=(PAESE.territori||[]).length, dav=0, die=0, tu=0, lui=0, A=S.attivista;
+  for(var i=0;i<N;i++){ var a=(A.radici[i]||0), b=(A.rivale.radici[i]||0); tu+=a; lui+=b; if(a>0 && a>b) dav++; else if(b>a) die++; }
+  return { n:N, davanti:dav, dietro:die, tu:tu, lui:lui };
+}
+function radiciTraguardi(){ var N=(PAESE.territori||[]).length; return [Math.min(3, N), Math.max(1, Math.ceil(N/2)), Math.max(1, N-1)]; }
+function radiciTappa(dav){ var t=radiciTraguardi(), k=0; t.forEach(function(x){ if(dav>=x) k++; }); return k; }
+/* il confine del mese (avanzaMese, livello 0, PRIMA di S.month++): il mese che si chiude è meseAss() */
+function radiciMese(){
+  if(!radiciAttive()) return;
+  var A=S.attivista, R=A.radici, RV=A.rivale.radici, N=PAESE.territori.length, M=meseAss(), K=RADICI_K, T0=K.tetto;
+  var L=A.lavoro, w=(L && L.m===M && L.i!=null) ? L.i : null;
+  if(w!=null) R[w]=Math.min(T0, (R[w]||0) + K.base + (L.p?K.piazza:0) + (A.campagna?K.campagna:0));
+  var cresce={}, nr=1+(radiciDado('n', M)<0.5?0:1), k=0;
+  if(w!=null && (R[w]||0)>(RV[w]||0)){ RV[w]=Math.min(T0, (RV[w]||0)+K.rivRisponde); cresce[w]=1; k++; }   // risponde dove lo hai appena superato
+  for(var g=0; k<nr && g<6; g++){ var t=Math.floor(radiciDado('t'+g, M)*N); if(cresce[t]) continue; RV[t]=Math.min(T0, (RV[t]||0)+K.rivCresce); cresce[t]=1; k++; }
+  if(M % K.decadeOgni===0){
+    Object.keys(R).forEach(function(x){ if(+x!==w){ R[x]-=1; if(R[x]<=0) delete R[x]; } });
+    Object.keys(RV).forEach(function(x){ if(!cresce[x]){ RV[x]-=1; if(RV[x]<=0) delete RV[x]; } });
+  }
+  var c=radiciConto(), tp=radiciTappa(c.davanti);
+  if(tp>(A.radTappa||0)){ A.radTappa=tp;
+    S.log.unshift({ t:T('Le radici del movimento'), x:T('Territori in cui sei davanti a %S: %N su %M.').replace('%S',rivaleSigla()).replace('%N',c.davanti).replace('%M',c.n) }); }
+}
+/* la laurea: davanti nel territorio scelto → i servizi di partenza (e quindi il consenso, derivato) +RADICI_K.laurea */
+function radiciBonusLaurea(idx, ind){
+  if(!ATT_RADICI || !radiciDavanti(idx)) return false;
+  Object.keys(ind).forEach(function(k){ if(k!=='bilancio') ind[k]=clamp(ind[k]+RADICI_K.laurea, 0, 100); });
+  return true;
+}
 /* EVENTI REATTIVI (A.5, lotto 3). Il ROLL vive AL CONFINE (avanzaMese → S.attivista.evCorrente = id o null): così genAgenda si
    limita a LEGGERE evCorrente e ricostruire la carta dal pool per id → reload-stabile (niente reroll all'exploit; il roll usa
    Math.random ma è già consolidato). Freq ~3-5 a gavetta = EV_PROB + spacing ≥2 mesi + ring anti-wallpaper (evRecent) + pescaBag. */
@@ -4834,6 +4931,7 @@ function startAttivista(){
   S.minoranza=false; S.tenuta={}; S.tenutaForza0={}; S.tenutaLiv={}; S.tenutaUltimo={}; S.mesiMinoranza=0;
   initTerritori(); initPotereLocale();
   if(proprio) fondaPartitoProprio(proprio);           // L237-4: la fondazione dentro l'avvio, prima di agenda e primo salvataggio
+  radiciInit();                                       // L260-2: le radici e il movimento rivale (solo con ATT_RADICI; dopo la fondazione: la casa legge il partito)
   if(S.biografia) S.biografia.origine='attivista';    // l'epilogo ricorderà la militanza (diverso da 'locale')
   S.tab='gov';
   S.log=[{t:T('Attivista'), x:T('Cominci dal basso, senza carica: costruisci una base militante e la fiducia dei gruppi, fino alla prima candidatura.')}];   // L244-4
@@ -4863,6 +4961,7 @@ function diventaLocale(terrIdx){
   const TE=(PAESE.territori||[])[idx]||PAESE.territori[0], tipo=TE.tipo;
   const leve={}; LOCALE_LEVE[tipo].forEach(function(lv){ leve[lv.id]=1; });          // tutte a "medio"
   const ind={}; LOCALE_IND[tipo].forEach(function(d){ ind[d.id]=(d.id==='bilancio')?55:50; });
+  const _radB=radiciBonusLaurea(idx, ind);   // L260-2: davanti al movimento rivale nel territorio scelto → servizi (e consenso, derivato) +3
   S.locale={ nome:TE.nome, carica:TE.carica, caricaEn:TE.caricaEn||null, tipo:tipo, terrIdx:idx, ind:ind, leve:leve, consenso:50, mandato:1,
     budget: Math.round((S.pil||2150)*(tipo==='città'?3.2:15)) };
   S.livello=1;                                       // l'invariante torna: livello 1 ⟹ S.locale montato
@@ -4879,6 +4978,7 @@ function diventaLocale(terrIdx){
   const ruolo=ruoloLocale();
   bioFatto(T('Dalla militanza alla prima carica: %R.').replace('%R',ruolo));
   S.log.unshift({t:T('Prima carica'), x:T('Dalla gavetta da attivista alla prima carica: %L. Da qui in su, la scala.').replace('%L',localeNome())});
+  if(_radB) S.log.unshift({t:T('Le radici del movimento'), x:T('Qui il tuo movimento era più radicato del rivale: parti con i servizi un po\' più su.')});
   if(typeof PROMO_FIORE!=='undefined') PROMO_FIORE=true;
   S.tab='gov';
   genAgenda(false); generaTitolo(); render(); commitSnap();
@@ -4916,7 +5016,9 @@ function pickLocale(){
   const ev=pescaBag('loc|'+S.locale.tipo, pool); if(!ev) return null;   // sacchetto per-tipo (citta/regione separati)
   return { kind:'locale', data:ev, resolved:false };
 }
-/* fine mandato locale: rielezione CLEMENTE (consenso ≥ 40 → rieletto; sotto → sconfitta). La via maestra è salire. */
+/* fine mandato locale: rielezione CLEMENTE (consenso ≥ 40 → rieletto; sotto → sconfitta). La via maestra è salire.
+   L261-1: la chiama la proclamazione della notte locale (concludiNotteTipo; urnaLocale la chiama diretta a interruttore spento): la
+   soglia è LOCALE_SOGLIA, che la notte mostra come linea — chi cambia il 40 qui lo cambi lì. */
 function esitoElezioneLocale(){
   if(S.locale.consenso>=40){
     S.mandate++; S.turnInMandate=0; S.locale.mandato++; S.capitale=clamp(S.capitale+5,0,100);
@@ -6857,7 +6959,7 @@ function apriPrimaria(tipo, bonus){
     <div style="padding:0 18px 6px">${(S.correnti||[]).map(function(c){ const D=CORRENTI_DEF.find(function(d){return d.id===c.id;})||{};
       return `<div style="padding:5px 0"><div style="display:flex;justify-content:space-between;font-size:13px"><span>${T(D.nome)} <small style="color:var(--mut2)">· ${c.leader}</small></span><span class="mono">${Math.round(c.umore)}</span></div><div class="bar"><i style="width:${clamp(c.umore,2,100)}%;background:${c.umore<35?'var(--neg)':c.umore<50?'var(--warn)':'var(--pos)'}"></i></div></div>`; }).join('')}
       <div style="font-size:12px;color:var(--mut);margin-top:6px">${T("Pesano: l'umore delle correnti (50%), il consenso (%A · 30%), il potere locale (%B · 20%)%X.").replace('%A',Math.round(S.ind.consenso)).replace('%B',Math.round(pl)).replace('%X',PRIM.soglia>PRIM.sogliaBase?T(" — lo sfidante parte forte: guida un'area simbolo"):'')}</div></div>
-    <div class="choices"><button class="opt" style="border-color:var(--brand)" onclick="esitoPrimaria()"><span class="ol">${T('Vai al voto dei militanti →')}</span></button></div>`;
+    <div class="choices"><button class="opt" style="border-color:var(--brand)" onclick="votoMilitanti()"><span class="ol">${T('Vai al voto dei militanti →')}</span></button></div>`;
   document.getElementById('ov').classList.add('on');
 }
 function esitoPrimaria(){
@@ -8029,13 +8131,19 @@ function resolveItemCore(idx,ci){
       if(it.tipo==='altoRapp'){ it.resolved=true; return diventaAltoRappresentante(); }   // C2: Ambasciatore → Alto rappresentante (grado 1→2)
       if(it.tipo==='internazionale'){ it.resolved=true; return diventaInternazionale('consesso'); }   // livello 3→4 (o diplomatico→4): l'ATTO FINALE, il vertice del mondo
       if(it.tipo==='chiamata'){ it.resolved=true; return diventaMinistro(); }   // livello 1→2: la chiamata a Roma
-      let ok=false;
+      let ok=false, score=null;
       if(it.tipo==='successione') ok=true;
-      else { const score=(S.capitale||0)*0.8+umoreMedio()*0.2+(Math.random()*16-8); ok=score>=50; }   // primaria: pesata sul CAPITALE (che controlli) → costruirlo a 70 garantisce il salto; le correnti aiutano
-      if(ok){ it.resolved=true; return diventaPremier(it.tipo!=='successione'); }   // successione = subentro (no elezione); primaria = mandato vinto
-      S.capitale=clamp((S.capitale||0)-12,0,100);   // sconfitta ammorbidita: puoi ritentare
-      it.resolved=true; it.outcome=T('Hai tentato il salto e fallito: resti ministro, ridimensionato.');
-      S.log.unshift({t:T('Salto fallito'),x:T('La scalata si ferma qui: il capitale ne risente.')});
+      else { score=(S.capitale||0)*0.8+umoreMedio()*0.2+(Math.random()*16-8); ok=score>=50; }   // primaria: pesata sul CAPITALE (che controlli) → costruirlo a 70 garantisce il salto; le correnti aiutano
+      if(it.tipo==='successione'){ it.resolved=true; return diventaPremier(false); }   // successione = subentro (no elezione)
+      /* L261-2 · la sfida si conta in una notte dei militanti: lo score è già estratto qui sopra, la notte lo mette in scena e alla fine
+         sfidaMinistroEsito fa la coda di sempre (con la pagina; senza, o a interruttore spento, subito — com'era). */
+      if(nottePrimariaPagina()){ const prima=fotoEsiti();
+        const rN=avviaNottePrimaria({ v:score, soglia:50 }, function(diretto){ return sfidaMinistroEsito(it, ok, diretto, prima); },
+          { kicker:`${T((part(S.partito)||{}).nome)} · ${T('Primarie di partito')}`, avv:(S.premier&&S.premier.nome)||'—', sfidi:true });
+        if(rN==='notte') return;   // la notte è aperta: la coda la fa la sua chiusura
+        if(ok) return rN;          // il banco la salta (cerimonia 34: fine(true) già passata) e la coda prosegue qui sotto, com'era
+      } else if(ok) return sfidaMinistroEsito(it, ok, true);
+      else sfidaMinistroEsito(it, ok, true);
     }
     S.ind.consenso=computeConsenso();
   } else if(it.kind==='crisiInt'){
@@ -8221,6 +8329,7 @@ function resolveItemCore(idx,ci){
     if(choice.attacco) attaccoRisposta(it, d, choice.attacco);   // L245-7: il punto unico del campo `attacco:` (le quattro risposte all'attacco)
     segnoTerrApplica(it, d, choice);   // L239-6: il segno sul territorio (`segnoTerr:` sulla carta o sulla scelta), solo racconto
     if(S.attivista && S.attivista.campagna && !S.attivista.campagna.resaPending){ var _dB=S.attivista.base-_b0, _dA=S.attivista.autorev-_a0; if(_dB>0||_dA>0) nutriCampagna(_dB>=_dA?'piazza':'istituzionale'); }   // la carta ha costruito base→piazza / autorev→istituzionale → nutre la campagna (mossa O evento) se la corsia coincide; un mese-evento in-corsia NON è incuria
+    if(S.attivista && typeof radiciSegnaPiazza==='function') radiciSegnaPiazza(S.attivista.base-_b0, S.attivista.autorev-_a0);   // L260-2: la carta della piazza dà più radici nel territorio del mese
     // lealtà del ministro collegato
     if(d.min){ const m=getMin(d.min); if(m && choice.pleases){ m.loyalty=clamp(m.loyalty+(m.profile===choice.pleases?7:-3),0,100); } }
     // biografia: il classificatore tematico (pleases) + le tempeste memorabili
@@ -8450,6 +8559,7 @@ function corpoMese(){
 function avanzaMese(){
   if(agendaPending()) return;
   if(S.livello===0){   // ATTIVISTA (Build A): avanzamento MINIMO — nessun motore nazionale/locale (L0); il motore-base arriva a L3
+    radiciMese();   // L260-2: le radici del mese che si chiude e il movimento rivale (no-op con ATT_RADICI spento)
     S.month++;
     avanzaAnnoMandato();   // L173-1
     if(S.month===1 && S.eta!=null){ S.eta++; if(S.famiglia&&S.famiglia.figli) S.famiglia.figli.forEach(function(f){ f.eta++; });
@@ -8514,7 +8624,7 @@ function avanzaMese(){
   if(S.livello===1){   // POLITICO LOCALE: il motore è quello locale; non perdi a crisi/insolvenza nazionali
     simulateLocale();
     capitaleCresci();
-    if(urnaScadenzaOra()){ return esitoElezioneLocale(); }
+    if(urnaScadenzaOra()){ return urnaLocale(); }   // L261-1: la notte delle locali (o l'esito diretto, a interruttore spento)
     S.snap=Object.assign({},S.pol);
     aggiornaSfida();
     genAgenda(false); generaTitolo(); render(); commitSnap();
@@ -8677,6 +8787,27 @@ const SD_NOTTE=[4, 2.5, 1.2, 0.5, 0];
 const LAB_NOTTE=['Urne chiuse · Exit poll','Prime proiezioni','Le sezioni dai territori','Dati quasi definitivi','Proclamazione'];
 const NOTTE_MS=7000;          // ritmo per ondata (~35s in totale); «Avanti» accelera, «Salta» chiude
 const NOTTE_DICH=3;           // l'ondata della dichiarazione a caldo (la penultima)
+/* ⚑ L261-1 (25/10) · LA NOTTE PER TIPO. `NOTTE.tipo` (assente = 'nazionale') sceglie la riga di NOTTE_TIPI: ondate (`sd`), etichette
+   (`lab`), ritmo (`ms`), ondata della dichiarazione (`dich`, null = nessuna), tavolo, e la chiusura alla proclamazione (`chiudi`:
+   null = il flusso di sempre di concludiNotte). 'nazionale' = la notte di prima, con le stesse costanti: armaTimerNotte, avanzaNotte,
+   saltaNotte e notteSuonaEsito leggono la riga, e per la nazionale la riga è SD_NOTTE/LAB_NOTTE/NOTTE_MS/NOTTE_DICH.
+   'locale' = la rielezione del livello 1 (urnaLocale, da corpoMese): VERO = S.locale.consenso contro LOCALE_SOGLIA (la soglia di
+   esitoElezioneLocale, che alla proclamazione si chiama INVARIATA). Le regole d'oro valgono uguali: il vero si congela prima, le
+   ondate convergono (l'ultima = il vero), niente in S, nessun commitSnap durante la notte (il mese non si salva finché l'esito non
+   arriva: un caricamento rigioca il mese e l'urna dallo stesso stato). Interruttore NOTTE_LOCALE (`let`): spento = esito diretto,
+   come prima. Il banco salta la notte locale (cerimonia 33, harness.js: avviaNotteLocale → esitoElezioneLocale).
+   'primaria' (L261-2) = il voto dei militanti, più sotto (avviaNottePrimaria). Prossimi tipi (L261-3): 'intermedia', 'ministro'
+   (DESIGN-NOTTE.md §1). */
+let NOTTE_LOCALE=true;
+const LOCALE_SOGLIA=40;
+const NOTTE_TIPI={
+  nazionale:{ sd:SD_NOTTE, lab:LAB_NOTTE, ms:NOTTE_MS, dich:NOTTE_DICH, tavolo:true, chiudi:null },
+  locale:{ sd:[3, 1.2, 0], lab:['Prime sezioni','Metà delle sezioni','Proclamazione'], ms:5000, dich:null, tavolo:false, chiudi:function(){ esitoElezioneLocale(); } },
+  /* L261-2 · il voto dei militanti: la difesa della leadership (apriPrimaria) e la sfida che lanci tu da ministro (l'occasione). La
+     chiusura è della notte (NOTTE.fine, scritta da chi la apre): qui un ripiego che non fa nulla. */
+  primaria:{ sd:[3, 1.2, 0], lab:['Prime federazioni','Metà dei circoli','Il risultato'], ms:5000, dich:null, tavolo:false, chiudi:function(){} }
+};
+function notteRiga(){ return NOTTE_TIPI[(NOTTE && NOTTE.tipo) || 'nazionale']; }
 function rumore(v, sd){ return clamp(v + (Math.random()*2-1)*sd, 0, 100); }   // rumore uniforme ±sd, clampato [0,100]
 /* Sposta `target` seggi verso/da il blocco mantenendo la somma 100 (usato dal SORPASSO nel filo). */
 function spostaBlocco(shown, blocIds, target){
@@ -8943,35 +9074,185 @@ function avviaNotte(){
 function stopTimerNotte(){ if(NOTTE && NOTTE.timer){ clearTimeout(NOTTE.timer); NOTTE.timer=null; } }
 function armaTimerNotte(){
   if(!NOTTE) return; stopTimerNotte();
-  if(NOTTE.stadio===NOTTE_DICH && !NOTTE.dich) return;      // la DICHIARAZIONE aspetta il giocatore: nessun auto-avanzamento
-  if(NOTTE.stadio>=SD_NOTTE.length-1) return;               // l'ultima ondata resta ferma: il risultato lo apre lui
-  NOTTE.timer=setTimeout(function(){ if(NOTTE) avanzaNotte(); }, NOTTE_MS);
+  const R=notteRiga();                                      // L261-1: la riga del tipo (nazionale = le costanti di sempre)
+  if(R.dich!=null && NOTTE.stadio===R.dich && !NOTTE.dich) return;      // la DICHIARAZIONE aspetta il giocatore: nessun auto-avanzamento
+  if(NOTTE.stadio>=R.sd.length-1) return;               // l'ultima ondata resta ferma: il risultato lo apre lui
+  NOTTE.timer=setTimeout(function(){ if(NOTTE) avanzaNotte(); }, R.ms);
 }
 function avanzaNotte(){
   if(!NOTTE) return;
   stopTimerNotte();
   NOTTE.stadio++;
-  if(NOTTE.stadio>=SD_NOTTE.length) return concludiNotte();   // oltre la proclamazione → esito a valle
-  if(NOTTE.stadio===SD_NOTTE.length-1) notteSuonaEsito();      // L95-3
+  const n=notteRiga().sd.length;
+  if(NOTTE.stadio>=n) return concludiNotte();   // oltre la proclamazione → esito a valle
+  if(NOTTE.stadio===n-1) notteSuonaEsito();      // L95-3
   renderNotte(); armaTimerNotte();
 }
 /* «Salta allo spoglio finale»: va all'ULTIMA ondata (i numeri esatti). Chi salta rinuncia al palcoscenico →
    nessuna dichiarazione, nessun effetto (decisione Giacomo: mai un effetto che il giocatore non ha scelto). */
-function saltaNotte(){ if(!NOTTE) return; stopTimerNotte(); NOTTE.saltata=true; NOTTE.stadio=SD_NOTTE.length-1; notteSuonaEsito(); renderNotte(); }
+function saltaNotte(){ if(!NOTTE) return; stopTimerNotte(); NOTTE.saltata=true; NOTTE.stadio=notteRiga().sd.length-1; notteSuonaEsito(); renderNotte(); }
 /* L95-3 — la proclamazione: il brusio si ferma e parte l'esito, UNA volta per notte (avanti o salto, non tutti e due).
    Vinta/non vinta è la STESSA lettura dello sfondo di renderNotte (blocco elettorale che tocca 50 sull'ultima ondata,
    o la mia % oltre 50): scena e suono non possono dire due cose diverse. */
 function notteSuonaEsito(){
   if(!NOTTE || NOTTE.esitoSuonato) return; NOTTE.esitoSuonato=true;
   if(typeof taci==='function') taci('urne');
-  var onda=NOTTE.onde[SD_NOTTE.length-1], vinta;
+  var onda=NOTTE.onde[notteRiga().sd.length-1], vinta;
   var quota;   // L118-1: la stessa lettura, in numero — oltre 55 la vittoria è LARGA e la piazza suona le campane
-  if(NOTTE.sistema==='parlamentare'){ quota=quotaNotte(onda); vinta=quota>=50; }   // L247-1: senza coalizione i seggi del tuo partito + credBonus, come l'esito
+  if(NOTTE.tipo==='primaria'){   // L261-2: il brusio d'aula si ferma e suona l'esito; la piazza no — l'applauso dei militanti è di esitoPrimaria (o di diventaPremier), come sempre
+    if(typeof taci==='function') taci('aula');
+    if(typeof suona==='function') suona(onda.v>=NOTTE.vero.soglia?'esito':'esito_no');
+    return;
+  }
+  if(NOTTE.tipo==='locale'){ quota=onda.v-LOCALE_SOGLIA+50; vinta=onda.v>=LOCALE_SOGLIA; }   // L261-1: la soglia di esitoElezioneLocale (la larga: 15 punti sopra)
+  else if(NOTTE.sistema==='parlamentare'){ quota=quotaNotte(onda); vinta=quota>=50; }   // L247-1: senza coalizione i seggi del tuo partito + credBonus, come l'esito
   else { quota=onda.myPct; vinta=(onda.myPct>50); }
   if(typeof suona==='function'){ suona(vinta?'esito':'esito_no'); suona(vinta?(quota>=55?suonoPreferito('campane','folla'):'folla'):'fischi'); }   // L116-1: la piazza, sotto l'esito
 }
 function dichiaraNotte(i){ if(!NOTTE) return; NOTTE.dich=i; stopTimerNotte(); avanzaNotte(); }
+/* ⚑ L261-1 · LA NOTTE DELLE LOCALI. urnaLocale() è il punto unico dell'urna a scadenza del livello 1 (corpoMese): con NOTTE_LOCALE e
+   una pagina apre la notte, altrimenti l'esito diretto di sempre. */
+function urnaLocale(){
+  if(NOTTE_LOCALE && typeof document!=='undefined' && document.getElementById && document.getElementById('modal')) return avviaNotteLocale();
+  return esitoElezioneLocale();
+}
+/* Le ondate a ritroso dal vero (forma del ramo 'candidato' di generaOnde): cammino convergente, l'ultima = il vero esatto, e nel filo
+   (scarto ≤ 2 dalla soglia) il sorpasso all'ondata di mezzo. Math.random solo qui, nel transitorio (il banco salta la notte). */
+function generaOndeLocale(vero){ return generaOndeSoglia(vero, NOTTE_TIPI.locale.sd); }
+/* L261-2 · la stessa forma per ogni notte «contro una soglia» (la locale, la primaria): stesse estrazioni nello stesso ordine. */
+function generaOndeSoglia(vero, sd){
+  const N=sd.length, onde=[], v=vero.v, so=vero.soglia;
+  let off=(Math.random()*2-1)*sd[0];
+  for(let k=0;k<N;k++){
+    if(k>0) off = sd[k]===0 ? 0 : (0.6*off*(sd[k]/(sd[k-1]||1)) + 0.4*(Math.random()*2-1)*sd[k]);
+    onde.push({ v: sd[k]===0 ? v : clamp(v+off,0,100) });
+  }
+  if(N>2 && Math.abs(v-so)<=2) onde[1]={ v:(v>=so)?so-1.5:so+1.5 };   // SORPASSO a metà sezioni
+  return onde;
+}
+function avviaNotteLocale(){
+  const vero={ v:S.locale.consenso, soglia:LOCALE_SOGLIA };   // il VERO: lo stesso numero che legge esitoElezioneLocale
+  NOTTE={ tipo:'locale', sistema:'locale', vero:vero, stadio:0, onde:generaOndeLocale(vero), dich:null, saltata:false, timer:null };
+  if(typeof UIVALS!=='undefined'){ UIVALS['bar:notte:loc']=0; UIVALS['num:notte:loc']=0; UIVALS['notte:sfondo']=null; UIVALS['notte:verdetto']=null; }   // si conta da zero, come la nazionale
+  if(typeof suona==='function') suona('urne');
+  if(typeof musica==='function') musica();
+  if(typeof ambiente==='function') ambiente();
+  renderNotte(); armaTimerNotte();
+}
+function notteNarrLocale(stadio){
+  const v=NOTTE.vero.v, so=NOTTE.vero.soglia, d=v-so, serrato=Math.abs(d)<3, ok=d>=0;
+  if(stadio===0) return serrato?T('Le prime sezioni: il conto è sul filo della rielezione.'):(ok?T('Le prime sezioni ti danno sopra la soglia.'):T('Le prime sezioni ti danno sotto la soglia.'));
+  if(stadio===1) return serrato?T('A metà dello scrutinio si decide sezione per sezione.'):(ok?T('A metà dello scrutinio il margine regge.'):T('A metà dello scrutinio la rimonta non arriva.'));
+  return ok?(d>=10?T('Riconferma netta: il territorio è con te.'):gn('Rieletto: il mandato continua.','Rieletta: il mandato continua.')):T('Sotto la soglia: le urne non ti confermano.');
+}
+const NOTTE_LOCALE_AZIONI_PX=118;
+function renderNotteLocale(){
+  const R=NOTTE_TIPI.locale, ultima=NOTTE.stadio>=R.sd.length-1, onda=NOTTE.onde[NOTTE.stadio], so=NOTTE.vero.soglia;
+  const v=onda.v, vinta=ultima && v>=so;
+  const kicker=`${cap(entitaLocale())} · ${T('Elezioni')} ${S.year}`;
+  const scN=(typeof scenaNotte==='function')?scenaNotte(NOTTE.stadio, ultima, vinta):null;
+  const mbg=scenaMomentoHtml(scN, {sfondo:true});
+  const body=`<div style="padding:0 18px 6px"><div style="padding:6px 0"><div style="display:flex;justify-content:space-between;font-size:13px"><span style="font-weight:700">${ruoloLocale()} <span class="chip" style="background:var(--acc-bg);color:var(--acc-ink)">${T('tu')}</span></span><span class="mono val" data-anim="num:notte:loc" data-to="${v}" data-dec="1">${fmt(v,1)}%</span></div>
+      <div class="bar" style="position:relative">${fillI('notte:loc', clamp(v,2,100), 'var(--acc)')}<span style="position:absolute;left:${so}%;top:-2px;bottom:-2px;width:2px;background:var(--neg);opacity:.55"></span></div>
+      <div class="contorno" style="font-size:11px;color:var(--mut);margin-top:4px">${T('La linea: %N% per la rielezione.').replace('%N',so)}</div></div></div>`;
+  const azioni=`<div class="choices notte-bottoni"><button class="opt" style="border-color:${ultima?'var(--acc)':'var(--brand)'}" onclick="avanzaNotte()"><span class="ol"${ultima?' style="color:var(--acc-ink)"':''}>${T(ultima?'Risultato ufficiale →':'Avanti →')}</span></button>`+
+    (ultima?'':`<button class="opt" style="border-color:var(--mut2)" onclick="saltaNotte()"><span class="ol" style="color:var(--mut)">${T('Salta allo spoglio finale')}</span></button>`)+`</div>`;
+  document.getElementById('modal').innerHTML=`<div class="notte-wrap notte-locale">${mbg}<div class="mt"><div class="kicker">${kicker}</div><h2>${T(R.lab[NOTTE.stadio])}</h2></div>
+    <div style="min-height:186px">
+      <div class="mtext${ultima?' notte-verdetto-riga':''}"${ultima?' style="font-weight:600"':''}>${notteNarrLocale(NOTTE.stadio)}</div>
+      <div class="notte-panel">${body}</div>
+    </div>
+    <div class="notte-azioni-locale" style="min-height:${NOTTE_LOCALE_AZIONI_PX}px">${azioni}</div></div>`;   /* 375 senza salti: lo spazio dei due bottoni resta anche quando «Salta» se ne va */
+  document.getElementById('ov').classList.add('on');
+  agganciaVideoTutti();
+  notteMovimento(scN, ultima);
+  try{ playAnims(); }catch(e){}
+}
+/* ⚑ L261-2 · LA NOTTE DELLE PRIMARIE. Due urne dei militanti, un VERO già estratto da chi la apre (nessuna estrazione nuova):
+   (a) la difesa della leadership — PRIM.punteggio contro PRIM.soglia, congelati in apriPrimaria; il bottone «Vai al voto dei militanti»
+       passa da votoMilitanti() e alla fine esitoPrimaria() INVARIATA;
+   (b) la sfida da ministro — lo score dell'occasione 'primaria' contro 50, estratto in resolveItemCore dove e quando lo era; alla fine
+       la stessa coda di prima (diventaPremier o il salto fallito: sfidaMinistroEsito).
+   `fine` è la chiusura (in NOTTE, transitorio); `info` = {kicker, avv: chi sta dall'altra parte, sfidi: true se sfidi tu}. Interruttore
+   NOTTE_PRIMARIA (`let`): spento = il flusso di prima. Il banco la salta (cerimonia 34, harness.js: avviaNottePrimaria → fine(true)). */
+let NOTTE_PRIMARIA=true;
+function nottePrimariaPagina(){ return NOTTE_PRIMARIA && typeof document!=='undefined' && document.getElementById && !!document.getElementById('modal'); }
+function avviaNottePrimaria(vero, fine, info){
+  NOTTE={ tipo:'primaria', sistema:'primaria', vero:{ v:vero.v, soglia:vero.soglia }, info:info||{}, fine:fine, stadio:0, onde:generaOndeSoglia(vero, NOTTE_TIPI.primaria.sd), dich:null, saltata:false, timer:null };
+  if(typeof UIVALS!=='undefined'){ UIVALS['bar:notte:pri']=0; UIVALS['num:notte:pri']=0; UIVALS['notte:sfondo']=null; UIVALS['notte:verdetto']=null; }
+  if(typeof suona==='function') suona('aula');   // il brusio d'aula di apriPrimaria (nella sfida da ministro nasce qui), in loop fino all'esito
+  if(typeof musica==='function') musica();
+  if(typeof ambiente==='function') ambiente();
+  renderNotte(); armaTimerNotte();
+  return 'notte';
+}
+/* (a) il bottone del modale di apriPrimaria */
+function votoMilitanti(){
+  if(!PRIM) return;
+  if(!nottePrimariaPagina()) return esitoPrimaria();
+  const v=S.sfida||{}, tipo=PRIM.tipo;
+  avviaNottePrimaria({ v:PRIM.punteggio, soglia:PRIM.soglia }, function(){
+    try{ document.getElementById('ov').classList.add('on'); }catch(e){}   // esitoPrimaria scrive nel modale aperto, come quando la chiamava il bottone
+    esitoPrimaria();
+  }, { kicker:`${T((part(S.partito)||{}).nome)} · ${T(tipo==='vigilia'?'Verso le elezioni':'Congresso anticipato')}`, avv:v.volto||'—', area:v.area||'', sfidi:false });
+}
+/* (b) la coda dell'occasione 'primaria' dopo lo score: quella di sempre (resolveItemCore), più — quando arriva dopo la notte — la coda di
+   resolveItem (gli esiti della carta e il loro suono), che a notte aperta non era passata. `diretto` = chiamata dentro resolveItemCore. */
+function sfidaMinistroEsito(it, ok, diretto, prima){
+  if(ok){ it.resolved=true; return diventaPremier(true); }   // primaria = mandato vinto
+  S.capitale=clamp((S.capitale||0)-12,0,100);   // sconfitta ammorbidita: puoi ritentare
+  it.resolved=true; it.outcome=T('Hai tentato il salto e fallito: resti ministro, ridimensionato.');
+  S.log.unshift({t:T('Salto fallito'),x:T('La scalata si ferma qui: il capitale ne risente.')});
+  if(diretto) return;
+  S.ind.consenso=computeConsenso();
+  render();
+  if(prima && S.agenda && S.agenda.indexOf(it)>=0){
+    it.esiti=diffEsiti(prima, fotoEsiti());
+    if(typeof suonoEsito==='function' && typeof suona==='function'){ const _se=suonoEsito(it); if(_se) suona(_se); }
+  }
+}
+function notteNarrPrimaria(stadio){
+  const I=NOTTE.info||{}, v=NOTTE.vero.v, so=NOTTE.vero.soglia, d=v-so, serrato=Math.abs(d)<3, ok=d>=0;
+  if(stadio===0) return serrato?T('Le prime federazioni: il partito è spaccato a metà.'):(ok?T('Le prime federazioni sono con te.'):T('Le prime federazioni guardano altrove.'));
+  if(stadio===1) return serrato?T('Metà dei circoli ha votato: si decide circolo per circolo.'):(ok?T('Metà dei circoli ha votato: il margine regge.'):T('Metà dei circoli ha votato: la rimonta non arriva.'));
+  if(I.sfidi) return ok?T('Il partito sceglie te.'):T('Il partito resta con %P.').replace('%P',I.avv);
+  return ok?(d>=8?T('I militanti ti confermano con un margine netto.'):T('I militanti ti confermano.')):T('I militanti scelgono %V.').replace('%V',I.avv);
+}
+function renderNottePrimaria(){
+  const R=NOTTE_TIPI.primaria, I=NOTTE.info||{}, ultima=NOTTE.stadio>=R.sd.length-1, onda=NOTTE.onde[NOTTE.stadio], so=NOTTE.vero.soglia;
+  const v=onda.v, vinta=ultima && v>=so;
+  const scN=(typeof scenaNotte==='function')?scenaNotte(NOTTE.stadio, ultima, vinta):null;
+  const mbg=scenaMomentoHtml(scN, {sfondo:true});
+  const chi=I.sfidi?T('Sfidi <b>%P</b> per la guida del partito.').replace('%P',I.avv):T('Ti sfida <b>%V</b>%X.').replace('%V',I.avv).replace('%X',I.area?` — <b>${I.area}</b>`:'');
+  const body=`<div style="padding:0 18px 6px"><div style="padding:6px 0"><div style="display:flex;justify-content:space-between;font-size:13px"><span style="font-weight:700">${T('I militanti')} <span class="chip" style="background:var(--acc-bg);color:var(--acc-ink)">${T('tu')}</span></span><span class="mono val" data-anim="num:notte:pri" data-to="${v}" data-dec="1">${fmt(v,1)}</span></div>
+      <div class="bar" style="position:relative">${fillI('notte:pri', clamp(v,2,100), 'var(--acc)')}<span style="position:absolute;left:${so}%;top:-2px;bottom:-2px;width:2px;background:var(--neg);opacity:.55"></span></div>
+      <div class="contorno" style="font-size:11px;color:var(--mut);margin-top:4px">${T('La linea: %N per vincere.').replace('%N',fmt(so,0))}</div></div></div>`;
+  const azioni=`<div class="choices notte-bottoni"><button class="opt" style="border-color:${ultima?'var(--acc)':'var(--brand)'}" onclick="avanzaNotte()"><span class="ol"${ultima?' style="color:var(--acc-ink)"':''}>${T(ultima?'Risultato ufficiale →':'Avanti →')}</span></button>`+
+    (ultima?'':`<button class="opt" style="border-color:var(--mut2)" onclick="saltaNotte()"><span class="ol" style="color:var(--mut)">${T('Salta allo spoglio finale')}</span></button>`)+`</div>`;
+  document.getElementById('modal').innerHTML=`<div class="notte-wrap notte-locale notte-primaria">${mbg}<div class="mt"><div class="kicker">${I.kicker||''}</div><h2>${T(R.lab[NOTTE.stadio])}</h2></div>
+    <div style="min-height:206px">
+      <div class="mtext" style="padding-bottom:0">${chi}</div>
+      <div class="mtext${ultima?' notte-verdetto-riga':''}"${ultima?' style="font-weight:600"':''}>${notteNarrPrimaria(NOTTE.stadio)}</div>
+      <div class="notte-panel">${body}</div>
+    </div>
+    <div class="notte-azioni-locale" style="min-height:${NOTTE_LOCALE_AZIONI_PX}px">${azioni}</div></div>`;   /* 375 senza salti, come la locale */
+  document.getElementById('ov').classList.add('on');
+  agganciaVideoTutti();
+  notteMovimento(scN, ultima);
+  try{ playAnims(); }catch(e){}
+}
+/* la proclamazione delle notti con una chiusura loro: svuota il transitorio, poi l'esito di sempre (oggi esitoElezioneLocale, invariata) */
+function concludiNotteTipo(){
+  stopTimerNotte();
+  if(typeof taci==='function') taci('urne');
+  const chiudi=NOTTE.fine || notteRiga().chiudi; NOTTE=null;   // L261-2: la primaria porta la sua chiusura (NOTTE.fine)
+  if(typeof musica==='function') musica();
+  if(typeof ambiente==='function') ambiente();
+  try{ document.getElementById('ov').classList.remove('on'); }catch(e){}
+  chiudi();
+}
 function concludiNotte(){
+  if(NOTTE && notteRiga().chiudi) return concludiNotteTipo();   // L261-1: le notti con una chiusura loro (oggi la locale)
   stopTimerNotte();
   if(typeof taci==='function') taci('urne');   // L95-3: rete di sicurezza, il loop non sopravvive alla notte
   NOTTE_TERR=NOTTE.cambiTerr ? { mese:S.year*12+S.month, cambi:NOTTE.cambiTerr, quote:NOTTE.quoteTerr||[] } : null;   // L239-3: i cambi decisi alla notte aspettano l'esito (territoriDopoUrna) · L239-4: con le quote
@@ -9071,6 +9352,8 @@ function lancioNotte(fase){
 }
 function renderNotte(){
   if(!NOTTE) return;
+  if(NOTTE.tipo==='locale') return renderNotteLocale();   // L261-1
+  if(NOTTE.tipo==='primaria') return renderNottePrimaria();   // L261-2
   const ultima=NOTTE.stadio>=SD_NOTTE.length-1;
   const onda=NOTTE.onde[NOTTE.stadio];
   const kicker=`${T(nomePaeseOra())} · ${T(urnaLegislativa()?'Legislative anticipate':(S.elezioniAnticipate?'Elezioni anticipate':'Elezioni'))} ${S.year}`;
@@ -9334,7 +9617,11 @@ function economiaIndice(){ const i=S.ind||{}; let e=50;
 /* le dimensioni del livello corrente, coi VALORI attuali (0-100). Usato sia per lo snapshot sia per il render. */
 function bilancioDims(){
   const d=[]; const add=(key,nm,val)=>{ if(val!=null && !isNaN(val)) d.push({key:key, nm:T(nm), val:clamp(Math.round(val),0,100)}); };
-  if(S.livello===1 && S.locale){
+  if(S.livello===0 && S.attivista){   // L260-2 (⚠ 1 di L260-1): l'attivista ha le sue tre valute — prima cadeva nel ramo del capo del governo (Consenso, Economia, Statura)
+    add('base','Base militante', S.attivista.base);
+    add('autc','Autorevolezza di campo', S.attivista.autorev);
+    add('rep','Reputazione media', mediaGruppi());
+  } else if(S.livello===1 && S.locale){
     add('cons','Consenso', S.locale.consenso);
     const ind=S.locale.ind||{}; const ks=Object.keys(ind).filter(k=>k!=='bilancio');
     add('serv','Servizi e territorio', ks.length?ks.reduce((s,k)=>s+ind[k],0)/ks.length:null);
@@ -9400,7 +9687,7 @@ function mostraBilancio(prev, cur){
   const scFa=scenaMomentoHtml('assets/scenes/fineanno-'+(verd.k||'lucieombre')+'.webp');
   document.getElementById('modal').innerHTML=`${scFa}<div class="mt" style="display:flex;align-items:center;gap:11px"><div><div class="kicker">${T("Bilancio dell'anno")} · ${cur.anno-1}</div><h2>${T("L'anno che si chiude")}</h2></div></div>
     <div class="mtext" style="color:var(--mut2)">${T("Come è andato l'anno, in tendenza.")}</div>
-    <div class="bil-rows" style="padding:2px 18px 4px">${rows}</div>
+    <div class="bil-rows" style="padding:2px 18px 4px">${rows}</div>${radiciBilancioRiga()}
     <div class="rv-riga" style="padding:6px 18px 8px">${rvB}<div class="bil-verdetto" style="font-family:'Fraunces',serif;font-style:italic;font-size:18px;color:${verd.c}">${verd.t}.</div></div>
     <div class="choices"><button class="opt" style="border-color:var(--brand)" onclick="chiudiBilancio()"><span class="ol">${T('Continua →')}</span></button></div>`;
   document.getElementById('ov').classList.add('on');
@@ -9408,6 +9695,12 @@ function mostraBilancio(prev, cur){
   if(rvB && typeof personaggioMomentoAvvia==='function') personaggioMomentoAvvia(document.getElementById('modal'));   // L248-4: il personaggio del bilancio (con l'interruttore acceso)
   if(typeof parla==='function') parla(voceMomento(persDisegnato(rvB), (verd.k==='buono'||verd.k==='difficile') ? 'voce-pers-bilancio-'+verd.k : null, 'voce-fineanno-'+(verd.k||'lucieombre')));   // L218-4: la voce del verdetto, la stessa chiave della scena (nuovocapitolo col file dal L218-5) · L248-5: la battuta del personaggio negli anni buoni e difficili
   try{ playAnims(); }catch(e){}   // vetrina: le barre salgono da 0 al valore (transform scaleX, 60fps)
+}
+/* L260-2 · la riga del traguardo nel bilancio dell'attivista: davanti al movimento rivale in N territori su M */
+function radiciBilancioRiga(){
+  if(!ATT_RADICI || S.livello!==0 || !S.attivista || !S.attivista.radici || !S.attivista.rivale) return '';
+  const c=radiciConto();
+  return `<div class="mtext bil-radici" style="padding-top:0">${T('Le radici del movimento · territori in cui sei davanti a %S: %N su %M.').replace('%S',rivaleSigla()).replace('%N',c.davanti).replace('%M',c.n)}</div>`;
 }
 function chiudiBilancio(){ document.getElementById('ov').classList.remove('on'); if(typeof suona==='function') suona('timbro'); }   // L218-13 (F5a): il timbro sul bilancio dell'anno   // presentazione: il mese è già reso sotto (il render unico di fine mese, L123-1)
 
@@ -10596,6 +10889,7 @@ function applySnap(snap){
   document.getElementById('appoint').style.display='none';
   document.getElementById('game').style.display='block';
   applyPaese();
+  if(S.attivista && !S.attivista.laurea && (!S.attivista.radici || !S.attivista.rivale)) radiciInit();   // L260-2: un attivista di prima riceve radici e rivale (solo con ATT_RADICI; il dado è un hash: lo stesso a ogni caricamento)
   genAgenda(false);   // agenda fresca: il mese riparte pulito
   if(_pa) togliRisolteAgenda(_pa.risolte);   // L180-1: una carta risolta nel mese non torna (D150)
   if(!S.titoloMese){ try{ generaTitolo(); }catch(e){} }   // vecchi salvataggi senza titolo: la striscia c'è sempre
