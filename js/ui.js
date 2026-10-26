@@ -2235,7 +2235,7 @@ function render(){
     : liv4
     ? `${meseSpan()} · ${T('Segretario')} · ${T('mandato')} ${S.intl.mandato} · ${T('mese')} ${(S.intl.mesiInCarica||0)+1}/${S.intl.mandatoMesi}`
     : liv5
-    ? `${meseSpan()} · ${typeof ruoloDiplo==='function'?ruoloDiplo():T('Ambasciatore')}`
+    ? `${meseSpan()} · ${T(typeof ruoloDiplo==='function'?ruoloDiplo():'Ambasciatore')}`   // L258-11: il ruolo passa da T() (in inglese restava «Ambasciatore»)
     : S.opposizione
     ? `${meseSpan()} · <span style="color:var(--neg);font-weight:700">${T('OPPOSIZIONE')}</span> · ${T('governa')} ${T((part(S.governoAvversario)||{}).nome||'—')} · ${T('anno')} ${S.turnInMandate+1}/${PAESE.mandatoMesi/12} ${T('al voto')}`
     : `${meseSpan()} · ${T('Mandato')} ${S.mandate}, ${T('anno')} ${S.turnInMandate+1}/${PAESE.mandatoMesi/12}`)+((liv4||liv5)?'':dsk);
