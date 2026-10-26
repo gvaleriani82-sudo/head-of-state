@@ -997,9 +997,14 @@ function partnerTornaCapo(){
   if(REGOLA_F0RIENTRO) S.f0Rientro=Math.min(mioPartito().forza, S.forze[S.partito]||0);
 }
 function vinceIlGoverno(){ const g=(S.premier && S.premier.partito) || S.partito, w=rivaleGoverno(); return (S.forze[g]||0) >= (S.forze[(w||{}).id]||0); }
+/* L261-3 · spezzata in «decidi» (qui: maturaRP, poi vinceIlGoverno, dove e quando prima) e «applica» (applicaElezioneMinistro, il
+   corpo di prima riga per riga). La notte 'ministro' (avviaNotteMinistro) fa la stessa decisione all'apertura e applica alla chiusura. */
 function esitoElezioneMinistro(){
   maturaRP();
-  if(vinceIlGoverno()){
+  return applicaElezioneMinistro(vinceIlGoverno());
+}
+function applicaElezioneMinistro(vinta){
+  if(vinta){
     S.mandate++; S.turnInMandate=0; S.snap=Object.assign({},S.pol); S.leggiSnap=Object.assign({},S.leggi);
     if(PAESE.comeSiVince==='parlamentare'||PAESE.coalizione) S.seggi=calcSeggi();
     S.capitale=clamp(S.capitale+5,0,100); S.premCrisiMesi=0;
@@ -8053,6 +8058,14 @@ function resolveItem(idx,ci){
   if(typeof suonoCarta==='function' && typeof taci==='function' && !(S.agenda||[]).some(function(a){ return a && !a.resolved && suonoCarta(a)==='protesta'; })) taci('protesta');
   return r;
 }
+/* visibilità dell'amplificatore: se la stampa ha gonfiato o attutito il colpo, dillo dove il giocatore guarda (la coda di
+   resolveItemCore; L261-3: anche la chiusura della notte dell'intermedia, intermediaEsito) */
+function stampaFxEsito(it){
+  if(STAMPA_FX!==0 && it.outcome){
+    it.outcome+=' <span style="color:'+(STAMPA_FX>0?'var(--neg)':'var(--pos)')+'">'+(STAMPA_FX>0?'La stampa ostile gonfia il caso.':'La stampa amica attutisce il colpo.')+'</span>';
+    STAMPA_FX=0;
+  }
+}
 function resolveItemCore(idx,ci){
   const it=S.agenda[idx]; if(it.resolved) return;
   STAMPA_FX=0;   // bandierina dell'amplificatore: pulita prima degli effetti della scelta
@@ -8314,8 +8327,12 @@ function resolveItemCore(idx,ci){
     it.resolved=true; it.outcome=T('Scelta:')+' <b>'+T(choice.l)+'</b>.';
     S.log.unshift({t:T('Il partito'), x:T('Punto con le correnti:')+' '+T(choice.l)});
   } else if(it.kind==='intermedia'){
-    esitoIntermedia(it.ris);
-    it.resolved=true; it.outcome=T(it.ris.win?'Risultato incassato: avanzi nel territorio.':'Risultato incassato: arretri.');   // L16-1: due frasi intere, non un interruttore in mezzo
+    /* L261-3: al tocco della carta la notte dell'intermedia (il VERO è già nella carta: ris.quota contro ris.attesa); la carta resta da
+       risolvere finché la notte non chiude, e la chiusura è intermediaEsito (la coda di sempre, più quella di resolveItem) */
+    if(notteIntermediaPagina()){ const prima=fotoEsiti();
+      const rN=avviaNotteIntermedia(it, function(diretto){ return intermediaEsito(it, diretto, prima); });
+      if(rN==='notte') return;   // la notte è aperta: la coda la fa la sua chiusura
+    } else intermediaEsito(it, true);   // il banco (cerimonia 36: fine(true) già passata) prosegue qui sotto, com'era
   } else {
     const d=it.data; const choice=d.ch[ci];
     if(choice.need!=null && (S.ind.reputazione==null || S.ind.reputazione<choice.need)) return;   // opzione a soglia di reputazione: non disponibile
@@ -8359,11 +8376,7 @@ function resolveItemCore(idx,ci){
     if(_cadeGov && !S.opposizione){ CAUSA_CRISI=d.id||'?'; S.log.unshift({t:T('Sfiducia'), x:T('%A vota contro: il governo cade.').replace('%A', _cadeGov.nomi)}); crisiMinisteriale(); CAUSA_CRISI=null; }
     else if(d.id===QUESTIONE_FIDUCIA_EV.id && !S.opposizione && typeof parla==='function') parla('voce-fiducia-si');   // L218-5: la questione di fiducia passata (concessa, o rifiutata senza chi toglie la maggioranza)
   }
-  /* visibilità dell'amplificatore: se la stampa ha gonfiato o attutito il colpo, dillo dove il giocatore guarda */
-  if(STAMPA_FX!==0 && it.outcome){
-    it.outcome+=' <span style="color:'+(STAMPA_FX>0?'var(--neg)':'var(--pos)')+'">'+(STAMPA_FX>0?'La stampa ostile gonfia il caso.':'La stampa amica attutisce il colpo.')+'</span>';
-    STAMPA_FX=0;
-  }
+  stampaFxEsito(it);
   /* P1 (Sfide v3, #7b) — VERDETTO INEQUIVOCABILE: se la carta è una Sfida, la scelta ha costruito `_esito` in f()
      (esatto/sbagliato + risposta giusta evidenziata + perché + delta) → sovrascrive l'esito a schermo. Vale per
      ogni kind (event/attivista/stampa/locale) senza toccare i singoli gestori: niente frame ambiguo sul quiz. */
@@ -8615,8 +8628,8 @@ function avanzaMese(){
     if(S.intl.coesBassa>=3){ return gameOver('mandatoInt'); }   // coesione crollata a lungo → estromesso (conseguenza delle TUE scelte)
     S.intl.mesiInCarica=(S.intl.mesiInCarica||0)+1;
     if(S.intl.mesiInCarica>=S.intl.mandatoMesi){               // fine mandato (5 anni): rinnovo se coeso/autorevole, altrimenti non riconfermato
-      if(S.intl.coesione>=45 && S.intl.autorevolezza>=50){ S.agenda=[{kind:'rinnovoInt', resolved:false}]; render(); commitSnap(); return; }
-      return gameOver('mandatoInt');
+      if(nottePagina(NOTTE_RINNOVO)) return avviaNotteRinnovo();   // L261-3: la notte dei delegati (2 ondate), poi lo stesso bivio
+      return rinnovoEsito(rinnovoVinto());
     }
     genAgenda(false); render(); commitSnap();
     return;
@@ -8699,7 +8712,7 @@ function avanzaMese(){
       S.log.unshift({t:T('Cambio al vertice'),x:T('%G sostituisce il premier con %P. Tu resti ministro, da partner.').replace('%G',T((part(S.premier.partito)||{}).nome||'')).replace('%P',S.premier.nome)});
     }
     else if(S.premCrisiMesi>=3 && S.capitale<50){ S.premier=generaPremier(partnerAttivo()?S.premier.partito:undefined); S.premCrisiMesi=0; S.log.unshift({t:T('Cambio al vertice'),x:T('Il partito sostituisce il premier con %P. Tu, ancora acerbo, resti ministro.').replace('%P',S.premier.nome)}); }   // se non sei pronto, un nuovo premier; se lo sei, scatta l'occasione (pickOccasione) · L237-2bis (R0 2): da partner il premier resta del partito che guida
-    if(urnaScadenzaOra()){ return esitoElezioneMinistro(); }
+    if(urnaScadenzaOra()){ return urnaMinistro(); }   // L261-3: la notte da ministro (o l'esito diretto, a interruttore spento)
     maturaRP();
     S.snap=Object.assign({},S.pol); S.leggiSnap=Object.assign({},S.leggi);
     aggiornaSfida();
@@ -8796,17 +8809,28 @@ const NOTTE_DICH=3;           // l'ondata della dichiarazione a caldo (la penult
    ondate convergono (l'ultima = il vero), niente in S, nessun commitSnap durante la notte (il mese non si salva finché l'esito non
    arriva: un caricamento rigioca il mese e l'urna dallo stesso stato). Interruttore NOTTE_LOCALE (`let`): spento = esito diretto,
    come prima. Il banco salta la notte locale (cerimonia 33, harness.js: avviaNotteLocale → esitoElezioneLocale).
-   'primaria' (L261-2) = il voto dei militanti, più sotto (avviaNottePrimaria). Prossimi tipi (L261-3): 'intermedia', 'ministro'
-   (DESIGN-NOTTE.md §1). */
+   'primaria' (L261-2) = il voto dei militanti, più sotto (avviaNottePrimaria). 'ministro', 'intermedia', 'delegati' (L261-3) = le urne
+   restanti, più sotto (avviaNotteUrna). */
 let NOTTE_LOCALE=true;
 const LOCALE_SOGLIA=40;
 const NOTTE_TIPI={
   nazionale:{ sd:SD_NOTTE, lab:LAB_NOTTE, ms:NOTTE_MS, dich:NOTTE_DICH, tavolo:true, chiudi:null },
-  locale:{ sd:[3, 1.2, 0], lab:['Prime sezioni','Metà delle sezioni','Proclamazione'], ms:5000, dich:null, tavolo:false, chiudi:function(){ esitoElezioneLocale(); } },
+  locale:{ sd:[3, 1.2, 0], lab:['Prime sezioni','Metà delle sezioni','Proclamazione'], ms:5000, dich:null, tavolo:false, bilancio:true, chiudi:function(){ esitoElezioneLocale(); } },
   /* L261-2 · il voto dei militanti: la difesa della leadership (apriPrimaria) e la sfida che lanci tu da ministro (l'occasione). La
      chiusura è della notte (NOTTE.fine, scritta da chi la apre): qui un ripiego che non fa nulla. */
-  primaria:{ sd:[3, 1.2, 0], lab:['Prime federazioni','Metà dei circoli','Il risultato'], ms:5000, dich:null, tavolo:false, chiudi:function(){} }
+  primaria:{ sd:[3, 1.2, 0], lab:['Prime federazioni','Metà dei circoli','Il risultato'], ms:5000, dich:null, tavolo:false, chiudi:function(){} },
+  /* L261-3 · le urne restanti, tutte con la chiusura in NOTTE.fine (scritta da chi apre): l'elezione da ministro (il governo del tuo
+     premier si ripresenta), l'intermedia al tocco della carta, il rinnovo al vertice internazionale (2 ondate). `bilancio`: la notte
+     si apre dentro il mese, e il bilancio di gennaio (forseBilancio, che con un modale aperto salta) si riprova alla chiusura —
+     anche per la locale di L261-1, dove si perdeva */
+  ministro:{ sd:[3, 1.2, 0], lab:['Primi seggi','Metà delle sezioni','Il risultato'], ms:5000, dich:null, tavolo:false, bilancio:true, chiudi:function(){} },
+  intermedia:{ sd:[3, 1.2, 0], lab:['Primi comuni','Metà dello spoglio','Il risultato'], ms:5000, dich:null, tavolo:false, chiudi:function(){} },
+  delegati:{ sd:[2, 0], lab:['Le prime delegazioni','Il voto finale'], ms:5000, dich:null, tavolo:false, bilancio:true, chiudi:function(){} }
 };
+/* L261-3 · gli interruttori delle tre notti nuove (`let`, spenti = l'esito diretto di prima) e la pagina che le può mostrare */
+let NOTTE_MINISTRO=true, NOTTE_INTERMEDIA=true, NOTTE_RINNOVO=true;
+function nottePagina(acceso){ return !!acceso && typeof document!=='undefined' && document.getElementById && !!document.getElementById('modal'); }
+function notteIntermediaPagina(){ return nottePagina(NOTTE_INTERMEDIA); }
 function notteRiga(){ return NOTTE_TIPI[(NOTTE && NOTTE.tipo) || 'nazionale']; }
 function rumore(v, sd){ return clamp(v + (Math.random()*2-1)*sd, 0, 100); }   // rumore uniforme ±sd, clampato [0,100]
 /* Sposta `target` seggi verso/da il blocco mantenendo la somma 100 (usato dal SORPASSO nel filo). */
@@ -9075,7 +9099,8 @@ function stopTimerNotte(){ if(NOTTE && NOTTE.timer){ clearTimeout(NOTTE.timer); 
 function armaTimerNotte(){
   if(!NOTTE) return; stopTimerNotte();
   const R=notteRiga();                                      // L261-1: la riga del tipo (nazionale = le costanti di sempre)
-  if(R.dich!=null && NOTTE.stadio===R.dich && !NOTTE.dich) return;      // la DICHIARAZIONE aspetta il giocatore: nessun auto-avanzamento
+  if(R.dich!=null && NOTTE.stadio===R.dich && !NOTTE.dich && !NOTTE.taciuto) return;      // la DICHIARAZIONE aspetta il giocatore: nessun auto-avanzamento
+  if(NOTTE.pannello) return;                                // L261-4: il pannello dei cronisti è aperto, la notte aspetta
   if(NOTTE.stadio>=R.sd.length-1) return;               // l'ultima ondata resta ferma: il risultato lo apre lui
   NOTTE.timer=setTimeout(function(){ if(NOTTE) avanzaNotte(); }, R.ms);
 }
@@ -9090,7 +9115,7 @@ function avanzaNotte(){
 }
 /* «Salta allo spoglio finale»: va all'ULTIMA ondata (i numeri esatti). Chi salta rinuncia al palcoscenico →
    nessuna dichiarazione, nessun effetto (decisione Giacomo: mai un effetto che il giocatore non ha scelto). */
-function saltaNotte(){ if(!NOTTE) return; stopTimerNotte(); NOTTE.saltata=true; NOTTE.stadio=notteRiga().sd.length-1; notteSuonaEsito(); renderNotte(); }
+function saltaNotte(){ if(!NOTTE) return; stopTimerNotte(); NOTTE.saltata=true; NOTTE.pannello=null; NOTTE.stadio=notteRiga().sd.length-1; notteSuonaEsito(); renderNotte(); }
 /* L95-3 — la proclamazione: il brusio si ferma e parte l'esito, UNA volta per notte (avanti o salto, non tutti e due).
    Vinta/non vinta è la STESSA lettura dello sfondo di renderNotte (blocco elettorale che tocca 50 sull'ultima ondata,
    o la mia % oltre 50): scena e suono non possono dire due cose diverse. */
@@ -9104,12 +9129,95 @@ function notteSuonaEsito(){
     if(typeof suona==='function') suona(onda.v>=NOTTE.vero.soglia?'esito':'esito_no');
     return;
   }
-  if(NOTTE.tipo==='locale'){ quota=onda.v-LOCALE_SOGLIA+50; vinta=onda.v>=LOCALE_SOGLIA; }   // L261-1: la soglia di esitoElezioneLocale (la larga: 15 punti sopra)
+  if(NOTTE.tipo==='locale'){ quota=onda.v-LOCALE_SOGLIA+50; vinta=onda.v>=LOCALE_SOGLIA; }
+  else if(NOTTE.tipo==='ministro' || NOTTE.tipo==='intermedia' || NOTTE.tipo==='delegati'){ quota=onda.v-NOTTE.vero.soglia+50; vinta=onda.v>=NOTTE.vero.soglia; }   // L261-3: la stessa lettura, contro la linea della notte   // L261-1: la soglia di esitoElezioneLocale (la larga: 15 punti sopra)
   else if(NOTTE.sistema==='parlamentare'){ quota=quotaNotte(onda); vinta=quota>=50; }   // L247-1: senza coalizione i seggi del tuo partito + credBonus, come l'esito
   else { quota=onda.myPct; vinta=(onda.myPct>50); }
   if(typeof suona==='function'){ suona(vinta?'esito':'esito_no'); suona(vinta?(quota>=55?suonoPreferito('campane','folla'):'folla'):'fischi'); }   // L116-1: la piazza, sotto l'esito
 }
-function dichiaraNotte(i){ if(!NOTTE) return; NOTTE.dich=i; stopTimerNotte(); avanzaNotte(); }
+function dichiaraNotte(i){ if(!NOTTE) return; if(DICH_INCERTEZZA && NOTTE.pannello) return dichScegli(i); NOTTE.dich=i; stopTimerNotte(); avanzaNotte(); }   // L261-4: acceso, la scelta passa dal pannello della situazione
+/* ⚑ L261-4 (25/10) · LA DICHIARAZIONE NELL'INCERTEZZA, per tutti i tipi di notte. Interruttore DICH_INCERTEZZA (`let`): spento = la
+   notte nazionale di prima (DICH_NOTTE obbligata all'ondata NOTTE_DICH, effetti fissi) e nessuna dichiarazione negli altri tipi.
+   Acceso: in ogni ondata tranne l'ultima, finché non hai parlato, «Una parola ai cronisti» apre il pannello (NOTTE.pannello, transitorio:
+   ferma il timer) con le risposte della SITUAZIONE — la lettura che la notte mostra in quel momento (notteMargineMostrato), mai il vero —
+   e la POSTA dell'ondata (×2 con ≥ 3 ondate da vedere, ×1,5 con 2, ×1 con 1). Nella nazionale all'ondata NOTTE_DICH il pannello si apre
+   da solo, con «Nessun commento». La scelta va in NOTTE.dich = {k, posta, sit, i}; il CONTO (DICH_RISPOSTE.conto × posta, arrotondato
+   lontano da zero, col tetto) si applica alla chiusura, quando il lato è già deciso — concludiNotte per la nazionale, concludiNotteTipo
+   subito prima di chiudi() per gli altri: il vero e l'esito non lo vedono. Chi salta senza aver parlato: niente. Niente in S a notte
+   aperta, nessun dado; il banco non dichiara. */
+let DICH_INCERTEZZA=true;
+function notteMargineMostrato(){ return notteMargineOnda(NOTTE.stadio); }
+function notteMargineOnda(k){   // L261-5: la lettura di un'ondata qualunque (notteMargineMostrato = quella in pagina)
+  const onda=NOTTE.onde[k];
+  if(!NOTTE.tipo || NOTTE.tipo==='nazionale') return NOTTE.sistema==='parlamentare' ? quotaNotte(onda)-50 : (onda.myPct||0)-50;   // la barra del tuo blocco (seggi) o la tua %
+  return onda.v-NOTTE.vero.soglia;   // le notti contro una linea: la barra contro la linea
+}
+/* ⚑ L261-5 · LA NARRAZIONE NON ANTICIPA IL VERO. Nelle ondate prima della proclamazione le righe di notteNarr, notteNarrLocale,
+   notteNarrPrimaria e notteNarrUrna leggono la stessa lettura della barra (notteMargineOnda, quella di notteSituazione), non NOTTE.vero:
+   prima la riga sapeva già come finiva, e toglieva l'incertezza su cui poggia la dichiarazione di L261-4. All'ultima ondata (il vero
+   esatto) leggono il vero come prima. Interruttore NOTTE_NARR_MOSTRATA (`let`): spento = la narrazione di prima. Nessun dado. */
+let NOTTE_NARR_MOSTRATA=true;
+function notteNarrScarto(stadio, scartoVero){
+  return (NOTTE_NARR_MOSTRATA && stadio<notteRiga().sd.length-1 && NOTTE.onde && NOTTE.onde[stadio]) ? notteMargineOnda(stadio) : scartoVero;
+}
+function notteSituazione(){ const m=notteMargineMostrato(); return m>=3 ? 'vantaggio' : (m<=-3 ? 'svantaggio' : 'testa'); }
+function nottePosta(){ const r=notteRiga().sd.length-1-NOTTE.stadio; return r>=3 ? 2 : (r===2 ? 1.5 : 1); }
+/* il lato che la chiusura userà: nazionale = calcMargineEsito(...).win; le altre = il vero contro la linea (o il `win` deciso da chi apre) */
+function notteLato(){
+  if(!NOTTE.tipo || NOTTE.tipo==='nazionale') return calcMargineEsito(NOTTE.sistema, NOTTE.vero).win;
+  return NOTTE.vero.win!=null ? !!NOTTE.vero.win : NOTTE.vero.v>=NOTTE.vero.soglia;
+}
+function dichPuo(){ return DICH_INCERTEZZA && !!NOTTE && NOTTE.dich==null && !NOTTE.taciuto && !NOTTE.saltata && NOTTE.stadio<notteRiga().sd.length-1; }
+function dichApri(auto){
+  if(!dichPuo() || NOTTE.pannello) return;
+  NOTTE.pannello={ sit:notteSituazione(), posta:nottePosta(), auto:!!auto };
+  stopTimerNotte();
+  if(!auto) renderNotte();
+}
+function dichNonOra(){ if(!NOTTE || !NOTTE.pannello) return; NOTTE.pannello=null; renderNotte(); armaTimerNotte(); }
+function dichScegli(j){
+  if(!NOTTE || !NOTTE.pannello) return;
+  const P=NOTTE.pannello, op=DICH_RISPOSTE.opzioni[P.sit], o=op[clamp(j|0, 0, op.length-1)];
+  NOTTE.dich={ k:o.k, posta:P.posta, sit:P.sit, i:op.indexOf(o) }; NOTTE.pannello=null;
+  stopTimerNotte(); avanzaNotte();
+}
+function dichNessunCommento(){ if(!NOTTE) return; NOTTE.taciuto=true; NOTTE.pannello=null; stopTimerNotte(); avanzaNotte(); }
+function dichArrotonda(x){ return x<0 ? -Math.round(-x) : Math.round(x); }
+function dichConto(d, vinto){
+  const c=DICH_RISPOSTE.conto[d.k][vinto?'vinto':'perso'], tt=DICH_RISPOSTE.tetto;
+  return { stampa:clamp(dichArrotonda(c[0]*d.posta), tt.stampa[0], tt.stampa[1]), correnti:clamp(dichArrotonda(c[1]*d.posta), tt.correnti[0], tt.correnti[1]),
+    beat:DICH_RISPOSTE.beat[d.k+'|'+(vinto?'vinto':'perso')] };
+}
+function dichApplica(d, vinto){
+  if(!d || typeof d!=='object' || !DICH_RISPOSTE.conto[d.k]) return;
+  const c=dichConto(d, vinto);
+  if(c.stampa) stampad(c.stampa);
+  if(c.correnti) tutteCorrenti(c.correnti);
+  S.log.unshift({ t:T('La dichiarazione della notte'), x:T(c.beat) });
+}
+function dichEtichetta(o){ const t=(NOTTE && NOTTE.tipo) || 'nazionale'; return (o.lt && o.lt[t]) || o.l; }
+const DICH_SIT_TESTO={ vantaggio:'Per ora sei avanti.', testa:'Per ora è testa a testa.', svantaggio:'Per ora sei indietro.' };
+const DICH_POSTA_TESTO={ 2:'Presto: conta il doppio.', 1.5:'Conta una volta e mezza.', 1:'A spoglio quasi chiuso: conta una volta.' };
+function dichPannelloHtml(){
+  const P=NOTTE.pannello, op=DICH_RISPOSTE.opzioni[P.sit];
+  return `<div class="mtext dich-testa"><b>${T(P.auto?'I cronisti ti cercano: una parola, adesso.':'Una parola ai cronisti, a spoglio aperto.')}</b> <span class="dich-sit">${T(DICH_SIT_TESTO[P.sit])}</span></div><div class="choices notte-dich">`+
+    op.map(function(o,i){ return `<button class="opt" onclick="dichScegli(${i})"><span class="ol">${T(dichEtichetta(o))}</span><span class="oe">${T(o.e)}</span></button>`; }).join('')+
+    (P.auto ? `<button class="opt" style="border-color:var(--mut2)" onclick="dichNessunCommento()"><span class="ol" style="color:var(--mut)">${T('Nessun commento')}</span></button>`
+            : `<button class="opt" style="border-color:var(--mut2)" onclick="dichNonOra()"><span class="ol" style="color:var(--mut)">${T('Non ora')}</span></button>`)+
+    `</div><div class="dich-posta">${T(DICH_POSTA_TESTO[P.posta])}</div>`;
+}
+/* il bottone sobrio sotto «Avanti / Salta»: una riga-link (tre bottoni pieni non stanno nell'altezza ferma a 375) */
+function dichLinkHtml(){ return dichPuo() ? `<button class="notte-dich-link" onclick="dichApri()">${T('Una parola ai cronisti')}</button>` : ''; }
+/* le notti contro una linea: il corpo (testo + barre) e i bottoni, oppure — a pannello aperto — il pannello nella stessa altezza */
+const NOTTE_DICH_AZIONI_PX=184;
+function notteCorpoTipo(testoPx, corpo, azioni){
+  if(NOTTE_CRONACA) testoPx+=NOTTE_LANCIO_PX;   // L261-5: lo spazio del lancio (lancioTipoHtml) dentro il testo, anche a pannello aperto
+  if(!DICH_INCERTEZZA) return `<div style="min-height:${testoPx}px">${corpo}</div>
+    <div class="notte-azioni-locale" style="min-height:${NOTTE_LOCALE_AZIONI_PX}px">${azioni}</div>`;
+  if(NOTTE.pannello) return `<div class="notte-dich-corpo" style="min-height:${testoPx+NOTTE_DICH_AZIONI_PX}px">${dichPannelloHtml()}</div>`;
+  return `<div style="min-height:${testoPx}px">${corpo}</div>
+    <div class="notte-azioni-locale" style="min-height:${NOTTE_DICH_AZIONI_PX}px">${azioni}${dichLinkHtml()}</div>`;
+}
 /* ⚑ L261-1 · LA NOTTE DELLE LOCALI. urnaLocale() è il punto unico dell'urna a scadenza del livello 1 (corpoMese): con NOTTE_LOCALE e
    una pagina apre la notte, altrimenti l'esito diretto di sempre. */
 function urnaLocale(){
@@ -9140,7 +9248,7 @@ function avviaNotteLocale(){
   renderNotte(); armaTimerNotte();
 }
 function notteNarrLocale(stadio){
-  const v=NOTTE.vero.v, so=NOTTE.vero.soglia, d=v-so, serrato=Math.abs(d)<3, ok=d>=0;
+  const v=NOTTE.vero.v, so=NOTTE.vero.soglia, d=notteNarrScarto(stadio, v-so), serrato=Math.abs(d)<3, ok=d>=0;   // L261-5: prima della proclamazione la lettura della barra
   if(stadio===0) return serrato?T('Le prime sezioni: il conto è sul filo della rielezione.'):(ok?T('Le prime sezioni ti danno sopra la soglia.'):T('Le prime sezioni ti danno sotto la soglia.'));
   if(stadio===1) return serrato?T('A metà dello scrutinio si decide sezione per sezione.'):(ok?T('A metà dello scrutinio il margine regge.'):T('A metà dello scrutinio la rimonta non arriva.'));
   return ok?(d>=10?T('Riconferma netta: il territorio è con te.'):gn('Rieletto: il mandato continua.','Rieletta: il mandato continua.')):T('Sotto la soglia: le urne non ti confermano.');
@@ -9158,11 +9266,8 @@ function renderNotteLocale(){
   const azioni=`<div class="choices notte-bottoni"><button class="opt" style="border-color:${ultima?'var(--acc)':'var(--brand)'}" onclick="avanzaNotte()"><span class="ol"${ultima?' style="color:var(--acc-ink)"':''}>${T(ultima?'Risultato ufficiale →':'Avanti →')}</span></button>`+
     (ultima?'':`<button class="opt" style="border-color:var(--mut2)" onclick="saltaNotte()"><span class="ol" style="color:var(--mut)">${T('Salta allo spoglio finale')}</span></button>`)+`</div>`;
   document.getElementById('modal').innerHTML=`<div class="notte-wrap notte-locale">${mbg}<div class="mt"><div class="kicker">${kicker}</div><h2>${T(R.lab[NOTTE.stadio])}</h2></div>
-    <div style="min-height:186px">
-      <div class="mtext${ultima?' notte-verdetto-riga':''}"${ultima?' style="font-weight:600"':''}>${notteNarrLocale(NOTTE.stadio)}</div>
-      <div class="notte-panel">${body}</div>
-    </div>
-    <div class="notte-azioni-locale" style="min-height:${NOTTE_LOCALE_AZIONI_PX}px">${azioni}</div></div>`;   /* 375 senza salti: lo spazio dei due bottoni resta anche quando «Salta» se ne va */
+    ${notteCorpoTipo(186, `<div class="mtext${ultima?' notte-verdetto-riga':''}"${ultima?' style="font-weight:600"':''}>${notteNarrLocale(NOTTE.stadio)}</div>
+      ${lancioTipoHtml()}<div class="notte-panel">${body}</div>`, azioni)}</div>`;   /* 375 senza salti: lo spazio dei due bottoni resta anche quando «Salta» se ne va */
   document.getElementById('ov').classList.add('on');
   agganciaVideoTutti();
   notteMovimento(scN, ultima);
@@ -9212,7 +9317,7 @@ function sfidaMinistroEsito(it, ok, diretto, prima){
   }
 }
 function notteNarrPrimaria(stadio){
-  const I=NOTTE.info||{}, v=NOTTE.vero.v, so=NOTTE.vero.soglia, d=v-so, serrato=Math.abs(d)<3, ok=d>=0;
+  const I=NOTTE.info||{}, v=NOTTE.vero.v, so=NOTTE.vero.soglia, d=notteNarrScarto(stadio, v-so), serrato=Math.abs(d)<3, ok=d>=0;   // L261-5
   if(stadio===0) return serrato?T('Le prime federazioni: il partito è spaccato a metà.'):(ok?T('Le prime federazioni sono con te.'):T('Le prime federazioni guardano altrove.'));
   if(stadio===1) return serrato?T('Metà dei circoli ha votato: si decide circolo per circolo.'):(ok?T('Metà dei circoli ha votato: il margine regge.'):T('Metà dei circoli ha votato: la rimonta non arriva.'));
   if(I.sfidi) return ok?T('Il partito sceglie te.'):T('Il partito resta con %P.').replace('%P',I.avv);
@@ -9230,12 +9335,118 @@ function renderNottePrimaria(){
   const azioni=`<div class="choices notte-bottoni"><button class="opt" style="border-color:${ultima?'var(--acc)':'var(--brand)'}" onclick="avanzaNotte()"><span class="ol"${ultima?' style="color:var(--acc-ink)"':''}>${T(ultima?'Risultato ufficiale →':'Avanti →')}</span></button>`+
     (ultima?'':`<button class="opt" style="border-color:var(--mut2)" onclick="saltaNotte()"><span class="ol" style="color:var(--mut)">${T('Salta allo spoglio finale')}</span></button>`)+`</div>`;
   document.getElementById('modal').innerHTML=`<div class="notte-wrap notte-locale notte-primaria">${mbg}<div class="mt"><div class="kicker">${I.kicker||''}</div><h2>${T(R.lab[NOTTE.stadio])}</h2></div>
-    <div style="min-height:206px">
-      <div class="mtext" style="padding-bottom:0">${chi}</div>
+    ${notteCorpoTipo(206, `<div class="mtext" style="padding-bottom:0">${chi}</div>
       <div class="mtext${ultima?' notte-verdetto-riga':''}"${ultima?' style="font-weight:600"':''}>${notteNarrPrimaria(NOTTE.stadio)}</div>
-      <div class="notte-panel">${body}</div>
-    </div>
-    <div class="notte-azioni-locale" style="min-height:${NOTTE_LOCALE_AZIONI_PX}px">${azioni}</div></div>`;   /* 375 senza salti, come la locale */
+      ${lancioTipoHtml()}<div class="notte-panel">${body}</div>`, azioni)}</div>`;   /* 375 senza salti, come la locale */
+  document.getElementById('ov').classList.add('on');
+  agganciaVideoTutti();
+  notteMovimento(scN, ultima);
+  try{ playAnims(); }catch(e){}
+}
+/* ⚑ L261-3 · LE URNE RESTANTI. Tre notti «contro una linea», con la stessa forma della locale (generaOndeSoglia, chiusura in NOTTE.fine,
+   niente in S, nessun salvataggio a notte aperta) e un VERO già deciso da chi apre — nessuna estrazione nuova fuori dalle ondate:
+   (a) 'ministro' — l'urna a scadenza del livello 2 (urnaMinistro, da corpoMese): maturaRP e vinceIlGoverno all'apertura, dove e quando
+       li chiamava esitoElezioneMinistro; la barra è il partito del premier contro rivaleGoverno() (v = la quota del premier sulle due
+       forze, la linea a 50: v ≥ 50 ⇔ vinceIlGoverno); la chiusura è applicaElezioneMinistro(vinta), il corpo di prima;
+   (b) 'intermedia' — al tocco della carta (resolveItemCore): ris.quota contro ris.attesa, fissati alla generazione; la chiusura è
+       intermediaEsito, la coda di sempre più quella di resolveItem (gli esiti della carta e il loro suono);
+   (c) 'delegati' — la fine del mandato al vertice internazionale (corpoMese, livello 4), 2 ondate: margine m = min(coesione − 45,
+       autorevolezza − 50), barra 50 + m contro 50 (solo messa in scena: m ≥ 0 ⇔ rinnovoVinto()); la chiusura è rinnovoEsito, il bivio
+       di prima (la carta rinnovoInt o gameOver('mandatoInt')). L'estromissione a metà mandato (coesBassa) resta senza notte.
+   Interruttori NOTTE_MINISTRO, NOTTE_INTERMEDIA, NOTTE_RINNOVO (spenti = l'esito diretto). Il banco le salta: cerimonie 35-37
+   (harness.js). */
+function urnaMinistro(){
+  if(nottePagina(NOTTE_MINISTRO)) return avviaNotteMinistro();
+  return esitoElezioneMinistro();
+}
+function avviaNotteMinistro(){
+  maturaRP();
+  const vinta=vinceIlGoverno();   // il VERO: la stessa lettura di esitoElezioneMinistro, nello stesso punto (dopo maturaRP, che tocca solo S.rp)
+  const g=(S.premier && S.premier.partito) || S.partito, w=rivaleGoverno(), wid=(w||{}).id, fg=S.forze[g]||0, fw=S.forze[wid]||0;
+  const v=(fg+fw)>0 ? fg/(fg+fw)*100 : 50;
+  return avviaNotteUrna('ministro', { v:v, soglia:50, win:vinta }, function(){ applicaElezioneMinistro(vinta); },
+    { kicker:`${T(nomePaeseOra())} · ${T('Elezioni')} ${S.year}`, g:g, w:wid, tot:fg+fw, premier:(S.premier && S.premier.nome) || T('Il premier') });
+}
+function avviaNotteIntermedia(it, fine){
+  const r=it.ris;
+  return avviaNotteUrna('intermedia', { v:r.quota, soglia:r.attesa }, fine, { kicker:`${T(r.tipo)} · ${S.year}` });
+}
+/* la coda dell'intermedia: quella di sempre (resolveItemCore), più — quando arriva dopo la notte — la coda di resolveItemCore e di
+   resolveItem che a notte aperta non era passata. `diretto` = chiamata dentro resolveItemCore. */
+function intermediaEsito(it, diretto, prima){
+  if(!diretto) STAMPA_FX=0;
+  esitoIntermedia(it.ris);
+  it.resolved=true; it.outcome=T(it.ris.win?'Risultato incassato: avanzi nel territorio.':'Risultato incassato: arretri.');   // L16-1: due frasi intere, non un interruttore in mezzo
+  if(diretto) return;
+  stampaFxEsito(it);
+  render();
+  if(prima && S.agenda && S.agenda.indexOf(it)>=0){
+    it.esiti=diffEsiti(prima, fotoEsiti());
+    if(typeof suonoEsito==='function' && typeof suona==='function'){ const _se=suonoEsito(it); if(_se) suona(_se); }
+  }
+  if(typeof suonoCarta==='function' && typeof taci==='function' && !(S.agenda||[]).some(function(a){ return a && !a.resolved && suonoCarta(a)==='protesta'; })) taci('protesta');
+}
+function rinnovoVinto(){ return S.intl.coesione>=45 && S.intl.autorevolezza>=50; }
+function rinnovoEsito(vinta){
+  if(vinta){ S.agenda=[{kind:'rinnovoInt', resolved:false}]; render(); commitSnap(); return; }
+  return gameOver('mandatoInt');
+}
+function avviaNotteRinnovo(){
+  const I=S.intl, m=Math.min(I.coesione-45, I.autorevolezza-50), vinta=rinnovoVinto();
+  return avviaNotteUrna('delegati', { v:50+m, soglia:50, win:vinta }, function(){ rinnovoEsito(vinta); },
+    { kicker:`${cap(T(ruoloIntl()))} · ${T('Il rinnovo del mandato')} ${S.year}` });
+}
+function avviaNotteUrna(tipo, vero, fine, info){
+  NOTTE={ tipo:tipo, sistema:tipo, vero:{ v:vero.v, soglia:vero.soglia, win:vero.win }, info:info||{}, fine:fine, stadio:0, onde:generaOndeSoglia(vero, NOTTE_TIPI[tipo].sd), dich:null, saltata:false, timer:null };
+  if(typeof UIVALS!=='undefined'){ ['bar:notte:urna','num:notte:urna','bar:notte:urna2','num:notte:urna2'].forEach(function(k){ UIVALS[k]=0; }); UIVALS['notte:sfondo']=null; UIVALS['notte:verdetto']=null; }   // si conta da zero, come la locale
+  if(typeof suona==='function') suona('urne');
+  if(typeof musica==='function') musica();
+  if(typeof ambiente==='function') ambiente();
+  renderNotte(); armaTimerNotte();
+  return 'notte';
+}
+function notteNarrUrna(stadio){
+  const T_=NOTTE.tipo, I=NOTTE.info||{}, v=NOTTE.vero.v, so=NOTTE.vero.soglia, d=notteNarrScarto(stadio, v-so), serrato=Math.abs(d)<3, ok=d>=0, n=notteRiga().sd.length;
+  const W=T((part(I.w)||{}).nome||'');
+  if(T_==='delegati'){
+    if(stadio<n-1) return serrato?T('Le prime delegazioni: l\'assemblea è divisa.'):(ok?T('Le prime delegazioni votano per te.'):T('Le prime delegazioni guardano altrove.'));
+    return ok?T('L\'assemblea ti riconferma.'):T('L\'assemblea non ti riconferma.');
+  }
+  if(stadio===0){
+    if(T_==='ministro') return serrato?T('I primi seggi: il governo e %W sono testa a testa.').replace('%W',W):(ok?T('I primi seggi danno avanti il governo.'):T('I primi seggi danno avanti %W.').replace('%W',W));
+    return serrato?T('I primi comuni: il tuo blocco è sulla linea.'):(ok?T('I primi comuni ti danno sopra l\'attesa.'):T('I primi comuni ti danno sotto l\'attesa.'));
+  }
+  if(stadio===1) return serrato?T('A metà dello scrutinio si decide sezione per sezione.'):(ok?T('A metà dello scrutinio il margine regge.'):T('A metà dello scrutinio la rimonta non arriva.'));   // le righe della locale
+  if(T_==='ministro') return ok?T('Il governo di %P è confermato: resti ministro.').replace('%P',I.premier):T('Il governo di %P perde: vince %W.').replace('%P',I.premier).replace('%W',W);
+  return ok?T('Avanzi nel territorio'):T('Battuta d\'arresto');   // i titoli della carta di sempre
+}
+const NOTTE_URNA_TESTO_PX={ ministro:226, intermedia:186, delegati:186 };   /* 375 senza salti: lo spazio del testo e delle barre resta fermo fra le ondate */
+function renderNotteUrna(){
+  const R=notteRiga(), I=NOTTE.info||{}, tipo=NOTTE.tipo, ultima=NOTTE.stadio>=R.sd.length-1, onda=NOTTE.onde[NOTTE.stadio], so=NOTTE.vero.soglia;
+  const v=onda.v, vinta=ultima && v>=so;
+  const scN=(typeof scenaNotte==='function')?scenaNotte(NOTTE.stadio, ultima, vinta):null;
+  const mbg=scenaMomentoHtml(scN, {sfondo:true});
+  const linea=`<span style="position:absolute;left:${clamp(so,0,100)}%;top:-2px;bottom:-2px;width:2px;background:var(--neg);opacity:.55"></span>`;
+  let righe;
+  if(tipo==='ministro'){   // due barre: il partito del premier e il rivale, sulla somma delle due forze (all'ultima ondata le forze esatte)
+    const a=v/100*I.tot, b=(100-v)/100*I.tot, sc=Math.max(I.tot, 1);
+    const riga=function(nome, chip, val, k, col){ return `<div style="padding:6px 0"><div style="display:flex;justify-content:space-between;font-size:13px"><span style="font-weight:700">${nome}${chip}</span><span class="mono val" data-anim="num:notte:${k}" data-to="${val}" data-dec="1">${fmt(val,1)}%</span></div>
+      <div class="bar">${fillI('notte:'+k, clamp(val/sc*100,2,100), col)}</div></div>`; };
+    righe=riga(T((part(I.g)||{}).nome||''), ` <span class="chip" style="background:var(--acc-bg);color:var(--acc-ink)">${T('governo')}</span>`, a, 'urna', 'var(--acc)')+
+      riga(T((part(I.w)||{}).nome||''), '', b, 'urna2', 'var(--mut)')+
+      `<div class="contorno" style="font-size:11px;color:var(--mut);margin-top:4px">${T('Il partito del premier contro il primo degli altri.')}</div>`;
+  } else {
+    const nome=tipo==='delegati'?T('I delegati per te'):T('Il tuo blocco');
+    const nota=tipo==='delegati'?T('La linea: la metà dei delegati.'):T('La linea: %N%, il voto precedente.').replace('%N',Math.round(so));
+    righe=`<div style="padding:6px 0"><div style="display:flex;justify-content:space-between;font-size:13px"><span style="font-weight:700">${nome} <span class="chip" style="background:var(--acc-bg);color:var(--acc-ink)">${T('tu')}</span></span><span class="mono val" data-anim="num:notte:urna" data-to="${v}" data-dec="1">${fmt(v,1)}%</span></div>
+      <div class="bar" style="position:relative">${fillI('notte:urna', clamp(v,2,100), 'var(--acc)')}${linea}</div>
+      <div class="contorno" style="font-size:11px;color:var(--mut);margin-top:4px">${nota}</div></div>`;
+  }
+  const azioni=`<div class="choices notte-bottoni"><button class="opt" style="border-color:${ultima?'var(--acc)':'var(--brand)'}" onclick="avanzaNotte()"><span class="ol"${ultima?' style="color:var(--acc-ink)"':''}>${T(ultima?'Risultato ufficiale →':'Avanti →')}</span></button>`+
+    (ultima?'':`<button class="opt" style="border-color:var(--mut2)" onclick="saltaNotte()"><span class="ol" style="color:var(--mut)">${T('Salta allo spoglio finale')}</span></button>`)+`</div>`;
+  document.getElementById('modal').innerHTML=`<div class="notte-wrap notte-locale notte-${tipo}">${mbg}<div class="mt"><div class="kicker">${I.kicker||''}</div><h2>${T(R.lab[NOTTE.stadio])}</h2></div>
+    ${notteCorpoTipo(NOTTE_URNA_TESTO_PX[tipo]||186, `<div class="mtext${ultima?' notte-verdetto-riga':''}"${ultima?' style="font-weight:600"':''}>${notteNarrUrna(NOTTE.stadio)}</div>
+      ${lancioTipoHtml()}<div class="notte-panel"><div style="padding:0 18px 6px">${righe}</div></div>`, azioni)}</div>`;
   document.getElementById('ov').classList.add('on');
   agganciaVideoTutti();
   notteMovimento(scN, ultima);
@@ -9245,11 +9456,16 @@ function renderNottePrimaria(){
 function concludiNotteTipo(){
   stopTimerNotte();
   if(typeof taci==='function') taci('urne');
-  const chiudi=NOTTE.fine || notteRiga().chiudi; NOTTE=null;   // L261-2: la primaria porta la sua chiusura (NOTTE.fine)
+  const chiudi=NOTTE.fine || notteRiga().chiudi, bil=!!notteRiga().bilancio, dich=NOTTE.dich, lato=(dich!=null)?notteLato():null; NOTTE=null;   // L261-4: il lato si legge prima di svuotare il transitorio   // L261-2: la primaria porta la sua chiusura (NOTTE.fine)
   if(typeof musica==='function') musica();
   if(typeof ambiente==='function') ambiente();
   try{ document.getElementById('ov').classList.remove('on'); }catch(e){}
+  if(dich!=null) dichApplica(dich, lato);   // L261-4: il conto subito prima della chiusura (una fine di carriera vede già il registro)
   chiudi();
+  /* L261-3 · la notte aperta dentro il mese (locale, ministro, delegati) faceva saltare il bilancio di gennaio (forseBilancio esce con un
+     modale aperto, e il mese dopo non è più gennaio): si riprova qui, dopo l'esito — l'ordine dell'esito diretto, dove il bilancio
+     veniva dopo l'urna nello stesso mese. Con una fine di carriera (#over) o un altro modale aperto forseBilancio esce da sé. */
+  if(bil && S && typeof forseBilancio==='function'){ const sa=S.snapAnnuale; try{ forseBilancio(); }catch(e){} if(S && S.snapAnnuale!==sa) commitSnap(); }
 }
 function concludiNotte(){
   if(NOTTE && notteRiga().chiudi) return concludiNotteTipo();   // L261-1: le notti con una chiusura loro (oggi la locale)
@@ -9266,7 +9482,8 @@ function concludiNotte(){
   /* F4 — LA DICHIARAZIONE A CALDO, applicata QUI: dopo il risultato, mai prima. I seggi sono già congelati nel VERO
      → la parola della notte non può spostarne uno. Muove solo il DOPO (stampa, morale delle correnti). Effetti
      piccoli, tutte le opzioni legittime. Chi ha saltato la notte non ha dichiarato → nessun effetto. */
-  if(dich!=null && typeof DICH_NOTTE!=='undefined' && DICH_NOTTE[dich]){
+  if(dich!=null && typeof dich==='object') dichApplica(dich, mg.win);   // L261-4: il conto della dichiarazione nell'incertezza, col lato già deciso
+  else if(dich!=null && !DICH_INCERTEZZA && typeof DICH_NOTTE!=='undefined' && DICH_NOTTE[dich]){
     const D=DICH_NOTTE[dich];
     if(typeof stampad==='function' && D.stampa) stampad(D.stampa);
     if(typeof tutteCorrenti==='function' && D.correnti) tutteCorrenti(D.correnti);
@@ -9326,7 +9543,8 @@ function applicaMargineBio(mg){
    già scritta), che converge sul verdetto. Calcolata dal `vero` congelato → onesta, mai una sorpresa contraddittoria. */
 function notteNarr(stadio){
   if(!NOTTE) return '';
-  const mg=calcMargineEsito(NOTTE.sistema, NOTTE.vero), serrato=Math.abs(mg.m)<4;
+  const mv=calcMargineEsito(NOTTE.sistema, NOTTE.vero), sc=notteNarrScarto(stadio, null);   // L261-5: prima della proclamazione la lettura della barra
+  const mg= sc==null ? mv : { m:sc, win:sc>=0, tag:mv.tag }, serrato=Math.abs(mg.m)<4;
   if(stadio===0) return serrato?T('Le urne si chiudono. I primi exit poll danno un equilibrio perfetto: nulla è deciso.')
     : (mg.win?T('Le urne si chiudono. I primi exit poll ti danno in vantaggio.'):T('Le urne si chiudono. I primi exit poll ti danno indietro.'));
   if(stadio===1) return serrato?T('Le proiezioni si consolidano, ma il distacco resta dentro i margini d\'errore.')
@@ -9343,33 +9561,67 @@ function notteNarr(stadio){
 /* F4 — il lancio di stampa fra le ondate: voce d'epoca col meccanismo P5-bis (gemella era-taggata preferita,
    generico come fallback E come presente). Deterministico: nessun dado nella messa in scena. */
 function lancioNotte(fase){
+  if(!NOTTE_CRONACA) return lancioNottePrima(fase);
+  const s=lancioScelto(fase, 'nazionale');
+  return s ? `<div class="mtext" style="font-style:italic;color:var(--mut);border-left:2px solid var(--mut2);padding-left:10px">${T(s.testo)}</div>` : '';
+}
+const LANCI_PRIMA=['ln_open','ln50_open','ln60_open','ln_proj','ln50_proj','ln60_proj','ln_terr','ln50_terr','ln60_terr','ln_fin','ln50_fin','ln60_fin'];   // le 12 voci di prima di L261-5
+function lancioNottePrima(fase){   // la scelta di prima di L261-5 (NOTTE_CRONACA spento): solo le 12 voci di allora, le era italiane scritte a mano, la prima della lista
   if(typeof NOTTE_LANCI==='undefined') return '';
-  var pool=NOTTE_LANCI.filter(function(l){ return l.fase===fase && (typeof eraVivaT!=='function'||eraVivaT(l)); });
+  var pool=NOTTE_LANCI.filter(function(l){ return LANCI_PRIMA.indexOf(l.id)>=0 && l.fase===fase && (typeof eraVivaT!=='function'||eraVivaT(l)); });
   if(!pool.length) return '';
   var era=pool.filter(function(l){ return l.era==='italia1950'||l.era==='italia1960'; });
   var s=(era.length?era:pool)[0];
   return s ? `<div class="mtext" style="font-style:italic;color:var(--mut);border-left:2px solid var(--mut2);padding-left:10px">${T(s.testo)}</div>` : '';
 }
+/* ⚑ L261-5 · LA CRONACA DELLA NOTTE PER PAESE E DECENNIO. Il pool = la fase (l'indice dell'ondata) ∩ il tipo (una voce senza `tipo`
+   vale solo per la nazionale) ∩ eraVivaT (era = il tag di decennio della linea o 'contemporanea'; paesi = le chiavi di S.paese, come
+   le carte). Vince la voce più SPECIFICA viva — era + paese (3) › era (2) › paese (1) › generica (0) — e a parità la scelta è fissa per
+   la notte: un hash di tipo, fase, anno e mese (niente Math.random, niente in S). Interruttore NOTTE_CRONACA (`let`): spento = i lanci
+   di prima nella nazionale (lancioNottePrima) e nessuno negli altri tipi. */
+let NOTTE_CRONACA=true;
+function lancioSpec(l){ return ((l.era && l.era!=='universale')?2:0) + (l.paesi?1:0); }
+function lancioScelto(fase, tipo){
+  if(typeof NOTTE_LANCI==='undefined') return null;
+  tipo=tipo||'nazionale';
+  const pool=NOTTE_LANCI.filter(function(l){ return l.fase===fase && (l.tipo||'nazionale')===tipo && (typeof eraVivaT!=='function'||eraVivaT(l)); });
+  if(!pool.length) return null;
+  const best=Math.max.apply(null, pool.map(lancioSpec)), top=pool.filter(function(l){ return lancioSpec(l)===best; });
+  const y=(typeof S!=='undefined' && S && S.year)||0, m=(typeof S!=='undefined' && S && S.month)||0;
+  return top[hashId(tipo+'|'+fase+'|'+y+'|'+m) % top.length];
+}
+/* le notti per tipo: il lancio in uno spazio fisso fra la riga e le barre (NOTTE_LANCIO_PX, sommato all'altezza del testo da
+   notteCorpoTipo), così fra un'ondata e l'altra l'altezza non balla anche dove una fase non avesse voce */
+const NOTTE_LANCIO_PX=58;
+function lancioTipoHtml(){
+  if(!NOTTE_CRONACA || !NOTTE) return '';
+  const s=lancioScelto(NOTTE.stadio, NOTTE.tipo);
+  return `<div class="notte-lancio-slot" style="min-height:${NOTTE_LANCIO_PX}px">${s?`<div class="mtext notte-lancio-tipo">${T(s.testo)}</div>`:''}</div>`;
+}
 function renderNotte(){
   if(!NOTTE) return;
   if(NOTTE.tipo==='locale') return renderNotteLocale();   // L261-1
   if(NOTTE.tipo==='primaria') return renderNottePrimaria();   // L261-2
+  if(NOTTE.tipo==='ministro' || NOTTE.tipo==='intermedia' || NOTTE.tipo==='delegati') return renderNotteUrna();   // L261-3
   const ultima=NOTTE.stadio>=SD_NOTTE.length-1;
   const onda=NOTTE.onde[NOTTE.stadio];
   const kicker=`${T(nomePaeseOra())} · ${T(urnaLegislativa()?'Legislative anticipate':(S.elezioniAnticipate?'Elezioni anticipate':'Elezioni'))} ${S.year}`;
   const sulTavolo=(typeof notteSuTavolo==='function') && notteSuTavolo();   // L113-5: dove c'è il tavolo la notte sta in un foglio in basso, sopra si vede il paese
   const body = NOTTE.sistema==='parlamentare' ? notteSeggi(onda, ultima, sulTavolo) : notteCandidato(onda);
   const narr = notteNarr(NOTTE.stadio);   // la riga di narrazione (fase B): tensione/respiro secondo l'andamento
-  const lancio = lancioNotte(NOTTE.stadio);
+  const lancio = lancioNotte(NOTTE.stadio);   // L261-5: con NOTTE_CRONACA anche sul foglio del tavolo (prima di L261-5 sul tavolo non c'era)
   /* la DICHIARAZIONE A CALDO (penultima ondata): 2-3 opzioni. NON tocca i seggi — muove il dopo (concludiNotte). */
   let azioni;
-  if(NOTTE.stadio===NOTTE_DICH && !NOTTE.dich && typeof DICH_NOTTE!=='undefined'){
+  if(DICH_INCERTEZZA && NOTTE.stadio===NOTTE_DICH && NOTTE.dich==null && !NOTTE.taciuto && !NOTTE.saltata && !NOTTE.pannello) dichApri(true);   // L261-4: alla penultima il pannello si apre da solo
+  if(DICH_INCERTEZZA && NOTTE.pannello){
+    azioni = dichPannelloHtml();
+  } else if(!DICH_INCERTEZZA && NOTTE.stadio===NOTTE_DICH && !NOTTE.dich && typeof DICH_NOTTE!=='undefined'){
     azioni = `<div class="mtext" style="font-weight:600">${T('I cronisti ti cercano: una parola, adesso.')}</div><div class="choices">`+
       DICH_NOTTE.map(function(d,i){ return `<button class="opt" onclick="dichiaraNotte(${i})"><span class="ol">${T(d.l)}</span><span class="oe">${T(d.e)}</span></button>`; }).join('')+`</div>`;
   } else {
     const btnTxt = T(ultima ? 'Risultato ufficiale →' : 'Avanti →');
     azioni = `<div class="choices notte-bottoni"><button class="opt" style="border-color:${ultima?'var(--acc)':'var(--brand)'}" onclick="avanzaNotte()"><span class="ol"${ultima?' style="color:var(--acc-ink)"':''}>${btnTxt}</span></button>`+
-      (ultima?'':`<button class="opt" style="border-color:var(--mut2)" onclick="saltaNotte()"><span class="ol" style="color:var(--mut)">${T('Salta allo spoglio finale')}</span></button>`)+`</div>`;
+      (ultima?'':`<button class="opt" style="border-color:var(--mut2)" onclick="saltaNotte()"><span class="ol" style="color:var(--mut)">${T('Salta allo spoglio finale')}</span></button>`)+`</div>`+(DICH_INCERTEZZA?dichLinkHtml():'');
   }
   /* L9-1 — lo SFONDO della notte: attesa (stadio 0) / spoglio (in corso) / vittoria|sconfitta (proclamazione). Vinta =
      il blocco tocca 50 (parlamentare) o la mia % supera 50 (candidato); solo lettura del VERO congelato, non lo decide. */
@@ -9385,7 +9637,7 @@ function renderNotte(){
   document.getElementById('modal').innerHTML=`<div class="notte-wrap${sulTavolo?' sul-tavolo':''}">${mbg}<div class="mt"><div class="kicker">${kicker}</div><h2>${T(LAB_NOTTE[NOTTE.stadio])}</h2></div>
     <div${sulTavolo?'':' style="min-height:268px"'}>
       ${ultima && rvN ? `<div class="rv-riga rv-notte">${rvN}<div class="mtext notte-verdetto-riga" style="font-weight:600;padding:0">${narr}</div></div>` : `<div class="mtext${ultima?' notte-verdetto-riga':''}"${ultima?' style="font-weight:600"':''}>${narr}</div>`}
-      ${sulTavolo?'':lancio}
+      ${(sulTavolo && !NOTTE_CRONACA)?'':lancio}
       ${legenda}
       <div class="notte-panel">${body}</div>
     </div>
@@ -9457,7 +9709,7 @@ function notteSeggi(shown, ultima, compatto){
     return `<div style="padding:${compatto?3:5}px 0"><div style="display:flex;justify-content:space-between;font-size:13px"><span style="font-weight:${me?700:500}">${T(p.nome)}${me?(' <span class="chip" style="background:var(--acc-bg);color:var(--acc-ink)">'+T('tu')+'</span>'):''}</span><span class="mono val" data-anim="num:notte:seg:${p.id}" data-to="${shown[p.id]}" data-dec="0" data-unit="">${shown[p.id]}</span></div>
       <div class="bar">${fillI('notte:seg:'+p.id, clamp(shown[p.id],2,100), inBloc?'var(--acc)':'var(--mut2)')}</div></div>`; };
   /* alla dichiarazione (le tre risposte) e alla proclamazione (l'emiciclo) il foglio è pieno: lì tutti i partiti stanno dietro «Tutti i partiti» */
-  const nessuno=compatto && (ultima || NOTTE.stadio===NOTTE_DICH);
+  const nessuno=compatto && (ultima || (DICH_INCERTEZZA ? !!NOTTE.pannello : NOTTE.stadio===NOTTE_DICH));   // L261-4: col pannello dei cronisti, a qualunque ondata
   const primi=compatto ? (nessuno ? [] : sorted.filter((p,k)=>k<4 || p.id===S.partito)) : sorted, altri=compatto ? sorted.filter(p=>primi.indexOf(p)<0) : [];
   const rows=primi.map(riga).join('')+(altri.length ? `<details class="notte-tutti"${NOTTE.tutti?' open':''} ontoggle="if(NOTTE) NOTTE.tutti=this.open"><summary>${T('Tutti i partiti')} (${altri.length})</summary>${altri.map(riga).join('')}</details>` : '');
   /* alla PROCLAMAZIONE: l'aula come emiciclo (grafica lotto 2) — i puntini a ventaglio */

@@ -3091,6 +3091,14 @@ function renderGov(){
       if(!it.resolved){ h+=`<div class="opts">`+d.ch.map((c,i)=>`<button class="opt" onclick="resolveItem(${idx},${i})"><span class="ol">${subMin(T(c.l))}</span><span class="oe">${subMin(T(c.e))}</span></button>`).join('')+`</div>`; }
       else h+=`<div class="outcome">${it.outcome}</div>${esitiHtml(it)}${tornaTavoloHtml(it)}`;
       h+=`</div>`;
+    } else if(it.kind==='intermedia' && !it.resolved && typeof notteIntermediaPagina==='function' && notteIntermediaPagina()){
+      /* L261-3 · col notte dell'intermedia accesa la carta non anticipa il risultato: l'urna e la posta (il voto precedente), il
+         risultato lo dà la notte al tocco; dopo, la carta di sempre (il ramo qui sotto) */
+      const r=it.ris;
+      h+=`<div class="ag">${agScene(it)}<div class="ah"><div class="kick">${T(r.tipo)}</div>
+        <h3>${T('Si vota')}</h3></div>
+        <div class="atext">${T('Al voto precedente il tuo blocco aveva <b>%M%</b>: è la linea di stanotte.').replace('%M',Math.round(r.attesa))}</div>
+        <div class="opts"><button class="opt" onclick="resolveItem(${idx},0)"><span class="ol">${T('Allo spoglio →')}</span></button></div></div>`;
     } else if(it.kind==='intermedia'){
       const r=it.ris, col=r.win?'var(--pos)':'var(--neg)';
       h+=`<div class="ag ${it.resolved?'done':''}">${agScene(it)}<div class="ah"><div class="kick" style="color:${col}">${T(r.tipo)}</div>

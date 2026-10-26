@@ -493,12 +493,21 @@
   .notte-wrap .notte-panel{ background:var(--panel); border:1px solid var(--line2); border-radius:12px; padding:6px 4px; margin:8px 12px; }
   .notte-wrap .notte-panel .mtext{ color:var(--txt2); text-shadow:none; }                    /* i risultati nel pannello = colori normali, leggibili */
   .notte-wrap .choices{ padding:6px 14px 16px; }
+  /* L261-5 · il lancio di cronaca nelle notti per tipo: una riga corsiva sopra le barre, nello spazio fisso di NOTTE_LANCIO_PX */
+  .modal .mtext.notte-lancio-tipo{ padding:2px 18px 6px 28px; font-size:13px; font-style:italic; color:var(--mut); position:relative; }
+  .modal .mtext.notte-lancio-tipo::before{ content:''; position:absolute; left:18px; top:4px; bottom:8px; width:2px; background:var(--mut2); }
   /* L95-2 — lo sfondo della notte passa in DISSOLVENZA: la scena vecchia (.mbg-prima) resta sotto, la nuova entra
      sopra in 600 ms. Solo opacity. Tutte e due assolute (ereditano .mbg-img): il modale non balla. */
   @keyframes mbgEntra{ from{ opacity:0; } to{ opacity:1; } }
   .notte-wrap .mbg-img.mbg-entra{ animation:mbgEntra .6s ease both; }
   /* e il verdetto entra dopo le barre: il ritardo lo scrive notteMovimento() sul nodo */
   .notte-wrap .notte-verdetto{ animation:rise .26s cubic-bezier(.2,.7,.3,1) both; }
+  /* L261-4 · la dichiarazione nell'incertezza: la riga-link sotto «Avanti / Salta» (bersaglio 44, testo 13) e il pannello delle risposte */
+  .notte-wrap .notte-bottoni + .notte-dich-link{ margin-top:-10px; }
+  .notte-dich-link{ display:block; width:calc(100% - 28px); min-height:44px; margin:0 14px 8px; padding:0 4px; background:none; border:0; color:#cdd6ff; font:inherit; font-size:13px; text-decoration:underline; text-underline-offset:3px; text-align:center; cursor:pointer; text-shadow:0 1px 3px rgba(0,0,0,.55); }
+  .notte-wrap .dich-testa{ padding-bottom:2px; } .notte-wrap .dich-sit{ color:#cdd6ff; }
+  .notte-wrap .notte-dich{ padding-top:4px; padding-bottom:2px; }
+  .notte-wrap .dich-posta{ font-size:12px; color:#cdd6ff; padding:2px 18px 10px; text-shadow:0 1px 3px rgba(0,0,0,.55); }
 
   /* ============================================================
      RESPONSIVO — tablet (≥700px) e desktop (≥1000px).

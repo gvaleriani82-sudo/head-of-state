@@ -6016,6 +6016,77 @@ const NOTTE_LANCI = [
   {id:'ln_fin',    fase:4, testo:'Lo spoglio è chiuso: i numeri sono definitivi.'},
   {id:'ln50_fin',  fase:4, era:'italia1950', testo:'È arrivato l\'ultimo telegramma: il Paese conosce il suo Parlamento.'},
   {id:'ln60_fin',  fase:4, era:'italia1960', testo:'La diretta si chiude: il risultato è davanti al Paese, in ogni salotto.'},
+  /* ⚑ L261-5 (25/10) · la cronaca per paese e decennio: il presente (era 'contemporanea' + paesi) di Italia, Regno Unito, Germania,
+     Francia, Stati Uniti; le porte us1950, us1960, us1970, uk1980, de1950 (era = il tag di decennio; i mezzi d'epoca e le fonti in
+     DESIGN-NOTTE.md §10); la fase 3 generica; le notti per tipo (`tipo`, una voce per ondata). Sceglie lancioScelto (game.js). */
+  {id:"ln_quasi", fase:3, testo:"Mancano poche sezioni: i numeri non si muovono quasi più."},
+  {id:"ln_it_open", fase:0, era:'contemporanea', paesi:['italia'], testo:"Urne chiuse alle 23: in diretta escono i primi exit poll, con la forchetta larga."},
+  {id:"ln_it_proj", fase:1, era:'contemporanea', paesi:['italia'], testo:"Arrivano le prime proiezioni sulle schede vere: la forchetta si stringe."},
+  {id:"ln_it_terr", fase:2, era:'contemporanea', paesi:['italia'], testo:"Il portale del Viminale si aggiorna sezione per sezione: si colorano i collegi."},
+  {id:"ln_it_quasi", fase:3, era:'contemporanea', paesi:['italia'], testo:"Gli ultimi collegi uninominali si decidono per poche centinaia di voti."},
+  {id:"ln_it_fin", fase:4, era:'contemporanea', paesi:['italia'], testo:"Scrutinio completo: tocca alla Cassazione ripartire i seggi, ma il quadro è chiaro."},
+  {id:"ln_uk_open", fase:0, era:'contemporanea', paesi:['regnounito'], testo:"Le dieci di sera: l'exit poll esce al rintocco, e lo studio trattiene il fiato."},
+  {id:"ln_uk_proj", fase:1, era:'contemporanea', paesi:['regnounito'], testo:"Il primo collegio del Nord-Est dichiara prima di mezzanotte, come ogni volta."},
+  {id:"ln_uk_terr", fase:2, era:'contemporanea', paesi:['regnounito'], testo:"Nelle palestre e nei palazzetti si conta a mano: i collegi dichiarano a raffica."},
+  {id:"ln_uk_quasi", fase:3, era:'contemporanea', paesi:['regnounito'], testo:"All'alba mancano pochi collegi rurali: i riconteggi allungano la notte."},
+  {id:"ln_uk_fin", fase:4, era:'contemporanea', paesi:['regnounito'], testo:"Il collegio della soglia dichiara: la Camera ha i suoi numeri."},
+  {id:"ln_de_open", fase:0, era:'contemporanea', paesi:['germania'], testo:"Le 18 in punto: la prima stima delle reti pubbliche, al decimale."},
+  {id:"ln_de_proj", fase:1, era:'contemporanea', paesi:['germania'], testo:"Le proiezioni sui voti contati correggono la stima, un aggiornamento dopo l'altro."},
+  {id:"ln_de_terr", fase:2, era:'contemporanea', paesi:['germania'], testo:"I collegi uninominali arrivano Land per Land: la mappa dei primi voti si colora."},
+  {id:"ln_de_quasi", fase:3, era:'contemporanea', paesi:['germania'], testo:"Tutti guardano la soglia del cinque per cento: un decimale cambia il Bundestag."},
+  {id:"ln_de_fin", fase:4, era:'contemporanea', paesi:['germania'], testo:"Nella notte il risultato provvisorio ufficiale: i seggi sono ripartiti."},
+  {id:"ln_fr_open", fase:0, era:'contemporanea', paesi:['francia'], testo:"Alle 20 in punto la stima appare sugli schermi: prima di quell'ora, silenzio."},
+  {id:"ln_fr_proj", fase:1, era:'contemporanea', paesi:['francia'], testo:"Gli istituti affinano la stima sui primi seggi scrutinati: il quadro si muove di poco."},
+  {id:"ln_fr_terr", fase:2, era:'contemporanea', paesi:['francia'], testo:"Il Ministero dell'Interno pubblica i risultati dipartimento per dipartimento."},
+  {id:"ln_fr_quasi", fase:3, era:'contemporanea', paesi:['francia'], testo:"Le grandi città scrutinano per ultime: Parigi e Lione possono ancora spostare i decimali."},
+  {id:"ln_fr_fin", fase:4, era:'contemporanea', paesi:['francia'], testo:"Scrutinio completo: il Ministero dell'Interno pubblica i risultati definitivi."},
+  {id:"ln_us_open", fase:0, era:'contemporanea', paesi:['usa'], testo:"Si chiudono i seggi sulla costa est: le reti aspettano prima di assegnare gli Stati."},
+  {id:"ln_us_proj", fase:1, era:'contemporanea', paesi:['usa'], testo:"I primi Stati sono assegnati appena chiusi: quelli in bilico restano grigi."},
+  {id:"ln_us_terr", fase:2, era:'contemporanea', paesi:['usa'], testo:"Contea per contea la mappa si colora: i voti per posta arriveranno più tardi."},
+  {id:"ln_us_quasi", fase:3, era:'contemporanea', paesi:['usa'], testo:"Gli Stati in bilico contano ancora: le redazioni non si sbilanciano."},
+  {id:"ln_us_fin", fase:4, era:'contemporanea', paesi:['usa'], testo:"Lo Stato decisivo è assegnato: i 270 grandi elettori sono nel conto."},
+  {id:"ln_us50_open", fase:0, era:'us1950', testo:"Le urne chiudono a est: in studio, accanto alla lavagna, c'è un calcolatore elettronico."},
+  {id:"ln_us50_proj", fase:1, era:'us1950', testo:"Il calcolatore azzarda una previsione sui primi distretti; i commentatori non ci credono."},
+  {id:"ln_us50_terr", fase:2, era:'us1950', testo:"Le telescriventi delle agenzie portano i conti degli Stati: la lavagna si riempie."},
+  {id:"ln_us50_quasi", fase:3, era:'us1950', testo:"Dalle contee rurali dell'Ovest i numeri arrivano per telefono, uno alla volta."},
+  {id:"ln_us50_fin", fase:4, era:'us1950', testo:"Arriva il telegramma di chi ha perso: la corsa è chiusa."},
+  {id:"ln_us60_open", fase:0, era:'us1960', testo:"Si chiudono i seggi a est: tre reti in diretta, ciascuna col suo cervello elettronico."},
+  {id:"ln_us60_proj", fase:1, era:'us1960', testo:"Le proiezioni dei calcolatori si appoggiano su distretti campione scelti in anticipo."},
+  {id:"ln_us60_terr", fase:2, era:'us1960', testo:"Un servizio comune delle reti e delle agenzie raccoglie i voti: gli Stati arrivano a ritmo."},
+  {id:"ln_us60_quasi", fase:3, era:'us1960', testo:"Gli ultimi Stati dell'Ovest chiudono tardi: la notte non è ancora scritta."},
+  {id:"ln_us60_fin", fase:4, era:'us1960', testo:"Il conto dei grandi elettori è chiuso: la notte ha il suo vincitore."},
+  {id:"ln_us70_open", fase:0, era:'us1970', testo:"Le reti hanno i sondaggi all'uscita dei seggi, ma aspettano la chiusura per parlarne."},
+  {id:"ln_us70_proj", fase:1, era:'us1970', testo:"Sui grafici elettronici gli Stati cambiano colore man mano che vengono assegnati."},
+  {id:"ln_us70_terr", fase:2, era:'us1970', testo:"La grande mappa in studio si accende Stato per Stato: rosso e blu non hanno ancora un partito."},
+  {id:"ln_us70_quasi", fase:3, era:'us1970', testo:"Gli ultimi Stati sono sul filo: le reti tengono la proiezione in sospeso."},
+  {id:"ln_us70_fin", fase:4, era:'us1970', testo:"All'alba il conto dei grandi elettori è chiuso: la corsa ha un vincitore."},
+  {id:"ln_uk80_open", fase:0, era:'uk1980', testo:"Le dieci di sera: le due reti danno ciascuna il proprio exit poll."},
+  {id:"ln_uk80_proj", fase:1, era:'uk1980', testo:"In studio la lancetta dello swing oscilla: si misura lo spostamento dal voto precedente."},
+  {id:"ln_uk80_terr", fase:2, era:'uk1980', testo:"Nei municipi si conta a mano; il funzionario elettorale legge i numeri dal palco."},
+  {id:"ln_uk80_quasi", fase:3, era:'uk1980', testo:"Molti collegi rurali conteranno solo al mattino: la mappa ha ancora dei vuoti."},
+  {id:"ln_uk80_fin", fase:4, era:'uk1980', testo:"L'ultimo collegio che conta è dichiarato: la Camera ha i suoi numeri."},
+  {id:"ln_de50_open", fase:0, era:'de1950', testo:"Le urne chiudono alle 18: il paese ascolta la radio, la televisione è agli inizi."},
+  {id:"ln_de50_proj", fase:1, era:'de1950', testo:"Dai seggi i risultati vanno ai comuni e ai Länder per telefono e telescrivente."},
+  {id:"ln_de50_terr", fase:2, era:'de1950', testo:"La radio legge i risultati dei collegi a mano a mano che arrivano dai Länder."},
+  {id:"ln_de50_quasi", fase:3, era:'de1950', testo:"Si aspettano le grandi città: le cifre dei collegi rurali sono già sui fogli."},
+  {id:"ln_de50_fin", fase:4, era:'de1950', testo:"Nella notte il Commissario federale annuncia il risultato provvisorio."},
+  {id:"ln_loc_0", fase:0, tipo:'locale', testo:"Le schede passano di mano in mano sul tavolo della sezione."},
+  {id:"ln_loc_1", fase:1, tipo:'locale', testo:"In municipio i rappresentanti di lista sommano i verbali."},
+  {id:"ln_loc_2", fase:2, tipo:'locale', testo:"Il presidente dell'ufficio centrale firma il verbale: la cifra resta agli atti."},
+  {id:"ln_pri_0", fase:0, tipo:'primaria', testo:"Nelle sedi del partito i militanti votano davanti alle urne di cartone."},
+  {id:"ln_pri_1", fase:1, tipo:'primaria', testo:"I responsabili dei circoli dettano i numeri al telefono, uno alla volta."},
+  {id:"ln_pri_2", fase:2, tipo:'primaria', testo:"La commissione di garanzia controlla i verbali e rende pubblico il risultato."},
+  {id:"ln_pri_us_0", fase:0, tipo:'primaria', paesi:['usa'], testo:"Nelle sale dei comitati le delegazioni degli Stati contano i propri voti."},
+  {id:"ln_pri_us_1", fase:1, tipo:'primaria', paesi:['usa'], testo:"Gli Stati sfilano in ordine alfabetico: ogni delegazione annuncia il suo voto."},
+  {id:"ln_pri_us_2", fase:2, tipo:'primaria', paesi:['usa'], testo:"Il presidente della convention legge il conto finale dei delegati."},
+  {id:"ln_min_0", fase:0, tipo:'ministro', testo:"Il ministero si svuota: la notte si segue dalla sede del partito."},
+  {id:"ln_min_1", fase:1, tipo:'ministro', testo:"I collaboratori aggiornano il foglio dei seggi: il governo tiene o non tiene."},
+  {id:"ln_min_2", fase:2, tipo:'ministro', testo:"I conti sono fatti: domani si saprà se il tuo ufficio resta tuo."},
+  {id:"ln_int_0", fase:0, tipo:'intermedia', testo:"Il voto si conta lontano dalla capitale, ma la capitale guarda."},
+  {id:"ln_int_1", fase:1, tipo:'intermedia', testo:"I commentatori lo chiamano già un esame per il governo."},
+  {id:"ln_int_2", fase:2, tipo:'intermedia', testo:"Il risultato è ufficiale: domani sarà letto come un voto sul governo."},
+  {id:"ln_del_0", fase:0, tipo:'delegati', testo:"Nella sala dell'assemblea le delegazioni votano a turno, in ordine alfabetico."},
+  {id:"ln_del_1", fase:1, tipo:'delegati', testo:"Il segretariato conta le schede e legge il risultato all'assemblea."},
 ];
 /* F4 — LA DICHIARAZIONE A CALDO (penultima ondata). NON tocca i seggi: muove il dopo (stampa, morale delle
    correnti). Effetti piccoli, tre strade tutte legittime — la cura vale anche nella notte. */
@@ -6027,6 +6098,47 @@ const DICH_NOTTE = [
   {id:'affondo',   l:'«Chi ha perso ne tragga le conseguenze»',   e:'Colpo netto · stampa e avversari si irrigidiscono',
    stampa:-4, correnti:2, beat:'Hai affondato il colpo nella notte: un gesto che gli avversari non dimenticheranno.'},
 ];
+/* ⚑ L261-4 (25/10) · LA DICHIARAZIONE NELL'INCERTEZZA — le risposte per situazione (vantaggio · testa · svantaggio, dalla lettura che
+   la notte MOSTRA in quel momento, mai dal vero), il conto a posta 1 per gesto ed esito ([stampa, correnti]) e il beat del registro.
+   Le legge game.js (dichApri, dichScegli, dichConto) solo con l'interruttore DICH_INCERTEZZA acceso; spento resta DICH_NOTTE.
+   `lt` = la parola del tipo di notte (facoltativo: senza, vale `l`). Il nome della tabella non è DICH_INCERTEZZA: quello è l'interruttore. */
+const DICH_RISPOSTE = {
+  opzioni:{
+    vantaggio:[
+      {k:'rivendica', l:'«Abbiamo vinto»', lt:{nazionale:'«Il Paese ci ha dato fiducia»', locale:'«La città ci ha dato fiducia»', primaria:'«I militanti ci hanno dato fiducia»', ministro:'«Il Paese ha confermato il governo»', delegati:'«I delegati ci hanno dato fiducia»'},
+       e:'La base si accende · se lo spoglio ti smentisce, costa caro'},
+      {k:'affondo', l:'«Chi ha perso ne tragga le conseguenze»', e:'Colpo netto · se va male, te lo rinfacciano'},
+      {k:'prudenza', l:'«Aspettiamo i dati definitivi»', e:'Sobrio · la stampa apprezza la misura'}
+    ],
+    testa:[
+      {k:'prudenza', l:'«Aspettiamo i dati definitivi»', e:'Sobrio · la stampa apprezza la misura'},
+      {k:'rivendica', l:'«Ce l\'abbiamo fatta, lo dicono i numeri»', e:'La base si accende · se lo spoglio ti smentisce, costa caro'}
+    ],
+    svantaggio:[
+      {k:'ammette', l:'«Riconosco la sconfitta»', e:'Onesto · ma se poi vinci, l\'imbarazzo resta'},
+      {k:'prudenza', l:'«Aspettiamo i dati: la notte è lunga»', e:'Sobrio · la stampa apprezza la misura'},
+      {k:'rivendica', l:'«Non è finita: vinceremo»', lt:{primaria:'«Non è finita: i militanti sono con noi»', delegati:'«Non è finita: i delegati sono con noi»'},
+       e:'La base si accende · se lo spoglio ti smentisce, costa caro'}
+    ]
+  },
+  conto:{
+    prudenza:{ vinto:[3,1],   perso:[2,0] },
+    rivendica:{ vinto:[-1,3], perso:[-4,-3] },
+    affondo:{ vinto:[-3,2],   perso:[-5,-3] },
+    ammette:{ vinto:[-2,-2],  perso:[3,-1] }
+  },
+  beat:{
+    'prudenza|vinto':'Avevi chiesto di aspettare i dati: la vittoria arriva, e i cronisti apprezzano la misura.',
+    'prudenza|perso':'Avevi chiesto di aspettare i dati: la sconfitta arriva, ma nessuno può rinfacciarti una parola di troppo.',
+    'rivendica|vinto':'Avevi rivendicato la vittoria a caldo: i numeri ti danno ragione, i tuoi esultano, i cronisti meno.',
+    'rivendica|perso':'Avevi rivendicato la vittoria a caldo: lo spoglio ti smentisce, e i cronisti se lo ricordano.',
+    'affondo|vinto':'Avevi affondato il colpo a spoglio aperto: hai vinto, ma è un gesto che gli avversari non dimenticheranno.',
+    'affondo|perso':'Avevi chiesto agli avversari di trarre le conseguenze: alla fine tocca a te, e la frase ti torna indietro.',
+    'ammette|vinto':'Avevi ammesso la sconfitta troppo presto: la vittoria arriva, ma l\'imbarazzo resta.',
+    'ammette|perso':'Avevi riconosciuto la sconfitta prima della fine: lo spoglio la conferma, e la tua misura viene notata.'
+  },
+  tetto:{ stampa:[-8,5], correnti:[-5,5] }
+};
 
 /* D4 — il PILASTRO datato dell'ingresso ONU (14 dic 1955): one-shot, scatta con l'orologio nell'era '50 (vedi genAgenda).
    Da qui l'orizzonte ONU si apre (l'apice atlantico/europeo lascia il posto a quello ONU nell'avanzamento). Fatto storico
