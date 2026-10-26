@@ -1127,6 +1127,7 @@ function ruoloDiplo(){
 function startDiplomatico(){
   initStatoBase();                                   // S.livello=5 impostato in applicaPersonaggio (CREA.livello===5)
   S.diplo={ grado:1, credito:50, mesiAlto:0 };
+  bilInit();   // L260-5: la rete bilaterale (no-op con DIPLO_BILATERALI spento)
   installaProfilo(GOVERNI_PROFILI['centro']); S.snap=Object.assign({},S.pol);   // nazionale neutro/dormiente (L104-3: dal punto unico)
   S.ministers=[]; S.coalizione=[S.partito]; S.seggi=(PAESE.coalizione||PAESE.comeSiVince==='parlamentare')?calcSeggi():null;
   S.minoranza=false; S.tenuta={};
@@ -1150,6 +1151,102 @@ function diventaAltoRappresentante(){   // grado 1→2: la promozione (gated sul
   if(typeof PROMO_FIORE!=='undefined') PROMO_FIORE=true;
   genAgenda(false); render(); commitSnap();
 }
+/* L260-5 (26/10) · I RAPPORTI BILATERALI DEL DIPLOMATICO (DIPLO_BILATERALI, §3 D-OC2 di DESIGN-OLTRE-LE-CARTE.md, rapporto «⚑ L260-5»).
+   S.diplo.bil = 3-5 partner {id, t, v, u, s60?, i?, g?} (dati puri): t = 'rivale' (fino a due dalle righe lunghe di RIVALI, lo stesso filtro
+   di rivaleDesc; senza righe l'Unione Sovietica fino al 1991, poi la Russia), 'swing' (la potenza non allineata viva, potenzeDi('swing')),
+   'alleato' (i due di ALLEATI_DIPLO, data.js); v il rapporto 0-100, u il mese assoluto dell'ultima missione (o dell'ingresso), s60 «sopra
+   60 una volta», i «Intesa data», g «Gelo in corso». Nasce in startDiplomatico (e in applySnap per un salvataggio di prima), si ricontrolla
+   a gennaio (bilGennaio: chi non è più vivo passa il valore al successore di BIL_SUCCESSORI, se c'è, o esce; chi entra parte da BIL_K[t]).
+   La missione del mese (bilMissione, una al mese: S.diplo.missioneMese) alza v di 3-6 e muove S.relInt secondo il tipo; la deriva
+   (bilMese, a fine mese) riporta di 1 verso la partenza i partner non visitati da BIL_K.deriva mesi; i traguardi (bilTraguardi) danno
+   Intesa (≥ 70, una volta) e Gelo (≤ 20, finché non risale sopra 30). Le carte di pickDiplo col volto del rivale muovono anche il suo v
+   (bilCartaRivale, la metà dello spostamento di S.relInt.rivale). Mai effetti sui partiti. Spento = il gioco di prima. */
+let DIPLO_BILATERALI=true;
+const BIL_K={ alleato:55, swing:45, rivale:30, deriva:2, intesa:70, gelo:20, disgelo:30, soglia:60, credSoglia:1, credIntesa:3, credGelo:-2, dadoMin:3, dadoMax:6 };
+const BIL_SUCCESSORI={ urss:'russia', germania_ovest:'germania' };
+function bilAttivi(){ return DIPLO_BILATERALI && typeof S!=='undefined' && !!S && S.livello===5 && !!S.diplo && Array.isArray(S.diplo.bil); }
+function bilMeseAss(){ return S.year*12+S.month; }
+function bilDef(id){
+  var p=(typeof POTENZE!=='undefined') ? POTENZE.find(function(x){ return x.id===id; }) : null; if(p) return p;
+  return (typeof ALLEATI_DIPLO!=='undefined') ? (ALLEATI_DIPLO.find(function(x){ return x.id===id; })||null) : null;
+}
+/* il nome nella lingua attiva: forma 'nudo' (Francia · France) o 'det' (la Francia, gli Stati Uniti · France, the United States) */
+function bilNome(id, forma){
+  var d=bilDef(id); if(!d) return id;
+  if(typeof curLang==='function' && curLang()==='en'){ var nm=d.nomeEn||d.nome; return (forma==='det' && d.artEn) ? 'the '+nm : nm; }
+  if(forma!=='det') return d.nome;
+  var a=d.art||'la'; return a.indexOf("'")>=0 ? a+d.nome : a+' '+d.nome;
+}
+function bilPartner(){
+  var k=rivaleChiave(), y=S.year, out=[], visti={}, self=PAESE && PAESE.potenzaId;
+  if(typeof RIVALI!=='undefined') RIVALI.forEach(function(r){
+    if(out.length>=2 || r.paese!==k || y<r.dal || y>r.fino || r.fino-r.dal<10 || visti[r.con] || r.con===self || !bilDef(r.con)) return;
+    visti[r.con]=true; out.push({id:r.con, t:'rivale'}); });
+  if(!out.length){ var rip=(y<=1991)?'urss':'russia'; if(rip!==self && bilDef(rip)){ visti[rip]=true; out.push({id:rip, t:'rivale'}); } }
+  var sw=(typeof potenzeDi==='function') ? potenzeDi('swing').filter(function(p){ return !visti[p.id]; }) : [];
+  if(sw.length){ visti[sw[0].id]=true; out.push({id:sw[0].id, t:'swing'}); }
+  var al=0;
+  if(typeof ALLEATI_DIPLO!=='undefined') ALLEATI_DIPLO.forEach(function(a){
+    if(al>=2 || a.paese!==k || y<a.dal || y>a.fino || visti[a.id]) return;
+    visti[a.id]=true; out.push({id:a.id, t:'alleato'}); al++; });
+  return out;
+}
+function bilInit(){
+  if(!DIPLO_BILATERALI || !S || !S.diplo) return;
+  var m=bilMeseAss();
+  S.diplo.bil=bilPartner().map(function(p){ return {id:p.id, t:p.t, v:BIL_K[p.t], u:m}; });
+}
+function bilGennaio(){
+  if(!bilAttivi() || S.month!==1) return;
+  var vecchi=S.diplo.bil, m=bilMeseAss();
+  S.diplo.bil=bilPartner().map(function(p){
+    var q=vecchi.find(function(x){ return x.id===p.id; });
+    if(!q){ var pred=Object.keys(BIL_SUCCESSORI).find(function(k){ return BIL_SUCCESSORI[k]===p.id && vecchi.some(function(x){ return x.id===k; }); });
+      if(pred){ var o=vecchi.find(function(x){ return x.id===pred; });
+        S.log.unshift({t:T('Il mondo è cambiato'), x:T('Il rapporto con %A passa a %B.').replace('%A', bilNome(pred,'det')).replace('%B', bilNome(p.id,'det'))});
+        q=Object.assign({}, o, {id:p.id}); } }
+    return q ? Object.assign({}, q, {t:p.t}) : {id:p.id, t:p.t, v:BIL_K[p.t], u:m};
+  });
+}
+/* i traguardi visibili di un partner: l'Intesa una volta per partner, il Gelo una volta finché il rapporto non risale sopra 30 */
+function bilTraguardi(p){
+  if(!p.i && p.v>=BIL_K.intesa){ p.i=true; creditoMuovi(BIL_K.credIntesa);
+    S.log.unshift({t:T('Intesa con %P').replace('%P', bilNome(p.id,'det')), x:T('Anni di missioni danno frutto: il rapporto è solido, e i diplomatici lo sanno.')});
+    bioFatto('Intesa con '+bilNome(p.id,'det')+'.'); }
+  if(p.g && p.v>BIL_K.disgelo) delete p.g;
+  if(!p.g && p.v<=BIL_K.gelo){ p.g=true; creditoMuovi(BIL_K.credGelo);
+    S.log.unshift({t:T('Gelo con %P').replace('%P', bilNome(p.id,'det')), x:T('Il rapporto si è raffreddato: le porte si chiudono, e il credito ne risente.')}); }
+}
+function bilMissionePossibile(){ return bilAttivi() && S.diplo.missioneMese!==bilMeseAss(); }
+/* la missione del mese verso il partner i (il bottone della scheda Governo, la cerimonia 38 del banco): true se fatta */
+function bilMissione(i){
+  if(!bilMissionePossibile()) return false;
+  var p=S.diplo.bil[i]; if(!p) return false;
+  var m=bilMeseAss(), d=BIL_K.dadoMin+Math.floor(Math.random()*(BIL_K.dadoMax-BIL_K.dadoMin+1));
+  p.v=clamp(p.v+d,0,100); p.u=m; S.diplo.missioneMese=m;
+  if(p.t==='alleato') relIntMuovi('alleanza',1);
+  else if(p.t==='swing') relIntMuovi('consesso',1);
+  else { relIntMuovi('rivale',2); relIntMuovi('alleanza',-1); }   // parlare col rivale costa agli alleati
+  if(!p.s60 && p.v>BIL_K.soglia){ p.s60=true; creditoMuovi(BIL_K.credSoglia); }
+  S.log.unshift({t:T('Missione diplomatica'), x:T('In missione presso %P: il rapporto sale a %N.').replace('%P', bilNome(p.id,'det')).replace('%N', Math.round(p.v))});
+  bilTraguardi(p);
+  return true;
+}
+/* a fine mese (advanceMonth, livello 5): la deriva dei partner trascurati e il controllo di gennaio */
+function bilMese(){
+  if(!bilAttivi()) return;
+  bilGennaio();
+  var m=bilMeseAss();
+  S.diplo.bil.forEach(function(p){ if(m-p.u>=BIL_K.deriva && p.v>BIL_K[p.t]) p.v=Math.max(BIL_K[p.t], p.v-1); });
+}
+/* una carta di pickDiplo col volto del rivale (d.potId) che ha mosso S.relInt.rivale di dr muove il v di quella potenza della metà */
+function bilCartaRivale(id, dr){
+  if(!bilAttivi() || !id || !dr) return;
+  var p=S.diplo.bil.find(function(x){ return x.id===id; }); if(!p) return;
+  var h=Math.round(Math.abs(dr)/2)*(dr>0?1:-1); if(!h) return;
+  p.v=clamp(p.v+h,0,100); bilTraguardi(p);
+}
+function bilStato(v){ return v<=BIL_K.gelo ? 'gelo' : v<45 ? 'freddo' : v<BIL_K.intesa ? 'cordiale' : 'intesa'; }
 /* L244-3 (15/10) · UNA CARTA volto:'rivale' ESCE SOLO SE C'È UN RIVALE VIVO, e allora passa sempre da potSub. Il rivale è di
    POTENZE (data.js), filtrato per epoca da potenzeDi(): fino al L245-3 fuori dalla linea italiana `urss` (era 'italia1950') non era
    viva e le altre erano 'contemporanea' — nelle porte britanniche, francesi, tedesche e americane prima del 2012 nessun rivale (dal
@@ -1173,6 +1270,7 @@ function pickDiplo(){   // il loop: una missione la maggior parte dei mesi, col 
     ch:ev.ch.map(function(c){ return Object.assign({}, c, {l:potSub(T(c.l),p), e:potSub(T(c.e),p)}); })
   }) : Object.assign({}, ev, { t:T(ev.t), text:T(ev.text), kick:T(ev.kick||''), ch:ev.ch.map(function(c){ return Object.assign({}, c, {l:T(c.l), e:T(c.e)}); }) });
   const inst=Object.assign({}, base, { t:entiSub(base.t), text:entiSub(base.text), ch:base.ch.map(function(c){ return Object.assign({}, c, {l:entiSub(c.l), e:entiSub(c.e)}); }) });   // D4b: %ONU era-aware
+  if(p && DIPLO_BILATERALI) inst.potId=p.id;   // L260-5: la potenza del volto, letta da bilCartaRivale alla risoluzione
   return { kind:'event', data:inst, resolved:false };
 }
 /* D4 — la SECONDA superficie del diplomatico: i «dossier di scrivania» (DIPLO_DOSS). Colma i mesi-vuoti a L5/L4
@@ -8344,8 +8442,10 @@ function resolveItemCore(idx,ci){
     if(choice.pesoUE!=null && (S.pesoUE==null || S.pesoUE<choice.pesoUE)) return;                 // opzione a soglia di peso europeo (gemella di need:)
     if(choice.ente!=null && (!S.relInt || (S.relInt[choice.ente]||0) < (choice.enteMin!=null?choice.enteMin:60))) return;   // opzione a soglia di STANDING con un ente (fase A): serve un rapporto già buono
     var _cadeGov=(typeof cadeAttivo==='function') ? cadeAttivo(choice) : null;   // L93-5: letto PRIMA della scelta, cioè quello che il chip mostrava
+    var _rv0=(d.potId && S.relInt) ? S.relInt.rivale : null;   // L260-5: la carta col volto del rivale muove anche il suo rapporto bilaterale
     var _b0=(S.attivista?S.attivista.base:0), _a0=(S.attivista?S.attivista.autorev:0);   // A.5 L2: snapshot per l'auto-detect del feeding campagna (la corsia = la valuta costruita)
     try{ ACT_PACE=pace(); choice.f(); } finally{ ACT_PACE=1; }   // A.5 ritmo: durante una carta ATTIVISTA i gd() scalano; il finally GARANTISCE il reset anche se f() eccepisce → mai ACT_PACE≠1 nel gioco nazionale (raggio d'esplosione: tutti i gruppi)
+    if(_rv0!=null && S.relInt && S.relInt.rivale!=null) bilCartaRivale(d.potId, S.relInt.rivale-_rv0);   // L260-5
     if(choice.crisi) crisiApplica(choice.crisi);   // L245-2: il punto unico del campo `crisi:` (la scala della crisi)
     if(choice.ricevuto) crisiRicevuto(choice.ricevuto);   // L245-6: il punto unico del campo `ricevuto:` (l'ultimatum ricevuto)
     if(choice.attacco) attaccoRisposta(it, d, choice.attacco);   // L245-7: il punto unico del campo `attacco:` (le quattro risposte all'attacco)
@@ -8624,6 +8724,7 @@ function avanzaMese(){
   if(famigliaPresente() && S.famiglia.serenita!=null){ const dm=(dif().degradoMult!=null)?dif().degradoMult:1; serenitaMuovi(-0.3*dm); }   // la carriera divora: chi cura gli affetti (sceglie famiglia sugli eventi) la tiene su; chi no, scivola alla crisi
   if(S.livello===5){   // DIPLOMATICO (C2): si sale per STANDING (credito + relInt); nessuna sconfitta nazionale, nessun mandato a scadenza
     if(S.diplo){ S.diplo.mesiAlto=(S.diplo.credito>=70)?(S.diplo.mesiAlto||0)+1:0; }   // mesi a credito alto → garantiscono la promozione
+    bilMese();   // L260-5: deriva dei partner trascurati e controllo di gennaio (no-op con DIPLO_BILATERALI spento)
     genAgenda(false); render(); commitSnap();
     return;
   }
@@ -11334,6 +11435,7 @@ function applySnap(snap){
   document.getElementById('game').style.display='block';
   applyPaese();
   if(S.attivista && !S.attivista.laurea && (!S.attivista.radici || !S.attivista.rivale)) radiciInit();   // L260-2: un attivista di prima riceve radici e rivale (solo con ATT_RADICI; il dado è un hash: lo stesso a ogni caricamento)
+  if(S.livello===5 && S.diplo && !Array.isArray(S.diplo.bil)) bilInit();   // L260-5: un diplomatico di prima riceve la rete bilaterale (solo con DIPLO_BILATERALI)
   genAgenda(false);   // agenda fresca: il mese riparte pulito
   if(_pa) togliRisolteAgenda(_pa.risolte);   // L180-1: una carta risolta nel mese non torna (D150)
   if(!S.titoloMese){ try{ generaTitolo(); }catch(e){} }   // vecchi salvataggi senza titolo: la striscia c'è sempre

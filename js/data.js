@@ -14869,6 +14869,36 @@ const RIVALI=(function(){
   });
   return r;
 })();
+/* L260-5 · GLI ALLEATI DEL DIPLOMATICO (DESIGN-OLTRE-LE-CARTE.md, «⚑ L260-5»): due paesi amici per partita, accanto ai rivali di RIVALI,
+   nella rete bilaterale del livello 5 (bilPartner in game.js, solo con DIPLO_BILATERALI). `paese` = una chiave di SCENARI (le porte) o di
+   PAESI (il presente), come in RIVALI; `id` distinto dagli id di POTENZE; `art`/`artEn` come in POTENZE (la forma «con la Francia», «with
+   the United States»). Solo paesi, mai persone. La Germania è «Germania Ovest» fino al 1990 (L249-1) e passa il rapporto alla Germania
+   unita (BIL_SUCCESSORI in game.js). La guardia (ogni partita giocabile al livello 5 ha due alleati vivi in ogni anno) è in
+   .claude/verifica-paese.js. */
+const ALLEATI_DIPLO=(function(){
+  var D={ stati_uniti:['Stati Uniti','gli','United States',true], francia:['Francia','la','France',false], regno_unito:['Regno Unito','il','United Kingdom',true],
+    germania_ovest:['Germania Ovest','la','West Germany',false], germania:['Germania','la','Germany',false], canada:['Canada','il','Canada',false],
+    giappone:['Giappone','il','Japan',false], australia:['Australia',"l'",'Australia',false], brasile:['Brasile','il','Brazil',false],
+    argentina:['Argentina',"l'",'Argentina',false], spagna:['Spagna','la','Spain',false] };
+  var r=[];
+  function riga(paesi, id, dal, fino){ var d=D[id]; paesi.split(' ').forEach(function(p){ r.push({paese:p, id:id, nome:d[0], art:d[1], nomeEn:d[2], artEn:d[3], dal:dal, fino:fino}); }); }
+  var IT='italia italia1950 italia1960 italia1970 italia1980 italia1990 italia2000', UK='regnounito uk1950 uk1960 uk1970 uk1980 uk1990 uk2000',
+      FR='francia fr1950 fr1960 fr1970 fr1980 fr1990 fr2000', DE='germania de1950 de1960 de1970 de1980 de1990 de2000', US='usa us1950 us1960 us1970';
+  riga(IT+' '+UK+' '+FR+' '+DE+' india canada australia giappone coreasud messico nigeria brasile', 'stati_uniti', 1945, 2099);
+  riga(IT+' '+UK+' '+DE, 'francia', 1945, 2099);
+  riga(FR, 'regno_unito', 1945, 1962);          // la Francia della Quarta Repubblica e dei primi anni di de Gaulle: Londra e Washington
+  riga(FR, 'germania_ovest', 1963, 1990);       // dal trattato dell'Eliseo (gennaio 1963)
+  riga(FR+' spagna', 'germania', 1991, 2099);
+  riga(US+' canada australia sudafrica nigeria', 'regno_unito', 1945, 2099);
+  riga(US+' messico', 'canada', 1945, 2099);
+  riga('spagna', 'francia', 1945, 2099);
+  riga('giappone', 'australia', 1945, 2099);
+  riga('coreasud india', 'giappone', 1945, 2099);
+  riga('brasile', 'argentina', 1945, 2099);
+  riga('argentina sudafrica', 'brasile', 1945, 2099);
+  riga('argentina', 'spagna', 1945, 2099);
+  return r;
+})();
 
 const INTERNAZIONALI=[
  {id:'nato_vertice',era:'universale', tono:'florido', min:'difesa', kick:'Alleanza atlantica', t:'Vertice dell\'Alleanza', text:'Gli alleati chiedono un impegno di spesa militare più alto. La tua risposta pesa sul rapporto con l\'Alleanza — e su chi la guarda da fuori.',ch:[

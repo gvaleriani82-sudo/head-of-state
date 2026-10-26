@@ -2730,6 +2730,31 @@ function radiciHtml(){
   h+=`</div>`;
   return h;
 }
+/* L260-5 · LA RETE DEL DIPLOMATICO (game.js, «I RAPPORTI BILATERALI»): la missione del mese nella scheda Governo — un bottone per
+   partner, una volta al mese — e l'elenco dei partner nella scheda Paese, sotto il tabellone. Solo con bilAttivi() (DIPLO_BILATERALI
+   acceso, livello 5): spenta, niente di nuovo. Bersagli ≥ 44 px, griglia a due colonne. */
+const BIL_TIPO={ alleato:'alleato', swing:'non allineato', rivale:'rivale' };
+const BIL_STATO={ gelo:'gelo', freddo:'freddo', cordiale:'cordiale', intesa:'intesa' };
+function uiMissione(i){ if(typeof bilMissione==='function' && bilMissione(i)){ if(typeof suona==='function') suona('passi'); render(); commitSnap(); } }
+function bilMissioniHtml(){
+  if(typeof bilAttivi!=='function' || !bilAttivi()) return '';
+  const fatta=!bilMissionePossibile();
+  let h=`<div class="card bil-card"><div class="ct">${T('Missione del mese')}</div>`;
+  h+=`<div class="log"><div class="li">${fatta ? T('La missione del mese è fatta: la prossima il mese che viene.') : T('Scegli dove andare: il rapporto sale. Chi trascuri da due mesi si raffredda, piano.')}</div></div>`;
+  h+=`<div class="bil-griglia" style="display:grid;grid-template-columns:1fr 1fr;gap:7px;padding:2px 12px 12px;">`
+    +S.diplo.bil.map(function(p,i){ const c=barColor(p.v);
+      return `<button class="bil-mis" onclick="uiMissione(${i})"${fatta?' disabled':''} style="min-height:44px;padding:7px 8px;border-radius:9px;border:1px solid var(--line2);background:var(--panel);color:var(--txt);font-family:inherit;font-size:12px;cursor:${fatta?'default':'pointer'};text-align:left;opacity:${fatta?'.6':'1'};"><b>${bilNome(p.id)}</b><br><span style="font-size:12px;color:${c}">${T(BIL_TIPO[p.t])} · ${fmt(p.v,0)}</span></button>`; }).join('')
+    +`</div></div>`;
+  return h;
+}
+function bilPartnerHtml(){
+  if(typeof bilAttivi!=='function' || !bilAttivi()) return '';
+  const cap=function(x){ return x.charAt(0).toUpperCase()+x.slice(1); };
+  let h=`<div class="card bil-partner"><div class="ct">${T('I tuoi rapporti bilaterali')}</div>`;
+  S.diplo.bil.forEach(function(p){ h+=indRow(cap(bilNome(p.id)), cap(T(BIL_TIPO[p.t]))+' · '+T(BIL_STATO[bilStato(p.v)]), fmt(p.v,0), p.v); });
+  h+=`<div class="contorno" style="font-size:11px;color:var(--mut2);line-height:1.45;padding:10px 14px 12px">${T('Intesa da 70 in su (credito +3, una volta per paese) · gelo a 20 o meno (credito −2).')}</div></div>`;
+  return h;
+}
 /* Scheda ATTIVISTA (Build A) — L1: cruscotto della militanza. Le 3 valute (base/autorev/reputazione media) con la SOGLIA
    di laurea visibile (gate non invisibile, rifinitura 2a) + i 6 gruppi col template `.grp` esistente. Le mosse arrivano a L2. */
 function renderAttivista(){
@@ -2842,6 +2867,7 @@ function renderGov(){
     const meta=T((D.grado>=2)?'rapporto con l\'ONU ≥ 75 → la chiamata a Segretario':'credito ≥ 70 → la promozione a Sottosegretario generale');
     h+=`<div class="banner${fioreB}">${T('<b>Sei %R.</b> Non governi un paese: costruisci rapporti e credito, missione dopo missione. La via al vertice del mondo passa dallo standing — %M.').replace('%R', T(typeof ruoloDiplo==='function'?ruoloDiplo():'Ambasciatore')).replace('%M', meta)}</div>`;
     h+=`<div class="card"><div class="ct">${T('La scala diplomatica')} · ${T(D.grado>=2?'Sottosegretario generale':'Ambasciatore')}</div>${ob(T('Credito diplomatico'),T('la tua reputazione tra i diplomatici'),D.credito)}${ob(T('Rapporto con l\'ONU'),T('il favore dei fori multilaterali: la porta del vertice'),cons)}</div>`;
+    h+=bilMissioniHtml();   // L260-5: la missione del mese (vuota con DIPLO_BILATERALI spento)
   }
   else if(S.opposizione){
     ruolo+=`<div class="banner" style="border-color:var(--neg)">${T('<b>All\'opposizione.</b> Governa %P: niente bilancio né ministri. Ogni mese una mossa; segui la tua risalita nella scheda <b>Partiti</b>.').replace('%P',T((part(S.governoAvversario)||{}).nome||'—'))}</div>`;
@@ -3209,6 +3235,7 @@ function renderPaese(){
       }
       hw+=`</div>`;
     }
+    if(S.livello===5) hw+=bilPartnerHtml();   // L260-5: i partner bilaterali sotto il tabellone (vuoto con DIPLO_BILATERALI spento)
     hw+=(S.livello===5)
       ? `<div class="card"><div class="ct">${T('Come funziona')}</div><div class="log"><div class="li">${T('Le tue <b>missioni</b> (scheda Governo) muovono questi rapporti, e a questo livello lo standing <b>persiste</b>. Porta il <b>rapporto con %ENTE</b> a 75 e arriverà la chiamata al vertice; il <b>credito diplomatico</b> ti promuove prima al grado intermedio.').replace('%ENTE', T(typeof consessoNome==='function'?consessoNome():'le Nazioni Unite'))}</div></div></div>`
       : `<div class="card"><div class="ct">${T('Come funziona')}</div><div class="log"><div class="li">${T("Le <b>crisi di mediazione</b> (scheda Governo) muovono questi rapporti, e a questo livello le tue scelte <b>persistono</b>: il mondo non torna com'era. <b>Coesione</b> e <b>autorevolezza</b> decidono il tuo mandato; questo tabellone è il mondo che reagisce — e che racconterà il tuo lascito.")}</div></div></div>`;
