@@ -5020,7 +5020,8 @@ function renderPartiti(){
       ${punti}</svg>
       <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--mut2);margin:-2px 0 4px"><span>${T('%N mesi fa').replace('%N',span)}</span><span>${T('oggi')}</span></div>`;
   })();
-  const sondBox=(typeof periodoSondaggi==='function' && periodoSondaggi() && so)?`<div class="card" style="margin-bottom:12px;padding:11px 14px">
+  const sondOra=(typeof periodoSondaggi==='function' && periodoSondaggi()) || (typeof oppTragAttivi==='function' && oppTragAttivi() && S.oppTraguardi.ult && S.oppTraguardi.ult.m===meseAss() && so && so.mese===meseMandato());   // L260-4bis: all'opposizione il grafico si apre anche nel mese della tappa
+  const sondBox=(sondOra && so)?`<div class="card" style="margin-bottom:12px;padding:11px 14px">
       <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut);margin-bottom:6px">${T('Ultimo sondaggio')}</div>
       <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px"><span style="font-size:12.5px;color:var(--mut2)">${T(so.tipo==='parlamentare'?'Il tuo blocco':'Testa a testa')} · ${T('margine')} ±${so.margine}</span><span class="mono" style="font-weight:600;font-size:17px">${so.val}%</span></div>
       ${graficoSond || `<div class="bar" style="position:relative"><i style="width:${clamp(so.val,2,100)}%;background:var(--brand)"></i><span style="position:absolute;left:50%;top:-2px;bottom:-2px;width:2px;background:var(--neg);opacity:.55"></span></div>`}
@@ -5068,8 +5069,20 @@ function renderPartiti(){
   const tenNote = hasAllies?' '+T('Ogni <b>alleato</b> ha una <b>tenuta</b>: se trascuri la sua base cala, finché ti pone un <b>ultimatum</b> e — se lo ignori — <b>esce</b> dalla coalizione.'):'';
   const minNote = S.minoranza?' <b style="color:var(--neg)">'+T('Governi in minoranza')+'</b>: '+T('ogni mese rischi una <b>mozione di sfiducia</b> che porta a elezioni anticipate.'):'';
   const govLine = S.opposizione?T("Al <b>Governo</b> c'è l'avversario; il tuo partito è all'<b>Opposizione</b>."):T("I partiti al <b>Governo</b> formano la tua maggioranza, gli altri sono all'<b>Opposizione</b>.");
-  const oppNote = S.opposizione?' <b style="color:var(--neg)">'+T("Sei all'opposizione")+'</b>: '+T('fai risalire la tua forza e vinci il prossimo voto per tornare al governo; se crolla sotto ~%N il partito ti scarica.').replace('%N',Math.round(Math.max(part(S.partito).forza*0.5,5))):'';
-  h+=`</div>${territBox}<div class="card"><div class="ct">${T('Come funziona')}</div><div class="log">
+  const oppNote = S.opposizione?' <b style="color:var(--neg)">'+T("Sei all'opposizione")+'</b>: '+T('fai risalire la tua forza e vinci il prossimo voto per tornare al governo; se crolla sotto ~%N il partito ti scarica.').replace('%N',Math.round(sogliaCrollo(f0Crollo()))):'';
+  h+=`</div>${territBox}${oppTragBox()}<div class="card"><div class="ct">${T('Come funziona')}</div><div class="log">
     <div class="li">${T("Le forze <b>seguono l'umore dei gruppi sociali</b> che ogni partito rappresenta: base soddisfatta → il partito cresce, altrimenti cala (lentamente, ancorato alla forza iniziale).")} ${govLine} ${comeVince}${tenNote}${minNote}${oppNote}</div></div></div>`;
   document.getElementById('sec-par').innerHTML=h;
+}
+/* L260-4bis · la scheda Partiti all'opposizione: il traguardo del trimestre (o l'intermedia che è la tappa grande), l'ultima tappa e il
+   rivale interno. Solo lettura (nessun bottone): sparisce con OPP_TRAGUARDI spento o fuori dall'opposizione del livello 3. */
+function oppTragBox(){
+  if(typeof oppTragAttivi!=='function' || !oppTragAttivi()) return '';
+  const T0=S.oppTraguardi, o=T0.obj, R=S.oppRivale, righe=[];
+  if(o){ const n=Math.max(0, o.mese-meseAss());
+    righe.push(`<div class="opp-trag-obj" style="font-size:13px">${T(o.int?'Il traguardo grande: %O':'Traguardo del trimestre: %O').replace('%O',oppTragObiettivoTesto(o))} <span style="color:var(--mut2)">· ${n===0?T('questo mese'):T(n===1?'manca un mese':'mancano %N mesi').replace('%N',n)}</span></div>`); }
+  if(T0.ult) righe.push(`<div style="font-size:12px;color:var(--mut2)">${T(T0.ult.fatta?'Ultima tappa: centrata':'Ultima tappa: mancata')} · ${T('tappe centrate in questa legislatura: %F su %N').replace('%F',T0.fatte).replace('%N',T0.fatte+T0.mancate)}</div>`);
+  if(R) righe.push(`<div class="opp-rivale" style="font-size:13px;margin-top:4px">${T('Il rivale interno: <b>%V</b>%X · forza %N').replace('%V',R.nome).replace('%X',R.area?(', '+R.carica+' — '+R.area):(R.carica?' ('+R.carica+')':'')).replace('%N',Math.round(R.forza))}${R.forza>OPP_TRAG_K.rivGuida?' <b style="color:var(--neg)">'+T('— guiderebbe la sfida')+'</b>':''}</div>`);
+  if(!righe.length) return '';
+  return `<div class="card opp-trag" style="padding:10px 14px;margin-bottom:12px"><div class="contorno" style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut);margin-bottom:6px">${T("La legislatura all'opposizione")}</div>${righe.join('')}</div>`;
 }

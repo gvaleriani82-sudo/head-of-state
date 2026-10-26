@@ -632,6 +632,7 @@ function startOpposizione(){
   document.getElementById('start').style.display='none';
   document.getElementById('ov').classList.remove('on');
   document.getElementById('game').style.display='block';
+  if(OPP_TRAGUARDI) oppTragNasci();   // L260-4bis: dopo l'orologio della porta (turnMandato): le intermedie della legislatura si leggono giuste
   genAgenda(false); render(); commitSnap();   // loop d'opposizione + primo confine di mese (mese 1)
 }
 
@@ -6894,7 +6895,9 @@ function aggiornaSfida(){
   const arrS=(seme && S.correnti.find(function(c){return c.id===seme.corrente && c.umore<40;}))||null;
   const arr=arrS||S.correnti.find(function(c){return c.umore<35;});
   if(!arr) return;
-  const v=(arrS && seme.volto)?{ volto:seme.volto, carica:T('capolista'), area:null, fonte:'liste', simbolo:false }:trovaVolto(); if(!v) return;
+  let v=(arrS && seme.volto)?{ volto:seme.volto, carica:T('capolista'), area:null, fonte:'liste', simbolo:false }:trovaVolto();
+  if(oppRivaleGuida()){ const R=S.oppRivale; v={ volto:R.nome, carica:R.carica, area:R.area, fonte:R.origine, simbolo:R.simbolo, rivale:true }; }   // L260-4bis: sopra la soglia la sfida è del rivale interno (stesso nome, continuità)
+  if(!v) return;
   if(arrS) S.sfidaSeme=null;   // il seme si consuma quando germoglia
   const D=CORRENTI_DEF.find(function(d){return d.id===arr.id;})||{};
   S.sfida=Object.assign({ corrente:arr.id, mese:mese, maturazione:0 }, v);
@@ -6947,8 +6950,9 @@ function basePrimaria(bonus){
   /* L258-6 · una porta può dichiarare la SUA soglia dell'opposizione (`sogliaPrimariaOpp`, campo di SCENARIO_ISTITUZIONI: PAESE la
      porta già risolta, anche dopo un caricamento); assente = 48 come sempre. Al governo resta 50, e il +2 del simbolo si somma sopra. */
   const sogliaBase=S.opposizione ? ((PAESE && PAESE.sogliaPrimariaOpp!=null) ? PAESE.sogliaPrimariaOpp : PRIMARIA_SOGLIA_OPP) : PRIMARIA_SOGLIA;
-  const soglia=sogliaBase + (S.sfida && S.sfida.fonte==='territorio' && S.sfida.simbolo ? 2 : 0);
-  return { base:umoreMedio()*0.5 + S.ind.consenso*0.3 + pl*0.2 + (bonus||0), soglia:soglia, sogliaBase:sogliaBase, pl:pl };   // L64-3: +3 se scegli tu il momento
+  const simbolo=(S.sfida && S.sfida.fonte==='territorio' && S.sfida.simbolo ? 2 : 0), rivale=oppRivaleSoglia();   // L260-4bis: la forza del rivale interno, se la sfida è sua (±3 al più; 0 con OPP_TRAGUARDI spento)
+  const soglia=sogliaBase + simbolo + rivale;
+  return { base:umoreMedio()*0.5 + S.ind.consenso*0.3 + pl*0.2 + (bonus||0), soglia:soglia, sogliaBase:sogliaBase, pl:pl, simbolo:simbolo, rivale:rivale };   // L64-3: +3 se scegli tu il momento
 }
 function apriPrimaria(tipo, bonus){
   const BP=basePrimaria(bonus), pl=BP.pl;
@@ -6963,7 +6967,7 @@ function apriPrimaria(tipo, bonus){
     <div class="mtext">${T('Ti sfida <b>%V</b>%X.').replace('%V',v.volto||'—').replace('%X',v.area?`, ${v.carica} — <b>${v.area}</b>`:(v.carica?` (${v.carica})`:''))} ${T(tipo==='vigilia'?'Prima di guidare il partito alle urne, devi vincere in casa.':'Il malcontento è maturo: il partito vota sulla tua leadership.')}</div>
     <div style="padding:0 18px 6px">${(S.correnti||[]).map(function(c){ const D=CORRENTI_DEF.find(function(d){return d.id===c.id;})||{};
       return `<div style="padding:5px 0"><div style="display:flex;justify-content:space-between;font-size:13px"><span>${T(D.nome)} <small style="color:var(--mut2)">· ${c.leader}</small></span><span class="mono">${Math.round(c.umore)}</span></div><div class="bar"><i style="width:${clamp(c.umore,2,100)}%;background:${c.umore<35?'var(--neg)':c.umore<50?'var(--warn)':'var(--pos)'}"></i></div></div>`; }).join('')}
-      <div style="font-size:12px;color:var(--mut);margin-top:6px">${T("Pesano: l'umore delle correnti (50%), il consenso (%A · 30%), il potere locale (%B · 20%)%X.").replace('%A',Math.round(S.ind.consenso)).replace('%B',Math.round(pl)).replace('%X',PRIM.soglia>PRIM.sogliaBase?T(" — lo sfidante parte forte: guida un'area simbolo"):'')}</div></div>
+      <div style="font-size:12px;color:var(--mut);margin-top:6px">${T("Pesano: l'umore delle correnti (50%), il consenso (%A · 30%), il potere locale (%B · 20%)%X.").replace('%A',Math.round(S.ind.consenso)).replace('%B',Math.round(pl)).replace('%X',(BP.simbolo?T(" — lo sfidante parte forte: guida un'area simbolo"):'')+(BP.rivale>0?T(' — lo sfidante parte forte: i traguardi mancati sono il suo argomento'):BP.rivale<0?T(' — lo sfidante parte debole: i traguardi centrati parlano per te'):''))}</div></div>
     <div class="choices"><button class="opt" style="border-color:var(--brand)" onclick="votoMilitanti()"><span class="ol">${T('Vai al voto dei militanti →')}</span></button></div>`;
   document.getElementById('ov').classList.add('on');
 }
@@ -7095,6 +7099,7 @@ function cartaRisultato(ev){
 }
 /* UNICO punto d'esito (FASE B: estendere qui + ris.aree). Potere locale, slancio, tenuta, aspettativa. */
 function esitoIntermedia(ris){
+  if(OPP_TRAGUARDI) oppTragIntermedia(ris);   // L260-4bis: l'intermedia che è la tappa grande, letta prima che il voto muova forze e correnti
   if(ris.territoriDopo) S.territori=ris.territoriDopo;                   // FASE B: commit dei territori decisi alla generazione
   const share=quotaTerritori();                                          // potere locale = quota dei territori controllati dal tuo blocco
   const cur=(S.potereLocale!=null)?S.potereLocale:(share!=null?share:ris.quota);
@@ -8696,7 +8701,7 @@ function avanzaMese(){
     }
     S.visibilita=clamp((S.visibilita||0)-4,0,100);                                   // il silenzio ti spegne (decadimento mensile)
     aggiornaSfida();                                                                 // la vita interna del partito non dorme nemmeno da sfidante
-    genAgenda(false); forseSondaggio(); render(); commitSnap();
+    genAgenda(false); forseSondaggio(); oppTragMese(); render(); commitSnap();   // L260-4bis: la tappa del trimestre dopo il sondaggio del mese (no-op con OPP_TRAGUARDI spento)
     if(sfidaMatura()) apriPrimaria('anticipata');                                    // congresso anticipato: il malcontento è maturo
     return;
   }
@@ -9939,7 +9944,7 @@ function mostraBilancio(prev, cur){
   const scFa=scenaMomentoHtml('assets/scenes/fineanno-'+(verd.k||'lucieombre')+'.webp');
   document.getElementById('modal').innerHTML=`${scFa}<div class="mt" style="display:flex;align-items:center;gap:11px"><div><div class="kicker">${T("Bilancio dell'anno")} · ${cur.anno-1}</div><h2>${T("L'anno che si chiude")}</h2></div></div>
     <div class="mtext" style="color:var(--mut2)">${T("Come è andato l'anno, in tendenza.")}</div>
-    <div class="bil-rows" style="padding:2px 18px 4px">${rows}</div>${radiciBilancioRiga()}
+    <div class="bil-rows" style="padding:2px 18px 4px">${rows}</div>${radiciBilancioRiga()}${oppTragBilancioRiga(cur.anno-1)}
     <div class="rv-riga" style="padding:6px 18px 8px">${rvB}<div class="bil-verdetto" style="font-family:'Fraunces',serif;font-style:italic;font-size:18px;color:${verd.c}">${verd.t}.</div></div>
     <div class="choices"><button class="opt" style="border-color:var(--brand)" onclick="chiudiBilancio()"><span class="ol">${T('Continua →')}</span></button></div>`;
   document.getElementById('ov').classList.add('on');
@@ -10160,7 +10165,15 @@ function probSfiduciaAvversario(){
   if(S.sostegnoAvv && S.seggi && S.seggi[S.sostegnoAvv.pid]!=null) suoi += (S.seggi[S.sostegnoAvv.pid]||0)*0.7;
   if(suoi>=50) return 0;                                  // ha i numeri: nessuna mozione lo tocca
   const scarto = Math.min(1, (50-suoi)/10);               // quanto gli manca alla soglia, saturato a 10 punti
-  return clamp(0.03*m*(1+Math.max(0,45-c)/45)*D.rischioSfiducia*scarto, 0, 0.40);
+  const p = clamp(0.03*m*(1+Math.max(0,45-c)/45)*D.rischioSfiducia*scarto, 0, 0.40);
+  /* L260-4 · OPP_GOV_AVV (accanto a OPP_DURATA): dove il paese dichiara `sfiduciaCostruttivaAvv` (oggi solo il presente tedesco) il
+     governo avversario in minoranza cade solo se esiste una maggioranza alternativa che ti comprende — la cricca di criccaMia, la stessa
+     di L108-1 —, altrimenti la probabilità è moltiplicata per OPP_GOV_AVV_K. Solo dal lato dell'avversario: `sfiduciaCostruttiva` sul
+     presente farebbe cadere sempre l'SPD al governo (misura di L107-2, il cordone non è dichiarato). Le porte de* lo ereditano ma non
+     arrivano qui (hanno `sfiduciaCostruttiva`, il ramo di L108-1 in advanceMonth). Il dado della chiamata è tirato prima: K non sposta
+     la sequenza. */
+  if(OPP_GOV_AVV && PAESE.sfiduciaCostruttivaAvv && criccaMia().seggi<50) return p*OPP_GOV_AVV_K;
+  return p;
 }
 /* Carta di crisi di coalizione del mese (ultimatum o rottura), o null. Stesso pattern isteresi+raffreddamento
    degli eventi-fiducia, ma PER alleato. La rottura rimuove subito l'alleato (stato sempre coerente). */
@@ -10233,9 +10246,21 @@ function margineFraseTrattativa(mg){
     sconfittaNetta:'Le urne ti voltano le spalle: una sconfitta netta.', valanga:'Le urne ti travolgono.'};
   return T((mg&&F[mg.tag])||'');
 }
-/* L153-1 · la riga della salvezza nei due modali d'esito: il partito è cresciuto dall'urna precedente (%A → %B, un decimale). */
+/* L153-1 · la riga della salvezza nei due modali d'esito: il partito è cresciuto dall'urna precedente (%A → %B, un decimale).
+   L260-3 · con OPP_DURATA la riga dice il vero della regola larga: «cresciuto» o «ha tenuto» (sceso di meno di OPP_SALVEZZA_MARGINE),
+   e quante sconfitte il congresso perdonerà ancora dopo questa (letta prima di segnaSalvezza: il modale si apre prima di perdiElezione). */
+function salvezzaCresciuto(){ return (S.forze[S.partito]||0) > (S.forzaUrnaPrec||0); }
 function salvezzaRiga(){
-  return '<div class="mtext" style="border-left:2px solid var(--acc);padding-left:10px">'+T('Hai perso, ma il partito è cresciuto: dal %A al %B%. Il congresso ti conferma alla guida. Una seconda sconfitta non la perdonerà.').replace('%A',fmt(S.forzaUrnaPrec||0,1)).replace('%B',fmt(S.forze[S.partito]||0,1))+'</div>';
+  const a=fmt(S.forzaUrnaPrec||0,1), b=fmt(S.forze[S.partito]||0,1);
+  let txt;
+  if(!OPP_DURATA) txt=T('Hai perso, ma il partito è cresciuto: dal %A al %B%. Il congresso ti conferma alla guida. Una seconda sconfitta non la perdonerà.').replace('%A',a).replace('%B',b);
+  else {
+    const resta=OPP_SALVEZZE-(S.salvezzeOpp||0)-1;
+    txt=T(salvezzaCresciuto() ? 'Hai perso, ma il partito è cresciuto: dal %A al %B%. Il congresso ti conferma alla guida.' : 'Hai perso, ma il partito ha tenuto: dal %A al %B%. Il congresso ti conferma alla guida.').replace('%A',a).replace('%B',b)
+      +' '+(resta<=0 ? T('Una nuova sconfitta non la perdonerà.')
+        : (resta===1 ? T('Ti perdonerà ancora una sconfitta, se il partito non cala di oltre %M punti.') : T('Ti perdonerà ancora %N sconfitte, se il partito non cala di oltre %M punti.').replace('%N',resta)).replace('%M',OPP_SALVEZZA_MARGINE));
+  }
+  return '<div class="mtext" style="border-left:2px solid var(--acc);padding-left:10px">'+txt+'</div>';
 }
 function esitoSeggi(win, total){
   if(urnaLegislativa()) return esitoLegislativa(win, total);   // L104-2
@@ -10339,7 +10364,162 @@ function sogliaCrollo(f0){ return Math.max(f0*0.5, Math.min(5, f0*0.6)); }
    globalThis.__BANCO_F0RIENTRO_OFF in __reseed). */
 let REGOLA_F0RIENTRO=true;
 function f0Crollo(){ return (REGOLA_F0RIENTRO && S.f0Rientro!=null) ? S.f0Rientro : mioPartito().forza; }
-function salvezzaOpp(){ return !!S && !!S.opposizione && (S.salvezzeOpp||0)<1 && S.forzaUrnaPrec!=null && (S.forze[S.partito]||0) > S.forzaUrnaPrec; }
+/* L260-3 (26/10) · LA DURATA ALL'OPPOSIZIONE (OPP_DURATA, §3 D-OC2 di DESIGN-OLTRE-LE-CARTE.md). Il passo 0 ha detto che dall'avvio
+   all'opposizione si esce quasi solo dall'URNA PERSA (Germania 12/20, Regno Unito 13/20; il crollo sotto sogliaCrollo 0/40; la primaria
+   8 e 5): in Germania la prima sconfitta col partito cresciuto si sopravvive già (13 salvezze) e chiude la SECONDA, anche col partito
+   ancora in crescita (+0,1…+1,4); nel Regno Unito la prima si perde con la forza giù di 1-3 punti. La leva è una sola, salvezzaOpp:
+   con OPP_DURATA il congresso perdona fino a OPP_SALVEZZE sconfitte (non una) e anche col partito sceso di meno di OPP_SALVEZZA_MARGINE
+   punti dall'urna prima (non solo cresciuto). Il resto della regola è quello di L153-1 (stesso punto unico, stessa cerimonia, stesso
+   costo di credibilità a ogni salvezza). Vale solo all'opposizione (S.opposizione), quindi al governo niente cambia. Spento = la regola
+   di L153-1 byte per byte (il banco: globalThis.__BANCO_OPP_DURATA_OFF in __reseed). I valori sono dello sweep del passo 3. */
+let OPP_DURATA=true, OPP_SALVEZZE=3, OPP_SALVEZZA_MARGINE=2;
+/* L260-4 (26/10) · IL GOVERNO AVVERSARIO CHE CADE OGNI ANNO (letto solo da probSfiduciaAvversario). Passo 0: in Germania la CDU
+   all'opposizione ha davanti un governo AfD+FDP di ~30 seggi, senza stampella e senza una maggioranza alternativa, che cadeva ogni 13
+   mesi (55 urne anticipate in 14 carriere su 40). Spento = la caduta a sorte di L90-2 per tutti. */
+let OPP_GOV_AVV=true, OPP_GOV_AVV_K=0;
+/* L260-4bis (26/10) · I TRAGUARDI DELL'OPPOSIZIONE E IL RIVALE INTERNO (OPP_TRAGUARDI, §3 D-OC2 di DESIGN-OLTRE-LE-CARTE.md).
+   All'opposizione (livello 3, non il volto del livello 2) la legislatura ha delle tappe dichiarate: ogni OPP_TRAG_K.ogni mesi il
+   sondaggio del trimestre (la cifra che il giocatore vede: sondaggioVero(), i seggi del tuo blocco o il testa a testa, col rumore della
+   banda di sondaggioEra() da un dado deterministico, mai Math.random) contro UN obiettivo dichiarato alla tappa prima: «accorciare» il
+   distacco dal governo di OPP_TRAG_K.accorcia, «tenere» il blocco sopra la base −OPP_TRAG_K.tieni, il «sorpasso» quando il distacco è
+   ≤ OPP_TRAG_K.sorpasso. Un'intermedia di PAESE.intermedie che cade prima della tappa dopo È la tappa (primo partito d'opposizione, o
+   davanti al governo nel voto se il distacco è stretto), letta in esitoIntermedia dal risultato com'è (nessuna regola nuova sul voto).
+   Fatta: correnti +OPP_TRAG_K.corr (tetto +6 per anno) e credibilità +2. Già davanti al governo (il sorpasso sarebbe gratis) l'obiettivo è
+   «tenere» il livello di oggi −1. Mancata: nessuna pena sul partito, ma il RIVALE INTERNO cresce (+12, +20
+   all'intermedia). Il rivale nasce coi traguardi da trovaVolto() (lo stesso generatore dello sfidante: nessun nome nuovo) e resta finché
+   resti all'opposizione (anche dopo un'urna persa e perdonata); sopra OPP_TRAG_K.rivGuida è lui il volto della sfida che nasce
+   (aggiornaSfida, mai un doppione), e la sua forza sposta la soglia della primaria di al più ±OPP_TRAG_K.sogliaMax (basePrimaria).
+   Non crea uscite: la sola uscita resta la primaria di sempre. Stato in S: S.oppTraguardi, S.oppRivale (dati puri; nascono al primo
+   mese all'opposizione anche nei salvataggi di prima, dove mancano). Spento = il gioco di prima byte per byte (i campi non nascono;
+   il banco: globalThis.__BANCO_OPP_TRAGUARDI_OFF in __reseed). */
+let OPP_TRAGUARDI=true;
+/* i valori dello sweep (rapporto «⚑ L260-4bis»): correnti +1 e non +3 (a +3 la Germania e l'Italia duravano 5-6 carriere su 40 in più: meno primarie), «accorciare» di 1 e non di 2 (a 2 i seggi del Regno Unito non si accorciavano quasi mai, 8%) */
+const OPP_TRAG_K={ ogni:3, accorcia:1, tieni:1, sorpasso:3, corr:1, corrTetto:6, cred:2, rivNasce:20, rivManca:12, rivIntManca:20, rivFatta:6, rivGuida:60, sogliaK:3/40, sogliaMax:3 };
+function oppTragAttivi(){ return OPP_TRAGUARDI && typeof S!=='undefined' && !!S && !!S.opposizione && S.livello===3 && !!S.oppTraguardi; }
+function oppTragDado(sale, mese){   // FNV-1a + finalizzatore murmur3, come radiciDado: personaggio e mese, mai Math.random
+  var s='opt|'+sale+'|'+scissioneCarriera()+'|'+mese, h=2166136261;
+  for(var i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619); }
+  h^=h>>>16; h=Math.imul(h,0x85ebca6b); h^=h>>>13; h=Math.imul(h,0xc2b2ae35); h^=h>>>16;
+  return (h>>>0)/4294967296;
+}
+/* la cifra del sondaggio e la stessa cifra per il governo (chi governa e non sta nel tuo blocco). Se il mese ha già il suo sondaggio
+   (la vigilia, nel gioco) si legge quello; altrimenti la tappa È il sondaggio del mese, col rumore della banda. */
+function oppTragLettura(mese, rumore){
+  var v=sondaggioVero(), mio=bloccoIds(), gov;
+  if(v.tipo==='parlamentare'){ var sg=calcSeggi(); gov=seggiCoalizione((S.coalizione||[]).filter(function(id){ return mio.indexOf(id)<0; }), sg); }
+  var mm=meseMandato(), so=S.ultimoSondaggio, val, m=sondaggioEra().base, nuovo=false;
+  if(rumore && so && so.mese===mm && so.tipo===v.tipo){ val=so.val; m=so.margine; }
+  else { val=Math.round(clamp(v.val + (rumore ? (oppTragDado('r', mese)*2-1)*m : 0), 0, 100)); nuovo=!!rumore; }
+  if(v.tipo!=='parlamentare') gov=100-val;
+  gov=Math.round(gov);
+  return { tipo:v.tipo, val:val, gov:gov, dist:gov-val, margine:m, nuovo:nuovo, opp:v.opp };
+}
+/* la tappa scrive il sondaggio del mese (lo stesso formato di forseSondaggio): il grafico della scheda Partiti lo mostra */
+function oppTragScriviSondaggio(L){
+  var E=sondaggioEra(), mm=meseMandato();
+  var testo = L.tipo==='parlamentare'
+    ? T('%V il tuo blocco al %N% dei seggi (±%M).').replace('%V',T(E.voce)).replace('%N',L.val).replace('%M',L.margine)
+    : T('%V il tuo %N% nel testa a testa con %O (±%M).').replace('%V',T(E.voce)).replace('%N',L.val).replace('%O',T((L.opp||{}).nome||'')).replace('%M',L.margine);
+  S.ultimoSondaggio={ tipo:L.tipo, val:L.val, margine:L.margine, testo:testo, mese:mm };
+  S.sondStorico=(S.sondStorico||[]).concat([{ mm:mm, val:L.val, margine:L.margine }]).slice(-8);
+}
+/* l'obiettivo della prossima tappa, uno solo, dalla situazione dell'ultima lettura */
+function oppTragScegli(L, M){
+  var K=OPP_TRAG_K, B=S.oppTraguardi.base, mm=meseMandato();
+  for(var k=0;k<=K.ogni;k++){ var iv=intermediaA(mm+k); if(iv) return { k:(L.dist<=K.sorpasso?'int_davanti':'int_primo'), mese:M+k, int:true, tipo:iv.tipo }; }
+  if(L.dist<=0) return { k:'tieni', x:L.val-K.tieni, mese:M+K.ogni, davanti:true };   // già davanti al governo (il governo di minoranza tedesco): tenere il livello di oggi, il sorpasso sarebbe gratis
+  if(L.dist<=K.sorpasso) return { k:'sorpasso', mese:M+K.ogni };
+  if(L.val<B.val) return { k:'tieni', x:B.val-K.tieni, mese:M+K.ogni };
+  return { k:'accorcia', x:L.dist-K.accorcia, mese:M+K.ogni };
+}
+function oppTragNasci(){
+  if(!OPP_TRAGUARDI || !S || !S.opposizione || S.livello!==3 || !S.forze) return;
+  var M=meseAss(), L=oppTragLettura(M, false), P=S.oppTraguardi;
+  S.oppTraguardi={ da:M, base:{ val:L.val, dist:L.dist }, ult:null, obj:null, fatte:0, mancate:0,
+    anno:(P && P.anno) || { a:S.year, f:0, n:0 }, annoPrec:(P && P.annoPrec) || null, corr:(P && P.corr) || { a:S.year, d:0 } };
+  if(!S.oppRivale){ var v=trovaVolto();
+    if(v) S.oppRivale={ nome:v.volto, origine:(v.fonte==='territorio'?'territorio':'corrente'), carica:v.carica, area:v.area, simbolo:!!v.simbolo, forza:OPP_TRAG_K.rivNasce }; }
+  S.oppTraguardi.obj=oppTragScegli(L, M);
+}
+/* il testo dell'obiettivo (anche per la scheda Partiti): frasi intere con i segnaposto */
+function oppTragObiettivoTesto(o){
+  if(!o) return '';
+  var tp=T(o.tipo||''); tp=tp.charAt(0).toLowerCase()+tp.slice(1);   // il tipo del voto a metà frase («alle elezioni regionali»)
+  if(o.k==='int_davanti') return T('alle %E, arrivare davanti al governo').replace('%E',tp);
+  if(o.k==='int_primo') return T('alle %E, essere il primo partito d\'opposizione').replace('%E',tp);
+  if(o.k==='sorpasso') return T('superare il governo nel sondaggio');
+  if(o.k==='tieni') return T('non scendere sotto il %X% nel sondaggio').replace('%X',o.x);
+  return T('portare il distacco dal governo a %X punti o meno').replace('%X',Math.max(0,o.x));
+}
+function oppTragConto(fatta, intermedia){
+  var K=OPP_TRAG_K, T0=S.oppTraguardi, R=S.oppRivale;
+  if(T0.anno.a!==S.year){ T0.annoPrec=T0.anno; T0.anno={ a:S.year, f:0, n:0 }; }
+  T0.anno.n++; if(fatta) T0.anno.f++;
+  if(fatta){ T0.fatte++;
+    if(T0.corr.a!==S.year) T0.corr={ a:S.year, d:0 };
+    var d=Math.min(K.corr, K.corrTetto-T0.corr.d); if(d>0){ tutteCorrenti(d); T0.corr.d+=d; }
+    S.credibilita=clamp((S.credibilita||0)+K.cred, 0, 100);
+    if(R) R.forza=clamp(R.forza-K.rivFatta, 0, 100);
+  } else { T0.mancate++;
+    if(R) R.forza=clamp(R.forza+(intermedia?K.rivIntManca:K.rivManca), 0, 100);
+  }
+}
+function oppTragRigaRivale(){
+  var R=S.oppRivale; if(!R) return '';
+  return ' '+T('Nel partito %V ne prende nota: forza %N.').replace('%V',R.nome).replace('%N',Math.round(R.forza));
+}
+/* il confine del mese all'opposizione (corpoMese, dopo genAgenda e forseSondaggio): la tappa del trimestre, se è il suo mese */
+function oppTragMese(){
+  if(!OPP_TRAGUARDI || !S.opposizione || S.livello!==3) return;
+  if(!S.oppTraguardi){ oppTragNasci(); return; }   // un salvataggio di prima, o un'uscita senza goOpposizione: nasce qui
+  var T0=S.oppTraguardi, o=T0.obj, M=meseAss();
+  if(!o){ T0.obj=oppTragScegli(oppTragLettura(M, false), M); return; }
+  if(o.int){ if(M>o.mese) T0.obj=oppTragScegli(oppTragLettura(M, false), M); return; }   // l'intermedia non è venuta: si passa oltre, senza conto
+  if(M<o.mese) return;
+  var L=oppTragLettura(M, true);
+  if(L.nuovo) oppTragScriviSondaggio(L);
+  var fatta = o.k==='sorpasso' ? L.dist<0 : o.k==='tieni' ? L.val>=o.x : L.dist<=o.x;
+  oppTragConto(fatta, false);
+  T0.ult={ m:M, val:L.val, gov:L.gov, fatta:fatta, k:o.k };
+  var x=T(L.tipo==='parlamentare' ? 'Il sondaggio del trimestre: il tuo blocco al %V% dei seggi, il governo al %G%. L\'obiettivo era %O.' : 'Il sondaggio del trimestre: tu al %V% nel testa a testa, il governo al %G%. L\'obiettivo era %O.').replace('%V',L.val).replace('%G',L.gov).replace('%O',oppTragObiettivoTesto(o));
+  if(fatta) x+=' '+T('Le correnti ti danno credito.'); else x+=oppTragRigaRivale();
+  S.log.unshift({ t:T(fatta?'Traguardo raggiunto':'Traguardo mancato'), x:x });
+  T0.obj=oppTragScegli(L, M);
+}
+/* l'intermedia che è la tappa (esitoIntermedia, prima di toccare forze e correnti): il voto com'è, nessuna regola nuova */
+function oppTragIntermedia(ris){
+  if(!oppTragAttivi() || !S.oppTraguardi.obj || !S.oppTraguardi.obj.int) return;
+  var T0=S.oppTraguardi, o=T0.obj, M=meseAss(), mio=bloccoIds(), f=S.forze||{}, fatta;
+  var fuori=PAESE.partiti.filter(function(p){ return (S.coalizione||[]).indexOf(p.id)<0; });
+  if(o.k==='int_davanti'){ var gq=(S.coalizione||[]).filter(function(id){ return mio.indexOf(id)<0; }).reduce(function(s,id){ return s+(f[id]||0); }, 0); fatta=ris.quota>gq; }
+  else fatta=fuori.every(function(p){ return p.id===S.partito || (f[p.id]||0)<=(f[S.partito]||0); });
+  oppTragConto(fatta, true);
+  T0.ult={ m:M, val:Math.round(ris.quota), gov:null, fatta:fatta, k:o.k };
+  var x=T('Il voto era la tappa grande: %O.').replace('%O',oppTragObiettivoTesto(o));
+  x+=' '+(fatta ? T('Obiettivo centrato: le correnti ti danno credito.') : T('Obiettivo mancato.')+oppTragRigaRivale());
+  S.log.unshift({ t:T(fatta?'Traguardo raggiunto':'Traguardo mancato'), x:x });
+  T0.obj=null;   // la tappa dopo la sceglie il confine del mese (oppTragMese), sui numeri di dopo il voto
+}
+/* il rivale guida la sfida che nasce: solo sopra la soglia, e con l'interruttore */
+function oppRivaleGuida(){ return oppTragAttivi() && !!S.oppRivale && S.oppRivale.forza>OPP_TRAG_K.rivGuida; }
+/* lo spostamento della soglia della primaria (basePrimaria): solo se la sfida è del rivale */
+function oppRivaleSoglia(){
+  if(!OPP_TRAGUARDI || !S || !S.opposizione || !S.sfida || !S.sfida.rivale || !S.oppRivale) return 0;
+  var K=OPP_TRAG_K; return clamp(Math.round((S.oppRivale.forza-K.rivGuida)*K.sogliaK), -K.sogliaMax, K.sogliaMax);
+}
+/* la riga del bilancio di gennaio: le tappe dell'anno che si chiude */
+function oppTragBilancioRiga(annoChiuso){
+  if(!oppTragAttivi()) return '';
+  var T0=S.oppTraguardi, r=(T0.anno && T0.anno.a===annoChiuso) ? T0.anno : (T0.annoPrec && T0.annoPrec.a===annoChiuso) ? T0.annoPrec : null;
+  if(!r || !r.n) return '';
+  return `<div class="mtext bil-tappe" style="padding-top:0">${T('Tappe dell\'opposizione centrate: %F su %N.').replace('%F',r.f).replace('%N',r.n)}</div>`;
+}
+function salvezzaOpp(){
+  if(!S || !S.opposizione || S.forzaUrnaPrec==null) return false;
+  const f=S.forze[S.partito]||0;
+  if(OPP_DURATA) return (S.salvezzeOpp||0)<OPP_SALVEZZE && f > S.forzaUrnaPrec-OPP_SALVEZZA_MARGINE;
+  return (S.salvezzeOpp||0)<1 && f > S.forzaUrnaPrec;
+}
 function segnaForzaUrna(){ S.forzaUrnaPrec=(S.forze && S.forze[S.partito]) || 0; }
 function segnaSalvezza(){ S.salvezzeOpp=(S.salvezzeOpp||0)+1; S.credibilita=Math.max(0,(S.credibilita||0)-10); }   // DOPO entraOpposizione, che la azzera a 50: 40 invece di 50 (il costo misurato in L143-5). La chiama anche il banco.
 function vincitore(){ return PAESE.partiti.filter(p=>p.id!==S.partito).sort((a,b)=>(S.forze[b.id]||0)-(S.forze[a.id]||0))[0]; }
@@ -10349,6 +10529,7 @@ function perdiElezione(){ if(S.opposizione){ if(salvezzaOpp()) goOpposizione(tru
    nessun log/genAgenda/commit (li fa il chiamante) né potere locale (persiste alla sconfitta, si ri-fissa all'avvio).
    Condiviso da goOpposizione (sconfitta) e startOpposizione (avvio da sfidante). */
 function entraOpposizione(w){
+  const eraOpp=!!S.opposizione;   // L260-4bis: il rivale interno resta se eri già all'opposizione (l'urna persa e perdonata)
   S.opposizione=true; S.governoAvversario=w.id; S.ministers=[];
   S.governoAvversarioVolto=nomePersona();   // L73-2: chi ti ha succeduto ha un nome (generato, mai reale)
   S.coalizione=[w.id].concat(PAESE.coalizione?compatibili(w.id,S.seggi).filter(p=>p.id!==S.partito).map(p=>p.id):[]);
@@ -10364,12 +10545,13 @@ function entraOpposizione(w){
   const prof = w.asse>=1?'destra' : w.asse<=-1?'sinistra' : 'centro';
   installaProfilo(GOVERNI_PROFILI[prof]); S.snap=Object.assign({},S.pol); S.leggiSnap=Object.assign({},S.leggi);   // L104-3: senza salto di disavanzo · eredita le politiche dell'avversario, contabilità RP pulita
   S.turnInMandate=0; S.elezioniAnticipate=false; S.ultimoSondaggio=null; S.sondStorico=[];
+  if(OPP_TRAGUARDI){ delete S.oppTraguardi; if(!eraOpp) delete S.oppRivale; }   // L260-4bis: legislatura nuova, traguardi nuovi (nascono in oppTragNasci, dopo che il chiamante ha fissato l'orologio). delete e non null: startMinistro passa di qui per montare il governo del premier, e il ministro non deve trovarsi i campi
 }
 /* Vai all'opposizione DOPO una sconfitta: governa il vincitore; il motore fa il resto. */
 /* L153-1 · `salvata` = la sconfitta dall'opposizione che il congresso perdona (perdiElezione, salvezzaOpp): resti sfidante
    contro il vincitore nuovo. È la STESSA cerimonia — un parametro, non una gemella — più il conto della salvezza. */
 function goOpposizione(salvata){
-  const w=vincitore();
+  const w=vincitore(), cresciuto=!salvata || !OPP_DURATA || salvezzaCresciuto();   // L260-3: letto prima di segnaForzaUrna (con OPP_DURATA si sopravvive anche col partito un po' sceso)
   entraOpposizione(w);
   if(salvata) segnaSalvezza();
   else if(typeof suona==='function') suona('banchi');   // L218-13 (F5f): dal governo all'opposizione dopo le urne (lo stesso punto della voce qui sotto)
@@ -10379,9 +10561,13 @@ function goOpposizione(salvata){
   chiudiSforzo(); territoriDopoUrna();   // L64-2: anche in sconfitta le aree lavorate possono passare al tuo blocco
   S.campNaz=null; S.campNazUltimo=null;   // Cantiere C: stagione chiusa anche in sconfitta (le promesse restano: da sfidante non le puoi tradire — la resa le premierà)
   S.bloccoAtteso=bloccoQuota();   // aspettativa = quota del tuo blocco d'opposizione (potere locale persiste)
-  if(salvata){
+  if(OPP_TRAGUARDI) oppTragNasci();   // L260-4bis: i traguardi della legislatura nuova (e il rivale, se non c'era)
+  if(salvata && cresciuto){
     bioFatto(gn('Sconfitto alle urne, ma confermato alla guida: il partito era cresciuto.','Sconfitta alle urne, ma confermata alla guida: il partito era cresciuto.'));
     S.log.unshift({t:T('Il congresso ti conferma'),x:T('Hai perso le elezioni, ma il partito è cresciuto: resti alla guida. Ora governa %P.').replace('%P',T(w.nome))});
+  } else if(salvata){   // L260-3: la salvezza col partito che ha tenuto (OPP_DURATA)
+    bioFatto(gn('Sconfitto alle urne, ma confermato alla guida: il partito aveva tenuto.','Sconfitta alle urne, ma confermata alla guida: il partito aveva tenuto.'));
+    S.log.unshift({t:T('Il congresso ti conferma'),x:T('Hai perso le elezioni, ma il partito ha tenuto: resti alla guida. Ora governa %P.').replace('%P',T(w.nome))});
   } else {
     bioFatto(gn('Sconfitto','Sconfitta')+' alle urne: comincia la traversata del deserto.');
     S.log.unshift({t:T('All\'opposizione'),x:T('Hai perso le elezioni: ora governa %P. Prepara la rivincita.').replace('%P',T(w.nome))});
@@ -10403,7 +10589,13 @@ function condannaLieve(){
   genAgenda(false); render(); commitSnap();
 }
 /* Torna al governo (dopo la nomina dei ministri dall'opposizione): nessuno strascico dall'era avversaria. */
+/* L260-3 · IL VOLTO CHE VINCE SALE. Il ministro del proprio partito che perde l'urna resta al livello 2 da volto all'opposizione
+   (applicaElezioneMinistro); se poi vince (urna, o la cricca della sfiducia costruttiva) passava di qui restando al livello 2: capo del
+   governo nei fatti (ministri nominati, S.opposizione=false) ma con le schede, i filtri e il motore del ministro (L260-1 §1). Qui sale al
+   livello 3 con le stesse righe di diventaPremier e partnerTornaCapo (lo stato del dicastero si chiude). REGOLA_VOLTO spenta = prima. */
+let REGOLA_VOLTO=true;
 function tornaAlGoverno(mins){
+  if(REGOLA_VOLTO && S.livello===2){ S.livello=3; S.premier=null; S.dicastero=null; S.capitale=null; S.prevSettore=null; S.silAvviso=null; S.premCrisiMesi=0; S.occUltima=null; S.mesiAltoCap=0; }
   S.ministers=mins; S.opposizione=false; S.governoAvversario=null;
   delete S.f0Rientro;   // L237-2ter: al governo la soglia del rientro da partner non vale più
   if(typeof parla==='function') parla(voceGesto('insediamento', 'voce-insediamento', {chiudeOv:true}));   // L218-4: torni capo del governo (dalle urne o con la sfiducia costruttiva); l'altro punto è diventaPremier · L248-5bis: lo strato
