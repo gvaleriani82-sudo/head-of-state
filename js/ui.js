@@ -2730,6 +2730,27 @@ function radiciHtml(){
   h+=`</div>`;
   return h;
 }
+/* L260-5bis · LA CORSA AL POSTO (game.js, «IL CONCORRENTE PER IL POSTO»): nella scheda Governo del livello 5, sopra la missione del mese,
+   il nome del concorrente, la carica in palio e due barre — il tuo punteggio corsaDiplo() e i suoi punti. Solo con concAttivo()
+   (DIPLO_CONCORRENTE acceso): spento, niente. Il nome del concorrente è un nome proprio: non passa da T(). */
+function concCorsaHtml(){
+  if(typeof concAttivo!=='function' || !concAttivo()) return '';
+  const c=S.diplo.conc, tu=corsaDiplo(), m=bilMeseAss();
+  /* L258-12 (passo 0, ⚠ 1 di L260-5quater): sopra 100 (il tetto del concorrente è 105) il bar è pieno e il numero dice «100+»; il valore
+     vero resta nello stato e decide la corsa — non lo si tronca a 100, che a 100 contro 105 farebbe leggere una parità «tua» */
+  const riga=(nm, sub, v)=>{ const col=barColor(clamp(v,0,100)); return `<div class="grp"><div class="top"><div class="nm">${nm}<small>${sub}</small></div><div class="pc mono" style="color:${col}">${v>100?'100+':Math.round(v)}</div></div><div class="bar"><i style="width:${clamp(v,2,100)}%;background:${col}"></i></div></div>`; };
+  let h=`<div class="card conc-card"><div class="ct">${T('Corsa al posto')}</div>`;
+  /* L260-5ter: le riaperture del grado 2 sono finite (CONC_RIAPERTURE, conc.chiuso) → una riga semplice, niente barre */
+  if(c.chiuso) return h+`<div class="log"><div class="li">${T('Il posto resta a %N: non ci saranno altre corse.').replace('%N', c.nome)}</div></div></div>`;
+  let nota;
+  if(c.grado>=3) nota=T('%N è %S: la corsa si riapre fra %M mesi.').replace('%N', c.nome).replace('%S', T(ruoloIntl())).replace('%M', Math.max(0, (c.fino||m)-m));
+  else nota=T('In palio: %R. Corre con te %N; a parità di punti il posto è tuo.').replace('%R', T(concPalioNome())).replace('%N', c.nome);
+  if(c.grado<3 && concAttesa()) nota+=' '+T('Il posto si riapre fra %M mesi.').replace('%M', c.attesa-m);
+  h+=`<div class="log"><div class="li">${nota}</div></div>`;
+  h+=riga(T('Tu'), T('credito, Intese e missioni degli ultimi sei mesi'), tu)+riga(c.nome, T('il concorrente'), c.punti);
+  h+=`</div>`;
+  return h;
+}
 /* L260-5 · LA RETE DEL DIPLOMATICO (game.js, «I RAPPORTI BILATERALI»): la missione del mese nella scheda Governo — un bottone per
    partner, una volta al mese — e l'elenco dei partner nella scheda Paese, sotto il tabellone. Solo con bilAttivi() (DIPLO_BILATERALI
    acceso, livello 5): spenta, niente di nuovo. Bersagli ≥ 44 px, griglia a due colonne. */
@@ -2867,6 +2888,7 @@ function renderGov(){
     const meta=T((D.grado>=2)?'rapporto con l\'ONU ≥ 75 → la chiamata a Segretario':'credito ≥ 70 → la promozione a Sottosegretario generale');
     h+=`<div class="banner${fioreB}">${T('<b>Sei %R.</b> Non governi un paese: costruisci rapporti e credito, missione dopo missione. La via al vertice del mondo passa dallo standing — %M.').replace('%R', T(typeof ruoloDiplo==='function'?ruoloDiplo():'Ambasciatore')).replace('%M', meta)}</div>`;
     h+=`<div class="card"><div class="ct">${T('La scala diplomatica')} · ${T(D.grado>=2?'Sottosegretario generale':'Ambasciatore')}</div>${ob(T('Credito diplomatico'),T('la tua reputazione tra i diplomatici'),D.credito)}${ob(T('Rapporto con l\'ONU'),T('il favore dei fori multilaterali: la porta del vertice'),cons)}</div>`;
+    h+=concCorsaHtml();   // L260-5bis: la corsa al posto col concorrente (vuota con DIPLO_CONCORRENTE spento)
     h+=bilMissioniHtml();   // L260-5: la missione del mese (vuota con DIPLO_BILATERALI spento)
   }
   else if(S.opposizione){
@@ -3490,7 +3512,42 @@ function renderPol(){
   }
   const nv=leggi.filter(L=>!!S.leggi[L.id]).length, apL=!!ap.__leggi;
   h+=`<div class="card g2 bil-sez${apL?' aperta':''}">${bilTesta('__leggi', T('Leggi del paese'), apL, T('%N in vigore').replace('%N', nv), false)}${apL?leggi.map(renderLegge).join(''):''}</div>`;   // leggi: riforme on/off, costano RP come il bilancio
+  h+=pariHtml();   // L260-6: i pari del capo del governo (vuoto con GOV_PARI spento, fuori dal presente o senza S.pari)
   document.getElementById('sec-pol').innerHTML=h;
+}
+/* L260-6 · il blocco «I pari» della scheda Bilancio: per voce la posizione su 5 con la cifra tua e quella del primo, poi la posizione
+   d'insieme. Legge solo pariClassifica (game.js); nelle porte storiche e senza S.pari non compare. */
+/* L260-6bis: il debito è la variazione dell'anno (varDeb, in punti di PIL, col segno «−» quando scende), il saldo si scrive come la riga in
+   testa alla scheda («deficit 3,8%» / «avanzo 0,6%», mai col segno meno: la cifra dei pari ha il segno di PAESI, negativo = disavanzo) */
+const PARI_NOMI={crescita:'Crescita', varDeb:'Debito', deficit:'Saldo di bilancio', scCrescita:'Crescita', scSaldo:'Saldo di bilancio'};   // L260-6ter: le voci dello scarto tengono i nomi di sempre
+/* L260-6ter · lo scarto dalla partenza accanto alla cifra vera. Per il saldo lo scarto è quello della parola che si legge: con un deficit
+   è quanto il deficit è cresciuto (−0,8 = sceso di 0,8), con un avanzo quanto l'avanzo è cresciuto — così «deficit 3,2% (−0,8)» si legge
+   come si scrive (nel conto scSaldo il segno è l'opposto: più alto = meglio). */
+function pariScarto(d){ return (d>0 ? '+' : d<0 ? '−' : '')+fmt(Math.abs(d),1); }
+function pariCon(k, o){
+  if(k==='scCrescita') return {v:pariCifra('crescita', o.crescita), d:pariScarto(o.scCrescita)};
+  return {v:pariCifra('deficit', o.deficit), d:pariScarto(o.deficit<0 ? -o.scSaldo : o.scSaldo)};
+}
+function pariCifra(k, v){
+  if(k==='deficit') return T(v<0 ? 'deficit %V' : 'avanzo %V').replace('%V', fmt(Math.abs(v),1)+'%');
+  if(k==='varDeb') return (v>0 ? '+' : v<0 ? '−' : '')+fmt(Math.abs(v),1);
+  return (v>0 ? '+' : '')+fmt(v,1)+'%';
+}
+function pariHtml(){
+  if(typeof pariAttivi!=='function' || !pariAttivi() || !S.pari) return '';
+  const mio=S.pari.mio, C=pariClassifica(mio||undefined);   // L260-6ter: il giocatore all'anno chiuso (S.pari.mio), come i pari; prima del primo gennaio nessuna classifica
+  const righe=C.voci.map(function(v){
+    let tu, chi='';
+    if(!mio) tu=T('primo anno in corso');
+    else if(v.k==='varDeb'){ tu=T("tu %V punti nell'anno (%L%)").replace('%V', pariCifra(v.k, v.tuo)).replace('%L', fmt(v.tuoO.debito,0));
+      chi=v.primo ? T('primo %P %V').replace('%P', T(PAESI[v.primo].nome)).replace('%V', pariCifra(v.k, v.primoV)) : T('il primo sei tu'); }
+    else { const a=pariCon(v.k, v.tuoO), b=pariCon(v.k, v.primoO);
+      tu=T('tu %V (%D dalla partenza)').replace('%V', a.v).replace('%D', a.d);
+      chi=v.primo ? T('primo %P %V (%D)').replace('%P', T(PAESI[v.primo].nome)).replace('%V', b.v).replace('%D', b.d) : T('il primo sei tu'); }
+    return `<div class="pari-riga"><div class="pari-v"><span>${T(PARI_NOMI[v.k])}</span><b>${mio ? T('%N° su 5').replace('%N', v.pos) : '—'}</b></div><div class="pari-d">${tu}${chi ? ' · '+chi : ''}</div></div>`;
+  }).join('');
+  const nomi=S.pari.p.map(function(q){ return T(PAESI[q.id].nome); }).join(', ');
+  return `<div class="card pari"><div class="ct">${T('I pari')}</div><div class="pari-chi contorno">${T('Il confronto con %L.').replace('%L', nomi)} ${T('Conta chi migliora di più rispetto a dove partiva.')}</div>${righe}<div class="pari-riga pari-tot"><div class="pari-v"><span>${T("Posizione d'insieme")}</span><b>${mio ? T('%N° su 5').replace('%N', C.pos) : '—'}</b></div></div></div>`;
 }
 /* L143-2 · lo stato delle sezioni del Bilancio: transitorio, per mese (al mese nuovo si riparte dalla regola: aperta solo la
    sezione della politica sotto pressione). ⚠ Mai in S né in localStorage. */

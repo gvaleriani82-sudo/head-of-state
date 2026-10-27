@@ -585,6 +585,7 @@ function startGame(mins){
   S.minoranza=(!PAESE.coalizione && PAESE.comeSiVince==='parlamentare') ? S.seggi[chosenPartito]<50 : false;
   S.tenuta={}; S.tenutaForza0={}; S.tenutaLiv={}; S.tenutaUltimo={}; S.mesiMinoranza=0;
   initTerritori(); initPotereLocale();   // territori (eletti assegnati per lean) + potere locale derivato; per i paesi a coalizione l'aspettativa è ri-fissata in confirmCoal
+  pariInit();   // L260-6: i pari del capo del governo (no-op con GOV_PARI spento o fuori dal presente)
   if((S.potereLocale||0)>50) S.rp++;     // gennaio d'avvio: +1 se controlli il territorio (come il vecchio sistema)
   S.log=[{t:T('Insediamento'),x:T('Il nuovo governo ha giurato (difficoltà: %D). Si parte da gennaio: vara la legge di bilancio.').replace('%D',T(S.diff))}];
   bioFatto((bgNome()?T(bgNome())+', '+T('giura come'):T('Giura come'))+' '+T(PAESE.titoloRuolo)+'.');   // il background apre la biografia ("Sindacalista, giura come...")
@@ -887,6 +888,7 @@ function pickOccasione(){
   if(S.livello===5){   // C2 — la salita diplomatica: Ambasciatore→Alto rappresentante (gated sul CREDITO), poi →Segretario (consesso≥75, stesso gate del politico)
     if(!S.diplo) return null;
     if(S.occUltima!=null && mese-S.occUltima<6) return null;
+    if(concAttesa()) return null;   // L260-5bis: dopo una corsa persa il posto non si riapre prima di conc.attesa
     if(S.diplo.grado===1){
       if(S.diplo.credito>=70 && (Math.random()<0.12 || (S.diplo.mesiAlto||0)>=24)){ S.occUltima=mese; return { kind:'occasione', tipo:'altoRapp', resolved:false }; }
       return null;
@@ -1064,9 +1066,11 @@ function autorevMuovi(n){ if(S.intl) S.intl.autorevolezza=clamp(S.intl.autorevol
 /* D4 asse-3 — apice della carriera internazionale, era+anno aware (overlay, chiave `consesso` invariata; PRESET §6a).
    Nel '50 l'Italia NON è all'ONU fino al 14/12/1955 → l'apice d'epoca è atlantico/europeo:
    ≥1955 le Nazioni Unite (il pilastro è scattato) · ≥1952 Segretario generale della NATO (carica reale dal marzo '52) ·
-   prima → Segretario generale del Consiglio d'Europa (dal 1949). Presente identico. */
+   prima → Segretario generale del Consiglio d'Europa (dal 1949). Presente identico.
+   L260-5ter passo 0: il confronto era su eraGiocata() (S.era = LINEA_IT nelle porte italiane), mai vero; la porta è S.scenario,
+   come in ruoloDiplo() dal L260-5bis. Dal L260-5quater anche consessoNome, consessoBreve e onuTok qui sotto (foriDEpoca()). */
 function ruoloIntl(){
-  if(typeof eraGiocata==='function' && eraGiocata()==='italia1950'){
+  if(typeof S!=='undefined' && S && S.scenario==='italia1950'){
     var y=(typeof S!=='undefined'&&S&&S.year)||1950;
     if(y>=1955) return 'Segretario generale delle Nazioni Unite';
     if(y>=1952) return 'Segretario generale della NATO';
@@ -1074,13 +1078,15 @@ function ruoloIntl(){
   }
   return 'Segretario generale delle Nazioni Unite';
 }
-/* etichette del nodo-multilaterale (`consesso`) per finestra: nel '50 pre-'55 sono i fori europei/atlantici. */
+/* etichette del nodo-multilaterale (`consesso`) per finestra: nel '50 pre-'55 sono i fori europei/atlantici.
+   L260-5quater passo 0: il confronto era su eraGiocata() (mai 'italia1950'), ora sulla porta, come ruoloIntl() qui sopra. */
+function foriDEpoca(){ return typeof S!=='undefined' && !!S && S.scenario==='italia1950' && ((S.year||1950)<1955); }
 function consessoNome(){
-  if(typeof eraGiocata==='function' && eraGiocata()==='italia1950' && (((typeof S!=='undefined'&&S&&S.year)||1950)<1955)) return 'i fori europei e atlantici';
+  if(foriDEpoca()) return 'i fori europei e atlantici';
   return 'le Nazioni Unite';
 }
 function consessoBreve(){
-  if(typeof eraGiocata==='function' && eraGiocata()==='italia1950' && (((typeof S!=='undefined'&&S&&S.year)||1950)<1955)) return 'Fori europei';
+  if(foriDEpoca()) return 'Fori europei';
   return 'ONU';
 }
 /* D4b — token %ONU nelle carte-crisi/missione (registro dell'ente che presiedi/frequenti): plurale femminile, così gli
@@ -1088,7 +1094,7 @@ function consessoBreve(){
    (l'apice d'epoca è NATO/Consiglio d'Europa, non l'ONU). Lingua-aware; applicato DOPO T() nelle pick-fn. */
 function onuTok(){
   var en=(typeof curLang==='function'&&curLang()==='en');
-  if(typeof eraGiocata==='function' && eraGiocata()==='italia1950' && (((typeof S!=='undefined'&&S&&S.year)||1950)<1955)) return en?'common institutions':'istituzioni comuni';
+  if(foriDEpoca()) return en?'common institutions':'istituzioni comuni';
   return en?'United Nations':'Nazioni Unite';
 }
 function entiSub(s){ return (s==null)?s:String(s).replace(/%ONU/g, onuTok()); }
@@ -1119,15 +1125,19 @@ function diventaInternazionale(ente){
    Segretario (livello 4, già fatto). Si sale per STANDING: credito alto → promozione; relInt.consesso≥75 → la chiamata.
    Nazionale dormiente; il narrativo (bio/personaggio/età/famiglia/tratti) ti segue, come le altre transizioni. */
 function creditoMuovi(n){ if(S.diplo) S.diplo.credito=clamp(S.diplo.credito+n,0,100); }
-function ruoloDiplo(){
-  if(!(S.diplo && S.diplo.grado>=2)) return 'Ambasciatore';   // grado 1 = era-neutro
-  if(typeof eraGiocata==='function' && eraGiocata()==='italia1950' && (((S&&S.year)||1950)<1955)) return 'Rappresentante permanente presso il Consiglio d\'Europa';   // D4: grado 2 d'epoca (reale)
+function ruoloDiplo(grado){   // L260-5bis: `grado` facoltativo (la carica in palio del concorrente); senza, il tuo
+  var g=(grado!=null) ? grado : (S.diplo && S.diplo.grado);
+  if(!(g>=2)) return 'Ambasciatore';   // grado 1 = era-neutro
+  /* D4: grado 2 d'epoca (reale). L260-5bis passo 0: il confronto era su eraGiocata(), che rende S.era (LINEA_IT nelle porte italiane)
+     e non era mai vero; la porta è S.scenario. ⚠ ruoloIntl() ha lo stesso ramo morto (segnalato nel rapporto, non toccato). */
+  if(S && S.scenario==='italia1950' && ((S.year||1950)<1955)) return 'Rappresentante permanente presso il Consiglio d\'Europa';
   return 'Sottosegretario generale delle Nazioni Unite';
 }
 function startDiplomatico(){
   initStatoBase();                                   // S.livello=5 impostato in applicaPersonaggio (CREA.livello===5)
   S.diplo={ grado:1, credito:50, mesiAlto:0 };
   bilInit();   // L260-5: la rete bilaterale (no-op con DIPLO_BILATERALI spento)
+  concNasce();   // L260-5bis: il concorrente per il posto (no-op con DIPLO_CONCORRENTE spento)
   installaProfilo(GOVERNI_PROFILI['centro']); S.snap=Object.assign({},S.pol);   // nazionale neutro/dormiente (L104-3: dal punto unico)
   S.ministers=[]; S.coalizione=[S.partito]; S.seggi=(PAESE.coalizione||PAESE.comeSiVince==='parlamentare')?calcSeggi():null;
   S.minoranza=false; S.tenuta={};
@@ -1146,8 +1156,8 @@ function startDiplomatico(){
 function diventaAltoRappresentante(){   // grado 1→2: la promozione (gated sul credito in pickOccasione)
   if(!S.diplo) return;
   S.diplo.grado=2; S.diplo.mesiAlto=0; S.occUltima=null;
-  bioFatto('Da Ambasciatore a Sottosegretario generale delle Nazioni Unite: la scala diplomatica sale.');
-  S.log.unshift({t:T('Promosso'),x:T('Sei Sottosegretario generale delle Nazioni Unite: un passo dal vertice del mondo.')});
+  bioFatto('Da Ambasciatore a '+ruoloDiplo()+': la scala diplomatica sale.');   // L260-5bis passo 0: il ruolo d'epoca (italia1950 prima del 1955)
+  S.log.unshift({t:T('Promosso'),x:T('Sei %R: un passo dal vertice del mondo.').replace('%R',T(ruoloDiplo()))});
   if(typeof PROMO_FIORE!=='undefined') PROMO_FIORE=true;
   genAgenda(false); render(); commitSnap();
 }
@@ -1224,6 +1234,7 @@ function bilMissione(i){
   var p=S.diplo.bil[i]; if(!p) return false;
   var m=bilMeseAss(), d=BIL_K.dadoMin+Math.floor(Math.random()*(BIL_K.dadoMax-BIL_K.dadoMin+1));
   p.v=clamp(p.v+d,0,100); p.u=m; S.diplo.missioneMese=m;
+  if(DIPLO_CONCORRENTE) p.m=m;   // L260-5bis: il mese dell'ultima MISSIONE (u è anche l'ingresso), letto da corsaDiplo
   if(p.t==='alleato') relIntMuovi('alleanza',1);
   else if(p.t==='swing') relIntMuovi('consesso',1);
   else { relIntMuovi('rivale',2); relIntMuovi('alleanza',-1); }   // parlare col rivale costa agli alleati
@@ -1247,6 +1258,190 @@ function bilCartaRivale(id, dr){
   p.v=clamp(p.v+h,0,100); bilTraguardi(p);
 }
 function bilStato(v){ return v<=BIL_K.gelo ? 'gelo' : v<45 ? 'freddo' : v<BIL_K.intesa ? 'cordiale' : 'intesa'; }
+/* L260-6 (27/10) · I PARI DEL CAPO DEL GOVERNO (GOV_PARI, §3 D-OC2 e D-OC4 di DESIGN-OLTRE-LE-CARTE.md, rapporto «⚑ L260-6»).
+   S.pari = {p:[{id, crescita, deficit, debito}], pos, anno, primo?, ult?} (dati puri): i quattro paesi di PARI (data.js) con le cifre
+   copiate da PAESI[id].economia (deficit col segno di PAESI: negativo = disavanzo; il debito nei tetti 0-250), `pos` la posizione d'insieme
+   del giocatore su 5 all'ultimo controllo, `anno` l'anno di quel controllo, `primo` «primo fra i pari» già scritto in biografia, `ult`
+   {a, prima, dopo} il cambio dell'anno che si chiude (lo legge la riga del bilancio di gennaio). Solo nel presente (S.scenario 'presente':
+   le porte storiche non hanno le cifre d'epoca degli altri paesi) e solo al capo del governo (livello 3, al governo); nasce in startGame o
+   al primo mese di governo (pariMese: anche i salvataggi di prima). A gennaio (pariGennaio) ogni pari si muove: crescita e deficit tornano
+   del 50% verso la cifra 2024 più un rumore (±1,0 e ±0,8) da un hash della carriera, dell'anno e del pari (pariDado, mai Math.random:
+   stessa carriera = stessa storia dei pari), il debito con la formula del giocatore (model.js: disavanzo meno debito × crescita
+   nominale, l'inflazione del pari ferma come quella del giocatore nel presente). La classifica (pariClassifica) confronta crescita ↑,
+   debito ↓ e deficit ↑ (l'inflazione no: il giocatore non ne ha un indicatore, S.inflazione è il seme fisso); la posizione d'insieme è la
+   somma dei ranghi, a parità vince il giocatore. Il traguardo: salire = stampa +1 (e la prima volta al 1° posto il fatto in biografia),
+   scendere di 2 o più = stampa −1; nient'altro. Spento = il gioco di prima.
+   L260-6bis (27/10) · IL DEBITO COME VARIAZIONE (rapporto «⚑ L260-6bis»): la voce «debito» non confronta più il livello (un'eredità che in
+   cinque anni non si recupera: Giappone sempre 5°, Corea e Nigeria sempre 1°) ma la variazione del debito/PIL nell'ultimo anno, scende di
+   più = meglio, con la stessa formula per tutti: per ogni pari `debitoPrima` (il debito al gennaio prima, scritto in pariGennaio PRIMA di
+   muoverlo) e per il giocatore `S.pari.mioDebitoPrima` (S.ind.debt al gennaio prima, scritto in pariGennaio DOPO la classifica, che lo
+   legge). pariInit li mette uguali al debito di partenza (variazione 0 per tutti: a parità vince il giocatore); un salvataggio di prima
+   senza i due campi vale variazione 0 finché il primo gennaio non li scrive. Fuori da gennaio la riga del giocatore è la variazione
+   dall'ultimo gennaio, quella dei pari l'ultimo anno chiuso.
+   L260-6ter (27/10) · CHI MIGLIORA DI PIÙ (rapporto «⚑ L260-6ter»): anche crescita e saldo si confrontano come scarto dalla cifra di
+   partenza (scCrescita, scSaldo: più alto = meglio; il saldo col segno di PAESI), con la stessa formula per tutti — per ogni pari
+   `crescita0`/`saldo0` (le cifre di PAESI, scritte in pariInit), per il giocatore `S.pari.mioCrescita0`/`mioSaldo0` (S.ind.growth e
+   −S.ind.deficit a pariInit). Un salvataggio di prima senza i campi li riceve al primo gennaio uguali alla cifra corrente (scarto 0
+   quell'anno). Al via gli scarti sono tutti 0 e la parità darebbe sempre il 1° posto: la prima classifica vera è il primo gennaio, quindi
+   `pos` nasce 0 («non ancora classificato») e il primo gennaio con la regola nuova (`S.pari.mio` assente) è l'INGRESSO nel confronto —
+   niente stampa né biografia, una riga di registro, `ult.prima` 0. `S.pari.mio` = le cifre del giocatore all'anno chiuso (scritte in
+   pariGennaio DOPO la classifica, accanto a mioDebitoPrima): la scheda confronta anno intero con anno intero (pariHtml, ui.js), e fino
+   al primo gennaio dice «primo anno in corso». */
+let GOV_PARI=true;
+const PARI_K={ rCrescita:1.0, rDeficit:0.8, ritorno:0.5, debitoMax:250, crescitaMin:-6, crescitaMax:9 };
+const PARI_VOCI=['scCrescita','varDeb','scSaldo'];   // L260-6bis: il debito sulla variazione (varDeb); L260-6ter: crescita e saldo sullo scarto dalla partenza
+function pariAttivi(){ return GOV_PARI && typeof S!=='undefined' && !!S && S.scenario==='presente' && S.livello===3 && !S.opposizione && typeof PARI!=='undefined' && !!PARI[S.paese]; }
+function pariDado(id, anno, sale){   // FNV-1a + finalizzatore murmur3, come radiciDado: carriera, anno e pari
+  var s='pari|'+sale+'|'+id+'|'+anno+'|'+scissioneCarriera(), h=2166136261;
+  for(var i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619); }
+  h^=h>>>16; h=Math.imul(h,0x85ebca6b); h^=h>>>13; h=Math.imul(h,0xc2b2ae35); h^=h>>>16;
+  return (h>>>0)/4294967296;
+}
+function pariR2(x){ return Math.round(x*100)/100; }
+function pariInit(){
+  if(!pariAttivi() || S.pari) return;
+  S.pari={ p:PARI[S.paese].map(function(id){ var e=PAESI[id].economia;
+    var d=clamp(e.debito,0,PARI_K.debitoMax); return {id:id, crescita:e.crescita, deficit:e.deficit, debito:d, debitoPrima:d, crescita0:e.crescita, saldo0:e.deficit}; }),
+    pos:0, anno:S.year, mioDebitoPrima:S.ind.debt, mioCrescita0:S.ind.growth, mioSaldo0:-S.ind.deficit };   // L260-6ter: pos 0 = non ancora classificato (la prima classifica è a gennaio)
+}
+/* le cifre del giocatore nella forma dei pari (deficit col segno di PAESI) */
+function pariSc(v, v0){ return pariR2(v-(v0!=null ? v0 : v)); }   // lo scarto da una cifra di riferimento (assente = 0)
+function pariTue(){ var P=S.pari, sal=-S.ind.deficit;
+  return {crescita:S.ind.growth, deficit:sal, debito:S.ind.debt, varDeb:pariSc(S.ind.debt, P.mioDebitoPrima), scCrescita:pariSc(S.ind.growth, P.mioCrescita0), scSaldo:pariSc(sal, P.mioSaldo0)}; }
+/* le cifre di un pari nella stessa forma (L260-6ter: la stessa formula del giocatore) */
+function pariLoro(q){ return {crescita:q.crescita, deficit:q.deficit, debito:q.debito, varDeb:pariSc(q.debito, q.debitoPrima), scCrescita:pariSc(q.crescita, q.crescita0), scSaldo:pariSc(q.deficit, q.saldo0)}; }
+function pariVarDeb(q){ return pariSc(q.debito, q.debitoPrima); }   // L260-6bis: la variazione dell'anno (assente = 0)
+function pariMeglio(k, a, b){ return k==='varDeb' ? a<b : a>b; }
+/* la classifica: per voce la posizione del giocatore su 5 (1 + quanti stanno strettamente meglio) e il primo (null = sei tu); d'insieme la
+   somma dei ranghi, 1 + quanti pari hanno una somma strettamente più bassa. `tu` facoltativo: le cifre del giocatore da usare (la scheda
+   passa quelle dell'anno chiuso, S.pari.mio); assente = le cifre di oggi */
+function pariClassifica(tu){
+  tu=tu||pariTue(); var tutti=[{id:null, v:tu}].concat(S.pari.p.map(function(q){ return {id:q.id, v:pariLoro(q)}; })), somme=tutti.map(function(){ return 0; });
+  var voci=PARI_VOCI.map(function(k){
+    var ranghi=tutti.map(function(a){ return 1+tutti.filter(function(b){ return b!==a && pariMeglio(k, b.v[k], a.v[k]); }).length; });
+    ranghi.forEach(function(r,i){ somme[i]+=r; });
+    var primo=tutti[0]; tutti.forEach(function(a){ if(pariMeglio(k, a.v[k], primo.v[k])) primo=a; });
+    return {k:k, pos:ranghi[0], tuo:tu[k], primo:primo.id, primoV:primo.v[k], tuoO:tu, primoO:primo.v};
+  });
+  return {voci:voci, pos:1+somme.slice(1).filter(function(x){ return x<somme[0]; }).length};
+}
+function pariMuovi(q, anno){
+  var e=PAESI[q.id].economia, K=PARI_K;
+  q.crescita=pariR2(clamp(e.crescita+K.ritorno*(q.crescita-e.crescita)+(2*pariDado(q.id,anno,'c')-1)*K.rCrescita, K.crescitaMin, K.crescitaMax));
+  q.deficit=pariR2(e.deficit+K.ritorno*(q.deficit-e.deficit)+(2*pariDado(q.id,anno,'d')-1)*K.rDeficit);
+  q.debito=pariR2(clamp(q.debito-q.deficit-q.debito*(q.crescita+(e.inflazione||0))/100, 0, K.debitoMax));
+}
+/* a gennaio (dopo S.month++): i pari si muovono, la posizione si rilegge, il traguardo */
+function pariGennaio(){
+  if(S.month!==1 || S.pari.anno===S.year) return;
+  var P=S.pari, ingresso=!P.mio;   // L260-6ter: senza le cifre dell'anno chiuso è la prima classifica (l'ingresso nel confronto)
+  P.p.forEach(function(q){ q.debitoPrima=q.debito; pariMuovi(q, S.year);   // L260-6bis: il debito di prima, poi il passo dell'anno
+    if(q.crescita0==null) q.crescita0=q.crescita; if(q.saldo0==null) q.saldo0=q.deficit; });   // L260-6ter: salvataggio di prima → scarto 0 quest'anno
+  if(P.mioDebitoPrima==null) P.mioDebitoPrima=S.ind.debt;   // salvataggio di prima: variazione 0 quest'anno
+  if(P.mioCrescita0==null) P.mioCrescita0=S.ind.growth;
+  if(P.mioSaldo0==null) P.mioSaldo0=-S.ind.deficit;
+  var prima=P.pos, tu=pariTue(), dopo=pariClassifica(tu).pos;
+  P.mio=tu;   // L260-6ter: le cifre dell'anno chiuso, lette dalla scheda fino al gennaio dopo
+  P.mioDebitoPrima=S.ind.debt;   // dopo la classifica, che legge la variazione dell'anno che si chiude
+  P.ult={a:S.year-1, prima:ingresso ? 0 : prima, dopo:dopo}; P.pos=dopo; P.anno=S.year;
+  if(ingresso){ S.log.unshift({t:T('I pari'), x:T('Il paese entra nel confronto fra i pari al %N° posto.').replace('%N',dopo)}); return; }
+  if(dopo<prima){ stampad(1);
+    S.log.unshift({t:T('I pari'), x:T('Il paese sale al %N° posto fra i pari.').replace('%N',dopo)});
+    if(dopo===1 && !S.pari.primo){ S.pari.primo=true; bioFatto(T('Il paese è primo fra i pari.')); } }
+  else if(dopo-prima>=2){ stampad(-1); S.log.unshift({t:T('I pari'), x:T('Il paese scende al %N° posto fra i pari.').replace('%N',dopo)}); }
+}
+function pariMese(){
+  if(!pariAttivi()) return;
+  if(!S.pari) pariInit(); else pariGennaio();
+}
+/* la riga del bilancio di gennaio: il cambio di posizione dell'anno che si chiude */
+function pariBilancioRiga(annoChiuso){
+  if(!pariAttivi() || !S.pari || !S.pari.ult || S.pari.ult.a!==annoChiuso) return '';
+  var u=S.pari.ult, x=u.prima===0 ? T('Entri nel confronto fra i pari al %N° posto.') : u.dopo<u.prima ? T('Sei salito al %N° posto fra i pari.') : u.dopo>u.prima ? T('Sei sceso al %N° posto fra i pari.') : T('Resti al %N° posto fra i pari.');
+  return `<div class="mtext bil-pari" style="padding-top:0">${x.replace('%N',u.dopo)}</div>`;
+}
+/* L260-5bis (26/10) · IL CONCORRENTE PER IL POSTO (DIPLO_CONCORRENTE, §3 D-OC2 di DESIGN-OLTRE-LE-CARTE.md, rapporto «⚑ L260-5bis»).
+   S.diplo.conc = {nome, f, punti, grado, vinto:[], attesa?, fino?, chiuso?} (dati puri): un altro diplomatico di fantasia (nome dalle liste del
+   paese, genere con quotaFemminileGoverno() come i ministri generati), che corre con te per il grado 2 e per il Segretariato. Nasce in
+   startDiplomatico (e in applySnap per un salvataggio di prima, livello 5) coi punti = il tuo credito iniziale + CONC_SCARTO; ogni mese
+   (concMese, a fine mese del livello 5) +1 col dado CONC_DADO, e +1…+3 (metà del calo) quando una carta ti abbassa il credito
+   (concCartaMale, ramo generico di resolveItemCore). La corsa la decide un punto solo, concCorsaPersa (alla scelta «cogli» di
+   un'occasione altoRapp o internazionale del livello 5): il tuo punteggio corsaDiplo() — credito + CONC_PESO_INTESA per partner in Intesa + 1 per
+   partner visitato negli ultimi 6 mesi — contro conc.punti; a parità vinci tu. Se vince lui: grado 2 → credito −3, attesa di CONC_ATTESA mesi,
+   lui al grado 2 coi punti a CONC_RIPARTENZA; Segretariato → lui Segretario per 60 mesi (grado 3), la corsa si riapre alla fine (concMese).
+   pickOccasione non offre il posto finché conc.attesa (mese assoluto) non è passato. Mai effetti sui partiti. Spento = il gioco di prima.
+   L260-5ter (27/10, rapporto «⚑ L260-5ter»): le leve sono costanti con nome (let: lo sweep le assegna senza toccare il codice), lette
+   SOLO in questo blocco — CONC_SCARTO (punti iniziali = credito + scarto), CONC_DADO (+1 al mese), CONC_TETTO (i punti del concorrente
+   non lo superano), CONC_PESO_INTESA (per partner in Intesa in corsaDiplo), CONC_ATTESA (mesi dopo una corsa persa al grado 2) e
+   CONC_RIAPERTURE (quante volte il grado 2 si riapre dopo una corsa persa: Infinity = sempre; finite, la corsa persa oltre il conto
+   chiude il posto — conc.chiuso, resti Ambasciatore, concAttesa vera per sempre; al Segretariato la regola non cambia).
+   L260-5quater (27/10): CONC_RIPARTENZA (i punti del concorrente quando riparte al grado 2, dopo averlo vinto o a fine mandato da
+   Segretario; era CONC_K.ripartenza 60, la leva che mancava in L260-5ter) a 90, tetto 105, una riapertura, attesa 24: acceso. */
+let DIPLO_CONCORRENTE=true;   // ACCESO da L260-5quater: grado 2 34·37/40, Segretario 22·27, conc vince 50·45% (rapporto «⚑ L260-5quater»)
+let CONC_SCARTO=20, CONC_DADO=0.65, CONC_TETTO=105, CONC_PESO_INTESA=3, CONC_ATTESA=24, CONC_RIAPERTURE=1, CONC_RIPARTENZA=90;
+const CONC_K={ crisiMax:3, mandato:60, missione:1, finestra:6, credPerso:-3 };
+function concAttivo(){ return DIPLO_CONCORRENTE && typeof S!=='undefined' && !!S && S.livello===5 && !!S.diplo && !!S.diplo.conc; }
+function concNasce(){
+  if(!DIPLO_CONCORRENTE || !S || !S.diplo) return;
+  var f=Math.random()<quotaFemminileGoverno();
+  S.diplo.conc={ nome:nomeGenere(f?'f':'m')+' '+rnd(PAESE.cognomi), f:f, punti:clamp((S.diplo.credito||50)+CONC_SCARTO,0,CONC_TETTO), grado:1, vinto:[] };
+}
+/* il tuo punteggio nella corsa: il credito, più la rete (Intese in corso e partner diversi visitati negli ultimi CONC_K.finestra mesi) */
+function corsaDiplo(){
+  if(!S || !S.diplo) return 0;
+  var c=S.diplo.credito||0;
+  if(bilAttivi()){ var m=bilMeseAss();
+    S.diplo.bil.forEach(function(p){ if(p.v>=BIL_K.intesa) c+=CONC_PESO_INTESA; if(p.m!=null && m-p.m<CONC_K.finestra) c+=CONC_K.missione; }); }
+  return c;
+}
+/* la carica in palio: il grado 2 (ruoloDiplo(2)) dall'Ambasciatore, il Segretariato dal grado 2 */
+function concPalio(){ return (S.diplo && S.diplo.grado>=2) ? 'segr' : 'alto'; }
+function concPalioNome(){ return concPalio()==='segr' ? ruoloIntl() : ruoloDiplo(2); }
+function concAttesa(){ return concAttivo() && (!!S.diplo.conc.chiuso || (S.diplo.conc.attesa!=null && bilMeseAss()<S.diplo.conc.attesa)); }
+/* una carta che ti abbassa il credito di `calo` punti: il concorrente guadagna dove tu perdi */
+function concCartaMale(calo){
+  if(!concAttivo() || !(calo>0) || S.diplo.conc.grado>=3) return;
+  var g=Math.min(CONC_K.crisiMax, Math.max(1, Math.round(calo/2)));
+  S.diplo.conc.punti=Math.min(CONC_TETTO, S.diplo.conc.punti+g);
+}
+/* a fine mese (livello 5): il passo del concorrente e la fine del suo mandato da Segretario */
+function concMese(){
+  if(!concAttivo()) return;
+  var c=S.diplo.conc, m=bilMeseAss();
+  if(c.grado>=3){
+    if(c.fino!=null && m>=c.fino){ c.grado=2; c.punti=CONC_RIPARTENZA; delete c.fino;
+      S.log.unshift({t:T('La corsa si riapre'), x:T('Il mandato di %N è finito: il posto di %R è di nuovo aperto.').replace('%N', c.nome).replace('%R', T(ruoloIntl()))}); }
+    return;
+  }
+  if(Math.random()<CONC_DADO) c.punti=Math.min(CONC_TETTO, c.punti+1);
+}
+/* la scelta «cogli» di un'occasione del livello 5: true se il posto va al concorrente (righe ed esito scritti qui) */
+function concCorsaPersa(it){
+  if(!concAttivo() || !it || (it.tipo!=='altoRapp' && it.tipo!=='internazionale')) return false;
+  var c=S.diplo.conc, tu=corsaDiplo(), palio=concPalio(), nome=concPalioNome(), m=bilMeseAss();
+  if(tu>=c.punti) return false;
+  var lui=c.punti;   // i punti della corsa, prima della ripartenza
+  c.vinto.push(palio);
+  if(palio==='alto'){
+    c.grado=2; c.punti=CONC_RIPARTENZA; creditoMuovi(CONC_K.credPerso);
+    if(c.vinto.filter(function(x){ return x==='alto'; }).length > CONC_RIAPERTURE){   // L260-5ter: le riaperture sono finite, il posto resta suo
+      c.chiuso=true; delete c.attesa;
+      S.log.unshift({t:T('Il posto resta a un altro'), x:T('Il posto di %R resta a %N: non ci saranno altre corse. Resti %D.').replace('%R', T(nome)).replace('%N', c.nome).replace('%D', T(ruoloDiplo()))});
+      bioFatto('Il posto di '+nome+' resta a '+c.nome+': non ci saranno altre corse.');
+    } else {
+      c.attesa=m+CONC_ATTESA;
+      S.log.unshift({t:T('Il posto va a un altro'), x:(CONC_ATTESA===12 ? T('Il posto di %R va a %N. Il tuo credito ne risente: ci riproverai fra un anno.') : T('Il posto di %R va a %N. Il tuo credito ne risente: ci riproverai fra %M mesi.').replace('%M', CONC_ATTESA)).replace('%R', T(nome)).replace('%N', c.nome)});
+      bioFatto('Il posto di '+nome+' va a '+c.nome+'.');
+    }
+  } else {
+    c.grado=3; c.fino=m+CONC_K.mandato; c.attesa=c.fino;
+    S.log.unshift({t:T('Il posto va a un altro'), x:T('Il posto di %S va a %N, per cinque anni. Resti %R: la corsa si riaprirà alla fine del suo mandato.').replace('%S', T(nome)).replace('%N', c.nome).replace('%R', T(ruoloDiplo()))});
+    bioFatto('Il posto di '+nome+' va a '+c.nome+'.');
+  }
+  S.occUltima=m; it.resolved=true;
+  it.outcome=T('La corsa va a %N (%A contro %B).').replace('%N', c.nome).replace('%A', Math.round(lui)).replace('%B', Math.round(tu));
+  return true;
+}
 /* L244-3 (15/10) · UNA CARTA volto:'rivale' ESCE SOLO SE C'È UN RIVALE VIVO, e allora passa sempre da potSub. Il rivale è di
    POTENZE (data.js), filtrato per epoca da potenzeDi(): fino al L245-3 fuori dalla linea italiana `urss` (era 'italia1950') non era
    viva e le altre erano 'contemporanea' — nelle porte britanniche, francesi, tedesche e americane prima del 2012 nessun rivale (dal
@@ -4746,6 +4941,13 @@ function snodoFormosa55Dovuta(){    return snodoScalaUsOk('cina') && !S.opposizi
 function snodoFormosa55OppDovuta(){ return snodoScalaUsOk('cina') && S.opposizione && S.usFormosa55Opp==null && S.usFormosa55==null && S.year===1955 && S.month>=1 && S.month<=2; }
 function snodoFormosa58Dovuta(){    return snodoScalaUsOk('cina') && !S.opposizione && S.usFormosa58==null && S.year===1958 && S.month>=8 && S.month<=9; }
 function snodoFormosa58OppDovuta(){ return snodoScalaUsOk('cina') && S.opposizione && S.usFormosa58Opp==null && S.usFormosa58==null && S.year===1958 && S.month>=8 && S.month<=9; }
+/* L258-13 · l'allerta dell'ottobre 1973 (us1970, con l'URSS, massimo 3), dietro un interruttore suo (il banco lo segue: __BANCO_SNODI_US70_OFF
+   = prima, __BANCO_SNODI_US70_ON = acceso a mano, in __reseed). Finestra 1973/10-11: ottobre è del pilastro pus70_petrolio, e l'iniezione dei
+   pilastri chiude il mese prima degli snodi (nessun caso «accanto» per uno snodo e un pilastro), quindi in pratica esce a novembre e S3 (le
+   code, snodoPetrolio73UsDovuta, 1973/11-12) scivola a dicembre: in agenda l'allerta sta prima di S3. Rapporto «⚑ L258-13». */
+let SNODI_SCALA_US70=true;   // L258-13 (27/10): ACCESO, misura-l258-13.js verde a 40×2 (45% al gradino 3, mai oltre, S3 invariato; rapporto «⚑ L258-13»)
+function snodoAllerta73Dovuta(){    return SNODI_SCALA_US70 && snodoScalaUsOk('urss') && S.scenario==='us1970' && !S.opposizione && S.usAllerta73==null && S.year===1973 && S.month>=10 && S.month<=11; }
+function snodoAllerta73OppDovuta(){ return SNODI_SCALA_US70 && snodoScalaUsOk('urss') && S.scenario==='us1970' && S.opposizione && S.usAllerta73Opp==null && S.usAllerta73==null && S.year===1973 && S.month>=10 && S.month<=11; }
 function snodoMoneta98Dovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_DE && S.livello===3 && S.deMoneta98==null && (S.year===1998 && S.month>=4 && S.month<=5); }
 /* L157-1 · i cancelli degli snodi del decennio tedesco 2000 (finestre di due mesi, come L153-2). Nessun pilastro né fatto-mondo in quei
    mesi: pde00_ueberlingen è del 2002/7, pm_tsunami del 2005/1, pm_crollo del 2008/9. S3 «La questione di fiducia» al governo solo per un
@@ -4807,12 +5009,13 @@ function snodoNastri74OppDovuta(){ return typeof S!=='undefined' && S && S.era==
 /* L227-1 · uno snodo nella stagione della campagna nazionale esce INSIEME alla carta di campagna (la forma di L177-2 per i pilastri
    `conCampagna`: due carte, uno snodo solo). Fuori stagione campagnaColPilastro dà null e non c'è niente in più. */
 /* L227-1 · il richiamo delle correnti passa prima di ogni snodo e fa agendaSolo: uno snodo con la finestra di UN mese solo (S2, i
-   missili: il mese dopo è il voto di metà mandato) ci si perderebbe — misurato, 1 carriera su 20 dall'opposizione. Nel suo mese
+   missili: il mese dopo è il voto di metà mandato; dal L258-13 l'aula dell'allerta del 1973, perché ottobre è del pilastro) ci si perderebbe — misurato, 1 carriera su 20 dall'opposizione (l'allerta: 12 su 98). Nel suo mese
    esce ACCANTO al richiamo (con la carta di campagna, come sempre in ottobre). Gli snodi a due mesi non ne hanno bisogno: il
    richiamo ha 8 mesi di pausa, il secondo mese è libero. */
 function snodoAccantoAlRichiamo(){
   var EV = (typeof snodoMissili62Dovuta==='function' && snodoMissili62Dovuta()) ? MISSILI62_EV
-         : ((typeof snodoMissili62OppDovuta==='function' && snodoMissili62OppDovuta()) ? MISSILI62_OPP_EV : null);
+         : ((typeof snodoMissili62OppDovuta==='function' && snodoMissili62OppDovuta()) ? MISSILI62_OPP_EV
+         : ((typeof snodoAllerta73OppDovuta==='function' && snodoAllerta73OppDovuta()) ? ALLERTA73_OPP_EV : null));   // L258-13: l'aula dell'allerta ha un mese solo (ottobre è del pilastro), e il richiamo la mangiava 12 volte su 98 (misura-l258-13.js)
   if(!EV) return;
   S.agenda.push({kind:'event', data:EV, resolved:false}); var c=campagnaColPilastro({conCampagna:true}); if(c) S.agenda.push(c);
 }
@@ -5260,10 +5463,22 @@ function crisiPot(){ return S.crisi ? potDi(S.crisi.con) : null; }
    unico: lo leggono crisiApplica (senza riga la crisi non si apre: la carta si gioca come prima, e il dado non si tira),
    crisiTettoBlocco (il gradino più alto) e crisiMese (una crisi aperta la cui riga è finita si chiude). Nessun campo in S. */
 function rivaleChiave(){ return (S.scenario && S.scenario!=='presente' && typeof SCENARI!=='undefined' && SCENARI[S.scenario]) ? S.scenario : S.paese; }
+/* L258-13 · una riga di RIVALI può dichiarare `soloSe` (una funzione: l'interruttore dello snodo che la vuole): spento l'interruttore, la
+   riga non c'è e il gioco è quello di prima (oggi solo la riga del 1973 us1970↔urss, SNODI_SCALA_US70). Senza il campo vale sempre. */
+function rivaleRigaAccesa(r){ return !r.soloSe || !!r.soloSe(); }
 function rivaleRiga(con){
   if(typeof RIVALI==='undefined' || !con) return null;
   var k=rivaleChiave(), y=S.year;
-  for(var i=0;i<RIVALI.length;i++){ var r=RIVALI[i]; if(r.paese===k && r.con===con && y>=r.dal && y<=r.fino) return r; }
+  for(var i=0;i<RIVALI.length;i++){ var r=RIVALI[i]; if(r.paese===k && r.con===con && y>=r.dal && y<=r.fino && rivaleRigaAccesa(r)) return r; }
+  return null;
+}
+/* L258-13 · la riga BREVE (fino−dal < 10, le crisi a tempo degli snodi di L245-8) per `con`, o null. La legge solo crisiMese, per le crisi
+   aperte da uno snodo: si chiudono quando la loro riga breve finisce, anche se sotto c'è una riga lunga con la stessa potenza (l'allerta
+   del 1973 con l'URSS). Per gli snodi di prima la potenza ha solo righe brevi in quella porta, quindi è lo stesso di !rivaleRiga. */
+function rivaleRigaBreve(con){
+  if(typeof RIVALI==='undefined' || !con) return null;
+  var k=rivaleChiave(), y=S.year;
+  for(var i=0;i<RIVALI.length;i++){ var r=RIVALI[i]; if(r.paese===k && r.con===con && y>=r.dal && y<=r.fino && r.fino-r.dal<10 && rivaleRigaAccesa(r)) return r; }
   return null;
 }
 /* L256-2 · la descrizione della «potenza rivale» nella scheda Paese e nel tabellone (ui.js, al posto di ENTI_INT.rivale.desc, mai
@@ -5337,7 +5552,7 @@ function crisiMese(){
   if(!REGOLA_CRISI_SCALA) return;
   if(!S.crisi){ crisiSubitaMese(); return; }   // L245-6: senza crisi, il rivale può aprirne una da sé
   var c=S.crisi, ora=crisiMeseAss();
-  if(!rivaleRiga(c.con)){ if(c.guerra){ guerraFine('stallo'); return; } crisiLog('La crisi con %POTdet si chiude: il mondo è cambiato.'); crisiChiudi(ora); return; }   // L245-3: la riga è finita (l'URSS nel gennaio 1992)
+  if(!rivaleRiga(c.con) || (c.snodo && !rivaleRigaBreve(c.con))){ if(c.guerra){ guerraFine('stallo'); return; } crisiLog('La crisi con %POTdet si chiude: il mondo è cambiato.'); crisiChiudi(ora); return; }   // L245-3: la riga è finita (l'URSS nel gennaio 1992)
   if(c.subita && !c.guerra){   // L245-6: il preavviso della crisi subita — un gradino al mese fino all'ultimatum, mai una discesa col tempo
     if(!crisiCapo()){ delete c.subita; delete c.ricevuto; c.ultimo=ora; }   // chi lascia la carica: la crisi torna una crisi di sempre, e rientra col tempo
     else {
@@ -5561,7 +5776,7 @@ function crisiSubitaMese(){
   if(CRISI_PAUSA>0 && S.crisiFine!=null && ora-S.crisiFine<CRISI_PAUSA) return;   // la pausa dopo una crisi chiusa, come crisiApplica
   if(typeof RIVALI==='undefined') return;
   var vive=potenzeDi('rivale').map(function(p){ return p.id; }), k=rivaleChiave(), y=S.year, con=null;
-  for(var i=0;i<RIVALI.length && !con;i++){ var r=RIVALI[i]; if(r.paese===k && y>=r.dal && y<=r.fino && r.massimo>=4 && vive.indexOf(r.con)>=0 && rivaleRiga(r.con)) con=r.con; }
+  for(var i=0;i<RIVALI.length && !con;i++){ var r=RIVALI[i]; if(r.paese===k && y>=r.dal && y<=r.fino && r.massimo>=4 && rivaleRigaAccesa(r) && vive.indexOf(r.con)>=0 && (rivaleRiga(r.con)||{}).massimo>=4) con=r.con; }   // L258-13: il tetto è della riga che vale (la prima), non di quella che il ciclo guarda: nel 1973 di us1970 l'URSS ha massimo 3
   if(!con) return;
   if(Math.random()>=SUBITA_K.p) return;   // il dado, solo dopo tutte le condizioni
   S.crisi={con:con, t:1, da:ora, ultimo:ora, alleati:null, subita:true};
@@ -7600,6 +7815,7 @@ function genAgendaRamo(first){
     if(!first && typeof snodoMerluzzo76OppDovuta==='function' && snodoMerluzzo76OppDovuta()){ S.agenda.push({kind:'event', data:MERLUZZO76_OPP_EV, resolved:false}); agendaSolo(); return; }   // L245-8-3: il merluzzo, dall'aula
     if(!first && typeof snodoFormosa55OppDovuta==='function' && snodoFormosa55OppDovuta()){ S.agenda.push({kind:'event', data:FORMOSA55_OPP_EV, resolved:false}); agendaSolo(); return; }   // L245-8-4: Formosa 1955, dall'aula
     if(!first && typeof snodoFormosa58OppDovuta==='function' && snodoFormosa58OppDovuta()){ S.agenda.push({kind:'event', data:FORMOSA58_OPP_EV, resolved:false}); agendaSolo(); return; }   // L245-8-4: Quemoy 1958, dall'aula
+    if(!first && typeof snodoAllerta73OppDovuta==='function' && snodoAllerta73OppDovuta()){ S.agenda.push({kind:'event', data:ALLERTA73_OPP_EV, resolved:false}); agendaSolo(); return; }   // L258-13: l'allerta, dall'aula (prima di S3)
     if(!first && typeof snodoSuezOppDovuta==='function' && snodoSuezOppDovuta()){ S.agenda.push({kind:'event', data:SUEZ_OPP_EV, resolved:false}); agendaSolo(); return; }   // L77-4: Suez dall'aula
     if(!first && typeof snodoCoal2010OppDovuta==='function' && snodoCoal2010OppDovuta()){ S.agenda.push({kind:'event', data:COAL2010_OPP_EV, resolved:false}); agendaSolo(); return; }   // L77-4: i cinque giorni, visti da chi ha perso
     if(!first && typeof snodoPoteriOppDovuta==='function' && snodoPoteriOppDovuta()){ S.agenda.push({kind:'event', data:POTERI_OPP_EV, resolved:false}); agendaSolo(); return; }   // L93-2: i poteri speciali, dall'aula
@@ -7701,6 +7917,7 @@ function genAgendaRamo(first){
   if(!first && typeof snodoMerluzzo76Dovuta==='function' && snodoMerluzzo76Dovuta()){ S.agenda.push({kind:'event', data:MERLUZZO76_EV, resolved:false}); agendaSolo(); return; }   // L245-8-3: il merluzzo apre la scala (prima del FMI, che ha due anni)
   if(!first && typeof snodoFormosa55Dovuta==='function' && snodoFormosa55Dovuta()){ S.agenda.push({kind:'event', data:FORMOSA55_EV, resolved:false}); agendaSolo(); return; }   // L245-8-4: Formosa 1955 apre la scala
   if(!first && typeof snodoFormosa58Dovuta==='function' && snodoFormosa58Dovuta()){ S.agenda.push({kind:'event', data:FORMOSA58_EV, resolved:false}); agendaSolo(); return; }   // L245-8-4: Quemoy 1958 apre la scala
+  if(!first && typeof snodoAllerta73Dovuta==='function' && snodoAllerta73Dovuta()){ S.agenda.push({kind:'event', data:ALLERTA73_EV, resolved:false}); agendaSolo(); return; }   // L258-13: l'allerta del 1973 apre la scala (prima di S3)
   // AVANZAMENTO Lotto 4: gli snodi '60 come SCELTA (Enel poi apertura) — carte one-shot nel '62-63, solo per il premier nel '50
   if(!first && typeof snodoEnelDovuta==='function' && snodoEnelDovuta()){ S.agenda.push({kind:'event', data:ENEL_EV, resolved:false}); agendaSolo(); return; }
   if(!first && typeof snodoAperturaDovuta==='function' && snodoAperturaDovuta()){ S.agenda.push({kind:'event', data:APERTURA_EV, resolved:false}); agendaSolo(); return; }
@@ -8243,6 +8460,8 @@ function resolveItemCore(idx,ci){
     if(ci===1){
       it.resolved=true; it.outcome=T('Lasci passare l\'occasione: resti %R, per ora.').replace('%R',S.livello===5?T(ruoloDiplo()):it.tipo==='internazionale'?T(PAESE.titoloRuolo):S.livello===1?ruoloLocale():ruoloDicastero());
       S.log.unshift({t:T('Occasione mancata'),x:T('Hai scelto di non salire, stavolta.')});
+    } else if(S.livello===5 && concCorsaPersa(it)){
+      /* L260-5bis: il posto va al concorrente (righe, esito e attesa scritti da concCorsaPersa); la coda prosegue come per «lascia» */
     } else {
       if(it.tipo==='altoRapp'){ it.resolved=true; return diventaAltoRappresentante(); }   // C2: Ambasciatore → Alto rappresentante (grado 1→2)
       if(it.tipo==='internazionale'){ it.resolved=true; return diventaInternazionale('consesso'); }   // livello 3→4 (o diplomatico→4): l'ATTO FINALE, il vertice del mondo
@@ -8444,8 +8663,10 @@ function resolveItemCore(idx,ci){
     var _cadeGov=(typeof cadeAttivo==='function') ? cadeAttivo(choice) : null;   // L93-5: letto PRIMA della scelta, cioè quello che il chip mostrava
     var _rv0=(d.potId && S.relInt) ? S.relInt.rivale : null;   // L260-5: la carta col volto del rivale muove anche il suo rapporto bilaterale
     var _b0=(S.attivista?S.attivista.base:0), _a0=(S.attivista?S.attivista.autorev:0);   // A.5 L2: snapshot per l'auto-detect del feeding campagna (la corsia = la valuta costruita)
+    var _cr0=(S.diplo && S.diplo.credito!=null) ? S.diplo.credito : null;   // L260-5bis: il credito prima della scelta (concCartaMale)
     try{ ACT_PACE=pace(); choice.f(); } finally{ ACT_PACE=1; }   // A.5 ritmo: durante una carta ATTIVISTA i gd() scalano; il finally GARANTISCE il reset anche se f() eccepisce → mai ACT_PACE≠1 nel gioco nazionale (raggio d'esplosione: tutti i gruppi)
     if(_rv0!=null && S.relInt && S.relInt.rivale!=null) bilCartaRivale(d.potId, S.relInt.rivale-_rv0);   // L260-5
+    if(_cr0!=null && S.diplo && S.diplo.credito<_cr0) concCartaMale(_cr0-S.diplo.credito);   // L260-5bis: il concorrente guadagna dove tu perdi
     if(choice.crisi) crisiApplica(choice.crisi);   // L245-2: il punto unico del campo `crisi:` (la scala della crisi)
     if(choice.ricevuto) crisiRicevuto(choice.ricevuto);   // L245-6: il punto unico del campo `ricevuto:` (l'ultimatum ricevuto)
     if(choice.attacco) attaccoRisposta(it, d, choice.attacco);   // L245-7: il punto unico del campo `attacco:` (le quattro risposte all'attacco)
@@ -8722,9 +8943,11 @@ function avanzaMese(){
   /* la serenità familiare cala ogni mese (la carriera che divora) — scalata da degradoMult; vale a ogni livello.
      Curare gli affetti (eventi) la rialza; sotto 35 arriva la crisi familiare (popup in pickPersonale). */
   if(famigliaPresente() && S.famiglia.serenita!=null){ const dm=(dif().degradoMult!=null)?dif().degradoMult:1; serenitaMuovi(-0.3*dm); }   // la carriera divora: chi cura gli affetti (sceglie famiglia sugli eventi) la tiene su; chi no, scivola alla crisi
+  pariMese();   // L260-6: i pari del capo del governo — a gennaio si muovono e la posizione si rilegge (no-op con GOV_PARI spento, fuori dal presente o dal livello 3)
   if(S.livello===5){   // DIPLOMATICO (C2): si sale per STANDING (credito + relInt); nessuna sconfitta nazionale, nessun mandato a scadenza
     if(S.diplo){ S.diplo.mesiAlto=(S.diplo.credito>=70)?(S.diplo.mesiAlto||0)+1:0; }   // mesi a credito alto → garantiscono la promozione
     bilMese();   // L260-5: deriva dei partner trascurati e controllo di gennaio (no-op con DIPLO_BILATERALI spento)
+    concMese();   // L260-5bis: il passo del concorrente (no-op con DIPLO_CONCORRENTE spento)
     genAgenda(false); render(); commitSnap();
     return;
   }
@@ -10045,7 +10268,7 @@ function mostraBilancio(prev, cur){
   const scFa=scenaMomentoHtml('assets/scenes/fineanno-'+(verd.k||'lucieombre')+'.webp');
   document.getElementById('modal').innerHTML=`${scFa}<div class="mt" style="display:flex;align-items:center;gap:11px"><div><div class="kicker">${T("Bilancio dell'anno")} · ${cur.anno-1}</div><h2>${T("L'anno che si chiude")}</h2></div></div>
     <div class="mtext" style="color:var(--mut2)">${T("Come è andato l'anno, in tendenza.")}</div>
-    <div class="bil-rows" style="padding:2px 18px 4px">${rows}</div>${radiciBilancioRiga()}${oppTragBilancioRiga(cur.anno-1)}
+    <div class="bil-rows" style="padding:2px 18px 4px">${rows}</div>${radiciBilancioRiga()}${oppTragBilancioRiga(cur.anno-1)}${pariBilancioRiga(cur.anno-1)}
     <div class="rv-riga" style="padding:6px 18px 8px">${rvB}<div class="bil-verdetto" style="font-family:'Fraunces',serif;font-style:italic;font-size:18px;color:${verd.c}">${verd.t}.</div></div>
     <div class="choices"><button class="opt" style="border-color:var(--brand)" onclick="chiudiBilancio()"><span class="ol">${T('Continua →')}</span></button></div>`;
   document.getElementById('ov').classList.add('on');
@@ -10813,7 +11036,9 @@ function pickOpposizione(){
   /* L66-1 — **l'`id` viene passato alla carta.** Prima si perdeva qui dentro: la carta arrivava in agenda senza
      identità, quindi non era tracciabile né misurabile — ed è precisamente ciò che ha reso cieca la sonda di
      L63-1, che contava per `id` e non vedeva l'intero pool d'opposizione. Una riga, e il ramo torna osservabile. */
-  return { id:ev.id, delega:ev.delega, kick:ev.kick, t:ev.t, text:ev.text, ch: ev.ch.map(function(c){ return { l:c.l, e:c.e, pleases:c.pleases, rischio:c.rischio, trasparenza:c.trasparenza, f:function(){ applyOppEffect(c); } }; }) };
+  /* L258-12 · `flag:{chiave:valore}` su una scelta = un flag di S scritto alla scelta (oggi solo o_us70_ostaggi → S.usOstaggi79Opp, che la
+     biografia legge da SNODI_STORICI). Additivo: senza il campo, come prima. */
+  return { id:ev.id, delega:ev.delega, kick:ev.kick, t:ev.t, text:ev.text, ch: ev.ch.map(function(c){ return { l:c.l, e:c.e, pleases:c.pleases, rischio:c.rischio, trasparenza:c.trasparenza, f:function(){ applyOppEffect(c); if(c.flag) for(const k in c.flag) S[k]=c.flag[k]; } }; }) };
 }
 /* ===== L25-2 + L25-3 — LE FAMIGLIE D'OPPOSIZIONE E IL LORO ARBITRO =====
    Due famiglie (α2 «ai fianchi sui media», α3 «allargare la base») con un innesco DEDICATO: dentro
@@ -11255,6 +11480,12 @@ function applySnap(snap){
   if(S.divorzioBdi===undefined){ S.divorzioBdi=null; S.scalaMobile=null; S.nucleare=null; }   // L33-1 — migrazione snodi '80
   if(!S.pilastri70 || typeof S.pilastri70!=='object') S.pilastri70={};   // L28-4 — migrazione pilastri '70
   if(S.attacco!=null && (typeof S.attacco!=='object' || typeof S.attacco.ultimo!=='number')) delete S.attacco;   // L245-7: lo stato dell'attacco illeggibile si toglie (assente = nessun attacco)
+  if(S.pari!=null && (typeof S.pari!=='object' || !Array.isArray(S.pari.p) || typeof S.pari.pos!=='number')) delete S.pari;   // L260-6: i pari illeggibili si tolgono (pariMese li rifà dalle cifre di PAESI al primo mese di governo)
+  if(S.pari){ if(S.pari.mioDebitoPrima!=null && typeof S.pari.mioDebitoPrima!=='number') delete S.pari.mioDebitoPrima;   // L260-6bis: come gli altri campi, un valore illeggibile si toglie (il primo gennaio lo riscrive)
+    S.pari.p.forEach(function(q){ if(q && q.debitoPrima!=null && typeof q.debitoPrima!=='number') delete q.debitoPrima;
+      if(q) ['crescita0','saldo0'].forEach(function(c){ if(q[c]!=null && typeof q[c]!=='number') delete q[c]; }); });   // L260-6ter: come debitoPrima
+    ['mioCrescita0','mioSaldo0'].forEach(function(c){ if(S.pari[c]!=null && typeof S.pari[c]!=='number') delete S.pari[c]; });
+    if(S.pari.mio!=null && (typeof S.pari.mio!=='object' || PARI_VOCI.concat(['crescita','deficit']).some(function(c){ return typeof S.pari.mio[c]!=='number'; }))) delete S.pari.mio; }
   if(!S.onuFatto && onuGiaStoria()) S.onuFatto=true;   // L243-1 — migrazione: chi è partito dopo il 1955 non riceve più la carta ONU
   /* L40-2 — i nuovi flag del '90: dato puro, migrazione per i salvataggi anteriori al lotto */
   if(S.maastricht===undefined) S.maastricht=null;
@@ -11436,6 +11667,7 @@ function applySnap(snap){
   applyPaese();
   if(S.attivista && !S.attivista.laurea && (!S.attivista.radici || !S.attivista.rivale)) radiciInit();   // L260-2: un attivista di prima riceve radici e rivale (solo con ATT_RADICI; il dado è un hash: lo stesso a ogni caricamento)
   if(S.livello===5 && S.diplo && !Array.isArray(S.diplo.bil)) bilInit();   // L260-5: un diplomatico di prima riceve la rete bilaterale (solo con DIPLO_BILATERALI)
+  if(S.livello===5 && S.diplo && !S.diplo.conc) concNasce();   // L260-5bis: un diplomatico di prima riceve il concorrente (solo con DIPLO_CONCORRENTE)
   genAgenda(false);   // agenda fresca: il mese riparte pulito
   if(_pa) togliRisolteAgenda(_pa.risolte);   // L180-1: una carta risolta nel mese non torna (D150)
   if(!S.titoloMese){ try{ generaTitolo(); }catch(e){} }   // vecchi salvataggi senza titolo: la striscia c'è sempre

@@ -14744,6 +14744,14 @@ const EVENTS=[
   text:'In Iran lo scià è caduto, e il petrolio che arrivava da là non arriva più. Il prezzo del greggio è raddoppiato in pochi mesi; questa volta le code davanti ai distributori sono più corte, perché le tessere di razionamento del 1973 sono ancora negli uffici delle contee e la gente sa come funzionano. Ma il prezzo sale lo stesso, e i sondaggi dicono che il paese non crede più a niente, nemmeno a te. Ti sei chiuso per dieci giorni nella residenza di campagna ad ascoltare chi veniva da fuori, e hai in tasca un discorso.',ch:US70_MALESSERE_CH},
  {id:'us70_malessere_prezzo', era:'us1970', unaCarriera:true, cond:()=>S.year===1979&&S.month>=7&&S.month<=8&&S.usPetrolio73==='prezzo', kick:'Il petrolio', t:'La crisi di fiducia',
   text:'In Iran lo scià è caduto, e il petrolio che arrivava da là non arriva più. Il prezzo del greggio è raddoppiato in pochi mesi; le code davanti ai distributori ci sono, ma più corte: dal 1973 il prezzo della benzina lo fa il mercato, e la benzina costa, ma si trova. Chi si scalda col gasolio e chi va al lavoro in macchina paga ogni mese di più, e i sondaggi dicono che il paese non crede più a niente, nemmeno a te. Ti sei chiuso per dieci giorni nella residenza di campagna ad ascoltare chi veniva da fuori, e hai in tasca un discorso.',ch:US70_MALESSERE_CH},
+ /* L258-12 (D287) · gli ostaggi di Teheran: cronaca ed evento, NON snodo — la porta chiude nel 1979/12 e il filo resta aperto per
+    us1980. Finestra 1979/11-12 (nessun pilastro, fatto-mondo, snodo, voto o campagna in quei mesi). S.usOstaggi79 lo leggono i titoli
+    ti_us70_ostaggi* (1979/12) e la biografia (SNODI_STORICI); us1980 lo riprenderà. */
+ {id:'us70_ostaggi', era:'us1970', unaCarriera:true, cond:()=>S.year===1979&&S.month>=11, kick:'Il mondo', t:'L\'ambasciata di Teheran',
+  text:'Il 4 novembre, a Teheran, centinaia di studenti hanno scavalcato il muro dell\'ambasciata americana e tengono prigioniere più di sessanta persone del personale. Chiedono che il vecchio sovrano, ricoverato a New York per curarsi, torni in Iran per essere processato; il nuovo governo religioso li applaude dalla piazza. Ogni sera la televisione mostra le bende sugli occhi e le bandiere bruciate davanti ai cancelli, e il paese ti chiede che cosa farai.',ch:[
+   {l:'Niente forza, per ora: petrolio fermo e soldi congelati',e:'La storia · a metà novembre fermi il petrolio che arriva dall\'Iran e congeli i loro soldi nelle banche americane, e tratti per vie traverse · a fine mese tredici ostaggi tornano a casa; gli altri restano, e il paese conta i giorni',f:()=>{S.usOstaggi79='pazienza'; stampad(1); gdUs60('cetomedio',1); gdUs60('lavoratori',-1);}},
+   {l:'Un ultimatum, e la flotta nel Golfo',e:'Una parte del paese ti applaude · a Teheran gridano più forte, e ogni nave in più è un passo verso una guerra che nessuno ha deciso',f:()=>{S.usOstaggi79='forza'; gdUs60('pensionati',1); gdUs60('cattolici',1); gdUs60('giovani',-2); repd(-2); stampad(-1);}},
+   {l:'Chiedere al vecchio sovrano di partire, e trattare direttamente',e:'Si apre un canale con Teheran · in Congresso e sui giornali c\'è chi grida alla resa davanti a un sequestro',f:()=>{S.usOstaggi79='trattativa'; gdUs60('giovani',1); gdUs60('cetomedio',-2); stampad(-2); repd(1);}}]},
  {id:'fr_ceca', era:'fr1950', cond:()=>S.year>=1951&&S.year<=1953, kick:'L\'Europa', t:'Il carbone e l\'acciaio con Bonn',
   text:'Sei paesi mettono in comune carbone e acciaio sotto un\'Alta Autorità che non risponde a nessun governo: per i siderurgici del nord è un mercato, per i minatori una minaccia, per i gollisti una rinuncia. Il tuo partito deve ratificare.',ch:[
    {l:'Ratifichi',e:'Le acciaierie del nord con te · i minatori temono il mercato comune',f:()=>{gdFr('imprenditori',3); gdFr('cetomedio',2); gdFr('lavoratori',-3); repd(1);}},
@@ -14865,6 +14873,11 @@ const RIVALI=(function(){
   // `lontano`: nessun segno sulla mappa. Due righe di un anno: a gennaio dopo crisiMese chiude («il mondo è cambiato»).
   riga('us1950', 'cina', 1955, 1955, 4, 'lontano');
   riga('us1950', 'cina', 1958, 1958, 4, 'lontano');
+  // L258-13: l'allerta dell'ottobre 1973 (ALLERTA73_EV), solo us1970. PRIMA della riga lunga dell'URSS? No: la riga lunga è più su, e
+  // rivaleRiga prende la prima che combacia; per questo la riga del 1973 si mette in testa (unshift qui sotto). Massimo 3: nel 1973
+  // OGNI crisi di us1970 con l'URSS ha tetto 3 (voluto, D286). rivaleDesc la ignora (fino−dal < 10); a gennaio 1974 crisiMese chiude la
+  // crisi dello snodo quando non c'è più una riga breve (rivaleRigaBreve, game.js): la riga lunga da sola non la chiuderebbe.
+  r.unshift({paese:'us1970', con:'urss', dal:1973, fino:1973, massimo:3, tipo:'blocco', soloSe:function(){ return typeof SNODI_SCALA_US70!=='undefined' && SNODI_SCALA_US70; }});   // soloSe: spento l'interruttore la riga non c'è (rivaleRigaAccesa, game.js), e il 1973 è quello di prima
   ['russia','cina'].forEach(function(c){ riga('brasile messico argentina sudafrica nigeria', c, 2012, 2099, 2, 'lontano'); });   // al più le sanzioni
   // L245-3bis: le porte 1990 e 2000 arrivano al presente (dal 2012 ogni linea apre `contemporanea`): da lì hanno i rivali del
   // presente del loro paese, stessi `massimo` e `tipo`, letti dalle righe qui sopra. La Russia dal 1992 c'è già e non si raddoppia.
@@ -14906,6 +14919,18 @@ const ALLEATI_DIPLO=(function(){
   riga('argentina', 'spagna', 1945, 2099);
   return r;
 })();
+/* L260-6 · I PARI DEL CAPO DEL GOVERNO (DESIGN-OLTRE-LE-CARTE.md, «⚑ L260-6»): per ogni paese del presente i quattro paesi di PAESI con cui
+   si confronta l'economia (scelta di Cowork). Li legge solo pariInit in game.js (GOV_PARI): le cifre di partenza sono PAESI[id].economia,
+   e solo nel presente. Guardia (ogni id esiste in PAESI, quattro per paese, nessun doppione, mai sé stesso) in prove/l260-6/prova-pari.js. */
+const PARI={
+  italia:['francia','germania','spagna','regnounito'],      francia:['germania','italia','spagna','regnounito'],
+  germania:['francia','italia','regnounito','spagna'],      spagna:['italia','francia','germania','regnounito'],
+  regnounito:['francia','germania','italia','usa'],         usa:['canada','regnounito','germania','giappone'],
+  canada:['usa','regnounito','australia','giappone'],       australia:['canada','regnounito','giappone','coreasud'],
+  giappone:['coreasud','usa','germania','australia'],       coreasud:['giappone','australia','usa','canada'],
+  india:['brasile','sudafrica','messico','nigeria'],        brasile:['argentina','messico','india','sudafrica'],
+  argentina:['brasile','messico','spagna','sudafrica'],     messico:['brasile','argentina','usa','canada'],
+  sudafrica:['nigeria','brasile','india','argentina'],      nigeria:['sudafrica','india','brasile','messico'] };
 
 const INTERNAZIONALI=[
  {id:'nato_vertice',era:'universale', tono:'florido', min:'difesa', kick:'Alleanza atlantica', t:'Vertice dell\'Alleanza', text:'Gli alleati chiedono un impegno di spesa militare più alto. La tua risposta pesa sul rapporto con l\'Alleanza — e su chi la guarda da fuori.',ch:[
@@ -20161,6 +20186,10 @@ const TITOLI=[
  {id:'ti_us70_s_lavoro', era:'us1970', amico:'Le fabbriche riassumono: la disoccupazione scende', ostile:'Le file per il sussidio di disoccupazione si allungano'},
  {id:'ti_us70_s_sanita', era:'us1970', amico:'Le cure per tutti: Washington studia un\'assicurazione nazionale', ostile:'Le spese mediche corrono: un ricovero costa uno stipendio'},
  {id:'ti_us70_s_bicentenario', era:'us1970', cond:()=>S.year>=1975&&S.year<=1976, amico:'Duecento anni: bandiere a ogni finestra, il paese torna a festeggiarsi', ostile:'Duecento anni: e la festa la pagano i contribuenti'},
+ // L258-12 · gli ostaggi di Teheran: nel 1979/12, dopo l'evento di novembre (uno per valore di S.usOstaggi79; all'opposizione non c'è prima pagina)
+ {id:'ti_us70_ostaggi', era:'us1970', pri:1, cond:()=>S.year===1979&&S.month===12&&S.usOstaggi79==='pazienza', amico:'Niente petrolio iraniano, soldi congelati: il Presidente stringe senza sparare', ostile:'Teheran libera tredici ostaggi: più di cinquanta restano nell\'ambasciata'},
+ {id:'ti_us70_ostaggi_forza', era:'us1970', pri:1, cond:()=>S.year===1979&&S.month===12&&S.usOstaggi79==='forza', amico:'La flotta nel Golfo: l\'America non si lascia ricattare', ostile:'Ostaggi: navi da guerra davanti all\'Iran, e a Teheran gridano più forte'},
+ {id:'ti_us70_ostaggi_trattativa', era:'us1970', pri:1, cond:()=>S.year===1979&&S.month===12&&S.usOstaggi79==='trattativa', amico:'Il vecchio sovrano lascia l\'America: si apre la trattativa per gli ostaggi', ostile:'Ostaggi: il Presidente cede sul vecchio sovrano, e Teheran chiede di più'},
  {id:'ng_p_ti_petrolio', era:'contemporanea', paesi:['nigeria'], amico:'La produzione di petrolio torna a salire', ostile:'Un barile su dieci sparisce: il furto record'},
 ];
 
@@ -20748,6 +20777,13 @@ const OPPOSIZIONE_EV = [
       { l:'Un\'inchiesta del Congresso, prima di decidere', e:'La storia · la commissione del Presidente e quelle del Congresso scrivono di regole sbagliate e di uomini mal preparati · le regole cambiano, e i cantieri rallentano', cred:3, stampa:1, gruppi:{cetomedio:1} },
       { l:'Una moratoria sulle centrali nuove', e:'Le università e le madri ti applaudono · i sindacati dei cantieri e le società elettriche no', gruppi:{giovani:3, lavoratori:-2, imprenditori:-2}, vis:3, base:1 },
       { l:'Fiducia ai tecnici: il nucleare serve, col petrolio che sale', e:'Le società elettriche ringraziano · a Harrisburg nessuno ti crede', gruppi:{imprenditori:2, giovani:-2}, cred:1, vis:-1 }, ]},
+  /* L258-12 (D287) · l'aula degli ostaggi di Teheran (1979/11-12): la scelta scrive S.usOstaggi79Opp col campo `flag` (letto in
+     pickOpposizione, accanto ad applyOppEffect), così la biografia la racconta come le aule degli snodi. */
+  { id:'o_us70_ostaggi', era:'us1970', unaCarriera:true, cond:()=>S.year===1979&&S.month>=11, delega:'esteri', kick:'Opposizione', t:'Gli ostaggi di Teheran',
+    text:'Dal 4 novembre gli studenti che hanno occupato l\'ambasciata a Teheran tengono prigionieri più di sessanta americani, e ogni sera la televisione li mostra con le bende sugli occhi. Il Presidente chiede al paese di restare unito. Nel tuo partito c\'è chi vuole la linea dura e chi chiede chi abbia deciso di far entrare il vecchio sovrano in America.', ch:[
+      { l:'Stare col Presidente finché ci sono gli ostaggi', e:'La storia · il paese si stringe attorno alla Casa Bianca, e il Presidente sale nei sondaggi come non saliva da anni · il tuo partito tace, e per qualche mese nessuno lo nota', cred:3, stampa:1, vis:-2, flag:{usOstaggi79Opp:'sostegno'} },
+      { l:'Chiedere la linea dura', e:'La base esulta · se domani a Teheran succede il peggio, qualcuno ricorderà chi spingeva', vis:3, base:2, cred:-1, gruppi:{giovani:-2}, flag:{usOstaggi79Opp:'linea'} },
+      { l:'Chiedere un\'inchiesta su chi ha fatto entrare il vecchio sovrano', e:'I giornali ti seguono · la Casa Bianca dice che si divide il paese mentre gli ostaggi aspettano', cred:1, vis:2, stampa:-1, gruppi:{cetomedio:1}, flag:{usOstaggi79Opp:'inchiesta'} }, ]},
 ];
 
 /* ===================== L25-2 · α2 — AI FIANCHI SUI MEDIA (famiglia d'opposizione) =====================
@@ -21951,6 +21987,8 @@ const SNODI_STORICI = {
   usFormosa55Opp: { storico:['vota'], conforme:'sullo stretto di Formosa, dall\'opposizione', diverge:{ 'limiti':'Nel 1955 l\'opposizione ha votato la risoluzione su Formosa chiedendo di nominare le isole una per una.' } },
   usFormosa58: { storico:['fermezza'], conforme:'su Quemoy', diverge:{ 'trattativa':'Nel 1958 ha scortato i convogli solo dopo l\'apertura dei colloqui fra ambasciatori.', 'lascia':'Nel 1958 ha consigliato ai nazionalisti di lasciare le isole.' } },
   usFormosa58Opp: { storico:['unita'], conforme:'su Quemoy, dall\'opposizione', diverge:{ 'limiti':'Nel 1958 l\'opposizione ha detto no a una guerra per Quemoy.' } },
+  usAllerta73: { storico:['allerta'], conforme:'sull\'allerta dell\'ottobre 1973', diverge:{ 'onu':'Nel 1973 ha cercato una forza di pace dell\'ONU senza alzare l\'allerta.', 'pressione':'Nel 1973 ha risposto alla nota di Mosca facendo pressione solo sull\'alleato, senza alzare l\'allerta.' } },   // L258-13
+  usAllerta73Opp: { storico:['sostegno'], conforme:'sull\'allerta dell\'ottobre 1973, dall\'opposizione', diverge:{ 'congresso':'Nel 1973 l\'opposizione ha chiesto che il Congresso fosse avvisato prima di un\'allerta.' } },
   nucleare: { storico:['uscita'], conforme:'sul nucleare dopo l\'incidente', diverge:{ 'ridimensionato':'Il nucleare non è stato chiuso dopo l\'incidente: il piano è andato avanti, ridimensionato.', 'ridimensionato_conteso':'Il nucleare non è stato chiuso dopo l\'incidente: il piano è andato avanti, ridimensionato e contestato.' } },
   scissione: { storico:['svolta'], conforme:'sulla svolta del partito comunista', diverge:{ 'rifondazione':'Il partito comunista non ha cambiato nome: la svolta è stata respinta e la storia ha preso un\'altra strada.' } },
   maastricht: { storico:['corri'], conforme:'sulla corsa a Maastricht', diverge:{ 'rallenta':'L\'Italia non è entrata nella moneta unica con la prima ondata: ha preso il treno dopo.' } },
@@ -22125,6 +22163,8 @@ const SNODI_STORICI = {
   usScandaloOpp:   { storico:['campagna'], conforme:'sull’irruzione del 1972, dall’opposizione', diverge:{ 'giudici':'Nel 1972 ha lasciato ai giudici l’irruzione negli uffici del suo partito.', 'commissione':'Nel 1972 ha chiesto subito una commissione d’inchiesta sull’irruzione.' } },
   usNastri74:      { storico:['consegna'], conforme:'sui nastri dello Studio Ovale', diverge:{ 'corte':'Nel 1974 ha resistito fino alla Corte suprema per non consegnare i nastri.', 'trascrizioni':'Nel 1974 ha consegnato le trascrizioni ritoccate dei nastri invece dei nastri.' } },
   usNastri74Opp:   { storico:['accusa'], conforme:'sui nastri dello Studio Ovale, dall’opposizione', diverge:{ 'corte':'Nel 1974 ha aspettato dall’opposizione la sentenza della Corte sui nastri.', 'uscita':'Nel 1974 ha cercato dall’opposizione un’uscita onorevole per il Presidente.' } },
+  usOstaggi79:     { storico:['pazienza'], conforme:'sugli ostaggi di Teheran', diverge:{ 'forza':'Nel 1979 ha mandato la flotta nel Golfo con un ultimatum per gli ostaggi di Teheran.', 'trattativa':'Nel 1979 ha fatto partire il vecchio sovrano per trattare sugli ostaggi di Teheran.' } },   // L258-12 (evento, non snodo)
+  usOstaggi79Opp:  { storico:['sostegno'], conforme:'sugli ostaggi di Teheran, dall’opposizione', diverge:{ 'linea':'Nel 1979 ha chiesto dall’opposizione la linea dura sugli ostaggi di Teheran.', 'inchiesta':'Nel 1979 ha chiesto un’inchiesta su chi aveva fatto entrare il vecchio sovrano in America.' } },
 };
 
 /* ==============================================================================================================
@@ -24727,6 +24767,7 @@ const SNODI_SCALA_STORIA = {
   merluzzo76: 'La storia · Nel giugno 1976 un accordo pose fine alla guerra del merluzzo: i pescherecci britannici lasciarono le acque islandesi.',   // L245-8-3
   formosa55: 'La storia · Nel gennaio 1955 il Congresso autorizzò il presidente a difendere Formosa; in primavera i bombardamenti sulle isole cessarono.',   // L245-8-4
   formosa58: 'La storia · Nell\'ottobre 1958 i bombardamenti su Quemoy si fermarono, poi ripresero a giorni alterni: le isole restarono ai nazionalisti.',
+  allerta73: 'La storia · Nell\'ottobre 1973 l\'allerta durò una notte; il cessate il fuoco resse e arrivò una forza di pace dell\'ONU senza le due potenze.',   // L258-13
 };
 /* ⚑ L245-8-3 · la terza guerra del merluzzo (1975-76), il primo snodo della scala nella linea britannica: stesso meccanismo di
    L245-8-1/2 (campo `crisi:` con `snodo:`), funzione snodoScalaUkOk e interruttore SNODI_SCALA_UK in game.js. La riga di RIVALI
@@ -24822,6 +24863,40 @@ const FORMOSA58_OPP_EV = {
     { l:'Non una guerra per Quemoy', e:'Ti distingui · ti accusano di lasciare soli gli alleati in Asia',
       f:function(){ S.usFormosa58Opp='limiti'; gd('cetomedio',1); gd('cattolici',-1);
         S.log.unshift({t:T('Lo stretto di Formosa'),x:T('Dall\'opposizione ha detto no a una guerra per Quemoy.')}); } },
+  ],
+};
+/* ⚑ L258-13 · l'allerta dell'ottobre 1973 (us1970, con l'Unione Sovietica, D286), lo stesso meccanismo di Formosa (campo `crisi:` con
+   `snodo:`), funzione snodoScalaUsOk e interruttore suo SNODI_SCALA_US70 in game.js. La riga di RIVALI del 1973 ha massimo 3: lo stato
+   d'allerta di una notte, mai ultimatum né guerra. Finestra 1973/10-11, ma ottobre è del pilastro pus70_petrolio e uno snodo non esce
+   accanto a un pilastro (l'iniezione dei pilastri chiude il mese): esce a novembre, e S3 (le code) scivola a dicembre. Flag nuovi cercati
+   in tutto js/ il 27/10 prima di scriverli (L99-2), zero occorrenze: usAllerta73, usAllerta73Opp. Effetti piccoli come Formosa. */
+const ALLERTA73_EV = {
+  id:'snodo_allerta73', snodo:true, era:'us1970', kick:'L\'allerta', tono:'grave',
+  t:'L\'allerta',
+  text:'La notte del 24 ottobre la guerra fra Israele e i paesi arabi era alla terza settimana, e il cessate il fuoco chiesto dall\'ONU non reggeva. Da Mosca arrivò una nota: truppe sovietiche e americane insieme, a separare gli eserciti, oppure i sovietici avrebbero mandato le loro da soli. Il Consiglio di sicurezza nazionale si riunì alla Casa Bianca, e la decisione toccò a te.',
+  ch:[
+    { l:'Alza lo stato d\'allerta delle forze in tutto il mondo', crisi:{con:'urss', t:3, snodo:'allerta73'}, e:'La storia · per una notte le forze sono in allerta in tutto il mondo · a Mosca tocca rispondere, e gli alleati europei protestano: nessuno li ha avvisati',
+      f:function(){ S.usAllerta73='allerta'; repd(1); gd('giovani',-1); relIntMuovi('alleanza',-1);
+        S.log.unshift({t:T('L\'allerta'),x:T('Ha alzato lo stato d\'allerta delle forze in tutto il mondo.')}); } },
+    { l:'Proponi una forza di pace dell\'ONU senza le due potenze', crisi:{con:'urss', t:1, snodo:'allerta73'}, e:'Al Consiglio di sicurezza si lavora a una forza neutrale · Mosca aspetta, e la tensione resta sul tavolo',
+      f:function(){ S.usAllerta73='onu'; gd('cetomedio',1);
+        S.log.unshift({t:T('L\'allerta'),x:T('Ha proposto all\'ONU una forza di pace senza le due potenze.')}); } },
+    { l:'Fai pressione solo sull\'alleato perché fermi l\'avanzata', e:'Nessuna crisi · Mosca non ha motivo di muoversi, e al Congresso ti accusano di aver ceduto a una nota',
+      f:function(){ S.usAllerta73='pressione'; allG(-1); repd(-1);
+        S.log.unshift({t:T('L\'allerta'),x:T('Ha fatto pressione sull\'alleato perché fermasse l\'avanzata, senza alzare l\'allerta.')}); } },
+  ],
+};
+const ALLERTA73_OPP_EV = {
+  id:'snodo_allerta73_opp', snodo:true, era:'us1970', kick:'L\'allerta', tono:'grave',
+  t:'L\'allerta, dall\'aula',
+  text:'La notte del 24 ottobre il Presidente ha messo le forze in allerta in tutto il mondo, dopo una nota da Mosca sulla guerra in Medio Oriente; gli alleati l\'hanno saputo dopo. Al Congresso si discute la legge sui poteri di guerra: chi manda le truppe dovrà dirlo alle Camere entro due giorni. Il tuo partito deve dire che cosa pensa della notte dell\'allerta.',
+  ch:[
+    { l:'Sostieni il Presidente', e:'La storia · nell\'ora della crisi il paese parla con una voce sola · i tuoi chiedono che cosa ci guadagni',
+      f:function(){ S.usAllerta73Opp='sostegno'; gd('cetomedio',1);
+        S.log.unshift({t:T('L\'allerta'),x:T('Dall\'opposizione ha sostenuto il Presidente nella notte dell\'allerta.')}); } },
+    { l:'Chiedi che il Congresso sia avvisato prima, la prossima volta', e:'Ti distingui · ti accusano di legare le mani al Presidente davanti a Mosca',
+      f:function(){ S.usAllerta73Opp='congresso'; gd('giovani',1); gd('cattolici',-1);
+        S.log.unshift({t:T('L\'allerta'),x:T('Dall\'opposizione ha chiesto che il Congresso sia avvisato prima di un\'allerta.')}); } },
   ],
 };
 /* ⚑ L245-8-2 · le ultime due date della linea italiana, con il meccanismo di L245-8-1 (stesso campo `crisi:` con `snodo:`, stessa

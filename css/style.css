@@ -131,6 +131,9 @@
   .pol{padding:12px 14px; border-top:1px solid var(--line);} .pol:first-of-type{border-top:none;}
   /* L143-2 · il Bilancio a sezioni: l'intestazione è il bottone (≥ 44 px), chiusa porta il riassunto dei livelli (12 px, una riga) */
   .bil-tot{display:flex; align-items:flex-start; gap:8px;} .bil-tot .fiscbar{flex:1; min-width:0;} .bil-tot .bil-tutto{flex:none; min-height:44px; margin-bottom:10px;}
+  /* L260-6 · il blocco «I pari» della scheda Bilancio: voce e posizione su una riga, le cifre sotto (≥ 12 px: servono a decidere) */
+  .pari .pari-chi{font-size:11px; color:var(--mut2); margin:-2px 14px 6px;} .pari .pari-riga{margin:0 14px;} .pari .pari-tot{margin-bottom:6px;} .pari-riga{padding:6px 0; border-top:1px solid var(--line);} .pari-chi + .pari-riga{border-top:0;}
+  .pari-v{display:flex; justify-content:space-between; align-items:baseline; gap:8px; font-size:13px;} .pari-v b{white-space:nowrap;} .pari-d{font-size:12px; color:var(--mut); overflow-wrap:anywhere;} .pari-tot .pari-v{font-weight:600;}
   .bil-sez-h{display:grid; grid-template-columns:1fr auto; align-items:center; column-gap:8px; width:100%; min-height:44px; padding:11px 14px 9px; background:none; border:0; color:var(--mut); text-align:left; font:inherit;}
   .bil-sez-h .bil-nm{font-size:11px; letter-spacing:.13em; text-transform:uppercase;}
   .bil-sez-h .bil-fr{font-size:12px; color:var(--mut2);}
