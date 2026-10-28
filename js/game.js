@@ -246,7 +246,11 @@ const DRIFT_INFLAZIONE_ERA = {
                 /* L258-2 · us1970 (PRESET-USA-1970 §2, prezzi al consumo, media annua ⚠ ordine di grandezza): la stagflazione, l'11 del 1974 e del 1979;
                    assoluta dalla scheda, non cercata, e nessun tetto (gli Stati Uniti non dichiarano inflazioneTetto). La chiusura a 1980 (us1980). */
                 {da:1969, inf:5.5}, {da:1970, inf:5.7}, {da:1971, inf:4.4}, {da:1972, inf:3.2}, {da:1973, inf:6.2}, {da:1974, inf:11.0},
-                {da:1975, inf:9.1}, {da:1976, inf:5.8}, {da:1977, inf:6.5}, {da:1978, inf:7.6}, {da:1979, inf:11.3}, {da:1980, inf:null} ]
+                {da:1975, inf:9.1}, {da:1976, inf:5.8}, {da:1977, inf:6.5}, {da:1978, inf:7.6}, {da:1979, inf:11.3},
+                /* L262-2 · us1980 (PRESET-USA-1980 §2; prezzi al consumo, media annua BLS, controllata su FRED CPIAUCSL in L262-2: 13,5 · 10,4 · 6,2 · 3,2 · 4,4 · 3,5 · 1,9 · 3,6 · 4,1 · 4,8 destagionalizzata):
+                   la disinflazione, assoluta e non cercata. La chiusura a 1990 (us1990). */
+                {da:1980, inf:13.5}, {da:1981, inf:10.3}, {da:1982, inf:6.2}, {da:1983, inf:3.2}, {da:1984, inf:4.3}, {da:1985, inf:3.6},
+                {da:1986, inf:1.9}, {da:1987, inf:3.6}, {da:1988, inf:4.1}, {da:1989, inf:4.8}, {da:1990, inf:null} ]
 };
 function inflazioneAnno(){
   if(typeof S==='undefined' || !S) return 0;
@@ -355,7 +359,9 @@ const DRIFT_DEFICIT_ERA = {
                 /* L180-2 · us1960 (PRESET-USA-1960 §2, verificata su FRED/BEA/BLS/OMB): righe 1961-1968 CERCATE sul reso, misura-us1960.js cerca, 20 semi per lato, luglio, carriere al governo; la chiusura a 1969 */
                 {da:1961, def:0}, {da:1962, def:1}, {da:1963, def:-0.5}, {da:1964, def:0.75}, {da:1965, def:0.25}, {da:1966, def:0.5}, {da:1967, def:-1.75}, {da:1968, def:1.5},
                 /* L258-2 · us1970 (PRESET-USA-1970 §2, ⚠ ordine di grandezza): righe 1969-1979 CERCATE sul reso, misura-us1970.js cerca, 20 semi per lato, luglio, carriere al governo, crescita di porta 5 (come us1960: la saldatura); resa 1,3 · 0,3 · 2,2 · 1,8 · 1,0 · 0,5 · 3,3 · 4,0 · 2,6 · 2,8 · 1,8 contro 0,3 · 2,1 · 1,9 · 1,1 · 0,4 · 3,3 · 4,1 · 2,6 · 2,6 · 1,6 (la riga del 1969 la assorbe la calibrazione d'avvio: 0); debito 36,9 → 32,1. La chiusura a 1980 (us1980). */
-                {da:1969, def:0}, {da:1970, def:-2.25}, {da:1971, def:1.75}, {da:1972, def:2.75}, {da:1973, def:1.75}, {da:1974, def:-2.75}, {da:1975, def:0.25}, {da:1976, def:4.75}, {da:1977, def:2.75}, {da:1978, def:3.5}, {da:1979, def:1}, {da:1980, def:0} ]
+                {da:1969, def:0}, {da:1970, def:-2.25}, {da:1971, def:1.75}, {da:1972, def:2.75}, {da:1973, def:1.75}, {da:1974, def:-2.75}, {da:1975, def:0.25}, {da:1976, def:4.75}, {da:1977, def:2.75}, {da:1978, def:3.5}, {da:1979, def:1},
+                /* L262-2 · us1980 (PRESET-USA-1980 §2, da FRED aperto in L262-2): righe 1980-1989 CERCATE sul reso, misura-us1980.js cerca, 20 semi per partenza (quattro: dal 1985 i Presidenti della porta escono col limite dei mandati), luglio, carriere al governo, crescita di porta 5 (la saldatura); resa 6,1 · 2,6 · 3,9 · 5,7 · 4,6 · 4,9 · 4,8 · 3,4 · 3,1 · 2,5 contro 2,6 · 2,5 · 3,8 · 5,7 · 4,6 · 4,9 · 4,8 · 3,1 · 3,0 · 2,7 (la riga del 1980 la assorbe la calibrazione d'avvio: 0; ⚠ il 6,1 del luglio 1980 è la recessione della primavera sopra l'avvio); debito 33,3 → 49,1 (FRED lordo 31,8 → 50,8). La chiusura a 1990 (us1990). */
+                {da:1980, def:0}, {da:1981, def:-1}, {da:1982, def:-2.5}, {da:1983, def:3.75}, {da:1984, def:4.5}, {da:1985, def:5.25}, {da:1986, def:5}, {da:1987, def:3.25}, {da:1988, def:3.75}, {da:1989, def:2}, {da:1990, def:0} ]
 };
 function deficitEra(){
   if(typeof S==='undefined' || !S || !S.era) return 0;
@@ -2164,7 +2170,9 @@ const DRIFT_ECONOMICO_ERA = {
                 /* L180-2 · us1960 (PRESET-USA-1960 §2, verificata su FRED/BEA/BLS/OMB): righe 1961-1968 CERCATE sul reso, misura-us1960.js cerca, 20 semi per lato, luglio, carriere al governo; la chiusura a 1969 */
                 {da:1961, ciclo:-3.5}, {da:1962, ciclo:1}, {da:1963, ciclo:-1.75}, {da:1964, ciclo:0.75}, {da:1965, ciclo:0.5}, {da:1966, ciclo:0.25}, {da:1967, ciclo:-4}, {da:1968, ciclo:-1},
                 /* L258-2 · us1970 (PRESET-USA-1970 §2, ⚠ ordine di grandezza): righe 1969-1979 CERCATE sul reso, misura-us1970.js cerca, 20 semi per lato, luglio, carriere al governo, crescita di porta 5 (come us1960: la saldatura); resa 3,0 · 0,2 · 3,4 · 5,4 · 5,4 · −0,5 · −0,2 · 5,5 · 4,5 · 5,3 · 3,1 contro la scheda 3,1 · 0,2 · 3,3 · 5,3 · 5,6 · −0,5 · −0,2 · 5,4 · 4,6 · 5,5 · 3,2 (le due recessioni). La chiusura a 1980 (us1980). */
-                {da:1969, ciclo:-3}, {da:1970, ciclo:-5.75}, {da:1971, ciclo:-1.75}, {da:1972, ciclo:0.25}, {da:1973, ciclo:-1}, {da:1974, ciclo:-7}, {da:1975, ciclo:-6}, {da:1976, ciclo:-0.25}, {da:1977, ciclo:-2.25}, {da:1978, ciclo:-0.5}, {da:1979, ciclo:-3.5}, {da:1980, ciclo:0} ]
+                {da:1969, ciclo:-3}, {da:1970, ciclo:-5.75}, {da:1971, ciclo:-1.75}, {da:1972, ciclo:0.25}, {da:1973, ciclo:-1}, {da:1974, ciclo:-7}, {da:1975, ciclo:-6}, {da:1976, ciclo:-0.25}, {da:1977, ciclo:-2.25}, {da:1978, ciclo:-0.5}, {da:1979, ciclo:-3.5},
+                /* L262-2 · us1980 (PRESET-USA-1980 §2, da FRED aperto in L262-2): righe 1980-1989 CERCATE sul reso, misura-us1980.js cerca, 20 semi per partenza (quattro: dal 1985 i Presidenti della porta escono col limite dei mandati), luglio, carriere al governo, crescita di porta 5 (la saldatura); resa −0,2 · 2,4 · −1,7 · 4,4 · 7,1 · 4,5 · 3,6 · 3,4 · 4,3 · 3,7 contro −0,3 · 2,5 · −1,8 · 4,6 · 7,2 · 4,2 · 3,5 · 3,5 · 4,2 · 3,7 (le due recessioni, il 1984). La chiusura a 1990 (us1990). */
+                {da:1980, ciclo:-6.25}, {da:1981, ciclo:-3}, {da:1982, ciclo:-8}, {da:1983, ciclo:-1}, {da:1984, ciclo:1.75}, {da:1985, ciclo:-2.5}, {da:1986, ciclo:-3.25}, {da:1987, ciclo:-3.25}, {da:1988, ciclo:-1.75}, {da:1989, ciclo:-2.75}, {da:1990, ciclo:0} ]
 };
 /* L60-2 · LA DISOCCUPAZIONE D'EPOCA. Il motore non aveva un posto dove un decennio potesse dire «qui i senza
    lavoro sono il doppio»: `S.uMod` decade dell'80% al mese e le carte danno solo colpi. Stessa forma di cicloBase():
@@ -2270,7 +2278,9 @@ const DRIFT_DISOCCUPAZIONE_ERA = {
                 /* L180-2 · us1960 (PRESET-USA-1960 §2, verificata su FRED/BEA/BLS/OMB): righe 1961-1968 CERCATE sul reso, misura-us1960.js cerca, 20 semi per lato, luglio, carriere al governo; la chiusura a 1969 */
                 {da:1961, un:-2.75}, {da:1962, un:-2.5}, {da:1963, un:-1.25}, {da:1964, un:-2.5}, {da:1965, un:0.25}, {da:1966, un:-2}, {da:1967, un:-4.25}, {da:1968, un:-4},
                 /* L258-2 · us1970 (PRESET-USA-1970 §2, ⚠ ordine di grandezza): righe 1969-1979 CERCATE sul reso, misura-us1970.js cerca, 20 semi per lato, luglio, carriere al governo, crescita di porta 5 (come us1960: la saldatura); resa 3,7 · 4,7 · 5,8 · 5,8 · 5,0 · 5,6 · 8,2 · 7,8 · 7,1 · 6,2 · 5,8 contro 3,5 · 4,9 · 5,9 · 5,6 · 4,9 · 5,6 · 8,5 · 7,7 · 7,1 · 6,1 · 5,8. La chiusura a 1980 (us1980). */
-                {da:1969, un:-5.25}, {da:1970, un:-5.75}, {da:1971, un:-2.5}, {da:1972, un:-1.75}, {da:1973, un:-2.5}, {da:1974, un:-5.75}, {da:1975, un:-1.75}, {da:1976, un:-0.75}, {da:1977, un:1.25}, {da:1978, un:-1.25}, {da:1979, un:-2}, {da:1980, un:0} ]
+                {da:1969, un:-5.25}, {da:1970, un:-5.75}, {da:1971, un:-2.5}, {da:1972, un:-1.75}, {da:1973, un:-2.5}, {da:1974, un:-5.75}, {da:1975, un:-1.75}, {da:1976, un:-0.75}, {da:1977, un:1.25}, {da:1978, un:-1.25}, {da:1979, un:-2},
+                /* L262-2 · us1980 (PRESET-USA-1980 §2, da FRED aperto in L262-2): righe 1980-1989 CERCATE sul reso, misura-us1980.js cerca, 20 semi per partenza (quattro: dal 1985 i Presidenti della porta escono col limite dei mandati), luglio, carriere al governo, crescita di porta 5 (la saldatura); resa 7,4 · 7,4 · 9,5 · 9,6 · 7,7 · 7,2 · 7,1 · 6,0 · 5,2 · 5,6 contro 7,2 · 7,6 · 9,7 · 9,6 · 7,5 · 7,2 · 7,0 · 6,2 · 5,5 · 5,3. La chiusura a 1990 (us1990). */
+                {da:1980, un:-3.25}, {da:1981, un:-2.25}, {da:1982, un:-1}, {da:1983, un:0.75}, {da:1984, un:1}, {da:1985, un:1.75}, {da:1986, un:-1}, {da:1987, un:-2.25}, {da:1988, un:-2.25}, {da:1989, un:-4}, {da:1990, un:0} ]
 };
 function disoccupazioneEra(){
   if(typeof S==='undefined' || !S) return 0;
@@ -3464,12 +3474,14 @@ function primaSedeDovuta(){
    DOPO la molla di evolvePartiti (livelli 1-3) e anche al livello 0, dove le forze altrimenti restano ferme. Il territorio «forte» del
    lotto (gruppi di p.base del territorio) non è leggibile: i territori dichiarano solo `lean` → nessuna differenza (×1, come dice il lotto).
    La prima sede aperta così consuma la visita gi_prima_sede (S.partitoProprio.sede); col giro la visita conta come prima sede
-   (ppSedeDaGiro). I traguardi (ppTraguardi, in S.partitoProprio.trag): «entra in parlamento» (forza ≥ ppSogliaParl(): i seggi della
-   fondazione ci sono già dal mese 0, L237-3, quindi la soglia è di forza), poi «supera <sigla>» — una volta per partito superato fra
-   quelli che ti stavano davanti; registro, biografia, stampa +1. Nessun effetto su vittoria e finali. Interruttore PP_SEDI. */
-let PP_SEDI=false;
+   (ppSedeDaGiro). I traguardi (ppTraguardi, in S.partitoProprio.trag), INDIPENDENTI dal L260-7bis: «arriva al %N%» (forza ≥
+   ppSogliaParl(), una volta sola; non si chiama «parlamento»: i seggi della fondazione ci sono già dal mese 0, L237-3) e «supera <sigla>» —
+   una volta per partito superato fra quelli che ti stavano davanti (dal primo mese, anche prima della soglia); registro, biografia,
+   stampa +1. La card ne mostra uno alla volta (ppTraguardoOra: la soglia finché non è presa). Nessun effetto su vittoria e finali.
+   Interruttore PP_SEDI, acceso dal L260-7bis. */
+let PP_SEDI=true;
 const PP_SEDI_K={ subito:0.15, mese:0.02, tetto:0.25, molla0:0.10 };   // molla0 = il k di evolvePartiti, per il solo partito proprio al livello 0 (ppSediMese)
-let PP_SEDI_ATTESA=3, PP_SEDI_MAX=12, PP_SOGLIA_PARL=5;
+let PP_SEDI_ATTESA=3, PP_SEDI_MAX=12, PP_SOGLIA_PARL=6;   // L260-7bis: la soglia 5→6 («arriva al 6%»)
 function ppSediAttive(){
   return !!(PP_SEDI && typeof S!=='undefined' && S && S.partito===PP_ID && S.partitoProprio && S.forze && S.territori
     && !((S.scenario && S.scenario!=='presente') || S.era) && S.livello>=0 && S.livello<=3);
@@ -3478,6 +3490,14 @@ function ppSedi(){ return (S && S.partitoProprio && Array.isArray(S.partitoPropr
 function ppSediPulisci(){
   var P=S.partitoProprio, ok=Array.isArray(P.sedi) && P.sedi.every(function(x){ return x && typeof x.t==='number' && typeof x.da==='number'; });
   if(!ok) delete P.sedi;
+}
+/* L260-7bis: il registro dei traguardi illeggibile si toglie (rinasce al mese dopo), quello di L260-7 (parl, sopra, sup) si legge com'è:
+   sup dice chi è già stato superato, quindi nessun premio doppio */
+function ppTragPulisci(){
+  var P=S.partitoProprio, tr=P.trag;
+  if(tr==null) return;
+  var lista=function(x){ return x==null || (Array.isArray(x) && x.every(function(id){ return typeof id==='string'; })); };
+  if(typeof tr!=='object' || Array.isArray(tr) || !(tr.parl==null || typeof tr.parl==='number') || !lista(tr.sopra) || !lista(tr.sup)) delete P.trag;
 }
 function ppSedeTetto(){ return Math.min(PP_SEDI_MAX, (S.territori||[]).length); }
 /* i mesi che mancano alla prossima sede (0 = ora); null = niente più sedi (tetto) */
@@ -3506,6 +3526,11 @@ function ppPrendi(q){
 }
 function ppNomeBreve(id){ var p=part(id)||{}; return id===PP_ID ? (p.sigla||p.nome||'') : (p.sigla || T(p.nome||'')); }   // per l'HTML (registro, biografia, scheda): la voce viva di pp_proprio è già escapata (L237-4)
 function ppSogliaParl(){ return (typeof PAESE.sbarramento==='number') ? PAESE.sbarramento : PP_SOGLIA_PARL; }
+/* L260-7bis: «arriva al 6%» — la card (card=true, «Traguardo: …») e il registro. «all'» davanti a 8, 11, 80…: si legge «otto», «undici» */
+function ppArrivaTesto(n, card){
+  var N=fmt(n, (n%1) ? 1 : 0), el=/^8/.test(N) || /^11(\D|$)/.test(N);
+  return T(card ? (el ? "Traguardo: <b>arriva all'%N%</b>." : 'Traguardo: <b>arriva al %N%</b>.') : (el ? "Il partito arriva all'%N%." : 'Il partito arriva al %N%.')).replace('%N', N);
+}
 /* «da superare»: il partito con la forza più vicina SOPRA la tua; null se sei il più forte del paese */
 function ppDaSuperare(){
   var f=S.forze[PP_ID]||0, best=null;
@@ -3517,7 +3542,7 @@ function ppPiuForteArea(){
   var pp=part(PP_ID)||{}, f=S.forze[PP_ID]||0;
   return PAESE.partiti.every(function(p){ return p.id===PP_ID || Math.abs((p.asse||0)-(pp.asse||0))>1 || (S.forze[p.id]||0)<=f; });
 }
-/* il traguardo visibile adesso: {k:'parl'} finché non sei entrato in parlamento, poi {k:'sup', id} sul partito da superare */
+/* il traguardo visibile adesso: {k:'parl'} finché la soglia («arriva al %N%») non è presa, poi {k:'sup', id} sul partito da superare */
 function ppTraguardoOra(){
   var tr=S.partitoProprio.trag||{};
   if(tr.parl==null) return { k:'parl', soglia:ppSogliaParl() };
@@ -3528,13 +3553,12 @@ function ppTraguardi(){
   var P=S.partitoProprio, f=S.forze[PP_ID]||0;
   P.trag=P.trag||{};
   var fatto=function(testo){ S.log.unshift({ t:T('Il tuo partito'), x:testo }); bioFatto(testo); if(S.ind && S.ind.stampa!=null) S.ind.stampa=clamp(S.ind.stampa+1, 0, 100); };
-  if(P.trag.parl==null){
-    if(f>=ppSogliaParl()){ P.trag.parl=meseAss(); P.trag.sopra=PAESE.partiti.filter(function(p){ return p.id!==PP_ID && (S.forze[p.id]||0)>f; }).map(function(p){ return p.id; });
-      fatto(T('%P supera la soglia del parlamento: %F%.').replace('%F', fmt(f,1)).replace('%P', function(){ return ppNomeBreve(PP_ID); })); }
-    return;   // uno alla volta: «supera» solo dopo il parlamento
-  }
-  P.trag.sup=P.trag.sup||[]; P.trag.sopra=P.trag.sopra||[];
-  /* si supera solo chi ti stava davanti (P.trag.sopra: davanti all'ingresso in parlamento, o passato davanti dopo), una volta per partito */
+  /* L260-7bis: i due traguardi sono indipendenti. La soglia una volta sola */
+  if(P.trag.parl==null && f>=ppSogliaParl()){ P.trag.parl=meseAss(); fatto(ppArrivaTesto(ppSogliaParl(), false)); }
+  /* «supera»: chi ti stava davanti la prima volta che si conta (P.trag.sopra nasce qui; un salvataggio di L260-7 lo ha già, scritto
+     all'ingresso in parlamento) o è passato davanti dopo; una volta per partito (P.trag.sup) */
+  if(!P.trag.sopra) P.trag.sopra=PAESE.partiti.filter(function(p){ return p.id!==PP_ID && (S.forze[p.id]||0)>f; }).map(function(p){ return p.id; });
+  P.trag.sup=P.trag.sup||[];
   P.trag.sopra.slice().forEach(function(id){
     if(P.trag.sup.indexOf(id)<0 && (S.forze[id]||0)<f){ P.trag.sup.push(id); fatto(T('%P supera %S nei sondaggi.').replace('%S', function(){ return ppNomeBreve(id); }).replace('%P', function(){ return ppNomeBreve(PP_ID); })); }
   });
@@ -11789,7 +11813,8 @@ function applySnap(snap){
   document.getElementById('game').style.display='block';
   applyPaese();
   if(S.attivista && !S.attivista.laurea && (!S.attivista.radici || !S.attivista.rivale)) radiciInit();   // L260-2: un attivista di prima riceve radici e rivale (solo con ATT_RADICI; il dado è un hash: lo stesso a ogni caricamento)
-  if(S.partitoProprio && S.partitoProprio.sedi!=null) ppSediPulisci();   // L260-7: un registro delle sedi illeggibile si toglie (senza = nessuna sede)
+  if(S.partitoProprio && S.partitoProprio.sedi!=null) ppSediPulisci();
+  if(S.partitoProprio && S.partitoProprio.trag!=null) ppTragPulisci();   // L260-7bis: il registro dei traguardi illeggibile si toglie   // L260-7: un registro delle sedi illeggibile si toglie (senza = nessuna sede)
   if(S.livello===5 && S.diplo && !Array.isArray(S.diplo.bil)) bilInit();   // L260-5: un diplomatico di prima riceve la rete bilaterale (solo con DIPLO_BILATERALI)
   if(S.livello===5 && S.diplo && !S.diplo.conc) concNasce();   // L260-5bis: un diplomatico di prima riceve il concorrente (solo con DIPLO_CONCORRENTE)
   genAgenda(false);   // agenda fresca: il mese riparte pulito

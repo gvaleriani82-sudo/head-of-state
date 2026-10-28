@@ -2733,8 +2733,12 @@ function radiciHtml(){
 /* L260-7 · IL TUO PARTITO E LE SEDI (game.js, «LE SEDI DEL PARTITO PROPRIO»): una card sola, con lo schema di radiciHtml (L260-2) — la
    riga della forza (disco, sigla, «forza 4,1%» e la freccia del mese, «da superare»), il traguardo visibile e, quando si può, la griglia
    dei territori per «Apri una sede». Solo con ppSediAttive() (PP_SEDI acceso, partito proprio, livelli 0-3, presente): spento, niente.
-   Livello 0 nella scheda Movimento (sotto le radici), livelli 1-3 nel blocco del ruolo. Bersagli ≥ 44 px. */
-function ppApriSedeUi(i){ if(typeof ppApriSede==='function' && ppApriSede(i)){ if(typeof suona==='function') suona('tocco'); render(); commitSnap(); } }
+   Livello 0 nella scheda Movimento (sotto le radici), livelli 1-3 nel blocco del ruolo. Bersagli ≥ 44 px.
+   L260-7bis: la griglia sta dietro il bottone «Apri una sede…» (PP_GRIGLIA_APERTA, stato del modulo e mai in S: chiusa di default,
+   si richiude dopo l'apertura di una sede); con l'attesa resta la riga «La prossima sede fra N mesi», senza bottone. */
+let PP_GRIGLIA_APERTA=false;
+function ppGrigliaUi(){ PP_GRIGLIA_APERTA=!PP_GRIGLIA_APERTA; if(typeof suona==='function') suona('tocco'); render(); }
+function ppApriSedeUi(i){ if(typeof ppApriSede==='function' && ppApriSede(i)){ PP_GRIGLIA_APERTA=false; if(typeof suona==='function') suona('tocco'); render(); commitSnap(); } }
 function ppSediHtml(){
   if(typeof ppSediAttive!=='function' || !ppSediAttive()) return '';
   const pp=part(PP_ID)||{}, f=S.forze[PP_ID]||0, fp=(S.forzePrev&&S.forzePrev[PP_ID]!=null)?S.forzePrev[PP_ID]:f, d=f-fp;
@@ -2743,13 +2747,16 @@ function ppSediHtml(){
   let h=`<div class="card pp-sedi-card"><div class="ct">${T('Il tuo partito')}</div>`;
   h+=`<div class="grp"><div class="top"><div class="nm">${ppDiscoHtml(pp.colore)}<b>${ppNomeBreve(PP_ID)}</b><small>${sup ? T('da superare: %S %F%').replace('%F', fmt(S.forze[sup]||0,1)).replace('%S', ppNomeBreve(sup)) : T(ppPiuForteArea() ? 'il più forte nella tua area' : 'il più forte del paese')}</small></div><div class="pc mono">${T('forza %F%').replace('%F', fmt(f,1))} ${fr}</div></div></div>`;
   const tr=ppTraguardoOra();
-  if(tr) h+=`<div class="log"><div class="li">${tr.k==='parl' ? T('Traguardo: <b>entra in parlamento</b> — la soglia è %N%.').replace('%N', fmt(tr.soglia,0)) : T('Traguardo: <b>supera %S</b>.').replace('%S', ppNomeBreve(tr.id))}</div></div>`;
+  if(tr) h+=`<div class="log"><div class="li">${tr.k==='parl' ? ppArrivaTesto(tr.soglia, true) : T('Traguardo: <b>supera %S</b>.').replace('%S', ppNomeBreve(tr.id))}</div></div>`;
   const Q=ppSedi(), att=ppSedeAttesa(), tetto=ppSedeTetto();
   h+=`<div class="ct" style="padding-top:4px">${T('Le sedi: %N su %M').replace('%N', Q.length).replace('%M', tetto)}</div>`;
   if(att==null) h+=`<div class="log"><div class="li">${T('Hai aperto tutte le sedi che il partito può reggere.')}</div></div>`;
   else if(att>0) h+=`<div class="log"><div class="li">${T(att===1 ? 'La prossima sede fra 1 mese.' : 'La prossima sede fra %N mesi.').replace('%N', att)}</div></div>`;
+  else if(!PP_GRIGLIA_APERTA)
+    h+=`<div style="padding:2px 12px 10px"><button class="pp-sedi-apri" onclick="ppGrigliaUi()" aria-expanded="false" style="min-height:44px;width:100%;padding:8px 10px;border-radius:9px;border:1px solid var(--line2);background:var(--panel);color:var(--txt);font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;">${T('Apri una sede…')}</button></div>`;
   else {
     h+=`<div class="log"><div class="li">${T('Apri una sede: il partito cresce un po\' subito e un po\' ogni mese. Una ogni %N mesi.').replace('%N', PP_SEDI_ATTESA)}</div></div>`;
+    h+=`<div style="padding:0 12px 6px"><button class="pp-sedi-apri" onclick="ppGrigliaUi()" aria-expanded="true" style="min-height:44px;width:100%;padding:8px 10px;border-radius:9px;border:1px solid var(--line2);background:transparent;color:var(--txt2);font-family:inherit;font-size:12px;cursor:pointer;">${T('Chiudi')}</button></div>`;
     h+=`<div class="pp-sedi-griglia" style="display:grid;grid-template-columns:1fr 1fr;gap:7px;padding:2px 12px 12px;">`
       +(PAESE.territori||[]).map(function(TE,i){ if(ppSedeIn(i) || !S.territori[i]) return '';
         return `<button class="pp-sede" onclick="ppApriSedeUi(${i})" style="min-height:44px;padding:7px 8px;border-radius:9px;border:1px solid var(--line2);background:var(--panel);color:var(--txt);font-family:inherit;font-size:12px;cursor:pointer;text-align:left;"><b>${nomeTerr(TE)}</b></button>`; }).join('')

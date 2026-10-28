@@ -1984,6 +1984,60 @@ const SCENARI = {
     ],
   },
   /* ============================================================================================================
+     L262-2 · STATI UNITI 1980 — la quarta porta della linea americana (PRESET-USA-1980.md, D288-D295). Si apre nel gennaio 1980
+     all'ULTIMO ANNO del mandato del Presidente eletto nel 1976 (D288 a: la prima porta americana che parte così) e chiude nel
+     dicembre 1989; si salda a us1970 (D291 a: le carriere che arrivano dal 1979 proseguono senza la spinta del 1980).
+     IL CALENDARIO (D288 a, L173-1): `meseUrna:11` e `turnMandato:3` contato dal novembre 1976 → a gennaio 1980 meseMandato() = 38;
+     presidenziale 1980/11 · metà mandato 1982/11 · presidenziale 1984/11 · metà mandato 1986/11 · presidenziale 1988/11; la vigilia
+     da 1980/5 (quattro mesi di governo prima della campagna). Stampato sul gioco da sonda-us1980-calendario.js. Niente `decennio`:
+     1980 è già nel suo decennio (clipDellaPorta prende porta-decennio-1980 dall'anno).
+     IL CONGRESSO (D292): la Camera del 1978 (277 democratici su 435, 63,7): il Presidente della porta ha il Congresso dalla sua.
+     CHI SI GIOCA (D289): i Democratici al governo (il Presidente, `mandatiVinti:1`: rivincere il 1980 → mandatoCompiuto alla vigilia
+     del 1984) e i Repubblicani dall'opposizione. I testi non dicono di che partito è il Presidente (le fuori storia partono uguali).
+     I TERRITORI sono i 18 del presente nello stesso ordine (paralleli per indice a mappa.aree: mai riordinare), col lean del 1976-80
+     (D292; positivo = repubblicano). `territoriDEpoca` NON si dichiara finché non ci sono le scene `gus80_` (D167).
+     LA CRESCITA DI PORTA è 5 come us1960 e us1970 (la saldatura: le carriere che arrivano leggono le righe d'era come la porta).
+     L'ECONOMIA da FRED (aperto in L262-2): PIL nominale 1980 2 857 mld (GDPA), debito federale lordo/PIL 31,8 (GFDGDPA188S), saldo
+     federale 1980 −2,6 (FYFSGDA188S; col segno di PAESI: negativo = disavanzo), inflazione 13,5 (BLS, media annua), disoccupazione di gennaio 1980 6,3 (UNRATE).
+     ============================================================================================================ */
+  us1980: {
+    id:'us1980', era:LINEA_US, nome:'Stati Uniti 1980', anno:1980, paese:'usa',
+    turnMandato: 3, meseUrna: 11,               // D288 (a): il mandato del novembre 1976 all'ultimo anno → presidenziale 1980/11
+    sistema: 'presidenziale', comeSiVince: 'candidato', coalizione: false, cadutaGoverno: false,
+    mandatoMesi: 48, mandatiMax: 2, mandatiConsecutivi: false,
+    titoloRuolo: 'Presidente', sedeGoverno: 'la Casa Bianca',
+    capitale: 'Washington',
+    ue: false,
+    congresso: { camera: 63.7 },                // D292: 277 democratici su 435 (la Camera del 1978): nessun governo diviso all'avvio
+    intermedie: [ {tipo:'Elezioni di metà mandato', mese:24, tocca:'tutti', penalitaGoverno:1} ],   // L262-2 · dalla sweep (misura-us1980.js gioc --penalita, 20 carriere × 4 partenze): metà mandato perse dal partito del Presidente 2 → 104/105 (99%) · 1,5 → 99/101 · 1 → 95/103 (92%, banda 80-95) · 0,5 → 91/103; partenza di D292 era 2 come us1970
+    /* D292 (L216-1, D270) · punti sul VOTO della presidenziale, positivo = al partito del Presidente in carica; li legge solo
+       spintaPresidenziale() (model.js), 0 se il Presidente sei tu. Partenza di Cowork {1980:-6, 1984:8, 1988:3}. */
+    spintaPresidenziale: { 1980: -6, 1984: 8, 1988: 3 },
+    mandatiVinti: 1,                           // D288: il Presidente ha vinto il 1976 (vale solo al livello 3 al governo: D135)
+    partiti: [
+      { id:'us_dem', nome:'Democratici',  orientamento:'centrosinistra', base:{ giovani:0.4, lavoratori:0.35, cetomedio:0.25 },                  forza:50, forzaAncora:50, asse:-1 },
+      { id:'us_rep', nome:'Repubblicani', orientamento:'centrodestra',   base:{ imprenditori:0.4, cetomedio:0.25, cattolici:0.2, pensionati:0.15 }, forza:50, forzaAncora:50, asse:1 },
+    ],
+    territori: [
+      {nome:'New York', tipo:'città', carica:'Sindaco', lean:0, simbolo:true}, {nome:'la California', tipo:'regione', carica:'Governatore', lean:1, simbolo:true}, {nome:'il Texas', tipo:'regione', carica:'Governatore', lean:1, simbolo:true}, {nome:'la Pennsylvania', tipo:'regione', carica:'Governatore', lean:0, simbolo:true},
+      {nome:'la Florida', tipo:'regione', carica:'Governatore', lean:1}, {nome:"l'Ohio", tipo:'regione', carica:'Governatore', lean:1}, {nome:'il Michigan', tipo:'regione', carica:'Governatore', lean:0}, {nome:'la Georgia', tipo:'regione', carica:'Governatore', lean:0},
+      {nome:"l'Illinois", tipo:'regione', carica:'Governatore', lean:0}, {nome:'lo stato di Washington', nomeEn:'Washington State', tipo:'regione', carica:'Governatore', lean:1}, {nome:"l'Arizona", tipo:'regione', carica:'Governatore', lean:2}, {nome:"l'Alabama", tipo:'regione', carica:'Governatore', lean:1},
+      {nome:'Los Angeles', tipo:'città', carica:'Sindaco', lean:0}, {nome:'Chicago', tipo:'città', carica:'Sindaco', lean:-2}, {nome:'Houston', tipo:'città', carica:'Sindaco', lean:1}, {nome:'Phoenix', tipo:'città', carica:'Sindaco', lean:2}, {nome:'Filadelfia', nomeEn:'Philadelphia', tipo:'città', carica:'Sindaco', lean:-2}, {nome:'San Francisco', tipo:'città', carica:'Sindaco', lean:-2}
+    ],
+    economia: { pil:2857, debito:32, deficit:-2.6, inflazione:13.5, crescita:5, crescitaTetto:9, disoccupazione:6.3 },   // crescitaTetto (L109-1): il 7,2 del 1984
+    debtAncora: 32,
+    inflazione: 13.5,  // l'anno per anno sta in DRIFT_INFLAZIONE_ERA (assoluta, BLS: la disinflazione dal 13,5 all'1,9 del 1986)
+    crescita: 5,       // la base di us1960/us1970, per la saldatura; il decennio sta nelle righe del ciclo (DRIFT_ECONOMICO_ERA)
+    logorioEra: 0.00375,                        // L262-2 · quello di us1970 (la saldatura). Sweep 0,006-0,018: nessun effetto sul 1980 del Presidente-giocatore; 0,025-0,04 sì (0,0325: 1980 vinto 18·13/40), ma in quattro anni il partito al governo crolla a ~30 contro ~70 e chi perde il 1980 rivince il 1984 dall'opposizione 21/21·26/26 (rapporto «⚑ L262-2», ⚠ 1)
+    valuta: VALUTA_DOLLARO,
+    intro: "Stati Uniti, 1980. Il Presidente è all'ultimo anno del mandato e fra dieci mesi chiede agli elettori di rieleggerlo. Da novembre più di cinquanta americani sono ostaggi nell'ambasciata di Teheran, i sovietici sono entrati in Afghanistan, e i prezzi salgono del tredici per cento l'anno.",
+    contesto: [
+      "Washington, gennaio 1980. Il notiziario della sera apre ogni giorno col conto dei giorni degli ostaggi. Il Presidente ha fermato le vendite di grano all'Unione Sovietica e chiede agli atleti di non andare alle Olimpiadi di Mosca; nel suo partito lo sfidante interno ha già aperto la campagna.",
+      "La banca centrale ha portato il denaro al prezzo più alto della sua storia per fermare l'inflazione: un mutuo costa più del tredici per cento, le concessionarie sono piene di automobili invendute e a Detroit si parla di licenziamenti. La benzina costa il doppio di un anno fa.",
+      "Nell'altro partito corre un ex governatore dell'Ovest che promette di tagliare le tasse, di riarmare il paese e di restituire agli americani la fiducia in sé stessi. I sondaggi danno i due vicini, e in autunno un candidato indipendente può togliere voti a tutti e due.",
+    ],
+  },
+  /* ============================================================================================================
      L44-3 · ITALIA 2000 — la settima e ultima porta. Stessa LINEA; il roster è quello uscito dalla frana del '94
      (PPI, PDS, AN, Rifondazione, Lega, FI, CCD e i laici superstiti), anno d'avvio 2000.
 
@@ -14845,7 +14899,7 @@ const POTENZE=[
 const RIVALI=(function(){
   var r=[];
   function riga(paesi, con, dal, fino, massimo, tipo){ paesi.split(' ').forEach(function(p){ r.push({paese:p, con:con, dal:dal, fino:fino, massimo:massimo, tipo:tipo}); }); }
-  riga('italia1950 italia1960 italia1970 italia1980 uk1950 uk1960 uk1970 uk1980 fr1950 fr1960 fr1970 fr1980 de1950 de1960 de1970 de1980 us1950 us1960 us1970', 'urss', 1945, 1991, 4, 'blocco');   // la guerra fredda: Cuba e Berlino si fermano all'ultimatum (L258-2, D286: us1970)
+  riga('italia1950 italia1960 italia1970 italia1980 uk1950 uk1960 uk1970 uk1980 fr1950 fr1960 fr1970 fr1980 de1950 de1960 de1970 de1980 us1950 us1960 us1970 us1980', 'urss', 1945, 1991, 4, 'blocco');   // la guerra fredda: Cuba e Berlino si fermano all'ultimatum (L258-2, D286: us1970; L262-2, D294: us1980)
   riga('italia1990 uk1990 fr1990 de1990', 'urss', 1945, 1991, 4, 'blocco');
   riga('italia1990 uk1990 fr1990 de1990 italia2000 uk2000 fr2000 de2000', 'russia', 1992, 2099, 4, 'blocco');
   ['russia','cina','iran'].forEach(function(c){ riga('italia francia regnounito germania spagna canada australia', c, 2012, 2099, 4, 'blocco'); });
@@ -14903,7 +14957,7 @@ const ALLEATI_DIPLO=(function(){
   var r=[];
   function riga(paesi, id, dal, fino){ var d=D[id]; paesi.split(' ').forEach(function(p){ r.push({paese:p, id:id, nome:d[0], art:d[1], nomeEn:d[2], artEn:d[3], dal:dal, fino:fino}); }); }
   var IT='italia italia1950 italia1960 italia1970 italia1980 italia1990 italia2000', UK='regnounito uk1950 uk1960 uk1970 uk1980 uk1990 uk2000',
-      FR='francia fr1950 fr1960 fr1970 fr1980 fr1990 fr2000', DE='germania de1950 de1960 de1970 de1980 de1990 de2000', US='usa us1950 us1960 us1970';
+      FR='francia fr1950 fr1960 fr1970 fr1980 fr1990 fr2000', DE='germania de1950 de1960 de1970 de1980 de1990 de2000', US='usa us1950 us1960 us1970 us1980';
   riga(IT+' '+UK+' '+FR+' '+DE+' india canada australia giappone coreasud messico nigeria brasile', 'stati_uniti', 1945, 2099);
   riga(IT+' '+UK+' '+DE, 'francia', 1945, 2099);
   riga(FR, 'regno_unito', 1945, 1962);          // la Francia della Quarta Repubblica e dei primi anni di de Gaulle: Londra e Washington
