@@ -3455,6 +3455,126 @@ function primaSedeDovuta(){
   var d=meseAss()-S.partitoProprio.da;
   return d>=0 && d<PRIMA_SEDE_MESI;
 }
+/* L260-7 · LE SEDI DEL PARTITO PROPRIO (DESIGN-OLTRE-LE-CARTE.md §3 D-OC1/D-OC2, «⚑ L260-7»). Un'azione del mese libera, non una carta:
+   «Apri una sede» su un territorio di S.territori dove non c'è già. Solo il partito proprio, livelli 0-3, nel presente (ppSediAttive),
+   al più una ogni PP_SEDI_ATTESA mesi e al più PP_SEDI_MAX in tutto. Stato puro: `S.partitoProprio.sedi = [{t, da}]` (t = indice di
+   S.territori, da = mese assoluto); senza il campo = nessuna sede (un salvataggio di prima), uno illeggibile lo toglie applySnap
+   (ppSediPulisci). Effetto: ogni sede +PP_SEDI_K.subito di forza all'apertura e +PP_SEDI_K.mese al mese (tetto PP_SEDI_K.tetto), presi
+   agli altri partiti con la ripartizione di fondaPartitoProprio (ppPrendi: somma sempre 100). La spinta mensile la dà ppSediMese,
+   DOPO la molla di evolvePartiti (livelli 1-3) e anche al livello 0, dove le forze altrimenti restano ferme. Il territorio «forte» del
+   lotto (gruppi di p.base del territorio) non è leggibile: i territori dichiarano solo `lean` → nessuna differenza (×1, come dice il lotto).
+   La prima sede aperta così consuma la visita gi_prima_sede (S.partitoProprio.sede); col giro la visita conta come prima sede
+   (ppSedeDaGiro). I traguardi (ppTraguardi, in S.partitoProprio.trag): «entra in parlamento» (forza ≥ ppSogliaParl(): i seggi della
+   fondazione ci sono già dal mese 0, L237-3, quindi la soglia è di forza), poi «supera <sigla>» — una volta per partito superato fra
+   quelli che ti stavano davanti; registro, biografia, stampa +1. Nessun effetto su vittoria e finali. Interruttore PP_SEDI. */
+let PP_SEDI=false;
+const PP_SEDI_K={ subito:0.15, mese:0.02, tetto:0.25, molla0:0.10 };   // molla0 = il k di evolvePartiti, per il solo partito proprio al livello 0 (ppSediMese)
+let PP_SEDI_ATTESA=3, PP_SEDI_MAX=12, PP_SOGLIA_PARL=5;
+function ppSediAttive(){
+  return !!(PP_SEDI && typeof S!=='undefined' && S && S.partito===PP_ID && S.partitoProprio && S.forze && S.territori
+    && !((S.scenario && S.scenario!=='presente') || S.era) && S.livello>=0 && S.livello<=3);
+}
+function ppSedi(){ return (S && S.partitoProprio && Array.isArray(S.partitoProprio.sedi)) ? S.partitoProprio.sedi : []; }
+function ppSediPulisci(){
+  var P=S.partitoProprio, ok=Array.isArray(P.sedi) && P.sedi.every(function(x){ return x && typeof x.t==='number' && typeof x.da==='number'; });
+  if(!ok) delete P.sedi;
+}
+function ppSedeTetto(){ return Math.min(PP_SEDI_MAX, (S.territori||[]).length); }
+/* i mesi che mancano alla prossima sede (0 = ora); null = niente più sedi (tetto) */
+function ppSedeAttesa(){
+  var Q=ppSedi(); if(Q.length>=ppSedeTetto()) return null;
+  var ult=Q.reduce(function(m, x){ return Math.max(m, x.da); }, -Infinity);
+  return Math.max(0, ult+PP_SEDI_ATTESA-meseAss());
+}
+function ppSedeIn(i){ return ppSedi().some(function(x){ return x.t===i; }); }
+function ppSedePuo(i){ return ppSediAttive() && !!(S.territori[i]) && !ppSedeIn(i) && ppSedeAttesa()===0; }
+/* `q` punti di forza al partito proprio, presi agli altri col peso di fondaPartitoProprio (asse vicino e base sovrapposta danno di più;
+   nessuno scende sotto 1). Rende quanto è passato davvero. */
+function ppPrendi(q){
+  var pp=part(PP_ID); if(!pp || !q) return 0;
+  var asse=pp.asse||0, w={}, sw=0, dato=0;
+  PAESE.partiti.forEach(function(p){ if(p.id===PP_ID) return; w[p.id]=(1/(1+Math.abs((p.asse||0)-asse)))*(1+_sovrapBasi(p.base, pp.base)); sw+=w[p.id]; });
+  if(!(sw>0)) return 0;
+  if(q<0){   // il verso opposto (la molla del livello 0, ppSediMese): il partito proprio rende agli altri con lo stesso peso, mai sotto 1
+    var r=Math.min(-q, Math.max(0, (S.forze[PP_ID]||0)-1)); if(!(r>0)) return 0;
+    PAESE.partiti.forEach(function(p){ if(p.id!==PP_ID) S.forze[p.id]=(S.forze[p.id]||0)+r*w[p.id]/sw; });
+    S.forze[PP_ID]-=r; return -r;
+  }
+  PAESE.partiti.forEach(function(p){ if(p.id===PP_ID) return; var f=S.forze[p.id]||0, nf=Math.max(Math.min(1,f), f-q*w[p.id]/sw); dato+=f-nf; S.forze[p.id]=nf; });
+  S.forze[PP_ID]=(S.forze[PP_ID]||0)+dato;
+  return dato;
+}
+function ppNomeBreve(id){ var p=part(id)||{}; return id===PP_ID ? (p.sigla||p.nome||'') : (p.sigla || T(p.nome||'')); }   // per l'HTML (registro, biografia, scheda): la voce viva di pp_proprio è già escapata (L237-4)
+function ppSogliaParl(){ return (typeof PAESE.sbarramento==='number') ? PAESE.sbarramento : PP_SOGLIA_PARL; }
+/* «da superare»: il partito con la forza più vicina SOPRA la tua; null se sei il più forte del paese */
+function ppDaSuperare(){
+  var f=S.forze[PP_ID]||0, best=null;
+  PAESE.partiti.forEach(function(p){ if(p.id===PP_ID) return; var g=S.forze[p.id]||0; if(g>f && (best==null || g<S.forze[best])) best=p.id; });
+  return best;
+}
+/* il più forte della tua area: nessun partito a |Δasse| ≤ 1 ha più forza */
+function ppPiuForteArea(){
+  var pp=part(PP_ID)||{}, f=S.forze[PP_ID]||0;
+  return PAESE.partiti.every(function(p){ return p.id===PP_ID || Math.abs((p.asse||0)-(pp.asse||0))>1 || (S.forze[p.id]||0)<=f; });
+}
+/* il traguardo visibile adesso: {k:'parl'} finché non sei entrato in parlamento, poi {k:'sup', id} sul partito da superare */
+function ppTraguardoOra(){
+  var tr=S.partitoProprio.trag||{};
+  if(tr.parl==null) return { k:'parl', soglia:ppSogliaParl() };
+  var id=ppDaSuperare(); return id ? { k:'sup', id:id } : null;
+}
+function ppTraguardi(){
+  if(!ppSediAttive()) return;
+  var P=S.partitoProprio, f=S.forze[PP_ID]||0;
+  P.trag=P.trag||{};
+  var fatto=function(testo){ S.log.unshift({ t:T('Il tuo partito'), x:testo }); bioFatto(testo); if(S.ind && S.ind.stampa!=null) S.ind.stampa=clamp(S.ind.stampa+1, 0, 100); };
+  if(P.trag.parl==null){
+    if(f>=ppSogliaParl()){ P.trag.parl=meseAss(); P.trag.sopra=PAESE.partiti.filter(function(p){ return p.id!==PP_ID && (S.forze[p.id]||0)>f; }).map(function(p){ return p.id; });
+      fatto(T('%P supera la soglia del parlamento: %F%.').replace('%F', fmt(f,1)).replace('%P', function(){ return ppNomeBreve(PP_ID); })); }
+    return;   // uno alla volta: «supera» solo dopo il parlamento
+  }
+  P.trag.sup=P.trag.sup||[]; P.trag.sopra=P.trag.sopra||[];
+  /* si supera solo chi ti stava davanti (P.trag.sopra: davanti all'ingresso in parlamento, o passato davanti dopo), una volta per partito */
+  P.trag.sopra.slice().forEach(function(id){
+    if(P.trag.sup.indexOf(id)<0 && (S.forze[id]||0)<f){ P.trag.sup.push(id); fatto(T('%P supera %S nei sondaggi.').replace('%S', function(){ return ppNomeBreve(id); }).replace('%P', function(){ return ppNomeBreve(PP_ID); })); }
+  });
+  PAESE.partiti.forEach(function(p){ if(p.id!==PP_ID && P.trag.sopra.indexOf(p.id)<0 && (S.forze[p.id]||0)>f) P.trag.sopra.push(p.id); });
+}
+function ppApriSede(i){
+  if(!ppSedePuo(i)) return false;
+  var P=S.partitoProprio, prima=!ppSedi().length, TE=PAESE.territori[i];
+  P.sedi=ppSedi().concat([{ t:i, da:meseAss() }]);
+  ppPrendi(PP_SEDI_K.subito);
+  var nome=nomeTerr(TE);   // il nome con l'articolo («la Baviera»): le frasi lo tengono dopo i due punti, mai dopo «a»/«in»
+  if(prima){
+    if(!P.sede) P.sede=meseAss();   // la prima sede consuma la visita del giro (primaSedeDovuta: niente doppione al livello 3)
+    var tx=T('Apri la prima sede del partito: %T.').replace('%T', function(){ return nome; });
+    S.log.unshift({ t:T('La prima sede'), x:tx }); bioFatto(tx);
+  } else S.log.unshift({ t:T('Una sede nuova'), x:T('Il partito apre una sede nuova: %T (%N in tutto).').replace('%N', P.sedi.length).replace('%T', function(){ return nome; }) });
+  ppTraguardi();
+  return true;
+}
+/* la visita «La prima sede» del giro (resolveGiro, livello 3): conta come prima sede, una voce nel registro delle sedi se c'è posto */
+function ppSedeDaGiro(i){
+  if(!ppSediAttive() || i==null || !S.territori[i] || ppSedeIn(i) || ppSedi().length>=ppSedeTetto()) return;
+  S.partitoProprio.sedi=ppSedi().concat([{ t:i, da:meseAss() }]);
+}
+/* il confine del mese (avanzaMese: livello 0 prima di S.month++, livelli 1-3 dopo simulateMonth) */
+function ppSediMese(){
+  if(!ppSediAttive()) return;
+  var n=ppSedi().length;
+  var spinta=n ? Math.min(PP_SEDI_K.tetto, n*PP_SEDI_K.mese) : 0;
+  if(S.livello===0){
+    S.forzePrev=Object.assign({}, S.forze);   // al livello 0 nessuno lo scrive: la freccia del mese è la spinta delle sedi
+    /* al livello 0 le forze non hanno la molla di evolvePartiti: senza, la spinta si accumulerebbe senza fine (misurato: 11,1 a 60 mesi,
+       con metà delle carriere ancora attiviste). Qui la molla vale per il SOLO partito proprio, col k di evolvePartiti (0,10) verso la
+       sua àncora: l'equilibrio è lo stesso dei livelli 1-3 (àncora + spinta/k), il resto resta fermo come prima. */
+    var pp=part(PP_ID)||{}, anc=Math.max(1, (pp.forzaAncora!=null ? pp.forzaAncora : (pp.forza||PP_FORZA))+((S.ancoraTappa&&S.ancoraTappa[PP_ID])||0));
+    spinta-=PP_SEDI_K.molla0*((S.forze[PP_ID]||0)-anc);
+  }
+  if(spinta) ppPrendi(spinta);
+  ppTraguardi();
+}
 /* una volta per elezione politica vinta: nextMandate (rielezione, e la rimonta via tornaAlGoverno, che lo chiama), la salita
    per elezione (diventaPremier) e l'ingresso da partner dopo il voto (entraDaPartner). NON in tornaAlGoverno, che ha già il suo
    doppio bioConta noto (R4): lì il conto lo fa nextMandate. */
@@ -6640,6 +6760,7 @@ function resolveGiro(ci){
   var opt=def.ch[ci]; if(!opt) { render(); return; }
   risolviScenaTerr(def, opt, G.idx);
   if(def.id==='gi_prima_sede' && S.partitoProprio) S.partitoProprio.sede=meseAss();   // L237-8: la prima sede si consuma SOLO alla scelta
+  if(def.id==='gi_prima_sede') ppSedeDaGiro(G.idx);   // L260-7: col giro la visita È la prima sede (una voce in S.partitoProprio.sedi, niente doppione)
   S.ind.consenso=computeConsenso();
   if(typeof suona==='function') suona('mappa');
   render(); commitSnap();
@@ -8899,6 +9020,7 @@ function avanzaMese(){
   if(agendaPending()) return;
   if(S.livello===0){   // ATTIVISTA (Build A): avanzamento MINIMO — nessun motore nazionale/locale (L0); il motore-base arriva a L3
     radiciMese();   // L260-2: le radici del mese che si chiude e il movimento rivale (no-op con ATT_RADICI spento)
+    ppSediMese();   // L260-7: la spinta mensile delle sedi del partito proprio (no-op con PP_SEDI spento o senza partito proprio)
     S.month++;
     avanzaAnnoMandato();   // L173-1
     if(S.month===1 && S.eta!=null){ S.eta++; if(S.famiglia&&S.famiglia.figli) S.famiglia.figli.forEach(function(f){ f.eta++; });
@@ -8923,6 +9045,7 @@ function avanzaMese(){
     return;
   }
   simulateMonth();       // AVANZAMENTO — il drift-economia vive DENTRO simulateMonth: S.ciclo reverte verso cicloBase()
+  ppSediMese();          // L260-7: le sedi spingono DOPO la molla di evolvePartiti (no-op con PP_SEDI spento o senza partito proprio)
   S.month++;
   avanzaAnnoMandato();   // L173-1: l'anno del mandato cresce al mese dell'urna (gennaio senza meseUrna)
   riallineamentoTappa();  // AVANZAMENTO — riallineamento-partiti alle tappe '58/'63 (Fase 1: inerte, tabella vuota → no-op)
@@ -11666,6 +11789,7 @@ function applySnap(snap){
   document.getElementById('game').style.display='block';
   applyPaese();
   if(S.attivista && !S.attivista.laurea && (!S.attivista.radici || !S.attivista.rivale)) radiciInit();   // L260-2: un attivista di prima riceve radici e rivale (solo con ATT_RADICI; il dado è un hash: lo stesso a ogni caricamento)
+  if(S.partitoProprio && S.partitoProprio.sedi!=null) ppSediPulisci();   // L260-7: un registro delle sedi illeggibile si toglie (senza = nessuna sede)
   if(S.livello===5 && S.diplo && !Array.isArray(S.diplo.bil)) bilInit();   // L260-5: un diplomatico di prima riceve la rete bilaterale (solo con DIPLO_BILATERALI)
   if(S.livello===5 && S.diplo && !S.diplo.conc) concNasce();   // L260-5bis: un diplomatico di prima riceve il concorrente (solo con DIPLO_CONCORRENTE)
   genAgenda(false);   // agenda fresca: il mese riparte pulito

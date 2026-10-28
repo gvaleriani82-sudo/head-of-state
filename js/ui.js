@@ -2730,6 +2730,34 @@ function radiciHtml(){
   h+=`</div>`;
   return h;
 }
+/* L260-7 · IL TUO PARTITO E LE SEDI (game.js, «LE SEDI DEL PARTITO PROPRIO»): una card sola, con lo schema di radiciHtml (L260-2) — la
+   riga della forza (disco, sigla, «forza 4,1%» e la freccia del mese, «da superare»), il traguardo visibile e, quando si può, la griglia
+   dei territori per «Apri una sede». Solo con ppSediAttive() (PP_SEDI acceso, partito proprio, livelli 0-3, presente): spento, niente.
+   Livello 0 nella scheda Movimento (sotto le radici), livelli 1-3 nel blocco del ruolo. Bersagli ≥ 44 px. */
+function ppApriSedeUi(i){ if(typeof ppApriSede==='function' && ppApriSede(i)){ if(typeof suona==='function') suona('tocco'); render(); commitSnap(); } }
+function ppSediHtml(){
+  if(typeof ppSediAttive!=='function' || !ppSediAttive()) return '';
+  const pp=part(PP_ID)||{}, f=S.forze[PP_ID]||0, fp=(S.forzePrev&&S.forzePrev[PP_ID]!=null)?S.forzePrev[PP_ID]:f, d=f-fp;
+  const fr=d>0.05?`<span style="color:var(--pos)">▲</span>`:d<-0.05?`<span style="color:var(--neg)">▼</span>`:'';
+  const sup=ppDaSuperare();
+  let h=`<div class="card pp-sedi-card"><div class="ct">${T('Il tuo partito')}</div>`;
+  h+=`<div class="grp"><div class="top"><div class="nm">${ppDiscoHtml(pp.colore)}<b>${ppNomeBreve(PP_ID)}</b><small>${sup ? T('da superare: %S %F%').replace('%F', fmt(S.forze[sup]||0,1)).replace('%S', ppNomeBreve(sup)) : T(ppPiuForteArea() ? 'il più forte nella tua area' : 'il più forte del paese')}</small></div><div class="pc mono">${T('forza %F%').replace('%F', fmt(f,1))} ${fr}</div></div></div>`;
+  const tr=ppTraguardoOra();
+  if(tr) h+=`<div class="log"><div class="li">${tr.k==='parl' ? T('Traguardo: <b>entra in parlamento</b> — la soglia è %N%.').replace('%N', fmt(tr.soglia,0)) : T('Traguardo: <b>supera %S</b>.').replace('%S', ppNomeBreve(tr.id))}</div></div>`;
+  const Q=ppSedi(), att=ppSedeAttesa(), tetto=ppSedeTetto();
+  h+=`<div class="ct" style="padding-top:4px">${T('Le sedi: %N su %M').replace('%N', Q.length).replace('%M', tetto)}</div>`;
+  if(att==null) h+=`<div class="log"><div class="li">${T('Hai aperto tutte le sedi che il partito può reggere.')}</div></div>`;
+  else if(att>0) h+=`<div class="log"><div class="li">${T(att===1 ? 'La prossima sede fra 1 mese.' : 'La prossima sede fra %N mesi.').replace('%N', att)}</div></div>`;
+  else {
+    h+=`<div class="log"><div class="li">${T('Apri una sede: il partito cresce un po\' subito e un po\' ogni mese. Una ogni %N mesi.').replace('%N', PP_SEDI_ATTESA)}</div></div>`;
+    h+=`<div class="pp-sedi-griglia" style="display:grid;grid-template-columns:1fr 1fr;gap:7px;padding:2px 12px 12px;">`
+      +(PAESE.territori||[]).map(function(TE,i){ if(ppSedeIn(i) || !S.territori[i]) return '';
+        return `<button class="pp-sede" onclick="ppApriSedeUi(${i})" style="min-height:44px;padding:7px 8px;border-radius:9px;border:1px solid var(--line2);background:var(--panel);color:var(--txt);font-family:inherit;font-size:12px;cursor:pointer;text-align:left;"><b>${nomeTerr(TE)}</b></button>`; }).join('')
+      +`</div>`;
+  }
+  if(Q.length) h+=`<div class="log"><div class="li contorno" style="font-size:11px">${T('Sedi aperte: %L.').replace('%L', Q.map(function(x){ return nomeTerr(PAESE.territori[x.t]); }).join(', '))}</div></div>`;
+  return h+`</div>`;
+}
 /* L260-5bis · LA CORSA AL POSTO (game.js, «IL CONCORRENTE PER IL POSTO»): nella scheda Governo del livello 5, sopra la missione del mese,
    il nome del concorrente, la carica in palio e due barre — il tuo punteggio corsaDiplo() e i suoi punti. Solo con concAttivo()
    (DIPLO_CONCORRENTE acceso): spento, niente. Il nome del concorrente è un nome proprio: non passa da T(). */
@@ -2811,6 +2839,7 @@ function renderAttivista(){
     });
   }
   h+=radiciHtml();   // L260-2: dove lavori questo mese e il movimento rivale (vuoto con ATT_RADICI spento)
+  h+=ppSediHtml();   // L260-7: il tuo partito e le sedi (vuoto con PP_SEDI spento o senza partito proprio)
   h+=`<div class="banner"><b>${T('La tua militanza.')}</b> ${T('Nessuna carica, nessun bilancio: costruisci mese per mese la tua base, la reputazione presso i gruppi e l\'autorevolezza sul campo, fino alla prima candidatura.')}</div>`;
   /* le tre valute del gate, con barra */
   h+=`<div class="card"><div class="ct">${T('Le tue tre valute')}</div>`;
@@ -2926,6 +2955,7 @@ function renderGov(){
      misura, non il gusto — col bilancio sopra la prima scelta della prima carta resta nella prima finestra in tutti i casi a
      375 IT, rapporto in DESIGN-PAGINE.md § L144-1). Il blocco del ruolo, la stampa del mese e la vita personale scendono SOTTO
      l'agenda, in quest'ordine, prima della prerogativa e dei ministeri. Fuori dal cassetto (livelli 4-5) l'ordine è quello di prima. */
+  if(S.livello>=1 && S.livello<=3) ruolo+=ppSediHtml();   // L260-7: il tuo partito e le sedi ai livelli 1-3, col blocco del ruolo (vuoto con PP_SEDI spento)
   const cassetto=tavoloAttivo();
   let sotto='';
   if(!cassetto) h+=ruolo;   // fuori dal cassetto il ruolo sta in testa, come prima (il banner di gennaio esclude il ruolo: nessun conflitto d'ordine)
@@ -3524,9 +3554,16 @@ const PARI_NOMI={crescita:'Crescita', varDeb:'Debito', deficit:'Saldo di bilanci
    è quanto il deficit è cresciuto (−0,8 = sceso di 0,8), con un avanzo quanto l'avanzo è cresciuto — così «deficit 3,2% (−0,8)» si legge
    come si scrive (nel conto scSaldo il segno è l'opposto: più alto = meglio). */
 function pariScarto(d){ return (d>0 ? '+' : d<0 ? '−' : '')+fmt(Math.abs(d),1); }
+/* L260-7 (passo 0, decisione di Cowork su ⚠ 3 di L260-6ter): lo scarto del saldo si scrive a parole nel verso del conto (scSaldo, più alto
+   = meglio): «migliorato di 0,3» · «peggiorato di 0,3» · «invariato». Crescita e debito restano col segno. */
+function pariScartoSaldo(d){
+  const a=fmt(Math.abs(d),1);
+  if(Math.abs(d)<0.05) return T('invariato');
+  return T(d>0 ? 'migliorato di %V' : 'peggiorato di %V').replace('%V', a);
+}
 function pariCon(k, o){
   if(k==='scCrescita') return {v:pariCifra('crescita', o.crescita), d:pariScarto(o.scCrescita)};
-  return {v:pariCifra('deficit', o.deficit), d:pariScarto(o.deficit<0 ? -o.scSaldo : o.scSaldo)};
+  return {v:pariCifra('deficit', o.deficit), d:pariScartoSaldo(o.scSaldo)};
 }
 function pariCifra(k, v){
   if(k==='deficit') return T(v<0 ? 'deficit %V' : 'avanzo %V').replace('%V', fmt(Math.abs(v),1)+'%');
