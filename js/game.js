@@ -547,6 +547,7 @@ function initStatoBase(){
      livelli 1-2) e l'etichetta del salvataggio — nessuno lo legge come anzianità di porta (epitaffio, punteggio, limite e avviso
      leggono `S.mandatesWon`). Prima un sindaco di uk1990 vedeva «Mandato 3» al primo mandato locale. */
   if(S.livello!==3){ S.mandatesWon=0; S.mandatiConsecutivi=0; S.mandate=1; }
+  if(S.livello===3) S.logorioAcc=logorioMaturato(_SC);   // L262-2bis: la porta a mandato in corso parte col logorio dei mesi già governati (0 senza il campo; dall'opposizione lo prende l'avversario in startOpposizione)
   S.ind.consenso=computeConsenso();
   S.ind.deficit=computeDeficit();
   S.ind.fiducia=targetFiducia();   // parte dal valore "vero" dato dai conti iniziali (~78)
@@ -564,6 +565,52 @@ function initStatoBase(){
   S.pesoUE=pesoUEBase();   // peso del tuo gruppo a Bruxelles (solo ue:true, altrove null); si aggiorna alle europee
   initCorrenti();          // le tre correnti interne del partito (lotto primarie)
   S.biografia=bioVuota();  // la memoria della carriera (sistema narrativo, lotto 1)
+}
+
+/* L262-2bis · IL LOGORIO GIÀ MATURATO di una porta che parte a mandato in corso. `mesiGiaInCarica` (campo facoltativo dello
+   scenario, oggi solo us1980 = 38: gennaio 1977 → gennaio 1980) dice da quanti mesi il partito al governo governa all'avvio; il
+   logorio parte come se li avesse governati, con la forma chiusa di `logorioTotale()` (mesi × logorioEra × difficoltà × età, cioè
+   `rateLogorioMese()` a consenso neutro: niente coefficienti nuovi). Al governo (livello 3) va in `S.logorioAcc` (initStatoBase),
+   dall'opposizione in `S.logorioAvv` (startOpposizione). `mesiAlGoverno` resta 0: lo leggono scandali e F2, non il logorio.
+   Spento o senza il campo = 0, il gioco di prima. Nessun campo nuovo in S: un salvataggio vecchio resta com'è.
+   ⚠ SPENTO (L262-2bis, 28/10): il Presidente-giocatore vince il 1980 40/40 anche a 46 mesi (bersaglio D293 8-20/40); servono
+   ~80 mesi (4/40) e la curva è a gradino (120 → 0/40). Sonda `.claude/sonda-l262-2bis.js`, rapporto «⚑ L262-2bis» in PRESET-USA-1980.md. */
+let LOGORIO_MATURATO=false;
+function logorioMaturato(sc){
+  if(!LOGORIO_MATURATO || !sc || !(sc.mesiGiaInCarica>0)) return 0;
+  return sc.mesiGiaInCarica*((S.logorioEra!=null)?S.logorioEra:0.002)*(dif().logorioMult!=null?dif().logorioMult:1)*etaLogorio();
+}
+/* L262-2quater · LA CAMPAGNA DELLO SFIDANTE alle presidenziali americane. `campSlancio` (le carte CAMPAGNA_EV) spinge il blocco del
+   giocatore di +0,4…+1,8 di forza a carta, e l'avversario non faceva campagna: +4,7…+6 in ogni porta americana (L262-2ter). Acceso,
+   a ogni carta di campagna risolta (lo stesso calendario: chiamata da campSlancio, una volta per carta; il mese delle liste no) il
+   principale avversario del giocatore — al governo l'avversario del testa a testa, all'opposizione il partito del Presidente — prende
+   una spinta FISSA, CAMP_SFIDANTE_K × CAMP_MEDIA: niente dadi (la sequenza del banco non si sposta) e niente scelte sue.
+   CAMP_MEDIA = la media di campSlancio di una carta a scelta media, sulle sei carte `universale` (le sole vive nelle porte americane:
+   cn_treno è italia1950, cn_tv contemporanea): (0,6 + 0,55 + 0,5 + 0,7 + 0,6 + 0,6) / 6 × 2 = 1,183 — la ricontrolla sui dati
+   `.claude/sonda-l262-2quater.js`. Solo nelle porte della LINEA_US (SCENARI[S.scenario].era), mai nel presente americano né altrove;
+   nessun campo in S. Spento = il gioco di prima. Il k è della PORTA, `SCENARI.<porta>.campSfidante` (assente = 0, nessuna spinta):
+   lo sweep di L262-2quater con un k uguale per tutte le porte faceva uscire us1950 e us1970 dalla banda già a 0,5 (tabella nel rapporto
+   «⚑ L262-2quater» di PRESET-USA-1980.md). CAMP_SFIDANTE_K (null) è solo per le misure: un numero vale per tutte le porte americane.
+   ⚠ SPENTO (L262-2quater, 28/10): nessun k mette us1980 in banda (col logorio maturato il 1980 c'è a k 0,55-0,6, ma le primarie perse
+   salgono a 20-27/40), e nessuna porta dichiara campSfidante. Sonda `.claude/sonda-l262-2quater.js`. */
+let CAMP_SFIDANTE=false, CAMP_SFIDANTE_K=null;
+const CAMP_MEDIA=1.1833;
+function campSfidanteAttivo(){
+  if(!CAMP_SFIDANTE || !S || S.livello!==3 || !S.scenario || S.scenario==='presente') return false;
+  const sc=(typeof SCENARI!=='undefined') ? SCENARI[S.scenario] : null;
+  return !!(sc && sc.era===LINEA_US);
+}
+function campSfidanteK(){
+  if(CAMP_SFIDANTE_K!=null) return CAMP_SFIDANTE_K;
+  const sc=SCENARI[S.scenario], k=sc && sc.campSfidante;
+  return (typeof k==='number' && isFinite(k)) ? k : 0;
+}
+function campSfidante(){
+  if(!campSfidanteAttivo()) return;
+  const k=campSfidanteK(); if(!(k>0)) return;
+  const riv=(S.opposizione && governoGuida()) || testaATesta().opp.id;
+  if(!riv || riv===S.partito) return;
+  applicaSlancio([riv], k*CAMP_MEDIA);
 }
 
 /* --- Nuova partita (al GOVERNO) --- */
@@ -623,6 +670,7 @@ function startOpposizione(){
      legislatura nuova come prima. Senza `turnMandato` (il presente) non cambia niente. */
   var _SCo=(typeof SCENARI!=='undefined' && S.scenario) ? SCENARI[S.scenario] : null;
   if(_SCo && _SCo.turnMandato!=null) S.turnInMandate=_SCo.turnMandato;
+  S.logorioAvv=logorioMaturato(_SCo);   // L262-2bis: e il governo avversario della porta ha già governato i suoi mesi (entraOpposizione lo azzerava)
   initTerritori(); initPotereLocale();   // territori per lean + potere locale del TUO blocco d'opposizione (bloccoIds = opp)
   S.mandate=0;                           // non hai ancora vinto un mandato: la prima vittoria sarà "Mandato 1"
   /* L175-1 · L'ANZIANITÀ DI PORTA È DI CHI GOVERNA (la terza delle tre righe; la seconda, dal L176-1, la toglie ai livelli 0-2 e 5
@@ -8890,7 +8938,7 @@ function bloccoElettorale(){
 }
 /* Lo slancio di campagna: punta al blocco elettorale del contesto e amplifica ×2 la spinta autorata, perché
    evolvePartiti RIASSORBE gli scossoni (~10%/mese verso l'equilibrio): senza compensazione, 6 mesi varrebbero ~1 punto. */
-function campSlancio(x){ applicaSlancio(bloccoElettorale(), x*2); }
+function campSlancio(x){ applicaSlancio(bloccoElettorale(), x*2); campSfidante(); }   // L262-2quater: la campagna dello sfidante (sopra logorioMaturato)
 function campPromessa(grp){ S.promesseCampagna=S.promesseCampagna||[]; S.promesseCampagna.push({grp:grp, mese:S.year*12+S.month, colpi:0}); }
 /* La resa dei conti: le promesse della SCORSA campagna si pesano all'apertura della nuova — tradita (colpi≥6 nel
    mandato, contati da gd come per l'intervista) → il gruppo e la stampa te la rinfacciano; mantenuta → sostegno

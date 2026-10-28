@@ -2003,6 +2003,7 @@ const SCENARI = {
   us1980: {
     id:'us1980', era:LINEA_US, nome:'Stati Uniti 1980', anno:1980, paese:'usa',
     turnMandato: 3, meseUrna: 11,               // D288 (a): il mandato del novembre 1976 all'ultimo anno → presidenziale 1980/11
+    mesiGiaInCarica: 38,                        // L262-2bis: il Presidente governa dal gennaio 1977 — il logorio parte già maturato (logorioMaturato, game.js; interruttore LOGORIO_MATURATO)
     sistema: 'presidenziale', comeSiVince: 'candidato', coalizione: false, cadutaGoverno: false,
     mandatoMesi: 48, mandatiMax: 2, mandatiConsecutivi: false,
     titoloRuolo: 'Presidente', sedeGoverno: 'la Casa Bianca',
