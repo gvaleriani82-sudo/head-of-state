@@ -2529,6 +2529,7 @@ function renderLocalePage(){
     <div class="ind" style="border-top:none"><div class="nm"><b style="font-size:17px">${euro(L.budget)}</b><small>${T('la cassa annua che puoi impegnare nelle tue scelte')}</small></div></div></div>`;
   h+=`<div class="card"><div class="ct">${tRA} · ${T('gli indicatori')}</div>${renderLocaleInd()}</div>`;
   h+=`<div class="card"><div class="ct">${T('Le tue leve')}</div><div style="font-size:12px;color:var(--mut2);padding:0 14px 4px">${T("Più servizi costano al bilancio; i tributi lo rimpinguano ma pesano sul consenso. Trova l'equilibrio.")}</div>${renderLocaleLeve()}</div>`;
+  h+=locPariHtml();   // L260-8: i sindaci delle altre città (vuoto con LOC_PARI spento o fuori dal presente)
   return h;
 }
 function renderMinisteroPage(minId){
@@ -2792,6 +2793,27 @@ function concCorsaHtml(){
 const BIL_TIPO={ alleato:'alleato', swing:'non allineato', rivale:'rivale' };
 const BIL_STATO={ gelo:'gelo', freddo:'freddo', cordiale:'cordiale', intesa:'intesa' };
 function uiMissione(i){ if(typeof bilMissione==='function' && bilMissione(i)){ if(typeof suona==='function') suona('passi'); render(); commitSnap(); } }
+/* L260-9 · «Il dossier conteso» (pagina del volto, livello 2 all'opposizione): il dossier, il ministro con la sigla e il disco, le due righe
+   con lo scarto dalla partenza a parole e la freccia del mese, i tre bottoni dell'azione del mese (44 px) con l'effetto in una riga.
+   Legge solo game.js (voltoAttivo, voltoTuSc, voltoLuiSc, voltoAzionePossibile, voltoDossierNome). */
+function uiVoltoAzione(k){ if(typeof voltoAzione==='function' && voltoAzione(k)){ if(typeof suona==='function') suona('tocco'); render(); commitSnap(); } }
+function voltoScarto(d){ return T("%V da quando sei all'opposizione").replace('%V', (d>0 ? '+' : d<0 ? '−' : '')+fmt(Math.abs(d),1)); }
+function voltoDossierHtml(){
+  if(typeof voltoAttivo!=='function' || !voltoAttivo() || !S.volto) return '';
+  const V=S.volto, P=part(V.min.partito)||{}, libera=voltoAzionePossibile();
+  const riga=function(nome, chi, sc, d){ return `<div class="pari-riga"><div class="pari-v"><span>${nome}</span><b>${locPariFreccia(d)} ${voltoScarto(sc)}</b></div>${chi?`<div class="pari-d">${chi}</div>`:''}</div>`; };
+  let h=`<div class="card pari volto-dossier"><div class="ct">${T('Il dossier conteso')} · ${voltoDossierNome()}</div>`;
+  h+=`<div class="pari-chi contorno">${T('A gennaio conta chi è cresciuto di più da quando sei all\'opposizione: tu o il ministro.')}</div>`;
+  h+=riga(T('Tu'), '', voltoTuSc(), V.tu-V.tp);
+  h+=riga(T('Il ministro'), `${escAttr(V.min.nome)} · ${ppDiscoHtml(P.colore)}${P.sigla||T(P.nome||'')}`, voltoLuiSc(), V.lui-V.lp);
+  const B=[['interroga','Interroga il ministro','+2…+4 per te, −1 al ministro'],['proposta','Presenta la tua proposta','+1…+2 subito, poi +0,5 per 3 mesi'],['piazza','Porta il caso in piazza','da 0 a +6 per te; può costarti 2']];
+  h+=`<div class="volto-az" style="display:grid;gap:7px;padding:8px 12px 12px;">`+B.map(function(b){
+    const fatta=!libera, scelta=V.mese===meseAss() && V.az===b[0];
+    const resa=(libera && typeof voltoResa==='function') ? voltoResa(b[0]) : 1;   // L260-9bis passo 2: la stessa azione di fila rende meno (solo con VOLTO_DOSSIER_DECR)
+    return `<button class="volto-bt" onclick="uiVoltoAzione('${b[0]}')"${fatta?' disabled':''} style="min-height:44px;padding:7px 10px;border-radius:9px;border:1px solid ${scelta?'var(--brand)':'var(--line2)'};background:var(--panel);color:var(--txt);font-family:inherit;font-size:13px;cursor:${fatta?'default':'pointer'};text-align:left;opacity:${fatta&&!scelta?'.6':'1'};"><b>${T(b[1])}</b><br><span style="font-size:12px;color:var(--mut)">${resa<1 ? T(resa<0.5 ? 'di nuovo: rende un quarto' : 'di nuovo: rende la metà') : T(b[2])}</span></button>`; }).join('')+`</div>`;
+  h+=`<div class="contorno" style="font-size:11px;color:var(--mut2);line-height:1.45;padding:0 14px 12px">${libera ? T('Una mossa al mese: anche il ministro lavora, e se salti perdi terreno.') : T('La mossa del mese è fatta: la prossima il mese che viene.')}</div></div>`;
+  return h;
+}
 function bilMissioniHtml(){
   if(typeof bilAttivi!=='function' || !bilAttivi()) return '';
   const fatta=!bilMissionePossibile();
@@ -2931,6 +2953,7 @@ function renderGov(){
     ruolo+=`<div class="banner" style="border-color:var(--neg)">${T('<b>All\'opposizione.</b> Governa %P: niente bilancio né ministri. Ogni mese una mossa; segui la tua risalita nella scheda <b>Partiti</b>.').replace('%P',T((part(S.governoAvversario)||{}).nome||'—'))}</div>`;
     const ob=(l,sub,v)=>{ const c=v<33?'var(--neg)':v<60?'var(--warn)':'var(--pos)'; return `<div class="grp"><div class="top"><div class="nm">${l}<small>${sub}</small></div><div class="pc mono" style="color:${c}">${Math.round(v)}</div></div><div class="bar"><i style="width:${clamp(v,2,100)}%;background:${c}"></i></div></div>`; };
     ruolo+=`<div class="card"><div class="ct">${T('La tua opposizione')}</div>${ob(T('Visibilità'),T('quanto i media parlano di te'),S.visibilita||0)}${ob(T('Credibilità'),T('quanto sei un\'alternativa seria'),S.credibilita||0)}${(S.salvezzeOpp||0)>=1?`<div class="contorno" style="font-size:12px;color:var(--mut);line-height:1.45;margin-top:8px">${T('Il congresso ti ha già confermato una volta: la prossima sconfitta chiude la carriera.')}</div>`:''}</div>`;   // L153-1: la riga fissa dopo la salvezza (salvezzaOpp in game.js)
+    ruolo+=voltoDossierHtml();   // L260-9: il dossier conteso del volto (vuoto con VOLTO_DOSSIER spento o fuori dal livello 2)
   }
   else if(S.livello===1){
     /* livello 1 — POLITICO LOCALE: la tua città/regione è tutto il gioco; notorietà = capitale */
@@ -3496,6 +3519,7 @@ function renderPol(){
     let h=`<div class="banner">${T('<b>Bilancio %L.</b> Imposta le tue leve: più servizi migliorano gli indicatori ma costano al bilancio; i tributi lo rimpinguano ma pesano sul consenso.').replace('%L',diLuogo(S.locale.nome))}</div>`;
     h+=`<div class="card"><div class="ct">${T('Le tue leve')}</div>${renderLocaleLeve()}</div>`;
     h+=`<div class="card"><div class="ct">${T(S.locale.tipo==='città'?'Stato della città':'Stato della regione')}</div>${renderLocaleInd()}</div>`;
+    h+=locPariHtml();   // L260-8: i sindaci delle altre città
     document.getElementById('sec-pol').innerHTML=h;
     return;
   }
@@ -3592,6 +3616,32 @@ function pariHtml(){
   }).join('');
   const nomi=S.pari.p.map(function(q){ return T(PAESI[q.id].nome); }).join(', ');
   return `<div class="card pari"><div class="ct">${T('I pari')}</div><div class="pari-chi contorno">${T('Il confronto con %L.').replace('%L', nomi)} ${T('Conta chi migliora di più rispetto a dove partiva.')}</div>${righe}<div class="pari-riga pari-tot"><div class="pari-v"><span>${T("Posizione d'insieme")}</span><b>${mio ? T('%N° su 5').replace('%N', C.pos) : '—'}</b></div></div></div>`;
+}
+/* L260-8 · «Le altre città»: la tabellina dei sindaci delle altre città (pagina locale e scheda Bilancio del livello 1). Per riga la
+   città, il titolare, la sigla col disco colore e lo scarto dalla partenza a parole con la freccia del mese; la tua riga evidenziata; in
+   ordine di classifica (a parità prima tu, come locPariPos). Legge solo game.js (locPariSc, locPariTuo, locPariPos). */
+function locPariFreccia(d){ return d>0.05 ? '↑' : d<-0.05 ? '↓' : '→'; }
+function locPariScarto(d){ return T("%V dall'insediamento").replace('%V', (d>0 ? '+' : d<0 ? '−' : '')+fmt(Math.abs(d),1)); }
+function locPariHtml(){
+  if(typeof locPariAttivi!=='function' || !locPariAttivi() || !S.locale.pari) return '';
+  const st=S.locale.pariSt, tu=locPariTuo();
+  const righe=[{tu:true, sc:tu, d:S.locale.consenso-st.cp}].concat(S.locale.pari.map(function(q){ return {q:q, sc:locPariSc(q), d:q.grad-q.gp}; }));
+  righe.sort(function(a,b){ return b.sc-a.sc || (a.tu ? -1 : b.tu ? 1 : 0); });
+  const html=righe.map(function(r){
+    let nome, chi;
+    if(r.tu){ nome=escAttr(localeNome()); chi=T('tu'); }
+    else { const TE=PAESE.territori[r.q.t]||{}, P=part(r.q.partito)||{};
+      nome=nomeTerr(TE); chi=`${escAttr(r.q.nome)} · ${ppDiscoHtml(P.colore)}${P.sigla||T(P.nome||'')}`; }
+    return `<div class="pari-riga${r.tu?' locpari-tu':''}"><div class="pari-v"><span>${nome}</span><b>${locPariFreccia(r.d)} ${locPariScarto(r.sc)}</b></div><div class="pari-d">${chi}</div></div>`;
+  }).join('');
+  const pos=st.pos ? T('%N° su 5').replace('%N', st.pos) : '—';
+  return `<div class="card pari locpari"><div class="ct">${locPariTitolo()}</div><div class="pari-chi contorno">${T('Conta chi migliora di più rispetto a dove partiva.')} ${st.pos ? '' : T('La prima classifica è a gennaio.')}</div>${righe.length ? html : ''}<div class="pari-riga pari-tot"><div class="pari-v"><span>${T('Posizione a gennaio')}</span><b>${pos}</b></div></div></div>`;
+}
+/* la riga della scheda Partiti: quanti dei cinque (tu e i quattro) stanno col tuo blocco */
+function locPariPartitiRiga(){
+  if(typeof locPariAttivi!=='function' || !locPariAttivi() || !S.locale.pari) return '';
+  const asseTuo=mioPartito().asse, n=1+S.locale.pari.filter(function(q){ return compatibile(q.partito, asseTuo, S.partito); }).length;
+  return `<div class="card" style="padding:10px 14px;margin-bottom:12px"><span style="font-size:12.5px;color:var(--mut)">${T(S.locale.tipo==='città' ? 'Sindaci del tuo blocco · <b>%N</b> su %M' : 'Territori guidati dal tuo blocco · <b>%N</b> su %M').replace('%N', n).replace('%M', S.locale.pari.length+1)}</span></div>`;
 }
 /* L143-2 · lo stato delle sezioni del Bilancio: transitorio, per mese (al mese nuovo si riparte dalla regola: aperta solo la
    sezione della politica sotto pressione). ⚠ Mai in S né in localStorage. */
@@ -5198,7 +5248,7 @@ function renderPartiti(){
   const minNote = S.minoranza?' <b style="color:var(--neg)">'+T('Governi in minoranza')+'</b>: '+T('ogni mese rischi una <b>mozione di sfiducia</b> che porta a elezioni anticipate.'):'';
   const govLine = S.opposizione?T("Al <b>Governo</b> c'è l'avversario; il tuo partito è all'<b>Opposizione</b>."):T("I partiti al <b>Governo</b> formano la tua maggioranza, gli altri sono all'<b>Opposizione</b>.");
   const oppNote = S.opposizione?' <b style="color:var(--neg)">'+T("Sei all'opposizione")+'</b>: '+T('fai risalire la tua forza e vinci il prossimo voto per tornare al governo; se crolla sotto ~%N il partito ti scarica.').replace('%N',Math.round(sogliaCrollo(f0Crollo()))):'';
-  h+=`</div>${territBox}${oppTragBox()}<div class="card"><div class="ct">${T('Come funziona')}</div><div class="log">
+  h+=`</div>${territBox}${locPariPartitiRiga()}${oppTragBox()}<div class="card"><div class="ct">${T('Come funziona')}</div><div class="log">
     <div class="li">${T("Le forze <b>seguono l'umore dei gruppi sociali</b> che ogni partito rappresenta: base soddisfatta → il partito cresce, altrimenti cala (lentamente, ancorato alla forza iniziale).")} ${govLine} ${comeVince}${tenNote}${minNote}${oppNote}</div></div></div>`;
   document.getElementById('sec-par').innerHTML=h;
 }

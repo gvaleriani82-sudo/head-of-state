@@ -1414,6 +1414,181 @@ function pariBilancioRiga(annoChiuso){
   var u=S.pari.ult, x=u.prima===0 ? T('Entri nel confronto fra i pari al %N° posto.') : u.dopo<u.prima ? T('Sei salito al %N° posto fra i pari.') : u.dopo>u.prima ? T('Sei sceso al %N° posto fra i pari.') : T('Resti al %N° posto fra i pari.');
   return `<div class="mtext bil-pari" style="padding-top:0">${x.replace('%N',u.dopo)}</div>`;
 }
+/* L260-8 (28/10) · I SINDACI DELLE ALTRE CITTÀ (LOC_PARI, §3 di DESIGN-OLTRE-LE-CARTE.md, rapporto «⚑ L260-8»). Il gemello dei pari
+   del capo del governo al livello 1, solo nel presente. S.locale.pari = [{t, nome, partito, grad, grad0, f0, gp}] (dati puri): i 4
+   titolari (LOC_PARI_N) delle aree dello STESSO tipo della tua (città con città, regioni con regioni: le cariche si confrontano fra
+   pari), nell'ordine di PAESE.territori (le grandi prima), con almeno 2 di un partito diverso dal tuo se ce ne sono (locPariScegli).
+   Nome e partito sono quelli di S.territori[t] (titolare: nomePersona(), nomi di fantasia dalle liste del paese). grad0 = 45-60 dal
+   dado; ogni mese (locPariMese) grad torna del LOC_PARI_RIT verso grad0 + LOC_PARI_VENTO × (forza nazionale del suo partito − f0, la
+   forza alla nascita) più il dado ±LOC_PARI_DADO, tetto 20-80; `gp` = grad del mese prima (la freccia della scheda). Se il titolare
+   dell'area cambia, il sindaco nuovo riparte da un grad0 nuovo. Il dado è locPariDado (FNV-1a + murmur su personaggio, area e mese,
+   come pariDado: mai Math.random, nessuna estrazione del banco, lo stesso dopo un caricamento). S.locale.pariSt = {c0, cp, pos,
+   anno, cn, ult?, primo?, ultimo?}: c0 il tuo consenso all'insediamento (o al primo mese con LOC_PARI), cp e cn il consenso alla
+   fine del mese prima e di questo (la freccia della scheda).
+   Il confronto è sullo SCARTO dalla partenza (lezione di L260-6ter): tu consenso − c0, loro grad − grad0; posizione su 5, a parità
+   vinci tu. A gennaio (locPariGennaio, prima dell'urna locale): il primo gennaio è l'INGRESSO (niente notorietà), poi salire =
+   S.capitale +1, scendere = −1; al 1° o al 5° una riga di registro (e la prima volta un fatto in biografia). Nient'altro: consenso,
+   soglia dell'urna e chiamata non si toccano. Spento = nessun campo in S, il gioco di prima. */
+let LOC_PARI=true;
+let LOC_PARI_N=4, LOC_PARI_VENTO=0.5, LOC_PARI_DADO=5, LOC_PARI_RIT=0.05;   // DADO 1,5 della consegna → 5 (rapporto «⚑ L260-8»: a 1,5 il giocatore era 1° nel 93% dei gennai)
+function locPariAttivi(){ return LOC_PARI && typeof S!=='undefined' && !!S && S.scenario==='presente' && S.livello===1 && !!S.locale && Array.isArray(S.territori) && S.territori.length>0; }
+function locPariDado(sale){   // FNV-1a + finalizzatore murmur3, come pariDado
+  var s='locpari|'+sale+'|'+scissioneCarriera(), h=2166136261;
+  for(var i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619); }
+  h^=h>>>16; h=Math.imul(h,0x85ebca6b); h^=h>>>13; h=Math.imul(h,0xc2b2ae35); h^=h>>>16;
+  return (h>>>0)/4294967296;
+}
+function locPariMio(i){ var L=S.locale; return L.terrIdx!=null ? i===L.terrIdx : ((PAESE.territori[i]||{}).nome===L.nome); }
+function locPariScegli(){
+  var tipo=S.locale.tipo, c=[];
+  (PAESE.territori||[]).forEach(function(TE,i){ if(TE.tipo===tipo && !locPariMio(i) && S.territori[i]) c.push(i); });
+  var scelti=c.slice(0, LOC_PARI_N), resto=c.slice(LOC_PARI_N);
+  function diversi(){ return scelti.filter(function(i){ return S.territori[i].partito!==S.partito; }).length; }
+  for(var k=scelti.length-1; k>=0 && diversi()<2; k--){   // almeno 2 di un altro partito: dal fondo, col primo diverso che resta
+    if(S.territori[scelti[k]].partito!==S.partito) continue;
+    var j=resto.findIndex(function(i){ return S.territori[i].partito!==S.partito; }); if(j<0) break;
+    scelti[k]=resto.splice(j,1)[0];
+  }
+  return scelti.sort(function(a,b){ return a-b; });
+}
+function locPariNuovo(t){
+  var tt=S.territori[t], g0=Math.round((45+15*locPariDado('g0|'+t+'|'+tt.titolare))*10)/10;
+  return {t:t, nome:tt.titolare, partito:tt.partito, grad:g0, grad0:g0, gp:g0, f0:(S.forze&&S.forze[tt.partito])||0};
+}
+function locPariInit(){
+  if(!locPariAttivi() || S.locale.pari) return;
+  S.locale.pari=locPariScegli().map(locPariNuovo);
+  S.locale.pariSt={c0:S.locale.consenso, cp:S.locale.consenso, cn:S.locale.consenso, pos:0, anno:S.year};   // pos 0 = non ancora classificato: la prima classifica è il primo gennaio
+}
+function locPariSc(q){ return pariR2(q.grad-q.grad0); }
+function locPariTuo(){ return pariR2(S.locale.consenso-S.locale.pariSt.c0); }
+function locPariPos(){ var tu=locPariTuo(); return 1+S.locale.pari.filter(function(q){ return locPariSc(q)>tu; }).length; }
+function locPariGruppo(){ return T(S.locale.tipo==='città' ? 'le grandi città' : 'i grandi territori'); }
+function locPariTitolo(){ return T(S.locale.tipo==='città' ? 'Le altre città' : 'Gli altri territori'); }
+function locPariMuovi(){
+  S.locale.pari.forEach(function(q, k){
+    var tt=S.territori[q.t]; if(!tt) return;
+    if(tt.titolare!==q.nome){ S.locale.pari[k]=locPariNuovo(q.t); return; }   // l'area ha un titolare nuovo: riparte da un grad0 nuovo
+    q.partito=tt.partito;
+    var vento=LOC_PARI_VENTO*(((S.forze&&S.forze[q.partito])||0)-q.f0), e=(2*locPariDado('m|'+q.t+'|'+q.nome+'|'+meseAss())-1)*LOC_PARI_DADO;
+    q.gp=q.grad; q.grad=pariR2(clamp(q.grad+LOC_PARI_RIT*(q.grad0+vento-q.grad)+e, 20, 80));
+  });
+}
+function locPariGennaio(){
+  var st=S.locale.pariSt; if(S.month!==1 || st.anno===S.year) return;
+  var prima=st.pos, dopo=locPariPos(), G=locPariGruppo(), tit=locPariTitolo();
+  st.ult={a:S.year-1, prima:prima, dopo:dopo}; st.pos=dopo; st.anno=S.year;
+  if(!prima){ S.log.unshift({t:tit, x:T('Entri nel confronto fra %G al %N° posto.').replace('%G',G).replace('%N',dopo)}); return; }
+  if(dopo<prima){ S.capitale=clamp(S.capitale+1,0,100); S.log.unshift({t:tit, x:T('Sali al %N° posto fra %G.').replace('%N',dopo).replace('%G',G)}); }
+  else if(dopo>prima){ S.capitale=clamp(S.capitale-1,0,100); S.log.unshift({t:tit, x:T('Scendi al %N° posto fra %G.').replace('%N',dopo).replace('%G',G)}); }
+  if(dopo===1){ S.log.unshift({t:tit, x:T('Al primo posto fra %G: la tua amministrazione è la più apprezzata.').replace('%G',G)});
+    if(!st.primo){ st.primo=true; bioFatto(T('Al primo posto fra %G.').replace('%G',G)); } }
+  else if(dopo===S.locale.pari.length+1){ S.log.unshift({t:tit, x:T("All'ultimo posto fra %G: la tua amministrazione è la meno apprezzata.").replace('%G',G)});
+    if(!st.ultimo){ st.ultimo=true; bioFatto(T("All'ultimo posto fra %G.").replace('%G',G)); } }
+}
+/* a fine mese del livello 1 (dopo simulateLocale, prima dell'urna locale): nascita, passo del mese, gennaio */
+function locPariMese(){
+  if(!locPariAttivi()) return;
+  if(!S.locale.pari){ locPariInit(); return; }
+  locPariMuovi(); locPariGennaio();
+  var st=S.locale.pariSt; st.cp=(st.cn!=null ? st.cn : st.c0); st.cn=S.locale.consenso;   // cp = il consenso a fine del mese prima (la freccia), cn = a fine di questo
+}
+/* la riga del bilancio di gennaio */
+function locPariBilancioRiga(annoChiuso){
+  if(!locPariAttivi() || !S.locale.pari || !S.locale.pariSt.ult || S.locale.pariSt.ult.a!==annoChiuso) return '';
+  var u=S.locale.pariSt.ult, G=locPariGruppo(), x=!u.prima ? T('Entri nel confronto fra %G al %N° posto.') : u.dopo<u.prima ? T('Sali al %N° posto fra %G.') : u.dopo>u.prima ? T('Scendi al %N° posto fra %G.') : T('Resti al %N° posto fra %G.');
+  return `<div class="mtext bil-pari" style="padding-top:0">${x.replace('%G',G).replace('%N',u.dopo)}</div>`;
+}
+/* L260-9 (28/10) · IL DOSSIER CONTESO DEL VOLTO (VOLTO_DOSSIER, §3 di DESIGN-OLTRE-LE-CARTE.md, rapporto «⚑ L260-9»). Il volto è il
+   livello 2 all'opposizione (S.livello===2 && S.opposizione: il ministro del proprio partito che perde l'urna, applicaElezioneMinistro;
+   il suo mese e la sua agenda sono quelli dell'opposizione). S.volto = {dos, min:{nome, g, partito}, gv, tu, tu0, tp, lui, lui0, lp, c0,
+   pr, mese, az, anno, ult?, avanti?} (dati puri): `dos` = il dicastero che avevi (S.dicastero; senza, 'economia'), `min` = il ministro
+   in carica di quel dicastero nel governo avversario — all'opposizione S.ministers è vuoto, quindi si genera coi nomi del paese
+   (PAESE.nomiM/nomiF, cognomi, quotaFemminileGoverno come mkCand) e un dado; partito = governoGuida(); `gv` = S.governoAvversarioVolto
+   alla nascita (cambia a ogni governo nuovo: allora ministro nuovo, lui0 nuovo); `c0` = il consenso del governo alla nascita del ministro.
+   Il dado è voltoDado (FNV-1a + murmur su personaggio e sale, come locPariDado: mai Math.random, nessuna estrazione del banco, lo stesso
+   dopo un caricamento). L'azione del mese (voltoAzione, fuori dalle carte, una sola, facoltativa: `mese` = il mese assoluto dell'ultima,
+   `az` = quale): interroga (tu +2…+4, lui −1) · proposta (tu +1…+2 e +0,5 per 3 mesi, `pr`) · piazza (tu +0…+6, col dado sotto 0,25 −2).
+   Ogni mese (voltoMese, accanto a pariMese): lui torna del VOLTO_DOSSIER_RIT verso lui0 + VOLTO_DOSSIER_VENTO × (consenso del governo − c0)
+   più la sua mossa del mese VOLTO_DOSSIER_RISP e il dado ±VOLTO_DOSSIER_DADO (L260-9bis: il ministro risponde, e il RIT è 0,25 per tutti e due —
+   con 0,05 le mosse del volto cumulavano fino al tetto 80, rapporto «⚑ L260-9»: ora chi salta il mese perde terreno); tu torna del RIT verso tu0; tetto 20-80. A gennaio il confronto sullo SCARTO dalla partenza (tu−tu0
+   contro lui−lui0; a parità davanti tu): davanti = credibilità +1, dietro = −1, una riga di registro e, la prima volta davanti, la
+   biografia. ⚠ La consegna diceva S.capitale: per il volto non lo legge nessuno (il ramo dell'opposizione), la credibilità sì (credBonus
+   all'urna): nient'altro passa di qui. Fuori dal volto S.volto si toglie (voltoMese e tornaAlGoverno). Spento = nessun campo in S. */
+let VOLTO_DOSSIER=true;   // ACCESO dal L260-9bis (rapporto «⚑ L260-9bis»: il ministro risponde, RIT 0,25, DADO 8 → davanti 28-52% dei gennai per paese; in L260-9 era spento, 100%)
+let VOLTO_DOSSIER_DADO=8, VOLTO_DOSSIER_RIT=0.25, VOLTO_DOSSIER_VENTO=0.5;   // L260-9bis: RIT da 0,05 a 0,25 (per tu e per lui: chi salta il mese perde terreno); DADO da 2 a 8 (lo spread della mossa del ministro: con 2 il vento del governo decideva il paese, Regno Unito 13-16%)
+let VOLTO_DOSSIER_RISP=2.5;   // L260-9bis: la mossa media del ministro al mese, più il dado ±DADO (la mossa del volto col banco, interroga/proposta alternate, vale +2,75 al mese col gocciolio della proposta; misurato: 2,5 pareggia il −1 che «Interroga» toglie al ministro)
+let VOLTO_DOSSIER_DECR=false;   // L260-9bis passo 2: la stessa azione due mesi di fila vale la metà, tre un quarto (spento: vedi il rapporto «⚑ L260-9bis»)
+const VOLTO_AZIONI=['interroga','proposta','piazza'];
+function voltoAttivo(){ return VOLTO_DOSSIER && typeof S!=='undefined' && !!S && S.livello===2 && !!S.opposizione; }
+function voltoDado(sale){   // FNV-1a + finalizzatore murmur3, come locPariDado
+  var s='volto|'+sale+'|'+scissioneCarriera(), h=2166136261;
+  for(var i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619); }
+  h^=h>>>16; h=Math.imul(h,0x85ebca6b); h^=h>>>13; h=Math.imul(h,0xc2b2ae35); h^=h>>>16;
+  return (h>>>0)/4294967296;
+}
+function voltoScegli(lista, sale){ return (lista && lista.length) ? lista[Math.floor(voltoDado(sale)*lista.length)%lista.length] : ''; }
+function voltoMinistro(dos, gv){
+  var sale=dos+'|'+(gv||''), g=voltoDado('g|'+sale)<quotaFemminileGoverno() ? 'f' : 'm';
+  var L=(g==='f' ? PAESE.nomiF : PAESE.nomiM); if(!L || !L.length) L=PAESE.nomi;
+  return {nome:voltoScegli(L, 'n|'+sale)+' '+voltoScegli(PAESE.cognomi, 'c|'+sale), g:g, partito:governoGuida()};
+}
+function voltoLui0(dos, gv){ return Math.round((45+15*voltoDado('l0|'+dos+'|'+(gv||'')))*10)/10; }
+function voltoNasci(){
+  var dos=S.dicastero || 'economia', gv=S.governoAvversarioVolto || '', t0=Math.round((45+15*voltoDado('t0|'+dos))*10)/10, l0=voltoLui0(dos, gv), c=(S.ind&&S.ind.consenso)||50;
+  S.volto={dos:dos, min:voltoMinistro(dos, gv), gv:gv, tu:t0, tu0:t0, tp:t0, lui:l0, lui0:l0, lp:l0, c0:c, pr:0, mese:null, az:null, anno:S.year};
+}
+function voltoTuSc(){ return pariR2(S.volto.tu-S.volto.tu0); }
+function voltoLuiSc(){ return pariR2(S.volto.lui-S.volto.lui0); }
+function voltoDossierNome(){ return T(dicNm(S.volto.dos) || ''); }
+/* l'azione del mese è ancora libera? (la UI mostra i bottoni, il banco sceglie) */
+function voltoAzionePossibile(){ return voltoAttivo() && !!S.volto && S.volto.mese!==meseAss(); }
+/* L260-9bis passo 2 (VOLTO_DOSSIER_DECR): la resa di un'azione — 1, ½ se è la stessa del mese prima, ¼ dalla terza di fila in poi; un'azione
+   diversa riporta il pieno. Spento = 1 sempre. La legge anche il riquadro («rende la metà», ui.js). */
+function voltoResa(k){
+  var V=S.volto; if(!VOLTO_DOSSIER_DECR || !V || V.az!==k || V.mese!==meseAss()-1) return 1;
+  return (V.rip||1)>=2 ? 0.25 : 0.5;
+}
+function voltoAzione(k){
+  if(!voltoAzionePossibile() || VOLTO_AZIONI.indexOf(k)<0) return false;
+  var V=S.volto, d=voltoDado('az|'+k+'|'+meseAss()), dt=0, f=voltoResa(k);
+  if(VOLTO_DOSSIER_DECR) V.rip=(V.az===k && V.mese===meseAss()-1) ? (V.rip||1)+1 : 1;   // L260-9bis passo 2: quante volte di fila (solo con DECR acceso: spento nessun campo nuovo)
+  if(k==='interroga'){ dt=2+2*d; V.lui=pariR2(clamp(V.lui-f, 20, 80)); }
+  else if(k==='proposta'){ dt=1+d; V.pr=3; V.prf=f<1 ? f : undefined; if(V.prf===undefined) delete V.prf; }
+  else { dt=d<0.25 ? -2 : 6*(d-0.25)/0.75; }
+  if(dt>0) dt*=f;   // il rendimento decrescente tocca il guadagno, non il costo della piazza
+  V.tu=pariR2(clamp(V.tu+dt, 20, 80)); V.mese=meseAss(); V.az=k;
+  var tit={interroga:'Interroghi il ministro', proposta:'Presenti la tua proposta', piazza:'Porti il caso in piazza'}[k];
+  S.log.unshift({t:T('Il dossier conteso'), x:T(tit)+' · '+voltoDossierNome()+'.'});
+  return true;
+}
+function voltoGennaio(){
+  var V=S.volto; if(S.month!==1 || V.anno===S.year) return;
+  var avanti=voltoTuSc()>=voltoLuiSc(), dos=voltoDossierNome();
+  V.anno=S.year; V.ult={a:S.year-1, avanti:avanti};
+  S.credibilita=clamp((S.credibilita||0)+(avanti ? 1 : -1), 0, 100);
+  if(avanti){ S.log.unshift({t:T('Il dossier conteso'), x:T('Sei più credibile del ministro su %D.').replace('%D',dos)});
+    if(!V.avanti){ V.avanti=true; bioFatto(T('Più credibile del ministro su %D.').replace('%D',dos)); } }
+  else S.log.unshift({t:T('Il dossier conteso'), x:T('Il ministro è più credibile di te su %D.').replace('%D',dos)});
+}
+/* a ogni mese (accanto a pariMese, dopo S.month++): nascita, ministro nuovo, passo del mese, gennaio; fuori dal volto si toglie */
+function voltoMese(){
+  if(!voltoAttivo()){ if(S && S.volto) delete S.volto; return; }
+  if(!S.volto){ voltoNasci(); return; }
+  var V=S.volto, gv=S.governoAvversarioVolto || '';
+  if(gv!==V.gv){ V.gv=gv; V.min=voltoMinistro(V.dos, gv); V.lui0=voltoLui0(V.dos, gv); V.lui=V.lui0; V.lp=V.lui0; V.c0=(S.ind&&S.ind.consenso)||50; }   // governo nuovo: ministro nuovo
+  V.tp=V.tu; V.lp=V.lui;
+  if(V.pr>0){ V.tu+=0.5*(V.prf||1); V.pr--; if(!V.pr) delete V.prf; }
+  V.tu=pariR2(clamp(V.tu+VOLTO_DOSSIER_RIT*(V.tu0-V.tu), 20, 80));
+  var vento=VOLTO_DOSSIER_VENTO*(((S.ind&&S.ind.consenso)||50)-V.c0), e=(2*voltoDado('m|'+V.min.nome+'|'+meseAss())-1)*VOLTO_DOSSIER_DADO;
+  V.lui=pariR2(clamp(V.lui+VOLTO_DOSSIER_RIT*(V.lui0+vento-V.lui)+VOLTO_DOSSIER_RISP+e, 20, 80));   // L260-9bis: il ministro risponde ogni mese (VOLTO_DOSSIER_RISP ± il dado)
+  voltoGennaio();
+}
+function voltoBilancioRiga(annoChiuso){
+  if(!voltoAttivo() || !S.volto || !S.volto.ult || S.volto.ult.a!==annoChiuso) return '';
+  var x=S.volto.ult.avanti ? T('Sei più credibile del ministro su %D.') : T('Il ministro è più credibile di te su %D.');
+  return `<div class="mtext bil-pari" style="padding-top:0">${x.replace('%D',voltoDossierNome())}</div>`;
+}
 /* L260-5bis (26/10) · IL CONCORRENTE PER IL POSTO (DIPLO_CONCORRENTE, §3 D-OC2 di DESIGN-OLTRE-LE-CARTE.md, rapporto «⚑ L260-5bis»).
    S.diplo.conc = {nome, f, punti, grado, vinto:[], attesa?, fino?, chiuso?} (dati puri): un altro diplomatico di fantasia (nome dalle liste del
    paese, genere con quotaFemminileGoverno() come i ministri generati), che corre con te per il grado 2 e per il Segretariato. Nasce in
@@ -1613,6 +1788,7 @@ function startLocale(){
   initTerritori(); initPotereLocale();
   if(proprio) fondaPartitoProprio(proprio);          // L237-4: la fondazione dentro l'avvio, prima di agenda, titolo e primo salvataggio
   simulateLocale();                                  // consenso locale iniziale
+  locPariInit();                                     // L260-8: i sindaci delle altre città, col consenso dell'insediamento (no-op con LOC_PARI spento)
   if(S.biografia) S.biografia.origine='locale';       // l'epilogo ricorderà la gavetta
   const ruolo=ruoloLocale();
   S.log=[{t:T('Eletto %R').replace('%R',ruolo), x:luoghiSub(T('Cominci dal basso: amministra bene %L, costruisci la notorietà, e il partito ti chiamerà %ACAPITALE.')).replace('%L',localeNome())}];   // L244-4: titolo e luogo nella lingua del gioco (ruoloLocale è già tradotto)
@@ -5473,6 +5649,7 @@ function diventaLocale(terrIdx){
   S.minoranza=false; S.tenuta={}; S.tenutaForza0={}; S.tenutaLiv={}; S.tenutaUltimo={}; S.mesiMinoranza=0;
   initTerritori(); initPotereLocale();
   simulateLocale();                                  // consenso locale iniziale
+  locPariInit();                                     // L260-8: i sindaci delle altre città (no-op con LOC_PARI spento)
   /* la biografia RESTA 'attivista' (l'epilogo distingue la militanza da chi è partito già sindaco); aggiungo il fatto della carica */
   const ruolo=ruoloLocale();
   bioFatto(T('Dalla militanza alla prima carica: %R.').replace('%R',ruolo));
@@ -9139,6 +9316,7 @@ function avanzaMese(){
      Curare gli affetti (eventi) la rialza; sotto 35 arriva la crisi familiare (popup in pickPersonale). */
   if(famigliaPresente() && S.famiglia.serenita!=null){ const dm=(dif().degradoMult!=null)?dif().degradoMult:1; serenitaMuovi(-0.3*dm); }   // la carriera divora: chi cura gli affetti (sceglie famiglia sugli eventi) la tiene su; chi no, scivola alla crisi
   pariMese();   // L260-6: i pari del capo del governo — a gennaio si muovono e la posizione si rilegge (no-op con GOV_PARI spento, fuori dal presente o dal livello 3)
+  voltoMese();   // L260-9: il dossier conteso del volto — il passo del mese e, a gennaio, il confronto (fuori dal volto toglie S.volto; no-op con VOLTO_DOSSIER spento)
   if(S.livello===5){   // DIPLOMATICO (C2): si sale per STANDING (credito + relInt); nessuna sconfitta nazionale, nessun mandato a scadenza
     if(S.diplo){ S.diplo.mesiAlto=(S.diplo.credito>=70)?(S.diplo.mesiAlto||0)+1:0; }   // mesi a credito alto → garantiscono la promozione
     bilMese();   // L260-5: deriva dei partner trascurati e controllo di gennaio (no-op con DIPLO_BILATERALI spento)
@@ -9161,6 +9339,7 @@ function avanzaMese(){
   if(S.livello===1){   // POLITICO LOCALE: il motore è quello locale; non perdi a crisi/insolvenza nazionali
     simulateLocale();
     capitaleCresci();
+    locPariMese();   // L260-8: i sindaci delle altre città — il passo del mese e, a gennaio, la classifica (no-op con LOC_PARI spento o fuori dal presente)
     if(urnaScadenzaOra()){ return urnaLocale(); }   // L261-1: la notte delle locali (o l'esito diretto, a interruttore spento)
     S.snap=Object.assign({},S.pol);
     aggiornaSfida();
@@ -10463,7 +10642,7 @@ function mostraBilancio(prev, cur){
   const scFa=scenaMomentoHtml('assets/scenes/fineanno-'+(verd.k||'lucieombre')+'.webp');
   document.getElementById('modal').innerHTML=`${scFa}<div class="mt" style="display:flex;align-items:center;gap:11px"><div><div class="kicker">${T("Bilancio dell'anno")} · ${cur.anno-1}</div><h2>${T("L'anno che si chiude")}</h2></div></div>
     <div class="mtext" style="color:var(--mut2)">${T("Come è andato l'anno, in tendenza.")}</div>
-    <div class="bil-rows" style="padding:2px 18px 4px">${rows}</div>${radiciBilancioRiga()}${oppTragBilancioRiga(cur.anno-1)}${pariBilancioRiga(cur.anno-1)}
+    <div class="bil-rows" style="padding:2px 18px 4px">${rows}</div>${radiciBilancioRiga()}${oppTragBilancioRiga(cur.anno-1)}${pariBilancioRiga(cur.anno-1)}${locPariBilancioRiga(cur.anno-1)}${voltoBilancioRiga(cur.anno-1)}
     <div class="rv-riga" style="padding:6px 18px 8px">${rvB}<div class="bil-verdetto" style="font-family:'Fraunces',serif;font-style:italic;font-size:18px;color:${verd.c}">${verd.t}.</div></div>
     <div class="choices"><button class="opt" style="border-color:var(--brand)" onclick="chiudiBilancio()"><span class="ol">${T('Continua →')}</span></button></div>`;
   document.getElementById('ov').classList.add('on');
@@ -11115,6 +11294,7 @@ function condannaLieve(){
 let REGOLA_VOLTO=true;
 function tornaAlGoverno(mins){
   if(REGOLA_VOLTO && S.livello===2){ S.livello=3; S.premier=null; S.dicastero=null; S.capitale=null; S.prevSettore=null; S.silAvviso=null; S.premCrisiMesi=0; S.occUltima=null; S.mesiAltoCap=0; }
+  if(S.volto) delete S.volto;   // L260-9: al governo il dossier conteso finisce (voltoMese lo toglierebbe al mese dopo: qui subito)
   S.ministers=mins; S.opposizione=false; S.governoAvversario=null;
   delete S.f0Rientro;   // L237-2ter: al governo la soglia del rientro da partner non vale più
   if(typeof parla==='function') parla(voceGesto('insediamento', 'voce-insediamento', {chiudeOv:true}));   // L218-4: torni capo del governo (dalle urne o con la sfiducia costruttiva); l'altro punto è diventaPremier · L248-5bis: lo strato
@@ -11675,6 +11855,9 @@ function applySnap(snap){
   if(S.divorzioBdi===undefined){ S.divorzioBdi=null; S.scalaMobile=null; S.nucleare=null; }   // L33-1 — migrazione snodi '80
   if(!S.pilastri70 || typeof S.pilastri70!=='object') S.pilastri70={};   // L28-4 — migrazione pilastri '70
   if(S.attacco!=null && (typeof S.attacco!=='object' || typeof S.attacco.ultimo!=='number')) delete S.attacco;   // L245-7: lo stato dell'attacco illeggibile si toglie (assente = nessun attacco)
+  if(S.locale && (S.locale.pari!=null || S.locale.pariSt!=null) && (!Array.isArray(S.locale.pari) || !S.locale.pariSt || typeof S.locale.pariSt.c0!=='number' || typeof S.locale.pariSt.pos!=='number'
+    || S.locale.pari.some(function(q){ return !q || typeof q.t!=='number' || typeof q.grad!=='number' || typeof q.grad0!=='number'; }))){ delete S.locale.pari; delete S.locale.pariSt; }   // L260-8: i sindaci illeggibili si tolgono (locPariMese li rifà al mese dopo)
+  if(S.volto!=null && (typeof S.volto!=='object' || typeof S.volto.tu!=='number' || typeof S.volto.tu0!=='number' || typeof S.volto.lui!=='number' || typeof S.volto.lui0!=='number' || !S.volto.min || typeof S.volto.min.nome!=='string')) delete S.volto;   // L260-9: il dossier conteso illeggibile si toglie (voltoMese lo rifà al mese dopo)
   if(S.pari!=null && (typeof S.pari!=='object' || !Array.isArray(S.pari.p) || typeof S.pari.pos!=='number')) delete S.pari;   // L260-6: i pari illeggibili si tolgono (pariMese li rifà dalle cifre di PAESI al primo mese di governo)
   if(S.pari){ if(S.pari.mioDebitoPrima!=null && typeof S.pari.mioDebitoPrima!=='number') delete S.pari.mioDebitoPrima;   // L260-6bis: come gli altri campi, un valore illeggibile si toglie (il primo gennaio lo riscrive)
     S.pari.p.forEach(function(q){ if(q && q.debitoPrima!=null && typeof q.debitoPrima!=='number') delete q.debitoPrima;
