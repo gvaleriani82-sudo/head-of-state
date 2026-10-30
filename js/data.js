@@ -20380,6 +20380,9 @@ const TITOLI=[
 {id:'ti_us80_casse', era:'us1980', pri:1, cond:()=>S.usCasse89==='piano' && S.year===1989 && S.month>=3 && S.month<=4, amico:'Casse di risparmio: depositi al sicuro, e quelle insolventi chiudono', ostile:'Il conto delle casse fallite finisce sul bilancio pubblico'},
 {id:'ti_us80_casse_settore', era:'us1980', pri:1, cond:()=>S.usCasse89==='settore' && S.year===1989 && S.month>=3 && S.month<=4, amico:'Casse di risparmio: il conto lo paga prima di tutto il settore', ostile:'Contributi più alti alle banche: il settore teme di non reggere'},
 {id:'ti_us80_casse_attesa', era:'us1980', pri:1, cond:()=>S.usCasse89==='attesa' && S.year===1989 && S.month>=3 && S.month<=4, amico:'Casse di risparmio: regole più severe, e subito', ostile:'Casse insolventi: regole nuove, e il salvataggio può aspettare'},
+{id:'ti_us80_panama', era:'us1980', pri:1, cond:()=>S.usPanama89==='intervento' && S.year===1990 && S.month>=2 && S.month<=3, amico:'Il generale di Panama si è consegnato, e governa chi ha vinto a maggio', ostile:'Panama: il generale è preso, ma quanti civili sono morti?'},
+{id:'ti_us80_panama_sanzioni', era:'us1980', pri:1, cond:()=>S.usPanama89==='sanzioni' && S.year===1990 && S.month>=2 && S.month<=3, amico:'Panama: sanzioni e pressione, senza mandare le truppe', ostile:'Panama: le sanzioni non bastano, il generale resta al suo posto'},
+{id:'ti_us80_panama_attesa', era:'us1980', pri:1, cond:()=>S.usPanama89==='attesa' && S.year===1990 && S.month>=2 && S.month<=3, amico:'Panama: rinforzi nella zona del Canale, gli americani al sicuro', ostile:'Panama: i rinforzi al Canale, e il generale è ancora lì'},
 {id:'ti_us80_malta', era:'us1980', pri:1, cond:()=>S.usMalta89==='finita' && S.year===1990 && S.month===1, amico:'Al largo di Malta, nella tempesta: la guerra fredda è finita', ostile:'La guerra fredda è finita, dice il Presidente: i missili sovietici sono ancora lì'},
 {id:'ti_us80_malta_prudenza', era:'us1980', pri:1, cond:()=>S.usMalta89==='prudenza' && S.year===1990 && S.month===1, amico:'Malta: aiuti a Mosca, ma solo con le riforme', ostile:'Malta: il Presidente prudente mentre l\'Europa cambia'},
 {id:'ti_us80_malta_nato', era:'us1980', pri:1, cond:()=>S.usMalta89==='nato' && S.year===1990 && S.month===1, amico:'Malta: la Germania unita deve stare nella NATO', ostile:'Malta: sulla Germania il vertice si inceppa'},
@@ -26608,6 +26611,50 @@ const CASSE89_OPP_EV = {
     { l:'Pretendere che paghino prima gli azionisti e i dirigenti delle casse', e:'Il ceto medio ti ascolta · le imprese dicono che così nessuno investirà più nel credito',
       f:function(){ S.usCasse89Opp='azionisti'; gdUs60('cetomedio',1); gdUs60('imprenditori',-1);
         S.log.unshift({t:T('Il paese'),x:T('Dall\'opposizione ha preteso che a pagare per le casse di risparmio siano prima gli azionisti e i dirigenti.')}); } },
+  ],
+};
+/* ==============================================================================================================
+   L262-15 · STATI UNITI 1980 — PANAMA (1989/12) (scheda PRESET-USA-1980 §3-§4, decisioni di Cowork del 30/10; testi di Code).
+   Stessi helper di L262-8…14. Nomi nuovi cercati in tutto js/, .claude/ e prove/ il 30/10 prima di scriverli (L99-2), zero occorrenze:
+   us80_panama(_opp), usPanama89(Opp), panamaOra, panamaOppOra, ti_us80_panama, us80CarteDelMese, us80Dicembre89.
+   ⚑ NON È UNO SNODO (nessuna riga in SNODI_STORICI, RIVALI, POTENZE) e NON È DEL SACCHETTO: carta DOVUTA come Beirut e Grenada, solo il 1989/12,
+   nello stesso mese di Malta e dopo di lei (cancelli in game.js accanto a casseOra). I titoli stanno nel 1990/2-3: il 1990/1 è di Malta, che ha quel
+   mese solo, e un mese ha una prima pagina sola.
+   ⚑ Nessun nome di persona e nessun giudizio sul generale. Verificato il 30/10 (Wikipedia, «United States invasion of Panama»): voto del 7 maggio 1989
+   annullato due giorni dopo; incriminazione del febbraio 1988; un tenente dei marines ucciso a un posto di blocco la notte dopo il 15 dicembre;
+   intervento del 20 dicembre; il generale si consegna il 3 gennaio 1990; 23 militari americani caduti; morti panamensi contesi (da 300 a 3000 civili
+   secondo le fonti: nessuna cifra nel testo). ⚠ Il presidente eletto giura nelle ore dell'intervento, non a gennaio: la frase della consegna è corretta.
+   ============================================================================================================== */
+const PANAMA89_EV = {
+  id:'us80_panama', era:'us1980', kick:'Il mondo',
+  t:'Panama',
+  text:'A maggio il regime militare di Panama ha annullato le elezioni vinte dall\'opposizione. Il generale che comanda le forze armate è incriminato negli Stati Uniti per traffico di droga, e a metà dicembre un militare americano è stato ucciso a un posto di blocco. Nella zona del Canale vivono migliaia di americani, e al Pentagono aspettano un ordine.',
+  ch:[
+    { l:'L\'intervento militare: catturare il generale e insediare il governo eletto', e:'La storia · il 20 dicembre le truppe americane entrano a Panama; il presidente eletto a maggio giura nelle stesse ore, e a inizio gennaio il generale si consegna. Cadono 23 militari americani e civili panamensi, quanti è ancora conteso · il tuo partito e il ceto medio approvano, i giornali chiedono conto delle vittime',
+      f:function(){ S.usPanama89='intervento'; baseUs60(1); gdUs60('cetomedio',1); stampad(-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Ha ordinato l\'intervento a Panama per catturare il generale e insediare il governo eletto.')}); } },
+    { l:'Sanzioni più dure e pressione con i paesi dell\'America latina, nessun intervento', e:'I giornali scrivono che hai scelto la pressione e non le truppe · il tuo partito dice che il generale resta al suo posto',
+      f:function(){ S.usPanama89='sanzioni'; stampad(1); baseUs60(-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Su Panama ha scelto sanzioni più dure e la pressione con i paesi dell\'America latina, senza intervento.')}); } },
+    { l:'Proteggere i cittadini americani e il Canale: rinforzi nella zona, e si aspetta', e:'Le famiglie nella zona del Canale tirano il fiato · i giornali chiedono che cosa si stia aspettando',
+      f:function(){ S.usPanama89='attesa'; gdUs60('cetomedio',1); stampad(-1);
+        S.log.unshift({t:T('Il mondo'),x:T('A Panama ha mandato rinforzi per proteggere i cittadini americani e il Canale, e ha scelto di aspettare.')}); } },
+  ],
+};
+const PANAMA89_OPP_EV = {
+  id:'us80_panama_opp', era:'us1980', kick:'Il mondo',
+  t:'Panama, dall\'aula',
+  text:'Il 20 dicembre le truppe americane sono entrate a Panama per catturare il generale che comanda le forze armate, incriminato negli Stati Uniti per traffico di droga, e per insediare il presidente eletto a maggio, nel voto che il regime ha annullato. Il Congresso non ha votato, e dai quartieri della capitale arrivano notizie di civili uccisi.',
+  ch:[
+    { l:'Sostenere l\'intervento: le truppe vanno appoggiate', e:'I giornali scrivono che davanti ai soldati l\'aula è unita · la base dice che hai firmato in bianco',
+      f:function(){ S.usPanama89Opp='appoggio'; stampad(1); baseUs60(-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Dall\'opposizione ha sostenuto l\'intervento a Panama.')}); } },
+    { l:'Chiedere che il Congresso voti prima di ogni uso della forza', e:'La base ti applaude · i giornali scrivono che apri il dibattito mentre i soldati combattono',
+      f:function(){ S.usPanama89Opp='voto'; baseUs60(1); stampad(-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Dall\'opposizione ha chiesto che il Congresso voti prima di ogni uso della forza, dopo Panama.')}); } },
+    { l:'Chiedere conto delle vittime civili e un\'inchiesta', e:'La base ti segue · il ceto medio non vuole processi mentre i soldati sono ancora là',
+      f:function(){ S.usPanama89Opp='vittime'; gdUs60('cetomedio',-1); baseUs60(1);
+        S.log.unshift({t:T('Il mondo'),x:T('Dall\'opposizione ha chiesto conto delle vittime civili di Panama e un\'inchiesta.')}); } },
   ],
 };
 /* ==============================================================================================================
