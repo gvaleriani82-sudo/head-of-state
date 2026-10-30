@@ -20371,6 +20371,15 @@ const TITOLI=[
 {id:'ti_us80_olimpiadi', era:'us1980', pri:1, cond:()=>S.usOlimpiadi84==='festa' && S.year===1984 && S.month>=8 && S.month<=9, amico:'Primi nel medagliere, e i Giochi chiudono in attivo: la festa del paese', ostile:'Lo stadio come un comizio: i Giochi in piena campagna'},
 {id:'ti_us80_olimpiadi_neutrali', era:'us1980', pri:1, cond:()=>S.usOlimpiadi84==='neutrali' && S.year===1984 && S.month>=8 && S.month<=9, amico:'Giochi senza politica, e la porta resta aperta all\'Est', ostile:'Mosca diserta i Giochi, e Washington non dice una parola'},
 {id:'ti_us80_olimpiadi_sicurezza', era:'us1980', pri:1, cond:()=>S.usOlimpiadi84==='sicurezza' && S.year===1984 && S.month>=8 && S.month<=9, amico:'Giochi sicuri dal primo all\'ultimo giorno', ostile:'Transenne e Guardia nazionale: i Giochi blindati di Los Angeles'},
+{id:'ti_us80_fisco', era:'us1980', pri:1, cond:()=>S.usFisco86==='compromesso' && S.year===1986 && S.month>=11 && S.month<=12, amico:'La riforma delle tasse è legge, e porta la firma dei due partiti', ostile:'Aliquote giù, detrazioni via: chi paga davvero la riforma?'},
+{id:'ti_us80_fisco_aliquote', era:'us1980', pri:1, cond:()=>S.usFisco86==='aliquote' && S.year===1986 && S.month>=11 && S.month<=12, amico:'Tasse più basse: la riforma arriva giusto in tempo per il voto', ostile:'Si parla delle aliquote, non delle detrazioni che spariscono'},
+{id:'ti_us80_fisco_imprese', era:'us1980', pri:1, cond:()=>S.usFisco86==='imprese' && S.year===1986 && S.month>=11 && S.month<=12, amico:'Firmata la riforma, e le imprese riavranno gli sgravi', ostile:'La riforma è appena firmata, e c\'è già chi promette di disfarla'},
+{id:'ti_us80_borsa', era:'us1980', pri:1, cond:()=>S.usBorsa87==='calma' && S.year===1987 && S.month>=11 && S.month<=12, amico:'Dopo il crollo la banca centrale tiene aperto il credito, e le Borse respirano', ostile:'Borse a picco, e dal governo arriva solo l\'invito alla calma'},
+{id:'ti_us80_borsa_vertice', era:'us1980', pri:1, cond:()=>S.usBorsa87==='vertice' && S.year===1987 && S.month>=11 && S.month<=12, amico:'Dopo il crollo, Presidente e Congresso al tavolo per tagliare il deficit', ostile:'Un vertice sul deficit: le Borse aspettano ancora i fatti'},
+{id:'ti_us80_borsa_regole', era:'us1980', pri:1, cond:()=>S.usBorsa87==='regole' && S.year===1987 && S.month>=11 && S.month<=12, amico:'Dopo il crollo, regole nuove per la Borsa e per le vendite automatiche', ostile:'Regole promesse a crollo avvenuto: Wall Street protesta'},
+{id:'ti_us80_casse', era:'us1980', pri:1, cond:()=>S.usCasse89==='piano' && S.year===1989 && S.month>=3 && S.month<=4, amico:'Casse di risparmio: depositi al sicuro, e quelle insolventi chiudono', ostile:'Il conto delle casse fallite finisce sul bilancio pubblico'},
+{id:'ti_us80_casse_settore', era:'us1980', pri:1, cond:()=>S.usCasse89==='settore' && S.year===1989 && S.month>=3 && S.month<=4, amico:'Casse di risparmio: il conto lo paga prima di tutto il settore', ostile:'Contributi più alti alle banche: il settore teme di non reggere'},
+{id:'ti_us80_casse_attesa', era:'us1980', pri:1, cond:()=>S.usCasse89==='attesa' && S.year===1989 && S.month>=3 && S.month<=4, amico:'Casse di risparmio: regole più severe, e subito', ostile:'Casse insolventi: regole nuove, e il salvataggio può aspettare'},
 {id:'ti_us80_malta', era:'us1980', pri:1, cond:()=>S.usMalta89==='finita' && S.year===1990 && S.month===1, amico:'Al largo di Malta, nella tempesta: la guerra fredda è finita', ostile:'La guerra fredda è finita, dice il Presidente: i missili sovietici sono ancora lì'},
 {id:'ti_us80_malta_prudenza', era:'us1980', pri:1, cond:()=>S.usMalta89==='prudenza' && S.year===1990 && S.month===1, amico:'Malta: aiuti a Mosca, ma solo con le riforme', ostile:'Malta: il Presidente prudente mentre l\'Europa cambia'},
 {id:'ti_us80_malta_nato', era:'us1980', pri:1, cond:()=>S.usMalta89==='nato' && S.year===1990 && S.month===1, amico:'Malta: la Germania unita deve stare nella NATO', ostile:'Malta: sulla Germania il vertice si inceppa'},
@@ -26470,6 +26479,135 @@ const OLIMPIADI84_OPP_EV = {
     { l:'Quanto costa allo Stato la sicurezza dei Giochi?', e:'I giornali seguono il conto dei soldi federali · chi ha messo i soldi nei Giochi dice che cerchi il pelo nell\'uovo',
       f:function(){ S.usOlimpiadi84Opp='conti'; stampad(1); gdUs60('imprenditori',-1);
         S.log.unshift({t:T('Il paese'),x:T('Dall\'opposizione ha chiesto conto dei soldi federali spesi per la sicurezza dei Giochi di Los Angeles.')}); } },
+  ],
+};
+/* ==============================================================================================================
+   L262-12 · STATI UNITI 1980 — LA RIFORMA FISCALE (1986/10) (scheda PRESET-USA-1980 §3-§4, decisioni di Cowork del 30/10; testi di Code).
+   Stessi helper di L262-8…11. Nomi nuovi cercati in tutto js/, .claude/ e prove/ il 30/10 prima di scriverli (L99-2), zero occorrenze:
+   us80_fisco(_opp), usFisco86(Opp), fiscoOra, fiscoOppOra, ti_us80_fisco.
+   ⚑ NON È UNO SNODO (nessuna riga in SNODI_STORICI né in RIVALI) e NON È DEL SACCHETTO: carta DOVUTA come le Olimpiadi (cancelli in game.js
+   accanto a olimpiadiOra), solo il 1986/10 (mese libero: Cerritos è di agosto, novembre è il voto, dicembre è di San Juan). Il mese prima
+   della metà mandato: esce con la carta di campagna accanto (snodoColCampagna).
+   ⚑ Il testo non dice chi governa e non nomina nessuno. Verificato il 30/10 (Wikipedia, Britannica): le due Camere approvano il testo finale il
+   25 e il 27 settembre 1986, il Presidente firma il 22 ottobre; l'aliquota più alta dei redditi scende dal 50 al 28 per cento. Il 97-3 è
+   il voto del Senato di giugno, non quello finale (74-23): nessuno dei due nel testo. La carta d'aula ha la stessa data per decisione di
+   Cowork: il testo non dice il mese, dice «a poche settimane dal voto».
+   ============================================================================================================== */
+const FISCO86_EV = {
+  id:'us80_fisco', era:'us1980', kick:'Il paese',
+  t:'La riforma delle tasse',
+  text:'Dopo due anni di trattative il Congresso manda al Presidente la riforma delle tasse più ampia da decenni: aliquote più basse e meno scaglioni, via molte detrazioni e scappatoie, più tasse alle imprese per pareggiare il conto. I due partiti l\'hanno votata insieme, e fra un mese si vota per il Congresso.',
+  ch:[
+    { l:'Firmare il compromesso e presentarlo come opera dei due partiti', e:'La storia · la legge passa con i voti dei due partiti e resta per anni la riforma fiscale di riferimento: l\'aliquota più alta dei redditi scende dal 50 al 28 per cento · giornali e alleati apprezzano, il tuo partito voleva intestarsela',
+      f:function(){ S.usFisco86='compromesso'; stampad(1); repd(1); baseUs60(-1);
+        S.log.unshift({t:T('Il paese'),x:T('Ha firmato la riforma delle tasse e l\'ha presentata come opera dei due partiti.')}); } },
+    { l:'Firmare e in campagna parlare solo delle aliquote più basse', e:'Il tuo partito e il ceto medio hanno il loro argomento · i giornali ricordano le detrazioni che spariscono',
+      f:function(){ S.usFisco86='aliquote'; baseUs60(1); gdUs60('cetomedio',1); stampad(-1);
+        S.log.unshift({t:T('Il paese'),x:T('Ha firmato la riforma delle tasse e in campagna ha parlato solo delle aliquote più basse.')}); } },
+    { l:'Firmare, ma promettere alle imprese di ridare gli sgravi persi', e:'Le imprese tirano il fiato · il ceto medio si chiede chi pagherà il conto, e gli alleati quanto vale la firma',
+      f:function(){ S.usFisco86='imprese'; gdUs60('imprenditori',1); gdUs60('cetomedio',-1); repd(-1);
+        S.log.unshift({t:T('Il paese'),x:T('Ha firmato la riforma delle tasse e ha promesso alle imprese di ridare gli sgravi persi.')}); } },
+  ],
+};
+const FISCO86_OPP_EV = {
+  id:'us80_fisco_opp', era:'us1980', kick:'Il paese',
+  t:'La riforma delle tasse, dall\'aula',
+  text:'La riforma delle tasse più ampia da decenni è all\'ultimo voto: aliquote più basse e meno scaglioni, via molte detrazioni e scappatoie, più tasse alle imprese. L\'hanno scritta insieme i due partiti, e a poche settimane dal voto per il Congresso ogni voto in aula finisce in un volantino.',
+  ch:[
+    { l:'Votare la riforma con la maggioranza: è anche nostra', e:'I giornali lodano il voto dei due partiti · la base dice che regali una vittoria al governo',
+      f:function(){ S.usFisco86Opp='vota'; stampad(1); baseUs60(-1);
+        S.log.unshift({t:T('Il paese'),x:T('Dall\'opposizione ha votato la riforma delle tasse con la maggioranza.')}); } },
+    { l:'Votare contro: troppe detrazioni tolte al ceto medio', e:'Il ceto medio ti ascolta · i giornali scrivono che voti contro le aliquote più basse',
+      f:function(){ S.usFisco86Opp='contro'; gdUs60('cetomedio',1); stampad(-1);
+        S.log.unshift({t:T('Il paese'),x:T('Dall\'opposizione ha votato contro la riforma delle tasse, per le detrazioni tolte al ceto medio.')}); } },
+    { l:'Astenersi e chiedere un voto dopo novembre', e:'La base non vuole regalare niente prima delle urne · i giornali scrivono che ti nascondi',
+      f:function(){ S.usFisco86Opp='rinvio'; baseUs60(1); stampad(-1);
+        S.log.unshift({t:T('Il paese'),x:T('Dall\'opposizione ha scelto l\'astensione sulla riforma delle tasse e ha chiesto un voto dopo novembre.')}); } },
+  ],
+};
+/* ==============================================================================================================
+   L262-13 · STATI UNITI 1980 — IL LUNEDÌ NERO (1987/10) (scheda PRESET-USA-1980 §4, decisioni di Cowork del 30/10; testi di Code).
+   Stessi helper di L262-8…12. Nomi nuovi cercati in tutto js/, .claude/ e prove/ il 30/10 prima di scriverli (L99-2), zero occorrenze:
+   us80_borsa(_opp), usBorsa87(Opp), borsaOra, borsaOppOra, ti_us80_borsa.
+   ⚑ NON È UNO SNODO (nessuna riga in SNODI_STORICI né in RIVALI) e NON È DEL SACCHETTO: carta DOVUTA come la riforma fiscale (cancelli in game.js
+   accanto a fiscoOra), solo il 1987/10 (mese libero: Detroit è di agosto, S4 di novembre-dicembre; nessun voto né campagna nel 1987).
+   ⚑ Il testo non dice chi governa e il crollo non è colpa di nessuno. Verificato il 30/10 (Wikipedia, «Black Monday (1987)»): lunedì 19 ottobre
+   1987 l'indice Dow Jones perde il 22,6 per cento; il 20 ottobre la banca centrale si dichiara pronta a dare liquidità; sull'economia reale
+   l'effetto è limitato e breve.
+   ============================================================================================================== */
+const BORSA87_EV = {
+  id:'us80_borsa', era:'us1980', kick:'Il paese',
+  t:'Il lunedì nero',
+  text:'In un solo giorno la Borsa di New York perde quasi un quarto del suo valore: è il crollo più grave dal 1929. Le Borse del mondo seguono, i risparmiatori chiamano le banche, e la stampa chiede al Presidente che cosa farà.',
+  ch:[
+    { l:'Rassicurare il paese e lasciare alla banca centrale il compito di dare liquidità', e:'La storia · la banca centrale si dice pronta a sostenere le banche, i mercati si calmano e il crollo, 22,6 per cento in un giorno, non porta una recessione · giornali e alleati apprezzano la calma, il tuo partito ti vorrebbe più presente',
+      f:function(){ S.usBorsa87='calma'; repd(1); stampad(1); baseUs60(-1);
+        S.log.unshift({t:T('Il paese'),x:T('Dopo il crollo della Borsa ha rassicurato il paese e ha lasciato alla banca centrale il compito di dare liquidità.')}); } },
+    { l:'Convocare un vertice col Congresso per tagliare il deficit', e:'I giornali seguono il vertice e il ceto medio vede qualcuno al lavoro · le imprese temono che il conto finisca su di loro',
+      f:function(){ S.usBorsa87='vertice'; stampad(1); gdUs60('cetomedio',1); gdUs60('imprenditori',-1);
+        S.log.unshift({t:T('Il paese'),x:T('Dopo il crollo della Borsa ha convocato un vertice col Congresso per tagliare il deficit.')}); } },
+    { l:'Promettere regole nuove sulla Borsa e sulle vendite automatiche', e:'Il tuo partito e il ceto medio ti seguono · le imprese protestano, e gli alleati temono che le regole spaventino ancora i mercati',
+      f:function(){ S.usBorsa87='regole'; baseUs60(1); gdUs60('cetomedio',1); gdUs60('imprenditori',-1); repd(-1);
+        S.log.unshift({t:T('Il paese'),x:T('Dopo il crollo della Borsa ha promesso regole nuove sulla Borsa e sulle vendite automatiche.')}); } },
+  ],
+};
+const BORSA87_OPP_EV = {
+  id:'us80_borsa_opp', era:'us1980', kick:'Il paese',
+  t:'Il lunedì nero, dall\'aula',
+  text:'In un solo giorno la Borsa di New York perde quasi un quarto del suo valore: è il crollo più grave dal 1929. I risparmiatori hanno paura, le televisioni cercano una voce dell\'opposizione, e il tuo partito chiede che cosa dirai.',
+  ch:[
+    { l:'Chiedere unità: in un giorno di panico non si attacca', e:'I giornali apprezzano il tono · la base dice che lasci passare il momento',
+      f:function(){ S.usBorsa87Opp='unita'; stampad(1); baseUs60(-1);
+        S.log.unshift({t:T('Il paese'),x:T('Dall\'opposizione ha chiesto unità nel giorno del crollo della Borsa.')}); } },
+    { l:'Dire che è il conto della politica economica di chi governa', e:'La base ti applaude · i giornali scrivono che fai polemica sul panico',
+      f:function(){ S.usBorsa87Opp='attacco'; baseUs60(1); stampad(-1);
+        S.log.unshift({t:T('Il paese'),x:T('Dall\'opposizione ha detto che il crollo della Borsa è il conto della politica economica di chi governa.')}); } },
+    { l:'Proporre regole nuove per proteggere i piccoli risparmiatori', e:'Il ceto medio ti ascolta · le imprese dicono che non è il momento di altre regole',
+      f:function(){ S.usBorsa87Opp='risparmiatori'; gdUs60('cetomedio',1); gdUs60('imprenditori',-1);
+        S.log.unshift({t:T('Il paese'),x:T('Dall\'opposizione ha proposto regole nuove per proteggere i piccoli risparmiatori dopo il crollo della Borsa.')}); } },
+  ],
+};
+/* ==============================================================================================================
+   L262-14 · STATI UNITI 1980 — LE CASSE DI RISPARMIO (1989/2) (scheda PRESET-USA-1980 §3-§4, decisioni di Cowork del 30/10; testi di Code).
+   Stessi helper di L262-8…13. Nomi nuovi cercati in tutto js/, .claude/ e prove/ il 30/10 prima di scriverli (L99-2), zero occorrenze:
+   us80_casse(_opp), usCasse89(Opp), casseOra, casseOppOra, ti_us80_casse.
+   ⚑ NON È UNO SNODO (nessuna riga in SNODI_STORICI né in RIVALI) e NON È DEL SACCHETTO: carta DOVUTA come il lunedì nero (cancelli in game.js
+   accanto a borsaOra), solo il 1989/2 (mese libero: nessun pilastro né fatto-mondo fino a Sioux City, 1989/7).
+   ⚑ Il testo non dice chi governa, non nomina casse né persone, e la crisi non è colpa di nessuno. Verificato il 30/10 (Wikipedia, «Savings and
+   loan crisis»): piano annunciato il 6 febbraio 1989, legge del 9 agosto 1989; fondo dei depositi insolvente a fine 1988; il petrolio e il Sud-Ovest;
+   1043 casse fallite fra il 1986 e il 1995 (nel testo del 1989 «centinaia», allora il totale non si sapeva); 123,8 miliardi a carico dei contribuenti
+   a fine 1999 (solo su «La storia ·»).
+   ============================================================================================================== */
+const CASSE89_EV = {
+  id:'us80_casse', era:'us1980', kick:'Il paese',
+  t:'Le casse di risparmio',
+  text:'Centinaia di casse di risparmio, soprattutto nel Sud-Ovest colpito dal crollo del petrolio, sono insolventi, e il fondo che assicura i depositi è vuoto. I risparmiatori temono per i loro conti, e il Congresso aspetta la proposta del Presidente.',
+  ch:[
+    { l:'Proporre un piano federale: le casse insolventi si chiudono, i depositi sono garantiti, paga il bilancio pubblico', e:'La storia · in agosto il Congresso approva il salvataggio: nasce un ente pubblico che chiude o vende le casse fallite, e il conto, alla fine quasi 124 miliardi di dollari, resta in gran parte ai contribuenti · giornali, alleati e ceto medio approvano, il tuo partito protesta per il conto',
+      f:function(){ S.usCasse89='piano'; repd(1); stampad(1); gdUs60('cetomedio',1); baseUs60(-1);
+        S.log.unshift({t:T('Il paese'),x:T('Ha proposto un piano federale per le casse di risparmio: chiuse quelle insolventi, garantiti i depositi, a carico del bilancio pubblico.')}); } },
+    { l:'Far pagare il conto soprattutto al settore, con contributi più alti delle banche', e:'Il tuo partito e i giornali approvano · le imprese protestano, e gli alleati temono che il settore non regga il conto',
+      f:function(){ S.usCasse89='settore'; baseUs60(1); gdUs60('imprenditori',-1); stampad(1); repd(-1);
+        S.log.unshift({t:T('Il paese'),x:T('Ha chiesto al settore di pagare il conto delle casse di risparmio, con contributi più alti delle banche.')}); } },
+    { l:'Prendere tempo: regole più severe subito, il salvataggio più avanti', e:'Le imprese tirano il fiato · i giornali chiedono quanto costerà aspettare, e il ceto medio teme per i suoi conti',
+      f:function(){ S.usCasse89='attesa'; gdUs60('imprenditori',1); stampad(-1); gdUs60('cetomedio',-1);
+        S.log.unshift({t:T('Il paese'),x:T('Sulle casse di risparmio ha preso tempo: regole più severe subito, il salvataggio più avanti.')}); } },
+  ],
+};
+const CASSE89_OPP_EV = {
+  id:'us80_casse_opp', era:'us1980', kick:'Il paese',
+  t:'Le casse di risparmio, dall\'aula',
+  text:'Centinaia di casse di risparmio, soprattutto nel Sud-Ovest colpito dal crollo del petrolio, sono insolventi, e il fondo che assicura i depositi è vuoto. Il salvataggio arriva in aula, i risparmiatori temono per i loro conti, e il tuo partito chiede come voterai.',
+  ch:[
+    { l:'Votare il salvataggio per proteggere i risparmiatori', e:'I giornali apprezzano il senso di responsabilità · la base non vuole pagare quel conto',
+      f:function(){ S.usCasse89Opp='voto'; stampad(1); baseUs60(-1);
+        S.log.unshift({t:T('Il paese'),x:T('Dall\'opposizione ha votato il salvataggio delle casse di risparmio per proteggere i risparmiatori.')}); } },
+    { l:'Chiedere una commissione d\'inchiesta su chi doveva vigilare', e:'La base ti segue · i giornali scrivono che intanto i depositi aspettano',
+      f:function(){ S.usCasse89Opp='inchiesta'; baseUs60(1); stampad(-1);
+        S.log.unshift({t:T('Il paese'),x:T('Dall\'opposizione ha chiesto una commissione d\'inchiesta su chi doveva vigilare sulle casse di risparmio.')}); } },
+    { l:'Pretendere che paghino prima gli azionisti e i dirigenti delle casse', e:'Il ceto medio ti ascolta · le imprese dicono che così nessuno investirà più nel credito',
+      f:function(){ S.usCasse89Opp='azionisti'; gdUs60('cetomedio',1); gdUs60('imprenditori',-1);
+        S.log.unshift({t:T('Il paese'),x:T('Dall\'opposizione ha preteso che a pagare per le casse di risparmio siano prima gli azionisti e i dirigenti.')}); } },
   ],
 };
 /* ==============================================================================================================
