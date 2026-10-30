@@ -497,7 +497,7 @@ function initStatoBase(){
   S.deAsilo92=null; S.deAsilo92Opp=null; S.deConto93=null; S.deConto93Opp=null; S.dePacchetto96=null; S.dePacchetto96Opp=null; S.deKosovo99=null; S.deKosovo99Opp=null; S.deMoneta98=null;   // L153-2: il decennio tedesco '90
   S.deIraq02=null; S.deIraq02Opp=null; S.deAgenda03=null; S.deAgenda03Opp=null; S.deFiducia05=null; S.deFiducia05Opp=null; S.deBanche08=null; S.deBanche08Opp=null;   // L157-1: il decennio tedesco 2000
   S.usCorea=null; S.usCoreaOpp=null; S.usGenerale=null; S.usGeneraleOpp=null; S.usAcciaio=null; S.usAcciaioOpp=null; S.usScuola=null; S.usScuolaOpp=null;   // L176-2: gli snodi di us1950
-  S.usBaia=null; S.usBaiaOpp=null; S.usMissili=null; S.usMissiliOpp=null; S.usDiritti=null; S.usDirittiOpp=null; S.usVietnam=null; S.usVietnamOpp=null; S.usLuna70=null; S.usLuna70Opp=null; S.usPace73=null; S.usPace73Opp=null; S.usPetrolio73=null; S.usPetrolio73Opp=null;   // L227-1: gli snodi di us1960
+  S.usBaia=null; S.usBaiaOpp=null; S.usMissili=null; S.usMissiliOpp=null; S.usDiritti=null; S.usDirittiOpp=null; S.usVietnam=null; S.usVietnamOpp=null; S.usLuna70=null; S.usLuna70Opp=null; S.usPace73=null; S.usPace73Opp=null; S.usPetrolio73=null; S.usPetrolio73Opp=null; S.usOstaggi80=null; S.usOstaggi80Opp=null; S.usRecessione82=null; S.usRecessione82Opp=null; S.usArmiIran85=null; S.usArmiIran86=null; S.usArmiIran86Opp=null; S.usMissili87=null; S.usMissili87Opp=null; S.usControllori81=null; S.usControllori81Opp=null; S.usMosca88=null; S.usMosca88Opp=null; S.usMalta89=null; S.usMalta89Opp=null; S.usGrano80=null; S.usGrano80Opp=null; S.usProfughi80=null; S.usProfughi80Opp=null; S.usMessico82=null; S.usMessico82Opp=null; S.usJumbo83=null; S.usJumbo83Opp=null; S.usBeirut83=null; S.usBeirut83Opp=null; S.usGrenada83=null; S.usGrenada83Opp=null; S.usOlimpiadi84=null; S.usOlimpiadi84Opp=null;   // L227-1: gli snodi di us1960 · L258-4, L262-4, L262-5, L262-6, L262-7, L262-8, L262-9 e L262-10: anche gli snodi di us1970 e us1980
   S.usScandalo=null; S.usScandaloOpp=null; S.usNastri74=null; S.usNastri74Opp=null;   // L258-5: lo scandalo di us1970 (usNastriRitorno e usDimissioni sono facoltativi: nascono solo quando servono)
   S.scioglimento97=null;   // L103-1: lo scioglimento del '97 (null = storico; 'no' = «aspetta», tappa 1998/3). Lo scrive S4 in L103-2
   S.coabitazione=false;   // L100-2: il Presidente con l'Assemblea degli altri (derivato dai seggi, dato puro, round-trip)
@@ -1226,7 +1226,20 @@ function diventaAltoRappresentante(){   // grado 1→2: la promozione (gated sul
    Intesa (≥ 70, una volta) e Gelo (≤ 20, finché non risale sopra 30). Le carte di pickDiplo col volto del rivale muovono anche il suo v
    (bilCartaRivale, la metà dello spostamento di S.relInt.rivale). Mai effetti sui partiti. Spento = il gioco di prima. */
 let DIPLO_BILATERALI=true;
-const BIL_K={ alleato:55, swing:45, rivale:30, deriva:2, intesa:70, gelo:20, disgelo:30, soglia:60, credSoglia:1, credIntesa:3, credGelo:-2, dadoMin:3, dadoMax:6 };
+/* L260-10 (29/10) · IL GELO CHE ESISTE (BIL_GELO, rapporto «⚑ L260-10» in DESIGN-OLTRE-LE-CARTE.md). Prima il Gelo (≤ 20) non arrivava mai:
+   la deriva si fermava alla partenza (rivale 30). Acceso: (1) solo i RIVALI scendono sotto la partenza, fino a BIL_K.fondoRivale (alleati e
+   non allineati col pavimento di sempre), e dopo la deriva bilMese chiama bilTraguardi sui partner che si sono mossi (senza, il Gelo per
+   deriva non scatterebbe); (2) la missione dal rivale toglie BIL_K.costoAlleati a ogni alleato della rete, mai sotto la sua partenza, con una
+   riga «Gli alleati prendono nota» solo se uno si è mosso. Il Gelo resta com'era (credito −2 una volta finché non risale sopra 30). Nessun
+   campo nuovo in S. Spento = L260-5. ⚠ SPENTO (29/10): col banco (che va sempre dal partner più freddo, cioè dal rivale: 42% delle
+   missioni) il Gelo resta 0% con qualunque fondoRivale (5-20 identici), e il costo sugli alleati porta l'Intesa dei presenti da 15-20% a 0% e
+   il Segretario da 22·27 a 18·17 su 40; con un giocatore che non visita mai il rivale il Gelo è 100% (spento 5-13%). Il Gelo lo decide come
+   si gioca, non la leva: rapporto «⚑ L260-10». L260-10bis (29/10): costoAlleati 0 (il rivale si paga già con relIntMuovi('alleanza',-1): il
+   codice di bilCostoAlleati resta, a costo 0 non muove nessuno, e il sottotitolo di bilMissioniHtml c'è solo con costo > 0); SPENTO DEFINITIVO
+   per la regola della consegna: col banco misto (metà missioni a un non rivale a caso) il banco va ancora dal rivale il 40% e il Gelo è 0% con
+   ogni fondoRivale 5-20 (a 0,75 di non rivali, rivale 32%, sarebbe 35·38%): rapporto «⚑ L260-10bis». */
+let BIL_GELO=false;
+const BIL_K={ alleato:55, swing:45, rivale:30, deriva:2, intesa:70, gelo:20, disgelo:30, soglia:60, credSoglia:1, credIntesa:3, credGelo:-2, dadoMin:3, dadoMax:6, fondoRivale:10, costoAlleati:0 };
 const BIL_SUCCESSORI={ urss:'russia', germania_ovest:'germania' };
 function bilAttivi(){ return DIPLO_BILATERALI && typeof S!=='undefined' && !!S && S.livello===5 && !!S.diplo && Array.isArray(S.diplo.bil); }
 function bilMeseAss(){ return S.year*12+S.month; }
@@ -1291,7 +1304,8 @@ function bilMissione(i){
   if(DIPLO_CONCORRENTE) p.m=m;   // L260-5bis: il mese dell'ultima MISSIONE (u è anche l'ingresso), letto da corsaDiplo
   if(p.t==='alleato') relIntMuovi('alleanza',1);
   else if(p.t==='swing') relIntMuovi('consesso',1);
-  else { relIntMuovi('rivale',2); relIntMuovi('alleanza',-1); }   // parlare col rivale costa agli alleati
+  else { relIntMuovi('rivale',2); relIntMuovi('alleanza',-1);   // parlare col rivale costa agli alleati
+    if(BIL_GELO) bilCostoAlleati(); }   // L260-10: e anche nel rapporto con ciascuno
   if(!p.s60 && p.v>BIL_K.soglia){ p.s60=true; creditoMuovi(BIL_K.credSoglia); }
   S.log.unshift({t:T('Missione diplomatica'), x:T('In missione presso %P: il rapporto sale a %N.').replace('%P', bilNome(p.id,'det')).replace('%N', Math.round(p.v))});
   bilTraguardi(p);
@@ -1302,7 +1316,15 @@ function bilMese(){
   if(!bilAttivi()) return;
   bilGennaio();
   var m=bilMeseAss();
-  S.diplo.bil.forEach(function(p){ if(m-p.u>=BIL_K.deriva && p.v>BIL_K[p.t]) p.v=Math.max(BIL_K[p.t], p.v-1); });
+  S.diplo.bil.forEach(function(p){ var fondo=bilFondo(p); if(m-p.u>=BIL_K.deriva && p.v>fondo){ p.v=Math.max(fondo, p.v-1); if(BIL_GELO) bilTraguardi(p); } });   // L260-10: col Gelo acceso il traguardo si guarda anche dopo la deriva
+}
+/* L260-10 · il pavimento della deriva: la partenza, o per un rivale col Gelo acceso BIL_K.fondoRivale */
+function bilFondo(p){ return (BIL_GELO && p.t==='rivale') ? BIL_K.fondoRivale : BIL_K[p.t]; }
+/* L260-10 · la missione dal rivale: ogni alleato della rete perde BIL_K.costoAlleati, mai sotto la partenza; la riga solo se uno si è mosso */
+function bilCostoAlleati(){
+  var mossi=[];
+  S.diplo.bil.forEach(function(q){ if(q.t!=='alleato') return; var v=Math.max(BIL_K[q.t], q.v-BIL_K.costoAlleati); if(v<q.v){ q.v=v; mossi.push(bilNome(q.id,'det')); } });
+  if(mossi.length) S.log.unshift({t:T('Missione diplomatica'), x:T('Gli alleati prendono nota: %A.').replace('%A', mossi.join(curLang()==='en' ? ' and ' : ' e '))});
 }
 /* una carta di pickDiplo col volto del rivale (d.potId) che ha mosso S.relInt.rivale di dr muove il v di quella potenza della metà */
 function bilCartaRivale(id, dr){
@@ -5365,6 +5387,138 @@ function snodoPace73Dovuta(){ return typeof S!=='undefined' && S && S.era===LINE
 function snodoPace73OppDovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_US && S.livello===3 && S.opposizione && S.usPace73Opp==null && S.usPace73==null && us60Guerra() && (S.year===1973 && S.month>=1 && S.month<=2); }
 function snodoPetrolio73UsDovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_US && S.livello===3 && !S.opposizione && S.usPetrolio73==null && (S.year===1973 && S.month>=11 && S.month<=12); }
 function snodoPetrolio73UsOppDovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_US && S.livello===3 && S.opposizione && S.usPetrolio73Opp==null && S.usPetrolio73==null && (S.year===1973 && S.month>=11 && S.month<=12); }
+/* L262-4 · i cancelli degli snodi di us1980 (data.js, testa del blocco OSTAGGI80_EV). S1 1980/3-4 (il vulcano è di maggio), S2 1982/2
+   (gennaio è di pus80_potomac). Il rilascio non è uno snodo (nessun flag della tabella): lo innesca ostaggiRilascioOra(), dal mese
+   scritto da S1 in S.usOstaggiRilascio, o senza S1 nella finestra della storia (1980/12-1981/2); scivola di al più due mesi se il mese
+   è preso (un pilastro passa prima). Il mese dentro la finestra da us80Dado: carriera e sale, NON il mese (il bersaglio si calcola
+   una volta, e senza S1 si ricalcola uguale a ogni mese); il blitz invece tira attaccoDado('blitz80') nel mese dello snodo, quindi
+   un caricamento che rigioca il mese ritrova lo stesso esito. */
+function snodoOstaggi80Dovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_US && S.livello===3 && !S.opposizione && S.usOstaggi80==null && (S.year===1980 && S.month>=3 && S.month<=4); }
+function snodoOstaggi80OppDovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_US && S.livello===3 && S.opposizione && S.usOstaggi80Opp==null && S.usOstaggi80==null && (S.year===1980 && S.month>=3 && S.month<=4); }
+function snodoRecessione82Dovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_US && S.livello===3 && !S.opposizione && S.usRecessione82==null && (S.year===1982 && S.month===2); }
+function snodoRecessione82OppDovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_US && S.livello===3 && S.opposizione && S.usRecessione82Opp==null && S.usRecessione82==null && (S.year===1982 && S.month===2); }
+function us80Dado(sale){
+  var s='us80|'+sale+'|'+scissioneCarriera(), h=2166136261;
+  for(var i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619); }
+  h^=h>>>16; h=Math.imul(h,0x85ebca6b); h^=h>>>13; h=Math.imul(h,0xc2b2ae35); h^=h>>>16;
+  return (h>>>0)/4294967296;
+}
+/* la finestra del rilascio per strada: [primo mese, numero di mesi]; 'riuscito' = il mese dopo lo snodo (chiamata dalla scelta) */
+function us80RilascioMese(strada){
+  var w = strada==='riuscito' ? [meseAss()+1, 1] : (strada==='pressione' ? [1981*12+3, 4] : [1980*12+12, 3]);
+  return w[0] + Math.min(w[1]-1, Math.floor(us80Dado('rilascio|'+strada)*w[1]));
+}
+function us80RilascioBersaglio(){ return S.usOstaggiRilascio!=null ? S.usOstaggiRilascio : us80RilascioMese('storia'); }
+function ostaggiRilascioOra(){
+  if(typeof S==='undefined' || !S || S.era!==LINEA_US || S.livello!==3 || S.usOstaggiLiberi!=null) return false;
+  if(S.year<1980 || S.year>1981) return false;
+  if(S.year===1980 && S.month<=4 && S.usOstaggi80==null && S.usOstaggi80Opp==null) return false;   // S1 ancora da giocare
+  var m=meseAss(), t=us80RilascioBersaglio();
+  return m>=t && m<=t+2;
+}
+/* L262-5 · i cancelli degli snodi S3-S4 di us1980 e del seme del 1985 (data.js, testa del blocco LIBANO85_EV). Il seme 1985/7-8 a chi
+   governa (agosto è di pus80_dallas: in pratica luglio); è uno snodo e non un evento del sacchetto, perché il posto dell'evento esce il
+   10% dei mesi a sorte e il segno del 1985 non sarebbe arrivato quasi mai a S3. S3 1987/1-2 (dicembre 1986 è di pus80_sanjuan) SOLO
+   a chi governa col segno 'segreto' del 1985 (D296 (i)); l'aula a chi è all'opposizione con la finestra della storia: il governo
+   avversario ha venduto, come nel 1986 vero. S4 1987/11-12 (ottobre è del lunedì nero), nessuna scala e nessuna riga di RIVALI. */
+function snodoLibano85Dovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_US && S.livello===3 && !S.opposizione && S.usArmiIran85==null && (S.year===1985 && S.month>=7 && S.month<=8); }
+function snodoArmi87Dovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_US && S.livello===3 && !S.opposizione && S.usArmiIran85==='segreto' && S.usArmiIran86==null && (S.year===1987 && S.month>=1 && S.month<=2); }
+function snodoArmi87OppDovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_US && S.livello===3 && S.opposizione && S.usArmiIran86Opp==null && S.usArmiIran86==null && (S.year===1987 && S.month>=1 && S.month<=2); }
+function snodoMissili87Dovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_US && S.livello===3 && !S.opposizione && S.usMissili87==null && (S.year===1987 && S.month>=11 && S.month<=12); }
+function snodoMissili87OppDovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_US && S.livello===3 && S.opposizione && S.usMissili87Opp==null && S.usMissili87==null && (S.year===1987 && S.month>=11 && S.month<=12); }
+/* L262-6 · i controllori di volo e la ripresa (data.js, testa del blocco CONTROLLORI81_EV). I controllori 1981/8-9 a chi governa e,
+   dall'aula, a chi è all'opposizione (luglio è di pus80_passerelle; il rilascio tardivo degli ostaggi passa prima nell'iniezione).
+   La ripresa NON è uno snodo né una carta del sacchetto: è dovuta come il rilascio, al mese us80Dado('ripresa') della finestra
+   1983/3-1984/4 (carriera, non mese: il bersaglio si ricalcola uguale), scivola di al più due mesi se il mese è preso (pus80_caroline,
+   1984/3), mai oltre il 1984/4; una variante sola, da usRecessione82 (ripresaCarta). La scelta scrive usRipresa83 (mese assoluto). */
+function snodoControllori81Dovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_US && S.livello===3 && !S.opposizione && S.usControllori81==null && (S.year===1981 && S.month>=8 && S.month<=9); }
+function snodoControllori81OppDovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_US && S.livello===3 && S.opposizione && S.usControllori81Opp==null && S.usControllori81==null && (S.year===1981 && S.month>=8 && S.month<=9); }
+function us80RipresaBersaglio(){ return 1983*12+3 + Math.min(13, Math.floor(us80Dado('ripresa')*14)); }
+/* L262-10 · la ripresa è un andamento, non una data (Cowork (4)): settembre 1983 è del jumbo e ottobre di Beirut e Grenada, quindi la
+   ripresa non esce in quei due mesi. Un bersaglio a 1983/9 o 1983/10 passa al 1983/11; una finestra che li attraversa (bersaglio
+   1983/7-8, mese preso) si allunga di due mesi, così non perde i suoi tre mesi; mai oltre il 1984/4. La usano ripresa83Ora e ripresaOppOra. */
+function ripresaFinestra(){
+  var m=meseAss(), t=us80RipresaBersaglio(), s9=1983*12+9, s10=1983*12+10;
+  if(m===s9 || m===s10) return false;
+  if(t===s9 || t===s10) t=1983*12+11;
+  var fine=t+2; if(t<=s10 && fine>=s9) fine+=2;
+  return m>=t && m<=Math.min(fine, 1984*12+4);
+}
+function ripresa83Ora(){
+  if(typeof S==='undefined' || !S || S.era!==LINEA_US || S.livello!==3 || S.opposizione || S.usRipresa83!=null) return false;
+  return ripresaFinestra();
+}
+function ripresaCarta(){ var k=S.usRecessione82; return k==='allenta' ? RIPRESA83_INFLAZIONE_EV : (k==='tasse' ? RIPRESA83_TASSE_EV : RIPRESA83_EV); }
+/* L262-7 · l'aula della ripresa, dovuta all'opposizione (⚠ 4 di L262-6): stesso mese di ripresa83Ora, stessa finestra; esce una volta
+   (S.carteUnaCarriera, il registro di unaCarriera) e la sua cond in OPPOSIZIONE_EV è falsa, quindi il sorteggio non la riprende.
+   Iniettata accanto alle aule degli snodi, cioè prima degli archi personali: nei salti gli archi prendevano il posto d'aula. */
+function ripresaOppOra(){
+  if(typeof S==='undefined' || !S || S.era!==LINEA_US || S.livello!==3 || !S.opposizione) return false;
+  if(S.carteUnaCarriera && S.carteUnaCarriera.o_us80_ripresa) return false;
+  return ripresaFinestra();
+}
+function ripresaOppCarta(){ var ev=OPPOSIZIONE_EV.find(function(e){ return e.id==='o_us80_ripresa'; }); segnaUnaCarriera(ev.id); return oppCartaItem(ev); }
+/* L262-7 · Mosca e Malta (data.js, testa del blocco MOSCA88_EV): carte DOVUTE, non snodi e non del sacchetto. Mosca al mese
+   us80Dado('mosca') di 1988/5-6 (carriera, non mese: il bersaglio si ricalcola uguale), scivola di un mese se il mese è preso e mai
+   oltre il 1988/6 (luglio è di pus80_caldo88; con giugno preso non esce); Malta solo il 1989/12 (novembre è del Muro). La versione
+   d'aula allo stesso mese, a chi è all'opposizione; il flag (la scelta) è anche il segno «già uscita». */
+function us80MoscaBersaglio(){ return 1988*12+5 + Math.min(1, Math.floor(us80Dado('mosca')*2)); }
+function moscaFinestra(){ var m=meseAss(); return m>=us80MoscaBersaglio() && m<=1988*12+6; }
+function moscaOra(){ return typeof S!=='undefined' && !!S && S.era===LINEA_US && S.livello===3 && !S.opposizione && S.usMosca88==null && moscaFinestra(); }
+function moscaOppOra(){ return typeof S!=='undefined' && !!S && S.era===LINEA_US && S.livello===3 && !!S.opposizione && S.usMosca88Opp==null && S.usMosca88==null && moscaFinestra(); }
+function maltaOra(){ return typeof S!=='undefined' && !!S && S.era===LINEA_US && S.livello===3 && !S.opposizione && S.usMalta89==null && meseAss()===1989*12+12; }
+function maltaOppOra(){ return typeof S!=='undefined' && !!S && S.era===LINEA_US && S.livello===3 && !!S.opposizione && S.usMalta89Opp==null && S.usMalta89==null && meseAss()===1989*12+12; }
+/* L262-8 · il grano e i profughi da Cuba (data.js, testa del blocco GRANO80_EV): carte DOVUTE come Mosca e Malta. Il grano al primo
+   mese utile di 1980/1-3: la porta parte a gennaio e il primo mese del governo è della legge di bilancio (genAgendaRamo(first)),
+   quindi in pratica febbraio; nell'iniezione passa PRIMA degli ostaggi (S1 ha anche aprile). I profughi al mese us80Dado('profughi')
+   di 1980/4-6 (carriera, non mese), dopo ostaggi e rilascio nell'iniezione; scivolano se il mese è preso (il vulcano di maggio è un
+   pilastro), mai oltre il 1980/6. Il flag è la scelta e il segno «già uscita»; l'aula allo stesso mese, a chi è all'opposizione. */
+function granoFinestra(){ var m=meseAss(); return m>=1980*12+1 && m<=1980*12+3; }
+function granoOra(){ return typeof S!=='undefined' && !!S && S.era===LINEA_US && S.livello===3 && !S.opposizione && S.usGrano80==null && granoFinestra(); }
+function granoOppOra(){ return typeof S!=='undefined' && !!S && S.era===LINEA_US && S.livello===3 && !!S.opposizione && S.usGrano80Opp==null && S.usGrano80==null && granoFinestra(); }
+function us80ProfughiBersaglio(){ return 1980*12+4 + Math.min(2, Math.floor(us80Dado('profughi')*3)); }
+function profughiFinestra(){ var m=meseAss(); return m>=us80ProfughiBersaglio() && m<=1980*12+6; }
+function profughiOra(){ return typeof S!=='undefined' && !!S && S.era===LINEA_US && S.livello===3 && !S.opposizione && S.usProfughi80==null && profughiFinestra(); }
+function profughiOppOra(){ return typeof S!=='undefined' && !!S && S.era===LINEA_US && S.livello===3 && !!S.opposizione && S.usProfughi80Opp==null && S.usProfughi80==null && profughiFinestra(); }
+/* L262-9 · il Messico e il jumbo coreano (data.js, testa del blocco MESSICO82_EV): carte DOVUTE come il grano. Il Messico solo il
+   1982/8 (luglio è di pus80_kenner; agosto è fuori dalla stagione della metà mandato, ma passa da snodoColCampagna come le altre).
+   Il jumbo solo il 1983/9 (dal L262-10: ottobre è di Beirut e Grenada, e la ripresa dovuta di L262-6 cede settembre, ripresaFinestra).
+   L'aula allo stesso mese, a chi è all'opposizione. */
+function messicoOra(){ return typeof S!=='undefined' && !!S && S.era===LINEA_US && S.livello===3 && !S.opposizione && S.usMessico82==null && meseAss()===1982*12+8; }
+function messicoOppOra(){ return typeof S!=='undefined' && !!S && S.era===LINEA_US && S.livello===3 && !!S.opposizione && S.usMessico82Opp==null && S.usMessico82==null && meseAss()===1982*12+8; }
+function jumboFinestra(){ return meseAss()===1983*12+9; }
+function jumboOra(){ return typeof S!=='undefined' && !!S && S.era===LINEA_US && S.livello===3 && !S.opposizione && S.usJumbo83==null && jumboFinestra(); }
+function jumboOppOra(){ return typeof S!=='undefined' && !!S && S.era===LINEA_US && S.livello===3 && !!S.opposizione && S.usJumbo83Opp==null && S.usJumbo83==null && jumboFinestra(); }
+/* L262-10 · Beirut e Grenada (data.js, testa del blocco BEIRUT83_EV): carte DOVUTE come il jumbo, solo il 1983/10 (la caserma il 23,
+   lo sbarco il 25) e nello stesso mese, prima Beirut e poi Grenada (us80Ottobre83, nell'iniezione e accanto al richiamo). Il flag è la
+   scelta e il segno «già uscita»; l'aula allo stesso mese, a chi è all'opposizione. */
+function ottobre83(){ return meseAss()===1983*12+10; }
+function beirutOra(){ return typeof S!=='undefined' && !!S && S.era===LINEA_US && S.livello===3 && !S.opposizione && S.usBeirut83==null && ottobre83(); }
+function beirutOppOra(){ return typeof S!=='undefined' && !!S && S.era===LINEA_US && S.livello===3 && !!S.opposizione && S.usBeirut83Opp==null && S.usBeirut83==null && ottobre83(); }
+function grenadaOra(){ return typeof S!=='undefined' && !!S && S.era===LINEA_US && S.livello===3 && !S.opposizione && S.usGrenada83==null && ottobre83(); }
+function grenadaOppOra(){ return typeof S!=='undefined' && !!S && S.era===LINEA_US && S.livello===3 && !!S.opposizione && S.usGrenada83Opp==null && S.usGrenada83==null && ottobre83(); }
+/* mette in agenda le carte di ottobre ancora dovute (al governo o dall'aula), con la carta di campagna se cade in stagione; false se nessuna */
+function us80Ottobre83(){
+  var c=[];
+  if(beirutOra()) c.push(BEIRUT83_EV); else if(beirutOppOra()) c.push(BEIRUT83_OPP_EV);
+  if(grenadaOra()) c.push(GRENADA83_EV); else if(grenadaOppOra()) c.push(GRENADA83_OPP_EV);
+  if(!c.length) return false;
+  c.forEach(function(ev){ S.agenda.push({kind:'event', data:ev, resolved:false}); });
+  var k=campagnaColPilastro({conCampagna:true}); if(k) S.agenda.push(k);
+  return true;
+}
+/* L262-11 · le Olimpiadi di Los Angeles (data.js, testa del blocco OLIMPIADI84_EV): carta DOVUTA come Beirut, solo il 1984/7 (la
+   cerimonia d'apertura è del 28 luglio; nessun pilastro né fatto-mondo nel mese). È stagione della presidenziale: nell'iniezione passa
+   da snodoColCampagna, quindi la carta di campagna del mese esce accanto (una, non due). Accanto al richiamo come le altre di un mese. */
+function luglio84(){ return meseAss()===1984*12+7; }
+function olimpiadiOra(){ return typeof S!=='undefined' && !!S && S.era===LINEA_US && S.livello===3 && !S.opposizione && S.usOlimpiadi84==null && luglio84(); }
+function olimpiadiOppOra(){ return typeof S!=='undefined' && !!S && S.era===LINEA_US && S.livello===3 && !!S.opposizione && S.usOlimpiadi84Opp==null && S.usOlimpiadi84==null && luglio84(); }
+/* il testo del rilascio: 'presto' (il blitz riuscito, primavera 1980), 'giuramento' (gennaio 1981), 'tardi' (gli altri mesi) */
+function us80LiberiTempo(){
+  if(typeof S==='undefined' || !S) return 'tardi';
+  if(S.year===1980 && S.month<=8) return 'presto';
+  return (S.year===1981 && S.month===1) ? 'giuramento' : 'tardi';
+}
 /* L258-5 · i cancelli dello scandalo (data.js, testa del blocco SCANDALO72_EV). S4a 1972/7-8 dentro la campagna presidenziale (giugno è di
    pus70_rapidcity): l'iniezione mette anche la carta di campagna (snodoColCampagna). Il Presidente-giocatore deve potersi ricandidare
    (!limiteMandatiRaggiunto(): chi ha già vinto due volte chiude alla vigilia e non ha una rielezione da proteggere); il Presidente-IA
@@ -5384,6 +5538,21 @@ function snodoAccantoAlRichiamo(){
   var EV = (typeof snodoMissili62Dovuta==='function' && snodoMissili62Dovuta()) ? MISSILI62_EV
          : ((typeof snodoMissili62OppDovuta==='function' && snodoMissili62OppDovuta()) ? MISSILI62_OPP_EV
          : ((typeof snodoAllerta73OppDovuta==='function' && snodoAllerta73OppDovuta()) ? ALLERTA73_OPP_EV : null));   // L258-13: l'aula dell'allerta ha un mese solo (ottobre è del pilastro), e il richiamo la mangiava 12 volte su 98 (misura-l258-13.js)
+  /* L262-7: anche Mosca e Malta (carte dovute, non snodi). Malta ha un mese solo, e Mosca uno solo quando il bersaglio è giugno: il
+     richiamo all'opposizione del dicembre 1989 la mangiava (prova-us1980d.js, 2 carriere su 8). */
+  if(!EV) EV = (typeof maltaOra==='function' && maltaOra()) ? MALTA89_EV : (maltaOppOra() ? MALTA89_OPP_EV : (moscaOra() ? MOSCA88_EV : (moscaOppOra() ? MOSCA88_OPP_EV : null)));
+  /* L262-8: anche il grano e i profughi da Cuba (carte dovute di un mese o pochi, la lezione ⚠ 1 di L262-7). */
+  if(!EV) EV = (typeof granoOra==='function' && granoOra()) ? GRANO80_EV : (granoOppOra() ? GRANO80_OPP_EV : (profughiOra() ? PROFUGHI80_EV : (profughiOppOra() ? PROFUGHI80_OPP_EV : null)));
+  /* L262-9: anche il Messico e il jumbo (un mese solo ciascuno; dal L262-10 la ripresa non esce a settembre, ripresaFinestra). */
+  if(!EV) EV = (typeof messicoOra==='function' && messicoOra()) ? MESSICO82_EV : (messicoOppOra() ? MESSICO82_OPP_EV
+    : (jumboOra() ? JUMBO83_EV : (jumboOppOra() ? JUMBO83_OPP_EV : null)));
+  /* L262-10: Beirut e Grenada, un mese solo, tutte e due accanto al richiamo. */
+  if(!EV && typeof us80Ottobre83==='function' && us80Ottobre83()) return;
+  /* L262-11: le Olimpiadi, un mese solo (la carta di campagna la mette la riga in fondo). */
+  if(!EV) EV = (typeof olimpiadiOra==='function' && olimpiadiOra()) ? OLIMPIADI84_EV : (olimpiadiOppOra() ? OLIMPIADI84_OPP_EV : null);
+  /* L262-8: e l'aula della ripresa (L262-7), che col bersaglio al 1984/4 ha un mese solo: il richiamo la mangiava (prova-us1980c.js,
+     1 carriera su 6, vista quando il grano di gennaio ha spostato il caso). È un dossier, non un evento. */
+  if(!EV && typeof ripresaOppOra==='function' && ripresaOppOra()){ S.agenda.push({kind:'dossier', data:ripresaOppCarta(), resolved:false}); return; }
   if(!EV) return;
   S.agenda.push({kind:'event', data:EV, resolved:false}); var c=campagnaColPilastro({conCampagna:true}); if(c) S.agenda.push(c);
 }
@@ -8234,6 +8403,21 @@ function genAgendaRamo(first){
     if(!first && typeof snodoPetrolio73UsOppDovuta==='function' && snodoPetrolio73UsOppDovuta()){ S.agenda.push({kind:'event', data:PETROLIO73_US_OPP_EV, resolved:false}); agendaSolo(); return; }   // L258-4: le code, dall'aula
     if(!first && typeof snodoScandalo72OppDovuta==='function' && snodoScandalo72OppDovuta()){ snodoColCampagna({kind:'event', data:SCANDALO72_OPP_EV, resolved:false}); return; }   // L258-5: l'irruzione, dall'aula (con la carta di campagna della presidenziale)
     if(!first && typeof snodoNastri74OppDovuta==='function' && snodoNastri74OppDovuta()){ S.agenda.push({kind:'event', data:NASTRI74_OPP_EV, resolved:false}); agendaSolo(); return; }   // L258-5: i nastri, dall'aula
+    if(!first && typeof granoOppOra==='function' && granoOppOra()){ snodoColCampagna({kind:'event', data:GRANO80_OPP_EV, resolved:false}); return; }   // L262-8: il grano, dall'aula (non è uno snodo; prima degli ostaggi)
+    if(!first && typeof snodoOstaggi80OppDovuta==='function' && snodoOstaggi80OppDovuta()){ S.agenda.push({kind:'event', data:OSTAGGI80_OPP_EV, resolved:false}); agendaSolo(); return; }   // L262-4: gli ostaggi, dall'aula
+    if(!first && typeof snodoRecessione82OppDovuta==='function' && snodoRecessione82OppDovuta()){ S.agenda.push({kind:'event', data:RECESSIONE82_OPP_EV, resolved:false}); agendaSolo(); return; }   // L262-4: la recessione, dall'aula
+    if(!first && typeof ostaggiRilascioOra==='function' && ostaggiRilascioOra()){ snodoColCampagna({kind:'event', data:US80_LIBERI_OPP_EV, resolved:false}); return; }   // L262-4: il rilascio (non è uno snodo), dall'aula
+    if(!first && typeof profughiOppOra==='function' && profughiOppOra()){ snodoColCampagna({kind:'event', data:PROFUGHI80_OPP_EV, resolved:false}); return; }   // L262-8: i profughi da Cuba, dall'aula (non è uno snodo)
+    if(!first && typeof snodoControllori81OppDovuta==='function' && snodoControllori81OppDovuta()){ S.agenda.push({kind:'event', data:CONTROLLORI81_OPP_EV, resolved:false}); agendaSolo(); return; }   // L262-6: i controllori di volo, dall'aula
+    if(!first && typeof snodoArmi87OppDovuta==='function' && snodoArmi87OppDovuta()){ S.agenda.push({kind:'event', data:ARMI87_OPP_EV, resolved:false}); agendaSolo(); return; }   // L262-5: le armi all'Iran, dall'aula
+    if(!first && typeof snodoMissili87OppDovuta==='function' && snodoMissili87OppDovuta()){ S.agenda.push({kind:'event', data:MISSILI87_OPP_EV, resolved:false}); agendaSolo(); return; }   // L262-5: i missili, dall'aula
+    if(!first && typeof ripresaOppOra==='function' && ripresaOppOra()){ S.agenda.push({kind:'dossier', data:ripresaOppCarta(), resolved:false}); agendaSolo(); return; }   // L262-7: l'aula della ripresa, dovuta (prima degli archi personali)
+    if(!first && typeof moscaOppOra==='function' && moscaOppOra()){ snodoColCampagna({kind:'event', data:MOSCA88_OPP_EV, resolved:false}); return; }   // L262-7: Mosca, dall'aula (non è uno snodo; con la carta di campagna se cade in stagione)
+    if(!first && typeof maltaOppOra==='function' && maltaOppOra()){ S.agenda.push({kind:'event', data:MALTA89_OPP_EV, resolved:false}); agendaSolo(); return; }   // L262-7: Malta, dall'aula (non è uno snodo)
+    if(!first && typeof messicoOppOra==='function' && messicoOppOra()){ snodoColCampagna({kind:'event', data:MESSICO82_OPP_EV, resolved:false}); return; }   // L262-9: il Messico, dall'aula (non è uno snodo)
+    if(!first && typeof jumboOppOra==='function' && jumboOppOra()){ snodoColCampagna({kind:'event', data:JUMBO83_OPP_EV, resolved:false}); return; }   // L262-9: il jumbo coreano, dall'aula (solo settembre: dal L262-10 la ripresa lo cede)
+    if(!first && typeof us80Ottobre83==='function' && us80Ottobre83()){ agendaSolo(); return; }   // L262-10: Beirut e Grenada, dall'aula (non sono snodi: carte dovute, tutte e due nel 1983/10)
+    if(!first && typeof olimpiadiOppOra==='function' && olimpiadiOppOra()){ snodoColCampagna({kind:'event', data:OLIMPIADI84_OPP_EV, resolved:false}); return; }   // L262-11: le Olimpiadi, dall'aula (non è uno snodo; con la carta di campagna della presidenziale)
     if(!first && typeof snodoScuola57OppDovuta==='function' && snodoScuola57OppDovuta()){ S.agenda.push({kind:'event', data:(S.partito==='us_rep' ? SCUOLA57_OPP_REP_EV : SCUOLA57_OPP_EV), resolved:false}); agendaSolo(); return; }   // L176-2: la scuola, dall'aula · D139 (L177-1): il testo repubblicano, stessi effetti
     // Cantiere C: la stagione elettorale vale anche da SFIDANTE (bloccoIds = il tuo blocco d'opposizione)
     if(typeof pickCampagnaNazionale==='function'){ const cnbO=pickCampagnaNazionale(); if(cnbO){ S.agenda.push(cnbO); agendaSolo(); return; } }
@@ -8404,6 +8588,22 @@ function genAgendaRamo(first){
   if(!first && typeof snodoPetrolio73UsDovuta==='function' && snodoPetrolio73UsDovuta()){ S.agenda.push({kind:'event', data:PETROLIO73_US_EV, resolved:false}); agendaSolo(); return; }   // L258-4: le code
   if(!first && typeof snodoScandalo72Dovuta==='function' && snodoScandalo72Dovuta()){ snodoColCampagna({kind:'event', data:SCANDALO72_EV, resolved:false}); return; }   // L258-5: l'irruzione (con la carta di campagna della presidenziale)
   if(!first && typeof snodoNastri74Dovuta==='function' && snodoNastri74Dovuta()){ S.agenda.push({kind:'event', data:NASTRI74_EV, resolved:false}); agendaSolo(); return; }   // L258-5: i nastri
+  if(!first && typeof granoOra==='function' && granoOra()){ snodoColCampagna({kind:'event', data:GRANO80_EV, resolved:false}); return; }   // L262-8: il grano (non è uno snodo: carta dovuta; prima degli ostaggi)
+  if(!first && typeof snodoOstaggi80Dovuta==='function' && snodoOstaggi80Dovuta()){ S.agenda.push({kind:'event', data:OSTAGGI80_EV, resolved:false}); agendaSolo(); return; }   // L262-4: gli ostaggi
+  if(!first && typeof snodoRecessione82Dovuta==='function' && snodoRecessione82Dovuta()){ S.agenda.push({kind:'event', data:RECESSIONE82_EV, resolved:false}); agendaSolo(); return; }   // L262-4: la recessione
+  if(!first && typeof ostaggiRilascioOra==='function' && ostaggiRilascioOra()){ snodoColCampagna({kind:'event', data:US80_LIBERI_EV, resolved:false}); return; }   // L262-4: il rilascio (non è uno snodo; con la carta di campagna se cade in stagione)
+  if(!first && typeof profughiOra==='function' && profughiOra()){ snodoColCampagna({kind:'event', data:PROFUGHI80_EV, resolved:false}); return; }   // L262-8: i profughi da Cuba (non è uno snodo: carta dovuta; con la carta di campagna se cade in stagione)
+  if(!first && typeof snodoControllori81Dovuta==='function' && snodoControllori81Dovuta()){ S.agenda.push({kind:'event', data:CONTROLLORI81_EV, resolved:false}); agendaSolo(); return; }   // L262-6: i controllori di volo
+  if(!first && typeof ripresa83Ora==='function' && ripresa83Ora()){ S.agenda.push({kind:'event', data:ripresaCarta(), resolved:false}); agendaSolo(); return; }   // L262-6: la ripresa (non è uno snodo: carta dovuta, una variante da usRecessione82)
+  if(!first && typeof snodoLibano85Dovuta==='function' && snodoLibano85Dovuta()){ S.agenda.push({kind:'event', data:LIBANO85_EV, resolved:false}); agendaSolo(); return; }   // L262-5: gli ostaggi del Libano (il seme di S3)
+  if(!first && typeof snodoArmi87Dovuta==='function' && snodoArmi87Dovuta()){ S.agenda.push({kind:'event', data:ARMI87_EV, resolved:false}); agendaSolo(); return; }   // L262-5: le armi all'Iran (solo col segno del 1985)
+  if(!first && typeof snodoMissili87Dovuta==='function' && snodoMissili87Dovuta()){ S.agenda.push({kind:'event', data:MISSILI87_EV, resolved:false}); agendaSolo(); return; }   // L262-5: i missili
+  if(!first && typeof moscaOra==='function' && moscaOra()){ snodoColCampagna({kind:'event', data:MOSCA88_EV, resolved:false}); return; }   // L262-7: il vertice di Mosca (non è uno snodo: carta dovuta; con la carta di campagna se cade in stagione)
+  if(!first && typeof maltaOra==='function' && maltaOra()){ S.agenda.push({kind:'event', data:MALTA89_EV, resolved:false}); agendaSolo(); return; }   // L262-7: Malta (non è uno snodo: carta dovuta)
+  if(!first && typeof messicoOra==='function' && messicoOra()){ snodoColCampagna({kind:'event', data:MESSICO82_EV, resolved:false}); return; }   // L262-9: il Messico (non è uno snodo: carta dovuta; con la carta di campagna se cade in stagione)
+  if(!first && typeof jumboOra==='function' && jumboOra()){ snodoColCampagna({kind:'event', data:JUMBO83_EV, resolved:false}); return; }   // L262-9: il jumbo coreano (non è uno snodo: carta dovuta; solo settembre, dal L262-10 la ripresa lo cede)
+  if(!first && typeof us80Ottobre83==='function' && us80Ottobre83()){ agendaSolo(); return; }   // L262-10: Beirut e Grenada (non sono snodi: carte dovute, tutte e due nel 1983/10, prima Beirut)
+  if(!first && typeof olimpiadiOra==='function' && olimpiadiOra()){ snodoColCampagna({kind:'event', data:OLIMPIADI84_EV, resolved:false}); return; }   // L262-11: le Olimpiadi di Los Angeles (non è uno snodo: carta dovuta; con la carta di campagna della presidenziale)
   if(!first && typeof franco90AncoraDovuta==='function'){ var _f9=franco90AncoraDovuta();   // L103-2: la corsa al franco del '92 e del '93
     if(_f9 && !cedeVoto(ancoraReggeRinvio(FRANCO90_ANCORE, _f9))){ S.francoAncore=S.francoAncore||{}; S.francoAncore[_f9]=true; if(_f9==='a92' && pesoFranco92()>1) S.francoGrave=true;   // col no a Maastricht pesa doppio
       S.agenda.push({kind:'event', data:(_f9==='a92' ? FRANCO92_EV : FRANCO93_EV), resolved:false}); agendaSolo(); return; } }
@@ -11413,6 +11613,11 @@ function pickOpposizione(){
      L63-1, che contava per `id` e non vedeva l'intero pool d'opposizione. Una riga, e il ramo torna osservabile. */
   /* L258-12 · `flag:{chiave:valore}` su una scelta = un flag di S scritto alla scelta (oggi solo o_us70_ostaggi → S.usOstaggi79Opp, che la
      biografia legge da SNODI_STORICI). Additivo: senza il campo, come prima. */
+  return oppCartaItem(ev);
+}
+/* L262-7 · la carta d'opposizione com'esce in agenda (kind:'dossier'), tolta da pickOpposizione perché la usa anche l'aula dovuta della
+   ripresa (ripresaOppCarta): una forma sola. */
+function oppCartaItem(ev){
   return { id:ev.id, delega:ev.delega, kick:ev.kick, t:ev.t, text:ev.text, ch: ev.ch.map(function(c){ return { l:c.l, e:c.e, pleases:c.pleases, rischio:c.rischio, trasparenza:c.trasparenza, f:function(){ applyOppEffect(c); if(c.flag) for(const k in c.flag) S[k]=c.flag[k]; } }; }) };
 }
 /* ===== L25-2 + L25-3 — LE FAMIGLIE D'OPPOSIZIONE E IL LORO ARBITRO =====
@@ -11819,7 +12024,7 @@ function applySnap(snap){
   ['deAsilo92','deAsilo92Opp','deConto93','deConto93Opp','dePacchetto96','dePacchetto96Opp','deKosovo99','deKosovo99Opp','deMoneta98'].forEach(function(k){ if(S[k]===undefined) S[k]=null; });   // L153-2: uno per uno
   ['deIraq02','deIraq02Opp','deAgenda03','deAgenda03Opp','deFiducia05','deFiducia05Opp','deBanche08','deBanche08Opp'].forEach(function(k){ if(S[k]===undefined) S[k]=null; });   // L157-1: uno per uno
   ['usCorea','usCoreaOpp','usGenerale','usGeneraleOpp','usAcciaio','usAcciaioOpp','usScuola','usScuolaOpp'].forEach(function(k){ if(S[k]===undefined) S[k]=null; });   // L176-2: uno per uno
-  ['usBaia','usBaiaOpp','usMissili','usMissiliOpp','usDiritti','usDirittiOpp','usVietnam','usVietnamOpp','usLuna70','usLuna70Opp','usPace73','usPace73Opp','usPetrolio73','usPetrolio73Opp'].forEach(function(k){ if(S[k]===undefined) S[k]=null; });   // L227-1: i salvataggi di us1960 di prima caricano
+  ['usBaia','usBaiaOpp','usMissili','usMissiliOpp','usDiritti','usDirittiOpp','usVietnam','usVietnamOpp','usLuna70','usLuna70Opp','usPace73','usPace73Opp','usPetrolio73','usPetrolio73Opp','usOstaggi80','usOstaggi80Opp','usRecessione82','usRecessione82Opp','usArmiIran85','usArmiIran86','usArmiIran86Opp','usMissili87','usMissili87Opp','usControllori81','usControllori81Opp','usMosca88','usMosca88Opp','usMalta89','usMalta89Opp','usGrano80','usGrano80Opp','usProfughi80','usProfughi80Opp','usMessico82','usMessico82Opp','usJumbo83','usJumbo83Opp','usBeirut83','usBeirut83Opp','usGrenada83','usGrenada83Opp','usOlimpiadi84','usOlimpiadi84Opp'].forEach(function(k){ if(S[k]===undefined) S[k]=null; });   // L227-1: i salvataggi di us1960 di prima caricano · L258-4, L262-4, L262-5, L262-6, L262-7, L262-8, L262-9 e L262-10: anche gli snodi di us1970 e us1980
   ['usScandalo','usScandaloOpp','usNastri74','usNastri74Opp'].forEach(function(k){ if(S[k]===undefined) S[k]=null; });   // L258-5
   if(S.usNastriRitorno!=null && !(typeof S.usNastriRitorno==='object' && typeof S.usNastriRitorno.mese==='number' && /^(voto|trascrizioni|successione)$/.test(S.usNastriRitorno.tipo||''))) delete S.usNastriRitorno;   // L258-5: un seguito illeggibile si toglie
   if(S.scioglimento97===undefined) S.scioglimento97=null;   // L103-1

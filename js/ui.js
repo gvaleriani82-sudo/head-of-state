@@ -2821,7 +2821,7 @@ function bilMissioniHtml(){
   h+=`<div class="log"><div class="li">${fatta ? T('La missione del mese è fatta: la prossima il mese che viene.') : T('Scegli dove andare: il rapporto sale. Chi trascuri da due mesi si raffredda, piano.')}</div></div>`;
   h+=`<div class="bil-griglia" style="display:grid;grid-template-columns:1fr 1fr;gap:7px;padding:2px 12px 12px;">`
     +S.diplo.bil.map(function(p,i){ const c=barColor(p.v);
-      return `<button class="bil-mis" onclick="uiMissione(${i})"${fatta?' disabled':''} style="min-height:44px;padding:7px 8px;border-radius:9px;border:1px solid var(--line2);background:var(--panel);color:var(--txt);font-family:inherit;font-size:12px;cursor:${fatta?'default':'pointer'};text-align:left;opacity:${fatta?'.6':'1'};"><b>${bilNome(p.id)}</b><br><span style="font-size:12px;color:${c}">${T(BIL_TIPO[p.t])} · ${fmt(p.v,0)}</span></button>`; }).join('')
+      return `<button class="bil-mis" onclick="uiMissione(${i})"${fatta?' disabled':''} style="min-height:44px;padding:7px 8px;border-radius:9px;border:1px solid var(--line2);background:var(--panel);color:var(--txt);font-family:inherit;font-size:12px;cursor:${fatta?'default':'pointer'};text-align:left;opacity:${fatta?'.6':'1'};"><b>${bilNome(p.id)}</b><br><span style="font-size:12px;color:${c}">${T(BIL_TIPO[p.t])} · ${fmt(p.v,0)}</span>${(typeof BIL_GELO!=='undefined' && BIL_GELO && BIL_K.costoAlleati>0 && p.t==='rivale') ? `<br><span style="font-size:12px;color:var(--mut2)">${T('Gli alleati se ne accorgono')}</span>` : ''}</button>`; }).join('')   // L260-10: col Gelo la missione dal rivale costa a ogni alleato (L260-10bis: solo se il costo è > 0, oggi 0)
     +`</div></div>`;
   return h;
 }

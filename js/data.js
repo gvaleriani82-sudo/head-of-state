@@ -2014,6 +2014,11 @@ const SCENARI = {
     /* D292 (L216-1, D270) · punti sul VOTO della presidenziale, positivo = al partito del Presidente in carica; li legge solo
        spintaPresidenziale() (model.js), 0 se il Presidente sei tu. Partenza di Cowork {1980:-6, 1984:8, 1988:3}. */
     spintaPresidenziale: { 1980: -6, 1984: 8, 1988: 3 },
+    /* L262-5 · la soglia della primaria all'opposizione di questa porta (assente = 48, PRIMARIA_SOGLIA_OPP; la legge solo basePrimaria()).
+       Coi pilastri (L262-3) e le aule (L262-4, L262-5) i Democratici all'opposizione perdevano la primaria 21 · 21 volte su 40 (13 prima
+       dei pilastri). Sweep 48→42 (misura-us1980.js gioc --soglia, personaggio rinominato, 40 × 2 semi): 21·21 · 14·13 · 9·9 · 4·3;
+       46 è il valore più vicino a 48 dentro 10-15. Le altre tre partenze non hanno primarie perse con nessun valore (identiche). */
+    sogliaPrimariaOpp: 46,
     mandatiVinti: 1,                           // D288: il Presidente ha vinto il 1976 (vale solo al livello 3 al governo: D135)
     partiti: [
       { id:'us_dem', nome:'Democratici',  orientamento:'centrosinistra', base:{ giovani:0.4, lavoratori:0.35, cetomedio:0.25 },                  forza:50, forzaAncora:50, asse:-1 },
@@ -20336,6 +20341,40 @@ const TITOLI=[
  {id:'ti_us70_ostaggi', era:'us1970', pri:1, cond:()=>S.year===1979&&S.month===12&&S.usOstaggi79==='pazienza', amico:'Niente petrolio iraniano, soldi congelati: il Presidente stringe senza sparare', ostile:'Teheran libera tredici ostaggi: più di cinquanta restano nell\'ambasciata'},
  {id:'ti_us70_ostaggi_forza', era:'us1970', pri:1, cond:()=>S.year===1979&&S.month===12&&S.usOstaggi79==='forza', amico:'La flotta nel Golfo: l\'America non si lascia ricattare', ostile:'Ostaggi: navi da guerra davanti all\'Iran, e a Teheran gridano più forte'},
  {id:'ti_us70_ostaggi_trattativa', era:'us1970', pri:1, cond:()=>S.year===1979&&S.month===12&&S.usOstaggi79==='trattativa', amico:'Il vecchio sovrano lascia l\'America: si apre la trattativa per gli ostaggi', ostile:'Ostaggi: il Presidente cede sul vecchio sovrano, e Teheran chiede di più'},
+// L262-4 · gli ostaggi del 1980 e il rilascio: il blitz nel mese dopo lo snodo (uno per esito), il rilascio nel mese dopo (all'opposizione non c'è prima pagina)
+{id:'ti_us80_blitz', era:'us1980', pri:1, cond:()=>S.year===1980 && S.month>=4 && S.month<=5 && S.usBlitz80==='riuscito', amico:'Otto elicotteri nel deserto, e tutti a casa', ostile:'Il blitz riesce: ma il Presidente ha giocato la vita di cinquantatré persone'},
+{id:'ti_us80_blitz_fallito', era:'us1980', pri:1, cond:()=>S.year===1980 && S.month>=4 && S.month<=5 && S.usBlitz80==='fallito', amico:'Il blitz fallisce nel deserto: il Presidente si prende la colpa', ostile:'Otto militari morti nel deserto, e gli ostaggi restano a Teheran'},
+// L262-6 · la ripresa: il mese dopo la carta (usRipresa83), solo con la rotta tenuta nel 1982 o senza la recessione (chi non c'era)
+{id:'ti_us80_ripresa', era:'us1980', pri:1, cond:()=>S.usRipresa83!=null && meseAss()===S.usRipresa83+1 && (S.usRecessione82==='rotta' || S.usRecessione82==null), amico:'La disoccupazione scende, mese dopo mese: la ripresa è qui', ostile:'La ripresa c\'è: e il disavanzo è il più alto del dopoguerra'},
+// L262-7 · Mosca e Malta: il mese dopo la carta (la carta esce prima del titolo del suo mese: nel mese della carta il flag è ancora null). Mosca 1988/5-6 → titolo 1988/6-7; Malta 1989/12 → 1990/1
+{id:'ti_us80_mosca', era:'us1980', pri:1, cond:()=>S.usMosca88==='passeggiata' && S.year===1988 && S.month>=6 && S.month<=7, amico:'Sulla piazza Rossa, fra la gente: il Presidente e il leader sovietico come vecchi amici', ostile:'La passeggiata sulla piazza Rossa: e i missili strategici restano dove sono'},
+{id:'ti_us80_mosca_diritti', era:'us1980', pri:1, cond:()=>S.usMosca88==='diritti' && S.year===1988 && S.month>=6 && S.month<=7, amico:'A Mosca il Presidente riceve i dissidenti: la libertà sul tavolo del vertice', ostile:'Il Presidente coi dissidenti: Mosca si offende, il vertice si raffredda'},
+{id:'ti_us80_mosca_breve', era:'us1980', pri:1, cond:()=>S.usMosca88==='breve' && S.year===1988 && S.month>=6 && S.month<=7, amico:'Mosca: tre giorni di lavoro sui missili a lungo raggio, niente passerelle', ostile:'Un vertice breve e senza foto: il momento sprecato'},
+{id:'ti_us80_grano', era:'us1980', pri:1, cond:()=>S.usGrano80==='pieno' && S.year===1980 && S.month>=2 && S.month<=4, amico:'Embargo pieno sul grano per Mosca: lo Stato compra il raccolto', ostile:'Il grano pagato dai contribuenti: l\'embargo costa centinaia di milioni'},
+{id:'ti_us80_grano_contratti', era:'us1980', pri:1, cond:()=>S.usGrano80==='contratti' && S.year===1980 && S.month>=2 && S.month<=4, amico:'Il grano già venduto parte, il resto si ferma: un embargo con giudizio', ostile:'L\'embargo del grano ha un buco grande come un granaio'},
+{id:'ti_us80_grano_nessuno', era:'us1980', pri:1, cond:()=>S.usGrano80==='nessuno' && S.year===1980 && S.month>=2 && S.month<=4, amico:'Via l\'embargo: il grano torna a viaggiare, la risposta a Mosca cambia strada', ostile:'Via l\'embargo del grano: dopo l\'Afghanistan, una resa'},
+{id:'ti_us80_profughi', era:'us1980', pri:1, cond:()=>S.usProfughi80==='aperte' && S.year===1980 && S.month>=5 && S.month<=7, amico:'Braccia aperte ai profughi di Cuba: l\'America resta una porta', ostile:'Centinaia di profughi al giorno, e nessuno sa dove metterli'},
+{id:'ti_us80_profughi_guardia', era:'us1980', pri:1, cond:()=>S.usProfughi80==='guardia' && S.year===1980 && S.month>=5 && S.month<=7, amico:'La guardia costiera ferma le barche: ordine sulle coste della Florida', ostile:'Le barche dei profughi respinte in mare: le chiese protestano'},
+{id:'ti_us80_profughi_basi', era:'us1980', pri:1, cond:()=>S.usProfughi80==='basi' && S.year===1980 && S.month>=5 && S.month<=7, amico:'I profughi di Cuba nelle basi militari: accoglienza, con i controlli', ostile:'Profughi dietro il filo spinato delle basi: si parla di campi'},
+{id:'ti_us80_messico', era:'us1980', pri:1, cond:()=>S.usMessico82==='ponte' && S.year===1982 && S.month>=9 && S.month<=10, amico:'Il prestito-ponte salva il Messico, e le banche respirano', ostile:'Soldi pubblici per le banche che hanno prestato al Messico'},
+{id:'ti_us80_messico_banche', era:'us1980', pri:1, cond:()=>S.usMessico82==='banche' && S.year===1982 && S.month>=9 && S.month<=10, amico:'Nessun salvataggio: chi ha prestato al Messico paga', ostile:'Il Messico non paga, Washington guarda: tremano le banche'},
+{id:'ti_us80_messico_fondo', era:'us1980', pri:1, cond:()=>S.usMessico82==='fondo' && S.year===1982 && S.month>=9 && S.month<=10, amico:'Aiuti al Messico, ma solo col Fondo monetario', ostile:'Il Messico in ginocchio, e Washington detta le condizioni'},
+{id:'ti_us80_jumbo', era:'us1980', pri:1, cond:()=>S.usJumbo83==='onu' && S.year===1983 && S.month>=10 && S.month<=11, amico:'All\'ONU le voci dei piloti sovietici: Mosca resta senza parole', ostile:'Le registrazioni all\'ONU, e poi? Duecentosessantanove morti senza risposta'},
+{id:'ti_us80_jumbo_sanzioni', era:'us1980', pri:1, cond:()=>S.usJumbo83==='sanzioni' && S.year===1983 && S.month>=10 && S.month<=11, amico:'Niente voli sovietici, niente grano: la risposta per l\'aereo abbattuto', ostile:'Sanzioni per l\'aereo abbattuto, e gli alleati europei non seguono'},
+{id:'ti_us80_jumbo_negoziato', era:'us1980', pri:1, cond:()=>S.usJumbo83==='negoziato' && S.year===1983 && S.month>=10 && S.month<=11, amico:'Fermezza per l\'aereo abbattuto, ma il negoziato sui missili continua', ostile:'Abbattono un aereo di linea, e si continua a trattare'},
+{id:'ti_us80_beirut', era:'us1980', pri:1, cond:()=>S.usBeirut83==='resta' && S.year===1983 && S.month>=11 && S.month<=12, amico:'Dopo la caserma i marines restano a Beirut: l\'America non scappa', ostile:'Duecentoquarantuno morti, e i marines restano a Beirut a fare che cosa?'},
+{id:'ti_us80_beirut_ritiro', era:'us1980', pri:1, cond:()=>S.usBeirut83==='ritiro' && S.year===1983 && S.month>=11 && S.month<=12, amico:'I marines torneranno sulle navi: basta morti in Libano', ostile:'Una bomba, e l\'America lascia Beirut'},
+{id:'ti_us80_beirut_fuoco', era:'us1980', pri:1, cond:()=>S.usBeirut83==='fuoco' && S.year===1983 && S.month>=11 && S.month<=12, amico:'Le navi rispondono dal mare per la caserma di Beirut', ostile:'I cannoni sulle colline del Libano: una guerra che nessuno ha votato'},
+{id:'ti_us80_grenada', era:'us1980', pri:1, cond:()=>S.usGrenada83==='sbarco' && S.year===1983 && S.month>=11 && S.month<=12, amico:'Grenada presa in pochi giorni, gli studenti tornano a casa', ostile:'Lo sbarco a Grenada, e all\'ONU l\'America resta sola'},
+{id:'ti_us80_grenada_evacuazione', era:'us1980', pri:1, cond:()=>S.usGrenada83==='evacuazione' && S.year===1983 && S.month>=11 && S.month<=12, amico:'Gli studenti di Grenada a casa, senza una guerra', ostile:'Salvati gli studenti, l\'isola resta ai militari'},
+{id:'ti_us80_grenada_diplomazia', era:'us1980', pri:1, cond:()=>S.usGrenada83==='diplomazia' && S.year===1983 && S.month>=11 && S.month<=12, amico:'Su Grenada la legge degli Stati americani, non le navi', ostile:'Grenada ai militari, e Washington manda i diplomatici'},
+{id:'ti_us80_olimpiadi', era:'us1980', pri:1, cond:()=>S.usOlimpiadi84==='festa' && S.year===1984 && S.month>=8 && S.month<=9, amico:'Primi nel medagliere, e i Giochi chiudono in attivo: la festa del paese', ostile:'Lo stadio come un comizio: i Giochi in piena campagna'},
+{id:'ti_us80_olimpiadi_neutrali', era:'us1980', pri:1, cond:()=>S.usOlimpiadi84==='neutrali' && S.year===1984 && S.month>=8 && S.month<=9, amico:'Giochi senza politica, e la porta resta aperta all\'Est', ostile:'Mosca diserta i Giochi, e Washington non dice una parola'},
+{id:'ti_us80_olimpiadi_sicurezza', era:'us1980', pri:1, cond:()=>S.usOlimpiadi84==='sicurezza' && S.year===1984 && S.month>=8 && S.month<=9, amico:'Giochi sicuri dal primo all\'ultimo giorno', ostile:'Transenne e Guardia nazionale: i Giochi blindati di Los Angeles'},
+{id:'ti_us80_malta', era:'us1980', pri:1, cond:()=>S.usMalta89==='finita' && S.year===1990 && S.month===1, amico:'Al largo di Malta, nella tempesta: la guerra fredda è finita', ostile:'La guerra fredda è finita, dice il Presidente: i missili sovietici sono ancora lì'},
+{id:'ti_us80_malta_prudenza', era:'us1980', pri:1, cond:()=>S.usMalta89==='prudenza' && S.year===1990 && S.month===1, amico:'Malta: aiuti a Mosca, ma solo con le riforme', ostile:'Malta: il Presidente prudente mentre l\'Europa cambia'},
+{id:'ti_us80_malta_nato', era:'us1980', pri:1, cond:()=>S.usMalta89==='nato' && S.year===1990 && S.month===1, amico:'Malta: la Germania unita deve stare nella NATO', ostile:'Malta: sulla Germania il vertice si inceppa'},
+{id:'ti_us80_liberi', era:'us1980', pri:1, cond:()=>S.usOstaggiLiberi!=null && meseAss()===S.usOstaggiLiberi+1,amico:'Gli ostaggi sono a casa', ostile:'Gli ostaggi sono a casa: e il conto dei giorni resta'},
  {id:'ng_p_ti_petrolio', era:'contemporanea', paesi:['nigeria'], amico:'La produzione di petrolio torna a salire', ostile:'Un barile su dieci sparisce: il furto record'},
 ];
 
@@ -20930,6 +20969,21 @@ const OPPOSIZIONE_EV = [
       { l:'Stare col Presidente finché ci sono gli ostaggi', e:'La storia · il paese si stringe attorno alla Casa Bianca, e il Presidente sale nei sondaggi come non saliva da anni · il tuo partito tace, e per qualche mese nessuno lo nota', cred:3, stampa:1, vis:-2, flag:{usOstaggi79Opp:'sostegno'} },
       { l:'Chiedere la linea dura', e:'La base esulta · se domani a Teheran succede il peggio, qualcuno ricorderà chi spingeva', vis:3, base:2, cred:-1, gruppi:{giovani:-2}, flag:{usOstaggi79Opp:'linea'} },
       { l:'Chiedere un\'inchiesta su chi ha fatto entrare il vecchio sovrano', e:'I giornali ti seguono · la Casa Bianca dice che si divide il paese mentre gli ostaggi aspettano', cred:1, vis:2, stampa:-1, gruppi:{cetomedio:1}, flag:{usOstaggi79Opp:'inchiesta'} }, ]},
+  /* L262-6 · l'aula della ripresa (1983/3-1984/4, prima della vigilia): il testo legge S.usRecessione82Opp (il tema scelto dall'aula
+     nel 1982; senza, il testo di base). La carta del governo è dovuta (data.js, blocco RIPRESA83_EV).
+     L262-7 · DOVUTA anche questa (Cowork, ⚠ 4 di L262-6): la inietta ripresaOppOra() (game.js) al mese us80Dado('ripresa') della
+     finestra, prima degli archi personali; dal sorteggio di pickOpposizione è esclusa con la cond sempre falsa (unaCarriera resta:
+     l'innesco la segna con segnaUnaCarriera, e quella è la sola «già uscita»). */
+  { id:'o_us80_ripresa', era:'us1980', unaCarriera:true, cond:()=>false, delega:'economia', kick:'Opposizione', t:'La ripresa del governo',
+    get text(){ var k=(typeof S!=='undefined' && S) ? S.usRecessione82Opp : null;
+      return k==='lavoro' ? 'La disoccupazione scende, le borse corrono e il Presidente dice che la cura ha funzionato. Ma nelle città dell\'acciaio e dell\'auto, dove nel 1982 hai fatto la tua campagna, le fabbriche chiuse non riaprono: il lavoro che torna è altrove, e paga meno. Il tuo partito deve decidere che cosa dire a un anno dal voto.'
+        : k==='tassi' ? 'La disoccupazione scende, le borse corrono e il Presidente dice che la cura ha funzionato. Ma il denaro resta caro: chi compra una casa o un trattore paga ancora più del 12%, e nel 1982 il tuo partito aveva fatto dei tassi la sua battaglia. Il tuo partito deve decidere che cosa dire a un anno dal voto.'
+        : k==='disavanzo' ? 'La disoccupazione scende, le borse corrono e il Presidente dice che la cura ha funzionato. Ma il debito che nel 1982 avevi denunciato sta raddoppiando, e il disavanzo è il più alto del dopoguerra. Il tuo partito deve decidere che cosa dire a un anno dal voto.'
+        : 'La disoccupazione scende, le borse corrono e il Presidente dice che la cura ha funzionato. Il disavanzo è il più alto del dopoguerra, e nelle città delle fabbriche chiuse il lavoro non torna. Il tuo partito deve decidere che cosa dire a un anno dal voto.'; },
+    ch:[
+      { l:'Insistere sul tema di sempre', e:'La tua base ti riconosce · chi ha ritrovato un lavoro ti chiede se hai visto i numeri', base:2, vis:1, gruppi:{lavoratori:1, cetomedio:-1} },
+      { l:'Parlare del futuro, non del 1982', e:'Le idee nuove piacciono ai giornali · i vecchi del partito dicono che hai cambiato discorso', cred:1, stampa:1, gruppi:{giovani:1}, base:-1 },
+      { l:'Riconoscere la ripresa', e:'Un gesto da statista · la base non capisce perché aiuti chi governa', cred:2, base:-1, gruppi:{cetomedio:1} }, ]},
 ];
 
 /* ===================== L25-2 · α2 — AI FIANCHI SUI MEDIA (famiglia d'opposizione) =====================
@@ -22311,6 +22365,21 @@ const SNODI_STORICI = {
   usNastri74Opp:   { storico:['accusa'], conforme:'sui nastri dello Studio Ovale, dall’opposizione', diverge:{ 'corte':'Nel 1974 ha aspettato dall’opposizione la sentenza della Corte sui nastri.', 'uscita':'Nel 1974 ha cercato dall’opposizione un’uscita onorevole per il Presidente.' } },
   usOstaggi79:     { storico:['pazienza'], conforme:'sugli ostaggi di Teheran', diverge:{ 'forza':'Nel 1979 ha mandato la flotta nel Golfo con un ultimatum per gli ostaggi di Teheran.', 'trattativa':'Nel 1979 ha fatto partire il vecchio sovrano per trattare sugli ostaggi di Teheran.' } },   // L258-12 (evento, non snodo)
   usOstaggi79Opp:  { storico:['sostegno'], conforme:'sugli ostaggi di Teheran, dall’opposizione', diverge:{ 'linea':'Nel 1979 ha chiesto dall’opposizione la linea dura sugli ostaggi di Teheran.', 'inchiesta':'Nel 1979 ha chiesto un’inchiesta su chi aveva fatto entrare il vecchio sovrano in America.' } },
+  /* L262-4 · i due snodi di us1980 e le aule (frasi di Code). Il blitz ha due esiti (usBlitz80): la frase del finale dice la scelta. */
+  usOstaggi80:     { storico:['trattativa'], conforme:'sugli ostaggi del 1980', diverge:{ 'blitz':'Nel 1980 ha mandato i militari a liberare gli ostaggi di Teheran con un blitz nel deserto.', 'pressione':'Nel 1980 ha rotto con l’Iran e fatto bloccare i porti del petrolio per gli ostaggi.' } },
+  usOstaggi80Opp:  { storico:['unita'], conforme:'sugli ostaggi del 1980, dall’opposizione', diverge:{ 'agire':'Nel 1980 ha chiesto dall’opposizione di agire per gli ostaggi di Teheran.', 'campagna':'Nel 1980 ha fatto del conto dei giorni degli ostaggi il cuore della sua campagna.' } },
+  usRecessione82:  { storico:['rotta'], conforme:'sulla recessione del 1982', diverge:{ 'allenta':'Nel 1982 ha chiesto in pubblico alla banca centrale di abbassare i tassi.', 'tasse':'Nel 1982 ha rimesso una parte delle tasse appena tagliate.' } },
+  usRecessione82Opp:{ storico:['lavoro'], conforme:'sulla recessione del 1982, dall’opposizione', diverge:{ 'tassi':'Nel 1982 ha attaccato dall’opposizione la banca centrale e il denaro caro.', 'disavanzo':'Nel 1982 ha fatto del disavanzo il tema dell’opposizione.' } },
+  /* L262-6 · i controllori di volo del 1981 (frasi di Code). Dall'aula la riga conforme è la mediazione: nel 1981 il partito
+     d'opposizione protestò poco e chiese di trattare. */
+  usControllori81:  { storico:['licenzi'], conforme:'sui controllori di volo del 1981', diverge:{ 'tratti':'Nel 1981 ha trattato coi controllori di volo in sciopero.', 'congresso':'Nel 1981 ha chiesto al Congresso una mediazione sullo sciopero dei controllori di volo.' } },
+  usControllori81Opp:{ storico:['mediazione'], conforme:'sui controllori di volo del 1981, dall’opposizione', diverge:{ 'lavoratori':'Nel 1981 si è schierato dall’opposizione coi controllori di volo in sciopero.', 'legge':'Nel 1981 ha detto dall’opposizione che la legge sugli scioperi va rispettata.' } },
+  /* L262-5 · il seme del 1985, S3 e S4 di us1980 e le aule (frasi di Code). */
+  usArmiIran85:    { storico:['segreto'], conforme:'sugli ostaggi del Libano nel 1985', diverge:{ 'rifiuto':'Nel 1985 ha rifiutato di vendere armi all’Iran in cambio degli ostaggi del Libano.', 'congresso':'Nel 1985 ha portato al Congresso la proposta di armi all’Iran per gli ostaggi del Libano.' } },
+  usArmiIran86:    { storico:['commissione'], conforme:'sullo scandalo delle armi all’Iran', diverge:{ 'nega':'Nel 1987 ha negato tutto sulle armi all’Iran e ha lasciato scavare il procuratore.', 'congresso':'Nel 1987 ha dato tutte le carte sulle armi all’Iran al Congresso e ha licenziato i suoi.' } },
+  usArmiIran86Opp: { storico:['audizioni'], conforme:'sullo scandalo delle armi all’Iran, dall’opposizione', diverge:{ 'accusa':'Nel 1987 ha chiesto dall’opposizione la messa in stato d’accusa del Presidente per le armi all’Iran.', 'legge':'Nel 1987 ha fatto votare una legge che vietava di nuovo gli aiuti ai ribelli del Nicaragua.' } },
+  usMissili87:     { storico:['firma'], conforme:'sul trattato dei missili del 1987', diverge:{ 'dipiu':'Nel 1987 ha chiesto anche i missili strategici, e il trattato sui missili d’Europa è saltato.', 'rinvio':'Nel 1987 ha rinviato il trattato sui missili d’Europa per difendere lo scudo spaziale.' } },
+  usMissili87Opp:  { storico:['sostieni'], conforme:'sul trattato dei missili del 1987, dall’opposizione', diverge:{ 'contro':'Nel 1987 ha combattuto dall’opposizione il trattato sui missili d’Europa.', 'ratifica':'Nel 1987 ha legato il voto sul trattato dei missili alle condizioni del Senato.' } },
 };
 
 /* ==============================================================================================================
@@ -25698,6 +25767,709 @@ const PETROLIO73_US_OPP_EV = {
     { l:'Via i controlli: il mercato farà finire le code', e:'Gli economisti ti danno ragione · chi si scalda col gasolio fa i conti, e li fa su di te',
       f:function(){ S.usPetrolio73Opp='mercato'; gdUs60('imprenditori',2); gdUs60('pensionati',-2); gdUs60('lavoratori',-1);
         S.log.unshift({t:T('Il petrolio'),x:T('Ha chiesto dall\'opposizione di togliere i controlli sul prezzo della benzina.')}); } },
+  ],
+};
+/* ==============================================================================================================
+   L262-4 · STATI UNITI 1980 — DUE SNODI E LE AULE (scheda PRESET-USA-1980 §4 S1-S2, D290 (i), D291 (a); testi di Code). La forma
+   delle coppie di us1970 (gli stessi helper: gdUs60, baseUs60, fidUs60). Flag nuovi cercati in tutto js/ e .claude/ il 29/10 prima di
+   scriverli (L99-2), zero occorrenze: usOstaggi80, usOstaggi80Opp, usRecessione82, usRecessione82Opp e i campi accessori usBlitz80
+   ('riuscito'|'fallito', solo col blitz), usOstaggiRilascio (mese assoluto da cui esce il rilascio) e usOstaggiLiberi (mese assoluto
+   del rilascio giocato). Cifre verificate da un agente il 29/10 (en.wikipedia, FRED): 53 ostaggi nel marzo 1980, otto elicotteri e
+   otto militari morti, relazioni rotte il 7 aprile, il blocco dei porti discusso e mai fatto, il rilascio del 20 gennaio 1981 dopo 444
+   giorni; nel febbraio 1982 i prestiti sopra il 15% (16,56%) da più di un anno — non due: fra giugno e ottobre 1980 erano scesi —, la
+   disoccupazione all'8,9% e al 10,8% a fine anno, la legge del 1982 che riprende circa un terzo del taglio.
+   ⚑ CHI RICEVE CHE COSA (cancelli in game.js accanto a quelli di us1970): S1 gli ostaggi 1980/3-4 (nessun pilastro, fatto-mondo, voto
+   o vigilia; il vulcano è di maggio) · S2 la recessione 1982/2 (gennaio è di pus80_potomac). Il RILASCIO (US80_LIBERI_EV e la sua
+   versione d'aula) non è uno snodo: non ha un flag della tabella e lo innesca ostaggiRilascioOra() — esce dal mese deciso dalla scelta
+   di S1 (usOstaggiRilascio: trattativa o blitz fallito 1980/12-1981/2, blitz riuscito il mese dopo, pressione 1981/3-6; il mese dentro
+   la finestra da us80Dado, mai Math.random), e senza S1 (l'opposizione: il Presidente-IA fa la storia; chi non c'era) nella finestra
+   della storia. Se il mese è preso da un pilastro (Las Vegas, 1980/12; il vulcano, 1980/5) scivola al mese dopo, fino a due.
+   ⚑ S1 LEGGE IL FLAG DI us1970 (D291 (a)): usOstaggi79 cambia la prima frase; senza flag parte neutro. Le aule muovono SOLO gruppi e
+   base (L12-2). La riga «La storia ·» sta sull'opzione (a), come chiede la consegna (⚠ nel rapporto: nel 1980 la storia è stata
+   tutte e tre — la rottura del 7 aprile, il blitz del 24, poi la trattativa). G5: il ministro che si dimette si dice col ruolo.
+   ============================================================================================================== */
+const OSTAGGI80_EV = {
+  id:'snodo_ostaggi80', snodo:true, era:'us1980', kick:'Gli ostaggi', tono:'grave',
+  t:'Il conto dei giorni',
+  get text(){ var k=(typeof S!=='undefined' && S) ? S.usOstaggi79 : null;
+    return k==='pazienza' ? 'Hai aspettato cinque mesi, col petrolio fermo e i soldi dell\'Iran congelati, e la pazienza non ha riportato a casa nessuno. Cinquantatré americani sono ancora nell\'ambasciata di Teheran, e ogni sera la televisione conta i giorni. La trattativa per vie traverse gira a vuoto: a Teheran nessuno ha l\'autorità di dire sì. I militari hanno pronto un piano, e la tua scrivania ne ha altri due.'
+      : k==='forza' ? 'La flotta è nel Golfo da novembre, e non è servita: le navi non sono entrate in un\'ambasciata. Cinquantatré americani sono ancora nell\'ambasciata di Teheran, e ogni sera la televisione conta i giorni. La trattativa per vie traverse gira a vuoto: a Teheran nessuno ha l\'autorità di dire sì. I militari hanno pronto un piano, e la tua scrivania ne ha altri due.'
+      : k==='trattativa' ? 'Il vecchio sovrano è partito, come chiedevano, e gli studenti non hanno mollato. Cinquantatré americani sono ancora nell\'ambasciata di Teheran, e ogni sera la televisione conta i giorni. La trattativa per vie traverse gira a vuoto: a Teheran nessuno ha l\'autorità di dire sì. I militari hanno pronto un piano, e la tua scrivania ne ha altri due.'
+      : 'Cinquantatré americani sono nell\'ambasciata di Teheran da cinque mesi, e ogni sera la televisione conta i giorni. La trattativa per vie traverse gira a vuoto: a Teheran nessuno ha l\'autorità di dire sì. I militari hanno pronto un piano, e la tua scrivania ne ha altri due.'; },
+  ch:[
+    { l:'La trattativa, ancora', e:'La storia · l\'Algeria si offre come tramite, e a Teheran la trattativa passa di mano in mano · il rilascio arriva quando arriva, e il paese continua a contare i giorni',
+      f:function(){ S.usOstaggi80='trattativa'; S.usOstaggiRilascio=us80RilascioMese('trattativa'); stampad(-1); gdUs60('giovani',1); gdUs60('cetomedio',-1);
+        S.log.unshift({t:T('Gli ostaggi'),x:T('Ha continuato a trattare per gli ostaggi di Teheran.')}); } },
+    { l:'Il blitz', e:'Otto elicotteri nel deserto, di notte · se riesce tornano tutti a casa, se va male lo vedrà il mondo intero',
+      f:function(){ S.usOstaggi80='blitz'; var ok=attaccoDado('blitz80')<1/3; S.usBlitz80=ok?'riuscito':'fallito'; S.usOstaggiRilascio=us80RilascioMese(ok?'riuscito':'fallito');
+        if(ok){ repd(3); stampad(2); gdUs60('cetomedio',2); gdUs60('pensionati',1); gdUs60('cattolici',1);
+          S.log.unshift({t:T('Gli ostaggi'),x:T('Il blitz nel deserto è riuscito: gli ostaggi di Teheran tornano a casa.')}); }
+        else { repd(-3); stampad(-2); gdUs60('cetomedio',-2); gdUs60('giovani',-1); gdUs60('pensionati',-1);
+          S.log.unshift({t:T('Gli ostaggi'),x:T('Il blitz è fallito nel deserto: otto militari morti, e il segretario di Stato si dimette. La trattativa riparte da capo.')}); } } },
+    { l:'La pressione: rottura, sanzioni, i porti chiusi', e:'Rompi le relazioni e chiudi ogni commercio, e la flotta blocca i porti del petrolio · a Teheran gridano più forte, e il rilascio si allontana', costo:{debito:0.3},
+      f:function(){ S.usOstaggi80='pressione'; S.usOstaggiRilascio=us80RilascioMese('pressione'); S.ind.debt+=0.3; gdUs60('pensionati',1); gdUs60('cattolici',1); gdUs60('giovani',-2); repd(-1); fidUs60(-1);
+        S.log.unshift({t:T('Gli ostaggi'),x:T('Ha rotto le relazioni con l\'Iran e fatto bloccare i porti del petrolio.')}); } },
+  ],
+};
+const OSTAGGI80_OPP_EV = {
+  id:'snodo_ostaggi80_opp', snodo:true, era:'us1980', kick:'Gli ostaggi', tono:'grave',
+  t:'Il conto dei giorni, dall\'aula',
+  text:'Cinquantatré americani sono nell\'ambasciata di Teheran da cinque mesi. Ogni sera la televisione apre col conto dei giorni, e il Presidente ha smesso di uscire dalla Casa Bianca per fare campagna: dice che il suo posto è lì finché gli ostaggi non tornano. Nelle primarie il tuo partito deve decidere che cosa dire, e l\'elezione è a novembre.',
+  ch:[
+    { l:'Stare col Presidente finché ci sono gli ostaggi', e:'La storia · per qualche mese nessuno attacca la Casa Bianca su Teheran · il conto dei giorni corre lo stesso, e lo fa da solo',
+      f:function(){ S.usOstaggi80Opp='unita'; gdUs60('cetomedio',1); gdUs60('pensionati',1); baseUs60(-1);
+        S.log.unshift({t:T('Gli ostaggi'),x:T('Dall\'opposizione è stato col Presidente finché c\'erano gli ostaggi di Teheran.')}); } },
+    { l:'Chiedere di agire', e:'I falchi del tuo partito ti applaudono · se qualcosa va storto nel deserto, qualcuno ricorderà chi spingeva',
+      f:function(){ S.usOstaggi80Opp='agire'; gdUs60('cattolici',2); gdUs60('giovani',-2); baseUs60(1);
+        S.log.unshift({t:T('Gli ostaggi'),x:T('Ha chiesto dall\'opposizione di agire per gli ostaggi di Teheran.')}); } },
+    { l:'Farne il cuore della campagna: il conto dei giorni', e:'Centocinquanta giorni, centosessanta: ogni comizio comincia dal numero · c\'è chi dice che usi cinquantatré prigionieri per vincere',
+      f:function(){ S.usOstaggi80Opp='campagna'; gdUs60('cetomedio',2); gdUs60('giovani',-1); gdUs60('pensionati',-1); baseUs60(1);
+        S.log.unshift({t:T('Gli ostaggi'),x:T('Ha fatto degli ostaggi di Teheran il cuore della sua campagna.')}); } },
+  ],
+};
+/* il rilascio: carta d'evento, non snodo (vedi la testa del blocco). Due testi per il tempo passato, uno per chi governa e uno per l'aula */
+const US80_LIBERI_EV = {
+  id:'us80_ostaggi_liberi', era:'us1980', kick:'Gli ostaggi',
+  t:'Liberi',
+  get text(){ var k=us80LiberiTempo();
+    return k==='presto' ? 'All\'alba gli aerei lasciano lo spazio aereo dell\'Iran: gli ostaggi sono liberi, tutti, dopo più di cinque mesi. All\'aeroporto militare li aspettano le famiglie e le telecamere di mezzo mondo. Il paese ha un giorno di festa, e qualcuno ti chiede già che cosa dirai.'
+      : k==='giuramento' ? 'Il giorno del giuramento, mentre a Washington si giura, gli aerei lasciano lo spazio aereo dell\'Iran: gli ostaggi sono liberi, tutti, dopo più di un anno. L\'accordo l\'ha fatto da tramite l\'Algeria, e i soldi congelati tornano a Teheran. Il paese ha un giorno di festa.'
+      : 'Gli aerei lasciano lo spazio aereo dell\'Iran: gli ostaggi sono liberi, tutti, dopo più di un anno. L\'accordo l\'ha fatto da tramite l\'Algeria, e i soldi congelati tornano a Teheran. Il paese ha un giorno di festa.'; },
+  ch:[
+    { l:'Andarli a prendere', e:'Le foto all\'aeroporto fanno il giro del mondo · c\'è chi dice che ti prendi un merito di molti',
+      f:function(){ S.usOstaggiLiberi=meseAss(); repd(2); stampad(1); gdUs60('cetomedio',1); gdUs60('pensionati',1);
+        S.log.unshift({t:T('Gli ostaggi'),x:T('Gli ostaggi di Teheran sono tornati a casa.')}); } },
+    { l:'Lasciare la festa alle famiglie', e:'Un discorso breve e niente foto · i giornali lo notano, e lo scrivono bene',
+      f:function(){ S.usOstaggiLiberi=meseAss(); repd(1); stampad(2); gdUs60('cetomedio',1);
+        S.log.unshift({t:T('Gli ostaggi'),x:T('Gli ostaggi di Teheran sono tornati a casa.')}); } },
+  ],
+};
+const US80_LIBERI_OPP_EV = {
+  id:'us80_ostaggi_liberi_opp', era:'us1980', kick:'Gli ostaggi',
+  t:'Liberi, dall\'aula',
+  get text(){ var k=us80LiberiTempo();
+    return k==='presto' ? 'All\'alba gli aerei lasciano lo spazio aereo dell\'Iran: gli ostaggi sono liberi, tutti, dopo più di cinque mesi. La Casa Bianca ha la sua giornata, e in aula il tuo partito deve dire qualcosa prima di sera.'
+      : k==='giuramento' ? 'Il giorno del giuramento, mentre a Washington si giura, gli aerei lasciano lo spazio aereo dell\'Iran: gli ostaggi sono liberi, tutti, dopo più di un anno. L\'accordo l\'ha fatto da tramite l\'Algeria. In aula il tuo partito deve dire qualcosa prima di sera.'
+      : 'Gli aerei lasciano lo spazio aereo dell\'Iran: gli ostaggi sono liberi, tutti, dopo più di un anno. L\'accordo l\'ha fatto da tramite l\'Algeria. In aula il tuo partito deve dire qualcosa prima di sera.'; },
+  ch:[
+    { l:'Rendere merito a chi ha trattato', e:'Un applauso in aula, da tutti i banchi · per un giorno nessuno fa politica',
+      f:function(){ S.usOstaggiLiberi=meseAss(); gdUs60('cetomedio',1); gdUs60('pensionati',1); baseUs60(-1);
+        S.log.unshift({t:T('Gli ostaggi'),x:T('Gli ostaggi di Teheran sono tornati a casa.')}); } },
+    { l:'Chiedere conto di quanto è durato', e:'La base vuole un\'inchiesta · le famiglie, in televisione, chiedono solo di essere lasciate in pace',
+      f:function(){ S.usOstaggiLiberi=meseAss(); gdUs60('cetomedio',-1); baseUs60(1);
+        S.log.unshift({t:T('Gli ostaggi'),x:T('Gli ostaggi di Teheran sono tornati a casa.')}); } },
+  ],
+};
+const RECESSIONE82_EV = {
+  id:'snodo_recessione82', snodo:true, era:'us1980', kick:'L\'economia',
+  t:'La recessione',
+  text:'La banca centrale tiene il denaro caro per piegare i prezzi, e i prestiti costano più del 15% da più di un anno. L\'inflazione scende, ma la disoccupazione va verso il 10%: chiudono le acciaierie, le fabbriche d\'auto mettono a casa un turno dopo l\'altro, e nelle città dei Grandi Laghi le vetrine sono vuote. Le tasse sono state appena tagliate, e il disavanzo esplode. I tuoi consiglieri non sono d\'accordo fra loro.',
+  ch:[
+    { l:'Tieni la rotta', e:'La storia · difendi la banca centrale e i tagli · la recessione dura fino a novembre e la metà mandato si perde, poi i prezzi sono domati e arriva la ripresa',
+      f:function(){ S.usRecessione82='rotta'; gdUs60('lavoratori',-2); gdUs60('cetomedio',-1); gdUs60('imprenditori',1); fidUs60(1);
+        S.log.unshift({t:T('L\'economia'),x:T('Nella recessione del 1982 ha tenuto la rotta: la banca centrale e i tagli alle tasse.')}); } },
+    { l:'Chiedi alla banca centrale di allentare', e:'La disoccupazione scende prima · i prezzi tornano a salire, e la banca è indipendente: chiederlo in pubblico costa caro sui mercati',
+      f:function(){ S.usRecessione82='allenta'; gdUs60('lavoratori',2); gdUs60('cetomedio',1); gdUs60('imprenditori',-1); fidUs60(-3); stampad(-1);
+        S.log.unshift({t:T('L\'economia'),x:T('Nella recessione del 1982 ha chiesto in pubblico alla banca centrale di abbassare i tassi.')}); } },
+    { l:'Rimetti una parte delle tasse', e:'Il disavanzo si stringe · la tua base, che quei tagli li aveva votati, non perdona', costo:{debito:-0.5},
+      f:function(){ S.usRecessione82='tasse'; S.ind.debt-=0.5; gdUs60('imprenditori',-2); gdUs60('cetomedio',-1); baseUs60(-2); fidUs60(2);
+        S.log.unshift({t:T('L\'economia'),x:T('Nella recessione del 1982 ha rimesso una parte delle tasse appena tagliate.')}); } },
+  ],
+};
+const RECESSIONE82_OPP_EV = {
+  id:'snodo_recessione82_opp', snodo:true, era:'us1980', kick:'L\'economia',
+  t:'La recessione, dall\'aula',
+  text:'La disoccupazione va verso il 10%, i prestiti costano più del 15%, e il disavanzo cresce mentre le tasse scendono. Il Presidente chiede pazienza: dice che la cura funziona e che serve tempo. A novembre si vota per il Congresso, e il tuo partito deve scegliere su che cosa fare la campagna.',
+  ch:[
+    { l:'La disoccupazione al centro', e:'La storia · nelle città delle fabbriche chiuse il tuo partito ritrova i suoi · chi ha un lavoro ti chiede che cosa proponi per i prezzi',
+      f:function(){ S.usRecessione82Opp='lavoro'; gdUs60('lavoratori',2); gdUs60('imprenditori',-1); baseUs60(1);
+        S.log.unshift({t:T('L\'economia'),x:T('Dall\'opposizione ha messo la disoccupazione al centro della campagna del 1982.')}); } },
+    { l:'Contro la banca centrale e i tassi', e:'Gli agricoltori e i costruttori ti seguono · gli economisti ti ricordano che i prezzi erano peggio',
+      f:function(){ S.usRecessione82Opp='tassi'; gdUs60('cetomedio',1); gdUs60('imprenditori',1); gdUs60('pensionati',-1);
+        S.log.unshift({t:T('L\'economia'),x:T('Dall\'opposizione ha attaccato la banca centrale e il denaro caro.')}); } },
+    { l:'Contro il disavanzo', e:'I conti ti danno ragione · nelle fabbriche chiuse il disavanzo non è la prima preoccupazione',
+      f:function(){ S.usRecessione82Opp='disavanzo'; gdUs60('cetomedio',1); gdUs60('imprenditori',1); gdUs60('lavoratori',-2);
+        S.log.unshift({t:T('L\'economia'),x:T('Dall\'opposizione ha fatto del disavanzo il tema della campagna del 1982.')}); } },
+  ],
+};
+/* ==============================================================================================================
+   L262-5 · STATI UNITI 1980 — IL SEME DEL 1985, S3 E S4 E LE AULE (scheda PRESET-USA-1980 §4 S3-S4, D296 (i); testi di Code). Stessa
+   forma di L262-4 (gdUs60, baseUs60, fidUs60). Flag nuovi cercati in tutto js/, .claude/ e prove/ il 29/10 prima di scriverli (L99-2),
+   zero occorrenze: usArmiIran85, usArmiIran86, usArmiIran86Opp, usMissili87, usMissili87Opp (usMissili e usMissiliOpp sono di us1960:
+   altri nomi, nessun conflitto).
+   ⚑ CHI RICEVE CHE COSA (cancelli in game.js accanto a quelli di L262-4): il SEME 1985/7-8 a chi governa (agosto è di pus80_dallas) —
+   uno snodo, non un evento del sacchetto: il posto dell'evento esce a sorte il 10% dei mesi, e il segno non sarebbe arrivato quasi mai
+   a S3 —; chi è all'opposizione nel 1985 non lo vede (non lo sa) · S3 le armi 1987/1-2 SOLO a chi governa col segno 'segreto'; l'aula
+   a chi è all'opposizione nella finestra della storia (il governo avversario ha venduto) · S4 i missili 1987/11-12 (ottobre è del
+   lunedì nero), nessuna scala, nessuna riga di RIVALI. NIENTE voto d'accusa (Cowork: la storia non l'ha avuto): «neghi» costa dopo
+   attraverso l'esposizione (espoSale), cioè il fronte giudiziario di sempre. G5: nessun nome, i collaboratori col ruolo. Cifre
+   verificate (en.wikipedia, Iran–Contra affair, INF Treaty, Reykjavík Summit): sette ostaggi americani in Libano a metà 1985, il primo
+   carico ad agosto e un ostaggio libero a settembre; la rivista di Beirut il 3 novembre 1986, la deviazione annunciata il 25 (tre
+   settimane dopo), il consigliere che si dimette e il collaboratore licenziato lo stesso giorno; la commissione di tre membri e il
+   rapporto del 26 febbraio 1987; il trattato firmato a Washington l'8 dicembre 1987, ratificato dal Senato nel maggio 1988 (93 a 5).
+   ============================================================================================================== */
+const LIBANO85_EV = {
+  id:'us80_libano', snodo:true, era:'us1980', kick:'Gli ostaggi',
+  t:'Gli ostaggi del Libano',
+  text:'A Beirut sette americani sono nelle mani di un gruppo armato vicino all\'Iran, alcuni da più di un anno. Un intermediario porta una proposta: l\'Iran, in guerra con l\'Iraq da cinque anni, ha bisogno di missili, e in cambio farebbe liberare gli ostaggi. Ma sull\'Iran c\'è l\'embargo, e una vendita d\'armi va comunicata al Congresso. Il tuo consigliere per la sicurezza nazionale dice che si può fare senza che nessuno lo sappia.',
+  ch:[
+    { l:'Vendi in segreto', e:'La storia · i primi missili partono ad agosto passando da un paese amico, e a settembre un ostaggio torna a casa · gli altri restano, e i carichi continuano',
+      f:function(){ S.usArmiIran85='segreto'; repd(1); gdUs60('pensionati',1); gdUs60('cetomedio',1);
+        S.log.unshift({t:T('Gli ostaggi'),x:T('Ha venduto in segreto armi all\'Iran per gli ostaggi del Libano.')}); } },
+    { l:'Rifiuti: con chi prende ostaggi non si tratta', e:'La regola resta la regola · le famiglie degli ostaggi, in televisione, chiedono perché',
+      f:function(){ S.usArmiIran85='rifiuto'; gdUs60('cattolici',1); gdUs60('cetomedio',-1);
+        S.log.unshift({t:T('Gli ostaggi'),x:T('Ha rifiutato di vendere armi all\'Iran in cambio degli ostaggi del Libano.')}); } },
+    { l:'Porti la proposta al Congresso', e:'La legge è rispettata · in una settimana la proposta è sui giornali, e l\'intermediario sparisce',
+      f:function(){ S.usArmiIran85='congresso'; stampad(-1); repd(-1); gdUs60('giovani',1);
+        S.log.unshift({t:T('Gli ostaggi'),x:T('Ha portato al Congresso la proposta di armi all\'Iran per gli ostaggi del Libano.')}); } },
+  ],
+};
+const ARMI87_EV = {
+  id:'snodo_armi87', snodo:true, era:'us1980', kick:'Lo scandalo', tono:'grave',
+  t:'Le armi e i soldi',
+  text:'A novembre una rivista di Beirut ha scritto che il tuo governo vendeva armi all\'Iran per liberare gli ostaggi in Libano. Tre settimane dopo si è saputo di peggio: una parte dei soldi della vendita è finita ai ribelli del Nicaragua, che il Congresso aveva vietato di aiutare. Il consigliere per la sicurezza nazionale si è dimesso, il suo collaboratore è stato licenziato, e le carte, si dice, sono state distrutte. Il paese vuole sapere che cosa sapevi tu.',
+  ch:[
+    { l:'Una commissione, e la verità', e:'La storia · tre saggi indagano, e a fine febbraio scrivono che il Presidente non controllava i suoi · lo ammetti in televisione; le audizioni dell\'estate le guardano milioni di americani, finisci il mandato, alcuni collaboratori sono condannati',
+      f:function(){ S.usArmiIran86='commissione'; repd(-2); stampad(-1); gdUs60('cetomedio',-1);
+        S.log.unshift({t:T('Lo scandalo'),x:T('Sulle armi all\'Iran ha voluto una commissione d\'indagine, e ha ammesso gli errori.')}); } },
+    { l:'Neghi e prendi tempo', e:'Per qualche settimana regge · il procuratore indipendente scava, e quello che trova lo trova dopo',
+      f:function(){ S.usArmiIran86='nega'; stampad(-1); espoSale(8);
+        S.log.unshift({t:T('Lo scandalo'),x:T('Sulle armi all\'Iran ha negato tutto e preso tempo.')}); } },
+    { l:'Dai tutto al Congresso e licenzi chi c\'era', e:'Le carte sul tavolo, subito, e via chi le ha firmate · costa adesso, e la storia si chiude prima',
+      f:function(){ S.usArmiIran86='congresso'; repd(-3); stampad(1); gdUs60('cattolici',-1); baseUs60(-1); espoSale(-4);
+        S.log.unshift({t:T('Lo scandalo'),x:T('Sulle armi all\'Iran ha dato tutte le carte al Congresso e licenziato i suoi collaboratori.')}); } },
+  ],
+};
+const ARMI87_OPP_EV = {
+  id:'snodo_armi87_opp', snodo:true, era:'us1980', kick:'Lo scandalo',
+  t:'Le armi e i soldi, dall\'aula',
+  text:'Una rivista di Beirut ha scritto che il governo vendeva armi all\'Iran per liberare gli ostaggi in Libano, e poi si è saputo che una parte dei soldi è finita ai ribelli del Nicaragua, contro una legge del Congresso. Il Presidente dice di non averlo saputo, e una commissione sua sta indagando. Il Congresso prepara le sue audizioni, e il tuo partito deve decidere fin dove spingere.',
+  ch:[
+    { l:'Le audizioni, in televisione', e:'La storia · l\'estate 1987 il paese guarda le audizioni in diretta · un ufficiale in divisa difende tutto, e per qualcuno diventa un eroe; il Presidente finisce il mandato, alcuni collaboratori sono condannati',
+      f:function(){ S.usArmiIran86Opp='audizioni'; gdUs60('cetomedio',1); baseUs60(1);
+        S.log.unshift({t:T('Lo scandalo'),x:T('Dall\'opposizione ha portato in televisione le audizioni sulle armi all\'Iran.')}); } },
+    { l:'La messa in stato d\'accusa', e:'La base esulta · il paese non vuole un altro Presidente cacciato, e lo dice nei sondaggi',
+      f:function(){ S.usArmiIran86Opp='accusa'; gdUs60('cetomedio',-2); gdUs60('giovani',1); baseUs60(2);
+        S.log.unshift({t:T('Lo scandalo'),x:T('Ha chiesto dall\'opposizione la messa in stato d\'accusa del Presidente per le armi all\'Iran.')}); } },
+    { l:'Una legge che vieti di nuovo gli aiuti', e:'Il divieto torna, più stretto · è una legge, non uno spettacolo: i giornali ne parlano poco',
+      f:function(){ S.usArmiIran86Opp='legge'; gdUs60('giovani',1); gdUs60('pensionati',1);
+        S.log.unshift({t:T('Lo scandalo'),x:T('Ha fatto votare una legge che vieta di nuovo gli aiuti ai ribelli del Nicaragua.')}); } },
+  ],
+};
+const MISSILI87_EV = {
+  id:'snodo_missili87', snodo:true, era:'us1980', kick:'Il mondo',
+  t:'I missili d\'Europa',
+  text:'In Islanda, l\'anno scorso, le due potenze si sono fermate a un passo dall\'accordo. Ora ci riprovano: sul tavolo c\'è un trattato che distrugge tutti i missili a medio raggio, a cominciare da quelli puntati sull\'Europa — i sovietici, e gli americani schierati dal 1983 fra le proteste di mezzo continente. Il leader sovietico verrebbe a Washington a dicembre per firmarlo. Nel tuo partito c\'è chi dice che ti fidi troppo.',
+  ch:[
+    { l:'Firmi', e:'La storia · l\'8 dicembre, per la prima volta, una classe intera di armi nucleari viene distrutta, con gli ispettori dell\'una e dell\'altra parte · la destra del tuo partito grida al tradimento',
+      f:function(){ S.usMissili87='firma'; repd(2); stampad(1); gdUs60('giovani',2); gdUs60('cattolici',-1); baseUs60(-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Ha firmato il trattato che distrugge i missili a medio raggio.')}); } },
+    { l:'Chiedi di più: anche i missili strategici', e:'Tutto o niente · il vertice si chiude senza firma, e a Mosca dicono che l\'America non vuole la pace',
+      f:function(){ S.usMissili87='dipiu'; repd(-1); gdUs60('cattolici',1); gdUs60('giovani',-2); baseUs60(1);
+        S.log.unshift({t:T('Il mondo'),x:T('Ha chiesto anche i missili strategici, e il trattato sui missili d\'Europa è saltato.')}); } },
+    { l:'Rinvii: prima lo scudo spaziale', e:'Come in Islanda, lo scudo non si tocca · il trattato resta sul tavolo, e in Europa ricominciano le marce',
+      f:function(){ S.usMissili87='rinvio'; stampad(-1); gdUs60('giovani',-1); gdUs60('imprenditori',1); baseUs60(1);
+        S.log.unshift({t:T('Il mondo'),x:T('Ha rinviato il trattato sui missili d\'Europa per difendere lo scudo spaziale.')}); } },
+  ],
+};
+const MISSILI87_OPP_EV = {
+  id:'snodo_missili87_opp', snodo:true, era:'us1980', kick:'Il mondo',
+  t:'I missili d\'Europa, dall\'aula',
+  text:'Le due potenze stanno per firmare il trattato che distrugge tutti i missili a medio raggio, a cominciare da quelli puntati sull\'Europa. Il Presidente vuole la firma a dicembre, e poi servirà il voto del Senato. Al Congresso c\'è chi è contro: di Mosca, dicono, non ci si fida. Il tuo partito deve decidere che cosa farne.',
+  ch:[
+    { l:'Sostenere il trattato', e:'La storia · nella primavera dopo il Senato lo approva a larghissima maggioranza · il merito va alla Casa Bianca, e il tuo partito lo sa',
+      f:function(){ S.usMissili87Opp='sostieni'; gdUs60('giovani',1); gdUs60('cetomedio',1); baseUs60(-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Dall\'opposizione ha sostenuto il trattato sui missili a medio raggio.')}); } },
+    { l:'Contro: di Mosca non ci si fida', e:'I falchi applaudono · i giovani che marciavano contro i missili non capiscono',
+      f:function(){ S.usMissili87Opp='contro'; gdUs60('cattolici',1); gdUs60('giovani',-2); baseUs60(1);
+        S.log.unshift({t:T('Il mondo'),x:T('Dall\'opposizione ha votato contro il trattato sui missili a medio raggio.')}); } },
+    { l:'Approvarlo, alle vostre condizioni', e:'Il Senato lo approva e lo legge a modo suo · la Casa Bianca protesta per le condizioni, e firma lo stesso',
+      f:function(){ S.usMissili87Opp='ratifica'; gdUs60('cetomedio',1); baseUs60(1);
+        S.log.unshift({t:T('Il mondo'),x:T('Ha legato il voto sul trattato dei missili alle condizioni del Senato.')}); } },
+  ],
+};
+/* ==============================================================================================================
+   L262-6 · STATI UNITI 1980 — I CONTROLLORI DI VOLO (1981/8) E LA RIPRESA DEL 1983-84 (scheda PRESET-USA-1980 §3-§4, decisioni di
+   Cowork del 29/10; testi di Code). Stessi helper di L262-4 (gdUs60, baseUs60, fidUs60). Nomi nuovi cercati in tutto js/, .claude/ e
+   prove/ il 29/10 prima di scriverli (L99-2), zero occorrenze: usControllori81, usControllori81Opp, usRipresa83 (mese assoluto della
+   ripresa giocata, come usOstaggiLiberi), snodo_controllori81(_opp), us80_ripresa(_inflazione|_tasse), o_us80_ripresa, ti_us80_ripresa.
+   ⚑ I CONTROLLORI sono uno snodo iniettato (Cowork: un gesto del Presidente, non un evento del sacchetto), 1981/8-9 (luglio è di
+   pus80_passerelle; il rilascio tardivo degli ostaggi, con la pressione fino al 1981/8, passa prima). Non è S2: S2 resta la recessione.
+   ⚑ LA RIPRESA NON È NEL SACCHETTO (correzione alla consegna, come il seme del 1985 in L262-5): EVENTS esce a sorte il 10% dei mesi e
+   pesca fra decine di carte vive, quindi in 14 mesi una carta del sacchetto arrivava a una carriera su poche. È una carta DOVUTA, come
+   il rilascio di L262-4: il mese nella finestra 1983/3-1984/4 lo dà us80Dado('ripresa') (carriera, non mese), scivola di al più due
+   mesi se il mese è preso (pus80_caroline, 1984/3) e mai oltre il 1984/4 (la vigilia parte a maggio). Una sola delle tre varianti, da
+   usRecessione82 (ripresaCarta() in game.js): 'rotta' o null → us80_ripresa, 'allenta' → l'inflazione, 'tasse' → le tasse. Nessun
+   flag della tabella SNODI_STORICI: la scelta scrive usRipresa83, che legge il titolo del mese dopo. L'aula (o_us80_ripresa) sta in
+   OPPOSIZIONE_EV e legge usRecessione82Opp nel testo; dal L262-7 è dovuta anche lei (ripresaOppOra in game.js, fuori dal sorteggio).
+   ⚑ Cowork: la ripresa NON deve alzare il 1984 di chi governa — nessuna scelta con somma netta sui gruppi oltre +1, e la variante
+   dell'inflazione è negativa. Cifre (FRED, en.wikipedia «1981 PATCO strike»): sciopero il 3 agosto 1981, 48 ore, licenziati il 5
+   agosto in 11 345; il sindacato decertificato il 22 ottobre 1981; nel 1983 inflazione 3,2%, disavanzo 5,7% del PIL (il più alto del
+   dopoguerra), disoccupazione in calo da gennaio dopo il 10,8% di dicembre 1982; nel 1984 crescita 7,2% (la più alta dal 1951).
+   ============================================================================================================== */
+const CONTROLLORI81_EV = {
+  id:'snodo_controllori81', snodo:true, era:'us1980', kick:'Il lavoro',
+  t:'I controllori di volo',
+  text:'All\'alba il sindacato dei controllori del traffico aereo si è fermato: chiede più salario e meno ore nelle torri. Sono dipendenti federali, e per legge non possono scioperare. Migliaia di voli sono cancellati, gli aeroporti sono pieni di gente seduta per terra, e il paese guarda te. I tuoi consiglieri dicono che hai quarantotto ore.',
+  ch:[
+    { l:'Li licenzi tutti, se non tornano', e:'La storia · chi non torna entro due giorni è licenziato, undicimila persone; i supervisori e i militari tengono in piedi il servizio · il messaggio arriva a ogni sindacato del paese',
+      f:function(){ S.usControllori81='licenzi'; gdUs60('imprenditori',2); gdUs60('cetomedio',1); gdUs60('lavoratori',-2); baseUs60(1);
+        S.log.unshift({t:T('Il lavoro'),x:T('Ha licenziato i controllori di volo in sciopero che non sono tornati al lavoro.')}); } },
+    { l:'Tratti', e:'Gli aerei tornano a volare in pochi giorni · c\'è chi dice che una legge si può violare, se si è in tanti',
+      f:function(){ S.usControllori81='tratti'; gdUs60('lavoratori',1); gdUs60('imprenditori',-1); gdUs60('cetomedio',-1); repd(-1);
+        S.log.unshift({t:T('Il lavoro'),x:T('Ha trattato coi controllori di volo in sciopero.')}); } },
+    { l:'Chiedi la mediazione del Congresso', e:'La decisione passa all\'aula · intanto i voli restano fermi, e la tua base vorrebbe un Presidente che decide',
+      f:function(){ S.usControllori81='congresso'; gdUs60('lavoratori',1); gdUs60('imprenditori',-1); baseUs60(-1);
+        S.log.unshift({t:T('Il lavoro'),x:T('Ha chiesto al Congresso una mediazione sullo sciopero dei controllori di volo.')}); } },
+  ],
+};
+const CONTROLLORI81_OPP_EV = {
+  id:'snodo_controllori81_opp', snodo:true, era:'us1980', kick:'Il lavoro',
+  t:'I controllori di volo, dall\'aula',
+  text:'Il sindacato dei controllori del traffico aereo si è fermato per salario e turni, anche se la legge vieta lo sciopero ai dipendenti federali. Il Presidente ha dato quarantotto ore: chi non torna è licenziato. Migliaia di voli sono cancellati, e i sindacati guardano il tuo partito per sapere da che parte sta.',
+  ch:[
+    { l:'Coi lavoratori', e:'I sindacati ti ringraziano · chi ha passato la notte in aeroporto non capisce',
+      f:function(){ S.usControllori81Opp='lavoratori'; gdUs60('lavoratori',2); gdUs60('imprenditori',-1); gdUs60('cetomedio',-1);
+        S.log.unshift({t:T('Il lavoro'),x:T('Dall\'opposizione si è schierato coi controllori di volo in sciopero.')}); } },
+    { l:'La legge è legge', e:'Il ceto medio ti dà ragione · nelle sezioni del tuo partito qualcuno strappa la tessera',
+      f:function(){ S.usControllori81Opp='legge'; gdUs60('cetomedio',1); gdUs60('imprenditori',1); gdUs60('lavoratori',-2); baseUs60(-1);
+        S.log.unshift({t:T('Il lavoro'),x:T('Dall\'opposizione ha detto che la legge sugli scioperi va rispettata.')}); } },
+    { l:'Chiedere una mediazione', e:'La storia · il tuo partito protesta poco e chiede di trattare · i licenziamenti vanno avanti lo stesso, e i giornali ti trovano tiepido',
+      f:function(){ S.usControllori81Opp='mediazione'; gdUs60('lavoratori',1); baseUs60(1); stampad(-1);
+        S.log.unshift({t:T('Il lavoro'),x:T('Dall\'opposizione ha chiesto una mediazione nello sciopero dei controllori di volo.')}); } },
+  ],
+};
+const RIPRESA83_EV = {
+  id:'us80_ripresa', era:'us1980', kick:'L\'economia',
+  t:'La ripresa',
+  text:'La disoccupazione scende per la prima volta dopo tre anni, l\'inflazione resta sotto il 4%, e le borse corrono come non correvano da anni. I tuoi consiglieri dicono che la cura ha funzionato. Ma il disavanzo è il più alto del dopoguerra, e nelle città dell\'acciaio e dell\'auto le fabbriche chiuse non hanno riaperto.',
+  ch:[
+    { l:'Rivendichi la cura', e:'La storia · nel 1984 l\'economia cresce di oltre il 7%, il ritmo più alto da trent\'anni; il Presidente uscente vince in 49 stati · chi è rimasto senza lavoro ti trova arrogante',
+      f:function(){ S.usRipresa83=meseAss(); gdUs60('lavoratori',-1); gdUs60('imprenditori',1); gdUs60('cetomedio',1); baseUs60(1); stampad(-1);
+        S.log.unshift({t:T('L\'economia'),x:T('Ha rivendicato la ripresa come il frutto della sua cura.')}); } },
+    { l:'Ora i conti', e:'Il disavanzo comincia a stringersi · chi aspettava altri tagli alle tasse resta a mani vuote', costo:{debito:-0.3},
+      f:function(){ S.usRipresa83=meseAss(); S.ind.debt-=0.3; gdUs60('cetomedio',1); gdUs60('imprenditori',-1); baseUs60(-1);
+        S.log.unshift({t:T('L\'economia'),x:T('Con la ripresa ha messo mano al disavanzo.')}); } },
+    { l:'Ora le fabbriche chiuse', e:'Un programma per le città dell\'acciaio e dell\'auto · costa, e la tua base lo chiama spesa', costo:{debito:0.3},
+      f:function(){ S.usRipresa83=meseAss(); S.ind.debt+=0.3; gdUs60('lavoratori',2); gdUs60('imprenditori',-1); baseUs60(-1);
+        S.log.unshift({t:T('L\'economia'),x:T('Con la ripresa ha lanciato un programma per le città delle fabbriche chiuse.')}); } },
+  ],
+};
+const RIPRESA83_INFLAZIONE_EV = {
+  id:'us80_ripresa_inflazione', era:'us1980', kick:'L\'economia',
+  t:'La ripresa e i prezzi',
+  text:'La ripresa è arrivata prima che altrove, ma i prezzi hanno ripreso a correre: l\'inflazione torna verso il 6-7%, e la banca centrale rialza i tassi. Il denaro caro torna proprio mentre si avvicina la campagna, e i mercati ricordano chi, nel 1982, aveva chiesto in pubblico di allentare.',
+  ch:[
+    { l:'Difendi la banca, stavolta', e:'I mercati prendono nota · chi ha un mutuo da rinnovare ti chiede che cosa è cambiato dal 1982',
+      f:function(){ S.usRipresa83=meseAss(); gdUs60('pensionati',1); gdUs60('cetomedio',-1); gdUs60('lavoratori',-1); repd(1);
+        S.log.unshift({t:T('L\'economia'),x:T('Con i prezzi che risalivano ha difeso la banca centrale.')}); } },
+    { l:'Attacca di nuovo la banca', e:'I sindacati applaudono · sui mercati e sui giornali è la seconda volta, e la ricordano',
+      f:function(){ S.usRipresa83=meseAss(); gdUs60('lavoratori',1); gdUs60('imprenditori',-2); repd(-2); stampad(-1);
+        S.log.unshift({t:T('L\'economia'),x:T('Con i prezzi che risalivano ha attaccato di nuovo la banca centrale.')}); } },
+    { l:'Tagli la spesa per raffreddare', e:'Il disavanzo scende un poco · i tagli li sentono per primi gli anziani', costo:{debito:-0.3},
+      f:function(){ S.usRipresa83=meseAss(); S.ind.debt-=0.3; gdUs60('pensionati',-2); gdUs60('cetomedio',1);
+        S.log.unshift({t:T('L\'economia'),x:T('Con i prezzi che risalivano ha tagliato la spesa.')}); } },
+  ],
+};
+const RIPRESA83_TASSE_EV = {
+  id:'us80_ripresa_tasse', era:'us1980', kick:'L\'economia',
+  t:'La ripresa e le tasse',
+  text:'La ripresa è arrivata, e con un disavanzo più piccolo di quanto temessero tutti: le tasse rimesse nel 1982 hanno pagato una parte del conto. Ma la tua base non ha dimenticato chi le ha rimesse, e a un anno dal voto ti chiede di farsi perdonare.',
+  ch:[
+    { l:'Un nuovo taglio prima del voto', e:'La base torna con te · il disavanzo ricomincia a crescere, e i giornali fanno il conto', costo:{debito:0.5},
+      f:function(){ S.usRipresa83=meseAss(); S.ind.debt+=0.5; baseUs60(2); gdUs60('imprenditori',1); stampad(-1);
+        S.log.unshift({t:T('L\'economia'),x:T('Con la ripresa ha tagliato di nuovo le tasse prima del voto.')}); } },
+    { l:'La serietà paga', e:'I conti in ordine ti danno credito · la tua base, che voleva il taglio, resta a casa',
+      f:function(){ S.usRipresa83=meseAss(); gdUs60('cetomedio',1); repd(1); baseUs60(-2);
+        S.log.unshift({t:T('L\'economia'),x:T('Con la ripresa ha tenuto i conti in ordine, senza nuovi tagli.')}); } },
+    { l:'La riforma del sistema fiscale', e:'Un annuncio per il secondo mandato: meno aliquote, meno scappatoie · piace a chi fa i conti, meno a chi aspettava un taglio subito',
+      f:function(){ S.usRipresa83=meseAss(); gdUs60('imprenditori',1); gdUs60('cetomedio',1); baseUs60(-1); gdUs60('lavoratori',-1);
+        S.log.unshift({t:T('L\'economia'),x:T('Con la ripresa ha annunciato la riforma del sistema fiscale.')}); } },
+  ],
+};
+/* ==============================================================================================================
+   L262-7 · STATI UNITI 1980 — IL VERTICE DI MOSCA (1988/5-6) E MALTA (1989/12) (scheda PRESET-USA-1980 §3 e §4 S4, decisioni di Cowork
+   del 29/10; testi di Code). Stessi helper di L262-4 (gdUs60, baseUs60). Nomi nuovi cercati in tutto js/ il 29/10 prima di scriverli
+   (L99-2), zero occorrenze: us80_mosca(_opp), us80_malta(_opp), usMosca88(Opp), usMalta89(Opp), moscaOra, maltaOra, ripresaOppOra,
+   ti_us80_mosca, ti_us80_malta.
+   ⚑ NON SONO SNODI (Cowork (4): è distensione, nessuna riga in SNODI_STORICI né in RIVALI) e NON SONO DEL SACCHETTO: sono carte DOVUTE
+   come la ripresa di L262-6. Mosca al mese us80Dado('mosca') di 1988/5-6, scivola di un mese se il mese è preso, mai oltre il 1988/6
+   (luglio è di pus80_caldo88); Malta solo il 1989/12 (novembre è del Muro, pm_muro89; se dicembre è preso non esce). Il testo legge
+   S.usMissili87 (S4; null = la storia, 'firma') e, per l'aula, S.usMissili87Opp (null = 'sostieni'); Malta legge anche usMosca88.
+   I flag (usMosca88/usMalta89 e le versioni Opp) sono la scelta e insieme il segno «già uscita»: un campo solo per carta. ⚑ Il testo
+   non dice chi governa e non nomina persone: «il segretario generale sovietico», «il cancelliere tedesco». Nel 1988 a maggio il
+   Presidente andò a Mosca (29 maggio-2 giugno: la passeggiata sulla piazza Rossa, il discorso all'università); a Malta il 2-3 dicembre
+   1989 la tempesta fece saltare parte degli incontri sulle navi.
+   ============================================================================================================== */
+const MOSCA88_EV = {
+  id:'us80_mosca', era:'us1980', kick:'Il mondo',
+  t:'Il vertice di Mosca',
+  get text(){ var k=(typeof S!=='undefined' && S) ? S.usMissili87 : null;
+    return k==='dipiu' ? 'Sei a Mosca, e il trattato sui missili d\'Europa non c\'è: l\'anno scorso hai chiesto anche i missili strategici, e il vertice si è chiuso senza firma. Il segretario generale sovietico ti riceve lo stesso, ma la stampa di mezzo mondo scrive che questo viaggio deve ricucire. Hai tre giorni, e un programma da scegliere.'
+      : k==='rinvio' ? 'Sei a Mosca, e il trattato sui missili d\'Europa è ancora sul tavolo: l\'anno scorso lo hai rinviato per difendere lo scudo spaziale, e il segretario generale sovietico te lo rimette davanti al primo incontro. Senza lo scudo, dice, si firma domani. Hai tre giorni, e un programma da scegliere.'
+      : 'Sei a Mosca, e il trattato sui missili d\'Europa è in vigore: i primi missili si smontano già, con gli ispettori dell\'una e dell\'altra parte. Il segretario generale sovietico ti porta sulla piazza Rossa, fra la gente, e un giornalista ti chiede se la guerra fredda è finita. Hai tre giorni, e un programma da scegliere.'; },
+  ch:[
+    { l:'La passeggiata e il discorso agli studenti', e:'Le foto sulla piazza fanno il giro del mondo, e all\'università parli di libertà · la destra del tuo partito dice che fai festa col nemico',
+      f:function(){ S.usMosca88='passeggiata'; stampad(1); gdUs60('giovani',1); baseUs60(-1); if(S.usMissili87==='dipiu') baseUs60(-1);   // senza il trattato la festa costa di più alla destra
+        S.log.unshift({t:T('Il mondo'),x:T('A Mosca ha passeggiato sulla piazza Rossa e ha parlato agli studenti.')}); } },
+    { l:'I diritti umani al centro', e:'Ricevi i dissidenti nella residenza dell\'ambasciatore · a Mosca lo prendono come uno sgarbo, e il vertice si raffredda',
+      f:function(){ S.usMosca88='diritti'; gdUs60('cattolici',1); repd(-1);
+        S.log.unshift({t:T('Il mondo'),x:T('A Mosca ha messo i diritti umani al centro del vertice.')}); } },
+    { l:'Un vertice breve: solo i missili strategici', e:'Niente piazze e niente discorsi, si lavora sul trattato dei missili a lungo raggio · i giornali scrivono che hai sprecato il momento',
+      f:function(){ S.usMosca88='breve'; gdUs60('imprenditori',1); stampad(-1);
+        S.log.unshift({t:T('Il mondo'),x:T('A Mosca ha tenuto un vertice breve, solo sui missili strategici.')}); } },
+  ],
+};
+const MOSCA88_OPP_EV = {
+  id:'us80_mosca_opp', era:'us1980', kick:'Il mondo',
+  t:'Il vertice di Mosca, dall\'aula',
+  get text(){ var k=(typeof S!=='undefined' && S) ? S.usMissili87Opp : null;
+    return k==='contro' ? 'Il Presidente è a Mosca, e passeggia sulla piazza Rossa col segretario generale sovietico davanti alle telecamere di mezzo mondo. Il trattato sui missili che il tuo partito ha combattuto è in vigore, e i sondaggi dicono che il paese lo approva. A pochi mesi dal voto, il tuo partito deve dire qualcosa.'
+      : k==='ratifica' ? 'Il Presidente è a Mosca, e passeggia sulla piazza Rossa col segretario generale sovietico davanti alle telecamere di mezzo mondo. Il trattato sui missili è in vigore con le condizioni che il tuo partito ha scritto al Senato, e la Casa Bianca le racconta come sue. A pochi mesi dal voto, il tuo partito deve dire qualcosa.'
+      : 'Il Presidente è a Mosca, e passeggia sulla piazza Rossa col segretario generale sovietico davanti alle telecamere di mezzo mondo. Il trattato sui missili che il tuo partito ha votato è in vigore, e il merito lo prende la Casa Bianca. A pochi mesi dal voto, il tuo partito deve dire qualcosa.'; },
+  ch:[
+    { l:'Sostenere il Presidente', e:'Un gesto da statista · la base chiede perché fai la campagna dell\'avversario',
+      f:function(){ S.usMosca88Opp='sostieni'; gdUs60('cetomedio',1); baseUs60(-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Dall\'opposizione ha sostenuto il Presidente al vertice di Mosca.')}); } },
+    { l:'E i diritti umani?', e:'I dissidenti ringraziano · i giornali scrivono che rovini un giorno buono per il paese',
+      f:function(){ S.usMosca88Opp='diritti'; gdUs60('cattolici',1); stampad(-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Dall\'opposizione ha chiesto conto dei diritti umani al vertice di Mosca.')}); } },
+    { l:'Chiedere i conti della difesa', e:'Se la guerra fredda finisce, dove vanno i soldi delle armi? · i falchi dicono che vuoi disarmare il paese',
+      f:function(){ S.usMosca88Opp='difesa'; gdUs60('lavoratori',1); gdUs60('cattolici',-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Dopo il vertice di Mosca ha chiesto di tagliare la spesa per le armi.')}); } },
+  ],
+};
+const MALTA89_EV = {
+  id:'us80_malta', era:'us1980', kick:'Il mondo',
+  t:'Il vertice di Malta',
+  get text(){ var k=(typeof S!=='undefined' && S) ? S.usMissili87 : null, d=(typeof S!=='undefined' && S) && S.usMosca88==='diritti', zero=(k==='dipiu' || k==='rinvio');
+    return zero ? (d ? 'Il Muro di Berlino è caduto da tre settimane. Al largo di Malta, su una nave che la tempesta sballotta tanto che metà degli incontri salta, vedi il segretario generale sovietico: fra voi un trattato sui missili non c\'è, e si riparte quasi da zero. L\'anno scorso a Mosca hai messo i diritti umani al centro, e ora a Praga e a Berlino la gente è in piazza a chiederli. I giornalisti aspettano una frase.'
+        : 'Il Muro di Berlino è caduto da tre settimane. Al largo di Malta, su una nave che la tempesta sballotta tanto che metà degli incontri salta, vedi il segretario generale sovietico: fra voi un trattato sui missili non c\'è, e si riparte quasi da zero. I giornalisti aspettano una frase.')
+      : (d ? 'Il Muro di Berlino è caduto da tre settimane. Al largo di Malta, su una nave che la tempesta sballotta tanto che metà degli incontri salta, vedi il segretario generale sovietico: il trattato sui missili è in vigore, e si parte da lì. L\'anno scorso a Mosca hai messo i diritti umani al centro, e ora a Praga e a Berlino la gente è in piazza a chiederli. I giornalisti aspettano una frase: la guerra fredda è finita?'
+        : 'Il Muro di Berlino è caduto da tre settimane. Al largo di Malta, su una nave che la tempesta sballotta tanto che metà degli incontri salta, vedi il segretario generale sovietico: il trattato sui missili è in vigore, e si parte da lì. I giornalisti aspettano una frase: la guerra fredda è finita?'); },
+  ch:[
+    { l:'Dichiari finita la guerra fredda', e:'La frase apre tutti i telegiornali · i falchi del tuo partito dicono che è presto, e che Mosca ha ancora i suoi missili',
+      f:function(){ S.usMalta89='finita'; stampad(1); gdUs60('giovani',1); baseUs60(-1);
+        S.log.unshift({t:T('Il mondo'),x:T('A Malta ha detto che la guerra fredda è finita.')}); } },
+    { l:'Prudenza: aiuti a Mosca solo con le riforme', e:'Le banche e le imprese approvano · a Mosca dicono che l\'America detta condizioni',
+      f:function(){ S.usMalta89='prudenza'; gdUs60('imprenditori',1);
+        S.log.unshift({t:T('Il mondo'),x:T('A Malta ha legato gli aiuti a Mosca alle riforme.')}); } },
+    { l:'La Germania unita nella NATO, prima di tutto', e:'Il cancelliere tedesco ringrazia · a Mosca e in mezza Europa la parola «unita» fa ancora paura',
+      f:function(){ S.usMalta89='nato'; gdUs60('cattolici',1); repd(-1);
+        S.log.unshift({t:T('Il mondo'),x:T('A Malta ha chiesto che la Germania unita resti nella NATO.')}); } },
+  ],
+};
+const MALTA89_OPP_EV = {
+  id:'us80_malta_opp', era:'us1980', kick:'Il mondo',
+  t:'Il vertice di Malta, dall\'aula',
+  get text(){ var k=(typeof S!=='undefined' && S) ? S.usMissili87Opp : null;
+    return k==='contro' ? 'Il Muro è caduto da tre settimane, e il Presidente vede il segretario generale sovietico su una nave al largo di Malta, in mezzo alla tempesta. Il tuo partito ha combattuto il trattato sui missili, e ora che la guerra fredda finisce quel voto pesa. Il tuo partito deve dire qualcosa.'
+      : k==='ratifica' ? 'Il Muro è caduto da tre settimane, e il Presidente vede il segretario generale sovietico su una nave al largo di Malta, in mezzo alla tempesta. Il tuo partito ha scritto le condizioni del Senato sul trattato dei missili, e ora la Casa Bianca chiede di fidarsi di nuovo. Il tuo partito deve dire qualcosa.'
+      : 'Il Muro è caduto da tre settimane, e il Presidente vede il segretario generale sovietico su una nave al largo di Malta, in mezzo alla tempesta. Il tuo partito ha votato il trattato sui missili, e ora deve decidere che cosa dire della fine della guerra fredda.'; },
+  ch:[
+    { l:'Sostenere il Presidente', e:'Un gesto da statista · la base chiede perché fai la campagna dell\'avversario',
+      f:function(){ S.usMalta89Opp='sostieni'; gdUs60('cetomedio',1); baseUs60(-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Dall\'opposizione ha sostenuto il Presidente al vertice di Malta.')}); } },
+    { l:'E i diritti umani?', e:'I dissidenti ringraziano · i giornali scrivono che rovini un giorno buono per il paese',
+      f:function(){ S.usMalta89Opp='diritti'; gdUs60('cattolici',1); stampad(-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Dall\'opposizione ha chiesto conto dei diritti umani al vertice di Malta.')}); } },
+    { l:'Chiedere i conti della difesa', e:'Se la guerra fredda finisce, dove vanno i soldi delle armi? · i falchi dicono che vuoi disarmare il paese',
+      f:function(){ S.usMalta89Opp='difesa'; gdUs60('lavoratori',1); gdUs60('cattolici',-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Dopo il vertice di Malta ha chiesto di tagliare la spesa per le armi.')}); } },
+  ],
+};
+/* ==============================================================================================================
+   L262-8 · STATI UNITI 1980 — IL GRANO (1980/1-3) E I PROFUGHI DA CUBA (1980/4-6) (scheda PRESET-USA-1980 §3 e §4, decisioni di
+   Cowork del 29/10; testi di Code). Stessi helper di L262-7 (gdUs60, baseUs60). Nomi nuovi cercati in tutto js/ il 29/10 prima di
+   scriverli (L99-2), zero occorrenze: us80_grano(_opp), us80_profughi(_opp), usGrano80(Opp), usProfughi80(Opp), granoOra,
+   profughiOra, ti_us80_grano, ti_us80_profughi.
+   ⚑ NON SONO SNODI (Cowork (3): nessuna riga in SNODI_STORICI né in RIVALI) e NON SONO DEL SACCHETTO: carte DOVUTE come Mosca e Malta
+   (cancelli in game.js accanto a maltaOra). Il grano al primo mese utile (la porta parte a gennaio e il primo mese del governo è della
+   legge di bilancio: in pratica febbraio; marzo è il ripiego); i profughi al mese us80Dado('profughi') di 1980/4-6, scivolano se il
+   mese è preso, mai oltre il 1980/6.
+   ⚑ CORREZIONE ALLA CONSEGNA: il racconto d'apertura della porta (SCENARI.us1980.contesto) dice già che a gennaio «il Presidente ha
+   fermato le vendite di grano»; la carta del governo non chiede quindi SE fare l'embargo ma che cosa farne, e la terza scelta lo
+   RITIRA (flag 'nessuno', come nella consegna). Il boicottaggio olimpico non è una carta: nessuna riga in più (consegna, passo 1).
+   ⚑ Il testo non dice chi governa e non nomina persone: «il governo dell'Avana», «le barche», «la Florida». 1980: l'embargo del 4
+   gennaio fermò circa diciassette milioni di tonnellate già vendute; dal 20 aprile l'Avana lasciò partire chiunque, e fino a ottobre
+   arrivarono in Florida circa centoventicinquemila persone (i centri di Miami pieni, i campi nelle basi militari).
+   ============================================================================================================== */
+const GRANO80_EV = {
+  id:'us80_grano', era:'us1980', kick:'Il mondo',
+  t:'Il grano per Mosca',
+  /* L262-9 (decisione 4 di Cowork): «hai fermato» solo a chi parte dalla porta del 1980, il cui racconto d'apertura lo dice; chi ci
+     arriva da un'altra porta (us1970) non ha fatto quella mossa, e legge «il governo ha fermato». */
+  get text(){ return (typeof S!=='undefined' && S && S.scenario==='us1980')
+    ? 'A fine dicembre le truppe sovietiche sono entrate in Afghanistan, e a gennaio hai fermato le vendite di grano all\'Unione Sovietica: diciassette milioni di tonnellate già vendute restano nei silos e sui treni. Nel Midwest i prezzi scendono, e gli agricoltori chiedono chi pagherà il conto. Al Congresso c\'è chi vuole l\'embargo fino in fondo, e chi dice che i contratti firmati vanno onorati.'
+    : 'A fine dicembre le truppe sovietiche sono entrate in Afghanistan, e a gennaio il governo ha fermato le vendite di grano all\'Unione Sovietica: diciassette milioni di tonnellate già vendute restano nei silos e sui treni. Nel Midwest i prezzi scendono, e gli agricoltori chiedono chi pagherà il conto. Al Congresso c\'è chi vuole l\'embargo fino in fondo, e chi dice che i contratti firmati vanno onorati.'; },
+  ch:[
+    { l:'Embargo pieno: lo Stato compra il grano rimasto', e:'Il segnale a Mosca è netto, e il raccolto non marcisce nei silos · le imprese che commerciano il grano perdono i loro contratti',
+      f:function(){ S.usGrano80='pieno'; stampad(1); gdUs60('imprenditori',-1); gdUs60('cetomedio',1);
+        S.log.unshift({t:T('Il mondo'),x:T('Ha tenuto l\'embargo del grano per Mosca e ha comprato il raccolto rimasto.')}); } },
+    { l:'Embargo, ma i contratti già firmati si onorano', e:'Le imprese tirano il fiato: il grano già venduto parte, il resto si ferma · i giornali scrivono che l\'embargo ha un buco',
+      f:function(){ S.usGrano80='contratti'; gdUs60('imprenditori',1); stampad(-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Ha tenuto l\'embargo del grano per Mosca, ma ha fatto partire il grano già venduto.')}); } },
+    { l:'Ritiri l\'embargo: la risposta passa per altre vie', e:'Gli agricoltori e i portuali tornano a vendere e a caricare · l\'ala dura del tuo partito parla di resa, e gli alleati non capiscono',
+      f:function(){ S.usGrano80='nessuno'; gdUs60('lavoratori',1); baseUs60(-1); repd(-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Ha ritirato l\'embargo del grano per Mosca.')}); } },
+  ],
+};
+const GRANO80_OPP_EV = {
+  id:'us80_grano_opp', era:'us1980', kick:'Il mondo',
+  t:'Il grano per Mosca, dall\'aula',
+  text:'Dopo l\'invasione dell\'Afghanistan il governo ha deciso l\'embargo sul grano per l\'Unione Sovietica: diciassette milioni di tonnellate già vendute restano nei silos, e nel Midwest i prezzi scendono. Gli agricoltori riempiono le sale dei comizi e chiedono chi pagherà il conto. Il tuo partito deve dire da che parte sta.',
+  ch:[
+    { l:'Sostenere il governo', e:'Davanti a Mosca il paese parla con una voce sola · la base chiede perché fai la campagna dell\'avversario',
+      f:function(){ S.usGrano80Opp='sostieni'; gdUs60('cetomedio',1); baseUs60(-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Dall\'opposizione ha sostenuto l\'embargo del grano per Mosca.')}); } },
+    { l:'Il conto lo pagano gli agricoltori', e:'Nelle fattorie del Midwest ti ascoltano · i giornali scrivono che metti il raccolto prima della sicurezza del paese',
+      f:function(){ S.usGrano80Opp='agricoltori'; gdUs60('lavoratori',1); stampad(-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Dall\'opposizione ha attaccato l\'embargo del grano per il costo agli agricoltori.')}); } },
+    { l:'Un voto del Congresso sull\'embargo', e:'Chiedi che la decisione passi dall\'aula · la Casa Bianca risponde che in politica estera si parla con una voce sola',
+      f:function(){ S.usGrano80Opp='congresso'; gdUs60('cetomedio',1); gdUs60('giovani',-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Dall\'opposizione ha chiesto un voto del Congresso sull\'embargo del grano.')}); } },
+  ],
+};
+const PROFUGHI80_EV = {
+  id:'us80_profughi', era:'us1980', kick:'Il paese',
+  t:'Le barche da Cuba',
+  text:'Il governo dell\'Avana ha aperto il porto a chiunque voglia partire, e dalla Florida migliaia di barche fanno la spola per andare a prendere parenti e sconosciuti. Ne arrivano centinaia ogni giorno, i centri d\'accoglienza di Miami sono pieni, e fra i profughi, scrivono i giornali, il governo cubano ha messo anche i detenuti delle sue carceri. La guardia costiera aspetta un ordine.',
+  ch:[
+    { l:'Braccia aperte: accoglienza e asilo', e:'Le chiese aprono le porte e le famiglie cubane della Florida ringraziano · nei quartieri poveri di Miami si teme per il lavoro e per le case',
+      f:function(){ S.usProfughi80='aperte'; gdUs60('cattolici',1); gdUs60('lavoratori',-1);
+        S.log.unshift({t:T('Il paese'),x:T('Ha accolto i profughi arrivati da Cuba e ha dato loro l\'asilo.')}); } },
+    { l:'La guardia costiera ferma le barche', e:'Chi teme per il lavoro approva · le barche respinte aprono i telegiornali, e le chiese protestano',
+      f:function(){ S.usProfughi80='guardia'; gdUs60('lavoratori',1); stampad(-1); gdUs60('cattolici',-1);
+        S.log.unshift({t:T('Il paese'),x:T('Ha mandato la guardia costiera a fermare le barche da Cuba.')}); } },
+    { l:'Accoglienza nelle basi militari, con i controlli', e:'Ognuno viene schedato prima di uscire, e la gente si sente più tranquilla · all\'estero si parla di campi',
+      f:function(){ S.usProfughi80='basi'; gdUs60('cetomedio',1); repd(-1);
+        S.log.unshift({t:T('Il paese'),x:T('Ha accolto i profughi da Cuba nelle basi militari, con i controlli.')}); } },
+  ],
+};
+const PROFUGHI80_OPP_EV = {
+  id:'us80_profughi_opp', era:'us1980', kick:'Il paese',
+  t:'Le barche da Cuba, dall\'aula',
+  text:'Il governo dell\'Avana ha aperto il porto, e migliaia di barche arrivano in Florida: i centri d\'accoglienza sono pieni, e il governo prova a mettere ordine fra le spiagge e le basi militari. Gli elettori della Florida chiedono chi controlla le coste, le chiese chiedono asilo per tutti. Il tuo partito deve dire qualcosa.',
+  ch:[
+    { l:'Sostenere il governo', e:'Un gesto da statista · la base chiede perché fai la campagna dell\'avversario',
+      f:function(){ S.usProfughi80Opp='sostieni'; gdUs60('cetomedio',1); baseUs60(-1);
+        S.log.unshift({t:T('Il paese'),x:T('Dall\'opposizione ha sostenuto il governo sui profughi da Cuba.')}); } },
+    { l:'Chi controlla le coste?', e:'In Florida ti ascoltano · le chiese dicono che soffi sulla paura',
+      f:function(){ S.usProfughi80Opp='coste'; gdUs60('lavoratori',1); gdUs60('cattolici',-1);
+        S.log.unshift({t:T('Il paese'),x:T('Dall\'opposizione ha attaccato il governo sul controllo delle coste.')}); } },
+    { l:'Un voto del Congresso sull\'asilo', e:'Chiedi regole scritte per chi arriva · la Casa Bianca risponde che le leggi non fermano le barche',
+      f:function(){ S.usProfughi80Opp='congresso'; gdUs60('cetomedio',1); gdUs60('giovani',-1);
+        S.log.unshift({t:T('Il paese'),x:T('Dall\'opposizione ha chiesto un voto del Congresso sull\'asilo ai profughi da Cuba.')}); } },
+  ],
+};
+/* ==============================================================================================================
+   L262-9 · STATI UNITI 1980 — LA CRISI DEL DEBITO DEL MESSICO (1982/8) E IL JUMBO COREANO (1983/9) (scheda PRESET-USA-1980 §3 e §4,
+   decisioni di Cowork del 29/10; testi di Code). Stessi helper di L262-8. Nomi nuovi cercati in tutto js/, .claude/ e prove/ il 29/10
+   prima di scriverli (L99-2), zero occorrenze: us80_messico(_opp), us80_jumbo(_opp), usMessico82(Opp), usJumbo83(Opp), messicoOra,
+   jumboOra, ti_us80_messico, ti_us80_jumbo.
+   ⚑ NON SONO SNODI (Cowork (5): nessuna riga in SNODI_STORICI né in RIVALI: il jumbo non apre una scala con l'URSS, è cronaca di
+   tensione) e NON SONO DEL SACCHETTO: carte DOVUTE come il grano (cancelli in game.js accanto a profughiOra). Il Messico solo il 1982/8
+   (luglio è di pus80_kenner); il jumbo 1983/9, o 1983/10 se il mese è preso (la ripresa dovuta di L262-6 passa prima nell'iniezione).
+   ⚑ CORREZIONE ALLA CONSEGNA (passo 2 (b)): «se usGrano80 è 'nessuno', il grano che non hai mai fermato» — ma 'nessuno' è la scelta
+   che RITIRA un embargo già fatto (L262-8): il grano lo hai fermato e poi riaperto. L'etichetta è una sola e vale in tutti i casi:
+   «niente grano a Mosca» (di nuovo, o ancora).
+   ⚑ Il testo non dice chi governa e non nomina persone. 1982: il 12-20 agosto il Messico dichiara di non poter pagare il servizio del
+   debito; il Tesoro e la banca centrale mettono insieme un prestito d'emergenza, l'accordo col Fondo monetario arriva a fine anno.
+   1983: il 1° settembre i caccia sovietici abbattono il volo coreano partito da New York, 269 morti, fra loro un deputato; il 6
+   settembre le registrazioni dei piloti al Consiglio di sicurezza; il 16 l'annuncio che la navigazione satellitare sarà aperta ai civili.
+   ============================================================================================================== */
+const MESSICO82_EV = {
+  id:'us80_messico', era:'us1980', kick:'L\'economia',
+  t:'Il Messico non paga',
+  text:'Il governo messicano annuncia che non può più pagare gli interessi del debito estero. Le grandi banche del paese gli hanno prestato più del loro capitale, e con i tassi alti di questi anni il contagio può toccare tutta l\'America latina: dopo il Messico, il Brasile e l\'Argentina. Il Tesoro e la banca centrale aspettano una risposta entro il fine settimana.',
+  ch:[
+    { l:'Un prestito-ponte del Tesoro e della banca centrale, subito', e:'La storia · il prestito arriva in pochi giorni, e il debito si rinegozia col Fondo monetario · ma la crisi del debito dell\'America latina dura per tutto il decennio, e la base chiede perché i soldi pubblici salvano le banche',
+      f:function(){ S.usMessico82='ponte'; gdUs60('imprenditori',1); stampad(1); baseUs60(-1);
+        S.log.unshift({t:T('L\'economia'),x:T('Ha concesso al Messico un prestito-ponte del Tesoro e della banca centrale.')}); } },
+    { l:'Niente soldi pubblici: le banche si arrangino', e:'La base applaude: chi ha prestato male paga · le borse tremano, e i risparmiatori temono per i loro conti',
+      f:function(){ S.usMessico82='banche'; baseUs60(1); gdUs60('imprenditori',-2); gdUs60('cetomedio',-1);
+        S.log.unshift({t:T('L\'economia'),x:T('Ha lasciato alle banche il debito del Messico, senza soldi pubblici.')}); } },
+    { l:'Aiuti solo col Fondo monetario, e riforme in cambio', e:'Il ceto medio vede un governo che non regala niente · i sindacati dicono che le riforme le pagheranno gli operai, al sud e nelle fabbriche che vendono al Messico',
+      f:function(){ S.usMessico82='fondo'; gdUs60('cetomedio',1); gdUs60('lavoratori',-1);
+        S.log.unshift({t:T('L\'economia'),x:T('Ha legato gli aiuti al Messico a un accordo col Fondo monetario.')}); } },
+  ],
+};
+const MESSICO82_OPP_EV = {
+  id:'us80_messico_opp', era:'us1980', kick:'L\'economia',
+  t:'Il Messico non paga, dall\'aula',
+  text:'Il governo messicano non può più pagare gli interessi del debito estero, e le grandi banche del paese gli hanno prestato più del loro capitale. Il Tesoro ha messo insieme un prestito-ponte in un fine settimana, e a Wall Street si contano i danni. In aula si chiede chi ha lasciato le banche così esposte. Il tuo partito deve dire qualcosa.',
+  ch:[
+    { l:'Sostenere il prestito', e:'Un gesto da statista: il sistema non deve crollare · la base chiede perché salvi le banche',
+      f:function(){ S.usMessico82Opp='sostieni'; gdUs60('cetomedio',1); baseUs60(-1);
+        S.log.unshift({t:T('L\'economia'),x:T('Dall\'opposizione ha sostenuto il prestito-ponte al Messico.')}); } },
+    { l:'I tassi alti hanno affondato il Messico', e:'Nelle fabbriche che vendono al sud ti ascoltano · i giornali scrivono che attacchi la banca centrale per fare campagna',
+      f:function(){ S.usMessico82Opp='tassi'; gdUs60('lavoratori',1); stampad(-1);
+        S.log.unshift({t:T('L\'economia'),x:T('Dall\'opposizione ha accusato i tassi alti della crisi del Messico.')}); } },
+    { l:'Che paghino le banche', e:'La base applaude · gli imprenditori dicono che giochi col fuoco',
+      f:function(){ S.usMessico82Opp='banche'; baseUs60(1); gdUs60('imprenditori',-1);
+        S.log.unshift({t:T('L\'economia'),x:T('Dall\'opposizione ha chiesto che il debito del Messico lo paghino le banche.')}); } },
+  ],
+};
+const JUMBO83_EV = {
+  id:'us80_jumbo', era:'us1980', kick:'Il mondo',
+  t:'L\'aereo abbattuto',
+  text:'Un aereo di linea coreano partito da New York è entrato per errore nello spazio aereo sovietico, e i caccia lo hanno abbattuto sul mare: duecentosessantanove morti, fra loro un deputato del Congresso. Mosca prima nega tutto, poi parla di aereo spia. Gli alleati aspettano la risposta americana, e i servizi d\'ascolto hanno le registrazioni dei piloti sovietici.',
+  ch:[
+    { l:'La condanna all\'ONU, con le registrazioni dei piloti', e:'Il mondo sente i piloti sovietici che sparano, e Mosca resta senza parole · i giovani temono che si torni alla guerra fredda più dura',
+      f:function(){ S.usJumbo83='onu'; stampad(1); gdUs60('cattolici',1); gdUs60('giovani',-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Ha portato all\'ONU le registrazioni dei piloti sovietici che hanno abbattuto l\'aereo coreano.')}); } },
+    { l:'Sanzioni dure: niente voli sovietici, e niente grano a Mosca', e:'Il tuo partito vuole fermezza, e l\'avrà · gli agricoltori perdono di nuovo un cliente, e gli alleati europei non seguono',
+      f:function(){ S.usJumbo83='sanzioni'; baseUs60(1); gdUs60('cetomedio',-1); repd(-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Dopo l\'aereo coreano abbattuto ha fermato i voli sovietici e il grano per Mosca.')}); } },
+    { l:'Fermezza, ma il negoziato sui missili continua', e:'Il sistema di navigazione dei satelliti militari sarà aperto anche agli aerei civili · l\'ala dura del tuo partito dice che con chi abbatte gli aerei non si tratta',
+      f:function(){ S.usJumbo83='negoziato'; gdUs60('imprenditori',1); baseUs60(-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Dopo l\'aereo coreano abbattuto ha tenuto aperto il negoziato sui missili.')}); } },
+  ],
+};
+const JUMBO83_OPP_EV = {
+  id:'us80_jumbo_opp', era:'us1980', kick:'Il mondo',
+  t:'L\'aereo abbattuto, dall\'aula',
+  text:'I caccia sovietici hanno abbattuto un aereo di linea coreano entrato per errore nel loro spazio aereo: duecentosessantanove morti, fra loro un deputato del Congresso. Il governo ha chiesto la condanna all\'ONU, e in aula tutti si alzano per il minuto di silenzio. Poi bisogna parlare.',
+  ch:[
+    { l:'Unità nazionale', e:'Davanti a Mosca il paese parla con una voce sola · la base chiede dove sia l\'opposizione',
+      f:function(){ S.usJumbo83Opp='unita'; gdUs60('cetomedio',1); baseUs60(-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Dall\'opposizione ha fatto fronte comune col governo dopo l\'aereo coreano abbattuto.')}); } },
+    { l:'Sanzioni più dure', e:'I falchi ti applaudono · i giornali scrivono che una tragedia non è una gara',
+      f:function(){ S.usJumbo83Opp='sanzioni'; baseUs60(1); stampad(-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Dall\'opposizione ha chiesto sanzioni più dure contro Mosca per l\'aereo coreano.')}); } },
+    { l:'Il negoziato sui missili non si ferma', e:'Chi teme la guerra ti ascolta · i falchi dicono che sei morbido con chi abbatte gli aerei',
+      f:function(){ S.usJumbo83Opp='negoziato'; gdUs60('giovani',1); gdUs60('cattolici',-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Dall\'opposizione ha chiesto di non fermare il negoziato sui missili dopo l\'aereo coreano.')}); } },
+  ],
+};
+/* ==============================================================================================================
+   L262-10 · STATI UNITI 1980 — BEIRUT (LA CASERMA) E GRENADA (1983/10) (scheda PRESET-USA-1980 §3-§4, D297, decisioni di Cowork del
+   29/10; testi di Code). Stessi helper di L262-8/9. Nomi nuovi cercati in tutto js/, .claude/ e prove/ il 29/10 prima di scriverli
+   (L99-2), zero occorrenze: us80_beirut(_opp), us80_grenada(_opp), usBeirut83(Opp), usGrenada83(Opp), beirutOra, beirutOppOra,
+   grenadaOra, grenadaOppOra, ti_us80_beirut, ti_us80_grenada.
+   ⚑ NON SONO SNODI (Cowork (7): nessuna riga in SNODI_STORICI né in RIVALI: Grenada non apre una scala con l'URSS né con Cuba) e NON
+   SONO DEL SACCHETTO: carte DOVUTE come il jumbo (cancelli in game.js accanto a jumboOra). Tutte e due il 1983/10, nello stesso mese
+   (Cowork (5): il motore ne ammette due, come accanto al richiamo), prima Beirut e poi Grenada. Il jumbo resta a settembre e la ripresa
+   dovuta di L262-6 cede settembre e ottobre (ripresaFinestra, game.js).
+   ⚑ Beirut porta tono:'grave' (Cowork (6), verificato nel codice: la carta resta muta in entrata — suonoCarta —, la scena è del secchio
+   grave e sta ferma, graveInCorso() ferma il beat leggero del mese, che con agendaSolo non c'è comunque; NON è un pilastro: niente
+   cronaca, quindi musica, voci e giro restano come sono — musicaTragedia legge cronaca && grave — e pilastroGraveVicino legge solo i
+   pilastri, l'attacco non cambia). Grenada no.
+   ⚑ Il testo non dice chi governa e non nomina persone. 1983: il 23 ottobre all'alba un camion con l'esplosivo entra nella caserma dei
+   marines all'aeroporto di Beirut (241 militari americani morti), e nello stesso momento un secondo attacco colpisce i paracadutisti
+   francesi; i marines sono a Beirut dall'estate del 1982 nella forza multinazionale; il ritiro sulle navi è annunciato e fatto nel
+   febbraio 1984. Il 19 ottobre a Grenada un colpo di stato uccide il capo del governo; sull'isola ci sono circa seicento studenti
+   americani di medicina; i paesi dei Caraibi orientali chiedono l'intervento; lo sbarco è del 25, i combattimenti finiscono in pochi
+   giorni, il 2 novembre l'Assemblea generale dell'ONU deplora l'intervento, a metà dicembre le truppe da combattimento sono rientrate.
+   ============================================================================================================== */
+const BEIRUT83_EV = {
+  id:'us80_beirut', era:'us1980', kick:'Il mondo', tono:'grave',
+  t:'La caserma di Beirut',
+  text:'All\'alba un camion carico di esplosivo entra nella caserma dei marines all\'aeroporto di Beirut, dove i soldati stanno da un anno con la forza di pace: duecentoquarantuno militari americani morti. Nello stesso momento un secondo attacco colpisce i paracadutisti francesi. Il paese chiede che cosa ci facciano i marines in Libano.',
+  ch:[
+    { l:'Restare: i marines non si ritirano davanti alle bombe', e:'Il tuo partito vuole fermezza · le famiglie dei soldati chiedono per che cosa si muore, e i giornali contano i giorni',
+      f:function(){ S.usBeirut83='resta'; baseUs60(1); gdUs60('giovani',-1); stampad(-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Dopo l\'attacco alla caserma di Beirut ha tenuto i marines in Libano.')}); } },
+    { l:'Ritirare i marines sulle navi entro pochi mesi', e:'La storia · pochi mesi dopo, nel febbraio 1984, i marines lasciano Beirut per le navi al largo · il paese respira, gli alleati dicono che l\'America se ne va al primo colpo',
+      f:function(){ S.usBeirut83='ritiro'; gdUs60('cetomedio',1); repd(-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Dopo l\'attacco alla caserma di Beirut ha deciso il ritiro dei marines sulle navi.')}); } },
+    { l:'Rispondere col fuoco delle navi sulle colline', e:'I cannoni delle navi colpiscono le postazioni sulle colline, e il tuo partito applaude · le chiese e i giovani temono una guerra senza fine in Libano',
+      f:function(){ S.usBeirut83='fuoco'; baseUs60(1); gdUs60('cattolici',-1); gdUs60('giovani',-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Dopo l\'attacco alla caserma di Beirut ha fatto sparare le navi sulle colline.')}); } },
+  ],
+};
+const GRENADA83_EV = {
+  id:'us80_grenada', era:'us1980', kick:'Il mondo',
+  t:'Lo sbarco a Grenada',
+  text:'Sull\'isola di Grenada, nei Caraibi, un colpo di stato ha ucciso il capo del governo, e i militari hanno chiuso l\'aeroporto. Sull\'isola ci sono circa seicento studenti americani di medicina, e i paesi dei Caraibi orientali chiedono un intervento. Le navi sono già in rotta, e la risposta serve entro poche ore.',
+  ch:[
+    { l:'Lo sbarco, con i paesi dei Caraibi orientali', e:'La storia · in pochi giorni l\'isola è presa e gli studenti tornano a casa; a dicembre le truppe da combattimento sono già rientrate · all\'ONU l\'Assemblea generale condanna l\'intervento',
+      f:function(){ S.usGrenada83='sbarco'; baseUs60(1); gdUs60('cetomedio',1); stampad(-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Ha ordinato lo sbarco a Grenada con i paesi dei Caraibi orientali.')}); } },
+    { l:'Solo l\'evacuazione degli studenti', e:'Gli studenti tornano a casa e le famiglie ringraziano · l\'ala dura del tuo partito dice che hai lasciato l\'isola ai militari',
+      f:function(){ S.usGrenada83='evacuazione'; gdUs60('cetomedio',1); baseUs60(-1);
+        S.log.unshift({t:T('Il mondo'),x:T('A Grenada ha fatto evacuare gli studenti americani, senza sbarco.')}); } },
+    { l:'La via diplomatica, con l\'Organizzazione degli Stati americani', e:'I giornali scrivono che hai scelto la legge e non le navi · la base parla di debolezza, e chi investe nei Caraibi teme per i suoi affari',
+      f:function(){ S.usGrenada83='diplomazia'; stampad(1); baseUs60(-1); gdUs60('imprenditori',-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Su Grenada ha cercato la via diplomatica con l\'Organizzazione degli Stati americani.')}); } },
+  ],
+};
+const BEIRUT83_OPP_EV = {
+  id:'us80_beirut_opp', era:'us1980', kick:'Il mondo', tono:'grave',
+  t:'La caserma di Beirut, dall\'aula',
+  text:'Un camion carico di esplosivo è entrato all\'alba nella caserma dei marines all\'aeroporto di Beirut: duecentoquarantuno militari americani morti. Il governo ha detto che i marines restano, per ora. In aula si legge l\'elenco dei caduti, poi bisogna parlare.',
+  ch:[
+    { l:'Unità nazionale, nel lutto', e:'Davanti ai caduti il paese parla con una voce sola · la base chiede dove sia l\'opposizione',
+      f:function(){ S.usBeirut83Opp='lutto'; gdUs60('cattolici',1); baseUs60(-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Dall\'opposizione ha fatto fronte comune nel lutto per i marines di Beirut.')}); } },
+    { l:'Riportate a casa i marines', e:'Le famiglie dei soldati ti ascoltano · i falchi dicono che scappi davanti alle bombe',
+      f:function(){ S.usBeirut83Opp='ritiro'; gdUs60('giovani',1); stampad(-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Dall\'opposizione ha chiesto il ritiro dei marines dal Libano.')}); } },
+    { l:'Un\'inchiesta sulla sicurezza della caserma', e:'I giornali seguono le tue domande sul cancello aperto · i generali dicono che si fa politica sui morti',
+      f:function(){ S.usBeirut83Opp='inchiesta'; stampad(1); gdUs60('cetomedio',-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Dall\'opposizione ha chiesto un\'inchiesta sulla sicurezza della caserma di Beirut.')}); } },
+  ],
+};
+const GRENADA83_OPP_EV = {
+  id:'us80_grenada_opp', era:'us1980', kick:'Il mondo',
+  t:'Lo sbarco a Grenada, dall\'aula',
+  text:'Due giorni dopo Beirut, i marines e i paracadutisti sono sbarcati sull\'isola di Grenada, nei Caraibi, dove un colpo di stato aveva ucciso il capo del governo. I paesi dei Caraibi orientali applaudono, gli studenti americani di medicina tornano a casa, e il Congresso l\'ha saputo a sbarco iniziato.',
+  ch:[
+    { l:'Sostenere lo sbarco', e:'Gli studenti sono salvi, e il paese è con te · la base dice che hai firmato in bianco',
+      f:function(){ S.usGrenada83Opp='sostieni'; gdUs60('cetomedio',1); baseUs60(-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Dall\'opposizione ha sostenuto lo sbarco a Grenada.')}); } },
+    { l:'Un intervento senza il voto del Congresso', e:'La base ti applaude · i giornali scrivono che attacchi il paese mentre i soldati sbarcano',
+      f:function(){ S.usGrenada83Opp='condanna'; baseUs60(1); stampad(-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Dall\'opposizione ha condannato lo sbarco a Grenada fatto senza il voto del Congresso.')}); } },
+    { l:'La legge sui poteri di guerra, in aula', e:'Chi teme le guerre lontane ti ascolta · i falchi dicono che leghi le mani ai soldati',
+      f:function(){ S.usGrenada83Opp='poteri'; gdUs60('giovani',1); gdUs60('imprenditori',-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Dall\'opposizione ha chiesto conto al Congresso della legge sui poteri di guerra per Grenada.')}); } },
+  ],
+};
+/* ==============================================================================================================
+   L262-11 · STATI UNITI 1980 — LE OLIMPIADI DI LOS ANGELES (1984/7) (scheda PRESET-USA-1980 §3-§4, decisioni di Cowork del 30/10;
+   testi di Code). Stessi helper di L262-8/9/10. Nomi nuovi cercati in tutto js/, .claude/ e prove/ il 30/10 prima di scriverli
+   (L99-2), zero occorrenze: us80_olimpiadi(_opp), usOlimpiadi84(Opp), olimpiadiOra, olimpiadiOppOra, ti_us80_olimpiadi.
+   ⚑ NON È UNO SNODO (Cowork (5): nessuna riga in SNODI_STORICI né in RIVALI: il boicottaggio dell'Est non apre né alza una crisi con
+   l'URSS) e NON È DEL SACCHETTO: carta DOVUTA come Beirut (cancelli in game.js accanto a beirutOra), solo il 1984/7 (la cerimonia
+   d'apertura è del 28 luglio; il mese è libero da pilastri e fatti-mondo), in piena stagione della presidenziale: esce con la carta
+   di campagna accanto (snodoColCampagna).
+   ⚑ Il testo non dice chi governa, non nomina persone, atleti né sponsor, e non presuppone una scelta del 1980 (il boicottaggio di
+   Mosca non è una carta: una riga sola, fatto storico per tutte le partenze). 1984: l'8 maggio l'Unione Sovietica annuncia che non
+   andrà a Los Angeles, parlando della sicurezza dei suoi atleti, e la seguono quasi tutti i paesi del Patto di Varsavia (la Romania
+   va); i Giochi sono organizzati da un comitato privato e pagati quasi tutti da privati; la squadra di casa chiude prima nel
+   medagliere e i Giochi chiudono in attivo. Quattro anni prima gli Stati Uniti non erano andati a Mosca.
+   ============================================================================================================== */
+const OLIMPIADI84_EV = {
+  id:'us80_olimpiadi', era:'us1980', kick:'Il paese',
+  t:'I Giochi di Los Angeles',
+  text:'A fine luglio si aprono i Giochi di Los Angeles. In primavera l\'Unione Sovietica e quasi tutti i paesi del Patto di Varsavia hanno annunciato che non verranno, parlando della sicurezza dei loro atleti: quattro anni prima erano stati gli Stati Uniti a non andare a Mosca. I Giochi li pagano quasi tutti i privati, non la città né lo Stato, e il paese si prepara a guardare la squadra di casa in piena campagna elettorale.',
+  ch:[
+    { l:'Aprire i Giochi e farne la festa del paese', e:'La storia · la squadra di casa chiude prima nel medagliere, e i Giochi chiudono in attivo · il tuo partito è in festa, i giornali scrivono che lo stadio è diventato un comizio',
+      f:function(){ S.usOlimpiadi84='festa'; baseUs60(1); gdUs60('cetomedio',1); stampad(-1);
+        S.log.unshift({t:T('Il paese'),x:T('Ha aperto i Giochi di Los Angeles e ne ha fatto la festa del paese.')}); } },
+    { l:'Giochi fuori dalla politica: la porta resta aperta agli atleti dell\'Est', e:'I giornali e gli alleati apprezzano il silenzio sul boicottaggio · il tuo partito voleva una parola dura con Mosca',
+      f:function(){ S.usOlimpiadi84='neutrali'; stampad(1); repd(1); baseUs60(-1);
+        S.log.unshift({t:T('Il paese'),x:T('Ha tenuto i Giochi di Los Angeles fuori dalla politica, con la porta aperta agli atleti dell\'Est.')}); } },
+    { l:'Sicurezza prima di tutto: Guardia nazionale e agenzie federali intorno agli stadi', e:'Le famiglie si sentono tranquille · i giovani trovano gli stadi chiusi da transenne, e i giornali parlano di Giochi blindati',
+      f:function(){ S.usOlimpiadi84='sicurezza'; gdUs60('cetomedio',1); gdUs60('giovani',-1); stampad(-1);
+        S.log.unshift({t:T('Il paese'),x:T('Ha messo la Guardia nazionale e le agenzie federali intorno agli stadi dei Giochi di Los Angeles.')}); } },
+  ],
+};
+const OLIMPIADI84_OPP_EV = {
+  id:'us80_olimpiadi_opp', era:'us1980', kick:'Il paese',
+  t:'I Giochi di Los Angeles, dall\'aula',
+  text:'A fine luglio si aprono i Giochi di Los Angeles, senza l\'Unione Sovietica e quasi tutti i paesi del Patto di Varsavia: quattro anni prima erano stati gli Stati Uniti a non andare a Mosca. Il governo è in tribuna, la squadra di casa vince molto, e a quattro mesi dal voto ogni medaglia sembra un manifesto.',
+  ch:[
+    { l:'Festeggiare con il paese, niente polemiche', e:'Il paese è in festa e tu con lui · la base dice che regali i Giochi al governo',
+      f:function(){ S.usOlimpiadi84Opp='festa'; gdUs60('cetomedio',1); baseUs60(-1);
+        S.log.unshift({t:T('Il paese'),x:T('Dall\'opposizione ha festeggiato i Giochi di Los Angeles con il paese, senza polemiche.')}); } },
+    { l:'Il governo usa i Giochi per la campagna', e:'La base ti applaude · i giornali scrivono che fai polemica mentre il paese festeggia',
+      f:function(){ S.usOlimpiadi84Opp='accusa'; baseUs60(1); stampad(-1);
+        S.log.unshift({t:T('Il paese'),x:T('Dall\'opposizione ha accusato il governo di usare i Giochi di Los Angeles per la campagna.')}); } },
+    { l:'Quanto costa allo Stato la sicurezza dei Giochi?', e:'I giornali seguono il conto dei soldi federali · chi ha messo i soldi nei Giochi dice che cerchi il pelo nell\'uovo',
+      f:function(){ S.usOlimpiadi84Opp='conti'; stampad(1); gdUs60('imprenditori',-1);
+        S.log.unshift({t:T('Il paese'),x:T('Dall\'opposizione ha chiesto conto dei soldi federali spesi per la sicurezza dei Giochi di Los Angeles.')}); } },
   ],
 };
 /* ==============================================================================================================
