@@ -14852,14 +14852,14 @@ const EVENTS=[
    {l:'Difendere la parità, e tagliare la spesa',e:'I banchieri centrali si calmano · le fabbriche e i disoccupati pagano il conto, e il conto arriva prima del voto',costo:{debito:-0.5},f:()=>{S.ind.debt-=0.5; fidUs60(1); gdUs60('lavoratori',-3); gdUs60('pensionati',-1);}}]},
  {id:'us70_navetta', era:'us1970', unaCarriera:true, cond:()=>((S.year===1971&&S.month===12)||(S.year===1972&&S.month===1))&&S.usLuna70!=='marte'&&S.usLuna70!=='navetta', kick:'Lo spazio', t:'La navetta',
   text:'Gli ultimi voli verso la Luna sono già decisi, e poi i razzi giganti andranno al museo. L\'agenzia spaziale porta sul tuo tavolo il progetto che dovrebbe tenerla in vita: una navetta che parte come un razzo, torna a terra come un aereo e riparte, per portare in orbita satelliti e uomini a buon mercato. Costa miliardi di dollari, e in California e in Florida aspettano la risposta prima di licenziare.',ch:[
-   {l:'Approvare la navetta',e:'La storia · ai primi di gennaio del 1972 la approvi, in California · i cantieri restano aperti, e il primo volo arriverà quasi dieci anni dopo, a un costo che nessuno aveva previsto',costo:{debito:0.5},f:()=>{S.ind.debt+=0.5; gdUs60('lavoratori',2); gdUs60('imprenditori',1); fidUs60(-1);}},
-   {l:'Niente navetta: i razzi che ci sono bastano',e:'Il bilancio respira · in Florida i licenziamenti arrivano per Natale, e i giornali contano gli astronauti a terra',f:()=>{fidUs60(1); gdUs60('lavoratori',-2); stampad(-1);}},
-   {l:'Una navetta più piccola, divisa con gli europei',e:'Costa la metà, e gli europei ci mettono un laboratorio · i militari dicono che così non porterà i loro satelliti',costo:{debito:0.2},f:()=>{S.ind.debt+=0.2; repd(2); gdUs60('lavoratori',1); gdUs60('cattolici',-1);}}]},
+   {l:'Approvare la navetta',e:'La storia · ai primi di gennaio del 1972 la approvi, in California · i cantieri restano aperti, e il primo volo arriverà quasi dieci anni dopo, a un costo che nessuno aveva previsto',costo:{debito:0.5},f:()=>{S.usNavetta72='si'; S.ind.debt+=0.5; gdUs60('lavoratori',2); gdUs60('imprenditori',1); fidUs60(-1);}},
+   {l:'Niente navetta: i razzi che ci sono bastano',e:'Il bilancio respira · in Florida i licenziamenti arrivano per Natale, e i giornali contano gli astronauti a terra',f:()=>{S.usNavetta72='no'; fidUs60(1); gdUs60('lavoratori',-2); stampad(-1);}},
+   {l:'Una navetta più piccola, divisa con gli europei',e:'Costa la metà, e gli europei ci mettono un laboratorio · i militari dicono che così non porterà i loro satelliti',costo:{debito:0.2},f:()=>{S.usNavetta72='europa'; S.ind.debt+=0.2; repd(2); gdUs60('lavoratori',1); gdUs60('cattolici',-1);}}]},
  {id:'us70_navetta_marte', era:'us1970', unaCarriera:true, cond:()=>((S.year===1971&&S.month===12)||(S.year===1972&&S.month===1))&&S.usLuna70==='marte', kick:'Lo spazio', t:'Il conto di Marte',
   text:'Due anni fa hai promesso un equipaggio su Marte entro il decennio. Ora l\'agenzia spaziale porta il conto del prossimo anno: il razzo nuovo, la nave per il viaggio, una base in orbita da cui partire. La cifra è più del doppio di quella dell\'anno scorso, i prezzi salgono, e la commissione del bilancio della Camera ha già fatto sapere che così non la voterà.',ch:[
-   {l:'Rinviare Marte, e approvare la navetta',e:'La storia · ai primi di gennaio del 1972 si decide la navetta riutilizzabile, e Marte resta sulla carta · i giornali ricordano la promessa, e la ricordano spesso',costo:{debito:0.5},f:()=>{S.ind.debt+=0.5; stampad(-2); gdUs60('lavoratori',1); fidUs60(1);}},
-   {l:'Tenere la promessa, a qualunque costo',e:'Il mondo guarda ancora l\'America · al Congresso la spesa passa per pochi voti, e la paghi in ogni altro capitolo',costo:{debito:1.5},f:()=>{S.ind.debt+=1.5; repd(2); gdUs60('giovani',1); gdUs60('pensionati',-2); fidUs60(-2);}},
-   {l:'Fermare tutto: i soldi servono sulla Terra',e:'Il bilancio torna in ordine · in Florida e in California si chiudono i cantieri, e nel mondo si dice che l\'America ha perso la voglia',costo:{debito:-0.5},f:()=>{S.ind.debt-=0.5; fidUs60(2); gdUs60('lavoratori',-3); repd(-2); stampad(-1);}}]},
+   {l:'Rinviare Marte, e approvare la navetta',e:'La storia · ai primi di gennaio del 1972 si decide la navetta riutilizzabile, e Marte resta sulla carta · i giornali ricordano la promessa, e la ricordano spesso',costo:{debito:0.5},f:()=>{S.usNavetta72='si'; S.ind.debt+=0.5; stampad(-2); gdUs60('lavoratori',1); fidUs60(1);}},
+   {l:'Tenere la promessa, a qualunque costo',e:'Il mondo guarda ancora l\'America · al Congresso la spesa passa per pochi voti, e la paghi in ogni altro capitolo',costo:{debito:1.5},f:()=>{S.usNavetta72='no'; S.ind.debt+=1.5; repd(2); gdUs60('giovani',1); gdUs60('pensionati',-2); fidUs60(-2);}},
+   {l:'Fermare tutto: i soldi servono sulla Terra',e:'Il bilancio torna in ordine · in Florida e in California si chiudono i cantieri, e nel mondo si dice che l\'America ha perso la voglia',costo:{debito:-0.5},f:()=>{S.usNavetta72='no'; S.ind.debt-=0.5; fidUs60(2); gdUs60('lavoratori',-3); repd(-2); stampad(-1);}}]},
  {id:'us70_vicepresidente', era:'us1970', unaCarriera:true, cond:()=>S.year===1973&&S.month>=8&&S.month<=9, kick:'Il vicepresidente', t:'Il vicepresidente indagato',
   text:'Un quotidiano economico lo ha scritto ad agosto: i procuratori federali del Maryland indagano sul vicepresidente. Gli imprenditori edili dicono di avergli portato buste di contanti per anni, da governatore e poi anche a Washington. Lui grida alle menzogne e giura che non si dimetterà nemmeno se lo incriminano. I tuoi consiglieri ti dicono che le prove ci sono, e si discute se un vicepresidente in carica si possa processare.',ch:[
    {l:'Chiedergli di dimettersi',e:'La storia · il 10 ottobre ammette l\'evasione fiscale davanti a un giudice di Baltimora e lascia la carica · il Congresso conferma un deputato del Michigan, il primo vicepresidente che nessuno ha eletto',f:()=>{stampad(2); gdUs60('cetomedio',1); gdUs60('cattolici',-1);}},
@@ -20334,7 +20334,7 @@ const TITOLI=[
  {id:'ti_us70_s_scuole', era:'us1970', cond:()=>S.year>=1971, amico:'Nel Sud chiudono le scuole separate: bianchi e neri nella stessa classe', ostile:'Gli autobus scolastici: i genitori protestano davanti ai cancelli'},
  {id:'ti_us70_s_fabbriche', era:'us1970', cond:()=>S.year>=1974, amico:'Acciaio e auto: Washington difende le fabbriche americane', ostile:'Acciaio e auto: le importazioni dal Giappone e dall\'Europa chiudono le fabbriche'},
  {id:'ti_us70_s_grano', era:'us1970', cond:()=>S.year>1972||(S.year===1972&&S.month>=8), amico:'Il grano americano parte per Mosca: i campi del Midwest lavorano a pieno ritmo', ostile:'Il grano venduto a Mosca: e il pane al supermercato costa di più'},
- {id:'ti_us70_s_navetta', era:'us1970', cond:()=>S.year>=1972&&S.usLuna70!=='marte', amico:'Dopo la Luna, la navetta: parte e torna come un aereo', ostile:'La navetta spaziale costa miliardi, e volerà fra anni'},
+ {id:'ti_us70_s_navetta', era:'us1970', cond:()=>S.year>=1972&&S.usLuna70!=='marte'&&S.usNavetta72!=='no', amico:'Dopo la Luna, la navetta: parte e torna come un aereo', ostile:'La navetta spaziale costa miliardi, e volerà fra anni'},
  {id:'ti_us70_s_dollaro', era:'us1970', cond:()=>S.year>=1973, amico:'Il dollaro fluttua: le esportazioni americane ringraziano', ostile:'Il deficit cresce e il dollaro scende: l\'Europa costa di più'},
  {id:'ti_us70_s_lavoro', era:'us1970', amico:'Le fabbriche riassumono: la disoccupazione scende', ostile:'Le file per il sussidio di disoccupazione si allungano'},
  {id:'ti_us70_s_sanita', era:'us1970', amico:'Le cure per tutti: Washington studia un\'assicurazione nazionale', ostile:'Le spese mediche corrono: un ricovero costa uno stipendio'},
@@ -20358,9 +20358,36 @@ const TITOLI=[
 {id:'ti_us80_boicott', era:'us1980', pri:1, cond:()=>S.usBoicott80==='boicottaggio' && S.year===1980 && S.month>=5 && S.month<=7, amico:'Niente squadra a Mosca: il boicottaggio tiene, e gli alleati seguono', ostile:'Quattro anni di allenamenti per restare a casa: gli atleti pagano il boicottaggio'},
 {id:'ti_us80_boicott_cerimonie', era:'us1980', pri:1, cond:()=>S.usBoicott80==='cerimonie' && S.year===1980 && S.month>=5 && S.month<=7, amico:'La squadra va a Mosca, il governo resta a casa', ostile:'A Mosca sì, ma senza il governo: gli alleati non capiscono'},
 {id:'ti_us80_boicott_comitato', era:'us1980', pri:1, cond:()=>S.usBoicott80==='comitato' && S.year===1980 && S.month>=5 && S.month<=7, amico:'I Giochi di Mosca li decide il comitato olimpico: lo sport agli sportivi', ostile:'Sui Giochi di Mosca il governo tace, e il comitato resta solo'},
+{id:'ti_us80_navetta', era:'us1980', pri:1, cond:()=>S.usNavetta86==='lutto' && S.year===1986 && S.month>=3 && S.month<=5, amico:'Dopo la navetta il paese ricorda i sette, e aspetta risposte', ostile:'Parole per i sette, e ancora nessuna risposta sulla navetta'},
+{id:'ti_us80_navetta_commissione', era:'us1980', pri:1, cond:()=>S.usNavetta86==='commissione' && S.year===1986 && S.month>=3 && S.month<=5, amico:'La commissione sulla navetta va a fondo, e i voli restano fermi', ostile:'Navetta a terra e satelliti in attesa: quanto durerà la commissione?'},
+{id:'ti_us80_navetta_voli', era:'us1980', pri:1, cond:()=>S.usNavetta86==='voli' && S.year===1986 && S.month>=3 && S.month<=5, amico:'Il governo tiene il programma spaziale: i voli riprenderanno', ostile:'Si parla già di ripartire, e nessuno sa ancora perché la navetta è caduta'},
+{id:'ti_us80_reykjavik', era:'us1980', pri:1, cond:()=>S.usReykjavik86==='scudo' && S.year===1986 && S.month>=11 && S.month<=12, amico:'Lo scudo non si baratta: il vertice d\'Islanda finisce senza firma', ostile:'Un mondo con meno atomiche era a un passo: è saltato per lo scudo'},
+{id:'ti_us80_reykjavik_taglio', era:'us1980', pri:1, cond:()=>S.usReykjavik86==='taglio' && S.year===1986 && S.month>=11 && S.month<=12, amico:'Il grande taglio alle atomiche è firmato: lo scudo resta nei laboratori', ostile:'Lo scudo chiuso in laboratorio per dieci anni: i falchi parlano di resa'},
+{id:'ti_us80_reykjavik_negoziato', era:'us1980', pri:1, cond:()=>S.usReykjavik86==='negoziato' && S.year===1986 && S.month>=11 && S.month<=12, amico:'Niente firma in Islanda, ma sui missili d\'Europa si continua a trattare', ostile:'Due giorni in Islanda, e nessuno sa dire che cosa si è deciso'},
 {id:'ti_us80_libia', era:'us1980', pri:1, cond:()=>S.usLibia86==='raid' && S.year===1986 && S.month>=6 && S.month<=7, amico:'Colpite Tripoli e Bengasi: chi attacca gli americani ora sa il prezzo', ostile:'Bombe sulla Libia, e l\'Europa nega il sorvolo: l\'America è sola'},
 {id:'ti_us80_libia_sanzioni', era:'us1980', pri:1, cond:()=>S.usLibia86==='sanzioni' && S.year===1986 && S.month>=6 && S.month<=7, amico:'Sanzioni alla Libia: l\'America chiede all\'Europa di fare la sua parte', ostile:'Una bomba a Berlino, e la risposta è un embargo'},
 {id:'ti_us80_libia_prove', era:'us1980', pri:1, cond:()=>S.usLibia86==='prove' && S.year===1986 && S.month>=6 && S.month<=7, amico:'Le prove sulla Libia davanti al mondo: il caso arriva all\'ONU', ostile:'Molte carte e nessuna risposta: il caso della Libia finisce all\'ONU'},
+{id:'ti_us80_petrolio', era:'us1980', pri:1, cond:()=>S.usPetrolio86==='mercato' && S.year===1986 && S.month>=7 && S.month<=8, amico:'Benzina a buon mercato e niente dazi: il governo lascia fare al mercato', ostile:'Il Texas chiude i pozzi, e il governo sta a guardare'},
+{id:'ti_us80_petrolio_dazio', era:'us1980', pri:1, cond:()=>S.usPetrolio86==='dazio' && S.year===1986 && S.month>=7 && S.month<=8, amico:'Un dazio salva i pozzi di casa: in Texas si ricomincia a sperare', ostile:'Il dazio sul petrolio lo pagano le imprese, e gli alleati protestano'},
+{id:'ti_us80_petrolio_aiuti', era:'us1980', pri:1, cond:()=>S.usPetrolio86==='aiuti' && S.year===1986 && S.month>=7 && S.month<=8, amico:'Aiuti al Sud del petrolio, e le riserve si riempiono a prezzo basso', ostile:'Soldi pubblici ai petrolieri: il conto del crollo del greggio'},
+{id:'ti_us80_alaska', era:'us1980', pri:1, cond:()=>S.usAlaska89==='legge' && S.year===1989 && S.month>=5 && S.month<=8, amico:'Dopo la marea nera, il doppio scafo per legge: paga la compagnia', ostile:'La legge sul doppio scafo divide il Congresso, e le coste sono ancora nere'},
+{id:'ti_us80_alaska_pulizia', era:'us1980', pri:1, cond:()=>S.usAlaska89==='pulizia' && S.year===1989 && S.month>=5 && S.month<=8, amico:'La Guardia costiera e l\'esercito sulle spiagge dell\'Alaska: si pulisce', ostile:'Mesi sulle spiagge dell\'Alaska, e ancora nessuno dice chi paga'},
+{id:'ti_us80_alaska_trivelle', era:'us1980', pri:1, cond:()=>S.usAlaska89==='trivelle' && S.year===1989 && S.month>=5 && S.month<=8, amico:'Il petrolio dell\'Alaska serve al paese: niente leggi sull\'onda dell\'emozione', ostile:'Lontre nere in televisione, e il governo difende le trivelle'},
+{id:'ti_us80_pensioni', era:'us1980', pri:1, cond:()=>S.usPensioni83==='compromesso' && S.year===1983 && S.month>=2 && S.month<=5, amico:'Due partiti, un compromesso: gli assegni delle pensioni sono salvi', ostile:'Più tasse sulle buste paga e sulle pensioni: il compromesso non piace a nessuno'},
+{id:'ti_us80_pensioni_tagli', era:'us1980', pri:1, cond:()=>S.usPensioni83==='tagli' && S.year===1983 && S.month>=2 && S.month<=5, amico:'Meno pensioni domani per salvare la cassa di oggi: i contributi restano fermi', ostile:'Il governo taglia le pensioni di domani: chi è giovane pagherà il conto'},
+{id:'ti_us80_pensioni_contributi', era:'us1980', pri:1, cond:()=>S.usPensioni83==='contributi' && S.year===1983 && S.month>=2 && S.month<=5, amico:'Le pensioni non si toccano: contributi più alti, e gli assegni sono salvi', ostile:'Contributi più alti sulle buste paga: la cassa la salva chi lavora'},
+{id:'ti_us80_scudo', era:'us1980', pri:1, cond:()=>S.usScudo83==='annuncio' && S.year===1983 && S.month>=4 && S.month<=6 && meseAss()!==S.usRipresa83+1, amico:'Uno scudo nello spazio contro i missili: il governo promette la fine della paura atomica', ostile:'Satelliti e laser in televisione: quanto costa un sogno di fantascienza?'},
+{id:'ti_us80_scudo_ricerca', era:'us1980', pri:1, cond:()=>S.usScudo83==='ricerca' && S.year===1983 && S.month>=4 && S.month<=6 && meseAss()!==S.usRipresa83+1, amico:'Fondi alla ricerca contro i missili, e niente proclami', ostile:'Miliardi per una ricerca di cui nessuno parla: a che cosa servono?'},
+{id:'ti_us80_scudo_trattativa', era:'us1980', pri:1, cond:()=>S.usScudo83==='trattativa' && S.year===1983 && S.month>=4 && S.month<=6 && meseAss()!==S.usRipresa83+1, amico:'Lo scudo nello spazio, e insieme una proposta a Mosca sui missili', ostile:'Scudo e trattativa nello stesso discorso: a Mosca non ci crede nessuno'},
+{id:'ti_us80_paura', era:'us1980', pri:1, cond:()=>S.usPaura83==='distensione' && S.year===1984 && S.month<=2 && meseAss()!==S.usRipresa83+1, amico:'Dopo il film che ha spaventato il paese, toni più bassi verso Mosca', ostile:'Troppo morbidi con Mosca: dopo un film, il governo abbassa la voce'},
+{id:'ti_us80_paura_fermezza', era:'us1980', pri:1, cond:()=>S.usPaura83==='fermezza' && S.year===1984 && S.month<=2 && meseAss()!==S.usRipresa83+1, amico:'I missili arrivano in Europa, e il governo non si muove di un passo', ostile:'Il paese ha paura, e il governo tira dritto coi missili'},
+{id:'ti_us80_paura_discorso', era:'us1980', pri:1, cond:()=>S.usPaura83==='discorso' && S.year===1984 && S.month<=2 && meseAss()!==S.usRipresa83+1, amico:'Fermezza e una porta aperta: il discorso dopo il film che ha scosso il paese', ostile:'Un discorso per un film: il governo insegue la paura del paese'},
+{id:'ti_us80_golfo', era:'us1980', pri:1, cond:()=>S.usGolfo88==='rammarico' && S.year===1988 && S.month>=9 && S.month<=10, amico:'Un risarcimento alle famiglie del volo abbattuto: l\'America non si nasconde', ostile:'Rammarico sì, colpe no: il volo iraniano resta senza una risposta'},
+{id:'ti_us80_golfo_inchiesta', era:'us1980', pri:1, cond:()=>S.usGolfo88==='inchiesta' && S.year===1988 && S.month>=9 && S.month<=10, amico:'L\'inchiesta sul volo abbattuto si fa in pubblico, e cambiano le regole per le navi', ostile:'Le navi nel Golfo con le mani legate: i comandi protestano per le nuove regole'},
+{id:'ti_us80_golfo_difesa', era:'us1980', pri:1, cond:()=>S.usGolfo88==='difesa' && S.year===1988 && S.month>=9 && S.month<=10, amico:'Il governo sta con l\'equipaggio: in zona di guerra si decide in pochi secondi', ostile:'Un volo di linea abbattuto e nemmeno una parola: il mondo guarda l\'America'},
+{id:'ti_us80_scozia', era:'us1980', pri:1, cond:()=>S.usScozia88==='sicurezza' && S.year===1989 && S.month>=1 && S.month<=2, amico:'Controlli obbligatori sui voli verso gli Stati Uniti: dopo la Scozia si cambia', ostile:'Code e ritardi negli aeroporti: i controlli arrivano dopo la strage'},
+{id:'ti_us80_scozia_indagine', era:'us1980', pri:1, cond:()=>S.usScozia88==='indagine' && S.year===1989 && S.month>=1 && S.month<=2, amico:'Americani e inglesi insieme a cercare chi ha messo la bomba', ostile:'Settimane di indagini e nessun nome per il volo di Natale'},
+{id:'ti_us80_scozia_commissione', era:'us1980', pri:1, cond:()=>S.usScozia88==='commissione' && S.year===1989 && S.month>=1 && S.month<=2, amico:'Una commissione indipendente per le famiglie del volo di Natale', ostile:'Una commissione sugli allarmi, mentre il paese vuole un colpevole'},
 {id:'ti_us80_profughi', era:'us1980', pri:1, cond:()=>S.usProfughi80==='aperte' && S.year===1980 && S.month>=5 && S.month<=7, amico:'Braccia aperte ai profughi di Cuba: l\'America resta una porta', ostile:'Centinaia di profughi al giorno, e nessuno sa dove metterli'},
 {id:'ti_us80_profughi_guardia', era:'us1980', pri:1, cond:()=>S.usProfughi80==='guardia' && S.year===1980 && S.month>=5 && S.month<=7, amico:'La guardia costiera ferma le barche: ordine sulle coste della Florida', ostile:'Le barche dei profughi respinte in mare: le chiese protestano'},
 {id:'ti_us80_profughi_basi', era:'us1980', pri:1, cond:()=>S.usProfughi80==='basi' && S.year===1980 && S.month>=5 && S.month<=7, amico:'I profughi di Cuba nelle basi militari: accoglienza, con i controlli', ostile:'Profughi dietro il filo spinato delle basi: si parla di campi'},
@@ -25979,7 +26006,10 @@ const ARMI87_OPP_EV = {
 const MISSILI87_EV = {
   id:'snodo_missili87', snodo:true, era:'us1980', kick:'Il mondo',
   t:'I missili d\'Europa',
-  text:'In Islanda, l\'anno scorso, le due potenze si sono fermate a un passo dall\'accordo. Ora ci riprovano: sul tavolo c\'è un trattato che distrugge tutti i missili a medio raggio, a cominciare da quelli puntati sull\'Europa — i sovietici, e gli americani schierati dal 1983 fra le proteste di mezzo continente. Il leader sovietico verrebbe a Washington a dicembre per firmarlo. Nel tuo partito c\'è chi dice che ti fidi troppo.',
+  /* L262-20: una frase cambia con la scelta di Reykjavík ('taglio': in Islanda si è firmato). */
+  get text(){ return (typeof S!=='undefined' && S && S.usReykjavik86==='taglio')
+    ? 'In Islanda, l\'anno scorso, lo scudo è rimasto nei laboratori e le due potenze hanno firmato il grande taglio, ma da allora i negoziatori non hanno chiuso nemmeno un capitolo. Ora ci riprovano: sul tavolo c\'è un trattato che distrugge tutti i missili a medio raggio, a cominciare da quelli puntati sull\'Europa — i sovietici, e gli americani schierati dal 1983 fra le proteste di mezzo continente. Il leader sovietico verrebbe a Washington a dicembre per firmarlo. Nel tuo partito c\'è chi dice che ti fidi troppo.'
+    : 'In Islanda, l\'anno scorso, le due potenze si sono fermate a un passo dall\'accordo. Ora ci riprovano: sul tavolo c\'è un trattato che distrugge tutti i missili a medio raggio, a cominciare da quelli puntati sull\'Europa — i sovietici, e gli americani schierati dal 1983 fra le proteste di mezzo continente. Il leader sovietico verrebbe a Washington a dicembre per firmarlo. Nel tuo partito c\'è chi dice che ti fidi troppo.'; },
   ch:[
     { l:'Firmi', e:'La storia · l\'8 dicembre, per la prima volta, una classe intera di armi nucleari viene distrutta, con gli ispettori dell\'una e dell\'altra parte · la destra del tuo partito grida al tradimento',
       f:function(){ S.usMissili87='firma'; repd(2); stampad(1); gdUs60('giovani',2); gdUs60('cattolici',-1); baseUs60(-1);
@@ -25987,7 +26017,7 @@ const MISSILI87_EV = {
     { l:'Chiedi di più: anche i missili strategici', e:'Tutto o niente · il vertice si chiude senza firma, e a Mosca dicono che l\'America non vuole la pace',
       f:function(){ S.usMissili87='dipiu'; repd(-1); gdUs60('cattolici',1); gdUs60('giovani',-2); baseUs60(1);
         S.log.unshift({t:T('Il mondo'),x:T('Ha chiesto anche i missili strategici, e il trattato sui missili d\'Europa è saltato.')}); } },
-    { l:'Rinvii: prima lo scudo spaziale', e:'Come in Islanda, lo scudo non si tocca · il trattato resta sul tavolo, e in Europa ricominciano le marce',
+    { l:'Rinvii: prima lo scudo spaziale', e:'Lo scudo non si tocca · il trattato resta sul tavolo, e in Europa ricominciano le marce',
       f:function(){ S.usMissili87='rinvio'; stampad(-1); gdUs60('giovani',-1); gdUs60('imprenditori',1); baseUs60(1);
         S.log.unshift({t:T('Il mondo'),x:T('Ha rinviato il trattato sui missili d\'Europa per difendere lo scudo spaziale.')}); } },
   ],
@@ -26367,6 +26397,336 @@ const LIBIA86_OPP_EV = {
     { l:'Meglio le sanzioni con gli alleati che le bombe da soli', e:'La base ti segue · i giornali scrivono che le sanzioni non fermano le bombe',
       f:function(){ S.usLibia86Opp='alleati'; baseUs60(1); stampad(-1);
         S.log.unshift({t:T('Il mondo'),x:T('Dall\'opposizione ha chiesto sanzioni alla Libia insieme agli alleati, al posto delle bombe.')}); } },
+  ],
+};
+/* ==============================================================================================================
+   L262-19 · STATI UNITI 1980 — I DUE AEREI DEL 1988: IL MISSILE NEL GOLFO E IL VOLO DI NATALE (scheda PRESET-USA-1980 §3-§4, D297, decisioni di Cowork del 30/10; testi di Code).
+   Stessi helper di L262-8…17. Nomi nuovi cercati in tutto js/, .claude/ e prove/ il 30/10 prima di scriverli (L99-2), zero occorrenze: us80_golfo(_opp), us80_scozia(_opp),
+   usGolfo88(Opp), usScozia88(Opp), golfoOra, scoziaOra, us80GolfoMese, us80ScoziaMese, ti_us80_golfo, ti_us80_scozia.
+   ⚑ NON SONO SNODI (nessuna riga in SNODI_STORICI, RIVALI, POTENZE) e NON SONO DEL SACCHETTO: carte DOVUTE come la Libia (cancelli in game.js accanto a libiaOra). Il Golfo solo il
+   1988/8 (luglio è sempre di pus80_caldo88), la Scozia solo il 1988/12, mese libero. La Scozia porta tono:'grave' come Beirut (D297: carta muta, scena ferma, niente beat leggero); non è un pilastro.
+   ⚑ Nessun nome di persona, di nave, di compagnia; nessuna cifra di vittime. Il testo non dice chi governa: a dicembre 1988 parla a chi è in carica dopo il voto di novembre.
+   Verificato il 30/10: il 3 luglio 1988 un incrociatore nel Golfo lancia due missili contro un aereo scambiato per un caccia, nessun sopravvissuto; l'11 luglio il governo annuncia un
+   risarcimento alle famiglie; nel 1996 l'accordo con l'Iran, senza ammissione di responsabilità (Reagan Library, statement dell'11/7/1988; Kluwer Arbitration Blog). Il 21 dicembre 1988 un
+   volo da Londra a New York esplode sopra Lockerbie, per una bomba, con morti anche a terra e studenti che tornavano per Natale; un avviso anonimo era arrivato prima; le accuse a due
+   agenti libici sono del novembre 1991 (Dipartimento di Giustizia, 14/11/1991). ⚠ «Nessuno rivendica» della consegna tolto: non confermato. Rammarico «senza scuse» tolto dalla riga
+   «La storia»: le fonti non concordano.
+   ============================================================================================================== */
+const GOLFO88_EV = {
+  id:'us80_golfo', era:'us1980', kick:'Il mondo',
+  t:'Il missile nel Golfo',
+  text:'La flotta scorta le petroliere nel Golfo Persico, in mezzo alla guerra fra Iran e Iraq. Il 3 luglio, durante uno scontro con motovedette iraniane, un incrociatore ha lanciato due missili contro un aereo che credeva un caccia: era un volo di linea iraniano, e non ci sono sopravvissuti. Teheran parla di crimine, gli alleati chiedono chiarezza, i comandi difendono l\'equipaggio.',
+  ch:[
+    { l:'Rammarico ufficiale e un risarcimento alle famiglie, senza ammettere colpe', e:'La storia · Il governo offre un risarcimento senza ammettere responsabilità, e l\'accordo con l\'Iran arriva solo nel 1996 · gli alleati apprezzano il gesto, il tuo partito dice che così si dà ragione a Teheran',
+      f:function(){ S.usGolfo88='rammarico'; repd(1); baseUs60(-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Dopo il missile nel Golfo ha espresso rammarico e ha offerto un risarcimento alle famiglie.')}); } },
+    { l:'Un\'inchiesta militare pubblica, e regole d\'ingaggio riviste', e:'I giornali seguono l\'inchiesta giorno per giorno · il ceto medio si chiede se così si legano le mani ai marinai in zona di guerra',
+      f:function(){ S.usGolfo88='inchiesta'; stampad(1); gdUs60('cetomedio',-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Dopo il missile nel Golfo ha ordinato un\'inchiesta pubblica e ha rivisto le regole d\'ingaggio.')}); } },
+    { l:'Difendere l\'equipaggio: era una zona di guerra e l\'aereo non rispondeva', e:'Il tuo partito sta con i marinai · gli alleati chiedono come si possa non dire una parola per i morti',
+      f:function(){ S.usGolfo88='difesa'; baseUs60(1); repd(-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Dopo il missile nel Golfo ha difeso l\'equipaggio: era una zona di guerra.')}); } },
+  ],
+};
+const GOLFO88_OPP_EV = {
+  id:'us80_golfo_opp', era:'us1980', kick:'Il mondo',
+  t:'Il missile nel Golfo, dall\'aula',
+  text:'Il 3 luglio un incrociatore della flotta che scorta le petroliere nel Golfo Persico ha abbattuto un volo di linea iraniano, credendolo un caccia: nessun sopravvissuto. Teheran parla di crimine, i comandi difendono l\'equipaggio, ed è anno di elezioni. Il tuo partito deve dire da che parte sta.',
+  ch:[
+    { l:'Stare col paese: in guerra gli errori si piangono, non si sfruttano', e:'I giornali scrivono che non speculi sui morti · la base chiede perché fai da sponda al governo',
+      f:function(){ S.usGolfo88Opp='paese'; stampad(1); baseUs60(-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Dall\'opposizione ha evitato la polemica sul missile nel Golfo.')}); } },
+    { l:'Al Congresso, un\'inchiesta sulla missione di scorta', e:'Il ceto medio vuole sapere perché le navi sono lì · gli alleati temono che l\'America cambi idea a metà',
+      f:function(){ S.usGolfo88Opp='inchiesta'; gdUs60('cetomedio',1); repd(-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Dall\'opposizione ha chiesto al Congresso un\'inchiesta sulla scorta nel Golfo.')}); } },
+    { l:'Ritirare le navi dal Golfo: la scorta ci trascina in una guerra non nostra', e:'La base ti segue · i giornali chiedono chi proteggerà allora il petrolio',
+      f:function(){ S.usGolfo88Opp='ritiro'; baseUs60(1); stampad(-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Dall\'opposizione ha chiesto il ritiro delle navi dal Golfo.')}); } },
+  ],
+};
+const SCOZIA88_EV = {
+  id:'us80_scozia', era:'us1980', kick:'Il mondo', tono:'grave',
+  t:'Il volo di Natale',
+  text:'Un volo di linea americano partito da Londra per New York è esploso in volo sopra un paese della Scozia. Sono morti tutti i passeggeri e l\'equipaggio, e anche gente a terra. A bordo c\'erano moltissimi americani, molti studenti che tornavano a casa per Natale. Gli investigatori parlano di una bomba nella stiva, e nessuna pista è ancora provata.',
+  ch:[
+    { l:'Controlli obbligatori su bagagli e voli verso gli Stati Uniti, anche a costo di ritardi', e:'Chi vola si sente più sicuro · il tuo partito chiede perché ci sia voluta una strage',
+      f:function(){ S.usScozia88='sicurezza'; gdUs60('cetomedio',1); baseUs60(-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Dopo il volo esploso sopra la Scozia ha imposto controlli obbligatori su bagagli e voli.')}); } },
+    { l:'Un\'indagine comune con gli inglesi, senza accusare nessuno prima delle prove', e:'La storia · L\'indagine anglo-americana dura anni, e le accuse a due agenti libici arrivano solo nel 1991 · gli alleati apprezzano, i giornali chiedono risposte che non arrivano',
+      f:function(){ S.usScozia88='indagine'; repd(1); stampad(-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Dopo il volo esploso sopra la Scozia ha avviato un\'indagine comune con gli inglesi.')}); } },
+    { l:'Accanto alle famiglie: una commissione indipendente sugli allarmi arrivati prima', e:'Le famiglie e i giornali ti danno atto · gli alleati temono che si cerchino colpevoli nei loro aeroporti',
+      f:function(){ S.usScozia88='commissione'; stampad(1); repd(-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Dopo il volo esploso sopra la Scozia ha istituito una commissione indipendente sugli allarmi.')}); } },
+  ],
+};
+const SCOZIA88_OPP_EV = {
+  id:'us80_scozia_opp', era:'us1980', kick:'Il mondo', tono:'grave',
+  t:'Il volo di Natale, dall\'aula',
+  text:'Un volo di linea americano partito da Londra è esploso in volo sopra un paese della Scozia: morti tutti i passeggeri e l\'equipaggio, anche gente a terra, e a bordo tanti studenti che tornavano a casa per Natale. Gli investigatori parlano di una bomba nella stiva. In aula si ricordano i morti, poi bisogna parlare.',
+  ch:[
+    { l:'Unità nazionale: nessuna polemica nei giorni del lutto', e:'Davanti al lutto il paese parla con una voce sola · la base chiede dove sia l\'opposizione',
+      f:function(){ S.usScozia88Opp='unita'; gdUs60('cetomedio',1); baseUs60(-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Dall\'opposizione ha fatto fronte comune nel lutto per il volo esploso sopra la Scozia.')}); } },
+    { l:'Chiedere conto degli allarmi arrivati prima', e:'I giornali seguono le tue domande · all\'estero si dice che l\'America cerca colpevoli prima delle prove',
+      f:function(){ S.usScozia88Opp='allarmi'; stampad(1); repd(-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Dall\'opposizione ha chiesto conto degli allarmi arrivati prima del volo esploso sopra la Scozia.')}); } },
+    { l:'Sicurezza aerea pagata con fondi federali, non dai passeggeri', e:'La base ti segue · i giornali chiedono quanto costerà, e a chi',
+      f:function(){ S.usScozia88Opp='fondi'; baseUs60(1); stampad(-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Dall\'opposizione ha chiesto una sicurezza aerea pagata con fondi federali.')}); } },
+  ],
+};
+/* ==============================================================================================================
+   L262-20 · STATI UNITI 1980 — LA NAVETTA (1986/1) E REYKJAVÍK (1986/10) (scheda PRESET-USA-1980 §3-§4, decisioni di Cowork del 31/10; testi di Code).
+   Stessi helper di L262-19. Nomi nuovi cercati in tutto js/, .claude/ e prove/ il 31/10 prima di scriverli (L99-2), zero occorrenze: us80_navetta(_opp), us80_reykjavik(_opp),
+   usNavetta86(Opp), usReykjavik86(Opp), usNavetta72, navettaOra, reykjavikOra, us80NavettaMese, us80ReykjavikMese, ti_us80_navetta, ti_us80_reykjavik.
+   ⚑ NON SONO SNODI (nessuna riga in SNODI_STORICI, RIVALI, POTENZE) e NON SONO DEL SACCHETTO: carte DOVUTE (cancelli in game.js accanto a us80Aerei88). La navetta il 1986/1, ripiego 1986/2;
+   non è carta grave, ma il suo mese e il successivo non hanno beat leggeri (us80NavettaLutto, letta da graveInCorso). Reykjavík solo il 1986/10, accanto alla riforma fiscale e alla campagna (us80Ottobre86).
+   ⚑ Chi in us1970 ha detto no alla navetta (S.usNavetta72==='no') non la vede: nella sua storia non c'è. Nessun nome di persona né della navetta.
+   Verificato il 31/10: 28 gennaio 1986, si disintegra 73 secondi dopo il decollo, sette morti, a bordo un'insegnante, scolari davanti alla diretta; il discorso al Congresso di quella sera slitta di una
+   settimana e il Presidente parla al paese (PBS, Notre Dame Observer 29/1/1986); commissione presidenziale, guarnizioni del razzo laterale indebolite dal freddo, preoccupazioni dei tecnici ignorate; ritorno al volo a fine settembre 1988 (NASA, en.wikipedia).
+   11-12 ottobre 1986: taglio del 50% delle armi strategiche, zero missili a medio raggio in Europa, si parla di eliminare le atomiche; Mosca chiede dieci anni di scudo nei soli laboratori; nessuna firma; apre al trattato del 1987 (Reagan Library, Arms Control Association). «Milioni di ragazzi» tolto: nessuna cifra trovata.
+   ============================================================================================================== */
+const NAVETTA86_EV = {
+  id:'us80_navetta', era:'us1980', kick:'Lo spazio',
+  t:'Settantatré secondi',
+  text:'Il 28 gennaio la navetta è partita dalla Florida in una mattina gelata. Settantatré secondi dopo il decollo si è disintegrata davanti alle telecamere. Tutto l\'equipaggio è morto, sette persone, anche l\'insegnante che doveva fare lezione dallo spazio, e in tante scuole i ragazzi guardavano la diretta in classe. Quella sera dovevi parlare al Congresso.',
+  ch:[
+    { l:'Rinviare il discorso e parlare stasera al paese, ai ragazzi e alle famiglie dei sette', e:'Il discorso al Congresso slitta di una settimana · gli alleati si stringono attorno all\'America, i giornali chiedono già di chi sia la colpa',
+      f:function(){ S.usNavetta86='lutto'; repd(1); stampad(-1);
+        S.log.unshift({t:T('Lo spazio'),x:T('Dopo la navetta ha rinviato il discorso al Congresso e ha parlato al paese.')}); } },
+    { l:'Una commissione indipendente, e la navetta a terra finché non si sa perché', e:'La storia · la commissione trova una guarnizione indebolita dal freddo, e tecnici rimasti inascoltati · la navetta torna a volare solo nell\'autunno del 1988, e i mercati si chiedono quanto costerà',
+      f:function(){ S.usNavetta86='commissione'; stampad(1); fidUs60(-1);
+        S.log.unshift({t:T('Lo spazio'),x:T('Dopo la navetta ha istituito una commissione indipendente e ha fermato i voli.')}); } },
+    { l:'I voli devono riprendere presto: lo spazio non si ferma per una disgrazia', e:'Il tuo partito apprezza la fermezza · molte famiglie si chiedono chi salirà sulla prossima navetta, e a quale prezzo',
+      f:function(){ S.usNavetta86='voli'; baseUs60(1); gdUs60('cetomedio',-1);
+        S.log.unshift({t:T('Lo spazio'),x:T('Dopo la navetta ha promesso che i voli riprenderanno presto.')}); } },
+  ],
+};
+const NAVETTA86_OPP_EV = {
+  id:'us80_navetta_opp', era:'us1980', kick:'Lo spazio',
+  t:'Settantatré secondi, dall\'aula',
+  text:'Il 28 gennaio la navetta si è disintegrata settantatré secondi dopo il decollo, in diretta: morti tutti e sette, anche l\'insegnante che doveva fare lezione dallo spazio, e in tante scuole i ragazzi guardavano in classe. In aula si ricordano i morti, poi il tuo partito deve dire che cosa chiede.',
+  ch:[
+    { l:'Unità nazionale: nel lutto non si fa politica', e:'I giornali scrivono che non speculi sui morti · la base chiede dove sia l\'opposizione',
+      f:function(){ S.usNavetta86Opp='unita'; stampad(1); baseUs60(-1);
+        S.log.unshift({t:T('Lo spazio'),x:T('Dall\'opposizione ha fatto fronte comune nel lutto per la navetta.')}); } },
+    { l:'Chiedere al Congresso conto dei tagli e delle pressioni sui lanci', e:'Il ceto medio vuole sapere com\'è potuto succedere · all\'estero si vede un\'America che litiga sui suoi morti',
+      f:function(){ S.usNavetta86Opp='conto'; gdUs60('cetomedio',1); repd(-1);
+        S.log.unshift({t:T('Lo spazio'),x:T('Dall\'opposizione ha chiesto al Congresso conto dei tagli e delle pressioni sui lanci.')}); } },
+    { l:'Meno navette e più sonde senza equipaggio: lo spazio costa vite e soldi', e:'La base ti segue · i giornali scrivono che non è il giorno per fare i conti',
+      f:function(){ S.usNavetta86Opp='sonde'; baseUs60(1); stampad(-1);
+        S.log.unshift({t:T('Lo spazio'),x:T('Dall\'opposizione ha chiesto meno navette e più sonde senza equipaggio.')}); } },
+  ],
+};
+const REYKJAVIK86_EV = {
+  id:'us80_reykjavik', era:'us1980', kick:'Il mondo',
+  t:'La casa sul mare d\'Islanda',
+  text:'Un vertice lampo in Islanda col capo sovietico, l\'11 e il 12 ottobre. In due giorni si è arrivati dove nessuno era mai arrivato: dimezzare le armi strategiche, togliere i missili a medio raggio dall\'Europa, perfino parlare di un mondo senza atomiche. All\'ultima ora la condizione di Mosca: per dieci anni lo scudo spaziale resta nei laboratori.',
+  ch:[
+    { l:'No: lo scudo non si baratta, ci si alza dal tavolo', e:'La storia · il vertice si chiude senza firma, e da lì parte il trattato sui missili a medio raggio dell\'anno dopo · il tuo partito ti applaude, i giornali parlano di un\'occasione perduta',
+      f:function(){ S.usReykjavik86='scudo'; baseUs60(1); stampad(-1);
+        S.log.unshift({t:T('Il mondo'),x:T('In Islanda ha rifiutato di barattare lo scudo spaziale, e il vertice è finito senza firma.')}); } },
+    { l:'Sì: lo scudo resta nei laboratori, e si firma il grande taglio', e:'Gli alleati tirano un sospiro · nel tuo partito c\'è chi dice che hai ceduto la difesa del paese',
+      f:function(){ S.usReykjavik86='taglio'; repd(1); baseUs60(-1);
+        S.log.unshift({t:T('Il mondo'),x:T('In Islanda ha accettato di tenere lo scudo nei laboratori e ha firmato il grande taglio.')}); } },
+    { l:'Né sì né no: niente firma, ma i negoziati sui missili d\'Europa restano aperti', e:'Il ceto medio apprezza la prudenza · gli alleati chiedono che cosa abbia deciso, davvero, l\'America',
+      f:function(){ S.usReykjavik86='negoziato'; gdUs60('cetomedio',1); repd(-1);
+        S.log.unshift({t:T('Il mondo'),x:T('In Islanda non ha firmato, ma ha tenuto aperti i negoziati sui missili d\'Europa.')}); } },
+  ],
+};
+const REYKJAVIK86_OPP_EV = {
+  id:'us80_reykjavik_opp', era:'us1980', kick:'Il mondo',
+  t:'La casa sul mare d\'Islanda, dall\'aula',
+  text:'L\'11 e il 12 ottobre, in Islanda, il Presidente e il capo sovietico sono arrivati a un passo dal dimezzare le armi strategiche e dal togliere i missili a medio raggio dall\'Europa. All\'ultima ora Mosca ha chiesto di tenere per dieci anni lo scudo spaziale nei laboratori, e ci si è alzati senza firma. Il tuo partito deve dire da che parte sta.',
+  ch:[
+    { l:'Appoggiare il governo all\'estero: sui missili si parla con una voce sola', e:'I giornali apprezzano il senso dello Stato · la base chiede perché fai da sponda alla Casa Bianca',
+      f:function(){ S.usReykjavik86Opp='voce'; stampad(1); baseUs60(-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Dall\'opposizione ha appoggiato il governo dopo il vertice d\'Islanda.')}); } },
+    { l:'Accusare il governo di aver buttato l\'accordo per un sogno di fantascienza', e:'La base ti segue · gli alleati chiedono se l\'America parla con una voce sola',
+      f:function(){ S.usReykjavik86Opp='accusa'; baseUs60(1); repd(-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Dall\'opposizione ha accusato il governo di aver buttato l\'accordo d\'Islanda per lo scudo.')}); } },
+    { l:'Chiedere al Congresso di tagliare i fondi allo scudo', e:'Il ceto medio guarda volentieri quei miliardi · i giornali chiedono che cosa resti da trattare con Mosca',
+      f:function(){ S.usReykjavik86Opp='fondi'; gdUs60('cetomedio',1); stampad(-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Dall\'opposizione ha chiesto al Congresso di tagliare i fondi allo scudo spaziale.')}); } },
+  ],
+};
+/* ==============================================================================================================
+   L262-22 · STATI UNITI 1980 — LE PENSIONI (1983/1), LO SCUDO SPAZIALE (1983/3) E LA PAURA ATOMICA (1983/11) (scheda PRESET-USA-1980 §3, decisioni di Cowork del 31/10; testi di Code).
+   Stessi helper di L262-21. Nomi nuovi cercati in tutto js/, .claude/ e prove/ il 31/10 prima di scriverli (L99-2), zero occorrenze: us80_pensioni(_opp), us80_scudo(_opp), us80_paura(_opp), usPensioni83(Opp), usScudo83(Opp), usPaura83(Opp),
+   pensioniOra, scudoOra, pauraOra, us80PensioniMese, us80ScudoMese, us80PauraMese, ti_us80_pensioni, ti_us80_scudo, ti_us80_paura.
+   ⚑ NON SONO SNODI (nessuna riga in SNODI_STORICI, RIVALI, POTENZE) e NON SONO DEL SACCHETTO: carte DOVUTE (cancelli in game.js accanto a us80Petrolio). Nessuna è carta grave. Ripiego al mese dopo; la ripresa dovuta, se è dello stesso mese, esce accanto (us80Carte83).
+   ⚑ Nessun nome di persona, di film, di esercitazione; nessuna cifra. L'esercitazione la conosce solo chi governa: l'aula parla del film e della paura. Nessuna scelta cancella lo scudo (Cowork (7)).
+   Verificato il 31/10: la relazione della commissione nel gennaio 1983, gli assegni a rischio da luglio, la legge firmata ad aprile; l'età sale per chi nasce dal 1960 in poi, ma una fonte attribuisce l'aumento dell'età a un emendamento del Congresso e non alla commissione, quindi qui è «in aula» e non nel compromesso (PGPF, Tax Policy Center, Prospect).
+   Il discorso televisivo del 23 marzo 1983, il soprannome preso da un film di fantascienza subito dopo, il rifiuto sovietico (History, EBSCO, Air & Space Forces, Podvig). L'esercitazione del novembre 1983 con procedure nuove, l'allerta dei reparti aerei sovietici in Germania Est, quanto l'Occidente lo capisce solo molto dopo, gli storici che ancora ne discutono (National Security Archive, War on the Rocks): quindi «ha temuto», non «ha creduto», e «reparti aerei», non «bombardieri». Il film il 20 novembre, a meno di due settimane dall'inizio dell'esercitazione e a nove giorni dalla fine: «pochi giorni dopo», non «due settimane dopo». I missili verso la Germania Ovest negli stessi giorni (fonti sul film; la data esatta del primo arrivo non è confermata, e il testo non la dice).
+   ============================================================================================================== */
+const PENSIONI83_EV = {
+  id:'us80_pensioni', era:'us1980', kick:'L\'economia',
+  t:'La cassa delle pensioni',
+  text:'La cassa delle pensioni pubbliche è a pochi mesi dal non poter pagare gli assegni. La commissione dei due partiti, dopo più di un anno di lavoro, ti consegna un compromesso che non piace a nessuno: più contributi subito, l\'aumento degli assegni che slitta, le pensioni più alte che pagano le tasse. In aula c\'è già chi vuole alzare piano piano l\'età della pensione per chi oggi è giovane. Le due parti aspettano la tua mossa.',
+  ch:[
+    { l:'Firmare il compromesso dei due partiti così com\'è', e:'La storia · il compromesso passa in primavera coi voti dei due partiti, e il Congresso ci aggiunge l\'età che sale piano piano · all\'estero piace un\'America che tiene i conti, il tuo partito chiede che cosa ha ottenuto',
+      f:function(){ S.usPensioni83='compromesso'; repd(1); baseUs60(-1);
+        S.log.unshift({t:T('L\'economia'),x:T('Ha firmato il compromesso dei due partiti sulla cassa delle pensioni.')}); } },
+    { l:'Tagliare le pensioni future invece di alzare i contributi', e:'Le imprese tirano un sospiro · i pensionati si sentono traditi, e lo dicono forte',
+      f:function(){ S.usPensioni83='tagli'; gdUs60('imprenditori',1); gdUs60('pensionati',-1);
+        S.log.unshift({t:T('L\'economia'),x:T('Ha salvato la cassa delle pensioni tagliando gli assegni futuri.')}); } },
+    { l:'Le pensioni non si toccano: paga chi lavora, con contributi più alti', e:'I pensionati ti ringraziano · chi lavora guarda la busta paga, e non è contento',
+      f:function(){ S.usPensioni83='contributi'; gdUs60('pensionati',1); gdUs60('lavoratori',-1);
+        S.log.unshift({t:T('L\'economia'),x:T('Ha salvato la cassa delle pensioni con contributi più alti.')}); } },
+  ],
+};
+const PENSIONI83_OPP_EV = {
+  id:'us80_pensioni_opp', era:'us1980', kick:'L\'economia',
+  t:'La cassa delle pensioni, dall\'aula',
+  text:'La cassa delle pensioni pubbliche è a pochi mesi dal non poter pagare gli assegni. La commissione dei due partiti ha consegnato un compromesso che non piace a nessuno: più contributi subito, l\'aumento degli assegni che slitta, le pensioni più alte che pagano le tasse. C\'è chi vuole alzare anche l\'età della pensione, e il tuo partito deve dire come vota.',
+  ch:[
+    { l:'Votare il compromesso dei due partiti in aula', e:'All\'estero piace un\'America che tiene i conti · la base chiede perché aiuti il governo',
+      f:function(){ S.usPensioni83Opp='voto'; repd(1); baseUs60(-1);
+        S.log.unshift({t:T('L\'economia'),x:T('Dall\'opposizione ha votato il compromesso sulla cassa delle pensioni.')}); } },
+    { l:'Difendere le pensioni: nessun ritocco all\'età', e:'I pensionati ti ascoltano · i giovani chiedono chi pagherà il conto',
+      f:function(){ S.usPensioni83Opp='difesa'; gdUs60('pensionati',1); gdUs60('giovani',-1);
+        S.log.unshift({t:T('L\'economia'),x:T('Dall\'opposizione ha difeso le pensioni: nessun ritocco all\'età.')}); } },
+    { l:'Accusare il governo di mettere le mani sulle pensioni', e:'I giornali riprendono l\'accusa · all\'estero si chiedono se l\'America saprà pagare gli assegni',
+      f:function(){ S.usPensioni83Opp='accusa'; stampad(1); repd(-1);
+        S.log.unshift({t:T('L\'economia'),x:T('Dall\'opposizione ha accusato il governo di mettere le mani sulle pensioni.')}); } },
+  ],
+};
+const SCUDO83_EV = {
+  id:'us80_scudo', era:'us1980', kick:'Il mondo',
+  t:'Lo scudo spaziale',
+  text:'I tuoi consiglieri militari portano un\'idea che sembra fantascienza: satelliti e laser che fermano in volo i missili nemici, per uscire dall\'equilibrio del terrore. Costerebbe moltissimo e nessuno sa se funzionerà. A Mosca la leggeranno come una sfida, e gli alleati europei temono di restare scoperti.',
+  ch:[
+    { l:'Annunciarlo in televisione al paese: la fine della paura atomica', e:'La storia · il discorso televisivo di marzo, e subito i giornali lo chiamano col nome di un film di fantascienza · il tuo partito è entusiasta, i giovani ridono e si preoccupano',
+      f:function(){ S.usScudo83='annuncio'; baseUs60(1); gdUs60('giovani',-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Ha annunciato in televisione lo scudo spaziale contro i missili.')}); } },
+    { l:'Finanziare la ricerca senza annunci', e:'All\'estero nessuno si allarma · i giornali chiedono dove vanno a finire quei fondi',
+      f:function(){ S.usScudo83='ricerca'; repd(1); stampad(-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Ha finanziato la ricerca sullo scudo spaziale senza annunci.')}); } },
+    { l:'Annunciarlo, ma offrire insieme una trattativa sui missili', e:'I giovani ti seguono · nel tuo partito c\'è chi dice che l\'hai annunciato e già barattato',
+      f:function(){ S.usScudo83='trattativa'; gdUs60('giovani',1); baseUs60(-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Ha annunciato lo scudo spaziale offrendo insieme una trattativa sui missili.')}); } },
+  ],
+};
+const SCUDO83_OPP_EV = {
+  id:'us80_scudo_opp', era:'us1980', kick:'Il mondo',
+  t:'Lo scudo spaziale, dall\'aula',
+  text:'La Casa Bianca vuole uno scudo nello spazio: satelliti e laser che fermano in volo i missili nemici. Costerebbe moltissimo e nessuno sa se funzionerà. A Mosca parlano di sfida, gli alleati europei temono di restare scoperti, e in aula arrivano le richieste di fondi. Il tuo partito deve dire come vota.',
+  ch:[
+    { l:'Fantascienza costosa: tagliare i fondi in aula', e:'I giovani ti seguono · la base teme di passare per chi non difende il paese',
+      f:function(){ S.usScudo83Opp='taglio'; gdUs60('giovani',1); baseUs60(-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Dall\'opposizione ha chiesto di tagliare i fondi allo scudo spaziale.')}); } },
+    { l:'Votare i fondi della ricerca', e:'All\'estero si vede un\'America unita · i giovani non capiscono',
+      f:function(){ S.usScudo83Opp='fondi'; repd(1); gdUs60('giovani',-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Dall\'opposizione ha votato i fondi per la ricerca sullo scudo spaziale.')}); } },
+    { l:'Prima si tratti coi sovietici, poi si spenda', e:'I giornali riprendono la formula · all\'estero si chiedono chi comandi a Washington',
+      f:function(){ S.usScudo83Opp='trattare'; stampad(1); repd(-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Dall\'opposizione ha chiesto di trattare coi sovietici prima di spendere per lo scudo.')}); } },
+  ],
+};
+const PAURA83_EV = {
+  id:'us80_paura', era:'us1980', kick:'Il mondo',
+  t:'La notte che non c\'è stata',
+  text:'Un rapporto riservato dei servizi: durante un\'esercitazione della NATO in Europa, a Mosca qualcuno ha temuto l\'inizio di un attacco vero, e reparti aerei sovietici sono stati messi in allerta. È passato, ma per qualche giorno il mondo è stato più vicino alla guerra di quanto chiunque sappia. Pochi giorni dopo una rete nazionale manda in onda un film sul giorno dopo una guerra nucleare in una città del Midwest, e il paese intero lo guarda col fiato sospeso. Domani ti chiederanno che cosa ne pensi.',
+  ch:[
+    { l:'Abbassare i toni: un messaggio riservato di distensione a Mosca', e:'I giovani sentono che qualcosa è cambiato · la base ti chiede perché cedi proprio adesso',
+      f:function(){ S.usPaura83='distensione'; gdUs60('giovani',1); baseUs60(-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Dopo l\'allarme di novembre ha mandato a Mosca un messaggio riservato di distensione.')}); } },
+    { l:'Nessun cambio: i missili in Europa arrivano come previsto', e:'La storia · di quella notte il paese saprà solo anni dopo, e gli storici ne discutono ancora · il tuo partito è con te, i giovani scendono in piazza',
+      f:function(){ S.usPaura83='fermezza'; baseUs60(1); gdUs60('giovani',-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Dopo l\'allarme di novembre non ha cambiato niente: i missili in Europa sono arrivati come previsto.')}); } },
+    { l:'Parlare al paese dopo il film: fermezza, e una porta aperta al dialogo', e:'All\'estero piace il tono · i giornali chiedono perché un film abbia bisogno di una risposta',
+      f:function(){ S.usPaura83='discorso'; repd(1); stampad(-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Dopo il film sul giorno dopo ha parlato al paese: fermezza, e una porta aperta al dialogo.')}); } },
+  ],
+};
+const PAURA83_OPP_EV = {
+  id:'us80_paura_opp', era:'us1980', kick:'Il mondo',
+  t:'Il film del giorno dopo, dall\'aula',
+  text:'Una rete nazionale ha mandato in onda un film sul giorno dopo una guerra nucleare in una città del Midwest, e il paese intero lo ha guardato col fiato sospeso. I missili nuovi stanno arrivando in Europa, nelle piazze si chiede di fermare tutto, e domani in aula vogliono sapere da che parte sta il tuo partito.',
+  ch:[
+    { l:'Chiedere in aula il congelamento delle armi nucleari', e:'I giovani ti seguono · la base teme di sembrare debole con Mosca',
+      f:function(){ S.usPaura83Opp='congelamento'; gdUs60('giovani',1); baseUs60(-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Dall\'opposizione ha chiesto il congelamento delle armi nucleari.')}); } },
+    { l:'Stare col paese: fermezza, niente paura', e:'La base apprezza · i giovani ti voltano le spalle',
+      f:function(){ S.usPaura83Opp='fermezza'; baseUs60(1); gdUs60('giovani',-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Dall\'opposizione ha chiesto fermezza dopo il film sul giorno dopo.')}); } },
+    { l:'Accusare il governo di spaventare il mondo', e:'I giornali riprendono l\'accusa · all\'estero si chiedono chi parli per l\'America',
+      f:function(){ S.usPaura83Opp='accusa'; stampad(1); repd(-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Dall\'opposizione ha accusato il governo di spaventare il mondo.')}); } },
+  ],
+};
+/* ==============================================================================================================
+   L262-21 · STATI UNITI 1980 — IL PETROLIO CHE CROLLA (1986/3) E LA PETROLIERA IN ALASKA (1989/3) (scheda PRESET-USA-1980 §3-§4, decisioni di Cowork del 31/10; testi di Code).
+   Stessi helper di L262-20. Nomi nuovi cercati in tutto js/, .claude/ e prove/ il 31/10 prima di scriverli (L99-2), zero occorrenze: us80_petrolio(_opp), us80_alaska(_opp), usPetrolio86(Opp), usAlaska89(Opp),
+   petrolioOra, alaskaOra, us80PetrolioMese, us80AlaskaMese, ti_us80_petrolio, ti_us80_alaska.
+   ⚑ NON SONO SNODI (nessuna riga in SNODI_STORICI, RIVALI, POTENZE) e NON SONO DEL SACCHETTO: carte DOVUTE (cancelli in game.js accanto a us80Navetta). Nessuna è carta grave. Il petrolio il 1986/3, ripiego 1986/5; l'Alaska il 1989/3, ripiego 1989/4.
+   ⚑ Nessun nome di compagnia, di nave o di persona; nessuna cifra. Il testo dell'Alaska non dice «il tuo governo ha pochi mesi»: un Democratico eletto nel 1984 e rieletto nel 1988 è al secondo mandato.
+   Verificato il 31/10: l'Arabia Saudita e i vicini aumentano la produzione per riprendersi quote di mercato, il greggio perde più della metà fra gennaio e giugno 1986 (Brookings, Houston Chronicle: quindi «in pochi mesi», non «in poche settimane»); il segretario all'Energia respinge ad aprile la richiesta del governatore del Texas di una tassa sul petrolio importato, il Senato toglie la clausola il 2 luglio (Christian Science Monitor, The Battalion); le banche fallite in Texas, Oklahoma e Louisiana negli anni seguenti (FDIC).
+   24 marzo 1989, poco dopo mezzanotte; centinaia di chilometri di costa, uccelli e lontre, risposta iniziale lenta, Guardia costiera a capo delle operazioni (EPA, History, EBSCO); legge sull'inquinamento da petrolio firmata il 18 agosto 1990, doppio scafo per le petroliere nuove (fonti sulla legge). Non confermato: l'invio dell'esercito, che qui è solo una scelta e non è scritto come storia.
+   ============================================================================================================== */
+const PETROLIO86_EV = {
+  id:'us80_petrolio', era:'us1980', kick:'L\'economia',
+  t:'Il barile a picco',
+  text:'I paesi del Golfo hanno aperto i rubinetti, e in pochi mesi il prezzo del greggio si è più che dimezzato. Alla pompa si paga meno e le famiglie respirano. Ma in Texas, in Oklahoma e in Louisiana chiudono i pozzi, le banche locali tremano e le città del petrolio si svuotano. I governatori del Sud chiedono aiuto.',
+  ch:[
+    { l:'È il mercato: il petrolio a buon mercato fa bene al paese', e:'La storia · nessun dazio, e in Texas la crisi trascina giù banche e casse di risparmio per anni · il ceto medio fa il pieno contento, chi lavora sui pozzi resta a casa',
+      f:function(){ S.usPetrolio86='mercato'; gdUs60('cetomedio',1); gdUs60('lavoratori',-1);
+        S.log.unshift({t:T('L\'economia'),x:T('Davanti al crollo del greggio ha lasciato fare al mercato.')}); } },
+    { l:'Un dazio sul petrolio straniero, per salvare i pozzi di casa', e:'Chi lavora sui pozzi tira il fiato · le imprese pagano di più l\'energia, e protestano',
+      f:function(){ S.usPetrolio86='dazio'; gdUs60('lavoratori',1); gdUs60('imprenditori',-1);
+        S.log.unshift({t:T('L\'economia'),x:T('Davanti al crollo del greggio ha messo un dazio sul petrolio straniero.')}); } },
+    { l:'Aiuti mirati alle regioni del petrolio, e riempire le riserve strategiche a prezzo basso', e:'All\'estero piace un\'America che compra e non alza barriere · il tuo partito chiede da quando il governo salva i petrolieri',
+      f:function(){ S.usPetrolio86='aiuti'; repd(1); baseUs60(-1);
+        S.log.unshift({t:T('L\'economia'),x:T('Davanti al crollo del greggio ha aiutato le regioni del petrolio e ha riempito le riserve.')}); } },
+  ],
+};
+const PETROLIO86_OPP_EV = {
+  id:'us80_petrolio_opp', era:'us1980', kick:'L\'economia',
+  t:'Il barile a picco, dall\'aula',
+  text:'I paesi del Golfo hanno aperto i rubinetti, e in pochi mesi il greggio si è più che dimezzato. La benzina costa meno, ma in Texas, in Oklahoma e in Louisiana chiudono i pozzi e tremano le banche locali. In aula i deputati del Sud chiedono aiuto, e il tuo partito deve dire da che parte sta.',
+  ch:[
+    { l:'Difendere gli stati del petrolio: aiuti e un prezzo minimo', e:'Chi lavora sui pozzi ti ascolta · il ceto medio chiede perché dovrebbe pagare di più alla pompa',
+      f:function(){ S.usPetrolio86Opp='aiuti'; gdUs60('lavoratori',1); gdUs60('cetomedio',-1);
+        S.log.unshift({t:T('L\'economia'),x:T('Dall\'opposizione ha chiesto aiuti e un prezzo minimo per gli stati del petrolio.')}); } },
+    { l:'Godersi la benzina a buon mercato, e lasciare che il mercato decida', e:'Il ceto medio è d\'accordo · nelle città del petrolio ti danno per perso',
+      f:function(){ S.usPetrolio86Opp='mercato'; gdUs60('cetomedio',1); gdUs60('lavoratori',-1);
+        S.log.unshift({t:T('L\'economia'),x:T('Dall\'opposizione ha difeso la benzina a buon mercato e il mercato.')}); } },
+    { l:'Accusare il governo di aver lasciato marcire le banche del Sud', e:'I giornali riprendono l\'accusa · all\'estero si chiedono quanto siano solide le banche americane',
+      f:function(){ S.usPetrolio86Opp='banche'; stampad(1); repd(-1);
+        S.log.unshift({t:T('L\'economia'),x:T('Dall\'opposizione ha accusato il governo di aver lasciato marcire le banche del Sud.')}); } },
+  ],
+};
+const ALASKA89_EV = {
+  id:'us80_alaska', era:'us1980', kick:'Il paese',
+  t:'Marea nera nello stretto',
+  text:'Poco dopo mezzanotte una petroliera di una grande compagnia, carica di greggio, è finita sugli scogli in una baia dell\'Alaska. La macchia si allarga per centinaia di chilometri di costa, uccelli e lontre coperti di nero sono in tutti i telegiornali, la compagnia è lenta e i pescatori sono disperati. Tutti guardano Washington.',
+  ch:[
+    { l:'La compagnia paga tutto, e una legge: doppio scafo obbligatorio e un fondo per i disastri', e:'La storia · la legge contro l\'inquinamento da petrolio arriva l\'anno dopo, col doppio scafo per le petroliere nuove · i giovani ti seguono, le imprese fanno i conti',
+      f:function(){ S.usAlaska89='legge'; gdUs60('giovani',1); gdUs60('imprenditori',-1);
+        S.log.unshift({t:T('Il paese'),x:T('Dopo la marea nera in Alaska ha fatto pagare la compagnia e ha voluto il doppio scafo per legge.')}); } },
+    { l:'La Guardia costiera e l\'esercito sul posto: si pulisce subito, i conti dopo', e:'All\'estero si vede un\'America che si rimbocca le maniche · i giornali chiedono chi paga, e perché nessuno era pronto',
+      f:function(){ S.usAlaska89='pulizia'; repd(1); stampad(-1);
+        S.log.unshift({t:T('Il paese'),x:T('Dopo la marea nera in Alaska ha mandato la Guardia costiera e l\'esercito a pulire.')}); } },
+    { l:'Nessuna legge sull\'onda dell\'emozione: le trivellazioni in Alaska servono al paese', e:'Il tuo partito apprezza · i giovani scendono in piazza con le foto delle lontre',
+      f:function(){ S.usAlaska89='trivelle'; baseUs60(1); gdUs60('giovani',-1);
+        S.log.unshift({t:T('Il paese'),x:T('Dopo la marea nera in Alaska ha difeso le trivellazioni e non ha voluto nuove leggi.')}); } },
+  ],
+};
+const ALASKA89_OPP_EV = {
+  id:'us80_alaska_opp', era:'us1980', kick:'Il paese',
+  t:'Marea nera nello stretto, dall\'aula',
+  text:'Poco dopo mezzanotte una petroliera di una grande compagnia è finita sugli scogli in una baia dell\'Alaska. La macchia si allarga per centinaia di chilometri di costa, uccelli e lontre coperti di nero sono in tutti i telegiornali, e i pescatori sono disperati. In aula tutti vogliono un colpevole, e il tuo partito deve dire che cosa chiede.',
+  ch:[
+    { l:'Una commissione d\'inchiesta del Congresso sulla compagnia e sui controlli', e:'I giornali seguono ogni udienza · le imprese dicono che si cerca un capro espiatorio',
+      f:function(){ S.usAlaska89Opp='inchiesta'; stampad(1); gdUs60('imprenditori',-1);
+        S.log.unshift({t:T('Il paese'),x:T('Dall\'opposizione ha chiesto un\'inchiesta del Congresso sulla marea nera in Alaska.')}); } },
+    { l:'Una legge dell\'aula sul doppio scafo, prima del governo', e:'I giovani ti seguono · nel tuo partito c\'è chi conta i posti di lavoro in gioco',
+      f:function(){ S.usAlaska89Opp='legge'; gdUs60('giovani',1); baseUs60(-1);
+        S.log.unshift({t:T('Il paese'),x:T('Dall\'opposizione ha proposto una legge sul doppio scafo prima del governo.')}); } },
+    { l:'Niente processi in piazza: lavoro e petrolio dell\'Alaska prima di tutto', e:'La base apprezza · i giovani ti voltano le spalle',
+      f:function(){ S.usAlaska89Opp='lavoro'; baseUs60(1); gdUs60('giovani',-1);
+        S.log.unshift({t:T('Il paese'),x:T('Dall\'opposizione ha messo il lavoro e il petrolio dell\'Alaska prima dei processi.')}); } },
   ],
 };
 /* ==============================================================================================================
