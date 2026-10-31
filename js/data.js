@@ -2017,8 +2017,10 @@ const SCENARI = {
     /* L262-5 · la soglia della primaria all'opposizione di questa porta (assente = 48, PRIMARIA_SOGLIA_OPP; la legge solo basePrimaria()).
        Coi pilastri (L262-3) e le aule (L262-4, L262-5) i Democratici all'opposizione perdevano la primaria 21 · 21 volte su 40 (13 prima
        dei pilastri). Sweep 48→42 (misura-us1980.js gioc --soglia, personaggio rinominato, 40 × 2 semi): 21·21 · 14·13 · 9·9 · 4·3;
-       46 è il valore più vicino a 48 dentro 10-15. Le altre tre partenze non hanno primarie perse con nessun valore (identiche). */
-    sogliaPrimariaOpp: 46,
+       46 è il valore più vicino a 48 dentro 10-15. Le altre tre partenze non hanno primarie perse con nessun valore (identiche).
+       L262-18 (taratura di fine linea, 30/10): con tutte le carte della linea e cinque semi indipendenti (11, 1011, 2011, 3011, 4011; 40 carriere × 124 mesi) 44 · 45 · 46 · 47 · 48
+       danno in media 4,6 · 6,8 · 9,0 · 11,6 · 15,0 primarie perse: 47 è il valore più vicino a 46 dentro 10-15 (semi 14 · 9 · 9 · 10 · 16). */
+    sogliaPrimariaOpp: 47,
     mandatiVinti: 1,                           // D288: il Presidente ha vinto il 1976 (vale solo al livello 3 al governo: D135)
     partiti: [
       { id:'us_dem', nome:'Democratici',  orientamento:'centrosinistra', base:{ giovani:0.4, lavoratori:0.35, cetomedio:0.25 },                  forza:50, forzaAncora:50, asse:-1 },
@@ -20353,6 +20355,12 @@ const TITOLI=[
 {id:'ti_us80_grano', era:'us1980', pri:1, cond:()=>S.usGrano80==='pieno' && S.year===1980 && S.month>=2 && S.month<=4, amico:'Embargo pieno sul grano per Mosca: lo Stato compra il raccolto', ostile:'Il grano pagato dai contribuenti: l\'embargo costa centinaia di milioni'},
 {id:'ti_us80_grano_contratti', era:'us1980', pri:1, cond:()=>S.usGrano80==='contratti' && S.year===1980 && S.month>=2 && S.month<=4, amico:'Il grano già venduto parte, il resto si ferma: un embargo con giudizio', ostile:'L\'embargo del grano ha un buco grande come un granaio'},
 {id:'ti_us80_grano_nessuno', era:'us1980', pri:1, cond:()=>S.usGrano80==='nessuno' && S.year===1980 && S.month>=2 && S.month<=4, amico:'Via l\'embargo: il grano torna a viaggiare, la risposta a Mosca cambia strada', ostile:'Via l\'embargo del grano: dopo l\'Afghanistan, una resa'},
+{id:'ti_us80_boicott', era:'us1980', pri:1, cond:()=>S.usBoicott80==='boicottaggio' && S.year===1980 && S.month>=5 && S.month<=7, amico:'Niente squadra a Mosca: il boicottaggio tiene, e gli alleati seguono', ostile:'Quattro anni di allenamenti per restare a casa: gli atleti pagano il boicottaggio'},
+{id:'ti_us80_boicott_cerimonie', era:'us1980', pri:1, cond:()=>S.usBoicott80==='cerimonie' && S.year===1980 && S.month>=5 && S.month<=7, amico:'La squadra va a Mosca, il governo resta a casa', ostile:'A Mosca sì, ma senza il governo: gli alleati non capiscono'},
+{id:'ti_us80_boicott_comitato', era:'us1980', pri:1, cond:()=>S.usBoicott80==='comitato' && S.year===1980 && S.month>=5 && S.month<=7, amico:'I Giochi di Mosca li decide il comitato olimpico: lo sport agli sportivi', ostile:'Sui Giochi di Mosca il governo tace, e il comitato resta solo'},
+{id:'ti_us80_libia', era:'us1980', pri:1, cond:()=>S.usLibia86==='raid' && S.year===1986 && S.month>=6 && S.month<=7, amico:'Colpite Tripoli e Bengasi: chi attacca gli americani ora sa il prezzo', ostile:'Bombe sulla Libia, e l\'Europa nega il sorvolo: l\'America è sola'},
+{id:'ti_us80_libia_sanzioni', era:'us1980', pri:1, cond:()=>S.usLibia86==='sanzioni' && S.year===1986 && S.month>=6 && S.month<=7, amico:'Sanzioni alla Libia: l\'America chiede all\'Europa di fare la sua parte', ostile:'Una bomba a Berlino, e la risposta è un embargo'},
+{id:'ti_us80_libia_prove', era:'us1980', pri:1, cond:()=>S.usLibia86==='prove' && S.year===1986 && S.month>=6 && S.month<=7, amico:'Le prove sulla Libia davanti al mondo: il caso arriva all\'ONU', ostile:'Molte carte e nessuna risposta: il caso della Libia finisce all\'ONU'},
 {id:'ti_us80_profughi', era:'us1980', pri:1, cond:()=>S.usProfughi80==='aperte' && S.year===1980 && S.month>=5 && S.month<=7, amico:'Braccia aperte ai profughi di Cuba: l\'America resta una porta', ostile:'Centinaia di profughi al giorno, e nessuno sa dove metterli'},
 {id:'ti_us80_profughi_guardia', era:'us1980', pri:1, cond:()=>S.usProfughi80==='guardia' && S.year===1980 && S.month>=5 && S.month<=7, amico:'La guardia costiera ferma le barche: ordine sulle coste della Florida', ostile:'Le barche dei profughi respinte in mare: le chiese protestano'},
 {id:'ti_us80_profughi_basi', era:'us1980', pri:1, cond:()=>S.usProfughi80==='basi' && S.year===1980 && S.month>=5 && S.month<=7, amico:'I profughi di Cuba nelle basi militari: accoglienza, con i controlli', ostile:'Profughi dietro il filo spinato delle basi: si parla di campi'},
@@ -26201,7 +26209,7 @@ const MALTA89_OPP_EV = {
    mese è preso, mai oltre il 1980/6.
    ⚑ CORREZIONE ALLA CONSEGNA: il racconto d'apertura della porta (SCENARI.us1980.contesto) dice già che a gennaio «il Presidente ha
    fermato le vendite di grano»; la carta del governo non chiede quindi SE fare l'embargo ma che cosa farne, e la terza scelta lo
-   RITIRA (flag 'nessuno', come nella consegna). Il boicottaggio olimpico non è una carta: nessuna riga in più (consegna, passo 1).
+   RITIRA (flag 'nessuno', come nella consegna). Il boicottaggio olimpico è diventato una carta in L262-16 (BOICOTT80_EV), nel 1980/4.
    ⚑ Il testo non dice chi governa e non nomina persone: «il governo dell'Avana», «le barche», «la Florida». 1980: l'embargo del 4
    gennaio fermò circa diciassette milioni di tonnellate già vendute; dal 20 aprile l'Avana lasciò partire chiunque, e fino a ottobre
    arrivarono in Florida circa centoventicinquemila persone (i centri di Miami pieni, i campi nelle basi militari).
@@ -26272,6 +26280,93 @@ const PROFUGHI80_OPP_EV = {
     { l:'Un voto del Congresso sull\'asilo', e:'Chiedi regole scritte per chi arriva · la Casa Bianca risponde che le leggi non fermano le barche',
       f:function(){ S.usProfughi80Opp='congresso'; gdUs60('cetomedio',1); gdUs60('giovani',-1);
         S.log.unshift({t:T('Il paese'),x:T('Dall\'opposizione ha chiesto un voto del Congresso sull\'asilo ai profughi da Cuba.')}); } },
+  ],
+};
+/* ==============================================================================================================
+   L262-16 · STATI UNITI 1980 — IL BOICOTTAGGIO OLIMPICO (1980/4) (scheda PRESET-USA-1980 §4, decisioni di Cowork del 30/10; testi di Code).
+   Stessi helper di L262-8…15. Nomi nuovi cercati in tutto js/, .claude/ e prove/ il 30/10 prima di scriverli (L99-2), zero occorrenze:
+   us80_boicottaggio(_opp), usBoicott80(Opp), boicottOra, boicottOppOra, us80BoicottMese, ti_us80_boicott.
+   ⚑ NON È UNO SNODO (nessuna riga in SNODI_STORICI, RIVALI, POTENZE) e NON È DEL SACCHETTO: carta DOVUTA come il grano (cancelli in game.js accanto a
+   profughiOra). Il bersaglio è il 1980/3, che S1 prende sempre: esce nel 1980/4, a chi governa e dall'aula. Non a febbraio, anche dove sarebbe libero
+   (l'aula, chi arriva da us1970): l'ultimatum scade il 20 febbraio e la carta dice che è scaduto; e il voto del comitato è di aprile.
+   ⚑ Nessun nome di persona, nessuno slogan. Verificato il 30/10 (Wikipedia, «1980 Summer Olympics»; AP, Team USA e Christian Science Monitor sul voto):
+   ultimatum del 20 gennaio, un mese per il ritiro; Giochi dal 19 luglio al 3 agosto; il comitato vota il 12 aprile a Colorado Springs (cifre del voto
+   discordanti: nessuna nel testo); 66 paesi invitati assenti, per motivi diversi (nel testo «decine»). ⚠ L'annuncio di fine marzo NON si è confermato:
+   tolto, il testo non lo dice.
+   ============================================================================================================== */
+const BOICOTT80_EV = {
+  id:'us80_boicottaggio', era:'us1980', kick:'Il mondo',
+  t:'I Giochi di Mosca',
+  text:'L\'esercito sovietico è in Afghanistan da dicembre, e l\'ultimatum di gennaio, un mese di tempo per andarsene, è scaduto a vuoto. I Giochi d\'estate si aprono a Mosca il 19 luglio. Gli atleti si allenano da quattro anni, il comitato olimpico vota questo mese, e gli alleati aspettano di vedere che cosa fa Washington.',
+  ch:[
+    { l:'Il boicottaggio: la squadra non va a Mosca, e si chiede agli alleati di fare lo stesso', e:'La storia · Il comitato olimpico vota ad aprile di non andare a Mosca; decine di paesi restano a casa · il tuo partito e gli alleati approvano, i giornali raccontano gli atleti rimasti a casa',
+      f:function(){ S.usBoicott80='boicottaggio'; baseUs60(1); stampad(-1); repd(1);
+        S.log.unshift({t:T('Il mondo'),x:T('Ha chiesto il boicottaggio dei Giochi di Mosca, e agli alleati di fare lo stesso.')}); } },
+    { l:'La squadra va, ma niente cerimonie ufficiali né delegazione del governo', e:'I giornali scrivono che gli atleti non pagano per gli altri · il tuo partito dice che a Mosca si va lo stesso',
+      f:function(){ S.usBoicott80='cerimonie'; stampad(1); baseUs60(-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Ha lasciato andare la squadra a Mosca, senza cerimonie ufficiali né delegazione del governo.')}); } },
+    { l:'Decide il comitato olimpico: il governo non si pronuncia', e:'Il ceto medio apprezza: lo sport agli sportivi · gli alleati aspettavano una parola da Washington, e non arriva',
+      f:function(){ S.usBoicott80='comitato'; gdUs60('cetomedio',1); repd(-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Sui Giochi di Mosca ha lasciato decidere il comitato olimpico.')}); } },
+  ],
+};
+const BOICOTT80_OPP_EV = {
+  id:'us80_boicottaggio_opp', era:'us1980', kick:'Il mondo',
+  t:'I Giochi di Mosca, dall\'aula',
+  text:'L\'esercito sovietico è in Afghanistan da dicembre, l\'ultimatum di gennaio è scaduto senza un ritiro, e il governo chiede che la squadra non vada ai Giochi di Mosca di luglio. Il comitato olimpico vota questo mese, e gli atleti si allenano da quattro anni. Il tuo partito deve dire da che parte sta.',
+  ch:[
+    { l:'Appoggiare il boicottaggio: davanti all\'invasione il paese parla con una voce sola', e:'I giornali scrivono che sulla politica estera l\'aula è unita · la base chiede perché fai la campagna dell\'avversario',
+      f:function(){ S.usBoicott80Opp='voce'; stampad(1); baseUs60(-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Dall\'opposizione ha appoggiato il boicottaggio dei Giochi di Mosca.')}); } },
+    { l:'Difendere gli atleti: lo sport resta fuori dalla politica', e:'Il ceto medio ti ascolta · gli alleati chiedono da che parte sta il tuo partito',
+      f:function(){ S.usBoicott80Opp='atleti'; gdUs60('cetomedio',1); repd(-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Dall\'opposizione ha difeso gli atleti: lo sport resta fuori dalla politica.')}); } },
+    { l:'Chiedere sanzioni più dure al posto dei Giochi', e:'La base ti segue · i giornali scrivono che alzi il prezzo senza pagarlo',
+      f:function(){ S.usBoicott80Opp='sanzioni'; baseUs60(1); stampad(-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Dall\'opposizione ha chiesto sanzioni più dure a Mosca al posto dei Giochi.')}); } },
+  ],
+};
+/* ==============================================================================================================
+   L262-17 · STATI UNITI 1980 — LA LIBIA (1986/4) (scheda PRESET-USA-1980 §3, decisioni di Cowork del 30/10; testi di Code).
+   Stessi helper di L262-8…16. Nomi nuovi cercati in tutto js/, .claude/ e prove/ il 30/10 prima di scriverli (L99-2), zero occorrenze:
+   us80_libia(_opp), usLibia86(Opp), libiaOra, libiaOppOra, us80LibiaMese, us80Libia, ti_us80_libia.
+   ⚑ NON È UNO SNODO (nessuna riga in SNODI_STORICI, RIVALI, POTENZE: D294 (b) non presa, niente scala) e NON È DEL SACCHETTO: carta DOVUTA come il
+   boicottaggio (cancelli in game.js accanto a panamaOra), solo il 1986/4: il mese è libero, e la bomba è del 5 aprile, quindi a marzo il testo sarebbe falso.
+   ⚑ Nessun nome di persona, nessuna cifra di vittime. Verificato il 30/10 (Wikipedia, «1986 United States bombing of Libya» e «West Berlin discotheque bombing»;
+   UN Digital Library, risoluzione A/RES/41/38): scontri nel golfo della Sirte dal 24 marzo; bomba nella discoteca del 5 aprile, intercettazioni fra Tripoli e la
+   missione a Berlino Est; raid del 15 aprile su Tripoli e Bengasi, aerei partiti anche dalle basi britanniche, sorvolo negato da Francia e Spagna; l'Assemblea
+   generale condanna il raid il 20 novembre 1986.
+   ============================================================================================================== */
+const LIBIA86_EV = {
+  id:'us80_libia', era:'us1980', kick:'Il mondo',
+  t:'La bomba di Berlino',
+  text:'Da mesi gli attentati contro cittadini americani all\'estero vengono attribuiti a gruppi sostenuti da Tripoli. A marzo le navi della flotta hanno attraversato la linea che la Libia rivendica nel golfo della Sirte, e ci sono stati scontri. Ora una bomba in una discoteca di Berlino Ovest frequentata da soldati americani ha fatto morti, e le intercettazioni puntano alla Libia. Gli alleati europei chiedono prudenza.',
+  ch:[
+    { l:'Il raid: colpire di notte obiettivi militari e di comando in Libia', e:'La storia · Il 15 aprile gli aerei, partiti anche dalle basi britanniche, colpiscono Tripoli e Bengasi; Francia e Spagna negano il sorvolo, e a novembre l\'Assemblea generale dell\'ONU condanna il raid · il tuo partito approva, gli alleati europei no',
+      f:function(){ S.usLibia86='raid'; baseUs60(1); repd(-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Dopo la bomba di Berlino ha ordinato il raid sulla Libia.')}); } },
+    { l:'Sanzioni economiche, e la richiesta agli alleati europei di fare lo stesso', e:'Gli alleati apprezzano che si parli prima con loro · il tuo partito dice che a una bomba si risponde con qualcosa di più',
+      f:function(){ S.usLibia86='sanzioni'; repd(1); baseUs60(-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Dopo la bomba di Berlino ha scelto le sanzioni alla Libia, e le ha chieste agli alleati europei.')}); } },
+    { l:'Rendere pubbliche le prove e portare il caso all\'ONU, senza usare la forza', e:'I giornali pubblicano le intercettazioni e discutono le prove · il ceto medio si chiede se basti, con i soldati americani nel mirino',
+      f:function(){ S.usLibia86='prove'; stampad(1); gdUs60('cetomedio',-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Dopo la bomba di Berlino ha reso pubbliche le prove e ha portato il caso della Libia all\'ONU.')}); } },
+  ],
+};
+const LIBIA86_OPP_EV = {
+  id:'us80_libia_opp', era:'us1980', kick:'Il mondo',
+  t:'La bomba di Berlino, dall\'aula',
+  text:'Una bomba in una discoteca di Berlino Ovest frequentata da soldati americani ha fatto morti, e le intercettazioni puntano alla Libia, dopo gli scontri di marzo nel golfo della Sirte. Il governo prepara una risposta armata, e gli alleati europei chiedono prudenza. Il tuo partito deve dire da che parte sta.',
+  ch:[
+    { l:'Appoggiare l\'azione: davanti al terrorismo il paese parla con una voce sola', e:'I giornali scrivono che sul terrorismo l\'aula è unita · la base chiede perché fai da sponda al governo',
+      f:function(){ S.usLibia86Opp='voce'; stampad(1); baseUs60(-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Dall\'opposizione ha appoggiato l\'azione contro la Libia.')}); } },
+    { l:'Il Congresso va consultato: la legge sui poteri di guerra vale anche per un raid', e:'Il ceto medio apprezza che si rispetti la legge · gli alleati chiedono se l\'America parli con una voce sola',
+      f:function(){ S.usLibia86Opp='congresso'; gdUs60('cetomedio',1); repd(-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Dall\'opposizione ha chiesto che sulla Libia si consulti il Congresso.')}); } },
+    { l:'Meglio le sanzioni con gli alleati che le bombe da soli', e:'La base ti segue · i giornali scrivono che le sanzioni non fermano le bombe',
+      f:function(){ S.usLibia86Opp='alleati'; baseUs60(1); stampad(-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Dall\'opposizione ha chiesto sanzioni alla Libia insieme agli alleati, al posto delle bombe.')}); } },
   ],
 };
 /* ==============================================================================================================
@@ -26447,7 +26542,7 @@ const GRENADA83_OPP_EV = {
    d'apertura è del 28 luglio; il mese è libero da pilastri e fatti-mondo), in piena stagione della presidenziale: esce con la carta
    di campagna accanto (snodoColCampagna).
    ⚑ Il testo non dice chi governa, non nomina persone, atleti né sponsor, e non presuppone una scelta del 1980 (il boicottaggio di
-   Mosca non è una carta: una riga sola, fatto storico per tutte le partenze). 1984: l'8 maggio l'Unione Sovietica annuncia che non
+   Mosca è una carta dal L262-16, ma con tre esiti: questa non lo dà per fatto). 1984: l'8 maggio l'Unione Sovietica annuncia che non
    andrà a Los Angeles, parlando della sicurezza dei suoi atleti, e la seguono quasi tutti i paesi del Patto di Varsavia (la Romania
    va); i Giochi sono organizzati da un comitato privato e pagati quasi tutti da privati; la squadra di casa chiude prima nel
    medagliere e i Giochi chiudono in attivo. Quattro anni prima gli Stati Uniti non erano andati a Mosca.
