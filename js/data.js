@@ -2014,6 +2014,8 @@ const SCENARI = {
     /* D292 (L216-1, D270) · punti sul VOTO della presidenziale, positivo = al partito del Presidente in carica; li legge solo
        spintaPresidenziale() (model.js), 0 se il Presidente sei tu. Partenza di Cowork {1980:-6, 1984:8, 1988:3}. */
     spintaPresidenziale: { 1980: -6, 1984: 8, 1988: 3 },
+    /* L262-27 · i punti al Presidente-giocatore (solo con US80_PARTITA_VOTO, game.js): il Presidente democratico perdeva il 1984 sempre. k = 2 è il valore più piccolo che mette 1984 e 1988 nel bersaglio (sweep nel rapporto). */
+    spintaPresidenteGiocatore: { 1984: 2 },
     /* L262-5 · la soglia della primaria all'opposizione di questa porta (assente = 48, PRIMARIA_SOGLIA_OPP; la legge solo basePrimaria()).
        Coi pilastri (L262-3) e le aule (L262-4, L262-5) i Democratici all'opposizione perdevano la primaria 21 · 21 volte su 40 (13 prima
        dei pilastri). Sweep 48→42 (misura-us1980.js gioc --soglia, personaggio rinominato, 40 × 2 semi): 21·21 · 14·13 · 9·9 · 4·3;
@@ -6031,6 +6033,76 @@ const BEAT_LEGGERI = [
   {id:'lgus70_fonduta', era:'us1970', registro:'leggero', cond:()=>S.year>=1970&&S.year<=1975, kick:'Il paese', t:'Il pentolino arancione', text:'Fra i regali di nozze c\'erano tre pentolini per la fonduta, tutti arancioni, e stasera finalmente se ne usa uno. Gli amici siedono intorno al tavolo basso con le forchette lunghe, il formaggio fila, la fiammella sotto si spegne due volte. Chi perde il pezzo di pane nel pentolino, dice la regola, deve baciare il vicino; finisce che lo perdono tutti.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
   {id:'lgus70_macrame', era:'us1970', registro:'leggero', cond:()=>S.year>=1971&&S.year<=1976, kick:'Il paese', t:'I nodi del salotto', text:'In ogni salotto, davanti alla finestra, pende un vaso di felce tenuto da una rete di corda annodata a mano, con le perline di legno. Le ragazze imparano i nodi alla parrocchia o al centro sociale, e il sabato al mercatino se ne vendono a decine. Qualcuno ha appeso anche il gufo di corda in cucina, e la nonna dice che lo faceva lei, nel \'20, e si chiamava pizzo.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
   {id:'lgus70_poltrona_sacco', era:'us1970', registro:'leggero', cond:()=>S.year>=1970&&S.year<=1975, kick:'Il paese', t:'La poltrona senza forma', text:'Nella stanza dei ragazzi è arrivata una poltrona che non ha né gambe né schienale: un grande sacco di vinile pieno di palline di plastica, che prende la forma di chi ci si butta sopra. Ci si guarda la televisione sdraiati, ci si fanno i compiti, ci si addormenta. Il padre ha provato a sedersi una volta sola; per rialzarsi ha dovuto chiedere una mano.', ch:[{l:'Prosegui', e:'', f:function(){}}]},
+  /* L262-25 · leggeri di us1980 (31/10): la vita di tutti i giorni 1980-1989, due scelte di colore, effetti zero (VARIETA-L262-LEGGERI-US80.md) */
+  {id:'lgus80_cuffiette', era:'us1980', registro:'leggero', cond:()=>meseAss()>=1980*12+6&&meseAss()<=1989*12+12, kick:'Il paese', t:'La musica nelle orecchie', text:'Per strada, sull\'autobus, al parco, i ragazzi camminano con due cuffiette di spugna sulle orecchie e, alla cintura, un lettore di cassette grande come un libro tascabile. Non sentono il clacson e non sentono la madre che li chiama. Gli automobilisti protestano, e qualche cittadina parla già di multe a chi corre o pedala così.', ch:[
+    {l:'Ne chiedi uno in prestito, per provare', e:'Una cassetta intera, senza che nessuno ti disturbi', f:function(){}},
+    {l:'Alzi la voce per farti sentire', e:'Ti fanno segno di ripetere', f:function(){}} ]},
+  {id:'lgus80_cubo', era:'us1980', registro:'leggero', cond:()=>meseAss()>=1980*12+6&&meseAss()<=1982*12+12, kick:'Il paese', t:'Sei facce, nessuna a posto', text:'Un cubo di plastica con sei facce colorate, che girano a strati: è arrivato dall\'Ungheria e ce l\'hanno tutti, in metropolitana, in ufficio, sotto il banco. I ragazzi lo rimettono a posto in un minuto e se ne vantano; i padri lo smontano di nascosto col cacciavite. In libreria si vendono i manuali per risolverlo.', ch:[
+    {l:'Ci provi per dieci minuti', e:'Una faccia sola, e ti basta', f:function(){}},
+    {l:'Lo smonti col cacciavite', e:'Nessuno l\'ha visto', f:function(){}} ]},
+  {id:'lgus80_sala_giochi', era:'us1980', registro:'leggero', cond:()=>S.year>=1980&&S.year<=1984, kick:'Il paese', t:'Le monete del pomeriggio', text:'Dopo la scuola le sale giochi sono piene: file di schermi che lampeggiano e ragazzi in piedi, con una moneta da venticinque centesimi posata sul bordo per prenotare il turno. Un gioco in cui si mangiano puntini in un labirinto ha la coda davanti. Qualche cittadina discute se vietarle ai minori nelle ore di lezione.', ch:[
+    {l:'Giochi una partita, per capire', e:'Finisce in venti secondi', f:function(){}},
+    {l:'Chiedi ai ragazzi dei compiti', e:'Ti rispondono senza staccare gli occhi', f:function(){}} ]},
+  {id:'lgus80_noleggio', era:'us1980', registro:'leggero', cond:()=>S.year>=1984&&S.year<=1989, kick:'Il paese', t:'Il venerdì sera, fra gli scaffali', text:'Sotto casa ha aperto un negozio che affitta film: per pochi dollari te lo porti via fino a domani. Il venerdì sera c\'è la coda, le copie dei film nuovi finiscono subito, e la famiglia discute davanti agli scaffali più a lungo di quanto durerà il film. Se lo riporti in ritardo si paga, e se non l\'hai riavvolto ti guardano male.', ch:[
+    {l:'Prendi quello che è rimasto', e:'Non era il primo della lista, e neanche il quinto', f:function(){}},
+    {l:'Riporti la cassetta in tempo', e:'Per una volta, niente multa', f:function(){}} ]},
+  {id:'lgus80_aerobica', era:'us1980', registro:'leggero', cond:()=>S.year>=1982&&S.year<=1987, kick:'Il paese', t:'E uno, e due, su le braccia', text:'Nelle palestre e nei seminterrati delle chiese si fa ginnastica a tempo di musica, in tuta lucida e scaldamuscoli, con un\'istruttrice che grida di non fermarsi. Chi non vuole uscire di casa infila la cassetta nel videoregistratore e salta davanti al televisore, mentre al piano di sotto trema il lampadario.', ch:[
+    {l:'Ti iscrivi al corso del martedì', e:'Il mercoledì fai le scale piano', f:function(){}},
+    {l:'Guardi dalla porta', e:'Sembra faticoso, e lo è', f:function(){}} ]},
+  {id:'lgus80_video_musicali', era:'us1980', registro:'leggero', cond:()=>meseAss()>=1981*12+8&&meseAss()<=1989*12+12, kick:'Il paese', t:'Le canzoni si guardano', text:'Sul cavo c\'è un canale che trasmette solo canzoni con le immagini, giorno e notte, con un presentatore giovane che le annuncia come alla radio. I ragazzi tornano da scuola e non staccano più gli occhi, nei negozi di dischi si chiede il disco «di quel video», e i genitori si domandano che cosa ci sia da guardare in un cantante che cammina sotto la pioggia.', ch:[
+    {l:'Ti siedi a guardarne uno', e:'Alla fine ne sono passati quattro', f:function(){}},
+    {l:'Cambi canale', e:'I ragazzi lo rimettono appena esci', f:function(){}} ]},
+  {id:'lgus80_computer_casa', era:'us1980', registro:'leggero', cond:()=>S.year>=1982&&S.year<=1989, kick:'Il paese', t:'Il computer in salotto', text:'È arrivato in salotto un computer che si attacca al televisore: costa qualche centinaio di dollari, ha una tastiera, un manuale spesso così e, a parte, un registratore di cassette. La pubblicità promette che terrà i conti di casa e le ricette. I ragazzi ci scrivono i primi programmi e soprattutto ci giocano, e il televisore non è più libero.', ch:[
+    {l:'Provi a metterci le spese di casa', e:'Con la penna facevi prima', f:function(){}},
+    {l:'Ti fai spiegare come funziona da un dodicenne', e:'Lo spiega benissimo, e in fretta', f:function(){}} ]},
+  {id:'lgus80_bambole', era:'us1980', registro:'leggero', cond:()=>meseAss()>=1983*12+11&&meseAss()<=1984*12+12, kick:'Il paese', t:'La bambola da adottare', text:'Nei negozi si fa la coda dall\'alba per una bambola dalla faccia tonda, e si è arrivati alle mani: scaffali travolti, commessi barricati, qualcuno al pronto soccorso. Ogni bambola ha un nome suo e un certificato d\'adozione da firmare. Chi non l\'ha trovata offre il doppio sugli annunci del giornale.', ch:[
+    {l:'Ti metti in coda', e:'Davanti a te, altre duecento persone', f:function(){}},
+    {l:'Spieghi a casa che non ce n\'è più', e:'L\'hanno presa male', f:function(){}} ]},
+  {id:'lgus80_breakdance', era:'us1980', registro:'leggero', cond:()=>S.year>=1983&&S.year<=1986, kick:'Il paese', t:'A testa in giù, sul cartone', text:'Agli angoli delle strade i ragazzi stendono un cartone, accendono uno stereo grande come una valigia e ballano girando sulla schiena e sulla testa. È venuto dai quartieri di New York e adesso è in televisione e nelle scuole di ballo di provincia. I pronto soccorso segnalano caviglie slogate, e le madri chiedono che ne sia stato del valzer.', ch:[
+    {l:'Ti fermi a guardare', e:'Metti un dollaro nel cappello', f:function(){}},
+    {l:'Prosegui, attento al cartone', e:'Alle tue vertebre va bene così', f:function(){}} ]},
+  {id:'lgus80_furgone', era:'us1980', registro:'leggero', cond:()=>S.year>=1984&&S.year<=1989, kick:'Il paese', t:'Addio, station wagon', text:'La famiglia che cambia auto non vuole più la station wagon col finto legno sulle fiancate. Vuole il furgone piccolo, alto, con la porta che scorre di lato e fino a sette posti: entra nel garage, e ci stanno i figli, i loro amici e la squadra di calcio. Chi l\'ha comprato giura che non tornerà indietro.', ch:[
+    {l:'Fai un giro di prova', e:'Sembra di guidare il salotto', f:function(){}},
+    {l:'Ti tieni la vecchia', e:'Il finto legno ha i suoi anni, e tu anche', f:function(){}} ]},
+  {id:'lgus80_disco_argento', era:'us1980', registro:'leggero', cond:()=>S.year>=1985&&S.year<=1989, kick:'Il paese', t:'Il disco che non gracchia', text:'Nei negozi di dischi compare uno scaffale nuovo: dischi piccoli e argentati, che un raggio laser legge senza toccarli. Niente fruscii, niente graffi. Costano molto più di quelli di vinile, e il lettore qualche centinaio di dollari. Gli appassionati dicono che il suono è freddo, e intanto ricomprano tutto da capo.', ch:[
+    {l:'Ne ascolti uno in negozio', e:'Si sente persino chi tossisce in sala', f:function(){}},
+    {l:'Tieni i tuoi vecchi dischi', e:'Il fruscio, a casa tua, è di famiglia', f:function(){}} ]},
+  {id:'lgus80_catena', era:'us1980', registro:'leggero', cond:()=>meseAss()>=1986*12+6&&meseAss()<=1986*12+11, kick:'Il paese', t:'Mano nella mano', text:'A fine maggio cinque o sei milioni di americani si sono presi per mano per un quarto d\'ora, in una catena da un oceano all\'altro, per raccogliere soldi per gli affamati e i senzatetto: dieci dollari a posto. La catena aveva dei buchi, riempiti con nastri e corde, e i conti sono stati più magri del previsto. Di quel quarto d\'ora si parla ancora.', ch:[
+    {l:'Racconti dov\'eri tu', e:'Fra due sconosciuti, sotto il sole', f:function(){}},
+    {l:'Chiedi dove sono finiti i soldi', e:'La risposta è più lunga della catena', f:function(){}} ]},
+  {id:'lgus80_spalline', era:'us1980', registro:'leggero', cond:()=>S.year>=1983&&S.year<=1988, kick:'Il paese', t:'Le spalle larghe', text:'Le spalle si portano larghe: le giacche da donna hanno un\'imbottitura da giocatore di football, e sopra capelli cotonati e laccati che non si muovono nemmeno col vento. In ufficio le signore l\'hanno presa dagli sceneggiati della sera. Nei negozi le spalline si vendono anche sfuse, da cucire su tutto.', ch:[
+    {l:'Ti adegui', e:'Dalla porta si passa di traverso', f:function(){}},
+    {l:'Resti come sei', e:'Fra dieci anni, nelle foto, avrai ragione tu', f:function(){}} ]},
+  {id:'lgus80_telefono_auto', era:'us1980', registro:'leggero', cond:()=>S.year>=1984&&S.year<=1987, kick:'Il paese', t:'Il telefono in macchina', text:'Qualcuno ha cominciato a telefonare dal semaforo: nell\'auto di un agente immobiliare c\'è un apparecchio con la cornetta, e sul lunotto un\'antenna a ricciolo. Costa migliaia di dollari, più il canone e un tanto al minuto. In città lo guardano come si guardava il primo televisore a colori, e c\'è già chi monta l\'antenna finta.', ch:[
+    {l:'Ti fai prestare la cornetta', e:'Chiami casa, e dici che sei in macchina', f:function(){}},
+    {l:'Guardi il prezzo', e:'Il telefono a gettone all\'angolo va ancora benissimo', f:function(){}} ]},
+  {id:'lgus80_centro_commerciale', era:'us1980', registro:'leggero', cond:()=>S.year>=1980&&S.year<=1989, kick:'Il paese', t:'Il sabato sotto l\'aria condizionata', text:'Il sabato i ragazzi non vanno più in piazza, perché la piazza è un centro commerciale: aria condizionata, la fontana, una fetta di pizza, e non si compra niente. Restano per ore sulle panchine davanti al negozio di dischi. I negozianti chiedono un regolamento, i genitori sono contenti di sapere dove sono.', ch:[
+    {l:'Accompagni i ragazzi in auto', e:'Ti chiedono di lasciarli un po\' prima', f:function(){}},
+    {l:'Ci passi anche tu', e:'Esci con un paio di calzini e due ore in meno', f:function(){}} ]},
+  {id:'lgus80_cometa', era:'us1980', registro:'leggero', cond:()=>meseAss()>=1985*12+11&&meseAss()<=1986*12+4, kick:'Il paese', t:'La cometa timida', text:'Torna ogni settantasei anni, e ci si era preparati: telescopi venduti a migliaia, magliette, gite organizzate in campagna. Ma stavolta passa dalla parte sbagliata del Sole, e dalle città non si vede quasi niente: una macchiolina, se il cielo è buio e si sa dove guardare. I nonni che l\'hanno vista nel 1910 raccontano che era un\'altra cosa.', ch:[
+    {l:'Vai in campagna col binocolo', e:'Forse era quella, forse no', f:function(){}},
+    {l:'Ascolti il racconto del 1910', e:'Ogni volta la coda è più lunga', f:function(){}} ]},
+  {id:'lgus80_quiz_tavolo', era:'us1980', registro:'leggero', cond:()=>S.year>=1984&&S.year<=1986, kick:'Il paese', t:'Le domande dopo cena', text:'Il gioco del momento è una scatola di domande: storia, sport, scienze, spettacolo, per riempire una rotella di spicchi colorati. Se ne sono vendute milioni in un anno. Le cene finiscono a mezzanotte con qualcuno che contesta la risposta scritta sul cartoncino, e chi ha studiato di più perde contro chi guarda più televisione.', ch:[
+    {l:'Accetti una partita', e:'Ti manca solo lo spicchio dello sport', f:function(){}},
+    {l:'Contesti la risposta sul cartoncino', e:'Hai ragione, e non serve a niente', f:function(){}} ]},
+  {id:'lgus80_bebe_a_bordo', era:'us1980', registro:'leggero', cond:()=>S.year>=1985&&S.year<=1987, kick:'Il paese', t:'Bebè a bordo', text:'Sul lunotto delle auto è comparso un cartello giallo a rombo, attaccato con la ventosa: «Bebè a bordo». Nessuno sa bene che cosa debba fare chi sta dietro. Se ne vendono a centinaia di migliaia, e sono già arrivate le parodie: «Suocera nel bagagliaio», «Bebè annoiato».', ch:[
+    {l:'Ne compri uno per il nipotino', e:'Il nipotino va a scuola da due anni', f:function(){}},
+    {l:'Ridi della parodia al semaforo', e:'Quello davanti ti saluta', f:function(){}} ]},
+  {id:'lgus80_rampanti', era:'us1980', registro:'leggero', cond:()=>S.year>=1984&&S.year<=1988, kick:'Il paese', t:'L\'agenda e la valigetta', text:'Hanno trent\'anni, una laurea, una valigetta e un\'agenda di pelle da cui non si separano; corrono al mattino, bevono acqua minerale e a cena parlano di mutui. I giornali hanno trovato una parola per loro, e in pochi mesi è diventata un insulto. Nessuno dice di esserlo: sono sempre gli altri.', ch:[
+    {l:'Ti comperi l\'agenda anche tu', e:'Il martedì è già pieno, ma di cosa non ricordi', f:function(){}},
+    {l:'Ordini un caffè normale', e:'Il cameriere ti chiede di quale paese', f:function(){}} ]},
+  {id:'lgus80_olimpiadi', era:'us1980', registro:'leggero', cond:()=>meseAss()>=1984*12+2&&meseAss()<=1984*12+4, kick:'Il paese', t:'La fiaccola a chilometri', text:'A maggio la fiamma olimpica partirà da New York e attraverserà il paese fino a Los Angeles, quindicimila chilometri e trentatré stati. Un chilometro di corsa si compra per tremila dollari, che andranno alle associazioni giovanili, e i greci protestano: la fiamma non si vende. Nelle cittadine sul percorso si discute già di chi pagherà il tratto davanti al municipio.', ch:[
+    {l:'Segni la data sul calendario', e:'Passerà alle cinque del mattino, dicono', f:function(){}},
+    {l:'Fai il conto di quanto costa', e:'Il tuo isolato vale quasi trecento dollari', f:function(){}} ]},
+  {id:'lgus80_concerto', era:'us1980', registro:'leggero', cond:()=>meseAss()>=1985*12+7&&meseAss()<=1985*12+12, kick:'Il paese', t:'Sedici ore di musica', text:'A luglio, per sedici ore, due stadi sulle due sponde dell\'oceano hanno cantato per gli affamati dell\'Africa, in diretta in mezzo mondo. Si è lasciato il televisore acceso tutto il giorno, e i ragazzi hanno chiamato il numero in sovrimpressione. Adesso ci si chiede dove andranno a finire quei soldi.', ch:[
+    {l:'Fai anche tu la telefonata', e:'La linea è occupata per un\'ora', f:function(){}},
+    {l:'Chiedi quanti soldi sono arrivati', e:'Nessuno ha ancora il conto', f:function(){}} ]},
+  {id:'lgus80_segreteria', era:'us1980', registro:'leggero', cond:()=>S.year>=1984&&S.year<=1989, kick:'Il paese', t:'Dopo il segnale', text:'Chi chiama non trova più il telefono che squilla a vuoto: risponde una cassetta. «Non siamo in casa, lasciate un messaggio dopo il segnale.» C\'è chi ha registrato una canzone, chi fa lo spiritoso, chi recita. Molti riattaccano spaventati; altri, davanti alla macchina, parlano come a un impiegato del catasto e sillabano il cognome.', ch:[
+    {l:'Lasci un messaggio', e:'Lo ripeti due volte, e saluti', f:function(){}},
+    {l:'Riattacchi', e:'Richiamerai quando c\'è qualcuno', f:function(){}} ]},
+  {id:'lgus80_light', era:'us1980', registro:'leggero', cond:()=>S.year>=1982&&S.year<=1989, kick:'Il paese', t:'Zero calorie', text:'Al supermercato tutto è diventato leggero: le bibite, la birra, lo yogurt, le patatine. Sull\'etichetta c\'è un numero, e a tavola ormai lo conoscono tutti. La bibita dietetica si beve accanto alla torta di mele, con la coscienza a posto. I medici dicono di mangiare meno, ma quello non sta su nessuna etichetta.', ch:[
+    {l:'Provi quella dietetica', e:'Sa di qualcosa, non si capisce di che', f:function(){}},
+    {l:'Prendi la torta intera', e:'Le calorie le conti domani', f:function(){}} ]},
 ];
 
 /* ===== F1 — LA TELEFONATA. Un'interruzione, non una carta: overlay a squillo, due opzioni secche, decisione a
@@ -6252,6 +6324,15 @@ const NOTTE_LANCI = [
   {id:"ln_us70_terr", fase:2, era:'us1970', testo:"La grande mappa in studio si accende Stato per Stato: rosso e blu non hanno ancora un partito."},
   {id:"ln_us70_quasi", fase:3, era:'us1970', testo:"Gli ultimi Stati sono sul filo: le reti tengono la proiezione in sospeso."},
   {id:"ln_us70_fin", fase:4, era:'us1970', testo:"All'alba il conto dei grandi elettori è chiuso: la corsa ha un vincitore."},
+  // L262-26: paesi sulla nazionale perché nel 1980 è viva anche ln_us70_* (era fino al 1981): era + paese vince il pareggio, senza toccare le voci del '70
+  {id:"ln_us80_open", fase:0, era:'us1980', paesi:['usa'], testo:"Chiudono i seggi sulla costa est: le reti hanno già i sondaggi all'uscita e li usano subito."},
+  {id:"ln_us80_proj", fase:1, era:'us1980', paesi:['usa'], testo:"Gli Stati vengono assegnati appena chiudono le urne: sulla mappa elettronica il conto corre."},
+  {id:"ln_us80_terr", fase:2, era:'us1980', paesi:['usa'], testo:"A ovest si vota ancora mentre in studio il conto dei grandi elettori sale."},
+  {id:"ln_us80_quasi", fase:3, era:'us1980', paesi:['usa'], testo:"Un canale di sole notizie, acceso giorno e notte, resta in diretta fino all'ultimo Stato."},
+  {id:"ln_us80_fin", fase:4, era:'us1980', paesi:['usa'], testo:"In una sala affollata, chi ha perso parla ai suoi: la notte si chiude in diretta."},
+  {id:"ln_us80_int_0", fase:0, tipo:'intermedia', era:'us1980', testo:"Tutta la Camera e un terzo del Senato in palio: i seggi chiudono a ondate."},
+  {id:"ln_us80_int_1", fase:1, tipo:'intermedia', era:'us1980', testo:"Le reti assegnano i seggi uno a uno, distretto per distretto."},
+  {id:"ln_us80_int_2", fase:2, tipo:'intermedia', era:'us1980', testo:"Il conto è chiuso: domani lo leggeranno come un voto sul Presidente."},
   {id:"ln_uk80_open", fase:0, era:'uk1980', testo:"Le dieci di sera: le due reti danno ciascuna il proprio exit poll."},
   {id:"ln_uk80_proj", fase:1, era:'uk1980', testo:"In studio la lancetta dello swing oscilla: si misura lo spostamento dal voto precedente."},
   {id:"ln_uk80_terr", fase:2, era:'uk1980', testo:"Nei municipi si conta a mano; il funzionario elettorale legge i numeri dal palco."},
@@ -19220,11 +19301,11 @@ const TITOLI=[
  {id:'ti_voto', pri:1, serie:'voto', cond:()=>typeof periodoSondaggi==='function'&&periodoSondaggi(), amico:'Verso le urne: il governo si gioca la conferma a testa alta', ostile:'Verso le urne: il conto alla rovescia spaventa il governo'},   // L138-1b: la serie «voto» — cinque versioni; la cond è vera per mesi di fila (vigilia e minoranza), e regge perché generaTitolo scarta i recenti PER SERIE
  {id:'ti_voto_2', pri:1, serie:'voto', cond:()=>typeof periodoSondaggi==='function'&&periodoSondaggi(), amico:'Il governo conta i voti, e i voti ci sono', ostile:'Il governo conta i voti, e i conti non tornano'},
  {id:'ti_voto_3', pri:1, serie:'voto', cond:()=>typeof periodoSondaggi==='function'&&periodoSondaggi(), amico:'Mesi decisivi: la maggioranza serra le file', ostile:'Mesi decisivi: la maggioranza scricchiola'},
- {id:'ti_voto_4', pri:1, serie:'voto', cond:()=>typeof periodoSondaggi==='function'&&periodoSondaggi(), amico:'I sondaggi sorridono al governo', ostile:'I sondaggi tremano: il governo rischia'},
+ {id:'ti_voto_4', allegro:true, pri:1, serie:'voto', cond:()=>typeof periodoSondaggi==='function'&&periodoSondaggi(), amico:'I sondaggi sorridono al governo', ostile:'I sondaggi tremano: il governo rischia'},
  {id:'ti_voto_5', pri:1, serie:'voto', cond:()=>typeof periodoSondaggi==='function'&&periodoSondaggi(), amico:'Tutti con la calcolatrice in mano: il governo è avanti', ostile:'Tutti con la calcolatrice in mano: il governo è indietro'},
  {id:'ti_intermedia', pri:1, cond:()=>S.agenda&&S.agenda.some(a=>a.kind==='intermedia'), amico:'Il voto locale come termometro: il governo è pronto', ostile:'Il voto locale incombe: il governo trema'},
  {id:'ti_reputazione', cond:()=>S.ind.reputazione!=null&&S.ind.reputazione<40, amico:'Il Paese tratta da pari: realismo nelle alleanze', ostile:'Isolati: il Paese conta sempre meno nel mondo'},
- {id:'ti_bene', cond:()=>S.ind.growth>1&&S.ind.fiducia>70, amico:'Un Paese che riparte: i numeri danno ragione al governo', ostile:'Crescita sì, ma chi ne vede i frutti?'},
+ {id:'ti_bene', allegro:true, cond:()=>S.ind.growth>1&&S.ind.fiducia>70, amico:'Un Paese che riparte: i numeri danno ragione al governo', ostile:'Crescita sì, ma chi ne vede i frutti?'},
  /* Build B (iii) — la voce-stampa del '50 (era:'italia1950', eraVivaT le esclude nel presente): commenta le
     circostanze dell'epoca. Fra gli eventi-specifici e gli «ordinario»: un mese quieto del '50 suona d'epoca. */
  /* conds VARIATE e contestuali (non sempre-eleggibili): al variare degli indicatori nel gioco reale, mesi
@@ -19433,15 +19514,15 @@ const TITOLI=[
  {id:'ti70_reputazione', era:'italia1970', cond:()=>S.ind.reputazione!=null&&S.ind.reputazione<40, amico:'Realismo nelle alleanze: il Paese tratta senza alzare la voce', ostile:'Nei tavoli che contano l\'Italia resta ai margini'},
  /* ===== D2 — TITOLI DI STATO (pri 2, universali): il titolo LEGGE il paese (crescita, lavoro, conti, clima
     politico, stagione) — conds a bande larghe e sovrapposte, così in ogni stato ordinario ≥18 titoli vivi. ===== */
- {id:'ti_crescita', cond:()=>S.ind.growth>=0.5&&S.ind.growth<=1.5, amico:'L\'economia respira: segnali di fiducia', ostile:'Crescita tiepida: il paese vuole di più'},
+ {id:'ti_crescita', allegro:true, cond:()=>S.ind.growth>=0.5&&S.ind.growth<=1.5, amico:'L\'economia respira: segnali di fiducia', ostile:'Crescita tiepida: il paese vuole di più'},
  {id:'ti_stagnazione', cond:()=>S.ind.growth>=0&&S.ind.growth<0.5, amico:'Il motore gira piano, ma gira', ostile:'Un paese in surplace: tutto fermo, tutto uguale'},
- {id:'ti_lavoro_ok', cond:()=>S.ind.unemp<=6.5, amico:'Le assunzioni tirano: il lavoro c\'è', ostile:'Lavoro sì, ma a quali condizioni?'},
+ {id:'ti_lavoro_ok', allegro:true, cond:()=>S.ind.unemp<=6.5, amico:'Le assunzioni tirano: il lavoro c\'è', ostile:'Lavoro sì, ma a quali condizioni?'},
  {id:'ti_lavoro_chiaroscuro', cond:()=>S.ind.unemp>6.5&&S.ind.unemp<=9, amico:'Lavoro, segnali in chiaroscuro ma la rotta tiene', ostile:'Il lavoro che manca: famiglie col fiato corto'},
- {id:'ti_conti_ordine', cond:()=>S.ind.deficit<=3, amico:'Conti in ordine: lo Stato tira il fiato', ostile:'Il rigore c\'è: e la crescita?'},
+ {id:'ti_conti_ordine', allegro:true, cond:()=>S.ind.deficit<=3, amico:'Conti in ordine: lo Stato tira il fiato', ostile:'Il rigore c\'è: e la crescita?'},
  {id:'ti_conti_tesi', cond:()=>S.ind.deficit>3&&S.ind.deficit<=4.5, amico:'I conti sotto controllo, assicura il governo', ostile:'La coperta è corta: conti in salita'},
  {id:'ti_coalizione_tiene', cond:()=>S.coalizione&&S.coalizione.length>1, amico:'La maggioranza marcia compatta', ostile:'Alleati in ordine sparso: quanto regge?'},
- {id:'ti_consenso_alto', cond:()=>S.ind.consenso>=58, amico:'Il paese si fida: il governo in credito', ostile:'Applausi oggi: e domani?'},
- {id:'ti_fiducia_solida', cond:()=>S.ind.fiducia!=null&&S.ind.fiducia>=65, amico:'I creditori si fidano: il paese è solido', ostile:'Fiducia sì, ma è fiducia a tempo'},
+ {id:'ti_consenso_alto', allegro:true, cond:()=>S.ind.consenso>=58, amico:'Il paese si fida: il governo in credito', ostile:'Applausi oggi: e domani?'},
+ {id:'ti_fiducia_solida', allegro:true, cond:()=>S.ind.fiducia!=null&&S.ind.fiducia>=65, amico:'I creditori si fidano: il paese è solido', ostile:'Fiducia sì, ma è fiducia a tempo'},
  {id:'ti_piazza_fredda', cond:()=>{ var g=S.groups||{}; var m=100; for(var k in g) m=Math.min(m,g[k]); return m<42; }, amico:'Le piazze chiedono, il palazzo ascolta', ostile:'La protesta monta: il palazzo è lontano'},
  {id:'ti_sanita_tiene', cond:()=>S.ind.sanita!=null&&S.ind.sanita>=55, amico:'Ospedali che reggono: la sanità tiene', ostile:'La sanità tiene: ma quanto ancora?'},
  {id:'ti_sicurezza_num', cond:()=>S.ind.sicurezza!=null&&S.ind.sicurezza>=50, amico:'Città più sicure, dicono i numeri', ostile:'Sicurezza: i numeri sì, la percezione no'},
@@ -19453,12 +19534,12 @@ const TITOLI=[
     resta byte-identico, enrichito solo il presente). Struttura D2: leggono lo stato (crescita/lavoro/consenso/
     coalizione/ordine/reputazione) con conds a bande, voce amica/ostile. De-dup verificato vs il blocco D2 sopra:
     [NUOVO]=banda scoperta · [2ª voce]=registro distinto su banda coperta (riportato nel vaglio). ===== */
- {id:'ti_boom', era:'contemporanea', cond:()=>S.ind.growth>1.5, amico:'L\'economia corre, il governo incassa', ostile:'Il PIL corre, ma nelle tasche non si sente'},                                              // [NUOVO] growth>1.5 (sopra ti_crescita; ti_bene chiede fiducia>70)
+ {id:'ti_boom', allegro:true, era:'contemporanea', cond:()=>S.ind.growth>1.5, amico:'L\'economia corre, il governo incassa', ostile:'Il PIL corre, ma nelle tasche non si sente'},                                              // [NUOVO] growth>1.5 (sopra ti_crescita; ti_bene chiede fiducia>70)
  {id:'ti_crescita_ferma', era:'contemporanea', cond:()=>S.ind.growth>=0&&S.ind.growth<0.5, amico:'La crescita rallenta, il governo cerca la spinta', ostile:'La crescita si spegne, e si vede'},                    // [2ª voce] vs ti_stagnazione (registro più netto)
  {id:'ti_rosso', era:'contemporanea', cond:()=>S.ind.growth<0, amico:'Numeri in rosso: il governo prepara la manovra', ostile:'Numeri in rosso: il paese frena'},                                                 // [2ª voce] vs ti_recessione
  {id:'ti_lavoro_tira', era:'contemporanea', cond:()=>S.ind.unemp<=6, amico:'Il lavoro tira, calano le tensioni', ostile:'Occupati sì, ma con quali contratti?'},                                                 // [2ª voce] vs ti_lavoro_ok (unemp<=6)
  {id:'ti_lavoro_piazza', era:'contemporanea', cond:()=>S.ind.unemp>9, amico:'Disoccupazione alta: il governo apre i tavoli', ostile:'Senza lavoro: la piazza rumoreggia'},                                        // [2ª voce] vs ti_disocc (angolo sociale)
- {id:'ti_vento_favore', era:'contemporanea', cond:()=>S.ind.consenso>=58, amico:'Il vento soffia a favore', ostile:'Consensi oggi, promesse per domani'},                                                        // [2ª voce] vs ti_consenso_alto
+ {id:'ti_vento_favore', allegro:true, era:'contemporanea', cond:()=>S.ind.consenso>=58, amico:'Il vento soffia a favore', ostile:'Consensi oggi, promesse per domani'},                                                        // [2ª voce] vs ti_consenso_alto
  {id:'ti_sondaggi_calo', era:'contemporanea', cond:()=>S.ind.consenso>=40&&S.ind.consenso<52, amico:'Sondaggi in calo, ma la rotta tiene', ostile:'I sondaggi scivolano, il palazzo trema'},                       // [NUOVO] banda 40-52 (fra ti_consenso<40 e ti_consenso_alto>=58)
  {id:'ti_maggioranza_tiene', era:'contemporanea', cond:()=>S.coalizione&&S.coalizione.length>1&&S.ind.consenso>=50, amico:'La maggioranza tiene, per ora', ostile:'Maggioranza in fila, ma quanto durerà?'},        // [2ª voce] vs ti_coalizione_tiene (+consenso saldo)
  {id:'ti_alleati_nervosi', era:'contemporanea', cond:()=>S.coalizione&&S.coalizione.length>1&&S.ind.consenso<45, amico:'Alleati a confronto: la maggioranza cerca la quadra', ostile:'Alleati nervosi: la maggioranza scricchiola'}, // [NUOVO] coalizione debole (nessun titolo la copriva)
@@ -19629,7 +19710,7 @@ const TITOLI=[
  {id:'ti_ord_paese', pri:3, amico:'Il paese va avanti, il governo pure', ostile:'Il paese va avanti, nonostante tutto'},
  {id:'ti_ord_palazzo', pri:3, amico:'Palazzo operoso: dossier e riunioni', ostile:'Il palazzo parla con sé stesso'},
  {id:'ti_ord_settimana', pri:3, amico:'Settimane di lavoro ordinato', ostile:'Un\'altra settimana, le stesse promesse'},
- {id:'ti_ord_province', pri:3, amico:'Dalle province segnali di fiducia', ostile:'La provincia si sente dimenticata'},
+ {id:'ti_ord_province', allegro:true, pri:3, amico:'Dalle province segnali di fiducia', ostile:'La provincia si sente dimenticata'},
  {id:'ti_ord_attesa', pri:3, amico:'Il governo semina: i frutti verranno', ostile:'Il paese in sala d\'attesa'},
  {id:'ti_ord_misura', pri:3, amico:'Passi brevi, ma nella direzione giusta', ostile:'Piccolo cabotaggio: dov\'è la visione?'},
  /* ===== L60-2 · i sedici titoli del decennio inglese '80 (scheda §F) ===== */
@@ -20339,6 +20420,28 @@ const TITOLI=[
  {id:'ti_us70_s_lavoro', era:'us1970', amico:'Le fabbriche riassumono: la disoccupazione scende', ostile:'Le file per il sussidio di disoccupazione si allungano'},
  {id:'ti_us70_s_sanita', era:'us1970', amico:'Le cure per tutti: Washington studia un\'assicurazione nazionale', ostile:'Le spese mediche corrono: un ricovero costa uno stipendio'},
  {id:'ti_us70_s_bicentenario', era:'us1970', cond:()=>S.year>=1975&&S.year<=1976, amico:'Duecento anni: bandiere a ogni finestra, il paese torna a festeggiarsi', ostile:'Duecento anni: e la festa la pagano i contribuenti'},
+ /* L262-24 · i titoli «di stato» di us1980 (senza data, gradino 2: la gemella del decennio vince sulla generica). Il tag è vivo dal 1979: ogni `cond` parte dal 1980 o dopo, dal fatto che racconta (fonti nel rapporto «⚑ L262-24» di PRESET-USA-1980.md). Solo testo. */
+ {id:'ti_us80_s_tassi', era:'us1980', cond:()=>S.year>=1981&&S.year<=1983, amico:'L\'inflazione scende: la cura dei tassi alti funziona', ostile:'Mutui alle stelle: comprare casa diventa un sogno'},
+ {id:'ti_us80_s_regole', era:'us1980', cond:()=>S.year>=1984, amico:'Meno regole, più concorrenza: voli e telefonate costano meno', ostile:'Meno regole: le compagnie tagliano rotte e stipendi'},
+ {id:'ti_us80_s_deficit', era:'us1980', cond:()=>S.year>=1983, amico:'L\'economia cresce: i conti si rimetteranno a posto, dice il Tesoro', ostile:'Il debito pubblico corre: il conto lo pagheranno i figli'},
+ {id:'ti_us80_s_auto', era:'us1980', cond:()=>meseAss()>=1982*12+11, amico:'Le case giapponesi aprono fabbriche in America: posti nuovi in provincia', ostile:'Auto importate ovunque: le fabbriche di Detroit licenziano'},
+ {id:'ti_us80_s_acciaio', era:'us1980', cond:()=>S.year>=1982, amico:'Le città dell\'acciaio si reinventano: ospedali e università al posto degli altiforni', ostile:'Si spengono gli altiforni: le città dell\'acciaio si svuotano'},
+ {id:'ti_us80_s_borsa', era:'us1980', allegro:true, cond:()=>S.year>=1983&&meseAss()<=1987*12+9, amico:'Wall Street corre: crescono i risparmi di chi ha investito', ostile:'Scalate a debito: a Wall Street si arricchiscono in pochi'},
+ {id:'ti_us80_s_strada', era:'us1980', cond:()=>S.year>=1982, amico:'Rifugi e mense aperti tutto l\'inverno: le città fanno la loro parte', ostile:'Sempre più persone dormono per strada nelle grandi città'},
+ {id:'ti_us80_s_notizie', era:'us1980', cond:()=>meseAss()>=1980*12+6, amico:'Notizie a tutte le ore: il paese è sempre informato', ostile:'Il telegiornale che non si ferma mai: la politica diventa spettacolo'},
+ {id:'ti_us80_s_scuola', era:'us1980', cond:()=>meseAss()>=1983*12+5, amico:'Più matematica e più scienze: la scuola alza l\'asticella', ostile:'Un rapporto federale: la scuola americana resta indietro'},
+ {id:'ti_us80_s_armi', era:'us1980', cond:()=>S.year>=1981&&!(S.year===1983&&S.month>=4&&S.month<=6&&S.usScudo83!=null), amico:'Navi e aerei nuovi: le forze armate tornano forti', ostile:'Spese militari mai viste in tempo di pace, e i conti di casa aspettano'},
+ {id:'ti_us80_s_piogge', era:'us1980', cond:()=>S.year>=1981, amico:'Piogge acide: le centrali montano i filtri', ostile:'Laghi senza pesci e boschi malati: le piogge acide passano il confine'},
+ {id:'ti_us80_s_sindacati', era:'us1980', cond:()=>S.year>=1982, amico:'Nuovi contratti: le fabbriche restano aperte in cambio di salari più bassi', ostile:'Il sindacato perde iscritti, e lo sciopero non paga più'},
+ {id:'ti_us80_s_computer', era:'us1980', allegro:true, cond:()=>S.year>=1982, amico:'Un computer in ogni ufficio: nascono mestieri nuovi', ostile:'Il computer entra in fabbrica: chi non lo sa usare resta indietro'},
+ {id:'ti_us80_s_confine', era:'us1980', cond:()=>meseAss()>=1986*12+11, amico:'Una legge regolarizza chi lavora qui da anni', ostile:'Milioni da regolarizzare, e il confine resta un colabrodo, dicono i critici'},
+ {id:'ti_us80_s_sudafrica', era:'us1980', cond:()=>S.year>=1985&&S.year<=1988, amico:'Sanzioni al Sudafrica: Washington chiede la fine della segregazione', ostile:'Sanzioni al Sudafrica: i campus protestano, il governo frena'},
+ {id:'ti_us80_s_est', era:'us1980', cond:()=>meseAss()>=1989*12+6&&meseAss()<=1989*12+10, amico:'All\'Est i regimi vacillano: la guerra fredda finisce senza sparare', ostile:'L\'Est si apre: e ora chi paga la sua ripresa?'},
+ /* L262-27 · LA PRIMA PAGINA CHE REAGISCE ALL'ECONOMIA: con 16 gemelle vive i generici (ti_recessione, ti_disocc) non escono più in us1980 (L262-24).
+    Le soglie dalla misura del banco (prove/l262-27/misura-indicatori.js): unemp>=9 è vera nel 24-25% dei mesi, per il 91% nel 1982-83. Non escono nei mesi sobri (meseSobrioOra), non allegri. `reattivo:true`: dentro il gradino 2 passano prima delle altre gemelle (generaTitolo). */
+ {id:'ti_us80_s_frenata', era:'us1980', reattivo:true, cond:()=>S.year>=1980&&S.ind.growth<0&&!meseSobrioOra(), amico:"L'economia frena: è il prezzo per battere l'inflazione, dice il governo", ostile:"L'economia arretra, e i negozi abbassano le serrande"},
+ {id:'ti_us80_s_disoccupati', era:'us1980', reattivo:true, cond:()=>S.year>=1980&&S.ind.unemp>=US80_DISOCC_ALTA&&!meseSobrioOra(), amico:'Piani per il lavoro: corsi e cantieri per chi cerca un posto', ostile:'Si allungano le file agli uffici di collocamento'},
+ {id:'ti_us80_s_fabbriche', era:'us1980', reattivo:true, cond:()=>S.year>=1980&&S.ind.unemp>=US80_DISOCC_ALTA&&S.year<=1984&&!meseSobrioOra(), amico:'Aiuti alle città delle fabbriche: il governo promette posti nuovi', ostile:'Chiudono le fabbriche della cintura industriale, e le città restano senza lavoro'},
  // L258-12 · gli ostaggi di Teheran: nel 1979/12, dopo l'evento di novembre (uno per valore di S.usOstaggi79; all'opposizione non c'è prima pagina)
  {id:'ti_us70_ostaggi', era:'us1970', pri:1, cond:()=>S.year===1979&&S.month===12&&S.usOstaggi79==='pazienza', amico:'Niente petrolio iraniano, soldi congelati: il Presidente stringe senza sparare', ostile:'Teheran libera tredici ostaggi: più di cinquanta restano nell\'ambasciata'},
  {id:'ti_us70_ostaggi_forza', era:'us1970', pri:1, cond:()=>S.year===1979&&S.month===12&&S.usOstaggi79==='forza', amico:'La flotta nel Golfo: l\'America non si lascia ricattare', ostile:'Ostaggi: navi da guerra davanti all\'Iran, e a Teheran gridano più forte'},
@@ -20382,6 +20485,15 @@ const TITOLI=[
 {id:'ti_us80_paura', era:'us1980', pri:1, cond:()=>S.usPaura83==='distensione' && S.year===1984 && S.month<=2 && meseAss()!==S.usRipresa83+1, amico:'Dopo il film che ha spaventato il paese, toni più bassi verso Mosca', ostile:'Troppo morbidi con Mosca: dopo un film, il governo abbassa la voce'},
 {id:'ti_us80_paura_fermezza', era:'us1980', pri:1, cond:()=>S.usPaura83==='fermezza' && S.year===1984 && S.month<=2 && meseAss()!==S.usRipresa83+1, amico:'I missili arrivano in Europa, e il governo non si muove di un passo', ostile:'Il paese ha paura, e il governo tira dritto coi missili'},
 {id:'ti_us80_paura_discorso', era:'us1980', pri:1, cond:()=>S.usPaura83==='discorso' && S.year===1984 && S.month<=2 && meseAss()!==S.usRipresa83+1, amico:'Fermezza e una porta aperta: il discorso dopo il film che ha scosso il paese', ostile:'Un discorso per un film: il governo insegue la paura del paese'},
+{id:'ti_us80_fattorie', era:'us1980', pri:1, cond:()=>S.usFattorie85==='prestiti' && S.year===1985 && S.month>=3 && S.month<=6, amico:'Prestiti d\'emergenza alle fattorie: il governo ferma le aste', ostile:'Miliardi per i debiti delle fattorie: e gli altri chi li aiuta?'},
+{id:'ti_us80_fattorie_veto', era:'us1980', pri:1, cond:()=>S.usFattorie85==='veto' && S.year===1985 && S.month>=3 && S.month<=6, amico:'Veto ai prestiti: lo Stato non compra i debiti di tutti', ostile:'Le aste continuano, e il governo dice no alle campagne'},
+{id:'ti_us80_fattorie_moratoria', era:'us1980', pri:1, cond:()=>S.usFattorie85==='moratoria' && S.year===1985 && S.month>=3 && S.month<=6, amico:'Le aste si fermano, e la riforma agricola arriva in autunno', ostile:'Una moratoria e una promessa: alle campagne non bastano'},
+{id:'ti_us80_malattia', era:'us1980', pri:1, cond:()=>S.usMalattia85==='ricerca' && meseAss()>=1985*12+10 && meseAss()<=1986*12+1, amico:'Più fondi alla ricerca sulla malattia nuova, e il governo ne parla apertamente', ostile:'Tanti discorsi sulla malattia nuova, e una cura che ancora non c\'è'},
+{id:'ti_us80_malattia_prudenza', era:'us1980', pri:1, cond:()=>S.usMalattia85==='prudenza' && meseAss()>=1985*12+10 && meseAss()<=1986*12+1, amico:'Sulla malattia nuova il governo lascia parlare i medici', ostile:'La malattia nuova fa paura, e il governo tace'},
+{id:'ti_us80_malattia_informazione', era:'us1980', pri:1, cond:()=>S.usMalattia85==='informazione' && meseAss()>=1985*12+10 && meseAss()<=1986*12+1, amico:'Una campagna in ogni casa per dire la verità sulla malattia nuova', ostile:'Consigli in ogni casa: ma ai ricercatori chi dà i fondi?'},
+{id:'ti_us80_droga', era:'us1980', pri:1, cond:()=>S.usDroga86==='pene' && S.year===1987 && S.month<=2, amico:'Pene minime e più carceri: la linea dura contro la droga nuova', ostile:'Più carceri e nessuna cura: la droga resta nei quartieri'},
+{id:'ti_us80_droga_cure', era:'us1980', pri:1, cond:()=>S.usDroga86==='cure' && S.year===1987 && S.month<=2, amico:'Cure e scuole contro la droga nuova: il governo sceglie la prevenzione', ostile:'Contro la droga il governo manda i consultori: le strade restano alle bande'},
+{id:'ti_us80_droga_legge', era:'us1980', pri:1, cond:()=>S.usDroga86==='legge' && S.year===1987 && S.month<=2, amico:'La legge dei due partiti contro la droga alla prova delle città', ostile:'Un po\' di tutto prima del voto: la legge sulla droga è piaciuta solo ai candidati'},
 {id:'ti_us80_golfo', era:'us1980', pri:1, cond:()=>S.usGolfo88==='rammarico' && S.year===1988 && S.month>=9 && S.month<=10, amico:'Un risarcimento alle famiglie del volo abbattuto: l\'America non si nasconde', ostile:'Rammarico sì, colpe no: il volo iraniano resta senza una risposta'},
 {id:'ti_us80_golfo_inchiesta', era:'us1980', pri:1, cond:()=>S.usGolfo88==='inchiesta' && S.year===1988 && S.month>=9 && S.month<=10, amico:'L\'inchiesta sul volo abbattuto si fa in pubblico, e cambiano le regole per le navi', ostile:'Le navi nel Golfo con le mani legate: i comandi protestano per le nuove regole'},
 {id:'ti_us80_golfo_difesa', era:'us1980', pri:1, cond:()=>S.usGolfo88==='difesa' && S.year===1988 && S.month>=9 && S.month<=10, amico:'Il governo sta con l\'equipaggio: in zona di guerra si decide in pochi secondi', ostile:'Un volo di linea abbattuto e nemmeno una parola: il mondo guarda l\'America'},
@@ -26522,7 +26634,9 @@ const NAVETTA86_OPP_EV = {
 const REYKJAVIK86_EV = {
   id:'us80_reykjavik', era:'us1980', kick:'Il mondo',
   t:'La casa sul mare d\'Islanda',
-  text:'Un vertice lampo in Islanda col capo sovietico, l\'11 e il 12 ottobre. In due giorni si è arrivati dove nessuno era mai arrivato: dimezzare le armi strategiche, togliere i missili a medio raggio dall\'Europa, perfino parlare di un mondo senza atomiche. All\'ultima ora la condizione di Mosca: per dieci anni lo scudo spaziale resta nei laboratori.',
+  get text(){ return (typeof S!=='undefined' && S && S.usScudo83==='ricerca')   /* L262-23: chi nel 1983 ha finanziato lo scudo senza annunci non lo ha mai presentato al paese */
+    ? 'Un vertice lampo in Islanda col capo sovietico, l\'11 e il 12 ottobre. In due giorni si è arrivati dove nessuno era mai arrivato: dimezzare le armi strategiche, togliere i missili a medio raggio dall\'Europa, perfino parlare di un mondo senza atomiche. All\'ultima ora la condizione di Mosca: per dieci anni lo scudo spaziale resta nei laboratori. È il programma di difesa spaziale che la Casa Bianca aveva tenuto in sordina, e che ormai tutti conoscono.'
+    : 'Un vertice lampo in Islanda col capo sovietico, l\'11 e il 12 ottobre. In due giorni si è arrivati dove nessuno era mai arrivato: dimezzare le armi strategiche, togliere i missili a medio raggio dall\'Europa, perfino parlare di un mondo senza atomiche. All\'ultima ora la condizione di Mosca: per dieci anni lo scudo spaziale resta nei laboratori.'; },
   ch:[
     { l:'No: lo scudo non si baratta, ci si alza dal tavolo', e:'La storia · il vertice si chiude senza firma, e da lì parte il trattato sui missili a medio raggio dell\'anno dopo · il tuo partito ti applaude, i giornali parlano di un\'occasione perduta',
       f:function(){ S.usReykjavik86='scudo'; baseUs60(1); stampad(-1);
@@ -26549,6 +26663,112 @@ const REYKJAVIK86_OPP_EV = {
     { l:'Chiedere al Congresso di tagliare i fondi allo scudo', e:'Il ceto medio guarda volentieri quei miliardi · i giornali chiedono che cosa resti da trattare con Mosca',
       f:function(){ S.usReykjavik86Opp='fondi'; gdUs60('cetomedio',1); stampad(-1);
         S.log.unshift({t:T('Il mondo'),x:T('Dall\'opposizione ha chiesto al Congresso di tagliare i fondi allo scudo spaziale.')}); } },
+  ],
+};
+/* ==============================================================================================================
+   L262-23 · STATI UNITI 1980 — LE FATTORIE ALL'ASTA (1985/2), LA MALATTIA NUOVA (1985/9) E LA DROGA NUOVA (1986/8) (scheda PRESET-USA-1980 §3, decisioni di Cowork del 31/10; testi di Code).
+   Stessi helper di L262-22. Nomi nuovi cercati in tutto js/, .claude/ e prove/ il 31/10 prima di scriverli (L99-2), zero occorrenze: us80_fattorie(_opp), us80_malattia(_opp), us80_droga(_opp), usFattorie85(Opp), usMalattia85(Opp), usDroga86(Opp),
+   fattorieOra, malattiaOra, drogaOra, us80FattorieMese, us80MalattiaMese, us80DrogaMese, ti_us80_fattorie, ti_us80_malattia, ti_us80_droga.
+   ⚑ NON SONO SNODI (nessuna riga in SNODI_STORICI, RIVALI, POTENZE) e NON SONO DEL SACCHETTO: carte DOVUTE (cancelli in game.js accanto a us80Carte83). Nessuna è carta grave. Ripiego al mese dopo: l'agosto 1986 è di pus80_cerritos, quindi la droga esce di fatto a settembre.
+   ⚑ In GROUPS non c'è `agricoltori`: le campagne le muove `lavoratori` (decisione di Cowork). La malattia è cronaca: nessun gruppo di persone nominato come causa, nessuna cifra di morti. La droga: nessun quartiere né gruppo etnico. Nessun nome di persona, di concerto, di prodotto.
+   Verificato il 31/10: il veto del 6 marzo 1985 alla legge che univa gli aiuti per la carestia in Africa e il credito agricolo (Reagan Library, messaggio al Senato), la legge agricola e quella sul credito agricolo firmate il 23 dicembre 1985 (Reagan Library). Non confermato dalle fonti lette: la frequenza settimanale delle aste, che qui è racconto.
+   La prima risposta pubblica del Presidente il 17 settembre 1985, a una domanda in conferenza stampa (History, GSU, en.wikipedia, con la precisazione che il primo discorso è del 1987); l'opuscolo a ogni famiglia nel 1988 (CDC, NLM). L'Anti-Drug Abuse Act firmato il 27 ottobre 1986 con le pene minime obbligatorie, dopo un'estate di prime pagine (Encyclopedia.com, PBS, Reason).
+   ⚑ La consegna chiamava la carta «La polvere nuova»: questa droga si fuma in piccole pietre, non è una polvere; il titolo è «La droga nuova». «Dà dipendenza in pochi giorni» era il racconto dei giornali di allora, quindi il testo lo mette in bocca a loro.
+   ============================================================================================================== */
+const FATTORIE85_EV = {
+  id:'us80_fattorie', era:'us1980', kick:'L\'economia',
+  t:'Le fattorie all\'asta',
+  text:'Nel Midwest il prezzo della terra è crollato, i tassi sono alti e le banche pignorano: ogni settimana una fattoria di famiglia va all\'asta, a volte coi vicini che provano a fermarla. Al Congresso i due partiti hanno scritto una legge di prestiti d\'emergenza garantiti dallo Stato, e i tuoi consiglieri dicono che costa troppo.',
+  ch:[
+    { l:'Firmare i prestiti d\'emergenza', e:'Le campagne e chi ci lavora ti ringraziano · le imprese chiedono chi pagherà quei debiti',
+      f:function(){ S.usFattorie85='prestiti'; gdUs60('lavoratori',1); gdUs60('imprenditori',-1);
+        S.log.unshift({t:T('L\'economia'),x:T('Ha firmato i prestiti d\'emergenza per le fattorie.')}); } },
+    { l:'Veto: lo Stato non può comprare i debiti di tutti', e:'La storia · il veto arriva all\'inizio di marzo, e la legge agricola a fine anno · le imprese approvano, fra chi lavora la terra cresce la rabbia',
+      f:function(){ S.usFattorie85='veto'; gdUs60('imprenditori',1); gdUs60('lavoratori',-1);
+        S.log.unshift({t:T('L\'economia'),x:T('Ha messo il veto ai prestiti d\'emergenza per le fattorie.')}); } },
+    { l:'Niente legge ora: una moratoria delle aste e la riforma agricola in autunno', e:'All\'estero piace un\'America che non perde la testa · il tuo partito chiede che cosa tu abbia deciso, davvero',
+      f:function(){ S.usFattorie85='moratoria'; repd(1); baseUs60(-1);
+        S.log.unshift({t:T('L\'economia'),x:T('Ha fermato le aste delle fattorie e promesso la riforma agricola in autunno.')}); } },
+  ],
+};
+const FATTORIE85_OPP_EV = {
+  id:'us80_fattorie_opp', era:'us1980', kick:'L\'economia',
+  t:'Le fattorie all\'asta, dall\'aula',
+  text:'Nel Midwest il prezzo della terra è crollato, i tassi sono alti e le banche pignorano: ogni settimana una fattoria di famiglia va all\'asta, a volte coi vicini che provano a fermarla. Al Congresso è arrivata una legge di prestiti d\'emergenza garantiti dallo Stato, e il tuo partito deve dire come vota.',
+  ch:[
+    { l:'Votare i prestiti d\'emergenza', e:'Le campagne e chi ci lavora ti ascoltano · le imprese chiedono chi pagherà quei debiti',
+      f:function(){ S.usFattorie85Opp='voto'; gdUs60('lavoratori',1); gdUs60('imprenditori',-1);
+        S.log.unshift({t:T('L\'economia'),x:T('Dall\'opposizione ha votato i prestiti d\'emergenza per le fattorie.')}); } },
+    { l:'Meno spesa: aiutare solo chi può farcela', e:'Le imprese approvano · fra chi lavora la terra cresce la rabbia',
+      f:function(){ S.usFattorie85Opp='rigore'; gdUs60('imprenditori',1); gdUs60('lavoratori',-1);
+        S.log.unshift({t:T('L\'economia'),x:T('Dall\'opposizione ha chiesto di aiutare solo le fattorie che possono farcela.')}); } },
+    { l:'Accusare il governo di aver lasciato sole le campagne', e:'I giornali riprendono l\'accusa · all\'estero si chiedono se l\'America sappia tenere i conti',
+      f:function(){ S.usFattorie85Opp='accusa'; stampad(1); repd(-1);
+        S.log.unshift({t:T('L\'economia'),x:T('Dall\'opposizione ha accusato il governo di aver lasciato sole le campagne.')}); } },
+  ],
+};
+const MALATTIA85_EV = {
+  id:'us80_malattia', era:'us1980', kick:'Il paese',
+  t:'La malattia nuova',
+  text:'Da quattro anni i medici vedono una malattia che spegne le difese del corpo, e la chiamano AIDS. Ora è sulle prime pagine: la gente ha paura di prenderla da una stretta di mano, ci sono scuole che non vogliono bambini malati e famiglie lasciate sole. I ricercatori pubblici chiedono il doppio dei fondi, e domani in conferenza stampa ti chiederanno che cosa fa il governo.',
+  ch:[
+    { l:'Più fondi alla ricerca, e parlarne apertamente al paese', e:'I giovani ti ascoltano · nelle chiese c\'è chi preferirebbe parlarne meno',
+      f:function(){ S.usMalattia85='ricerca'; gdUs60('giovani',1); gdUs60('cattolici',-1);
+        S.log.unshift({t:T('Il paese'),x:T('Ha dato più fondi alla ricerca sulla malattia nuova e ne ha parlato apertamente al paese.')}); } },
+    { l:'Prudenza: lasciare parlare i medici, i fondi restano quelli', e:'La storia · la prima risposta pubblica del Presidente arriva a settembre, a una domanda in conferenza stampa · nelle chiese apprezzano il tono, i giornali scrivono che il governo tace',
+      f:function(){ S.usMalattia85='prudenza'; gdUs60('cattolici',1); stampad(-1);
+        S.log.unshift({t:T('Il paese'),x:T('Sulla malattia nuova ha lasciato parlare i medici, e i fondi sono rimasti quelli.')}); } },
+    { l:'Una campagna di informazione sanitaria in ogni casa', e:'La storia · un opuscolo in ogni casa arriverà solo nel 1988 · i giornali riprendono i consigli dei medici, il tuo partito chiede se tocca allo Stato entrare in casa',
+      f:function(){ S.usMalattia85='informazione'; stampad(1); baseUs60(-1);
+        S.log.unshift({t:T('Il paese'),x:T('Ha portato in ogni casa una campagna di informazione sulla malattia nuova.')}); } },
+  ],
+};
+const MALATTIA85_OPP_EV = {
+  id:'us80_malattia_opp', era:'us1980', kick:'Il paese',
+  t:'La malattia nuova, dall\'aula',
+  text:'Da quattro anni i medici vedono una malattia che spegne le difese del corpo, e la chiamano AIDS. Ora è sulle prime pagine: la gente ha paura di prenderla da una stretta di mano, ci sono scuole che non vogliono bambini malati e famiglie lasciate sole. I ricercatori pubblici chiedono il doppio dei fondi, e in aula vogliono sapere che cosa ne pensa il tuo partito.',
+  ch:[
+    { l:'Chiedere in aula il raddoppio dei fondi alla ricerca', e:'I giovani ti seguono · nelle chiese c\'è chi preferirebbe parlarne meno',
+      f:function(){ S.usMalattia85Opp='fondi'; gdUs60('giovani',1); gdUs60('cattolici',-1);
+        S.log.unshift({t:T('Il paese'),x:T('Dall\'opposizione ha chiesto il raddoppio dei fondi alla ricerca sulla malattia nuova.')}); } },
+    { l:'Prudenza e regole: controlli sanitari e informazione, senza escludere nessuno', e:'Nelle chiese apprezzano il tono · i giovani chiedono quando arriveranno i fondi',
+      f:function(){ S.usMalattia85Opp='prudenza'; gdUs60('cattolici',1); gdUs60('giovani',-1);
+        S.log.unshift({t:T('Il paese'),x:T('Dall\'opposizione ha chiesto controlli sanitari e informazione sulla malattia nuova.')}); } },
+    { l:'Accusare il governo di silenzio', e:'I giornali riprendono l\'accusa · all\'estero si chiedono perché l\'America litighi su una malattia',
+      f:function(){ S.usMalattia85Opp='accusa'; stampad(1); repd(-1);
+        S.log.unshift({t:T('Il paese'),x:T('Dall\'opposizione ha accusato il governo di silenzio sulla malattia nuova.')}); } },
+  ],
+};
+const DROGA86_EV = {
+  id:'us80_droga', era:'us1980', kick:'Il paese',
+  t:'La droga nuova',
+  text:'Una droga nuova, che costa poco, si è presa i quartieri di molte città. I giornali scrivono che dà dipendenza in pochi giorni, e ogni sera i telegiornali mostrano retate, sparatorie fra bande e madri disperate. A pochi mesi dal voto di metà mandato i due partiti fanno a gara a chi è più duro.',
+  ch:[
+    { l:'Pene minime obbligatorie e più carceri', e:'Il tuo partito è con te · i giovani chiedono se il carcere sia l\'unica risposta',
+      f:function(){ S.usDroga86='pene'; baseUs60(1); gdUs60('giovani',-1);
+        S.log.unshift({t:T('Il paese'),x:T('Contro la droga nuova ha scelto pene minime obbligatorie e più carceri.')}); } },
+    { l:'Cure e prevenzione nelle scuole e nei quartieri', e:'I giovani ti seguono · il tuo partito teme di passare per debole alla vigilia del voto',
+      f:function(){ S.usDroga86='cure'; gdUs60('giovani',1); baseUs60(-1);
+        S.log.unshift({t:T('Il paese'),x:T('Contro la droga nuova ha scelto cure e prevenzione nelle scuole e nei quartieri.')}); } },
+    { l:'Una legge dei due partiti prima del voto, un po\' di tutto', e:'La storia · la legge dei due partiti è firmata a fine ottobre, pochi giorni prima del voto, e porta le pene minime obbligatorie · all\'estero piace un\'America unita, i giornali parlano di una legge scritta per le urne',
+      f:function(){ S.usDroga86='legge'; repd(1); stampad(-1);
+        S.log.unshift({t:T('Il paese'),x:T('Contro la droga nuova ha firmato una legge dei due partiti prima del voto.')}); } },
+  ],
+};
+const DROGA86_OPP_EV = {
+  id:'us80_droga_opp', era:'us1980', kick:'Il paese',
+  t:'La droga nuova, dall\'aula',
+  text:'Una droga nuova, che costa poco, si è presa i quartieri di molte città. I giornali scrivono che dà dipendenza in pochi giorni, e ogni sera i telegiornali mostrano retate, sparatorie fra bande e madri disperate. A pochi mesi dal voto di metà mandato in aula si fa a gara a chi è più duro, e il tuo partito deve dire come vota.',
+  ch:[
+    { l:'Votare le pene più dure', e:'La base apprezza · i giovani ti voltano le spalle',
+      f:function(){ S.usDroga86Opp='pene'; baseUs60(1); gdUs60('giovani',-1);
+        S.log.unshift({t:T('Il paese'),x:T('Dall\'opposizione ha votato le pene più dure contro la droga nuova.')}); } },
+    { l:'Chiedere fondi per le cure', e:'I giovani ti seguono · la base teme di sembrare morbida alla vigilia del voto',
+      f:function(){ S.usDroga86Opp='cure'; gdUs60('giovani',1); baseUs60(-1);
+        S.log.unshift({t:T('Il paese'),x:T('Dall\'opposizione ha chiesto fondi per curare chi cade nella droga nuova.')}); } },
+    { l:'Accusare il governo di slogan senza soldi', e:'I giornali riprendono l\'accusa · all\'estero si chiedono perché l\'America litighi anche su questo',
+      f:function(){ S.usDroga86Opp='accusa'; stampad(1); repd(-1);
+        S.log.unshift({t:T('Il paese'),x:T('Dall\'opposizione ha accusato il governo di fare slogan senza soldi contro la droga.')}); } },
   ],
 };
 /* ==============================================================================================================

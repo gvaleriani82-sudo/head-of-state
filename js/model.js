@@ -883,6 +883,7 @@ function testaATesta(){
    anche il sondaggio (sondaggioVero: «il numero che deciderà il voto») la mostra da gennaio; decidiTerritoriNazionale la toglie, come
    il bonus di credibilità (l'onda dei territori è una quota, non la spinta della storia), e le intermedie non leggono testaATesta. */
 function spintaPresidenziale(){
+  if(S.livello===3 && !S.opposizione && US80_PARTITA_VOTO){ const c=PAESE.spintaPresidenteGiocatore, w=c ? c[S.year] : 0; return (typeof w==='number' && isFinite(w)) ? w : 0; }   // L262-27: un campo suo, la spinta qui sotto resta 0 per il Presidente-giocatore
   if(S.livello!==3 || !S.opposizione) return 0;
   const t=PAESE.spintaPresidenziale, v=t ? t[S.year] : 0;
   return (typeof v==='number' && isFinite(v)) ? v : 0;
