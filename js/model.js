@@ -630,7 +630,7 @@ function calcSeggiCollegi(){
   q2.slice().sort(function(a,b){ return b.r-a.r; }).forEach(function(x2){ if(used<100){ x2.f++; used++; } });
   var out={}; q2.forEach(function(x2){ out[x2.id]=x2.f; }); return out;
 }
-function calcSeggi(){
+function calcSeggi(senzaPremio){   // L263-6: `senzaPremio` = il Senato italiano (calcSeggiAlta): stesse forze, niente premio nazionale
   /* L47-1 — il bivio: chi dichiara i collegi passa di là, tutti gli altri proseguono nel ramo di sempre. */
   if(PAESE.sistemaSeggi==='collegi' && typeof calcSeggiCollegi==='function') return calcSeggiCollegi();
   const d=PAESE.distorsione||1, ps=PAESE.partiti;
@@ -644,7 +644,7 @@ function calcSeggi(){
   let used=q.reduce((s,x)=>s+x.f,0);
   q.slice().sort((a,b)=>b.r-a.r).forEach(x=>{ if(used<100){ x.f++; used++; } });
   const out={}; for(const x of q) out[x.id]=x.f;
-  return (typeof applicaPremio==='function') ? applicaPremio(out) : out;
+  return (!senzaPremio && typeof applicaPremio==='function') ? applicaPremio(out) : out;
 }
 /* ================================================================================================================
    L52-1 · IL PREMIO DI MAGGIORANZA — parametro per-scenario, sullo schema di `sistemaSeggi`.
@@ -674,22 +674,27 @@ function calcSeggi(){
    questa stessa macchina (che è di blocco, non di partito) ma con forma ad amplificazione invece che a soglia
    — ed è una decisione di design, non una taratura da infilare qui.
    ================================================================================================================ */
-function applicaPremio(out){
-  if(typeof S==='undefined' || !S) return out;
+/* L263-6 · chi vince il premio, o null se il premio non c'è: tolto da applicaPremio per il premio regionale del Senato (calcSeggiAlta), che lo legge senza riscrivere i seggi. */
+function premioVincente(out){
+  if(typeof S==='undefined' || !S) return null;
   const sc=(typeof SCENARI!=='undefined' && typeof chosenScenario!=='undefined') ? SCENARI[chosenScenario] : null;
   const pr=sc && sc.premio;
-  if(!pr || !pr.quota) return out;
-  if(pr.da!=null && S.year<pr.da) return out;
-  if(pr.spentoSe && S[pr.spentoSe.campo]===pr.spentoSe.valore) return out;   // il giocatore ha rifiutato la legge
+  if(!pr || !pr.quota) return null;
+  if(pr.da!=null && S.year<pr.da) return null;
+  if(pr.spentoSe && S[pr.spentoSe.campo]===pr.spentoSe.valore) return null;   // il giocatore ha rifiutato la legge
   const mio=(S.coalizione&&S.coalizione.length)?S.coalizione.slice():[S.partito];
   const somma=ids=>ids.reduce((s,id)=>s+(out[id]||0),0);
   /* il blocco rivale: il partito più grosso fuori dalla mia coalizione, coi suoi compatibili (anch'essi fuori) */
   const fuori=PAESE.partiti.filter(p=>mio.indexOf(p.id)<0);
-  if(!fuori.length) return out;
+  if(!fuori.length) return null;
   const capo=fuori.slice().sort((a,b)=>(out[b.id]||0)-(out[a.id]||0))[0];
   const rivale=[capo.id].concat(((typeof compatibili==='function')?compatibili(capo.id,out):[])
     .filter(p=>mio.indexOf(p.id)<0 && p.id!==capo.id).map(p=>p.id));
-  const vincente = (somma(mio)>=somma(rivale)) ? mio : rivale;
+  return { pr:pr, vincente:(somma(mio)>=somma(rivale)) ? mio : rivale };
+}
+function applicaPremio(out){
+  const pv=premioVincente(out); if(!pv) return out;
+  const pr=pv.pr, vincente=pv.vincente, somma=ids=>ids.reduce((s,id)=>s+(out[id]||0),0);
   const base=somma(vincente);
   if(base>=pr.quota) return out;                       // ha già più della quota: il premio non toglie niente
   const resto=100-pr.quota, baseResto=100-base;

@@ -385,6 +385,7 @@ function crescitaSeed(sc){
    Costruisce S e i derivati INDIPENDENTI dal ruolo: indicatori iniziali, leggi del paese, forze di partenza.
    Il ruolo (ministri/coalizione/territori) lo aggiunge il chiamante. Condiviso → un solo punto di verità. */
 function initStatoBase(){
+  CAMERA_VISTA='bassa';   // L263-5: l'aula guardata è dello schermo, non della carriera
   NOTTE_TERR=null;   // L239-3: una partita nuova non eredita i cambi di una notte (transitorio, mai in S)
   if(typeof MUSICA_PORTA!=='undefined') MUSICA_PORTA=null;   // L172-5: nasce la partita — da qui il tema lo dà musicaEpoca() da S.year, lo stesso brano della porta (nessuno stacco). Non prima: con goAppoint S nasce alla conferma dei ministri
   try{ resetUIAnim(); }catch(e){}   // nuova partita: prima apparizione senza animazioni
@@ -598,6 +599,51 @@ let CAMP_SFIDANTE=false, CAMP_SFIDANTE_K=null;
 /* L262-27 · LA PARTITA DEL 1984 DI us1980: il campo di porta `spintaPresidenteGiocatore:{<anno>:<punti>}`, punti sul voto al Presidente-giocatore (la spintaPresidenziale per lui vale 0 per regola, L216-1), lo legge spintaPresidenziale() (model.js) solo sotto questo interruttore. Il Presidente democratico arrivava al 1984 al 45,8%: 0/303 vinti con qualunque spinta. Sweep in «⚑ L262-27» (PRESET-USA-1980.md). Banco: __BANCO_US80_VOTO_OFF in __reseed. */
 let US80_PARTITA_VOTO=true;
 const CAMP_MEDIA=1.1833;
+/* L263-2 · DUE CAMERE: cameraAlta() è il lettore unico della tabella CAMERE (data.js): la riga del paese che copre l'anno, o null (paese monocamerale o assente; regge S vuoto). camereAttive() dice se la seconda camera conta in questa partita: CAMERE_DUE più il PAESE in CAMERE_PORTE (per paese e non per porta, perché una carriera passa da tutti i decenni). Li leggono il Senato a classi (L263-3) e il Senato che conta (L263-4, acceso col L263-4ter); S.camera2 (L263-6, blocco qui sotto) è il Senato italiano, in sola lettura; camereComposizione lo porta a schermo (DESIGN-CAMERE.md §3). Banco: __BANCO_CAMERE_DUE_ON (tutti i paesi con righe, solo per prove) e __BANCO_CAMERE_DUE_OFF in __reseed. */
+let CAMERE_DUE=true, CAMERE_PORTE=['usa','italia'];   // L263-4ter: acceso per gli USA (onda del Senato e Kalta 0,09: rapporto «⚑ L263-4ter» in DESIGN-CAMERE.md); L263-6: l'Italia, sola lettura (S.camera2 e lo schermo: nessun calcolo di maggioranza lo legge); il banco si spegne con __BANCO_CAMERE_DUE_OFF
+function cameraAlta(paese=(S&&S.paese), anno=(S&&S.year)){
+  return CAMERE.find(function(r){ return r.paese===paese && anno>=r.dal && (r.fino==null || anno<=r.fino); }) || null;
+}
+function camereAttive(){ return CAMERE_DUE && !!S && CAMERE_PORTE.includes(S.paese) && !!cameraAlta(); }
+/* L263-6 · IL SENATO ELETTO CON LO STESSO VOTO (DESIGN-CAMERE §3.2; solo le righe elezione:'stessoVoto' di un paese acceso). S.camera2={seggi:{id:%}}, somma 100. SOLA LETTURA: fiducia, trattativa e leggi leggono ancora S.seggi (L263-7/8), lo legge solo lo schermo.
+   calcSeggiAlta(): le forze del voto senza il premio nazionale; dove la riga ha premioRegionale (2006-2017) metà del premio, cioè a mezza strada fra i seggi senza premio e quelli col premio; più lo scarto per partito da un hash (carriera, anno, id: nessun numero casuale consumato). Con il premio il blocco che vince non supera mai la sua quota alla Camera. Il premio della legge del 1953 (applicaSnodoTruffa) non passa di qui: valeva per la sola Camera.
+   seggiNuovi() = calcSeggi() più il Senato, in ogni punto che fissa S.seggi. Il Senato si riscrive solo lì: chi cambia i partiti passa da camera2Segui()/camera2Sposta(). seggiAlta() = il Senato, o S.seggi per un salvataggio di prima fino alla prossima urna (§3.8). */
+const SENATO_IT={scarto:1.5, premioReg:0.5};   // L263-6: ±1,5 punti per partito (misura in «⚑ L263-6»); metà del premio nazionale
+function camera2Attiva(){ return camereAttive() && cameraAlta().elezione==='stessoVoto'; }
+function senatoDado(id){   // la ricetta di attaccoDado, sull'anno e non sul mese
+  var s='sen|'+id+'|'+scissioneCarriera()+'|'+S.year, h=2166136261;
+  for(var i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619); }
+  h^=h>>>16; h=Math.imul(h,0x85ebca6b); h^=h>>>13; h=Math.imul(h,0xc2b2ae35); h^=h>>>16;
+  return (h>>>0)/4294967296;
+}
+function seggiResti(v){   // a 100 coi resti più alti, lo stesso metodo di calcSeggi
+  var ids=Object.keys(v), tot=0; ids.forEach(function(id){ tot+=v[id]||0; }); tot=tot||1;
+  var q=ids.map(function(id){ var e=(v[id]||0)/tot*100; return {id:id, f:Math.floor(e), r:e-Math.floor(e)}; }), used=0;
+  q.forEach(function(x){ used+=x.f; });
+  q.slice().sort(function(a,b){ return b.r-a.r; }).forEach(function(x){ if(used<100){ x.f++; used++; } });
+  var out={}; q.forEach(function(x){ out[x.id]=x.f; }); return out;
+}
+function calcSeggiAlta(dichiarati){
+  var base=dichiarati||calcSeggi(true), riga=cameraAlta(), reg=!dichiarati && !!(riga && riga.premioRegionale), cam=reg ? calcSeggi() : null, pv=reg ? premioVincente(base) : null, v={};
+  PAESE.partiti.forEach(function(p){ var x=base[p.id]||0; if(pv) x+=SENATO_IT.premioReg*((cam[p.id]||0)-x);
+    v[p.id]=x>0 ? Math.max(0, x+(2*senatoDado(p.id)-1)*SENATO_IT.scarto) : 0; });
+  var out=seggiResti(v);
+  if(pv){ var somma=function(m){ return pv.vincente.reduce(function(s,id){ return s+(m[id]||0); },0); }, tetto=somma(cam);
+    while(somma(out)>tetto){   // lo scarto non porta il vincitore del premio oltre la sua quota alla Camera
+      var da=pv.vincente.slice().sort(function(a,b){ return (out[b]||0)-(out[a]||0); })[0], a=PAESE.partiti.filter(function(p){ return pv.vincente.indexOf(p.id)<0; }).sort(function(x,y){ return (out[y.id]||0)-(out[x.id]||0); })[0];
+      if(!a) break; out[da]--; out[a.id]++; } }
+  return out;
+}
+function camera2Voto(){ if(camera2Attiva()) S.camera2={seggi:calcSeggiAlta()}; }
+function seggiNuovi(){ var s=calcSeggi(); camera2Voto(); return s; }
+function seggiAlta(){ return (S.camera2 && S.camera2.seggi) || S.seggi; }
+function veroSeggi(){ var v={ seggi:Object.assign({},S.seggi) }; if(S.camera2) v.seggi2=Object.assign({},S.camera2.seggi); return v; }   // L263-6: il Senato congelato con gli altri valori veri (§3.5); le ondate restano sulla Camera
+function camera2Sposta(da, a, q){ var s=S.camera2 && S.camera2.seggi; if(!s || s[da]==null) return; var x=s[da]*q; if(a) s[a]=(s[a]||0)+x; s[da]-=x; if(q>=1) delete s[da]; }
+function camera2Segui(){   // il roster è cambiato: chi è uscito sparisce, chi è entrato ha la stessa quota che ha alla Camera, la somma torna a 100
+  var C=S.camera2; if(!C || !C.seggi) return;
+  var v={}; PAESE.partiti.forEach(function(p){ v[p.id]=C.seggi[p.id]!=null ? C.seggi[p.id] : ((S.seggi && S.seggi[p.id])||0); });
+  C.seggi=seggiResti(v);
+}
 function campSfidanteAttivo(){
   if(!CAMP_SFIDANTE || !S || S.livello!==3 || !S.scenario || S.scenario==='presente') return false;
   const sc=(typeof SCENARI!=='undefined') ? SCENARI[S.scenario] : null;
@@ -623,7 +669,7 @@ function startGame(mins){
   S.ministers=mins;
   /* coalizione di governo (passo 3): il tuo partito è sempre incluso; i seggi esistono dove c'è un parlamento */
   S.coalizione=[chosenPartito];
-  S.seggi=(PAESE.coalizione||PAESE.comeSiVince==='parlamentare')?calcSeggi():null;
+  S.seggi=(PAESE.coalizione||PAESE.comeSiVince==='parlamentare')?seggiNuovi():null;
   /* L50-1 · LA PORTA PUÒ DICHIARARE I SUOI SEGGI D'AVVIO, e uk1950 lo fa. Non è una scorciatoia: i seggi del
      1950 sono un FATTO della porta, esattamente come il debito al 195% o il PIL — non qualcosa da ri-derivare.
      Il motivo per cui serve: il modello-collegi è giusto su tre urne su quattro (1951, 1955, 1959: errore 1-2,9
@@ -635,6 +681,7 @@ function startGame(mins){
      Quindi: la porta dichiara il 1950 storico, il modello governa le elezioni che seguono (dove è 3 su 3). */
   var _SCseg = (typeof SCENARI!=='undefined' && SCENARI[chosenScenario]) ? SCENARI[chosenScenario].seggi : null;
   if(S.seggi && _SCseg){ Object.keys(_SCseg).forEach(function(id){ if(S.seggi[id]!=null) S.seggi[id]=_SCseg[id]; }); }
+  if(S.camera2 && _SCseg) S.camera2={seggi:calcSeggiAlta(S.seggi)};   // L263-6: la porta dichiara i seggi d'apertura (il voto vero): il Senato parte da quelli
   /* minoranza all'avvio: nei parlamentari SENZA coalizione (UK) riflette i seggi veri del tuo partito (chi parte
      piccolo governa in minoranza); nei paesi a coalizione la decide la trattativa iniziale; negli USA non esiste. */
   S.tappaForzaPrec=(S.forze && S.forze[chosenPartito]!=null)?S.forze[chosenPartito]:null;   // L61-4 - la porta parte dal dato storico: e il primo riferimento della traiettoria
@@ -663,9 +710,10 @@ function startGame(mins){
    Da qui il loop d'opposizione completo (carta mensile, eventi del governo AI, sondaggi a fine mandato, intermedie). */
 function startOpposizione(){
   initStatoBase();
-  S.seggi=(PAESE.coalizione||PAESE.comeSiVince==='parlamentare')?calcSeggi():null;   // serve a entraOpposizione e alla scheda Partiti
+  S.seggi=(PAESE.coalizione||PAESE.comeSiVince==='parlamentare')?seggiNuovi():null;   // serve a entraOpposizione e alla scheda Partiti
   const w=vincitore();                   // partito più forte ≠ tuo, dalle forze iniziali
   entraOpposizione(w);                   // governo all'avversario col suo profilo; tu sfidante (visibilità/credibilità standard)
+  if(S.congresso && S.congresso.classi) S.congresso.classiDi=S.governoAvversario;   // L263-3: il Senato dichiarato dalla porta è del partito che governa
   /* L133-3 (28/9) · CHI PARTE ALL'OPPOSIZIONE VOTA QUANDO VOTA LA PORTA. entraOpposizione azzera l'orologio del mandato
      (S.turnInMandate), che initStatoBase aveva messo a `turnMandato` dello scenario: così lo sfidante di una porta votava
      a un mandato pieno dall'avvio (la CDU di de1970 nel 1975 invece che nel 1972, e al governo 20 volte su 20). Qui, SOLO
@@ -784,7 +832,7 @@ function startMinistro(){
   S.capitale=30; S.visibilita=40; S.credibilita=50;
   S.prevSettore=(DICASTERO_IND[S.dicastero]?S.ind[DICASTERO_IND[S.dicastero][0]]:null);   // baseline per la crescita del capitale
   S.ministers=[];                                   // da ministro non nomini un gabinetto (lo fa il premier)
-  S.coalizione=[S.partito]; S.seggi=(PAESE.coalizione||PAESE.comeSiVince==='parlamentare')?calcSeggi():null;
+  S.coalizione=[S.partito]; S.seggi=(PAESE.coalizione||PAESE.comeSiVince==='parlamentare')?seggiNuovi():null;
   S.minoranza=false; S.tenuta={}; S.tenutaForza0={}; S.tenutaLiv={}; S.tenutaUltimo={}; S.mesiMinoranza=0;
   initTerritori(); initPotereLocale();
   S.ind.consenso=computeConsenso(); S.ind.deficit=computeDeficit(); S.ind.fiducia=targetFiducia();
@@ -1016,7 +1064,7 @@ function entraDaPartner(guida, rc){
   else {
     maturaRP(); segnaForzaUrna();   // l'urna vinta è chiusa (come nextMandate)
     S.mandate=(S.mandate||0)+1; S.turnInMandate=0;
-    if(!sistemaSemipres()) S.seggi=calcSeggi();
+    if(!sistemaSemipres()) S.seggi=seggiNuovi();
     S.sostegno=null; S.sostegnoStrappi=0;
     chiudiSforzo(); territoriDopoUrna(); S.campNaz=null; S.campNazUltimo=null;
     tutteCorrenti(8);   // la vittoria ricompatta il partito
@@ -1066,7 +1114,7 @@ function esitoElezioneMinistro(){
 function applicaElezioneMinistro(vinta){
   if(vinta){
     S.mandate++; S.turnInMandate=0; S.snap=Object.assign({},S.pol); S.leggiSnap=Object.assign({},S.leggi);
-    if(PAESE.comeSiVince==='parlamentare'||PAESE.coalizione) S.seggi=calcSeggi();
+    if(PAESE.comeSiVince==='parlamentare'||PAESE.coalizione) S.seggi=seggiNuovi();
     S.capitale=clamp(S.capitale+5,0,100); S.premCrisiMesi=0;
     bioFatto('Il governo di '+(S.premier?S.premier.nome:'partito')+' confermato alle urne.');
     S.log.unshift({t:T('Governo confermato'),x:T('%P vince le elezioni: resti ministro, il tuo capitale cresce.').replace('%P',(S.premier?S.premier.nome:T('Il premier')))});
@@ -1095,7 +1143,7 @@ function diventaPremier(viaElezione){
   S.ministers=MINISTRIES.map(function(M){ const c=mkCand(); return { min:M.id, nm:c.nm, g:c.g, profile:c.profile, comp:c.comp, loyalty:62 }; });   // formi un governo (transizione fluida, niente schermata)
   if(typeof assegnaVoltiGruppo==='function') assegnaVoltiGruppo(S.ministers);   // L20-1: volti distinti nel gabinetto generato alla salita
   if(!daPartner) S.coalizione=[S.partito];
-  S.seggi=(sistemaSemipres() && S.seggi) ? S.seggi : ((PAESE.coalizione||PAESE.comeSiVince==='parlamentare')?calcSeggi():null);   // L104-2: nel semipresidenziale la salita eredita l'Assemblea
+  S.seggi=(sistemaSemipres() && S.seggi) ? S.seggi : ((PAESE.coalizione||PAESE.comeSiVince==='parlamentare')?seggiNuovi():null);   // L104-2: nel semipresidenziale la salita eredita l'Assemblea
   S.minoranza = (PAESE.coalizione||PAESE.comeSiVince==='parlamentare') ? bloccoSeggi()<50 : false;   // L61-5 - il blocco, non il solo partito: nell appeso il Regno Unito puo averne uno
   S.tenuta={}; S.tenutaForza0={}; S.tenutaLiv={}; S.tenutaUltimo={}; S.mesiMinoranza=0; initTenuta(); S.bloccoAtteso=bloccoQuota();
   if(typeof aggiornaCoabitazione==='function') aggiornaCoabitazione();   // L100-2/L104-2 (dopo il reset di mesiMinoranza): alla salita si deriva
@@ -1196,7 +1244,7 @@ function startDiplomatico(){
   bilInit();   // L260-5: la rete bilaterale (no-op con DIPLO_BILATERALI spento)
   concNasce();   // L260-5bis: il concorrente per il posto (no-op con DIPLO_CONCORRENTE spento)
   installaProfilo(GOVERNI_PROFILI['centro']); S.snap=Object.assign({},S.pol);   // nazionale neutro/dormiente (L104-3: dal punto unico)
-  S.ministers=[]; S.coalizione=[S.partito]; S.seggi=(PAESE.coalizione||PAESE.comeSiVince==='parlamentare')?calcSeggi():null;
+  S.ministers=[]; S.coalizione=[S.partito]; S.seggi=(PAESE.coalizione||PAESE.comeSiVince==='parlamentare')?seggiNuovi():null;
   S.minoranza=false; S.tenuta={};
   if(S.relInt){ for(const id in S.relInt) S.relInt[id]=45; }   // il tabellone parte TIEPIDO: lo costruisci tu, missione dopo missione
   if(S.biografia) S.biografia.origine='diplomatico';
@@ -1808,7 +1856,7 @@ function startLocale(){
     budget: Math.round((S.pil||2150)*(tipo==='città'?3.2:15)) };   // BILANCIO in € mln (cantiere Budget): calibrato sulle ANCORE reali — Roma ~€6,85 mld (città ~3,2× PIL€mld), Lombardia ~€32 mld (regione ~15×)
   installaProfilo(GOVERNI_PROFILI['centro']); S.snap=Object.assign({},S.pol);   // nazionale neutro/dormiente (L104-3: dal punto unico)
   S.capitale=20; S.visibilita=30; S.credibilita=40; S.prevSettore=50;
-  S.ministers=[]; S.coalizione=[S.partito]; S.seggi=(PAESE.coalizione||PAESE.comeSiVince==='parlamentare')?calcSeggi():null;
+  S.ministers=[]; S.coalizione=[S.partito]; S.seggi=(PAESE.coalizione||PAESE.comeSiVince==='parlamentare')?seggiNuovi():null;
   S.minoranza=false; S.tenuta={}; S.tenutaForza0={}; S.tenutaLiv={}; S.tenutaUltimo={}; S.mesiMinoranza=0;
   initTerritori(); initPotereLocale();
   if(proprio) fondaPartitoProprio(proprio);          // L237-4: la fondazione dentro l'avvio, prima di agenda, titolo e primo salvataggio
@@ -3384,8 +3432,9 @@ function applicaRosterDelta(ricalcolaSeggi){
   /* e i SEGGI vanno ricalcolati, se l'insieme dei partiti è cambiato: erano la seconda metà dello stesso
      difetto — il roster si muoveva e `S.seggi` restava quello di prima, con voci mancanti o orfane. */
   if(ricalcolaSeggi && cambiato && S.seggi && typeof calcSeggi==='function' && (PAESE.coalizione||PAESE.comeSiVince==='parlamentare')){
-    try{ S.seggi=calcSeggi(); }catch(e){}
+    try{ S.seggi=calcSeggi(); if(S.camera2) camera2Voto(); }catch(e){}   // L263-6: il Senato segue la stessa regola; un salvataggio vecchio senza camera2 aspetta la prossima urna
   }
+  if(ricalcolaSeggi!==undefined) camera2Segui();   // L263-6: in applySnap (nessun argomento) il Senato salvato è già quello giusto, come i seggi
 }
 /* L107-3 · riapplica il registro dei territori entrati a una tappa su un PAESE appena ricostruito: cloni (PAESE.territori e
    PAESE.mappa sono condivisi con SCENARI/PAESI), in coda, una volta sola per nome. Idempotente. */
@@ -3501,6 +3550,7 @@ function applicaDirettive(d){
     if(S.forze && S.forze[e.id]!=null){ if(dest && S.forze[dest]!=null) S.forze[dest]+=S.forze[e.id]; delete S.forze[e.id]; }
     if(S.forzePrev && S.forzePrev[e.id]!=null){ if(dest && S.forzePrev[dest]!=null) S.forzePrev[dest]+=S.forzePrev[e.id]; delete S.forzePrev[e.id]; }
     if(S.seggi && S.seggi[e.id]!=null){ if(dest && S.seggi[dest]!=null) S.seggi[dest]+=S.seggi[e.id]; delete S.seggi[e.id]; }
+    camera2Sposta(e.id, dest, 1);   // L263-6
     if(S.intese && S.intese[e.id]!=null){ if(dest) S.intese[dest]=Math.max(S.intese[dest]||0, S.intese[e.id]); delete S.intese[e.id]; }
     if(Array.isArray(S.coalizione)){ S.coalizione=S.coalizione.filter(function(id){ return id!==e.id; }); if(dest && S.coalizione.indexOf(dest)<0 && S.partito!==dest) S.coalizione.push(dest); }
     if(Array.isArray(S.territori)) S.territori.forEach(function(t){ if(t && t.partito===e.id) t.partito = dest || S.partito; });
@@ -3935,6 +3985,7 @@ function scissioneFonda(def, quota){
   S.forze[vecchio]=fv-delta;
   if(SCISSIONE_ANCORA){ S.ancoraTappa=S.ancoraTappa||{}; S.ancoraTappa[vecchio]=(S.ancoraTappa[vecchio]||0)-delta; }
   var sp=0; if(S.seggi && S.seggi[vecchio]!=null){ sp=Math.round(S.seggi[vecchio]*q); S.seggi[vecchio]-=sp; }
+  camera2Sposta(vecchio, PP_ID, q);   // L263-6: la stessa quota anche al Senato
   ppNasce(def, asse, delta, sp, false);
   S.partitoProprio.scissioneDa=vecchio;
   /* coalizione, intese e territori: i tuoi passano al nuovo, quelli del partito restano al vecchio */
@@ -5903,7 +5954,7 @@ function startAttivista(){
   S.attivista={ base:10, autorev:15, mesi:0, paceMul:calcPaceMul(S.eta, S.diff||'normale'), campagna:null, campUltimo:0, campOfferta:false, campStoria:[], evUltimo:0, evRecent:[], evCorrente:null };   // valute + paceMul + stato campagna (L2 cooldown/offerta, L3 storico) + eventi
   installaProfilo(GOVERNI_PROFILI['centro']); S.snap=Object.assign({},S.pol);   // nazionale neutro/dormiente (L104-3: dal punto unico) (come startLocale)
   S.capitale=null; S.visibilita=null; S.credibilita=null; S.prevSettore=null;           // niente notorietà amministrativa: la standing è l'autorev di campo
-  S.ministers=[]; S.coalizione=[S.partito]; S.seggi=(PAESE.coalizione||PAESE.comeSiVince==='parlamentare')?calcSeggi():null;
+  S.ministers=[]; S.coalizione=[S.partito]; S.seggi=(PAESE.coalizione||PAESE.comeSiVince==='parlamentare')?seggiNuovi():null;
   S.minoranza=false; S.tenuta={}; S.tenutaForza0={}; S.tenutaLiv={}; S.tenutaUltimo={}; S.mesiMinoranza=0;
   initTerritori(); initPotereLocale();
   if(proprio) fondaPartitoProprio(proprio);           // L237-4: la fondazione dentro l'avvio, prima di agenda e primo salvataggio
@@ -5946,7 +5997,7 @@ function diventaLocale(terrIdx){
   S.turnInMandate=0;                                 // L5-FIX (HIGH): il clock del MANDATO riparte da zero come un'elezione fresca — la gavetta può aver scavalcato dei gennaio (turnInMandate++ a game.js:1970) e un sindaco laureato leggerebbe "anno 2/5" e affronterebbe la rielezione in anticipo. S.year/età NON si toccano: il tempo è passato davvero.
   S.capitale=20 + Math.round(clamp(autor-40,0,60)*0.13);   // premio MODESTO: 20 (come l'avvio diretto) + autorev 50→+1, 100→+8
   S.visibilita=30; S.credibilita=40; S.prevSettore=50;
-  S.ministers=[]; S.coalizione=[S.partito]; S.seggi=(PAESE.coalizione||PAESE.comeSiVince==='parlamentare')?calcSeggi():null;
+  S.ministers=[]; S.coalizione=[S.partito]; S.seggi=(PAESE.coalizione||PAESE.comeSiVince==='parlamentare')?seggiNuovi():null;
   S.minoranza=false; S.tenuta={}; S.tenutaForza0={}; S.tenutaLiv={}; S.tenutaUltimo={}; S.mesiMinoranza=0;
   initTerritori(); initPotereLocale();
   simulateLocale();                                  // consenso locale iniziale
@@ -6017,7 +6068,7 @@ function diventaMinistro(){
   installaProfilo(GOVERNI_PROFILI[profByAsse(S.premier.asse)]); S.snap=Object.assign({},S.pol);   // L104-3
   S.capitale=40; S.silAvviso=null; S.premCrisiMesi=0; S.premMossaUltimo=null;
   S.prevSettore=(DICASTERO_IND[S.dicastero]?S.ind[DICASTERO_IND[S.dicastero][0]]:null);
-  S.ministers=[]; S.coalizione=[S.partito]; S.seggi=(PAESE.coalizione||PAESE.comeSiVince==='parlamentare')?calcSeggi():null;
+  S.ministers=[]; S.coalizione=[S.partito]; S.seggi=(PAESE.coalizione||PAESE.comeSiVince==='parlamentare')?seggiNuovi():null;
   S.ind.consenso=computeConsenso(); S.ind.deficit=computeDeficit(); S.ind.fiducia=targetFiducia();
   bioFatto('Da '+ruoloPrima+' a '+ruoloDicastero()+': la chiamata '+aCapitale()+'.');
   S.log.unshift({t:luoghiSub(T('La chiamata %ACAPITALE')),x:T('Il partito ti porta nel governo come %R. La scalata continua.').replace('%R',T(ruoloDicastero()))});
@@ -7073,7 +7124,7 @@ function meseUrna(){ return (typeof S!=='undefined' && S && S.meseUrnaPorta) || 
 function meseMandato(){ return (S.turnInMandate||0)*12 + ((S.month - meseUrna() + 12) % 12); }
 function avanzaAnnoMandato(){ if(S.month>12){ S.month=1; S.year++; } if(S.month===meseUrna()) S.turnInMandate++; }   // chiamata dopo S.month++
 /* L173-2 · IL CONGRESSO DERIVATO (D126). `S.congresso = {camera}` è la quota della Camera del PARTITO DEL PRESIDENTE — chiunque
-   sia il giocatore: dall'opposizione è la quota dell'avversario che governa. ⚠ NON è `S.seggi` (≈130 letture: riempirlo accenderebbe
+   sia il giocatore: dall'opposizione è la quota dell'avversario che governa. ⚠ NON è `S.seggi` (≈115 righe: riempirlo accenderebbe
    minoranza, sfiducia, emiciclo, onda dei territori): è un campo puro e serializzabile che nessun calcolo di governo legge.
    Esiste solo se la porta (o il paese) dichiara `congresso:{camera}` (in SCENARIO_ISTITUZIONI); assente = null, e tutto come prima.
    Si scrive in tre punti: all'avvio (initCongresso, anche dall'opposizione: la Camera dichiarata è del partito che governa), alla
@@ -7084,10 +7135,69 @@ function avanzaAnnoMandato(){ if(S.month>12){ S.month=1; S.year++; } if(S.month=
    il complemento dava una Camera a 0 (misurato: 1 metà mandato su 34). Alla metà mandato è quella quota più lo scarto del voto
    (dado, campagna, penalità) col segno di chi è il Presidente. `S.governoDiviso` (Camera < 50) è derivato e si scrive solo qui. Effetti, in sola
    lettura: il banner (ui.js), un punto riforma in meno a gennaio (maturaRP) e, dall'opposizione, +5 di credibilità quando la metà
-   mandato ti dà la Camera. Leggi e proposte non si bloccano. */
-function initCongresso(){ var c=(typeof PAESE!=='undefined' && PAESE && PAESE.congresso) || null; S.congresso=(c && c.camera!=null) ? {camera:c.camera} : null; S.governoDiviso=!!(S.congresso && S.congresso.camera<50); }
-function aggiornaCongresso(cameraPresidente){ if(!S.congresso) return; S.congresso.camera=Math.round(clamp(cameraPresidente,0,100)*10)/10; S.governoDiviso=S.congresso.camera<50; }
-function quotaPartitoPresidente(){ var pres=S.opposizione ? S.governoAvversario : S.partito, f=S.forze||{}, tot=0; for(var k in f) tot+=f[k]||0; return tot ? (f[pres]||0)/tot*100 : 50; }
+   mandato ti dà la Camera. Leggi e proposte non si bloccano.
+   L263-3 · IL SENATO A TRE CLASSI (DESIGN-CAMERE §3.2), solo con classiAttive(): `S.congresso.classi=[III, I, II]` sono le quote del partito `classiDi` (il Presidente all'ultimo
+   voto) e il Senato è la loro media (`quotaSenato()`, il lettore unico). A ogni urna che muove la Camera la classe in palio prende la stessa quota, senza dadi (`classiDopoVoto`, lo
+   stesso calcolo per l'urna e per la riga della notte); se il Presidente ha cambiato partito le altre due si ribaltano (100−q) e, dal L263-4ter, c'è l'onda (`SENATO_ONDA`): le due si spostano del 25% verso la quota dell'urna e quella in palio prende 50+2×(urna−50), tetto 20-80; alla metà mandato e alla presidenziale senza cambio niente onda. Un salvataggio senza `classi` resta senza: fino
+   all'urna il Senato è la Camera, e all'urna le classi nascono dalla Camera di prima (`classiSegnaPres` ne fissa il partito, prima che il cambio di governo lo cancelli).
+   L263-4 · IL SENATO CONTA (DESIGN-CAMERE §3.4), solo con classiAttive(): `governoDivisoDa()` è il solo punto che calcola S.governoDiviso (Camera o Senato sotto 50: da qui il punto riforma in meno e il premio di credibilità all'opposizione), `divisoPer()` dice quale camera manca (banner e registro; è una funzione, non un campo: S.divisoPer finirebbe nello snapshot), pBocciatura ha il termine Kalta (dal L263-4bis solo con la Camera in mano) e usRimozioneF() legge il Senato alla rimozione. */
+function initCongresso(){ var c=(typeof PAESE!=='undefined' && PAESE && PAESE.congresso) || null; S.congresso=(c && c.camera!=null) ? {camera:c.camera} : null; if(S.congresso && classiAttive()){ var s0=c.senato!=null?c.senato:c.camera; S.congresso.classi=[s0,s0,s0]; S.congresso.classiDi=S.partito; } S.governoDiviso=governoDivisoDa(); }
+function governoDivisoDa(){ var C=S.congresso; if(!C) return false; return C.camera<50 || (classiAttive() && quotaSenato()<50); }
+function divisoPer(){ var C=S.congresso; if(!C) return null; var ca=C.camera<50, se=classiAttive() && quotaSenato()<50; return ca&&se ? 'tutte' : ca ? 'camera' : se ? 'senato' : null; }
+function classiAttive(){ return camereAttive() && cameraAlta().elezione==='classi'; }
+function classeInPalio(anno=S.year){ return ((Math.floor(anno/2)*2-1950)/2%3+3)%3; }   // 0 = classe III (1950, 1980), 1 = classe I (1952, 1982), 2 = classe II (1954, 1984); un anno dispari vale l'anno pari prima
+function partitoPresidente(){ return S.opposizione ? S.governoAvversario : S.partito; }
+const SENATO_ONDA={amp:2,spinta:0.25,min:20,max:80};   // L263-4ter, regola d della sonda di L263-4bis: l'onda del voto che cambia Presidente
+function classiDopoVoto(quota, pres, meta){   // puro: le tre classi dopo un voto che dà `quota` al partito `pres`; se la presidenziale cambia partito al Presidente, l'onda (`meta`: è una metà mandato, dove `classiDi` può essere vecchio di un livello basso: si ribalta, niente onda)
+  var C=S.congresso, base=C.classi ? C.classi : [C.camera,C.camera,C.camera], r=function(x){ return Math.round(clamp(x,0,100)*10)/10; }, cambia=(C.classiDi||pres)!==pres, onda=cambia && !meta, ip=classeInPalio(), O=SENATO_ONDA;
+  var out=base.map(function(q,i){ if(!cambia) return q; var v=r(100-q); return (onda && i!==ip) ? r(v+O.spinta*(quota-v)) : v; });
+  out[ip]=onda ? r(clamp(50+O.amp*(quota-50),O.min,O.max)) : r(quota); return out; }
+function mediaClassi(c){ return Math.round((c[0]+c[1]+c[2])/3*10)/10; }
+function quotaSenato(){ var C=S && S.congresso; if(!C) return null; return C.classi ? mediaClassi(C.classi) : C.camera; }
+function classiSegnaPres(){ var C=S && S.congresso; if(C && !C.classi && !C.classiDi && classiAttive()) C.classiDi=partitoPresidente(); }
+function senatoSeggi(q){ var r=cameraAlta(), tot=(r && r.seggiVeri) || 100; return {n:Math.round(q*tot/100), tot:tot}; }
+function senatoNotteRiga(quota, pres, meta){   // alla proclamazione: la Camera non è ancora scritta, il calcolo è quello che la scriverà
+  var q=senatoSeggi(mediaClassi(classiDopoVoto(quota, pres, meta)));
+  return `<div class="notte-senato" style="font-size:12px;color:var(--mut);margin-top:6px">${T('Senato: un terzo in palio → %N su %T al partito del Presidente').replace('%N',q.n).replace('%T',q.tot)}</div>`; }
+/* L263-5 · LE DUE AULE A SCHERMO. camereComposizione() = le due mappe {id:valore} per l'emiciclo, o null (camera sola, salvataggio senza classi, presente americano senza Congresso): la Camera in quote (il gioco non ha i suoi seggi), il Senato coi seggi di senatoSeggi(). Solo lettura: nessun calcolo ci passa.
+   camereNotteHtml() = la riga del Senato della notte con l'interruttore: alla presidenziale e alla metà mandato il foglio non ha un emiciclo e non ha posto per uno (≤ 52 px in più), quindi i bottoni scambiano la riga: il Senato com'era, o la Camera più «Camere divise» se le maggioranze sono di partiti diversi (sotto la riga lunga del Senato sarebbero 68 px). notteCameraVista riscrive solo quel nodo: renderNotte rifarebbe tavolo, personaggio e movimento. */
+function camereAltro(id){ var f=S.forze||{}, m=null; PAESE.partiti.forEach(function(p){ if(p.id!==id && (!m || (f[p.id]||0)>(f[m.id]||0))) m=p; }); return m ? m.id : null; }
+function camereComposizione(){
+  if(S && S.seggi && camereAttive() && cameraAlta().elezione==='stessoVoto') return { riga:cameraAlta(), alta:seggiAlta(), bassa:S.seggi, quote:true };   // L263-6: l'Italia; tutte e due le mappe in quote, la lettura è la scheda Partiti (renderPartiti), non camereAulaHtml
+  var C=S && S.congresso; if(!camereAttive() || !C || !C.classi) return null;
+  var pres=partitoPresidente(), presS=C.classiDi||pres, se=senatoSeggi(quotaSenato()), alta={}, bassa={}, r=function(x){ return Math.round(x*10)/10; };
+  alta[presS]=se.n; alta[camereAltro(presS)]=se.tot-se.n; bassa[pres]=r(C.camera); bassa[camereAltro(pres)]=r(100-C.camera);
+  return { riga:cameraAlta(), alta:alta, bassa:bassa };
+}
+let CAMERE_NOTTE=null;   // transitorio: i tre argomenti della riga della notte, per riscriverla al tocco
+/* L263-6 · «Camere divise» dove S.seggi c'è: il partito di maggioranza relativa cambia fra le aule, o la coalizione ha la Camera e non il Senato. Stessa frase nella scheda e alla proclamazione; '' se le aule dicono la stessa cosa. */
+function camereDiviseTesto(cam, sen, coal){
+  var primo=function(m){ var t=null; Object.keys(m).forEach(function(id){ if(t===null || (m[id]||0)>(m[t]||0)) t=id; }); return t; }, pc=primo(cam), ps=primo(sen);
+  if(pc && ps && (sen[ps]||0)>(sen[pc]||0)) return T('Camere divise: il Senato è di %P').replace('%P',T((part(ps)||{}).nome||''));
+  var somma=function(m){ return (coal||[]).reduce(function(s,id){ return s+(m[id]||0); },0); };
+  return (somma(cam)>=50 && somma(sen)<50) ? T('Camere divise: al Senato manca la maggioranza') : '';
+}
+function camereMaggioranza(alta, r){ var t=r.seggiVeri; return (alta && t && t!==100) ? Math.floor(t/2)+1 : 50; }
+/* L263-6 · alla proclamazione dell'urna coi seggi l'emiciclo c'è: bottoni sopra e una riga sola (o «Camere divise», o che cosa conta l'aula). NOTTE.vero.seggi2 è il Senato congelato con la Camera. */
+function camere2NotteHtml(shown, bloc){
+  if(!NOTTE || !NOTTE.vero || !NOTTE.vero.seggi2 || !camera2Attiva()) return '';
+  CAMERE_NOTTE={it:true, shown:shown, alta:NOTTE.vero.seggi2, bloc:bloc}; return `<div class="camere-notte camere-notte-it">${camereNotteCorpo()}</div>`;
+}
+function camere2NotteCorpo(a){
+  var alta=CAMERA_VISTA==='alta', r=cameraAlta(), riga=camereDiviseTesto(a.shown, a.alta, a.bloc) || (alta ? cameraAltaVista(r).titolo : T('Camera'))+' · '+T('Dà la fiducia');
+  return camereBottoniHtml(r,'notteCameraVista')+`<div class="camere-cosa camere-nota">${riga}</div>`+emiciclo(alta?a.alta:a.shown,{key:alta?'notte:alta':'notte',coal:a.bloc,maggioranza:camereMaggioranza(alta,r)});
+}
+function camereNotteCorpo(){
+  if(CAMERE_NOTTE && CAMERE_NOTTE.it) return camere2NotteCorpo(CAMERE_NOTTE);
+  var a=CAMERE_NOTTE, quota=a[0], pres=a[1], meta=a[2], q=mediaClassi(classiDopoVoto(quota, pres, meta));
+  var riga=CAMERA_VISTA==='alta' ? senatoNotteRiga(quota, pres, meta) : `<div class="notte-senato" style="font-size:12px;color:var(--mut);margin-top:6px">${T('Camera: %N% al partito del Presidente').replace('%N',Math.round(quota))}</div>`;
+  var divise=(CAMERA_VISTA!=='alta' && (quota>=50)!==(q>=50)) ? `<div class="notte-senato" style="font-size:12px;color:var(--mut)">${T('Camere divise: il Senato è di %P').replace('%P',T((part(q>=50?pres:camereAltro(pres))||{}).nome||''))}</div>` : '';
+  return camereBottoniHtml(cameraAlta(),'notteCameraVista')+riga+divise;
+}
+function camereNotteHtml(quota, pres, meta){ CAMERE_NOTTE=[quota, pres, meta]; return `<div class="camere-notte">${camereNotteCorpo()}</div>`; }
+function notteCameraVista(v){ CAMERA_VISTA=v==='alta'?'alta':'bassa'; if(typeof suona==='function') suona('tocco'); var el=document.querySelector('.camere-notte'); if(el && CAMERE_NOTTE) el.innerHTML=camereNotteCorpo(); }
+function aggiornaCongresso(cameraPresidente, meta){ if(!S.congresso) return; if(classiAttive()){ var presC=partitoPresidente(); S.congresso.classi=classiDopoVoto(cameraPresidente, presC, meta); S.congresso.classiDi=presC; } S.congresso.camera=Math.round(clamp(cameraPresidente,0,100)*10)/10; S.governoDiviso=governoDivisoDa(); }
+function quotaPartitoPresidente(){ var pres=partitoPresidente(), f=S.forze||{}, tot=0; for(var k in f) tot+=f[k]||0; return tot ? (f[pres]||0)/tot*100 : 50; }
 function urnaScadenzaOra(){ return S.month===meseUrna() && S.turnInMandate>=PAESE.mandatoMesi/12; }
 function avvisoUltimoMandatoOra(){ return S.month===meseUrna() && PAESE.mandatiMax!=null && mandatiRestanti()===0 && (S.turnInMandate||0)===PAESE.mandatoMesi/12-1 && !S.avvisoUltimoMandato; }
 function initPotereLocale(){ const share=quotaTerritori(); S.potereLocale=(share!=null)?share:bloccoQuota(); S.bloccoAtteso=bloccoQuota(); }
@@ -8108,8 +8218,8 @@ function esitoIntermedia(ris){
   }
   S.bloccoAtteso=ris.quota; S.campagnaMod=0; S.campagnaFaccia=false;
   if(S.congresso){   // L173-2: la metà mandato decide la Camera; dall'opposizione, la Camera che passa al tuo partito vale +5 di credibilità
-    var divisoPrima=!!S.governoDiviso; aggiornaCongresso(ris.camera!=null ? ris.camera : quotaPartitoPresidente());
-    if(S.opposizione && S.governoDiviso && !divisoPrima){ S.credibilita=clamp((S.credibilita||0)+5,0,100); S.log.unshift({t:T('La Camera è vostra'), x:T('Il voto di metà mandato dà la Camera al tuo partito: il Presidente dovrà trattare con voi.')}); }
+    var divisoPrima=!!S.governoDiviso; aggiornaCongresso(ris.camera!=null ? ris.camera : quotaPartitoPresidente(), true);
+    if(S.opposizione && S.governoDiviso && !divisoPrima){ S.credibilita=clamp((S.credibilita||0)+5,0,100); var soloSen=divisoPer()==='senato'; S.log.unshift({t:T(soloSen?'Il Senato è vostro':'La Camera è vostra'), x:T(soloSen?'Il voto di metà mandato dà il Senato al tuo partito: il Presidente dovrà trattare con voi.':'Il voto di metà mandato dà la Camera al tuo partito: il Presidente dovrà trattare con voi.')}); }
   }
   if(S.correnti){   // correnti: il voto locale pesa dentro il partito (vinta: tutti su; persa: i Militanti per primi)
     if(ris.win) tutteCorrenti(4);
@@ -9314,7 +9424,7 @@ function resolveItemCore(idx,ci){
       const esito=esitoSentenza();
       if(esito==='assoluzione'){
         S.esposizione=10; allG(6); stampad(4);
-        bioConta('assoluzioni'); bioFatto(gn('Assolto','Assolta')+' con formula piena: l\'inchiesta si sgonfia.');
+        bioConta('assoluzioni'); bioFatto(T('%A con formula piena: l\'inchiesta si sgonfia.').replace('%A',gn('Assolto','Assolta')));
         S.log.unshift({t:T('Assoluzione'),x:T('Formula piena: ne esci più forte. Il paese volta pagina con te.')});
         chiudiInchiesta();
         it.outcome=T('%A con formula piena: l\'aula applaude, l\'esposizione crolla. Il rilancio.').replace('%A',gn('Assolto','Assolta'));
@@ -9832,7 +9942,7 @@ function avanzaMese(){
   }
   maturaRP();   // PRIMA del reset degli snapshot: rpUsed() è ancora significativo
   S.snap=Object.assign({},S.pol); S.leggiSnap=Object.assign({},S.leggi);
-  if(S.month===1){ S.log.unshift({t:T('Nuovo anno'),x:T(((S.potereLocale||0)>50)?'Legge di bilancio: manovra +3 punti riforma (+1 dal territorio) — in cassa ne hai %N.':'Legge di bilancio: manovra +3 punti riforma — in cassa ne hai %N.').replace('%N',curRpMax())+((S.governoDiviso && !S.opposizione)?' '+T('Il Congresso è dell\'altro partito: un punto riforma in meno.'):'')}); }
+  if(S.month===1){ S.log.unshift({t:T('Nuovo anno'),x:T(((S.potereLocale||0)>50)?'Legge di bilancio: manovra +3 punti riforma (+1 dal territorio) — in cassa ne hai %N.':'Legge di bilancio: manovra +3 punti riforma — in cassa ne hai %N.').replace('%N',curRpMax())+((S.governoDiviso && !S.opposizione)?' '+T(divisoPer()==='senato'?'Il Senato è dell\'altro partito: un punto riforma in meno.':'Il Congresso è dell\'altro partito: un punto riforma in meno.'):'')}); }
   /* il conto della promessa (intervista) si chiude al confine: colpi deliberati ≥3 → ritorno di fiamma; 3 mesi senza → scade in silenzio */
   if(S.promessa){
     if((S.promessa.colpi||0)>=3){ const g=S.promessa.grp; S.promessa=null; gd(g,-4); stampad(-6);
@@ -10110,10 +10220,10 @@ function avviaAttesa(){
   let sistema, vero;
   applicaSpintaForze();   // L64-2: la campagna sul territorio confluisce nelle forze PRIMA che i seggi si calcolino
   if(PAESE.comeSiVince==='parlamentare' || urnaLegislativa()){   // L104-2: lo scioglimento nel semipresidenziale è un'urna di soli seggi
-    S.seggi=calcSeggi();                                       // VERO: seggi, calcolati una volta (qui, prima della chiusura)
-    sistema='parlamentare'; vero={ seggi:Object.assign({},S.seggi) };
+    S.seggi=seggiNuovi();                                      // VERO: seggi, calcolati una volta (qui, prima della chiusura)
+    sistema='parlamentare'; vero=veroSeggi();
   } else {
-    if((PAESE.coalizione||PAESE.comeSiVince==='parlamentare') && !sistemaSemipres()) S.seggi=calcSeggi();   // L104-2: la presidenziale non rifà l'Assemblea
+    if((PAESE.coalizione||PAESE.comeSiVince==='parlamentare') && !sistemaSemipres()) S.seggi=seggiNuovi();   // L104-2: la presidenziale non rifà l'Assemblea
     sistema='candidato'; vero=testaATesta();                  // VERO: testa a testa, deterministico
   }
   ATTESA={ sistema:sistema, vero:vero };
@@ -10154,8 +10264,8 @@ function avviaNotte(){
   let sistema, vero;
   if(ATTESA){ sistema=ATTESA.sistema; vero=ATTESA.vero; ATTESA=null; }   // usa il VERO congelato nell'attesa (non ricalcola: la chiusura non lo tocca)
   else {                                                                 // fallback (chiamata diretta): congela ora
-    if(PAESE.comeSiVince==='parlamentare' || urnaLegislativa()){ S.seggi=calcSeggi(); sistema='parlamentare'; vero={ seggi:Object.assign({},S.seggi) }; }
-    else { if((PAESE.coalizione||PAESE.comeSiVince==='parlamentare') && !sistemaSemipres()) S.seggi=calcSeggi(); sistema='candidato'; vero=testaATesta(); }   // L104-2
+    if(PAESE.comeSiVince==='parlamentare' || urnaLegislativa()){ S.seggi=seggiNuovi(); sistema='parlamentare'; vero=veroSeggi(); }
+    else { if((PAESE.coalizione||PAESE.comeSiVince==='parlamentare') && !sistemaSemipres()) S.seggi=seggiNuovi(); sistema='candidato'; vero=testaATesta(); }   // L104-2
   }
   NOTTE={ sistema:sistema, vero:vero, stadio:0, onde:generaOnde(sistema, vero), dich:null, saltata:false, timer:null };
   NOTTE_TERR=null; try{ notteTerritori(NOTTE); }catch(e){ NOTTE.cambiTerr=null; NOTTE.pienoTerr=null; }   // L239-3: i territori si decidono qui, dopo le onde (D-M2), e si applicano al clic dell'esito
@@ -10441,7 +10551,7 @@ function avviaNotteMinistro(){
 }
 function avviaNotteIntermedia(it, fine){
   const r=it.ris;
-  return avviaNotteUrna('intermedia', { v:r.quota, soglia:r.attesa }, fine, { kicker:`${T(r.tipo)} · ${S.year}` });
+  return avviaNotteUrna('intermedia', { v:r.quota, soglia:r.attesa }, fine, { kicker:`${T(r.tipo)} · ${S.year}`, senato:(S.congresso && classiAttive()) ? camereNotteHtml(r.camera!=null?r.camera:quotaPartitoPresidente(), partitoPresidente(), true) : '' });
 }
 /* la coda dell'intermedia: quella di sempre (resolveItemCore), più — quando arriva dopo la notte — la coda di resolveItemCore e di
    resolveItem che a notte aperta non era passata. `diretto` = chiamata dentro resolveItemCore. */
@@ -10512,7 +10622,7 @@ function renderNotteUrna(){
     const nota=tipo==='delegati'?T('La linea: la metà dei delegati.'):T('La linea: %N%, il voto precedente.').replace('%N',Math.round(so));
     righe=`<div style="padding:6px 0"><div style="display:flex;justify-content:space-between;font-size:13px"><span style="font-weight:700">${nome} <span class="chip" style="background:var(--acc-bg);color:var(--acc-ink)">${T('tu')}</span></span><span class="mono val" data-anim="num:notte:urna" data-to="${v}" data-dec="1">${fmt(v,1)}%</span></div>
       <div class="bar" style="position:relative">${fillI('notte:urna', clamp(v,2,100), 'var(--acc)')}${linea}</div>
-      <div class="contorno" style="font-size:11px;color:var(--mut);margin-top:4px">${nota}</div></div>`;
+      <div class="contorno" style="font-size:11px;color:var(--mut);margin-top:4px">${nota}</div>${(ultima && I.senato) ? I.senato : ''}</div>`;
   }
   const azioni=`<div class="choices notte-bottoni"><button class="opt" style="border-color:${ultima?'var(--acc)':'var(--brand)'}" onclick="avanzaNotte()"><span class="ol"${ultima?' style="color:var(--acc-ink)"':''}>${T(ultima?'Risultato ufficiale →':'Avanti →')}</span></button>`+
     (ultima?'':`<button class="opt" style="border-color:var(--mut2)" onclick="saltaNotte()"><span class="ol" style="color:var(--mut)">${T('Salta allo spoglio finale')}</span></button>`)+`</div>`;
@@ -10785,7 +10895,7 @@ function notteSeggi(shown, ultima, compatto){
   const primi=compatto ? (nessuno ? [] : sorted.filter((p,k)=>k<4 || p.id===S.partito)) : sorted, altri=compatto ? sorted.filter(p=>primi.indexOf(p)<0) : [];
   const rows=primi.map(riga).join('')+(altri.length ? `<details class="notte-tutti"${NOTTE.tutti?' open':''} ontoggle="if(NOTTE) NOTTE.tutti=this.open"><summary>${T('Tutti i partiti')} (${altri.length})</summary>${altri.map(riga).join('')}</details>` : '');
   /* alla PROCLAMAZIONE: l'aula come emiciclo (grafica lotto 2) — i puntini a ventaglio */
-  const emi=(ultima && typeof emiciclo==='function') ? `<div style="padding:6px 18px 0">${emiciclo(shown,{key:'notte',coal:bloc})}</div>` : '';
+  const emi=(ultima && typeof emiciclo==='function') ? `<div style="padding:6px 18px 0">${camere2NotteHtml(shown,bloc) || emiciclo(shown,{key:'notte',coal:bloc})}</div>` : '';   // L263-6: i bottoni dove il Senato c'è
   /* F4 — LA SOGLIA IN SCENA (il '53 e ogni snodo-soglia futuro): la posta dichiarata ondata per ondata.
      Il VERO non cambia: la soglia resta valutata a valle in applicaSnodoTruffa. Qui si VIVE, non si decide. */
   const soglia=(typeof snodoTruffaAttivo==='function' && snodoTruffaAttivo() && S.leggeTruffa==='approvata')
@@ -10805,7 +10915,13 @@ function notteCandidato(onda){
       <div style="padding:6px 0"><div style="display:flex;justify-content:space-between;font-size:13px"><span style="font-weight:700">${T(me.nome)} <span class="chip" style="background:var(--acc-bg);color:var(--acc-ink)">${T('tu')}</span></span><span class="mono val" data-anim="num:notte:me" data-to="${myP}" data-dec="1">${fmt(myP,1)}%</span></div>
         <div class="bar" style="position:relative">${fillI('notte:me', clamp(myP,2,100), 'var(--acc)')}${tacca50()}</div></div>
       <div style="padding:6px 0"><div style="display:flex;justify-content:space-between;font-size:13px"><span style="font-weight:600">${T(r.opp.nome)}</span><span class="mono val" data-anim="num:notte:opp" data-to="${oppP}" data-dec="1">${fmt(oppP,1)}%</span></div>
-        <div class="bar">${fillI('notte:opp', clamp(oppP,2,100), 'var(--mut2)')}</div></div></div>`;
+        <div class="bar">${fillI('notte:opp', clamp(oppP,2,100), 'var(--mut2)')}</div></div>${senatoNotteCandidato(onda)}</div>`;
+}
+/* L263-3 · la riga del Senato alla presidenziale, all'ultima ondata: il partito che avrà il Presidente e la sua quota, come li leggeranno nextMandate e goOpposizione */
+function senatoNotteCandidato(onda){
+  if(!S.congresso || !classiAttive() || NOTTE.stadio<SD_NOTTE.length-1) return '';
+  const w=onda.myPct>50 ? S.partito : vincitore().id, f=S.forze||{}; let tot=0; for(const k in f) tot+=f[k]||0;
+  return camereNotteHtml(tot ? (f[w]||0)/tot*100 : 50, w);
 }
 
 /* ============================================================
@@ -11030,7 +11146,7 @@ function chiudiBilancio(){ document.getElementById('ov').classList.remove('on');
 
 /* --- Trattativa di coalizione (avvio e rielezione). Riusa l'overlay #ov/#modal. --- */
 function openTrattativa(ctx){
-  if(!S.seggi) S.seggi=calcSeggi();
+  if(!S.seggi) S.seggi=seggiNuovi();
   COAL={ctx, membri:[S.partito]};
   renderTrattativa();
 }
@@ -11382,7 +11498,7 @@ function nextMandate(){
   segnaForzaUrna();   // L153-1: l'urna vinta è chiusa (al governo, o dall'opposizione via tornaAlGoverno)
   if(S.congresso) aggiornaCongresso(quotaPartitoPresidente());   // L173-2: alla presidenziale vinta la Camera è la quota del tuo partito
   S.mandatesWon++; S.mandate++; S.mandatiConsecutivi=(S.mandatiConsecutivi||0)+1; S.turnInMandate=0; S.snap=Object.assign({},S.pol); S.leggiSnap=Object.assign({},S.leggi);   // L86-1
-  if((PAESE.comeSiVince==='parlamentare'||PAESE.coalizione) && !sistemaSemipres()) S.seggi=calcSeggi();   // L104-2: nel semipresidenziale l'Assemblea resta quella in vigore
+  if((PAESE.comeSiVince==='parlamentare'||PAESE.coalizione) && !sistemaSemipres()) S.seggi=seggiNuovi();   // L104-2: nel semipresidenziale l'Assemblea resta quella in vigore
   if(sistemaSemipres()) S.scioglimentoScelto=false;   // L104-2
   S.minoranza = PAESE.coalizione ? seggiCoalizione(S.coalizione,S.seggi)<50
               : (PAESE.comeSiVince==='parlamentare' ? S.seggi[S.partito]<50 : false);
@@ -11596,6 +11712,7 @@ function perdiElezione(){ if(S.opposizione){ if(salvezzaOpp()) goOpposizione(tru
    nessun log/genAgenda/commit (li fa il chiamante) né potere locale (persiste alla sconfitta, si ri-fissa all'avvio).
    Condiviso da goOpposizione (sconfitta) e startOpposizione (avvio da sfidante). */
 function entraOpposizione(w){
+  classiSegnaPres();   // L263-3: un salvataggio senza classi: di chi era la Camera, prima che governi l'altro
   const eraOpp=!!S.opposizione;   // L260-4bis: il rivale interno resta se eri già all'opposizione (l'urna persa e perdonata)
   S.opposizione=true; S.governoAvversario=w.id; S.ministers=[];
   S.governoAvversarioVolto=nomePersona();   // L73-2: chi ti ha succeduto ha un nome (generato, mai reale)
@@ -11664,6 +11781,7 @@ let REGOLA_VOLTO=true;
 function tornaAlGoverno(mins){
   if(REGOLA_VOLTO && S.livello===2){ S.livello=3; S.premier=null; S.dicastero=null; S.capitale=null; S.prevSettore=null; S.silAvviso=null; S.premCrisiMesi=0; S.occUltima=null; S.mesiAltoCap=0; }
   if(S.volto) delete S.volto;   // L260-9: al governo il dossier conteso finisce (voltoMese lo toglierebbe al mese dopo: qui subito)
+  classiSegnaPres();   // L263-3: come entraOpposizione
   S.ministers=mins; S.opposizione=false; S.governoAvversario=null;
   delete S.f0Rientro;   // L237-2ter: al governo la soglia del rientro da partner non vale più
   if(typeof parla==='function') parla(voceGesto('insediamento', 'voce-insediamento', {chiudeOv:true}));   // L218-4: torni capo del governo (dalle urne o con la sfiducia costruttiva); l'altro punto è diventaPremier · L248-5bis: lo strato
@@ -11900,15 +12018,17 @@ function applicaLegge(L, approva){
      partner  per ogni alleato: Kp·max(0, |asse alleato − asse legge| − 1)·(1,6 − tenuta/100); pieno se DECISIVO (senza di lui
               la coalizione scende sotto 50), un quarto se no. Il decisivo col termine più alto è chi «vota contro».
      diviso   S.governoDiviso → Kdiv·(1 + max(0, 50 − Camera)/20).    consenso  Kc·min(1, max(0, 45 − consenso)/20).
+     alta     L263-4, solo con classiAttive(): Kdiv scatta se manca la Camera, e se manca il Senato Kalta·potere·(1 + 0,04·min(10, 50 − Senato)), mai sul voto d'accusa (quello è della Camera).
    Legge solo distanze d'asse e numeri, mai il colore della legge o del governo. Lo STESSO calcolo decide la riga «In aula» di
    renderLegge (ui.js) e l'esito qui: niente riga, niente bocciatura (votoInAulaAttivo, la regola di cadeChip, L93-5).
    A p = 0 non si estrae niente: a pesi zero il gioco è identico a prima del lotto (la misura: .claude/misura-l230-1.js).
    Respinta (leggeRespinta): niente applicaLegge (né unaTantum né tenuta di gradimento), punti riforma intatti, correnti −3,
    stampa −2, −5 di tenuta al decisivo che vota contro, una riga nel registro, `negativo` dopo il martelletto e voce-legge-no. */
-let LEGGI_VOTO_K = { Km:0.08, Kmin:0.25, Kp:0.04, Kdiv:0.18, Kc:0.08 };   // let: la misura li azzera (A/B a pesi zero)
+let LEGGI_VOTO_K = { Km:0.08, Kmin:0.25, Kp:0.04, Kdiv:0.18, Kc:0.08, Kalta:0.09 };   // let: la misura li azzera (A/B a pesi zero)
+const POTERE_ALTA = { pari:1, consensoParte:0.4, superabile:0.25, ritardo:0.1, nessuno:0 };   // L263-4: quanto pesa la camera alta che manca (DESIGN-CAMERE §3.4)
 function votoInAulaAttivo(L){ return !!L && S.livello===3 && !S.opposizione && !S.coabitazione && !(S.leggi && S.leggi[L.id]); }
 function pBocciatura(L){
-  const K=LEGGI_VOTO_K; let tipo, m;
+  const K=LEGGI_VOTO_K; let tipo, m, alta=false;
   if(S.seggi){ tipo='seggi'; m=seggiCoalizione(S.coalizione||[S.partito], S.seggi)-50; }
   else if(S.congresso && S.congresso.camera!=null){ tipo='congresso'; m=S.congresso.camera-50; }
   else { tipo='nessuno'; m=10; }
@@ -11918,9 +12038,12 @@ function pBocciatura(L){
     const d=Math.abs((P.asse||0)-(L.asse||0)), ten=(S.tenuta && S.tenuta[id]!=null)?S.tenuta[id]:60;
     const q=K.Kp*Math.max(0,d-1)*(1.6-ten/100), decisivo=tipo==='seggi' && (m-(S.seggi[id]||0))<0;
     p+= decisivo ? q : q*0.25; if(decisivo && q>qmax){ qmax=q; contro=id; } });
-  if(S.governoDiviso) p+=K.Kdiv*(1+Math.max(0,50-((S.congresso&&S.congresso.camera)||50))/20);
+  if(S.congresso && classiAttive()){ const qs=quotaSenato();   // L263-4: Kdiv solo per la Camera, o il Senato conterebbe due volte; L263-4bis: Kalta solo con la Camera in mano (con la Camera già persa, perdere anche il Senato non aggiunge rischio)
+    if(S.congresso.camera<50) p+=K.Kdiv*(1+Math.max(0,50-(S.congresso.camera||50))/20);
+    if(qs<50 && S.congresso.camera>=50 && L!==ACCUSA_LEGGE){ alta=true; p+=(K.Kalta||0)*(POTERE_ALTA[cameraAlta().potere]||0)*(1+0.04*Math.min(10,50-qs)); } }
+  else if(S.governoDiviso) p+=K.Kdiv*(1+Math.max(0,50-((S.congresso&&S.congresso.camera)||50))/20);
   p+=K.Kc*Math.min(1, Math.max(0,45-(S.ind.consenso||50))/20);
-  return { p:Math.max(0,Math.min(0.5,p)), contro:contro, m:m, tipo:tipo };
+  const V={ p:Math.max(0,Math.min(0.5,p)), contro:contro, m:m, tipo:tipo }; if(alta) V.alta=true; return V;
 }
 function votoInAula(L){ const V=pBocciatura(L); if(!(V.p>0)) return { respinta:false, contro:null };   // a p = 0 nessuna estrazione
   return { respinta: Math.random()<V.p, contro:V.contro }; }
@@ -11946,7 +12069,7 @@ function leggeRespinta(L, contro){
    GUERRA_LEGGE (L245-4): non è in LEGGI e S.leggi non la vede mai. pBocciatura dà la probabilità che il governo PERDA un voto in aula
    (governo diviso, consenso; negli Stati Uniti il margine dei seggi non conta, lo porta il Congresso): qui è la probabilità che la Camera
    voti l'accusa, più l'esito di S4a (coperto pesa di più) e l'esposizione (il Presidente non ha la credibilità, che è delle valute
-   d'opposizione). Il Senato giudica con una seconda estrazione a peso più basso (i due terzi): p × 0,6. Tutto con Math.random, come
+   d'opposizione). Il Senato giudica con una seconda estrazione a peso più basso (i due terzi): p × usRimozioneF(), 0,6 fisso o, con classiAttive(), dal Senato vero (L263-4). Tutto con Math.random, come
    votoInAula: nel banco consuma la sequenza solo nelle carriere che arrivano qui.
    S.usNastriRitorno = {mese, tipo[, p]} (facoltativo, mese = anno×12 + mese): lo scrive usNastriPianifica dalle scelte di NASTRI74_EV
    e NASTRI74_OPP_EV (data.js), lo legge e lo toglie usNastriMese in advanceMonth. Il mese salta i mesi del voto (novembre degli anni
@@ -11954,6 +12077,7 @@ function leggeRespinta(L, contro){
    un attimo prima di gameOver('dimissioni'): lo legge solo il testo del finale. */
 const ACCUSA_LEGGE={ id:'accusa', nome:'La messa in stato d\'accusa', asse:0 };
 function usScandaloK(){ return S.usScandalo==='coperto' ? 1.5 : 1; }
+function usRimozioneF(){ return (S.congresso && classiAttive()) ? clamp(0.6+0.02*(50-quotaSenato()),0.2,0.9) : 0.6; }   // L263-4: a Senato 50 resta 0,6, più è ostile (quota del Presidente più bassa) più facile è trovare i due terzi
 function usAccusaP(){
   var V=pBocciatura(ACCUSA_LEGGE).p, extra=(S.usScandalo==='coperto' ? 0.25 : 0.12) + Math.max(0,(S.esposizione||0)-30)/150;
   return Math.max(0.05, Math.min(0.9, V+extra));
@@ -11996,7 +12120,7 @@ function usNastriMese(){
   }
   /* R.tipo==='voto' */
   if(Math.random()>=pa){ S.log.unshift({t:T('Lo scandalo'),x:T('La Camera non trova i voti per l\'accusa: resti alla Casa Bianca, ma il caso non si chiude.')}); usSalvato(); return false; }
-  if(Math.random()>=pa*0.6){ S.log.unshift({t:T('Lo scandalo'),x:T('La Camera ti mette in stato d\'accusa; al Senato mancano i due terzi per rimuoverti. Resti, ma il paese non lo dimentica.')}); usSalvato(); return false; }
+  if(Math.random()>=pa*usRimozioneF()){ S.log.unshift({t:T('Lo scandalo'),x:T('La Camera ti mette in stato d\'accusa; al Senato mancano i due terzi per rimuoverti. Resti, ma il paese non lo dimentica.')}); usSalvato(); return false; }
   S.log.unshift({t:T('Lo scandalo'),x:gn('La Camera ti mette in stato d\'accusa e il Senato raggiunge i due terzi: sei rimosso dalla carica.','La Camera ti mette in stato d\'accusa e il Senato raggiunge i due terzi: sei rimossa dalla carica.')});
   return usDimetti('rimosso');
 }
@@ -12123,6 +12247,7 @@ function parseSave(text){
   return {ok:true, save:o};
 }
 function applySnap(snap){
+  CAMERA_VISTA='bassa';   // L263-5
   if(typeof taciTutto==='function') taciTutto();   // L95-3
   S = snap.s;
   const _pa=(SNAP_PRIMA_AGENDA && snap.pa && typeof snap.pa==="object") ? snap.pa : null;   // L180-1: lo stato di prima dell'agenda del mese (assente nei salvataggi vecchi: come prima)
@@ -12221,7 +12346,7 @@ function applySnap(snap){
   if(S.meseUrnaPorta===undefined){ const _scU=(typeof SCENARI!=='undefined' && SCENARI[S.scenario]) || null;
     S.meseUrnaPorta = (S.scenario==='uk1960') ? 1 : ((_scU && _scU.meseUrna) || (PAESI[S.paese] && PAESI[S.paese].meseUrna) || 1); }
   if(S.congresso===undefined) S.congresso=null;   // L173-2: un salvataggio di prima non ha Congresso
-  if(S.governoDiviso===undefined) S.governoDiviso=!!(S.congresso && S.congresso.camera<50);
+  if(S.governoDiviso===undefined) S.governoDiviso=governoDivisoDa();
   if(S.forzaUrnaPrec===undefined) S.forzaUrnaPrec=(S.forze && S.forze[S.partito]) || 0;
   if(S.ancoraTappa===undefined) S.ancoraTappa={};   // L106-3: i salvataggi di prima non hanno tappe marcate applicate (salvo fr2000 dopo il 2002: vedi l'archivio)
    // L61-4 - migrazione
@@ -12292,6 +12417,7 @@ function applySnap(snap){
   if(S.territorioRecente===undefined) S.territorioRecente=null;     // F2 — migrazione: anti-ripetizione area
   if(S.intervistaUltimo===undefined) S.intervistaUltimo=null;      // F5 — migrazione: cooldown intervista incalzante
   if(S.recentSfide===undefined) S.recentSfide=[];                  // Q-fix #2 — migrazione: finestra viste-di-recente condivisa
+  if(S.camera2 && (typeof S.camera2!=='object' || !S.camera2.seggi || typeof S.camera2.seggi!=='object')) delete S.camera2;   // L263-6: illeggibile = assente, seggiAlta() torna a S.seggi fino alla prossima urna
   /* AVANZAMENTO Fase 2 — migrazione split Fronte→PCI+PSI: i vecchi salvataggi-'50 hanno `i50_fronte` nel roster.
      Ripartisco la sua forza 22:9 (come il seed) su pci/psi e tolgo l'orfano; idem forzePrev/seggi; partito/coalizione rimappati sul PCI (il maggiore). Senza, la sinistra sparirebbe dal caricato. */
   if(S.era===LINEA_IT && S.forze && S.forze.i50_fronte!=null && S.forze.i50_pci==null){
@@ -12448,7 +12574,7 @@ function nomePartitoSalvato(s){
   var p=lista.find(function(x){ return x.id===id; }) || ((PAESI[s.paese]||{partiti:[]}).partiti.find(function(x){ return x.id===id; }));
   return (p && p.nome) || '';
 }
-function slotInfo(i){ const t=lsGet(slotKey(i)); if(!t) return null; const p=parseSave(t); if(!p.save) return {corrotto:true}; const s=p.save.s; return {nome:p.save.nome||('Slot '+(i+1)), paese:T((PAESI[s.paese]||{}).nome||'?'), partito:nomePartitoSalvato(s), anno:s.year, mandato:s.mandate, opp:!!s.opposizione}; }
+function slotInfo(i){ const t=lsGet(slotKey(i)); if(!t) return null; const p=parseSave(t); if(!p.save) return {corrotto:true}; const s=p.save.s; return {nome:p.save.nome||('Slot '+(i+1)), paese:T((PAESI[s.paese]||{}).nome||'?'), partito:T(nomePartitoSalvato(s)), anno:s.year, mandato:s.mandate, opp:!!s.opposizione}; }
 function salvaSlot(i, nome){ if(!lastSnap) commitSnap(); if(!lastSnap) return false; return lsSet(slotKey(i), JSON.stringify(Object.assign({}, lastSnap, {nome:(nome||'').slice(0,24)||('Slot '+(i+1))}))); }
 function caricaSlot(i){ const t=lsGet(slotKey(i)); if(!t) return {err:'Slot vuoto.'}; return caricaSalvataggio(t); }
 function eliminaSlot(i){ lsDel(slotKey(i)); }

@@ -143,6 +143,19 @@
   .pol .pn{font-weight:600; font-size:14px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:baseline; gap:8px;}
   .polcost{font-family:'IBM Plex Mono',monospace; font-weight:600; font-size:12px; color:var(--mut); white-space:nowrap;}   /* cantiere Budget: costo ricorrente per-politica / per-leva */
   .seg{display:flex; gap:5px;}
+  /* L263-5 · le due aule: i bottoni, la riga di 12 px che dice che cosa conta la camera, la legenda dell'emiciclo */
+  .camere-aula{padding:0 14px;}   /* i puntini non toccano il bordo della scheda */
+  .camere-aula .camere-vista{padding:10px 0 0;}
+  .camere-cosa{font-size:12px; color:var(--mut); padding:6px 2px 0;}
+  .camere-nota{padding:4px 2px 2px; text-align:center;}
+  .camere-notte .camere-vista{margin-top:8px;}
+  .camere-par{padding:8px 14px 0;}   /* L263-6: la scheda Partiti dell'Italia */
+  .camere-notte-it .camere-nota{padding:2px 2px 0;}
+  .camere-notte-it svg{max-width:248px !important; margin-top:18px !important;}   /* L263-6: alla proclamazione bottoni e riga stanno nel foglio: l'aula più stretta tiene l'altezza entro 52 px in più; il margine lascia il posto alla cifra sulla linea, che sta sopra il viewBox */
+  .card .ct.emi-titolo{text-align:center; padding:11px 0 16px;}   /* il 50 della linea sta sopra il viewBox: il titolo gli lascia il posto */
+  .emi-legenda{display:flex; flex-wrap:wrap; justify-content:center; gap:4px 12px; padding:6px 12px 2px; font-size:12px; color:var(--txt2);}
+  .emi-voce{display:inline-flex; align-items:center; gap:5px;}
+  .emi-voce i{display:inline-block; width:9px; height:9px; border-radius:50%;}
   /* L69-1 — il controllo segmentato a norma, OVUNQUE: bersaglio tattile 44px e testo 12px.
      Prima era 32-33px con testo fino a 10,5px: su un telefono non e compattezza, e un bottone che si
      sbaglia a premere. Il `flex-direction:column` + `justify-content:center` serve perche un'etichetta

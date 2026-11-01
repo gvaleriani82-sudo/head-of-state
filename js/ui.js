@@ -1453,6 +1453,7 @@ async function caricaAvatarFile(input){
 /* --- Selettore Paese + Partito (schermata iniziale). Cambiando paese, PAESE diventa attivo, la cornice
    si aggiorna (applyPaese) e il partito di default torna al più forte (primo in elenco) del nuovo paese. --- */
 function setCountry(c){
+  CAMERA_VISTA='bassa';   // L263-5
   chosenCountry=c; chosenScenario='presente'; PAESE=PAESI[c]; chosenPartito=PAESE.partiti[0].id;
   ppAzzera();   // L237-4: i doppioni e i gruppi sono del paese: la fondazione si rifà   // Build B: cambiare paese riazzera lo scenario (gli scenari sono per-paese)
   document.querySelectorAll('#country-seg button').forEach(b=>b.classList.toggle('on', b.dataset.c===c));
@@ -1462,6 +1463,7 @@ function setCountry(c){
 /* Build B — scelta dello scenario d'epoca. Sovrappone la lista-partiti dell'epoca al PAESE base (CLONE, mai muta
    PAESI). 'presente' = nessun override. Se lo scenario fissa un paese (es. italia1950), allinea anche il paese. */
 function setScenario(id){
+  CAMERA_VISTA='bassa';   // L263-5
   const sc=(typeof SCENARI!=='undefined' && SCENARI[id]) ? SCENARI[id] : SCENARI.presente;
   chosenScenario=sc.id;
   if(sc.paese) chosenCountry=sc.paese;
@@ -1840,7 +1842,7 @@ function renderStartPersistence(){
     if(t){ const p=parseSave(t); if(p.save){ const s=p.save.s; const pn=nomePartitoSalvato(s);   // L237-3: dal registro del salvataggio, non da PAESI grezzo
       html=`<div class="card" style="border-color:var(--brand);max-width:420px;margin:0 auto 16px;text-align:left"><div style="padding:12px 14px">
         <div class="contorno" style="letter-spacing:.16em;text-transform:uppercase;color:var(--brand)">${T('Carriera in corso')}</div>
-        <div style="font-weight:600;font-size:15px;margin:3px 0 1px">${escAttr(T((PAESI[s.paese]||{}).nome||''))} · ${escAttr(pn)}</div>
+        <div style="font-weight:600;font-size:15px;margin:3px 0 1px">${escAttr(T((PAESI[s.paese]||{}).nome||''))} · ${escAttr(T(pn))}</div>
         <div style="font-size:12.5px;color:var(--mut)">${T("Anno")} ${s.year} · ${s.opposizione ? (s.mandate>0 ? `${T("Mandato")} ${s.mandate} ${T("· all'opposizione")}` : T("Sfidante all'opposizione")) : `${T("Mandato")} ${s.mandate}`}</div>
         <button class="btn" style="margin-top:10px;width:100%" onclick="continuaCarriera()">${T('Continua la carriera →')}</button></div></div>`;
     }}
@@ -3326,7 +3328,8 @@ function renderPaese(){
   }
   let h=`<div class="contorno" style="font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--mut);margin:2px 2px 8px;">${T('Stato del paese')}</div>`;
   if(S.livello===2) h+=`<div class="banner">${T('<b>Governa %PM.</b> Vedi gli indicatori nazionali, ma non li guidi: la politica generale è del premier. Tu incidi dal <b>tuo dicastero</b>.').replace('%PM', escAttr((S.premier||{}).nome||T('il premier')))}</div>`;
-  if(S.governoDiviso && S.livello===3) h+=`<div class="banner">${T(S.opposizione ? '<b>Il Congresso è del tuo partito.</b> Il Presidente governa diviso.' : '<b>Il Congresso è dell\'altro partito.</b> Un punto riforma in meno alla manovra.')}</div>`;   // L173-2: il governo diviso, in sola lettura
+  if(S.governoDiviso && S.livello===3){ const soloSen=divisoPer()==='senato'; h+=`<div class="banner">${T(S.opposizione ? (soloSen ? '<b>Il Senato è del tuo partito.</b> Il Presidente governa diviso.' : '<b>Il Congresso è del tuo partito.</b> Il Presidente governa diviso.') : (soloSen ? '<b>Il Senato è dell\'altro partito.</b> Un punto riforma in meno alla manovra.' : '<b>Il Congresso è dell\'altro partito.</b> Un punto riforma in meno alla manovra.'))}</div>`; }   // L173-2: il governo diviso, in sola lettura; L263-4: col solo Senato contro lo dice
+  if(S.livello===3 && S.congresso && S.congresso.classi){ const seS=senatoSeggi(quotaSenato()); h+=`<div style="font-size:12px;color:var(--mut);margin:0 2px 8px">${T('Senato: %N su %T al partito del Presidente').replace('%N',seS.n).replace('%T',seS.tot)}</div>`; h+=camereAulaHtml(); }   // L263-3: il Senato, in sola lettura; L263-5: sotto, le due aule (nelle partite americane S.seggi è null e la scheda Partiti non ha emiciclo)
   if(S.coabitazione) h+=`<div class="banner">${T('<b>Governa %PM.</b> Tieni esteri e difesa; il resto non lo guidi.').replace('%PM', escAttr((S.premier||{}).nome||T('il Primo ministro')))}</div>`;   // L100-2: la coabitazione riusa il banner del livello 2
   h+=`<div class="budget">
     <div class="b"><div class="l">${T('Saldo di bilancio')}</div><div class="v" style="color:${def<=3?'var(--pos)':def<=4?'var(--warn)':'var(--neg)'}">${balText}</div></div>
@@ -5115,11 +5118,14 @@ function renderPartitoPage(){
    i puntini compaiono a ventaglio sx→dx (opacity/scale, ritardo per indice); reduced-motion → statico.
    Ri-render dello stesso stato → statico (firma in EMI_SIG, il ventaglio non ri-pulsa a ogni render). ===== */
 let EMI_SIG=null;
+/* L263-5 · le opzioni nuove, tutte additive (senza, l'HTML è quello di prima, byte per byte: prove/l263-5/prova-emiciclo.js): `nomi`/`colori` per un id fuori da PAESE.partiti; la voce '_ni' («non iscritti», grigia, ultima nel disegno e in legenda); `percento`: i valori sono quote, la legenda le dice in % e mai un numero di seggi (i puntini dalla somma progressiva, così fanno il totale); `legenda`: la legenda coi seggi; `titolo`: sta sopra il disegno; `maggioranza`: la cifra sulla linea tratteggiata (assente = 50). */
 function emiciclo(seggi, opts){
   opts=opts||{};
   const coal=opts.coal||S.coalizione||[S.partito], mine=opts.mine||S.partito;
   const ps=[...PAESE.partiti].filter(p=>(seggi[p.id]||0)>0).sort((a,b)=>((a.asse||0)-(b.asse||0))||((seggi[b.id]||0)-(seggi[a.id]||0)));
-  const tot=ps.reduce((s,p)=>s+(seggi[p.id]||0),0); if(!tot) return '';
+  const fuori=Object.keys(seggi).filter(id=>(seggi[id]||0)>0 && (id==='_ni' || (opts.nomi && opts.nomi[id]!=null)) && !PAESE.partiti.some(p=>p.id===id)).sort((a,b)=>(a==='_ni')-(b==='_ni'));
+  fuori.forEach(id=>{ const nm=(opts.nomi && opts.nomi[id]!=null) ? opts.nomi[id] : T('Non iscritti'); ps.push({id:id, nome:nm, nomeTesto:nm, fuori:true, colore:(opts.colori && opts.colori[id]) || (id==='_ni' ? 'var(--mut)' : 'var(--mut2)')}); });
+  const somma=ps.reduce((s,p)=>s+(seggi[p.id]||0),0), tot=opts.percento?Math.round(somma):somma; if(!tot) return '';
   /* file concentriche: seggi per fila proporzionali alla lunghezza dell'arco (resti ai più alti) */
   const RAGGI=[28,35,42,49,56], cx=58, cy=60, sumR=RAGGI.reduce((a,b)=>a+b,0);
   const perRiga=RAGGI.map(r=>({r, n:Math.floor(tot*r/sumR), resto:(tot*r/sumR)%1}));
@@ -5133,18 +5139,52 @@ function emiciclo(seggi, opts){
   /* firma: stesso stato → niente ri-animazione */
   const sig=(opts.key||'')+'|'+ps.map(p=>p.id+':'+seggi[p.id]).join(',');
   const anim=sig!==EMI_SIG && !motionReduced(); EMI_SIG=sig;
-  let dots='', k=0;
+  let dots='', k=0, cum=0;
   for(const p of ps){ const inCoal=coal.includes(p.id), me=p.id===mine;
-    const fill=me?'var(--acc)':inCoal?'var(--acc)':'var(--mut2)';
-    const op=me?'1':inCoal?'0.4':'0.45';
-    for(let i=0;i<(seggi[p.id]||0) && k<posti.length;i++,k++){ const pt=posti[k];
+    const fill=p.fuori?p.colore:me?'var(--acc)':inCoal?'var(--acc)':'var(--mut2)';
+    const op=p.fuori?'0.85':me?'1':inCoal?'0.4':'0.45';
+    p.emiFill=fill; p.emiOp=op;
+    const prima=cum; cum+=(seggi[p.id]||0); const quanti=opts.percento ? Math.round(cum)-Math.round(prima) : (seggi[p.id]||0);
+    for(let i=0;i<quanti && k<posti.length;i++,k++){ const pt=posti[k];
       dots+=`<circle class="emi-dot${anim?' emi-anim':''}" cx="${pt.x.toFixed(1)}" cy="${pt.y.toFixed(1)}" r="2.6" fill="${fill}" fill-opacity="${op}"${anim?` style="animation-delay:${k*7}ms"`:''}><title>${escAttr(p.nomeTesto!=null?p.nomeTesto:T(p.nome))}</title></circle>`; }   /* L237-5: il nome del partito proprio dal testo (nomeTesto), non dalla voce escapata: escAttr non escapa due volte */
   }
-  return `<svg viewBox="0 0 116 66" role="img" aria-label="${T('Emiciclo')}: ${tot} ${T('seggi')}" style="display:block;width:100%;max-width:340px;margin:0 auto;overflow:visible">
+  const svg=`<svg viewBox="0 0 116 66" role="img" aria-label="${T('Emiciclo')}: ${opts.percento ? (opts.titolo||opts.aria||'') : tot+' '+T('seggi')}" style="display:block;width:100%;max-width:340px;margin:0 auto;overflow:visible">
     ${dots}
     <line x1="${cx}" y1="${cy-61}" x2="${cx}" y2="${cy-23}" stroke="var(--neg)" stroke-width="1" stroke-dasharray="2 2" opacity="0.55"/>
-    <text x="${cx}" y="${cy-63}" text-anchor="middle" font-size="5.5" fill="var(--mut)">50</text>
+    <text x="${cx}" y="${cy-63}" text-anchor="middle" font-size="5.5" fill="var(--mut)">${opts.maggioranza!=null?opts.maggioranza:50}</text>
   </svg>`;
+  if(!opts.titolo && !opts.percento && !opts.legenda) return svg;
+  const voci=(opts.percento||opts.legenda) ? `<div class="emi-legenda">${ps.map(p=>`<span class="emi-voce" data-id="${p.id}"><i style="background:${p.emiFill};opacity:${p.emiOp}"></i>${p.fuori?p.nome:T(p.nome)} <b class="mono">${opts.percento ? fmt(seggi[p.id],1)+'%' : seggi[p.id]}</b></span>`).join('')}</div>` : '';
+  return (opts.titolo ? `<div class="ct emi-titolo">${opts.titolo}</div>` : '')+svg+voci;
+}
+/* L263-5 · QUALE AULA SI GUARDA: `CAMERA_VISTA` è dello schermo, mai in S né nei salvataggi; torna a 'bassa' a partita nuova, al caricamento e al cambio di paese (initStatoBase, applySnap, setCountry, setScenario). L'interruttore c'è solo con camereComposizione() (game.js): due camere attive e una composizione da disegnare; dove la camera è una sola lo schermo è quello di prima. */
+let CAMERA_VISTA='bassa';
+function cameraNome(r){ return (typeof curLang==='function' && curLang()==='en') ? (r.nomeEn||r.nome) : r.nome; }
+function cameraCosaConta(r){   // la riga di 12 px sotto i bottoni: che cosa conta la camera alta, dai campi della riga di CAMERE
+  if(r.fiducia) return T('Dà la fiducia al governo');
+  if(r.elezione==='composizione') return T('Solo composizione');
+  if(r.potere==='pari') return T('Vota ogni legge: può fermarla');
+  return '';
+}
+function cameraBassaCosa(){ return T(S.seggi ? 'Dà la fiducia al governo' : 'Vota ogni legge'); }   // dove S.seggi c'è, dà la fiducia; altrimenti (USA) vota le leggi e basta
+function cameraAltaVista(r){   // titolo e nota: la cifra solo se è vera, con seggiVeri:null il nome, la legenda in % e la riga «non certo» (decisione 2 del 01/11 08:47)
+  const certa=r.seggiVeri!=null;
+  return { titolo:cameraNome(r)+(certa ? ' · '+r.seggiVeri+' '+T('seggi') : ''), percento:!certa, legenda:certa, nota:certa ? '' : T("Numero dei seggi d'epoca non certo") };
+}
+function camereBottoniHtml(r, chiama){
+  const b=(v,nm)=>`<button class="${CAMERA_VISTA===v?'on':''}" aria-pressed="${CAMERA_VISTA===v}" onclick="${chiama}('${v}')">${nm}</button>`;
+  return `<div class="seg camere-vista" role="group" aria-label="${T("L'aula")}">${b('bassa',T('Camera'))}${b('alta',cameraNome(r))}</div>`;
+}
+function cameraVista(v){ CAMERA_VISTA=v==='alta'?'alta':'bassa'; if(typeof suona==='function') suona('tocco'); render(); }
+function camereAulaHtml(){
+  const C=(typeof camereComposizione==='function') ? camereComposizione() : null; if(!C || C.quote) return '';   // L263-6: dove S.seggi c'è l'aula sta nella scheda Partiti (renderPartiti)
+  const alta=CAMERA_VISTA==='alta', V=alta ? cameraAltaVista(C.riga) : {titolo:T('Camera'), percento:true, legenda:false, nota:''};
+  const seggi=alta ? C.alta : C.bassa, totA=C.riga.seggiVeri, cosa=alta ? cameraCosaConta(C.riga) : cameraBassaCosa();
+  return `<div class="card camere-aula">${camereBottoniHtml(C.riga,'cameraVista')}
+    ${cosa?`<div class="camere-cosa">${cosa}</div>`:''}
+    ${emiciclo(seggi,{key:'camere:'+(alta?'alta':'bassa'), coal:[S.partito], titolo:V.titolo, percento:V.percento, legenda:V.legenda, maggioranza:(alta && totA && totA!==100) ? Math.floor(totA/2)+1 : 50})}
+    ${V.nota?`<div class="camere-cosa camere-nota">${V.nota}</div>`:''}
+    <div class="contorno" style="font-size:11px;color:var(--mut2);padding:2px 15px 10px;text-align:center">${T('Il tuo partito pieno · la linea tratteggiata segna la maggioranza')}</div></div>`;
 }
 
 /* L25-1 — la riga «Intesa» sotto ogni partito NON-tuo, **solo all'opposizione**: il tavolo delle alleanze è un
@@ -5216,9 +5256,13 @@ function renderPartiti(){
   const dcAzione=dcP?`<div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap"><button class="mini-btn" style="margin-top:0;background:var(--acc-bg);border-color:var(--acc);color:var(--acc-ink);font-weight:600" onclick="azioneIncarico('${dcP.corrente}')">${T('Dai un incarico')} ${dcA} <small>(+8)</small></button>${dcP.mediazione?`<button class="mini-btn" style="margin-top:0" onclick="azioneMediazione()">${T('Media tra le correnti')}</button>`:''}</div>`:'';
   const partitoBox=S.correnti?`<div class="card" style="padding:10px 14px;margin-bottom:12px${dcP?';border-color:var(--acc)':''}"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><span style="font-size:12.5px;color:var(--mut)">${T('Il tuo partito')} · ${T('umore')} <b style="color:${mediaU<45?'var(--neg)':mediaU<55?'var(--warn-ink)':'var(--pos)'}">${mediaU}</b>${S.sfida?` · <b style="color:var(--neg)">${T('sfida in corso')}</b>`:dcP?` · <b style="color:var(--acc-ink)">${dcNome} ${T('da curare')}</b>`:''}</span><button class="mini-btn" style="margin-top:0;flex-shrink:0;background:var(--brand-bg);border-color:var(--brand);color:var(--brand);font-weight:600" onclick="apriPartito()">${T('Apri')} →</button></div>${dcAzione}</div>`:'';
   /* l'aula: emiciclo dai seggi reali (solo dove c'è un parlamento). Affianca le barre, non le sostituisce. */
-  const emiBox = hasSeats ? `<div class="card"><div class="ct">${T("L'aula")} · ${Object.values(S.seggi).reduce((a,b)=>a+b,0)} ${T('seggi')}</div>
-    <div style="padding:8px 14px 2px">${emiciclo(S.seggi,{key:'par'})}</div>
-    <div class="contorno" style="font-size:11px;color:var(--mut2);padding:0 15px 10px;text-align:center">${T('Il tuo partito pieno, gli alleati in chiaro · la linea tratteggiata segna la maggioranza (50)')}</div></div>` : '';
+  const C2=(hasSeats && typeof camereComposizione==='function') ? camereComposizione() : null, it2=!!(C2 && C2.quote), alta2=it2 && CAMERA_VISTA==='alta';   // L263-6: l'interruttore dove il Senato c'è; senza, l'HTML è quello di prima
+  const div2=it2 ? camereDiviseTesto(C2.bassa, C2.alta, coal) : '';
+  const emiBox = hasSeats ? `<div class="card"><div class="ct">${alta2 ? cameraAltaVista(C2.riga).titolo : `${T("L'aula")} · ${Object.values(S.seggi).reduce((a,b)=>a+b,0)} ${T('seggi')}`}</div>
+    ${it2?`<div class="camere-par">${camereBottoniHtml(C2.riga,'cameraVista')}<div class="camere-cosa">${alta2?cameraCosaConta(C2.riga):cameraBassaCosa()}</div></div>`:''}
+    <div style="padding:8px 14px 2px">${alta2 ? emiciclo(C2.alta,{key:'par:alta',percento:true,aria:cameraNome(C2.riga),maggioranza:camereMaggioranza(true,C2.riga)}) : emiciclo(S.seggi,{key:'par'})}</div>
+    ${div2?`<div class="camere-cosa camere-nota" style="padding:0 15px 4px">${div2}</div>`:''}
+    <div class="contorno" style="font-size:11px;color:var(--mut2);padding:0 15px 10px;text-align:center">${T(alta2?'Il tuo partito pieno · la linea tratteggiata segna la maggioranza':'Il tuo partito pieno, gli alleati in chiaro · la linea tratteggiata segna la maggioranza (50)')}</div></div>` : '';
   let h=sondBox+partitoBox+plBox+emiBox+`<div class="card g2"><div class="ct">${T('Partiti')} · ${T(P.nome)}${hasSeats?' · '+T('seggi'):''}</div>`;
   for(const p of ps){
     const mine=p.id===S.partito, gov=coal.includes(p.id);

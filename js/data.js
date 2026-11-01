@@ -1833,7 +1833,7 @@ const SCENARI = {
     titoloRuolo: 'Presidente', sedeGoverno: 'la Casa Bianca',
     capitale: 'Washington',
     ue: false,
-    congresso: { camera: 60.6 },                // D126: 263 democratici su 434 (la Camera del 1948)
+    congresso: { camera: 60.6, senato: 56.3 },  // D126: 263 democratici su 434 (la Camera del 1948) · L263-3: Senato 54 su 96 ✓ (en.wikipedia, 81st United States Congress, «Begin 54 42 96»)
     intermedie: [ {tipo:'Elezioni di metà mandato', mese:24, tocca:'tutti', penalitaGoverno:0.5} ],   // L173-2 · D134 (L176-1): col logorio di porta 0,014 la penalità non serve a far perdere chi governa — 0 · 0,5 · 1 · 1,5 → 85 · 92 · 98 · 98% (L175-1); banda storica 85-95 (dal 1946 il partito del Presidente perde seggi in 18 metà mandato su 20, ⚠)
     mandatiVinti: 1,                            // D130: il Presidente ha vinto il 1948 (vale solo per chi parte al governo: L175-1, startOpposizione)
     partiti: [
@@ -1885,7 +1885,7 @@ const SCENARI = {
     titoloRuolo: 'Presidente', sedeGoverno: 'la Casa Bianca',
     capitale: 'Washington',
     ue: false,
-    congresso: { camera: 60.0 },                // D161: 262 democratici su 437 (la Camera del 1960, con i seggi di Alaska e Hawaii)
+    congresso: { camera: 60.0, senato: 65.0 },  // D161: 262 democratici su 437 (la Camera del 1960, con i seggi di Alaska e Hawaii) · L263-3: Senato 65 su 100 ✓ (87th United States Congress, «Begin 65 35 100»)
     intermedie: [ {tipo:'Elezioni di metà mandato', mese:24, tocca:'tutti', penalitaGoverno:0.5} ],   // D161: come us1950 (D134)
     /* L216-1 (D270) · la valanga del 1964 e la vittoria dello sfidante nel 1968: punti sul VOTO della presidenziale, positivo = al
        partito del Presidente in carica; li legge solo spintaPresidenziale() (model.js), 0 se il Presidente sei tu. v68 = 4, il più piccolo
@@ -1946,7 +1946,7 @@ const SCENARI = {
     titoloRuolo: 'Presidente', sedeGoverno: 'la Casa Bianca',
     capitale: 'Washington',
     ue: false,
-    congresso: { camera: 44.1 },                // D283: 192 repubblicani su 435 (la Camera del 1968): governo diviso dal primo giorno
+    congresso: { camera: 44.1, senato: 43.0 },  // D283: 192 repubblicani su 435 (la Camera del 1968): governo diviso dal primo giorno · L263-3: Senato 43 su 100 ✓ (91st United States Congress, «43 Republican senators»)
     intermedie: [ {tipo:'Elezioni di metà mandato', mese:24, tocca:'tutti', penalitaGoverno:2} ],   // D283 (era 0,5 come us1950 e us1960) · L258-7 (25/10): 2 — il partito del Presidente perdeva la metà mandato il 67% delle volte (D285: 85-95%; la storia 1970-74-78 tre su tre); sweep 0,75 · 1 · 1,5 · 2 (20 carriere: 67 · 72 · 83 · 91%), 2 il più basso ≥ 85 col 1972 dei Repubblicani al governo in banda (PRESET-USA-1970 «⚑ L258-7»)
     /* D284 (L216-1, D270) · la valanga del Presidente in carica nel 1972 e la sconfitta del partito al governo nel 1976: punti sul VOTO
        della presidenziale, positivo = al partito del Presidente in carica; li legge solo spintaPresidenziale() (model.js), 0 se il
@@ -2009,7 +2009,7 @@ const SCENARI = {
     titoloRuolo: 'Presidente', sedeGoverno: 'la Casa Bianca',
     capitale: 'Washington',
     ue: false,
-    congresso: { camera: 63.7 },                // D292: 277 democratici su 435 (la Camera del 1978): nessun governo diviso all'avvio
+    congresso: { camera: 63.7, senato: 58.0 },  // D292: 277 democratici su 435 (la Camera del 1978): nessun governo diviso all'avvio · L263-3: Senato 58 su 100 ✓ (96th United States Congress, tabella «Begin 58 1 41»; ⚠ la frase sopra il grafico dà 57 e 42)
     intermedie: [ {tipo:'Elezioni di metà mandato', mese:24, tocca:'tutti', penalitaGoverno:1} ],   // L262-2 · dalla sweep (misura-us1980.js gioc --penalita, 20 carriere × 4 partenze): metà mandato perse dal partito del Presidente 2 → 104/105 (99%) · 1,5 → 99/101 · 1 → 95/103 (92%, banda 80-95) · 0,5 → 91/103; partenza di D292 era 2 come us1970
     /* D292 (L216-1, D270) · punti sul VOTO della presidenziale, positivo = al partito del Presidente in carica; li legge solo
        spintaPresidenziale() (model.js), 0 se il Presidente sei tu. Partenza di Cowork {1980:-6, 1984:8, 1988:3}. */
@@ -15123,6 +15123,50 @@ const RIVALI=(function(){
   });
   return r;
 })();
+/* L263-2 · LE SECONDE CAMERE (DESIGN-CAMERE.md, §1 e §3.1): una riga per paese e per periodo, perché una carriera attraversa i decenni e un
+   campo per porta sarebbe falso dal decennio dopo. `paese` = chiave di PAESI (non una porta); `fino` assente = ancora oggi. Vocabolari chiusi:
+   elezione stessoVoto · classi · territori · votoProprio · composizione; potere pari · consensoParte · superabile · ritardo · nessuno;
+   rinnovo.tipo intero · terzi · meta · derivato · nessuno (`derivato` = segue i voti dei territori, nessun calendario suo). `seggiVeri` è solo per lo schermo
+   (eletti, senza i membri di diritto o a vita; null = cifra non trovata o che cambia nel periodo: mai inventata), il motore lavorerà in percentuale.
+   Fonti, come in §1: ✓ pagina aperta · ◦ memoria · ⚠ non trovato o in contrasto. La Corea del Sud non ha righe: oggi è monocamerale (il 1960-61 non è raggiungibile).
+   Le legge solo cameraAlta() (game.js); dal L263-3 la leggono le classi del Senato, dal L263-6 il Senato italiano (calcSeggiAlta: `elezione:'stessoVoto'`, `premioRegionale`). La guardia è in verifica-paese.js (--rosso-camere=buco|potere|paese). */
+const CAMERE=[
+  // Italia: le due camere hanno sempre votato insieme, le durate diverse fino al 1963 non servono (§1.2). La sola camera alta che dà la fiducia (§3.3).
+  {paese:'italia', dal:1948, fino:1957, nome:'Senato', nomeEn:'Senate', seggiVeri:237, elezione:'stessoVoto', fiducia:true, potere:'pari', rinnovo:{tipo:'intero'}},   // ✓ 237 eletti (nel 1948 più 106 di diritto)
+  {paese:'italia', dal:1958, fino:1962, nome:'Senato', nomeEn:'Senate', seggiVeri:246, elezione:'stessoVoto', fiducia:true, potere:'pari', rinnovo:{tipo:'intero'}},   // ✓ 246
+  {paese:'italia', dal:1963, fino:2005, nome:'Senato', nomeEn:'Senate', seggiVeri:315, elezione:'stessoVoto', fiducia:true, potere:'pari', rinnovo:{tipo:'intero'}},   // ✓ 315
+  {paese:'italia', dal:2006, fino:2017, nome:'Senato', nomeEn:'Senate', seggiVeri:315, elezione:'stessoVoto', fiducia:true, potere:'pari', rinnovo:{tipo:'intero'}, premioRegionale:true},   // ✓ 315, premio regionale (voti del 2006, 2008, 2013)
+  {paese:'italia', dal:2018, fino:2021, nome:'Senato', nomeEn:'Senate', seggiVeri:315, elezione:'stessoVoto', fiducia:true, potere:'pari', rinnovo:{tipo:'intero'}},   // ✓ 315, misto a base regionale
+  {paese:'italia', dal:2022, nome:'Senato', nomeEn:'Senate', seggiVeri:200, elezione:'stessoVoto', fiducia:true, potere:'pari', rinnovo:{tipo:'intero'}},   // ✓ 200 eletti più 5 a vita (riforma del 2020)
+  // Stati Uniti: un terzo ogni due anni.
+  {paese:'usa', dal:1950, fino:1958, nome:'Senato', nomeEn:'Senate', seggiVeri:96, elezione:'classi', fiducia:false, potere:'pari', rinnovo:{tipo:'terzi', ogniMesi:24}},   // ✓ 96
+  {paese:'usa', dal:1959, nome:'Senato', nomeEn:'Senate', seggiVeri:100, elezione:'classi', fiducia:false, potere:'pari', rinnovo:{tipo:'terzi', ogniMesi:24}},   // ✓ 100 (98 per pochi mesi del 1959, Alaska prima delle Hawaii)
+  // Francia: l'ultima parola è dell'Assemblea.
+  {paese:'francia', dal:1946, fino:1958, nome:'Consiglio della Repubblica', nomeEn:'Council of the Republic', seggiVeri:320, elezione:'territori', fiducia:false, potere:'superabile', rinnovo:{tipo:'meta', ogniMesi:36}},   // ✓ 320 (la legge dice fra 250 e 320); ◦ il rinnovo per metà: la pagina dà solo i sei anni
+  {paese:'francia', dal:1959, fino:2003, nome:'Senato', nomeEn:'Senate', seggiVeri:null, elezione:'territori', fiducia:false, potere:'superabile', rinnovo:{tipo:'terzi', ogniMesi:36}},   // ⚠ non trovato (L263-1): cambia nel periodo, 321 alla fine ✓; ✓ nove anni, a terzi
+  {paese:'francia', dal:2004, fino:2010, nome:'Senato', nomeEn:'Senate', seggiVeri:null, elezione:'territori', fiducia:false, potere:'superabile', rinnovo:{tipo:'meta', ogniMesi:36}},   // ✓ da 321 verso 348; ✓ sei anni, per metà (legge del 2003)
+  {paese:'francia', dal:2011, nome:'Senato', nomeEn:'Senate', seggiVeri:348, elezione:'territori', fiducia:false, potere:'superabile', rinnovo:{tipo:'meta', ogniMesi:36}},   // ✓ 348
+  // Regno Unito: solo composizione, nessun voto.
+  {paese:'regnounito', dal:1950, fino:1957, nome:'Camera dei Lord', nomeEn:'House of Lords', seggiVeri:null, elezione:'composizione', fiducia:false, potere:'nessuno', rinnovo:{tipo:'nessuno'}},   // ⚠ non trovato (L263-1)
+  {paese:'regnounito', dal:1958, fino:1998, nome:'Camera dei Lord', nomeEn:'House of Lords', seggiVeri:null, elezione:'composizione', fiducia:false, potere:'nessuno', rinnovo:{tipo:'nessuno'}},   // ⚠ non trovato (L263-1); ✓ dal 1958 anche a vita
+  {paese:'regnounito', dal:1999, fino:2025, nome:'Camera dei Lord', nomeEn:'House of Lords', seggiVeri:null, elezione:'composizione', fiducia:false, potere:'nessuno', rinnovo:{tipo:'nessuno'}},   // ⚠ non trovato (L263-1): il totale cambia; ✓ dal 1999, 92 ereditari
+  {paese:'regnounito', dal:2026, nome:'Camera dei Lord', nomeEn:'House of Lords', seggiVeri:796, elezione:'composizione', fiducia:false, potere:'nessuno', rinnovo:{tipo:'nessuno'}},   // ✓ 796 al 31/10 (⚠ la stessa pagina dà anche 775); ✓ ereditari aboliti
+  // Germania: delegati dei governi dei Länder, nessuna durata.
+  {paese:'germania', dal:1949, fino:1989, nome:'Bundesrat', nomeEn:'Bundesrat', seggiVeri:null, elezione:'territori', fiducia:false, potere:'consensoParte', rinnovo:{tipo:'derivato'}},   // ⚠ non trovato (L263-1, riprovato in L263-2): ◦ 41 più 4 di Berlino Ovest senza voto, solo dal 1957
+  {paese:'germania', dal:1990, fino:1995, nome:'Bundesrat', nomeEn:'Bundesrat', seggiVeri:null, elezione:'territori', fiducia:false, potere:'consensoParte', rinnovo:{tipo:'derivato'}},   // ⚠ non trovato (L263-2): ◦ 68; ✓ l'Assia ha cinque voti dal 18/1/1996
+  {paese:'germania', dal:1996, nome:'Bundesrat', nomeEn:'Bundesrat', seggiVeri:69, elezione:'territori', fiducia:false, potere:'consensoParte', rinnovo:{tipo:'derivato'}},   // ✓ 69
+  // Gli altri dieci paesi bicamerali si giocano solo dal 2026: basta la riga del presente.
+  {paese:'australia', dal:2026, nome:'Senato', nomeEn:'Senate', seggiVeri:76, elezione:'votoProprio', fiducia:false, potere:'pari', rinnovo:{tipo:'meta', ogniMesi:36}},   // ✓ 76
+  {paese:'india', dal:2026, nome:'Rajya Sabha', nomeEn:'Rajya Sabha', seggiVeri:245, elezione:'territori', fiducia:false, potere:'superabile', rinnovo:{tipo:'terzi', ogniMesi:24}},   // ✓ 233 più 12 nominati
+  {paese:'sudafrica', dal:2026, nome:'Consiglio nazionale delle province', nomeEn:'National Council of Provinces', seggiVeri:90, elezione:'territori', fiducia:false, potere:'ritardo', rinnovo:{tipo:'derivato'}},   // ✓ 90, dieci per provincia; ◦ il potere
+  {paese:'argentina', dal:2026, nome:'Senato', nomeEn:'Senate', seggiVeri:72, elezione:'classi', fiducia:false, potere:'pari', rinnovo:{tipo:'terzi', ogniMesi:24}},   // ✓ 72
+  {paese:'giappone', dal:2026, nome:'Camera dei consiglieri', nomeEn:'House of Councillors', seggiVeri:248, elezione:'votoProprio', fiducia:false, potere:'superabile', rinnovo:{tipo:'meta', ogniMesi:36}},   // ✓ 248 (⚠ la stessa pagina dà anche 267)
+  {paese:'canada', dal:2026, nome:'Senato', nomeEn:'Senate', seggiVeri:105, elezione:'composizione', fiducia:false, potere:'nessuno', rinnovo:{tipo:'nessuno'}},   // ✓ 105
+  {paese:'spagna', dal:2026, nome:'Senato', nomeEn:'Senate', seggiVeri:266, elezione:'stessoVoto', fiducia:false, potere:'superabile', rinnovo:{tipo:'intero'}},   // ✓ 208 più 58 (⚠ l'infobox dà 267)
+  {paese:'brasile', dal:2026, nome:'Senato', nomeEn:'Senate', seggiVeri:81, elezione:'classi', fiducia:false, potere:'pari', rinnovo:{tipo:'terzi', ogniMesi:48}},   // ✓ 81; ✓ ogni quattro anni, a turno un terzo e due terzi
+  {paese:'messico', dal:2026, nome:'Senato', nomeEn:'Senate', seggiVeri:128, elezione:'stessoVoto', fiducia:false, potere:'pari', rinnovo:{tipo:'intero', ogniMesi:72}},   // ✓ 128; ✓ tutto insieme, col Presidente
+  {paese:'nigeria', dal:2026, nome:'Senato', nomeEn:'Senate', seggiVeri:109, elezione:'stessoVoto', fiducia:false, potere:'pari', rinnovo:{tipo:'intero', ogniMesi:48}}    // ✓ 109
+];
 /* L260-5 · GLI ALLEATI DEL DIPLOMATICO (DESIGN-OLTRE-LE-CARTE.md, «⚑ L260-5»): due paesi amici per partita, accanto ai rivali di RIVALI,
    nella rete bilaterale del livello 5 (bilPartner in game.js, solo con DIPLO_BILATERALI). `paese` = una chiave di SCENARI (le porte) o di
    PAESI (il presente), come in RIVALI; `id` distinto dagli id di POTENZE; `art`/`artEn` come in POTENZE (la forma «con la Francia», «with
