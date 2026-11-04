@@ -321,7 +321,7 @@ function simulateMonth(){
      `probSfiduciaAvversario` legge, esattamente come `probSfiducia` legge `mesiMinoranza`. Fuori
      dall'opposizione si azzera: la pazienza dell'Assemblea riparte con ogni governo. */
   if(S.opposizione){
-    const sottoAvv = (typeof bloccoSeggi==='function') ? (bloccoSeggi()<50) : false;
+    const sottoAvv = (typeof bloccoMaggioranza==='function') ? (bloccoMaggioranza()<50) : false;   // L263-7: nell'aula dove il governo avversario ha meno
     S.mesiMinoranzaAvv = sottoAvv ? (S.mesiMinoranzaAvv||0)+1 : 0;
   } else S.mesiMinoranzaAvv = 0;
 }

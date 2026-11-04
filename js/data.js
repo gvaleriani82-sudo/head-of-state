@@ -100,6 +100,12 @@ const PAESI = {
   },
   usa: {
     votoGuerra:true,   // L245-4: la dichiarazione di guerra passa dal voto in aula (votoGuerraPaese, game.js; assente = nessun voto)
+    /* L263-9 · il Congresso del presente, per il partito del Presidente all'avvio; letto solo da congressoOggiDi (game.js) con CAMERE_USA_OGGI.
+       Fonte: en.wikipedia «119th United States Congress», tabelle «Party summary», riga «Begin (January 3, 2025)»: Camera 219 su 434 (1 vacante),
+       Senato 52 su 99 (1 vacante), quote sui seggi occupati, come le porte (us1950: 263 su 434).
+       L263-9quater · cifre del 119°, riga Begin, al partito del Presidente del gioco, chiunque sia («a specchio»: un Presidente non parte con le aule perse
+       solo perché è democratico; il Presidente appena eletto porta con sé la sua maggioranza, come nel 2024). Le due voci sono uguali di proposito. */
+    congressoOggi:{ us_rep:{ camera:50.5, senato:52.5 }, us_dem:{ camera:50.5, senato:52.5 } },
     /* L94-1 · i nomi dei gruppi, del paese (v. italia) */
     nomiGruppi:{ lavoratori:'Lavoratori e sindacati', pensionati:'Pensionati', cetomedio:'Ceto medio',
                  imprenditori:'Imprese e industria', giovani:'Giovani e studenti', cattolici:'America religiosa' },
@@ -619,6 +625,11 @@ const PAESI = {
     flag: '<svg viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg"><rect width="30" height="20" fill="#fff"/><rect width="10" height="20" fill="#008751"/><rect x="20" width="10" height="20" fill="#008751"/></svg>',
     nomeArt: 'la Nigeria',
     titoloRuolo: 'Presidente',
+    /* L263-9quinquies · l'Assemblea Nazionale all'avvio, per il partito del Presidente del gioco chiunque sia («a specchio», N2: una voce unica, `tutti`); letta solo da congressoOggiDi (game.js) con CAMERE_NG.
+       Cifre della 10ª Assemblea all'insediamento (giugno 2023), sui seggi dell'APC che ha il Presidente. Fonti: en.wikipedia «2023 Nigerian Senate elections» (tabella dei risultati: APC 59 su 109 → 54,1)
+       e «2023 Nigerian House of Representatives election» (tabella dei risultati: APC 176 su 360 → 48,9; l'infobox dà al PDP 118 e non 119; la pagina «10th National Assembly of Nigeria» dà 162 su 327
+       seggi proclamati, 49,5). Camera: 48,9 all'insediamento 2023 (fonte), portata a 50,5 come lo specchio USA: L263-9sexies (decisione di Cowork del 03/11, «partiti neutri»: il Presidente del gioco, chiunque sia, non parte diviso). */
+    congressoOggi:{ tutti:{ camera:50.5, senato:54.1 } },
     mandatoMesi: 48, sistema: 'presidenziale', mandatiMax: 2, mandatiConsecutivi: false,
     coalizione: false, comeSiVince: 'candidato', cadutaGoverno: false, ue: false, distorsione: 1.1,
     intermedie: [{tipo:'Elezioni statali', mese:24, tocca:'regione'}],
@@ -12255,7 +12266,7 @@ const DOSSIERS=[
    {l:'Un patto federale: soldi in cambio di standard comuni', e:'I Länder prendono i soldi e discutono gli standard', pleases:'tecnico', costo:{debito:0.6}, f:()=>{S.ind.debt+=0.6; gd('giovani',2); gd('cetomedio',2);}},
    {l:'Digitalizzazione delle scuole, subito', e:'Tablet ovunque, insegnanti da nessuna parte', pleases:'progressista', costo:{debito:0.4}, f:()=>{S.ind.debt+=0.4; gd('giovani',2); gd('pensionati',-1);}},
    {l:'La scuola è dei Länder: non tocca a te', e:'Costituzionalmente esatto', pleases:'conservatore', f:()=>{gd('cetomedio',-1); gd('giovani',-1);}}]},
- {id:'de_p_d_bundesrat', era:'contemporanea', paesi:['germania'], min:'interno', kick:'Seconda camera', t:'Il Bundesrat blocca', text:'La camera dei Länder ha una maggioranza diversa dalla tua e ferma una legge che ti serve. Per sbloccarla devi trattare con i governi regionali, uno per uno, e ognuno ha una lista.', ch:[
+ {id:'de_p_d_bundesrat', era:'contemporanea', paesi:['germania'], min:'interno', cond:()=>typeof CAMERE_DE==='undefined' || !CAMERE_DE || bundesratContro(), kick:'Seconda camera', t:'Il Bundesrat blocca', get text(){ return (typeof CAMERE_DE!=='undefined' && CAMERE_DE && bundesratContro()) ? T('La camera dei Länder vota con il tuo governo solo per il %Q% e ferma una legge che ti serve. Per sbloccarla devi trattare con i governi regionali, uno per uno, e ognuno ha una lista.').replace('%Q', Math.round(quotaBundesrat())) : 'La camera dei Länder ha una maggioranza diversa dalla tua e ferma una legge che ti serve. Per sbloccarla devi trattare con i governi regionali, uno per uno, e ognuno ha una lista.'; }, ch:[   // L263-10bis: col Bundesrat acceso esce solo se è contrario (bundesratContro, game.js) e dice la cifra; spento, com'era. DOSSIERS non si copia: il getter regge
    {l:'Tratta: qualcosa per ogni Land', e:'La legge passa, con sedici allegati', pleases:'tecnico', costo:{debito:0.4}, f:()=>{S.ind.debt+=0.4; gd('cetomedio',1);}},
    {l:'Commissione di conciliazione, e pazienza', e:'La procedura prevista, e lunga', pleases:'conservatore', f:()=>{gd('pensionati',1);}},
    {l:'Riscrivi la legge in modo che il Bundesrat non serva', e:'Legalmente possibile, politicamente ricordato', pleases:'progressista', f:()=>{S.ind.stampa-=2; gd('cetomedio',-1);}}]},
@@ -15129,7 +15140,7 @@ const RIVALI=(function(){
    rinnovo.tipo intero · terzi · meta · derivato · nessuno (`derivato` = segue i voti dei territori, nessun calendario suo). `seggiVeri` è solo per lo schermo
    (eletti, senza i membri di diritto o a vita; null = cifra non trovata o che cambia nel periodo: mai inventata), il motore lavorerà in percentuale.
    Fonti, come in §1: ✓ pagina aperta · ◦ memoria · ⚠ non trovato o in contrasto. La Corea del Sud non ha righe: oggi è monocamerale (il 1960-61 non è raggiungibile).
-   Le legge solo cameraAlta() (game.js); dal L263-3 la leggono le classi del Senato, dal L263-6 il Senato italiano (calcSeggiAlta: `elezione:'stessoVoto'`, `premioRegionale`). La guardia è in verifica-paese.js (--rosso-camere=buco|potere|paese). */
+   `seggiClasse`/`fase`/`faseClasse` (L263-9bis, Argentina e Brasile; L263-9ter, il Messico a una classe): i seggi di ogni classe, l'anno di un rinnovo e la classe che vi si rinnova (classeInPalioSud, game.js). Le legge solo cameraAlta() (game.js); dal L263-3 la leggono le classi del Senato, dal L263-6 il Senato italiano (calcSeggiAlta: `elezione:'stessoVoto'`, `premioRegionale`). La guardia è in verifica-paese.js (--rosso-camere=buco|potere|paese). */
 const CAMERE=[
   // Italia: le due camere hanno sempre votato insieme, le durate diverse fino al 1963 non servono (§1.2). La sola camera alta che dà la fiducia (§3.3).
   {paese:'italia', dal:1948, fino:1957, nome:'Senato', nomeEn:'Senate', seggiVeri:237, elezione:'stessoVoto', fiducia:true, potere:'pari', rinnovo:{tipo:'intero'}},   // ✓ 237 eletti (nel 1948 più 106 di diritto)
@@ -15142,31 +15153,93 @@ const CAMERE=[
   {paese:'usa', dal:1950, fino:1958, nome:'Senato', nomeEn:'Senate', seggiVeri:96, elezione:'classi', fiducia:false, potere:'pari', rinnovo:{tipo:'terzi', ogniMesi:24}},   // ✓ 96
   {paese:'usa', dal:1959, nome:'Senato', nomeEn:'Senate', seggiVeri:100, elezione:'classi', fiducia:false, potere:'pari', rinnovo:{tipo:'terzi', ogniMesi:24}},   // ✓ 100 (98 per pochi mesi del 1959, Alaska prima delle Hawaii)
   // Francia: l'ultima parola è dell'Assemblea.
-  {paese:'francia', dal:1946, fino:1958, nome:'Consiglio della Repubblica', nomeEn:'Council of the Republic', seggiVeri:320, elezione:'territori', fiducia:false, potere:'superabile', rinnovo:{tipo:'meta', ogniMesi:36}},   // ✓ 320 (la legge dice fra 250 e 320); ◦ il rinnovo per metà: la pagina dà solo i sei anni
-  {paese:'francia', dal:1959, fino:2003, nome:'Senato', nomeEn:'Senate', seggiVeri:null, elezione:'territori', fiducia:false, potere:'superabile', rinnovo:{tipo:'terzi', ogniMesi:36}},   // ⚠ non trovato (L263-1): cambia nel periodo, 321 alla fine ✓; ✓ nove anni, a terzi
-  {paese:'francia', dal:2004, fino:2010, nome:'Senato', nomeEn:'Senate', seggiVeri:null, elezione:'territori', fiducia:false, potere:'superabile', rinnovo:{tipo:'meta', ogniMesi:36}},   // ✓ da 321 verso 348; ✓ sei anni, per metà (legge del 2003)
-  {paese:'francia', dal:2011, nome:'Senato', nomeEn:'Senate', seggiVeri:348, elezione:'territori', fiducia:false, potere:'superabile', rinnovo:{tipo:'meta', ogniMesi:36}},   // ✓ 348
+  {paese:'francia', dal:1946, fino:1958, nome:'Consiglio della Repubblica', nomeEn:'Council of the Republic', seggiVeri:320, elezione:'territori', fiducia:false, potere:'superabile', rinnovo:{tipo:'meta', ogniMesi:36}},   // ✓ 320 (la legge dice fra 250 e 320); ◦ il rinnovo per metà: la pagina dà solo i sei anni · quota da S.territori: L263-11 (SENATO_FR_SEGGI, quotaAltaTerritori)
+  {paese:'francia', dal:1959, fino:2003, nome:'Senato', nomeEn:'Senate', seggiVeri:null, elezione:'territori', fiducia:false, potere:'superabile', rinnovo:{tipo:'terzi', ogniMesi:36}},   // ⚠ non trovato (L263-1): cambia nel periodo, 321 alla fine ✓; ✓ nove anni, a terzi · quota da S.territori: L263-11 (SENATO_FR_SEGGI, quotaAltaTerritori)
+  {paese:'francia', dal:2004, fino:2010, nome:'Senato', nomeEn:'Senate', seggiVeri:null, elezione:'territori', fiducia:false, potere:'superabile', rinnovo:{tipo:'meta', ogniMesi:36}},   // ✓ da 321 verso 348; ✓ sei anni, per metà (legge del 2003) · quota da S.territori: L263-11 (SENATO_FR_SEGGI, quotaAltaTerritori)
+  {paese:'francia', dal:2011, nome:'Senato', nomeEn:'Senate', seggiVeri:348, elezione:'territori', fiducia:false, potere:'superabile', rinnovo:{tipo:'meta', ogniMesi:36}},   // ✓ 348 · quota da S.territori: L263-11 (SENATO_FR_SEGGI, quotaAltaTerritori)
   // Regno Unito: solo composizione, nessun voto.
   {paese:'regnounito', dal:1950, fino:1957, nome:'Camera dei Lord', nomeEn:'House of Lords', seggiVeri:null, elezione:'composizione', fiducia:false, potere:'nessuno', rinnovo:{tipo:'nessuno'}},   // ⚠ non trovato (L263-1)
   {paese:'regnounito', dal:1958, fino:1998, nome:'Camera dei Lord', nomeEn:'House of Lords', seggiVeri:null, elezione:'composizione', fiducia:false, potere:'nessuno', rinnovo:{tipo:'nessuno'}},   // ⚠ non trovato (L263-1); ✓ dal 1958 anche a vita
   {paese:'regnounito', dal:1999, fino:2025, nome:'Camera dei Lord', nomeEn:'House of Lords', seggiVeri:null, elezione:'composizione', fiducia:false, potere:'nessuno', rinnovo:{tipo:'nessuno'}},   // ⚠ non trovato (L263-1): il totale cambia; ✓ dal 1999, 92 ereditari
   {paese:'regnounito', dal:2026, nome:'Camera dei Lord', nomeEn:'House of Lords', seggiVeri:796, elezione:'composizione', fiducia:false, potere:'nessuno', rinnovo:{tipo:'nessuno'}},   // ✓ 796 al 31/10 (⚠ la stessa pagina dà anche 775); ✓ ereditari aboliti
   // Germania: delegati dei governi dei Länder, nessuna durata.
-  {paese:'germania', dal:1949, fino:1989, nome:'Bundesrat', nomeEn:'Bundesrat', seggiVeri:null, elezione:'territori', fiducia:false, potere:'consensoParte', rinnovo:{tipo:'derivato'}},   // ⚠ non trovato (L263-1, riprovato in L263-2): ◦ 41 più 4 di Berlino Ovest senza voto, solo dal 1957
-  {paese:'germania', dal:1990, fino:1995, nome:'Bundesrat', nomeEn:'Bundesrat', seggiVeri:null, elezione:'territori', fiducia:false, potere:'consensoParte', rinnovo:{tipo:'derivato'}},   // ⚠ non trovato (L263-2): ◦ 68; ✓ l'Assia ha cinque voti dal 18/1/1996
-  {paese:'germania', dal:1996, nome:'Bundesrat', nomeEn:'Bundesrat', seggiVeri:69, elezione:'territori', fiducia:false, potere:'consensoParte', rinnovo:{tipo:'derivato'}},   // ✓ 69
+  {paese:'germania', dal:1949, fino:1989, nome:'Bundesrat', nomeEn:'Bundesrat', seggiVeri:null, elezione:'territori', fiducia:false, potere:'consensoParte', rinnovo:{tipo:'derivato'}},   // ⚠ non trovato (L263-1, riprovato in L263-2): ◦ 41 più 4 di Berlino Ovest senza voto, solo dal 1957 · quota da S.territori: L263-10 (BUNDESRAT_VOTI, quotaBundesrat)
+  {paese:'germania', dal:1990, fino:1995, nome:'Bundesrat', nomeEn:'Bundesrat', seggiVeri:null, elezione:'territori', fiducia:false, potere:'consensoParte', rinnovo:{tipo:'derivato'}},   // ⚠ non trovato (L263-2): ◦ 68; ✓ l'Assia ha cinque voti dal 18/1/1996 · quota da S.territori: L263-10 (BUNDESRAT_VOTI, quotaBundesrat)
+  {paese:'germania', dal:1996, nome:'Bundesrat', nomeEn:'Bundesrat', seggiVeri:69, elezione:'territori', fiducia:false, potere:'consensoParte', rinnovo:{tipo:'derivato'}},   // ✓ 69 · quota da S.territori: L263-10 (BUNDESRAT_VOTI, quotaBundesrat)
   // Gli altri dieci paesi bicamerali si giocano solo dal 2026: basta la riga del presente.
   {paese:'australia', dal:2026, nome:'Senato', nomeEn:'Senate', seggiVeri:76, elezione:'votoProprio', fiducia:false, potere:'pari', rinnovo:{tipo:'meta', ogniMesi:36}},   // ✓ 76
-  {paese:'india', dal:2026, nome:'Rajya Sabha', nomeEn:'Rajya Sabha', seggiVeri:245, elezione:'territori', fiducia:false, potere:'superabile', rinnovo:{tipo:'terzi', ogniMesi:24}},   // ✓ 233 più 12 nominati
-  {paese:'sudafrica', dal:2026, nome:'Consiglio nazionale delle province', nomeEn:'National Council of Provinces', seggiVeri:90, elezione:'territori', fiducia:false, potere:'ritardo', rinnovo:{tipo:'derivato'}},   // ✓ 90, dieci per provincia; ◦ il potere
-  {paese:'argentina', dal:2026, nome:'Senato', nomeEn:'Senate', seggiVeri:72, elezione:'classi', fiducia:false, potere:'pari', rinnovo:{tipo:'terzi', ogniMesi:24}},   // ✓ 72
-  {paese:'giappone', dal:2026, nome:'Camera dei consiglieri', nomeEn:'House of Councillors', seggiVeri:248, elezione:'votoProprio', fiducia:false, potere:'superabile', rinnovo:{tipo:'meta', ogniMesi:36}},   // ✓ 248 (⚠ la stessa pagina dà anche 267)
+  {paese:'india', dal:2026, nome:'Rajya Sabha', nomeEn:'Rajya Sabha', seggiVeri:245, elezione:'territori', fiducia:false, potere:'superabile', rinnovo:{tipo:'terzi', ogniMesi:24}},   // ✓ 233 più 12 nominati · quota da S.territori: L263-11 (RAJYA_SEGGI, quotaAltaTerritori)
+  {paese:'sudafrica', dal:2026, nome:'Consiglio nazionale delle province', nomeEn:'National Council of Provinces', seggiVeri:90, elezione:'territori', fiducia:false, potere:'ritardo', rinnovo:{tipo:'derivato'}},   // ✓ 90, dieci per provincia; ◦ il potere · quota da S.territori: L263-11 (un voto per provincia, quotaAltaTerritori)
+  {paese:'argentina', dal:2026, nome:'Senato', nomeEn:'Senate', seggiVeri:72, elezione:'classi', fiducia:false, potere:'pari', rinnovo:{tipo:'terzi', ogniMesi:24}, seggiClasse:[24,24,24], fase:2025, faseClasse:0},   // ✓ 72; L263-9bis: ✓ un terzo ogni due anni, ultimo voto 2025 e prossimo 2027 (en.wikipedia «Argentine Senate»): la classe 0 è quella del 2025
+  {paese:'giappone', dal:2026, nome:'Camera dei consiglieri', nomeEn:'House of Councillors', seggiVeri:248, elezione:'votoProprio', fiducia:false, potere:'superabile', rinnovo:{tipo:'meta', ogniMesi:36}},   // ✓ 248 (⚠ la stessa pagina dà anche 267) · L263-12: classi elette nel luglio 2022 e nel luglio 2025 ✓, metà ogni 3 anni a luglio, non si scioglie ✓ (§1); il calendario è in game.js, ALTA_JP
   {paese:'canada', dal:2026, nome:'Senato', nomeEn:'Senate', seggiVeri:105, elezione:'composizione', fiducia:false, potere:'nessuno', rinnovo:{tipo:'nessuno'}},   // ✓ 105
-  {paese:'spagna', dal:2026, nome:'Senato', nomeEn:'Senate', seggiVeri:266, elezione:'stessoVoto', fiducia:false, potere:'superabile', rinnovo:{tipo:'intero'}},   // ✓ 208 più 58 (⚠ l'infobox dà 267)
-  {paese:'brasile', dal:2026, nome:'Senato', nomeEn:'Senate', seggiVeri:81, elezione:'classi', fiducia:false, potere:'pari', rinnovo:{tipo:'terzi', ogniMesi:48}},   // ✓ 81; ✓ ogni quattro anni, a turno un terzo e due terzi
-  {paese:'messico', dal:2026, nome:'Senato', nomeEn:'Senate', seggiVeri:128, elezione:'stessoVoto', fiducia:false, potere:'pari', rinnovo:{tipo:'intero', ogniMesi:72}},   // ✓ 128; ✓ tutto insieme, col Presidente
-  {paese:'nigeria', dal:2026, nome:'Senato', nomeEn:'Senate', seggiVeri:109, elezione:'stessoVoto', fiducia:false, potere:'pari', rinnovo:{tipo:'intero', ogniMesi:48}}    // ✓ 109
+  {paese:'spagna', dal:2026, nome:'Senato', nomeEn:'Senate', seggiVeri:266, elezione:'stessoVoto', fiducia:false, potere:'superabile', rinnovo:{tipo:'intero'}},   // ✓ 208 più 58 (⚠ l'infobox dà 267) · L263-12: il Senato si elegge con le generali, anche anticipate ✓ (§1, «4 anni, con la Camera»); qui i 208 eletti e i 58 designati dai parlamenti regionali stanno nella stessa fotografia ◦ (semplificazione)
+  {paese:'brasile', dal:2026, nome:'Senato', nomeEn:'Senate', seggiVeri:81, elezione:'classi', fiducia:false, potere:'pari', rinnovo:{tipo:'terzi', ogniMesi:48}, seggiClasse:[27,54], fase:2026, faseClasse:1},   // ✓ 81; ✓ ogni quattro anni, a turno un terzo e due terzi; L263-9bis: ✓ il 2022 ha eletto un terzo (en.wikipedia «Federal Senate (Brazil)»), quindi ⚠ dedotto: il 2026 due terzi (classe 1, 54 seggi), il 2030 un terzo
+  {paese:'messico', dal:2026, nome:'Senato', nomeEn:'Senate', seggiVeri:128, elezione:'classi', fiducia:false, potere:'pari', rinnovo:{tipo:'intero', ogniMesi:72}, seggiClasse:[128], fase:2024, faseClasse:0},   // ✓ 128; ✓ tutto insieme, col Presidente; L263-9ter: ✓ una classe sola (64 maggioritari, 32 prima minoranza, 32 lista nazionale, che il gioco non modella: la quota è quella del voto), ✓ ultimo voto 2/6/2024, prossimo 2030 (en.wikipedia «Senate of the Republic (Mexico)», «2024 Mexican general election»); ⚠ prima di L263-9ter era 'stessoVoto' senza effetto (nessun lettore fuori da CAMERE_PORTE): 'stessoVoto' resta l'Italia (e Spagna, Nigeria senza effetto)
+  {paese:'nigeria', dal:2026, nome:'Senato', nomeEn:'Senate', seggiVeri:109, elezione:'congresso', fiducia:false, potere:'pari', rinnovo:{tipo:'intero', ogniMesi:48}, fase:2023, seggiCamera:360}    // ✓ 109; L263-9quinquies (N1): famiglia «congresso» come il presente americano, senza classi: Camera dei Rappresentanti (✓ 360, seggiCamera) e Senato rinnovati insieme col Presidente ogni 4 anni (✓ 2023, prossimo voto 2027); letta da camereNg() (game.js) solo con CAMERE_NG
 ];
+/* L263-10 · I VOTI DEI LÄNDER NEL BUNDESRAT (art. 51 della Legge fondamentale: 3 voti, 4 sopra 2 milioni di abitanti, 5 sopra 6,
+   6 sopra 7 dal 1990; prima del 1990 3/4/5, Berlino Ovest senza voto). Chiave = `nome` di PAESE.territori (presente e porte de*);
+   le città che non sono città-stato e i Länder che il gioco non ha NON contano: quotaBundesrat() (game.js) fa la quota sui voti presenti.
+   Tre epoche, scelte da bundesratEpoca(): `ovest` fino al 1990/9, `unita` dal 1990/10 al 1995, `dal96` (l'Assia passa a 5 il 18/1/1996).
+   Fonte: en.wikipedia «Bundesrat of Germany», tabella dei voti per Land (✓ = la cifra di oggi, 69 in tutto; per `unita` 68, ✓ con
+   l'Assia a 4); `ovest` ◦ = dalla regola dell'art. 51 sulla popolazione degli anni '50-'80, il totale 41 (38 prima della Saar, 1957)
+   torna con la riga CAMERE del 1949-1989. */
+const BUNDESRAT_VOTI={
+  'Berlino Ovest':{ovest:0, unita:4, dal96:4},   // ◦ senza voto fino all'unità (la rinomina 1990/10 lo fa «Berlino»)
+  'Berlino':{ovest:0, unita:4, dal96:4},   // ✓ 4
+  'Amburgo':{ovest:3, unita:3, dal96:3},   // ✓ 3
+  'Brema':{ovest:3, unita:3, dal96:3},   // ✓ 3
+  'la Baviera':{ovest:5, unita:6, dal96:6},   // ✓ 6 · ◦ 5
+  'la Renania Settentrionale-Vestfalia':{ovest:5, unita:6, dal96:6},   // ✓ 6 · ◦ 5
+  'il Baden-Württemberg':{ovest:5, unita:6, dal96:6},   // ✓ 6 · ◦ 5 (il gioco lo ha dal 1950; nel vero dal 1952)
+  'la Bassa Sassonia':{ovest:5, unita:6, dal96:6},   // ✓ 6 · ◦ 5
+  "l'Assia":{ovest:4, unita:4, dal96:5},   // ✓ 5 dal 1996 · ✓ 4 prima
+  'la Renania-Palatinato':{ovest:4, unita:4, dal96:4},   // ✓ 4
+  'lo Schleswig-Holstein':{ovest:4, unita:4, dal96:4},   // ✓ 4
+  'la Saar':{ovest:3, unita:3, dal96:3},   // ✓ 3 (Land dal 1957)
+  'la Sassonia':{ovest:0, unita:4, dal96:4},   // ✓ 4 (Land dal 1990/10)
+  'il Brandeburgo':{ovest:0, unita:4, dal96:4},   // ✓ 4
+  'la Sassonia-Anhalt':{ovest:0, unita:4, dal96:4},   // ✓ 4
+  'la Turingia':{ovest:0, unita:4, dal96:4},   // ✓ 4
+  'il Meclemburgo-Pomerania Anteriore':{ovest:0, unita:3, dal96:3}   // ✓ 3
+};
+/* L263-11 · I PESI DELLE SECONDE CAMERE DERIVATE DA S.territori in Francia, India e Sudafrica (DESIGN-CAMERE.md, «⚑ L263-11»; decisioni F1-F7
+   di Cowork del 03/11). Chiave = `nome` di PAESE.territori; le aree assenti pesano zero: quotaAltaTerritori() (game.js) fa la quota sui pesi
+   presenti. Lette solo da altaTerrPeso() (game.js), con i tre interruttori CAMERE_FR, CAMERE_IN, CAMERE_ZA.
+   Francia — i senatori della serie 1 e 2 per dipartimento, fr.wikipedia «Élections sénatoriales françaises de 2023», sezione «Répartition par
+   département» (✓, 348 in tutto), sommati per le regioni del 2016 che il gioco ha; Parigi è un dipartimento (12) e l'Île-de-France conta gli
+   altri sette (41); le altre città stanno nel loro dipartimento e non contano. Le porte fr1950-fr2000 hanno gli stessi territori di oggi e
+   prendono gli stessi pesi (◦: il Senato del 1959-2010 ne aveva meno, la fonte d'epoca per dipartimento non c'è). Copertura 280 su 348
+   (mancano Borgogna-Franca Contea 18, Centro-Valle della Loira 15, Corsica 2, oltremare 21, francesi all'estero 12).
+   India — la Quarta Tabella, en.wikipedia «Rajya Sabha», tabella dei seggi per Stato (✓, 233 eletti più 12 nominati che non contano);
+   Delhi è un territorio con 3 seggi suoi, le altre città stanno nel loro Stato. Copertura 120 su 233.
+   Sudafrica — nessuna tabella: il Consiglio nazionale delle province vota le leggi della sezione 76 per delegazione, un voto per provincia
+   (Costituzione del 1996, sez. 65 ✓); peso 1 per ogni area `tipo:'regione'` (le province), le città zero. Copertura 8 su 9 (manca il Capo
+   Settentrionale). */
+const SENATO_FR_SEGGI={
+  'Parigi':12,   // ✓ 75
+  "l'Île-de-France":41,   // ✓ 77 6, 78 6, 91 5, 92 7, 93 6, 94 6, 95 5 (Parigi a parte)
+  'la Provenza':22,   // ✓ 04 1, 05 1, 06 5, 13 8, 83 4, 84 3
+  'i Hauts-de-France':28,   // ✓ 02 3, 59 11, 60 4, 62 7, 80 3
+  'il Grand Est':31,   // ✓ 08 2, 10 2, 51 3, 52 2, 54 4, 55 2, 57 5, 67 5, 68 4, 88 2
+  'la Normandia':17,   // ✓ 14 3, 27 3, 50 3, 61 2, 76 6
+  'la Bretagna':14,   // ✓ 22 3, 29 4, 35 4, 56 3
+  'la Nuova Aquitania':30,   // ✓ 16 2, 17 3, 19 2, 23 2, 24 2, 33 6, 40 2, 47 2, 64 3, 79 2, 86 2, 87 2
+  "l'Occitania":30,   // ✓ 09 1, 11 2, 12 2, 30 3, 31 5, 32 2, 34 4, 46 2, 48 1, 65 2, 66 2, 81 2, 82 2
+  "l'Alvernia-Rodano-Alpi":38,   // ✓ 01 3, 03 2, 07 2, 15 2, 26 3, 38 5, 42 4, 43 2, 63 3, 69 7, 73 2, 74 3
+  'i Paesi della Loira':17   // ✓ 44 5, 49 4, 53 2, 72 3, 85 3
+};
+const RAJYA_SEGGI={
+  'Delhi':3,   // ✓
+  "l'Uttar Pradesh":31,   // ✓
+  'il Maharashtra':19,   // ✓
+  'il Bengala Occidentale':16,   // ✓
+  'il Tamil Nadu':18,   // ✓
+  'il Karnataka':12,   // ✓
+  'il Rajasthan':10,   // ✓
+  'il Gujarat':11   // ✓
+};
 /* L260-5 · GLI ALLEATI DEL DIPLOMATICO (DESIGN-OLTRE-LE-CARTE.md, «⚑ L260-5»): due paesi amici per partita, accanto ai rivali di RIVALI,
    nella rete bilaterale del livello 5 (bilPartner in game.js, solo con DIPLO_BILATERALI). `paese` = una chiave di SCENARI (le porte) o di
    PAESI (il presente), come in RIVALI; `id` distinto dagli id di POTENZE; `art`/`artEn` come in POTENZE (la forma «con la Francia», «with
@@ -23037,6 +23110,9 @@ const RIMPASTO_EV = {
 /* L111-1 · la stessa cerimonia quando il partner è un alleato di RISERVA sotto la sfiducia costruttiva (il 1966 tedesco): cambia
    solo il titolo, il resto è il rimpasto com'è. La sceglie genAgenda con `rimpastoGrandeCoalizione()`. */
 const GRANDE_COALIZIONE_EV = Object.assign({}, RIMPASTO_EV, { t:'La grande coalizione' });
+/* L263-7bis · le stesse due cerimonie quando il governo è in minoranza solo per il Senato (minoranzaSoloSenato()): nessun alleato è andato via e alla Camera i numeri ci sono, quindi cambia solo il testo. Le sceglie genAgenda. */
+const SOSTEGNO_SENATO_EV = Object.assign({}, SOSTEGNO_EV, { text:'Al Senato i numeri non ci sono. Un partito che al governo non vuole entrare fa sapere che potrebbe non farlo cadere: si astiene, e in cambio chiede qualcosa. Non ministeri — quelli non li vuole. Un prezzo.' });
+const RIMPASTO_SENATO_EV = Object.assign({}, RIMPASTO_EV, { text:'Al Senato i numeri non tornano, e la sola Camera non basta. C\'è chi sarebbe disposto a entrare — non da fuori, dentro: vogliono ministeri veri, e li vogliono adesso.' });
 
 /* ==============================================================================================================
    L49-1 · IL DECENNIO INGLESE — LO SNODO SUEZ (scheda §A) E LA CORSA ALLA STERLINA (scheda §B).

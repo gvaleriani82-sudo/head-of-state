@@ -3328,8 +3328,11 @@ function renderPaese(){
   }
   let h=`<div class="contorno" style="font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--mut);margin:2px 2px 8px;">${T('Stato del paese')}</div>`;
   if(S.livello===2) h+=`<div class="banner">${T('<b>Governa %PM.</b> Vedi gli indicatori nazionali, ma non li guidi: la politica generale è del premier. Tu incidi dal <b>tuo dicastero</b>.').replace('%PM', escAttr((S.premier||{}).nome||T('il premier')))}</div>`;
-  if(S.governoDiviso && S.livello===3){ const soloSen=divisoPer()==='senato'; h+=`<div class="banner">${T(S.opposizione ? (soloSen ? '<b>Il Senato è del tuo partito.</b> Il Presidente governa diviso.' : '<b>Il Congresso è del tuo partito.</b> Il Presidente governa diviso.') : (soloSen ? '<b>Il Senato è dell\'altro partito.</b> Un punto riforma in meno alla manovra.' : '<b>Il Congresso è dell\'altro partito.</b> Un punto riforma in meno alla manovra.'))}</div>`; }   // L173-2: il governo diviso, in sola lettura; L263-4: col solo Senato contro lo dice
-  if(S.livello===3 && S.congresso && S.congresso.classi){ const seS=senatoSeggi(quotaSenato()); h+=`<div style="font-size:12px;color:var(--mut);margin:0 2px 8px">${T('Senato: %N su %T al partito del Presidente').replace('%N',seS.n).replace('%T',seS.tot)}</div>`; h+=camereAulaHtml(); }   // L263-3: il Senato, in sola lettura; L263-5: sotto, le due aule (nelle partite americane S.seggi è null e la scheda Partiti non ha emiciclo)
+  if(S.governoDiviso && S.livello===3 && typeof camereSudVivo==='function' && camereSudVivo()) h+=`<div class="banner">${T(S.opposizione ? '<b>Al Senato il governo non ha la maggioranza.</b> Il Presidente deve trattare.' : '<b>Al Senato la tua coalizione non ha la maggioranza.</b> Un punto riforma in meno alla manovra.')}</div>`;   // L263-9bis: Argentina e Brasile, dove il Senato è di più partiti
+  else if(S.governoDiviso && S.livello===3 && typeof camereNgVivo==='function' && camereNgVivo()){ const dvN=divisoPer(), auN=T(dvN==='senato'?'Senato':dvN==='camera'?'Camera dei Rappresentanti':'Assemblea Nazionale'); h+=`<div class="banner">${T(S.opposizione ? '<b>%A: il partito del Presidente non ha la maggioranza.</b> Il Presidente deve trattare.' : '<b>%A: il tuo partito non ha la maggioranza.</b> Un punto riforma in meno alla manovra.').replace('%A',auN)}</div>`; }   // L263-9quinquies: la Nigeria, molti partiti: si dice quale aula manca, mai «l'altro partito»
+  else if(S.governoDiviso && S.livello===3){ const soloSen=divisoPer()==='senato'; h+=`<div class="banner">${T(S.opposizione ? (soloSen ? '<b>Il Senato è del tuo partito.</b> Il Presidente governa diviso.' : '<b>Il Congresso è del tuo partito.</b> Il Presidente governa diviso.') : (soloSen ? '<b>Il Senato è dell\'altro partito.</b> Un punto riforma in meno alla manovra.' : '<b>Il Congresso è dell\'altro partito.</b> Un punto riforma in meno alla manovra.'))}</div>`; }   // L173-2: il governo diviso, in sola lettura; L263-4: col solo Senato contro lo dice
+  if(S.livello===3 && typeof camereNgVivo==='function' && camereNgVivo()){ h+=`<div style="font-size:12px;color:var(--mut);margin:0 2px 8px">${ngAssembleaRiga(S.congresso)}</div>`; h+=camereAulaHtml(); }   // L263-9quinquies: la Nigeria, la riga dell'Assemblea e le due aule
+  else if(S.livello===3 && S.congresso && S.congresso.classi){ const seS=senatoSeggi(quotaSenato()); h+=`<div style="font-size:12px;color:var(--mut);margin:0 2px 8px">${T('Senato: %N su %T al partito del Presidente').replace('%N',seS.n).replace('%T',seS.tot)}</div>`; h+=camereAulaHtml(); }   // L263-3: il Senato, in sola lettura; L263-5: sotto, le due aule (nelle partite americane S.seggi è null e la scheda Partiti non ha emiciclo)
   if(S.coabitazione) h+=`<div class="banner">${T('<b>Governa %PM.</b> Tieni esteri e difesa; il resto non lo guidi.').replace('%PM', escAttr((S.premier||{}).nome||T('il Primo ministro')))}</div>`;   // L100-2: la coabitazione riusa il banner del livello 2
   h+=`<div class="budget">
     <div class="b"><div class="l">${T('Saldo di bilancio')}</div><div class="v" style="color:${def<=3?'var(--pos)':def<=4?'var(--warn)':'var(--neg)'}">${balText}</div></div>
@@ -3477,8 +3480,12 @@ function leggeRischio(L){   // alleati che perderebbero (rischio) o guadagnerebb
    c'è (votoInAulaAttivo): niente riga, niente bocciatura — la regola di cadeChip (L93-5). Nessun numero di probabilità a schermo. */
 function aulaRiga(L){
   if(typeof votoInAulaAttivo!=='function' || !votoInAulaAttivo(L)) return '';
-  const k=aulaEsito(pBocciatura(L).p), col=k==='sicura'?'var(--pos)':k==='incerta'?'var(--warn)':'var(--neg)';
-  return ` · ${T('In aula')}: <b class="aula-esito" style="color:${col}">${T(k)}</b>`;
+  const V=pBocciatura(L), k=aulaEsito(V.p), col=k==='sicura'?'var(--pos)':k==='incerta'?'var(--warn)':'var(--neg)';
+  const sen=(V.alta && typeof camereLeggi==='function' && (camereLeggi() || camereSudVivo())) ? ' '+T('(il Senato)') : '';   // L263-8: il Senato italiano che manca (gli USA come prima)
+  const br=(V.alta && k!=='sicura' && typeof bundesratVivo==='function' && bundesratVivo()) ? ' · '+T('il Bundesrat è contro')   // L263-10bis: il Bundesrat contrario (nessun numero); L263-11bis: solo se l'esito non è «sicura»
+    : (V.alta && k!=='sicura' && typeof altaTerritoriViva==='function' && altaTerritoriViva()) ? ' · '+altaTerrTesti(cameraAlta()).contro   // L263-11bis: Francia, India, Sudafrica, la stessa regola
+    : (V.alta && k!=='sicura' && typeof altaPopViva==='function' && altaPopViva() && !camereLeggi()) ? ' · '+altaPopTesti(cameraAlta()).contro : '';   // L263-12bis: Giappone e Spagna, la stessa regola
+  return ` · ${T('In aula')}: <b class="aula-esito" style="color:${col}">${T(k)}</b>${sen}${br}`;
 }
 function renderLegge(L){
   const inVigore=!!S.leggi[L.id], oppo=S.opposizione;
@@ -5149,9 +5156,9 @@ function emiciclo(seggi, opts){
       dots+=`<circle class="emi-dot${anim?' emi-anim':''}" cx="${pt.x.toFixed(1)}" cy="${pt.y.toFixed(1)}" r="2.6" fill="${fill}" fill-opacity="${op}"${anim?` style="animation-delay:${k*7}ms"`:''}><title>${escAttr(p.nomeTesto!=null?p.nomeTesto:T(p.nome))}</title></circle>`; }   /* L237-5: il nome del partito proprio dal testo (nomeTesto), non dalla voce escapata: escAttr non escapa due volte */
   }
   const svg=`<svg viewBox="0 0 116 66" role="img" aria-label="${T('Emiciclo')}: ${opts.percento ? (opts.titolo||opts.aria||'') : tot+' '+T('seggi')}" style="display:block;width:100%;max-width:340px;margin:0 auto;overflow:visible">
-    ${dots}
+    ${dots}${opts.senzaMaggioranza ? '' : `
     <line x1="${cx}" y1="${cy-61}" x2="${cx}" y2="${cy-23}" stroke="var(--neg)" stroke-width="1" stroke-dasharray="2 2" opacity="0.55"/>
-    <text x="${cx}" y="${cy-63}" text-anchor="middle" font-size="5.5" fill="var(--mut)">${opts.maggioranza!=null?opts.maggioranza:50}</text>
+    <text x="${cx}" y="${cy-63}" text-anchor="middle" font-size="5.5" fill="var(--mut)">${opts.maggioranza!=null?opts.maggioranza:50}</text>`}
   </svg>`;
   if(!opts.titolo && !opts.percento && !opts.legenda) return svg;
   const voci=(opts.percento||opts.legenda) ? `<div class="emi-legenda">${ps.map(p=>`<span class="emi-voce" data-id="${p.id}"><i style="background:${p.emiFill};opacity:${p.emiOp}"></i>${p.fuori?p.nome:T(p.nome)} <b class="mono">${opts.percento ? fmt(seggi[p.id],1)+'%' : seggi[p.id]}</b></span>`).join('')}</div>` : '';
@@ -5162,15 +5169,65 @@ let CAMERA_VISTA='bassa';
 function cameraNome(r){ return (typeof curLang==='function' && curLang()==='en') ? (r.nomeEn||r.nome) : r.nome; }
 function cameraCosaConta(r){   // la riga di 12 px sotto i bottoni: che cosa conta la camera alta, dai campi della riga di CAMERE
   if(r.fiducia) return T('Dà la fiducia al governo');
-  if(r.elezione==='composizione') return T('Solo composizione');
+  if(r.elezione==='composizione') return (typeof cameraCompViva==='function' && cameraCompViva()) ? cameraCompTesti(r).cosa : T('Solo composizione');   // L263-14: Lord e Senato canadese, la prima riga dei loro fatti
   if(r.potere==='pari') return T('Vota ogni legge: può fermarla');
+  if(r.elezione==='territori' && typeof altaTerritoriViva==='function' && altaTerritoriViva()) return altaTerrTesti(r).cosa;   // L263-11bis: Francia, India, Sudafrica
+  if(r.elezione==='territori') return T('I governi dei Länder: può frenare le leggi');   // L263-10bis: il Bundesrat
+  if(typeof altaPopViva==='function' && altaPopViva() && !camereLeggi()) return altaPopTesti(r).cosa;   // L263-12bis: Giappone e Spagna
   return '';
 }
-function cameraBassaCosa(){ return T(S.seggi ? 'Dà la fiducia al governo' : 'Vota ogni legge'); }   // dove S.seggi c'è, dà la fiducia; altrimenti (USA) vota le leggi e basta
+function cameraBassaCosa(){ return T(S.seggi && PAESE.cadutaGoverno!==false ? 'Dà la fiducia al governo' : 'Vota ogni legge'); }   // dove S.seggi c'è e il governo può cadere, dà la fiducia; altrimenti (USA, e dal L263-9bis Argentina e Brasile, presidenziali con la Camera) vota le leggi e basta
 function cameraAltaVista(r){   // titolo e nota: la cifra solo se è vera, con seggiVeri:null il nome, la legenda in % e la riga «non certo» (decisione 2 del 01/11 08:47)
   const certa=r.seggiVeri!=null;
   return { titolo:cameraNome(r)+(certa ? ' · '+r.seggiVeri+' '+T('seggi') : ''), percento:!certa, legenda:certa, nota:certa ? '' : T("Numero dei seggi d'epoca non certo") };
 }
+/* L263-10bis · IL BUNDESRAT A SCHERMO: i voti dei Länder che il gioco ha (bundesratVoti, game.js), «con il governo» e «altri» in grigio neutro (mai un colore di partito).
+   Con tutti i Länder il titolo dà i voti veri dell'epoca (69 dal 1996, 68 nel 1990-1995, 41 all'Ovest, 38 prima della Saar); senza (il presente, 48 su 69) dà la quota coperta in %, e la nota dice quanti voti conta. */
+function bundesratVista(bv){
+  const q=Math.round(bv.si/bv.tot*100), pieno=bv.tot>=bundesratPieno();
+  return pieno ? { titolo:'Bundesrat · '+bv.tot+' '+T('voti'), nota:'' }
+    : { titolo:T('Bundesrat: %Q% dei voti dei Länder al governo').replace('%Q',q), nota:T('Contati %N voti su %T: i Länder che il gioco non ha non votano').replace('%N',bv.tot).replace('%T',bundesratPieno()) };
+}
+/* L263-11bis · LE SECONDE CAMERE DI FRANCIA, INDIA E SUDAFRICA A SCHERMO, lo schema del Bundesrat: i pesi delle aree presenti (altaTerrVoti, game.js) fra «con il governo» e «altri» in grigio.
+   Con tutte le aree (mai, oggi: Francia 280 su 348, India 120 su 233, Sudafrica 8 su 9) il titolo dà i seggi veri; altrimenti la quota coperta in % e la nota dice quanti ne conta, senza inventare le aree assenti.
+   Le frasi sono intere per camera (gli articoli: «la Rajya Sabha»), il nome viene dalla riga CAMERE (il Consiglio della Repubblica fino al 1958). */
+function altaTerrTesti(r){
+  const P=S.paese, cr=r.nome==='Consiglio della Repubblica';
+  if(P==='india') return { titolo:T('%N: %Q% dei seggi degli Stati al governo'), nota:T('Contati %N seggi su %T: gli Stati che il gioco non ha non votano'), cosa:T('Eletta dagli Stati: può frenare le leggi'), contorno:T('I seggi degli Stati · la linea tratteggiata segna la maggioranza'), divise:T('Camere divise: alla Rajya Sabha manca la maggioranza'), contro:T('la Rajya Sabha è contro'), unita:T('seggi') };
+  if(P==='sudafrica') return { titolo:T('%N: %Q% dei voti delle province al governo'), nota:T('Contati %N voti su %T: le province che il gioco non ha non votano'), cosa:T('Un voto per provincia: può ritardare le leggi'), contorno:T('I voti delle province · la linea tratteggiata segna la maggioranza'), divise:T('Camere divise: al Consiglio nazionale delle province manca la maggioranza'), contro:T('il Consiglio nazionale delle province è contro'), unita:T('voti') };
+  return { titolo:T('%N: %Q% dei seggi delle regioni al governo'), nota:T(r.seggiVeri!=null ? 'Contati %N seggi su %T: le regioni che il gioco non ha non votano' : "Contati %N seggi delle regioni del gioco: il totale d'epoca non è certo"), cosa:T('Eletto dai territori: può frenare le leggi'),
+    contorno:T('I seggi delle regioni · la linea tratteggiata segna la maggioranza'), divise:T(cr ? 'Camere divise: al Consiglio della Repubblica manca la maggioranza' : 'Camere divise: al Senato manca la maggioranza'), contro:T(cr ? 'il Consiglio della Repubblica è contro' : 'il Senato è contro'), unita:T('seggi') };
+}
+/* L263-12bis · GIAPPONE E SPAGNA A SCHERMO: la seconda camera eletta dal voto, coi partiti (le quote di S.camera2.seggi in seggi interi, altaPopSeggi in game.js) e i loro colori.
+   Frasi intere per camera (l'articolo: «la Camera dei consiglieri», «il Senato»); i fatti ✓ di DESIGN-CAMERE §1 (metà ogni tre anni; eletto con la Camera; il no si supera). */
+function altaPopTesti(r){
+  if(S.paese==='giappone') return { titolo:T('Camera dei consiglieri: %N seggi al governo'), cosa:T('Eletta a metà ogni tre anni: può frenare le leggi'), contro:T('la Camera dei consiglieri è contro'),
+    primo:T('Camere divise: la Camera dei consiglieri è di %P'), manca:T('Camere divise: alla Camera dei consiglieri manca la maggioranza') };
+  return { titolo:T('Senato: %N seggi al governo'), cosa:T('Eletto con la Camera: può frenare le leggi'), contro:T('il Senato è contro'), primo:T('Camere divise: il Senato è di %P'), manca:T('Camere divise: al Senato manca la maggioranza') };
+}
+function altaPopDivise(cam, sen, coal){   // la regola di camereDiviseTesto (game.js) col nome della camera
+  const X=altaPopTesti(cameraAlta()), primo=m=>{ let t=null; Object.keys(m).forEach(id=>{ if(t===null || (m[id]||0)>(m[t]||0)) t=id; }); return t; }, pc=primo(cam), ps=primo(sen);
+  if(pc && ps && (sen[ps]||0)>(sen[pc]||0)) return X.primo.replace('%P',T((part(ps)||{}).nome||''));
+  const somma=m=>(coal||[]).reduce((s,id)=>s+(m[id]||0),0); return (somma(cam)>=50 && somma(sen)<50) ? X.manca : '';
+}
+function altaTerrVista(at){
+  const r=cameraAlta(), X=altaTerrTesti(r), q=Math.round(at.si/at.tot*100), pieno=altaTerrPieno(), tutto=pieno!=null && at.tot>=pieno;
+  return tutto ? { titolo:cameraNome(r)+' · '+(S.paese==='sudafrica' ? r.seggiVeri+' '+T('seggi') : at.tot+' '+X.unita), nota:'' }
+    : { titolo:X.titolo.replace('%N',cameraNome(r)).replace('%Q',q), nota:X.nota.replace('%N',at.tot).replace('%T',pieno) };
+}
+function altaTerrEmiOpz(key, at){ return { key:key, legenda:true, aria:cameraNome(cameraAlta()), nomi:{_gov:T('Con il governo'), _altri:T('Altri')}, colori:{_gov:'var(--acc)', _altri:'var(--mut2)'}, maggioranza:Math.floor(at.tot/2)+1 }; }
+function bundesratEmiOpz(key, bv){ return { key:key, legenda:true, aria:'Bundesrat', nomi:{_gov:T('Con il governo'), _altri:T('Altri')}, colori:{_gov:'var(--acc)', _altri:'var(--mut2)'}, maggioranza:Math.floor(bv.tot/2)+1 }; }
+/* L263-14 · LA SECONDA AULA DI SOLA COMPOSIZIONE (Lord, Senato canadese): le righe di 12 px vengono solo dai fatti ✓ di DESIGN-CAMERE §1 (nessuna cifra nuova, nessun partito: i partiti dei Lord nei decenni non sono stati trovati).
+   I Lord fino al 1998 erano soprattutto ereditari, quindi «nominati» vale solo dal 2026 (ereditari aboliti); dal 1999 restano 92 ereditari. */
+function cameraCompTesti(r){
+  if(S.paese==='canada') return { cosa:T('Senatori nominati, non eletti: non vota la fiducia'), righe:[T('Respinge una legge di rado')] };
+  const ritardo=T('Può ritardare una legge di un anno');   // Parliament Act 1949 ✓, in tutte le righe britanniche
+  if(r.dal>=2026) return { cosa:T('Membri nominati, non eletti: non vota la fiducia'), righe:[ritardo] };
+  if(r.dal>=1999) return { cosa:T('Membri a vita e 92 per eredità, non eletti: non vota la fiducia'), righe:[ritardo] };
+  return { cosa:T('Membri soprattutto per eredità, non eletti: non vota la fiducia'), righe:r.dal>=1958 ? [ritardo, T('Dal 1958 anche membri a vita')] : [ritardo] };
+}
+const EMI_PUNTI_MAX=130;   // L263-14: oltre, i punti dell'emiciclo (diametro 5,2 su 660 unità d'arco) si toccano: coi 796 Lord a 375 px i centri distano ~2 px, quindi niente emiciclo
+function cameraCompEmi(r){ return r.seggiVeri!=null && r.seggiVeri<=EMI_PUNTI_MAX; }
 function camereBottoniHtml(r, chiama){
   const b=(v,nm)=>`<button class="${CAMERA_VISTA===v?'on':''}" aria-pressed="${CAMERA_VISTA===v}" onclick="${chiama}('${v}')">${nm}</button>`;
   return `<div class="seg camere-vista" role="group" aria-label="${T("L'aula")}">${b('bassa',T('Camera'))}${b('alta',cameraNome(r))}</div>`;
@@ -5178,11 +5235,11 @@ function camereBottoniHtml(r, chiama){
 function cameraVista(v){ CAMERA_VISTA=v==='alta'?'alta':'bassa'; if(typeof suona==='function') suona('tocco'); render(); }
 function camereAulaHtml(){
   const C=(typeof camereComposizione==='function') ? camereComposizione() : null; if(!C || C.quote) return '';   // L263-6: dove S.seggi c'è l'aula sta nella scheda Partiti (renderPartiti)
-  const alta=CAMERA_VISTA==='alta', V=alta ? cameraAltaVista(C.riga) : {titolo:T('Camera'), percento:true, legenda:false, nota:''};
+  const alta=CAMERA_VISTA==='alta', V=alta ? cameraAltaVista(C.riga) : C.ng ? {titolo:T('Camera dei Rappresentanti')+' · '+C.riga.seggiCamera+' '+T('seggi'), percento:false, legenda:true, nota:''} : {titolo:T('Camera'), percento:true, legenda:false, nota:''};   // L263-9quinquies: la Camera nigeriana in seggi
   const seggi=alta ? C.alta : C.bassa, totA=C.riga.seggiVeri, cosa=alta ? cameraCosaConta(C.riga) : cameraBassaCosa();
   return `<div class="card camere-aula">${camereBottoniHtml(C.riga,'cameraVista')}
     ${cosa?`<div class="camere-cosa">${cosa}</div>`:''}
-    ${emiciclo(seggi,{key:'camere:'+(alta?'alta':'bassa'), coal:[S.partito], titolo:V.titolo, percento:V.percento, legenda:V.legenda, maggioranza:(alta && totA && totA!==100) ? Math.floor(totA/2)+1 : 50})}
+    ${emiciclo(seggi,{key:'camere:'+(alta?'alta':'bassa'), coal:[S.partito], titolo:V.titolo, percento:V.percento, legenda:V.legenda, maggioranza:(alta && totA && totA!==100) ? Math.floor(totA/2)+1 : (!alta && C.ng) ? Math.floor(C.riga.seggiCamera/2)+1 : 50})}
     ${V.nota?`<div class="camere-cosa camere-nota">${V.nota}</div>`:''}
     <div class="contorno" style="font-size:11px;color:var(--mut2);padding:2px 15px 10px;text-align:center">${T('Il tuo partito pieno · la linea tratteggiata segna la maggioranza')}</div></div>`;
 }
@@ -5257,12 +5314,16 @@ function renderPartiti(){
   const partitoBox=S.correnti?`<div class="card" style="padding:10px 14px;margin-bottom:12px${dcP?';border-color:var(--acc)':''}"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><span style="font-size:12.5px;color:var(--mut)">${T('Il tuo partito')} · ${T('umore')} <b style="color:${mediaU<45?'var(--neg)':mediaU<55?'var(--warn-ink)':'var(--pos)'}">${mediaU}</b>${S.sfida?` · <b style="color:var(--neg)">${T('sfida in corso')}</b>`:dcP?` · <b style="color:var(--acc-ink)">${dcNome} ${T('da curare')}</b>`:''}</span><button class="mini-btn" style="margin-top:0;flex-shrink:0;background:var(--brand-bg);border-color:var(--brand);color:var(--brand);font-weight:600" onclick="apriPartito()">${T('Apri')} →</button></div>${dcAzione}</div>`:'';
   /* l'aula: emiciclo dai seggi reali (solo dove c'è un parlamento). Affianca le barre, non le sostituisce. */
   const C2=(hasSeats && typeof camereComposizione==='function') ? camereComposizione() : null, it2=!!(C2 && C2.quote), alta2=it2 && CAMERA_VISTA==='alta';   // L263-6: l'interruttore dove il Senato c'è; senza, l'HTML è quello di prima
-  const div2=it2 ? camereDiviseTesto(C2.bassa, C2.alta, coal) : '';
-  const emiBox = hasSeats ? `<div class="card"><div class="ct">${alta2 ? cameraAltaVista(C2.riga).titolo : `${T("L'aula")} · ${Object.values(S.seggi).reduce((a,b)=>a+b,0)} ${T('seggi')}`}</div>
+  const AT=(it2 && C2.at) ? altaTerrVista(C2.at) : null;   // L263-11bis: Francia, India, Sudafrica, lo schema del Bundesrat
+  const BV=(it2 && C2.br) ? bundesratVista(C2.br) : AT;   // L263-10bis: il Bundesrat
+  const CP=(it2 && C2.comp) ? cameraCompTesti(C2.riga) : null, CPe=CP && alta2 && cameraCompEmi(C2.riga);   // L263-14: Lord e Senato canadese, sola composizione (grigio, nessuna maggioranza)
+  const PV=(it2 && C2.pop) ? altaPopTesti(C2.riga) : null;   // L263-12bis: Giappone e Spagna
+  const div2=PV ? altaPopDivise(C2.bassa, C2.altaQ, coal) : CP ? (alta2 ? cameraAltaVista(C2.riga).nota : '') : AT ? (alta2 ? AT.nota : ((altaTerrContro() && seggiCoalizione(coal, S.seggi)>=50) ? altaTerrTesti(C2.riga).divise : '')) : BV ? (alta2 ? BV.nota : ((typeof bundesratContro==='function' && bundesratContro() && seggiCoalizione(coal, S.seggi)>=50) ? T('Camere divise: al Bundesrat manca la maggioranza') : '')) : it2 ? camereDiviseTesto(C2.bassa, C2.altaQ||C2.alta, coal) : '';   // L263-9bis: in Argentina e Brasile l'emiciclo è in seggi, la frase legge le quote
+  const emiBox = hasSeats ? `<div class="card"><div class="ct">${alta2 ? (PV ? PV.titolo.replace('%N',C2.pop.si) : BV ? BV.titolo : cameraAltaVista(C2.riga).titolo) : `${T("L'aula")} · ${Math.round(Object.values(S.seggi).reduce((a,b)=>a+b,0))} ${T('seggi')}`}</div>
     ${it2?`<div class="camere-par">${camereBottoniHtml(C2.riga,'cameraVista')}<div class="camere-cosa">${alta2?cameraCosaConta(C2.riga):cameraBassaCosa()}</div></div>`:''}
-    <div style="padding:8px 14px 2px">${alta2 ? emiciclo(C2.alta,{key:'par:alta',percento:true,aria:cameraNome(C2.riga),maggioranza:camereMaggioranza(true,C2.riga)}) : emiciclo(S.seggi,{key:'par'})}</div>
+    ${(CP && alta2 && !CPe) ? '' : `<div style="padding:${C2&&C2.seggiInt?26:8}px 14px 2px">${alta2 ? (CP ? emiciclo({_seggi:C2.riga.seggiVeri},{key:'par:alta', nomi:{_seggi:T('Seggi')}, colori:{_seggi:'var(--mut2)'}, aria:cameraNome(C2.riga), senzaMaggioranza:true}) : AT ? emiciclo(C2.alta, altaTerrEmiOpz('par:alta', C2.at)) : BV ? emiciclo(C2.alta, bundesratEmiOpz('par:alta', C2.br)) : emiciclo(C2.alta,{key:'par:alta',percento:!C2.seggiInt,legenda:!!C2.seggiInt,aria:cameraNome(C2.riga),maggioranza:camereMaggioranza(true,C2.riga)})) : emiciclo(S.seggi,{key:'par'})}</div>`}
     ${div2?`<div class="camere-cosa camere-nota" style="padding:0 15px 4px">${div2}</div>`:''}
-    <div class="contorno" style="font-size:11px;color:var(--mut2);padding:0 15px 10px;text-align:center">${T(alta2?'Il tuo partito pieno · la linea tratteggiata segna la maggioranza':'Il tuo partito pieno, gli alleati in chiaro · la linea tratteggiata segna la maggioranza (50)')}</div></div>` : '';
+    ${(CP && alta2) ? CP.righe.map(x=>`<div class="camere-cosa camere-nota" style="padding:0 15px 4px">${x}</div>`).join('')+'<div style="height:8px"></div>' : `<div class="contorno" style="font-size:11px;color:var(--mut2);padding:0 15px 10px;text-align:center">${alta2&&AT?altaTerrTesti(C2.riga).contorno:T(alta2&&BV?'I voti dei Länder · la linea tratteggiata segna la maggioranza':alta2?'Il tuo partito pieno · la linea tratteggiata segna la maggioranza':'Il tuo partito pieno, gli alleati in chiaro · la linea tratteggiata segna la maggioranza (50)')}</div>`}</div>` : '';
   let h=sondBox+partitoBox+plBox+emiBox+`<div class="card g2"><div class="ct">${T('Partiti')} · ${T(P.nome)}${hasSeats?' · '+T('seggi'):''}</div>`;
   for(const p of ps){
     const mine=p.id===S.partito, gov=coal.includes(p.id);
@@ -5289,7 +5350,7 @@ function renderPartiti(){
     : T('A fine mandato si vota in un <b>testa a testa</b> col rivale più forte: gli altri partiti si schierano per vicinanza politica e vinci se superi il 50%.');
   const hasAllies = S.tenuta && Object.keys(S.tenuta).length>0;
   const tenNote = hasAllies?' '+T('Ogni <b>alleato</b> ha una <b>tenuta</b>: se trascuri la sua base cala, finché ti pone un <b>ultimatum</b> e — se lo ignori — <b>esce</b> dalla coalizione.'):'';
-  const minNote = S.minoranza?' <b style="color:var(--neg)">'+T('Governi in minoranza')+'</b>: '+T('ogni mese rischi una <b>mozione di sfiducia</b> che porta a elezioni anticipate.'):'';
+  const minNote = S.minoranza?' <b style="color:var(--neg)">'+T(minoranzaSoloSenato()?'Governi senza maggioranza al Senato':'Governi in minoranza')+'</b>: '+T('ogni mese rischi una <b>mozione di sfiducia</b> che porta a elezioni anticipate.'):'';
   const govLine = S.opposizione?T("Al <b>Governo</b> c'è l'avversario; il tuo partito è all'<b>Opposizione</b>."):T("I partiti al <b>Governo</b> formano la tua maggioranza, gli altri sono all'<b>Opposizione</b>.");
   const oppNote = S.opposizione?' <b style="color:var(--neg)">'+T("Sei all'opposizione")+'</b>: '+T('fai risalire la tua forza e vinci il prossimo voto per tornare al governo; se crolla sotto ~%N il partito ti scarica.').replace('%N',Math.round(sogliaCrollo(f0Crollo()))):'';
   h+=`</div>${territBox}${locPariPartitiRiga()}${oppTragBox()}<div class="card"><div class="ct">${T('Come funziona')}</div><div class="log">

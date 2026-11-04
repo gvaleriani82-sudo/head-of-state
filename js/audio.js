@@ -635,7 +635,14 @@ function musicaEpocaAnno(y){
   return y<1960?'mus-1950' : y<1970?'mus-1960' : y<1980?'mus-1970' : y<1990?'mus-1980' : y<2000?'mus-1990' : 'mus-2000';
 }
 function musicaCrisi(){
-  return !!(S && S.livello===3 && !S.opposizione && ((S.mesiSottoCrisi||0)>0 || (S.minoranza && !S.coabitazione)));
+  if(!(S && S.livello===3 && !S.opposizione)) return false;
+  if((S.mesiSottoCrisi||0)>0) return true;
+  if(!S.minoranza || S.coabitazione) return false;
+  /* L263-8bis: la minoranza al solo Senato è paesaggio dopo 3 mesi, come in graveInCorso (L152-2): stesso contatore dell'episodio
+     (S.mesiMinoranza) e stessa costante. La minoranza vera (alla Camera, o all'aula sola) suona per tutto l'episodio, come prima. */
+  if(typeof minoranzaSoloSenato==='function' && minoranzaSoloSenato() && typeof MINORANZA_RESPIRO_MESI!=='undefined')
+    return (S.mesiMinoranza||0)<=MINORANZA_RESPIRO_MESI;
+  return true;
 }
 /* L245-7 · la carta d'attacco grave nell'agenda del mese (risolta o no): la musica a zero per tutto il mese, come sotto un
    pilastro-tragedia — ma letta a parte, perché musicaTragedia spegne anche il giro, le voci e gli ambienti, e la carta d'attacco è una
