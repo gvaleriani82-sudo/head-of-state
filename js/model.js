@@ -633,6 +633,7 @@ function calcSeggiCollegi(){
 function calcSeggi(senzaPremio){   // L263-6: `senzaPremio` = il Senato italiano (calcSeggiAlta): stesse forze, niente premio nazionale
   /* L47-1 — il bivio: chi dichiara i collegi passa di là, tutti gli altri proseguono nel ramo di sempre. */
   if(PAESE.sistemaSeggi==='collegi' && typeof calcSeggiCollegi==='function') return calcSeggiCollegi();
+  if(typeof auCollegiPaese==='function'){ var _ac=auCollegiPaese(); if(_ac) return calcSeggiCollegiAu(_ac); }   // L263-13ter (C1): l'Australia a collegi, solo con AU_COLLEGI (game.js); spento = null, il ramo di sempre
   const d=PAESE.distorsione||1, ps=PAESE.partiti;
   /* L107-2 · LO SBARRAMENTO (`PAESE.sbarramento`, percentuale; dichiarabile da una porta via SCENARIO_ISTITUZIONI). Un
      partito con forza sotto la soglia pesa zero nella torta: i suoi voti si ripartiscono fra gli altri da soli, nella

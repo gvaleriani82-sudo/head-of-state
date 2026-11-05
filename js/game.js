@@ -781,6 +781,52 @@ function altaPopVoti(coal, q){ q=q||S.camera2.seggi; var tot=cameraAlta().seggiV
 let CAMERE_AU=false;   // L263-13: scritto e spento (misura in «⚑ L263-13», DESIGN-CAMERE.md); l'accensione è di L263-13bis
 const AU_K={Kalta:0.05, minori:0.5, stessa:true};   // L263-13 (A2, A3): la taratura proposta; la misura li riscrive
 const ALTA_AU={seggiMeta:38, seggi:76, soglia:7, sogliaDoppio:4, seggiCamera:150, mesiBlocco:3, mesiFine:6};   // ◦ 150 alla Camera (il gioco non ha la cifra); ⚠ la quota vera per 6 seggi è 1/7 (14,3%): 7 e 4 sono circa mezza quota, la soglia pratica coi trasferimenti
+/* L263-13ter · L'AUSTRALIA: LA CAMERA A COLLEGI (DESIGN-CAMERE.md, «⚑ L263-13ter»; decisioni C1-C4 di Cowork del 04/11). Interruttore AU_COLLEGI, SPENTO.
+   (C1) acceso e in Australia, calcSeggi (model.js) passa da calcSeggiCollegiAu: il ramo dei collegi del Regno Unito (pesoCollegio, normalizzaPesi di model.js) con
+   n, ampiezza e skew di AU_COLL_K e il terreno di AU_TERRENO — la riga australia di data.js non cambia (né sistemaSeggi né terreno: li dà auCollegiPaese()).
+   ⚠ Il ramo dei collegi senza `terreno` sui partiti dà TUTTI i collegi al primo partito: la consegna non lo diceva, il terreno è nostro e simmetrico per costruzione
+   (Labor −0,3 e Liberali +0,3 con la stessa concentrazione; Verdi −0,6 e Nazionali +0,6 con la stessa concentrazione; One Nation +0,8; Indipendenti 0); chi non è in tabella (il
+   partito proprio) resta uniforme. (C2) le preferenze (auCollegioVince): nel collegio, se nessuno ha la metà delle quote locali, i voti degli altri vanno al più
+   vicino dei primi due sull'asse dei partiti (metà e metà se equidistanti) — pura, nessun numero casuale, nessun partito nominato. Spento: auCollegiPaese() = null
+   e calcSeggi è quello di sempre. Banco: __BANCO_AU_COLLEGI_ON/_OFF in __reseed. */
+let AU_COLLEGI=false;   // L263-13ter: scritto e spento (misura in «⚑ L263-13ter»); l'accensione è di L263-13bis
+const AU_COLL_K={n:150, ampiezza:20, skew:0, pref:true};   // L263-13ter: n = ALTA_AU.seggiCamera; ampiezza 20 · skew 0, la casella della griglia neutrale per costruzione (voti pari → 2 collegi di scarto; a 40 sono 4-6); nessuna casella regge (a)+(c): «⚑ L263-13ter»; la misura li riscrive
+const AU_TERRENO={au_alp:{t:-0.3, c:0.5}, au_lib:{t:0.3, c:0.5}, au_grn:{t:-0.6, c:1}, au_nat:{t:0.6, c:1}, au_on:{t:0.8, c:0.5}, au_ind:{t:0, c:0.5}};   // L263-13ter: simmetrico (Labor/Liberali, Verdi/Nazionali); a c 5 Verdi e Indipendenti prendevano il 30% dei collegi, a Verdi/Nazionali ±1 c 3 i Nazionali sprecavano voti nei collegi già liberali (voti pari: Labor +40 collegi su 150), a ±0,6 c 1 lo scarto è 2
+function auCollegiPaese(){ return (AU_COLLEGI && !!S && S.paese==='australia') ? AU_COLL_K : null; }
+/* L263-13quater · IL GOVERNO MONOCOLORE AUSTRALIANO (DESIGN-CAMERE.md, «⚑ L263-13quater»; decisioni C1-C4 di Cowork del 04/11). Interruttore AU_MONOCOLORE, SPENTO.
+   (C2) con AU_MONOCOLORE, AU_COLLEGI e in Australia: se un partito da solo, o il blocco Liberali+Nazionali, ha la maggioranza dei seggi della Camera, il governo
+   formato IN AUTOMATICO è solo quel partito o quel blocco (i minori restano fuori). Due chiamanti: entraOpposizione (il governo degli altri) e formaCoalizione del
+   banco (harness.js). La trattativa del giocatore non passa di qui (openTrattativa parte dal solo partito del giocatore): nessuna opzione tolta.
+   (C3) pura, un confronto di seggi; spento rende null senza leggere niente. Maggioranza = ≥ 50 come S.minoranza (maggioranzaCamere < 50). */
+let AU_MONOCOLORE=false;   // L263-13quater: scritto e spento (misura in «⚑ L263-13quater»)
+const AU_BLOCCO=['au_lib','au_nat'];   // L263-13quater (C2): la «Coalizione», contata come un blocco solo
+function auMonocolore(pid, seggi){   // L263-13quater (C2): i membri del governo monocolore di pid (pid per primo), o null (la formazione di sempre)
+  if(!(AU_MONOCOLORE && auCollegiPaese()) || !pid || !seggi) return null;
+  if(AU_BLOCCO.indexOf(pid)>=0) return AU_BLOCCO.reduce(function(t,id){ return t+(seggi[id]||0); },0)>=50 ? [pid].concat(AU_BLOCCO.filter(function(id){ return id!==pid && id in seggi; })) : null;   // la Coalizione governa insieme anche coi Liberali a maggioranza da soli (⚠ 3 di L263-13ter: Nazionali a zero seggi)
+  return (seggi[pid]||0)>=50 ? [pid] : null;
+}
+function auCollegioVince(ps, x, A, norm, pref){   // pura: chi vince il collegio x (C2)
+  var q={}, tot=0, f=S.forze||{};
+  ps.forEach(function(p){ q[p.id]=Math.max(0, f[p.id]||0)*pesoCollegio(p, x, A)*(norm[p.id]||1); tot+=q[p.id]; });
+  if(!(tot>0)) return null;
+  var ord=ps.slice().sort(function(a,b){ return q[b.id]-q[a.id]; }), a=ord[0], b=ord[1];
+  if(!pref || !b || q[a.id]>=tot/2) return a.id;
+  var va=q[a.id], vb=q[b.id];
+  for(var k=2;k<ord.length;k++){ var p=ord[k], da=Math.abs(p.asse-a.asse), db=Math.abs(p.asse-b.asse); if(da<db) va+=q[p.id]; else if(db<da) vb+=q[p.id]; else { va+=q[p.id]/2; vb+=q[p.id]/2; } }
+  return vb>va ? b.id : a.id;
+}
+function calcSeggiCollegiAu(cfg){   // pura: le quote della Camera (somma 100, resti più alti) dai collegi, come calcSeggiCollegi
+  var N=cfg.n||150, A=(cfg.ampiezza!=null?cfg.ampiezza:20), SK=cfg.skew||0, xs=[], vinti={};
+  var ps=PAESE.partiti.map(function(p){ var tr=AU_TERRENO[p.id]; return {id:p.id, asse:(p.asse!=null?p.asse:0), terreno:tr?tr.t:(p.terreno!=null?p.terreno:null), concentrazione:tr?tr.c:p.concentrazione}; });
+  ps.forEach(function(p){ vinti[p.id]=0; });
+  for(var i=0;i<N;i++){ var u=(N>1)?(i/(N-1))*2-1:0; xs.push(Math.max(-1, Math.min(1, u+SK))); }
+  var norm=normalizzaPesi(ps, xs, A);
+  for(var j=0;j<N;j++){ var w=auCollegioVince(ps, xs[j], A, norm, cfg.pref!==false); if(w) vinti[w]++; }
+  var q2=ps.map(function(p){ var e=vinti[p.id]/N*100; return {id:p.id, f:Math.floor(e), r:e-Math.floor(e)}; });
+  var used=q2.reduce(function(s2,x2){ return s2+x2.f; }, 0);
+  q2.slice().sort(function(a,b){ return b.r-a.r; }).forEach(function(x2){ if(used<100){ x2.f++; used++; } });
+  var out={}; q2.forEach(function(x2){ out[x2.id]=x2.f; }); return out;
+}
 function camereAu(){ var r; return CAMERE_AU && CAMERE_DUE && !!S && S.paese==='australia' && !!(r=cameraAlta()) && r.elezione==='votoProprio'; }
 function camereAuVivo(){ return camereAu() && !!S.seggi && !!(S.camera2 && S.camera2.classi && S.camera2.blocchi); }
 function auQuote(soglia, seggi){   // pura: i seggi di una metà (o dei 76) dai voti, soglia in punti, resti più alti; reso in quote 0-100 per ogni partito del roster
@@ -10237,6 +10283,21 @@ function avanzaMese(){
    di mese e l'elezione si RIGIOCA con lo stesso identico VERO (deterministico da S.forze). Atomico, incorruttibile. */
 const SD_NOTTE=[4, 2.5, 1.2, 0.5, 0];
 const LAB_NOTTE=['Urne chiuse · Exit poll','Prime proiezioni','Le sezioni dai territori','Dati quasi definitivi','Proclamazione'];
+/* L261-9: exit poll solo dove c'era (◦ uk1980/uk1990, us1970/us1980, presente). Funzione pura, letta da renderNotte (titolo
+   dell'ondata 0) e da notteNarr (riga dello stadio 0), solo nella notte nazionale. Non fa un secondo calcolo dell'era: passa dal
+   passaggio unico di lancioScelto (eraCombacia → eraCartaViva: la linea S.era e l'anno S.year), quindi segue la carriera e non la
+   porta d'avvio — un uk1970 che arriva al 1979 entra nel decennio uk1980 e ha l'exit poll, come le sue voci di cronaca.
+   Correzione alla consegna (rapporto «⚑ L261-9»): oltre ai tag della consegna anche uk2000, us1990, us2000 e `contemporanea` (il
+   presente e ogni linea dal 2012), così una carriera britannica o americana non lo perde a metà strada (uk1990 dopo il 2001). Il resto
+   (IT, FR, DE di ogni decennio fino al 2011, uk1950-uk1970, us1950-us1960) dice «prime stime», che è vero in ogni epoca. */
+const NOTTE_EXIT_POLL_TAG=['uk1980','uk1990','uk2000','us1970','us1980','us1990','us2000','contemporanea'];
+function notteExitPollVero(){
+  return NOTTE_EXIT_POLL_TAG.some(function(t){ return eraCombacia(t); });
+}
+function notteLab(stadio){
+  if(stadio===0 && !notteExitPollVero()) return 'Urne chiuse · Prime stime';
+  return LAB_NOTTE[stadio];
+}
 const NOTTE_MS=7000;          // ritmo per ondata (~35s in totale); «Avanti» accelera, «Salta» chiude
 const NOTTE_DICH=3;           // l'ondata della dichiarazione a caldo (la penultima)
 /* ⚑ L261-1 (25/10) · LA NOTTE PER TIPO. `NOTTE.tipo` (assente = 'nazionale') sceglie la riga di NOTTE_TIPI: ondate (`sd`), etichette
@@ -10984,6 +11045,8 @@ function notteNarr(stadio){
   if(!NOTTE) return '';
   const mv=calcMargineEsito(NOTTE.sistema, NOTTE.vero), sc=notteNarrScarto(stadio, null);   // L261-5: prima della proclamazione la lettura della barra
   const mg= sc==null ? mv : { m:sc, win:sc>=0, tag:mv.tag }, serrato=Math.abs(mg.m)<4;
+  if(stadio===0 && !notteExitPollVero()) return serrato?T('Le urne si chiudono. Le prime stime danno un equilibrio perfetto: nulla è deciso.')   // L261-9
+    : (mg.win?T('Le urne si chiudono. Le prime stime ti danno in vantaggio.'):T('Le urne si chiudono. Le prime stime ti danno indietro.'));
   if(stadio===0) return serrato?T('Le urne si chiudono. I primi exit poll danno un equilibrio perfetto: nulla è deciso.')
     : (mg.win?T('Le urne si chiudono. I primi exit poll ti danno in vantaggio.'):T('Le urne si chiudono. I primi exit poll ti danno indietro.'));
   if(stadio===1) return serrato?T('Le proiezioni si consolidano, ma il distacco resta dentro i margini d\'errore.')
@@ -11073,7 +11136,7 @@ function renderNotte(){
   /* 375px senza salti: altezza minima riservata → le ondate non fanno ballare il modale. Sfondo su WRAPPER (no leak di classe). */
   /* L113-5 · la legenda delle due lingue del tavolo: le righe sono il voto dell'area, il colore pieno chi la governa */
   const legenda = sulTavolo ? `<div class="notte-legenda contorno"><span class="nl-righe" aria-hidden="true"></span>${T('a righe: come ha votato')} · <span class="nl-pieno" aria-hidden="true"></span>${T("colore: chi governa l'area")}</div>` : '';
-  document.getElementById('modal').innerHTML=`<div class="notte-wrap${sulTavolo?' sul-tavolo':''}">${mbg}<div class="mt"><div class="kicker">${kicker}</div><h2>${T(LAB_NOTTE[NOTTE.stadio])}</h2></div>
+  document.getElementById('modal').innerHTML=`<div class="notte-wrap${sulTavolo?' sul-tavolo':''}">${mbg}<div class="mt"><div class="kicker">${kicker}</div><h2>${T(notteLab(NOTTE.stadio))}</h2></div>
     <div${sulTavolo?'':' style="min-height:268px"'}>
       ${ultima && rvN ? `<div class="rv-riga rv-notte">${rvN}<div class="mtext notte-verdetto-riga" style="font-weight:600;padding:0">${narr}</div></div>` : `<div class="mtext${ultima?' notte-verdetto-riga':''}"${ultima?' style="font-weight:600"':''}>${narr}</div>`}
       ${(sulTavolo && !NOTTE_CRONACA)?'':lancio}
@@ -11988,6 +12051,7 @@ function entraOpposizione(w){
   S.opposizione=true; S.governoAvversario=w.id; S.ministers=[];
   S.governoAvversarioVolto=nomePersona();   // L73-2: chi ti ha succeduto ha un nome (generato, mai reale)
   S.coalizione=[w.id].concat(PAESE.coalizione?compatibili(w.id,S.seggi).filter(p=>p.id!==S.partito).map(p=>p.id):[]);
+  { const mono=auMonocolore(w.id, S.seggi); if(mono) S.coalizione=mono.filter(id=>id!==S.partito); }   // L263-13quater (C2): il vincitore con la maggioranza da solo (o la Coalizione) governa senza i minori; spento null
   S.tenuta={}; S.tenutaForza0={}; S.tenutaLiv={}; S.tenutaUltimo={}; S.minoranza=false; S.mesiMinoranza=0;
   if(S.coabitazione){ S.coabitazione=false; S.premier=null; }   // L100-2: la presidenziale persa chiude anche la coabitazione
   S.caduteMandato=0;   // L93-4
