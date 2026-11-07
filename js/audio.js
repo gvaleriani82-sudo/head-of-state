@@ -544,8 +544,10 @@ const MUSICA_MANIFEST = {
      musicaScelta: tensione e guerra alternano A/B a ogni giro come le altre `-b`. */
   'mus-tensione':     { file:'mus-tensione.mp3',    loop:true,  gain:0.51 },                              // −19,4, picco −0,8 · 1:50
   'mus-tensione-b':   { file:'mus-tensione-b.mp3',  loop:true,  gain:0.42, variante:'mus-tensione' },     // −17,6, picco −0,7 · 2:00
+  'mus-tensione-c':   { file:'mus-tensione-c.mp3',  loop:true,  gain:0.53, variante:'mus-tensione' },     // −19,8, picco −1,3 · 2:00 · L218-29: la terza variante
   'mus-guerra':       { file:'mus-guerra.mp3',      loop:true,  gain:0.42 },                              // −17,6, picco −1,1 · 2:00
   'mus-guerra-b':     { file:'mus-guerra-b.mp3',    loop:true,  gain:0.51, variante:'mus-guerra' },       // −19,4, picco −0,4 · 2:00
+  'mus-guerra-c':     { file:'mus-guerra-c.mp3',    loop:true,  gain:0.60, variante:'mus-guerra' },       // −20,8, picco −1,1 · 1:46 · L218-29: la terza variante
   'mus-armistizio':   { file:'mus-armistizio.mp3',  loop:true,  gain:0.45 },                              // −18,3, picco −0,4 · 1:30
   'mus-dopoguerra':   { file:'mus-dopoguerra.mp3',  loop:true,  gain:0.47 },                              // −18,7, picco −1,1 · 1:30
   'mus-lutto':        { file:'mus-lutto.mp3',       loop:true,  gain:0.97 }                               // L245-7: −24,9, picco −7,2 · 1:30 (stessa regola: picco reso −7,5) — il mese dopo un attacco grave, musicaLutto()
@@ -568,7 +570,7 @@ const MUSICA_PRESENTI = ['mus-1950.mp3','mus-1960.mp3','mus-1970.mp3','mus-1980.
                          'mus-uk-1950.mp3','mus-uk-1960.mp3','mus-uk-1970.mp3','mus-uk-1980.mp3','mus-uk-1990.mp3','mus-uk-2000.mp3','mus-uk-presente.mp3',
                          'mus-fr-1950.mp3','mus-fr-1960.mp3','mus-fr-1970.mp3','mus-fr-1980.mp3','mus-fr-1990.mp3','mus-fr-2000.mp3','mus-fr-presente.mp3',
                          'mus-de-1950.mp3','mus-de-1960.mp3','mus-de-1970.mp3','mus-de-1980.mp3','mus-de-1990.mp3','mus-de-2000.mp3','mus-de-presente.mp3',   // L218-22: le 35 musiche del paese
-                         'mus-tensione.mp3','mus-tensione-b.mp3','mus-guerra.mp3','mus-guerra-b.mp3','mus-armistizio.mp3','mus-dopoguerra.mp3',   // L245-5: la guerra
+                         'mus-tensione.mp3','mus-tensione-b.mp3','mus-guerra.mp3','mus-guerra-b.mp3','mus-tensione-c.mp3','mus-guerra-c.mp3','mus-armistizio.mp3','mus-dopoguerra.mp3',   // L245-5: la guerra
                          'mus-lutto.mp3'];   // L245-7: il lutto dopo un attacco grave
 const MUSICA_CHIAVE = 'hos_musica', MUSICA_GAIN = 0.35, MUSICA_XFADE_S = 2.5, MUSICA_DUCK_S = 0.8;
 let MUSICA_DIR = 'assets/audio/';     // `let`: la pagina di prova di L114-1 la punta ai segnaposto di .claude/musica-prova/
@@ -690,8 +692,8 @@ function musicaVarianti(tema){
 function musicaGiroVariante(tema){ const V=musicaVarianti(tema); return V[(MUSICA_GIRO[tema]||0)%V.length]; }
 /* il tema di un brano (una variante risponde col suo tema) */
 function musicaTema(brano){ const M=MUSICA_MANIFEST[brano]; return (M && (M.variante || M.decennio)) || brano; }   // L218-22: la traccia del paese risponde col suo decennio
-/* ⚑ L245-5 · LA MUSICA DELLA GUERRA (puro): in guerra mus-guerra/-b a rotazione, con la trattativa a 2 o più mus-armistizio; una crisi
-   al gradino 3-4 senza guerra mus-tensione/-b; nel dopoguerra mus-armistizio i primi sei mesi se l'esito è pace o stallo, poi (e da
+/* ⚑ L245-5 · LA MUSICA DELLA GUERRA (puro): in guerra mus-guerra/-b/-c (L218-29: la -c) a rotazione, con la trattativa a 2 o più mus-armistizio; una crisi
+   al gradino 3-4 senza guerra mus-tensione/-b/-c; nel dopoguerra mus-armistizio i primi sei mesi se l'esito è pace o stallo, poi (e da
    subito per vittoria e sconfitta) mus-dopoguerra; altrimenti null — e musicaScelta va avanti come prima, byte per byte. */
 const MUSICA_ARMISTIZIO_MESI = 6;
 function musicaGuerra(){

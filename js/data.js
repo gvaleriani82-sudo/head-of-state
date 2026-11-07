@@ -654,6 +654,143 @@ const PAESI = {
       { id:'ng_apga', nome:'APGA',        orientamento:'regionalista',   base:{ cetomedio:0.5, imprenditori:0.3, lavoratori:0.2 }, forza:5,  asse:0 },
     ],
   },
+  /* ===== L250-2 (07/11) — LA DANIMARCA nel presente. Parlamentare con coalizione, soglia nazionale del 2% (la prima su un
+     presente: D-P5), monarchia col Primo ministro, nell'UE ma fuori dall'euro (la corona: riga in VALUTE).
+     · Le forze sono le urne del Folketing del 24/03/2026 (Wikipedia «2026 Danish general election», lette da Cowork il 07/11;
+       ◦ da ricontrollare su ft.dk / dst.dk), rinormalizzate a 100: il presente del gioco parte nel gennaio 2026, due mesi
+       prima di quel voto, ma come negli altri presenti l'aula d'avvio è quella dell'ultima urna nota (la Germania parte dalle
+       urne del 2025) e il giocatore guida il governo che ne nasce. Aula di 175: i 2+2 seggi di Fær Øer e Groenlandia sono
+       fuori dal roster (e fuori dalla mappa).
+     · Dodici partiti: i dieci sopra la soglia più Alternativet (2,6) e Borgernes Parti (2,1), `selezionabile:false`, che
+       danno alla soglia del 2% qualcosa da fare (con dieci il minore era al 5,8%: la soglia non avrebbe mai morso).
+     · `alleati` dichiarati, simmetrici: blocco rosso A-F-Ø-B-Å, blocco blu V-I-C-O-Æ-H, i Moderati (M) con A, F, B (il
+       governo A-F-M-B del giugno 2026) e con V. Il governo vero è di minoranza (82/175) con l'appoggio esterno di Ø e Å:
+       all'avvio il sostegno non si apre da solo (si offre a minoranza fresca, DESIGN-SOSTEGNO-ESTERNO.md), quindi la
+       trattativa d'avvio lascia scegliere al giocatore — con Ø e Å dentro il blocco rosso è a 55,9.
+     · `distorsione:1.0` come la Germania: proporzionale con seggi di compensazione nazionali, quasi senza premio al primo.
+     · Niente `terminoLocale`: nel codice è il nome della circoscrizione REGIONALE (`terminoRegione()`), e in Danimarca le
+       cinque aree sono Regioni (il ripiego); `Comune` (kommune) sarebbe stato falso lì. Niente `intermedie` (le comunali e
+       regionali cadono nel novembre 2029, cioè nella vigilia del voto nazionale: proposta nel rapporto). ===== */
+  danimarca: {
+    nomiGruppi:{ lavoratori:'Lavoratori e sindacati', pensionati:'Pensionati', cetomedio:'Ceto medio',
+                 imprenditori:'Imprese e industria', giovani:'Giovani e studenti', cattolici:{nm:'Chiesa e campagne', plurale:true} },
+    /* cifre 2024: debito 31% del PIL e AVANZO 4,5% (Eurostat, notifica dell'aprile 2025; Danmarks Statistik, «nyt» 51136; FMI
+       Article IV 2025: debito 31% a fine 2024). ◦ PIL ~2.940 mld di corone = ~394 mld € , inflazione armonizzata 1,3%,
+       crescita 3,5%: ordine di grandezza, da ricontrollare su dst.dk (CIFRE-ECONOMICHE.md). PIL € mld come gli altri. */
+    economia:{pil:394, debito:31, deficit:4.5, inflazione:1.3, crescita:3.5},
+    nome: 'Danimarca',
+    capitale: 'Copenaghen', sedeGoverno: 'Christiansborg',   /* L76-1: i luoghi sono DATI */
+    allineamento: 'occidentale',
+    colori: { bandiera: ['#c8102e', '#ffffff', '#c8102e'], accento: '#a9791a' },
+    flag: '<svg viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg"><rect width="30" height="20" fill="#c8102e"/><rect x="9.7" width="3.2" height="20" fill="#fff"/><rect y="8.6" width="30" height="2.8" fill="#fff"/></svg>',
+    nomeArt: 'la Danimarca',
+    titoloRuolo: 'Primo Ministro',
+    mandatoMesi: 48, sistema: 'parlamentare',
+    coalizione: true, comeSiVince: 'parlamentare', cadutaGoverno: true, ue: true, distorsione: 1.0,
+    avvioOppFuoriBlocco: true,   // L250-3: all'avvio dall'opposizione governa il più forte fuori dal tuo blocco (startOpposizione, vincitoreAvvioOpp): con vincitore() i Socialdemocratici avevano al governo SF, del loro blocco
+    sbarramento: 2,   // L250-2 (D-P5): la soglia dei seggi di compensazione (legge elettorale del Folketing, § 77 ◦), letta da calcSeggi() e compatibili()
+    /* lean: stima, non un dato — Copenaghen e le città più a sinistra (il blocco rosso vi è avanti da decenni), lo Jutland più
+       a destra (Venstre e i Democratici danesi vi sono più forti), la Selandia nel mezzo. */
+    territori: [
+      {nome:'Copenaghen', nomeEn:'Copenhagen', tipo:'città', carica:'Sindaco', lean:-2, simbolo:true}, {nome:'Aarhus', tipo:'città', carica:'Sindaco', lean:-1, simbolo:true}, {nome:'Odense', tipo:'città', carica:'Sindaco', lean:-1, simbolo:true}, {nome:'Aalborg', tipo:'città', carica:'Sindaco', lean:-1, simbolo:true},
+      {nome:'la Regione della Capitale', nomeEn:'the Capital Region', tipo:'regione', carica:'Presidente', lean:-1, simbolo:true}, {nome:'la Selandia', nomeEn:'Zealand', tipo:'regione', carica:'Presidente', lean:0}, {nome:'la Danimarca Meridionale', nomeEn:'Southern Denmark', tipo:'regione', carica:'Presidente', lean:1},
+      {nome:'lo Jutland Centrale', nomeEn:'Central Jutland', tipo:'regione', carica:'Presidente', lean:1}, {nome:'lo Jutland Settentrionale', nomeEn:'North Jutland', tipo:'regione', carica:'Presidente', lean:1}
+    ],
+    /* .claude/genera-mappe.js, voce `danimarca` (Natural Earth admin-1, 5 regioni; Bornholm dentro la Regione della Capitale) */
+    mappa: { viewBox:'0 0 100 82',
+      sfondo:'M18.3,74.3 L12.6,71.9 L9.3,72.0 L9.6,66.1 L8.0,65.9 L7.1,67.8 L6.5,66.8 L6.9,64.5 L8.4,64.9 L7.8,65.7 L9.7,65.9 L8.7,58.6 L6.3,58.0 L4.5,55.0 L3.5,55.6 L4.5,57.8 L1.5,55.9 L2.7,51.4 L2.0,45.0 L2.9,49.4 L5.6,47.0 L3.6,42.5 L2.3,42.0 L1.7,44.4 L2.0,30.3 L3.1,27.2 L3.0,28.9 L4.4,30.0 L4.3,30.9 L5.6,30.3 L7.3,31.3 L8.0,30.4 L9.0,32.9 L10.2,32.8 L10.7,30.8 L9.6,29.3 L12.8,27.2 L11.8,26.9 L13.3,24.9 L14.8,24.7 L16.4,27.2 L14.8,29.1 L14.8,30.8 L16.1,28.4 L17.7,29.1 L17.4,30.4 L18.3,31.6 L18.9,31.3 L18.0,30.9 L18.2,27.6 L16.3,27.7 L17.3,26.3 L16.4,25.1 L16.4,22.0 L17.9,20.1 L20.4,19.5 L22.3,20.8 L23.4,19.1 L26.5,18.6 L25.0,17.5 L23.7,18.5 L17.6,20.0 L15.5,18.6 L9.5,21.2 L7.0,25.1 L7.5,27.6 L5.8,27.7 L8.3,27.7 L7.9,30.1 L3.6,25.5 L3.6,27.3 L3.9,23.9 L8.7,17.0 L11.0,17.5 L13.7,16.1 L19.6,16.0 L21.8,14.0 L27.2,5.4 L30.4,5.2 L36.3,1.6 L33.6,6.0 L35.2,9.3 L35.1,14.2 L33.4,16.5 L32.5,19.8 L31.0,20.2 L27.6,17.8 L26.7,18.6 L27.7,18.0 L30.3,20.2 L32.0,20.5 L31.4,22.3 L32.4,27.0 L29.7,26.9 L25.0,28.9 L29.8,27.1 L32.3,27.3 L32.4,29.4 L30.6,30.9 L30.2,33.1 L32.2,29.8 L34.2,31.9 L39.0,31.5 L40.9,33.8 L37.8,40.9 L36.3,38.9 L35.2,40.3 L35.6,41.9 L34.8,42.2 L34.7,40.5 L33.3,40.7 L32.6,39.7 L34.4,39.4 L34.6,37.9 L33.8,37.4 L31.2,40.0 L30.9,44.3 L31.5,44.3 L30.2,48.8 L29.1,47.6 L25.9,48.4 L28.3,49.3 L27.8,52.1 L24.8,52.8 L21.6,51.7 L24.1,53.9 L25.7,53.9 L23.7,56.1 L20.8,57.3 L23.0,57.6 L22.0,58.9 L23.7,63.3 L23.4,64.5 L20.6,65.5 L20.2,66.3 L21.6,67.3 L19.9,68.5 L21.9,68.2 L24.0,69.5 L24.3,73.2 L22.5,72.7 L22.4,71.1 L20.0,74.1 ZM33.9,71.9 L34.8,73.1 L33.3,73.7 L30.3,70.0 L32.5,72.0 L33.0,71.4 L33.6,72.5 ZM27.9,70.0 L28.6,72.3 L27.3,72.9 L26.0,72.2 L27.6,72.5 L26.9,71.8 L24.7,71.5 L24.4,69.9 L25.6,70.7 L24.9,69.0 L23.2,68.9 L23.5,68.2 L22.6,68.0 L24.9,67.4 ZM39.4,68.3 L40.5,65.5 L40.2,68.7 L37.2,75.9 L36.0,73.4 L37.7,72.2 L37.3,71.1 ZM6.8,60.9 L5.4,58.0 L6.6,58.9 ZM36.9,67.8 L35.1,68.7 L30.9,67.1 L30.4,67.8 L28.8,67.3 L29.8,65.9 L27.7,64.5 L27.5,66.2 L27.4,64.1 L26.1,63.1 L26.1,60.8 L25.0,60.5 L25.5,59.5 L23.6,57.8 L25.1,58.5 L23.4,56.9 L25.1,55.8 L26.2,56.8 L31.0,54.5 L31.7,54.9 L31.9,54.1 L34.8,56.2 L33.5,58.1 L34.2,58.5 L36.1,57.2 L35.5,56.5 L36.3,54.3 L37.9,57.4 L35.3,58.5 L37.3,58.5 L39.2,62.2 L38.4,61.9 L38.5,66.3 ZM35.4,48.0 L35.2,44.8 L36.9,47.7 L35.7,50.7 L34.7,49.0 ZM48.5,27.6 L50.4,26.7 L49.4,27.9 ZM11.6,26.4 L9.3,28.0 L7.3,26.5 L7.7,25.2 L9.4,24.3 L8.7,24.2 L9.2,22.7 L11.4,22.3 L12.8,20.6 ZM43.4,11.8 L44.0,12.8 L42.4,12.8 L41.8,15.1 L39.4,13.5 ZM53.1,76.0 L52.6,77.9 L49.8,77.6 L47.7,78.6 L41.6,75.0 L42.9,73.6 L41.7,71.8 L42.5,70.7 L44.6,70.4 L49.6,74.1 L50.4,71.5 ZM60.9,68.7 L62.6,69.3 L62.6,70.6 L60.0,70.4 L58.0,72.2 L56.8,71.7 L57.6,69.7 L59.1,69.7 L58.6,67.9 ZM60.1,54.5 L57.9,57.4 L58.3,58.7 L61.2,60.4 L61.6,62.2 L57.7,63.8 L56.5,65.9 L56.2,64.9 L55.4,65.3 L57.5,66.2 L56.8,67.6 L57.4,69.3 L55.6,70.2 L54.0,69.2 L53.6,70.9 L54.6,70.7 L57.5,73.4 L54.6,77.0 L54.5,80.1 L53.4,77.8 L54.0,76.3 L51.2,70.9 L53.6,69.9 L53.0,68.7 L49.9,67.1 L52.8,68.2 L51.3,66.3 L52.5,65.8 L51.5,65.6 L51.3,64.3 L50.4,64.9 L47.3,63.9 L45.0,64.5 L45.4,63.1 L43.7,61.5 L44.1,60.9 L42.6,60.6 L44.4,59.4 L43.7,57.0 L42.6,56.7 L43.4,55.2 L40.5,52.9 L42.6,53.1 L39.7,51.1 L43.7,50.9 L43.1,51.2 L44.1,52.1 L44.1,51.2 L46.3,50.7 L46.2,48.7 L48.0,48.6 L48.5,47.0 L45.2,44.8 L49.7,46.2 L52.0,45.4 L51.7,47.1 L50.6,47.0 L51.3,49.4 L49.8,50.1 L51.6,49.7 L51.9,50.9 L50.5,51.4 L51.7,51.4 L52.2,53.1 L54.5,48.3 L54.3,46.4 L55.2,47.1 L55.9,51.2 L54.0,53.1 L55.2,52.2 L56.0,53.3 L56.5,51.4 L55.5,46.2 L53.1,46.0 L57.5,42.2 L59.7,41.6 L63.7,43.6 L62.2,46.5 L63.5,51.9 L61.9,54.4 ZM98.5,66.1 L97.4,69.6 L93.4,68.1 L92.1,66.9 L93.1,61.8 ZM63.6,52.4 L64.5,54.6 L62.8,55.8 L62.3,54.1 Z',
+      aree:[ {cx:62.1,cy:52.1,r:4}, {cx:30.5,cy:40.7,r:4}, {cx:33.0,cy:59.5,r:4}, {cx:26.6,cy:18.9,r:4}, {d:'M98.5,66.1 L97.4,69.6 L93.4,68.1 L92.1,66.9 L93.1,61.8 ZM63.6,52.4 L64.5,54.6 L62.8,55.8 L62.3,54.1 ZM53.2,51.3 L53.4,49.5 L54.5,48.3 L54.3,46.4 L55.2,47.1 L55.9,51.2 L55.5,51.7 ZM56.2,50.2 L55.5,46.2 L55.1,45.7 L53.3,46.2 L53.3,45.4 L58.6,41.5 L61.9,42.3 L63.7,43.6 L62.2,46.5 L63.5,49.7 L63.5,51.9 L61.9,54.4 L57.5,54.0 L57.4,52.9 L58.7,51.8 L58.5,51.1 Z'}, {d:'M53.1,76.0 L52.6,77.9 L49.8,77.6 L47.7,78.6 L41.6,75.0 L41.5,74.2 L42.9,73.6 L41.7,71.8 L42.5,70.7 L44.6,70.4 L46.5,72.3 L49.6,74.1 L49.3,73.2 L50.5,72.7 L50.4,71.5 L52.3,73.6 ZM60.9,68.7 L62.6,69.3 L62.6,70.6 L60.0,70.4 L58.0,72.2 L56.8,71.7 L57.6,69.7 L59.1,69.7 L58.6,67.9 ZM60.1,54.5 L57.9,57.4 L58.3,58.7 L61.2,60.4 L61.6,62.2 L57.7,63.8 L56.5,65.9 L56.2,64.9 L55.4,65.3 L57.5,66.2 L56.8,67.6 L57.4,69.3 L55.6,70.2 L54.0,69.2 L53.6,70.9 L54.1,71.3 L54.6,70.7 L57.5,73.4 L54.6,77.0 L54.5,80.1 L53.4,77.8 L54.0,76.3 L51.2,70.9 L53.6,69.9 L53.0,68.7 L49.9,67.1 L52.8,68.2 L51.3,66.3 L52.5,65.8 L51.5,65.6 L51.3,64.3 L50.4,64.9 L47.3,63.9 L45.0,64.5 L44.7,63.4 L45.4,63.1 L44.8,63.3 L43.7,61.5 L44.1,60.9 L42.9,61.2 L42.6,60.6 L44.4,59.4 L43.7,57.0 L42.6,56.7 L43.4,55.2 L42.6,53.9 L40.5,52.9 L42.6,53.1 L39.7,51.1 L43.7,50.9 L43.1,51.2 L44.1,52.1 L44.1,51.2 L46.3,50.7 L46.2,48.7 L48.0,48.6 L48.5,47.0 L45.2,44.8 L49.7,46.2 L52.0,45.4 L51.7,47.1 L50.6,47.0 L51.3,49.4 L49.8,49.9 L51.6,49.7 L51.9,50.9 L50.6,51.6 L51.7,51.4 L52.2,53.1 L53.2,51.3 L54.2,51.2 L54.8,51.6 L54.0,53.1 L55.2,52.2 L56.0,53.3 L56.2,50.2 L56.7,50.2 L58.7,51.8 L57.4,52.9 L57.5,54.0 Z'}, {d:'M18.3,74.3 L17.1,74.2 L16.6,73.1 L12.6,71.9 L9.3,72.0 L9.6,66.1 L8.0,65.9 L7.1,67.8 L6.5,66.8 L6.9,64.5 L8.4,64.9 L7.8,65.7 L9.7,65.9 L8.9,59.1 L8.4,58.3 L6.3,58.0 L4.5,55.5 L4.8,55.1 L3.5,55.6 L4.5,57.8 L1.5,55.9 L2.6,49.6 L5.3,49.6 L6.7,50.4 L8.0,48.8 L10.9,49.7 L12.3,47.6 L14.6,48.9 L17.4,46.1 L19.1,46.8 L21.2,50.0 L22.2,50.0 L22.2,50.8 L23.2,51.2 L23.2,51.9 L21.5,52.1 L23.0,52.4 L24.1,53.9 L25.7,53.9 L23.7,56.1 L21.6,56.5 L20.8,57.3 L23.0,57.6 L22.9,58.5 L22.0,58.9 L23.7,63.3 L23.4,64.5 L20.6,65.5 L21.0,66.1 L20.2,66.3 L21.6,67.3 L19.9,68.5 L21.9,68.2 L24.0,69.5 L24.4,71.9 L23.6,72.2 L24.2,73.5 L22.5,72.7 L22.4,71.1 L20.0,74.1 ZM33.9,71.9 L34.8,73.1 L33.3,73.7 L30.3,70.0 L32.5,72.0 L33.1,72.0 L33.0,71.4 L33.6,72.5 ZM27.9,70.0 L28.6,72.3 L27.3,72.9 L26.0,72.2 L27.6,72.5 L26.9,71.8 L24.7,71.5 L24.4,69.9 L25.6,70.7 L24.9,69.0 L23.2,68.9 L23.5,68.2 L22.6,68.0 L24.9,67.4 ZM39.4,68.3 L40.5,65.5 L40.2,68.7 L37.9,75.5 L37.2,75.9 L36.0,73.4 L37.7,72.2 L37.3,71.1 ZM6.8,60.9 L5.7,60.0 L5.4,58.0 L6.6,58.9 ZM36.9,67.8 L35.1,68.7 L30.9,67.1 L30.4,67.8 L28.8,67.3 L29.8,65.9 L29.2,64.9 L27.7,64.5 L28.0,66.3 L27.5,66.2 L27.4,64.1 L26.1,63.1 L26.1,60.8 L25.0,60.5 L24.6,60.0 L25.5,59.5 L23.6,57.8 L25.1,58.5 L23.4,56.9 L25.1,55.8 L26.2,56.8 L31.0,54.5 L31.7,54.9 L31.9,54.1 L34.8,56.2 L34.2,56.3 L34.4,57.2 L33.5,58.1 L34.2,58.5 L36.1,57.2 L35.5,56.5 L36.1,56.4 L36.3,54.3 L37.9,57.4 L35.3,58.5 L35.9,58.1 L37.3,58.5 L39.2,62.2 L38.4,61.9 L38.9,64.1 L38.5,66.3 L37.8,67.6 Z'}, {d:'M2.6,49.6 L2.0,45.0 L2.9,49.4 L5.6,47.0 L4.1,42.8 L2.3,42.0 L2.1,44.9 L1.7,44.1 L1.9,31.1 L3.1,27.2 L3.0,28.9 L4.4,30.0 L4.3,30.9 L5.6,30.3 L7.3,31.3 L8.0,30.4 L9.1,33.0 L10.3,32.7 L10.7,30.8 L9.6,29.3 L11.3,27.6 L12.8,27.2 L11.8,26.9 L13.3,24.9 L15.4,25.0 L16.4,27.2 L14.8,29.1 L14.8,30.8 L16.1,29.6 L15.6,29.4 L16.1,28.4 L16.0,29.0 L17.7,29.1 L17.4,30.4 L18.3,31.6 L19.1,31.1 L18.0,30.9 L18.4,28.2 L19.9,29.0 L20.7,27.8 L21.2,29.1 L23.0,29.4 L22.5,30.3 L25.1,31.0 L28.8,29.3 L30.4,27.6 L32.3,27.3 L32.4,29.4 L30.6,30.9 L30.2,33.1 L30.8,33.0 L31.0,31.0 L32.2,29.8 L34.2,31.9 L39.0,31.5 L40.9,33.7 L40.2,36.5 L38.1,39.1 L37.8,40.9 L36.9,40.6 L37.1,39.2 L36.3,38.9 L35.2,40.3 L35.6,41.9 L34.8,42.2 L34.7,40.5 L33.3,40.7 L32.6,39.7 L34.4,39.4 L34.6,37.9 L33.8,37.4 L31.2,40.0 L30.9,44.3 L31.5,44.3 L30.2,48.8 L29.1,47.6 L25.9,48.4 L28.3,49.3 L27.9,50.5 L28.5,50.9 L27.8,52.1 L24.0,52.4 L22.2,50.8 L22.2,50.0 L21.2,50.0 L19.4,47.1 L17.4,46.1 L14.6,48.9 L12.3,47.6 L10.9,49.7 L8.0,48.8 L6.7,50.4 L5.3,49.6 ZM35.4,48.0 L35.7,46.9 L34.8,45.9 L35.2,44.8 L36.2,47.7 L36.9,47.7 L35.7,50.7 L34.7,49.0 ZM48.5,27.6 L50.4,26.7 L49.4,27.9 Z'}, {d:'M18.4,28.2 L17.9,27.3 L16.3,27.7 L17.3,26.3 L16.4,25.1 L16.8,23.4 L16.2,22.7 L17.0,21.1 L20.0,19.4 L22.0,20.1 L22.3,20.8 L23.4,19.1 L26.5,18.6 L25.7,17.9 L24.9,17.4 L23.7,18.5 L23.2,18.1 L17.3,20.0 L15.5,18.6 L14.5,19.6 L13.9,19.3 L12.6,20.4 L11.9,20.0 L11.4,20.8 L9.5,21.2 L8.6,23.7 L7.0,25.1 L6.8,27.1 L7.5,27.6 L5.8,27.7 L8.3,27.7 L8.6,29.1 L7.9,30.1 L3.6,25.5 L3.6,27.3 L3.6,24.7 L8.7,17.0 L11.0,17.5 L13.7,16.1 L17.1,16.6 L19.6,16.0 L21.8,14.0 L27.2,5.4 L30.4,5.2 L35.1,1.7 L36.3,1.6 L33.6,6.0 L35.2,9.3 L35.1,14.2 L33.4,16.5 L32.5,19.8 L31.0,20.2 L27.6,17.8 L26.7,18.6 L27.7,18.0 L30.3,20.2 L32.0,20.5 L31.4,22.3 L32.4,27.0 L30.5,27.4 L29.7,26.9 L26.9,28.5 L25.0,28.8 L27.7,28.4 L29.8,27.1 L30.4,27.6 L28.8,29.3 L25.1,31.0 L22.5,30.3 L23.0,29.4 L21.2,29.1 L20.7,27.8 L19.9,29.0 ZM11.6,26.4 L10.7,27.5 L9.3,28.0 L8.3,26.5 L7.3,26.5 L7.7,25.2 L9.4,24.3 L8.7,24.2 L9.2,22.7 L11.4,22.3 L12.8,20.6 L12.6,23.1 L11.7,23.0 L12.3,24.8 ZM43.4,11.8 L44.1,12.0 L44.0,12.8 L42.4,12.8 L42.7,13.8 L41.8,15.1 L39.4,13.5 Z'} ] },
+    nomi: ['Mads','Sofie','Frederik','Ida','Mikkel','Freja','Rasmus','Emma','Jonas','Anne','Emil','Camilla','Mathias','Line','Christian','Maja','Søren','Signe','Kasper','Mette'],
+    nomiM: ['Mads','Frederik','Mikkel','Rasmus','Jonas','Emil','Mathias','Christian','Søren','Kasper'],
+    nomiF: ['Sofie','Ida','Freja','Emma','Anne','Camilla','Line','Maja','Signe','Mette'],
+    cognomi: ['Nielsen','Jensen','Hansen','Pedersen','Andersen','Christensen','Larsen','Sørensen','Rasmussen','Jørgensen','Petersen','Madsen','Kristensen','Olsen','Thomsen','Christiansen','Poulsen','Johansen','Møller','Mortensen'],
+    partiti: [
+      { id:'dk_s',   nome:'Socialdemocratici',       orientamento:'centrosinistra',   base:{ lavoratori:0.4, pensionati:0.4, cetomedio:0.2 },   forza:21.9, asse:-1, alleati:['dk_sf','dk_el','dk_rv','dk_alt','dk_m'] },
+      { id:'dk_sf',  nome:'SF',                      orientamento:'sinistra',         base:{ giovani:0.4, lavoratori:0.3, cetomedio:0.3 },      forza:11.6, asse:-2, alleati:['dk_s','dk_el','dk_rv','dk_alt','dk_m'] },
+      { id:'dk_v',   nome:'Venstre',                 orientamento:'centrodestra',     base:{ imprenditori:0.3, cetomedio:0.3, cattolici:0.2, pensionati:0.2 }, forza:10.1, asse:1, alleati:['dk_la','dk_k','dk_df','dk_dd','dk_bp','dk_m'] },
+      { id:'dk_la',  nome:'Liberal Alliance',        orientamento:'liberale',         base:{ imprenditori:0.5, giovani:0.3, cetomedio:0.2 },    forza:9.4,  asse:1, alleati:['dk_v','dk_k','dk_df','dk_dd','dk_bp'] },
+      { id:'dk_df',  nome:'Partito popolare danese', orientamento:'destra',           base:{ pensionati:0.4, lavoratori:0.3, cattolici:0.3 },   forza:9.1,  asse:2, alleati:['dk_v','dk_la','dk_k','dk_dd','dk_bp'] },
+      { id:'dk_m',   nome:'Moderati',                orientamento:'centro',           base:{ cetomedio:0.5, pensionati:0.3, imprenditori:0.2 }, forza:7.7,  asse:0, alleati:['dk_s','dk_sf','dk_rv','dk_v'] },
+      { id:'dk_k',   nome:'Conservatori',            orientamento:'centrodestra',     base:{ cetomedio:0.4, imprenditori:0.3, pensionati:0.3 }, forza:7.6,  asse:1, alleati:['dk_v','dk_la','dk_df','dk_dd','dk_bp'] },
+      { id:'dk_el',  nome:'Lista dell\'unità',       orientamento:'sinistra',         base:{ giovani:0.5, lavoratori:0.5 },                     forza:6.3,  asse:-2, alleati:['dk_s','dk_sf','dk_rv','dk_alt'] },
+      { id:'dk_rv',  nome:'Radikale Venstre',        orientamento:'centro',           base:{ cetomedio:0.5, giovani:0.5 },                      forza:5.8,  asse:0, alleati:['dk_s','dk_sf','dk_el','dk_alt','dk_m'] },
+      { id:'dk_dd',  nome:'Democratici danesi',      orientamento:'destra populista', base:{ cattolici:0.4, lavoratori:0.3, pensionati:0.3 },   forza:5.8,  asse:2, alleati:['dk_v','dk_la','dk_k','dk_df','dk_bp'] },
+      { id:'dk_alt', nome:'Alternativet',            orientamento:'ecologista',       base:{ giovani:0.6, cetomedio:0.4 },                      forza:2.6,  asse:-2, alleati:['dk_s','dk_sf','dk_el','dk_rv'], selezionabile:false,
+        nota:'Appena sopra la soglia del 2%: non regge una carriera.' },
+      { id:'dk_bp',  nome:'Partito dei cittadini',   orientamento:'destra',           base:{ cetomedio:0.5, lavoratori:0.5 },                   forza:2.1,  asse:2, alleati:['dk_v','dk_la','dk_k','dk_df','dk_dd'], selezionabile:false,
+        nota:'Appena sopra la soglia del 2%: non regge una carriera.' },
+    ],
+  },
+  /* ===== L250-5 (07/11) — I PAESI BASSI nel presente. Parlamentare con coalizione, proporzionale quasi puro (quoziente
+     ~0,67% dei 150 seggi della Tweede Kamer: niente `sbarramento`), monarchia col Primo ministro, nell'UE e nell'euro.
+     · Le forze sono le urne della Tweede Kamer del 29/10/2025 (seggi Kiesraad; le % lette da Cowork il 07/11 sui resoconti
+       di stampa, ◦ da ricontrollare su kiesraad.nl), rinormalizzate a 100 sui dodici partiti del roster (resti più alti al
+       decimo): ChristenUnie (1,8), 50PLUS (1,4) e Volt (1,1) spalmati in proporzione. Il presente del gioco parte nel gennaio
+       2026, prima del giuramento del governo (23/02/2026): come negli altri presenti l'aula d'avvio è quella dell'ultima urna
+       e il governo nasce dalla trattativa d'avvio.
+     · Dodici partiti: gli otto selezionabili (D-P4) più SP, Partito per gli animali, SGP e Denk `selezionabile:false`.
+     · `alleati` dichiarati e simmetrici: D66-VVD-CDA (il governo di minoranza del febbraio 2026, 66/150), D66-GL/PvdA, la
+       sinistra GL/PvdA-SP-PvdD-Denk, VVD-JA21, CDA-JA21-BBB, PVV-FvD, PVV-BBB, SGP-CDA; nessuna alleanza GL/PvdA-PVV (e
+       nessuna VVD-PVV né CDA-PVV: tutti e due l'avevano esclusa nella campagna del 2025 ◦).
+     · `distorsione:1.0` come la Germania e la Danimarca: proporzionale nazionale senza premio al primo.
+     · `cattolici` («Chiese e campagne»: paese misto, protestante e cattolico) nella base di CDA e SGP, un poco di JA21 e BBB:
+       il gruppo religioso ha chi lo tiene al centro e a destra (la lezione della ⚠ 2 danese, L250-4).
+     · Niente `terminoLocale` (è il nome della circoscrizione regionale: qui le aree sono Province, il ripiego «Regione» di
+       `terminoRegione()` — correzione alla consegna, come in L250-2). Niente `intermedie` (le provinciali del marzo 2027 ◦
+       sono un lotto suo, con una misura). ===== */
+  paesibassi: {
+    nomiGruppi:{ lavoratori:'Lavoratori e sindacati', pensionati:'Pensionati', cetomedio:'Ceto medio',
+                 imprenditori:'Imprese e industria', giovani:'Giovani e studenti', cattolici:{nm:'Chiese e campagne', plurale:true} },
+    /* cifre 2024: debito 43,3% del PIL (~492 mld €) e disavanzo 0,9% (CBS, 26/03/2025, «Government deficit rose to 0.9 percent
+       of GDP in 2024»). PIL ~1.136 mld € = 492 / 0,433 (derivato dalla stessa nota CBS). ◦ inflazione armonizzata 3,2% e
+       crescita ~1,0%: ordine di grandezza, da ricontrollare su StatLine (CIFRE-ECONOMICHE.md). */
+    economia:{pil:1136, debito:43, deficit:-0.9, inflazione:3.2, crescita:1.0},
+    nome: 'Paesi Bassi',
+    capitale: 'Amsterdam', sedeGoverno: 'Binnenhof',   /* Amsterdam è la capitale; governo e parlamento stanno all'Aia, nel Binnenhof: %SEDE è un palazzo in tutti i paesi («rallentata da %SEDE»), e «da L'Aia» sarebbe sbagliato */
+    allineamento: 'occidentale',
+    colori: { bandiera: ['#ae1c28', '#ffffff', '#21468b'], accento: '#c46a1a' },
+    flag: '<svg viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg"><rect width="30" height="20" fill="#21468b"/><rect width="30" height="13.33" fill="#fff"/><rect width="30" height="6.67" fill="#ae1c28"/></svg>',
+    nomeArt: 'i Paesi Bassi',
+    titoloRuolo: 'Primo Ministro',
+    mandatoMesi: 48, sistema: 'parlamentare',
+    coalizione: true, comeSiVince: 'parlamentare', cadutaGoverno: true, ue: true, distorsione: 1.0,
+    /* lean: stima, non un dato — Amsterdam, Utrecht e le città del Randstad più a sinistra e liberali (GL/PvdA e D66), il
+       Brabante e il Limburgo e le campagne del nord-est più a destra (PVV, BBB), la Zelanda e la fascia della Veluwe
+       (Gheldria, Overijssel) col voto riformato della SGP; Groninga e la Frisia nel mezzo. */
+    territori: [
+      {nome:'Amsterdam', tipo:'città', carica:'Sindaco', lean:-2, simbolo:true}, {nome:'Rotterdam', tipo:'città', carica:'Sindaco', lean:0, simbolo:true}, {nome:"L'Aia", nomeEn:'The Hague', nomeEnFrase:'the Hague', tipo:'città', carica:'Sindaco', lean:-1, simbolo:true}, {nome:'Utrecht', tipo:'città', carica:'Sindaco', lean:-2, simbolo:true},
+      {nome:'Groninga', nomeEn:'Groningen', tipo:'regione', carica:'Presidente', lean:0}, {nome:'la Frisia', nomeEn:'Friesland', tipo:'regione', carica:'Presidente', lean:0}, {nome:'il Drenthe', nomeEn:'Drenthe', tipo:'regione', carica:'Presidente', lean:1},
+      {nome:"l'Overijssel", nomeEn:'Overijssel', tipo:'regione', carica:'Presidente', lean:1}, {nome:'il Flevoland', nomeEn:'Flevoland', tipo:'regione', carica:'Presidente', lean:1}, {nome:'la Gheldria', nomeEn:'Gelderland', tipo:'regione', carica:'Presidente', lean:1},
+      {nome:'la provincia di Utrecht', nomeEn:'Utrecht Province', tipo:'regione', carica:'Presidente', lean:-1}, {nome:"l'Olanda Settentrionale", nomeEn:'North Holland', tipo:'regione', carica:'Presidente', lean:-1, simbolo:true}, {nome:"l'Olanda Meridionale", nomeEn:'South Holland', tipo:'regione', carica:'Presidente', lean:0},
+      {nome:'la Zelanda', nomeEn:'Zeeland', tipo:'regione', carica:'Presidente', lean:1}, {nome:'il Brabante Settentrionale', nomeEn:'North Brabant', tipo:'regione', carica:'Presidente', lean:1}, {nome:'il Limburgo', nomeEn:'Limburg', tipo:'regione', carica:'Presidente', lean:1}
+    ],
+    /* .claude/genera-mappe.js, voce `paesibassi` (Natural Earth admin-1, 12 province; fuori Bonaire, Sint Eustatius e Saba) */
+    mappa: { viewBox:'0 0 100 115',
+      sfondo:'M98.4,10.9 L98.4,21.0 L95.1,28.2 L94.4,35.4 L94.0,36.3 L86.9,35.9 L86.0,36.6 L86.0,38.1 L87.0,39.0 L85.2,39.8 L86.3,43.0 L91.0,44.3 L92.8,43.5 L94.7,47.0 L94.2,52.5 L85.3,59.9 L88.7,63.6 L86.4,66.1 L84.1,66.2 L80.0,68.2 L77.8,67.7 L77.9,69.1 L77.0,69.3 L75.0,67.5 L71.5,66.2 L70.6,66.7 L72.2,68.5 L70.4,68.0 L66.6,69.5 L67.4,71.1 L66.8,73.0 L68.6,73.6 L68.5,75.1 L70.8,76.6 L70.5,78.6 L73.2,82.1 L73.5,84.2 L73.2,88.9 L69.7,94.3 L69.8,96.0 L71.7,95.5 L72.0,96.8 L66.7,101.7 L64.6,101.3 L65.1,104.4 L68.4,104.1 L68.3,105.9 L69.9,106.8 L69.7,109.1 L67.5,111.4 L68.2,113.3 L63.1,113.2 L62.1,112.3 L60.9,113.1 L60.7,111.4 L58.8,110.0 L62.3,104.7 L61.3,104.7 L62.5,100.6 L64.4,98.8 L64.0,96.6 L57.4,94.5 L55.5,91.3 L52.9,92.4 L48.5,92.4 L48.1,90.4 L46.2,90.2 L44.8,87.6 L45.1,85.0 L43.8,83.4 L40.8,86.9 L37.1,86.1 L38.6,86.0 L38.7,83.5 L37.5,82.7 L33.8,85.9 L31.5,85.8 L31.1,83.5 L30.1,83.5 L27.4,84.8 L28.4,87.7 L27.8,88.6 L24.5,87.9 L23.8,85.8 L20.7,86.3 L17.9,84.4 L16.8,84.3 L15.4,86.4 L13.5,87.0 L10.1,84.4 L6.2,84.2 L4.1,81.3 L4.2,80.2 L6.8,78.6 L13.6,77.9 L15.3,79.1 L14.7,80.5 L18.3,81.2 L20.5,84.7 L25.0,84.6 L24.6,82.2 L20.2,81.1 L17.6,78.8 L19.6,78.0 L23.1,78.8 L20.7,76.8 L20.7,75.5 L22.4,74.9 L19.7,73.6 L18.8,70.8 L17.4,69.8 L14.7,70.7 L14.4,69.5 L17.0,68.2 L19.9,68.4 L18.7,66.8 L18.3,62.5 L21.5,61.7 L30.7,48.2 L32.9,41.2 L36.7,22.3 L38.5,22.3 L38.3,23.8 L39.9,24.9 L45.1,22.8 L52.7,16.9 L54.4,11.9 L58.0,8.5 L67.8,4.3 L76.1,4.6 L80.8,2.9 L89.2,2.5 L90.1,3.1 L91.0,6.5 L94.0,8.4 L95.7,8.2 L95.5,10.0 ZM4.1,93.3 L2.0,92.2 L1.5,87.6 L5.9,86.0 L13.7,88.9 L16.8,87.8 L17.5,86.2 L21.0,88.3 L23.5,87.9 L22.1,90.8 L16.1,94.5 L13.1,94.6 L12.3,92.6 L8.1,91.1 L5.7,91.5 L5.3,93.2 ZM18.8,74.9 L20.3,75.5 L20.1,76.6 L16.9,77.4 L13.1,74.3 L10.3,75.1 L10.1,73.3 L13.2,72.3 L16.4,72.6 ZM40.4,16.4 L40.4,17.8 L37.9,20.9 L36.2,20.8 L36.4,17.5 L39.4,13.2 L40.3,13.5 ZM40.0,11.9 L42.8,9.0 L45.7,8.2 L40.8,12.2 ZM53.8,3.3 L57.8,2.3 L48.3,6.5 L47.3,5.8 L49.4,4.3 ZM60.1,1.7 L67.2,2.0 L60.2,3.3 L59.1,2.5 ZM73.6,0.1 L76.8,0.3 L71.7,2.3 L71.4,1.2 Z',
+      aree:[ {cx:40.6,cy:46.8,r:3}, {cx:30.0,cy:65.3,r:3}, {cx:25.7,cy:59.1,r:3}, {cx:46.1,cy:58.3,r:3}, {d:'M98.4,10.9 L97.8,15.3 L98.1,22.3 L95.3,27.5 L93.9,26.3 L94.5,24.5 L91.9,21.4 L86.8,16.3 L84.2,16.6 L81.7,13.1 L80.1,12.6 L78.7,13.6 L76.6,17.3 L72.9,15.8 L72.7,13.8 L75.5,8.2 L75.2,6.8 L72.8,6.0 L72.6,5.1 L73.0,4.1 L76.1,4.6 L80.8,2.9 L86.7,2.0 L89.2,2.5 L90.1,3.1 L91.0,6.5 L94.0,8.4 L95.7,8.2 L95.5,10.0 Z'}, {d:'M47.6,20.6 L51.0,17.5 L52.7,16.9 L54.4,11.9 L58.0,8.5 L67.8,4.3 L73.0,4.1 L72.8,6.0 L75.2,6.8 L75.5,8.3 L73.8,11.1 L72.7,15.5 L76.1,17.2 L79.2,22.2 L77.1,24.7 L75.0,24.0 L69.1,28.3 L67.3,27.4 L65.3,28.9 L62.9,29.0 L61.8,27.6 L60.3,27.6 L57.2,29.5 L52.5,29.6 L49.7,26.5 ZM40.0,11.9 L42.8,9.0 L44.5,8.1 L45.7,8.2 L44.0,9.0 L40.8,12.2 ZM53.8,3.3 L57.8,2.3 L57.3,3.1 L55.1,3.4 L54.9,4.2 L48.3,6.5 L47.3,5.8 L49.4,4.3 ZM60.1,1.7 L66.1,1.5 L67.2,2.0 L60.2,3.3 L59.1,2.5 ZM73.6,0.1 L76.8,0.3 L71.7,2.3 L71.4,1.2 Z'}, {d:'M95.3,27.5 L94.0,36.3 L90.1,35.6 L86.4,36.3 L85.8,35.2 L83.7,34.4 L81.4,35.5 L81.4,36.9 L79.1,36.2 L78.0,36.6 L76.5,34.6 L72.8,34.0 L71.6,31.3 L73.5,29.3 L71.6,27.0 L75.0,24.0 L77.1,24.7 L79.1,22.6 L76.1,17.2 L76.8,17.2 L78.0,14.5 L80.1,12.6 L81.7,13.1 L84.2,16.6 L87.0,16.4 L94.5,24.5 L93.9,26.3 Z'}, {d:'M86.4,36.3 L86.0,38.1 L87.0,39.0 L85.2,39.8 L85.8,42.5 L87.0,43.4 L91.0,44.3 L92.8,43.5 L94.7,47.0 L93.8,50.3 L94.2,52.5 L89.2,57.3 L87.7,57.5 L85.0,56.8 L84.8,55.1 L80.8,54.7 L78.7,51.9 L72.0,52.5 L71.0,49.7 L70.0,48.8 L70.4,46.8 L71.7,45.4 L70.7,42.8 L69.1,41.0 L66.6,42.3 L64.9,40.6 L64.1,38.0 L64.4,37.1 L68.8,35.8 L66.4,34.4 L66.9,33.7 L65.9,30.9 L62.9,29.0 L65.3,28.9 L67.3,27.4 L69.1,28.3 L71.6,27.0 L73.5,29.3 L71.6,31.3 L72.9,34.1 L76.5,34.6 L78.0,36.6 L79.1,36.2 L81.4,36.9 L81.4,35.5 L83.7,34.4 L85.8,35.2 Z'}, {d:'M61.8,27.6 L65.9,30.9 L66.9,33.7 L66.4,34.4 L68.8,35.8 L64.1,37.5 L64.9,41.2 L63.6,43.9 L58.2,47.3 L56.5,50.6 L55.6,50.9 L53.8,51.1 L50.2,48.9 L47.1,48.5 L45.7,47.1 L45.7,45.7 L48.0,44.4 L45.5,38.1 L49.7,35.4 L50.9,33.3 L52.1,33.7 L52.4,29.5 L57.2,29.5 L59.6,27.7 Z'}, {d:'M87.7,57.5 L85.3,59.9 L85.3,60.6 L88.7,62.8 L87.0,65.7 L81.6,67.1 L80.0,68.2 L77.8,67.7 L77.9,69.1 L77.0,69.3 L75.0,67.5 L74.0,67.6 L71.5,66.2 L70.6,66.7 L72.2,68.5 L70.4,68.0 L66.6,69.5 L67.4,71.1 L66.8,72.4 L65.5,71.1 L64.8,71.9 L62.2,71.7 L59.8,70.2 L59.3,69.2 L55.7,68.7 L52.7,69.7 L52.4,71.2 L51.1,72.3 L46.5,72.9 L46.6,71.4 L43.4,69.7 L43.2,68.1 L46.1,67.1 L47.7,63.3 L49.5,62.8 L50.9,63.6 L54.7,62.5 L58.6,64.1 L57.0,57.7 L55.9,59.0 L54.9,58.6 L56.0,56.4 L53.8,54.8 L54.2,53.9 L53.1,53.0 L53.4,51.0 L56.5,50.6 L58.2,47.3 L63.6,43.9 L64.9,40.6 L66.8,42.3 L69.1,41.0 L70.7,42.8 L71.7,45.4 L70.4,46.8 L70.0,48.8 L72.2,52.7 L78.7,51.9 L80.8,54.7 L84.8,55.1 L85.0,56.8 Z'}, {d:'M53.4,51.0 L53.1,53.0 L54.2,53.9 L53.8,54.8 L56.0,56.4 L54.9,58.6 L55.9,59.0 L57.0,57.7 L58.6,64.1 L54.7,62.5 L50.9,63.6 L49.5,62.8 L47.5,63.3 L45.7,61.8 L40.3,64.4 L38.7,62.1 L39.3,61.2 L38.0,61.0 L40.0,59.0 L38.9,59.0 L37.8,57.1 L38.7,56.2 L39.7,56.5 L39.6,55.1 L37.2,52.9 L40.9,51.5 L41.4,50.7 L44.8,50.5 L43.9,51.0 L44.6,52.2 L44.0,53.6 L44.2,55.1 L48.2,54.3 L49.9,50.6 L52.3,50.4 Z'}, {d:'M30.7,48.2 L32.9,41.2 L36.4,22.6 L38.5,22.3 L38.3,23.8 L38.9,24.6 L40.9,24.8 L45.1,22.8 L47.6,20.6 L49.7,26.5 L52.4,29.5 L52.1,33.7 L50.9,33.3 L49.7,35.4 L45.5,38.1 L48.0,44.4 L45.7,45.7 L45.7,47.1 L47.1,48.5 L50.2,48.9 L52.4,50.4 L49.7,50.7 L47.7,54.6 L44.2,55.1 L44.0,53.6 L44.6,52.2 L43.9,51.0 L44.8,50.5 L41.4,50.7 L40.9,51.5 L36.4,53.4 L35.8,52.4 L32.5,53.2 L31.7,52.6 L33.3,49.1 L31.7,49.2 L30.5,48.6 ZM40.4,16.4 L40.9,16.6 L40.4,17.8 L37.9,20.9 L36.2,20.8 L35.7,19.8 L36.4,17.5 L39.4,13.2 L40.3,13.5 L40.8,15.4 Z'}, {d:'M20.7,76.5 L21.1,75.1 L22.4,74.9 L19.7,73.6 L18.8,70.8 L17.4,69.8 L14.7,70.7 L14.4,69.5 L17.0,68.2 L19.1,68.8 L19.9,68.4 L18.7,66.8 L18.5,62.2 L19.6,62.5 L21.5,61.7 L25.1,57.3 L30.7,48.2 L30.5,48.6 L31.7,49.2 L33.3,49.1 L31.7,52.9 L33.2,53.2 L35.8,52.4 L36.2,53.3 L37.2,52.9 L39.6,55.1 L39.7,56.5 L38.7,56.2 L37.8,57.1 L38.9,59.0 L40.0,59.0 L38.2,61.3 L39.3,61.2 L38.7,62.1 L40.3,64.4 L42.8,62.8 L43.9,63.0 L46.1,61.9 L47.7,63.3 L46.1,67.1 L43.2,68.1 L43.3,69.2 L40.8,69.0 L39.8,69.9 L37.8,70.1 L34.9,73.5 L31.6,74.5 L28.1,74.0 L26.3,76.1 L22.9,76.8 L21.2,76.0 Z'}, {d:'M4.1,93.3 L2.0,92.2 L1.5,87.6 L5.9,86.0 L11.7,88.6 L13.7,88.9 L16.8,87.8 L17.5,86.2 L21.0,88.3 L21.8,88.3 L22.4,87.5 L23.5,87.9 L22.1,90.8 L16.1,94.5 L13.1,94.6 L12.3,92.6 L8.1,91.1 L5.7,91.5 L5.3,93.2 ZM25.0,87.9 L24.4,87.7 L23.8,85.8 L20.7,86.3 L16.8,84.3 L15.4,86.4 L13.5,87.0 L10.1,84.4 L8.1,84.8 L6.2,84.2 L4.0,80.6 L6.8,78.6 L14.1,78.0 L15.5,79.7 L14.7,80.5 L18.3,81.2 L20.5,84.7 L24.5,84.8 ZM23.7,81.7 L20.2,81.1 L17.6,78.8 L19.6,78.0 L22.5,78.3 L23.9,79.7 ZM22.6,77.7 L21.3,77.6 L20.7,76.5 L21.2,76.0 L22.9,76.8 ZM18.8,74.9 L20.3,75.5 L20.1,76.6 L16.9,77.4 L13.1,74.3 L12.0,75.2 L10.3,75.1 L10.1,73.3 L13.2,72.3 L16.4,72.6 Z'}, {d:'M38.6,86.0 L38.7,83.5 L37.5,82.7 L36.3,83.1 L33.8,85.9 L31.0,85.4 L31.3,83.8 L30.8,83.4 L27.4,84.8 L28.3,88.4 L25.0,87.9 L24.5,84.8 L25.4,83.7 L23.7,81.7 L24.0,80.2 L22.6,77.7 L22.9,76.8 L26.3,76.1 L28.1,74.0 L31.6,74.5 L34.9,73.5 L37.8,70.1 L39.8,69.9 L40.8,69.0 L43.3,69.2 L44.7,70.9 L46.6,71.4 L46.5,72.9 L51.1,72.3 L52.4,71.2 L52.7,69.7 L55.7,68.7 L59.3,69.2 L59.8,70.2 L62.2,71.7 L65.3,72.1 L65.5,73.1 L67.3,73.8 L69.5,79.4 L69.1,80.1 L64.2,79.7 L65.2,84.7 L66.6,87.2 L65.1,88.5 L60.1,90.0 L58.6,93.5 L57.0,94.1 L56.6,92.3 L55.5,91.3 L52.9,92.4 L48.5,92.4 L48.1,90.4 L46.2,90.2 L44.8,87.6 L45.1,85.0 L43.8,83.4 L41.4,86.8 L37.1,86.1 L37.5,85.5 Z'}, {d:'M66.9,72.4 L66.8,73.0 L68.9,73.9 L68.5,75.1 L69.1,75.8 L70.8,76.6 L70.5,78.6 L73.2,82.1 L73.5,87.1 L73.2,88.9 L69.7,94.3 L69.8,96.0 L70.4,96.3 L71.7,95.5 L72.3,95.7 L71.5,96.3 L72.0,96.8 L67.9,99.9 L66.7,101.7 L65.3,100.9 L64.6,101.3 L65.1,104.4 L68.4,104.1 L68.3,105.9 L69.9,106.8 L69.7,109.1 L68.5,109.6 L68.3,111.2 L67.5,111.4 L68.2,113.3 L63.1,113.2 L62.1,112.3 L61.2,113.2 L60.4,112.8 L60.7,111.4 L59.2,110.6 L58.8,109.1 L62.3,104.7 L61.3,104.7 L62.7,102.0 L62.5,100.6 L63.2,100.5 L63.4,99.0 L64.4,98.8 L63.8,98.1 L64.3,97.3 L64.0,96.6 L62.8,96.8 L61.5,95.5 L59.7,95.7 L57.0,94.1 L58.6,93.5 L60.1,90.0 L65.1,88.5 L66.6,87.2 L65.2,84.7 L64.2,79.7 L69.5,79.8 L67.3,73.8 L65.5,73.1 L64.9,71.3 L65.5,71.1 Z'} ] },
+    nomi: ['Daan','Emma','Sem','Julia','Lucas','Mila','Levi','Tess','Finn','Sophie','Bram','Lotte','Thijs','Anouk','Jesse','Fleur','Ruben','Sanne','Joris','Eva'],
+    nomiM: ['Daan','Sem','Lucas','Levi','Finn','Bram','Thijs','Jesse','Ruben','Joris'],
+    nomiF: ['Emma','Julia','Mila','Tess','Sophie','Lotte','Anouk','Fleur','Sanne','Eva'],
+    cognomi: ['de Jong','Jansen','de Vries','van den Berg','van Dijk','Bakker','Janssen','Visser','Smit','Meijer','de Boer','Mulder','de Groot','Bos','Vos','Peters','Hendriks','van Leeuwen','Dekker','Brouwer'],
+    partiti: [
+      { id:'nl_d66',    nome:'D66',                     orientamento:'centro',           base:{ cetomedio:0.4, giovani:0.4, imprenditori:0.2 },   forza:17.9, asse:0,  alleati:['nl_vvd','nl_cda','nl_glpvda'] },
+      { id:'nl_pvv',    nome:'PVV',                     orientamento:'destra populista', base:{ lavoratori:0.4, pensionati:0.3, cetomedio:0.3 }, forza:17.7, asse:2,  alleati:['nl_fvd','nl_bbb'] },
+      { id:'nl_vvd',    nome:'VVD',                     orientamento:'liberale',         base:{ imprenditori:0.5, cetomedio:0.3, pensionati:0.2 }, forza:15.1, asse:1, alleati:['nl_d66','nl_cda','nl_ja21'] },
+      { id:'nl_glpvda', nome:'GroenLinks-PvdA',         orientamento:'centrosinistra',   base:{ lavoratori:0.4, giovani:0.4, cetomedio:0.2 },     forza:13.6, asse:-1, alleati:['nl_d66','nl_sp','nl_pvdd','nl_denk'] },
+      { id:'nl_cda',    nome:'CDA',                     orientamento:'centro',           base:{ cattolici:0.4, pensionati:0.3, cetomedio:0.3 },   forza:12.5, asse:0,  alleati:['nl_d66','nl_vvd','nl_ja21','nl_bbb','nl_sgp'] },
+      { id:'nl_ja21',   nome:'JA21',                    orientamento:'destra',           base:{ cetomedio:0.4, imprenditori:0.3, pensionati:0.2, cattolici:0.1 }, forza:6.4, asse:2, alleati:['nl_vvd','nl_cda','nl_bbb'] },
+      { id:'nl_fvd',    nome:'FvD',                     orientamento:'destra',           base:{ giovani:0.4, cetomedio:0.3, lavoratori:0.3 },     forza:4.8,  asse:2,  alleati:['nl_pvv'] },
+      { id:'nl_bbb',    nome:'BBB',                     orientamento:'populista',        base:{ imprenditori:0.3, pensionati:0.3, lavoratori:0.2, cattolici:0.2 }, forza:2.9, asse:1, alleati:['nl_cda','nl_ja21','nl_pvv'] },
+      { id:'nl_sp',     nome:'SP',                      orientamento:'sinistra',         base:{ lavoratori:0.6, pensionati:0.4 },                 forza:2.0,  asse:-2, alleati:['nl_glpvda','nl_pvdd','nl_denk'], selezionabile:false,
+        nota:'Due-tre seggi su centocinquanta: non regge una carriera.' },
+      { id:'nl_pvdd',   nome:'Partito per gli animali', orientamento:'ecologista',       base:{ giovani:0.6, cetomedio:0.4 },                     forza:2.2,  asse:-2, alleati:['nl_glpvda','nl_sp','nl_denk'], selezionabile:false,
+        nota:'Due-tre seggi su centocinquanta: non regge una carriera.' },
+      { id:'nl_sgp',    nome:'SGP',                     orientamento:'destra',           base:{ cattolici:0.7, pensionati:0.3 },                  forza:2.3,  asse:2,  alleati:['nl_cda'], selezionabile:false,
+        nota:'Due-tre seggi su centocinquanta: non regge una carriera.' },
+      { id:'nl_denk',   nome:'Denk',                    orientamento:'sinistra',         base:{ lavoratori:0.5, giovani:0.5 },                    forza:2.6,  asse:-1, alleati:['nl_glpvda','nl_sp','nl_pvdd'], selezionabile:false,
+        nota:'Due-tre seggi su centocinquanta: non regge una carriera.' },
+    ],
+  },
 };
 /* paese attivo (scambiato a inizio partita); default Italia */
 let PAESE = PAESI.italia;
@@ -698,6 +835,9 @@ const VALUTE = {
   /* Argentina: mostrata in DOLLARI USA (prassi reale argentina per le macro-grandezze; e l'unico modo di non stampare
      numeri già vecchi — il peso è passato da 915 a 1.243/USD in un anno). cross = quello del dollaro (1,082). */
   argentina:  { sym:'US$ ', cross:1.082,  nome:'dollari' },
+  /* L250-2 · la corona danese è agganciata all'euro nell'AEC II: tasso centrale 7,46038 corone per euro (Danmarks Nationalbank);
+     il cambio di mercato resta a pochi millesimi da lì, quindi cross = 7,46 senza passare dalla tabella IRS. */
+  danimarca:  { sym:'kr ',  cross:7.46,   nome:'corone' },
 };
 
 const SCENARI = {
@@ -4980,6 +5120,25 @@ const BEAT_LEGGERI = [
  {id:'es_p_b_cammino', era:'contemporanea', paesi:['spagna'], registro:'leggero', kick:'Il paese', t:'I pellegrini sulla strada', text:'Ogni anno centinaia di migliaia di persone attraversano a piedi il nord del paese verso una cattedrale, con una conchiglia sullo zaino. Non tutti credono; tutti arrivano.', ch:[
    {l:'Ne fai un tratto, un fine settimana', e:'Le foto girano, e per una volta sono belle', f:function(){}},
    {l:'Un messaggio ai pellegrini, e basta', e:'Sobrio', f:function(){}}]},
+ /* ===== L250-4 · DANIMARCA, sei beat leggeri — effetto zero, come i sei spagnoli. Quattro ancorati al calendario. ===== */
+ {id:'dk_p_b_hygge', era:'contemporanea', paesi:['danimarca'], registro:'leggero', cond:()=>stagioneMese()==='inverno', kick:'Il paese', t:'Le candele alle quattro', text:'Alle quattro del pomeriggio è già buio, e il paese accende candele in ogni finestra. C\'è una parola per quel modo di stare bene insieme al chiuso, e i giornali stranieri la spiegano ogni inverno come un segreto nazionale.', ch:[
+   {l:'Una cena a lume di candela con lo staff', e:'Le foto calde, e un po\' studiate', f:function(){}},
+   {l:'«Si lavora, il buio passa»', e:'Sobrio, e un filo freddo', f:function(){}}]},
+ {id:'dk_p_b_bici', era:'contemporanea', paesi:['danimarca'], registro:'leggero', kick:'Il paese', t:'L\'ingorgo di biciclette', text:'Nella capitale le biciclette sono più delle automobili, e all\'ora di punta le corsie ciclabili si intasano come autostrade. Un consigliere propone semafori dedicati, un altro corsie più larghe. Tutti ti chiedono come vai al lavoro.', ch:[
+   {l:'In bicicletta, e lo sanno tutti', e:'Con la pioggia, meglio ancora', f:function(){}},
+   {l:'In auto di servizio, e lo dici', e:'Onesto; qualcuno storce il naso', f:function(){}}]},
+ {id:'dk_p_b_sanhans', era:'contemporanea', paesi:['danimarca'], registro:'leggero', cond:()=>S.month===6, kick:'Il paese', t:'Il falò di mezza estate', text:'Una sera di fine giugno, fra le più lunghe dell\'anno, lungo le spiagge e nei giardini il paese accende falò e canta la stessa canzone. Quest\'anno ti hanno chiesto due parole prima che si accenda il fuoco.', ch:[
+   {l:'Due parole brevi, poi canti con gli altri', e:'Il discorso migliore dell\'anno, per brevità', f:function(){}},
+   {l:'Lasci parlare chi abita lì', e:'Elegante', f:function(){}}]},
+ {id:'dk_p_b_folkemoede', era:'contemporanea', paesi:['danimarca'], registro:'leggero', cond:()=>S.month===5||S.month===6, kick:'Il paese', t:'I palchi sull\'isola', text:'Ogni giugno, su un\'isola del Baltico, i partiti montano tende e palchi e per qualche giorno parlano all\'aperto con chi passa. Niente scaletta e niente transenne: chi si ferma ti fa una domanda e tu rispondi.', ch:[
+   {l:'Sali sul palco, senza appunti', e:'Una risposta buona gira per giorni', f:function(){}},
+   {l:'Una tenda sola, al riparo dal vento', e:'Prudente', f:function(){}}]},
+ {id:'dk_p_b_smorrebrod', era:'contemporanea', paesi:['danimarca'], registro:'leggero', cond:()=>S.month===12, kick:'Il paese', t:'Il pranzo di Natale in ufficio', text:'A dicembre ogni ufficio del paese ha il suo pranzo di Natale: pane di segale, aringhe, un bicchierino di troppo e discorsi che il lunedì nessuno ricorda. Il tuo staff ti aspetta a capotavola.', ch:[
+   {l:'Ci vai, e tieni il discorso corto', e:'Il lunedì se ne parla bene', f:function(){}},
+   {l:'Passi per un brindisi e te ne vai', e:'Lo capiscono, quasi tutti', f:function(){}}]},
+ {id:'dk_p_b_calcio', era:'contemporanea', paesi:['danimarca'], registro:'leggero', kick:'Il paese', t:'I tifosi in rosso e bianco', text:'La nazionale gioca una partita importante all\'estero, e migliaia di tifosi in rosso e bianco riempiono una piazza straniera cantando, senza rompere niente. Il giorno dopo i giornali di là li ringraziano.', ch:[
+   {l:'Scrivi ai tifosi: «Ci avete fatto onore»', e:'Una frase che tutti condividono', f:function(){}},
+   {l:'Guardi la partita in un bar, in mezzo agli altri', e:'La foto in maglia gira', f:function(){}}]},
  /* ===== L83-1 · STATI UNITI, sei beat leggeri (scheda §C). ===== */
  {id:'us_p_b_superbowl', era:'contemporanea', paesi:['usa'], registro:'leggero', cond:()=>S.month===2, kick:'Il paese', t:'La domenica di febbraio', text:'Una domenica sera il paese guarda la stessa partita, le stesse pubblicità e lo stesso concerto all\'intervallo. È il rito più condiviso che l\'America abbia, e il Presidente concede l\'intervista di tradizione.', ch:[
    {l:'Concedi l\'intervista', e:'Venti minuti visti da cento milioni', f:function(){}},
@@ -6241,7 +6400,7 @@ const F1_TELEFONATE = [
          { l:'Chiedere di aspettare il voto in aula', e:'La maggioranza regge (fiducia +); la richiesta filtra sui giornali (stampa −)', f:function(){ if(S.ind&&S.ind.fiducia!=null) S.ind.fiducia=clamp(S.ind.fiducia+1,0,100); stampad(-2); } } ],
     raffredda:function(){ stampad(-1); }, squilloTxt:'La perquisizione si fa lo stesso, e i giornali scrivono che eri stato avvisato.' },
 
-  { id:'tel_primario', paesi:['italia','regnounito','francia','giappone','coreasud','india','brasile','argentina','messico','nigeria','sudafrica'], chiamante:'Il primario di un grande ospedale', registro:'lavoro', cond:function(){ return !S.opposizione; },
+  { id:'tel_primario', paesi:['italia','regnounito','francia','giappone','coreasud','india','brasile','argentina','messico','nigeria','sudafrica','danimarca'], chiamante:'Il primario di un grande ospedale', registro:'lavoro', cond:function(){ return !S.opposizione; },
     t:'Il primario di un grande ospedale', text:'«Ho i letti nei corridoi. O arrivano i soldi per il reparto nuovo, o domani lo dico ai giornalisti.»',
     ch:[ { l:'Trovare i fondi', e:'Il reparto si farà (pensionati +); il conto sale un filo (debito +)', f:function(){ gd('pensionati',2); if(S.ind) S.ind.debt+=0.3; } },
          { l:'Chiedere di arrangiarsi con quello che c\'è', e:'I conti tengono (ceto medio +); i corridoi restano pieni (pensionati −)', f:function(){ gd('pensionati',-2); gd('cetomedio',1); } } ],
@@ -9084,12 +9243,12 @@ const GIRO_SCENE=[
   t:'Il capannone delle idee', text:'In una vecchia officina rimessa a nuovo lavorano cinquanta piccole imprese di ragazzi, fra computer, stampanti e divani sfondati: %TERR ci %TV{ha|hanno} scommesso, e i fondatori ti chiedono meno tasse per chi comincia.',
   ch:[ {u:2, l:'Tre anni senza tasse per le imprese nuove', e:'Applausi fra i computer; le botteghe di sempre chiedono perché loro no', f:()=>{ gd('giovani',1); gd('cetomedio',-1); }},
        {u:1, l:'Ascolti le idee, una per una', e:'Ti spiegano cose che non capisci del tutto; i giornali parlano di passerella', f:()=>{ gd('giovani',1); stampad(-1); }} ]},
- {id:'gi_autobus', era:'contemporanea', paesi:['italia','francia','usa','regnounito','australia','argentina','germania','giappone','canada','spagna','coreasud','brasile','messico'], kind:'giro', tipo:'citta',
+ {id:'gi_autobus', era:'contemporanea', paesi:['italia','francia','usa','regnounito','australia','argentina','germania','giappone','canada','spagna','coreasud','brasile','messico','danimarca'], kind:'giro', tipo:'citta',
   t:'L\'ultimo autobus', text:'L\'azienda dei trasporti ha tagliato le linee di notte, e chi finisce il turno all\'una torna a casa a piedi o in taxi: %TERR %TV{ti chiede|ti chiedono} di fare la strada con le infermiere e i cuochi del turno di notte.',
   ch:[ {u:2, l:'Prometti di riaprire le linee di notte', e:'Applausi alla fermata; l\'azienda dei trasporti chiede chi paga', f:()=>{ gd('lavoratori',1); gd('cetomedio',-1); }},
        {u:1, l:'Proponi taxi collettivi a prezzo fisso', e:'Un\'idea che piace a metà; i tassisti la chiamano concorrenza', f:()=>{ gd('lavoratori',1); gd('imprenditori',-1); }},
        {u:-1, l:'Il bilancio dei trasporti è in rosso: non si può', e:'Il tesoriere approva; alla fermata nessuno ti saluta', f:()=>{ gd('cetomedio',1); }} ]},
- {id:'gi_monopattini', era:'contemporanea', paesi:['italia','francia','usa','regnounito','australia','germania','giappone','canada','spagna','coreasud','brasile'], kind:'giro', tipo:'citta',
+ {id:'gi_monopattini', era:'contemporanea', paesi:['italia','francia','usa','regnounito','australia','germania','giappone','canada','spagna','coreasud','brasile','danimarca'], kind:'giro', tipo:'citta',
   t:'La regola dei monopattini', text:'Le società dei monopattini a noleggio ne hanno lasciati migliaia per le strade, e i marciapiedi sono una corsa a ostacoli: %TERR non %TV{parla|parlano} d\'altro, e chi li usa e chi ci inciampa ti chiedono di scegliere.',
   ch:[ {u:1, l:'Vietati sui marciapiedi, parcheggi solo nelle aree segnate', e:'Gli anziani approvano; i ragazzi parlano di proibizionismo', f:()=>{ gd('pensionati',1); gd('giovani',-1); }},
        {u:1, l:'Un giro in monopattino davanti alle telecamere', e:'Il video piace ai ragazzi; i titoli parlano del casco dimenticato', f:()=>{ gd('giovani',1); stampad(-1); }},
@@ -9122,7 +9281,7 @@ const GIRO_SCENE=[
   ch:[ {u:2, l:'Prometti uno sportello pubblico in ogni comune', e:'I pensionati applaudono; le banche ricordano che uno sportello costa', f:()=>{ gd('pensionati',1); gd('imprenditori',-1); }},
        {u:1, l:'Corsi gratuiti per usare la banca sul telefono', e:'I nipoti si offrono come insegnanti; i nonni non ne sono convinti', f:()=>{ gd('giovani',1); gd('pensionati',-1); }},
        {u:-1, l:'Le banche sono imprese private', e:'Le banche approvano; nella valle nessuno', f:()=>{ gd('imprenditori',1); }} ]},
- {id:'gi_accoglienza', era:'contemporanea', paesi:['italia','francia','usa','regnounito','germania','canada','spagna','coreasud','brasile','messico'], kind:'giro',
+ {id:'gi_accoglienza', era:'contemporanea', paesi:['italia','francia','usa','regnounito','germania','canada','spagna','coreasud','brasile','messico','danimarca'], kind:'giro',
   t:'Il centro d\'accoglienza', text:'In una vecchia caserma dovrebbe aprire un centro per duecento richiedenti asilo, e %TERR si %TV{divide|dividono}: in un centro civico ti aspettano i volontari che preparano i letti, in piazza un comitato che raccoglie le firme contro.',
   ch:[ {u:1, l:'Sì al centro, con più personale e regole chiare', e:'I volontari approvano; il comitato annuncia una fiaccolata', f:()=>{ gd('giovani',1); gd('pensionati',-1); }},
        {u:1, l:'Meno posti, divisi fra più comuni', e:'Il comitato si calma; i volontari dicono che è un modo per non decidere', f:()=>{ gd('cetomedio',1); gd('giovani',-1); }},
@@ -9136,7 +9295,7 @@ const GIRO_SCENE=[
   ch:[ {u:2, costo:{debito:0.2}, l:'Un fondo per difendere i computer degli ospedali', e:'Il direttore ringrazia; il conto pubblico sale', f:()=>{ gd('pensionati',1); if(S.ind) S.ind.debt+=0.2; }},
        {u:0, l:'Il riscatto non si paga, e lo dici ad alta voce', e:'Gli esperti approvano; in corsia si aspetta ancora', f:()=>{ stampad(1); gd('pensionati',-1); }},
        {u:1, l:'Pagate e ripartite: prima i malati', e:'I computer tornano in due giorni; i giornali scrivono che il ricatto paga', f:()=>{ gd('pensionati',1); stampad(-1); }} ]},
- {id:'gi_ciclabile', era:'contemporanea', paesi:['italia','francia','usa','regnounito','australia','argentina','germania','canada','spagna','brasile','messico'], kind:'giro', tipo:'citta',
+ {id:'gi_ciclabile', era:'contemporanea', paesi:['italia','francia','usa','regnounito','australia','argentina','germania','canada','spagna','brasile','messico','danimarca'], kind:'giro', tipo:'citta',
   t:'La pista ciclabile', text:'Il comune vuole togliere duecento parcheggi per una pista ciclabile lungo il viale principale: %TERR %TV{litiga|litigano} da un mese, e negozianti e ciclisti ti aspettano ai due capi dello stesso marciapiede.',
   ch:[ {u:1, l:'La pista si fa, e si fa subito', e:'I ciclisti festeggiano; i negozianti appendono cartelli di protesta', f:()=>{ gd('giovani',1); gd('cetomedio',-1); }},
        {u:1, l:'La pista sì, ma metà dei parcheggi resta', e:'I negozianti si calmano; i ciclisti parlano di una pista a metà', f:()=>{ gd('cetomedio',1); gd('giovani',-1); }} ]},
@@ -12392,6 +12551,50 @@ const DOSSIERS=[
    {l:'Riforma: multe ridotte e filmare è legale', e:'Le piazze ringraziano, i sindacati di polizia no', pleases:'progressista', f:()=>{gd('giovani',3); gd('lavoratori',1); gd('pensionati',-2);}},
    {l:'Lascia com\'è', e:'La sicurezza prima', pleases:'conservatore', f:()=>{gd('pensionati',2); gd('cetomedio',1); gd('giovani',-3);}},
    {l:'Un comitato di garanzia e più formazione', e:'La riforma senza la riforma', pleases:'tecnico', costo:{debito:0.1}, f:()=>{S.ind.debt+=0.1; gd('cetomedio',1);}}]},
+ /* ===== L250-3 (07/11) · DANIMARCA, dossier di dicastero (consegna di Cowork; fatti ◦ tenuti generici, nessuna cifra non verificata). ===== */
+ {id:'dk_p_d_flexicurity', era:'contemporanea', paesi:['danimarca'], min:'lavoro', kick:'Lavoro', t:'Licenziare è facile, cadere no', text:'Un\'impresa può licenziare quasi senza vincoli; chi perde il posto riceve un sussidio alto e corsi pagati per ripartire. Funziona, e costa: ogni anno qualcuno propone di stringere il sussidio e qualcun altro di allentare i licenziamenti.', ch:[
+   {l:'Accorcia il sussidio, più corsi brevi', e:'La cassa respira, chi è a casa un po\' meno', pleases:'conservatore', costo:{debito:-0.3}, f:()=>{S.ind.debt-=0.3; gd('imprenditori',2); gd('cetomedio',1); gd('lavoratori',-3);}},
+   {l:'Più formazione per chi perde il posto', e:'Il modello rafforzato, e pagato', pleases:'progressista', costo:{debito:0.5}, f:()=>{S.ind.debt+=0.5; gd('lavoratori',3); gd('giovani',1); gd('imprenditori',-1);}},
+   {l:'Un patto con sindacati e imprese', e:'Lento, come sempre qui, e regge', pleases:'tecnico', costo:{debito:0.2}, f:()=>{S.ind.debt+=0.2; gd('lavoratori',1); gd('imprenditori',1); gd('giovani',-1);}}]},
+ {id:'dk_p_d_vento', era:'contemporanea', paesi:['danimarca'], min:'sviluppo', kick:'Energia', t:'Il paese delle pale', text:'Il vento dà una parte enorme dell\'elettricità, e i parchi in mare crescono. Ma le reti vanno rifatte, le gare per il mare aperto restano deserte se lo Stato non mette garanzie, e i comuni non vogliono pale nuove sulla terraferma.', ch:[
+   {l:'Garanzie pubbliche per i parchi in mare', e:'Le gare ripartono, il rischio lo prende lo Stato', pleases:'tecnico', costo:{debito:0.7}, f:()=>{S.ind.debt+=0.7; gd('imprenditori',3); gd('giovani',1); gd('pensionati',-1);}},
+   {l:'Pale a terra, con un indennizzo a chi ci vive accanto', e:'Si costruisce, e i paesi si dividono', pleases:'progressista', costo:{debito:0.3}, f:()=>{S.ind.debt+=0.3; gd('giovani',2); gd('cetomedio',1); gd('cattolici',-3);}},
+   {l:'Prima le reti, poi le pale', e:'Prudente, e il calendario del clima slitta', pleases:'conservatore', f:()=>{gd('cattolici',2); gd('pensionati',1); gd('giovani',-2);}}]},
+ {id:'dk_p_d_bestiame', era:'contemporanea', paesi:['danimarca'], min:'sviluppo', kick:'Campagne', t:'La tassa sulle stalle', text:'Governo, agricoltori e ambientalisti hanno firmato un accordo per far pagare le emissioni degli allevamenti e restituire terra ai boschi. Ora va messo in pratica: quanto, da quando, e chi aiutare a cambiare mestiere.', ch:[
+   {l:'Applica l\'accordo com\'è, con i fondi per la transizione', e:'La parola data, e un conto da pagare', pleases:'tecnico', costo:{debito:0.5}, f:()=>{S.ind.debt+=0.5; gd('giovani',2); gd('cetomedio',1); gd('cattolici',-2);}},
+   {l:'Rinvia la tassa: prima i redditi delle aziende agricole', e:'Le campagne respirano, i conti del clima no', pleases:'conservatore', f:()=>{gd('cattolici',3); gd('imprenditori',1); gd('giovani',-3);}},
+   {l:'Anticipa: la terra comprata dallo Stato diventa bosco', e:'Più in fretta, e più caro', pleases:'progressista', costo:{debito:0.8}, f:()=>{S.ind.debt+=0.8; gd('giovani',3); gd('cattolici',-3); gd('pensionati',-1);}}]},
+ {id:'dk_p_d_integrazione', era:'contemporanea', paesi:['danimarca'], min:'interno', kick:'Integrazione', t:'I quartieri da trasformare', text:'Quasi tutti i partiti condividono da anni una linea dura sull\'immigrazione. Una legge indica i quartieri dove le case popolari vanno ridotte e mescolate, e i residenti fanno causa. Ogni governo deve decidere se spingere ancora o fermarsi.', ch:[
+   {l:'Avanti: demolizioni e asili obbligatori', e:'Il consenso largo regge, i ricorsi pure', pleases:'conservatore', costo:{debito:0.3}, f:()=>{S.ind.debt+=0.3; gd('pensionati',2); gd('cetomedio',1); gd('giovani',-3);}},
+   {l:'Rallenta: più scuole e lavoro, meno ruspe', e:'Piace a chi ci vive, meno a chi vota', pleases:'progressista', costo:{debito:0.4}, f:()=>{S.ind.debt+=0.4; gd('giovani',2); gd('lavoratori',1); gd('pensionati',-2);}},
+   {l:'Valuta i risultati prima di decidere', e:'Un rapporto, e un anno guadagnato', pleases:'tecnico', f:()=>{gd('cetomedio',1); gd('lavoratori',-1);}}]},
+ {id:'dk_p_d_groenlandia', era:'contemporanea', paesi:['danimarca'], min:'esteri', kick:'Groenlandia', t:'L\'isola che chiede la sua strada', text:'La Groenlandia è autonoma e parla sempre più di indipendenza. Intanto gli Stati Uniti, alleati di sempre, la guardano con un interesse che non nascondono. Da Copenaghen si decide quanto dare, quanto difendere e con chi parlare.', ch:[
+   {l:'Più autonomia e più fondi all\'isola', e:'Il rapporto si ricuce, e costa', pleases:'progressista', costo:{debito:0.5}, f:()=>{S.ind.debt+=0.5; gd('giovani',2); gd('cetomedio',1); gd('pensionati',-1);}},
+   {l:'Più navi e soldati nell\'Artico', e:'La sovranità si mostra, e si paga', pleases:'conservatore', costo:{debito:0.6}, f:()=>{S.ind.debt+=0.6; gd('pensionati',2); gd('imprenditori',1); gd('giovani',-2);}},
+   {l:'Un tavolo a tre con l\'isola e Washington', e:'Si parla, e qualcuno dice che si cede', pleases:'tecnico', f:()=>{S.ind.stampa-=1; gd('imprenditori',2); gd('pensionati',-1);}}]},
+ {id:'dk_p_d_difesa', era:'contemporanea', paesi:['danimarca'], min:'difesa', kick:'Difesa', t:'Il Baltico e la leva', text:'La spesa militare sale in fretta, il Baltico è tornato una frontiera e la leva è stata allargata anche alle donne. I soldi vanno trovati: in tasse, in debito o tagliando altrove.', ch:[
+   {l:'Un fondo a debito per la difesa', e:'In fretta, e il conto ai prossimi', pleases:'tecnico', costo:{debito:0.9}, f:()=>{S.ind.debt+=0.9; gd('imprenditori',2); gd('pensionati',1); gd('giovani',-1);}},
+   {l:'Taglia altrove: meno sussidi alle imprese', e:'I conti tornano, le imprese no', pleases:'progressista', f:()=>{gd('lavoratori',1); gd('pensionati',1); gd('imprenditori',-3);}},
+   {l:'Più leva e meno contratti esterni', e:'Costa meno, e pesa sui ventenni', pleases:'conservatore', costo:{debito:0.2}, f:()=>{S.ind.debt+=0.2; gd('pensionati',2); gd('cattolici',1); gd('giovani',-3);}}]},
+ {id:'dk_p_d_pensione', era:'contemporanea', paesi:['danimarca'], min:'lavoro', kick:'Pensioni', t:'La pensione che si allontana', text:'L\'età della pensione segue l\'aspettativa di vita e sale verso i settant\'anni. I conti ringraziano; chi fa un lavoro pesante dal giorno dopo la scuola chiede di uscire prima.', ch:[
+   {l:'Uscita anticipata per i lavori pesanti', e:'Giusto per molti, e costa', pleases:'progressista', costo:{debito:0.6}, f:()=>{S.ind.debt+=0.6; gd('lavoratori',3); gd('pensionati',1); gd('giovani',-1);}},
+   {l:'Tieni il meccanismo com\'è', e:'I conti in ordine, e i cantieri arrabbiati', pleases:'conservatore', costo:{debito:-0.2}, f:()=>{S.ind.debt-=0.2; gd('imprenditori',2); gd('cetomedio',1); gd('lavoratori',-3);}},
+   {l:'Lavoro più leggero dopo i sessanta', e:'Una via di mezzo che le aziende devono offrire', pleases:'tecnico', f:()=>{gd('pensionati',2); gd('lavoratori',1); gd('imprenditori',-2);}}]},
+ {id:'dk_p_d_medici', era:'contemporanea', paesi:['danimarca'], min:'salute', kick:'Sanità', t:'Il medico che manca in provincia', text:'Nelle città il medico di famiglia si trova, nelle province meno: liste chiuse e pazienti assegnati a ore di strada. La psichiatria ha attese lunghe, e gli ospedali sono delle Regioni, che chiedono soldi allo Stato.', ch:[
+   {l:'Incentivi ai medici che vanno in provincia', e:'Qualcuno parte, la città protesta', pleases:'tecnico', costo:{debito:0.4}, f:()=>{S.ind.debt+=0.4; gd('cattolici',2); gd('pensionati',2); gd('cetomedio',-1);}},
+   {l:'Un piano nazionale per la psichiatria', e:'Atteso da anni, e lungo da costruire', pleases:'progressista', costo:{debito:0.6}, f:()=>{S.ind.debt+=0.6; gd('giovani',3); gd('cetomedio',1); gd('imprenditori',-1);}},
+   {l:'Cliniche private convenzionate per le liste', e:'Veloce, e qualcuno lo chiama privatizzare', pleases:'conservatore', costo:{debito:0.3}, f:()=>{S.ind.debt+=0.3; gd('pensionati',2); gd('imprenditori',2); gd('lavoratori',-3);}}]},
+ /* L250-3 · la formazione e il sostegno esterno raccontati con carte (⚠ 2 di L250-2): solo racconto, effetti normali. dk_p_d_minoranza
+    esce solo al capo del governo danese senza maggioranza in aula (bloccoMaggioranza() < 50, il conto che decide S.minoranza);
+    dk_p_d_bloccoponte una volta per carriera (registro S.carteUnaCarriera, segnato alla scelta), dopo il primo anno di governo. */
+ {id:'dk_p_d_minoranza', era:'contemporanea', paesi:['danimarca'], min:'interno', kick:'Christiansborg', cond:()=>S.livello===3 && !S.opposizione && typeof bloccoMaggioranza==='function' && bloccoMaggioranza()<50, t:'Governare senza i numeri', text:'Il tuo governo non ha la maggioranza in aula, come capita spesso qui. Ogni legge va contrattata con qualcuno che non siede al tavolo dei ministri. Puoi scegliere come.', ch:[
+   {l:'Un accordo scritto con uno o due partiti esterni', e:'Più stabile, e il partner se ne prende il merito', pleases:'tecnico', f:()=>{S.ind.stampa+=1; gd('cetomedio',2); gd('lavoratori',-1); gd('giovani',-1);}},
+   {l:'Maggioranze diverse legge per legge', e:'Mani libere, e qualche voto perso', pleases:'conservatore', f:()=>{gd('imprenditori',2); gd('cetomedio',-1); S.ind.stampa-=1;}},
+   {l:'Allarga la coalizione e cedi ministeri', e:'I numeri arrivano, e il programma si annacqua', pleases:'progressista', f:()=>{gd('pensionati',1); gd('lavoratori',1); gd('giovani',-2);}}]},
+ {id:'dk_p_d_bloccoponte', era:'contemporanea', paesi:['danimarca'], min:'interno', kick:'Il centro', cond:()=>S.livello===3 && !S.opposizione && (S.mesiAlGoverno||0)>=12 && !(S.carteUnaCarriera && S.carteUnaCarriera.dk_p_d_bloccoponte), t:'Sopra i blocchi', text:'Da sempre qui si governa da un lato: rosso o blu. Il centro propone un governo che li scavalchi, con ministri dei due campi. Il tuo blocco lo chiama tradimento, il centro lo chiama buon senso.', ch:[
+   {l:'Apri al centro: un governo sopra i blocchi', e:'Il paese apprezza, il tuo blocco no', pleases:'tecnico', f:()=>{segnaUnaCarriera('dk_p_d_bloccoponte'); gd('cetomedio',3); gd('imprenditori',1); gd('lavoratori',-2); gd('giovani',-2);}},
+   {l:'Resta nel tuo blocco', e:'Fedele, e coi numeri di sempre', pleases:'conservatore', f:()=>{segnaUnaCarriera('dk_p_d_bloccoponte'); gd('lavoratori',2); gd('pensionati',1); gd('cetomedio',-2);}},
+   {l:'Un patto solo su difesa e clima', e:'Collabori dove serve, e nessuno è contento fino in fondo', pleases:'progressista', f:()=>{segnaUnaCarriera('dk_p_d_bloccoponte'); gd('giovani',2); gd('cetomedio',1); gd('pensionati',-2);}}]},
  /* ===== L83-1 · STATI UNITI, dossier di dicastero (scheda §B). ===== */
  {id:'us_p_d_oppioidi', era:'contemporanea', paesi:['usa'], min:'salute', kick:'Epidemia', t:'Le overdose', text:'Decine di migliaia di morti l\'anno per oppioidi, in paesi e città che non se ne sono più ripresi. Le aziende che li hanno venduti hanno pagato miliardi; le contee che li spendono non sanno da dove cominciare.', ch:[
    {l:'Cliniche e antidoto ovunque, con i soldi delle cause', e:'Si salvano vite; il problema resta', pleases:'progressista', costo:{debito:0.3}, f:()=>{S.ind.debt+=0.3; gd('lavoratori',3); gd('cattolici',2); gd('cetomedio',1);}},
@@ -15166,7 +15369,7 @@ const RIVALI=(function(){
   riga('italia1950 italia1960 italia1970 italia1980 uk1950 uk1960 uk1970 uk1980 fr1950 fr1960 fr1970 fr1980 de1950 de1960 de1970 de1980 us1950 us1960 us1970 us1980', 'urss', 1945, 1991, 4, 'blocco');   // la guerra fredda: Cuba e Berlino si fermano all'ultimatum (L258-2, D286: us1970; L262-2, D294: us1980)
   riga('italia1990 uk1990 fr1990 de1990', 'urss', 1945, 1991, 4, 'blocco');
   riga('italia1990 uk1990 fr1990 de1990 italia2000 uk2000 fr2000 de2000', 'russia', 1992, 2099, 4, 'blocco');
-  ['russia','cina','iran'].forEach(function(c){ riga('italia francia regnounito germania spagna canada australia', c, 2012, 2099, 4, 'blocco'); });
+  ['russia','cina','iran'].forEach(function(c){ riga('italia francia regnounito germania spagna canada australia danimarca paesibassi', c, 2012, 2099, 4, 'blocco'); });   // L250-2: + la Danimarca (Alleanza atlantica) · L250-5: + i Paesi Bassi
   ['russia','cina','iran','corea_nord'].forEach(function(c){ riga('usa', c, 2012, 2099, 4, 'blocco'); });
   ['russia','cina','corea_nord'].forEach(function(c){ riga('giappone', c, 2012, 2099, 4, 'blocco'); });
   riga('coreasud', 'corea_nord', 2012, 2099, 5, 'confine');
@@ -15249,7 +15452,9 @@ const CAMERE=[
   {paese:'spagna', dal:2026, nome:'Senato', nomeEn:'Senate', seggiVeri:266, elezione:'stessoVoto', fiducia:false, potere:'superabile', rinnovo:{tipo:'intero'}},   // ✓ 208 più 58 (⚠ l'infobox dà 267) · L263-12: il Senato si elegge con le generali, anche anticipate ✓ (§1, «4 anni, con la Camera»); qui i 208 eletti e i 58 designati dai parlamenti regionali stanno nella stessa fotografia ◦ (semplificazione)
   {paese:'brasile', dal:2026, nome:'Senato', nomeEn:'Senate', seggiVeri:81, elezione:'classi', fiducia:false, potere:'pari', rinnovo:{tipo:'terzi', ogniMesi:48}, seggiClasse:[27,54], fase:2026, faseClasse:1},   // ✓ 81; ✓ ogni quattro anni, a turno un terzo e due terzi; L263-9bis: ✓ il 2022 ha eletto un terzo (en.wikipedia «Federal Senate (Brazil)»), quindi ⚠ dedotto: il 2026 due terzi (classe 1, 54 seggi), il 2030 un terzo
   {paese:'messico', dal:2026, nome:'Senato', nomeEn:'Senate', seggiVeri:128, elezione:'classi', fiducia:false, potere:'pari', rinnovo:{tipo:'intero', ogniMesi:72}, seggiClasse:[128], fase:2024, faseClasse:0},   // ✓ 128; ✓ tutto insieme, col Presidente; L263-9ter: ✓ una classe sola (64 maggioritari, 32 prima minoranza, 32 lista nazionale, che il gioco non modella: la quota è quella del voto), ✓ ultimo voto 2/6/2024, prossimo 2030 (en.wikipedia «Senate of the Republic (Mexico)», «2024 Mexican general election»); ⚠ prima di L263-9ter era 'stessoVoto' senza effetto (nessun lettore fuori da CAMERE_PORTE): 'stessoVoto' resta l'Italia (e Spagna, Nigeria senza effetto)
-  {paese:'nigeria', dal:2026, nome:'Senato', nomeEn:'Senate', seggiVeri:109, elezione:'congresso', fiducia:false, potere:'pari', rinnovo:{tipo:'intero', ogniMesi:48}, fase:2023, seggiCamera:360}    // ✓ 109; L263-9quinquies (N1): famiglia «congresso» come il presente americano, senza classi: Camera dei Rappresentanti (✓ 360, seggiCamera) e Senato rinnovati insieme col Presidente ogni 4 anni (✓ 2023, prossimo voto 2027); letta da camereNg() (game.js) solo con CAMERE_NG
+  {paese:'nigeria', dal:2026, nome:'Senato', nomeEn:'Senate', seggiVeri:109, elezione:'congresso', fiducia:false, potere:'pari', rinnovo:{tipo:'intero', ogniMesi:48}, fase:2023, seggiCamera:360},   // ✓ 109; L263-9quinquies (N1): famiglia «congresso» come il presente americano, senza classi: Camera dei Rappresentanti (✓ 360, seggiCamera) e Senato rinnovati insieme col Presidente ogni 4 anni (✓ 2023, prossimo voto 2027); letta da camereNg() (game.js) solo con CAMERE_NG
+  // L250-5 · i Paesi Bassi: la Eerste Kamer (75 ✓), eletta dai consigli provinciali dopo le provinciali (◦ ogni quattro anni, intera); può respingere una legge, non emendarla. Solo dati: nessun interruttore la legge (CAMERE_NL, se servirà, dopo i cinque paesi: ⚠ nel rapporto L250-5)
+  {paese:'paesibassi', dal:2026, nome:'Prima Camera', nomeEn:'Senate', seggiVeri:75, elezione:'territori', fiducia:false, potere:'pari', rinnovo:{tipo:'intero'}},
 ];
 /* L263-10 · I VOTI DEI LÄNDER NEL BUNDESRAT (art. 51 della Legge fondamentale: 3 voti, 4 sopra 2 milioni di abitanti, 5 sopra 6,
    6 sopra 7 dal 1990; prima del 1990 3/4/5, Berlino Ovest senza voto). Chiave = `nome` di PAESE.territori (presente e porte de*);
@@ -15328,11 +15533,11 @@ const ALLEATI_DIPLO=(function(){
   function riga(paesi, id, dal, fino){ var d=D[id]; paesi.split(' ').forEach(function(p){ r.push({paese:p, id:id, nome:d[0], art:d[1], nomeEn:d[2], artEn:d[3], dal:dal, fino:fino}); }); }
   var IT='italia italia1950 italia1960 italia1970 italia1980 italia1990 italia2000', UK='regnounito uk1950 uk1960 uk1970 uk1980 uk1990 uk2000',
       FR='francia fr1950 fr1960 fr1970 fr1980 fr1990 fr2000', DE='germania de1950 de1960 de1970 de1980 de1990 de2000', US='usa us1950 us1960 us1970 us1980';
-  riga(IT+' '+UK+' '+FR+' '+DE+' india canada australia giappone coreasud messico nigeria brasile', 'stati_uniti', 1945, 2099);
+  riga(IT+' '+UK+' '+FR+' '+DE+' india canada australia giappone coreasud messico nigeria brasile danimarca paesibassi', 'stati_uniti', 1945, 2099);   // L250-2: + la Danimarca · L250-5: + i Paesi Bassi
   riga(IT+' '+UK+' '+DE, 'francia', 1945, 2099);
   riga(FR, 'regno_unito', 1945, 1962);          // la Francia della Quarta Repubblica e dei primi anni di de Gaulle: Londra e Washington
   riga(FR, 'germania_ovest', 1963, 1990);       // dal trattato dell'Eliseo (gennaio 1963)
-  riga(FR+' spagna', 'germania', 1991, 2099);
+  riga(FR+' spagna danimarca paesibassi', 'germania', 1991, 2099);   // L250-2: la Danimarca (solo presente) con Washington e Berlino · L250-5: i Paesi Bassi
   riga(US+' canada australia sudafrica nigeria', 'regno_unito', 1945, 2099);
   riga(US+' messico', 'canada', 1945, 2099);
   riga('spagna', 'francia', 1945, 2099);
@@ -15354,7 +15559,9 @@ const PARI={
   giappone:['coreasud','usa','germania','australia'],       coreasud:['giappone','australia','usa','canada'],
   india:['brasile','sudafrica','messico','nigeria'],        brasile:['argentina','messico','india','sudafrica'],
   argentina:['brasile','messico','spagna','sudafrica'],     messico:['brasile','argentina','usa','canada'],
-  sudafrica:['nigeria','brasile','india','argentina'],      nigeria:['sudafrica','india','brasile','messico'] };
+  sudafrica:['nigeria','brasile','india','argentina'],      nigeria:['sudafrica','india','brasile','messico'],
+  danimarca:['germania','regnounito','francia','spagna'],   // L250-2: i quattro europei del Nord-Ovest più vicini (nessun nordico in PAESI)
+  paesibassi:['germania','francia','regnounito','danimarca'] };   // L250-5: i vicini del Mare del Nord
 
 const INTERNAZIONALI=[
  {id:'nato_vertice',era:'universale', tono:'florido', min:'difesa', kick:'Alleanza atlantica', t:'Vertice dell\'Alleanza', text:'Gli alleati chiedono un impegno di spesa militare più alto. La tua risposta pesa sul rapporto con l\'Alleanza — e su chi la guarda da fuori.',ch:[
@@ -15546,7 +15753,7 @@ const CONFLITTI_SWING=[
    del governo (livello 3) con `S.crisi` aperta. Il primo gradino (tensione) non ha una carta sua: lo apre il campo `crisi:{t:1}`
    sulle scelte di fermezza di CONFLITTI_INT (la potenza è quella della carta: `pot` o quella pescata da `potPool`; un `con`
    scritto nel campo la sostituisce), letto in un punto solo, `crisiApplica` (game.js). Le carte le pesca `pickCrisiScala`
-   per il gradino in corso: a t = 1 «le sanzioni», a t = 2 «la mobilitazione», a t = 3 e 4 «l'ultimatum» (a t = 4 col testo
+   per il gradino in corso (dal L251-5 tre carte per gradino, sotto: una a caso, mai l'ultima uscita): a t = 1 «le sanzioni», a t = 2 «la mobilitazione», a t = 3 e 4 «l'ultimatum» (a t = 4 col testo
    della scadenza, i campi `t4*`). Tre scelte, sempre nello stesso ordine: sali · tieni · scendi (`crisiScala`; dal L245-3bis il campo `scala` le nomina, e al
    tetto della riga di RIVALI sotto 4 `pickCrisiScala` toglie quella che sale). Niente
    `pleases` e niente gruppi: le scelte non hanno un colore politico (regola fissa, partiti neutri). Niente persone, niente
@@ -15569,6 +15776,45 @@ const CRISI_SCALA_EV=[
    {l:'Poni l\'ultimatum', l4:'Tieni il punto fino alla scadenza', e:'Tutto su una carta: %POTdet deve rispondere', e4:'%POTDet cede, o respinge', f:()=>{relIntMuovi('rivale',-3); crisiScala('sali');}, scala:'sali'},
    {l:'Mantieni l\'allerta, senza ultimatum', l4:'Concedi altro tempo', e:'La crisi resta dov\'è', e4:'La scadenza si allunga', f:()=>{crisiScala('tieni');}, scala:'tieni'},
    {l:'Smobiliti', l4:'Ritiri l\'ultimatum', e:'La crisi scende; la fermezza si incrina', e4:'La crisi scende; la tua parola perde peso', f:()=>{relIntMuovi('rivale',3); repd(-1); crisiScala('scendi');}, scala:'scendi'},
+ ]},
+ /* L251-5 · sei carte in più della scala, due per gradino (1, 2, 3): pickCrisiScala sceglie fra le carte del gradino a caso, senza
+    ripetere l'ultima uscita (S.crisi.ultimaScala). Stessa forma delle tre qui sopra: sali · tieni · scendi, effetti piccoli, partiti
+    neutri, nessuna persona, nessun dettaglio militare, nessun mezzo moderno (valgono nel presente e nelle porte). */
+ {id:'crs_diplomatici', gradino:1, min:'esteri', kick:'Crisi internazionale', t:'I diplomatici espulsi', text:'%POTDet espelle due nostri diplomatici con un\'accusa vaga, e lo fa sapere ai giornali. Rispondere allo stesso modo alza la tensione; tacere sembra debolezza.', ch:[
+   {l:'Espelli i loro', e:'La pressione sale di un gradino; i canali si chiudono', f:()=>{relIntMuovi('alleanza',2); relIntMuovi('rivale',-4); crisiScala('sali');}, scala:'sali'},
+   {l:'Una protesta formale, niente di più', e:'Né un passo avanti né uno indietro', f:()=>{crisiScala('tieni');}, scala:'tieni'},
+   {l:'Chiedi un chiarimento riservato', e:'La tensione scende; qualcuno ti trova arrendevole', f:()=>{relIntMuovi('rivale',3); repd(-1); crisiScala('scendi');}, scala:'scendi'},
+ ]},
+ {id:'crs_embargo', gradino:1, min:'economia', kick:'Crisi internazionale', t:'Il blocco delle merci', text:'%POTDet ferma alla dogana un nostro prodotto di punta, con un pretesto sanitario. I produttori chiedono una risposta; gli alleati propongono di colpire un settore %POTdi.', ch:[
+   {l:'Blocchi un settore %POTdi', e:'La pressione sale di un gradino; il commercio ne risente', f:()=>{relIntMuovi('alleanza',3); relIntMuovi('rivale',-4); crisiScala('sali');}, scala:'sali'},
+   {l:'Cerchi altri mercati, senza ritorsioni', e:'La crisi resta dov\'è', f:()=>{crisiScala('tieni');}, scala:'tieni'},
+   {l:'Apri un tavolo tecnico', e:'La tensione scende; gli alleati ti trovano tiepido', f:()=>{relIntMuovi('rivale',3); relIntMuovi('alleanza',-2); crisiScala('scendi');}, scala:'scendi'},
+ ]},
+ {id:'crs_rotte', gradino:2, min:'esteri', kick:'Crisi internazionale', t:'Le rotte sospese', text:'Sotto le sanzioni, %POTdet ferma le navi mercantili dirette nei nostri porti. Si propone di sospendere tutti i collegamenti e di mettere in allerta la flotta: un segnale forte, che pesa su chi viaggia e commercia.',
+  ttext:'Sotto le sanzioni, %POTdet ferma le navi mercantili dirette nei nostri porti. Più in là di così, con %POTdet, non si va: resta da decidere se tenere le sanzioni o allentarle.', ch:[
+   {l:'Sospendi i collegamenti e allerti la flotta', e:'La pressione sale di un gradino; costa al bilancio ogni mese', f:()=>{relIntMuovi('alleanza',2); relIntMuovi('rivale',-4); crisiScala('sali');}, scala:'sali'},
+   {l:'Le sanzioni restano, le rotte anche', e:'La pressione resta quella che è', f:()=>{crisiScala('tieni');}, scala:'tieni'},
+   {l:'Proponi di riaprire i porti a vicenda', e:'La crisi scende di un gradino; gli alleati storcono il naso', f:()=>{relIntMuovi('rivale',3); relIntMuovi('alleanza',-3); crisiScala('scendi');}, scala:'scendi'},
+ ]},
+ {id:'crs_riserve', gradino:2, min:'difesa', kick:'Crisi internazionale', t:'I riservisti', text:'Le sanzioni contro %POTdet non hanno cambiato niente. Lo stato maggiore chiede di richiamare una parte dei riservisti: un messaggio che %POTdet capirebbe, e una spesa che il bilancio sentirebbe.',
+  ttext:'Le sanzioni contro %POTdet non hanno cambiato niente. Più in là di così, con %POTdet, non si va: resta da decidere se tenere la pressione o allentarla.', ch:[
+   {l:'Richiami i riservisti', e:'Un segnale di fermezza; costa al bilancio ogni mese', f:()=>{relIntMuovi('alleanza',2); relIntMuovi('rivale',-4); crisiScala('sali');}, scala:'sali'},
+   {l:'Aspetti, con le sanzioni in vigore', e:'La pressione resta quella che è', f:()=>{crisiScala('tieni');}, scala:'tieni'},
+   {l:'Proponi una tregua commerciale', e:'La crisi scende di un gradino; la tua fermezza si discute', f:()=>{relIntMuovi('rivale',3); repd(-1); crisiScala('scendi');}, scala:'scendi'},
+ ]},
+ {id:'crs_vertice', gradino:3, min:'esteri', kick:'Crisi internazionale', t:'Il vertice d\'emergenza', text:'Gli alleati si riuniscono d\'urgenza sulla crisi con %POTdet. Sul tavolo c\'è una dichiarazione comune con una richiesta precisa e una data: firmarla è un ultimatum.',
+  ttext:'Gli alleati si riuniscono d\'urgenza sulla crisi con %POTdet. Più in là di così, con %POTdet, non si va: resta da decidere se tenere l\'allerta o smobilitare.',
+  t4t:'Il vertice aspetta', t4text:'La dichiarazione comune è stata letta, e la data si avvicina. Gli alleati guardano a te per sapere se si tiene il punto.', ch:[
+   {l:'Firmi la dichiarazione con la data', l4:'Tieni il punto con gli alleati', e:'Tutto su una carta: %POTdet deve rispondere', e4:'%POTDet cede, o respinge', f:()=>{relIntMuovi('alleanza',2); relIntMuovi('rivale',-3); crisiScala('sali');}, scala:'sali'},
+   {l:'Firmi, ma senza una data', l4:'Chiedi di spostare la data', e:'La crisi resta dov\'è', e4:'La scadenza si allunga', f:()=>{crisiScala('tieni');}, scala:'tieni'},
+   {l:'Proponi una mediazione', l4:'Ritiri la firma', e:'La crisi scende; gli alleati ti trovano tiepido', e4:'La crisi scende; la tua parola perde peso', f:()=>{relIntMuovi('rivale',3); relIntMuovi('alleanza',-2); crisiScala('scendi');}, scala:'scendi'},
+ ]},
+ {id:'crs_scadenza', gradino:3, min:'difesa', kick:'Crisi internazionale', t:'La scadenza degli altri', text:'Un grande alleato ha posto da solo una scadenza %POTa, e ti chiede di unirti. Se ti unisci, la scadenza diventa anche tua.',
+  ttext:'Un grande alleato vorrebbe porre una scadenza %POTa. Più in là di così, con %POTdet, non si va: resta da decidere se tenere l\'allerta o smobilitare.',
+  t4t:'La scadenza degli altri si avvicina', t4text:'La scadenza posta %POTa sta per scadere, e porta anche il tuo nome. Tutti aspettano la risposta, e la tua prossima mossa.', ch:[
+   {l:'Ti unisci alla scadenza', l4:'Resti al fianco dell\'alleato', e:'Tutto su una carta: %POTdet deve rispondere', e4:'%POTDet cede, o respinge', f:()=>{relIntMuovi('alleanza',3); relIntMuovi('rivale',-3); crisiScala('sali');}, scala:'sali'},
+   {l:'Resti in allerta, senza unirti', l4:'Chiedi altro tempo', e:'La crisi resta dov\'è', e4:'La scadenza si allunga', f:()=>{crisiScala('tieni');}, scala:'tieni'},
+   {l:'Chiedi a tutti di ritirare le forze', l4:'Ti sfili dalla scadenza', e:'La crisi scende; l\'alleato non gradisce', e4:'La crisi scende; la tua parola perde peso', f:()=>{relIntMuovi('rivale',3); relIntMuovi('alleanza',-3); crisiScala('scendi');}, scala:'scendi'},
  ]},
  /* L245-4 · dopo l'ultimatum RESPINTO, solo dove la riga di RIVALI arriva a 5 (crisiCartaRespinto, game.js): la guerra la dichiara
     il capo del governo, mai la scala da sola. `vtext`/`ve` dove la dichiarazione passa dal voto in aula (votoGuerra). */
@@ -17719,6 +17965,31 @@ const SFIDE=[
  {id:'es_l_padron', era:'contemporanea', paese:'spagna', ruolo:'locale', diff:'facile', q:'Che cos\'è il «padrón municipal»?',
   op:['Il registro dei residenti del comune','L\'imposta sulle automobili','Il piano regolatore'], giusta:0,
   perche:'Iscriversi al padrón è il primo passo per la scuola, il medico e il voto locale.'},
+ /* L250-4 · DANIMARCA, otto domande del locale (il pool vivo a L1 normale era una sola domanda: le universali sono una media e tre difficili). */
+ {id:'dk_l_comuni', era:'contemporanea', paese:'danimarca', ruolo:'locale', diff:'media', q:'Quanti comuni ha la Danimarca dopo la riforma del 2007?',
+  op:['98','Circa trecento','Venti'], giusta:0,
+  perche:'La riforma del 2007 ha accorpato i comuni in 98 e sostituito le vecchie contee con cinque Regioni.'},
+ {id:'dk_l_regioni', era:'contemporanea', paese:'danimarca', ruolo:'locale', diff:'facile', q:'Di che cosa si occupano soprattutto le cinque Regioni danesi?',
+  op:['Degli ospedali e della sanità','Della polizia','Delle università'], giusta:0,
+  perche:'Le Regioni, nate nel 2007, gestiscono soprattutto gli ospedali, e non possono imporre tasse proprie.'},
+ {id:'dk_l_borgmester', era:'contemporanea', paese:'danimarca', ruolo:'locale', diff:'media', q:'Come diventa sindaco chi guida un comune danese?',
+  op:['Lo elegge il consiglio comunale fra i suoi membri','Lo eleggono direttamente i cittadini','Lo nomina il governo'], giusta:0,
+  perche:'Dopo il voto i consiglieri eletti scelgono il sindaco fra loro, spesso con un accordo chiuso la notte stessa.'},
+ {id:'dk_l_voto', era:'contemporanea', paese:'danimarca', ruolo:'locale', diff:'facile', q:'Ogni quanto si vota per i consigli comunali in Danimarca?',
+  op:['Ogni quattro anni, a novembre','Ogni anno, a maggio','Ogni cinque anni, insieme al parlamento'], giusta:0,
+  perche:'Comuni e Regioni votano lo stesso giorno, un martedì di novembre, ogni quattro anni.'},
+ {id:'dk_l_imposta', era:'contemporanea', paese:'danimarca', ruolo:'locale', diff:'media', q:'Qual è la prima entrata di un comune danese?',
+  op:['Un\'imposta sul reddito dei residenti, con l\'aliquota decisa dal consiglio','Una quota dell\'imposta sul valore aggiunto','Le multe e i parcheggi'], giusta:0,
+  perche:'Ogni comune fissa la sua aliquota sul reddito: fra un comune e l\'altro la differenza è di qualche punto.'},
+ {id:'dk_l_scuola', era:'contemporanea', paese:'danimarca', ruolo:'locale', diff:'facile', q:'Chi gestisce la scuola dell\'obbligo pubblica in Danimarca?',
+  op:['Il comune','La Regione','Una fondazione nazionale'], giusta:0,
+  perche:'La scuola dell\'obbligo pubblica è dei comuni: edifici, insegnanti e orari.'},
+ {id:'dk_l_anziani', era:'contemporanea', paese:'danimarca', ruolo:'locale', diff:'facile', q:'A chi tocca, in Danimarca, l\'assistenza agli anziani a casa e nelle case di riposo?',
+  op:['Al comune','Alla Regione','Alle famiglie, per legge'], giusta:0,
+  perche:'L\'assistenza a domicilio e le case di riposo sono un servizio comunale, e uno dei temi che decidono il voto locale.'},
+ {id:'dk_l_bornholm', era:'contemporanea', paese:'danimarca', ruolo:'locale', diff:'difficile', q:'Che cosa ha di particolare l\'isola di Bornholm nel governo locale danese?',
+  op:['È un comune solo, che appartiene alla Regione della Capitale','È governata direttamente dal parlamento','Ha un suo parlamento che fa le leggi'], giusta:0,
+  perche:'Tutta l\'isola è un comune unico, con qualche competenza in più degli altri, e fa parte della Regione della Capitale.'},
  {id:'es_dhondt', era:'contemporanea', paese:'spagna', ruolo:'governo', diff:'difficile', q:'Con quale sistema si elegge il Congresso dei Deputati spagnolo?',
   op:['Un proporzionale per circoscrizioni provinciali (metodo D\'Hondt)','Il maggioritario a turno unico','Il voto per acclamazione'], giusta:0,
   perche:'Il Congresso si elegge con un proporzionale per province, ripartito col metodo D\'Hondt.'},   // ⚠ contemporanea
@@ -20003,6 +20274,13 @@ const TITOLI=[
  // L136-3 (28/9) · due titoli-paese in più (testi di Cowork)
  {id:'es_p_ti_turismo', era:'contemporanea', paesi:['spagna'], amico:'Estate record: il turismo traina il paese', ostile:'Residenti contro turisti: le città in piazza'},
  {id:'es_p_ti_catalogna', era:'contemporanea', paesi:['spagna'], amico:'Barcellona e Madrid tornano a parlarsi', ostile:'La Catalogna rilancia: "Votiamo"'},
+ /* ===== L250-3 (07/11) · DANIMARCA, sei titoli del presente (consegna di Cowork). ===== */
+ {id:'dk_p_ti_festa', era:'contemporanea', paesi:['danimarca'], amico:'Un giorno di lavoro in più per la difesa: i conti tornano', ostile:'Via la festa di primavera: il paese non perdona'},
+ {id:'dk_p_ti_tunnel', era:'contemporanea', paesi:['danimarca'], amico:'Il tunnel verso la Germania avanza: il Nord si avvicina', ostile:'Il tunnel sotto il mare costa più del previsto'},
+ {id:'dk_p_ti_vento', era:'contemporanea', paesi:['danimarca'], amico:'Il vento del mare accende il paese', ostile:'Gare deserte in mare: le pale non arrivano'},
+ {id:'dk_p_ti_attese', era:'contemporanea', paesi:['danimarca'], amico:'Le liste d\'attesa si accorciano', ostile:'Mesi per una visita: la sanità delle Regioni affonda'},
+ {id:'dk_p_ti_case', era:'contemporanea', paesi:['danimarca'], amico:'Nuove case a Copenaghen: i giovani tornano in città', ostile:'Copenaghen per pochi: affitti alle stelle'},
+ {id:'dk_p_ti_groenlandia', era:'contemporanea', paesi:['danimarca'], amico:'Copenaghen e Nuuk: il patto regge', ostile:'La Groenlandia guarda altrove'},
  /* ===== L83-1 · STATI UNITI, quattro titoli del presente (scheda §D). ===== */
  {id:'us_p_ti_congresso', era:'contemporanea', paesi:['usa'], amico:'La Casa Bianca e il Congresso trovano l\'accordo', ostile:'Muro contro muro: Washington è bloccata'},
  {id:'us_p_ti_borsa', era:'contemporanea', paesi:['usa'], amico:'Wall Street ai massimi: l\'economia corre', ostile:'Wall Street corre, Main Street no'},

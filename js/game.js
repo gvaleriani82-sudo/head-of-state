@@ -931,6 +931,7 @@ function campSfidante(){
 function startGame(mins){
   if(typeof taciTutto==='function') taciTutto();   // L95-3: una partita nuova non eredita i loop della vecchia
   initStatoBase();
+  if(LAMPO) lampoCalendario();   // L251-3: la campagna lampo parte a 12 mesi dall'urna a scadenza (spento LAMPO è null: niente)
   S.ministers=mins;
   /* coalizione di governo (passo 3): il tuo partito è sempre incluso; i seggi esistono dove c'è un parlamento */
   S.coalizione=[chosenPartito];
@@ -965,6 +966,7 @@ function startGame(mins){
   render();
   /* paesi a coalizione: se il tuo partito da solo non ha 50 seggi, forma subito la coalizione iniziale
      (chiude l'incongruenza del piccolo partito che governa da solo). All'avvio non si fallisce: al peggio minoranza. */
+  if(LAMPO && lampoCoalizioneAvvio()) return;   // L251-3: la sfida dichiara la coalizione d'avvio: nessuna trattativa (spento LAMPO è null)
   if(PAESE.coalizione && S.seggi[chosenPartito]<50) openTrattativa('avvio');
   else commitSnap();   // solo / già-maggioranza: primo confine di mese qui (i paesi a coalizione lo fanno in confirmCoal)
 }
@@ -976,7 +978,7 @@ function startGame(mins){
 function startOpposizione(){
   initStatoBase();
   S.seggi=(PAESE.coalizione||PAESE.comeSiVince==='parlamentare')?seggiNuovi():null;   // serve a entraOpposizione e alla scheda Partiti
-  const w=vincitore();                   // partito più forte ≠ tuo, dalle forze iniziali
+  const w=(GOV_AVVIO_FUORI_BLOCCO && PAESE.avvioOppFuoriBlocco) ? vincitoreAvvioOpp() : vincitore();   // partito più forte ≠ tuo, dalle forze iniziali · L250-3: fuori dal tuo blocco
   entraOpposizione(w);                   // governo all'avversario col suo profilo; tu sfidante (visibilità/credibilità standard)
   if(congressoOggiDi(S.governoAvversario)) initCongresso(S.governoAvversario);   // L263-9: nel presente americano le cifre sono del partito che governa, non del tuo
   if(S.congresso && S.congresso.classi) S.congresso.classiDi=S.governoAvversario;   // L263-3: il Senato dichiarato dalla porta è del partito che governa
@@ -987,6 +989,7 @@ function startOpposizione(){
      legislatura nuova come prima. Senza `turnMandato` (il presente) non cambia niente. */
   var _SCo=(typeof SCENARI!=='undefined' && S.scenario) ? SCENARI[S.scenario] : null;
   if(_SCo && _SCo.turnMandato!=null) S.turnInMandate=_SCo.turnMandato;
+  if(LAMPO) lampoCalendario();   // L251-3: dopo l'orologio della porta, la sfida lo porta a 12 mesi dall'urna (spento LAMPO è null)
   S.logorioAvv=logorioMaturato(_SCo);   // L262-2bis: e il governo avversario della porta ha già governato i suoi mesi (entraOpposizione lo azzerava)
   initTerritori(); initPotereLocale();   // territori per lean + potere locale del TUO blocco d'opposizione (bloccoIds = opp)
   S.mandate=0;                           // non hai ancora vinto un mandato: la prima vittoria sarà "Mandato 1"
@@ -6411,7 +6414,8 @@ function pickConflittoInt(){
    · CHI LA APRE: il campo `crisi:{t:1}` su una scelta (oggi le scelte di fermezza di sette carte di CONFLITTI_INT; cv_profughi non
      ha una potenza, cv_swing non ha una scelta di fermezza), letto in UN punto, crisiApplica, nel ramo generico di resolveItemCore.
      Con una crisi aperta su un'altra potenza non apre niente; sulla stessa potenza è un fatto nuovo: un gradino in più (tetto 4).
-   · LA SCALA: una carta al mese al più (CRISI_SCALA_EV, data.js), nello slot dell'evento estero del livello 3 e con p 0,5 nei mesi
+   · LA SCALA: una carta al mese al più (CRISI_SCALA_EV, data.js; dal L251-5 tre per gradino, crisiScalaCarta sceglie a caso senza
+     ripetere l'ultima), nello slot dell'evento estero del livello 3 e con p 0,5 nei mesi
      con la crisi aperta (pickCrisiScala); tre scelte, sali · tieni · scendi (crisiScala). A t ≥ 3 con relInt.alleanza < 50 gli
      alleati frenano con p 0,55 (la salita non passa, stampa −1). All'ultimatum (t = 4) la salita è la scadenza: il rivale cede con
      p 0,6 (t torna a 2, reputazione +2) o respinge (t resta a 3; dal L245-4, dove la riga arriva a 5, t resta a 4 col segno `respinto` e la carta dopo offre la guerra).
@@ -6525,9 +6529,10 @@ function crisiScala(mossa){
     c.alleati='seguono';
   }
   if(c.t>=4){
+    if(LAMPO) LAMPO.ult=true;   // L251-5: la crisi da risolvere conta l'ultimatum toccato e quello respinto (transitorio, mai in S)
     if(Math.random()<CRISI_K.cede){ c.t=2; repd(CRISI_K.premioCede); crisiLog('%POTDet cede all\'ultimatum: la crisi torna alle sanzioni.'); }
-    else if(crisiTettoBlocco()>=5){ c.respinto=true; crisiLog('%POTDet respinge l\'ultimatum: resta solo la guerra, o un passo indietro.'); }   // L245-4: col tetto 5 la crisi resta all'ultimatum, e la carta dopo offre la guerra
-    else { c.t=3; crisiLog('%POTDet respinge l\'ultimatum: la crisi resta alla mobilitazione.'); }
+    else if(crisiTettoBlocco()>=5){ c.respinto=true; if(LAMPO) LAMPO.respinto=true; crisiLog('%POTDet respinge l\'ultimatum: resta solo la guerra, o un passo indietro.'); }   // L245-4: col tetto 5 la crisi resta all'ultimatum, e la carta dopo offre la guerra
+    else { c.t=3; if(LAMPO) LAMPO.respinto=true; crisiLog('%POTDet respinge l\'ultimatum: la crisi resta alla mobilitazione.'); }
     return;
   }
   c.t++;
@@ -6558,6 +6563,18 @@ function crisiMese(){
   if(c.t>=2) S.gMod-=CRISI_K.sanzGrowth;
 }
 function crisiDeficit(){ if(REGOLA_CRISI_SCALA && S.crisi && S.crisi.guerra) return S.crisi.guerra.costo; return (REGOLA_CRISI_SCALA && S.crisi && S.crisi.t>=3) ? CRISI_K.mobDeficit : 0; }   // L245-4: in guerra il costo del mese al posto della mobilitazione
+/* L251-5 · la carta del gradino: CRISI_SCALA_EV ne ha tre per gradino (1, 2, 3; il 3 serve anche all'ultimatum, t = 4); si sceglie a
+   caso fra quelle che non sono l'ultima uscita (S.crisi.ultimaScala, scritta qui: nasce con la crisi e se ne va con lei in
+   crisiChiudi). Con una sola carta candidata nessuna estrazione. La probabilità della carta per mese non cambia (CRISI_P_SCALA). */
+let CRISI_SCALA_SOLO_PRIMA=false;   // solo prove: la rossa di prova-crisi.js (E) — la sola prima carta del gradino, com'era prima
+function crisiScalaCarta(g){
+  var tutte=CRISI_SCALA_EV.filter(function(e){ return e.gradino===g; }); if(!tutte.length) return null;
+  if(CRISI_SCALA_SOLO_PRIMA) tutte=[tutte[0]];
+  var c=tutte.filter(function(e){ return e.id!==S.crisi.ultimaScala; }); if(!c.length) c=tutte;
+  var ev=(c.length>1) ? c[Math.floor(Math.random()*c.length)] : c[0];
+  S.crisi.ultimaScala=ev.id;
+  return ev;
+}
 /* la carta della scala del mese (genAgendaRamo, livello 3, slot dell'evento estero, prima dei conflitti) */
 function pickCrisiScala(){
   if(!REGOLA_CRISI_SCALA || !S.crisi || !crisiCapo() || typeof CRISI_SCALA_EV==='undefined') return null;
@@ -6567,7 +6584,7 @@ function pickCrisiScala(){
   if(Math.random()>=CRISI_P_SCALA) return null;   // L245-2bis
   if(S.crisi.respinto && S.crisi.t>=4) return crisiCartaRespinto();   // L245-4: dopo l'ultimatum respinto, la carta che offre la guerra
   var t=S.crisi.t, p=crisiPot(); if(!p) return null;
-  var ev=CRISI_SCALA_EV.find(function(e){ return e.gradino===Math.min(t,3); }); if(!ev) return null;
+  var ev=crisiScalaCarta(Math.min(t,3)); if(!ev) return null;   // L251-5: una fra le tre del gradino, mai l'ultima uscita
   var a4=(t>=4), tt=crisiTettoBlocco(), ch=ev.ch, alTetto=(tt<4 && t>=tt);
   if(alTetto){ ch=ch.filter(function(c){ return c.scala!=='sali'; }); if(ch.length<2) return null; }   // L245-3bis: al tetto della riga (sotto l'ultimatum) la carta non offre la salita
   var tx=(a4&&ev.t4text) ? ev.t4text : (alTetto&&ev.ttext) ? ev.ttext : ev.text;   // L255-2: al tetto nemmeno a parole (`ttext`); `t4text` resta all'ultimatum
@@ -7781,7 +7798,7 @@ function aCapitale(){ var c=capitalePaese(); return (/^[Aa]/.test(c) ? 'ad ' : '
    Ottawa, Madrid…: uguali nelle due lingue). `%ACAPITALE` e `%SEDE` non escono in inglese: nessuna voce EN li usa (le chiavi
    EN dicono «to the capital» o «%CAPITALE»), quindi restano solo italiani. */
 var CAPITALI_EN={ 'Roma':'Rome', 'Parigi':'Paris', 'Londra':'London', 'Berlino':'Berlin', 'Nuova Delhi':'New Delhi', 'Seul':'Seoul',
-  'Città del Messico':'Mexico City', 'Brasilia':'Brasília' };
+  'Città del Messico':'Mexico City', 'Brasilia':'Brasília', 'Copenaghen':'Copenhagen' };   // L250-2: Copenaghen
 function capitaleResa(){ var c=capitalePaese(); return (typeof curLang==='function' && curLang()==='en' && CAPITALI_EN[c]) || c; }
 function luoghiSub(str){
   if(str==null) return str;
@@ -9232,6 +9249,7 @@ function genAgendaRamo(first){
   let hadEvent=false;
   const inter=pickIntermedia();
   if(inter){ S.agenda.push(inter); hadEvent=true; }
+  if(!hadEvent && LAMPO && lampoCrisi()){ const cs=pickCrisiScala(); if(cs){ S.agenda.push({kind:'event', data:cs, resolved:false}); hadEvent=true; } }   // L251-5: nella crisi da risolvere la carta della scala viene prima degli altri eventi (fuori dalla sfida LAMPO è null: niente)
   if(!hadEvent){ const att=pickAttacco(); if(att){ S.agenda.push({kind:'event', data:att, resolved:false}); hadEvent=true; } }   // L245-7: l'attacco (spento: null, nessuna estrazione)
   // evento di soglia sui mercati (fiducia): l'evento del mese (solo se non c'è già un'intermedia)
   // PRESSIONE SU UNA POLITICA (loop attivo — Lotto 3): una politica lasciata a un estremo ti richiama a rivederla — il pezzo che CHIUDE
@@ -9247,7 +9265,7 @@ function genAgendaRamo(first){
   }
   // CONFLITTI internazionali (cantiere paesi reali, Fetta B): i flashpoint coi volti nominati, PRIMA della routine diplomatica (presenza ricorrente)
   if(!hadEvent){ const rt=guerraRitornoCarta(); if(rt){ S.agenda.push({kind:'event', data:rt, resolved:false}); hadEvent=true; } }   // L245-5: il ritorno, il mese dopo la fine della guerra
-  if(!hadEvent){ const cs=pickCrisiScala(); if(cs){ S.agenda.push({kind:'event', data:cs, resolved:false}); hadEvent=true; } }   // L245-2: la scala della crisi aperta, prima di un conflitto nuovo
+  if(!hadEvent && !(LAMPO && lampoCrisi())){ const cs=pickCrisiScala(); if(cs){ S.agenda.push({kind:'event', data:cs, resolved:false}); hadEvent=true; } }   // L245-2: la scala della crisi aperta, prima di un conflitto nuovo
   if(!hadEvent){ const cv=pickConflittoInt(); if(cv){ S.agenda.push({kind:'event', data:cv, resolved:false}); hadEvent=true; } }
   // grande evento internazionale (lotto Esteri+Difesa): esclusivo, ~ogni 6-9 mesi
   if(!hadEvent){ const iv=pickInternazionale(); if(iv){ S.agenda.push({kind:'event', data:iv, resolved:false}); hadEvent=true; } }
@@ -10027,7 +10045,8 @@ function advanceMonth(){
     MESE_IN_CORSO=false;
     if(!MESE_FINITO){ luogoTerrNasci(); tagliaLog(); if(MESE_RENDER) render(); if(MESE_SNAP) commitSnap();   // L239-5: il territorio delle carte localizzate si sceglie sullo stato di FINE mese, lo stesso che si salva (forseTerritorio e decadiUmore vengono dopo genAgenda)
         // L184-2: il tetto del registro, una volta per mese, prima del salvataggio
-      if(typeof guidaMese==='function') guidaMese(); }   // L218-6: la guida della prima partita (C22 dopo il primo mese, C23 dopo il terzo)
+      if(typeof guidaMese==='function') guidaMese();   // L218-6: la guida della prima partita (C22 dopo il primo mese, C23 dopo il terzo)
+      if(LAMPO) lampoForseFine(); }   // L251-2: passati i mesi della sfida, la sua fine (spento LAMPO è null: niente)
   }
 }
 function corpoMese(){
@@ -10535,8 +10554,15 @@ function territoriDopoUrna(){
 }
 function chiudiSforzo(){ if(S.campNaz && S.campNaz.sforzo>0) S.log.unshift({t:T('Campagna sul territorio'), x:T('Fine della campagna: %N punti di sforzo non spesi, persi.').replace('%N',S.campNaz.sforzo)}); }
 function avviaAttesa(){
-  let sistema, vero;
   applicaSpintaForze();   // L64-2: la campagna sul territorio confluisce nelle forze PRIMA che i seggi si calcolino
+  ATTESA=urnaVero();
+  renderAttesa();
+}
+/* L251-3 (05/11) · IL VERO DELL'URNA, un punto solo (era scritto due volte: qui e nel ripiego di avviaNotte, identico). Rifà i seggi
+   dove l'urna li rifà e rende {sistema, vero}; lo legge anche la sonda della campagna lampo (.claude/sonda-l251-3-lampo.js), che nel
+   banco non ha la notte e decide la sfida con calcMargineEsito sullo stesso vero. Niente estrazioni: testaATesta e veroSeggi sono puri. */
+function urnaVero(){
+  let sistema, vero;
   if(PAESE.comeSiVince==='parlamentare' || urnaLegislativa()){   // L104-2: lo scioglimento nel semipresidenziale è un'urna di soli seggi
     S.seggi=seggiNuovi(true);                                  // VERO: seggi, calcolati una volta (qui, prima della chiusura)
     sistema='parlamentare'; vero=veroSeggi();
@@ -10544,8 +10570,7 @@ function avviaAttesa(){
     if((PAESE.coalizione||PAESE.comeSiVince==='parlamentare') && !sistemaSemipres()) S.seggi=seggiNuovi(true);   // L104-2: la presidenziale non rifà l'Assemblea
     sistema='candidato'; vero=testaATesta();                  // VERO: testa a testa, deterministico
   }
-  ATTESA={ sistema:sistema, vero:vero };
-  renderAttesa();
+  return { sistema:sistema, vero:vero };
 }
 /* La chiusura della campagna: clima della vigilia + posta personale + una MOSSA di chiusura (carattere/tratti,
    effetto minimo: il vero è già congelato, quindi non può cambiare la notte). */
@@ -10581,10 +10606,7 @@ function stakesPersonali(){
 function avviaNotte(){
   let sistema, vero;
   if(ATTESA){ sistema=ATTESA.sistema; vero=ATTESA.vero; ATTESA=null; }   // usa il VERO congelato nell'attesa (non ricalcola: la chiusura non lo tocca)
-  else {                                                                 // fallback (chiamata diretta): congela ora
-    if(PAESE.comeSiVince==='parlamentare' || urnaLegislativa()){ S.seggi=seggiNuovi(true); sistema='parlamentare'; vero=veroSeggi(); }
-    else { if((PAESE.coalizione||PAESE.comeSiVince==='parlamentare') && !sistemaSemipres()) S.seggi=seggiNuovi(true); sistema='candidato'; vero=testaATesta(); }   // L104-2
-  }
+  else { const u=urnaVero(); sistema=u.sistema; vero=u.vero; }         // fallback (chiamata diretta): congela ora (L251-3: urnaVero, lo stesso calcolo di avviaAttesa)
   NOTTE={ sistema:sistema, vero:vero, stadio:0, onde:generaOnde(sistema, vero), dich:null, saltata:false, timer:null };
   NOTTE_TERR=null; try{ notteTerritori(NOTTE); }catch(e){ NOTTE.cambiTerr=null; NOTTE.pienoTerr=null; }   // L239-3: i territori si decidono qui, dopo le onde (D-M2), e si applicano al clic dell'esito
   try{ seedNotteAnim(); }catch(e){}   // l'exit poll sale da zero; le tappe successive partono dalla precedente
@@ -10989,6 +11011,7 @@ function concludiNotte(){
     if(typeof tutteCorrenti==='function' && D.correnti) tutteCorrenti(D.correnti);
     S.log.unshift({ t:T('La dichiarazione della notte'), x:T(D.beat) });
   }
+  if(LAMPO && lampoFineCampagna(mg)) return;   // L251-3: la campagna lampo finisce sulla notte, col margine — mai trattativa, opposizione o rimpasto (spento LAMPO è null)
   if(sistema==='parlamentare'){
     if(snodoTruffaAttivo()){                                    // Build B (b): lo snodo «legge truffa» come scelta — 3 esiti, beat NEUTRALE (conseguenza sì, giudizio no)
       applicaSnodoTruffa();
@@ -11136,7 +11159,7 @@ function renderNotte(){
   /* 375px senza salti: altezza minima riservata → le ondate non fanno ballare il modale. Sfondo su WRAPPER (no leak di classe). */
   /* L113-5 · la legenda delle due lingue del tavolo: le righe sono il voto dell'area, il colore pieno chi la governa */
   const legenda = sulTavolo ? `<div class="notte-legenda contorno"><span class="nl-righe" aria-hidden="true"></span>${T('a righe: come ha votato')} · <span class="nl-pieno" aria-hidden="true"></span>${T("colore: chi governa l'area")}</div>` : '';
-  document.getElementById('modal').innerHTML=`<div class="notte-wrap${sulTavolo?' sul-tavolo':''}">${mbg}<div class="mt"><div class="kicker">${kicker}</div><h2>${T(notteLab(NOTTE.stadio))}</h2></div>
+  document.getElementById('modal').innerHTML=`<div class="notte-wrap${sulTavolo?' sul-tavolo':''}">${mbg}<div class="mt"><div class="kicker contorno">${kicker}</div><h2>${T(notteLab(NOTTE.stadio))}</h2></div>
     <div${sulTavolo?'':' style="min-height:268px"'}>
       ${ultima && rvN ? `<div class="rv-riga rv-notte">${rvN}<div class="mtext notte-verdetto-riga" style="font-weight:600;padding:0">${narr}</div></div>` : `<div class="mtext${ultima?' notte-verdetto-riga':''}"${ultima?' style="font-weight:600"':''}>${narr}</div>`}
       ${(sulTavolo && !NOTTE_CRONACA)?'':lancio}
@@ -12039,6 +12062,21 @@ function salvezzaOpp(){
 }
 function segnaForzaUrna(){ S.forzaUrnaPrec=(S.forze && S.forze[S.partito]) || 0; }
 function segnaSalvezza(){ S.salvezzeOpp=(S.salvezzeOpp||0)+1; S.credibilita=Math.max(0,(S.credibilita||0)-10); }   // DOPO entraOpposizione, che la azzera a 50: 40 invece di 50 (il costo misurato in L143-5). La chiama anche il banco.
+/* ⚑ L250-3 (07/11) · IL GOVERNO ALL'AVVIO DALL'OPPOSIZIONE È FUORI DAL TUO BLOCCO. Chi parte all'opposizione partiva contro
+   vincitore(), il più forte degli altri: in Danimarca i Socialdemocratici avevano al governo SF, del loro blocco (10/10 al congresso,
+   L250-2 ⚠ 1). Qui, SOLO all'avvio (startOpposizione), il più forte FUORI dal blocco del giocatore (staColBlocco, la regola di
+   testaATesta() al governo, L175-2); se fuori non c'è nessuno, vincitore() com'è. vincitore() non cambia: la leggono goOpposizione,
+   governoGuida e altri. SOLO dove il paese dichiara `avvioOppFuoriBlocco:true` (oggi solo la Danimarca): su tutti i paesi la regola
+   cambiava 80 partenze su 225 in 15 paesi, molte implausibili (il PSDI del 1950 contro un governo monarchico) — elenco e proposta nel
+   rapporto «⚑ L250-3». Interruttore GOV_AVVIO_FUORI_BLOCCO (`let`; spento = il gioco di prima; il banco lo rimette in __reseed,
+   __BANCO_GOV_AVVIO_OFF = prima). Prova prove/l250-3/prova-avvio-opp.js (--rosso), A/B .claude/ab-l250-3.js. */
+let GOV_AVVIO_FUORI_BLOCCO=true;
+function vincitoreAvvioOpp(){
+  const me=S.partito, w=vincitore();
+  if(typeof staColBlocco!=='function' || !w || !staColBlocco(w.id, me)) return w;
+  const fuori=PAESE.partiti.filter(p=>p.id!==me && !staColBlocco(p.id, me)).sort((a,b)=>(S.forze[b.id]||0)-(S.forze[a.id]||0));
+  return fuori[0] || w;
+}
 function vincitore(){ return PAESE.partiti.filter(p=>p.id!==S.partito).sort((a,b)=>(S.forze[b.id]||0)-(S.forze[a.id]||0))[0]; }
 function vinciElezione(){ if(S.opposizione){ const gP=guidaPartnerVoto(); if(gP) return entraDaPartner(gP); goAppoint(); } else nextMandate(); }   // dall'opposizione si ri-nominano i ministri · L237-2bis: o si entra da partner, se la coalizione la guida un altro
 function perdiElezione(){ if(S.opposizione){ if(salvezzaOpp()) goOpposizione(true); else gameOver('congresso'); } else goOpposizione(); }
@@ -12489,9 +12527,433 @@ const RIVOLTA_TESTI={
 /* L95-3 · I FINALI CHE SUONANO (decisione di Cowork, 13/9). «Finale» e «game over» passano dalla stessa gameOver:
    la distinzione è QUESTA lista, dichiarata una volta. Suonano la fine voluta o compiuta — il mandato compiuto,
    il ritiro, la fine del mandato internazionale; tutto il resto (crisi, insolvenza, condanna, sconfitta…) è muto. */
+/* ================================================================================================================
+   L251-2 (05/11) · SFIDE VELOCI — LA CORNICE (piano §4 di «⚑ L251-1» in DESIGN-SFIDE.md). In schermata «Sfide veloci» /
+   «Quick challenges», nel codice LAMPO (D-S1: «sfida» nel codice è già la domanda di cultura, SFIDE/pescaSfida). Una partita corta
+   giocata col motore di sempre, che NON tocca la carriera.
+   · LAMPO_ATTIVO (`let`) ACCESO dal L251-3 (05/11: 8 scenari della campagna lampo in fascia su 8, ne servivano 4): il terzo bottone
+     della home c'è; fuori dalla sfida LAMPO resta null e nessun lettore cambia strada (A/B .claude/ab-l251-3.js). Spento = la home
+     di prima nodo per nodo.
+   · LAMPO = null fuori dalla sfida; durante: {id, formato, mesi, mese0, finito, c0, prima}. TRANSITORIO come NOTTE: mai in S né
+     nello snapshot.
+   · Sotto LAMPO niente scrive la carriera: UN punto solo, lampoSalvaSpento(), letto da commitSnap (hos_autosave) e da gameOver
+     (aggiungiCarriera → hos_profile, chiudiAutosave). Gli slot e l'esportazione non si raggiungono: il menu Partita ha
+     «Abbandona la sfida» al posto di «Salva e carica» (showPartita, ui.js). Nessun salvataggio a metà (D-S2): chiusa la pagina,
+     la sfida è persa.
+   · Stelle e record in localStorage `hos_lampo` ({<id>: {stelle, punti, giocate}}), separato da hos_profile/hos_autosave; letto e
+     scritto con try/catch (lsGet/lsSet): senza storage la sfida gira e non registra.
+   · LAMPO_PROVA = lo scenario di prova della cornice (il presente italiano, 2 mesi, nessuna taratura): mai in elenco, tranne con
+     LAMPO_MOSTRA_PROVA (solo prove e CDP).
+   · Nomi: nessun nome nuovo con «sfid» nel codice (lampo*, LAMPO_*). */
+let LAMPO_ATTIVO=true;   // L251-3: acceso (8 scenari in fascia)
+let LAMPO_MOSTRA_PROVA=false;   // solo prove e CDP: mette LAMPO_PROVA in elenco
+let LAMPO=null;
+const LAMPO_CHIAVE='hos_lampo';
+/* L251-3 (05/11) · LA CAMPAGNA LAMPO: le posizioni «sul filo», tarate col banco (30-70% con la mano casuale, D-S3;
+   .claude/sonda-l251-3-lampo.js). Campi oltre a quelli di LAMPO_PROVA:
+   · partito: chi giochi (deve essere selezionabile; senza, il primo della lista come una partita normale).
+   · avvio: i dati d'avvio della sfida, letti SOLO da lampoAvvia/lampoCoalizioneAvvio e mai scritti in SCENARI/PAESI/S permanente:
+       forze:{id:delta} = punti di forza spostati all'avvio su una COPIA di PAESE (forza della porta, quindi anche l'àncora della molla e
+         i seggi che ne vengono: niente regola nuova, solo un'altra partenza; i delta si dichiarano a somma zero);
+       coalizione:[id] = i partner del governo d'avvio nei paesi a coalizione (niente trattativa all'avvio, ⚠ 1 di L251-2).
+   · mesi: la durata scritta sulla scheda; quella vera la calcola lampoCalendario (i mesi fino all'urna a scadenza, 12 dove l'urna cade
+     nel mese d'avvio).
+   · Regole fisse: nessuna persona reale nei testi, partiti neutri (centro-destra e centro-sinistra nel ruolo del giocatore, almeno 2
+     scenari per lato), IT/EN in lang-en.js. La «sul filo» si fa solo coi dati d'avvio: nessuna regola del gioco cambia per la sfida.
+   · In tabella restano SOLO gli scenari in fascia (il rapporto «⚑ L251-3» in DESIGN-SFIDE.md §8 dice anche quelli tolti; per i dieci di
+     L251-4 il §9). L251-4: la regola della taratura è una ricerca libera a 20 carriere e al più 2 misure a 40, entra se l'ultima sta in
+     12-28/40; una porta entra solo se la sua urna vera a scadenza cade a 12±1 mesi dall'avvio. */
+const LAMPO_STELLE_CAMPAGNA=['Vinci le elezioni, anche di misura', 'Vinci con almeno 2 punti di margine', 'Vinci con almeno 5 punti di margine'];   // L251-4: le soglie di LAMPO_VALUTE.campagna (2/5 su mg.m)
+const LAMPO_SCENARI=[
+  { id:'ca_opp', formato:'campagna', paese:'canada', scenario:'presente', lato:'opposizione', partito:'ca_con', mesi:12, minuti:12, valuta:'campagna',
+    titolo:'Canada: la rincorsa', luogo:'Canada, oggi · all\'opposizione',
+    situazione:'Guidi i Conservatori all\'opposizione. Il governo liberale è logoro ma regge, e fra dodici mesi si vota: i sondaggi vi danno appaiati.',
+    obiettivo:'Vinci le elezioni fra dodici mesi.', stelle:LAMPO_STELLE_CAMPAGNA,
+    avvio:{ forze:{} } },
+  { id:'uk_opp', formato:'campagna', paese:'regnounito', scenario:'presente', lato:'opposizione', partito:'uk_con', mesi:12, minuti:12, valuta:'campagna',
+    titolo:'Regno Unito: la riconquista', luogo:'Regno Unito, oggi · all\'opposizione',
+    situazione:'Guidi i Conservatori all\'opposizione dopo una sconfitta pesante. Il governo laburista perde colpi, ma alla tua destra cresce un partito nuovo che ti contende gli stessi elettori.',
+    obiettivo:'Vinci le elezioni fra dodici mesi.', stelle:LAMPO_STELLE_CAMPAGNA,
+    avvio:{ forze:{ uk_con:17.8, uk_lab:-8.9, uk_reform:-8.9 } } },
+  { id:'de_opp', formato:'campagna', paese:'germania', scenario:'presente', lato:'opposizione', partito:'de_spd', mesi:12, minuti:12, valuta:'campagna',
+    titolo:'Germania: la sinistra al bivio', luogo:'Germania, oggi · all\'opposizione',
+    situazione:'Guidi i socialdemocratici all\'opposizione. Il governo di centro-destra ha una maggioranza stretta, e per tornare al governo ti serve un blocco che arrivi a metà del Bundestag.',
+    obiettivo:'Vinci le elezioni fra dodici mesi.', stelle:LAMPO_STELLE_CAMPAGNA,
+    avvio:{ forze:{ de_spd:5.5, de_cdu:-5.5 } } },
+  { id:'it_gov', formato:'campagna', paese:'italia', scenario:'presente', lato:'governo', partito:'it_fi', mesi:12, minuti:12, valuta:'campagna',
+    titolo:'Italia: l\'ultimo anno', luogo:'Italia, oggi · al governo',
+    situazione:'Guidi un governo di centro-destra all\'ultimo anno della legislatura. La coalizione tiene, ma il campo avversario si è unito e i sondaggi danno i due blocchi a un passo.',
+    obiettivo:'Vinci le elezioni fra dodici mesi.', stelle:LAMPO_STELLE_CAMPAGNA,
+    avvio:{ forze:{ it_pd:8, it_fdi:-8 }, coalizione:['it_fdi','it_lega'] } },
+  { id:'fr_gov', formato:'campagna', paese:'francia', scenario:'presente', lato:'governo', partito:'fr_ren', mesi:12, minuti:12, valuta:'campagna',
+    titolo:'Francia: la successione', luogo:'Francia, oggi · al governo',
+    situazione:'Guidi il partito di centro che governa dall\'Eliseo. Fra dodici mesi c\'è la presidenziale, e al ballottaggio ti aspetta la destra nazionale, avanti nei sondaggi.',
+    obiettivo:'Vinci la presidenziale fra dodici mesi.', stelle:LAMPO_STELLE_CAMPAGNA,
+    avvio:{ forze:{ fr_sx:-6, fr_ren:-5.75, fr_rn:11.75 }, coalizione:['fr_lr'] } },
+  { id:'us_opp', formato:'campagna', paese:'usa', scenario:'presente', lato:'opposizione', partito:'us_dem', mesi:12, minuti:12, valuta:'campagna',
+    titolo:'Stati Uniti: la sfida alla Casa Bianca', luogo:'Stati Uniti, oggi · all\'opposizione',
+    situazione:'Sei il candidato democratico contro il Presidente in carica. Il paese è diviso a metà, e la partita si decide in una manciata di Stati in bilico.',
+    obiettivo:'Vinci la presidenziale fra dodici mesi.', stelle:LAMPO_STELLE_CAMPAGNA,
+    avvio:{ forze:{ us_dem:-3, us_rep:3 } } },
+  { id:'es_gov', formato:'campagna', paese:'spagna', scenario:'presente', lato:'governo', partito:'es_psoe', mesi:12, minuti:12, valuta:'campagna',
+    titolo:'Spagna: il governo di minoranza', luogo:'Spagna, oggi · al governo',
+    situazione:'Guidi un governo socialista che vive di accordi in Parlamento. Fra dodici mesi si vota, e il centro-destra è il primo partito nei sondaggi.',
+    obiettivo:'Vinci le elezioni fra dodici mesi.', stelle:LAMPO_STELLE_CAMPAGNA,
+    avvio:{ forze:{ es_psoe:-4.4, es_pp:4.4 }, coalizione:['es_sum','es_erc','es_pnv'] } },
+  { id:'fr1980_opp', formato:'campagna', paese:'francia', scenario:'fr1980', lato:'opposizione', partito:'fr_sfio', mesi:12, minuti:12, valuta:'campagna',
+    titolo:'Francia 1980: l\'Eliseo a sinistra?', luogo:'Francia, 1980 · all\'opposizione',
+    situazione:'Guidi i socialisti all\'opposizione. Da ventidue anni l\'Eliseo è della destra, ma la destra è divisa in due partiti che non si amano. Fra dodici mesi si vota per il Presidente.',
+    obiettivo:'Vinci la presidenziale fra dodici mesi.', stelle:LAMPO_STELLE_CAMPAGNA,
+    avvio:{ forze:{ fr_sfio:-7.5, fr_unr:7.5 } } },
+  /* L251-4 · dieci scenari nuovi: nove presenti e una porta (de1960), tarati come in L251-3 (sonda-l251-4-lampo.js); uk1950 e
+     italia2000 tolti (l'urna a scadenza della prima è a 60 mesi; nella seconda la tappa del 2001 mette la Margherita nel blocco di FI e
+     decide l'urna da sola): rapporto «⚑ L251-4» in DESIGN-SFIDE.md §9 */
+  { id:'au_gov', formato:'campagna', paese:'australia', scenario:'presente', lato:'governo', partito:'au_alp', mesi:12, minuti:12, valuta:'campagna',
+    titolo:'Australia: la conferma', luogo:'Australia, oggi · al governo',
+    situazione:'Guidi un governo laburista che conta sui seggi di verdi e indipendenti. Fra dodici mesi si rinnova la Camera dei rappresentanti, e la coalizione liberale e nazionale è risalita fino a un passo da te.',
+    obiettivo:'Vinci le elezioni fra dodici mesi.', stelle:LAMPO_STELLE_CAMPAGNA,
+    avvio:{ forze:{ au_alp:-4.25, au_grn:-4.25, au_ind:-4.25, au_lib:6.375, au_nat:6.375 }, coalizione:['au_grn', 'au_ind'] } },
+  { id:'in_opp', formato:'campagna', paese:'india', scenario:'presente', lato:'opposizione', partito:'in_inc', mesi:12, minuti:12, valuta:'campagna',
+    titolo:'India: la rimonta del Congresso', luogo:'India, oggi · all\'opposizione',
+    situazione:'Guidi il Congresso all\'opposizione. Il governo nazionalista resta il primo partito, ma la sua maggioranza si è assottigliata: fra dodici mesi si vota per la Lok Sabha, e con i partiti regionali dalla tua parte la partita è aperta.',
+    obiettivo:'Vinci le elezioni fra dodici mesi.', stelle:LAMPO_STELLE_CAMPAGNA,
+    avvio:{ forze:{ in_inc:-3.1, in_reg:-3.1, in_left:-3.1, in_aap:-3.1, in_bjp:12.4 } } },
+  { id:'za_gov', formato:'campagna', paese:'sudafrica', scenario:'presente', lato:'governo', partito:'za_anc', mesi:12, minuti:12, valuta:'campagna',
+    titolo:'Sudafrica: il governo di unità', luogo:'Sudafrica, oggi · al governo',
+    situazione:'Guidi il partito della liberazione, che per la prima volta governa insieme ad altri. Fra dodici mesi si vota, e la tua quota scende da un\'elezione all\'altra: tenere il governo dipende da quanto resta del tuo blocco.',
+    obiettivo:'Vinci le elezioni fra dodici mesi.', stelle:LAMPO_STELLE_CAMPAGNA,
+    avvio:{ forze:{ za_anc:-5, za_ifp:-5, za_oth:-5, za_da:7.5, za_mk:7.5 }, coalizione:['za_ifp', 'za_oth'] } },
+  { id:'ar_opp', formato:'campagna', paese:'argentina', scenario:'presente', lato:'opposizione', partito:'ar_uxp', mesi:12, minuti:12, valuta:'campagna',
+    titolo:'Argentina: il ritorno', luogo:'Argentina, oggi · all\'opposizione',
+    situazione:'Guidi i peronisti all\'opposizione. Il governo liberista ha diviso il paese con una cura d\'urto all\'economia, e fra dodici mesi si elegge il Presidente: i sondaggi vi danno a un passo.',
+    obiettivo:'Vinci la presidenziale fra dodici mesi.', stelle:LAMPO_STELLE_CAMPAGNA,
+    avvio:{ forze:{ ar_uxp:-4.5, ar_fit:-4.5, ar_lla:4.5, ar_pro:4.5 } } },
+  { id:'jp_gov', formato:'campagna', paese:'giappone', scenario:'presente', lato:'governo', partito:'jp_ldp', mesi:12, minuti:12, valuta:'campagna',
+    titolo:'Giappone: il partito di sempre', luogo:'Giappone, oggi · al governo',
+    situazione:'Guidi i liberaldemocratici, al governo quasi senza interruzioni da settant\'anni, con il tuo alleato storico. Gli scandali sui fondi hanno logorato la fiducia, e fra dodici mesi si rinnova la Camera dei rappresentanti: la maggioranza non è più sicura.',
+    obiettivo:'Vinci le elezioni fra dodici mesi.', stelle:LAMPO_STELLE_CAMPAGNA,
+    avvio:{ forze:{ jp_ldp:-5, jp_cdp:5 }, coalizione:['jp_kom'] } },
+  { id:'kr_opp', formato:'campagna', paese:'coreasud', scenario:'presente', lato:'opposizione', partito:'kr_ppp', mesi:12, minuti:12, valuta:'campagna',
+    titolo:'Corea del Sud: la riscossa', luogo:'Corea del Sud, oggi · all\'opposizione',
+    situazione:'Guidi il partito conservatore all\'opposizione. Il governo democratico ha anche la maggioranza dell\'Assemblea, ma il paese resta diviso a metà, e fra dodici mesi si elegge il Presidente.',
+    obiettivo:'Vinci la presidenziale fra dodici mesi.', stelle:LAMPO_STELLE_CAMPAGNA,
+    avvio:{ forze:{ kr_ppp:5.75, kr_dp:-5.75 } } },
+  { id:'br_gov', formato:'campagna', paese:'brasile', scenario:'presente', lato:'governo', partito:'br_pt', mesi:12, minuti:12, valuta:'campagna',
+    titolo:'Brasile: il fronte largo', luogo:'Brasile, oggi · al governo',
+    situazione:'Guidi il Partito dei Lavoratori al governo, con un fronte largo di partiti di centro. Fra dodici mesi c\'è la presidenziale, e la destra ha il primo partito del Congresso.',
+    obiettivo:'Vinci la presidenziale fra dodici mesi.', stelle:LAMPO_STELLE_CAMPAGNA,
+    avvio:{ forze:{ br_pt:-3.3, br_psol:-3.3, br_psd:-3.3, br_mdb:-3.3, br_pl:6.6, br_uniao:6.6 }, coalizione:['br_psd', 'br_mdb'] } },
+  { id:'mx_opp', formato:'campagna', paese:'messico', scenario:'presente', lato:'opposizione', partito:'mx_pan', mesi:12, minuti:12, valuta:'campagna',
+    titolo:'Messico: l\'alternanza', luogo:'Messico, oggi · all\'opposizione',
+    situazione:'Guidi il PAN all\'opposizione. Il movimento al governo ha vinto l\'ultima presidenziale con un distacco storico, ma fra dodici mesi si elegge di nuovo il Presidente e una parte del paese cerca il cambio: per farcela ti serve il voto di centro.',
+    obiettivo:'Vinci la presidenziale fra dodici mesi.', stelle:LAMPO_STELLE_CAMPAGNA,
+    avvio:{ forze:{ mx_pan:14.75, mx_morena:-14.75 } } },
+  { id:'ng_opp', formato:'campagna', paese:'nigeria', scenario:'presente', lato:'opposizione', partito:'ng_pdp', mesi:12, minuti:12, valuta:'campagna',
+    titolo:'Nigeria: la sfida per la presidenza', luogo:'Nigeria, oggi · all\'opposizione',
+    situazione:'Guidi il PDP all\'opposizione. Il governo ha vinto l\'ultima volta con meno di metà dei voti, e fra dodici mesi si elegge il Presidente: se il campo d\'opposizione non si divide, la presidenza è a portata.',
+    obiettivo:'Vinci la presidenziale fra dodici mesi.', stelle:LAMPO_STELLE_CAMPAGNA,
+    avvio:{ forze:{ ng_pdp:-5.7, ng_lp:-5.7, ng_nnpp:-5.7, ng_apc:17.1 } } },
+  { id:'de1960_gov', formato:'campagna', paese:'germania', scenario:'de1960', lato:'governo', partito:'de_cdu', mesi:12, minuti:12, valuta:'campagna',
+    titolo:'Germania Ovest 1961: la maggioranza da difendere', luogo:'Germania Ovest, 1960 · al governo',
+    situazione:'Guidi i cristiano-democratici al governo di Bonn da undici anni. Il miracolo economico porta la firma del tuo partito, ma i socialdemocratici hanno cambiato volto e programma, e fra dodici mesi si vota per il Bundestag.',
+    obiettivo:'Vinci le elezioni fra dodici mesi.', stelle:LAMPO_STELLE_CAMPAGNA,
+    avvio:{ forze:{ de_cdu:-2.5, de_spd:2.5 }, coalizione:[] } },
+  /* L251-7 · due porte nuove (sonda-l251-7-lampo.js, rapporto «⚑ L251-7» in DESIGN-SFIDE.md §12): l'urna vera a scadenza di us1980 cade
+     a 10 mesi (la presidenziale 1980/11: mesi 10, come la porta) e quella di de1990 a 12 (1991/1, la tappa delle urne del 1990/12 è il
+     mese prima). Fuori: uk1990, uk2000, fr2000, fr1950, italia1990 (urna vera a 24 mesi). */
+  { id:'us1980_gov', formato:'campagna', paese:'usa', scenario:'us1980', lato:'governo', partito:'us_dem', mesi:10, minuti:10, valuta:'campagna',
+    titolo:'Stati Uniti 1980: la rielezione', luogo:'Stati Uniti, 1980 · al governo',
+    situazione:'Sei il Presidente democratico all\'ultimo anno del mandato. L\'inflazione corre a due cifre, decine di americani sono ostaggi a Teheran e l\'altro partito promette tasse più basse e un paese più forte. Fra dieci mesi gli elettori decidono se darti altri quattro anni.',
+    obiettivo:'Vinci la presidenziale fra dieci mesi.', stelle:LAMPO_STELLE_CAMPAGNA,
+    avvio:{ forze:{ us_dem:-4, us_rep:4 } } },
+  { id:'de1990_gov', formato:'campagna', paese:'germania', scenario:'de1990', lato:'governo', partito:'de_cdu', mesi:12, minuti:12, valuta:'campagna',
+    titolo:'Germania 1990: l\'unità e le urne', luogo:'Repubblica Federale, 1990 · al governo',
+    situazione:'Guidi i cristiano-democratici al governo di Bonn con i liberali. Il Muro è caduto e l\'unità arriverà in autunno, ma i socialdemocratici avvertono che costerà cara e nei sondaggi i due campi sono vicini. Fra dodici mesi si vota, e il Bundestag sarà quello della Germania unita.',
+    obiettivo:'Vinci le elezioni fra dodici mesi.', stelle:LAMPO_STELLE_CAMPAGNA,
+    avvio:{ forze:{ de_cdu:-8.5, de_fdp:-3, de_spd:8.5, de_grn:3 }, coalizione:['de_fdp'] } }
+];
+const LAMPO_PROVA={ id:'prova', formato:'campagna', paese:'italia', scenario:'presente', lato:'governo', mesi:2, minuti:3, valuta:'prova',
+  titolo:'Prova della cornice', luogo:'Italia, oggi',
+  situazione:'Due mesi al governo, per provare la cornice delle sfide: nessuna taratura, nessuna urna.',
+  obiettivo:'Arriva alla fine dei due mesi.',
+  stelle:['Ancora al governo alla fine', 'Il consenso non è sceso', 'Il consenso è salito di 2 punti'] };
+const LAMPO_FORMATI=[ {k:'campagna', nome:'Campagna lampo'}, {k:'crisi', nome:'Crisi da risolvere'} ];
+/* le valutazioni per nome (i dati restano puri): {stelle 0-3, punti (il record a parità di stelle), riga} */
+const LAMPO_VALUTE={
+  prova:function(){ var c=S.ind.consenso, d=c-LAMPO.c0, st=S.opposizione ? 0 : (d>=2 ? 3 : (d>=0 ? 2 : 1));
+    return { stelle:st, punti:Math.round(c*10)/10, riga:T('Consenso: %A% → %B%').replace('%A', fmt(LAMPO.c0,1)).replace('%B', fmt(c,1)) }; },
+  /* L251-3 · la campagna lampo: il margine della notte, calcMargineEsito (lo stesso numero di voce, biografia e titolo).
+     L251-4 (⚠ 2 di L251-3) · le stelle si leggono dal margine mg.m, NON dal tag: zero con una sconfitta (sconfittaMisura,
+     sconfittaNetta, valanga) o senza mg (e con ogni gameOver, in gameOver); ★★★ con m ≥ 5, ★★ con m ≥ 2, ★ sotto. Le soglie 4/10 di
+     calcMargineEsito (biografia, titoli, voce della notte) restano quelle: queste valgono solo qui. punti = il margine m (il record a
+     parità di stelle) */
+  campagna:function(mg){ if(!mg) return { stelle:0, punti:0, riga:'' };
+    var perso=(mg.tag==='sconfittaMisura' || mg.tag==='sconfittaNetta' || mg.tag==='valanga');
+    var st=perso ? 0 : (mg.m>=5 ? 3 : (mg.m>=2 ? 2 : 1));
+    return { stelle:st, punti:mg.m, riga:T('Margine: %M punti').replace('%M', (mg.m>0 ? '+' : '')+mg.m) }; },
+  /* L251-5 · la crisi da risolvere: ★★★ chiusa senza aver toccato l'ultimatum · ★★ chiusa · ★ aperta al 12° mese senza ultimatum
+     respinto · 0 con l'ultimatum respinto (e con ogni gameOver, in gameOver). punti = i mesi rimasti alla chiusura (0 se aperta):
+     a parità di stelle conta chi chiude prima. */
+  crisi:function(){ var aperta=!!S.crisi, st=LAMPO.respinto ? 0 : (aperta ? 1 : (LAMPO.ult ? 2 : 3));
+    var n=(LAMPO.chiusa!=null) ? LAMPO.chiusa : lampoTrascorsi();
+    var riga=LAMPO.respinto ? T('L\'ultimatum è stato respinto.')
+      : aperta ? T('Crisi aperta: gradino %G').replace('%G', T(CRISI_GRADINI[S.crisi.t]||''))
+      : T('Crisi chiusa al mese %N').replace('%N', n);
+    return { stelle:st, punti:aperta ? 0 : Math.max(0, LAMPO.mesi-n), riga:riga }; }
+};
+function lampoSalvaSpento(){ return !!LAMPO; }   // L251-2: il punto unico — sotto LAMPO niente scrive hos_autosave né hos_profile
+function lampoElenco(){ return LAMPO_SCENARI.concat(LAMPO_CRISI_ATTIVO ? LAMPO_CRISI : []).concat(LAMPO_MOSTRA_PROVA ? [LAMPO_PROVA] : []); }   // L251-5: la crisi da risolvere solo col suo interruttore
+function lampoDef(id){ if(id===LAMPO_PROVA.id) return LAMPO_PROVA; for(var i=0;i<LAMPO_SCENARI.length;i++) if(LAMPO_SCENARI[i].id===id) return LAMPO_SCENARI[i];
+  for(var j=0;j<LAMPO_CRISI.length;j++) if(LAMPO_CRISI[j].id===id) return LAMPO_CRISI[j]; return null; }
+function lampoLeggi(){ var t=lsGet(LAMPO_CHIAVE); if(!t) return {}; try{ var o=JSON.parse(t); return (o && typeof o==='object' && !Array.isArray(o)) ? o : {}; }catch(e){ return {}; } }
+function lampoRecord(id){ var v=lampoLeggi()[id]; return (v && typeof v==='object' && typeof v.stelle==='number') ? v : null; }
+function lampoStelleTotali(){ var o=lampoLeggi(), n=0; Object.keys(o).forEach(function(k){ var v=o[k]; if(v && typeof v.stelle==='number') n+=Math.max(0, Math.min(3, Math.round(v.stelle))); }); return n; }
+function lampoMeseAss(){ return S.year*12+S.month; }
+function lampoTrascorsi(){ return (LAMPO && S && LAMPO.mese0!=null) ? lampoMeseAss()-LAMPO.mese0 : 0; }
+function lampoRestano(){ return LAMPO ? Math.max(0, LAMPO.mesi-lampoTrascorsi()) : 0; }
+/* l'avvio: lo stesso ingresso di una partita nuova (setScenario/setCountry, CREA, gli start di sempre), senza nomina a mano del
+   gabinetto, senza clip di partenza né guida della prima partita (guidaInizia legge e scrive hos_guida_partita: non si consuma) */
+function lampoAvvia(def, giorno){
+  if(typeof def==='string') def=lampoDef(def);
+  if(!def) return false;
+  lampoCrisiRimetti();   // L251-5: «Rigioca» riparte con LAMPO ancora vivo: le costanti della crisi tornano quelle di prima
+  lampoSemeRimetti();    // L251-6: «Rigioca» di una sfida del giorno: prima la funzione di prima, poi (sotto) di nuovo il seme dall'inizio
+  var prima=(LAMPO && LAMPO.prima) ? LAMPO.prima
+    : { mode:chosenMode, diff:chosenDiff, paese:PAESE, country:chosenCountry, scenario:chosenScenario, partito:chosenPartito };   // L251-3: anche paese e scelte della home, rimessi alla chiusura
+  if(typeof taciTutto==='function') taciTutto();
+  if(typeof DA_STORICI!=="undefined") DA_STORICI=null;
+  CREA=null;   // un CREA rimasto da una creazione aperta non deve riscrivere la creazione in setScenario/setCountry
+  LAMPO={ id:def.id, formato:def.formato, mesi:def.mesi, mese0:null, finito:false, c0:null, prima:prima };   // PRIMA degli start: il loro commitSnap non scrive
+  if(giorno) lampoSemeApplica(giorno);   // L251-6: il seme del giorno PRIMA di ogni estrazione dell'avvio (paese, ministri, calendario, coalizione, crisi)
+  if(def.scenario && def.scenario!=='presente') setScenario(def.scenario); else setCountry(def.paese);
+  lampoPaeseAvvio(def);   // L251-3: le forze d'avvio della sfida, su una copia di PAESE (mai PAESI né SCENARI)
+  var sel=PAESE.partiti.filter(function(p){ return p.selezionabile!==false; });
+  chosenPartito=(def.partito && sel.some(function(p){ return p.id===def.partito; })) ? def.partito : sel[0].id;
+  chosenMode=(def.lato==='opposizione') ? 'opposizione' : 'governo';
+  chosenDiff='normale';
+  CREA={ nome:'', genere:'m', eta:52, background:null, famiglia:'borghese', orientamento:0, religiosita:'laico', livello:3, dicastero:'economia', terrIdx:1, avatar:null, avatarCustom:null };
+  ['start','crea','storici','lampo','over','appoint'].forEach(function(id){ var e=document.getElementById(id); if(e && e.style) e.style.display='none'; });
+  try{ resetUIAnim(); }catch(e){}
+  if(chosenMode==='opposizione') startOpposizione();
+  else { var mins=MINISTRIES.map(function(M){ var c=mkCand(); return { min:M.id, nm:c.nm, g:c.g, profile:c.profile, comp:c.comp, loyalty:62, rit:c.rit }; });
+    if(typeof assegnaVoltiGruppo==='function'){ mins.forEach(function(m){ m.rit=null; }); assegnaVoltiGruppo(mins); }
+    startGame(mins); }
+  LAMPO.mese0=lampoMeseAss(); LAMPO.c0=S.ind.consenso;
+  if(def.valuta==='crisi') lampoCrisiAvvio(def);   // L251-5: la crisi è aperta al mese 0
+  render();
+  /* L251-4 (⚠ 4 di L251-3) · la sfida da una porta mostra le clip della porta, come la carriera che parte da lì (storiciPorta):
+     la stessa funzione, sopra la prima schermata; senza clip, con l'intro spenta (movimento ridotto, rete leggera) o già viste nella
+     sessione non succede niente. Nessun effetto sullo stato. */
+  if(def.scenario && def.scenario!=='presente' && typeof apriClipPorta==='function'){ try{ apriClipPorta(def.scenario); }catch(e){} }
+  return true;
+}
+/* alla fine di ogni mese (advanceMonth, finally): passati i mesi della sfida, la fine */
+function lampoForseFine(){
+  if(!LAMPO || LAMPO.finito || !S) return;
+  if(lampoCampagna()){   // L251-3: la campagna finisce sulla notte (lampoFineCampagna); il tempo chiude solo se l'urna non è venuta
+    if(lampoTrascorsi()>LAMPO.mesi+1 && !ATTESA && !NOTTE) lampoFine({ stelle:0, punti:0, riga:T('L\'urna non è arrivata.') });
+    return; }
+  if(lampoCrisi()){   // L251-5: la crisi finisce chiusa, con l'ultimatum respinto o al 12° mese
+    if(!crisiCapo()){ lampoFine({ stelle:0, punti:0, riga:T('Hai perso la guida del governo.') }); return; }   // L251-5: caduto e battuto alle urne, o in minoranza dopo la caduta: la crisi non è più tua
+    if(S.crisi && S.crisi.t>=4) LAMPO.ult=true;
+    if(!S.crisi && LAMPO.chiusa==null) LAMPO.chiusa=lampoTrascorsi();
+    if(LAMPO.respinto || !S.crisi || lampoTrascorsi()>=LAMPO.mesi) lampoFine(LAMPO_VALUTE.crisi());
+    return; }
+  if(lampoTrascorsi()<LAMPO.mesi) return;
+  var f=LAMPO_VALUTE[(lampoDef(LAMPO.id)||{}).valuta];
+  lampoFine(f ? f() : { stelle:0, punti:0, riga:'' });
+}
+/* la fine: registra (hos_lampo) e mostra la schermata della sfida in #over. r = {stelle 0-3, punti, riga, motivo?} */
+function lampoFine(r){
+  if(!LAMPO || LAMPO.finito) return null;
+  if(MESE_IN_CORSO) MESE_FINITO=true;   // il render rinviato del mese non serve più (il salvataggio è già spento)
+  LAMPO.finito=true;
+  lampoCrisiRimetti();   // L251-5: finita la sfida (anche con un gameOver) la carta della scala torna alla probabilità della carriera
+  lampoSemeRimetti();    // L251-6: finita la sfida del giorno, Math.random torna la funzione di prima (anche dal gameOver, che passa di qui)
+  var st=Math.max(0, Math.min(3, Math.round(r.stelle||0))), pt=(typeof r.punti==='number') ? r.punti : 0;
+  if(LAMPO.giorno){   // L251-6: la sfida del giorno scrive SOLO hos_lampo_giorno, e solo la prima partita finita del giorno; mai hos_lampo
+    var valida=!lampoGiornoGiocato(LAMPO.giorno, LAMPO.id);   // L251-7: un record di oggi con un altro id (N cambiato in giornata) non consuma la partita valida
+    if(valida) lsSet(LAMPO_GIORNO_CHIAVE, JSON.stringify({ data:LAMPO.giorno, id:LAMPO.id, stelle:st, punti:pt }));
+    LAMPO.esito={ stelle:st, punti:pt, riga:r.riga||'', motivo:r.motivo||null, record:false, giorno:true, valida:valida };
+    if(typeof lampoFineSchermo==='function') lampoFineSchermo(LAMPO.esito);
+    return LAMPO.esito; }
+  var tutto=lampoLeggi(), vec=tutto[LAMPO.id], v=(vec && typeof vec==='object' && typeof vec.stelle==='number') ? vec : null;
+  var record=!v || st>v.stelle || (st===v.stelle && pt>(v.punti||0));
+  if(st===0 && !v) record=false;   // zero stelle al primo giro non è un record
+  tutto[LAMPO.id]={ stelle:v ? Math.max(v.stelle, st) : st, punti:(record || !v) ? pt : v.punti, giocate:((v && v.giocate) || 0)+1 };
+  lsSet(LAMPO_CHIAVE, JSON.stringify(tutto));
+  LAMPO.esito={ stelle:st, punti:pt, riga:r.riga||'', motivo:r.motivo||null, record:record };
+  if(typeof lampoFineSchermo==='function') lampoFineSchermo(LAMPO.esito);
+  return LAMPO.esito;
+}
+/* chiudere la sfida (fine o abbandono): niente resta, la carriera salvata si riprende dalla home («Continua la carriera») */
+function lampoChiudi(){
+  var prima=LAMPO && LAMPO.prima;
+  lampoCrisiRimetti();   // L251-5: l'abbandono a metà della crisi da risolvere
+  lampoSemeRimetti();    // L251-6: l'abbandono a metà della sfida del giorno (non consuma la partita valida: lampoFine non è passata)
+  if(typeof taciTutto==='function') taciTutto();
+  if(typeof taciVoce==='function'){ try{ taciVoce(); }catch(e){} }   // L251-3: la voce della notte (e il suo sottotitolo in alto) non sopravvive alla sfida: copriva «← Tutte le sfide»
+  if(typeof fermaRitrattiVivi==='function'){ try{ fermaRitrattiVivi(document.getElementById('over')); }catch(e){} }
+  LAMPO=null; S=null;
+  if(prima){ chosenMode=prima.mode; chosenDiff=prima.diff;
+    if(prima.paese){ PAESE=prima.paese; chosenCountry=prima.country; chosenScenario=prima.scenario; chosenPartito=prima.partito; } }   // L251-3: la home torna com'era (la copia di PAESE della sfida se ne va)
+}
+/* L251-3 · i dati d'avvio della campagna lampo. Letti da lampoAvvia (le forze, prima degli start), da startGame e startOpposizione
+   (il calendario, dopo l'orologio della porta) e da startGame (la coalizione): tutti dietro `if(LAMPO)`, spento il gioco non cambia. */
+function lampoCampagna(){ var d=LAMPO && lampoDef(LAMPO.id); return !!(d && d.valuta==='campagna'); }   // la campagna lampo vera (non la prova della cornice, che è formato 'campagna' con la sua valuta)
+function lampoPaeseAvvio(def){
+  var f=(def.avvio && def.avvio.forze) || {}, ks=Object.keys(f).filter(function(k){ return f[k]; });
+  if(!ks.length) return;
+  PAESE=Object.assign({}, PAESE, { partiti:PAESE.partiti.map(function(p){
+    if(!f[p.id]) return p;
+    var q=Object.assign({}, p, { forza:Math.max(1, Math.round((p.forza+f[p.id])*10)/10) });
+    if(p.forzaAncora!=null) q.forzaAncora=Math.max(1, Math.round((p.forzaAncora+f[p.id])*10)/10);
+    return q; }) });
+}
+/* l'urna a scadenza a 12 mesi dal mese d'avvio (il metodo di sonda-l251-1-lampo.js, ma qui, prima di genAgenda): se il mese d'avvio è
+   il mese dell'urna, S.turnInMandate = anni del mandato − 1; altrimenti l'urna cade al prossimo mese dell'urna (≥ 6 mesi) o a quello
+   dopo. LAMPO.mesi = i mesi veri fino all'urna (la riga del tempo li conta). */
+function lampoCalendario(){
+  if(lampoCrisi()){ S.turnInMandate=0; LAMPO.mesi=(lampoDef(LAMPO.id)||{}).mesi||12; return; }   // L251-5: la crisi da risolvere parte al primo anno del mandato (nessuna urna a scadenza nei 12 mesi della sfida)
+  if(!lampoCampagna()) return;   // la prova della cornice (LAMPO_PROVA) tiene il suo calendario
+  var anni=Math.round((PAESE.mandatoMesi||60)/12), d=(meseUrna()-S.month+12)%12;
+  var dist=(d===0) ? 12 : (d>=6 ? d : d+12);
+  S.turnInMandate=anni-((dist>12) ? 2 : 1);
+  LAMPO.mesi=dist;
+}
+function lampoCoalizioneAvvio(){
+  var d=lampoDef(LAMPO.id);
+  if(!d || !d.avvio || !d.avvio.coalizione || !PAESE.coalizione) return false;
+  S.coalizione=[S.partito].concat(d.avvio.coalizione.filter(function(id){ return id!==S.partito && S.forze[id]!=null; }));
+  S.minoranza=maggioranzaCamere(S.coalizione)<50;
+  if(typeof aggiornaCoabitazione==='function') aggiornaCoabitazione();
+  initTenuta(); initPotereLocale();
+  render();
+  return true;
+}
+/* alla fine della notte (concludiNotte), prima di trattativa ed esito: la campagna lampo finisce qui, qualunque urna sia (anche
+   un'anticipata dentro i 12 mesi). true = la sfida è finita, il chiamante non prosegue. */
+function lampoFineCampagna(mg){
+  if(!LAMPO || LAMPO.finito || !lampoCampagna()) return false;
+  var d=lampoDef(LAMPO.id), f=d && LAMPO_VALUTE[d.valuta];
+  lampoFine(f ? f(mg) : { stelle:0, punti:0, riga:'' });
+  return true;
+}
+/* L251-5 (07/11) · LA CRISI DA RISOLVERE (DESIGN-SFIDE.md §2 (B), «⚑ L251-5» §10). Gli scenari sono in LAMPO_CRISI (non in
+   LAMPO_SCENARI: quella resta la campagna lampo, e le sue prove la camminano intera), in elenco solo con LAMPO_CRISI_ATTIVO.
+   · L'avvio: al governo, coalizione dichiarata come la campagna lampo (lampoCoalizioneAvvio), mandato al primo anno (lampoCalendario:
+     nessuna urna a scadenza nei 12 mesi), e la crisi aperta al mese 0 con avvio.crisi = {con, t} passando da crisiApplica, la
+     funzione con cui la apre la carriera (con CRISI_P_APRE a 1 per quella chiamata sola: nessun dado; poi torna com'era). Il campo
+     `snodo` di crisiApplica NON si usa: crisiMese chiuderebbe subito una crisi di snodo senza la sua riga breve.
+   · Sotto la sfida CRISI_P_SCALA = 1 (la carta della scala ogni mese, e in genAgendaRamo prima degli altri eventi): il valore della
+     carriera è in LAMPO.crisiPrima e torna con lampoCrisiRimetti, chiamata da lampoFine (fine, e gameOver che passa di lì),
+     lampoChiudi (abbandono, «Torna al menu», «Altre sfide») e lampoAvvia («Rigioca»).
+   · La fine (lampoForseFine, alla fine di ogni mese): crisi chiusa (S.crisi null), ultimatum respinto (LAMPO.respinto, scritto da
+     crisiScala: niente guerra dentro la sfida), o il 12° mese. LAMPO.ult = l'ultimatum toccato (t a 4). Tutto transitorio. */
+let LAMPO_CRISI_ATTIVO=true;   // L251-5: ACCESO (8 scenari in fascia su 8 alla prima misura a 40; ne servivano 5, rapporto §10)
+const LAMPO_STELLE_CRISI=['Arriva a fine anno senza ultimatum respinto', 'Chiudi la crisi', 'Chiudi la crisi senza arrivare all\'ultimatum'];
+const LAMPO_CRISI=[
+  { id:'it_crisi', formato:'crisi', paese:'italia', scenario:'presente', lato:'governo', partito:'it_fdi', mesi:12, minuti:10, valuta:'crisi',
+    titolo:'Italia: l\'inverno del gas', luogo:'Italia, oggi · al governo',
+    situazione:'Guidi un governo di coalizione. La crisi con la Russia è arrivata alle sanzioni: gli alleati chiedono fermezza, le imprese temono per l\'energia. Hai un anno per farla rientrare.',
+    obiettivo:'Chiudi la crisi con la Russia entro dodici mesi.', stelle:LAMPO_STELLE_CRISI,
+    avvio:{ crisi:{ con:'russia', t:2 }, forze:{}, coalizione:['it_fi','it_lega'] } },
+  { id:'de_crisi', formato:'crisi', paese:'germania', scenario:'presente', lato:'governo', partito:'de_cdu', mesi:12, minuti:10, valuta:'crisi',
+    titolo:'Germania: l\'allerta', luogo:'Germania, oggi · al governo',
+    situazione:'Guidi una grande coalizione. La crisi con la Russia è arrivata alla mobilitazione: le forze sono in allerta, e un passo ancora è l\'ultimatum.',
+    obiettivo:'Chiudi la crisi con la Russia entro dodici mesi.', stelle:LAMPO_STELLE_CRISI,
+    avvio:{ crisi:{ con:'russia', t:3 }, forze:{ de_cdu:2, de_spd:1, de_afd:-3 }, coalizione:['de_spd'] } },
+  { id:'uk_crisi', formato:'crisi', paese:'regnounito', scenario:'presente', lato:'governo', partito:'uk_lab', mesi:12, minuti:10, valuta:'crisi',
+    titolo:'Regno Unito: le petroliere', luogo:'Regno Unito, oggi · al governo',
+    situazione:'Guidi un governo laburista. Con l\'Iran la tensione è salita fino alle sanzioni, e le petroliere aspettano al largo di sapere da che parte tira il vento.',
+    obiettivo:'Chiudi la crisi con l\'Iran entro dodici mesi.', stelle:LAMPO_STELLE_CRISI,
+    avvio:{ crisi:{ con:'iran', t:2 }, forze:{}, coalizione:[] } },
+  { id:'fr_crisi', formato:'crisi', paese:'francia', scenario:'presente', lato:'governo', partito:'fr_ren', mesi:12, minuti:10, valuta:'crisi',
+    titolo:'Francia: la linea rossa', luogo:'Francia, oggi · al governo',
+    situazione:'Guidi il governo del Presidente. La crisi con l\'Iran è alla mobilitazione, e gli alleati ti chiedono se è il momento di porre un ultimatum.',
+    obiettivo:'Chiudi la crisi con l\'Iran entro dodici mesi.', stelle:LAMPO_STELLE_CRISI,
+    avvio:{ crisi:{ con:'iran', t:3 }, forze:{}, coalizione:['fr_lr'] } },
+  { id:'jp_crisi', formato:'crisi', paese:'giappone', scenario:'presente', lato:'governo', partito:'jp_ldp', mesi:12, minuti:10, valuta:'crisi',
+    titolo:'Giappone: le isole contese', luogo:'Giappone, oggi · al governo',
+    situazione:'Guidi un governo di coalizione. Attorno a un gruppo di isole contese la crisi con la Cina è arrivata alle sanzioni, e il commercio fra i due paesi rallenta ogni settimana.',
+    obiettivo:'Chiudi la crisi con la Cina entro dodici mesi.', stelle:LAMPO_STELLE_CRISI,
+    avvio:{ crisi:{ con:'cina', t:2 }, forze:{}, coalizione:['jp_ish'] } },
+  { id:'kr_crisi', formato:'crisi', paese:'coreasud', scenario:'presente', lato:'governo', partito:'kr_dp', mesi:12, minuti:10, valuta:'crisi',
+    titolo:'Corea del Sud: sulla linea', luogo:'Corea del Sud, oggi · al governo',
+    situazione:'Guidi il governo del Presidente. La crisi con la Corea del Nord è alla mobilitazione: qui, oltre l\'ultimatum, c\'è solo la guerra.',
+    obiettivo:'Chiudi la crisi con la Corea del Nord entro dodici mesi.', stelle:LAMPO_STELLE_CRISI,
+    avvio:{ crisi:{ con:'corea_nord', t:3 }, forze:{}, coalizione:[] } },
+  { id:'in_crisi', formato:'crisi', paese:'india', scenario:'presente', lato:'governo', partito:'in_bjp', mesi:12, minuti:10, valuta:'crisi',
+    titolo:'India: il confine di montagna', luogo:'India, oggi · al governo',
+    situazione:'Guidi un governo di coalizione. Lungo il confine di montagna la crisi con la Cina è arrivata alle sanzioni, e nessuno dei due vuole essere il primo a cedere.',
+    obiettivo:'Chiudi la crisi con la Cina entro dodici mesi.', stelle:LAMPO_STELLE_CRISI,
+    avvio:{ crisi:{ con:'cina', t:2 }, forze:{}, coalizione:['in_reg'] } },
+  { id:'au_crisi', formato:'crisi', paese:'australia', scenario:'presente', lato:'governo', partito:'au_alp', mesi:12, minuti:10, valuta:'crisi',
+    titolo:'Australia: le rotte del Pacifico', luogo:'Australia, oggi · al governo',
+    situazione:'Guidi un governo laburista. La crisi con la Cina è alla mobilitazione: le rotte del commercio passano tutte da lì, e gli alleati aspettano una tua mossa.',
+    obiettivo:'Chiudi la crisi con la Cina entro dodici mesi.', stelle:LAMPO_STELLE_CRISI,
+    avvio:{ crisi:{ con:'cina', t:3 }, forze:{}, coalizione:['au_grn','au_ind'] } }
+];
+function lampoCrisi(){ var d=LAMPO && lampoDef(LAMPO.id); return !!(d && d.valuta==='crisi'); }
+function lampoCrisiAvvio(def){
+  var c=def.avvio && def.avvio.crisi; if(!c) return false;
+  LAMPO.crisiPrima={ scala:CRISI_P_SCALA };
+  var apre=CRISI_P_APRE; CRISI_P_APRE=1;
+  crisiApplica({ con:c.con, t:c.t });
+  CRISI_P_APRE=apre; CRISI_P_SCALA=1;
+  return !!S.crisi;
+}
+function lampoCrisiRimetti(){ if(LAMPO && LAMPO.crisiPrima){ CRISI_P_SCALA=LAMPO.crisiPrima.scala; delete LAMPO.crisiPrima; } }
+function lampoAbbandona(){ if(!LAMPO) return; lampoChiudi(); }
+/* L251-6 (07/11) · LA SFIDA DEL GIORNO (DESIGN-SFIDE.md §2 (C), «⚑ L251-6» §11). Uno scenario al giorno, uguale per tutti i dispositivi
+   nello stesso giorno, con lo STESSO seme: due partite con le stesse scelte danno la stessa S mese per mese.
+   · Il generatore: lampoRng = il mulberry32 del banco (.claude/harness.js, copiato: il gioco resta senza dipendenze); il seme è
+     lampoSemeGiorno('aaaammgg') (FNV-1a sulla stringa, mai 0). Sotto la sfida del giorno lampoSemeApplica mette Math.random =
+     lampoRng(seme) in lampoAvvia, PRIMA di ogni estrazione; lampoSemeRimetti rimette LA FUNZIONE CHE C'ERA (LAMPO.rndPrima: nel
+     browser quella nativa, nel banco quella del banco), chiamata da lampoFine (fine e gameOver), lampoChiudi (abbandono, «Torna al
+     menu», «Altre sfide») e lampoAvvia («Rigioca» = allenamento: stesso seme, stessa data, dall'inizio). Le sfide libere non toccano
+     Math.random.
+   · Il contorno (estrazioni a tempi che dipendono dall'utente, senza effetto su S) usa rndUi() = la Math.random del caricamento di
+     game.js (nel browser la nativa, nel banco quella del banco: identico a prima). Censite nel rapporto §11: oggi solo il battito
+     delle palpebre del personaggio (personaggio.js). Tutte le altre sono logica e consumano il seme.
+   · Il calendario: LAMPO_GIORNO_ORDINE (i 26 id, scritto a mano: due campagne e una crisi, paesi diversi in giorni vicini; uno
+     scenario nuovo va IN FONDO), con LAMPO_CRISI_ATTIVO spento le crisi si saltano; lampoGiorno(d) = giorni di calendario (data locale)
+     dal 01/01/2026 mod N. La sfida resta del giorno in cui è partita (LAMPO.giorno). ⚠ L251-7: «in fondo» non tiene fermi i giorni
+     passati: uno scenario nuovo cambia N e quindi il mod N di TUTTI i giorni (anche di oggi, se l'aggiornamento arriva in giornata).
+     Va bene così (nessuno conserva i giorni passati), perché il record del giorno porta il suo id e si legge solo se coincide con lo
+     scenario di oggi (lampoGiornoGiocato(data, id); anche la validità in lampoFine).
+   · Il record: hos_lampo_giorno = {data, id, stelle, punti}, scritto dalla PRIMA partita finita del giorno (lampoFine); le altre
+     dello stesso giorno sono allenamento e non scrivono né hos_lampo_giorno né hos_lampo; l'abbandono non consuma la valida. */
+const LAMPO_GIORNO_CHIAVE='hos_lampo_giorno';
+const LAMPO_GIORNO_ORDINE=['it_gov','us_opp','de_crisi','uk_opp','br_gov','jp_crisi','fr_gov','in_opp','kr_crisi','ca_opp','za_gov','it_crisi',
+  'de_opp','mx_opp','au_crisi','es_gov','ar_opp','fr_crisi','jp_gov','ng_opp','uk_crisi','fr1980_opp','au_gov','in_crisi','kr_opp','de1960_gov',
+  'us1980_gov','de1990_gov'];   // L251-7: le due porte nuove, in fondo (28 id)
+const RND_UI=Math.random;   // al caricamento di game.js: nel browser la nativa, nel banco quella del banco (il PREAMBLE la mette prima)
+function rndUi(){ return RND_UI(); }
+function lampoRng(seme){   // mulberry32, lo stesso di .claude/harness.js (stato chiuso nella funzione)
+  var st=(seme>>>0)||1;
+  return function(){ st|=0; st=(st+0x6D2B79F5)|0; var t=Math.imul(st^(st>>>15), 1|st); t=(t+Math.imul(t^(t>>>7), 61|t))^t; return ((t^(t>>>14))>>>0)/4294967296; };
+}
+function lampoSemeGiorno(data){ var h=0x811c9dc5, s=String(data); for(var i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h, 0x01000193)>>>0; } return (h>>>0)||1; }
+function lampoSemeApplica(data){ LAMPO.giorno=String(data); LAMPO.rndPrima=Math.random; Math.random=lampoRng(lampoSemeGiorno(data)); }
+function lampoSemeRimetti(){ if(LAMPO && LAMPO.rndPrima){ Math.random=LAMPO.rndPrima; delete LAMPO.rndPrima; } }
+function lampoGiornoData(d){ d=d||new Date(); var m=d.getMonth()+1, g=d.getDate(); return ''+d.getFullYear()+(m<10?'0':'')+m+(g<10?'0':'')+g; }
+function lampoGiornoOrdine(){ return LAMPO_GIORNO_ORDINE.filter(function(id){ var d=lampoDef(id); return !!d && d.id!==LAMPO_PROVA.id && (d.valuta!=='crisi' || LAMPO_CRISI_ATTIVO); }); }
+function lampoGiorno(d){
+  d=d||new Date();
+  var n=Math.round((Date.UTC(d.getFullYear(), d.getMonth(), d.getDate())-Date.UTC(2026, 0, 1))/86400000);   // giorni di calendario: anno/mese/giorno locali, niente ora legale
+  var o=lampoGiornoOrdine(); if(!o.length) return null;
+  return { data:lampoGiornoData(d), id:o[((n%o.length)+o.length)%o.length] };
+}
+function lampoGiornoLeggi(){ var t=lsGet(LAMPO_GIORNO_CHIAVE); if(!t) return null; try{ var o=JSON.parse(t); return (o && typeof o==='object' && typeof o.data==='string' && typeof o.stelle==='number') ? o : null; }catch(e){ return null; } }
+function lampoGiornoGiocato(data, id){ var v=lampoGiornoLeggi(); return (v && v.data===data && (id==null || v.id===id)) ? v : null; }   // la partita valida del giorno, se c'è (L251-7: e se è dello scenario di oggi)
+function lampoAvviaGiorno(d){ var g=lampoGiorno(d); if(!g) return false; return lampoAvvia(g.id, g.data); }
 const FINALI_CON_SUONO = ['mandatoCompiuto', 'ritiro', 'mandatoInt'];
 function gameOver(reason){
   if(MESE_IN_CORSO) MESE_FINITO=true;   // L123-1: il render e il salvataggio rinviati del mese non si fanno più
+  if(lampoSalvaSpento()){   // L251-2: una sfida finita prima del tempo (crisi, rivolta, primaria…) = zero stelle; né lo storico (aggiungiCarriera) né l'autosave (chiudiAutosave) si toccano
+    if(typeof taciTutto==='function') taciTutto(); if(typeof ambiente==='function') ambiente('fine');
+    if(!LAMPO.finito) lampoFine({ stelle:0, punti:0, riga:'', motivo:reason }); return; }
   if(typeof taciTutto==='function') taciTutto();   // L95-3: si ferma tutto; poi suona `finale` solo se il finale è nella lista
   if(FINALI_CON_SUONO.indexOf(reason)>=0 && typeof suona==='function') suona('finale');
   if(FINALI_CON_SUONO.indexOf(reason)>=0 && typeof musica==='function') musica('finale');   // L114-1: il brano del finale, sugli stessi motivi
@@ -12587,7 +13049,7 @@ function snapshot(){ return JSON.parse(snapshotStr()); }   // deep, indipendente
 /* confine di mese: aggiorna fotografia + autosave. L123-1 · due passaggi invece di tre: la stringa si fa UNA volta, lastSnap è il
    suo parse e il salvataggio scrive quella stessa stringa (identica byte per byte a JSON.stringify(lastSnap): dati puri).
    Dentro advanceMonth il salvataggio si rinvia alla fine del mese (MESE_IN_CORSO): uno per mese, dopo l'ultimo cambio di S. */
-function commitSnap(){ if(!S) return; if(MESE_IN_CORSO){ MESE_SNAP=true; return; } const str=snapshotStr(); lastSnap=JSON.parse(str); lsSet('hos_autosave', str); }
+function commitSnap(){ if(!S) return; if(lampoSalvaSpento()) return; if(MESE_IN_CORSO){ MESE_SNAP=true; return; } const str=snapshotStr(); lastSnap=JSON.parse(str); lsSet('hos_autosave', str); }
 function aMetaMese(){ return !!(S && S.agenda && S.agenda.some(function(a){return a.resolved;})); }   // ci sono carte già risolte questo mese?
 function parseSave(text){
   let o; try{ o=JSON.parse(text); }catch(e){ return {err:'Testo non leggibile (JSON non valido).'}; }

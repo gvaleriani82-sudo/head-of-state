@@ -1829,6 +1829,205 @@ function ppConfermaScissione(){
 }
 function ppAnnullaScissione(){ if(!PP_BOZZA) return; scissioneAnnulla(); ppChiudiScissione(); }
 
+/* ================================================================================================================
+   L251-2 (05/11) · SFIDE VELOCI — LO SCHERMO DELLA CORNICE (il motore è in game.js, accanto a gameOver: LAMPO, lampoAvvia, lampoFine).
+   · Home: il terzo bottone «Sfide veloci» sotto «Scenari storici», con «★ N» (le stelle totali, D-S7) se N > 0. Nasce QUI, solo con
+     LAMPO_ATTIVO (index.html non si tocca: spento, la home è quella di prima nodo per nodo; acceso dal L251-3). Lo ridisegna anche
+     applyStaticI18n (lang-en.js), così il cambio di lingua lo ritraduce.
+   · L'elenco e la scheda stanno in #lampo, una schermata gemella di #storici creata la prima volta che serve (mai nel markup).
+   · Durante: la riga del tempo al posto del mandato (lampoRigaTempo, letta da render), «Abbandona la sfida» nel menu Partita.
+   · La fine: in #over, la scena-momento della notte, le stelle una alla volta (`traguardo`, la terza `fanfara`), «Rigioca»/«Altre
+     sfide»/«Torna al menu» (L251-3: «Altre sfide» = lampoAltre, l'elenco). «Torna al menu» va alla home, dove «Continua la carriera»
+     c'è ancora (la carriera non è stata toccata). La campagna lampo finisce sulla notte (lampoFineCampagna, da concludiNotte).
+   Transitorio: LAMPO_SCHEDA (quale scheda è aperta), mai in S. */
+var LAMPO_SCHEDA=null;
+var LAMPO_SCHEDA_GIORNO=false;   // L251-6: la scheda aperta dalla riga «OGGI» (la sfida del giorno), transitorio
+var LAMPO_TIMER=[];
+function lampoAttivo(){ return (typeof LAMPO_ATTIVO!=='undefined') && !!LAMPO_ATTIVO; }
+function lampoHomeBottone(){
+  var el=document.getElementById('start-lampo');
+  if(!lampoAttivo()){ if(el && el.id==='start-lampo' && el.parentNode && el.parentNode.removeChild){ try{ el.parentNode.removeChild(el); }catch(e){} } return; }
+  if(!el){
+    var anc=document.querySelector ? document.querySelector('#start button[onclick="apriStorici()"]') : null;
+    if(!anc || !anc.parentNode || !anc.parentNode.parentNode) return;
+    el=document.createElement('div'); el.id='start-lampo'; el.style.marginTop='10px';
+    anc.parentNode.parentNode.insertBefore(el, anc.parentNode.nextSibling);
+  }
+  var n=lampoStelleTotali();
+  el.innerHTML='<button class="btn" style="padding:12px 22px;background:transparent;color:var(--brand);border:1px solid var(--brand)" onclick="apriLampo()">'
+    +T('Sfide veloci')+(n>0 ? ' <span class="lampo-tot" aria-label="'+escAttr(T('%N stelle').replace('%N', n))+'">★ '+n+'</span>' : '')+'</button>';
+}
+function lampoSchermo(){
+  var el=document.getElementById('lampo');
+  if(!el){
+    el=document.createElement('div'); el.id='lampo'; el.style.display='none';
+    el.innerHTML='<div class="screen"><div class="storici-col">'
+      +'<button class="lampo-indietro" onclick="lampoIndietro()" id="lampo-back"></button>'
+      +'<div id="lampo-body"></div></div></div>';
+    var w=document.querySelector('.wrap') || document.body; w.appendChild(el);
+  }
+  return el;
+}
+function apriLampo(){
+  if(!lampoAttivo()) return;
+  LAMPO_SCHEDA=null; LAMPO_SCHEDA_GIORNO=false;
+  var el=lampoSchermo();
+  ['start','storici','crea','over'].forEach(function(id){ var e=document.getElementById(id); if(e) e.style.display='none'; });
+  el.style.display='block'; window.scrollTo(0,0); renderLampo();
+}
+function lampoIndietro(){
+  if(LAMPO_SCHEDA){ LAMPO_SCHEDA=null; LAMPO_SCHEDA_GIORNO=false; renderLampo(); window.scrollTo(0,0); return; }
+  var el=document.getElementById('lampo'); if(el) el.style.display='none';
+  var st=document.getElementById('start'); if(st) st.style.display='block';
+  renderStartPersistence();
+}
+function lampoScheda(id){ LAMPO_SCHEDA=id; LAMPO_SCHEDA_GIORNO=false; renderLampo(); window.scrollTo(0,0); }
+/* L251-6 · la sfida del giorno: la scheda di sempre aperta dalla riga «OGGI», con le righe sue; «Gioca» parte col seme del giorno */
+function lampoSchedaGiorno(){ var g=(typeof lampoGiorno==='function') ? lampoGiorno() : null; if(!g) return; LAMPO_SCHEDA=g.id; LAMPO_SCHEDA_GIORNO=true; renderLampo(); window.scrollTo(0,0); }
+function lampoGiornoTesto(data){   // «7 novembre» / «7 November», dalla data aaaammgg
+  var m=parseInt(String(data).slice(4,6),10), g=parseInt(String(data).slice(6,8),10), n=T(MONTHS[(m-1+12)%12]||'');
+  return g+' '+(T('Gennaio')==='Gennaio' ? n.toLowerCase() : n);
+}
+function lampoGiornoRiga(){
+  var g=(typeof lampoGiorno==='function') ? lampoGiorno() : null; if(!g) return '';
+  var d=lampoDef(g.id); if(!d) return '';
+  var v=lampoGiornoGiocato(g.data, g.id), f=(LAMPO_FORMATI.filter(function(x){ return x.k===d.formato; })[0]||{nome:''}).nome;
+  var rec=v ? lampoGiornoRecTesto(d, v) : T('record: —');
+  return '<div class="contorno lampo-gruppo lampo-oggi-k">'+T('Oggi')+' · '+lampoGiornoTesto(g.data)+'</div><div class="cands">'
+    +'<button class="cand lampo-riga lampo-oggi" onclick="lampoSchedaGiorno()"><span class="cleft" style="flex-direction:column;align-items:flex-start;gap:2px">'
+    +'<span class="cn">'+T(d.titolo)+'</span><small style="color:var(--mut)">'+T(f)+' · '+T(d.luogo)+' · '+rec+'</small></span>'
+    +'<span class="cmeta lampo-st-riga" aria-label="'+escAttr(T('%N stelle').replace('%N', v ? v.stelle : 0))+'">'
+    +(v ? '<span class="contorno lampo-giocata" style="font-size:11px;color:var(--mut);margin-right:6px;font-weight:600;text-transform:uppercase;letter-spacing:.04em">'+T('giocata')+'</span>' : '')   // L251-7 (⚠ 3 di L251-6): dopo la partita valida, anche a zero stelle
+    +lampoStelleHtml(v ? v.stelle : 0)+'</span></button></div>';
+}
+function lampoGiornoRecTesto(d, v){   // il record del giorno: la partita valida, letta come il record della sfida libera
+  if(!v || !v.stelle) return T('record: —');
+  if(d.valuta==='campagna') return T('record: %R').replace('%R', (v.punti>0 ? '+' : '')+Math.round(v.punti)+' '+T('punti'));
+  if(d.valuta==='crisi'){ if(v.stelle<2) return T('record: %R').replace('%R', T('crisi aperta a fine anno'));
+    return T('record: %R').replace('%R', T('chiusa al mese %N').replace('%N', Math.max(0, (d.mesi||12)-Math.round(v.punti||0)))); }
+  return T('record: —');
+}
+function lampoGiocaGiorno(){ var el=document.getElementById('lampo'); if(el) el.style.display='none'; LAMPO_SCHEDA_GIORNO=false; lampoAvviaGiorno(); }
+function lampoStelleHtml(n, cls){ var h=''; for(var i=0;i<3;i++) h+='<span class="'+(cls||'lampo-st')+(i<n?' on':'')+'">'+(i<n?'★':'☆')+'</span>'; return h; }
+function lampoRecordTesto(d){
+  var r=lampoRecord(d.id);
+  if(!r || !r.giocate) return T('record: —');
+  if(d.valuta==='campagna'){   // L251-3: il record della campagna è il margine di una vittoria; una sconfitta non è un record
+    if(!r.stelle) return T('record: —');
+    return T('record: %R').replace('%R', (r.punti>0 ? '+' : '')+Math.round(r.punti)+' '+T('punti')); }
+  if(d.valuta==='crisi'){   // L251-5: il record della crisi è il mese della chiusura (punti = mesi rimasti); aperta a fine anno non è un record di chiusura
+    if(!r.stelle) return T('record: —');
+    if(r.stelle<2) return T('record: %R').replace('%R', T('crisi aperta a fine anno'));
+    return T('record: %R').replace('%R', T('chiusa al mese %N').replace('%N', Math.max(0, (d.mesi||12)-Math.round(r.punti||0)))); }
+  return T('record: %R').replace('%R', (d.valuta==='prova' ? fmt(r.punti,1)+'%' : fmt(r.punti,1)));
+}
+function renderLampo(){
+  var b=document.getElementById('lampo-body'), bk=document.getElementById('lampo-back'); if(!b) return;
+  if(bk) bk.textContent='← '+T(LAMPO_SCHEDA ? 'Tutte le sfide' : 'Sfide veloci');
+  var d=LAMPO_SCHEDA ? lampoDef(LAMPO_SCHEDA) : null;
+  if(d){
+    var r=lampoRecord(d.id), stelleR=r ? r.stelle : 0;
+    var gG=LAMPO_SCHEDA_GIORNO && (typeof lampoGiorno==='function') ? lampoGiorno() : null, vG=(gG && gG.id===d.id) ? lampoGiornoGiocato(gG.data, gG.id) : null;
+    if(gG && gG.id!==d.id) gG=null;   // il giorno è cambiato mentre la scheda era aperta: la scheda libera
+    b.innerHTML='<div class="em contorno" style="margin:0 0 4px">'+T((LAMPO_FORMATI.filter(function(f){ return f.k===d.formato; })[0]||{nome:''}).nome)+'</div>'
+      +'<h2 class="lampo-titolo">'+T(d.titolo)+'</h2>'
+      +'<div class="contorno lampo-luogo">'+T(d.luogo)+'</div>'
+      +'<p class="lampo-testo">'+T(d.situazione)+'</p>'
+      +'<div class="contorno lampo-etich">'+T('Obiettivo')+'</div>'
+      +'<p class="lampo-testo" style="margin-top:2px">'+T(d.obiettivo)+'</p>'
+      +'<ul class="lampo-stelle-lista">'+d.stelle.map(function(s, i){ return '<li><span class="lampo-st on" aria-hidden="true">'+'★★★'.slice(0, i+1)+'</span> '+T(s)+'</li>'; }).join('')+'</ul>'
+      +'<div class="lampo-durata">'+T('%M mesi · circa %N minuti').replace('%M', d.mesi).replace('%N', d.minuti)+'</div>'
+      +(gG ? '<div class="lampo-rec">'+lampoStelleHtml(vG ? vG.stelle : 0)+' <span>'+lampoGiornoRecTesto(d, vG)+'</span></div>'
+          +'<div class="note lampo-nota lampo-giorno-nota">'+T('Sfida del giorno: la prima partita conta, le altre sono allenamento.')
+          +(vG ? ' <b>'+T('Già giocata oggi: allenamento.')+'</b>' : '')+'</div>'
+        : '<div class="lampo-rec">'+lampoStelleHtml(stelleR)+' <span>'+lampoRecordTesto(d)+'</span></div>')
+      +'<div class="note lampo-nota">'+T('La carriera salvata non si tocca.')+' '+T('Se chiudi la pagina, la sfida è persa.')+'</div>'
+      +(gG ? '<button class="btn lampo-gioca" onclick="lampoGiocaGiorno()">'+T(vG ? 'Allenati' : 'Gioca')+'</button>'
+        : '<button class="btn lampo-gioca" onclick="lampoGioca(\''+d.id+'\')">'+T('Gioca')+'</button>');
+    return;
+  }
+  var lista=lampoElenco(), h='<div class="em contorno" style="margin:0 0 4px">'+T('Sfide veloci')+'</div>'
+    +'<p class="lampo-testo" style="color:var(--mut)">'+T('Partite corte, da un quarto d\'ora: un obiettivo, fino a tre stelle. La carriera salvata non si tocca.')+'</p>';
+  h+=lampoGiornoRiga();   // L251-6: in testa, la sfida del giorno
+  LAMPO_FORMATI.forEach(function(f){
+    var di=lista.filter(function(d){ return d.formato===f.k; }); if(!di.length) return;
+    h+='<div class="contorno lampo-gruppo">'+T(f.nome)+'</div><div class="cands">'+di.map(function(d){
+      var r=lampoRecord(d.id);
+      return '<button class="cand lampo-riga" onclick="lampoScheda(\''+d.id+'\')"><span class="cleft" style="flex-direction:column;align-items:flex-start;gap:2px">'
+        +'<span class="cn">'+T(d.titolo)+'</span><small style="color:var(--mut)">'+T(d.luogo)+' · '+lampoRecordTesto(d)+'</small></span>'
+        +'<span class="cmeta lampo-st-riga" aria-label="'+escAttr(T('%N stelle').replace('%N', r ? r.stelle : 0))+'">'+lampoStelleHtml(r ? r.stelle : 0)+'</span></button>';
+    }).join('')+'</div>';
+  });
+  if(!lista.length) h+='<div class="note">'+T('Le prime sfide arrivano presto.')+'</div>';
+  b.innerHTML=h;
+}
+function lampoGioca(id){
+  var el=document.getElementById('lampo'); if(el) el.style.display='none';
+  lampoAvvia(id);
+}
+/* la riga sotto l'intestazione, al posto del mandato (render) */
+function lampoRigaTempo(){
+  var n=lampoRestano(), tot=LAMPO.mesi||1, w=Math.max(0, Math.min(100, Math.round(100*(tot-n)/tot)));
+  var t=(LAMPO.formato==='campagna') ? (n===1 ? T('1 mese all\'urna') : T('%N mesi all\'urna').replace('%N', n)) : (n===1 ? T('1 mese alla fine') : T('%N mesi alla fine').replace('%N', n));
+  if(LAMPO.formato==='crisi' && S && S.crisi && typeof CRISI_GRADINI!=='undefined') t+=' · '+T('crisi: %G').replace('%G', T(CRISI_GRADINI[S.crisi.t]||''));   // L251-5: il gradino della crisi da risolvere
+  return '<span class="lampo-tempo contorno">'+T(LAMPO.giorno ? 'Sfida del giorno' : 'Sfida')+' · '+t+'<span class="lampo-barra" aria-hidden="true"><i style="width:'+w+'%"></i></span></span>';
+}
+function lampoMenuHtml(){
+  return '<button class="opt" onclick="lampoAbbandonaUi()"><span class="ol" style="color:var(--neg)">'+T('Abbandona la sfida')+'</span><span class="oe">'
+    +T('La sfida finisce senza stelle e torni alla schermata iniziale. La carriera salvata non si tocca.')+'</span></button>';
+}
+function lampoAbbandonaUi(){
+  if(!confirm(T('Abbandonare la sfida? Finisce senza stelle; la carriera salvata non si tocca.'))) return;
+  hideMenu(); lampoTornaHome();
+}
+function lampoTornaHome(){
+  LAMPO_TIMER.forEach(function(t){ clearTimeout(t); }); LAMPO_TIMER=[];
+  lampoAbbandona();
+  ['game','appoint','over','crea','lampo','storici'].forEach(function(id){ var e=document.getElementById(id); if(e) e.style.display='none'; });
+  var o=document.getElementById('ov'); if(o) o.classList.remove('on');
+  var st=document.getElementById('start'); if(st) st.style.display='block';
+  try{ resetUIAnim(); }catch(e){}
+  try{ renderStartPersistence(); }catch(e){}
+  try{ if(typeof musica==='function') musica(); if(typeof ambiente==='function') ambiente(); }catch(e){}
+  window.scrollTo(0,0);
+}
+function lampoAltre(){ lampoTornaHome(); apriLampo(); }   // L251-3: chiude la sfida come «Torna al menu» e apre l'elenco (apriLampo esce se l'interruttore è spento: resta la home)
+function lampoRigioca(){ var id=LAMPO && LAMPO.id, g=LAMPO && LAMPO.giorno; LAMPO_TIMER.forEach(function(t){ clearTimeout(t); }); LAMPO_TIMER=[]; if(id) lampoAvvia(id, g); }   // L251-6: la sfida del giorno si rigioca col suo seme e la sua data (allenamento)
+/* L251-6 · la fine della sfida del giorno: la partita valida o l'allenamento, e il record del giorno */
+function lampoFineGiornoHtml(e, d){
+  var v=(LAMPO && LAMPO.giorno) ? lampoGiornoGiocato(LAMPO.giorno, LAMPO.id) : null;
+  return '<div class="lampo-giorno-fine contorno">'+T('Sfida del giorno')+' · '+lampoGiornoTesto(LAMPO.giorno)+'</div>'
+    +'<p class="lampo-esito">'+T(e.valida ? 'La prima partita di oggi: il risultato è registrato.' : 'Allenamento: il risultato di oggi resta quello della prima partita.')+'</p>'
+    +(v ? '<div class="lampo-rec">'+lampoStelleHtml(v.stelle)+' <span>'+lampoGiornoRecTesto(d, v)+'</span></div>' : '');
+}
+/* la schermata finale: in #over (lo stesso contenitore del finale di carriera) */
+function lampoFineSchermo(e){
+  var vinta=e.stelle>0, d=lampoDef(LAMPO.id)||{titolo:''};
+  var tit=e.motivo ? T('La sfida finisce prima del tempo') : (vinta ? T('Sfida compiuta') : T('Sfida mancata'));
+  var riga=e.motivo ? ((typeof esitoLabel==='function') ? esitoLabel(e.motivo) : e.motivo) : e.riga;
+  var sc=(typeof SCENA_MOMENTO!=='undefined' && SCENA_MOMENTO.notte) ? SCENA_MOMENTO.notte[vinta ? 'vittoria' : 'sconfitta'] : null;
+  var o=document.getElementById('ov'); if(o) o.classList.remove('on');
+  document.getElementById('over').innerHTML=scenaMomentoHtml(sc, {fin:true})
+    +'<div class="screen center lampo-fine"><div class="em contorno">'+T('Sfide veloci')+' · '+T(d.titolo)+'</div><h2>'+tit+'</h2>'
+    +'<div class="lampo-stelle" role="img" aria-label="'+escAttr(T('%N stelle su 3').replace('%N', e.stelle))+'">'+lampoStelleHtml(0, 'lampo-st lampo-st-fine')+'</div>'
+    +(riga ? '<p class="lampo-esito">'+riga+'</p>' : '')
+    +(e.record ? '<div class="lampo-record">'+T('Record!')+'</div>' : '')
+    +(e.giorno ? lampoFineGiornoHtml(e, d) : '')
+    +'<div class="barra-avanti lampo-bottoni"><button class="btn" onclick="lampoRigioca()">'+T(e.giorno ? 'Rigioca (allenamento)' : 'Rigioca')+'</button>'
+    +'<button class="btn lampo-menu-btn" onclick="lampoAltre()">'+T('Altre sfide')+'</button>'   // L251-3 (⚠ 2 di L251-2): l'elenco delle sfide, senza passare dalla home
+    +'<button class="btn lampo-menu-btn" onclick="lampoTornaHome()">'+T('Torna al menu')+'</button></div></div>';
+  document.getElementById('game').style.display='none';
+  document.getElementById('over').style.display='block';
+  window.scrollTo(0,0);
+  try{ agganciaVideoTutti(); }catch(er){}
+  var stelle=[].slice.call(document.querySelectorAll('#over .lampo-st-fine'));
+  var spento=(typeof motionSpento==='function') && motionSpento();
+  var accendi=function(i){ var s=stelle[i]; if(!s) return; s.classList.add('on'); s.textContent='★';
+    if(typeof suona==='function') suona((i===2) ? 'fanfara' : 'traguardo'); };   // uno per stella: un effetto per gesto, mai tre insieme
+  if(spento){ for(var i=0;i<e.stelle;i++){ stelle[i].classList.add('on'); stelle[i].textContent='★'; } if(e.stelle && typeof suona==='function') suona(e.stelle===3 ? 'fanfara' : 'traguardo'); return; }
+  for(var k=0;k<e.stelle;k++) (function(k){ LAMPO_TIMER.push(setTimeout(function(){ accendi(k); }, 600+k*650)); })(k);
+}
+
 /* ===== Persistenza — UI (schermata iniziale, modale "Partita", carriere). Il nucleo è in game.js. ===== */
 function escAttr(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 /* participi concordati col genere del personaggio IN CORSO (gn, game.js); per le carriere passate
@@ -1853,6 +2052,7 @@ function renderStartPersistence(){
   if(prof){ const pr=getProfilo();   // il nome si sceglie UNA volta, nella creazione del personaggio: qui solo lo storico
     prof.innerHTML=pr.carriere.length?`<div style="margin-top:16px"><button onclick="showCarriere()" style="background:transparent;border:none;color:var(--brand);font-family:inherit;font-size:13px;text-decoration:underline;cursor:pointer">${T('Le tue carriere')} (${pr.carriere.length}) →</button></div>`:'';
   }
+  try{ lampoHomeBottone(); }catch(e){}   // L251-2: il terzo bottone della home (solo con LAMPO_ATTIVO)
 }
 function hideMenu(){ const m=document.getElementById('menu'); if(m) m.classList.remove('on'); }
 /* E4c — audio rimosso per scelta (verdetto playtest): il gioco è muto. Nei save vecchi può esistere
@@ -1912,7 +2112,7 @@ function showPartita(){
   if(!S) return;
   { const mm=document.getElementById('menu-modal'); if(mm) mm.dataset.vista='partita'; }
   const ok=storageOK();   // localStorage disponibile? (file:// su iOS lo blocca → degrada su export/import file)
-  let h=`<div class="mt"><div class="kicker">${T('Partita')}</div><h2>${T('Salva e carica')}</h2></div>`;
+  let h=`<div class="mt"><div class="kicker">${T('Partita')}</div><h2>${T((typeof LAMPO!=='undefined' && LAMPO) ? 'Sfida in corso' : 'Salva e carica')}</h2></div>`;
   h+=`<div class="seg" id="lang-seg-menu" style="max-width:200px;margin:0 auto 10px;">
       <button data-l="it" class="${curLang()==='it'?'on':''}" onclick="setLang('it')">Italiano</button>
       <button data-l="en" class="${curLang()==='en'?'on':''}" onclick="setLang('en')">English</button></div>`;
@@ -1928,6 +2128,9 @@ function showPartita(){
   const _auSeg=audioControlliHtml();
   h+=`<div class="contorno" style="font-size:11px;color:var(--mut);text-align:center;margin:0 auto 10px;max-width:300px">${T('Con <b>ridotto</b> restano solo le dissolvenze; con <b>spento</b> nulla si muove. La scelta resta su questo dispositivo.')}${movimentoScelto()?'':(motionSistemaReduce()?(' '+T('(il tuo dispositivo chiede meno movimento: si parte da ridotto)')):'')}</div>`;
   h+=_auSeg;
+  if(typeof LAMPO!=='undefined' && LAMPO){   // L251-2: niente slot né esportazione (nessun salvataggio a metà, D-S2): «Abbandona la sfida» al posto di «Salva»
+    h+=`<div class="choices">${lampoMenuHtml()}</div><div class="barra-avanti"><button class="opt" onclick="hideMenu()"><span class="ol">${T('Chiudi')}</span></button></div>`;
+    document.getElementById('menu-modal').innerHTML=h; document.getElementById('menu').classList.add('on'); return; }
   h+=`<div class="mtext">${T(aMetaMese()?"Sei a metà mese: il salvataggio riprenderà <b>dall'inizio del mese corrente</b>.":"Fotografia al confine del mese corrente.")}</div>`;
   h+=`<div class="choices">`;
   if(!ok) h+=`<div class="note" style="border-color:var(--warn);color:var(--warn-ink)">${T('Su questo dispositivo il salvataggio nel browser non è disponibile (stai aprendo il gioco da file locale). Per non perdere la carriera usa <b>Scarica file</b> qui sotto, e riprendila con <b>Importa</b>.')}</div>`;
@@ -2232,7 +2435,9 @@ function render(){
   if(liv0){ if(S.tab!=='gov' && S.tab!=='attorno') S.tab='gov'; }   // ATTIVISTA (A.5): due tab — Movimento (gov) + Attorno; coerce solo i tab non validi
   else if(noNaz && S.tab!=='gov' && S.tab!=='paese') S.tab='gov';   // solo Governo + Paese (lo stato del mondo)
   const mp=part(S.partito)||{}, dsk=ppDiscoHtml(mp.colore) ? ` · <span class="hdr-pp">${ppDiscoHtml(mp.colore)}${mp.sigla||mp.nome||''}</span>` : '';   // L237-4 (D-P5): il disco solo per un partito con `colore` (oggi il partito proprio); sigla già in HTML sicuro dal roster
-  document.getElementById('el').innerHTML = (liv0
+  document.getElementById('el').innerHTML = ((typeof LAMPO!=='undefined' && LAMPO)
+    ? `${meseSpan()} · ${lampoRigaTempo()}`   // L251-2: la sfida al posto del mandato
+    : liv0
     ? `${meseSpan()} · ${T('Attivista')}`
     : liv4
     ? `${meseSpan()} · ${T('Segretario')} · ${T('mandato')} ${S.intl.mandato} · ${T('mese')} ${(S.intl.mesiInCarica||0)+1}/${S.intl.mandatoMesi}`
@@ -2324,6 +2529,8 @@ var RITRATTI_AREA = {
   giappone:'asi', coreasud:'asi',
   india:'sud',
   nigeria:'afr', sudafrica:'afr',
+  danimarca:'occ',   // L250-2
+  paesibassi:'occ',   // L250-5
 };   // L10-1: prefissi allineati ai nomi-file su disco (occ/lat/asi/sud/afr), non ai nomi lunghi di L9-2
 /* L11-3 — conteggio PER POOL **E GENERE**: un lotto d'arte parziale (es. 5 maschi ma 4 femmine) non produce più un
    path inesistente. Derivarlo a runtime dai file richiederebbe fetch/sonde (il gioco usa script classici, niente

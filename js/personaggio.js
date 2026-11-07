@@ -388,8 +388,11 @@ function persFotogramma(ms){
   }
   persAvvia();   // senza istanze non chiede il fotogramma dopo
 }
+/* L251-6 · il battito delle palpebre è CONTORNO (a tempi che dipendono dallo schermo, senza effetto su S): rndUi(), la Math.random del
+   caricamento (game.js), non quella seminata della sfida del giorno. Prima che game.js sia caricato, Math.random. */
+function persRnd(){ return (typeof rndUi==="function") ? rndUi() : Math.random(); }
 function persDisegna(I, now){
-  if(I.t0==null){ I.t0=now; I.blink=now+2+Math.random()*3; }
+  if(I.t0==null){ I.t0=now; I.blink=now+2+persRnd()*3; }
   const piena=I.mov==='pieno', ta=now-I.t0;
   let P=persPosa(I.azione==='parla'?'respiro':I.azione, piena ? ta : PERS_POSE_CHIAVE[I.azione]);
   if(I.azione==='parla') P.umore=PERS_UMORE.parla;
@@ -405,7 +408,7 @@ function persDisegna(I, now){
   persAttr(R.brsx, 'transform','rotate('+P.sx[0].toFixed(2)+' 62 112)'); persAttr(R.avsx, 'transform','rotate('+P.sx[1].toFixed(2)+' 62 166)');
   persAttr(R.brdx, 'transform','rotate('+P.dx[0].toFixed(2)+' 138 112)'); persAttr(R.avdx, 'transform','rotate('+P.dx[1].toFixed(2)+' 138 166)');
   let pal=P.palpebra;
-  if(piena){ if(now>I.blink+0.14) I.blink=now+2+Math.random()*3; if(now>I.blink) pal=Math.min(pal, 0.08); }
+  if(piena){ if(now>I.blink+0.14) I.blink=now+2+persRnd()*3; if(now>I.blink) pal=Math.min(pal, 0.08); }
   const sc=function(cx){ return 'translate('+cx+',58) scale(1,'+pal.toFixed(2)+') translate('+(-cx)+',-58)'; };
   persAttr(R.occhioSx, 'transform', sc(89)); persAttr(R.occhioDx, 'transform', sc(111));
   const ap=persApertura(I, ta); I.apertura=persLerp(I.apertura||0, ap, piena?0.45:1);
