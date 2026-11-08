@@ -510,11 +510,11 @@ function applyPaese(){
   const introPaese=(typeof curLang==='function'&&curLang()==='en')?T(P.nome):P.nomeArt;
   /* L155-2 · gli anni fino alla PRIMA urna li conta il motore: una porta parte a legislatura in corso (`turnMandato`, lo stesso campo che
      initStatoBase copia in S.turnInMandate) e il motore vota a gennaio quando turnInMandate arriva a mandatoMesi/12 — le porte partono a
-     gennaio, quindi gli anni sono mandatoMesi/12 − turnMandato (de2000: 2; fr1980: 1). Il presente non ha turnMandato: il mandato intero. */
+     gennaio, quindi gli anni sono mandatoMesi/12 − turnMandato (de2000: 2; fr1980: 1). Il presente ha il mandato intero, salvo il paese che dichiara turnMandato (L250-12: la Svezia). */
   const scI=(typeof SCENARI!=='undefined' && typeof chosenScenario!=='undefined') ? SCENARI[chosenScenario] : null;
   /* L173-1 · con `meseUrna` (l'urna a novembre) il primo anno del mandato finisce al mese dell'urna, non a dicembre: i mesi alla prima urna
      da gennaio sono ((mu−2) mod 12)+1 più gli anni pieni (12 con gennaio: la formula di prima), e si arrotondano ad anni. */
-  const muI=(scI && scI.meseUrna) || P.meseUrna || 1, tmI=((scI && scI.id!=='presente' && scI.turnMandato) || 0);
+  const muI=(scI && scI.meseUrna) || P.meseUrna || 1, tmI=((scI && scI.id!=='presente') ? (scI.turnMandato || 0) : (P.turnMandato || 0));   // L250-12: un paese del presente può dichiarare l'orologio (la Svezia: turnMandato 3, urna a settembre → «tra un anno»)
   const anniUrna=Math.max(1, Math.round(((((muI-2)+12)%12)+1 + (P.mandatoMesi/12 - tmI - 1)*12)/12));
   if(intro) intro.textContent = (typeof chosenMode!=='undefined' && chosenMode==='opposizione')
     ? (anniUrna===1
@@ -2531,6 +2531,8 @@ var RITRATTI_AREA = {
   nigeria:'afr', sudafrica:'afr',
   danimarca:'occ',   // L250-2
   paesibassi:'occ',   // L250-5
+  svezia:'occ',   // L250-8
+  norvegia:'occ',   // L250-14
 };   // L10-1: prefissi allineati ai nomi-file su disco (occ/lat/asi/sud/afr), non ai nomi lunghi di L9-2
 /* L11-3 — conteggio PER POOL **E GENERE**: un lotto d'arte parziale (es. 5 maschi ma 4 femmine) non produce più un
    path inesistente. Derivarlo a runtime dai file richiederebbe fetch/sonde (il gioco usa script classici, niente
@@ -5557,7 +5559,8 @@ function renderPartiti(){
     : T('A fine mandato si vota in un <b>testa a testa</b> col rivale più forte: gli altri partiti si schierano per vicinanza politica e vinci se superi il 50%.');
   const hasAllies = S.tenuta && Object.keys(S.tenuta).length>0;
   const tenNote = hasAllies?' '+T('Ogni <b>alleato</b> ha una <b>tenuta</b>: se trascuri la sua base cala, finché ti pone un <b>ultimatum</b> e — se lo ignori — <b>esce</b> dalla coalizione.'):'';
-  const minNote = S.minoranza?' <b style="color:var(--neg)">'+T(minoranzaSoloSenato()?'Governi senza maggioranza al Senato':'Governi in minoranza')+'</b>: '+T('ogni mese rischi una <b>mozione di sfiducia</b> che porta a elezioni anticipate.'):'';
+  const minNote = (S.minoranza && typeof minoranzaSostenuta==='function' && minoranzaSostenuta()) ? ' <b>'+T("Governi in minoranza con l'appoggio esterno di %P").replace('%P',T((part(S.sostegno.pid)||{}).nome||''))+'</b>: '+T("finché l'intesa regge nessuna mozione ti tocca; se si rompe, cadi solo se contro di te c'è una maggioranza.")   // L250-9
+    : S.minoranza?' <b style="color:var(--neg)">'+T(minoranzaSoloSenato()?'Governi senza maggioranza al Senato':'Governi in minoranza')+'</b>: '+T('ogni mese rischi una <b>mozione di sfiducia</b> che porta a elezioni anticipate.'):'';
   const govLine = S.opposizione?T("Al <b>Governo</b> c'è l'avversario; il tuo partito è all'<b>Opposizione</b>."):T("I partiti al <b>Governo</b> formano la tua maggioranza, gli altri sono all'<b>Opposizione</b>.");
   const oppNote = S.opposizione?' <b style="color:var(--neg)">'+T("Sei all'opposizione")+'</b>: '+T('fai risalire la tua forza e vinci il prossimo voto per tornare al governo; se crolla sotto ~%N il partito ti scarica.').replace('%N',Math.round(sogliaCrollo(f0Crollo()))):'';
   h+=`</div>${territBox}${locPariPartitiRiga()}${oppTragBox()}<div class="card"><div class="ct">${T('Come funziona')}</div><div class="log">

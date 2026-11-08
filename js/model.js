@@ -827,7 +827,9 @@ function seggiCoalizione(ids, seggi){ return ids.reduce((s,id)=>s+(seggi[id]||0)
 /* "Il tuo blocco" per le elezioni intermedie: governando = la tua coalizione; in opposizione = tuo partito +
    compatibili per asse (la coalizione che raduneresti). bloccoQuota() = somma delle forze correnti del blocco. */
 function bloccoIds(){
-  if(!S.opposizione) return (S.coalizione||[S.partito]).slice();
+  if(!S.opposizione){ var cG=(S.coalizione||[S.partito]).slice();
+    if(typeof soloAppoggio==='function') soloAppoggio(S.partito).forEach(function(id){ if(cG.indexOf(id)<0) cG.push(id); });   // L250-9: con minoranzaNorma il blocco elettorale comprende chi ti sostiene da fuori (no-op senza il campo)
+    return cG; }
   return [S.partito].concat(compatibiliMiei().map(p=>p.id));   // L237-2: all'opposizione senza chi guida il governo
 }
 /* L237-2 (15/10, D-P1 di Giacomo, scelte (a)-(b) di Cowork) · I COMPATIBILI DEL GIOCATORE, ALL'OPPOSIZIONE SENZA CHI GUIDA IL GOVERNO.

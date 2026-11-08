@@ -417,6 +417,7 @@ function initStatoBase(){
      l'elezione naturale sull'anno dello snodo. Percorso d'ingresso diverso dal reset turnInMandate=0 di A.5
      (quello è diventaLocale/rielezione; qui è l'avvio-governo → startGame non lo ritocca). */
   if(_SC && _SC.turnMandato!=null){ S.turnInMandate=_SC.turnMandato; }
+  else if(S.scenario==='presente' && PAESE && PAESE.turnMandato!=null){ S.turnInMandate=PAESE.turnMandato; }   // L250-12: un paese del presente può dichiarare l'orologio del mandato in corso (oggi solo la Svezia: urna 2026/9, con meseUrna)
   S.meseUrnaPorta=meseUrna();   // L192-4: il calendario si fissa nella carriera (lo legge meseUrna()); un salvataggio vecchio lo riceve da applySnap
   initCongresso();   // L173-2: la Camera d'avvio, se la porta (o il paese) la dichiara; altrimenti S.congresso=null
   if(_SC && _SC.mandatiVinti!=null){ S.mandatesWon=_SC.mandatiVinti; S.mandate=_SC.mandatiVinti+1; S.mandatiConsecutivi=_SC.mandatiVinti; }   // L75-1: la porta parte con l'anzianità (uk1990: undici anni, tre vittorie) · L86-1: l'anzianità è consecutiva per definizione (chi è lì da undici anni non ha perso in mezzo) · L176-1: L'ANZIANITÀ DI PORTA È DI CHI GOVERNA — qui il livello non si sa ancora (lo scrive applicaPersonaggio, sotto): ai livelli 0-2 e 5 la toglie la riga dopo applicaPersonaggio, all'opposizione startOpposizione
@@ -986,9 +987,10 @@ function startOpposizione(){
      (S.turnInMandate), che initStatoBase aveva messo a `turnMandato` dello scenario: così lo sfidante di una porta votava
      a un mandato pieno dall'avvio (la CDU di de1970 nel 1975 invece che nel 1972, e al governo 20 volte su 20). Qui, SOLO
      all'avvio, l'orologio riprende quello della porta; a partita in corso l'uscita dal governo (goOpposizione) apre una
-     legislatura nuova come prima. Senza `turnMandato` (il presente) non cambia niente. */
+     legislatura nuova come prima. Senza `turnMandato` (il presente) non cambia niente — salvo il paese del presente che lo dichiara (L250-12: la Svezia, riga sotto). */
   var _SCo=(typeof SCENARI!=='undefined' && S.scenario) ? SCENARI[S.scenario] : null;
   if(_SCo && _SCo.turnMandato!=null) S.turnInMandate=_SCo.turnMandato;
+  else if(S.scenario==='presente' && PAESE && PAESE.turnMandato!=null) S.turnInMandate=PAESE.turnMandato;   // L250-12: lo stesso orologio del paese del presente (initStatoBase)
   if(LAMPO) lampoCalendario();   // L251-3: dopo l'orologio della porta, la sfida lo porta a 12 mesi dall'urna (spento LAMPO è null)
   S.logorioAvv=logorioMaturato(_SCo);   // L262-2bis: e il governo avversario della porta ha già governato i suoi mesi (entraOpposizione lo azzerava)
   initTerritori(); initPotereLocale();   // territori per lean + potere locale del TUO blocco d'opposizione (bloccoIds = opp)
@@ -1000,7 +1002,9 @@ function startOpposizione(){
      (`mandatiConsecutivi:false`) chiudeva con `mandatoCompiuto` alla vigilia del 1956 invece che del 1960; a `uk1990`/`uk2000`
      l'epitaffio del Labour diceva «2 mandati vinti» che erano dei Conservatori. Qui, accanto a `S.mandate=0`, che già lo diceva. */
   S.mandatesWon=0;
-  S.log=[{t:T('All\'opposizione'), x:T('Parti da sfidante: al governo c\'è %W. Costruisci consenso e riprenditi il paese alle prossime elezioni.').replace('%W',T(w.nome))}];   // L244-4: il nome del partito passa da T()
+  S.log=[{t:T('All\'opposizione'), x:(PAESE.minoranzaNorma && S.sostegnoAvv && part(S.sostegnoAvv.pid))
+    ? T('Parti da sfidante: al governo c\'è %W, con l\'appoggio esterno di %P. Costruisci consenso e riprenditi il paese alle prossime elezioni.').replace('%W',T(w.nome)).replace('%P',T(part(S.sostegnoAvv.pid).nome))   // L250-10 (⚠ 5 di L250-9): con minoranzaNorma la stampella si dice
+    : T('Parti da sfidante: al governo c\'è %W. Costruisci consenso e riprenditi il paese alle prossime elezioni.').replace('%W',T(w.nome))}];   // L244-4: il nome del partito passa da T()
   bioFatto((bgNome()?bgNome()+', e':'E')+'sordisce da sfidante: la scalata comincia dall\'opposizione.');   // "Sindacalista, esordisce da sfidante..."
   document.getElementById('appoint').style.display='none';
   document.getElementById('over').style.display='none';
@@ -1332,7 +1336,7 @@ function entraDaPartner(guida, rc){
   if(rc){ S.coalizione=rc.membri.slice(); S.turnInMandate=rc.turno; }   // la cricca della sfiducia costruttiva; altrimenti S.coalizione l'ha già scritta la trattativa
   else {
     maturaRP(); segnaForzaUrna();   // l'urna vinta è chiusa (come nextMandate)
-    S.mandate=(S.mandate||0)+1; S.turnInMandate=0;
+    S.mandate=(S.mandate||0)+1; azzeraOrologioUrna();   // L250-10: era S.turnInMandate=0
     if(!sistemaSemipres()) S.seggi=seggiNuovi();
     S.sostegno=null; S.sostegnoStrappi=0;
     chiudiSforzo(); territoriDopoUrna(); S.campNaz=null; S.campNazUltimo=null;
@@ -4848,6 +4852,7 @@ function coalizionePossibile(){
 function partnerSostegno(){
   if(typeof S==='undefined' || !S || !S.seggi) return null;
   var mio=part(S.partito); if(!mio) return null;
+  if(soloAppoggio(S.partito).length) return appoggioNorma(S.coalizione||[S.partito], S.partito);   // L250-9: con minoranzaNorma il partner è quello dichiarato
   var fuori=PAESE.partiti.filter(function(p){
     if((S.coalizione||[]).indexOf(p.id)>=0) return false;
     return Math.abs(p.asse-mio.asse)<=2 || (typeof intesaDi==='function' && intesaDi(p.id)>=50);
@@ -4999,6 +5004,8 @@ function governoCade(){
        una seconda volta, e il ciclo della IV Repubblica si fermerebbe al primo giro. */
     if(p && S.tenutaLiv) S.tenutaLiv[p.id]=0;
     S.log.unshift({t:T('Sfiducia'), x:T('L\'Assemblea nega la fiducia: il Presidente della Repubblica apre le consultazioni.')});
+  } else if(senzaUrne()){   // L250-14 (D-P6): il governo si rifà dalla stessa aula
+    S.log.unshift({t:T('Sfiducia'), x:T('Il governo perde la fiducia. Il Parlamento non si scioglie: dalla stessa aula nasce un governo nuovo, e alle urne non si va.')});
   } else {
     S.log.unshift({t:T('Sfiducia'), x:T('Il governo è caduto: il Presidente nomina un nuovo Primo ministro.')});
   }
@@ -5009,7 +5016,7 @@ function governoCade(){
    la CRICCA, non i compatibili del capofila; (b) la legislatura continua — `turnInMandate` non si azzera: si vota alla
    scadenza, o prima se il nuovo Cancelliere scioglie. Ritorna true se il governo è caduto (il mese si chiude qui, come
    dopo una sconfitta: il resto di advanceMonth è del governo). */
-function sfiduciaCostruttiva(){
+function sfiduciaCostruttiva(testo){   // L250-14: `testo` facoltativo (D-P6 lo passa: lì non c'è un Cancelliere); senza, la riga di sempre
   var b=bloccoAvverso();
   if(!b || b.seggi<50 || !b.capofila) return false;
   var w=part(b.capofila), turno=S.turnInMandate;
@@ -5017,11 +5024,50 @@ function sfiduciaCostruttiva(){
   S.coalizione=b.membri.slice();
   S.turnInMandate=turno;
   S.bloccoAtteso=bloccoQuota();
-  S.log.unshift({t:T('Sfiducia costruttiva'), x:T('%P elegge un nuovo Cancelliere: il governo cambia senza elezioni.').replace('%P', T(w.nome))});
+  S.log.unshift(testo ? {t:T('Sfiducia'), x:testo.replace('%P', T(w.nome))} : {t:T('Sfiducia costruttiva'), x:T('%P elegge un nuovo Cancelliere: il governo cambia senza elezioni.').replace('%P', T(w.nome))});
   if(typeof parla==='function') parla('voce-fiducia-no');   // L218-5 (gli altri punti: governoCade)
   var ov=(typeof document!=='undefined') && document.getElementById && document.getElementById('ov'); if(ov && ov.classList) ov.classList.remove('on');
   genAgenda(false); render(); commitSnap();
   return true;
+}
+/* L250-14 (08/11) · D-P6 — IL PARLAMENTO CHE NON SI SCIOGLIE (`PAESE.scioglimento===false`, oggi solo la Norvegia: lo Storting
+   non si scioglie mai, si vota solo alla scadenza ordinaria). Il campo spegneva già la voce dello scioglimento del giocatore
+   (azioneScioglimento, ~5255); qui spegne le DUE strade dalla caduta alle urne di advanceMonth — la sfiducia sul governo del
+   giocatore (`probSfiducia`) e quella sul governo avversario (`probSfiduciaAvversario`) — e la terza caduta di `crisiMinisteriale`.
+   Il tiro del dado resta dov'era (stessa sequenza dei numeri casuali); cambia solo che cosa succede DOPO:
+   · al governo: se un blocco avverso ha la maggioranza nella stessa aula (`bloccoAvverso()`, la cricca della sfiducia costruttiva),
+     il governo passa a lui senza urne (`sfiduciaCostruttiva(testo)`: entraOpposizione, legislatura che continua); altrimenti il
+     governo si rifà con gli stessi seggi (`governoCade`: il rimpasto se un partner porta i numeri, se no un governo di minoranza
+     con gli stessi partiti) e il mese prosegue;
+   · all'opposizione: se esiste una cricca ≥ 50 col TUO partito (`criccaMia()`) entri al governo senza urne (la strada di L108-1:
+     da partner se non guidi, `entraDaPartner`, o la nomina dei ministri con `S.rientroCostruttivo`); altrimenti il governo
+     avversario si rifà (la pena sul suo logorio, come il ramo semipresidenziale).
+   Nessun campo nuovo in `S`. Un paese senza il campo non passa mai di qui. Prova prove/l250-14/prova-senza-urne.js. */
+function senzaUrne(){ return !!(typeof PAESE!=='undefined' && PAESE && PAESE.scioglimento===false); }
+function cadutaSenzaUrne(){   // ritorna true se il mese si è chiuso (il governo è passato all'avversario)
+  var b=bloccoAvverso();
+  if(b && b.seggi>=50 && b.capofila) return sfiduciaCostruttiva(T('Il governo perde la fiducia. Il Parlamento non si scioglie: %P forma un governo nuovo dalla stessa aula, e alle urne non si va.'));
+  governoCade();
+  return false;
+}
+function cadutaAvversarioSenzaUrne(){   // ritorna true se il mese si è chiuso (sei entrato al governo)
+  var cm=criccaMia();
+  if(cm.seggi>=50){
+    var gCo=REGOLA_PARTNER ? guidaCoalizione(cm.membri, S.seggi) : S.partito;
+    if(gCo!==S.partito){
+      S.log.unshift({t:T('Il governo cade'), x:T('Il governo perde la fiducia e il Parlamento non si scioglie: nasce un governo guidato da %P, e tu ci entri da partner.').replace('%P', T((part(gCo)||{}).nome||''))});
+      entraDaPartner(gCo, { membri:cm.membri.slice(), turno:S.turnInMandate });
+      return true;
+    }
+    S.rientroCostruttivo={ membri:cm.membri.slice(), turno:S.turnInMandate };
+    S.log.unshift({t:T('Il governo cade'), x:T('Il governo perde la fiducia e il Parlamento non si scioglie: dalla stessa aula nasce il tuo governo, senza elezioni.')});
+    goAppoint();
+    return true;
+  }
+  S.logorioAvv=(S.logorioAvv||0) + (typeof rateLogorioMese==='function' ? rateLogorioMese()*CADUTA_LOGORIO_K : 0);
+  S.mesiMinoranzaAvv=0; S.mesiGovernoAvv=0; S.sostegnoAvv=null;
+  S.log.unshift({t:T('Il governo cade'), x:T('Il governo perde la fiducia. Il Parlamento non si scioglie: si forma un altro governo, e alle urne non si va.')});
+  return false;
 }
 /* L93-4 · la crisi ministeriale della IV Repubblica. Chiamata SOLO sotto `PAESE.crisiMinisteriale`, al confine del
    mese, quando il governo del giocatore è in minoranza. Le prime due cadute del mandato riformano il governo
@@ -5045,7 +5091,7 @@ function cadeAttivo(ch){
 function crisiMinisteriale(){
   S.caduteMandato=(S.caduteMandato||0)+1;
   S.ultimaCaduta=S.year*12+S.month;
-  if(S.caduteMandato>=3){
+  if(S.caduteMandato>=3 && !senzaUrne()){   // L250-14 (D-P6): dove il Parlamento non si scioglie, anche la terza caduta si rifà dall'aula
     S.governiCaduti=(S.governiCaduti||0)+1;
     S.elezioniAnticipate=true;
     S.log.unshift({t:T('Sfiducia'), x:T('Tre governi in un mandato: il Presidente scioglie l\'Assemblea.')});
@@ -5067,6 +5113,27 @@ function sostegnoDovuto(){
       && !S.sostegno && minoranzaFresca() && S.sostegnoOfferto!==(S.mandate||0)
       && !partnerRimpasto() && !!partnerSostegno();   // il rimpasto ha la precedenza: si prova prima quello
 }
+/* L250-11 (⚠ 1 di L250-10): il gruppo della promessa del prezzo «programma». Senza minoranzaNorma (o con
+   PROMESSA_VICINA spento) il primo gruppo della base di chi sostiene, come sempre. Con la norma il gruppo della
+   base di chi sostiene col PRODOTTO dei pesi più alto con la base del partito che guida il governo (a pari il
+   primo nell'ordine della base di chi sostiene; prodotto 0 per tutti = il primo): la promessa a SD sui
+   lavoratori, il gruppo che il governo M colpisce di più, rompeva l'accordo 2,6 volte per carriera.
+   Coi dati di oggi: M → cetomedio (0,08), KD → pensionati (0,09), L → cetomedio (0,10). */
+let PROMESSA_VICINA=true;
+/* La taratura (una sola, L250-11): fuori il gruppo che il prezzo stesso del patto colpisce (ceto medio −2 in sostegnoApri). Misurato:
+   col ceto medio dentro, sotto il governo M è il gruppo che perde di più (309 punti nei mesi col sostegno contro lavoratori 197,
+   pensionati 90), e la promessa si rompeva quanto prima. Con la taratura M → pensionati, KD → pensionati, L → lavoratori (prodotto 0). */
+let PROMESSA_SENZA_PREZZO=true;
+function promessaSostegnoGruppo(p){
+  if(!p || !p.base) return null;
+  var ks=Object.keys(p.base); if(!ks.length) return null;
+  if(!PROMESSA_VICINA || !PAESE || !PAESE.minoranzaNorma) return ks[0];
+  var guida=(PAESE.partiti||[]).find(function(x){ return x.id===S.partito; });
+  var bg=(guida && guida.base) || {};
+  var best=ks[0], bv=0;
+  ks.forEach(function(g){ if(PROMESSA_SENZA_PREZZO && g==='cetomedio') return; var v=(p.base[g]||0)*(bg[g]||0); if(v>bv+1e-12){ bv=v; best=g; } });
+  return best;
+}
 /* apre l'accordo col prezzo scelto. `mesi` conta la durata, che finisce comunque col mandato. */
 function sostegnoApri(prezzo){
   var p=partnerSostegno(); if(!p){ S.sostegno=null; return; }
@@ -5078,8 +5145,10 @@ function sostegnoApri(prezzo){
      che si LOGORA, non uno che non è mai esistito: chi firma un patto parte da un rapporto di lavoro. */
   if(typeof intesaMuovi==='function'){ try{ intesaMuovi(p.id, Math.max(0, 55-(typeof intesaDi==='function'?intesaDi(p.id):0))); }catch(e){} }
   var nome=T(p.nome);
-  if(prezzo==='programma'){ if(typeof campPromessa==='function' && p.base){ for(var g in p.base){ campPromessa(g); break; } }
-    gd('cetomedio',-2); stampad(-3); }
+  if(prezzo==='programma'){ var cPrima=!!(PROMESSA_VICINA && PAESE.minoranzaNorma);   // L250-11: con la norma il costo del patto (ceto medio −2) si paga PRIMA di registrare la promessa: il gruppo più vicino al governo è spesso il ceto medio, e il costo dell'accordo contava come il primo colpo alla promessa appena fatta (misurato: rotture 2,6 → 2,7·2,9)
+    if(cPrima) gd('cetomedio',-2);
+    if(typeof campPromessa==='function' && p.base){ var gP=promessaSostegnoGruppo(p); if(gP){ campPromessa(gP); if(PAESE.minoranzaNorma) S.promesseCampagna[S.promesseCampagna.length-1].perSostegno=p.id; } }   // L250-10: con minoranzaNorma la promessa sa per chi è; L250-11: e cade sul gruppo più vicino al governo
+    if(!cPrima) gd('cetomedio',-2); stampad(-3); }
   else if(prezzo==='veto'){ stampad(-4); tutteCorrenti(-5); }
   else { S.ind.debt+=0.6; stampad(-5); if(p.base) for(var g2 in p.base) gd(g2,3); }
   repd(-2);
@@ -5118,6 +5187,10 @@ function voceAlleanza(id, prima){
   parla(voceGesto('alleanza', 'voce-alleanza'));   // L248-5bis: l'alleato nuovo nello strato (tetto 12 mesi)
   return true;
 }
+/* L250-10 · con `minoranzaNorma` l'accordo dura la legislatura intera, non qualche mese: la promessa al sostenitore si rompe a 6 colpi,
+   la soglia della promessa «tradita» (resaPromesseCampagna, le tre tacche del tavolo), non a 3 (la stampella temporanea di L53-2). Taratura
+   del Passo 4 (rapporto «⚑ L250-10»): a 3 colpi le rotture restavano 28 su 10 carriere, tutte sulla promessa a SD. */
+let SOSTEGNO_NORMA_COLPI = 6;
 /* IL CONTO DEL SOSTEGNO, ogni mese: il prezzo si paga e si controlla se regge. Chiamata da avanzaMese. */
 function sostegnoTick(){
   if(!S || !S.sostegno) return;
@@ -5125,7 +5198,7 @@ function sostegnoTick(){
   if(!p || S.opposizione){ S.sostegno=null; return; }
   A.mesi=(A.mesi||0)+1;
   if(A.prezzo==='bottega'){ S.ind.debt+=0.05; }                       // costa ogni mese, davvero
-  if(A.prezzo==='programma' && S.promesseCampagna && S.promesseCampagna.some(function(q){ return (q.colpi||0)>=3; })) return sostegnoRompi('promessa');
+  if(A.prezzo==='programma' && S.promesseCampagna && S.promesseCampagna.some(function(q){ return PAESE.minoranzaNorma ? (q.perSostegno===A.pid && (q.colpi||0)>=SOSTEGNO_NORMA_COLPI) : (q.colpi||0)>=3; })) return sostegnoRompi('promessa');   // L250-10: con minoranzaNorma rompe solo la promessa fatta a chi sostiene, a SOSTEGNO_NORMA_COLPI
   if(A.prezzo==='veto' && (S.sostegnoStrappi||0)>=3) return sostegnoRompi('strappi');
   if(typeof intesaDi==='function' && intesaDi(A.pid)<25) return sostegnoRompi('intesa');
   if(A.mesi%6===0 && typeof intesaMuovi==='function'){ try{ intesaMuovi(A.pid,-3); }catch(e){} }   // logora: vivere di stampelle consuma il rapporto
@@ -5223,7 +5296,7 @@ function scioglimentoAmmesso(){
   if(PAESE.scioglimento===false) return false;                      // calendario rigido: la voce non compare
   if(PAESE.comeSiVince!=='parlamentare' && !PAESE.coalizione) return false;
   var mesiDalVoto=meseMandato();   // L173-1: era turnInMandate*12 + (mese−1), identico con meseUrna 1
-  if(sistemaSemipres() && S.legislaturaDa!=null) mesiDalVoto=Math.min(mesiDalVoto, S.year*12+S.month-S.legislaturaDa);   // L104-2: dall'Assemblea in vigore
+  if((sistemaSemipres() || PAESE.anticipateNelMandato) && S.legislaturaDa!=null) mesiDalVoto=Math.min(mesiDalVoto, S.year*12+S.month-S.legislaturaDa);   // L104-2: dall'Assemblea in vigore
   var minMesi=(PAESE.scioglimentoMesiMin!=null)?PAESE.scioglimentoMesiMin:18;   // L80-5: la Francia scioglie dopo 12 mesi
   if(mesiDalVoto<minMesi) return false;                            // prima è indecente
   var durata=(PAESE.mandatoMesi||60)/12;
@@ -7405,6 +7478,27 @@ function azioneAttacco(id, tono){
    col calendario di allora. Senza S (prima dell'avvio) vale la porta, come prima. */
 function meseUrna(){ return (typeof S!=='undefined' && S && S.meseUrnaPorta) || (typeof PAESE!=='undefined' && PAESE && PAESE.meseUrna) || 1; }
 function meseMandato(){ return (S.turnInMandate||0)*12 + ((S.month - meseUrna() + 12) % 12); }
+/* ⚑ L250-10 (08/11) · LE ANTICIPATE DENTRO IL MANDATO (`PAESE.anticipateNelMandato`, oggi solo la Svezia). In Svezia l'elezione
+   straordinaria rinnova il Riksdag ma non la scadenza ordinaria: la legislatura dopo dura quanto restava. Il punto unico è
+   `azzeraOrologioUrna()`, chiamato dove un'urna chiusa azzerava `S.turnInMandate` (nextMandate, entraOpposizione, entraDaPartner, e
+   la cerimonia del banco in harness.js): con il campo e un'urna anticipata (`S.elezioniAnticipate`, letto PRIMA che lo azzerino) a più
+   di 3 mesi dalla scadenza l'orologio resta com'è e `S.legislaturaDa` segna l'aula nuova (la legge `scioglimentoAmmesso`, come nel
+   semipresidenziale: i 18 mesi si contano dall'aula in vigore); a ≤ 3 mesi vale come l'ordinaria (mandato nuovo). I mandati
+   (S.mandate, mandatesWon, biografia) contano come prima. Senza il campo `azzeraOrologioUrna()` è `S.turnInMandate=0`.
+   Prova prove/l250-10/prova-anticipate.js, A/B .claude/ab-l250-10.js. */
+function anticipataNelMandato(){
+  return !!(typeof PAESE!=='undefined' && PAESE && PAESE.anticipateNelMandato && typeof S!=='undefined' && S && S.elezioniAnticipate
+    && ((PAESE.mandatoMesi||60) - meseMandato()) > 3);
+}
+function azzeraOrologioUrna(){
+  if(anticipataNelMandato()){ S.legislaturaDa=S.year*12+S.month; return false; }
+  S.turnInMandate=0; return true;
+}
+/* la scadenza ordinaria del mandato in corso, come «Mese anno» reso (per i testi dell'anticipata svedese) */
+function scadenzaOrdinariaTesto(){
+  const ass=S.year*12+(S.month-1)+Math.max(0,(PAESE.mandatoMesi||60)-meseMandato());
+  const n=T(MONTHS[ass%12]); return (T('Gennaio')==='Gennaio' ? n.toLowerCase() : n)+' '+Math.floor(ass/12);   // in italiano il mese in minuscolo (come ui.js)
+}
 function avanzaAnnoMandato(){ if(S.month>12){ S.month=1; S.year++; } if(S.month===meseUrna()) S.turnInMandate++; }   // chiamata dopo S.month++
 /* L173-2 · IL CONGRESSO DERIVATO (D126). `S.congresso = {camera}` è la quota della Camera del PARTITO DEL PRESIDENTE — chiunque
    sia il giocatore: dall'opposizione è la quota dell'avversario che governa. ⚠ NON è `S.seggi` (≈115 righe: riempirlo accenderebbe
@@ -7798,7 +7892,7 @@ function aCapitale(){ var c=capitalePaese(); return (/^[Aa]/.test(c) ? 'ad ' : '
    Ottawa, Madrid…: uguali nelle due lingue). `%ACAPITALE` e `%SEDE` non escono in inglese: nessuna voce EN li usa (le chiavi
    EN dicono «to the capital» o «%CAPITALE»), quindi restano solo italiani. */
 var CAPITALI_EN={ 'Roma':'Rome', 'Parigi':'Paris', 'Londra':'London', 'Berlino':'Berlin', 'Nuova Delhi':'New Delhi', 'Seul':'Seoul',
-  'Città del Messico':'Mexico City', 'Brasilia':'Brasília', 'Copenaghen':'Copenhagen' };   // L250-2: Copenaghen
+  'Città del Messico':'Mexico City', 'Brasilia':'Brasília', 'Copenaghen':'Copenhagen', 'Stoccolma':'Stockholm' };   // L250-2: Copenaghen · L250-8: Stoccolma
 function capitaleResa(){ var c=capitalePaese(); return (typeof curLang==='function' && curLang()==='en' && CAPITALI_EN[c]) || c; }
 function luoghiSub(str){
   if(str==null) return str;
@@ -10191,6 +10285,8 @@ function avanzaMese(){
         S.logorioAvv=(S.logorioAvv||0) + (typeof rateLogorioMese==='function' ? rateLogorioMese()*CADUTA_LOGORIO_K : 0);
         S.mesiMinoranzaAvv=0; S.mesiGovernoAvv=0; S.sostegnoAvv=null;   // L91-2: il Presidente ne nomina un altro, e il governo nuovo ha il suo anno di grazia
         S.log.unshift({t:T('Il governo cade'), x:T('Il governo perde la fiducia dell\'Assemblea. Il Presidente ne nomina un altro: alle urne non si va.')});
+      } else if(senzaUrne()){   // L250-14 (D-P6): il Parlamento non si scioglie
+        if(cadutaAvversarioSenzaUrne()) return;
       } else {
         S.elezioniAnticipate=true;
         S.log.unshift({t:T('Il governo cade'), x:T('Il governo cade: si torna alle urne.')});
@@ -10254,6 +10350,7 @@ function avanzaMese(){
        saltava genAgenda/generaTitolo/render/commitSnap: il mese della caduta restava con l'agenda del mese prima, già risolta,
        e non veniva salvato. Ora la caduta si registra e il mese prosegue, come `crisiMinisteriale()` nella IV Repubblica. */
     if(PAESE.sistema==='semipresidenziale'){ governoCade(); }
+    else if(senzaUrne()){ if(cadutaSenzaUrne()) return; }   // L250-14 (D-P6): il governo passa o si rifà dalla stessa aula, senza urne
     else {
       S.elezioniAnticipate=true;
       S.log.unshift({t:T('Sfiducia'),x:T('Mozione di sfiducia approvata: si va a elezioni anticipate.')});   // L80-5: passava dritta, restava in italiano anche in EN
@@ -11507,8 +11604,9 @@ function renderTrattativa(){
   const total=seggiCoalizione(COAL.membri, seggi);
   const cb=(ctx==='voto')?Math.round(credBonus()*10)/10:0;   // bonus credibilità: solo al voto vero (non avvio/rinnovo)
   const eff=total+cb;
-  const comp=compatibiliMiei(seggi).filter(p=>!COAL.membri.includes(p.id));   // L237-2: all'opposizione chi guida il governo non si imbarca (model.js)
+  const comp=senzaAppoggio(compatibiliMiei(seggi), mine).filter(p=>!COAL.membri.includes(p.id));   // L237-2: all'opposizione chi guida il governo non si imbarca (model.js) · L250-9: né chi sostiene solo da fuori
   const reached=eff>=50;
+  const pNorma=reached ? null : appoggioNorma(COAL.membri, mine, seggi);   // L250-9: la minoranza dichiarata, coi seggi di chi sostiene da fuori
   const memberRows=COAL.membri.map(id=>{ const p=part(id), you=id===mine;
     return `<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-top:1px solid var(--line)">
       <span style="font-weight:600;font-size:13.5px">${T(p.nome)} <small style="color:var(--mut2);font-weight:400">${you?T('· il tuo partito'):T(p.orientamento)}</small></span>
@@ -11518,7 +11616,8 @@ function renderTrattativa(){
   /* L237-2bis (d) · prima di firmare, chi guiderà: dall'opposizione, se la coalizione scelta ha un partito più forte del tuo, la firma lo dice (la stessa guidaCoalizione di vinciElezione) */
   const gFirma=(voto && REGOLA_PARTNER && S.opposizione && PAESE.comeSiVince==='parlamentare' && !(typeof urnaLegislativa==='function' && urnaLegislativa())) ? guidaCoalizione(COAL.membri, seggi) : mine;
   const firmaTxt = gFirma!==mine ? T('Firma: governo guidato da %P (tu da partner)').replace('%P',T((part(gFirma)||{}).nome||'')) : T(voto?'Conferma la maggioranza':'Forma il governo');
-  if(reached) action=`<button class="opt" style="border-color:var(--acc);background:var(--acc-bg)" onclick="${confirmFn}"><span class="ol" style="color:var(--acc-ink)">${firmaTxt} →</span><span class="oe">${total} ${T('seggi')}${cb?` +${cb} ${T('credibilità')} → ${Math.round(eff)}`:' '+T('su 100')}</span></button>`;
+  if(pNorma) action=`<button class="opt" style="border-color:var(--acc);background:var(--acc-bg)" onclick="${voto?'finalizeVoto(true)':confirmFn}"><span class="ol" style="color:var(--acc-ink)">${T('Governo di minoranza con l\'appoggio esterno di %P').replace('%P',T(pNorma.nome))} →</span><span class="oe">${T('%N seggi + %M da fuori').replace('%N',total).replace('%M',seggi[pNorma.id]||0)}</span></button>`;
+  else if(reached) action=`<button class="opt" style="border-color:var(--acc);background:var(--acc-bg)" onclick="${confirmFn}"><span class="ol" style="color:var(--acc-ink)">${firmaTxt} →</span><span class="oe">${total} ${T('seggi')}${cb?` +${cb} ${T('credibilità')} → ${Math.round(eff)}`:' '+T('su 100')}</span></button>`;
   else if(comp.length===0) action= voto
       ? `<button class="opt" style="border-color:var(--neg)" onclick="finalizeVoto(false)"><span class="ol">${T('Nessuna maggioranza possibile')}</span><span class="oe">${T("Vedi l'esito del voto")}</span></button>`
       : (coabitazioneInVista() ? `<button class="opt" style="border-color:var(--acc)" onclick="${confirmFn}"><span class="ol">${T('Coabitazione')} →</span><span class="oe">${T('solo %N seggi · l\'Assemblea è degli altri: il Primo ministro sarà del loro blocco').replace('%N',total)}</span></button>`
@@ -11580,7 +11679,8 @@ function confirmCoal(){   // solo avvio: chiude e avvia la partita
   if(typeof suona==='function'){ suona('firma');                      // L116-1: il governo nominato
     suona(suonoFormazione((S.scenario && S.scenario!=='presente') ? 'soglia' : 'fanfara')); }   // L116-1: il primo mese di una porta è un passaggio d'epoca · L118-1: nel presente l'insediamento · L140-1: una coalizione brinda al posto loro
   S.coalizione=COAL.membri.slice(); S.minoranza=maggioranzaCamere(S.coalizione)<50; COAL=null;
-  if(typeof aggiornaCoabitazione==='function') aggiornaCoabitazione();   // L100-2/L104-2: all'avvio la porta parte in coabitazione se i seggi lo dicono (il presente francese no: nessuna cricca a 50)
+  if(typeof aggiornaCoabitazione==='function') aggiornaCoabitazione();
+  normaApri();   // L250-9: la minoranza dichiarata con l'appoggio esterno (no-op senza minoranzaNorma)   // L100-2/L104-2: all'avvio la porta parte in coabitazione se i seggi lo dicono (il presente francese no: nessuna cricca a 50)
   initTenuta(); initPotereLocale();   // ora il blocco (coalizione) è noto: fissa potere locale e aspettativa
   document.getElementById('ov').classList.remove('on'); render(); commitSnap();   // primo confine di mese (coalizione formata)
   voceGoverno(coalV);   // L218-6
@@ -11628,6 +11728,8 @@ function confirmRinnovo(){
    `probSfiducia` non viene proprio invocata. Misurato: 0 chiamate in 120 mesi sulla linea italiana.
    ================================================================================================================ */
 function probSfiducia(){
+  /* L250-9 · parlamentarismo negativo: con l'appoggio esterno che porta a 50 nessun tiro; senza, solo se un blocco avverso vero c'è */
+  if(PAESE.minoranzaNorma && S.seggi){ if(minoranzaSostenuta()) return 0; if(bloccoAvverso().seggi<50) return 0; }
   const D=dif(), m=S.mesiMinoranza||0, c=S.ind.consenso;
   let mio = (S.seggi && S.partito!=null)
     ? (PAESE.coalizione ? seggiCoalizione(S.coalizione||[S.partito], S.seggi) : (S.seggi[S.partito]||0))
@@ -11667,6 +11769,7 @@ function partnerSostegnoAvversario(){
   var guida=null, max=-1;
   coal.forEach(function(id){ var s=S.seggi[id]||0; if(s>max){ max=s; guida=part(id); } });
   if(!guida) return null;
+  var gN=S.governoAvversario||coal[0]; if(soloAppoggio(gN).length) return appoggioNorma(coal, gN);   // L250-9: con minoranzaNorma il partner è quello dichiarato
   var fuori=PAESE.partiti.filter(function(p){
     if(coal.indexOf(p.id)>=0) return false;
     if(p.id===S.partito) return false;                     // tu no: sei l'opposizione, non la stampella
@@ -11698,6 +11801,9 @@ function probSfiduciaAvversario(){
      taratura — *un governo appena insediato non cade il mese dopo.* Dodici e non diciotto perché la sfiducia è
      dell'aula e lo scioglimento è del premier. */
   if((S.mesiGovernoAvv||0) < 12) return 0;
+  if(PAESE.minoranzaNorma && S.seggi){   // L250-9: come probSfiducia, dal lato dell'avversario
+    if(S.sostegnoAvv && seggiCoalizione((S.coalizione||[]).concat([S.sostegnoAvv.pid]), S.seggi)>=50) return 0;
+    if(criccaFuori().seggi<50) return 0; }
   const D=dif(), m=S.mesiMinoranzaAvv||0, c=S.ind.consenso;
   let suoi = (typeof bloccoSeggi==='function') ? bloccoSeggi() : 100;
   /* la stampella conta come per te (L53-2): i seggi di chi si astiene entrano scontati del 30% */
@@ -11854,7 +11960,8 @@ function nextMandate(){
   maturaRP();   // qui passa il confine di mese quando si vota: formula del mese in cui cade (gennaio→iniezione, anticipate a metà anno→+1). PRIMA del reset snapshot.
   segnaForzaUrna();   // L153-1: l'urna vinta è chiusa (al governo, o dall'opposizione via tornaAlGoverno)
   if(S.congresso) aggiornaCongresso(quotaPartitoPresidente());   // L173-2: alla presidenziale vinta la Camera è la quota del tuo partito
-  S.mandatesWon++; S.mandate++; S.mandatiConsecutivi=(S.mandatiConsecutivi||0)+1; S.turnInMandate=0; S.snap=Object.assign({},S.pol); S.leggiSnap=Object.assign({},S.leggi);   // L86-1
+  const _nm=!azzeraOrologioUrna();   // L250-10: con anticipateNelMandato l'anticipata non azzera la scadenza (sempre vero senza il campo)
+  S.mandatesWon++; S.mandate++; S.mandatiConsecutivi=(S.mandatiConsecutivi||0)+1; S.snap=Object.assign({},S.pol); S.leggiSnap=Object.assign({},S.leggi);   // L86-1
   if((PAESE.comeSiVince==='parlamentare'||PAESE.coalizione) && !sistemaSemipres()) S.seggi=seggiNuovi();   // L104-2: nel semipresidenziale l'Assemblea resta quella in vigore
   if(sistemaSemipres()) S.scioglimentoScelto=false;   // L104-2
   S.minoranza = PAESE.coalizione ? maggioranzaCamere(S.coalizione)<50
@@ -11865,11 +11972,12 @@ function nextMandate(){
   /* L53-2 — l'accordo esterno FINISCE COL MANDATO (design §A): le stampelle valgono per la legislatura che le
      ha chieste, non per quella dopo. Le due occasioni si riaprono col mandato nuovo. */
   S.sostegno=null; S.sostegnoStrappi=0;
+  normaApri();   // L250-9: con minoranzaNorma l'appoggio esterno si dichiara di nuovo col mandato nuovo (no-op senza il campo)
   chiudiSforzo(); territoriDopoUrna();   // L64-2: lo sforzo non speso si perde; le aree lavorate si decidono dal basso
   S.campNaz=null; S.campNazUltimo=null;   // Cantiere C: la stagione si chiude col voto (le promesseCampagna PERSISTONO: resa dei conti alla prossima)
   tutteCorrenti(8);   // la vittoria ricompatta il partito
-  bioConta('elezioniVinte'); contaMandatoProprio(); bioFatto(gn('Rieletto','Rieletta')+': comincia il mandato '+S.mandate+'.');   // L237-3: il conto del fondatore qui, non in tornaAlGoverno (che chiama nextMandate)
-  S.log.unshift({t:gn('Rieletto','Rieletta'),x:T(S.minoranza?'Inizia il mandato %N — governo di minoranza.':'Inizia il mandato %N.').replace('%N',S.mandate)});
+  bioConta('elezioniVinte'); contaMandatoProprio(); bioFatto(_nm ? T('Elezione straordinaria vinta: la legislatura scade come previsto (%M).').replace('%M', scadenzaOrdinariaTesto()) : gn('Rieletto','Rieletta')+': comincia il mandato '+S.mandate+'.');   // L250-10   // L237-3: il conto del fondatore qui, non in tornaAlGoverno (che chiama nextMandate)
+  S.log.unshift({t:gn('Rieletto','Rieletta'),x:_nm ? T('Elezione straordinaria · la legislatura scade come previsto (%M).').replace('%M', scadenzaOrdinariaTesto()) : T(S.minoranza?'Inizia il mandato %N — governo di minoranza.':'Inizia il mandato %N.').replace('%N',S.mandate)});   // L250-10
   document.getElementById('ov').classList.remove('on');
   genAgenda(false); generaTitolo(); render(); commitSnap();
 }
@@ -12077,7 +12185,73 @@ function vincitoreAvvioOpp(){
   const fuori=PAESE.partiti.filter(p=>p.id!==me && !staColBlocco(p.id, me)).sort((a,b)=>(S.forze[b.id]||0)-(S.forze[a.id]||0));
   return fuori[0] || w;
 }
-function vincitore(){ return PAESE.partiti.filter(p=>p.id!==S.partito).sort((a,b)=>(S.forze[b.id]||0)-(S.forze[a.id]||0))[0]; }
+/* ⚑ L250-9 (08/11) · LA MINORANZA COME NORMA (`PAESE.minoranzaNorma`, oggi solo la Svezia). In Svezia il governo di minoranza con
+   un appoggio esterno DICHIARATO è il modo normale di governare (M-KD-L con SD fuori dal governo, 2022), e il Riksdag fa cadere un
+   governo solo se una maggioranza assoluta vota contro (parlamentarismo negativo). Il campo `appoggioEsterno:{<chi guida>:[<chi
+   sostiene>]}` dice chi sostiene senza entrare. Strada presa (Passo 1): `compatibili()` NON cambia (la leggono anche il blocco
+   elettorale, il rimpasto, l'intesa, il governo avversario) e `alleati` resta com'è; i partiti di solo appoggio si tolgono nei TRE
+   punti che formano una coalizione — la trattativa (renderTrattativa), il banco (formaCoalizione, harness.js) e il governo
+   avversario (entraOpposizione) — con `senzaAppoggio()`. Lettori:
+     · `normaApri()` / `normaApriAvv()`: se la coalizione senza i partiti di solo appoggio sta sotto 50 e col primo di loro arriva a
+       50, nasce la minoranza dichiarata con `S.sostegno` (prezzo «programma», `sostegnoApri`) o `S.sostegnoAvv` (la forma di L91-2).
+       Chiamate da confirmCoal, nextMandate (anche la rimonta: tornaAlGoverno → nextMandate), formaCoalizione del banco ed
+       entraOpposizione.
+     · `probSfiducia` / `probSfiduciaAvversario`: col sostegno la cui somma (piena) arriva a 50 nessun tiro; senza, il tiro solo se
+       un blocco avverso vero è ≥ 50 (`bloccoAvverso()` per il giocatore, `criccaFuori()` per l'avversario).
+     · `partnerSostegno` / `partnerSostegnoAvversario`: il partner è quello dichiarato.
+     · `vincitore()` → `guidaNorma()`: il governo avversario lo guida il più forte di chi può guidare (le chiavi di `appoggioEsterno`
+       che lo dichiarano), non il partito di solo appoggio (SD → M).
+     · `bloccoIds()` (model.js): al governo il blocco elettorale comprende chi ti sostiene da fuori.
+     · `minoranzaSostenuta()`: la musica di crisi e la riga della scheda Partiti.
+   Senza il campo ogni funzione rende quello di prima (A/B .claude/ab-l250-9.js). Prova prove/l250-9/prova-minoranza.js. */
+function soloAppoggio(guida){ const t=PAESE && PAESE.minoranzaNorma && PAESE.appoggioEsterno; return (t && guida && t[guida]) || []; }
+function senzaAppoggio(lista, guida){ const a=soloAppoggio(guida); return a.length ? lista.filter(p=>a.indexOf(p.id)<0) : lista; }
+function appoggioNorma(membri, guida, seggi){
+  const a=soloAppoggio(guida), sg=seggi || (S && S.seggi); if(!a.length || !sg) return null;
+  const tot=seggiCoalizione(membri, sg); if(tot>=50) return null;
+  for(const id of a){ if(membri.indexOf(id)>=0) continue; const v=sg[id]||0; if(v>0 && tot+v>=50 && part(id)) return part(id); }
+  return null;
+}
+function guidaNorma(w){
+  if(!w || !PAESE || !PAESE.minoranzaNorma || !PAESE.appoggioEsterno) return w;
+  const t=PAESE.appoggioEsterno, chi=Object.keys(t).filter(k=>k!==S.partito && t[k].indexOf(w.id)>=0 && part(k));
+  if(!chi.length) return w;
+  chi.sort((a,b)=>(S.forze[b]||0)-(S.forze[a]||0));
+  return part(chi[0]);
+}
+function normaApri(){
+  if(!PAESE || !PAESE.minoranzaNorma || !S || S.livello!==3 || S.opposizione || S.coabitazione) return false;
+  const p=appoggioNorma(S.coalizione||[S.partito], S.partito); if(!p) return false;
+  S.minoranza=true; S.sostegno=null; sostegnoApri('programma');
+  return !!S.sostegno;
+}
+function normaApriAvv(){
+  if(!PAESE || !PAESE.minoranzaNorma || !S || !S.opposizione || !Array.isArray(S.coalizione) || !S.coalizione.length) return false;
+  const g=S.governoAvversario || S.coalizione[0], p=appoggioNorma(S.coalizione, g); if(!p) return false;
+  S.sostegnoAvv={pid:p.id, mesi:0, tenuta:55};
+  if(S.log) S.log.unshift({t:T('Il governo trova una stampella'), x:T('%P non entra nel governo ma promette di non farlo cadere.').replace('%P', T(p.nome))});
+  return true;
+}
+function minoranzaSostenuta(){
+  return !!(PAESE && PAESE.minoranzaNorma && S && S.minoranza && S.sostegno && S.seggi
+    && seggiCoalizione((S.coalizione||[S.partito]).concat([S.sostegno.pid]), S.seggi)>=50);
+}
+/* il blocco contro il governo avversario: la cricca più grande fra chi non sta nel governo e non lo sostiene (te compreso) */
+function criccaFuori(){
+  if(!S || !S.seggi || !PAESE || !PAESE.partiti) return {seggi:0, membri:[]};
+  const gov=(S.coalizione||[]).concat(S.sostegnoAvv ? [S.sostegnoAvv.pid] : []);
+  const fuori=PAESE.partiti.filter(p=>gov.indexOf(p.id)<0 && (S.seggi[p.id]||0)>0).map(p=>p.id);
+  let best={seggi:0, membri:[]}; const n=fuori.length;
+  for(let m=1; m<(1<<n); m++){
+    const membri=[]; for(let k=0;k<n;k++) if(m&(1<<k)) membri.push(fuori[k]);
+    let ok=true; for(let x=0;x<membri.length && ok;x++) for(let y=x+1;y<membri.length;y++){ if(!coppiaCompatibile(membri[x], membri[y])){ ok=false; break; } }
+    if(!ok) continue;
+    const tot=membri.reduce((s2,id)=>s2+(S.seggi[id]||0),0);
+    if(tot>best.seggi) best={seggi:tot, membri:membri};
+  }
+  return best;
+}
+function vincitore(){ const w=PAESE.partiti.filter(p=>p.id!==S.partito).sort((a,b)=>(S.forze[b.id]||0)-(S.forze[a.id]||0))[0]; return PAESE.minoranzaNorma ? guidaNorma(w) : w; }   // L250-9: con minoranzaNorma non guida un partito di solo appoggio
 function vinciElezione(){ if(S.opposizione){ const gP=guidaPartnerVoto(); if(gP) return entraDaPartner(gP); goAppoint(); } else nextMandate(); }   // dall'opposizione si ri-nominano i ministri · L237-2bis: o si entra da partner, se la coalizione la guida un altro
 function perdiElezione(){ if(S.opposizione){ if(salvezzaOpp()) goOpposizione(true); else gameOver('congresso'); } else goOpposizione(); }
 /* Stato d'opposizione: governa il vincitore w (col suo profilo-politiche), tu passi a sfidante. Solo stato:
@@ -12088,7 +12262,7 @@ function entraOpposizione(w){
   const eraOpp=!!S.opposizione;   // L260-4bis: il rivale interno resta se eri già all'opposizione (l'urna persa e perdonata)
   S.opposizione=true; S.governoAvversario=w.id; S.ministers=[];
   S.governoAvversarioVolto=nomePersona();   // L73-2: chi ti ha succeduto ha un nome (generato, mai reale)
-  S.coalizione=[w.id].concat(PAESE.coalizione?compatibili(w.id,S.seggi).filter(p=>p.id!==S.partito).map(p=>p.id):[]);
+  S.coalizione=[w.id].concat(PAESE.coalizione?senzaAppoggio(compatibili(w.id,S.seggi), w.id).filter(p=>p.id!==S.partito).map(p=>p.id):[]);   // L250-9: senza i partiti di solo appoggio (no-op senza minoranzaNorma)
   { const mono=auMonocolore(w.id, S.seggi); if(mono) S.coalizione=mono.filter(id=>id!==S.partito); }   // L263-13quater (C2): il vincitore con la maggioranza da solo (o la Coalizione) governa senza i minori; spento null
   S.tenuta={}; S.tenutaForza0={}; S.tenutaLiv={}; S.tenutaUltimo={}; S.minoranza=false; S.mesiMinoranza=0;
   if(S.coabitazione){ S.coabitazione=false; S.premier=null; }   // L100-2: la presidenziale persa chiude anche la coabitazione
@@ -12096,12 +12270,13 @@ function entraOpposizione(w){
   S.visibilita=40; S.credibilita=50; S.recentGov=[]; S.mesiAlGoverno=0; S.logorioAcc=0;   // variabili d'opposizione; la traversata del deserto azzera il logorio (L77-3: anche l'accumulatore)
   S.logorioAvv=0; S.mesiMinoranzaAvv=0;   // L90-2: e l'avversario che si insedia parte pulito — il suo logorio e' il SUO, non l'eredita' del tuo
   S.mesiGovernoAvv=0; S.sostegnoAvv=null;   // L91-2: governo nuovo, anno di grazia nuovo, nessuna stampella ereditata
+  normaApriAvv();   // L250-9: la minoranza dichiarata dell'avversario nasce con la sua stampella (no-op senza minoranzaNorma)
   S.mandatiConsecutivi=0;   // L86-1: la sconfitta interrompe la serie. `mandatesWon` NO: dove il limite è sui mandati totali (Corea, Messico) chi c'è stato non ci torna comunque.
   S.lineaMedia=S.lineaMedia||'documentata';   // la linea coi media (dato puro; i salvataggi senza campo migrano al default)
   if(S.archi) S.archi=S.archi.filter(function(a){ const A=ARCHI_DEF.find(function(d){return d.id===a.id;}); return A && (A.dove||'governo')==='entrambi'; });   // gli archi di GOVERNO non sopravvivono alla caduta; i personali sì (lotto 5)
   const prof = w.asse>=1?'destra' : w.asse<=-1?'sinistra' : 'centro';
   installaProfilo(GOVERNI_PROFILI[prof]); S.snap=Object.assign({},S.pol); S.leggiSnap=Object.assign({},S.leggi);   // L104-3: senza salto di disavanzo · eredita le politiche dell'avversario, contabilità RP pulita
-  S.turnInMandate=0; S.elezioniAnticipate=false; S.ultimoSondaggio=null; S.sondStorico=[];
+  azzeraOrologioUrna(); S.elezioniAnticipate=false; S.ultimoSondaggio=null; S.sondStorico=[];   // L250-10: era S.turnInMandate=0
   if(OPP_TRAGUARDI){ delete S.oppTraguardi; if(!eraOpp) delete S.oppRivale; }   // L260-4bis: legislatura nuova, traguardi nuovi (nascono in oppTragNasci, dopo che il chiamante ha fissato l'orologio). delete e non null: startMinistro passa di qui per montare il governo del premier, e il ministro non deve trovarsi i campi
 }
 /* Vai all'opposizione DOPO una sconfitta: governa il vincitore; il motore fa il resto. */

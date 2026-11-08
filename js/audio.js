@@ -640,6 +640,7 @@ function musicaCrisi(){
   if(!(S && S.livello===3 && !S.opposizione)) return false;
   if((S.mesiSottoCrisi||0)>0) return true;
   if(!S.minoranza || S.coabitazione) return false;
+  if(typeof minoranzaSostenuta==='function' && minoranzaSostenuta()) return false;   // L250-9: la minoranza con l'appoggio esterno dichiarato (minoranzaNorma) è il governo normale, non una crisi
   /* L263-8bis: la minoranza al solo Senato è paesaggio dopo 3 mesi, come in graveInCorso (L152-2): stesso contatore dell'episodio
      (S.mesiMinoranza) e stessa costante. La minoranza vera (alla Camera, o all'aula sola) suona per tutto l'episodio, come prima. */
   if(typeof minoranzaSoloSenato==='function' && minoranzaSoloSenato() && typeof MINORANZA_RESPIRO_MESI!=='undefined')

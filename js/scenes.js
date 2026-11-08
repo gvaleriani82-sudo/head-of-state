@@ -345,7 +345,8 @@ const AREA_DI_PAESE = { italia:'europa', francia:'europa', regnounito:'europa', 
                         giappone:'asiaest', coreasud:'asiaest', india:'asiasud',
                         nigeria:'africa', sudafrica:'africa',
                         danimarca:'europa',   // L250-2
-                        paesibassi:'europa' };   // L250-5
+                        paesibassi:'europa',   // L250-5
+                        svezia:'europa', norvegia:'europa' };   // L250-8 · L250-14
 /* 2/10 (turno Code delle 23): le prime diciotto, da arte-sorgente/scene-mondo/. 3/10 (turno Code delle 09): casa-base-asiasud
    e societacivile-base-asiasud, ritoccate da Cowork (tolti il marchio sul motorino e la scritta sul risciò): venti, tutte. */
 const SCENE_AREA = ['casa-base-nordamerica', 'casa-base-latina', 'casa-base-asiaest', 'casa-base-asiasud', 'casa-base-africa',
