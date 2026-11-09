@@ -2344,6 +2344,54 @@ const SCENARI = {
       "Nell'altro partito corre un ex governatore dell'Ovest che promette di tagliare le tasse, di riarmare il paese e di restituire agli americani la fiducia in sé stessi. I sondaggi danno i due vicini, e in autunno un candidato indipendente può togliere voti a tutti e due.",
     ],
   },
+  /* L264-2 · STATI UNITI 1990 — la quinta porta della linea americana (PRESET-USA-1990.md, D299-D301).
+     Il Presidente eletto nel 1988 al secondo anno del mandato (turnMandato 1, meseUrna 11: metà mandato 1990/11,
+     presidenziali 1992/11 e 1996/11), Camera e Senato dell'altro partito dal primo giorno (il Congresso del 1988).
+     Debito: FRED GFDGDPA188S 53,8 → 54 (la misura lorda di us1980, per la saldatura); la Tabella 7.1 dell'OMB
+     (edizione 2001) dà 55,9 a fine anno fiscale 1990 e 53,0 al 1989: scarto < 2 punti, resta 54. */
+  us1990: {
+    id:'us1990', era:LINEA_US, nome:'Stati Uniti 1990', anno:1990, paese:'usa',
+    turnMandato: 1, meseUrna: 11,               // D299: il mandato del novembre 1988 al secondo anno → metà mandato 1990/11, presidenziale 1992/11
+    mesiGiaInCarica: 12,                        // D300: per coerenza con us1980; inerte (LOGORIO_MATURATO spento)
+    sistema: 'presidenziale', comeSiVince: 'candidato', coalizione: false, cadutaGoverno: false,
+    mandatoMesi: 48, mandatiMax: 2, mandatiConsecutivi: false,
+    titoloRuolo: 'Presidente', sedeGoverno: 'la Casa Bianca',
+    capitale: 'Washington',
+    ue: false,
+    congresso: { camera: 40.2, senato: 45.0 },  // D301: 175 repubblicani su 435 e 45 senatori su 100 (il Congresso del 1988 ✓): governo diviso all'avvio
+    intermedie: [ {tipo:'Elezioni di metà mandato', mese:24, tocca:'tutti', penalitaGoverno:2.75} ],   // L264-2 · dalla sweep (misura-us1990.js gioc --penalita, D314): metà mandato perse dal partito del Presidente (Rep al governo + Dem all'opposizione), 40 carriere × semi 11 · 1011: 2,5 → 82 · 77% · 2,75 → 84 · 82% · 3 → 86 · 86% (banda 80-95); il 1996 del Presidente democratico scende con la penalità (2,5 → 66 · 70% · 2,75 → 69 · 54% · 3 → 63 · 52%): 2,75 tiene tutti e due nella banda in media; rapporto «⚑ L264-2»
+    /* D301 · punti sul VOTO della presidenziale, positivo = al partito del Presidente in carica (spintaPresidenziale(), model.js; 0 se il Presidente sei tu). */
+    spintaPresidenziale: { 1992: -5, 1996: 4 },
+    /* L264-2 · i punti al Presidente-giocatore (solo con US80_PARTITA_VOTO, game.js; spintaPresidenziale qui sopra vale 0 per lui). Sweep su 20 carriere,
+       forza 52:48, penalità 2,5: il 1992 del Presidente repubblicano vinto +1 → 20 · 0 → 13 · −1 → 5/20 (banda 4-10); il 1996 del Presidente democratico
+       (dall'opposizione) +1 → 19/19 · 0 → 18/19 · −1 → 12/19 (banda 12-18/20). Molto ripido: un punto sposta di 7-8 carriere su 20. */
+    spintaPresidenteGiocatore: { 1992: -1, 1996: -1 },
+    mandatiVinti: 1,                           // D300: il Presidente ha vinto il 1988 (vale solo al livello 3 al governo: D135)
+    /* L264-2 · forza d'avvio Dem 52 · Rep 48 (non 50:50 di D301): a 50:50 il Presidente repubblicano prendeva la Camera nel 1990 13/20 (D312, il rovescio);
+       51:49 → 4/20, 52:48 → 1/20 (la consegna: «abbassa di 1-2 punti, non toccare il motore»). Le forze del 1988 erano in bilico (Camera ~53/46 dem). */
+    partiti: [
+      { id:'us_dem', nome:'Democratici',  orientamento:'centrosinistra', base:{ giovani:0.4, lavoratori:0.35, cetomedio:0.25 },                  forza:52, forzaAncora:52, asse:-1 },
+      { id:'us_rep', nome:'Repubblicani', orientamento:'centrodestra',   base:{ imprenditori:0.4, cetomedio:0.25, cattolici:0.2, pensionati:0.15 }, forza:48, forzaAncora:48, asse:1 },
+    ],
+    territori: [
+      {nome:'New York', tipo:'città', carica:'Sindaco', lean:-1, simbolo:true}, {nome:'la California', tipo:'regione', carica:'Governatore', lean:-1, simbolo:true}, {nome:'il Texas', tipo:'regione', carica:'Governatore', lean:1, simbolo:true}, {nome:'la Pennsylvania', tipo:'regione', carica:'Governatore', lean:0, simbolo:true},
+      {nome:'la Florida', tipo:'regione', carica:'Governatore', lean:1}, {nome:"l'Ohio", tipo:'regione', carica:'Governatore', lean:0}, {nome:'il Michigan', tipo:'regione', carica:'Governatore', lean:0}, {nome:'la Georgia', tipo:'regione', carica:'Governatore', lean:0},
+      {nome:"l'Illinois", tipo:'regione', carica:'Governatore', lean:-1}, {nome:'lo stato di Washington', nomeEn:'Washington State', tipo:'regione', carica:'Governatore', lean:-1}, {nome:"l'Arizona", tipo:'regione', carica:'Governatore', lean:1}, {nome:"l'Alabama", tipo:'regione', carica:'Governatore', lean:2},
+      {nome:'Los Angeles', tipo:'città', carica:'Sindaco', lean:-2}, {nome:'Chicago', tipo:'città', carica:'Sindaco', lean:-2}, {nome:'Houston', tipo:'città', carica:'Sindaco', lean:1}, {nome:'Phoenix', tipo:'città', carica:'Sindaco', lean:1}, {nome:'Filadelfia', nomeEn:'Philadelphia', tipo:'città', carica:'Sindaco', lean:-2}, {nome:'San Francisco', tipo:'città', carica:'Sindaco', lean:-2}
+    ],
+    economia: { pil:5963, debito:54, deficit:-3.7, inflazione:5.4, crescita:5, crescitaTetto:9, disoccupazione:5.4 },   // D301; crescitaTetto 9 non morde (nessun anno sopra 5)
+    debtAncora: 54,
+    inflazione: 5.4,   // l'anno per anno sta in DRIFT_INFLAZIONE_ERA (assoluta, FRED FPCPITOTLZGUSA)
+    crescita: 5,       // la base della linea, per la saldatura; il decennio sta nelle righe del ciclo
+    logorioEra: 0.00375,                        // quello di us1980 (la saldatura)
+    valuta: VALUTA_DOLLARO,
+    intro: "Stati Uniti, 1990. Il Presidente eletto nel 1988 è al secondo anno del mandato, con la Camera e il Senato in mano all'altro partito. Il Muro è caduto da due mesi, i soldati americani sono a Panama da tre settimane, e l'economia comincia a rallentare.",
+    contesto: [
+      "Washington, gennaio 1990. In Europa i regimi dell'Est cadono uno dopo l'altro e a Berlino si parla già di una Germania sola. Al Pentagono si fanno i conti di quanto si potrà risparmiare ora che la guerra fredda sembra finita.",
+      "Il disavanzo federale non scende, le casse di risparmio fallite costano ai contribuenti miliardi di dollari e il Presidente ha vinto promettendo che le tasse non sarebbero salite. Il Congresso, dell'altro partito, aspetta che sia la Casa Bianca a cedere per prima.",
+      "Fra dieci mesi si vota per la Camera e per un terzo del Senato. Nel Golfo Persico il prezzo del petrolio è calmo; nelle fabbriche del Midwest si teme la recessione.",
+    ],
+  },
   /* ============================================================================================================
      L44-3 · ITALIA 2000 — la settima e ultima porta. Stessa LINEA; il roster è quello uscito dalla frana del '94
      (PPI, PDS, AN, Rifondazione, Lega, FI, CCD e i laici superstiti), anno d'avvio 2000.
@@ -15642,8 +15690,8 @@ const RIVALI=(function(){
   var r=[];
   function riga(paesi, con, dal, fino, massimo, tipo){ paesi.split(' ').forEach(function(p){ r.push({paese:p, con:con, dal:dal, fino:fino, massimo:massimo, tipo:tipo}); }); }
   riga('italia1950 italia1960 italia1970 italia1980 uk1950 uk1960 uk1970 uk1980 fr1950 fr1960 fr1970 fr1980 de1950 de1960 de1970 de1980 us1950 us1960 us1970 us1980', 'urss', 1945, 1991, 4, 'blocco');   // la guerra fredda: Cuba e Berlino si fermano all'ultimatum (L258-2, D286: us1970; L262-2, D294: us1980)
-  riga('italia1990 uk1990 fr1990 de1990', 'urss', 1945, 1991, 4, 'blocco');
-  riga('italia1990 uk1990 fr1990 de1990 italia2000 uk2000 fr2000 de2000', 'russia', 1992, 2099, 4, 'blocco');
+  riga('italia1990 uk1990 fr1990 de1990 us1990', 'urss', 1945, 1991, 4, 'blocco');   // L264-2: + us1990 (D303)
+  riga('italia1990 uk1990 fr1990 de1990 italia2000 uk2000 fr2000 de2000 us1980 us1990', 'russia', 1992, 2099, 4, 'blocco');   // L264-2 (D303): + us1990 e us1980 (le sue carriere dal 1992 non avevano un rivale)
   ['russia','cina','iran'].forEach(function(c){ riga('italia francia regnounito germania spagna canada australia danimarca paesibassi svezia norvegia', c, 2012, 2099, 4, 'blocco'); });   // L250-2: + la Danimarca (Alleanza atlantica) · L250-5: + i Paesi Bassi · L250-8: + la Svezia (nell'Alleanza dal 2024) · L250-14: + la Norvegia (dal 1949)
   ['russia','cina','iran','corea_nord'].forEach(function(c){ riga('usa', c, 2012, 2099, 4, 'blocco'); });
   ['russia','cina','corea_nord'].forEach(function(c){ riga('giappone', c, 2012, 2099, 4, 'blocco'); });
@@ -15677,7 +15725,7 @@ const RIVALI=(function(){
   ['russia','cina'].forEach(function(c){ riga('brasile messico argentina sudafrica nigeria', c, 2012, 2099, 2, 'lontano'); });   // al più le sanzioni
   // L245-3bis: le porte 1990 e 2000 arrivano al presente (dal 2012 ogni linea apre `contemporanea`): da lì hanno i rivali del
   // presente del loro paese, stessi `massimo` e `tipo`, letti dalle righe qui sopra. La Russia dal 1992 c'è già e non si raddoppia.
-  var PORTE_AL_PRESENTE={italia1990:'italia', italia2000:'italia', uk1990:'regnounito', uk2000:'regnounito', fr1990:'francia', fr2000:'francia', de1990:'germania', de2000:'germania'};
+  var PORTE_AL_PRESENTE={italia1990:'italia', italia2000:'italia', uk1990:'regnounito', uk2000:'regnounito', fr1990:'francia', fr2000:'francia', de1990:'germania', de2000:'germania', us1990:'usa'};   // L264-2: + us1990
   Object.keys(PORTE_AL_PRESENTE).forEach(function(porta){
     r.filter(function(x){ return x.paese===PORTE_AL_PRESENTE[porta]; }).forEach(function(x){
       if(r.some(function(y){ return y.paese===porta && y.con===x.con && y.fino>=x.dal; })) return;
@@ -15807,7 +15855,7 @@ const ALLEATI_DIPLO=(function(){
   var r=[];
   function riga(paesi, id, dal, fino){ var d=D[id]; paesi.split(' ').forEach(function(p){ r.push({paese:p, id:id, nome:d[0], art:d[1], nomeEn:d[2], artEn:d[3], dal:dal, fino:fino}); }); }
   var IT='italia italia1950 italia1960 italia1970 italia1980 italia1990 italia2000', UK='regnounito uk1950 uk1960 uk1970 uk1980 uk1990 uk2000',
-      FR='francia fr1950 fr1960 fr1970 fr1980 fr1990 fr2000', DE='germania de1950 de1960 de1970 de1980 de1990 de2000', US='usa us1950 us1960 us1970 us1980';
+      FR='francia fr1950 fr1960 fr1970 fr1980 fr1990 fr2000', DE='germania de1950 de1960 de1970 de1980 de1990 de2000', US='usa us1950 us1960 us1970 us1980 us1990';   // L264-2: + us1990
   riga(IT+' '+UK+' '+FR+' '+DE+' india canada australia giappone coreasud messico nigeria brasile danimarca paesibassi svezia norvegia', 'stati_uniti', 1945, 2099);   // L250-2: + la Danimarca · L250-5: + i Paesi Bassi · L250-8: + la Svezia · L250-14: + la Norvegia
   riga(IT+' '+UK+' '+DE, 'francia', 1945, 2099);
   riga(FR, 'regno_unito', 1945, 1962);          // la Francia della Quarta Repubblica e dei primi anni di de Gaulle: Londra e Washington
@@ -21343,6 +21391,11 @@ const TITOLI=[
 {id:'ti_us80_malta_prudenza', era:'us1980', pri:1, cond:()=>S.usMalta89==='prudenza' && S.year===1990 && S.month===1, amico:'Malta: aiuti a Mosca, ma solo con le riforme', ostile:'Malta: il Presidente prudente mentre l\'Europa cambia'},
 {id:'ti_us80_malta_nato', era:'us1980', pri:1, cond:()=>S.usMalta89==='nato' && S.year===1990 && S.month===1, amico:'Malta: la Germania unita deve stare nella NATO', ostile:'Malta: sulla Germania il vertice si inceppa'},
 {id:'ti_us80_liberi', era:'us1980', pri:1, cond:()=>S.usOstaggiLiberi!=null && meseAss()===S.usOstaggiLiberi+1,amico:'Gli ostaggi sono a casa', ostile:'Gli ostaggi sono a casa: e il conto dei giorni resta'},
+{id:'ti_us90_golfo', era:'us1990', pri:1, cond:()=>S.usGolfoEsito91==='vinta' && S.usGolfo90!=='subito' && S.year===1991 && S.month>=2 && S.month<=3, amico:'Il piccolo vicino è libero: cento ore sono bastate, il paese è con le truppe', ostile:'Vinta la guerra nel Golfo, e il dittatore resta al suo posto'},   // L264-3: i titoli del Golfo leggono l'esito (con l'embargo nessuna vittoria)
+{id:'ti_us90_golfo_subito', era:'us1990', pri:1, cond:()=>S.usGolfoEsito91==='vinta' && S.usGolfo90==='subito' && S.year===1991 && S.month>=2 && S.month<=3, amico:'La guerra d\'autunno è vinta: il piccolo vicino è libero', ostile:'Vinta la guerra nel Golfo, e il Congresso chiede il conto delle perdite'},
+{id:'ti_us90_golfo_attesa', era:'us1990', pri:1, cond:()=>S.usGolfoEsito91==='attesa' && S.year===1991 && S.month>=2 && S.month<=3, amico:'L\'embargo stringe, e nessun soldato è caduto', ostile:'Sei mesi di sanzioni, e il piccolo vicino è ancora occupato'},
+{id:'ti_us90_golfo_tardi', era:'us1990', pri:1, cond:()=>S.usGolfoEsito91==='vinta_tardi' && S.year===1991 && S.month>=4 && S.month<=6, amico:'Guerra breve nel Golfo, e il piccolo vicino è libero', ostile:'Vinta in primavera la guerra che si poteva vincere in inverno'},
+{id:'ti_us90_golfo_embargo', era:'us1990', pri:1, cond:()=>S.usGolfoEsito91==='embargo' && S.year===1991 && S.month>=4 && S.month<=6, amico:'Niente guerra nel deserto: l\'America sceglie la pazienza', ostile:'L\'invasore resta nel Golfo, e la benzina costa ancora cara'},
  {id:'ng_p_ti_petrolio', era:'contemporanea', paesi:['nigeria'], amico:'La produzione di petrolio torna a salire', ostile:'Un barile su dieci sparisce: il furto record'},
 ];
 
@@ -23354,6 +23407,10 @@ const SNODI_STORICI = {
   usArmiIran86Opp: { storico:['audizioni'], conforme:'sullo scandalo delle armi all’Iran, dall’opposizione', diverge:{ 'accusa':'Nel 1987 ha chiesto dall’opposizione la messa in stato d’accusa del Presidente per le armi all’Iran.', 'legge':'Nel 1987 ha fatto votare una legge che vietava di nuovo gli aiuti ai ribelli del Nicaragua.' } },
   usMissili87:     { storico:['firma'], conforme:'sul trattato dei missili del 1987', diverge:{ 'dipiu':'Nel 1987 ha chiesto anche i missili strategici, e il trattato sui missili d’Europa è saltato.', 'rinvio':'Nel 1987 ha rinviato il trattato sui missili d’Europa per difendere lo scudo spaziale.' } },
   usMissili87Opp:  { storico:['sostieni'], conforme:'sul trattato dei missili del 1987, dall’opposizione', diverge:{ 'contro':'Nel 1987 ha combattuto dall’opposizione il trattato sui missili d’Europa.', 'ratifica':'Nel 1987 ha legato il voto sul trattato dei missili alle condizioni del Senato.' } },
+  /* L264-3 · il Golfo di us1990 (frasi di Code): S1, la sua aula e l'esito (scritto dalla carta dovuta del 1991/1 e dalla primavera). */
+  usGolfo90:       { storico:['coalizione'], conforme:'sulla crisi del Golfo del 1990', diverge:{ 'sanzioni':'Nel 1990 ha scelto le sanzioni e l’attesa contro l’invasione nel Golfo.', 'subito':'Nel 1990 ha mandato subito i soldati nel Golfo, senza aspettare le Nazioni Unite.' } },
+  usGolfo90Opp:    { storico:['sanzioni'], conforme:'sulla crisi del Golfo del 1990, dall’opposizione', diverge:{ 'appoggio':'Nel 1990 ha appoggiato dall’opposizione il Presidente nella crisi del Golfo.', 'congresso':'Nel 1990 ha chiesto dall’opposizione il voto del Congresso prima di ogni guerra nel Golfo.' } },
+  usGolfoEsito91:  { storico:['vinta'], conforme:'sulla guerra del Golfo', diverge:{ 'attesa':'Nel 1991 ha tenuto l’embargo nel Golfo senza fare la guerra.', 'vinta_tardi':'Nel 1991 ha fatto la guerra del Golfo in primavera, dopo mesi di embargo.', 'embargo':'Nel 1991 ha tenuto l’embargo a oltranza: niente guerra nel Golfo, e l’invasore è rimasto.' } },
 };
 
 /* ==============================================================================================================
@@ -23635,7 +23692,7 @@ const PILASTRI_MONDO = [
     text:'La sera del 9 novembre un portavoce legge male un foglio, e in poche ore i berlinesi dell\'est sono ai posti di blocco a chiedere di passare. I soldati aprono. La notte stessa la gente sale sul Muro con i martelli; ventotto anni dopo la notte in cui era stato tirato su, l\'Europa divisa finisce in diretta televisiva.',
     logx:'I berlinesi passano il Muro: ventotto anni dopo, l\'Europa divisa finisce.',
     ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
-  { id:'pm_golfo', anno:1991, mese:1, tono:'grave', cronaca:true, kick:'Il mondo',
+  { id:'pm_golfo', anno:1991, mese:1, tono:'grave', cronaca:true, kick:'Il mondo', nonAlCapo:['usa'],   // L264-3 (D302 (i)): al Presidente americano esce l'esito del Golfo di us1990 (us90_golfo_esito), non la cronaca
     t:'Il Golfo',
     text:'Nella notte del 17 gennaio una coalizione di trenta paesi comincia a bombardare il paese che cinque mesi prima ha invaso e annesso il suo piccolo vicino. È la prima guerra in diretta televisiva: le luci verdi sul cielo della capitale, i missili sulle città dell\'alleato a ovest, cento ore di guerra di terra. L\'ordine del mondo dopo il Muro si decide qui.',
     logx:'La coalizione attacca: la prima guerra in diretta televisiva.',
@@ -28256,3 +28313,115 @@ SCENARI.de1980.mappa = SCENARI.de1970.mappa;
 /* L151-3 · de1990 parte A OVEST (D74) con gli stessi territori e la stessa mappa: l'Est entra alla tappa del 1990/10, come per de1980. */
 SCENARI.de1990.territori = SCENARI.de1980.territori;
 SCENARI.de1990.mappa = SCENARI.de1980.mappa;
+/* ==============================================================================================================
+   L264-3 · STATI UNITI 1990 — IL GOLFO: S1 (1990/8-9) CON LA SUA AULA, L'ESITO DOVUTO DEL 1991/1 E LA PRIMAVERA (scheda PRESET-USA-1990
+   §4 S1, D302 (i); testi di Code). Gli helper di us1960-us1980 (gdUs60, baseUs60, fidUs60). Nomi nuovi cercati in tutto js/, .claude/ e
+   prove/ il 09/11 prima di scriverli (L99-2), zero occorrenze: snodo_golfo90(_opp), us90_golfo_esito(_opp), us90_golfo_primavera,
+   usGolfo90(Opp), usGolfoEsito91, golfoEsitoOra, ti_us90_golfo. Varianti dell'esito per strada (ids us90_golfo_esito_subito e
+   us90_golfo_esito_attesa): una carta per strada, così ogni scelta scrive il suo esito con un letterale (verifica-snodi.js).
+   ⚑ CHI RICEVE CHE COSA (cancelli in game.js accanto a snodoAccantoAlRichiamo): S1 a chi governa nel 1990/8-9 (agosto e settembre senza
+   pilastri; ottobre è la campagna della metà mandato, mai lì), l'aula a chi è all'opposizione. Nel 1991/1 al Presidente americano esce
+   l'esito della sua strada al posto della cronaca pm_golfo (nonAlCapo:['usa']); senza S1 quello della storia ('vinta'). Esiti:
+   coalizione → 'vinta' · subito → 'vinta' (la guerra d'autunno, vinta a gennaio con più perdite: usGolfo90 dice quale) · sanzioni →
+   'attesa' e la primavera del 1991/3-4 → 'vinta_tardi' (la guerra ora) o 'embargo'. Dall'aula la cronaca resta, e accanto un rigo sul
+   voto di gennaio per chi ha chiesto le sanzioni o il voto del Congresso.
+   ⚑ Nessun nome di persona né del paese invasore (G5); «il Golfo», «il piccolo vicino», «il più grande produttore del mondo», «l'alleato».
+   Verificato il 09/11 (fonti di sempre: storia del Congresso, ONU): invasione del 2 agosto 1990 e annessione; la risoluzione 678 del
+   29 novembre fissa il 15 gennaio; il 12 gennaio 1991 il Congresso vota l'uso della forza, al Senato di pochi voti e con la maggioranza
+   del partito d'opposizione contro; la campagna aerea dalla notte del 17 gennaio; circa cento ore di guerra di terra a fine febbraio;
+   più di trenta paesi nella coalizione, mezzo milione di soldati americani nella regione.
+   ============================================================================================================== */
+const GOLFO90_EV = {
+  id:'snodo_golfo90', snodo:true, era:'us1990', kick:'Il mondo',
+  t:'La crisi del Golfo',
+  text:'Il 2 agosto l\'esercito di un dittatore del Golfo ha invaso il piccolo vicino e se l\'è annesso in un giorno. Il prezzo del petrolio raddoppia, e i carri armati dell\'invasore sono fermi al confine del più grande produttore del mondo, un alleato che ora chiede aiuto. Gli alleati europei e arabi guardano a Washington, e alle Nazioni Unite il Consiglio di sicurezza aspetta la tua proposta.',
+  ch:[
+    { l:'La coalizione e il mandato delle Nazioni Unite', e:'La storia · mezzo milione di soldati americani in Arabia, più di trenta paesi nella coalizione, una risoluzione dell\'ONU che fissa una scadenza a metà gennaio · ci vogliono mesi, e intanto il petrolio resta caro',
+      f:function(){ S.usGolfo90='coalizione'; repd(2); stampad(1); gdUs60('giovani',-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Davanti all\'invasione nel Golfo ha costruito una coalizione con il mandato delle Nazioni Unite.')}); } },
+    { l:'Le sanzioni e l\'attesa', e:'L\'embargo e la flotta, senza una scadenza · costa meno subito, ma il petrolio resta caro e il piccolo vicino resta occupato',
+      f:function(){ S.usGolfo90='sanzioni'; repd(-1); gdUs60('giovani',1); gdUs60('imprenditori',-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Davanti all\'invasione nel Golfo ha scelto le sanzioni e l\'attesa.')}); } },
+    { l:'L\'intervento subito, senza aspettare l\'ONU', e:'Meno alleati e più rischio · il Congresso protesta per i poteri di guerra, e la tua base ti applaude', costo:{debito:0.3},
+      f:function(){ S.usGolfo90='subito'; S.ind.debt+=0.3; repd(-2); stampad(-1); baseUs60(1); gdUs60('giovani',-2); gdUs60('cetomedio',-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Davanti all\'invasione nel Golfo ha mandato subito i soldati, senza aspettare le Nazioni Unite.')}); } },
+  ],
+};
+const GOLFO90_OPP_EV = {
+  id:'snodo_golfo90_opp', snodo:true, era:'us1990', kick:'Il mondo',
+  t:'La crisi del Golfo, dall\'aula',
+  text:'Il 2 agosto l\'esercito di un dittatore del Golfo ha invaso il piccolo vicino e se l\'è annesso, e il petrolio è raddoppiato. Il Presidente manda soldati in Arabia a difesa dell\'alleato, e parla di una coalizione e delle Nazioni Unite. A novembre si vota per il Congresso, e il tuo partito deve dire che cosa pensa.',
+  ch:[
+    { l:'Appoggiare il Presidente: davanti a un\'invasione il paese parla con una voce sola', e:'I giornali scrivono che l\'aula è unita · la base chiede perché fai da sponda al governo',
+      f:function(){ S.usGolfo90Opp='appoggio'; stampad(1); baseUs60(-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Dall\'opposizione ha appoggiato il Presidente nella crisi del Golfo.')}); } },
+    { l:'Chiedere più tempo per le sanzioni prima di ogni guerra', e:'La storia · a gennaio la maggioranza del partito d\'opposizione al Senato voterà contro la guerra · la base ti segue, e chi ha un figlio sotto le armi ti ascolta',
+      f:function(){ S.usGolfo90Opp='sanzioni'; baseUs60(1); gdUs60('giovani',1); gdUs60('imprenditori',-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Dall\'opposizione ha chiesto più tempo per le sanzioni nel Golfo.')}); } },
+    { l:'Chiedere il voto del Congresso prima di ogni guerra', e:'Il ceto medio apprezza che si rispetti la legge · alla Casa Bianca dicono che leghi le mani al paese',
+      f:function(){ S.usGolfo90Opp='congresso'; gdUs60('cetomedio',1); repd(-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Dall\'opposizione ha chiesto il voto del Congresso prima di ogni guerra nel Golfo.')}); } },
+  ],
+};
+/* l'esito del 1991/1, una carta per strada (la sceglie golfoEsitoCarta in game.js; l'iniezione lo scrive per esteso per verifica-snodi) */
+const US90_GOLFO_ESITO_EV = {
+  id:'us90_golfo_esito', snodo:true, era:'us1990', kick:'Il mondo', tono:'grave',
+  t:'Il Golfo, gennaio',
+  text:'La scadenza delle Nazioni Unite è passata, e il Congresso ha votato: puoi usare la forza. Nella notte del 17 gennaio comincia la campagna aerea, la prima guerra in diretta televisiva, e i comandi prevedono che la guerra di terra, quando verrà, durerà giorni e non mesi. Il paese si stringe intorno alle truppe.',
+  ch:[
+    { l:'Liberare il piccolo vicino e fermarsi lì', e:'La storia · a fine febbraio cento ore di guerra di terra, poi il cessate il fuoco: il vicino è libero, e il dittatore resta al suo posto · il paese è con te come non lo era da anni',
+      f:function(){ S.usGolfoEsito91='vinta'; repd(2); stampad(2); gdUs60('cetomedio',2); gdUs60('pensionati',1);
+        S.log.unshift({t:T('Il mondo'),x:T('La guerra del Golfo è vinta: il piccolo vicino è libero.')}); } },
+    { l:'Dopo la vittoria, tenere le sanzioni finché il regime non cade', e:'Gli alleati restano con te · il petrolio dell\'invasore resta fermo, e la guerra non finisce del tutto: se ne parlerà per anni',
+      f:function(){ S.usGolfoEsito91='vinta'; repd(1); stampad(1); gdUs60('cetomedio',1);
+        S.log.unshift({t:T('Il mondo'),x:T('La guerra del Golfo è vinta, e le sanzioni restano finché il regime non cade.')}); } },
+  ],
+};
+const US90_GOLFO_SUBITO_EV = {
+  id:'us90_golfo_esito_subito', snodo:true, era:'us1990', kick:'Il mondo', tono:'grave',
+  t:'Il Golfo, gennaio',
+  text:'La guerra è cominciata in autunno, senza aspettare le Nazioni Unite, con meno alleati e più soldati americani in prima linea. A gennaio l\'invasore si ritira dal piccolo vicino: la guerra è vinta. Ma le perdite sono state più alte di quanto dicevano i comandi, e al Congresso si discute ancora se il Presidente potesse farla senza un voto.',
+  ch:[
+    { l:'Celebrare la vittoria', e:'Le parate tornano nelle città · al Congresso l\'altro partito prepara un\'inchiesta sui poteri di guerra',
+      f:function(){ S.usGolfoEsito91='vinta'; repd(-1); stampad(1); baseUs60(1); gdUs60('cetomedio',1);
+        S.log.unshift({t:T('Il mondo'),x:T('La guerra del Golfo, cominciata in autunno, è vinta.')}); } },
+    { l:'Chiedere al Congresso una legge sui poteri di guerra, per il futuro', e:'I giornali apprezzano · la tua base dice che hai vinto e chiedi scusa',
+      f:function(){ S.usGolfoEsito91='vinta'; repd(-1); stampad(2); baseUs60(-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Vinta la guerra del Golfo, ha chiesto al Congresso una legge sui poteri di guerra.')}); } },
+  ],
+};
+const US90_GOLFO_ATTESA_EV = {
+  id:'us90_golfo_esito_attesa', snodo:true, era:'us1990', kick:'Il mondo',
+  t:'Il Golfo, gennaio',
+  text:'Sono passati cinque mesi di embargo. La flotta tiene chiusi i porti dell\'invasore, ma il piccolo vicino resta occupato e il petrolio resta caro: alla pompa se ne accorgono tutti. Gli alleati arabi chiedono quanto si aspetterà ancora, e in Europa c\'è chi propone di trattare. A gennaio non si combatte.',
+  ch:[
+    { l:'Tenere la linea: sanzioni, flotta, pazienza', e:'Il tuo partito si divide fra chi aspetta e chi vuole agire · a primavera la domanda tornerà, più forte',
+      f:function(){ S.usGolfoEsito91='attesa'; gdUs60('giovani',1); gdUs60('imprenditori',-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Nel Golfo ha tenuto l\'embargo, senza guerra.')}); } },
+    { l:'Preparare la coalizione, senza ancora una data', e:'I soldati partono per l\'Arabia, gli alleati firmano · a primavera dovrai decidere',
+      f:function(){ S.usGolfoEsito91='attesa'; repd(1); gdUs60('giovani',-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Nel Golfo ha tenuto l\'embargo e ha cominciato a preparare la coalizione.')}); } },
+  ],
+};
+const US90_GOLFO_PRIMAVERA_EV = {
+  id:'us90_golfo_primavera', snodo:true, era:'us1990', kick:'Il mondo',
+  t:'Il Golfo, primavera',
+  text:'Più di sette mesi dopo l\'invasione il piccolo vicino è ancora occupato, e l\'embargo non ha piegato nessuno. Il petrolio caro pesa sulla ripresa, e gli alleati arabi avvertono che d\'estate, nel deserto, non si combatte. Bisogna decidere adesso.',
+  ch:[
+    { l:'La guerra ora, con la coalizione', e:'Le Nazioni Unite danno il mandato, e la guerra di terra dura giorni · è vinta, ma più tardi e con meno slancio di quanto si sperava in autunno',
+      f:function(){ S.usGolfoEsito91='vinta_tardi'; repd(1); stampad(1); gdUs60('cetomedio',1); gdUs60('giovani',-1);
+        S.log.unshift({t:T('Il mondo'),x:T('In primavera ha fatto la guerra del Golfo con la coalizione, e l\'ha vinta.')}); } },
+    { l:'L\'embargo a oltranza', e:'Niente guerra · l\'invasore resta, il petrolio resta caro, e c\'è chi dice che l\'America ha perso la faccia',
+      f:function(){ S.usGolfoEsito91='embargo'; repd(-2); stampad(-1); gdUs60('giovani',1); gdUs60('imprenditori',-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Ha tenuto l\'embargo a oltranza: niente guerra nel Golfo, e l\'invasore è rimasto.')}); } },
+  ],
+};
+/* dall'aula, accanto alla cronaca pm_golfo del 1991/1: un rigo sul voto di gennaio, scelta unica (non è uno snodo, non scrive flag) */
+const US90_GOLFO_ESITO_OPP_EV = {
+  id:'us90_golfo_esito_opp', era:'us1990', kick:'Il mondo',
+  t:'Il voto di gennaio',
+  get text(){ return (typeof S!=='undefined' && S && S.usGolfo90Opp==='congresso')
+    ? 'Il 12 gennaio il Congresso ha votato sull\'uso della forza, come avevi chiesto: la risoluzione è passata, di pochi voti al Senato. Ora i soldati sono al fronte, e il tuo partito si stringe intorno alle truppe.'
+    : 'Il 12 gennaio il Congresso ha votato l\'uso della forza. Tu avevi chiesto più tempo per le sanzioni, e la maggioranza del tuo partito al Senato ha votato contro: la risoluzione è passata lo stesso, di pochi voti. Ora i soldati sono al fronte, e ogni parola conta.'; },
+  ch:[ { l:'Prosegui', e:'', f:function(){} } ],
+};

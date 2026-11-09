@@ -5465,10 +5465,10 @@ function rigaIntesa(p, mine){
   var col=dentro?'var(--pos)':(v>0?'var(--acc)':'var(--mut2)');
   var nota=dentro?T('nel tuo blocco'):(cap<60?T('troppo lontano')+' · '+T('tetto')+' '+cap:T('serve 60'));
   return `<div style="display:flex;align-items:center;gap:8px;margin-top:5px">
-    <span style="font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);min-width:46px">${gergo(T('Intesa'),'intesa')}</span>
+    <span class="contorno" style="font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);min-width:46px">${gergo(T('Intesa'),'intesa')}</span>
     <div class="bar" style="flex:1;position:relative">${fillI('intesa:'+p.id, clamp(v,2,100), col)}</div>
     <span class="mono" style="font-size:12px;color:${col};min-width:22px;text-align:right">${Math.round(v)}</span>
-    <small style="font-size:11px;color:var(--mut2);white-space:nowrap">${nota}</small></div>`;
+    <small class="contorno" style="font-size:11px;color:var(--mut2);white-space:nowrap">${nota}</small></div>`;
 }
 function renderPartiti(){
   if(S.partitoAperto && S.correnti){ document.getElementById('sec-par').innerHTML=renderPartitoPage(); return; }      // drill-down: la vita interna del partito
