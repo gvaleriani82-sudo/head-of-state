@@ -897,6 +897,7 @@ const PAESI = {
     mandatoMesi: 48, sistema: 'parlamentare',
     coalizione: true, comeSiVince: 'parlamentare', cadutaGoverno: true, ue: false, distorsione: 1.0,
     meseUrna: 9, turnMandato: 0,   // le politiche si votano a settembre ◦ (2025, 2029): al gennaio 2026 nessun anno pieno dal settembre 2025 → urna ordinaria 2029/9
+    minoranzaNorma: true, appoggioEsterno: { no_ap:['no_sv','no_sp','no_r','no_mdg'] },   // L250-15: Ap governa da solo con SV, Sp, Rødt e Verdi da fuori, sommati in quest'ordine (game.js, appoggioNormaLista); H e FrP no: a destra si governa insieme
     scioglimento: false,   // D-P6: lo Storting non si scioglie mai (nessuna urna anticipata: la caduta passa dalla stessa aula, game.js)
     sbarramento: 4,   // la soglia del 4% (nel vero solo per i seggi compensativi: limite noto), letta da calcSeggi() e compatibili()
     /* lean: stima, non un dato — Nord-Norge, Trondheim e il Trøndelag più a sinistra (Ap, SV e R vi sono forti), l'Innlandet agrario
@@ -917,15 +918,15 @@ const PAESI = {
     nomiF: ['Kari','Ingrid','Silje','Marit','Ida','Hilde','Ragnhild','Tone','Liv','Synnøve'],
     cognomi: ['Hansen','Johansen','Olsen','Larsen','Andersen','Pedersen','Nilsen','Kristiansen','Jensen','Karlsen','Haugen','Berg','Dahl','Bakken','Moen','Strand','Eide','Haugland','Nygård','Sandvik'],
     partiti: [
-      { id:'no_ap',  nome:'Laburisti',             orientamento:'centrosinistra',   base:{ lavoratori:0.4, pensionati:0.3, cetomedio:0.3 },   forza:29.3, asse:-1, alleati:['no_sv','no_sp','no_r','no_mdg'] },
-      { id:'no_frp', nome:'Partito del progresso', orientamento:'destra populista', base:{ lavoratori:0.3, pensionati:0.3, cetomedio:0.2, imprenditori:0.1, cattolici:0.1 }, forza:24.9, asse:2, alleati:['no_h','no_krf','no_v'] },
-      { id:'no_h',   nome:'Conservatori',          orientamento:'centrodestra',     base:{ imprenditori:0.4, cetomedio:0.4, pensionati:0.2 }, forza:15.3, asse:1,  alleati:['no_frp','no_krf','no_v'] },
-      { id:'no_sv',  nome:'Sinistra socialista',   orientamento:'sinistra',         base:{ giovani:0.4, lavoratori:0.3, cetomedio:0.3 },      forza:5.9,  asse:-2, alleati:['no_ap','no_r','no_mdg','no_sp'] },
-      { id:'no_sp',  nome:'Partito di centro',     orientamento:'centro',           base:{ cattolici:0.2, pensionati:0.3, lavoratori:0.3, cetomedio:0.2 }, forza:5.9, asse:0, alleati:['no_ap','no_sv','no_krf'] },
-      { id:'no_r',   nome:'Rødt',                  orientamento:'sinistra',         base:{ giovani:0.5, lavoratori:0.5 },                     forza:5.5,  asse:-2, alleati:['no_ap','no_sv'] },
-      { id:'no_mdg', nome:'Verdi',                 orientamento:'ecologista',       base:{ giovani:0.6, cetomedio:0.4 },                      forza:4.9,  asse:-2, alleati:['no_ap','no_sv'] },
-      { id:'no_krf', nome:'Cristiano-popolari',    orientamento:'centrodestra',     base:{ cattolici:0.6, pensionati:0.2, cetomedio:0.2 },    forza:4.4,  asse:1,  alleati:['no_h','no_v','no_frp','no_sp'] },
-      { id:'no_v',   nome:'Liberali',              orientamento:'liberale',         base:{ cetomedio:0.5, giovani:0.3, imprenditori:0.2 },    forza:3.9,  asse:1,  alleati:['no_h','no_krf','no_frp'], selezionabile:false,
+      { id:'no_ap',  nome:'Laburisti', sigla:'Ap',             orientamento:'centrosinistra',   base:{ lavoratori:0.4, pensionati:0.3, cetomedio:0.3 },   forza:29.3, asse:-1, alleati:['no_sv','no_sp','no_r','no_mdg'] },
+      { id:'no_frp', nome:'Partito del progresso', sigla:'FrP', orientamento:'destra populista', base:{ lavoratori:0.3, pensionati:0.3, cetomedio:0.2, imprenditori:0.1, cattolici:0.1 }, forza:24.9, asse:2, alleati:['no_h','no_krf','no_v'] },
+      { id:'no_h',   nome:'Conservatori', sigla:'H',          orientamento:'centrodestra',     base:{ imprenditori:0.4, cetomedio:0.4, pensionati:0.2 }, forza:15.3, asse:1,  alleati:['no_frp','no_krf','no_v'] },
+      { id:'no_sv',  nome:'Sinistra socialista', sigla:'SV',   orientamento:'sinistra',         base:{ giovani:0.4, lavoratori:0.3, cetomedio:0.3 },      forza:5.9,  asse:-2, alleati:['no_ap','no_r','no_mdg','no_sp'] },
+      { id:'no_sp',  nome:'Partito di centro', sigla:'Sp',     orientamento:'centro',           base:{ cattolici:0.2, pensionati:0.3, lavoratori:0.3, cetomedio:0.2 }, forza:5.9, asse:0, alleati:['no_ap','no_sv','no_krf'] },
+      { id:'no_r',   nome:'Rødt', sigla:'Rødt',                  orientamento:'sinistra',         base:{ giovani:0.5, lavoratori:0.5 },                     forza:5.5,  asse:-2, alleati:['no_ap','no_sv'] },
+      { id:'no_mdg', nome:'Verdi', sigla:'MDG',                 orientamento:'ecologista',       base:{ giovani:0.6, cetomedio:0.4 },                      forza:4.9,  asse:-2, alleati:['no_ap','no_sv'] },
+      { id:'no_krf', nome:'Cristiano-popolari', sigla:'KrF',    orientamento:'centrodestra',     base:{ cattolici:0.6, pensionati:0.2, cetomedio:0.2 },    forza:4.4,  asse:1,  alleati:['no_h','no_v','no_frp','no_sp'] },
+      { id:'no_v',   nome:'Liberali', sigla:'V',              orientamento:'liberale',         base:{ cetomedio:0.5, giovani:0.3, imprenditori:0.2 },    forza:3.9,  asse:1,  alleati:['no_h','no_krf','no_frp'], selezionabile:false,
         nota:'Venstre al 3,9% resta sotto la soglia del 4% e fuori dall\'aula: nel vero entra coi seggi di circoscrizione, che il gioco non modella.' },
     ],
   },

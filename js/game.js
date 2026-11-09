@@ -1003,7 +1003,7 @@ function startOpposizione(){
      l'epitaffio del Labour diceva «2 mandati vinti» che erano dei Conservatori. Qui, accanto a `S.mandate=0`, che già lo diceva. */
   S.mandatesWon=0;
   S.log=[{t:T('All\'opposizione'), x:(PAESE.minoranzaNorma && S.sostegnoAvv && part(S.sostegnoAvv.pid))
-    ? T('Parti da sfidante: al governo c\'è %W, con l\'appoggio esterno di %P. Costruisci consenso e riprenditi il paese alle prossime elezioni.').replace('%W',T(w.nome)).replace('%P',T(part(S.sostegnoAvv.pid).nome))   // L250-10 (⚠ 5 di L250-9): con minoranzaNorma la stampella si dice
+    ? T('Parti da sfidante: al governo c\'è %W, con l\'appoggio esterno di %P. Costruisci consenso e riprenditi il paese alle prossime elezioni.').replace('%W',T(w.nome)).replace('%P',S.sostegnoAvv.altri && S.sostegnoAvv.altri.length ? nomiElenco(sostegnoIds(S.sostegnoAvv)) : T(part(S.sostegnoAvv.pid).nome))   // L250-15: più sostenitori · L250-10 (⚠ 5 di L250-9): con minoranzaNorma la stampella si dice
     : T('Parti da sfidante: al governo c\'è %W. Costruisci consenso e riprenditi il paese alle prossime elezioni.').replace('%W',T(w.nome))}];   // L244-4: il nome del partito passa da T()
   bioFatto((bgNome()?bgNome()+', e':'E')+'sordisce da sfidante: la scalata comincia dall\'opposizione.');   // "Sindacalista, esordisce da sfidante..."
   document.getElementById('appoint').style.display='none';
@@ -3868,7 +3868,7 @@ function applicaDirettive(d){
     var capo = S.opposizione ? S.governoAvversario : S.partito;
     coppiePrima.forEach(function(id){
       if(coppiaCompatibile(id, capo) || alleatoRiserva(id, capo)) return;
-      if(S.opposizione){ S.coalizione=S.coalizione.filter(function(x){ return x!==id; }); if(S.sostegnoAvv && S.sostegnoAvv.pid===id) S.sostegnoAvv=null; }
+      if(S.opposizione){ S.coalizione=S.coalizione.filter(function(x){ return x!==id; }); if(S.sostegnoAvv && sostegnoIds(S.sostegnoAvv).indexOf(id)>=0) S.sostegnoAvv=null; }
       else if(typeof rompiPartner==='function') rompiPartner(id);
     });
   }
@@ -5137,23 +5137,40 @@ function promessaSostegnoGruppo(p){
 /* apre l'accordo col prezzo scelto. `mesi` conta la durata, che finisce comunque col mandato. */
 function sostegnoApri(prezzo){
   var p=partnerSostegno(); if(!p){ S.sostegno=null; return; }
+  /* L250-15: con la norma i sostenitori possono essere più d'uno (appoggioNormaLista); il primo resta in `pid`, gli altri in `altri` */
+  var lista=soloAppoggio(S.partito).length ? (appoggioNormaLista(S.coalizione||[S.partito], S.partito)||[p]) : [p];
   S.sostegno={ pid:p.id, prezzo:prezzo, mesi:0 };
+  if(lista.length>1) S.sostegno.altri=lista.slice(1).map(function(x){ return x.id; });
   S.sostegnoOfferto=(S.mandate||0); S.sostegnoStrappi=0;
   /* ⚠ L'ACCORDO STESSO STABILISCE IL RAPPORTO, e senza questa riga non funzionava niente: `S.intese` parte a
      zero per chi non ha mai trattato, quindi la soglia di rottura («intesa sotto 25») scattava al PRIMO mese e
      l'accordo moriva sempre — offerto 24 volte, zero mesi attivi. La soglia serve a rappresentare un rapporto
      che si LOGORA, non uno che non è mai esistito: chi firma un patto parte da un rapporto di lavoro. */
-  if(typeof intesaMuovi==='function'){ try{ intesaMuovi(p.id, Math.max(0, 55-(typeof intesaDi==='function'?intesaDi(p.id):0))); }catch(e){} }
-  var nome=T(p.nome);
+  if(typeof intesaMuovi==='function') lista.forEach(function(x){ try{ intesaMuovi(x.id, Math.max(0, 55-(typeof intesaDi==='function'?intesaDi(x.id):0))); }catch(e){} });   // L250-15: per ogni sostenitore
+  var nome=lista.length>1 ? nomiElenco(sostegnoIds(S.sostegno)) : T(p.nome);
   if(prezzo==='programma'){ var cPrima=!!(PROMESSA_VICINA && PAESE.minoranzaNorma);   // L250-11: con la norma il costo del patto (ceto medio −2) si paga PRIMA di registrare la promessa: il gruppo più vicino al governo è spesso il ceto medio, e il costo dell'accordo contava come il primo colpo alla promessa appena fatta (misurato: rotture 2,6 → 2,7·2,9)
     if(cPrima) gd('cetomedio',-2);
-    if(typeof campPromessa==='function' && p.base){ var gP=promessaSostegnoGruppo(p); if(gP){ campPromessa(gP); if(PAESE.minoranzaNorma) S.promesseCampagna[S.promesseCampagna.length-1].perSostegno=p.id; } }   // L250-10: con minoranzaNorma la promessa sa per chi è; L250-11: e cade sul gruppo più vicino al governo
+    if(typeof campPromessa==='function') sostegnoPromesse(lista);   // L250-10: con minoranzaNorma la promessa sa per chi è; L250-11: e cade sul gruppo più vicino al governo
     if(!cPrima) gd('cetomedio',-2); stampad(-3); }
   else if(prezzo==='veto'){ stampad(-4); tutteCorrenti(-5); }
   else { S.ind.debt+=0.6; stampad(-5); if(p.base) for(var g2 in p.base) gd(g2,3); }
   repd(-2);
-  S.log.unshift({t:T('La maggioranza'),x:T('%P non entra nel governo ma non lo fa cadere: si va avanti con un\'intesa esterna.').replace('%P',nome)});
+  S.log.unshift({t:T('La maggioranza'),x:(lista.length>1 ? T('%P non entrano nel governo ma non lo fanno cadere: si va avanti con un\'intesa esterna.') : T('%P non entra nel governo ma non lo fa cadere: si va avanti con un\'intesa esterna.')).replace('%P',nome)});
 }
+/* L250-15 · una promessa per sostenitore, sul gruppo più vicino al governo di ciascuno (promessaSostegnoGruppo); due sostenitori sullo
+   stesso gruppo = una promessa sola, che sa per chi è (`perSostegno` il primo, `perAltri` gli altri). Un sostenitore solo = come prima. */
+function sostegnoPromesse(lista){
+  var fatte={};
+  lista.forEach(function(x){
+    if(!x || !x.base) return;
+    var g=promessaSostegnoGruppo(x); if(!g) return;
+    if(fatte[g]){ if(PAESE.minoranzaNorma) fatte[g].perAltri=(fatte[g].perAltri||[]).concat([x.id]); return; }
+    campPromessa(g); var q=S.promesseCampagna[S.promesseCampagna.length-1];
+    if(PAESE.minoranzaNorma) q.perSostegno=x.id;
+    fatte[g]=q;
+  });
+}
+function promessaDi(q, id){ return q.perSostegno===id || (Array.isArray(q.perAltri) && q.perAltri.indexOf(id)>=0); }
 /* il rimpasto: l'alleato entra davvero. Costo concreto — due dicasteri passano di mano — e la base lo vede. */
 function rimpastoEntra(){
   var p=partnerRimpasto(); if(!p) return;
@@ -5198,13 +5215,45 @@ function sostegnoTick(){
   if(!p || S.opposizione){ S.sostegno=null; return; }
   A.mesi=(A.mesi||0)+1;
   if(A.prezzo==='bottega'){ S.ind.debt+=0.05; }                       // costa ogni mese, davvero
+  /* L250-15 · con più sostenitori (`A.altri`) ciascuno si controlla da sé: chi rompe esce dall'elenco (sostegnoTogli); se i rimasti non
+     arrivano più a 50 l'intesa si scioglie e il governo resta in minoranza, senza caduta automatica (la sfiducia la decide probSfiducia:
+     con la norma solo un blocco avverso ≥ 50). Con un sostenitore solo il ramo di sempre, riga per riga. */
+  if(Array.isArray(A.altri) && A.altri.length){
+    var ids=sostegnoIds(A);
+    for(var k=0;k<ids.length;k++){
+      var id=ids[k];
+      if(A.prezzo==='programma' && S.promesseCampagna && S.promesseCampagna.some(function(q){ return PAESE.minoranzaNorma ? (promessaDi(q, id) && (q.colpi||0)>=SOSTEGNO_NORMA_COLPI) : (q.colpi||0)>=3; })) return sostegnoTogli(id, 'promessa');
+      if(typeof intesaDi==='function' && intesaDi(id)<25) return sostegnoTogli(id, 'intesa');
+    }
+    if(A.prezzo==='veto' && (S.sostegnoStrappi||0)>=3) return sostegnoRompi('strappi');
+    if(A.mesi%6===0 && typeof intesaMuovi==='function') ids.forEach(function(id){ try{ intesaMuovi(id,-3); }catch(e){} });
+    return;
+  }
   if(A.prezzo==='programma' && S.promesseCampagna && S.promesseCampagna.some(function(q){ return PAESE.minoranzaNorma ? (q.perSostegno===A.pid && (q.colpi||0)>=SOSTEGNO_NORMA_COLPI) : (q.colpi||0)>=3; })) return sostegnoRompi('promessa');   // L250-10: con minoranzaNorma rompe solo la promessa fatta a chi sostiene, a SOSTEGNO_NORMA_COLPI
   if(A.prezzo==='veto' && (S.sostegnoStrappi||0)>=3) return sostegnoRompi('strappi');
   if(typeof intesaDi==='function' && intesaDi(A.pid)<25) return sostegnoRompi('intesa');
   if(A.mesi%6===0 && typeof intesaMuovi==='function'){ try{ intesaMuovi(A.pid,-3); }catch(e){} }   // logora: vivere di stampelle consuma il rapporto
 }
-function sostegnoRompi(perche){
+/* L250-15 · un sostenitore su più si sfila: esce dall'elenco (il primo dei rimasti passa in `pid`). Se i rimasti non portano più a 50
+   l'intesa si scioglie tutta (sostegnoRompi: il governo prosegue in minoranza, senza stampella). Il costo è quello della rottura. */
+function sostegnoTogli(id, perche){
+  var A=S && S.sostegno; if(!A) return;
+  var resto=sostegnoIds(A).filter(function(x){ return x!==id; });
+  var regge=resto.length && S.seggi && seggiCoalizione((S.coalizione||[S.partito]).concat(resto), S.seggi)>=50;
+  if(!regge){ sostegnoRompi(perche, id); return; }
+  A.pid=resto[0]; if(resto.length>1) A.altri=resto.slice(1); else delete A.altri;
+  stampad(-2); repd(-1);
+  S.log.unshift({t:T('La maggioranza'),x:T('%P ritira l\'appoggio esterno, ma gli altri restano: il governo tiene.').replace('%P',ppNomeBreve(id))});
+}
+function sostegnoRompi(perche, chi){
   if(!S || !S.sostegno) return;
+  if(Array.isArray(S.sostegno.altri) && S.sostegno.altri.length){   // L250-15: l'intesa a più si scioglie tutta
+    var nomeC=chi ? ppNomeBreve(chi) : nomiElenco(sostegnoIds(S.sostegno));
+    S.sostegno=null; S.minoranza=!S.coabitazione && bloccoMaggioranza()<50;
+    stampad(-4); repd(-2); gd('cetomedio',-2);
+    S.log.unshift({t:T('La maggioranza'),x:T('%P ritira l\'appoggio esterno e gli altri non bastano più: il governo va avanti in minoranza, senza rete.').replace('%P',nomeC)});
+    return;
+  }
   var nome=T(part(S.sostegno.pid) ? part(S.sostegno.pid).nome : '');
   S.sostegno=null; S.minoranza=!S.coabitazione && bloccoMaggioranza()<50;   // L101-1: in coabitazione la minoranza resta spenta
   stampad(-4); repd(-2); gd('cetomedio',-2);
@@ -10250,7 +10299,8 @@ function avanzaMese(){
     sostegnoAvvTick();
     if(!S.sostegnoAvv && bloccoMaggioranza()<50){
       var pAvv=partnerSostegnoAvversario();
-      if(pAvv){
+      if(pAvv && PAESE.minoranzaNorma && soloAppoggio(S.governoAvversario||(S.coalizione||[])[0]).length) normaApriAvv();   // L250-15: con la norma la stampella può essere di più partiti insieme (con uno solo: la stessa riga di sotto)
+      else if(pAvv){
         S.sostegnoAvv={pid:pAvv.id, mesi:0, tenuta:55};
         S.log.unshift({t:T('Il governo trova una stampella'), x:T('%P non entra nel governo ma promette di non farlo cadere.').replace('%P', T(pAvv.nome))});
       }
@@ -11606,7 +11656,7 @@ function renderTrattativa(){
   const eff=total+cb;
   const comp=senzaAppoggio(compatibiliMiei(seggi), mine).filter(p=>!COAL.membri.includes(p.id));   // L237-2: all'opposizione chi guida il governo non si imbarca (model.js) · L250-9: né chi sostiene solo da fuori
   const reached=eff>=50;
-  const pNorma=reached ? null : appoggioNorma(COAL.membri, mine, seggi);   // L250-9: la minoranza dichiarata, coi seggi di chi sostiene da fuori
+  const lNorma=reached ? null : appoggioNormaLista(COAL.membri, mine, seggi), pNorma=lNorma ? lNorma[0] : null;   // L250-15: anche più sostenitori insieme   // L250-9: la minoranza dichiarata, coi seggi di chi sostiene da fuori
   const memberRows=COAL.membri.map(id=>{ const p=part(id), you=id===mine;
     return `<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-top:1px solid var(--line)">
       <span style="font-weight:600;font-size:13.5px">${T(p.nome)} <small style="color:var(--mut2);font-weight:400">${you?T('· il tuo partito'):T(p.orientamento)}</small></span>
@@ -11616,7 +11666,7 @@ function renderTrattativa(){
   /* L237-2bis (d) · prima di firmare, chi guiderà: dall'opposizione, se la coalizione scelta ha un partito più forte del tuo, la firma lo dice (la stessa guidaCoalizione di vinciElezione) */
   const gFirma=(voto && REGOLA_PARTNER && S.opposizione && PAESE.comeSiVince==='parlamentare' && !(typeof urnaLegislativa==='function' && urnaLegislativa())) ? guidaCoalizione(COAL.membri, seggi) : mine;
   const firmaTxt = gFirma!==mine ? T('Firma: governo guidato da %P (tu da partner)').replace('%P',T((part(gFirma)||{}).nome||'')) : T(voto?'Conferma la maggioranza':'Forma il governo');
-  if(pNorma) action=`<button class="opt" style="border-color:var(--acc);background:var(--acc-bg)" onclick="${voto?'finalizeVoto(true)':confirmFn}"><span class="ol" style="color:var(--acc-ink)">${T('Governo di minoranza con l\'appoggio esterno di %P').replace('%P',T(pNorma.nome))} →</span><span class="oe">${T('%N seggi + %M da fuori').replace('%N',total).replace('%M',seggi[pNorma.id]||0)}</span></button>`;
+  if(pNorma) action=`<button class="opt" style="border-color:var(--acc);background:var(--acc-bg)" onclick="${voto?'finalizeVoto(true)':confirmFn}"><span class="ol" style="color:var(--acc-ink);white-space:normal">${T('Governo di minoranza con l\'appoggio esterno di %P').replace('%P',lNorma.length>1 ? nomiElenco(lNorma.map(x=>x.id)) : T(pNorma.nome))} →</span><span class="oe">${T('%N seggi + %M da fuori').replace('%N',total).replace('%M',lNorma.length>1 ? Math.round(lNorma.reduce((s2,x)=>s2+(seggi[x.id]||0),0)*10)/10 : (seggi[pNorma.id]||0))}</span></button>`;
   else if(reached) action=`<button class="opt" style="border-color:var(--acc);background:var(--acc-bg)" onclick="${confirmFn}"><span class="ol" style="color:var(--acc-ink)">${firmaTxt} →</span><span class="oe">${total} ${T('seggi')}${cb?` +${cb} ${T('credibilità')} → ${Math.round(eff)}`:' '+T('su 100')}</span></button>`;
   else if(comp.length===0) action= voto
       ? `<button class="opt" style="border-color:var(--neg)" onclick="finalizeVoto(false)"><span class="ol">${T('Nessuna maggioranza possibile')}</span><span class="oe">${T("Vedi l'esito del voto")}</span></button>`
@@ -11738,7 +11788,7 @@ function probSfiducia(){
      aula: i suoi seggi entrano nel conto, **scontati del 30%**, perché vivere di stampelle non è come avere
      la maggioranza — e perché il paletto del design dice che nessun automatismo deve salvare il giocatore.
      Se anche così non si arriva a 50, la sfiducia resta piena: la minoranza vera resta mortale. */
-  if(S.sostegno && S.seggi && S.seggi[S.sostegno.pid]!=null) mio += (S.seggi[S.sostegno.pid]||0)*0.7;
+  if(S.sostegno && S.seggi) sostegnoIds(S.sostegno).forEach(function(id){ if(S.seggi[id]!=null) mio += (S.seggi[id]||0)*0.7; });   // L250-15: tutti i sostenitori (uno solo = il conto di prima)
   if(camereFiducia()) mio=maggioranzaCamere(S.coalizione||[S.partito], S.sostegno && S.sostegno.pid, 0.7);   // L263-7: il conto di sopra, nell'aula dove manca di più
   if(mio>=50) return 0;                                   // hai i numeri: nessuna mozione ti tocca
   const scarto = Math.min(1, (50-mio)/10);                // quanto manca alla soglia, saturato a 10 punti
@@ -11802,12 +11852,12 @@ function probSfiduciaAvversario(){
      dell'aula e lo scioglimento è del premier. */
   if((S.mesiGovernoAvv||0) < 12) return 0;
   if(PAESE.minoranzaNorma && S.seggi){   // L250-9: come probSfiducia, dal lato dell'avversario
-    if(S.sostegnoAvv && seggiCoalizione((S.coalizione||[]).concat([S.sostegnoAvv.pid]), S.seggi)>=50) return 0;
+    if(S.sostegnoAvv && seggiCoalizione((S.coalizione||[]).concat(sostegnoIds(S.sostegnoAvv)), S.seggi)>=50) return 0;   // L250-15: la somma di chi sostiene
     if(criccaFuori().seggi<50) return 0; }
   const D=dif(), m=S.mesiMinoranzaAvv||0, c=S.ind.consenso;
   let suoi = (typeof bloccoSeggi==='function') ? bloccoSeggi() : 100;
   /* la stampella conta come per te (L53-2): i seggi di chi si astiene entrano scontati del 30% */
-  if(S.sostegnoAvv && S.seggi && S.seggi[S.sostegnoAvv.pid]!=null) suoi += (S.seggi[S.sostegnoAvv.pid]||0)*0.7;
+  if(S.sostegnoAvv && S.seggi) sostegnoIds(S.sostegnoAvv).forEach(function(id){ if(S.seggi[id]!=null) suoi += (S.seggi[id]||0)*0.7; });   // L250-15: tutti i sostenitori (uno solo = il conto di prima)
   if(camereFiducia()) suoi=maggioranzaCamere(S.coalizione||[S.partito], S.sostegnoAvv && S.sostegnoAvv.pid, 0.7);   // L263-7: come probSfiducia
   if(suoi>=50) return 0;                                  // ha i numeri: nessuna mozione lo tocca
   const scarto = Math.min(1, (50-suoi)/10);               // quanto gli manca alla soglia, saturato a 10 punti
@@ -12207,10 +12257,28 @@ function vincitoreAvvioOpp(){
 function soloAppoggio(guida){ const t=PAESE && PAESE.minoranzaNorma && PAESE.appoggioEsterno; return (t && guida && t[guida]) || []; }
 function senzaAppoggio(lista, guida){ const a=soloAppoggio(guida); return a.length ? lista.filter(p=>a.indexOf(p.id)<0) : lista; }
 function appoggioNorma(membri, guida, seggi){
+  const l=appoggioNormaLista(membri, guida, seggi); return l ? l[0] : null;
+}
+/* ⚑ L250-15 (08/11) · L'APPOGGIO ESTERNO CHE SOMMA (Norvegia: Ap a ~31 seggi con SV, Sp, Rødt e Verdi da fuori). Prima si cerca un
+   sostenitore che da SOLO porti a 50 (la regola di L250-9: Svezia, un solo SD, identica a prima); se nessuno basta, si prendono IN
+   ORDINE dalla lista di `appoggioEsterno` finché la somma arriva a 50; se nemmeno tutti bastano, null come prima. Rende la lista dei
+   partiti (lunga 1 nel caso di sempre). `APPOGGIO_SOMMA` spento = la regola di L250-9 (la prova rossa). Interruttore `let`. */
+let APPOGGIO_SOMMA=true;
+function appoggioNormaLista(membri, guida, seggi){
   const a=soloAppoggio(guida), sg=seggi || (S && S.seggi); if(!a.length || !sg) return null;
   const tot=seggiCoalizione(membri, sg); if(tot>=50) return null;
-  for(const id of a){ if(membri.indexOf(id)>=0) continue; const v=sg[id]||0; if(v>0 && tot+v>=50 && part(id)) return part(id); }
+  for(const id of a){ if(membri.indexOf(id)>=0) continue; const v=sg[id]||0; if(v>0 && tot+v>=50 && part(id)) return [part(id)]; }
+  if(!APPOGGIO_SOMMA) return null;
+  const l=[]; let s=tot;
+  for(const id of a){ if(membri.indexOf(id)>=0) continue; const v=sg[id]||0; if(!(v>0) || !part(id)) continue; l.push(part(id)); s+=v; if(s>=50) return l; }
   return null;
+}
+/* Chi sostiene da fuori: `S.sostegno` / `S.sostegnoAvv` tengono il primo in `pid` (tutti i lettori di prima) e gli altri in `altri`
+   (facoltativo: assente = un sostenitore solo, come i salvataggi di prima e la Svezia). */
+function sostegnoIds(A){ return A ? [A.pid].concat(Array.isArray(A.altri) ? A.altri : []) : []; }
+function nomiElenco(ids){
+  const n=ids.map(function(id){ return ppNomeBreve(id); }).filter(Boolean);
+  return n.length>1 ? n.slice(0,-1).join(', ')+' '+T('e')+' '+n[n.length-1] : (n[0]||'');
 }
 function guidaNorma(w){
   if(!w || !PAESE || !PAESE.minoranzaNorma || !PAESE.appoggioEsterno) return w;
@@ -12227,19 +12295,20 @@ function normaApri(){
 }
 function normaApriAvv(){
   if(!PAESE || !PAESE.minoranzaNorma || !S || !S.opposizione || !Array.isArray(S.coalizione) || !S.coalizione.length) return false;
-  const g=S.governoAvversario || S.coalizione[0], p=appoggioNorma(S.coalizione, g); if(!p) return false;
-  S.sostegnoAvv={pid:p.id, mesi:0, tenuta:55};
-  if(S.log) S.log.unshift({t:T('Il governo trova una stampella'), x:T('%P non entra nel governo ma promette di non farlo cadere.').replace('%P', T(p.nome))});
+  const g=S.governoAvversario || S.coalizione[0], l=appoggioNormaLista(S.coalizione, g); if(!l) return false;
+  S.sostegnoAvv={pid:l[0].id, mesi:0, tenuta:55};
+  if(l.length>1) S.sostegnoAvv.altri=l.slice(1).map(function(p){ return p.id; });   // L250-15: più sostenitori insieme
+  if(S.log) S.log.unshift({t:T('Il governo trova una stampella'), x:(l.length>1 ? T('%P non entrano nel governo ma promettono di non farlo cadere.') : T('%P non entra nel governo ma promette di non farlo cadere.')).replace('%P', l.length>1 ? nomiElenco(sostegnoIds(S.sostegnoAvv)) : T(l[0].nome))});
   return true;
 }
 function minoranzaSostenuta(){
   return !!(PAESE && PAESE.minoranzaNorma && S && S.minoranza && S.sostegno && S.seggi
-    && seggiCoalizione((S.coalizione||[S.partito]).concat([S.sostegno.pid]), S.seggi)>=50);
+    && seggiCoalizione((S.coalizione||[S.partito]).concat(sostegnoIds(S.sostegno)), S.seggi)>=50);
 }
 /* il blocco contro il governo avversario: la cricca più grande fra chi non sta nel governo e non lo sostiene (te compreso) */
 function criccaFuori(){
   if(!S || !S.seggi || !PAESE || !PAESE.partiti) return {seggi:0, membri:[]};
-  const gov=(S.coalizione||[]).concat(S.sostegnoAvv ? [S.sostegnoAvv.pid] : []);
+  const gov=(S.coalizione||[]).concat(sostegnoIds(S.sostegnoAvv));   // L250-15: tutti quelli che lo sostengono
   const fuori=PAESE.partiti.filter(p=>gov.indexOf(p.id)<0 && (S.seggi[p.id]||0)>0).map(p=>p.id);
   let best={seggi:0, membri:[]}; const n=fuori.length;
   for(let m=1; m<(1<<n); m++){
