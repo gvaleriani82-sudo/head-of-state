@@ -21396,6 +21396,14 @@ const TITOLI=[
 {id:'ti_us90_golfo_attesa', era:'us1990', pri:1, cond:()=>S.usGolfoEsito91==='attesa' && S.year===1991 && S.month>=2 && S.month<=3, amico:'L\'embargo stringe, e nessun soldato è caduto', ostile:'Sei mesi di sanzioni, e il piccolo vicino è ancora occupato'},
 {id:'ti_us90_golfo_tardi', era:'us1990', pri:1, cond:()=>S.usGolfoEsito91==='vinta_tardi' && S.year===1991 && S.month>=4 && S.month<=6, amico:'Guerra breve nel Golfo, e il piccolo vicino è libero', ostile:'Vinta in primavera la guerra che si poteva vincere in inverno'},
 {id:'ti_us90_golfo_embargo', era:'us1990', pri:1, cond:()=>S.usGolfoEsito91==='embargo' && S.year===1991 && S.month>=4 && S.month<=6, amico:'Niente guerra nel deserto: l\'America sceglie la pazienza', ostile:'L\'invasore resta nel Golfo, e la benzina costa ancora cara'},
+{id:'ti_us90_bilancio', era:'us1990', pri:1, cond:()=>(S.usBilancio90==='accordo'||S.usBilancio90==='accordo_destra'||S.usBilancio90==='firmato') && S.year===1990 && S.month===11, amico:'Il bilancio c\'è: entrate e tagli per chiudere il buco in cinque anni', ostile:'Il bilancio passa, e la promessa sulle tasse resta per strada'},   // L264-4: i titoli del bilancio d'ottobre (D304), il mese del voto
+{id:'ti_us90_bilancio_chiusura', era:'us1990', pri:1, cond:()=>(S.usBilancio90==='ponte'||S.usBilancio90==='chiusura'||S.usBilancio90==='veto') && S.year===1990 && S.month===11, amico:'Niente tasse nuove: la Casa Bianca non ha ceduto', ostile:'Uffici chiusi e bilancio in bilico: Washington va al voto senza conti'},
+{id:'ti_us90_sanita', era:'us1990', pri:1, cond:()=>(S.usSanita93==='piano'||S.usSanita93==='rinvio') && S.usCamera94!=='persa' && S.year===1994 && S.month===12, amico:"La riforma della sanità resta nel cassetto: il Presidente promette di riprovarci", ostile:"La riforma della sanità è morta senza un voto"},   // L264-5: i titoli di S3, il mese dopo la metà mandato (la frase sulla Camera solo se lo stato lo dice: usCamera94, D312)
+{id:'ti_us90_sanita_camera', era:'us1990', pri:1, cond:()=>(S.usSanita93==='piano'||S.usSanita93==='rinvio') && S.usCamera94==='persa' && S.year===1994 && S.month===12, amico:"Sanità ferma e Camera perduta: il Presidente deve ricominciare", ostile:"Dopo la sanità, la Camera: il voto boccia il Presidente"},
+{id:'ti_us90_sanita_legge', era:'us1990', pri:1, cond:()=>S.usSanita93==='compromesso' && S.usCamera94!=='persa' && S.year===1994 && S.month===12, amico:"La riforma della sanità c'è, più piccola ma c'è", ostile:"Una riforma a metà: milioni restano senza assicurazione"},
+{id:'ti_us90_sanita_legge_camera', era:'us1990', pri:1, cond:()=>S.usSanita93==='compromesso' && S.usCamera94==='persa' && S.year===1994 && S.month===12, amico:"La riforma della sanità c'è, ma la Camera cambia mano", ostile:"Il compromesso sulla sanità non salva la Camera"},
+{id:'ti_us90_rapporto', era:'us1990', pri:1, cond:()=>us90SecondoMandatoDem() && !S.opposizione && S.year===1998 && S.month===9, amico:"Il rapporto del procuratore arriva alla Camera: la Casa Bianca risponde punto per punto", ostile:"Il rapporto del procuratore è alla Camera, e si parla di voto d'accusa"},   // L264-6: la cronaca di S5 a chi governa (D308 (ii)), senza scelta
+{id:'ti_us90_assoluzione', era:'us1990', pri:1, cond:()=>us90SecondoMandatoDem() && !S.opposizione && S.year===1999 && S.month===2, amico:"Il Senato assolve il Presidente: i due terzi non ci sono", ostile:"Assolto al Senato, ma il voto d'accusa resta agli atti"},   // L264-6: l'assoluzione, a chi governa
  {id:'ng_p_ti_petrolio', era:'contemporanea', paesi:['nigeria'], amico:'La produzione di petrolio torna a salire', ostile:'Un barile su dieci sparisce: il furto record'},
 ];
 
@@ -23411,6 +23419,14 @@ const SNODI_STORICI = {
   usGolfo90:       { storico:['coalizione'], conforme:'sulla crisi del Golfo del 1990', diverge:{ 'sanzioni':'Nel 1990 ha scelto le sanzioni e l’attesa contro l’invasione nel Golfo.', 'subito':'Nel 1990 ha mandato subito i soldati nel Golfo, senza aspettare le Nazioni Unite.' } },
   usGolfo90Opp:    { storico:['sanzioni'], conforme:'sulla crisi del Golfo del 1990, dall’opposizione', diverge:{ 'appoggio':'Nel 1990 ha appoggiato dall’opposizione il Presidente nella crisi del Golfo.', 'congresso':'Nel 1990 ha chiesto dall’opposizione il voto del Congresso prima di ogni guerra nel Golfo.' } },
   usGolfoEsito91:  { storico:['vinta'], conforme:'sulla guerra del Golfo', diverge:{ 'attesa':'Nel 1991 ha tenuto l’embargo nel Golfo senza fare la guerra.', 'vinta_tardi':'Nel 1991 ha fatto la guerra del Golfo in primavera, dopo mesi di embargo.', 'embargo':'Nel 1991 ha tenuto l’embargo a oltranza: niente guerra nel Golfo, e l’invasore è rimasto.' } },
+  usTasse90:       { storico:['tratta'], conforme:'sulla promessa sulle tasse del 1990', diverge:{ 'promessa':'Nel 1990 ha tenuto la promessa della campagna: solo tagli, niente tasse nuove.', 'congresso':'Nel 1990 ha lasciato al Congresso la prima mossa sul bilancio.' } },
+  usTasse90Opp:    { storico:['entrate'], conforme:'sul bilancio del 1990, dall’opposizione', diverge:{ 'difesa':'Nel 1990 ha chiesto dall’opposizione solo tagli alla difesa.', 'attesa':'Nel 1990 ha aspettato dall’opposizione che fosse il Presidente a parlare di tasse.' } },
+  usSanita93:      { storico:['piano'], conforme:'sulla riforma sanitaria del 1993', diverge:{ 'compromesso':"Nel 1993 ha cercato sulla sanità un compromesso con i moderati dell'altro partito.", 'rinvio':"Nel 1993 ha rinviato la riforma sanitaria." } },   // L264-5
+  usSanita93Opp:   { storico:['contro'], conforme:'sulla riforma sanitaria del 1993, dall’opposizione', diverge:{ 'proprio':"Nel 1993 ha presentato dall'opposizione un piano sanitario suo.", 'collabora':"Nel 1993 ha collaborato dall'opposizione alla riforma sanitaria." } },
+  usChiusura95:    { storico:['veto'], conforme:'sulla chiusura degli uffici federali del 1995', diverge:{ 'firma':"Nel 1995 ha firmato il bilancio del Congresso per riaprire gli uffici federali.", 'compromesso':"Nel 1995 ha chiuso subito un compromesso sul bilancio." } },
+  usChiusura95Opp: { storico:['tieni'], conforme:'sulla chiusura degli uffici federali del 1995, dall’opposizione', diverge:{ 'riapri':"Nel 1995 ha riaperto dall'opposizione gli uffici federali per trattare.", 'ponte':"Nel 1995 ha votato dall'opposizione leggi-ponte per i servizi essenziali." } },
+  usBilancio90:    { storico:['accordo'], conforme:'sul bilancio d’ottobre del 1990', diverge:{ 'accordo_destra':'Nel 1990 ha ritirato l’accordo sul bilancio per cercarne uno più gradito al suo partito.', 'ponte':'Nel 1990, dopo la chiusura degli uffici federali, ha firmato un bilancio ponte.', 'chiusura':'Nel 1990 ha tenuto duro con gli uffici federali chiusi: niente tasse nuove.', 'firmato':'Nel 1990 ha firmato il bilancio scritto dal Congresso.', 'veto':'Nel 1990 ha messo il veto al bilancio scritto dal Congresso.' } },
+  usBilancio90Opp: { storico:['vota'], conforme:'sul bilancio d’ottobre del 1990, dall’opposizione', diverge:{ 'affossa':'Nel 1990 ha affossato dall’opposizione l’accordo sul bilancio per strappare di più.' } },
 };
 
 /* ==============================================================================================================
@@ -28424,4 +28440,439 @@ const US90_GOLFO_ESITO_OPP_EV = {
     ? 'Il 12 gennaio il Congresso ha votato sull\'uso della forza, come avevi chiesto: la risoluzione è passata, di pochi voti al Senato. Ora i soldati sono al fronte, e il tuo partito si stringe intorno alle truppe.'
     : 'Il 12 gennaio il Congresso ha votato l\'uso della forza. Tu avevi chiesto più tempo per le sanzioni, e la maggioranza del tuo partito al Senato ha votato contro: la risoluzione è passata lo stesso, di pochi voti. Ora i soldati sono al fronte, e ogni parola conta.'; },
   ch:[ { l:'Prosegui', e:'', f:function(){} } ],
+};
+/* ==============================================================================================================
+   L264-4 · STATI UNITI 1990 — LA PROMESSA SULLE TASSE (S2, 1990/6-7) CON LA SUA AULA E IL BILANCIO D'OTTOBRE DOVUTO DEL 1990/10 (scheda
+   PRESET-USA-1990 §4 S2, D304, D305; testi di Code). Gli helper di us1960-us1980 (gdUs60, baseUs60, fidUs60). Nomi nuovi cercati in tutto
+   js/, .claude/ e prove/ il 09/11 prima di scriverli (L99-2), zero occorrenze: snodo_tasse90(_opp), us90_bilancio(_opp), usTasse90(Opp),
+   usBilancio90(Opp), bilancio90Ora, ti_us90_bilancio.
+   ⚑ CHI RICEVE CHE COSA (cancelli in game.js accanto a snodoGolfo90Dovuta): S2 a chi governa nel 1990/6-7 (mesi liberi), l'aula a chi è
+   all'opposizione. Il bilancio d'ottobre è una carta DOVUTA del 1990/10 (il mese prima della metà mandato: esce con la carta di campagna,
+   snodoColCampagna, come la riforma fiscale del 1986), una carta per strada così ogni scelta scrive il suo esito con un letterale
+   (verifica-snodi.js): tratta (e chi non ha visto S2: la storia) → us90_bilancio · promessa → us90_bilancio_promessa · congresso →
+   us90_bilancio_congresso. Dall'aula us90_bilancio_opp, il testo legge usTasse90Opp (in una variabile: un confronto nelle scelte
+   inquinerebbe i valori che verifica-snodi legge).
+   ⚑ G5: la promessa del 1988 si racconta con parole nostre, mai la frase; nessun nome. Il Presidente-giocatore può essere dei due
+   partiti: «l'ala dura del tuo partito», mai «la destra».
+   ⚑ Il premier non ha credibilità: dove la scheda dice «costa in credibilità», a chi governa costa in stampa e nel ceto medio.
+   Verificato il 09/11 (storia del Congresso): a fine giugno 1990 il Presidente accetta che nel pacchetto ci siano aumenti delle
+   entrate; il 5 ottobre la Camera boccia l'accordo del vertice, con la maggioranza del partito del Presidente contro; il fine settimana
+   del 6-9 ottobre gli uffici federali chiudono; a fine ottobre passa un secondo pacchetto, più con i voti dell'altro partito.
+   ============================================================================================================== */
+const TASSE90_EV = {
+  id:'snodo_tasse90', snodo:true, era:'us1990', kick:'Il paese',
+  t:'La promessa sulle tasse',
+  text:'Il disavanzo non scende, e il vertice sul bilancio con i capi del Congresso è fermo da un mese. In campagna, due anni fa, avevi promesso che non ci sarebbero state tasse nuove, e l\'avevi ripetuto in ogni comizio. Ora l\'altro partito, che ha la maggioranza in tutte e due le camere, non tratta finché non sarai tu a dire per primo la parola «entrate».',
+  ch:[
+    { l:'Accettare di trattare anche sulle tasse', e:'La storia · l\'accordo arriverà in autunno, con aumenti e tagli · i mercati respirano, e l\'ala dura del tuo partito non perdona',
+      f:function(){ S.usTasse90='tratta'; baseUs60(-1); stampad(1); fidUs60(1);
+        S.log.unshift({t:T('Il paese'),x:T('Sul bilancio ha accettato di trattare anche sulle tasse, contro la promessa della campagna.')}); } },
+    { l:'Tenere la promessa: solo tagli', e:'La base ti applaude · il vertice rischia di saltare, il disavanzo resta e i giornali scrivono che il bilancio d\'autunno non c\'è', costo:{debito:0.3},
+      f:function(){ S.usTasse90='promessa'; S.ind.debt+=0.3; baseUs60(1); stampad(-1); fidUs60(-1);
+        S.log.unshift({t:T('Il paese'),x:T('Sul bilancio ha tenuto la promessa della campagna: solo tagli, niente tasse nuove.')}); } },
+    { l:'Lasciar decidere al Congresso', e:'Il bilancio lo scrive l\'altro partito, e tu lo firmerai o lo boccerai · i giornali scrivono che non decidi',
+      f:function(){ S.usTasse90='congresso'; stampad(-1); gdUs60('cetomedio',-1);
+        S.log.unshift({t:T('Il paese'),x:T('Sul bilancio ha lasciato la prima mossa al Congresso.')}); } },
+  ],
+};
+const TASSE90_OPP_EV = {
+  id:'snodo_tasse90_opp', snodo:true, era:'us1990', kick:'Il paese',
+  t:'La promessa sulle tasse, dall\'aula',
+  text:'Il disavanzo non scende, e il vertice sul bilancio fra la Casa Bianca e i capi del Congresso è fermo da un mese. Il Presidente aveva promesso in campagna che non ci sarebbero state tasse nuove. Il tuo partito ha la maggioranza in tutte e due le camere, e deve decidere che cosa chiedere per firmare.',
+  ch:[
+    { l:'Pretendere le entrate nel pacchetto', e:'La storia · a fine giugno il Presidente accetterà di trattare anche sulle tasse · i sindacati ti seguono, il ceto medio teme il conto',
+      f:function(){ S.usTasse90Opp='entrate'; gdUs60('lavoratori',1); gdUs60('cetomedio',-1);
+        S.log.unshift({t:T('Il paese'),x:T('Dall\'opposizione ha preteso le entrate nel pacchetto sul bilancio.')}); } },
+    { l:'Chiedere solo tagli alla difesa', e:'Il ceto medio apprezza · i giornali scrivono che con i soli tagli alla difesa il conto non torna',
+      f:function(){ S.usTasse90Opp='difesa'; gdUs60('cetomedio',1); stampad(-1);
+        S.log.unshift({t:T('Il paese'),x:T('Dall\'opposizione ha chiesto, sul bilancio, solo tagli alla difesa.')}); } },
+    { l:'Lasciare che il Presidente si bruci da solo', e:'Nessun voto finché non parla lui · la base è contenta, ma c\'è chi dice che giochi col bilancio del paese',
+      f:function(){ S.usTasse90Opp='attesa'; baseUs60(1); credd(-1);
+        S.log.unshift({t:T('Il paese'),x:T('Dall\'opposizione ha aspettato che fosse il Presidente a parlare di tasse.')}); } },
+  ],
+};
+/* il bilancio d'ottobre (D304), una carta per strada (la sceglie bilancio90Carta in game.js; l'iniezione la scrive per esteso per verifica-snodi) */
+const US90_BILANCIO_EV = {
+  id:'us90_bilancio', snodo:true, era:'us1990', kick:'Il paese',
+  t:'Il bilancio d\'ottobre',
+  text:'L\'accordo del vertice è arrivato: aumenti delle entrate e tagli alla spesa, per ridurre il disavanzo in cinque anni. Alla Camera però una parte del tuo partito vota contro, e l\'accordo cade. L\'anno fiscale è già cominciato, gli uffici federali vanno avanti con i rinvii, e fra un mese si vota per il Congresso.',
+  ch:[
+    { l:'Firmare l\'accordo, con i voti che ci sono', e:'La storia · il primo accordo cade, e a fine ottobre ne passa un secondo, più con i voti dell\'altro partito che con i tuoi · i conti migliorano, l\'ala dura del tuo partito se lo segna',
+      f:function(){ S.usBilancio90='accordo'; fidUs60(2); baseUs60(-1); stampad(1);
+        S.log.unshift({t:T('Il paese'),x:T('Ha firmato l\'accordo sul bilancio, con aumenti delle entrate e tagli alla spesa.')}); } },
+    { l:'Ritirarlo e cercarne uno più gradito al tuo partito', e:'La base ti ringrazia · i mercati non capiscono che cosa voglia l\'America, e il disavanzo resta',
+      f:function(){ S.usBilancio90='accordo_destra'; baseUs60(1); fidUs60(-1); stampad(-1);
+        S.log.unshift({t:T('Il paese'),x:T('Ha ritirato l\'accordo sul bilancio e ne ha cercato uno più gradito al suo partito.')}); } },
+  ],
+};
+const US90_BILANCIO_PROMESSA_EV = {
+  id:'us90_bilancio_promessa', snodo:true, era:'us1990', kick:'Il paese',
+  t:'Il bilancio d\'ottobre',
+  text:'Il vertice è saltato, e il bilancio non c\'è. L\'anno fiscale è cominciato senza fondi, e il fine settimana del 6-9 ottobre gli uffici federali chiudono: parchi, musei, sportelli. Le telecamere sono davanti ai cancelli, e fra un mese si vota per il Congresso.',
+  ch:[
+    { l:'Cedere e firmare un bilancio ponte', e:'Gli uffici riaprono il martedì · i giornali scrivono che la promessa ha tenuto per un fine settimana',
+      f:function(){ S.usBilancio90='ponte'; baseUs60(-1); stampad(1);
+        S.log.unshift({t:T('Il paese'),x:T('Dopo la chiusura degli uffici federali ha firmato un bilancio ponte.')}); } },
+    { l:'Tenere duro: niente tasse, anche a uffici chiusi', e:'La base è con te · il ceto medio vede i cancelli chiusi, e le telecamere restano lì', costo:{debito:0.2},
+      f:function(){ S.usBilancio90='chiusura'; S.ind.debt+=0.2; baseUs60(1); stampad(-1); gdUs60('cetomedio',-1);
+        S.log.unshift({t:T('Il paese'),x:T('Con gli uffici federali chiusi ha tenuto duro: niente tasse nuove.')}); } },
+  ],
+};
+const US90_BILANCIO_CONGRESSO_EV = {
+  id:'us90_bilancio_congresso', snodo:true, era:'us1990', kick:'Il paese',
+  t:'Il bilancio d\'ottobre',
+  text:'Il Congresso ha scritto il suo bilancio, e te l\'ha mandato: più entrate dai redditi alti, tagli alla difesa, la spesa sociale com\'è. L\'anno fiscale è già cominciato, gli uffici federali vanno avanti con i rinvii, e fra un mese si vota per il Congresso.',
+  ch:[
+    { l:'Firmarlo', e:'I mercati respirano · la tua base dice che hai firmato il bilancio dell\'altro partito',
+      f:function(){ S.usBilancio90='firmato'; fidUs60(1); baseUs60(-1);
+        S.log.unshift({t:T('Il paese'),x:T('Ha firmato il bilancio scritto dal Congresso.')}); } },
+    { l:'Mettere il veto', e:'La base ti applaude · il bilancio torna in aula, e i pensionati temono per gli assegni',
+      f:function(){ S.usBilancio90='veto'; baseUs60(1); stampad(-1); gdUs60('pensionati',-1);
+        S.log.unshift({t:T('Il paese'),x:T('Ha messo il veto al bilancio scritto dal Congresso.')}); } },
+  ],
+};
+const US90_BILANCIO_OPP_EV = {
+  id:'us90_bilancio_opp', snodo:true, era:'us1990', kick:'Il paese',
+  t:'Il bilancio d\'ottobre, dall\'aula',
+  get text(){ var v=(typeof S!=='undefined' && S) ? S.usTasse90Opp : null;
+    return v==='difesa'
+      ? 'L\'accordo del vertice è arrivato in aula: aumenti delle entrate e tagli alla spesa, e alla difesa meno di quanto avevi chiesto. Una parte del partito del Presidente vota contro, e senza i vostri voti non passa. L\'anno fiscale è già cominciato, e fra un mese si vota per il Congresso.'
+      : (v==='attesa'
+      ? 'Il Presidente ha parlato di tasse, alla fine, e l\'accordo del vertice è arrivato in aula: aumenti delle entrate e tagli alla spesa. La sua ala dura vota contro, e senza i vostri voti non passa. L\'anno fiscale è già cominciato, e fra un mese si vota per il Congresso.'
+      : 'L\'accordo del vertice è arrivato in aula, con le entrate che avevate chiesto e i tagli alla spesa. Una parte del partito del Presidente vota contro, e senza i vostri voti non passa. L\'anno fiscale è già cominciato, e fra un mese si vota per il Congresso.'); },
+  ch:[
+    { l:'Votare l\'accordo', e:'La storia · a fine ottobre il bilancio passa, più con i vostri voti che con quelli del Presidente · i giornali vi danno il merito, la base voleva di più',
+      f:function(){ S.usBilancio90Opp='vota'; stampad(1); baseUs60(-1);
+        S.log.unshift({t:T('Il paese'),x:T('Dall\'opposizione ha votato l\'accordo sul bilancio.')}); } },
+    { l:'Affossarlo per strappare di più', e:'La base è con te · il ceto medio teme che gli uffici chiudano, e la colpa si divide',
+      f:function(){ S.usBilancio90Opp='affossa'; baseUs60(1); gdUs60('cetomedio',-1);
+        S.log.unshift({t:T('Il paese'),x:T('Dall\'opposizione ha affossato l\'accordo sul bilancio per strappare di più.')}); } },
+  ],
+};
+/* ==============================================================================================================
+   L264-5 · STATI UNITI 1990 — LA RIFORMA SANITARIA (S3, 1993/9-10; dal L264-6 1993/9 o 1993/11, ottobre è della Somalia) E LA CHIUSURA DEGLI UFFICI FEDERALI (S4, 1995/11-12, solo col
+   governo diviso, D307 (a)), CON LE LORO AULE (scheda PRESET-USA-1990 §4 S3-S4; testi di Code). Gli helper di us1960-us1980. Nomi
+   nuovi cercati in js/, .claude/ e prove/ il 09/11 prima di scriverli (L99-2), zero occorrenze: snodo_sanita93(_opp)(_n),
+   snodo_chiusura95(_opp)(_n), usSanita93(Opp), usChiusura95(Opp), usCamera94, ti_us90_sanita, primariaRigaChiusura.
+   ⚑ CHI RICEVE CHE COSA (cancelli in game.js accanto a snodoTasse90Dovuta): S3 a chi governa nel 1993/9 (dal L264-6; o 1993/11) (il Presidente eletto nel
+   1992, dei due partiti), l'aula a chi è all'opposizione; S4 nel 1995/11-12 solo se divisoPer() non è null (il Congresso, o una sua
+   camera, è dell'altro partito), e l'aula solo al partito che ha il Congresso (all'opposizione, con divisoPer() non null).
+   ⚑ LA STORIA E IL FUORI STORIA: la storia è il Presidente democratico (S3, S4) e l'opposizione repubblicana (le aule). Per l'altro
+   Presidente (o l'altra opposizione) una carta gemella `_n`, senza «La storia ·», col testo che non dice chi governa; in S4 il
+   bilancio del Congresso è quello che l'altro partito scriverebbe (tasse sui redditi alti e tagli alla difesa, non la sanità degli
+   anziani). Una carta per variante, così ogni scelta scrive il suo valore con un letterale (verifica-snodi.js); l'iniezione la
+   sceglie con una ternaria scritta per esteso.
+   ⚑ G5: nessun nome, nessuna citazione, nessun marchio (gli spot delle assicurazioni senza chi li pagava). La cifra dei senza
+   assicurazione non è verificata: «decine di milioni». Il premier non ha credibilità: «costa in credibilità» = stampa e ceto medio.
+   Il flag lo legge SOLO il testo: i titoli ti_us90_sanita* del 1994/12 (il mese dopo il voto di metà mandato: nel 1994/11 la prima
+   pagina nasce prima dell'urna) e la riga della primaria della vigilia del 1996 (primariaRigaChiusura). Verificato il 09/11: il
+   discorso al Congresso in seduta comune del settembre 1993; il piano mai votato in aula e abbandonato nel settembre 1994; la
+   chiusura dal 14 al 19 novembre 1995 e dal 16 dicembre 1995 al 6 gennaio 1996; il pareggio in sette anni chiesto dal Congresso.
+   ============================================================================================================== */
+const SANITA93_TESTO = 'Decine di milioni di americani non hanno un\'assicurazione sanitaria, e la spesa per le cure cresce più in fretta dell\'economia da anni. Il piano preparato alla Casa Bianca è pronto, centinaia di pagine e mesi di lavoro, e lo presenti al Congresso in seduta comune. Le assicurazioni si preparano a combatterlo, i sindacati aspettano di vedere fin dove arrivi.';
+const SANITA93_EV = {
+  id:'snodo_sanita93', snodo:true, era:'us1990', kick:'Il paese',
+  t:'La riforma sanitaria',
+  text:SANITA93_TESTO,
+  ch:[
+    { l:'Il piano completo: copertura per tutti, a carico dei datori di lavoro', e:'La storia · il piano non arriverà mai al voto, e l\'anno dopo sarà abbandonato · lavoratori e pensionati ci sperano, le imprese e i giornali lo attaccano',
+      f:function(){ S.usSanita93='piano'; gdUs60('lavoratori',1); gdUs60('pensionati',1); gdUs60('imprenditori',-1); stampad(-1);
+        S.log.unshift({t:T('Il paese'),x:T('Ha presentato il piano sanitario completo: copertura per tutti, a carico dei datori di lavoro.')}); } },
+    { l:'Un compromesso con i moderati dell\'altro partito', e:'Meno copertura, più probabilità di passare · il ceto medio apprezza, la base del tuo partito si sente tradita',
+      f:function(){ S.usSanita93='compromesso'; baseUs60(-1); gdUs60('cetomedio',1); stampad(1);
+        S.log.unshift({t:T('Il paese'),x:T('Sulla sanità ha cercato un compromesso con i moderati dell\'altro partito.')}); } },
+    { l:'Rinviare: prima il bilancio e il commercio', e:'Il piano resta nel cassetto · la base è delusa, e i giornali scrivono che hai paura del Congresso',
+      f:function(){ S.usSanita93='rinvio'; stampad(-1); gdUs60('cetomedio',-1);
+        S.log.unshift({t:T('Il paese'),x:T('Ha rinviato la riforma sanitaria: prima il bilancio e il commercio.')}); } },
+  ],
+};
+const SANITA93_N_EV = {
+  id:'snodo_sanita93_n', snodo:true, era:'us1990', kick:'Il paese',
+  t:'La riforma sanitaria',
+  text:SANITA93_TESTO,
+  ch:[
+    { l:'Il piano completo: copertura per tutti, a carico dei datori di lavoro', e:'Lavoratori e pensionati ci sperano · le imprese lo attaccano, e i giornali contano le pagine',
+      f:function(){ S.usSanita93='piano'; gdUs60('lavoratori',1); gdUs60('pensionati',1); gdUs60('imprenditori',-1); stampad(-1);
+        S.log.unshift({t:T('Il paese'),x:T('Ha presentato il piano sanitario completo: copertura per tutti, a carico dei datori di lavoro.')}); } },
+    { l:'Un compromesso con i moderati dell\'altro partito', e:'Meno copertura, più probabilità di passare · il ceto medio apprezza, la base del tuo partito si sente tradita',
+      f:function(){ S.usSanita93='compromesso'; baseUs60(-1); gdUs60('cetomedio',1); stampad(1);
+        S.log.unshift({t:T('Il paese'),x:T('Sulla sanità ha cercato un compromesso con i moderati dell\'altro partito.')}); } },
+    { l:'Rinviare: prima il bilancio e il commercio', e:'Il piano resta nel cassetto · la base è delusa, e i giornali scrivono che hai paura del Congresso',
+      f:function(){ S.usSanita93='rinvio'; stampad(-1); gdUs60('cetomedio',-1);
+        S.log.unshift({t:T('Il paese'),x:T('Ha rinviato la riforma sanitaria: prima il bilancio e il commercio.')}); } },
+  ],
+};
+const SANITA93_OPP_TESTO = 'La Casa Bianca ha presentato al Congresso il suo piano sulla sanità: copertura per tutti, a carico dei datori di lavoro, centinaia di pagine. Decine di milioni di americani non hanno un\'assicurazione, e la spesa per le cure cresce più dell\'economia. Il tuo partito deve decidere che cosa fare del piano.';
+const SANITA93_OPP_EV = {
+  id:'snodo_sanita93_opp', snodo:true, era:'us1990', kick:'Il paese',
+  t:'La riforma sanitaria, dall\'aula',
+  text:SANITA93_OPP_TESTO,
+  ch:[
+    { l:'Fare campagna contro il piano', e:'La storia · gli spot delle assicurazioni in televisione, con una coppia in cucina che legge il piano, lo affondano: non arriverà mai al voto · le imprese ti seguono, i giornali parlano di paura venduta',
+      f:function(){ S.usSanita93Opp='contro'; gdUs60('imprenditori',1); stampad(-1);
+        S.log.unshift({t:T('Il paese'),x:T('Dall\'opposizione ha fatto campagna contro il piano sanitario della Casa Bianca.')}); } },
+    { l:'Presentare un piano vostro', e:'Meno ambizioso, meno caro · il ceto medio ascolta, la base voleva lo scontro',
+      f:function(){ S.usSanita93Opp='proprio'; gdUs60('cetomedio',1); baseUs60(-1);
+        S.log.unshift({t:T('Il paese'),x:T('Dall\'opposizione ha presentato un piano sanitario suo.')}); } },
+    { l:'Collaborare alla riforma', e:'I pensionati apprezzano · la base dice che fai il gioco del Presidente',
+      f:function(){ S.usSanita93Opp='collabora'; gdUs60('pensionati',1); baseUs60(-1);
+        S.log.unshift({t:T('Il paese'),x:T('Dall\'opposizione ha collaborato alla riforma sanitaria.')}); } },
+  ],
+};
+const SANITA93_OPP_N_EV = {
+  id:'snodo_sanita93_opp_n', snodo:true, era:'us1990', kick:'Il paese',
+  t:'La riforma sanitaria, dall\'aula',
+  text:SANITA93_OPP_TESTO,
+  ch:[
+    { l:'Fare campagna contro il piano', e:'Gli spot in televisione, con una coppia in cucina che legge il piano, fanno paura · le imprese ti seguono, i giornali parlano di paura venduta',
+      f:function(){ S.usSanita93Opp='contro'; gdUs60('imprenditori',1); stampad(-1);
+        S.log.unshift({t:T('Il paese'),x:T('Dall\'opposizione ha fatto campagna contro il piano sanitario della Casa Bianca.')}); } },
+    { l:'Presentare un piano vostro', e:'Meno ambizioso, meno caro · il ceto medio ascolta, la base voleva lo scontro',
+      f:function(){ S.usSanita93Opp='proprio'; gdUs60('cetomedio',1); baseUs60(-1);
+        S.log.unshift({t:T('Il paese'),x:T('Dall\'opposizione ha presentato un piano sanitario suo.')}); } },
+    { l:'Collaborare alla riforma', e:'I pensionati apprezzano · la base dice che fai il gioco del Presidente',
+      f:function(){ S.usSanita93Opp='collabora'; gdUs60('pensionati',1); baseUs60(-1);
+        S.log.unshift({t:T('Il paese'),x:T('Dall\'opposizione ha collaborato alla riforma sanitaria.')}); } },
+  ],
+};
+/* S4, la chiusura degli uffici federali (D307 (a): solo col governo diviso) */
+const CHIUSURA95_EV = {
+  id:'snodo_chiusura95', snodo:true, era:'us1990', kick:'Il paese',
+  t:'La chiusura degli uffici federali',
+  text:'Il Congresso, che è dell\'altro partito, ti ha mandato il suo bilancio: il pareggio in sette anni, con tagli alla sanità degli anziani, all\'istruzione e all\'ambiente. Non l\'hai firmato, e i fondi sono finiti: da metà novembre centinaia di migliaia di dipendenti federali sono stati mandati a casa per giorni, con parchi e sportelli chiusi. Senza un accordo, succederà di nuovo.',
+  ch:[
+    { l:'Tenere il veto', e:'La storia · la colpa la prende il Congresso, il Presidente risale, e il pareggio arriverà lo stesso con un accordo successivo · i pensionati sono con te, il ceto medio vede gli uffici chiusi',
+      f:function(){ S.usChiusura95='veto'; gdUs60('pensionati',1); gdUs60('cetomedio',-1); baseUs60(1);
+        S.log.unshift({t:T('Il paese'),x:T('Con gli uffici federali chiusi ha tenuto il veto sul bilancio del Congresso.')}); } },
+    { l:'Firmare il loro bilancio', e:'Gli uffici riaprono il giorno dopo · i mercati respirano, la tua base ti accusa di aver ceduto',
+      f:function(){ S.usChiusura95='firma'; baseUs60(-1); gdUs60('pensionati',-1); fidUs60(1);
+        S.log.unshift({t:T('Il paese'),x:T('Ha firmato il bilancio del Congresso, e gli uffici federali hanno riaperto.')}); } },
+    { l:'Un compromesso subito: i sette anni sì, i tagli alla sanità no', e:'Gli uffici riaprono · i giornali apprezzano, ma le due ali ti rimproverano',
+      f:function(){ S.usChiusura95='compromesso'; stampad(1); baseUs60(-1);
+        S.log.unshift({t:T('Il paese'),x:T('Sul bilancio ha chiuso un compromesso: il pareggio in sette anni, senza i tagli alla sanità.')}); } },
+  ],
+};
+const CHIUSURA95_N_EV = {
+  id:'snodo_chiusura95_n', snodo:true, era:'us1990', kick:'Il paese',
+  t:'La chiusura degli uffici federali',
+  text:'Il Congresso, che è dell\'altro partito, ti ha mandato il suo bilancio: il pareggio in sette anni, con più tasse sui redditi alti e tagli alla difesa. Non l\'hai firmato, e i fondi sono finiti: da metà novembre centinaia di migliaia di dipendenti federali sono stati mandati a casa per giorni, con parchi e sportelli chiusi. Senza un accordo, succederà di nuovo.',
+  ch:[
+    { l:'Tenere il veto', e:'Gli uffici restano chiusi finché il Congresso non cede · le imprese sono con te, il ceto medio vede i cancelli chiusi',
+      f:function(){ S.usChiusura95='veto'; gdUs60('imprenditori',1); gdUs60('cetomedio',-1); baseUs60(1);
+        S.log.unshift({t:T('Il paese'),x:T('Con gli uffici federali chiusi ha tenuto il veto sul bilancio del Congresso.')}); } },
+    { l:'Firmare il loro bilancio', e:'Gli uffici riaprono il giorno dopo · i mercati respirano, la tua base ti accusa di aver ceduto',
+      f:function(){ S.usChiusura95='firma'; baseUs60(-1); gdUs60('imprenditori',-1); fidUs60(1);
+        S.log.unshift({t:T('Il paese'),x:T('Ha firmato il bilancio del Congresso, e gli uffici federali hanno riaperto.')}); } },
+    { l:'Un compromesso subito: i sette anni sì, le tasse nuove no', e:'Gli uffici riaprono · i giornali apprezzano, ma le due ali ti rimproverano',
+      f:function(){ S.usChiusura95='compromesso'; stampad(1); baseUs60(-1);
+        S.log.unshift({t:T('Il paese'),x:T('Sul bilancio ha chiuso un compromesso: il pareggio in sette anni, senza le tasse nuove.')}); } },
+  ],
+};
+const CHIUSURA95_OPP_EV = {
+  id:'snodo_chiusura95_opp', snodo:true, era:'us1990', kick:'Il paese',
+  t:'La chiusura degli uffici federali, dall\'aula',
+  text:'Il vostro bilancio, il pareggio in sette anni con tagli alla sanità degli anziani, all\'istruzione e all\'ambiente, è sulla scrivania del Presidente, e lui non firma. I fondi sono finiti: da metà novembre centinaia di migliaia di dipendenti federali sono stati mandati a casa per giorni. Senza un accordo succederà di nuovo, e i giornali chiedono di chi è la colpa.',
+  ch:[
+    { l:'Tenere il bilancio fino in fondo', e:'La storia · la colpa della chiusura cade sul Congresso, e il Presidente risale nei sondaggi · la base è con te, il ceto medio no',
+      f:function(){ S.usChiusura95Opp='tieni'; baseUs60(1); gdUs60('cetomedio',-1); stampad(-1);
+        S.log.unshift({t:T('Il paese'),x:T('Dall\'opposizione ha tenuto il bilancio del Congresso fino in fondo, a uffici chiusi.')}); } },
+    { l:'Riaprire gli uffici e trattare', e:'Gli uffici riaprono · il ceto medio respira, la base dice che avete ceduto',
+      f:function(){ S.usChiusura95Opp='riapri'; baseUs60(-1); gdUs60('cetomedio',1);
+        S.log.unshift({t:T('Il paese'),x:T('Dall\'opposizione ha riaperto gli uffici federali per trattare col Presidente.')}); } },
+    { l:'Leggi-ponte per i servizi essenziali', e:'Pensioni e sussidi restano pagati · i giornali scrivono che rinviate il problema',
+      f:function(){ S.usChiusura95Opp='ponte'; gdUs60('pensionati',1); stampad(-1);
+        S.log.unshift({t:T('Il paese'),x:T('Dall\'opposizione ha votato leggi-ponte per i servizi essenziali.')}); } },
+  ],
+};
+const CHIUSURA95_OPP_N_EV = {
+  id:'snodo_chiusura95_opp_n', snodo:true, era:'us1990', kick:'Il paese',
+  t:'La chiusura degli uffici federali, dall\'aula',
+  text:'Il vostro bilancio, il pareggio in sette anni con più tasse sui redditi alti e tagli alla difesa, è sulla scrivania del Presidente, e lui non firma. I fondi sono finiti: da metà novembre centinaia di migliaia di dipendenti federali sono stati mandati a casa per giorni. Senza un accordo succederà di nuovo, e i giornali chiedono di chi è la colpa.',
+  ch:[
+    { l:'Tenere il bilancio fino in fondo', e:'La base è con te · il ceto medio vede i cancelli chiusi, e la colpa può cadere su di voi',
+      f:function(){ S.usChiusura95Opp='tieni'; baseUs60(1); gdUs60('cetomedio',-1); stampad(-1);
+        S.log.unshift({t:T('Il paese'),x:T('Dall\'opposizione ha tenuto il bilancio del Congresso fino in fondo, a uffici chiusi.')}); } },
+    { l:'Riaprire gli uffici e trattare', e:'Gli uffici riaprono · il ceto medio respira, la base dice che avete ceduto',
+      f:function(){ S.usChiusura95Opp='riapri'; baseUs60(-1); gdUs60('cetomedio',1);
+        S.log.unshift({t:T('Il paese'),x:T('Dall\'opposizione ha riaperto gli uffici federali per trattare col Presidente.')}); } },
+    { l:'Leggi-ponte per i servizi essenziali', e:'Pensioni e sussidi restano pagati · i giornali scrivono che rinviate il problema',
+      f:function(){ S.usChiusura95Opp='ponte'; gdUs60('pensionati',1); stampad(-1);
+        S.log.unshift({t:T('Il paese'),x:T('Dall\'opposizione ha votato leggi-ponte per i servizi essenziali.')}); } },
+  ],
+};
+/* ==============================================================================================================
+   L264-6 · STATI UNITI 1990 — LA RECESSIONE (1991/11), GLI ARSENALI (1992/2), LA SOMALIA (1993/10), IL TRATTATO COMMERCIALE (1993/11) E
+   LO SCANDALO DEL SECONDO MANDATO SOLO DALL'AULA (1998/12, D308 (ii)) (scheda PRESET-USA-1990 §4; testi di Code). Gli helper di
+   us1960-us1980. Nomi nuovi cercati in js/, .claude/ e prove/ il 09/11 prima di scriverli (L99-2), zero occorrenze:
+   us90_recessione(_opp), us90_arsenali(_opp), us90_somalia(_opp), us90_trattato(_opp), us90_accusa_opp, usRecessione91(Opp),
+   usArsenali92(Opp), usSomalia93(Opp), usTrattato93(Opp), usAccusa98Opp, usPres95, usMeta98, ti_us90_rapporto, ti_us90_assoluzione.
+   ⚑ NON SONO SNODI né carte del sacchetto: carte DOVUTE come Beirut di us1980 (cancelli in game.js accanto a primariaRigaChiusura,
+   us90Eventi). Il testo non dice chi governa: nessuna gemella `_n` serve (Cowork (2) vale se il testo storico presuppone un partito).
+   ⚑ La Somalia porta tono:'grave' (la forma di Beirut: carta muta, scena ferma, niente beat leggero; non è un pilastro) e sta in
+   US90_CARTE_SOBRIE (niente titoli allegri quel mese e il dopo).
+   ⚑ LO SCANDALO (D308 (ii), Cowork (6)-(7)): nessuna scelta a chi governa, nessuna carta in cui il giocatore sceglie di mentire; l'aula
+   solo a chi è all'opposizione di un Presidente democratico al secondo mandato (us90SecondoMandatoDem); a chi governa due titoli, il
+   rapporto (1998/9) e l'assoluzione (1999/2); all'opposizione che ha visto l'aula una riga del registro nel 1999/2 (us90Mese). Le
+   parole sono solo «uno scandalo personale», «la testimonianza sotto giuramento», «il procuratore indipendente», «il rapporto del
+   procuratore», «il voto d'accusa», «l'assoluzione»: nessun dettaglio, nessun nome, nessuna citazione, nessun luogo che identifichi
+   una persona (lo scan inglese ha la lista delle parole vietate). Nessuna legge, niente ACCUSA_LEGGE né pBocciatura: in (ii) il voto
+   è racconto.
+   ⚑ Verificato il 09/11 (memoria di Code, coerente con la scheda ✓): la recessione finita a marzo 1991 e la disoccupazione che sale
+   fino al giugno 1992; i sussidi prolungati a novembre 1991 dopo due veti; il programma del Congresso per smontare le armi delle
+   repubbliche ex sovietiche (fine 1991); la battaglia di Mogadiscio del 3-4 ottobre 1993, diciotto soldati americani, il ritiro
+   annunciato e completato nel marzo 1994; il trattato votato dalla Camera il 17 novembre 1993, più coi voti dell'opposizione che della
+   maggioranza, in vigore dal 1° gennaio 1994; il voto d'accusa del 19 dicembre 1998 (due articoli), l'assoluzione del 12 febbraio 1999.
+   ============================================================================================================== */
+const RECESSIONE91_EV = {
+  id:'us90_recessione', era:'us1990', kick:'Il paese',
+  t:'La ripresa senza lavoro',
+  get text(){ var r = (typeof S!=='undefined' && S) ? S.usTasse90 : null;   /* le quattro varianti scritte per intero (le chiavi inglesi sono le frasi intere) */
+    return r==='tratta' ? "Sulla carta la recessione è finita in primavera, ma i posti non tornano: le grandi aziende annunciano licenziamenti a migliaia, e la fiducia delle famiglie scende ancora. I sussidi di disoccupazione stanno per scadere per centinaia di migliaia di persone. E la promessa sulle tasse, che l'anno scorso hai messo sul tavolo della trattativa, te la rinfacciano a ogni comizio."
+         : r==='promessa' ? "Sulla carta la recessione è finita in primavera, ma i posti non tornano: le grandi aziende annunciano licenziamenti a migliaia, e la fiducia delle famiglie scende ancora. I sussidi di disoccupazione stanno per scadere per centinaia di migliaia di persone. Sulle tasse hai tenuto la promessa, e adesso il bilancio non ha margini per niente."
+         : r==='congresso' ? "Sulla carta la recessione è finita in primavera, ma i posti non tornano: le grandi aziende annunciano licenziamenti a migliaia, e la fiducia delle famiglie scende ancora. I sussidi di disoccupazione stanno per scadere per centinaia di migliaia di persone. Sulle tasse hai lasciato decidere il Congresso, e ognuno ora racconta la sua versione."
+         : "Sulla carta la recessione è finita in primavera, ma i posti non tornano: le grandi aziende annunciano licenziamenti a migliaia, e la fiducia delle famiglie scende ancora. I sussidi di disoccupazione stanno per scadere per centinaia di migliaia di persone. E ogni voce del bilancio ha già un padrone."; },
+
+  ch:[
+    { l:"Un taglio delle tasse per i ceti medi", e:"Il ceto medio respira · il disavanzo cresce, e gli economisti dicono che arriva tardi", costo:{debito:0.4},
+      f:function(){ S.usRecessione91='tasse'; gdUs60('cetomedio',1); stampad(-1);
+        S.log.unshift({t:T('Il paese'),x:T("Per la ripresa senza lavoro ha proposto un taglio delle tasse per i ceti medi.")}); } },
+    { l:"Prolungare i sussidi di disoccupazione", e:"La storia · a novembre, dopo due veti, i sussidi vengono allungati · i lavoratori ringraziano, i conservatori del tuo partito brontolano", costo:{debito:0.3},
+      f:function(){ S.usRecessione91='sussidi'; gdUs60('lavoratori',1); baseUs60(-1);
+        S.log.unshift({t:T('Il paese'),x:T("Ha prolungato i sussidi di disoccupazione.")}); } },
+    { l:"Aspettare la ripresa: prima il bilancio", e:"I conti restano in ordine · chi ha perso il lavoro dice che il Presidente non vede",
+      f:function(){ S.usRecessione91='attesa'; fidUs60(1); gdUs60('lavoratori',-1); stampad(-1);
+        S.log.unshift({t:T('Il paese'),x:T("Davanti alla ripresa senza lavoro ha scelto di aspettare: prima il bilancio.")}); } },
+  ],
+};
+const RECESSIONE91_OPP_EV = {
+  id:'us90_recessione_opp', era:'us1990', kick:'Il paese',
+  t:"La ripresa senza lavoro, dall'aula",
+  text:"Sulla carta la recessione è finita in primavera, ma i posti non tornano: le grandi aziende licenziano, e i sussidi stanno per scadere per centinaia di migliaia di persone. La Casa Bianca dice che la ripresa arriverà. In aula si discute che cosa fare intanto.",
+  ch:[
+    { l:"Chiedere i sussidi prolungati", e:"La storia · a novembre, dopo due veti, il Congresso li allunga · i lavoratori sono con te",
+      f:function(){ S.usRecessione91Opp='sussidi'; gdUs60('lavoratori',1); stampad(-1);
+        S.log.unshift({t:T('Il paese'),x:T("Dall'opposizione ha chiesto di prolungare i sussidi di disoccupazione.")}); } },
+    { l:"Attaccare «la ripresa senza lavoro»", e:"La base è con te · il ceto medio vuole proposte, non slogan",
+      f:function(){ S.usRecessione91Opp='attacco'; baseUs60(1); gdUs60('cetomedio',-1);
+        S.log.unshift({t:T('Il paese'),x:T("Dall'opposizione ha attaccato la ripresa senza lavoro.")}); } },
+    { l:"Proporre un vostro piano fiscale", e:"Il ceto medio ascolta · la base dice che fate i conti al posto del governo",
+      f:function(){ S.usRecessione91Opp='piano'; gdUs60('cetomedio',1); baseUs60(-1);
+        S.log.unshift({t:T('Il paese'),x:T("Dall'opposizione ha proposto un suo piano fiscale per la ripresa.")}); } },
+  ],
+};
+const ARSENALI92_EV = {
+  id:'us90_arsenali', era:'us1990', kick:'Il mondo',
+  t:'Gli arsenali delle repubbliche',
+  text:"L'Unione Sovietica non c'è più. Migliaia di testate atomiche restano in quattro repubbliche nuove, con eserciti che non sanno a chi obbedire, e gli scienziati che le hanno costruite non ricevono lo stipendio da mesi. Le capitali europee chiedono che cosa farà l'America.",
+  ch:[
+    { l:"Aiuti per smontare e custodire le armi", e:"La storia · il Congresso ha appena votato il programma, e le prime testate tornano in Russia per essere smontate · gli alleati approvano, la tua base chiede perché paghiamo noi", costo:{debito:0.2},
+      f:function(){ S.usArsenali92='smonta'; repd(1); baseUs60(-1);
+        S.log.unshift({t:T('Il mondo'),x:T("Ha finanziato lo smontaggio e la custodia delle armi delle repubbliche ex sovietiche.")}); } },
+    { l:"Aiuti economici larghi alla Russia democratica", e:"I giornali parlano di un piano come quello del dopoguerra · il conto è grosso, e il ceto medio non capisce", costo:{debito:0.6},
+      f:function(){ S.usArsenali92='aiuti'; repd(1); stampad(1); gdUs60('cetomedio',-1);
+        S.log.unshift({t:T('Il mondo'),x:T("Ha proposto aiuti economici larghi alla Russia democratica.")}); } },
+    { l:"Prudenza: prima le garanzie", e:"La tua base approva · le capitali europee temono che il tempo giochi contro",
+      f:function(){ S.usArsenali92='prudenza'; baseUs60(1); repd(-1);
+        S.log.unshift({t:T('Il mondo'),x:T("Sugli arsenali delle repubbliche ha chiesto garanzie prima di ogni aiuto.")}); } },
+  ],
+};
+const ARSENALI92_OPP_EV = {
+  id:'us90_arsenali_opp', era:'us1990', kick:'Il mondo',
+  t:"Gli arsenali delle repubbliche, dall'aula",
+  text:"L'Unione Sovietica non c'è più, e migliaia di testate atomiche restano in quattro repubbliche nuove. La Casa Bianca chiede fondi per smontarle e custodirle. In aula il tuo partito deve dire che cosa ne pensa.",
+  ch:[
+    { l:"Appoggiare i fondi", e:"Davanti alle testate il paese parla con una voce sola · la base voleva sentirti diverso",
+      f:function(){ S.usArsenali92Opp='appoggio'; gdUs60('cetomedio',1); baseUs60(-1);
+        S.log.unshift({t:T('Il mondo'),x:T("Dall'opposizione ha appoggiato i fondi per smontare le armi delle repubbliche.")}); } },
+    { l:"Chiedere i soldi per chi ha perso il lavoro qui", e:"I lavoratori ti ascoltano · i giornali scrivono che guardi solo a casa",
+      f:function(){ S.usArsenali92Opp='casa'; gdUs60('lavoratori',1); stampad(-1);
+        S.log.unshift({t:T('Il mondo'),x:T("Dall'opposizione ha chiesto di spendere a casa i soldi per gli arsenali.")}); } },
+    { l:"Chiedere aiuti più larghi", e:"I giovani e le chiese approvano · la base dice che il conto lo paghiamo noi",
+      f:function(){ S.usArsenali92Opp='piu'; gdUs60('giovani',1); baseUs60(-1);
+        S.log.unshift({t:T('Il mondo'),x:T("Dall'opposizione ha chiesto aiuti più larghi alle repubbliche ex sovietiche.")}); } },
+  ],
+};
+const SOMALIA93_EV = {
+  id:'us90_somalia', era:'us1990', kick:'Il mondo', tono:'grave',
+  t:'La battaglia in Somalia',
+  text:"I soldati americani mandati in Somalia per la carestia sono stati coinvolti in una battaglia in città, durata una notte e un giorno: diciotto morti. Le televisioni hanno mostrato i corpi. Il paese chiede perché i suoi soldati combattano in una guerra fra clan.",
+  ch:[
+    { l:"Il ritiro entro pochi mesi", e:"La storia · il ritiro è annunciato subito e completato a marzo 1994 · il paese respira, gli alleati dicono che l'America se ne va al primo colpo",
+      f:function(){ S.usSomalia93='ritiro'; gdUs60('cetomedio',1); repd(-1);
+        S.log.unshift({t:T('Il mondo'),x:T("Dopo la battaglia in Somalia ha deciso il ritiro dei soldati entro pochi mesi.")}); } },
+    { l:"Rinforzi per finire la missione", e:"Il tuo partito vuole fermezza · i giovani e le famiglie dei soldati chiedono per che cosa si muore", costo:{debito:0.3},
+      f:function(){ S.usSomalia93='rinforzi'; baseUs60(1); gdUs60('giovani',-1); stampad(-1);
+        S.log.unshift({t:T('Il mondo'),x:T("Dopo la battaglia in Somalia ha mandato rinforzi per finire la missione.")}); } },
+    { l:"Passare la missione all'ONU subito", e:"Gli alleati apprezzano · la base dice che lasci il lavoro a metà",
+      f:function(){ S.usSomalia93='onu'; repd(1); baseUs60(-1);
+        S.log.unshift({t:T('Il mondo'),x:T("Dopo la battaglia in Somalia ha passato subito la missione all'ONU.")}); } },
+  ],
+};
+const SOMALIA93_OPP_EV = {
+  id:'us90_somalia_opp', era:'us1990', kick:'Il mondo', tono:'grave',
+  t:"La battaglia in Somalia, dall'aula",
+  text:"In Somalia i soldati americani mandati per la carestia sono stati coinvolti in una battaglia in città: diciotto morti. In aula si leggono i loro nomi, poi bisogna parlare.",
+  ch:[
+    { l:"Unità nazionale, nel lutto", e:"Davanti ai caduti il paese parla con una voce sola · la base chiede dove sia l'opposizione",
+      f:function(){ S.usSomalia93Opp='lutto'; gdUs60('cattolici',1); baseUs60(-1);
+        S.log.unshift({t:T('Il mondo'),x:T("Dall'opposizione ha fatto fronte comune nel lutto per i soldati caduti in Somalia.")}); } },
+    { l:"Riportate a casa i soldati", e:"Le famiglie dei soldati ti ascoltano · i falchi dicono che scappi al primo colpo",
+      f:function(){ S.usSomalia93Opp='casa'; gdUs60('giovani',1); baseUs60(-1);
+        S.log.unshift({t:T('Il mondo'),x:T("Dall'opposizione ha chiesto il ritorno a casa dei soldati dalla Somalia.")}); } },
+    { l:"Chiedere conto della missione", e:"La base è con te · il ceto medio non vuole processi nel lutto",
+      f:function(){ S.usSomalia93Opp='conto'; baseUs60(1); gdUs60('cetomedio',-1);
+        S.log.unshift({t:T('Il mondo'),x:T("Dall'opposizione ha chiesto conto della missione in Somalia.")}); } },
+  ],
+};
+const TRATTATO93_EV = {
+  id:'us90_trattato', era:'us1990', kick:'Il paese',
+  t:'Il trattato commerciale',
+  text:"Il trattato commerciale col Canada e il Messico arriva alla Camera. Divide il tuo partito e unisce l'opposizione: i sindacati dicono che le fabbriche partiranno verso sud, le industrie che esportano lo vogliono subito. I voti dei tuoi non bastano.",
+  ch:[
+    { l:"Portarlo al voto coi voti dell'altro partito", e:"La storia · passa alla Camera con più voti dell'opposizione che della maggioranza, ed entra in vigore il 1° gennaio · le imprese applaudono, i sindacati non lo dimenticano",
+      f:function(){ S.usTrattato93='voto'; gdUs60('imprenditori',1); gdUs60('lavoratori',-1); baseUs60(-1);
+        S.log.unshift({t:T('Il paese'),x:T("Ha portato il trattato commerciale al voto con i voti dell'altro partito.")}); } },
+    { l:"Chiedere prima accordi su lavoro e ambiente", e:"I sindacati ti ascoltano · le imprese temono che il trattato non arrivi più",
+      f:function(){ S.usTrattato93='accordi'; gdUs60('lavoratori',1); gdUs60('imprenditori',-1);
+        S.log.unshift({t:T('Il paese'),x:T("Sul trattato commerciale ha chiesto prima accordi su lavoro e ambiente.")}); } },
+    { l:"Lasciarlo cadere", e:"Il tuo partito tira il fiato · il Canada e il Messico se lo ricordano, e le imprese anche",
+      f:function(){ S.usTrattato93='cade'; baseUs60(1); repd(-1); gdUs60('imprenditori',-1);
+        S.log.unshift({t:T('Il paese'),x:T("Ha lasciato cadere il trattato commerciale.")}); } },
+  ],
+};
+const TRATTATO93_OPP_EV = {
+  id:'us90_trattato_opp', era:'us1990', kick:'Il paese',
+  t:"Il trattato commerciale, dall'aula",
+  text:"Il trattato commerciale col Canada e il Messico arriva alla Camera, e il partito del Presidente è diviso: senza i vostri voti non passa. I sindacati dicono che le fabbriche partiranno verso sud, le industrie che esportano lo vogliono subito.",
+  ch:[
+    { l:"Votare sì", e:"La storia · passa con più voti vostri che della maggioranza · le imprese ringraziano, i giornali dicono che il trattato è vostro quanto suo",
+      f:function(){ S.usTrattato93Opp='si'; gdUs60('imprenditori',1); baseUs60(-1);
+        S.log.unshift({t:T('Il paese'),x:T("Dall'opposizione ha votato sì al trattato commerciale.")}); } },
+    { l:"Votare no", e:"I lavoratori sono con te · le imprese ti segnano fra gli avversari",
+      f:function(){ S.usTrattato93Opp='no'; gdUs60('lavoratori',1); gdUs60('imprenditori',-1);
+        S.log.unshift({t:T('Il paese'),x:T("Dall'opposizione ha votato no al trattato commerciale.")}); } },
+    { l:"Lasciare liberi i vostri: astensione del partito", e:"Nessuno si arrabbia davvero · i giornali scrivono che non avete una linea",
+      f:function(){ S.usTrattato93Opp='astensione'; stampad(-1); gdUs60('cetomedio',1);
+        S.log.unshift({t:T('Il paese'),x:T("Sul trattato commerciale ha lasciato liberi i suoi deputati.")}); } },
+  ],
+};
+const ACCUSA98_OPP_EV = {
+  id:'us90_accusa_opp', era:'us1990', kick:'Il paese',
+  t:"Il voto d'accusa",
+  get text(){ var m = (typeof S!=='undefined' && S) ? S.usMeta98 : null;   /* l'esito vero della metà mandato del 1998 (usMeta98, scritto in esitoIntermedia); le varianti per intero */
+    return m==='guadagna' ? "Un'indagine del procuratore indipendente, partita da altro, si è allargata a uno scandalo personale del Presidente e alla sua testimonianza sotto giuramento in una causa civile. A settembre il rapporto del procuratore è arrivato alla Camera. Al voto di novembre il partito del Presidente ha guadagnato seggi, ma la Camera uscente vota prima di sciogliersi. Sul tavolo c'è il voto d'accusa."
+         : m==='perde' ? "Un'indagine del procuratore indipendente, partita da altro, si è allargata a uno scandalo personale del Presidente e alla sua testimonianza sotto giuramento in una causa civile. A settembre il rapporto del procuratore è arrivato alla Camera. Al voto di novembre il partito del Presidente ha perso seggi, e la Camera uscente vota prima di sciogliersi. Sul tavolo c'è il voto d'accusa."
+         : "Un'indagine del procuratore indipendente, partita da altro, si è allargata a uno scandalo personale del Presidente e alla sua testimonianza sotto giuramento in una causa civile. A settembre il rapporto del procuratore è arrivato alla Camera. Il voto di novembre è passato, e la Camera uscente vota prima di sciogliersi. Sul tavolo c'è il voto d'accusa."; },
+
+  ch:[
+    { l:"Votare l'accusa", e:"La storia · la Camera approva due articoli quasi solo coi voti di un partito; il Senato assolverà · la base è con te, il ceto medio è stanco dello scandalo",
+      f:function(){ S.usAccusa98Opp='accusa'; baseUs60(1); gdUs60('cetomedio',-1); stampad(-1);
+        S.log.unshift({t:T('Il paese'),x:T("Dall'opposizione ha votato l'accusa contro il Presidente.")}); } },
+    { l:"Non votarla", e:"Il paese, stanco dello scandalo, ti dà ragione · la tua base no",
+      f:function(){ S.usAccusa98Opp='no'; gdUs60('cetomedio',1); baseUs60(-1);
+        S.log.unshift({t:T('Il paese'),x:T("Dall'opposizione non ha votato l'accusa contro il Presidente.")}); } },
+    { l:"Proporre una censura al posto dell'accusa", e:"La via di mezzo, che nella storia non arrivò al voto · i giornali apprezzano, la base la chiama una resa",
+      f:function(){ S.usAccusa98Opp='censura'; stampad(1); gdUs60('cattolici',1); baseUs60(-1);
+        S.log.unshift({t:T('Il paese'),x:T("Dall'opposizione ha proposto una censura al posto del voto d'accusa.")}); } },
+  ],
 };

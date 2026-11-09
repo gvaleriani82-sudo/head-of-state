@@ -505,7 +505,7 @@ function initStatoBase(){
   S.deIraq02=null; S.deIraq02Opp=null; S.deAgenda03=null; S.deAgenda03Opp=null; S.deFiducia05=null; S.deFiducia05Opp=null; S.deBanche08=null; S.deBanche08Opp=null;   // L157-1: il decennio tedesco 2000
   S.usCorea=null; S.usCoreaOpp=null; S.usGenerale=null; S.usGeneraleOpp=null; S.usAcciaio=null; S.usAcciaioOpp=null; S.usScuola=null; S.usScuolaOpp=null;   // L176-2: gli snodi di us1950
   S.meseSobrio=null;   // L262-24
-  S.usBaia=null; S.usBaiaOpp=null; S.usMissili=null; S.usMissiliOpp=null; S.usDiritti=null; S.usDirittiOpp=null; S.usVietnam=null; S.usVietnamOpp=null; S.usLuna70=null; S.usLuna70Opp=null; S.usPace73=null; S.usPace73Opp=null; S.usPetrolio73=null; S.usPetrolio73Opp=null; S.usOstaggi80=null; S.usOstaggi80Opp=null; S.usRecessione82=null; S.usRecessione82Opp=null; S.usArmiIran85=null; S.usArmiIran86=null; S.usArmiIran86Opp=null; S.usMissili87=null; S.usMissili87Opp=null; S.usControllori81=null; S.usControllori81Opp=null; S.usMosca88=null; S.usMosca88Opp=null; S.usMalta89=null; S.usMalta89Opp=null; S.usGrano80=null; S.usGrano80Opp=null; S.usProfughi80=null; S.usProfughi80Opp=null; S.usMessico82=null; S.usMessico82Opp=null; S.usJumbo83=null; S.usJumbo83Opp=null; S.usBeirut83=null; S.usBeirut83Opp=null; S.usGrenada83=null; S.usGrenada83Opp=null; S.usOlimpiadi84=null; S.usOlimpiadi84Opp=null; S.usFisco86=null; S.usFisco86Opp=null; S.usBorsa87=null; S.usBorsa87Opp=null; S.usCasse89=null; S.usCasse89Opp=null; S.usPanama89=null; S.usPanama89Opp=null; S.usBoicott80=null; S.usBoicott80Opp=null; S.usLibia86=null; S.usLibia86Opp=null; S.usGolfo88=null; S.usGolfo88Opp=null; S.usScozia88=null; S.usScozia88Opp=null; S.usNavetta86=null; S.usNavetta86Opp=null; S.usReykjavik86=null; S.usReykjavik86Opp=null; S.usPetrolio86=null; S.usPetrolio86Opp=null; S.usAlaska89=null; S.usAlaska89Opp=null; S.usPensioni83=null; S.usPensioni83Opp=null; S.usScudo83=null; S.usScudo83Opp=null; S.usPaura83=null; S.usPaura83Opp=null; S.usFattorie85=null; S.usFattorie85Opp=null; S.usMalattia85=null; S.usMalattia85Opp=null; S.usDroga86=null; S.usDroga86Opp=null; S.usNavetta72=null; S.usGolfo90=null; S.usGolfo90Opp=null; S.usGolfoEsito91=null;   // L227-1: gli snodi di us1960 · L258-4, L262-4, L262-5, L262-6, L262-7, L262-8, L262-9 e L262-10: anche gli snodi di us1970 e us1980
+  S.usBaia=null; S.usBaiaOpp=null; S.usMissili=null; S.usMissiliOpp=null; S.usDiritti=null; S.usDirittiOpp=null; S.usVietnam=null; S.usVietnamOpp=null; S.usLuna70=null; S.usLuna70Opp=null; S.usPace73=null; S.usPace73Opp=null; S.usPetrolio73=null; S.usPetrolio73Opp=null; S.usOstaggi80=null; S.usOstaggi80Opp=null; S.usRecessione82=null; S.usRecessione82Opp=null; S.usArmiIran85=null; S.usArmiIran86=null; S.usArmiIran86Opp=null; S.usMissili87=null; S.usMissili87Opp=null; S.usControllori81=null; S.usControllori81Opp=null; S.usMosca88=null; S.usMosca88Opp=null; S.usMalta89=null; S.usMalta89Opp=null; S.usGrano80=null; S.usGrano80Opp=null; S.usProfughi80=null; S.usProfughi80Opp=null; S.usMessico82=null; S.usMessico82Opp=null; S.usJumbo83=null; S.usJumbo83Opp=null; S.usBeirut83=null; S.usBeirut83Opp=null; S.usGrenada83=null; S.usGrenada83Opp=null; S.usOlimpiadi84=null; S.usOlimpiadi84Opp=null; S.usFisco86=null; S.usFisco86Opp=null; S.usBorsa87=null; S.usBorsa87Opp=null; S.usCasse89=null; S.usCasse89Opp=null; S.usPanama89=null; S.usPanama89Opp=null; S.usBoicott80=null; S.usBoicott80Opp=null; S.usLibia86=null; S.usLibia86Opp=null; S.usGolfo88=null; S.usGolfo88Opp=null; S.usScozia88=null; S.usScozia88Opp=null; S.usNavetta86=null; S.usNavetta86Opp=null; S.usReykjavik86=null; S.usReykjavik86Opp=null; S.usPetrolio86=null; S.usPetrolio86Opp=null; S.usAlaska89=null; S.usAlaska89Opp=null; S.usPensioni83=null; S.usPensioni83Opp=null; S.usScudo83=null; S.usScudo83Opp=null; S.usPaura83=null; S.usPaura83Opp=null; S.usFattorie85=null; S.usFattorie85Opp=null; S.usMalattia85=null; S.usMalattia85Opp=null; S.usDroga86=null; S.usDroga86Opp=null; S.usNavetta72=null; S.usGolfo90=null; S.usGolfo90Opp=null; S.usGolfoEsito91=null; S.usTasse90=null; S.usTasse90Opp=null; S.usBilancio90=null; S.usBilancio90Opp=null; S.usSanita93=null; S.usSanita93Opp=null; S.usChiusura95=null; S.usChiusura95Opp=null; S.usRecessione91=null; S.usRecessione91Opp=null; S.usArsenali92=null; S.usArsenali92Opp=null; S.usSomalia93=null; S.usSomalia93Opp=null; S.usTrattato93=null; S.usTrattato93Opp=null; S.usAccusa98Opp=null; S.usPres95=null;   // L227-1: gli snodi di us1960 · L258-4, L262-4, L262-5, L262-6, L262-7, L262-8, L262-9 e L262-10: anche gli snodi di us1970 e us1980
   S.usScandalo=null; S.usScandaloOpp=null; S.usNastri74=null; S.usNastri74Opp=null;   // L258-5: lo scandalo di us1970 (usNastriRitorno e usDimissioni sono facoltativi: nascono solo quando servono)
   S.scioglimento97=null;   // L103-1: lo scioglimento del '97 (null = storico; 'no' = «aspetta», tappa 1998/3). Lo scrive S4 in L103-2
   S.coabitazione=false;   // L100-2: il Presidente con l'Assemblea degli altri (derivato dai seggi, dato puro, round-trip)
@@ -6114,6 +6114,77 @@ function golfoEsitoOppAccanto(M){
   if(S.usGolfo90Opp!=='sanzioni' && S.usGolfo90Opp!=='congresso') return null;
   return {kind:'event', data:US90_GOLFO_ESITO_OPP_EV, resolved:false};
 }
+/* L264-4 · la promessa sulle tasse e il bilancio d'ottobre di us1990 (data.js, testa del blocco TASSE90_EV). S2 1990/6-7 a chi governa
+   e, dall'aula, a chi è all'opposizione (mesi liberi: il Golfo è 1990/8-9). Il bilancio è una carta DOVUTA del 1990/10 (D304), il mese
+   prima della metà mandato: nell'iniezione passa da snodoColCampagna (la carta di campagna accanto, una). La carta la sceglie
+   bilancio90Carta dalla strada di S2; senza S2 la storia ('tratta'). I nomi snodo…Dovuta del bilancio sono quelli che legge
+   verifica-snodi.js: sono loro a scrivere usBilancio90(Opp), righe di SNODI_STORICI. La primaria della vigilia del 1992 lo legge in un
+   testo (D305, primariaRigaTasse): nessuna leva. */
+function snodoTasse90Dovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_US && S.livello===3 && !S.opposizione && S.usTasse90==null && (S.year===1990 && S.month>=6 && S.month<=7); }
+function snodoTasse90OppDovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_US && S.livello===3 && S.opposizione && S.usTasse90Opp==null && S.usTasse90==null && (S.year===1990 && S.month>=6 && S.month<=7); }
+function bilancio90Ora(){ return typeof S!=='undefined' && !!S && S.era===LINEA_US && S.livello===3 && !S.opposizione && S.usBilancio90==null && meseAss()===1990*12+10; }
+function bilancio90OppOra(){ return typeof S!=='undefined' && !!S && S.era===LINEA_US && S.livello===3 && !!S.opposizione && S.usBilancio90Opp==null && S.usBilancio90==null && meseAss()===1990*12+10; }
+function snodoBilancio90Dovuta(){ return bilancio90Ora(); }
+function snodoBilancio90OppDovuta(){ return bilancio90OppOra(); }
+function bilancio90Carta(){ return S.usTasse90==='promessa' ? US90_BILANCIO_PROMESSA_EV : (S.usTasse90==='congresso' ? US90_BILANCIO_CONGRESSO_EV : US90_BILANCIO_EV); }
+function primariaRigaTasse(tipo){
+  if(tipo!=='vigilia' || typeof S==='undefined' || !S || S.era!==LINEA_US || S.opposizione || S.year<1991 || S.year>1992) return '';
+  if(!(S.usTasse90==='tratta' || S.usBilancio90==='accordo' || S.usBilancio90==='firmato')) return '';
+  return ' '+T(S.partito==='us_rep' ? 'La destra del partito non ha dimenticato l\'autunno del 1990.' : 'L\'ala dura del partito non ha dimenticato l\'autunno del 1990.');
+}/* L264-5 · la riforma sanitaria (S3, 1993/9-10; dal L264-6 1993/9 o 1993/11: ottobre è della Somalia) e la chiusura degli uffici federali (S4, 1995/11-12) di us1990 (data.js, testa del blocco
+   SANITA93_EV). S3 a chi governa (il Presidente eletto nel 1992, dei due partiti) e, dall'aula, a chi è all'opposizione. S4 solo col
+   governo diviso (D307 (a)): divisoPer() non null — al governo il Congresso (o una camera) è dell'altro partito, all'opposizione è del
+   tuo; senza Congresso (S.congresso assente) nessuna carta. La carta della storia (Presidente democratico, opposizione repubblicana)
+   o la gemella `_n` la sceglie la ternaria dell'iniezione, scritta per esteso (verifica-snodi.js): sanita93Carta/chiusura95Carta la
+   ripetono per snodoAccantoAlRichiamo. Il flag lo legge solo il testo: titoli ti_us90_sanita* (usCamera94, scritto alla metà mandato
+   del 1994 in esitoIntermedia) e primariaRigaChiusura. */
+function snodoSanita93Dovuta(){ return typeof S!=='undefined' && !!S && S.era===LINEA_US && S.livello===3 && !S.opposizione && S.usSanita93==null && S.year===1993 && (S.month===9 || S.month===11); }
+function snodoSanita93OppDovuta(){ return typeof S!=='undefined' && !!S && S.era===LINEA_US && S.livello===3 && !!S.opposizione && S.usSanita93Opp==null && S.usSanita93==null && S.year===1993 && (S.month===9 || S.month===11); }
+function snodoChiusura95Dovuta(){ return typeof S!=='undefined' && !!S && S.era===LINEA_US && S.livello===3 && !S.opposizione && S.usChiusura95==null && S.year===1995 && S.month>=11 && divisoPer()!==null; }
+function snodoChiusura95OppDovuta(){ return typeof S!=='undefined' && !!S && S.era===LINEA_US && S.livello===3 && !!S.opposizione && S.usChiusura95Opp==null && S.usChiusura95==null && S.year===1995 && S.month>=11 && divisoPer()!==null; }
+function sanita93Carta(){ return S.opposizione ? (S.partito==='us_rep' ? SANITA93_OPP_EV : SANITA93_OPP_N_EV) : (S.partito==='us_dem' ? SANITA93_EV : SANITA93_N_EV); }
+function chiusura95Carta(){ return S.opposizione ? (S.partito==='us_rep' ? CHIUSURA95_OPP_EV : CHIUSURA95_OPP_N_EV) : (S.partito==='us_dem' ? CHIUSURA95_EV : CHIUSURA95_N_EV); }
+function primariaRigaChiusura(tipo){
+  if(tipo!=='vigilia' || typeof S==='undefined' || !S || S.era!==LINEA_US || S.opposizione || S.year!==1996 || S.usChiusura95==null) return '';
+  return ' '+T(S.usChiusura95==='veto' ? "Il partito ricorda l'inverno della chiusura: hai tenuto il veto fino in fondo." : (S.usChiusura95==='firma' ? "Il partito ricorda l'inverno della chiusura: hai firmato il bilancio dell'altro partito." : "Il partito ricorda l'inverno della chiusura: l'hai chiuso con un compromesso."));
+}
+/* L264-6 · lo scandalo del secondo mandato (S5, D308 (ii): solo dall'aula) e quattro eventi datati di us1990 (data.js, testa del blocco
+   RECESSIONE91_EV). Carte DOVUTE come Beirut di us1980: il flag è la scelta e il segno «già uscita» (niente unaCarriera, come le dovute
+   di us1980), mai nei sacchetti, mai una riga in SNODI_STORICI. La porta la riconosce S.era===LINEA_US, come gli snodi S1-S4 (le
+   carriere di us1980 arrivate fin qui li vedono, D313 (a)).
+   ⚑ La recessione 1991/11, ripiego 1991/12 e 1992/1 (il dicembre 1991 è di pm_urss); gli arsenali solo il 1992/2; la Somalia solo il
+   1993/10 e BATTE S3 (che da qui esce il 1993/9 o, se allora non è potuto uscire, il 1993/11: snodoSanita93Dovuta); il trattato il
+   1993/11, o il 1993/12 se il 1993/11 è di S3. L'aula dello scandalo solo il 1998/12 (novembre è il voto), a chi è all'opposizione
+   di un Presidente democratico al secondo mandato.
+   ⚑ «Al secondo mandato» (Cowork (7)) = il partito del Presidente è us_dem oggi E lo era a metà del mandato 1993-97: S.usPres95, il
+   partito del Presidente al 1995/6, scritto da us90Mese() (nessuna altra traccia dice chi ha vinto il 1992 quando sei all'opposizione:
+   mesiGovernoAvv e il volto ripartono a ogni urna persa). Al governo coincide con mandatesWon 2 (il democratico che governa nel 1995
+   ha vinto il 1992). ⚠ Nella partenza fuori storia (Presidente democratico dal 1988) il Presidente-IA del 1998 sarebbe al terzo
+   mandato: il motore non limita i mandati dell'avversario, e l'aula esce lo stesso (limite noto, rapporto «⚑ L264-6»). */
+function us90SecondoMandatoDem(){ return typeof S!=='undefined' && !!S && S.era===LINEA_US && S.livello===3 && S.usPres95==='us_dem' && partitoPresidente()==='us_dem'; }
+function us90Mese(){
+  if(typeof S==='undefined' || !S || S.era!==LINEA_US || S.livello!==3) return;
+  var m=meseAss();
+  if(m===1995*12+6 && S.usPres95==null) S.usPres95=partitoPresidente();
+  if(m===1999*12+2 && S.opposizione && S.usAccusa98Opp!=null) S.log.unshift({t:T('Il paese'),x:T('Il Senato assolve il Presidente: i due terzi per la condanna non ci sono.')});   // la cronaca dell'assoluzione a chi ha visto l'aula (chi governa ha il titolo)
+}
+function recessione91Finestra(){ var m=meseAss(); return m>=1991*12+11 && m<=1992*12+1; }
+function recessione91Ora(){ return typeof S!=='undefined' && !!S && S.era===LINEA_US && S.livello===3 && !S.opposizione && S.usRecessione91==null && recessione91Finestra(); }
+function recessione91OppOra(){ return typeof S!=='undefined' && !!S && S.era===LINEA_US && S.livello===3 && !!S.opposizione && S.usRecessione91Opp==null && S.usRecessione91==null && recessione91Finestra(); }
+function arsenali92Ora(){ return typeof S!=='undefined' && !!S && S.era===LINEA_US && S.livello===3 && !S.opposizione && S.usArsenali92==null && meseAss()===1992*12+2; }
+function arsenali92OppOra(){ return typeof S!=='undefined' && !!S && S.era===LINEA_US && S.livello===3 && !!S.opposizione && S.usArsenali92Opp==null && S.usArsenali92==null && meseAss()===1992*12+2; }
+function somalia93Ora(){ return typeof S!=='undefined' && !!S && S.era===LINEA_US && S.livello===3 && !S.opposizione && S.usSomalia93==null && meseAss()===1993*12+10; }
+function somalia93OppOra(){ return typeof S!=='undefined' && !!S && S.era===LINEA_US && S.livello===3 && !!S.opposizione && S.usSomalia93Opp==null && S.usSomalia93==null && meseAss()===1993*12+10; }
+function trattato93Finestra(){ var m=meseAss(); return (m===1993*12+11 || m===1993*12+12) && !snodoSanita93Dovuta() && !snodoSanita93OppDovuta(); }
+function trattato93Ora(){ return typeof S!=='undefined' && !!S && S.era===LINEA_US && S.livello===3 && !S.opposizione && S.usTrattato93==null && trattato93Finestra(); }
+function trattato93OppOra(){ return typeof S!=='undefined' && !!S && S.era===LINEA_US && S.livello===3 && !!S.opposizione && S.usTrattato93Opp==null && S.usTrattato93==null && trattato93Finestra(); }
+function accusa98OppOra(){ return us90SecondoMandatoDem() && !!S.opposizione && S.usAccusa98Opp==null && meseAss()===1998*12+12; }
+function us90Mai(){ return false; }
+function us90Eventi(){
+  return us80CarteDelMese([[recessione91Ora, RECESSIONE91_EV, recessione91OppOra, RECESSIONE91_OPP_EV], [arsenali92Ora, ARSENALI92_EV, arsenali92OppOra, ARSENALI92_OPP_EV],
+    [somalia93Ora, SOMALIA93_EV, somalia93OppOra, SOMALIA93_OPP_EV], [trattato93Ora, TRATTATO93_EV, trattato93OppOra, TRATTATO93_OPP_EV], [us90Mai, null, accusa98OppOra, ACCUSA98_OPP_EV]]);
+}
+
 /* L227-1 · uno snodo nella stagione della campagna nazionale esce INSIEME alla carta di campagna (la forma di L177-2 per i pilastri
    `conCampagna`: due carte, uno snodo solo). Fuori stagione campagnaColPilastro dà null e non c'è niente in più. */
 /* L227-1 · il richiamo delle correnti passa prima di ogni snodo e fa agendaSolo: uno snodo con la finestra di UN mese solo (S2, i
@@ -6125,6 +6196,12 @@ function snodoAccantoAlRichiamo(){
          : ((typeof snodoMissili62OppDovuta==='function' && snodoMissili62OppDovuta()) ? MISSILI62_OPP_EV
          : ((typeof snodoAllerta73OppDovuta==='function' && snodoAllerta73OppDovuta()) ? ALLERTA73_OPP_EV : null));   // L258-13: l'aula dell'allerta ha un mese solo (ottobre è del pilastro), e il richiamo la mangiava 12 volte su 98 (misura-l258-13.js)
   /* L264-3: il Golfo di us1990 — S1 (due mesi), l'esito (un mese solo, 1991/1) e la primavera (uno o due mesi). */
+  /* L264-4: la promessa sulle tasse (due mesi) e il bilancio d'ottobre (un mese solo, con la carta di campagna dalla riga in fondo). */
+  /* L264-5: la riforma sanitaria e la chiusura degli uffici (due mesi ciascuna). */
+  if(!EV) EV = (snodoSanita93Dovuta() || snodoSanita93OppDovuta()) ? sanita93Carta() : ((snodoChiusura95Dovuta() || snodoChiusura95OppDovuta()) ? chiusura95Carta() : null);
+  /* L264-6: la recessione, gli arsenali, la Somalia, il trattato e l'aula dello scandalo (carte dovute, quasi tutte di un mese solo). */
+  if(!EV && us90Eventi()) return;
+  if(!EV) EV = snodoTasse90Dovuta() ? TASSE90_EV : (snodoTasse90OppDovuta() ? TASSE90_OPP_EV : (bilancio90Ora() ? bilancio90Carta() : (bilancio90OppOra() ? US90_BILANCIO_OPP_EV : null)));
   if(!EV) EV = snodoGolfo90Dovuta() ? GOLFO90_EV : (snodoGolfo90OppDovuta() ? GOLFO90_OPP_EV : (golfoEsitoOra() ? golfoEsitoCarta() : (golfoPrimaveraOra() ? US90_GOLFO_PRIMAVERA_EV : null)));
   /* L262-7: anche Mosca e Malta (carte dovute, non snodi). Malta ha un mese solo, e Mosca uno solo quando il bersaglio è giugno: il
      richiamo all'opposizione del dicembre 1989 la mangiava (prova-us1980d.js, 2 carriere su 8). L262-15: Malta e Panama insieme. */
@@ -7363,10 +7440,11 @@ function titoloPerId(id){
    comprese le carriere di us1970 che ci arrivano: le altre linee non scrivono mai il campo, e con null il titolo si pesca come prima. */
 /* L262-27 · la disoccupazione «alta» dei titoli reattivi di us1980 (ti_us80_s_disoccupati, ti_us80_s_fabbriche): 9 scatta nel 24-25% dei mesi del banco (bersaglio 15-30%), misura in prove/l262-27/misura-indicatori.js. */
 const US80_DISOCC_ALTA=9;
+const US90_CARTE_SOBRIE={ us90_somalia:1, us90_somalia_opp:1 };   // L264-6: la battaglia in Somalia (stessa funzione: niente titoli allegri quel mese e il dopo)
 const US80_CARTE_SOBRIE={ us80_navetta:1, us80_navetta_opp:1, us80_beirut:1, us80_beirut_opp:1, us80_paura:1, us80_paura_opp:1, us80_scozia:1, us80_scozia_opp:1 };
 function meseSobrioSegna(){
   if(!S || S.era!==LINEA_US || !S.agenda) return;
-  if(S.agenda.some(function(it){ var c=it&&it.data, id=c&&c.id; return !!id && (US80_CARTE_SOBRIE[id]===1 || (id.indexOf('pus80_')===0 && c.tono==='grave')); })) S.meseSobrio=meseAss();
+  if(S.agenda.some(function(it){ var c=it&&it.data, id=c&&c.id; return !!id && (US80_CARTE_SOBRIE[id]===1 || US90_CARTE_SOBRIE[id]===1 || (id.indexOf('pus80_')===0 && c.tono==='grave')); })) S.meseSobrio=meseAss();
 }
 function meseSobrioOra(){ if(S.meseSobrio==null) return false; var d=meseAss()-S.meseSobrio; return d>=0 && d<=1; }
 function generaTitolo(){
@@ -8569,7 +8647,7 @@ function apriPrimaria(tipo, bonus){
   if(typeof suona==='function') suona('aula');   // L95-3: il brusio d'aula, in loop fino all'esito
   const v=S.sfida||{};
   document.getElementById('modal').innerHTML=`<div class="mt"><div class="kicker">${T((part(S.partito)||{}).nome)} · ${T(tipo==='vigilia'?'Verso le elezioni':'Congresso anticipato')}</div><h2>${T('Primarie di partito')}</h2></div>
-    <div class="mtext">${T('Ti sfida <b>%V</b>%X.').replace('%V',v.volto||'—').replace('%X',v.area?`, ${v.carica} — <b>${v.area}</b>`:(v.carica?` (${v.carica})`:''))} ${T(tipo==='vigilia'?'Prima di guidare il partito alle urne, devi vincere in casa.':'Il malcontento è maturo: il partito vota sulla tua leadership.')}</div>
+    <div class="mtext">${T('Ti sfida <b>%V</b>%X.').replace('%V',v.volto||'—').replace('%X',v.area?`, ${v.carica} — <b>${v.area}</b>`:(v.carica?` (${v.carica})`:''))} ${T(tipo==='vigilia'?'Prima di guidare il partito alle urne, devi vincere in casa.':'Il malcontento è maturo: il partito vota sulla tua leadership.')}${primariaRigaTasse(tipo)}${primariaRigaChiusura(tipo)}</div>
     <div style="padding:0 18px 6px">${(S.correnti||[]).map(function(c){ const D=CORRENTI_DEF.find(function(d){return d.id===c.id;})||{};
       return `<div style="padding:5px 0"><div style="display:flex;justify-content:space-between;font-size:13px"><span>${T(D.nome)} <small style="color:var(--mut2)">· ${c.leader}</small></span><span class="mono">${Math.round(c.umore)}</span></div><div class="bar"><i style="width:${clamp(c.umore,2,100)}%;background:${c.umore<35?'var(--neg)':c.umore<50?'var(--warn)':'var(--pos)'}"></i></div></div>`; }).join('')}
       <div style="font-size:12px;color:var(--mut);margin-top:6px">${T("Pesano: l'umore delle correnti (50%), il consenso (%A · 30%), il potere locale (%B · 20%)%X.").replace('%A',Math.round(S.ind.consenso)).replace('%B',Math.round(pl)).replace('%X',(BP.simbolo?T(" — lo sfidante parte forte: guida un'area simbolo"):'')+(BP.rivale>0?T(' — lo sfidante parte forte: i traguardi mancati sono il suo argomento'):BP.rivale<0?T(' — lo sfidante parte debole: i traguardi centrati parlano per te'):''))}</div></div>
@@ -8716,7 +8794,9 @@ function esitoIntermedia(ris){
   S.bloccoAtteso=ris.quota; S.campagnaMod=0; S.campagnaFaccia=false;
   camera2SudIntermedia(ris);   // L263-9bis (D2, D5): l'intermedia argentina rinnova la sua classe del Senato
   if(S.congresso){   // L173-2: la metà mandato decide la Camera; dall'opposizione, la Camera che passa al tuo partito vale +5 di credibilità
-    var divisoPrima=!!S.governoDiviso; aggiornaCongresso(ris.camera!=null ? ris.camera : quotaPartitoPresidente(), true);
+    var divisoPrima=!!S.governoDiviso, cameraPrima=S.congresso.camera; aggiornaCongresso(ris.camera!=null ? ris.camera : quotaPartitoPresidente(), true);
+    if(S.era===LINEA_US && !S.opposizione && S.year===1994 && S.usSanita93!=null) S.usCamera94=(cameraPrima>=50 && S.congresso.camera<50) ? 'persa' : 'tenuta';   // L264-5: la frase sulla Camera dei titoli ti_us90_sanita* (D312: dallo stato, mai dalla data); solo nelle carriere che hanno visto S3
+    if(S.era===LINEA_US && S.opposizione && S.year===1998 && us90SecondoMandatoDem()) S.usMeta98=(S.congresso.camera>=cameraPrima) ? 'guadagna' : 'perde';   // L264-6: il testo dell'aula dello scandalo legge l'esito vero di questo voto
     if(S.opposizione && S.governoDiviso && !divisoPrima){ S.credibilita=clamp((S.credibilita||0)+5,0,100); var soloSen=divisoPer()==='senato'; S.log.unshift({t:T(soloSen?'Il Senato è vostro':'La Camera è vostra'), x:T(soloSen?'Il voto di metà mandato dà il Senato al tuo partito: il Presidente dovrà trattare con voi.':'Il voto di metà mandato dà la Camera al tuo partito: il Presidente dovrà trattare con voi.')}); }
   }
   if(S.correnti){   // correnti: il voto locale pesa dentro il partito (vinta: tutti su; persa: i Militanti per primi)
@@ -9160,6 +9240,11 @@ function genAgendaRamo(first){
     if(!first && typeof snodoNastri74OppDovuta==='function' && snodoNastri74OppDovuta()){ S.agenda.push({kind:'event', data:NASTRI74_OPP_EV, resolved:false}); agendaSolo(); return; }   // L258-5: i nastri, dall'aula
     if(!first && typeof granoOppOra==='function' && granoOppOra()){ snodoColCampagna({kind:'event', data:GRANO80_OPP_EV, resolved:false}); return; }   // L262-8: il grano, dall'aula (non è uno snodo; prima degli ostaggi)
     if(!first && typeof snodoOstaggi80OppDovuta==='function' && snodoOstaggi80OppDovuta()){ S.agenda.push({kind:'event', data:OSTAGGI80_OPP_EV, resolved:false}); boicottAccanto(); agendaSolo(); return; }   // L262-4: gli ostaggi, dall'aula
+    if(!first && typeof snodoSanita93OppDovuta==='function' && snodoSanita93OppDovuta()){ S.agenda.push({kind:'event', data:(S.partito==='us_rep' ? SANITA93_OPP_EV : SANITA93_OPP_N_EV), resolved:false}); agendaSolo(); return; }   // L264-5: la riforma sanitaria, dall'aula (la storia è l'opposizione repubblicana)
+    if(!first && typeof snodoChiusura95OppDovuta==='function' && snodoChiusura95OppDovuta()){ S.agenda.push({kind:'event', data:(S.partito==='us_rep' ? CHIUSURA95_OPP_EV : CHIUSURA95_OPP_N_EV), resolved:false}); agendaSolo(); return; }   // L264-5: la chiusura degli uffici, dall'aula (solo al partito del Congresso)
+    if(!first && typeof us90Eventi==='function' && us90Eventi()){ agendaSolo(); return; }   // L264-6: recessione, arsenali, Somalia, trattato e l'aula dello scandalo (carte dovute, non snodi), dall'aula
+    if(!first && typeof snodoTasse90OppDovuta==='function' && snodoTasse90OppDovuta()){ S.agenda.push({kind:'event', data:TASSE90_OPP_EV, resolved:false}); agendaSolo(); return; }   // L264-4: la promessa sulle tasse, dall'aula
+    if(!first && typeof snodoBilancio90OppDovuta==='function' && snodoBilancio90OppDovuta()){ snodoColCampagna({kind:'event', data:US90_BILANCIO_OPP_EV, resolved:false}); return; }   // L264-4: il bilancio d'ottobre, dall'aula (con la carta di campagna della metà mandato)
     if(!first && typeof snodoGolfo90OppDovuta==='function' && snodoGolfo90OppDovuta()){ S.agenda.push({kind:'event', data:GOLFO90_OPP_EV, resolved:false}); agendaSolo(); return; }   // L264-3: il Golfo, dall'aula
     if(!first && typeof snodoRecessione82OppDovuta==='function' && snodoRecessione82OppDovuta()){ S.agenda.push({kind:'event', data:RECESSIONE82_OPP_EV, resolved:false}); agendaSolo(); return; }   // L262-4: la recessione, dall'aula
     if(!first && typeof ostaggiRilascioOra==='function' && ostaggiRilascioOra()){ snodoColCampagna({kind:'event', data:US80_LIBERI_OPP_EV, resolved:false}); boicottAccanto(); return; }   // L262-4: il rilascio (non è uno snodo), dall'aula
@@ -9357,6 +9442,11 @@ function genAgendaRamo(first){
   if(!first && typeof snodoNastri74Dovuta==='function' && snodoNastri74Dovuta()){ S.agenda.push({kind:'event', data:NASTRI74_EV, resolved:false}); agendaSolo(); return; }   // L258-5: i nastri
   if(!first && typeof granoOra==='function' && granoOra()){ snodoColCampagna({kind:'event', data:GRANO80_EV, resolved:false}); return; }   // L262-8: il grano (non è uno snodo: carta dovuta; prima degli ostaggi)
   if(!first && typeof snodoOstaggi80Dovuta==='function' && snodoOstaggi80Dovuta()){ S.agenda.push({kind:'event', data:OSTAGGI80_EV, resolved:false}); boicottAccanto(); agendaSolo(); return; }   // L262-4: gli ostaggi
+  if(!first && typeof snodoSanita93Dovuta==='function' && snodoSanita93Dovuta()){ S.agenda.push({kind:'event', data:(S.partito==='us_dem' ? SANITA93_EV : SANITA93_N_EV), resolved:false}); agendaSolo(); return; }   // L264-5: la riforma sanitaria (S3 di us1990; la storia è il Presidente democratico)
+  if(!first && typeof snodoChiusura95Dovuta==='function' && snodoChiusura95Dovuta()){ S.agenda.push({kind:'event', data:(S.partito==='us_dem' ? CHIUSURA95_EV : CHIUSURA95_N_EV), resolved:false}); agendaSolo(); return; }   // L264-5: la chiusura degli uffici federali (S4, solo col governo diviso)
+  if(!first && typeof us90Eventi==='function' && us90Eventi()){ agendaSolo(); return; }   // L264-6: recessione, arsenali, Somalia e trattato (carte dovute, non snodi)
+  if(!first && typeof snodoTasse90Dovuta==='function' && snodoTasse90Dovuta()){ S.agenda.push({kind:'event', data:TASSE90_EV, resolved:false}); agendaSolo(); return; }   // L264-4: la promessa sulle tasse (S2 di us1990)
+  if(!first && typeof snodoBilancio90Dovuta==='function' && snodoBilancio90Dovuta()){ snodoColCampagna({kind:'event', data:(S.usTasse90==='promessa' ? US90_BILANCIO_PROMESSA_EV : (S.usTasse90==='congresso' ? US90_BILANCIO_CONGRESSO_EV : US90_BILANCIO_EV)), resolved:false}); return; }   // L264-4: il bilancio d'ottobre, dovuto il 1990/10 (la carta della strada: bilancio90Carta; con la carta di campagna)
   if(!first && typeof snodoGolfo90Dovuta==='function' && snodoGolfo90Dovuta()){ S.agenda.push({kind:'event', data:GOLFO90_EV, resolved:false}); agendaSolo(); return; }   // L264-3: il Golfo (S1 di us1990)
   if(!first && typeof snodoGolfoEsito91Dovuta==='function' && snodoGolfoEsito91Dovuta()){ S.agenda.push({kind:'event', data:(S.usGolfo90==='sanzioni' ? US90_GOLFO_ATTESA_EV : (S.usGolfo90==='subito' ? US90_GOLFO_SUBITO_EV : US90_GOLFO_ESITO_EV)), resolved:false}); agendaSolo(); return; }   // L264-3: l'esito del Golfo, dovuto il 1991/1 al posto di pm_golfo (la carta della strada: golfoEsitoCarta)
   if(!first && typeof snodoGolfoPrimavera91Dovuta==='function' && snodoGolfoPrimavera91Dovuta()){ S.agenda.push({kind:'event', data:US90_GOLFO_PRIMAVERA_EV, resolved:false}); agendaSolo(); return; }   // L264-3: la primavera del Golfo (solo dopo l'attesa)
@@ -10284,6 +10374,7 @@ function avanzaMese(){
   ppSediMese();          // L260-7: le sedi spingono DOPO la molla di evolvePartiti (no-op con PP_SEDI spento o senza partito proprio)
   S.month++;
   avanzaAnnoMandato();   // L173-1: l'anno del mandato cresce al mese dell'urna (gennaio senza meseUrna)
+  us90Mese();   // L264-6: il partito del Presidente a metà del mandato 1993-97 (S.usPres95) e la cronaca dell'assoluzione dall'aula
   riallineamentoTappa();  // AVANZAMENTO — riallineamento-partiti alle tappe '58/'63 (Fase 1: inerte, tabella vuota → no-op)
   if(S.dopoguerra) dopoguerraMese();   // L245-4: i 24 mesi del dopoguerra finiscono
   if(usNastriMese()) return;   // L258-5: il voto d'accusa, il ritorno delle trascrizioni o la successione dall'aula, al mese suo (no-op senza S.usNastriRitorno)
@@ -13315,6 +13406,10 @@ function resetAll(){
   if(typeof taciVoce==='function') taciVoce();   // L218-4: la voce della carriera finita non segue sulla home
   if(typeof guidaFine==='function') guidaFine();   // L218-6: la guida è della prima partita sola
   NOTTE_TERR=null;   // L239-3: i cambi di una notte della carriera finita non passano alla prossima
+  /* L264-5 · «Gioca di nuovo» (il solo chiamante) lascia lo stato come «Abbandona la partita» (abbandonaPartita, ui.js): S=null. Con la
+     carriera finita in memoria, un capo del governo nuovo passava da confirmCabinet → `S && S.opposizione` → tornaAlGoverno sulla
+     carriera VECCHIA (partito, anno, mandato e personaggio di prima): prove/l264-5/prova-gioca-di-nuovo.js. */
+  S=null;
   document.getElementById('over').style.display='none';
   document.getElementById('start').style.display='block';
   try{ if(typeof musica==='function') musica(); if(typeof ambiente==='function') ambiente(); }catch(e){}   // L118-1: sulla home il tema del gioco
@@ -13420,7 +13515,7 @@ function applySnap(snap){
   ['deIraq02','deIraq02Opp','deAgenda03','deAgenda03Opp','deFiducia05','deFiducia05Opp','deBanche08','deBanche08Opp'].forEach(function(k){ if(S[k]===undefined) S[k]=null; });   // L157-1: uno per uno
   ['usCorea','usCoreaOpp','usGenerale','usGeneraleOpp','usAcciaio','usAcciaioOpp','usScuola','usScuolaOpp'].forEach(function(k){ if(S[k]===undefined) S[k]=null; });   // L176-2: uno per uno
   if(S.meseSobrio===undefined || (S.meseSobrio!==null && typeof S.meseSobrio!=='number')) S.meseSobrio=null;   // L262-24
-  ['usBaia','usBaiaOpp','usMissili','usMissiliOpp','usDiritti','usDirittiOpp','usVietnam','usVietnamOpp','usLuna70','usLuna70Opp','usPace73','usPace73Opp','usPetrolio73','usPetrolio73Opp','usOstaggi80','usOstaggi80Opp','usRecessione82','usRecessione82Opp','usArmiIran85','usArmiIran86','usArmiIran86Opp','usMissili87','usMissili87Opp','usControllori81','usControllori81Opp','usMosca88','usMosca88Opp','usMalta89','usMalta89Opp','usGrano80','usGrano80Opp','usProfughi80','usProfughi80Opp','usMessico82','usMessico82Opp','usJumbo83','usJumbo83Opp','usBeirut83','usBeirut83Opp','usGrenada83','usGrenada83Opp','usOlimpiadi84','usOlimpiadi84Opp','usFisco86','usFisco86Opp','usBorsa87','usBorsa87Opp','usCasse89','usCasse89Opp','usPanama89','usPanama89Opp','usBoicott80','usBoicott80Opp','usLibia86','usLibia86Opp','usGolfo88','usGolfo88Opp','usScozia88','usScozia88Opp','usNavetta86','usNavetta86Opp','usReykjavik86','usReykjavik86Opp','usNavetta72','usPetrolio86','usPetrolio86Opp','usAlaska89','usAlaska89Opp','usPensioni83','usPensioni83Opp','usScudo83','usScudo83Opp','usPaura83','usPaura83Opp','usFattorie85','usFattorie85Opp','usMalattia85','usMalattia85Opp','usDroga86','usDroga86Opp','usGolfo90','usGolfo90Opp','usGolfoEsito91'].forEach(function(k){ if(S[k]===undefined) S[k]=null; });   // L227-1: i salvataggi di us1960 di prima caricano · L258-4, L262-4, L262-5, L262-6, L262-7, L262-8, L262-9 e L262-10: anche gli snodi di us1970 e us1980
+  ['usBaia','usBaiaOpp','usMissili','usMissiliOpp','usDiritti','usDirittiOpp','usVietnam','usVietnamOpp','usLuna70','usLuna70Opp','usPace73','usPace73Opp','usPetrolio73','usPetrolio73Opp','usOstaggi80','usOstaggi80Opp','usRecessione82','usRecessione82Opp','usArmiIran85','usArmiIran86','usArmiIran86Opp','usMissili87','usMissili87Opp','usControllori81','usControllori81Opp','usMosca88','usMosca88Opp','usMalta89','usMalta89Opp','usGrano80','usGrano80Opp','usProfughi80','usProfughi80Opp','usMessico82','usMessico82Opp','usJumbo83','usJumbo83Opp','usBeirut83','usBeirut83Opp','usGrenada83','usGrenada83Opp','usOlimpiadi84','usOlimpiadi84Opp','usFisco86','usFisco86Opp','usBorsa87','usBorsa87Opp','usCasse89','usCasse89Opp','usPanama89','usPanama89Opp','usBoicott80','usBoicott80Opp','usLibia86','usLibia86Opp','usGolfo88','usGolfo88Opp','usScozia88','usScozia88Opp','usNavetta86','usNavetta86Opp','usReykjavik86','usReykjavik86Opp','usNavetta72','usPetrolio86','usPetrolio86Opp','usAlaska89','usAlaska89Opp','usPensioni83','usPensioni83Opp','usScudo83','usScudo83Opp','usPaura83','usPaura83Opp','usFattorie85','usFattorie85Opp','usMalattia85','usMalattia85Opp','usDroga86','usDroga86Opp','usGolfo90','usGolfo90Opp','usGolfoEsito91','usTasse90','usTasse90Opp','usBilancio90','usBilancio90Opp','usSanita93','usSanita93Opp','usChiusura95','usChiusura95Opp','usRecessione91','usRecessione91Opp','usArsenali92','usArsenali92Opp','usSomalia93','usSomalia93Opp','usTrattato93','usTrattato93Opp','usAccusa98Opp','usPres95'].forEach(function(k){ if(S[k]===undefined) S[k]=null; });   // L227-1: i salvataggi di us1960 di prima caricano · L258-4, L262-4, L262-5, L262-6, L262-7, L262-8, L262-9 e L262-10: anche gli snodi di us1970 e us1980
   ['usScandalo','usScandaloOpp','usNastri74','usNastri74Opp'].forEach(function(k){ if(S[k]===undefined) S[k]=null; });   // L258-5
   if(S.usNastriRitorno!=null && !(typeof S.usNastriRitorno==='object' && typeof S.usNastriRitorno.mese==='number' && /^(voto|trascrizioni|successione)$/.test(S.usNastriRitorno.tipo||''))) delete S.usNastriRitorno;   // L258-5: un seguito illeggibile si toglie
   if(S.scioglimento97===undefined) S.scioglimento97=null;   // L103-1
