@@ -2361,11 +2361,15 @@ const SCENARI = {
     congresso: { camera: 40.2, senato: 45.0 },  // D301: 175 repubblicani su 435 e 45 senatori su 100 (il Congresso del 1988 ✓): governo diviso all'avvio
     intermedie: [ {tipo:'Elezioni di metà mandato', mese:24, tocca:'tutti', penalitaGoverno:2.75} ],   // L264-2 · dalla sweep (misura-us1990.js gioc --penalita, D314): metà mandato perse dal partito del Presidente (Rep al governo + Dem all'opposizione), 40 carriere × semi 11 · 1011: 2,5 → 82 · 77% · 2,75 → 84 · 82% · 3 → 86 · 86% (banda 80-95); il 1996 del Presidente democratico scende con la penalità (2,5 → 66 · 70% · 2,75 → 69 · 54% · 3 → 63 · 52%): 2,75 tiene tutti e due nella banda in media; rapporto «⚑ L264-2»
     /* D301 · punti sul VOTO della presidenziale, positivo = al partito del Presidente in carica (spintaPresidenziale(), model.js; 0 se il Presidente sei tu). */
-    spintaPresidenziale: { 1992: -5, 1996: 4 },
+    /* L265-2 (D318) · la chiave 2000: le carriere di us1990 che arrivano al voto del 2000 (la porta us2000 parte nel 2001 e la sua spinta non le raggiunge).
+       Sweep (misura-us2000.js p2000, 20 carriere per partenza): chi è all'opposizione al voto vince 2,5 → 13,1/20 · 3 → 10,3 · 3,5 → 5,5 · 4 → 4,1 (banda 8-12, prima 30/30);
+       a 3 su 5 semi × 40: 147/289 = 10,2/20. Margine (testaATesta, prima dell'arrotondamento di calcMargineEsito): |m| < 0,25 18% · < 0,5 34% · < 1 65% · < 2 80%. */
+    spintaPresidenziale: { 1992: -5, 1996: 4, 2000: 3 },
     /* L264-2 · i punti al Presidente-giocatore (solo con US80_PARTITA_VOTO, game.js; spintaPresidenziale qui sopra vale 0 per lui). Sweep su 20 carriere,
        forza 52:48, penalità 2,5: il 1992 del Presidente repubblicano vinto +1 → 20 · 0 → 13 · −1 → 5/20 (banda 4-10); il 1996 del Presidente democratico
        (dall'opposizione) +1 → 19/19 · 0 → 18/19 · −1 → 12/19 (banda 12-18/20). Molto ripido: un punto sposta di 7-8 carriere su 20. */
-    spintaPresidenteGiocatore: { 1992: -1, 1996: -1 },
+    /* L264-13 passo 5 · taratura di fine linea su D314 (5 semi × 40 carriere × 124 mesi, col gioco dopo i titoli reattivi): a −1 · −1 il 1996 democratico era 7,8/20 (banda 12-18) e il 1992 repubblicano 3,7/20 (banda 4-10). Sweep −1…0 a passi di 0,25: il 1996 a −0,25 → 13,3/20, il 1992 a −0,75 → 5,8/20 (il valore più vicino a oggi in banda); metà mandato 87%, primarie perse 10/160. Tabella in «⚑ L264-13». */
+    spintaPresidenteGiocatore: { 1992: -0.75, 1996: -0.25 },
     mandatiVinti: 1,                           // D300: il Presidente ha vinto il 1988 (vale solo al livello 3 al governo: D135)
     /* L264-2 · forza d'avvio Dem 52 · Rep 48 (non 50:50 di D301): a 50:50 il Presidente repubblicano prendeva la Camera nel 1990 13/20 (D312, il rovescio);
        51:49 → 4/20, 52:48 → 1/20 (la consegna: «abbassa di 1-2 punti, non toccare il motore»). Le forze del 1988 erano in bilico (Camera ~53/46 dem). */
@@ -2390,6 +2394,57 @@ const SCENARI = {
       "Washington, gennaio 1990. In Europa i regimi dell'Est cadono uno dopo l'altro e a Berlino si parla già di una Germania sola. Al Pentagono si fanno i conti di quanto si potrà risparmiare ora che la guerra fredda sembra finita.",
       "Il disavanzo federale non scende, le casse di risparmio fallite costano ai contribuenti miliardi di dollari e il Presidente ha vinto promettendo che le tasse non sarebbero salite. Il Congresso, dell'altro partito, aspetta che sia la Casa Bianca a cedere per prima.",
       "Fra dieci mesi si vota per la Camera e per un terzo del Senato. Nel Golfo Persico il prezzo del petrolio è calmo; nelle fabbriche del Midwest si teme la recessione.",
+    ],
+  },
+  /* L265-2 · STATI UNITI 2000 — la sesta e ultima porta della linea americana (PRESET-USA-2000.md, D316 (c), D317, D327).
+     Parte a GENNAIO 2001 col Presidente eletto nel novembre 2000 al primo mese (la forma di us1960, D151): a gennaio 2000 il Presidente
+     al governo avrebbe due mandati e chiuderebbe alla vigilia. Il 2000 lo giocano le carriere di us1990 (D318: la loro chiave 2000).
+     Nessun finale di porta: dal 2013 il presente (D317 (a); righe d'era chiuse a {da:2013}). */
+  us2000: {
+    id:'us2000', era:LINEA_US, nome:'Stati Uniti 2000', anno:2001, paese:'usa',
+    turnMandato: 0, meseUrna: 11,               // D317: il mandato conta dal novembre 2000 → metà mandato 2002/11, presidenziale 2004/11, 2008/11, 2012/11
+    sistema: 'presidenziale', comeSiVince: 'candidato', coalizione: false, cadutaGoverno: false,
+    mandatoMesi: 48, mandatiMax: 2, mandatiConsecutivi: false,
+    titoloRuolo: 'Presidente', sedeGoverno: 'la Casa Bianca',
+    capitale: 'Washington',
+    ue: false,
+    congresso: { camera: 50.8, senato: 50.0 },  // D327: 221 su 435 e 50 su 100 al partito del Presidente (il Congresso eletto nel 2000 ✓); a 50 esatti il Senato è «in mano» (governoDivisoDa divide sotto 50)
+    intermedie: [ {tipo:'Elezioni di metà mandato', mese:24, tocca:'tutti', penalitaGoverno:2.75} ],   // D327: partenza della sweep (quella di us1990); esito in «⚑ L265-2»
+    /* D327 · punti sul VOTO della presidenziale, positivo = al partito del Presidente in carica (spintaPresidenziale(), model.js; 0 se il Presidente sei tu). Sweep in «⚑ L265-2». */
+    /* L265-2 · sweep (20 carriere, Democratici dall'opposizione, soglia 42): il 2004 vinto dallo sfidante 3 → 20/20 · 4 → 20 · 5 → 11 · 5,5 → 6 · 6 → 4/20 (banda 4-9):
+       ripidissimo. Il 2008 dall'opposizione −6 → 12/12 (bersaglio ≥ 13/20 di chi arriva). Il 2012 qui vale solo per lo sfidante del Presidente-giocatore. */
+    spintaPresidenziale: { 2004: 5.5, 2008: -6, 2012: 3 },
+    /* L265-2 · i punti al Presidente-giocatore (US80_PARTITA_VOTO): il 2004 del Presidente repubblicano rivinto −1 → 20/20 · −2 → 20 · −3 → 15/20 (banda 11-16);
+       il 2012 di chi governa dal 2009 (Democratici partiti all'opposizione) 3 → 1/8 · 6 → 4/8 · 8 → 8/8 (banda 55-80%; 20 carriere, campioni piccoli). */
+    /* conferma su 5 semi × 40 (11 · 1011 · 2011 · 3011 · 4011): a −3 · 7 il 2004 16,8/20 e il 2012 89%; a −3,5 · 6 il 2004 14,2/20 e il 2012 66% (13,2/20). */
+    spintaPresidenteGiocatore: { 2004: -3.5, 2012: 6 },
+    sogliaPrimariaOpp: 42,                     // L265-2 (come us1970): a 48 i Democratici dall'opposizione perdevano la primaria prima del 2004 16/20 (D96 6), a 44 7/20, a 42 3/20, a 40 0/20
+    mandatiVinti: 1,                           // D316 (c): il Presidente ha vinto il 2000 (vale solo al livello 3 al governo: D135)
+    /* L265-2 · forza d'avvio Dem 48 · Rep 52 (non 50:50 di D327; la consegna: «se il 2002 la toglie più di 8/20, alza la forza Rep di 1-2 punti»). Camera tenuta dal
+       Presidente repubblicano nel 2002 (20 carriere al governo): 50:50 → 2/20 · 49:51 → 4 · 48:52 → 7 · 47:53 → 10 (ma il 2006 → 11/20 tenuta); rapporto «⚑ L265-2». */
+    partiti: [
+      { id:'us_dem', nome:'Democratici',  orientamento:'centrosinistra', base:{ giovani:0.4, lavoratori:0.35, cetomedio:0.25 },                  forza:48, forzaAncora:48, asse:-1 },
+      { id:'us_rep', nome:'Repubblicani', orientamento:'centrodestra',   base:{ imprenditori:0.4, cetomedio:0.25, cattolici:0.2, pensionati:0.15 }, forza:52, forzaAncora:52, asse:1 },
+    ],
+    /* D327 · i 18 territori del presente nello stesso ordine di mappa.aree; lean dal voto per stato del 2000 e del 2004 (positivo = repubblicano; ◦ a memoria:
+       Florida pari e R+5, Ohio R+3,5 e R+2, Pennsylvania D+4 e D+2,5, Michigan D+5 e D+3,5, Arizona R+6 e R+10). */
+    territori: [
+      {nome:'New York', tipo:'città', carica:'Sindaco', lean:-2, simbolo:true}, {nome:'la California', tipo:'regione', carica:'Governatore', lean:-2, simbolo:true}, {nome:'il Texas', tipo:'regione', carica:'Governatore', lean:2, simbolo:true}, {nome:'la Pennsylvania', tipo:'regione', carica:'Governatore', lean:0, simbolo:true},
+      {nome:'la Florida', tipo:'regione', carica:'Governatore', lean:1}, {nome:"l'Ohio", tipo:'regione', carica:'Governatore', lean:1}, {nome:'il Michigan', tipo:'regione', carica:'Governatore', lean:-1}, {nome:'la Georgia', tipo:'regione', carica:'Governatore', lean:1},
+      {nome:"l'Illinois", tipo:'regione', carica:'Governatore', lean:-2}, {nome:'lo stato di Washington', nomeEn:'Washington State', tipo:'regione', carica:'Governatore', lean:-1}, {nome:"l'Arizona", tipo:'regione', carica:'Governatore', lean:1}, {nome:"l'Alabama", tipo:'regione', carica:'Governatore', lean:2},
+      {nome:'Los Angeles', tipo:'città', carica:'Sindaco', lean:-2}, {nome:'Chicago', tipo:'città', carica:'Sindaco', lean:-2}, {nome:'Houston', tipo:'città', carica:'Sindaco', lean:1}, {nome:'Phoenix', tipo:'città', carica:'Sindaco', lean:1}, {nome:'Filadelfia', nomeEn:'Philadelphia', tipo:'città', carica:'Sindaco', lean:-2}, {nome:'San Francisco', tipo:'città', carica:'Sindaco', lean:-2}
+    ],
+    economia: { pil:10251, debito:55, deficit:1.2, inflazione:2.8, crescita:5, crescitaTetto:9, disoccupazione:4.2 },   // D327 (§2 della scheda): PIL 2000 ✓, debito lordo 2001 54,5 ✓, avanzo dell'anno fiscale 2001 ◦, disoccupazione di gennaio 2001 4,2 (UNRATE ◦)
+    debtAncora: 55,
+    inflazione: 2.8,   // l'anno per anno sta in DRIFT_INFLAZIONE_ERA (assoluta, FRED FPCPITOTLZGUSA)
+    crescita: 5,       // la base della linea, per la saldatura; il decennio sta nelle righe del ciclo
+    logorioEra: 0.00375,                        // quello di us1990 (la saldatura)
+    valuta: VALUTA_DOLLARO,
+    intro: "Stati Uniti, 2001. Il Presidente eletto nel novembre 2000, dopo trentasei giorni di riconteggi e una sentenza della Corte suprema, entra alla Casa Bianca. La Camera è del suo partito per pochi seggi, il Senato è diviso a metà.",
+    contesto: [
+      "Washington, gennaio 2001. Il bilancio federale è in attivo per il quarto anno di fila, e al Congresso si discute di che cosa fare dell'avanzo: tagliare le tasse, pagare il debito, mettere al sicuro le pensioni.",
+      "La bolla dei titoli tecnologici è scoppiata da dieci mesi: in borsa le società della rete valgono una frazione di un anno fa, e le fabbriche cominciano a rallentare. Gli economisti discutono se sia una frenata o una recessione.",
+      "Il paese esce da un'elezione che ha diviso a metà gli elettori e i grandi elettori. Fra ventidue mesi si vota per la Camera e per un terzo del Senato.",
     ],
   },
   /* ============================================================================================================
@@ -6591,6 +6646,85 @@ const BEAT_LEGGERI = [
   {id:'lgus80_light', era:'us1980', registro:'leggero', cond:()=>S.year>=1982&&S.year<=1989, kick:'Il paese', t:'Zero calorie', text:'Al supermercato tutto è diventato leggero: le bibite, la birra, lo yogurt, le patatine. Sull\'etichetta c\'è un numero, e a tavola ormai lo conoscono tutti. La bibita dietetica si beve accanto alla torta di mele, con la coscienza a posto. I medici dicono di mangiare meno, ma quello non sta su nessuna etichetta.', ch:[
     {l:'Provi quella dietetica', e:'Sa di qualcosa, non si capisce di che', f:function(){}},
     {l:'Prendi la torta intera', e:'Le calorie le conti domani', f:function(){}} ]},
+  /* L264-11 · leggeri di us1990 (10/11): la vita di tutti i giorni 1990-1999, due scelte di colore, effetti zero (VARIETA-L264-LEGGERI-US90.md). Ogni finestra parte dal 1990 o dopo: il tag us1990 è vivo dal 1989. */
+  {id:'lgus90_cercapersone', era:'us1990', registro:'leggero', cond:()=>S.year>=1994&&S.year<=1997, kick:'Il paese', t:'Il numero alla cintura', text:'Lo portavano i medici di guardia; adesso ce l\'hanno i ragazzi, agganciato alla cintura dei jeans. Suona, compare un numero, e si corre al telefono pubblico più vicino. Fra loro si scrivono a cifre: tre numeri vogliono dire «ti voglio bene», altri «chiama subito». Molte scuole li vietano, e i genitori non sanno se preoccuparsi o comprarne uno anche loro.', ch:[
+    {l:'Ti fai spiegare i codici', e:'Ne impari due, e li confondi', f:function(){}},
+    {l:'Chiedi a che cosa serve, a quattordici anni', e:'«A farsi trovare», ti rispondono', f:function(){}} ]},
+  {id:'lgus90_pattini', era:'us1990', registro:'leggero', cond:()=>S.year>=1990&&S.year<=1997, kick:'Il paese', t:'Le ruote in fila', text:'Sui lungomare, nei parchi e nei parcheggi vuoti della domenica si pattina con le ruote in fila, una dietro l\'altra, come la lama di un pattino da ghiaccio. Lo fanno i ragazzi e lo fanno gli impiegati dopo l\'ufficio, con casco, ginocchiere e paragomiti. Frenare è la parte difficile, e i pronto soccorso se ne sono accorti.', ch:[
+    {l:'Ne provi un paio a noleggio', e:'Dieci metri diritti, poi una siepe', f:function(){}},
+    {l:'Guardi dalla panchina', e:'Passano tutti, e qualcuno saluta', f:function(){}} ]},
+  {id:'lgus90_flanella', era:'us1990', registro:'leggero', cond:()=>S.year>=1992&&S.year<=1994, kick:'Il paese', t:'La camicia del boscaiolo', text:'I ragazzi si vestono come se dovessero tagliare la legna: camicia di flanella a quadri, jeans strappati al ginocchio, scarponi slacciati, capelli lunghi. La moda viene da una città piovosa del Nord-Ovest, insieme a una musica di chitarre che i genitori trovano triste. Gli stilisti l\'hanno già portata in passerella, a prezzi che un boscaiolo non pagherebbe.', ch:[
+    {l:'Tiri fuori la tua vecchia camicia a quadri', e:'Ti dicono che è quella giusta', f:function(){}},
+    {l:'Chiedi se quei jeans si possono rammendare', e:'Ti guardano come un marziano', f:function(){}} ]},
+  {id:'lgus90_immagini_nascoste', era:'us1990', registro:'leggero', cond:()=>meseAss()>=1993*12+11&&meseAss()<=1995*12+12, kick:'Il paese', t:'Guarda meglio', text:'Nei centri commerciali c\'è la folla davanti a certi manifesti che sembrano carta da parati: puntini e ghirigori colorati. Chi li fissa nel modo giusto, lasciando andare gli occhi, vede uscire una figura in rilievo. I libri sono in classifica e i disegni escono anche sul giornale della domenica. Metà della famiglia la figura la vede subito; l\'altra metà resta lì, con il mal di testa.', ch:[
+    {l:'Fissi il manifesto per cinque minuti', e:'Nessuna figura; in compenso vedi doppio', f:function(){}},
+    {l:'Dici che l\'hai vista', e:'Ti chiedono che cos\'era', f:function(){}} ]},
+  {id:'lgus90_ballo_fila', era:'us1990', registro:'leggero', cond:()=>meseAss()>=1992*12+7&&meseAss()<=1995*12+12, kick:'Il paese', t:'Tutti in fila, stivali ai piedi', text:'La musica delle campagne è scesa in città. Nei locali si balla in fila, tutti rivolti dalla stessa parte, gli stessi passi nello stesso momento: tacco, punta, giro, battuta di mani. Ci vogliono gli stivali, e a molti piace anche il cappello. Chi sbaglia un passo si ritrova faccia a faccia con tutta la fila.', ch:[
+    {l:'Provi i primi passi', e:'Giri dalla parte sbagliata, una volta sola', f:function(){}},
+    {l:'Tieni il tempo dal bancone', e:'Con il piede, che nessuno vede', f:function(){}} ]},
+  {id:'lgus90_caffe', era:'us1990', registro:'leggero', cond:()=>S.year>=1994&&S.year<=1999, kick:'Il paese', t:'Il caffè con il menù', text:'Il caffè era uno solo, e la seconda tazza era gratis. Adesso a ogni angolo apre un locale dove il caffè ha un menù lungo come quello di un ristorante, con i nomi italiani, il latte montato a vapore e tre misure di bicchiere, nessuna delle quali si chiama «piccolo». Costa parecchio di più, e la gente fa la fila ed esce con il bicchiere di carta in mano.', ch:[
+    {l:'Ordini leggendo dal cartello', e:'Ti arriva una cosa con la schiuma', f:function(){}},
+    {l:'Chiedi un caffè normale', e:'«Quale?», dice il ragazzo al banco', f:function(){}} ]},
+  {id:'lgus90_librerie', era:'us1990', registro:'leggero', cond:()=>S.year>=1993&&S.year<=1999, kick:'Il paese', t:'La libreria dove ci si siede', text:'Ai bordi delle città aprono librerie grandi come magazzini: scaffali a perdita d\'occhio, posti per sedersi a leggere, il bar con i dolci. Ci si passa la serata senza comprare niente, e nessuno ti manda via. Le piccole librerie del centro contano i clienti, e non ridono.', ch:[
+    {l:'Leggi un capitolo seduto', e:'Poi il libro lo rimetti a posto', f:function(){}},
+    {l:'Passi dalla libreria sotto casa', e:'Il libraio sa già che cosa cerchi', f:function(){}} ]},
+  {id:'lgus90_mondiali', era:'us1990', registro:'leggero', cond:()=>meseAss()>=1994*12+4&&meseAss()<=1994*12+7, kick:'Il paese', t:'Il pallone che non si prende con le mani', text:'Quest\'estate il campionato del mondo di calcio si gioca qui, in nove città, negli stadi del football. Mezzo paese sta imparando le regole: novanta minuti, niente pubblicità in mezzo, e una partita può finire zero a zero senza che nessuno chieda i soldi indietro. I bambini, che a calcio giocano già, le spiegano ai padri.', ch:[
+    {l:'Guardi una partita intera', e:'Zero a zero, e non ti sei annoiato', f:function(){}},
+    {l:'Chiedi che cos\'è il fuorigioco', e:'Te lo spiega una bambina di nove anni', f:function(){}} ]},
+  {id:'lgus90_senza_finali', era:'us1990', registro:'leggero', cond:()=>meseAss()>=1994*12+11&&meseAss()<=1995*12+3, kick:'Il paese', t:'L\'autunno senza le finali', text:'I giocatori di baseball sono in sciopero da agosto, e a settembre il resto della stagione è stato cancellato: niente finali, e non succedeva da novant\'anni. Si litiga su quanto una squadra può spendere in stipendi. Molti tifosi non parteggiano per nessuno, e intanto vanno a vedere la squadra del liceo.', ch:[
+    {l:'Vai alla partita del liceo', e:'Un posto in prima fila, e un panino', f:function(){}},
+    {l:'Lasci il guantone nell\'armadio', e:'Fino a primavera; poi si vedrà', f:function(){}} ]},
+  {id:'lgus90_venerdi', era:'us1990', registro:'leggero', cond:()=>S.year>=1994&&S.year<=1999, kick:'Il paese', t:'Il venerdì senza cravatta', text:'In molti uffici il venerdì la cravatta resta a casa: l\'azienda lo permette, anzi lo raccomanda. Ma nessuno sa che cosa mettersi al suo posto. C\'è chi arriva in pantaloni color sabbia e camicia a quadretti, chi in tuta, e chi, per non sbagliare, si presenta in giacca come sempre e viene guardato con sospetto. Un produttore di pantaloni ha mandato agli uffici del personale una guida illustrata.', ch:[
+    {l:'Vieni in giacca, come sempre', e:'Ti chiedono se hai un funerale', f:function(){}},
+    {l:'Provi i pantaloni color sabbia', e:'In ufficio, oggi, siete in undici uguali', f:function(){}} ]},
+  {id:'lgus90_fuoristrada', era:'us1990', registro:'leggero', cond:()=>S.year>=1993&&S.year<=1999, kick:'Il paese', t:'Quattro ruote motrici, per la spesa', text:'Il furgone familiare non piace più: sa di pannolini. La famiglia adesso vuole il fuoristrada, alto, squadrato, con le quattro ruote motrici, fatto per i guadi e le pietraie. Lo si guida fino al supermercato e alla scuola, su strade asfaltate. Dall\'alto si vede bene, dicono, e al distributore si fa finta di niente.', ch:[
+    {l:'Sali a provarlo', e:'Ci vuole il predellino, ma la vista è bella', f:function(){}},
+    {l:'Chiedi quanto consuma', e:'Il venditore ti parla della vista', f:function(){}} ]},
+  {id:'lgus90_parabola', era:'us1990', registro:'leggero', cond:()=>S.year>=1995&&S.year<=1999, kick:'Il paese', t:'La parabola grande come una pizza', text:'Le parabole erano dischi da giardino, grandi come un ombrellone. Adesso ce n\'è una grande come una pizza, che si fissa al balcone o al tetto e porta in casa più di cento canali. Si passa la serata a scorrerli tutti, avanti e indietro, e alla fine si riguarda un vecchio film già visto.', ch:[
+    {l:'Scorri tutti i canali', e:'Quaranta minuti, e non hai scelto', f:function(){}},
+    {l:'Spegni e apri un libro', e:'La parabola, fuori, guarda il cielo da sola', f:function(){}} ]},
+  {id:'lgus90_dischetti', era:'us1990', registro:'leggero', cond:()=>S.year>=1994&&S.year<=1996, kick:'Il paese', t:'Il fischio del modem', text:'Nella cassetta della posta, insieme alle bollette, arrivano dischetti per il computer: ore gratis per provare un servizio che collega la casa al resto del mondo, attraverso il telefono. Si infila il dischetto, il modem fischia e gracchia, e poi si è «dentro». Intanto la linea di casa è occupata, e la nonna non riesce a chiamare.', ch:[
+    {l:'Provi le ore gratis', e:'Ti scrive uno sconosciuto dall\'Ohio', f:function(){}},
+    {l:'Usi il dischetto come sottobicchiere', e:'Ne hai già sei', f:function(){}} ]},
+  {id:'lgus90_fiaccola', era:'us1990', registro:'leggero', cond:()=>meseAss()>=1996*12+2&&meseAss()<=1996*12+4, kick:'Il paese', t:'La fiaccola passa di qui', text:'A fine aprile la fiamma olimpica partirà da Los Angeles e per dodici settimane attraverserà quarantadue stati, fino in Georgia, dove a luglio si aprono i Giochi. La porteranno più di dodicimila persone, un tratto a testa. Nelle cittadine sul percorso si sa già il giorno del passaggio, e le scuole chiedono di uscire prima.', ch:[
+    {l:'Guardi la mappa del percorso', e:'Passa a un\'ora di macchina: si può fare', f:function(){}},
+    {l:'Chiedi chi la porterà, dalle tue parti', e:'La maestra, dicono, e tutti sono d\'accordo', f:function(){}} ]},
+  {id:'lgus90_ballo_estate', era:'us1990', registro:'leggero', cond:()=>meseAss()>=1996*12+12&&meseAss()<=1997*12+4, kick:'Il paese', t:'Il ballo che sanno tutti', text:'È cominciato l\'estate scorsa e non è ancora finito: una canzone venuta dalla Spagna, rimasta in testa alle classifiche per più di tre mesi, e un ballo che si fa quasi da fermi, con le braccia: mani avanti, mani sulle spalle, mani sui fianchi, un saltello di lato. Lo si balla a ogni festa. Le parole non le capisce nessuno, e non importa a nessuno.', ch:[
+    {l:'Ti alzi anche tu, alla festa', e:'Le mani le sai; il saltello arriva in ritardo', f:function(){}},
+    {l:'Resti seduto al tavolo', e:'Con te, uno zio e la torta', f:function(){}} ]},
+  {id:'lgus90_solletico', era:'us1990', registro:'leggero', cond:()=>meseAss()>=1996*12+12&&meseAss()<=1997*12+1, kick:'Il paese', t:'Il pupazzo che ride', text:'Il regalo di questo Natale è un pupazzo rosso di pelo che, se gli premi la pancia, ride e si scuote tutto. Costa meno di trenta dollari e non si trova più: nei negozi si fa a spinte all\'apertura, in qualche città è intervenuta la polizia, e sugli annunci c\'è chi ne chiede mille. I bambini lo vogliono; i genitori, a questo punto, lo vogliono di più.', ch:[
+    {l:'Fai il giro dei negozi', e:'Sette negozi, sette cartelli «esaurito»', f:function(){}},
+    {l:'Compri un orsacchiotto normale', e:'Non ride, ma c\'è', f:function(){}} ]},
+  {id:'lgus90_pupazzetti', era:'us1990', registro:'leggero', cond:()=>S.year>=1996&&S.year<=1999, kick:'Il paese', t:'I pupazzetti come azioni', text:'Sono animaletti di pezza che stanno in una mano, imbottiti di palline, da pochi dollari l\'uno. Ma certi modelli non si trovano più, e allora passano di mano a dieci volte il prezzo. C\'è chi li compra come un investimento: li tiene nella plastica con il cartellino intatto e consulta i listini come la pagina della borsa.', ch:[
+    {l:'Ne compri uno, per i bambini', e:'Ti proibiscono di togliere il cartellino', f:function(){}},
+    {l:'Chiedi quanto varranno fra dieci anni', e:'Tutti sicuri; nessuno sa dirti perché', f:function(){}} ]},
+  {id:'lgus90_animaletto', era:'us1990', registro:'leggero', cond:()=>meseAss()>=1997*12+5&&meseAss()<=1998*12+2, kick:'Il paese', t:'L\'animaletto nell\'uovo', text:'Viene dal Giappone ed è grande come un portachiavi: un uovo di plastica con uno schermo, e dentro un animaletto fatto di puntini che chiede da mangiare, vuole giocare e sporca. Se lo trascuri, muore. I bambini se lo portano dietro e lo accudiscono durante la lezione; molte scuole l\'hanno vietato, e così a metà mattina tocca ai genitori dargli da mangiare.', ch:[
+    {l:'Lo tieni tu per un giorno', e:'Suona in riunione, due volte', f:function(){}},
+    {l:'Lo lasci nel cassetto', e:'La sera, sullo schermo, non si muove più niente', f:function(){}} ]},
+  {id:'lgus90_cometa', era:'us1990', registro:'leggero', cond:()=>meseAss()>=1997*12+3&&meseAss()<=1997*12+5, kick:'Il paese', t:'La cometa sopra i tetti', text:'Questa volta non servono né il telescopio né la gita in campagna: la sera la cometa è lì, e si vede a occhio nudo anche fra i lampioni della città. Resterà per settimane. La gente esce in giardino dopo cena e chiama i vicini; chi una decina d\'anni fa aveva cercato l\'altra, quella timida, dice che stavolta il cielo ha mantenuto.', ch:[
+    {l:'Esci in giardino a guardarla', e:'Resti fuori finché non hai freddo', f:function(){}},
+    {l:'Svegli i bambini', e:'Domani a scuola avranno sonno, e qualcosa da raccontare', f:function(){}} ]},
+  {id:'lgus90_telefono_tasca', era:'us1990', registro:'leggero', cond:()=>S.year>=1998&&S.year<=1999, kick:'Il paese', t:'Il telefono nel taschino', text:'Il telefono senza fili non è più un mattone da uomini d\'affari: sta nel taschino, i più nuovi si aprono a conchiglia, e gli abbonati sono decine di milioni. Squilla al cinema, a teatro, al ristorante, e chi risponde alza la voce come se dovesse farsi sentire fin là. I giornali cominciano a parlare di buone maniere.', ch:[
+    {l:'Lo spegni prima del film', e:'In sala, non tutti hanno fatto lo stesso', f:function(){}},
+    {l:'Rispondi sottovoce', e:'Ti sentono fino alla terza fila', f:function(){}} ]},
+  {id:'lgus90_film_disco', era:'us1990', registro:'leggero', cond:()=>S.year>=1998&&S.year<=1999, kick:'Il paese', t:'Il film su un disco', text:'Accanto alle videocassette, nei negozi, è comparso uno scaffale di dischi argentati, grandi come quelli della musica: dentro c\'è un film intero, con un\'immagine più nitida, e non c\'è niente da riavvolgere. Il lettore costa ancora parecchio e le cassette restano di gran lunga le più vendute. Chi ne ha una parete guarda lo scaffale e fa i conti.', ch:[
+    {l:'Ne noleggi uno, per vedere', e:'Si distingue ogni filo d\'erba', f:function(){}},
+    {l:'Ti tieni le cassette', e:'Sono tante, e hai appena finito di pagarle', f:function(){}} ]},
+  {id:'lgus90_pantaloni_larghi', era:'us1990', registro:'leggero', cond:()=>S.year>=1993&&S.year<=1998, kick:'Il paese', t:'Due taglie in più', text:'I ragazzi portano i pantaloni di due taglie in più, calati sui fianchi, con l\'orlo che striscia per terra, e il berretto da baseball in testa anche in classe. Molte scuole hanno scritto una regola, e in un liceo di Los Angeles c\'è la «prova di gravità»: se senza cintura non stanno su, a scuola non entrano. I ragazzi li tirano su fino alla porta dell\'aula.', ch:[
+    {l:'Regali una cintura', e:'La mette, due buchi più larga', f:function(){}},
+    {l:'Ripensi ai tuoi pantaloni a zampa', e:'Tua madre diceva le stesse cose', f:function(){}} ]},
+  {id:'lgus90_bici_montagna', era:'us1990', registro:'leggero', cond:()=>S.year>=1990&&S.year<=1994, kick:'Il paese', t:'La bici da montagna, in pianura', text:'Una bicicletta venduta su due, ormai, ha le ruote grosse e tassellate, il manubrio diritto e una fila di marce: è fatta per i sentieri di montagna. Molti la usano soprattutto sull\'asfalto, per andare al lavoro o fino al parco, e le marce più basse non le hanno mai toccate. Ma sulle buche, dicono, è un\'altra cosa.', ch:[
+    {l:'La provi su un sentiero vero', e:'In salita scopri a che cosa servono le marce', f:function(){}},
+    {l:'La usi per andare a prendere il giornale', e:'Tutte quelle marce, e ne usi una', f:function(){}} ]},
+  {id:'lgus90_scorte', era:'us1990', registro:'leggero', cond:()=>meseAss()>=1999*12+6&&meseAss()<=1999*12+12, kick:'Il paese', t:'La notte del 31', text:'E se a mezzanotte del 31 dicembre i computer scambiassero il 2000 per il 1900? Nel dubbio, c\'è chi riempie il garage: taniche d\'acqua, pile, scatolette, torce. La Croce Rossa consiglia una scorta per qualche giorno, una settimana al più, e di non accaparrare. Il vicino ne ha per sei mesi, e non dice dove.', ch:[
+    {l:'Compri pile e qualche tanica', e:'Male che vada, servono per il campeggio', f:function(){}},
+    {l:'Prenoti il veglione', e:'Se va via la luce, ci sono le candele', f:function(){}} ]},
+  {id:'lgus90_riciclo', era:'us1990', registro:'leggero', cond:()=>S.year>=1990&&S.year<=1993, kick:'Il paese', t:'Il bidone in più', text:'Il comune ha consegnato a ogni casa un bidone in più: dentro vanno le lattine, le bottiglie e i giornali, e il camion passa a ritirarli davanti al vialetto. In cucina adesso si discute: il vasetto va sciacquato? Il tappo si toglie? I bambini, che l\'hanno imparato a scuola, sorvegliano la pattumiera e rimproverano i genitori.', ch:[
+    {l:'Sciacqui il vasetto', e:'Approvato dal controllo, che ha otto anni', f:function(){}},
+    {l:'Butti tutto insieme, di nascosto', e:'Ti hanno visto', f:function(){}} ]},
+  {id:'lgus90_figurine', era:'us1990', registro:'leggero', cond:()=>S.year>=1990&&S.year<=1992, kick:'Il paese', t:'Le figurine sotto chiave', text:'Le figurine dei giocatori di baseball non si scambiano più in cortile: si comprano a scatole chiuse e si mettono via, come un investimento. Ci sono le fiere, le riviste con i prezzi, e padri che vietano ai figli di aprire le bustine. Se ne stampano a non finire e tutti le conservano: qualcuno comincia a chiedersi a chi le rivenderà.', ch:[
+    {l:'Apri una bustina', e:'Un giocatore che non conosci, in ottimo stato', f:function(){}},
+    {l:'Cerchi le tue, in soffitta', e:'Tua madre le ha buttate anni fa', f:function(){}} ]},
 ];
 
 /* ===== F1 — LA TELEFONATA. Un'interruzione, non una carta: overlay a squillo, due opzioni secche, decisione a
@@ -6821,6 +6955,15 @@ const NOTTE_LANCI = [
   {id:"ln_us80_int_0", fase:0, tipo:'intermedia', era:'us1980', testo:"Tutta la Camera e un terzo del Senato in palio: i seggi chiudono a ondate."},
   {id:"ln_us80_int_1", fase:1, tipo:'intermedia', era:'us1980', testo:"Le reti assegnano i seggi uno a uno, distretto per distretto."},
   {id:"ln_us80_int_2", fase:2, tipo:'intermedia', era:'us1980', testo:"Il conto è chiuso: domani lo leggeranno come un voto sul Presidente."},
+  // L264-12: paesi anche sulla metà mandato, perché nel 1990-91 è viva anche ln_us80_int_* (era us1980 fino al 1991): era + paese vince il pareggio
+  {id:"ln_us90_open", fase:0, era:'us1990', paesi:['usa'], testo:"A est chiudono i primi seggi: le reti hanno tutte gli stessi sondaggi all'uscita."},
+  {id:"ln_us90_proj", fase:1, era:'us1990', paesi:['usa'], testo:"Uno Stato alla volta, appena chiude: in studio il conto dei grandi elettori sale verso 270."},
+  {id:"ln_us90_terr", fase:2, era:'us1990', paesi:['usa'], testo:"Le reti hanno promesso al Congresso di non assegnare uno Stato finché lì si vota."},
+  {id:"ln_us90_quasi", fase:3, era:'us1990', paesi:['usa'], testo:"Alla radio le linee sono aperte: chiamano ascoltatori da ogni parte del paese."},
+  {id:"ln_us90_fin", fase:4, era:'us1990', paesi:['usa'], testo:"Un palco, le bandiere, una folla in attesa da ore: le ultime parole della notte, in diretta."},
+  {id:"ln_us90_int_0", fase:0, tipo:'intermedia', era:'us1990', paesi:['usa'], testo:"Stanotte niente Casa Bianca: in palio la Camera e trentasei governatori."},
+  {id:"ln_us90_int_1", fase:1, tipo:'intermedia', era:'us1990', paesi:['usa'], testo:"Oltre ai seggi si contano i quesiti messi al voto Stato per Stato."},
+  {id:"ln_us90_int_2", fase:2, tipo:'intermedia', era:'us1990', paesi:['usa'], testo:"Ogni distretto ha votato per sé: domattina se ne cercherà un senso solo."},
   {id:"ln_uk80_open", fase:0, era:'uk1980', testo:"Le dieci di sera: le due reti danno ciascuna il proprio exit poll."},
   {id:"ln_uk80_proj", fase:1, era:'uk1980', testo:"In studio la lancetta dello swing oscilla: si misura lo spostamento dal voto precedente."},
   {id:"ln_uk80_terr", fase:2, era:'uk1980', testo:"Nei municipi si conta a mano; il funzionario elettorale legge i numeri dal palco."},
@@ -15777,7 +15920,7 @@ const RIVALI=(function(){
   function riga(paesi, con, dal, fino, massimo, tipo){ paesi.split(' ').forEach(function(p){ r.push({paese:p, con:con, dal:dal, fino:fino, massimo:massimo, tipo:tipo}); }); }
   riga('italia1950 italia1960 italia1970 italia1980 uk1950 uk1960 uk1970 uk1980 fr1950 fr1960 fr1970 fr1980 de1950 de1960 de1970 de1980 us1950 us1960 us1970 us1980', 'urss', 1945, 1991, 4, 'blocco');   // la guerra fredda: Cuba e Berlino si fermano all'ultimatum (L258-2, D286: us1970; L262-2, D294: us1980)
   riga('italia1990 uk1990 fr1990 de1990 us1990', 'urss', 1945, 1991, 4, 'blocco');   // L264-2: + us1990 (D303)
-  riga('italia1990 uk1990 fr1990 de1990 italia2000 uk2000 fr2000 de2000 us1980 us1990', 'russia', 1992, 2099, 4, 'blocco');   // L264-2 (D303): + us1990 e us1980 (le sue carriere dal 1992 non avevano un rivale)
+  riga('italia1990 uk1990 fr1990 de1990 italia2000 uk2000 fr2000 de2000 us1980 us1990 us2000', 'russia', 1992, 2099, 4, 'blocco');   // L264-2 (D303): + us1990 e us1980 (le sue carriere dal 1992 non avevano un rivale) · L265-2 (D330): + us2000
   ['russia','cina','iran'].forEach(function(c){ riga('italia francia regnounito germania spagna canada australia danimarca paesibassi svezia norvegia', c, 2012, 2099, 4, 'blocco'); });   // L250-2: + la Danimarca (Alleanza atlantica) · L250-5: + i Paesi Bassi · L250-8: + la Svezia (nell'Alleanza dal 2024) · L250-14: + la Norvegia (dal 1949)
   ['russia','cina','iran','corea_nord'].forEach(function(c){ riga('usa', c, 2012, 2099, 4, 'blocco'); });
   ['russia','cina','corea_nord'].forEach(function(c){ riga('giappone', c, 2012, 2099, 4, 'blocco'); });
@@ -15811,7 +15954,7 @@ const RIVALI=(function(){
   ['russia','cina'].forEach(function(c){ riga('brasile messico argentina sudafrica nigeria', c, 2012, 2099, 2, 'lontano'); });   // al più le sanzioni
   // L245-3bis: le porte 1990 e 2000 arrivano al presente (dal 2012 ogni linea apre `contemporanea`): da lì hanno i rivali del
   // presente del loro paese, stessi `massimo` e `tipo`, letti dalle righe qui sopra. La Russia dal 1992 c'è già e non si raddoppia.
-  var PORTE_AL_PRESENTE={italia1990:'italia', italia2000:'italia', uk1990:'regnounito', uk2000:'regnounito', fr1990:'francia', fr2000:'francia', de1990:'germania', de2000:'germania', us1990:'usa'};   // L264-2: + us1990
+  var PORTE_AL_PRESENTE={italia1990:'italia', italia2000:'italia', uk1990:'regnounito', uk2000:'regnounito', fr1990:'francia', fr2000:'francia', de1990:'germania', de2000:'germania', us1990:'usa', us2000:'usa'};   // L264-2: + us1990 · L265-2 (D330): + us2000
   Object.keys(PORTE_AL_PRESENTE).forEach(function(porta){
     r.filter(function(x){ return x.paese===PORTE_AL_PRESENTE[porta]; }).forEach(function(x){
       if(r.some(function(y){ return y.paese===porta && y.con===x.con && y.fino>=x.dal; })) return;
@@ -15941,7 +16084,7 @@ const ALLEATI_DIPLO=(function(){
   var r=[];
   function riga(paesi, id, dal, fino){ var d=D[id]; paesi.split(' ').forEach(function(p){ r.push({paese:p, id:id, nome:d[0], art:d[1], nomeEn:d[2], artEn:d[3], dal:dal, fino:fino}); }); }
   var IT='italia italia1950 italia1960 italia1970 italia1980 italia1990 italia2000', UK='regnounito uk1950 uk1960 uk1970 uk1980 uk1990 uk2000',
-      FR='francia fr1950 fr1960 fr1970 fr1980 fr1990 fr2000', DE='germania de1950 de1960 de1970 de1980 de1990 de2000', US='usa us1950 us1960 us1970 us1980 us1990';   // L264-2: + us1990
+      FR='francia fr1950 fr1960 fr1970 fr1980 fr1990 fr2000', DE='germania de1950 de1960 de1970 de1980 de1990 de2000', US='usa us1950 us1960 us1970 us1980 us1990 us2000';   // L264-2: + us1990 · L265-2: + us2000
   riga(IT+' '+UK+' '+FR+' '+DE+' india canada australia giappone coreasud messico nigeria brasile danimarca paesibassi svezia norvegia', 'stati_uniti', 1945, 2099);   // L250-2: + la Danimarca · L250-5: + i Paesi Bassi · L250-8: + la Svezia · L250-14: + la Norvegia
   riga(IT+' '+UK+' '+DE, 'francia', 1945, 2099);
   riga(FR, 'regno_unito', 1945, 1962);          // la Francia della Quarta Repubblica e dei primi anni di de Gaulle: Londra e Washington
@@ -21364,6 +21507,7 @@ const TITOLI=[
  {id:'ti_us70_s_sanita', era:'us1970', amico:'Le cure per tutti: Washington studia un\'assicurazione nazionale', ostile:'Le spese mediche corrono: un ricovero costa uno stipendio'},
  {id:'ti_us70_s_bicentenario', era:'us1970', cond:()=>S.year>=1975&&S.year<=1976, amico:'Duecento anni: bandiere a ogni finestra, il paese torna a festeggiarsi', ostile:'Duecento anni: e la festa la pagano i contribuenti'},
  /* L262-24 · i titoli «di stato» di us1980 (senza data, gradino 2: la gemella del decennio vince sulla generica). Il tag è vivo dal 1979: ogni `cond` parte dal 1980 o dopo, dal fatto che racconta (fonti nel rapporto «⚑ L262-24» di PRESET-USA-1980.md). Solo testo. */
+/* L264-13 passo 2 · tetto d'anno S.year<=1989 (solo la cond, testi intatti) su ti_us80_s_armi — l'unico che contraddice ti_us90_s_basi — e sui due reattivi frenata e disoccupati (nel 1990-91 rubavano gli episodi della recessione a ti_us90_s_frenata). È il RIPIEGO della consegna: il tetto sui dodici ti_us80_s_ vivi nel 1990-91 (il tag us1980 è vivo fino al 1991; erano il 48% delle prime pagine di us1990) portava le ripetute di us1990 nel 1990-91 dal 1-4% al 16% (+12-14 punti, limite 5): prove/l264-13/sonda-9091.js, tabella in «⚑ L264-13». */
  {id:'ti_us80_s_tassi', era:'us1980', cond:()=>S.year>=1981&&S.year<=1983, amico:'L\'inflazione scende: la cura dei tassi alti funziona', ostile:'Mutui alle stelle: comprare casa diventa un sogno'},
  {id:'ti_us80_s_regole', era:'us1980', cond:()=>S.year>=1984, amico:'Meno regole, più concorrenza: voli e telefonate costano meno', ostile:'Meno regole: le compagnie tagliano rotte e stipendi'},
  {id:'ti_us80_s_deficit', era:'us1980', cond:()=>S.year>=1983, amico:'L\'economia cresce: i conti si rimetteranno a posto, dice il Tesoro', ostile:'Il debito pubblico corre: il conto lo pagheranno i figli'},
@@ -21373,7 +21517,7 @@ const TITOLI=[
  {id:'ti_us80_s_strada', era:'us1980', cond:()=>S.year>=1982, amico:'Rifugi e mense aperti tutto l\'inverno: le città fanno la loro parte', ostile:'Sempre più persone dormono per strada nelle grandi città'},
  {id:'ti_us80_s_notizie', era:'us1980', cond:()=>meseAss()>=1980*12+6, amico:'Notizie a tutte le ore: il paese è sempre informato', ostile:'Il telegiornale che non si ferma mai: la politica diventa spettacolo'},
  {id:'ti_us80_s_scuola', era:'us1980', cond:()=>meseAss()>=1983*12+5, amico:'Più matematica e più scienze: la scuola alza l\'asticella', ostile:'Un rapporto federale: la scuola americana resta indietro'},
- {id:'ti_us80_s_armi', era:'us1980', cond:()=>S.year>=1981&&!(S.year===1983&&S.month>=4&&S.month<=6&&S.usScudo83!=null), amico:'Navi e aerei nuovi: le forze armate tornano forti', ostile:'Spese militari mai viste in tempo di pace, e i conti di casa aspettano'},
+ {id:'ti_us80_s_armi', era:'us1980', cond:()=>S.year<=1989&&S.year>=1981&&!(S.year===1983&&S.month>=4&&S.month<=6&&S.usScudo83!=null), amico:'Navi e aerei nuovi: le forze armate tornano forti', ostile:'Spese militari mai viste in tempo di pace, e i conti di casa aspettano'},
  {id:'ti_us80_s_piogge', era:'us1980', cond:()=>S.year>=1981, amico:'Piogge acide: le centrali montano i filtri', ostile:'Laghi senza pesci e boschi malati: le piogge acide passano il confine'},
  {id:'ti_us80_s_sindacati', era:'us1980', cond:()=>S.year>=1982, amico:'Nuovi contratti: le fabbriche restano aperte in cambio di salari più bassi', ostile:'Il sindacato perde iscritti, e lo sciopero non paga più'},
  {id:'ti_us80_s_computer', era:'us1980', allegro:true, cond:()=>S.year>=1982, amico:'Un computer in ogni ufficio: nascono mestieri nuovi', ostile:'Il computer entra in fabbrica: chi non lo sa usare resta indietro'},
@@ -21382,8 +21526,8 @@ const TITOLI=[
  {id:'ti_us80_s_est', era:'us1980', cond:()=>meseAss()>=1989*12+6&&meseAss()<=1989*12+10, amico:'All\'Est i regimi vacillano: la guerra fredda finisce senza sparare', ostile:'L\'Est si apre: e ora chi paga la sua ripresa?'},
  /* L262-27 · LA PRIMA PAGINA CHE REAGISCE ALL'ECONOMIA: con 16 gemelle vive i generici (ti_recessione, ti_disocc) non escono più in us1980 (L262-24).
     Le soglie dalla misura del banco (prove/l262-27/misura-indicatori.js): unemp>=9 è vera nel 24-25% dei mesi, per il 91% nel 1982-83. Non escono nei mesi sobri (meseSobrioOra), non allegri. `reattivo:true`: dentro il gradino 2 passano prima delle altre gemelle (generaTitolo). */
- {id:'ti_us80_s_frenata', era:'us1980', reattivo:true, cond:()=>S.year>=1980&&S.ind.growth<0&&!meseSobrioOra(), amico:"L'economia frena: è il prezzo per battere l'inflazione, dice il governo", ostile:"L'economia arretra, e i negozi abbassano le serrande"},
- {id:'ti_us80_s_disoccupati', era:'us1980', reattivo:true, cond:()=>S.year>=1980&&S.ind.unemp>=US80_DISOCC_ALTA&&!meseSobrioOra(), amico:'Piani per il lavoro: corsi e cantieri per chi cerca un posto', ostile:'Si allungano le file agli uffici di collocamento'},
+ {id:'ti_us80_s_frenata', era:'us1980', reattivo:true, cond:()=>S.year<=1989&&S.year>=1980&&S.ind.growth<0&&!meseSobrioOra(), amico:"L'economia frena: è il prezzo per battere l'inflazione, dice il governo", ostile:"L'economia arretra, e i negozi abbassano le serrande"},
+ {id:'ti_us80_s_disoccupati', era:'us1980', reattivo:true, cond:()=>S.year<=1989&&S.year>=1980&&S.ind.unemp>=US80_DISOCC_ALTA&&!meseSobrioOra(), amico:'Piani per il lavoro: corsi e cantieri per chi cerca un posto', ostile:'Si allungano le file agli uffici di collocamento'},
  {id:'ti_us80_s_fabbriche', era:'us1980', reattivo:true, cond:()=>S.year>=1980&&S.ind.unemp>=US80_DISOCC_ALTA&&S.year<=1984&&!meseSobrioOra(), amico:'Aiuti alle città delle fabbriche: il governo promette posti nuovi', ostile:'Chiudono le fabbriche della cintura industriale, e le città restano senza lavoro'},
  // L258-12 · gli ostaggi di Teheran: nel 1979/12, dopo l'evento di novembre (uno per valore di S.usOstaggi79; all'opposizione non c'è prima pagina)
  {id:'ti_us70_ostaggi', era:'us1970', pri:1, cond:()=>S.year===1979&&S.month===12&&S.usOstaggi79==='pazienza', amico:'Niente petrolio iraniano, soldi congelati: il Presidente stringe senza sparare', ostile:'Teheran libera tredici ostaggi: più di cinquanta restano nell\'ambasciata'},
@@ -21488,6 +21632,10 @@ const TITOLI=[
 {id:'ti_us90_sanita_camera', era:'us1990', pri:1, cond:()=>(S.usSanita93==='piano'||S.usSanita93==='rinvio') && S.usCamera94==='persa' && S.year===1994 && S.month===12, amico:"Sanità ferma e Camera perduta: il Presidente deve ricominciare", ostile:"Dopo la sanità, la Camera: il voto boccia il Presidente"},
 {id:'ti_us90_sanita_legge', era:'us1990', pri:1, cond:()=>S.usSanita93==='compromesso' && S.usCamera94!=='persa' && S.year===1994 && S.month===12, amico:"La riforma della sanità c'è, più piccola ma c'è", ostile:"Una riforma a metà: milioni restano senza assicurazione"},
 {id:'ti_us90_sanita_legge_camera', era:'us1990', pri:1, cond:()=>S.usSanita93==='compromesso' && S.usCamera94==='persa' && S.year===1994 && S.month===12, amico:"La riforma della sanità c'è, ma la Camera cambia mano", ostile:"Il compromesso sulla sanità non salva la Camera"},
+/* L264-13 passo 3 · la Camera del 1994 per chi non ha avuto S3 (la sanità): S.usCamera94 si scrive ora per ogni capo del governo di LINEA_US nel 1994 (esitoIntermedia), e questi titoli escono il mese dopo il voto solo se S.usSanita93 è nullo (i ti_us90_sanita* li hanno già). «La prima volta in quarant'anni» solo col Presidente democratico che perde la Camera: nel 1994 la Camera passa ai Repubblicani per la prima volta dal voto del 1954 (fonte nel rapporto «⚑ L264-13»); per il Presidente repubblicano la gemella neutra. «Tenuta» solo con la Camera davvero in mano (≥ 50). */
+{id:'ti_us90_camera94_persa', era:'us1990', pri:1, cond:()=>S.usSanita93==null && S.usCamera94==='persa' && partitoPresidente()==='us_dem' && S.year===1994 && S.month===12, amico:"La Camera cambia maggioranza per la prima volta in quarant'anni: il Presidente cerca un'intesa", ostile:"Dopo quarant'anni la Camera passa all'opposizione: il Presidente resta senza maggioranza"},
+{id:'ti_us90_camera94_persa_n', era:'us1990', pri:1, cond:()=>S.usSanita93==null && S.usCamera94==='persa' && partitoPresidente()!=='us_dem' && S.year===1994 && S.month===12, amico:"La Camera passa all'opposizione: il Presidente dovrà trattare su ogni legge", ostile:"Il voto di metà mandato toglie la Camera al Presidente"},
+{id:'ti_us90_camera94_tenuta', era:'us1990', pri:1, cond:()=>S.usSanita93==null && S.usCamera94==='tenuta' && !!S.congresso && S.congresso.camera>=50 && S.year===1994 && S.month===12, amico:"La Camera resta al partito del Presidente", ostile:"Il Presidente tiene la Camera, ma il paese resta diviso"},
 {id:'ti_us90_rapporto', era:'us1990', pri:1, cond:()=>us90SecondoMandatoDem() && !S.opposizione && S.year===1998 && S.month===9, amico:"Il rapporto del procuratore arriva alla Camera: la Casa Bianca risponde punto per punto", ostile:"Il rapporto del procuratore è alla Camera, e si parla di voto d'accusa"},   // L264-6: la cronaca di S5 a chi governa (D308 (ii)), senza scelta
 {id:'ti_us90_assoluzione', era:'us1990', pri:1, cond:()=>us90SecondoMandatoDem() && !S.opposizione && S.year===1999 && S.month===2, amico:"Il Senato assolve il Presidente: i due terzi non ci sono", ostile:"Assolto al Senato, ma il voto d'accusa resta agli atti"},   // L264-6: l'assoluzione, a chi governa
 {id:'ti_us90_attivo_chiusura', era:'us1990', pri:1, cond:()=>us90AttivoTitolo() && S.usChiusura95!=null, amico:"Tre anni dopo la chiusura degli uffici, il bilancio federale chiude in attivo", ostile:"Tre anni dopo la chiusura degli uffici i conti sono in attivo, e ognuno se ne prende il merito"},   // L264-8: il bilancio in attivo (1998/10-12, solo se il saldo a schermo è in attivo: us90AttivoTitolo in game.js); tre varianti che si escludono, nessuna cifra
@@ -21546,6 +21694,9 @@ const TITOLI=[
  {id:'ti_us90_s_tabacco', era:'us1990', cond:()=>meseAss()>=1998*12+12, amico:"I produttori di sigarette pagheranno le cure: accordo con quasi tutti gli Stati", ostile:"Sigarette: via i cartelloni, ma si continua a vendere"},
  {id:'ti_us90_s_stazione', era:'us1990', cond:()=>meseAss()>=1998*12+12, amico:"In orbita i primi pezzi della stazione spaziale internazionale", ostile:"La stazione spaziale costa più del previsto, e siamo all'inizio"},
  {id:'ti_us90_s_millennio', era:'us1990', cond:()=>meseAss()>=1999*12+3 && meseAss()<=1999*12+12, amico:"I computer sono pronti per il 2000, assicurano gli uffici federali", ostile:"Il baco del millennio: miliardi spesi, e c'è chi fa scorte in cantina"},
+/* L264-13 passo 1 · i titoli reattivi di us1990 (la forma di ti_us80_s_frenata): la cond legge un indicatore della partita. Soglie dalla misura del banco (prove/l264-13/misura-indicatori.js, 5 semi × 160 carriere): growth<0 nel 3% dei mesi (22% nel 1991); unemp>=7 nel 16-17% dei mesi, 25% al governo, mediana 7,2-7,3 nel 1992-93. Fuori dai mesi sobri, non allegri, nessun effetto. Fatti: recessione luglio 1990 - marzo 1991 (NBER), disoccupazione al massimo a giugno 1992 (7,8%, BLS), la «ripresa senza lavoro» e i licenziamenti fra gli impiegati (BLS, Monthly Labor Review 1994/6). */
+ {id:'ti_us90_s_frenata', era:'us1990', reattivo:true, cond:()=>S.year>=1990&&S.ind.growth<0&&!meseSobrioOra(), amico:"L'economia frena, ma passerà: i tassi scendono, dice il governo", ostile:"L'economia arretra: cartelli «vendesi» nei sobborghi, e tagli anche fra gli impiegati"},
+ {id:'ti_us90_s_senzalavoro', era:'us1990', reattivo:true, cond:()=>S.year>=1990&&S.ind.unemp>=US90_DISOCC_ALTA&&!meseSobrioOra(), amico:'Corsi di formazione e aiuti per chi ha perso il posto', ostile:"L'economia riparte, ma le assunzioni no"},
  {id:'ng_p_ti_petrolio', era:'contemporanea', paesi:['nigeria'], amico:'La produzione di petrolio torna a salire', ostile:'Un barile su dieci sparisce: il furto record'},
 ];
 
@@ -23864,7 +24015,7 @@ const PILASTRI_MONDO = [
     ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
   { id:'pm_11settembre', anno:2001, mese:9, tono:'grave', cronaca:true, kick:'Il mondo',
     t:'Le torri',
-    text:'La mattina dell\'11 settembre due aerei di linea dirottati entrano nelle torri gemelle di New York, un terzo nel Pentagono, un quarto cade in un campo. Le torri crollano in diretta davanti al mondo: quasi tremila morti. L\'America chiude il cielo, l\'Alleanza invoca per la prima volta la difesa comune, e il decennio che era cominciato con il Muro finisce qui.',
+    text:'La mattina dell\'11 settembre due aerei di linea dirottati entrano nelle torri gemelle di New York, un terzo nel Pentagono, un quarto cade in un campo. Il mondo guarda in diretta: quasi tremila morti. L\'America chiude il cielo, l\'Alleanza invoca per la prima volta la difesa comune, e il decennio che era cominciato con il Muro finisce qui.',
     logx:'Due aerei nelle torri gemelle: quasi tremila morti, in diretta.',
     ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
   /* L105-4 · due fatti-mondo (scheda PRESET-FRANCIA-2000 §I-H): l'onda (gennaio 2005) e il crollo (settembre 2008).
@@ -28860,7 +29011,7 @@ const CHIUSURA95_OPP_N_EV = {
    una persona (lo scan inglese ha la lista delle parole vietate). Nessuna legge, niente ACCUSA_LEGGE né pBocciatura: in (ii) il voto
    è racconto.
    ⚑ Verificato il 09/11 (memoria di Code, coerente con la scheda ✓): la recessione finita a marzo 1991 e la disoccupazione che sale
-   fino al giugno 1992; i sussidi prolungati a novembre 1991 dopo due veti; il programma del Congresso per smontare le armi delle
+   fino al giugno 1992; i sussidi prolungati a novembre 1991 dopo un veto (11 ottobre) e una legge di agosto mai attivata (corretto in L264-11); il programma del Congresso per smontare le armi delle
    repubbliche ex sovietiche (fine 1991); la battaglia di Mogadiscio del 3-4 ottobre 1993, diciotto soldati americani, il ritiro
    annunciato e completato nel marzo 1994; il trattato votato dalla Camera il 17 novembre 1993, più coi voti dell'opposizione che della
    maggioranza, in vigore dal 1° gennaio 1994; il voto d'accusa del 19 dicembre 1998 (due articoli), l'assoluzione del 12 febbraio 1999.
@@ -28878,7 +29029,7 @@ const RECESSIONE91_EV = {
     { l:"Un taglio delle tasse per i ceti medi", e:"Il ceto medio respira · il disavanzo cresce, e gli economisti dicono che arriva tardi", costo:{debito:0.4},
       f:function(){ S.usRecessione91='tasse'; S.ind.debt+=0.4; gdUs60('cetomedio',1); stampad(-1);
         S.log.unshift({t:T('Il paese'),x:T("Per la ripresa senza lavoro ha proposto un taglio delle tasse per i ceti medi.")}); } },
-    { l:"Prolungare i sussidi di disoccupazione", e:"La storia · a novembre, dopo due veti, i sussidi vengono allungati · i lavoratori ringraziano, i conservatori del tuo partito brontolano", costo:{debito:0.3},
+    { l:"Prolungare i sussidi di disoccupazione", e:"La storia · a novembre, dopo un veto e una legge rimasta sulla carta, i sussidi vengono allungati · i lavoratori ringraziano, i conservatori del tuo partito brontolano", costo:{debito:0.3},
       f:function(){ S.usRecessione91='sussidi'; S.ind.debt+=0.3; gdUs60('lavoratori',1); baseUs60(-1);
         S.log.unshift({t:T('Il paese'),x:T("Ha prolungato i sussidi di disoccupazione.")}); } },
     { l:"Aspettare la ripresa: prima il bilancio", e:"I conti restano in ordine · chi ha perso il lavoro dice che il Presidente non vede",
@@ -28891,7 +29042,7 @@ const RECESSIONE91_OPP_EV = {
   t:"La ripresa senza lavoro, dall'aula",
   text:"Sulla carta la recessione è finita in primavera, ma i posti non tornano: le grandi aziende licenziano, e i sussidi stanno per scadere per centinaia di migliaia di persone. La Casa Bianca dice che la ripresa arriverà. In aula si discute che cosa fare intanto.",
   ch:[
-    { l:"Chiedere i sussidi prolungati", e:"La storia · a novembre, dopo due veti, il Congresso li allunga · i lavoratori sono con te",
+    { l:"Chiedere i sussidi prolungati", e:"La storia · a novembre, dopo un veto e una legge rimasta sulla carta, il Congresso li allunga · i lavoratori sono con te",
       f:function(){ S.usRecessione91Opp='sussidi'; gdUs60('lavoratori',1); stampad(-1);
         S.log.unshift({t:T('Il paese'),x:T("Dall'opposizione ha chiesto di prolungare i sussidi di disoccupazione.")}); } },
     { l:"Attaccare «la ripresa senza lavoro»", e:"La base è con te · il ceto medio vuole proposte, non slogan",

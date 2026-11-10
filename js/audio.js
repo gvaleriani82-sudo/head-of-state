@@ -484,6 +484,7 @@ const MUSICA_MANIFEST = {
      tetto dei 3). Gain sul volume reso degli altri brani (−25,2 dB): −17,9 RMS, picco −0,4 → 0,43 (picco reso −7,7). Fuori partita il
      tema alterna con lei a ogni giro, come i temi d'epoca. Misure in Chrome: `.claude/misura-l218-16.js`. */
   'mus-tema-b':   { file:'mus-tema-b.mp3',   loop:true,  gain:0.43, variante:'mus-tema' },   // −17,9, picco −0,4 · 2:00
+  'mus-tema-c':   { file:'mus-tema-c.mp3',   loop:true,  gain:0.34, variante:'mus-tema' },   // L218-30: −15,8, picco −0,8 · 1:50 (reso −25,1) — il tema ruota A → B → C
   /* ⚑ L218-22 (15/10) · LE TERZE VARIANTI `-c` (§G3, Eleven Music v2.5, ~2:00, 192 kbps così come sono: niente ffmpeg per i 128).
      Come le `-b`: `variante:` = il tema, in loop, e `musicaVarianti()` le prende da sole → la rotazione è A → B → C a ogni giro; il
      finale non è in loop e `musica('finale')` sceglie fra tre dall'orologio. Gain sul volume reso degli altri brani (−25,2 dB), picco
@@ -498,10 +499,14 @@ const MUSICA_MANIFEST = {
   'mus-campagna-c':   { file:'mus-campagna-c.mp3', loop:true,  gain:0.31, variante:'mus-campagna' },  // −15,0, picco −0,1 · 2:00
   'mus-crisi-c':      { file:'mus-crisi-c.mp3',    loop:true,  gain:0.35, variante:'mus-crisi' },     // −16,1, picco −0,7 · 2:00
   'mus-notte-c':      { file:'mus-notte-c.mp3',    loop:true,  gain:0.45, variante:'mus-notte' },     // −18,3, picco −1,0 · 2:00
+  'mus-spoglio':      { file:'mus-spoglio.mp3',    loop:true,  gain:0.42, variante:'mus-notte' },     // L218-30 (Cowork (1)-(b)): la quarta variante della notte, A → B → C → spoglio · −17,6, picco −0,6 · 2:00
+  /* L218-30 (Cowork (2)) · LA FONDAZIONE DEL PARTITO PROPRIO: nel mese in cui nasce e nei due dopo (musicaFondazione(), sotto guerra, crisi, campagna e notte), A ↔ B */
+  'mus-fondazione':   { file:'mus-fondazione.mp3', loop:true,  gain:0.31 },                           // −15,0, picco −0,1 · 1:30
+  'mus-fondazione-b': { file:'mus-fondazione-b.mp3', loop:true, gain:0.33, variante:'mus-fondazione' }, // −15,6, picco −0,8 · 2:00
   'mus-finale-c':     { file:'mus-finale-c.mp3',   loop:false, gain:0.40, variante:'mus-finale' },    // −17,3, picco −1,0 · 2:00
   /* ⚑ L218-22 · LE MUSICHE DEL PAESE (§G2, 35 brani: it us uk fr de × sei decenni e il presente; 192 kbps così come sono). Campo `paese:`
      (la sigla di `musicaPaese()`) e `decennio:` (il tema generico che sostituiscono). Nella partita di uno dei cinque paesi la traccia del
-     paese PRENDE IL POSTO DELLA A nella rotazione del suo decennio (giro 0 → `mus-<p>-<d>`, giro 1 → `-b`, giro 2 → `-c`): lo fa un punto
+     paese PRENDE IL POSTO DELLA A nella rotazione del suo decennio (giro 0 → `mus-<p>-<d>`, giro 1 → `-b` — nel presente dei cinque la -b di paese, L218-30 bis —, giro 2 → `-c`): lo fa un punto
      solo, `musicaAPaese()`, dentro `musicaVarianti()`; se il file non è in MUSICA_PRESENTI resta la A generica. Gli altri paesi suonano la
      generica. Gain come sopra (−25,2 dB resi, picco reso ≤ −1). */
   'mus-it-1950':       { file:'mus-it-1950.mp3',     loop:true, gain:0.49, paese:'it', decennio:'mus-1950' },     // −18,9, picco −1,5 · 2:00
@@ -539,6 +544,19 @@ const MUSICA_MANIFEST = {
   'mus-de-1990':       { file:'mus-de-1990.mp3',     loop:true, gain:0.35, paese:'de', decennio:'mus-1990' },     // −16,0, picco −0,1 · 2:00
   'mus-de-2000':       { file:'mus-de-2000.mp3',     loop:true, gain:0.29, paese:'de', decennio:'mus-2000' },     // −14,5, picco −0,3 · 2:00
   'mus-de-presente':   { file:'mus-de-presente.mp3', loop:true, gain:0.57, paese:'de', decennio:'mus-presente' }, // −20,3, picco −1,2 · 2:00
+  /* L218-30 · il presente dei paesi nuovi (L250): gain della regola di L218-9, misurati in Chrome (.claude/misura-l218-30.js). Il Belgio (mus-be-presente) aspetta il suo lotto di struttura: non è in PAESI. */
+  'mus-dk-presente':   { file:'mus-dk-presente.mp3', loop:true, gain:0.35, paese:'dk', decennio:'mus-presente' }, // −16,0, picco −0,8 · 2:00
+  'mus-nl-presente':   { file:'mus-nl-presente.mp3', loop:true, gain:0.39, paese:'nl', decennio:'mus-presente' }, // −16,9, picco −1,2 · 2:00
+  'mus-se-presente':   { file:'mus-se-presente.mp3', loop:true, gain:0.40, paese:'se', decennio:'mus-presente' }, // −17,3, picco −1,3 · 2:00
+  'mus-no-presente':   { file:'mus-no-presente.mp3', loop:true, gain:0.63, paese:'no', decennio:'mus-presente' }, // −21,2, picco −1,1 · 2:00
+  /* L218-30 bis · la SECONDA traccia del presente dei cinque paesi storici: `decennio:` = la B generica che sostituisce (mus-presente-b),
+     quindi la rotazione del presente è A di paese → B di paese → C generica (musicaVarianti passa ogni variante da musicaAPaese; musicaTema
+     risale dalla B di paese a mus-presente). Senza il file resta la B generica. Gain della regola di L218-9, .claude/misura-l218-30bis.js. */
+  'mus-it-presente-b': { file:'mus-it-presente-b.mp3', loop:true, gain:0.31, paese:'it', decennio:'mus-presente-b' }, // −15,1, picco −1,2 · 1:50
+  'mus-fr-presente-b': { file:'mus-fr-presente-b.mp3', loop:true, gain:0.39, paese:'fr', decennio:'mus-presente-b' }, // −17,0, picco −1,2 · 2:00
+  'mus-uk-presente-b': { file:'mus-uk-presente-b.mp3', loop:true, gain:0.40, paese:'uk', decennio:'mus-presente-b' }, // −17,2, picco −0,4 · 2:00
+  'mus-de-presente-b': { file:'mus-de-presente-b.mp3', loop:true, gain:0.32, paese:'de', decennio:'mus-presente-b' }, // −15,4, picco −1,2 · 2:00
+  'mus-us-presente-b': { file:'mus-us-presente-b.mp3', loop:true, gain:0.29, paese:'us', decennio:'mus-presente-b' }, // −14,4, picco −0,7 · 2:00
   /* ⚑ L245-5 (20/10) · LA MUSICA DELLA GUERRA (L218-17 e L218-28: Eleven Music v2.5, 192 kbps così come sono, tutti sotto i 3 MB). Gain sul
      volume reso degli altri brani (−25,2 dB: regola di L218-9), picco reso ≤ −1 dBFS. La sceglie musicaGuerra(), letta per prima in
      musicaScelta: tensione e guerra alternano A/B a ogni giro come le altre `-b`. */
@@ -549,6 +567,7 @@ const MUSICA_MANIFEST = {
   'mus-guerra-b':     { file:'mus-guerra-b.mp3',    loop:true,  gain:0.51, variante:'mus-guerra' },       // −19,4, picco −0,4 · 2:00
   'mus-guerra-c':     { file:'mus-guerra-c.mp3',    loop:true,  gain:0.60, variante:'mus-guerra' },       // −20,8, picco −1,1 · 1:46 · L218-29: la terza variante
   'mus-armistizio':   { file:'mus-armistizio.mp3',  loop:true,  gain:0.45 },                              // −18,3, picco −0,4 · 1:30
+  'mus-armistizio-b': { file:'mus-armistizio-b.mp3', loop:true, gain:0.33, variante:'mus-armistizio' },  // L218-30: −15,6, picco −1,1 · 2:00 (reso −25,3) — la trattativa lunga alterna A/B (musicaGuerra passa da musicaGiroVariante)
   'mus-dopoguerra':   { file:'mus-dopoguerra.mp3',  loop:true,  gain:0.47 },                              // −18,7, picco −1,1 · 1:30
   'mus-lutto':        { file:'mus-lutto.mp3',       loop:true,  gain:0.97 }                               // L245-7: −24,9, picco −7,2 · 1:30 (stessa regola: picco reso −7,5) — il mese dopo un attacco grave, musicaLutto()
 };
@@ -570,8 +589,10 @@ const MUSICA_PRESENTI = ['mus-1950.mp3','mus-1960.mp3','mus-1970.mp3','mus-1980.
                          'mus-uk-1950.mp3','mus-uk-1960.mp3','mus-uk-1970.mp3','mus-uk-1980.mp3','mus-uk-1990.mp3','mus-uk-2000.mp3','mus-uk-presente.mp3',
                          'mus-fr-1950.mp3','mus-fr-1960.mp3','mus-fr-1970.mp3','mus-fr-1980.mp3','mus-fr-1990.mp3','mus-fr-2000.mp3','mus-fr-presente.mp3',
                          'mus-de-1950.mp3','mus-de-1960.mp3','mus-de-1970.mp3','mus-de-1980.mp3','mus-de-1990.mp3','mus-de-2000.mp3','mus-de-presente.mp3',   // L218-22: le 35 musiche del paese
-                         'mus-tensione.mp3','mus-tensione-b.mp3','mus-guerra.mp3','mus-guerra-b.mp3','mus-tensione-c.mp3','mus-guerra-c.mp3','mus-armistizio.mp3','mus-dopoguerra.mp3',   // L245-5: la guerra
-                         'mus-lutto.mp3'];   // L245-7: il lutto dopo un attacco grave
+                         'mus-tensione.mp3','mus-tensione-b.mp3','mus-guerra.mp3','mus-guerra-b.mp3','mus-tensione-c.mp3','mus-guerra-c.mp3','mus-armistizio.mp3','mus-dopoguerra.mp3','mus-armistizio-b.mp3','mus-tema-c.mp3','mus-dk-presente.mp3','mus-nl-presente.mp3','mus-se-presente.mp3','mus-no-presente.mp3','mus-it-presente-b.mp3','mus-fr-presente-b.mp3','mus-uk-presente-b.mp3','mus-de-presente-b.mp3','mus-us-presente-b.mp3',   // L218-30 (bis: le -b del presente di paese)
+                            // L245-5: la guerra
+                         'mus-lutto.mp3',    // L245-7: il lutto dopo un attacco grave
+                         'mus-spoglio.mp3','mus-fondazione.mp3','mus-fondazione-b.mp3'];   // L218-30: lo spoglio (quarta variante della notte) e la fondazione A ↔ B
 const MUSICA_CHIAVE = 'hos_musica', MUSICA_GAIN = 0.35, MUSICA_XFADE_S = 2.5, MUSICA_DUCK_S = 0.8;
 let MUSICA_DIR = 'assets/audio/';     // `let`: la pagina di prova di L114-1 la punta ai segnaposto di .claude/musica-prova/
 let MUSICA_BUF = {}, MUSICA_CARICO = {}, MUSICA_ORA = null, MUSICA_VOCE = null, MUSICA_ZITTA = false;
@@ -653,6 +674,15 @@ function musicaCrisi(){
 function musicaAttaccoZitta(){
   return !!(S && Array.isArray(S.agenda) && S.agenda.some(function(a){ return a && a.data && a.data.attacco==='grave'; }));
 }
+/* L218-30 (Cowork (2)) · IL PARTITO NUOVO (puro): vero nel mese della fondazione e nei due dopo (S.partitoProprio.da = il mese assoluto,
+   S.year*12+S.month, scritto da ppNasce). Senza il file in MUSICA_PRESENTI torna la musica di prima. */
+const MUSICA_FONDAZIONE_MESI = 3;
+function musicaFondazione(){
+  if(typeof S==='undefined' || !S || !S.partitoProprio || typeof S.partitoProprio.da!=='number' || S.year==null) return false;
+  if(MUSICA_PRESENTI.indexOf('mus-fondazione.mp3')<0) return false;
+  const n=(S.year*12+S.month)-S.partitoProprio.da;
+  return n>=0 && n<MUSICA_FONDAZIONE_MESI;
+}
 function musicaLutto(){
   const A=(typeof S!=='undefined' && S) ? S.attacco : null;
   return (A && A.grave && typeof A.ultimo==='number' && S.year!=null && (S.year*12+S.month)===A.ultimo+1) ? 'mus-lutto' : null;
@@ -674,7 +704,7 @@ function fuoriPartita(){
    chiama SOLO `musicaVarianti()`, quindi la usano insieme `musicaScelta()` (ramo dell'epoca e ramo della porta, via musicaGiroVariante),
    `musicaParti()` (alternanza e precarico: si carica la traccia del paese, non la generica) e nessun altro tema: notte, crisi, campagna,
    finale e tema del gioco non hanno tracce di paese. Transitorio, niente in S. */
-const MUSICA_SIGLA_PAESE = { italia:'it', usa:'us', regnounito:'uk', francia:'fr', germania:'de' };
+const MUSICA_SIGLA_PAESE = { italia:'it', usa:'us', regnounito:'uk', francia:'fr', germania:'de', danimarca:'dk', paesibassi:'nl', svezia:'se', norvegia:'no' };   // L218-30: i quattro paesi nuovi hanno solo il presente (mus-<p>-presente); gli altri decenni tornano alla A generica
 function musicaPaese(){
   const k=(MUSICA_PORTA!=null) ? MUSICA_PORTA_PAESE : ((typeof S!=='undefined' && S) ? S.paese : null);
   return (k && MUSICA_SIGLA_PAESE[k]) || null;
@@ -687,12 +717,12 @@ function musicaAPaese(tema){
 /* L118-1 · le varianti di un tema che HANNO IL FILE, nell'ordine A, B, C (senza varianti: il tema solo); L218-22: la A è quella del paese */
 function musicaVarianti(tema){
   const V=[musicaAPaese(tema)];
-  Object.keys(MUSICA_MANIFEST).forEach(function(k){ const M=MUSICA_MANIFEST[k]; if(M.variante===tema && MUSICA_PRESENTI.indexOf(M.file)>=0) V.push(k); });
+  Object.keys(MUSICA_MANIFEST).forEach(function(k){ const M=MUSICA_MANIFEST[k]; if(M.variante===tema && MUSICA_PRESENTI.indexOf(M.file)>=0) V.push(musicaAPaese(k)); });   // L218-30 bis: anche la B (e la C) può avere la traccia del paese
   return V;
 }
 function musicaGiroVariante(tema){ const V=musicaVarianti(tema); return V[(MUSICA_GIRO[tema]||0)%V.length]; }
 /* il tema di un brano (una variante risponde col suo tema) */
-function musicaTema(brano){ const M=MUSICA_MANIFEST[brano]; return (M && (M.variante || M.decennio)) || brano; }   // L218-22: la traccia del paese risponde col suo decennio
+function musicaTema(brano){ const M=MUSICA_MANIFEST[brano]; return M ? (M.variante || (M.decennio ? musicaTema(M.decennio) : brano)) : brano; }   // L218-22: la traccia del paese risponde col suo decennio; L218-30 bis: la B di paese risale alla B generica e da lì al tema
 /* ⚑ L245-5 · LA MUSICA DELLA GUERRA (puro): in guerra mus-guerra/-b/-c (L218-29: la -c) a rotazione, con la trattativa a 2 o più mus-armistizio; una crisi
    al gradino 3-4 senza guerra mus-tensione/-b/-c; nel dopoguerra mus-armistizio i primi sei mesi se l'esito è pace o stallo, poi (e da
    subito per vittoria e sconfitta) mus-dopoguerra; altrimenti null — e musicaScelta va avanti come prima, byte per byte. */
@@ -701,12 +731,12 @@ function musicaGuerra(){
   if(typeof S==='undefined' || !S) return null;
   if(typeof REGOLA_GUERRA!=='undefined' && !REGOLA_GUERRA) return null;
   const c=S.crisi;
-  if(c && c.guerra) return (c.guerra.trattativa>=2) ? 'mus-armistizio' : musicaGiroVariante('mus-guerra');
+  if(c && c.guerra) return (c.guerra.trattativa>=2) ? musicaGiroVariante('mus-armistizio') : musicaGiroVariante('mus-guerra');   // L218-30: anche l'armistizio alterna A/B
   if(c && c.t>=3 && c.t<=4) return musicaGiroVariante('mus-tensione');
   const d=S.dopoguerra;
   if(d && typeof d.fino==='number' && S.year!=null){
     const dopo=(typeof GUERRA_K!=='undefined' && GUERRA_K.dopo) || 24, mesi=(S.year*12+S.month)-(d.fino-dopo);
-    return ((d.esito==='pace' || d.esito==='stallo') && mesi<MUSICA_ARMISTIZIO_MESI) ? 'mus-armistizio' : 'mus-dopoguerra';
+    return ((d.esito==='pace' || d.esito==='stallo') && mesi<MUSICA_ARMISTIZIO_MESI) ? musicaGiroVariante('mus-armistizio') : 'mus-dopoguerra';
   }
   return null;
 }
@@ -721,6 +751,7 @@ function musicaScelta(){
   const ml=musicaLutto(); if(ml) return ml;                                                          // L245-7: il mese dopo un attacco grave, sotto la musica di guerra                                                          // L245-5: guerra, tensione, dopoguerra — L237-5 (passo 0): DOPO la notte, che suona anche in guerra
   if(musicaCrisi()) return musicaGiroVariante('mus-crisi');                                          // L122-1: anche crisi e campagna
   if(typeof inCampagna==='function' && inCampagna()) return musicaGiroVariante('mus-campagna');      // hanno la loro variante
+  if(musicaFondazione()) return musicaGiroVariante('mus-fondazione');                                // L218-30: i tre mesi dalla nascita del partito proprio, sotto guerra, crisi, campagna e notte
   const ep=musicaEpoca();
   return ep ? musicaGiroVariante(ep) : ep;                       // L118-1: la variante di questo giro, se il tema ne ha una
 }

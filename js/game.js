@@ -253,7 +253,11 @@ const DRIFT_INFLAZIONE_ERA = {
                 {da:1986, inf:1.9}, {da:1987, inf:3.6}, {da:1988, inf:4.1}, {da:1989, inf:4.8},
                 /* L264-2 · us1990 (PRESET-USA-1990 §2; prezzi al consumo, media annua, FRED FPCPITOTLZGUSA): il picco del Golfo e la discesa; assoluta e non cercata. La chiusura a 2000 (us2000). */
                 {da:1990, inf:5.4}, {da:1991, inf:4.2}, {da:1992, inf:3.0}, {da:1993, inf:3.0}, {da:1994, inf:2.6}, {da:1995, inf:2.8},
-                {da:1996, inf:2.9}, {da:1997, inf:2.3}, {da:1998, inf:1.6}, {da:1999, inf:2.2}, {da:2000, inf:null} ]
+                {da:1996, inf:2.9}, {da:1997, inf:2.3}, {da:1998, inf:1.6}, {da:1999, inf:2.2},
+                /* L265-2 · us2000 (PRESET-USA-2000 §2, FRED FPCPITOTLZGUSA ✓): righe 2000-2012, assolute e non cercate; il 2000 lo vivono solo le carriere di us1990
+                   (prima vedevano null = il seme della loro porta, 5,4). I prezzi scendono nel 2009. La chiusura a 2013 (dal 2013 il seme della porta: il presente). */
+                {da:2000, inf:3.4}, {da:2001, inf:2.8}, {da:2002, inf:1.6}, {da:2003, inf:2.3}, {da:2004, inf:2.7}, {da:2005, inf:3.4}, {da:2006, inf:3.2},
+                {da:2007, inf:2.8}, {da:2008, inf:3.8}, {da:2009, inf:-0.4}, {da:2010, inf:1.6}, {da:2011, inf:3.2}, {da:2012, inf:2.1}, {da:2013, inf:null} ]
 };
 function inflazioneAnno(){
   if(typeof S==='undefined' || !S) return 0;
@@ -366,7 +370,9 @@ const DRIFT_DEFICIT_ERA = {
                 /* L262-2 · us1980 (PRESET-USA-1980 §2, da FRED aperto in L262-2): righe 1980-1989 CERCATE sul reso, misura-us1980.js cerca, 20 semi per partenza (quattro: dal 1985 i Presidenti della porta escono col limite dei mandati), luglio, carriere al governo, crescita di porta 5 (la saldatura); resa 6,1 · 2,6 · 3,9 · 5,7 · 4,6 · 4,9 · 4,8 · 3,4 · 3,1 · 2,5 contro 2,6 · 2,5 · 3,8 · 5,7 · 4,6 · 4,9 · 4,8 · 3,1 · 3,0 · 2,7 (la riga del 1980 la assorbe la calibrazione d'avvio: 0; ⚠ il 6,1 del luglio 1980 è la recessione della primavera sopra l'avvio); debito 33,3 → 49,1 (FRED lordo 31,8 → 50,8). Dal 1990 le righe di us1990 (L264-2). */
                 {da:1980, def:0}, {da:1981, def:-1}, {da:1982, def:-2.5}, {da:1983, def:3.75}, {da:1984, def:4.5}, {da:1985, def:5.25}, {da:1986, def:5}, {da:1987, def:3.25}, {da:1988, def:3.75}, {da:1989, def:2},
                 /* L264-2 · us1990 (PRESET-USA-1990 §2, FRED): righe 1990-1999 CERCATE sul reso, misura-us1990.js cerca, 20 semi per partenza, luglio, carriere al governo, crescita di porta 5 (la saldatura); resa 5,6 · 4,5 · 4,6 · 3,8 · 2,7 · 2,1 · 1,3 · 0,0 · −1,0 · −1,4 contro 3,7 · 4,4 · 4,5 · 3,7 · 2,8 · 2,1 · 1,3 · 0,3 · −0,8 · −1,3 (positivo = disavanzo; la riga del 1990 la assorbe la calibrazione d'avvio: 0; l'avanzo del 1998-99 si vede); debito 55,9 → 63,4 (1994-95) → 47,2 (1999) contro FRED lordo 53,8 → ~65 → 58,2: scende più della storia (⚠ rapporto «⚑ L264-2»). La chiusura a 2000 (us2000). */
-                {da:1990, def:0}, {da:1991, def:-2.5}, {da:1992, def:0}, {da:1993, def:-0.75}, {da:1994, def:-0.75}, {da:1995, def:-2.5}, {da:1996, def:-2.5}, {da:1997, def:-1.75}, {da:1998, def:-2.5}, {da:1999, def:-2.75}, {da:2000, def:0} ]
+                {da:1990, def:0}, {da:1991, def:-2.5}, {da:1992, def:0}, {da:1993, def:-0.75}, {da:1994, def:-0.75}, {da:1995, def:-2.5}, {da:1996, def:-2.5}, {da:1997, def:-1.75}, {da:1998, def:-2.5}, {da:1999, def:-2.75},
+                /* L265-2 · us2000 (PRESET-USA-2000 §2, FRED): righe 2001-2012 CERCATE sul reso, misura-us2000.js cerca, 20 semi per partenza, luglio, carriere al governo, crescita di porta 5 (la saldatura); resa 1,5 · 1,5 · 3,4 · 3,5 · 2,3 · 1,7 · 1,0 · 3,1 · 9,7 · 8,5 · 8,3 · 6,5 contro −1,2 · 1,4 · 3,3 · 3,4 · 2,4 · 1,8 · 1,1 · 3,1 · 9,8 · 8,6 · 8,3 · 6,6 (positivo = disavanzo; la riga del 2001 la assorbe la calibrazione d'avvio: 0, quindi l'avanzo del 2001 non si vede); debito 55,1 (2001) → 58,2 (2007) → 88,0 (2012) contro FRED lordo 54,5 → 61,8 → 98,8. La riga del 2000 la vivono solo le carriere di us1990 (misura-us2000.js a2000, 10 semi per partenza, luglio 2000: crescita 4,3 contro 4,1 · disoccupazione 4,4 contro 4,0 · saldo −2,4 contro −2,3, l'avanzo). ⚠ Dal 2009 al governo arrivano 2 carriere su 80 (la porta senza snodi: il partito al governo perde il 2008 quasi sempre): quelle righe sono tarate su poche partite. La chiusura a 2013 (il presente). */
+                {da:2000, def:-4.5}, {da:2001, def:0}, {da:2002, def:0.75}, {da:2003, def:3.5}, {da:2004, def:4}, {da:2005, def:2.5}, {da:2006, def:1.5}, {da:2007, def:0.25}, {da:2008, def:1}, {da:2009, def:7}, {da:2010, def:10.25}, {da:2011, def:8.5}, {da:2012, def:6.5}, {da:2013, def:0} ]
 };
 function deficitEra(){
   if(typeof S==='undefined' || !S || !S.era) return 0;
@@ -2749,7 +2755,9 @@ const DRIFT_ECONOMICO_ERA = {
                 /* L262-2 · us1980 (PRESET-USA-1980 §2, da FRED aperto in L262-2): righe 1980-1989 CERCATE sul reso, misura-us1980.js cerca, 20 semi per partenza (quattro: dal 1985 i Presidenti della porta escono col limite dei mandati), luglio, carriere al governo, crescita di porta 5 (la saldatura); resa −0,2 · 2,4 · −1,7 · 4,4 · 7,1 · 4,5 · 3,6 · 3,4 · 4,3 · 3,7 contro −0,3 · 2,5 · −1,8 · 4,6 · 7,2 · 4,2 · 3,5 · 3,5 · 4,2 · 3,7 (le due recessioni, il 1984). Dal 1990 le righe di us1990 (L264-2). */
                 {da:1980, ciclo:-6.25}, {da:1981, ciclo:-3}, {da:1982, ciclo:-8}, {da:1983, ciclo:-1}, {da:1984, ciclo:1.75}, {da:1985, ciclo:-2.5}, {da:1986, ciclo:-3.25}, {da:1987, ciclo:-3.25}, {da:1988, ciclo:-1.75}, {da:1989, ciclo:-2.75},
                 /* L264-2 · us1990 (PRESET-USA-1990 §2, FRED): righe 1990-1999 CERCATE sul reso, misura-us1990.js cerca, 20 semi per partenza, luglio, carriere al governo, crescita di porta 5 (la saldatura); resa 2,0 · −0,0 · 3,6 · 2,7 · 4,2 · 2,7 · 3,8 · 4,7 · 4,9 · 5,1 contro 1,9 · −0,1 · 3,5 · 2,7 · 4,0 · 2,7 · 3,8 · 4,4 · 4,5 · 4,8 (la recessione 1990-91, la crescita lunga). La chiusura a 2000 (us2000). */
-                {da:1990, ciclo:-4}, {da:1991, ciclo:-6}, {da:1992, ciclo:-1.5}, {da:1993, ciclo:-3.5}, {da:1994, ciclo:-1.25}, {da:1995, ciclo:-3.5}, {da:1996, ciclo:-1.5}, {da:1997, ciclo:-1.25}, {da:1998, ciclo:-1.5}, {da:1999, ciclo:-1}, {da:2000, ciclo:0} ]
+                {da:1990, ciclo:-4}, {da:1991, ciclo:-6}, {da:1992, ciclo:-1.5}, {da:1993, ciclo:-3.5}, {da:1994, ciclo:-1.25}, {da:1995, ciclo:-3.5}, {da:1996, ciclo:-1.5}, {da:1997, ciclo:-1.25}, {da:1998, ciclo:-1.5}, {da:1999, ciclo:-1},
+                /* L265-2 · us2000 (PRESET-USA-2000 §2, FRED): righe 2001-2012 CERCATE sul reso, misura-us2000.js cerca, 20 semi per partenza, luglio, carriere al governo, crescita di porta 5 (la saldatura); resa 1,1 · 1,7 · 3,0 · 3,6 · 3,5 · 2,8 · 2,0 · 0,0 · −2,5 · 2,0 · 1,2 · 1,5 contro 1,0 · 1,7 · 2,8 · 3,8 · 3,5 · 2,8 · 2,0 · 0,1 · −2,6 · 2,7 · 1,6 · 2,3 (le due recessioni, il −2,6 del 2009). La riga del 2000 la vivono solo le carriere di us1990 (misura-us2000.js a2000, 10 semi per partenza, luglio 2000: crescita 4,3 contro 4,1 · disoccupazione 4,4 contro 4,0 · saldo −2,4 contro −2,3, l'avanzo). ⚠ Dal 2009 al governo arrivano 2 carriere su 80 (la porta senza snodi: il partito al governo perde il 2008 quasi sempre): quelle righe sono tarate su poche partite. La chiusura a 2013 (il presente). */
+                {da:2000, ciclo:-2.25}, {da:2001, ciclo:-5}, {da:2002, ciclo:-3.5}, {da:2003, ciclo:-2.25}, {da:2004, ciclo:-1.5}, {da:2005, ciclo:-2.75}, {da:2006, ciclo:-3.5}, {da:2007, ciclo:-4.25}, {da:2008, ciclo:-6.25}, {da:2009, ciclo:-9.25}, {da:2010, ciclo:-3.25}, {da:2011, ciclo:-5.25}, {da:2012, ciclo:-4}, {da:2013, ciclo:0} ]
 };
 /* L60-2 · LA DISOCCUPAZIONE D'EPOCA. Il motore non aveva un posto dove un decennio potesse dire «qui i senza
    lavoro sono il doppio»: `S.uMod` decade dell'80% al mese e le carte danno solo colpi. Stessa forma di cicloBase():
@@ -2859,7 +2867,9 @@ const DRIFT_DISOCCUPAZIONE_ERA = {
                 /* L262-2 · us1980 (PRESET-USA-1980 §2, da FRED aperto in L262-2): righe 1980-1989 CERCATE sul reso, misura-us1980.js cerca, 20 semi per partenza (quattro: dal 1985 i Presidenti della porta escono col limite dei mandati), luglio, carriere al governo, crescita di porta 5 (la saldatura); resa 7,4 · 7,4 · 9,5 · 9,6 · 7,7 · 7,2 · 7,1 · 6,0 · 5,2 · 5,6 contro 7,2 · 7,6 · 9,7 · 9,6 · 7,5 · 7,2 · 7,0 · 6,2 · 5,5 · 5,3. Dal 1990 le righe di us1990 (L264-2). */
                 {da:1980, un:-3.25}, {da:1981, un:-2.25}, {da:1982, un:-1}, {da:1983, un:0.75}, {da:1984, un:1}, {da:1985, un:1.75}, {da:1986, un:-1}, {da:1987, un:-2.25}, {da:1988, un:-2.25}, {da:1989, un:-4},
                 /* L264-2 · us1990 (PRESET-USA-1990 §2, FRED): righe 1990-1999 CERCATE sul reso, misura-us1990.js cerca, 20 semi per partenza, luglio, carriere al governo, crescita di porta 5 (la saldatura); resa (luglio) 5,8 · 6,7 · 7,4 · 7,1 · 6,2 · 5,7 · 5,4 · 4,9 · 4,7 · 4,3 contro UNRATE di luglio 5,5 · 6,8 · 7,7 · 6,9 · 6,1 · 5,7 · 5,4 · 4,9 · 4,5 · 4,3 (il picco del 1992, il 4 di fine decennio). La chiusura a 2000 (us2000). */
-                {da:1990, un:-3.75}, {da:1991, un:-4.25}, {da:1992, un:-1}, {da:1993, un:-2}, {da:1994, un:-2.75}, {da:1995, un:-3.25}, {da:1996, un:-3.5}, {da:1997, un:-1}, {da:1998, un:-2.25}, {da:1999, un:-2.25}, {da:2000, un:0} ]
+                {da:1990, un:-3.75}, {da:1991, un:-4.25}, {da:1992, un:-1}, {da:1993, un:-2}, {da:1994, un:-2.75}, {da:1995, un:-3.25}, {da:1996, un:-3.5}, {da:1997, un:-1}, {da:1998, un:-2.25}, {da:1999, un:-2.25},
+                /* L265-2 · us2000 (PRESET-USA-2000 §2, FRED): righe 2001-2012 CERCATE sul reso, misura-us2000.js cerca, 20 semi per partenza, luglio, carriere al governo, crescita di porta 5 (la saldatura); resa (luglio) 4,7 · 5,7 · 6,3 · 5,7 · 5,0 · 4,7 · 4,7 · 5,7 · 10,0 · 10,5 · 10,1 · 9,5 contro UNRATE di luglio ◦ 4,6 · 5,8 · 6,2 · 5,5 · 5,0 · 4,7 · 4,7 · 5,8 · 9,5 · 9,4 · 9,0 · 8,2 (il 6 del 2003, il 10 del 2009). La riga del 2000 la vivono solo le carriere di us1990 (misura-us2000.js a2000, 10 semi per partenza, luglio 2000: crescita 4,3 contro 4,1 · disoccupazione 4,4 contro 4,0 · saldo −2,4 contro −2,3, l'avanzo). ⚠ Dal 2009 al governo arrivano 2 carriere su 80 (la porta senza snodi: il partito al governo perde il 2008 quasi sempre): quelle righe sono tarate su poche partite. La chiusura a 2013 (il presente). */
+                {da:2000, un:-5}, {da:2001, un:-5.5}, {da:2002, un:-4}, {da:2003, un:-2.5}, {da:2004, un:-3.75}, {da:2005, un:-3.25}, {da:2006, un:-4.75}, {da:2007, un:-5}, {da:2008, un:-4.75}, {da:2009, un:-0.25}, {da:2010, un:-0.75}, {da:2011, un:-0.25}, {da:2012, un:-1.75}, {da:2013, un:0} ]
 };
 function disoccupazioneEra(){
   if(typeof S==='undefined' || !S) return 0;
@@ -7494,6 +7504,8 @@ function titoloPerId(id){
    comprese le carriere di us1970 che ci arrivano: le altre linee non scrivono mai il campo, e con null il titolo si pesca come prima. */
 /* L262-27 · la disoccupazione «alta» dei titoli reattivi di us1980 (ti_us80_s_disoccupati, ti_us80_s_fabbriche): 9 scatta nel 24-25% dei mesi del banco (bersaglio 15-30%), misura in prove/l262-27/misura-indicatori.js. */
 const US80_DISOCC_ALTA=9;
+/* L264-13 · la disoccupazione «alta» di ti_us90_s_senzalavoro: 7 scatta nel 16-17% dei mesi del banco di us1990 (25% al governo, bersaglio 15-30%), concentrata nel 1992-93; il 9 di us1980 qui non scatta mai. Misura in prove/l264-13/misura-indicatori.js. */
+const US90_DISOCC_ALTA=7;
 const US90_CARTE_SOBRIE={ us90_somalia:1, us90_somalia_opp:1 };   // L264-6: la battaglia in Somalia (stessa funzione: niente titoli allegri quel mese e il dopo)
 const US80_CARTE_SOBRIE={ us80_navetta:1, us80_navetta_opp:1, us80_beirut:1, us80_beirut_opp:1, us80_paura:1, us80_paura_opp:1, us80_scozia:1, us80_scozia_opp:1 };
 function meseSobrioSegna(){
@@ -7811,11 +7823,11 @@ function camere2NotteCorpo(a){
   return camereBottoniHtml(r,'notteCameraVista')+`<div class="camere-cosa camere-nota">${riga}</div>`+emiciclo(alta?a.alta:a.shown,{key:alta?'notte:alta':'notte',coal:a.bloc,maggioranza:camereMaggioranza(alta,r)});
 }
 function camereNotteCorpo(){
-  if(CAMERE_NOTTE && CAMERE_NOTTE.br) return bundesratNotteCorpo(CAMERE_NOTTE);
-  if(CAMERE_NOTTE && CAMERE_NOTTE.at) return altaTerrNotteCorpo(CAMERE_NOTTE);
-  if(CAMERE_NOTTE && CAMERE_NOTTE.pop) return altaPopNotteCorpo(CAMERE_NOTTE);
-  if(CAMERE_NOTTE && CAMERE_NOTTE.it) return camere2NotteCorpo(CAMERE_NOTTE);
-  if(CAMERE_NOTTE && CAMERE_NOTTE.sud){ var w=CAMERE_NOTTE.w, r0=cameraAlta(), st='font-size:12px;color:var(--mut);margin-top:6px';   // L263-9bis
+  if(CAMERE_NOTTE && CAMERE_NOTTE.br===true) return bundesratNotteCorpo(CAMERE_NOTTE);
+  if(CAMERE_NOTTE && CAMERE_NOTTE.at===true) return altaTerrNotteCorpo(CAMERE_NOTTE);   // L264-12: ===true, perché l'array dei tre argomenti di camereNotteHtml (USA) ha .at = Array.prototype.at, sempre vero: la notte americana finiva qui e si rompeva
+  if(CAMERE_NOTTE && CAMERE_NOTTE.pop===true) return altaPopNotteCorpo(CAMERE_NOTTE);
+  if(CAMERE_NOTTE && CAMERE_NOTTE.it===true) return camere2NotteCorpo(CAMERE_NOTTE);
+  if(CAMERE_NOTTE && CAMERE_NOTTE.sud===true){ var w=CAMERE_NOTTE.w, r0=cameraAlta(), st='font-size:12px;color:var(--mut);margin-top:6px';   // L263-9bis
     var rg=CAMERA_VISTA==='alta' ? T('Senato: %N su %T al partito del Presidente').replace('%N',senatoSudSeggi()[w]||0).replace('%T',r0.seggiVeri) : T('Camera: %N% al partito del Presidente').replace('%N',Math.round((S.seggi&&S.seggi[w])||0));
     return camereBottoniHtml(r0,'notteCameraVista')+`<div class="notte-senato" style="${st}">${rg}</div>`; }
   var a=CAMERE_NOTTE, quota=a[0], pres=a[1], meta=a[2], q=mediaClassi(classiDopoVoto(quota, pres, meta));
@@ -8849,7 +8861,7 @@ function esitoIntermedia(ris){
   camera2SudIntermedia(ris);   // L263-9bis (D2, D5): l'intermedia argentina rinnova la sua classe del Senato
   if(S.congresso){   // L173-2: la metà mandato decide la Camera; dall'opposizione, la Camera che passa al tuo partito vale +5 di credibilità
     var divisoPrima=!!S.governoDiviso, cameraPrima=S.congresso.camera; aggiornaCongresso(ris.camera!=null ? ris.camera : quotaPartitoPresidente(), true);
-    if(S.era===LINEA_US && !S.opposizione && S.year===1994 && S.usSanita93!=null) S.usCamera94=(cameraPrima>=50 && S.congresso.camera<50) ? 'persa' : 'tenuta';   // L264-5: la frase sulla Camera dei titoli ti_us90_sanita* (D312: dallo stato, mai dalla data); solo nelle carriere che hanno visto S3
+    if(S.era===LINEA_US && !S.opposizione && S.year===1994) S.usCamera94=(cameraPrima>=50 && S.congresso.camera<50) ? 'persa' : 'tenuta';   // L264-5: la frase sulla Camera dei titoli ti_us90_sanita* (D312: dallo stato, mai dalla data) · L264-13 passo 3: per ogni capo del governo, non solo dopo S3 — la leggono anche i ti_us90_camera94_* (con S.usSanita93 nullo)
     if(S.era===LINEA_US && S.opposizione && S.year===1998 && us90SecondoMandatoDem()) S.usMeta98=(S.congresso.camera>=cameraPrima) ? 'guadagna' : 'perde';   // L264-6: il testo dell'aula dello scandalo legge l'esito vero di questo voto
     if(S.opposizione && S.governoDiviso && !divisoPrima){ S.credibilita=clamp((S.credibilita||0)+5,0,100); var soloSen=divisoPer()==='senato'; S.log.unshift({t:T(soloSen?'Il Senato è vostro':'La Camera è vostra'), x:T(soloSen?'Il voto di metà mandato dà il Senato al tuo partito: il Presidente dovrà trattare con voi.':'Il voto di metà mandato dà la Camera al tuo partito: il Presidente dovrà trattare con voi.')}); }
   }
