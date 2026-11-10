@@ -4116,6 +4116,92 @@ const PILASTRI_LINEA = [
     text:'Alle cinque di sera del 17 ottobre, mentre lo stadio aspetta la partita, la terra trema intorno alla baia di San Francisco. Cede un tratto del ponte sulla baia, e a Oakland crolla il piano alto di una strada sopraelevata sulle auto dell\'ora di punta. Muoiono più di sessanta persone.',
     logx:'Il terremoto della baia di San Francisco: più di sessanta morti.',
     ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  // ── us1990 · L264-9 (D136, D309 a, D311 a): diciassette sciagure G8 dal §5 di PRESET-USA-1990.md (cifre aperte su en.wikipedia in L264-1; l'aereo del 1996 a 8-10 miglia dalla costa, dentro le acque territoriali: controllato in L264-9). Los Angeles, l'assedio in Texas e Oklahoma City senza perché; `conCampagna` sui mesi della stagione presidenziale (maggio-ottobre 1992 e 1996) e sul mese prima della metà mandato del 1994. ⚠ Il primo (1990/1) a chi parte da us1990 esce a febbraio: l'iniezione salta il primo mese della partita.
+  { id:'pus90_longisland90', linea:LINEA_US, anno:1990, mese:1, era:'us1990', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Senza carburante',
+    text:'La sera del 25 gennaio, dopo più di un\'ora di attese in volo sopra New York nel maltempo, un aereo di linea in arrivo dal Sudamerica resta senza carburante e cade su una collina boscosa di Long Island, fra le case. Muoiono settantatré persone; più di ottanta si salvano.',
+    logx:'Un aereo di linea senza carburante cade su Long Island: settantatré morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus90_bronx', linea:LINEA_US, anno:1990, mese:3, era:'us1990', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Il locale del Bronx',
+    text:'Nella notte del 25 marzo, nel Bronx, a New York, un uomo cacciato da un locale da ballo senza licenza torna con una tanica di benzina e dà fuoco all\'unica scala d\'ingresso. Dentro quasi nessuno trova un\'altra uscita. Muoiono ottantasette persone, quasi tutte per il fumo.',
+    logx:'L\'incendio doloso di un locale da ballo del Bronx: ottantasette morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus90_losangeles', linea:LINEA_US, conCampagna:true, anno:1992, mese:5, era:'us1990', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Los Angeles',
+    text:'Dal pomeriggio del 29 aprile, per cinque giorni, interi quartieri di Los Angeles sono in mano ai disordini: incendi, saccheggi, sparatorie agli incroci. Arrivano la Guardia nazionale e poi i soldati; sulla città cala il coprifuoco. Quando torna la calma i morti sono più di cinquanta, e interi isolati sono bruciati.',
+    logx:'I disordini di Los Angeles: più di cinquanta morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus90_uragano92', linea:LINEA_US, conCampagna:true, anno:1992, mese:8, era:'us1990', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'L\'uragano d\'agosto',
+    text:'All\'alba del 24 agosto un uragano fra i più violenti del secolo tocca terra a sud di Miami, in Florida: il vento spazza via quartieri interi di case e lascia senza tetto più di centomila persone. Due giorni dopo colpisce la Louisiana. Muoiono sessantacinque persone.',
+    logx:'L\'uragano sulla Florida e sulla Louisiana: sessantacinque morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus90_tempesta93', linea:LINEA_US, anno:1993, mese:3, era:'us1990', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'La tempesta di marzo',
+    text:'Fra il 12 e il 15 marzo una tempesta larga quanto il paese risale la costa orientale dal Golfo del Messico al Canada: tornado e mareggiate in Florida, neve fino in Alabama, bufere e gelo sui monti e sulle città del Nordest. Milioni di persone restano senza luce. Negli Stati Uniti muoiono più di duecento persone.',
+    logx:'La tempesta di marzo sulla costa orientale: più di duecento morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus90_texas93', linea:LINEA_US, anno:1993, mese:4, era:'us1990', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'L\'assedio in Texas',
+    text:'Il 19 aprile, vicino a una cittadina del Texas, finisce l\'assedio cominciato il 28 febbraio intorno alla fattoria di un gruppo religioso armato: dopo cinquantun giorni gli agenti federali muovono per farli uscire, e a mezzogiorno gli edifici prendono fuoco. Nell\'incendio muoiono settantasei persone, fra cui molti bambini.',
+    logx:'L\'assedio di un gruppo religioso armato in Texas finisce in un incendio: settantasei morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus90_northridge', linea:LINEA_US, anno:1994, mese:1, era:'us1990', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Northridge',
+    text:'Alle quattro e mezza del mattino del 17 gennaio la terra trema sotto la valle a nord di Los Angeles. Crollano palazzine, parcheggi e tratti di autostrada sopraelevata; è un giorno di festa, e a quell\'ora le strade sono vuote. Muoiono cinquantasette persone, e migliaia restano ferite.',
+    logx:'Il terremoto di Northridge, a Los Angeles: cinquantasette morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus90_pittsburgh', linea:LINEA_US, anno:1994, mese:9, era:'us1990', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Pittsburgh',
+    text:'La sera dell\'8 settembre un aereo di linea in arrivo da Chicago, a pochi minuti dall\'atterraggio a Pittsburgh, si rovescia all\'improvviso su un fianco e precipita in un bosco. Muoiono tutte le centotrentadue persone a bordo.',
+    logx:'Un aereo di linea precipita vicino a Pittsburgh: centotrentadue morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus90_roselawn', linea:LINEA_US, conCampagna:true, anno:1994, mese:10, era:'us1990', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Roselawn',
+    text:'Il pomeriggio del 31 ottobre un aereo regionale diretto a Chicago gira in attesa sopra l\'Indiana, nella pioggia gelata. Il ghiaccio si forma sulle ali, l\'aereo si rovescia e cade in un campo vicino a Roselawn. Muoiono tutte le sessantotto persone a bordo.',
+    logx:'Un aereo regionale cade nel gelo vicino a Roselawn, in Indiana: sessantotto morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus90_oklahoma95', linea:LINEA_US, anno:1995, mese:4, era:'us1990', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Oklahoma City',
+    text:'Alle nove del mattino del 19 aprile un furgone carico d\'esplosivo salta in aria davanti a un palazzo di uffici federali nel centro di Oklahoma City. Metà dell\'edificio crolla, piano su piano; al secondo piano c\'era un asilo. Muoiono centosessantotto persone, fra loro molti bambini.',
+    logx:'Un\'autobomba davanti a un palazzo di uffici federali a Oklahoma City: centosessantotto morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus90_caldo95', linea:LINEA_US, anno:1995, mese:7, era:'us1990', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Il caldo di Chicago',
+    text:'A metà luglio un\'onda di caldo umido si ferma su Chicago: per cinque giorni il caldo non dà tregua nemmeno di notte, la corrente salta, e nelle case chiuse dei quartieri poveri muoiono soprattutto i vecchi soli. Gli obitori non bastano, e i corpi aspettano in camion frigoriferi. I morti sono centinaia.',
+    logx:'L\'ondata di caldo di Chicago: centinaia di morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus90_tormenta96', linea:LINEA_US, anno:1996, mese:1, era:'us1990', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'La tormenta di gennaio',
+    text:'Fra il 6 e l\'8 gennaio una tormenta copre la costa orientale da Washington a Boston sotto più di mezzo metro di neve: aeroporti chiusi, città ferme, strade sparite. Poi il disgelo e la pioggia gonfiano i fiumi. Muoiono più di centocinquanta persone; con le piene, quasi centonovanta.',
+    logx:'La tormenta di gennaio sulla costa orientale e le piene: quasi centonovanta morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus90_paludi', linea:LINEA_US, conCampagna:true, anno:1996, mese:5, era:'us1990', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Le paludi',
+    text:'Il pomeriggio dell\'11 maggio, pochi minuti dopo il decollo da Miami, un incendio scoppia nella stiva di un aereo di linea. I piloti provano a tornare indietro; l\'aereo precipita nelle paludi della Florida e sparisce nel fango. Muoiono tutte le centodieci persone a bordo.',
+    logx:'Un aereo di linea precipita nelle paludi della Florida: centodieci morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus90_longisland96', linea:LINEA_US, conCampagna:true, anno:1996, mese:7, era:'us1990', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Al largo di Long Island',
+    text:'La sera del 17 luglio, dodici minuti dopo il decollo da New York per Parigi, un grande aereo di linea esplode in volo e cade in mare al largo di Long Island. Dalla costa si vede il fuoco sull\'acqua. Muoiono tutte le duecentotrenta persone a bordo.',
+    logx:'Un aereo di linea esplode in volo al largo di Long Island: duecentotrenta morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus90_guam', linea:LINEA_US, anno:1997, mese:8, era:'us1990', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Guam',
+    text:'Nella notte del 6 agosto, sotto la pioggia, un grande aereo di linea in arrivo da Seul scende troppo presto verso la pista di Guam, territorio americano nel Pacifico, e urta una collina a pochi chilometri dall\'aeroporto. Muoiono duecentoventinove persone; una ventina si salvano.',
+    logx:'Un aereo di linea urta una collina a Guam: duecentoventinove morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus90_tornado99', linea:LINEA_US, anno:1999, mese:5, era:'us1990', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'I tornado dell\'Oklahoma',
+    text:'La sera del 3 maggio decine di tornado attraversano l\'Oklahoma e il Kansas; il più violento passa sui sobborghi a sud di Oklahoma City e rade al suolo interi quartieri. Nei giorni della tempesta muoiono una cinquantina di persone.',
+    logx:'I tornado dell\'Oklahoma: una cinquantina di morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
+  { id:'pus90_carolina99', linea:LINEA_US, anno:1999, mese:9, era:'us1990', codaFino:Infinity, tono:'grave', cronaca:true, kick:'Il paese',
+    t:'Le piene della Carolina',
+    text:'Il 16 settembre un uragano tocca terra in Carolina del Nord e risale la costa fino al New England, su terre già inzuppate da un\'altra tempesta. I fiumi escono dagli argini, e per settimane intere cittadine restano sott\'acqua. Negli Stati Uniti muoiono più di ottanta persone, una cinquantina in Carolina del Nord.',
+    logx:'L\'uragano e le piene in Carolina del Nord: più di ottanta morti.',
+    ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
 ];
 
 /* ============================================================================================================
@@ -21404,6 +21490,62 @@ const TITOLI=[
 {id:'ti_us90_sanita_legge_camera', era:'us1990', pri:1, cond:()=>S.usSanita93==='compromesso' && S.usCamera94==='persa' && S.year===1994 && S.month===12, amico:"La riforma della sanità c'è, ma la Camera cambia mano", ostile:"Il compromesso sulla sanità non salva la Camera"},
 {id:'ti_us90_rapporto', era:'us1990', pri:1, cond:()=>us90SecondoMandatoDem() && !S.opposizione && S.year===1998 && S.month===9, amico:"Il rapporto del procuratore arriva alla Camera: la Casa Bianca risponde punto per punto", ostile:"Il rapporto del procuratore è alla Camera, e si parla di voto d'accusa"},   // L264-6: la cronaca di S5 a chi governa (D308 (ii)), senza scelta
 {id:'ti_us90_assoluzione', era:'us1990', pri:1, cond:()=>us90SecondoMandatoDem() && !S.opposizione && S.year===1999 && S.month===2, amico:"Il Senato assolve il Presidente: i due terzi non ci sono", ostile:"Assolto al Senato, ma il voto d'accusa resta agli atti"},   // L264-6: l'assoluzione, a chi governa
+{id:'ti_us90_attivo_chiusura', era:'us1990', pri:1, cond:()=>us90AttivoTitolo() && S.usChiusura95!=null, amico:"Tre anni dopo la chiusura degli uffici, il bilancio federale chiude in attivo", ostile:"Tre anni dopo la chiusura degli uffici i conti sono in attivo, e ognuno se ne prende il merito"},   // L264-8: il bilancio in attivo (1998/10-12, solo se il saldo a schermo è in attivo: us90AttivoTitolo in game.js); tre varianti che si escludono, nessuna cifra
+{id:'ti_us90_attivo_tasse', era:'us1990', pri:1, cond:()=>us90AttivoTitolo() && S.usChiusura95==null && S.usTasse90==='tratta', amico:"L'accordo del 1990 che costò caro oggi dà i suoi frutti: il bilancio chiude in attivo", ostile:"Bilancio in attivo otto anni dopo l'accordo che costò caro, e di quel conto nessuno parla più"},
+{id:'ti_us90_attivo', era:'us1990', pri:1, cond:()=>us90AttivoTitolo() && S.usChiusura95==null && S.usTasse90!=='tratta', amico:"Lo Stato incassa più di quanto spende: l'anno si chiude in attivo", ostile:"Conti in attivo, e a Washington già si litiga su come spenderlo"},
+{id:'ti_us90_kosovo', era:'us1990', pri:1, cond:()=>S.usKosovo99==='bombe' && S.year===1999 && S.month>=6 && S.month<=7, amico:"Dopo undici settimane di bombe l'esercito serbo lascia il Kosovo: nessun americano caduto in combattimento", ostile:"Undici settimane di bombe, e ora la pace tocca ai soldati tenerla"},   // L264-8: l'esito del Kosovo legge la scelta (1999/6-7)
+{id:'ti_us90_kosovo_terra', era:'us1990', pri:1, cond:()=>S.usKosovo99==='terra' && S.year===1999 && S.month>=6 && S.month<=7, amico:"L'invasione non è servita: l'esercito serbo si ritira prima che i soldati partano", ostile:"Truppe pronte per un'invasione che non c'è stata: il Congresso chiede il conto"},
+{id:'ti_us90_kosovo_onu', era:'us1990', pri:1, cond:()=>S.usKosovo99==='onu' && S.year===1999 && S.month>=6 && S.month<=7, amico:"L'alleanza ha bombardato lo stesso, e dopo undici settimane l'esercito serbo si ritira", ostile:"L'alleanza ha bombardato lo stesso, senza aspettare Washington"},
+ /* L264-10 · i datati che mancavano agli eventi di us1990 (pri:1, il mese dopo la scelta, una variante per scelta) e i 16 di stato ti_us90_s_ (senza pri, nessuno allegro; anno >= 1990: l'era apre un anno prima) */
+ {id:'ti_us90_tasse', era:'us1990', pri:1, cond:()=>S.usTasse90==='tratta' && meseAss()>=1990*12+7 && meseAss()<=1990*12+8, amico:"Per chiudere il buco tutto è sul tavolo, anche le entrate", ostile:"La promessa di non alzare le tasse non c'è più"},
+ {id:'ti_us90_tasse_promessa', era:'us1990', pri:1, cond:()=>S.usTasse90==='promessa' && meseAss()>=1990*12+7 && meseAss()<=1990*12+8, amico:"Solo tagli, niente tasse nuove: la Casa Bianca tiene la promessa", ostile:"Solo tagli: il vertice sul bilancio rischia di saltare"},
+ {id:'ti_us90_tasse_congresso', era:'us1990', pri:1, cond:()=>S.usTasse90==='congresso' && meseAss()>=1990*12+7 && meseAss()<=1990*12+8, amico:"Il bilancio lo scriva il Congresso: la Casa Bianca aspetta il testo", ostile:"Sulle tasse la Casa Bianca non decide"},
+ {id:'ti_us90_recessione', era:'us1990', pri:1, cond:()=>S.usRecessione91==='tasse' && meseAss()>=1991*12+12 && meseAss()<=1992*12+2, amico:"Un taglio delle tasse per i ceti medi contro la ripresa senza lavoro", ostile:"Un taglio delle tasse a debito: arriva tardi, dicono gli economisti"},
+ {id:'ti_us90_recessione_sussidi', era:'us1990', pri:1, cond:()=>S.usRecessione91==='sussidi' && meseAss()>=1991*12+12 && meseAss()<=1992*12+2, amico:"Sussidi più lunghi per chi cerca lavoro, in attesa dei posti", ostile:"La ripresa c'è nei numeri, non nelle buste paga"},
+ {id:'ti_us90_recessione_attesa', era:'us1990', pri:1, cond:()=>S.usRecessione91==='attesa' && meseAss()>=1991*12+12 && meseAss()<=1992*12+2, amico:"Prima i conti: nessuna spesa nuova in attesa della ripresa", ostile:"I posti non tornano, e la Casa Bianca aspetta"},
+ {id:'ti_us90_arsenali', era:'us1990', pri:1, cond:()=>S.usArsenali92==='smonta' && meseAss()>=1992*12+3 && meseAss()<=1992*12+4, amico:"Le testate dell'ex Unione Sovietica: l'America paga per metterle al sicuro", ostile:"Soldi americani per smontare le atomiche degli altri"},
+ {id:'ti_us90_arsenali_aiuti', era:'us1990', pri:1, cond:()=>S.usArsenali92==='aiuti' && meseAss()>=1992*12+3 && meseAss()<=1992*12+4, amico:"Aiuti alla Russia democratica: costano meno di un'altra guerra fredda", ostile:"Aiuti larghi alla Russia, mentre in patria mancano i posti"},
+ {id:'ti_us90_arsenali_prudenza', era:'us1990', pri:1, cond:()=>S.usArsenali92==='prudenza' && meseAss()>=1992*12+3 && meseAss()<=1992*12+4, amico:"Prima le garanzie, poi gli aiuti: nessun assegno in bianco", ostile:"Migliaia di testate senza un padrone certo, e Washington aspetta"},
+ {id:'ti_us90_somalia', era:'us1990', pri:1, cond:()=>S.usSomalia93==='ritiro' && meseAss()>=1993*12+11 && meseAss()<=1993*12+12, amico:"Somalia: i soldati torneranno a casa entro la primavera", ostile:"Somalia: l'America se ne va dopo la battaglia"},
+ {id:'ti_us90_somalia_rinforzi', era:'us1990', pri:1, cond:()=>S.usSomalia93==='rinforzi' && meseAss()>=1993*12+11 && meseAss()<=1993*12+12, amico:"Somalia: partono i rinforzi, la missione continua", ostile:"Somalia: altri soldati in una guerra fra clan"},
+ {id:'ti_us90_somalia_onu', era:'us1990', pri:1, cond:()=>S.usSomalia93==='onu' && meseAss()>=1993*12+11 && meseAss()<=1993*12+12, amico:"Somalia: la missione passa alle Nazioni Unite", ostile:"Somalia: il lavoro resta a metà, e passa ad altri"},
+ {id:'ti_us90_trattato', era:'us1990', pri:1, cond:()=>S.usTrattato93==='voto' && meseAss()>=1993*12+12 && meseAss()<=1994*12+1, amico:"Il trattato commerciale con i vicini è approvato: in vigore dal 1° gennaio", ostile:"Il trattato passa coi voti dell'altro partito: i sindacati non dimenticano"},
+ {id:'ti_us90_trattato_accordi', era:'us1990', pri:1, cond:()=>S.usTrattato93==='accordi' && meseAss()>=1993*12+12 && meseAss()<=1994*12+1, amico:"Trattato commerciale: prima gli accordi su lavoro e ambiente", ostile:"Trattato commerciale fermo: le imprese temono che non arrivi più"},
+ {id:'ti_us90_trattato_cade', era:'us1990', pri:1, cond:()=>S.usTrattato93==='cade' && meseAss()>=1993*12+12 && meseAss()<=1994*12+1, amico:"Niente trattato commerciale: i sindacati tirano il fiato", ostile:"Il trattato commerciale è caduto: i vicini e le imprese se lo ricorderanno"},
+ {id:'ti_us90_haiti', era:'us1990', pri:1, cond:()=>S.usHaiti94==='ultimatum' && meseAss()>=1994*12+9 && meseAss()<=1994*12+10, amico:"Haiti: i militari cedono, i soldati sbarcano senza combattere", ostile:"Haiti: migliaia di soldati sull'isola, e nessuno dice per quanto"},
+ {id:'ti_us90_haiti_sanzioni', era:'us1990', pri:1, cond:()=>S.usHaiti94==='sanzioni' && meseAss()>=1994*12+9 && meseAss()<=1994*12+10, amico:"Haiti: sanzioni più dure, nessun soldato in pericolo", ostile:"Haiti: i profughi nei campi, i militari ancora al potere"},
+ {id:'ti_us90_haiti_onu', era:'us1990', pri:1, cond:()=>S.usHaiti94==='onu' && meseAss()>=1994*12+9 && meseAss()<=1994*12+10, amico:"Haiti: la crisi passa alle Nazioni Unite e ai paesi della regione", ostile:"Haiti: le barche continuano ad arrivare, e Washington guarda altrove"},
+ {id:'ti_us90_chiusura', era:'us1990', pri:1, cond:()=>S.usChiusura95==='veto' && meseAss()>=1995*12+12 && meseAss()<=1996*12+2, amico:"Uffici federali chiusi: la Casa Bianca non firma il bilancio del Congresso", ostile:"Parchi e sportelli chiusi: a Washington nessuno cede"},
+ {id:'ti_us90_chiusura_firma', era:'us1990', pri:1, cond:()=>S.usChiusura95==='firma' && meseAss()>=1995*12+12 && meseAss()<=1996*12+2, amico:"Il bilancio del Congresso è firmato: gli uffici federali riaprono", ostile:"La Casa Bianca cede sul bilancio: gli uffici riaprono, i suoi protestano"},
+ {id:'ti_us90_chiusura_compromesso', era:'us1990', pri:1, cond:()=>S.usChiusura95==='compromesso' && meseAss()>=1995*12+12 && meseAss()<=1996*12+2, amico:"Compromesso sul bilancio: il pareggio in sette anni, e gli uffici riaprono", ostile:"Un compromesso che scontenta le due ali: gli uffici riaprono, la lite resta"},
+ {id:'ti_us90_bosnia', era:'us1990', pri:1, cond:()=>S.usBosnia95==='soldati' && meseAss()>=1996*12+1 && meseAss()<=1996*12+3, amico:"I soldati americani in Bosnia a guardia della pace", ostile:"Soldati americani in Bosnia per un anno: le famiglie chiedono se basterà"},
+ {id:'ti_us90_bosnia_aerei', era:'us1990', pri:1, cond:()=>S.usBosnia95==='aerei' && meseAss()>=1996*12+1 && meseAss()<=1996*12+3, amico:"Bosnia: aerei, soldi e addestramento, nessun soldato americano a terra", ostile:"Bosnia: il lavoro pericoloso resta agli alleati"},
+ {id:'ti_us90_bosnia_congresso', era:'us1990', pri:1, cond:()=>S.usBosnia95==='congresso' && meseAss()>=1996*12+1 && meseAss()<=1996*12+3, amico:"Bosnia: prima di mandare soldati decide il Congresso", ostile:"Bosnia: gli alleati aspettano, Washington discute"},
+ {id:'ti_us90_assistenza', era:'us1990', pri:1, cond:()=>S.usWelfare96==='firma' && meseAss()>=1996*12+9 && meseAss()<=1996*12+10, amico:"L'assistenza cambia: un limite di cinque anni e l'obbligo di lavorare", ostile:"Firmata la riforma dell'assistenza: i tagli toccano i più poveri, dicono i critici"},
+ {id:'ti_us90_assistenza_veto', era:'us1990', pri:1, cond:()=>S.usWelfare96==='veto' && meseAss()>=1996*12+9 && meseAss()<=1996*12+10, amico:"Terzo veto sull'assistenza: la Casa Bianca chiede una riforma meno dura", ostile:"Terzo veto: la riforma dell'assistenza resta ferma a due mesi dal voto"},
+ {id:'ti_us90_assistenza_correggi', era:'us1990', pri:1, cond:()=>S.usWelfare96==='correggi' && meseAss()>=1996*12+9 && meseAss()<=1996*12+10, amico:"La riforma dell'assistenza è legge: i tagli agli immigrati saranno corretti", ostile:"Firma oggi, correzioni domani: sull'assistenza una promessa prima del voto"},
+ {id:'ti_us90_asia', era:'us1990', pri:1, cond:()=>S.usAsia97==='fondo' && meseAss()>=1997*12+12 && meseAss()<=1998*12+1, amico:"Asia: Washington sostiene il salvataggio, Wall Street tira il fiato", ostile:"Asia: soldi per salvare chi ha prestato male"},
+ {id:'ti_us90_asia_mercati', era:'us1990', pri:1, cond:()=>S.usAsia97==='mercati' && meseAss()>=1997*12+12 && meseAss()<=1998*12+1, amico:"Asia: nessun soldo pubblico per chi ha sbagliato", ostile:"Le monete dell'Asia cadono, e Washington sta a guardare"},
+ {id:'ti_us90_asia_dazi', era:'us1990', pri:1, cond:()=>S.usAsia97==='dazi' && meseAss()>=1997*12+12 && meseAss()<=1998*12+1, amico:"Merci a prezzi stracciati dall'Asia: la Casa Bianca difende le fabbriche", ostile:"Dazi mentre l'Asia è in crisi: chi esporta teme la risposta"},
+ {id:'ti_us90_fondo', era:'us1990', pri:1, cond:()=>S.usFondo98==='banche' && meseAss()>=1998*12+11 && meseAss()<=1998*12+12, amico:"Il fondo salvato dalle banche: nessun soldo pubblico, i mercati si calmano", ostile:"La finanza si salva fra amici, e le regole possono aspettare"},
+ {id:'ti_us90_fondo_regole', era:'us1990', pri:1, cond:()=>S.usFondo98==='regole' && meseAss()>=1998*12+11 && meseAss()<=1998*12+12, amico:"Dopo il salvataggio del fondo, regole per chi scommette a debito", ostile:"Regole per i fondi: le banche avvertono che i capitali andranno altrove"},
+ {id:'ti_us90_fondo_condanna', era:'us1990', pri:1, cond:()=>S.usFondo98==='condanna' && meseAss()>=1998*12+11 && meseAss()<=1998*12+12, amico:"Chi scommette deve poter fallire: la Casa Bianca contro il salvataggio del fondo", ostile:"La Casa Bianca attacca il salvataggio, e i risparmiatori guardano la Borsa"},
+ {id:'ti_us90_s_casse', era:'us1990', cond:()=>meseAss()>=1990*12+1 && meseAss()<=1992*12+12, amico:"Casse di risparmio: lo Stato chiude gli istituti falliti e protegge i depositi", ostile:"Casse di risparmio: il salvataggio lo pagano i contribuenti"},
+ {id:'ti_us90_s_disabili', era:'us1990', cond:()=>meseAss()>=1990*12+8 && meseAss()<=1993*12+12, amico:"Rampe e ascensori: la legge apre uffici e negozi a chi è disabile", ostile:"La legge sui disabili: i piccoli negozi temono i costi"},
+ {id:'ti_us90_s_aria', era:'us1990', cond:()=>meseAss()>=1992*12+1 && meseAss()<=1994*12+12, amico:"Aria più pulita: la nuova legge taglia i fumi delle centrali", ostile:"Aria pulita: le società elettriche avvertono che le bollette saliranno"},
+ {id:'ti_us90_s_basi', era:'us1990', cond:()=>meseAss()>=1991*12+1 && meseAss()<=1995*12+12, amico:"Finita la guerra fredda, si spende meno per le armi", ostile:"Chiudono le basi: le città dei militari perdono il lavoro"},
+ {id:'ti_us90_s_lavoro', era:'us1990', cond:()=>meseAss()>=1992*12+3 && meseAss()<=1993*12+12, amico:"L'economia è tornata a crescere, dicono i dati", ostile:"La ripresa c'è, ma le grandi aziende licenziano ancora"},
+ {id:'ti_us90_s_congedo', era:'us1990', cond:()=>meseAss()>=1993*12+3 && meseAss()<=1995*12+12, amico:"Dodici settimane a casa per un figlio appena nato o un genitore malato: è legge", ostile:"Il congedo per la famiglia c'è, ma senza stipendio"},
+ {id:'ti_us90_s_armi', era:'us1990', cond:()=>meseAss()>=1994*12+3 && meseAss()<=1996*12+12, amico:"Controlli su chi compra una pistola: la legge è in vigore", ostile:"Controlli sulle armi: per alcuni sono troppi, per altri troppo pochi"},
+ {id:'ti_us90_s_fabbriche', era:'us1990', cond:()=>(S.usTrattato93==null||S.usTrattato93==='voto') && meseAss()>=1994*12+3 && meseAss()<=1995*12+12, amico:"Il trattato commerciale è in vigore: cadono i primi dazi con i vicini", ostile:"Il trattato commerciale divide ancora: i sindacati temono per le fabbriche"},
+ {id:'ti_us90_s_confine', era:'us1990', cond:()=>meseAss()>=1994*12+10, amico:"Più agenti e più barriere lungo il confine sud", ostile:"Al confine sud si passa lo stesso, più lontano dalle città"},
+ {id:'ti_us90_s_reati', era:'us1990', cond:()=>S.year>=1995, amico:"I reati calano nelle grandi città", ostile:"Carceri piene come non mai: il paese costruisce prigioni"},
+ {id:'ti_us90_s_assicurati', era:'us1990', cond:()=>S.year>=1995, amico:"Le assicurazioni frenano i costi: la spesa per la sanità cresce meno", ostile:"Milioni di persone senza assicurazione: ammalarsi resta un rischio"},
+ {id:'ti_us90_s_rete', era:'us1990', cond:()=>S.year>=1997, amico:"Il paese si collega: la posta elettronica entra nelle case", ostile:"Chi non ha un computer in casa resta fuori dalla rete"},
+ {id:'ti_us90_s_borsa', era:'us1990', cond:()=>meseAss()>=1995*12+12 && meseAss()<=1999*12+12 && !(meseAss()>=1997*12+11 && meseAss()<=1998*12+1) && !(meseAss()>=1998*12+8 && meseAss()<=1998*12+12), amico:"Wall Street ai massimi: crescono i risparmi di chi ha investito", ostile:"Borsa ai massimi: c'è chi teme una bolla"},
+ {id:'ti_us90_s_tabacco', era:'us1990', cond:()=>meseAss()>=1998*12+12, amico:"I produttori di sigarette pagheranno le cure: accordo con quasi tutti gli Stati", ostile:"Sigarette: via i cartelloni, ma si continua a vendere"},
+ {id:'ti_us90_s_stazione', era:'us1990', cond:()=>meseAss()>=1998*12+12, amico:"In orbita i primi pezzi della stazione spaziale internazionale", ostile:"La stazione spaziale costa più del previsto, e siamo all'inizio"},
+ {id:'ti_us90_s_millennio', era:'us1990', cond:()=>meseAss()>=1999*12+3 && meseAss()<=1999*12+12, amico:"I computer sono pronti per il 2000, assicurano gli uffici federali", ostile:"Il baco del millennio: miliardi spesi, e c'è chi fa scorte in cantina"},
  {id:'ng_p_ti_petrolio', era:'contemporanea', paesi:['nigeria'], amico:'La produzione di petrolio torna a salire', ostile:'Un barile su dieci sparisce: il furto record'},
 ];
 
@@ -28734,10 +28876,10 @@ const RECESSIONE91_EV = {
 
   ch:[
     { l:"Un taglio delle tasse per i ceti medi", e:"Il ceto medio respira · il disavanzo cresce, e gli economisti dicono che arriva tardi", costo:{debito:0.4},
-      f:function(){ S.usRecessione91='tasse'; gdUs60('cetomedio',1); stampad(-1);
+      f:function(){ S.usRecessione91='tasse'; S.ind.debt+=0.4; gdUs60('cetomedio',1); stampad(-1);
         S.log.unshift({t:T('Il paese'),x:T("Per la ripresa senza lavoro ha proposto un taglio delle tasse per i ceti medi.")}); } },
     { l:"Prolungare i sussidi di disoccupazione", e:"La storia · a novembre, dopo due veti, i sussidi vengono allungati · i lavoratori ringraziano, i conservatori del tuo partito brontolano", costo:{debito:0.3},
-      f:function(){ S.usRecessione91='sussidi'; gdUs60('lavoratori',1); baseUs60(-1);
+      f:function(){ S.usRecessione91='sussidi'; S.ind.debt+=0.3; gdUs60('lavoratori',1); baseUs60(-1);
         S.log.unshift({t:T('Il paese'),x:T("Ha prolungato i sussidi di disoccupazione.")}); } },
     { l:"Aspettare la ripresa: prima il bilancio", e:"I conti restano in ordine · chi ha perso il lavoro dice che il Presidente non vede",
       f:function(){ S.usRecessione91='attesa'; fidUs60(1); gdUs60('lavoratori',-1); stampad(-1);
@@ -28766,10 +28908,10 @@ const ARSENALI92_EV = {
   text:"L'Unione Sovietica non c'è più. Migliaia di testate atomiche restano in quattro repubbliche nuove, con eserciti che non sanno a chi obbedire, e gli scienziati che le hanno costruite non ricevono lo stipendio da mesi. Le capitali europee chiedono che cosa farà l'America.",
   ch:[
     { l:"Aiuti per smontare e custodire le armi", e:"La storia · il Congresso ha appena votato il programma, e le prime testate tornano in Russia per essere smontate · gli alleati approvano, la tua base chiede perché paghiamo noi", costo:{debito:0.2},
-      f:function(){ S.usArsenali92='smonta'; repd(1); baseUs60(-1);
+      f:function(){ S.usArsenali92='smonta'; S.ind.debt+=0.2; repd(1); baseUs60(-1);
         S.log.unshift({t:T('Il mondo'),x:T("Ha finanziato lo smontaggio e la custodia delle armi delle repubbliche ex sovietiche.")}); } },
     { l:"Aiuti economici larghi alla Russia democratica", e:"I giornali parlano di un piano come quello del dopoguerra · il conto è grosso, e il ceto medio non capisce", costo:{debito:0.6},
-      f:function(){ S.usArsenali92='aiuti'; repd(1); stampad(1); gdUs60('cetomedio',-1);
+      f:function(){ S.usArsenali92='aiuti'; S.ind.debt+=0.6; repd(1); stampad(1); gdUs60('cetomedio',-1);
         S.log.unshift({t:T('Il mondo'),x:T("Ha proposto aiuti economici larghi alla Russia democratica.")}); } },
     { l:"Prudenza: prima le garanzie", e:"La tua base approva · le capitali europee temono che il tempo giochi contro",
       f:function(){ S.usArsenali92='prudenza'; baseUs60(1); repd(-1);
@@ -28801,7 +28943,7 @@ const SOMALIA93_EV = {
       f:function(){ S.usSomalia93='ritiro'; gdUs60('cetomedio',1); repd(-1);
         S.log.unshift({t:T('Il mondo'),x:T("Dopo la battaglia in Somalia ha deciso il ritiro dei soldati entro pochi mesi.")}); } },
     { l:"Rinforzi per finire la missione", e:"Il tuo partito vuole fermezza · i giovani e le famiglie dei soldati chiedono per che cosa si muore", costo:{debito:0.3},
-      f:function(){ S.usSomalia93='rinforzi'; baseUs60(1); gdUs60('giovani',-1); stampad(-1);
+      f:function(){ S.usSomalia93='rinforzi'; S.ind.debt+=0.3; baseUs60(1); gdUs60('giovani',-1); stampad(-1);
         S.log.unshift({t:T('Il mondo'),x:T("Dopo la battaglia in Somalia ha mandato rinforzi per finire la missione.")}); } },
     { l:"Passare la missione all'ONU subito", e:"Gli alleati apprezzano · la base dice che lasci il lavoro a metà",
       f:function(){ S.usSomalia93='onu'; repd(1); baseUs60(-1);
@@ -28874,5 +29016,267 @@ const ACCUSA98_OPP_EV = {
     { l:"Proporre una censura al posto dell'accusa", e:"La via di mezzo, che nella storia non arrivò al voto · i giornali apprezzano, la base la chiama una resa",
       f:function(){ S.usAccusa98Opp='censura'; stampad(1); gdUs60('cattolici',1); baseUs60(-1);
         S.log.unshift({t:T('Il paese'),x:T("Dall'opposizione ha proposto una censura al posto del voto d'accusa.")}); } },
+  ],
+};
+/* ==============================================================================================================
+   L264-7 · STATI UNITI 1990 — HAITI (1994/8), LA BOSNIA (1995/12, dopo S4), LA RIFORMA DELL'ASSISTENZA (1996/8, in campagna, solo col
+   governo diviso) E LA CRISI ASIATICA (1997/11) (scheda PRESET-USA-1990 §4; decisioni (6)-(9) di Cowork in L264-7; testi di Code).
+   Nomi nuovi cercati in js/, .claude/ e prove/ il 09/11 prima di scriverli (L99-2), zero occorrenze: us90_haiti(_opp),
+   us90_bosnia(_opp), us90_welfare(_opp), us90_asia(_opp), usHaiti94(Opp), usBosnia95(Opp), usWelfare96(Opp), usAsia97(Opp),
+   usBosniaSlitta.
+   ⚑ Carte DOVUTE come quelle di L264-6 (cancelli in game.js accanto a us90Eventi, che le mette in agenda): il flag è la scelta e il
+   segno «già uscita», mai nei sacchetti, mai una riga in SNODI_STORICI. Nessun testo presuppone il partito di chi governa: nessuna
+   gemella `_n`. Nessuna guerra del motore, nessuna riga di RIVALI (D306), nessuna legge (il welfare è racconto).
+   ⚑ Verificato il 09/11 (memoria di Code, coerente con la scheda ✓): il colpo di Stato ad Haiti del settembre 1991, la risoluzione del
+   Consiglio di sicurezza del 31 luglio 1994, l'accordo dell'ultima ora del 18 settembre con gli aerei in volo, lo sbarco senza
+   combattere del 19 e il ritorno del presidente eletto il 15 ottobre; gli accordi di pace per la Bosnia negoziati in una base aerea
+   dell'Ohio a novembre e firmati a Parigi il 14 dicembre 1995, circa ventimila soldati americani nella forza dell'alleanza; la
+   riforma dell'assistenza dopo due veti, firmata il 22 agosto 1996 (limite di cinque anni, obbligo di lavoro, il programma federale
+   agli Stati, tagli agli immigrati); il crollo della borsa di Hong Kong dell'ottobre 1997, la richiesta della Corea del Sud al Fondo
+   a fine novembre e il pacchetto di dicembre di circa cinquantasette miliardi di dollari con una «seconda linea» dei governi.
+   ============================================================================================================== */
+const HAITI94_EV = {
+  id:'us90_haiti', era:'us1990', kick:'Il mondo',
+  t:"L'ultimatum ai militari dell'isola",
+  text:"Tre anni fa i militari di Haiti hanno deposto il primo presidente eletto dell'isola. Da allora migliaia di profughi prendono il mare verso la Florida su barche di fortuna, e la Guardia costiera non sa più dove metterli. A fine luglio il Consiglio di sicurezza ha autorizzato l'uso della forza per riportare il governo legittimo.",
+  ch:[
+    { l:"Un ultimatum, coi soldati pronti", e:"La storia · a settembre, con gli aerei già in volo, i militari accettano di andarsene, e ventimila soldati sbarcano senza combattere; il presidente eletto torna a ottobre · i giornali parlano di fermezza, la tua base teme un'altra Somalia", costo:{debito:0.2},
+      f:function(){ S.usHaiti94='ultimatum'; S.ind.debt+=0.2; stampad(1); repd(1); baseUs60(-1);
+        S.log.unshift({t:T('Il mondo'),x:T("Ha dato un ultimatum ai militari di Haiti, coi soldati pronti a sbarcare.")}); } },
+    { l:"Sanzioni più dure e i profughi in campi fuori dal paese", e:"Niente soldati in pericolo · le chiese chiedono che cosa succede nei campi, e i militari dell'isola restano",
+      f:function(){ S.usHaiti94='sanzioni'; gdUs60('cetomedio',1); gdUs60('cattolici',-1);
+        S.log.unshift({t:T('Il mondo'),x:T("Su Haiti ha scelto sanzioni più dure e campi per i profughi fuori dal paese.")}); } },
+    { l:"Lasciare la crisi all'ONU e agli Stati della regione", e:"Il ceto medio approva la prudenza · i profughi continuano ad arrivare, e i giornali dicono che l'America guarda altrove",
+      f:function(){ S.usHaiti94='onu'; gdUs60('cetomedio',1); stampad(-1); repd(-1);
+        S.log.unshift({t:T('Il mondo'),x:T("Ha lasciato la crisi di Haiti all'ONU e agli Stati della regione.")}); } },
+  ],
+};
+const HAITI94_OPP_EV = {
+  id:'us90_haiti_opp', era:'us1990', kick:'Il mondo',
+  t:"L'ultimatum ai militari dell'isola, dall'aula",
+  text:"Ad Haiti i militari che tre anni fa hanno deposto il presidente eletto non se ne vanno, e i profughi arrivano a migliaia sulle coste della Florida. Il Consiglio di sicurezza ha autorizzato la forza, e la Casa Bianca prepara i soldati. In aula il tuo partito deve dire da che parte sta.",
+  ch:[
+    { l:"Appoggiare l'invio, se il Congresso vota", e:"Il paese apprezza un'opposizione responsabile · la base voleva sentirti più duro",
+      f:function(){ S.usHaiti94Opp='appoggio'; gdUs60('cetomedio',1); baseUs60(-1);
+        S.log.unshift({t:T('Il mondo'),x:T("Dall'opposizione ha appoggiato l'invio dei soldati ad Haiti, col voto del Congresso.")}); } },
+    { l:"Chiedere prima il voto del Congresso", e:"I giornali scrivono che difendi le regole · la Casa Bianca dice che non c'è tempo",
+      f:function(){ S.usHaiti94Opp='voto'; stampad(1); gdUs60('cetomedio',-1);
+        S.log.unshift({t:T('Il mondo'),x:T("Dall'opposizione ha chiesto il voto del Congresso prima di ogni invio ad Haiti.")}); } },
+    { l:"Votare contro l'invio", e:"La base è con te · le chiese e i giornali dicono che lasci l'isola ai militari",
+      f:function(){ S.usHaiti94Opp='contro'; baseUs60(1); gdUs60('cattolici',-1); stampad(-1);
+        S.log.unshift({t:T('Il mondo'),x:T("Dall'opposizione ha votato contro l'invio dei soldati ad Haiti.")}); } },
+  ],
+};
+const BOSNIA95_EV = {
+  id:'us90_bosnia', era:'us1990', kick:'Il mondo',
+  get text(){ var tardi = (typeof S!=='undefined' && S && S.year===1996);   /* le due varianti per intero: dicembre, o febbraio se S4 ha preso dicembre */
+    return tardi ? "Dopo tre anni di guerra e i bombardamenti dell'alleanza dell'estate scorsa, i tre governi della regione hanno firmato la pace: negoziata in una base aerea dell'Ohio, firmata a Parigi il 14 dicembre. Mentre a Washington si litigava sul bilancio, le prime truppe dell'alleanza sono già partite. Ora tocca a te dire quanti soldati americani restano, e per quanto."
+                 : "Dopo tre anni di guerra e i bombardamenti dell'alleanza dell'estate, a un tavolo in una base aerea dell'Ohio i tre governi della regione hanno firmato la pace; la firma solenne è a Parigi, il 14 dicembre. Servono soldati per tenerla, e l'alleanza ne chiede ventimila americani per un anno."; },
+  t:'I soldati per la pace in Bosnia',
+  ch:[
+    { l:"Mandare i soldati con l'alleanza", e:"La storia · ventimila soldati in Bosnia da dicembre; il Congresso protesta ma non li blocca · gli alleati ringraziano, le famiglie dei soldati chiedono per quanto", costo:{debito:0.3},
+      f:function(){ S.usBosnia95='soldati'; S.ind.debt+=0.3; repd(1); stampad(1); gdUs60('giovani',-1);
+        S.log.unshift({t:T('Il mondo'),x:T("Ha mandato i soldati in Bosnia con l'alleanza, per tenere la pace.")}); } },
+    { l:"Solo aerei, soldi e addestramento: niente truppe di terra", e:"Nessun soldato in pericolo · gli europei dicono che l'America lascia a loro il lavoro pericoloso", costo:{debito:0.1},
+      f:function(){ S.usBosnia95='aerei'; S.ind.debt+=0.1; baseUs60(1); repd(-1);
+        S.log.unshift({t:T('Il mondo'),x:T("Per la pace in Bosnia ha offerto aerei, soldi e addestramento, ma niente truppe di terra.")}); } },
+    { l:"Prima il voto del Congresso, poi la decisione", e:"Il ceto medio apprezza la prudenza · gli alleati aspettano, e i giornali dicono che ti nascondi dietro il Congresso",
+      f:function(){ S.usBosnia95='congresso'; gdUs60('cetomedio',1); stampad(-1);
+        S.log.unshift({t:T('Il mondo'),x:T("Sui soldati in Bosnia ha chiesto prima il voto del Congresso.")}); } },
+  ],
+};
+const BOSNIA95_OPP_EV = {
+  id:'us90_bosnia_opp', era:'us1990', kick:'Il mondo',
+  t:"I soldati per la pace in Bosnia, dall'aula",
+  text:"In Bosnia i tre governi della regione hanno firmato la pace, e l'alleanza chiede ventimila soldati americani per tenerla, per un anno. La Casa Bianca li manda. In aula si vota una risoluzione: il tuo partito deve dire che cosa ne pensa.",
+  ch:[
+    { l:"Appoggiare i soldati", e:"La storia · il Congresso protesta ma non li blocca · davanti ai soldati che partono il paese parla con una voce sola, la base voleva sentirti diverso",
+      f:function(){ S.usBosnia95Opp='appoggio'; gdUs60('cetomedio',1); baseUs60(-1);
+        S.log.unshift({t:T('Il mondo'),x:T("Dall'opposizione ha appoggiato i soldati mandati in Bosnia.")}); } },
+    { l:"Votare contro l'invio", e:"La base è con te · gli alleati e i giornali dicono che lasci la pace a metà",
+      f:function(){ S.usBosnia95Opp='contro'; baseUs60(1); stampad(-1);
+        S.log.unshift({t:T('Il mondo'),x:T("Dall'opposizione ha votato contro l'invio dei soldati in Bosnia.")}); } },
+    { l:"Chiedere una data di ritiro", e:"Le famiglie dei soldati ti ascoltano · la Casa Bianca dice che una data aiuta solo chi vuole aspettare",
+      f:function(){ S.usBosnia95Opp='data'; gdUs60('giovani',1); repd(-1);
+        S.log.unshift({t:T('Il mondo'),x:T("Dall'opposizione ha chiesto una data di ritiro per i soldati in Bosnia.")}); } },
+  ],
+};
+const WELFARE96_EV = {
+  id:'us90_welfare', era:'us1990', kick:'Il paese',
+  t:"La terza riforma dell'assistenza",
+  text:"Il Congresso, che è dell'altro partito, ti manda per la terza volta la riforma dell'assistenza ai poveri: le prime due le hai fermate col veto. Un limite di cinque anni all'aiuto in tutta la vita, l'obbligo di lavorare per chi lo riceve, il programma federale passato agli Stati, e tagli agli aiuti per gli immigrati. Mancano tre mesi al voto.",
+  ch:[
+    { l:"Firmare", e:"La storia · firmata il 22 agosto, a tre mesi dal voto; due collaboratori si dimettono per protesta · il ceto medio approva, la tua base e i lavoratori ti accusano di aver ceduto",
+      f:function(){ S.usWelfare96='firma'; gdUs60('cetomedio',2); baseUs60(-1); gdUs60('lavoratori',-1);
+        S.log.unshift({t:T('Il paese'),x:T("Ha firmato la riforma dell'assistenza mandata dal Congresso.")}); } },
+    { l:"Il terzo veto", e:"La tua base ti applaude · il centro ti chiama «il Presidente del no», a tre mesi dal voto",
+      f:function(){ S.usWelfare96='veto'; baseUs60(1); gdUs60('cetomedio',-2);
+        S.log.unshift({t:T('Il paese'),x:T("Ha messo il terzo veto sulla riforma dell'assistenza.")}); } },
+    { l:"Firmare, e promettere di correggere i tagli agli immigrati dopo il voto", e:"Il ceto medio approva · i pensionati e i lavoratori aspettano di vedere la correzione, e la tua base la ricorderà",
+      f:function(){ S.usWelfare96='correggi'; gdUs60('cetomedio',1); gdUs60('pensionati',-1); stampad(1); baseUs60(-1);
+        S.log.unshift({t:T('Il paese'),x:T("Ha firmato la riforma dell'assistenza promettendo di correggere i tagli agli immigrati.")}); } },
+  ],
+};
+const WELFARE96_OPP_EV = {
+  id:'us90_welfare_opp', era:'us1990', kick:'Il paese',
+  t:"La terza riforma dell'assistenza, dall'aula",
+  text:"Il tuo partito, che ha la maggioranza al Congresso, ha approvato per la terza volta la riforma dell'assistenza ai poveri: limite di cinque anni all'aiuto, obbligo di lavoro, il programma federale agli Stati, tagli agli aiuti per gli immigrati. Il Presidente ha fermato le prime due col veto. Mancano tre mesi al voto.",
+  ch:[
+    { l:"Chiedere al Presidente di firmare", e:"La storia · la firma arriva il 22 agosto · il ceto medio vi riconosce la riforma, e il Presidente se la prende anche lui",
+      f:function(){ S.usWelfare96Opp='firma'; gdUs60('cetomedio',1); baseUs60(-1);
+        S.log.unshift({t:T('Il paese'),x:T("Dall'opposizione ha chiesto al Presidente di firmare la riforma dell'assistenza.")}); } },
+    { l:"Attaccare il veto annunciato", e:"La base è con te · i giornali dicono che vuoi la riforma come arma, non come legge",
+      f:function(){ S.usWelfare96Opp='attacco'; baseUs60(1); stampad(-1);
+        S.log.unshift({t:T('Il paese'),x:T("Dall'opposizione ha attaccato il veto annunciato sulla riforma dell'assistenza.")}); } },
+    { l:"Offrire un compromesso sui tagli agli immigrati", e:"Le chiese e i pensionati apprezzano · la base dice che regali la vittoria al Presidente",
+      f:function(){ S.usWelfare96Opp='compromesso'; gdUs60('cattolici',1); gdUs60('pensionati',1); baseUs60(-1);
+        S.log.unshift({t:T('Il paese'),x:T("Dall'opposizione ha offerto un compromesso sui tagli agli immigrati della riforma dell'assistenza.")}); } },
+  ],
+};
+const ASIA97_EV = {
+  id:'us90_asia', era:'us1990', kick:'Il mondo',
+  t:"Le monete dell'Asia cadono",
+  text:"A ottobre la borsa di Hong Kong è crollata. Adesso la Corea del Sud, un alleato con trentasettemila soldati americani sul suo suolo, chiede aiuto al Fondo monetario: le monete dell'Asia orientale cadono una dopo l'altra, e le banche americane che hanno prestato laggiù tremano.",
+  ch:[
+    { l:"Sostenere il salvataggio del Fondo", e:"La storia · a dicembre un pacchetto di quasi sessanta miliardi di dollari, con una seconda linea dei governi · le banche respirano, la tua base chiede perché paghiamo gli errori degli altri", costo:{debito:0.2},
+      f:function(){ S.usAsia97='fondo'; S.ind.debt+=0.2; gdUs60('imprenditori',1); repd(1); baseUs60(-1);
+        S.log.unshift({t:T('Il mondo'),x:T("Ha sostenuto il salvataggio del Fondo monetario per le economie dell'Asia.")}); } },
+    { l:"Lasciar fare ai mercati: niente soldi pubblici a chi ha sbagliato", e:"La tua base approva · le banche e gli alleati dell'Asia temono il contagio",
+      f:function(){ S.usAsia97='mercati'; baseUs60(1); gdUs60('imprenditori',-1); repd(-1);
+        S.log.unshift({t:T('Il mondo'),x:T("Davanti alla crisi dell'Asia ha lasciato fare ai mercati: niente soldi pubblici.")}); } },
+    { l:"Proteggere le industrie di casa dall'ondata di importazioni", e:"I lavoratori ti ascoltano · le imprese che esportano e i giornali parlano di dazi fuori tempo",
+      f:function(){ S.usAsia97='dazi'; gdUs60('lavoratori',1); gdUs60('imprenditori',-1); stampad(-1);
+        S.log.unshift({t:T('Il mondo'),x:T("Davanti alla crisi dell'Asia ha protetto le industrie di casa dalle importazioni a basso prezzo.")}); } },
+  ],
+};
+const ASIA97_OPP_EV = {
+  id:'us90_asia_opp', era:'us1990', kick:'Il mondo',
+  t:"Le monete dell'Asia cadono, dall'aula",
+  text:"Dopo il crollo della borsa di Hong Kong, la Corea del Sud chiede aiuto al Fondo monetario e le monete dell'Asia orientale cadono una dopo l'altra. La Casa Bianca appoggia il salvataggio e chiede al Congresso i fondi per il Fondo. In aula il tuo partito deve decidere.",
+  ch:[
+    { l:"Appoggiare il salvataggio", e:"Le banche e le imprese ringraziano · la base dice che il conto lo paghiamo noi",
+      f:function(){ S.usAsia97Opp='appoggio'; gdUs60('imprenditori',1); baseUs60(-1);
+        S.log.unshift({t:T('Il mondo'),x:T("Dall'opposizione ha appoggiato il salvataggio delle economie dell'Asia.")}); } },
+    { l:"Votare contro i salvataggi", e:"La base è con te · i giornali scrivono che giochi col contagio",
+      f:function(){ S.usAsia97Opp='contro'; baseUs60(1); stampad(-1);
+        S.log.unshift({t:T('Il mondo'),x:T("Dall'opposizione ha votato contro i salvataggi delle economie dell'Asia.")}); } },
+    { l:"Chiedere dazi sulle importazioni a basso prezzo", e:"I lavoratori ti ascoltano · le imprese che esportano ti segnano fra gli avversari",
+      f:function(){ S.usAsia97Opp='dazi'; gdUs60('lavoratori',1); gdUs60('imprenditori',-1);
+        S.log.unshift({t:T('Il mondo'),x:T("Dall'opposizione ha chiesto dazi sulle importazioni a basso prezzo dall'Asia.")}); } },
+  ],
+};
+/* ==============================================================================================================
+   L264-8 · STATI UNITI 1990 — IL FONDO DI GREENWICH (1998/10, accanto alla campagna di metà mandato), IL BILANCIO IN ATTIVO (carta
+   1999/1, titoli dal 1998/10) E IL KOSOVO (1999/3) (scheda PRESET-USA-1990 §4; decisioni (4)-(7) di Cowork in L264-8; testi di Code).
+   Nomi nuovi cercati in js/, .claude/ e prove/ il 09/11 prima di scriverli (L99-2), zero occorrenze: us90_fondo(_opp),
+   us90_attivo(_opp), us90_kosovo(_opp), usFondo98(Opp), usAttivo99(Opp), usKosovo99(Opp), usTrattatoSlitta, ti_us90_attivo,
+   ti_us90_kosovo. ⚠ Le costanti del Kosovo si chiamano KOSOVO99_US_(OPP_)EV: KOSOVO99_EV è lo snodo tedesco, KOSOVO99_IT_EV l'italiano.
+   ⚑ Carte DOVUTE come quelle di L264-7 (cancelli in game.js accanto a us90Eventi): il flag è la scelta e il segno «già uscita», mai
+   nei sacchetti, mai una riga in SNODI_STORICI. Nessun testo presuppone il partito di chi governa: nessuna gemella `_n`. Nessuna
+   guerra del motore, nessuna riga di RIVALI (D303, D306), nessuna legge. Nessun marchio (decisione (7)): il fondo non ha nome,
+   l'alleanza è «l'alleanza atlantica», nessun nome di persona né di operazione.
+   ⚑ L'attivo (carta e titoli) esce SOLO se il saldo che il giocatore vede è in attivo (us90AttivoVero, game.js), e i testi NON dicono
+   la cifra: la riga «Bilancio dello Stato» scrive il saldo della partita, che non è quello della storia.
+   ⚑ Verificato il 09/11 su fonti aperte (ricerca web): il salvataggio del 23 settembre 1998, quattordici fra banche e case di
+   intermediazione chiamate dalla banca centrale di New York, 3,6 miliardi di dollari, nessun soldo della banca centrale ✓; l'anno
+   fiscale 1998 in attivo (69-70 miliardi), il primo dal 1969 ✓; i bombardamenti dal 24 marzo 1999 per 78 giorni, fino al 10 giugno, e
+   nessun caduto in combattimento (due piloti morti in addestramento) ✓; il voto della Camera del 28 aprile, 213 a 213 ✓. NON
+   confermati dalla ricerca, quindi tolti dai testi: la cifra dei soldi presi in prestito dal fondo, il numero dei tagli dei tassi, il
+   mese del veto sul taglio delle tasse.
+   ============================================================================================================== */
+const FONDO98_EV = {
+  id:'us90_fondo', era:'us1990', kick:'Il paese',
+  t:'Il fondo di Greenwich',
+  text:"Ad agosto la Russia ha smesso di pagare i suoi debiti. A fine settembre un grande fondo speculativo di Greenwich, nel Connecticut, che aveva scommesso con montagne di soldi presi in prestito, è stato salvato in una notte: quattordici banche, chiamate dalla banca centrale di New York, ci hanno messo più di tre miliardi e mezzo di dollari. Nessun soldo pubblico. La borsa trema, e manca un mese al voto.",
+  ch:[
+    { l:"Lasciar fare alla banca centrale e alle banche creditrici", e:"La storia · nessun soldo pubblico; in autunno la banca centrale taglia i tassi e i mercati si calmano · le imprese respirano, la tua base dice che la finanza si salva sempre fra amici",
+      f:function(){ S.usFondo98='banche'; gdUs60('imprenditori',1); baseUs60(-1);
+        S.log.unshift({t:T('Il paese'),x:T("Sul fondo di Greenwich ha lasciato fare alla banca centrale e alle banche creditrici.")}); } },
+    { l:"Chiedere al Congresso regole per questi fondi e per i loro contratti", e:"La storia · nella primavera dopo un gruppo di lavoro del governo propone regole, e nessuna legge arriva · i giornali approvano, le banche dicono che così i capitali vanno altrove",
+      f:function(){ S.usFondo98='regole'; stampad(1); gdUs60('imprenditori',-1);
+        S.log.unshift({t:T('Il paese'),x:T("Dopo il salvataggio del fondo di Greenwich ha chiesto al Congresso regole per i fondi speculativi.")}); } },
+    { l:"Condannare il salvataggio: chi ha scommesso deve poter fallire", e:"La tua base applaude · i mercati si chiedono che cosa rischia la Casa Bianca, e il ceto medio guarda i propri risparmi",
+      f:function(){ S.usFondo98='condanna'; baseUs60(1); gdUs60('imprenditori',-1); gdUs60('cetomedio',-1);
+        S.log.unshift({t:T('Il paese'),x:T("Ha condannato il salvataggio del fondo di Greenwich: chi ha scommesso deve poter fallire.")}); } },
+  ],
+};
+const FONDO98_OPP_EV = {
+  id:'us90_fondo_opp', era:'us1990', kick:'Il paese',
+  t:"Il fondo di Greenwich, dall'aula",
+  text:"A fine settembre un grande fondo speculativo di Greenwich, nel Connecticut, è stato salvato in una notte da quattordici banche chiamate dalla banca centrale di New York: più di tre miliardi e mezzo di dollari, nessun soldo pubblico. La Casa Bianca lascia fare. La borsa trema, manca un mese al voto e in aula si chiedono udienze.",
+  ch:[
+    { l:"Appoggiare la banca centrale", e:"Le imprese e i risparmiatori apprezzano la calma · la base voleva sentirti contro la finanza",
+      f:function(){ S.usFondo98Opp='appoggio'; gdUs60('imprenditori',1); baseUs60(-1);
+        S.log.unshift({t:T('Il paese'),x:T("Dall'opposizione ha appoggiato la banca centrale sul fondo di Greenwich.")}); } },
+    { l:"Attaccare «il salvataggio dei ricchi»", e:"La base è con te · i giornali scrivono che giochi col panico a un mese dal voto",
+      f:function(){ S.usFondo98Opp='attacco'; baseUs60(1); stampad(-1);
+        S.log.unshift({t:T('Il paese'),x:T("Dall'opposizione ha attaccato «il salvataggio dei ricchi» del fondo di Greenwich.")}); } },
+    { l:"Chiedere udienze e regole", e:"I giornali approvano · le banche ti segnano fra gli avversari",
+      f:function(){ S.usFondo98Opp='udienze'; stampad(1); gdUs60('imprenditori',-1);
+        S.log.unshift({t:T('Il paese'),x:T("Dall'opposizione ha chiesto udienze e regole dopo il salvataggio del fondo di Greenwich.")}); } },
+  ],
+};
+const ATTIVO99_EV = {
+  id:'us90_attivo', era:'us1990', kick:'Il paese',
+  t:"Che fare dell'attivo",
+  text:"Lo Stato incassa più di quanto spende, e le previsioni dicono che non sarà l'ultimo anno. A Washington tutti hanno un'idea su come usare l'attivo, e ognuno chiama prudenza la sua.",
+  ch:[
+    { l:"Prima le pensioni e il debito", e:"La storia · nel 1998 il bilancio federale chiude in attivo, il primo dal 1969; il Presidente chiede di mettere da parte la maggior parte dell'attivo per le pensioni pubbliche; in estate il Congresso vota un grande taglio delle tasse, e arriva il veto · i pensionati approvano, chi aspettava il taglio no",
+      f:function(){ S.usAttivo99='pensioni'; gdUs60('pensionati',1); gdUs60('imprenditori',-1);
+        S.log.unshift({t:T('Il paese'),x:T("Ha destinato l'attivo del bilancio prima alle pensioni e al debito.")}); } },
+    { l:"Un taglio delle tasse per tutti", e:"Il ceto medio e le imprese festeggiano · i pensionati chiedono chi pagherà le pensioni fra vent'anni, e i giornali parlano di un regalo fatto coi soldi di domani",
+      f:function(){ S.usAttivo99='tasse'; gdUs60('cetomedio',1); gdUs60('imprenditori',1); gdUs60('pensionati',-1); stampad(-1);
+        S.log.unshift({t:T('Il paese'),x:T("Ha usato l'attivo del bilancio per un taglio delle tasse per tutti.")}); } },
+    { l:"Scuole, sanità e strade", e:"I giovani e i lavoratori approvano · le imprese e il ceto medio dicono che l'attivo è già speso",
+      f:function(){ S.usAttivo99='spesa'; gdUs60('giovani',1); gdUs60('lavoratori',1); gdUs60('imprenditori',-1); gdUs60('cetomedio',-1);
+        S.log.unshift({t:T('Il paese'),x:T("Ha destinato l'attivo del bilancio a scuole, sanità e strade.")}); } },
+  ],
+};
+const ATTIVO99_OPP_EV = {
+  id:'us90_attivo_opp', era:'us1990', kick:'Il paese',
+  t:"Che fare dell'attivo, dall'aula",
+  text:"Per la prima volta da una generazione lo Stato incassa più di quanto spende. La Casa Bianca vuole mettere da parte l'attivo per le pensioni pubbliche; in aula ognuno ha un'altra idea, e il tuo partito deve scegliere la sua.",
+  ch:[
+    { l:"Chiedere il taglio delle tasse", e:"Il ceto medio e le imprese ti ascoltano · i pensionati no",
+      f:function(){ S.usAttivo99Opp='tasse'; gdUs60('cetomedio',1); gdUs60('pensionati',-1);
+        S.log.unshift({t:T('Il paese'),x:T("Dall'opposizione ha chiesto di usare l'attivo per un taglio delle tasse.")}); } },
+    { l:"Difendere le pensioni", e:"I pensionati sono con te · la base dice che parli come la Casa Bianca",
+      f:function(){ S.usAttivo99Opp='pensioni'; gdUs60('pensionati',1); baseUs60(-1);
+        S.log.unshift({t:T('Il paese'),x:T("Dall'opposizione ha difeso le pensioni nella discussione sull'attivo.")}); } },
+    { l:"Chiedere che si paghi il debito", e:"I giornali lodano la serietà · la base voleva una bandiera, non un conto",
+      f:function(){ S.usAttivo99Opp='debito'; stampad(1); baseUs60(-1);
+        S.log.unshift({t:T('Il paese'),x:T("Dall'opposizione ha chiesto di usare l'attivo per pagare il debito.")}); } },
+  ],
+};
+const KOSOVO99_US_EV = {
+  id:'us90_kosovo', era:'us1990', kick:'Il mondo',
+  t:'Le bombe sulla Serbia',
+  text:"In una provincia della Serbia a maggioranza albanese l'esercito caccia i civili dai villaggi, e le strade verso il confine sono piene di profughi. Le trattative in Francia sono fallite. L'alleanza atlantica è pronta a bombardare, senza un voto del Consiglio di sicurezza.",
+  ch:[
+    { l:"Bombardamenti con l'alleanza, niente truppe di terra", e:"La storia · dal 24 marzo, 78 giorni di bombe; a giugno l'esercito serbo si ritira, e nessun americano muore in combattimento · gli alleati sono con te, la tua base chiede chi ha votato questa guerra", costo:{debito:0.2},
+      f:function(){ S.usKosovo99='bombe'; S.ind.debt+=0.2; repd(1); baseUs60(-1);
+        S.log.unshift({t:T('Il mondo'),x:T("Ha bombardato la Serbia con l'alleanza atlantica, senza truppe di terra.")}); } },
+    { l:"Preparare anche l'invasione di terra", e:"I giornali e gli alleati parlano di fermezza · le famiglie dei soldati e il ceto medio chiedono quanti partiranno", costo:{debito:0.3},
+      f:function(){ S.usKosovo99='terra'; S.ind.debt+=0.3; stampad(1); repd(1); gdUs60('giovani',-1); gdUs60('cetomedio',-1);
+        S.log.unshift({t:T('Il mondo'),x:T("Con le bombe sulla Serbia ha preparato anche l'invasione di terra.")}); } },
+    { l:"Niente bombe senza il voto dell'ONU: si continua a trattare", e:"Il ceto medio approva la prudenza · gli alleati dicono che l'America li lascia soli, e i profughi continuano a passare il confine",
+      f:function(){ S.usKosovo99='onu'; gdUs60('cetomedio',1); repd(-1); stampad(-1);
+        S.log.unshift({t:T('Il mondo'),x:T("Ha rifiutato le bombe sulla Serbia senza il voto dell'ONU: si continua a trattare.")}); } },
+  ],
+};
+const KOSOVO99_US_OPP_EV = {
+  id:'us90_kosovo_opp', era:'us1990', kick:'Il mondo',
+  t:"Le bombe sulla Serbia, dall'aula",
+  text:"In una provincia della Serbia a maggioranza albanese l'esercito caccia i civili dai villaggi. La Casa Bianca ha scelto le bombe con l'alleanza atlantica, senza un voto del Consiglio di sicurezza e senza un voto del Congresso, e promette che non ci saranno truppe di terra. In aula arriva una mozione d'appoggio.",
+  ch:[
+    { l:"Appoggiare i bombardamenti", e:"Coi piloti in volo il paese parla con una voce sola · la base voleva sentirti diverso",
+      f:function(){ S.usKosovo99Opp='appoggio'; gdUs60('cetomedio',1); baseUs60(-1);
+        S.log.unshift({t:T('Il mondo'),x:T("Dall'opposizione ha appoggiato i bombardamenti sulla Serbia.")}); } },
+    { l:"Votare contro", e:"La storia · a fine aprile la Camera si divide a metà, 213 a 213, e la mozione d'appoggio non passa · la base è con te, i giornali dicono che lasci soli i piloti",
+      f:function(){ S.usKosovo99Opp='contro'; baseUs60(1); stampad(-1);
+        S.log.unshift({t:T('Il mondo'),x:T("Dall'opposizione ha votato contro la mozione d'appoggio ai bombardamenti sulla Serbia.")}); } },
+    { l:"Chiedere che decida il Congresso", e:"I giornali scrivono che difendi le regole · la Casa Bianca dice che le bombe non aspettano un voto",
+      f:function(){ S.usKosovo99Opp='congresso'; stampad(1); gdUs60('cetomedio',-1);
+        S.log.unshift({t:T('Il mondo'),x:T("Dall'opposizione ha chiesto che sulle bombe sulla Serbia decida il Congresso.")}); } },
   ],
 };
