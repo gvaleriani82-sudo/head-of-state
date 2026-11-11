@@ -21699,6 +21699,8 @@ const TITOLI=[
  {id:'ti_us90_s_senzalavoro', era:'us1990', reattivo:true, cond:()=>S.year>=1990&&S.ind.unemp>=US90_DISOCC_ALTA&&!meseSobrioOra(), amico:'Corsi di formazione e aiuti per chi ha perso il posto', ostile:"L'economia riparte, ma le assunzioni no"},
 /* L265-6 passo 3 · il declassamento del 5 agosto 2011 (✓: una delle tre grandi agenzie toglie al debito americano il voto massimo, le altre due lo tengono), SOLO TITOLO, nessun effetto (decisione 8 di Cowork); nessun nome d'agenzia. Esce dopo S6 se non è finito con l'accordo, o dall'aula (dove il mondo segue la storia; ma all'opposizione non c'è prima pagina: la condizione c'è per completezza). Il mese dopo S6: 2011/8 se S6 è uscito a luglio, 2011/9 se è scivolato ad agosto (la finestra dei recenti non lo ripete). */
 {id:'ti_us00_declassamento', era:'us2000', pri:1, cond:()=>((S.usTetto11 && S.usTetto11!=='accordo') || !!S.usTetto11Opp) && S.year===2011 && (S.month===8 || S.month===9), amico:'Una delle tre grandi agenzie toglie al debito americano il voto massimo; le altre due lo confermano', ostile:'Il debito americano perde il voto massimo, per la prima volta'},
+{id:'ti_us00_shuttle', era:'us2000', pri:1, cond:()=>S.era===LINEA_US && S.year===2003 && S.month===2, amico:'Lo shuttle si disintegra al rientro, a pochi minuti da casa: perduti i sette astronauti', ostile:"Lo shuttle perduto al rientro con i sette a bordo: un'inchiesta dirà che cosa si sapeva"},   // L265-8: sobrio in tutte e due le voci
+{id:'ti_us00_caccia', era:'us2000', pri:1, cond:()=>S.era===LINEA_US && caccia11Vale() && S.year===2011 && S.month===5, amico:"Dopo dieci anni la caccia è finita: l'uomo dell'11 settembre ucciso in un raid notturno, e la gente scende in strada davanti alla Casa Bianca", ostile:"L'uomo dell'11 settembre ucciso in un raid dopo dieci anni: viveva da anni a poca distanza da un'accademia militare"},   // L265-8: mai nel ramo «nessuna» di S1
  {id:'ng_p_ti_petrolio', era:'contemporanea', paesi:['nigeria'], amico:'La produzione di petrolio torna a salire', ostile:'Un barile su dieci sparisce: il furto record'},
 ];
 
@@ -29843,10 +29845,15 @@ const RICOSTR05_OPP_EV = {
         S.log.unshift({t:T('Il paese'),x:T("Dopo l'uragano ha proposto dall'opposizione di ricostruire con chi ci abitava.")}); } },
   ],
 };
+const CRISI08_US_TESTO = "Il 15 settembre una delle grandi banche d'affari di Wall Street fallisce, e nessuno la salva. In pochi giorni le banche smettono di prestarsi denaro, il credito alle imprese si ferma e le Borse del mondo perdono un terzo. Il Tesoro ha pronto un piano da settecento miliardi per comprare i titoli che nessuno vuole più: ma ci vuole il voto del Congresso, e mancano sette settimane alle elezioni.";   // L265-8: la base del getter qui sotto
 const CRISI08_US_EV = {
   id:'snodo_us_crisi08', snodo:true, era:'us2000', kick:"L'economia",
   t:'Il crollo',
-  text:"Il 15 settembre una delle grandi banche d'affari di Wall Street fallisce, e nessuno la salva. In pochi giorni le banche smettono di prestarsi denaro, il credito alle imprese si ferma e le Borse del mondo perdono un terzo. Il Tesoro ha pronto un piano da settecento miliardi per comprare i titoli che nessuno vuole più: ma ci vuole il voto del Congresso, e mancano sette settimane alle elezioni.",
+  get text(){ var m=(typeof S!=='undefined' && S) ? S.usMutui07 : null;   // L265-8: una frase secondo i mutui del 2007 (solo testo; le varianti scritte per intero: le chiavi inglesi sono le frasi intere)
+    return m==='regole' ? "Il 15 settembre una delle grandi banche d'affari di Wall Street fallisce, e nessuno la salva. In pochi giorni le banche smettono di prestarsi denaro, il credito alle imprese si ferma e le Borse del mondo perdono un terzo. Il Tesoro ha pronto un piano da settecento miliardi per comprare i titoli che nessuno vuole più: ma ci vuole il voto del Congresso, e mancano sette settimane alle elezioni. Le regole sui mutui dell'anno scorso sono arrivate tardi."
+         : m==='fondo' ? "Il 15 settembre una delle grandi banche d'affari di Wall Street fallisce, e nessuno la salva. In pochi giorni le banche smettono di prestarsi denaro, il credito alle imprese si ferma e le Borse del mondo perdono un terzo. Il Tesoro ha pronto un piano da settecento miliardi per comprare i titoli che nessuno vuole più: ma ci vuole il voto del Congresso, e mancano sette settimane alle elezioni. Il fondo per le rate ha salvato qualche casa, non le banche."
+         : m==='mercato' ? "Il 15 settembre una delle grandi banche d'affari di Wall Street fallisce, e nessuno la salva. In pochi giorni le banche smettono di prestarsi denaro, il credito alle imprese si ferma e le Borse del mondo perdono un terzo. Il Tesoro ha pronto un piano da settecento miliardi per comprare i titoli che nessuno vuole più: ma ci vuole il voto del Congresso, e mancano sette settimane alle elezioni. L'anno scorso si era detto che il mercato si sarebbe corretto da solo."
+         : CRISI08_US_TESTO; },
   ch:[
     { l:"Il salvataggio delle banche coi soldi pubblici", e:"La storia · il credito ricomincia a muoversi · la tua base non perdona i soldi dati alle banche, e la Camera può dire no al primo voto", costo:{debito:2},
       f:function(){ S.usCrisi08='salvataggio'; S.ind.debt+=2; gdUs60('imprenditori',1); gdUs60('lavoratori',-1); baseUs60(-1);
@@ -30244,5 +30251,120 @@ const FARMACI03_OPP_EV = {
     { l:"Votare contro: costa troppo", e:"I giornali lodano i conti · i pensionati se lo ricordano",
       f:function(){ S.usFarmaci03Opp='contro'; stampad(1); gdUs60('pensionati',-1);
         S.log.unshift({t:T('Il paese'),x:T("Dall'opposizione ha votato contro la copertura dei farmaci per gli anziani: costa troppo.")}); } },
+  ],
+};
+/* L265-8 · STATI UNITI 2000 — GLI ULTIMI EVENTI DATATI (D325): LE CASE E LE RATE (2007/4, ripiego 2007/5), LA MAREA NERA (2010/5,
+   ripiego 2010/6, mese sobrio) E LA CITTÀ SOTTO ASSEDIO (il solo 2011/3). Carte DOVUTE come quelle di L265-7: nessuna riga in
+   SNODI_STORICI, mai nei sacchetti, il flag è la scelta e il segno «già uscita», nessuna gemella _n. Nomi cercati in js/ l'11/11 prima
+   di scriverli (L99-2), zero occorrenze. La Libia americana è racconto ed effetti: nessuna scala, nessuna riga di RIVALI, mai
+   S.libia11/LIBIA11_EV (sono di italia2000); nessuna leva dell'alleanza nelle dovute americane (relIntMuovi non c'è): repd.
+   ⚑ «La storia ·» solo dove la verifica su en.wikipedia (11/11) lo conferma: la prima grande società di mutui fallita il 2 aprile 2007;
+   in ottobre 2007 un'alleanza volontaria fra governo, banche e consulenti; la piattaforma esplosa il 20 aprile 2010 con 11 morti, un
+   fermo di circa sei mesi delle trivellazioni in acque profonde e un fondo per i danni pagato dalla società (giugno); la risoluzione del
+   17 marzo 2011, gli attacchi dal 19, il comando all'alleanza atlantica il 31 marzo, nessun voto del Congresso che autorizzi. Tolti:
+   «il problema è contenuto» (non confermato) e la minaccia «senza pietà» alla città (non confermata). */
+function libia11Guerre(){   // le guerre aperte nel 2011/3: l'Iraq (guerraIraq) e l'Afghanistan (S1: campagna, invasione, o la storia)
+  var i=(typeof guerraIraq==='function' && guerraIraq()), r=(typeof S!=='undefined' && S) ? S.usRisposta01 : null;
+  var a=(r==null || r==='campagna' || r==='invasione');
+  return i && a ? 2 : (a ? 'a' : (i ? 'i' : 0)); }
+const LIBIA11_TESTO = "In Nord Africa un popolo si è ribellato a un regime vecchio di quarant'anni, e le colonne del regime marciano sulla città dei ribelli. Il Consiglio di sicurezza autorizza a proteggere i civili, e gli alleati europei chiedono agli Stati Uniti di esserci.";
+const MUTUI07_EV = {
+  id:'us00_mutui', era:'us2000', kick:"L'economia",
+  t:'Le case e le rate',
+  text:"Per dieci anni i prezzi delle case sono saliti, e le banche hanno prestato anche a chi non poteva dimostrare un reddito, con rate basse i primi anni e più care dopo. Ora i prezzi scendono, le rate salgono, le prime società di mutui falliscono, e nei quartieri nuovi compaiono i cartelli dei pignoramenti. Nessuno sa ancora quanto è grande.",
+  ch:[
+    { l:"Aiutare chi rischia la casa: un fondo per rinegoziare le rate", e:"Lavoratori e ceto medio respirano · le imprese parlano di soldi a chi non doveva firmare, e la tua base conta il conto", costo:{debito:0.3},
+      f:function(){ S.usMutui07='fondo'; S.ind.debt+=0.3; gdUs60('lavoratori',1); gdUs60('cetomedio',1); gdUs60('imprenditori',-1); baseUs60(-1);
+        S.log.unshift({t:T("L'economia"),x:T("Quando le rate dei mutui sono salite ha aperto un fondo per aiutare le famiglie a rinegoziarle.")}); } },
+    { l:"Regole a chi presta: niente mutui senza la prova del reddito", e:"I giornali e il ceto medio approvano · le imprese no, e per i giovani comprare casa diventa più difficile",
+      f:function(){ S.usMutui07='regole'; stampad(1); gdUs60('cetomedio',1); gdUs60('imprenditori',-1); gdUs60('giovani',-1);
+        S.log.unshift({t:T("L'economia"),x:T("Quando le rate dei mutui sono salite ha imposto regole a chi presta: niente mutui senza la prova del reddito.")}); } },
+    { l:"Il mercato si corregge da solo: accordi volontari fra banche e famiglie", e:"La storia · in autunno nasce un'alleanza volontaria fra governo, banche e consulenti · le imprese approvano, chi rischia la casa si sente solo",
+      f:function(){ S.usMutui07='mercato'; gdUs60('imprenditori',1); gdUs60('lavoratori',-1);
+        S.log.unshift({t:T("L'economia"),x:T("Quando le rate dei mutui sono salite ha lasciato fare al mercato, con accordi volontari fra banche e famiglie.")}); } },
+  ],
+};
+const MUTUI07_OPP_EV = {
+  id:'us00_mutui_opp', era:'us2000', kick:"L'economia",
+  t:"Le case e le rate, dall'aula",
+  text:"I prezzi delle case scendono, le rate dei mutui salgono e le prime società che prestavano a chi non poteva dimostrare un reddito sono fallite. Nei quartieri nuovi compaiono i cartelli dei pignoramenti. In aula il tuo partito deve dire che cosa chiede.",
+  ch:[
+    { l:"Chiedere un fondo per le famiglie", e:"I lavoratori sono con te · le imprese ti segnano fra chi spende",
+      f:function(){ S.usMutui07Opp='fondo'; gdUs60('lavoratori',1); gdUs60('imprenditori',-1);
+        S.log.unshift({t:T("L'economia"),x:T("Dall'opposizione ha chiesto un fondo per le famiglie che rischiano la casa.")}); } },
+    { l:"Chiedere regole a chi presta", e:"Il ceto medio ti ascolta · i giovani temono che il mutuo diventi un miraggio",
+      f:function(){ S.usMutui07Opp='regole'; gdUs60('cetomedio',1); gdUs60('giovani',-1);
+        S.log.unshift({t:T("L'economia"),x:T("Dall'opposizione ha chiesto regole a chi presta: niente mutui senza la prova del reddito.")}); } },
+    { l:"Tenersene fuori: è un affare fra chi presta e chi firma", e:"La storia · nel 2007 nessuna regola nuova · le imprese approvano, i lavoratori no",
+      f:function(){ S.usMutui07Opp='fuori'; gdUs60('imprenditori',1); gdUs60('lavoratori',-1);
+        S.log.unshift({t:T("L'economia"),x:T("Dall'opposizione ha detto che i mutui sono un affare fra chi presta e chi firma.")}); } },
+  ],
+};
+const MAREA10_EV = {
+  id:'us00_marea', era:'us2000', kick:'Il paese',
+  t:'La marea nera del Golfo',
+  text:"Una piattaforma che trivella in acque profonde nel Golfo del Messico esplode e affonda: undici operai morti. Dal fondo del mare il greggio esce per settimane, e nessuno riesce a chiudere il pozzo. La chiazza arriva alle paludi e alle spiagge, e la pesca è ferma.",
+  ch:[
+    { l:"Fermare le nuove trivellazioni in acque profonde finché non si sa che cosa è successo, e la società paga", e:"La storia · un fermo di circa sei mesi, e un fondo per i danni pagato dalla società · i giovani e il ceto medio sono con te, le imprese e i lavoratori del Golfo contano i posti",
+      f:function(){ S.usMarea10='fermo'; gdUs60('giovani',1); gdUs60('cetomedio',1); gdUs60('imprenditori',-1); gdUs60('lavoratori',-1);
+        S.log.unshift({t:T('Il paese'),x:T("Dopo la marea nera del Golfo ha fermato le nuove trivellazioni in acque profonde e ha fatto pagare la società.")}); } },
+    { l:"La società paga tutto, ma le trivelle non si fermano", e:"Imprese e lavoratori del Golfo approvano · i giovani e i giornali chiedono se hai visto le spiagge",
+      f:function(){ S.usMarea10='paga'; gdUs60('imprenditori',1); gdUs60('lavoratori',1); gdUs60('giovani',-1); stampad(-1);
+        S.log.unshift({t:T('Il paese'),x:T("Dopo la marea nera del Golfo ha fatto pagare la società senza fermare le trivellazioni.")}); } },
+    { l:"Lo Stato prende in mano la bonifica, poi manda il conto", e:"I giornali e il ceto medio vedono qualcuno al comando · le imprese temono il precedente", costo:{debito:0.1},
+      f:function(){ S.usMarea10='stato'; S.ind.debt+=0.1; stampad(1); gdUs60('cetomedio',1); gdUs60('imprenditori',-1);
+        S.log.unshift({t:T('Il paese'),x:T("Dopo la marea nera del Golfo lo Stato ha preso in mano la bonifica e ha mandato il conto alla società.")}); } },
+  ],
+};
+const MAREA10_OPP_EV = {
+  id:'us00_marea_opp', era:'us2000', kick:'Il paese',
+  t:"La marea nera del Golfo, dall'aula",
+  text:"Una piattaforma esplosa nel Golfo del Messico ha ucciso undici operai, e dal fondo del mare il greggio esce da settimane. La chiazza arriva alle paludi e alle spiagge. In aula il tuo partito deve dire che cosa chiede.",
+  ch:[
+    { l:"Chiedere il fermo delle trivellazioni in acque profonde", e:"La storia · il fermo arriva · i giovani sono con te, i lavoratori del Golfo no",
+      f:function(){ S.usMarea10Opp='fermo'; gdUs60('giovani',1); gdUs60('lavoratori',-1);
+        S.log.unshift({t:T('Il paese'),x:T("Dall'opposizione ha chiesto il fermo delle trivellazioni in acque profonde dopo la marea nera.")}); } },
+    { l:"Difendere i posti di lavoro del Golfo", e:"I lavoratori ringraziano · i giovani ti trovano tiepido",
+      f:function(){ S.usMarea10Opp='posti'; gdUs60('lavoratori',1); gdUs60('giovani',-1);
+        S.log.unshift({t:T('Il paese'),x:T("Dall'opposizione ha difeso i posti di lavoro del Golfo dopo la marea nera.")}); } },
+    { l:"Attaccare il governo per la lentezza", e:"La base è con te · i giornali scrivono che non è il momento",
+      f:function(){ S.usMarea10Opp='lentezza'; baseUs60(1); stampad(-1);
+        S.log.unshift({t:T('Il paese'),x:T("Dall'opposizione ha attaccato il governo per la lentezza contro la marea nera.")}); } },
+  ],
+};
+const LIBIA11_US_EV = {
+  id:'us00_libia', era:'us2000', kick:'Il mondo',
+  t:'La città sotto assedio',
+  get text(){ var g=libia11Guerre();   // le varianti scritte per intero (chiavi inglesi)
+    return g===2 ? "In Nord Africa un popolo si è ribellato a un regime vecchio di quarant'anni, e le colonne del regime marciano sulla città dei ribelli. Il Consiglio di sicurezza autorizza a proteggere i civili, e gli alleati europei chiedono agli Stati Uniti di esserci. Il paese ha già due guerre aperte."
+         : g==='a' ? "In Nord Africa un popolo si è ribellato a un regime vecchio di quarant'anni, e le colonne del regime marciano sulla città dei ribelli. Il Consiglio di sicurezza autorizza a proteggere i civili, e gli alleati europei chiedono agli Stati Uniti di esserci. Il paese ha già una guerra che dura da dieci anni."
+         : g==='i' ? "In Nord Africa un popolo si è ribellato a un regime vecchio di quarant'anni, e le colonne del regime marciano sulla città dei ribelli. Il Consiglio di sicurezza autorizza a proteggere i civili, e gli alleati europei chiedono agli Stati Uniti di esserci. Il paese ha già una guerra che dura da otto anni."
+         : LIBIA11_TESTO; },
+  ch:[
+    { l:"Aerei e missili con gli alleati, nessun soldato a terra, e il comando passa presto all'alleanza", e:"La storia · dopo dodici giorni il comando passa all'alleanza atlantica, e il Congresso non vota · gli alleati e il ceto medio approvano, la tua base chiede perché un'altra guerra", costo:{debito:0.1},
+      f:function(){ S.usLibia11='aerei'; S.ind.debt+=0.1; repd(1); gdUs60('cetomedio',1); baseUs60(-1);
+        S.log.unshift({t:T('Il mondo'),x:T("Ha mandato aerei e missili a proteggere la città sotto assedio, con gli alleati e senza soldati a terra.")}); } },
+    { l:"Prima un voto del Congresso, poi si decide", e:"I giornali lodano il metodo · gli alleati aspettano, e la città pure",
+      f:function(){ S.usLibia11='congresso'; stampad(1); repd(-1);
+        S.log.unshift({t:T('Il mondo'),x:T("Per la città sotto assedio ha chiesto prima un voto del Congresso.")}); } },
+    { l:"Restarne fuori: solo sanzioni e aiuti", e:"La tua base e i giovani sono con te · gli alleati se lo ricordano, e il ceto medio teme la strage",
+      f:function(){ S.usLibia11='fuori'; baseUs60(1); gdUs60('giovani',1); repd(-1); gdUs60('cetomedio',-1);
+        S.log.unshift({t:T('Il mondo'),x:T("Per la città sotto assedio è rimasto fuori dalla guerra: solo sanzioni e aiuti.")}); } },
+  ],
+};
+const LIBIA11_US_OPP_EV = {
+  id:'us00_libia_opp', era:'us2000', kick:'Il mondo',
+  t:"La città sotto assedio, dall'aula",
+  text:"In Nord Africa le colonne di un regime vecchio di quarant'anni marciano sulla città dei ribelli. Il Consiglio di sicurezza autorizza a proteggere i civili, e la Casa Bianca manda gli aerei con gli alleati. In aula il tuo partito deve dire da che parte sta.",
+  ch:[
+    { l:"Appoggiare l'intervento", e:"La storia · gli aerei partono, e il comando passa all'alleanza atlantica · il ceto medio approva, la base dice che fate il gioco del governo",
+      f:function(){ S.usLibia11Opp='appoggio'; gdUs60('cetomedio',1); baseUs60(-1);
+        S.log.unshift({t:T('Il mondo'),x:T("Dall'opposizione ha appoggiato l'intervento per la città sotto assedio.")}); } },
+    { l:"Chiedere che voti il Congresso", e:"I giornali ti danno ragione · il ceto medio non capisce l'attesa",
+      f:function(){ S.usLibia11Opp='voto'; stampad(1); gdUs60('cetomedio',-1);
+        S.log.unshift({t:T('Il mondo'),x:T("Dall'opposizione ha chiesto che sull'intervento voti il Congresso.")}); } },
+    { l:"Contro una guerra in più", e:"La base e i giovani sono con te · il ceto medio teme la strage",
+      f:function(){ S.usLibia11Opp='contro'; baseUs60(1); gdUs60('giovani',1); gdUs60('cetomedio',-1);
+        S.log.unshift({t:T('Il mondo'),x:T("Dall'opposizione ha votato contro l'intervento per la città sotto assedio.")}); } },
   ],
 };
