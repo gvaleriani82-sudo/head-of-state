@@ -30076,3 +30076,173 @@ const TETTO11_OPP_N_EV = {
         S.log.unshift({t:T("L'economia"),x:T("Dall'opposizione ha votato una proroga breve del tetto del debito.")}); } },
   ],
 };
+/* ==============================================================================================================
+   L265-7 · STATI UNITI 2000 — I PRIMI CINQUE EVENTI DATATI (D325): L'AVANZO E LE TASSE (2001/5), I BILANCI TRUCCATI (2002/7), IL
+   SECONDO TAGLIO (2003/5), IL GRANDE BUIO D'AGOSTO (2003/8, carta sobria, solo a chi governa) E LE MEDICINE DEGLI ANZIANI (2003/12)
+   (scheda PRESET-USA-2000 §4 «eventi datati», D325; consegna L265-7; testi di Code). Carte DOVUTE come quelle di us1990 (L264-6/7):
+   nessuna riga in SNODI_STORICI, mai nei sacchetti, il flag è la scelta e il segno «già uscita», nessuna gemella `_n` (i testi non
+   presuppongono un partito). Nomi cercati in js/ l'11/11 prima di scriverli (L99-2), zero occorrenze: us00_avanzo(_opp),
+   us00_bilanci(_opp), us00_taglio03(_opp), us00_blackout, us00_farmaci(_opp), usAvanzo01(Opp), usBilanci02(Opp), usTaglio03(Opp),
+   usBlackout03, usFarmaci03(Opp).
+   ⚑ CHI RICEVE CHE COSA (cancelli in game.js accanto a us00Eventi): ogni carta a chi governa gli Stati Uniti in linea americana (anche le
+   carriere di us1990 che ci arrivano), l'aula a chi è all'opposizione; il blackout solo a chi governa. Mesi: l'avanzo 2001/5 (ripiego
+   2001/6), i bilanci 2002/7 (ripiego 2002/8), il taglio 2003/5 (ripiego 2003/6), il blackout il solo 2003/8, i farmaci 2003/12 (ripiego
+   2004/1). Senza scelta del giocatore il mondo segue la storia (tagli del 2001 e del 2003, legge severa, farmaci con le assicurazioni).
+   ⚑ «La storia ·» solo dove la verifica su en.wikipedia (11/11) lo conferma: la legge del 2001 firmata a giugno; quella dei bilanci
+   votata quasi all'unanimità (423-3 e 99-0); il taglio del 2003 al Senato 50 a 50, deciso dal voto del Vicepresidente; per il blackout
+   l'inchiesta comune col Canada subito e le regole obbligatorie solo con la legge sull'energia del 2005 → il ramo (b); i farmaci col
+   voto della Camera tenuto aperto per ore nella notte e la copertura affidata ad assicurazioni private. Tolti: il mese dei rimborsi del
+   2001 (la voce non lo dà) e le vittime del blackout (nessuna cifra concorde). */
+const AVANZO01_EV = {
+  id:'us00_avanzo', era:'us2000', kick:"L'economia",
+  t:"A chi va l'avanzo",
+  text:"Le previsioni ufficiali dicono che nei prossimi dieci anni il bilancio federale avrà un avanzo come non si vedeva da una generazione. Ma l'economia rallenta: la bolla dei titoli tecnologici è scoppiata e le borse scendono da un anno. In Congresso si discute a chi debba andare quell'avanzo previsto.",
+  ch:[
+    { l:"Tagliare le tasse a tutti gli scaglioni", e:"La storia · la legge è firmata a giugno, e un assegno di rimborso arriva a quasi tutte le famiglie · le imprese e il ceto medio ringraziano, i pensionati temono per le pensioni", costo:{debito:0.8},
+      f:function(){ S.usAvanzo01='tagli'; S.ind.debt+=0.8; gdUs60('cetomedio',1); gdUs60('imprenditori',1); baseUs60(1); gdUs60('pensionati',-1);
+        S.log.unshift({t:T("L'economia"),x:T("Ha usato l'avanzo del bilancio per tagliare le tasse a tutti gli scaglioni.")}); } },
+    { l:"Metterlo al sicuro per le pensioni e la sanità degli anziani", e:"I pensionati sono con te · le imprese volevano meno tasse", costo:{debito:0.2},
+      f:function(){ S.usAvanzo01='pensioni'; S.ind.debt+=0.2; gdUs60('pensionati',2); gdUs60('imprenditori',-1);
+        S.log.unshift({t:T("L'economia"),x:T("Ha messo da parte l'avanzo del bilancio per le pensioni e la sanità degli anziani.")}); } },
+    { l:"Ripagare il debito", e:"I giornali lodano la prudenza · la tua base e il ceto medio si aspettavano qualcosa in tasca",
+      f:function(){ S.usAvanzo01='debito'; S.ind.debt-=0.6; stampad(1); baseUs60(-1); gdUs60('cetomedio',-1);
+        S.log.unshift({t:T("L'economia"),x:T("Ha usato l'avanzo del bilancio per ripagare il debito.")}); } },
+  ],
+};
+const AVANZO01_OPP_EV = {
+  id:'us00_avanzo_opp', era:'us2000', kick:"L'economia",
+  t:"A chi va l'avanzo, dall'aula",
+  text:"Le previsioni dicono che nei prossimi dieci anni il bilancio federale avrà un avanzo come non si vedeva da una generazione, e la Casa Bianca chiede al Congresso di restituirlo con un grande taglio delle tasse. L'economia rallenta. In aula il tuo partito deve decidere come votare.",
+  ch:[
+    { l:"Votare i tagli", e:"Il ceto medio approva · la base dice che fate il gioco del governo",
+      f:function(){ S.usAvanzo01Opp='voti'; gdUs60('cetomedio',1); baseUs60(-1);
+        S.log.unshift({t:T("L'economia"),x:T("Dall'opposizione ha votato i tagli delle tasse fatti con l'avanzo del bilancio.")}); } },
+    { l:"Tagli più piccoli, il resto alle pensioni", e:"I pensionati ti ascoltano · le imprese ti segnano fra chi frena",
+      f:function(){ S.usAvanzo01Opp='piccoli'; gdUs60('pensionati',1); gdUs60('imprenditori',-1);
+        S.log.unshift({t:T("L'economia"),x:T("Dall'opposizione ha chiesto tagli delle tasse più piccoli e il resto dell'avanzo alle pensioni.")}); } },
+    { l:"Votare contro: l'avanzo non durerà", e:"La storia · la legge passa lo stesso, con una parte dei voti del tuo partito · la base è con te, il ceto medio non capisce perché rinunci a un rimborso",
+      f:function(){ S.usAvanzo01Opp='contro'; baseUs60(1); gdUs60('cetomedio',-1);
+        S.log.unshift({t:T("L'economia"),x:T("Dall'opposizione ha votato contro i tagli delle tasse: l'avanzo, ha detto, non durerà.")}); } },
+  ],
+};
+const BILANCI02_EV = {
+  id:'us00_bilanci', era:'us2000', kick:"L'economia",
+  t:'I bilanci truccati',
+  text:"In pochi mesi alcune delle più grandi società del paese sono fallite, e si è scoperto che i loro bilanci erano falsi. Migliaia di dipendenti hanno perso insieme il posto e i risparmi della pensione, investiti nelle azioni della ditta. La borsa scende, e il paese chiede chi controllava i conti.",
+  ch:[
+    { l:"Una legge severa: i capi rispondono dei bilanci, un controllore pubblico sui revisori", e:"La storia · votata quasi all'unanimità nelle due camere · lavoratori e ceto medio sono con te, le imprese contano i costi dei controlli",
+      f:function(){ S.usBilanci02='severa'; gdUs60('lavoratori',1); gdUs60('cetomedio',1); gdUs60('imprenditori',-1); stampad(1);
+        S.log.unshift({t:T("L'economia"),x:T("Dopo i bilanci truccati ha fatto approvare una legge severa sui conti delle società.")}); } },
+    { l:"Regole più leggere: non si punisce chi è onesto", e:"Le imprese ringraziano · il ceto medio e i giornali chiedono se hai capito che cosa è successo",
+      f:function(){ S.usBilanci02='leggera'; gdUs60('imprenditori',1); gdUs60('cetomedio',-1); stampad(-1);
+        S.log.unshift({t:T("L'economia"),x:T("Dopo i bilanci truccati ha scelto regole più leggere sui conti delle società.")}); } },
+    { l:"Lasciar fare ai tribunali: le leggi ci sono già", e:"Le imprese approvano · chi ha perso la pensione si sente solo",
+      f:function(){ S.usBilanci02='tribunali'; gdUs60('lavoratori',-1); gdUs60('pensionati',-1); gdUs60('imprenditori',1);
+        S.log.unshift({t:T("L'economia"),x:T("Dopo i bilanci truccati ha lasciato fare ai tribunali, senza una legge nuova.")}); } },
+  ],
+};
+const BILANCI02_OPP_EV = {
+  id:'us00_bilanci_opp', era:'us2000', kick:"L'economia",
+  t:"I bilanci truccati, dall'aula",
+  text:"Alcune delle più grandi società del paese sono fallite coi bilanci falsi, e migliaia di dipendenti hanno perso il posto e la pensione. In Congresso c'è una legge severa sui conti delle società. In aula il tuo partito deve decidere che cosa dire.",
+  ch:[
+    { l:"Appoggiare la legge severa", e:"La storia · passa quasi all'unanimità · il ceto medio approva, la base dice che il merito va al governo",
+      f:function(){ S.usBilanci02Opp='severa'; gdUs60('cetomedio',1); baseUs60(-1);
+        S.log.unshift({t:T("L'economia"),x:T("Dall'opposizione ha appoggiato la legge severa sui conti delle società.")}); } },
+    { l:"Chiedere di più: il carcere e la restituzione dei premi", e:"I lavoratori sono con te · le imprese ti segnano fra gli avversari",
+      f:function(){ S.usBilanci02Opp='dipiu'; gdUs60('lavoratori',1); gdUs60('imprenditori',-1);
+        S.log.unshift({t:T("L'economia"),x:T("Dall'opposizione ha chiesto il carcere per i capi e la restituzione dei premi.")}); } },
+    { l:"Attaccare il governo per i controlli mancati", e:"La base è con te · i giornali scrivono che cercate un colpevole invece di una legge",
+      f:function(){ S.usBilanci02Opp='controlli'; baseUs60(1); stampad(-1);
+        S.log.unshift({t:T("L'economia"),x:T("Dall'opposizione ha attaccato il governo per i controlli mancati sui conti delle società.")}); } },
+  ],
+};
+/* il taglio del 2003: le due aperture secondo l'avanzo del 2001 («un secondo taglio» dopo i tagli, o se il mondo ha seguito la storia;
+   altrimenti «un taglio per la ripresa»), e la riga della guerra solo con la guerra in Iraq cominciata (guerraIraq(), game.js: dal
+   2003/4 l'intervento, anche quello della storia). Le quattro varianti scritte per intero (le chiavi inglesi sono le frasi intere). */
+function taglio03Secondo(){ return typeof S!=='undefined' && !!S && (S.usAvanzo01==null || S.usAvanzo01==='tagli'); }
+function taglio03Guerra(){ return typeof guerraIraq==='function' && guerraIraq(); }
+const TAGLIO03_EV = {
+  id:'us00_taglio03', era:'us2000', kick:"L'economia",
+  get t(){ return taglio03Secondo() ? 'Un altro taglio delle tasse' : 'Un taglio per la ripresa'; },
+  get text(){ var s=taglio03Secondo(), g=taglio03Guerra();
+    return s ? (g ? "Il bilancio è in rosso, con una guerra da pagare, e la ripresa non porta posti di lavoro. In Congresso c'è un secondo taglio delle tasse, sui dividendi e sui guadagni di borsa: chi lo vuole dice che rimette in moto gli investimenti, chi lo combatte che aiuta chi ha già."
+                  : "Il bilancio è in rosso, e la ripresa non porta posti di lavoro. In Congresso c'è un secondo taglio delle tasse, sui dividendi e sui guadagni di borsa: chi lo vuole dice che rimette in moto gli investimenti, chi lo combatte che aiuta chi ha già.")
+             : (g ? "Il bilancio è in rosso, con una guerra da pagare, e la ripresa non porta posti di lavoro. In Congresso c'è un taglio per far ripartire l'economia, sulle tasse dei dividendi e dei guadagni di borsa: chi lo vuole dice che rimette in moto gli investimenti, chi lo combatte che aiuta chi ha già."
+                  : "Il bilancio è in rosso, e la ripresa non porta posti di lavoro. In Congresso c'è un taglio per far ripartire l'economia, sulle tasse dei dividendi e dei guadagni di borsa: chi lo vuole dice che rimette in moto gli investimenti, chi lo combatte che aiuta chi ha già."); },
+  ch:[
+    { l:"Firmare il taglio", e:"La storia · al Senato finisce in parità, e decide il voto del Vicepresidente · imprese e ceto medio approvano, i lavoratori chiedono che cosa ne avranno", costo:{debito:0.6},
+      f:function(){ S.usTaglio03='taglio'; S.ind.debt+=0.6; gdUs60('imprenditori',1); gdUs60('cetomedio',1); gdUs60('lavoratori',-1);
+        S.log.unshift({t:T("L'economia"),x:T("Nel 2003 ha firmato un taglio delle tasse sui dividendi e sui guadagni di borsa.")}); } },
+    { l:"Un taglio solo per chi lavora e ha figli", e:"Lavoratori e giovani famiglie sentono la differenza · le imprese volevano altro", costo:{debito:0.3},
+      f:function(){ S.usTaglio03='famiglie'; S.ind.debt+=0.3; gdUs60('lavoratori',1); gdUs60('giovani',1); gdUs60('imprenditori',-1);
+        S.log.unshift({t:T("L'economia"),x:T("Nel 2003 ha tagliato le tasse solo a chi lavora e ha figli.")}); } },
+    { l:"Nessun taglio finché il bilancio è in rosso", e:"I giornali lodano la prudenza · la tua base e le imprese non la prendono bene",
+      f:function(){ S.usTaglio03='nessuno'; stampad(1); baseUs60(-1); gdUs60('imprenditori',-1);
+        S.log.unshift({t:T("L'economia"),x:T("Nel 2003 ha rinunciato a tagliare le tasse finché il bilancio resta in rosso.")}); } },
+  ],
+};
+const TAGLIO03_OPP_EV = {
+  id:'us00_taglio03_opp', era:'us2000', kick:"L'economia",
+  t:"Il taglio delle tasse, dall'aula",
+  text:"Il bilancio è in rosso e la ripresa non porta posti di lavoro. La Casa Bianca chiede al Congresso un taglio delle tasse sui dividendi e sui guadagni di borsa. In aula il tuo partito deve decidere come votare.",
+  ch:[
+    { l:"Votare il taglio", e:"Le imprese ringraziano · la base dice che votate per chi ha già",
+      f:function(){ S.usTaglio03Opp='voti'; gdUs60('imprenditori',1); baseUs60(-1);
+        S.log.unshift({t:T("L'economia"),x:T("Dall'opposizione ha votato il taglio delle tasse sui dividendi.")}); } },
+    { l:"Proporre il taglio per chi lavora", e:"I lavoratori ti ascoltano · i giornali scrivono che la proposta non ha i voti",
+      f:function(){ S.usTaglio03Opp='famiglie'; gdUs60('lavoratori',1); stampad(-1);
+        S.log.unshift({t:T("L'economia"),x:T("Dall'opposizione ha proposto un taglio delle tasse per chi lavora e ha figli.")}); } },
+    { l:"Votare contro", e:"La storia · la legge passa lo stesso, per un voto · la base è con te, il ceto medio pensa al rimborso perso",
+      f:function(){ S.usTaglio03Opp='contro'; baseUs60(1); gdUs60('cetomedio',-1);
+        S.log.unshift({t:T("L'economia"),x:T("Dall'opposizione ha votato contro il taglio delle tasse sui dividendi.")}); } },
+  ],
+};
+const BLACKOUT03_EV = {
+  id:'us00_blackout', era:'us2000', kick:'Il paese',
+  t:"Il grande buio d'agosto",
+  text:"Un pomeriggio d'agosto la corrente salta in pochi minuti dal Midwest alla costa atlantica e in una provincia del Canada: decine di milioni di persone restano al buio. I treni si fermano, la gente torna a casa a piedi sui ponti, le città dormono senza luce. In qualche ora in molti posti la corrente torna, nelle grandi città in due giorni. Nessun attentato: un guasto, e una rete vecchia.",
+  ch:[
+    { l:"Regole obbligatorie per chi gestisce le reti, e soldi federali per rifarle", e:"Il ceto medio vuole la luce sicura · le società elettriche e le imprese contano i costi", costo:{debito:0.2},
+      f:function(){ S.usBlackout03='regole'; S.ind.debt+=0.2; gdUs60('cetomedio',1); gdUs60('imprenditori',-1);
+        S.log.unshift({t:T('Il paese'),x:T("Dopo il grande buio d'agosto ha imposto regole obbligatorie a chi gestisce le reti elettriche.")}); } },
+    { l:"Un'inchiesta insieme al Canada, poi le regole", e:"La storia · l'inchiesta comune trova il guasto; le regole diventano obbligatorie solo con la legge sull'energia del 2005 · i giornali apprezzano il metodo",
+      f:function(){ S.usBlackout03='inchiesta'; stampad(1);
+        S.log.unshift({t:T('Il paese'),x:T("Dopo il grande buio d'agosto ha aperto un'inchiesta insieme al Canada.")}); } },
+    { l:"Tocca alle società elettriche e agli Stati", e:"Le imprese approvano · il ceto medio chiede chi garantisce che non succeda più",
+      f:function(){ S.usBlackout03='stati'; gdUs60('imprenditori',1); gdUs60('cetomedio',-1);
+        S.log.unshift({t:T('Il paese'),x:T("Dopo il grande buio d'agosto ha lasciato le reti alle società elettriche e agli Stati.")}); } },
+  ],
+};
+const FARMACI03_EV = {
+  id:'us00_farmaci', era:'us2000', kick:'Il paese',
+  t:'Le medicine degli anziani',
+  text:"L'assicurazione pubblica degli anziani paga il medico e l'ospedale, ma non le medicine, e il loro prezzo sale ogni anno: molti pensionati scelgono quali pillole prendere. In Congresso c'è la più grande estensione del programma dalla sua nascita, la copertura dei farmaci. Resta da decidere chi la gestisce, e quanto costa.",
+  ch:[
+    { l:"Firmare: la copertura dei farmaci, affidata ad assicurazioni private", e:"La storia · alla Camera il voto resta aperto per ore nella notte, e lo Stato non potrà trattare i prezzi · i pensionati e le imprese approvano, la tua base e i giovani contano il conto", costo:{debito:0.7},
+      f:function(){ S.usFarmaci03='privata'; S.ind.debt+=0.7; gdUs60('pensionati',2); gdUs60('imprenditori',1); baseUs60(-1); gdUs60('giovani',-1);
+        S.log.unshift({t:T('Il paese'),x:T("Ha firmato la copertura dei farmaci per gli anziani, affidata ad assicurazioni private.")}); } },
+    { l:"La copertura la dà lo Stato, che tratta i prezzi coi produttori", e:"Pensionati e lavoratori sono con te · i produttori di farmaci e le imprese no", costo:{debito:0.5},
+      f:function(){ S.usFarmaci03='pubblica'; S.ind.debt+=0.5; gdUs60('pensionati',2); gdUs60('lavoratori',1); gdUs60('imprenditori',-2);
+        S.log.unshift({t:T('Il paese'),x:T("Ha fatto approvare una copertura pubblica dei farmaci per gli anziani, con i prezzi trattati dallo Stato.")}); } },
+    { l:"Rinviare: col bilancio in rosso non si apre una spesa nuova", e:"I giornali e la tua base lodano i conti · i pensionati non lo dimenticano",
+      f:function(){ S.usFarmaci03='rinvio'; stampad(1); gdUs60('pensionati',-2); baseUs60(1);
+        S.log.unshift({t:T('Il paese'),x:T("Ha rinviato la copertura dei farmaci per gli anziani: il bilancio è in rosso.")}); } },
+  ],
+};
+const FARMACI03_OPP_EV = {
+  id:'us00_farmaci_opp', era:'us2000', kick:'Il paese',
+  t:"Le medicine degli anziani, dall'aula",
+  text:"In Congresso c'è la copertura dei farmaci per gli anziani, la più grande estensione della loro assicurazione pubblica dalla sua nascita, affidata ad assicurazioni private. In aula il tuo partito deve decidere come votare.",
+  ch:[
+    { l:"Votare la legge", e:"I pensionati ringraziano · la base dice che regalate la vittoria al governo",
+      f:function(){ S.usFarmaci03Opp='voti'; gdUs60('pensionati',1); baseUs60(-1);
+        S.log.unshift({t:T('Il paese'),x:T("Dall'opposizione ha votato la copertura dei farmaci per gli anziani.")}); } },
+    { l:"Chiedere che sia lo Stato a trattare i prezzi", e:"La storia · la richiesta resta fuori dalla legge · i lavoratori sono con te, le imprese no",
+      f:function(){ S.usFarmaci03Opp='prezzi'; gdUs60('lavoratori',1); gdUs60('imprenditori',-1);
+        S.log.unshift({t:T('Il paese'),x:T("Dall'opposizione ha chiesto che sia lo Stato a trattare i prezzi dei farmaci per gli anziani.")}); } },
+    { l:"Votare contro: costa troppo", e:"I giornali lodano i conti · i pensionati se lo ricordano",
+      f:function(){ S.usFarmaci03Opp='contro'; stampad(1); gdUs60('pensionati',-1);
+        S.log.unshift({t:T('Il paese'),x:T("Dall'opposizione ha votato contro la copertura dei farmaci per gli anziani: costa troppo.")}); } },
+  ],
+};
