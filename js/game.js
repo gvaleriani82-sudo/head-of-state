@@ -6340,9 +6340,9 @@ function blackout03Ora(){ return us00Gov() && S.usBlackout03==null && meseAss()=
 function farmaci03Ora(){ return us00Gov() && S.usFarmaci03==null && S.usFarmaci03Opp==null && us00Mesi([2003*12+12, 2004*12+1]); }
 function farmaci03OppOra(){ return us00Opp() && S.usFarmaci03Opp==null && S.usFarmaci03==null && us00Mesi([2003*12+12, 2004*12+1]); }
 /* L265-8 · gli ultimi eventi datati di us2000 (D325; data.js, testa del blocco MUTUI07_EV), nella stessa us00Eventi e con le stesse
-   regole di L265-7. Mesi (sonda prove/l265-8/sonda-calendario.js: tutti liberi oggi; nessun pilastro pus00_ ancora): le case e le rate
+   regole di L265-7. Mesi (sonda prove/l265-8/sonda-calendario.js: tutti liberi; i pilastri pus00_ del L265-9 non toccano né questi mesi né i ripieghi): le case e le rate
    2007/4, ripiego 2007/5 (mai 2007/3, della dovuta us00_rinforzo07) · la marea nera 2010/5, ripiego 2010/6 (carta sobria, anche
-   l'aula: US00_CARTE_SOBRIE) · la città sotto assedio il solo 2011/3 (aprile sarà del pilastro dei tornado: se marzo è occupato la
+   l'aula: US00_CARTE_SOBRIE) · la città sotto assedio il solo 2011/3 (aprile è del pilastro dei tornado, L265-9: se marzo è occupato la
    carta non esce). Mai S.libia11 (è di italia2000). La caccia finita (2011/5) è un titolo e una riga di registro, nessuna carta:
    caccia11Vale() la spegne nel ramo «nessuna» di S1 (gli Stati Uniti non hanno risposto con la forza); la riga la scrive us90Mese. */
 function mutui07Ora(){ return us00Gov() && S.usMutui07==null && S.usMutui07Opp==null && us00Mesi([2007*12+4, 2007*12+5]); }
@@ -7633,7 +7633,7 @@ function titoloPerId(id){
   if(!TITOLI_PER_ID){ TITOLI_PER_ID={}; TITOLI.forEach(t=>{ TITOLI_PER_ID[t.id]=t; }); }
   return TITOLI_PER_ID[id];
 }
-/* L262-24 · IL MESE SOBRIO DI us1980. Nel mese in cui esce una di queste carte (la navetta, la caserma di Beirut, la paura atomica, la Scozia, governo e aula) o un pilastro `pus80_` (dal L264-9 anche `pus90_`) grave, e nel mese dopo,
+/* L262-24 · IL MESE SOBRIO DI us1980. Nel mese in cui esce una di queste carte (la navetta, la caserma di Beirut, la paura atomica, la Scozia, governo e aula) o un pilastro `pus80_` (dal L264-9 anche `pus90_`, dal L265-9 `pus00_`) grave, e nel mese dopo,
    la prima pagina non pesca i titoli generici allegri (`allegro:true`, data.js). Lo segna genAgenda (S.meseSobrio = il mese assoluto, si salva), lo legge solo generaTitolo. Vale per la linea americana dal 1980,
    comprese le carriere di us1970 che ci arrivano: le altre linee non scrivono mai il campo, e con null il titolo si pesca come prima. */
 /* L262-27 · la disoccupazione «alta» dei titoli reattivi di us1980 (ti_us80_s_disoccupati, ti_us80_s_fabbriche): 9 scatta nel 24-25% dei mesi del banco (bersaglio 15-30%), misura in prove/l262-27/misura-indicatori.js. */
@@ -7645,7 +7645,7 @@ const US00_CARTE_SOBRIE={ us00_blackout:1, us00_marea:1, us00_marea_opp:1 };   /
 const US80_CARTE_SOBRIE={ us80_navetta:1, us80_navetta_opp:1, us80_beirut:1, us80_beirut_opp:1, us80_paura:1, us80_paura_opp:1, us80_scozia:1, us80_scozia_opp:1 };
 function meseSobrioSegna(){
   if(!S || S.era!==LINEA_US || !S.agenda) return;
-  if(S.agenda.some(function(it){ var c=it&&it.data, id=c&&c.id; return !!id && (US80_CARTE_SOBRIE[id]===1 || US90_CARTE_SOBRIE[id]===1 || US00_CARTE_SOBRIE[id]===1 || ((id.indexOf('pus80_')===0 || id.indexOf('pus90_')===0) && c.tono==='grave')); })) S.meseSobrio=meseAss();
+  if(S.agenda.some(function(it){ var c=it&&it.data, id=c&&c.id; return !!id && (US80_CARTE_SOBRIE[id]===1 || US90_CARTE_SOBRIE[id]===1 || US00_CARTE_SOBRIE[id]===1 || ((id.indexOf('pus80_')===0 || id.indexOf('pus90_')===0 || id.indexOf('pus00_')===0) && c.tono==='grave')); })) S.meseSobrio=meseAss();
 }
 function meseSobrioOra(){ if(S.meseSobrio==null) return false; var d=meseAss()-S.meseSobrio; return d>=0 && d<=1; }
 function generaTitolo(){
