@@ -21697,6 +21697,8 @@ const TITOLI=[
 /* L264-13 passo 1 · i titoli reattivi di us1990 (la forma di ti_us80_s_frenata): la cond legge un indicatore della partita. Soglie dalla misura del banco (prove/l264-13/misura-indicatori.js, 5 semi × 160 carriere): growth<0 nel 3% dei mesi (22% nel 1991); unemp>=7 nel 16-17% dei mesi, 25% al governo, mediana 7,2-7,3 nel 1992-93. Fuori dai mesi sobri, non allegri, nessun effetto. Fatti: recessione luglio 1990 - marzo 1991 (NBER), disoccupazione al massimo a giugno 1992 (7,8%, BLS), la «ripresa senza lavoro» e i licenziamenti fra gli impiegati (BLS, Monthly Labor Review 1994/6). */
  {id:'ti_us90_s_frenata', era:'us1990', reattivo:true, cond:()=>S.year>=1990&&S.ind.growth<0&&!meseSobrioOra(), amico:"L'economia frena, ma passerà: i tassi scendono, dice il governo", ostile:"L'economia arretra: cartelli «vendesi» nei sobborghi, e tagli anche fra gli impiegati"},
  {id:'ti_us90_s_senzalavoro', era:'us1990', reattivo:true, cond:()=>S.year>=1990&&S.ind.unemp>=US90_DISOCC_ALTA&&!meseSobrioOra(), amico:'Corsi di formazione e aiuti per chi ha perso il posto', ostile:"L'economia riparte, ma le assunzioni no"},
+/* L265-6 passo 3 · il declassamento del 5 agosto 2011 (✓: una delle tre grandi agenzie toglie al debito americano il voto massimo, le altre due lo tengono), SOLO TITOLO, nessun effetto (decisione 8 di Cowork); nessun nome d'agenzia. Esce dopo S6 se non è finito con l'accordo, o dall'aula (dove il mondo segue la storia; ma all'opposizione non c'è prima pagina: la condizione c'è per completezza). Il mese dopo S6: 2011/8 se S6 è uscito a luglio, 2011/9 se è scivolato ad agosto (la finestra dei recenti non lo ripete). */
+{id:'ti_us00_declassamento', era:'us2000', pri:1, cond:()=>((S.usTetto11 && S.usTetto11!=='accordo') || !!S.usTetto11Opp) && S.year===2011 && (S.month===8 || S.month===9), amico:'Una delle tre grandi agenzie toglie al debito americano il voto massimo; le altre due lo confermano', ostile:'Il debito americano perde il voto massimo, per la prima volta'},
  {id:'ng_p_ti_petrolio', era:'contemporanea', paesi:['nigeria'], amico:'La produzione di petrolio torna a salire', ostile:'Un barile su dieci sparisce: il furto record'},
 ];
 
@@ -23720,6 +23722,25 @@ const SNODI_STORICI = {
   usChiusura95Opp: { storico:['tieni'], conforme:'sulla chiusura degli uffici federali del 1995, dall’opposizione', diverge:{ 'riapri':"Nel 1995 ha riaperto dall'opposizione gli uffici federali per trattare.", 'ponte':"Nel 1995 ha votato dall'opposizione leggi-ponte per i servizi essenziali." } },
   usBilancio90:    { storico:['accordo'], conforme:'sul bilancio d’ottobre del 1990', diverge:{ 'accordo_destra':'Nel 1990 ha ritirato l’accordo sul bilancio per cercarne uno più gradito al suo partito.', 'ponte':'Nel 1990, dopo la chiusura degli uffici federali, ha firmato un bilancio ponte.', 'chiusura':'Nel 1990 ha tenuto duro con gli uffici federali chiusi: niente tasse nuove.', 'firmato':'Nel 1990 ha firmato il bilancio scritto dal Congresso.', 'veto':'Nel 1990 ha messo il veto al bilancio scritto dal Congresso.' } },
   usBilancio90Opp: { storico:['vota'], conforme:'sul bilancio d’ottobre del 1990, dall’opposizione', diverge:{ 'affossa':'Nel 1990 ha affossato dall’opposizione l’accordo sul bilancio per strappare di più.' } },
+  /* L265-3 · la risposta all'11 settembre di us2000 (frasi di Code): S1, la sua aula e la legge sulla sicurezza del 2001/12. */
+  usRisposta01:    { storico:['campagna'], conforme:"sulla risposta all'11 settembre", diverge:{ 'mirato':"Nel 2001 ha risposto all'11 settembre con colpi mirati, senza truppe a terra.", 'invasione':"Nel 2001 ha risposto all'11 settembre con un'invasione di terra in forze.", 'nessuna':"Nel 2001 ha risposto all'11 settembre senza armi: la giustizia internazionale, i conti congelati, la polizia." } },
+  usRisposta01Opp: { storico:['si'], conforme:"sulla risposta all'11 settembre, dall'opposizione", diverge:{ 'limiti':"Nel 2001 ha votato dall'opposizione l'uso della forza chiedendo un limite di tempo e di luogo.", 'no':"Nel 2001 ha votato dall'opposizione contro l'uso della forza." } },
+  usSicurezza01:   { storico:['larghi'], conforme:'sulla legge sulla sicurezza del 2001', diverge:{ 'garanzie':"Nel 2001 ha applicato la legge sulla sicurezza con garanzie e una scadenza.", 'rinvio':"Nel 2001 ha rimandato al Congresso le regole della legge sulla sicurezza." } },
+  /* L265-4 · l'Iraq in due tempi di us2000 (frasi di Code): il primo tempo del 2002/10, il secondo del 2003/3 (col bivio del 2003/10) e le loro aule. */
+  usIraq02:        { storico:['larga'], conforme:"sull'autorizzazione all'uso della forza contro il regime di Baghdad", diverge:{ 'onu':"Nel 2002 ha chiesto un'autorizzazione all'uso della forza legata alle Nazioni Unite.", 'nonchiede':"Nel 2002 non ha chiesto al Congresso l'autorizzazione all'uso della forza contro il regime di Baghdad." } },
+  usIraq02Opp:     { storico:['si'], conforme:"sull'autorizzazione all'uso della forza contro il regime di Baghdad, dall'opposizione", diverge:{ 'onu':"Nel 2002 ha votato dall'opposizione l'uso della forza solo col vincolo delle Nazioni Unite.", 'no':"Nel 2002 ha votato dall'opposizione contro l'uso della forza contro il regime di Baghdad." } },
+  usIraq03:        { storico:['intervento'], conforme:"sull'intervento in Iraq", diverge:{ 'ispezioni':"Nel 2003 ha dato altro tempo agli ispettori delle Nazioni Unite in Iraq.", 'contenimento':"Nel 2003, dopo le ispezioni, ha chiuso il fascicolo dell'Iraq senza guerra.", 'rinuncia':"Nel 2003 ha rinunciato all'intervento in Iraq." } },
+  usIraq03Opp:     { storico:['truppe'], conforme:"sulla guerra in Iraq, dall'opposizione", diverge:{ 'contro':"Dall'opposizione si è detto contro la guerra in Iraq fin dal primo giorno.", 'conti':"Dall'opposizione ha chiesto i conti della guerra in Iraq." } },
+  /* L265-5 · la ricostruzione dopo l'uragano (2005/10) e la crisi finanziaria (2008/9) di us2000 (frasi di Code), con le loro aule. */
+  usRicostr05:     { storico:['stati'], conforme:"sulla ricostruzione dopo l'uragano del 2005", diverge:{ 'federale':"Nel 2005 ha affidato la ricostruzione dopo l'uragano a un piano federale grande, con un'agenzia nuova.", 'sgravi':"Nel 2005 ha ricostruito dopo l'uragano con sgravi e zone franche per chi investe." } },
+  usRicostr05Opp:  { storico:['inchiesta'], conforme:"sulla ricostruzione dopo l'uragano del 2005, dall'opposizione", diverge:{ 'fondi':"Nel 2005 ha votato dall'opposizione i fondi della ricostruzione senza condizioni.", 'proposta':"Nel 2005 ha proposto dall'opposizione di ricostruire con chi ci abitava." } },
+  usCrisi08:       { storico:['salvataggio','bocciata'], conforme:'sul salvataggio delle banche del 2008', diverge:{ 'fallire':"Nel 2008 ha lasciato fallire le banche, senza soldi pubblici.", 'condizioni':"Nel 2008 ha salvato le banche con condizioni: lo Stato nel capitale e un tetto agli stipendi." } },
+  usCrisi08Opp:    { storico:['si'], conforme:"sul salvataggio delle banche del 2008, dall'opposizione", diverge:{ 'no':"Nel 2008 ha votato dall'opposizione contro il salvataggio delle banche.", 'condizioni':"Nel 2008 ha votato dall'opposizione il salvataggio delle banche solo con le condizioni." } },
+  /* L265-6 · la riforma sanitaria del 2010 e il tetto del debito del 2011 di us2000 (frasi di Code), con le loro aule. */
+  usSanita10:      { storico:['intera'], conforme:'sulla riforma sanitaria del 2010', diverge:{ 'compromesso':"Nel 2010 ha fatto approvare sulla sanità un compromesso più piccolo.", 'rinvio':"Nel 2010 ha rinviato la riforma sanitaria." } },
+  usSanita10Opp:   { storico:['contro'], conforme:"sulla riforma sanitaria del 2010, dall'opposizione", diverge:{ 'piano':"Nel 2010 ha presentato dall'opposizione un piano sanitario suo.", 'collabora':"Nel 2010 ha collaborato dall'opposizione a una parte della riforma sanitaria." } },
+  usTetto11:       { storico:['tagli'], conforme:'sul tetto del debito del 2011', diverge:{ 'punto':"Nel 2011 ha tenuto il punto sul tetto del debito fino all'ultimo giorno.", 'accordo':"Nel 2011 ha chiuso sul tetto del debito un accordo grande: tagli ed entrate insieme." } },
+  usTetto11Opp:    { storico:['tieni'], conforme:"sul tetto del debito del 2011, dall'opposizione", diverge:{ 'tratta':"Nel 2011 ha alzato dall'opposizione il tetto del debito per trattare.", 'proroga':"Nel 2011 ha votato dall'opposizione una proroga breve del tetto del debito." } },
 };
 
 /* ==============================================================================================================
@@ -24025,7 +24046,7 @@ const PILASTRI_MONDO = [
     text:'Il giorno dopo Natale un terremoto sotto l\'oceano Indiano solleva un\'onda che in poche ore colpisce le coste di dodici paesi, dall\'Indonesia alla Somalia. Più di duecentomila morti; fra loro migliaia di turisti europei nelle spiagge della Thailandia. Le immagini arrivano dai telefoni dei sopravvissuti, prima che dalle televisioni.',
     logx:'Un\'onda nell\'oceano Indiano: più di duecentomila morti in dodici paesi.',
     ch:[ { l:'Prosegui', e:'', f:function(){} } ] },
-  { id:'pm_crollo', anno:2008, mese:9, tono:'grave', cronaca:true, kick:'Il mondo',
+  { id:'pm_crollo', anno:2008, mese:9, tono:'grave', cronaca:true, kick:'Il mondo', nonAlCapo:['usa'],   // L265-5 (D322): al Presidente americano esce la crisi del 2008/9 (CRISI08_US_EV), dall'aula la cronaca resta
     t:'Il crollo',
     text:'Il 15 settembre una delle grandi banche d\'affari di Wall Street fallisce, e nessuno la salva. In una settimana le banche del mondo smettono di prestarsi denaro, i governi nazionalizzano quello che fino al giorno prima era il cuore del capitalismo, e le Borse perdono un terzo. La crisi dei mutui americani è diventata la crisi di tutti.',
     logx:'Una grande banca americana fallisce: il credito si ferma in tutto il mondo.',
@@ -29429,5 +29450,629 @@ const KOSOVO99_US_OPP_EV = {
     { l:"Chiedere che decida il Congresso", e:"I giornali scrivono che difendi le regole · la Casa Bianca dice che le bombe non aspettano un voto",
       f:function(){ S.usKosovo99Opp='congresso'; stampad(1); gdUs60('cetomedio',-1);
         S.log.unshift({t:T('Il mondo'),x:T("Dall'opposizione ha chiesto che sulle bombe sulla Serbia decida il Congresso.")}); } },
+  ],
+};
+/* ==============================================================================================================
+   L265-3 · STATI UNITI 2000 — LA RISPOSTA ALL'11 SETTEMBRE (S1, 2001/10) CON LA SUA AULA, LE CONSEGUENZE DOVUTE CHE LEGGONO IL FLAG,
+   LA LEGGE SULLA SICUREZZA (2001/12) E IL 2000 IN TRIBUNALE (S0, 2000/12, solo per le carriere di us1990 a margine stretto). Scheda
+   PRESET-USA-2000 §4 S0 e S1, D318, D319, D331; testi di Code. Gli helper di us1960-us1990 (gdUs60, baseUs60). Nomi nuovi cercati in
+   tutto js/ e .claude/ il 10/11 prima di scriverli (L99-2), zero occorrenze: snodo_risposta01(_opp), RISPOSTA01(_OPP)_EV, usRisposta01(Opp),
+   us00_campi02, usCampi02, us00_allarme02, usAllarme02, us00_conto_guerra, usContoGuerra, us00_afghanistan06, usAfghan06,
+   snodo_sicurezza01, usSicurezza01, us00_tribunale, usMargine00, usTribunale00, us00Eventi.
+   ⚑ CHI RICEVE CHE COSA (cancelli in game.js accanto a us90Eventi): pm_11settembre (2001/9) resta per tutti, uguale. S1 a chi governa
+   gli Stati Uniti nel 2001/10-11 (novembre solo se ottobre è preso, per es. dal richiamo), l'aula a chi è all'opposizione. Le conseguenze
+   sono carte DOVUTE a chi governa nel loro mese (anche se non ha scelto lui: il testo dice «la scelta dell'autunno 2001»): mirato →
+   i campi 2002/3 · campagna (e senza S1: la storia) → la guerra dimenticata 2006/5 (anche dopo mirato + rilancio) · invasione → il conto
+   2003/1, 2005/2, 2007/2 (la stessa carta, ridurre dalla seconda volta ferma la terza) · nessuna → l'allarme 2002/6. La legge sulla
+   sicurezza 2001/12 a chi governa, solo dopo S1 e mai dopo «nessuna» (là la stessa scelta è nell'allarme). Il tribunale del 2000/12 a chi
+   era candidato nella presidenziale del 2000 con |margine| < 0,25 punti prima dell'arrotondamento (S.usMargine00, centesimi di punto,
+   scritto da segnaMargine00 in urnaVero): una carta per chi è avanti e una per chi è dietro; mai effetti sul risultato.
+   ⚑ Nessun nome di persona, di organizzazione o di capo (G5), nessuna immagine degli impatti: «i campi», «il regime che li ospita», «le
+   montagne», «l'Alleanza», «il mandato delle Nazioni Unite». Il Presidente non ha partito nei testi (la porta ha i due lati).
+   Verificato il 10/11 (fonti di sempre: storia del Congresso, archivi dei giornali): quasi tremila morti l'11 settembre; l'autorizzazione
+   all'uso della forza del 18 settembre (420 a 1 alla Camera, 98 a 0 al Senato); la campagna aerea dal 7 ottobre con l'Alleanza del nord
+   sul terreno, Kabul il 13 novembre; le lettere con la polvere, cinque morti; la legge sulla sicurezza firmata il 26 ottobre; i
+   trentasei giorni del 2000, chiusi dalla Corte il 12 dicembre, con poche centinaia di voti di scarto nello Stato decisivo.
+   ============================================================================================================== */
+function us00Sei(n){ ['lavoratori','pensionati','cetomedio','imprenditori','giovani','cattolici'].forEach(function(g){ gdUs60(g, n); }); }
+const RISPOSTA01_EV = {
+  id:'snodo_risposta01', snodo:true, era:'us2000', kick:'Il mondo', tono:'grave',
+  t:'La risposta',
+  text:"Un mese fa quasi tremila persone sono morte in una mattina, a New York, a Washington e in un campo della Pennsylvania. Chi ha colpito si addestrava in campi fra le montagne di un paese lontano, e il regime che li ospita rifiuta di consegnare i capi. Intanto lettere con una polvere mortale arrivano nelle redazioni e negli uffici del Congresso, e alla fine i morti saranno cinque. Il paese è unito come non lo era da sessant'anni, gli alleati atlantici dicono che un attacco a uno è un attacco a tutti, e tutti aspettano la tua decisione.",
+  ch:[
+    { l:"Il colpo mirato: missili e incursioni sui campi, nessuna truppa a terra", e:"Costa poco e non rischia soldati · il regime che ospita i campi resta al suo posto, e i giornali scrivono che il paese chiedeva di più", costo:{debito:0.3},
+      f:function(){ S.usRisposta01='mirato'; S.ind.debt+=0.3; us00Sei(1); gdUs60('imprenditori',1); stampad(-1);
+        S.log.unshift({t:T('Il mondo'),x:T("Dopo l'11 settembre ha risposto con colpi mirati sui campi, senza truppe a terra.")}); } },
+    { l:"La campagna dal cielo, con l'Alleanza sul terreno e il mandato delle Nazioni Unite", e:"La storia · il regime cade in poche settimane, poi resta una presenza lunga in un paese lontano · gli alleati sono con te, i più giovani meno", costo:{debito:0.8},
+      f:function(){ S.usRisposta01='campagna'; S.ind.debt+=0.8; us00Sei(2); gdUs60('pensionati',1); gdUs60('cetomedio',1); gdUs60('giovani',-3); stampad(1); repd(1);
+        S.log.unshift({t:T('Il mondo'),x:T("Dopo l'11 settembre ha risposto con la campagna dal cielo, con gli alleati e il mandato delle Nazioni Unite.")}); } },
+    { l:"L'invasione, con truppe di terra in forze", e:"Il paese si stringe intorno ai soldati come non mai · costa caro, e una guerra di terra fra quelle montagne non finisce in un anno", costo:{debito:1.5},
+      f:function(){ S.usRisposta01='invasione'; S.ind.debt+=1.5; us00Sei(3); gdUs60('giovani',-6); gdUs60('pensionati',2);
+        S.log.unshift({t:T('Il mondo'),x:T("Dopo l'11 settembre ha risposto con un'invasione di terra in forze.")}); } },
+    { l:"Nessuna risposta militare: la giustizia internazionale, i conti congelati, la polizia e i servizi", e:"Nessun soldato in pericolo · il paese voleva una risposta, e i giornali chiedono dov'è; i più giovani sono con te", costo:{debito:0.1},
+      f:function(){ S.usRisposta01='nessuna'; S.ind.debt+=0.1; us00Sei(-1); gdUs60('imprenditori',1.5); gdUs60('giovani',2); stampad(-1.5); repd(-0.5);   // L265-3: effetti dimezzati dalla misura per ramo (il 2004 a 11,4/20 contro la media 14,6)
+        S.log.unshift({t:T('Il mondo'),x:T("Dopo l'11 settembre ha risposto senza armi: la giustizia internazionale, i conti congelati, la polizia.")}); } },
+  ],
+};
+const RISPOSTA01_OPP_EV = {
+  id:'snodo_risposta01_opp', snodo:true, era:'us2000', kick:'Il mondo', tono:'grave',
+  t:"La risposta, dall'aula",
+  text:"Un mese fa quasi tremila persone sono morte in una mattina. Il Presidente ha chiesto al Congresso l'autorizzazione a usare la forza contro chi ha colpito e contro chi lo ospita, senza un limite di tempo né di luogo, e l'aula la vota quasi all'unanimità. Il tuo partito deve dire da che parte sta, e il paese ascolta.",
+  ch:[
+    { l:"Votare sì e stare con il Presidente", e:"La storia · davanti ai morti il paese parla con una voce sola · un giorno ti chiederanno conto di un'autorizzazione senza confini",
+      f:function(){ S.usRisposta01Opp='si'; gdUs60('cetomedio',1); gdUs60('pensionati',1);
+        S.log.unshift({t:T('Il mondo'),x:T("Dall'opposizione ha votato l'uso della forza dopo l'11 settembre.")}); } },
+    { l:"Votare sì, ma chiedere un limite di tempo e di luogo", e:"I giornali scrivono che difendi le regole · alla Casa Bianca dicono che non è il momento dei distinguo",
+      f:function(){ S.usRisposta01Opp='limiti'; gdUs60('cetomedio',1); gdUs60('giovani',1); gdUs60('pensionati',-1);
+        S.log.unshift({t:T('Il mondo'),x:T("Dall'opposizione ha votato l'uso della forza dopo l'11 settembre, chiedendo un limite di tempo e di luogo.")}); } },
+    { l:"Votare no", e:"Il voto solitario · i più giovani sono con te, il paese no",
+      f:function(){ S.usRisposta01Opp='no'; gdUs60('giovani',2); gdUs60('cetomedio',-2); gdUs60('pensionati',-2);
+        S.log.unshift({t:T('Il mondo'),x:T("Dall'opposizione ha votato contro l'uso della forza dopo l'11 settembre.")}); } },
+  ],
+};
+const SICUREZZA01_EV = {
+  id:'snodo_sicurezza01', snodo:true, era:'us2000', kick:'Il paese',
+  t:'La legge sulla sicurezza',
+  text:"La legge sulla sicurezza firmata a ottobre ha dato ai servizi e alla polizia poteri nuovi: intercettazioni più facili, archivi aperti, stranieri trattenuti più a lungo. Il Congresso l'ha votata in poche settimane, e ora tocca al governo scrivere le regole per applicarla. Le associazioni per i diritti civili chiedono garanzie; i servizi chiedono le mani libere.",
+  ch:[
+    { l:"Poteri larghi: le mani libere ai servizi", e:"La storia · le regole lasciano ai servizi tutto lo spazio della legge · i più anziani si sentono protetti, i più giovani e i giornali meno",
+      f:function(){ S.usSicurezza01='larghi'; gdUs60('pensionati',1); gdUs60('giovani',-1); stampad(-1);
+        S.log.unshift({t:T('Il paese'),x:T('Ha applicato la legge sulla sicurezza con poteri larghi ai servizi.')}); } },
+    { l:"Garanzie e una scadenza: ogni potere nuovo da rinnovare", e:"I giornali apprezzano · i servizi dicono che gli leghi le mani",
+      f:function(){ S.usSicurezza01='garanzie'; gdUs60('giovani',1); gdUs60('pensionati',-1); stampad(1);
+        S.log.unshift({t:T('Il paese'),x:T('Ha applicato la legge sulla sicurezza con garanzie e una scadenza.')}); } },
+    { l:"Rimandare le regole al Congresso", e:"Le regole le scriverà l'aula · intanto nessuno sa bene che cosa si può fare, e il ceto medio se ne accorge",
+      f:function(){ S.usSicurezza01='rinvio'; gdUs60('cetomedio',-1); stampad(1);
+        S.log.unshift({t:T('Il paese'),x:T('Ha rimandato al Congresso le regole della legge sulla sicurezza.')}); } },
+  ],
+};
+/* le conseguenze, carte DOVUTE (non snodi: nessuna riga in SNODI_STORICI, il flag è il segno «già uscita») */
+const US00_CAMPI02_EV = {
+  id:'us00_campi02', era:'us2000', kick:'Il mondo',
+  t:'I campi',
+  text:"Sei mesi dopo la scelta dell'autunno 2001 i rapporti dei servizi dicono che i campi fra le montagne sono di nuovo pieni. Il regime che li ospita è ancora al suo posto, e chi ha colpito l'America si è spostato di qualche valle: i missili hanno distrutto le baracche, non la rete. La domanda dell'autunno torna sul tavolo.",
+  ch:[
+    { l:"Rilanciare: la campagna dal cielo, con gli alleati sul terreno", e:"Si fa adesso quello che non si è fatto in autunno · costa, e i giornali scrivono di un anno perso", costo:{debito:1},
+      f:function(){ S.usCampi02='rilancio'; S.ind.debt+=1; gdUs60('cetomedio',1); gdUs60('pensionati',1); stampad(-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Con i campi di nuovo pieni ha rilanciato la campagna dal cielo, con gli alleati.')}); } },
+    { l:"Tenere la linea: colpi mirati quando serve", e:"Nessun soldato in più · i giornali chiedono che cosa si aspetta, e i più anziani hanno paura",
+      f:function(){ S.usCampi02='linea'; stampad(-1); gdUs60('pensionati',-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Con i campi di nuovo pieni ha tenuto la linea dei colpi mirati.')}); } },
+  ],
+};
+const US00_AFGHANISTAN06_EV = {
+  id:'us00_afghanistan06', era:'us2000', kick:'Il mondo',
+  t:'La guerra dimenticata',
+  text:"Quasi cinque anni dopo la scelta dell'autunno 2001, in quel paese lontano i soldati americani e quelli dell'Alleanza sono ancora lì. Nelle valli del sud i combattenti del vecchio regime sono tornati, e i combattimenti sono i più duri da allora. A casa nessuno ci pensava più: adesso i comandi chiedono rinforzi.",
+  ch:[
+    { l:"Mandare rinforzi", e:"I comandi hanno quello che chiedono · costa, e i ragazzi partono di nuovo", costo:{debito:0.5},
+      f:function(){ S.usAfghan06='rinforzi'; S.ind.debt+=0.5; gdUs60('giovani',-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Nella guerra dimenticata ha mandato rinforzi.')}); } },
+    { l:"Cominciare un ritiro graduale", e:"Gli alleati restano più soli nelle valli · i giornali scrivono di una guerra lasciata a metà, i più giovani approvano",
+      f:function(){ S.usAfghan06='ritiro'; stampad(-1); gdUs60('giovani',1);
+        S.log.unshift({t:T('Il mondo'),x:T('Nella guerra dimenticata ha cominciato un ritiro graduale.')}); } },
+  ],
+};
+/* il conto della guerra: la stessa carta tre volte (2003/1, 2005/2, 2007/2); il giro lo dice il mese (us00ContoGiro in game.js).
+   S.usContoGuerra = quante volte è uscita (0-3); «ridurre» dalla seconda volta lo porta a 3 e ferma la terza. */
+const US00_CONTO_GUERRA_EV = {
+  id:'us00_conto_guerra', era:'us2000', kick:'Il mondo',
+  t:'Il conto della guerra',
+  get text(){ var g=(typeof us00ContoGiro==='function') ? us00ContoGiro() : 1;
+    return g>=3 ? "Sono passati più di cinque anni dalla scelta dell'autunno 2001, e le truppe di terra sono ancora fra quelle montagne. Le valli non sono mai state in pace, e ogni mese c'è un funerale in qualche cittadina. Il Pentagono presenta il conto dell'anno, il terzo che arriva sul tuo tavolo."
+      : (g===2 ? "La guerra di terra della scelta dell'autunno 2001 è al suo quarto inverno. Il regime è caduto da tempo, ma i soldati sono ancora lì, e il paese che li salutava con le bandiere ora chiede quando torneranno. Il Pentagono presenta il conto dell'anno."
+      : "Più di un anno dopo la scelta dell'autunno 2001 le truppe di terra sono ancora fra quelle montagne, molte più di quante ne servissero per vincere le prime battaglie. Il regime è caduto, ma le valli non sono in pace. Il Pentagono presenta il conto dell'anno."); },
+  ch:[
+    { l:"Restare con le truppe che ci sono", e:"I comandi tengono le posizioni · il conto sale, e i giornali lo contano", costo:{debito:0.8},
+      f:function(){ var g=us00ContoGiro(); S.usContoGuerra=Math.max(S.usContoGuerra||0, g); S.ind.debt+=0.8; us00Sei(-1); gdUs60('giovani',-1); stampad(-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Ha pagato il conto della guerra di terra e ha tenuto le truppe.')}); } },
+    { l:"Cominciare a ridurre le truppe", e:"Una parte dei soldati torna a casa · i più anziani temono che il lavoro resti a metà; dopo il secondo inverno la riduzione chiude il conto", costo:{debito:0.8},
+      f:function(){ var g=us00ContoGiro(); S.usContoGuerra=(g>=2) ? 3 : Math.max(S.usContoGuerra||0, g); S.ind.debt+=0.8; us00Sei(-1); gdUs60('pensionati',-1);
+        S.log.unshift({t:T('Il mondo'),x:T('Ha pagato il conto della guerra di terra e ha cominciato a ridurre le truppe.')}); } },
+  ],
+};
+const US00_ALLARME02_EV = {
+  id:'us00_allarme02', era:'us2000', kick:'Il paese',
+  t:"L'allarme",
+  text:"Nove mesi dopo la scelta dell'autunno 2001 i servizi hanno sventato un piano: un uomo fermato in aeroporto, una casa perquisita, altri nomi su una lista. Non è successo niente, e il paese ha avuto paura lo stesso. In autunno la risposta è stata la giustizia e non le armi; ora i servizi chiedono poteri nuovi, e i giornali chiedono dov'è la risposta.",
+  ch:[
+    { l:"Dare ai servizi poteri larghi", e:"I più anziani si sentono protetti · i più giovani e i giornali no",
+      f:function(){ S.usAllarme02='larghi'; gdUs60('pensionati',1); gdUs60('giovani',-2); stampad(-1);
+        S.log.unshift({t:T('Il paese'),x:T("Dopo l'allarme ha dato ai servizi poteri larghi.")}); } },
+    { l:"Poteri nuovi, con garanzie e una scadenza", e:"I più giovani apprezzano · i più anziani dicono che è poco",
+      f:function(){ S.usAllarme02='garanzie'; gdUs60('giovani',1); gdUs60('pensionati',-1);
+        S.log.unshift({t:T('Il paese'),x:T("Dopo l'allarme ha dato ai servizi poteri nuovi, con garanzie e una scadenza.")}); } },
+  ],
+};
+/* il 2000 in tribunale: una carta per chi è dietro e una per chi è avanti (la sceglie tribunaleCarta in game.js dal segno di usMargine00) */
+const US00_TRIBUNALE_EV = {
+  id:'us00_tribunale', era:'us2000', kick:'Il paese',
+  t:'La Corte',
+  text:"La notte di novembre non era finita. In uno Stato il conteggio si era fermato a poche centinaia di voti, e da lì dipendeva la presidenza: per trentasei giorni si è parlato di schede forate, di riconteggi a mano, di ricorsi. Ora la Corte ha chiuso il conteggio, e il risultato resta quello della notte: tu sei dall'altra parte. Resta da dire che cosa ne pensi.",
+  ch:[
+    { l:"Dire che il riconteggio andava fatto fino in fondo", e:"La tua base è con te · i giornali scrivono che non sai perdere, e le imprese vogliono che si chiuda",
+      f:function(){ S.usTribunale00='riconteggio'; stampad(-1); baseUs60(1); gdUs60('imprenditori',-1);
+        S.log.unshift({t:T('Il paese'),x:T('Dopo i trentasei giorni ha detto che il riconteggio andava fatto fino in fondo.')}); } },
+    { l:"Riconoscere la sconfitta", e:"I giornali scrivono che hai messo il paese prima di te · la tua base resta delusa",
+      f:function(){ S.usTribunale00='riconosce'; stampad(1); baseUs60(-1);
+        S.log.unshift({t:T('Il paese'),x:T('Dopo i trentasei giorni ha riconosciuto la sconfitta.')}); } },
+  ],
+};
+const US00_TRIBUNALE_AVANTI_EV = {
+  id:'us00_tribunale_avanti', era:'us2000', kick:'Il paese',
+  t:'La Corte',
+  text:"La notte di novembre non era finita. In uno Stato il conteggio si era fermato a poche centinaia di voti, e da lì dipendeva la presidenza: per trentasei giorni si è parlato di schede forate, di riconteggi a mano, di ricorsi. Ora la Corte ha chiuso il conteggio, e il risultato resta quello della notte: la presidenza è tua, e metà del paese pensa che non sia andata così.",
+  ch:[
+    { l:"Difendere il conteggio: le regole sono quelle", e:"La tua base è con te · i giornali scrivono che hai vinto in tribunale",
+      f:function(){ S.usTribunale00='difende'; baseUs60(1); stampad(-1);
+        S.log.unshift({t:T('Il paese'),x:T('Dopo i trentasei giorni ha difeso il conteggio.')}); } },
+    { l:"Dire che il riconteggio a mano andava accettato", e:"I giornali apprezzano · la tua base dice che regali argomenti a chi ha perso",
+      f:function(){ S.usTribunale00='amano'; stampad(1); baseUs60(-1);
+        S.log.unshift({t:T('Il paese'),x:T('Dopo i trentasei giorni ha detto che il riconteggio a mano andava accettato.')}); } },
+  ],
+};
+/* ==============================================================================================================
+   L265-4 · STATI UNITI 2000 — L'IRAQ IN DUE TEMPI (S2): L'AUTORIZZAZIONE DEL 2002/10 CON LA SUA AULA, LA DECISIONE DEL 2003/3 CON
+   LA SUA AULA, IL SECONDO BIVIO DELLE ISPEZIONI DEL 2003/10 E IL DOPOGUERRA DOVUTO (2004/4 · 2005/11 · 2006/10 · 2007/3 · 2011/12).
+   Scheda PRESET-USA-2000 §4 S2, D319, D320; consegna L265-4; testi di Code. Gli helper di us1960-us2000 (gdUs60, baseUs60, us00Sei).
+   ⚠ Correzione alla consegna: IRAQ02_EV e snodo_iraq02 sono lo snodo TEDESCO di de2000 (L157-1): il primo tempo americano si chiama
+   IRAQ02_US_EV / IRAQ02_US_OPP_EV, id snodo_us_iraq02(_opp) (la forma di KOSOVO99_US_EV). Gli altri nomi della consegna cercati in js/
+   il 10/11 prima di scriverli (L99-2), zero occorrenze: usIraq02(Opp), snodo_iraq03(_opp), IRAQ03(_OPP)_EV, usIraq03(Opp), snodo_iraq03b,
+   IRAQ03B_EV, usIraq03Tardi, guerraIraq, us00_guerriglia04, usGuerriglia04, us00_caduti, usCadutiIraq, us00_rinforzo07, usRinforzo07,
+   us00_ritiro11, usRitiro11, iraqDeb. Mai S.iraq (uk2000) né S.deIraq02 (de2000); nessuna riga di RIVALI (D320).
+   ⚑ CHI RICEVE CHE COSA (cancelli in game.js accanto a us00Eventi): il primo tempo a chi governa gli Stati Uniti il 2002/10 (con la carta
+   di campagna della metà mandato accanto), l'aula a chi è all'opposizione; il secondo tempo il 2003/3 solo dopo «larga» o «onu» (dopo
+   «nonchiede» e senza il primo tempo non esce: vale la storia); l'aula del 2003/3 solo se la guerra comincia (sempre, fuori da
+   «nonchiede»); il bivio del 2003/10 solo dopo «ispezioni». Il dopoguerra (carte DOVUTE, non snodi) a chi governa nel suo mese, solo con
+   guerraIraq() vero. ⚑ Il costo doppio (D319, decisione 8 di Cowork): dopo S.usRisposta01==='invasione' il DEBITO dell'intervento e di
+   ogni carta del dopoguerra raddoppia (iraqDeb); gruppi e stampa no. I `costo` di quelle scelte sono getter: l'etichetta dice il conto
+   che si paga (L264-9). Tono: politica, non lutto (decisione 5 di Cowork: nessun tono:'grave'). Nessun nome di persona, di capo, di
+   generale o di giudice; nessuna cifra dei caduti; nessuna immagine di prigioni o di statue; il testo del 2003/3 non dice se le armi
+   ci sono. Verificato il 10/11: gli ispettori lasciarono l'Iraq nel dicembre 1998 e tornarono il 27 novembre 2002; il Congresso votò
+   l'autorizzazione a ottobre 2002 a larga maggioranza; la seconda risoluzione fu ritirata a marzo 2003, l'intervento cominciò il 20
+   marzo e Baghdad cadde il 9 aprile; i rinforzi del 2007 furono annunciati a gennaio; l'accordo sulle truppe scadeva il 31 dicembre 2011.
+   ============================================================================================================== */
+function iraqPrima(k){ return S[k]; }   // la strada di prima, letta dentro una scelta (verifica-snodi legge le f: un confronto scritto S.x==='v' lì sembrerebbe il valore della scelta)
+function iraqDeb(x){ return (typeof S!=='undefined' && S && S.usRisposta01==='invasione') ? Math.round(x*2*10)/10 : x; }
+const IRAQ02_US_EV = {
+  id:'snodo_us_iraq02', snodo:true, era:'us2000', kick:'Il mondo',
+  t:"L'autorizzazione",
+  text:"Da mesi i servizi dicono che il regime di Baghdad nasconde armi proibite, e gli ispettori delle Nazioni Unite sono fuori dal paese da quasi quattro anni. Al Consiglio di sicurezza si discute una risoluzione nuova, gli alleati sono divisi, e fra un mese il paese vota per il Congresso. Tocca a te decidere se chiedere all'aula l'autorizzazione a usare la forza, e quale.",
+  ch:[
+    { l:"Chiedere un'autorizzazione larga: la forza se servirà, senza aspettare le Nazioni Unite", e:"La storia · l'aula dice sì a larga maggioranza e la campagna parla d'altro · i più giovani e gli alleati prudenti no",
+      f:function(){ S.usIraq02='larga'; gdUs60('pensionati',1); gdUs60('giovani',-1); stampad(1); repd(-1);
+        S.log.unshift({t:T('Il mondo'),x:T("Ha chiesto al Congresso un'autorizzazione larga all'uso della forza contro il regime di Baghdad.")}); } },
+    { l:"Chiedere un'autorizzazione legata alle Nazioni Unite", e:"Gli alleati apprezzano · la tua base dice che sei troppo prudente",
+      f:function(){ S.usIraq02='onu'; gdUs60('cetomedio',1); repd(1); baseUs60(-1);
+        S.log.unshift({t:T('Il mondo'),x:T("Ha chiesto al Congresso un'autorizzazione all'uso della forza legata alle Nazioni Unite.")}); } },
+    { l:"Non chiederla: nessuna guerra in vista", e:"I più giovani sono con te · a un mese dal voto i giornali parlano di debolezza",
+      f:function(){ S.usIraq02='nonchiede'; gdUs60('giovani',1); gdUs60('pensionati',-1); stampad(-1);
+        S.log.unshift({t:T('Il mondo'),x:T("Non ha chiesto al Congresso l'autorizzazione all'uso della forza contro il regime di Baghdad.")}); } },
+  ],
+};
+const IRAQ02_US_OPP_EV = {
+  id:'snodo_us_iraq02_opp', snodo:true, era:'us2000', kick:'Il mondo',
+  t:"L'autorizzazione, dall'aula",
+  get text(){ var r=(typeof S!=='undefined' && S) ? S.usRisposta01Opp : null;
+    return r==='no' ? "Il Presidente chiede al Congresso l'autorizzazione a usare la forza contro il regime di Baghdad, che secondo i servizi nasconde armi proibite. Il voto cade a un mese dalle elezioni per il Congresso, e l'aula si prepara a dire sì a larga maggioranza. Un anno fa hai votato contro l'uso della forza: chi ti ha seguito allora ti guarda."
+      : (r==='si' || r==='limiti' ? "Il Presidente chiede al Congresso l'autorizzazione a usare la forza contro il regime di Baghdad, che secondo i servizi nasconde armi proibite. Il voto cade a un mese dalle elezioni per il Congresso, e l'aula si prepara a dire sì a larga maggioranza. Un anno fa hai votato sì all'uso della forza, e la Casa Bianca lo ricorda a tutti."
+      : "Il Presidente chiede al Congresso l'autorizzazione a usare la forza contro il regime di Baghdad, che secondo i servizi nasconde armi proibite. Il voto cade a un mese dalle elezioni per il Congresso, e l'aula si prepara a dire sì a larga maggioranza. Il tuo partito deve decidere come votare."); },
+  ch:[
+    { l:"Votare sì", e:"La storia · il Congresso dice sì a larga maggioranza · la base del tuo partito si divide",
+      f:function(){ S.usIraq02Opp='si'; gdUs60('pensionati',1); baseUs60(-1); if(iraqPrima('usRisposta01Opp')==='no') baseUs60(-1);
+        S.log.unshift({t:T('Il mondo'),x:T("Dall'opposizione ha votato l'autorizzazione all'uso della forza contro il regime di Baghdad.")}); } },
+    { l:"Votare sì, solo col vincolo delle Nazioni Unite", e:"I giornali scrivono che tieni insieme il partito · alla Casa Bianca dicono che il vincolo non vale niente",
+      f:function(){ S.usIraq02Opp='onu'; gdUs60('cetomedio',1); gdUs60('pensionati',-1); if(iraqPrima('usRisposta01Opp')==='no') baseUs60(-1);
+        S.log.unshift({t:T('Il mondo'),x:T("Dall'opposizione ha votato l'uso della forza contro il regime di Baghdad solo col vincolo delle Nazioni Unite.")}); } },
+    { l:"Votare no", e:"I più giovani sono con te · i giornali scrivono che a un mese dal voto lasci il paese solo davanti a un pericolo",
+      f:function(){ S.usIraq02Opp='no'; gdUs60('giovani',2); gdUs60('pensionati',-1); stampad(-1); if(iraqPrima('usRisposta01Opp')==='si' || iraqPrima('usRisposta01Opp')==='limiti') stampad(-1);
+        S.log.unshift({t:T('Il mondo'),x:T("Dall'opposizione ha votato contro l'uso della forza contro il regime di Baghdad.")}); } },
+  ],
+};
+const IRAQ03_EV = {
+  id:'snodo_iraq03', snodo:true, era:'us2000', kick:'Il mondo',
+  t:'La decisione',
+  get text(){ return (typeof S!=='undefined' && S && S.usIraq02==='onu')
+    ? "Sono passati cinque mesi dal voto del Congresso. Gli ispettori delle Nazioni Unite sono tornati in Iraq e chiedono altro tempo; i servizi dicono che il regime di Baghdad nasconde ancora le armi proibite, e nessuno può provarlo né escluderlo. Le Nazioni Unite sono divise, e una seconda risoluzione non passerà. L'autorizzazione che hai chiesto era legata alle Nazioni Unite, e le Nazioni Unite non decidono. Le truppe sono già nel Golfo."
+    : "Sono passati cinque mesi dal voto del Congresso. Gli ispettori delle Nazioni Unite sono tornati in Iraq e chiedono altro tempo; i servizi dicono che il regime di Baghdad nasconde ancora le armi proibite, e nessuno può provarlo né escluderlo. Le Nazioni Unite sono divise, e una seconda risoluzione non passerà. Le truppe sono già nel Golfo, e aspettano una decisione."; },
+  ch:[
+    { l:"L'intervento, con la coalizione di chi ci sta", e:"La storia · il regime cade in tre settimane, e comincia un dopoguerra di cui nessuno conosce la durata · gli alleati che hanno detto no non lo dimenticano",
+      get costo(){ return {debito:iraqDeb(1.5)}; },
+      f:function(){ S.usIraq03='intervento'; S.ind.debt+=iraqDeb(1.5); us00Sei(1); gdUs60('giovani',-2); repd(-2); stampad(1); if(iraqPrima('usIraq02')==='onu'){ repd(-1); stampad(-1); }
+        S.log.unshift({t:T('Il mondo'),x:T("Nel marzo 2003 è intervenuto in Iraq con la coalizione di chi ci stava.")}); } },
+    { l:"Altro tempo agli ispettori, col mandato delle Nazioni Unite", e:"Le truppe restano nel Golfo, e in autunno la domanda torna · i più anziani e i giornali chiedono quanto si aspetta", costo:{debito:0.2},
+      f:function(){ S.usIraq03='ispezioni'; S.ind.debt+=0.2; repd(1); gdUs60('pensionati',-1); stampad(-1);
+        S.log.unshift({t:T('Il mondo'),x:T("Nel marzo 2003 ha dato altro tempo agli ispettori delle Nazioni Unite in Iraq.")}); } },
+    { l:"Rinunciare: le truppe tornano a casa", e:"I più giovani sono con te · il prezzo del petrolio sale, e i giornali parlano di debolezza",
+      f:function(){ S.usIraq03='rinuncia'; gdUs60('giovani',2); gdUs60('pensionati',-2); gdUs60('imprenditori',-1); stampad(-2); repd(1);
+        S.log.unshift({t:T('Il mondo'),x:T("Nel marzo 2003 ha rinunciato all'intervento in Iraq.")}); } },
+  ],
+};
+const IRAQ03_OPP_EV = {
+  id:'snodo_iraq03_opp', snodo:true, era:'us2000', kick:'Il mondo',
+  t:"La guerra, dall'aula",
+  text:"Le truppe sono entrate in Iraq con la coalizione di chi ci sta, senza una seconda risoluzione delle Nazioni Unite. Il paese si stringe intorno ai soldati, e il tuo partito deve dire che cosa dirà da oggi in poi: la guerra durerà più di una campagna elettorale.",
+  ch:[
+    { l:"Con le truppe: la critica a dopo", e:"La storia · il partito sta con i soldati · i più giovani si aspettavano altro",
+      f:function(){ S.usIraq03Opp='truppe'; gdUs60('pensionati',1); gdUs60('giovani',-1);
+        S.log.unshift({t:T('Il mondo'),x:T("Dall'opposizione è stato con le truppe in Iraq, rimandando la critica a dopo.")}); } },
+    { l:"Contro la guerra da subito", e:"I più giovani sono con te · i giornali scrivono che parli mentre i soldati combattono",
+      f:function(){ S.usIraq03Opp='contro'; gdUs60('giovani',1); stampad(-1); if(iraqPrima('usIraq02Opp')==='no') baseUs60(1); if(iraqPrima('usIraq02Opp')==='si') stampad(-1);
+        S.log.unshift({t:T('Il mondo'),x:T("Dall'opposizione si è detto contro la guerra in Iraq fin dal primo giorno.")}); } },
+    { l:"Chiedere i conti: quanto costa e quanto dura", e:"Il ceto medio ascolta · alla Casa Bianca dicono che non è il momento",
+      f:function(){ S.usIraq03Opp='conti'; gdUs60('cetomedio',1); gdUs60('pensionati',-1);
+        S.log.unshift({t:T('Il mondo'),x:T("Dall'opposizione ha chiesto i conti della guerra in Iraq: quanto costa e quanto dura.")}); } },
+  ],
+};
+const IRAQ03B_EV = {
+  id:'snodo_iraq03b', snodo:true, era:'us2000', kick:'Il mondo',
+  t:'Gli ispettori',
+  text:"In marzo hai dato altro tempo agli ispettori delle Nazioni Unite. Sette mesi dopo hanno girato il paese, aperto magazzini e laboratori, e non hanno trovato le armi proibite; i servizi dicono che non basta a escludere che ci siano. Le truppe aspettano nel Golfo da quasi un anno, e ogni mese costano.",
+  ch:[
+    { l:"L'intervento, adesso, col mandato", e:"Arrivi tardi, ma con più alleati di marzo · comincia un dopoguerra di cui nessuno conosce la durata",
+      get costo(){ return {debito:iraqDeb(1.2)}; },
+      f:function(){ S.usIraq03='intervento'; S.usIraq03Tardi=true; S.ind.debt+=iraqDeb(1.2); gdUs60('giovani',-1);
+        S.log.unshift({t:T('Il mondo'),x:T("Nell'ottobre 2003, dopo le ispezioni, è intervenuto in Iraq col mandato delle Nazioni Unite.")}); } },
+    { l:"Chiudere il fascicolo: contenimento e sanzioni", e:"Le truppe tornano a casa · i giornali scrivono di un anno perso, i più giovani approvano",
+      f:function(){ S.usIraq03='contenimento'; stampad(-1); gdUs60('giovani',1); repd(1);
+        S.log.unshift({t:T('Il mondo'),x:T("Nell'ottobre 2003, dopo le ispezioni, ha chiuso il fascicolo dell'Iraq: contenimento e sanzioni.")}); } },
+  ],
+};
+/* il dopoguerra, carte DOVUTE (non snodi: nessuna riga in SNODI_STORICI, il flag è il segno «già uscita»); a ogni scelta il debito
+   +0,5 (+1 dopo «invasione», iraqDeb) più quello della scelta. Il testo dice «la guerra cominciata nel 2003», mai «la tua». */
+const US00_GUERRIGLIA04_EV = {
+  id:'us00_guerriglia04', era:'us2000', kick:'Il mondo',
+  t:'La guerriglia',
+  text:"Il regime di Baghdad non c'è più, ma la guerra cominciata nel 2003 non è finita: imboscate sulle strade, città che si ribellano, e ogni settimana i giornali pubblicano nuovi nomi di caduti. Le armi proibite non si sono trovate. Fra sette mesi il paese sceglie il Presidente, e i comandi chiedono una decisione.",
+  ch:[
+    { l:"Più truppe", e:"I comandi hanno i rinforzi · costa, e altri ragazzi partono",
+      get costo(){ return {debito:iraqDeb(0.8)}; },
+      f:function(){ S.usGuerriglia04='truppe'; S.ind.debt+=iraqDeb(0.8); gdUs60('giovani',-1);
+        S.log.unshift({t:T('Il mondo'),x:T("Davanti alla guerriglia in Iraq ha mandato più truppe.")}); } },
+    { l:"Passare la mano in fretta a un governo iracheno", e:"I più giovani approvano · i giornali scrivono che lasci il paese a metà",
+      get costo(){ return {debito:iraqDeb(0.5)}; },
+      f:function(){ S.usGuerriglia04='passaggio'; S.ind.debt+=iraqDeb(0.5); stampad(-1); gdUs60('giovani',1);
+        S.log.unshift({t:T('Il mondo'),x:T("Davanti alla guerriglia in Iraq ha passato in fretta la mano a un governo iracheno.")}); } },
+  ],
+};
+/* i caduti: la stessa carta due volte (2005/11, 2006/10); il giro lo dice il mese (us00CadutiGiro in game.js). S.usCadutiIraq = 0-2. */
+const US00_CADUTI_EV = {
+  id:'us00_caduti', era:'us2000', kick:'Il mondo',
+  t:'I caduti',
+  get text(){ var g=(typeof us00CadutiGiro==='function') ? us00CadutiGiro() : 1;
+    return g>=2 ? "La guerra cominciata nel 2003 non finisce. In Iraq le milizie si combattono quartiere per quartiere, e i soldati americani stanno in mezzo. Fra un mese il paese vota per il Congresso, e la guerra è la prima domanda di ogni comizio."
+      : "La guerra cominciata nel 2003 è al suo terzo inverno. In Iraq si prova a votare e a scrivere una costituzione, ma le bombe sulle strade non si fermano, e nelle cittadine di casa i funerali dei soldati sono diventati una cronaca di ogni settimana. I sondaggi dicono che la maggioranza del paese non crede più nella guerra."; },
+  ch:[
+    { l:"Restare finché serve", e:"I comandi tengono le posizioni · il paese è stanco, e i giornali chiedono fino a quando",
+      get costo(){ return {debito:iraqDeb(0.5)}; },
+      f:function(){ S.usCadutiIraq=us00CadutiGiro(); S.ind.debt+=iraqDeb(0.5); us00Sei(-1); gdUs60('giovani',-1); stampad(-1);
+        S.log.unshift({t:T('Il mondo'),x:T("Davanti ai caduti in Iraq ha deciso di restare finché serve.")}); } },
+    { l:"Fissare una data per il ritiro", e:"I più giovani approvano · i più anziani temono un paese lasciato a metà",
+      get costo(){ return {debito:iraqDeb(0.5)}; },
+      f:function(){ S.usCadutiIraq=us00CadutiGiro(); S.ind.debt+=iraqDeb(0.5); us00Sei(-1); gdUs60('pensionati',-1);
+        S.log.unshift({t:T('Il mondo'),x:T("Davanti ai caduti in Iraq ha fissato una data per il ritiro.")}); } },
+  ],
+};
+const US00_RINFORZO07_EV = {
+  id:'us00_rinforzo07', era:'us2000', kick:'Il mondo',
+  t:'La decisione rimandata',
+  text:"Per tutto l'inverno la decisione è stata rimandata. In Iraq la guerra cominciata nel 2003 è diventata una guerra fra iracheni, e i soldati americani stanno in mezzo. I comandi chiedono altre brigate per riprendere Baghdad quartiere per quartiere; al Congresso molti chiedono un calendario per tornare a casa.",
+  ch:[
+    { l:"I rinforzi", e:"La storia · altre brigate partono per Baghdad · costa, e i giornali dicono che è l'ultima carta",
+      get costo(){ return {debito:iraqDeb(1)}; },
+      f:function(){ S.usRinforzo07='rinforzi'; S.ind.debt+=iraqDeb(1); stampad(1);
+        S.log.unshift({t:T('Il mondo'),x:T("Nel 2007 ha mandato rinforzi in Iraq.")}); } },
+    { l:"Il ritiro a tappe", e:"I più giovani approvano · gli alleati che restano si sentono lasciati soli",
+      get costo(){ return {debito:iraqDeb(0.5)}; },
+      f:function(){ S.usRinforzo07='ritiro'; S.ind.debt+=iraqDeb(0.5); gdUs60('giovani',1); gdUs60('pensionati',-1); repd(-1);
+        S.log.unshift({t:T('Il mondo'),x:T("Nel 2007 ha cominciato il ritiro a tappe dall'Iraq.")}); } },
+    { l:"Lasciare le cose come stanno", e:"Nessuna decisione nuova · i giornali chiedono che cosa si aspetta",
+      get costo(){ return {debito:iraqDeb(0.5)}; },
+      f:function(){ S.usRinforzo07='resta'; S.ind.debt+=iraqDeb(0.5); stampad(-1);
+        S.log.unshift({t:T('Il mondo'),x:T("Nel 2007 ha lasciato le cose come stavano in Iraq.")}); } },
+  ],
+};
+const US00_RITIRO11_EV = {
+  id:'us00_ritiro11', era:'us2000', kick:'Il mondo',
+  t:'Il ritiro',
+  text:"Alla fine dell'anno scade l'accordo con il governo di Baghdad, e la guerra cominciata nel 2003 arriva alla sua ultima decisione. Gli ultimi soldati americani in Iraq aspettano l'ordine: tornare tutti a casa, o lasciare un contingente ad addestrare l'esercito iracheno.",
+  ch:[
+    { l:"Il ritiro completo", e:"La storia · gli ultimi soldati passano il confine · i comandi dicono che il lavoro resta a metà",
+      get costo(){ return {debito:Math.round((iraqDeb(0.5)-0.2)*10)/10}; },
+      f:function(){ S.usRitiro11='completo'; S.ind.debt+=Math.round((iraqDeb(0.5)-0.2)*10)/10; gdUs60('giovani',1);
+        S.log.unshift({t:T('Il mondo'),x:T("Alla fine del 2011 ha ritirato gli ultimi soldati dall'Iraq.")}); } },
+    { l:"Un contingente di addestratori resta", e:"Gli alleati sono più tranquilli · i giornali chiedono quando finisce davvero",
+      get costo(){ return {debito:iraqDeb(0.5)}; },
+      f:function(){ S.usRitiro11='resta'; S.ind.debt+=iraqDeb(0.5); stampad(-1); repd(1);
+        S.log.unshift({t:T('Il mondo'),x:T("Alla fine del 2011 ha lasciato in Iraq un contingente di addestratori.")}); } },
+  ],
+};
+/* ==============================================================================================================
+   L265-5 · STATI UNITI 2000 — LA RICOSTRUZIONE DOPO L'URAGANO (S3, 2005/10) CON LA SUA AULA, LA CRISI FINANZIARIA (S4, 2008/9) CON
+   LA SUA AULA E IL PRIMO VOTO DELLA CAMERA CHE PUÒ CADERE, E LE TRE CARTE DOVUTE DEL 2009 (la stretta 2009/1 solo dopo «fallire», lo
+   stimolo 2009/2, le case automobilistiche 2009/4). Scheda PRESET-USA-2000 §4 S3 e S4, D321 (a), D322 (a); consegna L265-5; testi di
+   Code. Gli helper di us1960-us2000 (gdUs60, baseUs60, us00Sei, iraqPrima).
+   ⚠ Correzione alla consegna: CRISI08_EV e snodo_crisi08 sono lo snodo ITALIANO della crisi (L-linea italiana, flag S.crisi08): la
+   crisi americana si chiama CRISI08_US_EV / CRISI08_US_OPP_EV, id snodo_us_crisi08(_opp) (la forma di IRAQ02_US_EV). Gli altri nomi
+   della consegna cercati in js/ il 10/11 prima di scriverli (L99-2), zero occorrenze: RICOSTR05(_OPP)_EV, snodo_ricostr05(_opp),
+   usRicostr05(Opp), usCrisi08(Opp), us00_stretta09, usStretta09, us00_stimolo09, usStimolo09, us00_auto09, usAuto09.
+   ⚑ CHI RICEVE CHE COSA (cancelli in game.js accanto a us00Eventi): la ricostruzione a chi governa gli Stati Uniti nel 2005/10 (ripiego
+   2005/11 accanto ai caduti; accanto al richiamo se ottobre ne ha uno), l'aula a chi è all'opposizione. La crisi a chi governa gli Stati
+   Uniti nel 2008/9, CHIUNQUE sia (decisione 8: anche le carriere di us1990 e delle porte prima; anche il Presidente al secondo mandato,
+   che è in carica fino al mese dell'urna), con la carta di campagna accanto; a lui la cronaca pm_crollo non arriva (nonAlCapo:['usa'],
+   D322). Dall'opposizione americana la cronaca resta, e accanto escono l'aula e la carta di campagna (tre carte). Il primo voto della
+   Camera sul salvataggio cade col dado del personaggio (attaccoDado('crisi08'), mai Math.random: tirato una volta dentro la scelta e
+   scritto nel flag), 1/3, 1/2 se la Camera non è del partito del Presidente. Le dovute del 2009 a chi governa nel loro mese (di solito il
+   successore: il testo dice «la scelta dell'autunno», mai «la tua»).
+   ⚑ La ricostruzione non è grave (decisione 7: politica, non lutto; grave sarà il pilastro del 2005/8). Nessun nome di persona, di
+   ufficio, di città, di quartiere, di banca, di banchiere, di ministro, di marchio; mai «colpa»; nessuna cifra nei bottoni.
+   Verificato il 10/11 (fonti di sempre): l'uragano del 29 agosto 2005, gli argini rotti, la città sotto l'acqua per l'ottanta per cento,
+   più di mille morti; il 15 settembre 2008 il fallimento della banca d'affari, la legge da settecento miliardi bocciata alla Camera il
+   29 settembre e approvata il 3 ottobre; i prestiti ponte di dicembre a due delle tre grandi case automobilistiche, il fallimento
+   pilotato del 30 aprile 2009; la legge di stimolo firmata il 17 febbraio 2009, quasi ottocento miliardi.
+   ============================================================================================================== */
+const RICOSTR05_EV = {
+  id:'snodo_ricostr05', snodo:true, era:'us2000', kick:'Il paese',
+  t:'La ricostruzione',
+  text:"Dopo l'uragano di fine agosto sulla costa del Golfo gli argini hanno ceduto, e una città intera è rimasta sotto l'acqua per settimane. Più di mille morti, centinaia di migliaia di sfollati sparsi in mezzo paese, quartieri dove non resta una casa in piedi. Le acque si sono ritirate: adesso bisogna decidere chi ricostruisce, con quali soldi e con quali regole.",
+  ch:[
+    { l:"Un piano federale grande, con un'agenzia nuova che lo guida", e:"Lo Stato federale si prende la ricostruzione · costa, e la tua base parla di conti che non tornano", costo:{debito:1},
+      f:function(){ S.usRicostr05='federale'; S.ind.debt+=1; gdUs60('lavoratori',1); gdUs60('pensionati',1); baseUs60(-1);
+        S.log.unshift({t:T('Il paese'),x:T("Dopo l'uragano ha affidato la ricostruzione a un piano federale grande, con un'agenzia nuova.")}); } },
+    { l:"I fondi agli Stati e alle città: decidono loro", e:"Chi conosce i luoghi sceglie come ricostruire · i giornali scrivono che i cantieri partono piano", costo:{debito:0.6},
+      f:function(){ S.usRicostr05='stati'; S.ind.debt+=0.6; gdUs60('cetomedio',1); stampad(-1);
+        S.log.unshift({t:T('Il paese'),x:T("Dopo l'uragano ha dato i fondi della ricostruzione agli Stati e alle città.")}); } },
+    { l:"Sgravi e zone franche per chi investe sulla costa", e:"Le imprese tornano a investire · chi ha perso la casa e i più giovani si sentono lasciati indietro", costo:{debito:0.3},
+      f:function(){ S.usRicostr05='sgravi'; S.ind.debt+=0.3; gdUs60('imprenditori',2); gdUs60('lavoratori',-1); gdUs60('giovani',-1);
+        S.log.unshift({t:T('Il paese'),x:T("Dopo l'uragano ha puntato sugli sgravi e sulle zone franche per chi investe sulla costa.")}); } },
+  ],
+};
+const RICOSTR05_OPP_EV = {
+  id:'snodo_ricostr05_opp', snodo:true, era:'us2000', kick:'Il paese',
+  t:"La ricostruzione, dall'aula",
+  text:"Dopo l'uragano di fine agosto sulla costa del Golfo gli argini hanno ceduto e una città intera è rimasta sotto l'acqua per settimane: più di mille morti, centinaia di migliaia di sfollati. Il governo chiede al Congresso i fondi per ricostruire, e il tuo partito deve decidere che cosa chiedere in cambio.",
+  ch:[
+    { l:"Chiedere una commissione d'inchiesta indipendente", e:"I giornali sono con te · il ceto medio dice che non è il momento",
+      f:function(){ S.usRicostr05Opp='inchiesta'; stampad(1); gdUs60('cetomedio',-1);
+        S.log.unshift({t:T('Il paese'),x:T("Dopo l'uragano ha chiesto dall'opposizione una commissione d'inchiesta indipendente.")}); } },
+    { l:"Votare i fondi senza condizioni", e:"I più anziani apprezzano · la base del tuo partito voleva di più",
+      f:function(){ S.usRicostr05Opp='fondi'; gdUs60('pensionati',1); baseUs60(-1);
+        S.log.unshift({t:T('Il paese'),x:T("Dopo l'uragano ha votato dall'opposizione i fondi della ricostruzione senza condizioni.")}); } },
+    { l:"La vostra proposta: ricostruire con chi ci abitava", e:"I lavoratori della costa sono con te · le imprese temono regole e ritardi",
+      f:function(){ S.usRicostr05Opp='proposta'; gdUs60('lavoratori',1); gdUs60('imprenditori',-1);
+        S.log.unshift({t:T('Il paese'),x:T("Dopo l'uragano ha proposto dall'opposizione di ricostruire con chi ci abitava.")}); } },
+  ],
+};
+const CRISI08_US_EV = {
+  id:'snodo_us_crisi08', snodo:true, era:'us2000', kick:"L'economia",
+  t:'Il crollo',
+  text:"Il 15 settembre una delle grandi banche d'affari di Wall Street fallisce, e nessuno la salva. In pochi giorni le banche smettono di prestarsi denaro, il credito alle imprese si ferma e le Borse del mondo perdono un terzo. Il Tesoro ha pronto un piano da settecento miliardi per comprare i titoli che nessuno vuole più: ma ci vuole il voto del Congresso, e mancano sette settimane alle elezioni.",
+  ch:[
+    { l:"Il salvataggio delle banche coi soldi pubblici", e:"La storia · il credito ricomincia a muoversi · la tua base non perdona i soldi dati alle banche, e la Camera può dire no al primo voto", costo:{debito:2},
+      f:function(){ S.usCrisi08='salvataggio'; S.ind.debt+=2; gdUs60('imprenditori',1); gdUs60('lavoratori',-1); baseUs60(-1);
+        var pBoc=(S.congresso && S.congresso.camera<50) ? 1/2 : 1/3;
+        if(attaccoDado('crisi08')<pBoc){ S.usCrisi08='bocciata'; gdUs60('imprenditori',-1); stampad(-1);
+          S.log.unshift({t:T("L'economia"),x:T("Al primo voto la Camera boccia il salvataggio delle banche e la Borsa cade; la settimana dopo la Camera rivota e la legge passa.")}); }
+        else S.log.unshift({t:T("L'economia"),x:T("Ha salvato le banche coi soldi pubblici, e il Congresso ha votato il piano.")}); } },
+    { l:"Lasciar fallire: nessun soldo pubblico", e:"La tua base applaude · le imprese restano senza credito, il ceto medio vede i risparmi scendere e i giornali parlano di panico",
+      f:function(){ S.usCrisi08='fallire'; baseUs60(1); gdUs60('imprenditori',-2); gdUs60('cetomedio',-1); stampad(-1);
+        S.log.unshift({t:T("L'economia"),x:T("Davanti al crollo delle banche ha deciso di non usare soldi pubblici.")}); } },
+    { l:"Il salvataggio con condizioni: lo Stato entra nelle banche e mette un tetto agli stipendi di chi le guida", e:"I lavoratori approvano, i partner esteri anche · il piano passa più tardi, e le banche protestano", costo:{debito:1.5},
+      f:function(){ S.usCrisi08='condizioni'; S.ind.debt+=1.5; gdUs60('lavoratori',1); gdUs60('imprenditori',-1); stampad(-1); repd(1);
+        S.log.unshift({t:T("L'economia"),x:T("Ha salvato le banche con condizioni: lo Stato nel capitale e un tetto agli stipendi di chi le guida.")}); } },
+  ],
+};
+const CRISI08_US_OPP_EV = {
+  id:'snodo_us_crisi08_opp', snodo:true, era:'us2000', kick:"L'economia",
+  t:"Il salvataggio, dall'aula",
+  text:"Il governo chiede al Congresso settecento miliardi per salvare le banche, dopo il fallimento di una grande banca d'affari e il credito fermo in tutto il paese. Mancano sette settimane alle elezioni: il tuo partito deve decidere come votare, e gli elettori guardano.",
+  ch:[
+    { l:"Votare sì", e:"La storia · il piano passa anche coi tuoi voti · la base del tuo partito non ama i soldi dati alle banche",
+      f:function(){ S.usCrisi08Opp='si'; gdUs60('imprenditori',1); baseUs60(-1);
+        S.log.unshift({t:T("L'economia"),x:T("Dall'opposizione ha votato il salvataggio delle banche.")}); } },
+    { l:"Votare no", e:"I lavoratori sono con te · le imprese e i giornali dicono che giochi col fuoco",
+      f:function(){ S.usCrisi08Opp='no'; gdUs60('lavoratori',1); gdUs60('imprenditori',-1); stampad(-1);
+        S.log.unshift({t:T("L'economia"),x:T("Dall'opposizione ha votato contro il salvataggio delle banche.")}); } },
+    { l:"Sì, ma solo con le condizioni: lo Stato nel capitale e un tetto agli stipendi", e:"Il ceto medio e i partner esteri apprezzano · le banche protestano",
+      f:function(){ S.usCrisi08Opp='condizioni'; gdUs60('cetomedio',1); repd(1); gdUs60('imprenditori',-1);
+        S.log.unshift({t:T("L'economia"),x:T("Dall'opposizione ha votato il salvataggio delle banche solo con le condizioni.")}); } },
+  ],
+};
+/* le dovute del 2009, carte DOVUTE (non snodi: nessuna riga in SNODI_STORICI, il flag è il segno «già uscita»). Il testo dice «la
+   scelta dell'autunno», mai «la tua»: di solito le riceve il successore. */
+const US00_STRETTA09_EV = {
+  id:'us00_stretta09', era:'us2000', kick:"L'economia",
+  t:'La stretta',
+  text:"Dopo la scelta dell'autunno nessuno ha salvato le banche, e il credito non si è più mosso. Le fabbriche non trovano chi presti i soldi per pagare gli stipendi, i negozi chiudono, e la gente ritira i risparmi dagli sportelli. Il paese entra nella recessione più dura da molti decenni.",
+  ch:[
+    { l:"Il salvataggio, adesso: più tardi e più caro", e:"Il credito riparte piano · costa più di quanto sarebbe costato in autunno, e la tua base lo ricorda", costo:{debito:2.5},
+      f:function(){ S.usStretta09='tardi'; us00Sei(-1); S.ind.debt+=2.5; gdUs60('imprenditori',1); baseUs60(-1);
+        S.log.unshift({t:T("L'economia"),x:T("Nel gennaio 2009 ha salvato le banche in ritardo, a un prezzo più alto.")}); } },
+    { l:"Solo la garanzia sui depositi", e:"I risparmi sono al sicuro e i più anziani respirano · le imprese restano senza credito", costo:{debito:0.8},
+      f:function(){ S.usStretta09='depositi'; us00Sei(-1); S.ind.debt+=0.8; gdUs60('imprenditori',-1); gdUs60('pensionati',1);
+        S.log.unshift({t:T("L'economia"),x:T("Nel gennaio 2009 ha garantito i depositi, senza salvare le banche.")}); } },
+  ],
+};
+const US00_STIMOLO09_EV = {
+  id:'us00_stimolo09', era:'us2000', kick:"L'economia",
+  t:'Lo stimolo',
+  text:"Dopo il crollo dell'autunno e la scelta che ne è seguita, il paese è in recessione: ogni mese spariscono centinaia di migliaia di posti di lavoro. Il Congresso è pronto a votare un piano di spesa e di sgravi per rimettere in moto l'economia; si discute di quanto grande, e di chi deve pagarlo.",
+  ch:[
+    { l:"Un piano grande: opere, scuole, sussidi a chi perde il lavoro", e:"La storia · quasi ottocento miliardi, il più grande da decenni · le imprese temono il debito", costo:{debito:2},
+      f:function(){ S.usStimolo09='grande'; S.ind.debt+=2; gdUs60('lavoratori',1); gdUs60('giovani',1); gdUs60('imprenditori',-1);
+        S.log.unshift({t:T("L'economia"),x:T("Nel 2009 ha fatto approvare un piano di stimolo grande.")}); } },
+    { l:"Un piano mirato, metà sgravi", e:"Il ceto medio sente qualcosa in busta paga · i giornali scrivono che è poco per una crisi così", costo:{debito:1},
+      f:function(){ S.usStimolo09='mirato'; S.ind.debt+=1; gdUs60('cetomedio',1);
+        S.log.unshift({t:T("L'economia"),x:T("Nel 2009 ha fatto approvare un piano di stimolo mirato, metà sgravi.")}); } },
+    { l:"Niente piano: prima il bilancio", e:"Le imprese apprezzano i conti in ordine · chi perde il lavoro resta solo, e i giornali non capiscono",
+      f:function(){ S.usStimolo09='niente'; gdUs60('imprenditori',1); gdUs60('lavoratori',-2); stampad(-1);
+        S.log.unshift({t:T("L'economia"),x:T("Nel 2009 ha rinunciato al piano di stimolo per tenere in ordine il bilancio.")}); } },
+  ],
+};
+const US00_AUTO09_EV = {
+  id:'us00_auto09', era:'us2000', kick:"L'economia",
+  t:'Le case automobilistiche',
+  text:"Due delle tre grandi case automobilistiche del paese sono senza soldi: i prestiti ponte dell'inverno sono finiti, le vendite sono crollate dopo il crollo dell'autunno, e centinaia di migliaia di posti di lavoro dipendono da loro e dai loro fornitori. Chiedono altri soldi pubblici; senza, chiudono.",
+  ch:[
+    { l:"Il prestito, e un fallimento pilotato per ripartire", e:"La storia · le fabbriche restano aperte con un piano nuovo · le imprese dicono che lo Stato non fa il costruttore di automobili", costo:{debito:0.5},
+      f:function(){ S.usAuto09='pilotato'; S.ind.debt+=0.5; gdUs60('lavoratori',1); gdUs60('imprenditori',-1);
+        S.log.unshift({t:T("L'economia"),x:T("Nel 2009 ha salvato due grandi case automobilistiche con un prestito e un fallimento pilotato.")}); } },
+    { l:"Il prestito senza condizioni", e:"Gli operai sono con te · i giornali e il ceto medio chiedono perché paghi senza chiedere niente", costo:{debito:0.8},
+      f:function(){ S.usAuto09='prestito'; S.ind.debt+=0.8; gdUs60('lavoratori',2); stampad(-1); gdUs60('cetomedio',-1);
+        S.log.unshift({t:T("L'economia"),x:T("Nel 2009 ha prestato soldi pubblici a due grandi case automobilistiche senza condizioni.")}); } },
+    { l:"Nessun aiuto: decide il mercato", e:"La tua base e le imprese approvano · chiudono fabbriche, e intere contee perdono il lavoro",
+      f:function(){ S.usAuto09='niente'; gdUs60('lavoratori',-2); gdUs60('imprenditori',1); baseUs60(1);
+        S.log.unshift({t:T("L'economia"),x:T("Nel 2009 ha negato ogni aiuto pubblico alle case automobilistiche.")}); } },
+  ],
+};
+/* ==============================================================================================================
+   L265-6 · STATI UNITI 2000 — LA RIFORMA SANITARIA (S5, 2010/3, solo col Congresso amico) E IL TETTO DEL DEBITO (S6, 2011/7, solo col
+   governo diviso), CON LE LORO GEMELLE `_n` E LE LORO AULE (scheda PRESET-USA-2000 §4 S5 e S6, D323 (a), D324 (a); consegna L265-6;
+   testi di Code). La forma di snodo_sanita93 / snodo_chiusura95 di us1990 (L264-5: cancelli, gemella `_n`, scala ±1), non i testi.
+   Nomi della consegna cercati in js/ l'11/11 prima di scriverli (L99-2), zero occorrenze: SANITA10(_N)(_OPP)(_OPP_N)_EV,
+   snodo_sanita10(_n)(_opp)(_opp_n), usSanita10(Opp), TETTO11(_N)(_OPP)(_OPP_N)_EV, snodo_tetto11(_n)(_opp)(_opp_n), usTetto11(Opp),
+   usCamera10, ti_us00_declassamento (e i cancelli snodoSanita10*, snodoTetto11*).
+   ⚑ CHI RICEVE CHE COSA (cancelli in game.js accanto a us00Eventi): S5 a chi governa gli Stati Uniti (linea americana: anche le carriere
+   di us1990) nel 2010/3 col Congresso amico (divisoPer() null, Congresso presente); l'aula a chi è all'opposizione quando il Presidente
+   ha il Congresso con sé. S6 a chi governa nel 2011/7 (ripiego 2011/8) col governo diviso (divisoPer() non null), di qualunque partito
+   sia (decisione 10); l'aula a chi è all'opposizione e ha in Congresso almeno una camera (divisoPer() non null). La storia è il
+   Presidente democratico e l'opposizione repubblicana; per gli altri la gemella `_n`, senza «La storia ·», col testo che non dice il
+   partito. Una carta per variante, così ogni scelta scrive il suo valore con un letterale (verifica-snodi.js).
+   ⚑ Nessun dado (decisione 9): snodo_sanita93 e snodo_chiusura95 non ne hanno; la riforma passa col Congresso amico e l'accordo si fa,
+   il prezzo sta negli effetti. Nessun nome di persona, di legge col nome di qualcuno, di assicurazione, di agenzia, di canale, di
+   movimento; nessuna citazione; mai «colpa»; nessuna cifra nei bottoni («219 a 212» solo nella riga del registro della storia).
+   Verificato (scheda §3, ✓): il Senato il 24 dicembre 2009, la Camera il 21 marzo 2010 (219 a 212), la firma il 23; la legge sul
+   tetto del 2 agosto 2011 con i tagli automatici se la commissione non si accorda; il 5 agosto una delle tre agenzie toglie il voto
+   massimo, le altre due lo tengono.
+   ============================================================================================================== */
+const SANITA10_TESTO = "Decine di milioni di americani non hanno un'assicurazione sanitaria, il costo delle cure sale più in fretta dei salari, e chi è già malato si vede rifiutare una polizza. Dopo un anno di commissioni e di udienze il Senato ha votato la sua legge alla vigilia di Natale; adesso tocca alla Camera, dove i voti si contano uno a uno. Il Congresso è del tuo partito: la riforma passa, se la vuoi, e il prezzo lo decidi tu.";
+const SANITA10_EV = {
+  id:'snodo_sanita10', snodo:true, era:'us2000', kick:'Il paese',
+  t:'La riforma sanitaria',
+  text:SANITA10_TESTO,
+  ch:[
+    { l:"La riforma intera, con l'obbligo di assicurarsi", e:"La storia · la Camera la approva di pochi voti e la firmi due giorni dopo · lavoratori e giovani ci guadagnano, il ceto medio e le imprese temono i costi, i giornali contano le pagine", costo:{debito:0.8},
+      f:function(){ S.usSanita10='intera'; S.ind.debt+=0.8; gdUs60('lavoratori',1); gdUs60('giovani',1); baseUs60(1); gdUs60('cetomedio',-1); gdUs60('imprenditori',-1); stampad(-1);
+        S.log.unshift({t:T('Il paese'),x:T("Ha fatto approvare la riforma sanitaria intera, con l'obbligo di assicurarsi: alla Camera 219 a 212.")}); } },
+    { l:'Un compromesso più piccolo: i bambini e chi è già malato', e:"Meno copertura, meno spesa · i pensionati e il ceto medio respirano, la base del tuo partito voleva di più", costo:{debito:0.4},
+      f:function(){ S.usSanita10='compromesso'; S.ind.debt+=0.4; gdUs60('pensionati',1); gdUs60('cetomedio',1); baseUs60(-1);
+        S.log.unshift({t:T('Il paese'),x:T('Sulla sanità ha fatto approvare un compromesso più piccolo: i bambini e chi è già malato.')}); } },
+    { l:'Rinviare: prima il lavoro', e:"La riforma aspetta · le imprese e i partner esteri apprezzano, la base e i più giovani si sentono traditi",
+      f:function(){ S.usSanita10='rinvio'; gdUs60('imprenditori',1); baseUs60(-2); gdUs60('giovani',-1); repd(1);
+        S.log.unshift({t:T('Il paese'),x:T('Ha rinviato la riforma sanitaria: prima il lavoro.')}); } },
+  ],
+};
+const SANITA10_N_EV = {
+  id:'snodo_sanita10_n', snodo:true, era:'us2000', kick:'Il paese',
+  t:'La riforma sanitaria',
+  text:SANITA10_TESTO,
+  ch:[
+    { l:"Crediti d'imposta e conti di risparmio per le cure, polizze vendibili da uno Stato all'altro", e:"La riforma del tuo partito passa · il ceto medio e le imprese ci guadagnano, lavoratori e pensionati temono di restare scoperti, i giornali contano le pagine", costo:{debito:0.6},
+      f:function(){ S.usSanita10='intera'; S.ind.debt+=0.6; gdUs60('cetomedio',1); gdUs60('imprenditori',1); baseUs60(1); gdUs60('lavoratori',-1); gdUs60('pensionati',-1); stampad(-1);
+        S.log.unshift({t:T('Il paese'),x:T("Ha fatto approvare la sua riforma sanitaria: crediti d'imposta, conti di risparmio per le cure, polizze vendibili da uno Stato all'altro.")}); } },
+    { l:'Un compromesso più piccolo: i bambini e chi è già malato', e:"Meno copertura, meno spesa · i pensionati e il ceto medio respirano, la base del tuo partito voleva di più", costo:{debito:0.4},
+      f:function(){ S.usSanita10='compromesso'; S.ind.debt+=0.4; gdUs60('pensionati',1); gdUs60('cetomedio',1); baseUs60(-1);
+        S.log.unshift({t:T('Il paese'),x:T('Sulla sanità ha fatto approvare un compromesso più piccolo: i bambini e chi è già malato.')}); } },
+    { l:'Rinviare: prima il lavoro', e:"La riforma aspetta · le imprese e i partner esteri apprezzano, la base e i più giovani si sentono traditi",
+      f:function(){ S.usSanita10='rinvio'; gdUs60('imprenditori',1); baseUs60(-2); gdUs60('giovani',-1); repd(1);
+        S.log.unshift({t:T('Il paese'),x:T('Ha rinviato la riforma sanitaria: prima il lavoro.')}); } },
+  ],
+};
+const SANITA10_OPP_EV = {
+  id:'snodo_sanita10_opp', snodo:true, era:'us2000', kick:'Il paese',
+  t:"La riforma sanitaria, dall'aula",
+  text:"La Casa Bianca e il Congresso, tutti e due dell'altro partito, stanno per approvare la loro riforma sanitaria: l'obbligo di assicurarsi, aiuti a chi non può pagare, nessuna polizza rifiutata a chi è già malato. Il Senato l'ha votata alla vigilia di Natale, alla Camera i voti si contano uno a uno. Il tuo partito non ha i numeri per fermarla: deve decidere che cosa dire, e che cosa ricorderanno gli elettori a novembre.",
+  ch:[
+    { l:"Contro, fino all'ultimo voto", e:"La storia · nessun voto del tuo partito, e la riforma passa lo stesso · la base è con te, il ceto medio vuole sapere che cosa proponete",
+      f:function(){ S.usSanita10Opp='contro'; baseUs60(1); gdUs60('cetomedio',-1);
+        S.log.unshift({t:T('Il paese'),x:T("Dall'opposizione ha votato contro la riforma sanitaria fino all'ultimo voto.")}); } },
+    { l:'Un piano vostro', e:"Più piccolo e meno caro · all'estero lo citano come una proposta seria, i giornali scrivono che nessuno lo legge",
+      f:function(){ S.usSanita10Opp='piano'; repd(1); stampad(-1);
+        S.log.unshift({t:T('Il paese'),x:T("Dall'opposizione ha presentato un piano sanitario suo.")}); } },
+    { l:'Collaborare su una parte', e:"Il ceto medio apprezza · la base dice che fai il gioco del Presidente",
+      f:function(){ S.usSanita10Opp='collabora'; gdUs60('cetomedio',1); baseUs60(-1);
+        S.log.unshift({t:T('Il paese'),x:T("Dall'opposizione ha collaborato a una parte della riforma sanitaria.")}); } },
+  ],
+};
+const SANITA10_OPP_N_EV = {
+  id:'snodo_sanita10_opp_n', snodo:true, era:'us2000', kick:'Il paese',
+  t:"La riforma sanitaria, dall'aula",
+  text:"La Casa Bianca e il Congresso, tutti e due dell'altro partito, stanno per approvare la loro riforma sanitaria: crediti d'imposta, conti di risparmio per le cure, polizze vendibili da uno Stato all'altro. Il Senato l'ha votata alla vigilia di Natale, alla Camera i voti si contano uno a uno. Il tuo partito non ha i numeri per fermarla: deve decidere che cosa dire, e che cosa ricorderanno gli elettori a novembre.",
+  ch:[
+    { l:"Contro, fino all'ultimo voto", e:"Nessun voto del tuo partito, e la riforma passa lo stesso · la base è con te, il ceto medio vuole sapere che cosa proponete",
+      f:function(){ S.usSanita10Opp='contro'; baseUs60(1); gdUs60('cetomedio',-1);
+        S.log.unshift({t:T('Il paese'),x:T("Dall'opposizione ha votato contro la riforma sanitaria fino all'ultimo voto.")}); } },
+    { l:'Un piano vostro', e:"Più piccolo e meno caro · all'estero lo citano come una proposta seria, i giornali scrivono che nessuno lo legge",
+      f:function(){ S.usSanita10Opp='piano'; repd(1); stampad(-1);
+        S.log.unshift({t:T('Il paese'),x:T("Dall'opposizione ha presentato un piano sanitario suo.")}); } },
+    { l:'Collaborare su una parte', e:"Il ceto medio apprezza · la base dice che fai il gioco del Presidente",
+      f:function(){ S.usSanita10Opp='collabora'; gdUs60('cetomedio',1); baseUs60(-1);
+        S.log.unshift({t:T('Il paese'),x:T("Dall'opposizione ha collaborato a una parte della riforma sanitaria.")}); } },
+  ],
+};
+/* S6, il tetto del debito (D324 (a): solo col governo diviso). La gemella `_n` cambia solo che cosa chiede l'altro partito in Congresso
+   (la forma di CHIUSURA95_N_EV); i tagli automatici della storia toccano a metà la difesa, quindi le tre strade valgono per tutti e due. */
+const TETTO11_EV = {
+  id:'snodo_tetto11', snodo:true, era:'us2000', kick:"L'economia",
+  t:'Il tetto del debito',
+  text:"Il debito federale ha toccato il tetto fissato per legge. Il Tesoro ha spostato i conti finché ha potuto, ma ai primi di agosto non potrà più pagare tutto: stipendi, pensioni, interessi. In Congresso l'altro partito ha i voti per bloccare ogni cosa, e alza il tetto solo in cambio di tagli alla spesa. I mercati guardano, e chi giudica il debito del paese avverte che anche uno stallo può costare.",
+  ch:[
+    { l:"Tenere il punto fino all'ultimo giorno", e:"La base è con te · le imprese e i giornali contano i giorni, e gli assegni d'agosto dei pensionati restano in forse",
+      f:function(){ S.usTetto11='punto'; baseUs60(1); gdUs60('imprenditori',-1); gdUs60('pensionati',-1); stampad(-1);
+        S.log.unshift({t:T("L'economia"),x:T("Sul tetto del debito ha tenuto il punto fino all'ultimo giorno.")}); } },
+    { l:'Accettare i tagli automatici', e:"La storia · il tetto sale, e se in autunno il Congresso non trova i tagli scattano da soli, metà sulla difesa · le imprese respirano, i lavoratori temono per i servizi", costo:{debito:-0.5},
+      f:function(){ S.usTetto11='tagli'; S.ind.debt-=0.5; gdUs60('imprenditori',1); gdUs60('lavoratori',-1); baseUs60(-1);
+        S.log.unshift({t:T("L'economia"),x:T('Per alzare il tetto del debito ha accettato i tagli automatici.')}); } },
+    { l:'Un accordo grande: tagli ed entrate insieme', e:"Il ceto medio e i partner esteri apprezzano · la base del tuo partito non perdona i tagli, le imprese non vogliono le tasse", costo:{debito:-1},
+      f:function(){ S.usTetto11='accordo'; S.ind.debt-=1; gdUs60('cetomedio',1); repd(1); baseUs60(-2); gdUs60('imprenditori',-1);
+        S.log.unshift({t:T("L'economia"),x:T("Sul tetto del debito ha chiuso un accordo grande: tagli ed entrate insieme.")}); } },
+  ],
+};
+const TETTO11_N_EV = {
+  id:'snodo_tetto11_n', snodo:true, era:'us2000', kick:"L'economia",
+  t:'Il tetto del debito',
+  text:"Il debito federale ha toccato il tetto fissato per legge. Il Tesoro ha spostato i conti finché ha potuto, ma ai primi di agosto non potrà più pagare tutto: stipendi, pensioni, interessi. In Congresso l'altro partito ha i voti per bloccare ogni cosa, e alza il tetto solo in cambio di tagli alla difesa e di più tasse sui redditi alti. I mercati guardano, e chi giudica il debito del paese avverte che anche uno stallo può costare.",
+  ch:[
+    { l:"Tenere il punto fino all'ultimo giorno", e:"La base è con te · le imprese e i giornali contano i giorni, e gli assegni d'agosto dei pensionati restano in forse",
+      f:function(){ S.usTetto11='punto'; baseUs60(1); gdUs60('imprenditori',-1); gdUs60('pensionati',-1); stampad(-1);
+        S.log.unshift({t:T("L'economia"),x:T("Sul tetto del debito ha tenuto il punto fino all'ultimo giorno.")}); } },
+    { l:'Accettare i tagli automatici', e:"Il tetto sale, e se in autunno il Congresso non trova i tagli scattano da soli, metà sulla difesa · le imprese respirano, i lavoratori temono per i servizi", costo:{debito:-0.5},
+      f:function(){ S.usTetto11='tagli'; S.ind.debt-=0.5; gdUs60('imprenditori',1); gdUs60('lavoratori',-1); baseUs60(-1);
+        S.log.unshift({t:T("L'economia"),x:T('Per alzare il tetto del debito ha accettato i tagli automatici.')}); } },
+    { l:'Un accordo grande: tagli ed entrate insieme', e:"Il ceto medio e i partner esteri apprezzano · la base del tuo partito non perdona le tasse, le imprese nemmeno", costo:{debito:-1},
+      f:function(){ S.usTetto11='accordo'; S.ind.debt-=1; gdUs60('cetomedio',1); repd(1); baseUs60(-2); gdUs60('imprenditori',-1);
+        S.log.unshift({t:T("L'economia"),x:T("Sul tetto del debito ha chiuso un accordo grande: tagli ed entrate insieme.")}); } },
+  ],
+};
+const TETTO11_OPP_EV = {
+  id:'snodo_tetto11_opp', snodo:true, era:'us2000', kick:"L'economia",
+  t:"Il tetto del debito, dall'aula",
+  text:"Il debito federale ha toccato il tetto fissato per legge, e ai primi di agosto il Tesoro non potrà più pagare tutto. In Congresso i voti per decidere li ha il tuo partito: il Presidente chiede di alzare il tetto, voi chiedete in cambio tagli alla spesa. I mercati guardano, e i giornali contano i giorni.",
+  ch:[
+    { l:'Tenere il tetto finché non arrivano i tagli', e:"La storia · all'ultimo il tetto sale coi tagli automatici · la base è con te, le imprese temono lo stallo e i giornali vi accusano di giocare col fuoco",
+      f:function(){ S.usTetto11Opp='tieni'; baseUs60(1); gdUs60('imprenditori',-1); stampad(-1);
+        S.log.unshift({t:T("L'economia"),x:T("Dall'opposizione ha tenuto fermo il tetto del debito finché non sono arrivati i tagli.")}); } },
+    { l:'Alzarlo e trattare', e:"Il ceto medio respira · la base dice che avete ceduto",
+      f:function(){ S.usTetto11Opp='tratta'; gdUs60('cetomedio',1); baseUs60(-1);
+        S.log.unshift({t:T("L'economia"),x:T("Dall'opposizione ha alzato il tetto del debito per trattare col Presidente.")}); } },
+    { l:'Una proroga breve', e:"Gli assegni dei pensionati sono salvi · i giornali scrivono che rinviate il problema",
+      f:function(){ S.usTetto11Opp='proroga'; stampad(-1); gdUs60('pensionati',1);
+        S.log.unshift({t:T("L'economia"),x:T("Dall'opposizione ha votato una proroga breve del tetto del debito.")}); } },
+  ],
+};
+const TETTO11_OPP_N_EV = {
+  id:'snodo_tetto11_opp_n', snodo:true, era:'us2000', kick:"L'economia",
+  t:"Il tetto del debito, dall'aula",
+  text:"Il debito federale ha toccato il tetto fissato per legge, e ai primi di agosto il Tesoro non potrà più pagare tutto. In Congresso i voti per decidere li ha il tuo partito: il Presidente chiede di alzare il tetto, voi chiedete in cambio tagli alla difesa e più tasse sui redditi alti. I mercati guardano, e i giornali contano i giorni.",
+  ch:[
+    { l:'Tenere il tetto finché non arriva quello che chiedete', e:"La base è con te · le imprese temono lo stallo e i giornali vi accusano di giocare col fuoco",
+      f:function(){ S.usTetto11Opp='tieni'; baseUs60(1); gdUs60('imprenditori',-1); stampad(-1);
+        S.log.unshift({t:T("L'economia"),x:T("Dall'opposizione ha tenuto fermo il tetto del debito finché non ha avuto quello che chiedeva.")}); } },
+    { l:'Alzarlo e trattare', e:"Il ceto medio respira · la base dice che avete ceduto",
+      f:function(){ S.usTetto11Opp='tratta'; gdUs60('cetomedio',1); baseUs60(-1);
+        S.log.unshift({t:T("L'economia"),x:T("Dall'opposizione ha alzato il tetto del debito per trattare col Presidente.")}); } },
+    { l:'Una proroga breve', e:"Gli assegni dei pensionati sono salvi · i giornali scrivono che rinviate il problema",
+      f:function(){ S.usTetto11Opp='proroga'; stampad(-1); gdUs60('pensionati',1);
+        S.log.unshift({t:T("L'economia"),x:T("Dall'opposizione ha votato una proroga breve del tetto del debito.")}); } },
   ],
 };
