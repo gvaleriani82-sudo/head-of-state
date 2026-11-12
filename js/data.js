@@ -930,6 +930,76 @@ const PAESI = {
         nota:'Venstre al 3,9% resta sotto la soglia del 4% e fuori dall\'aula: nel vero entra coi seggi di circoscrizione, che il gioco non modella.' },
     ],
   },
+  /* ===== L250-20 (12/11) · IL BELGIO, nel presente (gennaio 2026), dall'aula della Camera dei rappresentanti eletta il 09/06/2024 ◦.
+     · Undici partiti della consegna di Cowork (% e seggi ◦ da ricontrollare su elections.fgov.be: non letti in questo turno). Le forze
+       partono dai SEGGI, non dalle %: ogni partito corre solo nella sua comunità e le % nazionali non dicono la quota d'aula (N-VA
+       16,7% dei voti e 24 seggi, PS 8,0% e 16 seggi). Seggi ◦ 24 · 20 · 20 · 15 · 13 · 16 · 11 · 14 · 7 · 6 · 3 = 149 + DéFI 1 (fuori
+       dal roster): il 150° seggio va alla N-VA (25), quindi forza = seggi / 150 al decimo, somma 100,0. Il governo vero a cinque
+       (N-VA, MR, Les Engagés, Vooruit, CD&V) fa così 83 e non 82.
+     · `comunita` ('nl' | 'fr' | null: il PTB è l'unico partito nazionale) sui partiti e sui territori ('bxl' per Bruxelles): DATO
+       INERTE, nessuna funzione lo legge in questo lotto — letto da L250-21 (le due comunità, D-P3 (a)).
+     · Nessuna soglia nazionale (nel vero il 5% per circoscrizione ◦: non modellato, limite noto; il roster è già quello dell'aula).
+       `distorsione:1.0`: proporzionale.
+     · `alleati` dichiarati e simmetrici: la coalizione in carica (N-VA, MR, Les Engagés, Vooruit, CD&V, tutti con tutti), quella di
+       prima a sette (PS, MR, Ecolo, Open Vld, Vooruit, CD&V, Groen, tutti con tutti), il governo del 2014-18 (N-VA, MR, CD&V, Open Vld),
+       le famiglie a cavallo delle comunità, e Les Engagés coi socialisti e i liberali (il centro dei governi fino al 2014); il PTB
+       solo con la sinistra (PS, Vooruit, Groen, Ecolo: mai al governo federale ◦, ma una carriera deve poter fare un blocco);
+       nessuna alleanza col Vlaams Belang (cordone sanitario ◦: `alleati:[]` = con nessuno) e nessuna PTB-N-VA, PTB-MR, PTB-Open Vld.
+     · Urna a giugno ogni 5 anni: `meseUrna:6, mandatoMesi:60, turnMandato:1` (dal giugno 2024 al gennaio 2026 un anno pieno →
+       urna ordinaria 2029/6, poi 2034/6). Scioglimento: il ripiego del motore (nel vero la Camera si scioglie solo a condizioni
+       strette ◦, nessun campo). Voto obbligatorio ◦: nessun campo. UE ed euro (`ue:true`, ramo € di euro()). Monarchia (il Re).
+     · Senato non eletto: riga in CAMERE (sola composizione). Niente `terminoLocale`, niente `intermedie`, niente `nomiGruppi`
+       (il nome di ripiego del gruppo religioso regge in Belgio). ===== */
+  belgio: {
+    /* ◦ cifre 2024 SENZA FONTE letta in questo turno (ordine di grandezza della conoscenza di Code, da ricontrollare su Banca nazionale
+       del Belgio / Eurostat / FMI): debito ~105% del PIL, disavanzo ~4,5%, PIL ~615 mld €, inflazione armonizzata ~4,3%, crescita ~1%.
+       Riga in CIFRE-ECONOMICHE.md e ⚠ nel rapporto. */
+    economia:{pil:615, debito:105, deficit:-4.5, inflazione:4.3, crescita:1.0},
+    nome: 'Belgio',
+    capitale: 'Bruxelles', sedeGoverno: 'Rue de la Loi 16',   /* l'ufficio del Primo ministro, «il 16»; il parlamento al Palazzo della Nazione: %SEDE è un palazzo */
+    allineamento: 'occidentale',
+    colori: { bandiera: ['#000000', '#fdda24', '#ef3340'], accento: '#c9a400' },
+    flag: '<svg viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg"><rect width="10" height="20" fill="#000"/><rect x="10" width="10" height="20" fill="#fdda24"/><rect x="20" width="10" height="20" fill="#ef3340"/></svg>',
+    nomeArt: 'il Belgio',
+    titoloRuolo: 'Primo Ministro',
+    mandatoMesi: 60, sistema: 'parlamentare',
+    coalizione: true, comeSiVince: 'parlamentare', cadutaGoverno: true, ue: true, distorsione: 1.0,
+    meseUrna: 6, turnMandato: 1,   // le politiche si votano a giugno ◦ (2024, 2029): al gennaio 2026 un anno pieno dal giugno 2024 → urna ordinaria 2029/6
+    /* lean: stima, non un dato — le Fiandre e il Limburgo più a destra (N-VA e Vlaams Belang vi sono le prime forze), le città
+       fiamminghe un po' meno (Gand più a sinistra e verde, Anversa nel mezzo), il Brabante fiammingo liberale; l'Hainaut e Liegi a
+       sinistra (il PS e il PTB), il Brabante vallone liberale (MR) ma pesa meno dell'Hainaut, Namur e il Lussemburgo al centro;
+       Bruxelles a sinistra e verde. */
+    territori: [
+      {nome:'Bruxelles', nomeEn:'Brussels', tipo:'città', carica:'Sindaco', lean:-1, simbolo:true, comunita:'bxl'}, {nome:'Anversa', nomeEn:'Antwerp', tipo:'città', carica:'Sindaco', lean:0, simbolo:true, comunita:'nl'},
+      {nome:'Gand', nomeEn:'Ghent', tipo:'città', carica:'Sindaco', lean:-1, simbolo:true, comunita:'nl'}, {nome:'Liegi', nomeEn:'Liège', tipo:'città', carica:'Sindaco', lean:-2, simbolo:true, comunita:'fr'},
+      {nome:'le Fiandre occidentali e orientali', nomeEn:'West and East Flanders', tipo:'regione', carica:'Presidente', lean:1, plurale:true, pluraleEn:true, comunita:'nl'},
+      {nome:'Anversa e il Limburgo', nomeEn:'Antwerp and Limburg', tipo:'regione', carica:'Presidente', lean:1, plurale:true, pluraleEn:true, comunita:'nl'},
+      {nome:'il Brabante fiammingo', nomeEn:'Flemish Brabant', tipo:'regione', carica:'Presidente', lean:1, simbolo:true, comunita:'nl'},
+      {nome:"l'Hainaut e il Brabante vallone", nomeEn:'Hainaut and Walloon Brabant', tipo:'regione', carica:'Presidente', lean:-1, plurale:true, pluraleEn:true, comunita:'fr'},
+      {nome:'Liegi, Namur e il Lussemburgo', nomeEn:'Liège, Namur and Luxembourg', tipo:'regione', carica:'Presidente', lean:-1, plurale:true, pluraleEn:true, comunita:'fr'}
+    ],
+    /* .claude/genera-mappe.js, voce `belgio` (Natural Earth admin-1, 10 province + la Regione di Bruxelles raggruppate in 5 aree; Bruxelles dentro il Brabante fiammingo) */
+    mappa: { viewBox:'0 0 100 82',
+      sfondo:'M4.7,28.6 L3.1,27.3 L3.7,22.7 L1.5,17.7 L16.7,8.1 L22.3,6.3 L22.4,9.7 L23.4,11.4 L26.2,11.6 L26.5,10.0 L28.9,9.6 L33.1,11.1 L33.9,13.0 L36.9,13.0 L43.0,9.4 L44.3,6.6 L46.5,10.4 L47.0,9.4 L46.0,8.9 L45.3,6.5 L49.1,7.0 L48.2,3.6 L49.5,2.9 L51.9,2.3 L51.8,4.2 L54.6,4.6 L58.3,1.5 L59.5,2.3 L59.4,4.8 L57.9,4.8 L61.6,5.6 L64.6,2.3 L65.9,3.8 L65.6,6.3 L67.0,8.7 L68.9,8.9 L69.3,10.9 L73.7,10.9 L76.3,9.8 L78.2,12.9 L84.8,14.9 L85.2,17.0 L83.3,18.8 L82.1,22.7 L83.1,22.7 L79.6,27.9 L81.5,29.2 L81.7,30.9 L82.8,30.1 L83.9,30.9 L88.9,31.0 L89.4,32.7 L91.6,33.0 L93.1,36.1 L95.3,36.4 L93.1,39.2 L93.4,40.2 L94.3,41.5 L97.6,41.7 L97.6,46.1 L98.5,48.2 L96.3,48.7 L95.9,50.1 L93.0,51.9 L92.0,56.0 L91.2,54.4 L88.1,54.2 L85.9,56.9 L84.4,61.6 L82.0,65.0 L83.0,66.3 L82.3,66.3 L82.2,68.6 L84.2,71.7 L85.3,72.0 L85.2,73.9 L86.2,74.8 L85.0,78.1 L83.8,79.0 L80.1,78.8 L79.1,80.0 L77.7,79.6 L75.9,80.7 L74.0,76.5 L71.3,75.9 L71.6,74.7 L70.4,72.9 L68.2,73.1 L63.2,68.7 L60.1,68.9 L60.4,64.1 L58.5,62.4 L60.4,57.4 L60.4,54.9 L58.6,54.6 L55.9,57.4 L55.0,61.3 L49.7,63.4 L43.4,62.5 L42.0,61.7 L41.9,60.5 L44.0,58.1 L43.3,55.7 L41.9,55.6 L43.8,51.2 L43.4,50.2 L41.9,50.5 L38.8,47.1 L36.1,47.8 L32.5,47.0 L31.1,48.9 L30.2,48.1 L29.8,43.1 L28.9,41.9 L26.1,41.5 L25.6,40.1 L22.6,41.3 L20.4,39.9 L19.4,33.2 L16.8,29.9 L12.8,30.7 L10.7,33.1 L8.2,32.1 L5.8,28.7 ZM50.8,29.2 L48.2,30.5 L44.9,28.2 L46.2,25.4 L48.9,24.5 Z',
+      aree:[ {cx:47.6,cy:27.2,r:3}, {cx:48.8,cy:12.5,r:3}, {cx:31.8,cy:19.0,r:3}, {cx:78.3,cy:35.7,r:3}, {d:'M4.7,28.6 L3.1,27.3 L2.9,24.6 L3.7,22.7 L2.4,21.1 L1.5,17.7 L16.7,8.1 L22.3,6.3 L22.4,9.7 L23.4,11.4 L26.2,11.6 L26.5,10.0 L28.9,9.6 L33.1,11.1 L33.9,13.0 L37.4,12.8 L41.7,10.4 L44.0,8.1 L44.3,6.6 L46.3,9.4 L46.0,10.9 L47.0,15.3 L43.4,17.0 L43.5,19.4 L44.8,19.6 L44.2,21.5 L42.8,21.5 L42.7,23.9 L41.0,23.8 L40.9,25.8 L39.7,27.5 L40.6,28.2 L40.2,29.3 L38.3,30.4 L37.3,30.0 L37.5,31.7 L36.1,31.7 L35.8,31.0 L33.0,31.1 L32.6,29.8 L31.5,30.3 L31.3,29.8 L29.5,32.1 L27.1,31.6 L27.0,30.4 L25.1,30.3 L22.7,32.6 L21.7,32.1 L21.2,30.8 L19.1,30.4 L17.6,31.0 L16.1,29.7 L14.1,30.3 L13.5,28.6 L12.0,29.2 L12.5,30.0 L11.5,30.7 L9.6,31.0 L10.2,33.0 L8.2,32.1 L5.8,28.7 Z'}, {d:'M58.0,1.5 L59.2,2.0 L59.5,2.9 L59.4,4.8 L58.3,4.3 L57.9,4.8 L61.6,5.6 L62.8,4.9 L64.2,2.4 L65.4,2.9 L65.9,3.8 L65.6,6.3 L67.0,8.7 L68.9,8.9 L69.3,10.9 L73.7,10.9 L76.3,9.8 L78.2,12.9 L80.5,14.1 L82.3,13.9 L83.6,15.1 L84.8,14.9 L84.6,16.4 L85.2,17.0 L84.2,17.3 L84.0,18.7 L83.3,18.8 L83.5,20.2 L82.1,22.7 L83.1,22.7 L79.6,27.0 L80.4,28.8 L79.2,30.0 L77.0,30.6 L76.4,31.9 L75.5,31.4 L75.3,32.1 L74.1,31.9 L73.4,31.0 L71.6,32.3 L68.2,32.1 L68.1,33.1 L66.4,32.6 L66.9,31.6 L66.6,29.8 L67.7,28.6 L67.2,28.4 L67.3,27.1 L68.6,24.8 L67.2,24.2 L65.4,24.4 L64.9,23.4 L66.0,21.6 L67.0,21.1 L66.9,20.2 L67.9,20.2 L66.6,19.1 L65.9,19.2 L65.5,20.4 L63.1,19.3 L59.3,20.7 L58.6,19.6 L56.2,21.1 L56.5,20.5 L55.8,20.2 L54.0,20.6 L53.7,21.5 L51.2,20.8 L50.7,21.4 L50.1,20.9 L48.6,21.2 L48.3,19.9 L47.5,20.4 L46.2,19.5 L43.5,19.4 L43.4,17.0 L47.0,15.3 L46.0,10.9 L47.0,9.4 L46.0,8.9 L45.3,6.5 L48.6,7.3 L49.2,6.3 L48.2,3.6 L51.6,2.2 L52.1,2.6 L51.8,4.2 L54.6,4.6 ZM82.8,30.1 L86.8,31.6 L86.0,32.6 L84.5,32.4 L83.4,31.0 L82.4,30.8 Z'}, {d:'M50.8,29.2 L48.2,30.5 L47.0,29.9 L46.3,28.5 L44.9,28.2 L45.8,27.5 L46.2,25.4 L48.9,24.5 L50.7,28.2 L50.0,28.6 ZM41.2,32.7 L36.9,33.4 L35.9,32.3 L36.1,31.7 L37.5,31.7 L37.3,30.0 L38.3,30.4 L40.2,29.3 L40.6,28.2 L39.7,27.5 L40.9,25.8 L41.0,23.8 L42.7,23.9 L42.4,22.3 L42.8,21.5 L44.2,21.5 L44.8,19.6 L46.2,19.5 L47.5,20.4 L48.3,19.9 L48.6,21.2 L50.1,20.9 L50.7,21.4 L51.2,20.8 L53.7,21.5 L54.0,20.6 L55.8,20.2 L56.5,20.5 L56.2,21.1 L58.6,19.6 L59.3,20.7 L63.1,19.3 L65.5,20.4 L65.9,19.2 L66.6,19.1 L67.9,20.2 L66.9,20.2 L67.0,21.1 L66.0,21.6 L64.9,23.4 L65.4,24.4 L67.2,24.2 L68.6,24.8 L67.3,27.1 L67.2,28.4 L67.7,28.6 L66.6,29.8 L66.9,31.6 L66.4,32.6 L65.4,32.6 L65.0,31.3 L63.4,30.2 L61.8,31.2 L61.6,30.3 L59.7,30.5 L57.6,28.7 L56.7,29.5 L54.8,29.1 L55.2,30.7 L54.7,31.3 L53.9,31.3 L53.7,30.5 L52.0,31.8 L50.8,30.7 L48.1,31.8 L48.0,32.4 L47.0,31.7 L45.9,33.2 L44.8,33.3 L42.5,31.8 Z'}, {d:'M10.7,33.1 L9.6,31.0 L11.5,30.7 L12.5,30.0 L12.0,29.2 L13.9,28.9 L14.1,30.3 L12.2,31.1 ZM22.6,41.3 L20.4,39.9 L19.4,33.2 L17.6,31.0 L19.1,30.4 L21.2,30.8 L21.7,32.1 L22.7,32.6 L25.1,30.3 L27.0,30.4 L27.1,31.6 L29.5,32.1 L30.5,30.2 L32.6,29.8 L33.0,31.1 L35.8,31.0 L36.4,33.2 L38.4,33.5 L42.5,31.8 L44.8,33.3 L45.9,33.2 L47.0,31.7 L48.0,32.4 L48.1,31.8 L50.8,30.7 L52.0,31.8 L53.7,30.5 L53.9,31.3 L54.7,31.3 L55.2,30.7 L54.8,29.1 L56.7,29.5 L57.6,28.7 L59.7,30.5 L61.6,30.3 L61.8,31.2 L63.4,30.2 L64.4,31.0 L63.7,32.0 L64.3,32.9 L63.5,35.3 L58.7,36.7 L58.7,37.3 L57.4,37.3 L57.2,36.5 L56.4,37.1 L55.5,36.6 L55.5,38.3 L53.1,38.5 L52.8,41.2 L53.7,40.9 L53.8,41.7 L53.1,43.2 L54.2,43.9 L53.4,44.8 L54.0,45.5 L53.5,48.0 L50.7,47.7 L50.1,48.6 L48.7,48.4 L48.5,49.1 L45.9,50.5 L47.3,51.6 L47.9,51.1 L48.8,51.5 L48.7,53.3 L47.8,54.0 L48.7,55.7 L48.4,58.0 L49.9,62.3 L49.5,63.3 L45.7,62.3 L43.8,62.6 L42.0,61.7 L42.2,59.7 L44.0,58.3 L43.3,55.7 L41.9,55.6 L42.7,52.3 L43.8,51.2 L43.4,50.2 L41.9,50.5 L41.2,49.1 L38.8,47.1 L36.1,47.8 L34.7,47.1 L32.5,47.0 L31.1,48.9 L30.2,48.1 L29.8,43.1 L28.9,41.9 L26.1,41.5 L25.6,40.1 Z'}, {d:'M59.6,55.0 L59.2,54.3 L58.6,54.6 L55.9,57.4 L55.3,61.1 L49.5,63.3 L49.9,62.3 L48.4,58.0 L48.7,55.7 L47.8,54.0 L48.7,53.3 L48.8,51.5 L47.9,51.1 L47.3,51.6 L45.9,50.5 L48.5,49.1 L48.7,48.4 L50.1,48.6 L50.7,47.7 L53.5,48.0 L54.0,45.5 L53.4,44.8 L54.2,43.9 L53.1,43.2 L53.8,41.7 L53.7,40.9 L52.8,41.2 L53.1,38.5 L55.5,38.3 L55.5,36.6 L56.4,37.1 L57.2,36.5 L57.4,37.3 L58.7,37.3 L58.7,36.7 L63.5,35.3 L64.3,32.9 L63.7,32.0 L64.4,31.0 L65.4,32.6 L68.1,33.1 L68.2,32.1 L71.6,32.3 L73.4,31.0 L74.7,32.2 L75.5,31.4 L76.4,31.9 L77.0,30.6 L79.2,30.0 L80.4,28.8 L81.5,29.2 L81.2,30.6 L83.4,31.0 L84.5,32.4 L86.2,32.5 L86.8,31.6 L86.3,31.0 L88.9,31.0 L89.4,32.7 L91.6,33.0 L93.1,36.1 L95.3,36.4 L93.1,39.2 L93.4,40.2 L94.3,41.5 L97.6,41.7 L97.6,46.1 L98.5,48.2 L96.3,48.7 L95.9,50.1 L93.0,51.9 L93.2,53.5 L92.2,54.2 L92.0,56.0 L91.2,54.4 L90.0,54.8 L89.0,53.8 L88.1,54.2 L87.6,55.6 L85.9,56.9 L85.0,60.0 L84.1,60.6 L84.4,61.6 L82.0,65.0 L83.0,66.3 L82.3,66.3 L82.2,68.6 L83.5,69.7 L84.2,71.7 L85.3,72.0 L85.2,73.9 L86.2,74.8 L84.4,78.7 L82.7,78.6 L81.8,79.3 L80.1,78.8 L79.1,80.0 L77.7,79.6 L75.4,80.5 L75.2,78.7 L74.0,76.5 L72.3,75.5 L71.4,76.0 L71.4,74.1 L70.4,72.9 L68.2,73.1 L66.0,70.5 L63.2,68.7 L60.3,69.2 L59.7,66.5 L60.4,64.1 L58.5,62.4 L59.5,58.2 L60.0,57.1 L60.4,57.4 L60.7,55.2 Z'} ] },
+    nomi: ['Jan','Lotte','Pieter','An','Wouter','Els','Koen','Sofie','Bart','Katrien','Luc','Nathalie','Julien','Céline','Olivier','Isabelle','Nicolas','Aurélie','Thomas','Marie'],
+    nomiM: ['Jan','Pieter','Wouter','Koen','Bart','Luc','Julien','Olivier','Nicolas','Thomas'],
+    nomiF: ['Lotte','An','Els','Sofie','Katrien','Nathalie','Céline','Isabelle','Aurélie','Marie'],
+    cognomi: ['Peeters','Janssens','Maes','De Smet','Claes','Jacobs','Mertens','Willems','Wouters','Goossens','Dubois','Lambert','Dupont','Leclercq','Simon','Lejeune','Renard','Laurent','Dumont','Collard'],
+    partiti: [   // `comunita`: dato inerte, letto da L250-21
+      { id:'be_nva',     nome:'Nuova alleanza fiamminga',         comunita:'nl', orientamento:'centrodestra',     base:{ cetomedio:0.4, imprenditori:0.3, pensionati:0.2, cattolici:0.1 }, forza:16.7, asse:1,  alleati:['be_mr','be_le','be_vooruit','be_cdv','be_vld'] },
+      { id:'be_vb',      nome:'Interesse fiammingo',              comunita:'nl', orientamento:'destra populista', base:{ lavoratori:0.4, pensionati:0.3, cetomedio:0.3 },   forza:13.3, asse:2,  alleati:[] },
+      { id:'be_mr',      nome:'Movimento riformatore',            comunita:'fr', orientamento:'centrodestra',     base:{ imprenditori:0.4, cetomedio:0.4, pensionati:0.2 }, forza:13.3, asse:1,  alleati:['be_nva','be_le','be_vooruit','be_cdv','be_vld','be_ps','be_ecolo','be_groen'] },
+      { id:'be_ptb',     nome:'Partito del lavoro',               comunita:null, orientamento:'sinistra',         base:{ lavoratori:0.6, giovani:0.4 },                     forza:10.0, asse:-2, alleati:['be_ps','be_vooruit','be_groen','be_ecolo'] },
+      { id:'be_vooruit', nome:'Vooruit',                          comunita:'nl', orientamento:'centrosinistra',   base:{ lavoratori:0.4, cetomedio:0.3, giovani:0.3 },      forza:8.7,  asse:-1, alleati:['be_nva','be_mr','be_le','be_cdv','be_ps','be_vld','be_groen','be_ecolo','be_ptb'] },
+      { id:'be_ps',      nome:'Partito socialista',               comunita:'fr', orientamento:'centrosinistra',   base:{ lavoratori:0.5, pensionati:0.4, cetomedio:0.1 },   forza:10.7, asse:-1, alleati:['be_mr','be_le','be_vooruit','be_cdv','be_vld','be_groen','be_ecolo','be_ptb'] },
+      { id:'be_cdv',     nome:'Cristiano-democratici fiamminghi', comunita:'nl', orientamento:'centro',           base:{ cattolici:0.4, pensionati:0.3, cetomedio:0.2, imprenditori:0.1 }, forza:7.3, asse:0, alleati:['be_nva','be_mr','be_le','be_vooruit','be_ps','be_vld','be_groen','be_ecolo'] },
+      { id:'be_le',      nome:'Les Engagés',                      comunita:'fr', orientamento:'centro',           base:{ cetomedio:0.4, cattolici:0.3, pensionati:0.3 },    forza:9.3,  asse:0,  alleati:['be_nva','be_mr','be_vooruit','be_cdv','be_ps','be_vld'] },
+      { id:'be_vld',     nome:'Liberali fiamminghi',              comunita:'nl', orientamento:'liberale',         base:{ imprenditori:0.5, cetomedio:0.3, giovani:0.2 },    forza:4.7,  asse:1,  alleati:['be_nva','be_mr','be_le','be_vooruit','be_cdv','be_ps','be_groen','be_ecolo'] },
+      { id:'be_groen',   nome:'Verdi fiamminghi',                 comunita:'nl', orientamento:'ecologista',       base:{ giovani:0.6, cetomedio:0.4 },                      forza:4.0,  asse:-2, alleati:['be_mr','be_vooruit','be_ps','be_cdv','be_vld','be_ecolo','be_ptb'] },
+      { id:'be_ecolo',   nome:'Ecolo',                            comunita:'fr', orientamento:'ecologista',       base:{ giovani:0.6, cetomedio:0.4 },                      forza:2.0,  asse:-2, alleati:['be_mr','be_vooruit','be_ps','be_cdv','be_vld','be_groen','be_ptb'] },
+    ],
+  },
 };
 /* paese attivo (scambiato a inizio partita); default Italia */
 let PAESE = PAESI.italia;
@@ -16161,7 +16231,7 @@ const RIVALI=(function(){
   riga('italia1950 italia1960 italia1970 italia1980 uk1950 uk1960 uk1970 uk1980 fr1950 fr1960 fr1970 fr1980 de1950 de1960 de1970 de1980 us1950 us1960 us1970 us1980', 'urss', 1945, 1991, 4, 'blocco');   // la guerra fredda: Cuba e Berlino si fermano all'ultimatum (L258-2, D286: us1970; L262-2, D294: us1980)
   riga('italia1990 uk1990 fr1990 de1990 us1990', 'urss', 1945, 1991, 4, 'blocco');   // L264-2: + us1990 (D303)
   riga('italia1990 uk1990 fr1990 de1990 italia2000 uk2000 fr2000 de2000 us1980 us1990 us2000', 'russia', 1992, 2099, 4, 'blocco');   // L264-2 (D303): + us1990 e us1980 (le sue carriere dal 1992 non avevano un rivale) · L265-2 (D330): + us2000
-  ['russia','cina','iran'].forEach(function(c){ riga('italia francia regnounito germania spagna canada australia danimarca paesibassi svezia norvegia', c, 2012, 2099, 4, 'blocco'); });   // L250-2: + la Danimarca (Alleanza atlantica) · L250-5: + i Paesi Bassi · L250-8: + la Svezia (nell'Alleanza dal 2024) · L250-14: + la Norvegia (dal 1949)
+  ['russia','cina','iran'].forEach(function(c){ riga('italia francia regnounito germania spagna canada australia danimarca paesibassi svezia norvegia belgio', c, 2012, 2099, 4, 'blocco'); });   // L250-20: + il Belgio (nell'Alleanza dal 1949)   // L250-2: + la Danimarca (Alleanza atlantica) · L250-5: + i Paesi Bassi · L250-8: + la Svezia (nell'Alleanza dal 2024) · L250-14: + la Norvegia (dal 1949)
   ['russia','cina','iran','corea_nord'].forEach(function(c){ riga('usa', c, 2012, 2099, 4, 'blocco'); });
   ['russia','cina','corea_nord'].forEach(function(c){ riga('giappone', c, 2012, 2099, 4, 'blocco'); });
   riga('coreasud', 'corea_nord', 2012, 2099, 5, 'confine');
@@ -16252,6 +16322,8 @@ const CAMERE=[
   {paese:'nigeria', dal:2026, nome:'Senato', nomeEn:'Senate', seggiVeri:109, elezione:'congresso', fiducia:false, potere:'pari', rinnovo:{tipo:'intero', ogniMesi:48}, fase:2023, seggiCamera:360},   // ✓ 109; L263-9quinquies (N1): famiglia «congresso» come il presente americano, senza classi: Camera dei Rappresentanti (✓ 360, seggiCamera) e Senato rinnovati insieme col Presidente ogni 4 anni (✓ 2023, prossimo voto 2027); letta da camereNg() (game.js) solo con CAMERE_NG
   // L250-5 · i Paesi Bassi: la Eerste Kamer (75 ✓), eletta dai consigli provinciali dopo le provinciali (◦ ogni quattro anni, intera); può respingere una legge, non emendarla. Solo dati: nessun interruttore la legge (CAMERE_NL, se servirà, dopo i cinque paesi: ⚠ nel rapporto L250-5)
   {paese:'paesibassi', dal:2026, nome:'Prima Camera', nomeEn:'Senate', seggiVeri:75, elezione:'territori', fiducia:false, potere:'pari', rinnovo:{tipo:'intero'}},
+  // L250-20 · il Belgio: dal 2014 il Senato non è eletto ◦ (50 senatori designati dai parlamenti delle comunità e delle regioni, 10 cooptati), non vota la fiducia e interviene solo sulla Costituzione e sulle leggi istituzionali ◦: sola composizione, come i Lord e il Senato canadese (CAMERE_COMP)
+  {paese:'belgio', dal:2026, nome:'Senato', nomeEn:'Senate', seggiVeri:60, elezione:'composizione', fiducia:false, potere:'nessuno', rinnovo:{tipo:'nessuno'}},   // ✓ 60, fissato dalla Costituzione (art. 67, dal 2014)
 ];
 /* L268-1 · LA CAMERA BASSA (O UNICA) DI OGNI PAESE, PER LEGISLATURA (DESIGN-CAMERE.md §«Seggi veri»): SOLO PRESENTAZIONE (D-S1), la legge
    seggiTotali() (game.js accanto a cameraAlta). dal = l'anno dell'urna che elegge quell'aula, fino = l'anno prima della successiva che la cambia;
@@ -16325,6 +16397,7 @@ const CAMERE_BASSE=[
   {paese:'paesibassi', dal:2025, nome:'Seconda Camera', nomeEn:'House of Representatives', seggi:150},            // ✓ (150 dal 1956)
   {paese:'svezia', dal:2022, nome:'Riksdag', nomeEn:'Riksdag', seggi:349},                                        // ✓ unica (349 dal 1976)
   {paese:'norvegia', dal:2025, nome:'Storting', nomeEn:'Storting', seggi:169},                                    // ✓ unica (150 + 19 di compensazione)
+  {paese:'belgio', dal:2024, nome:'Camera dei rappresentanti', nomeEn:'Chamber of Representatives', seggi:150},  // ✓ 150, fissato dalla Costituzione (art. 63, dal 1995)
 ];
 /* L263-10 · I VOTI DEI LÄNDER NEL BUNDESRAT (art. 51 della Legge fondamentale: 3 voti, 4 sopra 2 milioni di abitanti, 5 sopra 6,
    6 sopra 7 dal 1990; prima del 1990 3/4/5, Berlino Ovest senza voto). Chiave = `nome` di PAESE.territori (presente e porte de*);
@@ -16403,11 +16476,11 @@ const ALLEATI_DIPLO=(function(){
   function riga(paesi, id, dal, fino){ var d=D[id]; paesi.split(' ').forEach(function(p){ r.push({paese:p, id:id, nome:d[0], art:d[1], nomeEn:d[2], artEn:d[3], dal:dal, fino:fino}); }); }
   var IT='italia italia1950 italia1960 italia1970 italia1980 italia1990 italia2000', UK='regnounito uk1950 uk1960 uk1970 uk1980 uk1990 uk2000',
       FR='francia fr1950 fr1960 fr1970 fr1980 fr1990 fr2000', DE='germania de1950 de1960 de1970 de1980 de1990 de2000', US='usa us1950 us1960 us1970 us1980 us1990 us2000';   // L264-2: + us1990 · L265-2: + us2000
-  riga(IT+' '+UK+' '+FR+' '+DE+' india canada australia giappone coreasud messico nigeria brasile danimarca paesibassi svezia norvegia', 'stati_uniti', 1945, 2099);   // L250-2: + la Danimarca · L250-5: + i Paesi Bassi · L250-8: + la Svezia · L250-14: + la Norvegia
+  riga(IT+' '+UK+' '+FR+' '+DE+' india canada australia giappone coreasud messico nigeria brasile danimarca paesibassi svezia norvegia belgio', 'stati_uniti', 1945, 2099);   // L250-20: + il Belgio   // L250-2: + la Danimarca · L250-5: + i Paesi Bassi · L250-8: + la Svezia · L250-14: + la Norvegia
   riga(IT+' '+UK+' '+DE, 'francia', 1945, 2099);
   riga(FR, 'regno_unito', 1945, 1962);          // la Francia della Quarta Repubblica e dei primi anni di de Gaulle: Londra e Washington
   riga(FR, 'germania_ovest', 1963, 1990);       // dal trattato dell'Eliseo (gennaio 1963)
-  riga(FR+' spagna danimarca paesibassi svezia norvegia', 'germania', 1991, 2099);   // L250-2: la Danimarca (solo presente) con Washington e Berlino · L250-5: i Paesi Bassi · L250-8: la Svezia · L250-14: la Norvegia
+  riga(FR+' spagna danimarca paesibassi svezia norvegia belgio', 'germania', 1991, 2099);   // L250-20: + il Belgio   // L250-2: la Danimarca (solo presente) con Washington e Berlino · L250-5: i Paesi Bassi · L250-8: la Svezia · L250-14: la Norvegia
   riga(US+' canada australia sudafrica nigeria', 'regno_unito', 1945, 2099);
   riga(US+' messico', 'canada', 1945, 2099);
   riga('spagna', 'francia', 1945, 2099);
@@ -16433,7 +16506,8 @@ const PARI={
   danimarca:['germania','regnounito','francia','spagna'],   // L250-2: i quattro europei del Nord-Ovest più vicini (nessun nordico in PAESI)
   paesibassi:['germania','francia','regnounito','danimarca'],   // L250-5: i vicini del Mare del Nord
   svezia:['danimarca','germania','paesibassi','regnounito'],   // L250-8: i vicini del Baltico e del Mare del Nord (nessun altro nordico in PAESI)
-  norvegia:['svezia','danimarca','regnounito','germania'] };   // L250-14: i due nordici e i due vicini del Mare del Nord (Svezia e Danimarca restano senza la Norvegia: quattro per paese, la guardia di L260-6)
+  norvegia:['svezia','danimarca','regnounito','germania'],   // L250-14: i due nordici e i due vicini del Mare del Nord
+  belgio:['paesibassi','francia','germania','spagna'] };   // L250-20: i tre vicini e la Spagna (un'altra monarchia dell'euro col debito sopra il 100%); nessuno degli altri cambia (quattro per paese, la guardia di L260-6)   // L250-14: i due nordici e i due vicini del Mare del Nord (Svezia e Danimarca restano senza la Norvegia: quattro per paese, la guardia di L260-6)
 
 const INTERNAZIONALI=[
  {id:'nato_vertice',era:'universale', tono:'florido', min:'difesa', kick:'Alleanza atlantica', t:'Vertice dell\'Alleanza', text:'Gli alleati chiedono un impegno di spesa militare più alto. La tua risposta pesa sul rapporto con l\'Alleanza — e su chi la guarda da fuori.',ch:[
@@ -22964,13 +23038,17 @@ const MOSSE_CHIUSURA=[
    Assenti nel dubbio: droghe NL (tolleranza, non legalizzazione), patrimoniale NL (box 3), liberalizz_lavoro DK (flexicurity).
    Rapporto «⚑ L250-13» in DESIGN-PAESI-NUOVI.md.
    L250-14 (08/11): la Norvegia ◦ — matrimonio (2009), leva (anche femminile dal 2015), patrimoniale (la formuesskatt); nucleare no,
-   salario minimo no (minimi di settore estesi, nessun minimo generale), droghe e pena di morte no. Rapporto «⚑ L250-14». */
+   salario minimo no (minimi di settore estesi, nessun minimo generale), droghe e pena di morte no. Rapporto «⚑ L250-14».
+   L250-20 (12/11): il Belgio ◦ — matrimonio (2003), nucleare (le centrali di Doel e Tihange in funzione e l'uscita del 2003 ritirata
+   nel 2025: il criterio di L250-13, «ci sono centrali»); leva no (sospesa dal 1994), salario minimo no (minimo da contratto
+   interprofessionale reso obbligatorio, non una legge dello Stato: la chiave è «legale»), patrimoniale, droghe e pena di morte no.
+   Il fine vita (2002) non è una legge del pool. Rapporto «⚑ L250-20». */
 const LEGGI = [
   // ===== Comuni (ovunque) =====
   { id:'salario_min', nome:'Salario minimo legale', desc:'Fissa per legge una retribuzione oraria minima.', asse:-1, costo:1,
     iniziale:{usa:1, regnounito:1, francia:1, paesibassi:1}, unaTantum:{grp:{lavoratori:6, giovani:3, imprenditori:-6}}, permanenti:{grp:{lavoratori:3, imprenditori:-3}} },
   { id:'matrimonio', era:'contemporanea', nome:'Matrimonio egualitario', desc:'Estende il matrimonio civile alle coppie dello stesso sesso.', asse:-1, costo:1,
-    iniziale:{usa:1, francia:1, regnounito:1, danimarca:1, paesibassi:1, svezia:1, norvegia:1}, unaTantum:{grp:{giovani:7, cattolici:-7}}, permanenti:{grp:{giovani:3, cattolici:-3}} },
+    iniziale:{usa:1, francia:1, regnounito:1, danimarca:1, paesibassi:1, svezia:1, norvegia:1, belgio:1}, unaTantum:{grp:{giovani:7, cattolici:-7}}, permanenti:{grp:{giovani:3, cattolici:-3}} },
   { id:'droghe', era:'contemporanea', nome:'Legalizzazione droghe leggere', desc:'Depenalizza il consumo e la vendita regolata di cannabis.', asse:-1, costo:1,
     iniziale:{}, unaTantum:{grp:{giovani:6, cattolici:-5, cetomedio:-2}}, permanenti:{grp:{giovani:3, cattolici:-3}} },
   { id:'pena_morte', nome:'Pena di morte', desc:'Prevede la pena capitale per i reati più gravi.', asse:2, costo:2,
@@ -22978,7 +23056,7 @@ const LEGGI = [
   { id:'leva', nome:'Leva militare obbligatoria', desc:'Reintroduce il servizio militare obbligatorio.', asse:1, costo:1,
     iniziale:{danimarca:1, svezia:1, norvegia:1}, unaTantum:{grp:{cattolici:3, pensionati:3, giovani:-7}}, permanenti:{grp:{giovani:-3}, sicurezza:1} },
   { id:'nucleare', era:'contemporanea', nome:'Nucleare civile', desc:'Autorizza la costruzione di nuove centrali nucleari.', asse:1, costo:2,
-    iniziale:{francia:1, usa:1, regnounito:1, paesibassi:1, svezia:1}, unaTantum:{grp:{imprenditori:5, giovani:-5}}, permanenti:{grp:{giovani:-2}, growth:0.3, ambiente:-4} },
+    iniziale:{francia:1, usa:1, regnounito:1, paesibassi:1, svezia:1, belgio:1}, unaTantum:{grp:{imprenditori:5, giovani:-5}}, permanenti:{grp:{giovani:-2}, growth:0.3, ambiente:-4} },
   { id:'patrimoniale', nome:'Imposta patrimoniale', desc:'Introduce un\'imposta sui grandi patrimoni.', asse:-2, costo:2,
     iniziale:{norvegia:1}, unaTantum:{grp:{lavoratori:6, imprenditori:-8, cetomedio:-4}}, permanenti:{grp:{imprenditori:-3, cetomedio:-2}, deficit:-0.6} },
   { id:'liberalizz_lavoro', nome:'Liberalizzazione del lavoro', desc:'Allenta i vincoli su assunzioni e licenziamenti.', asse:2, costo:2,

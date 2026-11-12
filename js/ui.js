@@ -2533,6 +2533,7 @@ var RITRATTI_AREA = {
   paesibassi:'occ',   // L250-5
   svezia:'occ',   // L250-8
   norvegia:'occ',   // L250-14
+  belgio:'occ',   // L250-20
 };   // L10-1: prefissi allineati ai nomi-file su disco (occ/lat/asi/sud/afr), non ai nomi lunghi di L9-2
 /* L11-3 — conteggio PER POOL **E GENERE**: un lotto d'arte parziale (es. 5 maschi ma 4 femmine) non produce più un
    path inesistente. Derivarlo a runtime dai file richiederebbe fetch/sonde (il gioco usa script classici, niente
@@ -5432,6 +5433,7 @@ function bundesratEmiOpz(key, bv){ return { key:key, legenda:true, aria:'Bundesr
    I Lord fino al 1998 erano soprattutto ereditari, quindi «nominati» vale solo dal 2026 (ereditari aboliti); dal 1999 restano 92 ereditari. */
 function cameraCompTesti(r){
   if(S.paese==='canada') return { cosa:T('Senatori nominati, non eletti: non vota la fiducia'), righe:[T('Respinge una legge di rado')] };
+  if(S.paese==='belgio') return { cosa:T('Senatori designati dai parlamenti delle comunità e delle regioni, non eletti: non vota la fiducia'), righe:[T('Vota solo sulla Costituzione e sulle leggi istituzionali')] };   // L250-20 ◦
   const ritardo=T('Può ritardare una legge di un anno');   // Parliament Act 1949 ✓, in tutte le righe britanniche
   if(r.dal>=2026) return { cosa:T('Membri nominati, non eletti: non vota la fiducia'), righe:[ritardo] };
   if(r.dal>=1999) return { cosa:T('Membri a vita e 92 per eredità, non eletti: non vota la fiducia'), righe:[ritardo] };

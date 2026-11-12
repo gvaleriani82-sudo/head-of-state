@@ -69,6 +69,12 @@ const EN = {
   "Norvegia":"Norway",   /* L250-14: e sotto il roster norvegese (Conservatori, Partito di centro, Verdi, Liberali hanno già la loro voce) */
   "Laburisti":"Labour Party", "Partito del progresso":"Progress Party", "Sinistra socialista":"Socialist Left", "Rødt":"Red Party",
   "Cristiano-popolari":"Christian People's Party", "Comunità cristiane e campagne":"Christian communities and countryside", "Regjeringskvartalet":"Regjeringskvartalet",
+  "Belgio":"Belgium",   /* L250-20: e sotto il roster belga (Vooruit, Les Engagés, Ecolo restano col loro nome) */
+  "Nuova alleanza fiamminga":"New Flemish Alliance", "Interesse fiammingo":"Flemish Interest", "Movimento riformatore":"Reformist Movement", "Partito del lavoro":"Workers' Party",
+  "Vooruit":"Vooruit", "Partito socialista":"Socialist Party", "Cristiano-democratici fiamminghi":"Flemish Christian Democrats", "Les Engagés":"Les Engagés",
+  "Liberali fiamminghi":"Flemish Liberals", "Verdi fiamminghi":"Flemish Greens", "Ecolo":"Ecolo", "Rue de la Loi 16":"Rue de la Loi 16",
+  "Senatori designati dai parlamenti delle comunità e delle regioni, non eletti: non vota la fiducia":"Senators chosen by the community and regional parliaments, not elected: no confidence vote",
+  "Vota solo sulla Costituzione e sulle leggi istituzionali":"Votes only on the Constitution and the institutional laws",
   /* L250-14 (D-P6): il Parlamento che non si scioglie */
   "Il governo perde la fiducia. Il Parlamento non si scioglie: dalla stessa aula nasce un governo nuovo, e alle urne non si va.":"The government loses the confidence vote. Parliament cannot be dissolved: a new government is formed from the same chamber, and there is no election.",
   "Il governo perde la fiducia. Il Parlamento non si scioglie: %P forma un governo nuovo dalla stessa aula, e alle urne non si va.":"The government loses the confidence vote. Parliament cannot be dissolved: %P forms a new government from the same chamber, and there is no election.",
@@ -5135,7 +5141,7 @@ const EN = {
   "Dinastia politica":"Political dynasty",
   "Un cognome che apre porte: il partito ti accoglie meglio. E ti osserva di più.":"A surname that opens doors: the party welcomes you more warmly. And watches you more closely.",
   "Popolari":"People's Party", "Socialisti":"Socialists", "Liberali":"Liberals",
-  "Destra":"Right", "Conservatori":"Conservatives", "Non iscritti":"Non-attached",
+  "Destra":"Right", "Conservatori":"Conservatives", 
   "Verdi":"Greens", "Sinistra radicale":"Radical Left",
 
   /* ============================================================================
@@ -13108,7 +13114,6 @@ const EN = {
   "L'albero di sempre non c'è più":"The tree that was always there is gone",
   "Resti dentro: il vento non ha ancora finito":"You stay in: the wind has not finished yet",
   "La radio parla di un uomo che aveva detto di non preoccuparsi":"The radio talks about a man who said not to worry",
-  "Il lunedì nero":"Black Monday",
   "In un giorno la Borsa perde più che in qualunque altro giorno a memoria d'uomo. Chi aveva comprato le azioni delle aziende di Stato guarda il telegiornale in silenzio.":"In a single day the stock market loses more than on any other day in living memory. Those who bought shares in the state companies watch the news in silence.",
   "Vendi quello che hai, prima che scenda ancora":"You sell what you have, before it falls further",
   "Il guadagno di una settimana, perso in un pomeriggio":"A week’s gain, lost in an afternoon",

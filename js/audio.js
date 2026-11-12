@@ -544,11 +544,12 @@ const MUSICA_MANIFEST = {
   'mus-de-1990':       { file:'mus-de-1990.mp3',     loop:true, gain:0.35, paese:'de', decennio:'mus-1990' },     // −16,0, picco −0,1 · 2:00
   'mus-de-2000':       { file:'mus-de-2000.mp3',     loop:true, gain:0.29, paese:'de', decennio:'mus-2000' },     // −14,5, picco −0,3 · 2:00
   'mus-de-presente':   { file:'mus-de-presente.mp3', loop:true, gain:0.57, paese:'de', decennio:'mus-presente' }, // −20,3, picco −1,2 · 2:00
-  /* L218-30 · il presente dei paesi nuovi (L250): gain della regola di L218-9, misurati in Chrome (.claude/misura-l218-30.js). Il Belgio (mus-be-presente) aspetta il suo lotto di struttura: non è in PAESI. */
+  /* L218-30 · il presente dei paesi nuovi (L250): gain della regola di L218-9, misurati in Chrome (.claude/misura-l218-30.js). Il Belgio (mus-be-presente) dal L250-20. */
   'mus-dk-presente':   { file:'mus-dk-presente.mp3', loop:true, gain:0.35, paese:'dk', decennio:'mus-presente' }, // −16,0, picco −0,8 · 2:00
   'mus-nl-presente':   { file:'mus-nl-presente.mp3', loop:true, gain:0.39, paese:'nl', decennio:'mus-presente' }, // −16,9, picco −1,2 · 2:00
   'mus-se-presente':   { file:'mus-se-presente.mp3', loop:true, gain:0.40, paese:'se', decennio:'mus-presente' }, // −17,3, picco −1,3 · 2:00
   'mus-no-presente':   { file:'mus-no-presente.mp3', loop:true, gain:0.63, paese:'no', decennio:'mus-presente' }, // −21,2, picco −1,1 · 2:00
+  'mus-be-presente':   { file:'mus-be-presente.mp3', loop:true, gain:0.41, paese:'be', decennio:'mus-presente' }, // −17,4, picco −0,8 · 2:00 · L250-20 (.claude/misura-l250-20-musica.js)
   /* L218-30 bis · la SECONDA traccia del presente dei cinque paesi storici: `decennio:` = la B generica che sostituisce (mus-presente-b),
      quindi la rotazione del presente è A di paese → B di paese → C generica (musicaVarianti passa ogni variante da musicaAPaese; musicaTema
      risale dalla B di paese a mus-presente). Senza il file resta la B generica. Gain della regola di L218-9, .claude/misura-l218-30bis.js. */
@@ -589,7 +590,7 @@ const MUSICA_PRESENTI = ['mus-1950.mp3','mus-1960.mp3','mus-1970.mp3','mus-1980.
                          'mus-uk-1950.mp3','mus-uk-1960.mp3','mus-uk-1970.mp3','mus-uk-1980.mp3','mus-uk-1990.mp3','mus-uk-2000.mp3','mus-uk-presente.mp3',
                          'mus-fr-1950.mp3','mus-fr-1960.mp3','mus-fr-1970.mp3','mus-fr-1980.mp3','mus-fr-1990.mp3','mus-fr-2000.mp3','mus-fr-presente.mp3',
                          'mus-de-1950.mp3','mus-de-1960.mp3','mus-de-1970.mp3','mus-de-1980.mp3','mus-de-1990.mp3','mus-de-2000.mp3','mus-de-presente.mp3',   // L218-22: le 35 musiche del paese
-                         'mus-tensione.mp3','mus-tensione-b.mp3','mus-guerra.mp3','mus-guerra-b.mp3','mus-tensione-c.mp3','mus-guerra-c.mp3','mus-armistizio.mp3','mus-dopoguerra.mp3','mus-armistizio-b.mp3','mus-tema-c.mp3','mus-dk-presente.mp3','mus-nl-presente.mp3','mus-se-presente.mp3','mus-no-presente.mp3','mus-it-presente-b.mp3','mus-fr-presente-b.mp3','mus-uk-presente-b.mp3','mus-de-presente-b.mp3','mus-us-presente-b.mp3',   // L218-30 (bis: le -b del presente di paese)
+                         'mus-tensione.mp3','mus-tensione-b.mp3','mus-guerra.mp3','mus-guerra-b.mp3','mus-tensione-c.mp3','mus-guerra-c.mp3','mus-armistizio.mp3','mus-dopoguerra.mp3','mus-armistizio-b.mp3','mus-tema-c.mp3','mus-dk-presente.mp3','mus-nl-presente.mp3','mus-se-presente.mp3','mus-no-presente.mp3','mus-be-presente.mp3','mus-it-presente-b.mp3','mus-fr-presente-b.mp3','mus-uk-presente-b.mp3','mus-de-presente-b.mp3','mus-us-presente-b.mp3',   // L218-30 (bis: le -b del presente di paese)
                             // L245-5: la guerra
                          'mus-lutto.mp3',    // L245-7: il lutto dopo un attacco grave
                          'mus-spoglio.mp3','mus-fondazione.mp3','mus-fondazione-b.mp3'];   // L218-30: lo spoglio (quarta variante della notte) e la fondazione A ↔ B
@@ -704,7 +705,7 @@ function fuoriPartita(){
    chiama SOLO `musicaVarianti()`, quindi la usano insieme `musicaScelta()` (ramo dell'epoca e ramo della porta, via musicaGiroVariante),
    `musicaParti()` (alternanza e precarico: si carica la traccia del paese, non la generica) e nessun altro tema: notte, crisi, campagna,
    finale e tema del gioco non hanno tracce di paese. Transitorio, niente in S. */
-const MUSICA_SIGLA_PAESE = { italia:'it', usa:'us', regnounito:'uk', francia:'fr', germania:'de', danimarca:'dk', paesibassi:'nl', svezia:'se', norvegia:'no' };   // L218-30: i quattro paesi nuovi hanno solo il presente (mus-<p>-presente); gli altri decenni tornano alla A generica
+const MUSICA_SIGLA_PAESE = { italia:'it', usa:'us', regnounito:'uk', francia:'fr', germania:'de', danimarca:'dk', paesibassi:'nl', svezia:'se', norvegia:'no', belgio:'be' };   // L218-30: i quattro paesi nuovi hanno solo il presente (mus-<p>-presente); gli altri decenni tornano alla A generica
 function musicaPaese(){
   const k=(MUSICA_PORTA!=null) ? MUSICA_PORTA_PAESE : ((typeof S!=='undefined' && S) ? S.paese : null);
   return (k && MUSICA_SIGLA_PAESE[k]) || null;
