@@ -616,6 +616,64 @@ let CAMERE_DUE=true, CAMERE_PORTE=['usa','italia'];   // L263-4ter: acceso per g
 function cameraAlta(paese=(S&&S.paese), anno=(S&&S.year)){
   return CAMERE.find(function(r){ return r.paese===paese && anno>=r.dal && (r.fino==null || anno<=r.fino); }) || null;
 }
+/* L268-1 · I SEGGI VERI (DESIGN-CAMERE.md §«Seggi veri»): SOLO PRESENTAZIONE, il motore resta in centesimi che sommano 100 (D-S1: S.seggi,
+   S.camera2.seggi, calcSeggi, seggiCoalizione e le soglie non leggono di qui). cameraBassa(paese, anno) = la riga di CAMERE_BASSE (data.js,
+   accanto a CAMERE: la camera bassa o unica, per periodo); seggiTotali(paese, anno, camera) = il totale della camera ('bassa' | 'alta') in
+   quell'anno, dalla riga bassa o dal seggiVeri di CAMERE; senza riga o senza cifra confermata (seggi:null) 100, il ripiego di sempre.
+   L'anno è quello dell'urna che ha eletto l'aula (D-S4, la tabella è per legislatura): lo sceglie chi rende (Passo 3 di L268-1). */
+function cameraBassa(paese=(S&&S.paese), anno=(S&&S.year)){
+  return (typeof CAMERE_BASSE!=='undefined' ? CAMERE_BASSE : []).find(function(r){ return r.paese===paese && anno>=r.dal && (r.fino==null || anno<=r.fino); }) || null;
+}
+function seggiTotali(paese=(S&&S.paese), anno=(S&&S.year), camera='bassa'){
+  var r=camera==='alta' ? cameraAlta(paese, anno) : cameraBassa(paese, anno), n=r ? (camera==='alta' ? r.seggiVeri : r.seggi) : null;
+  return (Number.isInteger(n) && n>0) ? n : 100;
+}
+/* L268-1 Passo 3 · LA RESA DEI SEGGI VERI (D-S1/D-S2): nessun calcolo di gioco legge di qui.
+   annoAula() = l'anno dell'urna che ha eletto la camera bassa in vigore (D-S4): il mese dell'ultima urna a scadenza (meseMandato), o
+   nel semipresidenziale l'Assemblea nata dopo (S.legislaturaDa). Alla notte, alla trattativa del voto e all'esito chi rende passa S.year.
+   seggiVeri(quote, totale, coal) = le quote (somma qualunque) in seggi interi coi resti più alti, somma = totale; con `coal` i resti si
+   aggiustano perché il testo segua il motore: la coalizione ha la maggioranza mostrata (⌊totale/2⌋+1) se e solo se ha ≥ 50 in centesimi.
+   Con totale 100 (il ripiego) le quote tornano com'erano, e la maggioranza mostrata resta 50, quella del motore. quotaVera(q, tot) è lo
+   stesso per una cifra sola (la coalizione più la credibilità, la proiezione). */
+function annoAula(){
+  if(typeof S==='undefined' || !S) return null;
+  var m=S.year*12+S.month-(typeof meseMandato==='function' ? meseMandato() : 0);
+  if(typeof sistemaSemipres==='function' && sistemaSemipres() && S.legislaturaDa!=null) m=S.legislaturaDa;
+  return Math.floor((m-1)/12);
+}
+function totaleAula(anno){ return seggiTotali(S.paese, anno!=null ? anno : annoAula(), 'bassa'); }
+function maggioranzaVera(tot){ return tot===100 ? 50 : Math.floor(tot/2)+1; }
+function seggiVeri(quote, totale, coal){
+  if(!quote) return quote;
+  if(totale==null || totale===100) return quote;
+  var ids=Object.keys(quote).filter(function(id){ return (quote[id]||0)>0; }), somma=ids.reduce(function(s,id){ return s+quote[id]; },0), out={}, r={}, usati=0;
+  Object.keys(quote).forEach(function(id){ out[id]=0; });
+  if(!somma) return out;
+  ids.forEach(function(id){ var x=quote[id]/somma*totale; out[id]=Math.floor(x); r[id]=x-out[id]; usati+=out[id]; });
+  ids.slice().sort(function(a,b){ return (r[b]-r[a]) || (quote[b]-quote[a]); }).forEach(function(id){ if(usati<totale){ out[id]++; r[id]-=1; usati++; } });
+  if(coal && coal.length){
+    var dentro=function(id){ return coal.indexOf(id)>=0; }, qc=ids.filter(dentro).reduce(function(s,id){ return s+quote[id]; },0)/somma*100;
+    var motore=qc>=50-1e-9, maj=maggioranzaVera(totale), sc=function(){ return ids.filter(dentro).reduce(function(s,id){ return s+out[id]; },0); }, g=0;
+    while(g++<totale && (motore ? sc()<maj : sc()>=maj)){
+      var da=ids.filter(function(id){ return (motore ? !dentro(id) : dentro(id)) && out[id]>0; }).sort(function(a,b){ return r[a]-r[b]; })[0];
+      var a=ids.filter(function(id){ return motore ? dentro(id) : !dentro(id); }).sort(function(x,y){ return r[y]-r[x]; })[0];
+      if(!da || !a) break;
+      out[da]--; r[da]+=1; out[a]++; r[a]-=1;
+    }
+  }
+  return out;
+}
+function quotaVera(q, tot){
+  if(tot==null || tot===100) return q;
+  var maj=maggioranzaVera(tot), v=Math.round(q*tot/100);
+  if(q>=50-1e-9 && v<maj) v=maj; else if(q<50-1e-9 && v>=maj) v=maj-1;
+  return Math.max(0, Math.min(tot, v));
+}
+function sommaVera(v, ids){ return (ids||[]).reduce(function(s,id){ return s+((v&&v[id])||0); },0); }
+function emiOptsBassa(o, anno){   // le opzioni dell'emiciclo della camera bassa (100 pallini, D-S3) col totale vero, se c'è
+  var tot=totaleAula(anno); if(tot===100) return o;
+  var x=Object.assign({}, o); x.veri={tot:tot}; x.maggioranza=maggioranzaVera(tot); return x;
+}
 function camereAttive(){ return CAMERE_DUE && !!S && CAMERE_PORTE.includes(S.paese) && !!cameraAlta(); }
 /* L263-7 · IL SENATO NELLA FIDUCIA (DESIGN-CAMERE §3.3, opzione a: il voto si vince sulla Camera, ma senza il Senato il governo nasce in minoranza). ACCESO dal L263-7bis. camereFiducia() = l'interruttore, un Senato calcolato (camera2Attiva) e una riga che dà la fiducia.
    maggioranzaCamere(ids, pid, k) = la quota di ids più k volte quella di pid (la stampella): il minimo fra le due aule se camereFiducia(), altrimenti la sola Camera, identica a seggiCoalizione. bloccoMaggioranza() è la stessa domanda per la coalizione in carica: bloccoSeggi() resta il lettore della Camera. Chi decide se c'è maggioranza legge questi due; chi vuole un numero della Camera (scioglimentoQuadro, onda, pBocciatura) no: tabella in «⚑ L263-7»; dal L263-8 pBocciatura legge il Senato solo con camereLeggi(), qui sotto. Il banco: __BANCO_CAMERE_FIDUCIA_ON in __reseed. */
@@ -7964,20 +8022,20 @@ function camere2NotteHtml(shown, bloc){
 function bundesratNotteCorpo(a){   // L263-10bis: alla proclamazione della federale, Bundestag | Bundesrat
   var alta=CAMERA_VISTA==='alta', r=cameraAlta(), bv=bundesratVoti(a.bloc), V=bundesratVista(bv);
   var riga=alta ? V.titolo : T('Camera')+' · '+T('Dà la fiducia');
-  return camereBottoniHtml(r,'notteCameraVista')+`<div class="camere-cosa camere-nota">${riga}</div>`+(alta ? emiciclo({_gov:bv.si, _altri:bv.tot-bv.si},bundesratEmiOpz('notte:alta',bv)) : emiciclo(a.shown,{key:'notte',coal:a.bloc,maggioranza:50}));
+  return camereBottoniHtml(r,'notteCameraVista')+`<div class="camere-cosa camere-nota">${riga}</div>`+(alta ? emiciclo({_gov:bv.si, _altri:bv.tot-bv.si},bundesratEmiOpz('notte:alta',bv)) : emiciclo(a.shown,emiOptsBassa({key:'notte',coal:a.bloc,maggioranza:50},S.year)));
 }
 function altaTerrNotteCorpo(a){   // L263-11bis: alla proclamazione delle legislative, Camera | seconda camera
   var alta=CAMERA_VISTA==='alta', r=cameraAlta(), at=altaTerrVoti(a.bloc), V=altaTerrVista(at);
   var riga=alta ? V.titolo : T('Camera')+' · '+T('Dà la fiducia');
-  return camereBottoniHtml(r,'notteCameraVista')+`<div class="camere-cosa camere-nota">${riga}</div>`+(alta ? emiciclo({_gov:at.si, _altri:at.tot-at.si},altaTerrEmiOpz('notte:alta',at)) : emiciclo(a.shown,{key:'notte',coal:a.bloc,maggioranza:50}));
+  return camereBottoniHtml(r,'notteCameraVista')+`<div class="camere-cosa camere-nota">${riga}</div>`+(alta ? emiciclo({_gov:at.si, _altri:at.tot-at.si},altaTerrEmiOpz('notte:alta',at)) : emiciclo(a.shown,emiOptsBassa({key:'notte',coal:a.bloc,maggioranza:50},S.year)));
 }
 function altaPopNotteCorpo(a){   // L263-12bis: alla proclamazione, Camera | Camera dei consiglieri o Senato, i seggi per partito
   var alta=CAMERA_VISTA==='alta', r=cameraAlta(), riga=alta ? altaPopTesti(r).titolo.replace('%N',altaPopVoti(a.bloc, a.alta).si) : T('Camera')+' · '+T('Dà la fiducia');
-  return camereBottoniHtml(r,'notteCameraVista')+`<div class="camere-cosa camere-nota">${riga}</div>`+(alta ? emiciclo(altaPopSeggi(a.alta),{key:'notte:alta',legenda:true,aria:cameraNome(r),coal:a.bloc,maggioranza:Math.floor(r.seggiVeri/2)+1}) : emiciclo(a.shown,{key:'notte',coal:a.bloc,maggioranza:50}));
+  return camereBottoniHtml(r,'notteCameraVista')+`<div class="camere-cosa camere-nota">${riga}</div>`+(alta ? emiciclo(altaPopSeggi(a.alta),{key:'notte:alta',legenda:true,aria:cameraNome(r),coal:a.bloc,maggioranza:Math.floor(r.seggiVeri/2)+1}) : emiciclo(a.shown,emiOptsBassa({key:'notte',coal:a.bloc,maggioranza:50},S.year)));
 }
 function camere2NotteCorpo(a){
   var alta=CAMERA_VISTA==='alta', r=cameraAlta(), riga=camereDiviseTesto(a.shown, a.alta, a.bloc) || (alta ? cameraAltaVista(r).titolo : T('Camera'))+' · '+T('Dà la fiducia');
-  return camereBottoniHtml(r,'notteCameraVista')+`<div class="camere-cosa camere-nota">${riga}</div>`+emiciclo(alta?a.alta:a.shown,{key:alta?'notte:alta':'notte',coal:a.bloc,maggioranza:camereMaggioranza(alta,r)});
+  return camereBottoniHtml(r,'notteCameraVista')+`<div class="camere-cosa camere-nota">${riga}</div>`+emiciclo(alta?a.alta:a.shown,alta?{key:'notte:alta',coal:a.bloc,maggioranza:camereMaggioranza(alta,r)}:emiOptsBassa({key:'notte',coal:a.bloc,maggioranza:camereMaggioranza(alta,r)},S.year));
 }
 function camereNotteCorpo(){
   if(CAMERE_NOTTE && CAMERE_NOTTE.br===true) return bundesratNotteCorpo(CAMERE_NOTTE);
@@ -11753,25 +11811,26 @@ function notteSeggi(shown, ultima, compatto){
   /* F4 — il blocco mostrato è quello che DECIDE: nel '53 con la legge approvata è l'APPARENTAMENTO (bloccoElettorale),
      non la sola coalizione. Guardi salire la riga che vale davvero: la soglia si vive, non si legge dopo. */
   const bloc=bloccoNotte();   // L247-1: senza coalizione (Regno Unito) il blocco che decide è il tuo partito da solo
-  const blocTot=bloc.reduce((s,id)=>s+(shown[id]||0),0), reached=quotaNotte(shown)>=50;   // la barra verde quando l'esito è vinto (+ credBonus)
+  const NT=totaleAula(S.year), NV=seggiVeri(shown, NT, bloc);   // L268-1: i numeri scritti in seggi veri (le barre restano in centesimi)
+  const blocTot=bloc.reduce((s,id)=>s+(NV[id]||0),0), reached=quotaNotte(shown)>=50;   // la barra verde quando l'esito è vinto (+ credBonus)
   const sorted=[...ps].sort((a,b)=>shown[b.id]-shown[a.id]);
   /* L113-5 · sul tavolo il foglio è più basso: si vedono i primi quattro partiti (e il tuo), gli altri dietro «Tutti i partiti».
      Lo stato aperto/chiuso vive nel transitorio NOTTE, non in S. */
   const riga=p=>{ const inBloc=bloc.includes(p.id), me=p.id===S.partito;
-    return `<div style="padding:${compatto?3:5}px 0"><div style="display:flex;justify-content:space-between;font-size:13px"><span style="font-weight:${me?700:500}">${T(p.nome)}${me?(' <span class="chip" style="background:var(--acc-bg);color:var(--acc-ink)">'+T('tu')+'</span>'):''}</span><span class="mono val" data-anim="num:notte:seg:${p.id}" data-to="${shown[p.id]}" data-dec="0" data-unit="">${shown[p.id]}</span></div>
+    return `<div style="padding:${compatto?3:5}px 0"><div style="display:flex;justify-content:space-between;font-size:13px"><span style="font-weight:${me?700:500}">${T(p.nome)}${me?(' <span class="chip" style="background:var(--acc-bg);color:var(--acc-ink)">'+T('tu')+'</span>'):''}</span><span class="mono val" data-anim="num:notte:seg:${p.id}" data-to="${NV[p.id]}" data-dec="0" data-unit="">${NV[p.id]}</span></div>
       <div class="bar">${fillI('notte:seg:'+p.id, clamp(shown[p.id],2,100), inBloc?'var(--acc)':'var(--mut2)')}</div></div>`; };
   /* alla dichiarazione (le tre risposte) e alla proclamazione (l'emiciclo) il foglio è pieno: lì tutti i partiti stanno dietro «Tutti i partiti» */
   const nessuno=compatto && (ultima || (DICH_INCERTEZZA ? !!NOTTE.pannello : NOTTE.stadio===NOTTE_DICH));   // L261-4: col pannello dei cronisti, a qualunque ondata
   const primi=compatto ? (nessuno ? [] : sorted.filter((p,k)=>k<4 || p.id===S.partito)) : sorted, altri=compatto ? sorted.filter(p=>primi.indexOf(p)<0) : [];
   const rows=primi.map(riga).join('')+(altri.length ? `<details class="notte-tutti"${NOTTE.tutti?' open':''} ontoggle="if(NOTTE) NOTTE.tutti=this.open"><summary>${T('Tutti i partiti')} (${altri.length})</summary>${altri.map(riga).join('')}</details>` : '');
   /* alla PROCLAMAZIONE: l'aula come emiciclo (grafica lotto 2) — i puntini a ventaglio */
-  const emi=(ultima && typeof emiciclo==='function') ? `<div style="padding:6px 18px 0">${camere2NotteHtml(shown,bloc) || emiciclo(shown,{key:'notte',coal:bloc})}</div>` : '';   // L263-6: i bottoni dove il Senato c'è
+  const emi=(ultima && typeof emiciclo==='function') ? `<div style="padding:6px 18px 0">${camere2NotteHtml(shown,bloc) || emiciclo(shown,emiOptsBassa({key:'notte',coal:bloc},S.year))}</div>` : '';   // L263-6: i bottoni dove il Senato c'è
   /* F4 — LA SOGLIA IN SCENA (il '53 e ogni snodo-soglia futuro): la posta dichiarata ondata per ondata.
      Il VERO non cambia: la soglia resta valutata a valle in applicaSnodoTruffa. Qui si VIVE, non si decide. */
   const soglia=(typeof snodoTruffaAttivo==='function' && snodoTruffaAttivo() && S.leggeTruffa==='approvata')
-    ? `<div class="mtext" style="color:var(--acc-ink);border-left:2px solid var(--acc);padding-left:10px">${T('Il premio di maggioranza: al blocco apparentato serve il 50%.')} <b class="mono val" data-anim="num:notte:soglia" data-to="${blocTot}" data-dec="0" data-unit="">${blocTot}</b> ${T('in questo momento')}.</div>` : '';
-  return `<div class="mtext">${T('Il tuo blocco:')} <b class="mono val" data-anim="num:notte:bloc" data-to="${blocTot}" data-dec="0" data-unit="" style="color:${reached?'var(--pos)':'var(--acc)'};font-size:17px">${blocTot}</b> ${T('seggi su 100')} <small style="color:var(--mut2)">${T('(servono 50)')}</small>.
-      <div class="bar" style="position:relative;margin-top:8px">${fillI('notte:bloc', clamp(blocTot,2,100), reached?'var(--pos)':'var(--acc)')}${tacca50()}</div></div>
+    ? `<div class="mtext" style="color:var(--acc-ink);border-left:2px solid var(--acc);padding-left:10px">${T('Il premio di maggioranza: al blocco apparentato serve il 50%.')} <b class="mono val" data-anim="num:notte:soglia" data-to="${bloc.reduce((s,id)=>s+(shown[id]||0),0)}" data-dec="0" data-unit="">${bloc.reduce((s,id)=>s+(shown[id]||0),0)}</b> ${T('in questo momento')}.</div>` : '';
+  return `<div class="mtext">${T('Il tuo blocco:')} <b class="mono val" data-anim="num:notte:bloc" data-to="${blocTot}" data-dec="0" data-unit="" style="color:${reached?'var(--pos)':'var(--acc)'};font-size:17px">${blocTot}</b> ${T('seggi su %T').replace('%T',NT)} <small style="color:var(--mut2)">${T('(servono %M)').replace('%M',maggioranzaVera(NT))}</small>.
+      <div class="bar" style="position:relative;margin-top:8px">${fillI('notte:bloc', clamp(blocTot*100/NT,2,100), reached?'var(--pos)':'var(--acc)')}${tacca50()}</div></div>
     ${soglia}
     ${emi}
     <div style="padding:0 18px 6px">${rows}</div>`;
@@ -12036,27 +12095,28 @@ function renderTrattativa(){
   const eff=total+cb;
   const comp=senzaAppoggio(compatibiliMiei(seggi), mine).filter(p=>!COAL.membri.includes(p.id));   // L237-2: all'opposizione chi guida il governo non si imbarca (model.js) · L250-9: né chi sostiene solo da fuori
   const reached=eff>=50;
+  const TT=totaleAula(voto ? S.year : null), TV=seggiVeri(seggi, TT, COAL.membri), totV=(TT===100) ? total : sommaVera(TV, COAL.membri), effV=(TT===100) ? eff : (cb ? quotaVera(eff, TT) : totV), cbV=(TT===100) ? cb : effV-totV;   // L268-1: i numeri scritti in seggi veri, coerenti col motore (D-S2)
   const lNorma=reached ? null : appoggioNormaLista(COAL.membri, mine, seggi), pNorma=lNorma ? lNorma[0] : null;   // L250-15: anche più sostenitori insieme   // L250-9: la minoranza dichiarata, coi seggi di chi sostiene da fuori
   const memberRows=COAL.membri.map(id=>{ const p=part(id), you=id===mine;
     return `<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-top:1px solid var(--line)">
       <span style="font-weight:600;font-size:13.5px">${T(p.nome)} <small style="color:var(--mut2);font-weight:400">${you?T('· il tuo partito'):T(p.orientamento)}</small></span>
-      <span class="mono" style="font-size:13px">${seggi[id]}${you?'':` <span onclick="removeAlly('${id}')" style="cursor:pointer;color:var(--neg);font-weight:700;padding:0 5px">×</span>`}</span></div>`; }).join('');
-  const addRows=comp.map(p=>`<button class="opt" onclick="addAlly('${p.id}')"><span class="ol">+ ${T(p.nome)} <small style="color:var(--mut2);font-weight:400">${T(p.orientamento)}</small></span><span class="oe">${seggi[p.id]} ${T('seggi')}</span></button>`).join('');
+      <span class="mono" style="font-size:13px">${TV[id]}${you?'':` <span onclick="removeAlly('${id}')" style="cursor:pointer;color:var(--neg);font-weight:700;padding:0 5px">×</span>`}</span></div>`; }).join('');
+  const addRows=comp.map(p=>`<button class="opt" onclick="addAlly('${p.id}')"><span class="ol">+ ${T(p.nome)} <small style="color:var(--mut2);font-weight:400">${T(p.orientamento)}</small></span><span class="oe">${TV[p.id]} ${T('seggi')}</span></button>`).join('');
   let action='';
   /* L237-2bis (d) · prima di firmare, chi guiderà: dall'opposizione, se la coalizione scelta ha un partito più forte del tuo, la firma lo dice (la stessa guidaCoalizione di vinciElezione) */
   const gFirma=(voto && REGOLA_PARTNER && S.opposizione && PAESE.comeSiVince==='parlamentare' && !(typeof urnaLegislativa==='function' && urnaLegislativa())) ? guidaCoalizione(COAL.membri, seggi) : mine;
   const firmaTxt = gFirma!==mine ? T('Firma: governo guidato da %P (tu da partner)').replace('%P',T((part(gFirma)||{}).nome||'')) : T(voto?'Conferma la maggioranza':'Forma il governo');
-  if(pNorma) action=`<button class="opt" style="border-color:var(--acc);background:var(--acc-bg)" onclick="${voto?'finalizeVoto(true)':confirmFn}"><span class="ol" style="color:var(--acc-ink);white-space:normal">${T('Governo di minoranza con l\'appoggio esterno di %P').replace('%P',lNorma.length>1 ? nomiElenco(lNorma.map(x=>x.id)) : T(pNorma.nome))} →</span><span class="oe">${T('%N seggi + %M da fuori').replace('%N',total).replace('%M',lNorma.length>1 ? Math.round(lNorma.reduce((s2,x)=>s2+(seggi[x.id]||0),0)*10)/10 : (seggi[pNorma.id]||0))}</span></button>`;
-  else if(reached) action=`<button class="opt" style="border-color:var(--acc);background:var(--acc-bg)" onclick="${confirmFn}"><span class="ol" style="color:var(--acc-ink)">${firmaTxt} →</span><span class="oe">${total} ${T('seggi')}${cb?` +${cb} ${T('credibilità')} → ${Math.round(eff)}`:' '+T('su 100')}</span></button>`;
+  if(pNorma) action=`<button class="opt" style="border-color:var(--acc);background:var(--acc-bg)" onclick="${voto?'finalizeVoto(true)':confirmFn}"><span class="ol" style="color:var(--acc-ink);white-space:normal">${T('Governo di minoranza con l\'appoggio esterno di %P').replace('%P',lNorma.length>1 ? nomiElenco(lNorma.map(x=>x.id)) : T(pNorma.nome))} →</span><span class="oe">${T('%N seggi + %M da fuori').replace('%N',totV).replace('%M',TT!==100 ? sommaVera(TV, lNorma.map(x=>x.id)) : lNorma.length>1 ? Math.round(lNorma.reduce((s2,x)=>s2+(seggi[x.id]||0),0)*10)/10 : (seggi[pNorma.id]||0))}</span></button>`;
+  else if(reached) action=`<button class="opt" style="border-color:var(--acc);background:var(--acc-bg)" onclick="${confirmFn}"><span class="ol" style="color:var(--acc-ink)">${firmaTxt} →</span><span class="oe">${totV} ${T('seggi')}${cb?` +${cbV} ${T('credibilità')} → ${Math.round(effV)}`:' '+T('su %T').replace('%T',TT)}</span></button>`;
   else if(comp.length===0) action= voto
       ? `<button class="opt" style="border-color:var(--neg)" onclick="finalizeVoto(false)"><span class="ol">${T('Nessuna maggioranza possibile')}</span><span class="oe">${T("Vedi l'esito del voto")}</span></button>`
-      : (coabitazioneInVista() ? `<button class="opt" style="border-color:var(--acc)" onclick="${confirmFn}"><span class="ol">${T('Coabitazione')} →</span><span class="oe">${T('solo %N seggi · l\'Assemblea è degli altri: il Primo ministro sarà del loro blocco').replace('%N',total)}</span></button>`
-        : `<button class="opt" style="border-color:var(--acc)" onclick="${confirmFn}"><span class="ol">${T('Governo di minoranza')} →</span><span class="oe">${T('solo %N seggi · sarà fragile').replace('%N',total)}</span></button>`);
+      : (coabitazioneInVista() ? `<button class="opt" style="border-color:var(--acc)" onclick="${confirmFn}"><span class="ol">${T('Coabitazione')} →</span><span class="oe">${T('solo %N seggi · l\'Assemblea è degli altri: il Primo ministro sarà del loro blocco').replace('%N',totV)}</span></button>`
+        : `<button class="opt" style="border-color:var(--acc)" onclick="${confirmFn}"><span class="ol">${T('Governo di minoranza')} →</span><span class="oe">${T('solo %N seggi · sarà fragile').replace('%N',totV)}</span></button>`);
   const kicker = voto?`${T(urnaLegislativa()?'Legislative anticipate':(S.elezioniAnticipate?'Elezioni anticipate':'Elezioni'))} ${S.year}` : T(ctx==='rinnovo'?'Nuovo mandato':'Formazione del governo');
   const titolo = T(voto?'Trattativa per il nuovo governo' : ctx==='rinnovo'?'Ricostruisci la maggioranza' : 'Forma la tua maggioranza');
   const mgFrase = (voto && S.margineEsito) ? `<b>${margineFraseTrattativa(S.margineEsito)}</b> ` : '';   // fase B: il verdetto delle urne prima della trattativa
   document.getElementById('modal').innerHTML=`<div class="mt"><div class="kicker">${T(nomePaeseOra())} · ${kicker}</div><h2>${titolo}</h2></div>
-    <div class="mtext">${mgFrase}${T('Servono <b>50 seggi</b> su 100. La tua coalizione ha')} <b class="mono" style="color:${reached?'var(--pos)':'var(--acc)'}">${total}</b> ${T('seggi')}${cb?` <b class="mono" style="color:${cb>=0?'var(--pos)':'var(--neg)'}">${cb>=0?'+':''}${cb}</b> ${T('dalla credibilità')} → <b class="mono">${Math.round(eff)}</b>`:''}.
+    <div class="mtext">${mgFrase}${T('Servono <b>%M seggi</b> su %T. La tua coalizione ha').replace('%M',maggioranzaVera(TT)).replace('%T',TT)} <b class="mono" style="color:${reached?'var(--pos)':'var(--acc)'}">${totV}</b> ${T('seggi')}${cb?` <b class="mono" style="color:${cb>=0?'var(--pos)':'var(--neg)'}">${cb>=0?'+':''}${cbV}</b> ${T('dalla credibilità')} → <b class="mono">${Math.round(effV)}</b>`:''}.
       <div class="bar" style="margin-top:8px"><i style="width:${clamp(eff,2,100)}%;background:${reached?'var(--pos)':'var(--acc)'}"></i></div>${trattativaSenatoRiga(COAL.membri)}</div>
     <div style="padding:0 18px">${memberRows}</div>
     ${comp.length?`<div class="mtext" style="padding-bottom:4px">${T('Partiti compatibili da imbarcare (|asse|≤1):')}</div>`:''}
@@ -12341,16 +12401,18 @@ function salvezzaRiga(){
 function esitoSeggi(win, total){
   if(urnaLegislativa()) return esitoLegislativa(win, total);   // L104-2
   const seggi=S.seggi, ps=[...PAESE.partiti].sort((a,b)=>seggi[b.id]-seggi[a.id]);
+  const ET=totaleAula(S.year), EV=seggiVeri(seggi, ET, S.coalizione), totV=(ET===100) ? total : sommaVera(EV, S.coalizione);   // L268-1
   const rows=ps.map(p=>{ const gov=S.coalizione.includes(p.id) && (win || !notteSenzaCoalizione());   // L247-1: senza coalizione, da sconfitto la tua riga non dice «Governo»
     return `<div style="padding:6px 0">
-      <div style="display:flex;justify-content:space-between;font-size:13px"><span style="font-weight:${gov?700:500}">${T(p.nome)} ${gov?'<span class="chip" style="background:var(--acc-bg);color:var(--acc-ink)">'+T('Governo')+'</span>':''}</span><span class="mono">${seggi[p.id]}</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:13px"><span style="font-weight:${gov?700:500}">${T(p.nome)} ${gov?'<span class="chip" style="background:var(--acc-bg);color:var(--acc-ink)">'+T('Governo')+'</span>':''}</span><span class="mono">${EV[p.id]}</span></div>
       <div class="bar"><i style="width:${clamp(seggi[p.id],2,100)}%;background:${gov?'var(--acc)':'var(--mut2)'}"></i></div></div>`; }).join('');
   const cb=Math.round(credBonus()*10)/10;
   const salv=!win && salvezzaOpp();   // L153-1: lo stesso calcolo che perdiElezione leggerà al tocco
-  const cbTxt=(S.opposizione&&cb)?` (${cb>=0?'+':''}${cb} ${T('dalla credibilità')} → <b>${Math.round(total+cb)}</b>)`:'';
-  const sub= win?T('La tua coalizione ottiene <b>%N seggi</b>%X su 100 e forma il governo.').replace('%N',total).replace('%X',cbTxt)
-               :(S.opposizione?T('La tua coalizione si ferma a <b>%N seggi</b>%X: non basta a tornare al governo.').replace('%N',total).replace('%X',cbTxt)
-                             :T("La tua coalizione si ferma a <b>%N seggi</b>: senza maggioranza, passi all'opposizione.").replace('%N',total));
+  const effV=(ET===100) ? total+cb : quotaVera(total+cb, ET), cbV=(ET===100) ? cb : effV-totV;
+  const cbTxt=(S.opposizione&&cb)?` (${cbV>=0?'+':''}${cbV} ${T('dalla credibilità')} → <b>${Math.round(effV)}</b>)`:'';
+  const sub= win?T('La tua coalizione ottiene <b>%N seggi</b>%X su %T e forma il governo.').replace('%N',totV).replace('%X',cbTxt).replace('%T',ET)
+               :(S.opposizione?T('La tua coalizione si ferma a <b>%N seggi</b>%X: non basta a tornare al governo.').replace('%N',totV).replace('%X',cbTxt)
+                             :T("La tua coalizione si ferma a <b>%N seggi</b>: senza maggioranza, passi all'opposizione.").replace('%N',totV));
   document.getElementById('modal').innerHTML=`<div class="mt"><div class="kicker">${T(urnaLegislativa()?'Legislative anticipate':(S.elezioniAnticipate?'Elezioni anticipate':'Elezioni'))} · ${S.year}</div><h2>${titoloEsito(win)}</h2></div>
     <div class="mtext">${sub}</div>
     <div style="padding:0 18px 6px">${rows}</div>${salv?salvezzaRiga():''}
@@ -12361,12 +12423,13 @@ function esitoSeggi(win, total){
    mandato nuovo e nessun passaggio all'opposizione — il Presidente resta; cambia solo di chi è l'Assemblea. */
 function esitoLegislativa(win, total){
   const seggi=S.seggi, ps=[...PAESE.partiti].sort((a,b)=>(seggi[b.id]||0)-(seggi[a.id]||0));
+  const ET=totaleAula(S.year), EV=seggiVeri(seggi, ET, S.coalizione), totV=(ET===100) ? total : sommaVera(EV, S.coalizione);   // L268-1
   const rows=ps.map(p=>{ const gov=S.coalizione.includes(p.id);
     return `<div style="padding:6px 0">
-      <div style="display:flex;justify-content:space-between;font-size:13px"><span style="font-weight:${gov?700:500}">${T(p.nome)} ${gov?'<span class="chip" style="background:var(--acc-bg);color:var(--acc-ink)">'+T('Governo')+'</span>':''}</span><span class="mono">${seggi[p.id]||0}</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:13px"><span style="font-weight:${gov?700:500}">${T(p.nome)} ${gov?'<span class="chip" style="background:var(--acc-bg);color:var(--acc-ink)">'+T('Governo')+'</span>':''}</span><span class="mono">${EV[p.id]||0}</span></div>
       <div class="bar"><i style="width:${clamp(seggi[p.id]||0,2,100)}%;background:${gov?'var(--acc)':'var(--mut2)'}"></i></div></div>`; }).join('');
-  const sub= win ? T('La tua coalizione ottiene <b>%N seggi</b> su 100: l\'Assemblea nuova è tua, e il mandato all\'Eliseo continua.').replace('%N',total)
-                : T('La tua coalizione si ferma a <b>%N seggi</b>: l\'Assemblea nuova non è tua. Il mandato all\'Eliseo continua, con una maggioranza da cercare o in coabitazione.').replace('%N',total);
+  const sub= win ? T('La tua coalizione ottiene <b>%N seggi</b> su %T: l\'Assemblea nuova è tua, e il mandato all\'Eliseo continua.').replace('%N',totV).replace('%T',ET)
+                : T('La tua coalizione si ferma a <b>%N seggi</b>: l\'Assemblea nuova non è tua. Il mandato all\'Eliseo continua, con una maggioranza da cercare o in coabitazione.').replace('%N',totV);
   document.getElementById('modal').innerHTML=`<div class="mt"><div class="kicker">${T('Legislative anticipate')} · ${S.year}</div><h2>${titoloEsito(win)}</h2></div>
     <div class="mtext">${sub}</div>
     <div style="padding:0 18px 6px">${rows}</div>

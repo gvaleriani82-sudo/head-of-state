@@ -609,6 +609,28 @@
     .storici-col{ max-width:960px; }
     #storici-body .cands, #storici-linea{ display:grid; grid-template-columns:repeat(auto-fill, minmax(300px, 1fr)); gap:10px; }
   }
+  /* L267-1 (12/11) · LA HOME SU PC, solo in ORIZZONTALE sopra i 1000 px (l'iPad Pro verticale a 1024 resta la griglia di L144-2).
+     La causa: la hero copriva 20 righe e si centrava su TUTTA la colonna destra (logo, testo, nota, bottoni: 650-810 px contro
+     i 279 della scena), quindi partiva 130-190 px sotto il bordo alto del logo, a metà logo; e la riga lingua/Suono copriva le
+     due colonne, quindi stava centrata sul vuoto fra l'una e l'altra. La cura:
+     1. il blocco è alto almeno la finestra e le sue righe si centrano in verticale (align-content); quando non ci sta, parte
+        in alto col margine di sempre (min-height, non height);
+     2. STESSO BORDO ALTO fra scena e logo: la hero parte dalla riga del logo (riga 3: 1 = lingua, 2 = «Carriera in corso»,
+        vuota senza salvataggio) e si allinea in alto — il centro non regge: con la colonna destra 2-3 volte più alta della
+        scena, la scena centrata parte sempre dentro il logo;
+     3. la riga lingua/Suono sta sopra la colonna destra (riga 1, colonna 2);
+     4. con la scheda «Carriera in corso» il logo si riduce sull'altezza della finestra (min 110 px), così a 1280×720 e
+        1366×768 «Gioca oggi», «Scenari storici» e «Sfide veloci» restano sopra la piega; senza scheda resta 240;
+     5. senza hero (#home-hero non .on) la colonna è una sola, centrata, larga come quella di destra.
+     Il nodo della hero non si sposta (la clip home-hero non rinasce): cambia solo dove la mette la griglia. */
+  @media (min-width:1000px) and (orientation:landscape){
+    #start .home-2col{ min-height:calc(100vh - 3px); align-content:center; }
+    #start .home-2col > .lang-riga{ grid-column:2; grid-row:1; }
+    #start .home-2col #home-hero.on{ grid-row:3 / span 18; align-self:start; }
+    #start .home-2col:has(#start-continue .card) #home-emblema{ width:clamp(110px, calc(100vh - 600px), 240px); height:auto; }
+    #start .home-2col:not(:has(#home-hero.on)){ grid-template-columns:minmax(0, 440px); justify-content:center; }
+    #start .home-2col:not(:has(#home-hero.on)) > *, #start .home-2col:not(:has(#home-hero.on)) #home-emblema{ grid-column:1; }
+  }
 
   /* ============================================================
      FASCIA LEGGERA — transizioni e animazioni sobrie (150-300ms), solo presentazione.

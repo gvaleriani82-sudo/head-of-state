@@ -10354,7 +10354,14 @@ const LOCALE_EV=[
     {l:'Impianto moderno di riciclo',e:'Soluzione di prospettiva; costa e divide',pleases:'progressista',costo:{pct:1.5},f:()=>{locInd('ambiente',9); locInd('bilancio',-7); gd('giovani',3);}},
     {l:'Discarica tradizionale, in fretta',e:'Rapida ed economica; proteste locali',pleases:'populista',costo:{pct:0.4},f:()=>{locInd('ambiente',-3); locInd('bilancio',-2); gd('cetomedio',-2);}},
   ]},
-  {id:'l_fondi', era:'contemporanea', tipo:'regione', kick:'Palazzo', t:'Fondi europei da assegnare', text:'Arrivano fondi importanti per lo sviluppo: come li distribuisci?', ch:[
+  /* L250-18 (12/11): `l_fondi` solo dove il paese è nell'Unione (cond su PAESE.ue); fuori esce la gemella `l_fondi_naz`, che
+     cambia solo il titolo: stesse scelte, stessi effetti (la prova prove/l250-18/prova.js confronta le funzioni). Usciva 72 volte
+     in 10 carriere × 120 mesi nei 13 presenti fuori dall'Unione (censimento prove/l250-18/censimento-ue.js). */
+  {id:'l_fondi', era:'contemporanea', tipo:'regione', cond:()=>!!PAESE.ue, kick:'Palazzo', t:'Fondi europei da assegnare', text:'Arrivano fondi importanti per lo sviluppo: come li distribuisci?', ch:[
+    {l:'Bando trasparente per merito',e:'Equità e fiducia; qualcuno resta a bocca asciutta',pleases:'tecnico',trasparenza:5,f:()=>{locInd('sviluppo',7); gd('giovani',2);}},
+    {l:'Indirizzi i fondi ai tuoi territori',e:'Consenso mirato; un uso disinvolto',rischio:7,f:()=>{locInd('sviluppo',5); gd('cetomedio',2);}},
+  ]},
+  {id:'l_fondi_naz', era:'contemporanea', tipo:'regione', cond:()=>!PAESE.ue, kick:'Palazzo', t:'Fondi per lo sviluppo da assegnare', text:'Arrivano fondi importanti per lo sviluppo: come li distribuisci?', ch:[
     {l:'Bando trasparente per merito',e:'Equità e fiducia; qualcuno resta a bocca asciutta',pleases:'tecnico',trasparenza:5,f:()=>{locInd('sviluppo',7); gd('giovani',2);}},
     {l:'Indirizzi i fondi ai tuoi territori',e:'Consenso mirato; un uso disinvolto',rischio:7,f:()=>{locInd('sviluppo',5); gd('cetomedio',2);}},
   ]},
@@ -16215,8 +16222,12 @@ const CAMERE=[
   {paese:'usa', dal:1959, nome:'Senato', nomeEn:'Senate', seggiVeri:100, elezione:'classi', fiducia:false, potere:'pari', rinnovo:{tipo:'terzi', ogniMesi:24}},   // ✓ 100 (98 per pochi mesi del 1959, Alaska prima delle Hawaii)
   // Francia: l'ultima parola è dell'Assemblea.
   {paese:'francia', dal:1946, fino:1958, nome:'Consiglio della Repubblica', nomeEn:'Council of the Republic', seggiVeri:320, elezione:'territori', fiducia:false, potere:'superabile', rinnovo:{tipo:'meta', ogniMesi:36}},   // ✓ 320 (la legge dice fra 250 e 320); ◦ il rinnovo per metà: la pagina dà solo i sei anni · quota da S.territori: L263-11 (SENATO_FR_SEGGI, quotaAltaTerritori)
-  {paese:'francia', dal:1959, fino:2003, nome:'Senato', nomeEn:'Senate', seggiVeri:null, elezione:'territori', fiducia:false, potere:'superabile', rinnovo:{tipo:'terzi', ogniMesi:36}},   // ⚠ non trovato (L263-1): cambia nel periodo, 321 alla fine ✓; ✓ nove anni, a terzi · quota da S.territori: L263-11 (SENATO_FR_SEGGI, quotaAltaTerritori)
-  {paese:'francia', dal:2004, fino:2010, nome:'Senato', nomeEn:'Senate', seggiVeri:null, elezione:'territori', fiducia:false, potere:'superabile', rinnovo:{tipo:'meta', ogniMesi:36}},   // ✓ da 321 verso 348; ✓ sei anni, per metà (legge del 2003) · quota da S.territori: L263-11 (SENATO_FR_SEGGI, quotaAltaTerritori)
+  {paese:'francia', dal:1959, fino:1961, nome:'Senato', nomeEn:'Senate', elezione:'territori', fiducia:false, potere:'superabile', rinnovo:{tipo:'terzi', ogniMesi:36}, seggiVeri:307},   // L268-1: ✓ 307 con i 34 dell'Algeria (senat.fr, rapporto l99-261; Wikipedia 309)
+  {paese:'francia', dal:1962, fino:1964, nome:'Senato', nomeEn:'Senate', elezione:'territori', fiducia:false, potere:'superabile', rinnovo:{tipo:'terzi', ogniMesi:36}, seggiVeri:274},   // L268-1: ✓ 274, tolta l'Algeria (stessa fonte)
+  {paese:'francia', dal:1965, fino:1988, nome:'Senato', nomeEn:'Senate', elezione:'territori', fiducia:false, potere:'superabile', rinnovo:{tipo:'terzi', ogniMesi:36}, seggiVeri:null},  // L268-1: ◦ 274-320 (solo Wikipedia, rinnovi a gradini) · prima: ⚠ non trovato (L263-1): cambia nel periodo, 321 alla fine ✓; ✓ nove anni, a terzi · quota da S.territori: L263-11 (SENATO_FR_SEGGI, quotaAltaTerritori)
+  {paese:'francia', dal:1989, fino:2003, nome:'Senato', nomeEn:'Senate', elezione:'territori', fiducia:false, potere:'superabile', rinnovo:{tipo:'terzi', ogniMesi:36}, seggiVeri:322},   // L268-1: ✓ 322 di legge, 321 occupati (il seggio di Afars e Issas vuoto dal 1980; senat.fr l99-261, l03-196)
+  {paese:'francia', dal:2004, fino:2007, nome:'Senato', nomeEn:'Senate', seggiVeri:null, elezione:'territori', fiducia:false, potere:'superabile', rinnovo:{tipo:'meta', ogniMesi:36}},   // L268-1: ⚠ 331 (senat.fr l03-196) contro 321 (senat.fr r12-533) · prima: ✓ da 321 verso 348; ✓ sei anni, per metà (legge del 2003) · quota da S.territori: L263-11 (SENATO_FR_SEGGI, quotaAltaTerritori)
+  {paese:'francia', dal:2008, fino:2010, nome:'Senato', nomeEn:'Senate', seggiVeri:343, elezione:'territori', fiducia:false, potere:'superabile', rinnovo:{tipo:'meta', ogniMesi:36}},   // L268-1: ✓ 343 (senat.fr r12-533)
   {paese:'francia', dal:2011, nome:'Senato', nomeEn:'Senate', seggiVeri:348, elezione:'territori', fiducia:false, potere:'superabile', rinnovo:{tipo:'meta', ogniMesi:36}},   // ✓ 348 · quota da S.territori: L263-11 (SENATO_FR_SEGGI, quotaAltaTerritori)
   // Regno Unito: solo composizione, nessun voto.
   {paese:'regnounito', dal:1950, fino:1957, nome:'Camera dei Lord', nomeEn:'House of Lords', seggiVeri:null, elezione:'composizione', fiducia:false, potere:'nessuno', rinnovo:{tipo:'nessuno'}},   // ⚠ non trovato (L263-1)
@@ -16224,7 +16235,8 @@ const CAMERE=[
   {paese:'regnounito', dal:1999, fino:2025, nome:'Camera dei Lord', nomeEn:'House of Lords', seggiVeri:null, elezione:'composizione', fiducia:false, potere:'nessuno', rinnovo:{tipo:'nessuno'}},   // ⚠ non trovato (L263-1): il totale cambia; ✓ dal 1999, 92 ereditari
   {paese:'regnounito', dal:2026, nome:'Camera dei Lord', nomeEn:'House of Lords', seggiVeri:796, elezione:'composizione', fiducia:false, potere:'nessuno', rinnovo:{tipo:'nessuno'}},   // ✓ 796 al 31/10 (⚠ la stessa pagina dà anche 775); ✓ ereditari aboliti
   // Germania: delegati dei governi dei Länder, nessuna durata.
-  {paese:'germania', dal:1949, fino:1989, nome:'Bundesrat', nomeEn:'Bundesrat', seggiVeri:null, elezione:'territori', fiducia:false, potere:'consensoParte', rinnovo:{tipo:'derivato'}},   // ⚠ non trovato (L263-1, riprovato in L263-2): ◦ 41 più 4 di Berlino Ovest senza voto, solo dal 1957 · quota da S.territori: L263-10 (BUNDESRAT_VOTI, quotaBundesrat)
+  {paese:'germania', dal:1949, fino:1956, nome:'Bundesrat', nomeEn:'Bundesrat', elezione:'territori', fiducia:false, potere:'consensoParte', rinnovo:{tipo:'derivato'}, seggiVeri:null},   // L268-1: ⚠ 43 poi 38 (solo una tesi della FU Berlin) · prima: ⚠ non trovato (L263-1, riprovato in L263-2): ◦ 41 più 4 di Berlino Ovest senza voto, solo dal 1957 · quota da S.territori: L263-10 (BUNDESRAT_VOTI, quotaBundesrat)
+  {paese:'germania', dal:1957, fino:1989, nome:'Bundesrat', nomeEn:'Bundesrat', elezione:'territori', fiducia:false, potere:'consensoParte', rinnovo:{tipo:'derivato'}, seggiVeri:41},     // L268-1: ✓ 41 senza i 4 di Berlino senza voto (Statistisches Jahrbuch 1958)
   {paese:'germania', dal:1990, fino:1995, nome:'Bundesrat', nomeEn:'Bundesrat', seggiVeri:null, elezione:'territori', fiducia:false, potere:'consensoParte', rinnovo:{tipo:'derivato'}},   // ⚠ non trovato (L263-2): ◦ 68; ✓ l'Assia ha cinque voti dal 18/1/1996 · quota da S.territori: L263-10 (BUNDESRAT_VOTI, quotaBundesrat)
   {paese:'germania', dal:1996, nome:'Bundesrat', nomeEn:'Bundesrat', seggiVeri:69, elezione:'territori', fiducia:false, potere:'consensoParte', rinnovo:{tipo:'derivato'}},   // ✓ 69 · quota da S.territori: L263-10 (BUNDESRAT_VOTI, quotaBundesrat)
   // Gli altri dieci paesi bicamerali si giocano solo dal 2026: basta la riga del presente.
@@ -16240,6 +16252,79 @@ const CAMERE=[
   {paese:'nigeria', dal:2026, nome:'Senato', nomeEn:'Senate', seggiVeri:109, elezione:'congresso', fiducia:false, potere:'pari', rinnovo:{tipo:'intero', ogniMesi:48}, fase:2023, seggiCamera:360},   // ✓ 109; L263-9quinquies (N1): famiglia «congresso» come il presente americano, senza classi: Camera dei Rappresentanti (✓ 360, seggiCamera) e Senato rinnovati insieme col Presidente ogni 4 anni (✓ 2023, prossimo voto 2027); letta da camereNg() (game.js) solo con CAMERE_NG
   // L250-5 · i Paesi Bassi: la Eerste Kamer (75 ✓), eletta dai consigli provinciali dopo le provinciali (◦ ogni quattro anni, intera); può respingere una legge, non emendarla. Solo dati: nessun interruttore la legge (CAMERE_NL, se servirà, dopo i cinque paesi: ⚠ nel rapporto L250-5)
   {paese:'paesibassi', dal:2026, nome:'Prima Camera', nomeEn:'Senate', seggiVeri:75, elezione:'territori', fiducia:false, potere:'pari', rinnovo:{tipo:'intero'}},
+];
+/* L268-1 · LA CAMERA BASSA (O UNICA) DI OGNI PAESE, PER LEGISLATURA (DESIGN-CAMERE.md §«Seggi veri»): SOLO PRESENTAZIONE (D-S1), la legge
+   seggiTotali() (game.js accanto a cameraAlta). dal = l'anno dell'urna che elegge quell'aula, fino = l'anno prima della successiva che la cambia;
+   seggi = i membri all'inizio della legislatura (eccedenti e compensativi compresi), seggi non elettivi fuori (D-S5: i deputati di Berlino Ovest
+   senza voto pieno fino al 1987, i delegati americani senza voto); seggi:null = cifra non confermata su una fonte ufficiale né fissata da una
+   legge: lo schermo dice 100 come prima. ✓ = fonte ufficiale o legge, ◦ = solo Wikipedia (allora null). Fonti per riga nel rapporto «⚑ L268-1».
+   Regola del Regno Unito: il totale della Camera dei Comuni con l'Irlanda del Nord (i commenti 623/633/641 dei roster sono senza). La guardia
+   è in .claude/verifica-paese.js (L268-1, --rosso-basse). */
+const CAMERE_BASSE=[
+  // Italia: 1948 574 e 1958 596 (la legge 493/1956 dice 594) solo da Wikipedia → null; 590 dalla legge 148/1953; 630 dalla l. cost. 2/1963; 400 dalla l. cost. 1/2020.
+  {paese:'italia', dal:1948, fino:1952, nome:'Camera dei deputati', nomeEn:'Chamber of Deputies', seggi:null},   // ◦ 574
+  {paese:'italia', dal:1953, fino:1957, nome:'Camera dei deputati', nomeEn:'Chamber of Deputies', seggi:590},    // ✓ l. 148/1953
+  {paese:'italia', dal:1958, fino:1962, nome:'Camera dei deputati', nomeEn:'Chamber of Deputies', seggi:null},   // ◦ 596 (l. 493/1956: 594)
+  {paese:'italia', dal:1963, fino:2021, nome:'Camera dei deputati', nomeEn:'Chamber of Deputies', seggi:630},    // ✓ l. cost. 2/1963
+  {paese:'italia', dal:2022, nome:'Camera dei deputati', nomeEn:'Chamber of Deputies', seggi:400},              // ✓ l. cost. 1/2020
+  // Francia: i seggi ELETTI a ogni urna (ministero dell'Interno, risposta all'interrogazione AN n. 52861, JO 1/2/2005): Algeria compresa fino al 1958, nel 1956 non votata.
+  {paese:'francia', dal:1946, fino:1950, nome:'Assemblea nazionale', nomeEn:'National Assembly', seggi:619},   // ✓ 544 + 75
+  {paese:'francia', dal:1951, fino:1955, nome:'Assemblea nazionale', nomeEn:'National Assembly', seggi:627},   // ✓ 544 + 83
+  {paese:'francia', dal:1956, fino:1957, nome:'Assemblea nazionale', nomeEn:'National Assembly', seggi:597},   // ✓ 544 + 53 (i 30 dell'Algeria non votati)
+  {paese:'francia', dal:1958, fino:1961, nome:'Assemblea nazionale', nomeEn:'National Assembly', seggi:552},   // ✓ 465 + 87 (Wikipedia 576 coi 33 provvisori d'oltremare)
+  {paese:'francia', dal:1962, fino:1966, nome:'Assemblea nazionale', nomeEn:'National Assembly', seggi:482},   // ✓
+  {paese:'francia', dal:1967, fino:1972, nome:'Assemblea nazionale', nomeEn:'National Assembly', seggi:487},   // ✓ 1967 e 1968
+  {paese:'francia', dal:1973, fino:1977, nome:'Assemblea nazionale', nomeEn:'National Assembly', seggi:490},   // ✓
+  {paese:'francia', dal:1978, fino:1985, nome:'Assemblea nazionale', nomeEn:'National Assembly', seggi:491},   // ✓ 1978 e 1981
+  {paese:'francia', dal:1986, nome:'Assemblea nazionale', nomeEn:'National Assembly', seggi:577},              // ✓ 1986-2002 dalla tabella; dal 2008 tetto dell'art. 24 Cost.
+  // Regno Unito: House of Commons Library, briefing CBP-7529 (1950-2019); 2024 dal Parliamentary Constituencies Act 2020 (650).
+  {paese:'regnounito', dal:1950, fino:1954, nome:'Camera dei Comuni', nomeEn:'House of Commons', seggi:625},   // ✓ (12 dell'Irlanda del Nord)
+  {paese:'regnounito', dal:1955, fino:1973, nome:'Camera dei Comuni', nomeEn:'House of Commons', seggi:630},   // ✓
+  {paese:'regnounito', dal:1974, fino:1982, nome:'Camera dei Comuni', nomeEn:'House of Commons', seggi:635},   // ✓ febbraio e ottobre 1974, 1979
+  {paese:'regnounito', dal:1983, fino:1991, nome:'Camera dei Comuni', nomeEn:'House of Commons', seggi:650},   // ✓ (17 dell'Irlanda del Nord)
+  {paese:'regnounito', dal:1992, fino:1996, nome:'Camera dei Comuni', nomeEn:'House of Commons', seggi:651},   // ✓
+  {paese:'regnounito', dal:1997, fino:2004, nome:'Camera dei Comuni', nomeEn:'House of Commons', seggi:659},   // ✓ (18 dell'Irlanda del Nord)
+  {paese:'regnounito', dal:2005, fino:2009, nome:'Camera dei Comuni', nomeEn:'House of Commons', seggi:646},   // ✓ la Scozia da 72 a 59
+  {paese:'regnounito', dal:2010, nome:'Camera dei Comuni', nomeEn:'House of Commons', seggi:650},              // ✓ 2010-2019; 2024 per legge
+  // Germania: Bundestag, Datenhandbuch cap. 23 e 2.1 (bundestag.de) all'inizio di ogni legislatura, senza i deputati di Berlino Ovest fino al 1987 (8, poi 22); 2025 Bundeswahlleiterin.
+  {paese:'germania', dal:1949, fino:1952, nome:'Bundestag', nomeEn:'Bundestag', seggi:402},   // ✓ (410 con Berlino)
+  {paese:'germania', dal:1953, fino:1956, nome:'Bundestag', nomeEn:'Bundestag', seggi:487},   // ✓ (509; dal 1957 i 10 della Saar)
+  {paese:'germania', dal:1957, fino:1960, nome:'Bundestag', nomeEn:'Bundestag', seggi:497},   // ✓
+  {paese:'germania', dal:1961, fino:1964, nome:'Bundestag', nomeEn:'Bundestag', seggi:499},   // ✓
+  {paese:'germania', dal:1965, fino:1979, nome:'Bundestag', nomeEn:'Bundestag', seggi:496},   // ✓ 1965, 1969, 1972, 1976
+  {paese:'germania', dal:1980, fino:1982, nome:'Bundestag', nomeEn:'Bundestag', seggi:497},   // ✓
+  {paese:'germania', dal:1983, fino:1986, nome:'Bundestag', nomeEn:'Bundestag', seggi:498},   // ✓
+  {paese:'germania', dal:1987, fino:1989, nome:'Bundestag', nomeEn:'Bundestag', seggi:497},   // ✓ (dal 3/10/1990 più i 144 della Volkskammer)
+  {paese:'germania', dal:1990, fino:1993, nome:'Bundestag', nomeEn:'Bundestag', seggi:662},   // ✓ Berlino vota
+  {paese:'germania', dal:1994, fino:1997, nome:'Bundestag', nomeEn:'Bundestag', seggi:672},   // ✓
+  {paese:'germania', dal:1998, fino:2001, nome:'Bundestag', nomeEn:'Bundestag', seggi:669},   // ✓
+  {paese:'germania', dal:2002, fino:2004, nome:'Bundestag', nomeEn:'Bundestag', seggi:603},   // ✓
+  {paese:'germania', dal:2005, fino:2008, nome:'Bundestag', nomeEn:'Bundestag', seggi:614},   // ✓
+  {paese:'germania', dal:2009, fino:2012, nome:'Bundestag', nomeEn:'Bundestag', seggi:622},   // ✓
+  {paese:'germania', dal:2013, fino:2016, nome:'Bundestag', nomeEn:'Bundestag', seggi:631},   // ✓
+  {paese:'germania', dal:2017, fino:2020, nome:'Bundestag', nomeEn:'Bundestag', seggi:709},   // ✓
+  {paese:'germania', dal:2021, fino:2024, nome:'Bundestag', nomeEn:'Bundestag', seggi:736},   // ✓ all'inizio (735 dopo)
+  {paese:'germania', dal:2025, nome:'Bundestag', nomeEn:'Bundestag', seggi:630},              // ✓ riforma del 2023, niente eccedenti
+  // Stati Uniti: House Historian; i sei delegati senza voto fuori.
+  {paese:'usa', dal:1950, fino:1958, nome:'Camera dei Rappresentanti', nomeEn:'House of Representatives', seggi:435},   // ✓ legge del 1929
+  {paese:'usa', dal:1959, fino:1962, nome:'Camera dei Rappresentanti', nomeEn:'House of Representatives', seggi:437},   // ✓ PL 85-508 e 86-3 (Alaska, Hawaii), fino al 1963
+  {paese:'usa', dal:1963, nome:'Camera dei Rappresentanti', nomeEn:'House of Representatives', seggi:435},              // ✓
+  // I paesi che si giocano solo nel presente: la riga dell'urna in vigore (fonti dei parlamenti, rapporto «⚑ L268-1»).
+  {paese:'spagna', dal:2023, nome:'Congresso dei Deputati', nomeEn:'Congress of Deputies', seggi:350},            // ✓
+  {paese:'canada', dal:2025, nome:'Camera dei Comuni', nomeEn:'House of Commons', seggi:343},                     // ✓ (338 fino al 2021)
+  {paese:'australia', dal:2022, nome:'Camera dei Rappresentanti', nomeEn:'House of Representatives', seggi:150},  // ✓ 2022 e 2025
+  {paese:'giappone', dal:2026, nome:'Camera dei Rappresentanti', nomeEn:'House of Representatives', seggi:465},   // ✓ (⚠ taglio di 31 proposto nell'ottobre 2026, non legge)
+  {paese:'india', dal:2024, nome:'Lok Sabha', nomeEn:'Lok Sabha', seggi:543},                                     // ✓ (i 2 nominati aboliti nel 2020)
+  {paese:'coreasud', dal:2024, nome:'Assemblea nazionale', nomeEn:'National Assembly', seggi:300},                // ✓ unica
+  {paese:'argentina', dal:2025, nome:'Camera dei Deputati', nomeEn:'Chamber of Deputies', seggi:257},             // ✓
+  {paese:'brasile', dal:2022, nome:'Camera dei Deputati', nomeEn:'Chamber of Deputies', seggi:513},               // ✓ (il 531 è stato bloccato dal veto)
+  {paese:'messico', dal:2024, nome:'Camera dei Deputati', nomeEn:'Chamber of Deputies', seggi:500},               // ✓
+  {paese:'sudafrica', dal:2024, nome:'Assemblea nazionale', nomeEn:'National Assembly', seggi:400},               // ✓
+  {paese:'nigeria', dal:2023, nome:'Camera dei Rappresentanti', nomeEn:'House of Representatives', seggi:360},    // ✓
+  {paese:'danimarca', dal:2022, nome:'Folketing', nomeEn:'Folketing', seggi:179},                                 // ✓ unica, con i 2 delle Fær Øer e i 2 della Groenlandia
+  {paese:'paesibassi', dal:2025, nome:'Seconda Camera', nomeEn:'House of Representatives', seggi:150},            // ✓ (150 dal 1956)
+  {paese:'svezia', dal:2022, nome:'Riksdag', nomeEn:'Riksdag', seggi:349},                                        // ✓ unica (349 dal 1976)
+  {paese:'norvegia', dal:2025, nome:'Storting', nomeEn:'Storting', seggi:169},                                    // ✓ unica (150 + 19 di compensazione)
 ];
 /* L263-10 · I VOTI DEI LÄNDER NEL BUNDESRAT (art. 51 della Legge fondamentale: 3 voti, 4 sopra 2 milioni di abitanti, 5 sopra 6,
    6 sopra 7 dal 1990; prima del 1990 3/4/5, Berlino Ovest senza voto). Chiave = `nome` di PAESE.territori (presente e porte de*);
