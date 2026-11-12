@@ -5180,14 +5180,34 @@ function sostegnoApri(prezzo){
    stesso gruppo = una promessa sola, che sa per chi è (`perSostegno` il primo, `perAltri` gli altri). Un sostenitore solo = come prima. */
 function sostegnoPromesse(lista){
   var fatte={};
+  var piu=SOSTEGNO_PIU_GRUPPI && PAESE && PAESE.minoranzaNorma && lista.length>1;   // L250-16: più sostenitori = gruppi diversi finché ce ne sono
   lista.forEach(function(x){
     if(!x || !x.base) return;
     var g=promessaSostegnoGruppo(x); if(!g) return;
+    if(piu && fatte[g]){ var alt=promessaSostegnoGraduatoria(x).find(function(h){ return !fatte[h]; }); if(alt) g=alt; }
     if(fatte[g]){ if(PAESE.minoranzaNorma) fatte[g].perAltri=(fatte[g].perAltri||[]).concat([x.id]); return; }
     campPromessa(g); var q=S.promesseCampagna[S.promesseCampagna.length-1];
     if(PAESE.minoranzaNorma) q.perSostegno=x.id;
     fatte[g]=q;
   });
+}
+/* ⚑ L250-16 (12/11, ⚠ 1 di L250-15) · CON PIÙ SOSTENITORI LE PROMESSE CADONO SU GRUPPI DIVERSI E REGGONO DI PIÙ. In Norvegia SV, Sp e
+   Rødt prendevano tutti i lavoratori (promessaSostegnoGruppo: il prodotto dei pesi con la base di Ap), e una promessa sola, condivisa,
+   colpita da tutti i mesi di governo faceva cadere tre sostenitori insieme (sostegno in piedi 34·40% dei mesi). Acceso: nell'ordine della
+   lista, chi trova il suo gruppo già promesso prende il successivo della sua graduatoria (promessaSostegnoGraduatoria: lo stesso criterio,
+   stesse esclusioni) non ancora promesso; se non ne resta nessuno condivide come prima (perAltri). Coi dati di oggi SV → lavoratori,
+   Sp → pensionati, Rødt → giovani, MDG condivide giovani con Rødt. Il prezzo dell'accordo (ceto medio −2, stampa −3) resta uno per
+   accordo (sostegnoApri). E la promessa di un sostenitore fra più d'uno si rompe a SOSTEGNO_PIU_COLPI (11 dopo la taratura; la consegna diceva 9), non a SOSTEGNO_NORMA_COLPI (6):
+   letto solo nel ramo «più sostenitori» di sostegnoTick. Un sostenitore solo (Svezia) = come prima, riga per riga. Spento = L250-15. */
+let SOSTEGNO_PIU_GRUPPI=true;
+let SOSTEGNO_PIU_COLPI=11;   // L250-16, la taratura (una sola): 9 dava 46·45% di mesi col sostegno, 10 48·48, 11 48·58
+function promessaSostegnoGraduatoria(p){
+  if(!p || !p.base) return [];
+  var primo=promessaSostegnoGruppo(p), guida=(PAESE.partiti||[]).find(function(x){ return x.id===S.partito; }), bg=(guida && guida.base) || {};
+  var ks=Object.keys(p.base).filter(function(g){ return g!==primo && !(PROMESSA_SENZA_PREZZO && g==='cetomedio'); });
+  var v=function(g){ return (p.base[g]||0)*(bg[g]||0); };
+  ks=ks.map(function(g,i){ return {g:g,i:i}; }).sort(function(a,b){ return (v(b.g)-v(a.g)) || (a.i-b.i); }).map(function(o){ return o.g; });
+  return primo ? [primo].concat(ks) : ks;
 }
 function promessaDi(q, id){ return q.perSostegno===id || (Array.isArray(q.perAltri) && q.perAltri.indexOf(id)>=0); }
 /* il rimpasto: l'alleato entra davvero. Costo concreto — due dicasteri passano di mano — e la base lo vede. */
@@ -5241,7 +5261,7 @@ function sostegnoTick(){
     var ids=sostegnoIds(A);
     for(var k=0;k<ids.length;k++){
       var id=ids[k];
-      if(A.prezzo==='programma' && S.promesseCampagna && S.promesseCampagna.some(function(q){ return PAESE.minoranzaNorma ? (promessaDi(q, id) && (q.colpi||0)>=SOSTEGNO_NORMA_COLPI) : (q.colpi||0)>=3; })) return sostegnoTogli(id, 'promessa');
+      if(A.prezzo==='programma' && S.promesseCampagna && S.promesseCampagna.some(function(q){ return PAESE.minoranzaNorma ? (promessaDi(q, id) && (q.colpi||0)>=(SOSTEGNO_PIU_GRUPPI ? SOSTEGNO_PIU_COLPI : SOSTEGNO_NORMA_COLPI)) : (q.colpi||0)>=3; })) return sostegnoTogli(id, 'promessa');   // L250-16: con più sostenitori a 9 colpi
       if(typeof intesaDi==='function' && intesaDi(id)<25) return sostegnoTogli(id, 'intesa');
     }
     if(A.prezzo==='veto' && (S.sostegnoStrappi||0)>=3) return sostegnoRompi('strappi');
