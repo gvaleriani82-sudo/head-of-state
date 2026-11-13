@@ -930,10 +930,12 @@ const PAESI = {
         nota:'Venstre al 3,9% resta sotto la soglia del 4% e fuori dall\'aula: nel vero entra coi seggi di circoscrizione, che il gioco non modella.' },
     ],
   },
-  /* ===== L250-20 (12/11) · IL BELGIO, nel presente (gennaio 2026), dall'aula della Camera dei rappresentanti eletta il 09/06/2024 ◦.
-     · Undici partiti della consegna di Cowork (% e seggi ◦ da ricontrollare su elections.fgov.be: non letti in questo turno). Le forze
+  /* ===== L250-20 (12/11) · IL BELGIO, nel presente (gennaio 2026), dall'aula della Camera dei rappresentanti eletta il 09/06/2024.
+     · Undici partiti della consegna di Cowork. Seggi verificati il 13/11 (L250-24): la tabella della Camera di en.wikipedia.org «2024 Belgian
+       federal election» (revisione 1382212591), concorde con l'elenco ufficiale della Camera (dekamer.be) e con l'annuario UMons «Belgium:
+       Political Developments and Data in 2024» (Les Engagés 14); nessuna cifra cambiata. Le forze
        partono dai SEGGI, non dalle %: ogni partito corre solo nella sua comunità e le % nazionali non dicono la quota d'aula (N-VA
-       16,7% dei voti e 24 seggi, PS 8,0% e 16 seggi). Seggi ◦ 24 · 20 · 20 · 15 · 13 · 16 · 11 · 14 · 7 · 6 · 3 = 149 + DéFI 1 (fuori
+       16,7% dei voti e 24 seggi, PS 8,0% e 16 seggi). Seggi 24 · 20 · 20 · 15 · 13 · 16 · 11 · 14 · 7 · 6 · 3 = 149 + DéFI 1 (fuori
        dal roster): il 150° seggio va alla N-VA (25), quindi forza = seggi / 150 al decimo, somma 100,0. Il governo vero a cinque
        (N-VA, MR, Les Engagés, Vooruit, CD&V) fa così 83 e non 82.
      · `comunita` ('nl' | 'fr' | null: il PTB è l'unico partito nazionale) sui partiti e sui territori ('bxl' per Bruxelles): LETTO
@@ -951,10 +953,10 @@ const PAESI = {
      · Senato non eletto: riga in CAMERE (sola composizione). Niente `terminoLocale`, niente `intermedie`, niente `nomiGruppi`
        (il nome di ripiego del gruppo religioso regge in Belgio). ===== */
   belgio: {
-    /* ◦ cifre 2024 SENZA FONTE letta in questo turno (ordine di grandezza della conoscenza di Code, da ricontrollare su Banca nazionale
-       del Belgio / Eurostat / FMI): debito ~105% del PIL, disavanzo ~4,5%, PIL ~615 mld €, inflazione armonizzata ~4,3%, crescita ~1%.
-       Riga in CIFRE-ECONOMICHE.md e ⚠ nel rapporto. */
-    economia:{pil:615, debito:105, deficit:-4.5, inflazione:4.3, crescita:1.0},
+    /* cifre 2024 verificate il 13/11 (L250-24): debito 103,9% e disavanzo 4,4% del PIL (Istituto dei conti nazionali, revisione di ottobre
+       2025, ripresa da Eurostat; la prima stima di aprile era 104,7 e 4,5), inflazione armonizzata 4,3% media annua (Statbel), crescita reale
+       1,1% e PIL ~620 mld € (FocusEconomics sui dati nazionali). Prima (L250-20, a memoria): 105 · −4,5 · 615 · 4,3 · 1,0. Riga in CIFRE-ECONOMICHE.md. */
+    economia:{pil:620, debito:104, deficit:-4.4, inflazione:4.3, crescita:1.1},
     nome: 'Belgio',
     capitale: 'Bruxelles', sedeGoverno: 'Rue de la Loi 16',   /* l'ufficio del Primo ministro, «il 16»; il parlamento al Palazzo della Nazione: %SEDE è un palazzo */
     allineamento: 'occidentale',
@@ -13460,6 +13462,51 @@ const DOSSIERS=[
    {l:'Cedi una voce di spesa a ciascuno', e:'Il bilancio passa, e lo paga il debito', pleases:'tecnico', costo:{debito:0.5}, f:()=>{S.ind.debt+=0.5; segnaUnaCarriera('no_p_d_autunno|'+S.year); gd('lavoratori',1); gd('pensionati',1); gd('imprenditori',-1);}},
    {l:'Poni la fiducia sul tuo bilancio', e:'Coerente, e si rischia la crisi', pleases:'conservatore', f:()=>{segnaUnaCarriera('no_p_d_autunno|'+S.year); gd('imprenditori',2); gd('cetomedio',1); gd('lavoratori',-1); S.ind.stampa-=1;}},
    {l:'Cerca i voti del centro all\'opposizione', e:'Passa tranquillo, e chi ti sostiene si offende', pleases:'progressista', f:()=>{segnaUnaCarriera('no_p_d_autunno|'+S.year); gd('cetomedio',2); gd('giovani',-1); gd('lavoratori',-1);}}]},
+ /* ===== L250-24 (13/11) · BELGIO, dossier di dicastero (consegna di Cowork; fatti verificati su fonte il 13/11 — rapporto «⚑ L250-24» §27 di
+    DESIGN-PAESI-NUOVI.md —, niente persone né aziende, nessun partito scritto a mano). be_p_d_alleanza della consegna è diventata be_p_d_treni:
+    la spesa militare è già l'universale ms_df_spesa («Gli alleati chiedono più spesa militare»). be_p_d_formazione è DOVUTA (cond sempre falsa:
+    mai nel sacchetto, la mette in agenda beFormazioneDovuta() in genAgendaRamo, game.js); be_p_d_correnti è una carta normale del sacchetto,
+    dopo la prima urna vinta, una volta per carriera (S.carteUnaCarriera). ===== */
+ {id:'be_p_d_indice', era:'contemporanea', paesi:['belgio'], min:'lavoro', kick:'L\'indice', t:'Gli stipendi che seguono i prezzi', text:'Qui salari, pensioni e sussidi salgono da soli quando salgono i prezzi: un indice li adegua senza trattativa. Le famiglie non perdono potere d\'acquisto, ma dopo un anno di prezzi alti le imprese pagano il conto tutto insieme e dicono di perdere terreno sui paesi vicini.', ch:[
+   {l:'Tieni l\'indice intero', e:'Le buste paga reggono, le imprese no', pleases:'progressista', f:()=>{gd('lavoratori',3); gd('pensionati',1); gd('imprenditori',-3);}},
+   {l:'Salta uno scatto per la competitività', e:'Le fabbriche respirano, e le piazze si riempiono', pleases:'conservatore', f:()=>{gd('imprenditori',3); gd('cetomedio',1); gd('lavoratori',-3); S.ind.stampa-=1;}},
+   {l:'Scatto pieno solo per i redditi bassi', e:'Più giusto, e nessuno è contento fino in fondo', pleases:'tecnico', f:()=>{gd('lavoratori',1); gd('pensionati',1); gd('cetomedio',-2);}}]},
+ {id:'be_p_d_reattori', era:'contemporanea', paesi:['belgio'], min:'sviluppo', kick:'I reattori', t:'Le centrali che dovevano chiudere', text:'Una legge di vent\'anni fa prevedeva di spegnere tutti i reattori nucleari. Il Parlamento l\'ha cancellata, ma le centrali sono vecchie e il loro proprietario non vuole più gestirle. Senza di loro mancherebbe una parte grande della corrente del paese.', ch:[
+   {l:'Prolunga i reattori che ci sono, con lo Stato socio', e:'La luce resta accesa, e lo Stato si prende un rischio', pleases:'tecnico', costo:{debito:0.6}, f:()=>{S.ind.debt+=0.6; gd('imprenditori',2); gd('cetomedio',1); gd('giovani',-2);}},
+   {l:'Prepara reattori nuovi per il prossimo decennio', e:'Una scommessa lunga, e cara', pleases:'conservatore', costo:{debito:0.8}, f:()=>{S.ind.debt+=0.8; gd('imprenditori',2); gd('pensionati',1); gd('giovani',-3);}},
+   {l:'Spegnili come previsto: eolico in mare e gas', e:'I giovani applaudono, la bolletta trema', pleases:'progressista', costo:{debito:0.4}, f:()=>{S.ind.debt+=0.4; gd('giovani',3); gd('imprenditori',-2); gd('pensionati',-1);}}]},
+ {id:'be_p_d_pensioni', era:'contemporanea', paesi:['belgio'], min:'economia', kick:'A sessantasette anni', t:'L\'età che sale', text:'La legge porta l\'età della pensione a sessantasette anni nel 2030, e il conto dell\'invecchiamento cresce lo stesso. Chi fa un lavoro pesante dice che a quell\'età non ci arriva; chi paga le pensioni dice che non basta.', ch:[
+   {l:'Un premio a chi resta, una penalità a chi esce prima', e:'I conti migliorano, e i sindacati scendono in piazza', pleases:'conservatore', costo:{debito:-0.4}, f:()=>{S.ind.debt-=0.4; gd('imprenditori',2); gd('cetomedio',1); gd('lavoratori',-2); gd('pensionati',-1);}},
+   {l:'Un\'eccezione per i lavori pesanti', e:'Più giusto, e la lista dei mestieri non finisce mai', pleases:'tecnico', costo:{debito:0.2}, f:()=>{S.ind.debt+=0.2; gd('lavoratori',2); gd('cetomedio',-1); gd('imprenditori',-1);}},
+   {l:'Rinvia e paga con le tasse', e:'Nessuno lavora di più, e il conto passa ai figli', pleases:'progressista', costo:{debito:0.6}, f:()=>{S.ind.debt+=0.6; gd('pensionati',2); gd('lavoratori',1); gd('giovani',-2);}}]},
+ {id:'be_p_d_sussidio', era:'contemporanea', paesi:['belgio'], min:'lavoro', kick:'Due anni', t:'Il sussidio che finisce', text:'Per decenni il sussidio di disoccupazione non aveva una scadenza. Una riforma lo limita a due anni, e chi ne esce bussa ai servizi sociali del suo comune, che chiedono soldi per reggere l\'urto.', ch:[
+   {l:'Tieni il limite: il lavoro c\'è', e:'Più gente cerca lavoro, e i comuni protestano', pleases:'conservatore', costo:{debito:-0.3}, f:()=>{S.ind.debt+=-0.3; gd('imprenditori',2); gd('cetomedio',1); gd('lavoratori',-3);}},
+   {l:'Limite, ma con un corso di formazione garantito', e:'Una strada per uscire, e un conto da pagare', pleases:'tecnico', costo:{debito:0.3}, f:()=>{S.ind.debt+=0.3; gd('giovani',2); gd('lavoratori',1); gd('imprenditori',-1);}},
+   {l:'Torna al sussidio senza scadenza', e:'Nessuno resta senza niente, e il bilancio sì', pleases:'progressista', costo:{debito:0.5}, f:()=>{S.ind.debt+=0.5; gd('lavoratori',3); gd('cetomedio',-2); gd('imprenditori',-1);}}]},
+ {id:'be_p_d_scalo', era:'contemporanea', paesi:['belgio'], min:'giustizia', kick:'Lo scalo', t:'Le bombe nei quartieri', text:'Dal grande porto di Anversa passa molta della cocaina che arriva in Europa. Le bande che se la contendono lanciano ordigni contro le case dei rivali, di notte, nei quartieri della città e della capitale. Gli abitanti chiedono di dormire tranquilli.', ch:[
+   {l:'Una procura e una polizia solo per il porto', e:'Indagini lunghe e mirate, e risultati lenti', pleases:'tecnico', costo:{debito:0.4}, f:()=>{S.ind.debt+=0.4; gd('cetomedio',2); gd('pensionati',1); gd('imprenditori',-1);}},
+   {l:'Pattuglie nelle strade colpite, giorno e notte', e:'I quartieri si sentono protetti, i giudici chiedono di più', pleases:'conservatore', costo:{debito:0.3}, f:()=>{S.ind.debt+=0.3; gd('pensionati',2); gd('cetomedio',1); gd('giovani',-2);}},
+   {l:'Scuola e sport per i ragazzi che le bande arruolano', e:'Si toglie terreno alle bande, e ci vogliono anni', pleases:'progressista', costo:{debito:0.3}, f:()=>{S.ind.debt+=0.3; gd('giovani',3); gd('lavoratori',1); gd('pensionati',-2);}}]},
+ {id:'be_p_d_trasferimenti', era:'contemporanea', paesi:['belgio'], min:'interno', kick:'Chi paga per chi', t:'Il nord, il sud e i conti', text:'Ogni anno una parte delle tasse pagate al nord finisce al sud, dove il lavoro manca di più. Al nord molti chiedono di tenersi i loro soldi e una nuova riforma dello Stato, dopo le sei già fatte; al sud molti la temono.', ch:[
+   {l:'Più competenze e più tasse proprie alle regioni', e:'Il nord è soddisfatto, il sud si sente lasciato solo', pleases:'conservatore', f:()=>{gd('imprenditori',2); gd('cetomedio',1); gd('lavoratori',-2); gd('pensionati',-1);}},
+   {l:'La solidarietà resta com\'è', e:'Nessuno perde niente, e la discussione torna', pleases:'progressista', f:()=>{gd('lavoratori',2); gd('pensionati',1); gd('imprenditori',-2); S.ind.stampa-=1;}},
+   {l:'Trasferimenti legati a obiettivi di lavoro', e:'Un patto chiaro, e qualcuno da tutte e due le parti si offende', pleases:'tecnico', f:()=>{gd('cetomedio',2); gd('giovani',1); gd('lavoratori',-1); gd('imprenditori',-1);}}]},
+ {id:'be_p_d_capitale', era:'contemporanea', paesi:['belgio'], min:'infrastrutture', kick:'La capitale', t:'La capitale in rosso', text:'Bruxelles ha i conti in rosso, diciannove comuni e sei zone di polizia, ed è anche la capitale dell\'Unione. Chiede allo Stato un aiuto; le due grandi regioni rispondono che la capitale deve prima mettere ordine in casa sua.', ch:[
+   {l:'Un aiuto federale, con condizioni scritte', e:'La capitale respira, e accetta un controllore', pleases:'tecnico', costo:{debito:0.5}, f:()=>{S.ind.debt+=0.5; gd('cetomedio',2); gd('giovani',1); gd('imprenditori',-1);}},
+   {l:'Una sola polizia per tutta la capitale', e:'Più ordine, e i sindaci perdono un pezzo di potere', pleases:'conservatore', costo:{debito:0.2}, f:()=>{S.ind.debt+=0.2; gd('pensionati',2); gd('cetomedio',1); gd('giovani',-2);}},
+   {l:'Decide la regione: lo Stato non entra', e:'Rispetti le regole, e i buchi restano', pleases:'progressista', f:()=>{gd('imprenditori',1); gd('cetomedio',1); gd('lavoratori',-2); S.ind.stampa-=1;}}]},
+ {id:'be_p_d_treni', era:'contemporanea', paesi:['belgio'], min:'infrastrutture', kick:'I pendolari', t:'Il treno delle otto', text:'Ogni mattina centinaia di migliaia di persone vanno a lavorare nella capitale, in treno o in coda sulla tangenziale. La rete espressa attorno a Bruxelles, cominciata più di vent\'anni fa, è ancora a metà, e i treni in ritardo fanno notizia ogni settimana.', ch:[
+   {l:'Finisci la rete espressa, a ogni costo', e:'Fra qualche anno si viaggia meglio, e il conto è subito', pleases:'tecnico', costo:{debito:0.7}, f:()=>{S.ind.debt+=0.7; gd('cetomedio',2); gd('giovani',1); gd('pensionati',-1);}},
+   {l:'Un pedaggio per entrare in auto nella capitale', e:'Meno code e più soldi, e la periferia si arrabbia', pleases:'progressista', costo:{debito:-0.2}, f:()=>{S.ind.debt-=0.2; gd('giovani',2); gd('cetomedio',-2); gd('lavoratori',-1);}},
+   {l:'Più corsie sulla tangenziale', e:'Gli automobilisti ringraziano, il traffico torna', pleases:'conservatore', costo:{debito:0.4}, f:()=>{S.ind.debt+=0.4; gd('cetomedio',1); gd('imprenditori',1); gd('giovani',-2);}}]},
+ {id:'be_p_d_formazione', era:'contemporanea', paesi:['belgio'], min:'interno', kick:'Il formatore', cond:()=>false, t:'Dopo mesi di trattativa', text:'Il governo è nato, ma ci sono voluti mesi. Il Re ha affidato l\'incarico a un informatore, poi a un formatore; partiti di due comunità hanno trattato su ogni riga, mentre il governo uscente restava per gli affari correnti. Qui si è aspettato anche più di cinquecento giorni. Ora l\'accordo va scritto.', ch:[
+   {l:'Un accordo scritto riga per riga', e:'Stabile, e ogni tavolo ha avuto il suo prezzo', pleases:'tecnico', costo:{debito:0.3}, f:()=>{segnaUnaCarriera('be_p_d_formazione|'+S.mandate); S.ind.debt+=0.3; gd('cetomedio',2); gd('pensionati',1); gd('giovani',-1);}},
+   {l:'Un accordo corto, solo sui conti', e:'Mani libere, e gli alleati inquieti', pleases:'conservatore', f:()=>{segnaUnaCarriera('be_p_d_formazione|'+S.mandate); gd('imprenditori',2); gd('cetomedio',-1); S.ind.stampa-=1;}},
+   {l:'Lascia fuori i temi delle comunità', e:'Pace oggi, e il nodo tornerà', pleases:'progressista', f:()=>{segnaUnaCarriera('be_p_d_formazione|'+S.mandate); gd('lavoratori',1); gd('giovani',1); gd('cattolici',-1); S.ind.stampa+=1;}}]},
+ {id:'be_p_d_correnti', era:'contemporanea', paesi:['belgio'], min:'interno', kick:'Affari correnti', cond:()=>S.livello===3 && !S.opposizione && (S.mandatesWon||0)>=1 && !(S.carteUnaCarriera && S.carteUnaCarriera.be_p_d_correnti), t:'Il bilancio a dodicesimi', text:'Nei mesi senza governo lo Stato ha speso un dodicesimo del bilancio dell\'anno prima, mese per mese: niente spese nuove, decisioni ferme, cantieri in attesa. Ora tocca a te rimettere in moto la macchina, e l\'Unione guarda il disavanzo.', ch:[
+   {l:'Un bilancio pieno e severo, subito', e:'I conti tornano in ordine, e la spesa ferma resta ferma', pleases:'conservatore', costo:{debito:-0.4}, f:()=>{segnaUnaCarriera('be_p_d_correnti'); S.ind.debt-=0.4; gd('imprenditori',2); gd('cetomedio',1); gd('lavoratori',-2);}},
+   {l:'Spalma i ritardi su due anni', e:'Si riparte piano, e nessuno si lamenta troppo', pleases:'tecnico', costo:{debito:0.2}, f:()=>{segnaUnaCarriera('be_p_d_correnti'); S.ind.debt+=0.2; gd('cetomedio',1); gd('pensionati',1); gd('giovani',-1);}},
+   {l:'Chiedi tempo all\'Unione e rilancia gli investimenti', e:'I cantieri ripartono, e Bruxelles alza il sopracciglio', pleases:'progressista', costo:{debito:0.6}, f:()=>{segnaUnaCarriera('be_p_d_correnti'); S.ind.debt+=0.6; gd('lavoratori',2); gd('giovani',1); S.ind.stampa-=1;}}]},
  /* ===== L83-1 · STATI UNITI, dossier di dicastero (scheda §B). ===== */
  {id:'us_p_d_oppioidi', era:'contemporanea', paesi:['usa'], min:'salute', kick:'Epidemia', t:'Le overdose', text:'Decine di migliaia di morti l\'anno per oppioidi, in paesi e città che non se ne sono più ripresi. Le aziende che li hanno venduti hanno pagato miliardi; le contee che li spendono non sanno da dove cominciare.', ch:[
    {l:'Cliniche e antidoto ovunque, con i soldi delle cause', e:'Si salvano vite; il problema resta', pleases:'progressista', costo:{debito:0.3}, f:()=>{S.ind.debt+=0.3; gd('lavoratori',3); gd('cattolici',2); gd('cetomedio',1);}},
@@ -21335,6 +21382,13 @@ const TITOLI=[
  {id:'no_p_ti_merluzzo', era:'contemporanea', paesi:['norvegia'], amico:'Il merluzzo d\'inverno arriva in branchi: i porti del nord lavorano', ostile:'Quote di pesca tagliate: i porti del nord temono l\'inverno'},
  {id:'no_p_ti_valanga', era:'contemporanea', paesi:['norvegia'], amico:'Riaperta la strada della valle: il paese non è più isolato', ostile:'La valanga chiude la strada: un paese isolato da giorni'},
  {id:'no_p_ti_baite', era:'contemporanea', paesi:['norvegia'], amico:'Le baite portano lavoro: il comune di montagna rinasce', ostile:'Baite a peso d\'oro: in montagna c\'è gente solo il sabato'},
+ /* ===== L250-24 (13/11) · BELGIO, sei titoli del presente (consegna di Cowork; niente persone né aziende, nord e sud nominati come parole comuni). ===== */
+ {id:'be_p_ti_indice', era:'contemporanea', paesi:['belgio'], amico:'Scatta l\'indice: stipendi e pensioni salgono con i prezzi', ostile:'Lo scatto dell\'indice pesa sulle imprese: «Perdiamo terreno sui vicini»'},
+ {id:'be_p_ti_container', era:'contemporanea', paesi:['belgio'], amico:'Sequestro record nel porto: la dogana ferma un carico di cocaina', ostile:'Un altro ordigno nella notte: il porto porta la paura in città'},
+ {id:'be_p_ti_treni', era:'contemporanea', paesi:['belgio'], amico:'Treni puntuali questo mese: i pendolari arrivano in orario', ostile:'Ritardi e corse cancellate: i pendolari della capitale in coda'},
+ {id:'be_p_ti_piena', era:'contemporanea', paesi:['belgio'], amico:'Argini nuovi nelle valli del sud: la piena passa senza danni', ostile:'Fiumi in piena nelle valli del sud: case allagate e strade chiuse'},
+ {id:'be_p_ti_cantieri', era:'contemporanea', paesi:['belgio'], amico:'Riaprono le strade del centro: la capitale chiude i cantieri', ostile:'Cantieri ovunque nella capitale: il centro è un labirinto'},
+ {id:'be_p_ti_conti', era:'contemporanea', paesi:['belgio'], amico:'Nord e sud firmano: un patto sui soldi delle regioni', ostile:'Nord e sud litigano sui conti: «Chi paga per chi?»'},
  /* ===== L83-1 · STATI UNITI, quattro titoli del presente (scheda §D). ===== */
  {id:'us_p_ti_congresso', era:'contemporanea', paesi:['usa'], amico:'La Casa Bianca e il Congresso trovano l\'accordo', ostile:'Muro contro muro: Washington è bloccata'},
  {id:'us_p_ti_borsa', era:'contemporanea', paesi:['usa'], amico:'Wall Street ai massimi: l\'economia corre', ostile:'Wall Street corre, Main Street no'},

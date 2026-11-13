@@ -9865,6 +9865,7 @@ function genAgendaRamo(first){
   if(!first && typeof pickCampagnaNazionale==='function'){ const cnb=pickCampagnaNazionale(); if(cnb){ S.agenda.push(cnb); agendaSolo(); return; } }
   // ATTO FINALE (fase C1a): la chiamata a guidare il Consesso (gated su relInt alto) — quando arriva, è LA carta del mese
   if(!first && !cedeVoto(true)){ const occI=pickOccasione(); if(occI){ S.agenda.push(occI); agendaSolo(); return; } }
+  if(!first && beFormazioneDovuta()){ const _bf=DOSSIERS.find(d=>d.id==='be_p_d_formazione'); if(_bf) S.agenda.push({kind:'dossier', data:_bf, resolved:false}); }   // L250-24: la formazione belga, dovuta il mese 1-2 dopo l'urna (non esclusiva: il resto dell'agenda segue)
   // rimpasti in sospeso (carte obbligatorie post-scandalo: storicamente esenti dal tetto)
   const hadRimpasto=S.pendingRimpasto.length>0;
   for(const pr of S.pendingRimpasto){   // L127-1b: coppie {id, uscita} (un id nudo di un salvataggio vecchio lo migra applySnap)
@@ -13040,6 +13041,20 @@ function applyOppEffect(spec){
    Non è `unaVolta` degli archi (L217-1): quello vale per ARCHI_DEF e ha i suoi due lettori. */
 function giaUscitaUnaCarriera(e){ return !!(e && e.unaCarriera && S.carteUnaCarriera && S.carteUnaCarriera[e.id]); }
 function segnaUnaCarriera(id){ S.carteUnaCarriera=S.carteUnaCarriera||{}; S.carteUnaCarriera[id]=true; }
+/* ⚑ L250-24 (13/11) · LA FORMAZIONE BELGA, CARTA DOVUTA (D-P2: la formazione lunga si racconta con carte, il governo nel gioco è già nato).
+   `be_p_d_formazione` (data.js, cond sempre falsa: mai nel sacchetto dei dossier) la mette in agenda genAgendaRamo quando questa è vera:
+   presente belga, capo del governo, il mese 1 o 2 dopo un'urna ORDINARIA o una vinta che ha azzerato l'orologio (S.turnInMandate===0 e
+   meseMandato() 1-2: nextMandate e tornaAlGoverno passano da azzeraOrologioUrna), una volta per mandato (chiave 'be_p_d_formazione|<S.mandate>'
+   in S.carteUnaCarriera, segnata alla scelta: nessun campo nuovo in S). All'avvio della carriera mai (S.turnInMandate parte da turnMandato=1);
+   dall'opposizione mai. ⚠ Dopo un'urna anticipata che cade fuori dal mese dell'urna ordinaria il conto meseMandato() riparte da giugno:
+   la carta non esce (limite noto, rapporto «⚑ L250-24»). nl_p_d_formazione NON è dovuta (carta del sacchetto, una volta per carriera):
+   il cancello è suo. Prova prove/l250-24/prova-contenuto-be.js. */
+function beFormazioneDovuta(){
+  if(typeof S==='undefined' || !S || S.paese!=='belgio' || S.scenario!=='presente') return false;
+  if(S.livello!==3 || S.opposizione || (S.turnInMandate||0)!==0) return false;
+  const m=meseMandato(); if(m!==1 && m!==2) return false;
+  return !(S.carteUnaCarriera && S.carteUnaCarriera['be_p_d_formazione|'+S.mandate]);
+}
 function pickOpposizione(){
   const ok=i=>(!OPPOSIZIONE_EV[i].cond || OPPOSIZIONE_EV[i].cond()) && (typeof eraVivaT!=='function'||eraVivaT(OPPOSIZIONE_EV[i])) && !giaUscitaUnaCarriera(OPPOSIZIONE_EV[i]);   // L232-1: unaCarriera · FIX: era-gate anche il percorso opposizione (default eraVivaT: l'opposizione è senza-tempo; i moderni TV → contemporanea). Prima nel '50 usciva «il duello in TV»
   /* ================================================================================================================
