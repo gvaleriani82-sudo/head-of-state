@@ -7034,7 +7034,7 @@ function crisiScala(mossa){
   c.ultimo=ora;
   if(mossa==='scendi'){
     c.t--; if(c.respinto) delete c.respinto;
-    if(c.t<=0){ crisiLog('La crisi con %POTdet è rientrata.'); crisiChiudi(ora); }
+    if(c.t<=0){ crisiLog('La crisi con %POTdet è rientrata.'); crisiChiudi(ora); voceCrisi('voce-crisi-rientra'); }   // L218-32
     else crisiLog(T('La crisi con %POTdet scende di un gradino: %G.').replace('%G', T(CRISI_GRADINI[c.t])));
     return;
   }
@@ -7052,6 +7052,7 @@ function crisiScala(mossa){
   }
   c.t++;
   crisiLog(T('La crisi con %POTdet sale di un gradino: %G.').replace('%G', T(CRISI_GRADINI[c.t])));
+  voceCrisi(c.t===2 ? 'voce-crisi-sanzioni' : c.t===3 ? 'voce-crisi-mobilitazione' : c.t===4 ? 'voce-ultimatum' : null);   // L218-32: il gradino scelto dal giocatore (l'ultimatum è il suo, non quello ricevuto)
 }
 /* il mese (advanceMonth, dopo riallineamentoTappa e prima dei rami: vale a ogni livello, una crisi aperta da capo del governo
    che lascia la carica rientra col tempo) */
@@ -7073,7 +7074,7 @@ function crisiMese(){
     if(S.crisi && S.crisi.t>=2) S.gMod-=CRISI_K.sanzGrowth; return; }   // L245-4: in guerra il tempo non fa scendere la crisi
   if(ora-c.ultimo>=CRISI_QUIETE){ c.t--; c.ultimo=ora;   // L245-2bis
     if(c.respinto) delete c.respinto;   // L245-4
-    if(c.t<=0){ crisiLog('La crisi con %POTdet si è spenta col tempo.'); crisiChiudi(ora); return; }
+    if(c.t<=0){ crisiLog('La crisi con %POTdet si è spenta col tempo.'); crisiChiudi(ora); voceCrisi('voce-crisi-rientra'); return; }   // L218-32 (voceCrisi tace se non sei più il capo del governo)
     crisiLog(T('Senza fatti nuovi, la crisi con %POTdet scende di un gradino: %G.').replace('%G', T(CRISI_GRADINI[c.t]))); }
   if(c.t>=2) S.gMod-=CRISI_K.sanzGrowth;
 }
@@ -7156,13 +7157,15 @@ function guerraLeggibile(g){   // applySnap: la forma di S.crisi.guerra
   var num=function(v){ return typeof v==='number' && isFinite(v); };
   return !!(g && Array.isArray(g.fronti) && g.fronti.length>=1 && g.fronti.length<=3 && g.fronti.every(function(f){ return f && typeof f.n==='string' && Number.isInteger(f.linea) && f.linea>=-3 && f.linea<=3; })
     && ['forze','opinione','costo','mesi','caduti','trattativa','ordini','rally','fermo'].every(function(k){ return num(g[k]); }) && Number.isInteger(g.caduti)
-    && (g.difesa===undefined || typeof g.difesa==='boolean'));   // L245-6: la guerra difensiva, booleano facoltativo
+    && (g.difesa===undefined || typeof g.difesa==='boolean')   // L245-6: la guerra difensiva, booleano facoltativo
+    && (g.detto===undefined || (!!g.detto && typeof g.detto==='object' && !Array.isArray(g.detto))));   // L218-32: le voci già dette in questa guerra, oggetto facoltativo (salvataggi di prima senza)
 }
 function guerraDichiara(){
   if(!REGOLA_GUERRA || !S.crisi || S.crisi.guerra || !S.crisi.respinto || !crisiCapo() || crisiTettoBlocco()<5) return false;
   var V=guerraVotoAula();
   if(V.respinta){ repd(-2); crisiLog('L\'aula respinge la dichiarazione di guerra: la crisi con %POTdet resta all\'ultimatum.'); return false; }
   guerraApri(false, V.vota ? 'L\'aula approva: è guerra con %POTdet.' : 'È guerra con %POTdet.');
+  voceCrisi(V.vota ? voceUsa('voce-guerra-voto') : 'voce-guerra');   // L218-32: il voto vince sulla dichiarazione (una voce sola); `voce-guerra` è la coppia -a/-b (voceScelta, audio.js)
   return true;
 }
 /* il pezzo comune delle due guerre (L245-6): la dichiarata (guerraDichiara, difesa false) e la difensiva (crisiRicevuto, difesa
@@ -7185,7 +7188,7 @@ function guerraOrdine(i, tipo){
   var g=S.crisi.guerra; if(g.ordini>=GUERRA_K.ordini || !g.fronti[i]) return false;
   if(tipo==='avanza'){ var ok=Math.random()<g.forze/120; guerraPerdite(3+Math.floor(Math.random()*4)); if(ok) guerraMuoviLinea(i, 1); }
   else if(tipo==='tieni'){ g.forze=clamp(g.forze+1, 0, 100); }
-  else if(tipo==='tratta'){ g.trattativa=Math.min(3, g.trattativa+1); if(g.fronti[i].linea<0) g.opinione=clamp(g.opinione-2, 0, 100); }
+  else if(tipo==='tratta'){ var tr0=g.trattativa; g.trattativa=Math.min(3, g.trattativa+1); if(g.fronti[i].linea<0) g.opinione=clamp(g.opinione-2, 0, 100); voceTregua(tr0); }   // L218-32
   else return false;
   g.ordini++;
   if(S.ind) S.ind.consenso=computeConsenso();
@@ -7196,7 +7199,7 @@ function guerraEffetto(e){
   if(!guerraAttiva()) return; var g=S.crisi.guerra;
   if(e.forze){ if(e.forze<0) guerraPerdite(-e.forze); else g.forze=clamp(g.forze+e.forze, 0, 100); }
   if(e.opinione) g.opinione=clamp(g.opinione+e.opinione, 0, 100);
-  if(e.trattativa) g.trattativa=clamp(g.trattativa+e.trattativa, 0, 3);
+  if(e.trattativa){ var tr0=g.trattativa; g.trattativa=clamp(g.trattativa+e.trattativa, 0, 3); voceTregua(tr0); }   // L218-32
   if(e.costo) g.costo=Math.round(clamp(g.costo+e.costo, 0.05, 0.5)*100)/100;
   if(e.linea) guerraMuoviLinea(Math.floor(Math.random()*g.fronti.length), e.linea);
   if(S.ind) S.ind.consenso=computeConsenso();
@@ -7215,11 +7218,12 @@ function guerraMese(){
   if(g.forze<15 || (guerraTipo()==='confine' && g.fronti.some(function(f){ return f.linea<=-3; }))) guerraFine('sconfitta');
   else if(tutti3 || (tuttiSu && Math.random()<GUERRA_K.pPace)) guerraFine('vittoria');
   else if(g.fermo>=GUERRA_K.stallo) guerraFine('stallo');
+  if(g.mesi===7 && S.crisi && S.crisi.guerra===g) voceCrisi('voce-guerra-stanchezza');   // L218-32: il primo mese oltre la soglia della stanchezza (g.mesi > 6, qui sopra), una volta per guerra; mai nel mese in cui la guerra finisce (vince l'esito)
 }
 const GUERRA_FINE_LOG={ vittoria:'%POTDet chiede la pace: la guerra è vinta.', sconfitta:'Il fronte cede: la guerra con %POTdet è perduta.', pace:'Firmato l\'accordo con %POTdet: la guerra finisce al tavolo.', stallo:'Nessuna linea si muove più: cessate il fuoco con %POTdet.' };
 function guerraFine(esito, riga){
   if(!S.crisi || !S.crisi.guerra) return;
-  var c=S.crisi, ora=crisiMeseAss();
+  var c=S.crisi, ora=crisiMeseAss(), tregua=!!(c.guerra.detto && c.guerra.detto.tregua);   // L218-32: letto prima che crisiChiudi tolga la guerra
   crisiLog(riga || GUERRA_FINE_LOG[esito]);
   if(esito==='vittoria') repd(3);
   else if(esito==='sconfitta'){ repd(-5); if(S.groups) GROUPS.forEach(function(gr){ gd(gr.id, -3); }); }
@@ -7228,6 +7232,29 @@ function guerraFine(esito, riga){
   crisiChiudi(ora);
   S.dopoguerra={ esito:esito, fino:ora+GUERRA_K.dopo };
   if(S.ind) S.ind.consenso=computeConsenso();
+  voceCrisi(esito==='vittoria' ? 'voce-guerra-vinta' : esito==='sconfitta' ? 'voce-guerra-persa' : esito==='pace' ? 'voce-pace'
+    : (esito==='stallo' && !tregua) ? 'voce-cessate-fuoco' : esito==='stallo' ? 'voce-pace' : null);   // L218-32: lo stallo è un cessate il fuoco (GUERRA_FINE_LOG); se il cessate il fuoco è già stato detto, la pace. Chi ha lasciato la carica: niente (voceCrisi)
+}
+/* ⚑ L218-32 · LE VOCI DI CRISI E DI GUERRA (giro suoni 25, S2; manifesto in audio.js). Solo audio: nessun numero di gioco cambia.
+   voceCrisi(id): parla solo per un gesto o un fatto del giocatore CAPO DEL GOVERNO (crisiCapo), mai durante la notte elettorale; parla()
+   fa il resto (audio spento, tragedia, nonPaesi, la variante di lei). voceUsa(id): negli Stati Uniti (S.paese, anche nelle porte us*) la
+   presa col Congresso, `<id>-usa`. voceTregua(prima): il cessate il fuoco quando la trattativa sale a 2 (guerraOrdine «tratta»,
+   guerraEffetto), una volta per guerra — il segno è S.crisi.guerra.detto.tregua (campo facoltativo, nato solo lì: guerraLeggibile lo
+   ammette; nessun calcolo lo legge, se non guerraFine per scegliere fra cessate il fuoco e pace allo stallo). Agganci: crisiScala (sali:
+   sanzioni, mobilitazione, ultimatum; scendi a 0: rientra), crisiMese (spenta per quiete: rientra), guerraDichiara (voto o coppia
+   `voce-guerra`), guerraMese (il 7° mese: stanchezza), guerraFine (esito), guerraRitornoFatto (reduci), attaccoRisposta (unità; emergenza
+   se la legge passa — respinta parla `voce-legge-no`). `voce-opp-guerra` resta senza aggancio: all'opposizione la guerra del governo non
+   c'è nel modello (chi lascia la carica la chiude in stallo). Prova prove/l218-32/prova-voci-guerra.js. */
+function voceUsa(id){ return (S && S.paese==='usa') ? id+'-usa' : id; }
+function voceCrisi(id){
+  if(!id || !S || !crisiCapo() || typeof parla!=='function') return;
+  if(typeof NOTTE!=='undefined' && NOTTE) return;
+  parla(id);
+}
+function voceTregua(prima){
+  var g=S.crisi && S.crisi.guerra; if(!g || prima>=2 || g.trattativa<2 || (g.detto && g.detto.tregua) || !crisiCapo()) return;
+  g.detto=g.detto||{}; g.detto.tregua=true;
+  voceCrisi('voce-cessate-fuoco');
 }
 /* L245-5 · la carta del ritorno (DOPOGUERRA_EV, data.js): una per guerra, al capo del governo, nello slot dell'evento estero dal
    mese dopo guerraFine; se lo slot è preso (un'intermedia, la pressione su una politica, i mercati, un evento grave) riprova per
@@ -7239,7 +7266,7 @@ function guerraRitornoCarta(){
   if(ora<fine+1 || ora>fine+GUERRA_RITORNO_MESI) return null;
   return DOPOGUERRA_EV[0] || null;
 }
-function guerraRitornoFatto(){ if(S.dopoguerra) S.dopoguerra.ritorno=true; }
+function guerraRitornoFatto(){ if(S.dopoguerra){ var gia=S.dopoguerra.ritorno; S.dopoguerra.ritorno=true; if(!gia) voceCrisi('voce-reduci'); } }   // L218-32: la voce dei reduci
 function dopoguerraMese(){ if(S.dopoguerra && crisiMeseAss()>=S.dopoguerra.fino) delete S.dopoguerra; }
 /* il consenso del governo in guerra (computeConsenso): rally + (opinione − 60)/10; 0 in pace */
 function guerraConsenso(){ if(!guerraAttiva()) return 0; var g=S.crisi.guerra; return g.rally+(g.opinione-GUERRA_K.opinione)/10; }
@@ -7402,11 +7429,13 @@ function attaccoRisposta(it, d, mossa){
     if(typeof suona==='function') suona('martelletto');
     A.sic=(A.sic||0)+ATTACCO_K.sicLegge; gd('giovani',-1);
     S.log.unshift({t:T('Legge approvata'), x:T('La legge d\'emergenza')+'. '+T('La stampa si divide.')});
+    voceCrisi(voceUsa('voce-emergenza'));   // L218-32: i poteri straordinari passati (respinti parla voce-legge-no)
   } else if(mossa==='liberta'){
     A.sic=(A.sic||0)+ATTACCO_K.sicLiberta; A.gap=ATTACCO_K.gapLibera;
   } else if(mossa==='unita'){
     ATTACCO_GRUPPI_UNITA.forEach(function(g){ gd(g,1); });
     if(typeof suona==='function') suona('candele');
+    voceCrisi('voce-unita');   // L218-32
   } else if(mossa==='alleati'){
     relIntMuovi('alleanza', ATTACCO_K.alleanza);
   }
@@ -14108,6 +14137,7 @@ function applySnap(snap){
   if(!S.recentPot) S.recentPot=[];   // cantiere paesi reali (Fetta A): finestra anti-ripetizione dei volti nominati
   if(!S.recentConflInt) S.recentConflInt=[];   // cantiere paesi reali (Fetta B): finestra anti-ripetizione dei conflitti da premier
   if(S.crisi!=null && !(S.crisi.con && typeof potDi==='function' && potDi(S.crisi.con) && S.crisi.t>=1 && S.crisi.t<=5)) S.crisi=null;
+  if(S.crisi && S.crisi.guerra && S.crisi.guerra.detto!==undefined && !(S.crisi.guerra.detto && typeof S.crisi.guerra.detto==='object' && !Array.isArray(S.crisi.guerra.detto))) delete S.crisi.guerra.detto;   // L218-32: le voci già dette illeggibili si tolgono (la guerra resta)
   if(S.crisi && S.crisi.guerra!==undefined && !guerraLeggibile(S.crisi.guerra)){ delete S.crisi.guerra; if(S.crisi.t>4) S.crisi.t=4; }   // L245-4: una guerra illeggibile sparisce, la crisi torna all'ultimatum
   if(S.crisi && S.crisi.t===5 && !S.crisi.guerra) S.crisi.t=4;
   if(S.crisi){ ['subita','ricevuto'].forEach(function(k){ if(S.crisi[k]!==undefined && S.crisi[k]!==true) delete S.crisi[k]; }); if(S.crisi.ricevuto && !S.crisi.subita) delete S.crisi.ricevuto; }   // L245-6: la crisi subita (segni illeggibili si tolgono)
