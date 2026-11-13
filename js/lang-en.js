@@ -88,6 +88,7 @@ const EN = {
   "finché l'intesa regge nessuna mozione ti tocca; se si rompe, cadi solo se contro di te c'è una maggioranza.":"while the agreement holds no motion can touch you; if it breaks, you fall only if a majority stands against you.",
   "Due-tre seggi su centocinquanta: non regge una carriera.":"Two or three seats out of a hundred and fifty: it cannot carry a career.",
   "Appena sopra la soglia del 2%: non regge una carriera.":"Just above the 2% threshold: it cannot carry a career.",
+  "Nessun partito governa con lui (cordone sanitario): non è una carriera giocabile.":"No party governs with it (the cordon sanitaire): it is not a playable career.",   // L250-23
 
   /* --- schermata iniziale --- */
   "La tua carriera politica":"Your political career",
@@ -31446,6 +31447,8 @@ const EN = {
   /* il registro (S.log): esiti, primarie, processo, compleanni — prima scritti senza T() */
   "Al governo, da ministro":"In government, as minister",
   "Hai vinto le elezioni: torni a guidare il paese.":"You won the election: you lead the country again.",
+  "Il nuovo governo riparte da politiche neutre: decidi tu dove portarle.":"The new government starts from neutral policies: where they go is up to you.",
+  "Il nuovo governo riparte dal tuo programma: le politiche dell'esecutivo uscente sono azzerate.":"The new government starts from your platform: the outgoing cabinet's policies are reset.",
   "Il tuo governo ha perso le elezioni: ne diventi il volto all'opposizione.":"Your government lost the election: you become its face in opposition.",
   "Primarie vinte":"Primary won",
   "Il partito si ricompatta: la leadership è confermata.":"The party closes ranks: the leadership is confirmed.",
@@ -33932,6 +33935,8 @@ const EN = {
   "Al Senato i numeri non ci sono. Un partito che al governo non vuole entrare fa sapere che potrebbe non farlo cadere: si astiene, e in cambio chiede qualcosa. Non ministeri — quelli non li vuole. Un prezzo.":"The numbers in the Senate are not there. A party that does not want to join the government lets it be known that it might not bring it down: it will abstain, and in exchange it asks for something. Not ministries — it does not want those. A price.",
   "Al Senato i numeri non tornano, e la sola Camera non basta. C'è chi sarebbe disposto a entrare — non da fuori, dentro: vogliono ministeri veri, e li vogliono adesso.":"In the Senate the numbers do not add up, and the lower house alone is not enough. Somebody would be willing to come in — not from outside, inside: they want real ministries, and they want them now.",
   "Senato: %N% — governo senza maggioranza al Senato":"Senate: %N% — government without a Senate majority",
+  "Senato: %N su %T, servono %M":"Senate: %N of %T, %M needed",
+  "Senato: %N su %T, servono %M — governo senza maggioranza al Senato":"Senate: %N of %T, %M needed — government without a Senate majority",
   "Dà la fiducia":"Votes confidence",
   "Camere divise: il Senato è di %P":"Split houses: the Senate is held by %P",
   "Il tuo partito pieno · la linea tratteggiata segna la maggioranza":"Your party in full colour · the dashed line marks the majority",

@@ -4112,7 +4112,7 @@ function renderMappaSVG(){
   const chiamaIdx=(S.territorioChiama&&typeof S.territorioChiama.idx==='number')?S.territorioChiama.idx:null;   // F2
   for(const i of idx){
     const A=M.aree[i]; if(!A) continue;
-    const t=S.territori[i]||{}, tuo=compatibile(t.partito,asseTuo,S.partito), L=Math.abs(TE[i].lean);
+    const t=S.territori[i]||{}, tuo=compatibile(t.partito,asseTuo,S.partito,i), L=Math.abs(TE[i].lean);
     const op=L>=2?0.95:L===1?0.72:0.5;
     const sel=MAPSEL===i, chiama=(chiamaIdx===i);   // F2 — l'area che chiama pulsa (E5: alla comparsa, poi ferma)
     const lav=!!(t.spinta);   // L64-2: area lavorata in campagna
@@ -4357,7 +4357,7 @@ function aggiornaTavolo(){
   const chiamaIdx=(S.territorioChiama && typeof S.territorioChiama.idx==='number') ? S.territorioChiama.idx : null;
   const forza=vistaForzaAttiva();   // L239-4: «Dove sei forte» acceso (e possibile): le aree con q si colorano dalla quota
   svg.querySelectorAll('.tv-area').forEach(function(el){
-    const i=+el.getAttribute('data-i'), t=S.territori[i]||{}, tuo=compatibile(t.partito, asseTuo, S.partito), L=Math.abs(TE[i].lean||0);
+    const i=+el.getAttribute('data-i'), t=S.territori[i]||{}, tuo=compatibile(t.partito, asseTuo, S.partito, i), L=Math.abs(TE[i].lean||0);
     const sel=(MAPSEL===i), chiama=(chiamaIdx===i), lav=!!t.spinta, citta=!!el.getAttribute('r');
     const fq=(forza && typeof t.q==='number') ? forzaTono(t.q) : null;
     /* la VELATURA del blocco: oro il tuo, ardesia l'avversario; la trasparenza dice il radicamento (lean) · L239-4: con la vista
@@ -5131,7 +5131,7 @@ function premiAvanza(){
 }
 function renderMappaInfo(){
   if(MAPSEL==null) return `<div style="padding:4px 14px 12px;font-size:12px;color:var(--mut2)">${T("Tocca un'area per i dettagli.")}</div>`;
-  const TE=PAESE.territori[MAPSEL], t=S.territori[MAPSEL]||{}, tuo=compatibile(t.partito, mioPartito().asse, S.partito);
+  const TE=PAESE.territori[MAPSEL], t=S.territori[MAPSEL]||{}, tuo=compatibile(t.partito, mioPartito().asse, S.partito, MAPSEL);
   const pn=T((part(t.partito)||{}).nome||'—');   // L244-4: il nome del partito passa da T()
   /* F2 — se l'area selezionata è quella che CHIAMA, la mini-scheda con la scelta prende il posto dell'info piatta.
      Map-native: la decisione vive qui (S.territorioChiama, dato puro), non come carta-agenda. */
@@ -5182,7 +5182,7 @@ function giroBottone(i, chiama){
 function renderMappaPage(){
   const asseTuo=mioPartito().asse;
   const pl=(S.potereLocale!=null)?Math.round(S.potereLocale):null;
-  const mie=S.territori.filter(t=>compatibile(t.partito,asseTuo,S.partito)).length;
+  const mie=S.territori.filter((t,i)=>compatibile(t.partito,asseTuo,S.partito,i)).length;
   let h=`<button class="mini-btn" style="margin-bottom:10px" onclick="chiudiMappa()">← ${T('Partiti')}</button>`;
   h+=`<div class="contorno" style="font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--mut);margin:2px 2px 8px;">${T('Il territorio · controllo politico')}</div>`;
   if(typeof inCampagna==='function' && inCampagna()){ const sf=campSforzo(); h+=`<div class="banner camp-banner">${(sf>0?T('<b>Campagna sul territorio</b>: %N punti di sforzo da spendere, %M mesi al voto. Tocca un\'area e investi: dove vai, sposti; dove non vai, perdi terreno. Quel che resta a fine campagna si perde.').replace('%N',sf):T('<b>Campagna sul territorio</b>: sforzo esaurito, %M mesi al voto. Le aree lavorate sono segnate in blu.')).replace('%M',mesiAllaFine())}</div>`; }   // L64-2
@@ -5190,7 +5190,7 @@ function renderMappaPage(){
   h+=`<div class="card uno"><div class="ct">${T('La mappa')}</div><div class="mappa-wrap">${renderMappaSVG()}</div>
     <div class="mappa-leg"><span><i style="background:var(--acc)"></i>${T('il tuo blocco')}</span><span><i style="background:var(--mut2)"></i>${T('avversario')}</span><span><i style="background:var(--acc);opacity:.5"></i>${T('tinta chiara = contendibile')}</span><span><i style="border:1.6px solid var(--brand)"></i>${T('area simbolo')}</span></div>
     ${renderMappaInfo()}</div>`;
-  h+=`<div class="card"><div class="ct">${T('Aree simbolo')}</div>`+PAESE.territori.map(function(TE,i){ if(!TE.simbolo) return ''; const t=S.territori[i]||{}; const tuo=compatibile(t.partito,asseTuo,S.partito); const pn=T((part(t.partito)||{}).nome||'');
+  h+=`<div class="card"><div class="ct">${T('Aree simbolo')}</div>`+PAESE.territori.map(function(TE,i){ if(!TE.simbolo) return ''; const t=S.territori[i]||{}; const tuo=compatibile(t.partito,asseTuo,S.partito,i); const pn=T((part(t.partito)||{}).nome||'');
     return `<div class="grp"><div class="top"><div class="nm">${nomeTerr(TE)}<small>${caricaTerr(TE)}</small></div><span class="chip" style="background:${tuo?'var(--acc-bg)':'var(--line2)'};color:${tuo?'var(--acc-ink)':'var(--mut)'}">${T(tuo?'tuo':'avversario')}</span></div><div style="font-size:12px;color:var(--mut)">${t.titolare||'—'} · ${pn}</div></div>`; }).join('')+`</div>`;
   h+=`<div class="card"><div class="ct">${T('Come funziona')}</div><div class="log"><div class="li">${T('Ogni area ha una tendenza storica (tinta piena = roccaforte, chiara = contendibile) e un eletto locale. Alle <b>elezioni intermedie</b> le aree possono cambiare colore: più aree controlla il tuo blocco, più sale il <b>potere locale</b> (sopra 50 → <b>+1 punto riforma</b> a gennaio).')}</div></div></div>`;
   return h;
@@ -5518,8 +5518,8 @@ function renderPartiti(){
       <div style="font-size:11px;color:var(--mut2);margin-top:6px">${T("La tacca segna il 50%. I sondaggi hanno un margine d'errore: indicano la tendenza, non la certezza.")}</div></div>`:'';
   const campRiga=(typeof inCampagna==='function' && inCampagna() && PAESE.mappa)?`<div class="banner camp-banner" style="margin-bottom:12px">${T('Campagna sul territorio: <b>%N punti</b> da spendere sulla mappa, %M mesi al voto.').replace('%N',campSforzo()).replace('%M',mesiAllaFine())} <a href="#" onclick="apriMappa();return false;" style="font-weight:600">${T('Apri la mappa →')}</a></div>`:'';   // L64-2
   const territBox=(campRiga)+((S.territori&&S.territori.length)?(PAESE.mappa
-    ? `<div class="card" style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 14px;margin-bottom:12px"><span style="font-size:12.5px;color:var(--mut)">${T('Il territorio · <b>%N</b> aree su %M al tuo blocco').replace('%N',S.territori.filter(function(t){return compatibile(t.partito,asseTuo,S.partito);}).length).replace('%M',S.territori.length)}</span><button class="mini-btn" style="margin-top:0;flex-shrink:0;background:var(--brand-bg);border-color:var(--brand);color:var(--brand);font-weight:600" onclick="apriMappa()">${T('Apri la mappa →')}</button></div>`
-    : `<div class="card"><div class="ct">${T('Il territorio')}</div>`+PAESE.territori.map(function(TE,i){ const t=S.territori[i]||{}; const tuo=compatibile(t.partito,asseTuo,S.partito); const pn=T((part(t.partito)||{}).nome||''); return `<div class="grp"><div class="top"><div class="nm">${nomeTerr(TE)}<small>${caricaTerr(TE)}</small></div><span class="chip" style="background:${tuo?'var(--acc-bg)':'var(--line2)'};color:${tuo?'var(--acc-ink)':'var(--mut)'}">${T(tuo?'tuo':'avversario')}</span></div><div style="font-size:12px;color:var(--mut)">${t.titolare||'—'} · ${pn}</div></div>`; }).join('')+`</div>`):'');
+    ? `<div class="card" style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 14px;margin-bottom:12px"><span style="font-size:12.5px;color:var(--mut)">${T('Il territorio · <b>%N</b> aree su %M al tuo blocco').replace('%N',S.territori.filter(function(t,i){return compatibile(t.partito,asseTuo,S.partito,i);}).length).replace('%M',S.territori.length)}</span><button class="mini-btn" style="margin-top:0;flex-shrink:0;background:var(--brand-bg);border-color:var(--brand);color:var(--brand);font-weight:600" onclick="apriMappa()">${T('Apri la mappa →')}</button></div>`
+    : `<div class="card"><div class="ct">${T('Il territorio')}</div>`+PAESE.territori.map(function(TE,i){ const t=S.territori[i]||{}; const tuo=compatibile(t.partito,asseTuo,S.partito,i); const pn=T((part(t.partito)||{}).nome||''); return `<div class="grp"><div class="top"><div class="nm">${nomeTerr(TE)}<small>${caricaTerr(TE)}</small></div><span class="chip" style="background:${tuo?'var(--acc-bg)':'var(--line2)'};color:${tuo?'var(--acc-ink)':'var(--mut)'}">${T(tuo?'tuo':'avversario')}</span></div><div style="font-size:12px;color:var(--mut)">${t.titolare||'—'} · ${pn}</div></div>`; }).join('')+`</div>`):'');
   const mediaU=S.correnti?Math.round(umoreMedio()):null;
   const dcP=S.correnti?correnteDaCurare():null;   // loop attivo Lotto 2: evidenzia già sulla landing quale corrente curare
   const dcNome=dcP?T((CORRENTI_DEF.find(function(d){return d.id===dcP.corrente;})||{}).nome||''):'';
@@ -5534,10 +5534,11 @@ function renderPartiti(){
   const CP=(it2 && C2.comp) ? cameraCompTesti(C2.riga) : null, CPe=CP && alta2 && cameraCompEmi(C2.riga);   // L263-14: Lord e Senato canadese, sola composizione (grigio, nessuna maggioranza)
   const PV=(it2 && C2.pop) ? altaPopTesti(C2.riga) : null;   // L263-12bis: Giappone e Spagna
   const div2=PV ? altaPopDivise(C2.bassa, C2.altaQ, coal) : CP ? (alta2 ? cameraAltaVista(C2.riga).nota : '') : AT ? (alta2 ? AT.nota : ((altaTerrContro() && seggiCoalizione(coal, S.seggi)>=50) ? altaTerrTesti(C2.riga).divise : '')) : BV ? (alta2 ? BV.nota : ((typeof bundesratContro==='function' && bundesratContro() && seggiCoalizione(coal, S.seggi)>=50) ? T('Camere divise: al Bundesrat manca la maggioranza') : '')) : it2 ? camereDiviseTesto(C2.bassa, C2.altaQ||C2.alta, coal) : '';   // L263-9bis: in Argentina e Brasile l'emiciclo è in seggi, la frase legge le quote
+  /* L268-2: nella vista del Senato italiano (quote, non seggiInt) l'emiciclo porta `veri` dalla riga di CAMERE: legenda in seggi veri e «ogni pallino ≈» (prima la legenda era in % e la linea diceva la maggioranza vera) */
   const AV=hasSeats ? totaleAula() : 100, AR=(AV!==100) ? cameraBassa(S.paese, annoAula()) : null, VS=hasSeats ? seggiVeri(S.seggi, AV, coal) : null;   // L268-1: il totale vero della camera bassa, i seggi per partito veri (D-S2)
   const emiBox = hasSeats ? `<div class="card"><div class="ct">${alta2 ? (PV ? PV.titolo.replace('%N',C2.pop.si) : BV ? BV.titolo : cameraAltaVista(C2.riga).titolo) : AR ? `${cameraNome(AR)} · ${AV} ${T('seggi')}` : `${T("L'aula")} · ${Math.round(Object.values(S.seggi).reduce((a,b)=>a+b,0))} ${T('seggi')}`}</div>
     ${it2?`<div class="camere-par">${camereBottoniHtml(C2.riga,'cameraVista')}<div class="camere-cosa">${alta2?cameraCosaConta(C2.riga):cameraBassaCosa()}</div></div>`:''}
-    ${(CP && alta2 && !CPe) ? '' : `<div style="padding:${C2&&C2.seggiInt?26:8}px 14px 2px">${alta2 ? (CP ? emiciclo({_seggi:C2.riga.seggiVeri},{key:'par:alta', nomi:{_seggi:T('Seggi')}, colori:{_seggi:'var(--mut2)'}, aria:cameraNome(C2.riga), senzaMaggioranza:true}) : AT ? emiciclo(C2.alta, altaTerrEmiOpz('par:alta', C2.at)) : BV ? emiciclo(C2.alta, bundesratEmiOpz('par:alta', C2.br)) : emiciclo(C2.alta,{key:'par:alta',percento:!C2.seggiInt,legenda:!!C2.seggiInt,aria:cameraNome(C2.riga),maggioranza:camereMaggioranza(true,C2.riga)})) : emiciclo(S.seggi,emiOptsBassa({key:'par'}))}</div>`}
+    ${(CP && alta2 && !CPe) ? '' : `<div style="padding:${C2&&C2.seggiInt?26:8}px 14px 2px">${alta2 ? (CP ? emiciclo({_seggi:C2.riga.seggiVeri},{key:'par:alta', nomi:{_seggi:T('Seggi')}, colori:{_seggi:'var(--mut2)'}, aria:cameraNome(C2.riga), senzaMaggioranza:true}) : AT ? emiciclo(C2.alta, altaTerrEmiOpz('par:alta', C2.at)) : BV ? emiciclo(C2.alta, bundesratEmiOpz('par:alta', C2.br)) : emiciclo(C2.alta,Object.assign({key:'par:alta',percento:!C2.seggiInt,legenda:!!C2.seggiInt,aria:cameraNome(C2.riga),maggioranza:camereMaggioranza(true,C2.riga)},(!C2.seggiInt && C2.riga.seggiVeri && C2.riga.seggiVeri!==100) ? {percento:false, legenda:true, veri:{tot:C2.riga.seggiVeri}} : {}))) : emiciclo(S.seggi,emiOptsBassa({key:'par'}))}</div>`}
     ${div2?`<div class="camere-cosa camere-nota" style="padding:0 15px 4px">${div2}</div>`:''}
     ${(CP && alta2) ? CP.righe.map(x=>`<div class="camere-cosa camere-nota" style="padding:0 15px 4px">${x}</div>`).join('')+'<div style="height:8px"></div>' : `<div class="contorno" style="font-size:11px;color:var(--mut2);padding:0 15px 10px;text-align:center">${alta2&&AT?altaTerrTesti(C2.riga).contorno:(alta2&&BV?T('I voti dei Länder · la linea tratteggiata segna la maggioranza'):alta2?T('Il tuo partito pieno · la linea tratteggiata segna la maggioranza'):T('Il tuo partito pieno, gli alleati in chiaro · la linea tratteggiata segna la maggioranza (%M)').replace('%M',maggioranzaVera(AV)))}</div>`}</div>` : '';
   let h=sondBox+partitoBox+plBox+emiBox+`<div class="card g2"><div class="ct">${T('Partiti')} · ${T(P.nome)}${hasSeats?' · '+T('seggi'):''}</div>`;

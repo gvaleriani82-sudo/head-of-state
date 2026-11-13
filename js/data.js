@@ -936,8 +936,8 @@ const PAESI = {
        16,7% dei voti e 24 seggi, PS 8,0% e 16 seggi). Seggi ◦ 24 · 20 · 20 · 15 · 13 · 16 · 11 · 14 · 7 · 6 · 3 = 149 + DéFI 1 (fuori
        dal roster): il 150° seggio va alla N-VA (25), quindi forza = seggi / 150 al decimo, somma 100,0. Il governo vero a cinque
        (N-VA, MR, Les Engagés, Vooruit, CD&V) fa così 83 e non 82.
-     · `comunita` ('nl' | 'fr' | null: il PTB è l'unico partito nazionale) sui partiti e sui territori ('bxl' per Bruxelles): DATO
-       INERTE, nessuna funzione lo legge in questo lotto — letto da L250-21 (le due comunità, D-P3 (a)).
+     · `comunita` ('nl' | 'fr' | null: il PTB è l'unico partito nazionale) sui partiti e sui territori ('bxl' per Bruxelles): LETTO
+       dal L250-22 (le due comunità, D-P3 (a)) da `comunitaAmmette()` in game.js: un partito tiene solo le aree della sua comunità e Bruxelles.
      · Nessuna soglia nazionale (nel vero il 5% per circoscrizione ◦: non modellato, limite noto; il roster è già quello dell'aula).
        `distorsione:1.0`: proporzionale.
      · `alleati` dichiarati e simmetrici: la coalizione in carica (N-VA, MR, Les Engagés, Vooruit, CD&V, tutti con tutti), quella di
@@ -964,6 +964,8 @@ const PAESI = {
     titoloRuolo: 'Primo Ministro',
     mandatoMesi: 60, sistema: 'parlamentare',
     coalizione: true, comeSiVince: 'parlamentare', cadutaGoverno: true, ue: true, distorsione: 1.0,
+    guidaConAlleati: true,   // L250-23: un partito con alleati:[] non guida un governo senza ≥ 50 da solo (guidaAmmessa in vincitore() e vincitoreAvvioOpp(), game.js)
+    coalMinima: true,        // L250-23: il governo si forma con la coalizione minima (la cinquina N-VA, MR, Les Engagés, Vooruit, CD&V: 10/10 per seme); letto da entraOpposizione, dalla trattativa d'avvio e dal banco
     meseUrna: 6, turnMandato: 1,   // le politiche si votano a giugno ◦ (2024, 2029): al gennaio 2026 un anno pieno dal giugno 2024 → urna ordinaria 2029/6
     /* lean: stima, non un dato — le Fiandre e il Limburgo più a destra (N-VA e Vlaams Belang vi sono le prime forze), le città
        fiamminghe un po' meno (Gand più a sinistra e verde, Anversa nel mezzo), il Brabante fiammingo liberale; l'Hainaut e Liegi a
@@ -986,9 +988,10 @@ const PAESI = {
     nomiM: ['Jan','Pieter','Wouter','Koen','Bart','Luc','Julien','Olivier','Nicolas','Thomas'],
     nomiF: ['Lotte','An','Els','Sofie','Katrien','Nathalie','Céline','Isabelle','Aurélie','Marie'],
     cognomi: ['Peeters','Janssens','Maes','De Smet','Claes','Jacobs','Mertens','Willems','Wouters','Goossens','Dubois','Lambert','Dupont','Leclercq','Simon','Lejeune','Renard','Laurent','Dumont','Collard'],
-    partiti: [   // `comunita`: dato inerte, letto da L250-21
+    partiti: [   // `comunita`: letto da comunitaAmmette (L250-22)
       { id:'be_nva',     nome:'Nuova alleanza fiamminga',         comunita:'nl', orientamento:'centrodestra',     base:{ cetomedio:0.4, imprenditori:0.3, pensionati:0.2, cattolici:0.1 }, forza:16.7, asse:1,  alleati:['be_mr','be_le','be_vooruit','be_cdv','be_vld'] },
-      { id:'be_vb',      nome:'Interesse fiammingo',              comunita:'nl', orientamento:'destra populista', base:{ lavoratori:0.4, pensionati:0.3, cetomedio:0.3 },   forza:13.3, asse:2,  alleati:[] },
+      { id:'be_vb',      nome:'Interesse fiammingo',              comunita:'nl', orientamento:'destra populista', base:{ lavoratori:0.4, pensionati:0.3, cetomedio:0.3 },   forza:13.3, asse:2,  alleati:[], selezionabile:false,
+        nota:'Nessun partito governa con lui (cordone sanitario): non è una carriera giocabile.' },   // L250-23: resta nel roster, nelle urne e nella scheda Partiti
       { id:'be_mr',      nome:'Movimento riformatore',            comunita:'fr', orientamento:'centrodestra',     base:{ imprenditori:0.4, cetomedio:0.4, pensionati:0.2 }, forza:13.3, asse:1,  alleati:['be_nva','be_le','be_vooruit','be_cdv','be_vld','be_ps','be_ecolo','be_groen'] },
       { id:'be_ptb',     nome:'Partito del lavoro',               comunita:null, orientamento:'sinistra',         base:{ lavoratori:0.6, giovani:0.4 },                     forza:10.0, asse:-2, alleati:['be_ps','be_vooruit','be_groen','be_ecolo'] },
       { id:'be_vooruit', nome:'Vooruit',                          comunita:'nl', orientamento:'centrosinistra',   base:{ lavoratori:0.4, cetomedio:0.3, giovani:0.3 },      forza:8.7,  asse:-1, alleati:['be_nva','be_mr','be_le','be_cdv','be_ps','be_vld','be_groen','be_ecolo','be_ptb'] },

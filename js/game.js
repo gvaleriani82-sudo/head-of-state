@@ -3751,7 +3751,7 @@ function applicaRosterDelta(ricalcolaSeggi){
     /* L237-3 · e i campi del partito proprio (e di chiunque nasca nel Regno Unito): `sigla` e `colore` (nuovi, solo `pp_proprio`),
        `terreno` e `concentrazione` (i collegi, model.js pesoCollegio: senza, un partito nato a Londra tornava «uniforme» al
        caricamento). L'asse c'era già. Additivo: una voce senza i campi ricostruisce la stessa voce di prima. */
-    ['sigla','colore','terreno','concentrazione'].forEach(function(k){ if(n[k]!=null) np[k]=n[k]; });
+    ['sigla','colore','terreno','concentrazione','comunita'].forEach(function(k){ if(n[k]!=null) np[k]=n[k]; });   // L250-22: anche la comunità (Belgio)
     /* L237-4 · IL NOME SCRITTO DAL GIOCATORE ARRIVA AL ROSTER GIÀ ESCAPATO. Nome e sigla del partito proprio sono testo libero, e il
        nome di un partito finisce in decine di modelli HTML (`T(p.nome)` nelle notti, nel registro, nelle schede): invece di
        ricordarsene in ogni punto, la voce viva ha `nome`/`sigla` in HTML sicuro e `nomeTesto`/`siglaTesto` col testo com'è. Il
@@ -3850,7 +3850,7 @@ function applicaDirettive(d){
   if(terrTocca || d.mappa){
     applicaTerritoriDelta();
     if(S.territori && PAESE.territori) for(var it=S.territori.length; it<PAESE.territori.length; it++)
-      S.territori.push({ titolare:nomePersona(), partito:partitoVicinoLean(PAESE.territori[it].lean) });
+      S.territori.push({ titolare:nomePersona(), partito:partitoVicinoLean(PAESE.territori[it].lean, it) });
   }
   if(d.capitale) S.capitaleSede=d.capitale;
   S.rosterDelta = S.rosterDelta || {entra:[], esce:[], rinomina:[]};
@@ -4003,7 +4003,7 @@ function rinormalizzaForze(){
   S.forzePrev=Object.assign({}, S.forze);
 }
 function _partitoDef(d){ var o={ id:d.id, nome:d.nome, orientamento:d.orientamento||'centro', base:d.base||{}, forza:d.forza||1, asse:(d.asse!=null?d.asse:0), gruppoUE:d.gruppoUE||'noniscritti' };
-  ['sigla','colore','terreno','concentrazione'].forEach(function(k){ if(d[k]!=null) o[k]=d[k]; });   // L237-3: gli stessi campi della ricostruzione (additivo)
+  ['sigla','colore','terreno','concentrazione','comunita'].forEach(function(k){ if(d[k]!=null) o[k]=d[k]; });   // L237-3: gli stessi campi della ricostruzione (additivo) · L250-22: e la comunità
   return o; }
 
 /* ============================================================================================================
@@ -4034,6 +4034,7 @@ function ppNasce(def, asse, forza, seggiPP, ricalcolaSeggi){
   var n={ id:PP_ID, nome:String(def.nome||''), orientamento:orientamentoDaAsse(asse), base:Object.assign({}, def.base||{}), forza:forza, asse:asse, gruppoUE:'noniscritti' };
   if(def.sigla) n.sigla=String(def.sigla);
   if(def.colore) n.colore=String(def.colore);
+  if(def.comunita) n.comunita=String(def.comunita);   // L250-22: solo dalla scissione (il partito d'origine), mai dal foglio del nome
   if(PAESE.sistemaSeggi==='collegi'){ n.terreno=0; n.concentrazione=PP_CONCENTRAZIONE; }
   S.rosterDelta=S.rosterDelta||{entra:[], esce:[], rinomina:[]};
   S.rosterDelta.entra.push(n);
@@ -4336,7 +4337,7 @@ function scissioneFonda(def, quota){
   if(SCISSIONE_ANCORA){ S.ancoraTappa=S.ancoraTappa||{}; S.ancoraTappa[vecchio]=(S.ancoraTappa[vecchio]||0)-delta; }
   var sp=0; if(S.seggi && S.seggi[vecchio]!=null){ sp=Math.round(S.seggi[vecchio]*q); S.seggi[vecchio]-=sp; }
   camera2Sposta(vecchio, PP_ID, q);   // L263-6: la stessa quota anche al Senato
-  ppNasce(def, asse, delta, sp, false);
+  ppNasce(pv.comunita ? Object.assign({}, def, {comunita:pv.comunita}) : def, asse, delta, sp, false);   // L250-22: la scissione eredita la comunità del partito d'origine (Belgio)
   S.partitoProprio.scissioneDa=vecchio;
   /* coalizione, intese e territori: i tuoi passano al nuovo, quelli del partito restano al vecchio */
   var coal=(S.coalizione||[]).filter(function(id){ return id!==vecchio && id!==PP_ID; });
@@ -8033,9 +8034,10 @@ function altaPopNotteCorpo(a){   // L263-12bis: alla proclamazione, Camera | Cam
   var alta=CAMERA_VISTA==='alta', r=cameraAlta(), riga=alta ? altaPopTesti(r).titolo.replace('%N',altaPopVoti(a.bloc, a.alta).si) : T('Camera')+' · '+T('Dà la fiducia');
   return camereBottoniHtml(r,'notteCameraVista')+`<div class="camere-cosa camere-nota">${riga}</div>`+(alta ? emiciclo(altaPopSeggi(a.alta),{key:'notte:alta',legenda:true,aria:cameraNome(r),coal:a.bloc,maggioranza:Math.floor(r.seggiVeri/2)+1}) : emiciclo(a.shown,emiOptsBassa({key:'notte',coal:a.bloc,maggioranza:50},S.year)));
 }
+/* L268-2 · alla notte l'emiciclo del Senato italiano porta `veri` (il seggiVeri della riga): il disegno resta a 100 pallini, la riga «ogni pallino ≈ N seggi» spiega la maggioranza vera (prima: 101 sopra 100 pallini senza spiegazione). */
 function camere2NotteCorpo(a){
   var alta=CAMERA_VISTA==='alta', r=cameraAlta(), riga=camereDiviseTesto(a.shown, a.alta, a.bloc) || (alta ? cameraAltaVista(r).titolo : T('Camera'))+' · '+T('Dà la fiducia');
-  return camereBottoniHtml(r,'notteCameraVista')+`<div class="camere-cosa camere-nota">${riga}</div>`+emiciclo(alta?a.alta:a.shown,alta?{key:'notte:alta',coal:a.bloc,maggioranza:camereMaggioranza(alta,r)}:emiOptsBassa({key:'notte',coal:a.bloc,maggioranza:camereMaggioranza(alta,r)},S.year));
+  return camereBottoniHtml(r,'notteCameraVista')+`<div class="camere-cosa camere-nota">${riga}</div>`+emiciclo(alta?a.alta:a.shown,alta?Object.assign({key:'notte:alta',coal:a.bloc,maggioranza:camereMaggioranza(alta,r)},(r.seggiVeri && r.seggiVeri!==100) ? {veri:{tot:r.seggiVeri}} : {}):emiOptsBassa({key:'notte',coal:a.bloc,maggioranza:camereMaggioranza(alta,r)},S.year));
 }
 function camereNotteCorpo(){
   if(CAMERE_NOTTE && CAMERE_NOTTE.br===true) return bundesratNotteCorpo(CAMERE_NOTTE);
@@ -8062,7 +8064,26 @@ function nomePersona(){ return rnd(PAESE.nomi)+' '+rnd(PAESE.cognomi); }
 /* L80-4 - «questo territorio e' del mio blocco?». Passa da staColBlocco quando si sa CHI chiede (il terzo
    argomento): cosi' un'area governata da un alleato dichiarato conta come tua anche sulla mappa, e non solo
    in parlamento. Senza il terzo argomento resta l'asse, che e' il comportamento di sempre. */
-function compatibile(partitoId, asse, idTuo){
+/* L250-22 (12/11) · LE DUE COMUNITÀ (D-P3 (a), ⚠ 5 di L250-20). In un paese che dichiara `comunita` sui territori (oggi solo il Belgio:
+   'nl' le aree fiamminghe, 'fr' le vallone, 'bxl' Bruxelles) un partito con `comunita` tiene solo le aree della sua comunità e
+   Bruxelles; un partito senza (`null`/assente: il PTB, il partito proprio) è ammesso ovunque. UNA regola sola, letta in quattro punti e
+   solo lì: `partitoVicinoLean` (l'avvio e le aree nuove), `scegliPartito` (a chi passa un'area che cambia mano: null = nessuno del
+   lato è ammesso, l'area resta com'è), `compatibile` col quarto argomento (l'indice dell'area: un titolare non ammesso non è di nessun
+   blocco) e, da loro, `decidiTerritori`/`calcolaTerritoriNazionale` (l'onda vale solo dove il lato ha un ammesso). Il potere locale
+   (quotaTerritori) segue da sé. Un paese senza `comunita` sui territori → true subito: gli altri 20 presenti e le porte non cambiano.
+   Nessun campo in S; una partita salvata prima del lotto si corregge al primo passaggio di mano. */
+var _COMUNITA_TE=null, _COMUNITA_SI=false;
+function comunitaPaese(){ var TE=(typeof PAESE!=='undefined' && PAESE && PAESE.territori) || null; if(TE!==_COMUNITA_TE){ _COMUNITA_TE=TE; _COMUNITA_SI=!!(TE && TE.some(function(t){ return t && t.comunita; })); } return _COMUNITA_SI; }
+function comunitaAmmette(partito, territorio){
+  if(!comunitaPaese()) return true;
+  var TE=(typeof territorio==='number') ? PAESE.territori[territorio] : territorio;
+  if(!TE || !TE.comunita || TE.comunita==='bxl') return true;
+  var p=(typeof partito==='string') ? part(partito) : partito;
+  if(!p || !p.comunita) return true;
+  return p.comunita===TE.comunita;
+}
+function compatibile(partitoId, asse, idTuo, i){
+  if(i!=null && !comunitaAmmette(partitoId, i)) return false;   // L250-22: un titolare non ammesso nell'area non è del tuo blocco (solo coi territori a comunità)
   if(idTuo && typeof staColBlocco==='function') return partitoId===idTuo || staColBlocco(partitoId, idTuo);
   const p=part(partitoId); return p ? Math.abs(p.asse-asse)<=1 : false;
 }
@@ -8077,13 +8098,16 @@ function mioPartito(){
   return { id:S.partito, nome:'—', asse:0, base:{}, forza:1, orientamento:'centro' };
 }
 function asseBlocco(){ const ids=bloccoIds(); let s=0,w=0; for(const id of ids){ const p=part(id); if(!p) continue; const f=(S.forze&&S.forze[id])||0; s+=p.asse*f; w+=f; } return w>0?s/w:(mioPartito().asse||0); }   // media PESATA e CONTINUA dell'asse del blocco
-function partitoVicinoLean(lean){ let best=PAESE.partiti[0], bd=Infinity; for(const p of PAESE.partiti){ const d=Math.abs(p.asse-lean); if(d<bd){ bd=d; best=p; } } return best.id; }
+function partitoVicinoLean(lean, i){ let pool=PAESE.partiti; if(i!=null && comunitaPaese()){ const amm=pool.filter(function(p){ return comunitaAmmette(p, i); }); if(amm.length) pool=amm; }   // L250-22: gli ammessi nell'area (nessuno = come prima)
+  let best=pool[0], bd=Infinity; for(const p of pool){ const d=Math.abs(p.asse-lean); if(d<bd){ bd=d; best=p; } } return best.id; }
 /* L80-4 - a chi passa un territorio che cambia mano: se si sa chi e' il giocatore si usa la stessa nozione
    di blocco delle alleanze, altrimenti l'asse come prima. */
-function scegliPartito(tuoLato, lean, asseTuo, idTuo){ const dentro=function(p){ return (idTuo && typeof staColBlocco==='function') ? (p.id===idTuo || staColBlocco(p.id, idTuo)) : Math.abs(p.asse-asseTuo)<=1; };
-  const cand=PAESE.partiti.filter(function(p){ return tuoLato ? dentro(p) : !dentro(p); }); const pool=cand.length?cand:PAESE.partiti; let best=pool[0], bd=Infinity; for(const p of pool){ const d=Math.abs(p.asse-lean); if(d<bd){ bd=d; best=p; } } return best.id; }
-function initTerritori(){ S.territori=(PAESE.territori||[]).map(function(TE){ return { titolare:nomePersona(), partito:partitoVicinoLean(TE.lean) }; }); }
-function quotaTerritori(){ if(!S.territori || !S.territori.length) return null; const a=mioPartito().asse; return S.territori.filter(function(t){ return compatibile(t.partito,a,S.partito); }).length / S.territori.length * 100; }
+function scegliPartito(tuoLato, lean, asseTuo, idTuo, i){ const dentro=function(p){ return (idTuo && typeof staColBlocco==='function') ? (p.id===idTuo || staColBlocco(p.id, idTuo)) : Math.abs(p.asse-asseTuo)<=1; };
+  const cand=PAESE.partiti.filter(function(p){ return tuoLato ? dentro(p) : !dentro(p); }); let pool=cand.length?cand:PAESE.partiti;
+  if(i!=null && comunitaPaese()){ pool=pool.filter(function(p){ return comunitaAmmette(p, i); }); if(!pool.length) return null; }   // L250-22: solo gli ammessi nell'area; nessuno del lato = l'area resta com'è (chi chiama lo sa)
+  let best=pool[0], bd=Infinity; for(const p of pool){ const d=Math.abs(p.asse-lean); if(d<bd){ bd=d; best=p; } } return best.id; }
+function initTerritori(){ S.territori=(PAESE.territori||[]).map(function(TE, i){ return { titolare:nomePersona(), partito:partitoVicinoLean(TE.lean, i) }; }); }
+function quotaTerritori(){ if(!S.territori || !S.territori.length) return null; const a=mioPartito().asse; return S.territori.filter(function(t, i){ return compatibile(t.partito,a,S.partito,i); }).length / S.territori.length * 100; }
 /* ============================================================
    F2 — LA MAPPA CHE CHIAMA. Un territorio pulsa (marcatore S.territorioChiama, dato puro) → il pallino sul tab Partiti
    e il pulse sulla mappa invitano → tap sull'area → mini-scheda con 2 opzioni. Ignorare = zero imboscata: il marcatore
@@ -8111,7 +8135,7 @@ function territorioChiamaDovuto(){
 function pickTerritorioChiama(){
   var a=mioPartito().asse;
   var idxs=S.territori.map(function(_,i){return i;});
-  var avv=idxs.filter(function(i){ return !compatibile(S.territori[i].partito,a,S.partito) && i!==S.territorioRecente; });
+  var avv=idxs.filter(function(i){ return !compatibile(S.territori[i].partito,a,S.partito,i) && i!==S.territorioRecente; });
   var pool=avv.length?avv:idxs.filter(function(i){return i!==S.territorioRecente;});
   if(!pool.length) pool=idxs;
   pool=pool.concat(pool.filter(function(i){ return (S.territori[i].umore||0)<0; }));   // L182-3 (D170): i trascurati chiamano, peso doppio (nessun umore: pool identico)
@@ -8187,7 +8211,7 @@ function giroPossibile(){
   return territoriDEpoca();
 }
 function tipoTerrNorm(TE){ return String((TE&&TE.tipo)||'').normalize('NFD').replace(/[̀-ͯ]/g,''); }   // «città» dei dati → «citta» delle scene
-function casaTerr(i){ var t=S.territori[i]||{}; return compatibile(t.partito, mioPartito().asse, S.partito) ? 'amica' : 'avversa'; }
+function casaTerr(i){ var t=S.territori[i]||{}; return compatibile(t.partito, mioPartito().asse, S.partito, i) ? 'amica' : 'avversa'; }
 /* le scene vive per l'area i: filtro per tipo/ruolo/casa, poi il passaggio unico d'epoca e la cond */
 function scenePerTerr(i){
   if(typeof GIRO_SCENE==='undefined') return [];
@@ -8373,7 +8397,7 @@ function cartaLuogoTerr(d){ return !!(d && d.luogo==='terr'); }
 function sceltaLuogoTerr(id){
   if(!S || !Array.isArray(S.territori) || !S.territori.length || typeof hashId!=='function') return null;
   var a=(mioPartito()||{}).asse||0, idxs=S.territori.map(function(_,i){return i;});
-  var avv=idxs.filter(function(i){ return !compatibile(S.territori[i].partito,a,S.partito) && i!==S.territorioRecente; });
+  var avv=idxs.filter(function(i){ return !compatibile(S.territori[i].partito,a,S.partito,i) && i!==S.territorioRecente; });
   var pool=avv.length?avv:idxs.filter(function(i){return i!==S.territorioRecente;});
   if(!pool.length) pool=idxs;
   pool=pool.concat(pool.filter(function(i){ return (S.territori[i].umore||0)<0; }));
@@ -8482,9 +8506,10 @@ function decidiTerritori(ris){
   PAESE.territori.forEach(function(TE,i){
     if(!(ris.tocca==='tutti' || TE.tipo===ris.tocca)) return;
     const localShare=50 + wave + (TE.lean*aB*4) + ((dopo[i].spinta||0)*0.5) + (Math.random()*6-3);   // L64-2: la spinta della campagna PRIMA dell'onda
-    const nuovoTuo=localShare>50, eraTuo=compatibile(dopo[i].partito, asseTuo, S.partito);
-    if(nuovoTuo!==eraTuo){
-      const partito=scegliPartito(nuovoTuo, TE.lean, asseTuo, S.partito), nome=nomePersona();
+    const nuovoTuo=localShare>50, eraTuo=compatibile(dopo[i].partito, asseTuo, S.partito, i);
+    const partito=(nuovoTuo!==eraTuo) ? scegliPartito(nuovoTuo, TE.lean, asseTuo, S.partito, i) : null;   // L250-22: null = nessuno del lato vincente è ammesso nell'area, che resta com'è
+    if(partito!=null){
+      const nome=nomePersona();
       dopo[i]=portaUmore(dopo[i], { titolare:nome, partito:partito });   // L182-3: il voto non azzera l umore del giro
       ris.aree.push({ nome:TE.nome, nomeEn:TE.nomeEn, carica:TE.carica, caricaEn:TE.caricaEn, titolare:nome, partito:partito, tuo:nuovoTuo });   // FIX: era T.nome/T.carica (T = funzione traduzione → undefined); porta i campi grezzi, risolti in-lingua dal render
     }
@@ -8828,7 +8853,7 @@ function trovaVolto(){
   if(S.territori && PAESE.territori && part(S.partito)){
     const a=mioPartito().asse;
     PAESE.territori.forEach(function(TE,i){
-      const t=S.territori[i]; if(!t || !compatibile(t.partito,a,S.partito)) return;
+      const t=S.territori[i]; if(!t || !compatibile(t.partito,a,S.partito,i)) return;
       const score=(TE.simbolo?8:4) + ((S.forze[t.partito]||0)*0.2) + (TE.tipo==='regione'?2:0);
       if(score>bs){ bs=score; best={ volto:t.titolare, carica:caricaTerr(TE), area:nomeTerr(TE), fonte:'territorio', simbolo:!!TE.simbolo }; }
     });
@@ -11027,7 +11052,7 @@ function inCampagna(){ if(typeof S==='undefined'||!S||S.livello!==3||!PAESE.terr
 function mesiAllaFine(){ const fine=(PAESE.mandatoMesi||60); return Math.max(0, fine-meseMandato()); }
 function sforzoIniziale(){ const pl=(S.potereLocale!=null)?S.potereLocale:50; return CAMP_SFORZO_BASE + (pl>=60?1:0); }
 function campSforzo(){ if(!inCampagna()) return 0; if(!S.campNaz) S.campNaz={piazza:0,promMantenuta:false,n:0}; if(S.campNaz.sforzo==null){ S.campNaz.sforzo=sforzoIniziale(); S.campNaz.sforzo0=S.campNaz.sforzo; S.campNaz.speso={}; if(typeof parla==='function') parla(voceGesto('comizio', 'voce-campagna'));   /* L248-5bis: il comizio d'apertura nello strato · L218-6: si apre la campagna (C18), una volta per campagna */ S.log.unshift({t:T('Campagna sul territorio'), x:T('La campagna è aperta: hai %N punti di sforzo da spendere sulla mappa entro %M mesi. Quelli non spesi si perdono.').replace('%N',S.campNaz.sforzo).replace('%M',mesiAllaFine())}); } return S.campNaz.sforzo; }
-function tipoTerritorio(i){ const TE=PAESE.territori[i], t=S.territori[i]||{}; const tuo=compatibile(t.partito, mioPartito().asse, S.partito); const L=Math.abs(TE.lean); if(L>=2) return tuo?'roccaforte':'avversario'; return tuo?'bilico':'bilico'; }
+function tipoTerritorio(i){ const TE=PAESE.territori[i], t=S.territori[i]||{}; const tuo=compatibile(t.partito, mioPartito().asse, S.partito, i); const L=Math.abs(TE.lean); if(L>=2) return tuo?'roccaforte':'avversario'; return tuo?'bilico':'bilico'; }
 function costoInvestimento(i){ const tipo=tipoTerritorio(i); let c=(tipo==='avversario')?2:1; if(tipo==='avversario' && (S.potereLocale||0)>=60) c=1; return c; }
 function ritornoInvestimento(i){ const tipo=tipoTerritorio(i); const base=(tipo==='roccaforte')?4:(tipo==='bilico'?10:6); return base + ((S.potereLocale||0)>=60?2:0); }
 function investiTerritorio(i){
@@ -11090,8 +11115,8 @@ function calcolaTerritoriNazionale(onda, quote){
     if(!sp){ if(quote) quote.push({ i:i, q:quotaArea(50 + wave + (TE.lean*aB*4)) }); return; }   // L182-3: il lettore unico (spinta + umore del giro; umore 0 = come prima) · solo le aree lavorate in campagna si decidono qui (le altre le decidono le intermedie) · L239-4: la quota senza dado
     const localShare=50 + wave + (TE.lean*aB*4) + sp*0.5 + (Math.random()*6-3);
     if(quote) quote.push({ i:i, q:quotaArea(localShare) });
-    const nuovoTuo=localShare>50, eraTuo=compatibile(t.partito, asseTuo, S.partito);
-    if(nuovoTuo && !eraTuo){ const tit=nomePersona(); cambi.push({ i:i, titolareNuovo:tit, partitoNuovo:scegliPartito(true, TE.lean, asseTuo, S.partito), quota:localShare }); }
+    const nuovoTuo=localShare>50, eraTuo=compatibile(t.partito, asseTuo, S.partito, i);
+    if(nuovoTuo && !eraTuo){ const pn=scegliPartito(true, TE.lean, asseTuo, S.partito, i); if(pn!=null){ const tit=nomePersona(); cambi.push({ i:i, titolareNuovo:tit, partitoNuovo:pn, quota:localShare }); } }   // L250-22: pn null = nessuno del tuo blocco è ammesso nell'area
   });
   return cambi;
 }
@@ -11100,7 +11125,7 @@ function applicaTerritoriNazionale(cambi, quote){
   const vinte=[];
   try{
     const asseTuo=mioPartito().asse;
-    (cambi||[]).forEach(function(c){ const t=S.territori[c.i]; if(!t || compatibile(t.partito, asseTuo, S.partito)) return;
+    (cambi||[]).forEach(function(c){ const t=S.territori[c.i]; if(!t || compatibile(t.partito, asseTuo, S.partito, c.i)) return;
       S.territori[c.i]=portaUmore(t, { titolare:c.titolareNuovo, partito:c.partitoNuovo }); vinte.push(PAESE.territori[c.i]); });   // L182-3: l umore resta
     (quote||[]).forEach(function(x){ const t=S.territori[x.i]; if(t) t.q=x.q; });   // L239-4: dopo i cambi (portaUmore ha fatto l'oggetto nuovo)
   } finally { S.territori.forEach(function(t){ if(t) t.spinta=0; }); }
@@ -11128,7 +11153,7 @@ function notteTerritori(N){
   N.cambiTerr=notteDecideTerritori() ? calcolaTerritoriNazionale(ondaNotteTerritori(N.sistema, N.vero), N.quoteTerr) : [];
   const asseTuo=mioPartito().asse, cambiati={};
   N.cambiTerr.forEach(function(c){ cambiati[c.i]=c; });
-  N.pienoTerr=(S.territori||[]).map(function(t, i){ return cambiati[i] ? true : !!(t && compatibile(t.partito, asseTuo, S.partito)); });
+  N.pienoTerr=(S.territori||[]).map(function(t, i){ return cambiati[i] ? true : !!(t && compatibile(t.partito, asseTuo, S.partito, i)); });
   N.quotaTerr=cambiati;   // per la lettura che converge (ui.js, notteLettura): la quota vera delle aree che cambiano
 }
 function territoriDopoUrna(){
@@ -12083,6 +12108,7 @@ function chiudiBilancio(){ document.getElementById('ov').classList.remove('on');
 function openTrattativa(ctx){
   if(!S.seggi) S.seggi=seggiNuovi();
   COAL={ctx, membri:[S.partito]};
+  if(ctx==='avvio' && PAESE.coalMinima && !S.opposizione) COAL.membri=coalizioneMinima([S.partito].concat(senzaAppoggio(compatibiliMiei(S.seggi), S.partito).map(p=>p.id)));   // L250-23: la trattativa d'avvio propone la coalizione minima (il giocatore può togliere e aggiungere)
   renderTrattativa();
 }
 function addAlly(id){ if(COAL && !COAL.membri.includes(id)) COAL.membri.push(id); renderTrattativa(); }
@@ -12123,11 +12149,14 @@ function renderTrattativa(){
     <div class="choices">${addRows}${action}</div>`;
   document.getElementById('ov').classList.add('on');
 }
-/* L263-7 · la riga del Senato (opzione a di §3.3): la firma resta quella della Camera, e la riga dice che governo nasce. Una riga sola, solo con camereFiducia(): a interruttore spento la trattativa è identica. */
+/* L263-7 · la riga del Senato (opzione a di §3.3): la firma resta quella della Camera, e la riga dice che governo nasce. Una riga sola, solo con camereFiducia(): a interruttore spento la trattativa è identica.
+   L268-2 · i seggi veri (sola presentazione): %N = seggiVeri(seggiAlta(), totale, membri) sommati sui membri, il metodo di L268-1 per la Camera (con `coal` il numero segue `ok` del motore: ≥ maggioranza vera se e solo se q ≥ 50); %T = il seggiVeri della riga di CAMERE dell'anno del Senato (senatoAnno), %M la maggioranza vera, come la Camera la scrive sopra («Servono %M seggi su %T»). Senza cifra vera (totale 100) la riga di prima in %. ok, q e il colore non cambiano. */
 function trattativaSenatoRiga(membri){
   if(!camereFiducia()) return '';
-  var q=seggiCoalizione(membri, seggiAlta()), ok=q>=50;
-  return `<div class="tratt-senato" style="margin-top:6px;font-size:12px;white-space:nowrap;color:${ok?'var(--mut)':'var(--acc-ink)'}">${T(ok?'Senato: %N%':'Senato: %N% — governo senza maggioranza al Senato').replace('%N',Math.round(q))}</div>`;
+  var q=seggiCoalizione(membri, seggiAlta()), ok=q>=50, TS=seggiTotali(S.paese, senatoAnno(), 'alta'), col=ok?'var(--mut)':'var(--acc-ink)';
+  if(TS===100) return `<div class="tratt-senato" style="margin-top:6px;font-size:12px;white-space:nowrap;color:${col}">${T(ok?'Senato: %N%':'Senato: %N% — governo senza maggioranza al Senato').replace('%N',Math.round(q))}</div>`;
+  var nV=sommaVera(seggiVeri(seggiAlta(), TS, membri), membri);
+  return `<div class="tratt-senato" style="margin-top:6px;font-size:12px;${ok?'white-space:nowrap;':''}color:${col}">${T(ok?'Senato: %N su %T, servono %M':'Senato: %N su %T, servono %M — governo senza maggioranza al Senato').replace('%N',nV).replace('%T',TS).replace('%M',maggioranzaVera(TS))}</div>`;
 }
 /* L104-2 · con i membri che la trattativa ha in mano, l'Assemblea darebbe una coabitazione? (solo semipresidenziale) */
 function coabitazioneInVista(){
@@ -12675,7 +12704,7 @@ let GOV_AVVIO_FUORI_BLOCCO=true;
 function vincitoreAvvioOpp(){
   const me=S.partito, w=vincitore();
   if(typeof staColBlocco!=='function' || !w || !staColBlocco(w.id, me)) return w;
-  const fuori=PAESE.partiti.filter(p=>p.id!==me && !staColBlocco(p.id, me)).sort((a,b)=>(S.forze[b.id]||0)-(S.forze[a.id]||0));
+  const fuori=PAESE.partiti.filter(p=>p.id!==me && !staColBlocco(p.id, me) && (!PAESE.guidaConAlleati || guidaAmmessa(p))).sort((a,b)=>(S.forze[b.id]||0)-(S.forze[a.id]||0));   // L250-23: con guidaConAlleati solo chi può guidare
   return fuori[0] || w;
 }
 /* ⚑ L250-9 (08/11) · LA MINORANZA COME NORMA (`PAESE.minoranzaNorma`, oggi solo la Svezia). In Svezia il governo di minoranza con
@@ -12763,7 +12792,37 @@ function criccaFuori(){
   }
   return best;
 }
-function vincitore(){ const w=PAESE.partiti.filter(p=>p.id!==S.partito).sort((a,b)=>(S.forze[b.id]||0)-(S.forze[a.id]||0))[0]; return PAESE.minoranzaNorma ? guidaNorma(w) : w; }   // L250-9: con minoranzaNorma non guida un partito di solo appoggio
+/* ⚑ L250-23 (13/11) · CHI NON HA ALLEATI NON GUIDA (`PAESE.guidaConAlleati`, oggi solo il Belgio). Col cordone sanitario il Vlaams
+   Belang ha `alleati:[]`, ed era il più forte fuori dal blocco della N-VA: dall'opposizione governava da solo in minoranza (~11% dei mesi,
+   10 urne fuori calendario per seme). Qui un partito con `alleati` vuoto NON guida se da solo non ha ≥ 50 (forze correnti `S.forze`);
+   guida il più forte FUORI dal blocco del giocatore che con i suoi alleati dichiarati (senza il giocatore) arriva a 50; se nessuno ci
+   arriva, il più forte che può guidare (governo di minoranza, come oggi); se nessuno può guidare, il partito di sempre. Vale anche per
+   un partito nato in partita (una scissione senza alleati). Letta da vincitore() e vincitoreAvvioOpp(); senza il campo rende `w` com'è
+   (prova F di prove/l250-23/prova-governo-be.js: invariati tutti gli altri paesi e le porte). */
+/* L250-23 · `PAESE.coalMinima`: dalla lista [guida, poi i compatibili in ordine di seggi] la coalizione si ferma alla prima maggioranza
+   (la regola «minima» del banco). Letta da entraOpposizione (il governo avversario), openTrattativa('avvio') (la proposta) e
+   formaCoalizione del banco (harness.js). Nessuna maggioranza: la lista intera (come prima). */
+function coalizioneMinima(lista){
+  if(!S || !S.seggi || !Array.isArray(lista)) return lista;
+  const out=[]; let t=0;
+  for(const id of lista){ out.push(id); t+=S.seggi[id]||0; if(t>=50) return out; }
+  return lista;
+}
+function guidaAmmessa(p){
+  if(!p) return false;
+  if(Array.isArray(p.alleati) && !p.alleati.length) return (S.forze[p.id]||0)>=50;
+  return true;
+}
+function guidaConAlleati(w){
+  if(!w || !PAESE || !PAESE.guidaConAlleati || !S || !S.forze) return w;
+  const me=S.partito, ord=PAESE.partiti.filter(p=>p.id!==me && (S.forze[p.id]||0)>0).sort((a,b)=>(S.forze[b.id]||0)-(S.forze[a.id]||0));
+  const amm=ord.filter(guidaAmmessa); if(!amm.length) return w;
+  const magg=p=>{ const al=Array.isArray(p.alleati) ? p.alleati : PAESE.partiti.filter(q=>q.id!==p.id && staColBlocco(q.id, p.id)).map(q=>q.id);
+    return al.filter(id=>id!==me).reduce((t,id)=>t+(S.forze[id]||0), S.forze[p.id]||0)>=50; };
+  const fuori=amm.filter(p=>!staColBlocco(p.id, me) && magg(p));
+  return fuori[0] || amm[0];
+}
+function vincitore(){ const w=PAESE.partiti.filter(p=>p.id!==S.partito).sort((a,b)=>(S.forze[b.id]||0)-(S.forze[a.id]||0))[0]; return PAESE.minoranzaNorma ? guidaNorma(w) : (PAESE.guidaConAlleati ? guidaConAlleati(w) : w); }   // L250-9: con minoranzaNorma non guida un partito di solo appoggio · L250-23: con guidaConAlleati chi non ha alleati non guida
 function vinciElezione(){ if(S.opposizione){ const gP=guidaPartnerVoto(); if(gP) return entraDaPartner(gP); goAppoint(); } else nextMandate(); }   // dall'opposizione si ri-nominano i ministri · L237-2bis: o si entra da partner, se la coalizione la guida un altro
 function perdiElezione(){ if(S.opposizione){ if(salvezzaOpp()) goOpposizione(true); else gameOver('congresso'); } else goOpposizione(); }
 /* Stato d'opposizione: governa il vincitore w (col suo profilo-politiche), tu passi a sfidante. Solo stato:
@@ -12774,7 +12833,8 @@ function entraOpposizione(w){
   const eraOpp=!!S.opposizione;   // L260-4bis: il rivale interno resta se eri già all'opposizione (l'urna persa e perdonata)
   S.opposizione=true; S.governoAvversario=w.id; S.ministers=[];
   S.governoAvversarioVolto=nomePersona();   // L73-2: chi ti ha succeduto ha un nome (generato, mai reale)
-  S.coalizione=[w.id].concat(PAESE.coalizione?senzaAppoggio(compatibili(w.id,S.seggi), w.id).filter(p=>p.id!==S.partito).map(p=>p.id):[]);   // L250-9: senza i partiti di solo appoggio (no-op senza minoranzaNorma)
+  S.coalizione=[w.id].concat(PAESE.coalizione?senzaAppoggio(compatibili(w.id,S.seggi), w.id).filter(p=>p.id!==S.partito).map(p=>p.id):[]);
+  if(PAESE.coalMinima && S.seggi) S.coalizione=coalizioneMinima(S.coalizione);   // L250-23: col campo il governo avversario si ferma alla prima maggioranza (in ordine di seggi), no-op senza   // L250-9: senza i partiti di solo appoggio (no-op senza minoranzaNorma)
   { const mono=auMonocolore(w.id, S.seggi); if(mono) S.coalizione=mono.filter(id=>id!==S.partito); }   // L263-13quater (C2): il vincitore con la maggioranza da solo (o la Coalizione) governa senza i minori; spento null
   S.tenuta={}; S.tenutaForza0={}; S.tenutaLiv={}; S.tenutaUltimo={}; S.minoranza=false; S.mesiMinoranza=0;
   if(S.coabitazione){ S.coabitazione=false; S.premier=null; }   // L100-2: la presidenziale persa chiude anche la coabitazione
@@ -12838,11 +12898,29 @@ function condannaLieve(){
    governo nei fatti (ministri nominati, S.opposizione=false) ma con le schede, i filtri e il motore del ministro (L260-1 §1). Qui sale al
    livello 3 con le stesse righe di diventaPremier e partnerTornaCapo (lo stato del dicastero si chiude). REGOLA_VOLTO spenta = prima. */
 let REGOLA_VOLTO=true;
+/* L250-21 · LE LEVE DI CHI TORNA AL GOVERNO. `entraOpposizione` installa il profilo dell'avversario (L104-3) e fino a qui chi
+   vinceva dall'opposizione governava con le SUE leve: il pavimento della rivolta (`pavimentoGruppo`, model.js) è calcolato a leve
+   neutre, e cattolici e giovani scendevano a 5-8 punti dal pavimento (rivolte 19/40 in Svezia e Danimarca: «⚑ L250-19» §22).
+   Qui, nel presente, al ritorno le leve ripartono dal braccio scelto in «⚑ L250-21» §24 ('N' = neutre, GOVERNI_PROFILI.centro;
+   'P' = il profilo del tuo asse, misurato e scartato: manda in rivolta i cattolici dei partiti di destra). installaProfilo:
+   nessun salto di disavanzo. S.leggi e S.leggiSnap NON si toccano (le leggi dell'avversario sono leggi dello Stato).
+   Le porte storiche restano come prima (tarate col profilo ereditato). LEVE_RITORNO_ON spento = prima (banco: __BANCO_LEVE_RITORNO_OFF). */
+const LEVE_RITORNO='N';
+let LEVE_RITORNO_ON=true;
+function leveRitorno(){
+  if(!LEVE_RITORNO_ON || S.scenario!=='presente') return false;
+  installaProfilo(GOVERNI_PROFILI[LEVE_RITORNO==='N' ? 'centro' : profByAsse((part(S.partito)||{}).asse||0)]); S.snap=Object.assign({},S.pol);
+  return true;
+}
+function leveRitornoRiga(){
+  return {t:T('Al governo'), x:T(LEVE_RITORNO==='N' ? 'Il nuovo governo riparte da politiche neutre: decidi tu dove portarle.' : 'Il nuovo governo riparte dal tuo programma: le politiche dell\'esecutivo uscente sono azzerate.')};
+}
 function tornaAlGoverno(mins){
   if(REGOLA_VOLTO && S.livello===2){ S.livello=3; S.premier=null; S.dicastero=null; S.capitale=null; S.prevSettore=null; S.silAvviso=null; S.premCrisiMesi=0; S.occUltima=null; S.mesiAltoCap=0; }
   if(S.volto) delete S.volto;   // L260-9: al governo il dossier conteso finisce (voltoMese lo toglierebbe al mese dopo: qui subito)
   classiSegnaPres();   // L263-3: come entraOpposizione
   S.ministers=mins; S.opposizione=false; S.governoAvversario=null;
+  const leveNuove=leveRitorno();   // L250-21: nel presente le leve ripartono neutre (vale anche per la sfiducia costruttiva qui sotto)
   delete S.f0Rientro;   // L237-2ter: al governo la soglia del rientro da partner non vale più
   if(typeof parla==='function') parla(voceGesto('insediamento', 'voce-insediamento', {chiudeOv:true}));   // L218-4: torni capo del governo (dalle urne o con la sfiducia costruttiva); l'altro punto è diventaPremier · L248-5bis: lo strato
   /* L108-1 · il rientro della sfiducia costruttiva: niente urne, niente mandato nuovo. Il governo è la cricca che ha eletto
@@ -12856,6 +12934,7 @@ function tornaAlGoverno(mins){
     initTenuta(); S.bloccoAtteso=bloccoQuota();
     bioFatto(T('Il governo torna suo senza elezioni, con la sfiducia costruttiva.'));
     S.log.unshift({t:T('Al governo'), x:T('Il Parlamento ti elegge: torni a guidare il paese senza passare dalle urne.')});
+    if(leveNuove) S.log.unshift(leveRitornoRiga());   // L250-21
     document.getElementById('appoint').style.display='none';
     document.getElementById('game').style.display='block';
     genAgenda(false); generaTitolo(); render(); commitSnap();
@@ -12874,6 +12953,7 @@ function tornaAlGoverno(mins){
   S.snap=Object.assign({},S.pol);                             // contabilità RP pulita: erediti le politiche e le cambi coi tuoi punti
   bioFatto('La rimonta è completa: di nuovo al governo.');   // L256-1: l'elezione la conta nextMandate qui sotto (bioConta + contaMandatoProprio): un'elezione vinta = un conteggio
   S.log.unshift({t:T('Al governo'),x:T('Hai vinto le elezioni: torni a guidare il paese.')});   // L244-4
+  if(leveNuove) S.log.unshift(leveRitornoRiga());   // L250-21
   document.getElementById('appoint').style.display='none';
   document.getElementById('game').style.display='block';
   nextMandate();   // mandato pieno: ricalcola seggi/minoranza/tenuta, ri-snap S.snap, agenda, render
@@ -13956,7 +14036,7 @@ function applySnap(snap){
   if(S.promesseCampagna===undefined) S.promesseCampagna=[];
   if(S.territori==null && PAESE.territori){ try{ initTerritori(); }catch(e){} }   // retro-compatibilità: salvataggi pre-territori
   else if(S.territori && PAESE.territori && S.territori.length<PAESE.territori.length){   // espansione aree (4→12): conserva gli eletti esistenti (i primi 4, stesso ordine), inizializza solo le nuove
-    try{ S.territori=PAESE.territori.map(function(TE,i){ return S.territori[i] || { titolare:nomePersona(), partito:partitoVicinoLean(TE.lean) }; }); }catch(e){}
+    try{ S.territori=PAESE.territori.map(function(TE,i){ return S.territori[i] || { titolare:nomePersona(), partito:partitoVicinoLean(TE.lean, i) }; }); }catch(e){}
   }
   if(S.rp==null){ S.rp = ((S.month===1)?3:1) + ((S.month===1 && !S.opposizione && (S.potereLocale||0)>50)?1:0); }   // migrazione vecchi salvataggi (pre-stock): mai meno del vecchio massimale del mese caricato
   if(S.ind && S.ind.stampa==null) S.ind.stampa=55;   // migrazione vecchi salvataggi (pre-stampa): rapporto neutro-positivo iniziale
