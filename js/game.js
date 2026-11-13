@@ -9011,7 +9011,7 @@ function vinciPrimaria(){
   S.sfida=null; S.primariaUltima=S.year*12+S.month;
   S.log.unshift({t:T('Primarie vinte'), x:T('Il partito si ricompatta: la leadership è confermata.')});   // L244-4
   document.getElementById('ov').classList.remove('on');
-  if(tipo==='vigilia'){ election(); } else { render(); commitSnap(); }
+  if(tipo==='vigilia'){ election(); } else { render(); commitSnap(); parlaGesto('congresso'); }   // L218-33: la leadership confermata, nello strato (alla vigilia segue l'urna: niente battuta)
 }
 /* --- Gestione attiva: UNA mossa di partito ogni cdPartito() mesi (2 al neutro; cooldown separato dalla mossa-stampa). --- */
 function mossaPartitoDisponibile(){ const m=S.year*12+S.month; return S.mossaPartito==null || m-S.mossaPartito>=cdPartito(); }
@@ -9119,6 +9119,7 @@ function cartaRisultato(ev){
 function esitoIntermedia(ris){
   if(OPP_TRAGUARDI) oppTragIntermedia(ris);   // L260-4bis: l'intermedia che è la tappa grande, letta prima che il voto muova forze e correnti
   if(ris.territoriDopo) S.territori=ris.territoriDopo;                   // FASE B: commit dei territori decisi alla generazione
+  if(ris.territoriDopo) voceMappa(ris.aree);   // L218-33: una battuta per l'esito (conquista se un'area è passata a te, persa se solo perse; «tutta» una volta)
   const share=quotaTerritori();                                          // potere locale = quota dei territori controllati dal tuo blocco
   const cur=(S.potereLocale!=null)?S.potereLocale:(share!=null?share:ris.quota);
   S.potereLocale=clamp(cur+((share!=null?share:ris.quota)-cur)*0.5, 0, 100);   // converge come prima
@@ -10679,6 +10680,7 @@ function advanceMonth(){
     MESE_IN_CORSO=false;
     if(!MESE_FINITO){ luogoTerrNasci(); tagliaLog(); if(MESE_RENDER) render(); if(MESE_SNAP) commitSnap();   // L239-5: il territorio delle carte localizzate si sceglie sullo stato di FINE mese, lo stesso che si salva (forseTerritorio e decadiUmore vengono dopo genAgenda)
         // L184-2: il tetto del registro, una volta per mese, prima del salvataggio
+      voceInaugurazione();   // L218-33: il cantiere che diventa opera questo mese, dopo il render (lo strato vive fuori da render)
       if(typeof guidaMese==='function') guidaMese();   // L218-6: la guida della prima partita (C22 dopo il primo mese, C23 dopo il terzo)
       if(LAMPO) lampoForseFine(); }   // L251-2: passati i mesi della sfida, la sua fine (spento LAMPO è null: niente)
   }
@@ -11161,6 +11163,7 @@ function applicaTerritoriNazionale(cambi, quote){
   } finally { S.territori.forEach(function(t){ if(t) t.spinta=0; }); }
   if(vinte.length && typeof initPotereLocale==='function') initPotereLocale();   // solo se qualcosa è cambiato: il gioco senza campagna resta identico
   if(vinte.length) S.log.unshift({t:T('Campagna sul territorio'), x:T('La campagna sul territorio ha pagato: %N aree sono passate al tuo blocco.').replace('%N',vinte.length)});
+  if(vinte.length) voceMappa(vinte.map(function(){ return {tuo:true}; }));   // L218-33: le aree conquistate al voto nazionale (con un modale aperto lo strato non c'è: niente)
   return vinte;
 }
 function decidiTerritoriNazionale(){
@@ -12218,6 +12221,49 @@ function voceGesto(momento, oggi, opt){
   return voceMomento(!!esito, 'voce-pers-'+momento, oggi);
 }
 function voceMomento(disegnato, pers, oggi){ return (disegnato && pers && typeof voceHaFile==='function' && voceHaFile(pers)) ? pers : oggi; }
+/* L218-33 · LE BATTUTE DEL PERSONAGGIO RIMASTE (riga 13 del piano). Sette momenti senza una voce di oggi passano dallo strato dei
+   gesti con `parlaGesto` (la voce di oggi è null: senza strato — interruttori spenti, modale aperto, pilastro-tragedia, voce che parla,
+   file mancante per genere e lingua, tetto dei 12 mesi — non parla niente, come prima; `parla(null)` non si chiama mai):
+   · fondazione  → `voceFondazione()`: a velo di partenza chiuso (chiudiPartenza) o, senza velo, alla fine di avviaRuolo (ui.js), solo nel mese
+                   della fondazione (`S.partitoProprio.da`) e non dopo una scissione; dopo la guida, che ha la precedenza;
+   · scissione   → `ppConfermaScissione` (ui.js), a foglio chiuso;
+   · congresso   → `vinciPrimaria` della primaria ANTICIPATA (la leadership confermata, a modale chiuso; alla vigilia segue l'urna: niente);
+   · mappa-conquista / mappa-persa / mappa-tutta → `voceMappa(aree)` dall'esito di un voto che sposta aree (`esitoIntermedia`, le aree
+                   del voto; `applicaTerritoriNazionale`, solo conquiste): UNA battuta per esito; «tutta» quando ogni area è del tuo
+                   blocco (`compatibile`), una volta per carriera (`VOCE_MAPPA_TUTTA`, transitorio per carriera: un caricamento lo azzera);
+   · inaugurazione → `voceInaugurazione()` alla fine del mese in cui un cantiere deciso dal giocatore (`segnoTerr` 'cantiere') diventa
+                   opera (il primo mese dell'opera in `segnoTerr`), dopo il render.
+   Tetto di 12 mesi per conquista, persa e inaugurazione (`PERS_STRATO_TETTO`, personaggio.js). SENZA aggancio (la voce nel manifesto):
+   `visita-disastro` (nessuna scelta «vai sul posto» dopo una calamità al capo del governo), `prima-scheda` (all'apertura della notte
+   parla già la voce della notte e il modale è aperto), `primi-seggi`/`primi-seggi-usa` (il partito proprio nasce coi seggi: non c'è un
+   «primo ingresso» in parlamento) — «⚑ L218-33» in CODA-LAVORI. Nessun campo in S, nessun dado. */
+function parlaGesto(momento, opt){
+  if(typeof parla!=='function' || (typeof voceInCorso==='function' && voceInCorso())) return null;
+  const v=voceGesto(momento, null, opt);
+  if(v) parla(v);
+  return v;
+}
+function voceFondazione(){
+  if(!S || !S.partitoProprio || S.partitoProprio.scissioneDa || S.partitoProprio.da!==meseAss()) return null;
+  return parlaGesto('fondazione');
+}
+const VOCE_MAPPA_TUTTA = {};   // L218-33: carriera (scissioneCarriera) → true quando «mappa-tutta» ha parlato; transitorio, mai in S
+function mappaTuttaOra(){
+  if(!S || !Array.isArray(S.territori) || !S.territori.length || !PAESE.territori) return false;
+  const asse=mioPartito().asse;
+  return S.territori.every(function(t, i){ return t && compatibile(t.partito, asse, S.partito, i); });
+}
+function voceMappa(aree){
+  if(!S || !aree || !aree.length) return null;
+  const k=scissioneCarriera();
+  if(!VOCE_MAPPA_TUTTA[k] && mappaTuttaOra()){ const v=parlaGesto('mappa-tutta'); if(v){ VOCE_MAPPA_TUTTA[k]=true; return v; } }
+  return parlaGesto(aree.some(function(a){ return a && a.tuo; }) ? 'mappa-conquista' : 'mappa-persa');
+}
+function voceInaugurazione(){
+  if(!S || !Array.isArray(S.territori)) return null;
+  const c=S.territori.some(function(t, i){ const s=segnoTerr(i); return !!(s && s.specie==='opera' && s.mesi===SEGNO_TERR_MESI.opera); });   // il primo mese dell'opera = il cantiere che finisce ora (letto da segnoTerr, l'unico lettore del segno)
+  return c ? parlaGesto('inaugurazione') : null;
+}
 function voceGoverno(coal){ if(coal && typeof parla==='function' && !(typeof voceInCorso==='function' && voceInCorso())) parla('voce-governo'); }
 function suonoFormazione(ripiego){
   const brinda = governoDiCoalizione();

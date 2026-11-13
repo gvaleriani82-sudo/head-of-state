@@ -51,8 +51,9 @@ let PERS_FUMETTO = true;      // L248-6: ACCESO; false = nessun fumetto, la batt
 const PERS_BOCCA_K = { soglia:0.02, k:8, chiusura:0.08 };   // RMS sotto la soglia = bocca chiusa; apertura = min(1, rms×k); in chiusura al più 1 in 80 ms
 const PERS_FUMETTO_LPS = 26;  // lettere al secondo del fumetto (il prototipo §1)
 let PERS_STRATO = true;   // L248-5bis: ACCESO («⚑ L248-5bis»: prove e fotogrammi a CPU ×4 verdi); false = i quattro gesti con la voce di oggi, niente strato
-const PERS_STRATO_MODO = { insediamento:'mosso', legge:'mosso', comizio:'mosso', alleanza:'mosso' };
-const PERS_STRATO_TETTO = { legge:12, alleanza:12 };   // mesi di gioco fra due strati dello stesso momento; gli altri due hanno già il loro ritmo (una salita, una campagna)
+const PERS_STRATO_MODO = { insediamento:'mosso', legge:'mosso', comizio:'mosso', alleanza:'mosso',
+  fondazione:'mosso', scissione:'mosso', congresso:'mosso', inaugurazione:'mosso', 'mappa-conquista':'mosso', 'mappa-persa':'mosso', 'mappa-tutta':'mosso' };   // L218-33: i sette momenti agganciati
+const PERS_STRATO_TETTO = { legge:12, alleanza:12, inaugurazione:12, 'mappa-conquista':12, 'mappa-persa':12, 'visita-disastro':12 };   // L218-33: i momenti che possono tornare nello stesso anno, come l'alleanza (visita-disastro senza aggancio, il tetto pronto)   // mesi di gioco fra due strati dello stesso momento; gli altri due hanno già il loro ritmo (una salita, una campagna)
 const PERS_ULTIMO_MOMENTO = {};
 /* il tetto: vero (e segnato) se il momento può tornare ora; `ora` = S.year*12+S.month */
 function persTettoPassa(momento, ora){
@@ -83,7 +84,19 @@ const BATTUTE_PERSONAGGIO = {
   'insediamento':       'Giuro di servire il paese, tutto il paese.',
   'legge':              'Ecco la firma. Da oggi questa legge è di tutti.',
   'comizio':            'Sono qui per ascoltarvi, e per chiedervi il voto.',
-  'alleanza':           'Non la pensiamo uguale su tutto. Ma su questo sì.'
+  'alleanza':           'Non la pensiamo uguale su tutto. Ma su questo sì.',
+  /* L218-33: le undici rimaste (testi = CENSIMENTO-ASSET.md §2b e giro-suoni/voci-jane/elenco.json, identici alle prese) */
+  'congresso':          'Questo partito è di chi lo costruisce ogni giorno.',
+  'fondazione':         'Oggi nasce qualcosa di nuovo. Cominciamo da qui.',
+  'scissione':          'Non lascio le mie idee. Lascio chi le ha tradite.',
+  'inaugurazione':      'Promessa fatta, promessa mantenuta.',
+  'visita-disastro':    'Sono qui, e resto finché serve.',
+  'mappa-conquista':    'Questa regione ci ha dato fiducia. Non la deluderemo.',
+  'mappa-persa':        'Qui abbiamo perso terreno. Torneremo ad ascoltare.',
+  'mappa-tutta':        'Da nord a sud, il paese ha scelto insieme.',
+  'prima-scheda':       'Il nostro simbolo è sulla scheda. Ora tocca a voi.',
+  'primi-seggi':        'Eravamo in pochi. Adesso siamo in parlamento.',
+  'primi-seggi-usa':    'Eravamo in pochi. Adesso siamo al Congresso.'
 };
 
 function personaggioCarnagione(p){

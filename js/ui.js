@@ -808,7 +808,8 @@ function personaggioMomentoAzione(opt){
      chiamata da voceParti), su `taciVoce`, subito se `#ov` si apre (l'osservatore di #ov qui sotto), e in `resetAll`. Le istanze si
      fermano e lo strato si svuota: niente personaggi vivi nascosti. Niente in S.
    ================================================================================================================ */
-const PERS_STRATO_AZIONE = { insediamento:'giuramento', legge:'firma', comizio:'comizio', alleanza:'stretta' };
+const PERS_STRATO_AZIONE = { insediamento:'giuramento', legge:'firma', comizio:'comizio', alleanza:'stretta',
+  fondazione:'comizio', scissione:'parla', congresso:'vittoria', inaugurazione:'firma', 'mappa-conquista':'vittoria', 'mappa-persa':'sconfitta', 'mappa-tutta':'vittoria' };   // L218-33: i sette momenti agganciati (le loro battute: voceGesto via parlaGesto, game.js)
 const PERS_STRATO_TETTO_MS = 4500, PERS_STRATO_CODA_MS = 400, PERS_STRATO_ATTESA_MS = 4500;
 let PERS_STRATO_TIMER = 0;
 function personaggioStratoEl(){
@@ -1044,7 +1045,8 @@ function avviaRuolo(){
   else goAppoint();
   if(typeof guidaInizia==='function') guidaInizia();   // L218-6: la prima partita nuova di questo dispositivo accende la guida
   apriPartenza(partenza);
-  if(!PARTENZA_APERTA && typeof guida==='function') guida(1); }   // L218-6: senza clip di partenza il benvenuto subito (con la clip, a velo chiuso)
+  if(!PARTENZA_APERTA && typeof guida==='function') guida(1);
+  if(!PARTENZA_APERTA && typeof voceFondazione==='function') voceFondazione(); }   // L218-33: senza velo la battuta della fondazione subito (dopo la guida, che ha la precedenza)   // L218-6: senza clip di partenza il benvenuto subito (con la clip, a velo chiuso)
 /* ================================================================================================================
    L127-2 · LA CLIP DEL PUNTO DI PARTENZA. Decisione di Giacomo (28/9): a OGNI nuova partita (non una volta per dispositivo come
    l'intro), si salta, non parte alla ripresa di un salvataggio.
@@ -1192,6 +1194,7 @@ function chiudiPartenza(){
   PARTENZA_APERTA=false;
   document.removeEventListener('keydown', partenzaTasto, true);
   if(typeof guida==='function') guida(1);   // L218-6: il benvenuto della guida, a velo chiuso (la voce di partenza è finita o è stata saltata)
+  if(typeof voceFondazione==='function') voceFondazione();   // L218-33: la battuta della fondazione a velo chiuso (il velo fa partire la musica di prima; dopo la guida)
   const el=document.getElementById('partenza');
   /* L181-4: clip e voce non si troncano più (sorgente via e poster visibile per 350 ms): la voce scende in dissolvenza col velo,
      e il ritratto vivo (L178-3) si ferma alla fine, nello stesso task in cui il velo esce */
@@ -1824,8 +1827,9 @@ function ppConfermaScissione(){
   const B=PP_BOZZA; B.err=ppControlla(B);
   if(Object.keys(B.err).length){ renderScissioneFoglio(); return; }
   const base={}; B.base.forEach(function(g){ base[g]=1/B.base.length; });
-  scissioneFonda({ nome:String(B.nome).trim(), sigla:String(B.sigla).trim().toUpperCase(), colore:B.colore, asse:B.asse, base:base }, B.quota);
+  const fatta=scissioneFonda({ nome:String(B.nome).trim(), sigla:String(B.sigla).trim().toUpperCase(), colore:B.colore, asse:B.asse, base:base }, B.quota);
   ppChiudiScissione();
+  if(fatta!==false && typeof parlaGesto==='function') parlaGesto('scissione');   // L218-33: a foglio chiuso, nello strato
 }
 function ppAnnullaScissione(){ if(!PP_BOZZA) return; scissioneAnnulla(); ppChiudiScissione(); }
 
