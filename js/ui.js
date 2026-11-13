@@ -1829,6 +1829,7 @@ function ppConfermaScissione(){
   const base={}; B.base.forEach(function(g){ base[g]=1/B.base.length; });
   const fatta=scissioneFonda({ nome:String(B.nome).trim(), sigla:String(B.sigla).trim().toUpperCase(), colore:B.colore, asse:B.asse, base:base }, B.quota);
   ppChiudiScissione();
+  if(fatta!==false && typeof suona==='function') suona('strappo');   // L218-34: lo strappo, prima della battuta
   if(fatta!==false && typeof parlaGesto==='function') parlaGesto('scissione');   // L218-33: a foglio chiuso, nello strato
 }
 function ppAnnullaScissione(){ if(!PP_BOZZA) return; scissioneAnnulla(); ppChiudiScissione(); }

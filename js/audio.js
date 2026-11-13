@@ -145,7 +145,31 @@ const AUDIO_MANIFEST = {
      suoni. Agganci: campane-lutto → la carta d'attacco grave che entra (suonoCarta, `attacco:'grave'`; la leggera suona `allarme`);
      candele → la risposta «unità nazionale» (attaccoRisposta, game.js). */
   'campane-lutto': { file:'campane-lutto.mp3',   loop:false, gain:1.10 },  // 4,0 s: RMS −24,3, picco −4,0 → regola di sopra (picco reso −3,2)
-  candele:         { file:'candele.mp3',         loop:false, gain:0.84 }   // 3,0 s: RMS −21,9, picco −5,5 → regola di sopra
+  candele:         { file:'candele.mp3',         loop:false, gain:0.84 },  // 3,0 s: RMS −21,9, picco −5,5 → regola di sopra
+  /* ⚑ L218-34 (13/11) · MAPPA, PARTITO, GUERRA E SPOGLIO (L218-17, L218-18, L218-26: giro suoni, così come sono). Gain con la regola di sopra
+     (0,6 × 10^((−19 − RMS)/20), tetto del picco −1 dBFS) misurati in Chrome con .claude/misura-l218-34.js: rendono tutti −23,4…−23,6.
+     Le chiavi «mappa-conquista», «mappa-persa», «congresso» sono di questo manifesto: le battute del personaggio stanno in VOCI_MANIFEST
+     come «voce-pers-<momento>», quindi i due spazi di nomi non si toccano. Gli agganci li dice la tabella di «⚑ L218-34» in CODA-LAVORI. */
+  artiglieria:        { file:'artiglieria.mp3',        loop:false, gain:0.55 },  // 3,0 s: RMS −18,3, picco −1,1
+  elicottero:         { file:'elicottero.mp3',         loop:false, gain:1.17 },  // 3,0 s: RMS −24,8, picco −7,9
+  'jet-sorvolo':      { file:'jet-sorvolo.mp3',        loop:false, gain:0.51 },  // 3,0 s: RMS −17,6, picco −0,9
+  'radio-militare':   { file:'radio-militare.mp3',     loop:false, gain:0.73 },  // 2,0 s: RMS −20,8, picco −3,9
+  ultimatum:          { file:'ultimatum.mp3',          loop:false, gain:0.72 },  // 1,0 s: RMS −20,6, picco +0,2 decodificato (tetto 0,87)
+  bandiera:           { file:'bandiera.mp3',           loop:false, gain:0.94 },  // 2,0 s: RMS −22,9, picco −1,5
+  'crisi-giorno':     { file:'crisi-giorno.mp3',       loop:false, gain:0.53 },  // 1,5 s: RMS −17,9, picco −4,2
+  'minuto-silenzio':  { file:'minuto-silenzio.mp3',    loop:false, gain:0.81 },  // 4,0 s: RMS −21,6, picco −0,6
+  alluvione:          { file:'alluvione.mp3',          loop:false, gain:0.38 },  // 3,0 s: RMS −15,0, picco −1,5
+  sisma:              { file:'sisma.mp3',              loop:false, gain:0.53 },  // 3,0 s: RMS −17,9, picco −1,9
+  saracinesca:        { file:'saracinesca.mp3',        loop:false, gain:0.70 },  // 2,0 s: RMS −20,3, picco −2,7
+  'mappa-conquista':  { file:'mappa-conquista.mp3',    loop:false, gain:0.65 },  // 1,0 s: RMS −19,8, picco −1,0
+  'mappa-persa':      { file:'mappa-persa.mp3',        loop:false, gain:0.36 },  // 1,0 s: RMS −14,7, picco −0,8
+  congresso:          { file:'congresso.mp3',          loop:false, gain:0.54 },  // 3,0 s: RMS −18,1, picco 0,0 (tetto 0,89)
+  giuramento:         { file:'giuramento.mp3',         loop:false, gain:0.80 },  // 2,0 s: RMS −21,5, picco +0,1 decodificato (tetto 0,88)
+  strappo:            { file:'strappo.mp3',            loop:false, gain:0.43 },  // 1,0 s: RMS −16,1, picco −1,0
+  annuncio:           { file:'annuncio.mp3',           loop:false, gain:0.75 },  // 1,2 s: RMS −20,9, picco −6,1
+  nastro:             { file:'nastro.mp3',             loop:false, gain:0.64 },  // 1,5 s: RMS −19,5, picco −1,1
+  'spoglio-ondata':   { file:'spoglio-ondata.mp3',     loop:false, gain:0.78 },  // 1,5 s: RMS −21,2, picco −4,6
+  'spoglio-sorpasso': { file:'spoglio-sorpasso.mp3',   loop:false, gain:0.61 }   // 2,0 s: RMS −19,1, picco +0,5 decodificato (tetto 0,84)
 };
 /* ⚠ I FILE CHE ESISTONO DAVVERO in assets/audio/. Il motore carica SOLO questi: un nome del manifesto che non è
    qui non genera nessuna richiesta di rete. Si aggiorna a mano quando un file cambia, e se la lista e la cartella
@@ -169,7 +193,10 @@ const AUDIO_PRESENTI = ['tocco.mp3','carta.mp3','chip.mp3','mese.mp3','giornale.
                         'dimissioni.mp3','traguardo.mp3','salva.mp3','scorri.mp3','no.mp3','sondaggio.mp3',   // L218-13 (12/10, giro suoni 13: F5)
                         'brusio.mp3','rotativa.mp3',   // L218-14 (12/10, giro suoni 14: F5h, F5n — §F5 completa)
                         'mappa-segno.mp3','colonna.mp3','nave.mp3','sirena-aerea.mp3',   // L245-5 (20/10: la guerra sul tavolo, file di L218-17)
-                        'campane-lutto.mp3','candele.mp3'];   // L245-7 (22/10: l'attacco, file di L218-17)
+                        'campane-lutto.mp3','candele.mp3',   // L245-7 (22/10: l'attacco, file di L218-17)
+                        'artiglieria.mp3','elicottero.mp3','jet-sorvolo.mp3','radio-militare.mp3','ultimatum.mp3','bandiera.mp3','crisi-giorno.mp3',
+                        'minuto-silenzio.mp3','alluvione.mp3','sisma.mp3','saracinesca.mp3','mappa-conquista.mp3','mappa-persa.mp3','congresso.mp3',
+                        'giuramento.mp3','strappo.mp3','annuncio.mp3','nastro.mp3','spoglio-ondata.mp3','spoglio-sorpasso.mp3'];   // L218-34 (13/11: giro suoni 17, 18, 26)
 
 /* ── 6 · NIENTE SINTETICO A RUNTIME ────────────────────────────────────────────────────────────────────────
    Il motore carica FILE. I suoni li genera `.claude/genera-audio.js` una volta, fuori dal gioco (L95-3a); la prima
@@ -367,6 +394,8 @@ function suonoTitolo(t){ return (t && t.pri===1 && !t.serie) ? suonoPreferito('r
    il suono specifico vince sul generico — e prima delle righe per SPECIE (`macchina` prende tutti i dossier: `cantiere` e `treno`
    dopo di lei non uscivano mai, misurato). */
 const SUONO_CARTA = [
+  ['ultimatum', [],                           /^$/, { id:/^crs_(ultimatum|ricevuto)$/ }],   // L218-34: l'ultimatum dato e ricevuto nella scala della crisi — prima di `orologio`, che lo prendeva per «ultimatum»
+  ['sisma',    [],                            /^$/, { id:/^sisma$/ }],   // L218-34: la carta localizzata del terremoto (L239-5) — prima di `allarme`, che la prendeva per «calamit»
   ['orologio', [],                            /scadenz|ultimatum|questione di fiducia|voto di fiducia|conto alla rovescia/i],
   ['porta',    [],                            /^$/, { id:/^rb_/ }],
   ['brusio',   ['scandalo'],                  /^$/],   // L218-14 (F5h): lo scandalo del ministro che esplode — PRIMA di `sussurro`, che lo prendeva per specie e ora resta ai testi d'indiscrezione
@@ -398,6 +427,11 @@ function suonoCarta(item){
   const d=item.data||{};
   if(d.attacco) return d.attacco==='grave' ? (audioHaFile('campane-lutto') ? 'campane-lutto' : null) : (audioHaFile('allarme') ? 'allarme' : null);   // L245-7: la carta d'attacco
   if(d.cronaca===true || d.tono==='grave') return null;
+  if(d.fase && /^gu_/.test(String(d.id||''))){   // L218-34: la carta del fronte (GUERRA_EV, id gu_: guerraCarta ne fa una copia), una al mese: artiglieria e radio militare a turno sul mese (mai un dado); sotto un pilastro-tragedia solo la radio
+    const radio=(typeof musicaTragedia==='function' && musicaTragedia()) || (((typeof S!=='undefined' && S && S.month) || 0) % 2===1);
+    const n=radio ? 'radio-militare' : 'artiglieria';
+    if(audioHaFile(n)) return n;
+  }
   const testo=String(d.kick||'')+' · '+String(d.t||''), anno=audioAnno();
   for(let i=0;i<SUONO_CARTA.length;i++){ const R=SUONO_CARTA[i], O=R[3]||{};
     if(!audioHaFile(R[0])) continue;                                   // L118-1: niente file, niente riga
@@ -879,7 +913,11 @@ const AMBIENTI_MANIFEST = {
   'amb-ufficio-oggi':   { file:'amb-ufficio-oggi.mp3',   gain:0.70 },   // RMS −34,9 / picco −6,6
   'amb-aula-oggi':      { file:'amb-aula-oggi.mp3',      gain:0.87 },   // RMS −36,8 / picco −15,9
   'amb-piazza-oggi':    { file:'amb-piazza-oggi.mp3',    gain:0.65 },   // RMS −34,3 / picco −18,8
-  'amb-redazione-oggi': { file:'amb-redazione-oggi.mp3', gain:0.43 }    // RMS −30,6 / picco −17,4
+  'amb-redazione-oggi': { file:'amb-redazione-oggi.mp3', gain:0.43 },   // RMS −30,6 / picco −17,4
+  /* L218-34 · la sala crisi dei mesi di guerra (giro suoni 17). Gain dalla regola degli ambienti: −38,9 → 1,10 (reso −38, come amb-ufficio-oggi).
+     ⚠ NON in AMBIENTI_PRESENTI: il file del giro è 25 s a 192 kbps, 587 KB, sopra il tetto di 400 della guardia (L117-1), e qui non c'è un
+     encoder per ricodificarlo. Finché manca, ambienteScelto() resta sull'ufficio (ambienteDEpoca/ambienteSalaCrisi ripiegano). */
+  'amb-sala-crisi':     { file:'amb-sala-crisi.mp3',     gain:1.10 }    // RMS −38,9 / picco −22,9
 };
 /* ⚠ GLI AMBIENTI CHE ESISTONO DAVVERO in assets/audio/. L116-2 (26/9) era vuota: gli originali a 192 kbps pesavano 361 KB l'uno.
    L117-1 (27/9): entrano i quattro RICODIFICATI da Cowork a 112 kbps (arte-sorgente/audio-elevenlabs/ricodificati/), 206 KB l'uno,
@@ -919,6 +957,8 @@ function ambienteSegna(amb, esito){
   if(AMBIENTE_REGISTRO.length>500) AMBIENTE_REGISTRO.splice(0, AMBIENTE_REGISTRO.length-500);
 }
 /* ⚑ IL PUNTO DI VERITÀ del luogo che si sente: puro, legge lo stato e non tocca niente (lo legge anche la misura nel banco) */
+/* L218-34 · la sala crisi del cassetto Guerra: finché il file non è in AMBIENTI_PRESENTI (587 KB, sopra il tetto della guardia) resta l'ufficio. */
+function ambienteSalaCrisi(){ const M=AMBIENTI_MANIFEST['amb-sala-crisi']; return (M && AMBIENTI_PRESENTI.indexOf(M.file)>=0) ? 'amb-sala-crisi' : 'amb-ufficio'; }
 function ambienteScelto(){
   if(typeof S==='undefined' || !S) return null;
   if(fuoriPartita()) return null;                                          // L118-1: sulla home tace (c'è il tema); prima restava il luogo della carriera abbandonata
@@ -935,6 +975,7 @@ function ambienteScelto(){
   if(t==='pol') return 'amb-ufficio';
   if(t==='par') return 'amb-aula';
   if(t==='stampa') return 'amb-redazione';
+  if(t==='guerra') return ambienteSalaCrisi();   // L218-34: il cassetto Guerra (prima cadeva sull'ufficio)
   if(t==='paese' || t==='attorno' || t==='tavolo') return 'amb-piazza';
   return 'amb-ufficio';
 }
@@ -1022,6 +1063,8 @@ const VOCI_MANIFEST = {
   'voce-fiducia-si':          { file:'voce-fiducia-si.mp3',          gain:0.39, f:{ file:'voce-fiducia-si-f.mp3', gain:1.06 }, nonPaesi:['usa'], en:'The chamber has renewed its confidence. The majority holds. Now, back to work.', it:'L\'aula ha rinnovato la fiducia. La maggioranza tiene. E adesso, al lavoro.' },   // C11 · −15,2 / −1,1 (L218-5) · lei −23,9 / −6,6 (Jane, L218-31)
   'voce-fiducia-no':          { file:'voce-fiducia-no.mp3',          gain:0.39, f:{ file:'voce-fiducia-no-f.mp3', gain:1.08 }, nonPaesi:['usa'], en:'The chamber has withdrawn its confidence. This government ends tonight, but our duty to the country does not.', it:'L\'aula ha tolto la fiducia. Questo governo finisce stanotte, ma il nostro dovere verso il paese no.' },   // C12 · −15,3 / −1,2 (L218-5) · lei −24,1 / −7,8 (Jane, L218-31)
   'voce-crisi':               { file:'voce-crisi.mp3',               gain:0.44, f:{ file:'voce-crisi-f.mp3', gain:0.99 }, en:'This is a serious moment for our country. I ask for calm, for unity, and for courage. We will face this together.', it:'È un momento grave per il nostro paese. Chiedo calma, unità e coraggio. Lo affronteremo insieme.' },   // C13 · −16,3 / −1,1 (L218-5) · lei −23,3 / −6,9 (Jane, L218-31)
+  'voce-spoglio-testa':       { file:'voce-spoglio-testa.mp3',       gain:0.49, f:{ file:'voce-spoglio-testa-f.mp3', gain:0.86 }, en:'We are ahead. Nobody celebrates until the last vote is counted.', it:'Siamo avanti. Nessuno esulti finché non è contato l\'ultimo voto.' },   // L218-34 · S6 · −17,3 / −1,7 · lei −22,1 / −6,6 (Jane)
+  'voce-spoglio-rimonta':     { file:'voce-spoglio-rimonta.mp3',     gain:0.37, f:{ file:'voce-spoglio-rimonta-f.mp3', gain:1.02 }, en:'The night is long. The last districts are still out.', it:'La notte è lunga. Mancano ancora le ultime sezioni.' },   // L218-34 · S6 · −14,8 / −1,4 · lei −23,6 / −8,7 (Jane)
   'voce-notte':               { file:'voce-notte.mp3',               gain:0.47, f:{ file:'voce-notte-f.mp3', gain:1.04 }, en:'The polls are closed. Now we wait, and every vote will be counted.', it:'I seggi sono chiusi. Ora si aspetta, e ogni voto sarà contato.' },   // C14 · −16,8 / −1,6 (L218-5) · lei −23,8 / −7,7 (Jane, L218-31)
   'voce-finale-alto':         { file:'voce-finale-alto.mp3',         gain:0.44, f:{ file:'voce-finale-alto-f.mp3', gain:1.01 }, en:'My time in office is over. History will judge what we built. I believe it will be kind.', it:'Il mio tempo al governo è finito. La storia giudicherà ciò che abbiamo costruito. Credo che sarà generosa.' },   // C15 · −16,3 / −1,1 (L218-5) · lei −23,6 / −5,7 (Jane, L218-31)
   'voce-finale-basso':        { file:'voce-finale-basso.mp3',        gain:0.46, f:{ file:'voce-finale-basso-f.mp3', gain:1.08 }, en:'My career ends here, not as I had hoped. But every defeat teaches something to those who come next.', it:'La mia carriera finisce qui, non come speravo. Ma ogni sconfitta insegna qualcosa a chi viene dopo.' },   // C16 · −16,6 / −1,2 (L218-5) · lei −24,1 / −7,4 (Jane, L218-31)
@@ -1171,6 +1214,7 @@ const VOCI_PRESENTI = ['voce-insediamento.mp3', 'voce-vittoria-a.mp3', 'voce-vit
                        'voce-pace.mp3', 'voce-pace-f.mp3', 'voce-guerra-vinta.mp3', 'voce-guerra-vinta-f.mp3', 'voce-guerra-persa.mp3', 'voce-guerra-persa-f.mp3',
                        'voce-guerra-stanchezza.mp3', 'voce-guerra-stanchezza-f.mp3', 'voce-reduci.mp3', 'voce-reduci-f.mp3', 'voce-opp-guerra.mp3', 'voce-opp-guerra-f.mp3',
                        'voce-unita.mp3', 'voce-unita-f.mp3', 'voce-emergenza.mp3', 'voce-emergenza-f.mp3', 'voce-emergenza-usa.mp3', 'voce-emergenza-usa-f.mp3',
+                       'voce-spoglio-testa.mp3', 'voce-spoglio-testa-f.mp3', 'voce-spoglio-rimonta.mp3', 'voce-spoglio-rimonta-f.mp3',   // L218-34 (S6: lui da voci-s6, lei «Jane» da voci-jane)
                        /* L248-5 (giro suoni 22, L218-23): le 32 battute del personaggio, voce-pers-<momento>-<it|en>-<m|f>.mp3 · L218-33: le 44 delle undici rimaste (lui da voci-s4, lei «Jane» da voci-jane) */
                        ].concat(['vittoria','sconfitta','bilancio-buono','bilancio-difficile','insediamento','legge','comizio','alleanza',
                          'congresso','fondazione','scissione','inaugurazione','visita-disastro','mappa-conquista','mappa-persa','mappa-tutta','prima-scheda','primi-seggi','primi-seggi-usa'].reduce(function(a, m){

@@ -23190,8 +23190,8 @@ const LEGGI = [
   { id:'autonomia', era:'contemporanea', nome:'Autonomia differenziata', desc:'Trasferisce più poteri e risorse alle regioni.', asse:1, costo:1, paesi:['italia'],
     iniziale:{}, unaTantum:{grp:{cetomedio:4, imprenditori:3, lavoratori:-3}}, permanenti:{grp:{}} },
   // ===== Regno Unito =====
-  { id:'monarchia', nome:'Monarchia', desc:'Mantiene la monarchia come forma di Stato.', asse:1, costo:2, paesi:['regnounito'],
-    iniziale:{regnounito:1}, unaTantum:{grp:{pensionati:5, cattolici:3, giovani:-4}}, permanenti:{grp:{pensionati:2}} },
+  { id:'monarchia', nome:'Monarchia', desc:'Mantiene la monarchia come forma di Stato.', asse:1, costo:2, paesi:['regnounito','danimarca','paesibassi','svezia','norvegia','belgio','spagna','giappone','canada','australia'],   // L250-26: tutte le monarchie giocabili (solo dati; nessun nome per paese)
+    iniziale:{regnounito:1, danimarca:1, paesibassi:1, svezia:1, norvegia:1, belgio:1, spagna:1, giappone:1, canada:1, australia:1}, unaTantum:{grp:{pensionati:5, cattolici:3, giovani:-4}}, permanenti:{grp:{pensionati:2}} },
   { id:'sovranita', nome:'Sovranità sui trattati', desc:'Afferma la prevalenza della legge nazionale sui trattati.', asse:2, costo:2, paesi:['regnounito'],
     iniziale:{regnounito:1}, unaTantum:{grp:{cetomedio:4, pensionati:4, giovani:-5, imprenditori:-4}}, permanenti:{grp:{imprenditori:-2}, growth:-0.2} },
   { id:'lord_elettiva', nome:'Camera alta elettiva', desc:'Rende elettiva la camera alta del parlamento.', asse:-1, costo:1, paesi:['regnounito'],

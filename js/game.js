@@ -1493,6 +1493,7 @@ function diventaPremier(viaElezione){
   S.mandate=S.mandate||1; S.turnInMandate=0; S.elezioniAnticipate=false; S.ultimoSondaggio=null; S.sondStorico=[];
   S.snap=Object.assign({},S.pol); S.leggiSnap=Object.assign({},S.leggi);
   bioFatto(T('Da %A a %B: la scalata è compiuta.').replace('%A',ruoloPrima).replace('%B',T(PAESE.titoloRuolo)));
+  if(typeof suona==='function') suona('giuramento');   // L218-34: il giuramento, prima della voce (l'altro punto è tornaAlGoverno)
   if(typeof parla==='function') parla(voceGesto('insediamento', 'voce-insediamento', {chiudeOv:true}));   // L218-4: diventi capo del governo (l'altro punto è tornaAlGoverno, la rimonta) · L248-5bis: col personaggio nello strato, la sua battuta
   S.log.unshift({t:T('Al vertice'),x:T('Sei %R. Il paese è nelle tue mani.').replace('%R',T(PAESE.titoloRuolo))});
   if(typeof PROMO_FIORE!=='undefined') PROMO_FIORE=true;   // fioretto sul nuovo titolo
@@ -5512,6 +5513,7 @@ function azioneScioglimento(){
   if(PAESE.sfiduciaCostruttiva) S.log.unshift({t:T('La questione di fiducia'),x:T('Hai posto la questione di fiducia e l\'hai persa apposta: si vota in anticipo, e la scelta è tua.')});   // L107-2
   else S.log.unshift({t:T('Scioglimento'),x:T('Hai chiesto lo scioglimento: si vota in anticipo, e la scelta è tua.')});
   if(typeof bioFatto==='function'){ try{ bioFatto(T('Ha sciolto le Camere per andare al voto in anticipo.')); }catch(e){} }
+  if(typeof suona==='function' && !(typeof musicaTragedia==='function' && musicaTragedia())) suona('annuncio');   // L218-34: l'annuncio delle anticipate (avviaAttesa non suona: il gesto ha posto)
   election();
 }
 /* ================================================================================================================
@@ -6794,6 +6796,7 @@ function diventaLocale(terrIdx){
   if(typeof PROMO_FIORE!=='undefined') PROMO_FIORE=true;
   S.tab='gov';
   genAgenda(false); generaTitolo(); render(); commitSnap();
+  if(typeof suona==='function' && !(typeof musicaTragedia==='function' && musicaTragedia())) suona('annuncio');   // L218-34: l'annuncio della candidatura (mai sotto un pilastro-tragedia)
   if(typeof parla==='function' && !(typeof voceInCorso==='function' && voceInCorso())) parla('voce-candidatura');   // L218-12: l'attivista si candida alla prima carica (F4p)
 }
 /* il consenso locale: media dei servizi − impopolarità delle tasse, col bilancio come vincolo (rosso = malus).
@@ -7052,6 +7055,7 @@ function crisiScala(mossa){
   }
   c.t++;
   crisiLog(T('La crisi con %POTdet sale di un gradino: %G.').replace('%G', T(CRISI_GRADINI[c.t])));
+  if(c.t===3 && typeof suona==='function' && !(typeof musicaTragedia==='function' && musicaTragedia())) suona('jet-sorvolo');   // L218-34: la mobilitazione (mai sotto un pilastro-tragedia; la base della guerra ha già colonna e nave)
   voceCrisi(c.t===2 ? 'voce-crisi-sanzioni' : c.t===3 ? 'voce-crisi-mobilitazione' : c.t===4 ? 'voce-ultimatum' : null);   // L218-32: il gradino scelto dal giocatore (l'ultimatum è il suo, non quello ricevuto)
 }
 /* il mese (advanceMonth, dopo riallineamentoTappa e prima dei rami: vale a ogni livello, una crisi aperta da capo del governo
@@ -7232,6 +7236,7 @@ function guerraFine(esito, riga){
   crisiChiudi(ora);
   S.dopoguerra={ esito:esito, fino:ora+GUERRA_K.dopo };
   if(S.ind) S.ind.consenso=computeConsenso();
+  if((esito==='vittoria' || esito==='pace') && typeof suona==='function') suona('bandiera');   // L218-34: la vittoria o la pace firmata, prima della voce
   voceCrisi(esito==='vittoria' ? 'voce-guerra-vinta' : esito==='sconfitta' ? 'voce-guerra-persa' : esito==='pace' ? 'voce-pace'
     : (esito==='stallo' && !tregua) ? 'voce-cessate-fuoco' : esito==='stallo' ? 'voce-pace' : null);   // L218-32: lo stallo è un cessate il fuoco (GUERRA_FINE_LOG); se il cessate il fuoco è già stato detto, la pace. Chi ha lasciato la carica: niente (voceCrisi)
 }
@@ -7434,7 +7439,7 @@ function attaccoRisposta(it, d, mossa){
     A.sic=(A.sic||0)+ATTACCO_K.sicLiberta; A.gap=ATTACCO_K.gapLibera;
   } else if(mossa==='unita'){
     ATTACCO_GRUPPI_UNITA.forEach(function(g){ gd(g,1); });
-    if(typeof suona==='function') suona('candele');
+    if(typeof suona==='function') suona(suonoPreferito('minuto-silenzio', 'candele'));   // L218-34: il minuto di silenzio al posto delle candele (L245-7)
     voceCrisi('voce-unita');   // L218-32
   } else if(mossa==='alleati'){
     relIntMuovi('alleanza', ATTACCO_K.alleanza);
@@ -8345,7 +8350,7 @@ function resolveGiro(ci){
   if(def.id==='gi_prima_sede' && S.partitoProprio) S.partitoProprio.sede=meseAss();   // L237-8: la prima sede si consuma SOLO alla scelta
   if(def.id==='gi_prima_sede') ppSedeDaGiro(G.idx);   // L260-7: col giro la visita È la prima sede (una voce in S.partitoProprio.sedi, niente doppione)
   S.ind.consenso=computeConsenso();
-  if(typeof suona==='function') suona('mappa');
+  if(typeof suona==='function') suona(def.id==='gi_prima_sede' ? 'saracinesca' : 'mappa');   // L218-34: la prima sede alza la saracinesca
   render(); commitSnap();
 }
 /* il lettore unico dell'umore (D170): la spinta di campagna più l'umore pesato. Umore 0 → la spinta di sempre. */
@@ -8979,7 +8984,7 @@ function apriPrimaria(tipo, bonus){
   const punteggio=BP.base + (Math.random()*6-3);
   const soglia=BP.soglia;
   PRIM={ tipo:tipo, punteggio:punteggio, soglia:soglia, sogliaBase:BP.sogliaBase, win:punteggio>=soglia };
-  if(typeof suona==='function') suona('aula');   // L95-3: il brusio d'aula, in loop fino all'esito
+  if(typeof suona==='function') suona('congresso');   // L218-34: l'apertura del congresso, al posto del brusio d'aula (L95-3) — il brusio resta il letto della notte della primaria (avviaNottePrimaria)
   const v=S.sfida||{};
   document.getElementById('modal').innerHTML=`<div class="mt"><div class="kicker">${T((part(S.partito)||{}).nome)} · ${T(tipo==='vigilia'?'Verso le elezioni':'Congresso anticipato')}</div><h2>${T('Primarie di partito')}</h2></div>
     <div class="mtext">${T('Ti sfida <b>%V</b>%X.').replace('%V',v.volto||'—').replace('%X',v.area?`, ${v.carica} — <b>${v.area}</b>`:(v.carica?` (${v.carica})`:''))} ${T(tipo==='vigilia'?'Prima di guidare il partito alle urne, devi vincere in casa.':'Il malcontento è maturo: il partito vota sulla tua leadership.')}${primariaRigaTasse(tipo)}${primariaRigaChiusura(tipo)}</div>
@@ -11276,7 +11281,26 @@ function avanzaNotte(){
   const n=notteRiga().sd.length;
   if(NOTTE.stadio>=n) return concludiNotte();   // oltre la proclamazione → esito a valle
   if(NOTTE.stadio===n-1) notteSuonaEsito();      // L95-3
+  else notteSuonoOndata();                        // L218-34: le ondate prima della proclamazione
   renderNotte(); armaTimerNotte();
+}
+/* ⚑ L218-34 · IL SUONO DELLE ONDATE. A ogni ondata che avanza (mai la prima, dove suonano urne e voce della notte; mai l'ultima, dove
+   suona l'esito; mai col salto, che va dritto alla proclamazione) un effetto solo: `spoglio-sorpasso` se cambia chi è in testa — il segno
+   della lettura della barra (notteMargineOnda: la stessa della dichiarazione, mai il vero) passa da ≥ 0 a < 0 o al contrario —, altrimenti
+   `spoglio-ondata` (vince il più raro). E UNA voce dello spoglio per notte (NOTTE.voceSpoglio, transitorio come NOTTE): `voce-spoglio-testa`
+   alla prima ondata in cui sei avanti, `voce-spoglio-rimonta` alla prima in cui sei dietro con ondate ancora da venire; mai sopra un'altra
+   voce (voceInCorso), mai sotto un pilastro-tragedia (lo fa parla). Tutte le notti di NOTTE_TIPI passano di qui. Nessun dado. */
+function notteSuonoOndata(){
+  if(!NOTTE || !NOTTE.onde || NOTTE.stadio<1) return null;
+  const k=NOTTE.stadio, ora=notteMargineOnda(k), prima=notteMargineOnda(k-1);
+  const sorpasso=(ora>=0)!==(prima>=0), eff=sorpasso ? 'spoglio-sorpasso' : 'spoglio-ondata';
+  if(typeof suona==='function') suona(eff);
+  let v=null;
+  if(!NOTTE.voceSpoglio && ora!==0 && typeof parla==='function' && !(typeof voceInCorso==='function' && voceInCorso())){
+    v = ora>0 ? 'voce-spoglio-testa' : 'voce-spoglio-rimonta';
+    NOTTE.voceSpoglio=v; parla(v);
+  }
+  return { eff:eff, voce:v };
 }
 /* «Salta allo spoglio finale»: va all'ULTIMA ondata (i numeri esatti). Chi salta rinuncia al palcoscenico →
    nessuna dichiarazione, nessun effetto (decisione Giacomo: mai un effetto che il giocatore non ha scelto). */
@@ -11450,7 +11474,7 @@ function nottePrimariaPagina(){ return NOTTE_PRIMARIA && typeof document!=='unde
 function avviaNottePrimaria(vero, fine, info){
   NOTTE={ tipo:'primaria', sistema:'primaria', vero:{ v:vero.v, soglia:vero.soglia }, info:info||{}, fine:fine, stadio:0, onde:generaOndeSoglia(vero, NOTTE_TIPI.primaria.sd), dich:null, saltata:false, timer:null };
   if(typeof UIVALS!=='undefined'){ UIVALS['bar:notte:pri']=0; UIVALS['num:notte:pri']=0; UIVALS['notte:sfondo']=null; UIVALS['notte:verdetto']=null; }
-  if(typeof suona==='function') suona('aula');   // il brusio d'aula di apriPrimaria (nella sfida da ministro nasce qui), in loop fino all'esito
+  if(typeof suona==='function') suona('aula');   // il brusio d'aula della notte della primaria, in loop fino all'esito (dal L218-34 apriPrimaria suona congresso all'apertura e il brusio nasce qui anche alla vigilia)
   if(typeof musica==='function') musica();
   if(typeof ambiente==='function') ambiente();
   renderNotte(); armaTimerNotte();
@@ -12255,6 +12279,7 @@ function mappaTuttaOra(){
 }
 function voceMappa(aree){
   if(!S || !aree || !aree.length) return null;
+  if(typeof suona==='function') suona(aree.some(function(a){ return a && a.tuo; }) ? 'mappa-conquista' : 'mappa-persa');   // L218-34: l'effetto dell'esito, uno solo (conquista se un'area è passata a te), anche col modale aperto
   const k=scissioneCarriera();
   if(!VOCE_MAPPA_TUTTA[k] && mappaTuttaOra()){ const v=parlaGesto('mappa-tutta'); if(v){ VOCE_MAPPA_TUTTA[k]=true; return v; } }
   return parlaGesto(aree.some(function(a){ return a && a.tuo; }) ? 'mappa-conquista' : 'mappa-persa');
@@ -12262,6 +12287,7 @@ function voceMappa(aree){
 function voceInaugurazione(){
   if(!S || !Array.isArray(S.territori)) return null;
   const c=S.territori.some(function(t, i){ const s=segnoTerr(i); return !!(s && s.specie==='opera' && s.mesi===SEGNO_TERR_MESI.opera); });   // il primo mese dell'opera = il cantiere che finisce ora (letto da segnoTerr, l'unico lettore del segno)
+  if(c && typeof suona==='function') suona('nastro');   // L218-34: il taglio del nastro, prima della battuta (che parla solo con lo strato)
   return c ? parlaGesto('inaugurazione') : null;
 }
 function voceGoverno(coal){ if(coal && typeof parla==='function' && !(typeof voceInCorso==='function' && voceInCorso())) parla('voce-governo'); }
@@ -12998,6 +13024,7 @@ function tornaAlGoverno(mins){
   S.ministers=mins; S.opposizione=false; S.governoAvversario=null;
   const leveNuove=leveRitorno();   // L250-21: nel presente le leve ripartono neutre (vale anche per la sfiducia costruttiva qui sotto)
   delete S.f0Rientro;   // L237-2ter: al governo la soglia del rientro da partner non vale più
+  if(typeof suona==='function') suona('giuramento');   // L218-34: il giuramento, prima della voce (l'altro punto è diventaPremier)
   if(typeof parla==='function') parla(voceGesto('insediamento', 'voce-insediamento', {chiudeOv:true}));   // L218-4: torni capo del governo (dalle urne o con la sfiducia costruttiva); l'altro punto è diventaPremier · L248-5bis: lo strato
   /* L108-1 · il rientro della sfiducia costruttiva: niente urne, niente mandato nuovo. Il governo è la cricca che ha eletto
      il Cancelliere, e la legislatura è quella dell'avversario caduto (turnInMandate conservato). */
