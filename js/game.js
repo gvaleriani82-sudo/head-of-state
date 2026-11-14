@@ -5284,6 +5284,7 @@ function rimpastoEntra(){
   var prima=(S.coalizione||[S.partito]).slice();   // L229-1: chi c'era prima, per la voce dell'alleanza
   S.coalizione=(S.coalizione||[S.partito]).concat([p.id]);
   S.minoranza=bloccoMaggioranza()<50;
+  ricPosto(p.id);   // L271-2: il partito dell'alleato entra (no-op spenta)
   S.rimpastoOfferto=(S.mandate||0);
   S.tenuta=S.tenuta||{}; S.tenutaForza0=S.tenutaForza0||{};
   S.tenuta[p.id]=58; S.tenutaForza0[p.id]=S.forze[p.id];   // entra senza luna di miele: è un matrimonio d'interesse
@@ -7486,7 +7487,8 @@ function pickONG(){
    intl): chiamarle fuori contesto è no-op sicuro. */
 function premiaSfida(cornice, ok){
   var d=[];
-  if(cornice==='piazza'){ if(ok){ attA(4); attB(1); d.push(T('Base')+' +4'); d.push(T('Autorevolezza')+' +1'); } else { attA(-1); d.push(T('Base')+' −1'); } }
+  if(cornice==='piazza' && RIC_SFIDA_K!==1){ var k=RIC_SFIDA_K; if(ok && k>0){ attA(4*k); attB(1*k); d.push(T('Base')+' +'+(4*k)); d.push(T('Autorevolezza')+' +'+(1*k)); } }   // L271-2: il giornalista (D350) — 0 = la risposta sbagliata non costa, 0,5 = la giusta rende la metà
+  else if(cornice==='piazza'){ if(ok){ attA(4); attB(1); d.push(T('Base')+' +4'); d.push(T('Autorevolezza')+' +1'); } else { attA(-1); d.push(T('Base')+' −1'); } }
   else if(cornice==='aula'){ if(S.locale){ S.locale.consenso=clamp((S.locale.consenso||0)+(ok?2:-1),0,100); d.push(T('Consenso locale')+' '+(ok?'+2':'−1')); } }
   else if(cornice==='vertice'){ if(ok){ autorevMuovi(3); creditoMuovi(3); d.push(T('Autorevolezza')+' +3'); d.push(T('Credito diplomatico')+' +3'); } else { autorevMuovi(-1); creditoMuovi(-1); d.push(T('Autorevolezza')+' −1'); d.push(T('Credito diplomatico')+' −1'); } }
   /* L23-1 — la cornice `stampa` è l'unica servita da DUE ruoli: premier e sfidante. La reputazione internazionale è
@@ -7514,7 +7516,7 @@ function cartaSfida(q, cornice){
   /* D5 — PREMIO VISIBILE: premia() ritorna il delta nominato (valuta + segno), mostrato nel log come le altre carte.
      Vale per giusto E sbagliato → la gaffe piccola si VEDE piccola (la cura resa leggibile).
      F5 — estratto in premiaSfida(cornice,ok) top-level: stessa logica, riusata anche dall'intervista incalzante. */
-  function premia(ok){ return premiaSfida(cornice, ok); }
+  function premia(ok){ ricDomanda(cornice, ok); try{ return premiaSfida(cornice, ok); } finally{ ricDomandaDopo(cornice); } }   // L271-2: chi chiede (D348; no-op spenta)
   const opts=q.op.map(function(o,i){
     var opt={ l:T(o), e:'' };
     opt.f=(function(idx){ return function(){
@@ -7691,7 +7693,8 @@ function concludiIntervista(){
   var I=INTERVISTA, deltas=[];
   I.done.forEach(function(d){ var s=premiaSfida(I.cornice, d.ok); if(s) deltas.push(s); });
   var perfetto=(I.correct===I.done.length && I.done.length===I.qs.length && I.qs.length>=2);
-  if(perfetto){ if(I.cornice==='vertice') autorevMuovi(1); else if(I.cornice==='piazza') attA(1); else repd(1); deltas.push(T('sangue freddo')+' +1'); }   // bonus-tenuta piatto (L184-2, D178: il chip dice «sangue freddo», EN «composure»; «tenuta» è la tenuta degli alleati, EN «loyalty»)
+  var _bonus=ricIntervista(I, perfetto);   // L271-2: il giornalista (D350; spenta = perfetto)
+  if(_bonus){ if(I.cornice==='vertice') autorevMuovi(1); else if(I.cornice==='piazza') attA(1); else repd(1); deltas.push(T('sangue freddo')+' +1'); }   // bonus-tenuta piatto (L184-2, D178: il chip dice «sangue freddo», EN «composure»; «tenuta» è la tenuta degli alleati, EN «loyalty»)
   var testo = perfetto ? T('Hai retto l\'incalzare fino in fondo: prova piena.')
             : (I.correct>0 ? T('Hai retto le prime, poi il cronista ti ha messo in difficoltà: una cavata onorevole.')
                            : T('Il cronista ti ha spiazzato subito: capita, si rimonta.'));
@@ -7857,7 +7860,8 @@ function generaTitoloLocale(){
   S.lastTitolo=q.id;
   const luogo=localeNome()||'', ente=(tipo==='regione')?T('Regione'):T('Comune');
   const sub=(s)=>String(s).replace(/%LUOGO/g,luogo).replace(/%ENTE/g,ente);
-  S.titoloMese={ id:q.id, testo:sub(T(amica?q.amico:q.ostile)), tono:(amica?'amica':'ostile') };   // i18n: T sul template, PRIMA di sub (%LUOGO/%ENTE intatti)
+  S.titoloMese={ id:q.id, testo:sub(T(amica?q.amico:q.ostile)), tono:(amica?'amica':'ostile') };
+  ricTitoloLocale();   // L271-2: la firma del giornalista, un titolo su tre (nessuno stato)   // i18n: T sul template, PRIMA di sub (%LUOGO/%ENTE intatti)
   if(typeof suona==='function') suona(suonoGiornale());   // L95-3: il titolo locale del mese · L118-1: dal 2000 `notifica`
 }
 
@@ -8331,15 +8335,16 @@ let AGENDA_MAX_AGG=null;       // un valore unico forzato (banco: __AGENDA_MAX_A
 /* L270-3 Passo 1 (a), decisione di Cowork su ⚠ 1 di «⚑ L270-2»: le carte che l'agenda può aggiungere in un mese, PER FETTA — 2 dove
    «acceso 2» sta entro +0,75 carte al mese, 1 dove supera +0,8 (L0 attivista +0,92, L5 diplomatico +1,05 nella sonda di L270-2).
    Con 1 la seconda e la terza giornata danno solo il secondo gradino o il rinvio, come già fa il tetto. */
-const AGENDA_MAX_AGG_FETTA={ L0:1, L4:1, L5:1 };   // L4: la sonda del Passo 1 (b) con 2 dava +1,12 (1,72 → 2,84): la regola del lotto ci mette 1 anche lì
+const AGENDA_MAX_AGG_FETTA={ L0:1, L1:1, L4:1, L5:1 };   // L271-2: L1 a 1 (Passo 0 ⚠ 2 di «⚑ L271-1»); L4: la sonda del Passo 1 (b) con 2 dava +1,12 (1,72 → 2,84): la regola del lotto ci mette 1 anche lì
 function agendaMaxAgg(){ if(AGENDA_MAX_AGG>0) return AGENDA_MAX_AGG; var f=agendaFetta(); return (f && AGENDA_MAX_AGG_FETTA[f]) || 2; }
 /* L270-3 Passo 1 (c), la leva decisa prima su ⚠ 2: il secondo gradino di «Le capitali» (voce ufficio, fetta L5: credito +1). Si
    spegne solo se i finali «ritiro» del diplomatico acceso restano più del doppio del placebo. */
-let AGENDA_CAPITALI_G2=false;   // SPENTO dal Passo 1 (c): diplomatico acceso «ritiro» 26/80 contro 10/80 del placebo (più del doppio)
+let AGENDA_CAPITALI_G2=true;    // L271-2: di nuovo acceso (⚠ 1 di «⚑ L271-1» accettata, nota del diplomatico); era spento dal Passo 1 (c) di L270-3: diplomatico acceso «ritiro» 26/80 contro 10/80 del placebo (più del doppio)
 let AGENDA_G2_META=false;      // i secondi gradini dimezzati (arrotondati in su, minimo 1)
 let AGENDA_SOLO_MESE=false;    // transitorio: il mese è «solo» (AG_SOLO o primo mese) — lo scrive genAgenda
 let AGENDA_BOZZA=null;         // transitorio: {m, g} le giornate posate e non ancora confermate
 const AGENDA_GIORNATE=3, AGENDA_TETTO=4;
+let AGENDA_PARTITO_L1=0.25;  // L271-2 (Passo 0 ⚠ 2): il secondo gradino di «Il partito» al L1 — leva (a) +0,5 dava 0,727 punti di notorietà al mese (> 0,60), quindi (b) +0,25
 function agG2(n){ return AGENDA_G2_META ? Math.max(1, Math.ceil(n/2)) : n; }
 /* la fetta della carriera: L0, L1, L2, L2opp (il volto), L3, L3opp, L4, L5 */
 function agendaFetta(){
@@ -8385,7 +8390,7 @@ const AGENDA_VOCI = {
     L0:{ carta:function(){ if(S.attivista.campagna || S.attivista.campOfferta) return null; S.attivista.campOfferta=true; var it=cardCampOfferta(); if(!it){ S.attivista.campOfferta=false; return null; } return {it:it, k:'camp|camp_offerta'}; },
          doppione:function(){ return agHa(function(it){ return it.data && (it.data.campStart || it.data.campResa); }); },
          g2:function(){ attB(agG2(1)); } },
-    L1:{ sola:true, g2:function(){ S.capitale=clamp((S.capitale||0)+agG2(1),0,100); } },
+    L1:{ sola:true, g2:function(){ S.capitale=clamp((S.capitale||0)+AGENDA_PARTITO_L1,0,100); } },   // L271-2: +0,5 fuori da agG2 (che arrotonda in su)
     L2:{ sola:true, g2:function(){ leald(agG2(3)); } },
     L3:{ carta:function(){ var it=agPrendi('puntoUltimo', null, function(){ return pickPuntoPartito(); }); return it?{it:it, k:'punto|'+it.data.id}:null; },
          doppione:function(){ return agHa(function(it){ return it.kind==='puntopartito'; }); },
@@ -8540,6 +8545,7 @@ function agendaConferma(){
   });
   S.agendaMese={ m:meseAss(), g:g, staff:false, agg:agg, rinv:rinv };
   AGENDA_BOZZA=null;
+  ricAgenda(g);   // L271-2: giornalista e alleato (no-op spenta)
   agendaRegistro();   // L270-3: la riga del registro, una per mese
   return true;
 }
@@ -8683,6 +8689,269 @@ function agendaRiepilogo(){
 }
 /* la riga del registro alla conferma: una sola per mese */
 function agendaRegistro(){ var r=agendaEsitoRighe(); if(r.length && S.log) S.log.unshift({t:T('L\'agenda del mese'), x:r.join(' ')}); }
+/* ⚑ L271-2 · LE PERSONE RICORRENTI — il motore (DESIGN-FORMATI.md «⚑ L271-1» D347-D356, «⚑ L271-2»). SPENTO (RICORRENTI=false):
+   spento nessuna funzione qui scrive S (S.ricorrenti non nasce) e nessun aggancio cambia niente. Tre persone per carriera —
+   il rivale (riv), il giornalista (gio), l'alleato (all) — prese da chi ha già un nome (D347: capocorrente, ministro conteso,
+   rivale interno, concorrente, premier) o con un nome da un HASH di personaggio, ruolo e mese di nascita (ricNomeHash: mai
+   Math.random, mai persone reali: le liste del paese). Stato SOLO in S.ricorrenti={riv, gio, all}, ognuno
+   {n, g, src, r, f, da, e, t}: nome, genere, sorgente («<fetta>/<tipo>[:<i o id>]»: la fetta di nascita dice il cambio di
+   livello), rapporto −3…+3, al più tre fatti {k, m}, mese di nascita, mese dell'ultimo effetto, mese dell'ultimo fatto; il
+   rivale del capo del governo può avere in più `s` = lo sfidante che prende il ruolo mentre c'è (⚠ 6 di «⚑ L271-1»: il
+   capocorrente fissato alla nascita resta sotto). Effetti (D350) uno per ruolo ogni 12 mesi, solo a rapporto ≥ +2 o ≤ −2,
+   mai sul VERO delle urne, sulle forze, sui seggi. RIC_PLACEBO (solo il banco): stesse nascite e nomi, rapporto fermo,
+   nessun effetto. I testi sono chiavi IT col ripiego (la resa e l'inglese sono la riga 22). */
+let RICORRENTI=false;
+let RIC_PLACEBO=false;     // il banco: __RICORRENTI_PLACEBO (mai nel sorgente acceso)
+const RIC_RUOLI=['riv','gio','all'];
+const RIC_K={ partenza:{riv:-1, gio:0, all:1}, ritorno:12, trascurato:6, pensione:96, tettoEffetto:12, fatti:3, soglia:2 };
+/* D348 · le telefonate che hanno per chiamante un ruolo nostro: id → ruolo, lato (gov|opp|null), rr per scelta. Tutte binarie:
+   la prima scelta va incontro a chi chiama (+1), la seconda no (−1). Gli id esistono tutti in F1_TELEFONATE (data.js, 14/11). */
+const RIC_TEL={
+  tel_direttore:{ ruolo:'gio', lato:null, rr:[1,-1] },
+  tel_sponda:{ ruolo:'all', lato:'opp', rr:[1,-1] }, tel_smentita:{ ruolo:'all', lato:'opp', rr:[1,-1] }, tel_congresso:{ ruolo:'all', lato:'opp', rr:[1,-1] },
+  tel_segretario:{ ruolo:'all', lato:'gov', rr:[1,-1] }, tel_deputato:{ ruolo:'all', lato:'gov', rr:[1,-1] }
+};
+const RIC_MOV_CARTE=['ev_rivale'];   // le carte del movimento che parlano del rivale (L0)
+/* D349 · i fatti: chiave → Δ rapporto */
+const RIC_FATTI={ int_retta:1, int_spiazzato:-1, tel_squillo:-1, tel_si:1, tel_no:-1, retro_cedi:1, retro_sfida:-1,
+  domanda_bene:1, domanda_male:0, agenda_stampa:1, agenda_partito:1, trascurato:-1, battuto:-2, posto:2 };
+function ricVivo(){ return RICORRENTI && typeof S!=='undefined' && !!S && !LAMPO; }
+function ricHash(s){
+  var h=2166136261; s=String(s);
+  for(var i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619); }
+  h^=h>>>16; h=Math.imul(h,0x85ebca6b); h^=h>>>13; h=Math.imul(h,0xc2b2ae35); h^=h>>>16;
+  return h>>>0;
+}
+/* il nome nuovo: dalle liste del paese, con un hash (la forma di attaccoDado); k = il mese di nascita */
+function ricNomeHash(ruolo, k){
+  var base=ruolo+'|'+k+'|'+scissioneCarriera(), h=ricHash('ric|g|'+base);
+  var g=(h%100)<50 ? 'f' : 'm';
+  var L=(g==='f') ? PAESE.nomiF : PAESE.nomiM; if(!L || !L.length) L=PAESE.nomi||['—'];
+  var C=PAESE.cognomi||[''];
+  return { n:L[ricHash('ric|n|'+base)%L.length]+' '+C[ricHash('ric|c|'+base)%C.length], g:g };
+}
+function ricFe(p){ return p && p.src ? String(p.src).split('/')[0] : null; }
+function ricTipo(p){ return p && p.src ? String(p.src).split('/')[1]||'' : ''; }
+/* D347 · la sorgente per ruolo e fetta: {n, g, src} o null (= nome nuovo da hash) */
+function ricSorgente(ruolo, fe){
+  var C=S.correnti||[];
+  function corr(ostile){
+    if(!C.length) return null;
+    var i=ostile ? 0 : C.length-1;
+    C.forEach(function(c,j){ if(c && c.umore!=null && (ostile ? c.umore<C[i].umore : c.umore>C[i].umore)) i=j; });
+    return C[i] && C[i].leader ? { n:C[i].leader, g:null, src:'corr:'+i } : null;
+  }
+  if(ruolo==='riv'){
+    if(fe==='L2' || fe==='L3') return corr(true);
+    if(fe==='L2opp') return (S.volto && S.volto.min && S.volto.min.nome) ? { n:S.volto.min.nome, g:S.volto.min.g||null, src:'volto' } : null;
+    if(fe==='L3opp') return (S.oppRivale && S.oppRivale.nome) ? { n:S.oppRivale.nome, g:null, src:'opprivale' } : corr(true);
+    if((fe==='L4' || fe==='L5') && S.diplo && S.diplo.conc && S.diplo.conc.nome) return { n:S.diplo.conc.nome, g:S.diplo.conc.f?'f':'m', src:'conc' };
+    return null;
+  }
+  if(ruolo==='all'){
+    if(fe==='L2') return (S.premier && S.premier.nome) ? { n:S.premier.nome, g:null, src:'premier' } : null;
+    if(fe==='L3') return corr(false);
+    if(fe==='L2opp' || fe==='L3opp'){ var p=(typeof unTavolo==='function') ? unTavolo() : null; return p ? { n:null, g:null, src:'part:'+p } : null; }
+    if(fe==='L4' || fe==='L5'){ var a=ricAlleatoPaese(); return a ? { n:null, g:null, src:'paese:'+a } : null; }
+  }
+  return null;
+}
+function ricAlleatoPaese(){
+  if(typeof ALLEATI_DIPLO==='undefined') return null;
+  var k=(S.scenario && S.scenario!=='presente') ? S.scenario : S.paese;
+  var r=ALLEATI_DIPLO.find(function(x){ return (x.paese===k || x.paese===S.paese) && (x.dal==null || S.year>=x.dal) && (x.fino==null || S.year<=x.fino); });
+  return r ? r.id : null;
+}
+function ricNasce(ruolo, prima){   // prima = il nome di chi esce (chi entra nello stesso mese non ha il suo nome)
+  var fe=agendaFetta(); if(!fe) return null;
+  if(fe==='L3' && ruolo==='all' && (S.correnti||[]).length<2) return null;
+  var m=meseAss(), so=ricSorgente(ruolo, fe), nh=ricNomeHash(ruolo, m);
+  for(var z=2; prima && nh.n===prima && z<6; z++) nh=ricNomeHash(ruolo, m+'|'+z);
+  var p={ n:(so && so.n) || nh.n, g:(so && so.g) || (so && so.n ? null : nh.g), src:fe+'/'+(so ? so.src : 'hash'),
+          r:RIC_K.partenza[ruolo], f:[], da:m, e:null, t:m };
+  if(p.g==null) p.g=nh.g;   // il genere di un nome ripreso senza genere: dall'hash (lo usa solo la resa del ruolo giornalistico)
+  S.ricorrenti=S.ricorrenti||{}; S.ricorrenti[ruolo]=p;
+  return p;
+}
+/* la persona di un ruolo, nata se manca (nascita pigra: vale anche per i salvataggi di prima) */
+function ricPersona(ruolo){
+  if(!ricVivo()) return null;
+  var R=S.ricorrenti, p=R && R[ruolo];
+  if(!p) p=ricNasce(ruolo);
+  if(!p) return null;
+  return (ruolo==='riv' && p.s) ? p.s : p;
+}
+/* una comparsa (il banco la conta: cerimonia 45); nessuno stato */
+function ricComparsa(ruolo, formato){ return ricPersona(ruolo); }
+function ricFatto(ruolo, k, dr){
+  var p=ricPersona(ruolo); if(!p) return null;
+  if(dr==null) dr=RIC_FATTI[k]||0;
+  if(RIC_PLACEBO) dr=0;
+  p.r=clamp((p.r||0)+dr, -3, 3);
+  p.f=(p.f||[]); p.f.push({ k:k, m:meseAss() }); while(p.f.length>RIC_K.fatti) p.f.shift();
+  p.t=meseAss();
+  return p;
+}
+/* D350 · l'effetto: segno +1 (rapporto ≥ +2) o −1 (≤ −2), al più uno ogni 12 mesi per ruolo; true se scatta (e lo segna) */
+function ricEffetto(ruolo, segno){
+  if(RIC_PLACEBO) return false;
+  var p=ricPersona(ruolo); if(!p) return false;
+  if(segno>0 ? p.r<RIC_K.soglia : p.r>-RIC_K.soglia) return false;
+  var R=S.ricorrenti[ruolo];   // il tetto è del RUOLO (lo sfidante del rivale lo condivide)
+  if(R.e!=null && meseAss()-R.e<RIC_K.tettoEffetto) return false;
+  R.e=meseAss();
+  return true;
+}
+/* D351 · l'uscita, con la riga di congedo (quattro motivi); chi entra dopo riparte dalla partenza */
+const RIC_CONGEDO={ sconfitta:'%N lascia la scena: battuto.', promozione:'%N lascia la scena: passa ad altro incarico.',
+  pensione:'%N lascia la scena: va in pensione.', livello:'%N lascia la scena: resta dov\'eri tu.' };
+function ricEsce(ruolo, motivo, soloSfidante){
+  var R=S.ricorrenti; if(!R || !R[ruolo]) return;
+  var p=soloSfidante ? R[ruolo].s : R[ruolo]; if(!p) return;
+  if(p.n && S.log) S.log.unshift({ t:T('Le persone'), x:T(RIC_CONGEDO[motivo]||RIC_CONGEDO.livello).replace('%N', p.n) });
+  if(soloSfidante) delete R[ruolo].s; else delete R[ruolo];
+}
+function ricPartnerAlleato(){ var a=S.ricorrenti && S.ricorrenti.all, t=ricTipo(a); return t.indexOf('part:')===0 ? t.slice(5) : null; }
+/* D351 (b) · il cambio di livello: rivale e alleato escono, il giornalista resta (cambia solo la fetta della sorgente) */
+function ricCambioLivello(){
+  if(!ricVivo() || !S.ricorrenti) return;
+  var fe=agendaFetta();
+  ['riv','all'].forEach(function(r){ var p=S.ricorrenti[r]; if(p && ricFe(p)!==fe) ricEsce(r, 'livello'); });
+  var g=S.ricorrenti.gio; if(g && fe && ricFe(g)!==fe) g.src=fe+'/'+ricTipo(g);
+}
+/* la sorgente c'è ancora? (D351 (a)) */
+function ricSorgenteViva(p){
+  var t=ricTipo(p), C=S.correnti||[];
+  if(t.indexOf('corr:')===0){ var c=C[+t.slice(5)]; return !!(c && c.leader===p.n); }
+  if(t==='premier') return !!(S.premier && S.premier.nome===p.n);
+  if(t==='volto') return !!(S.volto && S.volto.min && S.volto.min.nome===p.n);
+  if(t==='opprivale') return !!(S.oppRivale && S.oppRivale.nome===p.n);
+  if(t==='conc') return !!(S.diplo && S.diplo.conc && S.diplo.conc.nome===p.n);
+  return true;
+}
+/* il mese (corpoMese, dopo avanzaMese e quindi dopo genAgenda) */
+function ricMese(){
+  if(!ricVivo()) return;
+  if(!agendaFetta()) return;
+  S.ricorrenti=S.ricorrenti||{};
+  ricCambioLivello();
+  var m=meseAss();
+  RIC_RUOLI.forEach(function(ruolo){
+    var P=S.ricorrenti[ruolo];
+    var vec=P ? P.n : null;
+    if(P && !ricSorgenteViva(P)) { ricEsce(ruolo, 'promozione'); P=null; }
+    if(P && m-P.da>=RIC_K.pensione && /^(hash|part:|paese:)/.test(ricTipo(P))){ ricEsce(ruolo, 'pensione'); P=null; }   // la pensione è dei nomi nuovi: chi è ripreso esce con la sua sorgente
+    if(!P) P=ricNasce(ruolo, vec);
+    if(!P) return;
+    /* ⚠ 6 · lo sfidante prende il ruolo del rivale solo mentre c'è; se è il capocorrente stesso, niente */
+    if(ruolo==='riv' && ricFe(P)==='L3'){
+      var v=S.sfida && S.sfida.volto;
+      if(v && v!==P.n && !(P.s && P.s.n===v)){ var nh=ricNomeHash('sfi', m); P.s={ n:v, g:nh.g, src:'L3/sfida', r:RIC_K.partenza.riv, f:[], da:m, t:m }; }
+      if(P.s && (!v || P.s.n!==v)) ricEsce('riv', 'promozione', true);
+    }
+    [P, P.s].forEach(function(p){
+      if(!p) return;
+      var par=(p===P.s) ? RIC_K.partenza.riv : RIC_K.partenza[ruolo];
+      if(!RIC_PLACEBO && p.r!==par && m-(p.t!=null?p.t:p.da)>=RIC_K.ritorno){ p.r+= p.r>par ? -1 : 1; p.t=m; }
+    });
+    if(ruolo==='all') ricTrascurato(P, m);
+  });
+  /* D350 · «non ti risponde più»: l'alleato a ≤ −2, una volta ogni 12 mesi */
+  var A=S.ricorrenti.all;
+  if(A && A.r<=-RIC_K.soglia && ricEffetto('all', -1)){
+    var fe=ricFe(A), t=ricTipo(A);
+    if(fe==='L2') leald(-3);
+    else if(fe==='L3' && t.indexOf('corr:')===0){ var c=(S.correnti||[])[+t.slice(5)]; if(c && c.umore!=null) c.umore=clamp(c.umore-5,0,100); }
+    else if((fe==='L2opp' || fe==='L3opp') && ricPartnerAlleato() && typeof intesaMuovi==='function') intesaMuovi(ricPartnerAlleato(), -5);
+  }
+}
+/* «trascurato»: sei mesi senza una giornata sul partito né una sua telefonata risposta — un fatto per episodio */
+function ricTrascurato(P, m){
+  if(!(typeof AGENDA_MESE!=='undefined' && AGENDA_MESE) || !agendaRegola('partito')) return;
+  var ult=P.da, tr=false;
+  (P.f||[]).forEach(function(x){ if(x.k==='agenda_partito' || x.k==='tel_si' || x.k==='tel_no' || x.k==='posto'){ ult=Math.max(ult, x.m); tr=false; } if(x.k==='trascurato' && x.m>=ult) tr=true; });
+  if(!tr && m-ult>=RIC_K.trascurato) ricFatto('all', 'trascurato');
+}
+/* gli agganci (D348) — tutti no-op a costante spenta */
+/* la telefonata: ci = indice della scelta, null = lasciata squillare. Rende true se l'alleato «ti copre» (niente raffredda) */
+function ricTel(def, ci){
+  if(!ricVivo() || !def) return false;
+  var M=RIC_TEL[def.id]; if(!M) return false;
+  if(M.lato==='opp' && !S.opposizione) return false;
+  if(M.lato==='gov' && S.opposizione) return false;
+  if(!ricComparsa(M.ruolo, 'telefonata')) return false;
+  if(ci==null){ var copre=(M.ruolo==='all') && ricEffetto('all', 1); ricFatto(M.ruolo, 'tel_squillo'); return copre; }
+  var d=(M.rr && M.rr[ci]) || 0;
+  ricFatto(M.ruolo, d>=0 ? 'tel_si' : 'tel_no', d);
+  return false;
+}
+/* l'intervista: rende il bonus «sangue freddo» corretto dall'effetto del giornalista (D350) */
+function ricIntervista(I, perfetto){
+  if(!ricVivo() || !I || !ricComparsa('gio', 'intervista')) return perfetto;
+  var bonus=perfetto;
+  if(!perfetto && I.done && I.done.length && ricEffetto('gio', 1)) bonus=true;
+  else if(perfetto && ricEffetto('gio', -1)) bonus=false;
+  if(perfetto) ricFatto('gio', 'int_retta'); else if(I.correct===0) ricFatto('gio', 'int_spiazzato');
+  return bonus;
+}
+/* la domanda (sfida singola): chi chiede secondo la cornice; il moltiplicatore del premio (1 · 0 · 0,5) per il giornalista in piazza */
+let RIC_SFIDA_K=1;   // transitorio: letto solo dentro premiaSfida, rimesso a 1 da chi lo cambia
+function ricDomandaRuolo(cornice){ var fe=agendaFetta(); if(cornice==='piazza' && fe==='L0') return 'gio'; if(cornice==='aula' && fe==='L1') return 'riv'; if(cornice==='vertice' && (fe==='L4' || fe==='L5')) return 'gio'; return null; }
+function ricDomanda(cornice, ok){
+  RIC_SFIDA_K=1;
+  if(!ricVivo()) return;
+  var ruolo=ricDomandaRuolo(cornice); if(!ruolo || !ricComparsa(ruolo, 'domanda')) return;
+  if(ruolo==='gio' && cornice==='piazza'){ if(!ok && ricEffetto('gio', 1)) RIC_SFIDA_K=0; else if(ok && ricEffetto('gio', -1)) RIC_SFIDA_K=0.5; }
+  ricFatto(ruolo, ok ? 'domanda_bene' : 'domanda_male');
+}
+function ricDomandaDopo(cornice){
+  RIC_SFIDA_K=1;
+  if(!ricVivo() || ricDomandaRuolo(cornice)!=='riv' || !S.locale) return;
+  if(ricEffetto('riv', 1)) S.capitale=clamp((S.capitale||0)+1,0,100);
+  else if(ricEffetto('riv', -1)) S.capitale=clamp((S.capitale||0)-1,0,100);
+}
+/* la carta risolta: il retroscena di Palazzo (L3, L3-opp) e la carta del movimento sul rivale (L0) */
+function ricCarta(it, d, ci){
+  if(!ricVivo() || !d || !d.id) return;
+  var fe=agendaFetta();
+  if((fe==='L3' || fe==='L3opp') && d.kick==='Palazzo' && typeof RETRO_BEAT!=='undefined' && RETRO_BEAT.some(function(x){ return x.id===d.id; })){
+    if(!ricComparsa('riv', 'retroscena')) return;
+    if(ricEffetto('riv', 1)) agCorrenti(1); else if(ricEffetto('riv', -1)) agCorrenti(-1);
+    ricFatto('riv', ci===0 ? 'retro_cedi' : 'retro_sfida');
+  } else if(fe==='L0' && RIC_MOV_CARTE.indexOf(d.id)>=0){
+    if(!ricComparsa('riv', 'movimento')) return;
+    if(ricEffetto('riv', 1)) attA(1); else if(ricEffetto('riv', -1)) attA(-1);
+  }
+}
+/* il titolo locale firmato: un titolo su tre, dall'hash del mese (nessuno stato, nessuna estrazione) */
+function ricFirma(){ return ricVivo() && agendaFetta()==='L1' && ricHash('ric|firma|'+meseAss()+'|'+scissioneCarriera())%3===0; }
+function ricTitoloLocale(){ if(ricFirma()) ricComparsa('gio', 'firma'); }
+/* l'agenda confermata: una volta al mese per voce */
+function ricAgenda(g){
+  if(!ricVivo() || !g) return;
+  if(g.stampa>0 && ricComparsa('gio', 'agenda')) ricFatto('gio', 'agenda_stampa');
+  if(g.partito>0 && ricComparsa('all', 'agenda')) ricFatto('all', 'agenda_partito');
+}
+/* la primaria vinta: lo sfidante era il rivale → battuto ed esce (se era il capocorrente stesso, resta) */
+function ricBattuto(volto){
+  if(!ricVivo() || !volto || !S.ricorrenti || !S.ricorrenti.riv) return;
+  var P=S.ricorrenti.riv;
+  if(P.s && P.s.n===volto){ ricFatto('riv', 'battuto'); ricEsce('riv', 'sconfitta', true); }
+  else if(P.n===volto){ ricFatto('riv', 'battuto'); if(ricFe(P)!=='L3') ricEsce('riv', 'sconfitta'); }   // ⚠ 6: al L3 il capocorrente sfidante battuto resta
+}
+/* il posto: il partito dell'alleato entra nel governo */
+function ricPosto(pid){ if(!ricVivo() || !pid || ricPartnerAlleato()!==pid) return; ricFatto('all', 'posto'); }
+/* applySnap: assente = nessuna persona; un valore illeggibile si toglie (la forma di ppSediPulisci) */
+function ricPulisci(){
+  var R=S.ricorrenti;
+  if(R==null) return;
+  if(typeof R!=='object' || Array.isArray(R)){ delete S.ricorrenti; return; }
+  function ok(p){ return p && typeof p==='object' && typeof p.n==='string' && typeof p.r==='number' && p.r>=-3 && p.r<=3 && Array.isArray(p.f) && typeof p.da==='number' && typeof p.src==='string'; }
+  Object.keys(R).forEach(function(k){
+    if(RIC_RUOLI.indexOf(k)<0 || !ok(R[k])){ delete R[k]; return; }
+    if(R[k].s!=null && !ok(R[k].s)) delete R[k].s;
+  });
+}
 /* ⚑ L239-7 · LE TRE FORME DEL GETTONE (DESIGN-MAPPA.md §2 (d) e §3 punto 6; decisioni di Cowork del 21/10 sulle valute).
    Lo stesso gettone del mese (giroPossibile, S.giroMese) si spende in una di tre forme, scelte dal foglietto dell'area:
    · VISITA = apriGiro di sempre (la scena F2 o di GIRO_SCENE, umore dalla scelta);
@@ -9407,6 +9676,7 @@ function esitoPrimaria(){
 function vinciPrimaria(){
   const tipo=PRIM?PRIM.tipo:'anticipata'; PRIM=null;
   if(S.sfida) bioFatto('Primarie vinte: la sfida di '+S.sfida.volto+' respinta.');
+  if(S.sfida) ricBattuto(S.sfida.volto);   // L271-2: il rivale battuto (no-op spenta)
   tutteCorrenti(10);   // sollievo: il partito si ricompatta
   S.sfida=null; S.primariaUltima=S.year*12+S.month;
   S.log.unshift({t:T('Primarie vinte'), x:T('Il partito si ricompatta: la leadership è confermata.')});   // L244-4
@@ -10873,6 +11143,7 @@ function resolveItemCore(idx,ci){
     if(choice.crisi) crisiApplica(choice.crisi);   // L245-2: il punto unico del campo `crisi:` (la scala della crisi)
     if(choice.ricevuto) crisiRicevuto(choice.ricevuto);   // L245-6: il punto unico del campo `ricevuto:` (l'ultimatum ricevuto)
     if(choice.attacco) attaccoRisposta(it, d, choice.attacco);   // L245-7: il punto unico del campo `attacco:` (le quattro risposte all'attacco)
+    ricCarta(it, d, ci);   // L271-2: il rivale nel retroscena e nella carta del movimento (no-op spenta)
     segnoTerrApplica(it, d, choice);   // L239-6: il segno sul territorio (`segnoTerr:` sulla carta o sulla scelta), solo racconto
     if(S.attivista && S.attivista.campagna && !S.attivista.campagna.resaPending){ var _dB=S.attivista.base-_b0, _dA=S.attivista.autorev-_a0; if(_dB>0||_dA>0) nutriCampagna(_dB>=_dA?'piazza':'istituzionale'); }   // la carta ha costruito base→piazza / autorev→istituzionale → nutre la campagna (mossa O evento) se la corsia coincide; un mese-evento in-corsia NON è incuria
     if(S.attivista && typeof radiciSegnaPiazza==='function') radiciSegnaPiazza(S.attivista.base-_b0, S.attivista.autorev-_a0);   // L260-2: la carta della piazza dà più radici nel territorio del mese
@@ -11115,6 +11386,7 @@ function corpoMese(){
   avanzaMese();
   camereSudDiviso();   // L263-9bis: una volta al mese (la coalizione cambia in molti punti; il banner lo legge)
   camera2JpMese();   // L263-12: il rinnovo di luglio della Camera dei consiglieri (no-op a interruttore spento)
+  try{ ricMese(); }catch(e){}   // L271-2: le persone ricorrenti (no-op con RICORRENTI spenta)
   try{ scissioneMese(); }catch(e){}   // L237-6: la stampa −3 il mese dopo una scissione (no-op senza)
   /* L116-1 · la soglia: il decennio che cambia in una linea storica (gennaio di un anno che finisce per zero, fino al 2013: dopo
      è il presente); il primo mese di una porta suona in confirmCoal */
@@ -12458,6 +12730,7 @@ function renderTelefonata(){
 function rispondiTel(ci){
   if(!TEL) return; stopTimerTel();
   var def=TEL.def, opt=def.ch[ci];
+  ricTel(def, ci);   // L271-2: la persona che chiama (no-op spenta)
   if(opt && opt.f){ try{ opt.f(); }catch(e){} }
   if(opt && opt.pleases && typeof bioPleases==='function') bioPleases(opt.pleases);
   S.log.unshift({ t:T(def.t), x:T(opt.l)+' — '+T(opt.e) });
@@ -12469,7 +12742,8 @@ function rispondiTel(ci){
 function scadeTel(){
   if(!TEL || TEL.missed) return; stopTimerTel();
   var def=TEL.def; TEL.missed=true;
-  if(def && def.raffredda){ try{ def.raffredda(); }catch(e){} }
+  var _copre=ricTel(def, null);   // L271-2: l'alleato che «ti copre» (D350): niente raffreddamento
+  if(def && def.raffredda && !_copre){ try{ def.raffredda(); }catch(e){} }
   S.log.unshift({ t:T(def.t), x:T('Hai lasciato squillare.')+(def.squilloTxt?(' '+T(def.squilloTxt)):'') });
   S.telUltimo=S.year*12+S.month; S.telPendente=null;
   renderTelefonata(); commitSnap();
@@ -14674,6 +14948,7 @@ function applySnap(snap){
   applyPaese();
   if(S.attivista && !S.attivista.laurea && (!S.attivista.radici || !S.attivista.rivale)) radiciInit();   // L260-2: un attivista di prima riceve radici e rivale (solo con ATT_RADICI; il dado è un hash: lo stesso a ogni caricamento)
   if(S.partitoProprio && S.partitoProprio.sedi!=null) ppSediPulisci();
+  if(S.ricorrenti!=null) ricPulisci();   // L271-2: le persone ricorrenti (un valore illeggibile si toglie)
   if(S.partitoProprio && S.partitoProprio.trag!=null) ppTragPulisci();   // L260-7bis: il registro dei traguardi illeggibile si toglie   // L260-7: un registro delle sedi illeggibile si toglie (senza = nessuna sede)
   if(S.livello===5 && S.diplo && !Array.isArray(S.diplo.bil)) bilInit();   // L260-5: un diplomatico di prima riceve la rete bilaterale (solo con DIPLO_BILATERALI)
   if(S.livello===5 && S.diplo && !S.diplo.conc) concNasce();   // L260-5bis: un diplomatico di prima riceve il concorrente (solo con DIPLO_CONCORRENTE)
