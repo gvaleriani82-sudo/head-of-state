@@ -2492,6 +2492,7 @@ function render(){
   const tv=tavoloAttivo(); if(S.tab==='tavolo' && !tv) S.tab='gov';
   const cch=document.querySelector('.cassetto-chiudi'); if(cch) cch.setAttribute('aria-label', T('Chiudi'));
   const gm=document.getElementById('game'); gm.classList.toggle('con-tavolo', tv); gm.classList.toggle('cassetto-aperto', tv && S.tab!=='tavolo'); gm.classList.toggle('cassetto-guerra', tv && S.tab==='guerra'); document.body.classList.toggle('con-tavolo', tv);
+  try{ agendaRiepAggiorna(); }catch(e){}   // L270-3: la riga del riepilogo sopra la barra (prima di misurarne l'altezza)
   try{ const eh=document.querySelector('.endbar').offsetHeight; if(eh>0) document.documentElement.style.setProperty('--endH', eh+'px'); }catch(e){}   // a #game ancora nascosto l'altezza è 0: resta l'ultima buona (o i 72 del CSS)
   document.querySelectorAll('.sec').forEach(el=>el.classList.remove('on'));
   const secEl=document.getElementById('sec-'+S.tab); if(secEl) secEl.classList.add('on');
@@ -3142,7 +3143,7 @@ function renderAttorno(){
   var el=document.getElementById('sec-attorno'); if(el) el.innerHTML=h;
 }
 function renderGov(){
-  if(S.livello===0){ document.getElementById('sec-gov').innerHTML=renderAttivista(); return; }   // ATTIVISTA (Build A): scheda focalizzata sulla militanza
+  if(S.livello===0){ document.getElementById('sec-gov').innerHTML=agendaCassettoHtml()+renderAttivista(); return; }   // L270-3: l'agenda del mese in testa (vuota se spenta)   // ATTIVISTA (Build A): scheda focalizzata sulla militanza
   if(!S.opposizione && S.ministeroAperto==='__locale__'){ document.getElementById('sec-gov').innerHTML=renderLocalePage(); return; }   // drill-down: cruscotto locale (livello 1)
   if(!S.opposizione && S.ministeroAperto){ document.getElementById('sec-gov').innerHTML=renderMinisteroPage(S.ministeroAperto); return; }   // drill-down: pagina del ministero
   let h='', ruolo='';   // L144-1: il blocco del ruolo (opposizione, livello 1, livello 2) si scrive a parte e si mette dopo
@@ -3220,6 +3221,7 @@ function renderGov(){
   if(cassetto){ sotto=ruolo+sotto+stampa+vitaPersonaleCard(); }
   else h+=stampa+vitaPersonaleCard();
   // agenda
+  h+=agendaCassettoHtml();   // L270-3: l'agenda del mese, prima riga delle carte dove il tavolo non c'è (vuota se spenta o già decisa)
   h+=`<div class="contorno" style="font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--mut);margin:2px 2px 8px;">${T('Agenda di')} ${T(MONTHS[S.month-1])}</div>`;
   /* L95-1 — l'entrata non è più della SCATOLA. La classe stava qui, sulla firma dell'agenda, e scattava una
      volta per mese qualunque fosse il numero di carte: misurato, 8 entrate per 15 carte risolte (L94-2). Ora
@@ -5031,9 +5033,73 @@ function toccaFisso(key){
   FISSO_APERTO=(key && FISSO_APERTO!==key && TAVOLO_FISSI[key]) ? key : null; QUALE_APERTO=null;
   fissoFoglio();
 }
+/* ================================================================================================================
+   ⚑ L270-3 · L'AGENDA DEL MESE — la presentazione (DESIGN-FORMATI.md D344 e «⚑ L270-3» Passo 3). Il motore è in game.js (blocco
+   «⚑ L270-2»), i testi pure (agendaNome, agendaTarghetta, agendaEsitoRighe, agendaRiepilogo). Qui: lo stesso blocco
+   (agendaBloccoHtml) nel FOGLIETTO del tavolo (agendaFoglio, con la precedenza in fissoFoglio su tutto salvo i gesti espliciti:
+   la scena del giro, un segno toccato, «Quale?») dove il tavolo c'è, e come PRIMA RIGA del cassetto Governo dove non c'è (L0,
+   L4, L5); la riga del riepilogo (#agenda-riep) sopra la barra di fine mese, nata e tolta dal render (con AGENDA_MESE spenta
+   nessun nodo). L'ultima voce toccata (la sua targhetta) è transitoria: AGENDA_UI_ULTIMA, mai in S. Suoni: agenda-segna alla
+   giornata posata (non quando si toglie), agenda-chiudi alla conferma e a «Lascia fare allo staff»; niente per lo staff
+   implicito (una carta toccata, resolveItem) né al caricamento.
+   ================================================================================================================ */
+let AGENDA_UI_ULTIMA=null;
+function agendaUiViva(){ return typeof AGENDA_MESE!=='undefined' && AGENDA_MESE && !!S && typeof agendaPossibile==='function' && agendaPossibile(); }
+function agendaBloccoHtml(){
+  const voci=agendaVoci(), g=agBozza().g, rim=agendaGiornateRimaste(), pos=AGENDA_GIORNATE-rim;
+  const ult=(AGENDA_UI_ULTIMA && voci.indexOf(AGENDA_UI_ULTIMA)>=0) ? AGENDA_UI_ULTIMA : null;
+  const punti=function(n, m){ let s=''; for(let i=0;i<m;i++) s+=(i<n?'●':'○'); return s; };
+  const targa=ult ? `<b>${agendaNome(ult)}</b>: ${agendaTarghetta(ult)}` : T('Un tocco posa una giornata; su una voce piena, un tocco la svuota.');
+  return `<div class="ag-mese" data-stato="${pos?'bozza':'da-decidere'}">`+
+    `<div class="ag-mese-testa"><span class="contorno ag-mese-k">${T('L\'agenda del mese')} · ${T(MONTHS[S.month-1])}</span><span class="ag-mese-p" aria-hidden="true">${punti(pos, AGENDA_GIORNATE)}</span></div>`+
+    `<div class="ag-mese-i">${T('Tre giornate: dove le metti?')} <span class="ag-mese-c">${T('Giornate: %N di %M').replace('%N', pos).replace('%M', AGENDA_GIORNATE)}</span></div>`+
+    `<div class="ag-voci">`+voci.map(function(v){ const n=g[v]||0, m=agendaMaxVoce(v);
+      return `<button class="ag-voce${n?' posata':''}" data-v="${v}" aria-pressed="${n?'true':'false'}" onclick="agendaTocca('${v}')"><span class="ag-voce-n">${agendaNome(v)}</span><span class="ag-voce-p">${n ? punti(n, m) : ''}</span></button>`; }).join('')+`</div>`+
+    `<div class="ag-targa">${targa}</div>`+
+    `<div class="ag-azioni"><button class="ag-staff" onclick="agendaStaffUi()">${T('Lascia fare allo staff')}</button><button class="btn ag-conferma" onclick="agendaConfermaUi()"${pos?'':' disabled'}>${T('Conferma')}</button></div>`+
+    `</div>`;
+}
+function agendaFoglio(f){
+  const h=agendaBloccoHtml();
+  if(f.innerHTML!==h) f.innerHTML=h;
+  f.setAttribute('aria-label', T('L\'agenda del mese'));
+  f.classList.add('tv-foglio-agenda');
+  const nota=document.querySelector('#tavolo .tv-nota'), top=(nota && nota.style.display!=='none' && nota.innerHTML) ? (nota.offsetTop+nota.offsetHeight+6) : 10;
+  f.style.top=top+'px'; f.style.bottom=''; f.style.display='';
+}
+function agendaRidisegna(){ if(typeof render==='function') render(); }
+function agendaTocca(v){
+  if(!agendaUiViva()) return;
+  const g=agBozza().g, n=g[v]||0;
+  AGENDA_UI_ULTIMA=v;
+  if(n>0 && (n>=agendaMaxVoce(v) || agendaGiornateRimaste()<=0)) agendaSvuota(v);   // la voce piena (o le giornate finite): un tocco la svuota
+  else if(agendaPosa(v) && typeof suona==='function') suona('agenda-segna');
+  agendaRidisegna();
+}
+function agendaConfermaUi(){
+  if(!agendaUiViva()) return;
+  if(agendaConferma()){ AGENDA_UI_ULTIMA=null; if(typeof suona==='function') suona('agenda-chiudi'); agendaRidisegna(); if(typeof commitSnap==='function') commitSnap(); }
+}
+function agendaStaffUi(){
+  if(!agendaUiViva()) return;
+  if(agendaStaff()){ AGENDA_UI_ULTIMA=null; if(typeof suona==='function') suona('agenda-chiudi'); agendaRidisegna(); if(typeof commitSnap==='function') commitSnap(); }
+}
+/* la prima riga del cassetto Governo dove il tavolo non c'è (L0, L4, L5 e i livelli 1-3 senza mappa) */
+function agendaCassettoHtml(){ return (agendaUiViva() && !tavoloAttivo()) ? `<div class="card ag-mese-card">${agendaBloccoHtml()}</div>` : ''; }
+/* la riga del riepilogo sopra la barra di fine mese: nasce e si toglie qui (nessun nodo con la costante spenta) */
+function agendaRiepAggiorna(){
+  const eb=document.querySelector('.endbar'); if(!eb) return;
+  let el=document.getElementById('agenda-riep');
+  const txt=(typeof AGENDA_MESE!=='undefined' && AGENDA_MESE && S && typeof agendaRiepilogo==='function') ? agendaRiepilogo() : '';
+  if(!txt){ if(el) el.remove(); return; }
+  if(!el){ el=document.createElement('div'); el.id='agenda-riep'; el.className='agenda-riep contorno'; eb.insertBefore(el, eb.firstChild); }
+  if(el.textContent!==txt) el.textContent=txt;
+}
 function fissoFoglio(){
   const f=document.querySelector('#tavolo .tv-foglio'); if(!f) return;
+  f.classList.remove('tv-foglio-agenda');
   if(typeof GIRO_APERTO!=='undefined' && GIRO_APERTO){ if(giroFoglio(f)) return; }   // L182-3: la scena del giro ha la precedenza (la apre un gesto esplicito)
+  if(!FISSO_APERTO && !QUALE_APERTO && agendaUiViva()){ agendaFoglio(f); return; }   // L270-3: l'agenda del mese, finché è da distribuire
   const R=FISSO_APERTO && TAVOLO_FISSI[FISSO_APERTO];
   if((!R || !R.F) && QUALE_APERTO){ qualeFoglio(f); return; }   // L129-1: lo stesso foglietto, per il tocco ambiguo
   if(!R || !R.F){ if(f.style.display!=='none'){ f.innerHTML=''; f.style.display='none'; } return; }

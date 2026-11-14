@@ -959,6 +959,25 @@
     max-height:calc(100% - 20px); overflow:auto; overscroll-behavior:contain;   /* L185-1: una scena del giro con tre scelte su uno schermo basso scorre dentro il foglietto, non esce dal tavolo */
     background:var(--panel); color:var(--txt); border:1px solid var(--tv-rame); border-left-width:4px; border-radius:12px; box-shadow:0 6px 20px rgba(0,0,0,.3); }
   .tv-foglio .tv-chiudi{ margin:-10px -8px 0 6px; }
+  /* L270-3 · l'agenda del mese: lo stesso blocco nel foglietto del tavolo e in testa al cassetto (niente sotto 11 px, bersagli ≥ 44 px) */
+  .ag-mese-testa{ display:flex; justify-content:space-between; align-items:baseline; gap:8px; }
+  .ag-mese-k{ font-size:11px; letter-spacing:.13em; text-transform:uppercase; color:var(--acc-ink); font-weight:700; }
+  .ag-mese-p{ font-size:13px; letter-spacing:2px; color:var(--acc-ink); white-space:nowrap; }
+  .ag-mese-i{ font-size:13px; font-weight:600; margin-top:3px; line-height:1.3; }
+  .ag-mese-c{ font-weight:400; color:var(--mut); font-size:12px; white-space:nowrap; }
+  .ag-voci{ display:grid; grid-template-columns:1fr 1fr; gap:6px; margin:8px 0 6px; }
+  .ag-voce{ min-height:44px; display:flex; justify-content:space-between; align-items:center; gap:4px; text-align:left; padding:6px 9px;
+    font:inherit; font-size:13px; line-height:1.2; color:var(--txt); background:var(--panel2); border:1px solid var(--line); border-radius:10px; cursor:pointer; min-width:0; }
+  .ag-voce-n{ overflow-wrap:anywhere; }
+  .ag-voce.posata{ border-color:var(--acc); background:var(--acc-bg); font-weight:600; }
+  .ag-voce-p{ font-size:12px; letter-spacing:1px; color:var(--acc-ink); white-space:nowrap; }
+  .ag-targa{ font-size:12px; line-height:1.4; color:var(--txt2); min-height:2.8em; }
+  .ag-azioni{ display:flex; gap:8px; margin-top:8px; }
+  .ag-azioni button{ flex:1; min-height:44px; }
+  .ag-staff{ font:inherit; font-size:13px; font-weight:600; color:var(--txt); background:transparent; border:1px solid var(--line2); border-radius:11px; padding:8px 10px; cursor:pointer; }
+  .ag-conferma{ padding:8px 10px; font-size:14px; }
+  .ag-mese-card{ padding:12px 14px; margin-bottom:12px; border-left:4px solid var(--acc); }
+  .agenda-riep{ max-width:560px; margin:0 auto 6px; font-size:11px; color:var(--mut); line-height:1.3; overflow-wrap:anywhere; }
   .tv-foglio-t{ font-weight:700; font-size:14px; line-height:1.3; margin-bottom:3px; }
   .tv-foglio-r{ font-size:12.5px; line-height:1.4; color:var(--txt2); }
   .tv-foglio-tacche{ font-size:11.5px; color:var(--mut); margin-top:4px; letter-spacing:.02em; }

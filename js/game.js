@@ -2102,6 +2102,10 @@ function pickDiplo(){   // il loop: una missione la maggior parte dei mesi, col 
   const rv=rivaleVivo();   // L244-3: una carta volto:'rivale' esce solo se c'è un rivale vivo (stessa regola in pickCrisiInt)
   let pool=DIPLO_EV.filter(function(e){return (!e.cond||e.cond())&&(typeof eraVivaT!=='function'||eraVivaT(e))&&(rv||e.volto!=='rivale');});   // FIX era-gate percorso diplomatico (astratto-senza-tempo: default eraVivaT; i pochi moderni → contemporanea)
   const ev=pescaBag('diplo', pool); if(!ev) return null;
+  return diploCarta(ev);
+}
+/* L270-2: la carta dalla voce del pool (la rimette anche agendaRipristina) */
+function diploCarta(ev){
   let p=null; if(ev.volto==='rivale') p=rivaleNominato();   // non null: il pool l'ha già garantito
   /* i18n: T() PRIMA di potSub — si traduce il TEMPLATE (coi %POT intatti), poi la sostituzione gira
      nella lingua corrente (ramo EN di potSub). La carta nasce nella lingua del pescaggio (pattern log). */
@@ -2138,6 +2142,10 @@ function pickCrisiInt(){
   let pool=CRISI_INT.filter(function(e){return (!e.cond||e.cond())&&(typeof eraVivaT!=='function'||eraVivaT(e))&&(rv||e.volto!=='rivale');});   // FIX era-gate crisi da Segretario (astratte-senza-tempo: default eraVivaT; i moderni → contemporanea)
   const ev=pescaBag('crisiint', pool); if(!ev) return null;
   S.intl.crisiUltimo=mese;
+  return crisiIntCarta(ev);
+}
+/* L270-2: la carta dalla voce del pool (la rimette anche agendaRipristina) */
+function crisiIntCarta(ev){
   /* Fetta C: le crisi ANTAGONISTE (volto:'rivale') prendono un volto reale PESCATO (vario nel mandato, anti-ripetizione
      in S.recentPot) e tornano già passate in potSub; le altre (interne/sistemiche/UE, 9 su 17 dal L244-3) restano astratte (nessun volto). */
   let base=ev;
@@ -7713,6 +7721,10 @@ function pickConferenza(){
      al SACCHETTO (pescaBag: estrazione senza rimpiazzo, come il punto-partito) → tutte le domande cond-vere ruotano. */
   const q=(typeof pescaBag==='function' ? pescaBag('conf', pool) : pool[0]) || pool[0];
   S.confUltimo=mese; S.lastConfQ=q.id;
+  return confCarta(q);
+}
+/* L270-2: la carta dalla domanda (la rimette anche agendaRipristina) */
+function confCarta(q){
   /* i18n: le FUNZIONI t/text traducono da sé i componenti (T(template).replace dentro data.js); le stringhe piatte
      si traducono qui al pescaggio (pattern-log: la domanda nasce nella lingua corrente). */
   return { id:q.id, t:(typeof q.t==='function'?q.t():T(q.t)), text:(typeof q.text==='function'?q.text():T(q.text)), ch:q.ch };
@@ -8242,6 +8254,7 @@ function giroPossibile(){
   if(NOTTE) return false;
   if(typeof musicaTragedia==='function' && musicaTragedia()) return false;         // G8: sulle sciagure vere niente meccanica
   if(S.year===S.annoInizio && S.month===1) return false;                           // il primo mese di una carriera
+  if(AGENDA_MESE && agendaMeseVivo() && !agendaGettone()) return false;           // L270-2 (D342): con l'agenda del mese, il gettone solo con una giornata sul territorio o con lo staff
   return territoriDEpoca();
 }
 function tipoTerrNorm(TE){ return String((TE&&TE.tipo)||'').normalize('NFD').replace(/[̀-ͯ]/g,''); }   // «città» dei dati → «citta» delle scene
@@ -8288,6 +8301,388 @@ function apriGiro(i){
   if(typeof render==='function') render();
 }
 function chiudiGiro(){ GIRO_APERTO=null; if(typeof render==='function') render(); }
+/* ================================================================================================================
+   ⚑ L270-2 · L'AGENDA DEL MESE — IL MOTORE (DESIGN-FORMATI.md «⚑ L270-1» D336-D346 e «⚑ L270-2»). ACCESA dal L270-3
+   (14/11, «⚑ L270-3»): a costante spenta nessun lettore qui sotto cambia niente (A/B 0); accesa con lo staff sempre, nemmeno (A/B 0 tolto
+   S.agendaMese). Testi più sotto («⚑ L270-3 · I TESTI»), interfaccia in ui.js («⚑ L270-3 · L'AGENDA DEL MESE — la presentazione»).
+   · Il momento (D336 (a)): il mese è già fatto al confine; a inizio mese, prima della prima carta, il giocatore posa tre giornate
+     sulle voci (agendaPosa; la bozza è transitoria: AGENDA_BOZZA) e conferma (agendaConferma) — SOLO lì le aggiunte e i rinvii —
+     oppure lascia fare allo staff (agendaStaff: il mese di oggi, nessuna estrazione). Una carta risolta prima vale «staff»
+     (resolveItem). Fuori (agendaPossibile): costante, fetta con ≥ 4 voci, AG_SOLO del mese (copiato da genAgenda nel transitorio
+     AGENDA_SOLO_MESE, mai in S), NOTTE, musicaTragedia(), primo mese della carriera, inCampagna(), una carta del mese già risolta.
+   · Il campo (D337 (ii)): S.agendaMese = {m, g:{voce:n}, staff, agg:[chiavi], rinv:[chiavi]}; agendaRipristina (applySnap, dopo
+     genAgenda) rimette per chiave le carte aggiunte (dal loro pool, per id) e ritoglie le rinviate; un valore illeggibile o di un
+     altro mese si toglie. Le chiavi delle aggiunte sono «voce|forma|id[|cornice|kind]» (agendaRifai), quelle dei rinvii
+     chiaveCartaAgenda. ⚠ La ricostruzione non estrae, salvo il volto della carta del diplomatico (rivaleNominato) e i nomi della
+     carta-scandalo del governo avversario (rnd): quelle due, come prima di L180-1, si ripescano.
+   · Le voci (D338, D339): AGENDA_VOCI; la prima giornata = una carta dovuta dal pool della voce (senza cadenza né dado; il suo
+     «ultimo» lo segna il pool stesso), la seconda = un effetto piccolo; a pool vuoto, doppione dello stesso tipo nel mese, tetto
+     delle AGENDA_TETTO carte aperte o AGENDA_MAX_AGG aggiunte già fatte, la giornata dà solo il secondo gradino. Nessuna voce
+     legge partito, blocco o asse. Il riposo (D341) rinvia una carta facoltativa a giornata (tolta dal mese e dalla finestra dei
+     recenti del suo pool) e, se il respiro è dovuto e il mese non ha un leggero, mette il beat leggero.
+   · Il gettone (D342): con l'agenda del mese decisa, il giro c'è solo con una giornata sul territorio o con lo staff
+     (giroPossibile); l'area che chiama resta apribile senza gettone. Le scelte del mese che esistono (radici, missione, dossier
+     conteso) non si toccano (D343).
+   · Leve di L270-2 Passo 0: AGENDA_MAX_AGG (⚠ 5: «al più due carte aggiunte», se la sonda supera il bersaglio) e AGENDA_G2_META
+     (i secondi gradini dimezzati, se D174 non passa). Banco: cerimonia 44 (harness.js, agendaBanco).
+   ================================================================================================================ */
+let AGENDA_MESE=true;   // ACCESA dal L270-3 (14/11): D174 passata in dieci fette, prove dei testi e CDP a 375 verdi nello stesso turno. ⚠ Il banco ha l agenda in tutte le carriere (cerimonia 44): __AGENDA_SOLO_STAFF rende le misure confrontabili con quelle di prima, __AGENDA_OFF rifà il gioco spento
+let AGENDA_MAX_AGG=null;       // un valore unico forzato (banco: __AGENDA_MAX_AGG, sonda: --max-agg=); null = la tabella per fetta qui sotto
+/* L270-3 Passo 1 (a), decisione di Cowork su ⚠ 1 di «⚑ L270-2»: le carte che l'agenda può aggiungere in un mese, PER FETTA — 2 dove
+   «acceso 2» sta entro +0,75 carte al mese, 1 dove supera +0,8 (L0 attivista +0,92, L5 diplomatico +1,05 nella sonda di L270-2).
+   Con 1 la seconda e la terza giornata danno solo il secondo gradino o il rinvio, come già fa il tetto. */
+const AGENDA_MAX_AGG_FETTA={ L0:1, L4:1, L5:1 };   // L4: la sonda del Passo 1 (b) con 2 dava +1,12 (1,72 → 2,84): la regola del lotto ci mette 1 anche lì
+function agendaMaxAgg(){ if(AGENDA_MAX_AGG>0) return AGENDA_MAX_AGG; var f=agendaFetta(); return (f && AGENDA_MAX_AGG_FETTA[f]) || 2; }
+/* L270-3 Passo 1 (c), la leva decisa prima su ⚠ 2: il secondo gradino di «Le capitali» (voce ufficio, fetta L5: credito +1). Si
+   spegne solo se i finali «ritiro» del diplomatico acceso restano più del doppio del placebo. */
+let AGENDA_CAPITALI_G2=false;   // SPENTO dal Passo 1 (c): diplomatico acceso «ritiro» 26/80 contro 10/80 del placebo (più del doppio)
+let AGENDA_G2_META=false;      // i secondi gradini dimezzati (arrotondati in su, minimo 1)
+let AGENDA_SOLO_MESE=false;    // transitorio: il mese è «solo» (AG_SOLO o primo mese) — lo scrive genAgenda
+let AGENDA_BOZZA=null;         // transitorio: {m, g} le giornate posate e non ancora confermate
+const AGENDA_GIORNATE=3, AGENDA_TETTO=4;
+function agG2(n){ return AGENDA_G2_META ? Math.max(1, Math.ceil(n/2)) : n; }
+/* la fetta della carriera: L0, L1, L2, L2opp (il volto), L3, L3opp, L4, L5 */
+function agendaFetta(){
+  if(typeof S==='undefined' || !S) return null;
+  var L=S.livello;
+  if(L===2) return S.opposizione ? 'L2opp' : 'L2';
+  if(L===3) return S.opposizione ? 'L3opp' : 'L3';
+  if(L===0) return (S.attivista && !S.attivista.laurea) ? 'L0' : null;
+  return (L===1 || L===4 || L===5) ? 'L'+L : null;
+}
+/* esegue fn con il PRIMO Math.random() a 0 (il dado della voce: «senza il dado»), poi rimette la funzione che c'era */
+function agSenzaDado(fn){
+  var orig=Math.random, primo=true;
+  Math.random=function(){ if(primo){ primo=false; Math.random=orig; return 0; } return orig(); };
+  try{ return fn(); } finally { Math.random=orig; }
+}
+/* «senza cadenza»: il campo dell'ultima uscita a null per la sola chiamata; il pool, se pesca, lo riscrive col mese */
+function agPrendi(campo, oggetto, fn){ var o=oggetto||S, v=o[campo]; o[campo]=null; var r=fn(); if(!r) o[campo]=v; return r; }
+function agSfida(ruoli, cornice){ var v=S.sfideUltimo; S.sfideUltimo=-9999; var q=pescaSfida(ruoli, cornice); if(!q) S.sfideUltimo=v; return q; }
+function agHa(pred){ return (S.agenda||[]).some(function(it){ return it && !it.resolved && pred(it); }); }
+function agId(it){ return it && it.data && it.data.id; }
+function agSfidaId(it){ var x=agId(it); return typeof x==='string' && x.indexOf('sfida_')===0; }
+function agTrova(arr, id){ return (arr||[]).filter(function(x){ return x && x.id===id; })[0] || null; }
+function agCorrenti(n){ (S.correnti||[]).forEach(function(c){ if(c && c.umore!=null) c.umore=clamp(c.umore+n,0,100); }); }
+/* AGENDA_VOCI: per voce le fette; per fetta {carta: () → {it, k} | null, doppione: () → bool, g2: () → void, g2c: () → bool (il
+   secondo gradino c'è), sola: una giornata soltanto, gettone: la prima giornata è il gettone del giro}. Un valore stringa è un
+   rimando alla regola di un'altra fetta. `nome` è la chiave IT col ripiego (le rese per epoca e l'inglese nel lotto 19). */
+const AGENDA_VOCI = {
+  terr: { nome:'Il territorio', fette:{
+    L0:{ carta:function(){ var id=agSenzaDado(function(){ return agPrendi('evUltimo', S.attivista, function(){ return provaAttivistaEvento(); }); }); var it=id&&cardAttivistaEvento(id); return it?{it:it, k:'att|'+id}:null; },
+         doppione:function(){ return agHa(function(it){ return it.kind==='attivista' && it.data && it.data.ev; }); },
+         g2:function(){ var i=(typeof radiciAttive==='function' && radiciAttive() && typeof radiciLavoroOra==='function') ? radiciLavoroOra() : null, R=S.attivista.radici;
+           if(i!=null && R && typeof R[i]==='number') R[i]=clamp(R[i]+agG2(1),0,100); else attB(agG2(1)); } },
+    L1:{ carta:function(){ var it=pickLocale(); return it?{it:it, k:'loc|'+it.data.id}:null; },
+         doppione:function(){ return agHa(function(it){ return it.kind==='locale'; }); },
+         g2:function(){ var ind=(S.locale&&S.locale.ind)||{}, ks=Object.keys(ind).filter(function(k){ return k!=='bilancio' && typeof ind[k]==='number'; }); if(!ks.length) return;
+           ks.sort(function(a,b){ return ind[a]-ind[b]; }); locInd(ks[0], agG2(2)); } },
+    L3:{ gettone:true,
+         g2:function(){ if(S.territorioChiama || S.telPendente) return; var idx=pickTerritorioChiama(); if(idx==null) return; var prob=pickProblemaTerr(); if(!prob) return;
+           S.territorioChiama={idx:idx, prob:prob, nato:meseAss()}; S.territorioUltimo=meseAss(); S.territorioRecente=idx; } },
+    L3opp:'L3' } },
+  partito: { nome:'Il partito', fette:{
+    L0:{ carta:function(){ if(S.attivista.campagna || S.attivista.campOfferta) return null; S.attivista.campOfferta=true; var it=cardCampOfferta(); if(!it){ S.attivista.campOfferta=false; return null; } return {it:it, k:'camp|camp_offerta'}; },
+         doppione:function(){ return agHa(function(it){ return it.data && (it.data.campStart || it.data.campResa); }); },
+         g2:function(){ attB(agG2(1)); } },
+    L1:{ sola:true, g2:function(){ S.capitale=clamp((S.capitale||0)+agG2(1),0,100); } },
+    L2:{ sola:true, g2:function(){ leald(agG2(3)); } },
+    L3:{ carta:function(){ var it=agPrendi('puntoUltimo', null, function(){ return pickPuntoPartito(); }); return it?{it:it, k:'punto|'+it.data.id}:null; },
+         doppione:function(){ return agHa(function(it){ return it.kind==='puntopartito'; }); },
+         g2:function(){ agCorrenti(agG2(1)); } },
+    L3opp:{ carta:function(){ if(S.leggeroUltimo===meseAss()) return null; var b=pescaRetro(); if(!b) return null; S.retroUltimo=meseAss(); return {it:{kind:'event', data:b, resolved:false}, k:'retro|'+b.id}; },
+         doppione:function(){ return S.retroUltimo===meseAss() || agHa(function(it){ return typeof RETRO_BEAT!=='undefined' && RETRO_BEAT.indexOf(it.data)>=0; }); },
+         g2:function(){ agCorrenti(agG2(1)); } },
+    L2opp:'L3opp' } },
+  ufficio: { nome:'L\'ufficio', fette:{
+    L2:{ carta:function(){ var it=pickMinistro(); return it?{it:it, k:'minc|'+it.data.id}:null; },
+         doppione:function(){ return agHa(function(it){ return it.kind==='ministro'; }); },
+         g2:function(){ var d=(typeof DICASTERO_IND!=='undefined') && DICASTERO_IND[S.dicastero]; if(d && S.ind && typeof S.ind[d[0]]==='number') S.ind[d[0]]=clamp(S.ind[d[0]]+d[1]*agG2(1),0,100); } },
+    L4:{ carta:function(){ if(!S.intl) return null; var it=agSenzaDado(function(){ return agPrendi('crisiUltimo', S.intl, function(){ return pickCrisiInt(); }); }); return it?{it:it, k:'crisiint|'+it.data.id}:null; },
+         doppione:function(){ return agHa(function(it){ return it.kind==='crisiInt'; }); } },
+    L5:{ carta:function(){ var it=agSenzaDado(function(){ return pickDiplo(); }); return it?{it:it, k:'diplo|'+it.data.id}:null; },
+         doppione:function(){ return agHa(function(it){ return typeof DIPLO_EV!=='undefined' && !!agTrova(DIPLO_EV, agId(it)); }); },
+         g2:function(){ if(S.diplo && typeof S.diplo.credito==="number") S.diplo.credito=clamp(S.diplo.credito+agG2(1),0,100); },
+         g2c:function(){ return AGENDA_CAPITALI_G2; } } } },   // L270-3: «Le capitali», il secondo gradino spegnibile (⚠ 2)
+  scrivania: { nome:'La scrivania', fette:{
+    L4:{ carta:function(){ var it=pickDiploDoss(); return it?{it:it, k:'diplodoss|'+it.data.id}:null; },
+         doppione:function(){ return agHa(function(it){ return typeof DIPLO_DOSS!=='undefined' && DIPLO_DOSS.indexOf(it.data)>=0; }); } },
+    L5:'L4' } },
+  aula: { nome:'L\'aula', fette:{
+    L3opp:{ carta:function(){ var gv=pickGovernoEvent(); if(!gv) return null; return {it:{kind:'event', data:gv, resolved:false, agGov:true}, k:'gov|'+S.recentGov[S.recentGov.length-1]}; },
+         doppione:function(){ return agHa(function(it){ return it.kind==='event' && it.data && !it.data.id; }); },   // la mossa del governo è l'unica carta-evento senza id
+         g2:function(){ S.credibilita=clamp((S.credibilita||0)+agG2(1),0,100); } },
+    L2opp:'L3opp' } },
+  stampa: { nome:'Stampa', fette:{
+    L0:{ carta:function(){ var q=agSfida(['attivista'],'piazza'); return q?{it:{kind:'attivista', data:q, resolved:false}, k:'sfida|'+q.id+'|piazza|attivista'}:null; },
+         doppione:function(){ return agHa(agSfidaId); }, g2:function(){ attA(agG2(1)); } },
+    L1:{ carta:function(){ var q=agSfida(['locale'],'aula'); return q?{it:{kind:'event', data:q, resolved:false}, k:'sfida|'+q.id+'|aula|event'}:null; },
+         doppione:function(){ return agHa(agSfidaId); } },
+    L2:{ carta:function(){ var q=agSfida(['governo','ministro'],'commissione'); if(!q) return null; S.confUltimo=meseAss(); return {it:{kind:'stampa', data:q, resolved:false}, k:'sfida|'+q.id+'|commissione|stampa'}; },
+         doppione:function(){ return agHa(function(it){ return it.kind==='stampa'; }); },
+         g2:function(){ if(S.ind && S.ind.stampa!=null) S.ind.stampa=clamp(S.ind.stampa+agG2(1),0,100); } },
+    L3:{ carta:function(){ var cf=agPrendi('confUltimo', null, function(){ return pickConferenza(); }); if(!cf) return null;
+           var sf=cf.id && String(cf.id).indexOf('sfida_')===0; return {it:{kind:'stampa', data:cf, resolved:false}, k:(sf ? 'sfida|'+cf.id+'|stampa|stampa' : 'conf|'+cf.id)}; },
+         doppione:function(){ return agHa(function(it){ return it.kind==='stampa'; }); },
+         g2:function(){ if(S.ind && S.ind.stampa!=null) S.ind.stampa=clamp(S.ind.stampa+agG2(1),0,100); } },
+    L3opp:{ carta:function(){ var q=agSfida(['governo'],'stampa'); return q?{it:{kind:'stampa', data:q, resolved:false}, k:'sfida|'+q.id+'|stampa|stampa'}:null; },
+         doppione:function(){ return agHa(function(it){ return it.kind==='stampa'; }); },
+         g2:function(){ S.visibilita=clamp((S.visibilita||0)+agG2(3),0,100); } },
+    L2opp:'L3opp',
+    L4:{ carta:function(){ var q=agSfida(['intl'],'vertice'); return q?{it:{kind:'event', data:q, resolved:false}, k:'sfida|'+q.id+'|vertice|event'}:null; },
+         doppione:function(){ return agHa(agSfidaId); } },
+    L5:'L4' } },
+  estero: { nome:'L\'estero', fette:{
+    L3:{ carta:function(){ if(typeof INTERNAZIONALI==='undefined') return null; var pool=INTERNAZIONALI.filter(function(e){ return (!e.cond||e.cond()) && eraViva(e); });
+           var ev=pescaBag('int', pool); return ev?{it:{kind:'event', data:ev, resolved:false}, k:'int|'+ev.id}:null; },
+         doppione:function(){ return agHa(function(it){ return typeof INTERNAZIONALI!=='undefined' && INTERNAZIONALI.indexOf(it.data)>=0; }); },
+         g2:function(){ if(S.relInt && S.relInt.alleanza!=null) S.relInt.alleanza=clamp(S.relInt.alleanza+agG2(1),0,100); },
+         g2c:function(){ return !!(S.relInt && S.relInt.alleanza!=null); } } } },
+  famiglia: { nome:'La famiglia', tutte:true, cond:function(){ return typeof famigliaPresente==='function' && famigliaPresente(); }, fette:{
+    tutte:{ carta:function(){
+             var fv=agSenzaDado(function(){ return agPrendi('famigliaVivaUltimo', null, function(){ return famigliaVivaCard(); }); });
+             if(fv){ S.persUltimo=meseAss(); return {it:fv, k:'fam|'+fv.data.id}; }
+             var pe=agPrendi('persUltimo', null, function(){ return pickPersonale(); }); return pe?{it:pe, k:'pers|'+pe.data.id}:null; },
+           doppione:function(){ return agHa(function(it){ return it.kind==='personale'; }); },
+           g2:function(){ serenitaMuovi(agG2(3)); } } } },
+  riposo: { nome:'Riposo', tutte:true, fette:{ tutte:{ riposo:true } } }
+};
+const AGENDA_ORDINE=['terr','partito','ufficio','scrivania','aula','stampa','estero','famiglia','riposo'];
+/* la regola della voce per la fetta di oggi */
+function agendaRegola(v){
+  var V=AGENDA_VOCI[v], f=agendaFetta(); if(!V || !f) return null;
+  if(V.cond && !V.cond()) return null;
+  var r=V.tutte ? V.fette.tutte : V.fette[f];
+  if(typeof r==='string') r=V.fette[r];
+  if(!r) return null;
+  if(r.gettone && !agTerrGettone()) return null;
+  return r;
+}
+/* il territorio al livello 3: dove il gettone c'è (giroPossibile senza la riga del gettone speso) */
+function agTerrGettone(){
+  if(!GIRO_SUL_TAVOLO || !S || S.livello!==3) return false;
+  if(!PAESE || !PAESE.mappa || !PAESE.territori || !S.territori || !S.territori.length) return false;
+  if(inCampagna() || NOTTE) return false;
+  if(typeof musicaTragedia==='function' && musicaTragedia()) return false;
+  if(S.year===S.annoInizio && S.month===1) return false;
+  return territoriDEpoca();
+}
+function agMaxGiornate(r){ if(!r) return 0; if(r.riposo) return 2; if(r.sola) return 1; if(r.gettone) return r.g2 ? 2 : 1; if(!r.carta || !r.g2 || (r.g2c && !r.g2c())) return 1; return 2; }
+function agendaVoci(){ return AGENDA_ORDINE.filter(function(v){ return !!agendaRegola(v); }); }
+function agendaMeseVivo(){ return !!(typeof S!=='undefined' && S && S.agendaMese && S.agendaMese.m===meseAss()); }
+function agendaGettone(){ return agendaMeseVivo() && (!!S.agendaMese.staff || ((S.agendaMese.g||{}).terr||0)>=1); }
+function agendaPossibile(){
+  if(!AGENDA_MESE || typeof S==='undefined' || !S) return false;
+  if(agendaMeseVivo()) return false;                                               // già decisa (o staff)
+  if(AGENDA_SOLO_MESE || NOTTE) return false;
+  if(typeof musicaTragedia==='function' && musicaTragedia()) return false;
+  if(S.year===S.annoInizio && S.month===1) return false;
+  if(inCampagna()) return false;
+  if((S.agenda||[]).some(function(it){ return it && it.resolved; })) return false;   // «prima della prima carta»
+  return agendaVoci().length>=4;
+}
+function agBozza(){ var m=meseAss(); if(!AGENDA_BOZZA || AGENDA_BOZZA.m!==m) AGENDA_BOZZA={m:m, g:{}}; return AGENDA_BOZZA; }
+function agendaGiornateRimaste(){ var g=agBozza().g, n=0; Object.keys(g).forEach(function(k){ n+=g[k]; }); return AGENDA_GIORNATE-n; }
+function agendaMaxVoce(v){ return agMaxGiornate(agendaRegola(v)); }
+/* posa una giornata sulla voce v (il terzo tocco che svuota la voce lo chiamerà ui.js nel 19: agendaSvuota) */
+function agendaPosa(v){
+  if(!agendaPossibile()) return false;
+  var r=agendaRegola(v); if(!r) return false;
+  var B=agBozza(), n=B.g[v]||0;
+  if(n>=agMaxGiornate(r) || agendaGiornateRimaste()<=0) return false;
+  B.g[v]=n+1; return true;
+}
+function agendaSvuota(v){ var B=agBozza(); delete B.g[v]; }
+function agendaStaff(){
+  if(!AGENDA_MESE || typeof S==='undefined' || !S) return false;
+  S.agendaMese={ m:meseAss(), g:{}, staff:true, agg:[], rinv:[] };
+  AGENDA_BOZZA=null; return true;
+}
+/* il riposo (D341): la carta facoltativa meno urgente del mese; mai una dovuta né una sfida-domanda */
+const AG_RINVIO_ORDINE=['conflitto','budget','proposta','dossier','locale','attivista','personale'];
+function agRinviabile(it){
+  if(!it || it.resolved || !it.kind || AG_RINVIO_ORDINE.indexOf(it.kind)<0) return false;
+  var d=it.data||{};
+  if(agSfidaId(it) || d.campStart || d.campResa || d.snodo || d.cronaca || d.dovuta) return false;
+  if(it.kind==='personale' && d.tipo==='crisi') return false;   // la vita privata drammatica non si rinvia
+  return true;
+}
+function agRinvia(){
+  var best=-1, rank=99;
+  (S.agenda||[]).forEach(function(it, i){ if(!agRinviabile(it)) return; var r=AG_RINVIO_ORDINE.indexOf(it.kind); if(r<rank){ rank=r; best=i; } });
+  if(best<0) return null;
+  var it=S.agenda[best], k=chiaveCartaAgenda(it), id=agId(it);
+  S.agenda.splice(best,1);
+  if(id!=null) Object.keys(S).forEach(function(c){ if(/^recent/.test(c) && Array.isArray(S[c])){ var j=S[c].indexOf(id); if(j>=0) S[c].splice(j,1); } });   // fuori dalla finestra dei recenti: torna candidata
+  return k || ('?|'+it.kind);   // l'evento del mese dell'attivista resta in evCorrente: torna il mese dopo
+}
+function agApri(){ return (S.agenda||[]).filter(function(it){ return it && !it.resolved; }).length; }
+/* la conferma: le aggiunte e i rinvii avvengono SOLO qui */
+function agendaConferma(){
+  if(!agendaPossibile()) return false;
+  var g=Object.assign({}, agBozza().g), agg=[], rinv=[];
+  AGENDA_ORDINE.forEach(function(v){
+    var n=g[v]||0; if(!n) return;
+    var r=agendaRegola(v); if(!r) return;
+    if(r.riposo){
+      for(var i=0;i<n;i++){ var k=agRinvia(); if(k) rinv.push(k); }
+      if(typeof leggeroDovuto==='function' && leggeroDovuto() && S.leggeroUltimo!==meseAss() && agg.length<agendaMaxAgg() && agApri()<AGENDA_TETTO){
+        var bl=pescaLeggero(); if(bl){ S.leggeroUltimo=meseAss(); S.agenda.push({kind:'event', data:bl, resolved:false}); agg.push('riposo|leggero|'+bl.id); } }
+      return;
+    }
+    if(r.gettone){ if(n>=2 && r.g2) r.g2(); return; }   // la prima giornata è il gettone (agendaGettone legge g.terr)
+    if(r.sola || !r.carta){ if(r.g2 && (!r.g2c || r.g2c())) r.g2(); return; }
+    var aggiunta=false;
+    if(agg.length<agendaMaxAgg() && agApri()<AGENDA_TETTO && !(r.doppione && r.doppione())){
+      var c=r.carta(); if(c && c.it){ S.agenda.push(c.it); agg.push(v+'|'+c.k); aggiunta=true; }
+    }
+    if((!aggiunta || n>=2) && r.g2 && (!r.g2c || r.g2c())) r.g2();
+  });
+  S.agendaMese={ m:meseAss(), g:g, staff:false, agg:agg, rinv:rinv };
+  AGENDA_BOZZA=null;
+  agendaRegistro();   // L270-3: la riga del registro, una per mese
+  return true;
+}
+/* la carta aggiunta, rifatta dalla sua chiave (per id dal pool di sempre, senza estrazione salvo le due dette in testa) */
+function agendaRifai(k){
+  var p=String(k).split('|'), f=p[0], id=p[1];
+  try{
+    if(f==='att') return cardAttivistaEvento(id);
+    if(f==='camp'){ if(S.attivista) S.attivista.campOfferta=true; return cardCampOfferta(); }
+    if(f==='loc'){ var e=agTrova(LOCALE_EV, id); return e?{kind:'locale', data:e, resolved:false}:null; }
+    if(f==='punto'){ var q=agTrova(PUNTO_PARTITO, id); return q?{kind:'puntopartito', data:q, resolved:false}:null; }
+    if(f==='retro'){ var b=agTrova(RETRO_BEAT, id); return b?{kind:'event', data:b, resolved:false}:null; }
+    if(f==='leggero'){ var bl=agTrova(BEAT_LEGGERI, id); return bl?{kind:'event', data:bl, resolved:false}:null; }
+    if(f==='minc'){ var mc=agTrova(MINISTRO_CARTE, id); return mc?{kind:'ministro', data:mc, resolved:false}:null; }
+    if(f==='crisiint'){ var ci=agTrova(CRISI_INT, id); return ci?crisiIntCarta(ci):null; }
+    if(f==='diplo'){ var dp=agTrova(DIPLO_EV, id); return dp?diploCarta(dp):null; }
+    if(f==='diplodoss'){ var dd=agTrova(DIPLO_DOSS, id); return dd?{kind:'event', data:dd, resolved:false}:null; }
+    if(f==='gov'){ var ix=parseInt(id,10); return (GOVERNO_EV[ix]) ? {kind:'event', data:governoEventDa(ix), resolved:false, agGov:true} : null; }
+    if(f==='int'){ var iv=agTrova(INTERNAZIONALI, id); return iv?{kind:'event', data:iv, resolved:false}:null; }
+    if(f==='fam'){ var fv=agTrova(FAMIGLIA_VIVA, id); return fv?{kind:'personale', data:fv, resolved:false}:null; }
+    if(f==='pers'){ var pe=agTrova(EVENTI_PERSONALI, id); return pe?{kind:'personale', data:pe, resolved:false}:null; }
+    if(f==='conf'){ var cq=agTrova(CONFERENZE, id); return cq?{kind:'stampa', data:confCarta(cq), resolved:false}:null; }
+    if(f==='sfida'){ var sq=agTrova(SFIDE, String(id).replace(/^sfida_/,'')); return sq?{kind:p[3]||'stampa', data:cartaSfida(sq, p[2]), resolved:false}:null; }
+  }catch(e){}
+  return null;
+}
+/* applySnap, dopo genAgenda: il campo letto, le rinviate ritolte, le aggiunte rimesse per chiave; illeggibile o di un altro mese → via */
+function agendaRipristina(pa){
+  if(typeof S==='undefined' || !S || !('agendaMese' in S)) return;
+  var A=S.agendaMese;
+  if(!A || typeof A!=='object' || typeof A.m!=='number' || A.m!==meseAss() || (A.agg && !Array.isArray(A.agg)) || (A.rinv && !Array.isArray(A.rinv))){ delete S.agendaMese; return; }
+  var risolte=(pa && Array.isArray(pa.risolte)) ? pa.risolte : [];
+  (A.rinv||[]).forEach(function(c){ var i=(S.agenda||[]).findIndex(function(it){ return it && !it.resolved && chiaveCartaAgenda(it)===c; }); if(i>=0) S.agenda.splice(i,1); });
+  (A.agg||[]).forEach(function(k){
+    var s=String(k), it=agendaRifai(s.slice(s.indexOf('|')+1)); if(!it) return;
+    var c=chiaveCartaAgenda(it);
+    if(c && (risolte.indexOf(c)>=0 || (S.agenda||[]).some(function(x){ return x && chiaveCartaAgenda(x)===c; }))) return;   // risolta nel mese o già in agenda: non torna
+    S.agenda.push(it);
+  });
+}
+/* ⚑ L270-3 · I TESTI DELL'AGENDA DEL MESE (DESIGN-FORMATI.md «⚑ L270-1» D338, D346 e «⚑ L270-3» Passo 2). Le chiavi IT sono le
+   stringhe qui sotto (T() prima della sostituzione dei segnaposto); l'inglese in lang-en.js. Nessun numero nudo, nessuna variabile.
+   · AGENDA_TV_DAL: paese → [anno, mese] della televisione regolare; prima la voce si chiama «Stampa e radio». Solo i paesi con una
+     porta che comincia prima di quella data (Francia, Regno Unito e Stati Uniti l'avevano già prima del 1950): fonti nel rapporto.
+     Italia: RAI, 3 gennaio 1954 · Germania Ovest: NWDR, 25 dicembre 1952. Dal 2005 (e nel presente) «Stampa, TV e rete». */
+const AGENDA_TV_DAL={ italia:[1954,1], germania:[1952,12] };
+const AGENDA_RETE_DAL=2005;
+function agendaStampaNome(){
+  if(S.scenario==='presente' || S.year>=AGENDA_RETE_DAL) return 'Stampa, TV e rete';
+  var tv=AGENDA_TV_DAL[S.paese];
+  if(tv && meseAss() < tv[0]*12+tv[1]) return 'Stampa e radio';
+  return 'Stampa e TV';
+}
+/* il nome della voce per la fetta di oggi (la chiave IT; la resa la fa agendaNome) */
+const AGENDA_NOMI={
+  terr:{ L0:'La piazza', L1:'@locale', L3:'Sul territorio', L3opp:'Sul territorio' },
+  partito:{ L0:'Il movimento', L1:'Il partito', L2:'@capo', L2opp:'Il partito', L3:'Il partito', L3opp:'Il partito' },
+  ufficio:{ L2:'Il ministero', L4:'Le crisi', L5:'Le capitali' },
+  scrivania:{ _:'La scrivania' }, aula:{ _:'L\'aula' }, stampa:{ _:'@stampa' }, estero:{ _:'L\'estero' },
+  famiglia:{ _:'La famiglia' }, riposo:{ _:'Riposo' }
+};
+function agendaNomeChiave(v){
+  var t=AGENDA_NOMI[v], f=agendaFetta(); if(!t) return v;
+  var x=(f && t[f]) || t._ || '';
+  if(x==='@locale') return (S.locale && S.locale.tipo==='regione') ? 'La regione' : 'Il comune';
+  if(x==='@capo') return (PAESE && PAESE.titoloRuolo==='Presidente') ? 'Il presidente' : 'Il premier';   // il titolo istituzionale, al maschile
+  if(x==='@stampa') return agendaStampaNome();
+  return x;
+}
+function agendaNome(v){ return T(agendaNomeChiave(v)); }
+/* che cosa porta la PRIMA giornata (una carta) e la SECONDA (un effetto), per voce e fetta: parole di gioco */
+const AGENDA_CARTA_TXT={
+  terr:{ L0:'un\'iniziativa del movimento', L1:'una questione da risolvere' },
+  partito:{ L0:'una proposta di campagna', L3:'un incontro col partito', L3opp:'un retroscena dal palazzo', L2opp:'un retroscena dal palazzo' },
+  ufficio:{ L2:'una pratica del ministero', L4:'una crisi da mediare', L5:'una missione all\'estero' },
+  scrivania:{ _:'un fascicolo da studiare' },
+  aula:{ _:'la prossima mossa del governo' },
+  stampa:{ L0:'una domanda in piazza', L1:'una domanda in consiglio', L2:'una domanda in commissione', L3:'una conferenza stampa', L3opp:'una domanda dei cronisti', L2opp:'una domanda dei cronisti', L4:'una domanda al vertice', L5:'una domanda al vertice' },
+  estero:{ _:'un fatto dall\'estero' },
+  famiglia:{ _:'un momento in famiglia' }
+};
+const AGENDA_G2_TXT={
+  terr:{ L0:'il movimento mette radici dove lavori', L1:'il servizio più indietro migliora', L3:'un\'area chiede una visita', L3opp:'un\'area chiede una visita' },
+  partito:{ L0:'la base cresce', L1:'il tuo peso nel partito cresce', L2:'il capo del governo si fida di più', L3:'le correnti si calmano', L3opp:'le correnti si calmano', L2opp:'le correnti si calmano' },
+  ufficio:{ L2:'il tuo settore migliora', L5:'il tuo credito cresce' },
+  aula:{ _:'la tua credibilità cresce' },
+  stampa:{ L0:'la tua autorevolezza cresce', L2:'la stampa ti tratta meglio', L3:'la stampa ti tratta meglio', L3opp:'ti vedono di più', L2opp:'ti vedono di più' },
+  estero:{ _:'gli alleati ti sentono più vicino' },
+  famiglia:{ _:'un po\' di serenità' }
+};
+function agTxt(tab, v){ var t=tab[v], f=agendaFetta(); if(!t) return null; var x=(f && t[f]) || t._; return x ? T(x) : null; }
+function agendaG2Vivo(r){ return !!(r && r.g2 && (!r.g2c || r.g2c())); }
+function agRinviabiliN(){ return (S.agenda||[]).filter(agRinviabile).length; }
+/* la voce v non apre una carta questo mese (tetto, doppione, aggiunte già prenotate dalla bozza) */
+function agendaCartaChiusa(v){
+  var r=agendaRegola(v); if(!r || !r.carta) return true;
+  if(agApri()>=AGENDA_TETTO) return true;
+  if(r.doppione && r.doppione()) return true;
+  var g=agBozza().g, n=0;
+  AGENDA_ORDINE.forEach(function(w){ if(w===v || !g[w]) return; var rw=agendaRegola(w); if(rw && rw.carta && !rw.sola) n++; });
+  return n>=agendaMaxAgg();
+}
+/* la targhetta di una riga: che cosa porta la prima giornata e che cosa la seconda */
+function agendaTarghetta(v){
+  var r=agendaRegola(v); if(!r) return '';
+  if(r.riposo) return agRinviabiliN()>0 ? T('Rinvia una carta non urgente; la seconda giornata ne rinvia un\'altra.') : T('Niente da rinviare questo mese.');
+  var a=agTxt(AGENDA_CARTA_TXT, v), b=agendaG2Vivo(r) ? agTxt(AGENDA_G2_TXT, v) : null;
+  if(r.gettone) return T('Con una giornata qui, questo mese puoi fare il giro.') + (b ? ' '+T('Con due: %B.').replace('%B', b) : '');
+  if(r.sola || !r.carta) return b ? T('Una giornata: %B.').replace('%B', b) : '';
+  if(agendaCartaChiusa(v)) return T('Questo mese l\'agenda è piena: la giornata rafforza, non apre carte.') + (b ? ' '+T('Rafforza: %B.').replace('%B', b) : '');
+  if(!b) return T('Una giornata: %A.').replace('%A', a);
+  return T('Prima giornata: %A. Seconda: %B.').replace('%A', a).replace('%B', b);
+}
+/* le righe d'esito (derivate da S.agendaMese: valgono anche dopo un caricamento) */
+function agendaEsitoRighe(){
+  var A=S && S.agendaMese; if(!A) return [];
+  if(A.staff) return [T('Lo staff ha organizzato il mese.')];
+  var out=[];
+  AGENDA_ORDINE.forEach(function(v){
+    var n=(A.g||{})[v]||0; if(!n) return;
+    var r=agendaRegola(v), nome=agendaNome(v), x;
+    if(v==='riposo'){ var k=(A.rinv||[]).length; x = k>=2 ? T('due carte aspetteranno il mese prossimo') : k===1 ? T('una carta aspetterà il mese prossimo') : T('niente da rinviare'); }
+    else if(r && r.gettone){ x = T('questo mese puoi fare il giro'); if(n>=2 && agendaG2Vivo(r)) x += ', ' + agTxt(AGENDA_G2_TXT, v); }
+    else {
+      var agg=(A.agg||[]).some(function(c){ return String(c).indexOf(v+'|')===0; });
+      var b=(r && agendaG2Vivo(r)) ? agTxt(AGENDA_G2_TXT, v) : null;
+      if(agg){ x = T('arriva %A').replace('%A', agTxt(AGENDA_CARTA_TXT, v) || T('una carta')); if(n>=2 && b) x += ', ' + b; }
+      else x = b || T('niente di nuovo questo mese');
+    }
+    out.push(T('%V: %X.').replace('%V', nome).replace('%X', x));
+  });
+  return out;
+}
+/* la riga del riepilogo sopra la barra di fine mese: «Agenda: Il partito ×2 · Stampa e TV» / «Agenda: lo staff» */
+function agendaRiepilogo(){
+  if(!agendaMeseVivo()) return '';
+  var A=S.agendaMese;
+  if(A.staff) return T('Agenda: lo staff');
+  var p=[]; AGENDA_ORDINE.forEach(function(v){ var n=(A.g||{})[v]||0; if(n) p.push(agendaNome(v) + (n>1 ? ' ×'+n : '')); });
+  return T('Agenda: %L').replace('%L', p.join(' · '));
+}
+/* la riga del registro alla conferma: una sola per mese */
+function agendaRegistro(){ var r=agendaEsitoRighe(); if(r.length && S.log) S.log.unshift({t:T('L\'agenda del mese'), x:r.join(' ')}); }
 /* ⚑ L239-7 · LE TRE FORME DEL GETTONE (DESIGN-MAPPA.md §2 (d) e §3 punto 6; decisioni di Cowork del 21/10 sulle valute).
    Lo stesso gettone del mese (giroPossibile, S.giroMese) si spende in una di tre forme, scelte dal foglietto dell'area:
    · VISITA = apriGiro di sempre (la scena F2 o di GIRO_SCENE, umore dalla scelta);
@@ -10021,6 +10416,7 @@ function genAgenda(first){
   const _pre=(SNAP_PRIMA_AGENDA && S) ? fotoPrimaAgenda() : null;
   AG_SOLO=false;
   genAgendaRamo(first);
+  AGENDA_SOLO_MESE=!!(first || AG_SOLO);    // L270-2: il segno del mese per l'agenda (transitorio)
   if(!(first || AG_SOLO)) codaAgenda();      // primo mese e mesi-setpiece: nessuna coda
   meseSobrioSegna();                         // L262-24: prima del titolo del mese, che gira dopo genAgenda
   if(!MESE_IN_CORSO) luogoTerrNasci();       // L239-5: le carte con `luogo:'terr'` ricevono il loro territorio (niente Math.random); dentro il mese alla fine (advanceMonth)
@@ -10171,6 +10567,7 @@ function diffEsiti(prima,dopo){
   return out.slice(0,ESITI_MAX);
 }
 function resolveItem(idx,ci){
+  if(AGENDA_MESE && agendaPossibile()) agendaStaff();   // L270-2 (⚠ 4 di L270-1): una carta risolta con l'agenda aperta vale «staff», senza avvisi
   const it=S.agenda[idx];
   if(it && !it.resolved){ if(typeof suona==='function') suona('tocco'); }   // L95-3: il tocco sull'opzione — qui, dove la scelta si DECIDE
   const prima=(it&&!it.resolved)?fotoEsiti():null;
@@ -13246,6 +13643,10 @@ function pickGovernoEvent(){
   if(!pool.length) pool=GOVERNO_EV.map((e,i)=>i).filter(ok);
   if(!pool.length) return null;
   const idx=rnd(pool); S.recentGov.push(idx); if(S.recentGov.length>8) S.recentGov.shift();   // D2: finestra 3→8 (pool 12): niente terzo passaggio ravvicinato
+  return governoEventDa(idx);
+}
+/* L270-2: la carta dall'indice (la rimette anche agendaRipristina dopo un caricamento) */
+function governoEventDa(idx){
   const ev=GOVERNO_EV[idx], govNm=(part(S.governoAvversario)||{}).nome||T('il governo');
   let t=T(ev.t||'').replace(/%G/g,govNm), text=T(ev.text||'').replace(/%G/g,govNm);   // i18n: T() sul template, PRIMA dei replace (%G/%M intatti)
   if(ev.scandalo){ const m=rnd(PAESE.nomi)+' '+rnd(PAESE.cognomi), sc=rnd(SCANDALI); t=t.replace(/%M/g,m); text=m+' ('+T('ministro di %G').replace('%G',govNm)+') '+T(sc.text); }
@@ -14278,6 +14679,7 @@ function applySnap(snap){
   if(S.livello===5 && S.diplo && !S.diplo.conc) concNasce();   // L260-5bis: un diplomatico di prima riceve il concorrente (solo con DIPLO_CONCORRENTE)
   genAgenda(false);   // agenda fresca: il mese riparte pulito
   if(_pa) togliRisolteAgenda(_pa.risolte);   // L180-1: una carta risolta nel mese non torna (D150)
+  agendaRipristina(_pa);   // L270-2: le carte aggiunte e rinviate dall'agenda del mese, per chiave (un valore illeggibile o di un altro mese si toglie)
   if(!S.titoloMese){ try{ generaTitolo(); }catch(e){} }   // vecchi salvataggi senza titolo: la striscia c'è sempre
   if(!S.tab) S.tab='gov';
   render();

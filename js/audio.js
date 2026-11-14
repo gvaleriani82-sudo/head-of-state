@@ -173,7 +173,10 @@ const AUDIO_MANIFEST = {
   /* L218-35 · promesse e trattativa (giro suoni 27): gain da .claude/misura-l218-35.js */
   promessa:           { file:'promessa.mp3',           loop:false, gain:0.88 },  // 1,0 s: RMS −26,7, picco +0,1 decodificato (al tetto del picco: reso −27,8)
   'promessa-mancata': { file:'promessa-mancata.mp3',   loop:false, gain:0.80 },  // 1,0 s: RMS −21,5, picco −3,6
-  'trattativa-round': { file:'trattativa-round.mp3',   loop:false, gain:0.87 }   // 1,5 s: RMS −22,3, picco +0,1 decodificato
+  'trattativa-round': { file:'trattativa-round.mp3',   loop:false, gain:0.87 },  // 1,5 s: RMS −22,3, picco +0,1 decodificato
+  /* L270-3 · l'agenda del mese (giro suoni 26): gain da .claude/misura-l270-3-audio.js, resa come gli effetti brevi d'interfaccia */
+  'agenda-segna':     { file:'agenda-segna.mp3',       loop:false, gain:1.16 },  // 0,6 s: RMS −27,1, picco −6,3; la regola dava 1,52 (reso −23,4): tenuto al reso di `tocco` (−25,8), gesto ripetuto tre volte al mese
+  'agenda-chiudi':    { file:'agenda-chiudi.mp3',      loop:false, gain:0.88 }   // 1,0 s: RMS −28,8, picco +0,1 decodificato → tetto del picco (reso −29,9)
 };
 /* ⚠ I FILE CHE ESISTONO DAVVERO in assets/audio/. Il motore carica SOLO questi: un nome del manifesto che non è
    qui non genera nessuna richiesta di rete. Si aggiorna a mano quando un file cambia, e se la lista e la cartella
@@ -201,7 +204,8 @@ const AUDIO_PRESENTI = ['tocco.mp3','carta.mp3','chip.mp3','mese.mp3','giornale.
                         'artiglieria.mp3','elicottero.mp3','jet-sorvolo.mp3','radio-militare.mp3','ultimatum.mp3','bandiera.mp3','crisi-giorno.mp3',
                         'minuto-silenzio.mp3','alluvione.mp3','sisma.mp3','saracinesca.mp3','mappa-conquista.mp3','mappa-persa.mp3','congresso.mp3',
                         'giuramento.mp3','strappo.mp3','annuncio.mp3','nastro.mp3','spoglio-ondata.mp3','spoglio-sorpasso.mp3',   // L218-34 (13/11: giro suoni 17, 18, 26)
-                        'promessa.mp3','promessa-mancata.mp3','trattativa-round.mp3'];   // L218-35 (giro suoni 27)
+                        'promessa.mp3','promessa-mancata.mp3','trattativa-round.mp3',   // L218-35 (giro suoni 27)
+                        'agenda-segna.mp3','agenda-chiudi.mp3'];   // L270-3 (14/11: l'agenda del mese, file di L218-26)
 
 /* ── 6 · NIENTE SINTETICO A RUNTIME ────────────────────────────────────────────────────────────────────────
    Il motore carica FILE. I suoni li genera `.claude/genera-audio.js` una volta, fuori dal gioco (L95-3a); la prima
