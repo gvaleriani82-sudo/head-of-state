@@ -5626,7 +5626,7 @@ const BEAT_LEGGERI = [
    {l:'Scrivi ai tifosi: «Ci avete fatto onore»', e:'Una frase che tutti condividono', f:function(){}},
    {l:'Guardi la partita in un bar, in mezzo agli altri', e:'La foto in maglia gira', f:function(){}}]},
  /* ===== L250-7 · PAESI BASSI, sei beat leggeri — effetto zero, come i sei danesi. Tre ancorati al calendario. ===== */
- {id:'nl_p_b_koningsdag', era:'contemporanea', paesi:['paesibassi'], registro:'leggero', cond:()=>S.month===4, kick:'Il paese', t:'Il giorno del Re', text:'A fine aprile il paese si veste di arancione. Nelle strade chiunque può stendere un telo e vendere quello che ha in soffitta, i bambini suonano per qualche moneta e i canali si riempiono di barche. Ti hanno visto in un mercatino.', ch:[
+ {id:'nl_p_b_koningsdag', era:'contemporanea', paesi:['paesibassi'], registro:'leggero', cond:()=>S.month===4 && S.leggi.monarchia!==false, kick:'Il paese', t:'Il giorno del Re', text:'A fine aprile il paese si veste di arancione. Nelle strade chiunque può stendere un telo e vendere quello che ha in soffitta, i bambini suonano per qualche moneta e i canali si riempiono di barche. Ti hanno visto in un mercatino.', ch:[
    {l:'Compri un vecchio giradischi e tratti sul prezzo', e:'Il video della trattativa gira tutto il giorno', f:function(){}},
    {l:'Una sciarpa arancione e due passi, senza comprare niente', e:'Sobrio, e sorridente', f:function(){}}]},
  {id:'nl_p_b_fiets', era:'contemporanea', paesi:['paesibassi'], registro:'leggero', kick:'Il paese', t:'Le biciclette nel canale', text:'Davanti alla stazione centrale il parcheggio delle biciclette è pieno anche al terzo piano, e ogni anno dai canali della capitale ripescano migliaia di bici arrugginite. Un giornalista ti chiede quante te ne hanno rubate.', ch:[
@@ -14807,7 +14807,7 @@ const EVENTS=[
    {l:'Nomine indipendenti, con un comitato', e:'Meglio, e sempre nomine', f:()=>{gd('cetomedio',2); gd('giovani',1);}},                                                                                                                              // ⑪
    {l:'Chiedi alle province una riforma vera', e:'La risposta arriverà fra dieci anni', f:()=>{gd('cetomedio',1); gd('pensionati',-1);}},
    {l:'Nomina i tuoi: così fanno tutti', e:'Così fanno tutti, e tutti lo scrivono', f:()=>{S.ind.stampa-=2; gd('giovani',-2);}}]},
- {id:'ca_p_monarchia', era:'contemporanea', paesi:['canada'], kick:'Corona', t:'Il volto sulle banconote', text:'Il capo dello Stato vive a cinquemila chilometri e cambia per nascita. Una parte del paese, soprattutto francofona, vorrebbe una repubblica; cambiare la Costituzione richiede tutte le province, che non sono mai d\'accordo su niente. Intanto bisogna decidere il volto sulla nuova banconota.', ch:[
+ {id:'ca_p_monarchia', era:'contemporanea', paesi:['canada'], cond:()=>S.leggi.monarchia!==false, kick:'Corona', t:'Il volto sulle banconote', text:'Il capo dello Stato vive a cinquemila chilometri e cambia per nascita. Una parte del paese, soprattutto francofona, vorrebbe una repubblica; cambiare la Costituzione richiede tutte le province, che non sono mai d\'accordo su niente. Intanto bisogna decidere il volto sulla nuova banconota.', ch:[
    {l:'Apri il dibattito sulla repubblica', e:'Se ne parla, e non se ne fa niente', f:()=>{gd('giovani',2); gd('cattolici',1); gd('pensionati',-3);}},                                                                                                // ⑫
    {l:'La monarchia è la nostra storia: nessun dibattito', e:'Sereno, e il Québec sbuffa', f:()=>{gd('pensionati',3); gd('cetomedio',1); gd('giovani',-2); gd('cattolici',-1);}},
    {l:'Sulla banconota un canadese, e basta', e:'Il compromesso che piace', f:()=>{S.ind.stampa+=1; gd('cetomedio',1); gd('giovani',1);}}]},
@@ -14853,7 +14853,7 @@ const EVENTS=[
    {l:'Vieta la pubblicità delle scommesse', e:'Le tv perdono, le famiglie no', f:()=>{gd('cattolici',4); gd('cetomedio',2); gd('giovani',1); gd('imprenditori',-3);}},                                                                                    // ⑪
    {l:'Carta di gioco con limiti di perdita', e:'I club protestano, i dati dicono che funziona', f:()=>{gd('cattolici',2); gd('cetomedio',1); gd('pensionati',-2);}},
    {l:'È una libertà: nessun intervento', e:'Le entrate reggono', f:()=>{gd('imprenditori',2); gd('pensionati',1); gd('cattolici',-3);}}]},
- {id:'au_p_repubblica', era:'contemporanea', paesi:['australia'], kick:'Corona', t:'La repubblica, di nuovo', text:'Il capo dello Stato vive dall\'altra parte del mondo, e il paese ha già detto no una volta a una repubblica — non perché volesse il re, ma perché non gli piaceva il modello proposto. Un cambio sul trono riapre la domanda.', ch:[
+ {id:'au_p_repubblica', era:'contemporanea', paesi:['australia'], cond:()=>S.leggi.monarchia!==false, kick:'Corona', t:'La repubblica, di nuovo', text:'Il capo dello Stato vive dall\'altra parte del mondo, e il paese ha già detto no una volta a una repubblica — non perché volesse il re, ma perché non gli piaceva il modello proposto. Un cambio sul trono riapre la domanda.', ch:[
    {l:'Un nuovo referendum, con il presidente eletto dal popolo', e:'Il modello che avrebbe vinto l\'altra volta', f:()=>{gd('giovani',3); gd('lavoratori',1); gd('pensionati',-3);}},                                                                   // ⑫
    {l:'Non è il momento: ci sono le bollette', e:'Vero, e il tema resta lì', f:()=>{gd('pensionati',2); gd('cetomedio',1); gd('giovani',-1);}},
    {l:'Ministro per la repubblica, senza data', e:'Un segnale, e nient\'altro', f:()=>{gd('giovani',1); gd('pensionati',-1);}}]},
@@ -14907,7 +14907,7 @@ const EVENTS=[
    {l:'Allarga il programma: più tasse ai comuni scelti', e:'I regali migliorano, le città perdono gettito', f:()=>{gd('cattolici',3); gd('cetomedio',1); gd('lavoratori',-1);}},                                                                             // ⑪
    {l:'Fondi diretti ai comuni sotto i mille abitanti', e:'Meno sakè, più strade', costo:{debito:0.4}, f:()=>{S.ind.debt+=0.4; gd('cattolici',2); gd('pensionati',2);}},
    {l:'Accompagna la chiusura: servizi nei capoluoghi', e:'Onesto, e nessun sindaco lo vota', costo:{debito:-0.2}, f:()=>{S.ind.debt-=0.2; gd('cattolici',-4); gd('pensionati',-2); gd('cetomedio',1);}}]},
- {id:'jp_p_successione', era:'contemporanea', paesi:['giappone'], kick:'Cerimonia', t:'La linea maschile', text:'La legge riserva il trono ai maschi, e i maschi in linea sono pochissimi. Il paese discute da vent\'anni se cambiare la regola; la maggioranza dei cittadini è favorevole, una parte del tuo partito no. La famiglia imperiale, per Costituzione, non ha voce.', ch:[
+ {id:'jp_p_successione', era:'contemporanea', paesi:['giappone'], cond:()=>S.leggi.monarchia!==false, kick:'Cerimonia', t:'La linea maschile', text:'La legge riserva il trono ai maschi, e i maschi in linea sono pochissimi. Il paese discute da vent\'anni se cambiare la regola; la maggioranza dei cittadini è favorevole, una parte del tuo partito no. La famiglia imperiale, per Costituzione, non ha voce.', ch:[
    {l:'Apri alla successione femminile', e:'La maggioranza del paese è d\'accordo; il dibattito dura anni', f:()=>{gd('giovani',3); gd('cetomedio',2); gd('cattolici',-4);}},                                                                                    // ⑫
    {l:'Riporta in linea i rami collaterali', e:'La soluzione della tradizione', f:()=>{gd('cattolici',2); gd('pensionati',1); gd('giovani',-2);}},
    {l:'Rinvia: non è urgente', e:'Lo è da vent\'anni', f:()=>{gd('cetomedio',-1);}}]},
@@ -23149,21 +23149,26 @@ const MOSSE_CHIUSURA=[
    L250-20 (12/11): il Belgio ◦ — matrimonio (2003), nucleare (le centrali di Doel e Tihange in funzione e l'uscita del 2003 ritirata
    nel 2025: il criterio di L250-13, «ci sono centrali»); leva no (sospesa dal 1994), salario minimo no (minimo da contratto
    interprofessionale reso obbligatorio, non una legge dello Stato: la chiave è «legale»), patrimoniale, droghe e pena di morte no.
-   Il fine vita (2002) non è una legge del pool. Rapporto «⚑ L250-20». */
+   Il fine vita (2002) non è una legge del pool. Rapporto «⚑ L250-20».
+   L250-27 (13/11): i dodici presenti vecchi ◦ — matrimonio (AU 2017, ZA 2006, DE 2017, CA 2005, ES 2005, BR 2013 per sentenza,
+   MX 2022 in tutti gli Stati, AR 2010), nucleare (IN, ZA, JP, CA, BR, MX, AR, KR: «ci sono centrali»; la Spagna no, uscita programmata),
+   salario minimo legale (AU, IN, ZA 2019, JP, CA, ES, BR, MX, AR, KR, NG), leva (BR, MX a sorteggio, KR), pena di morte (JP, IN, NG;
+   la Corea del Sud no, mai eseguita dal 1997). ⚠ La GERMANIA è fuori dal salario minimo (2015): `iniziale` non ha anno, e
+   `salario_min` non ha `era`, quindi `germania:1` lo accenderebbe anche in de1950…de1990. Rapporto «⚑ L250-27». */
 const LEGGI = [
   // ===== Comuni (ovunque) =====
   { id:'salario_min', nome:'Salario minimo legale', desc:'Fissa per legge una retribuzione oraria minima.', asse:-1, costo:1,
-    iniziale:{usa:1, regnounito:1, francia:1, paesibassi:1}, unaTantum:{grp:{lavoratori:6, giovani:3, imprenditori:-6}}, permanenti:{grp:{lavoratori:3, imprenditori:-3}} },
+    iniziale:{usa:1, regnounito:1, francia:1, paesibassi:1, australia:1, india:1, sudafrica:1, giappone:1, canada:1, spagna:1, brasile:1, messico:1, argentina:1, coreasud:1, nigeria:1}, unaTantum:{grp:{lavoratori:6, giovani:3, imprenditori:-6}}, permanenti:{grp:{lavoratori:3, imprenditori:-3}} },
   { id:'matrimonio', era:'contemporanea', nome:'Matrimonio egualitario', desc:'Estende il matrimonio civile alle coppie dello stesso sesso.', asse:-1, costo:1,
-    iniziale:{usa:1, francia:1, regnounito:1, danimarca:1, paesibassi:1, svezia:1, norvegia:1, belgio:1}, unaTantum:{grp:{giovani:7, cattolici:-7}}, permanenti:{grp:{giovani:3, cattolici:-3}} },
+    iniziale:{usa:1, francia:1, regnounito:1, danimarca:1, paesibassi:1, svezia:1, norvegia:1, belgio:1, australia:1, sudafrica:1, germania:1, canada:1, spagna:1, brasile:1, messico:1, argentina:1}, unaTantum:{grp:{giovani:7, cattolici:-7}}, permanenti:{grp:{giovani:3, cattolici:-3}} },
   { id:'droghe', era:'contemporanea', nome:'Legalizzazione droghe leggere', desc:'Depenalizza il consumo e la vendita regolata di cannabis.', asse:-1, costo:1,
     iniziale:{}, unaTantum:{grp:{giovani:6, cattolici:-5, cetomedio:-2}}, permanenti:{grp:{giovani:3, cattolici:-3}} },
   { id:'pena_morte', nome:'Pena di morte', desc:'Prevede la pena capitale per i reati più gravi.', asse:2, costo:2,
-    iniziale:{usa:1}, unaTantum:{grp:{cattolici:4, pensionati:3, cetomedio:2, giovani:-6}}, permanenti:{grp:{giovani:-2}, sicurezza:1} },
+    iniziale:{usa:1, giappone:1, india:1, nigeria:1}, unaTantum:{grp:{cattolici:4, pensionati:3, cetomedio:2, giovani:-6}}, permanenti:{grp:{giovani:-2}, sicurezza:1} },
   { id:'leva', nome:'Leva militare obbligatoria', desc:'Reintroduce il servizio militare obbligatorio.', asse:1, costo:1,
-    iniziale:{danimarca:1, svezia:1, norvegia:1}, unaTantum:{grp:{cattolici:3, pensionati:3, giovani:-7}}, permanenti:{grp:{giovani:-3}, sicurezza:1} },
+    iniziale:{danimarca:1, svezia:1, norvegia:1, brasile:1, messico:1, coreasud:1}, unaTantum:{grp:{cattolici:3, pensionati:3, giovani:-7}}, permanenti:{grp:{giovani:-3}, sicurezza:1} },
   { id:'nucleare', era:'contemporanea', nome:'Nucleare civile', desc:'Autorizza la costruzione di nuove centrali nucleari.', asse:1, costo:2,
-    iniziale:{francia:1, usa:1, regnounito:1, paesibassi:1, svezia:1, belgio:1}, unaTantum:{grp:{imprenditori:5, giovani:-5}}, permanenti:{grp:{giovani:-2}, growth:0.3, ambiente:-4} },
+    iniziale:{francia:1, usa:1, regnounito:1, paesibassi:1, svezia:1, belgio:1, india:1, sudafrica:1, giappone:1, canada:1, brasile:1, messico:1, argentina:1, coreasud:1}, unaTantum:{grp:{imprenditori:5, giovani:-5}}, permanenti:{grp:{giovani:-2}, growth:0.3, ambiente:-4} },
   { id:'patrimoniale', nome:'Imposta patrimoniale', desc:'Introduce un\'imposta sui grandi patrimoni.', asse:-2, costo:2,
     iniziale:{norvegia:1}, unaTantum:{grp:{lavoratori:6, imprenditori:-8, cetomedio:-4}}, permanenti:{grp:{imprenditori:-3, cetomedio:-2}, deficit:-0.6} },
   { id:'liberalizz_lavoro', nome:'Liberalizzazione del lavoro', desc:'Allenta i vincoli su assunzioni e licenziamenti.', asse:2, costo:2,

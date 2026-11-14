@@ -10552,7 +10552,17 @@ function bloccoElettorale(){
 /* Lo slancio di campagna: punta al blocco elettorale del contesto e amplifica ×2 la spinta autorata, perché
    evolvePartiti RIASSORBE gli scossoni (~10%/mese verso l'equilibrio): senza compensazione, 6 mesi varrebbero ~1 punto. */
 function campSlancio(x){ applicaSlancio(bloccoElettorale(), x*2); campSfidante(); }   // L262-2quater: la campagna dello sfidante (sopra logorioMaturato)
-function campPromessa(grp){ S.promesseCampagna=S.promesseCampagna||[]; S.promesseCampagna.push({grp:grp, mese:S.year*12+S.month, colpi:0}); }
+/* L218-35 · il suono della promessa: l'effetto `promessa` a ogni promessa (nel gesto è il secondo suono, al posto dell'esito), la voce
+   `voce-promessa` solo alla PRIMA promessa della campagna, dedotta da S.promesseCampagna PRIMA della scrittura (nessuna promessa negli
+   ultimi 6 mesi, la lunghezza della stagione: le promesse della campagna prima restano per la resa dei conti ma sono più vecchie).
+   Niente campo in S, nessun numero casuale; sotto un pilastro-tragedia l'effetto tace (parla tace da sé), mai una voce sopra un'altra. */
+function campPromessaSuono(prima){
+  if(typeof musicaTragedia==='function' && musicaTragedia()) return;
+  if(typeof suona==='function') suona('promessa');
+  if(prima && typeof parla==='function' && !(typeof voceInCorso==='function' && voceInCorso())) parla('voce-promessa');
+}
+function campPromessa(grp){ S.promesseCampagna=S.promesseCampagna||[]; const mese=S.year*12+S.month, prima=!S.promesseCampagna.some(function(p){ return mese-p.mese<=6; });
+  S.promesseCampagna.push({grp:grp, mese:mese, colpi:0}); campPromessaSuono(prima); }
 /* La resa dei conti: le promesse della SCORSA campagna si pesano all'apertura della nuova — tradita (colpi≥6 nel
    mandato, contati da gd come per l'intervista) → il gruppo e la stampa te la rinfacciano; mantenuta → sostegno
    e la chiusura «L'uomo di parola» si sblocca. Mai gameover-feeding: morde, non affonda. */
@@ -10560,16 +10570,27 @@ function resaPromesseCampagna(){
   if(!S.promesseCampagna || !S.promesseCampagna.length) return;
   var mese=S.year*12+S.month, vecchie=S.promesseCampagna.filter(function(p){return mese-p.mese>12;});
   if(!vecchie.length) return;
+  var tradite=0, mantenute=0;   // L218-35: un suono e una voce per resa (una per mese: la resa apre la stagione una volta), la tradita vince
   vecchie.forEach(function(p){
     var nome=nomeGruppo(p.grp);
     const mantenuta=!((p.colpi||0)>=6);
     S.promesseEsito=S.promesseEsito||[]; S.promesseEsito.push({grp:p.grp, anno:S.year, mantenuta:mantenuta});   // L73-2: il finale tira le somme
-    if(!mantenuta){ gd(p.grp,-5); stampad(-4); S.log.unshift({t:T('La promessa tradita'), x:T('In campagna avevi promesso attenzione a %G, poi i fatti: ora te la rinfacciano.').replace('%G',nome)}); }
-    else { if(S.campNaz) S.campNaz.promMantenuta=true; gd(p.grp,4);
+    if(!mantenuta){ tradite++; gd(p.grp,-5); stampad(-4); S.log.unshift({t:T('La promessa tradita'), x:T('In campagna avevi promesso attenzione a %G, poi i fatti: ora te la rinfacciano.').replace('%G',nome)}); }
+    else { mantenute++; if(S.campNaz) S.campNaz.promMantenuta=true; gd(p.grp,4);
       S.log.unshift({t:T('La promessa mantenuta'), x:T('%G ricorda la parola data — e mantenuta.').replace('%G',nome)});
-      if(MESE_IN_CORSO && typeof suona==='function') suona('traguardo'); }   // L218-13 (F5j): la promessa mantenuta (una per frame: suona non ripete un nome); solo nel mese nuovo, non in applySnap
+    }   // L218-13 (F5j): il `traguardo` della promessa mantenuta suona dopo il giro, in promessaEsitoSuono (L218-35: non quando c'è anche una tradita)
   });
+  if(MESE_IN_CORSO) promessaEsitoSuono(tradite, mantenute);   // L218-35
   S.promesseCampagna=S.promesseCampagna.filter(function(p){return mese-p.mese<=12;});
+}
+/* L218-35 · l'esito delle promesse alla resa dei conti: tradita → `promessa-mancata` e `voce-promessa-tradita` (vince sulla mantenuta
+   dello stesso mese: la mantenuta ha già il suo `traguardo`, che allora non suona); solo mantenute → `voce-promessa-mantenuta`.
+   Solo nel mese nuovo (MESE_IN_CORSO, mai da applySnap); sotto un pilastro-tragedia l'effetto tace; mai una voce sopra un'altra. */
+function promessaEsitoSuono(tradite, mantenute){
+  if(!tradite && !mantenute) return;
+  const trag=typeof musicaTragedia==='function' && musicaTragedia();
+  if(typeof suona==='function'){ if(tradite){ if(!trag) suona('promessa-mancata'); } else suona('traguardo'); }   // L218-13: la mantenuta suona il traguardo come prima (una volta: suona non ripete un nome nel frame)
+  if(typeof parla==='function' && !(typeof voceInCorso==='function' && voceInCorso())) parla(tradite ? 'voce-promessa-tradita' : 'voce-promessa-mantenuta');
 }
 function pickCampagnaNazionale(){
   if(typeof CAMPAGNA_EV==='undefined' || !S || S.livello!==3) return null;   // il voto nazionale: premier o sfidante (livello resta 3)
@@ -12308,6 +12329,7 @@ function confirmCoal(){   // solo avvio: chiude e avvia la partita
 }
 function finalizeVoto(win){   // rielezione parlamentare: porta alla schermata esito
   if(win) voceGoverno(governoDiCoalizione());   // L218-6: la maggioranza confermata, se è una coalizione
+  else if(typeof parla==='function' && !(typeof voceInCorso==='function' && voceInCorso())) parla('voce-trattativa-rottura');   // L218-35: «Nessuna maggioranza possibile», la trattativa fallita (parla tace sotto un pilastro-tragedia)
   if(win && typeof suona==='function'){ suona('firma');               // L116-1: la maggioranza confermata
     const b=suonoFormazione(null); if(b) suona(b); }                    // L140-1: il secondo posto era libero — una coalizione brinda
   S.coalizione=COAL.membri.slice(); S.minoranza=false; const total=seggiCoalizione(S.coalizione,S.seggi); COAL=null;
@@ -13126,6 +13148,7 @@ function beFormazioneDovuta(){
   if(typeof S==='undefined' || !S || S.paese!=='belgio' || S.scenario!=='presente') return false;
   if(S.livello!==3 || S.opposizione || (S.turnInMandate||0)!==0) return false;
   const m=meseMandato(); if(m!==1 && m!==2) return false;
+  if(S.leggi && S.leggi.monarchia===false) return false;   // L250-27 (Passo 0, ⚠ 2 di L250-26): la carta nomina il Re; il governo nasce lo stesso dalla trattativa
   return !(S.carteUnaCarriera && S.carteUnaCarriera['be_p_d_formazione|'+S.mandate]);
 }
 function pickOpposizione(){
