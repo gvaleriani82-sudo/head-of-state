@@ -3271,6 +3271,8 @@ function renderGov(){
       h+=`</div>`;
     } else if(it.kind==='vicenda'){
       h+=vicendaCartaHtml(it, idx);   // L272-3
+    } else if(it.kind==='negoziato'){
+      h+=negoziatoCartaHtml(it, idx);   // L273-2: il ramo minimo (la carta vera è della riga 28)
     } else if(it.kind==='arco'){
       /* gli archi narrativi (lotto 4 + payoff fase A): carta maggiore. Il marker discreto = titolo dell'arco +
          capitolo (a.scelte.length+1), nella riga .kick esistente. Testi via arcoSub (%FILO/%RUOLO/%ECO/%FIGLIO). */
@@ -5105,6 +5107,21 @@ function vicendaCartaHtml(it, idx){
       else h+=`<div class="outcome">${it.outcome||''}</div>${esitiHtml(it)}${tornaTavoloHtml(it)}`;
       h+=`</div>`;
       return h;
+}
+/* L273-2 · la carta del round (ramo minimo, testi provvisori): il kicker «Trattativa · round %N di %M» con le tacche della pazienza;
+   le classi sono quelle della vicenda (vic-carta, vic-kick, vic-tacche): nessuna regola css nuova */
+function negoziatoCartaHtml(it, idx){
+  let h='';
+  const d=it.data, N=it.neg||{};
+  const sub=(s)=>(typeof negoziatoSub==='function')?negoziatoSub(s,it):T(s);
+  const pz=N.pz||0, tacche=[1,2,3].map(k=>`<i class="${k<=pz?'on':''}"></i>`).join('');
+  h+=`<div class="ag major vic-carta ${it.resolved?'done':''}">${agScene(it)}<div class="ah"><div class="kick vic-kick"><span>${T('Trattativa · round %N di %M').replace('%N',N.r||1).replace('%M',3)}</span><span class="vic-tacche" aria-hidden="true">${tacche}</span></div><h3>${sub(d.t)}</h3></div>
+    <div class="atext">${sub(d.text)}</div>`;
+  if(!it.resolved){ h+=`<div class="opts">`+d.ch.map((c,i)=>
+    `<button class="opt" onclick="resolveItem(${idx},${i})"><span class="ol">${sub(c.l)}</span><span class="oe">${sub(c.e)}</span>${costoChip(c)}</button>`).join('')+`</div>`; }
+  else h+=`<div class="outcome">${it.outcome||''}</div>${esitiHtml(it)}${tornaTavoloHtml(it)}`;
+  h+=`</div>`;
+  return h;
 }
 function vicendaRigaDati(){
   const a=(typeof vicendaAperta==='function') ? vicendaAperta() : null; if(!a) return null;

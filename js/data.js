@@ -7672,6 +7672,30 @@ const VICENDE_DEF=[
         { l:'Porti la rabbia in piazza', e:'autorevolezza +1 · reputazione −1', f:function(){ attA(1); allG(-1); } },
         { l:'Resti accanto alle famiglie', e:'base +1 · radici +1', f:function(a){ attB(1); vicRadici(a, 1); } } ] } } } } }
 ];
+/* ================================================================================================================
+   ⚑ L273-2 · LE TRATTATIVE A PIÙ ROUND — la tabella (DESIGN-FORMATI.md «⚑ L273-1» D374-D375, «⚑ L273-2»). TRATTATIVE (game.js),
+   SPENTA. Un negoziato di prova: il PATTO DI GOVERNO. Testi PROVVISORI in italiano col ripiego (la resa inglese e i testi veri
+   sono della riga 28). Campi: id, fam (famiglia del cooldown: patto · estero · opp), lati ('gov' L3 al governo · 'estero' L4-L5 ·
+   'opp' L3-opp), coalizione (solo nei paesi con PAESE.coalizione), era, nasce ('stato' = dalla coalizione nuova), orig (gli id
+   delle carte d'origine che si trasformano nel round 1), ric (le richieste dalla più leggera, indice = ric−1: k, nome; fondi ha
+   il debito), mosse (cedi · rilancia · tieni), r1/rFerma/rScesa (il testo del round), stati (le tre righe d'arrivo).
+   Segnaposto (negoziatoSub): %P la controparte (il nome dal roster), %R la richiesta, %C le concessioni, %F la forza a parole.
+   Nessuna persona reale, nessun partito scritto a mano, partiti neutri: la richiesta dipende dalla base dell'alleato.
+   ================================================================================================================ */
+const TRATTATIVE_DEF=[
+  { id:'patto', fam:'patto', lati:['gov'], coalizione:true, era:'universale', nasce:'stato', orig:['alleato_ultimatum'],
+    kick:'Trattativa', titolo:'Il conto di %P',
+    ric:[ { k:'fondi', nome:'fondi per i loro elettori', debito:0.5 },
+          { k:'legge', nome:'una legge per la loro base' },
+          { k:'ministero', nome:'un ministero di peso' } ],
+    r1:'%P siede al tavolo con una richiesta: %R. Senza di loro i numeri non tengono, e lo sanno.',
+    rFerma:'%P torna con la stessa richiesta: %R. Hai già concesso: %C.',
+    rScesa:'%P abbassa il tiro: adesso chiede %R. Hai già concesso: %C.',
+    mosse:[ { l:'Cedi: %R', e:'Accordo pieno, al prezzo della richiesta' },
+            { l:'Rilanci con un\'offerta minore', e:'Metà prezzo, se reggono i numeri: %F' },
+            { l:'Tieni il punto', e:'Pazienza −1 · la richiesta può scendere' } ],
+    stati:{ pieno:'Accordo pieno con %P.', compromesso:'Un compromesso con %P.', rottura:'La trattativa con %P si è rotta.' } },
+];
 const ARCHI_DEF=[
  /* A — VERTENZA INDUSTRIALE (economico): la fabbrica che chiude, secondo come la gestisci si salva,
     si cede o esplode in sciopero generale. Riconverge: la tensione può tornare al tavolo. */
