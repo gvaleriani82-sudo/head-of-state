@@ -2834,7 +2834,7 @@ function renderStampaTab(){
     <div class="bar">${fillI('stampa:sala', clamp(st,2,100), st>=60?'var(--pos)':st<=40?'var(--neg)':'var(--brand)')}</div>
     <div style="font-size:12px;color:var(--mut2);margin-top:5px">${T('Sopra ~64 i colpi politici si attutiscono; sotto ~36 si gonfiano. Nel silenzio torna verso %N%X.').replace('%N',50+etaAutorev()).replace('%X',etaAutorev()?' ('+T('l\'età pesa:')+' '+T(etaAutorev()>0?'l\'autorevolezza aiuta':'devi conquistarti il rispetto')+')':'')}</div>${fascia}</div>`;
   if(S.titoloMese) h+=`<div class="card" style="padding:11px 14px;margin-bottom:12px"><div class="contorno" style="letter-spacing:.16em;text-transform:uppercase;color:var(--mut)">${T('La prima pagina')} · ${T(MONTHS[S.month-1])}</div>
-    <div style="font-family:'Fraunces',serif;font-style:italic;font-size:16.5px;margin-top:4px;line-height:1.3">«${S.titoloMese.testo}»</div></div>`;
+    <div style="font-family:'Fraunces',serif;font-style:italic;font-size:16.5px;margin-top:4px;line-height:1.3">«${S.titoloMese.testo}»</div>${ricFirmaHtml()}</div>`;
   if(S.promessa) h+=`<div class="banner" style="font-size:12.5px">${T('Intervista in piedi: hai promesso attenzione a <b>%G</b>. Colpirlo con le tue scelte nei prossimi mesi sarà rinfacciato.').replace('%G',nomeGruppo(S.promessa.grp))}</div>`;
   const stResto=disp?0:Math.max(1,cdStampa()-((S.year*12+S.month)-S.mossaUltima));   // il contatore legge cdStampa(): col personaggio anziano dice il numero vero
   /* Lotto 1: la sala EVIDENZIA la mossa che conviene (affinamento #1: segnale → capisco → agisco, niente caccia al tesoro) */
@@ -3079,7 +3079,7 @@ function renderAttivista(){
     /* la CARTA-MOSSA del mese (Build A, L2): scena (RUOTA per tema, anti-wallpaper) + le 3 scelte. resolveItem le applica
        (muove le valute), agendaPending fa da gate → una mossa per turno. */
     (S.agenda||[]).forEach(function(it,idx){ if(it.kind!=='attivista'||!it.data) return; const d=it.data;
-      h+=`<div class="ag major ${it.resolved?'done':''}">${agScene(it)}<div class="ah"><div class="kick">${T(d.kick)}</div><h3>${T(d.t)}</h3></div><div class="atext">${T(d.text)}</div>`;
+      h+=`<div class="ag major ${it.resolved?'done':''}">${agScene(it)}<div class="ah"><div class="kick">${T(d.kick)}</div><h3>${T(d.t)}</h3></div>${it.ric?ricRigaHtml(it.ric):''}<div class="atext">${T(d.text)}</div>`;
       if(!it.resolved){ h+=`<div class="opts">`+d.ch.map(function(c,ci){ return `<button class="opt" onclick="resolveItem(${idx},${ci})"><span class="ol">${T(c.l)}</span><span class="oe">${T(c.e)}</span></button>`; }).join('')+`</div>`; }
       else h+=`<div class="outcome">${it.outcome||''}</div>${esitiHtml(it)}${tornaTavoloHtml(it)}`;
       h+=`</div>`;
@@ -3143,7 +3143,7 @@ function renderAttorno(){
   var el=document.getElementById('sec-attorno'); if(el) el.innerHTML=h;
 }
 function renderGov(){
-  if(S.livello===0){ document.getElementById('sec-gov').innerHTML=agendaCassettoHtml()+renderAttivista(); return; }   // L270-3: l'agenda del mese in testa (vuota se spenta)   // ATTIVISTA (Build A): scheda focalizzata sulla militanza
+  if(S.livello===0){ document.getElementById('sec-gov').innerHTML=agendaCassettoHtml()+renderAttivista()+ricPersoneHtml(); return; }   // L270-3: l'agenda del mese in testa (vuota se spenta)   // ATTIVISTA (Build A): scheda focalizzata sulla militanza
   if(!S.opposizione && S.ministeroAperto==='__locale__'){ document.getElementById('sec-gov').innerHTML=renderLocalePage(); return; }   // drill-down: cruscotto locale (livello 1)
   if(!S.opposizione && S.ministeroAperto){ document.getElementById('sec-gov').innerHTML=renderMinisteroPage(S.ministeroAperto); return; }   // drill-down: pagina del ministero
   let h='', ruolo='';   // L144-1: il blocco del ruolo (opposizione, livello 1, livello 2) si scrive a parte e si mette dopo
@@ -3215,12 +3215,13 @@ function renderGov(){
   if(!S.opposizione && S.livello!==4 && S.livello!==5 && S.titoloMese){   // la striscia-stampa nazionale non vale per il Segretario (liv 4) né per il diplomatico (liv 5)
     const tm=S.titoloMese;
     stampa=`<div class="pressa" onclick="setTab('stampa')"><div class="pk">${T('La stampa')} · ${T(MONTHS[S.month-1])} · <span style="color:${tm.tono==='amica'?'var(--pos)':'var(--neg)'}">${T(tm.tono==='amica'?'benevola':'ostile')}</span></div>
-      <div class="pt">«${tm.testo}»</div><div class="pl">${T('Ufficio stampa →')}</div></div>`;
+      <div class="pt">«${tm.testo}»</div>${ricFirmaHtml()}<div class="pl">${T('Ufficio stampa →')}</div></div>`;
   }
   /* vita personale: indicatore visibile (valore/100 + barra animata + etichetta umana) — prima dell'agenda fuori dal cassetto, dopo nel cassetto */
   if(cassetto){ sotto=ruolo+sotto+stampa+vitaPersonaleCard(); }
   else h+=stampa+vitaPersonaleCard();
   // agenda
+  if(S.livello===4 || S.livello===5) h+=ricPersoneHtml();   // L271-3: la riga «Le persone» (vuota spenta)
   h+=agendaCassettoHtml();   // L270-3: l'agenda del mese, prima riga delle carte dove il tavolo non c'è (vuota se spenta o già decisa)
   h+=`<div class="contorno" style="font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--mut);margin:2px 2px 8px;">${T('Agenda di')} ${T(MONTHS[S.month-1])}</div>`;
   /* L95-1 — l'entrata non è più della SCATOLA. La classe stava qui, sulla firma dell'agenda, e scattava una
@@ -3445,7 +3446,7 @@ function renderGov(){
       let kicker=T(d.kick);
       if(!major && d.min){ const mn=getMin(d.min); if(mn) kicker=T('Proposta')+' · '+mn.nm; }
       h+=`<div class="ag ${major?'major':''} ${it.resolved?'done':''}">${agScene(it)}<div class="ah"><div class="kick">${kicker}</div><h3>${testoLuogo(it, T(d.t))}</h3></div>
-        <div class="atext">${testoLuogo(it, T(d.text))}</div>`;
+        ${it.ric?ricRigaHtml(it.ric):''}<div class="atext">${testoLuogo(it, T(d.text))}</div>`;
       if(!it.resolved){ h+=`<div class="opts">`+d.ch.map((c,i)=>{
         const lockedRep=c.need!=null && (S.ind.reputazione==null || S.ind.reputazione<c.need);     // opzione da mediatore: a soglia di reputazione, mostrata onesta
         const lockedUE=c.pesoUE!=null && (S.pesoUE==null || S.pesoUE<c.pesoUE);                    // soglia gemella: peso del tuo gruppo a Bruxelles
@@ -5642,7 +5643,7 @@ function renderPartiti(){
     : S.minoranza?' <b style="color:var(--neg)">'+T(minoranzaSoloSenato()?'Governi senza maggioranza al Senato':'Governi in minoranza')+'</b>: '+T('ogni mese rischi una <b>mozione di sfiducia</b> che porta a elezioni anticipate.'):'';
   const govLine = S.opposizione?T("Al <b>Governo</b> c'è l'avversario; il tuo partito è all'<b>Opposizione</b>."):T("I partiti al <b>Governo</b> formano la tua maggioranza, gli altri sono all'<b>Opposizione</b>.");
   const oppNote = S.opposizione?' <b style="color:var(--neg)">'+T("Sei all'opposizione")+'</b>: '+T('fai risalire la tua forza e vinci il prossimo voto per tornare al governo; se crolla sotto ~%N il partito ti scarica.').replace('%N',Math.round(sogliaCrollo(f0Crollo()))):'';
-  h+=`</div>${territBox}${locPariPartitiRiga()}${oppTragBox()}<div class="card"><div class="ct">${T('Come funziona')}</div><div class="log">
+  h+=`</div>${territBox}${locPariPartitiRiga()}${oppTragBox()}${([1,2,3].indexOf(S.livello)>=0)?ricPersoneHtml():''}<div class="card"><div class="ct">${T('Come funziona')}</div><div class="log">
     <div class="li">${T("Le forze <b>seguono l'umore dei gruppi sociali</b> che ogni partito rappresenta: base soddisfatta → il partito cresce, altrimenti cala (lentamente, ancorato alla forza iniziale).")} ${govLine} ${comeVince}${tenNote}${minNote}${oppNote}</div></div></div>`;
   document.getElementById('sec-par').innerHTML=h;
 }

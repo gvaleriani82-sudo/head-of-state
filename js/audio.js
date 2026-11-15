@@ -176,7 +176,8 @@ const AUDIO_MANIFEST = {
   'trattativa-round': { file:'trattativa-round.mp3',   loop:false, gain:0.87 },  // 1,5 s: RMS −22,3, picco +0,1 decodificato
   /* L270-3 · l'agenda del mese (giro suoni 26): gain da .claude/misura-l270-3-audio.js, resa come gli effetti brevi d'interfaccia */
   'agenda-segna':     { file:'agenda-segna.mp3',       loop:false, gain:1.16 },  // 0,6 s: RMS −27,1, picco −6,3; la regola dava 1,52 (reso −23,4): tenuto al reso di `tocco` (−25,8), gesto ripetuto tre volte al mese
-  'agenda-chiudi':    { file:'agenda-chiudi.mp3',      loop:false, gain:0.88 }   // 1,0 s: RMS −28,8, picco +0,1 decodificato → tetto del picco (reso −29,9)
+  'agenda-chiudi':    { file:'agenda-chiudi.mp3',      loop:false, gain:0.88 },  // 1,0 s: RMS −28,8, picco +0,1 decodificato → tetto del picco (reso −29,9)
+  'ricorrente':       { file:'ricorrente.mp3',         loop:false, gain:0.71 }   // L271-3: 1,0 s, RMS −20,5, picco +0,1; la regola degli effetti 0,71 (reso −23,5; il tetto del picco 0,88 non morde). La persona già incontrata che torna: ricSuona (game.js)
 };
 /* ⚠ I FILE CHE ESISTONO DAVVERO in assets/audio/. Il motore carica SOLO questi: un nome del manifesto che non è
    qui non genera nessuna richiesta di rete. Si aggiorna a mano quando un file cambia, e se la lista e la cartella
@@ -205,7 +206,8 @@ const AUDIO_PRESENTI = ['tocco.mp3','carta.mp3','chip.mp3','mese.mp3','giornale.
                         'minuto-silenzio.mp3','alluvione.mp3','sisma.mp3','saracinesca.mp3','mappa-conquista.mp3','mappa-persa.mp3','congresso.mp3',
                         'giuramento.mp3','strappo.mp3','annuncio.mp3','nastro.mp3','spoglio-ondata.mp3','spoglio-sorpasso.mp3',   // L218-34 (13/11: giro suoni 17, 18, 26)
                         'promessa.mp3','promessa-mancata.mp3','trattativa-round.mp3',   // L218-35 (giro suoni 27)
-                        'agenda-segna.mp3','agenda-chiudi.mp3'];   // L270-3 (14/11: l'agenda del mese, file di L218-26)
+                        'agenda-segna.mp3','agenda-chiudi.mp3',   // L270-3 (14/11: l'agenda del mese, file di L218-26)
+                        'ricorrente.mp3'];   // L271-3 (14/11: le persone ricorrenti, file di L218-26)
 
 /* ── 6 · NIENTE SINTETICO A RUNTIME ────────────────────────────────────────────────────────────────────────
    Il motore carica FILE. I suoni li genera `.claude/genera-audio.js` una volta, fuori dal gioco (L95-3a); la prima

@@ -977,6 +977,16 @@
   .ag-staff{ font:inherit; font-size:13px; font-weight:600; color:var(--txt); background:transparent; border:1px solid var(--line2); border-radius:11px; padding:8px 10px; cursor:pointer; }
   .ag-conferma{ padding:8px 10px; font-size:14px; }
   .ag-mese-card{ padding:12px 14px; margin-bottom:12px; border-left:4px solid var(--acc); }
+  /* L271-3 · le persone ricorrenti: una riga dove la persona compare (telefonata, intervista, carta), la firma del titolo locale, la riga
+     «Le persone» nei cassetti. 12 px per ciò che serve a scegliere (nome, stato, targhetta), 11 px la firma; niente sotto 11. */
+  .ric-riga{ display:flex; flex-direction:column; gap:2px; margin:6px 0 8px; padding:6px 10px; border-left:3px solid var(--line, rgba(127,127,127,.35)); font-size:12px; line-height:1.35; color:var(--txt); }
+  .ric-riga .ric-chi b{ font-weight:600; }
+  .ric-riga .ric-fatto{ color:var(--mut); }
+  .ric-riga .ric-eff{ color:var(--acc); font-size:12px; }
+  .ric-firma{ font-size:11px; color:var(--mut); margin-top:3px; letter-spacing:.04em; }
+  .ric-persone{ padding:10px 14px; margin-bottom:12px; }
+  .ric-persone .kick{ font-size:11px; letter-spacing:.13em; text-transform:uppercase; color:var(--mut); margin-bottom:2px; }
+  .ric-persone .ric-riga{ margin:6px 0 2px; }
   .agenda-riep{ max-width:560px; margin:0 auto 6px; font-size:11px; color:var(--mut); line-height:1.3; overflow-wrap:anywhere; }
   .tv-foglio-t{ font-weight:700; font-size:14px; line-height:1.3; margin-bottom:3px; }
   .tv-foglio-r{ font-size:12.5px; line-height:1.4; color:var(--txt2); }

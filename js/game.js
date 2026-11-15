@@ -7653,6 +7653,7 @@ function forseIntervista(){
   if(S.agenda && S.agenda.some(function(a){ return a && a.data && /^sfida_/.test(String(a.data.id||'')); })) return;   // MAI intervista + Sfida singola nello stesso mese
   var setup=buildIntervista(); if(!setup) return;
   INTERVISTA=setup; S.intervistaUltimo=S.year*12+S.month;
+  INTERVISTA.ric=ricScheda('gio', 'intervista'); if(INTERVISTA.ric) ricSuona(INTERVISTA.ric);   // L271-3 (D357)
   renderIntervista(); commitSnap();
 }
 function renderIntervista(){
@@ -7669,11 +7670,12 @@ function renderIntervista(){
       <div class="choices"><button class="opt" onclick="chiudiIntervista()"><span class="ol">${T('Chiudi')}</span></button></div>`;
   } else {
     var q=I.qs[I.step];
-    var intro=(I.step===0)?T('Il cronista va dritto al punto:'):T('Non ti molla — e rilancia:');
+    var _rp=ricSchedaPersona(I.ric);   // L271-3: il cronista ha un nome
+    var intro=(I.step===0)?(_rp && ricVivo() ? T('%N va dritto al punto:').replace('%N', _rp.n) : T('Il cronista va dritto al punto:')):T('Non ti molla — e rilancia:');
     var prog=T('Battuta %N di %T').replace('%N',I.step+1).replace('%T',I.qs.length);
     var opts=q.op.map(function(o,i){ return `<button class="opt" onclick="rispondiIntervista(${i})"><span class="ol">${T(o)}</span></button>`; }).join('');
     m.innerHTML=`<div class="mt"><div class="kicker">${T(C.kick)} · ${prog}</div><h2>${T(C.t)}</h2></div>
-      <div class="mtext">${T(intro)} «${T(q.q)}»</div>
+      ${ricRigaHtml(I.ric)}<div class="mtext">${T(intro)} «${T(q.q)}»</div>
       <div class="choices">${opts}</div>`;
   }
   document.getElementById('ov').classList.add('on');
@@ -8546,6 +8548,7 @@ function agendaConferma(){
   S.agendaMese={ m:meseAss(), g:g, staff:false, agg:agg, rinv:rinv };
   AGENDA_BOZZA=null;
   ricAgenda(g);   // L271-2: giornalista e alleato (no-op spenta)
+  RIC_GESTO=true; try{ ricSchedeAgenda(); } finally{ RIC_GESTO=false; }   // L271-3: le carte aggiunte dalla conferma
   agendaRegistro();   // L270-3: la riga del registro, una per mese
   return true;
 }
@@ -8689,7 +8692,7 @@ function agendaRiepilogo(){
 }
 /* la riga del registro alla conferma: una sola per mese */
 function agendaRegistro(){ var r=agendaEsitoRighe(); if(r.length && S.log) S.log.unshift({t:T('L\'agenda del mese'), x:r.join(' ')}); }
-/* ⚑ L271-2 · LE PERSONE RICORRENTI — il motore (DESIGN-FORMATI.md «⚑ L271-1» D347-D356, «⚑ L271-2»). SPENTO (RICORRENTI=false):
+/* ⚑ L271-2 · LE PERSONE RICORRENTI — il motore (DESIGN-FORMATI.md «⚑ L271-1» D347-D356, «⚑ L271-2»). ACCESO dal L271-3 (RICORRENTI=true);
    spento nessuna funzione qui scrive S (S.ricorrenti non nasce) e nessun aggancio cambia niente. Tre persone per carriera —
    il rivale (riv), il giornalista (gio), l'alleato (all) — prese da chi ha già un nome (D347: capocorrente, ministro conteso,
    rivale interno, concorrente, premier) o con un nome da un HASH di personaggio, ruolo e mese di nascita (ricNomeHash: mai
@@ -8699,8 +8702,8 @@ function agendaRegistro(){ var r=agendaEsitoRighe(); if(r.length && S.log) S.log
    rivale del capo del governo può avere in più `s` = lo sfidante che prende il ruolo mentre c'è (⚠ 6 di «⚑ L271-1»: il
    capocorrente fissato alla nascita resta sotto). Effetti (D350) uno per ruolo ogni 12 mesi, solo a rapporto ≥ +2 o ≤ −2,
    mai sul VERO delle urne, sulle forze, sui seggi. RIC_PLACEBO (solo il banco): stesse nascite e nomi, rapporto fermo,
-   nessun effetto. I testi sono chiavi IT col ripiego (la resa e l'inglese sono la riga 22). */
-let RICORRENTI=false;
+   nessun effetto. I testi, la resa e l'inglese: blocco «⚑ L271-3» qui sotto. */
+let RICORRENTI=true;   // L271-3 (14/11): ACCESA — testi, CDP a 375, D174 nelle dieci fette e A/B placebo verdi nello stesso turno («⚑ L271-3»)
 let RIC_PLACEBO=false;     // il banco: __RICORRENTI_PLACEBO (mai nel sorgente acceso)
 const RIC_RUOLI=['riv','gio','all'];
 const RIC_K={ partenza:{riv:-1, gio:0, all:1}, ritorno:12, trascurato:6, pensione:96, tettoEffetto:12, fatti:3, soglia:2 };
@@ -8880,14 +8883,23 @@ function ricTel(def, ci){
   if(M.lato==='opp' && !S.opposizione) return false;
   if(M.lato==='gov' && S.opposizione) return false;
   if(!ricComparsa(M.ruolo, 'telefonata')) return false;
+  if(typeof TEL!=='undefined' && TEL && TEL.ric && TEL.id===def.id) ricLetta(TEL.ric);   // L271-3 (D357)
   if(ci==null){ var copre=(M.ruolo==='all') && ricEffetto('all', 1); ricFatto(M.ruolo, 'tel_squillo'); return copre; }
   var d=(M.rr && M.rr[ci]) || 0;
   ricFatto(M.ruolo, d>=0 ? 'tel_si' : 'tel_no', d);
   return false;
 }
+/* L271-3 · la scheda della telefonata: solo le voci di RIC_TEL dal lato giusto (la stessa guardia di ricTel) */
+function ricSchedaTel(def){
+  if(!ricVivo() || !def) return null;
+  var M=RIC_TEL[def.id]; if(!M) return null;
+  if((M.lato==='opp' && !S.opposizione) || (M.lato==='gov' && S.opposizione)) return null;
+  return ricScheda(M.ruolo, 'tel');
+}
 /* l'intervista: rende il bonus «sangue freddo» corretto dall'effetto del giornalista (D350) */
 function ricIntervista(I, perfetto){
   if(!ricVivo() || !I || !ricComparsa('gio', 'intervista')) return perfetto;
+  if(I.ric) ricLetta(I.ric);   // L271-3 (D357)
   var bonus=perfetto;
   if(!perfetto && I.done && I.done.length && ricEffetto('gio', 1)) bonus=true;
   else if(perfetto && ricEffetto('gio', -1)) bonus=false;
@@ -8913,6 +8925,7 @@ function ricDomandaDopo(cornice){
 /* la carta risolta: il retroscena di Palazzo (L3, L3-opp) e la carta del movimento sul rivale (L0) */
 function ricCarta(it, d, ci){
   if(!ricVivo() || !d || !d.id) return;
+  if(it && it.ric) ricLetta(it.ric);   // L271-3 (D357): la riga mostrata sulla carta diventa «l'ultima»
   var fe=agendaFetta();
   if((fe==='L3' || fe==='L3opp') && d.kick==='Palazzo' && typeof RETRO_BEAT!=='undefined' && RETRO_BEAT.some(function(x){ return x.id===d.id; })){
     if(!ricComparsa('riv', 'retroscena')) return;
@@ -8950,7 +8963,242 @@ function ricPulisci(){
   Object.keys(R).forEach(function(k){
     if(RIC_RUOLI.indexOf(k)<0 || !ok(R[k])){ delete R[k]; return; }
     if(R[k].s!=null && !ok(R[k].s)) delete R[k].s;
+    [R[k], R[k] && R[k].s].forEach(function(p){ if(p && p.u!=null && !(typeof p.u==='number' && p.u>=0 && p.u===Math.floor(p.u))) delete p.u; });   // L271-3 (D357): u illeggibile → nessuna
   });
+}
+/* ⚑ L271-3 · LE PERSONE RICORRENTI — I TESTI (DESIGN-FORMATI.md «⚑ L271-1» D347-D355, D357 di Cowork, «⚑ L271-3»). Le chiavi IT sono le
+   stringhe qui sotto (T() prima della sostituzione dei segnaposto %N %M %P %A); l'inglese in lang-en.js. Nessun numero, nessuna variabile.
+   · D357 · LA RIGA SI SCEGLIE QUANDO IL FORMATO NASCE (ricScheda: la telefonata che squilla, l'intervista che si apre, la carta che entra
+     nel mese), mai nella resa: la scelta è ricHash(persona, ruolo, banda, mese, formato) fra le righe della banda, e se esce la stessa
+     dell'ultima volta (p.u, l'indice nella lista piatta del ruolo) si prende la successiva. Nessun pescaBag (consumerebbe Math.random e
+     scriverebbe S.bagVisti). La scheda vive nel transitorio (TEL.ric, INTERVISTA.ric, it.ric sulla carta: l'agenda non è nello snapshot) e
+     scrive in S SOLO alla risoluzione (ricLetta: p.u e il «letto» l:1 del fatto mostrato), quindi un caricamento a metà mese ritrova la stessa
+     riga e due rese consecutive non cambiano né testo né stato.
+   · Il mezzo del giornalista per epoca (ricMezzo): prima di AGENDA_TV_DAL un quotidiano o il giornale radio, dopo un quotidiano o il
+     telegiornale, nel presente un quotidiano o un sito d'informazione (la rete SOLO nel presente, mai nelle porte); quale dei due lo dice
+     l'hash della persona. Titoli istituzionali al maschile; il ruolo giornalistico e i compagni secondo il genere della persona. */
+const RIC_RUOLO_TXT={
+  riv:{ L0:'il portavoce del movimento rivale', L1:'il capo dell\'opposizione in consiglio', L2:'il capocorrente più ostile', L2opp:'il ministro che ti contende il dossier',
+        L3:'il capocorrente più ostile', L3sfida:'lo sfidante alla guida del partito', L3opp:'il rivale interno', L3oppcorr:'il capocorrente più ostile',
+        L4:'il concorrente per il posto', L4hash:'l\'inviato di una potenza rivale', L5:'il concorrente per il posto', L5hash:'l\'inviato di una potenza rivale' },
+  gio:{ L0:['il cronista locale','la cronista locale'], L1:['il cronista della cronaca cittadina','la cronista della cronaca cittadina'],
+        pol:['il cronista politico','la cronista politica'], dip:['il corrispondente diplomatico','la corrispondente diplomatica'] },
+  all:{ L0:['un compagno del movimento','una compagna del movimento'], L1:'il capogruppo della tua maggioranza', L2:'il capo del governo',
+        L2opp:'il segretario di %P', L3:'il capocorrente più leale', L3opp:'il segretario di %P', L4:'l\'ambasciatore %A', L5:'l\'ambasciatore %A' }
+};
+const RIC_MEZZO_TXT={ carta:'di un quotidiano', radio:'del giornale radio', tv:'del telegiornale', rete:'di un sito d\'informazione' };
+const RIC_RUOLO_GIO='%R %M';   // «la cronista politica del telegiornale»
+const RIC_STATO_TXT=[['ti è nemico','ti è nemica'],'ostile',['freddo','fredda'],'neutrale','cordiale','dalla tua',['ti è amico','ti è amica']];
+/* righe di stato: ruolo → formato → banda (contro ≤ −2 · neutro −1…+1 · con ≥ +2) → due righe. Solo gli incroci che il motore produce
+   (la tabella degli agganci di «⚑ L271-2» Passo 2): il rivale nel retroscena (L3, L3-opp), in consiglio (L1), nella carta del movimento (L0);
+   il giornalista al telefono, nell'intervista, nella domanda (piazza, vertice); l'alleato al telefono. */
+const RIC_RIGHE_TXT={
+  riv:{
+    retro:{ contro:['Si dice che stia già contando i voti contro di te.','Nei corridoi non nasconde che vuole il tuo posto.'],
+            neutro:['Per ora osserva, e prende nota.','Aspetta di vedere da che parte tira il vento.'],
+            con:['Per una volta, dalla sua parte non arrivano colpi.','Ha fatto sapere che per ora non ti ostacola.'] },
+    domanda:{ contro:['Ha preparato la domanda per metterti in difficoltà.','Ogni seduta è un\'occasione per attaccarti.'],
+              neutro:['Fa il suo mestiere di opposizione, senza accanimento.','Ti incalza, ma resta sui fatti.'],
+              con:['Anche dall\'opposizione, ti riconosce il lavoro fatto.','La domanda è dura, il tono rispettoso.'] },
+    movimento:{ contro:['Racconta a tutti che il vostro movimento è finito.','Il suo movimento vi ruba la piazza, e lo dice in giro.'],
+                neutro:['Il suo movimento e il tuo si guardano a distanza.','Per ora la piazza basta per tutti e due.'],
+                con:['Fra i due movimenti, per una volta, c\'è rispetto.','Ha detto in pubblico che lottate per le stesse cose.'] }
+  },
+  gio:{
+    tel:{ contro:['Chiama per una conferma, ma il pezzo è già scritto.','Le sue telefonate non portano mai buone notizie.'],
+          neutro:['Chiama per sentire la tua versione.','Vuole una parola prima di chiudere il pezzo.'],
+          con:['Ti avverte prima che la notizia esca.','Ti lascia il tempo di preparare una risposta.'] },
+    intervista:{ contro:['Le sue domande non lasciano scampo.','Ha studiato il dossier per metterti all\'angolo.'],
+                 neutro:['Fa domande dirette, senza sconti e senza agguati.','Vuole risposte chiare, niente di più.'],
+                 con:['Ti lascia finire le frasi.','Le domande sono dure, ma ascolta le risposte.'] },
+    domanda:{ contro:['È la prima mano alzata, come sempre quando c\'è da colpire.','Cerca la frase sbagliata da mettere in prima pagina.'],
+              neutro:['Fa la domanda che tutti hanno in mente.','Prende appunti, e chiede.'],
+              con:['La domanda ti dà modo di spiegarti.','Ascolta davvero quello che rispondi.'] }
+  },
+  all:{
+    tel:{ contro:['Da settimane non si fa sentire: adesso chiama.','Il tono è freddo: si aspetta qualcosa.'],
+          neutro:['Chiama per sapere che cosa pensi.','Vuole capire da che parte stai.'],
+          con:['Chiama per darti una mano, come sempre.','Al telefono ti dice le cose come stanno.'] }
+  }
+};
+/* una riga per fatto (detta una volta: poi l:1 dentro il fatto) e l'ingresso (nessun fatto ancora) */
+const RIC_FATTO_TXT={ int_retta:'L\'ultima intervista l\'hai retta fino in fondo.', int_spiazzato:'L\'ultima intervista è andata storta dalla prima domanda.',
+  tel_squillo:'L\'ultima volta hai lasciato squillare il telefono.', tel_si:'L\'ultima volta hai accettato quello che chiedeva.', tel_no:'L\'ultima volta hai detto di no.',
+  retro_cedi:'L\'ultima volta hai ceduto alle correnti.', retro_sfida:'L\'ultima volta hai tirato dritto.',
+  domanda_bene:'L\'ultima domanda l\'hai chiusa con la risposta giusta.', domanda_male:'L\'ultima domanda ti è andata storta.',
+  agenda_stampa:'Di recente hai dedicato una giornata alla stampa.', agenda_partito:'Di recente avete lavorato insieme una giornata intera.',
+  trascurato:'Da mesi non trovi il tempo per una telefonata o un incontro.', battuto:'Ha perso la sfida contro di te.', posto:'Il suo partito è entrato nel governo con te.' };
+const RIC_INGRESSO_TXT={ riv:'Te ne hanno parlato: vuole il tuo posto.', gio:'Ti segue da poco, ma legge tutto.', all:'Sulla carta è dalla tua parte.' };
+/* D350 · le targhette, scritte prima della scelta e solo quando l'effetto può scattare (ricEffettoPuo) */
+const RIC_EFF_TXT={
+  'gio+intervista':'Ti tratta bene: anche con un\'incertezza, il sangue freddo te lo riconosce.',
+  'gio-intervista':'Ce l\'ha con te: anche una prova perfetta non ti varrà il sangue freddo.',
+  'gio+domanda':'Ti tratta bene: una risposta sbagliata non ti costa.',
+  'gio-domanda':'Ce l\'ha con te: una risposta giusta rende la metà.',
+  'riv+retro':'Ti lascia lavorare: comunque scegli, le correnti si calmano un po\'.',
+  'riv-retro':'Ti fa la guerra: comunque scegli, le correnti si agitano.',
+  'riv+domanda':'Ti lascia lavorare: comunque vada, la seduta ti dà un po\' di notorietà.',
+  'riv-domanda':'Ti fa la guerra: comunque vada, la seduta ti toglie un po\' di notorietà.',
+  'riv+movimento':'Ti lascia lavorare: comunque scegli, il movimento guadagna un po\' di base.',
+  'riv-movimento':'Ti fa la guerra: comunque scegli, il movimento perde un po\' di base.',
+  'all+tel':'Ti copre: se la lasci squillare, non te ne vuole.',
+  'all-':'Non ti risponde più: presto lo farà pesare.'
+};
+const RIC_FIRMA_TXT='di %N';
+/* il genere della persona per le parole che si accordano (ruolo giornalistico, compagni, stati) */
+function ricF(p){ return !!(p && p.g==='f'); }
+function ricBanda(r){ return r<=-RIC_K.soglia ? 'contro' : (r>=RIC_K.soglia ? 'con' : 'neutro'); }
+function ricStato(p){ var w=RIC_STATO_TXT[clamp(Math.round(p.r||0),-3,3)+3]; return T(Array.isArray(w) ? w[ricF(p)?1:0] : w); }
+/* il mezzo del giornalista: dall'epoca e dall'hash della persona (stabile) */
+function ricMezzo(p){
+  var a=ricHash('ric|mezzo|'+(p&&p.n)+'|'+(p&&p.da))%2===0;
+  if(S.scenario==='presente') return a ? 'carta' : 'rete';
+  var tv=AGENDA_TV_DAL[S.paese];
+  if(tv && meseAss() < tv[0]*12+tv[1]) return a ? 'carta' : 'radio';
+  return a ? 'carta' : 'tv';
+}
+function ricDiDi(art, nome){   // di + l'articolo dell'alleato (ALLEATI_DIPLO)
+  var m={ 'il':'del ', 'la':'della ', 'gli':'degli ', 'l\'':'dell\'', 'i':'dei ', 'le':'delle ' };
+  return (m[art]!=null ? m[art] : 'di ')+nome;
+}
+function ricAlleatoNome(id){
+  if(typeof ALLEATI_DIPLO==='undefined') return id;
+  var r=ALLEATI_DIPLO.find(function(x){ return x.id===id; }); if(!r) return id;
+  return (typeof curLang==='function' && curLang()==='en') ? (r.artEn ? 'the ' : '')+r.nomeEn : ricDiDi(r.art, r.nome);
+}
+/* il ruolo a parole: la fetta di NASCITA della persona (dice anche chi era) */
+function ricRuolo(ruolo, p){
+  var fe=ricFe(p)||agendaFetta(), t=ricTipo(p), R=RIC_RUOLO_TXT[ruolo], k;
+  if(ruolo==='gio'){
+    var grp=(fe==='L0'||fe==='L1') ? fe : ((fe==='L4'||fe==='L5') ? 'dip' : 'pol');
+    return T(RIC_RUOLO_GIO).replace('%R', T(R[grp][ricF(p)?1:0])).replace('%M', T(RIC_MEZZO_TXT[ricMezzo(p)]));
+  }
+  if(ruolo==='riv'){
+    k=fe;
+    if(fe==='L3' && /sfida/.test(t)) k='L3sfida';
+    else if(fe==='L3opp' && t.indexOf('corr:')===0) k='L3oppcorr';
+    else if((fe==='L4'||fe==='L5') && t==='hash') k=fe+'hash';
+    return T(R[k]||R.L3);
+  }
+  var v=R[fe]||R.L3;
+  if(Array.isArray(v)) return T(v[ricF(p)?1:0]);
+  var s=T(v);
+  if(s.indexOf('%P')>=0){ var pid=t.indexOf('part:')===0 ? t.slice(5) : null; s=s.replace('%P', pid ? ppNomeBreve(pid) : T('un partito vicino')); }
+  if(s.indexOf('%A')>=0){ var aid=t.indexOf('paese:')===0 ? t.slice(6) : null; s=s.replace('%A', aid ? ricAlleatoNome(aid) : T('di un paese amico')); }
+  return s;
+}
+/* la lista piatta delle righe di un ruolo: l'indice è p.u */
+function ricPiatta(ruolo){
+  var L=[], F=RIC_RIGHE_TXT[ruolo]||{};
+  Object.keys(F).forEach(function(fo){ ['contro','neutro','con'].forEach(function(b){ (F[fo][b]||[]).forEach(function(x, j){ L.push({fo:fo, b:b, j:j, x:x}); }); }); });
+  return L;
+}
+/* D350 · l'effetto può scattare ADESSO? (puro: la stessa condizione di ricEffetto, senza scrivere) */
+function ricEffettoPuo(ruolo, segno){
+  if(!ricVivo() || RIC_PLACEBO || !S.ricorrenti || !S.ricorrenti[ruolo]) return false;
+  var R=S.ricorrenti[ruolo], p=(ruolo==='riv' && R.s) ? R.s : R;
+  if(segno>0 ? p.r<RIC_K.soglia : p.r>-RIC_K.soglia) return false;
+  return !(R.e!=null && meseAss()-R.e<RIC_K.tettoEffetto);
+}
+function ricEffChiave(ruolo, fo){
+  var ok=function(s){ return ricEffettoPuo(ruolo, s); };
+  var fe=agendaFetta();
+  if(ruolo==='gio' && fo==='intervista') return ok(1) ? 'gio+intervista' : (ok(-1) ? 'gio-intervista' : null);
+  if(ruolo==='gio' && fo==='domanda' && fe==='L0') return ok(1) ? 'gio+domanda' : (ok(-1) ? 'gio-domanda' : null);
+  if(ruolo==='riv' && (fo==='retro' || fo==='domanda' || fo==='movimento')) return ok(1) ? 'riv+'+fo : (ok(-1) ? 'riv-'+fo : null);
+  if(ruolo==='all' && fo==='tel') return ok(1) ? 'all+tel' : null;
+  return null;
+}
+/* D357 · la scheda di una comparsa: si sceglie qui, alla nascita del formato. {r, s, fo, i, fk, fm, ing, eff} o null */
+function ricScheda(ruolo, fo){
+  if(!ricVivo()) return null;
+  var p=ricComparsa(ruolo, fo); if(!p) return null;
+  var R=S.ricorrenti[ruolo], sc={ r:ruolo, s:!!(ruolo==='riv' && R && R.s===p), fo:fo, i:-1, fk:null, fm:null, ing:false, eff:ricEffChiave(ruolo, fo) };
+  var f=(p.f||[]), u=f[f.length-1];
+  if(u && !u.l && RIC_FATTO_TXT[u.k]){ sc.fk=u.k; sc.fm=u.m; }
+  else if(!f.length) sc.ing=true;
+  else {
+    var b=ricBanda(p.r||0), L=ricPiatta(ruolo), idx=[];
+    L.forEach(function(x, i){ if(x.fo===fo && x.b===b) idx.push(i); });
+    if(idx.length){
+      var k=idx[ricHash('ric|riga|'+p.n+'|'+ruolo+'|'+b+'|'+meseAss()+'|'+fo)%idx.length];
+      if(k===p.u && idx.length>1) k=idx[(idx.indexOf(k)+1)%idx.length];
+      sc.i=k;
+    } else sc.ing=true;
+  }
+  return sc;
+}
+function ricSchedaPersona(sc){
+  if(!sc || !S || !S.ricorrenti) return null;
+  var R=S.ricorrenti[sc.r]; if(!R) return null;
+  return sc.s ? (R.s||null) : R;
+}
+/* la seconda riga della scheda (il fatto, l'ingresso o lo stato) e la targhetta */
+function ricSchedaTesto(sc){
+  var p=ricSchedaPersona(sc); if(!p) return '';
+  if(sc.fk) return T(RIC_FATTO_TXT[sc.fk]);
+  if(sc.ing || sc.i<0) return T(RIC_INGRESSO_TXT[sc.r]);
+  var x=ricPiatta(sc.r)[sc.i]; return x ? T(x.x) : T(RIC_INGRESSO_TXT[sc.r]);
+}
+/* alla risoluzione: la riga detta diventa «l'ultima» (u) e il fatto mostrato «letto» (l:1). Il solo punto in cui la scheda scrive S. */
+function ricLetta(sc){
+  if(!ricVivo() || !sc) return;
+  var p=ricSchedaPersona(sc); if(!p) return;
+  if(sc.i>=0) p.u=sc.i;
+  if(sc.fk) (p.f||[]).forEach(function(x){ if(x.k===sc.fk && x.m===sc.fm) x.l=1; });
+}
+/* le carte del mese: il retroscena di Palazzo, la domanda nominata, la carta del movimento (alla fine di genAgenda e di agendaConferma) */
+const RIC_SFIDA_KICK={ 'Società civile':'piazza', 'Palazzo':'aula', 'Foro multilaterale':'vertice' };
+function ricSchedeAgenda(){
+  if(!ricVivo() || !S.agenda) return;
+  var fe=agendaFetta();
+  S.agenda.forEach(function(it){
+    if(!it || it.resolved || it.ric!==undefined || !it.data || !it.data.id) return;
+    var d=it.data, id=String(d.id), sc=null;
+    if(/^sfida_/.test(id)){ var cor=RIC_SFIDA_KICK[d.kick]; var ru=cor ? ricDomandaRuolo(cor) : null; if(ru) sc=ricScheda(ru, 'domanda'); }
+    else if((fe==='L3' || fe==='L3opp') && d.kick==='Palazzo' && typeof RETRO_BEAT!=='undefined' && RETRO_BEAT.some(function(x){ return x.id===d.id; })) sc=ricScheda('riv', 'retro');
+    else if(fe==='L0' && RIC_MOV_CARTE.indexOf(id)>=0) sc=ricScheda('riv', 'movimento');
+    it.ric=sc;
+    if(sc) ricSuona(sc);
+  });
+}
+/* ⚑ L271-3 · il suono `ricorrente`: alla comparsa di una persona che ha già almeno un fatto, al più una volta per mese di gioco, mai alla
+   prima comparsa, mai al caricamento (solo dentro il mese o in un gesto), mai sotto tragedia o lutto, mai nella riga «Le persone»; la
+   telefonata no (ha già il suo squillo: il suono di chi chiama è lo squillo). RIC_SUONO_MESE è transitorio, mai in S. */
+let RIC_SUONO_MESE=null, RIC_GESTO=false;
+function ricSuona(sc){
+  if(!sc || sc.fo==='tel' || typeof suona!=='function') return;
+  var p=ricSchedaPersona(sc); if(!p || !(p.f||[]).length) return;
+  if(!(typeof MESE_IN_CORSO!=='undefined' && MESE_IN_CORSO) && !RIC_GESTO) return;
+  if(typeof musicaTragedia==='function' && musicaTragedia()) return;
+  if(typeof musicaAttaccoZitta==='function' && musicaAttaccoZitta()) return;
+  if(RIC_SUONO_MESE===meseAss()) return;
+  RIC_SUONO_MESE=meseAss();
+  suona('ricorrente');
+}
+/* LA RESA (pura: legge S e la scheda, non scrive niente) */
+function ricRigaHtml(sc){
+  if(!ricVivo() || !sc) return '';
+  var p=ricSchedaPersona(sc); if(!p) return '';
+  var eff=sc.eff ? `<span class="ric-eff">${T(RIC_EFF_TXT[sc.eff])}</span>` : '';
+  return `<div class="ric-riga"><span class="ric-chi"><b>${p.n}</b>, ${ricRuolo(sc.r, p)} · ${ricStato(p)}</span><span class="ric-fatto">${ricSchedaTesto(sc)}</span>${eff}</div>`;
+}
+function ricFirmaHtml(){
+  if(!ricFirma() || !S.ricorrenti || !S.ricorrenti.gio) return '';
+  return `<div class="ric-firma contorno">${T(RIC_FIRMA_TXT).replace('%N', S.ricorrenti.gio.n)}</div>`;
+}
+/* la riga «Le persone» del cassetto: tre righe al più, nome · ruolo · stato e l'ultimo fatto; legge S.ricorrenti e basta (nessuna nascita) */
+function ricPersoneHtml(){
+  if(!ricVivo() || !S.ricorrenti) return '';
+  var righe=RIC_RUOLI.map(function(r){
+    var R=S.ricorrenti[r]; if(!R) return '';
+    var p=(r==='riv' && R.s) ? R.s : R, f=(p.f||[]), u=f[f.length-1];
+    var fatto=(u && RIC_FATTO_TXT[u.k]) ? T(RIC_FATTO_TXT[u.k]) : T(RIC_INGRESSO_TXT[r]);
+    var eff=(r==='all' && ricEffettoPuo('all', -1)) ? `<span class="ric-eff">${T(RIC_EFF_TXT['all-'])}</span>` : '';
+    return `<div class="ric-riga"><span class="ric-chi"><b>${p.n}</b>, ${ricRuolo(r, p)} · ${ricStato(p)}</span><span class="ric-fatto">${fatto}</span>${eff}</div>`;
+  }).join('');
+  if(!righe) return '';
+  return `<div class="card ric-persone"><div class="kick contorno">${T('Le persone')}</div>${righe}</div>`;
 }
 /* ⚑ L239-7 · LE TRE FORME DEL GETTONE (DESIGN-MAPPA.md §2 (d) e §3 punto 6; decisioni di Cowork del 21/10 sulle valute).
    Lo stesso gettone del mese (giroPossibile, S.giroMese) si spende in una di tre forme, scelte dal foglietto dell'area:
@@ -10691,6 +10939,7 @@ function genAgenda(first){
   meseSobrioSegna();                         // L262-24: prima del titolo del mese, che gira dopo genAgenda
   if(!MESE_IN_CORSO) luogoTerrNasci();       // L239-5: le carte con `luogo:'terr'` ricevono il loro territorio (niente Math.random); dentro il mese alla fine (advanceMonth)
   if(_pre) segnaPrimaAgenda(_pre);
+  ricSchedeAgenda();                         // L271-3 (D357): la riga delle persone nasce con la carta (no-op spenta)
   if(MESE_IN_CORSO) voceAgendaMese();        // L218-12: solo nel mese nuovo (genAgenda gira anche in applySnap e dopo una carta)
 }
 /* L218-12 · LE VOCI DELLE CARTE CHE ENTRANO (F4n, F4q, F4s, F4t): l'id della carta → la voce, detta UNA volta quando la carta entra
@@ -12701,6 +12950,7 @@ function armaTimerTel(){
 function apriTelefonata(){
   var def=telDef(S.telPendente); if(!def){ S.telPendente=null; return; }
   TEL={ id:def.id, def:def, missed:false, timer:null, tic:null };
+  TEL.ric=ricSchedaTel(def);   // L271-3 (D357): la persona che chiama, scelta qui (null spenta o se non è una delle nostre)
   if(typeof suona==='function') suona(suonoTelefono());   // L95-3: dove parte lo squillo (telRing), una volta per chiamata · L118-1: dal 2000 `vibrazione`
   if(typeof guida==='function') guida(4);   // L218-6: la guida della prima partita, al primo squillo (C24)
   renderTelefonata(); armaTimerTel(); telTicSpento();
@@ -12719,7 +12969,7 @@ function renderTelefonata(){
   } else {
     var opts=def.ch.map(function(c,i){ return `<button class="opt" onclick="rispondiTel(${i})"><span class="ol">${T(c.l)}</span><span class="oe">${T(c.e)}</span></button>`; }).join('');
     document.getElementById('modal').innerHTML=`${scImgT}<div class="mt"><div class="kicker">☎ ${voceTel(def)}</div><h2>${T(def.t)}</h2></div>
-      <div class="mtext">${T(def.text)}</div>
+      ${ricRigaHtml(TEL.ric)}<div class="mtext">${T(def.text)}</div>
       ${barra}
       <div class="choices">${opts}</div>`;
   }
