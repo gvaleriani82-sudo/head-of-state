@@ -7588,9 +7588,9 @@ const VICENDE_DEF=[
         { l:'Offri il tuo aiuto per ricostruire', e:'credibilità +1', f:function(){ credd(1); } } ] } } },
     piazza:{
      1:{ t:'L\'alluvione colpisce %TERR', text:'Il fiume ha rotto gli argini e la pianura è sott\'acqua. Nella sede del movimento si contano i volontari: c\'è chi vuole partire subito e chi vuole farsi sentire.', ch:[
-       { l:'Parti come volontario', e:'base +2 · radici +2', f:function(a){ attB(2); vicRadici(a, 2); } },
-       { l:'Organizzi una raccolta', e:'reputazione +2 · radici +2', f:function(a){ allG(2); vicRadici(a, 2); } },
-       { l:'Protesti contro i ritardi', e:'autorevolezza +2 · reputazione −1', f:function(){ attA(2); allG(-1); } } ] },
+       { l:'Parti come volontario', e:'radici +2', f:function(a){ vicRadici(a, 2); } },
+       { l:'Organizzi una raccolta', e:'radici +2', f:function(a){ vicRadici(a, 2); } },
+       { l:'Protesti contro i ritardi', e:'radici invariate', f:function(){} } ] },
      2:{ t:'Il fango copre %TERR', text:'L\'acqua si è ritirata, il fango no. I volontari sono stanchi e molte famiglie chiedono ancora aiuto.', ch:[
        { l:'Resti con i volontari', e:'base +1', f:function(){ attB(1); } },
        { l:'Passi la mano ad altri', e:'nessun effetto', f:function(){} } ] },
@@ -7655,9 +7655,9 @@ const VICENDE_DEF=[
         { l:'Offri il tuo aiuto per gli ospedali', e:'credibilità +1', f:function(){ credd(1); } } ] } } },
     piazza:{
      1:{ t:'Un\'epidemia colpisce %TERR', text:'Un contagio nuovo ha colpito %TERR e i reparti si riempiono. Nel movimento c\'è chi vuole dare una mano e chi vuole farsi sentire.', ch:[
-       { l:'Ti metti a disposizione dei volontari', e:'base +2 · radici +2', f:function(a){ attB(2); vicRadici(a, 2); } },
-       { l:'Organizzi una raccolta per gli ospedali', e:'reputazione +2 · radici +2', f:function(a){ allG(2); vicRadici(a, 2); } },
-       { l:'Protesti contro i ritardi', e:'autorevolezza +2 · reputazione −1', f:function(){ attA(2); allG(-1); } } ] },
+       { l:'Ti metti a disposizione dei volontari', e:'radici +2', f:function(a){ vicRadici(a, 2); } },
+       { l:'Organizzi una raccolta per gli ospedali', e:'radici +2', f:function(a){ vicRadici(a, 2); } },
+       { l:'Protesti contro i ritardi', e:'radici invariate', f:function(){} } ] },
      2:{ t:'Il contagio stringe %TERR', text:'Il contagio non si ferma e i volontari sono stanchi. Le famiglie più sole chiedono ancora aiuto.', ch:[
        { l:'Resti con i volontari', e:'base +1', f:function(){ attB(1); } },
        { l:'Passi la mano ad altri', e:'nessun effetto', f:function(){} } ] },

@@ -10194,7 +10194,7 @@ function arcoSub(str, a){
   return out;
 }
 /* ================================================================================================================
-   ⚑ L272-2 · LE VICENDE — le crisi interne in più tempi (DESIGN-FORMATI.md «⚑ L272-1» D358-D368, «⚑ L272-2»). SPENTA.
+   ⚑ L272-2 · LE VICENDE — le crisi interne in più tempi (DESIGN-FORMATI.md «⚑ L272-1» D358-D368, «⚑ L272-2»). ACCESA dal L272-5 (15/11, D371).
    Una macchina sua con la forma degli archi (nodi, scelte con `peso`, `%ECO`, fatto ed epilogo in biografia), ma NON in
    `S.archi`: un tempo al mese per tre mesi di fila. Il campo è `S.vicenda = {a, ult, n}` (a = la vicenda aperta o null:
    {tipo, t, terr, lato, peso, sc[], eco, da, pr, sl, orig, posto, stato}; ult = il mese della chiusura, il cooldown;
@@ -10216,7 +10216,7 @@ function arcoSub(str, a){
      età), mese di nascita e tipo — mai il partito né l'area politica.
    · `VICENDE_PLACEBO`: stesse nascite e stesse carte, nessun effetto su indicatori, segni, umore, biografia.
    ================================================================================================================ */
-let VICENDE=false;
+let VICENDE=true;   // L272-5 (15/11): ACCESA — C4 per fetta vissuta (D371) passa, D174 (i)(iii)(iv), A/B spenta-prima 0/1224
 let VICENDE_PLACEBO=false;
 const VICENDE_K={ cooldown:72, slittaMax:2, p:0.006, c4:0.30 };   // c4: la soglia del dossier nel mese del tempo al capo del governo (C4)
 let VICENDE_ROSSO=null;   // solo le prove: 'c4' = il tempo 2-3 come carta IN PIÙ (C4 rossa) · 'crisi' = nasce anche con S.crisi a gradino ≥ 3
