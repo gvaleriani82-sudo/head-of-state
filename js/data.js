@@ -7523,6 +7523,155 @@ const DIFESE_INCHIESTA={
    nuovo. `cond` = quando il mondo rende sensato l'arco; `prob` = chance mensile quando cond è vera;
    `cooldown` mesi prima che lo stesso arco possa ripartire. `dove:'governo'` (in questo lotto tutti:
    sono dilemmi che si giocano con le leve del potere). Testi d'agenzia, ritoccabili a costo zero. ===== */
+/* ================================================================================================================
+   ⚑ L272-2 · L272-3 · LE VICENDE — le crisi interne in più tempi (game.js «⚑ L272-2 · LE VICENDE», DESIGN-FORMATI.md
+   «⚑ L272-1», «⚑ L272-3»). Lo schema dei nodi è quello di ARCHI_DEF (`t`, `text`, `ch[{l, e, peso, eco, f, costo}]`) per
+   LATO ('decide' | 'fuori' | 'piazza') e per TEMPO (1, 2, e il 3 per stato d'arrivo: gestita · meta · sfuggita). `e` e
+   `costo` possono essere per livello ({L3, L2, L1}: la targhetta prima della scelta, D190). `orig` = le carte d'origine che
+   il motore trasforma nel tempo 1; `min` = il dicastero del lato «decide» al L2; `locale` = il tipo d'ente al L1; `aree`
+   (facoltativo) = i territori ammessi per nome, vuoto = tutti; `leggi()` = la lettura dello stato alla nascita del tempo 3
+   (+1/0); `cantiere` = alla chiusura «gestita» il segno `cantiere` sul territorio. Le scelte con `resp:true` attutiscono
+   l'umore della chiusura «sfuggita» (−1 invece di −2); `gio` è il passo del giornalista ricorrente. `fatti`/`epi` per lato.
+   L272-3: i testi veri, IT qui e EN in lang-en.js. Regole: un testo per tutti i decenni («i soccorsi», «gli sfollati», «i
+   reparti», «i medici»), nessun mezzo d'informazione nominato, nessun luogo-data vero (il territorio è %TERR), nessuna
+   persona, partiti neutri («il governo»), nessuna malattia vera (D369: l'epidemia è sempre generica). VICENDE (game.js).
+   ================================================================================================================ */
+const VICENDE_DEF=[
+ { id:'alluvione', era:'universale', titolo:'L\'alluvione', kick:'Maltempo', min:'sviluppo', locale:'regione',
+   orig:['pioggia','l_alluvione'], aree:[], lati:['decide','fuori','piazza'], cantiere:true,
+   leggi:function(){ if(S.livello===1) return (S.locale && S.locale.ind && S.locale.ind.ambiente>=55) ? 1 : 0; return (S.pol && S.pol.manutenzione>1) ? 1 : 0; },   // la scala delle leve è 0…2 (1 = Standard): +1 con la manutenzione Programmata
+   fatti:{
+    decide:{ gestita:'Hai portato %TERR fuori dall\'alluvione.', meta:'L\'alluvione ha lasciato %TERR fra luci e ombre.', sfuggita:'L\'alluvione che ha colpito %TERR ti è sfuggita di mano.' },
+    fuori:{ gestita:'Hai seguito da fuori l\'alluvione che ha colpito %TERR: il governo ne è uscito bene.', meta:'Hai seguito da fuori l\'alluvione che ha colpito %TERR: il governo ne è uscito fra luci e ombre.', sfuggita:'Hai seguito da fuori l\'alluvione che ha colpito %TERR: al governo è sfuggita di mano.' },
+    piazza:{ gestita:'Quando l\'alluvione ha colpito %TERR, il movimento ha spalato il fango con gli altri.', meta:'Quando l\'alluvione ha colpito %TERR, il movimento ha fatto la sua parte.', sfuggita:'Quando l\'alluvione ha colpito %TERR, il movimento è rimasto accanto a chi era stato lasciato solo.' } },
+   epi:{ decide:{ gestita:'quando il fiume ruppe gli argini, tenne la barra dritta', sfuggita:'l\'alluvione che non seppe governare' } },
+   tempi:{
+    decide:{
+     1:{ t:'L\'alluvione colpisce %TERR', text:'Il fiume ha rotto gli argini nella notte e la pianura è sott\'acqua. I soccorsi sono partiti, gli sfollati riempiono le scuole e tutti aspettano una tua parola.', ch:[
+       { l:'Vai sul posto', e:{ L3:'stampa +1 · lavoratori +2', L2:'stampa +1 · lavoratori +2', L1:'ambiente +2 · stampa +1' }, peso:1, eco:'Dopo la tua visita, ', sulPosto:true,
+         f:function(){ stampad(1); vicGruppo('lavoratori', 2); } },
+       { l:'Resti a coordinare i soccorsi', e:{ L3:'correnti +1', L2:'lealtà del premier +1', L1:'correnti +1' }, peso:0, eco:'Con i soccorsi coordinati da te, ',
+         f:function(){ vicCorr(1); } },
+       { l:'Lasci fare ai tecnici', e:'nessun costo per ora', peso:-1, eco:'Con i tecnici lasciati soli, ' } ] },
+     2:{ t:'Il fango copre %TERR', text:'%ECOl\'acqua si è ritirata, ma metà dei paesi è ancora sotto il fango e le famiglie chiedono di tornare a casa. Che cosa viene prima?', ch:[
+       { l:'Fare presto: fondi subito', e:{ L3:'debito +0,6 · lavoratori +2', L2:'debito +0,6 · lavoratori +2', L1:'bilancio −5 · ambiente +2' }, costo:{ L3:{debito:0.6}, L2:{debito:0.6}, L1:{pct:1} }, peso:1,
+         f:function(){ vicDebito(0.6); vicGruppo('lavoratori', 2); } },
+       { l:'Fare bene: gara e controlli', e:'ceto medio +2 · il territorio aspetta', peso:0,
+         f:function(){ gd('cetomedio', 2); } } ] },
+     3:{
+      gestita:{ t:'Il conto dell\'alluvione', text:'Le strade sono riaperte e i cantieri lavorano: %TERR %TV{riconosce|riconoscono} che la risposta è stata all\'altezza.', ch:[
+        { l:'Lo rivendichi', e:'stampa +2', f:function(){ stampad(2); } },
+        { l:'Ringrazi chi ha lavorato', e:'tutti i gruppi +1', f:function(){ allG(1); } } ] },
+      meta:{ t:'Il conto dell\'alluvione', text:'Qualcosa ha funzionato e qualcosa no: i ritardi pesano quanto i soccorsi.', ch:[
+        { l:'Apri un\'inchiesta interna', e:{ L3:'correnti −2 · stampa +1', L2:'lealtà del premier −2 · stampa +1', L1:'correnti −2 · stampa +1' }, f:function(){ vicCorr(-2); stampad(1); } },
+        { l:'Chiudi il capitolo', e:'stampa −1', f:function(){ stampad(-1); } } ] },
+      sfuggita:{ t:'Il conto dell\'alluvione', text:'La ricostruzione è ferma, molte famiglie sono ancora fuori casa e la rabbia cresce. Qualcuno deve risponderne.', ch:[
+        { l:'Ti assumi la responsabilità', e:{ L3:'stampa +1 · correnti −3', L2:'stampa +1 · lealtà del premier −3', L1:'stampa +1 · correnti −3' }, resp:true, f:function(){ stampad(1); vicCorr(-3); } },
+        { l:'Scarichi su altri', e:{ L3:'correnti +1 · stampa −3', L2:'lealtà del premier +1 · stampa −3', L1:'correnti +1 · stampa −3' }, gio:-1, f:function(){ vicCorr(1); stampad(-3); } } ] } } },
+    fuori:{
+     1:{ t:'L\'alluvione colpisce %TERR', text:'Il fiume ha rotto gli argini e la pianura è sott\'acqua. Il governo manda i soccorsi: tu non decidi, ma tutti aspettano di sentire che cosa dici.', ch:[
+       { l:'Sostieni il governo nell\'emergenza', e:'pensionati +1', f:function(){ gd('pensionati', 1); } },
+       { l:'Incalzi il governo sui ritardi', e:'stampa +1', f:function(){ stampad(1); } },
+       { l:'Porti una proposta per i soccorsi', e:'credibilità +1', f:function(){ credd(1); } } ] },
+     2:{ t:'Il fango copre %TERR', text:'L\'acqua si è ritirata, il fango no. In aula arrivano i fondi per la ricostruzione.', ch:[
+       { l:'Voti i fondi', e:'lavoratori +1', f:function(){ gd('lavoratori', 1); } },
+       { l:'Chiedi un\'inchiesta sui ritardi', e:'stampa +1 · ceto medio −1', f:function(){ stampad(1); gd('cetomedio', -1); } } ] },
+     3:{
+      gestita:{ t:'Il conto dell\'alluvione', text:'La ricostruzione corre: il governo ne esce bene.', ch:[
+        { l:'Riconosci il lavoro fatto', e:'credibilità +1', f:function(){ credd(1); } },
+        { l:'Chiedi conto dei ritardi', e:'stampa +1', f:function(){ stampad(1); } } ] },
+      meta:{ t:'Il conto dell\'alluvione', text:'Qualcosa ha funzionato e qualcosa no: il governo non ne esce né bene né male.', ch:[
+        { l:'Chiedi un\'inchiesta', e:'stampa +1', f:function(){ stampad(1); } },
+        { l:'Volti pagina', e:'nessun effetto', f:function(){} } ] },
+      sfuggita:{ t:'Il conto dell\'alluvione', text:'La ricostruzione è ferma: il governo è sotto accusa.', ch:[
+        { l:'Chiedi che qualcuno ne risponda', e:'stampa +1', f:function(){ stampad(1); } },
+        { l:'Offri il tuo aiuto per ricostruire', e:'credibilità +1', f:function(){ credd(1); } } ] } } },
+    piazza:{
+     1:{ t:'L\'alluvione colpisce %TERR', text:'Il fiume ha rotto gli argini e la pianura è sott\'acqua. Nella sede del movimento si contano i volontari: c\'è chi vuole partire subito e chi vuole farsi sentire.', ch:[
+       { l:'Parti come volontario', e:'base +2 · radici +2', f:function(a){ attB(2); vicRadici(a, 2); } },
+       { l:'Organizzi una raccolta', e:'reputazione +2 · radici +2', f:function(a){ allG(2); vicRadici(a, 2); } },
+       { l:'Protesti contro i ritardi', e:'autorevolezza +2 · reputazione −1', f:function(){ attA(2); allG(-1); } } ] },
+     2:{ t:'Il fango copre %TERR', text:'L\'acqua si è ritirata, il fango no. I volontari sono stanchi e molte famiglie chiedono ancora aiuto.', ch:[
+       { l:'Resti con i volontari', e:'base +1', f:function(){ attB(1); } },
+       { l:'Passi la mano ad altri', e:'nessun effetto', f:function(){} } ] },
+     3:{
+      gestita:{ t:'Il conto dell\'alluvione', text:'La ricostruzione corre e la gente ricorda chi ha spalato il fango.', ch:[
+        { l:'Racconti quello che avete fatto', e:'autorevolezza +1', f:function(){ attA(1); } },
+        { l:'Torni al lavoro di tutti i giorni', e:'base +1', f:function(){ attB(1); } } ] },
+      meta:{ t:'Il conto dell\'alluvione', text:'Qualcosa ha funzionato e qualcosa no: i ritardi pesano quanto i soccorsi.', ch:[
+        { l:'Chiedi conto dei ritardi', e:'autorevolezza +1', f:function(){ attA(1); } },
+        { l:'Volti pagina', e:'nessun effetto', f:function(){} } ] },
+      sfuggita:{ t:'Il conto dell\'alluvione', text:'La ricostruzione è ferma e la rabbia cresce: la gente cerca chi l\'ha aiutata davvero.', ch:[
+        { l:'Porti la rabbia in piazza', e:'autorevolezza +1 · reputazione −1', f:function(){ attA(1); allG(-1); } },
+        { l:'Resti accanto alle famiglie', e:'base +1 · radici +1', f:function(a){ attB(1); vicRadici(a, 1); } } ] } } } } },
+ { id:'epidemia', era:'universale', titolo:'L\'epidemia', kick:'Sanità', min:'salute',
+   orig:['du_epidemia','pandemia'], aree:[], lati:['decide','fuori','piazza'], cantiere:false,
+   leggi:function(){ return (S.ind && S.ind.sanita>=60) ? 1 : 0; },   // la sanità a 60 o più: gli ospedali reggono
+   fatti:{
+    decide:{ gestita:'Hai fermato l\'epidemia che ha colpito %TERR.', meta:'L\'epidemia ha lasciato %TERR fra luci e ombre.', sfuggita:'L\'epidemia che ha colpito %TERR ti è sfuggita di mano.' },
+    fuori:{ gestita:'Hai seguito da fuori l\'epidemia che ha colpito %TERR: il governo ne è uscito bene.', meta:'Hai seguito da fuori l\'epidemia che ha colpito %TERR: il governo ne è uscito fra luci e ombre.', sfuggita:'Hai seguito da fuori l\'epidemia che ha colpito %TERR: al governo è sfuggita di mano.' },
+    piazza:{ gestita:'Quando l\'epidemia ha colpito %TERR, il movimento ha portato aiuto a chi era chiuso in casa.', meta:'Quando l\'epidemia ha colpito %TERR, il movimento ha fatto la sua parte.', sfuggita:'Quando l\'epidemia ha colpito %TERR, il movimento è rimasto accanto a chi era stato lasciato solo.' } },
+   epi:{ decide:{ gestita:'quando il contagio riempì i reparti, tenne la barra dritta', sfuggita:'l\'epidemia che non seppe governare' } },
+   tempi:{
+    decide:{
+     1:{ t:'Un\'epidemia colpisce %TERR', text:'Un contagio nuovo ha colpito %TERR e i reparti si riempiono in fretta. I medici chiedono indicazioni, le famiglie chiedono di sapere: tutti guardano a te.', ch:[
+       { l:'Vai nei reparti', e:'stampa +1 · pensionati +2', peso:0, eco:'Dopo la tua visita nei reparti, ', sulPosto:true,
+         f:function(){ stampad(1); gd('pensionati', 2); } },
+       { l:'Resti a coordinare medici e ospedali', e:{ L3:'correnti +1', L2:'lealtà del premier +1' }, peso:1, eco:'Con medici e ospedali coordinati da te, ',
+         f:function(){ vicCorr(1); } },
+       { l:'Lasci fare ai medici', e:'nessun costo per ora', peso:-1, eco:'Con i medici lasciati soli, ' } ] },
+     2:{ t:'Il contagio stringe %TERR', text:'%ECOil contagio non si ferma da solo. Chiudere costa al paese, restare aperti costa ai reparti. Che cosa viene prima?', ch:[
+       { l:'Chiudi scuole e mercati', e:'imprenditori −3 · i reparti respirano', peso:1,
+         f:function(){ gd('imprenditori', -3); } },
+       { l:'Resti aperto, con regole severe', e:'imprenditori +2 · pensionati −2', peso:0,
+         f:function(){ gd('imprenditori', 2); gd('pensionati', -2); } } ] },
+     3:{
+      gestita:{ t:'Il conto dell\'epidemia', text:'Il contagio è sceso e i reparti si svuotano: %TERR %TV{riconosce|riconoscono} che la risposta è stata all\'altezza.', ch:[
+        { l:'Lo rivendichi', e:'stampa +2', f:function(){ stampad(2); } },
+        { l:'Ringrazi medici e infermieri', e:'tutti i gruppi +1', f:function(){ allG(1); } } ] },
+      meta:{ t:'Il conto dell\'epidemia', text:'Il contagio è sceso, ma i ritardi dei primi giorni si ricordano quanto le cure.', ch:[
+        { l:'Apri un\'inchiesta interna', e:{ L3:'correnti −2 · stampa +1', L2:'lealtà del premier −2 · stampa +1' }, f:function(){ vicCorr(-2); stampad(1); } },
+        { l:'Chiudi il capitolo', e:'stampa −1', f:function(){ stampad(-1); } } ] },
+      sfuggita:{ t:'Il conto dell\'epidemia', text:'Il contagio ha corso più dei medici e le famiglie contano i giorni persi. Qualcuno deve risponderne.', ch:[
+        { l:'Ti assumi la responsabilità', e:{ L3:'stampa +1 · correnti −3', L2:'stampa +1 · lealtà del premier −3' }, resp:true, f:function(){ stampad(1); vicCorr(-3); } },
+        { l:'Scarichi su altri', e:{ L3:'correnti +1 · stampa −3', L2:'lealtà del premier +1 · stampa −3' }, gio:-1, f:function(){ vicCorr(1); stampad(-3); } } ] } } },
+    fuori:{
+     1:{ t:'Un\'epidemia colpisce %TERR', text:'Un contagio nuovo ha colpito %TERR e i reparti si riempiono. Il governo prende le prime misure: tu non decidi, ma tutti aspettano di sentire che cosa dici.', ch:[
+       { l:'Sostieni il governo nell\'emergenza', e:'pensionati +1', f:function(){ gd('pensionati', 1); } },
+       { l:'Incalzi il governo sui ritardi', e:'stampa +1', f:function(){ stampad(1); } },
+       { l:'Porti una proposta per gli ospedali', e:'credibilità +1', f:function(){ credd(1); } } ] },
+     2:{ t:'Il contagio stringe %TERR', text:'Il contagio non si ferma. In aula arrivano i fondi per gli ospedali e le regole per le scuole.', ch:[
+       { l:'Voti i fondi', e:'pensionati +1', f:function(){ gd('pensionati', 1); } },
+       { l:'Chiedi un\'inchiesta sui ritardi', e:'stampa +1 · ceto medio −1', f:function(){ stampad(1); gd('cetomedio', -1); } } ] },
+     3:{
+      gestita:{ t:'Il conto dell\'epidemia', text:'Il contagio è sceso: il governo ne esce bene.', ch:[
+        { l:'Riconosci il lavoro fatto', e:'credibilità +1', f:function(){ credd(1); } },
+        { l:'Chiedi conto dei ritardi', e:'stampa +1', f:function(){ stampad(1); } } ] },
+      meta:{ t:'Il conto dell\'epidemia', text:'Il contagio è sceso, ma tardi: il governo non ne esce né bene né male.', ch:[
+        { l:'Chiedi un\'inchiesta', e:'stampa +1', f:function(){ stampad(1); } },
+        { l:'Volti pagina', e:'nessun effetto', f:function(){} } ] },
+      sfuggita:{ t:'Il conto dell\'epidemia', text:'Il contagio ha corso più dei medici: il governo è sotto accusa.', ch:[
+        { l:'Chiedi che qualcuno ne risponda', e:'stampa +1', f:function(){ stampad(1); } },
+        { l:'Offri il tuo aiuto per gli ospedali', e:'credibilità +1', f:function(){ credd(1); } } ] } } },
+    piazza:{
+     1:{ t:'Un\'epidemia colpisce %TERR', text:'Un contagio nuovo ha colpito %TERR e i reparti si riempiono. Nel movimento c\'è chi vuole dare una mano e chi vuole farsi sentire.', ch:[
+       { l:'Ti metti a disposizione dei volontari', e:'base +2 · radici +2', f:function(a){ attB(2); vicRadici(a, 2); } },
+       { l:'Organizzi una raccolta per gli ospedali', e:'reputazione +2 · radici +2', f:function(a){ allG(2); vicRadici(a, 2); } },
+       { l:'Protesti contro i ritardi', e:'autorevolezza +2 · reputazione −1', f:function(){ attA(2); allG(-1); } } ] },
+     2:{ t:'Il contagio stringe %TERR', text:'Il contagio non si ferma e i volontari sono stanchi. Le famiglie più sole chiedono ancora aiuto.', ch:[
+       { l:'Resti con i volontari', e:'base +1', f:function(){ attB(1); } },
+       { l:'Passi la mano ad altri', e:'nessun effetto', f:function(){} } ] },
+     3:{
+      gestita:{ t:'Il conto dell\'epidemia', text:'Il contagio è sceso e la gente ricorda chi ha portato la spesa a chi non poteva uscire.', ch:[
+        { l:'Racconti quello che avete fatto', e:'autorevolezza +1', f:function(){ attA(1); } },
+        { l:'Torni al lavoro di tutti i giorni', e:'base +1', f:function(){ attB(1); } } ] },
+      meta:{ t:'Il conto dell\'epidemia', text:'Il contagio è sceso, ma tardi: i ritardi pesano quanto le cure.', ch:[
+        { l:'Chiedi conto dei ritardi', e:'autorevolezza +1', f:function(){ attA(1); } },
+        { l:'Volti pagina', e:'nessun effetto', f:function(){} } ] },
+      sfuggita:{ t:'Il conto dell\'epidemia', text:'Il contagio ha corso più dei medici e la rabbia cresce: la gente cerca chi l\'ha aiutata davvero.', ch:[
+        { l:'Porti la rabbia in piazza', e:'autorevolezza +1 · reputazione −1', f:function(){ attA(1); allG(-1); } },
+        { l:'Resti accanto alle famiglie', e:'base +1 · radici +1', f:function(a){ attB(1); vicRadici(a, 1); } } ] } } } } }
+];
 const ARCHI_DEF=[
  /* A — VERTENZA INDUSTRIALE (economico): la fabbrica che chiude, secondo come la gestisci si salva,
     si cede o esplode in sciopero generale. Riconverge: la tensione può tornare al tavolo. */
@@ -7891,7 +8040,7 @@ const ARCHI_DEF=[
              S.tavoloPid = P ? P.id : null;
              /* il RUOLO è una frase intera con segnaposto, tradotta e sostituita QUI (il motore applica T() al
                 risultato: su una stringa già risolta è un no-op). Mai `'testo '+nome`: è la classe di L16-1. */
-             return {nome: nomeGenere('m')+' '+rnd(PAESE.cognomi), ruolo: T('il segretario di %P').replace('%P', P?T(P.nome):T('un partito vicino')), arc:'notabile'}; },
+             return {nome: nomeGenere('m')+' '+rnd(PAESE.cognomi), ruolo: (typeof segretarioDel==='function' ? segretarioDel(P?T(P.nome):null) : T('il segretario del partito %P').replace('%P', P?T(P.nome):T('un partito vicino'))), arc:'notabile'}; },   // L272-2 Passo 0
   nodi:{
    start:{kick:'Palazzo', t:'Il pranzo esplorativo', text:'%FILO, %RUOLO, accetta un pranzo riservato. Niente giornalisti, niente delegazioni: voi due e la domanda che nessuno pronuncia — si può costruire qualcosa, o ci si limita a non farsi la guerra?', ch:[
      {l:'Metti sul tavolo un programma comune', e:'Fai sul serio; ora sei impegnato', eco:'Dopo il programma messo sul tavolo, ', goto:'programma', f:()=>{ intesaMuovi(S.tavoloPid, 5); }},
@@ -10497,7 +10646,7 @@ const LOCALE_EV=[
     {l:'Sostegno mirato a chi è più colpito',e:'Aiuti selettivi, conti più sostenibili',pleases:'tecnico',costo:{pct:0.6},f:()=>{locInd('sviluppo',2); locInd('bilancio',-3); gd('lavoratori',1);}},
   ]},
   {id:'l_alluvione', tipo:'regione', kick:'Emergenza', t:'Dopo l\'alluvione', text:'Un\'alluvione ha colpito alcuni comuni: ora servono soccorsi, conta dei danni e ricostruzione.', ch:[
-    {l:'Protezione civile e fondi per la ricostruzione',e:'Risposta piena al territorio; spesa pesante',pleases:'progressista',costo:{pct:1.9},f:()=>{locInd('ambiente',5); locInd('bilancio',-9); gd('lavoratori',3); gd('cetomedio',2);}},
+    {l:'Soccorsi e fondi per la ricostruzione',e:'Risposta piena al territorio; spesa pesante',pleases:'progressista',costo:{pct:1.9},f:()=>{locInd('ambiente',5); locInd('bilancio',-9); gd('lavoratori',3); gd('cetomedio',2);}},
     {l:'Gestione essenziale, conti sotto controllo',e:'L\'indispensabile; qualcuno resta scontento',pleases:'tecnico',costo:{pct:0.6},f:()=>{locInd('ambiente',2); locInd('bilancio',-3);}},
   ]},
   /* ===== LOTTO 2 — REGIONE (espansione): opportunità/agency oltre il tutto-crisi. Costi DICHIARATI (costo:{pct} sul bilancio

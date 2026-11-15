@@ -1191,3 +1191,9 @@
   .lampo-bottoni{flex-wrap:wrap;}   /* L251-3: tre bottoni a 375 vanno a capo */
   .lampo-bottoni .btn{min-height:44px;}
   .lampo-menu-btn{background:transparent; color:var(--brand); border:1px solid var(--brand);}
+  /* L272-3 (D366) · la vicenda: kicker con le tre tacche dei tempi, riga del cassetto dove il tavolo non c'è */
+  .ag .vic-kick{display:flex; align-items:center; justify-content:space-between; gap:8px;}
+  .vic-tacche{display:inline-flex; gap:5px; flex:none;}
+  .vic-tacche i{width:9px; height:9px; border-radius:50%; border:1.5px solid currentColor; box-sizing:border-box; opacity:.55;}
+  .vic-tacche i.on{background:currentColor; opacity:1;}
+  .vic-riga{color:var(--mut); padding:6px 2px 8px; letter-spacing:.02em;}

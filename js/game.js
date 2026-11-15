@@ -1325,7 +1325,7 @@ function pickMinistro(){
 function pickDossierSettore(){
   let avail=DOSSIERS.filter(function(d){ return d.min===S.dicastero && (!d.cond||d.cond()) && eraViva(d); });
   const d=pescaBag('doss|'+S.dicastero, avail, {vivePrima:true}); if(!d) return null;   // L152-2: i dossier di stagione (pronto_soccorso, overtourism, vaccini_stagione) entravano nel sacco solo se il rimescolo cadeva nei loro mesi
-  return { kind:'dossier', data:d, resolved:false };
+  return vicendaTrasforma({ kind:'dossier', data:d, resolved:false });   // L272-2: il tempo 1 dal dossier d'origine (spenta: l'item com'è)
 }
 /* L'OCCASIONE (la salita): meriti + fiuto. Successione (premier caduto + sei pronto), candidatura offerta
    (capitale molto alto — la GARANZIA che una via su arriva sempre), primaria (capitale alto + correnti).
@@ -4184,6 +4184,15 @@ function ppPrendi(q){
   return dato;
 }
 function ppNomeBreve(id){ var p=part(id)||{}; return id===PP_ID ? (p.sigla||p.nome||'') : (p.sigla || T(p.nome||'')); }   // per l'HTML (registro, biografia, scheda): la voce viva di pp_proprio è già escapata (L237-4)
+/* L272-2 Passo 0 (⚠ 1 di «⚑ L271-3», ⚠ 5 di «⚑ L272-1»): «il segretario di Partito Democratico» → la frase con l'articolo.
+   nome = il nome GIÀ reso (ppNomeBreve o T(P.nome)), null = nessun partito. Se il nome comincia già con «Partito»/«Party»/«Parti»
+   o contiene «Party» (in inglese), la forma che non ripete la parola: «il segretario del Partito Comunista» / «the Communist Party secretary»;
+   altrimenti «il segretario del partito Labour» / «the Labour party secretary». Chiavi: tre, tutte con la resa EN. */
+function segretarioDel(nome){
+  if(!nome) return T('il segretario di un partito vicino');
+  var k=/^(Partito|Party|Parti)\b|\bParty\b/i.test(String(nome).replace(/<[^>]*>/g,'')) ? 'il segretario del %P' : 'il segretario del partito %P';
+  return T(k).replace('%P', nome);
+}
 function ppSogliaParl(){ return (typeof PAESE.sbarramento==='number') ? PAESE.sbarramento : PP_SOGLIA_PARL; }
 /* L260-7bis: «arriva al 6%» — la card (card=true, «Traguardo: …») e il registro. «all'» davanti a 8, 11, 80…: si legge «otto», «undici» */
 function ppArrivaTesto(n, card){
@@ -6838,7 +6847,7 @@ function pickLocale(){
   function condOk(e){ return !e.cond||e.cond(); }   // carte stagionali/condizionate (es. il concerto di Capodanno)
   let pool=LOCALE_EV.filter(function(e){ return tipoOk(e)&&condOk(e)&&(typeof eraVivaT!=='function'||eraVivaT(e)); });   // FIX era-gate percorso locale (default eraVivaT: la governance locale è senza-tempo; i moderni → contemporanea, con equivalenti '50)
   const ev=pescaBag('loc|'+S.locale.tipo, pool); if(!ev) return null;   // sacchetto per-tipo (citta/regione separati)
-  return { kind:'locale', data:ev, resolved:false };
+  return vicendaTrasforma({ kind:'locale', data:ev, resolved:false });   // L272-2: `l_alluvione` può diventare il tempo 1 (spenta: l'item com'è)
 }
 /* fine mandato locale: rielezione CLEMENTE (consenso ≥ 40 → rieletto; sotto → sconfitta). La via maestra è salire.
    L261-1: la chiama la proclamazione della notte locale (concludiNotteTipo; urnaLocale la chiama diretta a interruttore spento): la
@@ -7402,6 +7411,15 @@ function attaccoDado(sale){
 }
 /* un pilastro grave della linea della partita (o un fatto-mondo grave, dove i fatti-mondo arrivano: non nella linea italiana, non nei
    paesi di `nonInPaesi`) entro ±mesi dal mese di oggi; per data, visto o no */
+/* L272-3 (⚠ 1 di «⚑ L272-2»): la sorella che guarda solo DOPO un pilastro grave (p ≤ ora < p+mesi), letta solo da vicendaAmmessa:
+   una crisi interna appena dopo una tragedia vera no, una crisi un mese prima sì (il pilastro arriva e la vicenda slitta). */
+function pilastroGraveDopo(mesi){
+  if(typeof S==='undefined' || !S) return false;
+  var ora=S.year*12+S.month, dopo=function(p){ if(!p || p.tono!=='grave') return false; var m=p.anno*12+p.mese; return m<=ora && ora<m+mesi; };
+  if(typeof PILASTRI_LINEA!=='undefined' && PILASTRI_LINEA.some(function(p){ return S.era===(p.linea||LINEA_IT) && dopo(p); })) return true;
+  if(typeof PILASTRI_MONDO!=='undefined' && S.era!==LINEA_IT && PILASTRI_MONDO.some(function(p){ return dopo(p) && !(p.nonInPaesi && p.nonInPaesi.indexOf(S.paese)>=0); })) return true;
+  return false;
+}
 function pilastroGraveVicino(mesi){
   if(typeof S==='undefined' || !S) return false;
   var ora=S.year*12+S.month, vicino=function(p){ return !!p && p.tono==='grave' && Math.abs(p.anno*12+p.mese-ora)<=mesi; };
@@ -8717,7 +8735,8 @@ const RIC_TEL={
 const RIC_MOV_CARTE=['ev_rivale'];   // le carte del movimento che parlano del rivale (L0)
 /* D349 · i fatti: chiave → Δ rapporto */
 const RIC_FATTI={ int_retta:1, int_spiazzato:-1, tel_squillo:-1, tel_si:1, tel_no:-1, retro_cedi:1, retro_sfida:-1,
-  domanda_bene:1, domanda_male:0, agenda_stampa:1, agenda_partito:1, trascurato:-1, battuto:-2, posto:2 };
+  domanda_bene:1, domanda_male:0, agenda_stampa:1, agenda_partito:1, trascurato:-1, battuto:-2, posto:2,
+  crisi_bene:1, crisi_male:-1 };   // L272-3: la chiusura di una vicenda (vicendaGiornalista)
 function ricVivo(){ return RICORRENTI && typeof S!=='undefined' && !!S && !LAMPO; }
 function ricHash(s){
   var h=2166136261; s=String(s);
@@ -8984,7 +9003,7 @@ const RIC_RUOLO_TXT={
   gio:{ L0:['il cronista locale','la cronista locale'], L1:['il cronista della cronaca cittadina','la cronista della cronaca cittadina'],
         pol:['il cronista politico','la cronista politica'], dip:['il corrispondente diplomatico','la corrispondente diplomatica'] },
   all:{ L0:['un compagno del movimento','una compagna del movimento'], L1:'il capogruppo della tua maggioranza', L2:'il capo del governo',
-        L2opp:'il segretario di %P', L3:'il capocorrente più leale', L3opp:'il segretario di %P', L4:'l\'ambasciatore %A', L5:'l\'ambasciatore %A' }
+        L2opp:'il segretario del partito %P', L3:'il capocorrente più leale', L3opp:'il segretario del partito %P', L4:'l\'ambasciatore %A', L5:'l\'ambasciatore %A' }
 };
 const RIC_MEZZO_TXT={ carta:'di un quotidiano', radio:'del giornale radio', tv:'del telegiornale', rete:'di un sito d\'informazione' };
 const RIC_RUOLO_GIO='%R %M';   // «la cronista politica del telegiornale»
@@ -9027,7 +9046,8 @@ const RIC_FATTO_TXT={ int_retta:'L\'ultima intervista l\'hai retta fino in fondo
   retro_cedi:'L\'ultima volta hai ceduto alle correnti.', retro_sfida:'L\'ultima volta hai tirato dritto.',
   domanda_bene:'L\'ultima domanda l\'hai chiusa con la risposta giusta.', domanda_male:'L\'ultima domanda ti è andata storta.',
   agenda_stampa:'Di recente hai dedicato una giornata alla stampa.', agenda_partito:'Di recente avete lavorato insieme una giornata intera.',
-  trascurato:'Da mesi non trovi il tempo per una telefonata o un incontro.', battuto:'Ha perso la sfida contro di te.', posto:'Il suo partito è entrato nel governo con te.' };
+  trascurato:'Da mesi non trovi il tempo per una telefonata o un incontro.', battuto:'Ha perso la sfida contro di te.', posto:'Il suo partito è entrato nel governo con te.',
+  crisi_bene:"Ha raccontato bene come hai retto l'ultima emergenza.", crisi_male:"Ha scritto che l'ultima emergenza ti è sfuggita di mano." };
 const RIC_INGRESSO_TXT={ riv:'Te ne hanno parlato: vuole il tuo posto.', gio:'Ti segue da poco, ma legge tutto.', all:'Sulla carta è dalla tua parte.' };
 /* D350 · le targhette, scritte prima della scelta e solo quando l'effetto può scattare (ricEffettoPuo) */
 const RIC_EFF_TXT={
@@ -9082,6 +9102,7 @@ function ricRuolo(ruolo, p){
   }
   var v=R[fe]||R.L3;
   if(Array.isArray(v)) return T(v[ricF(p)?1:0]);
+  if(v==='il segretario del partito %P'){ var pid0=t.indexOf('part:')===0 ? t.slice(5) : null; return segretarioDel(pid0 ? ppNomeBreve(pid0) : null); }   // L272-2 Passo 0
   var s=T(v);
   if(s.indexOf('%P')>=0){ var pid=t.indexOf('part:')===0 ? t.slice(5) : null; s=s.replace('%P', pid ? ppNomeBreve(pid) : T('un partito vicino')); }
   if(s.indexOf('%A')>=0){ var aid=t.indexOf('paese:')===0 ? t.slice(6) : null; s=s.replace('%A', aid ? ricAlleatoNome(aid) : T('di un paese amico')); }
@@ -9237,6 +9258,7 @@ function comizioTerr(i){
   var t=S.territori[i], TE=PAESE.territori[i];
   t.umore=clamp((t.umore||0)+1, -3, 3); t.ud=meseAss();
   S.giroMese=meseAss();
+  vicendaVisita(i);   // L272-2
   S.log.unshift({ t:T('Comizio · %T').replace('%T', cap(nomeTerr(TE))), x:T("La piazza risponde: l'umore dell'area sale.") });
   if(typeof suona==='function') suona('mappa');
   if(typeof render==='function') render(); if(typeof commitSnap==='function') commitSnap();
@@ -9248,6 +9270,7 @@ function investimentoTerr(i){
   if(!S.formeAnno || S.formeAnno.anno!==S.year) S.formeAnno={ anno:S.year, n:0 };
   S.formeAnno.n++;
   S.giroMese=meseAss();
+  vicendaVisita(i);   // L272-2
   S.log.unshift({ t:T('Fondi · %T').replace('%T', cap(nomeTerr(TE))), x:T("Un investimento annunciato: la spinta dell'area sale.") });
   if(typeof suona==='function') suona('mappa');
   if(typeof render==='function') render(); if(typeof commitSnap==='function') commitSnap();
@@ -9259,6 +9282,7 @@ function resolveGiro(ci){
   var def=defGiro(G.id); if(!def) { render(); return; }
   var opt=def.ch[ci]; if(!opt) { render(); return; }
   risolviScenaTerr(def, opt, G.idx);
+  vicendaVisita(G.idx);   // L272-2: la visita sul territorio colpito è «sul posto» (spenta: no-op)
   if(def.id==='gi_prima_sede' && S.partitoProprio) S.partitoProprio.sede=meseAss();   // L237-8: la prima sede si consuma SOLO alla scelta
   if(def.id==='gi_prima_sede') ppSedeDaGiro(G.idx);   // L260-7: col giro la visita È la prima sede (una voce in S.partitoProprio.sedi, niente doppione)
   S.ind.consenso=computeConsenso();
@@ -10169,6 +10193,281 @@ function arcoSub(str, a){
   if(f && f.pot && typeof potSub==='function' && typeof potDi==='function'){ const p=potDi(f.pot); if(p) out=potSub(out,p); }   // cantiere paesi reali (Fetta B): l'arco con un VOLTO fissato (es. l'aggressione) risolve %POTdet/%POTdi… dalla potenza del filo
   return out;
 }
+/* ================================================================================================================
+   ⚑ L272-2 · LE VICENDE — le crisi interne in più tempi (DESIGN-FORMATI.md «⚑ L272-1» D358-D368, «⚑ L272-2»). SPENTA.
+   Una macchina sua con la forma degli archi (nodi, scelte con `peso`, `%ECO`, fatto ed epilogo in biografia), ma NON in
+   `S.archi`: un tempo al mese per tre mesi di fila. Il campo è `S.vicenda = {a, ult, n}` (a = la vicenda aperta o null:
+   {tipo, t, terr, lato, peso, sc[], eco, da, pr, sl, orig, posto, stato}; ult = il mese della chiusura, il cooldown;
+   n = quante in carriera), dati puri; nasce SOLO a costante accesa e SOLO alla risoluzione del tempo 1.
+   · LA NASCITA (D362): dove la carta d'origine entra in agenda (`VICENDE_DEF[].orig`: `pioggia` nel ciclo dei dossier del
+     capo del governo e in `pickDossierSettore` del ministro, `l_alluvione` in `pickLocale` della regione) `vicendaTrasforma`
+     la rende il tempo 1 (stesso id d'origine: i registri dei recenti restano quelli della carta); dove non arriva (L3-opp,
+     L2-opp; L0 quando un tipo dichiara `piazza`) `vicendaNasceDado` col dado-hash `vicendaDado` (FNV + murmur, la forma di
+     `attaccoDado`: MAI Math.random). ⚠ `genAgenda` non scrive mai `S.vicenda` (lo rifà `applySnap` dallo stato d'inizio
+     mese): la carta del tempo 1 è un'estrazione come la carta d'origine, i tempi 2-3 si ricostruiscono dallo stato
+     (`vicendaTempo`, idempotente come `pushArco`).
+   · C4, NESSUNA CARTA IN PIÙ: il tempo prende il posto della carta dello stesso slot (capo del governo: il posto
+     dell'evento e i dossier n=max(0, n_senzaEvento−1); ministro, locale e opposizione: la catena della carta del mese).
+   · IL CALENDARIO (`vicendaMese`, in testa ad `avanzaMese`): il tempo dovuto nel mese che si chiude e non risolto SLITTA
+     (`sl`+1, `pr` al mese dopo); al secondo slittamento la vicenda si chiude «a metà» con una riga di registro; un cambio
+     di lato (sali, cadi, passi all'opposizione) la chiude allo stesso modo.
+   · LO STATO D'ARRIVO (D361/D363), letto alla nascita del tempo 3: chi decide = `peso` + `posto` (la visita del giro sul
+     territorio colpito, `vicendaVisita`) + `def.leggi()`; da fuori e in piazza = un hash di personaggio (nome, genere,
+     età), mese di nascita e tipo — mai il partito né l'area politica.
+   · `VICENDE_PLACEBO`: stesse nascite e stesse carte, nessun effetto su indicatori, segni, umore, biografia.
+   ================================================================================================================ */
+let VICENDE=false;
+let VICENDE_PLACEBO=false;
+const VICENDE_K={ cooldown:72, slittaMax:2, p:0.006, c4:0.30 };   // c4: la soglia del dossier nel mese del tempo al capo del governo (C4)
+let VICENDE_ROSSO=null;   // solo le prove: 'c4' = il tempo 2-3 come carta IN PIÙ (C4 rossa) · 'crisi' = nasce anche con S.crisi a gradino ≥ 3
+const VICENDE_STATI=['gestita','meta','sfuggita'];
+const VICENDE_LATI=['decide','fuori','piazza'];
+function vicendaViva(){ return VICENDE && typeof S!=='undefined' && !!S && !LAMPO && typeof VICENDE_DEF!=='undefined'; }
+function vicendaDef(id){ return (typeof VICENDE_DEF!=='undefined') ? (VICENDE_DEF.find(function(d){ return d.id===id; })||null) : null; }
+function vicendaAperta(){ return (vicendaViva() && S.vicenda && S.vicenda.a) ? S.vicenda.a : null; }
+/* il lato della carriera per un tipo: 'decide' | 'fuori' | 'piazza' | null (L1 città, gli altri dicasteri, L4, L5) */
+function vicendaLato(def){
+  if(typeof S==='undefined' || !S) return null;
+  if(S.livello===3) return S.opposizione ? 'fuori' : (S.coabitazione ? null : 'decide');
+  if(S.livello===2) return S.opposizione ? 'fuori' : ((def && def.min && S.dicastero===def.min) ? 'decide' : null);
+  if(S.livello===1) return (def && def.locale && S.locale && S.locale.tipo===def.locale) ? 'decide' : null;
+  if(S.livello===0) return 'piazza';
+  return null;
+}
+/* D363: il personaggio, e basta (niente partito, niente paese) */
+function vicendaPers(){ var p=(S && S.personaggio)||{}; return [p.nome||'', p.genere||'', p.etaIniziale||''].join('|'); }
+function vicendaHash(s){
+  var h=2166136261; s=String(s);
+  for(var i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619); }
+  h^=h>>>16; h=Math.imul(h,0x85ebca6b); h^=h>>>13; h=Math.imul(h,0xc2b2ae35); h^=h>>>16;
+  return (h>>>0)/4294967296;
+}
+function vicendaDado(sale){ return vicendaHash('vic|'+sale+'|'+vicendaPers()+'|'+meseAss()); }
+function vicendaAgendaTragedia(){ return Array.isArray(S.agenda) && S.agenda.some(function(it){ return it && it.data && it.data.cronaca && it.data.tono==='grave'; }); }
+function vicendaAgendaAttacco(){ return Array.isArray(S.agenda) && S.agenda.some(function(it){ return it && it.data && it.data.attacco; }); }
+/* tutti i «non nasce» di D362 */
+function vicendaAmmessa(def, lato){
+  if(!vicendaViva() || !def) return false;
+  if(!lato || (def.lati||[]).indexOf(lato)<0) return false;
+  if(def.paesi && def.paesi.indexOf(S.paese)<0) return false;
+  if(typeof eraVivaT==='function' && !eraVivaT(def)) return false;
+  var V=S.vicenda||{}, ora=meseAss();
+  if(V.a) return false;
+  if(typeof V.ult==='number' && ora-V.ult<VICENDE_K.cooldown) return false;
+  if(VICENDE_ROSSO!=='crisi' && S.crisi && (S.crisi.guerra || (S.crisi.t||0)>=3)) return false;
+  if(vigiliaMandato() || inCampagna() || NOTTE) return false;
+  if(pilastroGraveDopo(6) || vicendaAgendaTragedia() || vicendaAgendaAttacco()) return false;   // L272-3: la finestra solo dopo il pilastro (⚠ 1)
+  return true;
+}
+/* il territorio colpito: al L1 il tuo; altrove un hash (mai Math.random) fra le aree ammesse (`def.aree`, vuoto = tutte); -1 = nessuna ammessa */
+function vicendaTerr(def){
+  var ok=function(i){ return !def.aree || !def.aree.length || def.aree.indexOf(((PAESE.territori||[])[i]||{}).nome)>=0; };
+  if(S.livello===1 && S.locale && typeof S.locale.terrIdx==='number') return ok(S.locale.terrIdx) ? S.locale.terrIdx : -1;
+  if(!Array.isArray(S.territori) || !S.territori.length) return (def.aree && def.aree.length) ? -1 : null;
+  var idxs=S.territori.map(function(_,i){ return i; }).filter(ok);
+  if(!idxs.length) return -1;
+  return idxs[Math.min(idxs.length-1, Math.floor(vicendaDado('terr|'+def.id)*idxs.length))];
+}
+function vicLiv(){ return 'L'+((S && S.livello!=null) ? S.livello : 3); }
+function vicTesto(v){ if(v==null) return ''; if(typeof v==='string') return v; return v[vicLiv()]!=null ? v[vicLiv()] : (v.L3!=null ? v.L3 : ''); }
+function vicCosto(c){ var k=c && c.costo; if(!k) return null; if(k.debito!=null || k.pct!=null) return k; return k[vicLiv()]||null; }
+function vicendaNodo(def, lato, t, stato){ var N=def && def.tempi && def.tempi[lato]; if(!N) return null; return t<3 ? N[t] : (N[3] ? N[3][stato] : null); }
+/* l'item {kind:'vicenda'} dallo stato (o dalla carta d'origine): data.ch ha le etichette e le targhette del livello */
+function vicendaItem(def, lato, t, terr, origId, a){
+  var stato=a ? a.stato : null, nodo=vicendaNodo(def, lato, t, stato); if(!nodo) return null;
+  var ch=nodo.ch.map(function(c){ var o={ l:c.l, e:vicTesto(c.e) }; var k=vicCosto(c); if(k) o.costo=k; return o; });
+  return { kind:'vicenda', vic:{ tipo:def.id, t:t, terr:terr, lato:lato, orig:origId||null, stato:stato },
+           data:{ id:origId || ('vic_'+def.id+'_'+t), kick:def.kick, min:def.min, t:nodo.t, text:nodo.text, ch:ch, dovuta:true, vicenda:true }, resolved:false };
+}
+/* il testo di una carta-vicenda: T() PRIMA, poi %ECO e %TERR/%TV{…} (arcoTerrSub) */
+function vicendaSub(str, it){
+  var s=T(str||''), V=it && it.vic, a=S && S.vicenda && S.vicenda.a;
+  s=s.replace(/%ECO/g, (a && V && a.tipo===V.tipo && V.t>1) ? (a.eco||'') : '');
+  var TE=(V && typeof V.terr==='number' && PAESE && PAESE.territori) ? PAESE.territori[V.terr] : null;
+  return arcoTerrSub(s, TE);
+}
+/* il tempo 1 per trasformazione: chiamata dove la carta d'origine entra in agenda; spenta = l'item com'era (nessun dado) */
+function vicendaTrasforma(it){
+  if(!vicendaViva() || !it || !it.data || typeof VICENDE_DEF==='undefined') return it;
+  var id=it.data.id, def=VICENDE_DEF.find(function(d){ return (d.orig||[]).indexOf(id)>=0; }); if(!def) return it;
+  var a=S.vicenda && S.vicenda.a;
+  if(a && a.tipo===def.id && a.orig===id && a.da===meseAss()){   // già nata in questo mese (un caricamento): la stessa chiave, già decisa
+    var gi=vicendaItem(def, a.lato, 1, a.terr, id, null); if(gi){ gi.resolved=true; gi.outcome=''; } return gi || it;
+  }
+  var lato=vicendaLato(def); if(!vicendaAmmessa(def, lato)) return it;
+  var terr=vicendaTerr(def); if(terr===-1) return it;
+  return vicendaItem(def, lato, 1, terr, id, null) || it;
+}
+/* il tempo 1 col dado (da fuori, in piazza): nessuna estrazione del banco */
+function vicendaNasceDado(){
+  if(!vicendaViva()) return null;
+  for(var i=0;i<VICENDE_DEF.length;i++){
+    var def=VICENDE_DEF[i], lato=vicendaLato(def);
+    if(lato!=='fuori' && lato!=='piazza') continue;
+    if(!vicendaAmmessa(def, lato)) continue;
+    if(vicendaDado('nasce|'+def.id)>=VICENDE_K.p) continue;
+    var terr=vicendaTerr(def); if(terr===-1) continue;
+    var it=vicendaItem(def, lato, 1, terr, null, null); if(it) return it;
+  }
+  return null;
+}
+/* il tempo 2 o 3 dovuto in questo mese, dallo stato (idempotente); null = niente (o slitta: guerra › tempo, pilastro-tragedia) */
+function vicendaTempo(){
+  var a=vicendaAperta(); if(!a || a.t<2 || a.pr>meseAss()) return null;
+  var def=vicendaDef(a.tipo); if(!def || vicendaLato(def)!==a.lato) return null;
+  if(S.crisi && S.crisi.guerra) return null;
+  if(vicendaAgendaTragedia()) return null;
+  return vicendaItem(def, a.lato, a.t, a.terr, null, a);
+}
+/* la visita del giro (qualunque forma) sul territorio colpito, nel mese del tempo 1 o 2: «sul posto», una volta sola */
+function vicendaVisita(i){
+  if(!vicendaViva() || typeof i!=='number') return;
+  var a=S.vicenda && S.vicenda.a, prima;
+  if(a){ prima=!!a.posto; if(a.t===2 && a.terr===i && !a.posto) a.posto=1; if(!prima && a.posto) vicendaGestoVisita(); return; }
+  (S.agenda||[]).forEach(function(it){ if(it && it.kind==='vicenda' && !it.resolved && it.vic && it.vic.t===1 && it.vic.terr===i && !it.vic.posto){ it.vic.posto=1; vicendaGestoVisita(); } });
+}
+/* L272-3 (D364 (i), D367): la visita sul posto ha la battuta del personaggio (strato dei gesti) — il suono è l'elicottero */
+function vicendaGestoVisita(){ vicendaSuona('elicottero'); if(typeof parlaGesto==='function') parlaGesto('visita-disastro'); }
+/* L272-3 · un effetto (sicuro come suona) e le voci di D367: solo nelle partite in inglese (⚠ 1 di «⚑ L272-1»: nessuna presa
+   italiana), mai sotto la notte, mai con un'altra voce in corso, mai al caricamento (chiamata dentro il mese o nel gesto) */
+function vicendaSuona(n){ if(typeof suona==='function') suona(n); }
+function vicendaVoce(id){
+  if(typeof parla!=='function' || typeof curLang!=='function' || curLang()!=='en') return;
+  if(NOTTE || (typeof voceInCorso==='function' && voceInCorso())) return;
+  if(S.crisi && S.crisi.guerra) return;
+  parla(id);
+}
+/* all'entrata del tempo 2 (voce-crisi-passo) e del tempo 3 gestito o a metà (voce-crisi-fine: «È passata» sarebbe falso se sfuggita) */
+function vicendaVoceMese(){
+  if(!vicendaViva() || typeof MESE_IN_CORSO==='undefined' || !MESE_IN_CORSO || !Array.isArray(S.agenda)) return;
+  var it=S.agenda.find(function(x){ return x && x.kind==='vicenda' && !x.resolved && x.vic && x.vic.t>1; }); if(!it) return;
+  if(it.vic.t===2) vicendaVoce('voce-crisi-passo');
+  else if(it.vic.stato==='gestita' || it.vic.stato==='meta') vicendaVoce('voce-crisi-fine');
+}
+/* lo stato d'arrivo, alla nascita del tempo 3 */
+function vicendaStato(a, def){
+  if(a.lato!=='decide'){
+    var h=vicendaHash('stato|'+a.tipo+'|'+a.da+'|'+vicendaPers());
+    return h<1/3 ? 'gestita' : (h<2/3 ? 'meta' : 'sfuggita');
+  }
+  var s=(a.peso||0)+(a.posto?1:0)+((def && typeof def.leggi==='function') ? (def.leggi()||0) : 0);
+  return s>=2 ? 'gestita' : (s>=0 ? 'meta' : 'sfuggita');
+}
+/* D363: il tempo 3 da fuori premia chi ha letto giusto il governo (la scelta del tempo 1: 0 sostieni · 1 incalza · 2 proposta) */
+function vicendaLettura(a){
+  if(VICENDE_PLACEBO) return;
+  if(a.lato==='piazza'){   // L272-3: il movimento cresce dove ha letto giusto (0 volontario · 1 raccolta · 2 protesta)
+    var q=(a.sc||[])[0];
+    if(q<2 && a.stato==='gestita') attB(1);
+    else if(q===2 && a.stato==='sfuggita') attA(2);
+    else if(q===2 && a.stato==='gestita') allG(-1);
+    return;
+  }
+  if(a.lato!=='fuori') return;
+  var s=(a.sc||[])[0];
+  if(s===0 && a.stato==='gestita') credd(2);
+  else if(s===1 && a.stato==='sfuggita'){ credd(3); stampad(1); }
+  else if((s===0 && a.stato==='sfuggita') || (s===1 && a.stato==='gestita')) credd(-2);
+}
+/* il gancio del giornalista ricorrente (D364 (iii)): scrive solo quando la chiave c'è in RIC_FATTI (riga 25) */
+function vicendaGiornalista(esito, dr){
+  var k=esito==='gestita' ? 'crisi_bene' : (esito==='sfuggita' ? 'crisi_male' : null);
+  if(!k || VICENDE_PLACEBO || typeof RIC_FATTI==='undefined' || RIC_FATTI[k]==null || typeof ricVivo!=='function' || !ricVivo()) return;
+  ricFatto('gio', k, dr);
+}
+/* la chiusura col tempo 3: segno sul territorio, umore, biografia, epilogo, giornalista, cooldown */
+function vicendaChiudi(esito, opt){
+  var a=S.vicenda && S.vicenda.a; if(!a) return;
+  var def=vicendaDef(a.tipo), ora=meseAss(), TE=(typeof a.terr==='number' && PAESE.territori) ? PAESE.territori[a.terr] : null;
+  if(!VICENDE_PLACEBO){
+    var t=(typeof a.terr==='number' && Array.isArray(S.territori)) ? S.territori[a.terr] : null;
+    if(t && !(typeof segnoDiGuerra==='function' && segnoDiGuerra(a.terr))){
+      if(esito==='gestita'){ if(def && def.cantiere) t.segno={ t:'cantiere', da:ora, fino:ora+SEGNO_TERR_MESI.cantiere }; t.umore=clamp((t.umore||0)+1, -3, 3); t.ud=ora; }
+      else if(esito==='sfuggita'){ t.segno={ t:'crisi', da:ora, fino:ora+12 }; t.umore=clamp((t.umore||0)-((opt && opt.resp) ? 1 : 2), -3, 3); t.ud=ora; }
+    }
+    var FL=def && def.fatti && (def.fatti[a.lato] || def.fatti), F=FL && FL[esito];   // L272-3: fatti ed epiloghi per lato
+    if(F) bioFatto(arcoTerrSub(T(F), TE));
+    var EL=def && def.epi && (def.epi[a.lato] || (def.epi.decide ? null : def.epi)), E=EL && EL[esito];
+    if(E && S.biografia){ S.biografia.archiEpi=S.biografia.archiEpi||[]; S.biografia.archiEpi.push(arcoTerrSub(T(E), TE)); if(S.biografia.archiEpi.length>2) S.biografia.archiEpi.shift(); }
+    vicendaGiornalista(esito, opt && opt.gio);
+  }
+  if(def && VICENDE_ESITO_TXT[esito]) S.log.unshift({ t:T(def.titolo||"L'emergenza"), x:T(VICENDE_ESITO_TXT[esito]) });   // L272-3: lo stato a parole nel registro
+  S.vicenda.a=null; S.vicenda.ult=ora; S.vicenda.n=(S.vicenda.n||0)+1;
+}
+/* la chiusura senza tempo 3 («a metà»): due slittamenti, o un cambio di lato */
+function vicendaChiudiMeta(){
+  var a=S.vicenda && S.vicenda.a; if(!a) return;
+  var def=vicendaDef(a.tipo);
+  S.log.unshift({ t:T((def && def.titolo) || 'L\'emergenza'), x:T('L\'emergenza si è chiusa senza che tu ci mettessi mano.') });
+  S.vicenda.a=null; S.vicenda.ult=meseAss(); S.vicenda.n=(S.vicenda.n||0)+1;
+}
+/* il confine del mese (in testa ad avanzaMese, prima di S.month++): cambio di lato, slittamento */
+function vicendaMese(){
+  var a=vicendaAperta(); if(!a) return;
+  var def=vicendaDef(a.tipo);
+  if(!def || vicendaLato(def)!==a.lato){ vicendaChiudiMeta(); return; }
+  if(a.pr<=meseAss()){
+    a.sl=(a.sl||0)+1;
+    if(a.sl>=VICENDE_K.slittaMax){ vicendaChiudiMeta(); return; }
+    a.pr=meseAss()+1;
+  }
+}
+/* il ramo kind:'vicenda' di resolveItemCore */
+function vicendaRisolvi(it, ci){
+  var V=it.vic||{}, def=vicendaDef(V.tipo);
+  if(!def){ it.resolved=true; return; }
+  var ora=meseAss();
+  S.vicenda=S.vicenda||{ a:null, ult:null, n:0 };
+  if(V.t===1){
+    if(S.vicenda.a){ it.resolved=true; it.outcome=''; return; }   // guardia: già nata
+    S.vicenda.a={ tipo:V.tipo, t:1, terr:(typeof V.terr==='number' ? V.terr : null), lato:V.lato, peso:0, sc:[], eco:'', da:ora, pr:ora, sl:0, orig:V.orig||null, posto:V.posto ? 1 : 0, stato:null };
+    vicendaSegnoNascita(S.vicenda.a);   // L272-3: il segno sul tavolo dal primo giorno
+  }
+  var a=S.vicenda.a;
+  if(!a || a.t!==V.t || a.tipo!==V.tipo){ it.resolved=true; it.outcome=''; return; }
+  var nodo=vicendaNodo(def, a.lato, a.t, a.stato); if(!nodo){ it.resolved=true; return; }
+  var c=nodo.ch[ci]; if(!c) return;
+  if(!VICENDE_PLACEBO && typeof c.f==='function') c.f(a);
+  if(c.sulPosto && def.id==='alluvione') vicendaSuona('elicottero');   // L272-3 (D367): «vai sul posto» dopo l'alluvione, secondo suono del gesto
+  a.sc.push(ci);
+  a.peso=(a.peso||0)+(c.peso||0);
+  a.eco=c.eco ? T(c.eco) : '';
+  var tit=vicendaSub(nodo.t, it);
+  S.log.unshift({ t:tit, x:T('Decisione:')+' '+vicendaSub(c.l, it) });
+  if(a.t===1){ a.t=2; a.pr=ora+1; a.sl=0; it.outcome=T('Scelta:')+' <b>'+vicendaSub(c.l, it)+'</b>. '+T('L\'emergenza continua.'); }
+  else if(a.t===2){ a.t=3; a.pr=ora+1; a.sl=0; a.stato=vicendaStato(a, def); it.outcome=T('Scelta:')+' <b>'+vicendaSub(c.l, it)+'</b>. '+T('L\'emergenza continua.'); }
+  else { vicendaLettura(a); var esito=a.stato; vicendaChiudi(esito, { resp:!!c.resp, gio:c.gio }); it.outcome='<b>'+vicendaSub(c.l, it)+'</b>.'; }
+  S.ind.consenso=computeConsenso();
+  it.resolved=true;
+}
+/* applySnap: un valore illeggibile si toglie (tipo sconosciuto, tempo fuori da 1-3, territorio fuori da S.territori, lato o stato sconosciuto) */
+function vicendaPulisci(){
+  var V=S.vicenda; if(V==null) return;
+  if(typeof V!=='object' || Array.isArray(V)){ delete S.vicenda; return; }
+  var a=V.a;
+  if(a!=null){
+    var ok=typeof a==='object' && !!vicendaDef(a.tipo) && [1,2,3].indexOf(a.t)>=0 && VICENDE_LATI.indexOf(a.lato)>=0
+      && (a.terr==null || (typeof a.terr==='number' && Array.isArray(S.territori) && a.terr>=0 && a.terr<S.territori.length))
+      && typeof a.pr==='number' && typeof a.da==='number' && Array.isArray(a.sc)
+      && (a.t<3 || VICENDE_STATI.indexOf(a.stato)>=0);
+    if(!ok) V.a=null;
+  } else V.a=null;
+  if(V.ult!=null && typeof V.ult!=='number') V.ult=null;
+  if(typeof V.n!=='number') V.n=0;
+}
+/* gli effetti delle scelte (data.js VICENDE_DEF): un aiuto per livello, così la tabella resta dichiarativa */
+function vicCorr(n){ if(S.livello===2){ if(S.premier && S.premier.lealta!=null) S.premier.lealta=clamp(S.premier.lealta+n,0,100); } else agCorrenti(n); }
+function vicDebito(x){ if(S.livello===1) locInd('bilancio', -Math.round(x*8)); else if(S.ind && S.ind.debt!=null) S.ind.debt+=x; }
+function vicGruppo(g, n){ if(S.livello===1) locInd('ambiente', n); else gd(g, n); }
+/* L272-3 · le radici del movimento sul territorio colpito (lato piazza): la stessa scala e lo stesso tetto di radiciMese */
+function vicRadici(a, n){ if(!a || typeof a.terr!=='number' || typeof radiciAttive!=='function' || !radiciAttive()) return; var R=S.attivista.radici; R[a.terr]=Math.min(RADICI_K.tetto, (R[a.terr]||0)+n); }
+const VICENDE_ESITO_TXT={ gestita:"L'emergenza è stata gestita.", meta:"L'emergenza si è chiusa a metà.", sfuggita:"L'emergenza è sfuggita di mano." };
+/* L272-3 · il segno «crisi» alla nascita (D364 (iv)): sul territorio colpito fino al mese del tempo 3; la chiusura lo sostituisce */
+function vicendaSegnoNascita(a){
+  if(VICENDE_PLACEBO || !a || typeof a.terr!=='number' || !Array.isArray(S.territori)) return;
+  var t=S.territori[a.terr]; if(!t || (typeof segnoDiGuerra==='function' && segnoDiGuerra(a.terr))) return;
+  t.segno={ t:'crisi', da:a.da, fino:a.da+3 };
+}
 /* aggiornaArchi: (1) prova ad accendere un nuovo arco "in sottofondo" (se c'è uno slot libero); (2) presenta
    UNA SOLA carta-arco — la coda FIFO sceglie chi aspetta da più tempo, gli altri restano in attesa. L'attivazione
    è separata dalla presentazione: così due archi possono coesistere e ALTERNARSI di mese in mese (l'intreccio),
@@ -10382,6 +10681,7 @@ function genAgendaRamo(first){
   if(S.livello===0){ if(S.attivista && !S.attivista.laurea){                     // ATTIVISTA: UNA carta al mese, scelta per priorità (rework L2: campagne come carte di flusso)
       var ac=null;
       if(S.attivista.campagna && S.attivista.campagna.resaPending) ac=cardCampResa();        // 1) la RESA della campagna
+      else if(vicendaViva() && (ac=vicendaTempo() || vicendaNasceDado())) {}                // L272-3: la vicenda in piazza (tempo 2-3 o nascita col dado-hash) al posto della carta del mese (C4; spenta: niente, nessun dado; la catena if/else resta intatta)
       else if(S.attivista.evCorrente) ac=cardAttivistaEvento(S.attivista.evCorrente);        // 2) l'EVENTO (L3)
       // P1 (Sfide v3, #7c): la Sfida SOPRA l'offerta-campagna — prima era in fondo e le campagne pluri-mese la affamavano
       //   (asimmetria cross-ruolo: il premier la riceve via la conferenza sempre-presente). Ora ~1/5 come gli altri ruoli.
@@ -10425,9 +10725,13 @@ function genAgendaRamo(first){
       /* rifinitura locale — il RESPIRO: la vita personale è il SECONDO FLUSSO che si alterna al locale. Quando un
          evento personale c'è, il pool locale RIPOSA (respiro riempito da CONTENUTO); se non c'è, esce una carta
          locale — MAI una tregua nuda (zero dead air). Così la ricorrenza locale cala senza vuoti. */
+      const vt1=vicendaTempo();   // L272-2: il tempo 2-3 prende il posto della carta del mese (C4; spenta: null)
+      if(vt1){ S.agenda.push(vt1); }
+      else {
       var sf1=(typeof pescaSfida==='function')?pescaSfida(['locale'],'aula'):null;   // D1b: la sfida in consiglio (gated)
       if(sf1){ S.agenda.push({kind:'event', data:sf1, resolved:false}); }
       else { const pe=pickPersonale(); if(pe){ S.agenda.push(pe); } else { const le=pickLocale(); if(le) S.agenda.push(le); } }
+      }
     }
     return;
   }
@@ -10545,12 +10849,15 @@ function genAgendaRamo(first){
     else if(!inq && !inqA){
       /* D4 — la Sfida arriva anche allo SFIDANTE (regola: le Sfide in tutte le modalità). Cornice naturale: il
          giornalista che incalza l'alternativa al governo (cornice 'stampa'); riusa le domande `governo`, auto-gata a ~1/5 mesi. */
-      var sfO=(typeof pescaSfida==='function')?pescaSfida(['governo'],'stampa'):null;
+      const vto=vicendaTempo();   // L272-2: il tempo 2-3 prende il posto della carta del mese (C4; spenta: null)
+      var sfO=vto ? null : ((typeof pescaSfida==='function')?pescaSfida(['governo'],'stampa'):null);
       if(sfO){ S.agenda.push({kind:'stampa', data:sfO, resolved:false}); }
       else {
-        let op = famigliaOppDovuta() ? pickFamigliaOpp() : null;   // L25-2/L25-3: le famiglie si prendono lo slot della carta d'opposizione, a turno fra loro (stesso kind: la forma del mese non cambia)
-        if(!op) op = pickOpposizione();
-        if(op) S.agenda.push({kind:'dossier', data:op, resolved:false});
+        const vno=vto || vicendaNasceDado();   // L272-2: da fuori la vicenda nasce col dado-hash, al posto della carta d'opposizione (spenta: null, nessun dado)
+        let op = vno ? null : (famigliaOppDovuta() ? pickFamigliaOpp() : null);   // L25-2/L25-3: le famiglie si prendono lo slot della carta d'opposizione, a turno fra loro (stesso kind: la forma del mese non cambia)
+        if(!op && !vno) op = pickOpposizione();
+        if(vno) S.agenda.push(vno);
+        else if(op) S.agenda.push({kind:'dossier', data:op, resolved:false});
         if(S.agenda.length<2){ const pe=pickPersonale(); if(pe) S.agenda.push(pe); }
         else if(Math.random()<0.35){ const gv=pickGovernoEvent(); if(gv) S.agenda.push({kind:'event', data:gv, resolved:false}); }
       }
@@ -10569,8 +10876,10 @@ function genAgendaRamo(first){
          sul suo timer da 5 mesi). Rianima il ramo che a L2 non veniva mai raggiunto (pickConferenza è dopo il return).
          Solo la Sfida, non la conferenza piena: il mese del ministro resta più raccolto del L3. Wrap identico al L3. */
       let sfC=null;
-      if(typeof pescaSfida==='function') sfC=pescaSfida(['governo','ministro'],'commissione');
-      if(sfC){ S.confUltimo=S.year*12+S.month; S.agenda.push({kind:'stampa', data:sfC, resolved:false}); }
+      const vt2=vicendaTempo();   // L272-2: il tempo 2-3 prende il posto della carta del mese (C4; spenta: null)
+      if(!vt2 && typeof pescaSfida==='function') sfC=pescaSfida(['governo','ministro'],'commissione');
+      if(vt2){ S.agenda.push(vt2); if(S.agenda.length<2){ const pe=pickPersonale(); if(pe) S.agenda.push(pe); } }
+      else if(sfC){ S.confUltimo=S.year*12+S.month; S.agenda.push({kind:'stampa', data:sfC, resolved:false}); }
       else if(ministroDovuto()){ const mc=pickMinistro(); if(mc){ S.agenda.push(mc); } else { const ds=pickDossierSettore(); if(ds) S.agenda.push(ds); } }
       else {
         const ds=pickDossierSettore(); if(ds) S.agenda.push(ds);
@@ -10802,6 +11111,8 @@ function genAgendaRamo(first){
   let hadEvent=false;
   const inter=pickIntermedia();
   if(inter){ S.agenda.push(inter); hadEvent=true; }
+  let hadVic=false;   // L272-2: il tempo 2-3 di una vicenda prende il posto dell'evento (C4; spenta: null, nessuna estrazione)
+  if(!hadEvent){ const vt=vicendaTempo(); if(vt){ S.agenda.push(vt); if(VICENDE_ROSSO!=='c4'){ hadEvent=true; hadVic=true; } } }
   if(!hadEvent && LAMPO && lampoCrisi()){ const cs=pickCrisiScala(); if(cs){ S.agenda.push({kind:'event', data:cs, resolved:false}); hadEvent=true; } }   // L251-5: nella crisi da risolvere la carta della scala viene prima degli altri eventi (fuori dalla sfida LAMPO è null: niente)
   if(!hadEvent){ const att=pickAttacco(); if(att){ S.agenda.push({kind:'event', data:att, resolved:false}); hadEvent=true; } }   // L245-7: l'attacco (spento: null, nessuna estrazione)
   // evento di soglia sui mercati (fiducia): l'evento del mese (solo se non c'è già un'intermedia)
@@ -10814,7 +11125,7 @@ function genAgendaRamo(first){
   if(!hadEvent && Math.random()<0.10*dif().freqEventi){
     S.recentEvent=S.recentEvent||[];   // finestra anti-ripetizione (5): prima escludevamo solo l'ULTIMO evento
     const pool=EVENTS.filter(e=>(!e.cond||e.cond())&&eraViva(e)&&!S.recentEvent.includes(e.id)&&!giaUscitaUnaCarriera(e));   // L232-1: unaCarriera (la finestra dei recenti ha 5 posti: un evento con una finestra di mesi tornava) · Build B: eraViva ADDITIVO — gli eventi senza tag passano sempre (nessuna regressione); abilita i pilastri d'epoca taggati
-    if(pool.length){ const ev=rnd(pool); if(ev.unaCarriera) segnaUnaCarriera(ev.id); S.recentEvent.push(ev.id); if(S.recentEvent.length>5) S.recentEvent.shift(); S.agenda.push({kind:'event', data:ev, resolved:false}); hadEvent=true; }
+    if(pool.length){ const ev=rnd(pool); if(ev.unaCarriera) segnaUnaCarriera(ev.id); S.recentEvent.push(ev.id); if(S.recentEvent.length>5) S.recentEvent.shift(); S.agenda.push(vicendaTrasforma({kind:'event', data:ev, resolved:false})); hadEvent=true; }   // L272-3: `pandemia` può diventare il tempo 1 dell'epidemia (spenta: l'item com'è)
   }
   // CONFLITTI internazionali (cantiere paesi reali, Fetta B): i flashpoint coi volti nominati, PRIMA della routine diplomatica (presenza ricorrente)
   if(!hadEvent){ const rt=guerraRitornoCarta(); if(rt){ S.agenda.push({kind:'event', data:rt, resolved:false}); hadEvent=true; } }   // L245-5: il ritorno, il mese dopo la fine della guerra
@@ -10897,7 +11208,8 @@ function genAgendaRamo(first){
   }
   // dossier: il totale di carte/mese resta <= 2 (eventi, iniziative dei ministri, inchiesta, archi, appuntamenti e vita privata riducono i dossier)
   let n; const r=Math.random();
-  if(hadEvent) n=(r<0.5?0:1);
+  if(hadVic) n=(r<VICENDE_K.c4?0:1);   // L272-2 (C4): un dossier con p 1−c4 (tarato sulla media delle carte del mese senza il tempo; «n_senzaEvento−1» del design ne dava 0,38 in meno)
+  else if(hadEvent) n=(r<0.5?0:1);
   else n=(r<0.16?0:r<0.64?1:2);
   const iniz=(hadProposta?1:0)+(hadBudget?1:0)+(hadScandalo?1:0)+(hadConflitto?1:0)+(hadConf?1:0)+(hadPunto?1:0)+(hadInchiesta?1:0)+(hadArco?1:0)+(hadPers?1:0);
   n=Math.max(0, Math.min(n, 2-iniz-(hadEvent?1:0)));   // il tetto vero: evento + iniziative + inchiesta + arco + dossier ≤ 2
@@ -10905,7 +11217,7 @@ function genAgendaRamo(first){
   let avail=DOSSIERS.filter(d=>!S.recentDoss.includes(d.id) && (!d.cond||d.cond()) && eraViva(d) && (!S.coabitazione || coabitazioneMinistero(d.min)));   // L100-2: in coabitazione solo esteri e difesa (il filtro del livello 2)   // i dossier possono avere cond (es. liste solo con sanità bassa); eraViva (flip) esclude i moderni nel '50
   for(let i=0;i<n && avail.length;i++){
     const d=rnd(avail); avail=avail.filter(x=>x.id!==d.id);
-    S.agenda.push({kind:'dossier', data:d, resolved:false});
+    S.agenda.push(vicendaTrasforma({kind:'dossier', data:d, resolved:false}));   // L272-2: `pioggia` può diventare il tempo 1 (spenta: l'item com'è)
     S.recentDoss.push(d.id); if(S.recentDoss.length>22) S.recentDoss.shift();   // finestra 22 ≈ 20 mesi senza rivedere la stessa carta (pool ~92)
   }
 
@@ -10951,6 +11263,7 @@ const VOCI_CARTA = { sciopero:'voce-sciopero', sisma:'voce-lutto', crollo:'voce-
   g7:'voce-vertice', nato_vertice:'voce-vertice', mg_vertice:'voce-vertice', dp_summit:'voce-vertice', dp_comunicato:'voce-vertice' };
 const VOCI_CARTA_CAPO = ['voce-sciopero', 'voce-lutto'];
 function voceAgendaMese(){
+  vicendaVoceMese();   // L272-3: le voci della vicenda (solo in inglese; spenta: niente)
   if(typeof parla!=='function' || (typeof voceInCorso==='function' && voceInCorso()) || !S || !Array.isArray(S.agenda)) return;
   for(const it of S.agenda){
     const d=it && !it.resolved && it.data, v=d && d.id && VOCI_CARTA[d.id];
@@ -11243,6 +11556,8 @@ function resolveItemCore(idx,ci){
     S.ind.consenso=computeConsenso();
     it.resolved=true; it.outcome=T('Scelta:')+' <b>'+subFamiglia(T(choice.l))+'</b>.';
     S.log.unshift({t:subFamiglia(T(d.t)), x:T('Decisione:')+' '+subFamiglia(T(choice.l))});
+  } else if(it.kind==='vicenda'){
+    vicendaRisolvi(it, ci);   // L272-2: le crisi in più tempi
   } else if(it.kind==='arco'){
     /* gli archi narrativi (lotto 4): la scelta esegue gli effetti e determina il nodo successivo (o chiude) */
     const a=S.archi && S.archi.find(function(x){return x.id===it.arco;});
@@ -11647,6 +11962,7 @@ function corpoMese(){
 }
 function avanzaMese(){
   if(agendaPending()) return;
+  vicendaMese();   // L272-2: slittamento e cambio di lato della vicenda aperta, prima di S.month++ (spenta: no-op)
   if(S.livello===0){   // ATTIVISTA (Build A): avanzamento MINIMO — nessun motore nazionale/locale (L0); il motore-base arriva a L3
     radiciMese();   // L260-2: le radici del mese che si chiude e il movimento rivale (no-op con ATT_RADICI spento)
     ppSediMese();   // L260-7: la spinta mensile delle sedi del partito proprio (no-op con PP_SEDI spento o senza partito proprio)
@@ -15198,7 +15514,8 @@ function applySnap(snap){
   applyPaese();
   if(S.attivista && !S.attivista.laurea && (!S.attivista.radici || !S.attivista.rivale)) radiciInit();   // L260-2: un attivista di prima riceve radici e rivale (solo con ATT_RADICI; il dado è un hash: lo stesso a ogni caricamento)
   if(S.partitoProprio && S.partitoProprio.sedi!=null) ppSediPulisci();
-  if(S.ricorrenti!=null) ricPulisci();   // L271-2: le persone ricorrenti (un valore illeggibile si toglie)
+  if(S.ricorrenti!=null) ricPulisci();
+  if(S.vicenda!=null) vicendaPulisci();   // L272-2: la vicenda aperta (un valore illeggibile si toglie)   // L271-2: le persone ricorrenti (un valore illeggibile si toglie)
   if(S.partitoProprio && S.partitoProprio.trag!=null) ppTragPulisci();   // L260-7bis: il registro dei traguardi illeggibile si toglie   // L260-7: un registro delle sedi illeggibile si toglie (senza = nessuna sede)
   if(S.livello===5 && S.diplo && !Array.isArray(S.diplo.bil)) bilInit();   // L260-5: un diplomatico di prima riceve la rete bilaterale (solo con DIPLO_BILATERALI)
   if(S.livello===5 && S.diplo && !S.diplo.conc) concNasce();   // L260-5bis: un diplomatico di prima riceve il concorrente (solo con DIPLO_CONCORRENTE)

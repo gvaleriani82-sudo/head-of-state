@@ -3078,7 +3078,8 @@ function renderAttivista(){
   } else {
     /* la CARTA-MOSSA del mese (Build A, L2): scena (RUOTA per tema, anti-wallpaper) + le 3 scelte. resolveItem le applica
        (muove le valute), agendaPending fa da gate → una mossa per turno. */
-    (S.agenda||[]).forEach(function(it,idx){ if(it.kind!=='attivista'||!it.data) return; const d=it.data;
+    (S.agenda||[]).forEach(function(it,idx){ if(it.kind==='vicenda'){ h+=vicendaCartaHtml(it, idx); return; }   // L272-3: la vicenda in piazza
+      if(it.kind!=='attivista'||!it.data) return; const d=it.data;
       h+=`<div class="ag major ${it.resolved?'done':''}">${agScene(it)}<div class="ah"><div class="kick">${T(d.kick)}</div><h3>${T(d.t)}</h3></div>${it.ric?ricRigaHtml(it.ric):''}<div class="atext">${T(d.text)}</div>`;
       if(!it.resolved){ h+=`<div class="opts">`+d.ch.map(function(c,ci){ return `<button class="opt" onclick="resolveItem(${idx},${ci})"><span class="ol">${T(c.l)}</span><span class="oe">${T(c.e)}</span></button>`; }).join('')+`</div>`; }
       else h+=`<div class="outcome">${it.outcome||''}</div>${esitiHtml(it)}${tornaTavoloHtml(it)}`;
@@ -3143,7 +3144,7 @@ function renderAttorno(){
   var el=document.getElementById('sec-attorno'); if(el) el.innerHTML=h;
 }
 function renderGov(){
-  if(S.livello===0){ document.getElementById('sec-gov').innerHTML=agendaCassettoHtml()+renderAttivista()+ricPersoneHtml(); return; }   // L270-3: l'agenda del mese in testa (vuota se spenta)   // ATTIVISTA (Build A): scheda focalizzata sulla militanza
+  if(S.livello===0){ document.getElementById('sec-gov').innerHTML=vicendaCassettoHtml()+agendaCassettoHtml()+renderAttivista()+ricPersoneHtml(); return; }   // L272-3: la riga della vicenda in testa (vuota se spenta)   // L270-3: l'agenda del mese in testa (vuota se spenta)   // ATTIVISTA (Build A): scheda focalizzata sulla militanza
   if(!S.opposizione && S.ministeroAperto==='__locale__'){ document.getElementById('sec-gov').innerHTML=renderLocalePage(); return; }   // drill-down: cruscotto locale (livello 1)
   if(!S.opposizione && S.ministeroAperto){ document.getElementById('sec-gov').innerHTML=renderMinisteroPage(S.ministeroAperto); return; }   // drill-down: pagina del ministero
   let h='', ruolo='';   // L144-1: il blocco del ruolo (opposizione, livello 1, livello 2) si scrive a parte e si mette dopo
@@ -3222,6 +3223,7 @@ function renderGov(){
   else h+=stampa+vitaPersonaleCard();
   // agenda
   if(S.livello===4 || S.livello===5) h+=ricPersoneHtml();   // L271-3: la riga «Le persone» (vuota spenta)
+  h+=vicendaCassettoHtml();   // L272-3: la vicenda aperta, dove il tavolo non c'è (vuota se spenta)
   h+=agendaCassettoHtml();   // L270-3: l'agenda del mese, prima riga delle carte dove il tavolo non c'è (vuota se spenta o già decisa)
   h+=`<div class="contorno" style="font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--mut);margin:2px 2px 8px;">${T('Agenda di')} ${T(MONTHS[S.month-1])}</div>`;
   /* L95-1 — l'entrata non è più della SCATOLA. La classe stava qui, sulla firma dell'agenda, e scattava una
@@ -3267,6 +3269,8 @@ function renderGov(){
         <button class="opt" onclick="resolveItem(${idx},1)"><span class="ol">${T('Nega')}</span><span class="oe">${T('Nessun costo, nessun miglioramento')}</span></button></div>`; }
       else h+=`<div class="outcome">${it.outcome}</div>${esitiHtml(it)}${tornaTavoloHtml(it)}`;
       h+=`</div>`;
+    } else if(it.kind==='vicenda'){
+      h+=vicendaCartaHtml(it, idx);   // L272-3
     } else if(it.kind==='arco'){
       /* gli archi narrativi (lotto 4 + payoff fase A): carta maggiore. Il marker discreto = titolo dell'arco +
          capitolo (a.scelte.length+1), nella riga .kick esistente. Testi via arcoSub (%FILO/%RUOLO/%ECO/%FIGLIO). */
@@ -5086,6 +5090,39 @@ function agendaStaffUi(){
   if(agendaStaff()){ AGENDA_UI_ULTIMA=null; if(typeof suona==='function') suona('agenda-chiudi'); agendaRidisegna(); if(typeof commitSnap==='function') commitSnap(); }
 }
 /* la prima riga del cassetto Governo dove il tavolo non c'è (L0, L4, L5 e i livelli 1-3 senza mappa) */
+/* L272-3 (D366) · la vicenda aperta: una riga nel foglietto del territorio colpito, una riga nel cassetto dove il tavolo non c'è (contorno, non toccabile) */
+/* L272-2 · L272-3 · la carta della vicenda (le crisi in più tempi): kicker «Crisi · tempo %N di %M» con le tre tacche, targhette prima
+   della scelta (D190) e costoChip. Una funzione sola per il cassetto Governo e per il cassetto del movimento (l'attivista, lato piazza). */
+function vicendaCartaHtml(it, idx){
+  let h='';
+      const d=it.data, V=it.vic||{};
+      const sub=(s)=>(typeof vicendaSub==='function')?vicendaSub(s,it):T(s);
+      const tN=V.t||1, tacche=[1,2,3].map(k=>`<i class="${k<=tN?'on':''}"></i>`).join('');   // L272-3 (D366): le tre tacche dei tempi
+      h+=`<div class="ag major vic-carta ${it.resolved?'done':''}">${agScene(it)}<div class="ah"><div class="kick vic-kick"><span>${T('Crisi · tempo %N di %M').replace('%N',tN).replace('%M',3)}</span><span class="vic-tacche" aria-hidden="true">${tacche}</span></div><h3>${sub(d.t)}</h3></div>
+        <div class="atext">${sub(d.text)}</div>`;
+      if(!it.resolved){ h+=`<div class="opts">`+d.ch.map((c,i)=>
+        `<button class="opt" onclick="resolveItem(${idx},${i})"><span class="ol">${sub(c.l)}</span><span class="oe">${sub(c.e)}</span>${costoChip(c)}</button>`).join('')+`</div>`; }
+      else h+=`<div class="outcome">${it.outcome||''}</div>${esitiHtml(it)}${tornaTavoloHtml(it)}`;
+      h+=`</div>`;
+      return h;
+}
+function vicendaRigaDati(){
+  const a=(typeof vicendaAperta==='function') ? vicendaAperta() : null; if(!a) return null;
+  const def=vicendaDef(a.tipo); if(!def) return null;
+  const tit=T(def.titolo||"L'emergenza"), v=tit.charAt(0).toLowerCase()+tit.slice(1);
+  return { a:a, v:v, V:tit, n:a.t };
+}
+function vicendaFoglioRiga(terr){
+  const R=vicendaRigaDati(); if(!R || R.a.terr!==terr) return '';
+  return T(R.a.t>=3 ? '%V · tempo %N di %M · si chiude questo mese' : '%V · tempo %N di %M · il prossimo il mese dopo').replace('%V',R.V).replace('%N',R.n).replace('%M',3);
+}
+function vicendaCassettoHtml(){
+  if(typeof tavoloAttivo==='function' && tavoloAttivo()) return '';
+  const R=vicendaRigaDati(); if(!R) return '';
+  const TE=(typeof R.a.terr==='number' && PAESE.territori) ? PAESE.territori[R.a.terr] : null;
+  const x=arcoTerrSub(T('In corso: %V (%TERR), tempo %N di %M').replace('%V',R.v).replace('%N',R.n).replace('%M',3), TE);
+  return `<div class="vic-riga contorno">${x}</div>`;
+}
 function agendaCassettoHtml(){ return (agendaUiViva() && !tavoloAttivo()) ? `<div class="card ag-mese-card">${agendaBloccoHtml()}</div>` : ''; }
 /* la riga del riepilogo sopra la barra di fine mese: nasce e si toglie qui (nessun nodo con la costante spenta) */
 function agendaRiepAggiorna(){
@@ -5111,7 +5148,7 @@ function fissoFoglio(){
     if(F.inchiesta) righe.push(T('La magistratura sta indagando.')); }
   else if(F.tipo==='promessa'){ righe.push(F.tacche>=3 ? T('Ormai è tradita: alla prossima campagna te la rinfacceranno.') : T('Alla prossima campagna chiederanno conto.'));
     tacche=T('Consenso perso: %N punti su 6').replace('%N', F.punti); }
-  else if(F.tipo==='segno') righe.push(segnoRiga(F));   // L239-6
+  else if(F.tipo==='segno'){ righe.push(segnoRiga(F)); const vr=vicendaFoglioRiga(F.terr); if(vr) righe.push(vr); }   // L239-6 · L272-3: la vicenda aperta su quel territorio
   else righe.push(F.n===1 ? T('Un altro mese sotto il limite e la carriera finisce.') : T('Ancora %N mesi sotto il limite e la carriera finisce.').replace('%N', F.n));
   const h=`<button class="tv-chiudi" onclick="toccaFisso(null)" aria-label="${escAttr(T('Chiudi'))}">✕</button>`+
     `<div class="tv-foglio-t">${fissoTitolo(F)}</div>`+righe.map(function(r){ return `<div class="tv-foglio-r">${r}</div>`; }).join('')+

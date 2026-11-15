@@ -407,7 +407,8 @@ function suonoTitolo(t){ return (t && t.pri===1 && !t.serie) ? suonoPreferito('r
 const SUONO_CARTA = [
   ['ultimatum', [],                           /^$/, { id:/^crs_(ultimatum|ricevuto)$/ }],   // L218-34: l'ultimatum dato e ricevuto nella scala della crisi — prima di `orologio`, che lo prendeva per «ultimatum»
   ['sisma',    [],                            /^$/, { id:/^sisma$/ }],   // L218-34: la carta localizzata del terremoto (L239-5) — prima di `allarme`, che la prendeva per «calamit»
-  ['alluvione',[],                            /^$/, { id:/^pioggia$/ }],   // L218-35: il dossier «Forti alluvioni in una regione» — prima di `macchina`, che lo prendeva per specie (dossier)
+  ['alluvione',[],                            /^$/, { id:/^pioggia$/ }],
+  ['crisi-giorno',[],                         /^$/, { id:/^vic_/ }],   // L272-3 (D367): il tempo 2 e 3 di una vicenda che entra (il tempo 1 tiene il suono della carta d'origine)   // L218-35: il dossier «Forti alluvioni in una regione» — prima di `macchina`, che lo prendeva per specie (dossier)
   ['orologio', [],                            /scadenz|ultimatum|questione di fiducia|voto di fiducia|conto alla rovescia/i],
   ['porta',    [],                            /^$/, { id:/^rb_/ }],
   ['brusio',   ['scandalo'],                  /^$/],   // L218-14 (F5h): lo scandalo del ministro che esplode — PRIMA di `sussurro`, che lo prendeva per specie e ora resta ai testi d'indiscrezione
@@ -704,7 +705,12 @@ function musicaEpocaAnno(y){
   if(y>=2014) return 'mus-presente';
   return y<1960?'mus-1950' : y<1970?'mus-1960' : y<1980?'mus-1970' : y<1990?'mus-1980' : y<2000?'mus-1990' : 'mus-2000';
 }
+/* L272-3 (D367) · i mesi dei tempi 1 e 2 di una vicenda (la carta in agenda, decisa o no): la musica di crisi, a ogni livello e lato */
+function musicaVicenda(){
+  return !!(typeof VICENDE!=='undefined' && VICENDE && S && Array.isArray(S.agenda) && S.agenda.some(function(a){ return a && a.kind==='vicenda' && a.vic && a.vic.t<=2; }));
+}
 function musicaCrisi(){
+  if(musicaVicenda()) return true;   // L272-3
   if(!(S && S.livello===3 && !S.opposizione)) return false;
   if((S.mesiSottoCrisi||0)>0) return true;
   if(!S.minoranza || S.coabitazione) return false;
@@ -1172,6 +1178,8 @@ const VOCI_MANIFEST = {
   'voce-guerra-persa'         : { file:'voce-guerra-persa-it.mp3', gain:0.28, f:{ file:'voce-guerra-persa-it-f.mp3', gain:0.75 }, l:{ en:{ file:'voce-guerra-persa.mp3', gain:0.40, f:{ file:'voce-guerra-persa-f.mp3', gain:1.08 } } }, en:'We have lost this war. I take responsibility before the country and the families.', it:'Abbiamo perso questa guerra. Me ne assumo la responsabilità davanti al paese e alle famiglie.' },   // S2 · −15,5 · lei −24,1 (Jane)
   'voce-guerra-stanchezza'    : { file:'voce-guerra-stanchezza-it.mp3', gain:0.30, f:{ file:'voce-guerra-stanchezza-it-f.mp3', gain:0.84 }, l:{ en:{ file:'voce-guerra-stanchezza.mp3', gain:0.38, f:{ file:'voce-guerra-stanchezza-f.mp3', gain:1.00 } } }, en:'I know the country is weary. Every month of war has a price, and I feel it too.', it:'So che il paese è stanco. Ogni mese di guerra ha un prezzo, e lo sento anch\'io.' },   // S2 · −15,1 · lei −23,5 (Jane)
   'voce-reduci'               : { file:'voce-reduci-it.mp3', gain:0.40, f:{ file:'voce-reduci-it-f.mp3', gain:0.93 }, l:{ en:{ file:'voce-reduci.mp3', gain:0.34, f:{ file:'voce-reduci-f.mp3', gain:0.95 } } }, en:'Welcome home. Our country owes you a great deal, and it will not forget.', it:'Bentornati a casa. Il paese vi deve molto, e non lo dimenticherà.' },   // S2 · −14,1 · lei −23,0 (Jane)
+  'voce-crisi-passo'          : { file:'voce-crisi-passo.mp3', gain:0.32, f:{ file:'voce-crisi-passo-f.mp3', gain:1.07 }, en:'One day at a time. People first, explanations later.', it:'Un giorno alla volta. Prima le persone, poi le spiegazioni.' },   // L272-3 · S6 · lui −13,6 · lei Jane (solo inglese: vicendaVoce)
+  'voce-crisi-fine'           : { file:'voce-crisi-fine.mp3', gain:0.41, f:{ file:'voce-crisi-fine-f.mp3', gain:1.07 }, en:'It is over. Now they will ask us to account for every day.', it:'È passata. Adesso ci chiederanno conto di ogni giorno.' },   // L272-3 · S6 · lui −15,8 · lei Jane (solo inglese)
   'voce-opp-guerra'           : { file:'voce-opp-guerra.mp3', gain:0.43, f:{ file:'voce-opp-guerra-f.mp3', gain:0.96 }, en:'We stand by our troops, not this strategy. The government must say when and how this ends.', it:'Sosteniamo i nostri soldati, non questa strategia. Il governo deve dire quando e come finirà.' },   // S2 · −16,2 · lei −23,1 (Jane)
   'voce-unita'                : { file:'voce-unita-it.mp3', gain:0.36, f:{ file:'voce-unita-it-f.mp3', gain:0.89 }, l:{ en:{ file:'voce-unita.mp3', gain:0.38, f:{ file:'voce-unita-f.mp3', gain:0.90 } } }, en:'Today there are no parties. There is one country, and fear will not divide it.', it:'Oggi non ci sono partiti. C\'è un paese solo, che non si lascerà dividere dalla paura.' },   // S2 · −15,1 · lei −22,6 (Jane)
   'voce-emergenza'            : { file:'voce-emergenza-it.mp3', gain:0.43, f:{ file:'voce-emergenza-it-f.mp3', gain:0.94 }, l:{ en:{ file:'voce-emergenza.mp3', gain:0.41, f:{ file:'voce-emergenza-f.mp3', gain:0.96 } } }, en:'I have asked parliament for emergency powers, for a limited time. Security must not cost us our freedom.', it:'Ho chiesto all\'aula poteri straordinari, per un tempo limitato. La sicurezza non deve costare la libertà.' },   // S2 · −15,7 · lei −23,1 (Jane)
@@ -1233,7 +1241,8 @@ const VOCI_PRESENTI = ['voce-insediamento.mp3', 'voce-vittoria-a.mp3', 'voce-vit
                        'voce-pace.mp3', 'voce-pace-f.mp3', 'voce-guerra-vinta.mp3', 'voce-guerra-vinta-f.mp3', 'voce-guerra-persa.mp3', 'voce-guerra-persa-f.mp3',
                        'voce-guerra-stanchezza.mp3', 'voce-guerra-stanchezza-f.mp3', 'voce-reduci.mp3', 'voce-reduci-f.mp3', 'voce-opp-guerra.mp3', 'voce-opp-guerra-f.mp3',
                        'voce-unita.mp3', 'voce-unita-f.mp3', 'voce-emergenza.mp3', 'voce-emergenza-f.mp3', 'voce-emergenza-usa.mp3', 'voce-emergenza-usa-f.mp3',
-                       'voce-spoglio-testa.mp3', 'voce-spoglio-testa-f.mp3', 'voce-spoglio-rimonta.mp3', 'voce-spoglio-rimonta-f.mp3',   // L218-34 (S6: lui da voci-s6, lei «Jane» da voci-jane)
+                       'voce-spoglio-testa.mp3', 'voce-spoglio-testa-f.mp3', 'voce-spoglio-rimonta.mp3', 'voce-spoglio-rimonta-f.mp3',
+                       'voce-crisi-passo.mp3', 'voce-crisi-passo-f.mp3', 'voce-crisi-fine.mp3', 'voce-crisi-fine-f.mp3',   // L272-3 (S6: lui da voci-s6, lei «Jane» da voci-jane; solo inglese)   // L218-34 (S6: lui da voci-s6, lei «Jane» da voci-jane)
                        'voce-promessa.mp3', 'voce-promessa-f.mp3', 'voce-promessa-mantenuta.mp3', 'voce-promessa-mantenuta-f.mp3', 'voce-promessa-tradita.mp3', 'voce-promessa-tradita-f.mp3', 'voce-trattativa-accordo.mp3', 'voce-trattativa-accordo-f.mp3', 'voce-trattativa-rottura.mp3', 'voce-trattativa-rottura-f.mp3',   // L218-35 (S6: lui da voci-s6, lei «Jane» da voci-jane)
                        /* L218-35 · le 48 prese italiane (giro suoni 32, voci-it): <id>-it.mp3 lui («Statista»), <id>-it-f.mp3 lei («Jane») */
                        ].concat(['voce-spoglio-testa', 'voce-spoglio-rimonta', 'voce-promessa', 'voce-promessa-mantenuta', 'voce-promessa-tradita', 'voce-trattativa-accordo', 'voce-trattativa-rottura', 'voce-crisi-sanzioni', 'voce-crisi-mobilitazione', 'voce-crisi-rientra', 'voce-ultimatum', 'voce-attacco-a', 'voce-attacco-b', 'voce-guerra-a', 'voce-guerra-b', 'voce-guerra-voto', 'voce-cessate-fuoco', 'voce-pace', 'voce-guerra-vinta', 'voce-guerra-persa', 'voce-guerra-stanchezza', 'voce-reduci', 'voce-unita', 'voce-emergenza'].reduce(function(a, v){ return a.concat([v+'-it.mp3', v+'-it-f.mp3']); }, []), [
