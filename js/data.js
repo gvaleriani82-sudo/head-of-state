@@ -23466,12 +23466,17 @@ const MOSSE_CHIUSURA=[
    L250-27 (13/11): i dodici presenti vecchi ◦ — matrimonio (AU 2017, ZA 2006, DE 2017, CA 2005, ES 2005, BR 2013 per sentenza,
    MX 2022 in tutti gli Stati, AR 2010), nucleare (IN, ZA, JP, CA, BR, MX, AR, KR: «ci sono centrali»; la Spagna no, uscita programmata),
    salario minimo legale (AU, IN, ZA 2019, JP, CA, ES, BR, MX, AR, KR, NG), leva (BR, MX a sorteggio, KR), pena di morte (JP, IN, NG;
-   la Corea del Sud no, mai eseguita dal 1997). ⚠ La GERMANIA è fuori dal salario minimo (2015): `iniziale` non ha anno, e
-   `salario_min` non ha `era`, quindi `germania:1` lo accenderebbe anche in de1950…de1990. Rapporto «⚑ L250-27». */
+   la Corea del Sud no, mai eseguita dal 1997). Rapporto «⚑ L250-27».
+   L275-1 (16/11): `iniziale` può dire l'ANNO. Il valore `1` = in vigore all'avvio sempre; un anno (intero 1900-2100) = in vigore
+   all'avvio solo se la partita parte in quell'anno o dopo (lettore unico `inizialeViva` in game.js, chiamato dal seme delle leggi;
+   lo schema lo controlla verifica-forma.js). Oggi un anno solo, nel salario minimo: germania 2015 (MiLoG, dal 1° gennaio 2015: il
+   presente tedesco lo ha, de1950…de2000 no). ⚠ regnounito resta 1 (il minimo britannico è del 1° aprile 1999, National Minimum Wage
+   Act 1998): con 1999 la misura dava rivolte nuove in uk1970 e uk1960 al governo e la regola d'arresto del lotto l'ha riportato a 1
+   (uk1950…uk1990 partono ancora col salario minimo). Il seme si legge una volta, all'avvio. Rapporto «⚑ L275-1» in DESIGN-PAESI-NUOVI.md. */
 const LEGGI = [
   // ===== Comuni (ovunque) =====
   { id:'salario_min', nome:'Salario minimo legale', desc:'Fissa per legge una retribuzione oraria minima.', asse:-1, costo:1,
-    iniziale:{usa:1, regnounito:1, francia:1, paesibassi:1, australia:1, india:1, sudafrica:1, giappone:1, canada:1, spagna:1, brasile:1, messico:1, argentina:1, coreasud:1, nigeria:1}, unaTantum:{grp:{lavoratori:6, giovani:3, imprenditori:-6}}, permanenti:{grp:{lavoratori:3, imprenditori:-3}} },
+    iniziale:{usa:1, regnounito:1, francia:1, germania:2015, paesibassi:1, australia:1, india:1, sudafrica:1, giappone:1, canada:1, spagna:1, brasile:1, messico:1, argentina:1, coreasud:1, nigeria:1}, unaTantum:{grp:{lavoratori:6, giovani:3, imprenditori:-6}}, permanenti:{grp:{lavoratori:3, imprenditori:-3}} },
   { id:'matrimonio', era:'contemporanea', nome:'Matrimonio egualitario', desc:'Estende il matrimonio civile alle coppie dello stesso sesso.', asse:-1, costo:1,
     iniziale:{usa:1, francia:1, regnounito:1, danimarca:1, paesibassi:1, svezia:1, norvegia:1, belgio:1, australia:1, sudafrica:1, germania:1, canada:1, spagna:1, brasile:1, messico:1, argentina:1}, unaTantum:{grp:{giovani:7, cattolici:-7}}, permanenti:{grp:{giovani:3, cattolici:-3}} },
   { id:'droghe', era:'contemporanea', nome:'Legalizzazione droghe leggere', desc:'Depenalizza il consumo e la vendita regolata di cannabis.', asse:-1, costo:1,

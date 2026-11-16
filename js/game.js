@@ -392,6 +392,16 @@ function crescitaSeed(sc){
   if(typeof PAESE!=='undefined' && PAESE && PAESE.economia && PAESE.economia.crescita!=null) return PAESE.economia.crescita;
   return 0.8;                                                               // il valore universale di prima
 }
+/* L275-1 (16/11): `iniziale` di una legge può portare l'ANNO. Il valore per paese è `1` (o true) = in vigore all'avvio sempre,
+   oppure un anno (intero > 1) = in vigore all'avvio solo se la partita parte in quell'anno o dopo (oggi solo il salario minimo
+   tedesco, germania 2015; il britannico resta 1, «⚑ L275-1»). Letto SOLO dal seme delle leggi in initStatoBase, dove S.year è già l'anno della porta (riga `_SC.anno` sopra).
+   Il seme si legge una volta: chi arriva a quell'anno a carriera in corso non riceve la legge da sola (limite di «⚑ L275-1»). */
+function inizialeViva(L, paese, anno){
+  const v = L.iniziale && L.iniziale[paese];
+  if(v===1 || v===true) return true;
+  return typeof v==='number' && v>1 && anno>=v;
+}
+
 /* --- Stato base comune ai due avvii (al GOVERNO e all'OPPOSIZIONE) ---
    Costruisce S e i derivati INDIPENDENTI dal ruolo: indicatori iniziali, leggi del paese, forze di partenza.
    Il ruolo (ministri/coalizione/territori) lo aggiunge il chiamante. Condiviso → un solo punto di verità. */
@@ -550,7 +560,7 @@ function initStatoBase(){
   S.territorioRecente=null;    // F2 — ultima area chiamata (anti-ripetizione)
   S.intervistaUltimo=null;     // F5 — cooldown dell'intervista incalzante (dato puro; la catena vive in INTERVISTA transitorio)
   S.recentSfide=[];            // Q-fix #2 — finestra «viste di recente» condivisa fra Sfida singola e intervista (anti-ripetizione)
-  S.leggi={}; for(const L of LEGGI){ if(!L.paesi || L.paesi.indexOf(chosenCountry)>-1) S.leggi[L.id]= eraVivaT(L) && !!(L.iniziale&&L.iniziale[chosenCountry]); }   // Build B: gate-seed — una legge era-esclusa (es. reddito_citt iniziale:italia) NON parte attiva nel '50
+  S.leggi={}; for(const L of LEGGI){ if(!L.paesi || L.paesi.indexOf(chosenCountry)>-1) S.leggi[L.id]= eraVivaT(L) && inizialeViva(L, chosenCountry, S.year); }   // L275-1: il valore può essere un anno (inizialeViva) · Build B: gate-seed — una legge era-esclusa (es. reddito_citt iniziale:italia) NON parte attiva nel '50
   S.leggiSnap=Object.assign({},S.leggi);
   applicaPersonaggio();    // chi sei: S.personaggio/S.eta + crediti d'esordio sui gruppi (PRIMA del consenso, che li legge)
   /* L176-1 (D135) · L'ANZIANITÀ DI PORTA È DI CHI GOVERNA (la seconda delle tre righe: la prima è sopra, accanto a `mandatiVinti`,
