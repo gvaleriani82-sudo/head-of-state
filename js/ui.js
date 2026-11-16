@@ -3273,6 +3273,8 @@ function renderGov(){
       h+=vicendaCartaHtml(it, idx);   // L272-3
     } else if(it.kind==='negoziato'){
       h+=negoziatoCartaHtml(it, idx);   // L273-2 · L273-3: la carta del round (D380), per i tre tipi dal L273-4
+    } else if(it.kind==='discorso'){
+      h+=discorsoCartaHtml(it, idx);   // L274-2: il discorso, tre passi nella stessa carta (testo minimo; la carta di D391 nella riga 31)
     } else if(it.kind==='arco'){
       /* gli archi narrativi (lotto 4 + payoff fase A): carta maggiore. Il marker discreto = titolo dell'arco +
          capitolo (a.scelte.length+1), nella riga .kick esistente. Testi via arcoSub (%FILO/%RUOLO/%ECO/%FIGLIO). */
@@ -5121,6 +5123,23 @@ function negoziatoCartaHtml(it, idx){
     ${righe}<div class="atext">${sub(d.text)}</div>`;
   if(!it.resolved){ h+=`<div class="opts">`+d.ch.map((c,i)=>
     `<button class="opt" onclick="resolveItem(${idx},${i})"><span class="ol">${sub(c.l)}</span><span class="oe">${sub(c.e)}</span>${costoChip(c)}</button>`).join('')+`</div>`; }
+  else h+=`<div class="outcome">${it.outcome||''}</div>${esitiHtml(it)}${tornaTavoloHtml(it)}`;
+  h+=`</div>`;
+  return h;
+}
+/* L274-2 · la carta del discorso, minima (la carta di D391 è della riga 31): kicker «Discorso · tema → tono → promessa» con le tacche
+   dei passi fatti (le classi della vicenda, nessuna regola css nuova), le scelte fatte visibili sopra, poi la riga della reazione */
+function discorsoCartaHtml(it, idx){
+  let h='';
+  const d=it.data, P=it.passi||[], V=it.dis||{};
+  const tacche=[0,1,2].map(k=>`<i class="${(it.resolved || k<P.length)?'on':''}"></i>`).join('');
+  let fatte='';
+  if(P.length>=1 && V.temi) fatte+=`<div>${T('Tema:')} ${discorsoTemaNome(V.temi[P[0]])}</div>`;
+  if(P.length>=2) fatte+=`<div>${T('Tono:')} ${T(DIS_TONI_TXT[DIS_TONI[P[1]]])}</div>`;
+  h+=`<div class="ag major vic-carta ${it.resolved?'done':''}">${agScene(it)}<div class="ah"><div class="kick vic-kick"><span>${T('Discorso · tema → tono → promessa')}</span><span class="vic-tacche" aria-hidden="true">${tacche}</span></div><h3>${T(d.t)}</h3></div>
+    ${fatte?'<div class="neg-righe">'+fatte+'</div>':''}<div class="atext">${T(d.text)}</div>`;
+  if(!it.resolved){ h+=`<div class="opts">`+d.ch.map((c,i)=>
+    `<button class="opt" onclick="resolveItem(${idx},${i})"><span class="ol">${c.l}</span><span class="oe">${c.e}</span></button>`).join('')+`</div>`; }
   else h+=`<div class="outcome">${it.outcome||''}</div>${esitiHtml(it)}${tornaTavoloHtml(it)}`;
   h+=`</div>`;
   return h;

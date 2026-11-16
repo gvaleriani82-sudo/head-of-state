@@ -7751,6 +7751,29 @@ const TRATTATIVE_DEF=[
             compromesso:'Un compromesso con %P: un\'intesa su pochi punti, ma c\'è.',
             rottura:'Con %P la trattativa si è rotta: l\'opposizione resta divisa.' } },
 ];
+/* ================================================================================================================
+   ⚑ L274-2 · DISCORSI_DEF — i tipi del discorso (DESIGN-FORMATI.md «⚑ L274-1» D384, «⚑ L274-2»). Due tipi di prova coi testi
+   PROVVISORI (italiano col ripiego, nessun luogo né mezzo scritti: paese, epoca e monarchie sono della riga 31): la replica
+   dell'opposizione (L3-opp, L2-opp) e il discorso del capo del governo (L3 al governo, non in coabitazione). Campi: id, fette
+   (agendaFetta), orig (le carte d'origine che si trasformano), giornata (le voci dell'agenda: DISCORSI_VOCE), era, kick, titolo,
+   text, testi (temaE; toni e toniE con %G = il tema; solenneBassa = la targhetta senza la carica; prom e promE), reazioni (a, f, x).
+   Partiti neutri: nessun tema e nessun tono hanno un segno per partito.
+   ================================================================================================================ */
+const DISCORSI_TESTI_PROVA={ temaE:'Il tema del discorso',
+  toni:{ misurato:'Un tono misurato', acceso:'Un tono acceso', solenne:'Un tono solenne' },
+  toniE:{ misurato:'%G +1 · nessun rischio', acceso:'%G +3 · la stampa −2 · divide', solenne:'%G +1 · la stampa +2', solenneBassa:'Senza la carica, la solennità suona vuota' },
+  prom:{ n:'Nessuna promessa', p:'Un impegno preciso', g:'La tua parola' },
+  promE:{ n:'Niente da mantenere', p:'%G +2 · tre mesi per mantenerlo', g:'%G +4 · due anni · tradita costa' } };
+const DISCORSI_DEF=[
+  { id:'replica', fette:['L3opp','L2opp'], era:'universale', orig:['opp_comizio_piazza','opp_giro_province','opp_scontro_parlamento','opp_tribuna_politica'], giornata:['aula'],
+    kick:'Discorso', titolo:'La replica', text:'Il governo ha parlato; ora tocca a te rispondere. Prima di cominciare scegli di che cosa parlare, con che tono, e se impegnarti.',
+    testi:DISCORSI_TESTI_PROVA,
+    reazioni:{ a:'Applausi: la sala è con te.', f:'Freddezza: ascoltano, ma non si scaldano.', x:'Fischi: la replica non è passata.' } },
+  { id:'capo', fette:['L3'], era:'universale', orig:['rb_discorso'], giornata:['stampa'],
+    kick:'Discorso', titolo:'Il discorso', text:'Domani parli al paese da capo del governo. Il testo è ancora aperto: il tema, il tono, e quanto ti spingi a promettere.',
+    testi:DISCORSI_TESTI_PROVA,
+    reazioni:{ a:'Applausi: il paese ascolta e approva.', f:'Freddezza: il discorso scivola via.', x:'Fischi: il discorso diventa un caso.' } }
+];
 const ARCHI_DEF=[
  /* A — VERTENZA INDUSTRIALE (economico): la fabbrica che chiude, secondo come la gestisci si salva,
     si cede o esplode in sciopero generale. Riconverge: la tensione può tornare al tavolo. */

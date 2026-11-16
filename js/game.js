@@ -1319,7 +1319,7 @@ function pickMinistro(){
   let pool=MINISTRO_CARTE.filter(function(c){ return (!c.dic||c.dic===S.dicastero) && (!c.cond||c.cond()) && eraViva(c); });
   const q=pescaBag('minc|'+S.dicastero, pool); if(!q) return null;
   S.ministroUltimo=S.year*12+S.month;
-  return { kind:'ministro', data:q, resolved:false };
+  return discorsoTrasforma({ kind:'ministro', data:q, resolved:false });   // L274-2: predisposto (nessun tipo al L2)
 }
 /* dossier del TUO settore (filtro min===dicastero): le tue decisioni contano davvero, muovono il tuo dominio. */
 function pickDossierSettore(){
@@ -6746,7 +6746,7 @@ function provaAttivistaEvento(){
 function cardAttivistaEvento(id){   // ricostruisce la carta-evento dal pool statico (per id) → kind:'attivista' = resolveItem catch-all + agScene kick→bucket, come una mossa
   var E=(typeof ATTIVISTA_EV!=='undefined') && ATTIVISTA_EV.find(function(x){ return x.id===id; });
   if(!E) return null;
-  return { kind:'attivista', data:{ id:E.id, kick:E.kick, tono:E.tono||null, t:E.t, text:E.text, ev:true, ch:E.ch }, resolved:false };
+  return discorsoTrasforma({ kind:'attivista', data:{ id:E.id, kick:E.kick, tono:E.tono||null, t:E.t, text:E.text, ev:true, ch:E.ch }, resolved:false });   // L274-2: predisposto (nessun tipo al L0)
 }
 /* --- Nuova partita (da ATTIVISTA, Build A) — il gradino sotto il locale: 25 anni, nessuna carica, nessun bilancio.
    Le valute sono i 6 gruppi (reputazione, riuso) + la base militante + l'autorevolezza di campo, tutte dati puri in
@@ -8559,7 +8559,7 @@ function agendaConferma(){
     if(r.sola || !r.carta){ if(r.g2 && (!r.g2c || r.g2c())) r.g2(); return; }
     var aggiunta=false;
     if(agg.length<agendaMaxAgg() && agApri()<AGENDA_TETTO && !(r.doppione && r.doppione())){
-      var c=r.carta(); if(c && c.it){ S.agenda.push(c.it); agg.push(v+'|'+c.k); aggiunta=true; }
+      var c=discorsoGiornata(v, r.carta()); if(c && c.it){ S.agenda.push(c.it); agg.push(v+'|'+c.k); aggiunta=true; }   // L274-2: la carta della giornata può diventare il discorso (spenta: com'era)
     }
     if((!aggiunta || n>=2) && r.g2 && (!r.g2c || r.g2c())) r.g2();
   });
@@ -8589,6 +8589,7 @@ function agendaRifai(k){
     if(f==='fam'){ var fv=agTrova(FAMIGLIA_VIVA, id); return fv?{kind:'personale', data:fv, resolved:false}:null; }
     if(f==='pers'){ var pe=agTrova(EVENTI_PERSONALI, id); return pe?{kind:'personale', data:pe, resolved:false}:null; }
     if(f==='conf'){ var cq=agTrova(CONFERENZE, id); return cq?{kind:'stampa', data:confCarta(cq), resolved:false}:null; }
+    if(f==='dis'){ var dk=p.slice(2).join('|'), dv=agendaRifai(dk); return dv ? discorsoRifai(id, dv) : null; }   // L274-2: la giornata diventata discorso
     if(f==='sfida'){ var sq=agTrova(SFIDE, String(id).replace(/^sfida_/,'')); return sq?{kind:p[3]||'stampa', data:cartaSfida(sq, p[2]), resolved:false}:null; }
   }catch(e){}
   return null;
@@ -10257,6 +10258,7 @@ function vicendaAmmessa(def, lato){
   var V=S.vicenda||{}, ora=meseAss();
   if(V.a) return false;
   if(negoziatoAperto()) return false;   // L273-2: un tempo della vicenda e un round della trattativa mai aperti insieme (spenta: null)
+  if(discorsoNelMese()) return false;   // L274-2: niente vicenda nel mese di un discorso (spenta: false)
   if(typeof V.ult==='number' && ora-V.ult<VICENDE_K.cooldown) return false;
   if(VICENDE_ROSSO!=='crisi' && S.crisi && (S.crisi.guerra || (S.crisi.t||0)>=3)) return false;
   if(vigiliaMandato() || inCampagna() || NOTTE) return false;
@@ -10529,6 +10531,7 @@ function negoziatoAmmesso(def, lato, agenda){
   if(typeof eraVivaT==='function' && !eraVivaT(def)) return false;
   var N=S.negoziato||{}, ora=meseAss();
   if(N.a) return false;
+  if(discorsoNelMese()) return false;   // L274-2: niente negoziato nel mese di un discorso (spenta: false)
   var u=N.ult && N.ult[def.fam]; if(typeof u==='number' && ora-u<(TRATTATIVE_K.cool[def.fam]||30)) return false;
   if(TRATTATIVE_ROSSO!=='vicenda' && S.vicenda && S.vicenda.a) return false;
   if(S.crisi && (S.crisi.guerra || (S.crisi.t||0)>=2 || ((S.crisi.t||0)>=1 && def.fam!=='patto'))) return false;
@@ -10868,6 +10871,278 @@ function negoziatoChiudiOpp(stato, a, daSe){
   if(typeof intesaMuovi==='function') intesaMuovi(a.con, A.i);
   if(A.c) credd(A.c);
 }
+/* ================================================================================================================
+   ⚑ L274-2 · IL DISCORSO · SPENTA — il motore (DESIGN-FORMATI.md «⚑ L274-1» D383-D393, «⚑ L274-2»). Il quarto formato: una carta
+   sola in un mese solo con tre passi nella stessa carta (tema → tono → promessa) e la reazione subito. Contenuto IT/EN, schermo,
+   audio e accensione sono della riga 31; qui due tipi di prova (DISCORSI_DEF.replica, DISCORSI_DEF.capo) coi testi provvisori.
+   · IL CAMPO (D383): `S.discorso = {ult, n, e}` (ult = mese assoluto dell'ultimo discorso, il cooldown; n = quanti in carriera;
+     e = 'a'|'f'|'x', l'esito dell'ultimo: applausi · freddezza · fischi — lo leggeranno i titoli della riga 31), dati puri; nasce
+     SOLO a costante accesa; `discorsoPulisci` in applySnap toglie un valore illeggibile.
+   · LA NASCITA (D385), MAI UNA CARTA IN PIÙ: (1) per TRASFORMAZIONE (`discorsoTrasforma`) dove una carta d'origine del tipo entra
+     in agenda (`codaAgenda` per `rb_discorso`, la carta d'opposizione di genAgendaRamo; predisposte senza tipo: pickMinistro,
+     cardAttivistaEvento, pickDiplo); (2) dalla GIORNATA dell'agenda del mese (`discorsoGiornata` in agendaConferma), sulla voce
+     di `DISCORSI_VOCE` scritta nel tipo (`def.giornata`), col dado-hash sotto `DISCORSI_K.pAgenda`: la carta che la giornata
+     porterebbe diventa il discorso. Dovuto = `discorsoDovuto()` (D388).
+   · I PASSI (D383, D391): `it.passi` (transitorio, sull'item: l'agenda non si salva) e `it.data.ch` = le scelte del passo di oggi;
+     i passi 1 e 2 lasciano l'item NON risolto e nessun effetto; tutti gli effetti alla terza scelta (`discorsoRisolvi`): un
+     caricamento a metà carta riparte dal passo 1 senza aver applicato niente.
+   · LA REAZIONE (D386): R = T + G + A − 2·Tr + P + Pl + d, l'acceso × 1,5; applausi R ≥ 2 · freddezza · fischi R ≤ −1; tetto sul
+     gruppo del tema +6 / −4 (tono + promessa + reazione). Mai forze, seggi, voto vero, nessun premio secco. Partiti neutri.
+   · LA PROMESSA (D387): in `S.promesseCampagna` con `perDiscorso`, `scad`, `taglia` ('p' 3 mesi · 'g' 24 mesi); al più una del
+     discorso aperta, mai sullo stesso gruppo di un'altra aperta; all'opposizione (⚠ 2) niente piccola e la grande senza scadenza:
+     la giudica solo la resa della campagna. Giudizio: `discorsoPromesseMese` in corpoMese a ogni livello (`resaPromessa`, la
+     resa tolta da `resaPromesseCampagna` per la grande; la piccola coi numeri dell'intervista).
+   · `DISCORSI_PLACEBO`: stesse nascite nello stesso posto, stessi passi, cooldown sì; nessun effetto, promessa, fatto.
+     Spenta = niente: nessuna funzione legge un dado, scrive S o cambia un'estrazione. Zero Math.random.
+   ================================================================================================================ */
+let DISCORSI=false;   // L274-2 (16/11): il motore, SPENTO (due tipi di prova); contenuto, schermo, audio e accensione nella riga 31
+let DISCORSI_PLACEBO=false;
+const DISCORSI_K={ cool:48, pAgenda:0.10, tetto:6, pavimento:-4, scadP:3, scadG:24, avvio:6 };
+const DISCORSI_VOCE={ L0:'terr', L1:'terr', L3:'stampa', L3opp:'aula', L2opp:'aula', L4:'ufficio' };   // D385: la voce dell'agenda per fetta (la usa solo il tipo che c'è, via def.giornata)
+let DISCORSI_ROSSO=null;   // solo le prove: 'c4' = la carta come carta IN PIÙ in un mese senza origine (C4 rossa) · 'promessa' = la scadenza che non giudica
+const DIS_ESITI=['a','f','x'];
+function discorsoVivo(){ return DISCORSI && typeof S!=='undefined' && !!S && !LAMPO && typeof DISCORSI_DEF!=='undefined'; }
+/* la fetta del discorso (agendaFetta, più il Passo 0-b: in coabitazione il tipo del capo non nasce) */
+function discorsoFetta(){
+  if(typeof S==='undefined' || !S) return null;
+  var f=agendaFetta(); if(f==='L3' && S.coabitazione) return null;
+  return f;
+}
+function discorsoDefDi(f){ return (f && typeof DISCORSI_DEF!=='undefined') ? (DISCORSI_DEF.find(function(d){ return (d.fette||[]).indexOf(f)>=0 && (!d.paesi || d.paesi.indexOf(S.paese)>=0) && (typeof eraVivaT!=='function' || eraVivaT(d)); })||null) : null; }
+function discorsoDef(id){ return (typeof DISCORSI_DEF!=='undefined') ? (DISCORSI_DEF.find(function(d){ return d.id===id; })||null) : null; }
+function discorsoTipo(){ return discorsoDefDi(discorsoFetta()); }
+/* FNV + murmur sul personaggio e sul mese (la forma di vicendaDado), mai Math.random */
+function discorsoDado(sale){ return vicendaHash('dis|'+sale+'|'+vicendaPers()+'|'+meseAss()); }
+/* l'agenda del mese ha già una carta che toglie il posto al discorso (rimpasto, sostegno, richiamo, vicenda, negoziato) */
+function discorsoAgendaOccupata(){
+  var occ=[typeof RIMPASTO_EV!=='undefined'?RIMPASTO_EV:null, typeof SOSTEGNO_EV!=='undefined'?SOSTEGNO_EV:null,
+           typeof GRANDE_COALIZIONE_EV!=='undefined'?GRANDE_COALIZIONE_EV:null, typeof RIMPASTO_SENATO_EV!=='undefined'?RIMPASTO_SENATO_EV:null,
+           typeof SOSTEGNO_SENATO_EV!=='undefined'?SOSTEGNO_SENATO_EV:null, typeof RICHIAMO_CORRENTI_EV!=='undefined'?RICHIAMO_CORRENTI_EV:null,
+           typeof RICHIAMO_CORRENTI_OPP_EV!=='undefined'?RICHIAMO_CORRENTI_OPP_EV:null].filter(Boolean);
+  return Array.isArray(S.agenda) && S.agenda.some(function(it){ return it && (it.kind==='vicenda' || it.kind==='negoziato' || (it.data && occ.indexOf(it.data)>=0)); });
+}
+/* D388 · tutti i «non nasce»; true = il discorso è dovuto in questo mese (il tipo c'è) */
+function discorsoDovuto(){
+  if(!discorsoVivo() || !discorsoTipo()) return false;
+  var ora=meseAss(), D=S.discorso;
+  if(ora-((S.annoInizio||S.year)*12+1)<DISCORSI_K.avvio) return false;   // carriera prima del 6° mese
+  if(D && typeof D.ult==='number' && ora-D.ult<DISCORSI_K.cool) return false;
+  if((S.vicenda && S.vicenda.a) || (S.negoziato && S.negoziato.a)) return false;
+  if(S.crisi && (S.crisi.guerra || (S.crisi.t||0)>=3)) return false;
+  if(NOTTE || PRIM) return false;
+  if(vigiliaMandato() || inCampagna()) return false;
+  if(S.livello===3 && typeof intermediaA==='function' && intermediaA(meseMandato())) return false;
+  if(vicendaAgendaTragedia() || vicendaAgendaAttacco()) return false;
+  if(discorsoAgendaOccupata()) return false;
+  if(Array.isArray(S.agenda) && S.agenda.some(function(it){ return it && it.kind==='discorso'; })) return false;   // uno al mese: un discorso già in agenda (dalla carta o dalla giornata) ferma l'altro
+  return true;
+}
+/* il discorso del mese in agenda (non ancora finito o già finito): la riga di vicendaAmmessa e di negoziatoAmmesso (mai insieme) */
+function discorsoNelMese(){
+  if(!discorsoVivo()) return false;
+  if(S.discorso && S.discorso.ult===meseAss()) return true;
+  return Array.isArray(S.agenda) && S.agenda.some(function(it){ return it && it.kind==='discorso'; });
+}
+/* D385 · i temi, pura (non scrive S): il gruppo più scontento (la base del governo per chi governa, tutti per gli altri), il gruppo
+   più vicino della base del tuo partito, il tema del momento (la crisi a gradino 1-2: «la sicurezza del paese», senza promessa);
+   ripiego «il paese». Mai meno di due voci. Ogni voce: {k:'grp', g} · {k:'sicurezza'} · {k:'paese'}. */
+function discorsoTemi(){
+  var gs=(typeof GROUPS!=='undefined' ? GROUPS : []).map(function(x){ return x.id; }).filter(function(g){ return S.groups && typeof S.groups[g]==='number'; });
+  var gov=(S.livello===3 && !S.opposizione) || (S.livello===2 && !S.opposizione), pool=gs;
+  if(gov){
+    var b={}; (S.coalizione && S.coalizione.length ? S.coalizione : [S.partito]).forEach(function(id){ var p=(typeof part==='function') ? part(id) : null; if(p && p.base) Object.keys(p.base).forEach(function(g){ b[g]=1; }); });
+    var bl=gs.filter(function(g){ return b[g]; }); if(bl.length) pool=bl;
+  }
+  var t=[], primo=null;
+  pool.forEach(function(g){ if(primo==null || S.groups[g]<S.groups[primo]) primo=g; });
+  if(primo) t.push({k:'grp', g:primo});
+  var mio=(typeof part==='function') ? part(S.partito) : null, mb=(mio && mio.base) ? gs.filter(function(g){ return mio.base[g]!=null && g!==primo; }) : [];
+  var sec=null; mb.forEach(function(g){ if(sec==null || S.groups[g]>S.groups[sec]) sec=g; });
+  if(sec) t.push({k:'grp', g:sec});
+  if(S.crisi && !S.crisi.guerra && (S.crisi.t||0)>=1 && (S.crisi.t||0)<=2) t.push({k:'sicurezza'});
+  if(t.length<2) t.push({k:'paese'});
+  return t;
+}
+function discorsoTemaNome(m){ if(!m) return ''; if(m.k==='grp') return nomeGruppo(m.g); return T(m.k==='sicurezza' ? 'la sicurezza del paese' : 'il paese'); }
+/* la carica (D386): alta al L3 al governo, al L4 e al L5; bassa altrove */
+function discorsoCaricaAlta(){ return (S.livello===3 && !S.opposizione) || S.livello===4 || S.livello===5; }
+/* la promessa che si può fare sul tema (D387): [] = solo «nessuna»; la riga del blocco se una promessa aperta lo impedisce */
+function discorsoPromesseOfferte(tema){
+  if(!tema || tema.k!=='grp') return { t:[], blocco:null };
+  var P=S.promesseCampagna||[];
+  var aperta=P.find(function(p){ return p && p.perDiscorso; }), stesso=(S.promessa && S.promessa.grp===tema.g) || P.some(function(p){ return p && p.grp===tema.g; });
+  if(aperta || stesso) return { t:[], blocco:aperta ? aperta.grp : tema.g };
+  return { t:S.opposizione ? ['g'] : ['p','g'], blocco:null };   // ⚠ 2: all'opposizione la piccola non si offre
+}
+/* le scelte del passo (0 tema · 1 tono · 2 promessa), con la targhetta prima della scelta (D190) */
+function discorsoScelte(def, it){
+  var P=it.passi||[], tx=def.testi||{};
+  if(P.length===0) return it.dis.temi.map(function(m){ return { l:discorsoTemaNome(m), e:T(tx.temaE||'Il tema del discorso') }; });
+  var tema=it.dis.temi[P[0]], gn=discorsoTemaNome(tema), alta=discorsoCaricaAlta();
+  if(P.length===1) return DIS_TONI.map(function(k){ var e=tx.toniE[k]; if(k==='solenne' && !alta) e=tx.toniE.solenneBassa; return { l:T(tx.toni[k]), e:T(e).replace('%G', gn) }; });
+  var O=discorsoPromesseOfferte(tema), ch=[{ l:T(tx.prom.n), e:T(tx.promE.n), pr:null }];
+  O.t.forEach(function(k){ ch.push({ l:T(tx.prom[k]), e:T(tx.promE[k]).replace('%G', gn), pr:k }); });
+  if(O.blocco && tema.k==='grp') ch[0].e=T('Hai già una promessa aperta con %G').replace('%G', nomeGruppo(O.blocco));
+  return ch;
+}
+const DIS_TONI=['misurato','acceso','solenne'];
+/* l'item {kind:'discorso'}: data.ch = le scelte del passo; data.id = 'dis_<tipo>' (la chiave dell'agenda: un discorso al mese) */
+function discorsoItem(def, orig){
+  if(!def) return null;
+  var it={ kind:'discorso', dis:{ tipo:def.id, orig:orig||null, temi:discorsoTemi() }, passi:[],
+           data:{ id:'dis_'+def.id, kick:def.kick, t:def.titolo, text:def.text, ch:[], dovuta:true, discorso:true }, resolved:false };
+  it.data.ch=discorsoScelte(def, it);
+  return it;
+}
+/* (1) la trasformazione: chiamata dove la carta d'origine entra in agenda; spenta, senza tipo o non dovuto = l'item com'era */
+function discorsoTrasforma(it){
+  if(!discorsoVivo() || !it || !it.data) return it;
+  var id=it.data.id; if(!id) return it;
+  var def=discorsoTipo(); if(!def || (def.orig||[]).indexOf(id)<0) return it;
+  if(S.discorso && S.discorso.ult===meseAss()){ var gi=discorsoItem(def, id); if(gi){ gi.resolved=true; gi.outcome=''; } return gi || it; }   // già fatto in questo mese (un caricamento): la stessa chiave, la toglie la lista delle risolte
+  if(!discorsoDovuto()) return it;
+  return discorsoItem(def, id) || it;
+}
+/* (2) la giornata dell'agenda (agendaConferma): v = la voce, c = {it, k} che la giornata porterebbe; rende c (com'era) o il discorso con la chiave 'dis|<v>|<k>' */
+function discorsoGiornata(v, c){
+  if(!discorsoVivo() || !c || !c.it) return c;
+  var def=discorsoTipo(); if(!def || (def.giornata||[]).indexOf(v)<0) return c;
+  if(c.it.kind==='discorso') return c;
+  if(!discorsoDovuto()) return c;
+  if(discorsoDado('giornata|'+v)>=DISCORSI_K.pAgenda) return c;
+  var it=discorsoItem(def, 'g:'+v); return it ? { it:it, k:'dis|'+v+'|'+c.k } : c;
+}
+/* agendaRifai della chiave 'dis|<v>|<k>': la carta di prima rifatta, poi la stessa decisione (dovuto e dado non dipendono dalla carta) */
+function discorsoRifai(v, it){
+  if(!discorsoVivo() || !it) return it;
+  var def=discorsoTipo(); if(!def || (def.giornata||[]).indexOf(v)<0) return it;
+  if(S.discorso && S.discorso.ult===meseAss()){ var gi=discorsoItem(def, 'g:'+v); if(gi){ gi.resolved=true; gi.outcome=''; } return gi; }
+  var c=discorsoGiornata(v, { it:it, k:'' }); return c.it;
+}
+/* il rosso della prova C4: la carta come carta IN PIÙ, anche senza origine (solo DISCORSI_ROSSO='c4') */
+function discorsoRossoC4(){
+  if(DISCORSI_ROSSO!=='c4' || !discorsoVivo() || !discorsoDovuto()) return;
+  if((S.agenda||[]).some(function(x){ return x && x.kind==='discorso'; })) return;
+  var it=discorsoItem(discorsoTipo(), 'rosso'); if(it) S.agenda.push(it);
+}
+/* la valuta del tema: il gruppo (gd), con il tetto per discorso già applicato da chi chiama */
+function discorsoStampa(n){
+  if(!n) return;
+  if(S.livello===3 && !S.opposizione) stampad(n);
+  else if(S.livello===3 || S.livello===2) visd(n);
+  else if(S.livello===0) attA(n<0 ? -1 : 1);
+  else stampad(n);
+}
+/* D386 · Tr: le promesse tradite alle spalle (ultimi 60 mesi) più le aperte con colpi ≥ 3, al più 2 */
+function discorsoTradite(){
+  var n=0, a=S.year;
+  (S.promesseEsito||[]).forEach(function(p){ if(p && p.mantenuta===false && (a-(p.anno||0))*12<=60) n++; });
+  (S.promesseCampagna||[]).forEach(function(p){ if(p && (p.colpi||0)>=3) n++; });
+  if(S.promessa && (S.promessa.colpi||0)>=3) n++;
+  return Math.min(2, n);
+}
+/* D386 · Pl: chi è in platea (solo con RICORRENTI): il primo per ruolo — giornalista o rivale col rapporto ≤ −2 (−1), alleato ≥ +2 (+1) */
+function discorsoPlatea(){
+  if(typeof ricVivo!=='function' || !ricVivo() || !S.ricorrenti) return null;
+  var R=S.ricorrenti, ord=['gio','riv','all'];
+  for(var i=0;i<ord.length;i++){
+    var p=R[ord[i]]; if(!p) continue;
+    if(ord[i]==='all' ? (p.r||0)>=2 : (p.r||0)<=-2) return { ruolo:ord[i], v:ord[i]==='all' ? 1 : -1 };
+  }
+  return null;
+}
+/* D386 · A: chi parla, con la valuta della carriera */
+function discorsoAutorevolezza(){
+  var v=50;
+  if(S.livello===0 && S.attivista) v=S.attivista.autorev;
+  else if(S.livello===1 && S.locale) v=S.locale.consenso;
+  else if(S.livello===2 && !S.opposizione) v=(S.premier && S.premier.lealta!=null) ? S.premier.lealta : 50;
+  else if(S.livello===3 && !S.opposizione) v=S.ind ? S.ind.consenso : 50;
+  else if(S.livello===2 || S.livello===3) v=S.credibilita;
+  else if(S.livello===4) v=(S.intl && S.intl.coesione!=null) ? S.intl.coesione : 50;
+  else if(S.livello===5) v=(S.diplo && S.diplo.credito!=null) ? S.diplo.credito : 50;
+  return clamp(Math.round(((v==null?50:v)-50)/20), -2, 2);
+}
+/* D386 · la reazione scritta per intero: {R, esito, pl} */
+function discorsoReazione(tema, tono, taglia){
+  var Tt=tono==='acceso' ? 1 : (tono==='solenne' ? (discorsoCaricaAlta() ? 1 : -1) : 0);
+  var G=(tema && tema.k==='grp' && S.groups) ? clamp(Math.round(((S.groups[tema.g]||50)-50)/10), -3, 3) : 0;
+  var A=discorsoAutorevolezza(), Tr=discorsoTradite();
+  var P=taglia==='g' ? (Tr===0 ? 1 : -1) : 0;
+  var pl=discorsoPlatea(), Pl=pl ? pl.v : 0;
+  var d=[-0.5, 0, 0.5][Math.min(2, Math.floor(discorsoDado('reaz')*3))];
+  var R=Tt+G+A-2*Tr+P+Pl+d;
+  if(tono==='acceso') R=R*1.5;   // l'acceso amplifica (lontano da zero)
+  return { R:R, esito:R>=2 ? 'a' : (R<=-1 ? 'x' : 'f'), pl:pl, parti:{T:Tt, G:G, A:A, Tr:Tr, P:P, Pl:Pl, d:d} };
+}
+/* la promessa del discorso (D387), via campPromessa: i campi perDiscorso, scad, taglia */
+function discorsoPromessa(grp, taglia, tipo){
+  if(typeof campPromessa!=='function') return null;
+  campPromessa(grp);
+  var q=S.promesseCampagna[S.promesseCampagna.length-1]; if(!q) return null;
+  q.perDiscorso=tipo; q.taglia=taglia;
+  q.scad=(S.opposizione && taglia==='g') ? null : meseAss()+(taglia==='p' ? DISCORSI_K.scadP : DISCORSI_K.scadG);   // ⚠ 2: all'opposizione la grande la giudica solo la resa della campagna
+  return q;
+}
+const DIS_ESITO_TXT={ a:'Applausi.', f:'Freddezza.', x:'Fischi.' };
+/* il ramo kind:'discorso' di resolveItemCore: i passi 1 e 2 su it.passi (nessun effetto), la terza scelta fa tutto */
+function discorsoRisolvi(it, ci){
+  var V=it.dis||{}, def=discorsoDef(V.tipo);
+  if(!def){ it.resolved=true; it.outcome=''; return; }
+  var ch=(it.data.ch||[])[ci]; if(!ch) return;
+  it.passi=it.passi||[];
+  if(it.passi.length<2){ it.passi.push(ci); it.data.ch=discorsoScelte(def, it); return; }   // passi 1 e 2: lo stesso item, non risolto
+  var tema=V.temi[it.passi[0]], tono=DIS_TONI[it.passi[1]], taglia=ch.pr||null, ora=meseAss();
+  if((S.vicenda && S.vicenda.a) || (S.negoziato && S.negoziato.a && S.negoziato.a.da===ora) || (S.discorso && S.discorso.ult===ora) || discorsoTipo()!==def){ it.resolved=true; it.outcome=T('Il discorso è rinviato.'); return; }   // nato nello stesso mese: mai insieme; un altro già fatto nel mese; la carriera ha cambiato fetta nel mese (il tipo non è più il suo)
+  var reaz=discorsoReazione(tema, tono, taglia);
+  if(!DISCORSI_PLACEBO){
+    var alta=discorsoCaricaAlta(), dg=0, st=0, grp=(tema && tema.k==='grp') ? tema.g : null;
+    if(tono==='misurato') dg+=1;
+    else if(tono==='acceso'){ dg+=3; st-=2;
+      if(grp){ var lon=null; Object.keys(S.groups||{}).forEach(function(g){ if(g!==grp && (lon==null || S.groups[g]<S.groups[lon])) lon=g; }); if(lon) gd(lon, -1); } }
+    else if(alta){ dg+=1; st+=2; }
+    if(taglia==='p') dg+=2; else if(taglia==='g') dg+=4;
+    if(reaz.esito==='a') dg+=1; else if(reaz.esito==='x'){ dg-=2; st-=1; }
+    if(grp && dg){ dg=clamp(dg, DISCORSI_K.pavimento, DISCORSI_K.tetto); gd(grp, dg); }   // il tetto per discorso sul gruppo del tema
+    discorsoStampa(st);
+    if(reaz.esito==='a'){ if(S.livello===2 || S.livello===3) agCorrenti(1); if(S.livello===0) attB(1); }
+    if(grp && taglia) discorsoPromessa(grp, taglia, def.id);
+    if(reaz.pl && typeof RIC_FATTI!=='undefined' && reaz.esito!=='f'){ var fk=reaz.esito==='a' ? 'dis_si' : 'dis_no'; if(RIC_FATTI[fk]!=null) ricFatto(reaz.pl.ruolo, fk); }   // D389 (iii): predisposto, le chiavi sono della riga 31
+  }
+  var D=S.discorso || (S.discorso={ ult:null, n:0, e:null });
+  D.ult=ora; D.n=(D.n||0)+1; D.e=reaz.esito;
+  it.disEsito=reaz.esito; it.disR=reaz.R;
+  var lab=T(DIS_TONI_TXT[tono])+(taglia ? ' · '+T(taglia==='p' ? 'un impegno preciso' : 'la tua parola') : '');
+  var rx=T((def.reazioni||{})[reaz.esito] || DIS_ESITO_TXT[reaz.esito]);
+  S.log.unshift({ t:T(def.titolo), x:T('Tema:')+' '+discorsoTemaNome(tema)+' · '+lab+'. '+rx });
+  S.ind.consenso=computeConsenso();
+  it.outcome='<b>'+lab+'</b>. '+rx;
+  it.resolved=true;
+}
+const DIS_TONI_TXT={ misurato:'Misurato', acceso:'Acceso', solenne:'Solenne' };
+/* D387 · la scadenza (corpoMese, dopo avanzaMese, a ogni livello): la piccola coi numeri dell'intervista, la grande con resaPromessa */
+function discorsoPromesseMese(){
+  if(!S || !Array.isArray(S.promesseCampagna) || !S.promesseCampagna.length) return;
+  if(DISCORSI_ROSSO==='promessa') return;
+  var ora=meseAss(), via=[];
+  S.promesseCampagna.forEach(function(p){
+    if(!p || !p.perDiscorso || typeof p.scad!=='number' || ora<p.scad) return;
+    via.push(p);
+    if(DISCORSI_PLACEBO) return;
+    if(p.taglia==='p'){
+      if((p.colpi||0)>=3){ gd(p.grp,-4); discorsoStampa(-6); S.log.unshift({ t:T('La promessa del discorso'), x:T('Avevi preso un impegno preciso con %G: i fatti sono andati altrove.').replace('%G', nomeGruppo(p.grp)) }); }
+    } else {
+      var m=resaPromessa(p, true);
+      if(MESE_IN_CORSO) promessaEsitoSuono(m ? 0 : 1, m ? 1 : 0);
+    }
+  });
+  if(via.length) S.promesseCampagna=S.promesseCampagna.filter(function(p){ return via.indexOf(p)<0; });
+}
+/* applySnap: un valore illeggibile si toglie */
+function discorsoPulisci(){
+  var D=S.discorso; if(D==null) return;
+  if(typeof D!=='object' || Array.isArray(D) || !(D.ult==null || Number.isInteger(D.ult)) || !Number.isInteger(D.n) || !(D.e==null || DIS_ESITI.indexOf(D.e)>=0)){ delete S.discorso; return; }
+}
 /* aggiornaArchi: (1) prova ad accendere un nuovo arco "in sottofondo" (se c'è uno slot libero); (2) presenta
    UNA SOLA carta-arco — la coda FIFO sceglie chi aspetta da più tempo, gli altri restano in attesa. L'attivazione
    è separata dalla presentazione: così due archi possono coesistere e ALTERNARSI di mese in mese (l'intreccio),
@@ -11110,7 +11385,7 @@ function genAgendaRamo(first){
     if(!inq && !inqA){
       var sf5=(typeof pescaSfida==='function')?pescaSfida(['intl'],'vertice'):null;   // D1b: la sfida al vertice (gated)
       if(sf5){ S.agenda.push({kind:'event', data:sf5, resolved:false}); }
-      else { const dp=negoziatoAlPosto(negoziatoTrasforma(pickDiplo())); if(dp){ S.agenda.push(dp); } else { const dd=negoziatoAlPosto(negoziatoTrasforma(pickDiploDoss())); if(dd) S.agenda.push(dd); } }   /* L273-2: trasformazione e posto predisposti (spenta: l'item com'è) */   // D4: il fascicolo di scrivania colma il mese-vuoto (seconda superficie)
+      else { const dp=negoziatoAlPosto(negoziatoTrasforma(discorsoTrasforma(pickDiplo())));   /* L274-2: predisposto (nessun tipo al L5) */ if(dp){ S.agenda.push(dp); } else { const dd=negoziatoAlPosto(negoziatoTrasforma(pickDiploDoss())); if(dd) S.agenda.push(dd); } }   /* L273-2: trasformazione e posto predisposti (spenta: l'item com'è) */   // D4: il fascicolo di scrivania colma il mese-vuoto (seconda superficie)
       if(S.agenda.length<2){ const pe=pickPersonale(); if(pe) S.agenda.push(pe); }
     }
     return;
@@ -11257,7 +11532,7 @@ function genAgendaRamo(first){
         let op = vno ? null : (famigliaOppDovuta() ? pickFamigliaOpp() : null);   // L25-2/L25-3: le famiglie si prendono lo slot della carta d'opposizione, a turno fra loro (stesso kind: la forma del mese non cambia)
         if(!op && !vno) op = pickOpposizione();
         if(vno) S.agenda.push(vno);
-        else if(op) S.agenda.push(negoziatoAlPosto(negoziatoTrasforma({kind:'dossier', data:op, resolved:false})));   // L273-2: `opp_patto_partito_minore` può diventare il round 1 (predisposto: nessun tipo lo nomina), e il round prende il posto della carta (spenta: l'item com'è)
+        else if(op) S.agenda.push(negoziatoAlPosto(negoziatoTrasforma(discorsoTrasforma({kind:'dossier', data:op, resolved:false}))));   // L274-2: il comizio d'opposizione può diventare la replica (spenta: l'item com'è); il round della trattativa vince sul discorso   // L273-2: `opp_patto_partito_minore` può diventare il round 1 (predisposto: nessun tipo lo nomina), e il round prende il posto della carta (spenta: l'item com'è)
         if(S.agenda.length<2){ const pe=pickPersonale(); if(pe) S.agenda.push(pe); }
         else if(Math.random()<0.35){ const gv=pickGovernoEvent(); if(gv) S.agenda.push({kind:'event', data:gv, resolved:false}); }
       }
@@ -11620,6 +11895,7 @@ function genAgendaRamo(first){
     S.agenda.push(vicendaTrasforma({kind:'dossier', data:d, resolved:false}));   // L272-2: `pioggia` può diventare il tempo 1 (spenta: l'item com'è)
     S.recentDoss.push(d.id); if(S.recentDoss.length>22) S.recentDoss.shift();   // finestra 22 ≈ 20 mesi senza rivedere la stessa carta (pool ~92)
   }
+  discorsoRossoC4();   // L274-2: solo la prova rossa (DISCORSI_ROSSO='c4'); altrimenti no-op
   negoziatoPosto();   // L273-2: il round prende il posto di un dossier o dell'evento del mese; senza posto aspetta (C4; spenta: no-op)
 }
 /* ============================================================ L18-1 · LA CODA COMUNE DELL'AGENDA.
@@ -11761,7 +12037,7 @@ function codaAgenda(){
   /* L14-1 — il beat-retroscena: MAI nello stesso mese di un beat leggero (due registri diversi, insieme stonerebbero). */
   if(typeof retroDovuto==='function' && retroDovuto() && S.leggeroUltimo!==(S.year*12+S.month)){
     var _br=pescaRetro();
-    if(_br){ S.retroUltimo=S.year*12+S.month; S.agenda.push({kind:'event', data:_br, resolved:false}); }
+    if(_br){ S.retroUltimo=S.year*12+S.month; S.agenda.push(discorsoTrasforma({kind:'event', data:_br, resolved:false})); }   // L274-2: `rb_discorso` può diventare il discorso del capo (spenta: l'item com'è)
   }
 }
 function agendaPending(){return S.agenda.some(a=>!a.resolved);}
@@ -11960,6 +12236,8 @@ function resolveItemCore(idx,ci){
     vicendaRisolvi(it, ci);   // L272-2: le crisi in più tempi
   } else if(it.kind==='negoziato'){
     negoziatoRisolvi(it, ci);   // L273-2: le trattative a più round
+  } else if(it.kind==='discorso'){
+    discorsoRisolvi(it, ci);   // L274-2: il discorso, tre passi nella stessa carta
   } else if(it.kind==='arco'){
     /* gli archi narrativi (lotto 4): la scelta esegue gli effetti e determina il nodo successivo (o chiude) */
     const a=S.archi && S.archi.find(function(x){return x.id===it.arco;});
@@ -12205,17 +12483,22 @@ function resaPromesseCampagna(){
   var mese=S.year*12+S.month, vecchie=S.promesseCampagna.filter(function(p){return mese-p.mese>12;});
   if(!vecchie.length) return;
   var tradite=0, mantenute=0;   // L218-35: un suono e una voce per resa (una per mese: la resa apre la stagione una volta), la tradita vince
-  vecchie.forEach(function(p){
-    var nome=nomeGruppo(p.grp);
-    const mantenuta=!((p.colpi||0)>=6);
-    S.promesseEsito=S.promesseEsito||[]; S.promesseEsito.push({grp:p.grp, anno:S.year, mantenuta:mantenuta});   // L73-2: il finale tira le somme
-    if(!mantenuta){ tradite++; gd(p.grp,-5); stampad(-4); S.log.unshift({t:T('La promessa tradita'), x:T('In campagna avevi promesso attenzione a %G, poi i fatti: ora te la rinfacciano.').replace('%G',nome)}); }
-    else { mantenute++; if(S.campNaz) S.campNaz.promMantenuta=true; gd(p.grp,4);
-      S.log.unshift({t:T('La promessa mantenuta'), x:T('%G ricorda la parola data — e mantenuta.').replace('%G',nome)});
-    }   // L218-13 (F5j): il `traguardo` della promessa mantenuta suona dopo il giro, in promessaEsitoSuono (L218-35: non quando c'è anche una tradita)
-  });
+  vecchie.forEach(function(p){ if(resaPromessa(p)) mantenute++; else tradite++; });   // L274-2 (⚠ 5): il corpo in resaPromessa, che giudica anche la grande del discorso alla scadenza
   if(MESE_IN_CORSO) promessaEsitoSuono(tradite, mantenute);   // L218-35
   S.promesseCampagna=S.promesseCampagna.filter(function(p){return mese-p.mese<=12;});
+}
+/* L274-2 (⚠ 5 di «⚑ L274-1») · il giudizio di UNA promessa, tolto da resaPromesseCampagna senza cambiare niente (stesso ordine, stessi
+   effetti); daScadenza = la grande del discorso giudicata alla sua scadenza (discorsoPromesseMese): la stampa della carriera e niente
+   segno «promessa mantenuta» sulla campagna. Rende true se mantenuta. */
+function resaPromessa(p, daScadenza){
+  var nome=nomeGruppo(p.grp);
+  const mantenuta=!((p.colpi||0)>=6);
+  S.promesseEsito=S.promesseEsito||[]; S.promesseEsito.push({grp:p.grp, anno:S.year, mantenuta:mantenuta});   // L73-2: il finale tira le somme
+  if(!mantenuta){ gd(p.grp,-5); if(daScadenza) discorsoStampa(-4); else stampad(-4); S.log.unshift({t:T('La promessa tradita'), x:T('In campagna avevi promesso attenzione a %G, poi i fatti: ora te la rinfacciano.').replace('%G',nome)}); }
+  else { if(S.campNaz && !daScadenza) S.campNaz.promMantenuta=true; gd(p.grp,4);
+    S.log.unshift({t:T('La promessa mantenuta'), x:T('%G ricorda la parola data — e mantenuta.').replace('%G',nome)});
+  }   // L218-13 (F5j): il `traguardo` della promessa mantenuta suona dopo il giro, in promessaEsitoSuono (L218-35: non quando c'è anche una tradita)
+  return mantenuta;
 }
 /* L218-35 · l'esito delle promesse alla resa dei conti: tradita → `promessa-mancata` e `voce-promessa-tradita` (vince sulla mantenuta
    dello stesso mese: la mantenuta ha già il suo `traguardo`, che allora non suona); solo mantenute → `voce-promessa-mantenuta`.
@@ -12353,6 +12636,7 @@ function corpoMese(){
   camereSudDiviso();   // L263-9bis: una volta al mese (la coalizione cambia in molti punti; il banner lo legge)
   camera2JpMese();   // L263-12: il rinnovo di luglio della Camera dei consiglieri (no-op a interruttore spento)
   try{ ricMese(); }catch(e){}   // L271-2: le persone ricorrenti (no-op con RICORRENTI spenta)
+  if(DISCORSI) discorsoPromesseMese();   // L274-2: la scadenza delle promesse del discorso, a ogni livello (spenta: niente)
   try{ scissioneMese(); }catch(e){}   // L237-6: la stampa −3 il mese dopo una scissione (no-op senza)
   /* L116-1 · la soglia: il decennio che cambia in una linea storica (gennaio di un anno che finisce per zero, fino al 2013: dopo
      è il presente); il primo mese di una porta suona in confirmCoal */
@@ -15918,6 +16202,7 @@ function applySnap(snap){
   if(S.attivista && !S.attivista.laurea && (!S.attivista.radici || !S.attivista.rivale)) radiciInit();   // L260-2: un attivista di prima riceve radici e rivale (solo con ATT_RADICI; il dado è un hash: lo stesso a ogni caricamento)
   if(S.partitoProprio && S.partitoProprio.sedi!=null) ppSediPulisci();
   if(S.ricorrenti!=null) ricPulisci();
+  if(S.discorso!=null) discorsoPulisci();   // L274-2: il discorso (un valore illeggibile si toglie)
   if(S.negoziato!=null) negoziatoPulisci();   // L273-2: il negoziato aperto (un valore illeggibile si toglie)
   if(S.vicenda!=null) vicendaPulisci();   // L272-2: la vicenda aperta (un valore illeggibile si toglie)   // L271-2: le persone ricorrenti (un valore illeggibile si toglie)
   if(S.partitoProprio && S.partitoProprio.trag!=null) ppTragPulisci();   // L260-7bis: il registro dei traguardi illeggibile si toglie   // L260-7: un registro delle sedi illeggibile si toglie (senza = nessuna sede)
