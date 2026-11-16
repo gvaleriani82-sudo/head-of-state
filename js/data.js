@@ -7752,27 +7752,85 @@ const TRATTATIVE_DEF=[
             rottura:'Con %P la trattativa si è rotta: l\'opposizione resta divisa.' } },
 ];
 /* ================================================================================================================
-   ⚑ L274-2 · DISCORSI_DEF — i tipi del discorso (DESIGN-FORMATI.md «⚑ L274-1» D384, «⚑ L274-2»). Due tipi di prova coi testi
-   PROVVISORI (italiano col ripiego, nessun luogo né mezzo scritti: paese, epoca e monarchie sono della riga 31): la replica
-   dell'opposizione (L3-opp, L2-opp) e il discorso del capo del governo (L3 al governo, non in coabitazione). Campi: id, fette
-   (agendaFetta), orig (le carte d'origine che si trasformano), giornata (le voci dell'agenda: DISCORSI_VOCE), era, kick, titolo,
-   text, testi (temaE; toni e toniE con %G = il tema; solenneBassa = la targhetta senza la carica; prom e promE), reazioni (a, f, x).
-   Partiti neutri: nessun tema e nessun tono hanno un segno per partito.
+   ⚑ L274-3 · DISCORSI_DEF — i sette tipi del discorso coi testi a pezzi (DESIGN-FORMATI.md «⚑ L274-1» D384, D386, D387, D392,
+   «⚑ L274-2», «⚑ L274-3»). La costante DISCORSI è ACCESA dal L274-4 (a costante spenta niente di questo esce).
+   · DISCORSI_COMUNI: i pezzi di tutti i tipi — le domande dei passi, le etichette dei toni (la targhetta la calcola il motore dallo
+     stato, `discorsoTarghettaTono`, D190), le promesse, «l'impegno» (L4-L5), le righe che dicono perché non si promette, i temi
+     che non sono un gruppo, i mezzi (radio · televisione · rete, da `agendaStampaNome`), le reazioni per sala (piazza · aula ·
+     nazione · sala internazionale), il registro e la biografia.
+   · DISCORSI_DEF: id, fette (agendaFetta), orig (le carte d'origine), giornata (le voci di DISCORSI_VOCE), kick, titolo e text per
+     LUOGO (la chiave la sceglie `discorsoLuogo`: paese, sistema, porta, carta d'origine), mezzo (true = la riga del mezzo dopo
+     l'apertura), terr (true = la riga del territorio prima, solo come nome: %TERR soggetto), sala (luogo → classe delle reazioni).
+   · Regole: nessuna persona, testata, discorso o luogo-simbolo reale; nelle monarchie mai il sovrano (sempre l'aula); negli USA il
+     ministro parla davanti alla commissione, mai in aula; la rete solo dal 2005 e nel presente, la televisione da AGENDA_TV_DAL;
+     titoli istituzionali al maschile; partiti neutri (nessun tema e nessun tono hanno un segno per partito).
    ================================================================================================================ */
-const DISCORSI_TESTI_PROVA={ temaE:'Il tema del discorso',
+const DISCORSI_COMUNI={
+  kickPassi:{ prom:'Discorso · tema → tono → promessa', imp:'Discorso · tema → tono → impegno' },
+  domande:{ tema:'Di che cosa parli?', tono:'Con che tono?', prom:'Che cosa prometti?', imp:'Ti impegni?' },
+  temaE:'Il tema del discorso',
   toni:{ misurato:'Un tono misurato', acceso:'Un tono acceso', solenne:'Un tono solenne' },
-  toniE:{ misurato:'%G +1 · nessun rischio', acceso:'%G +3 · la stampa −2 · divide', solenne:'%G +1 · la stampa +2', solenneBassa:'Senza la carica, la solennità suona vuota' },
+  toneNulla:'Nessun effetto sul tema · nessun rischio', solenneBassa:'Senza la carica, la solennità suona vuota', divide:'divide',
   prom:{ n:'Nessuna promessa', p:'Un impegno preciso', g:'La tua parola' },
-  promE:{ n:'Niente da mantenere', p:'%G +2 · tre mesi per mantenerlo', g:'%G +4 · due anni · tradita costa' } };
+  promE:{ n:'Niente da mantenere', p:'%G +2 · tre mesi per mantenerlo', g:'%G +4 · due anni · tradita costa' },
+  perche:{ opp:'Dall\'opposizione la promessa si fa in campagna: qui conta la parola.', mov:'Dal movimento una promessa non si può misurare: qui conta la parola.' },
+  imp:{ n:'Nessun impegno', nE:'Niente da mantenere', i:'L\'impegno davanti a tutti' },
+  temi:{ paese:'il paese', sicurezza:'la sicurezza del paese', legge:'la tua legge: %L', quartiere:'il tuo quartiere', citta:'la tua città', regione:'la tua regione',
+         ente:'l\'unità dell\'organizzazione', membri:'i paesi membri', prestigio:'il prestigio del paese' },
+  valuta:{ base:'la base', coesione:'la coesione', credito:'il credito', stampa:'la stampa', visibilita:'la visibilità', autorev:'l\'autorevolezza' },
+  mezzo:{ radio:'I microfoni della radio sono accesi: la tua voce entra in ogni casa.',
+          tv:'Le telecamere della televisione sono già accese.',
+          rete:'Le telecamere sono accese, e il discorso girerà in rete prima che tu abbia finito.' },
+  reazioni:{
+    piazza:{ a:'Applausi dalla piazza; qualcuno alza un cartello col tuo nome.', f:'La piazza ascolta in silenzio, poi ognuno torna alle sue cose.', x:'Fischi dal fondo; la voce non basta a coprirli.' },
+    aula:{ a:'Applausi dai banchi; anche dall\'altra parte qualcuno annuisce.', f:'Ascoltano senza scaldarsi; qualcuno esce prima della fine.', x:'Rumori e proteste dai banchi; chi presiede deve chiedere silenzio.' },
+    nazione:{ a:'Le prime reazioni sono buone: il discorso piace.', f:'Il discorso scivola via; domani se ne parlerà poco.', x:'Il discorso diventa un caso: domani lo smonteranno riga per riga.' },
+    sala:{ a:'Applausi dalle delegazioni; più d\'una chiede il testo.', f:'Le delegazioni ascoltano in cuffia; nessuno si sbilancia.', x:'Qualche delegazione lascia la sala mentre parli.' } },
+  terrRiga:'%TERR ti %TV{aspetta|aspettano} per sentire che cosa hai da dire.',
+  bio:{ a:'Un suo discorso viene accolto dagli applausi.', x:'Un suo discorso viene accolto dai fischi.' }
+};
 const DISCORSI_DEF=[
-  { id:'replica', fette:['L3opp','L2opp'], era:'universale', orig:['opp_comizio_piazza','opp_giro_province','opp_scontro_parlamento','opp_tribuna_politica'], giornata:['aula'],
-    kick:'Discorso', titolo:'La replica', text:'Il governo ha parlato; ora tocca a te rispondere. Prima di cominciare scegli di che cosa parlare, con che tono, e se impegnarti.',
-    testi:DISCORSI_TESTI_PROVA,
-    reazioni:{ a:'Applausi: la sala è con te.', f:'Freddezza: ascoltano, ma non si scaldano.', x:'Fischi: la replica non è passata.' } },
-  { id:'capo', fette:['L3'], era:'universale', orig:['rb_discorso'], giornata:['stampa'],
-    kick:'Discorso', titolo:'Il discorso', text:'Domani parli al paese da capo del governo. Il testo è ancora aperto: il tema, il tono, e quanto ti spingi a promettere.',
-    testi:DISCORSI_TESTI_PROVA,
-    reazioni:{ a:'Applausi: il paese ascolta e approva.', f:'Freddezza: il discorso scivola via.', x:'Fischi: il discorso diventa un caso.' } }
+  { id:'piazza', fette:['L0'], era:'universale', orig:['ev_aula','ev_festa'], giornata:['terr'], kick:'Discorso', terr:true,
+    titolo:{ piazza:'Il palco in piazza', quartiere:'Il discorso al consiglio di quartiere' },
+    text:{ piazza:'Un palco di assi in mezzo alla piazza, un megafono che gracchia, la gente che si ferma con la spesa in mano.',
+           quartiere:'Il consiglio di quartiere ti ha dato dieci minuti, fra le fontanelle e i lampioni rotti. Sedie di plastica, il pubblico in piedi in fondo alla sala.' },
+    sala:{ piazza:'piazza', quartiere:'aula' } },
+  { id:'consiglio', fette:['L1'], era:'universale', orig:[], giornata:['terr'], kick:'Discorso', terr:true,
+    titolo:{ comune:'Il discorso in consiglio comunale', regione:'Il discorso in consiglio regionale' },
+    text:{ comune:'L\'aula del consiglio comunale è piena: consiglieri ai banchi, cittadini in fondo, qualche cronista locale col taccuino.',
+           regione:'L\'aula del consiglio regionale è piena: consiglieri ai banchi, sindaci in tribuna, qualche cronista col taccuino.' },
+    sala:{ comune:'aula', regione:'aula' } },
+  { id:'legge', fette:['L2'], era:'universale', orig:['mg_misura'], giornata:[], kick:'Discorso',
+    titolo:{ aula:'La legge in aula', comuni:'La legge ai Comuni', commissione:'Davanti alla commissione' },
+    text:{ aula:'Il provvedimento del tuo ministero arriva in aula: parli dal banco del governo, con la relazione davanti e i capigruppo che contano i presenti.',
+           comuni:'Il provvedimento del tuo ministero arriva ai Comuni: parli dal banco del governo, con l\'opposizione di fronte, a pochi passi.',
+           commissione:'Il provvedimento del tuo dipartimento arriva davanti alla commissione del Congresso: un tavolo lungo, i microfoni, i membri della commissione sui banchi rialzati e le domande già scritte.' },
+    sala:{ aula:'aula', comuni:'aula', commissione:'aula' } },
+  { id:'capo', fette:['L3'], era:'universale', orig:['rb_discorso'], giornata:['stampa'], kick:'Discorso', mezzo:true,
+    titolo:{ aula:'Il discorso in aula', comuni:'Il discorso ai Comuni', studio:'Il discorso alla nazione', nazione:'Il discorso alla nazione' },
+    text:{ aula:'L\'aula è piena; nei banchi c\'è chi sfoglia il giornale e chi aspetta la prima frase per applaudire o per rumoreggiare.',
+           comuni:'I Comuni sono pieni, i banchi stretti fino all\'ultimo posto; di fronte l\'opposizione aspetta la prima frase per rumoreggiare.',
+           studio:'Parli al paese dallo studio: una scrivania, una bandiera, le carte in ordine davanti a te.',
+           nazione:'Parli alla nazione da una sala del palazzo: una scrivania, le carte in ordine, il paese che ascolta.' },
+    sala:{ aula:'aula', comuni:'aula', studio:'nazione', nazione:'nazione' } },
+  { id:'replica', fette:['L3opp','L2opp'], era:'universale', orig:['opp_comizio_piazza','opp_giro_province','opp_scontro_parlamento','opp_tribuna_politica'], giornata:['aula'], kick:'Discorso', mezzo:true,
+    titolo:{ aula:'La replica', comuni:'La replica ai Comuni', risposta:'La risposta dell\'opposizione', studio:'La replica in televisione', piazza:'La replica in piazza', conferenza:'Il discorso alla conferenza del partito' },
+    text:{ aula:'Il governo ha appena finito di parlare; ora tocca a te, dai banchi dell\'opposizione. I tuoi aspettano una replica che si ricordi.',
+           comuni:'Il governo ha appena finito di parlare ai Comuni; ora ti alzi tu, dai banchi di fronte. I tuoi aspettano una replica che si ricordi.',
+           risposta:'Il Presidente ha parlato al paese; ora tocca a te dare la risposta dell\'opposizione: pochi minuti, un testo breve.',
+           piazza:'Il palco è montato in piazza, contro il governo: bandiere, il microfono, la gente che aspetta di sapere che cosa avete da dire voi.',
+           studio:'Lo studio è piccolo e caldo di luci: hai pochi minuti per rispondere al governo, seduto a un tavolo con un microfono davanti.',
+           conferenza:'La sala della conferenza del partito è piena: delegati, bandiere, la tribuna. Si aspettano un discorso contro il governo che li rimandi a casa con la voglia di lavorare.' },
+    sala:{ aula:'aula', comuni:'aula', risposta:'nazione', studio:'nazione', piazza:'piazza', conferenza:'piazza' } },
+  { id:'assemblea', fette:['L4'], era:'universale', orig:[], giornata:['ufficio'], kick:'Discorso', impegno:true,
+    titolo:{ assemblea:'Il discorso all\'assemblea' },
+    text:{ assemblea:'L\'assemblea delle %ONU ti aspetta: le delegazioni ai loro banchi, le cuffie della traduzione, il tuo turno all\'ordine del giorno.' },
+    sala:{ assemblea:'sala' } },
+  { id:'conferenza', fette:['L5'], era:'universale', orig:['dp_conferenza','dp_assemblea'], giornata:[], kick:'Discorso', impegno:true,
+    titolo:{ conferenza:'Il discorso alla conferenza', assemblea:'Il discorso all\'Assemblea' },
+    text:{ conferenza:'Presiedi la conferenza e tocca a te il discorso d\'apertura: le delegazioni in sala, le cuffie della traduzione, un testo che le cancellerie hanno già letto in bozza.',
+           assemblea:'All\'Assemblea delle %ONU tocca a te: dalla tribuna si vede tutta la sala, le cuffie della traduzione, qualche banco vuoto.' },
+    sala:{ conferenza:'sala', assemblea:'sala' } }
 ];
 const ARCHI_DEF=[
  /* A — VERTENZA INDUSTRIALE (economico): la fabbrica che chiude, secondo come la gestisci si salva,
@@ -21492,6 +21550,10 @@ const TITOLI=[
  /* L237-5 · la fondazione del partito proprio: la sceglie generaTitolo nel mese della fondazione o in quello dopo (titoloFondazioneDovuto),
     una volta per carriera; la cond la tiene fuori dal pool degli altri mesi. Neutro: amico e ostile uguali. */
  {id:'ti_pp_fondazione', cond:()=>titoloFondazioneDovuto(), amico:'Nasce %P: un nuovo nome sulla scheda', ostile:'Nasce %P: un nuovo nome sulla scheda'},
+ // L274-3 (D389 iv): il discorso del mese prima, uno per esito; la cond legge S.discorso (che nasce solo a DISCORSI accesa): spenta non esce mai
+ {id:'ti_dis_applausi', pri:1, cond:()=>disTitoloOra('a'), amico:'Il discorso che convince: applausi e consensi', ostile:'Applausi per il discorso, ma le promesse restano da vedere'},
+ {id:'ti_dis_freddo', pri:1, cond:()=>disTitoloOra('f'), amico:'Un discorso sobrio, accolto con freddezza', ostile:'Il discorso che nessuno ricorderà'},
+ {id:'ti_dis_fischi', pri:1, cond:()=>disTitoloOra('x'), amico:'Fischi al discorso: una giornata storta', ostile:'Fischi e proteste: il discorso è un caso'},
  {id:'ti_pp_scissione', cond:()=>titoloScissioneDovuto(), amico:'Scissione da %V: nasce %P', ostile:'Scissione da %V: nasce %P'},   // L237-6
  {id:'ti_estate', cond:()=>stagioneMese()==='estate'&&stagioneMese(S.month-1)==='estate', amico:'Il paese rallenta, il governo resta al lavoro', ostile:'Ferie per tutti, risposte per nessuno'},
  {id:'ti_rientro', cond:()=>stagioneMese()==='autunno'&&stagioneMese(S.month+1)==='autunno', amico:'Il rientro: l\'agenda d\'autunno del governo', ostile:'L\'autunno dei dossier: il tavolo è pieno'},

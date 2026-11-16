@@ -90,7 +90,8 @@ const AUDIO_MANIFEST = {
   campane:     { file:'campane.mp3',     loop:false, gain:0.41 },  // la festa nazionale · L141-1 (4,0 s): RMS −15,6, picco −1,5 → regola di sopra
   /* ⚑ L218-8 (11/10) · GLI EFFETTI E2 DEI FORMATI NUOVI (PROPOSTA-AUDIO.md §E2, giro suoni 8, ElevenLabs). ⚠ SENZA AGGANCIO: i formati
      viaggio sulla mappa, negoziato e discorso (DESIGN-FORMATI.md) non esistono ancora nel gioco, quindi nessun `suona()` li chiama;
-     file, gain e lista sono pronti per quando nasceranno (il gain si rifà solo se cambia il file). Misure in Chrome:
+     file, gain e lista sono pronti per quando nasceranno (il gain si rifà solo se cambia il file). ⚑ L274-3: i tre del discorso sono
+     agganciati (riga `dis_` di SUONO_CARTA, il microfono in discorsoRisolvi, l'eco in suonoEsito), dietro DISCORSI (accesa dal L274-4). Misure in Chrome:
      `.claude/misura-l218-8-e2.js`; il giro 9 (L218-9: viaggio-auto e negoziato-fogli rifatti, discorso-leggio) `.claude/misura-l218-9.js`. */
   'viaggio-aereo':      { file:'viaggio-aereo.mp3',      loop:false, gain:0.43 },  // viaggio: il volo · 3,0 s: RMS −16,0, picco +0,1 → regola di sopra (tetto 0,89)
   'viaggio-auto':       { file:'viaggio-auto.mp3',       loop:false, gain:1.09 },  // viaggio: l'auto ufficiale · L218-9 (giro 9, rifatto) 3,0 s: RMS −24,2, picco −2,4 → regola di sopra (tetto 1,17; quello del giro 8, −28,5, è in giro-suoni/prove/viaggio-auto-giro8.mp3)
@@ -373,6 +374,7 @@ function suonoEsito(it){
   if(!it) return null;
   if(it.kind==='budget') return 'firma';
   if(it.kind==='negoziato' && it.negEsito) return it.negEsito==='rottura' ? 'strappo' : 'stretta';   // L273-3 (D381): la chiusura di una trattativa
+  if(it.kind==='discorso' && it.disEsito) return ({ a:'applauso', f:'discorso-eco', x:'fischi' })[it.disEsito];   // L274-3 (D392): la terza scelta del discorso, secondo l'esito (il secondo suono del gesto)
   const E=it.esiti||[]; if(!E.length) return null;
   let buoni=0, cattivi=0, soldi=false;
   E.forEach(function(e){ const giu=(e.k==='ind:debt'); if(giu) soldi=true; if((e.d>0)!==giu) buoni++; else cattivi++; });
@@ -406,6 +408,7 @@ function suonoTitolo(t){ return (t && t.pri===1 && !t.serie) ? suonoPreferito('r
    il suono specifico vince sul generico — e prima delle righe per SPECIE (`macchina` prende tutti i dossier: `cantiere` e `treno`
    dopo di lei non uscivano mai, misurato). */
 const SUONO_CARTA = [
+  ['discorso-leggio',[],                      /^$/, { id:/^dis_/ }],   // L274-3 (D392): il discorso che entra, al posto del suono di carta (id dis_<tipo>: nasce solo a DISCORSI accesa)
   ['ultimatum', [],                           /^$/, { id:/^crs_(ultimatum|ricevuto)$/ }],   // L218-34: l'ultimatum dato e ricevuto nella scala della crisi — prima di `orologio`, che lo prendeva per «ultimatum»
   ['sisma',    [],                            /^$/, { id:/^sisma$/ }],   // L218-34: la carta localizzata del terremoto (L239-5) — prima di `allarme`, che la prendeva per «calamit»
   ['alluvione',[],                            /^$/, { id:/^pioggia$/ }],

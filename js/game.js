@@ -1319,7 +1319,7 @@ function pickMinistro(){
   let pool=MINISTRO_CARTE.filter(function(c){ return (!c.dic||c.dic===S.dicastero) && (!c.cond||c.cond()) && eraViva(c); });
   const q=pescaBag('minc|'+S.dicastero, pool); if(!q) return null;
   S.ministroUltimo=S.year*12+S.month;
-  return discorsoTrasforma({ kind:'ministro', data:q, resolved:false });   // L274-2: predisposto (nessun tipo al L2)
+  return discorsoTrasforma({ kind:'ministro', data:q, resolved:false });   // L274-2 · L274-3: «la legge in aula» nasce da mg_misura (spenta: l'item com'è)
 }
 /* dossier del TUO settore (filtro min===dicastero): le tue decisioni contano davvero, muovono il tuo dominio. */
 function pickDossierSettore(){
@@ -6746,7 +6746,7 @@ function provaAttivistaEvento(){
 function cardAttivistaEvento(id){   // ricostruisce la carta-evento dal pool statico (per id) → kind:'attivista' = resolveItem catch-all + agScene kick→bucket, come una mossa
   var E=(typeof ATTIVISTA_EV!=='undefined') && ATTIVISTA_EV.find(function(x){ return x.id===id; });
   if(!E) return null;
-  return discorsoTrasforma({ kind:'attivista', data:{ id:E.id, kick:E.kick, tono:E.tono||null, t:E.t, text:E.text, ev:true, ch:E.ch }, resolved:false });   // L274-2: predisposto (nessun tipo al L0)
+  return discorsoTrasforma({ kind:'attivista', data:{ id:E.id, kick:E.kick, tono:E.tono||null, t:E.t, text:E.text, ev:true, ch:E.ch }, resolved:false });   // L274-2 · L274-3: «la piazza» nasce da ev_aula ed ev_festa (spenta: l'item com'è)
 }
 /* --- Nuova partita (da ATTIVISTA, Build A) — il gradino sotto il locale: 25 anni, nessuna carica, nessun bilancio.
    Le valute sono i 6 gruppi (reputazione, riuso) + la base militante + l'autorevolezza di campo, tutte dati puri in
@@ -8737,7 +8737,7 @@ const RIC_MOV_CARTE=['ev_rivale'];   // le carte del movimento che parlano del r
 /* D349 · i fatti: chiave → Δ rapporto */
 const RIC_FATTI={ int_retta:1, int_spiazzato:-1, tel_squillo:-1, tel_si:1, tel_no:-1, retro_cedi:1, retro_sfida:-1,
   domanda_bene:1, domanda_male:0, agenda_stampa:1, agenda_partito:1, trascurato:-1, battuto:-2, posto:2,
-  crisi_bene:1, crisi_male:-1,
+  crisi_bene:1, crisi_male:-1, dis_si:1, dis_no:-1,
   patto_si:1, patto_no:-1, oppatto_si:1, oppatto_no:-1 };   // L273-4: il patto fra opposizioni con l'alleato ricorrente del partito controparte · L273-3: la chiusura di un patto con l'alleato ricorrente (negoziatoRicFatto)   // L272-3: la chiusura di una vicenda (vicendaGiornalista)
 function ricVivo(){ return RICORRENTI && typeof S!=='undefined' && !!S && !LAMPO; }
 function ricHash(s){
@@ -9051,7 +9051,8 @@ const RIC_FATTO_TXT={ int_retta:'L\'ultima intervista l\'hai retta fino in fondo
   trascurato:'Da mesi non trovi il tempo per una telefonata o un incontro.', battuto:'Ha perso la sfida contro di te.', posto:'Il suo partito è entrato nel governo con te.',
   crisi_bene:"Ha raccontato bene come hai retto l'ultima emergenza.", crisi_male:"Ha scritto che l'ultima emergenza ti è sfuggita di mano.",
   patto_si:"L'ultima trattativa fra voi si è chiusa con un'intesa.", patto_no:"L'ultima trattativa fra voi si è rotta.",
-  oppatto_si:"L'ultimo patto fra i vostri partiti si è chiuso con un'intesa.", oppatto_no:"L'ultimo patto fra i vostri partiti è saltato." };   // L273-4
+  oppatto_si:"L'ultimo patto fra i vostri partiti si è chiuso con un'intesa.", oppatto_no:"L'ultimo patto fra i vostri partiti è saltato.",   // L273-4
+  dis_si:"Era in platea al tuo ultimo discorso, e ha applaudito.", dis_no:"Era in platea al tuo ultimo discorso, quando sono partiti i fischi." };   // L274-3 (D389 iii): la persona in platea
 const RIC_INGRESSO_TXT={ riv:'Te ne hanno parlato: vuole il tuo posto.', gio:'Ti segue da poco, ma legge tutto.', all:'Sulla carta è dalla tua parte.' };
 /* D350 · le targhette, scritte prima della scelta e solo quando l'effetto può scattare (ricEffettoPuo) */
 const RIC_EFF_TXT={
@@ -10872,9 +10873,12 @@ function negoziatoChiudiOpp(stato, a, daSe){
   if(A.c) credd(A.c);
 }
 /* ================================================================================================================
-   ⚑ L274-2 · IL DISCORSO · SPENTA — il motore (DESIGN-FORMATI.md «⚑ L274-1» D383-D393, «⚑ L274-2»). Il quarto formato: una carta
-   sola in un mese solo con tre passi nella stessa carta (tema → tono → promessa) e la reazione subito. Contenuto IT/EN, schermo,
-   audio e accensione sono della riga 31; qui due tipi di prova (DISCORSI_DEF.replica, DISCORSI_DEF.capo) coi testi provvisori.
+   ⚑ L274-2 · IL DISCORSO · ACCESA (L274-4) — il motore (DESIGN-FORMATI.md «⚑ L274-1» D383-D393, «⚑ L274-2»). Il quarto formato: una carta
+   sola in un mese solo con tre passi nella stessa carta (tema → tono → promessa) e la reazione subito. Dal L274-3 (16/11, «⚑ L274-3»,
+   ancora SPENTA: l'accensione è L274-4) i sette tipi coi testi IT/EN a pezzi (data.js DISCORSI_COMUNI, DISCORSI_DEF), il luogo per
+   paese ed epoca (`discorsoLuogo`, `discorsoMezzo`), la valuta del tema per livello (`discorsoValuta`), la targhetta calcolata dallo
+   stato (`discorsoEffTono`: la stessa funzione fa l'effetto), «l'impegno» al L4-L5, all'opposizione e al L0 nessuna promessa
+   (Passo 0), i suoni di D392, i titoli e i fatti delle persone di D389.
    · IL CAMPO (D383): `S.discorso = {ult, n, e}` (ult = mese assoluto dell'ultimo discorso, il cooldown; n = quanti in carriera;
      e = 'a'|'f'|'x', l'esito dell'ultimo: applausi · freddezza · fischi — lo leggeranno i titoli della riga 31), dati puri; nasce
      SOLO a costante accesa; `discorsoPulisci` in applySnap toglie un valore illeggibile.
@@ -10889,17 +10893,18 @@ function negoziatoChiudiOpp(stato, a, daSe){
    · LA REAZIONE (D386): R = T + G + A − 2·Tr + P + Pl + d, l'acceso × 1,5; applausi R ≥ 2 · freddezza · fischi R ≤ −1; tetto sul
      gruppo del tema +6 / −4 (tono + promessa + reazione). Mai forze, seggi, voto vero, nessun premio secco. Partiti neutri.
    · LA PROMESSA (D387): in `S.promesseCampagna` con `perDiscorso`, `scad`, `taglia` ('p' 3 mesi · 'g' 24 mesi); al più una del
-     discorso aperta, mai sullo stesso gruppo di un'altra aperta; all'opposizione (⚠ 2) niente piccola e la grande senza scadenza:
-     la giudica solo la resa della campagna. Giudizio: `discorsoPromesseMese` in corpoMese a ogni livello (`resaPromessa`, la
+     discorso aperta, mai sullo stesso gruppo di un'altra aperta; dal L274-3 (Passo 0) all'opposizione e al L0 nessuna promessa
+     (la riga che dice perché), al L4-L5 «l'impegno», solo subito. Giudizio: `discorsoPromesseMese` in corpoMese a ogni livello (`resaPromessa`, la
      resa tolta da `resaPromesseCampagna` per la grande; la piccola coi numeri dell'intervista).
    · `DISCORSI_PLACEBO`: stesse nascite nello stesso posto, stessi passi, cooldown sì; nessun effetto, promessa, fatto.
      Spenta = niente: nessuna funzione legge un dado, scrive S o cambia un'estrazione. Zero Math.random.
    ================================================================================================================ */
-let DISCORSI=false;   // L274-2 (16/11): il motore, SPENTO (due tipi di prova); contenuto, schermo, audio e accensione nella riga 31
+let DISCORSI=true;    // L274-2 (16/11): il motore · L274-3 (16/11): i sette tipi, schermo e audio · ACCESO dal L274-4 (16/11: D390 a quattro semi, C3, D174, CDP verdi)
 let DISCORSI_PLACEBO=false;
-const DISCORSI_K={ cool:48, pAgenda:0.10, tetto:6, pavimento:-4, scadP:3, scadG:24, avvio:6 };
+const DISCORSI_K={ cool:48, pAgenda:0.10, tetto:6, pavimento:-4, scadP:3, scadG:24, avvio:6,
+  centro:{ L0:100, L1:50, L2:91, L3:56, opp:82, L4:50, L5:100 } };   // ⚑ L274-4: il centro di A per fetta (mediana della valuta, sonda-l274-4.js; < 3 punti da 50 = 50); L1 (54) e L4 (62) rimessi a 50 dal vincolo della C3 (consiglio solenne 0% e assemblea misurato 2% di applausi)
 const DISCORSI_VOCE={ L0:'terr', L1:'terr', L3:'stampa', L3opp:'aula', L2opp:'aula', L4:'ufficio' };   // D385: la voce dell'agenda per fetta (la usa solo il tipo che c'è, via def.giornata)
-let DISCORSI_ROSSO=null;   // solo le prove: 'c4' = la carta come carta IN PIÙ in un mese senza origine (C4 rossa) · 'promessa' = la scadenza che non giudica
+let DISCORSI_ROSSO=null;   // solo le prove: 'c4' = la carta come carta IN PIÙ in un mese senza origine (C4 rossa) · 'promessa' = la scadenza che non giudica · 'opp' (L274-3) = all'opposizione la promessa riaperta · 'centro' (L274-4) = il centro di A rimesso a 50
 const DIS_ESITI=['a','f','x'];
 function discorsoVivo(){ return DISCORSI && typeof S!=='undefined' && !!S && !LAMPO && typeof DISCORSI_DEF!=='undefined'; }
 /* la fetta del discorso (agendaFetta, più il Passo 0-b: in coabitazione il tipo del capo non nasce) */
@@ -10943,54 +10948,209 @@ function discorsoNelMese(){
   if(S.discorso && S.discorso.ult===meseAss()) return true;
   return Array.isArray(S.agenda) && S.agenda.some(function(it){ return it && it.kind==='discorso'; });
 }
-/* D385 · i temi, pura (non scrive S): il gruppo più scontento (la base del governo per chi governa, tutti per gli altri), il gruppo
-   più vicino della base del tuo partito, il tema del momento (la crisi a gradino 1-2: «la sicurezza del paese», senza promessa);
-   ripiego «il paese». Mai meno di due voci. Ogni voce: {k:'grp', g} · {k:'sicurezza'} · {k:'paese'}. */
+/* D385 · i temi, pura (non scrive S). Per i livelli dei gruppi: il gruppo più scontento (la base del governo per chi governa, tutti
+   per gli altri), il gruppo più vicino della base del tuo partito, il tema del momento — il primo vero fra «la tua legge» (L274-3,
+   Passo 0 ⚠ 3: `S.ultimaLegge` col mese, la legge ancora in vigore, negli ultimi 3 mesi; nessun campo nuovo), «la sicurezza del
+   paese» (crisi a gradino 1-2) e il territorio del discorso al L0-L1. Al L4: l'unità dell'organizzazione e i paesi membri. Al L5:
+   l'alleato più caldo e il partner più freddo della rete bilaterale, il prestigio del paese. Ripiego «il paese». Mai meno di due.
+   Ogni voce: {k:'grp', g} · {k:'legge', id} · {k:'sicurezza'} · {k:'terr'} · {k:'paese'} · {k:'ente'} · {k:'membri'} · {k:'part', id} · {k:'prestigio'}. */
 function discorsoTemi(){
+  var t=[];
+  if(S.livello===4){ t.push({k:'ente'}); t.push({k:'membri'}); return t; }
+  if(S.livello===5){
+    var B=(S.diplo && Array.isArray(S.diplo.bil)) ? S.diplo.bil : [], al=null, fr=null;
+    B.forEach(function(p){ if(!p || typeof p.v!=='number') return; if(p.t!=='rivale' && (al==null || p.v>al.v)) al=p; if(fr==null || p.v<fr.v) fr=p; });
+    if(al) t.push({k:'part', id:al.id}); if(fr && fr!==al) t.push({k:'part', id:fr.id});
+    t.push({k:'prestigio'}); if(t.length<2) t.push({k:'paese'});
+    return t;
+  }
   var gs=(typeof GROUPS!=='undefined' ? GROUPS : []).map(function(x){ return x.id; }).filter(function(g){ return S.groups && typeof S.groups[g]==='number'; });
   var gov=(S.livello===3 && !S.opposizione) || (S.livello===2 && !S.opposizione), pool=gs;
   if(gov){
     var b={}; (S.coalizione && S.coalizione.length ? S.coalizione : [S.partito]).forEach(function(id){ var p=(typeof part==='function') ? part(id) : null; if(p && p.base) Object.keys(p.base).forEach(function(g){ b[g]=1; }); });
     var bl=gs.filter(function(g){ return b[g]; }); if(bl.length) pool=bl;
   }
-  var t=[], primo=null;
+  var primo=null;
   pool.forEach(function(g){ if(primo==null || S.groups[g]<S.groups[primo]) primo=g; });
   if(primo) t.push({k:'grp', g:primo});
   var mio=(typeof part==='function') ? part(S.partito) : null, mb=(mio && mio.base) ? gs.filter(function(g){ return mio.base[g]!=null && g!==primo; }) : [];
   var sec=null; mb.forEach(function(g){ if(sec==null || S.groups[g]>S.groups[sec]) sec=g; });
   if(sec) t.push({k:'grp', g:sec});
-  if(S.crisi && !S.crisi.guerra && (S.crisi.t||0)>=1 && (S.crisi.t||0)<=2) t.push({k:'sicurezza'});
+  var L=discorsoLeggeRecente();
+  if(L) t.push({k:'legge', id:L.id});
+  else if(S.crisi && !S.crisi.guerra && (S.crisi.t||0)>=1 && (S.crisi.t||0)<=2) t.push({k:'sicurezza'});
+  else if((S.livello===0 || S.livello===1) && discorsoTerrIdx()!=null) t.push({k:'terr'});
   if(t.length<2) t.push({k:'paese'});
   return t;
 }
-function discorsoTemaNome(m){ if(!m) return ''; if(m.k==='grp') return nomeGruppo(m.g); return T(m.k==='sicurezza' ? 'la sicurezza del paese' : 'il paese'); }
+/* ⚠ 3 di «⚑ L274-2» (L274-3 Passo 0): la tua legge approvata negli ultimi 3 mesi e ancora in vigore — `S.ultimaLegge` {id, mese} lo
+   scrive setLegge a ogni voto (anche l'abrogazione: per questo `S.leggi[id]===true`); al governo, L2 e L3. Nessun campo nuovo. */
+function discorsoLeggeRecente(){
+  if(S.opposizione || !(S.livello===2 || S.livello===3) || !S.ultimaLegge || !S.leggi) return null;
+  var u=S.ultimaLegge; if(typeof u.mese!=='number' || S.leggi[u.id]!==true || meseAss()-u.mese>3) return null;
+  return (typeof LEGGI!=='undefined') ? (LEGGI.find(function(x){ return x.id===u.id; })||null) : null;
+}
+/* il territorio del discorso (solo come nome, D389 (v)): al L1 il tuo; al L0 quello dove lavori questo mese, altrimenti la radice più forte */
+function discorsoTerrIdx(){
+  var n=(PAESE && PAESE.territori) ? PAESE.territori.length : 0, ok=function(i){ return typeof i==='number' && i>=0 && i<n; };
+  if(S.livello===1 && S.locale) return ok(S.locale.terrIdx) ? S.locale.terrIdx : null;
+  if(S.livello!==0 || !S.attivista) return null;
+  var A=S.attivista; if(A.lavoro && ok(A.lavoro.i)) return A.lavoro.i;
+  var best=null; Object.keys(A.radici||{}).forEach(function(k){ var i=+k; if(ok(i) && (best==null || (A.radici[k]||0)>(A.radici[best]||0))) best=i; });
+  return best;
+}
+function discorsoTemaNome(m){
+  if(!m) return ''; var C=DISCORSI_COMUNI.temi;
+  if(m.k==='grp') return nomeGruppo(m.g);
+  if(m.k==='legge'){ var L=(typeof LEGGI!=='undefined') ? LEGGI.find(function(x){ return x.id===m.id; }) : null; return T(C.legge).replace('%L', L ? T(L.nome) : ''); }
+  if(m.k==='terr') return T(S.livello===0 ? C.quartiere : ((S.locale && S.locale.tipo==='regione') ? C.regione : C.citta));
+  if(m.k==='part') return bilNome(m.id, 'det');
+  return T(C[m.k] || C.paese);
+}
 /* la carica (D386): alta al L3 al governo, al L4 e al L5; bassa altrove */
 function discorsoCaricaAlta(){ return (S.livello===3 && !S.opposizione) || S.livello===4 || S.livello===5; }
-/* la promessa che si può fare sul tema (D387): [] = solo «nessuna»; la riga del blocco se una promessa aperta lo impedisce */
-function discorsoPromesseOfferte(tema){
-  if(!tema || tema.k!=='grp') return { t:[], blocco:null };
+/* il tipo prende «l'impegno» al posto della promessa (L4-L5, D387) */
+function discorsoImpegno(def){ return !!(def && def.impegno); }
+/* ⚑ L274-3 · LA VALUTA DEL TEMA (D386): dove va il «sul tema» del tono, della promessa e della reazione. L0 la base del movimento (qualunque
+   tema), L4 la coesione, L5 il partner del tema o il credito (il prestigio); altrove il gruppo (gd); un tema senza valuta (il paese, la
+   sicurezza, la tua legge, il territorio al L1) non muove niente. Lo leggono la targhetta e l'effetto: lo stesso conto (D190). */
+function discorsoValuta(tema){
+  if(!tema) return null;
+  if(S.livello===0) return { k:'base' };
+  if(S.livello===4) return { k:'coesione' };
+  if(S.livello===5){ if(tema.k==='part') return { k:'part', id:tema.id }; if(tema.k==='prestigio') return { k:'credito' }; return null; }
+  if(tema.k==='grp') return { k:'grp', g:tema.g };
+  return null;
+}
+function discorsoValutaNome(v){
+  if(!v) return ''; var C=DISCORSI_COMUNI.valuta;
+  if(v.k==='grp') return nomeGruppo(v.g);
+  if(v.k==='part') return bilNome(v.id, 'det');
+  return T(C[v.k]);
+}
+function discorsoValutaMuovi(v, n){
+  if(!v || !n) return;
+  if(v.k==='grp') gd(v.g, n);
+  else if(v.k==='base') attB(n);
+  else if(v.k==='coesione') coesioneMuovi(n);
+  else if(v.k==='credito') creditoMuovi(n);
+  else if(v.k==='part'){ var p=(S.diplo && Array.isArray(S.diplo.bil)) ? S.diplo.bil.find(function(x){ return x && x.id===v.id; }) : null; if(p) p.v=clamp(p.v+n, 0, 100); }
+}
+/* la stampa della carriera (il costo dell'acceso, il premio del solenne): L3 al governo la stampa, all'opposizione (L2, L3) la
+   visibilità, al L0 l'autorevolezza di un punto solo (attA ±1), altrove la stampa */
+function discorsoStampaChi(){
+  var st=(S.ind && S.ind.stampa!=null) ? 'stampa' : null, vi=(S.visibilita!=null) ? 'visibilita' : st;
+  if(S.livello===3 && !S.opposizione) return st;
+  if(S.livello===2 || S.livello===3) return vi;   // il ministro e l'opposizione: la visibilità (come il motore di L274-2)
+  if(S.livello===0) return S.attivista ? 'autorev' : null;
+  return st;
+}
+function discorsoStampaVal(n){ return (n && discorsoStampaChi()==='autorev') ? (n<0 ? -1 : 1) : n; }
+function discorsoStampa(n){
+  if(!n) return;
+  var c=discorsoStampaChi();
+  if(c==='visibilita') visd(n); else if(c==='autorev') attA(n<0 ? -1 : 1); else if(c==='stampa') stampad(n);
+}
+/* D386 · l'effetto del tono sul tema, calcolato dallo stato: {v, dv, st, lon} — la targhetta e l'effetto leggono QUESTO */
+function discorsoEffTono(tono, tema){
+  var v=discorsoValuta(tema), e={ v:v, dv:0, st:0, lon:null, vuoto:false };
+  if(tono==='misurato') e.dv=1;
+  else if(tono==='acceso'){ e.dv=3; e.st=-2;
+    if(tema && tema.k==='grp' && S.groups){ var lon=null; Object.keys(S.groups).forEach(function(g){ if(g!==tema.g && (lon==null || S.groups[g]<S.groups[lon])) lon=g; }); e.lon=lon; } }
+  else if(discorsoCaricaAlta()){ e.dv=1; e.st=2; }
+  else e.vuoto=true;
+  if(!v) e.dv=0;
+  e.st=discorsoStampaVal(e.st);
+  return e;
+}
+function discorsoNum(n){ return (n>0 ? '+' : '−')+Math.abs(n); }
+function discorsoTarghettaTono(tono, tema){
+  var e=discorsoEffTono(tono, tema), C=DISCORSI_COMUNI, P=[];
+  if(e.vuoto) return T(C.solenneBassa);
+  if(e.v && e.dv) P.push(discorsoValutaNome(e.v)+' '+discorsoNum(e.dv));
+  if(e.st && discorsoStampaChi()) P.push(T(C.valuta[discorsoStampaChi()])+' '+discorsoNum(e.st));
+  if(e.lon) P.push(T(C.divide));
+  return P.length ? P.join(' · ') : T(C.toneNulla);
+}
+/* «l'impegno» (D387, L4-L5): solo subito, nessuno stato che resta. L5: il credito +1 e il partner più freddo −1; L4: la coesione +1 e la stampa −1 */
+function discorsoImpegnoEff(){
+  if(S.livello===5){ var fr=null; ((S.diplo && S.diplo.bil) || []).forEach(function(p){ if(p && typeof p.v==='number' && (fr==null || p.v<fr.v)) fr=p; });
+    return { v:{k:'credito'}, dv:1, cv:fr ? {k:'part', id:fr.id} : null, cn:fr ? -1 : 0 }; }
+  return { v:{k:'coesione'}, dv:1, cv:null, cn:0, st:-1 };
+}
+function discorsoTarghettaImpegno(){
+  var e=discorsoImpegnoEff(), P=[discorsoValutaNome(e.v)+' '+discorsoNum(e.dv)];
+  if(e.cv && e.cn) P.push(discorsoValutaNome(e.cv)+' '+discorsoNum(e.cn));
+  if(e.st && discorsoStampaChi()) P.push(T(DISCORSI_COMUNI.valuta[discorsoStampaChi()])+' '+discorsoNum(e.st));
+  return P.join(' · ');
+}
+/* la promessa che si può fare sul tema (D387 e L274-3 Passo 0): {t, blocco, perche}. All'opposizione (L3-opp, L2-opp) e al L0 solo
+   «nessuna», con la riga che dice perché; L4-L5 l'impegno; altrove la piccola e la grande sul gruppo del tema, al più una del
+   discorso aperta e mai sullo stesso gruppo di un'altra aperta */
+function discorsoPromesseOfferte(tema, def){
+  if(discorsoImpegno(def || discorsoTipo())) return { t:['i'], blocco:null, perche:null };
+  if(S.opposizione && DISCORSI_ROSSO!=='opp') return { t:[], blocco:null, perche:'opp' };   // L274-3 Passo 0 (⚠ 1 e ⚠ 2 di «⚑ L274-2»): all'opposizione il discorso non promette
+  if(S.livello===0) return { t:[], blocco:null, perche:'mov' };
+  if(!tema || tema.k!=='grp') return { t:[], blocco:null, perche:null };
   var P=S.promesseCampagna||[];
   var aperta=P.find(function(p){ return p && p.perDiscorso; }), stesso=(S.promessa && S.promessa.grp===tema.g) || P.some(function(p){ return p && p.grp===tema.g; });
-  if(aperta || stesso) return { t:[], blocco:aperta ? aperta.grp : tema.g };
-  return { t:S.opposizione ? ['g'] : ['p','g'], blocco:null };   // ⚠ 2: all'opposizione la piccola non si offre
+  if(aperta || stesso) return { t:[], blocco:aperta ? aperta.grp : tema.g, perche:null };
+  return { t:['p','g'], blocco:null, perche:null };
 }
-/* le scelte del passo (0 tema · 1 tono · 2 promessa), con la targhetta prima della scelta (D190) */
+/* le scelte del passo (0 tema · 1 tono · 2 promessa o impegno), con la targhetta calcolata dallo stato prima della scelta (D190) */
 function discorsoScelte(def, it){
-  var P=it.passi||[], tx=def.testi||{};
-  if(P.length===0) return it.dis.temi.map(function(m){ return { l:discorsoTemaNome(m), e:T(tx.temaE||'Il tema del discorso') }; });
-  var tema=it.dis.temi[P[0]], gn=discorsoTemaNome(tema), alta=discorsoCaricaAlta();
-  if(P.length===1) return DIS_TONI.map(function(k){ var e=tx.toniE[k]; if(k==='solenne' && !alta) e=tx.toniE.solenneBassa; return { l:T(tx.toni[k]), e:T(e).replace('%G', gn) }; });
-  var O=discorsoPromesseOfferte(tema), ch=[{ l:T(tx.prom.n), e:T(tx.promE.n), pr:null }];
-  O.t.forEach(function(k){ ch.push({ l:T(tx.prom[k]), e:T(tx.promE[k]).replace('%G', gn), pr:k }); });
-  if(O.blocco && tema.k==='grp') ch[0].e=T('Hai già una promessa aperta con %G').replace('%G', nomeGruppo(O.blocco));
+  var P=it.passi||[], C=DISCORSI_COMUNI;
+  if(P.length===0) return it.dis.temi.map(function(m){ return { l:discorsoTemaNome(m), e:T(C.temaE) }; });
+  var tema=it.dis.temi[P[0]], gn=discorsoTemaNome(tema);
+  if(P.length===1) return DIS_TONI.map(function(k){ return { l:T(C.toni[k]), e:discorsoTarghettaTono(k, tema) }; });
+  var O=discorsoPromesseOfferte(tema, def);
+  if(O.t[0]==='i') return [{ l:T(C.imp.n), e:T(C.imp.nE), pr:null }, { l:T(C.imp.i), e:discorsoTarghettaImpegno(), pr:'i' }];
+  var ch=[{ l:T(C.prom.n), e:T(C.promE.n), pr:null }];
+  O.t.forEach(function(k){ ch.push({ l:T(C.prom[k]), e:T(C.promE[k]).replace('%G', gn), pr:k }); });
+  if(O.perche) ch[0].e=T(C.perche[O.perche]);
+  else if(O.blocco && tema.k==='grp') ch[0].e=T('Hai già una promessa aperta con %G').replace('%G', nomeGruppo(O.blocco));
   return ch;
 }
 const DIS_TONI=['misurato','acceso','solenne'];
+/* ⚑ L274-3 · IL LUOGO (D384): la chiave del titolo e dell'apertura, dal tipo, dal paese, dal sistema e dalla carta d'origine.
+   Negli USA il ministro davanti alla commissione e il capo dallo studio; nei sistemi presidenziali e semipresidenziali il capo
+   alla nazione; nel Regno Unito ai Comuni; nelle monarchie l'aula (mai il sovrano). */
+function discorsoLuogo(def, orig){
+  var usa=S.paese==='usa', uk=S.paese==='regnounito', sis=PAESE && PAESE.sistema;
+  switch(def.id){
+    case 'piazza': return orig==='ev_aula' ? 'quartiere' : 'piazza';
+    case 'consiglio': return (S.locale && S.locale.tipo==='regione') ? 'regione' : 'comune';
+    case 'legge': return usa ? 'commissione' : (uk ? 'comuni' : 'aula');
+    case 'capo': if(usa) return 'studio'; if(sis==='presidenziale' || sis==='semipresidenziale') return 'nazione'; return uk ? 'comuni' : 'aula';
+    case 'replica':
+      if(orig==='opp_comizio_piazza' || orig==='opp_giro_province') return uk ? 'conferenza' : 'piazza';
+      if(orig==='opp_tribuna_politica') return 'studio';
+      return uk ? 'comuni' : (usa ? 'risposta' : 'aula');
+    case 'assemblea': return 'assemblea';
+    case 'conferenza': return orig==='dp_assemblea' ? 'assemblea' : 'conferenza';
+  }
+  return Object.keys(def.text||{})[0];
+}
+/* il mezzo (D392): la voce «Stampa» dell'agenda per epoca — radio prima di AGENDA_TV_DAL, la televisione dopo, la rete dal 2005 e nel presente */
+function discorsoMezzo(){ var n=agendaStampaNome(); return n==='Stampa e radio' ? 'radio' : (n==='Stampa e TV' ? 'tv' : 'rete'); }
+/* la resa del titolo e del testo (alla resa, non alla nascita: la lingua cambia) */
+function discorsoTitolo(it){ var def=discorsoDef(it && it.dis && it.dis.tipo); if(!def) return ''; var tt=def.titolo; return T(typeof tt==='string' ? tt : (tt[it.dis.luogo] || tt[Object.keys(tt)[0]])); }
+function discorsoTesto(it){
+  var def=discorsoDef(it && it.dis && it.dis.tipo); if(!def) return '';
+  var C=DISCORSI_COMUNI, L=it.dis.luogo, x=entiSub(T(def.text[L] || def.text[Object.keys(def.text)[0]]));
+  if(def.terr && typeof it.dis.terr==='number' && PAESE.territori && PAESE.territori[it.dis.terr]) x=arcoTerrSub(T(C.terrRiga), PAESE.territori[it.dis.terr])+' '+x;
+  if(def.mezzo && L!=='piazza' && L!=='conferenza') x+=' '+T(C.mezzo[discorsoMezzo()]);
+  return x;
+}
+function discorsoSala(it){ var def=discorsoDef(it && it.dis && it.dis.tipo); return (def && def.sala && def.sala[it.dis.luogo]) || 'aula'; }
+function discorsoDomanda(it){ var C=DISCORSI_COMUNI.domande, n=(it.passi||[]).length, def=discorsoDef(it.dis && it.dis.tipo); return T(n===0 ? C.tema : (n===1 ? C.tono : (discorsoImpegno(def) ? C.imp : C.prom))); }
+function discorsoKick(it){ var def=discorsoDef(it.dis && it.dis.tipo); return T(DISCORSI_COMUNI.kickPassi[discorsoImpegno(def) ? 'imp' : 'prom']); }
 /* l'item {kind:'discorso'}: data.ch = le scelte del passo; data.id = 'dis_<tipo>' (la chiave dell'agenda: un discorso al mese) */
 function discorsoItem(def, orig){
   if(!def) return null;
-  var it={ kind:'discorso', dis:{ tipo:def.id, orig:orig||null, temi:discorsoTemi() }, passi:[],
-           data:{ id:'dis_'+def.id, kick:def.kick, t:def.titolo, text:def.text, ch:[], dovuta:true, discorso:true }, resolved:false };
+  var it={ kind:'discorso', dis:{ tipo:def.id, orig:orig||null, temi:discorsoTemi(), luogo:discorsoLuogo(def, orig), terr:def.terr ? discorsoTerrIdx() : null }, passi:[],
+           data:{ id:'dis_'+def.id, kick:def.kick, t:'', text:'', ch:[], dovuta:true, discorso:true }, resolved:false };
+  it.data.t=discorsoTitolo(it); it.data.text=discorsoTesto(it);
   it.data.ch=discorsoScelte(def, it);
   return it;
 }
@@ -11025,14 +11185,6 @@ function discorsoRossoC4(){
   if((S.agenda||[]).some(function(x){ return x && x.kind==='discorso'; })) return;
   var it=discorsoItem(discorsoTipo(), 'rosso'); if(it) S.agenda.push(it);
 }
-/* la valuta del tema: il gruppo (gd), con il tetto per discorso già applicato da chi chiama */
-function discorsoStampa(n){
-  if(!n) return;
-  if(S.livello===3 && !S.opposizione) stampad(n);
-  else if(S.livello===3 || S.livello===2) visd(n);
-  else if(S.livello===0) attA(n<0 ? -1 : 1);
-  else stampad(n);
-}
 /* D386 · Tr: le promesse tradite alle spalle (ultimi 60 mesi) più le aperte con colpi ≥ 3, al più 2 */
 function discorsoTradite(){
   var n=0, a=S.year;
@@ -11051,22 +11203,35 @@ function discorsoPlatea(){
   }
   return null;
 }
-/* D386 · A: chi parla, con la valuta della carriera */
+/* D386 · A: chi parla, con la valuta della carriera. ⚑ L274-4 (⚠ 1 di «⚑ L274-3»): A si centra sulla MEDIANA della valuta della
+   fetta (DISCORSI_K.centro, misurata una volta sul lato spento da .claude/sonda-l274-4.js), non su 50; una regola sola per i sette tipi.
+   discorsoAFetta() = {k, v}: la chiave del centro (null quando il campo manca: allora v 50 e A 0, come prima). Lo legge SOLO la reazione. */
+function discorsoAFetta(){
+  if(S.livello===0) return S.attivista && S.attivista.autorev!=null ? { k:'L0', v:S.attivista.autorev } : { k:null, v:50 };
+  if(S.livello===1) return S.locale && S.locale.consenso!=null ? { k:'L1', v:S.locale.consenso } : { k:null, v:50 };
+  if(S.livello===2 && !S.opposizione) return (S.premier && S.premier.lealta!=null) ? { k:'L2', v:S.premier.lealta } : { k:null, v:50 };
+  if(S.livello===3 && !S.opposizione) return (S.ind && S.ind.consenso!=null) ? { k:'L3', v:S.ind.consenso } : { k:null, v:50 };
+  if(S.livello===2 || S.livello===3) return S.credibilita!=null ? { k:'opp', v:S.credibilita } : { k:null, v:50 };
+  if(S.livello===4) return (S.intl && S.intl.coesione!=null) ? { k:'L4', v:S.intl.coesione } : { k:null, v:50 };
+  if(S.livello===5) return (S.diplo && S.diplo.credito!=null) ? { k:'L5', v:S.diplo.credito } : { k:null, v:50 };
+  return { k:null, v:50 };
+}
+function discorsoCentro(k){ var c=DISCORSI_K.centro; return (DISCORSI_ROSSO!=='centro' && k && c && c[k]!=null) ? c[k] : 50; }   // 'centro' = la rossa della prova: tutto a 50
 function discorsoAutorevolezza(){
-  var v=50;
-  if(S.livello===0 && S.attivista) v=S.attivista.autorev;
-  else if(S.livello===1 && S.locale) v=S.locale.consenso;
-  else if(S.livello===2 && !S.opposizione) v=(S.premier && S.premier.lealta!=null) ? S.premier.lealta : 50;
-  else if(S.livello===3 && !S.opposizione) v=S.ind ? S.ind.consenso : 50;
-  else if(S.livello===2 || S.livello===3) v=S.credibilita;
-  else if(S.livello===4) v=(S.intl && S.intl.coesione!=null) ? S.intl.coesione : 50;
-  else if(S.livello===5) v=(S.diplo && S.diplo.credito!=null) ? S.diplo.credito : 50;
-  return clamp(Math.round(((v==null?50:v)-50)/20), -2, 2);
+  var x=discorsoAFetta();
+  return clamp(Math.round((x.v-discorsoCentro(x.k))/20), -2, 2);
+}
+/* D386 · G: il pubblico sul tema — il gruppo, o al L5 il partner del tema (v); temi senza valore 0 */
+function discorsoPubblico(tema){
+  if(!tema) return 0;
+  if(tema.k==='grp' && S.groups) return clamp(Math.round(((S.groups[tema.g]||50)-50)/10), -3, 3);
+  if(tema.k==='part'){ var p=((S.diplo && S.diplo.bil) || []).find(function(x){ return x && x.id===tema.id; }); return p ? clamp(Math.round(((p.v||50)-50)/10), -3, 3) : 0; }
+  return 0;
 }
 /* D386 · la reazione scritta per intero: {R, esito, pl} */
 function discorsoReazione(tema, tono, taglia){
   var Tt=tono==='acceso' ? 1 : (tono==='solenne' ? (discorsoCaricaAlta() ? 1 : -1) : 0);
-  var G=(tema && tema.k==='grp' && S.groups) ? clamp(Math.round(((S.groups[tema.g]||50)-50)/10), -3, 3) : 0;
+  var G=discorsoPubblico(tema);
   var A=discorsoAutorevolezza(), Tr=discorsoTradite();
   var P=taglia==='g' ? (Tr===0 ? 1 : -1) : 0;
   var pl=discorsoPlatea(), Pl=pl ? pl.v : 0;
@@ -11075,13 +11240,14 @@ function discorsoReazione(tema, tono, taglia){
   if(tono==='acceso') R=R*1.5;   // l'acceso amplifica (lontano da zero)
   return { R:R, esito:R>=2 ? 'a' : (R<=-1 ? 'x' : 'f'), pl:pl, parti:{T:Tt, G:G, A:A, Tr:Tr, P:P, Pl:Pl, d:d} };
 }
-/* la promessa del discorso (D387), via campPromessa: i campi perDiscorso, scad, taglia */
+/* la promessa del discorso (D387): la voce di campPromessa (stessa forma), con perDiscorso, scad, taglia; senza il suono di
+   campPromessa (D392: due effetti per gesto — il tocco e la reazione); la grande dice `voce-promessa` se nessuna voce parla.
+   L274-3: il ramo «scad:null della grande all'opposizione» è tolto — all'opposizione il discorso non promette più (Passo 0). */
 function discorsoPromessa(grp, taglia, tipo){
-  if(typeof campPromessa!=='function') return null;
-  campPromessa(grp);
-  var q=S.promesseCampagna[S.promesseCampagna.length-1]; if(!q) return null;
-  q.perDiscorso=tipo; q.taglia=taglia;
-  q.scad=(S.opposizione && taglia==='g') ? null : meseAss()+(taglia==='p' ? DISCORSI_K.scadP : DISCORSI_K.scadG);   // ⚠ 2: all'opposizione la grande la giudica solo la resa della campagna
+  S.promesseCampagna=S.promesseCampagna||[];
+  var q={ grp:grp, mese:meseAss(), colpi:0, perDiscorso:tipo, taglia:taglia, scad:meseAss()+(taglia==='p' ? DISCORSI_K.scadP : DISCORSI_K.scadG) };
+  S.promesseCampagna.push(q);
+  if(taglia==='g' && typeof parla==='function' && !(typeof voceInCorso==='function' && voceInCorso()) && !(typeof musicaTragedia==='function' && musicaTragedia())) parla('voce-promessa');
   return q;
 }
 const DIS_ESITO_TXT={ a:'Applausi.', f:'Freddezza.', x:'Fischi.' };
@@ -11089,37 +11255,41 @@ const DIS_ESITO_TXT={ a:'Applausi.', f:'Freddezza.', x:'Fischi.' };
 function discorsoRisolvi(it, ci){
   var V=it.dis||{}, def=discorsoDef(V.tipo);
   if(!def){ it.resolved=true; it.outcome=''; return; }
-  var ch=(it.data.ch||[])[ci]; if(!ch) return;
   it.passi=it.passi||[];
-  if(it.passi.length<2){ it.passi.push(ci); it.data.ch=discorsoScelte(def, it); return; }   // passi 1 e 2: lo stesso item, non risolto
-  var tema=V.temi[it.passi[0]], tono=DIS_TONI[it.passi[1]], taglia=ch.pr||null, ora=meseAss();
+  it.data.ch=discorsoScelte(def, it);   // L274-3: le scelte rifatte dallo stato di adesso (le stesse che la carta mostra: targhetta = effetto)
+  var ch=it.data.ch[ci]; if(!ch) return;
+  if(it.passi.length<2){ it.passi.push(ci); it.data.ch=discorsoScelte(def, it);   // passi 1 e 2: lo stesso item, non risolto
+    if(it.passi.length===1 && typeof suona==='function') suona('discorso-microfono');   // D392: dal tema al tono, il microfono (il secondo suono del gesto, dopo il tocco)
+    return; }
+  var tema=V.temi[it.passi[0]], tono=DIS_TONI[it.passi[1]], taglia=(ch.pr==='p' || ch.pr==='g') ? ch.pr : null, imp=ch.pr==='i', ora=meseAss();
   if((S.vicenda && S.vicenda.a) || (S.negoziato && S.negoziato.a && S.negoziato.a.da===ora) || (S.discorso && S.discorso.ult===ora) || discorsoTipo()!==def){ it.resolved=true; it.outcome=T('Il discorso è rinviato.'); return; }   // nato nello stesso mese: mai insieme; un altro già fatto nel mese; la carriera ha cambiato fetta nel mese (il tipo non è più il suo)
   var reaz=discorsoReazione(tema, tono, taglia);
   if(!DISCORSI_PLACEBO){
-    var alta=discorsoCaricaAlta(), dg=0, st=0, grp=(tema && tema.k==='grp') ? tema.g : null;
-    if(tono==='misurato') dg+=1;
-    else if(tono==='acceso'){ dg+=3; st-=2;
-      if(grp){ var lon=null; Object.keys(S.groups||{}).forEach(function(g){ if(g!==grp && (lon==null || S.groups[g]<S.groups[lon])) lon=g; }); if(lon) gd(lon, -1); } }
-    else if(alta){ dg+=1; st+=2; }
+    var E=discorsoEffTono(tono, tema), dg=E.dv, st=E.st;
+    if(E.lon) gd(E.lon, -1);
     if(taglia==='p') dg+=2; else if(taglia==='g') dg+=4;
     if(reaz.esito==='a') dg+=1; else if(reaz.esito==='x'){ dg-=2; st-=1; }
-    if(grp && dg){ dg=clamp(dg, DISCORSI_K.pavimento, DISCORSI_K.tetto); gd(grp, dg); }   // il tetto per discorso sul gruppo del tema
+    if(E.v && dg){ dg=clamp(dg, DISCORSI_K.pavimento, DISCORSI_K.tetto); discorsoValutaMuovi(E.v, dg); }   // il tetto per discorso sulla valuta del tema
     discorsoStampa(st);
-    if(reaz.esito==='a'){ if(S.livello===2 || S.livello===3) agCorrenti(1); if(S.livello===0) attB(1); }
-    if(grp && taglia) discorsoPromessa(grp, taglia, def.id);
-    if(reaz.pl && typeof RIC_FATTI!=='undefined' && reaz.esito!=='f'){ var fk=reaz.esito==='a' ? 'dis_si' : 'dis_no'; if(RIC_FATTI[fk]!=null) ricFatto(reaz.pl.ruolo, fk); }   // D389 (iii): predisposto, le chiavi sono della riga 31
+    if(imp){ var I=discorsoImpegnoEff(); discorsoValutaMuovi(I.v, I.dv); if(I.cv) discorsoValutaMuovi(I.cv, I.cn); if(I.st) discorsoStampa(I.st); }
+    if(reaz.esito==='a' && (S.livello===2 || S.livello===3)) agCorrenti(1);
+    if(taglia && tema && tema.k==='grp') discorsoPromessa(tema.g, taglia, def.id);
+    if(reaz.pl && typeof RIC_FATTI!=='undefined' && reaz.esito!=='f'){ var fk=reaz.esito==='a' ? 'dis_si' : 'dis_no'; if(RIC_FATTI[fk]!=null) ricFatto(reaz.pl.ruolo, fk); }   // D389 (iii): un fatto sulla persona in platea
+    if(reaz.esito!=='f') bioFatto(DISCORSI_COMUNI.bio[reaz.esito]);
   }
   var D=S.discorso || (S.discorso={ ult:null, n:0, e:null });
   D.ult=ora; D.n=(D.n||0)+1; D.e=reaz.esito;
   it.disEsito=reaz.esito; it.disR=reaz.R;
-  var lab=T(DIS_TONI_TXT[tono])+(taglia ? ' · '+T(taglia==='p' ? 'un impegno preciso' : 'la tua parola') : '');
-  var rx=T((def.reazioni||{})[reaz.esito] || DIS_ESITO_TXT[reaz.esito]);
-  S.log.unshift({ t:T(def.titolo), x:T('Tema:')+' '+discorsoTemaNome(tema)+' · '+lab+'. '+rx });
+  var lab=T(DIS_TONI_TXT[tono])+(taglia ? ' · '+T(taglia==='p' ? 'un impegno preciso' : 'la tua parola') : (imp ? ' · '+T('l\'impegno') : ''));
+  var rx=T(DISCORSI_COMUNI.reazioni[discorsoSala(it)][reaz.esito] || DIS_ESITO_TXT[reaz.esito]);
+  S.log.unshift({ t:discorsoTitolo(it), x:T('Tema:')+' '+discorsoTemaNome(tema)+' · '+lab+'. '+rx });
   S.ind.consenso=computeConsenso();
   it.outcome='<b>'+lab+'</b>. '+rx;
   it.resolved=true;
 }
-const DIS_TONI_TXT={ misurato:'Misurato', acceso:'Acceso', solenne:'Solenne' };
+/* D389 (iv) · il titolo del mese dopo il discorso (ti_dis_*): l'esito di S.discorso.e, il mese dopo; spenta mai */
+function disTitoloOra(e){ return DISCORSI && typeof S!=='undefined' && !!S && !!S.discorso && S.discorso.ult===meseAss()-1 && S.discorso.e===e; }
+const DIS_TONI_TXT={ misurato:'Tono misurato', acceso:'Tono acceso', solenne:'Tono solenne' };   // L274-3: «Acceso» da solo era già una chiave (l'interruttore: «On»)
 /* D387 · la scadenza (corpoMese, dopo avanzaMese, a ogni livello): la piccola coi numeri dell'intervista, la grande con resaPromessa */
 function discorsoPromesseMese(){
   if(!S || !Array.isArray(S.promesseCampagna) || !S.promesseCampagna.length) return;
@@ -11385,7 +11555,7 @@ function genAgendaRamo(first){
     if(!inq && !inqA){
       var sf5=(typeof pescaSfida==='function')?pescaSfida(['intl'],'vertice'):null;   // D1b: la sfida al vertice (gated)
       if(sf5){ S.agenda.push({kind:'event', data:sf5, resolved:false}); }
-      else { const dp=negoziatoAlPosto(negoziatoTrasforma(discorsoTrasforma(pickDiplo())));   /* L274-2: predisposto (nessun tipo al L5) */ if(dp){ S.agenda.push(dp); } else { const dd=negoziatoAlPosto(negoziatoTrasforma(pickDiploDoss())); if(dd) S.agenda.push(dd); } }   /* L273-2: trasformazione e posto predisposti (spenta: l'item com'è) */   // D4: il fascicolo di scrivania colma il mese-vuoto (seconda superficie)
+      else { const dp=negoziatoAlPosto(negoziatoTrasforma(discorsoTrasforma(pickDiplo())));   /* L274-2 · L274-3: «la conferenza» nasce da dp_conferenza e dp_assemblea (spenta: l'item com'è) */ if(dp){ S.agenda.push(dp); } else { const dd=negoziatoAlPosto(negoziatoTrasforma(pickDiploDoss())); if(dd) S.agenda.push(dd); } }   /* L273-2: trasformazione e posto predisposti (spenta: l'item com'è) */   // D4: il fascicolo di scrivania colma il mese-vuoto (seconda superficie)
       if(S.agenda.length<2){ const pe=pickPersonale(); if(pe) S.agenda.push(pe); }
     }
     return;

@@ -3079,6 +3079,7 @@ function renderAttivista(){
     /* la CARTA-MOSSA del mese (Build A, L2): scena (RUOTA per tema, anti-wallpaper) + le 3 scelte. resolveItem le applica
        (muove le valute), agendaPending fa da gate → una mossa per turno. */
     (S.agenda||[]).forEach(function(it,idx){ if(it.kind==='vicenda'){ h+=vicendaCartaHtml(it, idx); return; }   // L272-3: la vicenda in piazza
+      if(it.kind==='discorso'){ h+=discorsoCartaHtml(it, idx); return; }   // L274-3: il discorso dell'attivista (la piazza)
       if(it.kind!=='attivista'||!it.data) return; const d=it.data;
       h+=`<div class="ag major ${it.resolved?'done':''}">${agScene(it)}<div class="ah"><div class="kick">${T(d.kick)}</div><h3>${T(d.t)}</h3></div>${it.ric?ricRigaHtml(it.ric):''}<div class="atext">${T(d.text)}</div>`;
       if(!it.resolved){ h+=`<div class="opts">`+d.ch.map(function(c,ci){ return `<button class="opt" onclick="resolveItem(${idx},${ci})"><span class="ol">${T(c.l)}</span><span class="oe">${T(c.e)}</span></button>`; }).join('')+`</div>`; }
@@ -3144,7 +3145,7 @@ function renderAttorno(){
   var el=document.getElementById('sec-attorno'); if(el) el.innerHTML=h;
 }
 function renderGov(){
-  if(S.livello===0){ document.getElementById('sec-gov').innerHTML=vicendaCassettoHtml()+agendaCassettoHtml()+renderAttivista()+ricPersoneHtml(); return; }   // L272-3: la riga della vicenda in testa (vuota se spenta)   // L270-3: l'agenda del mese in testa (vuota se spenta)   // ATTIVISTA (Build A): scheda focalizzata sulla militanza
+  if(S.livello===0){ document.getElementById('sec-gov').innerHTML=vicendaCassettoHtml()+discorsoCassettoHtml()+agendaCassettoHtml()+renderAttivista()+ricPersoneHtml(); return; }   // L272-3: la riga della vicenda in testa (vuota se spenta)   // L270-3: l'agenda del mese in testa (vuota se spenta)   // ATTIVISTA (Build A): scheda focalizzata sulla militanza
   if(!S.opposizione && S.ministeroAperto==='__locale__'){ document.getElementById('sec-gov').innerHTML=renderLocalePage(); return; }   // drill-down: cruscotto locale (livello 1)
   if(!S.opposizione && S.ministeroAperto){ document.getElementById('sec-gov').innerHTML=renderMinisteroPage(S.ministeroAperto); return; }   // drill-down: pagina del ministero
   let h='', ruolo='';   // L144-1: il blocco del ruolo (opposizione, livello 1, livello 2) si scrive a parte e si mette dopo
@@ -3223,7 +3224,7 @@ function renderGov(){
   else h+=stampa+vitaPersonaleCard();
   // agenda
   if(S.livello===4 || S.livello===5) h+=ricPersoneHtml();   // L271-3: la riga «Le persone» (vuota spenta)
-  h+=vicendaCassettoHtml()+negoziatoCassettoHtml();   // L273-3: la trattativa aperta, stessa regola · L272-3: la vicenda aperta, dove il tavolo non c'è (vuota se spenta)
+  h+=vicendaCassettoHtml()+negoziatoCassettoHtml()+discorsoCassettoHtml();   // L274-3: la riga del discorso (vuota se spenta) · L273-3: la trattativa aperta, stessa regola · L272-3: la vicenda aperta, dove il tavolo non c'è (vuota se spenta)
   h+=agendaCassettoHtml();   // L270-3: l'agenda del mese, prima riga delle carte dove il tavolo non c'è (vuota se spenta o già decisa)
   h+=`<div class="contorno" style="font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--mut);margin:2px 2px 8px;">${T('Agenda di')} ${T(MONTHS[S.month-1])}</div>`;
   /* L95-1 — l'entrata non è più della SCATOLA. La classe stava qui, sulla firma dell'agenda, e scattava una
@@ -3274,7 +3275,7 @@ function renderGov(){
     } else if(it.kind==='negoziato'){
       h+=negoziatoCartaHtml(it, idx);   // L273-2 · L273-3: la carta del round (D380), per i tre tipi dal L273-4
     } else if(it.kind==='discorso'){
-      h+=discorsoCartaHtml(it, idx);   // L274-2: il discorso, tre passi nella stessa carta (testo minimo; la carta di D391 nella riga 31)
+      h+=discorsoCartaHtml(it, idx);   // L274-2 · L274-3: il discorso, tre passi nella stessa carta (la carta di D391)
     } else if(it.kind==='arco'){
       /* gli archi narrativi (lotto 4 + payoff fase A): carta maggiore. Il marker discreto = titolo dell'arco +
          capitolo (a.scelte.length+1), nella riga .kick esistente. Testi via arcoSub (%FILO/%RUOLO/%ECO/%FIGLIO). */
@@ -5127,22 +5128,40 @@ function negoziatoCartaHtml(it, idx){
   h+=`</div>`;
   return h;
 }
-/* L274-2 · la carta del discorso, minima (la carta di D391 è della riga 31): kicker «Discorso · tema → tono → promessa» con le tacche
-   dei passi fatti (le classi della vicenda, nessuna regola css nuova), le scelte fatte visibili sopra, poi la riga della reazione */
+/* L274-3 · la carta del discorso (D391): i tre passi uno alla volta nella stessa carta. Kicker «Discorso · tema → tono → promessa»
+   (al L4-L5 «impegno») con le tacche dei passi fatti (le classi della vicenda), il titolo e l'apertura del luogo (discorsoTitolo,
+   discorsoTesto: resi qui, nella lingua di adesso), «Tema:» / «Tono:» già scelti sopra (.neg-righe), la domanda del passo, i bottoni
+   con la targhetta prima della scelta (discorsoScelte, calcolata dallo stato a ogni resa: la stessa che decide l'effetto), poi la
+   riga della reazione e la riga-effetto. Nessuna regola css nuova, nessuna animazione nuova fra due render() (L95-1). */
 function discorsoCartaHtml(it, idx){
   let h='';
-  const d=it.data, P=it.passi||[], V=it.dis||{};
+  const P=it.passi||[], V=it.dis||{}, def=discorsoDef(V.tipo);
   const tacche=[0,1,2].map(k=>`<i class="${(it.resolved || k<P.length)?'on':''}"></i>`).join('');
   let fatte='';
   if(P.length>=1 && V.temi) fatte+=`<div>${T('Tema:')} ${discorsoTemaNome(V.temi[P[0]])}</div>`;
-  if(P.length>=2) fatte+=`<div>${T('Tono:')} ${T(DIS_TONI_TXT[DIS_TONI[P[1]]])}</div>`;
-  h+=`<div class="ag major vic-carta ${it.resolved?'done':''}">${agScene(it)}<div class="ah"><div class="kick vic-kick"><span>${T('Discorso · tema → tono → promessa')}</span><span class="vic-tacche" aria-hidden="true">${tacche}</span></div><h3>${T(d.t)}</h3></div>
-    ${fatte?'<div class="neg-righe">'+fatte+'</div>':''}<div class="atext">${T(d.text)}</div>`;
-  if(!it.resolved){ h+=`<div class="opts">`+d.ch.map((c,i)=>
+  if(P.length>=2) fatte+=`<div>${T(DIS_TONI_TXT[DIS_TONI[P[1]]])}</div>`;
+  h+=`<div class="ag major vic-carta ${it.resolved?'done':''}">${agScene(it)}<div class="ah"><div class="kick vic-kick"><span>${discorsoKick(it)}</span><span class="vic-tacche" aria-hidden="true">${tacche}</span></div><h3>${discorsoTitolo(it)}</h3></div>
+    ${fatte?'<div class="neg-righe">'+fatte+'</div>':''}<div class="atext">${discorsoTesto(it)}</div>`;
+  if(!it.resolved){
+    const ch=def ? discorsoScelte(def, it) : (it.data.ch||[]);
+    h+=`<div class="neg-righe"><div><b>${discorsoDomanda(it)}</b></div></div><div class="opts">`+ch.map((c,i)=>
     `<button class="opt" onclick="resolveItem(${idx},${i})"><span class="ol">${c.l}</span><span class="oe">${c.e}</span></button>`).join('')+`</div>`; }
   else h+=`<div class="outcome">${it.outcome||''}</div>${esitiHtml(it)}${tornaTavoloHtml(it)}`;
   h+=`</div>`;
   return h;
+}
+/* L274-3 · la riga del cassetto dove il tavolo non c'è (contorno, non toccabile; vuota se spenta): «Discorso · <esito>» nel mese del
+   discorso, e la promessa del discorso aperta, se c'è */
+function discorsoCassettoHtml(){
+  if(typeof DISCORSI==='undefined' || !DISCORSI || !S) return '';
+  if(typeof tavoloAttivo==='function' && tavoloAttivo()) return '';
+  const D=S.discorso, P=(S.promesseCampagna||[]).find(p=>p && p.perDiscorso);
+  const parti=[];
+  if(D && D.ult===meseAss() && D.e) parti.push(T({a:'Discorso · applausi', f:'Discorso · freddezza', x:'Discorso · fischi'}[D.e]));
+  if(P) parti.push(T('promessa aperta con %G').replace('%G', nomeGruppo(P.grp)));
+  if(!parti.length) return '';
+  if(parti.length===1 && P) parti[0]=T('Discorso · promessa aperta con %G').replace('%G', nomeGruppo(P.grp));
+  return `<div class="vic-riga contorno">${parti.join(' · ')}</div>`;
 }
 function vicendaRigaDati(){
   const a=(typeof vicendaAperta==='function') ? vicendaAperta() : null; if(!a) return null;
