@@ -7674,27 +7674,82 @@ const VICENDE_DEF=[
 ];
 /* ================================================================================================================
    ⚑ L273-2 · LE TRATTATIVE A PIÙ ROUND — la tabella (DESIGN-FORMATI.md «⚑ L273-1» D374-D375, «⚑ L273-2»). TRATTATIVE (game.js),
-   SPENTA. Un negoziato di prova: il PATTO DI GOVERNO. Testi PROVVISORI in italiano col ripiego (la resa inglese e i testi veri
-   sono della riga 28). Campi: id, fam (famiglia del cooldown: patto · estero · opp), lati ('gov' L3 al governo · 'estero' L4-L5 ·
+   ACCESA dal L273-4 (16/11). Tre tipi: il PATTO DI GOVERNO (L273-3), il NEGOZIATO ESTERO e il PATTO FRA OPPOSIZIONI (L273-4),
+   testi veri IT/EN (100 chiavi IT, «⚑ L273-4»). I due tipi del L273-4 portano anche controparte/valida/prezzo/chiudi (funzioni
+   in game.js), forza ed eff (righe proprie) e fatti (le chiavi di RIC_FATTI). Campi: id, fam (famiglia del cooldown: patto · estero · opp), lati ('gov' L3 al governo · 'estero' L4-L5 ·
    'opp' L3-opp), coalizione (solo nei paesi con PAESE.coalizione), era, nasce ('stato' = dalla coalizione nuova), orig (gli id
    delle carte d'origine che si trasformano nel round 1), ric (le richieste dalla più leggera, indice = ric−1: k, nome; fondi ha
-   il debito), mosse (cedi · rilancia · tieni), r1/rFerma/rScesa (il testo del round), stati (le tre righe d'arrivo).
+   il debito; dal L273-3 anche pieno/mezzo, la targhetta del prezzo), mosse (cedi · rilancia · tieni: le etichette; la riga
+   dell'effetto la calcola negoziatoTarghetta dallo stato), r1, r2/r3 {rilancio, tieni} (il testo del round secondo la mossa di
+   prima) e rScesa (la richiesta scesa), stati (le tre righe d'arrivo). %GR = il gruppo della promessa (L273-3).
    Segnaposto (negoziatoSub): %P la controparte (il nome dal roster), %R la richiesta, %C le concessioni, %F la forza a parole.
    Nessuna persona reale, nessun partito scritto a mano, partiti neutri: la richiesta dipende dalla base dell'alleato.
    ================================================================================================================ */
 const TRATTATIVE_DEF=[
   { id:'patto', fam:'patto', lati:['gov'], coalizione:true, era:'universale', nasce:'stato', orig:['alleato_ultimatum'],
     kick:'Trattativa', titolo:'Il conto di %P',
-    ric:[ { k:'fondi', nome:'fondi per i loro elettori', debito:0.5 },
-          { k:'legge', nome:'una legge per la loro base' },
-          { k:'ministero', nome:'un ministero di peso' } ],
-    r1:'%P siede al tavolo con una richiesta: %R. Senza di loro i numeri non tengono, e lo sanno.',
-    rFerma:'%P torna con la stessa richiesta: %R. Hai già concesso: %C.',
-    rScesa:'%P abbassa il tiro: adesso chiede %R. Hai già concesso: %C.',
-    mosse:[ { l:'Cedi: %R', e:'Accordo pieno, al prezzo della richiesta' },
-            { l:'Rilanci con un\'offerta minore', e:'Metà prezzo, se reggono i numeri: %F' },
-            { l:'Tieni il punto', e:'Pazienza −1 · la richiesta può scendere' } ],
-    stati:{ pieno:'Accordo pieno con %P.', compromesso:'Un compromesso con %P.', rottura:'La trattativa con %P si è rotta.' } },
+    ric:[ { k:'fondi', nome:'fondi per i loro elettori', debito:0.5, pieno:'Il debito sale', mezzo:'Il debito sale della metà' },
+          { k:'legge', nome:'una legge per la loro base', pieno:'Una promessa da mantenere: %GR', mezzo:'Una promessa da mantenere: %GR' },
+          { k:'ministero', nome:'un ministero di peso', pieno:'Un tuo ministro ne esce indebolito · malumori nel partito', mezzo:'Un tuo ministro ne esce un po\' indebolito' } ],
+    r1:'Il governo è appena nato e %P presenta il conto. Il loro segretario lo dice senza giri di parole: i voti che portano hanno un prezzo, e lo vogliono vedere scritto.',
+    r2:{ rilancio:'%P ha letto la tua offerta e la rimanda indietro: troppo poco, dicono, per i voti che portano. La delegazione resta seduta, ma guarda l\'orologio.',
+         tieni:'%P non ha gradito il tuo «no». In aula i loro parlamentari si fanno attendere, e nei corridoi si comincia a parlare di verifica.' },
+    r3:{ rilancio:'Ultimo tavolo. %P è disposto a chiudere, ma non a qualunque prezzo: dopo stasera, dicono, ognuno farà i suoi conti.',
+         tieni:'Ultimo tavolo. Due «no» di fila hanno lasciato il segno: %P si presenta con la stessa richiesta e la porta socchiusa.' },
+    rScesa:'%P ha capito che i numeri sono dalla tua parte e abbassa il tiro: la richiesta è più piccola, il tono più cortese.',
+    mosse:[ { l:'Cedi: %R' }, { l:'Rilanci con un\'offerta minore' }, { l:'Tieni il punto' } ],
+    stati:{ pieno:'Accordo pieno con %P: la coalizione riparte su basi più solide.',
+            compromesso:'Un compromesso con %P: nessuno ha vinto, ma il governo regge.',
+            rottura:'La trattativa con %P si è rotta: restano al governo, ma da oggi contano i giorni.' } },
+  /* L273-4 · IL NEGOZIATO ESTERO (D374-D377, lati L4-L5). La controparte (negoziatoControparteEstero, game.js): la potenza
+     dell'item (`it.data.potId`, scritto da diploCarta solo sulle carte col volto del rivale) se c'è e non è quella della crisi
+     in corso; altrimenti la controparte generica 'deleg' = «l'altra delegazione». Oggi nessuna delle cinque carte d'origine
+     ha il volto del rivale: tutte e cinque nascono con 'deleg'. Prezzi ≤ ±2 (credito o autorevolezza, alleati, debito), stato
+     d'arrivo di D375 (il partner +6/+3/−8 se è un partner di S.diplo.bil, credito +2/+1; la rottura con la delegazione
+     raffredda il consesso −2). Nessuna parola d'epoca: niente sigle, vertici, trattati, organizzazioni col nome. */
+  { id:'estero', fam:'estero', lati:['estero'], era:'universale', orig:['dp_negoziato','dp_notte','dp_mari','dd_commercio','dd_organismo'],
+    controparte:function(it){ return negoziatoControparteEstero(it); }, valida:function(a){ return negoziatoValidaEstero(a); },
+    prezzo:function(a, k, R){ negoziatoPrezzoEstero(a, k, R); }, chiudi:function(stato, a, daSe){ negoziatoChiudiEstero(stato, a, daSe); },
+    kick:'Trattativa', titolo:'Il tavolo con %P',
+    ric:[ { k:'accesso', nome:'un accesso per le loro navi e le loro merci', pieno:'Gli alleati storcono il naso', mezzo:'Gli alleati storcono un po\' il naso' },
+          { k:'testo', nome:'il loro testo, parola per parola', pieno:'La tua linea cede: il tuo credito scende', mezzo:'La tua linea cede a metà' },
+          { k:'quota', nome:'una quota più alta da pagare', debito:0.4, pieno:'Il bilancio paga', mezzo:'Il bilancio paga la metà' } ],
+    r1:'Il negoziato è arrivato al nodo che nessuno voleva toccare. Di fronte a te siede %P: prima di firmare vogliono vedere una concessione, e la vogliono scritta.',
+    r2:{ rilancio:'La tua controproposta è tornata indietro con le correzioni a margine: per %P non basta. Il capodelegazione resta seduto, ma chiede tempo per sentire la sua capitale.',
+         tieni:'Il tuo «no» ha raffreddato la sala. La seduta riprende dopo una lunga pausa, e la richiesta di %P è la stessa, il tono più asciutto.' },
+    r3:{ rilancio:'Ultima sessione: con %P si chiude stanotte o non si chiude più. Il tuo ultimo rilancio è sul tavolo, e la sala aspetta.',
+         tieni:'Ultima sessione. Due rifiuti di fila hanno lasciato il segno: la richiesta di %P non cambia, il tempo per discuterla sì.' },
+    rScesa:'Le altre delegazioni stanno con te, e al tavolo se ne sono accorti: la richiesta di %P si fa più piccola, e chiede soltanto di salvare la faccia.',
+    forza:{ '1':'la sala sta con te', '0':'la sala è divisa', '-1':'la sala sta con loro' },
+    eff:{ accordo:'accordo pieno, il testo si firma' },
+    mosse:[ { l:'Cedi: %R' }, { l:'Rilanci con un\'offerta minore' }, { l:'Tieni il punto' } ],
+    stati:{ pieno:'Accordo pieno con %P: il testo si firma, e il tuo nome resta in fondo alla pagina.',
+            compromesso:'Un compromesso con %P: un testo più corto, ma firmato da tutti.',
+            rottura:'Con %P il tavolo si è rotto: le delegazioni ripartono senza una firma.' } },
+  /* L273-4 · IL PATTO FRA OPPOSIZIONI (D374, D377, lato L3-opp, solo nei paesi a coalizione). La controparte
+     (negoziatoControparteOpp, game.js): il partito più grande fra i compatibili col tuo (compatibiliMiei), fuori dal governo
+     (S.coalizione all'opposizione = il governo degli altri), diverso dal tuo; a parità l'ordine del roster; nessuno = la carta
+     resta com'è. Niente tenuta (non c'è un governo): prezzi ≤ ±2 (credibilità, visibilità, correnti), stato d'arrivo di D375
+     (intesa +10/+5/−15, credibilità +2/+1/−2). Partiti neutri: la richiesta non dipende dall'area politica. */
+  { id:'opp', fam:'opp', lati:['opp'], coalizione:true, era:'universale', orig:['opp_patto_partito_minore'], fatti:['oppatto_si','oppatto_no'],
+    controparte:function(it){ return negoziatoControparteOpp(it); }, valida:function(a){ return negoziatoValidaOpp(a); },
+    prezzo:function(a, k, R){ negoziatoPrezzoOpp(a, k, R); }, chiudi:function(stato, a, daSe){ negoziatoChiudiOpp(stato, a, daSe); },
+    kick:'Trattativa', titolo:'Il patto con %P',
+    ric:[ { k:'programma', nome:'un punto del loro programma nel tuo', pieno:'Il tuo programma si sposta: credibilità −2', mezzo:'Il tuo programma si sposta un poco: credibilità −1' },
+          { k:'portavoce', nome:'un portavoce comune', pieno:'La voce non è più solo tua: visibilità −2', mezzo:'La voce non è più solo tua: visibilità −1' },
+          { k:'liste', nome:'posti sicuri nelle tue liste', pieno:'Malumori nelle correnti: i posti si tolgono ai tuoi', mezzo:'Qualche malumore nelle correnti' } ],
+    r1:'%P accetta di sedersi. Un\'intesa fra opposizioni conviene a tutti e due, dice il loro segretario, ma il prezzo vogliono fissarlo loro, e vederlo scritto.',
+    r2:{ rilancio:'%P ha letto la tua offerta e la trova stretta: da soli, dicono, perdono meno che con un\'intesa al ribasso. Il loro segretario chiede di rivedersi.',
+         tieni:'Il tuo «no» è arrivato ai giornali prima che a %P. Il loro segretario non l\'ha gradito, ma il tavolo resta apparecchiato.' },
+    r3:{ rilancio:'Ultimo incontro. Con %P si chiude adesso, o al voto si va divisi: la tua offerta è sul tavolo.',
+         tieni:'Ultimo incontro. Due rifiuti di fila hanno lasciato il segno: la richiesta di %P è la stessa, la voglia di aspettare no.' },
+    rScesa:'%P ha capito che senza di te resta ai margini, e abbassa il tiro: la richiesta è più piccola, il tono più cordiale.',
+    forza:{ '1':'sei tu il centro dell\'opposizione', '0':'avete bisogno l\'uno dell\'altro', '-1':'senza di loro non sei un\'alternativa' },
+    eff:{ accordo:'accordo pieno, l\'intesa si rafforza' },
+    mosse:[ { l:'Cedi: %R' }, { l:'Rilanci con un\'offerta minore' }, { l:'Tieni il punto' } ],
+    stati:{ pieno:'Accordo pieno con %P: l\'opposizione si presenta unita.',
+            compromesso:'Un compromesso con %P: un\'intesa su pochi punti, ma c\'è.',
+            rottura:'Con %P la trattativa si è rotta: l\'opposizione resta divisa.' } },
 ];
 const ARCHI_DEF=[
  /* A — VERTENZA INDUSTRIALE (economico): la fabbrica che chiude, secondo come la gestisci si salva,

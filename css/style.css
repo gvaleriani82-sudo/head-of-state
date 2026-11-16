@@ -1197,3 +1197,6 @@
   .vic-tacche i{width:9px; height:9px; border-radius:50%; border:1.5px solid currentColor; box-sizing:border-box; opacity:.55;}
   .vic-tacche i.on{background:currentColor; opacity:1;}
   .vic-riga{color:var(--mut); padding:6px 2px 8px; letter-spacing:.02em;}
+  /* L273-3 (D380) · la trattativa: le righe «Chiedono», «Hai già concesso», «Al tavolo» fuori dal testo del round */
+  .ag .neg-righe{padding:4px 15px 0; font-size:12px; line-height:1.45; color:var(--txt2);}
+  .ag .neg-righe div{margin:1px 0;}

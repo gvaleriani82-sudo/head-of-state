@@ -372,6 +372,7 @@ function taciTutto(){ Object.keys(AUDIO_LOOP).forEach(taci); }
 function suonoEsito(it){
   if(!it) return null;
   if(it.kind==='budget') return 'firma';
+  if(it.kind==='negoziato' && it.negEsito) return it.negEsito==='rottura' ? 'strappo' : 'stretta';   // L273-3 (D381): la chiusura di una trattativa
   const E=it.esiti||[]; if(!E.length) return null;
   let buoni=0, cattivi=0, soldi=false;
   E.forEach(function(e){ const giu=(e.k==='ind:debt'); if(giu) soldi=true; if((e.d>0)!==giu) buoni++; else cattivi++; });
@@ -408,6 +409,7 @@ const SUONO_CARTA = [
   ['ultimatum', [],                           /^$/, { id:/^crs_(ultimatum|ricevuto)$/ }],   // L218-34: l'ultimatum dato e ricevuto nella scala della crisi — prima di `orologio`, che lo prendeva per «ultimatum»
   ['sisma',    [],                            /^$/, { id:/^sisma$/ }],   // L218-34: la carta localizzata del terremoto (L239-5) — prima di `allarme`, che la prendeva per «calamit»
   ['alluvione',[],                            /^$/, { id:/^pioggia$/ }],
+  ['trattativa-round',[],                     /^$/, { id:/^neg_[a-z]+_r[23]$/ }],   // L273-3 (D381): il round 2 e 3 di una trattativa che entra (il round 1 tiene il suono della carta d'origine o quello di carta)
   ['crisi-giorno',[],                         /^$/, { id:/^vic_/ }],   // L272-3 (D367): il tempo 2 e 3 di una vicenda che entra (il tempo 1 tiene il suono della carta d'origine)   // L218-35: il dossier «Forti alluvioni in una regione» — prima di `macchina`, che lo prendeva per specie (dossier)
   ['orologio', [],                            /scadenz|ultimatum|questione di fiducia|voto di fiducia|conto alla rovescia/i],
   ['porta',    [],                            /^$/, { id:/^rb_/ }],

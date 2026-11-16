@@ -8736,7 +8736,8 @@ const RIC_MOV_CARTE=['ev_rivale'];   // le carte del movimento che parlano del r
 /* D349 · i fatti: chiave → Δ rapporto */
 const RIC_FATTI={ int_retta:1, int_spiazzato:-1, tel_squillo:-1, tel_si:1, tel_no:-1, retro_cedi:1, retro_sfida:-1,
   domanda_bene:1, domanda_male:0, agenda_stampa:1, agenda_partito:1, trascurato:-1, battuto:-2, posto:2,
-  crisi_bene:1, crisi_male:-1 };   // L272-3: la chiusura di una vicenda (vicendaGiornalista)
+  crisi_bene:1, crisi_male:-1,
+  patto_si:1, patto_no:-1, oppatto_si:1, oppatto_no:-1 };   // L273-4: il patto fra opposizioni con l'alleato ricorrente del partito controparte · L273-3: la chiusura di un patto con l'alleato ricorrente (negoziatoRicFatto)   // L272-3: la chiusura di una vicenda (vicendaGiornalista)
 function ricVivo(){ return RICORRENTI && typeof S!=='undefined' && !!S && !LAMPO; }
 function ricHash(s){
   var h=2166136261; s=String(s);
@@ -9047,7 +9048,9 @@ const RIC_FATTO_TXT={ int_retta:'L\'ultima intervista l\'hai retta fino in fondo
   domanda_bene:'L\'ultima domanda l\'hai chiusa con la risposta giusta.', domanda_male:'L\'ultima domanda ti è andata storta.',
   agenda_stampa:'Di recente hai dedicato una giornata alla stampa.', agenda_partito:'Di recente avete lavorato insieme una giornata intera.',
   trascurato:'Da mesi non trovi il tempo per una telefonata o un incontro.', battuto:'Ha perso la sfida contro di te.', posto:'Il suo partito è entrato nel governo con te.',
-  crisi_bene:"Ha raccontato bene come hai retto l'ultima emergenza.", crisi_male:"Ha scritto che l'ultima emergenza ti è sfuggita di mano." };
+  crisi_bene:"Ha raccontato bene come hai retto l'ultima emergenza.", crisi_male:"Ha scritto che l'ultima emergenza ti è sfuggita di mano.",
+  patto_si:"L'ultima trattativa fra voi si è chiusa con un'intesa.", patto_no:"L'ultima trattativa fra voi si è rotta.",
+  oppatto_si:"L'ultimo patto fra i vostri partiti si è chiuso con un'intesa.", oppatto_no:"L'ultimo patto fra i vostri partiti è saltato." };   // L273-4
 const RIC_INGRESSO_TXT={ riv:'Te ne hanno parlato: vuole il tuo posto.', gio:'Ti segue da poco, ma legge tutto.', all:'Sulla carta è dalla tua parte.' };
 /* D350 · le targhette, scritte prima della scelta e solo quando l'effetto può scattare (ricEffettoPuo) */
 const RIC_EFF_TXT={
@@ -10470,7 +10473,7 @@ function vicendaSegnoNascita(a){
   t.segno={ t:'crisi', da:a.da, fino:a.da+3 };
 }
 /* ================================================================================================================
-   ⚑ L273-2 · LE TRATTATIVE · SPENTA — le trattative a più round (DESIGN-FORMATI.md «⚑ L273-1» D372-D382, «⚑ L273-2»).
+   ⚑ L273-2 · LE TRATTATIVE · ACCESA dal L273-4 (16/11, i tre tipi: patto di governo, negoziato estero, patto fra opposizioni; «⚑ L273-4») — le trattative a più round (DESIGN-FORMATI.md «⚑ L273-1» D372-D382, «⚑ L273-2»).
    Il terzo cugino delle vicende: un round al mese, al più tre. Il campo è `S.negoziato = {a, ult, n, cv, freddo}`
    (a = il negoziato aperto o null: {tipo, lato, con, ric, r, pz, F, m[], conc[], da, pr, sl, orig}; ult = {<famiglia>: mese
    dell'ultima chiusura}, il cooldown; n = quanti in carriera; cv = la chiave dell'ultima coalizione vista; freddo = {<con>:
@@ -10485,17 +10488,18 @@ function vicendaSegnoNascita(a){
    · C4, NESSUNA CARTA IN PIÙ (D376): ogni round (anche il round 1 dallo stato) esce SOLO in un mese che ha già una carta nel
      suo posto e la sostituisce (`negoziatoPosto` al L3: un dossier, se no l'evento del mese; `negoziatoAlPosto` al L5 e al
      L3-opp: la carta di pickDiplo/pickDiploDoss/pickOpposizione); senza posto ASPETTA (`sl`+1) e dopo `attesaMax` mesi si
-     chiude «da sé» con lo stato che le mosse hanno già dato (rottura a pz 0, altrimenti compromesso).
-   · LE MOSSE (D375): cedere (accordo pieno al prezzo della richiesta) · rilanciare (F ≥ 0: compromesso a metà prezzo; F −1:
+     chiude «da sé» con lo stato che le mosse hanno già dato (rottura a pz 0, altrimenti compromesso, che dal L273-3 — ⚠ 5 — dà
+     tenuta +3 e non +8).
+   · LE MOSSE (D375): cedere (accordo pieno al prezzo della richiesta) · rilanciare (F ≥ 0: compromesso a metà prezzo — dal L273-3, ⚠ 4, al round 1 con F 0 costa pz −1 e non chiude; F −1:
      pz −1) · tenere il punto (pz −1; con F +1 la richiesta scende, a 0 accordo pieno senza concessione); pz 0 = rottura,
      dopo il round 3 con pz > 0 compromesso. Mai forze, seggi, voto vero; mai una caduta automatica del governo.
    · `TRATTATIVE_PLACEBO`: stesse nascite, stessi round nello stesso posto, stesse mosse; nessun effetto (prezzi, tenuta,
      freddo, fatti). Spenta = niente: nessuna funzione legge un dado, scrive S o cambia un'estrazione. Zero Math.random.
    ================================================================================================================ */
-let TRATTATIVE=false;   // L273-2 (15/11): SPENTA — il motore con un negoziato di prova (il patto di governo); contenuto, schermo e accensione nella riga 28
+let TRATTATIVE=true;   // L273-4 (16/11): ACCESA coi tre tipi (D379 passa per fetta e per livello vissuto, A/B spenta-prima 0/1224, CDP verde). L273-2 (15/11): il motore con un negoziato di prova (il patto di governo); contenuto, schermo e accensione nella riga 28
 let TRATTATIVE_PLACEBO=false;
 const TRATTATIVE_K={ cool:{patto:30, estero:36, opp:36}, freddo:24, attesaMax:2 };
-let TRATTATIVE_ROSSO=null;   // solo le prove: 'c4' = il round come carta IN PIÙ anche senza posto (C4 rossa) · 'vicenda' = nasce anche con una vicenda aperta
+let TRATTATIVE_ROSSO=null;   // solo le prove: 'c4' = il round come carta IN PIÙ anche senza posto (C4 rossa) · 'vicenda' = nasce anche con una vicenda aperta · 'rilancio' = il rilancio con F 0 che chiude al round 1 (la regola di prima del L273-3) · 'deleg' = L273-4: una potenza estratta dove la carta d'origine non la porta
 const NEG_STATI=['pieno','compromesso','rottura'];
 const NEG_LATI=['gov','estero','opp'];
 function negoziatoVivo(){ return TRATTATIVE && typeof S!=='undefined' && !!S && !LAMPO && typeof TRATTATIVE_DEF!=='undefined'; }
@@ -10568,25 +10572,56 @@ function negoziatoPazienza(def, con){
   return clamp(pz, 1, 3);
 }
 function negoziatoRic0(F){ return F===1 ? 1 : (F===-1 ? 3 : 2); }
-function negoziatoNome(con){ var p=(typeof part==='function') ? part(con) : null; return p ? T(p.nome||'') : String(con||''); }
+function negoziatoNome(con){
+  if(con==='deleg') return T("l'altra delegazione");   // L273-4: la controparte generica del negoziato estero (le carte d'origine senza potenza)
+  var p=(typeof part==='function') ? part(con) : null; if(p) return T(p.nome||'');
+  var q=(typeof POTENZE!=='undefined') ? POTENZE.find(function(x){ return x.id===con; }) : null;   // L273-4: una potenza (oggi nessuna carta d'origine la porta)
+  return q ? potSub('%POTdet', q) : String(con||'');
+}
 function negoziatoRicDef(def, ric){ return (def && def.ric && def.ric[ric-1]) || null; }
 /* il testo di una carta-trattativa: T() PRIMA, poi i segnaposto (%P la controparte, %R la richiesta, %C le concessioni, %F la forza a parole) */
 function negoziatoSub(str, it){
   var s=T(str||''), N=(it && it.neg) || {}, def=negoziatoDef(N.tipo);
+  if(s===str && s && s.indexOf(' · ')>0) s=s.split(' · ').map(function(x){ return T(x); }).join(' · ');   // L273-3: la targhetta composta, tradotta a pezzi alla resa
   var R=negoziatoRicDef(def, N.ric), conc=(N.conc||[]).map(function(k){ var r=negoziatoRicDef(def, k); return r ? T(r.nome) : ''; }).filter(Boolean);
+  if(s.indexOf('%GR')>=0) s=s.replace(/%GR/g, negoziatoGruppo(N.con));
   return s.replace(/%P/g, negoziatoNome(N.con)).replace(/%R/g, R ? T(R.nome) : '').replace(/%C/g, conc.length ? conc.join(', ') : T('niente'))
-          .replace(/%F/g, T(NEG_FORZA_TXT[String(N.F||0)]||''));
+          .replace(/%F/g, T(((def && def.forza) || NEG_FORZA_TXT)[String(N.F||0)]||''));   // L273-4: la forza a parole del tipo (def.forza), altrimenti quella del patto
 }
-const NEG_FORZA_TXT={ '1':'sei tu a dettare', '0':'i numeri reggono', '-1':'senza di loro non c\'è maggioranza' };
+/* L273-3 · %GR: il gruppo su cui cade la promessa della «legge per la base» (lo stesso calcolo di negoziatoPrezzo) */
+function negoziatoGruppo(con){
+  var p=(typeof part==='function') ? part(con) : null, g=p ? promessaSostegnoGruppo(p) : null;
+  return g ? nomeGruppo(g) : T('la loro base');
+}
+const NEG_FORZA_TXT={ '1':'sei tu a dettare le condizioni', '0':'i numeri reggono', '-1':'senza di loro non c\'è maggioranza' };
+/* L273-3 · la targhetta di ogni mossa, scritta PRIMA della scelta e calcolata dallo stato come negoziatoRisolvi (stesso ordine:
+   prezzo · pazienza · richiesta scesa · rottura a pz 0 · compromesso dopo il round 3) */
+const NEG_EFF_TXT={ accordo:'accordo pieno, l\'alleato si fida di più', compromesso:'un compromesso · %F',
+  primo:'Pazienza −1 · al primo tavolo un\'offerta minore non basta', debole:'Pazienza −1 · %F',
+  scende:'Pazienza −1 · la richiesta scende', resta:'Pazienza −1 · la richiesta resta',
+  cedono:'Cedono: accordo senza concessioni', rompe:'La pazienza è finita: la trattativa si rompe',
+  ultimo:'Pazienza −1 · ultimo round: si chiude con un compromesso senza prezzo' };
+function negoziatoRilancioChiude(a){ var F=a.F||0; return F>=0 && !(a.r===1 && F===0 && TRATTATIVE_ROSSO!=='rilancio'); }   // ⚠ 4: un punto solo per motore e targhetta
+function negoziatoTarghetta(def, a, i){
+  var R=negoziatoRicDef(def, a.ric), F=a.F||0, pz=a.pz||0, E=(def && def.eff) ? Object.assign({}, NEG_EFF_TXT, def.eff) : NEG_EFF_TXT;   // L273-4: un tipo può riscrivere una riga comune (def.eff: oggi solo «accordo»)
+  if(i===0) return (R ? R.pieno+' · ' : '')+E.accordo;   // composta: negoziatoSub traduce i pezzi alla resa (la chiave è il pezzo)
+  if(i===1 && negoziatoRilancioChiude(a)) return (R ? R.mezzo+' · ' : '')+E.compromesso;
+  if(i===2 && F===1 && (a.ric||0)<=1) return E.cedono;
+  if(pz-1<=0) return E.rompe;
+  if(a.r>=3) return E.ultimo;
+  if(i===1) return F<0 ? E.debole : E.primo;
+  return F===1 ? E.scende : E.resta;
+}
 /* l'item {kind:'negoziato'} da uno stato (a, o il prototipo della trasformazione); id: 'neg_<tipo>_r<round>' o l'id della carta d'origine al round 1 */
 function negoziatoItem(def, a, r, origId){
   if(!def || !a) return null;
   var R=negoziatoRicDef(def, a.ric), M=def.mosse||[];
-  var testo=r===1 ? def.r1 : ((a.m && a.m.length && a.ric<(a.ric0||a.ric)) ? def.rScesa : def.rFerma);
+  var ult=(a.m && a.m.length) ? a.m[a.m.length-1] : 2, RR=r===2 ? def.r2 : def.r3;   // L273-3: il round 2-3 risponde alla mossa di prima
+  var testo=r===1 ? def.r1 : (a.ric<(a.ric0||a.ric) ? def.rScesa : ((RR && RR[ult===1 ? 'rilancio' : 'tieni']) || def.rScesa));
   var ch=M.map(function(m, i){
-    var o={ l:m.l, e:m.e };
+    var o={ l:m.l, e:negoziatoTarghetta(def, a, i) };
     if(i===0 && R && R.debito) o.costo={ debito:R.debito };
-    if(i===1 && R && R.debito && (a.F||0)>=0) o.costo={ debito:R.debito/2 };
+    if(i===1 && R && R.debito && negoziatoRilancioChiude(a)) o.costo={ debito:R.debito/2 };
     return o;
   });
   return { kind:'negoziato', neg:{ tipo:def.id, lato:a.lato, con:a.con, r:r, ric:a.ric, pz:a.pz, F:a.F, orig:a.orig||null, conc:(a.conc||[]).slice() },
@@ -10603,7 +10638,7 @@ function negoziatoTrasforma(it, origId){
   if(!negoziatoVivo() || !it || !it.data) return it;
   var id=origId || it.data.id; if(!id) return it;
   var def=TRATTATIVE_DEF.find(function(d){ return (d.orig||[]).indexOf(id)>=0; }); if(!def) return it;
-  var con=it.ally || it.data.potId || it.data.con || null; if(!con) return it;
+  var con=def.controparte ? def.controparte(it) : (it.ally || it.data.potId || it.data.con || null); if(!con) return it;   // L273-4: la regola della controparte è del tipo (def.controparte; null = la carta resta com'è)
   var a=S.negoziato && S.negoziato.a, ora=meseAss();
   if(a && a.tipo===def.id && a.orig===id && a.con===con && a.da===ora){   // già nato in questo mese (un caricamento): la stessa chiave, già decisa
     var gi=negoziatoItem(def, a, 1, id); if(gi){ gi.resolved=true; gi.outcome=''; } return gi || it;
@@ -10664,6 +10699,7 @@ function negoziatoAlPosto(it){
 function negoziatoPrezzo(a, k){
   if(TRATTATIVE_PLACEBO || !a) return;
   var def=negoziatoDef(a.tipo), R=negoziatoRicDef(def, a.ric); if(!R) return;
+  if(def.prezzo){ def.prezzo(a, k, R); return; }   // L273-4: estero e opposizione hanno i prezzi loro (TRATTATIVE_DEF.<tipo>.prezzo, ≤ ±2)
   if(R.k==='fondi'){ if(S.ind && S.ind.debt!=null) S.ind.debt+=(R.debito||0.5)*k; }
   else if(R.k==='legge'){
     var p=(typeof part==='function') ? part(a.con) : null, g=p ? promessaSostegnoGruppo(p) : null;
@@ -10677,24 +10713,28 @@ function negoziatoPrezzo(a, k){
 }
 /* il fatto dell'alleato ricorrente (D378 (ii)): chiamata predisposta — scrive solo quando la chiave c'è in RIC_FATTI (riga 28) */
 function negoziatoRicFatto(stato, a){
-  var k=stato==='rottura' ? 'patto_no' : 'patto_si';
+  var def=negoziatoDef(a && a.tipo), FK=(def && def.fam==='patto') ? ['patto_si','patto_no'] : (def && def.fatti);   // L273-4: le chiavi del tipo (def.fatti; l'estero non ne ha: la controparte non è una persona ricorrente)
+  if(!FK) return;
+  var k=stato==='rottura' ? FK[1] : FK[0];
   if(TRATTATIVE_PLACEBO || typeof RIC_FATTI==='undefined' || RIC_FATTI[k]==null || typeof ricVivo!=='function' || !ricVivo()) return;
   if(typeof ricPartnerAlleato!=='function' || ricPartnerAlleato()!==a.con) return;
   ricFatto('all', k, stato==='rottura' ? -1 : 1);
 }
 const NEG_TENUTA={ pieno:15, compromesso:8, rottura:-15 };
+const NEG_TENUTA_DASE=3;   // L273-3 (⚠ 5): la chiusura «da sé» in compromesso non vale come un compromesso al tavolo
 /* la chiusura: tenuta, freddo, fatto, registro, cooldown */
 function negoziatoChiudi(stato, daSe){
   var N=S.negoziato, a=N && N.a; if(!a) return;
   var def=negoziatoDef(a.tipo), ora=meseAss();
   if(!TRATTATIVE_PLACEBO){
-    if(def && def.fam==='patto' && S.tenuta && S.tenuta[a.con]!=null) S.tenuta[a.con]=clamp(S.tenuta[a.con]+NEG_TENUTA[stato], 0, 100);
+    if(def && def.fam==='patto' && S.tenuta && S.tenuta[a.con]!=null) S.tenuta[a.con]=clamp(S.tenuta[a.con]+((daSe && stato==='compromesso') ? NEG_TENUTA_DASE : NEG_TENUTA[stato]), 0, 100);   // L273-3 (⚠ 5): il compromesso «da sé» +3
+    if(def && def.chiudi) def.chiudi(stato, a, daSe);   // L273-4: lo stato d'arrivo dell'estero (partner, credito) e dell'opposizione (intesa, credibilità), D375
     if(stato==='rottura'){ N.freddo=N.freddo||{}; N.freddo[a.con]=ora; }
     negoziatoRicFatto(stato, a);
   }
   var tit=negoziatoSub((def && def.titolo) || 'La trattativa', { neg:a });
   var x=T((def && def.stati && def.stati[stato]) || NEG_ESITO_TXT[stato]);
-  if(daSe) x=T('La trattativa si è chiusa da sé.')+' '+x;
+  if(daSe) x=T('Il tavolo non si è più riunito: la trattativa si è chiusa da sé.')+' '+x;
   S.log.unshift({ t:tit, x:negoziatoSub(x, { neg:a }) });
   N.a=null; N.ult=N.ult||{}; if(def) N.ult[def.fam]=ora; N.n=(N.n||0)+1;
 }
@@ -10706,7 +10746,7 @@ function negoziatoMese(){
   var a=S.negoziato && S.negoziato.a;
   if(a){
     var def=negoziatoDef(a.tipo), ora=meseAss();
-    if(!def || negoziatoLato()!==a.lato || (def.fam==='patto' && (S.coalizione||[]).indexOf(a.con)<0)) negoziatoChiudiDaSe();
+    if(!def || negoziatoLato()!==a.lato || (def.fam==='patto' && (S.coalizione||[]).indexOf(a.con)<0) || (def.valida && !def.valida(a))) negoziatoChiudiDaSe();   // L273-4: def.valida (l'opposizione: la controparte entrata al governo)
     else if(a.pr<=ora){
       a.sl=(a.sl||0)+1;
       if(a.sl>=TRATTATIVE_K.attesaMax) negoziatoChiudiDaSe();
@@ -10731,15 +10771,22 @@ function negoziatoRisolvi(it, ci){
   var lab=negoziatoSub(M.l, it), esito=null;
   a.m.push(ci);
   if(ci===0){ negoziatoPrezzo(a, 1); a.conc.push(a.ric); esito='pieno'; }
-  else if(ci===1){ if((a.F||0)>=0){ negoziatoPrezzo(a, 0.5); a.conc.push(a.ric); esito='compromesso'; } else a.pz--; }
+  else if(ci===1){ if(negoziatoRilancioChiude(a)){ negoziatoPrezzo(a, 0.5); a.conc.push(a.ric); esito='compromesso'; } else a.pz--; }   // L273-3 (⚠ 4): al round 1 con F 0 il rilancio costa un punto di pazienza e NON chiude
   else { a.pz--; if(a.F===1){ a.ric--; if(a.ric<=0) esito='pieno'; } }
   if(!esito && a.pz<=0) esito='rottura';
   if(!esito && a.r>=3) esito='compromesso';
   S.log.unshift({ t:negoziatoSub(def.titolo, it), x:T('Decisione:')+' '+lab });
-  if(esito){ negoziatoChiudi(esito, false); it.outcome='<b>'+lab+'</b>. '+T(NEG_ESITO_TXT[esito]); it.negEsito=esito; }
+  if(esito){ negoziatoChiudi(esito, false); negoziatoVoce(esito); it.outcome='<b>'+lab+'</b>. '+T(NEG_ESITO_TXT[esito]); it.negEsito=esito; }
   else { a.r++; a.pr=ora+1; a.sl=0; it.outcome='<b>'+lab+'</b>. '+T('La trattativa continua.'); }
   S.ind.consenso=computeConsenso();
   it.resolved=true;
+}
+/* L273-3 (D381) · la voce della chiusura al tavolo (mai quella «da sé», che cade al confine del mese): accordo o compromesso →
+   voce-trattativa-accordo, rottura → voce-trattativa-rottura; solo se nessuna voce parla o sta arrivando (voce-governo resta alla
+   conferma della coalizione, un mese prima), mai sotto la notte. La presa per lingua e genere la sceglie parla() (L218-35, L255-1). */
+function negoziatoVoce(esito){
+  if(typeof parla!=='function' || NOTTE || (typeof voceInCorso==='function' && voceInCorso())) return;
+  parla(esito==='rottura' ? 'voce-trattativa-rottura' : 'voce-trattativa-accordo');
 }
 /* applySnap: un valore illeggibile si toglie (tipo sconosciuto, round fuori da 1-3, controparte uscita dal roster o dalla coalizione) */
 function negoziatoPulisci(){
@@ -10751,12 +10798,75 @@ function negoziatoPulisci(){
     var ok=typeof a==='object' && !!def && [1,2,3].indexOf(a.r)>=0 && NEG_LATI.indexOf(a.lato)>=0
       && [1,2,3].indexOf(a.ric)>=0 && typeof a.pz==='number' && a.pz>=0 && a.pz<=3 && [-1,0,1].indexOf(a.F)>=0
       && typeof a.pr==='number' && typeof a.da==='number' && Array.isArray(a.m) && Array.isArray(a.conc)
-      && (def.fam!=='patto' || ((typeof part==='function' && !!part(a.con)) && (S.coalizione||[]).indexOf(a.con)>=0));
+      && (def.fam!=='patto' || ((typeof part==='function' && !!part(a.con)) && (S.coalizione||[]).indexOf(a.con)>=0))
+      && (!def.valida || def.valida(a));   // L273-4: estero (delegazione o potenza viva) e opposizione (partito nel roster, fuori dal governo)
     if(!ok) N.a=null;
   } else N.a=null;
   if(!N.ult || typeof N.ult!=='object') N.ult={};
   if(!N.freddo || typeof N.freddo!=='object') N.freddo={};
   if(typeof N.n!=='number') N.n=0;
+}
+/* ⚑ L273-4 · I DUE TIPI NUOVI (il negoziato estero e il patto fra opposizioni): le funzioni che TRATTATIVE_DEF.estero e
+   TRATTATIVE_DEF.opp chiamano dai loro campi (controparte, valida, prezzo, chiudi). La macchina comune non cambia: i ganci
+   nel motore leggono solo il campo del tipo (negoziatoTrasforma → def.controparte, negoziatoPrezzo → def.prezzo,
+   negoziatoChiudi → def.chiudi, negoziatoMese e negoziatoPulisci → def.valida, negoziatoRicFatto → def.fatti,
+   negoziatoSub → def.forza, negoziatoTarghetta → def.eff, negoziatoNome → 'deleg' e le potenze). Nessun dado.
+   · LA CONTROPARTE ESTERA: il campo che porta la potenza è `it.data.potId` (diploCarta, solo sulle carte col volto del
+     rivale e con DIPLO_BILATERALI); se c'è ed è la potenza della crisi in corso → null (la carta resta com'è, D376); se
+     non c'è → 'deleg' (TRATTATIVE_ROSSO 'deleg': una potenza estratta, la rossa della prova). */
+function negoziatoControparteEstero(it){
+  var pid=it && it.data && it.data.potId;
+  if(pid){ if(S.crisi && S.crisi.con===pid) return null; return pid; }
+  if(TRATTATIVE_ROSSO==='deleg' && typeof potenzeDi==='function'){ var l=potenzeDi('rivale'); if(l.length) return l[Math.floor(Math.random()*l.length)].id; }
+  return 'deleg';
+}
+function negoziatoValidaEstero(a){
+  if(!a) return false;
+  if(a.con==='deleg') return true;
+  return (typeof POTENZE!=='undefined') && POTENZE.some(function(p){ return p.id===a.con; });
+}
+/* il credito del diplomatico (L5) o l'autorevolezza del Segretario generale (L4, che non ha S.diplo) */
+function negoziatoCreditoEstero(n){
+  if(S.livello===4 && S.intl && S.intl.autorevolezza!=null) S.intl.autorevolezza=clamp(S.intl.autorevolezza+n, 0, 100);
+  else creditoMuovi(n);
+}
+function negoziatoPrezzoEstero(a, k, R){
+  if(R.k==='accesso') relIntMuovi('alleanza', -Math.round(2*k));
+  else if(R.k==='testo') negoziatoCreditoEstero(-Math.round(2*k));
+  else if(R.k==='quota'){ if(S.ind && S.ind.debt!=null) S.ind.debt+=(R.debito||0.4)*k; }
+}
+const NEG_ESTERO_ARRIVO={ pieno:{v:6, c:2}, compromesso:{v:3, c:1}, rottura:{v:-8, c:0} };
+function negoziatoChiudiEstero(stato, a, daSe){
+  var A=NEG_ESTERO_ARRIVO[stato]; if(!A) return;
+  var p=(S.diplo && Array.isArray(S.diplo.bil)) ? S.diplo.bil.find(function(x){ return x.id===a.con; }) : null;
+  if(p) p.v=clamp((p.v||0)+A.v, 0, 100);
+  else if(stato==='rottura') relIntMuovi('consesso', -2);   // la delegazione (o una potenza fuori dalla rete): si raffredda la sala
+  if(A.c) negoziatoCreditoEstero(A.c);
+}
+/* · LA CONTROPARTE DELL'OPPOSIZIONE: il partito più grande fra i compatibili col tuo (compatibiliMiei, che toglie già chi guida
+     il governo), fuori dal governo (all'opposizione S.coalizione è il governo degli altri), diverso dal tuo; a parità l'ordine
+     del roster; nessuno → null (la carta resta com'è). */
+function negoziatoControparteOpp(it){
+  if(!S.opposizione || !PAESE.coalizione || typeof compatibiliMiei!=='function') return null;
+  var gov=S.coalizione||[], ord=(PAESE.partiti||[]).map(function(p){ return p.id; });
+  var l=compatibiliMiei().filter(function(p){ return p && p.id!==S.partito && gov.indexOf(p.id)<0; });
+  if(!l.length) return null;
+  var peso=function(id){ return (S.seggi && S.seggi[id]!=null) ? S.seggi[id] : ((S.forze||{})[id]||0); };
+  l.sort(function(x,y){ return (peso(y.id)-peso(x.id)) || (ord.indexOf(x.id)-ord.indexOf(y.id)); });
+  return l[0].id;
+}
+function negoziatoValidaOpp(a){ return !!a && typeof part==='function' && !!part(a.con) && (S.coalizione||[]).indexOf(a.con)<0 && a.con!==S.partito; }
+function negoziatoPrezzoOpp(a, k, R){
+  var n=Math.max(1, Math.round(2*k));
+  if(R.k==='programma') credd(-n);
+  else if(R.k==='portavoce') visd(-n);
+  else if(R.k==='liste') agCorrenti(-n);
+}
+const NEG_OPP_ARRIVO={ pieno:{i:10, c:2}, compromesso:{i:5, c:1}, rottura:{i:-15, c:-2} };
+function negoziatoChiudiOpp(stato, a, daSe){
+  var A=NEG_OPP_ARRIVO[stato]; if(!A) return;
+  if(typeof intesaMuovi==='function') intesaMuovi(a.con, A.i);
+  if(A.c) credd(A.c);
 }
 /* aggiornaArchi: (1) prova ad accendere un nuovo arco "in sottofondo" (se c'è uno slot libero); (2) presenta
    UNA SOLA carta-arco — la coda FIFO sceglie chi aspetta da più tempo, gli altri restano in attesa. L'attivazione

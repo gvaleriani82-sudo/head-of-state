@@ -3223,7 +3223,7 @@ function renderGov(){
   else h+=stampa+vitaPersonaleCard();
   // agenda
   if(S.livello===4 || S.livello===5) h+=ricPersoneHtml();   // L271-3: la riga «Le persone» (vuota spenta)
-  h+=vicendaCassettoHtml();   // L272-3: la vicenda aperta, dove il tavolo non c'è (vuota se spenta)
+  h+=vicendaCassettoHtml()+negoziatoCassettoHtml();   // L273-3: la trattativa aperta, stessa regola · L272-3: la vicenda aperta, dove il tavolo non c'è (vuota se spenta)
   h+=agendaCassettoHtml();   // L270-3: l'agenda del mese, prima riga delle carte dove il tavolo non c'è (vuota se spenta o già decisa)
   h+=`<div class="contorno" style="font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--mut);margin:2px 2px 8px;">${T('Agenda di')} ${T(MONTHS[S.month-1])}</div>`;
   /* L95-1 — l'entrata non è più della SCATOLA. La classe stava qui, sulla firma dell'agenda, e scattava una
@@ -3272,7 +3272,7 @@ function renderGov(){
     } else if(it.kind==='vicenda'){
       h+=vicendaCartaHtml(it, idx);   // L272-3
     } else if(it.kind==='negoziato'){
-      h+=negoziatoCartaHtml(it, idx);   // L273-2: il ramo minimo (la carta vera è della riga 28)
+      h+=negoziatoCartaHtml(it, idx);   // L273-2 · L273-3: la carta del round (D380), per i tre tipi dal L273-4
     } else if(it.kind==='arco'){
       /* gli archi narrativi (lotto 4 + payoff fase A): carta maggiore. Il marker discreto = titolo dell'arco +
          capitolo (a.scelte.length+1), nella riga .kick esistente. Testi via arcoSub (%FILO/%RUOLO/%ECO/%FIGLIO). */
@@ -5108,15 +5108,17 @@ function vicendaCartaHtml(it, idx){
       h+=`</div>`;
       return h;
 }
-/* L273-2 · la carta del round (ramo minimo, testi provvisori): il kicker «Trattativa · round %N di %M» con le tacche della pazienza;
-   le classi sono quelle della vicenda (vic-carta, vic-kick, vic-tacche): nessuna regola css nuova */
+/* L273-2 · L273-3 · la carta del round (D380): il kicker «Trattativa · round %N di %M» con le tacche della pazienza, le righe
+   «Chiedono», «Hai già concesso» e «Al tavolo» (la forza a parole) fuori dal testo del round, le targhette prima della scelta
+   (negoziatoTarghetta) e costoChip; classi della vicenda più .neg-righe (css, L273-3) */
 function negoziatoCartaHtml(it, idx){
   let h='';
   const d=it.data, N=it.neg||{};
   const sub=(s)=>(typeof negoziatoSub==='function')?negoziatoSub(s,it):T(s);
   const pz=N.pz||0, tacche=[1,2,3].map(k=>`<i class="${k<=pz?'on':''}"></i>`).join('');
-  h+=`<div class="ag major vic-carta ${it.resolved?'done':''}">${agScene(it)}<div class="ah"><div class="kick vic-kick"><span>${T('Trattativa · round %N di %M').replace('%N',N.r||1).replace('%M',3)}</span><span class="vic-tacche" aria-hidden="true">${tacche}</span></div><h3>${sub(d.t)}</h3></div>
-    <div class="atext">${sub(d.text)}</div>`;
+  const righe=it.resolved ? '' : `<div class="neg-righe"><div>${sub('Chiedono: %R')}</div><div>${sub('Hai già concesso: %C')}</div><div>${sub('Al tavolo: %F')}</div></div>`;   // L273-3 (D380): fuori dal testo del round
+  h+=`<div class="ag major vic-carta ${it.resolved?'done':''}">${agScene(it)}<div class="ah"><div class="kick vic-kick"><span>${T('Trattativa · round %N di %M').replace('%N',N.r||1).replace('%M',3)}</span><span class="vic-tacche" aria-hidden="true" title="${T('Pazienza')}">${tacche}</span></div><h3>${sub(d.t)}</h3></div>
+    ${righe}<div class="atext">${sub(d.text)}</div>`;
   if(!it.resolved){ h+=`<div class="opts">`+d.ch.map((c,i)=>
     `<button class="opt" onclick="resolveItem(${idx},${i})"><span class="ol">${sub(c.l)}</span><span class="oe">${sub(c.e)}</span>${costoChip(c)}</button>`).join('')+`</div>`; }
   else h+=`<div class="outcome">${it.outcome||''}</div>${esitiHtml(it)}${tornaTavoloHtml(it)}`;
@@ -5138,6 +5140,13 @@ function vicendaCassettoHtml(){
   const R=vicendaRigaDati(); if(!R) return '';
   const TE=(typeof R.a.terr==='number' && PAESE.territori) ? PAESE.territori[R.a.terr] : null;
   const x=arcoTerrSub(T('In corso: %V (%TERR), tempo %N di %M').replace('%V',R.v).replace('%N',R.n).replace('%M',3), TE);
+  return `<div class="vic-riga contorno">${x}</div>`;
+}
+/* L273-3 (D380) · la trattativa aperta: una riga del cassetto Governo dove il tavolo non c'è (contorno, non toccabile; vuota se spenta) */
+function negoziatoCassettoHtml(){
+  if(typeof tavoloAttivo==='function' && tavoloAttivo()) return '';
+  const a=(typeof negoziatoAperto==='function') ? negoziatoAperto() : null; if(!a) return '';
+  const x=T('In corso: la trattativa con %P, round %N di %M').replace('%P', negoziatoNome(a.con)).replace('%N', a.r).replace('%M', 3);
   return `<div class="vic-riga contorno">${x}</div>`;
 }
 function agendaCassettoHtml(){ return (agendaUiViva() && !tavoloAttivo()) ? `<div class="card ag-mese-card">${agendaBloccoHtml()}</div>` : ''; }
