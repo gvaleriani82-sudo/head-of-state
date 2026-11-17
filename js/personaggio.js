@@ -53,7 +53,7 @@ const PERS_FUMETTO_LPS = 26;  // lettere al secondo del fumetto (il prototipo §
 let PERS_STRATO = true;   // L248-5bis: ACCESO («⚑ L248-5bis»: prove e fotogrammi a CPU ×4 verdi); false = i quattro gesti con la voce di oggi, niente strato
 const PERS_STRATO_MODO = { insediamento:'mosso', legge:'mosso', comizio:'mosso', alleanza:'mosso',
   fondazione:'mosso', scissione:'mosso', congresso:'mosso', inaugurazione:'mosso', 'mappa-conquista':'mosso', 'mappa-persa':'mosso', 'mappa-tutta':'mosso' };   // L218-33: i sette momenti agganciati
-const PERS_STRATO_TETTO = { legge:12, alleanza:12, inaugurazione:12, 'mappa-conquista':12, 'mappa-persa':12, 'visita-disastro':12 };   // L218-33: i momenti che possono tornare nello stesso anno, come l'alleanza (visita-disastro senza aggancio, il tetto pronto)   // mesi di gioco fra due strati dello stesso momento; gli altri due hanno già il loro ritmo (una salita, una campagna)
+const PERS_STRATO_TETTO = { legge:12, alleanza:12, inaugurazione:12, 'mappa-conquista':12, 'mappa-persa':12, 'visita-disastro':12 };   // L218-33: i momenti che possono tornare nello stesso anno, come l'alleanza (visita-disastro dal L272-3: «vai sul posto» dell'alluvione)   // mesi di gioco fra due strati dello stesso momento; gli altri due hanno già il loro ritmo (una salita, una campagna)
 const PERS_ULTIMO_MOMENTO = {};
 /* il tetto: vero (e segnato) se il momento può tornare ora; `ora` = S.year*12+S.month */
 function persTettoPassa(momento, ora){

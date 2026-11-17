@@ -809,7 +809,8 @@ function personaggioMomentoAzione(opt){
      fermano e lo strato si svuota: niente personaggi vivi nascosti. Niente in S.
    ================================================================================================================ */
 const PERS_STRATO_AZIONE = { insediamento:'giuramento', legge:'firma', comizio:'comizio', alleanza:'stretta',
-  fondazione:'comizio', scissione:'parla', congresso:'vittoria', inaugurazione:'firma', 'mappa-conquista':'vittoria', 'mappa-persa':'sconfitta', 'mappa-tutta':'vittoria' };   // L218-33: i sette momenti agganciati (le loro battute: voceGesto via parlaGesto, game.js)
+  fondazione:'comizio', scissione:'parla', congresso:'vittoria', inaugurazione:'firma', 'mappa-conquista':'vittoria', 'mappa-persa':'sconfitta', 'mappa-tutta':'vittoria',
+  'visita-disastro':'parla', 'prima-scheda':'comizio', 'primi-seggi':'vittoria', 'primi-seggi-usa':'vittoria' };   // L218-33: i sette momenti agganciati (le loro battute: voceGesto via parlaGesto, game.js) · L275-3: i quattro che mancavano — senza la riga lo strato diceva null e la battuta taceva (visita-disastro, agganciata dal L272-3, non aveva mai parlato nel gioco)
 const PERS_STRATO_TETTO_MS = 4500, PERS_STRATO_CODA_MS = 400, PERS_STRATO_ATTESA_MS = 4500;
 let PERS_STRATO_TIMER = 0;
 function personaggioStratoEl(){
@@ -3080,6 +3081,7 @@ function renderAttivista(){
        (muove le valute), agendaPending fa da gate → una mossa per turno. */
     (S.agenda||[]).forEach(function(it,idx){ if(it.kind==='vicenda'){ h+=vicendaCartaHtml(it, idx); return; }   // L272-3: la vicenda in piazza
       if(it.kind==='discorso'){ h+=discorsoCartaHtml(it, idx); return; }   // L274-3: il discorso dell'attivista (la piazza)
+      if(it.kind==='negoziato'){ h+=negoziatoCartaHtml(it, idx); return; }   // L275-8: la vertenza dell'attivista (spenta: nessun item negoziato al L0)
       if(it.kind!=='attivista'||!it.data) return; const d=it.data;
       h+=`<div class="ag major ${it.resolved?'done':''}">${agScene(it)}<div class="ah"><div class="kick">${T(d.kick)}</div><h3>${T(d.t)}</h3></div>${it.ric?ricRigaHtml(it.ric):''}<div class="atext">${T(d.text)}</div>`;
       if(!it.resolved){ h+=`<div class="opts">`+d.ch.map(function(c,ci){ return `<button class="opt" onclick="resolveItem(${idx},${ci})"><span class="ol">${T(c.l)}</span><span class="oe">${T(c.e)}</span></button>`; }).join('')+`</div>`; }
@@ -3330,7 +3332,7 @@ function renderGov(){
       const d=it.data;
       const kick = (d.tipo==='grane') ? (typeof dicNome==='function'?dicNome():T('Il tuo dicastero')) : T('Politica interna');
       h+=`<div class="ag ${it.resolved?'done':''}">${agScene(it)}<div class="ah"><div class="kick">${kick}</div><h3>${subMin(T(d.t))}</h3></div>
-        <div class="atext">${subMin(T(d.text))}</div>`;
+        ${it.ric?ricRigaHtml(it.ric):''}<div class="atext">${subMin(T(d.text))}</div>`;   /* L275-7 (F18): la riga dell'alleato (il capo del governo), come nel ramo generico */
       if(!it.resolved){ h+=`<div class="opts">`+d.ch.map((c,i)=>
         `<button class="opt" onclick="resolveItem(${idx},${i})"><span class="ol">${subMin(T(c.l))}</span><span class="oe">${subMin(T(c.e))}</span></button>`).join('')+`</div>`; }
       else h+=`<div class="outcome">${it.outcome}</div>${esitiHtml(it)}${tornaTavoloHtml(it)}`;
@@ -5159,8 +5161,11 @@ function discorsoCassettoHtml(){
   const parti=[];
   if(D && D.ult===meseAss() && D.e) parti.push(T({a:'Discorso · applausi', f:'Discorso · freddezza', x:'Discorso · fischi'}[D.e]));
   if(P) parti.push(T('promessa aperta con %G').replace('%G', nomeGruppo(P.grp)));
+  const R=S.attivista && S.attivista.promRad, TR=R && PAESE.territori ? PAESE.territori[R.i] : null;   // L275-9: la promessa alle radici aperta
+  if(TR) parti.push(arcoTerrSub(T(DISCORSI_COMUNI.radice.cassetto), TR));
   if(!parti.length) return '';
   if(parti.length===1 && P) parti[0]=T('Discorso · promessa aperta con %G').replace('%G', nomeGruppo(P.grp));
+  else if(parti.length===1 && TR) parti[0]=T('Discorso')+' · '+parti[0];
   return `<div class="vic-riga contorno">${parti.join(' · ')}</div>`;
 }
 function vicendaRigaDati(){

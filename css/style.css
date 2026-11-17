@@ -81,6 +81,26 @@
   .clock{text-align:right; line-height:1.18;}
   .clock .yr{font-family:'Fraunces',serif; font-size:22px; font-weight:600;}
   .clock .el{font-size:11px; color:var(--mut); letter-spacing:.03em;}
+  /* L275-4 (⚠ 1 di L275-3): sotto i 400 px la riga del mese (`#el`: «OPPOSITION · in power: <partito>», il disco del partito proprio)
+     poteva avere una parola più larga dello spazio che le lasciano titolo e bottoni (379-405 px a 375: «OPPOSIZIONE», un nome di partito
+     lungo, `.hdr-pp` nowrap). Ora va a capo anche DENTRO la parola e il disco va a capo con la riga. Cambia solo dove la riga stava al suo
+     minimo (dentro lo schermo ma sopra il margine destro di 16 px): lì ora va a capo e lascia il margine; altrove invariata al pixel.
+     ⚠ «Danimarca» (IT) e «Netherlands» (EN) col ritrattino sbordano lo stesso: lì la riga è già all'anno (55 px), è il titolo del paese
+     (nel rapporto «⚑ L275-4»). Sonda .claude/l275-4-larghezza.js. iPad e PC (≥ 400 px) intoccati. */
+  /* L275-5 (⚠ 1 di L275-4): le tre regole di L275-4 sono tolte. Sotto i 400 px la riga del mese (`#el`) va su una SECONDA riga a tutta
+     larghezza, sotto titolo e bottoni; l'anno resta in alto a destra. Solo CSS, il markup (index.html) non cambia: il gruppo di destra e
+     `.clock` diventano `display:contents`, così bottoni, anno e riga sono figli diretti di `.hbar` (che va a capo) e la riga prende
+     `order` e il 100%; gli spazi fra titolo, bottoni e anno scendono da 10 a 6 px (7 fra ritrattino e titolo). Niente parole spezzate (la riga va a capo fra le parole). Il titolo del paese cede coi puntini solo se ancora non
+     ci sta («Danimarca» IT, «Netherlands» EN col ritrattino: rapporto «⚑ L275-5»). Sonda .claude/l275-5-larghezza.js. ≥ 400 px intoccato. */
+  @media (max-width:399.98px){
+    .hbar{flex-wrap:wrap; column-gap:6px; row-gap:5px; align-items:center;}
+    .hbar > div:first-child{flex:1 1 0; min-width:0; align-self:flex-end; gap:7px !important;}
+    .hbar > div:last-child, .hbar .clock{display:contents !important;}
+    .hbar .brand{min-width:0;}
+    .hbar .brand h1{min-width:0; overflow:hidden; text-overflow:ellipsis; font-size:17.5px;}   /* L275-6 (⚠ 2 di L275-5): 21 → 17,5 px (a 19 e a 18 «Netherlands» coi puntini: a 18 chiedeva 107 px su 106), «Danimarca» IT e «Netherlands» EN col ritrattino interi (sonda .claude/l275-6-larghezza.js, puntini 0) */
+    .hbar .clock .yr{align-self:center;}
+    .hbar .clock .el{order:9; flex:0 0 100%; text-align:left;}
+  }
 
   .keys{display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--line); border-bottom:1px solid var(--line);}
   .key{background:var(--bg2); padding:8px 6px 9px; text-align:center;}

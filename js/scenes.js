@@ -232,7 +232,7 @@ const VIDEO_PRESENTI = ['home-hero', 'partito-base', 'vitaprivata-base', 'retro-
   'vitaprivata-anni80', 'giustizia-base', 'elezioni-florido-regnounito', 'ordinepubblico-base-asiaest',   // L197-43 (giro clip 40): lo schermo del televisore e la palma, il giudice che gira una pagina, bandiere e applausi lenti, fronde e fili
   'ordinepubblico-base-africa', 'societacivile-anni60', 'societacivile-anni70',   // L197-44 (giro clip 41): fronde dell'acacia e fili, i cartelli bianchi che oscillano, striscioni e fiume (scuola-base non portata: l'aula d'epoca di L197-40)
   'societacivile-anni80', 'istituzioni-anni50',
-  'guerra-sala', 'guerra-sala-anni50', 'guerra-porto',
+  'guerra-sala', 'guerra-sala-anni50', 'guerra-porto', 'guerra-sala-v2',   // L275-6 (F31): il convoglio dietro la recinzione (poster↔f0 7,5 sul canvas · cucitura 2,2)
   'societacivile-florido', 'societacivile-base-asiasud', 'crisi-base-africa',
   'partito-anni50', 'stampa-base', 'partito-anni70', 'ordinepubblico-base-asiasud',
   'casa-base-latina', 'guerra-ritorno', 'casa-base-asiaest',
@@ -384,7 +384,11 @@ const SCENE_VARIANTI = ['vitaprivata-base-v2', 'vitaprivata-base-v3', 'vitapriva
   /* L192-6 (5/10): le due rifatte (`casa-base-v2` senza insegne, `casa-base-nordamerica-v2` senza il pick-up) e due delle «da rifare» di
      L181-5 (`societacivile-base-nordamerica-v3` senza veicoli in primo piano, `vitaprivata-anni80-v4` con la torta senza scritte); la
      terza, `societacivile-base-asiaest-v3`, è lo stesso nome rifatto in fotografia (il file è nuovo, la lista no). */
-  'casa-base-v2', 'casa-base-nordamerica-v2', 'societacivile-base-nordamerica-v3', 'vitaprivata-anni80-v4'];
+  'casa-base-v2', 'casa-base-nordamerica-v2', 'societacivile-base-nordamerica-v3', 'vitaprivata-anni80-v4',
+  /* L275-6 (F31): la clip buona `guerra-base` del giro clip 42 (L197-45) come seconda sala della guerra: il convoglio dietro la recinzione
+     (nessun testo, nessuna bandiera). Ruota con `guerra-sala` sulle carte del fronte (kick «La guerra»), con la scelta per hash di
+     scenaVariante (nessun Math.random); il cassetto Guerra passa da scenaSrc e resta sulla sala. Il 1950 (`guerra-sala-anni50`) non la vede. */
+  'guerra-sala-v2'];
 const ROTAZIONE_VARIANTI = true;
 /* L181-5 · LE VARIANTI D'EUROPA: varianti di una scena neutra che mostrano l'Europa (tetti e abbaini dalla finestra, delegati tutti
    europei, la sala gotica). `scenaVariante()` le salta quando il paese della partita non è in Europa (`AREA_DI_PAESE[S.paese]` diverso

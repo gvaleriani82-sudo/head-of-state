@@ -7716,10 +7716,10 @@ const TRATTATIVE_DEF=[
           { k:'quota', nome:'una quota più alta da pagare', debito:0.4, pieno:'Il bilancio paga', mezzo:'Il bilancio paga la metà' } ],
     r1:'Il negoziato è arrivato al nodo che nessuno voleva toccare. Di fronte a te siede %P: prima di firmare vogliono vedere una concessione, e la vogliono scritta.',
     r2:{ rilancio:'La tua controproposta è tornata indietro con le correzioni a margine: per %P non basta. Il capodelegazione resta seduto, ma chiede tempo per sentire la sua capitale.',
-         tieni:'Il tuo «no» ha raffreddato la sala. La seduta riprende dopo una lunga pausa, e la richiesta di %P è la stessa, il tono più asciutto.' },
+         tieni:'Il tuo «no» ha raffreddato la sala. La seduta riprende dopo una lunga pausa: al tavolo con %P la richiesta è la stessa, il tono più asciutto.' },
     r3:{ rilancio:'Ultima sessione: con %P si chiude stanotte o non si chiude più. Il tuo ultimo rilancio è sul tavolo, e la sala aspetta.',
-         tieni:'Ultima sessione. Due rifiuti di fila hanno lasciato il segno: la richiesta di %P non cambia, il tempo per discuterla sì.' },
-    rScesa:'Le altre delegazioni stanno con te, e al tavolo se ne sono accorti: la richiesta di %P si fa più piccola, e chiede soltanto di salvare la faccia.',
+         tieni:'Ultima sessione. Due rifiuti di fila hanno lasciato il segno: al tavolo con %P la richiesta non cambia, il tempo per discuterla sì.' },
+    rScesa:'Le altre delegazioni stanno con te, e al tavolo con %P se ne sono accorti: la richiesta si fa più piccola, e chiede soltanto di salvare la faccia.',
     forza:{ '1':'la sala sta con te', '0':'la sala è divisa', '-1':'la sala sta con loro' },
     eff:{ accordo:'accordo pieno, il testo si firma' },
     mosse:[ { l:'Cedi: %R' }, { l:'Rilanci con un\'offerta minore' }, { l:'Tieni il punto' } ],
@@ -7750,6 +7750,33 @@ const TRATTATIVE_DEF=[
     stati:{ pieno:'Accordo pieno con %P: l\'opposizione si presenta unita.',
             compromesso:'Un compromesso con %P: un\'intesa su pochi punti, ma c\'è.',
             rottura:'Con %P la trattativa si è rotta: l\'opposizione resta divisa.' } },
+  /* L275-8 · LA VERTENZA DELL'ATTIVISTA (F24, D377; lato 'attivista' = L0 vissuto, prima della laurea), dietro TRATTATIVE_VERTENZA
+     (game.js, SPENTA finché le misure non sono verdi). Origini: `ev_percorso` (il corteo: «Le autorità autorizzano il corteo, ma non il
+     percorso») e `ev_cancelli` (la fabbrica che chiude: «l'azienda e i moderati ti mettono nel mirino»). La controparte è quella che la
+     carta nomina già (vertenzaControparte, game.js): 'autorita' = «le autorità» per il corteo, 'azienda' = «l'azienda» per i cancelli;
+     a schermo da negoziatoNome. %P mai soggetto (le autorità / l'azienda: plurale e singolare). Nessuna persona, nessun nome, nessun
+     partito, nessun mezzo d'epoca. Prezzi e arrivo solo sui campi che le due carte già toccano (vertenzaPrezzo, vertenzaChiudi):
+     base (attB), autorevolezza (attA), ceto medio, e il gruppo della carta (giovani per il corteo, lavoratori per i cancelli). */
+  { id:'vertenza', fam:'vertenza', lati:['attivista'], era:'universale', orig:['ev_percorso','ev_cancelli'],
+    controparte:function(it){ return vertenzaControparte(it); }, valida:function(a){ return vertenzaValida(a); },
+    prezzo:function(a, k, R){ vertenzaPrezzo(a, k, R); }, chiudi:function(stato, a, daSe){ vertenzaChiudi(stato, a, daSe); },
+    forzaF:function(con){ return vertenzaForza(con); },
+    kick:'Trattativa', titolo:'Il tavolo con %P',
+    ric:[ { k:'orario', nome:'orari e tempi decisi da loro', pieno:'La base si sente frenata: base −2', mezzo:'La base si sente un po\' frenata: base −1' },
+          { k:'ordine', nome:'un servizio d\'ordine che risponda di tutto', pieno:'Se qualcosa va storto, la colpa è vostra: autorevolezza −2', mezzo:'Se qualcosa va storto, la colpa è vostra: autorevolezza −1' },
+          { k:'posto', nome:'lasciare libero il posto che volevate tenere', pieno:'I più duri parlano di resa: base −1, autorevolezza −1', mezzo:'I più duri parlano di resa: base −1' } ],
+    r1:'La protesta è decisa, ma prima c\'è un tavolo con %P. Le condizioni arrivano una per volta, e la risposta la vogliono prima che la gente si muova.',
+    r2:{ rilancio:'La vostra controproposta torna indietro: al tavolo con %P vi dicono che non basta. Fuori, i tuoi aspettano di sapere se si parte.',
+         tieni:'Il tuo «no» non è piaciuto: al tavolo con %P il tono si è fatto più freddo, e il giorno si avvicina.' },
+    r3:{ rilancio:'Ultimo incontro con %P: o si chiude adesso, o la protesta va avanti senza un accordo. La tua offerta è sul tavolo.',
+         tieni:'Ultimo incontro. Due rifiuti di fila hanno lasciato il segno: al tavolo con %P la richiesta è la stessa, la voglia di aspettare no.' },
+    rScesa:'Al tavolo con %P si sono accorti di quanta gente è pronta a seguirvi: la richiesta si fa più piccola, il tono più cauto.',
+    forza:{ '1':'la gente è con voi', '0':'contate su chi c\'è', '-1':'senza numeri non vi ascoltano' },
+    eff:{ accordo:'accordo pieno, la protesta si fa senza incidenti' },
+    mosse:[ { l:'Cedi: %R' }, { l:'Rilanci con un\'offerta minore' }, { l:'Tieni il punto' } ],
+    stati:{ pieno:'Accordo pieno con %P: la protesta si fa alle condizioni concordate, e nessuno si fa male.',
+            compromesso:'Un compromesso con %P: metà di quello che chiedevano, metà di quello che volevate.',
+            rottura:'Con %P il tavolo si è rotto: la protesta si fa lo stesso, e ha il suo costo.' } },
 ];
 /* ================================================================================================================
    ⚑ L274-3 · DISCORSI_DEF — i sette tipi del discorso coi testi a pezzi (DESIGN-FORMATI.md «⚑ L274-1» D384, D386, D387, D392,
@@ -7787,6 +7814,11 @@ const DISCORSI_COMUNI={
     nazione:{ a:'Le prime reazioni sono buone: il discorso piace.', f:'Il discorso scivola via; domani se ne parlerà poco.', x:'Il discorso diventa un caso: domani lo smonteranno riga per riga.' },
     sala:{ a:'Applausi dalle delegazioni; più d\'una chiede il testo.', f:'Le delegazioni ascoltano in cuffia; nessuno si sbilancia.', x:'Qualche delegazione lascia la sala mentre parli.' } },
   terrRiga:'%TERR ti %TV{aspetta|aspettano} per sentire che cosa hai da dire.',
+  /* ⚑ L275-9 (F30) · la promessa alle radici (piazza, L0): %TERR sempre all'inizio o dopo «:», mai dopo una preposizione semplice */
+  radice:{ l:'%TERR: il movimento ci metterà radici', e:'Entro %M mesi · mantenuta: %B · tradita: %A', titolo:'La promessa alle radici', lab:'la promessa alle radici',
+           ok:'%TERR: il movimento è davanti, come avevi promesso.', no:'%TERR: avevi promesso radici, ma il movimento non è davanti.',
+           laureaSi:'%TERR: ti candidi prima della scadenza, e lì il movimento è davanti.', laureaNo:'%TERR: ti candidi prima della scadenza, e lì il movimento non è ancora davanti.',
+           cassetto:'promessa alle radici: %TERR' },
   bio:{ a:'Un suo discorso viene accolto dagli applausi.', x:'Un suo discorso viene accolto dai fischi.' }
 };
 const DISCORSI_DEF=[
@@ -7837,7 +7869,7 @@ const ARCHI_DEF=[
     si cede o esplode in sciopero generale. Riconverge: la tensione può tornare al tavolo. */
  {id:'vertenza',era:'universale', famiglia:'Economia', dove:'governo', prob:0.13, cooldown:30, titolo:'la vertenza',
   cond:()=>S.ind.unemp>8,
-  filo:()=>({nome: nomeGenere('m')+' '+rnd(PAESE.cognomi), ruolo:'il leader sindacale', arc:'militante'}),   // L11-1
+  filo:()=>({nome: nomeLecito(nomeGenere('m'), rnd(PAESE.cognomi)), ruolo:'il leader sindacale', arc:'militante'}),   // L11-1
   nodi:{
    start:{kick:'Lavoro', t:'Una grande fabbrica annuncia esuberi', text:'Un grande stabilimento del paese annuncia migliaia di esuberi. %FILO, %RUOLO, monta la protesta e ti sfida: o lo Stato interviene, o il mercato fa il suo corso.', ch:[
      {l:'Tavolo di crisi: fondi pubblici per i posti', e:'Salvi l\'occupazione, il conto sale', peso:-1, eco:'Dopo che hai aperto ai sindacati, ', goto:'salvataggio', costo:{debito:0.5},f:()=>{S.ind.debt+=0.5; gd('lavoratori',4); gd('imprenditori',-1);}},
@@ -7867,7 +7899,7 @@ const ARCHI_DEF=[
  /* B — ONDATA SOCIALE (sociale): un movimento di piazza che monta. Ascolto o repressione. */
  {id:'ondata',era:'universale', famiglia:'Società', dove:'governo', prob:0.13, cooldown:30, titolo:'l\'ondata',
   cond:()=>Math.min(S.groups.giovani, S.groups.lavoratori)<38,
-  filo:()=>({nome: nomeGenere('m')+' '+rnd(PAESE.cognomi), ruolo:'la voce del movimento', arc:'militante'}),   // L11-1 (condivide il volto con `vertenza`: nomi diversi, vedi report)
+  filo:()=>({nome: nomeLecito(nomeGenere('m'), rnd(PAESE.cognomi)), ruolo:'la voce del movimento', arc:'militante'}),   // L11-1 (condivide il volto con `vertenza`: nomi diversi, vedi report)
   nodi:{
    start:{kick:'Società', t:'Un movimento di piazza monta', text:'Un movimento spontaneo riempie le piazze: giovani, precari, comitati. %FILO, %RUOLO, ne diventa il simbolo, e cresce ogni settimana.', ch:[
      {l:'Ascolta: apri un tavolo con %FILO', e:'Li riconosci; rischi di legittimarli', peso:-1, eco:'Dopo l\'apertura al dialogo, ', goto:'dialogo', f:()=>{gd('giovani',2);}},
@@ -7897,7 +7929,7 @@ const ARCHI_DEF=[
  /* C — CRISI DIPLOMATICA (internazionale): tensione con un partner. Fermezza o mediazione. */
  {id:'diplomatica',era:'universale', famiglia:'Esteri', dove:'governo', prob:0.12, cooldown:30, titolo:'la crisi diplomatica',
   cond:()=>S.ind.reputazione!=null && S.ind.reputazione<45,
-  filo:()=>({nome: nomeGenere('f')+' '+rnd(PAESE.cognomi), ruolo:'l\'omologa del paese rivale', arc:'diplomatico'}),   // L11-1: arc-diplomatico è donna → nome+ruolo al femminile
+  filo:()=>({nome: nomeLecito(nomeGenere('f'), rnd(PAESE.cognomi)), ruolo:'l\'omologa del paese rivale', arc:'diplomatico'}),   // L11-1: arc-diplomatico è donna → nome+ruolo al femminile
   nodi:{
    start:{kick:'Esteri', t:'Tensione con un partner strategico', text:'%FILO, %RUOLO, alza la voce: dazi minacciati, un\'ambasciata richiamata. La crisi è sul tavolo.', ch:[
      {l:'Linea ferma: difendi l\'interesse nazionale', e:'Mostri i muscoli; %FILO rilancia', peso:1, eco:'Dopo la tua linea dura, ', goto:'escalation', f:()=>{gd('cetomedio',1); repd(-2); relIntMuovi('rivale',-3);}},
@@ -7960,7 +7992,7 @@ const ARCHI_DEF=[
     l'esposizione: l'intreccio cross-sistema col lotto 3. */
  {id:'istituzionale',era:'universale', famiglia:'Istituzioni', dove:'governo', prob:0.12, cooldown:30, titolo:'lo scontro con la Corte',
   cond:()=>S.ultimaLegge!=null && (S.year*12+S.month)-S.ultimaLegge.mese<=8 && S.ind.fiducia!=null && S.ind.fiducia<62,
-  filo:()=>({nome: nomeGenere('f')+' '+rnd(PAESE.cognomi), ruolo:'la Presidente dell\'Alta Corte', arc:'magistrato'}),   // L11-1: arc-magistrato è donna → nome+ruolo al femminile
+  filo:()=>({nome: nomeLecito(nomeGenere('f'), rnd(PAESE.cognomi)), ruolo:'la Presidente dell\'Alta Corte', arc:'magistrato'}),   // L11-1: arc-magistrato è donna → nome+ruolo al femminile
   nodi:{
    start:{kick:'Istituzioni', t:'L\'Alta Corte mette in dubbio la tua riforma', text:'%FILO, %RUOLO, solleva dubbi di legittimità sulla tua riforma bandiera: potrebbe bocciarla.', ch:[
      {l:'Rispetta i rilievi, riscrivi la norma', e:'Garantismo; la base s\'aspettava di più', peso:-1, eco:'Dopo l\'apertura ai rilievi, ', goto:'riscrittura', f:()=>{repd(1);}},
@@ -8048,7 +8080,7 @@ const ARCHI_DEF=[
     non-partigiani, tono da cronaca — mai scandali storici reali riconoscibili. ============================================ */
  {id:'appalto', era:'universale', famiglia:'Scandali', dove:'governo', prob:0.08, cooldown:36, titolo:'lo scandalo dell\'appalto',
   cond:()=> !S.inchiesta && (S.mesiAlGoverno||0)>=6 && (S.scandaloUltimo==null || (S.year*12+S.month)-S.scandaloUltimo>=36),
-  filo:()=>{ S.scandaloUltimo=S.year*12+S.month; return {nome: nomeGenere('m')+' '+rnd(PAESE.cognomi), ruolo:'l\'imprenditore dell\'appalto', arc:'industriale'}; },   // L11-1
+  filo:()=>{ S.scandaloUltimo=S.year*12+S.month; return {nome: nomeLecito(nomeGenere('m'), rnd(PAESE.cognomi)), ruolo:'l\'imprenditore dell\'appalto', arc:'industriale'}; },   // L11-1
   fuga:{p:'Un dossier sull\'appalto circola nelle redazioni', e50:'Una lettera anonima al ministero segnala l\'appalto'},
   nodi:{
    start:{kick:'Istituzioni', t:'Un sussurro sull\'appalto', text:'In privato ti avvisano: quella gara vinta troppo in fretta da %FILO fa parlare. Per ora è solo un mormorio.', ch:[
@@ -8076,7 +8108,7 @@ const ARCHI_DEF=[
 
  {id:'finanziamento', era:'universale', famiglia:'Scandali', dove:'governo', prob:0.08, cooldown:36, titolo:'lo scandalo del finanziamento',
   cond:()=> !S.inchiesta && (S.mesiAlGoverno||0)>=6 && (S.scandaloUltimo==null || (S.year*12+S.month)-S.scandaloUltimo>=36),
-  filo:()=>{ S.scandaloUltimo=S.year*12+S.month; return {nome: nomeGenere('m')+' '+rnd(PAESE.cognomi), ruolo:'il tesoriere del partito', arc:'faccendiere'}; },   // L11-1
+  filo:()=>{ S.scandaloUltimo=S.year*12+S.month; return {nome: nomeLecito(nomeGenere('m'), rnd(PAESE.cognomi)), ruolo:'il tesoriere del partito', arc:'faccendiere'}; },   // L11-1
   fuga:{p:'Un bonifico al partito finisce sui giornali', e50:'Un esposto riservato parla di fondi al partito'},
   nodi:{
    start:{kick:'Istituzioni', t:'Un sussurro sui fondi', text:'In privato ti avvisano: un versamento al partito, gestito da %FILO, è arrivato per vie che è meglio guardare. Per ora è solo un mormorio.', ch:[
@@ -8104,7 +8136,7 @@ const ARCHI_DEF=[
 
  {id:'ente', era:'universale', famiglia:'Scandali', dove:'governo', prob:0.08, cooldown:36, titolo:'lo scandalo dell\'ente',
   cond:()=> !S.inchiesta && (S.mesiAlGoverno||0)>=6 && (S.scandaloUltimo==null || (S.year*12+S.month)-S.scandaloUltimo>=36),
-  filo:()=>{ S.scandaloUltimo=S.year*12+S.month; return {nome: nomeGenere('m')+' '+rnd(PAESE.cognomi), ruolo:'il presidente dell\'ente', arc:'notabile'}; },   // L11-1
+  filo:()=>{ S.scandaloUltimo=S.year*12+S.month; return {nome: nomeLecito(nomeGenere('m'), rnd(PAESE.cognomi)), ruolo:'il presidente dell\'ente', arc:'notabile'}; },   // L11-1
   fuga:{p:'Un\'inchiesta sui conti dell\'ente esce online', e50:'Una relazione della Corte dei conti sull\'ente circola'},
   nodi:{
    start:{kick:'Istituzioni', t:'Un sussurro sull\'ente', text:'In privato ti avvisano: quell\'ente pubblico dove hai messo %FILO spende senza freni. Per ora è solo un mormorio.', ch:[
@@ -8132,7 +8164,7 @@ const ARCHI_DEF=[
 
  {id:'collaboratore', era:'universale', famiglia:'Scandali', dove:'governo', prob:0.08, cooldown:36, titolo:'lo scandalo del collaboratore',
   cond:()=> !S.inchiesta && (S.mesiAlGoverno||0)>=6 && (S.scandaloUltimo==null || (S.year*12+S.month)-S.scandaloUltimo>=36),
-  filo:()=>{ S.scandaloUltimo=S.year*12+S.month; return {nome: rnd(PAESE.nomi)+' '+rnd(PAESE.cognomi), ruolo:'il tuo stretto collaboratore'}; },
+  filo:()=>{ S.scandaloUltimo=S.year*12+S.month; return {nome: nomeLecito(rnd(PAESE.nomi), rnd(PAESE.cognomi)), ruolo:'il tuo stretto collaboratore'}; },
   fuga:{p:'Un articolo mette in fila gli affari del tuo collaboratore', e50:'Una soffiata negli ambienti parla del tuo collaboratore'},
   nodi:{
    start:{kick:'Istituzioni', t:'Un sussurro sul collaboratore', text:'In privato ti avvisano: %FILO ha interessi privati che toccano le tue firme. Per ora è solo un mormorio.', ch:[
@@ -8169,7 +8201,7 @@ const ARCHI_DEF=[
     chiamate rendono dove quelle valute contano. ============================================ */
  {id:'fonte', era:'universale', famiglia:'Società', dove:'entrambi', prob:0.14, cooldown:24, titolo:'il cronista di lungo corso',
   cond:()=> (S.mesiAlGoverno||0)>=4 || !!S.opposizione,
-  filo:()=>({nome: nomeGenere('m')+' '+rnd(PAESE.cognomi), ruolo:'il cronista di lungo corso', arc:'cronista'}),
+  filo:()=>({nome: nomeLecito(nomeGenere('m'), rnd(PAESE.cognomi)), ruolo:'il cronista di lungo corso', arc:'cronista'}),
   nodi:{
    start:{kick:'Ombre', t:'Qualcuno ha qualcosa su di te', text:'%FILO, %RUOLO, chiede di vederti fuori dagli orari. Non porta un registratore. Dice di avere un documento che riguarda una persona a te vicina, e di non aver ancora deciso cosa farne. Non chiede soldi: chiede di essere il primo a cui parli, la prossima volta che parlerai.', ch:[
      {l:'Ascolti cosa ha', e:'Sai prima degli altri; adesso gli devi qualcosa', eco:'Dopo quell\'incontro fuori orario, ', goto:'canale', f:()=>{ stampad(2); visd(5); spregiudicata(2); }},
@@ -8200,7 +8232,7 @@ const ARCHI_DEF=[
              S.tavoloPid = P ? P.id : null;
              /* il RUOLO è una frase intera con segnaposto, tradotta e sostituita QUI (il motore applica T() al
                 risultato: su una stringa già risolta è un no-op). Mai `'testo '+nome`: è la classe di L16-1. */
-             return {nome: nomeGenere('m')+' '+rnd(PAESE.cognomi), ruolo: (typeof segretarioDel==='function' ? segretarioDel(P?T(P.nome):null) : T('il segretario del partito %P').replace('%P', P?T(P.nome):T('un partito vicino'))), arc:'notabile'}; },   // L272-2 Passo 0
+             return {nome: nomeLecito(nomeGenere('m'), rnd(PAESE.cognomi)), ruolo: (typeof segretarioDel==='function' ? segretarioDel(P?T(P.nome):null) : T('il segretario del partito %P').replace('%P', P?T(P.nome):T('un partito vicino'))), arc:'notabile'}; },   // L272-2 Passo 0
   nodi:{
    start:{kick:'Palazzo', t:'Il pranzo esplorativo', text:'%FILO, %RUOLO, accetta un pranzo riservato. Niente giornalisti, niente delegazioni: voi due e la domanda che nessuno pronuncia — si può costruire qualcosa, o ci si limita a non farsi la guerra?', ch:[
      {l:'Metti sul tavolo un programma comune', e:'Fai sul serio; ora sei impegnato', eco:'Dopo il programma messo sul tavolo, ', goto:'programma', f:()=>{ intesaMuovi(S.tavoloPid, 5); }},
@@ -8220,7 +8252,7 @@ const ARCHI_DEF=[
 
  {id:'ascolto', era:'universale', famiglia:'Economia', dove:'governo', prob:0.14, cooldown:24, titolo:'la rappresentante del settore',
   cond:()=> (S.mesiAlGoverno||0)>=6,
-  filo:()=>({nome: nomeGenere('f')+' '+rnd(PAESE.cognomi), ruolo:'la rappresentante del settore', arc:'lobbista'}),
+  filo:()=>({nome: nomeLecito(nomeGenere('f'), rnd(PAESE.cognomi)), ruolo:'la rappresentante del settore', arc:'lobbista'}),
   nodi:{
    start:{kick:'Palazzo', t:'Chiede solo di essere ascoltata', text:'%FILO, %RUOLO, chiede un incontro. Non porta richieste: porta uno studio. Duecento pagine di dati su un dossier che il tuo ufficio sta istruendo da mesi con metà delle risorse. È materiale buono, e lo sai. È anche materiale scritto da chi ha un interesse.', ch:[
      {l:'La ricevi: i dati servono', e:'Guadagni mesi di lavoro istruttorio; l\'agenda gliela apri', eco:'Dopo aver aperto la porta allo studio, ', goto:'studio', f:()=>{ corrented('pontieri',3); corrented('militanti',-2); }},
@@ -8250,7 +8282,7 @@ const ARCHI_DEF=[
     arco vecchio: al ministro e al diplomatico gli eleggibili erano tre). Il `cooldown` resta scritto ma non serve più. ===================================================================================================== */
  {id:'promessa', era:'universale', famiglia:'Società', dove:'entrambi', prob:0.10, cooldown:36, unaVolta:true, titolo:'la promessa di un tempo',
   cond:()=> S.livello>=1,
-  filo:()=>({nome: nomeGenere('f')+' '+rnd(PAESE.cognomi), ruolo:'la maestra del paese'}),
+  filo:()=>({nome: nomeLecito(nomeGenere('f'), rnd(PAESE.cognomi)), ruolo:'la maestra del paese'}),
   nodi:{
    start:{kick:'Società', t:'Una lettera di molti anni fa', text:'%FILO, %RUOLO di un piccolo paese fuori mano dove tenesti uno dei tuoi primi comizi, ti scrive. Allega la lettera che le mandasti allora: prometteva che la strada per il paese sarebbe stata finita. La strada è ancora a metà, e la tua firma lei l\'ha conservata.', ch:[
      {l:'Ci vai di persona', e:'Un giorno tolto all\'agenda; la promessa torna tua', eco:'Dopo il viaggio fino al paese, ', goto:'visita', f:()=>{ credd(2); visd(-1); stampad(1); }},
@@ -8297,7 +8329,7 @@ const ARCHI_DEF=[
 
  {id:'allieva', era:'universale', famiglia:'Società', dove:'entrambi', prob:0.10, cooldown:36, unaVolta:true, titolo:'la giovane che ti ha scelto',
   cond:()=> S.livello>=1,
-  filo:()=>({nome: nomeGenere('f')+' '+rnd(PAESE.cognomi), ruolo:'la giovane collaboratrice'}),
+  filo:()=>({nome: nomeLecito(nomeGenere('f'), rnd(PAESE.cognomi)), ruolo:'la giovane collaboratrice'}),
   nodi:{
    start:{kick:'Palazzo', t:'La lettera di una studentessa', text:'%FILO, una studentessa, ti scrive che si è iscritta al partito dopo averti sentito parlare. Chiede di lavorare con te, anche senza paga, anche solo per rispondere alla posta.', ch:[
      {l:'La prendi nel tuo ufficio', e:'Una persona in più che ci crede; qualcuno dello staff storce il naso', eco:'Dopo che l\'hai presa con te, ', goto:'lavoro', f:()=>{ corrented('militanti',1); visd(1); }},
@@ -23476,7 +23508,7 @@ const MOSSE_CHIUSURA=[
 const LEGGI = [
   // ===== Comuni (ovunque) =====
   { id:'salario_min', nome:'Salario minimo legale', desc:'Fissa per legge una retribuzione oraria minima.', asse:-1, costo:1,
-    iniziale:{usa:1, regnounito:1, francia:1, germania:2015, paesibassi:1, australia:1, india:1, sudafrica:1, giappone:1, canada:1, spagna:1, brasile:1, messico:1, argentina:1, coreasud:1, nigeria:1}, unaTantum:{grp:{lavoratori:6, giovani:3, imprenditori:-6}}, permanenti:{grp:{lavoratori:3, imprenditori:-3}} },
+    iniziale:{usa:1, regnounito:1999, francia:1, germania:2015, paesibassi:1, australia:1, india:1, sudafrica:1, giappone:1, canada:1, spagna:1, brasile:1, messico:1, argentina:1, coreasud:1, nigeria:1}, unaTantum:{grp:{lavoratori:6, giovani:3, imprenditori:-6}}, permanenti:{grp:{lavoratori:3, imprenditori:-3}} },
   { id:'matrimonio', era:'contemporanea', nome:'Matrimonio egualitario', desc:'Estende il matrimonio civile alle coppie dello stesso sesso.', asse:-1, costo:1,
     iniziale:{usa:1, francia:1, regnounito:1, danimarca:1, paesibassi:1, svezia:1, norvegia:1, belgio:1, australia:1, sudafrica:1, germania:1, canada:1, spagna:1, brasile:1, messico:1, argentina:1}, unaTantum:{grp:{giovani:7, cattolici:-7}}, permanenti:{grp:{giovani:3, cattolici:-3}} },
   { id:'droghe', era:'contemporanea', nome:'Legalizzazione droghe leggere', desc:'Depenalizza il consumo e la vendita regolata di cannabis.', asse:-1, costo:1,
@@ -23705,6 +23737,41 @@ const CONFLITTI=[
 /* nomi di fantasia */
 const PROFS=['tecnico','progressista','conservatore','populista'];
 function rnd(a){return a[Math.floor(Math.random()*a.length)];}
+/* L275-4 (⚠ 2 di L275-3) · NIENTE PERSONE REALI nei nomi generati. Le coppie nome + cognome delle liste dei paesi (PAESI.<id>.nomi/nomiM/
+   nomiF × cognomi) che coincidono con una persona reale nota: capi di stato e di governo, leader e ministri, celebrità mondiali evidenti
+   («Daniel Radcliffe» è il caso trovato nel CDP di L275-3, il giornalista dell'intervista). Lista «a vista», compilata senza rete
+   incrociando le liste di oggi: NON esaustiva, da riaprire in F11 (e a ogni lista di nomi nuova). Per paese solo per leggerla: la regola
+   la guarda tutta (una coppia vera in un paese è vera ovunque). */
+const NOMI_VIETATI = {
+  italia:['Davide Serra'],
+  francia:['Vincent Lambert','Laurent Garnier'],
+  usa:['Michael Porter','Sarah Hughes','Emily Hughes','Christopher Hughes','Robert Hughes','Michael Crawford','David Foster','Robert Mercer','James Brooks'],
+  regnounito:['Daniel Radcliffe','Benjamin Kingsley','Thomas Fairfax','Henry Thornton'],
+  australia:['Jack Thompson','James Taylor','Noah Taylor','James Anderson','Grace Jones','Chloe Smith','Chloe Kelly','James Murphy'],
+  india:['Amit Shah','Aditya Chopra','Sanjay Kapoor','Arjun Kapoor','Karan Singh','Amit Kumar','Sanjay Gupta','Rahul Bose','Neha Sharma','Amit Mehta'],
+  sudafrica:['Pieter Botha','Johan Botha','Bongani Khumalo'],
+  argentina:['Diego Torres'],
+  germania:['Felix Klein','Maximilian Weber','Jonas Hofmann'],
+  giappone:['Takumi Saito'],
+  canada:['Jacob Tremblay'],
+  spagna:['Mario Gómez','Hugo Sánchez','Marcos Alonso','Diego López'],
+  coreasud:['Yu-na Kim'],
+  brasile:['Gabriel Barbosa','Lucas Lima','Bernardo Silva'],
+  messico:['Gael García','Sofía Reyes'],
+  nigeria:['Emeka Okafor'],
+  danimarca:['Mikkel Hansen','Christian Poulsen','Mads Pedersen','Frederik Andersen'],
+  belgio:['Koen Wouters']
+};
+const NOMI_VIETATI_TUTTI = (function(){ var o={}; Object.keys(NOMI_VIETATI).forEach(function(k){ NOMI_VIETATI[k].forEach(function(n){ o[n]=true; }); }); return o; })();
+/* La regola, senza dadi in più: se la coppia è vietata si prende il cognome SUCCESSIVO della stessa lista (circolare), finché la coppia è
+   lecita. Chi genera un nome passa di qui (nomePersona, nomeGenere + cognome, mkCand, il volto, le persone ricorrenti, il concorrente);
+   nessuna chiamata a Math.random, niente in S: un nome lecito esce identico a prima. C = la lista dei cognomi (di norma PAESE.cognomi). */
+function nomeLecito(nome, cognome, C){
+  var n=nome+' '+cognome; if(!NOMI_VIETATI_TUTTI[n]) return n;
+  C=C||(typeof PAESE!=='undefined' && PAESE && PAESE.cognomi)||[]; var i=C.indexOf(cognome); if(i<0) return n;
+  for(var k=1;k<C.length;k++){ var m=nome+' '+C[(i+k)%C.length]; if(!NOMI_VIETATI_TUTTI[m]) return m; }
+  return n;
+}
 /* candidato ministro: nome e cognome pescati dal paese attivo (PAESE.nomi/cognomi) */
 /* L9-2 — genere PRIMA del nome (da PAESE.nomiM/nomiF, che esistono per ogni paese; fallback a PAESE.nomi che resta
    dov'è). `g` salvato sul candidato (dato puro, serializza). Il RITRATTO non si salva: lo ricalcola `ritrattoDi(m)`
@@ -23736,7 +23803,7 @@ function quotaFemminileGoverno(){
   return 0.04;
 }
 function mkCand(){ var g=Math.random()<quotaFemminileGoverno()?'f':'m'; var lista=(g==='f'?PAESE.nomiF:PAESE.nomiM)||PAESE.nomi;
-  return {nm:rnd(lista)+' '+rnd(PAESE.cognomi), g:g, profile:rnd(PROFS), comp:1+Math.floor(Math.random()*3)}; }
+  return {nm:nomeLecito(rnd(lista), rnd(PAESE.cognomi)), g:g, profile:rnd(PROFS), comp:1+Math.floor(Math.random()*3)}; }
 
 /* PRESSIONI SULLE POLITICHE (loop attivo — Lotto 3): eventi che ti fanno TORNARE a rivedere una politica lasciata a un estremo,
    quando la condizione economica/sociale matura (il costo ricorrente visibile → deficit → una pressione ti richiama: il loop si

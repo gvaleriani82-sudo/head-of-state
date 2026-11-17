@@ -245,6 +245,21 @@ function rivaleNominato(){
   const p=rnd(pool); S.recentPot.push(p.id); if(S.recentPot.length>2) S.recentPot.shift();
   return p;
 }
+/* L275-7 (F32) · LA preposizione articolata, un punto solo: preposizione semplice (a, di, da, in, su; maiuscola compresa)
+   + articolo → la forma fusa CON lo spazio o l'apostrofo che serve davanti al nome («della », «dell'», «Alla »). Senza articolo
+   (art vuoto o sconosciuto) resta «di ». La leggono potSub (davanti a %POTdet) e ricDiDi (game.js: il paese dell'alleato). */
+function prepArticolata(prep, art){
+  const b={a:'a', di:'de', da:'da', in:'ne', su:'su'}, P=String(prep||''), k=P.toLowerCase(), base=b[k];
+  if(base==null) return P+' ';
+  const fine={ 'il':'l ', 'la':'lla ', 'lo':'llo ', "l'":"ll'", 'gli':'gli ', 'i':'i ', 'le':'lle ' }[art];
+  let out;
+  if(fine==null) out=(k==='di'?'di':P.toLowerCase())+' ';
+  else if(art==='il') out=(k==='di'?'del ':k==='in'?'nel ':base+'l ');
+  else if(art==='i') out=(k==='di'?'dei ':k==='in'?'nei ':base+'i ');
+  else if(art==='gli') out=(k==='di'?'degli ':k==='in'?'negli ':base+'gli ');
+  else out=base+fine;
+  return P.charAt(0)!==P.charAt(0).toLowerCase() ? out.charAt(0).toUpperCase()+out.slice(1) : out;
+}
 function potSub(txt,p){ if(!txt||!p) return txt||'';
   const car=(typeof curLang==='function'&&curLang()==='en')?(p.carattereEn||p.carattere||''):(p.carattere||'');
   if(typeof curLang==='function' && curLang()==='en'){
@@ -254,6 +269,9 @@ function potSub(txt,p){ if(!txt||!p) return txt||'';
     return txt.replace(/%POTDet/g,Det).replace(/%POTdet/g,det).replace(/%POTdi/g,'of '+det).replace(/%POTa/g,'to '+det).replace(/%POTda/g,'from '+det).replace(/%POTsu/g,'on '+det).replace(/%POTin/g,'in '+det).replace(/%POTcar/g,car).replace(/%POT/g,nm);
   }
   const el=(p.art||'la').indexOf("'")>=0; const j=function(b){ return el?b+p.nome:b+' '+p.nome; }; const C=function(s){ return s.charAt(0).toUpperCase()+s.slice(1); };   // elisione (l') → forma attaccata (all'Iran); C = maiuscola a inizio frase (La Russia/L'Iran)
+  /* L275-7 (F32): «a/di/da/in/su %POTdet» → preposizione articolata («accanto alla Cina», «in casa dell'Iran»), PRIMA della
+     sostituzione semplice; solo italiano, solo una preposizione semplice come parola intera subito prima. Prova `prove/l275-7/scan-prep.js`. */
+  txt=txt.replace(/(^|[^A-Za-zÀ-ÿ'’])(a|di|da|in|su|A|Di|Da|In|Su) %POTdet/g, function(x, pre, prep){ return pre+prepArticolata(prep, p.art||'la')+p.nome; });
   return txt.replace(/%POTDet/g,C(j(p.art||'la'))).replace(/%POTdet/g,j(p.art||'la')).replace(/%POTdi/g,j(el?"dell'":'della')).replace(/%POTa/g,j(el?"all'":'alla')).replace(/%POTda/g,j(el?"dall'":'dalla')).replace(/%POTsu/g,j(el?"sull'":'sulla')).replace(/%POTin/g,j(el?"nell'":'nella')).replace(/%POTcar/g,car).replace(/%POT/g,p.nome); }
 function stampad(n){ if(S.ind && S.ind.stampa!=null) S.ind.stampa=clamp(S.ind.stampa+n,0,100); }   // sposta il RAPPORTO CON LA STAMPA (usato dalle conferenze stampa)
 function minFragile(){ return (S.ministers||[]).find(m=>m && !m.resigning && m.loyalty<35) || null; }   // ministro in difficoltà (per la domanda di conferenza)
