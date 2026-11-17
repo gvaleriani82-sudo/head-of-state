@@ -1568,6 +1568,7 @@ function diventaInternazionale(ente){
   S.premier=null; S.dicastero=null; S.capitale=null; S.opposizione=false; S.governoAvversario=null;
   S.ministers=[]; S.coalizione=[S.partito]; S.pendingRimpasto=[]; S.minoranza=false; S.mesiSottoCrisi=0; S.occUltima=null;
   S.ministeroAperto=null; S.tab='gov';   // atterra sulla home del Segretario (niente drill-down residui)
+  discorsoPartnerChiudi();   // L275-10: la promessa al partner aperta si chiude senza effetti (no-op senza promPar)
   S.diplo=null;   // C2: se sei arrivato dal percorso diplomatico, lo chiude (ora sei Segretario)
   bioFatto('Da '+ruoloPrima+' a '+ruoloIntl()+': oltre il vertice nazionale, al servizio del mondo.');
   S.log.unshift({t:T('Al vertice del mondo'), x:T('Sei %R. Non governi un paese: medi tra le potenze.').replace('%R',T(ruoloIntl()))});
@@ -11003,10 +11004,10 @@ let DISCORSI_PLACEBO=false;
 let DISCORSI_RADICE=true;            // L275-9 (F30): la promessa alle radici della piazza (L0), ACCESA dal L275-9 (17/11: prove, CDP IT/EN, guardie, A/B spenta-prima 0/1020, D390 a quattro semi, D174, C4 verdi) · spenta: al L0 solo «nessuna promessa» con perche:'mov', byte per byte
 let DISCORSI_RADICE_PLACEBO=false;   // solo le misure: stesse nascite, giudizio senza effetti
 const DISCORSI_K={ cool:48, pAgenda:0.10, tetto:6, pavimento:-4, scadP:3, scadG:24, avvio:6,
-  radice:{ mesi:6, ok:2, no:2 },   // L275-9: la promessa alle radici, scadenza in mesi, base +ok se mantenuta, autorevolezza −no se tradita
+  radice:{ mesi:6, ok:2, no:2 },   // L275-9: la promessa alle radici, scadenza in mesi, base +ok se mantenuta, autorevolezza −no se tradita · L275-10 Passo 1: misurata a 9 (mantenute 13% come a 6, fuori da 15-85%): resta 6, ⚠ 2 di «⚑ L275-9» chiusa come accettata
   centro:{ L0:100, L1:50, L2:91, L3:56, opp:82, L4:50, L5:100 } };   // ⚑ L274-4: il centro di A per fetta (mediana della valuta, sonda-l274-4.js; < 3 punti da 50 = 50); L1 (54) e L4 (62) rimessi a 50 dal vincolo della C3 (consiglio solenne 0% e assemblea misurato 2% di applausi)
 const DISCORSI_VOCE={ L0:'terr', L1:'terr', L3:'stampa', L3opp:'aula', L2opp:'aula', L4:'ufficio' };   // D385: la voce dell'agenda per fetta (la usa solo il tipo che c'è, via def.giornata)
-let DISCORSI_ROSSO=null;   // solo le prove: 'c4' = la carta come carta IN PIÙ in un mese senza origine (C4 rossa) · 'promessa' = la scadenza che non giudica · 'opp' (L274-3) = all'opposizione la promessa riaperta · 'centro' (L274-4) = il centro di A rimesso a 50
+let DISCORSI_ROSSO=null;   // solo le prove: 'c4' = la carta come carta IN PIÙ in un mese senza origine (C4 rossa) · 'promessa' = la scadenza che non giudica · 'opp' (L274-3) = all'opposizione la promessa riaperta · 'centro' (L274-4) = il centro di A rimesso a 50 · 'partner' (L275-10) = la promessa al partner giudicata senza il gradino · 'livello' (L275-10) = il cambio di livello che non la chiude
 const DIS_ESITI=['a','f','x'];
 function discorsoVivo(){ return DISCORSI && typeof S!=='undefined' && !!S && !LAMPO && typeof DISCORSI_DEF!=='undefined'; }
 /* la fetta del discorso (agendaFetta, più il Passo 0-b: in coabitazione il tipo del capo non nasce) */
@@ -11207,7 +11208,9 @@ function discorsoScelte(def, it){
   var tema=it.dis.temi[P[0]], gn=discorsoTemaNome(tema);
   if(P.length===1) return DIS_TONI.map(function(k){ return { l:T(C.toni[k]), e:discorsoTarghettaTono(k, tema) }; });
   var O=discorsoPromesseOfferte(tema, def, it);
-  if(O.t[0]==='i') return [{ l:T(C.imp.n), e:T(C.imp.nE), pr:null }, { l:T(C.imp.i), e:discorsoTarghettaImpegno(), pr:'i' }];
+  if(O.t[0]==='i'){ var OP=discorsoPartnerOffertaIt(def, it);   // L275-10 (F28): accesa, al posto dell'impegno la promessa con la scadenza (con una aperta torna l'impegno)
+    if(OP) return [{ l:T(C.imp.n), e:T(C.imp.nE), pr:null }, { l:discorsoPartnerScelta(OP), e:discorsoPartnerTarghetta(OP), pr:'pp' }];
+    return [{ l:T(C.imp.n), e:T(C.imp.nE), pr:null }, { l:T(C.imp.i), e:discorsoTarghettaImpegno(), pr:'i' }]; }
   if(O.t[0]==='r'){ var TR=PAESE.territori[discorsoRadiceOfferta(tema, it)];   // L275-9: la promessa alle radici, la targhetta dallo stato (D190)
     return [{ l:T(C.prom.n), e:T(C.promE.n), pr:null }, { l:arcoTerrSub(T(C.radice.l), TR), e:discorsoRadiceTarghetta(), pr:'r' }]; }
   var ch=[{ l:T(C.prom.n), e:T(C.promE.n), pr:null }];
@@ -11366,7 +11369,7 @@ function discorsoRisolvi(it, ci){
   if(it.passi.length<2){ it.passi.push(ci); it.data.ch=discorsoScelte(def, it);   // passi 1 e 2: lo stesso item, non risolto
     if(it.passi.length===1 && typeof suona==='function') suona('discorso-microfono');   // D392: dal tema al tono, il microfono (il secondo suono del gesto, dopo il tocco)
     return; }
-  var tema=V.temi[it.passi[0]], tono=DIS_TONI[it.passi[1]], taglia=(ch.pr==='p' || ch.pr==='g') ? ch.pr : null, imp=ch.pr==='i', rad=ch.pr==='r', ora=meseAss();
+  var tema=V.temi[it.passi[0]], tono=DIS_TONI[it.passi[1]], taglia=(ch.pr==='p' || ch.pr==='g') ? ch.pr : null, imp=ch.pr==='i', rad=ch.pr==='r', par=ch.pr==='pp', ora=meseAss();
   if((S.vicenda && S.vicenda.a) || (S.negoziato && S.negoziato.a && S.negoziato.a.da===ora) || (S.discorso && S.discorso.ult===ora) || discorsoTipo()!==def){ it.resolved=true; it.outcome=T('Il discorso è rinviato.'); return; }   // nato nello stesso mese: mai insieme; un altro già fatto nel mese; la carriera ha cambiato fetta nel mese (il tipo non è più il suo)
   var reaz=discorsoReazione(tema, tono, taglia);
   if(!DISCORSI_PLACEBO){
@@ -11380,13 +11383,14 @@ function discorsoRisolvi(it, ci){
     if(reaz.esito==='a' && (S.livello===2 || S.livello===3)) agCorrenti(1);
     if(taglia && tema && tema.k==='grp') discorsoPromessa(tema.g, taglia, def.id);
     if(rad) discorsoRadiceApri(discorsoRadiceOfferta(tema, it));   // L275-9: nessun effetto subito, solo lo stato (S.attivista.promRad)
+    if(par) discorsoPartnerApri(discorsoPartnerOffertaIt(def, it));   // L275-10: nessun effetto subito, solo lo stato (S.diplo.promPar · S.intl.promPar)
     if(reaz.pl && typeof RIC_FATTI!=='undefined' && reaz.esito!=='f'){ var fk=reaz.esito==='a' ? 'dis_si' : 'dis_no'; if(RIC_FATTI[fk]!=null) ricFatto(reaz.pl.ruolo, fk); }   // D389 (iii): un fatto sulla persona in platea
     if(reaz.esito!=='f') bioFatto(DISCORSI_COMUNI.bio[reaz.esito]);
   }
   var D=S.discorso || (S.discorso={ ult:null, n:0, e:null });
   D.ult=ora; D.n=(D.n||0)+1; D.e=reaz.esito;
   it.disEsito=reaz.esito; it.disR=reaz.R;
-  var lab=T(DIS_TONI_TXT[tono])+(taglia ? ' · '+T(taglia==='p' ? 'un impegno preciso' : 'la tua parola') : (imp ? ' · '+T('l\'impegno') : (rad ? ' · '+T(DISCORSI_COMUNI.radice.lab) : '')));
+  var lab=T(DIS_TONI_TXT[tono])+(taglia ? ' · '+T(taglia==='p' ? 'un impegno preciso' : 'la tua parola') : (imp ? ' · '+T('l\'impegno') : (rad ? ' · '+T(DISCORSI_COMUNI.radice.lab) : (par ? ' · '+T('la tua parola') : ''))));
   var rx=T(DISCORSI_COMUNI.reazioni[discorsoSala(it)][reaz.esito] || DIS_ESITO_TXT[reaz.esito]);
   S.log.unshift({ t:discorsoTitolo(it), x:T('Tema:')+' '+discorsoTemaNome(tema)+' · '+lab+'. '+rx });
   S.ind.consenso=computeConsenso();
@@ -11466,6 +11470,90 @@ function discorsoRadicePulisci(){
   var A=S.attivista; if(!A || A.promRad==null) return;
   var P=A.promRad, n=(PAESE.territori||[]).length;
   if((A.laurea && DISCORSI_ROSSO!=='laurea') || S.livello!==0 || typeof P!=='object' || Array.isArray(P) || !Number.isInteger(P.i) || P.i<0 || P.i>=n || !Number.isInteger(P.m) || !Number.isInteger(P.scad)) delete A.promRad;
+}
+/* ⚑ L275-10 (F28) · LA PROMESSA AL PARTNER E ALL'ENTE — promessa al partner ACCESA dal L275-10 (interruttore DISCORSI_PARTNER). Al passo 3 dell'assemblea (L4) e della
+   conferenza (L5) la seconda scelta non è più «l'impegno» solo subito ma una promessa con una scadenza (DISCORSI_K.partner), che subito
+   non dà e non toglie niente: tutto alla scadenza. Con una promessa già aperta la seconda scelta torna «l'impegno» di oggi, identica.
+   · L5, conferenza: il destinatario è il partner più freddo, scelto da discorsoImpegnoEff() (la stessa funzione dell'impegno: il cv);
+     lo stato vive in S.diplo.promPar={k:'partner', id, v0, m, scad} (S.diplo si azzera uscendo dal L5: diventaInternazionale lo mette a
+     null, e prima di farlo chiude la promessa senza effetti con una riga). v0 = la relazione (S.diplo.bil[].v, intero 0-100) alla scelta;
+     mantenuta se alla scadenza v ≥ v0 + 1 (il gradino: 1, quello che l'impegno muove già, −1) → il credito +ok; tradita → il credito −no;
+     partner sparito (bilGennaio lo ha tolto o passato a un successore) → chiusa senza effetti.
+   · L4, assemblea: il destinatario è l'ente; lo stato in S.intl.promPar={k:'ente', v0, m, scad}, v0 = la coesione alla scelta; mantenuta
+     se alla scadenza la coesione è ≥ v0 → la stampa +ok (discorsoStampa, il campo che l'impegno tocca già); tradita → la stampa −no.
+   · Il ritmo: nessun pace() al L4-L5 (creditoMuovi, stampad e le carte di quei livelli non lo leggono).
+   · Il giudizio: al confine del mese di scadenza, DOPO l'avanzamento mensile del livello (avanzaMese: L5 dopo bilMese e concMese, L4 dopo
+     intDrift), dopo S.month++: il mese che si chiude è meseAss()−1. discorsoPartnerEsito è pura.
+   · Fine carriera (gameOver) con la promessa aperta: chiusa senza effetti con una riga. applySnap (discorsoPartnerPulisci) toglie un campo
+     illeggibile, di un altro livello o con un partner che non c'è. Mai S.promesseCampagna, mai voto, forze, seggi, gruppi, RIC_FATTI. */
+let DISCORSI_PARTNER=true;             // L275-10 (F28): la promessa del diplomatico e del segretario internazionale, ACCESA dal L275-10 (17/11: prove, CDP IT/EN, guardie, A/B spenta-prima 0/1020, D390 a quattro semi, D174, C4 verdi) · spenta: «l'impegno» com'era, byte per byte
+let DISCORSI_PARTNER_PLACEBO=false;    // solo le misure: stesse nascite, giudizio senza effetti
+DISCORSI_K.partner={ mesi:12, ok:2, no:2 };   // L275-10: una costante per tutti e due i livelli
+function discorsoPartnerCasa(){ return S.livello===5 ? (S.diplo||null) : (S.livello===4 ? (S.intl||null) : null); }
+/* l'offerta (pura): null, o {k:'partner', id} al L5 conferenza, o {k:'ente'} al L4 assemblea */
+function discorsoPartnerOffertaIt(def, it){ return discorsoPartnerOfferta(def || discorsoTipo()); }
+function discorsoPartnerOfferta(def){
+  if(!DISCORSI_PARTNER || S.opposizione || !def) return null;
+  var H=discorsoPartnerCasa(); if(!H || H.promPar) return null;
+  if(S.livello===5 && def.id==='conferenza'){ var I=discorsoImpegnoEff(); return (I.cv && I.cv.k==='part') ? { k:'partner', id:I.cv.id } : null; }
+  if(S.livello===4 && def.id==='assemblea') return (discorsoStampaChi()==='stampa' && typeof S.intl.coesione==='number') ? { k:'ente' } : null;
+  return null;
+}
+/* la valuta del premio (credito al L5, stampa al L4): {nome, ok, no} per la targhetta */
+function discorsoPartnerValuta(k){ return k==='partner' ? discorsoValutaNome({k:'credito'}) : T(DISCORSI_COMUNI.valuta.stampa); }
+function discorsoPartnerTarghetta(O){
+  var K=DISCORSI_K.partner, v=discorsoPartnerValuta(O && O.k);
+  return T(DISCORSI_COMUNI.partner.e).replace('%M', K.mesi).replace('%OK', v+' '+discorsoNum(K.ok)).replace('%NO', v+' '+discorsoNum(-K.no));
+}
+/* il destinatario nelle frasi: al L5 il nome del partner (forma 'det'), al L4 «l'assemblea» */
+function discorsoPartnerNome(P){ return (P && P.k==='partner') ? bilNome(P.id, 'det') : T(DISCORSI_COMUNI.partner.assemblea); }
+function discorsoPartnerScelta(O){ var C=DISCORSI_COMUNI.partner; return O.k==='partner' ? T(C.l5).replace('%P', bilNome(O.id, 'det')) : T(C.l4); }
+function discorsoPartnerApri(O){
+  var H=discorsoPartnerCasa(); if(!O || !H || H.promPar) return null;
+  var m=meseAss(), scad=m+DISCORSI_K.partner.mesi;
+  if(O.k==='partner'){ var p=(H.bil||[]).find(function(x){ return x && x.id===O.id; }); if(!p) return null; H.promPar={ k:'partner', id:O.id, v0:p.v, m:m, scad:scad }; }
+  else H.promPar={ k:'ente', v0:S.intl.coesione, m:m, scad:scad };
+  return H.promPar;
+}
+/* pura: 'ok' · 'no' · 'via' (il partner non c'è più) · null (niente da giudicare nel mese che si chiude, `chiuso`) */
+function discorsoPartnerEsito(chiuso){
+  var H=discorsoPartnerCasa(), P=H && H.promPar; if(!P || chiuso<P.scad) return null;
+  if(P.k==='partner'){ var p=(H.bil||[]).find(function(x){ return x && x.id===P.id; }); if(!p || typeof p.v!=='number') return 'via'; return p.v>=P.v0+(DISCORSI_ROSSO==='partner' ? 0 : 1) ? 'ok' : 'no'; }   // 'partner' = la rossa della prova: senza il gradino
+  return (typeof S.intl.coesione==='number' && S.intl.coesione>=P.v0) ? 'ok' : 'no';
+}
+function discorsoPartnerRiga(P, chiave){
+  var C=DISCORSI_COMUNI.partner, t=P.k==='partner' ? T(C.titoloP).replace('%A', discorsoPartnerA(P.id)) : T(C.titoloE);
+  var x=chiave==='chiusa' ? T(C.chiusa) : T(C[chiave+(P.k==='partner' ? 'P' : 'E')]).replace('%P', cap(bilNome(P.id||'', 'det')));
+  S.log.unshift({ t:t, x:x });
+}
+/* «a» + il partner: in italiano la preposizione articolata (prepArticolata, l'articolo della potenza), in inglese «to» */
+function discorsoPartnerA(id){
+  if(typeof curLang==='function' && curLang()==='en') return 'to '+bilNome(id, 'det');
+  var d=bilDef(id); if(!d) return 'a '+id;
+  return prepArticolata('a', d.art||'la')+d.nome;
+}
+/* avanzaMese, L4 e L5, dopo l'avanzamento del livello e dopo S.month++ */
+function discorsoPartnerMese(){
+  var chiuso=meseAss()-1, es=discorsoPartnerEsito(chiuso); if(!es) return;
+  var H=discorsoPartnerCasa(), P=H.promPar, K=DISCORSI_K.partner; delete H.promPar;
+  if(es==='via'){ discorsoPartnerRiga(P, 'chiusa'); return; }
+  if(!DISCORSI_PARTNER_PLACEBO && !DISCORSI_PLACEBO){
+    if(P.k==='partner') creditoMuovi(es==='ok' ? K.ok : -K.no);
+    else discorsoStampa(es==='ok' ? K.ok : -K.no);
+  }
+  discorsoPartnerRiga(P, es);
+  if(MESE_IN_CORSO && typeof promessaEsitoSuono==='function') promessaEsitoSuono(es==='ok' ? 0 : 1, es==='ok' ? 1 : 0);
+}
+/* cambio di livello (L5 → L4) o fine carriera: la promessa aperta si chiude senza effetti, con una riga */
+function discorsoPartnerChiudi(){
+  if(typeof S==='undefined' || !S || DISCORSI_ROSSO==='livello') return;   // 'livello' = la rossa della prova: il cambio di livello non chiude
+  [S.diplo, S.intl].forEach(function(H){ if(H && H.promPar && typeof H.promPar==='object'){ var P=H.promPar; delete H.promPar; if(Array.isArray(S.log)) discorsoPartnerRiga(P, 'chiusa'); } });
+}
+/* applySnap: illeggibile, di un altro livello, col partner che non c'è → via (nessuna migrazione) */
+function discorsoPartnerPulisci(){
+  var D=S.diplo, I=S.intl, ok=function(P){ return P && typeof P==='object' && !Array.isArray(P) && typeof P.v0==='number' && Number.isInteger(P.m) && Number.isInteger(P.scad); };
+  if(D && D.promPar!=null){ var P=D.promPar; if((S.livello!==5 && DISCORSI_ROSSO!=='livello') || !ok(P) || P.k!=='partner' || !(D.bil||[]).some(function(x){ return x && x.id===P.id; })) delete D.promPar; }
+  if(I && I.promPar!=null){ var Q=I.promPar; if((S.livello!==4 && DISCORSI_ROSSO!=='livello') || !ok(Q) || Q.k!=='ente') delete I.promPar; }
 }
 /* aggiornaArchi: (1) prova ad accendere un nuovo arco "in sottofondo" (se c'è uno slot libero); (2) presenta
    UNA SOLA carta-arco — la coda FIFO sceglie chi aspetta da più tempo, gli altri restano in attesa. L'attivazione
@@ -13034,11 +13122,13 @@ function avanzaMese(){
     if(S.diplo){ S.diplo.mesiAlto=(S.diplo.credito>=70)?(S.diplo.mesiAlto||0)+1:0; }   // mesi a credito alto → garantiscono la promozione
     bilMese();   // L260-5: deriva dei partner trascurati e controllo di gennaio (no-op con DIPLO_BILATERALI spento)
     concMese();   // L260-5bis: il passo del concorrente (no-op con DIPLO_CONCORRENTE spento)
+    discorsoPartnerMese();   // L275-10: la promessa al partner alla scadenza, dopo il passo del livello (no-op senza promPar)
     genAgenda(false); render(); commitSnap();
     return;
   }
   if(S.livello===4){   // SEGRETARIO GENERALE (fase C1a): medi tra i blocchi; NON perdi a crisi/insolvenza nazionali
     intDrift();
+    discorsoPartnerMese();   // L275-10: la promessa all'assemblea alla scadenza, dopo il passo del livello (no-op senza promPar)
     S.intl.coesBassa = (S.intl.coesione<25) ? (S.intl.coesBassa||0)+1 : 0;
     if(S.intl.coesBassa>=3){ return gameOver('mandatoInt'); }   // coesione crollata a lungo → estromesso (conseguenza delle TUE scelte)
     S.intl.mesiInCarica=(S.intl.mesiInCarica||0)+1;
@@ -16192,6 +16282,7 @@ function gameOver(reason){
   if(lampoSalvaSpento()){   // L251-2: una sfida finita prima del tempo (crisi, rivolta, primaria…) = zero stelle; né lo storico (aggiungiCarriera) né l'autosave (chiudiAutosave) si toccano
     if(typeof taciTutto==='function') taciTutto(); if(typeof ambiente==='function') ambiente('fine');
     if(!LAMPO.finito) lampoFine({ stelle:0, punti:0, riga:'', motivo:reason }); return; }
+  discorsoPartnerChiudi();   // L275-10: fine carriera, la promessa aperta si chiude senza effetti (no-op senza promPar)
   if(typeof taciTutto==='function') taciTutto();   // L95-3: si ferma tutto; poi suona `finale` solo se il finale è nella lista
   if(FINALI_CON_SUONO.indexOf(reason)>=0 && typeof suona==='function') suona('finale');
   if(FINALI_CON_SUONO.indexOf(reason)>=0 && typeof musica==='function') musica('finale');   // L114-1: il brano del finale, sugli stessi motivi
@@ -16606,7 +16697,8 @@ function applySnap(snap){
   if(S.partitoProprio && S.partitoProprio.sedi!=null) ppSediPulisci();
   if(S.ricorrenti!=null) ricPulisci();
   if(S.discorso!=null) discorsoPulisci();   // L274-2: il discorso (un valore illeggibile si toglie)
-  if(S.attivista && S.attivista.promRad!=null) discorsoRadicePulisci();   // L275-9: la promessa alle radici (illeggibile o dopo la laurea si toglie)
+  if(S.attivista && S.attivista.promRad!=null) discorsoRadicePulisci();
+  if((S.diplo && S.diplo.promPar!=null) || (S.intl && S.intl.promPar!=null)) discorsoPartnerPulisci();   // L275-10: la promessa al partner o all'ente   // L275-9: la promessa alle radici (illeggibile o dopo la laurea si toglie)
   if(S.negoziato!=null) negoziatoPulisci();   // L273-2: il negoziato aperto (un valore illeggibile si toglie)
   if(S.vicenda!=null) vicendaPulisci();   // L272-2: la vicenda aperta (un valore illeggibile si toglie)   // L271-2: le persone ricorrenti (un valore illeggibile si toglie)
   if(S.partitoProprio && S.partitoProprio.trag!=null) ppTragPulisci();   // L260-7bis: il registro dei traguardi illeggibile si toglie   // L260-7: un registro delle sedi illeggibile si toglie (senza = nessuna sede)

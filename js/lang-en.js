@@ -36684,4 +36684,17 @@ const EN = {
   "%TERR: ti candidi prima della scadenza, e lì il movimento è davanti.":"You stand for office before the deadline; in %TERR your movement is ahead.",
   "%TERR: ti candidi prima della scadenza, e lì il movimento non è ancora davanti.":"You stand for office before the deadline; in %TERR your movement is not ahead yet.",
   "promessa alle radici: %TERR":"promise of roots: %TERR",
+  /* ⚑ L275-10 (F28): la promessa al partner (L5) e all'assemblea (L4) */
+  "Una promessa di un passo avanti: %P":"A promise of a step forward: %P",
+  "Una promessa all'assemblea: nessuno resterà indietro":"A promise to the assembly: no one will be left behind",
+  "Entro %M mesi · mantenuta: %OK · tradita: %NO":"Within %M months · kept: %OK · broken: %NO",
+  "La promessa %A":"The promise %A",
+  "La promessa all'assemblea":"The promise to the assembly",
+  "%P: il passo avanti è arrivato, come avevi promesso.":"%P: the step forward has come, as you promised.",
+  "%P: avevi promesso un passo avanti, ma il rapporto non si è mosso.":"%P: you promised a step forward, but the relationship has not moved.",
+  "L'assemblea è rimasta unita, come avevi promesso.":"The assembly has held together, as you promised.",
+  "Avevi promesso un'assemblea unita: la coesione è scesa.":"You promised a united assembly: cohesion has slipped.",
+  "Le cose cambiano prima della scadenza: la promessa si chiude senza bilancio.":"Things change before the deadline: the promise closes with no reckoning.",
+  "promessa aperta: %P":"open promise: %P",
+  "l'assemblea":"the assembly",
 };

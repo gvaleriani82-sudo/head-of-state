@@ -5163,9 +5163,11 @@ function discorsoCassettoHtml(){
   if(P) parti.push(T('promessa aperta con %G').replace('%G', nomeGruppo(P.grp)));
   const R=S.attivista && S.attivista.promRad, TR=R && PAESE.territori ? PAESE.territori[R.i] : null;   // L275-9: la promessa alle radici aperta
   if(TR) parti.push(arcoTerrSub(T(DISCORSI_COMUNI.radice.cassetto), TR));
+  const PP=(S.livello===5 && S.diplo && S.diplo.promPar) || (S.livello===4 && S.intl && S.intl.promPar) || null;   // L275-10: la promessa al partner o all'assemblea aperta
+  if(PP && typeof discorsoPartnerNome==='function') parti.push(T(DISCORSI_COMUNI.partner.cassetto).replace('%P', discorsoPartnerNome(PP)));
   if(!parti.length) return '';
   if(parti.length===1 && P) parti[0]=T('Discorso · promessa aperta con %G').replace('%G', nomeGruppo(P.grp));
-  else if(parti.length===1 && TR) parti[0]=T('Discorso')+' · '+parti[0];
+  else if(parti.length===1 && (TR || PP)) parti[0]=T('Discorso')+' · '+parti[0];
   return `<div class="vic-riga contorno">${parti.join(' · ')}</div>`;
 }
 function vicendaRigaDati(){

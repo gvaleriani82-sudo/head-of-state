@@ -7819,7 +7819,13 @@ const DISCORSI_COMUNI={
            ok:'%TERR: il movimento è davanti, come avevi promesso.', no:'%TERR: avevi promesso radici, ma il movimento non è davanti.',
            laureaSi:'%TERR: ti candidi prima della scadenza, e lì il movimento è davanti.', laureaNo:'%TERR: ti candidi prima della scadenza, e lì il movimento non è ancora davanti.',
            cassetto:'promessa alle radici: %TERR' },
-  bio:{ a:'Un suo discorso viene accolto dagli applausi.', x:'Un suo discorso viene accolto dai fischi.' }
+  bio:{ a:'Un suo discorso viene accolto dagli applausi.', x:'Un suo discorso viene accolto dai fischi.' },
+  /* ⚑ L275-10 (F28) · la promessa al partner (L5) e all'ente (L4): %P sempre all'inizio o dopo «:»; %A = «alla Francia» (prepArticolata) */
+  partner:{ l5:'Una promessa di un passo avanti: %P', l4:'Una promessa all\'assemblea: nessuno resterà indietro',
+            e:'Entro %M mesi · mantenuta: %OK · tradita: %NO', titoloP:'La promessa %A', titoloE:'La promessa all\'assemblea',
+            okP:'%P: il passo avanti è arrivato, come avevi promesso.', noP:'%P: avevi promesso un passo avanti, ma il rapporto non si è mosso.',
+            okE:'L\'assemblea è rimasta unita, come avevi promesso.', noE:'Avevi promesso un\'assemblea unita: la coesione è scesa.',
+            chiusa:'Le cose cambiano prima della scadenza: la promessa si chiude senza bilancio.', cassetto:'promessa aperta: %P', assemblea:'l\'assemblea' }
 };
 const DISCORSI_DEF=[
   { id:'piazza', fette:['L0'], era:'universale', orig:['ev_aula','ev_festa'], giornata:['terr'], kick:'Discorso', terr:true,
