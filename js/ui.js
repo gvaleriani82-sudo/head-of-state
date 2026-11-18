@@ -5123,7 +5123,7 @@ function negoziatoCartaHtml(it, idx){
   const pz=N.pz||0, tacche=[1,2,3].map(k=>`<i class="${k<=pz?'on':''}"></i>`).join('');
   const righe=it.resolved ? '' : `<div class="neg-righe"><div>${sub('Chiedono: %R')}</div><div>${sub('Hai già concesso: %C')}</div><div>${sub('Al tavolo: %F')}</div></div>`;   // L273-3 (D380): fuori dal testo del round
   h+=`<div class="ag major vic-carta ${it.resolved?'done':''}">${agScene(it)}<div class="ah"><div class="kick vic-kick"><span>${T('Trattativa · round %N di %M').replace('%N',N.r||1).replace('%M',3)}</span><span class="vic-tacche" aria-hidden="true" title="${T('Pazienza')}">${tacche}</span></div><h3>${sub(d.t)}</h3></div>
-    ${righe}<div class="atext">${sub(d.text)}</div>`;
+    ${(typeof negoziatoRicRiga==='function' && negoziatoRicRiga(it))?ricRigaHtml(it.ric):''}${righe}<div class="atext">${sub(d.text)}</div>`;   /* L275-12 (⚠ 5): la riga di F18, solo i tipi con ricRiga (il dicastero) */
   if(!it.resolved){ h+=`<div class="opts">`+d.ch.map((c,i)=>
     `<button class="opt" onclick="resolveItem(${idx},${i})"><span class="ol">${sub(c.l)}</span><span class="oe">${sub(c.e)}</span>${costoChip(c)}</button>`).join('')+`</div>`; }
   else h+=`<div class="outcome">${it.outcome||''}</div>${esitiHtml(it)}${tornaTavoloHtml(it)}`;

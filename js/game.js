@@ -1329,7 +1329,7 @@ function pickMinistro(){
   let pool=MINISTRO_CARTE.filter(function(c){ return (!c.dic||c.dic===S.dicastero) && (!c.cond||c.cond()) && eraViva(c); });
   const q=pescaBag('minc|'+S.dicastero, pool); if(!q) return null;
   S.ministroUltimo=S.year*12+S.month;
-  return discorsoTrasforma({ kind:'ministro', data:q, resolved:false });   // L274-2 · L274-3: «la legge in aula» nasce da mg_misura (spenta: l'item com'è)
+  return negoziatoTrasforma(discorsoTrasforma({ kind:'ministro', data:q, resolved:false }));   // L274-2 · L274-3: «la legge in aula» nasce da mg_misura (spenta: l'item com'è) · L275-11: mi_sacrificio può diventare il round 1 del dicastero (spenta: l'item com'è)
 }
 /* dossier del TUO settore (filtro min===dicastero): le tue decisioni contano davvero, muovono il tuo dominio. */
 function pickDossierSettore(){
@@ -6861,7 +6861,8 @@ function pickLocale(){
   function condOk(e){ return !e.cond||e.cond(); }   // carte stagionali/condizionate (es. il concerto di Capodanno)
   let pool=LOCALE_EV.filter(function(e){ return tipoOk(e)&&condOk(e)&&(typeof eraVivaT!=='function'||eraVivaT(e)); });   // FIX era-gate percorso locale (default eraVivaT: la governance locale è senza-tempo; i moderni → contemporanea, con equivalenti '50)
   const ev=pescaBag('loc|'+S.locale.tipo, pool); if(!ev) return null;   // sacchetto per-tipo (citta/regione separati)
-  return vicendaTrasforma({ kind:'locale', data:ev, resolved:false });   // L272-2: `l_alluvione` può diventare il tempo 1 (spenta: l'item com'è)
+  var itL=vicendaTrasforma({ kind:'locale', data:ev, resolved:false });   // L272-2: `l_alluvione` può diventare il tempo 1 (spenta: l'item com'è)
+  return TRATTATIVE_GIUNTA ? negoziatoTrasforma(itL) : itL;   // L275-13: l_civica può diventare il round 1 della giunta (spenta: l'item com'è)
 }
 /* fine mandato locale: rielezione CLEMENTE (consenso ≥ 40 → rieletto; sotto → sconfitta). La via maestra è salire.
    L261-1: la chiama la proclamazione della notte locale (concludiNotteTipo; urnaLocale la chiama diretta a interruttore spento): la
@@ -8590,11 +8591,11 @@ function agendaRifai(k){
   try{
     if(f==='att') return cardAttivistaEvento(id);
     if(f==='camp'){ if(S.attivista) S.attivista.campOfferta=true; return cardCampOfferta(); }
-    if(f==='loc'){ var e=agTrova(LOCALE_EV, id); return e?{kind:'locale', data:e, resolved:false}:null; }
+    if(f==='loc'){ var e=agTrova(LOCALE_EV, id); if(!e) return null; var itR={kind:'locale', data:e, resolved:false}; return TRATTATIVE_GIUNTA ? negoziatoTrasforma(itR) : itR; }   // L275-13: come pickLocale (spenta: l'item com'è)
     if(f==='punto'){ var q=agTrova(PUNTO_PARTITO, id); return q?{kind:'puntopartito', data:q, resolved:false}:null; }
     if(f==='retro'){ var b=agTrova(RETRO_BEAT, id); return b?{kind:'event', data:b, resolved:false}:null; }
     if(f==='leggero'){ var bl=agTrova(BEAT_LEGGERI, id); return bl?{kind:'event', data:bl, resolved:false}:null; }
-    if(f==='minc'){ var mc=agTrova(MINISTRO_CARTE, id); return mc?{kind:'ministro', data:mc, resolved:false}:null; }
+    if(f==='minc'){ var mc=agTrova(MINISTRO_CARTE, id); return mc?negoziatoTrasforma({kind:'ministro', data:mc, resolved:false}):null; }   // L275-11: come pickMinistro (spenta: l'item com'è)
     if(f==='crisiint'){ var ci=agTrova(CRISI_INT, id); return ci?crisiIntCarta(ci):null; }
     if(f==='diplo'){ var dp=agTrova(DIPLO_EV, id); return dp?diploCarta(dp):null; }
     if(f==='diplodoss'){ var dd=agTrova(DIPLO_DOSS, id); return dd?{kind:'event', data:dd, resolved:false}:null; }
@@ -10560,10 +10561,12 @@ function vicendaSegnoNascita(a){
 let TRATTATIVE=true;   // L273-4 (16/11): ACCESA coi tre tipi (D379 passa per fetta e per livello vissuto, A/B spenta-prima 0/1224, CDP verde). L273-2 (15/11): il motore con un negoziato di prova (il patto di governo); contenuto, schermo e accensione nella riga 28
 let TRATTATIVE_PLACEBO=false;
 let TRATTATIVE_VERTENZA=true;   // L275-8 (F24): la vertenza dell'attivista (TRATTATIVE_DEF.vertenza), ACCESA dal L275-8 (17/11: prove, CDP IT/EN, guardie, A/B spenta-prima 0/1020, D379, D174, C4 verdi); spenta = il lato 'attivista' non esiste (negoziatoLato dà null al L0) e ev_percorso/ev_cancelli restano com'erano. Banco: __TRATTATIVE_VERTENZA_ON / __TRATTATIVE_VERTENZA_SPENTO (vince) in __reseed
-const TRATTATIVE_K={ cool:{patto:30, estero:36, opp:36, vertenza:36}, freddo:24, attesaMax:2 };
+let TRATTATIVE_DICASTERO=true;   // L275-11 (F22): la trattativa del ministro col capo del governo (TRATTATIVE_DEF.dicastero), ACCESA dal L275-12 (cooldown 60, il round 2-3 al posto della sola carta del ministro: D379 passa su us1960 ministro con media −0,009995, sulla soglia); spenta = il lato 'ministro' non esiste (negoziatoLato dà null al L2) e mi_sacrificio resta com'era. Banco: __TRATTATIVE_DICASTERO_ON / __TRATTATIVE_DICASTERO_SPENTO (vince) in __reseed
+let TRATTATIVE_GIUNTA=true;   // L275-13 (F23): la trattativa del sindaco con la lista civica (TRATTATIVE_DEF.giunta), ACCESA dal L275-13 (17/11, cooldown 36: D379 sulle partenze locali media −0,0002 sul L1 vissuto, C4, D174, prove, CDP IT/EN, guardie, A/B spenta-prima 0/1020 verdi); spenta = il lato 'locale' non esiste (negoziatoLato dà null al L1) e l_civica resta com'era. Banco: __TRATTATIVE_GIUNTA_ON / __TRATTATIVE_GIUNTA_SPENTO (vince) in __reseed
+const TRATTATIVE_K={ cool:{patto:30, estero:36, opp:36, vertenza:36, dicastero:60, giunta:36}, freddo:24, attesaMax:2 };   // L275-13: giunta 36 (la leva della consegna è 60)
 let TRATTATIVE_ROSSO=null;   // solo le prove: 'c4' = il round come carta IN PIÙ anche senza posto (C4 rossa) · 'vicenda' = nasce anche con una vicenda aperta · 'rilancio' = il rilancio con F 0 che chiude al round 1 (la regola di prima del L273-3) · 'deleg' = L273-4: una potenza estratta dove la carta d'origine non la porta
 const NEG_STATI=['pieno','compromesso','rottura'];
-const NEG_LATI=['gov','estero','opp','attivista'];   // L275-8: 'attivista' = L0 (la vertenza)
+const NEG_LATI=['gov','estero','opp','attivista','ministro','locale'];   // L275-13: 'locale' = L1 da sindaco (la giunta)   // L275-8: 'attivista' = L0 (la vertenza) · L275-11: 'ministro' = L2 al governo (il dicastero)
 function negoziatoVivo(){ return TRATTATIVE && typeof S!=='undefined' && !!S && !LAMPO && typeof TRATTATIVE_DEF!=='undefined'; }
 function negoziatoDef(id){ return (typeof TRATTATIVE_DEF!=='undefined') ? (TRATTATIVE_DEF.find(function(d){ return d.id===id; })||null) : null; }
 function negoziatoAperto(){ return (negoziatoVivo() && S.negoziato && S.negoziato.a) ? S.negoziato.a : null; }
@@ -10573,6 +10576,8 @@ function negoziatoLato(){
   if(S.livello===3) return S.opposizione ? 'opp' : (S.coabitazione ? null : 'gov');
   if(S.livello===4 || S.livello===5) return 'estero';
   if(S.livello===0) return (TRATTATIVE_VERTENZA && S.attivista && !S.attivista.laurea) ? 'attivista' : null;   // L275-8: la vertenza, prima della laurea (spenta: null come prima)
+  if(S.livello===2) return (TRATTATIVE_DICASTERO && !S.opposizione) ? 'ministro' : null;   // L275-11: il dicastero, solo il ministro al governo (spenta: null come prima)
+  if(S.livello===1) return (TRATTATIVE_GIUNTA && S.locale && S.locale.tipo==='città') ? 'locale' : null;   // L275-13: la giunta, solo il sindaco (l_civica è tipo:'città'; spenta: null come prima)
   return null;
 }
 function negoziatoStato0(){ return { a:null, ult:{}, n:0, cv:null, freddo:{} }; }
@@ -10640,6 +10645,8 @@ function negoziatoRic0(F){ return F===1 ? 1 : (F===-1 ? 3 : 2); }
 function negoziatoNome(con){
   if(con==='deleg') return T("l'altra delegazione");
   if(con==='autorita') return T('le autorità');   // L275-8: la vertenza del corteo (ev_percorso: «Le autorità autorizzano il corteo»)
+  if(con==='premier') return T(ricCapoPresidente() ? 'il Presidente' : 'il capo del governo');   // L275-11: il dicastero (mi_sacrificio: «%PREMIER ti chiede…»), il ruolo di F18, mai il nome
+  if(con==='civica') return T('la lista civica');   // L275-13: la giunta (l_civica: «Una lista civica di quartiere… si offre di entrare in maggioranza»)
   if(con==='azienda') return T("l'azienda");   // L275-8: la vertenza dei cancelli (ev_cancelli: «l'azienda e i moderati ti mettono nel mirino»)   // L273-4: la controparte generica del negoziato estero (le carte d'origine senza potenza)
   var p=(typeof part==='function') ? part(con) : null; if(p) return T(p.nome||'');
   var q=(typeof POTENZE!=='undefined') ? POTENZE.find(function(x){ return x.id===con; }) : null;   // L273-4: una potenza (oggi nessuna carta d'origine la porta)
@@ -10970,6 +10977,92 @@ function vertenzaChiudi(stato, a, daSe){
 function vertenzaRound(){
   if(!TRATTATIVE_VERTENZA || !negoziatoVivo()) return null;
   var a=negoziatoAperto(); if(!a || a.tipo!=='vertenza') return null;
+  return negoziatoRound();
+}
+/* ⚑ L275-11 · LA TRATTATIVA DEL MINISTRO (F22; TRATTATIVE_DEF.dicastero, dietro TRATTATIVE_DICASTERO) · dicastero ACCESA dal L275-12 (cooldown 60, round al posto della sola carta del ministro: nel mese del round la domanda in commissione si pesca come sempre). Il quinto tipo, sul lato
+   'ministro' (negoziatoLato al L2 al governo, mai il volto all'opposizione). La macchina comune non cambia: i ganci sono quelli della
+   vertenza (controparte, valida, prezzo, chiudi, forzaF; negoziatoNome conosce 'premier'), e il round 2-3 prende il posto della carta
+   del mese nel ramo del ministro (dicasteroRound, accanto al tempo della vicenda).
+   · LA CONTROPARTE: quella che la carta nomina — mi_sacrificio «%PREMIER ti chiede di rinunciare a fondi del tuo dicastero» →
+     'premier' = il capo del governo, a schermo «il capo del governo» o «il Presidente» dove ricCapoPresidente() (la regola di F18),
+     mai il nome della persona. mg_tagli non nomina nessuno («La manovra prevede tagli»): non è un'origine.
+   · LA FORZA: +1 con la lealtà col capo del governo (S.premier.lealta) ≥ 60 e il capitale (S.capitale) ≥ 50, altrimenti 0 (mai −1).
+   · PREZZI (≤ ±2 per round, il compromesso la metà con minimo 1; solo i campi che mi_sacrificio tocca): il rinvio → settore −1 e
+     (pieno) capitale −1; la faccia → capitale; i fondi → settore. ARRIVO: pieno lealtà +6 · compromesso lealtà +3 (da sé +1) ·
+     rottura lealtà −6, settore +2, capitale +1 (le stesse cifre di «Difendo il mio bilancio»: tieni i fondi e paghi col rapporto).
+     Somma massima 11 (un prezzo pieno 2 + la rottura 9) contro il doppio dell'effetto più forte di mi_sacrificio (leald 9 → 18).
+   · F18: l'accordo scrive il fatto della scelta 0 (tel_si), la rottura quello della scelta 1 (tel_no), una volta, solo con RIC_F18
+     accesa (ricF18Voce('L2','mi_sacrificio')); compromesso e «da sé» nessuno.
+   · USCITA: dicasteroValida è falsa fuori dal L2 al governo (cambio di livello, governo caduto, ministro all'opposizione):
+     negoziatoMese la chiude «da sé» al confine del mese SENZA effetti (dicasteroChiudi esce: solo la riga del registro). */
+function dicasteroControparte(it){ var id=it && it.data && it.data.id; return (id==='mi_sacrificio' && S.premier) ? 'premier' : null; }
+function dicasteroValida(a){ return !!a && a.con==='premier' && S.livello===2 && !S.opposizione && !!S.premier; }
+function dicasteroForza(con){ var l=S.premier && S.premier.lealta; return (typeof l==='number' && l>=60 && (S.capitale||0)>=50) ? 1 : 0; }
+function dicasteroPrezzo(a, k, R){
+  var n=Math.max(1, Math.round(2*k));
+  if(R.k==='rinvio'){ dicMigliora(-1); if(k>=1) capd(-1); }
+  else if(R.k==='faccia') capd(-n);
+  else if(R.k==='fondi') dicMigliora(-n);
+}
+function dicasteroChiudi(stato, a, daSe){
+  if(!dicasteroValida(a)) return;   // fuori dal L2 al governo: chiusa senza effetti
+  if(stato==='pieno') leald(6);
+  else if(stato==='compromesso') leald(daSe ? 1 : 3);
+  else if(stato==='rottura'){ leald(-6); dicMigliora(2); capd(1); }
+  if(!daSe && stato!=='compromesso' && typeof ricF18Voce==='function'){   // F18: il fatto della scelta che la trattativa ha preso il posto (accordo = cede, rottura = tira dritto)
+    var v=ricF18Voce('L2', 'mi_sacrificio'); if(v && v.ix && ricComparsa(v.ruolo, v.fo)) ricFatto(v.ruolo, stato==='pieno' ? 'tel_si' : 'tel_no');
+  }
+}
+/* L275-12 (⚠ 5): la riga di F18 sulla carta della trattativa — solo i tipi con `ricRiga` (oggi il dicastero) e solo dove la carta ha
+   la scheda (`it.ric`: la scrive ricSchedeAgenda al round 1, perché lì l'id è quello della carta d'origine; ai round 2-3 l'id è
+   neg_dicastero_rN e la scheda non c'è). negoziatoRicLetta la segna letta alla risoluzione del round 1 (una volta: la carta si risolve una volta). */
+function negoziatoRicRiga(it){
+  var N=it && it.neg; if(!N || !it.ric) return false;
+  var d=TRATTATIVE_DEF.find(function(x){ return x.id===N.tipo; });
+  return !!(d && d.ricRiga);
+}
+function negoziatoRicLetta(it){ if(negoziatoRicRiga(it)) ricLetta(it.ric); }
+/* il round 2-3 al L2: la carta del mese (spenta, o nessuna trattativa del dicastero aperta: null e il ramo prosegue com'era) */
+function dicasteroRound(){
+  if(!TRATTATIVE_DICASTERO || !negoziatoVivo()) return null;
+  var a=negoziatoAperto(); if(!a || a.tipo!=='dicastero') return null;
+  return negoziatoRound();
+}
+/* ⚑ L275-13 · LA TRATTATIVA DEL SINDACO (F23; TRATTATIVE_DEF.giunta, dietro TRATTATIVE_GIUNTA) · giunta ACCESA dal L275-13 (cooldown 36). Il sesto tipo, sul lato 'locale'
+   (negoziatoLato al L1 solo dove chi gioca governa una città: l_civica è tipo:'città'; il L1 non ha un'opposizione in consiglio, e il
+   presidente di regione non vede la carta). La macchina comune non cambia: i ganci sono quelli del dicastero (controparte, valida,
+   prezzo, chiudi, forzaF; negoziatoNome conosce 'civica'), e il round 2-3 prende il posto della carta del mese nel ramo del L1
+   (giuntaRound, dopo il tempo della vicenda e la sfida in consiglio: nel mese di una sfida il round aspetta).
+   · ORIGINE: solo l_civica. l_assunzioni NON è un'origine (⚠ nel rapporto «⚑ L275-13»): la carta nomina «alleati e capicorrente»,
+     due controparti, e un accordo pieno sulle assunzioni di riguardo sarebbe un premio alla prassi scorretta.
+   · LA CONTROPARTE: 'civica' = «la lista civica», come la carta la chiama (EN «the civic list»); mai un nome di lista o di persona.
+   · LA FORZA: +1 col consenso in città (S.locale.consenso) ≥ 55 e il capitale (S.capitale) ≥ 50, altrimenti 0 (mai −1).
+   · PREZZI (≤ 2 per round, il compromesso la metà con minimo 1; solo i campi che l_civica tocca): la zona → servizi; l'assessorato →
+     giovani; la maggioranza piena → servizi −1 e giovani −1 (mezzo: giovani −1). ARRIVO: pieno servizi +2, ceto medio +2 (la base più
+     larga) · compromesso servizi +2, ceto medio +1 (gli accordi puntuali; da sé ceto medio +1) · rottura giovani +1 e il rischio 3 della
+     scelta «Governi da solo» (spregiudicata). Somma massima 6 (un prezzo pieno 2 + l'arrivo più forte 4) = il doppio dell'effetto più
+     forte di l_civica (3). Mai voto, seggi, forze, la promozione, il bilancio della città.
+   · F18: l_civica non è nella tabella delle persone ricorrenti: nessun fatto.
+   · USCITA: giuntaValida è falsa fuori dal L1 da sindaco (la salita al L2, la sconfitta): negoziatoMese la chiude «da sé» SENZA effetti. */
+function giuntaControparte(it){ var id=it && it.data && it.data.id; return id==='l_civica' ? 'civica' : null; }
+function giuntaValida(a){ return !!a && a.con==='civica' && S.livello===1 && !!S.locale && S.locale.tipo==='città'; }
+function giuntaForza(con){ var L=S.locale; return (L && (L.consenso||0)>=55 && (S.capitale||0)>=50) ? 1 : 0; }
+function giuntaPrezzo(a, k, R){
+  var n=Math.max(1, Math.round(2*k));
+  if(R.k==='zona') locInd('servizi', -n);
+  else if(R.k==='assessorato') gd('giovani', -n);
+  else if(R.k==='maggioranza'){ if(k>=1){ locInd('servizi', -1); gd('giovani', -1); } else gd('giovani', -1); }
+}
+function giuntaChiudi(stato, a, daSe){
+  if(!giuntaValida(a)) return;   // fuori dal L1 da sindaco: chiusa senza effetti
+  if(stato==='pieno'){ locInd('servizi', 2); gd('cetomedio', 2); }
+  else if(stato==='compromesso'){ if(daSe) gd('cetomedio', 1); else { locInd('servizi', 2); gd('cetomedio', 1); } }
+  else if(stato==='rottura'){ gd('giovani', 1); spregiudicata(3); }
+}
+/* il round 2-3 al L1: la carta del mese (spenta, o nessuna trattativa della giunta aperta: null e il ramo prosegue com'era) */
+function giuntaRound(){
+  if(!TRATTATIVE_GIUNTA || !negoziatoVivo()) return null;
+  var a=negoziatoAperto(); if(!a || a.tipo!=='giunta') return null;
   return negoziatoRound();
 }
 /* ================================================================================================================
@@ -11488,7 +11581,7 @@ function discorsoRadicePulisci(){
      illeggibile, di un altro livello o con un partner che non c'è. Mai S.promesseCampagna, mai voto, forze, seggi, gruppi, RIC_FATTI. */
 let DISCORSI_PARTNER=true;             // L275-10 (F28): la promessa del diplomatico e del segretario internazionale, ACCESA dal L275-10 (17/11: prove, CDP IT/EN, guardie, A/B spenta-prima 0/1020, D390 a quattro semi, D174, C4 verdi) · spenta: «l'impegno» com'era, byte per byte
 let DISCORSI_PARTNER_PLACEBO=false;    // solo le misure: stesse nascite, giudizio senza effetti
-DISCORSI_K.partner={ mesi:12, ok:2, no:2 };   // L275-10: una costante per tutti e due i livelli
+DISCORSI_K.partner={ mesi:12, ok:2, no:2, gradino:5 };   // L275-10: una costante per tutti e due i livelli · L275-11 Passo 2: «gradino» = quanto deve salire il partner al L5 (v ≥ v0 + gradino) perché la promessa sia mantenuta; il L4 resta «la coesione non è scesa»
 function discorsoPartnerCasa(){ return S.livello===5 ? (S.diplo||null) : (S.livello===4 ? (S.intl||null) : null); }
 /* l'offerta (pura): null, o {k:'partner', id} al L5 conferenza, o {k:'ente'} al L4 assemblea */
 function discorsoPartnerOffertaIt(def, it){ return discorsoPartnerOfferta(def || discorsoTipo()); }
@@ -11518,7 +11611,7 @@ function discorsoPartnerApri(O){
 /* pura: 'ok' · 'no' · 'via' (il partner non c'è più) · null (niente da giudicare nel mese che si chiude, `chiuso`) */
 function discorsoPartnerEsito(chiuso){
   var H=discorsoPartnerCasa(), P=H && H.promPar; if(!P || chiuso<P.scad) return null;
-  if(P.k==='partner'){ var p=(H.bil||[]).find(function(x){ return x && x.id===P.id; }); if(!p || typeof p.v!=='number') return 'via'; return p.v>=P.v0+(DISCORSI_ROSSO==='partner' ? 0 : 1) ? 'ok' : 'no'; }   // 'partner' = la rossa della prova: senza il gradino
+  if(P.k==='partner'){ var p=(H.bil||[]).find(function(x){ return x && x.id===P.id; }); if(!p || typeof p.v!=='number') return 'via'; return p.v>=P.v0+(DISCORSI_ROSSO==='partner' ? 0 : DISCORSI_K.partner.gradino) ? 'ok' : 'no'; }   // 'partner' = la rossa della prova: senza il gradino (L275-11: il gradino è DISCORSI_K.partner.gradino)
   return (typeof S.intl.coesione==='number' && S.intl.coesione>=P.v0) ? 'ok' : 'no';
 }
 function discorsoPartnerRiga(P, chiave){
@@ -11818,7 +11911,7 @@ function genAgendaRamo(first){
       else {
       var sf1=(typeof pescaSfida==='function')?pescaSfida(['locale'],'aula'):null;   // D1b: la sfida in consiglio (gated)
       if(sf1){ S.agenda.push({kind:'event', data:sf1, resolved:false}); }
-      else { const pe=pickPersonale(); if(pe){ S.agenda.push(pe); } else { const le=pickLocale(); if(le) S.agenda.push(le); } }
+      else { const gr1=giuntaRound(); if(gr1){ S.agenda.push(gr1); } else { const pe=pickPersonale(); if(pe){ S.agenda.push(pe); } else { const le=pickLocale(); if(le) S.agenda.push(le); } } }   // L275-13: il round 2-3 della giunta prende il posto della carta del mese (personale o locale), mai in più; nel mese della sfida aspetta (spenta: null)
       }
     }
     return;
@@ -11965,9 +12058,11 @@ function genAgendaRamo(first){
          Solo la Sfida, non la conferenza piena: il mese del ministro resta più raccolto del L3. Wrap identico al L3. */
       let sfC=null;
       const vt2=vicendaTempo();   // L272-2: il tempo 2-3 prende il posto della carta del mese (C4; spenta: null)
-      if(!vt2 && typeof pescaSfida==='function') sfC=pescaSfida(['governo','ministro'],'commissione');
+      const dr2=vt2 ? null : dicasteroRound();   // L275-11: il round 2-3 del dicastero prende il posto della carta del mese, come il tempo della vicenda (spenta: null)
+      if(!vt2 && typeof pescaSfida==='function') sfC=pescaSfida(['governo','ministro'],'commissione');   // L275-12 (leva B): la domanda in commissione si pesca come sempre anche nel mese del round
       if(vt2){ S.agenda.push(vt2); if(S.agenda.length<2){ const pe=pickPersonale(); if(pe) S.agenda.push(pe); } }
-      else if(sfC){ S.confUltimo=S.year*12+S.month; S.agenda.push({kind:'stampa', data:sfC, resolved:false}); }
+      else if(sfC){ S.confUltimo=S.year*12+S.month; S.agenda.push({kind:'stampa', data:sfC, resolved:false}); if(dr2) S.agenda.push(dr2); }   // L275-12 (leva B): il round prende il posto della sola carta del ministro
+      else if(dr2){ S.agenda.push(dr2); if(S.agenda.length<2){ const pe=pickPersonale(); if(pe) S.agenda.push(pe); } }
       else if(ministroDovuto()){ const mc=pickMinistro(); if(mc){ S.agenda.push(mc); } else { const ds=pickDossierSettore(); if(ds) S.agenda.push(ds); } }
       else {
         const ds=pickDossierSettore(); if(ds) S.agenda.push(ds);
@@ -12649,6 +12744,7 @@ function resolveItemCore(idx,ci){
   } else if(it.kind==='vicenda'){
     vicendaRisolvi(it, ci);   // L272-2: le crisi in più tempi
   } else if(it.kind==='negoziato'){
+    if(typeof negoziatoRicLetta==="function") negoziatoRicLetta(it);   // L275-12 (⚠ 5): la riga di F18 letta (solo i tipi con ricRiga, solo il round 1)
     negoziatoRisolvi(it, ci);   // L273-2: le trattative a più round
   } else if(it.kind==='discorso'){
     discorsoRisolvi(it, ci);   // L274-2: il discorso, tre passi nella stessa carta
