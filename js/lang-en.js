@@ -36736,4 +36736,14 @@ const EN = {
   "Accordo pieno con %P: la maggioranza si allarga, e la loro zona aspetta i lavori promessi.":"Full deal with %P: the majority grows wider, and their district waits for the promised works.",
   "Un compromesso con %P: accordi puntuali, nessuna poltrona.":"A compromise with %P: deals case by case, no seats.",
   "Con %P il tavolo si è rotto: governi da solo, con un'opposizione in più.":"With %P the table has broken up: you govern alone, with one more opposition.",
+  // L275-14 · il vertice dell'Alleanza del capo del governo (TRATTATIVE_DEF.vertice): 9 chiavi nuove, il resto sulle frasi dell'estero e del dicastero
+  "gli alleati":"the allies",
+  "Al vertice si chiede più spesa militare: al tavolo con %P la vogliono scritta.":"The meeting asks for more military spending: at the table with %P, they want it in writing.",
+  "un impegno nel comunicato, senza cifre":"a commitment in the communiqué, with no figures",
+  "più spesa militare, per gradi":"more military spending, step by step",
+  "l'impegno pieno, da subito":"the full commitment, starting now",
+  "accordo pieno, il rivale prende nota":"full deal, the rival takes note",
+  "Accordo pieno con %P: l'impegno è nel comunicato, e la potenza rivale lo legge.":"Full deal with %P: the commitment is in the communiqué, and the rival power reads it.",
+  "Un compromesso con %P: l'impegno c'è, la cifra resta vaga.":"A compromise with %P: the commitment is there, the figure stays vague.",
+  "Con %P il tavolo si è rotto: le risorse restano al fronte interno.":"With %P the table has broken up: the resources stay on the home front.",
 };

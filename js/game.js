@@ -10563,7 +10563,9 @@ let TRATTATIVE_PLACEBO=false;
 let TRATTATIVE_VERTENZA=true;   // L275-8 (F24): la vertenza dell'attivista (TRATTATIVE_DEF.vertenza), ACCESA dal L275-8 (17/11: prove, CDP IT/EN, guardie, A/B spenta-prima 0/1020, D379, D174, C4 verdi); spenta = il lato 'attivista' non esiste (negoziatoLato dà null al L0) e ev_percorso/ev_cancelli restano com'erano. Banco: __TRATTATIVE_VERTENZA_ON / __TRATTATIVE_VERTENZA_SPENTO (vince) in __reseed
 let TRATTATIVE_DICASTERO=true;   // L275-11 (F22): la trattativa del ministro col capo del governo (TRATTATIVE_DEF.dicastero), ACCESA dal L275-12 (cooldown 60, il round 2-3 al posto della sola carta del ministro: D379 passa su us1960 ministro con media −0,009995, sulla soglia); spenta = il lato 'ministro' non esiste (negoziatoLato dà null al L2) e mi_sacrificio resta com'era. Banco: __TRATTATIVE_DICASTERO_ON / __TRATTATIVE_DICASTERO_SPENTO (vince) in __reseed
 let TRATTATIVE_GIUNTA=true;   // L275-13 (F23): la trattativa del sindaco con la lista civica (TRATTATIVE_DEF.giunta), ACCESA dal L275-13 (17/11, cooldown 36: D379 sulle partenze locali media −0,0002 sul L1 vissuto, C4, D174, prove, CDP IT/EN, guardie, A/B spenta-prima 0/1020 verdi); spenta = il lato 'locale' non esiste (negoziatoLato dà null al L1) e l_civica resta com'era. Banco: __TRATTATIVE_GIUNTA_ON / __TRATTATIVE_GIUNTA_SPENTO (vince) in __reseed
-const TRATTATIVE_K={ cool:{patto:30, estero:36, opp:36, vertenza:36, dicastero:60, giunta:36}, freddo:24, attesaMax:2 };   // L275-13: giunta 36 (la leva della consegna è 60)
+let TRATTATIVE_VERTICE=true;   // L275-14 (F25): il vertice dell'Alleanza del capo del governo (TRATTATIVE_DEF.vertice), ACCESO dal L275-14 (18/11, cooldown 48: D379 su tutte le partenze, C4 del L3, D174, prove, CDP IT/EN, guardie, A/B spenta-prima 0/1020 verdi); per trasformazione di nato_vertice (pickInternazionale), solo nei paesi e dalle date di VERTICE_PAESI; spenta = nato_vertice resta com'era (verticeTrasforma restituisce l'item). Banco: __TRATTATIVE_VERTICE_ON / __TRATTATIVE_VERTICE_SPENTO (vince) in __reseed
+const TRATTATIVE_K={ cool:{patto:30, estero:36, opp:36, vertenza:36, dicastero:60, giunta:36, vertice:48}, freddo:24, attesaMax:2 };   // L275-13: giunta 36 (la leva della consegna è 60) · L275-14: vertice 48 (la leva della consegna è 72)
+let TRATTATIVE_VOLTO=true;   // L275-16 (F26): il negoziato estero col VOLTO della potenza rivale (TRATTATIVE_DEF.estero.origVolto, oggi dp_veto: la potenza è il potId della carta, scritto da diploCarta), ACCESO dal L275-16 (18/11: prove, CDP IT/EN, guardie, A/B spenta-prima 0/1020, D379, C4 del L4 e del L5, D174 verdi; 118 negoziati col volto su 1499, 8%); spento = le origini col volto non si leggono e dp_veto resta com'era. Banco: __TRATTATIVE_VOLTO_ON / __TRATTATIVE_VOLTO_SPENTO (vince) in __reseed
 let TRATTATIVE_ROSSO=null;   // solo le prove: 'c4' = il round come carta IN PIÙ anche senza posto (C4 rossa) · 'vicenda' = nasce anche con una vicenda aperta · 'rilancio' = il rilancio con F 0 che chiude al round 1 (la regola di prima del L273-3) · 'deleg' = L273-4: una potenza estratta dove la carta d'origine non la porta
 const NEG_STATI=['pieno','compromesso','rottura'];
 const NEG_LATI=['gov','estero','opp','attivista','ministro','locale'];   // L275-13: 'locale' = L1 da sindaco (la giunta)   // L275-8: 'attivista' = L0 (la vertenza) · L275-11: 'ministro' = L2 al governo (il dicastero)
@@ -10647,6 +10649,7 @@ function negoziatoNome(con){
   if(con==='autorita') return T('le autorità');   // L275-8: la vertenza del corteo (ev_percorso: «Le autorità autorizzano il corteo»)
   if(con==='premier') return T(ricCapoPresidente() ? 'il Presidente' : 'il capo del governo');   // L275-11: il dicastero (mi_sacrificio: «%PREMIER ti chiede…»), il ruolo di F18, mai il nome
   if(con==='civica') return T('la lista civica');   // L275-13: la giunta (l_civica: «Una lista civica di quartiere… si offre di entrare in maggioranza»)
+  if(con==='alleati') return T('gli alleati');   // L275-14: il vertice (nato_vertice: «Gli alleati chiedono un impegno di spesa militare più alto»)
   if(con==='azienda') return T("l'azienda");   // L275-8: la vertenza dei cancelli (ev_cancelli: «l'azienda e i moderati ti mettono nel mirino»)   // L273-4: la controparte generica del negoziato estero (le carte d'origine senza potenza)
   var p=(typeof part==='function') ? part(con) : null; if(p) return T(p.nome||'');
   var q=(typeof POTENZE!=='undefined') ? POTENZE.find(function(x){ return x.id===con; }) : null;   // L273-4: una potenza (oggi nessuna carta d'origine la porta)
@@ -10711,7 +10714,7 @@ function negoziatoProto(def, lato, con, orig){
 function negoziatoTrasforma(it, origId){
   if(!negoziatoVivo() || !it || !it.data) return it;
   var id=origId || it.data.id; if(!id) return it;
-  var def=TRATTATIVE_DEF.find(function(d){ return (d.orig||[]).indexOf(id)>=0; }); if(!def) return it;
+  var def=TRATTATIVE_DEF.find(function(d){ return (d.orig||[]).indexOf(id)>=0 || (TRATTATIVE_VOLTO && it.data.potId && (d.origVolto||[]).indexOf(id)>=0); }); if(!def) return it;   // L275-16 (F26): le origini col volto del rivale (def.origVolto) solo a TRATTATIVE_VOLTO accesa e con la potenza sulla carta (potId); spenta, o senza potId, la carta resta com'è
   var con=def.controparte ? def.controparte(it) : (it.ally || it.data.potId || it.data.con || null); if(!con) return it;   // L273-4: la regola della controparte è del tipo (def.controparte; null = la carta resta com'è)
   var a=S.negoziato && S.negoziato.a, ora=meseAss();
   if(a && a.tipo===def.id && a.orig===id && a.con===con && a.da===ora){   // già nato in questo mese (un caricamento): la stessa chiave, già decisa
@@ -11064,6 +11067,43 @@ function giuntaRound(){
   if(!TRATTATIVE_GIUNTA || !negoziatoVivo()) return null;
   var a=negoziatoAperto(); if(!a || a.tipo!=='giunta') return null;
   return negoziatoRound();
+}
+/* ⚑ L275-14 · IL VERTICE DEL CAPO DEL GOVERNO (F25; TRATTATIVE_DEF.vertice, dietro TRATTATIVE_VERTICE) · vertice ACCESO dal L275-14 (cooldown 48). Il settimo tipo, sul lato 'gov'
+   (L3 al governo fuori dalla coabitazione, come il patto). Nasce per TRASFORMAZIONE (decisione di Cowork 18/11 08:47): la carta nato_vertice
+   pescata da pickInternazionale nel ramo del capo del governo passa da verticeTrasforma → negoziatoTrasforma; spenta (fuori da
+   VERTICE_PAESI la carta non c'è: la sua cond legge verticeVero, L275-15), o in cooldown (48) o con un «non nasce» di D376 (negoziatoAmmesso): la carta esce com'è, intatta. Il round 1 prende
+   il posto della carta trasformata; i round 2-3 il posto di un dossier o dell'evento del mese (negoziatoPosto, la regola del patto).
+   · DOVE: verticeVero() = S.paese in VERTICE_PAESI e la data della partita (S.year, S.month) dalla data della riga in poi.
+   · LA CONTROPARTE: 'alleati' = «gli alleati», come la carta li chiama (EN «the allies»); mai un paese, una persona, un'organizzazione.
+   · LA FORZA: +1 con S.relInt.alleanza ≥ 60 e la reputazione internazionale (S.ind.reputazione, quella che repd muove) ≥ 66 (il verde
+     di barColor), altrimenti 0 (mai −1). Nelle porte senza S.relInt: 0.
+   · PREZZI (solo i campi che nato_vertice tocca): il comunicato → giovani −1 (anche il mezzo); graduale → debito 0,6 (mezzo 0,3);
+     pieno → debito 1,2 (mezzo 0,6). ARRIVO: pieno alleanza +9, rivale −6, repd +2 · compromesso alleanza +4, rivale −3, repd +1 (da sé:
+     alleanza +2) · rottura alleanza −6, rivale +3, ceto medio +2 («risorse al fronte interno»). Nessun arrivo oltre la carta (9 · −6 ·
+     1,2); lv('difesa') non aggrava niente. Mai voto, seggi, forze, tenuta. Nessuna persona ricorrente, nessuna promessa (D378).
+   · USCITA: verticeValida è falsa fuori dal L3 al governo (negoziatoLato lo controlla già) o fuori da VERTICE_PAESI: chiusa «da sé»
+     SENZA effetti. */
+function verticeVero(){
+  var R=(typeof VERTICE_PAESI!=='undefined') && S && VERTICE_PAESI[S.paese]; if(!R) return false;
+  return S.year>R.anno || (S.year===R.anno && S.month>=R.mese);
+}
+function verticeControparte(it){ var id=it && it.data && it.data.id; return (id==='nato_vertice' && (verticeVero() || TRATTATIVE_ROSSO==='paese')) ? 'alleati' : null; }   // 'paese': solo le prove (la rossa che trasforma fuori elenco)
+function verticeValida(a){ return !!a && a.con==='alleati' && S.livello===3 && !S.opposizione && (verticeVero() || TRATTATIVE_ROSSO==='paese'); }
+function verticeForza(con){ var al=S.relInt && S.relInt.alleanza, rp=S.ind && S.ind.reputazione; return (al!=null && al>=60 && rp!=null && rp>=66) ? 1 : 0; }
+function verticePrezzo(a, k, R){
+  if(R.k==='comunicato') gd('giovani', -1);
+  else if(S.ind && S.ind.debt!=null) S.ind.debt+=(R.debito||0)*k;
+}
+function verticeChiudi(stato, a, daSe){
+  if(!verticeValida(a)) return;   // fuori dal L3 al governo o dall'elenco: chiusa senza effetti
+  if(stato==='pieno'){ relIntMuovi('alleanza', 9); relIntMuovi('rivale', -6); repd(2); }
+  else if(stato==='compromesso'){ if(daSe) relIntMuovi('alleanza', 2); else { relIntMuovi('alleanza', 4); relIntMuovi('rivale', -3); repd(1); } }
+  else if(stato==='rottura'){ relIntMuovi('alleanza', -6); relIntMuovi('rivale', 3); gd('cetomedio', 2); }
+}
+/* la trasformazione al punto di pickInternazionale (spenta, o non nato_vertice: l'item com'è; nessun dado, nessuna scrittura) */
+function verticeTrasforma(it){
+  if(!TRATTATIVE_VERTICE || !it || !it.data || it.data.id!=='nato_vertice') return it;
+  return negoziatoTrasforma(it);
 }
 /* ================================================================================================================
    ⚑ L274-2 · IL DISCORSO · ACCESA (L274-4) — il motore (DESIGN-FORMATI.md «⚑ L274-1» D383-D393, «⚑ L274-2»). Il quarto formato: una carta
@@ -12315,7 +12355,7 @@ function genAgendaRamo(first){
   if(!hadEvent && !(LAMPO && lampoCrisi())){ const cs=pickCrisiScala(); if(cs){ S.agenda.push({kind:'event', data:cs, resolved:false}); hadEvent=true; } }   // L245-2: la scala della crisi aperta, prima di un conflitto nuovo
   if(!hadEvent){ const cv=pickConflittoInt(); if(cv){ S.agenda.push({kind:'event', data:cv, resolved:false}); hadEvent=true; } }
   // grande evento internazionale (lotto Esteri+Difesa): esclusivo, ~ogni 6-9 mesi
-  if(!hadEvent){ const iv=pickInternazionale(); if(iv){ S.agenda.push({kind:'event', data:iv, resolved:false}); hadEvent=true; } }
+  if(!hadEvent){ const iv=pickInternazionale(); if(iv){ S.agenda.push(verticeTrasforma({kind:'event', data:iv, resolved:false})); hadEvent=true; } }   // L275-14: nato_vertice può diventare il round 1 del vertice (spenta: l'item com'è)
   if(!hadEvent){ const og=pickONG(); if(og){ S.agenda.push({kind:'event', data:og, resolved:false}); hadEvent=true; } }   // fase B: la società civile come attore (stesso slot-evento internazionale)
   // crisi di coalizione (passo 4): ultimatum o rottura di un alleato; è l'evento del mese, mai con un altro evento
   if(!hadEvent){

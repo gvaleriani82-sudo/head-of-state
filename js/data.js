@@ -7703,11 +7703,14 @@ const TRATTATIVE_DEF=[
             rottura:'La trattativa con %P si è rotta: restano al governo, ma da oggi contano i giorni.' } },
   /* L273-4 · IL NEGOZIATO ESTERO (D374-D377, lati L4-L5). La controparte (negoziatoControparteEstero, game.js): la potenza
      dell'item (`it.data.potId`, scritto da diploCarta solo sulle carte col volto del rivale) se c'è e non è quella della crisi
-     in corso; altrimenti la controparte generica 'deleg' = «l'altra delegazione». Oggi nessuna delle cinque carte d'origine
-     ha il volto del rivale: tutte e cinque nascono con 'deleg'. Prezzi ≤ ±2 (credito o autorevolezza, alleati, debito), stato
+     in corso; altrimenti la controparte generica 'deleg' = «l'altra delegazione». Le cinque carte di `orig` non hanno il volto
+     del rivale: nascono tutte con 'deleg'. L275-16 (F26): `origVolto` = le origini col volto del rivale (oggi solo `dp_veto`, il
+     veto annunciato: si tratta sul testo con la potenza che lo minaccia), lette da negoziatoTrasforma SOLO con TRATTATIVE_VOLTO
+     accesa (dal L275-16) e SOLO se la carta porta `potId` (diploCarta): la controparte è allora la potenza; senza potId la carta resta com'è.
+     Per aggiungere un'origine col volto basta questo elenco. Prezzi ≤ ±2 (credito o autorevolezza, alleati, debito), stato
      d'arrivo di D375 (il partner +6/+3/−8 se è un partner di S.diplo.bil, credito +2/+1; la rottura con la delegazione
      raffredda il consesso −2). Nessuna parola d'epoca: niente sigle, vertici, trattati, organizzazioni col nome. */
-  { id:'estero', fam:'estero', lati:['estero'], era:'universale', orig:['dp_negoziato','dp_notte','dp_mari','dd_commercio','dd_organismo'],
+  { id:'estero', fam:'estero', lati:['estero'], era:'universale', orig:['dp_negoziato','dp_notte','dp_mari','dd_commercio','dd_organismo'], origVolto:['dp_veto'],
     controparte:function(it){ return negoziatoControparteEstero(it); }, valida:function(a){ return negoziatoValidaEstero(a); },
     prezzo:function(a, k, R){ negoziatoPrezzoEstero(a, k, R); }, chiudi:function(stato, a, daSe){ negoziatoChiudiEstero(stato, a, daSe); },
     kick:'Trattativa', titolo:'Il tavolo con %P',
@@ -7831,7 +7834,41 @@ const TRATTATIVE_DEF=[
     stati:{ pieno:'Accordo pieno con %P: la maggioranza si allarga, e la loro zona aspetta i lavori promessi.',
             compromesso:'Un compromesso con %P: accordi puntuali, nessuna poltrona.',
             rottura:'Con %P il tavolo si è rotto: governi da solo, con un\'opposizione in più.' } },
+  /* L275-14 · IL VERTICE DELL'ALLEANZA DEL CAPO DEL GOVERNO (F25; lato 'gov' = L3 al governo, come il patto), dietro TRATTATIVE_VERTICE
+     (game.js, ACCESO dal L275-14, cooldown 48). Nasce per TRASFORMAZIONE della carta `nato_vertice` pescata da pickInternazionale (decisione di Cowork 18/11 08:47, ⚠ 1
+     di «⚑ L275-14»): nessun campo `nasce` (negoziatoNasceStato cerca solo `nasce:'stato'`), nessun `coalizione` (anche Regno Unito, USA,
+     presidenziali). Solo nei paesi e dalle date di VERTICE_PAESI (sotto), letta da verticeControparte; dal L275-15 anche la cond della carta: altrove la carta non esce.
+     La controparte è quella che la carta nomina, «gli alleati» ('alleati', negoziatoNome). Richieste dalla più leggera: l'impegno nel
+     comunicato senza cifre · un aumento graduale (debito 0,6) · l'impegno pieno da subito (debito 1,2). Prezzi e arrivo SOLO sui campi che
+     nato_vertice tocca (verticePrezzo, verticeChiudi). r2 rilancio e forza dall'estero, r2 tieni, r3 e rScesa dal dicastero: chiavi già tradotte, le più corte (tetto 450 px). */
+  { id:'vertice', fam:'vertice', lati:['gov'], era:'universale', orig:['nato_vertice'],
+    controparte:function(it){ return verticeControparte(it); }, valida:function(a){ return verticeValida(a); },
+    prezzo:function(a, k, R){ verticePrezzo(a, k, R); }, chiudi:function(stato, a, daSe){ verticeChiudi(stato, a, daSe); },
+    forzaF:function(con){ return verticeForza(con); },
+    kick:'Trattativa', titolo:'Il tavolo con %P',
+    ric:[ { k:'comunicato', nome:'un impegno nel comunicato, senza cifre', pieno:'Affidabilità; costo interno; giovani freddi', mezzo:'Affidabilità; costo interno; giovani freddi' },
+          { k:'graduale', nome:'più spesa militare, per gradi', debito:0.6, pieno:'Il bilancio paga', mezzo:'Il bilancio paga la metà' },
+          { k:'pieno', nome:'l\'impegno pieno, da subito', debito:1.2, pieno:'Il bilancio paga', mezzo:'Il bilancio paga la metà' } ],
+    r1:'Al vertice si chiede più spesa militare: al tavolo con %P la vogliono scritta.',
+    r2:{ rilancio:'La controproposta torna con le correzioni a margine: al tavolo con %P non basta.',
+         tieni:'Il tuo «no» non è piaciuto: al tavolo con %P si parla meno, e si guarda il calendario.' },
+    r3:{ rilancio:'Ultimo incontro: al tavolo con %P si chiude oggi. La tua offerta è sul tavolo.',
+         tieni:'Ultimo incontro, dopo due rifiuti: al tavolo con %P la richiesta è la stessa, la pazienza no.' },
+    rScesa:'Al tavolo con %P si sono accorti che hai peso: la richiesta si fa più piccola.',
+    forza:{ '1':'la sala sta con te', '0':'la sala è divisa', '-1':'la sala è divisa' },
+    eff:{ accordo:'accordo pieno, il rivale prende nota', compromesso:'un compromesso' },   // la forza è già nella riga «Al tavolo»: la targhetta del rilancio resta su una riga (tetto 450 px)
+    mosse:[ { l:'Cedi: %R' }, { l:'Rilanci con un\'offerta minore' }, { l:'Tieni il punto' } ],
+    stati:{ pieno:'Accordo pieno con %P: l\'impegno è nel comunicato, e la potenza rivale lo legge.',
+            compromesso:'Un compromesso con %P: l\'impegno c\'è, la cifra resta vaga.',
+            rottura:'Con %P il tavolo si è rotto: le risorse restano al fronte interno.' } },
 ];
+/* L275-14 · dove il vertice dell'Alleanza è vero (decisione di Cowork 18/11 08:47, ⚠ 2 di «⚑ L275-14»): id di PAESI → la data da cui
+   chi gioca è dentro l'Alleanza (anno, mese 1-12; la forma della cond di de50_q_nato). Sempre = anno 0. Fuori elenco (Giappone, Corea
+   del Sud, Australia, i non allineati) il tipo non nasce e la carta esce com'è. Fonti nel rapporto «⚑ L275-14». La legge SOLO il tipo
+   (verticeVero, game.js) e, dal L275-15 (F33), la cond della carta nato_vertice: fuori elenco la carta non esce da nessuna pesca. */
+const VERTICE_PAESI={ italia:{anno:0, mese:1}, francia:{anno:0, mese:1}, regnounito:{anno:0, mese:1}, usa:{anno:0, mese:1},
+  canada:{anno:0, mese:1}, danimarca:{anno:0, mese:1}, paesibassi:{anno:0, mese:1}, norvegia:{anno:0, mese:1}, belgio:{anno:0, mese:1},
+  germania:{anno:1955, mese:5}, svezia:{anno:2024, mese:3}, spagna:{anno:1982, mese:5} };
 /* ================================================================================================================
    ⚑ L274-3 · DISCORSI_DEF — i sette tipi del discorso coi testi a pezzi (DESIGN-FORMATI.md «⚑ L274-1» D384, D386, D387, D392,
    «⚑ L274-2», «⚑ L274-3»). La costante DISCORSI è ACCESA dal L274-4 (a costante spenta niente di questo esce).
@@ -16979,7 +17016,7 @@ const PARI={
   belgio:['paesibassi','francia','germania','spagna'] };   // L250-20: i tre vicini e la Spagna (un'altra monarchia dell'euro col debito sopra il 100%); nessuno degli altri cambia (quattro per paese, la guardia di L260-6)   // L250-14: i due nordici e i due vicini del Mare del Nord (Svezia e Danimarca restano senza la Norvegia: quattro per paese, la guardia di L260-6)
 
 const INTERNAZIONALI=[
- {id:'nato_vertice',era:'universale', tono:'florido', min:'difesa', kick:'Alleanza atlantica', t:'Vertice dell\'Alleanza', text:'Gli alleati chiedono un impegno di spesa militare più alto. La tua risposta pesa sul rapporto con l\'Alleanza — e su chi la guarda da fuori.',ch:[
+ {id:'nato_vertice',era:'universale', cond:()=>typeof verticeVero!=='function'||verticeVero(), tono:'florido', min:'difesa', kick:'Alleanza atlantica', t:'Vertice dell\'Alleanza', text:'Gli alleati chiedono un impegno di spesa militare più alto. La tua risposta pesa sul rapporto con l\'Alleanza — e su chi la guarda da fuori.',ch:[
    {l:'Aderisci all\'impegno', e:'Affidabile agli alleati; la potenza rivale si irrigidisce', pleases:'conservatore', costo:{debito:1.2},f:()=>{S.ind.debt+=1.2; relIntMuovi('alleanza',9); relIntMuovi('rivale',-6); repd(3); gd('giovani',-2); gd('imprenditori',2);}},
    {l:'Rinvia l\'aumento', e:'Risorse al fronte interno; gli alleati storcono il naso', pleases:'populista', f:()=>{relIntMuovi('alleanza',lv('difesa')===0?-9:-6); relIntMuovi('rivale',3); repd(-3); gd('cetomedio',2);}},
  ]},
