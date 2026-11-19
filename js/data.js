@@ -17092,7 +17092,7 @@ const INTERNAZIONALI=[
    {l:'Rinvia l\'aumento', e:'Risorse al fronte interno; gli alleati storcono il naso', pleases:'populista', f:()=>{relIntMuovi('alleanza',lv('difesa')===0?-9:-6); relIntMuovi('rivale',3); repd(-3); gd('cetomedio',2);}},
  ]},
  {id:'missione_int',era:'universale', min:'difesa', kick:'Sicurezza internazionale', t:'Missione internazionale', text:'Si propone la partecipazione a una missione multilaterale: costi e rischi, ma peso sullo scacchiere.',ch:[
-   {l:'Partecipa', e:'Riconosciuto da alleati e Nazioni Unite; costi e rischi', pleases:'tecnico', costo:{debito:0.8},f:()=>{S.ind.debt+=0.8; relIntMuovi('alleanza',5); relIntMuovi('consesso',5); relIntMuovi('rivale',-3); repd(4); gd('giovani',-2); gd('cattolici',2);}},
+   {l:'Partecipa', e:'Riconosciuto da alleati e %ONU; costi e rischi', pleases:'tecnico', costo:{debito:0.8},f:()=>{S.ind.debt+=0.8; relIntMuovi('alleanza',5); relIntMuovi('consesso',5); relIntMuovi('rivale',-3); repd(4); gd('giovani',-2); gd('cattolici',2);}},
    {l:'Declina', e:'Nessun coinvolgimento esterno', pleases:'populista', f:()=>{relIntMuovi('alleanza',-4); relIntMuovi('consesso',-3); repd(-3); gd('giovani',2);}},
  ]},
  {id:'basi_coop',era:'universale', tono:'florido', min:'difesa', kick:'Cooperazione militare', t:'Cooperazione militare più stretta', text:'Un alleato propone una cooperazione militare più stretta sul territorio — un passo che la potenza rivale non vedrà di buon occhio.',ch:[
@@ -17110,14 +17110,14 @@ const INTERNAZIONALI=[
    {l:'Tessi la mediazione', e:'Da ponte credibile tra le parti: i Grandi ti riconoscono', ente:'consesso', enteMin:62, pleases:'tecnico', f:()=>{relIntMuovi('consesso',9); repd(5); gd('imprenditori',2); gd('giovani',2);}},
  ]},
  {id:'onu_ris',era:'universale', min:'esteri', kick:'Assemblea internazionale', t:'Risoluzione controversa', text:'In assemblea si vota una risoluzione divisiva, promossa dal fronte occidentale contro la potenza rivale.',ch:[
-   {l:'Allineati al fronte prevalente', e:'In linea con le Nazioni Unite e gli alleati; il rivale se lo lega al dito', f:()=>{relIntMuovi('consesso',5); relIntMuovi('alleanza',3); relIntMuovi('rivale',-6); repd(4); gd('cetomedio',-2);}},
+   {l:'Allineati al fronte prevalente', e:'In linea con le %ONU e gli alleati; il rivale se lo lega al dito', f:()=>{relIntMuovi('consesso',5); relIntMuovi('alleanza',3); relIntMuovi('rivale',-6); repd(4); gd('cetomedio',-2);}},
    {l:'Astieniti', e:'Prudenza: non scontenti, non entusiasmi nessuno', f:()=>{}},
-   {l:'Opponiti in nome della sovranità', e:'Strizzi l\'occhio al rivale; le Nazioni Unite ti isolano', pleases:'populista', f:()=>{relIntMuovi('consesso',-7); relIntMuovi('rivale',6); repd(-5); gd('cetomedio',4);}},
+   {l:'Opponiti in nome della sovranità', e:'Strizzi l\'occhio al rivale; le %ONU ti isolano', pleases:'populista', f:()=>{relIntMuovi('consesso',-7); relIntMuovi('rivale',6); repd(-5); gd('cetomedio',4);}},
  ]},
  {id:'crisi_dipl',era:'universale', tono:'grave', min:'esteri', kick:'Crisi diplomatica', t:'Crisi con la potenza rivale', text:'Le relazioni con la potenza rivale si surriscaldano. Fermezza, distensione, o ti fai mediatore?',ch:[
    {l:'Linea di fermezza', e:'Compatto con l\'Alleanza; col rivale si gela', pleases:'populista', f:()=>{relIntMuovi('alleanza',5); relIntMuovi('rivale',-8); repd(-2); gd('cetomedio',3); S.gMod-=0.15;}},
    {l:'Cerca la distensione', e:'Riapri col rivale; gli alleati diffidano', pleases:'tecnico', f:()=>{relIntMuovi('rivale',7); relIntMuovi('alleanza',-4); repd(2); gd('imprenditori',2);}},
-   {l:'Offri una mediazione di terzi', e:'Da mediatore credibile delle Nazioni Unite: tutti ti ascoltano', ente:'consesso', enteMin:64, f:()=>{relIntMuovi('consesso',7); relIntMuovi('rivale',3); repd(8);}},
+   {l:'Offri una mediazione di terzi', e:'Da mediatore credibile delle %ONU: tutti ti ascoltano', ente:'consesso', enteMin:64, f:()=>{relIntMuovi('consesso',7); relIntMuovi('rivale',3); repd(8);}},
  ]},
  {id:'clima_vertice', min:'esteri', kick:'Vertice sul clima', t:'Impegni sul clima', text:'Le Nazioni Unite chiedono impegni vincolanti sulle emissioni.',ch:[
    {l:'Sottoscrivi impegni ambiziosi', e:'Ambiente e Nazioni Unite su, industria sotto pressione', pleases:'progressista', f:()=>{S.ind.ambiente+=4; relIntMuovi('consesso',8); repd(5); gd('giovani',4); gd('imprenditori',-4);}},
@@ -17125,11 +17125,11 @@ const INTERNAZIONALI=[
  ]},
  {id:'accordo_comm',era:'universale', min:'esteri', kick:'Negoziato commerciale', t:'Accordo commerciale internazionale', text:'Un trattato col campo occidentale aprirebbe nuovi mercati ma esporrebbe alcuni settori.',ch:[
    {l:'Firma l\'accordo', e:'Export su; ti leghi al campo occidentale', pleases:'conservatore', f:()=>{S.gMod+=0.25; relIntMuovi('consesso',5); relIntMuovi('alleanza',3); repd(4); gd('imprenditori',5); gd('lavoratori',-3);}},
-   {l:'Proteggi il mercato interno', e:'Tuteli i settori fragili; le Nazioni Unite storcono il naso, il rivale meno', pleases:'populista', f:()=>{relIntMuovi('consesso',-4); relIntMuovi('rivale',3); repd(-3); gd('lavoratori',3); gd('imprenditori',-2);}},
+   {l:'Proteggi il mercato interno', e:'Tuteli i settori fragili; le %ONU storcono il naso, il rivale meno', pleases:'populista', f:()=>{relIntMuovi('consesso',-4); relIntMuovi('rivale',3); repd(-3); gd('lavoratori',3); gd('imprenditori',-2);}},
  ]},
  {id:'umanitaria',era:'universale', min:'esteri', kick:'Emergenza umanitaria', t:'Emergenza umanitaria', text:'Una crisi umanitaria oltre confine chiede una risposta internazionale.',ch:[
-   {l:'Guida gli aiuti', e:'Generosità riconosciuta dalle Nazioni Unite, costa', pleases:'progressista', costo:{debito:0.6},f:()=>{S.ind.debt+=0.6; relIntMuovi('consesso',8); repd(5); gd('cattolici',4); gd('giovani',2);}},
-   {l:'Contributo simbolico', e:'Conti salvi; le Nazioni Unite notano l\'assenza', pleases:'tecnico', f:()=>{relIntMuovi('consesso',-3); repd(-2);}},
+   {l:'Guida gli aiuti', e:'Generosità riconosciuta dalle %ONU, costa', pleases:'progressista', costo:{debito:0.6},f:()=>{S.ind.debt+=0.6; relIntMuovi('consesso',8); repd(5); gd('cattolici',4); gd('giovani',2);}},
+   {l:'Contributo simbolico', e:'Conti salvi; le %ONU notano l\'assenza', pleases:'tecnico', f:()=>{relIntMuovi('consesso',-3); repd(-2);}},
  ]},
  /* eventi-PRESSIONE (fase A): cond-gati sul basso standing → la CONSEGUENZA ricorrente di un rapporto trascurato.
     La cura: arrivano dalle TUE scelte d'allineamento (lo standing è basso perché l'hai reso tale), mai a freddo. */
@@ -17137,7 +17137,7 @@ const INTERNAZIONALI=[
    {l:'Un gesto di riavvicinamento', e:'Ricuci con gli alleati, a un prezzo', pleases:'conservatore', costo:{debito:0.5},f:()=>{S.ind.debt+=0.5; relIntMuovi('alleanza',8); relIntMuovi('rivale',-3); gd('giovani',-1);}},
    {l:'Rivendichi l\'autonomia', e:'Tieni il punto; la frattura con l\'Alleanza si allarga', pleases:'populista', f:()=>{relIntMuovi('alleanza',-4); relIntMuovi('rivale',3); gd('cetomedio',2);}},
  ]},
- {id:'consesso_isola',era:'universale', tono:'grave', min:'esteri', cond:()=>S.relInt&&S.relInt.consesso!=null&&S.relInt.consesso<35, kick:'Assemblea internazionale', t:'Isolato alle Nazioni Unite', text:'Alle Nazioni Unite sei sempre più solo: le tue posizioni trovano poche sponde, e si vede.',ch:[
+ {id:'consesso_isola',era:'universale', tono:'grave', min:'esteri', cond:()=>S.relInt&&S.relInt.consesso!=null&&S.relInt.consesso<35, kick:'Assemblea internazionale', t:'Isolato alle %ONU', text:'Alle %ONU sei sempre più solo: le tue posizioni trovano poche sponde, e si vede.',ch:[
    {l:'Apri un\'iniziativa diplomatica', e:'Provi a rientrare nel gioco; richiede impegno', pleases:'tecnico', costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; relIntMuovi('consesso',8);}},
    {l:'Vai per la tua strada', e:'Orgoglio sovranista; l\'isolamento si consolida', pleases:'populista', f:()=>{relIntMuovi('consesso',-4); relIntMuovi('rivale',3); gd('cetomedio',3);}},
  ]},
@@ -17350,10 +17350,10 @@ const CRISI_SCALA_EV=[
  /* L245-6 · l'ultimatum RICEVUTO: la crisi che apre il rivale (crisiSubitaMese, game.js) arriva qui dopo tre mesi di segnali; la
     pesca crisiCartaRicevuto, certa, nello slot dell'evento estero. Quattro risposte, campo `ricevuto` letto in UN punto
     (crisiRicevuto, dal ramo generico di resolveItemCore): le `f` sono vuote. Partiti neutri, niente gruppi, niente persone. */
- {id:'crs_ricevuto', gradino:'ricevuto', min:'difesa', kick:'Crisi internazionale', t:'L\'ultimatum %POTdi', text:'Dopo le sanzioni e la mobilitazione, %POTdet ci pone un ultimatum, con una scadenza. Si può resistere, chiamare gli alleati, portare la crisi alle Nazioni Unite o cedere.', ch:[
+ {id:'crs_ricevuto', gradino:'ricevuto', min:'difesa', kick:'Crisi internazionale', t:'L\'ultimatum %POTdi', text:'Dopo le sanzioni e la mobilitazione, %POTdet ci pone un ultimatum, con una scadenza. Si può resistere, chiamare gli alleati, portare la crisi alle %ONU o cedere.', ch:[
    {l:'Resisti', e:'Nessuna concessione: %POTdet può cedere, o tirare dritto', ricevuto:'resisti', f:()=>{}},
    {l:'Chiami gli alleati', e:'Se l\'Alleanza ti segue, %POTdet ci pensa due volte', ricevuto:'alleati', f:()=>{}},
-   {l:'Porti la crisi alle Nazioni Unite', e:'Con una maggioranza in Assemblea, la crisi scende', ricevuto:'onu', f:()=>{}},
+   {l:'Porti la crisi alle %ONU', e:'Con una maggioranza in Assemblea, la crisi scende', ricevuto:'onu', f:()=>{}},
    {l:'Cedi all\'ultimatum', e:'La crisi si chiude; la tua parola perde peso, e la stampa non perdona', ricevuto:'cedi', f:()=>{}},
  ]},
 ];

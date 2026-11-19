@@ -3456,15 +3456,17 @@ function renderGov(){
       const d=it.data; const major=it.kind==='event';
       let kicker=T(d.kick);
       if(!major && d.min){ const mn=getMin(d.min); if(mn) kicker=T('Proposta')+' · '+mn.nm; }
-      h+=`<div class="ag ${major?'major':''} ${it.resolved?'done':''}">${agScene(it)}<div class="ah"><div class="kick">${kicker}</div><h3>${testoLuogo(it, T(d.t))}</h3></div>
-        ${it.ric?ricRigaHtml(it.ric):''}<div class="atext">${testoLuogo(it, T(d.text))}</div>`;
+      /* L275-21 (F35): il segnaposto %ONU (il nome dell'ente prima e dopo l'ingresso nelle Nazioni Unite) si risolve qui, dopo T(),
+         come nelle carte del L4 (entiSub, game.js): titolo, testo, scelte. Senza %ONU la stringa torna com'era. */
+      h+=`<div class="ag ${major?'major':''} ${it.resolved?'done':''}">${agScene(it)}<div class="ah"><div class="kick">${kicker}</div><h3>${entiSub(testoLuogo(it, T(d.t)))}</h3></div>
+        ${it.ric?ricRigaHtml(it.ric):''}<div class="atext">${entiSub(testoLuogo(it, T(d.text)))}</div>`;
       if(!it.resolved){ h+=`<div class="opts">`+d.ch.map((c,i)=>{
         const lockedRep=c.need!=null && (S.ind.reputazione==null || S.ind.reputazione<c.need);     // opzione da mediatore: a soglia di reputazione, mostrata onesta
         const lockedUE=c.pesoUE!=null && (S.pesoUE==null || S.pesoUE<c.pesoUE);                    // soglia gemella: peso del tuo gruppo a Bruxelles
         const cEnte=c.ente!=null?(typeof ENTI_INT!=='undefined'&&ENTI_INT.find(x=>x.id===c.ente)):null;   // soglia di STANDING con un ente (fase A)
         const lockedEnte=c.ente!=null && (!S.relInt || (S.relInt[c.ente]||0) < (c.enteMin!=null?c.enteMin:60));
         const locked=lockedRep||lockedUE||lockedEnte;
-        return `<button class="opt" ${locked?'disabled':''} onclick="resolveItem(${idx},${i})"><span class="ol">${T(c.l)}</span><span class="oe">${lockedRep?(T('Serve reputazione ≥ %N').replace('%N',c.need)):lockedUE?(T('Serve peso a Bruxelles ≥ %N').replace('%N',c.pesoUE)):lockedEnte?(T('Serve rapporto con %E ≥ %N').replace('%E',((cEnte&&cEnte.breve)||c.ente)).replace('%N',(c.enteMin!=null?c.enteMin:60))):T(c.e)}</span>${locked?'':costoChip(c)}${locked?'':cadeChip(c)}${locked?'':compraChip(c)}</button>`;
+        return `<button class="opt" ${locked?'disabled':''} onclick="resolveItem(${idx},${i})"><span class="ol">${entiSub(T(c.l))}</span><span class="oe">${lockedRep?(T('Serve reputazione ≥ %N').replace('%N',c.need)):lockedUE?(T('Serve peso a Bruxelles ≥ %N').replace('%N',c.pesoUE)):lockedEnte?(T('Serve rapporto con %E ≥ %N').replace('%E',(c.ente==='consesso'&&typeof foriDEpoca==='function'&&foriDEpoca())?T(consessoBreve()):((cEnte&&cEnte.breve)||c.ente)).replace('%N',(c.enteMin!=null?c.enteMin:60))):entiSub(T(c.e))}</span>${locked?'':costoChip(c)}${locked?'':cadeChip(c)}${locked?'':compraChip(c)}</button>`;
       }).join('')+`</div>`; }
       else h+=`<div class="outcome">${it.outcome}</div>${esitiHtml(it)}${tornaTavoloHtml(it)}`;
       h+=`</div>`;

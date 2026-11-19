@@ -1257,7 +1257,8 @@ function subMin(s){ return (s||'')
   .replace(/%DICA/g, (typeof dicPrepA==='function'?dicPrepA():dicNome()))       // «a %DIC» articolato
   .replace(/%DIC/g, dicNome())
   .replace(/%PREMIER/g, (S.premier||{}).nome||T('il premier'))
-  .replace(/%SEDE|%CAPITALE|%ACAPITALE/g, function(m){ return (typeof luoghiSub==='function') ? luoghiSub(m) : m; }); }   /* L76-1: i luoghi sono dati del paese — un risolutore solo */
+  .replace(/%SEDE|%CAPITALE|%ACAPITALE/g, function(m){ return (typeof luoghiSub==='function') ? luoghiSub(m) : m; })   /* L76-1: i luoghi sono dati del paese — un risolutore solo */
+  .replace(/%ONU/g, function(){ return (typeof onuTok==='function') ? onuTok() : 'Nazioni Unite'; }); }   /* L275-21 (F35): il nome dell'ente, come entiSub */
 function capitaleCresci(){
   const cm=(dif().capitaleMult!=null)?dif().capitaleMult:1;   // la salita è più lenta a difficile, più rapida a facile
   if(S.livello===1){   // da locale: la notorietà cresce amministrando bene — LENTA: si sale vincendo, non accumulando
@@ -1528,18 +1529,26 @@ function autorevMuovi(n){ if(S.intl) S.intl.autorevolezza=clamp(S.intl.autorevol
    prima → Segretario generale del Consiglio d'Europa (dal 1949). Presente identico.
    L260-5ter passo 0: il confronto era su eraGiocata() (S.era = LINEA_IT nelle porte italiane), mai vero; la porta è S.scenario,
    come in ruoloDiplo() dal L260-5bis. Dal L260-5quater anche consessoNome, consessoBreve e onuTok qui sotto (foriDEpoca()). */
+/* L275-21 (F35): non più la porta ma il PAESE e la data d'ingresso (foriDEpoca() = !onuVero(), ONU_PAESI in data.js). Membro → le Nazioni
+   Unite; prima, Italia: dal 1952 NATO, prima Consiglio d'Europa (come sempre, ora fino al 1955/11 compreso); Repubblica federale: NATO da
+   quando verticeVero() (VERTICE_PAESI, 1955/5), prima Consiglio d'Europa. Ogni altro paese le Nazioni Unite. */
 function ruoloIntl(){
-  if(typeof S!=='undefined' && S && S.scenario==='italia1950'){
-    var y=(typeof S!=='undefined'&&S&&S.year)||1950;
-    if(y>=1955) return 'Segretario generale delle Nazioni Unite';
-    if(y>=1952) return 'Segretario generale della NATO';
+  if(!foriDEpoca()) return 'Segretario generale delle Nazioni Unite';
+  if(S.paese==='germania'){
+    if(typeof verticeVero==='function' && verticeVero()) return 'Segretario generale della NATO';
     return 'Segretario generale del Consiglio d\'Europa';
   }
-  return 'Segretario generale delle Nazioni Unite';
+  var y=S.year||1950;
+  if(y>=1952) return 'Segretario generale della NATO';
+  return 'Segretario generale del Consiglio d\'Europa';
 }
-/* etichette del nodo-multilaterale (`consesso`) per finestra: nel '50 pre-'55 sono i fori europei/atlantici.
-   L260-5quater passo 0: il confronto era su eraGiocata() (mai 'italia1950'), ora sulla porta, come ruoloIntl() qui sopra. */
-function foriDEpoca(){ return typeof S!=='undefined' && !!S && S.scenario==='italia1950' && ((S.year||1950)<1955); }
+/* etichette del nodo-multilaterale (`consesso`) per finestra: prima dell'ingresso nelle Nazioni Unite sono i fori europei/atlantici.
+   L260-5quater passo 0: il confronto era su eraGiocata() (mai 'italia1950'), poi sulla porta (italia1950 prima del 1955).
+   L275-21 (F35): sul paese e sul mese, = !onuVero() (italia fino al 1955/11, germania fino al 1973/8; ogni paese fuori da ONU_PAESI
+   mai). Il nome dell'ente nelle carte passa da qui e dal segnaposto %ONU (onuTok/entiSub): mai «Nazioni Unite» in chiaro in una carta
+   comune. FORI_ROSSO (solo la prova) la rende sempre falsa. */
+let FORI_ROSSO=false;
+function foriDEpoca(){ return !FORI_ROSSO && typeof S!=='undefined' && !!S && typeof onuVero==='function' && !onuVero(); }
 function consessoNome(){
   if(foriDEpoca()) return 'i fori europei e atlantici';
   return 'le Nazioni Unite';
@@ -1589,8 +1598,8 @@ function ruoloDiplo(grado){   // L260-5bis: `grado` facoltativo (la carica in pa
   var g=(grado!=null) ? grado : (S.diplo && S.diplo.grado);
   if(!(g>=2)) return 'Ambasciatore';   // grado 1 = era-neutro
   /* D4: grado 2 d'epoca (reale). L260-5bis passo 0: il confronto era su eraGiocata(), che rende S.era (LINEA_IT nelle porte italiane)
-     e non era mai vero; la porta è S.scenario. ⚠ ruoloIntl() ha lo stesso ramo morto (segnalato nel rapporto, non toccato). */
-  if(S && S.scenario==='italia1950' && ((S.year||1950)<1955)) return 'Rappresentante permanente presso il Consiglio d\'Europa';
+     e non era mai vero; la porta è S.scenario. L275-21 (F35): passa da foriDEpoca() (paese e mese, = !onuVero()), come ruoloIntl(). */
+  if(foriDEpoca()) return 'Rappresentante permanente presso il Consiglio d\'Europa';
   return 'Sottosegretario generale delle Nazioni Unite';
 }
 function startDiplomatico(){
@@ -11950,7 +11959,7 @@ function onuGiaStoria(){ return !!(S && S.era===LINEA_IT && (1955*12+12) < ((S.a
 function genAgendaRamo(first){
   S.agenda=[];
   // D4 — il PILASTRO datato: l'Italia entra alle Nazioni Unite (14 dic 1955). One-shot per l'era '50 (qualsiasi livello):
-  // L'orizzonte ONU (ruoloIntl, nodo, sede) lo apre l'OROLOGIO (S.year≥1955), non S.onuFatto: il flag serve solo a dare la carta una volta.
+  // L'orizzonte ONU (ruoloIntl, nodo, sede) lo apre l'OROLOGIO (dal L275-21 foriDEpoca() = !onuVero(): Italia dal 1955/12), non S.onuFatto: il flag serve solo a dare la carta una volta.
   /* L243-1 · IL PALETTO DI L34-3 MANCAVA QUI: senza limite sull'inizio della carriera, chi partiva nel 1960-2000 riceveva la
      carta al secondo mese, da sola (agendaSolo), come se l'Italia entrasse all'ONU allora (segnalazione di Giacomo, Italia 1980,
      ambasciatore). Un fatto avvenuto prima dell'inizio è storia: si segna fatto e non esce. Lo stesso calcolo, `onuGiaStoria()`,
@@ -13085,8 +13094,9 @@ function resolveItemCore(idx,ci){
     }
     S.ind.consenso=computeConsenso();
     /* L28-4: una CRONACA non e' una scelta. I pilastri-'70 scrivono il fatto nel registro, non «Decisione: Prosegui». */
-    it.resolved=true; it.outcome = d.cronaca ? '' : T('Scelta:')+' <b>'+T(choice.l)+'</b>.';
-    S.log.unshift({t:T(d.t), x: d.cronaca ? T(d.logx||d.t) : T('Decisione:')+' '+T(choice.l)});
+    /* L275-21 (F35): %ONU risolto dopo T() anche nell'esito e nel registro (entiSub: senza %ONU la stringa è quella di prima). */
+    it.resolved=true; it.outcome = d.cronaca ? '' : T('Scelta:')+' <b>'+entiSub(T(choice.l))+'</b>.';
+    S.log.unshift({t:entiSub(T(d.t)), x: d.cronaca ? T(d.logx||d.t) : T('Decisione:')+' '+entiSub(T(choice.l))});
     if(it.kind==='dossier' && d && /^pp_/.test(d.id||'')){ S.pressAck=S.pressAck||{}; S.pressAck[d.pol]=S.year*12+S.month; }   // loop attivo Lotto 3: aver DECISO (rivedi o tieni) mette a tacere il richiamo su quella politica per qualche mese — tenere non resta un problema aperto
     /* L93-5 · il voto di fiducia, nello stesso mese. CAUSA_CRISI è transitoria (mai in S): la legge solo chi misura le cause. */
     /* L93-5b · il governo che si compra si logora: sulla linea che la molla non ha, come la caduta. Solo sotto la crisi ministeriale. */
