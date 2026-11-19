@@ -1385,7 +1385,7 @@ function renderCreazione(){
     h+=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;max-width:360px;margin:9px auto 0;">`
       +MINISTRIES.map(function(M){ const _nm=(typeof dicNm==='function'?dicNm(M.id):M.nm); return `<button onclick="setCrea('dicastero','${M.id}')" style="padding:9px 8px;border-radius:9px;border:1px solid ${C.dicastero===M.id?'var(--brand)':'var(--line2)'};background:${C.dicastero===M.id?'var(--acc-bg)':'var(--panel)'};color:var(--txt);font-family:inherit;font-size:12px;cursor:pointer;">${T(_nm)}</button>`; }).join('')+`</div>`;   // D3: nomi era-aware nel selettore
   } else if(C.livello===5){
-    h+=nota(T('Il percorso alternativo: cominci dalla diplomazia, come Ambasciatore. Non governi mai un paese — sali costruendo rapporti e credito, missione dopo missione, fino alla chiamata a Segretario generale delle Nazioni Unite.'));
+    h+=nota(T('Il percorso alternativo: cominci dalla diplomazia, come Ambasciatore. Non governi mai un paese — sali costruendo rapporti e credito, missione dopo missione, fino alla chiamata al vertice del mondo.'));   /* L275-23 (⚠ 2 di L275-22): generica per ogni porta e per il presente — qui S non c'è e foriDEpoca() non si legge */
   } else h+=nota(T('Il gioco pieno, dall\'insediamento: nomini il governo e guidi il paese.'));
   h+=fine;
   const etaOpts=(C.livello===0?[25,30,35]:C.livello===1?etaOptLocale(C.terrIdx):C.livello===2?[40,45,50]:C.livello===5?[40,45,50]:[45,50,55,60]);   // A.5 rework: età a scatti di 5
@@ -3171,7 +3171,7 @@ function renderGov(){
       ? ((D.grado>=2) ? T('rapporto con %ENTE ≥ 75 → la chiamata a Segretario').replace('%ENTE', T(consessoNome())) : T('credito ≥ 70 → la promozione a %R').replace('%R', T(ruoloDiplo(2))))
       : T((D.grado>=2)?'rapporto con l\'ONU ≥ 75 → la chiamata a Segretario':'credito ≥ 70 → la promozione a Sottosegretario generale');
     h+=`<div class="banner${fioreB}">${T('<b>Sei %R.</b> Non governi un paese: costruisci rapporti e credito, missione dopo missione. La via al vertice del mondo passa dallo standing — %M.').replace('%R', T(typeof ruoloDiplo==='function'?ruoloDiplo():'Ambasciatore')).replace('%M', meta)}</div>`;
-    h+=`<div class="card"><div class="ct">${T('La scala diplomatica')} · ${T(D.grado>=2?'Sottosegretario generale':'Ambasciatore')}</div>${ob(T('Credito diplomatico'),T('la tua reputazione tra i diplomatici'),D.credito)}${ob(fori?T('Rapporto con %ENTE').replace('%ENTE', T(consessoNome())):T('Rapporto con l\'ONU'),T('il favore dei fori multilaterali: la porta del vertice'),cons)}</div>`;
+    h+=`<div class="card"><div class="ct">${T('La scala diplomatica')} · ${T(D.grado>=2?(fori?'Rappresentante permanente':'Sottosegretario generale'):'Ambasciatore')}</div>${ob(T('Credito diplomatico'),T('la tua reputazione tra i diplomatici'),D.credito)}${ob(fori?T('Rapporto con %ENTE').replace('%ENTE', T(consessoNome())):T('Rapporto con l\'ONU'),T('il favore dei fori multilaterali: la porta del vertice'),cons)}</div>`;
     h+=concCorsaHtml();   // L260-5bis: la corsa al posto col concorrente (vuota con DIPLO_CONCORRENTE spento)
     h+=bilMissioniHtml();   // L260-5: la missione del mese (vuota con DIPLO_BILATERALI spento)
   }
