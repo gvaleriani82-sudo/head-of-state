@@ -10564,8 +10564,11 @@ let TRATTATIVE_VERTENZA=true;   // L275-8 (F24): la vertenza dell'attivista (TRA
 let TRATTATIVE_DICASTERO=true;   // L275-11 (F22): la trattativa del ministro col capo del governo (TRATTATIVE_DEF.dicastero), ACCESA dal L275-12 (cooldown 60, il round 2-3 al posto della sola carta del ministro: D379 passa su us1960 ministro con media −0,009995, sulla soglia); spenta = il lato 'ministro' non esiste (negoziatoLato dà null al L2) e mi_sacrificio resta com'era. Banco: __TRATTATIVE_DICASTERO_ON / __TRATTATIVE_DICASTERO_SPENTO (vince) in __reseed
 let TRATTATIVE_GIUNTA=true;   // L275-13 (F23): la trattativa del sindaco con la lista civica (TRATTATIVE_DEF.giunta), ACCESA dal L275-13 (17/11, cooldown 36: D379 sulle partenze locali media −0,0002 sul L1 vissuto, C4, D174, prove, CDP IT/EN, guardie, A/B spenta-prima 0/1020 verdi); spenta = il lato 'locale' non esiste (negoziatoLato dà null al L1) e l_civica resta com'era. Banco: __TRATTATIVE_GIUNTA_ON / __TRATTATIVE_GIUNTA_SPENTO (vince) in __reseed
 let TRATTATIVE_VERTICE=true;   // L275-14 (F25): il vertice dell'Alleanza del capo del governo (TRATTATIVE_DEF.vertice), ACCESO dal L275-14 (18/11, cooldown 48: D379 su tutte le partenze, C4 del L3, D174, prove, CDP IT/EN, guardie, A/B spenta-prima 0/1020 verdi); per trasformazione di nato_vertice (pickInternazionale), solo nei paesi e dalle date di VERTICE_PAESI; spenta = nato_vertice resta com'era (verticeTrasforma restituisce l'item). Banco: __TRATTATIVE_VERTICE_ON / __TRATTATIVE_VERTICE_SPENTO (vince) in __reseed
-const TRATTATIVE_K={ cool:{patto:30, estero:36, opp:36, vertenza:36, dicastero:60, giunta:36, vertice:48}, freddo:24, attesaMax:2 };   // L275-13: giunta 36 (la leva della consegna è 60) · L275-14: vertice 48 (la leva della consegna è 72)
+const TRATTATIVE_K={ cool:{patto:30, estero:36, opp:36, vertenza:36, dicastero:60, giunta:36, vertice:48, bilancio:36, manovra:120}, freddo:24, attesaMax:2 };   // L275-13: giunta 36 (la leva della consegna è 60) · L275-14: vertice 48 (la leva della consegna è 72) · L275-17: bilancio 36 (la leva della consegna è 60) · L275-18: manovra 120 (la regola di Cowork sui tre gradini 60 · 84 · 120: il primo con tutte e sei le partenze a ≤ 1,0 nascite per carriera)
 let TRATTATIVE_VOLTO=true;   // L275-16 (F26): il negoziato estero col VOLTO della potenza rivale (TRATTATIVE_DEF.estero.origVolto, oggi dp_veto: la potenza è il potId della carta, scritto da diploCarta), ACCESO dal L275-16 (18/11: prove, CDP IT/EN, guardie, A/B spenta-prima 0/1020, D379, C4 del L4 e del L5, D174 verdi; 118 negoziati col volto su 1499, 8%); spento = le origini col volto non si leggono e dp_veto resta com'era. Banco: __TRATTATIVE_VOLTO_ON / __TRATTATIVE_VOLTO_SPENTO (vince) in __reseed
+let TRATTATIVE_BILANCIO=true;   // L275-17 (F21, prima metà): la trattativa del Presidente col Congresso nel presente americano (TRATTATIVE_DEF.bilancio), per trasformazione di us_p_tetto e us_p_shutdown (bilancioTrasforma), ACCESA dal L275-17 (18/11, cooldown 36: prove, CDP IT/EN, guardie, A/B spenta-prima 0/1020, D379, C4 del L3, D174 verdi; 0,57 trattative per carriera da Presidente); spenta = le due carte restano com'erano. Banco: __TRATTATIVE_BILANCIO_ON / __TRATTATIVE_BILANCIO_SPENTO (vince) in __reseed
+let TRATTATIVE_MANOVRA=false;   // SPENTA DEFINITIVA per il piano dal L275-19 (18/11: con gli effetti d arrivo dimezzati D379 resta rossa nelle stesse 4 partenze, rapporto «⚑ L275-19»)   // L275-18 (F21, seconda metà): la legge di bilancio con l'alleato decisivo (TRATTATIVE_DEF.manovra), nasce DALLO STATO al confine settembre → ottobre (manovraNasce, in negoziatoMese) solo nei paesi e dagli anni di MANOVRA_PAESI; SPENTA dal L275-18 (18/11: prove, CDP IT/EN, guardie, C4 del L3, D174, identità fuori elenco verdi, ma D379 per partenza rossa in 4 su 6 — Italia, Germania, Paesi Bassi, Danimarca del presente, −0,004…−0,023 carte al mese, per composizione: più mesi al L4 —, e il cooldown è già al gradino più alto, 120; rapporto «⚑ L275-18»); spenta = il gioco di L275-17 (manovraNasce non scrive niente). Banco: __TRATTATIVE_MANOVRA_ON / __TRATTATIVE_MANOVRA_SPENTO (vince) in __reseed
+// L275-20 (⚠ 2 di L275-19): se TRATTATIVE_MANOVRA si riaccende, la targhetta del pieno («accordo pieno, i mercati respirano») diventa «accordo pieno», chiave nuova: la fiducia +1 non c'è più dal L275-19.
 let TRATTATIVE_ROSSO=null;   // solo le prove: 'c4' = il round come carta IN PIÙ anche senza posto (C4 rossa) · 'vicenda' = nasce anche con una vicenda aperta · 'rilancio' = il rilancio con F 0 che chiude al round 1 (la regola di prima del L273-3) · 'deleg' = L273-4: una potenza estratta dove la carta d'origine non la porta
 const NEG_STATI=['pieno','compromesso','rottura'];
 const NEG_LATI=['gov','estero','opp','attivista','ministro','locale'];   // L275-13: 'locale' = L1 da sindaco (la giunta)   // L275-8: 'attivista' = L0 (la vertenza) · L275-11: 'ministro' = L2 al governo (il dicastero)
@@ -10649,6 +10652,7 @@ function negoziatoNome(con){
   if(con==='autorita') return T('le autorità');   // L275-8: la vertenza del corteo (ev_percorso: «Le autorità autorizzano il corteo»)
   if(con==='premier') return T(ricCapoPresidente() ? 'il Presidente' : 'il capo del governo');   // L275-11: il dicastero (mi_sacrificio: «%PREMIER ti chiede…»), il ruolo di F18, mai il nome
   if(con==='civica') return T('la lista civica');   // L275-13: la giunta (l_civica: «Una lista civica di quartiere… si offre di entrare in maggioranza»)
+  if(con==='congresso') return T('il Congresso');   // L275-17: la trattativa col Congresso (us_p_tetto, us_p_shutdown: un'istituzione, mai un partito)
   if(con==='alleati') return T('gli alleati');   // L275-14: il vertice (nato_vertice: «Gli alleati chiedono un impegno di spesa militare più alto»)
   if(con==='azienda') return T("l'azienda");   // L275-8: la vertenza dei cancelli (ev_cancelli: «l'azienda e i moderati ti mettono nel mirino»)   // L273-4: la controparte generica del negoziato estero (le carte d'origine senza potenza)
   var p=(typeof part==='function') ? part(con) : null; if(p) return T(p.nome||'');
@@ -10831,6 +10835,7 @@ function negoziatoMese(){
     }
   }
   negoziatoNasceStato();
+  manovraNasce();   // L275-18: la legge di bilancio con l'alleato, al confine settembre → ottobre (spenta: no-op)
 }
 /* il ramo kind:'negoziato' di resolveItemCore: le tre mosse (0 cedi · 1 rilancia · 2 tieni) */
 function negoziatoRisolvi(it, ci){
@@ -11087,6 +11092,15 @@ function verticeVero(){
   var R=(typeof VERTICE_PAESI!=='undefined') && S && VERTICE_PAESI[S.paese]; if(!R) return false;
   return S.year>R.anno || (S.year===R.anno && S.month>=R.mese);
 }
+/* L275-20 (F34) · onuVero() = il paese della partita è membro delle Nazioni Unite alla data della partita (S.year, S.month): assente da
+   ONU_PAESI (data.js) = sempre; altrimenti dalla data della riga in poi (la forma di verticeVero, rovesciata sul paese assente). La legge
+   solo la cond di dp_veto e dp_assemblea; ONU_ROSSO (solo la prova) la rende sempre vera. */
+let ONU_ROSSO=false;
+function onuVero(){
+  if(ONU_ROSSO) return true;
+  var R=(typeof ONU_PAESI!=='undefined') && S && ONU_PAESI[S.paese]; if(!R) return true;
+  return S.year>R.anno || (S.year===R.anno && S.month>=R.mese);
+}
 function verticeControparte(it){ var id=it && it.data && it.data.id; return (id==='nato_vertice' && (verticeVero() || TRATTATIVE_ROSSO==='paese')) ? 'alleati' : null; }   // 'paese': solo le prove (la rossa che trasforma fuori elenco)
 function verticeValida(a){ return !!a && a.con==='alleati' && S.livello===3 && !S.opposizione && (verticeVero() || TRATTATIVE_ROSSO==='paese'); }
 function verticeForza(con){ var al=S.relInt && S.relInt.alleanza, rp=S.ind && S.ind.reputazione; return (al!=null && al>=60 && rp!=null && rp>=66) ? 1 : 0; }
@@ -11104,6 +11118,120 @@ function verticeChiudi(stato, a, daSe){
 function verticeTrasforma(it){
   if(!TRATTATIVE_VERTICE || !it || !it.data || it.data.id!=='nato_vertice') return it;
   return negoziatoTrasforma(it);
+}
+/* ⚑ L275-17 · LA TRATTATIVA COL CONGRESSO (F21, prima metà; TRATTATIVE_DEF.bilancio, dietro TRATTATIVE_BILANCIO, ACCESA dal L275-17, cooldown 36). L'ottavo tipo,
+   sul lato 'gov' (il Presidente: L3 al governo). Nasce per TRASFORMAZIONE, come il vertice: us_p_tetto e us_p_shutdown (EVENTS,
+   era:'contemporanea', paesi:['usa']) escono solo nel posto dell'evento grave raro del ramo del capo del governo, e lì passano da
+   bilancioTrasforma → negoziatoTrasforma; spenta, in cooldown, o con un «non nasce» di D376: la carta esce com'è, intatta.
+   Il round 1 prende il posto della carta; i round 2-3 il posto di un dossier o dell'evento del mese (negoziatoPosto).
+   · DOVE: solo nel presente americano (S.scenario==='presente', S.paese==='usa'); nelle porte us* (anche dopo il 2012, quando la carta
+     torna viva) la controparte è null e la carta resta carta. Le carte datate delle porte (us90_bilancio*, snodo_chiusura95*,
+     snodo_tetto11*, us00_bilanci*) non sono origini.
+   · LA CONTROPARTE: 'congresso' = «il Congresso» (EN «Congress»), un'istituzione: mai un partito, mai una persona.
+   · L'ORIGINE: bilancioOrig() = la carta d'origine (BILANCIO_ORIG, transitorio, scritto da bilancioTrasforma per il round 1; poi
+     S.negoziato.a.orig) — la leggono i getter r1 e stati del tipo (testo del round 1 e degli stati per origine).
+   · LA FORZA: con S.congresso (il Congresso del presente, L263-9quater): +1 se divisoPer() è null (il partito del Presidente ha Camera
+     e Senato) oppure S.ind.consenso ≥ 60; −1 se il governo è diviso E il consenso < 40; altrimenti 0. Senza S.congresso (un salvataggio
+     di prima): il solo consenso, 60 e 40.
+   · PREZZI (solo i gruppi che le due carte toccano; il compromesso la metà, minimo 1): il taglio simbolico → lavoratori −1; un capitolo →
+     lavoratori −2; tutti i tagli → lavoratori −2, pensionati −1 (−1 anche a metà: oltre, us_p_shutdown non li porta).
+   · ARRIVO, dentro la forbice delle scelte della carta d'origine:
+     us_p_tetto — pieno fiducia +2, imprenditori +1, debito −0,2 × la richiesta (la ① «tagli in cambio del tetto»: −0,6, fiducia +2,
+       imprenditori +2) · compromesso fiducia +1, ceto medio +1 (da sé: debito +0,3, ceto medio +1 = la ③ «tetto sospeso») ·
+       rottura fiducia −3, stampa +1, lavoratori +2, ceto medio −1 (= la ② «si alza e basta», la peggiore).
+     us_p_shutdown — pieno stampa +1, ceto medio +1 (la ③ senza il debito, coi tagli pagati dai gruppi) · compromesso ceto medio +1,
+       debito +0,2 (da sé: stampa −1, lavoratori +1, la ① a metà) · rottura fiducia −2, tutti i gruppi −2, pensionati +1 (= la ②
+       «resisti», la peggiore). Nessuna chiave nuova. Mai voto, seggi, forze, Congresso. Nessuna persona ricorrente, nessuna promessa.
+   · USCITA: bilancioValida è falsa fuori dal L3 al governo o dal presente americano: chiusa «da sé» SENZA effetti. */
+let BILANCIO_ORIG=null;   // transitorio: la carta d'origine del round 1 che sta nascendo (mai in S)
+function bilancioOrig(){ var a=(typeof S!=='undefined' && S && S.negoziato && S.negoziato.a); return (a && a.tipo==='bilancio' && a.orig) ? a.orig : BILANCIO_ORIG; }
+function bilancioVero(){ return !!S && S.paese==='usa' && (S.scenario==='presente' || TRATTATIVE_ROSSO==='bilancio'); }   // 'bilancio': solo le prove (la rossa che trasforma anche nelle porte us*)
+function bilancioControparte(it){ var id=it && it.data && it.data.id; return ((id==='us_p_tetto' || id==='us_p_shutdown') && bilancioVero()) ? 'congresso' : null; }
+function bilancioValida(a){ return !!a && a.con==='congresso' && S.livello===3 && !S.opposizione && bilancioVero(); }
+function bilancioForza(con){
+  var c=(S.ind && S.ind.consenso!=null) ? S.ind.consenso : 50;
+  if(!S.congresso) return c>=60 ? 1 : (c<40 ? -1 : 0);
+  var dv=divisoPer();
+  if(dv===null || c>=60) return 1;
+  return c<40 ? -1 : 0;
+}
+function bilancioPrezzo(a, k, R){
+  var n=Math.max(1, Math.round(2*k));
+  if(R.k==='simbolico') gd('lavoratori', -1);
+  else if(R.k==='capitolo') gd('lavoratori', -n);
+  else if(R.k==='pieni'){ gd('lavoratori', -n); gd('pensionati', -1); }   // pensionati −1 anche pieno: la scelta peggiore di us_p_shutdown li porta a −1 (la forbice)
+}
+function bilancioChiudi(stato, a, daSe){
+  if(!bilancioValida(a)) return;   // fuori dal L3 al governo o dal presente americano: chiusa senza effetti
+  var I=S.ind;
+  if(a.orig==='us_p_shutdown'){
+    if(stato==='pieno'){ I.stampa+=1; gd('cetomedio', 1); }
+    else if(stato==='compromesso'){ if(daSe){ I.stampa-=1; gd('lavoratori', 1); } else { gd('cetomedio', 1); I.debt+=0.2; } }
+    else if(stato==='rottura'){ I.fiducia-=2; allG(-2); gd('pensionati', 1); }
+  } else {
+    if(stato==='pieno'){ I.fiducia+=2; gd('imprenditori', 1); I.debt-=0.2*Math.max(0, a.ric||0); }
+    else if(stato==='compromesso'){ if(daSe){ I.debt+=0.3; gd('cetomedio', 1); } else { I.fiducia+=1; gd('cetomedio', 1); } }
+    else if(stato==='rottura'){ I.fiducia-=3; I.stampa+=1; gd('lavoratori', 2); gd('cetomedio', -1); }
+  }
+}
+/* la trasformazione al posto dell'evento grave raro (spenta, o non una delle due carte: l'item com'è; nessun dado, nessuna scrittura in S) */
+function bilancioTrasforma(it){
+  if(!TRATTATIVE_BILANCIO || !it || !it.data || (it.data.id!=='us_p_tetto' && it.data.id!=='us_p_shutdown')) return it;
+  BILANCIO_ORIG=it.data.id;
+  try{ return negoziatoTrasforma(it); } finally { BILANCIO_ORIG=null; }
+}
+/* ⚑ L275-18 · LA LEGGE DI BILANCIO CON L'ALLEATO (F21, seconda metà; TRATTATIVE_DEF.manovra, dietro TRATTATIVE_MANOVRA, SPENTA dal
+   L275-18: D379 per partenza rossa in 4 su 6, rapporto «⚑ L275-18»; SPENTA DEFINITIVA dal L275-19, effetti dimezzati e D379 ancora rossa, «⚑ L275-19»; cooldown TRATTATIVE_K.cool.manovra 120). Il nono tipo, sul lato 'gov' (il capo del governo di coalizione).
+   NON è una carta in più: nasce DALLO STATO, come il patto di governo, al confine settembre → ottobre (manovraNasce, chiamata da
+   negoziatoMese SUBITO DOPO negoziatoNasceStato: un patto nato allo stesso confine passa prima), e il round 1 prende un posto
+   dell'agenda d'ottobre (negoziatoPosto: un dossier, se no l'evento); senza posto aspetta TRATTATIVE_K.attesaMax e si chiude «da sé».
+   Zero dadi; genAgenda non scrive S.
+   · DOVE: manovraVera() = S.paese in MANOVRA_PAESI (data.js), S.year ≥ l'anno della riga, PAESE.coalizione. Fuori elenco (Regno Unito,
+     USA, Francia, Spagna, Svezia, Norvegia…) il tipo non esiste.
+   · QUANDO: S.month 9 (il confine prima di S.month++), L3 al governo (negoziatoLato 'gov'), un alleato decisivo (negoziatoDecisivi),
+     negoziatoAmmesso del tipo (nessun negoziato aperto, vicenda, crisi, guerra, vigilia, campagna, notte, primaria, intermedia; il
+     cooldown della famiglia), ≥ MANOVRA_DAL_PATTO (18) mesi dall'ultimo patto (S.negoziato.ult.patto, misurati sul mese del round 1).
+   · LA CONTROPARTE: l'alleato decisivo più grande (dec[0]), come il patto; il nome lo dà negoziatoNome (il partito del roster).
+   · LA FORZA: quella del patto, letta da negoziatoForza col tipo patto (nessuna riga nuova nel motore).
+   · PREZZI (manovraPrezzo): la voce simbolica → stampa −1 (anche a metà); il capitolo → debito +0,2 × k; il pacchetto → debito +0,4 × k.
+     Nessuna promessa, nessun ministro, nessun fatto ricorrente.
+   · ARRIVO (manovraChiudi, dimezzato dal L275-19, seconda misura): tenuta dell'alleato pieno +5 · compromesso +3 (da sé +1) · rottura
+     −15 (il patto: +15 · +8 (+3) · −15); il pieno non muove la fiducia (era +1 in L275-18); rottura fiducia −2, stampa −1. Mai voto, seggi, leggi, forze; la rottura non fa cadere il governo.
+   · USCITA: manovraValida è falsa fuori dal L3 al governo, fuori da MANOVRA_PAESI, o se l'alleato non è più nella coalizione o non è più
+     decisivo: chiusa «da sé» SENZA effetti. */
+const MANOVRA_DAL_PATTO=18;
+function manovraVera(){
+  if(typeof S==='undefined' || !S) return false;
+  if(TRATTATIVE_ROSSO==='manovra') return true;   // solo le prove: la rossa che la fa nascere anche fuori elenco (Regno Unito)
+  var R=(typeof MANOVRA_PAESI!=='undefined') && MANOVRA_PAESI[S.paese]; if(!R) return false;
+  return !!PAESE.coalizione && S.year>=R.anno;
+}
+function manovraValida(a){
+  return !!a && S.livello===3 && !S.opposizione && manovraVera() && (S.coalizione||[]).indexOf(a.con)>=0 && negoziatoDecisivi().indexOf(a.con)>=0;
+}
+function manovraForza(con){ return negoziatoForza(negoziatoDef('patto'), con); }
+function manovraPrezzo(a, k, R){
+  if(R.k==='voce'){ if(S.ind && S.ind.stampa!=null) S.ind.stampa-=1; }
+  else if(S.ind && S.ind.debt!=null) S.ind.debt+=(R.debito||0)*k;
+}
+function manovraChiudi(stato, a, daSe){
+  if(!manovraValida(a)) return;   // fuori dal L3 al governo o dall'elenco, alleato uscito o non più decisivo: chiusa senza effetti
+  var I=S.ind, dt=stato==='pieno' ? 5 : (stato==='compromesso' ? (daSe ? 1 : 3) : -15);   // L275-19: dimezzati (erano +10 · +5 · +2)
+  if(S.tenuta && S.tenuta[a.con]!=null) S.tenuta[a.con]=clamp(S.tenuta[a.con]+dt, 0, 100);
+  if(stato==='rottura'){ I.fiducia-=2; I.stampa-=1; }   // L275-19: il pieno non muove più la fiducia (era +1)
+}
+/* la nascita dallo stato (da negoziatoMese, prima di S.month++); spenta, o un solo «non nasce»: niente, nemmeno S.negoziato */
+function manovraNasce(){
+  if(!TRATTATIVE_MANOVRA || !negoziatoVivo() || S.month!==9) return;
+  if(negoziatoLato()!=='gov' || !manovraVera()) return;
+  var def=negoziatoDef('manovra'); if(!def || !negoziatoAmmesso(def, 'gov', false)) return;
+  var dec=negoziatoDecisivi(); if(!dec.length) return;
+  var ora=meseAss(), up=S.negoziato && S.negoziato.ult && S.negoziato.ult.patto;
+  if(typeof up==='number' && ora+1-up<MANOVRA_DAL_PATTO) return;
+  var N=S.negoziato || (S.negoziato=negoziatoStato0());
+  var a=negoziatoProto(def, 'gov', dec[0], 'stato');
+  a.da=ora+1; a.pr=ora+1; a.sl=0;
+  N.a=a;
 }
 /* ================================================================================================================
    ⚑ L274-2 · IL DISCORSO · ACCESA (L274-4) — il motore (DESIGN-FORMATI.md «⚑ L274-1» D383-D393, «⚑ L274-2»). Il quarto formato: una carta
@@ -12348,7 +12476,7 @@ function genAgendaRamo(first){
   if(!hadEvent && Math.random()<0.10*dif().freqEventi){
     S.recentEvent=S.recentEvent||[];   // finestra anti-ripetizione (5): prima escludevamo solo l'ULTIMO evento
     const pool=EVENTS.filter(e=>(!e.cond||e.cond())&&eraViva(e)&&!S.recentEvent.includes(e.id)&&!giaUscitaUnaCarriera(e));   // L232-1: unaCarriera (la finestra dei recenti ha 5 posti: un evento con una finestra di mesi tornava) · Build B: eraViva ADDITIVO — gli eventi senza tag passano sempre (nessuna regressione); abilita i pilastri d'epoca taggati
-    if(pool.length){ const ev=rnd(pool); if(ev.unaCarriera) segnaUnaCarriera(ev.id); S.recentEvent.push(ev.id); if(S.recentEvent.length>5) S.recentEvent.shift(); S.agenda.push(vicendaTrasforma({kind:'event', data:ev, resolved:false})); hadEvent=true; }   // L272-3: `pandemia` può diventare il tempo 1 dell'epidemia (spenta: l'item com'è)
+    if(pool.length){ const ev=rnd(pool); if(ev.unaCarriera) segnaUnaCarriera(ev.id); S.recentEvent.push(ev.id); if(S.recentEvent.length>5) S.recentEvent.shift(); S.agenda.push(bilancioTrasforma(vicendaTrasforma({kind:'event', data:ev, resolved:false}))); hadEvent=true; }   // L272-3: `pandemia` può diventare il tempo 1 dell'epidemia (spenta: l'item com'è) · L275-17: us_p_tetto e us_p_shutdown possono diventare il round 1 col Congresso (bilancioTrasforma; spenta: l'item com'è)
   }
   // CONFLITTI internazionali (cantiere paesi reali, Fetta B): i flashpoint coi volti nominati, PRIMA della routine diplomatica (presenza ricorrente)
   if(!hadEvent){ const rt=guerraRitornoCarta(); if(rt){ S.agenda.push({kind:'event', data:rt, resolved:false}); hadEvent=true; } }   // L245-5: il ritorno, il mese dopo la fine della guerra

@@ -7861,6 +7861,67 @@ const TRATTATIVE_DEF=[
     stati:{ pieno:'Accordo pieno con %P: l\'impegno è nel comunicato, e la potenza rivale lo legge.',
             compromesso:'Un compromesso con %P: l\'impegno c\'è, la cifra resta vaga.',
             rottura:'Con %P il tavolo si è rotto: le risorse restano al fronte interno.' } },
+  /* L275-17 · LA TRATTATIVA COL CONGRESSO (F21, prima metà; lato 'gov' = il Presidente nel presente americano), dietro TRATTATIVE_BILANCIO
+     (game.js, ACCESA dal L275-17, cooldown 36). Nasce per TRASFORMAZIONE di us_p_tetto e us_p_shutdown (EVENTS, il posto dell'evento grave raro del capo del
+     governo: bilancioTrasforma); le carte sono già filtrate da era e paesi, e la controparte c'è solo con S.scenario==='presente' (le porte
+     us* restano carte, anche dopo il 2012). La controparte è un'istituzione, «il Congresso» ('congresso'): mai un partito né una persona.
+     Richieste dalla più leggera: un taglio simbolico · tagli a un capitolo · tutti i tagli chiesti; prezzi SOLO sui gruppi che le due carte
+     toccano (bilancioPrezzo), arrivo per origine dentro la forbice delle scelte della carta (bilancioChiudi). Il testo del round 1 e gli
+     stati dipendono dalla carta d'origine: r1 e stati sono getter su r1Orig/statiOrig (l'origine la legge bilancioOrig, game.js).
+     r2, r3, rScesa e la forza da vertice e dicastero: chiavi già tradotte. */
+  { id:'bilancio', fam:'bilancio', lati:['gov'], era:'universale', orig:['us_p_tetto','us_p_shutdown'],
+    controparte:function(it){ return bilancioControparte(it); }, valida:function(a){ return bilancioValida(a); },
+    prezzo:function(a, k, R){ bilancioPrezzo(a, k, R); }, chiudi:function(stato, a, daSe){ bilancioChiudi(stato, a, daSe); },
+    forzaF:function(con){ return bilancioForza(con); },
+    kick:'Trattativa', titolo:'Il tavolo con %P',
+    ric:[ { k:'simbolico', nome:'un taglio simbolico e una commissione', pieno:'Un taglio piccolo, ma da spiegare', mezzo:'Un taglio piccolo, ma da spiegare' },
+          { k:'capitolo', nome:'tagli a un capitolo di spesa', pieno:'Paga chi lavora', mezzo:'Paga chi lavora' },
+          { k:'pieni', nome:'tutti i tagli chiesti', pieno:'Pagano i sussidi', mezzo:'Pagano i sussidi' } ],
+    r1Orig:{ us_p_tetto:'Il tetto del debito scade: al tavolo con %P si alza solo coi tagli.',
+             us_p_shutdown:'Gli uffici federali chiudono: al tavolo con %P vogliono tagli.' },
+    get r1(){ return this.r1Orig[bilancioOrig()] || this.r1Orig.us_p_tetto; },
+    r2:{ rilancio:'La controproposta torna con le correzioni a margine: al tavolo con %P non basta.',
+         tieni:'Il tuo «no» non è piaciuto: al tavolo con %P si parla meno, e si guarda il calendario.' },
+    r3:{ rilancio:'Ultimo incontro: al tavolo con %P si chiude oggi. La tua offerta è sul tavolo.',
+         tieni:'Ultimo incontro, dopo due rifiuti: al tavolo con %P la richiesta è la stessa, la pazienza no.' },
+    rScesa:'Al tavolo con %P si sono accorti che hai peso: la richiesta si fa più piccola.',
+    forza:{ '1':'conti più degli altri', '0':'il tuo peso è quello di sempre', '-1':'il tuo peso è quello di sempre' },
+    eff:{ accordo:'accordo pieno, i mercati respirano', compromesso:'un compromesso' },
+    mosse:[ { l:'Cedi: %R' }, { l:'Rilanci con un\'offerta minore' }, { l:'Tieni il punto' } ],
+    statiOrig:{ us_p_tetto:{ pieno:'Accordo pieno con %P: il tetto sale, i tagli passano e i mercati respirano.',
+                             compromesso:'Un compromesso con %P: il tetto è sospeso, i tagli no.',
+                             rottura:'Con %P il tavolo si è rotto: i mercati contano i giorni.' },
+                us_p_shutdown:{ pieno:'Accordo pieno con %P: il bilancio passa e gli uffici federali riaprono.',
+                                compromesso:'Un compromesso con %P: una proroga, e gli uffici riaprono.',
+                                rottura:'Con %P il tavolo si è rotto: gli uffici federali restano chiusi.' } },
+    get stati(){ return this.statiOrig[bilancioOrig()] || this.statiOrig.us_p_tetto; } },
+  /* L275-18 · LA LEGGE DI BILANCIO CON L'ALLEATO (F21, seconda metà; lato 'gov' = il capo del governo di coalizione), dietro TRATTATIVE_MANOVRA
+     (game.js, SPENTA dal L275-18: D379 per partenza rossa in 4 su 6, rapporto «⚑ L275-18»; SPENTA DEFINITIVA dal L275-19, «⚑ L275-19»). NON è una carta in più: nasce DALLO STATO al confine settembre → ottobre (manovraNasce,
+     game.js, una riga in negoziatoMese dopo negoziatoNasceStato), solo nei paesi e dagli anni di MANOVRA_PAESI, con un alleato decisivo
+     (negoziatoDecisivi), ≥ 18 mesi dall'ultimo patto e il cooldown del tipo; il round 1 prende un posto dell'agenda d'ottobre (negoziatoPosto),
+     i round 2-3 novembre e dicembre. La controparte e la forza sono quelle del patto (l'alleato decisivo, negoziatoForza del patto); nessuna
+     promessa, nessun fatto ricorrente. Prezzi: la voce simbolica → stampa −1; il capitolo → debito 0,2; il pacchetto → debito 0,4 (a metà la
+     metà). Arrivo (manovraChiudi, dimezzato dal L275-19): tenuta dell'alleato +5 · +3 (da sé +1) · −15, −2 di fiducia e stampa −1 alla rottura. r2, r3,
+     rScesa, titolo, mosse e la forza a parole già tradotti (vertice e patto). */
+  { id:'manovra', fam:'manovra', lati:['gov'], era:'universale', nasce:'manovra',
+    controparte:function(it){ return null; }, valida:function(a){ return manovraValida(a); },
+    prezzo:function(a, k, R){ manovraPrezzo(a, k, R); }, chiudi:function(stato, a, daSe){ manovraChiudi(stato, a, daSe); },
+    forzaF:function(con){ return manovraForza(con); },
+    kick:'Trattativa', titolo:'Il tavolo con %P',
+    ric:[ { k:'voce', nome:'una voce per la loro base, simbolica', pieno:'Una voce da difendere sui giornali', mezzo:'Una voce da difendere sui giornali' },
+          { k:'capitolo', nome:'un capitolo di spesa', debito:0.2, pieno:'Il bilancio paga', mezzo:'Il bilancio paga la metà' },
+          { k:'pacchetto', nome:'tutto il loro pacchetto', debito:0.4, pieno:'Il bilancio paga', mezzo:'Il bilancio paga la metà' } ],
+    r1:'Si scrive la legge di bilancio: al tavolo con %P vogliono la loro parte.',
+    r2:{ rilancio:'La controproposta torna con le correzioni a margine: al tavolo con %P non basta.',
+         tieni:'Il tuo «no» non è piaciuto: al tavolo con %P si parla meno, e si guarda il calendario.' },
+    r3:{ rilancio:'Ultimo incontro: al tavolo con %P si chiude oggi. La tua offerta è sul tavolo.',
+         tieni:'Ultimo incontro, dopo due rifiuti: al tavolo con %P la richiesta è la stessa, la pazienza no.' },
+    rScesa:'Al tavolo con %P si sono accorti che hai peso: la richiesta si fa più piccola.',
+    eff:{ accordo:'accordo pieno, i mercati respirano', compromesso:'un compromesso' },   // targhette su una riga (tetto 450 px, come il vertice): la forza è già nella riga «Al tavolo»; «i mercati respirano» è la chiave del bilancio, già tradotta (⚠ dal L275-19 il pieno non muove più la fiducia: il testo è rimasto, rapporto «⚑ L275-19»)
+    mosse:[ { l:'Cedi: %R' }, { l:'Rilanci con un\'offerta minore' }, { l:'Tieni il punto' } ],
+    stati:{ pieno:'Accordo pieno con %P: la legge di bilancio passa con la loro firma.',
+            compromesso:'Un compromesso con %P: il bilancio passa, a metà strada.',
+            rottura:'Con %P il tavolo si è rotto: la legge di bilancio passa a fatica.' } },
 ];
 /* L275-14 · dove il vertice dell'Alleanza è vero (decisione di Cowork 18/11 08:47, ⚠ 2 di «⚑ L275-14»): id di PAESI → la data da cui
    chi gioca è dentro l'Alleanza (anno, mese 1-12; la forma della cond di de50_q_nato). Sempre = anno 0. Fuori elenco (Giappone, Corea
@@ -7869,6 +7930,16 @@ const TRATTATIVE_DEF=[
 const VERTICE_PAESI={ italia:{anno:0, mese:1}, francia:{anno:0, mese:1}, regnounito:{anno:0, mese:1}, usa:{anno:0, mese:1},
   canada:{anno:0, mese:1}, danimarca:{anno:0, mese:1}, paesibassi:{anno:0, mese:1}, norvegia:{anno:0, mese:1}, belgio:{anno:0, mese:1},
   germania:{anno:1955, mese:5}, svezia:{anno:2024, mese:3}, spagna:{anno:1982, mese:5} };
+/* L275-20 (F34) · da quando il paese è membro delle Nazioni Unite: id di PAESI → la data d'ammissione. AL CONTRARIO di VERTICE_PAESI:
+   un paese ASSENTE è membro da sempre per il gioco (USA, Regno Unito, Francia dal 1945; i paesi del solo presente non hanno partite prima
+   dell'ingresso). Italia 14/12/1955, Repubblica federale di Germania 18/9/1973 (elenco degli Stati membri con la data d'ammissione, fonte
+   nel rapporto «⚑ L275-20»). La legge SOLO onuVero (game.js), letta dalla cond di dp_veto e dp_assemblea. */
+const ONU_PAESI={ italia:{anno:1955, mese:12}, germania:{anno:1973, mese:9} };
+/* L275-18 · dove la legge di bilancio si tratta con l'alleato decisivo, in autunno (F21, seconda metà): id di PAESI → l'anno da cui vale
+   (l'anno finanziario è l'anno solare e il bilancio si discute in autunno; 0 = sempre). Fonti nel rapporto «⚑ L275-18»: Italia dal 1965
+   (legge 1 marzo 1964 n. 62), Repubblica federale dal 1961, Danimarca dal 1979 (lov nr. 314 del 10 giugno 1976); Paesi Bassi e Belgio
+   dal primo anno giocabile. La legge SOLO il tipo (manovraVera, game.js); fuori elenco il tipo non esiste. */
+const MANOVRA_PAESI={ italia:{anno:1965}, germania:{anno:1961}, paesibassi:{anno:0}, belgio:{anno:0}, danimarca:{anno:1979} };
 /* ================================================================================================================
    ⚑ L274-3 · DISCORSI_DEF — i sette tipi del discorso coi testi a pezzi (DESIGN-FORMATI.md «⚑ L274-1» D384, D386, D387, D392,
    «⚑ L274-2», «⚑ L274-3»). La costante DISCORSI è ACCESA dal L274-4 (a costante spenta niente di questo esce).
@@ -17559,12 +17630,12 @@ const DIPLO_EV=[
    {l:'Giri le capitali a raccogliere voti', e:'La candidatura vola; i favori si pagheranno', pleases:'populista', f:()=>{creditoMuovi(6); relIntMuovi('consesso',-1);}},
    {l:'La sostieni senza scambiare favori', e:'Pulito; forse non basta', pleases:'tecnico', f:()=>{creditoMuovi(1); relIntMuovi('consesso',4);}},
  ]},
- {id:'dp_assemblea', kick:'Foro multilaterale', t:'Un voto in Assemblea', text:'All\'Assemblea si vota una risoluzione che divide i tuoi partner dai paesi del sud del mondo. Il tuo voto lo guardano in tanti.', ch:[
+ {id:'dp_assemblea', cond:()=>typeof onuVero!=='function'||onuVero(), kick:'Foro multilaterale', t:'Un voto in Assemblea', text:'All\'Assemblea si vota una risoluzione che divide i tuoi partner dai paesi del sud del mondo. Il tuo voto lo guardano in tanti.', ch:[
    {l:'Voti con i partner', e:'Fedeltà premiata; il sud prende nota', pleases:'conservatore', f:()=>{creditoMuovi(2); relIntMuovi('alleanza',5); relIntMuovi('consesso',-2);}},
    {l:'Voti con il sud', e:'Un ponte nuovo; i partner chiedono spiegazioni', pleases:'progressista', f:()=>{creditoMuovi(2); relIntMuovi('consesso',5); relIntMuovi('alleanza',-4);}},
    {l:'Ti astieni e spieghi perché', e:'Nessuno contento, nessuno offeso', pleases:'tecnico', f:()=>{creditoMuovi(1); relIntMuovi('consesso',2);}},
  ]},
- {id:'dp_veto', volto:'rivale', kick:'Consiglio di sicurezza', t:'Il veto annunciato', text:'Una risoluzione che hai scritto con pazienza sta per essere bloccata dal veto di %POTdet. C\'è ancora una notte per riscriverla.', ch:[
+ {id:'dp_veto', volto:'rivale', cond:()=>typeof onuVero!=='function'||onuVero(), kick:'Consiglio di sicurezza', t:'Il veto annunciato', text:'Una risoluzione che hai scritto con pazienza sta per essere bloccata dal veto di %POTdet. C\'è ancora una notte per riscriverla.', ch:[
    {l:'La riscrivi finché passa', e:'Passa un testo più debole; ma passa', pleases:'tecnico', f:()=>{creditoMuovi(5); relIntMuovi('rivale',3); relIntMuovi('alleanza',-2); relIntMuovi('consesso',2);}},
    {l:'La porti al voto così com\'è', e:'Il veto arriva, e lo vede il mondo', pleases:'conservatore', f:()=>{creditoMuovi(2); relIntMuovi('rivale',-4); relIntMuovi('alleanza',4);}},
  ]},
