@@ -6902,7 +6902,7 @@ function diventaMinistro(){
   bioFatto('Da '+ruoloPrima+' a '+ruoloDicastero()+': la chiamata '+aCapitale()+'.');
   S.log.unshift({t:luoghiSub(T('La chiamata %ACAPITALE')),x:T('Il partito ti porta nel governo come %R. La scalata continua.').replace('%R',T(ruoloDicastero()))});
   if(typeof PROMO_FIORE!=='undefined') PROMO_FIORE=true;
-  S.turnInMandate=0; S.mandate=S.mandate||1;
+  S.turnInMandate=salitaTurnoMandato(); S.mandate=S.mandate||1;   // ⚑ L275-25 (F37, A2): 0 come sempre, tranne nelle partite americane (salitaTurnoMandato, sotto)
   document.getElementById('appoint').style.display='none';
   document.getElementById('over').style.display='none';
   document.getElementById('ov').classList.remove('on');
@@ -6910,6 +6910,24 @@ function diventaMinistro(){
   genAgenda(false); generaTitolo(); render(); commitSnap();
 }
 
+/* ⚑ L275-25 (F37, A2) · il mandato alla salita al livello 2. Fuori dalle partite americane 0, la regola di sempre (il ministro apre
+   una legislatura sua: uk1960, la Svezia e gli altri paesi con meseUrna restano identici). Nelle partite americane — la linea
+   (S.era===LINEA_US: us1950 … us2000) e il presente americano (S.scenario==='presente' e S.paese==='usa': lo stesso insieme di
+   voceUsa) — la presidenziale è fissa: il mandato è quello della nazione, cioè gli anni pieni dall'ultima urna nazionale, contati
+   dal calendario di initStatoBase (turnMandato della porta o del paese all'avvio, gennaio di S.annoInizio) più un anno a ogni mese
+   dell'urna (meseUrna()) passato da allora, modulo la durata del mandato (PAESE.mandatoMesi/12). Così meseMandato() dà i mesi
+   dall'ultima presidenziale. Esempio (rapporto «⚑ L275-24»): us1990, seme 31, salita nel 1998/8 → 1 (meseMandato 21, urna 2000/11).
+   Nessuna migrazione: una carriera già sfasata in un salvataggio resta com'è. Puro: non scrive S. */
+function salitaTurnoMandato(){
+  if(typeof S==='undefined' || !S) return 0;
+  if(!(S.era===LINEA_US || (S.scenario==='presente' && S.paese==='usa'))) return 0;
+  var anni=Math.round((PAESE.mandatoMesi||48)/12); if(!(anni>0)) return 0;
+  var sc=(typeof SCENARI!=='undefined' && S.scenario!=='presente') ? SCENARI[S.scenario] : null;
+  var t0=(sc && sc.turnMandato!=null) ? sc.turnMandato : ((S.scenario==='presente' && PAESE.turnMandato!=null) ? PAESE.turnMandato : 0);
+  var a0=(S.annoInizio||S.year)*12+1, a=S.year*12+S.month, mu=meseUrna(), n=0;
+  for(var k=a0+1;k<=a;k++) if(((k-1)%12)+1===mu) n++;
+  return (t0+n)%anni;
+}
 /* --- Fiducia dei mercati: ritorna l'evento di soglia quando si SCENDE a un livello nuovo. {data, kind} o null.
    Escalation verso l'alto immediata. Due freni anti-ripetizione: ISTERESI (un livello si riarma solo quando la
    fiducia risale sopra la sua soglia + MARG) e RAFFREDDAMENTO (lo stesso evento non rispara entro RAFFR mesi). --- */
@@ -10405,11 +10423,11 @@ function vicendaVisita(i){
 }
 /* L272-3 (D364 (i), D367): la visita sul posto ha la battuta del personaggio (strato dei gesti) — il suono è l'elicottero */
 function vicendaGestoVisita(){ vicendaSuona('elicottero'); if(typeof parlaGesto==='function') parlaGesto('visita-disastro'); }
-/* L272-3 · un effetto (sicuro come suona) e le voci di D367: solo nelle partite in inglese (⚠ 1 di «⚑ L272-1»: nessuna presa
-   italiana), mai sotto la notte, mai con un'altra voce in corso, mai al caricamento (chiamata dentro il mese o nel gesto) */
+/* L272-3 · un effetto (sicuro come suona) e le voci di D367: mai sotto la notte, mai con un'altra voce in corso, mai al caricamento
+   (chiamata dentro il mese o nel gesto). L275-25 (F38): anche in italiano — la presa italiana è la base del manifesto, l'inglese in l.en */
 function vicendaSuona(n){ if(typeof suona==='function') suona(n); }
 function vicendaVoce(id){
-  if(typeof parla!=='function' || typeof curLang!=='function' || curLang()!=='en') return;
+  if(typeof parla!=='function') return;
   if(NOTTE || (typeof voceInCorso==='function' && voceInCorso())) return;
   if(S.crisi && S.crisi.guerra) return;
   parla(id);
@@ -12626,7 +12644,7 @@ const VOCI_CARTA = { sciopero:'voce-sciopero', sisma:'voce-lutto', crollo:'voce-
   g7:'voce-vertice', nato_vertice:'voce-vertice', mg_vertice:'voce-vertice', dp_summit:'voce-vertice', dp_comunicato:'voce-vertice' };
 const VOCI_CARTA_CAPO = ['voce-sciopero', 'voce-lutto'];
 function voceAgendaMese(){
-  vicendaVoceMese();   // L272-3: le voci della vicenda (solo in inglese; spenta: niente)
+  vicendaVoceMese();   // L272-3: le voci della vicenda (L275-25: IT ed EN; spenta: niente)
   if(typeof parla!=='function' || (typeof voceInCorso==='function' && voceInCorso()) || !S || !Array.isArray(S.agenda)) return;
   for(const it of S.agenda){
     const d=it && !it.resolved && it.data, v=d && d.id && VOCI_CARTA[d.id];
