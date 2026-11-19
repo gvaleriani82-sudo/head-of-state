@@ -7390,7 +7390,9 @@ function crisiRicevuto(mossa){
   if(mossa==='cedi'){ repd(-SUBITA_K.cediRep); stampad(-SUBITA_K.cediStampa); crisiLog('Cedi all\'ultimatum %POTdi: la crisi si chiude, a un prezzo.'); crisiChiudi(ora); return; }
   if(mossa==='onu'){
     if(rel('consesso')>=SUBITA_K.consessoMin){ c.t=2; delete c.subita; crisiLog('L\'Assemblea si muove: la crisi con %POTdet scende alle sanzioni.'); return; }
-    crisiLog('All\'ONU nessuna maggioranza.');
+    /* L275-22 (F36): prima dell'ingresso nelle Nazioni Unite i fori d'epoca (consessoNome); fuori la riga di sempre, byte per byte */
+    if(typeof foriDEpoca==='function' && foriDEpoca()) crisiLog(T('Nessuna maggioranza fra %ENTE.').replace('%ENTE', T(consessoNome())));
+    else crisiLog('All\'ONU nessuna maggioranza.');
   }
   var pc=CRISI_K.cede;
   if(mossa==='alleati'){
@@ -9811,8 +9813,8 @@ function generaEpilogo(reason){
      nazionale. Tono guidato dall'ESITO (robusto): estromissione/non-rinnovo (`mandatoInt`) → caduta; uscita
      VOLONTARIA (ritiro all'apice, congedo d'età) → corona, a prescindere dalla coesione del momento. */
   if(S.intl){
-    if(reason==='mandatoInt') par.push(T('Arrivò al vertice del mondo, ma le Nazioni Unite si sfaldarono tra le sue mani.'));
-    else par.push(T('Coronò la carriera al vertice del mondo: da %RUOLO, tenne coese le Nazioni Unite.').replace('%RUOLO',T(ruoloIntl())));
+    if(reason==='mandatoInt') par.push(entiSub(T('Arrivò al vertice del mondo, ma le %ONU si sfaldarono tra le sue mani.')));   /* L275-22 (F36): il nome dell'ente alla data di fine carriera */
+    else par.push(entiSub(T('Coronò la carriera al vertice del mondo: da %RUOLO, tenne coese le %ONU.').replace('%RUOLO',T(ruoloIntl()))));
     /* Fetta 2: il congedo legge lo STATO FINALE DEL TABELLONE — il mondo che le tue mediazioni hanno plasmato
        (la tensione Alleanza–rivale: ricucita → mondo unito; spaccata → mondo diviso). */
     const ri=S.relInt||{}; const gap=Math.abs((ri.alleanza||50)-(ri.rivale||50));
@@ -16588,7 +16590,7 @@ function gameOver(reason){
         : T('A %E anni scegli la vita prima della carica: ti ritiri per ragioni di salute. Nessuna sconfitta — una resa serena a ciò che conta davvero.').replace('%E',S.eta))
     : reason==='silurato'?T('Hai preso le distanze una volta di troppo: il premier ti estromette dal governo in un rimpasto. L\'ambizione, senza la pazienza, ti è costata il posto. La carriera finisce qui.')
     : reason==='sconfittaLocale'?T('Gli elettori %DL non ti riconfermano: un mandato amministrato male si paga alle urne. La carriera politica si ferma sul primo gradino.').replace('%DL',S.locale?diLuogo(S.locale.nome):T('locali'))
-    : reason==='mandatoInt'?T('I membri delle Nazioni Unite non ti riconfermano: la coesione si era logorata sotto la tua guida. Il mandato al vertice del mondo finisce qui — ma resta nella storia chi ci è arrivato.')
+    : reason==='mandatoInt'?entiSub(T('I membri delle %ONU non ti riconfermano: la coesione si era logorata sotto la tua guida. Il mandato al vertice del mondo finisce qui — ma resta nella storia chi ci è arrivato.'))   /* L275-22 (F36) */
     : T('Hai perso le elezioni e passi all\'opposizione.');
   const epilogo=generaEpilogo(reason).map(function(p){return '<p style="margin:7px 0">'+p+'</p>';}).join('');
   const F=(typeof generaFinale==='function')?generaFinale(reason):null;   // L73-2: titolo in alto, verdetto sotto la storia

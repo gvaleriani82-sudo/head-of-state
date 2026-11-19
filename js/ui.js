@@ -3157,17 +3157,21 @@ function renderGov(){
     /* livello 4 — SEGRETARIO GENERALE DEL CONSESSO (fase C1a): non governi un paese, medi tra i blocchi. Due indicatori. */
     const I=S.intl||{coesione:50,autorevolezza:50,mandato:1};
     const ob=(l,sub,v)=>{ const c=v<33?'var(--neg)':v<60?'var(--warn)':'var(--pos)'; return `<div class="grp"><div class="top"><div class="nm">${l}<small>${sub}</small></div><div class="pc mono" style="color:${c}">${Math.round(v)}</div></div><div class="bar"><i style="width:${clamp(v,2,100)}%;background:${c}"></i></div></div>`; };
-    h+=`<div class="banner${fioreB}">${T('<b>Sei %R.</b> Non governi un paese: medi tra le potenze. Tieni coese le Nazioni Unite — e l\'autorevolezza apre le porte del compromesso.').replace('%R', T(typeof ruoloIntl==='function'?ruoloIntl():'Segretario generale delle Nazioni Unite'))}</div>`;
-    h+=`<div class="card"><div class="ct">${T('Le Nazioni Unite')} · ${T('mandato')} ${I.mandato}</div>${ob(T('Coesione'),T('quanto i membri restano allineati'),I.coesione)}${ob(T('Autorevolezza'),T('la tua credibilità di mediatore'),I.autorevolezza)}</div>`;
+    h+=`<div class="banner${fioreB}">${T('<b>Sei %R.</b> Non governi un paese: medi tra le potenze. Tieni coese le %ONU — e l\'autorevolezza apre le porte del compromesso.').replace('%R', T(typeof ruoloIntl==='function'?ruoloIntl():'Segretario generale delle Nazioni Unite')).replace(/%ONU/g, onuTok())}</div>`;   /* L275-22 (F36): il nome dell'ente dopo T(), come le carte di L275-21 */
+    h+=`<div class="card"><div class="ct">${entiSub(T('Le %ONU'))} · ${T('mandato')} ${I.mandato}</div>${ob(T('Coesione'),T('quanto i membri restano allineati'),I.coesione)}${ob(T('Autorevolezza'),T('la tua credibilità di mediatore'),I.autorevolezza)}</div>`;
   }
   else if(S.livello===5){
     /* livello 5 — DIPLOMATICO (C2): non governi, costruisci standing. Credito + il rapporto col Consesso (il gate al vertice). */
     const D=S.diplo||{credito:50,grado:1};
     const cons=(S.relInt&&S.relInt.consesso!=null)?S.relInt.consesso:50;
     const ob=(l,sub,v)=>{ const c=v<33?'var(--neg)':v<60?'var(--warn)':'var(--pos)'; return `<div class="grp"><div class="top"><div class="nm">${l}<small>${sub}</small></div><div class="pc mono" style="color:${c}">${Math.round(v)}</div></div><div class="bar"><i style="width:${clamp(v,2,100)}%;background:${c}"></i></div></div>`; };
-    const meta=T((D.grado>=2)?'rapporto con l\'ONU ≥ 75 → la chiamata a Segretario':'credito ≥ 70 → la promozione a Sottosegretario generale');
+    /* L275-22 (F36): nelle finestre (foriDEpoca) l'ente e la carica d'epoca; fuori le stringhe di sempre, byte per byte */
+    const fori=(typeof foriDEpoca==='function' && foriDEpoca());
+    const meta=fori
+      ? ((D.grado>=2) ? T('rapporto con %ENTE ≥ 75 → la chiamata a Segretario').replace('%ENTE', T(consessoNome())) : T('credito ≥ 70 → la promozione a %R').replace('%R', T(ruoloDiplo(2))))
+      : T((D.grado>=2)?'rapporto con l\'ONU ≥ 75 → la chiamata a Segretario':'credito ≥ 70 → la promozione a Sottosegretario generale');
     h+=`<div class="banner${fioreB}">${T('<b>Sei %R.</b> Non governi un paese: costruisci rapporti e credito, missione dopo missione. La via al vertice del mondo passa dallo standing — %M.').replace('%R', T(typeof ruoloDiplo==='function'?ruoloDiplo():'Ambasciatore')).replace('%M', meta)}</div>`;
-    h+=`<div class="card"><div class="ct">${T('La scala diplomatica')} · ${T(D.grado>=2?'Sottosegretario generale':'Ambasciatore')}</div>${ob(T('Credito diplomatico'),T('la tua reputazione tra i diplomatici'),D.credito)}${ob(T('Rapporto con l\'ONU'),T('il favore dei fori multilaterali: la porta del vertice'),cons)}</div>`;
+    h+=`<div class="card"><div class="ct">${T('La scala diplomatica')} · ${T(D.grado>=2?'Sottosegretario generale':'Ambasciatore')}</div>${ob(T('Credito diplomatico'),T('la tua reputazione tra i diplomatici'),D.credito)}${ob(fori?T('Rapporto con %ENTE').replace('%ENTE', T(consessoNome())):T('Rapporto con l\'ONU'),T('il favore dei fori multilaterali: la porta del vertice'),cons)}</div>`;
     h+=concCorsaHtml();   // L260-5bis: la corsa al posto col concorrente (vuota con DIPLO_CONCORRENTE spento)
     h+=bilMissioniHtml();   // L260-5: la missione del mese (vuota con DIPLO_BILATERALI spento)
   }
@@ -3343,15 +3347,15 @@ function renderGov(){
       const txt={ successione:T('Il governo di %PM è caduto. I notabili del partito guardano a te per la successione: il vertice è a un passo.').replace('%PM',pn),
         candidatura:T('Il partito ti offre la candidatura alla guida: il tuo nome è ormai quello dell\'ambizione che ha fatto strada. È il momento.'),
         primaria:T('Si apre una primaria per la leadership. Puoi sfidare %PM: le correnti ti seguono, ma in primaria nulla è scontato.').replace('%PM',pn),
-        altoRapp:T('Il tuo nome circola tra le cancellerie: ti offrono il grado di Sottosegretario generale delle Nazioni Unite, un passo dal vertice del mondo.'),
-        internazionale:T(daDiplo?'Le Nazioni Unite ti chiamano: dopo una carriera tessuta nella diplomazia, il mondo ti vuole come arbitro tra le potenze. È l\'atto finale.':'Le Nazioni Unite ti chiamano: dopo gli anni al vertice del tuo paese, il mondo ti vuole come arbitro tra le potenze. È l\'atto finale.'),
+        altoRapp:T('Il tuo nome circola tra le cancellerie: ti offrono il grado di %R, un passo dal vertice del mondo.').replace('%R', T(ruoloDiplo(2))),   /* L275-22 (F36): la carica e l'ente alla data della carta */
+        internazionale:entiSub(T(daDiplo?'Le %ONU ti chiamano: dopo una carriera tessuta nella diplomazia, il mondo ti vuole come arbitro tra le potenze. È l\'atto finale.':'Le %ONU ti chiamano: dopo gli anni al vertice del tuo paese, il mondo ti vuole come arbitro tra le potenze. È l\'atto finale.')),
         chiamata:luoghiSub(T('Il tuo nome è arrivato fino %ACAPITALE: il partito ti vuole nel governo e ti offre un posto da ministro. Lasci il tuo territorio per la politica nazionale.')) }[it.tipo];   // L244-2: la chiamata del locale (pickOccasione, livello 1) non aveva testo né titolo → «undefined»
       const chiam=(it.tipo==='chiamata');
       const titolo=chiam ? luoghiSub(T('La chiamata %ACAPITALE')) : T({ successione:'La successione', candidatura:'La candidatura offerta', primaria:'La primaria', altoRapp:'La promozione', internazionale:'La chiamata del mondo' }[it.tipo]);   // L244-2: la stessa chiave del registro (game.js, diventaMinistro)
       h+=`<div class="ag major ${it.resolved?'done':''}">${agScene(it)}<div class="ah"><div class="kick">${T(intl?'L\'atto finale · oltre il vertice':'L\'occasione · la salita')}</div><h3>${titolo}</h3></div>
         <div class="atext">${txt}</div>`;
       if(!it.resolved){ h+=`<div class="opts">
-        <button class="opt" style="border-color:var(--acc)" onclick="resolveItem(${idx},0)"><span class="ol">${T('Cogli il salto')}</span><span class="oe">${T(intl?'Diventi Segretario generale delle Nazioni Unite — la stessa carriera, oltre il vertice nazionale':it.tipo==='altoRapp'?'Diventi Sottosegretario generale delle Nazioni Unite — un passo dal vertice':it.tipo==='primaria'?'Sfidi: l\'esito dipende dal capitale e dalle correnti':chiam?'Entri nel governo: la stessa carriera, sulla scena nazionale':'Diventi capo del governo — la stessa carriera, al vertice')}</span></button>
+        <button class="opt" style="border-color:var(--acc)" onclick="resolveItem(${idx},0)"><span class="ol">${T('Cogli il salto')}</span><span class="oe">${intl?T('Diventi %R — la stessa carriera, oltre il vertice nazionale').replace('%R', T(ruoloIntl())):it.tipo==='altoRapp'?T('Diventi %R — un passo dal vertice').replace('%R', T(ruoloDiplo(2))):T(it.tipo==='primaria'?'Sfidi: l\'esito dipende dal capitale e dalle correnti':chiam?'Entri nel governo: la stessa carriera, sulla scena nazionale':'Diventi capo del governo — la stessa carriera, al vertice')}</span></button>
         <button class="opt" onclick="resolveItem(${idx},1)"><span class="ol">${daDiplo?T('Resti %R').replace('%R',T(typeof ruoloDiplo==='function'?ruoloDiplo():'Ambasciatore')):intl?T('Resti %R').replace('%R',T(PAESE.titoloRuolo)):chiam?T('Resti %R').replace('%R',ruoloLocale()):T('Lascia, resta ministro')}</span><span class="oe">${T('Non è ancora il tuo momento')}</span></button></div>`; }
       else h+=`<div class="outcome">${it.outcome}</div>${esitiHtml(it)}${tornaTavoloHtml(it)}`;
       h+=`</div>`;
@@ -3369,10 +3373,10 @@ function renderGov(){
     } else if(it.kind==='rinnovoInt'){
       /* fine mandato internazionale (fase C1a): rinnovo o ritiro all'apice */
       const I=S.intl||{};
-      h+=`<div class="ag major ${it.resolved?'done':''}">${agScene(it)}<div class="ah"><div class="kick">${T('Fine del mandato')}</div><h3>${T('Le Nazioni Unite decidono')}</h3></div>
+      h+=`<div class="ag major ${it.resolved?'done':''}">${agScene(it)}<div class="ah"><div class="kick">${T('Fine del mandato')}</div><h3>${entiSub(T('Le %ONU decidono'))}</h3></div>
         <div class="atext">${T("Cinque anni al vertice del mondo volgono al termine. I membri sono pronti a riconfermarti: puoi continuare, o ritirarti all'apice di una carriera che ha toccato il cielo.")}</div>`;   // L244-4: la carta passa dal dizionario
       if(!it.resolved){ h+=`<div class="opts">
-        <button class="opt" style="border-color:var(--acc)" onclick="resolveItem(${idx},0)"><span class="ol">${T('Accetti un nuovo mandato')}</span><span class="oe">${T('Continui a guidare le Nazioni Unite')}</span></button>
+        <button class="opt" style="border-color:var(--acc)" onclick="resolveItem(${idx},0)"><span class="ol">${T('Accetti un nuovo mandato')}</span><span class="oe">${entiSub(T('Continui a guidare le %ONU'))}</span></button>
         <button class="opt" onclick="resolveItem(${idx},1)"><span class="ol">${T("Ti ritiri all'apice")}</span><span class="oe">${T('Lasci da protagonista: la parola passa alla storia')}</span></button></div>`; }
       else h+=`<div class="outcome">${it.outcome}</div>${esitiHtml(it)}${tornaTavoloHtml(it)}`;
       h+=`</div>`;
