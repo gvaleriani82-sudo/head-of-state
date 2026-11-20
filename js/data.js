@@ -17190,6 +17190,25 @@ const ONG_EV=[
    {l:'Apri un tavolo di confronto', e:'Provi a ricucire; l\'industria diffida', pleases:'tecnico', f:()=>{relIntMuovi('ong',8); gd('imprenditori',-2);}},
    {l:'Le accusi di fare politica', e:'Compatti la tua base; la frattura si scava', pleases:'populista', f:()=>{relIntMuovi('ong',-4); gd('cetomedio',3); stampad(-2);}},
  ]},
+ /* L275-31 (F12) · quattro carte nuove, sempre vive come ong_migranti e ong_fondi (nessuna cond): EFFETTI COPIATI PER INTERO da una sorella
+    (stessi numeri, stessi gruppi, stesso pleases e costo), cambiano solo id, testi e min. ong_salute = ong_migranti · ong_fame = ong_fondi ·
+    ong_stampa = ong_pressione (senza la sua cond) · ong_trasparenza = ong_fondi. */
+ {id:'ong_salute', min:'salute', kick:'Società civile', t:'Una campagna per le cure nel mondo', text:'Una coalizione di organizzazioni umanitarie lancia una campagna internazionale: chiede ai governi più impegno per portare cure e vaccini nei paesi poveri.',ch:[
+   {l:'Aumenti il contributo', e:'Vicinanza alla società civile e al mondo religioso; il ceto medio guarda alla spesa', pleases:'progressista', f:()=>{relIntMuovi('ong',6); gd('cattolici',3); gd('cetomedio',-2);}},
+   {l:'Prima i conti di casa', e:'Accontenti chi chiede rigore; rottura con le ONG', pleases:'populista', f:()=>{relIntMuovi('ong',-5); gd('cetomedio',2); gd('cattolici',-1);}},
+ ]},
+ {id:'ong_fame', min:'esteri', kick:'Società civile', t:'Un appello contro la fame', text:'Le organizzazioni umanitarie lanciano un appello per una carestia lontana: chiedono di aumentare gli aiuti alimentari.',ch:[
+   {l:'Aumenti gli aiuti', e:'Rispondi all\'appello e la società civile apprezza; costa', pleases:'progressista', costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; relIntMuovi('ong',5); gd('giovani',2);}},
+   {l:'Gli aiuti restano quelli', e:'Conti salvi; le ONG restano deluse', pleases:'tecnico', f:()=>{relIntMuovi('ong',-4);}},
+ ]},
+ {id:'ong_stampa', min:'giustizia', kick:'Società civile', t:'La libertà di stampa sotto esame', text:'Un rapporto delle organizzazioni per la libertà di stampa mette il paese sotto esame: indipendenza dei giornali e tutela delle fonti finiscono in discussione.',ch:[
+   {l:'Prendi sul serio il rapporto', e:'Provi a ricucire; le imprese temono nuove regole', pleases:'tecnico', f:()=>{relIntMuovi('ong',8); gd('imprenditori',-2);}},
+   {l:'Respingi il rapporto', e:'Compatti la tua base; la stampa non gradisce', pleases:'populista', f:()=>{relIntMuovi('ong',-4); gd('cetomedio',3); stampad(-2);}},
+ ]},
+ {id:'ong_trasparenza', min:'giustizia', kick:'Società civile', t:'La classifica della trasparenza', text:'Una classifica internazionale sulla corruzione boccia il paese sulla trasparenza degli appalti: le organizzazioni chiedono una riforma.',ch:[
+   {l:'Riformi gli appalti', e:'Più controlli e più trasparenza; la riforma costa', pleases:'progressista', costo:{debito:0.3},f:()=>{S.ind.debt+=0.3; relIntMuovi('ong',5); gd('giovani',2);}},
+   {l:'Contesti la classifica', e:'Difendi le tue regole; le ONG prendono nota', pleases:'tecnico', f:()=>{relIntMuovi('ong',-4);}},
+ ]},
 ];
 
 /* ===== CONFLITTI INTERNAZIONALI (cantiere paesi reali e conflitti, FASE B) — i flashpoint che vivi DA PREMIER (liv. 3):
@@ -21278,6 +21297,21 @@ const MINISTRO_CARTE=[
    Ordinati per SPECIFICITÀ (generaTitolo, game.js, pesca il PRIMO con cond vera; generici in fondo).
    Ogni voce ha DUE varianti della stessa notizia: `amico` (rapporto stampa ≥50) / `ostile` (<50).
    Cornice pura: NON è una carta, niente effetti, niente tetto. Testi ritoccabili a costo zero. ===== */
+/* L275-31 (F12) · ESTATE E RIENTRO NON PIÙ UGUALI OGNI ANNO. `ti_estate` e `ti_rientro` restano UN titolo ciascuno (stesso id, stessa
+   cond): il testo cambia con l'anno di gioco, quattro versioni a rotazione (S.year modulo 4; la versione 0 è quella di sempre). Le coppie
+   di mesi in cui sono vivi (luglio-agosto e settembre-ottobre a nord, gennaio-febbraio e marzo-aprile a sud) stanno sempre nello stesso
+   anno. Correzione alla consegna, che chiedeva sei id nuovi uno per anno: il sacchetto 'titoli' (pescaBag con vivePrima) metterebbe in
+   testa ogni anno l'id nuovo, assente al rimescolo, e la scelta cambierebbe; con lo stesso id le estrazioni restano identiche e cambia
+   solo la riga stampata (S.titoloMese.testo). Testi che reggono in ogni paese, decennio ed emisfero: niente mesi, mare, neve, scuola. */
+const TI_STAGIONE={
+  estate:{
+    amico:['Il paese rallenta, il governo resta al lavoro', 'Palazzi mezzi vuoti, ma i dossier non vanno in vacanza', 'Chi resta di turno: il governo presidia i dossier aperti', 'Settimane tranquille per preparare la ripresa'],
+    ostile:['Ferie per tutti, risposte per nessuno', 'Il caldo rallenta tutto, anche le risposte del governo', 'Uffici chiusi, pratiche ferme: l\'estate del rinvio', 'Il paese in pausa, i problemi no'] },
+  rientro:{
+    amico:['Il rientro: l\'agenda d\'autunno del governo', 'Riapre l\'aula: il governo presenta il calendario', 'I conti da chiudere: il governo si rimette al lavoro', 'Tornano le promesse di primavera, e il governo le rilancia'],
+    ostile:['L\'autunno dei dossier: il tavolo è pieno', 'Riapre l\'aula, e con lei le liti rimandate', 'Il conto dell\'estate arriva sul tavolo del governo', 'Le promesse di primavera tornano a chiedere il conto'] }
+};
+function tiStagioneIdx(){ var y=(typeof S!=='undefined' && S && S.year!=null) ? S.year : 0; return ((y%4)+4)%4; }
 const TITOLI=[
  /* ============================================================================================================
     L49-1 · I SEDICI TITOLI DEL DECENNIO INGLESE (scheda §E) — pool `ti_uk50`, ognuno con la sua gemella di stato
@@ -21760,8 +21794,8 @@ const TITOLI=[
  {id:'ti_dis_freddo', pri:1, cond:()=>disTitoloOra('f'), amico:'Un discorso sobrio, accolto con freddezza', ostile:'Il discorso che nessuno ricorderà'},
  {id:'ti_dis_fischi', pri:1, cond:()=>disTitoloOra('x'), amico:'Fischi al discorso: una giornata storta', ostile:'Fischi e proteste: il discorso è un caso'},
  {id:'ti_pp_scissione', cond:()=>titoloScissioneDovuto(), amico:'Scissione da %V: nasce %P', ostile:'Scissione da %V: nasce %P'},   // L237-6
- {id:'ti_estate', cond:()=>stagioneMese()==='estate'&&stagioneMese(S.month-1)==='estate', amico:'Il paese rallenta, il governo resta al lavoro', ostile:'Ferie per tutti, risposte per nessuno'},
- {id:'ti_rientro', cond:()=>stagioneMese()==='autunno'&&stagioneMese(S.month+1)==='autunno', amico:'Il rientro: l\'agenda d\'autunno del governo', ostile:'L\'autunno dei dossier: il tavolo è pieno'},
+ {id:'ti_estate', cond:()=>stagioneMese()==='estate'&&stagioneMese(S.month-1)==='estate', get amico(){ return TI_STAGIONE.estate.amico[tiStagioneIdx()]; }, get ostile(){ return TI_STAGIONE.estate.ostile[tiStagioneIdx()]; }},   // L275-31: il testo dell'anno (TI_STAGIONE, sopra TITOLI)
+ {id:'ti_rientro', cond:()=>stagioneMese()==='autunno'&&stagioneMese(S.month+1)==='autunno', get amico(){ return TI_STAGIONE.rientro.amico[tiStagioneIdx()]; }, get ostile(){ return TI_STAGIONE.rientro.ostile[tiStagioneIdx()]; }},
  /* ===== D2 — TITOLI D'EPOCA '50 (pri 2, era italia1950): la scheda-materia-prima §3-bis di PRESET-ITALIA-1950.md,
     sourceata; ancore-anno e DUE scadenze (Corea ≤'53, TV-sperimentale '52-'54) via cond su S.year. Dedup rispettato:
     la CECA è angolo-titolo (la carta-evento resta distinta), niente Polesine (solo carta-shock), niente Anno Santo. ===== */
