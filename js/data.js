@@ -135,8 +135,8 @@ const PAESI = {
     nomiF: ['Emily','Sarah','Jessica','Ashley','Megan','Laura','Rachel','Hannah','Nicole','Samantha'],
     cognomi: ['Brooks','Hale','Coleman','Porter','Bishop','Bryant','Foster','Russell','Hartman','Lawson','Crawford','Caldwell','Donovan','Easton','Pratt','Sutton','Greer','Lockhart','Mercer','Hughes'],
     partiti: [
-      { id:'us_dem', nome:'Democratici',  orientamento:'centrosinistra', base:{ giovani:0.4, lavoratori:0.35, cetomedio:0.25 },                  forza:50, asse:-1 },
-      { id:'us_rep', nome:'Repubblicani', orientamento:'centrodestra',   base:{ imprenditori:0.4, cetomedio:0.25, cattolici:0.2, pensionati:0.15 }, forza:50, asse:1 },
+      { id:'us_dem', nome:'Democratici', segr:'il segretario dei Democratici',  orientamento:'centrosinistra', base:{ giovani:0.4, lavoratori:0.35, cetomedio:0.25 },                  forza:50, asse:-1 },
+      { id:'us_rep', nome:'Repubblicani', segr:'il segretario dei Repubblicani', orientamento:'centrodestra',   base:{ imprenditori:0.4, cetomedio:0.25, cattolici:0.2, pensionati:0.15 }, forza:50, asse:1 },
     ],
   },
   regnounito: {
@@ -189,9 +189,9 @@ const PAESI = {
     cognomi: ['Hartley','Whitfield','Pennington','Pemberton','Hollis','Bramwell','Holloway','Ellison','Fairfax','Goodwin','Harrington','Kingsley','Lockwood','Marsden','Norbury','Radcliffe','Sinclair','Thornton','Westbrook','Yates'],
     partiti: [
       { id:'uk_lab',    nome:'Labour',            orientamento:'centrosinistra',   base:{ lavoratori:0.6, giovani:0.4 },                   forza:38, asse:-1, terreno:-0.55, concentrazione:0.75 },
-      { id:'uk_con',    nome:'Conservatives',     orientamento:'centrodestra',     base:{ imprenditori:0.5, cetomedio:0.3, pensionati:0.2 }, forza:26, asse:1, terreno:0.45, concentrazione:0.55 },
+      { id:'uk_con',    nome:'Conservatives', segr:'il segretario dei Conservatori',     orientamento:'centrodestra',     base:{ imprenditori:0.5, cetomedio:0.3, pensionati:0.2 }, forza:26, asse:1, terreno:0.45, concentrazione:0.55 },
       { id:'uk_reform', nome:'Reform UK',         orientamento:'destra populista', base:{ cetomedio:0.6, pensionati:0.4 },                 forza:22, asse:2, terreno:0.85, concentrazione:5 },
-      { id:'uk_libdem', nome:'Liberal Democrats', orientamento:'centro',           base:{ cetomedio:0.6, giovani:0.4 },                    forza:14, asse:0 , terreno:-0.95, concentrazione:24 /* L47-2: la specie-Liberal — pochi collegi, ma li vince */},
+      { id:'uk_libdem', nome:'Liberal Democrats', segr:'il segretario dei Liberal Democratici', orientamento:'centro',           base:{ cetomedio:0.6, giovani:0.4 },                    forza:14, asse:0 , terreno:-0.95, concentrazione:24 /* L47-2: la specie-Liberal — pochi collegi, ma li vince */},
     ],
   },
   australia: {
@@ -225,10 +225,10 @@ const PAESI = {
     cognomi: ['Smith','Jones','Williams','Brown','Wilson','Taylor','Nguyen','Walker','Harris','Thompson','Ryan','Murphy','Kelly','Mitchell','Anderson','Robinson','Davies','Evans','Clark','Hughes'],
     partiti: [
       { id:'au_alp', nome:'Labor',        orientamento:'centrosinistra',   base:{ lavoratori:0.5, giovani:0.3, cetomedio:0.2 },     forza:33, asse:-1 },
-      { id:'au_lib', nome:'Liberali',     orientamento:'centrodestra',     base:{ imprenditori:0.5, cetomedio:0.3, pensionati:0.2 }, forza:28, asse:1 },
-      { id:'au_ind', nome:'Indipendenti', orientamento:'centro',           base:{ cetomedio:0.6, imprenditori:0.4 },                forza:13, asse:0 },
-      { id:'au_grn', nome:'Verdi',        orientamento:'ecologista',       base:{ giovani:0.7, lavoratori:0.3 },                    forza:12, asse:-2 },
-      { id:'au_nat', nome:'Nazionali',    orientamento:'destra',           base:{ pensionati:0.5, imprenditori:0.5 },               forza:7,  asse:2 },
+      { id:'au_lib', nome:'Liberali', segr:'il segretario dei Liberali',     orientamento:'centrodestra',     base:{ imprenditori:0.5, cetomedio:0.3, pensionati:0.2 }, forza:28, asse:1 },
+      { id:'au_ind', nome:'Indipendenti', segr:'il segretario degli Indipendenti', orientamento:'centro',           base:{ cetomedio:0.6, imprenditori:0.4 },                forza:13, asse:0 },
+      { id:'au_grn', nome:'Verdi', segr:'il segretario dei Verdi',        orientamento:'ecologista',       base:{ giovani:0.7, lavoratori:0.3 },                    forza:12, asse:-2 },
+      { id:'au_nat', nome:'Nazionali', segr:'il segretario dei Nazionali',    orientamento:'destra',           base:{ pensionati:0.5, imprenditori:0.5 },               forza:7,  asse:2 },
       { id:'au_on',  nome:'One Nation',   orientamento:'destra populista', base:{ cetomedio:0.6, pensionati:0.4 },                  forza:7,  asse:2 },
     ],
   },
@@ -265,7 +265,7 @@ const PAESI = {
          convenienza fra un partito nazionale e i regionali, non vicinanze d'asse. Con la sola regola |asse|<=1
          il BJP (asse 2) non aveva NESSUN alleato ammesso e restava a 40 seggi: minoranza per costruzione. */
       { id:'in_bjp',  nome:'BJP',                orientamento:'destra',         base:{ cattolici:0.4, cetomedio:0.4, imprenditori:0.2 }, forza:38, asse:2, alleati:['in_reg'] },
-      { id:'in_reg',  nome:'Partiti regionali',  orientamento:'centro',         base:{ lavoratori:0.4, pensionati:0.3, cetomedio:0.3 },  forza:24, asse:0, alleati:['in_bjp','in_inc','in_aap'] },
+      { id:'in_reg',  nome:'Partiti regionali', segr:'il segretario di un partito regionale',  orientamento:'centro',         base:{ lavoratori:0.4, pensionati:0.3, cetomedio:0.3 },  forza:24, asse:0, alleati:['in_bjp','in_inc','in_aap'] },
       { id:'in_inc',  nome:'Congresso',          orientamento:'centrosinistra', base:{ lavoratori:0.4, giovani:0.3, cetomedio:0.3 },     forza:22, asse:-1, alleati:['in_reg','in_left','in_aap'] },
       { id:'in_aap',  nome:'AAP',                orientamento:'populista',      base:{ giovani:0.5, cetomedio:0.3, lavoratori:0.2 },     forza:8,  asse:0, alleati:['in_inc','in_reg'] },
       { id:'in_left', nome:'Sinistra',           orientamento:'sinistra',       base:{ lavoratori:0.6, giovani:0.4 },                    forza:8,  asse:-2, alleati:['in_inc'] },
@@ -305,7 +305,7 @@ const PAESI = {
       { id:'za_da',   nome:'Alleanza Democratica', orientamento:'centrodestra',     base:{ imprenditori:0.5, cetomedio:0.4, cattolici:0.1 }, forza:22, asse:1 },
       { id:'za_mk',   nome:'MK',                   orientamento:'populista',        base:{ lavoratori:0.5, giovani:0.5 },                    forza:14, asse:-1 },
       { id:'za_eff',  nome:'EFF',                  orientamento:'sinistra populista', base:{ giovani:0.6, lavoratori:0.4 },                  forza:10, asse:-2 },
-      { id:'za_oth',  nome:'Altri partiti',        orientamento:'centro',           base:{ cetomedio:0.5, imprenditori:0.3, cattolici:0.2 }, forza:8,  asse:0 },
+      { id:'za_oth',  nome:'Altri partiti', segr:'il segretario di un altro partito',        orientamento:'centro',           base:{ cetomedio:0.5, imprenditori:0.3, cattolici:0.2 }, forza:8,  asse:0 },
       { id:'za_ifp',  nome:'IFP',                  orientamento:'centro',           base:{ pensionati:0.5, cattolici:0.5 },                  forza:6,  asse:0 },
     ],
   },
@@ -339,10 +339,10 @@ const PAESI = {
     nomiF: ['Sofía','Valentina','Martina','Lucía','Camila','Julieta','Catalina','Florencia','Agustina','Paula'],
     cognomi: ['González','Rodríguez','Fernández','López','Martínez','García','Pérez','Romero','Sosa','Álvarez','Torres','Ruiz','Ramírez','Flores','Acosta','Benítez','Medina','Suárez','Herrera','Gómez'],
     partiti: [
-      { id:'ar_uxp', nome:'Peronisti',          orientamento:'populista',      base:{ lavoratori:0.5, pensionati:0.3, cetomedio:0.2 }, forza:33, asse:-1 },
+      { id:'ar_uxp', nome:'Peronisti', segr:'il segretario dei Peronisti',          orientamento:'populista',      base:{ lavoratori:0.5, pensionati:0.3, cetomedio:0.2 }, forza:33, asse:-1 },
       { id:'ar_lla', nome:'La Libertad Avanza', orientamento:'destra',         base:{ cetomedio:0.4, imprenditori:0.4, giovani:0.2 },  forza:30, asse:2 },
       { id:'ar_pro', nome:'PRO',                orientamento:'centrodestra',   base:{ imprenditori:0.5, cetomedio:0.5 },               forza:15, asse:1 },
-      { id:'ar_ucr', nome:'Radicali (UCR)',     orientamento:'centro',         base:{ cetomedio:0.6, pensionati:0.4 },                 forza:14, asse:0 },
+      { id:'ar_ucr', nome:'Radicali (UCR)', segr:'il segretario dei Radicali (UCR)',     orientamento:'centro',         base:{ cetomedio:0.6, pensionati:0.4 },                 forza:14, asse:0 },
       { id:'ar_fit', nome:'Sinistra',           orientamento:'sinistra',       base:{ lavoratori:0.6, giovani:0.4 },                   forza:8,  asse:-2 },
     ],
   },
@@ -382,7 +382,7 @@ const PAESI = {
       { id:'de_cdu', nome:'CDU/CSU', orientamento:'centrodestra',     base:{ cetomedio:0.4, imprenditori:0.3, pensionati:0.3 }, forza:30, asse:1 },
       { id:'de_afd', nome:'AfD',     orientamento:'destra populista', base:{ cetomedio:0.5, lavoratori:0.3, pensionati:0.2 },  forza:20, asse:2 },
       { id:'de_spd', nome:'SPD',     orientamento:'centrosinistra',   base:{ lavoratori:0.5, pensionati:0.3, cetomedio:0.2 }, forza:18, asse:-1 },
-      { id:'de_grn', nome:'Verdi',   orientamento:'ecologista',       base:{ giovani:0.6, cetomedio:0.4 },                    forza:14, asse:-2 },
+      { id:'de_grn', nome:'Verdi', segr:'il segretario dei Verdi',   orientamento:'ecologista',       base:{ giovani:0.6, cetomedio:0.4 },                    forza:14, asse:-2 },
       { id:'de_fdp', nome:'FDP',     orientamento:'liberale',         base:{ imprenditori:0.5, cetomedio:0.5 },               forza:9,  asse:1 },
       { id:'de_lnk', nome:'Linke',   orientamento:'sinistra',         base:{ lavoratori:0.6, giovani:0.4 },                   forza:9,  asse:-2 },
     ],
@@ -453,11 +453,11 @@ const PAESI = {
     nomiF: ['Emma','Olivia','Charlotte','Sophia','Ava','Emily','Chloé','Léa','Florence','Alice'],
     cognomi: ['Smith','Brown','Tremblay','Roy','Wilson','MacDonald','Gagnon','Martin','Lee','Taylor','Campbell','Bouchard','Anderson','Côté','Johnson','Gauthier','Morin','Bélanger','White','Singh'],
     partiti: [
-      { id:'ca_con', nome:'Conservatori',  orientamento:'centrodestra',   base:{ imprenditori:0.4, pensionati:0.3, cetomedio:0.3 }, forza:34, asse:1 },
-      { id:'ca_lib', nome:'Liberali',      orientamento:'centro',         base:{ cetomedio:0.4, giovani:0.3, lavoratori:0.3 },    forza:33, asse:0 },
+      { id:'ca_con', nome:'Conservatori', segr:'il segretario dei Conservatori',  orientamento:'centrodestra',   base:{ imprenditori:0.4, pensionati:0.3, cetomedio:0.3 }, forza:34, asse:1 },
+      { id:'ca_lib', nome:'Liberali', segr:'il segretario dei Liberali',      orientamento:'centro',         base:{ cetomedio:0.4, giovani:0.3, lavoratori:0.3 },    forza:33, asse:0 },
       { id:'ca_ndp', nome:'Nuovo Partito Democratico', orientamento:'sinistra', base:{ lavoratori:0.5, giovani:0.5 },           forza:16, asse:-1 },
       { id:'ca_bq',  nome:'Bloc Québécois', orientamento:'regionalista',  base:{ lavoratori:0.4, cetomedio:0.4, pensionati:0.2 }, forza:9,  asse:0 },
-      { id:'ca_grn', nome:'Verdi',         orientamento:'ecologista',     base:{ giovani:0.7, cetomedio:0.3 },                    forza:8,  asse:-2 },
+      { id:'ca_grn', nome:'Verdi', segr:'il segretario dei Verdi',         orientamento:'ecologista',     base:{ giovani:0.7, cetomedio:0.3 },                    forza:8,  asse:-2 },
     ],
   },
   spagna: {
@@ -705,16 +705,16 @@ const PAESI = {
     nomiF: ['Sofie','Ida','Freja','Emma','Anne','Camilla','Line','Maja','Signe','Mette'],
     cognomi: ['Nielsen','Jensen','Hansen','Pedersen','Andersen','Christensen','Larsen','Sørensen','Rasmussen','Jørgensen','Petersen','Madsen','Kristensen','Olsen','Thomsen','Christiansen','Poulsen','Johansen','Møller','Mortensen'],
     partiti: [
-      { id:'dk_s',   nome:'Socialdemocratici',       orientamento:'centrosinistra',   base:{ lavoratori:0.4, pensionati:0.4, cetomedio:0.2 },   forza:21.9, asse:-1, alleati:['dk_sf','dk_el','dk_rv','dk_alt','dk_m'] },
+      { id:'dk_s',   nome:'Socialdemocratici', segr:'il segretario dei Socialdemocratici',       orientamento:'centrosinistra',   base:{ lavoratori:0.4, pensionati:0.4, cetomedio:0.2 },   forza:21.9, asse:-1, alleati:['dk_sf','dk_el','dk_rv','dk_alt','dk_m'] },
       { id:'dk_sf',  nome:'SF',                      orientamento:'sinistra',         base:{ giovani:0.4, lavoratori:0.3, cetomedio:0.3 },      forza:11.6, asse:-2, alleati:['dk_s','dk_el','dk_rv','dk_alt','dk_m'] },
       { id:'dk_v',   nome:'Venstre',                 orientamento:'centrodestra',     base:{ imprenditori:0.3, cetomedio:0.3, cattolici:0.2, pensionati:0.2 }, forza:10.1, asse:1, alleati:['dk_la','dk_k','dk_df','dk_dd','dk_bp','dk_m'] },
       { id:'dk_la',  nome:'Liberal Alliance',        orientamento:'liberale',         base:{ imprenditori:0.5, giovani:0.3, cetomedio:0.2 },    forza:9.4,  asse:1, alleati:['dk_v','dk_k','dk_df','dk_dd','dk_bp'] },
       { id:'dk_df',  nome:'Partito popolare danese', orientamento:'destra',           base:{ pensionati:0.4, lavoratori:0.3, cattolici:0.3 },   forza:9.1,  asse:2, alleati:['dk_v','dk_la','dk_k','dk_dd','dk_bp'] },
-      { id:'dk_m',   nome:'Moderati',                orientamento:'centro',           base:{ cetomedio:0.5, pensionati:0.3, imprenditori:0.2 }, forza:7.7,  asse:0, alleati:['dk_s','dk_sf','dk_rv','dk_v'] },
-      { id:'dk_k',   nome:'Conservatori',            orientamento:'centrodestra',     base:{ cetomedio:0.4, imprenditori:0.3, pensionati:0.3 }, forza:7.6,  asse:1, alleati:['dk_v','dk_la','dk_df','dk_dd','dk_bp'] },
+      { id:'dk_m',   nome:'Moderati', segr:'il segretario dei Moderati',                orientamento:'centro',           base:{ cetomedio:0.5, pensionati:0.3, imprenditori:0.2 }, forza:7.7,  asse:0, alleati:['dk_s','dk_sf','dk_rv','dk_v'] },
+      { id:'dk_k',   nome:'Conservatori', segr:'il segretario dei Conservatori',            orientamento:'centrodestra',     base:{ cetomedio:0.4, imprenditori:0.3, pensionati:0.3 }, forza:7.6,  asse:1, alleati:['dk_v','dk_la','dk_df','dk_dd','dk_bp'] },
       { id:'dk_el',  nome:'Lista dell\'unità',       orientamento:'sinistra',         base:{ giovani:0.5, lavoratori:0.5 },                     forza:6.3,  asse:-2, alleati:['dk_s','dk_sf','dk_rv','dk_alt'] },
       { id:'dk_rv',  nome:'Radikale Venstre',        orientamento:'centro',           base:{ cetomedio:0.5, giovani:0.5 },                      forza:5.8,  asse:0, alleati:['dk_s','dk_sf','dk_el','dk_alt','dk_m'] },
-      { id:'dk_dd',  nome:'Democratici danesi',      orientamento:'destra populista', base:{ cattolici:0.4, lavoratori:0.3, pensionati:0.3 },   forza:5.8,  asse:2, alleati:['dk_v','dk_la','dk_k','dk_df','dk_bp'] },
+      { id:'dk_dd',  nome:'Democratici danesi', segr:'il segretario dei Democratici danesi',      orientamento:'destra populista', base:{ cattolici:0.4, lavoratori:0.3, pensionati:0.3 },   forza:5.8,  asse:2, alleati:['dk_v','dk_la','dk_k','dk_df','dk_bp'] },
       { id:'dk_alt', nome:'Alternativet',            orientamento:'ecologista',       base:{ giovani:0.6, cetomedio:0.4 },                      forza:2.6,  asse:-2, alleati:['dk_s','dk_sf','dk_el','dk_rv'], selezionabile:false,
         nota:'Appena sopra la soglia del 2%: non regge una carriera.' },
       { id:'dk_bp',  nome:'Partito dei cittadini',   orientamento:'destra',           base:{ cetomedio:0.5, lavoratori:0.5 },                   forza:2.1,  asse:2, alleati:['dk_v','dk_la','dk_k','dk_df','dk_dd'], selezionabile:false,
@@ -851,14 +851,14 @@ const PAESI = {
     nomiF: ['Anna','Maria','Eva','Karin','Sara','Emma','Lena','Linnea','Elin','Ingrid'],
     cognomi: ['Andersson','Johansson','Karlsson','Nilsson','Eriksson','Larsson','Olsson','Persson','Svensson','Gustafsson','Pettersson','Jonsson','Jansson','Hansson','Bengtsson','Lindberg','Lindström','Jakobsson','Magnusson','Lindqvist'],
     partiti: [
-      { id:'se_s',  nome:'Socialdemocratici',      orientamento:'centrosinistra',   base:{ lavoratori:0.4, pensionati:0.4, cetomedio:0.2 },   forza:30.8, asse:-1, alleati:['se_v','se_mp','se_c'] },
-      { id:'se_sd', nome:'Democratici svedesi',    orientamento:'destra populista', base:{ lavoratori:0.4, pensionati:0.3, cetomedio:0.2, cattolici:0.1 }, forza:20.9, asse:2, alleati:['se_m','se_kd','se_l'] },
-      { id:'se_m',  nome:'Moderati',               orientamento:'centrodestra',     base:{ imprenditori:0.4, cetomedio:0.4, pensionati:0.2 }, forza:19.4, asse:1,  alleati:['se_kd','se_l','se_sd'] },
+      { id:'se_s',  nome:'Socialdemocratici', segr:'il segretario dei Socialdemocratici',      orientamento:'centrosinistra',   base:{ lavoratori:0.4, pensionati:0.4, cetomedio:0.2 },   forza:30.8, asse:-1, alleati:['se_v','se_mp','se_c'] },
+      { id:'se_sd', nome:'Democratici svedesi', segr:'il segretario dei Democratici svedesi',    orientamento:'destra populista', base:{ lavoratori:0.4, pensionati:0.3, cetomedio:0.2, cattolici:0.1 }, forza:20.9, asse:2, alleati:['se_m','se_kd','se_l'] },
+      { id:'se_m',  nome:'Moderati', segr:'il segretario dei Moderati',               orientamento:'centrodestra',     base:{ imprenditori:0.4, cetomedio:0.4, pensionati:0.2 }, forza:19.4, asse:1,  alleati:['se_kd','se_l','se_sd'] },
       { id:'se_v',  nome:'Partito della sinistra', orientamento:'sinistra',         base:{ giovani:0.5, lavoratori:0.5 },                     forza:6.8,  asse:-2, alleati:['se_s','se_mp'] },
       { id:'se_c',  nome:'Partito di centro',      orientamento:'centro',           base:{ cetomedio:0.3, imprenditori:0.3, cattolici:0.2, giovani:0.2 }, forza:6.8, asse:0, alleati:['se_s','se_l'] },
-      { id:'se_kd', nome:'Cristiano-democratici',  orientamento:'centrodestra',     base:{ cattolici:0.5, pensionati:0.3, cetomedio:0.2 },   forza:5.4,  asse:1,  alleati:['se_m','se_l','se_sd'] },
-      { id:'se_mp', nome:'Verdi',                  orientamento:'ecologista',       base:{ giovani:0.6, cetomedio:0.4 },                     forza:5.2,  asse:-2, alleati:['se_s','se_v'] },
-      { id:'se_l',  nome:'Liberali',               orientamento:'liberale',         base:{ cetomedio:0.5, imprenditori:0.3, giovani:0.2 },   forza:4.7,  asse:1,  alleati:['se_m','se_kd','se_c','se_sd'] },
+      { id:'se_kd', nome:'Cristiano-democratici', segr:'il segretario dei Cristiano-democratici',  orientamento:'centrodestra',     base:{ cattolici:0.5, pensionati:0.3, cetomedio:0.2 },   forza:5.4,  asse:1,  alleati:['se_m','se_l','se_sd'] },
+      { id:'se_mp', nome:'Verdi', segr:'il segretario dei Verdi',                  orientamento:'ecologista',       base:{ giovani:0.6, cetomedio:0.4 },                     forza:5.2,  asse:-2, alleati:['se_s','se_v'] },
+      { id:'se_l',  nome:'Liberali', segr:'il segretario dei Liberali',               orientamento:'liberale',         base:{ cetomedio:0.5, imprenditori:0.3, giovani:0.2 },   forza:4.7,  asse:1,  alleati:['se_m','se_kd','se_c','se_sd'] },
     ],
   },
   /* ===== L250-14 (08/11) · NORVEGIA, nel presente (gennaio 2026), dall'aula delle elezioni dello Storting dell'8 settembre 2025 ◦.
@@ -918,15 +918,15 @@ const PAESI = {
     nomiF: ['Kari','Ingrid','Silje','Marit','Ida','Hilde','Ragnhild','Tone','Liv','Synnøve'],
     cognomi: ['Hansen','Johansen','Olsen','Larsen','Andersen','Pedersen','Nilsen','Kristiansen','Jensen','Karlsen','Haugen','Berg','Dahl','Bakken','Moen','Strand','Eide','Haugland','Nygård','Sandvik'],
     partiti: [
-      { id:'no_ap',  nome:'Laburisti', sigla:'Ap',             orientamento:'centrosinistra',   base:{ lavoratori:0.4, pensionati:0.3, cetomedio:0.3 },   forza:29.3, asse:-1, alleati:['no_sv','no_sp','no_r','no_mdg'] },
+      { id:'no_ap',  nome:'Laburisti', segr:'il segretario dei Laburisti', sigla:'Ap',             orientamento:'centrosinistra',   base:{ lavoratori:0.4, pensionati:0.3, cetomedio:0.3 },   forza:29.3, asse:-1, alleati:['no_sv','no_sp','no_r','no_mdg'] },
       { id:'no_frp', nome:'Partito del progresso', sigla:'FrP', orientamento:'destra populista', base:{ lavoratori:0.3, pensionati:0.3, cetomedio:0.2, imprenditori:0.1, cattolici:0.1 }, forza:24.9, asse:2, alleati:['no_h','no_krf','no_v'] },
-      { id:'no_h',   nome:'Conservatori', sigla:'H',          orientamento:'centrodestra',     base:{ imprenditori:0.4, cetomedio:0.4, pensionati:0.2 }, forza:15.3, asse:1,  alleati:['no_frp','no_krf','no_v'] },
+      { id:'no_h',   nome:'Conservatori', segr:'il segretario dei Conservatori', sigla:'H',          orientamento:'centrodestra',     base:{ imprenditori:0.4, cetomedio:0.4, pensionati:0.2 }, forza:15.3, asse:1,  alleati:['no_frp','no_krf','no_v'] },
       { id:'no_sv',  nome:'Sinistra socialista', sigla:'SV',   orientamento:'sinistra',         base:{ giovani:0.4, lavoratori:0.3, cetomedio:0.3 },      forza:5.9,  asse:-2, alleati:['no_ap','no_r','no_mdg','no_sp'] },
       { id:'no_sp',  nome:'Partito di centro', sigla:'Sp',     orientamento:'centro',           base:{ cattolici:0.2, pensionati:0.3, lavoratori:0.3, cetomedio:0.2 }, forza:5.9, asse:0, alleati:['no_ap','no_sv','no_krf'] },
       { id:'no_r',   nome:'Rødt', sigla:'Rødt',                  orientamento:'sinistra',         base:{ giovani:0.5, lavoratori:0.5 },                     forza:5.5,  asse:-2, alleati:['no_ap','no_sv'] },
-      { id:'no_mdg', nome:'Verdi', sigla:'MDG',                 orientamento:'ecologista',       base:{ giovani:0.6, cetomedio:0.4 },                      forza:4.9,  asse:-2, alleati:['no_ap','no_sv'] },
-      { id:'no_krf', nome:'Cristiano-popolari', sigla:'KrF',    orientamento:'centrodestra',     base:{ cattolici:0.6, pensionati:0.2, cetomedio:0.2 },    forza:4.4,  asse:1,  alleati:['no_h','no_v','no_frp','no_sp'] },
-      { id:'no_v',   nome:'Liberali', sigla:'V',              orientamento:'liberale',         base:{ cetomedio:0.5, giovani:0.3, imprenditori:0.2 },    forza:3.9,  asse:1,  alleati:['no_h','no_krf','no_frp'], selezionabile:false,
+      { id:'no_mdg', nome:'Verdi', segr:'il segretario dei Verdi', sigla:'MDG',                 orientamento:'ecologista',       base:{ giovani:0.6, cetomedio:0.4 },                      forza:4.9,  asse:-2, alleati:['no_ap','no_sv'] },
+      { id:'no_krf', nome:'Cristiano-popolari', segr:'il segretario dei Cristiano-popolari', sigla:'KrF',    orientamento:'centrodestra',     base:{ cattolici:0.6, pensionati:0.2, cetomedio:0.2 },    forza:4.4,  asse:1,  alleati:['no_h','no_v','no_frp','no_sp'] },
+      { id:'no_v',   nome:'Liberali', segr:'il segretario dei Liberali', sigla:'V',              orientamento:'liberale',         base:{ cetomedio:0.5, giovani:0.3, imprenditori:0.2 },    forza:3.9,  asse:1,  alleati:['no_h','no_krf','no_frp'], selezionabile:false,
         nota:'Venstre al 3,9% resta sotto la soglia del 4% e fuori dall\'aula: nel vero entra coi seggi di circoscrizione, che il gioco non modella.' },
     ],
   },
@@ -998,10 +998,10 @@ const PAESI = {
       { id:'be_ptb',     nome:'Partito del lavoro',               comunita:null, orientamento:'sinistra',         base:{ lavoratori:0.6, giovani:0.4 },                     forza:10.0, asse:-2, alleati:['be_ps','be_vooruit','be_groen','be_ecolo'] },
       { id:'be_vooruit', nome:'Vooruit',                          comunita:'nl', orientamento:'centrosinistra',   base:{ lavoratori:0.4, cetomedio:0.3, giovani:0.3 },      forza:8.7,  asse:-1, alleati:['be_nva','be_mr','be_le','be_cdv','be_ps','be_vld','be_groen','be_ecolo','be_ptb'] },
       { id:'be_ps',      nome:'Partito socialista',               comunita:'fr', orientamento:'centrosinistra',   base:{ lavoratori:0.5, pensionati:0.4, cetomedio:0.1 },   forza:10.7, asse:-1, alleati:['be_mr','be_le','be_vooruit','be_cdv','be_vld','be_groen','be_ecolo','be_ptb'] },
-      { id:'be_cdv',     nome:'Cristiano-democratici fiamminghi', comunita:'nl', orientamento:'centro',           base:{ cattolici:0.4, pensionati:0.3, cetomedio:0.2, imprenditori:0.1 }, forza:7.3, asse:0, alleati:['be_nva','be_mr','be_le','be_vooruit','be_ps','be_vld','be_groen','be_ecolo'] },
+      { id:'be_cdv',     nome:'Cristiano-democratici fiamminghi', segr:'il segretario dei Cristiano-democratici fiamminghi', comunita:'nl', orientamento:'centro',           base:{ cattolici:0.4, pensionati:0.3, cetomedio:0.2, imprenditori:0.1 }, forza:7.3, asse:0, alleati:['be_nva','be_mr','be_le','be_vooruit','be_ps','be_vld','be_groen','be_ecolo'] },
       { id:'be_le',      nome:'Les Engagés',                      comunita:'fr', orientamento:'centro',           base:{ cetomedio:0.4, cattolici:0.3, pensionati:0.3 },    forza:9.3,  asse:0,  alleati:['be_nva','be_mr','be_vooruit','be_cdv','be_ps','be_vld'] },
-      { id:'be_vld',     nome:'Liberali fiamminghi',              comunita:'nl', orientamento:'liberale',         base:{ imprenditori:0.5, cetomedio:0.3, giovani:0.2 },    forza:4.7,  asse:1,  alleati:['be_nva','be_mr','be_le','be_vooruit','be_cdv','be_ps','be_groen','be_ecolo'] },
-      { id:'be_groen',   nome:'Verdi fiamminghi',                 comunita:'nl', orientamento:'ecologista',       base:{ giovani:0.6, cetomedio:0.4 },                      forza:4.0,  asse:-2, alleati:['be_mr','be_vooruit','be_ps','be_cdv','be_vld','be_ecolo','be_ptb'] },
+      { id:'be_vld',     nome:'Liberali fiamminghi', segr:'il segretario dei Liberali fiamminghi',              comunita:'nl', orientamento:'liberale',         base:{ imprenditori:0.5, cetomedio:0.3, giovani:0.2 },    forza:4.7,  asse:1,  alleati:['be_nva','be_mr','be_le','be_vooruit','be_cdv','be_ps','be_groen','be_ecolo'] },
+      { id:'be_groen',   nome:'Verdi fiamminghi', segr:'il segretario dei Verdi fiamminghi',                 comunita:'nl', orientamento:'ecologista',       base:{ giovani:0.6, cetomedio:0.4 },                      forza:4.0,  asse:-2, alleati:['be_mr','be_vooruit','be_ps','be_cdv','be_vld','be_ecolo','be_ptb'] },
       { id:'be_ecolo',   nome:'Ecolo',                            comunita:'fr', orientamento:'ecologista',       base:{ giovani:0.6, cetomedio:0.4 },                      forza:2.0,  asse:-2, alleati:['be_mr','be_vooruit','be_ps','be_cdv','be_vld','be_groen','be_ptb'] },
     ],
   },
@@ -1083,7 +1083,7 @@ const SCENARI = {
       { id:'i50_pci',   nome:'PCI',                orientamento:'sinistra',       base:{ lavoratori:0.6, giovani:0.4 },                                    forza:22, asse:-2, gruppoUE:'sinistra'      },
       { id:'i50_psi',   nome:'PSI',                orientamento:'sinistra',       base:{ lavoratori:0.6, giovani:0.4 },                                    forza:9,  asse:-2, gruppoUE:'socialisti'    },
       { id:'i50_psdi',  nome:'PSDI',              orientamento:'centrosinistra', base:{ lavoratori:0.5, cetomedio:0.5 },                                  forza:7,  asse:-1, gruppoUE:'socialisti'    },
-      { id:'i50_pnm',   nome:'Monarchici',        orientamento:'destra',         base:{ pensionati:0.5, imprenditori:0.5 },                               forza:5,  asse:2,  gruppoUE:'conservatori'  },
+      { id:'i50_pnm',   nome:'Monarchici', segr:'il segretario dei Monarchici',        orientamento:'destra',         base:{ pensionati:0.5, imprenditori:0.5 },                               forza:5,  asse:2,  gruppoUE:'conservatori'  },
       { id:'i50_pli',   nome:'PLI',               orientamento:'centrodestra',   base:{ imprenditori:0.6, cetomedio:0.4 },                                forza:4,  asse:1,  gruppoUE:'liberali'      },
       { id:'i50_pri',   nome:'PRI',               orientamento:'centro',         base:{ cetomedio:0.6, giovani:0.4 },                                     forza:3,  asse:0,  gruppoUE:'liberali'      },
       { id:'i50_msi',   nome:'MSI',               orientamento:'destra',         base:{ pensionati:0.5, cetomedio:0.5 },                                  forza:2,  asse:2,  gruppoUE:'noniscritti'   },
@@ -1145,7 +1145,7 @@ const SCENARI = {
       { id:'i50_psdi',  nome:'PSDI',       orientamento:'centrosinistra', base:{ lavoratori:0.5, cetomedio:0.5 },                                  forza:5.3,  asse:-1, gruppoUE:'socialisti'   },
       { id:'i50_msi',   nome:'MSI',        orientamento:'destra',         base:{ pensionati:0.5, cetomedio:0.5 },                                  forza:4.8,  asse:2,  gruppoUE:'noniscritti'  },
       { id:'i50_pri',   nome:'PRI',        orientamento:'centro',         base:{ cetomedio:0.6, giovani:0.4 },                                     forza:2.1,  asse:0,  gruppoUE:'liberali'     },
-      { id:'i50_pnm',   nome:'Monarchici', orientamento:'destra',         base:{ pensionati:0.5, imprenditori:0.5 },                               forza:1.4,  asse:2,  gruppoUE:'conservatori' },
+      { id:'i50_pnm',   nome:'Monarchici', segr:'il segretario dei Monarchici', orientamento:'destra',         base:{ pensionati:0.5, imprenditori:0.5 },                               forza:1.4,  asse:2,  gruppoUE:'conservatori' },
     ],
     /* Seed in MAGNITUDINE-LIRE (scheda §2): PIL ~68.000 mld al 1970 · debito 37% (serie unica Osservatorio CPI,
        riconciliata in CIFRE-ECONOMICHE.md). Il disavanzo d'avvio la scheda NON lo dà per il 1970: 3 è dedotto
@@ -1194,7 +1194,7 @@ const SCENARI = {
       { id:'i50_pci',   nome:'PCI',        orientamento:'sinistra',       base:{ lavoratori:0.6, giovani:0.4 },                                    forza:23.1, asse:-2, gruppoUE:'sinistra'     },
       { id:'i50_psi',   nome:'PSI',        orientamento:'sinistra',       base:{ lavoratori:0.6, giovani:0.4 },                                    forza:14.4, asse:-2, gruppoUE:'socialisti'   },
       { id:'i50_msi',   nome:'MSI',        orientamento:'destra',         base:{ pensionati:0.5, cetomedio:0.5 },                                  forza:4.9,  asse:2,  gruppoUE:'noniscritti'  },
-      { id:'i50_pnm',   nome:'Monarchici', orientamento:'destra',         base:{ pensionati:0.5, imprenditori:0.5 },                               forza:4.9,  asse:2,  gruppoUE:'conservatori' },
+      { id:'i50_pnm',   nome:'Monarchici', segr:'il segretario dei Monarchici', orientamento:'destra',         base:{ pensionati:0.5, imprenditori:0.5 },                               forza:4.9,  asse:2,  gruppoUE:'conservatori' },
       { id:'i50_psdi',  nome:'PSDI',       orientamento:'centrosinistra', base:{ lavoratori:0.5, cetomedio:0.5 },                                  forza:4.7,  asse:-1, gruppoUE:'socialisti'   },
       { id:'i50_pli',   nome:'PLI',        orientamento:'centrodestra',   base:{ imprenditori:0.6, cetomedio:0.4 },                                forza:3.5,  asse:1,  gruppoUE:'liberali'     },
       { id:'i50_pri',   nome:'PRI',        orientamento:'centro',         base:{ cetomedio:0.6, giovani:0.4 },                                     forza:1.4,  asse:0,  gruppoUE:'liberali'     },
@@ -1493,8 +1493,8 @@ const SCENARI = {
       { id:'fr_pcf',  nome:'PCF',        orientamento:'sinistra',       base:{ lavoratori:0.7, giovani:0.3 },                     forza:28.3, asse:-2, alleati:[] },
       { id:'fr_mrp',  nome:'MRP',        orientamento:'centro',         base:{ cattolici:0.5, cetomedio:0.3, pensionati:0.2 },    forza:26.0, asse:1,  alleati:['fr_sfio','fr_rad','fr_mod'] },
       { id:'fr_sfio', nome:'SFIO',       orientamento:'centrosinistra', base:{ lavoratori:0.5, cetomedio:0.3, giovani:0.2 },      forza:17.9, asse:-1, alleati:['fr_rad','fr_mrp','fr_mod'] },
-      { id:'fr_mod',  nome:'Moderati',   orientamento:'centrodestra',   base:{ imprenditori:0.4, pensionati:0.3, cattolici:0.3 }, forza:12.9, asse:1,  alleati:['fr_sfio','fr_rad','fr_mrp'] },
-      { id:'fr_rad',  nome:'Radicali',   orientamento:'centro',         base:{ cetomedio:0.6, imprenditori:0.4 },                 forza:11.1, asse:0,  alleati:['fr_sfio','fr_mrp','fr_mod'] },
+      { id:'fr_mod',  nome:'Moderati', segr:'il segretario dei Moderati',   orientamento:'centrodestra',   base:{ imprenditori:0.4, pensionati:0.3, cattolici:0.3 }, forza:12.9, asse:1,  alleati:['fr_sfio','fr_rad','fr_mrp'] },
+      { id:'fr_rad',  nome:'Radicali', segr:'il segretario dei Radicali',   orientamento:'centro',         base:{ cetomedio:0.6, imprenditori:0.4 },                 forza:11.1, asse:0,  alleati:['fr_sfio','fr_mrp','fr_mod'] },
       /* ⚠⚠ IL RPF A 3,1 NON E' UNA CARRIERA GIOCABILE, ed e' un fatto misurato, non un timore. Il motore chiude
          la partita con `gameOver('congresso')` quando la forza del partito scende sotto **max(forza d'avvio x 0,5 ; 5)**:
          il 5 e' un PAVIMENTO ASSOLUTO, quindi un partito che parte a 3,1 e' gia' sotto la soglia al primo mese.
@@ -1575,9 +1575,9 @@ const SCENARI = {
          per tutto il decennio, conterebbero come avversari. Un id che non esiste ancora non combacia con nessuno:
          e additivo, e dal '62 in poi combacia. Simmetrico per dichiarazione (fr_ri nomina fr_unr e fr_mrp). */
       { id:'fr_unr',  nome:'UNR',        orientamento:'destra',         base:{ cetomedio:0.4, pensionati:0.3, cattolici:0.3 },   forza:17.6, asse:1,  alleati:['fr_mod','fr_mrp','fr_ri'] },
-      { id:'fr_mod',  nome:'Moderati',   orientamento:'centrodestra',   base:{ imprenditori:0.4, pensionati:0.3, cattolici:0.3 }, forza:20.0, asse:1,  alleati:['fr_unr','fr_mrp','fr_rad'] },
+      { id:'fr_mod',  nome:'Moderati', segr:'il segretario dei Moderati',   orientamento:'centrodestra',   base:{ imprenditori:0.4, pensionati:0.3, cattolici:0.3 }, forza:20.0, asse:1,  alleati:['fr_unr','fr_mrp','fr_rad'] },
       { id:'fr_mrp',  nome:'MRP',        orientamento:'centro',         base:{ cattolici:0.5, cetomedio:0.3, pensionati:0.2 },    forza:11.1, asse:1,  alleati:['fr_unr','fr_mod','fr_rad','fr_ri'] },
-      { id:'fr_rad',  nome:'Radicali',   orientamento:'centro',         base:{ cetomedio:0.6, imprenditori:0.4 },                 forza:8.0,  asse:0,  alleati:['fr_sfio','fr_mrp','fr_mod'] },
+      { id:'fr_rad',  nome:'Radicali', segr:'il segretario dei Radicali',   orientamento:'centro',         base:{ cetomedio:0.6, imprenditori:0.4 },                 forza:8.0,  asse:0,  alleati:['fr_sfio','fr_mrp','fr_mod'] },
       { id:'fr_sfio', nome:'SFIO',       orientamento:'centrosinistra', base:{ lavoratori:0.5, cetomedio:0.3, giovani:0.2 },      forza:15.5, asse:-1, alleati:['fr_rad'] },
       /* il PCF resta fuori dall'arco come nel '50: mezzo elettorato operaio e nessun alleato possibile */
       { id:'fr_pcf',  nome:'PCF',        orientamento:'sinistra',       base:{ lavoratori:0.7, giovani:0.3 },                     forza:19.0, asse:-2, alleati:[] },
@@ -1639,7 +1639,7 @@ const SCENARI = {
       { id:'fr_unr',  nome:'UDR',                orientamento:'destra',         base:{ cetomedio:0.4, pensionati:0.3, cattolici:0.3 },    forza:37.0, asse:1,  alleati:['fr_ri','fr_mrp'] },
       { id:'fr_ri',   nome:'Repubblicani indipendenti', orientamento:'centrodestra', base:{ imprenditori:0.4, cetomedio:0.4, pensionati:0.2 }, forza:6.6, asse:1, alleati:['fr_unr','fr_mrp'] },
       { id:'fr_mrp',  nome:'Centro democratico', orientamento:'centro',         base:{ cattolici:0.5, cetomedio:0.3, pensionati:0.2 },     forza:10.3, asse:1,  alleati:['fr_unr','fr_ri','fr_rad'] },
-      { id:'fr_rad',  nome:'Radicali',           orientamento:'centro',         base:{ cetomedio:0.6, imprenditori:0.4 },                  forza:2.0,  asse:0,  alleati:['fr_mrp','fr_sfio'] },
+      { id:'fr_rad',  nome:'Radicali', segr:'il segretario dei Radicali',           orientamento:'centro',         base:{ cetomedio:0.6, imprenditori:0.4 },                  forza:2.0,  asse:0,  alleati:['fr_mrp','fr_sfio'] },
       { id:'fr_sfio', nome:'FGDS',               orientamento:'centrosinistra', base:{ lavoratori:0.5, cetomedio:0.3, giovani:0.2 },       forza:14.5, asse:-1, alleati:['fr_rad','fr_pcf'] },
       { id:'fr_pcf',  nome:'PCF',                orientamento:'sinistra',       base:{ lavoratori:0.7, giovani:0.3 },                      forza:20.0, asse:-2, alleati:['fr_sfio'] },
     ],
@@ -1799,7 +1799,7 @@ const SCENARI = {
       { id:'fr_ri',    nome:'UDF',  orientamento:'centrodestra',    base:{ imprenditori:0.4, cetomedio:0.4, pensionati:0.2 },    forza:16.4, asse:1,  alleati:['fr_unr'] },
       { id:'fr_sfio',  nome:'PS',   orientamento:'centrosinistra',  base:{ lavoratori:0.5, cetomedio:0.3, giovani:0.2 },         forza:28.9, asse:-1, alleati:['fr_pcf','fr_verts'] },
       { id:'fr_pcf',   nome:'PCF',  orientamento:'sinistra',        base:{ lavoratori:0.7, giovani:0.3 },                        forza:11.5, asse:-2, alleati:['fr_sfio','fr_verts'] },
-      { id:'fr_verts', nome:'Verdi', orientamento:'ecologista',     base:{ giovani:0.5, cetomedio:0.5 },                         forza:7.9,  asse:-1, alleati:['fr_sfio','fr_pcf'],
+      { id:'fr_verts', nome:'Verdi', segr:'il segretario dei Verdi', orientamento:'ecologista',     base:{ giovani:0.5, cetomedio:0.5 },                         forza:7.9,  asse:-1, alleati:['fr_sfio','fr_pcf'],
         selezionabile:false, nota:'I Verdi hanno sette deputati e governano col PS: non è una carriera che si possa giocare' },
       { id:'fr_fn',    nome:'Front national', orientamento:'destra populista', base:{ lavoratori:0.4, cetomedio:0.3, pensionati:0.3 }, forza:17.2, asse:2, alleati:[],
         selezionabile:false, nota:'Il Front national ha un deputato e nessun alleato: non è una carriera che si possa giocare' },
@@ -2047,7 +2047,7 @@ const SCENARI = {
       { id:'de_cdu', nome:'CDU/CSU', orientamento:'centrodestra',   base:{ cattolici:0.35, cetomedio:0.35, imprenditori:0.3 }, forza:44.7, forzaAncora:46.2, asse:1,  alleati:[], alleatiRiserva:['de_spd'] },
       { id:'de_spd', nome:'SPD',     orientamento:'centrosinistra', base:{ lavoratori:0.6, pensionati:0.2, giovani:0.2 },    forza:43.1, forzaAncora:39.7, asse:-1, alleati:['de_fdp'], alleatiRiserva:['de_cdu'] },
       { id:'de_fdp', nome:'FDP',     orientamento:'liberale',       base:{ imprenditori:0.5, cetomedio:0.5 },                forza:10.7, forzaAncora:8.9,  asse:1,  alleati:['de_spd'] },
-      { id:'de_grn', nome:'Verdi',   orientamento:'ecologista',     base:{ giovani:0.6, cetomedio:0.4 },                     forza:1.5,  forzaAncora:5.2,  asse:-2, alleati:[],
+      { id:'de_grn', nome:'Verdi', segr:'il segretario dei Verdi',   orientamento:'ecologista',     base:{ giovani:0.6, cetomedio:0.4 },                     forza:1.5,  forzaAncora:5.2,  asse:-2, alleati:[],
         selezionabile:false, nota:'I Verdi entrano nel Bundestag nel 1983 e non governano nel decennio: non è una carriera che si possa giocare' },   // D56 (la nota riscritta in L154-1: con la regola B la prima sconfitta non chiude più)
     ],
     /* il Bundestag del 1976 senza Berlino (496), in carica all'avvio, come lo lascia de1970 */
@@ -2101,7 +2101,7 @@ const SCENARI = {
       { id:'de_cdu', nome:'CDU/CSU', orientamento:'centrodestra',   base:{ cattolici:0.35, cetomedio:0.35, imprenditori:0.3 }, forza:44.9, forzaAncora:42.6, asse:1,  alleati:['de_fdp'], alleatiRiserva:['de_spd'] },
       { id:'de_spd', nome:'SPD',     orientamento:'centrosinistra', base:{ lavoratori:0.6, pensionati:0.2, giovani:0.2 },    forza:37.5, forzaAncora:40.9, asse:-1, alleati:['de_grn'], alleatiRiserva:['de_cdu'] },   // L154-1 (D105): la SPD è una carriera. Con la regola B (L153-1) parte all'opposizione, perde il 1991 e resta 15 volte su 20; il congresso entro 60 mesi 5/20 (misura-l154-1.js)
       { id:'de_fdp', nome:'FDP',     orientamento:'liberale',       base:{ imprenditori:0.5, cetomedio:0.5 },                forza:9.2,  forzaAncora:8.0,  asse:1,  alleati:['de_cdu'] },
-      { id:'de_grn', nome:'Verdi',   orientamento:'ecologista',     base:{ giovani:0.6, cetomedio:0.4 },                     forza:8.4,  forzaAncora:6.4,  asse:-2, alleati:['de_spd'],
+      { id:'de_grn', nome:'Verdi', segr:'il segretario dei Verdi',   orientamento:'ecologista',     base:{ giovani:0.6, cetomedio:0.4 },                     forza:8.4,  forzaAncora:6.4,  asse:-2, alleati:['de_spd'],
         selezionabile:false, nota:'I Verdi restano all\'opposizione fino al 1998 e nel 1990 perdono voti: non è una carriera che si possa giocare' },   // D75; L154-1: congresso 20/20 al 1991/1 anche con la regola B (il partito non cresce)
     ],
     /* il Bundestag del 25 gennaio 1987 senza Berlino (497), in carica all'avvio */
@@ -2152,7 +2152,7 @@ const SCENARI = {
     partiti: [
       { id:'de_spd', nome:'SPD',     orientamento:'centrosinistra', base:{ lavoratori:0.6, pensionati:0.2, giovani:0.2 },    forza:43.5, forzaAncora:37.2, asse:-1, alleati:['de_grn'], alleatiRiserva:['de_cdu'] },
       { id:'de_cdu', nome:'CDU/CSU', orientamento:'centrodestra',   base:{ cattolici:0.35, cetomedio:0.35, imprenditori:0.3 }, forza:37.3, forzaAncora:36.6, asse:1,  alleati:['de_fdp'], alleatiRiserva:['de_spd'] },
-      { id:'de_grn', nome:'Verdi',   orientamento:'ecologista',     base:{ giovani:0.6, cetomedio:0.4 },                     forza:7.1,  forzaAncora:8.2,  asse:-2, alleati:['de_spd'] },
+      { id:'de_grn', nome:'Verdi', segr:'il segretario dei Verdi',   orientamento:'ecologista',     base:{ giovani:0.6, cetomedio:0.4 },                     forza:7.1,  forzaAncora:8.2,  asse:-2, alleati:['de_spd'] },
       { id:'de_fdp', nome:'FDP',     orientamento:'liberale',       base:{ imprenditori:0.5, cetomedio:0.5 },                forza:6.6,  forzaAncora:8.9,  asse:1,  alleati:['de_cdu'] },
       { id:'de_lnk', nome:'PDS',     orientamento:'sinistra',       base:{ lavoratori:0.6, giovani:0.4 },                    forza:5.4,  forzaAncora:4.5,  asse:-2, alleati:[],
         selezionabile:false, nota:'La PDS non governa mai a livello federale: non è una carriera che si possa giocare' },   // D96
@@ -2209,8 +2209,8 @@ const SCENARI = {
     intermedie: [ {tipo:'Elezioni di metà mandato', mese:24, tocca:'tutti', penalitaGoverno:0.5} ],   // L173-2 · D134 (L176-1): col logorio di porta 0,014 la penalità non serve a far perdere chi governa — 0 · 0,5 · 1 · 1,5 → 85 · 92 · 98 · 98% (L175-1); banda storica 85-95 (dal 1946 il partito del Presidente perde seggi in 18 metà mandato su 20, ⚠)
     mandatiVinti: 1,                            // D130: il Presidente ha vinto il 1948 (vale solo per chi parte al governo: L175-1, startOpposizione)
     partiti: [
-      { id:'us_dem', nome:'Democratici',  orientamento:'centrosinistra', base:{ giovani:0.4, lavoratori:0.35, cetomedio:0.25 },                  forza:52, forzaAncora:50, asse:-1 },
-      { id:'us_rep', nome:'Repubblicani', orientamento:'centrodestra',   base:{ imprenditori:0.4, cetomedio:0.25, cattolici:0.2, pensionati:0.15 }, forza:48, forzaAncora:50, asse:1 },
+      { id:'us_dem', nome:'Democratici', segr:'il segretario dei Democratici',  orientamento:'centrosinistra', base:{ giovani:0.4, lavoratori:0.35, cetomedio:0.25 },                  forza:52, forzaAncora:50, asse:-1 },
+      { id:'us_rep', nome:'Repubblicani', segr:'il segretario dei Repubblicani', orientamento:'centrodestra',   base:{ imprenditori:0.4, cetomedio:0.25, cattolici:0.2, pensionati:0.15 }, forza:48, forzaAncora:50, asse:1 },
     ],
     territori: [
       {nome:'New York', tipo:'città', carica:'Sindaco', lean:-2, simbolo:true}, {nome:'la California', tipo:'regione', carica:'Governatore', lean:1, simbolo:true}, {nome:'il Texas', tipo:'regione', carica:'Governatore', lean:-2, simbolo:true}, {nome:'la Pennsylvania', tipo:'regione', carica:'Governatore', lean:1, simbolo:true},
@@ -2268,8 +2268,8 @@ const SCENARI = {
     spintaPresidenziale: { 1964: 6, 1968: -4 },
     mandatiVinti: 1,                            // D152: il Presidente ha vinto il 1960 (vale solo al livello 3 al governo: D135)
     partiti: [
-      { id:'us_dem', nome:'Democratici',  orientamento:'centrosinistra', base:{ giovani:0.4, lavoratori:0.35, cetomedio:0.25 },                  forza:52, forzaAncora:51, asse:-1 },
-      { id:'us_rep', nome:'Repubblicani', orientamento:'centrodestra',   base:{ imprenditori:0.4, cetomedio:0.25, cattolici:0.2, pensionati:0.15 }, forza:48, forzaAncora:49, asse:1 },
+      { id:'us_dem', nome:'Democratici', segr:'il segretario dei Democratici',  orientamento:'centrosinistra', base:{ giovani:0.4, lavoratori:0.35, cetomedio:0.25 },                  forza:52, forzaAncora:51, asse:-1 },
+      { id:'us_rep', nome:'Repubblicani', segr:'il segretario dei Repubblicani', orientamento:'centrodestra',   base:{ imprenditori:0.4, cetomedio:0.25, cattolici:0.2, pensionati:0.15 }, forza:48, forzaAncora:49, asse:1 },
     ],
     territori: [
       {nome:'New York', tipo:'città', carica:'Sindaco', lean:-2, simbolo:true}, {nome:'la California', tipo:'regione', carica:'Governatore', lean:0, simbolo:true}, {nome:'il Texas', tipo:'regione', carica:'Governatore', lean:-1, simbolo:true}, {nome:'la Pennsylvania', tipo:'regione', carica:'Governatore', lean:0, simbolo:true},
@@ -2331,8 +2331,8 @@ const SCENARI = {
     sogliaPrimariaOpp: 42,
     mandatiVinti: 1,                           // D276: il Presidente ha vinto il 1968 (vale solo al livello 3 al governo: D135)
     partiti: [
-      { id:'us_dem', nome:'Democratici',  orientamento:'centrosinistra', base:{ giovani:0.4, lavoratori:0.35, cetomedio:0.25 },                  forza:51, forzaAncora:51, asse:-1 },
-      { id:'us_rep', nome:'Repubblicani', orientamento:'centrodestra',   base:{ imprenditori:0.4, cetomedio:0.25, cattolici:0.2, pensionati:0.15 }, forza:49, forzaAncora:49, asse:1 },
+      { id:'us_dem', nome:'Democratici', segr:'il segretario dei Democratici',  orientamento:'centrosinistra', base:{ giovani:0.4, lavoratori:0.35, cetomedio:0.25 },                  forza:51, forzaAncora:51, asse:-1 },
+      { id:'us_rep', nome:'Repubblicani', segr:'il segretario dei Repubblicani', orientamento:'centrodestra',   base:{ imprenditori:0.4, cetomedio:0.25, cattolici:0.2, pensionati:0.15 }, forza:49, forzaAncora:49, asse:1 },
     ],
     territori: [
       {nome:'New York', tipo:'città', carica:'Sindaco', lean:-1, simbolo:true}, {nome:'la California', tipo:'regione', carica:'Governatore', lean:0, simbolo:true}, {nome:'il Texas', tipo:'regione', carica:'Governatore', lean:0, simbolo:true}, {nome:'la Pennsylvania', tipo:'regione', carica:'Governatore', lean:0, simbolo:true},
@@ -2384,8 +2384,11 @@ const SCENARI = {
     congresso: { camera: 63.7, senato: 58.0 },  // D292: 277 democratici su 435 (la Camera del 1978): nessun governo diviso all'avvio · L263-3: Senato 58 su 100 ✓ (96th United States Congress, tabella «Begin 58 1 41»; ⚠ la frase sopra il grafico dà 57 e 42)
     intermedie: [ {tipo:'Elezioni di metà mandato', mese:24, tocca:'tutti', penalitaGoverno:1} ],   // L262-2 · dalla sweep (misura-us1980.js gioc --penalita, 20 carriere × 4 partenze): metà mandato perse dal partito del Presidente 2 → 104/105 (99%) · 1,5 → 99/101 · 1 → 95/103 (92%, banda 80-95) · 0,5 → 91/103; partenza di D292 era 2 come us1970
     /* D292 (L216-1, D270) · punti sul VOTO della presidenziale, positivo = al partito del Presidente in carica; li legge solo
-       spintaPresidenziale() (model.js), 0 se il Presidente sei tu. Partenza di Cowork {1980:-6, 1984:8, 1988:3}. */
-    spintaPresidenziale: { 1980: -6, 1984: 8, 1988: 3 },
+       spintaPresidenziale() (model.js), 0 se il Presidente sei tu. Partenza di Cowork {1980:-6, 1984:8, 1988:3}.
+       ⚑ L275-29 (F40): ritarata col banco del 19/11, agenda accesa. Il 1988 3 → 7 (Democratici partiti all'opposizione, 5 semi × 80, 124 mesi,
+       vinti/arrivati con sfidanti e Presidenti insieme: 3 → 80,6% · 5 → 80,6% · 7 → 77,0%, banda 65,9-77,4%). Il 1980 resta −6: lo sfidante lo vince
+       40/40 da −6 a +2 (seme 11), +3 → 23/40, +4 → 3/40, +5 → 0/40 (banda dedotta 18-30% a ~+3,5, oltre il tetto +2 della consegna). */
+    spintaPresidenziale: { 1980: -6, 1984: 8, 1988: 7 },
     /* L262-27 · i punti al Presidente-giocatore (solo con US80_PARTITA_VOTO, game.js): il Presidente democratico perdeva il 1984 sempre. k = 2 è il valore più piccolo che mette 1984 e 1988 nel bersaglio (sweep nel rapporto). */
     spintaPresidenteGiocatore: { 1984: 2 },
     /* L262-5 · la soglia della primaria all'opposizione di questa porta (assente = 48, PRIMARIA_SOGLIA_OPP; la legge solo basePrimaria()).
@@ -2397,8 +2400,8 @@ const SCENARI = {
     sogliaPrimariaOpp: 47,
     mandatiVinti: 1,                           // D288: il Presidente ha vinto il 1976 (vale solo al livello 3 al governo: D135)
     partiti: [
-      { id:'us_dem', nome:'Democratici',  orientamento:'centrosinistra', base:{ giovani:0.4, lavoratori:0.35, cetomedio:0.25 },                  forza:50, forzaAncora:50, asse:-1 },
-      { id:'us_rep', nome:'Repubblicani', orientamento:'centrodestra',   base:{ imprenditori:0.4, cetomedio:0.25, cattolici:0.2, pensionati:0.15 }, forza:50, forzaAncora:50, asse:1 },
+      { id:'us_dem', nome:'Democratici', segr:'il segretario dei Democratici',  orientamento:'centrosinistra', base:{ giovani:0.4, lavoratori:0.35, cetomedio:0.25 },                  forza:50, forzaAncora:50, asse:-1 },
+      { id:'us_rep', nome:'Repubblicani', segr:'il segretario dei Repubblicani', orientamento:'centrodestra',   base:{ imprenditori:0.4, cetomedio:0.25, cattolici:0.2, pensionati:0.15 }, forza:50, forzaAncora:50, asse:1 },
     ],
     territori: [
       {nome:'New York', tipo:'città', carica:'Sindaco', lean:0, simbolo:true}, {nome:'la California', tipo:'regione', carica:'Governatore', lean:1, simbolo:true}, {nome:'il Texas', tipo:'regione', carica:'Governatore', lean:1, simbolo:true}, {nome:'la Pennsylvania', tipo:'regione', carica:'Governatore', lean:0, simbolo:true},
@@ -2449,8 +2452,8 @@ const SCENARI = {
     /* L264-2 · forza d'avvio Dem 52 · Rep 48 (non 50:50 di D301): a 50:50 il Presidente repubblicano prendeva la Camera nel 1990 13/20 (D312, il rovescio);
        51:49 → 4/20, 52:48 → 1/20 (la consegna: «abbassa di 1-2 punti, non toccare il motore»). Le forze del 1988 erano in bilico (Camera ~53/46 dem). */
     partiti: [
-      { id:'us_dem', nome:'Democratici',  orientamento:'centrosinistra', base:{ giovani:0.4, lavoratori:0.35, cetomedio:0.25 },                  forza:52, forzaAncora:52, asse:-1 },
-      { id:'us_rep', nome:'Repubblicani', orientamento:'centrodestra',   base:{ imprenditori:0.4, cetomedio:0.25, cattolici:0.2, pensionati:0.15 }, forza:48, forzaAncora:48, asse:1 },
+      { id:'us_dem', nome:'Democratici', segr:'il segretario dei Democratici',  orientamento:'centrosinistra', base:{ giovani:0.4, lavoratori:0.35, cetomedio:0.25 },                  forza:52, forzaAncora:52, asse:-1 },
+      { id:'us_rep', nome:'Repubblicani', segr:'il segretario dei Repubblicani', orientamento:'centrodestra',   base:{ imprenditori:0.4, cetomedio:0.25, cattolici:0.2, pensionati:0.15 }, forza:48, forzaAncora:48, asse:1 },
     ],
     territori: [
       {nome:'New York', tipo:'città', carica:'Sindaco', lean:-1, simbolo:true}, {nome:'la California', tipo:'regione', carica:'Governatore', lean:-1, simbolo:true}, {nome:'il Texas', tipo:'regione', carica:'Governatore', lean:1, simbolo:true}, {nome:'la Pennsylvania', tipo:'regione', carica:'Governatore', lean:0, simbolo:true},
@@ -2488,7 +2491,9 @@ const SCENARI = {
     /* D327 · punti sul VOTO della presidenziale, positivo = al partito del Presidente in carica (spintaPresidenziale(), model.js; 0 se il Presidente sei tu). Sweep in «⚑ L265-2». */
     /* L265-2 · sweep (20 carriere, Democratici dall'opposizione, soglia 42): il 2004 vinto dallo sfidante 3 → 20/20 · 4 → 20 · 5 → 11 · 5,5 → 6 · 6 → 4/20 (banda 4-9):
        ripidissimo. Il 2008 dall'opposizione −6 → 12/12 (bersaglio ≥ 13/20 di chi arriva). Il 2012 qui vale solo per lo sfidante del Presidente-giocatore. */
-    spintaPresidenziale: { 2004: 5.5, 2008: -6, 2012: 3 },
+    /* ⚑ L275-27 (F37, B2): ritarata col banco del 19/11, agenda accesa. Democratici dall'opposizione, 2004 vinto (seme 11 × 40): 5,5 → 20/20 · 7 → 16,5 · 8,5 → 3 · 10 → 0,5 · 12 → 0;
+       cinque semi × 80: 8 → 7,6/20 (6,5 · 8 · 7 · 7,5 · 9) · 8,25 → 5,5/20 (4 · 6,25 · 4,75 · 5,75 · 6,75); scelto il più piccolo in banda 4-9. */
+    spintaPresidenziale: { 2004: 8, 2008: -6, 2012: 3 },
     /* L265-2 · i punti al Presidente-giocatore (US80_PARTITA_VOTO): il 2004 del Presidente repubblicano rivinto −1 → 20/20 · −2 → 20 · −3 → 15/20 (banda 11-16);
        il 2012 di chi governa dal 2009 (Democratici partiti all'opposizione) 3 → 1/8 · 6 → 4/8 · 8 → 8/8 (banda 55-80%; 20 carriere, campioni piccoli). */
     /* conferma su 5 semi × 40 (11 · 1011 · 2011 · 3011 · 4011): a −3 · 7 il 2004 16,8/20 e il 2012 89%; a −3,5 · 6 il 2004 14,2/20 e il 2012 66% (13,2/20). */
@@ -2498,8 +2503,8 @@ const SCENARI = {
     /* L265-2 · forza d'avvio Dem 48 · Rep 52 (non 50:50 di D327; la consegna: «se il 2002 la toglie più di 8/20, alza la forza Rep di 1-2 punti»). Camera tenuta dal
        Presidente repubblicano nel 2002 (20 carriere al governo): 50:50 → 2/20 · 49:51 → 4 · 48:52 → 7 · 47:53 → 10 (ma il 2006 → 11/20 tenuta); rapporto «⚑ L265-2». */
     partiti: [
-      { id:'us_dem', nome:'Democratici',  orientamento:'centrosinistra', base:{ giovani:0.4, lavoratori:0.35, cetomedio:0.25 },                  forza:48, forzaAncora:48, asse:-1 },
-      { id:'us_rep', nome:'Repubblicani', orientamento:'centrodestra',   base:{ imprenditori:0.4, cetomedio:0.25, cattolici:0.2, pensionati:0.15 }, forza:52, forzaAncora:52, asse:1 },
+      { id:'us_dem', nome:'Democratici', segr:'il segretario dei Democratici',  orientamento:'centrosinistra', base:{ giovani:0.4, lavoratori:0.35, cetomedio:0.25 },                  forza:48, forzaAncora:48, asse:-1 },
+      { id:'us_rep', nome:'Repubblicani', segr:'il segretario dei Repubblicani', orientamento:'centrodestra',   base:{ imprenditori:0.4, cetomedio:0.25, cattolici:0.2, pensionati:0.15 }, forza:52, forzaAncora:52, asse:1 },
     ],
     /* D327 · i 18 territori del presente nello stesso ordine di mappa.aree; lean dal voto per stato del 2000 e del 2004 (positivo = repubblicano; ◦ a memoria:
        Florida pari e R+5, Ohio R+3,5 e R+2, Pennsylvania D+4 e D+2,5, Michigan D+5 e D+3,5, Arizona R+6 e R+10). */
@@ -2551,7 +2556,7 @@ const SCENARI = {
       { id:'i90_prc',   nome:'Rifondazione', orientamento:'sinistra',       base:{ lavoratori:0.6, giovani:0.4 },                  forza:9.4,  asse:-2, gruppoUE:'sinistra'     },
       { id:'i50_dc',    nome:'PPI',          orientamento:'centro',         base:{ cattolici:0.6, cetomedio:0.4 },                 forza:7.5,  asse:0,  gruppoUE:'popolari'     },
       { id:'i90_ccd',   nome:'CCD-CDU',      orientamento:'centrodestra',   base:{ cattolici:0.6, pensionati:0.4 },                forza:6.3,  asse:1,  gruppoUE:'popolari'     },
-      { id:'i80_verdi', nome:'Verdi',        orientamento:'sinistra',       base:{ giovani:0.6, cetomedio:0.4 },                   forza:2,    asse:-1, gruppoUE:'verdi'        },
+      { id:'i80_verdi', nome:'Verdi', segr:'il segretario dei Verdi',        orientamento:'sinistra',       base:{ giovani:0.6, cetomedio:0.4 },                   forza:2,    asse:-1, gruppoUE:'verdi'        },
       { id:'i50_pri',   nome:'I laici',      orientamento:'centro',         base:{ cetomedio:0.6, giovani:0.4 },                   forza:0.9,  asse:0,  gruppoUE:'liberali'     },
     ],
     /* ==========================================================================================================
@@ -2630,9 +2635,9 @@ const SCENARI = {
       { id:'i50_msi',   nome:'MSI',        orientamento:'destra',         base:{ pensionati:0.5, cetomedio:0.5 },                                  forza:6.4,  asse:2,  gruppoUE:'noniscritti'  },
       { id:'i50_pri',   nome:'PRI',        orientamento:'centro',         base:{ cetomedio:0.6, giovani:0.4 },                                     forza:4,    asse:0,  gruppoUE:'liberali'     },
       { id:'i50_psdi',  nome:'PSDI',       orientamento:'centrosinistra', base:{ lavoratori:0.5, cetomedio:0.5 },                                  forza:3.2,  asse:-1, gruppoUE:'socialisti'   },
-      { id:'i80_verdi', nome:'Verdi',      orientamento:'sinistra',       base:{ giovani:0.6, cetomedio:0.4 },                                     forza:2.7,  asse:-1, gruppoUE:'verdi'        },
+      { id:'i80_verdi', nome:'Verdi', segr:'il segretario dei Verdi',      orientamento:'sinistra',       base:{ giovani:0.6, cetomedio:0.4 },                                     forza:2.7,  asse:-1, gruppoUE:'verdi'        },
       { id:'i50_pli',   nome:'PLI',        orientamento:'centrodestra',   base:{ imprenditori:0.6, cetomedio:0.4 },                                forza:2.3,  asse:1,  gruppoUE:'liberali'     },
-      { id:'i50_pnm',   nome:'Monarchici', orientamento:'destra',         base:{ pensionati:0.5, imprenditori:0.5 },                               forza:0.4,  asse:2,  gruppoUE:'conservatori' },
+      { id:'i50_pnm',   nome:'Monarchici', segr:'il segretario dei Monarchici', orientamento:'destra',         base:{ pensionati:0.5, imprenditori:0.5 },                               forza:0.4,  asse:2,  gruppoUE:'conservatori' },
     ],
     /* Seed dalla scheda §2: PIL nominale ~1.358.000 mld lire al 1990 — e la scheda-'80 chiudeva esattamente
        lì, quindi le due porte si agganciano. Debito 95,2% (serie Folliero su dati BdI/ISTAT): il decennio
@@ -2681,7 +2686,7 @@ const SCENARI = {
       { id:'i50_psdi',  nome:'PSDI',       orientamento:'centrosinistra', base:{ lavoratori:0.5, cetomedio:0.5 },                                  forza:4.1,  asse:-1, gruppoUE:'socialisti'   },
       { id:'i50_pri',   nome:'PRI',        orientamento:'centro',         base:{ cetomedio:0.6, giovani:0.4 },                                     forza:3.2,  asse:0,  gruppoUE:'liberali'     },
       { id:'i50_pli',   nome:'PLI',        orientamento:'centrodestra',   base:{ imprenditori:0.6, cetomedio:0.4 },                                forza:2.1,  asse:1,  gruppoUE:'liberali'     },
-      { id:'i50_pnm',   nome:'Monarchici', orientamento:'destra',         base:{ pensionati:0.5, imprenditori:0.5 },                               forza:0.5,  asse:2,  gruppoUE:'conservatori' },
+      { id:'i50_pnm',   nome:'Monarchici', segr:'il segretario dei Monarchici', orientamento:'destra',         base:{ pensionati:0.5, imprenditori:0.5 },                               forza:0.5,  asse:2,  gruppoUE:'conservatori' },
     ],
     /* Seed dalla scheda §2: PIL ~394.000 mld lire al 1980 · debito **57%** (la serie unica riparte esattamente
        dove la chiudeva la scheda-'70). Il disavanzo d'avvio la scheda non lo dà: 5 è dedotto dall'ordine del
@@ -8400,7 +8405,7 @@ const ARCHI_DEF=[
              S.tavoloPid = P ? P.id : null;
              /* il RUOLO è una frase intera con segnaposto, tradotta e sostituita QUI (il motore applica T() al
                 risultato: su una stringa già risolta è un no-op). Mai `'testo '+nome`: è la classe di L16-1. */
-             return {nome: nomeLecito(nomeGenere('m'), rnd(PAESE.cognomi)), ruolo: (typeof segretarioDel==='function' ? segretarioDel(P?T(P.nome):null) : T('il segretario del partito %P').replace('%P', P?T(P.nome):T('un partito vicino'))), arc:'notabile'}; },   // L272-2 Passo 0
+             return {nome: nomeLecito(nomeGenere('m'), rnd(PAESE.cognomi)), ruolo: (typeof segretarioDel==='function' ? segretarioDel(P?T(P.nome):null, P) : T('il segretario del partito %P').replace('%P', P?T(P.nome):T('un partito vicino'))), arc:'notabile'}; },   // L272-2 Passo 0
   nodi:{
    start:{kick:'Palazzo', t:'Il pranzo esplorativo', text:'%FILO, %RUOLO, accetta un pranzo riservato. Niente giornalisti, niente delegazioni: voi due e la domanda che nessuno pronuncia — si può costruire qualcosa, o ci si limita a non farsi la guerra?', ch:[
      {l:'Metti sul tavolo un programma comune', e:'Fai sul serio; ora sei impegnato', eco:'Dopo il programma messo sul tavolo, ', goto:'programma', f:()=>{ intesaMuovi(S.tavoloPid, 5); }},
@@ -22845,6 +22850,17 @@ const TITOLI=[
  {id:'ti_us00_s_frenata', era:'us2000', reattivo:true, cond:()=>S.year>=2001&&S.year<=2012&&S.ind.growth<0&&!meseSobrioOra()&&!(meseAss()>=2001*12+9&&meseAss()<=2001*12+12), amico:"L'economia frena, ma i tassi scendono: mutui e prestiti costano meno", ostile:"L'economia arretra: centri commerciali con le vetrine vuote e i parcheggi deserti"},
  {id:'ti_us00_s_senzalavoro', era:'us2000', reattivo:true, cond:()=>S.year>=2001&&S.year<=2012&&S.ind.unemp>=US00_DISOCC_ALTA&&!meseSobrioOra()&&!(meseAss()>=2001*12+9&&meseAss()<=2001*12+12), amico:'Sussidi allungati e corsi per chi cambia mestiere', ostile:"Fiere del lavoro prese d'assalto: la fila gira attorno all'isolato"},
  {id:'ti_us00_s_pienoimpiego', era:'us2000', reattivo:true, cond:()=>S.year>=2004&&S.year<=2012&&S.ind.unemp<=US00_DISOCC_BASSA&&!meseSobrioOra(), amico:"«Cercasi personale» nelle vetrine: il lavoro non manca", ostile:"Lavoro per tutti, ma spesso a ore e senza assicurazione sanitaria"},
+ /* L275-30 (F4) · dieci titoli di stato ti_us00_s_ in più per il 2006-2012 (forma dei 16 di L265-10: senza pri, nessuno allegro, nessun effetto). Finestre dalla fonte, rapporto «⚑ L275-30» in PRESET-USA-2000.md; script .claude/incolla-l275-30.js. */
+ {id:'ti_us00_s_tvdigitale', era:'us2000', cond:()=>meseAss()>=2008*12+9 && meseAss()<=2009*12+6, amico:"La televisione passa al segnale digitale: immagini più nitide", ostile:"Si spengono le vecchie antenne: chi non ha il decoder resta senza televisione"},
+ {id:'ti_us00_s_censimento', era:'us2000', cond:()=>meseAss()>=2010*12+3 && meseAss()<=2011*12+1, amico:"Il censimento conta il paese: la popolazione cresce al Sud e all'Ovest", ostile:"Il censimento ridisegna la Camera: seggi in meno agli stati delle vecchie fabbriche"},
+ {id:'ti_us00_s_siccita', era:'us2000', cond:()=>meseAss()>=2012*12+6 && meseAss()<=2012*12+9, amico:"Siccità sulle pianure del granturco: aiuti agli agricoltori colpiti", ostile:"La siccità più dura da decenni: il granturco secca nei campi"},
+ {id:'ti_us00_s_studenti', era:'us2000', cond:()=>meseAss()>=2011*12+10 && meseAss()<=2012*12+12, amico:"Prestiti agli studenti: l'università si paga a rate", ostile:"Il debito degli studenti supera quello delle carte di credito"},
+ {id:'ti_us00_s_pensione', era:'us2000', cond:()=>meseAss()>=2008*12+1 && meseAss()<=2012*12+12, amico:"La generazione del dopoguerra arriva alla pensione", ostile:"Arriva alla pensione la generazione del dopoguerra: i conti della previdenza tremano"},
+ {id:'ti_us00_s_fumo', era:'us2000', cond:()=>meseAss()>=2006*12+1 && meseAss()<=2010*12+7, amico:"Bar e ristoranti senza fumo: si respira meglio", ostile:"Vietato fumare anche al bancone: i gestori temono di perdere clienti"},
+ {id:'ti_us00_s_vento', era:'us2000', cond:()=>meseAss()>=2007*12+1 && meseAss()<=2009*12+12, amico:"Pale eoliche sulle grandi pianure: il vento porta lavoro e affitti ai campi", ostile:"Le pale crescono all'orizzonte, e chi abita vicino protesta"},
+ {id:'ti_us00_s_poste', era:'us2000', cond:()=>meseAss()>=2009*12+1 && meseAss()<=2012*12+12, amico:"Le poste tagliano i costi per restare in piedi", ostile:"Poste in perdita: si parla di togliere la consegna del sabato"},
+ {id:'ti_us00_s_dischi', era:'us2000', cond:()=>meseAss()>=2006*12+8 && meseAss()<=2009*12+6, amico:"La musica si compra in rete, una canzone alla volta", ostile:"Chiudono i negozi di dischi: la musica passa in rete"},
+ {id:'ti_us00_s_lettori', era:'us2000', cond:()=>meseAss()>=2009*12+11 && meseAss()<=2011*12+12, amico:"I libri si leggono sullo schermo: una biblioteca in tasca", ostile:"Librerie di catena in difficoltà: i libri si leggono sugli schermi"},
  {id:'ng_p_ti_petrolio', era:'contemporanea', paesi:['nigeria'], amico:'La produzione di petrolio torna a salire', ostile:'Un barile su dieci sparisce: il furto record'},
 ];
 

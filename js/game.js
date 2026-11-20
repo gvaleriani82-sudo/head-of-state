@@ -1502,7 +1502,7 @@ function diventaPremier(viaElezione){
   S.tenuta={}; S.tenutaForza0={}; S.tenutaLiv={}; S.tenutaUltimo={}; S.mesiMinoranza=0; initTenuta(); S.bloccoAtteso=bloccoQuota();
   if(typeof aggiornaCoabitazione==='function') aggiornaCoabitazione();   // L100-2/L104-2 (dopo il reset di mesiMinoranza): alla salita si deriva
   if(viaElezione){ bioConta('elezioniVinte'); contaMandatoProprio(); S.mandatesWon=(S.mandatesWon||0)+1; S.mandatiConsecutivi=(S.mandatiConsecutivi||0)+1; }   // L86-1: i due contatori salgono insieme; solo il secondo si azzera alla sconfitta
-  S.mandate=S.mandate||1; S.turnInMandate=0; S.elezioniAnticipate=false; S.ultimoSondaggio=null; S.sondStorico=[];
+  S.mandate=S.mandate||1; S.turnInMandate=salitaTurnoMandato(); S.elezioniAnticipate=false; S.ultimoSondaggio=null; S.sondStorico=[];   // ⚑ L275-26 (F37, ⚠ 1 di L275-25): 0 come sempre, tranne nelle partite americane (salitaTurnoMandato, la regola di diventaMinistro). Nessuno dei due chiamanti viene da un'urna nazionale (successione senza urna; sfida vinta da ministro, viaElezione = la primaria), quindi nessun parametro in più.
   S.snap=Object.assign({},S.pol); S.leggiSnap=Object.assign({},S.leggi);
   bioFatto(T('Da %A a %B: la scalata è compiuta.').replace('%A',ruoloPrima).replace('%B',T(PAESE.titoloRuolo)));
   if(typeof suona==='function') suona('giuramento');   // L218-34: il giuramento, prima della voce (l'altro punto è tornaAlGoverno)
@@ -3052,7 +3052,7 @@ function cicloBase(){
 const TAPPA_SOGLIA_SEGGI = 25;
 /* L103-1 · i Verdi che entrano alla tappa del 1997/6 o del 1998/3 (una sola scatta): un oggetto solo, così le due tappe
    gemelle non possono divergere. `selezionabile:false` (D25: sette deputati, una carriera che non si può giocare). */
-const VERDI_1997 = { id:'fr_verts', nome:'Verdi', orientamento:'ecologista', base:{ giovani:0.5, cetomedio:0.5 }, forza:7.9, asse:-1,
+const VERDI_1997 = { id:'fr_verts', nome:'Verdi', segr:'il segretario dei Verdi', orientamento:'ecologista', base:{ giovani:0.5, cetomedio:0.5 }, forza:7.9, asse:-1,
                      alleati:['fr_sfio','fr_pcf'], selezionabile:false, nota:'I Verdi del 1997 hanno sette deputati e governano col PS: non è una carriera che si possa giocare' };
 const RIALLINEAMENTI_ERA = {
   [LINEA_IT]: {
@@ -3081,7 +3081,7 @@ const RIALLINEAMENTI_ERA = {
        La Lega Lombarda resta fuori come da consegna: 0,48% è sotto qualunque soglia rappresentabile — entrerà
        col '90, che è il decennio in cui conta. `forza:2.5` è la sua quota d'esordio; la rinormalizzazione della
        tappa la riporta in scala col resto del roster. */
-    1987: { entra:[ {id:'i80_verdi', nome:'Verdi', orientamento:'sinistra', base:{giovani:0.6, cetomedio:0.4}, forza:2.5, asse:-1, gruppoUE:'verdi'} ],
+    1987: { entra:[ {id:'i80_verdi', nome:'Verdi', segr:'il segretario dei Verdi', orientamento:'sinistra', base:{giovani:0.6, cetomedio:0.4}, forza:2.5, asse:-1, gruppoUE:'verdi'} ],
             delta:[ {id:'i50_pci',delta:-3.5}, {id:'i50_psi',delta:3}, {id:'i50_dc',delta:1.5}, {id:'i50_pri',delta:-1.5},
                     {id:'i50_msi',delta:-0.5}, {id:'i50_psdi',delta:0.5}, {id:'i50_pli',delta:0.5} ] },                       // Σ=0 · il PCI declina, il PSI tocca il massimo dal dopoguerra, la DC recupera, l'onda laica si ritira
 
@@ -3252,7 +3252,7 @@ const RIALLINEAMENTI_ERA = {
     '2005/5': { delta:[ {id:'uk_lab',delta:-5.5}, {id:'uk_con',delta:0.7}, {id:'uk_lib',delta:3.7}, {id:'uk_snp',delta:-0.3}, {id:'uk_plaid',delta:-0.1} ],
             urne:  { uk_lab:35.2, uk_con:32.4, uk_lib:22.0, uk_snp:1.5, uk_plaid:0.6 },
             seggi: { uk_lab:56.96, uk_con:31.68, uk_lib:9.92, uk_snp:0.96, uk_plaid:0.48 } },   // 356/198/62/6/3 su 625 · maggioranza 68 col 35,2%
-    '2010/5': { entra:[ { id:'uk_green', nome:'Verdi', orientamento:'sinistra', base:{ giovani:0.6, cetomedio:0.4 },
+    '2010/5': { entra:[ { id:'uk_green', nome:'Verdi', segr:'il segretario dei Verdi', orientamento:'sinistra', base:{ giovani:0.6, cetomedio:0.4 },
                           forza:1.0, asse:-1, gruppoUE:'verdi', terreno:-0.9, concentrazione:60 } ],
             delta:[ {id:'uk_con',delta:3.7}, {id:'uk_lab',delta:-6.2}, {id:'uk_lib',delta:1.0}, {id:'uk_snp',delta:0.2} ],
             urne:  { uk_con:36.1, uk_lab:29.0, uk_lib:23.0, uk_snp:1.7, uk_plaid:0.6, uk_green:1.0 },
@@ -3523,7 +3523,7 @@ const RIALLINEAMENTI_ERA = {
     '1976/10': { delta:[ {id:'de_cdu',delta:3.9}, {id:'de_spd',delta:-3.2}, {id:'de_fdp',delta:-0.4}, {id:'de_npd',delta:-0.3} ],   // Σ 0
                  urne:  { de_cdu:48.6, de_spd:42.6, de_fdp:7.9, de_npd:0.3 },
                  seggi: { de_cdu:49.0, de_spd:43.1, de_fdp:7.9, de_npd:0 } },
-    '1980/1':  { entra:[ { id:'de_grn', nome:'Verdi', orientamento:'ecologista', base:{ giovani:0.6, cetomedio:0.4 }, forza:1.5, asse:-2, alleati:[],
+    '1980/1':  { entra:[ { id:'de_grn', nome:'Verdi', segr:'il segretario dei Verdi', orientamento:'ecologista', base:{ giovani:0.6, cetomedio:0.4 }, forza:1.5, asse:-2, alleati:[],
                            selezionabile:false, nota:'I Verdi nascono nel 1980 e restano fuori dal Bundestag fino al 1983: la loro carriera comincia nel decennio dopo' } ],
                  seggiInvariati:true },   // L148-1 (D64): i Verdi entrano con 0 seggi; in de1970 l'urna del motore dello stesso mese gira DOPO la tappa e rifà comunque i seggi
     '1980/10': { delta:[ {id:'de_cdu',delta:-4.2}, {id:'de_spd',delta:0.2}, {id:'de_fdp',delta:2.7}, {id:'de_npd',delta:-0.2} ],   // Σ −1,5 = i Verdi entrati a gennaio
@@ -3781,7 +3781,7 @@ function applicaRosterDelta(ricalcolaSeggi){
     /* L237-3 · e i campi del partito proprio (e di chiunque nasca nel Regno Unito): `sigla` e `colore` (nuovi, solo `pp_proprio`),
        `terreno` e `concentrazione` (i collegi, model.js pesoCollegio: senza, un partito nato a Londra tornava «uniforme» al
        caricamento). L'asse c'era già. Additivo: una voce senza i campi ricostruisce la stessa voce di prima. */
-    ['sigla','colore','terreno','concentrazione','comunita'].forEach(function(k){ if(n[k]!=null) np[k]=n[k]; });   // L250-22: anche la comunità (Belgio)
+    ['sigla','colore','terreno','concentrazione','comunita','segr'].forEach(function(k){ if(n[k]!=null) np[k]=n[k]; });   // L250-22: anche la comunità (Belgio); L275-28: e la frase del segretario (i Verdi che nascono a una tappa)
     /* L237-4 · IL NOME SCRITTO DAL GIOCATORE ARRIVA AL ROSTER GIÀ ESCAPATO. Nome e sigla del partito proprio sono testo libero, e il
        nome di un partito finisce in decine di modelli HTML (`T(p.nome)` nelle notti, nel registro, nelle schede): invece di
        ricordarsene in ogni punto, la voce viva ha `nome`/`sigla` in HTML sicuro e `nomeTesto`/`siglaTesto` col testo com'è. Il
@@ -4209,7 +4209,14 @@ function ppNomeBreve(id){ var p=part(id)||{}; return id===PP_ID ? (p.sigla||p.no
    nome = il nome GIÀ reso (ppNomeBreve o T(P.nome)), null = nessun partito. Se il nome comincia già con «Partito»/«Party»/«Parti»
    o contiene «Party» (in inglese), la forma che non ripete la parola: «il segretario del Partito Comunista» / «the Communist Party secretary»;
    altrimenti «il segretario del partito Labour» / «the Labour party secretary». Chiavi: tre, tutte con la resa EN. */
-function segretarioDel(nome){
+/* L275-28 (F19, ⚠ 3 di «⚑ L272-2») · i nomi al plurale: «il segretario del partito Repubblicani» → «il segretario dei Repubblicani».
+   Il partito (id o oggetto, facoltativo) può dichiarare `segr` = la FRASE INTERA italiana, che è la chiave inglese (una per frase:
+   la guardia i18n vuole la chiave scritta nei sorgenti). Lo dichiarano 40 partiti (l'elenco nel rapporto «⚑ L275-28»); mai il
+   partito proprio (pp_proprio: la regola di sempre). Senza il campo, tutto come prima. ⚠ Un partito RINOMINATO a una tappa terrebbe
+   il campo (applicaRosterDelta copia la voce): per questo i partiti rinominati non lo hanno. */
+function segretarioDel(nome, p){
+  var o=(typeof p==='string') ? part(p) : p;
+  if(o && o.segr && o.id!==PP_ID) return T(o.segr);
   if(!nome) return T('il segretario di un partito vicino');
   var k=/^(Partito|Party|Parti)\b|\bParty\b/i.test(String(nome).replace(/<[^>]*>/g,'')) ? 'il segretario del %P' : 'il segretario del partito %P';
   return T(k).replace('%P', nome);
@@ -9193,7 +9200,7 @@ function ricRuolo(ruolo, p){
   }
   var v=(fe==='L2' && R.L2pres && ricCapoPresidente()) ? R.L2pres : (R[fe]||R.L3);   // L275-8 Passo 1: dove il capo del governo è il Presidente (la regola dell'agenda, `@capo`)
   if(Array.isArray(v)) return T(v[ricF(p)?1:0]);
-  if(v==='il segretario del partito %P'){ var pid0=t.indexOf('part:')===0 ? t.slice(5) : null; return segretarioDel(pid0 ? ppNomeBreve(pid0) : null); }   // L272-2 Passo 0
+  if(v==='il segretario del partito %P'){ var pid0=t.indexOf('part:')===0 ? t.slice(5) : null; return segretarioDel(pid0 ? ppNomeBreve(pid0) : null, pid0); }   // L272-2 Passo 0; L275-28: e il partito, per la frase al plurale (segr)
   var s=T(v);
   if(s.indexOf('%P')>=0){ var pid=t.indexOf('part:')===0 ? t.slice(5) : null; s=s.replace('%P', pid ? ppNomeBreve(pid) : T('un partito vicino')); }
   if(s.indexOf('%A')>=0){ var aid=t.indexOf('paese:')===0 ? t.slice(6) : null; s=s.replace('%A', aid ? ricAlleatoNome(aid) : T('di un paese amico')); }
