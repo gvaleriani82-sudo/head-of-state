@@ -2442,7 +2442,12 @@ const SCENARI = {
     /* L265-2 (D318) · la chiave 2000: le carriere di us1990 che arrivano al voto del 2000 (la porta us2000 parte nel 2001 e la sua spinta non le raggiunge).
        Sweep (misura-us2000.js p2000, 20 carriere per partenza): chi è all'opposizione al voto vince 2,5 → 13,1/20 · 3 → 10,3 · 3,5 → 5,5 · 4 → 4,1 (banda 8-12, prima 30/30);
        a 3 su 5 semi × 40: 147/289 = 10,2/20. Margine (testaATesta, prima dell'arrotondamento di calcMargineEsito): |m| < 0,25 18% · < 0,5 34% · < 1 65% · < 2 80%. */
-    spintaPresidenziale: { 1992: -5, 1996: 4, 2000: 3 },
+    /* L275-34 (F2) · le chiavi 2004-2012: le carriere di us1990 che passano il 2001 leggono ancora questa tabella (S.scenario non cambia, ⚑ L265-13 ⚠ 2);
+       partenza = i valori di us2000 (⚑ L275-27: 8, -6, 3). 2004: chi è all'opposizione al voto (32 carriere su 5 semi × 320, tutte repubblicane contro il
+       Presidente democratico) vince 32/32 a 0 · 8/32 a 4 · 1/31 a 5,5 · 0/31 a 6, 8, 10 (banda della regola 15-50%): 4, il più vicino a 8 che entra.
+       2008 (23 carriere, 23/23 con -6 e senza) e 2012 (nessuna al livello 3 col banco) copiati da us2000 senza taratura. Rapporto «⚑ L275-34» in PRESET-USA-2000.md.
+       Chi cambia una chiave 2004-2012 di us2000 guarda anche questa. */
+    spintaPresidenziale: { 1992: -5, 1996: 4, 2000: 3, 2004: 4, 2008: -6, 2012: 3 },
     /* L264-2 · i punti al Presidente-giocatore (solo con US80_PARTITA_VOTO, game.js; spintaPresidenziale qui sopra vale 0 per lui). Sweep su 20 carriere,
        forza 52:48, penalità 2,5: il 1992 del Presidente repubblicano vinto +1 → 20 · 0 → 13 · −1 → 5/20 (banda 4-10); il 1996 del Presidente democratico
        (dall'opposizione) +1 → 19/19 · 0 → 18/19 · −1 → 12/19 (banda 12-18/20). Molto ripido: un punto sposta di 7-8 carriere su 20. */
