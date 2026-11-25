@@ -3644,7 +3644,7 @@ function crisiRiga(){
    Il governo continua: le altre schede restano. Le etichette sono in GUERRA_UI (la prova le passa a T in inglese). */
 let GUERRA_SETTORE=0;
 const GUERRA_UI=['La guerra · mese %N', 'con %POTdet', 'Costo', 'punti di deficit al mese', 'Forze', 'Opinione', 'Ordini del mese: %N di %M',
-  'Avanza', 'Tieni', 'Tratta', 'Questo mese', 'Trattativa', 'Alleati', 'con te', 'frenano', 'nessun impegno', 'Caduti: circa %N',
+  'Avanza', 'Tieni', 'Tratta', 'Questo mese', 'Trattativa', 'Alleati', 'con te', 'frenano', 'nessun impegno', 'Caduti: circa %N', 'Caduti: %N',
   'Nessuna carta del fronte questo mese.', 'Tocca un settore, poi dai l\'ordine.', 'Dopoguerra', 'vittoria', 'sconfitta', 'pace negoziata',
   'cessate il fuoco', 'ancora %N mesi', 'Hai dato gli ordini del mese.'];
 function guerraTab(){ return typeof guerraAttiva==='function' && guerraAttiva() && crisiCapo(); }
@@ -3658,19 +3658,54 @@ function guerraBarra(nm, v){ v=Math.round(v);
   return `<div class="gu-bar"><div class="gu-bar-top"><span class="contorno">${T(nm)}</span><b>${v}</b></div><div class="bar"><i style="width:${clamp(v,2,100)}%;background:${barColor(v)}"></i></div></div>`; }
 function guerraSettoreScegli(i){ GUERRA_SETTORE=i; render(); }
 function guerraOrdineUI(i, tipo){ if(guerraOrdine(i, tipo)){ if(typeof suona==='function') suona('tocco'); render(); commitSnap(); } }
+/* ⚑ L275-61 (F52, la vista) · la mappa ridotta del teatro, dal L275-62 al posto della scena in testa al cassetto (solo con GUERRA_TEATRI: teatroGuerra() in game.js).
+   Il mare è il fondo (--tv-mare del tavolo), le terre sagome piene (--tg-terra, la tinta di base della terra del tavolo, una variabile sola),
+   nessun confine né nome di stato o di città. Etichette: i nomi di geografia fisica di TEATRI (T()); a 375 al più 4, quelle di
+   TEATRI_NOMI_375 (scelte dal CDP .claude/l275-61-cdp.js --scegli con la regola della consegna: nell'ordine dei nomi, le prime 4 che non
+   toccano i segni, il porto né fra loro, in IT e in EN), le altre con .tg-largo (visibili solo dai 1000 px in orizzontale). I settori: un
+   tondo sul suo punto col numero 1-3 dentro, dal L275-62 con la tinta di barColor della sua linea (sotto, ⚑ L275-62), lo stesso
+   numero accanto al nome nella lista (.gu-num). Il porto: un'ancora disegnata, tenuta dentro il riquadro. Nessun bottone, nessuna
+   animazione, nessun numero della guerra. Le misure (corpo, raggi) sono in unità del disegno: col viewBox largo 100 e alto 82-87, a 375 la
+   mappa è alta 200 px (2,30-2,44 px per unità), dai 1000 px larga 300 (3 px per unità, L275-62) e il CSS rimpicciolisce testo e segni. */
+/* ⚑ L275-62 (F52, chiusura) · la mappa prende il POSTO della scena (.gu-scena non esce quando teatroGuerra() rende un teatro: la scena è solo
+   un disegno, alt vuoto, nessun suono né video; le guerre senza teatro e l'interruttore spento tengono la scena di sempre). Il colore: il tondo
+   del settore k ha la tinta di barColor((linea+3)/6×100), e la pallina accesa della barra di quel settore la stessa (una strada: stile in
+   linea, style="fill:…" sul tondo e style="background:…" sulla pallina, solo con il teatro). Il numero nel tondo prende da TEATRI_NUM_FILL
+   (tabella fissa per linea, fra --tv-bordo e --tv-segno, il chiaro già in uso nella mappa) quello col contrasto più alto sulla tinta del tema
+   chiaro (il solo attivo: il tema scuro è archiviato in style.css): neg/pos → --tv-segno (4,1 · 4,0:1), warn → --tv-bordo (3,7:1).
+   Dai 1000 px in orizzontale la mappa è larga al più 300 (style.css); TEATRI_TUTTI_1000 = i teatri in cui lì tutte le etichette stanno senza
+   toccarsi, IT ed EN, in tutte le righe (dal CDP .claude/l275-62-cdp.js --tutte); gli altri tengono le 4 di TEATRI_NOMI_375. */
+function teatroTinta(linea){ return barColor((linea+3)/6*100); }
+const TEATRI_NUM_FILL={ '-3':'var(--tv-segno)', '-2':'var(--tv-segno)', '-1':'var(--tv-segno)', '0':'var(--tv-bordo)', '1':'var(--tv-segno)', '2':'var(--tv-segno)', '3':'var(--tv-segno)' };
+const TEATRI_TUTTI_1000=['golfo','suez','med_centrale','balcani','atlantico_sud'];   // dal CDP --tutte (L275-62): a 300 px tutte le etichette stanno in tutti e cinque i teatri, 24/24
+const TEATRI_NOMI_375={ atlantico_sud:[0,1,2,3], golfo:[0,1,2,4], suez:[0,2,3,4], balcani:[0,1,2,3], med_centrale:[0,1,2,3] };   // dal CDP --scegli (L275-61): golfo senza «Penisola arabica» (tocca «Stretto di Hormuz»), suez senza «Canale di Suez» (tocca il tondo del Canale in IT)
+function teatroGuerraHtml(tg){
+  const t=tg.t, vb=t.vb, tieni=TEATRI_NOMI_375[tg.id]||[], m=4.2;
+  const px=Math.min(Math.max(tg.porto[0], vb[0]+m), vb[0]+vb[2]-m), py=Math.min(Math.max(tg.porto[1], vb[1]+m), vb[1]+vb[3]-m);   // l'ancora resta dentro il riquadro
+  let h=`<div class="teatro-guerra${TEATRI_TUTTI_1000.indexOf(tg.id)>=0?' tg-tutti':''}"><svg viewBox="${vb.join(' ')}" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${escAttr(T('Il teatro della guerra: %S').replace('%S', tg.nomi.map(function(n){ return T(n); }).join(', ')))}">`;
+  h+=`<rect class="tg-mare" x="${vb[0]}" y="${vb[1]}" width="${vb[2]}" height="${vb[3]}"/>`;
+  t.terre.forEach(function(d){ h+=`<path class="tg-terra" d="${d}"/>`; });
+  t.nomi.forEach(function(n, i){ const a=n.x<22?'start':n.x>78?'end':'middle';
+    h+=`<text class="tg-nome${tieni.indexOf(i)<0?' tg-largo':''}" data-i="${i}" x="${n.x}" y="${n.y}" text-anchor="${a}" dominant-baseline="central">${T(n.k)}</text>`; });
+  h+=`<g class="tg-porto" transform="translate(${px} ${py})"><circle cx="0" cy="-2.6" r="1"/><path d="M0,-1.6 L0,3.2 M-1.8,-0.6 L1.8,-0.6 M-3,1.2 Q-2.6,3.6 0,3.6 Q2.6,3.6 3,1.2"/></g>`;
+  tg.settori.forEach(function(p, k){ h+=`<g class="tg-sett-g" data-linea="${tg.linee[k]}"><circle class="tg-sett" cx="${p[0]}" cy="${p[1]}" r="5" style="fill:${teatroTinta(tg.linee[k])}"/><text class="tg-num" x="${p[0]}" y="${p[1]}" text-anchor="middle" dominant-baseline="central" style="fill:${TEATRI_NUM_FILL[String(tg.linee[k])]||'var(--tv-bordo)'}">${k+1}</text></g>`; });
+  return h+`</svg></div>`;
+}
 function renderGuerra(){
   const el=document.getElementById('sec-guerra'); if(!el) return;
   if(!guerraTab()){ el.innerHTML=''; return; }
   const g=S.crisi.guerra, p=crisiPot(); if(GUERRA_SETTORE>=g.fronti.length) GUERRA_SETTORE=0;
-  const sc=guerraScena(), pieni=g.ordini>=GUERRA_K.ordini;
+  const tg=(typeof teatroGuerra==='function') ? teatroGuerra() : null;   // L275-61: null con GUERRA_TEATRI spento (il cassetto di prima)
+  const sc=tg ? null : guerraScena(), pieni=g.ordini>=GUERRA_K.ordini;   // L275-62: col teatro la mappa al posto della scena
   let h=`<div class="card gu">`;
-  if(sc) h+=`<img class="gu-scena" src="${sc}" alt="" loading="lazy" decoding="async">`;
+  if(tg) h+=teatroGuerraHtml(tg);
+  else if(sc) h+=`<img class="gu-scena" src="${sc}" alt="" loading="lazy" decoding="async">`;
   h+=`<div class="gu-testa"><div><div class="ct" style="margin:0">${T('La guerra · mese %N').replace('%N', g.mesi+1)}</div><div class="contorno gu-con">${escAttr(potSub(T('con %POTdet'),p))}</div></div>`
     +`<div class="gu-costo"><span class="contorno">${T('Costo')}</span><b>${fmt(g.costo,2)}</b><span class="contorno">${T('punti di deficit al mese').replace('%N','')}</span></div></div>`;
   h+=`<div class="gu-bars">${guerraBarra('Forze', g.forze)}${guerraBarra('Opinione', g.opinione)}</div>`;
   h+=`<div class="gu-fronti">`+g.fronti.map(function(f,i){
-    let pall=''; for(let k=-3;k<=3;k++) pall+=`<i class="${k===f.linea?'on':''}${k===0?' zero':''}"></i>`;
-    return `<button class="gu-fronte${i===GUERRA_SETTORE?' on':''}" onclick="guerraSettoreScegli(${i})" aria-pressed="${i===GUERRA_SETTORE?'true':'false'}"><span class="gu-nome">${T(f.n)}</span><span class="gu-linea" aria-hidden="true">${pall}</span><b class="gu-val">${f.linea>0?'+':''}${f.linea}</b></button>`;
+    let pall=''; for(let k=-3;k<=3;k++) pall+=`<i class="${k===f.linea?'on':''}${k===0?' zero':''}"${tg&&k===f.linea?` style="background:${teatroTinta(f.linea)}"`:''}></i>`;
+    return `<button class="gu-fronte${i===GUERRA_SETTORE?' on':''}" onclick="guerraSettoreScegli(${i})" aria-pressed="${i===GUERRA_SETTORE?'true':'false'}">${tg?`<span class="gu-num" aria-hidden="true">${i+1}</span>`:''}<span class="gu-nome">${T(f.n)}</span><span class="gu-linea" aria-hidden="true">${pall}</span><b class="gu-val">${f.linea>0?'+':''}${f.linea}</b></button>`;
   }).join('')+`</div>`;
   h+=`<div class="contorno gu-nota">${pieni ? T('Hai dato gli ordini del mese.') : T('Tocca un settore, poi dai l\'ordine.')} · ${T('Ordini del mese: %N di %M').replace('%N', g.ordini).replace('%M', GUERRA_K.ordini)}</div>`;
   h+=`<div class="gu-ordini">`+['avanza','tieni','tratta'].map(function(o){
@@ -3683,7 +3718,7 @@ function renderGuerra(){
   else h+=`<div class="gu-carta contorno">${T('Nessuna carta del fronte questo mese.')}</div>`;
   let tr=''; for(let k=1;k<=3;k++) tr+=(k<=g.trattativa?'●':'○');
   const al=S.crisi.alleati==='seguono' ? T('con te') : S.crisi.alleati==='frenano' ? T('frenano') : T('nessun impegno');
-  h+=`<div class="gu-piede"><span><span class="contorno">${T('Trattativa')}</span> <b aria-label="${g.trattativa}/3">${tr}</b></span><span><span class="contorno">${T('Alleati')}:</span> <b>${al}</b></span><span class="contorno">${T('Caduti: circa %N').replace('%N', fmt(Math.round(g.caduti/10)*10,0))}</span></div>`;
+  h+=`<div class="gu-piede"><span><span class="contorno">${T('Trattativa')}</span> <b aria-label="${g.trattativa}/3">${tr}</b>${(typeof guerraTrattativaFerma==='function' && guerraTrattativaFerma()) ? ` <span class="contorno">${T('I colloqui non sono ancora cominciati.')}</span>` : ''}${(typeof guerraVittoriaFerma==='function' && guerraVittoriaFerma() && g.fronti.some(function(f){ return f.linea>=3; })) ? ` <span class="contorno">${T('Sul campo questa guerra non si decide.')}</span>` : ''}</span><span><span class="contorno">${T('Alleati')}:</span> <b>${al}</b></span><span class="contorno">${(typeof guerraForma==='function' && guerraForma()==='aerea') ? T('Caduti: %N').replace('%N', fmt(g.caduti,0)) : T('Caduti: circa %N').replace('%N', fmt(Math.round(g.caduti/10)*10,0))}</span></div>`;   // L275-47: la forma aerea senza arrotondamento (decisione 3 su «⚑ L275-43»), le altre come prima
   h+=`</div>`;
   el.innerHTML=h;
 }

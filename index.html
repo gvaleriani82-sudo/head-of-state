@@ -49,6 +49,10 @@
            Sopra l'immagine la clip `home-hero` (L95-4/L119-1). La scatola: aspect-ratio 16/9, larghezza piena fino a 440/500/560 px. -->
       <div id="home-hero" aria-hidden="true"></div>
       </div>
+      <!-- L276-1 — .home-testo: occhiello, titolo per i lettori di schermo, testo e nota. Sotto i 1000 px non esiste per il
+           layout (display:contents, come .home-vetrina): tutto come prima. Dai 1000 px con la scena è la colonna di sinistra
+           sotto la scena (css, blocco L276-1), così le due colonne partono e finiscono insieme. -->
+      <div class="home-testo">
       <div style="display:flex;align-items:center;justify-content:center;gap:10px;">
         <span style="display:inline-block;width:26px;height:1px;background:var(--line2);"></span>
         <div class="em" id="start-ruolo" data-i18n style="margin:0;">La tua carriera politica</div>
@@ -60,6 +64,7 @@
       <!-- pitch GENERICO (statico, bilingue): la intro per-paese/ruolo vive ora nel setup (#setup-intro), dove si sceglie -->
       <p id="start-intro" data-i18n>Dal primo comizio al vertice del paese: scegli dove giocare, dai un volto alla tua carriera politica e guidala mese per mese, tra scelte, alleanze e imprevisti.</p>
       <div class="note" data-i18n><b>Nota.</b> I valori del gioco (debito, crescita, ecc.) sono <b>stilizzati</b> e non sono dati ufficiali. I nomi dei ministri sono di fantasia. È una simulazione di dinamiche politiche, non un modello economico reale.</div>
+      </div><!-- /.home-testo (L276-1) -->
       <!-- L57-1 — LA HOME A DUE MODI. Prima c'era un solo «Nuova partita» che portava a una pagina dove il
            presente e le porte storiche stavano nella stessa striscia, come se fossero la stessa cosa.
            «Gioca oggi» va dritto al presente (un tocco in meno: non devi più scegliere lo scenario);

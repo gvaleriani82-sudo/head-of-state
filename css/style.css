@@ -651,6 +651,48 @@
     #start .home-2col:not(:has(#home-hero.on)){ grid-template-columns:minmax(0, 440px); justify-content:center; }
     #start .home-2col:not(:has(#home-hero.on)) > *, #start .home-2col:not(:has(#home-hero.on)) #home-emblema{ grid-column:1; }
   }
+  /* L276-1 (21/11) · LA HOME IN ORIZZONTALE, DUE COLONNE VERE (segnalato da Giacomo sull'iPad, 1106×829 CSS, con la scheda
+     «Carriera in corso»). La causa: la colonna sinistra aveva la sola scena (16:9, ~280 px) e la destra tutto il resto
+     (lingua, scheda, logo, occhiello, testo, nota, bottoni: 650-800 px); con L267-1 la scena partiva dalla riga del logo,
+     quindi con la scheda sopra il logo restava a metà colonna, con ~170 px vuoti sopra e ~300 sotto. E una griglia sola non
+     basta a spostare il testo a sinistra: le righe sono comuni alle due colonne, e ogni riga di sinistra allunga quella di
+     destra (buchi). La cura (forma A della consegna):
+     1. occhiello, titolo per i lettori di schermo, testo e nota stanno in un contenitore, .home-testo (index.html), che sotto
+        i 1000 px è display:contents (nessun nodo spostato, telefono e iPad verticale identici); dai 1000 px con la scena è un
+        blocco nella colonna di sinistra;
+     2. scena e .home-testo coprono TUTTE le righe di sinistra (riga 1, span 20, in alto): nessuna riga loro allunga la destra.
+        Il testo parte sotto la scena con un margine pari all'altezza della scena, che si conosce senza misurarla: la colonna è
+        metà del contenuto della griglia meno lo spazio fra le colonne (unità del contenitore, cqw), la scena è 16:9 di quella;
+     3. lingua/Suono in riga 1 sopra la colonna destra anche nell'iPad Pro verticale (lì L144-2 la stendeva sulle due colonne,
+        e la scena centrata partiva 236 px sotto la lingua: stesso difetto, stessa cura);
+     4. il blocco esce dal tetto di 960 della .wrap, solo qui: min(1180 px, finestra − 64), centrato (margini uguali);
+     5. il logo misura quanto serve perché la colonna destra finisca dove finisce la sinistra: senza scheda 240 come prima
+        (le due colonne sono già pari), con la scheda si riduce (l'altezza della scheda è quella che la sinistra non ha);
+     6. «Suono» non si stringe più sotto la sua scritta (flex:none: in griglia la riga è larga quanto la colonna e la
+        min-width:44 esplicita lasciava che il bottone scendesse a 51 px con 55 di testo). Sotto i 1000 px non cambia nulla:
+        lì la scritta ci stava già (67/67).
+     Senza scena resta la colonna unica di L267-1. Il nodo della scena non si sposta (la clip home-hero non rinasce). */
+  .home-testo{ display:contents; }
+  .lang-riga .suono-btn{ flex:none; }
+  @media (min-width:1000px){
+    /* --home-f è la parte della colonna sinistra (deve stare con grid-template-columns: 1fr 1fr = .5, 2,125fr 1fr = .68),
+       --home-scena-h l'altezza della scena che ne segue */
+    #start .home-2col:has(#home-hero.on){ --home-w:min(1180px, 100vw - 64px); --home-gap:40px; --home-f:.5;
+      --home-scena-h:calc((100cqw - var(--home-gap)) * var(--home-f) * 9 / 16);
+      width:var(--home-w); max-width:none; margin-left:calc((100% - var(--home-w)) / 2);
+      grid-template-columns:minmax(0,1fr) minmax(0,1fr); column-gap:var(--home-gap); align-items:start; container-type:inline-size; }
+    #start .home-2col:has(#home-hero.on) > .lang-riga{ grid-column:2; grid-row:1; }
+    #start .home-2col:has(#home-hero.on) > .btn{ justify-self:center; width:min(100%, 420px); }   /* «Gioca oggi» largo come la scheda, non 550 px */
+    #start .home-2col #home-hero.on{ grid-column:1; grid-row:1 / span 20; align-self:start; }
+    #start .home-2col:has(#home-hero.on) .home-testo{ display:block; min-width:0; grid-column:1; grid-row:1 / span 20; align-self:start;
+      margin-top:calc(var(--home-scena-h) + 18px); }
+    #start .home-2col:has(#home-hero.on) .home-testo > :first-child{ margin-top:0; }
+    #start .home-2col:has(#home-hero.on) #home-emblema{ width:clamp(110px, var(--home-scena-h) - 50px, 240px); height:auto; }
+    /* con la scheda «Carriera in corso» (~194 px che la sinistra non ha): la scena si allarga (68% delle colonne) e il logo
+       scende fino a 110; in orizzontale resta anche il tetto di L267-1 sull'altezza della finestra (i tre bottoni sopra la piega) */
+    #start .home-2col:has(#home-hero.on):has(#start-continue .card){ --home-f:.68; grid-template-columns:minmax(0,2.125fr) minmax(0,1fr); }
+    #start .home-2col:has(#home-hero.on):has(#start-continue .card) #home-emblema{ width:clamp(110px, min(var(--home-scena-h) - 240px, 100vh - 600px), 240px); }
+  }
 
   /* ============================================================
      FASCIA LEGGERA — transizioni e animazioni sobrie (150-300ms), solo presentazione.
@@ -832,6 +874,19 @@
      orizzontale la colonna di sempre (la regola nel blocco qui sotto la rimette a none). */
   #game.con-tavolo.cassetto-guerra main{ max-height:min(60vh, calc((100vh - var(--hdrH,211px) - var(--endH,72px)) * .85)); max-height:min(60dvh, calc((100dvh - var(--hdrH,211px) - var(--endH,72px)) * .85)); }
   .gu{ display:flex; flex-direction:column; gap:10px; }
+  /* L275-61 · la mappa del teatro nel cassetto «Guerra» (GUERRA_TEATRI, teatroGuerraHtml in ui.js): a 375 alta 200 px, centrata; mare e terra
+     del tavolo (--tv-mare; --tg-terra = la tinta di base della terra del tavolo, una variabile sola); il tondo del settore e la pallina
+     accesa della sua barra con la tinta di barColor della linea (stile in linea, L275-62: la regola qui sotto resta il ripiego). Misure in unità del disegno: 5 unità ≈ 11,5-12,2 px resi a 200 px d'altezza. */
+  .teatro-guerra{ --tg-terra:#7b7852; display:flex; justify-content:center; }
+  .teatro-guerra svg{ display:block; height:200px; width:auto; max-width:100%; border-radius:10px; }
+  .tg-mare{ fill:var(--tv-mare); }
+  .tg-terra{ fill:var(--tg-terra); stroke:var(--tv-bordo); stroke-width:.3; stroke-linejoin:round; }
+  .tg-nome{ fill:var(--tv-segno); font-size:5px; font-style:italic; paint-order:stroke; stroke:var(--tv-mare); stroke-width:1px; stroke-linejoin:round; }
+  .tg-largo{ display:none; }
+  .tg-porto{ fill:none; stroke:var(--tv-segno); stroke-width:.7; stroke-linecap:round; }
+  .tg-sett{ fill:var(--acc); stroke:var(--tv-segno); stroke-width:.6; }
+  .tg-num{ fill:var(--tv-bordo); font-size:5.4px; font-weight:700; }
+  .gu-num{ flex:0 0 22px; height:22px; border-radius:50%; background:var(--acc); color:var(--tv-bordo); font-size:12px; font-weight:700; display:flex; align-items:center; justify-content:center; }
   .gu-scena{ display:block; width:100%; height:72px; object-fit:cover; border-radius:10px; background:var(--panel2); }
   .gu-testa{ display:flex; justify-content:space-between; align-items:flex-start; gap:10px; }
   .gu-con{ margin-top:2px; }
@@ -910,6 +965,9 @@
       max-height:none; border-radius:16px 0 0 16px; box-shadow:-10px 0 28px rgba(0,0,0,.28); }
     #game.con-tavolo main.sale{ animation:cassettoLato .26s cubic-bezier(.2,.7,.3,1); }
     body:not(.notte-sul-tavolo) #game.con-tavolo.cassetto-aperto .tavolo{ margin-right:var(--cassetto-lato); }
+    .teatro-guerra svg{ height:auto; width:min(100%, 300px); }   /* L275-62: nella colonna da 460 la mappa al posto della scena, larga al più 300 (3 px per unità) */
+    .tg-tutti .tg-largo{ display:inline; }   /* L275-62: tutte le etichette solo nei teatri di TEATRI_TUTTI_1000 (ui.js), gli altri le 4 del telefono */
+    .tg-nome{ font-size:3.8px; stroke-width:.8px; } .tg-num{ font-size:4.2px; } .tg-sett{ r:4px; }   /* L275-62: a 300 px corpo ≥ 11,4 px, tondi 24 px */
     #game.con-tavolo.cassetto-guerra main{ max-height:none; }   /* L245-4: a lato il cassetto della guerra è la colonna intera */   /* la notte (L113-5) sposta lo stesso nodo a tutta larghezza: non si tocca */
   }
   /* L146-2 (29/9) · LA NOTTE A DUE COLONNE, sopra i 1000 px in orizzontale: in orizzontale l'altezza è poca, e la notte di L113-5

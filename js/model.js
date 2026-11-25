@@ -271,8 +271,11 @@ function potSub(txt,p){ if(!txt||!p) return txt||'';
   const el=(p.art||'la').indexOf("'")>=0; const j=function(b){ return el?b+p.nome:b+' '+p.nome; }; const C=function(s){ return s.charAt(0).toUpperCase()+s.slice(1); };   // elisione (l') → forma attaccata (all'Iran); C = maiuscola a inizio frase (La Russia/L'Iran)
   /* L275-7 (F32): «a/di/da/in/su %POTdet» → preposizione articolata («accanto alla Cina», «in casa dell'Iran»), PRIMA della
      sostituzione semplice; solo italiano, solo una preposizione semplice come parola intera subito prima. Prova `prove/l275-7/scan-prep.js`. */
+  /* L275-59 (F52, Passo 1): i cinque %POTdi/%POTa/%POTda/%POTsu/%POTin passano da prepArticolata con l'articolo della potenza
+     (prima sempre al femminile: «della Vietnam del Nord»); per 'la' e "l'" l'uscita è identica a prima. Prova prove/l275-59/prova-pot.js. */
+  const pa=function(prep){ return prepArticolata(prep, p.art||'la')+p.nome; };
   txt=txt.replace(/(^|[^A-Za-zÀ-ÿ'’])(a|di|da|in|su|A|Di|Da|In|Su) %POTdet/g, function(x, pre, prep){ return pre+prepArticolata(prep, p.art||'la')+p.nome; });
-  return txt.replace(/%POTDet/g,C(j(p.art||'la'))).replace(/%POTdet/g,j(p.art||'la')).replace(/%POTdi/g,j(el?"dell'":'della')).replace(/%POTa/g,j(el?"all'":'alla')).replace(/%POTda/g,j(el?"dall'":'dalla')).replace(/%POTsu/g,j(el?"sull'":'sulla')).replace(/%POTin/g,j(el?"nell'":'nella')).replace(/%POTcar/g,car).replace(/%POT/g,p.nome); }
+  return txt.replace(/%POTDet/g,C(j(p.art||'la'))).replace(/%POTdet/g,j(p.art||'la')).replace(/%POTdi/g,pa('di')).replace(/%POTa/g,pa('a')).replace(/%POTda/g,pa('da')).replace(/%POTsu/g,pa('su')).replace(/%POTin/g,pa('in')).replace(/%POTcar/g,car).replace(/%POT/g,p.nome); }
 function stampad(n){ if(S.ind && S.ind.stampa!=null) S.ind.stampa=clamp(S.ind.stampa+n,0,100); }   // sposta il RAPPORTO CON LA STAMPA (usato dalle conferenze stampa)
 function minFragile(){ return (S.ministers||[]).find(m=>m && !m.resigning && m.loyalty<35) || null; }   // ministro in difficoltà (per la domanda di conferenza)
 

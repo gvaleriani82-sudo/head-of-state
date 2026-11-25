@@ -1186,6 +1186,7 @@ const EN = {
   "La costa":"The coast",
   "Il nord":"The north",
   "Il mare":"The sea",
+  "Il cielo":"The skies", "Le basi":"The bases",   // L275-43: i settori della guerra aerea (FRONTI_NOMI.aerea)
   "Il canale":"The channel",
   "Il discorso alla nazione":"The address to the nation",
   "Il paese è in guerra con %POTdet da pochi giorni. Ti chiedono di parlare alla nazione: la gente vuole sapere che cosa aspettarsi.":"The country has been at war with %POTdet for a few days. You are asked to address the nation: people want to know what to expect.",
@@ -13315,6 +13316,40 @@ const EN = {
   "Le isole non sono state riprese: si è trattato, e non è morto nessuno.":"The islands were not retaken: there was negotiation, and nobody died.",
   "La flotta si è fermata a metà Atlantico, con un compromesso che nessuno voleva.":"The fleet halted mid-Atlantic, with a compromise nobody wanted.",
   "La flotta è salpata, e la storia si è fermata lì.":"The fleet sailed, and the story stopped there.",
+  "La flotta è tornata sconfitta, e le isole sono rimaste a un governo militare.":"The fleet came home beaten, and the islands stayed with a military government.",   // L275-45
+  "La flotta salpa verso le isole: è guerra con %POTdet.":"The fleet sails for the islands: it is war with %POTdet.",   // L275-45
+  "Gli aerei decollano con l'Alleanza: è guerra con %POTdet.":"The planes take off with the Alliance: it is war with %POTdet.",   // L275-47
+  "Gli aerei tedeschi decollano con l'Alleanza: è guerra con %POTdet.":"German planes take off with the Alliance: it is war with %POTdet.",   // L275-47
+  "Nel 1999 gli aerei sono partiti con l'Alleanza, e la guerra del Kosovo è finita con una sconfitta.":"In 1999 the planes took off with the Alliance, and the Kosovo war ended in defeat.",   // L275-47
+  "Nel 1999 ha mandato gli aerei con l'Alleanza, e la guerra del Kosovo è finita con una sconfitta.":"In 1999 sent the planes with the Alliance, and the Kosovo war ended in defeat.",   // L275-47
+  "Gli aerei decollano con gli alleati: è guerra con %POTdet.":"The planes take off with the allies: it is war with %POTdet.",   // L275-48
+  "La spedizione sbarca sul Canale: è guerra con %POTdet.":"The expedition lands on the Canal: it is war with %POTdet.",   // L275-50
+  "La spedizione sbarca sul Canale con Londra: è guerra con %POTdet.":"The expedition lands on the Canal with London: it is war with %POTdet.",   // L275-50
+  "A Suez la spedizione è stata respinta, e il Canale è rimasto agli altri.":"At Suez the expedition was driven back, and the Canal stayed in other hands.",   // L275-50
+  "I soldati partono per il Golfo, senza aspettare le Nazioni Unite: è guerra con %POTdet.":"The soldiers leave for the Gulf without waiting for the United Nations: it is war with %POTdet.",   // L275-51
+  "La coalizione attacca nel Golfo: è guerra con %POTdet.":"The coalition attacks in the Gulf: it is war with %POTdet.",   // L275-51
+  "Nel Golfo la guerra si è chiusa con una tregua, e l’invasore non se n’è andato.":"In the Gulf the war ended in a truce, and the invader did not leave.",   // L275-51
+  "Nel Golfo la spedizione è stata respinta, e il piccolo vicino è rimasto occupato.":"In the Gulf the expedition was driven back, and the small neighbour stayed occupied.",   // L275-51
+  "Il deserto":"The desert",   // L275-51: il primo settore della guerra del Golfo
+  "I soldati partono per il Golfo con l'alleato, senza il mandato delle Nazioni Unite: è guerra con %POTdet.":"The soldiers leave for the Gulf with the ally, without a United Nations mandate: it is war with %POTdet.",   // L275-52
+  "La guerra in Iraq è finita in poche settimane; il dopoguerra è appena cominciato.":"The war in Iraq was over in a few weeks; the aftermath has only just begun.",   // L275-52
+  "La guerra in Iraq è finita; il dopoguerra è appena cominciato.":"The war in Iraq is over; the aftermath has only just begun.",   // L275-52
+  "In Iraq la guerra si è chiusa con una tregua, senza un vincitore.":"In Iraq the war ended in a truce, with no winner.",   // L275-52
+  "In Iraq la spedizione è stata respinta, e i soldati sono tornati a casa.":"In Iraq the expedition was driven back, and the soldiers came home.",   // L275-52
+  "La penisola":"The peninsula",   // L275-53: il primo settore della guerra di Corea
+  "I soldati partono per la Corea sotto la bandiera delle Nazioni Unite: è guerra con %POTdet.":"The soldiers leave for Korea under the United Nations flag: it is war with %POTdet.",   // L275-53
+  "In Corea si firma l'armistizio: la linea è quella di partenza.":"In Korea the armistice is signed: the line is where it started.",   // L275-53
+  "In Corea la guerra è stata vinta, e la penisola non è rimasta divisa.":"In Korea the war was won, and the peninsula did not stay divided.",   // L275-53
+  "In Corea la spedizione è stata respinta, e i soldati sono tornati a casa.":"In Korea the expedition was driven back, and the soldiers came home.",   // L275-53
+  "La giungla":"The jungle",   // L275-57: il primo settore della guerra del Vietnam
+  "I soldati partono per il Vietnam: è guerra con %POTdet.":"The soldiers leave for Vietnam: it is war with %POTdet.",   // L275-57
+  "In Vietnam si firma la pace: i soldati tornano a casa.":"In Vietnam the peace is signed: the soldiers come home.",   // L275-57
+  "In Vietnam la guerra è stata vinta, e il Sud è rimasto in piedi.":"In Vietnam the war was won, and the South is still standing.",   // L275-57
+  "In Vietnam la spedizione è stata respinta, e i soldati sono tornati a casa prima del tempo.":"In Vietnam the expedition was driven back, and the soldiers came home early.",   // L275-57
+  "Nel 2011 gli aerei sono partiti con gli alleati, e la guerra in Libia è finita con una sconfitta.":"In 2011 the planes took off with the allies, and the war in Libya ended in defeat.",   // L275-48
+  "Caduti: %N":"Fallen: %N",   // L275-47: la forma aerea, senza arrotondamento
+  "I colloqui non sono ancora cominciati.":"Talks have not begun yet.",   // L275-54: il cassetto «Guerra» prima di trattativaDal
+  "Sul campo questa guerra non si decide.":"This war will not be decided in the field.",   // L275-58: il cassetto «Guerra» prima di vittoriaDal, con un settore al massimo
   "sulle Falkland":"on the Falklands",
   "Con i minatori si è trattato prima dello sciopero: l'anno di sciopero non c'è mai stato.":"The miners were negotiated with before the strike: the year on strike never happened.",
   "Con i minatori si è aperto uno spiraglio e qualche pozzo si è salvato: nessuna vittoria da raccontare.":"With the miners a crack opened and some pits were saved: no victory to tell.",
@@ -36960,4 +36995,29 @@ const EN = {
   "La rimonta è completa: di nuovo al governo.":"The comeback is complete: back in government.",
   "Vara la legge: %L.":"Passes the law: %L.",
   "Abroga la legge: %L.":"Repeals the law: %L.",
+  /* L275-59 (F52): i nomi dei luoghi dei teatri (TEATRI, data.js; «Patagonia» c'era già) */
+  "Oceano Atlantico":"Atlantic Ocean",
+  "Isole Falkland":"Falkland Islands",
+  "Stretto di Magellano":"Strait of Magellan",
+  "Golfo Persico":"Persian Gulf",
+  "Stretto di Hormuz":"Strait of Hormuz",
+  "Tigri ed Eufrate":"Tigris and Euphrates",
+  "Penisola arabica":"Arabian Peninsula",
+  "Shatt al-Arab":"Shatt al-Arab",
+  "Mar Mediterraneo":"Mediterranean Sea",
+  "Canale di Suez":"Suez Canal",
+  "Sinai":"Sinai",
+  "Mar Rosso":"Red Sea",
+  "Delta del Nilo":"Nile Delta",
+  "Cipro":"Cyprus",
+  "Mar Adriatico":"Adriatic Sea",
+  "Mar Ionio":"Ionian Sea",
+  "Mar Egeo":"Aegean Sea",
+  "Danubio":"Danube",
+  "Canale d'Otranto":"Strait of Otranto",
+  "Canale di Sicilia":"Strait of Sicily",
+  "Golfo della Sirte":"Gulf of Sidra",
+  "Mar Tirreno":"Tyrrhenian Sea",
+  "Sicilia":"Sicily",
+  "Il teatro della guerra: %S":"The theatre of war: %S",   // L275-61: l'aria-label della mappa del teatro nel cassetto «Guerra»
 };

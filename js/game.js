@@ -5590,7 +5590,7 @@ function snodoEuropa70DueDovuta(){  return typeof S!=='undefined' && S && S.era=
    Poll tax: da settembre '88 a giugno '89. La scissione dell'81 (Labour) e i quattro che bussano (Liberal): gennaio-marzo
    '81, ANCHE all'opposizione — è una carta di partito, e nel 1981 quei due partiti sono all'opposizione. */
 function snodoFalklandDovuta(){     return typeof S!=='undefined' && S && S.era===LINEA_UK && S.livello===3 && !S.opposizione && S.falkland==null && S.year===1982 && S.month>=4 && S.month<=5; }
-function snodoFalklandDueDovuta(){  return typeof S!=='undefined' && S && S.era===LINEA_UK && S.livello===3 && !S.opposizione && S.falkland==='flotta'; }
+function snodoFalklandDueDovuta(){  return typeof S!=='undefined' && S && S.era===LINEA_UK && S.livello===3 && !S.opposizione && S.falkland==='flotta' && !(GUERRA_FALKLAND && S.crisi && S.crisi.snodo==='falkland82'); }   // L275-45: a guerra aperta dallo snodo la seconda carta non esce (alla fine guerraFine scrive l'esito nel flag)
 function snodoMinatori80Dovuta(){   return typeof S!=='undefined' && S && S.era===LINEA_UK && S.livello===3 && !S.opposizione && S.minatori80==null && S.year===1984 && S.month<=3; }
 function snodoMinatori80DueDovuta(){return typeof S!=='undefined' && S && S.era===LINEA_UK && S.livello===3 && !S.opposizione && S.minatori80==='scorte' && ((S.year===1984 && S.month>=6) || (S.year===1985 && S.month<=2)); }
 function snodoPolltaxDovuta(){      return typeof S!=='undefined' && S && S.era===LINEA_UK && S.livello===3 && !S.opposizione && S.polltax==null && ((S.year===1988 && S.month>=9) || (S.year===1989 && S.month<=6)); }
@@ -5661,7 +5661,7 @@ function snodoCoscienza60Dovuta(){   return typeof S!=='undefined' && S && S.era
 function snodoSuezOppDovuta(){    return typeof S!=='undefined' && S && S.era===LINEA_UK && S.livello===3 && S.opposizione && S.suezOpp==null && S.suez==null && S.year===1956 && S.month>=10; }
 function snodoCoal2010OppDovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_UK && S.livello===3 && S.opposizione && S.coal2010Opp==null && S.coalizione2010==null && S.year===2010 && S.month>=5 && S.month<=7 && (typeof parlamentoAppeso!=='function' || parlamentoAppeso()); }
 function snodoSuezDovuta(){     return typeof S!=='undefined' && S && S.era===LINEA_UK && S.livello===3 && !S.opposizione && S.suez==null && S.year===1956 && S.month>=10; }
-function snodoSuezDueDovuta(){  return typeof S!=='undefined' && S && S.era===LINEA_UK && S.livello===3 && !S.opposizione && S.suez==='intervento'; }
+function snodoSuezDueDovuta(){  return typeof S!=='undefined' && S && S.era===LINEA_UK && S.livello===3 && !S.opposizione && S.suez==='intervento' && !(GUERRA_SUEZ56 && S.crisi && S.crisi.snodo==='suez56'); }   // L275-50: a guerra aperta dallo snodo la seconda carta non esce (alla fine guerraFine scrive l'esito nel flag, e il flag non è più 'intervento')
 /* LA CORSA ALLA STERLINA — tre ancore (~1951, ~1955, ~1957), finestre di due anni perché una carta a finestra
    stretta si perde se il mese è occupato. `S.sterlinaAncore` marca quali sono state pescate: la stessa ancora
    non torna, ancore diverse sì — da cui le 2-3 pescate per decennio che chiede la scheda. */
@@ -5949,7 +5949,7 @@ function snodoBanche08OppDovuta(){ return typeof S!=='undefined' && S && S.era==
    già giocato la versione di governo. */
 function snodoCorea50Dovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_US && S.livello===3 && !S.opposizione && S.usCorea==null && (S.year===1950 && S.month>=7 && S.month<=8); }
 function snodoCorea50OppDovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_US && S.livello===3 && S.opposizione && S.usCoreaOpp==null && S.usCorea==null && (S.year===1950 && S.month>=7 && S.month<=8); }
-function snodoGenerale51Dovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_US && S.livello===3 && !S.opposizione && S.usGenerale==null && S.usCorea==='truppe' && (S.year===1951 && S.month>=4 && S.month<=5); }
+function snodoGenerale51Dovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_US && S.livello===3 && !S.opposizione && S.usGenerale==null && S.usCorea==='truppe' && !(typeof coreaChiusa==='function' && coreaChiusa()) && (S.year===1951 && S.month>=4 && S.month<=5); }   // L275-53: da acceso, a guerra del motore chiusa il generale non esce
 function snodoGenerale51OppDovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_US && S.livello===3 && S.opposizione && S.usGeneraleOpp==null && S.usGenerale==null && (S.year===1951 && S.month>=4 && S.month<=5); }
 function snodoAcciaio52Dovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_US && S.livello===3 && !S.opposizione && S.usAcciaio==null && (S.year===1952 && S.month>=4 && S.month<=5); }
 function snodoAcciaio52OppDovuta(){ return typeof S!=='undefined' && S && S.era===LINEA_US && S.livello===3 && S.opposizione && S.usAcciaioOpp==null && S.usAcciaio==null && (S.year===1952 && S.month>=4 && S.month<=5); }
@@ -6240,7 +6240,17 @@ function us90Dado(sale){
   h^=h>>>16; h=Math.imul(h,0x85ebca6b); h^=h>>>13; h=Math.imul(h,0xc2b2ae35); h^=h>>>16;
   return (h>>>0)/4294967296;
 }
-function golfoEsitoOra(){ return typeof S!=='undefined' && !!S && S.era===LINEA_US && S.livello===3 && !S.opposizione && S.usGolfoEsito91==null && meseAss()===1991*12+1; }
+function golfoEsitoOra(){ return typeof S!=='undefined' && !!S && S.era===LINEA_US && S.livello===3 && !S.opposizione && S.usGolfoEsito91==null && meseAss()===1991*12+1 && !golfoGuerraAperta(); }   // L275-51: a guerra aperta con l'Iraq (quella d'autunno, o quella di gennaio dopo la scelta) la carta d'esito non esce: l'esito lo scrive guerraFine
+/* L275-51 (F48) · il Golfo combattuto (GUERRA_GOLFO91, accanto a GUERRA_SUEZ56). golfoGuerraAperta: c'è una guerra con l'Iraq (solo acceso).
+   golfoGuerraApre: la scelta di gennaio che porta il campo crisi.guerra aprirà davvero la guerra in crisiApplica (le stesse uscite, nello
+   stesso ordine: interruttore, capo del governo, una crisi per volta, già in guerra, crisi subita, la riga a 5): allora la sua f non scrive
+   l'esito né i numeri (la guerra non è ancora vinta). Se crisiApplica uscirà prima la f fa quello che faceva. */
+function golfoGuerraAperta(){ return !!(GUERRA_GOLFO91 && S && S.crisi && S.crisi.con==='iraq' && S.crisi.guerra); }
+function golfoGuerraApre(){
+  if(!GUERRA_GOLFO91 || !REGOLA_CRISI_SCALA || typeof S==='undefined' || !S || !crisiCapo()) return false;
+  if(S.crisi && (S.crisi.con!=='iraq' || S.crisi.guerra || S.crisi.subita)) return false;
+  return snodoGuerraVale({con:'iraq', snodo:'golfo91', guerra:{}});
+}
 function snodoGolfoEsito91Dovuta(){ return golfoEsitoOra(); }
 function golfoEsitoCarta(){ return S.usGolfo90==='sanzioni' ? US90_GOLFO_ATTESA_EV : (S.usGolfo90==='subito' ? US90_GOLFO_SUBITO_EV : US90_GOLFO_ESITO_EV); }
 function us90PrimaveraBersaglio(){ return 1991*12+3 + Math.min(1, Math.floor(us90Dado('primavera')*2)); }
@@ -7029,7 +7039,7 @@ const CRISI_K={ cede:0.6, freno:0.55, alleanzaMin:50, sanzGrowth:0.1, mobDeficit
 const CRISI_TARATA={ apre:0.07, scala:0.5, quiete:4, pausa:36 }, CRISI_PRIMA={ apre:1, scala:0.5, quiete:4, pausa:0 }, CRISI_2BIS={ apre:0.15, scala:0.5, quiete:4, pausa:0 };
 let CRISI_P_APRE=CRISI_TARATA.apre, CRISI_P_SCALA=CRISI_TARATA.scala, CRISI_QUIETE=CRISI_TARATA.quiete, CRISI_PAUSA=CRISI_TARATA.pausa;
 function crisiTaratura(prima, pausaOff){ var v=prima?CRISI_PRIMA:(pausaOff?CRISI_2BIS:CRISI_TARATA); CRISI_P_APRE=v.apre; CRISI_P_SCALA=v.scala; CRISI_QUIETE=v.quiete; CRISI_PAUSA=v.pausa; }
-function crisiChiudi(ora){ var sn=S.crisi && S.crisi.snodo; S.crisi=null; if(CRISI_PAUSA>0) S.crisiFine=ora;   // L245-2ter: le due chiusure passano di qui
+function crisiChiudi(ora){ var sn=S.crisi && S.crisi.snodo, gf=S.crisi && S.crisi.guerra && S.crisi.guerra.flag; if(sn && gf && S[gf]==='persa' && typeof SNODI_SCALA_STORIA!=='undefined' && (sn+'|persa') in SNODI_SCALA_STORIA) sn=sn+'|persa'; S.crisi=null; if(CRISI_PAUSA>0) S.crisiFine=ora;   // L245-2ter: le due chiusure passano di qui · L275-48: la guerra dello snodo persa legge la variante «|persa» se c'è (vuota = nessuna riga)
   if(sn && typeof SNODI_SCALA_STORIA!=='undefined' && SNODI_SCALA_STORIA[sn]) S.log.unshift({t:T('Crisi internazionale'), x:T(SNODI_SCALA_STORIA[sn])}); }   // L245-8-1: la crisi aperta da uno snodo si chiude con la riga della storia (D-G6)
 function crisiCapo(){ return S.livello===3 && !S.opposizione; }
 function crisiMeseAss(){ return S.year*12+S.month; }
@@ -7078,7 +7088,7 @@ function crisiLog(x){ var p=crisiPot(); S.log.unshift({t:T('Crisi internazionale
 /* il punto unico del campo `crisi:` (resolveItemCore, ramo generico, subito dopo choice.f) */
 function crisiApplica(campo){
   if(!REGOLA_CRISI_SCALA || !campo || !campo.con || !crisiCapo()) return;
-  var ora=crisiMeseAss();
+  var ora=crisiMeseAss(), sg=snodoGuerraVale(campo);               // L275-43: lo snodo che apre la guerra (letto qui e basta)
   if(S.crisi && S.crisi.con!==campo.con) return;                 // una crisi per volta
   if(S.crisi && S.crisi.guerra) return;                            // L245-4: in guerra la fermezza di una carta non cambia niente
   if(S.crisi && S.crisi.subita) return;                            // L245-6: la crisi subita sale coi segnali del rivale (crisiMese), mai con una carta
@@ -7090,6 +7100,10 @@ function crisiApplica(campo){
     S.crisi={con:campo.con, t:0, da:ora, ultimo:ora, alleati:null};
     if(campo.snodo) S.crisi.snodo=campo.snodo; }   // L245-8-1: il nome dello snodo resta sulla crisi (crisiChiudi, attaccoDovuto)
   var t0=S.crisi.t; S.crisi.t=Math.min(crisiTettoBlocco(), 4, S.crisi.t+(campo.t||1)); S.crisi.ultimo=ora;   // L245-4: una carta non porta mai alla guerra (il 4 resta il tetto del campo `crisi:`)
+  if(sg){   // L275-43: la crisi a 4, poi la guerra dello snodo (niente voto in aula: la data storica la apre); la riga della guerra prende il posto di quella del gradino
+    S.crisi.t=4; guerraApri(false, campo.guerra.riga || 'È guerra con %POTdet.');
+    if(typeof campo.guerra.flag==='string' && campo.guerra.flag){ S.crisi.guerra.flag=campo.guerra.flag; if(campo.guerra.esiti) S.crisi.guerra.esiti=Object.assign({}, campo.guerra.esiti); }
+    return; }
   if(t0===0) crisiLog('Si apre una crisi con %POTdet: la tensione sale.');
   else if(S.crisi.t>t0) crisiLog(T('La crisi con %POTdet sale di un gradino: %G.').replace('%G', T(CRISI_GRADINI[S.crisi.t])));
 }
@@ -7131,7 +7145,7 @@ function crisiMese(){
   if(!REGOLA_CRISI_SCALA) return;
   if(!S.crisi){ crisiSubitaMese(); return; }   // L245-6: senza crisi, il rivale può aprirne una da sé
   var c=S.crisi, ora=crisiMeseAss();
-  if(!rivaleRiga(c.con) || (c.snodo && !rivaleRigaBreve(c.con))){ if(c.guerra){ guerraFine('stallo'); return; } crisiLog('La crisi con %POTdet si chiude: il mondo è cambiato.'); crisiChiudi(ora); return; }   // L245-3: la riga è finita (l'URSS nel gennaio 1992)
+  if(!rivaleRiga(c.con) || (c.snodo && !rivaleRigaBreve(c.con)) || (c.guerra && guerraFinoMese())){ if(c.guerra){   /* L275-54: o il mese `finoMese` dell'anno `fino` della riga */ guerraFine('stallo'); return; } crisiLog('La crisi con %POTdet si chiude: il mondo è cambiato.'); crisiChiudi(ora); return; }   // L245-3: la riga è finita (l'URSS nel gennaio 1992)
   if(c.subita && !c.guerra){   // L245-6: il preavviso della crisi subita — un gradino al mese fino all'ultimatum, mai una discesa col tempo
     if(!crisiCapo()){ delete c.subita; delete c.ricevuto; c.ultimo=ora; }   // chi lascia la carica: la crisi torna una crisi di sempre, e rientra col tempo
     else {
@@ -7208,9 +7222,95 @@ function pickCrisiScala(){
 let REGOLA_GUERRA=true;
 const GUERRA_K={ costo:0.15, rally:6, forze:70, forzeAlleati:10, opinione:60, ordini:2, stallo:18, dopo:24, votoMax:1, pPace:0.05, caduti:10 };
 const GUERRA_LEGGE={ id:'guerra', nome:'La dichiarazione di guerra', asse:0 };   // la voce che passa da pBocciatura (non è in LEGGI: S.leggi non la vede mai)
-const FRONTI_NOMI={ confine:['Il confine','La costa','Il nord'], altro:['Il mare','Le isole','Il canale'] };
+const FRONTI_NOMI={ confine:['Il confine','La costa','Il nord'], altro:['Il mare','Le isole','Il canale'], aerea:['Il cielo','Le basi','Il mare'] };   // L275-43: `aerea`, la forma della riga di RIVALI (guerraForma)
 function guerraAttiva(){ return !!(REGOLA_GUERRA && S && S.crisi && S.crisi.guerra); }
 function guerraTipo(){ var r=S.crisi ? rivaleRiga(S.crisi.con) : null; return r ? r.tipo : null; }
+/* ⚑ L275-43 · LA FORMA DELLA GUERRA E LA GUERRA APERTA DA UNO SNODO (F43, D-G6).
+   · LA FORMA: una riga di RIVALI può dichiarare `forma:'aerea'` (facoltativo; oggi nessuna riga lo porta). guerraForma() la legge dalla
+     riga della crisi in corso (come guerraTipo: niente in S), GUERRA_FORME dice che cosa sovrascrive di GUERRA_K — solo `caduti` (1 al
+     posto di 10: ×0,1, interi) — più due segni: `linea3:false` = nessuna sconfitta per un settore a −3 (resta quella per le forze sotto
+     15; per una riga `lontano` la linea a −3 non fa perdere già da L245-4, la regola valeva solo per `confine`), `fronti` = i nomi dei
+     settori in FRONTI_NOMI. Tutto il resto (costo, opinione, stallo, trattativa, ordini, ritorno, segni sul tavolo, suoni) è quello di
+     una guerra del suo `tipo`.
+   · LO SNODO (SNODI_GUERRA): una scelta di snodo con `crisi:{con, t, snodo, guerra:{riga, flag?, esiti?}}` — letto solo in crisiApplica
+     (snodoGuerraVale) — apre la crisi come lo snodo (niente pausa né dado) e, solo se l'interruttore è acceso, REGOLA_GUERRA è acceso e
+     la riga di RIVALI con `con` ha `massimo` 5, la porta alla guerra con guerraApri(false, riga): niente voto in aula (la data storica la
+     apre, come la crisi dello snodo). In ogni altro caso la scelta fa quello che faceva (la crisi al più a 4). Con `flag` il nome resta
+     sulla guerra (S.crisi.guerra.flag, `esiti` accanto) e guerraFine, a ogni esito, scrive S[flag] = esiti[esito] (o l'esito stesso):
+     guerraEsitoFlag. Prova prove/l275-43/prova-f43.js, A/B .claude/ab-l275-43.js, CDP .claude/l275-43-cdp.js. */
+let GUERRA_COREA50=false;   // L275-53 (F50, primo turno): la Corea 1950 in us1950 (riga di RIVALI con corea_nord_50 1950-1953 a 5 `lontano`, soloSe; la scelta «truppe» di COREA50_EV apre la guerra, S.usCorea resta 'truppe' e dall'esito 'vinta'/'persa', S.usCoreaFine l'anno della chiusura; i titoli e il generale legati alla guerra aperta: coreaChiusa). SPENTO in questo turno (la durata la tara il secondo). Spento = il gioco di prima
+/* L275-53: la guerra di Corea del motore è CHIUSA? (vero solo da acceso, e solo se il motore l'ha aperta e chiusa: S.usCoreaFine non nullo).
+   Con `primaDi` (un anno) vero solo se si è chiusa prima di quell'anno. Una guerra mai aperta dal motore (spento, un salvataggio di prima, la
+   scelta 'truppe' con crisiApplica uscita prima) dà falso: i titoli e il generale escono come prima. Lettori: ti_us50_corea, ti_us50_cina,
+   ti_us50_armistizio (data.js), snodoGenerale51Dovuta. */
+/* S.usCoreaFine NON nasce in initStatoBase né nella migrazione (assente = mai chiusa dal motore; S nasce nuovo a ogni partita): la forma dei flag di Formosa (L245-8-4), così lo stato di chi non va in guerra resta quello di prima byte per byte. */
+function coreaChiusa(primaDi){ if(typeof GUERRA_COREA50==='undefined' || !GUERRA_COREA50 || !S || S.usCoreaFine==null) return false; return primaDi==null ? true : S.usCoreaFine<primaDi; }
+let GUERRA_VIETNAM65=false;   // L275-57 (F51, primo turno): il Vietnam combattuto in us1960 e us1950 (righe di RIVALI con vietnam_nord_65 1965-1973 a 5 `lontano`, soloSe, trattativaDal 1968/5, finoMese 1, forzeMese; la scelta 'escalation' di VIETNAM65_EV apre la guerra, S.usVietnam resta 'escalation' e dall'esito 'vinta'/'persa', S.usVietnamFine quando e come si è chiusa; le carte di guerra in corso tacciono a guerra chiusa prima del 1973: vietnamChiusa). SPENTO in L275-57; L275-58 (secondo e ultimo turno) ha aggiunto vittoriaDal 1968/5 (guerraVittoriaFerma) e forzeMese 3, ma nessuna delle tre righe misurate ha passato il bersaglio col banco (sconfitte ≤ 8/40): resta SPENTO DEFINITIVO, il Vietnam resta di carte. Spento = il gioco di prima
+/* L275-57: la guerra del Vietnam del motore è CHIUSA PRIMA DEL 1973? (vero solo da acceso, e solo se il motore l'ha aperta e chiusa prima del 1973:
+   S.usVietnamFine.k==='prima'). Una guerra chiusa nel 1973 (lo stallo del finoMese di gennaio: gli accordi della storia) dà falso: us60Guerra resta
+   vera e gli snodi della pace del 1973 escono come oggi. Una guerra mai aperta dal motore (spento, un salvataggio di prima, 'escalation' con
+   crisiApplica uscita prima) dà falso: le carte escono come prima. Lettori: us60_leva, us60_sovrattassa, us60_offensiva, ti_us60_offensiva e
+   us60Guerra (data.js; da lì ti_us60_s_leva, pus60_chicago, snodoPace73Dovuta/OppDovuta). S.usVietnamFine NON nasce in initStatoBase né nella
+   migrazione (assente = mai chiusa dal motore), la forma di S.usCoreaFine. */
+function vietnamChiusa(){ if(typeof GUERRA_VIETNAM65==='undefined' || !GUERRA_VIETNAM65 || !S || !S.usVietnamFine) return false; return S.usVietnamFine.k==='prima'; }
+/* L275-54 (F50, secondo turno) · due campi di riga di RIVALI, opzionali, letti solo qui e solo se la riga viva della guerra li ha (oggi solo
+   us1950↔corea_nord_50, che ha soloSe = GUERRA_COREA50: da spento rivaleRiga non la rende e i campi non sono mai letti):
+   · trattativaDal:{anno, mese} — prima di quel mese la trattativa NON SALE (guerraOrdine «tratta», guerraEffetto con trattativa > 0); le
+     discese restano (da 0 non scende), vittoria, sconfitta e stallo come prima. La pace firmata (gu_accordo, fase 'pace') chiede trattativa 3:
+     senza salita non arriva. Il cassetto lo dice con una riga (renderGuerra, ui.js).
+   · finoMese (con `fino`) — la guerra ancora aperta all'anno `fino` e a quel mese si chiude in stallo in quel mese (crisiMese), non al
+     gennaio dopo. Una riga senza i campi: false, il gioco di prima. */
+function guerraRigaViva(){ return (S && S.crisi && S.crisi.guerra) ? rivaleRiga(S.crisi.con) : null; }
+function guerraTrattativaFerma(){ var r=guerraRigaViva(), d=r && r.trattativaDal; return !!(d && Number.isInteger(d.anno) && Number.isInteger(d.mese) && crisiMeseAss()<d.anno*12+d.mese); }
+/* L275-58 (F51, secondo turno) · `vittoriaDal:{anno, mese}`, quarto campo di riga opzionale, la forma di trattativaDal: prima di quel mese
+   guerraMese NON assegna la vittoria (né «tutti a +3» né il dado pPace con tutti su): la guerra resta aperta, le linee restano al loro tetto (+3,
+   guerraMuoviLinea le tiene lì), il numero casuale si consuma come prima; sconfitta, stallo, perdite, rientro e ordini come oggi. Oggi solo le due
+   righe vietnam_nord_65 (1968/5, soloSe = GUERRA_VIETNAM65: da spento mai letto). Una riga senza il campo: false, il gioco di prima. */
+function guerraVittoriaFerma(){ var r=guerraRigaViva(), d=r && r.vittoriaDal; return !!(d && Number.isInteger(d.anno) && Number.isInteger(d.mese) && crisiMeseAss()<d.anno*12+d.mese); }
+function guerraFinoMese(){ var r=guerraRigaViva(); return !!(r && Number.isInteger(r.finoMese) && S.year===r.fino && S.month>=r.finoMese); }
+/* L275-56 (F50-ter) · `forzeMese:n` (intero ≥ 1), terzo campo di riga opzionale letto come i due sopra: il rientro mensile delle forze (i rinforzi).
+   In guerraMese le forze risalgono di n DOPO il calo mensile e le perdite del mese e PRIMA del controllo «sotto 15: sconfitta»; mai oltre il
+   valore di partenza della guerra, rifatto con la formula di guerraNuova (GUERRA_K.forze + forzeAlleati se gli alleati seguono: nessun campo
+   nuovo in S). Il controllo «sotto 60 i settori arretrano» legge le forze di inizio mese (prima del calo, come sempre): il rientro lo sposta
+   dal mese dopo. Oggi solo us1950↔corea_nord_50 (soloSe = GUERRA_COREA50: da spento mai letto). Una riga senza il campo: 0, il gioco di prima. */
+function guerraForzeMese(){ var r=guerraRigaViva(); if(!(r && Number.isInteger(r.forzeMese) && r.forzeMese>=1)) return 0;
+  var g=S.crisi && S.crisi.guerra; return (Number.isInteger(r.forzeSotto) && g && g.forze<r.forzeSotto) ? r.forzeMese+1 : r.forzeMese; }   // L275-57 (regola (v), quarta riga): `forzeSotto:n`, campo di riga opzionale letto solo qui — sotto n forze il rientro è forzeMese+1, sopra forzeMese; chi non lo dichiara non cambia (oggi NESSUNA riga lo dichiara: la misura lo mette in memoria)
+function guerraForzeTetto(){ return GUERRA_K.forze+(S.crisi && S.crisi.alleati==='seguono' ? GUERRA_K.forzeAlleati : 0); }
+let GUERRA_IRAQ03_UK=true;   // L275-52 (F49): l'Iraq 2003 britannico (righe di RIVALI uk1980/uk1990/uk2000 con iraq 2002-2004 a 5 `lontano`, soloSe; la prima scelta di IRAQ_EV apre la guerra, S.iraq resta 'guerra' e dall'esito 'tregua'/'persa'). Spento = il gioco di prima
+let GUERRA_GOLFO91=true;   // L275-51 (F48): il Golfo combattuto nella linea americana (righe di RIVALI us1990/us1980 con iraq 1990-1991 a 5 `lontano`, soloSe; la scelta «subito» di GOLFO90_EV e le due di US90_GOLFO_ESITO_EV; golfoEsitoOra tace a guerra aperta). Spento = il gioco di prima
+let GUERRA_SUEZ56=true;   // L275-50 (F47): Suez combattuta in uk1950 e fr1950 (righe di RIVALI con egitto 1956-1957 a 5 `lontano`, soloSe; la prima scelta di SUEZ_EV e di SUEZ_FR_EV) e i due campi di riga `nomiFronti`/`trattativaDa` (guerraNuova, anche le Falkland). Spento = il gioco di prima
+/* ⚑ L275-61 (F52, la vista) · I TEATRI NEL CASSETTO «GUERRA». GUERRA_TEATRI: acceso, al posto della scena (L275-62) il cassetto disegna la mappa
+   ridotta del teatro (TEATRI di data.js, la riga di RIVALI col suo `teatro`/`settori`/`porto`); spento = il cassetto di prima byte per byte.
+   teatroGuerra(): la sola lettura, pura (non scrive S, nessun dado). La riga è quella di rivaleRiga(S.crisi.con), la stessa di guerraNuova e di
+   guerraForma: una guerra non vive oltre la sua riga (crisiMese la chiude in stallo il mese in cui rivaleRiga non la trova più), quindi a guerra
+   aperta la riga è sempre quella d'apertura (prova B di prove/l275-61/prova-f52b.js). null: interruttore spento, nessuna guerra, riga senza
+   teatro (`confine`: la Corea del Sud resta sulla mappa di casa; corea_nord_50, vietnam_nord_65), teatro inesistente. `settori` e `linee`
+   sono quelli dei fronti aperti (1-3, nell'ordine del cassetto: il settore k è il fronte k), `nomi` i nomi dei fronti (chiavi italiane). */
+let GUERRA_TEATRI=true;   // L275-62: ACCESO (prova-f52c verde, A/B 0/1020 spento e acceso, CDP 24/24 a 375 e 24/24 a 1024)
+function teatroGuerra(){
+  if(!GUERRA_TEATRI || typeof S==='undefined' || !S || !S.crisi || !S.crisi.guerra || typeof TEATRI==='undefined') return null;
+  var r=rivaleRiga(S.crisi.con), g=S.crisi.guerra;
+  if(!r || r.tipo==='confine' || !r.teatro || !TEATRI[r.teatro] || !Array.isArray(r.settori) || !Array.isArray(r.porto) || !Array.isArray(g.fronti)) return null;
+  var n=Math.min(g.fronti.length, r.settori.length);
+  return { id:r.teatro, t:TEATRI[r.teatro], settori:r.settori.slice(0, n), porto:r.porto, linee:g.fronti.slice(0, n).map(function(f){ return f.linea; }), nomi:g.fronti.slice(0, n).map(function(f){ return f.n; }) };
+}
+let GUERRA_LIBIA11=true;   // L275-48 (F46): la Libia combattuta in italia2000 (riga di RIVALI con libia 2011-2012 a 5 `lontano` aerea, soloSe; la prima scelta di LIBIA11_EV). Spento = il gioco di prima
+let GUERRA_KOSOVO99=true;   // L275-47 (F45): il Kosovo combattuto, una sola leva per italia1990 e de1990 (righe di RIVALI con rfj a 5 `lontano` aerea, soloSe; la prima scelta di KOSOVO99_IT_EV e di KOSOVO99_EV). Spento = il gioco di prima
+let GUERRA_FALKLAND=true;   // L275-45 (F44): le Falkland combattute (righe di RIVALI uk1970/uk1980 con argentina_82, soloSe; la prima scelta di FALKLAND_EV). Spento = il gioco di prima
+let SNODI_GUERRA=true;   // L275-43: ACCESO (A/B 0/1020 da spento e da acceso: nessun dato usa ancora il campo; il primo è F44, le Falkland)
+const GUERRA_FORME={ aerea:{ caduti:1, linea3:false, fronti:'aerea' } };
+function guerraForma(){ var r=S.crisi ? rivaleRiga(S.crisi.con) : null; return (r && r.forma && GUERRA_FORME[r.forma]) ? r.forma : null; }
+function snodoGuerraVale(campo){
+  if(!SNODI_GUERRA || !REGOLA_GUERRA || !campo || !campo.guerra || !campo.snodo) return false;
+  if(campo.guerra.con && campo.guerra.con!==campo.con) return false;
+  var r=rivaleRiga(campo.con); return !!(r && r.massimo>=5);
+}
+function guerraEsitoFlag(g, esito){
+  if(!g || typeof g.flag!=='string' || !g.flag) return;
+  S[g.flag]=(g.esiti && g.esiti[esito]!==undefined) ? g.esiti[esito] : esito;
+  var sn=S.crisi && S.crisi.snodo, d=(sn && typeof GUERRA_DOPO!=='undefined') ? GUERRA_DOPO[sn] : null;   // L275-50: i campi di stato del valore scritto (GUERRA_DOPO, data.js; oggi solo suez56)
+  if(d && typeof d[S[g.flag]]==='function') d[S[g.flag]]();
+}
 function votoGuerraPaese(){ return !!(PAESE && PAESE.votoGuerra); }   // L245-4: il punto unico del campo `votoGuerra` (PAESI)
 /* il voto in aula sulla dichiarazione: { vota, p, respinta } — fuori dai paesi che votano, nessun voto e nessuna estrazione */
 function guerraVotoAula(){
@@ -7219,17 +7319,21 @@ function guerraVotoAula(){
   return { vota:true, p:V.p, respinta:Math.random()<V.p };
 }
 function guerraNuova(){
-  var nomi=FRONTI_NOMI[guerraTipo()==='confine' ? 'confine' : 'altro'], n=1+Math.floor(Math.random()*3), f=[];
+  var rg=(GUERRA_SUEZ56 && S.crisi) ? rivaleRiga(S.crisi.con) : null;   // L275-50: i campi della riga `nomiFronti` e `trattativaDa`, letti solo con GUERRA_SUEZ56
+  var fm=guerraForma(), nomi=(rg && Array.isArray(rg.nomiFronti) && rg.nomiFronti.length===3) ? rg.nomiFronti : FRONTI_NOMI[fm ? GUERRA_FORME[fm].fronti : guerraTipo()==='confine' ? 'confine' : 'altro'], n=   // L275-43: la forma vince sul tipo per i nomi dei settori · L275-50: i nomi della riga vincono su tutti e due
+1+Math.floor(Math.random()*3), f=[];
   for(var i=0;i<n;i++) f.push({ n:nomi[i], linea:0 });
   var forze=GUERRA_K.forze+(S.crisi.alleati==='seguono' ? GUERRA_K.forzeAlleati : 0);
-  return { fronti:f, forze:forze, opinione:GUERRA_K.opinione+GUERRA_K.rally, costo:GUERRA_K.costo, mesi:0, caduti:0, trattativa:0, ordini:0, rally:GUERRA_K.rally, fermo:0 };
+  return { fronti:f, forze:forze, opinione:GUERRA_K.opinione+GUERRA_K.rally, costo:GUERRA_K.costo, mesi:0, caduti:0, trattativa:(rg && Number.isInteger(rg.trattativaDa)) ? clamp(rg.trattativaDa, 0, 3) : 0, ordini:0, rally:GUERRA_K.rally, fermo:0 };   // L275-50: la trattativa di partenza della riga
 }
 function guerraLeggibile(g){   // applySnap: la forma di S.crisi.guerra
   var num=function(v){ return typeof v==='number' && isFinite(v); };
   return !!(g && Array.isArray(g.fronti) && g.fronti.length>=1 && g.fronti.length<=3 && g.fronti.every(function(f){ return f && typeof f.n==='string' && Number.isInteger(f.linea) && f.linea>=-3 && f.linea<=3; })
     && ['forze','opinione','costo','mesi','caduti','trattativa','ordini','rally','fermo'].every(function(k){ return num(g[k]); }) && Number.isInteger(g.caduti)
     && (g.difesa===undefined || typeof g.difesa==='boolean')   // L245-6: la guerra difensiva, booleano facoltativo
-    && (g.detto===undefined || (!!g.detto && typeof g.detto==='object' && !Array.isArray(g.detto))));   // L218-32: le voci già dette in questa guerra, oggetto facoltativo (salvataggi di prima senza)
+    && (g.detto===undefined || (!!g.detto && typeof g.detto==='object' && !Array.isArray(g.detto)))   // L218-32: le voci già dette in questa guerra, oggetto facoltativo (salvataggi di prima senza)
+    && (g.flag===undefined || (typeof g.flag==='string' && g.flag.length>0))   // L275-43: il flag dello snodo che l'ha aperta, facoltativo
+    && (g.esiti===undefined || (!!g.esiti && typeof g.esiti==='object' && !Array.isArray(g.esiti))));   // L275-43: i valori del flag per esito, facoltativo   // L218-32: le voci già dette in questa guerra, oggetto facoltativo (salvataggi di prima senza)
 }
 function guerraDichiara(){
   if(!REGOLA_GUERRA || !S.crisi || S.crisi.guerra || !S.crisi.respinto || !crisiCapo() || crisiTettoBlocco()<5) return false;
@@ -7248,18 +7352,18 @@ function guerraApri(difesa, riga){
   if(difesa){ S.crisi.guerra.difesa=true; S.crisi.guerra.opinione=clamp(S.crisi.guerra.opinione+SUBITA_K.difesaOpinione, 0, 100); }
   crisiLog(riga);
   segniGuerra('dichiara');   // L245-5: fronte e base sul tavolo
-  if(typeof suona==='function'){ suona('colonna'); if(guerraTipo()!=='confine') suona('nave'); }   // L245-5: la colonna, e la nave per una guerra di mare
+  if(typeof suona==='function'){ suona('colonna'); if(guerraTipo()!=='confine') suona(guerraForma()==='aerea' ? 'jet-sorvolo' : 'nave'); }   // L245-5: la colonna, e la nave per una guerra di mare · L275-47: il jet per la forma aerea (decisione 2 su «⚑ L275-43»)
   if(difesa && typeof parla==='function') parla('voce-attacco-a');
 }
 function guerraMuoviLinea(i, d){ var g=S.crisi.guerra, f=g.fronti[i]; if(!f) return false; var v=clamp(f.linea+d, -3, 3); if(v===f.linea) return false; f.linea=v; g.fermo=0; return true; }
-function guerraPerdite(n){ var g=S.crisi.guerra; g.forze=clamp(g.forze-n, 0, 100); g.caduti+=n*GUERRA_K.caduti; }
+function guerraPerdite(n){ var g=S.crisi.guerra, fm=guerraForma(); g.forze=clamp(g.forze-n, 0, 100); g.caduti+= fm ? Math.round(n*GUERRA_FORME[fm].caduti) : n*GUERRA_K.caduti; }   // L275-43: con una forma i caduti della forma, interi
 /* un ordine a un settore (il cassetto «Guerra»): 'avanza' · 'tieni' · 'tratta'. Al più GUERRA_K.ordini al mese. */
 function guerraOrdine(i, tipo){
   if(!guerraAttiva() || !crisiCapo()) return false;
   var g=S.crisi.guerra; if(g.ordini>=GUERRA_K.ordini || !g.fronti[i]) return false;
   if(tipo==='avanza'){ var ok=Math.random()<g.forze/120; guerraPerdite(3+Math.floor(Math.random()*4)); if(ok) guerraMuoviLinea(i, 1); }
   else if(tipo==='tieni'){ g.forze=clamp(g.forze+1, 0, 100); }
-  else if(tipo==='tratta'){ var tr0=g.trattativa; g.trattativa=Math.min(3, g.trattativa+1); if(g.fronti[i].linea<0) g.opinione=clamp(g.opinione-2, 0, 100); voceTregua(tr0); }   // L218-32
+  else if(tipo==='tratta'){ var tr0=g.trattativa; g.trattativa=Math.min(3, g.trattativa+(guerraTrattativaFerma() ? 0 : 1));   /* L275-54: prima di trattativaDal non sale */ if(g.fronti[i].linea<0) g.opinione=clamp(g.opinione-2, 0, 100); voceTregua(tr0); }   // L218-32
   else return false;
   g.ordini++;
   if(S.ind) S.ind.consenso=computeConsenso();
@@ -7270,7 +7374,7 @@ function guerraEffetto(e){
   if(!guerraAttiva()) return; var g=S.crisi.guerra;
   if(e.forze){ if(e.forze<0) guerraPerdite(-e.forze); else g.forze=clamp(g.forze+e.forze, 0, 100); }
   if(e.opinione) g.opinione=clamp(g.opinione+e.opinione, 0, 100);
-  if(e.trattativa){ var tr0=g.trattativa; g.trattativa=clamp(g.trattativa+e.trattativa, 0, 3); voceTregua(tr0); }   // L218-32
+  if(e.trattativa && !(e.trattativa>0 && guerraTrattativaFerma())){ var tr0=g.trattativa;   /* L275-54: prima di trattativaDal la salita non c'è */ g.trattativa=clamp(g.trattativa+e.trattativa, 0, 3); voceTregua(tr0); }   // L218-32
   if(e.costo) g.costo=Math.round(clamp(g.costo+e.costo, 0.05, 0.5)*100)/100;
   if(e.linea) guerraMuoviLinea(Math.floor(Math.random()*g.fronti.length), e.linea);
   if(S.ind) S.ind.consenso=computeConsenso();
@@ -7285,9 +7389,12 @@ function guerraMese(){
   var perd=1, pr=Math.max(0, (60-g.forze)/100);
   if(pr>0 && Math.random()<pr){ if(guerraMuoviLinea(Math.floor(Math.random()*g.fronti.length), -1)) perd+=2; }
   guerraPerdite(perd);
+  var rin=guerraForzeMese(), tt;   // L275-56: il rientro dei rinforzi, dopo le perdite e prima della soglia 15; mai oltre la partenza
+  if(rin>0 && g.forze<(tt=guerraForzeTetto())) g.forze=Math.min(tt, g.forze+rin);
   var tutti3=g.fronti.every(function(f){ return f.linea>=3; }), tuttiSu=g.fronti.every(function(f){ return f.linea>=1; });
-  if(g.forze<15 || (guerraTipo()==='confine' && g.fronti.some(function(f){ return f.linea<=-3; }))) guerraFine('sconfitta');
-  else if(tutti3 || (tuttiSu && Math.random()<GUERRA_K.pPace)) guerraFine('vittoria');
+  var fm=guerraForma(), linea3=!(fm && GUERRA_FORME[fm].linea3===false);   // L275-43: la forma aerea non perde per un settore a −3
+  if(g.forze<15 || (linea3 && guerraTipo()==='confine' && g.fronti.some(function(f){ return f.linea<=-3; }))) guerraFine('sconfitta');
+  else if((tutti3 || (tuttiSu && Math.random()<GUERRA_K.pPace)) && !guerraVittoriaFerma()) guerraFine('vittoria');   // L275-58: prima di vittoriaDal la vittoria non si assegna (il dado si tira come prima)
   else if(g.fermo>=GUERRA_K.stallo) guerraFine('stallo');
   if(g.mesi===7 && S.crisi && S.crisi.guerra===g) voceCrisi('voce-guerra-stanchezza');   // L218-32: il primo mese oltre la soglia della stanchezza (g.mesi > 6, qui sopra), una volta per guerra; mai nel mese in cui la guerra finisce (vince l'esito)
 }
@@ -7299,6 +7406,7 @@ function guerraFine(esito, riga){
   if(esito==='vittoria') repd(3);
   else if(esito==='sconfitta'){ repd(-5); if(S.groups) GROUPS.forEach(function(gr){ gd(gr.id, -3); }); }
   if(c.alleati && S.relInt && S.relInt.alleanza!=null) relIntMuovi('alleanza', c.alleati==='seguono' ? 5 : -5);
+  guerraEsitoFlag(c.guerra, esito);   // L275-43: l'esito nel flag dello snodo che l'ha aperta (prima di crisiChiudi, che toglie la guerra)
   segniGuerra('fine');   // L245-5: fronte e colpita → ricostruzione (24 mesi = il dopoguerra qui sotto), base tolta — prima di crisiChiudi, finché segnoTerr vede la guerra
   crisiChiudi(ora);
   S.dopoguerra={ esito:esito, fino:ora+GUERRA_K.dopo };
