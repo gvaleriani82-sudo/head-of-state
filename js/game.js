@@ -562,6 +562,12 @@ function initStatoBase(){
   S.recentSfide=[];            // Q-fix #2 — finestra «viste di recente» condivisa fra Sfida singola e intervista (anti-ripetizione)
   S.leggi={}; for(const L of LEGGI){ if(!L.paesi || L.paesi.indexOf(chosenCountry)>-1) S.leggi[L.id]= eraVivaT(L) && inizialeViva(L, chosenCountry, S.year); }   // L275-1: il valore può essere un anno (inizialeViva) · Build B: gate-seed — una legge era-esclusa (es. reddito_citt iniziale:italia) NON parte attiva nel '50
   S.leggiSnap=Object.assign({},S.leggi);
+  /* L275-73 · I GRUPPI D'AVVIO DELLA PORTA. Una porta può dichiarare `gruppiAvvio:{<difficoltà>:{<gruppo>:<punti>}}`, sommati a GSTART
+     qui e solo qui (assente = GSTART, come prima). Oggi us1950 e de1950 a difficile: col boom degli anni '50 il bersaglio degli imprenditori
+     è 77-90 e il pavimento della rivolta (0,6 × bersaglio, pavimentoGruppo) sale a 46-55 nei primi tre mesi, mentre il gruppo partiva da 48:
+     la rivolta al mese 4 senza aver sbagliato niente (prove/l275-73/rivolta.js). */
+  { const _sc=(S.scenario && S.scenario!=='presente' && typeof SCENARI!=='undefined') ? SCENARI[S.scenario] : null, _ga=_sc && _sc.gruppiAvvio && _sc.gruppiAvvio[S.diff];
+    if(_ga) for(const g in _ga){ if(S.groups[g]!=null) S.groups[g]=clamp(S.groups[g]+_ga[g],0,100); } }
   applicaPersonaggio();    // chi sei: S.personaggio/S.eta + crediti d'esordio sui gruppi (PRIMA del consenso, che li legge)
   /* L176-1 (D135) · L'ANZIANITÀ DI PORTA È DI CHI GOVERNA (la seconda delle tre righe: la prima è sopra, accanto a `mandatiVinti`,
      la terza in startOpposizione). Un attivista, un consigliere, un ministro o un diplomatico partivano coi mandati vinti del
@@ -1358,7 +1364,7 @@ function pickOccasione(){
     if(!(S.relInt && S.relInt.consesso!=null && S.relInt.consesso>=75)) return null;   // relInt è il gatekeeper
     if((S.mandatesWon||0) < 1) return null;                                            // un premier affermato
     if(S.occUltima!=null && mese-S.occUltima<6) return null;
-    if(Math.random()<0.12 || S.relInt.consesso>=88){ S.occUltima=mese; return { kind:'occasione', tipo:'internazionale', resolved:false }; }   // garanzia a standing molto alto
+    if(dadoPosto('occ')<0.12 || S.relInt.consesso>=88){ S.occUltima=mese; return { kind:'occasione', tipo:'internazionale', resolved:false }; }   // garanzia a standing molto alto · L275-78: dadoPosto
     return null;
   }
   if(S.livello===1){   // da locale: la CHIAMATA a Roma. PROVA ELETTORALE OBBLIGATORIA: rieletto almeno una volta
@@ -3418,14 +3424,14 @@ const RIALLINEAMENTI_ERA = {
                 entra:[ VERDI_1997 ],
                 delta:[ {id:'fr_sfio',delta:5.7}, {id:'fr_pcf',delta:-0.2}, {id:'fr_unr',delta:-7.4}, {id:'fr_ri',delta:-7.4}, {id:'fr_fn',delta:1.4} ],   // Σ=−7,9 = l'ingresso dei Verdi
                 urne:  { fr_sfio:25.0, fr_unr:15.7, fr_fn:14.9, fr_ri:14.2, fr_pcf:9.9, fr_verts:6.8 },
-                seggi: { fr_sfio:49.2, fr_pcf:6.2, fr_verts:1.2, fr_unr:24.6, fr_ri:19.8, fr_fn:0.2 } },
+                seggi: { fr_sfio:48.6, fr_pcf:6.1, fr_verts:1.2, fr_unr:24.3, fr_ri:19.6, fr_fn:0.2 } },   // L275-73: al decimo, 100,0 coi resti più alti (era 101,2)
     /* 1998: la gemella. La legislatura del '93 scade a marzo e la sinistra la vince come vinse il 1997: stessi seggi, stesso
        ingresso (dichiarato: non inventiamo un'altra Assemblea). Per l'Eliseo di sinistra spegne la coabitazione del '93. */
     '1998/3': { se:function(){ return typeof S!=='undefined' && S && typeof eliseoDiSinistra==='function' && (eliseoDiSinistra() || S.scioglimento97==='no'); },
                 entra:[ VERDI_1997 ],
                 delta:[ {id:'fr_sfio',delta:5.7}, {id:'fr_pcf',delta:-0.2}, {id:'fr_unr',delta:-7.4}, {id:'fr_ri',delta:-7.4}, {id:'fr_fn',delta:1.4} ],   // Σ=−7,9 = l'ingresso dei Verdi
                 urne:  { fr_sfio:25.0, fr_unr:15.7, fr_fn:14.9, fr_ri:14.2, fr_pcf:9.9, fr_verts:6.8 },
-                seggi: { fr_sfio:49.2, fr_pcf:6.2, fr_verts:1.2, fr_unr:24.6, fr_ri:19.8, fr_fn:0.2 } },
+                seggi: { fr_sfio:48.6, fr_pcf:6.1, fr_verts:1.2, fr_unr:24.3, fr_ri:19.6, fr_fn:0.2 } },   // L275-73: al decimo, 100,0 coi resti più alti (era 101,2)
     /* L105-2 · IL 2000 (scheda PRESET-FRANCIA-2000 §1). Tre legislative, tutte CONDIZIONATE SULL'ELISEO come l'80 (D31):
        seguono la presidenziale del mese di gennaio, e nel ramo divergente l'Assemblea in vigore resta fino alla tappa dopo.
        Voti del 1° turno da france-politique.fr (consultato il 25/9/2026, dati del ministero), radicali nel PS, DL e poi
@@ -4646,6 +4652,18 @@ function riallineamentoTappa(){
       if(S.log) S.log.unshift({t:T('Il nuovo parlamento'), x:T('La composizione non somiglia a quella dei libri di storia: da qui in avanti il paese ha preso un\'altra strada.')});
     } else {
       Object.keys(entry.seggi).forEach(function(id){ if(S.seggi[id]!=null) S.seggi[id]=entry.seggi[id]; });
+      /* L275-71 · LA SOMMA TORNA A 100. Al livello 0 `avanzaMese` esce prima di `riallineamentoTappa`: le tappe degli anni
+         dell'attivista non si applicano e dopo la laurea il roster è quello vecchio (fr1960: fr_mod vivo, fr_ri mai nato). La
+         tabella di una tappa dopo scrive allora solo i partiti che combaciano e lascia gli altri col valore vecchio: 113,2 in
+         fr1960 1967/3, 102,0 in fr1970 1978/3, 94,5 in de1950 1956/8. Qui, e solo se la somma esce da 100 (tolleranza 0,05:
+         le tabelle sane sommano esattamente 100, L97-3), le quote si riportano a 100 pro quota coi resti più alti al decimo. */
+      var _qs=0, _ids=Object.keys(S.seggi); _ids.forEach(function(id){ _qs+=Math.max(0, +S.seggi[id]||0); });
+      if(_qs>0 && Math.abs(_qs-100)>0.05){
+        var _q=_ids.map(function(id){ var e=Math.max(0, +S.seggi[id]||0)/_qs*1000; return {id:id, f:Math.floor(e), r:e-Math.floor(e)}; }), _u=0;
+        _q.forEach(function(x){ _u+=x.f; });
+        _q.slice().sort(function(a,b){ return b.r-a.r; }).forEach(function(x){ if(_u<1000){ x.f++; _u++; } });
+        _q.forEach(function(x){ S.seggi[x.id]=x.f/10; });
+      }
       S.tappaSeggiEsito[chiave]='applicata';
       /* i seggi sono cambiati a metà mandato: la minoranza va riletta, come già fanno rimpasto e sostegno.
          In opposizione non ha senso — lì il numero che conta è quello di chi governa. */
@@ -6608,6 +6626,52 @@ function applicaTappaOra(chiave, conDelta){
   S.riallineamenti[chiave]=true;
   return true;
 }
+/* L275-79 · LE TAPPE SALTATE DALL'ATTIVISTA. Al livello 0 `avanzaMese` esce prima di riallineamentoTappa, che guarda solo la chiave
+   del mese in corso: le tappe degli anni della gavetta non scattano più, e il sindaco nuovo trovava il roster dell'avvio (fr1960: fr_mod
+   vivo, fr_ri mai nato). Chiamata una volta da diventaLocale, prima di seggi e territori: per ogni tappa dall'avvio della porta che non
+   può più scattare (chiave 'anno/mese' ≤ il mese in corso; 'anno' < l'anno in corso, o l'anno in corso a dicembre: riallineamentoTappa
+   gira dopo S.month++, quindi un 'anno' dell'anno in corso scatta da sé al mese dopo, intero), col suo `se`, le SOLE direttive di roster
+   (entra, esce, rinomina; mai delta, seggi, territori, capitale, mappa, alleati: i numeri delle tappe passate non si recuperano),
+   senza le voci sul partito del giocatore (applicaDirettive le salta già: qui niente avviso in console), in silenzio. Le forze tornano
+   alla somma di prima (l'`entra` aggiunge la forza dichiarata dalla direttiva). La tappa si segna nel registro: lo leggono solo
+   riallineamentoTappa e applicaTappaOra, come «già fatta». */
+function tappeSaltateLaurea(){
+  var perAnno=S.era && RIALLINEAMENTI_ERA[S.era], y0=S.annoInizio||S.year; if(!perAnno) return;
+  if(!S.riallineamenti) S.riallineamenti={};
+  function kd(k){ var p=String(k).split('/'); return p.length>1 ? {y:+p[0], m:+p[1]} : {y:+p[0], m:0.5, anno:true}; }
+  var somma=function(o){ var q=0; for(var id in (o||{})) q+=(+o[id]||0); return q; }, f0=somma(S.forze), fp0=somma(S.forzePrev);
+  Object.keys(perAnno).filter(function(k){ var d=kd(k), e=perAnno[k];
+    if(S.riallineamenti[k] || !e || Array.isArray(e) || !(e.entra||e.esce||e.rinomina)) return false;
+    if(d.anno ? d.y<y0 : (d.y<y0 || (d.y===y0 && d.m<=1))) return false;                                   // prima dell'avvio della porta
+    return d.anno ? (d.y<S.year || (d.y===S.year && S.month===12)) : (d.y<S.year || (d.y===S.year && d.m<=S.month));
+  }).sort(function(a,b){ var x=kd(a), y=kd(b); return x.y-y.y || x.m-y.m; }).forEach(function(k){
+    var e=perAnno[k]; if(typeof e.se==='function'){ var ok=false; try{ ok=e.se(); }catch(_){ ok=false; } if(!ok) return; }
+    var mio=function(x){ return x.id!==S.partito; };
+    applicaDirettive({ entra:e.entra, esce:(e.esce||[]).filter(mio), rinomina:(e.rinomina||[]).filter(mio), seggiInvariati:true });
+    S.riallineamenti[k]=true;
+  });
+  [['forze',f0],['forzePrev',fp0]].forEach(function(c){ var q=somma(S[c[0]]); if(q>0 && c[1]>0 && Math.abs(q-c[1])>1e-9) for(var id in S[c[0]]) S[c[0]][id]=S[c[0]][id]*c[1]/q; });
+}
+/* L275-82 · LA CARTA DELLE TAPPE SALTATE DALL'ATTIVISTA. Gemella di tappeSaltateLaurea (stessa selezione: dopo l'avvio della porta, non più
+   in grado di scattare, col suo `se`), ma per le SOLE direttive `territori`/`capitale`/`mappa`, in ordine di data, in silenzio. Chiamata al
+   livello 0 a ogni mese con l'offerta di candidatura aperta (avanzaMese), prima che il foglio di scelta si disegni: il territorio si sceglie
+   sulla carta del mese (de1990 dopo il 1990/10: i Länder dell'Est, Berlino). Idempotente col segno `S.riallineamenti[k+'#carta']` (nessun
+   campo nuovo; riallineamentoTappa, applicaTappaOra e tappeSaltateLaurea leggono solo la chiave nuda). Il caricamento passa dal registro
+   S.territoriDelta (applySnap) e da S.capitaleSede, come per chi è già al livello 1. */
+function cartaSaltataLaurea(){
+  var perAnno=S.era && RIALLINEAMENTI_ERA[S.era], y0=S.annoInizio||S.year; if(!perAnno) return;
+  if(!S.riallineamenti) S.riallineamenti={};
+  function kd(k){ var p=String(k).split('/'); return p.length>1 ? {y:+p[0], m:+p[1]} : {y:+p[0], m:0.5, anno:true}; }
+  Object.keys(perAnno).filter(function(k){ var d=kd(k), e=perAnno[k];
+    if(S.riallineamenti[k] || S.riallineamenti[k+'#carta'] || !e || Array.isArray(e) || !(e.territori||e.capitale||e.mappa)) return false;
+    if(d.anno ? d.y<y0 : (d.y<y0 || (d.y===y0 && d.m<=1))) return false;
+    return d.anno ? (d.y<S.year || (d.y===S.year && S.month===12)) : (d.y<S.year || (d.y===S.year && d.m<=S.month));
+  }).sort(function(a,b){ var x=kd(a), y=kd(b); return x.y-y.y || x.m-y.m; }).forEach(function(k){
+    var e=perAnno[k]; if(typeof e.se==='function'){ var ok=false; try{ ok=e.se(); }catch(_){ ok=false; } if(!ok) return; }
+    applicaDirettive({ territori:e.territori, capitale:e.capitale, mappa:e.mappa, seggiInvariati:true });
+    S.riallineamenti[k+'#carta']=true;
+  });
+}
 /* L111-2 · il titolo «La prima recessione: i liberali escono» — vero se i liberali sono usciti nel 1966: S3 «tasse», o la FDP rotta e
    fuori dal governo senza che sia stato lo Spiegel (approssimazione dichiarata: una rottura spontanea del 1963-66 conta come «del 1966»). */
 function liberaliUsciti66(){
@@ -6836,6 +6900,7 @@ function diventaLocale(terrIdx){
   S.locale={ nome:TE.nome, carica:TE.carica, caricaEn:TE.caricaEn||null, tipo:tipo, terrIdx:idx, ind:ind, leve:leve, consenso:50, mandato:1,
     budget: Math.round((S.pil||2150)*(tipo==='città'?3.2:15)) };
   S.livello=1;                                       // l'invariante torna: livello 1 ⟹ S.locale montato
+  tappeSaltateLaurea();                              // L275-79: le direttive di roster delle tappe saltate al livello 0, prima di seggi e territori
   if(S.attivista.campagna) risolviCampagna('Una campagna era in corso: candidandoti ora la chiudi sul risultato raggiunto.');   // A.5 L2: la candidatura chiude la campagna sul progresso attuale (payoff parziale scalato → no exploit); il bonus ai gruppi si porta al locale
   S.attivista=null;                                  // fase conclusa: il dato puro esce dal salvataggio
   S.turnInMandate=0;                                 // L5-FIX (HIGH): il clock del MANDATO riparte da zero come un'elezione fresca — la gavetta può aver scavalcato dei gennaio (turnInMandate++ a game.js:1970) e un sindaco laureato leggerebbe "anno 2/5" e affronterebbe la rielezione in anticipo. S.year/età NON si toccano: il tempo è passato davvero.
@@ -6935,9 +7000,11 @@ function diventaMinistro(){
    dell'urna (meseUrna()) passato da allora, modulo la durata del mandato (PAESE.mandatoMesi/12). Così meseMandato() dà i mesi
    dall'ultima presidenziale. Esempio (rapporto «⚑ L275-24»): us1990, seme 31, salita nel 1998/8 → 1 (meseMandato 21, urna 2000/11).
    Nessuna migrazione: una carriera già sfasata in un salvataggio resta com'è. Puro: non scrive S. */
+/* ⚑ L275-76 · l'insieme delle partite americane (la linea e il presente americano), letto da salitaTurnoMandato e da azzeraOrologioUrna. */
+function partitaAmericana(){ return !!(typeof S!=='undefined' && S && (S.era===LINEA_US || (S.scenario==='presente' && S.paese==='usa'))); }
 function salitaTurnoMandato(){
   if(typeof S==='undefined' || !S) return 0;
-  if(!(S.era===LINEA_US || (S.scenario==='presente' && S.paese==='usa'))) return 0;
+  if(!partitaAmericana()) return 0;
   var anni=Math.round((PAESE.mandatoMesi||48)/12); if(!(anni>0)) return 0;
   var sc=(typeof SCENARI!=='undefined' && S.scenario!=='presente') ? SCENARI[S.scenario] : null;
   var t0=(sc && sc.turnMandato!=null) ? sc.turnMandato : ((S.scenario==='presente' && PAESE.turnMandato!=null) ? PAESE.turnMandato : 0);
@@ -6985,7 +7052,7 @@ function initRelInt(){
    conflitti DEVONO sentirsi come presenza ricorrente); finestra anti-ripetizione in S.recentConflInt. */
 function pickConflittoInt(){
   if(typeof CONFLITTI_INT==='undefined' || typeof potSub!=='function') return null;
-  if(Math.random()>=0.20) return null;   // i flashpoint sono PRESENZA RICORRENTE: ~1 ogni 5-6 mesi (Giacomo: «un filo più caldi»)
+  if(dadoPosto('conf')>=0.20) return null;   // L275-78: dadoPosto (Math.random senza rottura pendente) · i flashpoint sono PRESENZA RICORRENTE: ~1 ogni 5-6 mesi (Giacomo: «un filo più caldi»)
   /* Fetta B — sedia-swing: il non allineato salta i conflitti `occ:true` (specifici dell'Occidente: difesa comune, ecc.)
      e prende invece il pool CONFLITTI_SWING (corteggiato dai due poli); l'occidentale prende tutti i CONFLITTI_INT. */
   const na=(typeof nonAllineato==='function' && nonAllineato());
@@ -7182,7 +7249,7 @@ function pickCrisiScala(){
   if(S.crisi.guerra) return guerraCarta();   // L245-4: in guerra la carta del fronte, una al mese (nessuna estrazione per la carta)
   if(S.crisi.ricevuto) return crisiCartaRicevuto();   // L245-6: l'ultimatum ricevuto, certo (nessuna estrazione per la carta)
   if(S.crisi.subita) return null;                     // L245-6: nel preavviso nessuna carta della scala (i segnali sono del rivale)
-  if(Math.random()>=CRISI_P_SCALA) return null;   // L245-2bis
+  if(dadoPosto('scala')>=CRISI_P_SCALA) return null;   // L245-2bis · L275-78: dadoPosto
   if(S.crisi.respinto && S.crisi.t>=4) return crisiCartaRespinto();   // L245-4: dopo l'ultimatum respinto, la carta che offre la guerra
   var t=S.crisi.t, p=crisiPot(); if(!p) return null;
   var ev=crisiScalaCarta(Math.min(t,3)); if(!ev) return null;   // L251-5: una fra le tre del gradino, mai l'ultima uscita
@@ -7278,7 +7345,8 @@ function guerraForzeMese(){ var r=guerraRigaViva(); if(!(r && Number.isInteger(r
 function guerraForzeTetto(){ return GUERRA_K.forze+(S.crisi && S.crisi.alleati==='seguono' ? GUERRA_K.forzeAlleati : 0); }
 let GUERRA_IRAQ03_UK=true;   // L275-52 (F49): l'Iraq 2003 britannico (righe di RIVALI uk1980/uk1990/uk2000 con iraq 2002-2004 a 5 `lontano`, soloSe; la prima scelta di IRAQ_EV apre la guerra, S.iraq resta 'guerra' e dall'esito 'tregua'/'persa'). Spento = il gioco di prima
 let GUERRA_GOLFO91=true;   // L275-51 (F48): il Golfo combattuto nella linea americana (righe di RIVALI us1990/us1980 con iraq 1990-1991 a 5 `lontano`, soloSe; la scelta «subito» di GOLFO90_EV e le due di US90_GOLFO_ESITO_EV; golfoEsitoOra tace a guerra aperta). Spento = il gioco di prima
-let GUERRA_SUEZ56=true;   // L275-50 (F47): Suez combattuta in uk1950 e fr1950 (righe di RIVALI con egitto 1956-1957 a 5 `lontano`, soloSe; la prima scelta di SUEZ_EV e di SUEZ_FR_EV) e i due campi di riga `nomiFronti`/`trattativaDa` (guerraNuova, anche le Falkland). Spento = il gioco di prima
+let GUERRA_SUEZ56=true;   // L275-50 (F47): Suez combattuta in uk1950 e fr1950 (righe di RIVALI con egitto 1956-1957 a 5 `lontano`, soloSe; la prima scelta di SUEZ_EV e di SUEZ_FR_EV) (i due campi di riga `nomiFronti`/`trattativaDa` dal L275-75 stanno sotto CAMPI_RIGA_GUERRA). Spento = il gioco di prima
+let CAMPI_RIGA_GUERRA=true;   // L275-75: la leva dei due campi di riga `nomiFronti`/`trattativaDa` (guerraNuova), sempre accesa; GUERRA_SUEZ56 spegne solo Suez
 /* ⚑ L275-61 (F52, la vista) · I TEATRI NEL CASSETTO «GUERRA». GUERRA_TEATRI: acceso, al posto della scena (L275-62) il cassetto disegna la mappa
    ridotta del teatro (TEATRI di data.js, la riga di RIVALI col suo `teatro`/`settori`/`porto`); spento = il cassetto di prima byte per byte.
    teatroGuerra(): la sola lettura, pura (non scrive S, nessun dado). La riga è quella di rivaleRiga(S.crisi.con), la stessa di guerraNuova e di
@@ -7319,7 +7387,7 @@ function guerraVotoAula(){
   return { vota:true, p:V.p, respinta:Math.random()<V.p };
 }
 function guerraNuova(){
-  var rg=(GUERRA_SUEZ56 && S.crisi) ? rivaleRiga(S.crisi.con) : null;   // L275-50: i campi della riga `nomiFronti` e `trattativaDa`, letti solo con GUERRA_SUEZ56
+  var rg=(CAMPI_RIGA_GUERRA && S.crisi) ? rivaleRiga(S.crisi.con) : null;   // L275-50: i campi della riga `nomiFronti` e `trattativaDa` · L275-75: letti con CAMPI_RIGA_GUERRA (prima dietro GUERRA_SUEZ56)
   var fm=guerraForma(), nomi=(rg && Array.isArray(rg.nomiFronti) && rg.nomiFronti.length===3) ? rg.nomiFronti : FRONTI_NOMI[fm ? GUERRA_FORME[fm].fronti : guerraTipo()==='confine' ? 'confine' : 'altro'], n=   // L275-43: la forma vince sul tipo per i nomi dei settori · L275-50: i nomi della riga vincono su tutti e due
 1+Math.floor(Math.random()*3), f=[];
   for(var i=0;i<n;i++) f.push({ n:nomi[i], linea:0 });
@@ -7633,7 +7701,7 @@ function attaccoRisposta(it, d, mossa){
 }
 function pickInternazionale(){
   if(typeof INTERNAZIONALI==='undefined') return null;
-  if(Math.random()>=0.13) return null;
+  if(dadoPosto('int')>=0.13) return null;   // L275-78: dadoPosto
   const pool=INTERNAZIONALI.filter(e=>(!e.cond||e.cond()) && eraViva(e));
   const ev=pescaBag('int', pool); if(!ev) return null;
   return ev;
@@ -7642,7 +7710,7 @@ function pickInternazionale(){
    tematici leggono la policy specifica → la spaccatura verde/diritti). Entra nel giro degli eventi internazionali. */
 function pickONG(){
   if(typeof ONG_EV==='undefined' || !S.relInt || S.relInt.ong==null) return null;
-  if(Math.random()>=0.11) return null;
+  if(dadoPosto('ong')>=0.11) return null;   // L275-78: dadoPosto
   const pool=ONG_EV.filter(e=>(!e.cond||e.cond()) && eraViva(e));
   const ev=pescaBag('ong', pool); if(!ev) return null;
   return ev;
@@ -8169,6 +8237,10 @@ function anticipataNelMandato(){
 }
 function azzeraOrologioUrna(){
   if(anticipataNelMandato()){ S.legislaturaDa=S.year*12+S.month; return false; }
+  /* ⚑ L275-76 · nelle partite americane la presidenziale è fissa: chi lascia la Casa Bianca a metà mandato (condannaLieve →
+     entraOpposizione) non riapre l'orologio, che resta quello della nazione (salitaTurnoMandato, dal calendario d'avvio). Dopo
+     un'urna presidenziale vera salitaTurnoMandato() vale già 0 (sonda prove/l275-76/sonda-calendario.js): identico a prima. */
+  if(partitaAmericana()){ S.turnInMandate=salitaTurnoMandato(); return true; }
   S.turnInMandate=0; return true;
 }
 /* la scadenza ordinaria del mandato in corso, come «Mese anno» reso (per i testi dell'anticipata svedese) */
@@ -9683,11 +9755,11 @@ function decidiTerritori(ris){
   const dopo=S.territori.map(function(t){ return Object.assign({},t); });
   PAESE.territori.forEach(function(TE,i){
     if(!(ris.tocca==='tutti' || TE.tipo===ris.tocca)) return;
-    const localShare=50 + wave + (TE.lean*aB*4) + ((dopo[i].spinta||0)*0.5) + (Math.random()*6-3);   // L64-2: la spinta della campagna PRIMA dell'onda
+    const localShare=50 + wave + (TE.lean*aB*4) + ((dopo[i].spinta||0)*0.5) + (attaccoDado('intermedia|'+ris.tipo+'|'+i)*6-3);   // L64-2: la spinta della campagna PRIMA dell'onda · L275-81: il ±3 dal dado-hash per area (personaggio, mese, indice), non da Math.random
     const nuovoTuo=localShare>50, eraTuo=compatibile(dopo[i].partito, asseTuo, S.partito, i);
     const partito=(nuovoTuo!==eraTuo) ? scegliPartito(nuovoTuo, TE.lean, asseTuo, S.partito, i) : null;   // L250-22: null = nessuno del lato vincente è ammesso nell'area, che resta com'è
     if(partito!=null){
-      const nome=nomePersona();
+      const sa='intermedia|'+ris.tipo+'|'+i, nome=nomeLecito(PAESE.nomi[Math.floor(attaccoDado(sa+'|n')*PAESE.nomi.length)], PAESE.cognomi[Math.floor(attaccoDado(sa+'|c')*PAESE.cognomi.length)]);   // L275-81: le liste di nomePersona, due dadi-hash (nomeLecito ripiega da sé, senza dadi)
       dopo[i]=portaUmore(dopo[i], { titolare:nome, partito:partito });   // L182-3: il voto non azzera l umore del giro
       ris.aree.push({ nome:TE.nome, nomeEn:TE.nomeEn, carica:TE.carica, caricaEn:TE.caricaEn, titolare:nome, partito:partito, tuo:nuovoTuo });   // FIX: era T.nome/T.carica (T = funzione traduzione → undefined); porta i campi grezzi, risolti in-lingua dal render
     }
@@ -9731,7 +9803,9 @@ function campagnaColPilastro(P){
    ⚑ ACCESO il 6/10 (L179-4, D225: Giacomo ha scelto (a)). Rimisurato sul motore di quel giorno (`censimento-l178-2.js cura`, 20
    carriere × 132 mesi per lato, tutte le porte e cinque presenti): 144 voti cancellati da un pilastro → 0, in sette casi (fr1960
    gov e opp 20+20, fr1970 20+15, uk1980 gov 20, uk1960 18+7, uk2000 gov 17, italia1970 opp 7); la causa di fine che peggiora di più
-   +2/20 (fr1960 opposizione, primaria 14 → 16), quindi anche la regola di L178-2 oggi passa. */
+   +2/20 (fr1960 opposizione, primaria 14 → 16), quindi anche la regola di L178-2 oggi passa.
+   L275-83: la chiama anche il richiamo delle correnti (i due punti di genAgendaRamo, governo e opposizione): il richiamo non si rinvia
+   (L179-2, qui sotto) e nel mese del voto la carta del risultato esce accanto a lui, invece di sparire. */
 let PILASTRO_COL_VOTO = true;    // let e non const: il banco lo varia (L178-2)
 function votoColPilastro(){
   if(!PILASTRO_COL_VOTO || typeof S==='undefined' || !S || S.livello!==3) return null;
@@ -9748,7 +9822,8 @@ function votoColPilastro(){
    · la questione di fiducia: regge fino a ottobre (il suo mese va da marzo a novembre);
    · l'occasione del livello 3: non è un dovuto ma un'estrazione — nel mese del voto non si estrae.
    FUORI dalla cura: il richiamo delle correnti (misurato: rinviato di un mese, in 3 carriere su 22 la corrente scende sotto 35 e la
-   sfida alla leadership si apre SENZA avviso — l'imboscata che il richiamo esiste per evitare; de2000 e oggi/usa dall'opposizione);
+   sfida alla leadership si apre SENZA avviso — l'imboscata che il richiamo esiste per evitare; de2000 e oggi/usa dall'opposizione;
+   dal L275-83 il richiamo resta nel mese e il voto esce accanto a lui, con votoColPilastro);
    rimpasto e sostegno (la finestra è la minoranza «fresca» di 1-2 mesi, e un mese di rinvio è un mese di minoranza
    in più: cambierebbe chi cade); la campagna nazionale (fuori dalla stagione per costruzione); pilastri e snodi (L179-4, G1).
    ⚑ COM'È FINITA (3/10, turno delle 21): ACCESO. 20 carriere × 132 mesi per lato, tutte le porte e i presenti: i voti cancellati da
@@ -10255,9 +10330,9 @@ function cartaCampagna(ev){
 }
 function cartaRisultato(ev){
   /* L173-2 · `penalitaGoverno` sulla voce di `intermedie`: chi governa paga la metà mandato (al governo la tua quota scende,
-     all'opposizione sale). Assente = 0, e il dado si tira come prima (stesso numero di chiamate a Math.random). */
+     all'opposizione sale). Assente = 0. Dal L275-78 il ±2 non tira Math.random (attaccoDado, sotto). */
   const pen=(ev && ev.penalitaGoverno) ? (S.opposizione ? ev.penalitaGoverno : -ev.penalitaGoverno) : 0;
-  const quota=clamp(bloccoQuota()+(S.campagnaMod||0)+(Math.random()*4-2)+pen, 0, 100);
+  const quota=clamp(bloccoQuota()+(S.campagnaMod||0)+(attaccoDado('intermedia|'+ev.tipo)*4-2)+pen, 0, 100);   // L275-78 (a): il ±2 dal dado-hash (personaggio e mese), non da Math.random: un caricamento ritrova la stessa quota (un'urna sola per mese: intermediaA)
   const attesa=(S.bloccoAtteso!=null)?S.bloccoAtteso:quota;
   const ris={ tipo:ev.tipo, tocca:ev.tocca||'tutti', quota, attesa, margine:Math.round((quota-attesa)*10)/10, win:quota>=attesa, faccia:!!S.campagnaFaccia, aree:[] };
   if(S.congresso) ris.camera=clamp(quotaPartitoPresidente() + (S.opposizione ? -1 : 1)*(quota-bloccoQuota()), 0, 100);   // L173-2: la Camera che questo voto dà al partito del Presidente
@@ -12232,7 +12307,7 @@ function genAgendaRamo(first){
     /* L27-1 — LA CARTA-RICHIAMO DELLE CORRENTI ANCHE QUI. Togliere il gate non bastava: l'iniezione del richiamo
        sta in fondo a genAgendaRamo, DOPO il `return` di questo ramo (misurato: gate aperto → 0 carte uscite in
        216 mesi). Stessa precedenza che ha al governo (prima della stagione elettorale), stesso `agendaSolo()`. */
-    if(!first && typeof richiamoCorrentiDovuto==='function' && richiamoCorrentiDovuto()){ S.richiamoCorrUltimo=S.year*12+S.month; S.agenda.push({kind:'event', data:cartaRichiamoCorrenti(), resolved:false}); snodoAccantoAlRichiamo(); agendaSolo(); return; }   // L227-1: S2 di us1960 non si perde sotto il richiamo
+    if(!first && typeof richiamoCorrentiDovuto==='function' && richiamoCorrentiDovuto()){ S.richiamoCorrUltimo=S.year*12+S.month; S.agenda.push({kind:'event', data:cartaRichiamoCorrenti(), resolved:false}); snodoAccantoAlRichiamo(); var _vr=votoColPilastro(); if(_vr) S.agenda.push(_vr); agendaSolo(); return; }   // L227-1: S2 di us1960 non si perde sotto il richiamo · L275-83: nel mese del voto di un'intermedia anche la carta del risultato (richiamo prima, risultato dopo)
     if(!first && scissioneMiaDovuta()){ S.agenda.push({kind:'event', data:cartaScissioneMia(), resolved:false}); agendaSolo(); return; }   // L237-6: «Il partito ti sta stretto», carta dovuta accanto al richiamo
     if(!first && typeof snodoAlleanza81Dovuta==='function' && snodoAlleanza81Dovuta()){ S.agenda.push({kind:'event', data:(S.partito==='uk_lib'?QUATTRO_EV:SCISSIONE81_EV), resolved:false}); agendaSolo(); return; }   // L60-2: la scissione dell'81 arriva anche all'opposizione
     if(!first && typeof snodoAnimaDovuta==='function' && snodoAnimaDovuta()){ S.agenda.push({kind:'event', data:ANIMA_EV, resolved:false}); agendaSolo(); return; }   // L75-1: l'anima del partito, all'opposizione
@@ -12582,7 +12657,7 @@ function genAgendaRamo(first){
   if(!first && typeof snodoMattarellumDovuta==='function' && snodoMattarellumDovuta()){ S.agenda.push({kind:'event', data:MATTARELLUM_EV, resolved:false}); agendaSolo(); return; }
   if(!first && typeof snodoMaastrichtDovuta==='function' && snodoMaastrichtDovuta()){ S.agenda.push({kind:'event', data:MAASTRICHT_EV, resolved:false}); agendaSolo(); return; }
   // CURA Lotto P3 (#9): la CARTA-RICHIAMO delle correnti — chiama alla scheda PRIMA che sia tardi (mai l'imboscata a 30)
-  if(!first && typeof richiamoCorrentiDovuto==='function' && richiamoCorrentiDovuto()){ S.richiamoCorrUltimo=S.year*12+S.month; S.agenda.push({kind:'event', data:cartaRichiamoCorrenti(), resolved:false}); snodoAccantoAlRichiamo(); agendaSolo(); return; }   // L227-1: S2 di us1960 non si perde sotto il richiamo
+  if(!first && typeof richiamoCorrentiDovuto==='function' && richiamoCorrentiDovuto()){ S.richiamoCorrUltimo=S.year*12+S.month; S.agenda.push({kind:'event', data:cartaRichiamoCorrenti(), resolved:false}); snodoAccantoAlRichiamo(); var _vr=votoColPilastro(); if(_vr) S.agenda.push(_vr); agendaSolo(); return; }   // L227-1: S2 di us1960 non si perde sotto il richiamo · L275-83: nel mese del voto di un'intermedia anche la carta del risultato (richiamo prima, risultato dopo)
   if(!first && scissioneMiaDovuta()){ S.agenda.push({kind:'event', data:cartaScissioneMia(), resolved:false}); agendaSolo(); return; }   // L237-6: «Il partito ti sta stretto», carta dovuta accanto al richiamo
   // Cantiere C: la STAGIONE ELETTORALE (ultimi 6 mesi) — il beat-campagna è LA carta del mese (setpiece: la campagna assorbe l'agenda)
   if(!first && typeof pickCampagnaNazionale==='function'){ const cnb=pickCampagnaNazionale(); if(cnb){ S.agenda.push(cnb); agendaSolo(); return; } }
@@ -12617,7 +12692,7 @@ function genAgendaRamo(first){
   if(!hadEvent){ const pp=pickPolPressione(); if(pp){ S.agenda.push(pp); hadEvent=true; } }
   if(!hadEvent){ const fidEv=pickFiduciaEvent(); if(fidEv){ S.agenda.push({kind:fidEv.kind, data:fidEv.data, resolved:false}); hadEvent=true; } }
   // evento grave raro (solo se non c'è già l'evento mercati)
-  if(!hadEvent && Math.random()<0.10*dif().freqEventi){
+  if(!hadEvent && dadoPosto('grave')<0.10*dif().freqEventi){   // L275-78: dadoPosto (Math.random senza rottura pendente)
     S.recentEvent=S.recentEvent||[];   // finestra anti-ripetizione (5): prima escludevamo solo l'ULTIMO evento
     const pool=EVENTS.filter(e=>(!e.cond||e.cond())&&eraViva(e)&&!S.recentEvent.includes(e.id)&&!giaUscitaUnaCarriera(e));   // L232-1: unaCarriera (la finestra dei recenti ha 5 posti: un evento con una finestra di mesi tornava) · Build B: eraViva ADDITIVO — gli eventi senza tag passano sempre (nessuna regressione); abilita i pilastri d'epoca taggati
     if(pool.length){ const ev=rnd(pool); if(ev.unaCarriera) segnaUnaCarriera(ev.id); S.recentEvent.push(ev.id); if(S.recentEvent.length>5) S.recentEvent.shift(); S.agenda.push(bilancioTrasforma(vicendaTrasforma({kind:'event', data:ev, resolved:false}))); hadEvent=true; }   // L272-3: `pandemia` può diventare il tempo 1 dell'epidemia (spenta: l'item com'è) · L275-17: us_p_tetto e us_p_shutdown possono diventare il round 1 col Congresso (bilancioTrasforma; spenta: l'item com'è)
@@ -12783,9 +12858,9 @@ function voceAgendaMese(){
      rimesso, un caricamento lo sposterebbe). E `log`: è cronaca, le righe d'ingresso si riscrivono (come prima).
      E i campi che il FILO di un arco nato in questa generazione scrive (`filoArco`: `S.tavoloPid`, `S.scandaloUltimo`).
    · ⚠ IL SALVATAGGIO DOPO UNA CARTA RISOLTA (la regola di D150: una carta risolta nel mese non torna mai). Due difese:
-     (1) i campi si rimettono solo se al momento del salvataggio valgono TUTTI ancora quello che `genAgenda` ha lasciato — se una
-     risoluzione (o chiunque dopo) ne ha cambiato uno, non se ne rimette nessuno e il caricamento è quello di prima: i campi si
-     tengono fra loro (la promessa di campagna rimessa sopra i gruppi già toccati da una carta raddoppierebbe il conto);
+     (1) un campo si rimette solo se al momento del salvataggio vale ancora quello che `genAgenda` ha lasciato; se una risoluzione
+     (o chiunque dopo) lo ha cambiato, dal L275-70 passa in `pa.ingresso` (rimesso per la sola rigenerazione, poi torna il valore
+     salvato: nessun conto raddoppiato) — fino al L275-70 un campo toccato faceva cadere tutti gli altri (vedi primaAgendaSnap);
      (2) le carte già risolte nel mese viaggiano per chiave (`chiaveCartaAgenda`: kind + id/tipo/ministero) e dopo la
      rigenerazione si tolgono: i loro segni d'ingresso li riscrive la rigenerazione stessa (stessi valori di dopo), gli effetti
      della scelta sono già in `s` una volta. Le carte tolte restano in `AG_TOLTE` fino alla generazione dopo, così anche un
@@ -12822,20 +12897,55 @@ function segnaPrimaAgenda(foto){
       Object.keys(Object.assign({},a,b)).forEach(function(j){ const sb=_jsAg(b[j]); if(_jsAg(a[j])!==sb){ P[k+'.'+j]=(a[j]===undefined?{__undef:1}:a[j]); D[k+'.'+j]=sb; } });
     } else { const sb=_jsAg(b); if(_jsAg(a)!==sb){ P[k]=(a===undefined?{__undef:1}:a); D[k]=sb; } }
   });
-  AG_PRIMA=P; AG_DOPO=D; AG_S=S; AG_MESE=S.year*12+S.month;
+  AG_PRIMA=P; AG_DOPO=D; AG_S=S; AG_MESE=S.year*12+S.month; AG_FOTO=foto;
 }
 function _valAg(s, p){ const q=p.split('.'); if(q.length===1) return s[q[0]]; const o=s[q[0]]; return (o && typeof o==='object') ? o[q[1]] : undefined; }
 function chiaveCartaAgenda(it){ if(!it) return null; const x=(it.data&&it.data.id)||it.tipo||it.min||''; return x ? (it.kind+'|'+x) : null; }
 function primaAgendaSnap(){
   if(!SNAP_PRIMA_AGENDA || !AG_PRIMA || AG_S!==S || AG_MESE!==S.year*12+S.month) return null;   // di un altro stato o di un altro mese: niente
   const campi={};
-  let tocco=false;
-  Object.keys(AG_PRIMA).forEach(function(p){ if(_jsAg(_valAg(S,p))===AG_DOPO[p]) campi[p]=AG_PRIMA[p]; else tocco=true; });   // difesa (1)
-  if(tocco) Object.keys(campi).forEach(function(p){ delete campi[p]; });   // difesa (1): o tutti o nessuno (i campi si tengono fra loro)
+  const tocco=[];
+  Object.keys(AG_PRIMA).forEach(function(p){ if(_jsAg(_valAg(S,p))===AG_DOPO[p]) campi[p]=AG_PRIMA[p]; else tocco.push(p); });   // difesa (1)
+  /* difesa (1), dal L275-70: un campo che genAgenda ha scritto e che dopo (il resto del mese, una carta risolta) ha cambiato ancora non si
+     rimette al valore di prima — lo si perderebbe —: passa in `pa.ingresso` (per la sola rigenerazione, poi torna quello salvato). Gli altri
+     si rimettono. Fino al L275-70 un solo campo toccato faceva cadere TUTTI i campi ("o tutti o nessuno"), e la rigenerazione ripartiva
+     dallo stato di fine mese: la campagna già aperta, le promesse già giudicate (la promessa che spariva al caricamento, «⚑ L275-67»). */
   const risolte=AG_TOLTE.slice();
   (S.agenda||[]).forEach(function(it){ if(it && it.resolved){ const c=chiaveCartaAgenda(it); if(c) risolte.push(c); } });   // difesa (2)
-  if(!Object.keys(campi).length && !risolte.length) return null;
-  return {campi:campi, risolte:risolte};
+  let ingresso=ingressoAgendaSnap();   // L275-70: i campi scritti DOPO genAgenda nel mese, col valore che genAgenda aveva visto
+  if(tocco.length){ ingresso=ingresso||{}; tocco.forEach(function(p){ ingresso[p]=AG_PRIMA[p]; }); }
+  if(!Object.keys(campi).length && !risolte.length && !ingresso) return null;
+  const o={campi:campi, risolte:risolte}; if(ingresso) o.ingresso=ingresso; return o;
+}
+/* L275-70 · LA RIGENERAZIONE VEDE LO STATO CHE AVEVA VISTO genAgenda. `pa.campi` rimette i campi che genAgenda ha SCRITTO; ma
+   dopo genAgenda, nello stesso mese, altri scrivono S (generaTitolo, forseSondaggio e la tappa del trimestre, forseBilancio,
+   forseTelefonata, il territorio che chiama, decadiUmore, forseIntervista, il mese delle persone ricorrenti…) e, a metà mese, le
+   carte risolte. Al caricamento la rigenerazione leggeva quei campi già al valore di fine mese e decideva un'altra agenda — con
+   lo stesso dado: un'altra carta della scala, un rimpasto in più, la Lega che rientra in coalizione (misura: prove/l275-70/).
+   `pa.ingresso` = per quei campi (a due livelli, come `pa.campi`, e mai uno che genAgenda ha scritto) il valore all'ingresso di
+   genAgenda; `applySnap` li rimette SUBITO PRIMA della rigenerazione e subito dopo rimette quelli del salvataggio: la
+   rigenerazione vede lo stato d'inizio mese, lo stato caricato resta quello salvato. Assente nei salvataggi di prima: come prima. */
+let AG_FOTO=null;
+function ingressoAgendaSnap(){
+  if(!AG_FOTO || !AG_PRIMA) return null;
+  const U=_jsAg(undefined), ing={};
+  Object.keys(Object.assign({},AG_FOTO,S)).forEach(function(k){
+    if(agendaCampoEscluso(k) || (k in AG_PRIMA)) return;
+    const fs=(k in AG_FOTO) ? AG_FOTO[k] : U;
+    if(fs===_jsAg(S[k])) return;
+    const a=(fs===U) ? undefined : JSON.parse(fs), b=S[k];
+    if(a && b && typeof a==='object' && typeof b==='object' && !Array.isArray(a) && !Array.isArray(b)){
+      Object.keys(Object.assign({},a,b)).forEach(function(j){ if((k+'.'+j) in AG_PRIMA) return; if(_jsAg(a[j])!==_jsAg(b[j])) ing[k+'.'+j]=(a[j]===undefined?{__undef:1}:a[j]); });
+    } else if(!Object.keys(AG_PRIMA).some(function(p){ return p.indexOf(k+'.')===0; })) ing[k]=(a===undefined?{__undef:1}:a);
+  });
+  return Object.keys(ing).length ? ing : null;
+}
+function ingressoScambia(pa){
+  if(!pa || !pa.ingresso || typeof pa.ingresso!=='object') return null;
+  const fine={};
+  Object.keys(pa.ingresso).forEach(function(p){ const v=_valAg(S,p); fine[p]=(v===undefined ? {__undef:1} : JSON.parse(JSON.stringify(v))); });
+  rimettiPrimaAgenda(S, pa.ingresso);
+  return fine;
 }
 function rimettiPrimaAgenda(s, campi){
   Object.keys(campi||{}).forEach(function(p){ const v=campi[p], u=v&&v.__undef, q=p.split('.');
@@ -13496,6 +13606,7 @@ function avanzaMese(){
       if(!S.attivista.laurea && attLaureabile()){ S.attivista.laurea=true;               // L4: raggiunto il gate → si apre la prima candidatura (flag persistito nel salvataggio)
         S.log.unshift({t:T('Pronto per la candidatura'), x:T('Hai base, fiducia dei gruppi e autorevolezza: il partito è pronto a candidarti. Scegli dove scendere in campo.')});
         discorsoRadiceLaurea(); }   // L275-9: la promessa alle radici aperta si chiude senza effetti (no-op senza promRad)
+      if(S.attivista.laurea) cartaSaltataLaurea();   // L275-82: con l'offerta aperta la carta segue le tappe del mese, prima del foglio di scelta
       // ROLL del mese AL CONFINE (reload-stabile): priorità resa > evento > offerta-campagna; la carta la sceglie genAgenda
       if(S.attivista.laurea){ S.attivista.evCorrente=null; S.attivista.campOfferta=false; }
       else if(C2 && C2.resaPending){ S.attivista.evCorrente=null; S.attivista.campOfferta=false; }   // la resa ha la precedenza sul mese
@@ -15370,20 +15481,30 @@ function rompiPartner(id){
   if(MESE_IN_CORSO && !S.opposizione && !S.coabitazione && S.livello===3 && typeof parla==='function' && !(typeof voceInCorso==='function' && voceInCorso())) parla('voce-coalizione-rotta');
   return true;
 }
+/* L275-78 (b-bis) · la rottura PENDENTE: il primo alleato in coalizione sotto la soglia della rottura (sRot 20 di pickAlleato) non ancora
+   annunciato, o null. Puro (nessuna scrittura in S): è la condizione di pickAlleato, e la legge dadoPosto. Nei mesi con una rottura
+   pendente i tiri che decidono se il posto dell'evento è libero (dadoPosto, nei sei cancelli prima di pickAlleato in genAgendaRamo:
+   evento grave, scala della crisi, conflitto, internazionale, ONG, occasione del capo del governo) vengono dal dado-hash del mese, così
+   un caricamento ritrova la stessa rottura o la stessa attesa; il mese dopo il dado è un altro (meseAss). Senza rottura pendente: Math.random. */
+function rotturaPendente(){
+  if(!S || S.livello!==3 || S.opposizione || !PAESE.coalizione || !S.tenuta || !S.coalizione) return null;   // pickAlleato la chiama solo genAgendaRamo al livello 3
+  const L=S.tenutaLiv||{};
+  return S.coalizione.find(function(id){ return id!==S.partito && (S.tenuta[id]||0)<20 && (L[id]||0)<2; }) || null;
+}
+function dadoPosto(sale){ return rotturaPendente() ? attaccoDado('posto|'+sale) : Math.random(); }
 function pickAlleato(){
   if(S.opposizione || !PAESE.coalizione || !S.tenuta) return null;
   const allies=S.coalizione.filter(id=>id!==S.partito);
   if(!allies.length) return null;
   const mese=S.year*12+S.month, MARG=8, RAFFR=6, sUlt=35, sRot=20;
   S.tenutaLiv=S.tenutaLiv||{}; S.tenutaUltimo=S.tenutaUltimo||{};
-  // 1) rottura: un alleato sotto la soglia, non ancora annunciata
-  for(const id of allies){
-    if((S.tenuta[id]||0)<sRot && (S.tenutaLiv[id]||0)<2){
+  // 1) rottura: un alleato sotto la soglia, non ancora annunciata (L275-78: la condizione è rotturaPendente(), sotto)
+  const id=rotturaPendente();
+  if(id){
       rompiPartner(id);   // L111-2: un punto solo di verità per «un alleato ha rotto»
       const nome=T(part(id).nome), AE=ALLEATI_EV.rottura;   // L244-4: il nome del partito passa da T()   // (rinominata da T: oscurava la funzione i18n T())
       return { kind:'event', ally:id, data:{ kick:T(AE.kick), t:T(AE.t).replace(/%A/g,nome), text:T(AE.text).replace(/%A/g,nome),
         ch:[ {l:T(AE.ok.l), e:T(AE.ok.e), f:()=>{}} ] } };
-    }
   }
   // 2) ultimatum: alleato in zona 20..35, con isteresi (riarmo sopra 35+MARG) e raffreddamento per alleato
   let cand=null;
@@ -17069,7 +17190,7 @@ function applySnap(snap){
   if(S.campNaz===undefined) S.campNaz=null;                        // Cantiere C — migrazione campagna nazionale
   if(S.campNazUltimo===undefined) S.campNazUltimo=null;
   if(S.promesseCampagna===undefined) S.promesseCampagna=[];
-  if(S.territori==null && PAESE.territori){ try{ initTerritori(); }catch(e){} }   // retro-compatibilità: salvataggi pre-territori
+  if(S.territori==null && PAESE.territori && !(S.livello>=4)){ try{ initTerritori(); }catch(e){} }   // retro-compatibilità: salvataggi pre-territori · L275-78 (c): non ai livelli 4-5 — il diplomatico gioca con S.territori null (startDiplomatico non li genera, e dal 4-5 non si torna giù): generarli al caricamento tirava 2 numeri per territorio e dava titolari che la partita continuata non ha
   else if(S.territori && PAESE.territori && S.territori.length<PAESE.territori.length){   // espansione aree (4→12): conserva gli eletti esistenti (i primi 4, stesso ordine), inizializza solo le nuove
     try{ S.territori=PAESE.territori.map(function(TE,i){ return S.territori[i] || { titolare:nomePersona(), partito:partitoVicinoLean(TE.lean, i) }; }); }catch(e){}
   }
@@ -17078,6 +17199,7 @@ function applySnap(snap){
   if(S.tab==='ind'||S.tab==='con') S.tab='paese';    // migrazione tab: Indicatori+Consenso sono fuse in "Paese" (2026-06-11)
   if(PAESE.ue && S.pesoUE==null){ try{ S.pesoUE=pesoUEBase(); }catch(e){} }   // migrazione vecchi salvataggi (pre-Parlamento europeo)
   S.recentEvent=S.recentEvent||[]; S.recentInt=S.recentInt||[];               // migrazione: finestre anti-ripetizione eventi (i vecchi lastEvent/lastInt restano inerti)
+  S.recentProp=S.recentProp||[]; S.recentDoss=S.recentDoss||[]; S.recentScandalo=S.recentScandalo||[]; S.recentBudget=S.recentBudget||[]; S.recentConflitto=S.recentConflitto||[];   // L275-73: le altre cinque finestre del capo del governo, nello stesso modo (un salvataggio senza faceva cadere pickProposta & co. su S.recentProp.includes: prove/l275-73/migrazione.js)
   if(!S.correnti){ try{ initCorrenti(); }catch(e){} }                          // migrazione vecchi salvataggi (pre-correnti): umori a 60, leader nuovi
   if(S.mossaPartito===undefined) S.mossaPartito=null;
   if(!S.biografia) S.biografia=bioVuota();                                     // migrazione vecchi salvataggi (pre-biografia): memoria vuota, i tratti maturano da qui
@@ -17177,7 +17299,9 @@ function applySnap(snap){
   if(S.partitoProprio && S.partitoProprio.trag!=null) ppTragPulisci();   // L260-7bis: il registro dei traguardi illeggibile si toglie   // L260-7: un registro delle sedi illeggibile si toglie (senza = nessuna sede)
   if(S.livello===5 && S.diplo && !Array.isArray(S.diplo.bil)) bilInit();   // L260-5: un diplomatico di prima riceve la rete bilaterale (solo con DIPLO_BILATERALI)
   if(S.livello===5 && S.diplo && !S.diplo.conc) concNasce();   // L260-5bis: un diplomatico di prima riceve il concorrente (solo con DIPLO_CONCORRENTE)
+  const _fine=ingressoScambia(_pa);   // L275-70: i campi scritti dopo genAgenda tornano al valore d'ingresso per la sola rigenerazione…
   genAgenda(false);   // agenda fresca: il mese riparte pulito
+  if(_fine) rimettiPrimaAgenda(S, _fine);   // …e subito dopo tornano quelli del salvataggio
   if(_pa) togliRisolteAgenda(_pa.risolte);   // L180-1: una carta risolta nel mese non torna (D150)
   agendaRipristina(_pa);   // L270-2: le carte aggiunte e rinviate dall'agenda del mese, per chiave (un valore illeggibile o di un altro mese si toglie)
   if(!S.titoloMese){ try{ generaTitolo(); }catch(e){} }   // vecchi salvataggi senza titolo: la striscia c'è sempre

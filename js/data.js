@@ -1805,7 +1805,7 @@ const SCENARI = {
         selezionabile:false, nota:'Il Front national ha un deputato e nessun alleato: non è una carriera che si possa giocare' },
     ],
     /* l'Assemblea del giugno 1997, come la lascia la tappa 1997/6 di fr1990 */
-    seggi: { fr_sfio:49.2, fr_pcf:6.2, fr_verts:1.2, fr_unr:24.6, fr_ri:19.8, fr_fn:0.2 },
+    seggi: { fr_sfio:48.6, fr_pcf:6.1, fr_verts:1.2, fr_unr:24.3, fr_ri:19.6, fr_fn:0.2 },   // L275-73: al decimo, 100,0 coi resti più alti (era 101,2)
     /* ⚠ cifre INSEE/Eurostat di memoria, ordine di grandezza (scheda §2, CIFRE-ECONOMICHE.md). In franchi fino al 2001:
        il changeover del gennaio 2002 (CHANGEOVER, game.js) converte il PIL e passa all'euro. */
     economia: { pil:9450, debito:58, deficit:-1.5, inflazione:1.7, inflazioneTetto:5, crescita:1.5, disoccupazione:9 },
@@ -1845,6 +1845,7 @@ const SCENARI = {
   de1950: {
     id:'de1950', era:LINEA_DE, nome:'Germania Ovest 1950', nomePaese:'Germania Ovest', sottotitolo:"Repubblica Federale · capitale Bonn · la Germania Est è un altro stato", anno:1950, paese:'germania', territoriDEpoca:true,   /* L182-3 (D167): territori di quel paese e di quel decennio: il giro sul tavolo esce */
     turnMandato: 1,
+    gruppiAvvio: { difficile:{ imprenditori:6 } },   // L275-73: a difficile gli imprenditori partono 6 punti sopra GSTART (48 → 54): col boom il pavimento della rivolta sale a 46-55 nei primi mesi e la rivolta cadeva al mese 4 senza errori (6 su 160 carriere, prove/l275-73/rivolta.js; +6 → 0, spazzata 6/9/12/15)
     sistema: 'parlamentare', comeSiVince: 'parlamentare', coalizione: true, cadutaGoverno: true,
     sfiduciaCostruttiva: true, sbarramento: 5,
     mandatoMesi: 48, mandatiMax: null,
@@ -2105,7 +2106,7 @@ const SCENARI = {
         selezionabile:false, nota:'I Verdi restano all\'opposizione fino al 1998 e nel 1990 perdono voti: non è una carriera che si possa giocare' },   // D75; L154-1: congresso 20/20 al 1991/1 anche con la regola B (il partito non cresce)
     ],
     /* il Bundestag del 25 gennaio 1987 senza Berlino (497), in carica all'avvio */
-    seggi: { de_cdu:44.9, de_spd:37.4, de_fdp:9.3, de_grn:8.5 },
+    seggi: { de_cdu:44.8, de_spd:37.4, de_fdp:9.3, de_grn:8.5 },   // L275-73: al decimo, 100,0 coi resti più alti (era 100,1)
     /* ⚠ cifre della scheda §2, ordine di grandezza (Destatis/Bundesbank da confermare): miliardi di marchi, l'Ovest nel 1990. `S.pil` non
        cresce (D67) e all'unità non salta (D60). */
     economia: { pil:2430, debito:41.8, deficit:-2.0, inflazione:2.7, inflazioneTetto:8, crescita:4.5, disoccupazione:7.2, disoccupazionePavimento:0.5 },
@@ -2163,7 +2164,7 @@ const SCENARI = {
        «L155-1» e «L158-1»). Con la media pura (t=1: SPD 33,2) la molla portava la SPD a 35,8 prima del 2002 e l'urna era persa
        20/20. La Linke resta 4,5 con la sua tappa marcata del 2005; il crollo della SPD del 2009 resta alla tappa (`se` sulla grande coalizione). */
     /* il Bundestag del 27 settembre 1998 (669), in carica all'avvio */
-    seggi: { de_spd:44.5, de_cdu:36.6, de_grn:7.0, de_fdp:6.4, de_lnk:5.4 },
+    seggi: { de_spd:44.6, de_cdu:36.6, de_grn:7.0, de_fdp:6.4, de_lnk:5.4 },   // L275-73: al decimo, 100,0 coi resti più alti (era 99,9)
     /* ⚠ cifre della scheda §2, ordine di grandezza (Destatis/Bundesbank da confermare): miliardi di marchi fino al 2001; il changeover
        del gennaio 2002 divide il PIL per 1,95583 e passa all'euro. `S.pil` non cresce (D67). */
     economia: { pil:4030, debito:59, deficit:-1.2, inflazione:1.4, inflazioneTetto:8, crescita:4.5, disoccupazione:10.7, disoccupazionePavimento:0.5 },
@@ -2200,6 +2201,7 @@ const SCENARI = {
   us1950: {
     id:'us1950', era:LINEA_US, nome:'Stati Uniti 1950', anno:1950, paese:'usa', territoriDEpoca:true,   /* L182-3 (D167): territori di quel paese e di quel decennio: il giro sul tavolo esce */
     turnMandato: 1, meseUrna: 11,               // D125: il mandato del novembre 1948 al secondo anno → presidenziale 1952/11
+    gruppiAvvio: { difficile:{ imprenditori:6 } },   // L275-73: a difficile gli imprenditori partono 6 punti sopra GSTART (48 → 54): col boom il pavimento della rivolta sale a 46-55 nei primi mesi e la rivolta cadeva al mese 4 senza errori (6 su 160 carriere, prove/l275-73/rivolta.js; +6 → 0, spazzata 6/9/12/15)
     sistema: 'presidenziale', comeSiVince: 'candidato', coalizione: false, cadutaGoverno: false,
     mandatoMesi: 48, mandatiMax: 2, mandatiConsecutivi: false,
     titoloRuolo: 'Presidente', sedeGoverno: 'la Casa Bianca',
@@ -15591,9 +15593,9 @@ const EVENTS=[
    {l:'Rinegozia: più tempo, meno avanzo', e:'Un anno comprato', costo:{debito:0.2}, f:()=>{S.ind.debt+=0.2; gd('lavoratori',1);}},
    {l:'Il paese non si governa da Washington', e:'Applausi in piazza, silenzio dei mercati', f:()=>{S.ind.fiducia-=4; gd('lavoratori',3); gd('giovani',2); gd('imprenditori',-3);}}]},
  {id:'ar_p_dollaro', era:'contemporanea', paesi:['argentina'], min:'economia', kick:'Cambio', t:'I dieci dollari', text:'Il paese ha un cambio ufficiale e uno vero, con nomi diversi per ogni strada: il «blu», quello della carta, quello del turista. Chi può compra dollari e li mette sotto il materasso; lo Stato vieta, poi permette, poi vieta. Unificare il cambio è una svalutazione con un altro nome.', ch:[
-   {l:'Unifica il cambio: una svalutazione, e poi basta', e:'I prezzi saltano una volta, i mercati respirano', f:()=>{S.ind.fiducia+=3; gd('imprenditori',3); gd('lavoratori',-3); gd('pensionati',-2); gd('cetomedio',-2);}},                                            // ④
+   {l:'Unifica il cambio: una svalutazione, e poi basta', e:'I prezzi saltano una volta, i mercati respirano', f:()=>{S.ind.fiducia=clamp(S.ind.fiducia+3,0,100); gd('imprenditori',3); gd('lavoratori',-3); gd('pensionati',-2); gd('cetomedio',-2);}},                                            // ④
    {l:'Mantieni i controlli e stringi i buchi', e:'Il materasso resta pieno', f:()=>{S.ind.fiducia-=2; gd('cetomedio',1); gd('imprenditori',-2);}},
-   {l:'Dollarizza: la moneta nazionale finisce', e:'Il sogno di metà del paese, e la fine di una parte della sovranità', f:()=>{S.ind.fiducia+=2; S.ind.stampa+=2; gd('cetomedio',3); gd('imprenditori',2); gd('lavoratori',-3); gd('pensionati',-2);}}]},
+   {l:'Dollarizza: la moneta nazionale finisce', e:'Il sogno di metà del paese, e la fine di una parte della sovranità', f:()=>{S.ind.fiducia=clamp(S.ind.fiducia+2,0,100); S.ind.stampa=clamp(S.ind.stampa+2,0,100); gd('cetomedio',3); gd('imprenditori',2); gd('lavoratori',-3); gd('pensionati',-2);}}]},
  {id:'ar_p_ritenute', era:'contemporanea', paesi:['argentina'], min:'sviluppo', kick:'Campagna', t:'Le ritenute sul grano', text:'Lo Stato trattiene una parte di ogni tonnellata di soia e grano esportata: è la sua entrata più sicura e la guerra più antica con la campagna, che ha già bloccato le strade per mesi una volta. Abbassarle piace ai campi e svuota le casse; alzarle riempie le casse e le strade.', ch:[
    {l:'Abbassale gradualmente: la campagna investe', e:'I trattori tornano nei campi, il Tesoro cerca altrove', costo:{debito:0.5}, f:()=>{S.ind.debt+=0.5; S.ind.fiducia+=1; gd('cattolici',4); gd('imprenditori',2); gd('lavoratori',-2);}},                          // ⑤
    {l:'Mantienile: sono le entrate dello Stato', e:'La campagna minaccia lo sciopero', costo:{debito:-0.2}, f:()=>{S.ind.debt-=0.2; gd('cattolici',-3); gd('lavoratori',1);}},
@@ -15604,7 +15606,7 @@ const EVENTS=[
    {l:'Ritira', e:'La centrale festeggia, i mercati annotano', f:()=>{S.ind.fiducia-=2; gd('lavoratori',4); gd('imprenditori',-3);}}]},
  {id:'ar_p_province', era:'contemporanea', paesi:['argentina'], min:'interno', kick:'Federazione', t:'I governatori alla porta', text:'Le province vivono dei trasferimenti federali e i governatori arrivano insieme alla Casa Rosada con la stessa lista: fondi, o niente voti in Senato. Il federalismo argentino è un negoziato mensile fra chi ha i soldi e chi ha i senatori.', ch:[
    {l:'Paga: i fondi in cambio dei voti', e:'Il Senato vota, la cassa si svuota', costo:{debito:0.7}, f:()=>{S.ind.debt+=0.7; gd('cetomedio',-1); gd('lavoratori',1);}},
-   {l:'Taglia i trasferimenti: le province si arrangino', e:'Le province chiudono le scuole, e lo dicono', costo:{debito:-0.6}, f:()=>{S.ind.debt-=0.6; S.ind.fiducia+=2; gd('lavoratori',-3); gd('cattolici',-2); gd('cetomedio',1);}},
+   {l:'Taglia i trasferimenti: le province si arrangino', e:'Le province chiudono le scuole, e lo dicono', costo:{debito:-0.6}, f:()=>{S.ind.debt-=0.6; S.ind.fiducia=clamp(S.ind.fiducia+2,0,100); gd('lavoratori',-3); gd('cattolici',-2); gd('cetomedio',1);}},
    {l:'Un patto fiscale nuovo, con regole scritte', e:'Il patto che si firma ogni cinque anni', costo:{debito:0.3}, f:()=>{S.ind.debt+=0.3; gd('cetomedio',1);}}]},
  {id:'ar_p_litio', era:'contemporanea', paesi:['argentina'], min:'sviluppo', kick:'Nord', t:'Il litio del Nord', text:'Nelle saline del Nord c\'è il metallo che il mondo vuole per le batterie, e le compagnie straniere fanno la fila. Le province dicono che la risorsa è loro; le comunità dicono che l\'acqua è loro; il governo vede la prima esportazione che non dipende dalla pioggia.', ch:[
    {l:'Regime speciale per gli investimenti: stabilità fiscale trent\'anni', e:'Le compagnie arrivano, le regole restano', f:()=>{S.ind.fiducia+=2; gd('imprenditori',4); gd('lavoratori',1); gd('giovani',-2);}},
@@ -16850,7 +16852,7 @@ const RIVALI=(function(){
   // (rivaleChiave è S.scenario: le carriere di uk1970 arrivano al 1982 con la loro chiave). Massimo 5 `lontano`: la guerra di mare, fronti
   // «Il mare · Le isole» (FRONTI_NOMI.altro), nessun segno sulla mappa. Fino 1983: con 1982 crisiMese chiuderebbe la guerra in stallo a
   // gennaio 1983. soloSe: spento GUERRA_FALKLAND le righe non ci sono e crisiApplica esce subito (la scelta fa quello di prima).
-  // L275-50: `nomiFronti` = i nomi dei settori della riga (letti da guerraNuova solo con GUERRA_SUEZ56: spento, «Il mare · Le isole · Il canale»)
+  // L275-50: `nomiFronti` = i nomi dei settori della riga (letti da guerraNuova solo con CAMPI_RIGA_GUERRA, L275-75: spento, «Il mare · Le isole · Il canale»)
   ['uk1980','uk1970'].forEach(function(p){ r.push({paese:p, con:'argentina_82', dal:1982, fino:1983, massimo:5, tipo:'lontano', teatro:'atlantico_sud', settori:[[55,46.9],[76.5,53.2],[21,49.3]], porto:[87.5,2.3], nomiFronti:['Il mare','Le isole','Il cielo'], soloSe:function(){ return typeof GUERRA_FALKLAND!=='undefined' && GUERRA_FALKLAND; }}); });
   // L245-8-4: le due crisi dello stretto di Formosa (FORMOSA55_EV, FORMOSA58_EV), solo us1950 (us1960 parte nel 1961). La potenza è
   // `cina` com'è: rivaleRiga legge solo questa tabella, e i volti (potenzeDi) e la crisi subita (che vuole una potenza viva per
@@ -16867,7 +16869,8 @@ const RIVALI=(function(){
   // acceso l'interruttore copre la riga italiana di oggi (1999, 4, confine), che da spento risponde com'era; de1990 non aveva righe con rfj.
   // Massimo 5 `lontano`, forma aerea (GUERRA_FORME.aerea: «Il cielo · Le basi · Il mare», caduti ×0,1, nessuna sconfitta per linea a −3).
   // Fino 2000: con 1999 una guerra oltre dicembre si chiuderebbe in stallo da sola a gennaio (crisiMese).
-  ['de1990','italia1990'].forEach(function(p){ r.unshift({paese:p, con:'rfj', dal:1999, fino:2000, massimo:5, tipo:'lontano', teatro:'balcani', settori:[[69.2,38.5],[35.4,57.2],[41.5,39.6]], porto:[18.5,32.3], forma:'aerea', soloSe:function(){ return typeof GUERRA_KOSOVO99!=='undefined' && GUERRA_KOSOVO99; }}); });
+  // trattativaDa:2: 78 giorni veri, L275-74 (letto da guerraNuova con CAMPI_RIGA_GUERRA, come Suez e il Golfo).
+  ['de1990','italia1990'].forEach(function(p){ r.unshift({paese:p, con:'rfj', dal:1999, fino:2000, massimo:5, tipo:'lontano', teatro:'balcani', settori:[[69.2,38.5],[35.4,57.2],[41.5,39.6]], porto:[18.5,32.3], forma:'aerea', trattativaDa:2, soloSe:function(){ return typeof GUERRA_KOSOVO99!=='undefined' && GUERRA_KOSOVO99; }}); });
   // L275-48 (F46): la Libia combattuta (la prima scelta di LIBIA11_EV porta `crisi:{… guerra:…}`). In testa (unshift): acceso l'interruttore
   // copre la riga di oggi (2011, 4, confine), che da spento risponde com'era. Massimo 5 `lontano`, forma aerea come il Kosovo. Fino 2012: con
   // 2011 una guerra oltre dicembre si chiuderebbe in stallo da sola a gennaio. La potenza è minore: nessuna crisi subita la sceglie (potenzeDi).
@@ -16875,24 +16878,24 @@ const RIVALI=(function(){
   // L275-50 (F47): Suez combattuta (la prima scelta di SUEZ_EV e di SUEZ_FR_EV porta `crisi:{… guerra:…}`). In testa (unshift), uk1950 e fr1950
   // (le sole porte che arrivano al 1956). Massimo 5 `lontano`, forma normale. Fino 1957: con 1956 una guerra oltre dicembre si chiuderebbe in stallo
   // da sola a gennaio. `nomiFronti`: il primo settore è il Canale (sempre c'è). `trattativaDa`: la trattativa parte già alta (la pressione
-  // esterna). Tutti e due letti da guerraNuova solo con GUERRA_SUEZ56. La potenza è minore: nessuna crisi subita la sceglie (potenzeDi).
+  // esterna). Tutti e due letti da guerraNuova solo con CAMPI_RIGA_GUERRA (L275-75). La potenza è minore: nessuna crisi subita la sceglie (potenzeDi).
   ['fr1950','uk1950'].forEach(function(p){ r.unshift({paese:p, con:'egitto', dal:1956, fino:1957, massimo:5, tipo:'lontano', teatro:'suez', settori:[[56.1,59.7],[54.4,46.1],[40,60.2]], porto:[20,24.5], nomiFronti:['Il Canale','La costa','Il cielo'], trattativaDa:3, soloSe:function(){ return typeof GUERRA_SUEZ56!=='undefined' && GUERRA_SUEZ56; }}); });
   // L275-51 (F48): il Golfo combattuto (la scelta «subito» di GOLFO90_EV, 1990/8-9, e le due scelte di US90_GOLFO_ESITO_EV, 1991/1, portano
   // `crisi:{… guerra:…}`). In testa (unshift), una riga per ogni chiave di rivaleChiave che arriva al 1990 da capo della linea americana
   // (us1990, e us1980: le sue carriere hanno la loro chiave). Massimo 5 `lontano`, forma normale (la guerra di terra dopo un mese d'aria).
   // Fino 1991: una guerra aperta a fine 1991 si chiude in stallo a gennaio 1992 (crisiMese), contata nella misura. La potenza è minore:
-  // nessuna crisi subita la sceglie (potenzeDi). nomiFronti/trattativaDa letti da guerraNuova (con GUERRA_SUEZ56, la leva dei due campi).
+  // nessuna crisi subita la sceglie (potenzeDi). nomiFronti/trattativaDa letti da guerraNuova (con CAMPI_RIGA_GUERRA, la leva dei due campi dal L275-75).
   ['us1980','us1990'].forEach(function(p){ r.unshift({paese:p, con:'iraq', dal:1990, fino:1991, massimo:5, tipo:'lontano', teatro:'golfo', settori:[[29.4,37],[24.4,17.2],[44.6,42.2]], porto:[97.8,74], nomiFronti:['Il deserto','Il cielo','La costa'], trattativaDa:3, soloSe:function(){ return typeof GUERRA_GOLFO91!=='undefined' && GUERRA_GOLFO91; }}); });
   // L275-52 (F49): l'Iraq 2003 britannico (la prima scelta di IRAQ_EV, 2002/9-2003/3, porta `crisi:{… guerra:…}`). In testa (unshift), una riga
   // per ogni chiave di rivaleChiave che arriva al 2002 da capo della linea britannica (uk2000, e uk1990/uk1980: le loro carriere hanno la loro
   // chiave; uk1980 ci arriva, 1 carriera su 40 col banco). Massimo 5 `lontano`, forma normale. Fino 2004: una guerra aperta a fine 2004 si chiude
-  // in stallo (crisiMese). nomiFronti/trattativaDa letti da guerraNuova solo con GUERRA_SUEZ56 (la leva dei due campi: F11). POTENZE.iraq resta
+  // in stallo (crisiMese). nomiFronti/trattativaDa letti da guerraNuova solo con CAMPI_RIGA_GUERRA (la leva dei due campi dal L275-75: F11). POTENZE.iraq resta
   // con fino 2003: potDi non legge dal/fino, il nome c'è anche nel 2004 (prova L). La potenza è minore: nessuna crisi subita la sceglie.
   ['uk1980','uk1990','uk2000'].forEach(function(p){ r.unshift({paese:p, con:'iraq', dal:2002, fino:2004, massimo:5, tipo:'lontano', teatro:'golfo', settori:[[31.1,33.8],[24.4,17.2],[47.4,38.6]], porto:[97.8,74], nomiFronti:['Il deserto','Il cielo','La costa'], trattativaDa:3, soloSe:function(){ return typeof GUERRA_IRAQ03_UK!=='undefined' && GUERRA_IRAQ03_UK; }}); });
   // L275-53 (F50): la Corea 1950 (la scelta «truppe» di COREA50_EV, 1950/7-8, porta `crisi:{… guerra:…}`). In testa (unshift), la sola chiave che
   // arriva al 1950/7 da capo della linea americana (us1950: Passo 0 (c) di «⚑ L275-53»). Massimo 5 `lontano`, forma normale. Fino 1953: una guerra
   // aperta a fine 1953 si chiude in stallo a gennaio 1954 (crisiMese). La potenza è minore: nessuna crisi subita la sceglie (potenzeDi). nomiFronti e
-  // trattativaDa letti da guerraNuova (con GUERRA_SUEZ56). Spento l'interruttore la riga non c'è (rivaleRigaAccesa): il gioco di prima.
+  // trattativaDa letti da guerraNuova (con CAMPI_RIGA_GUERRA, L275-75). Spento l'interruttore la riga non c'è (rivaleRigaAccesa): il gioco di prima.
   r.unshift({paese:'us1950', con:'corea_nord_50', dal:1950, fino:1953, massimo:5, tipo:'lontano', nomiFronti:['La penisola','Il cielo','La costa'], trattativaDa:0, trattativaDal:{anno:1951, mese:7}, finoMese:7, forzeMese:1, soloSe:function(){ return typeof GUERRA_COREA50!=='undefined' && GUERRA_COREA50; }});
   // L275-57 (F51): il Vietnam (la scelta 'escalation' di VIETNAM65_EV, 1965/2-3, porta `crisi:{… guerra:…}`). In testa (unshift), una riga per ogni
   // chiave che arriva al 1965/2 da capo della linea americana (us1960 e us1950: Passo 0 (c) di «⚑ L275-57»). Massimo 5 `lontano`, forma normale;
@@ -18070,7 +18073,7 @@ const SFIDE=[
   perche:'Il dazio rincara le importazioni per proteggere i produttori interni.'},   // definizione standard
  // --- d'epoca italia1950 (sourceate dal PRESET-ITALIA-1950.md; il doppio-uso: varietà + immersione) ---
  {id:'i50_nato', era:'italia1950', diff:'facile', q:'In che anno l\'Italia ha firmato il Patto Atlantico?',
-  op:['Nel 1949','Nel 1945','Nel 1955'], giusta:0,
+  op:['Nel 1949','Nel 1945','Nel 1947'], giusta:0,
   perche:'Il Trattato è firmato a Washington il 4 aprile 1949, per l\'Italia dal ministro Sforza.'},   // fonte: NATO, dichiarazione 4/4/1949 (cronaca: linea figure-reali ok)
  {id:'i50_marshall', era:'italia1950', diff:'media', q:'Che cos\'è il Piano Marshall?',
   op:['Un piano militare per il confine orientale','Il programma americano di aiuti alla ricostruzione europea','La riforma agraria del dopoguerra'], giusta:1,
@@ -18127,7 +18130,7 @@ const SFIDE=[
   op:['Nel 1946','Nel 1948','Nel 1919'], giusta:0,
   perche:'Il voto fu esteso alle donne nel 1945; votarono per la prima volta nel 1946.'},   // fonte: D.Lgs.Lgt. 23/1945
  {id:'i50_costituzione', era:'italia1950', ruolo:'attivista', diff:'facile', q:'Quando è entrata in vigore la Costituzione della Repubblica?',
-  op:['Nel 1948','Nel 1861','Nel 1953'], giusta:0,
+  op:['Nel 1948','Nel 1861','Nel 1946'], giusta:0,
   perche:'La Costituzione repubblicana è in vigore dal 1° gennaio 1948.'},   // fonte: entrata in vigore 1/1/1948
  {id:'i50_inacasa', era:'italia1950', ruolo:'locale', diff:'media', q:'Che cos\'era il piano INA-Casa, avviato nel 1949?',
   op:['Un programma pubblico di case popolari per i lavoratori','Una banca per l\'edilizia di lusso','Un\'imposta sulle abitazioni'], giusta:0,
@@ -18136,7 +18139,7 @@ const SFIDE=[
   op:['La redistribuzione di terre dei grandi latifondi ai contadini','L\'abolizione dell\'agricoltura','La vendita delle terre all\'estero'], giusta:0,
   perche:'Le leggi del 1950 espropriarono e redistribuirono ai contadini terre dei grandi latifondi.'},   // fonte: L.230/1950 (Sila) e L.841/1950 (stralcio) → ancora ≥1951
  {id:'i50_lira', era:'italia1950', ruolo:'ministro', diff:'facile', q:'Qual era la moneta dell\'Italia nei primi anni \'50?',
-  op:['La lira','L\'euro','Lo scudo'], giusta:0,
+  op:['La lira','Il franco','Lo scudo'], giusta:0,
   perche:'L\'Italia usava la lira.'},   // storia monetaria (euro dal 2002)
  {id:'i50_ige', era:'italia1950', ruolo:'ministro', diff:'difficile', q:'Qual era la principale imposta sui consumi in Italia prima dell\'IVA?',
   op:['L\'IGE, l\'imposta generale sull\'entrata','L\'IRPEF','Il bollo auto'], giusta:0,
@@ -18150,8 +18153,8 @@ const SFIDE=[
  /* ===== AVANZAMENTO Fase 2 · Lotto 4 — BANCA QUIZ '60 (era:'italia1960', §8): sourceati, tag-era per-voce, ruolo, ancore-anno.
     Cornici ≥6 già garantite dalle universali (misura D5); questi 17 arricchiscono la linea storica. paese esplicito
     (Italia-istituzionali vs mondo); i nomi reali solo come cronaca nel `perche`, mai nella domanda. ===== */
- {id:'q60_luna', era:'italia1960', codaFino:Infinity, paese:'universale', diff:'facile', cond:()=>S.year>=1969, q:'In che anno l\'uomo mise piede sulla Luna per la prima volta?',
-  op:['Nel 1969','Nel 1961','Nel 1975'], giusta:0, perche:'Il 20 luglio 1969 la missione Apollo 11 portò i primi uomini sulla Luna.'},
+ {id:'q60_luna', era:'italia1960', codaFino:Infinity, paese:'universale', diff:'facile', cond:()=>S.year>=1970||(S.year===1969&&S.month>=8), q:'In che anno l\'uomo mise piede sulla Luna per la prima volta?',
+  op:['Nel 1969','Nel 1961','Nel 1957'], giusta:0, perche:'Il 20 luglio 1969 la missione Apollo 11 portò i primi uomini sulla Luna.'},
  {id:'q60_muro', era:'italia1960', codaFino:Infinity, paese:'universale', diff:'facile', cond:()=>S.year>=1961, q:'Cosa fu eretto a Berlino nel 1961, simbolo della guerra fredda?',
   op:['Un muro che divise la città','Una nuova stazione','Un grande stadio'], giusta:0, perche:'Nell\'agosto 1961 fu costruito il Muro di Berlino, che divise la città per 28 anni.'},
  {id:'q60_cuba', era:'italia1960', codaFino:Infinity, paese:'universale', diff:'media', cond:()=>S.year>=1962, q:'Cosa portò il mondo sull\'orlo della guerra atomica nell\'ottobre 1962?',
@@ -18182,7 +18185,7 @@ const SFIDE=[
   op:['Gli esperimenti nucleari nell\'atmosfera','Il commercio delle armi','La navigazione nucleare'], giusta:0, perche:'Il trattato del 1963 mise al bando i test nucleari nell\'atmosfera, nello spazio e sott\'acqua.'},
  {id:'q60_tnp', era:'italia1960', codaFino:Infinity, paese:'universale', ruolo:'intl', diff:'difficile', cond:()=>S.year>=1968, q:'Cosa mirava a fermare il Trattato di non proliferazione del 1968?',
   op:['La diffusione delle armi nucleari','Il commercio del petrolio','L\'emigrazione'], giusta:0, perche:'Il TNP del 1968 puntava a limitare la diffusione delle armi atomiche nel mondo.'},
- {id:'q60_concilio', era:'italia1960', codaFino:Infinity, paese:'universale', ruolo:'intl', diff:'media', cond:()=>S.year>=1962, q:'Cosa fu il Concilio Vaticano II (1962-1965)?',
+ {id:'q60_concilio', era:'italia1960', codaFino:Infinity, paese:'universale', ruolo:'intl', diff:'media', cond:()=>S.year>=1966, q:'Cosa fu il Concilio Vaticano II (1962-1965)?',
   op:['Una grande assemblea della Chiesa cattolica per rinnovarsi','Un vertice politico europeo','Un trattato commerciale'], giusta:0, perche:'Il Concilio Vaticano II (1962-65) rinnovò profondamente la vita e la liturgia della Chiesa cattolica.'},
  /* ===== Q-fix PARTE 3 — 4 DIFFICILI italia1960, mirate al triennio-buco '60-'62 (diagnosi Consegna 1: 1 sola difficile viva ≤'62).
     giusta variata (op non mescolate a schermo). De-dup verificato: #3 vs q60_centrosinistra (l'anno) e #4 vs q60_mediaunica (cosa introdusse) → fatti/risposte-famiglia distinti. ===== */
@@ -18221,7 +18224,7 @@ const SFIDE=[
  {id:'i70_domeniche', era:'italia1970', codaFino:Infinity, paese:'italia', ruolo:'governo', diff:'media', cond:()=>S.year>=1974, q:'Che cosa furono le «domeniche a piedi» del 1973-74?',
   op:['Uno sciopero dei benzinai','Una manifestazione ecologista','Il divieto di circolare in auto per risparmiare carburante'], giusta:2,
   perche:'Conseguenza dello shock petrolifero: austerità energetica per decreto.'},
- {id:'i70_statuto', era:'italia1970', codaFino:Infinity, paese:'italia', ruolo:'governo', diff:'difficile', q:'Che cosa introdusse lo Statuto dei lavoratori del 1970?',
+ {id:'i70_statuto', era:'italia1970', codaFino:Infinity, paese:'italia', ruolo:'governo', diff:'difficile', cond:()=>S.year>=1971||(S.year===1970&&S.month>=6), q:'Che cosa introdusse lo Statuto dei lavoratori del 1970?',
   op:['Il salario minimo nazionale','Tutele sindacali e limiti ai licenziamenti nei luoghi di lavoro','La settimana di 35 ore'], giusta:1,
   perche:'Legge 300/1970: diritti sindacali in fabbrica e il reintegro in caso di licenziamento illegittimo.'},
  {id:'i70_tributaria', era:'italia1970', codaFino:Infinity, paese:'italia', ruolo:'governo', diff:'difficile', cond:()=>S.year>=1974, q:'Che cosa cambiò con la riforma tributaria del 1973-74?',
@@ -18276,7 +18279,7 @@ const SFIDE=[
   op:['Una sconfitta militare sul campo','Un voto contrario del Parlamento','La corsa alla sterlina e il rifiuto americano di sostenerla'], giusta:2,
   perche:'La pressione finanziaria impose il cessate il fuoco.'},
  {id:'uk50_leva', era:'uk1950', codaFino:Infinity, paese:'regnounito', ruolo:'governo', diff:'media', q:'Che cos\'era il servizio militare obbligatorio britannico degli anni \'50?',
-  op:['Un servizio volontario retribuito','Due anni di leva per i giovani maschi, fino ai primi anni \'60','Un obbligo solo in tempo di guerra'], giusta:1,
+  op:['Un servizio volontario retribuito','Due anni di leva per i giovani maschi','Un obbligo solo in tempo di guerra'], giusta:1,
   perche:'Le ultime chiamate furono all\'inizio degli anni \'60.'},
  {id:'uk50_itv', era:'uk1950', codaFino:Infinity, paese:'regnounito', ruolo:'governo', diff:'difficile', cond:()=>S.year>=1955, q:'Che cosa cambiò nel sistema televisivo britannico nel 1955?',
   op:['Nacque una rete commerciale accanto al servizio pubblico','La BBC fu privatizzata','La televisione a colori entrò in servizio'], giusta:0,
@@ -18315,16 +18318,16 @@ const SFIDE=[
  {id:'fr60_elezione', era:'fr1960', codaFino:Infinity, paese:'francia', ruolo:'governo', diff:'facile', cond:()=>S.year>=1963||(S.year===1962&&S.month>=11), q:'Chi elegge il Presidente della Repubblica dopo il referendum dell\'ottobre 1962?',
   op:['Il popolo, a suffragio diretto','L\'Assemblea nazionale','Un collegio di notabili'], giusta:0,
   perche:'Il referendum del 28 ottobre 1962 introduce l\'elezione diretta: da allora il Presidente lo sceglie il corpo elettorale.'},
- {id:'fr60_censura', era:'fr1960', codaFino:Infinity, paese:'francia', ruolo:'governo', diff:'difficile', cond:()=>S.year>=1963, q:'Quante mozioni di censura sono state approvate nella V Repubblica fino al 1969?',
+ {id:'fr60_censura', era:'fr1960', codaFino:Infinity, paese:'francia', ruolo:'governo', diff:'difficile', cond:()=>S.year>=1964, q:'Quante mozioni di censura sono state approvate nei primi cinque anni della V Repubblica?',
   op:['Nessuna','Una, nell\'ottobre 1962','Tre'], giusta:1,
-  perche:'La sola censura approvata della V Repubblica è quella del 5 ottobre 1962, contro il governo che aveva annunciato il referendum.'},
+  perche:'La prima censura approvata della V Repubblica è quella del 5 ottobre 1962, contro il governo che aveva annunciato il referendum.'},
  {id:'fr60_nato', era:'fr1960', codaFino:Infinity, paese:'francia', ruolo:'governo', diff:'media', cond:()=>S.year>=1966, q:'Che cosa fa la Francia con la NATO nel 1966?',
   op:['Esce dall\'Alleanza atlantica','Resta in tutto','Esce dal comando integrato, ma resta nell\'Alleanza'], giusta:2,
   perche:'Nel 1966 la Francia lascia il comando integrato e fa uscire basi e comandi alleati, ma resta membro dell\'Alleanza.'},
  {id:'fr60_ballottaggio', era:'fr1960', codaFino:Infinity, paese:'francia', ruolo:'governo', diff:'media', cond:()=>S.year>=1966, q:'Che cosa succede al Presidente al primo turno della presidenziale del dicembre 1965?',
   op:['Va al ballottaggio','Vince al primo turno','Si ritira'], giusta:0,
   perche:'Con il 44,6 per cento il Presidente uscente non passa al primo turno: è il primo ballottaggio presidenziale della Repubblica.'},
- {id:'fr60_settennato', era:'fr1960', codaFino:Infinity, paese:'francia', ruolo:'governo', diff:'facile', q:'Quanto dura il mandato del Presidente della Repubblica negli anni Sessanta?',
+ {id:'fr60_settennato', era:'fr1960', codaFino:Infinity, paese:'francia', ruolo:'governo', diff:'facile', cond:()=>S.year>=1960, q:'Quanto dura il mandato del Presidente della Repubblica negli anni Sessanta?',
   op:['Cinque anni','Sette anni','Quattro anni'], giusta:1,
   perche:'Il settennato resta la regola fino al 2000: sette anni, rinnovabili senza limite.'},
  {id:'fr60_grenelle', era:'fr1960', codaFino:Infinity, paese:'francia', ruolo:'governo', diff:'media', cond:()=>S.year>=1968&&(S.year>1968||S.month>=6), q:'Che cosa sono gli accordi di Grenelle, nel maggio 1968?',
@@ -18333,7 +18336,7 @@ const SFIDE=[
  {id:'fr60_dimissioni', era:'fr1960', codaFino:Infinity, paese:'francia', ruolo:'governo', diff:'facile', cond:()=>S.year>=1969&&(S.year>1969||S.month>=5), q:'Perché il Presidente lascia la carica nell\'aprile 1969?',
   op:['Ha perso un referendum a cui aveva legato la carica','Ha perso le elezioni legislative','Per ragioni di età'], giusta:0,
   perche:'Il 27 aprile 1969 il no vince di poco al referendum su regioni e Senato, e il Presidente lascia le funzioni il giorno dopo.'},
- {id:'fr60_nuovofranco', era:'fr1960', codaFino:Infinity, paese:'francia', ruolo:'governo', diff:'media', q:'Quanto vale un nuovo franco del 1960?',
+ {id:'fr60_nuovofranco', era:'fr1960', codaFino:Infinity, paese:'francia', ruolo:'governo', diff:'media', cond:()=>S.year>=1960, q:'Quanto vale un nuovo franco del 1960?',
   op:['Dieci vecchi franchi','Cento vecchi franchi','Mille vecchi franchi'], giusta:1,
   perche:'Dal 1 gennaio 1960 un nuovo franco vale cento franchi vecchi: cambiano le cifre, non il potere d\'acquisto.'},
  /* L99-2 · le otto sfide del decennio francese '70 (scheda §G): istituzioni e fatti, mai i titolari (regola D5). La
@@ -18348,7 +18351,7 @@ const SFIDE=[
   op:['Il carbone','Il gas','Il nucleare'], giusta:2,
   perche:'Il piano del marzo 1974 lancia la costruzione in serie di centrali nucleari: in dieci anni l\'atomo darà la gran parte della corrente.'},
  {id:'fr70_diciotto', era:'fr1970', codaFino:Infinity, paese:'francia', ruolo:'governo', diff:'media', cond:()=>S.year>=1975, q:'In che anno la maggiore età in Francia scende a diciotto anni?',
-  op:['1974','1968','1981'], giusta:0,
+  op:['1974','1968','1958'], giusta:0,
   perche:'La legge del luglio 1974 porta la maggiore età, e con lei il voto, da ventuno a diciotto anni.'},
  {id:'fr70_ivg', era:'fr1970', codaFino:Infinity, paese:'francia', ruolo:'governo', diff:'difficile', cond:()=>S.year>=1976||(S.year===1975&&S.month>=2), q:'Con quali voti passa la legge sull\'aborto del gennaio 1975?',
   op:['Solo quelli della maggioranza','Quelli della sinistra e di una parte della maggioranza','All\'unanimità'], giusta:1,
@@ -18366,7 +18369,7 @@ const SFIDE=[
     primo posto; cartaSfida mostra le opzioni NELL'ORDINE dichiarato (non le rimescola), quindi la posizione della
     giusta è ruotata qui, come nelle sfide del '70. Il «perché» è di Code. */
  {id:'fr80_eliseo', era:'fr1980', codaFino:Infinity, paese:'francia', ruolo:'governo', diff:'facile', cond:()=>S.year>=1982, q:'In che anno la sinistra conquista l\'Eliseo?',
-  op:['1981','1974','1988'], giusta:0,
+  op:['1981','1974','1978'], giusta:0,
   perche:'Nel maggio 1981 il candidato socialista vince la presidenziale: è la prima volta per la sinistra nella Quinta Repubblica.'},
  {id:'fr80_pena', era:'fr1980', codaFino:Infinity, paese:'francia', ruolo:'governo', diff:'facile', cond:()=>S.year>=1982, q:'Che cosa abolisce la Francia nel 1981?',
   op:['La leva obbligatoria','La pena di morte','Il monopolio televisivo'], giusta:1,
@@ -18492,7 +18495,7 @@ const SFIDE=[
   perche:'La CDU/CSU resta il primo partito, ma socialdemocratici e liberali insieme hanno la maggioranza e scelgono il Cancelliere.'},
  /* L135-3 · le otto sfide del decennio tedesco '70 (scheda §I-G), la giusta nelle posizioni della scheda (0,1,2,1,2,0,1,2). Il «perché» è di Code. */
  {id:'de70_q_varsavia', era:'de1970', codaFino:Infinity, paese:'germania', ruolo:'governo', diff:'facile', cond:()=>S.year>=1971, q:'In che anno il Cancelliere si inginocchia a Varsavia?',
-  op:['1970','1968','1974'], giusta:0,
+  op:['1970','1968','1969'], giusta:0,
   perche:'Il 7 dicembre 1970, davanti al monumento agli insorti del ghetto, prima della firma del trattato con la Polonia.'},
  {id:'de70_q_duevoti', era:'de1970', codaFino:Infinity, paese:'germania', ruolo:'governo', diff:'media', cond:()=>S.year>=1973||(S.year===1972&&S.month>=5), q:'Come finisce la sfiducia costruttiva dell\'aprile 1972?',
   op:['Passa con un voto','Fallisce per due voti','Non si vota'], giusta:1,
@@ -18529,7 +18532,7 @@ const SFIDE=[
   op:['Harrisburg','Chernobyl','Sellafield'], giusta:1,
   perche:'Il reattore di Chernobyl, in Ucraina, esplode il 26 aprile 1986; la nube arriva fino alla Germania del sud.'},
  {id:'de80_q_muro', era:'de1980', codaFino:Infinity, paese:'germania', ruolo:'governo', diff:'facile', cond:()=>S.year>=1990||(S.year===1989&&S.month>=12), q:'In che anno cade il Muro di Berlino?',
-  op:['1990','1987','1989'], giusta:2,
+  op:['1988','1987','1989'], giusta:2,
   perche:'La sera del 9 novembre 1989 i posti di blocco di Berlino si aprono.'},
  {id:'de80_q_dueppiuquattro', era:'de1980', codaFino:Infinity, paese:'germania', ruolo:'governo', diff:'media', cond:()=>S.year>=1991||(S.year===1990&&S.month>=10), q:'In quale città si firma il trattato «due più quattro»?',
   op:['Mosca','Washington','Bonn'], giusta:0,
@@ -18558,7 +18561,7 @@ const SFIDE=[
   op:['L\'Elba','Il Reno','L\'Oder'], giusta:2,
   perche:'L\'Oder esce dagli argini in Polonia e nella Repubblica Ceca; nel Brandeburgo trentamila soldati difendono le dighe.'},
  {id:'de90_q_russi', era:'de1990', codaFino:Infinity, paese:'germania', ruolo:'governo', diff:'media', cond:()=>S.year>=1995||(S.year===1994&&S.month>=10), q:'In che anno gli ultimi soldati russi lasciano il paese?',
-  op:['1994','1991','1999'], giusta:0,
+  op:['1994','1991','1992'], giusta:0,
   perche:'Il ritiro si chiude nell\'estate del 1994, quattro anni dopo il trattato che lo aveva fissato.'},
  {id:'de90_q_governo99', era:'de1990', codaFino:Infinity, paese:'germania', ruolo:'governo', diff:'facile', cond:()=>S.year>=2000||(S.year===1999&&S.month>=10), q:'Dove lavora il governo dall\'autunno del 1999?',
   op:['A Bonn','A Berlino','A Francoforte'], giusta:1,
@@ -18569,7 +18572,7 @@ const SFIDE=[
  /* L157-1 · le otto sfide del decennio tedesco 2000 (scheda §I-G; i «perché» sono di Code). Nessuna su una tragedia, nessuna su un fatto
     che una scelta del giocatore può aver cambiato. Giusta ruotata: 0,1,2,1,2,0,1,2. */
  {id:'de00_q_euro', era:'de2000', codaFino:Infinity, paese:'germania', ruolo:'governo', diff:'facile', cond:()=>S.year>=2003||(S.year===2002&&S.month>=2), q:'In che anno l\'euro entra nelle tasche?',
-  op:['2002','1999','2004'], giusta:0,
+  op:['2002','1999','2001'], giusta:0,
   perche:'Dal 1° gennaio 2002 si paga con banconote e monete in euro; il marco resta in circolazione accanto all\'euro fino alla fine di febbraio.'},
  {id:'de00_q_elba', era:'de2000', codaFino:Infinity, paese:'germania', ruolo:'governo', diff:'facile', cond:()=>S.year>=2003||(S.year===2002&&S.month>=9), q:'Quale fiume allaga Dresda nell\'agosto 2002?',
   op:['Il Reno','L\'Elba','L\'Oder'], giusta:1,
@@ -18581,7 +18584,7 @@ const SFIDE=[
   op:['In Francia','In Germania','In Giappone e Corea'], giusta:1,
   perche:'Il mondiale del 2006 si gioca in Germania, fra giugno e luglio: la squadra di casa arriva terza.'},
  {id:'de00_q_allargamento', era:'de2000', codaFino:Infinity, paese:'germania', ruolo:'governo', diff:'media', cond:()=>S.year>=2005||(S.year===2004&&S.month>=6), q:'In che anno l\'Unione si allarga a dieci paesi, otto dell\'Est?',
-  op:['2000','2007','2004'], giusta:2,
+  op:['2000','2002','2004'], giusta:2,
   perche:'Il 1° maggio 2004 entrano nell\'Unione dieci paesi: otto dell\'ex blocco orientale, più Malta e Cipro.'},
  {id:'de00_q_vertice', era:'de2000', codaFino:Infinity, paese:'germania', ruolo:'governo', diff:'media', cond:()=>S.year>=2008||(S.year===2007&&S.month>=7), q:'Quale vertice si tiene sul Baltico nel giugno 2007, dietro una recinzione?',
   op:['Il vertice degli otto grandi','Il Consiglio europeo','Il vertice dell\'Alleanza atlantica'], giusta:0,
@@ -18594,7 +18597,7 @@ const SFIDE=[
   perche:'Il 16 giugno 2007 la PDS e una lista nata all\'Ovest contro le riforme del lavoro si fondono in un partito solo, la Linke.'},
  /* L177-3 · Stati Uniti 1950, parte 2: otto domande (PRESET-USA-1950 §I, correzioni ⚠ nel rapporto «⚑ L177-3») */
  {id:'us50_q_corea', era:'us1950', codaFino:Infinity, paese:'usa', ruolo:'governo', diff:'facile', cond:()=>S.year>1950||(S.year===1950&&S.month>=8), q:'In che anno comincia la guerra di Corea?',
-  op:['1950','1948','1953'], giusta:0,
+  op:['1950','1948','1949'], giusta:0,
   perche:'L\'esercito del Nord passa il confine il 25 giugno 1950; l\'armistizio arriva nel luglio 1953.'},
  {id:'us50_q_emendamento', era:'us1950', codaFino:Infinity, paese:'usa', ruolo:'governo', diff:'media', cond:()=>S.year>1951||(S.year===1951&&S.month>=3), q:'Quale emendamento della Costituzione, ratificato nel 1951, limita il Presidente a due mandati?',
   op:['Il diciannovesimo','Il ventiduesimo','Il venticinquesimo'], giusta:1,
@@ -18630,7 +18633,7 @@ const SFIDE=[
   op:['Fu introdotto l\'obbligo fino a 18 anni','Si passò gradualmente a una scuola secondaria unica','Furono abolite le scuole private'], giusta:1,
   perche:'Al posto della selezione a undici anni.'},
  {id:'uk60_decimale', era:'uk1960', codaFino:Infinity, paese:'regnounito', ruolo:'governo', diff:'difficile', cond:()=>S.year>=1971, q:'Quando fu decisa e quando entrò in vigore la decimalizzazione della sterlina?',
-  op:['Decisa e attuata nel 1966','Attuata nel 1980','Decisa negli anni \'60, in vigore nel 1971'], giusta:2,
+  op:['Decisa e attuata nel 1966','Attuata nel 1968','Decisa negli anni \'60, in vigore nel 1971'], giusta:2,
   perche:'Cento penny per sterlina al posto di scellini e pence.'},
  {id:'uk60_belfast', era:'uk1960', codaFino:Infinity, paese:'regnounito', ruolo:'governo', diff:'media', cond:()=>S.year>=1969, q:'Perché nel 1969 l\'esercito britannico fu schierato in Irlanda del Nord?',
   op:['Per contenere gli scontri dopo giorni di violenze','Per un\'invasione esterna','Per un\'esercitazione della NATO'], giusta:0,
@@ -18900,8 +18903,8 @@ const SFIDE=[
  {id:'u_i_asilo', era:'universale', ruolo:'intl', diff:'media', q:'Che cos\'è l\'asilo politico?',
   op:['La protezione che uno Stato concede a chi è perseguitato nel suo paese','Il permesso di lavoro stagionale','La scuola per i figli dei diplomatici'], giusta:0,
   perche:'L\'asilo protegge chi rischia la persecuzione per le sue idee, la sua fede o la sua origine.'},   // Dichiarazione universale 1948 art. 14
- {id:'u_i_rifugiati', era:'universale', ruolo:'intl', diff:'difficile', cond:()=>S.year>=1951, q:'In quale anno fu firmata a Ginevra la Convenzione sullo status dei rifugiati?',
-  op:['Nel 1919','Nel 1975','Nel 1951'], giusta:2,
+ {id:'u_i_rifugiati', era:'universale', ruolo:'intl', diff:'difficile', cond:()=>S.year>=1952||(S.year===1951&&S.month>=8), q:'In quale anno fu firmata a Ginevra la Convenzione sullo status dei rifugiati?',
+  op:['Nel 1919','Nel 1945','Nel 1951'], giusta:2,
   perche:'La Convenzione di Ginevra sui rifugiati è del luglio 1951.'},
  {id:'u_i_miglia', era:'universale', ruolo:'intl', diff:'difficile', cond:()=>S.year>=1982, q:'Fino a quante miglia dalla costa arrivano le acque territoriali, secondo la Convenzione dell\'ONU sul diritto del mare?',
   op:['Tre','Dodici','Duecento'], giusta:1,
@@ -21123,7 +21126,7 @@ const SFIDE=[
   op:['Lo nomina il governo','Lo elegge il consiglio regionale','Lo eleggono direttamente i cittadini'], giusta:2,
   perche:'Dal 2000 il presidente della Regione è eletto direttamente.'},   // l. cost. 1/1999
  {id:'it_l_prg', era:'universale', paese:'italia', ruolo:'locale', diff:'difficile', q:'Da quale legge nasce il piano regolatore generale dei comuni italiani?',
-  op:['Dalla legge urbanistica del 1942','Dalla Costituzione del 1948','Dalla legge sulle regioni del 1970'], giusta:0,
+  op:['Dalla legge urbanistica del 1942','Dalla Costituzione del 1948','Dal testo unico comunale e provinciale del 1934'], giusta:0,
   perche:'Il piano regolatore generale è previsto dalla legge urbanistica del 1942.'},   // l. 1150/1942
  {id:'it_l_mafia', era:'universale', paese:'italia', ruolo:'locale', diff:'difficile', cond:()=>S.year>=1991, q:'Per quale ragione, dal 1991, lo Stato può sciogliere un consiglio comunale?',
   op:['Per un bilancio in perdita','Per infiltrazioni della criminalità organizzata','Per una legge regionale contraria'], giusta:1,
@@ -21140,7 +21143,7 @@ const SFIDE=[
  /* ===== Q-fix PARTE 2 (23 lug 2026) — §B: 9 domande d'epoca DIFFICILI (italia1950, diff:'difficile'), sourceate da
     SFIDE-BANCA §B. Senza `ruolo` → gancio-conferenza (governo/ministro), dove si misura la difficoltà-partita; paese
     ='italia' dall'IIFE (era==='italia1950'). `cond` = ancora/finestra-anno (anti-anacronismo, §D walk-campionato). ===== */
- {id:'i50_ced', era:'italia1950', diff:'difficile', cond:()=>S.year>=1952&&S.year<=1954, q:'Cosa fu la CED, il progetto respinto dall\'Assemblea francese nel 1954?',
+ {id:'i50_ced', era:'italia1950', diff:'difficile', cond:()=>(S.year===1954&&S.month>=9)||S.year===1955||S.year===1956, q:'Cosa fu la CED, il progetto respinto dall\'Assemblea francese nel 1954?',
   op:['Un\'unione doganale','Un esercito europeo comune','Un patto con l\'URSS'], giusta:1,
   perche:'La Comunità Europea di Difesa, firmata nel 1952, fu affossata dall\'Assemblea francese nell\'agosto 1954.'},   // fonte: Trattato CED 1952 → finestra 1952-1954
  {id:'i50_trieste', era:'italia1950', diff:'difficile', cond:()=>S.year>=1954, q:'Cosa stabilì il Memorandum di Londra del 1954 su Trieste?',
@@ -21945,7 +21948,7 @@ const TITOLI=[
  {id:'ti_uk90_s_carta', era:'uk1990', cond:()=>S.year<=1996, amico:'La carta del cittadino: i servizi pubblici promettono tempi certi', ostile:'La carta del cittadino: i treni restano in ritardo'},
  {id:'ti_uk90_s_centro', era:'uk1990', cond:()=>S.year>=1995, amico:'Né destra né sinistra: la politica si sposta al centro', ostile:'La terza via: ma dove porta?'},
  /* ===== L77-1 · i sedici titoli del decennio inglese 2000 (scheda §6) ===== */
- {id:'ti_uk00_marcia', era:'uk2000', cond:()=>S.year>=2003, amico:'Un milione in strada, e il Parlamento decide', ostile:'Un milione in strada contro la guerra'},
+ {id:'ti_uk00_marcia', era:'uk2000', cond:()=>S.year===2003&&S.month<=4&&S.iraq!=='fuori',   /* L275-75: la marcia del febbraio 2003, gennaio-aprile; mai dopo «fuori» (S.iraq non scritto: esce) */ amico:'Un milione in strada, e il Parlamento decide', ostile:'Un milione in strada contro la guerra'},
  {id:'ti_uk00_armi', era:'uk2000', cond:()=>S.iraq==='guerra'&&S.year>=2004&&!(typeof GUERRA_IRAQ03_UK!=='undefined'&&GUERRA_IRAQ03_UK&&S.crisi&&S.crisi.con==='iraq'&&S.crisi.guerra),   /* L275-52: a guerra aperta con l'Iraq il titolo è prematuro (solo acceso); con 'tregua'/'persa' tace (il testo dice le armi cercate dopo una guerra vinta) */ amico:'Le armi non trovate: la ricerca continua', ostile:'Le armi che non c\'erano'},
  {id:'ti_uk00_setteluglio', era:'uk2000', cond:()=>S.year>=2005&&(S.year>2005||S.month>=7), amico:'Sette luglio: la città non si ferma', ostile:'Sette luglio'},
  {id:'ti_uk00_olimpiadi', era:'uk2000', cond:()=>S.year>=2005&&(S.year>2005||S.month>=7), amico:'Le Olimpiadi a Londra', ostile:'Le Olimpiadi a Londra: e chi le paga?'},
@@ -24063,7 +24066,7 @@ const NOMI_VIETATI = {
   brasile:['Gabriel Barbosa','Lucas Lima','Bernardo Silva'],
   messico:['Gael García','Sofía Reyes'],
   nigeria:['Emeka Okafor'],
-  danimarca:['Mikkel Hansen','Christian Poulsen','Mads Pedersen','Frederik Andersen'],
+  danimarca:['Mikkel Hansen','Christian Poulsen','Mads Pedersen','Frederik Andersen','Christian Christensen'],   // L275-73: + Christian Christensen (prove/l275-69/nomi-vietati.md)
   belgio:['Koen Wouters']
 };
 const NOMI_VIETATI_TUTTI = (function(){ var o={}; Object.keys(NOMI_VIETATI).forEach(function(k){ NOMI_VIETATI[k].forEach(function(n){ o[n]=true; }); }); return o; })();
@@ -25075,11 +25078,16 @@ const FALKLAND_DUE_EV = {
   text:'La flotta è a metà Atlantico. Arrivano le prime perdite, da entrambe le parti, e arrivano insieme alle prime richieste di mediazione.',
   ch:[
     { l:'Si va fino in fondo', e:'Le isole tornano. Quasi mille morti, la maggior parte argentini. Il paese che si credeva in declino scopre di poter ancora vincere, e chi governa raccoglie tutto.', costo:{debito:1.5},
-      f:function(){ S.falkland='vinta'; S.ind.debt+=1.5; repd(10); stampad(8); gd('cetomedio',10); gd('pensionati',10); gd('imprenditori',8); gd('lavoratori',6); gd('giovani',4); gd('cattolici',6); corrented('fedelissimi',8); corrented('pontieri',5); corrented('militanti',5); if(typeof credd==='function') credd(8); if(typeof visd==='function') visd(6); S.log.unshift({t:T('Le isole'),x:T('Le isole riprese, e il paese in piedi ad applaudire.')}); } },
+      f:function(){ S.falkland='vinta'; falklandVintaEff(); } },
     { l:'Si accetta la mediazione a metà strada', e:'Un compromesso che nessuno festeggia: le isole restano contese, i morti restano morti.', costo:{debito:0.6},
-      f:function(){ S.falkland='meta'; S.ind.debt+=0.6; repd(-4); stampad(-5); gd('cetomedio',-5); gd('pensionati',-3); corrented('fedelissimi',-4); S.log.unshift({t:T('Le isole'),x:T('Fermati a metà Atlantico, con un compromesso che nessuno voleva.')}); } },
+      f:function(){ S.falkland='meta'; falklandMetaEff(); } },
   ],
 };
+/* L275-74 · GLI EFFETTI DELLE DUE SCELTE DI FALKLAND_DUE_EV, in un posto solo: li chiamano la carta (dopo aver scritto S.falkland) e,
+   con GUERRA_FALKLAND, GUERRA_DOPO.falkland82 quando la guerra aperta dallo snodo finisce 'vinta' o 'meta' (S.falkland l'ha già scritto
+   guerraEsitoFlag). Lì si sommano ai numeri di guerraFine: voluto (correttivo 5 di «⚑ L275-68», la misura --dopo-falk). */
+function falklandVintaEff(){ S.ind.debt+=1.5; repd(10); stampad(8); gd('cetomedio',10); gd('pensionati',10); gd('imprenditori',8); gd('lavoratori',6); gd('giovani',4); gd('cattolici',6); corrented('fedelissimi',8); corrented('pontieri',5); corrented('militanti',5); if(typeof credd==='function') credd(8); if(typeof visd==='function') visd(6); S.log.unshift({t:T('Le isole'),x:T('Le isole riprese, e il paese in piedi ad applaudire.')}); }
+function falklandMetaEff(){ S.ind.debt+=0.6; repd(-4); stampad(-5); gd('cetomedio',-5); gd('pensionati',-3); corrented('fedelissimi',-4); S.log.unshift({t:T('Le isole'),x:T('Fermati a metà Atlantico, con un compromesso che nessuno voleva.')}); }
 const MINATORI80_EV = {
   id:'snodo_minatori80', snodo:true, kick:'Il carbone', tono:'grave',
   t:'Le scorte',
@@ -25602,6 +25610,9 @@ const SUEZ_DUE_EV = {
    → S.sterlinaSalva, «Vai avanti» → S.sterlinaCrisi), senza i loro numeri (gd, repd, stampad, debito: li dà già guerraFine). 'persa'
    come 'fondo' per la sterlina. Una tabella e non una funzione sulla scelta: S.crisi.guerra si salva, e una funzione non si serializza. */
 const GUERRA_DOPO = {
+  // L275-74: le Falkland al voto. Gli effetti delle due scelte di FALKLAND_DUE_EV (falklandVintaEff, falklandMetaEff, accanto alla carta),
+  // sommati a guerraFine; 'persa' niente (bastano i numeri di guerraFine). S.falkland non si riscrive.
+  falkland82: { vinta: function(){ falklandVintaEff(); }, meta: function(){ falklandMetaEff(); } },
   suez56: {
     fermato: function(){ S.sterlinaSalva=(S.sterlinaSalva||0)+1; },
     fondo:   function(){ S.sterlinaCrisi=(S.sterlinaCrisi||0)+1; },

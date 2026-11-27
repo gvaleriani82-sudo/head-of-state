@@ -250,6 +250,10 @@
   .mappa-wrap{padding:4px 12px 2px;}
   .mappa-wrap svg{display:block; width:100%; max-width:420px; height:auto; margin:0 auto;}
   .mappa-wrap path[onclick], .mappa-wrap circle[onclick]{cursor:pointer; transition:fill .3s ease, fill-opacity .3s ease;}
+  /* L275-65 (F42 A1): sotto i 700 px la mappa REALE dei quartieri (la card di mappaLocale, riconosciuta dall'aria-label fisso di
+     renderQuartieriSVG: la mappa nazionale usa la stessa .mappa-wrap e non si tocca) non supera il 60% dell'altezza dello schermo;
+     il viewBox resta in «meet» (il default: niente preserveAspectRatio), quindi intera, centrata, mai tagliata né deformata. */
+  @media (max-width:699.98px){ .mappa-wrap svg[aria-label="Mappa reale del territorio"]{ max-height:60vh; } }
   .mappa-leg{display:flex; flex-wrap:wrap; gap:5px 14px; padding:8px 14px 6px; font-size:11px; color:var(--mut);}
   .mappa-leg i{display:inline-block; width:10px; height:10px; border-radius:3px; margin-right:5px; vertical-align:-1px;}
 

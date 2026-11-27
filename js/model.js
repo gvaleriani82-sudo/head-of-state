@@ -312,7 +312,7 @@ function simulateMonth(){
      diventare 40 al primo mese, e la fiducia pagare (40 − àncora) × 0,5 per un debito che non c'era: era il motivo del
      «debito fermo a ~40» di tre rapporti. 5 perché uno Stato non ha debito negativo e lo zero non serve. */
   S.ind.debt=clamp(S.ind.debt + S.ind.deficit/12 - S.ind.debt*(S.ind.growth+(typeof inflazioneAnno==='function' ? inflazioneAnno() : (S.inflazione||0)))/100/12, DEBITO_PAVIMENTO, 260);
-  S.ind.sanita+= (targetService('sanita')-S.ind.sanita)*0.10;
+  S.ind.sanita=clamp(S.ind.sanita+(targetService('sanita')-S.ind.sanita)*0.10, 0, 100);   // L275-73: il tetto 0-100 alla scrittura (le carte scrivono sanita+=N senza limite e la molla teneva il di più per mesi)
   S.ind.sicurezza+= (targetService('sicurezza')-S.ind.sicurezza)*0.10;
   S.ind.ambiente+= (targetService('ambiente')-S.ind.ambiente)*0.10;
   const D=dif();
@@ -321,7 +321,7 @@ function simulateMonth(){
   aggiornaRivolta();   // L72-1: il conto alla rovescia della rivolta (dopo la molla, prima della morte in game.js)
   S.gMod*=0.8; S.uMod*=0.8;
   if(S.ind.fiducia!=null){
-    S.ind.fiducia += (targetFiducia()-S.ind.fiducia)*0.10;   // convergenza lenta come gli altri indicatori
+    S.ind.fiducia = clamp(S.ind.fiducia + (targetFiducia()-S.ind.fiducia)*0.10, 0, 100);   // convergenza lenta come gli altri indicatori   // L275-73: col tetto 0-100 (le carte del sacchetto scrivono fiducia+=N senza limite: 101,8 in argentina 3o difficile, prove/l275-73/tetto.js)
     /* L74-1 — il contatore dell'insolvenza corre SOLO da premier al governo (sono i tuoi conti) e si azzera
        all'opposizione: prima correva ovunque, ma il controllo gameOver('insolvenza') sta solo nel ramo di governo
        e il rientro lo azzerava — sulle porte italiane storiche 112 mesi sotto soglia senza mai un esito (L72-3). */
